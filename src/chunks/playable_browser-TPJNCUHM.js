@@ -53797,15 +53797,12 @@ function measureWorldViewport(environment) {
   const viewport = environment.visualViewport, root = environment.document.documentElement;
   const visual = valid(viewport?.width) && valid(viewport?.height);
   const offset2 = (value2) => Number.isFinite(value2) ? Math.max(0, value2) : 0;
-  const width = Math.max(1, Math.round(visual ? viewport.width : fallback(root.clientWidth, environment.innerWidth)));
-  let height = Math.max(1, Math.round(visual ? viewport.height : fallback(root.clientHeight, environment.innerHeight)));
-  const standalone = environment.navigator?.standalone === true || environment.matchMedia?.("(display-mode: standalone)")?.matches === true, screen = environment.screen;
-  if (standalone && valid(screen?.width) && valid(screen?.height)) {
-    const landscape = width > height, fullWidth = landscape ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height), fullHeight = landscape ? Math.min(screen.width, screen.height) : Math.max(screen.width, screen.height);
-    const scale = visual && valid(viewport.scale) ? viewport.scale : 1, shown = height * scale;
-    if (Math.abs(width * scale - fullWidth) <= 2 && fullHeight > shown && fullHeight - shown <= 80) height = Math.round(fullHeight / scale);
-  }
-  return Object.freeze({ left: visual ? offset2(viewport.offsetLeft) : 0, top: visual ? offset2(viewport.offsetTop) : 0, width, height });
+  return Object.freeze({
+    left: visual ? offset2(viewport.offsetLeft) : 0,
+    top: visual ? offset2(viewport.offsetTop) : 0,
+    width: Math.max(1, Math.round(visual ? viewport.width : fallback(root.clientWidth, environment.innerWidth))),
+    height: Math.max(1, Math.round(visual ? viewport.height : fallback(root.clientHeight, environment.innerHeight)))
+  });
 }
 function coordinateWorldViewport({ environment, shell, onResize = () => {
 } }) {
