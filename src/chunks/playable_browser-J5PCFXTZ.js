@@ -30914,7 +30914,7 @@ function createGroundItemPresentation() {
 
 // src/client/dynamic_world_lights_v1.js
 var DYNAMIC_WORLD_LIGHTS_VERSION = "dynamic-world-lights-v2";
-var PORTAL_OUTER = "#67e8f9";
+var PORTAL_OUTER = "#6cc6ff";
 var PORTAL_INNER = "#c4b5fd";
 var PLAYER = "#ffe9c4";
 var MAX_LOOT_LIGHTS = 12;
@@ -30971,15 +30971,30 @@ function createDynamicWorldLightsV1(doc) {
       pool(drop.position.x, drop.position.y - 4, 36 + tier2 * 8, RARITY_COLORS[tier2], 0.3 + tier2 * 0.07);
       loot++;
     }
-    if (player?.alive && !interior2) pool(player.position.x, player.position.y - 6, 104, PLAYER, 0.55);
+    if (player?.alive && !interior2) pool(player.position.x, player.position.y - 6, 124, PLAYER, 0.68);
     lc.restore();
   }
-  function glow6(ctx, model, view, frame, time) {
+  function glow6(ctx, model, view, frame, time, player = null) {
     cores = 0;
     if (!frame?.enabled) return;
     const strength = Math.min(1, (frame.profile === "interior" ? 0.4 : 0) + darknessOf(frame) * 1.4);
     if (strength < 0.04) return;
+    const visible3 = (x, y, r) => !(x + r < view.x || y + r < view.y || x - r > view.x + view.width || y - r > view.y + view.height);
     ctx.save();
+    ctx.globalCompositeOperation = "screen";
+    const bounce = (x, y, r, color28, alpha) => {
+      if (!visible3(x, y, r)) return;
+      ctx.globalAlpha = alpha * strength;
+      ctx.drawImage(stamp2(color28), x - r, y - r, r * 2, r * 2);
+    };
+    for (const portal of model.space.exits ?? []) if (portal.extractionPortal?.visible) bounce(portal.x, portal.y, 110, PORTAL_OUTER, 0.2);
+    let loot = 0;
+    for (const drop of model.loot ?? []) {
+      if (loot++ >= MAX_LOOT_LIGHTS) break;
+      const tier2 = Math.max(0, Math.min(RARITY_COLORS.length - 1, groundItemPresentation(drop, time).rarity));
+      bounce(drop.position.x, drop.position.y - 4, 28 + tier2 * 6, RARITY_COLORS[tier2], 0.1 + tier2 * 0.03);
+    }
+    if (player?.alive) bounce(player.position.x, player.position.y - 6, 96, PLAYER, 0.06);
     ctx.globalCompositeOperation = "lighter";
     const pulse = 0.85 + 0.15 * Math.sin(time * 4e-3);
     for (const portal of model.space.exits ?? []) {
@@ -43910,7 +43925,8 @@ function lightingFrameV1(model, review = null) {
   const override = review?.getOverrideMinute?.(), clock = Number.isFinite(override) ? worldTimeAtMinute(override) : model.worldTime ?? worldTimeAtTick(model.tick ?? 0), enabled = review?.enabled?.() !== false, minute = clock.minuteOfDay;
   const room = interior(model.space), tavern = Boolean(model.space.settlementInterior);
   let ambient, shadowAlpha = 0, vector2 = { x: 0, y: 0 };
-  if (room) ambient = tavern ? [190, 185, 175] : [151, 157, 171];
+  const underground = ["woodland-cave", "procedural-crypt"].includes((model.space.site ?? model.space.functionalSite)?.siteKind);
+  if (room) ambient = tavern ? [190, 185, 175] : underground ? [100, 106, 124] : [132, 138, 154];
   else {
     const dawn = clamp43((minute - 300) / 120), dusk = clamp43((minute - 1140) / 120), night = [96, 112, 145], day = [255, 255, 255], warm = [237, 210, 190];
     if (minute < 300 || minute >= 1260) ambient = night;
@@ -44379,6 +44395,20 @@ function createLighting(canvas, { presentation = null } = {}) {
     if (["lantern", "world-lantern", "fort-lantern"].includes(light.kind)) lanternFixture(ctx, light, time, options);
     else drawFlameFixture(ctx, light, time, lit, options);
   }
+  let carried = null;
+  function carriedLightStamp() {
+    if (carried) return carried;
+    carried = canvas.ownerDocument.createElement("canvas");
+    carried.width = carried.height = 128;
+    const g = carried.getContext("2d"), gradient = g.createRadialGradient(64, 64, 1, 64, 64, 64);
+    gradient.addColorStop(0, "#fff0d0f2");
+    gradient.addColorStop(0.35, "#ffe2b4b0");
+    gradient.addColorStop(0.7, "#f0c89048");
+    gradient.addColorStop(1, "#f0c89000");
+    g.fillStyle = gradient;
+    g.fillRect(0, 0, 128, 128);
+    return carried;
+  }
   function draw(ctx, space, view, time, player = null, { unified = false } = {}) {
     const scene = comparisonSpace(space);
     profile = lightingProfile(scene);
@@ -44434,11 +44464,11 @@ function createLighting(canvas, { presentation = null } = {}) {
       } else if (!custom) embers += 2;
     }
     if (profile === "interior" && player?.alive) {
-      const at3 = performance.now(), light = { id: "local-player", x: player.position.x, y: player.position.y - 5, radius: 56 };
+      const at3 = performance.now(), radius = unified ? 150 : 56, light = { id: "local-player", x: player.position.x, y: player.position.y - 5, radius };
       ctx.save();
       ctx.clip(clips.pathFor(source3, light, true));
-      ctx.globalAlpha = 0.32;
-      ctx.drawImage(stamps.get("player"), light.x - 56, light.y - 56, 112, 112);
+      ctx.globalAlpha = unified ? 0.95 : 0.32;
+      ctx.drawImage(unified ? carriedLightStamp() : stamps.get("player"), light.x - radius, light.y - radius, radius * 2, radius * 2);
       ctx.restore();
       playerLights = 1;
       worstPlayerLightMs = Math.max(worstPlayerLightMs, performance.now() - at3);
@@ -50050,7 +50080,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
       else paintLight();
       if (model.space.visual) {
         lighting.emissive(ctx, model.space, lightView, time);
-        dynamicLights.glow(ctx, model, lightView, frame, time);
+        dynamicLights.glow(ctx, model, lightView, frame, time, visualActor);
       }
       nightActors.draw(ctx, visualModel, lightView, frame);
       groundItems.emission(ctx, model, time, viewport, { frame });
