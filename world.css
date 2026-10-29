@@ -829,3 +829,27 @@ body #world-death #world-respawn:focus-visible{outline:2px solid #f0d69e;outline
 body #world-death #world-death-download{margin:12px 0 0;background:none;border:0;min-height:32px;font-size:10px;color:#a7b9c3;text-decoration:underline;}
 body #world-death button:disabled{opacity:.5;}
 @media(max-height:500px){body #world-death{padding:14px 24px;}body #world-death .death-emblem,body #world-death .death-intro{display:none;}body #world-death h2{font-size:27px;}body #world-death .death-eyebrow{margin:2px 0 6px;}body #world-death p{margin:6px 0;}body #world-death .death-policy{padding:6px 0;margin:8px 0;}}
+
+/* Potion belt: one-tap health potion in the old rations slot. */
+body #carried-rations.potion-button{overflow:hidden;color:#ffe3e0!important;border-color:#c0574f!important;background:linear-gradient(180deg,#5a2430f2,#3a1820f5)!important;font-weight:700;}
+body #carried-rations.potion-button::before{content:"";display:inline-block;width:10px;height:13px;margin-right:6px;vertical-align:-2px;border-radius:2px 2px 5px 5px;background:linear-gradient(180deg,#ffd6d0 0 22%,#e2463f 22%);box-shadow:0 0 6px #ff5b4f;}
+body #carried-rations.potion-button::after{content:"";position:absolute;inset:0;background:#0b0f16b8;transform-origin:bottom;transform:scaleY(var(--potion-cooldown,0));pointer-events:none;}
+body #carried-rations.potion-button[data-empty=true]{opacity:.55;filter:saturate(.4);}
+body #carried-rations.potion-button.potion-gained{animation:potion-gained .7s ease-out;}
+@keyframes potion-gained{0%{box-shadow:0 0 0 0 #ff6b5fcc;transform:scale(1.12);}100%{box-shadow:0 0 0 14px #ff6b5f00;transform:scale(1);}}
+
+/* Compact portrait HUD: area + clock ride along the bottom of the vitals panel,
+ and MENU sits in the minimap footer, freeing both screen edges below them. */
+@media(max-width:600px){
+ body #world-hud-vitals{height:100px!important;}
+ body #world-status,body #world-wallet{top:auto!important;bottom:24px!important;}
+ body #world-hud-title{left:calc(21px + var(--world-safe-left))!important;top:calc(91px + var(--world-safe-top))!important;width:calc(100vw - 178px - var(--world-safe-left) - var(--world-safe-right))!important;max-width:none!important;transform:none!important;flex-direction:row!important;align-items:baseline!important;gap:6px!important;padding:0!important;margin:0!important;background:none!important;border:0!important;box-shadow:none!important;}
+ body #world-hud-title{z-index:30!important;}
+ body #world-hud-title strong{display:none!important;}
+ body #space-label{flex:1 1 auto;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:11px!important;}
+ body #world-time-clock{flex:0 0 auto;font-size:9px!important;}
+ /* The minimap sits in a higher layer, so its footer carries a MENU proxy. */
+ body #local-world-controls:not([open]){display:none!important;}
+ body .chart-mini .chart-menu-proxy{display:inline-block!important;}
+}
+body .chart-mini .chart-menu-proxy{display:none;min-height:25px;padding:0 7px;margin-left:auto;margin-right:4px;background:#202f3b;border:1px solid #6a7b78;color:#d6c29a;font:600 9px var(--rpg-ui);letter-spacing:.06em;border-radius:2px;}

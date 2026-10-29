@@ -842,9 +842,9 @@ function fractionalModifier12(n, d, p, q) {
   n = BigInt(n);
   d = BigInt(d);
   requireContract(n >= 0n && d > 0n && Number.isSafeInteger(p) && p >= 0 && p <= 100 && Number.isSafeInteger(q) && q >= 1 && q <= 100, "Invalid fractional power");
-  const budget = { left: WORK }, scale2 = 10n ** 12n, A = pow(n, BigInt(p), budget) * pow(scale2, BigInt(q), budget), B = pow(d, BigInt(p), budget);
-  let root = integerRoot(A / B, q);
-  if (pow(2n * root + 1n, BigInt(q), budget) * B <= A * pow(2n, BigInt(q), budget)) root++;
+  const budget = { left: WORK }, scale2 = 10n ** 12n, A = pow(n, BigInt(p), budget) * pow(scale2, BigInt(q), budget), B2 = pow(d, BigInt(p), budget);
+  let root = integerRoot(A / B2, q);
+  if (pow(2n * root + 1n, BigInt(q), budget) * B2 <= A * pow(2n, BigInt(q), budget)) root++;
   return combatAmount(root, scale2);
 }
 
@@ -13964,6 +13964,92 @@ function validateD8Advance(before, after, oldLevel, newLevel, oldAuthorityOrder)
   if (purchases(prior) !== purchases(after)) requireContract(after.revision > prior.revision && after.lastChange?.authorityOrder > oldAuthorityOrder, "Progression changes require a later authoritative command");
 }
 
+// src/shared/contracts/potion_belt_v1.js
+var POTION_BELT_POLICY = Object.freeze({
+  version: "potion-belt-v1",
+  baseCharges: 3,
+  maxCapacityUpgrades: 3,
+  capacityPrices: Object.freeze(["30", "80", "180"]),
+  baseHealPercent: 40,
+  potencyStep: 10,
+  maxPotencyUpgrades: 2,
+  potencyPrices: Object.freeze(["60", "160"]),
+  cooldownTicks: 240,
+  dropPercent: Object.freeze({ ordinary: 4, elite: 30, boss: 100 }),
+  bossBonusPercent: 25,
+  refillIntervalTicks: 60,
+  offers: Object.freeze({ capacity: "potion-capacity", potency: "potion-potency" }),
+  maximumGrants: 1e6
+});
+var B = POTION_BELT_POLICY;
+var EMPTY = Object.freeze({ grants: 0, capacityUpgrades: 0, potencyUpgrades: 0, lastUseTick: null });
+var potionBelt = (p) => p.inventory.services?.potions ?? EMPTY;
+var potionCapacity = (p) => B.baseCharges + potionBelt(p).capacityUpgrades;
+var potionHealPercent = (p) => B.baseHealPercent + B.potencyStep * potionBelt(p).potencyUpgrades;
+function potionCount(p) {
+  const l = p.inventory.services;
+  return l ? l.supplyPurchases + potionBelt(p).grants - l.suppliesUsed : 0;
+}
+function potionCooldownTicks(state, p) {
+  const t = potionBelt(p).lastUseTick;
+  return t === null ? 0 : Math.max(0, B.cooldownTicks - (state.tick - t));
+}
+function writable(p) {
+  const l = p.inventory.services;
+  requireContract(l, "Potion belt requires settlement services");
+  return l.potions ??= { grants: 0, capacityUpgrades: 0, potencyUpgrades: 0, lastUseTick: null };
+}
+function grantPotions(p, count) {
+  if (!p.inventory.services) return 0;
+  const room2 = Math.max(0, potionCapacity(p) - potionCount(p)), granted = Math.min(room2, count);
+  if (granted) writable(p).grants += granted;
+  return granted;
+}
+function markPotionUsed(state, p) {
+  writable(p).lastUseTick = state.tick;
+}
+function potionDropCount(state, player, target) {
+  const boss = Boolean(state.bossCombat?.bossesByEntityId?.[target.entityId]), elite = Boolean(state.eliteCombat?.elitesByEntityId?.[target.entityId]);
+  const roll = (salt) => gearHash4(B.version + "/" + state.campaign.seed.seedHex + "/" + player.playerId + "/" + target.entityId + "/" + salt) % 100;
+  if (boss) return 1 + (roll("bonus") < B.bossBonusPercent ? 1 : 0);
+  return roll("drop") < (elite ? B.dropPercent.elite : B.dropPercent.ordinary) ? 1 : 0;
+}
+function potionUpgrade(p, offerId) {
+  const b = potionBelt(p);
+  if (offerId === B.offers.capacity) return { field: "capacityUpgrades", done: b.capacityUpgrades, price: B.capacityPrices[b.capacityUpgrades] ?? null, label: "Potion belt +1 slot" };
+  if (offerId === B.offers.potency) return { field: "potencyUpgrades", done: b.potencyUpgrades, price: B.potencyPrices[b.potencyUpgrades] ?? null, label: "Stronger potions +" + B.potencyStep + "% heal" };
+  return null;
+}
+function applyPotionUpgrade(p, offerId) {
+  const u = potionUpgrade(p, offerId);
+  requireContract(u?.price, "Potion upgrade unavailable");
+  writable(p)[u.field]++;
+  return u.price;
+}
+function potionUpgradeSpent(p) {
+  const b = potionBelt(p);
+  let spent = "0";
+  for (let i = 0; i < b.capacityUpgrades; i++) spent = addAmount(spent, B.capacityPrices[i]);
+  for (let i = 0; i < b.potencyUpgrades; i++) spent = addAmount(spent, B.potencyPrices[i]);
+  return spent;
+}
+function validatePotionBelt(state, p, legacyMaximum) {
+  const r = p.inventory.services?.potions;
+  if (r) {
+    closedRecord(r, ["grants", "capacityUpgrades", "potencyUpgrades", "lastUseTick"]);
+    safeInteger(r.grants, 0, B.maximumGrants);
+    safeInteger(r.capacityUpgrades, 0, B.maxCapacityUpgrades);
+    safeInteger(r.potencyUpgrades, 0, B.maxPotencyUpgrades);
+    if (r.lastUseTick !== null) safeInteger(r.lastUseTick, 0, state.tick);
+  }
+  safeInteger(potionCount(p), 0, Math.max(potionCapacity(p), legacyMaximum));
+}
+function validatePotionProgress(x, y) {
+  const a = x?.potions ?? EMPTY, b = y?.potions ?? EMPTY;
+  requireContract(b.grants >= a.grants && b.capacityUpgrades >= a.capacityUpgrades && b.potencyUpgrades >= a.potencyUpgrades && (a.lastUseTick === null || b.lastUseTick !== null && b.lastUseTick >= a.lastUseTick), "Potion belt regressed");
+  return b.capacityUpgrades - a.capacityUpgrades + b.potencyUpgrades - a.potencyUpgrades;
+}
+
 // src/shared/contracts/settlement_services_v1.js
 var same15 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var ordinary = new Set(REWARD_POOLS.flat());
@@ -14016,14 +14102,15 @@ function saleQuote(p, item) {
   const power2 = progressionBigInt(item.generated?.itemPower ?? 1), bounded = Number(power2 > BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) ? BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) : power2);
   return String(SETTLEMENT_LIFE_POLICY.sale.baseGold + bounded * SETTLEMENT_LIFE_POLICY.sale.perItemPower + (item.generated?.rarityTier ?? 0) * SETTLEMENT_LIFE_POLICY.sale.perRarityTier);
 }
-var supplyCount = (p) => (p.inventory.services?.supplyPurchases ?? 0) - (p.inventory.services?.suppliesUsed ?? 0);
+var supplyCount = potionCount;
 function serviceActionProblem(s, p, kind, payload) {
   const inv = p.inventory, l = inv?.services, a = s.entitiesById[p.entityId], primary = s.primary.actorsById[a.entityId];
   if (!l || !hasSettlementLife(s.d9World?.plannedWorld)) return "Settlement services are unavailable";
   if (inv.revision !== payload.inventoryRevision) return "Your inventory changed. Review the new offer.";
   if (!a.alive || primary.current || primary.heldCommandId || primary.queuedCommandId) return "Finish your action first";
   if (kind === "supply.use") {
-    if (supplyCount(p) < 1) return "No field rations carried";
+    if (potionCount(p) < 1) return "No potions left";
+    if (potionCooldownTicks(s, p) > 0) return "Potion is still cooling down";
     if (compareCombat(a.hp, a.maxHp) >= 0) return "Already at full health";
     return null;
   }
@@ -14031,11 +14118,12 @@ function serviceActionProblem(s, p, kind, payload) {
   if (!npc) return "Approach this civilian on clear ground";
   if (kind === "service.modify" || kind === "service.material") return workshopProblem(s, p, npc, kind, payload);
   if (kind === "service.buy") {
-    if (payload.offerId === SETTLEMENT_LIFE_POLICY.supply.id) {
-      if (npc.role !== "general") return "This merchant does not stock provisions";
-      if (supplyCount(p) >= SETTLEMENT_LIFE_POLICY.supply.maximum) return "Provision carrying limit reached";
-      if (l.supplyPurchases >= SETTLEMENT_LIFE_POLICY.maximumSupplyPurchases) return "Provision ledger limit reached";
-      return compareAmount(inv.gold, SETTLEMENT_LIFE_POLICY.supply.price) < 0 ? "Insufficient gold" : null;
+    if (payload.offerId === SETTLEMENT_LIFE_POLICY.supply.id) return "Potions are found on defeated enemies, not sold";
+    const upgrade = potionUpgrade(p, payload.offerId);
+    if (upgrade) {
+      if (npc.role !== "general") return "Only the general merchant upgrades potions";
+      if (!upgrade.price) return "Already fully upgraded";
+      return compareAmount(inv.gold, upgrade.price) < 0 ? "Insufficient gold" : null;
     }
     const stock = serviceStock(s, p, npc).find((q) => q.offer.id === payload.offerId);
     if (!stock) return "Offer unavailable";
@@ -14066,10 +14154,8 @@ function applyServiceAction(s, p, c, order) {
     return;
   }
   if (c.kind === "service.buy") {
-    if (c.payload.offerId === SETTLEMENT_LIFE_POLICY.supply.id) {
-      price = SETTLEMENT_LIFE_POLICY.supply.price;
-      l.supplyPurchases++;
-    } else {
+    if (potionUpgrade(p, c.payload.offerId)) price = applyPotionUpgrade(p, c.payload.offerId);
+    else {
       const n = serviceNpcsFor(s.d9World?.plannedWorld).find((n2) => n2.id === c.payload.npcId), q = serviceStock(s, p, n).find((q2) => q2.offer.id === c.payload.offerId);
       price = q.offer.price;
       i.itemsById[q.item.itemId] = copyWire(q.item);
@@ -14089,7 +14175,8 @@ function applyServiceAction(s, p, c, order) {
     a.hp = copyWire(a.maxHp);
   } else {
     l.suppliesUsed++;
-    a.hp = copyWire(combatInteger(minCombat(a.maxHp, addCombat(a.hp, roundCombat(multiplyCombat(a.maxHp, SETTLEMENT_LIFE_POLICY.supply.recoveryPercent, 100))))));
+    markPotionUsed(s, p);
+    a.hp = copyWire(combatInteger(minCombat(a.maxHp, addCombat(a.hp, roundCombat(multiplyCombat(a.maxHp, potionHealPercent(p), 100))))));
   }
   i.revision++;
   l.lastTransaction = { command: copyWire(c), authorityOrder: order, tick: s.tick, revision: i.revision };
@@ -14097,7 +14184,7 @@ function applyServiceAction(s, p, c, order) {
 function serviceGoldAdjustment(p, gold) {
   const l = p.inventory.services;
   if (!l) return gold;
-  let income = l.retiredSaleGold, spent = addAmount(multiplyAmount(String(l.supplyPurchases), SETTLEMENT_LIFE_POLICY.supply.price), multiplyAmount(String(l.restCount), SETTLEMENT_LIFE_POLICY.rest.price));
+  let income = l.retiredSaleGold, spent = addAmount(addAmount(multiplyAmount(String(l.supplyPurchases), SETTLEMENT_LIFE_POLICY.supply.price), multiplyAmount(String(l.restCount), SETTLEMENT_LIFE_POLICY.rest.price)), potionUpgradeSpent(p));
   for (const r of Object.values(l.salesByItemId)) income = addAmount(income, r.gold);
   for (const r of Object.values(l.purchasesBySourceId)) {
     const n = ORDINARY_SERVICE_NPCS.find((n2) => n2.id === r.npcId), offer = SETTLEMENT_LIFE_POLICY.stockByRole[n?.role]?.find((q) => q.id === r.offerId);
@@ -14113,14 +14200,14 @@ function validateSettlementServices(s, p, validateCommand2) {
     return;
   }
   requireContract(l, "Missing service state");
-  closedRecord(l, ["version", "purchasesBySourceId", "salesByItemId", "retiredSaleGold", "supplyPurchases", "suppliesUsed", "restCount", "lastTransaction"], ["workshop", "combatHash"]);
+  closedRecord(l, ["version", "purchasesBySourceId", "salesByItemId", "retiredSaleGold", "supplyPurchases", "suppliesUsed", "restCount", "lastTransaction"], ["workshop", "combatHash", "potions"]);
   requireContract((l.combatHash ?? null) === (hasWorldCombat(s) ? WORLD_COMBAT_HASH : null), "Service combat policy drift");
   validateWorkshop(s, p, validateCommand2);
   requireContract(l.version === SETTLEMENT_LIFE_VERSION, "Unknown service version");
   amount(l.retiredSaleGold);
   safeInteger(l.supplyPurchases, 0, SETTLEMENT_LIFE_POLICY.maximumSupplyPurchases);
-  safeInteger(l.suppliesUsed, 0, l.supplyPurchases);
-  safeInteger(supplyCount(p), 0, SETTLEMENT_LIFE_POLICY.supply.maximum);
+  safeInteger(l.suppliesUsed, 0, l.supplyPurchases + (l.potions?.grants ?? 0));
+  validatePotionBelt(s, p, SETTLEMENT_LIFE_POLICY.supply.maximum);
   safeInteger(l.restCount, 0, SETTLEMENT_LIFE_POLICY.maximumRests);
   requireContract(Object.keys(l.purchasesBySourceId).length <= SETTLEMENT_LIFE_POLICY.maximumPurchaseRecords && Object.keys(l.salesByItemId).length <= SETTLEMENT_LIFE_POLICY.sale.retainedReceiptBound, "Service receipt bound");
   function receipt(r, kind) {
@@ -14175,6 +14262,7 @@ function validateServiceProgress(before, after, pid) {
   requireContract(Boolean(x) === Boolean(y), "Service state changed after genesis");
   if (!x) return;
   requireContract(y.supplyPurchases >= x.supplyPurchases && y.suppliesUsed >= x.suppliesUsed && y.restCount >= x.restCount, "Service counters regressed");
+  const upgrades = validatePotionProgress(x, y);
   for (const [id, r] of Object.entries(x.purchasesBySourceId)) requireContract(same15(r, y.purchasesBySourceId[id]), "Purchase history rewritten");
   let retired = x.retiredSaleGold;
   for (const [id, r] of Object.entries(x.salesByItemId)) {
@@ -14202,7 +14290,7 @@ function validateServiceProgress(before, after, pid) {
     requireContract(known && r.authorityOrder > before.lastAppliedAuthorityOrder && r.revision > a.revision, "Sale lacks carried ancestry or later command");
     added++;
   }
-  const changes = added + y.supplyPurchases - x.supplyPurchases + y.suppliesUsed - x.suppliesUsed + y.restCount - x.restCount;
+  const changes = added + upgrades + y.supplyPurchases - x.supplyPurchases + y.suppliesUsed - x.suppliesUsed + y.restCount - x.restCount;
   requireContract(b.revision - a.revision >= changes, "Service changes lack inventory revisions");
   if (changes) requireContract(y.lastTransaction.authorityOrder > before.lastAppliedAuthorityOrder, "Service counters lack a later receipt");
   else requireContract(same15(x.lastTransaction, y.lastTransaction), "Service receipt changed without transaction");
@@ -22429,6 +22517,14 @@ export {
   inventoryIntakeCapacity,
   emptyMasteryTransient,
   validateD8Advance,
+  POTION_BELT_POLICY,
+  potionCapacity,
+  potionHealPercent,
+  potionCount,
+  potionCooldownTicks,
+  grantPotions,
+  potionDropCount,
+  potionUpgrade,
   saleQuote,
   supplyCount,
   serviceActionProblem,

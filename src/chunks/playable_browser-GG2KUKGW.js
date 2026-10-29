@@ -144,6 +144,7 @@ import {
   PLANNED_RUIN_VERSION,
   PLANNED_WORLD_VERSION,
   PLAYER_INVENTORY_VERSION,
+  POTION_BELT_POLICY,
   RARITY_COLORS,
   RARITY_NAMES,
   RESONANCE_SETS,
@@ -394,6 +395,7 @@ import {
   fundForgeReview,
   gearHash,
   generateOrdinaryPopulation,
+  grantPotions,
   groundCoverageStatusD9,
   groundGear,
   groundOccupancyWindowD9,
@@ -510,6 +512,12 @@ import {
   populationPointAllowed,
   populationRegionAt,
   positiveProgression,
+  potionCapacity,
+  potionCooldownTicks,
+  potionCount,
+  potionDropCount,
+  potionHealPercent,
+  potionUpgrade,
   prepareEpisodeReward,
   prepareProgressionChange,
   presentCombat,
@@ -694,7 +702,7 @@ import {
   worldLevelGapMultiplier,
   worldOrdinaryMeleeProfile,
   worldPointForArea
-} from "./chunk-YQT7TO5R.js";
+} from "./chunk-4XZNGA5C.js";
 
 // src/client/authority_clock.js
 var AUTHORITY_CLOCK_PERIOD_MS = 1e3 / 60;
@@ -19639,6 +19647,7 @@ function createActivityProgression(state, manifest, measure) {
       for (const row2 of rows) {
         const { player, next, d8, resolved } = row2;
         applyEpisodeReward(state, player, row2.inventoryPlan);
+        grantPotions(player, potionDropCount(state, player, target));
         markEarning(state, manifest, player);
         player.progression = copyWire(next);
         if (d8) player.d8 = d8;
@@ -24080,6 +24089,10 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
   function advanceOneTick() {
     return measure("simulation", () => {
       state.tick = safeInteger(state.tick + 1, 1);
+      if (state.d9World && state.tick % POTION_BELT_POLICY.refillIntervalTicks === 0) for (const p of Object.values(state.playersById)) {
+        const a = state.entitiesById[p.entityId];
+        if (a?.alive && a.residency.spaceInstanceId === state.overworldInstanceId && (isStarterVillageSafe(state, a.position) || isWorldPointSafe(manifest, a.position))) grantPotions(p, POTION_BELT_POLICY.maxCapacityUpgrades + POTION_BELT_POLICY.baseCharges);
+      }
       expireWildernessCrowdGrace(state);
       for (const [id, until] of Object.entries(state.siteExitProtectionByEntityId ?? {})) if (state.tick >= until) delete state.siteExitProtectionByEntityId[id];
       eliteCombat.beginTick();
@@ -25544,6 +25557,7 @@ function createActivityClientPort({ authority, localPlayerId, measure = (_n, fn)
           worldTime: worldTimeAtTick(state.tick),
           localPlayerId,
           inventory,
+          potions: Object.freeze({ count: potionCount(player), capacity: potionCapacity(player), healPercent: potionHealPercent(player), cooldownTicks: potionCooldownTicks(state, player), cooldownTotal: POTION_BELT_POLICY.cooldownTicks, enabled: Boolean(player.inventory?.services) }),
           forgeAccess: forgeAccess(state, player, m),
           loot: freezeProjection(loot),
           resources: freezeProjection(resources),
@@ -28046,7 +28060,7 @@ function createSettlementServicesMenu2(options) {
     if (cls) e.className = cls;
     return e;
   };
-  let npcId = null, mode = "gear", selected = null, line11 = 0, materialQuantity = 1, key2 = null, busy = false, notice = "", confirm = null;
+  let lastPotionCount = null, npcId = null, mode = "gear", selected = null, line11 = 0, materialQuantity = 1, key2 = null, busy = false, notice = "", confirm = null;
   const close = () => {
     if (busy) return;
     panel.close();
@@ -28066,8 +28080,13 @@ function createSettlementServicesMenu2(options) {
     i.alt = "";
     return i;
   };
-  const supplyButton = button("", () => open(null), "supplies");
+  const supplyButton = button("", () => {
+    const m = readModel();
+    if (!m.potions?.count || m.potions.cooldownTicks > 0 || busy) return;
+    issue("supply.use", {});
+  }, "drink-potion");
   supplyButton.id = "carried-rations";
+  supplyButton.classList.add("potion-button");
   supplyButton.style.cssText = "position:absolute;left:78px;top:12px;z-index:8;padding:10px;background:#282033;color:#f2db9d;border:1px solid #ad9359;border-radius:6px";
   supplyButton.setAttribute("data-gameplay-hud", "");
   doc.getElementById("world-bag").after(supplyButton);
@@ -28149,7 +28168,7 @@ function createSettlementServicesMenu2(options) {
     wallet.firstChild.width = 22;
     wallet.firstChild.height = 22;
     shell.append(wallet);
-    const tabs = el("nav", void 0, "forge-mode-bar"), modes = isAltar ? [["enchant", "Enchantment"], ["purge", "Purge"], ["resonance", "Resonance"], ["shatter", "Shatter"], ["materials", "Materials"]] : isSmith ? [["attune", "Attunement"], ["reforge", "Reforge"], ["awaken", "Awaken"], ["gear", "Trade"], ["materials", "Materials"]] : npc?.role === "innkeeper" ? [["rest", "Rest"]] : [["gear", "Equipment"], ["supplies", "Supplies"], ["sell", "Sell"]];
+    const tabs = el("nav", void 0, "forge-mode-bar"), modes = isAltar ? [["enchant", "Enchantment"], ["purge", "Purge"], ["resonance", "Resonance"], ["shatter", "Shatter"], ["materials", "Materials"]] : isSmith ? [["attune", "Attunement"], ["reforge", "Reforge"], ["awaken", "Awaken"], ["gear", "Trade"], ["materials", "Materials"]] : npc?.role === "innkeeper" ? [["rest", "Rest"]] : [["gear", "Equipment"], ["supplies", "Potions"], ["sell", "Sell"]];
     if (!npcId) modes.splice(0, modes.length, ["supplies", "Supplies"]);
     for (const [id, label3] of modes) {
       const b = button(label3, () => change(id), "tab:" + id, "forge-mode-btn");
@@ -28200,9 +28219,14 @@ function createSettlementServicesMenu2(options) {
         }, "sell:" + i.itemId));
       }
     } else if (mode === "supplies") {
-      body4.append(el("h3", "Field rations \xB7 " + supplyCount(p) + " / " + SETTLEMENT_LIFE_POLICY.supply.maximum));
-      if (npc?.role === "general") body4.append(button("Buy ration \xB7 2 Gold \xB7 restores 15% max HP", () => issue("service.buy", { npcId, offerId: "field-ration" }), "buy:field-ration"));
-      body4.append(button("Use one ration \xB7 recover 15% max HP", () => issue("supply.use", {}), "use-ration"));
+      const belt = m.potions;
+      body4.append(el("h3", "Health potions \xB7 " + belt.count + " / " + belt.capacity), el("p", "Each potion heals " + belt.healPercent + "% of max HP. Enemies drop potions (elites often, bosses always) and your belt refills for free in town."));
+      if (npc?.role === "general") for (const offerId of Object.values(POTION_BELT_POLICY.offers)) {
+        const u = potionUpgrade(p, offerId), b = button(u.price ? u.label + " \xB7 " + u.price + " Gold" : u.label + " \xB7 fully upgraded", () => issue("service.buy", { npcId, offerId }), "buy:" + offerId);
+        b.disabled = busy || !u.price || compareAmount(inv.gold, u.price) < 0;
+        body4.append(b);
+      }
+      else body4.append(el("p", "Visit a general merchant to carry more potions or make them stronger."));
     } else if (mode === "rest") {
       body4.append(el("h3", "A safe rest"), el("p", SETTLEMENT_LIFE_POLICY.rest.effect), el("p", "Cost: 5 Gold \xB7 no time skipping, revival, reset or status cure."));
       body4.append(button("Rest \xB7 recover all missing HP \xB7 5 Gold", () => issue("service.rest", { npcId }), "rest"));
@@ -28310,9 +28334,20 @@ function createSettlementServicesMenu2(options) {
     }
   }
   function refresh(m) {
-    supplyButton.hidden = !m.inventory?.services;
+    supplyButton.hidden = !m.potions?.enabled;
     if (supplyButton.hidden) return;
-    supplyButton.textContent = "Rations \xB7 " + supplyCount({ inventory: m.inventory });
+    const belt = m.potions, cooling = belt.cooldownTicks > 0, label3 = cooling ? "Potion \xB7 " + Math.ceil(belt.cooldownTicks / 60) + "s" : "Potion \xB7 " + belt.count + "/" + belt.capacity;
+    if (supplyButton.textContent !== label3) supplyButton.textContent = label3;
+    supplyButton.dataset.empty = String(belt.count < 1);
+    if (lastPotionCount !== null && belt.count > lastPotionCount) {
+      supplyButton.classList.remove("potion-gained");
+      void supplyButton.offsetWidth;
+      supplyButton.classList.add("potion-gained");
+    }
+    lastPotionCount = belt.count;
+    supplyButton.dataset.cooling = String(cooling);
+    supplyButton.style.setProperty("--potion-cooldown", String(cooling ? belt.cooldownTicks / belt.cooldownTotal : 0));
+    supplyButton.setAttribute("aria-label", "Drink health potion, " + belt.count + " of " + belt.capacity + ", heals " + belt.healPercent + " percent");
     const next = m.localPlayerId + "/" + m.inventory.revision + "/" + m.playersById[m.localPlayerId].progression.level + "/" + npcId + "/" + mode + "/" + selected + "/" + line11 + "/" + materialQuantity + "/" + busy + "/" + notice + "/" + confirm + "/" + (m.serviceNpcs?.find((n) => n.id === npcId)?.available ?? false);
     if (panel.open && key2 !== next) {
       const focus = doc.activeElement?.dataset.serviceAction;
@@ -28778,6 +28813,16 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
   small.setAttribute("aria-label", "Minimap \u2014 open world map");
   small.tabIndex = 0;
   miniFooter.append(el("span", "N \u2191"));
+  const menuProxy = el("button", "MENU");
+  menuProxy.type = "button";
+  menuProxy.className = "chart-menu-proxy";
+  menuProxy.setAttribute("aria-label", "Open menu");
+  menuProxy.onclick = (e) => {
+    e.stopPropagation();
+    const menu = doc.getElementById("local-world-controls");
+    if (menu) menu.open = !menu.open;
+  };
+  miniFooter.append(menuProxy);
   mini.append(small, miniFooter);
   atlas.className = "chart-atlas";
   atlas.hidden = true;
