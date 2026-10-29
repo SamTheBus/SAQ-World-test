@@ -48037,7 +48037,7 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
       created++;
       emit("allocate", { id });
     }
-    const pixels = Math.ceil(SIZE * scale);
+    const pixels = Math.max(1, Math.round(32 * scale)) * (SIZE / 32);
     if (raster.width !== pixels || raster.height !== pixels) {
       raster.width = pixels;
       raster.height = pixels;
