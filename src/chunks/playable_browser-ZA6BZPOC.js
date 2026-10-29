@@ -712,7 +712,7 @@ import {
   worldLevelGapMultiplier,
   worldOrdinaryMeleeProfile,
   worldPointForArea
-} from "./chunk-BL3EJPM2.js";
+} from "./chunk-CYUROK72.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -15540,6 +15540,17 @@ function advanceClassSkillTimers(tick, combat) {
   if (k.last && tick - k.last.tick >= SKILL_LAST_TICKS) delete k.last;
   prune(combat);
 }
+var BLOCK_BASH_REFUND_TICKS = 60;
+function reduceSkillCooldown(combat, skillId, ticks) {
+  const k = combat?.skills;
+  if (!k?.cooldowns[skillId]) return;
+  const left = k.cooldowns[skillId] - ticks;
+  if (left >= 1) k.cooldowns[skillId] = left;
+  else {
+    delete k.cooldowns[skillId];
+    prune(combat);
+  }
+}
 function cancelClassSkillAction(combat) {
   if (combat?.skills) {
     delete combat.skills.flurry;
@@ -16838,6 +16849,163 @@ function validateD8Receipt(state, player, validateCommand2) {
   if (a) requireContract(a.status === "applied" && a.commandCanonical === canonicalStringify(c) && a.authorityOrder === r.authorityOrder, "Progression command receipt");
 }
 
+// src/simulation/subweapon_rules.js
+function combatRoll(combat, chance) {
+  const draw = nextUint32(combat.rng);
+  combat.rng = copyWire(draw.state);
+  return BigInt(draw.value) * BigInt(chance.d) < BigInt(chance.n) * 4294967296n;
+}
+var clearHullGap = (a, b) => Math.max(0, Math.hypot(a.position.x - b.position.x, a.position.y - b.position.y) - a.hullRadius - b.hullRadius);
+function subweaponLineClear(collision, a, b) {
+  const dx = b.position.x - a.position.x, dy = b.position.y - a.position.y, d = Math.hypot(dx, dy);
+  if (!d) return true;
+  const from = a.hullRadius + 4, to = Math.max(from, d - b.hullRadius - 4);
+  for (let t = from; t <= to; t += 4) if (collidesWithTiles(collision, a.position.x + dx * t / d, a.position.y + dy * t / d, 4)) return false;
+  return !collidesWithTiles(collision, a.position.x + dx * to / d, a.position.y + dy * to / d, 4);
+}
+var CLASS_MOVES = Object.freeze({ dagger: Object.freeze({ name: "Dash", frames: 8, distance: 64, cooldown: 90 }), tome: Object.freeze({ name: "Blink", frames: 4, distance: 72, cooldown: 150 }) });
+var MAX_CLASS_MOVE = Object.freeze({ frames: 8, distance: 72, cooldown: 150 });
+function rhythmFires(sequence, chance) {
+  const s = BigInt(sequence), n = BigInt(chance.n), d = BigInt(chance.d);
+  return s > 0n && s * n / d > (s - 1n) * n / d;
+}
+function canShadowDash(actor, combat, stats, suppressed = false) {
+  return !suppressed && actor.alive && Boolean(CLASS_MOVES[stats.subType]) && combat.dash.frames === 0 && combat.dash.cooldown === 0;
+}
+function beginShadowDash(actor, combat, stats, aim2, suppressed = false) {
+  if (!canShadowDash(actor, combat, stats, suppressed)) return false;
+  const intent = actor.movementIntent, direction3 = Math.hypot(intent.x, intent.y) > 0.01 ? intent : aim2, length = Math.hypot(direction3.x, direction3.y);
+  if (!length) return false;
+  const move2 = CLASS_MOVES[stats.subType];
+  Object.assign(combat.dash, { frames: move2.frames, cooldown: move2.cooldown, remaining: move2.distance, x: direction3.x / length, y: direction3.y / length });
+  return true;
+}
+function advanceShadowDash(actor, combat, stats, collision, suppressed = false) {
+  const dash = combat.dash;
+  const move2 = CLASS_MOVES[stats.subType];
+  if (!move2) {
+    Object.assign(dash, { frames: 0, cooldown: 0, remaining: 0 });
+    return false;
+  }
+  if (!actor.alive) {
+    dash.frames = 0;
+    dash.remaining = 0;
+    return false;
+  }
+  if (dash.cooldown > 0) dash.cooldown--;
+  if (suppressed) {
+    dash.frames = 0;
+    dash.remaining = 0;
+    return false;
+  }
+  if (!dash.frames) return false;
+  const distance8 = Math.min(move2.distance / move2.frames, dash.remaining), x = actor.position.x, y = actor.position.y;
+  const blocked3 = (f) => collidesWithTiles(collision, x + dash.x * distance8 * f, y + dash.y * distance8 * f, actor.hullRadius);
+  let fraction6 = 1;
+  if (blocked3(1)) {
+    let lo = 0, hi = 1;
+    for (let i = 0; i < 10; i++) {
+      const mid = (lo + hi) / 2;
+      if (blocked3(mid)) hi = mid;
+      else lo = mid;
+    }
+    fraction6 = lo;
+  }
+  actor.position = { x: x + dash.x * distance8 * fraction6, y: y + dash.y * distance8 * fraction6 };
+  actor.movedLastTick = fraction6 > 0;
+  dash.remaining = Math.max(0, dash.remaining - distance8 * fraction6);
+  dash.frames--;
+  if (fraction6 < 0.999 || dash.remaining <= 1e-3 || !dash.frames) {
+    dash.frames = 0;
+    dash.remaining = 0;
+  }
+  return true;
+}
+function reconcileSubweapon(actor, combat, stats) {
+  reconcileGuard(combat.guard, actor, stats);
+  if (compareCombat(combat.barrier, stats.maxBarrier) > 0) combat.barrier = copyWire(stats.maxBarrier);
+  if (compareCombat(combat.barrier, stats.maxBarrier) === 0) combat.barrierRechargeRemainder = 0;
+  if (stats.subType !== "shield") combat.pressure = 0;
+  if (!CLASS_MOVES[stats.subType]) Object.assign(combat.dash, { frames: 0, cooldown: 0, remaining: 0 });
+  if (!actor.alive) {
+    combat.barrier = "0";
+    combat.barrierRechargeRemainder = 0;
+    combat.pressure = 0;
+    combat.dash.frames = 0;
+    combat.dash.remaining = 0;
+  }
+}
+function advanceSubweaponTimers(actor, combat, stats, { suppressed = false } = {}) {
+  if (suppressed) lowerShield(combat.guard);
+  advanceGuard(combat.guard, actor, stats);
+  if (!stats.subType && !combat.fatigue && !combat.counterCooldown) return;
+  reconcileSubweapon(actor, combat, stats);
+  if (!actor.alive) return;
+  if (combat.fatigue > 0) combat.fatigue--;
+  if (combat.counterCooldown > 0) combat.counterCooldown--;
+  if (!suppressed && stats.subType === "tome" && compareCombat(combat.barrier, stats.maxBarrier) < 0) {
+    const accrued = BigInt(combat.barrierRechargeRemainder) + integerBigInt(stats.maxBarrier);
+    combat.barrier = combatInteger(minCombat(stats.maxBarrier, addCombat(combat.barrier, combatAmount(accrued / 600n))));
+    combat.barrierRechargeRemainder = compareCombat(combat.barrier, stats.maxBarrier) === 0 ? 0 : Number(accrued % 600n);
+  }
+}
+function criticalDamagePacket(combat, stats, base, mechanic, forced = false) {
+  const critical = combatRoll(combat, stats.critChance) || forced;
+  return { damage: outgoingCombat(critical ? multiplyCombat(base, stats.critMultiplier.n, stats.critMultiplier.d) : base), critical, mechanic };
+}
+var shieldPacket = (stats) => {
+  const f = stats.familyProperties, defense = addCombat(f?.reflect ?? combatAmount(1), f?.bashDefense ?? combatAmount(0)), base = addCombat(multiplyCombat(stats.defense, defense.n, defense.d), multiplyCombat(stats.attack, f?.bashAttack?.n ?? 0, f?.bashAttack?.d ?? 1)), scale = f?.bashMultiplier ?? combatAmount(1);
+  return multiplyCombat(base, scale.n, scale.d);
+};
+function successfulSubweaponHit({ combat, stats, target, damage, bleed, fire, offhand: offhand2 = () => {
+}, suppressed = false, knight = false, rhythm = null }) {
+  if (suppressed) return { proactive: false };
+  if (!knight && stats.subType === "shield" && combat.pressure === 3 && target.alive) {
+    damage(shieldPacket(stats), "bash");
+    combat.pressure = 0;
+  }
+  let proactive = false;
+  if (stats.subType === "dagger") {
+    if (combatRoll(combat, stats.familyProperties?.bleed ?? combatAmount(15, 100)) && target.alive) {
+      bleed(stats.attack);
+      proactive = true;
+    }
+    if ((rhythm === null ? combatRoll(combat, stats.familyProperties?.offhand ?? combatAmount(1, 2)) : rhythmFires(rhythm, stats.familyProperties?.offhand ?? combatAmount(1, 2))) && target.alive) {
+      proactive = true;
+      damage(multiplyCombat(stats.attack, stats.familyProperties?.offhandDamage?.n ?? 45, stats.familyProperties?.offhandDamage?.d ?? 100), "offhand");
+      offhand2();
+      if (combatRoll(combat, stats.familyProperties?.bleed ?? combatAmount(15, 100)) && target.alive) {
+        bleed(stats.attack);
+        proactive = true;
+      }
+    }
+  }
+  return { proactive };
+}
+function incomingSubweaponHit({ combat, stats, raw, boss = false, actor = null, source: source3 = null, suppressed = false, knight = false }) {
+  if (suppressed) return { damage: combatInteger(mitigateFractionalPlayerDamage(raw, stats.defense)), absorbed: "0", defense: null, counter: null, suppressed: true };
+  const absorbed = combatInteger(minCombat(combat.barrier, raw));
+  combat.barrier = combatInteger(subtractCombat(combat.barrier, absorbed));
+  raw = subtractCombat(raw, absorbed);
+  if (compareCombat(raw, 0) === 0) return { damage: "0", absorbed, defense: "barrier", counter: null };
+  const net = mitigateFractionalPlayerDamage(raw, stats.defense), family = stats.subType;
+  const chance = family === "shield" ? stats.blockChance : family === "dagger" ? stats.parryChance : combatAmount(0);
+  const activeGuard = family === "shield" && guardsSource(combat.guard, actor, source3);
+  const guarded = activeGuard || compareCombat(chance, 0) > 0 && combatRoll(combat, multiplyCombat(chance, (boss ? 65 : 100) * (combat.fatigue ? 50 : 100), 1e4));
+  if (!guarded) return { damage: combatInteger(net), absorbed, defense: null, counter: null };
+  if (activeGuard) spendGuard(combat.guard, net);
+  combat.fatigue = 30;
+  if (family === "shield" && knight) reduceSkillCooldown(combat, "shield_bash", BLOCK_BASH_REFUND_TICKS);
+  else if (family === "shield") combat.pressure = Math.min(3, combat.pressure + 1);
+  const riposte = family !== "shield" || !knight && combatRoll(combat, combatAmount(1, 4));
+  const mitigation = multiplyCombat(family === "shield" ? stats.familyProperties?.blockMitigation ?? combatAmount(7, 10) : stats.familyProperties?.parryMitigation ?? combatAmount(3, 5), boss ? 65 : 100, 100);
+  const damage = combatInteger(multiplyCombat(net, subtractCombat(1, mitigation).n, subtractCombat(1, mitigation).d));
+  const masteryCounterEligible = !boss || combat.counterCooldown === 0;
+  const counter = riposte && (!boss || combat.counterCooldown === 0) ? { damage: family === "shield" ? shieldPacket(stats) : multiplyCombat(stats.attack, stats.familyProperties?.riposte?.n ?? 80, stats.familyProperties?.riposte?.d ?? 100), mechanic: family === "shield" ? "bash" : "riposte" } : null;
+  if (counter && boss) combat.counterCooldown = 60;
+  return { damage, absorbed, prevented: subtractCombat(net, damage), masteryCounterEligible, defense: family === "shield" ? "block" : "parry", counter };
+}
+
 // src/shared/contracts/tome_cast.js
 function captureTomeRecipe(player, areaScale = 1, stats = null) {
   const item = player.inventory.itemsById[player.inventory.equipped.subweapon], def = itemDefinition(item), r = (id) => finiteNodeRank(player.d8, id), balanced = usesBuildBalanceV2(player), intel = balanced ? progressionBigInt(combatInteger((stats ?? resolvePlayerStats(player)).attributes.int)) : 5n;
@@ -16995,10 +17163,10 @@ function validateSubweaponCombat(s) {
     requireContract(compareCombat(v.barrier, stats.maxBarrier) <= 0, "Barrier exceeds resolved capacity");
     const d = v.dash;
     closedRecord(d, ["frames", "cooldown", "remaining", "x", "y"]);
-    safeInteger(d.frames, 0, 8);
-    safeInteger(d.cooldown, 0, 90);
-    requireContract(Number.isFinite(d.remaining) && d.remaining >= 0 && d.remaining <= 64 && Number.isFinite(d.x) && Number.isFinite(d.y) && Math.abs(Math.hypot(d.x, d.y) - 1) < 1e-9, "Invalid Dash geometry");
-    requireContract(!d.frames || a.alive && stats.subType === "dagger" && d.cooldown > 0 && d.remaining > 0, "Invalid active Dash");
+    safeInteger(d.frames, 0, MAX_CLASS_MOVE.frames);
+    safeInteger(d.cooldown, 0, MAX_CLASS_MOVE.cooldown);
+    requireContract(Number.isFinite(d.remaining) && d.remaining >= 0 && d.remaining <= MAX_CLASS_MOVE.distance && Number.isFinite(d.x) && Number.isFinite(d.y) && Math.abs(Math.hypot(d.x, d.y) - 1) < 1e-9, "Invalid Dash geometry");
+    requireContract(!d.frames || a.alive && Boolean(CLASS_MOVES[stats.subType]) && d.cooldown > 0 && d.remaining > 0, "Invalid active Dash");
     requireContract(stats.subType === "shield" || v.pressure === 0, "Pressure without Shield");
     requireContract(a.alive || compareCombat(v.barrier, 0) === 0, "Dead Barrier");
   }
@@ -17077,154 +17245,6 @@ function cancelSubweaponResidency(s, id) {
   }
   for (const [key2, b] of Object.entries(c.projectiles)) if (b.sourceId === id) delete c.projectiles[key2];
   for (const [key2, e] of Object.entries(c.effects)) if (e.sourceId === id || e.targetId === id) delete c.effects[key2];
-}
-
-// src/simulation/subweapon_rules.js
-function combatRoll(combat, chance) {
-  const draw = nextUint32(combat.rng);
-  combat.rng = copyWire(draw.state);
-  return BigInt(draw.value) * BigInt(chance.d) < BigInt(chance.n) * 4294967296n;
-}
-var clearHullGap = (a, b) => Math.max(0, Math.hypot(a.position.x - b.position.x, a.position.y - b.position.y) - a.hullRadius - b.hullRadius);
-function subweaponLineClear(collision, a, b) {
-  const dx = b.position.x - a.position.x, dy = b.position.y - a.position.y, d = Math.hypot(dx, dy);
-  if (!d) return true;
-  const from = a.hullRadius + 4, to = Math.max(from, d - b.hullRadius - 4);
-  for (let t = from; t <= to; t += 4) if (collidesWithTiles(collision, a.position.x + dx * t / d, a.position.y + dy * t / d, 4)) return false;
-  return !collidesWithTiles(collision, a.position.x + dx * to / d, a.position.y + dy * to / d, 4);
-}
-function canShadowDash(actor, combat, stats, suppressed = false) {
-  return !suppressed && actor.alive && stats.subType === "dagger" && combat.dash.frames === 0 && combat.dash.cooldown === 0;
-}
-function beginShadowDash(actor, combat, stats, aim2, suppressed = false) {
-  if (!canShadowDash(actor, combat, stats, suppressed)) return false;
-  const intent = actor.movementIntent, direction3 = Math.hypot(intent.x, intent.y) > 0.01 ? intent : aim2, length = Math.hypot(direction3.x, direction3.y);
-  if (!length) return false;
-  Object.assign(combat.dash, { frames: 8, cooldown: 90, remaining: 64, x: direction3.x / length, y: direction3.y / length });
-  return true;
-}
-function advanceShadowDash(actor, combat, stats, collision, suppressed = false) {
-  const dash = combat.dash;
-  if (stats.subType !== "dagger") {
-    Object.assign(dash, { frames: 0, cooldown: 0, remaining: 0 });
-    return false;
-  }
-  if (!actor.alive) {
-    dash.frames = 0;
-    dash.remaining = 0;
-    return false;
-  }
-  if (dash.cooldown > 0) dash.cooldown--;
-  if (suppressed) {
-    dash.frames = 0;
-    dash.remaining = 0;
-    return false;
-  }
-  if (!dash.frames) return false;
-  const distance8 = Math.min(8, dash.remaining), x = actor.position.x, y = actor.position.y;
-  const blocked3 = (f) => collidesWithTiles(collision, x + dash.x * distance8 * f, y + dash.y * distance8 * f, actor.hullRadius);
-  let fraction6 = 1;
-  if (blocked3(1)) {
-    let lo = 0, hi = 1;
-    for (let i = 0; i < 10; i++) {
-      const mid = (lo + hi) / 2;
-      if (blocked3(mid)) hi = mid;
-      else lo = mid;
-    }
-    fraction6 = lo;
-  }
-  actor.position = { x: x + dash.x * distance8 * fraction6, y: y + dash.y * distance8 * fraction6 };
-  actor.movedLastTick = fraction6 > 0;
-  dash.remaining = Math.max(0, dash.remaining - distance8 * fraction6);
-  dash.frames--;
-  if (fraction6 < 0.999 || dash.remaining <= 1e-3 || !dash.frames) {
-    dash.frames = 0;
-    dash.remaining = 0;
-  }
-  return true;
-}
-function reconcileSubweapon(actor, combat, stats) {
-  reconcileGuard(combat.guard, actor, stats);
-  if (compareCombat(combat.barrier, stats.maxBarrier) > 0) combat.barrier = copyWire(stats.maxBarrier);
-  if (compareCombat(combat.barrier, stats.maxBarrier) === 0) combat.barrierRechargeRemainder = 0;
-  if (stats.subType !== "shield") combat.pressure = 0;
-  if (stats.subType !== "dagger") Object.assign(combat.dash, { frames: 0, cooldown: 0, remaining: 0 });
-  if (!actor.alive) {
-    combat.barrier = "0";
-    combat.barrierRechargeRemainder = 0;
-    combat.pressure = 0;
-    combat.dash.frames = 0;
-    combat.dash.remaining = 0;
-  }
-}
-function advanceSubweaponTimers(actor, combat, stats, { suppressed = false } = {}) {
-  if (suppressed) lowerShield(combat.guard);
-  advanceGuard(combat.guard, actor, stats);
-  if (!stats.subType && !combat.fatigue && !combat.counterCooldown) return;
-  reconcileSubweapon(actor, combat, stats);
-  if (!actor.alive) return;
-  if (combat.fatigue > 0) combat.fatigue--;
-  if (combat.counterCooldown > 0) combat.counterCooldown--;
-  if (!suppressed && stats.subType === "tome" && compareCombat(combat.barrier, stats.maxBarrier) < 0) {
-    const accrued = BigInt(combat.barrierRechargeRemainder) + integerBigInt(stats.maxBarrier);
-    combat.barrier = combatInteger(minCombat(stats.maxBarrier, addCombat(combat.barrier, combatAmount(accrued / 600n))));
-    combat.barrierRechargeRemainder = compareCombat(combat.barrier, stats.maxBarrier) === 0 ? 0 : Number(accrued % 600n);
-  }
-}
-function criticalDamagePacket(combat, stats, base, mechanic, forced = false) {
-  const critical = combatRoll(combat, stats.critChance) || forced;
-  return { damage: outgoingCombat(critical ? multiplyCombat(base, stats.critMultiplier.n, stats.critMultiplier.d) : base), critical, mechanic };
-}
-var shieldPacket = (stats) => {
-  const f = stats.familyProperties, defense = addCombat(f?.reflect ?? combatAmount(1), f?.bashDefense ?? combatAmount(0)), base = addCombat(multiplyCombat(stats.defense, defense.n, defense.d), multiplyCombat(stats.attack, f?.bashAttack?.n ?? 0, f?.bashAttack?.d ?? 1)), scale = f?.bashMultiplier ?? combatAmount(1);
-  return multiplyCombat(base, scale.n, scale.d);
-};
-function successfulSubweaponHit({ combat, stats, target, damage, bleed, fire, offhand: offhand2 = () => {
-}, suppressed = false }) {
-  if (suppressed) return { proactive: false };
-  if (stats.subType === "shield" && combat.pressure === 3 && target.alive) {
-    damage(shieldPacket(stats), "bash");
-    combat.pressure = 0;
-  }
-  let proactive = false;
-  if (stats.subType === "dagger") {
-    if (combatRoll(combat, stats.familyProperties?.bleed ?? combatAmount(15, 100)) && target.alive) {
-      bleed(stats.attack);
-      proactive = true;
-    }
-    if (combatRoll(combat, stats.familyProperties?.offhand ?? combatAmount(1, 2)) && target.alive) {
-      proactive = true;
-      damage(multiplyCombat(stats.attack, stats.familyProperties?.offhandDamage?.n ?? 45, stats.familyProperties?.offhandDamage?.d ?? 100), "offhand");
-      offhand2();
-      if (combatRoll(combat, stats.familyProperties?.bleed ?? combatAmount(15, 100)) && target.alive) {
-        bleed(stats.attack);
-        proactive = true;
-      }
-    }
-  }
-  return { proactive };
-}
-function incomingSubweaponHit({ combat, stats, raw, boss = false, actor = null, source: source3 = null, suppressed = false }) {
-  if (suppressed) return { damage: combatInteger(mitigateFractionalPlayerDamage(raw, stats.defense)), absorbed: "0", defense: null, counter: null, suppressed: true };
-  const absorbed = combatInteger(minCombat(combat.barrier, raw));
-  combat.barrier = combatInteger(subtractCombat(combat.barrier, absorbed));
-  raw = subtractCombat(raw, absorbed);
-  if (compareCombat(raw, 0) === 0) return { damage: "0", absorbed, defense: "barrier", counter: null };
-  const net = mitigateFractionalPlayerDamage(raw, stats.defense), family = stats.subType;
-  const chance = family === "shield" ? stats.blockChance : family === "dagger" ? stats.parryChance : combatAmount(0);
-  const activeGuard = family === "shield" && guardsSource(combat.guard, actor, source3);
-  const guarded = activeGuard || compareCombat(chance, 0) > 0 && combatRoll(combat, multiplyCombat(chance, (boss ? 65 : 100) * (combat.fatigue ? 50 : 100), 1e4));
-  if (!guarded) return { damage: combatInteger(net), absorbed, defense: null, counter: null };
-  if (activeGuard) spendGuard(combat.guard, net);
-  combat.fatigue = 30;
-  if (family === "shield") combat.pressure = Math.min(3, combat.pressure + 1);
-  const riposte = family !== "shield" || combatRoll(combat, combatAmount(1, 4));
-  const mitigation = multiplyCombat(family === "shield" ? stats.familyProperties?.blockMitigation ?? combatAmount(7, 10) : stats.familyProperties?.parryMitigation ?? combatAmount(3, 5), boss ? 65 : 100, 100);
-  const damage = combatInteger(multiplyCombat(net, subtractCombat(1, mitigation).n, subtractCombat(1, mitigation).d));
-  const masteryCounterEligible = !boss || combat.counterCooldown === 0;
-  const counter = riposte && (!boss || combat.counterCooldown === 0) ? { damage: family === "shield" ? shieldPacket(stats) : multiplyCombat(stats.attack, stats.familyProperties?.riposte?.n ?? 80, stats.familyProperties?.riposte?.d ?? 100), mechanic: family === "shield" ? "bash" : "riposte" } : null;
-  if (counter && boss) combat.counterCooldown = 60;
-  return { damage, absorbed, prevented: subtractCombat(net, damage), masteryCounterEligible, defense: family === "shield" ? "block" : "parry", counter };
 }
 
 // src/shared/contracts/content_numeric_admission_d9.js
@@ -21069,11 +21089,14 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
   }
   const suppressed = (id) => subweaponSuppressedD12_4I(s, id);
   const skills = createClassSkills(s, { damage, effects: effects2, periodic, getStats: stats, players, identity: identity2 });
+  const heroClass = (a) => players.get(a.entityId)?.d8?.heroClass, swing = (a) => s.primary.actorsById[a.entityId]?.current?.sourceSequence ?? null;
   function successful(source3, target, captured) {
-    const outcome = successfulSubweaponHit({
+    const cls = heroClass(source3), outcome = successfulSubweaponHit({
       combat: c.actors[source3.entityId],
       stats: captured,
       target,
+      knight: cls === "knight",
+      rhythm: cls === "rogue" ? swing(source3) : null,
       damage: (raw, kind) => damage(source3, target, raw, kind, null, { sourceItem: damageSourceItem(players.get(source3.entityId), kind), trigger: kind === "bash" ? "pressure" : null }),
       bleed: (attack) => periodic(source3, target, "bleed", attack, captured),
       offhand: () => effects2.offhand(source3, target, captured)
@@ -21092,8 +21115,8 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
   }
   function proc(source3, target) {
     if (suppressed(source3.entityId)) return false;
-    const captured = stats(source3.entityId);
-    if (captured.subType !== "tome" || !combatRoll(c.actors[source3.entityId], captured.familyProperties?.tomeChance ?? captured.familyProperties?.fireChance ?? FIRE_TOME_PROC_CHANCE)) return false;
+    const captured = stats(source3.entityId), chance = captured.familyProperties?.tomeChance ?? captured.familyProperties?.fireChance ?? FIRE_TOME_PROC_CHANCE, beat = heroClass(source3) === "mage" ? swing(source3) : null;
+    if (captured.subType !== "tome" || !(beat === null ? combatRoll(c.actors[source3.entityId], chance) : rhythmFires(beat, chance))) return false;
     const dx = target.position.x - source3.position.x, dy = target.position.y - source3.position.y, d = Math.hypot(dx, dy);
     if (!d) return false;
     const owner = players.get(source3.entityId), recipe = owner.d8 ? captureTomeRecipe(owner, effects2.area(source3), captured) : null, anchor = recipe ? commitTomeAnchor(owner, recipe) : captured.spellType ?? "fire";
@@ -24048,7 +24071,7 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
       const stats = progression.resolvedStats(target.entityId), suppressed = subweaponSuppressedD12_4I(state, target.entityId);
       defenseStats = stats;
       const defenseSource = attribution?.projectileDirection ? { ...source3, position: { x: target.position.x - attribution.projectileDirection.x * 32, y: target.position.y - attribution.projectileDirection.y * 32 } } : source3;
-      defense = incomingSubweaponHit({ combat: state.subweaponCombat.actors[target.entityId], stats, raw, actor: target, source: defenseSource, boss: bossCombat.isBoss(source3.entityId) || Boolean(state.content.definitionsById[source3.contentDefinitionId]?.isBoss), suppressed });
+      defense = incomingSubweaponHit({ combat: state.subweaponCombat.actors[target.entityId], stats, raw, actor: target, source: defenseSource, knight: playerFor(target.entityId)?.d8?.heroClass === "knight", boss: bossCombat.isBoss(source3.entityId) || Boolean(state.content.definitionsById[source3.contentDefinitionId]?.isBoss), suppressed });
       raw = defense.damage;
       if (compareCombat(defense.absorbed, 0) > 0) barrierAbsorption = { absorbed: copyWire(defense.absorbed), remaining: copyWire(state.subweaponCombat.actors[target.entityId].barrier), capacity: copyWire(stats.maxBarrier) };
     }
@@ -25196,7 +25219,7 @@ function projectCombatPresentation(state, visibleIds) {
   return { masteryHazards: mastery.flatMap((b) => Object.values(b.hazards)).filter((e) => ids3.has(e.sourceId)).map((e) => ({ position: { ...e.position }, radius: e.radius, expiresTick: e.expiresTick })), masteryRazors: mastery.flatMap((b) => Object.values(b.razors)).filter((e) => ids3.has(e.sourceId)).map((e) => ({ position: { ...e.position }, direction: { ...e.direction } })), statuses: [...Object.values(state.subweaponCombat.effects), ...mastery.flatMap((b) => [...Object.values(b.poisons).map((e) => ({ ...e, id: e.sourceId + "/" + e.id, kind: "poison" })), ...Object.values(b.statuses).map((e) => ({ ...e, id: e.sourceId + "/" + e.id, stacks: e.rank, nextTick: e.expiresTick, appliedTick: e.expiresTick - (e.kind === "expose" ? 300 : e.kind === "slow" ? 240 : 90) }))]), ...Object.values(state.subweaponCombat.controls ?? {}).map((e) => ({ ...e, kind: e.phase, nextTick: e.expiresTick }))].filter((e) => ids3.has(e.targetId) && e.expiresTick > state.tick).map((e) => ({ lane: (lanes2.set(e.targetId, (lanes2.get(e.targetId) ?? -1) + 1), lanes2.get(e.targetId)), id: e.id, sourceId: e.sourceId, targetId: e.targetId, kind: e.kind, stacks: e.stacks, expiresTick: e.expiresTick, nextTick: e.nextTick, durationFrames: ["bleed", "poison"].includes(e.kind) ? 600 : e.kind === "burn" ? 240 : e.expiresTick - e.appliedTick })), families: Object.fromEntries(Object.entries(state.subweaponCombat.actors).filter(([id]) => ids3.has(id)).map(([id, c]) => [id, { mastery: (() => {
     const p = Object.values(state.playersById).find((p2) => p2.entityId === id), d = p?.d8, t = d?.transient;
     return t ? { pulseBlocks: t.pulseBlocks, syphon: finiteNodeRank(d, "tome_arcane_syphon") > 0, earthBreaker: finiteNodeRank(d, "shield_earth_breaker_bash") > 0, singularity: finiteNodeRank(d, "tome_keystone_singularity") > 0, anchor: t.lastAnchor, fortitudeStacks: t.fortitudeStacks, retaliatoryReady: t.retaliatoryReady, colossus: t.colossusTicks > 0, shadowStep: t.shadowStepTicks > 0, syphonStacks: t.syphonStacks, weavingStacks: t.weavingStacks } : null;
-  })(), element: Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.itemsById[Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.equipped.subweapon]?.generated?.definition.spellType ?? "fire", guard: c.guard ? { ...c.guard, integrity: presentCombat(c.guard.integrity), direction: { ...c.guard.direction } } : null, pressure: c.pressure, dash: { ...c.dash }, delivery: { ...c.delivery }, skill: c.skills?.last ? { ...c.skills.last } : null }])) };
+  })(), element: Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.itemsById[Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.equipped.subweapon]?.generated?.definition.spellType ?? "fire", guard: c.guard ? { ...c.guard, integrity: presentCombat(c.guard.integrity), direction: { ...c.guard.direction } } : null, pressure: c.pressure, dash: { ...c.dash }, blink: itemDefinition(((p) => p?.inventory.itemsById[p.inventory.equipped.subweapon])(Object.values(state.playersById).find((p) => p.entityId === id)))?.subType === "tome", delivery: { ...c.delivery }, skill: c.skills?.last ? { ...c.skills.last } : null }])) };
 }
 
 // src/shared/content/creatures_d11.js
@@ -26117,7 +26140,7 @@ function createClassPickerV1({ document, environment, readModel, adapter, report
     const head12 = el("span", "class-card-head");
     head12.append(icon, el("strong", "", c.name), el("em", "", OFFHAND_NAMES[c.offhand]));
     const sk = el("span", "class-card-skill");
-    sk.append(el("b", "", `Free skill \xB7 ${skill.name}`), el("small", "", skill.description));
+    sk.append(el("b", "", `Shift \xB7 ${c.move.name}`), el("small", "", c.move.description), el("b", "", `Free skill \xB7 ${skill.name}`), el("small", "", skill.description));
     b.append(head12, el("span", "class-card-role", c.role), sk);
     b.onclick = () => {
       selected = c.id;
@@ -31351,7 +31374,7 @@ function createSubweaponHud({ document, environment, readModel, adapter, isBlock
   };
   function activate() {
     const m = readModel(), id = m.playersById[m.localPlayerId].entityId;
-    if (isBlocked() || m.subweapon?.suppressed || !m.entitiesById[id].alive || m.playersById[m.localPlayerId].stats.subType !== "dagger" || m.subweapon.dash.cooldown || m.persistence.phase !== "encounter") return;
+    if (isBlocked() || m.subweapon?.suppressed || !m.entitiesById[id].alive || !CLASS_MOVES[m.playersById[m.localPlayerId].stats.subType] || m.subweapon.dash.cooldown || m.persistence.phase !== "encounter") return;
     try {
       adapter.issue("combat.shadowDash", { aim: m.primary.actorsById[id].facing }, m);
     } catch (e) {
@@ -31383,8 +31406,8 @@ function createSubweaponHud({ document, environment, readModel, adapter, isBlock
   function refresh(m) {
     guard.refresh(m);
     const local5 = m.playersById[m.localPlayerId], c = m.subweapon, type = local5.stats.subType;
-    panel.hidden = !["shield", "tome"].includes(type) || isBlocked() || c?.suppressed;
-    dash.hidden = type !== "dagger" || isBlocked() || c?.suppressed;
+    panel.hidden = !["shield", "tome"].includes(type) || type === "shield" && local5.d8?.heroClass === "knight" || isBlocked() || c?.suppressed;
+    dash.hidden = !CLASS_MOVES[type] || isBlocked() || c?.suppressed;
     if (!c) return;
     panel.dataset.ready = String(type === "shield" && c.pressure === 3);
     if (type === "shield" && c.pressure > lastPressure) {
@@ -31422,14 +31445,17 @@ function createSubweaponHud({ document, environment, readModel, adapter, isBlock
       text2 = next;
     }
     panel.dataset.family = type ?? "";
-    const ready = c.dash.cooldown === 0, value2 = ready ? "DASH \xB7 1/1\nShift" : `DASH
+    const blink = type === "tome", name = blink ? "BLINK" : "DASH", ready = c.dash.cooldown === 0, value2 = ready ? `${name} \xB7 1/1
+Shift` : `${name}
 ${(c.dash.cooldown / 60).toFixed(1)}s`;
     if (dash.dataset.label !== value2) {
       const label3 = document.createElement("span");
       label3.textContent = value2;
-      dash.innerHTML = '<svg aria-hidden="true" viewBox="-25 -11 34 22" width="30" height="20"><path d="M-22 -7L5 0L-22 7" fill="none" stroke="#c9afff" stroke-width="3"/></svg>';
+      dash.innerHTML = blink ? '<svg aria-hidden="true" viewBox="-12 -12 24 24" width="26" height="26"><circle r="7" fill="none" stroke="#9fd0ff" stroke-width="2.4" stroke-dasharray="4 3"/><path d="M0-11v5M0 6v5M-11 0h5M6 0h5" stroke="#e3f2ff" stroke-width="2.2" stroke-linecap="round"/></svg>' : '<svg aria-hidden="true" viewBox="-25 -11 34 22" width="30" height="20"><path d="M-22 -7L5 0L-22 7" fill="none" stroke="#c9afff" stroke-width="3"/></svg>';
       dash.append(label3);
       dash.dataset.label = value2;
+      dash.dataset.move = blink ? "blink" : "dash";
+      dash.setAttribute("aria-label", `${blink ? "Blink" : "Shadow Dash"} \u2014 Shift`);
     }
     dash.disabled = !ready || !m.entitiesById[local5.entityId].alive;
   }
@@ -44793,6 +44819,27 @@ function drawSkillBurst(ctx, b, age) {
   }
   ctx.restore();
 }
+function drawBlinkBurst(ctx, b, age) {
+  if (age >= 240) return;
+  const t = age / 240, leaving = b.kind === "blink", x = b.x, y = b.y - 12;
+  ctx.save();
+  ctx.globalAlpha = 1 - t;
+  ctx.strokeStyle = "#9fd0ff";
+  ctx.lineWidth = 2.5 * (1 - t) + 1;
+  ctx.setLineDash([5, 4]);
+  ctx.beginPath();
+  ctx.arc(x, y, leaving ? 14 + 10 * t : 22 - 10 * t, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = "#e8f6ff";
+  for (let k = 0; k < 6; k++) {
+    const a = k * Math.PI / 3 + (leaving ? t : -t) * 2, r = leaving ? 10 + 22 * t : 26 - 14 * t;
+    ctx.beginPath();
+    ctx.arc(x + Math.cos(a) * r, y + Math.sin(a) * r, 2 * (1 - t) + 0.6, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
 function createCombatVfx() {
   let key2 = null, seen = false, lastModel = null;
   const statuses = /* @__PURE__ */ new Map(), families3 = /* @__PURE__ */ new Map(), bursts = [], live = /* @__PURE__ */ new Set();
@@ -44828,8 +44875,8 @@ function createCombatVfx() {
         if (f.delivery.status === "launched" && f.delivery.tick !== old2.delivery && f.mastery?.syphon) add("syphon", a, time);
         if (f.pressure > old2.pressure) add("pressure", a, time, poses[id]?.facing ?? 1, f.pressure);
         if (f.delivery.status === "launched" && f.delivery.tick !== old2.delivery) add(f.element === "fire" ? "ignite" : f.element, { position: tomeFocusPosition(a, poses[id]?.facing ?? 1, time, poses[id]?.primary, m.tick) }, time);
-        if (f.dash.frames > old2.dash) add("dash", a, time, f.dash.x, f.dash.y);
-        if (old2.dash > 0 && f.dash.frames === 0) add("dashEnd", a, time, old2.dx, old2.dy);
+        if (f.dash.frames > old2.dash) add(f.blink ? "blink" : "dash", a, time, f.dash.x, f.dash.y);
+        if (old2.dash > 0 && f.dash.frames === 0) add(f.blink ? "blinkEnd" : "dashEnd", a, time, old2.dx, old2.dy);
         if (f.skill && f.skill.tick !== old2.skill) {
           add("skill:" + f.skill.skillId, a, time, f.skill.x, f.skill.y);
           bursts[bursts.length - 1].color = SKILL_ELEMENT_COLORS[f.element] ?? SKILL_ELEMENT_COLORS.fire;
@@ -44847,6 +44894,8 @@ function createCombatVfx() {
       const age = time - b.born;
       if (b.kind.startsWith("skill:")) {
         drawSkillBurst(ctx, b, age);
+      } else if (b.kind.startsWith("blink")) {
+        drawBlinkBurst(ctx, b, age);
       } else if (b.kind === "pressure") {
         if (age < 220) {
           ctx.save();
@@ -44904,7 +44953,20 @@ function createCombatVfx() {
         for (let i = 0; i < 3; i++) diamond(ctx, a.position.x + side * 19, a.position.y - 15 + i * 6, 2.2, "#ffd674");
         ctx.restore();
       }
-      if (f.dash.frames > 0) {
+      if (f.dash.frames > 0 && f.blink) {
+        ctx.save();
+        ctx.globalAlpha = 0.55;
+        ctx.strokeStyle = "#bfe3ff";
+        ctx.lineWidth = 2;
+        ctx.lineCap = "round";
+        for (const s of [-5, 0, 5]) {
+          ctx.beginPath();
+          ctx.moveTo(a.position.x - f.dash.x * 30 - f.dash.y * s, a.position.y - 12 - f.dash.y * 30 + f.dash.x * s);
+          ctx.lineTo(a.position.x - f.dash.x * 6 - f.dash.y * s, a.position.y - 12 - f.dash.y * 6 + f.dash.x * s);
+          ctx.stroke();
+        }
+        ctx.restore();
+      } else if (f.dash.frames > 0) {
         ctx.save();
         for (let i = 3; i >= 1; i--) {
           ctx.globalAlpha = 0.12 + (3 - i) * 0.07;

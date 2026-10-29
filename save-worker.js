@@ -7387,15 +7387,15 @@ var ACTIVITY_SAVE_NAMESPACE = FORGE_REVIEW_BUILD ? "saq-world-forge-review-v1" :
 
 // src/shared/content/hero_classes_v1.js
 var HERO_CLASSES = freezeWire({
-  knight: { id: "knight", name: "Knight", offhand: "shield", signature: "shield_bash", color: "#73bedc", role: "The front line: guard, control space, then answer with a deliberate Bash." },
-  rogue: { id: "rogue", name: "Rogue", offhand: "dagger", signature: "flurry", color: "#b88cff", role: "Move through openings, focus targets and turn afflictions into crowd damage." },
-  mage: { id: "mage", name: "Mage", offhand: "tome", signature: "cast", color: "#f0a35a", role: "Choose an elemental style, combine elements and spend Barrier tactically." }
+  knight: { id: "knight", name: "Knight", offhand: "shield", signature: "shield_bash", move: { name: "Guard", description: "Hold to block everything from the front." }, color: "#73bedc", role: "The front line: guard, control space, then answer with a deliberate Bash." },
+  rogue: { id: "rogue", name: "Rogue", offhand: "dagger", signature: "flurry", move: { name: "Dash", description: "A quick dash out of trouble." }, color: "#b88cff", role: "Move through openings, focus targets and turn afflictions into crowd damage." },
+  mage: { id: "mage", name: "Mage", offhand: "tome", signature: "cast", move: { name: "Blink", description: "Step a short distance in a flash of arcane light." }, color: "#f0a35a", role: "Choose an elemental style, combine elements and spend Barrier tactically." }
 });
 var HERO_CLASS_IDS = Object.freeze(Object.keys(HERO_CLASSES));
 var CLASS_SKILLS = freezeWire({
-  shield_bash: { id: "shield_bash", name: "Shield Bash", classId: "knight", cooldownTicks: 360, description: "Shove a forward cone: Attack plus Shield damage, knockback and a short stun on ordinary enemies." },
-  flurry: { id: "flurry", name: "Flurry", classId: "rogue", cooldownTicks: 300, description: "Three quick offhand cuts in front of you. Each cut can crit and Bleed." },
-  cast: { id: "cast", name: "Cast", classId: "mage", cooldownTicks: 240, description: "A heavy bolt of your Tome\u2019s element at the nearest enemy in front of you." }
+  shield_bash: { id: "shield_bash", name: "Shield Bash", classId: "knight", cooldownTicks: 360, description: "Shove a forward cone: Attack plus Shield damage, knockback and a short stun on ordinary enemies. Every block takes 1 second off its cooldown." },
+  flurry: { id: "flurry", name: "Flurry", classId: "rogue", cooldownTicks: 300, description: "Three quick offhand cuts in front of you. Each cut can crit and Bleed. Your offhand also stabs on every 2nd hit." },
+  cast: { id: "cast", name: "Cast", classId: "mage", cooldownTicks: 240, description: "A heavy bolt of your Tome\u2019s element at the nearest enemy in front of you. Your Tome also fires on every 3rd swing." }
 });
 var CLASS_SKILL_IDS = Object.freeze(Object.keys(CLASS_SKILLS));
 var MAX_SKILL_COOLDOWN_TICKS = 1200;
@@ -18998,6 +18998,38 @@ function validateD8Receipt(state, player, validateCommand2) {
   if (a) requireContract(a.status === "applied" && a.commandCanonical === canonicalStringify(c) && a.authorityOrder === r.authorityOrder, "Progression command receipt");
 }
 
+// src/shared/contracts/shield_guard.js
+var GUARD_POLICY = Object.freeze({ version: "shield-guard-v1", capacity: 32, minimum: 8, delay: 60, riposteNumerator: 1, riposteDenominator: 4 });
+var createShieldGuard = (alive = true) => ({ integrity: String(alive ? 32 : 0), guardRechargeRemainder: 0, delay: 60, requested: false, raised: false, mustRelease: false, direction: { x: 1, y: 0 } });
+function validateShieldGuard(g, actor, stats, primary, legacy = false) {
+  closedRecord(g, ["integrity", "delay", "requested", "raised", "mustRelease", "direction", ...!legacy ? ["guardRechargeRemainder"] : []]);
+  if (legacy) validateCombatAmount(g.integrity);
+  else {
+    validateInteger(g.integrity);
+    safeInteger(g.guardRechargeRemainder, 0, 14);
+    requireContract(compareCombat(g.integrity, 32) !== 0 || g.guardRechargeRemainder === 0, "Full Guard remainder");
+  }
+  requireContract(compareCombat(g.integrity, 32) <= 0, "Guard capacity");
+  safeInteger(g.delay, 0, 60);
+  for (const k of ["requested", "raised", "mustRelease"]) requireContract(typeof g[k] === "boolean", "Guard boolean");
+  closedRecord(g.direction, ["x", "y"]);
+  requireContract(Number.isFinite(g.direction.x) && Number.isFinite(g.direction.y) && Math.abs(Math.hypot(g.direction.x, g.direction.y) - 1) < 1e-9, "Guard direction");
+  requireContract(!g.raised || g.requested && !g.mustRelease && actor.alive && stats.subType === "shield" && !primary?.current && compareCombat(g.integrity, 0) > 0, "Invalid raised Guard");
+  requireContract(actor.alive || compareCombat(g.integrity, 0) === 0, "Dead Guard resource");
+}
+function lowerShield(g, forceRelease = false) {
+  if (!g) return;
+  const held = g.raised || g.requested;
+  if (held) g.delay = 60;
+  g.raised = false;
+  g.requested = false;
+  if (forceRelease && held) g.mustRelease = true;
+}
+
+// src/simulation/subweapon_rules.js
+var CLASS_MOVES = Object.freeze({ dagger: Object.freeze({ name: "Dash", frames: 8, distance: 64, cooldown: 90 }), tome: Object.freeze({ name: "Blink", frames: 4, distance: 72, cooldown: 150 }) });
+var MAX_CLASS_MOVE = Object.freeze({ frames: 8, distance: 72, cooldown: 150 });
+
 // src/shared/contracts/tome_cast.js
 function validateTomeRecipe(r) {
   const balanced = r.version === "tome-cast-world-build-v2";
@@ -19055,34 +19087,6 @@ function migrateIntegerCombat(s) {
   }
   c.version = INTEGER_COMBAT_STATE;
   return s;
-}
-
-// src/shared/contracts/shield_guard.js
-var GUARD_POLICY = Object.freeze({ version: "shield-guard-v1", capacity: 32, minimum: 8, delay: 60, riposteNumerator: 1, riposteDenominator: 4 });
-var createShieldGuard = (alive = true) => ({ integrity: String(alive ? 32 : 0), guardRechargeRemainder: 0, delay: 60, requested: false, raised: false, mustRelease: false, direction: { x: 1, y: 0 } });
-function validateShieldGuard(g, actor, stats, primary, legacy = false) {
-  closedRecord(g, ["integrity", "delay", "requested", "raised", "mustRelease", "direction", ...!legacy ? ["guardRechargeRemainder"] : []]);
-  if (legacy) validateCombatAmount(g.integrity);
-  else {
-    validateInteger(g.integrity);
-    safeInteger(g.guardRechargeRemainder, 0, 14);
-    requireContract(compareCombat(g.integrity, 32) !== 0 || g.guardRechargeRemainder === 0, "Full Guard remainder");
-  }
-  requireContract(compareCombat(g.integrity, 32) <= 0, "Guard capacity");
-  safeInteger(g.delay, 0, 60);
-  for (const k of ["requested", "raised", "mustRelease"]) requireContract(typeof g[k] === "boolean", "Guard boolean");
-  closedRecord(g.direction, ["x", "y"]);
-  requireContract(Number.isFinite(g.direction.x) && Number.isFinite(g.direction.y) && Math.abs(Math.hypot(g.direction.x, g.direction.y) - 1) < 1e-9, "Guard direction");
-  requireContract(!g.raised || g.requested && !g.mustRelease && actor.alive && stats.subType === "shield" && !primary?.current && compareCombat(g.integrity, 0) > 0, "Invalid raised Guard");
-  requireContract(actor.alive || compareCombat(g.integrity, 0) === 0, "Dead Guard resource");
-}
-function lowerShield(g, forceRelease = false) {
-  if (!g) return;
-  const held = g.raised || g.requested;
-  if (held) g.delay = 60;
-  g.raised = false;
-  g.requested = false;
-  if (forceRelease && held) g.mustRelease = true;
 }
 
 // src/shared/contracts/subweapon_combat.js
@@ -19152,10 +19156,10 @@ function validateSubweaponCombat(s) {
     requireContract(compareCombat(v.barrier, stats.maxBarrier) <= 0, "Barrier exceeds resolved capacity");
     const d = v.dash;
     closedRecord(d, ["frames", "cooldown", "remaining", "x", "y"]);
-    safeInteger(d.frames, 0, 8);
-    safeInteger(d.cooldown, 0, 90);
-    requireContract(Number.isFinite(d.remaining) && d.remaining >= 0 && d.remaining <= 64 && Number.isFinite(d.x) && Number.isFinite(d.y) && Math.abs(Math.hypot(d.x, d.y) - 1) < 1e-9, "Invalid Dash geometry");
-    requireContract(!d.frames || a.alive && stats.subType === "dagger" && d.cooldown > 0 && d.remaining > 0, "Invalid active Dash");
+    safeInteger(d.frames, 0, MAX_CLASS_MOVE.frames);
+    safeInteger(d.cooldown, 0, MAX_CLASS_MOVE.cooldown);
+    requireContract(Number.isFinite(d.remaining) && d.remaining >= 0 && d.remaining <= MAX_CLASS_MOVE.distance && Number.isFinite(d.x) && Number.isFinite(d.y) && Math.abs(Math.hypot(d.x, d.y) - 1) < 1e-9, "Invalid Dash geometry");
+    requireContract(!d.frames || a.alive && Boolean(CLASS_MOVES[stats.subType]) && d.cooldown > 0 && d.remaining > 0, "Invalid active Dash");
     requireContract(stats.subType === "shield" || v.pressure === 0, "Pressure without Shield");
     requireContract(a.alive || compareCombat(v.barrier, 0) === 0, "Dead Barrier");
   }

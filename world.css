@@ -1136,6 +1136,7 @@ body.skill-arc-v1 .subweapon-hud{left:calc(12px + var(--world-safe-left));right:
 .class-card-role{font:12px/1.45 var(--rpg-ui);color:#c3ccd0}
 .class-card-skill{display:flex;flex-direction:column;gap:3px;padding:8px 9px;border-radius:8px;background:#0b1117;border-left:3px solid var(--class)}
 .class-card-skill b{font:700 11px var(--rpg-ui);color:#f0d68f}
+.class-card-skill small+b{margin-top:5px}
 .class-card-skill small{font:11px/1.4 var(--rpg-ui);color:#aab4b8}
 .class-picker-status{min-height:18px;margin:10px 0 0;text-align:center;font:600 12px var(--rpg-ui);color:#e0bd6f}
 .class-picker-actions{display:flex;gap:10px;justify-content:center;margin-top:8px}

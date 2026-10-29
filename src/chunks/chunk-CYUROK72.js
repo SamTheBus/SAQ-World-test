@@ -1152,15 +1152,15 @@ var SIMULATION_TICKS_PER_SECOND = 60;
 
 // src/shared/content/hero_classes_v1.js
 var HERO_CLASSES = freezeWire({
-  knight: { id: "knight", name: "Knight", offhand: "shield", signature: "shield_bash", color: "#73bedc", role: "The front line: guard, control space, then answer with a deliberate Bash." },
-  rogue: { id: "rogue", name: "Rogue", offhand: "dagger", signature: "flurry", color: "#b88cff", role: "Move through openings, focus targets and turn afflictions into crowd damage." },
-  mage: { id: "mage", name: "Mage", offhand: "tome", signature: "cast", color: "#f0a35a", role: "Choose an elemental style, combine elements and spend Barrier tactically." }
+  knight: { id: "knight", name: "Knight", offhand: "shield", signature: "shield_bash", move: { name: "Guard", description: "Hold to block everything from the front." }, color: "#73bedc", role: "The front line: guard, control space, then answer with a deliberate Bash." },
+  rogue: { id: "rogue", name: "Rogue", offhand: "dagger", signature: "flurry", move: { name: "Dash", description: "A quick dash out of trouble." }, color: "#b88cff", role: "Move through openings, focus targets and turn afflictions into crowd damage." },
+  mage: { id: "mage", name: "Mage", offhand: "tome", signature: "cast", move: { name: "Blink", description: "Step a short distance in a flash of arcane light." }, color: "#f0a35a", role: "Choose an elemental style, combine elements and spend Barrier tactically." }
 });
 var HERO_CLASS_IDS = Object.freeze(Object.keys(HERO_CLASSES));
 var CLASS_SKILLS = freezeWire({
-  shield_bash: { id: "shield_bash", name: "Shield Bash", classId: "knight", cooldownTicks: 360, description: "Shove a forward cone: Attack plus Shield damage, knockback and a short stun on ordinary enemies." },
-  flurry: { id: "flurry", name: "Flurry", classId: "rogue", cooldownTicks: 300, description: "Three quick offhand cuts in front of you. Each cut can crit and Bleed." },
-  cast: { id: "cast", name: "Cast", classId: "mage", cooldownTicks: 240, description: "A heavy bolt of your Tome\u2019s element at the nearest enemy in front of you." }
+  shield_bash: { id: "shield_bash", name: "Shield Bash", classId: "knight", cooldownTicks: 360, description: "Shove a forward cone: Attack plus Shield damage, knockback and a short stun on ordinary enemies. Every block takes 1 second off its cooldown." },
+  flurry: { id: "flurry", name: "Flurry", classId: "rogue", cooldownTicks: 300, description: "Three quick offhand cuts in front of you. Each cut can crit and Bleed. Your offhand also stabs on every 2nd hit." },
+  cast: { id: "cast", name: "Cast", classId: "mage", cooldownTicks: 240, description: "A heavy bolt of your Tome\u2019s element at the nearest enemy in front of you. Your Tome also fires on every 3rd swing." }
 });
 var CLASS_SKILL_IDS = Object.freeze(Object.keys(CLASS_SKILLS));
 var SKILL_SLOT_COUNT = 3;
