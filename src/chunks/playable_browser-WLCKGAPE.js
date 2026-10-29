@@ -14556,9 +14556,9 @@ function createPlannedCryptExterior(asset, id, terrain = createPlannedTerrain(as
     circulation.add(key2(x, y));
   }
   requireContract(terrain.base(entrance.x, entrance.y).biome === BIOME_CODES[r.id.split(":")[2]], "Crypt entrance biome mismatch");
-  const apply = (x, y, b) => solids.has(key2(x, y)) ? { ...b, collision: "2", material: "g", route: 0, ruinExterior: true } : trail2.has(key2(x, y)) ? { ...b, collision: "1", material: "p", route: 1, ruinExterior: true } : circulation.has(key2(x, y)) ? { ...b, collision: "1", material: "g", route: 0, ruinExterior: true } : b;
+  const apply2 = (x, y, b) => solids.has(key2(x, y)) ? { ...b, collision: "2", material: "g", route: 0, ruinExterior: true } : trail2.has(key2(x, y)) ? { ...b, collision: "1", material: "p", route: 1, ruinExterior: true } : circulation.has(key2(x, y)) ? { ...b, collision: "1", material: "g", route: 0, ruinExterior: true } : b;
   const presentation = (cx, cy, siteId) => ({ blockers: [...solids].map((k) => k.split(",").map(Number)).filter(([x, y]) => Math.floor(x / 32) === cx && Math.floor(y / 26) === cy).map(([x, y]) => ({ id: "ruin:" + siteId + ":crypt-door-" + x + "-" + y, kind: "ruin-exterior-masonry", presentationPart: "entry-structure", detail: "crypt-entry", x: x - cx * 32, y: y - cy * 26, width: 1, height: 1 })), decorations: Math.floor(entrance.x / 32) === cx && Math.floor(entrance.y / 26) === cy ? [{ id: "ruin-art:" + siteId + ":entry", kind: "ruin-entry-facade", x: entrance.x + 0.5 - cx * 32, y: entrance.y + 0.5 - cy * 26, variant: 0 }] : [] });
-  return Object.freeze({ reservation: r, destination: d, left, top, width, height, entrance, road: d.point, allowed, inside: inside3, ownsStructure: (x, y) => solids.has(key2(x, y)), trail: trail2, circulation, connector, apply, presentation, terrain, realizationVersion: PLANNED_CRYPT_VERSION });
+  return Object.freeze({ reservation: r, destination: d, left, top, width, height, entrance, road: d.point, allowed, inside: inside3, ownsStructure: (x, y) => solids.has(key2(x, y)), trail: trail2, circulation, connector, apply: apply2, presentation, terrain, realizationVersion: PLANNED_CRYPT_VERSION });
 }
 async function derivePlannedCryptReservation(asset, binding, sha256, { reservationId, terrain } = {}) {
   const g = createPlannedCryptExterior(asset, reservationId, terrain), r = g.reservation, biome = r.id.split(":")[2], identity2 = await worldIdentity(asset.campaignSeedHex, PLANNED_CRYPT_VERSION, [binding.assetHash, r.id, r.tier], sha256), siteId = "site:" + identity2.digest.slice(0, 32), entrance = tileAddress(g.entrance.x, g.entrance.y), region = regionAddress(entrance.chunkX, entrance.chunkY), chunk2 = await worldIdentity(PLANNED_WORLD_VERSION + "/" + NATURAL_CLUSTER_VERSION + "/" + asset.campaignSeedHex + "/" + binding.assetHash + "/" + binding.townPrototype + "/" + PLANNED_CRYPT_VERSION + "/" + PLANNED_RUIN_EXTERIOR_VERSION2, "chunk", [entrance.chunkX, entrance.chunkY], sha256);
@@ -14607,9 +14607,9 @@ function createPlannedCryptExteriorV2(asset, id, terrain = createPlannedTerrain(
     circulation.add(key2(x, y));
   }
   requireContract(terrain.base(entrance.x, entrance.y).biome === BIOME_CODES[r.id.split(":")[2]], "Crypt entrance biome mismatch");
-  const apply = (x, y, b) => solids.has(key2(x, y)) ? { ...b, collision: "2", material: "g", route: 0, ruinExterior: true } : trail2.has(key2(x, y)) ? { ...b, collision: "1", material: "p", route: 1, ruinExterior: true } : circulation.has(key2(x, y)) ? { ...b, collision: "1", material: "g", route: 0, ruinExterior: true } : b;
+  const apply2 = (x, y, b) => solids.has(key2(x, y)) ? { ...b, collision: "2", material: "g", route: 0, ruinExterior: true } : trail2.has(key2(x, y)) ? { ...b, collision: "1", material: "p", route: 1, ruinExterior: true } : circulation.has(key2(x, y)) ? { ...b, collision: "1", material: "g", route: 0, ruinExterior: true } : b;
   const presentation = (cx, cy, siteId) => ({ blockers: [...solids].map((k) => k.split(",").map(Number)).filter(([x, y]) => Math.floor(x / 32) === cx && Math.floor(y / 26) === cy).map(([x, y]) => ({ id: "ruin:" + siteId + ":crypt-door-" + x + "-" + y, kind: "ruin-exterior-masonry", presentationPart: "entry-structure", detail: "crypt-entry", x: x - cx * 32, y: y - cy * 26, width: 1, height: 1 })), decorations: Math.floor(entrance.x / 32) === cx && Math.floor(entrance.y / 26) === cy ? [{ id: "ruin-art:" + siteId + ":entry", kind: "ruin-entry-facade", x: entrance.x + 0.5 - cx * 32, y: entrance.y + 0.5 - cy * 26, variant: 0 }] : [] });
-  return Object.freeze({ reservation: r, destination: d, left, top, width, height, entrance, road: d.point, allowed, inside: inside3, ownsStructure: (x, y) => solids.has(key2(x, y)), trail: trail2, circulation, connector, apply, presentation, terrain, realizationVersion: PLANNED_CRYPT_V2 });
+  return Object.freeze({ reservation: r, destination: d, left, top, width, height, entrance, road: d.point, allowed, inside: inside3, ownsStructure: (x, y) => solids.has(key2(x, y)), trail: trail2, circulation, connector, apply: apply2, presentation, terrain, realizationVersion: PLANNED_CRYPT_V2 });
 }
 async function derivePlannedCryptReservationV2(asset, binding, sha256, { reservationId, terrain } = {}) {
   const g = createPlannedCryptExteriorV2(asset, reservationId, terrain), r = g.reservation, biome = r.id.split(":")[2], identity2 = await worldIdentity(asset.campaignSeedHex, PLANNED_CRYPT_V2, [binding.assetHash, r.id, r.tier], sha256), siteId = "site:" + identity2.digest.slice(0, 32), entrance = tileAddress(g.entrance.x, g.entrance.y), region = regionAddress(entrance.chunkX, entrance.chunkY), chunk2 = await worldIdentity(PLANNED_WORLD_VERSION + "/" + NATURAL_CLUSTER_VERSION + "/" + asset.campaignSeedHex + "/" + binding.assetHash + (binding.townPrototype ? "/" + binding.townPrototype : "") + "/" + PLANNED_CRYPT_V2 + "/" + PLANNED_RUIN_EXTERIOR_VERSION2, "chunk", [entrance.chunkX, entrance.chunkY], sha256);
@@ -14796,9 +14796,9 @@ function createPlannedRuinExterior(asset, reservationId, terrain = createPlanned
   }
   const ownsStructure = (x, y) => inside3(x, y) && walk[y - top][x - left] === "2";
   const clearEntrance = (x, y) => x >= entrance.x - 4 && x <= entrance.x + 4 && y >= entrance.y - 4 && y <= entrance.y + 3 && !ownsStructure(x, y);
-  const apply = (x, y, b) => ownsStructure(x, y) ? { ...b, collision: "2", material: "g", route: 0, ruinExterior: true } : trail2.has(x + "," + y) ? { ...b, collision: "1", material: "p", route: 1, ruinExterior: true } : clearEntrance(x, y) || circulation.has(key2(x, y)) || moduleClear.has(key2(x, y)) ? { ...b, collision: "1", material: "g", route: 0, ruinExterior: true } : b;
+  const apply2 = (x, y, b) => ownsStructure(x, y) ? { ...b, collision: "2", material: "g", route: 0, ruinExterior: true } : trail2.has(x + "," + y) ? { ...b, collision: "1", material: "p", route: 1, ruinExterior: true } : clearEntrance(x, y) || circulation.has(key2(x, y)) || moduleClear.has(key2(x, y)) ? { ...b, collision: "1", material: "g", route: 0, ruinExterior: true } : b;
   const presentation = (cx, cy, siteId) => ({ blockers: blockers.filter((b) => left + b.x < cx * 32 + 32 && left + b.x + b.width > cx * 32 && top + b.y < cy * 26 + 26 && top + b.y + b.height > cy * 26).map((b) => ({ ...b, id: "ruin:" + siteId + ":" + b.detail, x: left + b.x - cx * 32, y: top + b.y - cy * 26 })), decorations: decorations.filter((q) => Math.floor((left + q.x) / 32) === cx && Math.floor((top + q.y) / 26) === cy).map((q, i) => ({ ...q, id: "ruin-art:" + siteId + ":" + q.kind + ":" + (q.standardRuinKit ? q.x + "," + q.y : i), x: left + q.x - cx * 32, y: top + q.y - cy * 26 })) });
-  return Object.freeze({ reservation: r, destination: d, policy, left, top, width, height, entrance, gate, road: d.point, side, connector, trail: trail2, circulation, allowed, inside: inside3, ownsStructure, apply, presentation, terrain, realizationVersion: realization?.version ?? (r.tier === "standard" ? STANDARD_RUIN_KIT_VERSION : PLANNED_RUIN_EXTERIOR_VERSION2), variant: variation.toString(16).padStart(8, "0") });
+  return Object.freeze({ reservation: r, destination: d, policy, left, top, width, height, entrance, gate, road: d.point, side, connector, trail: trail2, circulation, allowed, inside: inside3, ownsStructure, apply: apply2, presentation, terrain, realizationVersion: realization?.version ?? (r.tier === "standard" ? STANDARD_RUIN_KIT_VERSION : PLANNED_RUIN_EXTERIOR_VERSION2), variant: variation.toString(16).padStart(8, "0") });
 }
 async function derivePlannedRuinReservation(asset, binding, sha256, { reservationId, terrain, realization = null } = {}) {
   const g = createPlannedRuinExterior(asset, reservationId, terrain, realization), r = g.reservation, biome = r.id.split(":")[2], identity2 = await worldIdentity(asset.campaignSeedHex, PLANNED_RUIN_VERSION, [binding.assetHash, r.id, r.tier], sha256), siteId = "site:" + identity2.digest.slice(0, 32), entrance = tileAddress(g.entrance.x, g.entrance.y), region = regionAddress(entrance.chunkX, entrance.chunkY);
@@ -14962,9 +14962,9 @@ function createPlannedFortExterior(asset, reservationId, terrain = createPlanned
     }
   }
   decorations.push({ kind: "fort-keep-facade", x: kx + kw / 2, y: ky + kh / 2, width: kw, height: kh }, { kind: "fort-banner", x: entrance.x - left - 3, y: entrance.y - top, variant: 0 }, { kind: "fort-banner", x: entrance.x - left + 3, y: entrance.y - top, variant: 1 }, { kind: "fort-training-target", x: 8, y: height - 10, variant: 0 }, { kind: "fort-crates", x: width - 9, y: height - 10, variant: 0 }, { kind: "fort-fire", x: 10, y: height - 14, variant: 0 });
-  const apply = (x, y, b) => inside3(x, y) ? { ...b, collision: walk[y - top][x - left], material: ground[y - top][x - left], route: ground[y - top][x - left] === "p" ? 1 : 0, fortExterior: true } : trail2.has(x + "," + y) ? { ...b, collision: "1", material: "p", route: 1, fortExterior: true } : b;
+  const apply2 = (x, y, b) => inside3(x, y) ? { ...b, collision: walk[y - top][x - left], material: ground[y - top][x - left], route: ground[y - top][x - left] === "p" ? 1 : 0, fortExterior: true } : trail2.has(x + "," + y) ? { ...b, collision: "1", material: "p", route: 1, fortExterior: true } : b;
   const presentation = (cx, cy, siteId) => ({ blockers: blockers.filter((b) => left + b.x < cx * 32 + 32 && left + b.x + b.width > cx * 32 && top + b.y < cy * 26 + 26 && top + b.y + b.height > cy * 26).map((b) => ({ ...b, id: "fort:" + siteId + ":" + b.detail, x: left + b.x - cx * 32, y: top + b.y - cy * 26 })), decorations: decorations.filter((q) => Math.floor((left + q.x) / 32) === cx && Math.floor((top + q.y) / 26) === cy).map((q, i) => ({ ...q, id: "fort-art:" + siteId + ":" + q.kind + ":" + i, x: left + q.x - cx * 32, y: top + q.y - cy * 26 })) });
-  return Object.freeze({ reservation: r, destination: d, policy, left, top, width, height, entrance, gate, road: d.point, side, connector, trail: trail2, allowed, inside: inside3, apply, presentation, terrain, realizationVersion: realization?.version ?? PLANNED_FORT_VERSION, variant: realization?.variant ?? "reviewed-v1" });
+  return Object.freeze({ reservation: r, destination: d, policy, left, top, width, height, entrance, gate, road: d.point, side, connector, trail: trail2, allowed, inside: inside3, apply: apply2, presentation, terrain, realizationVersion: realization?.version ?? PLANNED_FORT_VERSION, variant: realization?.variant ?? "reviewed-v1" });
 }
 async function derivePlannedFortReservation(asset, binding, sha256, { reservationId, terrain } = {}) {
   const g = createPlannedFortExterior(asset, reservationId, terrain), r = g.reservation, biome = r.id.split(":")[2], identity2 = await worldIdentity(asset.campaignSeedHex, PLANNED_FORT_VERSION, [binding.assetHash, r.id, r.tier], sha256), siteId = "site:" + identity2.digest.slice(0, 32), entrance = tileAddress(g.entrance.x, g.entrance.y), region = regionAddress(entrance.chunkX, entrance.chunkY);
@@ -15038,13 +15038,13 @@ function createPlannedCaveExterior(asset, reservationId = PLANNED_CAVE_ID, share
     const [x, y] = k.split(",").map(Number);
     requireContract(terrain.base(x, y).walkable && terrain.base(x, y).landmassId === r.landmassId, "Cave approach cannot replace water");
   }
-  const apply = (x, y, base) => inside3(x, y) ? { ...base, collision: WOODLAND_CAVE_EXTERIOR.collision[y - top][x - left] === "1" ? "1" : "2", material: WOODLAND_CAVE_EXTERIOR.terrain[y - top][x - left], route: WOODLAND_CAVE_EXTERIOR.collision[y - top][x - left] === "1" && WOODLAND_CAVE_EXTERIOR.terrain[y - top][x - left] === "p" ? 1 : 0, caveExterior: true } : trail2.has(x + "," + y) ? { ...base, collision: "1", material: "p", route: 1, caveExterior: true } : base;
+  const apply2 = (x, y, base) => inside3(x, y) ? { ...base, collision: WOODLAND_CAVE_EXTERIOR.collision[y - top][x - left] === "1" ? "1" : "2", material: WOODLAND_CAVE_EXTERIOR.terrain[y - top][x - left], route: WOODLAND_CAVE_EXTERIOR.collision[y - top][x - left] === "1" && WOODLAND_CAVE_EXTERIOR.terrain[y - top][x - left] === "p" ? 1 : 0, caveExterior: true } : trail2.has(x + "," + y) ? { ...base, collision: "1", material: "p", route: 1, caveExterior: true } : base;
   const intersects5 = (cx, cy) => [f, a].some((c) => c.x === cx && c.y === cy);
   const presentation = (cx, cy, siteId) => {
     if (cx !== f.x || cy !== f.y) return { blockers: [], decorations: [] };
     return { blockers: WOODLAND_CAVE_EXTERIOR.blockers.map((b) => ({ ...copyWire(b), id: "cave:" + siteId + ":" + b.detail, x: left + b.x - cx * 32, y: top + b.y - cy * 26 })), decorations: WOODLAND_CAVE_EXTERIOR.decorations.map((d, i) => ({ ...copyWire(d), id: "cave-decoration:" + siteId + ":" + i, x: left + d.x - cx * 32, y: top + d.y - cy * 26 })) };
   };
-  return Object.freeze({ reservation: r, destination, footprint: f, approach: a, left, top, entrance, road, trail: trail2, inside: inside3, allowed, apply, intersects: intersects5, presentation, terrain });
+  return Object.freeze({ reservation: r, destination, footprint: f, approach: a, left, top, entrance, road, trail: trail2, inside: inside3, allowed, apply: apply2, intersects: intersects5, presentation, terrain });
 }
 async function derivePlannedCaveReservation(asset, binding, sha256, { reservationId = PLANNED_CAVE_ID, terrain = null } = {}) {
   const g = createPlannedCaveExterior(asset, reservationId, terrain), r = g.reservation, identity2 = await worldIdentity(asset.campaignSeedHex, PLANNED_CAVE_VERSION, [binding.assetHash, r.id, r.tier], sha256), siteId = "site:" + identity2.digest.slice(0, 32), entrance = tileAddress(g.entrance.x, g.entrance.y), region = regionAddress(entrance.chunkX, entrance.chunkY), biome = r.id.split(":")[2];
@@ -23993,7 +23993,7 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
     for (const id of Object.keys(state.appliedCommandsById)) if (!pinned.has(id)) delete state.appliedCommandsById[id];
     pruneContexts();
   }
-  function apply(command, authorityOrder) {
+  function apply2(command, authorityOrder) {
     requireContract(authorityOrder === state.lastAppliedAuthorityOrder + 1 && command.clientSequence === state.appliedClientSequences[command.playerId] + 1, "Noncontiguous applied command");
     const player = state.playersById[command.playerId], actor = state.entitiesById[player.entityId], inventory = player.inventory, respawning = command.kind === "player.respawn", suppressed = subweaponSuppressedD12_4I(state, actor.entityId), target = command.kind === "ferry.travel" ? ferryTravelTarget(state, actor, command.payload) : command.kind === "site.transition" ? siteTransitionTarget(state, manifest, actor, command.payload) : null, progressionPlan = prepareD8Command(player, command), valid = (command.kind !== "worldEvent.activate" || canActivateWorldEvent(state, player, command.payload.groupId)) && (command.kind !== "discovery.readNote" || canReadTrailNote(state, player, command.payload)) && (!progressionPlan || !progressionPlan.error && command.expectedSaveRevision === state.campaign.saveRevision) && activityContextMatches(state, command) && (respawning ? !actor.alive : actor.alive) && (!["site.transition", "ferry.travel"].includes(command.kind) || Boolean(target)) && (command.kind !== "loot.pickup" || inventory?.revision === command.payload.inventoryRevision && canPickUp(state, player, command.payload.sourceEntityId, resolvePlayerStats(player).pickupRadius)) && (command.kind !== "subweapon.claim" || canClaimSubweapon(state, player, command.payload)) && (command.kind !== "combat.guardIntent" || !command.payload.pressed || !suppressed && resolvePlayerStats(player).subType === "shield") && (command.kind !== "combat.shadowDash" || canShadowDash(actor, state.subweaponCombat.actors[actor.entityId], resolvePlayerStats(player), suppressed)) && (command.kind !== "gear.salvage" || canSalvage(state, player, command.payload)) && (command.kind !== "gear.drop" || canDropGear(state, player, command.payload)) && (command.kind !== "resource.interact" || canUseResource(state, manifest, player, command.payload)) && (command.kind !== "forge.attune" || canAttune(state, player, command.payload, manifest)) && (!(command.kind.startsWith("service.") || command.kind === "supply.use") || serviceActionProblem(state, player, command.kind, command.payload) === null) && (!command.kind.startsWith("equipment.") || equipmentActionAvailable(state, player, command.kind, command.payload));
     if (valid) {
@@ -24326,7 +24326,7 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
   };
   return Object.freeze({
     advanceOneTick,
-    apply,
+    apply: apply2,
     relocateForFixture,
     developerRelocateToWorld,
     readState,
@@ -28059,7 +28059,7 @@ function createWorldEventHudV3(document, onActivate = () => {
 // src/client/canvas_display_size_v1.js
 function observeCanvasDisplaySize({ environment, canvas, onSize }) {
   let last = null, disposed = false, updates = 0;
-  function apply(width, height) {
+  function apply2(width, height) {
     if (disposed || !Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) return;
     const size = { width: Math.max(1, Math.round(width)), height: Math.max(1, Math.round(height)) };
     if (last?.width === size.width && last?.height === size.height) return;
@@ -28069,11 +28069,11 @@ function observeCanvasDisplaySize({ environment, canvas, onSize }) {
   }
   const observer = typeof environment.ResizeObserver === "function" ? new environment.ResizeObserver((entries) => {
     const entry = entries.find((e) => e.target === canvas);
-    if (entry) apply(entry.contentRect.width, entry.contentRect.height);
+    if (entry) apply2(entry.contentRect.width, entry.contentRect.height);
   }) : null;
   observer?.observe(canvas);
   const bounds2 = canvas.getBoundingClientRect();
-  apply(bounds2.width, bounds2.height);
+  apply2(bounds2.width, bounds2.height);
   return Object.freeze({ resources: () => ({ updates, last }), destroy: () => {
     disposed = true;
     observer?.disconnect();
@@ -31010,6 +31010,473 @@ function createDynamicWorldLightsV1(doc) {
   return Object.freeze({ illuminate, glow: glow6, resources: () => ({ dynamicWorldLights: { version: DYNAMIC_WORLD_LIGHTS_VERSION, drawn, cores } }) });
 }
 
+// src/client/day_night_lighting_v1.js
+var DAY_NIGHT_LIGHTING_VERSION = "day-night-lighting-v1";
+var DAY_NIGHT_LIMITS = Object.freeze({ descriptorPages: 4, descriptorCasters: 512, visibleCasters: 160, actorCasters: 64, maximumShadowPixels: 160, outdoorLightRays: 128, outdoorLightBlockers: 64, outdoorLightRadius: 208 });
+var clamp25 = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+var mix14 = (a, b, t) => a + (b - a) * t;
+var interior = (space) => Boolean(space.site || space.functionalSite || space.settlementInterior);
+function lightingFrameV1(model, review = null) {
+  const override = review?.getOverrideMinute?.(), clock = Number.isFinite(override) ? worldTimeAtMinute(override) : model.worldTime ?? worldTimeAtTick(model.tick ?? 0), enabled = review?.enabled?.() !== false, minute = clock.minuteOfDay;
+  const room = interior(model.space), tavern = Boolean(model.space.settlementInterior);
+  let ambient, shadowAlpha = 0, vector2 = { x: 0, y: 0 };
+  const underground = ["woodland-cave", "procedural-crypt"].includes((model.space.site ?? model.space.functionalSite)?.siteKind);
+  if (room) ambient = tavern ? [190, 185, 175] : underground ? [100, 106, 124] : [132, 138, 154];
+  else {
+    const dawn = clamp25((minute - 300) / 120), dusk = clamp25((minute - 1140) / 120), night = [96, 112, 145], day = [255, 255, 255], warm = [237, 210, 190];
+    if (minute < 300 || minute >= 1260) ambient = night;
+    else if (minute < 420) {
+      const a = dawn < 0.5 ? night : warm, b = dawn < 0.5 ? warm : day, t = dawn < 0.5 ? dawn * 2 : (dawn - 0.5) * 2;
+      ambient = a.map((v, i) => mix14(v, b[i], t));
+    } else if (minute < 1140) ambient = day;
+    else {
+      const a = dusk < 0.5 ? day : warm, b = dusk < 0.5 ? warm : night, t = dusk < 0.5 ? dusk * 2 : (dusk - 0.5) * 2;
+      ambient = a.map((v, i) => mix14(v, b[i], t));
+    }
+    const sun = minute >= 300 && minute < 1260, progress8 = sun ? (minute - 300) / 960 : (minute - 1260 + 1440) % 1440 / 480, elevation = Math.sin(Math.PI * clamp25(progress8)), length = clamp25(34 + 116 * (1 - elevation), 24, DAY_NIGHT_LIMITS.maximumShadowPixels);
+    vector2 = { x: -Math.cos(Math.PI * progress8) * length, y: (0.42 + 0.2 * Math.abs(Math.cos(Math.PI * progress8))) * length };
+    const visibility = sun ? Math.min(1, clamp25((minute - 300) / 120), clamp25((1260 - minute) / 120)) : Math.min(1, progress8 * 8, (1 - progress8) * 8);
+    shadowAlpha = (sun ? 0.105 + 0.035 * elevation : 0.055) * clamp25(visibility);
+  }
+  return Object.freeze({ version: DAY_NIGHT_LIGHTING_VERSION, enabled, clock, minuteOfDay: minute, period: clock.period, preview: Number.isFinite(override), profile: room ? "interior" : "outdoor", ambient: ambient.map(Math.round), vector: vector2, shadowAlpha: enabled ? shadowAlpha : 0, tavern });
+}
+var LIGHT_MAP_SCALE = 0.5;
+var lightMaps = /* @__PURE__ */ new WeakMap();
+function composeLightMapV1(ctx, frame, paint) {
+  const target = ctx.canvas, doc = target?.ownerDocument;
+  if (typeof ctx.getTransform !== "function" || !doc?.createElement || !(target.width > 0 && target.height > 0)) return false;
+  const w = Math.max(1, Math.ceil(target.width * LIGHT_MAP_SCALE)), h = Math.max(1, Math.ceil(target.height * LIGHT_MAP_SCALE));
+  let map = lightMaps.get(target);
+  if (!map) {
+    map = doc.createElement("canvas");
+    lightMaps.set(target, map);
+  }
+  if (map.width !== w || map.height !== h) {
+    map.width = w;
+    map.height = h;
+  }
+  const lc = map.getContext("2d"), [r, g, b] = frame.ambient, sx = w / target.width, sy = h / target.height, m = ctx.getTransform();
+  lc.setTransform(1, 0, 0, 1, 0, 0);
+  lc.globalAlpha = 1;
+  lc.globalCompositeOperation = "source-over";
+  lc.fillStyle = `rgb(${r},${g},${b})`;
+  lc.fillRect(0, 0, w, h);
+  lc.save();
+  lc.setTransform(m.a * sx, m.b * sy, m.c * sx, m.d * sy, m.e * sx, m.f * sy);
+  paint(lc);
+  lc.restore();
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = "multiply";
+  ctx.drawImage(map, 0, 0, target.width, target.height);
+  ctx.restore();
+  return true;
+}
+function drawAmbientV1(ctx, view, frame, paintLights = null) {
+  if (!frame.enabled) return;
+  const [r, g, b] = frame.ambient;
+  if (r === 255 && g === 255 && b === 255) return;
+  if (paintLights && composeLightMapV1(ctx, frame, paintLights)) return;
+  ctx.save();
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = "multiply";
+  ctx.fillStyle = `rgb(${r},${g},${b})`;
+  ctx.fillRect(view.x, view.y, view.width, view.height);
+  ctx.restore();
+  if (paintLights) paintLights(ctx);
+}
+function hull(points2) {
+  const p = points2.sort((a, b) => a.x - b.x || a.y - b.y), cross = (a, b, c) => (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x), low = [], high = [];
+  for (const q of p) {
+    while (low.length > 1 && cross(low.at(-2), low.at(-1), q) <= 0) low.pop();
+    low.push(q);
+  }
+  for (const q of [...p].reverse()) {
+    while (high.length > 1 && cross(high.at(-2), high.at(-1), q) <= 0) high.pop();
+    high.push(q);
+  }
+  return [...low.slice(0, -1), ...high.slice(0, -1)];
+}
+function shadowPolygonV1(caster2, frame) {
+  const scale = clamp25(caster2.height / 96, 0.12, 1.2), length = Math.hypot(frame.vector.x, frame.vector.y) * scale, cap = length > 160 ? 160 / length : 1, vx = frame.vector.x * scale * cap, vy = frame.vector.y * scale * cap, points2 = [];
+  if (caster2.round) {
+    for (let i = 0; i < 8; i++) {
+      const a = i * Math.PI / 4, x = caster2.x + caster2.w * 0.5 + Math.cos(a) * caster2.w * 0.44, y = caster2.y + caster2.h * 0.73 + Math.sin(a) * caster2.h * 0.22;
+      points2.push({ x, y }, { x: x + vx, y: y + vy });
+    }
+  } else for (const [x, y] of [[caster2.x, caster2.y], [caster2.x + caster2.w, caster2.y], [caster2.x + caster2.w, caster2.y + caster2.h], [caster2.x, caster2.y + caster2.h]]) points2.push({ x, y }, { x: x + vx, y: y + vy });
+  return hull(points2);
+}
+function casterFor(b, t, offset2) {
+  const kind = b.kind, heights = { "fort-wall": 62, "fort-tower-base": 150, "fort-keep-base": 128, "fort-gatehouse-base": 100, "ruin-exterior-masonry": 48, "cave-rock-wall": 72, "civilian-building": 132, building: 132, fence: 26, trees: 70, thicket: 52, rock: 24 };
+  if (!heights[kind]) return null;
+  let x = b.x * t, y = b.y * t, w = b.width * t, h = b.height * t;
+  const round = ["trees", "thicket", "rock"].includes(kind);
+  if (round) {
+    const ww = Math.min(w, 96), hh = Math.min(h, 80);
+    x += (w - ww) * 0.5;
+    y += (h - hh) * 0.7;
+    w = ww;
+    h = hh;
+  }
+  return { id: b.id ?? `${kind}/${x + offset2.x}/${y + offset2.y}`, kind, x, y, w, h, height: heights[kind], round };
+}
+function outdoorLightClipV1(space, light) {
+  const t = space.collision.tileSize, origin = light.occlusionOrigin ?? light, radius = Math.min(DAY_NIGHT_LIMITS.outdoorLightRadius, light.radius), x = origin.x, y = origin.y, solid = (b) => b.kind === "building" || b.kind === "civilian-building" || b.kind === "fence" || b.kind === "ruin-exterior-masonry" || b.kind === "cave-rock-wall" || b.kind.startsWith("fort-") && b.kind !== "fort-prop-solid";
+  const rectangles = (space.visual?.blockers ?? []).filter(solid).map((b) => ({ x: b.x * t, y: b.y * t, w: b.width * t, h: b.height * t })).filter((b) => b.x <= x + radius && b.x + b.w >= x - radius && b.y <= y + radius && b.y + b.h >= y - radius).sort((a, b) => Math.hypot(a.x + a.w * 0.5 - x, a.y + a.h * 0.5 - y) - Math.hypot(b.x + b.w * 0.5 - x, b.y + b.h * 0.5 - y) || a.x - b.x || a.y - b.y).slice(0, DAY_NIGHT_LIMITS.outdoorLightBlockers);
+  const facing2 = { south: [0, Math.PI], north: [-Math.PI, 0], east: [-Math.PI / 2, Math.PI / 2], west: [Math.PI / 2, Math.PI * 1.5] }[light.facing], start = facing2?.[0] ?? -Math.PI, end = facing2?.[1] ?? Math.PI, angles = [];
+  for (let i = 0; i <= 64; i++) angles.push(start + (end - start) * i / 64);
+  for (const b of rectangles) for (const [px, py] of [[b.x, b.y], [b.x + b.w, b.y], [b.x + b.w, b.y + b.h], [b.x, b.y + b.h]]) {
+    let angle3 = Math.atan2(py - y, px - x);
+    while (angle3 < start) angle3 += Math.PI * 2;
+    while (angle3 > end) angle3 -= Math.PI * 2;
+    if (angle3 >= start && angle3 <= end && angles.length + 3 <= DAY_NIGHT_LIMITS.outdoorLightRays) angles.push(Math.max(start, angle3 - 1e-4), angle3, Math.min(end, angle3 + 1e-4));
+  }
+  angles.sort((a, b) => a - b);
+  const points2 = [];
+  for (const angle3 of angles) {
+    const dx = Math.cos(angle3), dy = Math.sin(angle3);
+    let reach = radius;
+    for (const b of rectangles) {
+      let lo = -Infinity, hi = Infinity;
+      for (const [p, d, min, max] of [[x, dx, b.x, b.x + b.w], [y, dy, b.y, b.y + b.h]]) {
+        if (Math.abs(d) < 1e-9) {
+          if (p < min || p > max) {
+            hi = -Infinity;
+            break;
+          }
+        } else {
+          let a = (min - p) / d, z = (max - p) / d;
+          if (a > z) [a, z] = [z, a];
+          lo = Math.max(lo, a);
+          hi = Math.min(hi, z);
+        }
+      }
+      if (hi >= Math.max(0, lo) && lo >= 0) reach = Math.min(reach, lo + 0.5);
+      else if (lo < 0 && hi > 0) reach = Math.min(reach, hi + 0.5);
+    }
+    points2.push({ x: x + dx * reach, y: y + dy * reach });
+  }
+  const path9 = new Path2D();
+  if (facing2) path9.moveTo(x, y);
+  else if (points2.length) path9.moveTo(points2[0].x, points2[0].y);
+  for (const p of points2) path9.lineTo(p.x, p.y);
+  path9.closePath();
+  return { path: path9, points: points2, origin: { x, y }, blockers: rectangles.length, rays: angles.length, radius };
+}
+function createDayNightLightingV1({ review = null } = {}) {
+  const pages = /* @__PURE__ */ new Map();
+  let frame = null, descriptorBuilds = 0, visible3 = 0, dynamic = 0, considered = 0, worstMs = 0;
+  function begin(model) {
+    frame = lightingFrameV1(model, review);
+    return frame;
+  }
+  function descriptors(space) {
+    let list = pages.get(space.visual);
+    if (list) {
+      pages.delete(space.visual);
+      pages.set(space.visual, list);
+      return list;
+    }
+    const t = space.collision.tileSize, offset2 = environmentWorldOffset(space);
+    list = [];
+    for (const b of space.visual?.blockers ?? []) {
+      const d = casterFor(b, t, offset2);
+      if (d) list.push(d);
+      if (list.length >= DAY_NIGHT_LIMITS.descriptorCasters) break;
+    }
+    pages.set(space.visual, list);
+    while (pages.size > DAY_NIGHT_LIMITS.descriptorPages) pages.delete(pages.keys().next().value);
+    descriptorBuilds++;
+    return list;
+  }
+  function staticCasters(model, view, skip = null) {
+    const pad = DAY_NIGHT_LIMITS.maximumShadowPixels;
+    const candidates = descriptors(model.space).filter((c) => c.x + c.w + pad > view.x && c.y + c.h + pad > view.y && c.x - pad < view.x + view.width && c.y - pad < view.y + view.height && !skip?.(c));
+    considered = candidates.length;
+    candidates.sort((a, b) => Math.hypot(a.x + a.w * 0.5 - view.x - view.width * 0.5, a.y + a.h * 0.5 - view.y - view.height * 0.5) - Math.hypot(b.x + b.w * 0.5 - view.x - view.width * 0.5, b.y + b.h * 0.5 - view.y - view.height * 0.5) || a.id.localeCompare(b.id));
+    return candidates.slice(0, DAY_NIGHT_LIMITS.visibleCasters);
+  }
+  function casters(model, view, skip = null) {
+    visible3 = dynamic = 0;
+    if (!frame?.enabled || frame.profile === "interior" || !model.space.visual) return [];
+    const list = staticCasters(model, view, skip);
+    visible3 = list.length;
+    return list;
+  }
+  function shadows(ctx, model, view) {
+    visible3 = dynamic = considered = 0;
+    if (!frame?.enabled || frame.profile === "interior" || !model.space.visual) return;
+    const at3 = performance.now(), pad = DAY_NIGHT_LIMITS.maximumShadowPixels;
+    const selected = staticCasters(model, view), actors2 = Object.entries(model.entitiesById ?? {}).filter(([, a]) => a.alive && (!a.residency || !model.context?.spaceInstanceId || a.residency.spaceInstanceId === model.context.spaceInstanceId) && a.position.x >= view.x - pad && a.position.x <= view.x + view.width + pad && a.position.y >= view.y - pad && a.position.y <= view.y + view.height + pad).sort(([a], [b]) => a.localeCompare(b)).slice(0, DAY_NIGHT_LIMITS.actorCasters);
+    for (const [id, a] of actors2) {
+      const r = Math.max(6, Math.min(22, a.hullRadius ?? 9));
+      selected.push({ id: "actor/" + id, x: a.position.x - r, y: a.position.y - r * 0.4, w: r * 2, h: r * 0.8, height: a.boss ? 58 : 26, round: true });
+      dynamic++;
+    }
+    ctx.save();
+    ctx.globalAlpha = frame.shadowAlpha;
+    ctx.fillStyle = "#16202d";
+    ctx.beginPath();
+    for (const c of selected) {
+      const polygon27 = shadowPolygonV1(c, frame);
+      if (polygon27.length < 3) continue;
+      ctx.moveTo(polygon27[0].x, polygon27[0].y);
+      for (let i = 1; i < polygon27.length; i++) ctx.lineTo(polygon27[i].x, polygon27[i].y);
+      ctx.closePath();
+    }
+    ctx.fill();
+    ctx.restore();
+    visible3 = selected.length - dynamic;
+    worstMs = Math.max(worstMs, performance.now() - at3);
+  }
+  return Object.freeze({ begin, shadows, casters, ambient: (ctx, view, paintLights = null) => drawAmbientV1(ctx, view, frame, paintLights), frame: () => frame, clear: () => pages.clear(), resources: () => ({ dayNightLighting: { version: DAY_NIGHT_LIGHTING_VERSION, enabled: frame?.enabled ?? false, profile: frame?.profile ?? null, minuteOfDay: frame?.minuteOfDay ?? null, period: frame?.period ?? null, previewOverride: frame?.preview ?? false, ambient: frame?.ambient ?? null, shadowDirection: frame?.vector ?? null, shadowAlpha: frame?.shadowAlpha ?? 0, descriptorPages: pages.size, descriptorBuilds, castersConsidered: considered, staticCasters: visible3, actorCasters: dynamic, worstShadowMs: worstMs, limits: DAY_NIGHT_LIMITS, approximation: "Conservative 2D footprints and presentation heights; not physical 3D shadows or gameplay visibility." } }) });
+}
+
+// src/client/silhouette_shadows_v1.js
+var SILHOUETTE_SHADOWS_VERSION = "silhouette-shadows-v1";
+var SILHOUETTE_LIMITS = Object.freeze({ layerScale: 0.5, silhouetteMaxSide: 160, recordedCasters: 768, actorCasters: 40, actorRefreshPerFrame: 8, actorRefreshFrames: 3, actorStaleFrames: 120, actorScale: 0.5, maximumLength: 160, referenceHeight: 96, indoorDepth: 0.24, indoorAlpha: 0.2, outdoorGain: 1.9, outdoorMaximumAlpha: 0.3 });
+var SHADOW = "#16202d";
+var noop = () => {
+};
+var NATURAL_CASTERS = ["trees", "thicket", "rock"];
+var multiply = (a, b) => [a[0] * b[0] + a[2] * b[1], a[1] * b[0] + a[3] * b[1], a[0] * b[2] + a[2] * b[3], a[1] * b[2] + a[3] * b[3], a[0] * b[4] + a[2] * b[5] + a[4], a[1] * b[4] + a[3] * b[5] + a[5]];
+var apply = (m, x, y) => ({ x: m[0] * x + m[2] * y + m[4], y: m[1] * x + m[3] * y + m[5] });
+function recordSpriteDrawsV1(paint) {
+  const draws = [], stack = [];
+  let m = [1, 0, 0, 1, 0, 0], alpha = 1, procedural = false;
+  const api = {
+    save() {
+      stack.push([m, alpha]);
+    },
+    restore() {
+      const s = stack.pop();
+      if (s) [m, alpha] = s;
+    },
+    translate(x, y) {
+      m = multiply(m, [1, 0, 0, 1, x, y]);
+    },
+    scale(x, y) {
+      m = multiply(m, [x, 0, 0, y, 0, 0]);
+    },
+    rotate(r) {
+      const c = Math.cos(r), s = Math.sin(r);
+      m = multiply(m, [c, s, -s, c, 0, 0]);
+    },
+    transform(a, b, c, d, e, f) {
+      m = multiply(m, [a, b, c, d, e, f]);
+    },
+    setTransform(a, b, c, d, e, f) {
+      m = typeof a === "object" && a ? [a.a, a.b, a.c, a.d, a.e, a.f] : [a, b, c, d, e, f];
+    },
+    resetTransform() {
+      m = [1, 0, 0, 1, 0, 0];
+    },
+    drawImage(image, ...r) {
+      if (alpha <= 0.05 || !image || !(image.width > 0 && image.height > 0)) return;
+      const w = image.width, h = image.height;
+      const [sx, sy, sw, sh, dx, dy, dw, dh] = r.length >= 8 ? r : r.length >= 4 ? [0, 0, w, h, ...r] : [0, 0, w, h, r[0], r[1], w, h];
+      draws.push({ image, sx, sy, sw, sh, dx, dy, dw, dh, m, alpha });
+    },
+    fill() {
+      procedural = true;
+    },
+    stroke() {
+      procedural = true;
+    },
+    fillRect() {
+      procedural = true;
+    },
+    strokeRect() {
+      procedural = true;
+    },
+    fillText() {
+      procedural = true;
+    },
+    measureText: () => ({ width: 0 }),
+    getTransform: () => ({ a: m[0], b: m[1], c: m[2], d: m[3], e: m[4], f: m[5] }),
+    createLinearGradient: () => ({ addColorStop: noop }),
+    createRadialGradient: () => ({ addColorStop: noop }),
+    createPattern: () => null
+  };
+  const ctx = new Proxy(api, { get: (t, k) => k === "globalAlpha" ? alpha : Object.hasOwn(t, k) ? t[k] : typeof k === "string" && /^[a-z]/.test(k) && !/Style$|^line|^font|^text|^image|^global|^shadow|^filter|^canvas$/.test(k) ? noop : void 0, set: (t, k, v) => {
+    if (k === "globalAlpha") alpha = Number(v);
+    return true;
+  } });
+  let handled = false;
+  try {
+    handled = paint(ctx) !== false;
+  } catch {
+    return { handled: false, draws: [], procedural: true, base: 0, height: 0 };
+  }
+  let base = -Infinity, top = Infinity;
+  for (const d of draws) for (const [x, y] of [[d.dx, d.dy], [d.dx + d.dw, d.dy], [d.dx, d.dy + d.dh], [d.dx + d.dw, d.dy + d.dh]]) {
+    const p = apply(d.m, x, y);
+    base = Math.max(base, p.y);
+    top = Math.min(top, p.y);
+  }
+  return { handled: handled && draws.length > 0, draws, procedural, base: Number.isFinite(base) ? base : 0, height: Number.isFinite(base) ? base - top : 0 };
+}
+function shadowProjectionV1(vector2, baseY, height, limits = SILHOUETTE_LIMITS) {
+  const length = Math.hypot(vector2.x, vector2.y) * height / limits.referenceHeight, cap = length > limits.maximumLength ? limits.maximumLength / length : 1, kx = vector2.x / limits.referenceHeight * cap, ky = vector2.y / limits.referenceHeight * cap;
+  return [1, 0, -kx, -ky, kx * baseY, baseY * (1 + ky)];
+}
+function createSilhouetteShadowsV1(doc, limits = SILHOUETTE_LIMITS) {
+  const silhouettes = /* @__PURE__ */ new WeakMap(), recorded = /* @__PURE__ */ new Map(), actors2 = /* @__PURE__ */ new Map(), layers = /* @__PURE__ */ new WeakMap();
+  let frameNo = 0, stats = { scenery: 0, procedural: 0, polygons: 0, actors: 0, actorRenders: 0, recordings: 0 };
+  function silhouetteFor(image) {
+    let s = silhouettes.get(image);
+    if (s) return s;
+    const f = Math.min(1, limits.silhouetteMaxSide / Math.max(image.width, image.height)), c = doc.createElement("canvas");
+    c.width = Math.max(1, Math.round(image.width * f));
+    c.height = Math.max(1, Math.round(image.height * f));
+    const g = c.getContext("2d");
+    g.drawImage(image, 0, 0, c.width, c.height);
+    g.globalCompositeOperation = "source-in";
+    g.fillStyle = SHADOW;
+    g.fillRect(0, 0, c.width, c.height);
+    s = { canvas: c, fx: c.width / image.width, fy: c.height / image.height };
+    silhouettes.set(image, s);
+    return s;
+  }
+  function recordingFor(caster2) {
+    let r = recorded.get(caster2.key);
+    if (r) {
+      recorded.delete(caster2.key);
+      recorded.set(caster2.key, r);
+      return r;
+    }
+    r = recordSpriteDrawsV1(caster2.paint);
+    stats.recordings++;
+    recorded.set(caster2.key, r);
+    while (recorded.size > limits.recordedCasters) recorded.delete(recorded.keys().next().value);
+    return r;
+  }
+  function actorCanvas(caster2) {
+    const q = limits.actorScale, radius = Math.max(10, caster2.radius ?? 10), w = caster2.boss ? Math.min(320, Math.max(160, radius * 8)) : 96, h = caster2.boss ? Math.min(360, Math.max(180, radius * 9)) : 112, above = h * 0.82;
+    let a = actors2.get(caster2.key);
+    const fresh = !a || a.w !== w || a.h !== h;
+    if (fresh) {
+      const c = a?.canvas ?? doc.createElement("canvas");
+      c.width = Math.ceil(w * q);
+      c.height = Math.ceil(h * q);
+      a = { canvas: c, w, h, above, rendered: -Infinity, seen: frameNo };
+      actors2.set(caster2.key, a);
+    }
+    a.seen = frameNo;
+    return { a, fresh };
+  }
+  function renderActor(a, caster2) {
+    const g = a.canvas.getContext("2d"), q = limits.actorScale;
+    g.save();
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.globalCompositeOperation = "source-over";
+    g.globalAlpha = 1;
+    g.clearRect(0, 0, a.canvas.width, a.canvas.height);
+    g.setTransform(q, 0, 0, q, (a.w / 2 - caster2.anchorX) * q, (a.above - caster2.anchorY) * q);
+    caster2.render(g);
+    g.restore();
+    g.save();
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.globalCompositeOperation = "source-in";
+    g.fillStyle = SHADOW;
+    g.fillRect(0, 0, a.canvas.width, a.canvas.height);
+    g.restore();
+    a.rendered = frameNo;
+    stats.actorRenders++;
+  }
+  function draw(ctx, { frame, scenery = [], polygons = () => [], actors: actorCasters = [] }) {
+    frameNo++;
+    stats = { scenery: 0, procedural: 0, polygons: 0, actors: 0, actorRenders: 0, recordings: stats.recordings };
+    const target = ctx.canvas;
+    if (typeof ctx.getTransform !== "function" || !target?.ownerDocument?.createElement || !(target.width > 0 && target.height > 0) || !frame?.enabled) return false;
+    const indoor = frame.profile === "interior", alpha = indoor ? limits.indoorAlpha : Math.min(limits.outdoorMaximumAlpha, frame.shadowAlpha * limits.outdoorGain);
+    if (alpha <= 4e-3) return true;
+    const vector2 = indoor ? { x: 0, y: limits.indoorDepth * limits.referenceHeight } : frame.vector;
+    const w = Math.max(1, Math.ceil(target.width * limits.layerScale)), h = Math.max(1, Math.ceil(target.height * limits.layerScale));
+    let layer = layers.get(target);
+    if (!layer) {
+      layer = doc.createElement("canvas");
+      layers.set(target, layer);
+    }
+    if (layer.width !== w || layer.height !== h) {
+      layer.width = w;
+      layer.height = h;
+    }
+    const lc = layer.getContext("2d"), m = ctx.getTransform(), sx = w / target.width, sy = h / target.height, world = [m.a * sx, m.b * sy, m.c * sx, m.d * sy, m.e * sx, m.f * sy];
+    lc.setTransform(1, 0, 0, 1, 0, 0);
+    lc.globalCompositeOperation = "source-over";
+    lc.globalAlpha = 1;
+    lc.clearRect(0, 0, w, h);
+    const covered = /* @__PURE__ */ new Set(), tile = 32;
+    if (!indoor) for (const caster2 of scenery) {
+      const r = recordingFor(caster2);
+      if (!r.handled || r.procedural) {
+        stats.procedural++;
+        continue;
+      }
+      covered.add(Math.floor(caster2.x / tile) + "," + Math.floor(caster2.y / tile));
+      const p = shadowProjectionV1(vector2, r.base, r.height, limits);
+      for (const d of r.draws) {
+        const s = silhouetteFor(d.image);
+        lc.setTransform(...multiply(multiply(world, p), d.m));
+        lc.globalAlpha = Math.min(1, d.alpha);
+        lc.drawImage(s.canvas, d.sx * s.fx, d.sy * s.fy, d.sw * s.fx, d.sh * s.fy, d.dx, d.dy, d.dw, d.dh);
+      }
+      stats.scenery++;
+    }
+    lc.globalAlpha = 1;
+    if (!indoor) {
+      const boxes = polygons((c) => {
+        if (!NATURAL_CASTERS.includes(c.kind)) return false;
+        const x0 = Math.floor(c.x / tile) - 1, y0 = Math.floor(c.y / tile) - 1, x1 = Math.floor((c.x + c.w) / tile) + 1, y1 = Math.floor((c.y + c.h) / tile) + 1;
+        for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (covered.has(x + "," + y)) return true;
+        return false;
+      });
+      lc.setTransform(...world);
+      lc.fillStyle = SHADOW;
+      lc.beginPath();
+      for (const c of boxes) {
+        const poly7 = shadowPolygonV1(c, frame);
+        if (poly7.length < 3) continue;
+        lc.moveTo(poly7[0].x, poly7[0].y);
+        for (let i = 1; i < poly7.length; i++) lc.lineTo(poly7[i].x, poly7[i].y);
+        lc.closePath();
+        stats.polygons++;
+      }
+      lc.fill();
+    }
+    let budget = limits.actorRefreshPerFrame;
+    for (const caster2 of actorCasters.slice(0, limits.actorCasters)) {
+      const { a, fresh } = actorCanvas(caster2), phase = [...caster2.key].reduce((n, ch) => n + ch.charCodeAt(0), 0);
+      if (fresh || a.rendered === -Infinity) renderActor(a, caster2);
+      else if (budget > 0 && (frameNo + phase) % limits.actorRefreshFrames === 0) {
+        renderActor(a, caster2);
+        budget--;
+      }
+      const p = shadowProjectionV1(vector2, caster2.anchorY, a.above, limits);
+      lc.setTransform(...multiply(world, p));
+      lc.drawImage(a.canvas, caster2.anchorX - a.w / 2, caster2.anchorY - a.above, a.w, a.h);
+      stats.actors++;
+    }
+    for (const [key2, a] of actors2) if (frameNo - a.seen > limits.actorStaleFrames) actors2.delete(key2);
+    lc.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalCompositeOperation = "source-over";
+    ctx.globalAlpha = alpha;
+    ctx.drawImage(layer, 0, 0, target.width, target.height);
+    ctx.restore();
+    return true;
+  }
+  function clear2() {
+    recorded.clear();
+    actors2.clear();
+  }
+  return Object.freeze({ draw, clear: clear2, resources: () => ({ silhouetteShadows: { version: SILHOUETTE_SHADOWS_VERSION, ...stats, recordedCasters: recorded.size, actorCanvases: actors2.size, limits } }) });
+}
+
 // src/client/hero_level_up_v3.js
 var HERO_LEVEL_UP_V3 = Object.freeze({ durationMs: 2600, maximumParticles: 32 });
 function createHeroLevelUpV3() {
@@ -31820,9 +32287,9 @@ var LIGHT_BARK = "#a8784d";
 var DARK_BARK = "#433025";
 var LEAF = "#8ab75c";
 var GREEN = "#a0ed75";
-var clamp25 = (v) => Math.max(0, Math.min(1, v));
+var clamp26 = (v) => Math.max(0, Math.min(1, v));
 var ease = (v) => {
-  v = clamp25(v);
+  v = clamp26(v);
   return v * v * (3 - 2 * v);
 };
 var lerp2 = (a, b, p) => a + (b - a) * p;
@@ -31926,7 +32393,7 @@ function brokenRim(c, r, color28, width = 1.7) {
   }
 }
 function aegisWarning(c, h, tick) {
-  const q = clamp25((tick - h.startedTick) / Math.max(1, h.resolvesTick - h.startedTick));
+  const q = clamp26((tick - h.startedTick) / Math.max(1, h.resolvesTick - h.startedTick));
   c.save();
   c.translate(h.position.x, h.position.y);
   if (h.ability === "magnetic_pull") {
@@ -32018,7 +32485,7 @@ function groundRoots(c, r, growth, light) {
   }
 }
 function treantWarning(c, row2, tick) {
-  const q = clamp25((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick)), snare = row2.ability === "root_snare", r = row2.radius ?? (snare ? 75 : 64);
+  const q = clamp26((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick)), snare = row2.ability === "root_snare", r = row2.radius ?? (snare ? 75 : 64);
   c.save();
   c.translate(row2.position.x, row2.position.y);
   c.fillStyle = snare ? "#568c3826" : "#bd80351f";
@@ -32095,7 +32562,7 @@ function impactGround(c, row2, tick) {
       c.restore();
     }
   } else groundRoots(c, r, growth, snare ? GREEN : "#ba956a");
-  const wave = clamp25(age / 15);
+  const wave = clamp26(age / 15);
   c.globalAlpha *= 1 - ease(age / 23);
   circle(c, { x: 0, y: 0 }, 8 + (r - 8) * ease(wave), magnetic ? PALE2 : snare ? "#ceffa1" : "#d3ac77", 3.2 * (1 - wave) + 1);
   c.restore();
@@ -32144,7 +32611,7 @@ function rootSpear(c, p, height, lean, opacity) {
   c.restore();
 }
 function flyingLeaf(c, contact, lift, index, age, life) {
-  const q = clamp25(age / life);
+  const q = clamp26(age / life);
   c.save();
   c.translate(contact.x, contact.y - lift);
   c.rotate(index * 2.4 + q * 3.1);
@@ -32176,7 +32643,7 @@ function bossPolishDepthItems(model, tick, viewport = null) {
       if (age >= 19) continue;
       const angle3 = row2.angle, p = { x: center2.x + Math.cos(angle3) * 51, y: center2.y + Math.sin(angle3) * 51 };
       add(row2.id + "/bash", p, (c) => {
-        const q = clamp25(age / 19), rise = ease(age / 3);
+        const q = clamp26(age / 19), rise = ease(age / 3);
         c.save();
         c.translate(p.x, p.y - 18);
         c.rotate(angle3);
@@ -32265,9 +32732,9 @@ function drawAegisProjectileTrails(c, model, tick) {
 
 // src/client/corrosive_goop_motion_v5.js
 var TAU36 = Math.PI * 2;
-var clamp26 = (x) => Math.max(0, Math.min(1, x));
+var clamp27 = (x) => Math.max(0, Math.min(1, x));
 var ease2 = (x) => {
-  x = clamp26(x);
+  x = clamp27(x);
   return x * x * (3 - 2 * x);
 };
 function corrosiveGoopMotionV5(actor, tick) {
@@ -32291,7 +32758,7 @@ function corrosiveGoopMotionV5(actor, tick) {
 function corrosiveGoopPointV5(pose, x, y) {
   const g = pose.goo;
   if (!g) return { x, y };
-  const h = clamp26((-y - 4) / 92), belly = 1 - h;
+  const h = clamp27((-y - 4) / 92), belly = 1 - h;
   const sideWave = Math.sin(g.phase - h * 2.3 + (x < 0 ? 0.35 : 1.4)) * 2.1 * g.flow;
   return {
     x: x * (1 + g.squash * (1 - 0.34 * h)) + g.baseCreep * belly * belly + g.upperLag * h * h + sideWave,
@@ -32499,10 +32966,10 @@ function drawCorrosiveEmbeddedEyesV7(c, pose, look, open = 1, flash = false) {
 
 // src/client/corrosive_pseudopods_v7.js
 var { ink: INK30, base: GEL, light: LIGHT3 } = CORROSIVE_SLUDGE_PALETTE_V7;
-var clamp27 = (x) => Math.max(0, Math.min(1, x));
-var mix14 = (a, b, t) => a + (b - a) * t;
+var clamp28 = (x) => Math.max(0, Math.min(1, x));
+var mix15 = (a, b, t) => a + (b - a) * t;
 var point6 = (x, y) => ({ x, y });
-var lerp3 = (a, b, t) => point6(mix14(a.x, b.x, t), mix14(a.y, b.y, t));
+var lerp3 = (a, b, t) => point6(mix15(a.x, b.x, t), mix15(a.y, b.y, t));
 var unit3 = (x, y) => {
   const d = Math.hypot(x, y) || 1;
   return point6(x / d, y / d);
@@ -32518,14 +32985,14 @@ function corrosivePseudopodGeometryV7(side, pose, tick) {
     side * (59 + sway + Math.sin(phase + side) * 2 * flow) - drag * 0.45,
     -6 + bodyY + Math.sin(phase - side) * 2 * flow
   );
-  const amount = clamp27(pose.armAmount ?? 0), targeted = !!pose.tip && side === pose.side;
+  const amount = clamp28(pose.armAmount ?? 0), targeted = !!pose.tip && side === pose.side;
   let tip = targeted ? lerp3(rest, pose.tip, amount) : rest;
   let c1 = point6(side * 41 + bodyX - drag * 0.2, -6 + bodyY + flow * 2);
   let c2 = point6(side * 47 - drag * 0.45, 7 + bodyY + sway);
   if (targeted) {
     const quick = pose.ability === "strike";
     const reach = unit3(tip.x - root.x, tip.y - root.y);
-    const bend1 = quick ? point6(mix14(root.x, tip.x, 0.34) + side * 7, mix14(root.y, tip.y, 0.34) + 7) : point6(root.x + side * 24, root.y - 32 - (pose.slamWeight ?? 0) * 7);
+    const bend1 = quick ? point6(mix15(root.x, tip.x, 0.34) + side * 7, mix15(root.y, tip.y, 0.34) + 7) : point6(root.x + side * 24, root.y - 32 - (pose.slamWeight ?? 0) * 7);
     const carry = 23 + (pose.slamWeight ?? 0) * 6;
     const bend2 = quick ? point6(tip.x - reach.x * 19, tip.y - reach.y * 19 + 4) : point6(tip.x - reach.x * carry, tip.y - reach.y * carry);
     c1 = lerp3(c1, bend1, amount);
@@ -32613,12 +33080,12 @@ function bossHealthRatioV4(a) {
 var TAU38 = Math.PI * 2;
 var INK31 = "#11151a";
 var LIGHT4 = "#75c988";
-var clamp28 = (v) => Math.max(0, Math.min(1, v));
+var clamp29 = (v) => Math.max(0, Math.min(1, v));
 var ease3 = (v) => {
-  v = clamp28(v);
+  v = clamp29(v);
   return v * v * (3 - 2 * v);
 };
-var mix15 = (a, b, p) => a + (b - a) * p;
+var mix16 = (a, b, p) => a + (b - a) * p;
 var point7 = (x, y) => ({ x, y });
 var unit4 = (x, y) => {
   const d = Math.hypot(x, y) || 1;
@@ -32680,7 +33147,7 @@ function sampleChain(rows) {
   for (const row2 of rows) {
     const d = distance6(row2.from, row2.to), steps = Math.max(1, Math.ceil(d / 7));
     if (!points2.length) points2.push({ ...row2.from, s: 0, r: row2.radius, expiresTick: row2.expiresTick });
-    for (let i = 1; i <= steps; i++) points2.push({ x: mix15(row2.from.x, row2.to.x, i / steps), y: mix15(row2.from.y, row2.to.y, i / steps), s: length + d * i / steps, r: row2.radius, expiresTick: row2.expiresTick });
+    for (let i = 1; i <= steps; i++) points2.push({ x: mix16(row2.from.x, row2.to.x, i / steps), y: mix16(row2.from.y, row2.to.y, i / steps), s: length + d * i / steps, r: row2.radius, expiresTick: row2.expiresTick });
     length += d;
   }
   for (let i = 0; i < points2.length; i++) {
@@ -32724,7 +33191,7 @@ function chains(rows) {
 }
 function ageGradient(c, chain, tick, rgb, minimum, maximum, span = 90) {
   const first = chain[0], last = chain.find((r) => r.expiresTick - tick >= span) ?? chain.at(-1), a = first.from, b = last.to;
-  const alpha = (row2) => mix15(minimum, maximum, ease3((row2.expiresTick - tick) / span));
+  const alpha = (row2) => mix16(minimum, maximum, ease3((row2.expiresTick - tick) / span));
   if (distance6(a, b) < 0.1) return `rgba(${rgb},${alpha(last)})`;
   const gradient = c.createLinearGradient(a.x, a.y, b.x, b.y);
   gradient.addColorStop(0, `rgba(${rgb},${alpha(first)})`);
@@ -32787,7 +33254,7 @@ function approvedMinion(c, row2, tick, { scaleX = 1, scaleY = 1, alpha = 1, flas
   if (!profile || !painter) return;
   const melee = typeof row2.meleePhase === "object" ? row2.meleePhase : null, span = Math.max(1, (melee?.phaseEndsTick ?? tick) - (melee?.phaseStartedTick ?? tick));
   const attack = hostileMeleePose({ ...row2, alive: true, meleePhase: melee }, tick), seed2 = (row2.visualSeed ?? hash10(row2.id)) >>> 0;
-  const m = { x: frame.x, y: frame.y, w: frame.width, h: frame.height, flashTimer: flash ? 1 : 0, movedLastTick: !!row2.movedLastTick, meleePhase: melee, phaseProgress: melee ? clamp28((tick - melee.phaseStartedTick) / span) : 0, meleeAction: !!attack, familyAttack: attack, deathProgress: 0, presentationTick: tick, motionBlend: row2.movedLastTick ? 1 : 0, stepPhase: tick * 0.66 + seed2 % 17 * 0.13, paletteKey: profile.paletteKey };
+  const m = { x: frame.x, y: frame.y, w: frame.width, h: frame.height, flashTimer: flash ? 1 : 0, movedLastTick: !!row2.movedLastTick, meleePhase: melee, phaseProgress: melee ? clamp29((tick - melee.phaseStartedTick) / span) : 0, meleeAction: !!attack, familyAttack: attack, deathProgress: 0, presentationTick: tick, motionBlend: row2.movedLastTick ? 1 : 0, stepPhase: tick * 0.66 + seed2 % 17 * 0.13, paletteKey: profile.paletteKey };
   c.save();
   c.translate(row2.position.x, row2.position.y);
   c.globalAlpha *= alpha;
@@ -32853,8 +33320,8 @@ function drawCorrosiveBodyRuptures(c, actor, tick, bodyPose = null) {
   }
 }
 function minionPose(row2, tick) {
-  const air = clamp28((tick - row2.spawnedTick) / Math.max(1, row2.landsTick - row2.spawnedTick));
-  const landing = clamp28((tick - row2.landsTick) / Math.max(1, row2.activatesTick - row2.landsTick));
+  const air = clamp29((tick - row2.spawnedTick) / Math.max(1, row2.landsTick - row2.spawnedTick));
+  const landing = clamp29((tick - row2.landsTick) / Math.max(1, row2.activatesTick - row2.landsTick));
   const height = (1 - air) * 33 + 4 * air * (1 - air) * (31 + (row2.volleyOrdinal ?? 0) * 2.5);
   const launch = unit4(row2.landingPosition.x - row2.originPosition.x, row2.landingPosition.y - row2.originPosition.y);
   return { air, landing, height, launch, age: tick - row2.spawnedTick, terminalAge: row2.stage === "dissolving" ? tick - (row2.retireTick - 24) : null };
@@ -32892,7 +33359,7 @@ function drawCorrosiveMinionGround(c, rows, tick) {
       }
     } else if (row2.stage === "active") ellipse3(c, 0, 2, 11, 3, "#0a0e0f33");
     else if (row2.stage === "dissolving") {
-      const q = clamp28(pose.terminalAge / 24);
+      const q = clamp29(pose.terminalAge / 24);
       c.globalAlpha *= 1 - q;
       splatPath(c, 12 + q * 5, hash10(row2.id));
       fill2(c, slag2 ? "#7a4c30" : "#386e42");
@@ -32902,7 +33369,7 @@ function drawCorrosiveMinionGround(c, rows, tick) {
 }
 function strand(c, root, tip, amount) {
   if (amount <= 0) return;
-  const d = unit4(tip.x - root.x, tip.y - root.y), n = point7(-d.y, d.x), w = 3.8 * amount, thin = 0.8 * amount, m = point7(mix15(root.x, tip.x, 0.55), mix15(root.y, tip.y, 0.55) + 5 * amount);
+  const d = unit4(tip.x - root.x, tip.y - root.y), n = point7(-d.y, d.x), w = 3.8 * amount, thin = 0.8 * amount, m = point7(mix16(root.x, tip.x, 0.55), mix16(root.y, tip.y, 0.55) + 5 * amount);
   c.beginPath();
   c.moveTo(root.x + n.x * w, root.y + n.y * w);
   c.quadraticCurveTo(m.x + n.x * w * 0.4, m.y + n.y * w * 0.4, tip.x + n.x * thin, tip.y + n.y * thin);
@@ -32969,7 +33436,7 @@ function minionBody(c, row2, tick, model, bodyPoseForActor) {
   if (row2.stage === "active") {
     const flash = Number.isFinite(row2.lastDamagedTick) && tick - row2.lastDamagedTick >= 0 && tick - row2.lastDamagedTick < 4;
     approvedMinion(c, row2, tick, { flash });
-    const profile = creaturePresentationForRenderV3(row2.enemyFamily), max = Math.max(1, presentCombat(row2.maxHp)), ratio = clamp28(presentCombat(row2.hp) / max), width = Math.max(18, Math.min(34, profile.visualBounds.width * 0.68)), y = row2.position.y + profile.labels.healthBarY;
+    const profile = creaturePresentationForRenderV3(row2.enemyFamily), max = Math.max(1, presentCombat(row2.maxHp)), ratio = clamp29(presentCombat(row2.hp) / max), width = Math.max(18, Math.min(34, profile.visualBounds.width * 0.68)), y = row2.position.y + profile.labels.healthBarY;
     c.save();
     c.fillStyle = INK31;
     c.fillRect(row2.position.x - width / 2, y, width, 3);
@@ -32979,7 +33446,7 @@ function minionBody(c, row2, tick, model, bodyPoseForActor) {
     return;
   }
   if (row2.stage === "dissolving") {
-    const q = clamp28(pose.terminalAge / 24);
+    const q = clamp29(pose.terminalAge / 24);
     if (q >= 1) return;
     if (row2.retireTick - 24 < row2.landsTick) {
       const atHit = minionPose(row2, row2.retireTick - 24), height = atHit.height * (1 - ease3(q));
@@ -33023,14 +33490,14 @@ var LIGHT5 = "#75c988";
 var DARK4 = "#216b4c";
 var ACID = "#b5e976";
 var MINT = "#dbf8b5";
-var clamp29 = (v) => Math.max(0, Math.min(1, v));
+var clamp30 = (v) => Math.max(0, Math.min(1, v));
 var ease4 = (v) => {
-  v = clamp29(v);
+  v = clamp30(v);
   return v * v * (3 - 2 * v);
 };
-var mix16 = (a, b, p) => a + (b - a) * p;
+var mix17 = (a, b, p) => a + (b - a) * p;
 var point8 = (x, y) => ({ x, y });
-var lerp4 = (a, b, p) => point8(mix16(a.x, b.x, p), mix16(a.y, b.y, p));
+var lerp4 = (a, b, p) => point8(mix17(a.x, b.x, p), mix17(a.y, b.y, p));
 function hash11(value2) {
   let n = 2166136261;
   for (const ch of String(value2)) n = Math.imul(n ^ ch.charCodeAt(0), 16777619);
@@ -33068,7 +33535,7 @@ function localTarget(actor, record2, height = 0) {
 function corrosiveAttackPose(actor, tick) {
   const b = actor.boss ?? {}, pending = b.pendingAction, last = b.lastAction;
   const active = actor.alive !== false && b.bossDefinitionId === ID;
-  const p = active && pending ? clamp29((tick - pending.startedTick) / Math.max(1, pending.resolvesTick - pending.startedTick)) : 0;
+  const p = active && pending ? clamp30((tick - pending.startedTick) / Math.max(1, pending.resolvesTick - pending.startedTick)) : 0;
   const age = last ? tick - last.resolvedTick : Infinity;
   const recent = active && age >= 0 && age < 40 ? last : null;
   const aim2 = pending ? localTarget(actor, pending) : recent ? localTarget(actor, recent) : point8(Math.cos(b.facingAngle ?? 1.57) * 40, Math.sin(b.facingAngle ?? 1.57) * 40);
@@ -33128,7 +33595,7 @@ function corrosiveAttackPose(actor, tick) {
 function paintGel(c, actor, tick, flash = false) {
   const b = actor.boss;
   if (b?.bossDefinitionId !== ID) return false;
-  const pose = corrosiveAttackPose(actor, tick), death = actor.alive === false ? clamp29((actor.deathAge ?? 0) / 36) : 0;
+  const pose = corrosiveAttackPose(actor, tick), death = actor.alive === false ? clamp30((actor.deathAge ?? 0) / 36) : 0;
   c.save();
   c.translate(actor.position.x, actor.position.y);
   c.globalAlpha *= 1 - death * 0.8;
@@ -33162,9 +33629,9 @@ function surfaceFor(c) {
 }
 function drawCorrosiveAbomination(c, actor, tick, flash = false, { gelOpacity = CORROSIVE_GEL_OPACITY_V4 } = {}) {
   if (actor.boss?.bossDefinitionId !== ID) return false;
-  const pose = corrosiveAttackPose(actor, tick), death = actor.alive === false ? clamp29((actor.deathAge ?? 0) / 36) : 0;
+  const pose = corrosiveAttackPose(actor, tick), death = actor.alive === false ? clamp30((actor.deathAge ?? 0) / 36) : 0;
   const left = Math.floor(Math.min(-90, (pose.tip?.x ?? 0) - 30)), top = Math.floor(Math.min(-135, (pose.tip?.y ?? 0) - 45)), right = Math.ceil(Math.max(90, (pose.tip?.x ?? 0) + 30)), bottom = Math.ceil(Math.max(35, (pose.tip?.y ?? 0) + 30)), w = right - left, h = bottom - top;
-  const surface = surfaceFor(c), alpha = flash ? 1 : clamp29(gelOpacity);
+  const surface = surfaceFor(c), alpha = flash ? 1 : clamp30(gelOpacity);
   if (surface && w * 2 <= 768 && h * 2 <= 768) {
     const g = surface.context;
     g.setTransform(1, 0, 0, 1, 0, 0);
@@ -33200,7 +33667,7 @@ function irregularPool(c, x, y, r, seed2) {
 function poolGround(c, row2, tick) {
   const age = tick - row2.createdTick, left = row2.expiresTick - tick;
   if (age < 0 || left <= 0) return;
-  const r = row2.radius ?? 12, seed2 = hash11(row2.id), spread = 0.25 + 0.75 * ease4(age / 13), fade = 0.28 + 0.72 * clamp29(left / 65);
+  const r = row2.radius ?? 12, seed2 = hash11(row2.id), spread = 0.25 + 0.75 * ease4(age / 13), fade = 0.28 + 0.72 * clamp30(left / 65);
   c.save();
   c.translate(row2.position.x, row2.position.y);
   ellipse4(c, 0, 0, r, r, "#478b3533", false);
@@ -33224,7 +33691,7 @@ function poolGround(c, row2, tick) {
   c.restore();
 }
 function warning(c, row2, tick) {
-  const q = clamp29((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick));
+  const q = clamp30((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick));
   if (row2.ability !== "slam") return;
   const p = row2.targetPosition ?? row2.position, r = row2.radius ?? 64, seed2 = hash11(row2.id ?? row2.bossId);
   c.save();
@@ -33292,7 +33759,7 @@ function splash(c, p, age, seed2, power = 1) {
   if (age < 0 || age >= 40) return;
   c.save();
   c.translate(p.x, p.y);
-  const q = clamp29(age / 40);
+  const q = clamp30(age / 40);
   c.globalAlpha = 1 - ease4((age - 25) / 15);
   for (let i = 0; i < 7; i++) {
     const a = i * 2.39996 + seed2 % 7, speed = (0.4 + i % 3 * 0.2) * power, dx = Math.cos(a) * speed * age, dy = Math.sin(a) * speed * age * 0.6;
@@ -33300,7 +33767,7 @@ function splash(c, p, age, seed2, power = 1) {
     if (height > 0) droplet(c, dx, dy - height, (1.5 + i % 3 * 0.48) * (1 - q * 0.35));
   }
   if (age < 22) {
-    const rise = Math.sin(clamp29((age + 1) / 22) * Math.PI), h = (21 + power * 7) * rise, w = (7 + power * 2) * (1 - age / 44);
+    const rise = Math.sin(clamp30((age + 1) / 22) * Math.PI), h = (21 + power * 7) * rise, w = (7 + power * 2) * (1 - age / 44);
     c.beginPath();
     c.moveTo(-w, 1);
     c.bezierCurveTo(-w * 1.5, -h * 0.2, -w * 0.5, -h * 0.45, -w * 0.6, -h);
@@ -33374,7 +33841,7 @@ function spore(c, row2, tick) {
   c.restore();
 }
 function stormPod(c, row2, p, index, tick) {
-  const q = clamp29((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick)), growth = ease4((q - 0.12) / 0.88);
+  const q = clamp30((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick)), growth = ease4((q - 0.12) / 0.88);
   if (growth <= 0) return;
   const o = row2.originPosition, seed2 = index * 2.2, root = point8(o.x, o.y - 31), tip = point8(p.x, p.y - 7);
   c.save();
@@ -33383,7 +33850,7 @@ function stormPod(c, row2, p, index, tick) {
   c.lineWidth = 1.2;
   c.beginPath();
   c.moveTo(root.x, root.y);
-  c.quadraticCurveTo(mix16(root.x, tip.x, 0.7), Math.min(root.y, tip.y) - 8 - growth * 7, tip.x, tip.y);
+  c.quadraticCurveTo(mix17(root.x, tip.x, 0.7), Math.min(root.y, tip.y) - 8 - growth * 7, tip.x, tip.y);
   c.stroke();
   ellipse4(c, p.x, p.y - 7, 1 + growth * 5.5, 1.3 + growth * 5.2, BASE, true, 1.1);
   ellipse4(c, p.x - 1.3, p.y - 8.5, 0.6 + growth * 1.7, 0.5 + growth * 1.3, LIGHT5, false);
@@ -33442,12 +33909,12 @@ var LIGHT6 = "#49305f";
 var VIOLET = "#9d58d0";
 var PINK = "#ed459b";
 var PALE3 = "#efd3ff";
-var clamp30 = (x) => Math.max(0, Math.min(1, x));
+var clamp31 = (x) => Math.max(0, Math.min(1, x));
 var ease5 = (x) => {
-  x = clamp30(x);
+  x = clamp31(x);
   return x * x * (3 - 2 * x);
 };
-var mix17 = (a, b, p) => a + (b - a) * p;
+var mix18 = (a, b, p) => a + (b - a) * p;
 var point9 = (x, y) => ({ x, y });
 function unit6(x, y) {
   const d = Math.hypot(x, y) || 1;
@@ -33493,7 +33960,7 @@ function localTarget2(actor, record2) {
   return point9(p.x - actor.position.x, p.y - actor.position.y);
 }
 function castProgress(row2, tick) {
-  return clamp30((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick));
+  return clamp31((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick));
 }
 function voidAttackPose(actor, tick) {
   const b = actor.boss ?? {}, alive = actor.alive !== false && b.bossDefinitionId === ID2;
@@ -33530,7 +33997,7 @@ function voidAttackPose(actor, tick) {
     pose.charge = 0.45 * amount;
     pose.drive = amount;
   } else if (pending?.ability === "eye_lance") {
-    const charge = ease5(p / 0.72), pulse = Math.sin(Math.PI * clamp30((p - 0.7) / 0.24));
+    const charge = ease5(p / 0.72), pulse = Math.sin(Math.PI * clamp31((p - 0.7) / 0.24));
     pose.bodyY -= charge * 5;
     pose.charge = charge;
     pose.pulse = pulse;
@@ -33551,7 +34018,7 @@ function voidAttackPose(actor, tick) {
     pose.rotation += Math.sin(tick * 0.025) * 0.035 * coil;
     pose.charge = coil;
   } else if (recent?.ability === "singularity") {
-    const amount = 1 - ease5(age / 38), kick = Math.sin(Math.PI * clamp30(age / 14));
+    const amount = 1 - ease5(age / 38), kick = Math.sin(Math.PI * clamp31(age / 14));
     pose.bodyY += -8 * amount + 5 * kick;
     pose.scaleX = 1 - 0.06 * amount;
     pose.scaleY = 1 + 0.08 * amount;
@@ -33605,7 +34072,7 @@ function core4(c, pose, flash) {
 }
 function drawVoidOverseer(c, actor, tick, flash = false) {
   if (actor.boss?.bossDefinitionId !== ID2) return false;
-  const pose = voidAttackPose(actor, tick), death = actor.alive === false ? clamp30((actor.deathAge ?? 0) / 36) : 0;
+  const pose = voidAttackPose(actor, tick), death = actor.alive === false ? clamp31((actor.deathAge ?? 0) / 36) : 0;
   c.save();
   c.translate(actor.position.x, actor.position.y);
   c.lineCap = "round";
@@ -33658,7 +34125,7 @@ function inwardDust(c, p, tick, startedTick, seed2, progress8, collapseAge = nul
   for (let i = 0; i < 28; i++) {
     if (elapsed < i * 2) continue;
     const q = (elapsed - i * 2) % 43 / 43, dist3 = 115 + (seed2 + i * 37) % 70, a = seed2 % 31 * 0.21 + i * 2.39996 + q * 0.32;
-    const drawQ = collapseAge === null ? q : mix17(q, 1, ease5(collapseAge / 14)), r = dist3 * (1 - drawQ * drawQ), tailQ = Math.max(0, drawQ - 0.075), rt = dist3 * (1 - tailQ * tailQ), opacity = Math.sin(q * Math.PI) * (0.3 + 0.35 * progress8) * (collapseAge === null ? 1 : 1 - clamp30(collapseAge / 18));
+    const drawQ = collapseAge === null ? q : mix18(q, 1, ease5(collapseAge / 14)), r = dist3 * (1 - drawQ * drawQ), tailQ = Math.max(0, drawQ - 0.075), rt = dist3 * (1 - tailQ * tailQ), opacity = Math.sin(q * Math.PI) * (0.3 + 0.35 * progress8) * (collapseAge === null ? 1 : 1 - clamp31(collapseAge / 18));
     if (opacity <= 0) continue;
     c.globalAlpha = opacityScale * opacity;
     c.strokeStyle = i % 3 === 0 ? PALE3 : i % 2 ? PINK : VIOLET;
@@ -33715,7 +34182,7 @@ function singularityGround(c, row2, tick) {
 function slamGround2(c, row2, tick) {
   const age = tick - row2.resolvedTick;
   if (age < 0 || age >= 40) return;
-  const p = row2.targetPosition, q = clamp30(age / 40), r = row2.radius ?? 64;
+  const p = row2.targetPosition, q = clamp31(age / 40), r = row2.radius ?? 64;
   c.save();
   if (age < 12) {
     c.globalAlpha = 1 - ease5(age / 12);
@@ -33774,7 +34241,7 @@ function forceGeometry(row2, tick, pending) {
     const p = castProgress(row2, tick), gather = ease5((p - 0.35) / 0.5), drop = ease5((p - 0.82) / 0.18);
     return { visible: gather, y: -44 * gather * (1 - drop) - 6 * drop, height: 20 * gather * (1 - 0.65 * drop), width: (5 + 9 * drop) * gather, alpha: gather, drop };
   }
-  const age = tick - row2.resolvedTick, q = clamp30(age / 40), rise = Math.sin(Math.PI * clamp30(age / 17));
+  const age = tick - row2.resolvedTick, q = clamp31(age / 40), rise = Math.sin(Math.PI * clamp31(age / 17));
   return { visible: age >= 0 && age < 40 ? 1 : 0, y: -6 * (1 - ease5(age / 20)), height: (7 + 15 * rise) * (1 - ease5(age / 34)), width: (14 + 8 * rise) * (1 - ease5(age / 38)), alpha: 1 - ease5(q), drop: 1 };
 }
 function slamForce(c, row2, tick, pending, source3) {
@@ -33955,9 +34422,9 @@ function drawVoidBossHud(c, canvas, model) {
 // src/client/chronos_assembly_v6.js
 var TAU41 = Math.PI * 2;
 var P3 = Object.freeze({ ink: "#14202a", navy: "#263a4b", deep: "#182632", brass: "#ad7737", gold: "#d9b05a", light: "#f7dc94", ivory: "#eee4c9", shade: "#baab87", cyan: "#9fe4e1", blue: "#508c9b" });
-var clamp31 = (x) => Math.max(0, Math.min(1, x));
+var clamp32 = (x) => Math.max(0, Math.min(1, x));
 var smooth19 = (x) => {
-  x = clamp31(x);
+  x = clamp32(x);
   return x * x * (3 - 2 * x);
 };
 function shape(c, pts, fill4, width = 1.65) {
@@ -34147,12 +34614,12 @@ var GOLD2 = "#dca942";
 var IVORY = "#fff1c7";
 var CYAN2 = "#9edfe3";
 var BRASS = "#93612d";
-var clamp32 = (n) => Math.max(0, Math.min(1, n));
+var clamp33 = (n) => Math.max(0, Math.min(1, n));
 var ease6 = (n) => {
-  const p = clamp32(n);
+  const p = clamp33(n);
   return p * p * (3 - 2 * p);
 };
-var progress = (row2, tick) => clamp32((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick));
+var progress = (row2, tick) => clamp33((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick));
 var position2 = (row2) => row2.position ?? row2.targetPosition;
 function ring(c, radius, color28, width = 1, start = 0, end = TAU42) {
   c.beginPath();
@@ -34366,7 +34833,7 @@ function drawChronosFieldV6(c, row2, tick, pending) {
   if (pending && (tick < row2.startedTick || tick > row2.resolvesTick)) return;
   if (!pending && (tick < row2.createdTick || tick > row2.expiresTick)) return;
   const q = pending ? progress(row2, tick) : 1, age = pending ? 0 : tick - row2.createdTick;
-  const radius = row2.radius ?? 35, fade = pending ? 1 : clamp32((row2.expiresTick - tick) / 48);
+  const radius = row2.radius ?? 35, fade = pending ? 1 : clamp33((row2.expiresTick - tick) / 48);
   c.save();
   c.translate(p.x, p.y);
   c.globalAlpha *= fade;
@@ -34407,9 +34874,9 @@ var TAU43 = Math.PI * 2;
 var INK35 = "#11151a";
 var GOLD3 = "#e2ac43";
 var PALE4 = "#ffe8ad";
-var clamp33 = (x) => Math.max(0, Math.min(1, x));
+var clamp34 = (x) => Math.max(0, Math.min(1, x));
 var ease7 = (x) => {
-  x = clamp33(x);
+  x = clamp34(x);
   return x * x * (3 - 2 * x);
 };
 var point22 = (x, y) => ({ x, y });
@@ -34419,13 +34886,13 @@ var unit7 = (x, y) => {
   const d = Math.hypot(x, y) || 1;
   return point22(x / d, y / d);
 };
-var progress2 = (row2, tick) => clamp33((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick));
+var progress2 = (row2, tick) => clamp34((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick));
 function fraction2(value2, max) {
   const a = asCombatAmount(value2 ?? 0), b = asCombatAmount(max ?? 1);
   if (a.n === "0" || b.n === "0") return 0;
   const head32 = (s) => Number(s.slice(0, 15)), exponent = (s) => s.length - Math.min(15, s.length);
   const power = exponent(a.n) + exponent(b.d) - exponent(a.d) - exponent(b.n);
-  return clamp33(head32(a.n) * head32(b.d) / (head32(a.d) * head32(b.n)) * 10 ** Math.max(-330, Math.min(330, power)));
+  return clamp34(head32(a.n) * head32(b.d) / (head32(a.d) * head32(b.n)) * 10 ** Math.max(-330, Math.min(330, power)));
 }
 function ellipse6(c, x, y, rx, ry, fill4, outline2 = false, width = 1.26) {
   c.beginPath();
@@ -34581,7 +35048,7 @@ function chronosAttackPose(actor2, tick) {
 }
 function drawChronosArbitrator(c, actor2, tick, flash = false) {
   if (actor2.boss?.bossDefinitionId !== ID3) return false;
-  const pose = chronosAttackPose(actor2, tick), death = actor2.alive === false ? clamp33((actor2.deathAge ?? 0) / 38) : 0;
+  const pose = chronosAttackPose(actor2, tick), death = actor2.alive === false ? clamp34((actor2.deathAge ?? 0) / 38) : 0;
   c.save();
   c.translate(actor2.position.x, actor2.position.y);
   c.lineCap = "round";
@@ -34661,7 +35128,7 @@ function rewindWard(c, row2, tick, actor2) {
     ellipse6(c, 0, 0, 69, 69, glow6);
     circle3(c, 0, 0, radius, "#e2ac4338", 0.8);
     for (let i = 0; i < 12; i++) {
-      const health = clamp33(ratio * 12 - i), a = -Math.PI / 2 + i * TAU43 / 12, span = TAU43 / 12 - 0.055;
+      const health = clamp34(ratio * 12 - i), a = -Math.PI / 2 + i * TAU43 / 12, span = TAU43 / 12 - 0.055;
       if (health <= 0) continue;
       c.strokeStyle = INK35;
       c.lineWidth = 4.8;
@@ -34797,18 +35264,18 @@ var PALE5 = "#e5fbff";
 var FACE = "#30233f";
 var LIGHT7 = "#573550";
 var TEAL = "#19bf9d";
-var clamp34 = (x) => Math.max(0, Math.min(1, x));
+var clamp35 = (x) => Math.max(0, Math.min(1, x));
 var ease8 = (x) => {
-  x = clamp34(x);
+  x = clamp35(x);
   return x * x * (3 - 2 * x);
 };
-var mix18 = (a, b, p) => a + (b - a) * p;
+var mix19 = (a, b, p) => a + (b - a) * p;
 var point23 = (x, y) => ({ x, y });
 var unit8 = (x, y) => {
   const d = Math.hypot(x, y) || 1;
   return point23(x / d, y / d);
 };
-var progress3 = (row2, tick) => clamp34((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick));
+var progress3 = (row2, tick) => clamp35((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick));
 function hash13(value2) {
   let n = 2166136261;
   for (const ch of String(value2)) n = Math.imul(n ^ ch.charCodeAt(0), 16777619);
@@ -34819,7 +35286,7 @@ function fraction3(value2, max) {
   if (a.n === "0" || b.n === "0") return 0;
   const head32 = (s) => Number(s.slice(0, 15)), exponent = (s) => s.length - Math.min(15, s.length);
   const power = exponent(a.n) + exponent(b.d) - exponent(a.d) - exponent(b.n);
-  return clamp34(head32(a.n) * head32(b.d) / (head32(a.d) * head32(b.n)) * 10 ** Math.max(-330, Math.min(330, power)));
+  return clamp35(head32(a.n) * head32(b.d) / (head32(a.d) * head32(b.n)) * 10 ** Math.max(-330, Math.min(330, power)));
 }
 function ellipse7(c, x, y, rx, ry, fill4, outline2 = false, width = 1.26) {
   c.beginPath();
@@ -34880,7 +35347,7 @@ var FORMS = [
 ];
 function formAt(time, lock = 0) {
   const cycle = (time % 900 + 900) % 900, index = Math.floor(cycle / 300), p = ease8((cycle % 300 - 236) / 64);
-  return FORMS[index].map(([x, y], i) => [mix18(mix18(x, FORMS[(index + 1) % 3][i][0], p), FORMS[0][i][0], lock), mix18(mix18(y, FORMS[(index + 1) % 3][i][1], p), FORMS[0][i][1], lock)]);
+  return FORMS[index].map(([x, y], i) => [mix19(mix19(x, FORMS[(index + 1) % 3][i][0], p), FORMS[0][i][0], lock), mix19(mix19(y, FORMS[(index + 1) % 3][i][1], p), FORMS[0][i][1], lock)]);
 }
 function nexusAttackPose(actor2, tick) {
   const b = actor2.boss ?? {}, decoy = isDecoy(actor2), alive = actor2.alive !== false;
@@ -34892,7 +35359,7 @@ function nexusAttackPose(actor2, tick) {
   const pose = { ability: record2?.ability ?? null, p, age, direction: d, aim: aim2, bodyX: 0, bodyY: (decoy ? -21 : -40) + Math.sin((tick + seed2 * 0.13) / 11) * (decoy ? 1.7 : 3), rotation: 0.09 + Math.sin((tick + seed2 * 0.04) / 77) * 0.12, yaw: 0.72 * Math.sin((tick + seed2 * 0.31) / 42 + 0.6), scaleX: 1, scaleY: 1, charge: 0, release: 0, lock: 0, formTime: tick + seed2 % 180, decoy };
   if (decoy) {
     const shotAge = tick - (actor2.nexusDecoy.lastShotTick ?? -Infinity), ready = actor2.nexusDecoy.aggro ? 1 - ease8(((actor2.nexusDecoy.nextShotTick ?? tick + 60) - tick) / 16) : 0;
-    pose.charge = clamp34(ready) * 0.5;
+    pose.charge = clamp35(ready) * 0.5;
     if (shotAge >= 0 && shotAge < 16) {
       const recoil = 1 - ease8(shotAge / 16);
       pose.bodyY -= 2 * recoil;
@@ -34928,7 +35395,7 @@ function nexusAttackPose(actor2, tick) {
     pose.scaleY = 1 + 0.055 * coil;
     pose.charge = coil;
   } else if (recent?.ability === "prism_collapse") {
-    const amount2 = 1 - ease8(age / 36), kick = Math.sin(Math.PI * clamp34(age / 12));
+    const amount2 = 1 - ease8(age / 36), kick = Math.sin(Math.PI * clamp35(age / 12));
     pose.bodyX = -d.x * 3 * amount2;
     pose.bodyY += -6 * amount2 + 2.5 * kick;
     pose.rotation -= d.x * 0.07 * amount2;
@@ -35020,7 +35487,7 @@ function prism(c, pose, size, flash) {
     for (let i = 0; i < verts.length; i++) {
       const a = verts[i], z = verts[(i + 1) % verts.length];
       if (Math.hypot(z[0] - a[0], z[1] - a[1]) < 6 * size) continue;
-      wire(c, [[mix18(a[0], z[0], 0.08), mix18(a[1], z[1], 0.08)], [mix18(a[0], z[0], 0.29), mix18(a[1], z[1], 0.29)]], i % 2 ? CYAN3 : HOT, 0.9, false);
+      wire(c, [[mix19(a[0], z[0], 0.08), mix19(a[1], z[1], 0.08)], [mix19(a[0], z[0], 0.29), mix19(a[1], z[1], 0.29)]], i % 2 ? CYAN3 : HOT, 0.9, false);
     }
     if (pose.charge > 0) {
       c.save();
@@ -35261,7 +35728,7 @@ function barrierWard(c, row2, tick, model2) {
     wire(c, shape2, CYAN3, 1.35, true, true);
     for (let i = 0; i < 6; i++) {
       const a = shape2[i], b = shape2[(i + 1) % 6];
-      wire(c, [[mix18(a[0], b[0], 0.08), mix18(a[1], b[1], 0.08)], [mix18(a[0], b[0], 0.08 + 0.28 * charge), mix18(a[1], b[1], 0.08 + 0.28 * charge)]], i % 2 ? HOT : PALE5, 0.8, false);
+      wire(c, [[mix19(a[0], b[0], 0.08), mix19(a[1], b[1], 0.08)], [mix19(a[0], b[0], 0.08 + 0.28 * charge), mix19(a[1], b[1], 0.08 + 0.28 * charge)]], i % 2 ? HOT : PALE5, 0.8, false);
     }
     if (hitAge >= 0 && hitAge < 8) {
       c.save();
@@ -35284,7 +35751,7 @@ function barrierWard(c, row2, tick, model2) {
 function tether(c, row2, decoy, tick, model2) {
   if (row2.outcome !== "active" || decoy.alive === false) return;
   const a = barrierCenter(row2, model2), boss2 = model2.entitiesById?.[row2.sourceEntityId], bp = boss2 ? nexusAttackPose(boss2, tick) : { bodyX: 0, bodyY: -45 }, dp = nexusAttackPose(decoy, tick);
-  const from = point23(a.x + bp.bodyX, a.y + bp.bodyY), to = point23(decoy.position.x + dp.bodyX, decoy.position.y + dp.bodyY), middle = point23(mix18(from.x, to.x, 0.5), Math.min(from.y, to.y) - 8);
+  const from = point23(a.x + bp.bodyX, a.y + bp.bodyY), to = point23(decoy.position.x + dp.bodyX, decoy.position.y + dp.bodyY), middle = point23(mix19(from.x, to.x, 0.5), Math.min(from.y, to.y) - 8);
   c.save();
   c.globalAlpha *= 0.65;
   c.strokeStyle = INK36;
@@ -35315,7 +35782,7 @@ function bolt(c, row2, tick) {
 }
 function glitchStatus(c, row2, tick) {
   if (tick < row2.appliedTick || tick >= row2.expiresTick) return;
-  const p = row2.position, remaining = clamp34((row2.expiresTick - tick) / Math.max(1, row2.expiresTick - row2.appliedTick));
+  const p = row2.position, remaining = clamp35((row2.expiresTick - tick) / Math.max(1, row2.expiresTick - row2.appliedTick));
   c.save();
   c.translate(p.x, p.y);
   c.lineCap = "round";
@@ -35395,14 +35862,14 @@ var BELLY = "#ab513e";
 var HORN = "#d77a3a";
 var PALE6 = "#ffe7a5";
 var FIRE = "#ff6031";
-var clamp35 = (x) => Math.max(0, Math.min(1, x));
+var clamp36 = (x) => Math.max(0, Math.min(1, x));
 var ease9 = (x) => {
-  x = clamp35(x);
+  x = clamp36(x);
   return x * x * (3 - 2 * x);
 };
-var mix19 = (a, b, u) => a + (b - a) * u;
+var mix20 = (a, b, u) => a + (b - a) * u;
 var point24 = (x, y) => ({ x, y });
-var progress4 = (row2, tick) => clamp35((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick));
+var progress4 = (row2, tick) => clamp36((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick));
 function hash14(s) {
   let h = 2166136261;
   for (const x of String(s)) h = Math.imul(h ^ x.charCodeAt(0), 16777619);
@@ -35468,11 +35935,11 @@ function hooktailAttackPose(actor2, tick) {
     p.headAngle = -0.04 * u;
     p.jaw += 0.36 * u;
     p.heat = ease9(q);
-    p.pulse = Math.sin(Math.PI * clamp35((q - 0.8) / 0.2));
+    p.pulse = Math.sin(Math.PI * clamp36((q - 0.8) / 0.2));
     p.wing -= 0.12 * u;
     p.coil = 0.3 * u;
   } else if (recent?.ability === "scarlet_fire") {
-    const u = 1 - ease9(age / 34), kick = Math.sin(Math.PI * clamp35(age / 11));
+    const u = 1 - ease9(age / 34), kick = Math.sin(Math.PI * clamp36(age / 11));
     p.bodyX += (3 + 2 * kick) * u;
     p.neckX = (4 + 2 * kick) * u;
     p.neckY = -4 * u;
@@ -35512,7 +35979,7 @@ function hooktailAttackPose(actor2, tick) {
     p.coil = rise;
     p.compression = 0.18 * drive;
     p.heat = 0.48 * rise;
-    p.pulse = Math.sin(Math.PI * clamp35((q - 0.86) / 0.14));
+    p.pulse = Math.sin(Math.PI * clamp36((q - 0.86) / 0.14));
   } else if (recent?.ability === "calamity_slam") {
     const u = 1 - ease9(age / 42);
     p.bodyY += 3 * u;
@@ -35539,11 +36006,11 @@ function tailNodes(actor2, p, tick) {
   const idle2 = idleTail(p, tick);
   if (p.ability !== "slam") return idle2;
   const gathering = p.p ? ease9(p.p / 0.61) : 1, drive = p.tailDrive * (1 - p.tailReturn), tip = idle2.at(-1), cock = point24(53, -85), target = point24((p.target.x - actor2.position.x) / p.orientation - p.bodyX, p.target.y - actor2.position.y - p.bodyY - 2);
-  const end = point24(mix19(mix19(tip.x, cock.x, gathering), target.x, drive), mix19(mix19(tip.y, cock.y, gathering), target.y, drive));
-  const start2 = idle2[0], control = point24(mix19(95, target.x * 0.4, drive), mix19(-60, -85, drive));
+  const end = point24(mix20(mix20(tip.x, cock.x, gathering), target.x, drive), mix20(mix20(tip.y, cock.y, gathering), target.y, drive));
+  const start2 = idle2[0], control = point24(mix20(95, target.x * 0.4, drive), mix20(-60, -85, drive));
   return idle2.map((v, i) => {
     const t = i / 6, u = 1 - t, curve2 = point24(u * u * start2.x + 2 * u * t * control.x + t * t * end.x, u * u * start2.y + 2 * u * t * control.y + t * t * end.y), weight2 = gathering * (1 - p.tailReturn);
-    return { x: mix19(v.x, curve2.x, weight2), y: mix19(v.y, curve2.y, weight2), r: v.r };
+    return { x: mix20(v.x, curve2.x, weight2), y: mix20(v.y, curve2.y, weight2), r: v.r };
   });
 }
 function smoothBoundary(c, nodes) {
@@ -35816,7 +36283,7 @@ function collapsedRing(c, row2, tick) {
     if (hot > 0) {
       glow3(c, x + s2 / 2, y + s2 * 0.6, s2 * 0.8, `rgba(191,42,35,${hot * 0.18})`);
     }
-    const local32 = Math.max(0, age - seed2 % 6), u = clamp35(local32 / 27), fall = ease9(u), drop = (u * 0.45 + u * u * 0.85) * s2, shrink = 1 - fall * 0.34;
+    const local32 = Math.max(0, age - seed2 % 6), u = clamp36(local32 / 27), fall = ease9(u), drop = (u * 0.45 + u * u * 0.85) * s2, shrink = 1 - fall * 0.34;
     if (fall < 1) {
       c.save();
       c.translate(x + s2 * 0.5, y + s2 * 0.5 + drop);
@@ -36028,9 +36495,9 @@ var RED = "#ba442a";
 var FIRE2 = "#f27632";
 var GOLD4 = "#ffc36b";
 var HOT2 = "#fff0b5";
-var clamp36 = (x) => Math.max(0, Math.min(1, x));
+var clamp37 = (x) => Math.max(0, Math.min(1, x));
 var ease10 = (x) => {
-  x = clamp36(x);
+  x = clamp37(x);
   return x * x * (3 - 2 * x);
 };
 function hash15(value2) {
@@ -36078,7 +36545,7 @@ function ring2(c, x, y, r, color82, width = 1) {
   c.stroke();
 }
 function progress5(row2, tick) {
-  return clamp36((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick));
+  return clamp37((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick));
 }
 function tongue(c, x, y, width, height, tick, seed2 = 0, heat = 1) {
   const bend = Math.sin(tick * 0.16 + seed2) * width * 0.35;
@@ -36137,7 +36604,7 @@ function cinderhartAttackPose(actor2, tick) {
     p.bodyAngle -= 0.11 * p.rear;
     p.headAngle -= 0.32 * p.rear;
     p.heat = 0.2 + 0.8 * ease10(q);
-    p.pulse = Math.sin(Math.PI * clamp36((q - 0.8) / 0.2));
+    p.pulse = Math.sin(Math.PI * clamp37((q - 0.8) / 0.2));
   } else if (pending?.ability === "cinder_rush") {
     const u = ease10(q / 0.65);
     p.bodyY += 5 * u;
@@ -36147,7 +36614,7 @@ function cinderhartAttackPose(actor2, tick) {
     p.heat = 0.35 + 0.65 * q;
     p.stride = Math.sin(tick * 0.75) * q * 0.35;
     p.stretch = 0.15 * u;
-    p.pulse = Math.sin(Math.PI * clamp36((q - 0.82) / 0.18));
+    p.pulse = Math.sin(Math.PI * clamp37((q - 0.82) / 0.18));
   } else if (rush) {
     p.bodyY = 3 + Math.sin(tick * 0.8) * 2;
     p.bodyAngle = 0.09;
@@ -36337,7 +36804,7 @@ function drawCinderBunny(c, actor2, tick, flash = false) {
   const b = actor2.cinderBunny;
   if (b?.summonType !== BUNNY_ID) return false;
   const dead = actor2.alive === false || b.stage === "defeated", age = dead ? Math.max(0, tick - (b.defeatedTick ?? tick)) : 0, fade = dead ? 1 - ease10(age / 24) : 1;
-  const hopping = !dead && b.stage === "hopping", u = hopping ? clamp36((tick - b.hopStartedTick) / Math.max(1, b.landsTick - b.hopStartedTick)) : 0, arc3 = hopping ? Math.sin(Math.PI * u) * 24 : 0;
+  const hopping = !dead && b.stage === "hopping", u = hopping ? clamp37((tick - b.hopStartedTick) / Math.max(1, b.landsTick - b.hopStartedTick)) : 0, arc3 = hopping ? Math.sin(Math.PI * u) * 24 : 0;
   const restAge = Math.max(0, tick - b.stageStartedTick), restLength = Math.max(1, (b.nextHopTick ?? tick + 18) - b.stageStartedTick), crouch = !hopping && !dead ? ease10((restAge / restLength - 0.55) / 0.45) : 0;
   const recentLand = !hopping && b.hopSequence > 0 && !dead ? Math.max(0, 1 - restAge / 8) : 0, stretch = hopping ? Math.sin(Math.PI * u) : 0, sign = (b.facing ?? 1) < 0 ? -1 : 1;
   const seed2 = hash15(actor2.entityId) % 31;
@@ -36392,7 +36859,7 @@ function drawCinderBunny(c, actor2, tick, flash = false) {
     for (let i = 0; i < 6; i++) {
       const a = i * 2.3999, r = age * 0.52;
       c.save();
-      c.globalAlpha *= 1 - clamp36(age / 24);
+      c.globalAlpha *= 1 - clamp37(age / 24);
       ellipse9(c, Math.cos(a) * r, -6 + Math.sin(a) * r * 0.6 - age * 0.35, 0.8, 1.1, i % 2 ? GOLD4 : FIRE2);
       c.restore();
     }
@@ -36403,7 +36870,7 @@ function drawCinderBunny(c, actor2, tick, flash = false) {
 function fireGround(c, row2, tick) {
   const age = tick - row2.createdTick, left = row2.expiresTick - tick;
   if (age < 0 || left <= 0) return;
-  const r = row2.radius, ignite = clamp36((tick - row2.createdTick) / Math.max(1, row2.ignitesTick - row2.createdTick)), active = tick >= row2.ignitesTick, fade = 0.2 + 0.8 * clamp36(left / 60), seed2 = hash15(row2.id) % 31;
+  const r = row2.radius, ignite = clamp37((tick - row2.createdTick) / Math.max(1, row2.ignitesTick - row2.createdTick)), active = tick >= row2.ignitesTick, fade = 0.2 + 0.8 * clamp37(left / 60), seed2 = hash15(row2.id) % 31;
   c.save();
   c.translate(row2.position.x, row2.position.y);
   ellipse9(c, 0, 0, r, r, `rgba(22,19,24,${active ? 0.44 * fade : 0.22 * ignite})`);
@@ -36425,7 +36892,7 @@ function fireGround(c, row2, tick) {
 function fireTongues(c, row2, tick) {
   const age = tick - row2.createdTick, left = row2.expiresTick - tick;
   if (age < 0 || left <= 0) return;
-  const active = tick >= row2.ignitesTick, seed2 = hash15(row2.id) % 47, ignite = ease10(age / 12), fade = clamp36(left / 60), heat = active ? Math.max(0.18, fade) : 0.25;
+  const active = tick >= row2.ignitesTick, seed2 = hash15(row2.id) % 47, ignite = ease10(age / 12), fade = clamp37(left / 60), heat = active ? Math.max(0.18, fade) : 0.25;
   c.save();
   c.translate(row2.position.x, row2.position.y);
   if (!active) {
@@ -36453,7 +36920,7 @@ function fireTongues(c, row2, tick) {
 }
 function landingWarning(c, row2, tick) {
   if (tick < row2.startedTick || tick > row2.landsTick) return;
-  const u = clamp36((tick - row2.startedTick) / Math.max(1, row2.landsTick - row2.startedTick)), r = row2.radius;
+  const u = clamp37((tick - row2.startedTick) / Math.max(1, row2.landsTick - row2.startedTick)), r = row2.radius;
   c.save();
   c.translate(row2.position.x, row2.position.y);
   c.globalAlpha *= 0.25 + 0.6 * ease10(u);
@@ -36972,12 +37439,12 @@ var TAU48 = Math.PI * 2;
 var INK39 = "#34251b";
 var GOLD5 = "#e5ae39";
 var PALE7 = "#fff0ad";
-var clamp37 = (v) => Math.max(0, Math.min(1, v));
+var clamp38 = (v) => Math.max(0, Math.min(1, v));
 var smooth20 = (v) => {
-  v = clamp37(v);
+  v = clamp38(v);
   return v * v * (3 - 2 * v);
 };
-var mix20 = (a, b, q) => a + (b - a) * q;
+var mix21 = (a, b, q) => a + (b - a) * q;
 var hash16 = (value2) => {
   let n = 2166136261;
   for (const ch of String(value2)) n = Math.imul(n ^ ch.charCodeAt(0), 16777619);
@@ -37092,8 +37559,8 @@ function shellPath(c, rx, ry, time, front2) {
 function drawMarcusMoltenWardV5(c, row2, tick, { center: center2, ratio, front: front2 = false }) {
   const active = row2.outcome === "channeling", age = row2.resolvedTick == null ? 0 : tick - row2.resolvedTick;
   if (!active && (age < 0 || age >= 36) || tick < row2.startedTick) return;
-  const entry = smooth20((tick - row2.startedTick) / 14), health = clamp37(ratio);
-  const rx = mix20(24, 38, entry), ry = mix20(30, 47, entry);
+  const entry = smooth20((tick - row2.startedTick) / 14), health = clamp38(ratio);
+  const rx = mix21(24, 38, entry), ry = mix21(30, 47, entry);
   c.save();
   c.translate(center2.x, center2.y);
   c.lineJoin = "round";
@@ -37143,7 +37610,7 @@ function drawMarcusMoltenWardV5(c, row2, tick, { center: center2, ratio, front: 
     stroke2(c, "#f8cc69aa", 1.7);
     c.restore();
     for (let i = 0; i < 5; i++) {
-      const full = clamp37(health * 5 - i), a = -Math.PI / 2 + (i - 2) * 0.24;
+      const full = clamp38(health * 5 - i), a = -Math.PI / 2 + (i - 2) * 0.24;
       if (!full) continue;
       const x = Math.cos(a) * (rx - 2), y = Math.sin(a) * (ry - 2);
       c.beginPath();
@@ -37193,7 +37660,7 @@ var TAU49 = Math.PI * 2;
 var INK40 = "#11151a";
 var CLOTH = "#261a36";
 var FOLD = "#493253";
-var SHADOW = "#160f25";
+var SHADOW2 = "#160f25";
 var DEEP = "#090711";
 var GOLD6 = "#edbf43";
 var LIGHT8 = "#ffe094";
@@ -37202,19 +37669,19 @@ var BRASS2 = "#b07729";
 var RED2 = "#f05b4b";
 var VIOLET2 = "#b17be1";
 var MOLTEN = "#ee762b";
-var clamp38 = (x) => Math.max(0, Math.min(1, x));
+var clamp39 = (x) => Math.max(0, Math.min(1, x));
 var ease11 = (x) => {
-  x = clamp38(x);
+  x = clamp39(x);
   return x * x * (3 - 2 * x);
 };
-var mix21 = (a, b, p) => a + (b - a) * p;
+var mix22 = (a, b, p) => a + (b - a) * p;
 var point25 = (x, y) => ({ x, y });
 var unit9 = (x, y) => {
   const d = Math.hypot(x, y) || 1;
   return point25(x / d, y / d);
 };
 var rotate3 = (x, y, a) => point25(Math.cos(a) * x - Math.sin(a) * y, Math.sin(a) * x + Math.cos(a) * y);
-var progress6 = (row2, tick) => clamp38((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick));
+var progress6 = (row2, tick) => clamp39((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick));
 function hash17(value2) {
   let n = 2166136261;
   for (const ch of String(value2)) n = Math.imul(n ^ ch.charCodeAt(0), 16777619);
@@ -37224,7 +37691,7 @@ function fraction4(value2, max) {
   const a = asCombatAmount(value2 ?? 0), b = asCombatAmount(max ?? 1);
   if (a.n === "0" || b.n === "0") return 0;
   const head32 = (s) => Number(s.slice(0, 15)), exp = (s) => s.length - Math.min(15, s.length), p = exp(a.n) + exp(b.d) - exp(a.d) - exp(b.n);
-  return clamp38(head32(a.n) * head32(b.d) / (head32(a.d) * head32(b.n)) * 10 ** Math.max(-330, Math.min(330, p)));
+  return clamp39(head32(a.n) * head32(b.d) / (head32(a.d) * head32(b.n)) * 10 ** Math.max(-330, Math.min(330, p)));
 }
 function positive(value2) {
   return asCombatAmount(value2 ?? 0).n !== "0";
@@ -37395,19 +37862,19 @@ function coinFormation(actor2, pose, tick) {
     const row2 = { index: i, x: base.x, y: base.y, depth, r: 4.8, angle: 0.18 * Math.sin(tick * 0.045 + i * 0.9) + pose.rotation, flat: 0.7 + 0.23 * Math.abs(Math.cos(tick * 0.028 + i * 0.83)), alpha: 1 };
     if (pending) {
       const origin = pending.originPosition ?? actor2.position, target = point25(origin.x - actor2.position.x + Math.cos(heading) * 12, origin.y - actor2.position.y + Math.sin(heading) * 12 - 5);
-      row2.x = mix21(row2.x, target.x, settle);
-      row2.y = mix21(row2.y, target.y, settle);
-      row2.depth = mix21(depth, Math.sin(heading), settle);
-      row2.r = mix21(row2.r, 4.5, settle);
-      row2.angle = mix21(row2.angle, heading, align);
-      row2.flat = mix21(row2.flat, 0.44 + 0.38 * Math.abs(Math.cos(i)), settle);
+      row2.x = mix22(row2.x, target.x, settle);
+      row2.y = mix22(row2.y, target.y, settle);
+      row2.depth = mix22(depth, Math.sin(heading), settle);
+      row2.r = mix22(row2.r, 4.5, settle);
+      row2.angle = mix22(row2.angle, heading, align);
+      row2.flat = mix22(row2.flat, 0.44 + 0.38 * Math.abs(Math.cos(i)), settle);
     } else if (refilling) {
       const age = releaseAge - 24 - i * 3, u = ease11(age / 15);
       if (age <= 0) continue;
       const from = bodyOffset(pose, 0, -24);
-      row2.x = mix21(from.x, row2.x, u);
-      row2.y = mix21(from.y, row2.y, u) - Math.sin(Math.PI * u) * (6 + i % 3);
-      row2.depth = mix21(1, depth, ease11((u - 0.35) / 0.65));
+      row2.x = mix22(from.x, row2.x, u);
+      row2.y = mix22(from.y, row2.y, u) - Math.sin(Math.PI * u) * (6 + i % 3);
+      row2.depth = mix22(1, depth, ease11((u - 0.35) / 0.65));
       row2.r *= 0.25 + 0.75 * u;
       row2.alpha = ease11(age / 9);
     }
@@ -37445,7 +37912,7 @@ function cloak(c, pose, flash) {
     c.clip();
     polygon22(c, [[-29, 1], [-12, -4], [8, 4], [-1, 8], [-22, 8]], FOLD, false);
     polygon22(c, [[2, -4], [17, -7], [27, 4], [15, 9], [7, 3]], "#35243f", false);
-    polygon22(c, [[-14, 7], [2, 2], [18, 7], [12, 11], [-7, 11]], SHADOW, false);
+    polygon22(c, [[-14, 7], [2, 2], [18, 7], [12, 11], [-7, 11]], SHADOW2, false);
     c.restore();
     line6(c, [[-16, -2], [-1, 5], [13, 1]], "#110d1e", 0.8);
   }
@@ -37458,7 +37925,7 @@ function cloak(c, pose, flash) {
   c.lineTo(15, 2);
   c.quadraticCurveTo(3, 8, -16, 1);
   c.closePath();
-  c.fillStyle = fill4(SHADOW);
+  c.fillStyle = fill4(SHADOW2);
   c.fill();
   c.strokeStyle = INK40;
   c.lineWidth = 1.26;
@@ -37506,7 +37973,7 @@ function cloak(c, pose, flash) {
     c.closePath();
     c.fillStyle = FOLD;
     c.fill();
-    polygon22(c, [[7, -47], [14, -38], [11, -27], [4, -28], [6, -37]], SHADOW, false);
+    polygon22(c, [[7, -47], [14, -38], [11, -27], [4, -28], [6, -37]], SHADOW2, false);
     c.restore();
   }
   ellipse11(c, 0, -37, 6.7, 8.3, flash ? "#fff" : DEEP, true, 0.9);
@@ -37700,9 +38167,9 @@ function lasso(c, row2, tick, model2, pending) {
   const hit = row2.hitRecords?.[0], target = hit ? model2.entitiesById?.[hit.targetEntityId]?.position ?? hit.position : row2.targetPosition;
   c.save();
   if (pending) {
-    const cast = ease11((q - 0.57) / 0.43), coil = ease11(q / 0.45), end = point25(mix21(clasp.x, row2.targetPosition.x, cast), mix21(clasp.y, row2.targetPosition.y - 6, cast) - Math.sin(Math.PI * cast) * 26);
+    const cast = ease11((q - 0.57) / 0.43), coil = ease11(q / 0.45), end = point25(mix22(clasp.x, row2.targetPosition.x, cast), mix22(clasp.y, row2.targetPosition.y - 6, cast) - Math.sin(Math.PI * cast) * 26);
     rope(c, clasp, end, Math.sin(Math.PI * cast) * 15, 0.35 + 0.65 * coil);
-    ropeLoop(c, end, mix21(7, 19, cast) * coil, mix21(3, 9, cast) * coil, -0.22 + q * TAU49, coil);
+    ropeLoop(c, end, mix22(7, 19, cast) * coil, mix22(3, 9, cast) * coil, -0.22 + q * TAU49, coil);
     if (coil > 0.1) {
       c.save();
       c.globalAlpha *= coil * 0.5;
@@ -37721,7 +38188,7 @@ function lasso(c, row2, tick, model2, pending) {
       }
     }
   } else if (!hit) {
-    const fade = 1 - ease11(age / 24), reel = ease11(age / 24), to = point25(mix21(row2.targetPosition.x, clasp.x, reel), mix21(row2.targetPosition.y - 6, clasp.y, reel) + Math.sin(Math.PI * reel) * 10);
+    const fade = 1 - ease11(age / 24), reel = ease11(age / 24), to = point25(mix22(row2.targetPosition.x, clasp.x, reel), mix22(row2.targetPosition.y - 6, clasp.y, reel) + Math.sin(Math.PI * reel) * 10);
     rope(c, clasp, to, 16 * Math.sin(Math.PI * reel), fade);
     ropeLoop(c, to, 19 * (1 - reel) + 2, 9 * (1 - reel) + 1, reel * 0.8, fade);
   }
@@ -37779,7 +38246,7 @@ function dashEcho(c, row2, tick) {
     c.save();
     c.globalAlpha *= fade * 0.55;
     for (let j = 1; j <= 6; j++) {
-      const q = j / 7, x = mix21(p.x, to.x, q), y = mix21(p.y, to.y, q) - 5;
+      const q = j / 7, x = mix22(p.x, to.x, q), y = mix22(p.y, to.y, q) - 5;
       line6(c, [[x - 2, y], [x + 2, y]], j % 2 ? GOLD6 : MOLTEN, 0.9);
     }
     c.restore();
@@ -37818,7 +38285,7 @@ function siphon(c, row2, tick, model2) {
   for (const [kind, enabled, side] of [["gold", positive(last.goldAmount), -1], ["hp", positive(last.hpDrained), 1]]) {
     if (!enabled) continue;
     for (let i = 0; i < 4; i++) {
-      const delay = i * 1.25, q = clamp38((age - delay) / (14 - delay));
+      const delay = i * 1.25, q = clamp39((age - delay) / (14 - delay));
       if (age < delay || q >= 1) continue;
       const u = 1 - q, middle = point25((from.x + to.x) / 2 + side * 8, Math.min(from.y, to.y) - 14), x = u * u * from.x + 2 * u * q * middle.x + q * q * to.x, y = u * u * from.y + 2 * u * q * middle.y + q * q * to.y;
       c.save();
@@ -37862,7 +38329,7 @@ function payoutOrigin(row2) {
 }
 function payoutGround(c, row2, tick) {
   if (!positive(row2.amount) || tick < row2.createdTick || row2.collectedTick != null && tick >= row2.collectedTick) return;
-  const q = clamp38((tick - row2.createdTick) / Math.max(1, row2.landsTick - row2.createdTick)), p = point25(mix21(row2.originPosition.x, row2.position.x, q), mix21(row2.originPosition.y, row2.position.y, q));
+  const q = clamp39((tick - row2.createdTick) / Math.max(1, row2.landsTick - row2.createdTick)), p = point25(mix22(row2.originPosition.x, row2.position.x, q), mix22(row2.originPosition.y, row2.position.y, q));
   c.save();
   c.globalAlpha *= 0.25 + 0.75 * q;
   ellipse11(c, p.x, p.y + 2, 10 + q * 3, 3 + q * 0.7, "#33200d52");
@@ -37881,7 +38348,7 @@ function payout(c, row2, tick) {
     }
     const to = point25(row2.collectionPosition.x, row2.collectionPosition.y - 14);
     for (let i = 0; i < count; i++) {
-      const s = payoutSlot(i, count, seed2), delay = i % 6 * 1.1, q = clamp38((age - delay) / (22 - delay)), u = 1 - q, from = point25(row2.position.x + s.x, row2.position.y + s.y), middle = point25(mix21(from.x, to.x, 0.48), Math.min(from.y, to.y) - 17 - i % 3 * 3);
+      const s = payoutSlot(i, count, seed2), delay = i % 6 * 1.1, q = clamp39((age - delay) / (22 - delay)), u = 1 - q, from = point25(row2.position.x + s.x, row2.position.y + s.y), middle = point25(mix22(from.x, to.x, 0.48), Math.min(from.y, to.y) - 17 - i % 3 * 3);
       if (q >= 1) continue;
       const x = u * u * from.x + 2 * u * q * middle.x + q * q * to.x, y = u * u * from.y + 2 * u * q * middle.y + q * q * to.y;
       c.save();
@@ -37890,7 +38357,7 @@ function payout(c, row2, tick) {
       c.restore();
     }
     if (age >= 10) {
-      const q = clamp38((age - 10) / 20);
+      const q = clamp39((age - 10) / 20);
       c.save();
       c.globalAlpha *= 1 - ease11(q);
       for (let i = 0; i < 4; i++) {
@@ -37909,7 +38376,7 @@ function payout(c, row2, tick) {
       c.restore();
     }
   } else if (tick < row2.landsTick) {
-    const age = tick - row2.createdTick, q = clamp38(age / Math.max(1, row2.landsTick - row2.createdTick)), from = payoutOrigin(row2), to = row2.position, d = unit9(to.x - row2.originPosition.x, to.y - row2.originPosition.y), n = point25(-d.y, d.x), arc3 = Math.sin(Math.PI * q), travel = 1 - Math.pow(1 - q, 1.18), coins = [];
+    const age = tick - row2.createdTick, q = clamp39(age / Math.max(1, row2.landsTick - row2.createdTick)), from = payoutOrigin(row2), to = row2.position, d = unit9(to.x - row2.originPosition.x, to.y - row2.originPosition.y), n = point25(-d.y, d.x), arc3 = Math.sin(Math.PI * q), travel = 1 - Math.pow(1 - q, 1.18), coins = [];
     if (age < 6) {
       c.save();
       c.globalAlpha *= 1 - ease11(age / 6);
@@ -37918,10 +38385,10 @@ function payout(c, row2, tick) {
     }
     for (let i = 0; i < count; i++) {
       const s = payoutSlot(i, count, seed2), fan = count === 1 ? 0 : (i / (count - 1) - 0.5) * 31 * arc3;
-      coins.push({ x: mix21(from.x, to.x + s.x, travel) + n.x * fan, y: mix21(from.y, to.y + s.y, travel) + n.y * fan * 0.6 - arc3 * (10 + i % 5 * 4), s, i });
+      coins.push({ x: mix22(from.x, to.x + s.x, travel) + n.x * fan, y: mix22(from.y, to.y + s.y, travel) + n.y * fan * 0.6 - arc3 * (10 + i % 5 * 4), s, i });
     }
     coins.sort((a, b) => a.y - b.y);
-    for (const { x, y, s, i } of coins) coin2(c, x, y, s.r, s.a + TAU49 * (1 - q) * (1 + i % 2), mix21(0.26 + Math.abs(Math.cos(q * TAU49 * 1.4 + i)) * 0.53, s.flat, ease11((q - 0.65) / 0.35)));
+    for (const { x, y, s, i } of coins) coin2(c, x, y, s.r, s.a + TAU49 * (1 - q) * (1 + i % 2), mix22(0.26 + Math.abs(Math.cos(q * TAU49 * 1.4 + i)) * 0.53, s.flat, ease11((q - 0.65) / 0.35)));
   } else {
     const age = tick - row2.landsTick, bounce = age < 8 ? Math.sin(Math.PI * age / 8) * (1 - age / 8) * 2 : 0;
     c.translate(row2.position.x, row2.position.y - bounce);
@@ -37982,7 +38449,7 @@ function marcusDepthItems(model2, tick, viewport = null) {
     if (!positive(row2.amount) || tick < row2.createdTick || row2.collectedTick != null && tick - row2.collectedTick >= 30) continue;
     const collected = row2.collectedTick != null && tick >= row2.collectedTick, airborne = !collected && tick < row2.landsTick, from = collected ? row2.position : row2.originPosition, to = collected ? row2.collectionPosition : row2.position;
     if (!to) continue;
-    const q = airborne ? clamp38((tick - row2.createdTick) / Math.max(1, row2.landsTick - row2.createdTick)) : 1, anchor = airborne ? point25(mix21(from.x, to.x, q), Math.max(from.y, mix21(from.y, to.y, q))) : collected ? point25((from.x + to.x) / 2, Math.max(from.y, to.y)) : to;
+    const q = airborne ? clamp39((tick - row2.createdTick) / Math.max(1, row2.landsTick - row2.createdTick)) : 1, anchor = airborne ? point25(mix22(from.x, to.x, q), Math.max(from.y, mix22(from.y, to.y, q))) : collected ? point25((from.x + to.x) / 2, Math.max(from.y, to.y)) : to;
     add("return/" + row2.id, anchor, airborne || collected ? Math.hypot(to.x - from.x, to.y - from.y) + 85 : 25, 2, (c) => payout(c, row2, tick));
   }
   return items;
@@ -38002,19 +38469,19 @@ var WOOD_LIGHT = "#946039";
 var WOOD_DARK = "#402b24";
 var IRON = "#37343c";
 var RUBY = "#e33a66";
-var clamp39 = (x) => Math.max(0, Math.min(1, x));
+var clamp40 = (x) => Math.max(0, Math.min(1, x));
 var ease12 = (x) => {
-  x = clamp39(x);
+  x = clamp40(x);
   return x * x * (3 - 2 * x);
 };
-var mix22 = (a, b, p) => a + (b - a) * p;
+var mix23 = (a, b, p) => a + (b - a) * p;
 var point26 = (x, y) => ({ x, y });
 var unit10 = (x, y) => {
   const d = Math.hypot(x, y) || 1;
   return point26(x / d, y / d);
 };
 var rotate4 = (x, y, a) => point26(Math.cos(a) * x - Math.sin(a) * y, Math.sin(a) * x + Math.cos(a) * y);
-var progress7 = (row2, tick) => clamp39((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick));
+var progress7 = (row2, tick) => clamp40((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick));
 var color26 = (flash, value2) => flash ? "#fff" : value2;
 function hash18(value2) {
   let n = 2166136261;
@@ -38025,7 +38492,7 @@ function fraction5(value2, max) {
   const a = asCombatAmount(value2 ?? 0), b = asCombatAmount(max ?? 1);
   if (a.n === "0" || b.n === "0") return 0;
   const head32 = (s) => Number(s.slice(0, 15)), exp = (s) => s.length - Math.min(15, s.length), power = exp(a.n) + exp(b.d) - exp(a.d) - exp(b.n);
-  return clamp39(head32(a.n) * head32(b.d) / (head32(a.d) * head32(b.n)) * 10 ** Math.max(-330, Math.min(330, power)));
+  return clamp40(head32(a.n) * head32(b.d) / (head32(a.d) * head32(b.n)) * 10 ** Math.max(-330, Math.min(330, power)));
 }
 function positive2(value2) {
   return asCombatAmount(value2 ?? 0).n !== "0";
@@ -38090,8 +38557,8 @@ function gildedAttackPose(actor2, tick) {
   if (taxOwns) {
     const held = ease12(((tax.outcome === "channeling" ? tick : tax.resolvedTick) - tax.startedTick) / 14), weight2 = held * (tax.outcome === "channeling" ? 1 : 1 - ease12(taxAge / 30));
     pose.bodyY -= 4 * weight2;
-    pose.jaw = mix22(pose.jaw, 0.88, weight2);
-    pose.wing = mix22(pose.wing, -0.47, weight2);
+    pose.jaw = mix23(pose.jaw, 0.88, weight2);
+    pose.wing = mix23(pose.wing, -0.47, weight2);
     pose.armLift = -3 * weight2;
     pose.armFold = 0.8 * weight2;
     pose.charge = 0.85 * weight2;
@@ -38123,16 +38590,16 @@ function gildedAttackPose(actor2, tick) {
     pose.rotation += d.x * (-0.05 * coil + 0.09 * drive);
     pose.wing += -0.46 * coil + 0.76 * drive;
     pose.armLift = -22 * coil + 42 * drive;
-    pose.jaw = mix22(pose.jaw, 0.7, coil) * (1 - 0.82 * drive);
+    pose.jaw = mix23(pose.jaw, 0.7, coil) * (1 - 0.82 * drive);
     pose.charge = coil;
   } else if (recent?.ability === "vault_crush") {
-    const amount2 = 1 - ease12(age / 36), settle = Math.sin(Math.PI * clamp39(age / 13));
+    const amount2 = 1 - ease12(age / 36), settle = Math.sin(Math.PI * clamp40(age / 13));
     pose.bodyX = d.x * 3 * amount2;
     pose.bodyY += 7 * amount2 + 2 * settle;
     pose.rotation += d.x * 0.04 * amount2;
     pose.wing += 0.3 * amount2;
     pose.armLift = 20 * amount2;
-    pose.jaw = mix22(pose.jaw, 0.126, amount2);
+    pose.jaw = mix23(pose.jaw, 0.126, amount2);
     pose.charge = amount2;
     pose.release = 1 - ease12(age / 12);
   } else if (pending?.ability === "gold_fall") {
@@ -38141,7 +38608,7 @@ function gildedAttackPose(actor2, tick) {
     pose.wing -= 0.27 * coil;
     pose.armLift = -18 * coil + 5 * release;
     pose.armFold = -0.35 * coil;
-    pose.jaw = mix22(pose.jaw, 0.96, coil);
+    pose.jaw = mix23(pose.jaw, 0.96, coil);
     pose.charge = coil;
   } else if (recent?.ability === "gold_fall") {
     const amount2 = 1 - ease12(age / 34);
@@ -38149,7 +38616,7 @@ function gildedAttackPose(actor2, tick) {
     pose.wing -= 0.27 * amount2;
     pose.armLift = -13 * amount2;
     pose.armFold = -0.35 * amount2;
-    pose.jaw = mix22(pose.jaw, 0.96, amount2);
+    pose.jaw = mix23(pose.jaw, 0.96, amount2);
     pose.charge = amount2;
     pose.release = 1 - ease12(age / 12);
   } else if (recent?.ability === "strike" && age < 26) {
@@ -38157,7 +38624,7 @@ function gildedAttackPose(actor2, tick) {
     pose.bodyX = d.x * 7 * amount2;
     pose.bodyY += d.y * 8 * amount2;
     pose.rotation += d.x * 0.07 * amount2;
-    pose.jaw = mix22(pose.jaw, 0.05, amount2);
+    pose.jaw = mix23(pose.jaw, 0.05, amount2);
     pose.strike = amount2;
     pose.charge = 0.4 * amount2;
   }
@@ -38206,8 +38673,8 @@ function armGeometry(side, pose) {
   const root = point26(side * 25, 4), idle2 = point26(side * (32 - 11 * pose.armFold), 24 + pose.armLift), hand3 = { ...idle2 };
   if (side === pose.strikeSide && pose.strike > 0) {
     const vx = pose.aim.x - pose.actorX - pose.bodyX, vy = pose.aim.y - pose.actorY - 17 - pose.bodyY, u = rotate4(vx, vy, -pose.rotation), d = unit10(u.x - root.x, u.y - root.y);
-    hand3.x = mix22(hand3.x, u.x - d.x * 10, pose.strike);
-    hand3.y = mix22(hand3.y, u.y - d.y * 10, pose.strike);
+    hand3.x = mix23(hand3.x, u.x - d.x * 10, pose.strike);
+    hand3.y = mix23(hand3.y, u.y - d.y * 10, pose.strike);
   }
   const dx = hand3.x - root.x, dy = hand3.y - root.y, length = Math.hypot(dx, dy) || 1, bend = Math.max(4, Math.min(11, 19 - length * 0.18));
   const elbow22 = point26(root.x + dx * 0.45 + side * bend, root.y + dy * 0.45 - 3);
@@ -38443,7 +38910,7 @@ function drawGildedGround(c, model2, tick) {
 function stamp(c, row2, tick, pending) {
   const p = row2.position ?? row2.targetPosition, age = pending ? 0 : tick - row2.resolvedTick, q = pending ? progress7(row2, tick) : 1;
   if (!pending && (age < 0 || age >= 34)) return;
-  const build = ease12((q - 0.08) / 0.5), drop = ease12((q - 0.8) / 0.2), height = pending ? 58 * build * (1 - drop) : 0, fade = pending ? build : 1 - ease12((age - 7) / 27), ry = 12 * (pending ? 1 : 1 - 0.35 * Math.sin(Math.PI * clamp39(age / 10)));
+  const build = ease12((q - 0.08) / 0.5), drop = ease12((q - 0.8) / 0.2), height = pending ? 58 * build * (1 - drop) : 0, fade = pending ? build : 1 - ease12((age - 7) / 27), ry = 12 * (pending ? 1 : 1 - 0.35 * Math.sin(Math.PI * clamp40(age / 10)));
   if (fade <= 0) return;
   c.save();
   c.globalAlpha *= fade;
@@ -38483,7 +38950,7 @@ function fallingGold(c, row2, index, tick, pending) {
   if (fade <= 0) return;
   c.save();
   c.globalAlpha *= fade;
-  goldIngot(c, p.x, p.y - height - 4, build * (pending ? 1 : 1 - 0.08 * Math.sin(Math.PI * clamp39(age / 8))), -0.12 + index * 0.15);
+  goldIngot(c, p.x, p.y - height - 4, build * (pending ? 1 : 1 - 0.08 * Math.sin(Math.PI * clamp40(age / 8))), -0.12 + index * 0.15);
   if (pending && drop > 0) {
     c.save();
     c.globalAlpha *= drop * 0.45;
@@ -38501,7 +38968,7 @@ function wardSegments() {
   const result = [];
   for (let i = 0; i < WARD.length; i++) {
     const a = WARD[i], b = WARD[(i + 1) % WARD.length], parts = Math.hypot(b[0] - a[0], b[1] - a[1]) > 60 ? 2 : 1;
-    for (let j = 0; j < parts; j++) result.push([[mix22(a[0], b[0], j / parts), mix22(a[1], b[1], j / parts)], [mix22(a[0], b[0], (j + 1) / parts), mix22(a[1], b[1], (j + 1) / parts)]]);
+    for (let j = 0; j < parts; j++) result.push([[mix23(a[0], b[0], j / parts), mix23(a[1], b[1], j / parts)], [mix23(a[0], b[0], (j + 1) / parts), mix23(a[1], b[1], (j + 1) / parts)]]);
   }
   return result;
 }
@@ -38526,9 +38993,9 @@ function taxWard(c, row2, tick, model2) {
     c.stroke();
     c.restore();
     for (const [i, [a, b]] of WARD_SEGMENTS.entries()) {
-      const health = clamp39(ratio * WARD_SEGMENTS.length - i);
+      const health = clamp40(ratio * WARD_SEGMENTS.length - i);
       if (health <= 0) continue;
-      const from = [mix22(a[0], b[0], 0.05), mix22(a[1], b[1], 0.05)], to = [mix22(a[0], b[0], 0.05 + 0.9 * health), mix22(a[1], b[1], 0.05 + 0.9 * health)];
+      const from = [mix23(a[0], b[0], 0.05), mix23(a[1], b[1], 0.05)], to = [mix23(a[0], b[0], 0.05 + 0.9 * health), mix23(a[1], b[1], 0.05 + 0.9 * health)];
       line7(c, [from, to], INK41, 5.6);
       line7(c, [from, to], BRASS3, 3.1);
       line7(c, [[from[0] - 0.6, from[1] - 0.7], [to[0] - 0.6, to[1] - 0.7]], LIGHT9, 1.05);
@@ -38574,7 +39041,7 @@ function taxWard(c, row2, tick, model2) {
 function siphon2(c, row2, tick, model2) {
   const last = row2.lastSiphon;
   if (!last || !positive2(last.amount) || tick < last.tick || tick - last.tick >= 24 || !row2.targetPosition) return;
-  const { p, pose } = taxPose(row2, model2, tick), gap = 6 + 22 * pose.jaw, mouth22 = rotate4(0, -gap * 0.48, pose.rotation), to = point26(p.x + pose.bodyX + mouth22.x, p.y + pose.bodyY + mouth22.y), from = point26(row2.targetPosition.x, row2.targetPosition.y - 12), middle = point26(mix22(from.x, to.x, 0.48), Math.min(from.y, to.y) - 24);
+  const { p, pose } = taxPose(row2, model2, tick), gap = 6 + 22 * pose.jaw, mouth22 = rotate4(0, -gap * 0.48, pose.rotation), to = point26(p.x + pose.bodyX + mouth22.x, p.y + pose.bodyY + mouth22.y), from = point26(row2.targetPosition.x, row2.targetPosition.y - 12), middle = point26(mix23(from.x, to.x, 0.48), Math.min(from.y, to.y) - 24);
   const base = last.tick - (last.tick - row2.startedTick) % 3, budget = Math.min(8, Math.ceil(boundedAmount(row2.stolen, 240) / 30));
   c.save();
   for (let i = 0; i < budget; i++) {
@@ -38603,7 +39070,7 @@ function payoutSlot2(index, count, seed2) {
 }
 function payoutGround2(c, row2, tick) {
   if (!positive2(row2.amount) || tick < row2.createdTick || row2.collectedTick != null && tick >= row2.collectedTick) return;
-  const q = clamp39((tick - row2.createdTick) / Math.max(1, row2.landsTick - row2.createdTick)), p = point26(mix22(row2.originPosition.x, row2.position.x, q), mix22(row2.originPosition.y, row2.position.y, q));
+  const q = clamp40((tick - row2.createdTick) / Math.max(1, row2.landsTick - row2.createdTick)), p = point26(mix23(row2.originPosition.x, row2.position.x, q), mix23(row2.originPosition.y, row2.position.y, q));
   c.save();
   c.globalAlpha *= 0.25 + 0.75 * q;
   ellipse12(c, p.x, p.y + 2, 10 + q * 3, 3 + q * 0.7, "#33200d52");
@@ -38636,7 +39103,7 @@ function payoutPile(c, row2, tick) {
   c.restore();
 }
 function payoutFan(c, row2, tick) {
-  const age = tick - row2.createdTick, q = clamp39(age / Math.max(1, row2.landsTick - row2.createdTick)), from = payoutOrigin2(row2), to = row2.position, count = payoutCount2(row2), seed2 = hash18(row2.id);
+  const age = tick - row2.createdTick, q = clamp40(age / Math.max(1, row2.landsTick - row2.createdTick)), from = payoutOrigin2(row2), to = row2.position, count = payoutCount2(row2), seed2 = hash18(row2.id);
   const d = unit10(to.x - row2.originPosition.x, to.y - row2.originPosition.y), n = point26(-d.y, d.x), arc3 = Math.sin(Math.PI * q), travel = 1 - Math.pow(1 - q, 1.18);
   c.save();
   if (age < 6) {
@@ -38649,12 +39116,12 @@ function payoutFan(c, row2, tick) {
   const coins = [];
   for (let i = 0; i < count; i++) {
     const s = payoutSlot2(i, count, seed2), fan = count === 1 ? 0 : (i / (count - 1) - 0.5) * 31 * arc3;
-    const x = mix22(from.x, to.x + s.x, travel) + n.x * fan, y = mix22(from.y, to.y + s.y, travel) + n.y * fan * 0.6 - arc3 * (10 + i % 5 * 4);
+    const x = mix23(from.x, to.x + s.x, travel) + n.x * fan, y = mix23(from.y, to.y + s.y, travel) + n.y * fan * 0.6 - arc3 * (10 + i % 5 * 4);
     coins.push({ x, y, s, i });
   }
   coins.sort((a, b) => a.y - b.y);
   for (const { x, y, s, i } of coins) {
-    const settle = ease12((q - 0.65) / 0.35), ry = mix22(0.8 + Math.abs(Math.cos(q * TAU50 * 1.4 + i)) * (s.ry + 0.45), s.ry, settle);
+    const settle = ease12((q - 0.65) / 0.35), ry = mix23(0.8 + Math.abs(Math.cos(q * TAU50 * 1.4 + i)) * (s.ry + 0.45), s.ry, settle);
     coin3(c, x, y, s.rx, ry, s.angle + TAU50 * (1 - q) * (1 + i % 2));
   }
   c.restore();
@@ -38665,7 +39132,7 @@ function payoutPickup(c, row2, tick) {
   const count = payoutCount2(row2), seed2 = hash18(row2.id), to = point26(row2.collectionPosition.x, row2.collectionPosition.y - 14);
   c.save();
   for (let i = 0; i < count; i++) {
-    const s = payoutSlot2(i, count, seed2), delay = i % 6 * 1.1, q = clamp39((age - delay) / (22 - delay)), u = 1 - q, from = point26(row2.position.x + s.x, row2.position.y + s.y), middle = point26(mix22(from.x, to.x, 0.48), Math.min(from.y, to.y) - 17 - i % 3 * 3);
+    const s = payoutSlot2(i, count, seed2), delay = i % 6 * 1.1, q = clamp40((age - delay) / (22 - delay)), u = 1 - q, from = point26(row2.position.x + s.x, row2.position.y + s.y), middle = point26(mix23(from.x, to.x, 0.48), Math.min(from.y, to.y) - 17 - i % 3 * 3);
     if (q >= 1) continue;
     const x = u * u * from.x + 2 * u * q * middle.x + q * q * to.x, y = u * u * from.y + 2 * u * q * middle.y + q * q * to.y;
     c.save();
@@ -38678,7 +39145,7 @@ function payoutPickup(c, row2, tick) {
     c.restore();
   }
   if (age >= 10) {
-    const pop = clamp39((age - 10) / 20), alpha = 1 - ease12(pop);
+    const pop = clamp40((age - 10) / 20), alpha = 1 - ease12(pop);
     c.save();
     c.globalAlpha *= alpha;
     for (let i = 0; i < 4; i++) {
@@ -38749,7 +39216,7 @@ function gildedDepthItems(model2, tick, viewport = null) {
     const collected = row2.collectedTick != null && tick >= row2.collectedTick, airborne = !collected && tick < row2.landsTick;
     const from = collected ? row2.position : row2.originPosition, to = collected ? row2.collectionPosition : row2.position;
     if (!to) continue;
-    const q = airborne ? clamp39((tick - row2.createdTick) / Math.max(1, row2.landsTick - row2.createdTick)) : 1, anchor = airborne ? point26(mix22(from.x, to.x, q), Math.max(from.y, mix22(from.y, to.y, q))) : collected ? point26((from.x + to.x) / 2, Math.max(from.y, to.y)) : to;
+    const q = airborne ? clamp40((tick - row2.createdTick) / Math.max(1, row2.landsTick - row2.createdTick)) : 1, anchor = airborne ? point26(mix23(from.x, to.x, q), Math.max(from.y, mix23(from.y, to.y, q))) : collected ? point26((from.x + to.x) / 2, Math.max(from.y, to.y)) : to;
     add("return/" + row2.id, anchor, airborne || collected ? Math.hypot(to.x - from.x, to.y - from.y) + 85 : 25, 2, (c) => payout2(c, row2, tick));
   }
   return items;
@@ -39565,7 +40032,7 @@ function createBrimstoneEruptionPresentation() {
 function brimstoneEruptionEnvelope(v, tick, distance8 = 0) {
   const duration = (v.presentationUntilTick ?? v.expiresTick ?? v.detonatesTick + 18) - v.detonatesTick, age = tick - v.detonatesTick;
   if (age < 0 || age >= duration) return { height: 0, opacity: 0, age, localAge: -1 };
-  const delay = clamp40(distance8 / 96) * Math.min(10, duration * 0.23), localAge = age - delay;
+  const delay = clamp41(distance8 / 96) * Math.min(10, duration * 0.23), localAge = age - delay;
   if (localAge <= 0) return { height: 0, opacity: 0, age, localAge };
   const rise = ease14(localAge / Math.min(6, duration * 0.25));
   const fall = 1 - ease14((localAge - duration * 0.27) / (duration * 0.46));
@@ -39580,10 +40047,10 @@ var RUST = "#a04f35";
 var LAVA = "#f6662c";
 var GOLD8 = "#ffbd53";
 var WHITE = "#fff0b0";
-var clamp40 = (v) => Math.max(0, Math.min(1, v));
+var clamp41 = (v) => Math.max(0, Math.min(1, v));
 var lerp5 = (a, b, p) => a + (b - a) * p;
 var ease14 = (p) => {
-  p = clamp40(p);
+  p = clamp41(p);
   return p * p * (3 - 2 * p);
 };
 var hash19 = (s) => {
@@ -39622,7 +40089,7 @@ function line9(c, points2, color28, width) {
   c.stroke();
 }
 function brimstoneAttackPose(b, tick) {
-  const action2 = b.pendingAction, ability = action2?.ability, p = action2 ? clamp40((tick - action2.startedTick) / Math.max(1, action2.resolvesTick - action2.startedTick)) : 0;
+  const action2 = b.pendingAction, ability = action2?.ability, p = action2 ? clamp41((tick - action2.startedTick) / Math.max(1, action2.resolvesTick - action2.startedTick)) : 0;
   const last = b.lastAction, age = last ? tick - last.resolvedTick : 999, side = Math.cos(b.facingAngle ?? Math.PI / 2) >= 0 ? 1 : -1, hands = {};
   let drop = 0, heat = 0, strikeSide = 0;
   if (ability === "slam") {
@@ -39814,7 +40281,7 @@ function brimstoneSlams(model, tick) {
   return rows;
 }
 function slamGround4(c, s, tick) {
-  const age = tick - s.resolvedTick, p = clamp40(age / 42), burst = clamp40(age / 10), fade = 1 - ease14((age - 15) / 27), pos = s.targetPosition;
+  const age = tick - s.resolvedTick, p = clamp41(age / 42), burst = clamp41(age / 10), fade = 1 - ease14((age - 15) / 27), pos = s.targetPosition;
   c.save();
   c.translate(pos.x, pos.y);
   circlePath(c, { x: 0, y: 0 }, 64);
@@ -39826,7 +40293,7 @@ function slamGround4(c, s, tick) {
   }), "#30242b9a", null);
   disc(c, 0, 0, 55 * (1 - burst * 0.45), "#ff923b" + (age < 4 ? "7a" : "28"));
   spokes(c, 17, 62, 1);
-  c.globalAlpha = fade * (1 - clamp40(age / 21));
+  c.globalAlpha = fade * (1 - clamp41(age / 21));
   c.strokeStyle = GOLD8;
   c.lineWidth = 4 * (1 - burst) + 1;
   c.beginPath();
@@ -39838,7 +40305,7 @@ function drawBrimstoneAttackGround(c, model, tick) {
   c.save();
   const h = model.bossHazards ?? {};
   for (const t of h.brimstoneTelegraphs ?? []) {
-    const q = clamp40((tick - t.startedTick) / Math.max(1, t.resolvesTick - t.startedTick));
+    const q = clamp41((tick - t.startedTick) / Math.max(1, t.resolvesTick - t.startedTick));
     if (t.ability === "slam") moltenTarget(c, t.position, 64, q, hash19(t.bossId));
     else if (t.ability === "strike") {
       c.save();
@@ -39862,7 +40329,7 @@ function drawBrimstoneAttackGround(c, model, tick) {
       c.restore();
     } else for (const p of t.ventTargets) moltenTarget(c, p, 18, q, hash19(t.bossId));
   }
-  for (const v of h.brimstoneVents ?? []) ventFissure(c, v, clamp40((tick - v.createdTick) / 270), v.stage === "erupting", tick);
+  for (const v of h.brimstoneVents ?? []) ventFissure(c, v, clamp41((tick - v.createdTick) / 270), v.stage === "erupting", tick);
   for (const s of brimstoneSlams(model, tick)) slamGround4(c, s, tick);
   c.restore();
 }
@@ -39907,7 +40374,7 @@ function lavaJet(c, p, height, width, age, seed2, opacity = 1) {
   c.restore();
 }
 function ember(c, p, seed2, age, life = 30) {
-  const q = clamp40(age / life), a = seed2 * 2.39996, x = p.x + Math.cos(a) * (7 + q * 25), y = p.y - Math.sin(q * Math.PI) * (17 + seed2 % 4 * 6) - q * 8, r = 1.5 + seed2 % 3 * 0.25;
+  const q = clamp41(age / life), a = seed2 * 2.39996, x = p.x + Math.cos(a) * (7 + q * 25), y = p.y - Math.sin(q * Math.PI) * (17 + seed2 % 4 * 6) - q * 8, r = 1.5 + seed2 % 3 * 0.25;
   c.save();
   c.globalAlpha *= Math.sin(q * Math.PI);
   polygon24(c, [[x - r, y], [x, y - r * 2], [x + r, y], [x, y + r]], seed2 % 2 ? GOLD8 : LAVA, null);
@@ -39921,7 +40388,7 @@ function brimstoneEffectDepthItems(model, tick, viewport = null) {
   for (const v of model.bossHazards?.brimstoneVents ?? []) {
     const seed2 = hash19(v.id);
     if (v.stage !== "erupting") {
-      const q = clamp40((tick - v.createdTick) / 270);
+      const q = clamp41((tick - v.createdTick) / 270);
       add(v.id + "/boil", v.position, (c) => {
         c.save();
         lavaJet(c, { x: v.position.x, y: v.position.y - 2 }, 9 + q * 13, 5 + q * 2, tick, seed2);
@@ -39956,7 +40423,7 @@ function brimstoneEffectDepthItems(model, tick, viewport = null) {
   }
   for (const s of brimstoneSlams(model, tick)) {
     const age = tick - s.resolvedTick, p = s.targetPosition, key2 = "slam/" + s.resolvedTick + "/" + p.x + "/" + p.y;
-    if (age < 18) add(key2 + "/core", p, (c) => lavaJet(c, p, (1 - ease14((age - 5) / 13)) * 58, 22, age, 3, 1 - clamp40((age - 12) / 6)));
+    if (age < 18) add(key2 + "/core", p, (c) => lavaJet(c, p, (1 - ease14((age - 5) / 13)) * 58, 22, age, 3, 1 - clamp41((age - 12) / 6)));
     if (age < 30) for (let i = 0; i < 10; i++) {
       const q = age / 30, a = i * TAU52 / 10 + 0.2, r = 9 + q * (29 + i % 3 * 7), contact = { x: p.x + Math.cos(a) * r, y: p.y + Math.sin(a) * r }, lift = Math.sin(q * Math.PI) * (29 + i % 3 * 9), size = (3 + i % 3 * 0.8) * (1 - q * 0.45);
       add(key2 + "/shard/" + i, contact, (c) => {
@@ -40010,7 +40477,7 @@ var SHADE = "#292c37";
 var DEEP2 = "#1c2029";
 var ORANGE = "#f56829";
 var HOT3 = "#ffcb61";
-var clamp41 = (v) => Math.max(0, Math.min(1, v));
+var clamp42 = (v) => Math.max(0, Math.min(1, v));
 function poly3(c, p, fill4, edge = true) {
   c.beginPath();
   c.moveTo(...p[0]);
@@ -40189,7 +40656,7 @@ function drawBrimstoneBossHud(c, canvas, model) {
   const a = Object.values(model.entitiesById).find((a2) => a2.alive && a2.boss?.bossDefinitionId === BRIMSTONE_ID);
   if (!a) return false;
   const b = a.boss, w = Math.min(480, canvas.width - 24), x = (canvas.width - w) / 2, y = 10;
-  const ratio = a.hp && typeof a.hp.m === "number" && typeof a.maxHp?.m === "number" ? clamp41(a.hp.m / a.maxHp.m) : clamp41(presentCombat(a.hp) / Math.max(1, presentCombat(a.maxHp)));
+  const ratio = a.hp && typeof a.hp.m === "number" && typeof a.maxHp?.m === "number" ? clamp42(a.hp.m / a.maxHp.m) : clamp42(presentCombat(a.hp) / Math.max(1, presentCombat(a.maxHp)));
   c.save();
   c.fillStyle = "#15151fed";
   c.strokeStyle = "#cc8b4e";
@@ -40217,13 +40684,13 @@ function drawBrimstoneBossHud(c, canvas, model) {
 // src/client/ordinary_hostile_projectile_presentation.js
 var ORDINARY_HOSTILE_PROJECTILE_IMPACT_MS = 190;
 var TAU54 = Math.PI * 2;
-var clamp42 = (v, a, b) => Math.max(a, Math.min(b, v));
+var clamp43 = (v, a, b) => Math.max(a, Math.min(b, v));
 var styles = /* @__PURE__ */ new Set(["thorn", "frost", "fireball", "maelstrom", "void", "clockwork"]);
 function ordinaryHostileProjectilePose(projectile2, presentationTick) {
   const direction3 = projectile2.direction ?? { x: 1, y: 0 }, length = Math.hypot(direction3.x, direction3.y);
   const unit11 = length > 1e-3 ? { x: direction3.x / length, y: direction3.y / length } : { x: 1, y: 0 };
   const age = Number.isFinite(projectile2.firedTick) ? Math.max(0, presentationTick - projectile2.firedTick) : 3;
-  const radius = clamp42(Number.isFinite(projectile2.radius) ? projectile2.radius : 6, 2, 8);
+  const radius = clamp43(Number.isFinite(projectile2.radius) ? projectile2.radius : 6, 2, 8);
   return {
     position: { x: projectile2.position.x, y: projectile2.position.y - 8 },
     direction: unit11,
@@ -43915,219 +44382,6 @@ function createInteriorLightClips() {
   return Object.freeze({ pathFor, clear: clear2, resources: () => ({ lightFixedClips: fixed.size, lightPlayerClips: moving ? 1 : 0, lightClipBuilds: builds, lightPlayerClipBuilds: movingBuilds, lightWorstClipMs: worstMs, lightMaxClipRays: maxRays }) });
 }
 
-// src/client/day_night_lighting_v1.js
-var DAY_NIGHT_LIGHTING_VERSION = "day-night-lighting-v1";
-var DAY_NIGHT_LIMITS = Object.freeze({ descriptorPages: 4, descriptorCasters: 512, visibleCasters: 160, actorCasters: 64, maximumShadowPixels: 160, outdoorLightRays: 128, outdoorLightBlockers: 64, outdoorLightRadius: 208 });
-var clamp43 = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
-var mix23 = (a, b, t) => a + (b - a) * t;
-var interior = (space) => Boolean(space.site || space.functionalSite || space.settlementInterior);
-function lightingFrameV1(model, review = null) {
-  const override = review?.getOverrideMinute?.(), clock = Number.isFinite(override) ? worldTimeAtMinute(override) : model.worldTime ?? worldTimeAtTick(model.tick ?? 0), enabled = review?.enabled?.() !== false, minute = clock.minuteOfDay;
-  const room = interior(model.space), tavern = Boolean(model.space.settlementInterior);
-  let ambient, shadowAlpha = 0, vector2 = { x: 0, y: 0 };
-  const underground = ["woodland-cave", "procedural-crypt"].includes((model.space.site ?? model.space.functionalSite)?.siteKind);
-  if (room) ambient = tavern ? [190, 185, 175] : underground ? [100, 106, 124] : [132, 138, 154];
-  else {
-    const dawn = clamp43((minute - 300) / 120), dusk = clamp43((minute - 1140) / 120), night = [96, 112, 145], day = [255, 255, 255], warm = [237, 210, 190];
-    if (minute < 300 || minute >= 1260) ambient = night;
-    else if (minute < 420) {
-      const a = dawn < 0.5 ? night : warm, b = dawn < 0.5 ? warm : day, t = dawn < 0.5 ? dawn * 2 : (dawn - 0.5) * 2;
-      ambient = a.map((v, i) => mix23(v, b[i], t));
-    } else if (minute < 1140) ambient = day;
-    else {
-      const a = dusk < 0.5 ? day : warm, b = dusk < 0.5 ? warm : night, t = dusk < 0.5 ? dusk * 2 : (dusk - 0.5) * 2;
-      ambient = a.map((v, i) => mix23(v, b[i], t));
-    }
-    const sun = minute >= 300 && minute < 1260, progress8 = sun ? (minute - 300) / 960 : (minute - 1260 + 1440) % 1440 / 480, elevation = Math.sin(Math.PI * clamp43(progress8)), length = clamp43(34 + 116 * (1 - elevation), 24, DAY_NIGHT_LIMITS.maximumShadowPixels);
-    vector2 = { x: -Math.cos(Math.PI * progress8) * length, y: (0.42 + 0.2 * Math.abs(Math.cos(Math.PI * progress8))) * length };
-    const visibility = sun ? Math.min(1, clamp43((minute - 300) / 120), clamp43((1260 - minute) / 120)) : Math.min(1, progress8 * 8, (1 - progress8) * 8);
-    shadowAlpha = (sun ? 0.105 + 0.035 * elevation : 0.055) * clamp43(visibility);
-  }
-  return Object.freeze({ version: DAY_NIGHT_LIGHTING_VERSION, enabled, clock, minuteOfDay: minute, period: clock.period, preview: Number.isFinite(override), profile: room ? "interior" : "outdoor", ambient: ambient.map(Math.round), vector: vector2, shadowAlpha: enabled ? shadowAlpha : 0, tavern });
-}
-var LIGHT_MAP_SCALE = 0.5;
-var lightMaps = /* @__PURE__ */ new WeakMap();
-function composeLightMapV1(ctx, frame, paint) {
-  const target = ctx.canvas, doc = target?.ownerDocument;
-  if (typeof ctx.getTransform !== "function" || !doc?.createElement || !(target.width > 0 && target.height > 0)) return false;
-  const w = Math.max(1, Math.ceil(target.width * LIGHT_MAP_SCALE)), h = Math.max(1, Math.ceil(target.height * LIGHT_MAP_SCALE));
-  let map = lightMaps.get(target);
-  if (!map) {
-    map = doc.createElement("canvas");
-    lightMaps.set(target, map);
-  }
-  if (map.width !== w || map.height !== h) {
-    map.width = w;
-    map.height = h;
-  }
-  const lc = map.getContext("2d"), [r, g, b] = frame.ambient, sx = w / target.width, sy = h / target.height, m = ctx.getTransform();
-  lc.setTransform(1, 0, 0, 1, 0, 0);
-  lc.globalAlpha = 1;
-  lc.globalCompositeOperation = "source-over";
-  lc.fillStyle = `rgb(${r},${g},${b})`;
-  lc.fillRect(0, 0, w, h);
-  lc.save();
-  lc.setTransform(m.a * sx, m.b * sy, m.c * sx, m.d * sy, m.e * sx, m.f * sy);
-  paint(lc);
-  lc.restore();
-  ctx.save();
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.globalAlpha = 1;
-  ctx.globalCompositeOperation = "multiply";
-  ctx.drawImage(map, 0, 0, target.width, target.height);
-  ctx.restore();
-  return true;
-}
-function drawAmbientV1(ctx, view, frame, paintLights = null) {
-  if (!frame.enabled) return;
-  const [r, g, b] = frame.ambient;
-  if (r === 255 && g === 255 && b === 255) return;
-  if (paintLights && composeLightMapV1(ctx, frame, paintLights)) return;
-  ctx.save();
-  ctx.globalAlpha = 1;
-  ctx.globalCompositeOperation = "multiply";
-  ctx.fillStyle = `rgb(${r},${g},${b})`;
-  ctx.fillRect(view.x, view.y, view.width, view.height);
-  ctx.restore();
-  if (paintLights) paintLights(ctx);
-}
-function hull(points2) {
-  const p = points2.sort((a, b) => a.x - b.x || a.y - b.y), cross = (a, b, c) => (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x), low = [], high = [];
-  for (const q of p) {
-    while (low.length > 1 && cross(low.at(-2), low.at(-1), q) <= 0) low.pop();
-    low.push(q);
-  }
-  for (const q of [...p].reverse()) {
-    while (high.length > 1 && cross(high.at(-2), high.at(-1), q) <= 0) high.pop();
-    high.push(q);
-  }
-  return [...low.slice(0, -1), ...high.slice(0, -1)];
-}
-function shadowPolygonV1(caster2, frame) {
-  const scale = clamp43(caster2.height / 96, 0.12, 1.2), length = Math.hypot(frame.vector.x, frame.vector.y) * scale, cap = length > 160 ? 160 / length : 1, vx = frame.vector.x * scale * cap, vy = frame.vector.y * scale * cap, points2 = [];
-  if (caster2.round) {
-    for (let i = 0; i < 8; i++) {
-      const a = i * Math.PI / 4, x = caster2.x + caster2.w * 0.5 + Math.cos(a) * caster2.w * 0.44, y = caster2.y + caster2.h * 0.73 + Math.sin(a) * caster2.h * 0.22;
-      points2.push({ x, y }, { x: x + vx, y: y + vy });
-    }
-  } else for (const [x, y] of [[caster2.x, caster2.y], [caster2.x + caster2.w, caster2.y], [caster2.x + caster2.w, caster2.y + caster2.h], [caster2.x, caster2.y + caster2.h]]) points2.push({ x, y }, { x: x + vx, y: y + vy });
-  return hull(points2);
-}
-function casterFor(b, t, offset2) {
-  const kind = b.kind, heights = { "fort-wall": 62, "fort-tower-base": 150, "fort-keep-base": 128, "fort-gatehouse-base": 100, "ruin-exterior-masonry": 48, "cave-rock-wall": 72, "civilian-building": 132, building: 132, fence: 26, trees: 70, thicket: 52, rock: 24 };
-  if (!heights[kind]) return null;
-  let x = b.x * t, y = b.y * t, w = b.width * t, h = b.height * t;
-  const round = ["trees", "thicket", "rock"].includes(kind);
-  if (round) {
-    const ww = Math.min(w, 96), hh = Math.min(h, 80);
-    x += (w - ww) * 0.5;
-    y += (h - hh) * 0.7;
-    w = ww;
-    h = hh;
-  }
-  return { id: b.id ?? `${kind}/${x + offset2.x}/${y + offset2.y}`, x, y, w, h, height: heights[kind], round };
-}
-function outdoorLightClipV1(space, light) {
-  const t = space.collision.tileSize, origin = light.occlusionOrigin ?? light, radius = Math.min(DAY_NIGHT_LIMITS.outdoorLightRadius, light.radius), x = origin.x, y = origin.y, solid = (b) => b.kind === "building" || b.kind === "civilian-building" || b.kind === "fence" || b.kind === "ruin-exterior-masonry" || b.kind === "cave-rock-wall" || b.kind.startsWith("fort-") && b.kind !== "fort-prop-solid";
-  const rectangles = (space.visual?.blockers ?? []).filter(solid).map((b) => ({ x: b.x * t, y: b.y * t, w: b.width * t, h: b.height * t })).filter((b) => b.x <= x + radius && b.x + b.w >= x - radius && b.y <= y + radius && b.y + b.h >= y - radius).sort((a, b) => Math.hypot(a.x + a.w * 0.5 - x, a.y + a.h * 0.5 - y) - Math.hypot(b.x + b.w * 0.5 - x, b.y + b.h * 0.5 - y) || a.x - b.x || a.y - b.y).slice(0, DAY_NIGHT_LIMITS.outdoorLightBlockers);
-  const facing2 = { south: [0, Math.PI], north: [-Math.PI, 0], east: [-Math.PI / 2, Math.PI / 2], west: [Math.PI / 2, Math.PI * 1.5] }[light.facing], start = facing2?.[0] ?? -Math.PI, end = facing2?.[1] ?? Math.PI, angles = [];
-  for (let i = 0; i <= 64; i++) angles.push(start + (end - start) * i / 64);
-  for (const b of rectangles) for (const [px, py] of [[b.x, b.y], [b.x + b.w, b.y], [b.x + b.w, b.y + b.h], [b.x, b.y + b.h]]) {
-    let angle3 = Math.atan2(py - y, px - x);
-    while (angle3 < start) angle3 += Math.PI * 2;
-    while (angle3 > end) angle3 -= Math.PI * 2;
-    if (angle3 >= start && angle3 <= end && angles.length + 3 <= DAY_NIGHT_LIMITS.outdoorLightRays) angles.push(Math.max(start, angle3 - 1e-4), angle3, Math.min(end, angle3 + 1e-4));
-  }
-  angles.sort((a, b) => a - b);
-  const points2 = [];
-  for (const angle3 of angles) {
-    const dx = Math.cos(angle3), dy = Math.sin(angle3);
-    let reach = radius;
-    for (const b of rectangles) {
-      let lo = -Infinity, hi = Infinity;
-      for (const [p, d, min, max] of [[x, dx, b.x, b.x + b.w], [y, dy, b.y, b.y + b.h]]) {
-        if (Math.abs(d) < 1e-9) {
-          if (p < min || p > max) {
-            hi = -Infinity;
-            break;
-          }
-        } else {
-          let a = (min - p) / d, z = (max - p) / d;
-          if (a > z) [a, z] = [z, a];
-          lo = Math.max(lo, a);
-          hi = Math.min(hi, z);
-        }
-      }
-      if (hi >= Math.max(0, lo) && lo >= 0) reach = Math.min(reach, lo + 0.5);
-      else if (lo < 0 && hi > 0) reach = Math.min(reach, hi + 0.5);
-    }
-    points2.push({ x: x + dx * reach, y: y + dy * reach });
-  }
-  const path9 = new Path2D();
-  if (facing2) path9.moveTo(x, y);
-  else if (points2.length) path9.moveTo(points2[0].x, points2[0].y);
-  for (const p of points2) path9.lineTo(p.x, p.y);
-  path9.closePath();
-  return { path: path9, points: points2, origin: { x, y }, blockers: rectangles.length, rays: angles.length, radius };
-}
-function createDayNightLightingV1({ review = null } = {}) {
-  const pages = /* @__PURE__ */ new Map();
-  let frame = null, descriptorBuilds = 0, visible3 = 0, dynamic = 0, considered = 0, worstMs = 0;
-  function begin(model) {
-    frame = lightingFrameV1(model, review);
-    return frame;
-  }
-  function descriptors(space) {
-    let list = pages.get(space.visual);
-    if (list) {
-      pages.delete(space.visual);
-      pages.set(space.visual, list);
-      return list;
-    }
-    const t = space.collision.tileSize, offset2 = environmentWorldOffset(space);
-    list = [];
-    for (const b of space.visual?.blockers ?? []) {
-      const d = casterFor(b, t, offset2);
-      if (d) list.push(d);
-      if (list.length >= DAY_NIGHT_LIMITS.descriptorCasters) break;
-    }
-    pages.set(space.visual, list);
-    while (pages.size > DAY_NIGHT_LIMITS.descriptorPages) pages.delete(pages.keys().next().value);
-    descriptorBuilds++;
-    return list;
-  }
-  function shadows(ctx, model, view) {
-    visible3 = dynamic = considered = 0;
-    if (!frame?.enabled || frame.profile === "interior" || !model.space.visual) return;
-    const at3 = performance.now(), pad = DAY_NIGHT_LIMITS.maximumShadowPixels;
-    const candidates = descriptors(model.space).filter((c) => c.x + c.w + pad > view.x && c.y + c.h + pad > view.y && c.x - pad < view.x + view.width && c.y - pad < view.y + view.height);
-    considered = candidates.length;
-    candidates.sort((a, b) => Math.hypot(a.x + a.w * 0.5 - view.x - view.width * 0.5, a.y + a.h * 0.5 - view.y - view.height * 0.5) - Math.hypot(b.x + b.w * 0.5 - view.x - view.width * 0.5, b.y + b.h * 0.5 - view.y - view.height * 0.5) || a.id.localeCompare(b.id));
-    const selected = candidates.slice(0, DAY_NIGHT_LIMITS.visibleCasters), actors2 = Object.entries(model.entitiesById ?? {}).filter(([, a]) => a.alive && (!a.residency || !model.context?.spaceInstanceId || a.residency.spaceInstanceId === model.context.spaceInstanceId) && a.position.x >= view.x - pad && a.position.x <= view.x + view.width + pad && a.position.y >= view.y - pad && a.position.y <= view.y + view.height + pad).sort(([a], [b]) => a.localeCompare(b)).slice(0, DAY_NIGHT_LIMITS.actorCasters);
-    for (const [id, a] of actors2) {
-      const r = Math.max(6, Math.min(22, a.hullRadius ?? 9));
-      selected.push({ id: "actor/" + id, x: a.position.x - r, y: a.position.y - r * 0.4, w: r * 2, h: r * 0.8, height: a.boss ? 58 : 26, round: true });
-      dynamic++;
-    }
-    ctx.save();
-    ctx.globalAlpha = frame.shadowAlpha;
-    ctx.fillStyle = "#16202d";
-    ctx.beginPath();
-    for (const c of selected) {
-      const polygon27 = shadowPolygonV1(c, frame);
-      if (polygon27.length < 3) continue;
-      ctx.moveTo(polygon27[0].x, polygon27[0].y);
-      for (let i = 1; i < polygon27.length; i++) ctx.lineTo(polygon27[i].x, polygon27[i].y);
-      ctx.closePath();
-    }
-    ctx.fill();
-    ctx.restore();
-    visible3 = selected.length - dynamic;
-    worstMs = Math.max(worstMs, performance.now() - at3);
-  }
-  return Object.freeze({ begin, shadows, ambient: (ctx, view, paintLights = null) => drawAmbientV1(ctx, view, frame, paintLights), frame: () => frame, clear: () => pages.clear(), resources: () => ({ dayNightLighting: { version: DAY_NIGHT_LIGHTING_VERSION, enabled: frame?.enabled ?? false, profile: frame?.profile ?? null, minuteOfDay: frame?.minuteOfDay ?? null, period: frame?.period ?? null, previewOverride: frame?.preview ?? false, ambient: frame?.ambient ?? null, shadowDirection: frame?.vector ?? null, shadowAlpha: frame?.shadowAlpha ?? 0, descriptorPages: pages.size, descriptorBuilds, castersConsidered: considered, staticCasters: visible3, actorCasters: dynamic, worstShadowMs: worstMs, limits: DAY_NIGHT_LIMITS, approximation: "Conservative 2D footprints and presentation heights; not physical 3D shadows or gameplay visibility." } }) });
-}
-
 // src/client/lighting_presentation.js
 var LIGHT_LIMITS = Object.freeze({ descriptors: 64, pages: 4, staticVisible: 24, dynamicVisible: 8, embers: 16, stamps: 6, outdoorClipPages: 4, outdoorClips: 64 });
 var authoredSite = (space) => space.site ?? space.functionalSite ?? (space.settlementInterior ? { siteKind: "settlement-interior", contentHash: "tavern/" + space.settlementInterior.bindingId + "/" + space.settlementInterior.floorId } : null);
@@ -44488,7 +44742,7 @@ function createLighting(canvas, { presentation = null } = {}) {
     }
   }
   function ground(ctx, actor, { unified = false } = {}) {
-    if (unified && (actor.boss || frame?.profile !== "interior")) return;
+    if (unified) return;
     ctx.save();
     ctx.fillStyle = unified ? "rgba(7,16,25,.13)" : "#07101938";
     ctx.beginPath();
@@ -48070,7 +48324,7 @@ function composeSceneryPageV1(ctx, raster, x, y, size, m) {
 }
 
 // src/client/environment_cache.js
-function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, prepareDepthItems = null, drawFallback = null, drawRequiredObstacle = null, presentationIdentity = null, depthColliderVisuals = null, prepareAhead = null, fallbackReady = null } = {}) {
+function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, prepareDepthItems = null, prepareShadowCasters = null, drawFallback = null, drawRequiredObstacle = null, presentationIdentity = null, depthColliderVisuals = null, prepareAhead = null, fallbackReady = null } = {}) {
   const SIZE = 256, BASE_LIMIT = 32, MAX_LIMIT = 128, DESCRIPTORS = 64, PREFETCH = 8, ROUTE_PREFETCH = 16, RECENT = 24, LAYOUTS = 4;
   const pages = /* @__PURE__ */ new Map(), fallbacks = /* @__PURE__ */ new Map(), descriptors = /* @__PURE__ */ new Map(), layouts3 = /* @__PURE__ */ new Map(), stamps = /* @__PURE__ */ new Map(), flowerStamps = [], rasterPool = [];
   const win = canvas.ownerDocument.defaultView ?? globalThis;
@@ -48627,7 +48881,7 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
     schedule();
     return true;
   }
-  return Object.freeze({ draw, drawFlowers, depthItems: (space, view, time) => prepareDepthItems?.(space, view, layoutFor(space), art, time) ?? [], prepareVisible, clear: clear2, resources: () => ({ ...pathStats, environmentPathPreparationVersion: "moving-path-priority-v3", environmentPathLookaheadPixels: SIZE * 2, environmentPathPrefetchLimit: ROUTE_PREFETCH, environmentPathQueued: routeQueue.length, environmentPathAheadActive: Boolean(aheadJob), environmentPathAheadRecords: aheadReady.size, overworldRasterPages: pages.size, overworldRasterBytes: [...pages.values()].reduce((n, p) => n + p.raster.width * p.raster.height * 4, 0), environmentRetainedCanvasBytes: [...pages.values()].reduce((n, p) => n + p.raster.width * p.raster.height * 4, 0) + [...fallbacks.values()].reduce((n, p) => n + (p.raster?.width ?? 0) * (p.raster?.height ?? 0) * 4, 0) + rasterPool.reduce((n, c) => n + c.width * c.height * 4, 0) + [...stamps.values(), ...flowerStamps.filter(Boolean)].reduce((n, c) => n + c.width * c.height * 4, 0), overworldRasterBuilds: builds, overworldRasterCanvasesCreated: created, overworldRasterEvictions: evictions, environmentRasterMisses: misses, environmentFallbackBuilds: fallbackBuilds, environmentFallbackHits: fallbackHits, environmentFallbackCachePages: fallbacks.size, environmentFallbackLimit: Math.max(capacity, visibleIds.size), environmentLastMissReason: lastMissReason, environmentCacheClears: clearCount, environmentLastClearReason: lastClearReason, environmentClearReasons: { ...clearReasons }, environmentProtectedRasters: protectedIds.size, environmentVisibleRetained: visibleIds.size, environmentPreloadRetained: preloadIds.size, environmentRecentRetained: recentIds.size, environmentRetentionHits: retentionHits, visibleRasterPages, fallbackRasterPages: fallbackPages, environmentPeakFallbackPages: peakFallbackPages, activeColliderVisuals, missingColliderVisuals, underCoveredColliderVisuals, lastColliderAudit, lastColliderRepair, lastRasterLifecycle, environmentVisualGeneration: visualGeneration, environmentRasterGeneration: rasterGeneration, environmentStaleRasterDiscards: staleRasterDiscards, environmentAtomicRasterReplacements: atomicRasterReplacements, environmentRasterCompletenessRepairs: rasterCompletenessRepairs, environmentArtStamps: stamps.size + flowerStamps.filter(Boolean).length, environmentDescriptorTiles: descriptors.size, environmentDescriptorCommands: [...descriptors.values()].reduce((n, d) => n + d.commands.length, 0), environmentDescriptorReuses: descriptorReuses, environmentLayoutPages: layouts3.size, environmentRequiredMissing: requiredTasks.length, environmentPrefetchQueued: queue.length, environmentPrefetchActive: Boolean(activeJob || layoutJob || pending !== null), environmentPeakNeeded: peakNeeded, environmentPeakPrefetch: peakPrefetched, environmentRasterLimit: capacity, environmentRasterMaximum: MAX_LIMIT, environmentDescriptorLimit: DESCRIPTORS, environmentPrefetchLimit: PREFETCH, environmentRecentLimit: RECENT }) });
+  return Object.freeze({ draw, drawFlowers, depthItems: (space, view, time) => prepareDepthItems?.(space, view, layoutFor(space), art, time) ?? [], shadowCasters: (space, view) => prepareShadowCasters?.(space, view, layoutFor(space)) ?? [], prepareVisible, clear: clear2, resources: () => ({ ...pathStats, environmentPathPreparationVersion: "moving-path-priority-v3", environmentPathLookaheadPixels: SIZE * 2, environmentPathPrefetchLimit: ROUTE_PREFETCH, environmentPathQueued: routeQueue.length, environmentPathAheadActive: Boolean(aheadJob), environmentPathAheadRecords: aheadReady.size, overworldRasterPages: pages.size, overworldRasterBytes: [...pages.values()].reduce((n, p) => n + p.raster.width * p.raster.height * 4, 0), environmentRetainedCanvasBytes: [...pages.values()].reduce((n, p) => n + p.raster.width * p.raster.height * 4, 0) + [...fallbacks.values()].reduce((n, p) => n + (p.raster?.width ?? 0) * (p.raster?.height ?? 0) * 4, 0) + rasterPool.reduce((n, c) => n + c.width * c.height * 4, 0) + [...stamps.values(), ...flowerStamps.filter(Boolean)].reduce((n, c) => n + c.width * c.height * 4, 0), overworldRasterBuilds: builds, overworldRasterCanvasesCreated: created, overworldRasterEvictions: evictions, environmentRasterMisses: misses, environmentFallbackBuilds: fallbackBuilds, environmentFallbackHits: fallbackHits, environmentFallbackCachePages: fallbacks.size, environmentFallbackLimit: Math.max(capacity, visibleIds.size), environmentLastMissReason: lastMissReason, environmentCacheClears: clearCount, environmentLastClearReason: lastClearReason, environmentClearReasons: { ...clearReasons }, environmentProtectedRasters: protectedIds.size, environmentVisibleRetained: visibleIds.size, environmentPreloadRetained: preloadIds.size, environmentRecentRetained: recentIds.size, environmentRetentionHits: retentionHits, visibleRasterPages, fallbackRasterPages: fallbackPages, environmentPeakFallbackPages: peakFallbackPages, activeColliderVisuals, missingColliderVisuals, underCoveredColliderVisuals, lastColliderAudit, lastColliderRepair, lastRasterLifecycle, environmentVisualGeneration: visualGeneration, environmentRasterGeneration: rasterGeneration, environmentStaleRasterDiscards: staleRasterDiscards, environmentAtomicRasterReplacements: atomicRasterReplacements, environmentRasterCompletenessRepairs: rasterCompletenessRepairs, environmentArtStamps: stamps.size + flowerStamps.filter(Boolean).length, environmentDescriptorTiles: descriptors.size, environmentDescriptorCommands: [...descriptors.values()].reduce((n, d) => n + d.commands.length, 0), environmentDescriptorReuses: descriptorReuses, environmentLayoutPages: layouts3.size, environmentRequiredMissing: requiredTasks.length, environmentPrefetchQueued: queue.length, environmentPrefetchActive: Boolean(activeJob || layoutJob || pending !== null), environmentPeakNeeded: peakNeeded, environmentPeakPrefetch: peakPrefetched, environmentRasterLimit: capacity, environmentRasterMaximum: MAX_LIMIT, environmentDescriptorLimit: DESCRIPTORS, environmentPrefetchLimit: PREFETCH, environmentRecentLimit: RECENT }) });
 }
 
 // src/client/environment_presentation.js
@@ -48955,7 +49209,7 @@ function* prepareEnvironmentDrawing(ctx, space, viewport = null, layout = create
     yield;
     const { x, y, size, n } = tree, pad = size * (pilot?.treeOverhang ?? 0);
     if (x + size + pad <= bounds2.x || y + size + pad <= bounds2.y || x - pad >= bounds2.x + bounds2.width || y - pad >= bounds2.y + bounds2.height) continue;
-    if (!pilot?.treeShadow?.(ctx, space, x, y, size, n)) {
+    if (!pilot?.tree && !pilot?.treeShadow?.(ctx, space, x, y, size, n)) {
       ctx.fillStyle = tree.biome === "marsh" ? "#183f34" : "#214c2f";
       ctx.beginPath();
       ctx.ellipse(x + size * 0.5, y + size * 0.68, size * 0.4, size * 0.24, -0.12, 0, TAU61);
@@ -49398,8 +49652,43 @@ function prepareEnvironmentDepthItems(space, view, layout, art, time, pilot = nu
   } }));
   return items;
 }
+var shadowCasterCache = /* @__PURE__ */ new WeakMap();
+var canopyBases = /* @__PURE__ */ new WeakMap();
+function prepareEnvironmentShadowCasters(space, view, layout, pilot) {
+  if (!pilot) return [];
+  const pad = 224, inside3 = (x, y, r) => x >= view.x - pad - r && y >= view.y - pad - r && x <= view.x + view.width + pad + r && y <= view.y + view.height + pad + r, casters = [];
+  let bases = canopyBases.get(layout);
+  if (!bases) {
+    bases = new Set((layout.trees ?? []).map((p) => p.baseId));
+    canopyBases.set(layout, bases);
+  }
+  const once = (entry, make) => {
+    let c = shadowCasterCache.get(entry);
+    if (!c) {
+      c = make();
+      shadowCasterCache.set(entry, c);
+    }
+    return c;
+  };
+  for (const tree of layout.trees ?? []) {
+    const { x, y, size, n } = tree;
+    if (!inside3(x + size / 2, y + size * 0.8, size) || pilot.hasTree && !pilot.hasTree(space, x, y, size, n)) continue;
+    casters.push(once(tree, () => ({ key: "tree/" + tree.id, x: x + size / 2, y: y + size * 0.8, paint: (c) => pilot.tree(c, space, x, y, size, n, tree) })));
+  }
+  for (const base of layout.treeBases ?? []) {
+    const { x, y, w, n, biome } = base;
+    if (!base.forestRole || bases.has(base.id) || !inside3(x + w / 2, y + w * 0.8, w) || !pilot.base) continue;
+    casters.push(once(base, () => ({ key: "base/" + base.id, x: x + w / 2, y: y + w * 0.8, paint: (c) => pilot.base(c, space, x, y, w, n, biome, { hasCanopy: false, forestRole: base.forestRole }) })));
+  }
+  for (const rock2 of layout.rocks ?? []) {
+    const { x, y, size, n } = rock2;
+    if (!inside3(x + size / 2, y + size * 0.9, size) || !pilot.rock) continue;
+    casters.push(once(rock2, () => ({ key: "rock/" + rock2.id, x: x + size / 2, y: y + size * 0.9, paint: (c) => pilot.rock(c, space, x, y, size, n, rock2) })));
+  }
+  return casters;
+}
 function createEnvironmentCache2(canvas, { authoredArt = null, ...options } = {}) {
-  return createEnvironmentCache(canvas, { ...options, presentationIdentity: () => authoredArt?.fort?.identity?.() ?? "", depthColliderVisuals: fortDepthColliderVisuals, prepareAhead: authoredArt?.prepareRouteAhead ? ((space, bounds2) => authoredArt.prepareRouteAhead(space, bounds2)) : null, fallbackReady: authoredArt?.routeFallbackReady ? ((space, bounds2) => authoredArt.routeFallbackReady(space, bounds2)) : null, prepareDrawing: (ctx, space, view, layout, art) => prepareEnvironmentDrawing(ctx, space, view, layout, art, authoredArt), prepareDepthItems: (space, view, layout, art, time) => prepareEnvironmentDepthItems(space, view, layout, art, time, authoredArt), drawFallback: (ctx, space, bounds2) => drawEnvironmentFallback(ctx, space, bounds2, authoredArt), drawRequiredObstacle: (ctx, space, b, tx, ty) => drawRequiredObstacleVisual(ctx, space, b, tx, ty, authoredArt) });
+  return createEnvironmentCache(canvas, { ...options, presentationIdentity: () => authoredArt?.fort?.identity?.() ?? "", depthColliderVisuals: fortDepthColliderVisuals, prepareAhead: authoredArt?.prepareRouteAhead ? ((space, bounds2) => authoredArt.prepareRouteAhead(space, bounds2)) : null, fallbackReady: authoredArt?.routeFallbackReady ? ((space, bounds2) => authoredArt.routeFallbackReady(space, bounds2)) : null, prepareDrawing: (ctx, space, view, layout, art) => prepareEnvironmentDrawing(ctx, space, view, layout, art, authoredArt), prepareDepthItems: (space, view, layout, art, time) => prepareEnvironmentDepthItems(space, view, layout, art, time, authoredArt), prepareShadowCasters: (space, view, layout) => prepareEnvironmentShadowCasters(space, view, layout, authoredArt), drawFallback: (ctx, space, bounds2) => drawEnvironmentFallback(ctx, space, bounds2, authoredArt), drawRequiredObstacle: (ctx, space, b, tx, ty) => drawRequiredObstacleVisual(ctx, space, b, tx, ty, authoredArt) });
 }
 
 // src/client/aegis_mimic_presentation_v2.js
@@ -49759,7 +50048,8 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
     if (event.kind === "build") performanceProbe.record("environment.rasterBuild", event.ms ?? 0);
     if (event.kind === "compose") performanceProbe.record("environment.rasterDraw", event.ms ?? 0);
   } }), lighting = createLighting(canvas, { presentation: environmentArt?.worldLightsV1 }), dayNight = createDayNightLightingV1({ review: environmentArt?.dayNightReview });
-  const dynamicLights = createDynamicWorldLightsV1(canvas.ownerDocument);
+  const dynamicLights = createDynamicWorldLightsV1(canvas.ownerDocument), silhouetteShadows = createSilhouetteShadowsV1(canvas.ownerDocument);
+  let castingShadows = false;
   const camera = createCamera(), prompt = createPaintedPrompt(), actorMotion = createActorMotionPresentationV1({ collisionProbe: actorCollisionProbe });
   const seamDebug = new URLSearchParams(canvas.ownerDocument.defaultView?.location?.search ?? "").get("debugSeams") === "1";
   const collisionDebug = new URLSearchParams(canvas.ownerDocument.defaultView?.location?.search ?? "").get("collisionDebug") === "1";
@@ -49778,6 +50068,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
     siteEnvironment.clear();
     lighting.clear();
     dayNight.clear();
+    silhouetteShadows.clear();
     layout++;
   }
   function resize(width, height) {
@@ -49909,11 +50200,6 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
     } else if (model.space.visual && (model.space.site || model.space.functionalSite)) depthItems2.push(...siteEnvironment.depthItems(model.space, viewport, time));
     animatedFlowers = seamless && !model.space.site ? environmentCache.drawFlowers(ctx, { x: cam.x, y: cam.y, width: canvas.width / cam.zoom, height: canvas.height / cam.zoom }, time) : 0;
     ambientMarks = drawEnvironmentAmbient(ctx, model.space, { x: cam.x, y: cam.y, width: canvas.width / cam.zoom, height: canvas.height / cam.zoom }, time);
-    if (unified) {
-      const drawShadows = () => dayNight.shadows(ctx, visualModel, lightView);
-      if (performanceProbe) performanceProbe.measure("directionalShadows", drawShadows);
-      else drawShadows();
-    }
     if (collisionDebug && seamless && !model.space.site) drawCollisionCoverageDebug(ctx, model.space, viewport);
     depthItems2.push(...environmentArt?.reviewDepthItems?.(model, viewport) ?? []);
     depthItems2.push(...sporeDepthItems(model, viewport, environmentArt?.sporeArt), ...hollowDepthItems(model, viewport, environmentArt?.hollowArt));
@@ -50018,7 +50304,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
           drawToxicPoisonRearD12_4F(ctx2, drawn, model.tick);
           drawNullifiedRearD12_4I(ctx2, drawn, model.tick);
           drawWebbedRearD12_4J(ctx2, drawn, model.tick);
-          const leveling = id === model.playersById[model.localPlayerId].entityId && !canvas.ownerDocument.hidden && !model.siteActivationPending;
+          const leveling = id === model.playersById[model.localPlayerId].entityId && !canvas.ownerDocument.hidden && !model.siteActivationPending && !castingShadows;
           if (leveling) heroLevelUp.drawBack(ctx2, { ...drawn, entityId: id }, time);
           drawWorldHero(ctx2, drawn, pose.facing, time, pose.primary, model.tick, Boolean(reaction?.flash), equipmentArt);
           if (leveling) heroLevelUp.drawFront(ctx2, { ...drawn, entityId: id }, time);
@@ -50069,6 +50355,21 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
       ctx.restore();
     }
     drawFerryLandings(ctx, model.space.exits);
+    if (unified) {
+      const drawShadows = () => {
+        const hero = visualActor?.position ?? { x: cam.x, y: cam.y }, actorCasters = depthItems2.filter((item) => item.id.startsWith("actor/")).map((item) => ({ item, actor: visualModel.entitiesById[item.id.slice(6)] })).filter(({ actor: actor2 }) => actor2?.alive).sort((a, b) => Math.hypot(a.actor.position.x - hero.x, a.actor.position.y - hero.y) - Math.hypot(b.actor.position.x - hero.x, b.actor.position.y - hero.y)).map(({ item, actor: actor2 }) => ({ key: item.id, anchorX: item.anchorX, anchorY: item.anchorY, radius: actor2.hullRadius, boss: Boolean(actor2.boss), render: (g) => {
+          castingShadows = true;
+          try {
+            item.draw(g);
+          } finally {
+            castingShadows = false;
+          }
+        } }));
+        if (!silhouetteShadows.draw(ctx, { frame, scenery: seamless && !model.space.site ? environmentCache.shadowCasters(model.space, lightView) : [], polygons: (skip) => dayNight.casters(visualModel, lightView, skip), actors: actorCasters })) dayNight.shadows(ctx, visualModel, lightView);
+      };
+      if (performanceProbe) performanceProbe.measure("directionalShadows", drawShadows);
+      else drawShadows();
+    }
     drawDepthItems(ctx, depthItems2);
     if (unified) {
       const paintLights = (lc) => {
@@ -50161,6 +50462,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
     prompt,
     resources: () => Object.freeze({
       ...dynamicLights.resources(),
+      ...silhouetteShadows.resources(),
       groundItems: groundItems.inspect(),
       resourceDebris: resourceArt.resources(),
       ...nightActors.resources(),
