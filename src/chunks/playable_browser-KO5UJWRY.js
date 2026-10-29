@@ -31236,13 +31236,25 @@ function createDayNightLightingV1({ review = null } = {}) {
 
 // src/client/silhouette_shadows_v1.js
 var SILHOUETTE_SHADOWS_VERSION = "silhouette-shadows-v1";
-var SILHOUETTE_LIMITS = Object.freeze({ layerScale: 0.5, silhouetteMaxSide: 160, recordedCasters: 768, actorCasters: 40, actorRefreshPerFrame: 8, actorRefreshFrames: 3, actorStaleFrames: 120, actorScale: 0.5, maximumLength: 160, referenceHeight: 96, indoorDepth: 0.24, indoorAlpha: 0.2, outdoorGain: 1.9, outdoorMaximumAlpha: 0.3 });
+var SILHOUETTE_LIMITS = Object.freeze({ layerScale: 0.5, silhouetteMaxSide: 160, recordedCasters: 768, actorCasters: 40, actorRefreshPerFrame: 8, actorRefreshFrames: 3, actorStaleFrames: 120, actorScale: 0.5, maximumFootLift: 18, verticalScale: 0.6, actorSweep: [1 / 3, 2 / 3, 1], maximumLength: 160, referenceHeight: 96, indoorDepth: 0.24, indoorAlpha: 0.2, outdoorGain: 1.9, outdoorMaximumAlpha: 0.3 });
 var SHADOW = "#16202d";
 var noop = () => {
 };
 var NATURAL_CASTERS = ["trees", "thicket", "rock"];
 var multiply = (a, b) => [a[0] * b[0] + a[2] * b[1], a[1] * b[0] + a[3] * b[1], a[0] * b[2] + a[2] * b[3], a[1] * b[2] + a[3] * b[3], a[0] * b[4] + a[2] * b[5] + a[4], a[1] * b[4] + a[3] * b[5] + a[5]];
 var apply = (m, x, y) => ({ x: m[0] * x + m[2] * y + m[4], y: m[1] * x + m[3] * y + m[5] });
+function opaqueBottom(g, width, height, from = 0, to = 1) {
+  try {
+    const x0 = Math.floor(width * from), x1 = Math.max(x0 + 1, Math.ceil(width * to)), data = g.getImageData(x0, 0, x1 - x0, height).data, span = x1 - x0, need = Math.max(2, Math.round(span * 0.03));
+    for (let y = height - 1; y >= 0; y--) {
+      let n = 0;
+      for (let x = 0; x < span; x++) if (data[(y * span + x) * 4 + 3] > 96 && ++n >= need) return y + 1;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
 function recordSpriteDrawsV1(paint) {
   const draws = [], stack = [];
   let m = [1, 0, 0, 1, 0, 0], alpha = 1, procedural = false;
@@ -31323,8 +31335,8 @@ function shadowProjectionV1(vector2, baseY, height, limits = SILHOUETTE_LIMITS) 
   return [1, 0, -kx, -ky, kx * baseY, baseY * (1 + ky)];
 }
 function createSilhouetteShadowsV1(doc, limits = SILHOUETTE_LIMITS) {
-  const silhouettes = /* @__PURE__ */ new WeakMap(), recorded = /* @__PURE__ */ new Map(), actors2 = /* @__PURE__ */ new Map(), layers = /* @__PURE__ */ new WeakMap();
-  let frameNo = 0, stats = { scenery: 0, procedural: 0, polygons: 0, actors: 0, actorRenders: 0, recordings: 0 };
+  const silhouettes = /* @__PURE__ */ new WeakMap(), recorded = /* @__PURE__ */ new Map(), actors2 = /* @__PURE__ */ new Map(), layers = /* @__PURE__ */ new WeakMap(), feet = /* @__PURE__ */ new Map();
+  let frameNo = 0, maxGroundGap = 0, stats = { scenery: 0, procedural: 0, polygons: 0, actors: 0, actorRenders: 0, recordings: 0 };
   function silhouetteFor(image) {
     let s = silhouettes.get(image);
     if (s) return s;
@@ -31336,9 +31348,23 @@ function createSilhouetteShadowsV1(doc, limits = SILHOUETTE_LIMITS) {
     g.globalCompositeOperation = "source-in";
     g.fillStyle = SHADOW;
     g.fillRect(0, 0, c.width, c.height);
-    s = { canvas: c, fx: c.width / image.width, fy: c.height / image.height };
+    const bottom = opaqueBottom(g, c.width, c.height);
+    s = { canvas: c, fx: c.width / image.width, fy: c.height / image.height, bottom: bottom === null ? 1 : bottom / c.height };
     silhouettes.set(image, s);
     return s;
+  }
+  function groundOf(r) {
+    if (r.ground !== void 0) return r.ground;
+    let ground = -Infinity, top = Infinity;
+    for (const d of r.draws) {
+      const s = silhouetteFor(d.image), bottomSrc = Math.min(d.sy + d.sh, Math.max(d.sy, s.bottom * d.image.height)), y = d.dy + d.dh * (bottomSrc - d.sy) / d.sh;
+      ground = Math.max(ground, apply(d.m, d.dx + d.dw / 2, y).y);
+      for (const [px, py] of [[d.dx, d.dy], [d.dx + d.dw, d.dy]]) top = Math.min(top, apply(d.m, px, py).y);
+    }
+    r.ground = Number.isFinite(ground) ? ground : r.base;
+    maxGroundGap = Math.max(maxGroundGap, r.base - r.ground);
+    r.groundHeight = Number.isFinite(top) ? r.ground - top : r.height;
+    return r.ground;
   }
   function recordingFor(caster2) {
     let r = recorded.get(caster2.key);
@@ -31385,6 +31411,11 @@ function createSilhouetteShadowsV1(doc, limits = SILHOUETTE_LIMITS) {
     g.restore();
     a.rendered = frameNo;
     stats.actorRenders++;
+    if (caster2.kind && !feet.has(caster2.kind)) {
+      const row2 = opaqueBottom(g, a.canvas.width, a.canvas.height, 0.3, 0.7), lift = Math.max(limits.maximumFootLift, (caster2.radius ?? 10) * 1.6);
+      const offset2 = row2 === null ? 0 : row2 / q - a.above;
+      feet.set(caster2.kind, offset2 >= -lift && offset2 <= 12 ? offset2 : 0);
+    }
   }
   function draw(ctx, { frame, scenery = [], polygons = () => [], actors: actorCasters = [] }) {
     frameNo++;
@@ -31393,7 +31424,7 @@ function createSilhouetteShadowsV1(doc, limits = SILHOUETTE_LIMITS) {
     if (typeof ctx.getTransform !== "function" || !target?.ownerDocument?.createElement || !(target.width > 0 && target.height > 0) || !frame?.enabled) return false;
     const indoor = frame.profile === "interior", alpha = indoor ? limits.indoorAlpha : Math.min(limits.outdoorMaximumAlpha, frame.shadowAlpha * limits.outdoorGain);
     if (alpha <= 4e-3) return true;
-    const vector2 = indoor ? { x: 0, y: limits.indoorDepth * limits.referenceHeight } : frame.vector;
+    const vector2 = indoor ? { x: 0, y: limits.indoorDepth * limits.referenceHeight } : { x: frame.vector.x, y: frame.vector.y * limits.verticalScale }, flatFrame = { ...frame, vector: vector2 };
     const w = Math.max(1, Math.ceil(target.width * limits.layerScale)), h = Math.max(1, Math.ceil(target.height * limits.layerScale));
     let layer = layers.get(target);
     if (!layer) {
@@ -31417,7 +31448,7 @@ function createSilhouetteShadowsV1(doc, limits = SILHOUETTE_LIMITS) {
         continue;
       }
       covered.add(Math.floor(caster2.x / tile) + "," + Math.floor(caster2.y / tile));
-      const p = shadowProjectionV1(vector2, r.base, r.height, limits);
+      const p = shadowProjectionV1(vector2, groundOf(r), r.groundHeight, limits);
       for (const d of r.draws) {
         const s = silhouetteFor(d.image);
         lc.setTransform(...multiply(multiply(world, p), d.m));
@@ -31438,7 +31469,7 @@ function createSilhouetteShadowsV1(doc, limits = SILHOUETTE_LIMITS) {
       lc.fillStyle = SHADOW;
       lc.beginPath();
       for (const c of boxes) {
-        const poly7 = shadowPolygonV1(c, frame);
+        const poly7 = shadowPolygonV1(c, flatFrame);
         if (poly7.length < 3) continue;
         lc.moveTo(poly7[0].x, poly7[0].y);
         for (let i = 1; i < poly7.length; i++) lc.lineTo(poly7[i].x, poly7[i].y);
@@ -31455,9 +31486,12 @@ function createSilhouetteShadowsV1(doc, limits = SILHOUETTE_LIMITS) {
         renderActor(a, caster2);
         budget--;
       }
-      const p = shadowProjectionV1(vector2, caster2.anchorY, a.above, limits);
-      lc.setTransform(...multiply(world, p));
-      lc.drawImage(a.canvas, caster2.anchorX - a.w / 2, caster2.anchorY - a.above, a.w, a.h);
+      const foot = caster2.anchorY + (feet.get(caster2.kind) ?? 0);
+      for (const f of limits.actorSweep) {
+        const p = shadowProjectionV1({ x: vector2.x * f, y: vector2.y * f }, foot, a.above + foot - caster2.anchorY, limits);
+        lc.setTransform(...multiply(world, p));
+        lc.drawImage(a.canvas, caster2.anchorX - a.w / 2, caster2.anchorY - a.above, a.w, a.h);
+      }
       stats.actors++;
     }
     for (const [key2, a] of actors2) if (frameNo - a.seen > limits.actorStaleFrames) actors2.delete(key2);
@@ -31474,7 +31508,7 @@ function createSilhouetteShadowsV1(doc, limits = SILHOUETTE_LIMITS) {
     recorded.clear();
     actors2.clear();
   }
-  return Object.freeze({ draw, clear: clear2, resources: () => ({ silhouetteShadows: { version: SILHOUETTE_SHADOWS_VERSION, ...stats, recordedCasters: recorded.size, actorCanvases: actors2.size, limits } }) });
+  return Object.freeze({ draw, clear: clear2, resources: () => ({ silhouetteShadows: { version: SILHOUETTE_SHADOWS_VERSION, ...stats, recordedCasters: recorded.size, actorCanvases: actors2.size, maxGroundGap: Math.round(maxGroundGap * 10) / 10, feet: Object.fromEntries([...feet].map(([k, v]) => [k, Math.round(v * 10) / 10])), limits } }) });
 }
 
 // src/client/hero_level_up_v3.js
@@ -50357,7 +50391,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
     drawFerryLandings(ctx, model.space.exits);
     if (unified) {
       const drawShadows = () => {
-        const hero = visualActor?.position ?? { x: cam.x, y: cam.y }, actorCasters = depthItems2.filter((item) => item.id.startsWith("actor/")).map((item) => ({ item, actor: visualModel.entitiesById[item.id.slice(6)] })).filter(({ actor: actor2 }) => actor2?.alive).sort((a, b) => Math.hypot(a.actor.position.x - hero.x, a.actor.position.y - hero.y) - Math.hypot(b.actor.position.x - hero.x, b.actor.position.y - hero.y)).map(({ item, actor: actor2 }) => ({ key: item.id, anchorX: item.anchorX, anchorY: item.anchorY, radius: actor2.hullRadius, boss: Boolean(actor2.boss), render: (g) => {
+        const hero = visualActor?.position ?? { x: cam.x, y: cam.y }, actorCasters = depthItems2.filter((item) => item.id.startsWith("actor/")).map((item) => ({ item, actor: visualModel.entitiesById[item.id.slice(6)] })).filter(({ actor: actor2 }) => actor2?.alive).sort((a, b) => Math.hypot(a.actor.position.x - hero.x, a.actor.position.y - hero.y) - Math.hypot(b.actor.position.x - hero.x, b.actor.position.y - hero.y)).map(({ item, actor: actor2 }) => ({ key: item.id, anchorX: item.anchorX, anchorY: item.anchorY, radius: actor2.hullRadius, boss: Boolean(actor2.boss), kind: (actor2.boss?.bossDefinitionId ?? actor2.enemyFamily ?? actor2.subType ?? actor2.team ?? "actor") + "/" + Math.round(actor2.hullRadius ?? 10), render: (g) => {
           castingShadows = true;
           try {
             item.draw(g);
