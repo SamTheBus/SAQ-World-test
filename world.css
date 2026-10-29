@@ -924,6 +924,15 @@ body #world-loot-notice,body #world-level-up,body .progression-gain{display:none
 @keyframes lu-rays-in{from{opacity:0;transform:scale(.4);}}
 @keyframes lu-spark{0%{opacity:0;transform:translate(0,0) scale(.4);}15%{opacity:1;}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1);}}
 @keyframes lu-pop{0%{opacity:0;transform:scale(.2) rotate(-12deg);}100%{opacity:1;transform:none;}}
+
+/* Update banner: a newer build is published. It sits centred above the
+   interaction prompt, clear of the HUD, the toast feed and the action row. */
+#update-banner-v1{position:fixed;z-index:45;left:50%;bottom:calc(178px + var(--world-safe-bottom,0px));transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:1px;padding:8px 18px;min-height:44px;border:1.5px solid #c9a35a;border-radius:12px;background:linear-gradient(180deg,#1d2736,#121a26);color:#f1e3c2;box-shadow:0 6px 18px #0009;font:600 12px system-ui;cursor:pointer;touch-action:manipulation;animation:update-banner-in .35s ease-out}
+#update-banner-v1 strong{font:700 13px Georgia,serif;letter-spacing:.02em;color:#ffe2a0}
+#update-banner-v1 span{opacity:.85}
+#update-banner-v1:disabled{opacity:.8;cursor:default}
+@media(orientation:landscape) and (max-height:500px){#update-banner-v1{bottom:calc(84px + var(--world-safe-bottom,0px))}}
+@keyframes update-banner-in{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
 @keyframes lu-shine{to{text-shadow:0 2px 0 #7a5513,0 0 28px #ffe28a,0 0 52px #ffb43a;}}
 @keyframes lu-sub{from{opacity:0;transform:translate(-50%,10px);}}
 @media(prefers-reduced-motion:reduce){.level-up-v4 *{animation-duration:.01ms!important;animation-iteration-count:1!important;}}

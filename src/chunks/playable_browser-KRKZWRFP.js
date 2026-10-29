@@ -54287,6 +54287,80 @@ function coordinateWorldViewport({ environment, shell, onResize = () => {
   } });
 }
 
+// src/client/update_banner_v1.js
+var RELEASE = /data-world-release="([^"]+)"/;
+function releaseOfHtmlV1(html) {
+  return RELEASE.exec(String(html))?.[1] ?? null;
+}
+function watchForUpdatesV1(environment, { save = null, intervalMs = 18e4, firstCheckMs = 2e4, fetchImpl = null } = {}) {
+  const doc = environment.document, current = doc.documentElement.dataset.worldRelease, fetcher = fetchImpl ?? environment.fetch?.bind(environment);
+  if (!current || !fetcher) return null;
+  let banner = null, checking = false, timer = null, stopped = false, found = null;
+  async function check() {
+    if (stopped || checking || found || doc.hidden) return found;
+    checking = true;
+    try {
+      const url = new URL("./", environment.location.href);
+      url.search = "";
+      url.searchParams.set("update-check", String(Date.now()));
+      const response = await fetcher(url, { cache: "no-store" });
+      if (response.ok) {
+        const release = releaseOfHtmlV1(await response.text());
+        if (release && release !== current) {
+          found = release;
+          show(release);
+        }
+      }
+    } catch {
+    } finally {
+      checking = false;
+    }
+    return found;
+  }
+  function show(release) {
+    if (banner) return;
+    banner = doc.createElement("button");
+    banner.type = "button";
+    banner.id = "update-banner-v1";
+    banner.dataset.gameplayHud = "";
+    banner.setAttribute("aria-live", "polite");
+    const title = doc.createElement("strong");
+    title.textContent = "New version ready";
+    const sub = doc.createElement("span");
+    sub.textContent = "Tap to update";
+    banner.append(title, sub);
+    banner.addEventListener("click", async () => {
+      if (banner.disabled) return;
+      banner.disabled = true;
+      sub.textContent = "Saving\u2026";
+      try {
+        await Promise.race([Promise.resolve(save?.()), new Promise((resolve) => environment.setTimeout(resolve, 4e3))]);
+      } catch {
+      }
+      sub.textContent = "Updating\u2026";
+      const url = new URL(environment.location.href);
+      url.searchParams.set("build", release.replace(/^.*-/, ""));
+      environment.location.replace(url.href);
+    });
+    doc.body.append(banner);
+  }
+  const onVisible = () => {
+    if (!doc.hidden) check();
+  };
+  doc.addEventListener("visibilitychange", onVisible);
+  environment.addEventListener("pageshow", onVisible);
+  const first = environment.setTimeout(check, firstCheckMs);
+  timer = environment.setInterval(check, intervalMs);
+  return Object.freeze({ check, stop() {
+    stopped = true;
+    environment.clearTimeout(first);
+    environment.clearInterval(timer);
+    doc.removeEventListener("visibilitychange", onVisible);
+    environment.removeEventListener("pageshow", onVisible);
+    banner?.remove();
+  } });
+}
+
 // src/entrypoints/playable_browser.js
 var plannedBossHostingNamespaceV1 = (binding) => hasBossHostingV1(binding) ? "saq-world-boss-hosting-v1-" : null;
 function applyBossHostingWorkerBindingV1(workerUrl, binding) {
@@ -55147,6 +55221,7 @@ async function startWorldClient(environment) {
     if (activity) session.save?.()?.catch?.(() => {
     });
   });
+  watchForUpdatesV1(environment, { save: () => activity ? session.save?.() : null });
   environment.addEventListener("pagehide", (event) => {
     suspend();
     if (event.persisted) return;
