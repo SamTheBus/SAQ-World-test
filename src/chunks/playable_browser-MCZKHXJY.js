@@ -49574,6 +49574,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
   } }), lighting = createLighting(canvas, { presentation: environmentArt?.worldLightsV1 }), dayNight = createDayNightLightingV1({ review: environmentArt?.dayNightReview });
   const dynamicLights = createDynamicWorldLightsV1(canvas.ownerDocument);
   const camera = createCamera(), prompt = createPaintedPrompt(), actorMotion = createActorMotionPresentationV1({ collisionProbe: actorCollisionProbe });
+  const seamDebug = new URLSearchParams(canvas.ownerDocument.defaultView?.location?.search ?? "").get("debugSeams") === "1";
   const collisionDebug = new URLSearchParams(canvas.ownerDocument.defaultView?.location?.search ?? "").get("collisionDebug") === "1";
   const heroFacing = createHeroFacing(), siteEnvironment = createSiteEnvironment(canvas, { authoredArt: environmentArt });
   let invalidations = 0, lastInvalidationReason = "none", resizeEvents = 0, resizeChanges = 0, resizeNoops = 0, lastResize = null;
@@ -49674,6 +49675,25 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
       if (!authoredSite2) siteEnvironment.clear();
       const paint = () => authoredSite2 ? siteEnvironment.draw(ctx, model.space, viewport) : seamless ? environmentCache.draw(ctx, model.space, viewport, cam.zoom) : drawEnvironment(ctx, model.space, null);
       lastEnvironment = performanceProbe ? performanceProbe.measure("drawEnvironment", paint) : paint();
+      if (seamDebug && !authoredSite2) {
+        ctx.save();
+        ctx.lineWidth = 1 / cam.zoom;
+        for (const [step, color28] of [[256, "#3b82f6aa"], [null, "#ff2020"]]) {
+          ctx.strokeStyle = color28;
+          ctx.beginPath();
+          const sx = step ?? 1024, sy = step ?? 832;
+          for (let x = Math.floor(viewport.x / sx) * sx; x <= viewport.x + viewport.width; x += sx) {
+            ctx.moveTo(x, viewport.y);
+            ctx.lineTo(x, viewport.y + viewport.height);
+          }
+          for (let y = Math.floor(viewport.y / sy) * sy; y <= viewport.y + viewport.height; y += sy) {
+            ctx.moveTo(viewport.x, y);
+            ctx.lineTo(viewport.x + viewport.width, y);
+          }
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
       performanceProbe?.setGauge("paintedTerrainTiles", lastEnvironment.paintedTerrainTiles);
       performanceProbe?.setGauge("paintedBlockers", lastEnvironment.paintedBlockers);
     } else for (let row2 = 0; row2 < c.height; row2++) for (let col = 0; col < c.width; col++) {
