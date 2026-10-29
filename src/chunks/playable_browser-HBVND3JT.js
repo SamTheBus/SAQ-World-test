@@ -28971,16 +28971,6 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
   small.setAttribute("aria-label", "Minimap \u2014 open world map");
   small.tabIndex = 0;
   miniFooter.append(el("span", "N \u2191"));
-  const menuProxy = el("button", "MENU");
-  menuProxy.type = "button";
-  menuProxy.className = "chart-menu-proxy";
-  menuProxy.setAttribute("aria-label", "Open menu");
-  menuProxy.onclick = (e) => {
-    e.stopPropagation();
-    const menu = doc.getElementById("local-world-controls");
-    if (menu) menu.open = !menu.open;
-  };
-  miniFooter.append(menuProxy);
   mini.append(small, miniFooter);
   atlas.className = "chart-atlas";
   atlas.hidden = true;
@@ -47888,8 +47878,7 @@ function composeSceneryPageV1(ctx, raster, x, y, size, m) {
   }
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
-  const w = raster.width ?? size, h = raster.height ?? size;
-  ctx.drawImage(raster, 0.5, 0.5, w - 1, h - 1, r.x, r.y, r.width, r.height);
+  ctx.drawImage(raster, r.x, r.y, r.width, r.height);
   ctx.restore();
 }
 
@@ -54310,7 +54299,7 @@ async function startWorldClient(environment) {
   const clockLabel = environment.document.createElement("span");
   clockLabel.id = "world-time-clock";
   clockLabel.style.cssText = "font-size:12px;white-space:nowrap;color:#cbd8e8";
-  environment.document.getElementById("world-hud-title").append(clockLabel);
+  (environment.document.querySelector(".chart-mini") ?? environment.document.getElementById("world-hud-title")).append(clockLabel);
   function syncTime() {
     const m = clientPort.getReadModel(), t = m.worldTime, r = dayNightReview.read();
     if (!t) return;
