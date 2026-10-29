@@ -53771,7 +53771,7 @@ async function startWorldClient(environment) {
       sample.onclick = () => {
         if (performanceProbe.isRecording()) performanceProbe.stop();
         else {
-          performanceProbe.start();
+          performanceProbe.start({ reset: false });
           performanceProbe.setGauge("batteryPresentationFpsCap", batteryPresentation ? 30 : 0);
         }
         syncSample();
