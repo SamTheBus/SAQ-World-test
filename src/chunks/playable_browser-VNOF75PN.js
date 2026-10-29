@@ -47685,7 +47685,8 @@ function composeSceneryPageV1(ctx, raster, x, y, size, m) {
   }
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.drawImage(raster, r.x, r.y, r.width, r.height);
+  const w = raster.width ?? size, h = raster.height ?? size;
+  ctx.drawImage(raster, 0.5, 0.5, w - 1, h - 1, r.x, r.y, r.width, r.height);
   ctx.restore();
 }
 
@@ -53462,12 +53463,14 @@ function measureWorldViewport(environment) {
   const viewport = environment.visualViewport, root = environment.document.documentElement;
   const visual = valid(viewport?.width) && valid(viewport?.height);
   const offset2 = (value2) => Number.isFinite(value2) ? Math.max(0, value2) : 0;
-  return Object.freeze({
-    left: visual ? offset2(viewport.offsetLeft) : 0,
-    top: visual ? offset2(viewport.offsetTop) : 0,
-    width: Math.max(1, Math.round(visual ? viewport.width : fallback(root.clientWidth, environment.innerWidth))),
-    height: Math.max(1, Math.round(visual ? viewport.height : fallback(root.clientHeight, environment.innerHeight)))
-  });
+  const width = Math.max(1, Math.round(visual ? viewport.width : fallback(root.clientWidth, environment.innerWidth)));
+  let height = Math.max(1, Math.round(visual ? viewport.height : fallback(root.clientHeight, environment.innerHeight)));
+  const standalone = environment.navigator?.standalone === true || environment.matchMedia?.("(display-mode: standalone)")?.matches === true, screen = environment.screen;
+  if (standalone && valid(screen?.width) && valid(screen?.height)) {
+    const landscape = width > height, fullWidth = landscape ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height), fullHeight = landscape ? Math.min(screen.width, screen.height) : Math.max(screen.width, screen.height);
+    if (Math.abs(width - fullWidth) <= 1 && fullHeight > height && fullHeight - height <= 80) height = fullHeight;
+  }
+  return Object.freeze({ left: visual ? offset2(viewport.offsetLeft) : 0, top: visual ? offset2(viewport.offsetTop) : 0, width, height });
 }
 function coordinateWorldViewport({ environment, shell, onResize = () => {
 } }) {
