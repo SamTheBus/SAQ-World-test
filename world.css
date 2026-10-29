@@ -972,3 +972,126 @@ body #world-xp{color:#bfe6f0}
 @keyframes vbar-low{0%,100%{filter:brightness(1)}50%{filter:brightness(1.45)}}
 @keyframes vbar-shine{from{transform:translateX(-110%)}to{transform:translateX(110%)}}
 @keyframes vbar-xp-glow{0%{box-shadow:inset 0 1px 2px #000c,0 0 0 1px #0b1017,0 0 0 2px #9ff0ff,0 0 10px #7fe6ff}100%{box-shadow:inset 0 1px 2px #000c,0 0 0 1px #0b1017,0 0 0 2px #3e6e7a}}
+
+/* SKILLS_MENU_V2: full-height named tree, slide-up skill sheet, list view.
+   Two ids keep these ahead of the older progression-view button rules. */
+#world-inventory #world-progression-view{display:flex;flex-direction:column;flex:1;width:100%;min-width:0;min-height:0;overflow:hidden;padding:2px 0 0;position:relative}
+#world-inventory #world-progression-view[hidden]{display:none}
+#world-inventory[data-section=progression] #world-inventory-status:empty{display:none}
+#world-inventory #world-progression-view .progression-notice{position:absolute;left:50%;top:92px;z-index:5;transform:translateX(-50%);margin:0;padding:5px 12px;border-radius:12px;background:#1d2a33f2;border:1px solid var(--rpg-brass);color:#f1e3bd;font:600 11px var(--rpg-ui);white-space:nowrap;pointer-events:none;min-height:0}
+#world-inventory #world-progression-view .progression-notice:empty{display:none}
+#world-inventory #world-progression-view .skills-v2{display:flex;flex-direction:column;gap:6px;flex:1;min-height:0}
+#world-inventory #world-progression-view .skills-top{display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+#world-inventory #world-progression-view .skills-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:0}
+#world-inventory #world-progression-view .skills-tabs button{position:relative;min-height:40px;padding:4px 2px;display:flex;align-items:center;justify-content:center;gap:6px;font:600 13px var(--rpg-ui);color:#aeb7ba;background:#151d25;border:1px solid #303b46;border-radius:8px;box-shadow:none}
+#world-inventory #world-progression-view .skills-tabs button i{width:8px;height:8px;border-radius:50%;background:var(--tree);opacity:.55;flex-shrink:0}
+#world-inventory #world-progression-view .skills-tabs button[aria-pressed=true]{color:#fff;background:linear-gradient(#24303b,#18212a);border-color:var(--tree);box-shadow:inset 0 -3px 0 var(--tree),0 0 12px color-mix(in srgb,var(--tree) 30%,transparent)}
+#world-inventory #world-progression-view .skills-tabs button[aria-pressed=true] i{opacity:1;box-shadow:0 0 6px var(--tree)}
+#world-inventory #world-progression-view .skills-tabs b{position:absolute;top:-6px;right:-3px;min-width:18px;height:18px;padding:0 5px;box-sizing:border-box;border-radius:9px;background:#f0c75e;color:#231703;font:700 11px/18px var(--rpg-ui);box-shadow:0 0 8px #f0c75e80}
+#world-inventory #world-progression-view .skills-tabs b[hidden]{display:none}
+#world-inventory #world-progression-view .skills-head{display:flex;align-items:center;gap:8px;padding:5px 6px 5px 10px;background:#111920;border:1px solid #29343e;border-radius:8px;min-height:40px;box-sizing:border-box}
+#world-inventory #world-progression-view .skills-head.gained{animation:skills-gain .5s ease-out}
+#world-inventory #world-progression-view .skills-level{font:700 13px var(--rpg-ui);color:#ecd9a6;white-space:nowrap}
+#world-inventory #world-progression-view .skills-xp{position:relative;flex:1;min-width:0;height:18px;border-radius:9px;background:#070b10;overflow:hidden;box-shadow:inset 0 1px 3px #000c,0 0 0 1px #26313b}
+#world-inventory #world-progression-view .skills-xp i{position:absolute;inset:0;transform-origin:0 50%;background:linear-gradient(#ffffff45,#ffffff00 60%),var(--tree);transition:transform .35s ease-out}
+#world-inventory #world-progression-view .skills-xp span{position:relative;display:block;text-align:center;font:600 11px/18px var(--rpg-ui);color:#fff;text-shadow:0 1px 2px #000,0 0 3px #000;white-space:nowrap}
+#world-inventory #world-progression-view .skills-xp.flat{background:transparent;box-shadow:none}
+#world-inventory #world-progression-view .skills-xp.flat span{color:#9aa7ad;text-shadow:none;text-align:left}
+#world-inventory #world-progression-view .skills-sp{font:700 12px/22px var(--rpg-ui);padding:0 9px;border-radius:11px;background:#212b34;color:#8f9aa1;white-space:nowrap}
+#world-inventory #world-progression-view .skills-sp.has{background:#f0c75e;color:#231703;box-shadow:0 0 10px #f0c75e66}
+#world-inventory #world-progression-view .skills-mode{display:flex;border:1px solid #33404b;border-radius:7px;overflow:hidden;flex-shrink:0}
+#world-inventory #world-progression-view .skills-mode button{min-height:30px;min-width:40px;padding:0 6px;border:0;border-radius:0;background:#161f27;color:#8f9aa1;font:600 11px var(--rpg-ui);box-shadow:none}
+#world-inventory #world-progression-view .skills-mode button[aria-pressed=true]{background:#2d3a46;color:#fff}
+#world-inventory #world-progression-view .skills-body{position:relative;flex:1;min-height:0;display:flex;border:1px solid #29343e;border-radius:10px;overflow:hidden;background:radial-gradient(ellipse 90% 60% at 50% 25%,color-mix(in srgb,var(--tree) 12%,#121b24),#0a1016 80%)}
+#world-inventory #world-progression-view .skills-scroll{flex:1;min-width:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scroll-padding-bottom:var(--sheet,0px)}
+#world-inventory #world-progression-view .skills-scroll::after{content:"";display:block;height:var(--sheet,0px)}
+#world-inventory #world-progression-view .skills-tree{position:relative;height:clamp(calc((var(--rows) - 1) * 88px + 96px),100%,calc((var(--rows) - 1) * 116px + 96px));touch-action:pan-y}
+#world-inventory #world-progression-view .skills-plane{position:absolute;inset:32px 0 64px}
+#world-inventory #world-progression-view .skills-plane svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+#world-inventory #world-progression-view .skills-plane line{stroke:#2b3640;stroke-width:2;vector-effect:non-scaling-stroke}
+#world-inventory #world-progression-view .skills-plane line.reach{stroke:#6f7d87;stroke-dasharray:4 4}
+#world-inventory #world-progression-view .skills-plane line.lit{stroke:var(--tree);stroke-width:3;filter:drop-shadow(0 0 3px var(--tree))}
+#world-inventory #world-progression-view .skill-node{position:absolute;transform:translate(-50%,-23px);min-width:52px;min-height:0;padding:0;margin:0;border:0;background:none;box-shadow:none;display:flex;flex-direction:column;align-items:center;gap:0;color:#7f8b92;-webkit-tap-highlight-color:transparent}
+#world-inventory #world-progression-view .skill-disc{position:relative;flex-shrink:0;width:46px;height:46px;box-sizing:border-box;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 40% 30%,#24303a,#10171d);border:2px solid #36424c;box-shadow:0 3px 8px #000b;transition:border-color .2s,box-shadow .2s}
+#world-inventory #world-progression-view .skill-disc img{width:24px;height:24px;opacity:.4;filter:grayscale(.8)}
+#world-inventory #world-progression-view .skill-disc small{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);padding:0 5px;border-radius:7px;background:#0a0f14;border:1px solid #36424c;color:#aeb7ba;font:600 9px/13px var(--rpg-ui);white-space:nowrap}
+#world-inventory #world-progression-view .skill-name{margin-top:10px;max-width:100%;padding:1px 4px;box-sizing:border-box;border-radius:5px;background:#0a1016d9;font:600 10px/12px var(--rpg-ui);text-align:center;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:break-word}
+#world-inventory #world-progression-view .keystone .skill-disc{border-radius:13px}
+#world-inventory #world-progression-view .endless .skill-disc{box-shadow:0 0 0 3px #0a1016,0 0 0 4px #36424c,0 3px 8px #000b}
+#world-inventory #world-progression-view .owned .skill-disc{border-color:var(--art);background:radial-gradient(circle at 40% 30%,color-mix(in srgb,var(--art) 38%,#24303a),#10171d)}
+#world-inventory #world-progression-view .owned .skill-disc img,#world-inventory #world-progression-view .available .skill-disc img{opacity:1;filter:none}
+#world-inventory #world-progression-view .owned .skill-disc small{border-color:var(--art);color:#fff}
+#world-inventory #world-progression-view .skill-node.owned{color:#eef2f2}
+#world-inventory #world-progression-view .available .skill-disc{border-color:#f0c75e;animation:skills-ready 1.8s ease-in-out infinite}
+#world-inventory #world-progression-view .owned.available .skill-disc{border-color:var(--art)}
+#world-inventory #world-progression-view .skill-node.available{color:#f6dd9b}
+#world-inventory #world-progression-view .available .skill-disc::after,#world-inventory #world-progression-view .maxed .skill-disc::after{position:absolute;top:-5px;right:-5px;width:17px;height:17px;border-radius:50%;font:800 12px/17px var(--rpg-ui);text-align:center;box-shadow:0 1px 3px #000a}
+#world-inventory #world-progression-view .available .skill-disc::after{content:"+";background:#f0c75e;color:#231703}
+#world-inventory #world-progression-view .maxed .skill-disc::after{content:"\2713";background:#7fe0a0;color:#0b2414;font-size:10px}
+#world-inventory #world-progression-view .skill-node.selected .skill-disc{outline:2px solid #fff;outline-offset:3px}
+#world-inventory #world-progression-view .skill-node.learned .skill-disc{animation:skills-learned .7s ease-out}
+#world-inventory #world-progression-view .skills-foot{display:flex;flex-direction:column;align-items:center;gap:8px;padding:6px 14px 16px}
+#world-inventory #world-progression-view .skills-note{margin:0;text-align:center;font:12px/1.5 var(--rpg-ui);color:#93a1a8}
+#world-inventory #world-progression-view .skills-reset{min-height:36px;padding:0 14px;border:1px solid #3a4651;border-radius:18px;background:transparent;color:#9aa7ad;font:600 12px var(--rpg-ui);box-shadow:none}
+#world-inventory #world-progression-view .skills-reset-confirm{display:flex;gap:8px}
+#world-inventory #world-progression-view .skills-reset-confirm button{min-height:40px;padding:0 14px;border-radius:20px;border:1px solid #3a4651;background:#18212a;color:#dfe5e6;font:600 12px var(--rpg-ui);box-shadow:none}
+#world-inventory #world-progression-view .skills-reset-confirm .danger{background:#5b2028;border-color:#b34e57;color:#fff}
+#world-inventory #world-progression-view .skills-list{display:flex;flex-direction:column;gap:6px;padding:8px}
+#world-inventory #world-progression-view .skills-list h4{margin:8px 2px 0;font:700 10px var(--rpg-ui);letter-spacing:.14em;text-transform:uppercase;color:#8fa0a8}
+#world-inventory #world-progression-view .skills-row{display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:56px;padding:7px 10px 7px 8px;text-align:left;border:1px solid #26313b;border-radius:10px;background:#131b23;color:#dfe5e6;box-shadow:none}
+#world-inventory #world-progression-view .skills-row .skill-disc{width:40px;height:40px}
+#world-inventory #world-progression-view .skills-row .skill-disc img{width:21px;height:21px}
+#world-inventory #world-progression-view .skills-row strong{display:block;font:600 13px/1.3 var(--rpg-ui);color:#eef2f2}
+#world-inventory #world-progression-view .skills-row small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font:11px/1.35 var(--rpg-ui);color:#8f9ca3}
+#world-inventory #world-progression-view .skills-row em{font:700 11px var(--rpg-ui);font-style:normal;padding:3px 9px;border-radius:10px;background:#212b34;color:#aeb7ba;white-space:nowrap}
+#world-inventory #world-progression-view .skills-row.locked strong{color:#9aa7ad}
+#world-inventory #world-progression-view .skills-row.available{border-color:#f0c75e80;background:linear-gradient(90deg,#f0c75e14,#131b23 60%)}
+#world-inventory #world-progression-view .skills-row.available em{background:#f0c75e;color:#231703}
+#world-inventory #world-progression-view .skills-row.maxed em{background:#1f3a2a;color:#8fe6ad}
+#world-inventory #world-progression-view .skills-row.selected{border-color:#fff}
+#world-inventory #world-progression-view .skills-sheet{position:absolute;left:0;right:0;bottom:0;z-index:4;max-height:72%;display:flex;flex-direction:column;background:linear-gradient(#1c2731,#121a22 40%);border-top:2px solid var(--tree);border-radius:16px 16px 0 0;box-shadow:0 -12px 30px #000d;transform:translateY(calc(100% + 12px));transition:transform .26s cubic-bezier(.2,.85,.25,1),visibility 0s .26s;visibility:hidden}
+#world-inventory #world-progression-view .skills-sheet.open{transform:none;visibility:visible;transition:transform .26s cubic-bezier(.2,.85,.25,1)}
+#world-inventory #world-progression-view .skills-sheet.dragging{transition:none}
+#world-inventory #world-progression-view .skills-sheet-grab{flex-shrink:0;height:22px;touch-action:none;cursor:grab;position:relative}
+#world-inventory #world-progression-view .skills-sheet-grab::before{content:"";position:absolute;left:50%;top:8px;width:38px;height:4px;margin-left:-19px;border-radius:2px;background:#56636d}
+#world-inventory #world-progression-view .skills-sheet-body{overflow-y:auto;overscroll-behavior:contain;padding:0 14px 14px}
+#world-inventory #world-progression-view .sheet-empty{margin:24px 8px;text-align:center;font:13px/1.5 var(--rpg-ui);color:#8f9ca3}
+#world-inventory #world-progression-view .sheet-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center}
+#world-inventory #world-progression-view .sheet-head .skill-disc{width:50px;height:50px}
+#world-inventory #world-progression-view .sheet-head .skill-disc img{width:27px;height:27px}
+#world-inventory #world-progression-view .sheet-head h3{margin:0;font:700 17px/1.25 var(--rpg-title);color:#f4e7c4;letter-spacing:0;text-transform:none;border:0;padding:0}
+#world-inventory #world-progression-view .sheet-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+#world-inventory #world-progression-view .sheet-tags span{font:600 10px/18px var(--rpg-ui);padding:0 8px;border-radius:9px;background:#26313b;color:#c3ccd0}
+#world-inventory #world-progression-view .sheet-tags span.done{background:#1f3a2a;color:#8fe6ad}
+#world-inventory #world-progression-view .sheet-close{width:40px;min-width:40px;min-height:40px;padding:0;border:1px solid #33404b;border-radius:50%;background:#161f27;color:#c3ccd0;font:20px/1 var(--rpg-ui);align-self:start;box-shadow:none}
+#world-inventory #world-progression-view .sheet-desc{margin:12px 0 8px;font:13px/1.5 var(--rpg-ui);color:#e3e8e9}
+#world-inventory #world-progression-view .sheet-effect{display:grid;grid-template-columns:50px minmax(0,1fr);gap:8px;margin-top:6px;padding:8px 10px;border-radius:8px;background:#0b1117;border-left:3px solid #4b5862;font:12px/1.45 var(--rpg-ui);color:#cdd5d8}
+#world-inventory #world-progression-view .sheet-effect b{font:700 10px/17px var(--rpg-ui);letter-spacing:.1em;color:#8fa0a8}
+#world-inventory #world-progression-view .sheet-effect.next{border-left-color:#f0c75e}
+#world-inventory #world-progression-view .sheet-effect.next b{color:#f0c75e}
+#world-inventory #world-progression-view .sheet-needs{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px}
+#world-inventory #world-progression-view .sheet-needs small{font:600 11px var(--rpg-ui);color:#8fa0a8;margin-right:2px}
+#world-inventory #world-progression-view .sheet-needs>span,#world-inventory #world-progression-view .sheet-needs button{min-height:30px;display:inline-flex;align-items:center;padding:0 11px;border-radius:15px;border:1px solid #3a4651;background:#161f27;color:#c3ccd0;font:600 11px var(--rpg-ui);box-shadow:none}
+#world-inventory #world-progression-view .sheet-needs button{border-color:#6f7d87;color:#eef2f2;text-decoration:underline;text-decoration-color:#6f7d8780;text-underline-offset:3px}
+#world-inventory #world-progression-view .sheet-needs .met{border-color:#3f7a55;color:#8fe6ad;background:#14241b}
+#world-inventory #world-progression-view .sheet-needs .note{border-style:dashed;color:#e0c27c}
+#world-inventory #world-progression-view .sheet-buy{width:100%;min-height:50px;margin:14px 0 0;border:1px solid #ffe39a;border-radius:12px;background:linear-gradient(#f4cf6a,#c98d1d);color:#1f1404;font:700 15px var(--rpg-ui);letter-spacing:.02em;box-shadow:0 4px 14px #f0c75e40,inset 0 1px 0 #fff6}
+#world-inventory #world-progression-view .sheet-buy:disabled{opacity:1;border-color:#33404b;background:#1b242d;color:#76838b;box-shadow:none}
+#world-inventory #world-progression-view .sheet-why{margin:8px 0 0;text-align:center;font:12px/1.45 var(--rpg-ui);color:#e0bd6f}
+@keyframes skills-ready{0%,100%{box-shadow:0 0 0 0 #f0c75e00,0 3px 8px #000b}50%{box-shadow:0 0 0 4px #f0c75e2e,0 0 16px #f0c75e8c}}
+@keyframes skills-learned{0%{transform:scale(1.35);box-shadow:0 0 0 6px color-mix(in srgb,var(--art) 45%,transparent),0 0 26px var(--art)}100%{transform:none}}
+@keyframes skills-gain{0%{box-shadow:inset 0 0 14px color-mix(in srgb,var(--tree) 60%,transparent)}100%{box-shadow:none}}
+@media(min-width:700px){
+ #world-inventory #world-progression-view .skills-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(250px,36%)}
+ #world-inventory #world-progression-view .skills-scroll::after{display:none}
+ #world-inventory #world-progression-view .skills-sheet{position:relative;inset:auto;max-height:none;min-height:0;transform:none;visibility:visible;border-top:0;border-left:1px solid #29343e;border-radius:0;box-shadow:none;background:#111920e6}
+ #world-inventory #world-progression-view .skills-sheet-grab,#world-inventory #world-progression-view .sheet-close{display:none}
+ #world-inventory #world-progression-view .skills-sheet-body{padding-top:14px}
+}
+@media(max-height:500px) and (min-width:601px){
+ #world-inventory #world-progression-view .skills-top{flex-direction:row}
+ #world-inventory #world-progression-view .skills-tabs{flex:1.1}
+ #world-inventory #world-progression-view .skills-tabs button{min-height:36px}
+ #world-inventory #world-progression-view .skills-head{flex:1;min-height:36px}
+ #world-inventory #world-progression-view .skills-tree{height:calc((var(--rows) - 1) * 88px + 96px)}
+}

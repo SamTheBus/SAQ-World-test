@@ -607,6 +607,7 @@ import {
   siteSupportsResetD13C,
   siteTransitionTarget,
   spendGuard,
+  spentPoints,
   sporeOrdinal,
   sporeReinforcementV4,
   stepActorMovement,
@@ -702,7 +703,7 @@ import {
   worldLevelGapMultiplier,
   worldOrdinaryMeleeProfile,
   worldPointForArea
-} from "./chunk-4XZNGA5C.js";
+} from "./chunk-J6BO7LTG.js";
 
 // src/client/authority_clock.js
 var AUTHORITY_CLOCK_PERIOD_MS = 1e3 / 60;
@@ -26178,9 +26179,6 @@ function createCharacterStatsV3({ document: doc }) {
   } };
 }
 
-// src/client/progression_icons.js
-var PROGRESSION_ICONS = Object.freeze({ "shield_starter": { "color": "#38bdf8", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%2338bdf8%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2022s8-4%208-10V5l-8-3-8%203v7c0%206%208%2010%208%2010z%22%20/%3E%3Cline%20x1%3D%2212%22%20y1%3D%228%22%20x2%3D%2212%22%20y2%3D%2216%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20/%3E%3Cline%20x1%3D%228%22%20y1%3D%2212%22%20x2%3D%2216%22%20y2%3D%2212%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20/%3E%3C/g%3E%3C/svg%3E" }, "shield_hp": { "color": "#ff4757", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23ff4757%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%23ff4757%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2021.35l-1.45-1.32C5.4%2015.36%202%2012.28%202%208.5%202%205.42%204.42%203%207.5%203c1.74%200%203.41.81%204.5%202.09C13.09%203.81%2014.76%203%2016.5%203%2019.58%203%2022%205.42%2022%208.5c0%203.78-3.4%206.86-8.55%2011.54L12%2021.35z%22%20/%3E%3C/g%3E%3C/svg%3E" }, "shield_def": { "color": "#38bdf8", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%2338bdf8%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%202L4%205v6c0%205.55%203.84%2010.74%208%2012%204.16-1.26%208-6.45%208-12V5l-8-3z%22%20/%3E%3C/g%3E%3C/svg%3E" }, "shield_block": { "color": "#3498db", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%233498db%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%233498db%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2022s8-4%208-10V5l-8-3-8%203v7c0%206%208%2010%208%2010z%22%20/%3E%3Cpath%20d%3D%22M8%2010h8v4H8z%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.3%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.2%22%20/%3E%3C/g%3E%3C/svg%3E" }, "shield_bash": { "color": "#f1c40f", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23f1c40f%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%23f1c40f%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2022s8-4%208-10V5l-8-3-8%203v7c0%206%208%2010%208%2010z%22%20/%3E%3Cpath%20d%3D%22M12%202v4M12%2018v4M2%2012h4M18%2012h4%22%20stroke%3D%22%23f1c40f%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20/%3E%3C/g%3E%3C/svg%3E" }, "shield_fortitude": { "color": "#2ecc71", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%232ecc71%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%232ecc71%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2022s8-4%208-10V5l-8-3-8%203v7c0%206%208%2010%208%2010z%22%20/%3E%3Cpolyline%20points%3D%228%2C14%2012%2C10%2016%2C14%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222.2%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20/%3E%3C/g%3E%3C/svg%3E" }, "shield_keystone": { "color": "#a855f7", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23a855f7%22%20fill-opacity%3D%220.3%22%20stroke%3D%22%23a855f7%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2022s8-4%208-10V5l-8-3-8%203v7c0%206%208%2010%208%2010z%22%20fill%3D%22%23a855f7%22%20fill-opacity%3D%220.4%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.5%22%20stroke-dasharray%3D%223%202%22%20/%3E%3C/g%3E%3C/svg%3E" }, "dagger_starter": { "color": "#a855f7", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23a855f7%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%23a855f7%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%202L15%208L13%2018H11L9%208Z%22%20fill%3D%22%23a855f7%22%20stroke%3D%22%23a855f7%22%20stroke-width%3D%221.5%22%20/%3E%3Crect%20x%3D%228%22%20y%3D%2218%22%20width%3D%228%22%20height%3D%222%22%20fill%3D%22%23ffffff%22%20/%3E%3Crect%20x%3D%2211%22%20y%3D%2220%22%20width%3D%222%22%20height%3D%224%22%20fill%3D%22%23333%22%20/%3E%3Cline%20x1%3D%2212%22%20y1%3D%222%22%20x2%3D%2212%22%20y2%3D%2218%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221%22%20/%3E%3C/g%3E%3C/svg%3E" }, "dagger_crit": { "color": "#f1c40f", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23f1c40f%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%23f1c40f%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpolygon%20points%3D%2212%2C2%2015%2C9%2022%2C9%2017%2C14%2019%2C21%2012%2C17%205%2C21%207%2C14%202%2C9%209%2C9%22%20/%3E%3C/g%3E%3C/svg%3E" }, "dagger_crit_dmg": { "color": "#e67e22", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23e67e22%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%23e67e22%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M13%202L3%2014h9l-1%208%2010-12h-9l1-8z%22%20/%3E%3C/g%3E%3C/svg%3E" }, "dagger_parry": { "color": "#c084fc", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23c084fc%22%20fill-opacity%3D%220.15%22%20stroke%3D%22%23c084fc%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%2020L20%204M4%2020L2%2022M5%2015L9%2019M20%2020L4%204M20%2020L22%2022M15%2019L19%2015%22%20stroke%3D%22%23c084fc%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%222.5%22%20fill%3D%22%23ffffff%22%20stroke%3D%22%23c084fc%22%20stroke-width%3D%221%22%20/%3E%3C/g%3E%3C/svg%3E" }, "dagger_bleed": { "color": "#e74c3c", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23e74c3c%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%23e74c3c%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%202L16%209%20L14%2017%20H10%20L8%209%20Z%22%20fill%3D%22%23960018%22%20stroke%3D%22%23e74c3c%22%20stroke-width%3D%221.5%22%20/%3E%3Cpath%20d%3D%22M12%2014%20C10%2017%2C%2010%2020%2C%2012%2022%20C14%2020%2C%2014%2017%2C%2012%2014%20Z%22%20fill%3D%22%23e74c3c%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%220.8%22%20/%3E%3C/g%3E%3C/svg%3E" }, "dagger_riposte": { "color": "#f1c40f", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23f1c40f%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%23f1c40f%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%202L16%2010H8Z%22%20fill%3D%22%23f1c40f%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.2%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%228%22%20fill%3D%22none%22%20stroke%3D%22%23f1c40f%22%20stroke-width%3D%221.5%22%20stroke-dasharray%3D%222%202%22%20/%3E%3Cpath%20d%3D%22M12%206v12M6%2012h12%22%20stroke%3D%22%23e74c3c%22%20stroke-width%3D%221.8%22%20/%3E%3C/g%3E%3C/svg%3E" }, "dagger_keystone": { "color": "#e84393", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23e84393%22%20fill-opacity%3D%220.3%22%20stroke%3D%22%23e84393%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M8%204L11%2012H5Z%20M16%204L19%2012H13Z%22%20fill%3D%22%23e84393%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.2%22%20/%3E%3Cpath%20d%3D%22M3%2018Q12%2010%2C%2021%2018%22%20fill%3D%22none%22%20stroke%3D%22%23e84393%22%20stroke-width%3D%222%22%20stroke-dasharray%3D%223%202%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2218%22%20r%3D%223%22%20fill%3D%22%23ffffff%22%20stroke%3D%22%23e84393%22%20stroke-width%3D%221%22%20/%3E%3C/g%3E%3C/svg%3E" }, "tome_starter": { "color": "#3498db", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%233498db%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%233498db%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%225%22%20y%3D%226%22%20width%3D%2214%22%20height%3D%2215%22%20rx%3D%221.5%22%20fill%3D%22%233498db%22%20fill-opacity%3D%220.3%22%20stroke%3D%22%233498db%22%20stroke-width%3D%221.8%22%20/%3E%3Crect%20x%3D%225%22%20y%3D%226%22%20width%3D%223%22%20height%3D%2215%22%20fill%3D%22%231e293b%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2213.5%22%20r%3D%222.5%22%20fill%3D%22%23ffffff%22%20stroke%3D%22%233498db%22%20stroke-width%3D%221%22%20/%3E%3Cpath%20d%3D%22M12%202v3M12%2021v2M2%2013.5h3M21%2013.5h2%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20/%3E%3C/g%3E%3C/svg%3E" }, "tome_atk": { "color": "#e74c3c", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23e74c3c%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%23e74c3c%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M14.5%2017.5L3%206V3h3l11.5%2011.5%20M13%2019l6-6%20M16%2016l4%204%20M19%2021l2-2%22%20/%3E%3C/g%3E%3C/svg%3E" }, "tome_exp": { "color": "#a855f7", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23a855f7%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%23a855f7%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%2210%22%20/%3E%3Cpath%20d%3D%22M12%206v6l4%202%22%20/%3E%3C/g%3E%3C/svg%3E" }, "tome_barrier": { "color": "#9b59b6", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%239b59b6%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%239b59b6%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%227%22%20y%3D%227%22%20width%3D%2210%22%20height%3D%2212%22%20rx%3D%221%22%20fill%3D%22%239b59b6%22%20fill-opacity%3D%220.4%22%20stroke%3D%22%239b59b6%22%20stroke-width%3D%221.5%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2213%22%20r%3D%229%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.8%22%20stroke-dasharray%3D%224%202%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2213%22%20r%3D%2211%22%20fill%3D%22none%22%20stroke%3D%22%239b59b6%22%20stroke-width%3D%221%22%20opacity%3D%220.6%22%20/%3E%3C/g%3E%3C/svg%3E" }, "tome_proc": { "color": "#00d2ff", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%2300d2ff%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%2300d2ff%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%226%22%20y%3D%226%22%20width%3D%2212%22%20height%3D%2214%22%20rx%3D%221.5%22%20fill%3D%22%2300d2ff%22%20fill-opacity%3D%220.3%22%20stroke%3D%22%2300d2ff%22%20stroke-width%3D%221.8%22%20/%3E%3Cpath%20d%3D%22M18%204L16%209h4l-2%205%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20fill%3D%22none%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2213%22%20r%3D%222%22%20fill%3D%22%23ffffff%22%20/%3E%3C/g%3E%3C/svg%3E" }, "tome_power": { "color": "#f1c40f", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23f1c40f%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%23f1c40f%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%228%22%20cy%3D%228%22%20r%3D%223%22%20fill%3D%22%23e74c3c%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221%22%20/%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%228%22%20r%3D%223%22%20fill%3D%22%233498db%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2215%22%20r%3D%223.5%22%20fill%3D%22%23f1c40f%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221%22%20/%3E%3Crect%20x%3D%226%22%20y%3D%2219%22%20width%3D%2212%22%20height%3D%223%22%20fill%3D%22%23333%22%20stroke%3D%22%23f1c40f%22%20stroke-width%3D%221%22%20/%3E%3C/g%3E%3C/svg%3E" }, "tome_keystone": { "color": "#e879f9", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23e879f9%22%20fill-opacity%3D%220.3%22%20stroke%3D%22%23e879f9%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%227%22%20y%3D%228%22%20width%3D%2210%22%20height%3D%2212%22%20rx%3D%221%22%20fill%3D%22%23e879f9%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.5%22%20/%3E%3Cpath%20d%3D%22M12%202L12%208%20M4%2018L8%2014%20M20%2018L16%2014%22%20stroke%3D%22%23e879f9%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2214%22%20r%3D%222%22%20fill%3D%22%23ffffff%22%20/%3E%3C/g%3E%3C/svg%3E" }, "utility_pioneer": { "color": "#2ecc71", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%232ecc71%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%232ecc71%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22%20fill%3D%22none%22%20stroke%3D%22%232ecc71%22%20stroke-width%3D%221.8%22%20/%3E%3Cpolygon%20points%3D%2212%2C5%2015%2C12%2012%2C19%209%2C12%22%20fill%3D%22%23ffffff%22%20stroke%3D%22%232ecc71%22%20stroke-width%3D%221%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%222%22%20fill%3D%22%23f1c40f%22%20/%3E%3C/g%3E%3C/svg%3E" }, "utility_start_weapon": { "color": "#f1c40f", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23f1c40f%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%23f1c40f%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M14.5%2017.5L3%206V3h3l11.5%2011.5%22%20/%3E%3Ccircle%20cx%3D%2218%22%20cy%3D%2218%22%20r%3D%223%22%20fill%3D%22%23f1c40f%22%20/%3E%3C/g%3E%3C/svg%3E" }, "utility_start_armor": { "color": "#3498db", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%233498db%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%233498db%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%202L4%205v6c0%205.55%203.84%2010.74%208%2012%204.16-1.26%208-6.45%208-12V5l-8-3z%22%20/%3E%3Cpath%20d%3D%22M12%206v12%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.5%22%20/%3E%3C/g%3E%3C/svg%3E" }, "utility_start_head_feet": { "color": "#2ecc71", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%232ecc71%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%232ecc71%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%205h12v6H6z%20M8%2013h8v6H8z%22%20/%3E%3C/g%3E%3C/svg%3E" }, "utility_start_ring": { "color": "#e879f9", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23e879f9%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%23e879f9%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%227%22%20stroke%3D%22%23e879f9%22%20stroke-width%3D%222%22%20fill%3D%22none%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%225%22%20r%3D%222%22%20fill%3D%22%23ffffff%22%20/%3E%3C/g%3E%3C/svg%3E" }, "utility_gold": { "color": "#f1c40f", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23f1c40f%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%23f1c40f%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22%20fill%3D%22%23f1c40f%22%20fill-opacity%3D%220.3%22%20stroke%3D%22%23f1c40f%22%20stroke-width%3D%222%22%20/%3E%3Cpath%20d%3D%22M12%207v10M9%209h6M9%2014h6%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.5%22%20/%3E%3C/g%3E%3C/svg%3E" }, "utility_vitality": { "color": "#2ecc71", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%232ecc71%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%232ecc71%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2021.35l-1.45-1.32C5.4%2015.36%202%2012.28%202%208.5%202%205.42%204.42%203%207.5%203c1.74%200%203.41.81%204.5%202.09C13.09%203.81%2014.76%203%2016.5%203%2019.58%203%2022%205.42%2022%208.5c0%203.78-3.4%206.86-8.55%2011.54L12%2021.35z%22%20/%3E%3C/g%3E%3C/svg%3E" }, "utility_quality": { "color": "#ec4899", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23ec4899%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%23ec4899%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M2%2012s4-7%2010-7%2010%207%2010%207-4%207-10%207-10-7-10-7z%22%20fill%3D%22none%22%20stroke%3D%22%23ec4899%22%20stroke-width%3D%221.8%22%20/%3E%3Cpolygon%20points%3D%2212%2C7%2015%2C12%2012%2C17%209%2C12%22%20fill%3D%22%23ffffff%22%20stroke%3D%22%23ec4899%22%20stroke-width%3D%221%22%20/%3E%3C/g%3E%3C/svg%3E" }, "utility_elixir": { "color": "#34d399", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%2334d399%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%2334d399%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M10%205h4v3l4%208a2%202%200%200%201-1.8%203H7.8A2%202%200%200%201%206%2016l4-8V5z%22%20fill%3D%22%2334d399%22%20fill-opacity%3D%220.3%22%20stroke%3D%22%2334d399%22%20stroke-width%3D%221.8%22%20stroke-linejoin%3D%22round%22%20/%3E%3Crect%20x%3D%229%22%20y%3D%223%22%20width%3D%226%22%20height%3D%222%22%20fill%3D%22%23a0522d%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2214%22%20r%3D%222%22%20fill%3D%22%23ffffff%22%20/%3E%3C/g%3E%3C/svg%3E" }, "utility_bag": { "color": "#38bdf8", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%2338bdf8%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%225%22%20y%3D%228%22%20width%3D%2214%22%20height%3D%2212%22%20rx%3D%222%22%20fill%3D%22%2338bdf8%22%20fill-opacity%3D%220.3%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%221.8%22%20/%3E%3Cpath%20d%3D%22M9%208V6a3%203%200%200%201%206%200v2%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.5%22%20/%3E%3Cline%20x1%3D%222%22%20y1%3D%2214%22%20x2%3D%224%22%20y2%3D%2214%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20/%3E%3Cline%20x1%3D%2220%22%20y1%3D%2214%22%20x2%3D%2222%22%20y2%3D%2214%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20/%3E%3C/g%3E%3C/svg%3E" }, "utility_insurance": { "color": "#f1c40f", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23f1c40f%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%23f1c40f%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%204h12v16H6z%22%20fill%3D%22%23f1c40f%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%23f1c40f%22%20stroke-width%3D%221.8%22%20/%3E%3Cpath%20d%3D%22M12%207l4%202v4c0%203-4%205-4%205s-4-2-4-5V9l4-2z%22%20fill%3D%22%23ffffff%22%20stroke%3D%22%23f1c40f%22%20stroke-width%3D%221%22%20/%3E%3C/g%3E%3C/svg%3E" }, "utility_keystone": { "color": "#ffd700", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23ffd700%22%20fill-opacity%3D%220.35%22%20stroke%3D%22%23ffd700%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%2016l3-8%205%204%205-4%203%208H4z%22%20fill%3D%22%23ffd700%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%20/%3E%3Crect%20x%3D%224%22%20y%3D%2216%22%20width%3D%2216%22%20height%3D%223%22%20fill%3D%22%23ffd700%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2211%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20/%3E%3C/g%3E%3C/svg%3E" } });
-
 // src/client/progression_copy.js
 var pct = (n, r) => `${Math.round(n * r * 1e4) / 100}%`;
 var flat = (n, r) => Math.round(n * r * 1e3) / 1e3;
@@ -26305,6 +26303,354 @@ function nodeEffect(node, rank) {
 }
 var ATTRIBUTE_MEANINGS = Object.freeze({ str: "Each STR above 5: +2.5 Attack, +10 Max HP, +0.1% HP, +0.1% Shield/main-family Attack scaling and +0.1% raw Block chance.", dex: "Each DEX above 5: +1 Attack, +0.1% Dagger Attack scaling and +0.01% Critical multiplier. Does not inherently grant Critical chance or movement.", int: "Each INT above 5: +0.2 Defense and +0.1% Tome Attack scaling. Tome Barrier gains the source diminishing-return INT contribution. Mastery may add late INT effects." });
 
+// src/client/progression_icons.js
+var PROGRESSION_ICONS = Object.freeze({ "shield_starter": { "color": "#38bdf8", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%2338bdf8%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2022s8-4%208-10V5l-8-3-8%203v7c0%206%208%2010%208%2010z%22%20/%3E%3Cline%20x1%3D%2212%22%20y1%3D%228%22%20x2%3D%2212%22%20y2%3D%2216%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20/%3E%3Cline%20x1%3D%228%22%20y1%3D%2212%22%20x2%3D%2216%22%20y2%3D%2212%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20/%3E%3C/g%3E%3C/svg%3E" }, "shield_hp": { "color": "#ff4757", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23ff4757%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%23ff4757%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2021.35l-1.45-1.32C5.4%2015.36%202%2012.28%202%208.5%202%205.42%204.42%203%207.5%203c1.74%200%203.41.81%204.5%202.09C13.09%203.81%2014.76%203%2016.5%203%2019.58%203%2022%205.42%2022%208.5c0%203.78-3.4%206.86-8.55%2011.54L12%2021.35z%22%20/%3E%3C/g%3E%3C/svg%3E" }, "shield_def": { "color": "#38bdf8", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%2338bdf8%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%202L4%205v6c0%205.55%203.84%2010.74%208%2012%204.16-1.26%208-6.45%208-12V5l-8-3z%22%20/%3E%3C/g%3E%3C/svg%3E" }, "shield_block": { "color": "#3498db", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%233498db%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%233498db%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2022s8-4%208-10V5l-8-3-8%203v7c0%206%208%2010%208%2010z%22%20/%3E%3Cpath%20d%3D%22M8%2010h8v4H8z%22%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.3%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.2%22%20/%3E%3C/g%3E%3C/svg%3E" }, "shield_bash": { "color": "#f1c40f", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23f1c40f%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%23f1c40f%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2022s8-4%208-10V5l-8-3-8%203v7c0%206%208%2010%208%2010z%22%20/%3E%3Cpath%20d%3D%22M12%202v4M12%2018v4M2%2012h4M18%2012h4%22%20stroke%3D%22%23f1c40f%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20/%3E%3C/g%3E%3C/svg%3E" }, "shield_fortitude": { "color": "#2ecc71", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%232ecc71%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%232ecc71%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2022s8-4%208-10V5l-8-3-8%203v7c0%206%208%2010%208%2010z%22%20/%3E%3Cpolyline%20points%3D%228%2C14%2012%2C10%2016%2C14%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222.2%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20/%3E%3C/g%3E%3C/svg%3E" }, "shield_keystone": { "color": "#a855f7", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23a855f7%22%20fill-opacity%3D%220.3%22%20stroke%3D%22%23a855f7%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2022s8-4%208-10V5l-8-3-8%203v7c0%206%208%2010%208%2010z%22%20fill%3D%22%23a855f7%22%20fill-opacity%3D%220.4%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.5%22%20stroke-dasharray%3D%223%202%22%20/%3E%3C/g%3E%3C/svg%3E" }, "dagger_starter": { "color": "#a855f7", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23a855f7%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%23a855f7%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%202L15%208L13%2018H11L9%208Z%22%20fill%3D%22%23a855f7%22%20stroke%3D%22%23a855f7%22%20stroke-width%3D%221.5%22%20/%3E%3Crect%20x%3D%228%22%20y%3D%2218%22%20width%3D%228%22%20height%3D%222%22%20fill%3D%22%23ffffff%22%20/%3E%3Crect%20x%3D%2211%22%20y%3D%2220%22%20width%3D%222%22%20height%3D%224%22%20fill%3D%22%23333%22%20/%3E%3Cline%20x1%3D%2212%22%20y1%3D%222%22%20x2%3D%2212%22%20y2%3D%2218%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221%22%20/%3E%3C/g%3E%3C/svg%3E" }, "dagger_crit": { "color": "#f1c40f", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23f1c40f%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%23f1c40f%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpolygon%20points%3D%2212%2C2%2015%2C9%2022%2C9%2017%2C14%2019%2C21%2012%2C17%205%2C21%207%2C14%202%2C9%209%2C9%22%20/%3E%3C/g%3E%3C/svg%3E" }, "dagger_crit_dmg": { "color": "#e67e22", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23e67e22%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%23e67e22%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M13%202L3%2014h9l-1%208%2010-12h-9l1-8z%22%20/%3E%3C/g%3E%3C/svg%3E" }, "dagger_parry": { "color": "#c084fc", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23c084fc%22%20fill-opacity%3D%220.15%22%20stroke%3D%22%23c084fc%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%2020L20%204M4%2020L2%2022M5%2015L9%2019M20%2020L4%204M20%2020L22%2022M15%2019L19%2015%22%20stroke%3D%22%23c084fc%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%222.5%22%20fill%3D%22%23ffffff%22%20stroke%3D%22%23c084fc%22%20stroke-width%3D%221%22%20/%3E%3C/g%3E%3C/svg%3E" }, "dagger_bleed": { "color": "#e74c3c", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23e74c3c%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%23e74c3c%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%202L16%209%20L14%2017%20H10%20L8%209%20Z%22%20fill%3D%22%23960018%22%20stroke%3D%22%23e74c3c%22%20stroke-width%3D%221.5%22%20/%3E%3Cpath%20d%3D%22M12%2014%20C10%2017%2C%2010%2020%2C%2012%2022%20C14%2020%2C%2014%2017%2C%2012%2014%20Z%22%20fill%3D%22%23e74c3c%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%220.8%22%20/%3E%3C/g%3E%3C/svg%3E" }, "dagger_riposte": { "color": "#f1c40f", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23f1c40f%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%23f1c40f%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%202L16%2010H8Z%22%20fill%3D%22%23f1c40f%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.2%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%228%22%20fill%3D%22none%22%20stroke%3D%22%23f1c40f%22%20stroke-width%3D%221.5%22%20stroke-dasharray%3D%222%202%22%20/%3E%3Cpath%20d%3D%22M12%206v12M6%2012h12%22%20stroke%3D%22%23e74c3c%22%20stroke-width%3D%221.8%22%20/%3E%3C/g%3E%3C/svg%3E" }, "dagger_keystone": { "color": "#e84393", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23e84393%22%20fill-opacity%3D%220.3%22%20stroke%3D%22%23e84393%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M8%204L11%2012H5Z%20M16%204L19%2012H13Z%22%20fill%3D%22%23e84393%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.2%22%20/%3E%3Cpath%20d%3D%22M3%2018Q12%2010%2C%2021%2018%22%20fill%3D%22none%22%20stroke%3D%22%23e84393%22%20stroke-width%3D%222%22%20stroke-dasharray%3D%223%202%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2218%22%20r%3D%223%22%20fill%3D%22%23ffffff%22%20stroke%3D%22%23e84393%22%20stroke-width%3D%221%22%20/%3E%3C/g%3E%3C/svg%3E" }, "tome_starter": { "color": "#3498db", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%233498db%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%233498db%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%225%22%20y%3D%226%22%20width%3D%2214%22%20height%3D%2215%22%20rx%3D%221.5%22%20fill%3D%22%233498db%22%20fill-opacity%3D%220.3%22%20stroke%3D%22%233498db%22%20stroke-width%3D%221.8%22%20/%3E%3Crect%20x%3D%225%22%20y%3D%226%22%20width%3D%223%22%20height%3D%2215%22%20fill%3D%22%231e293b%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2213.5%22%20r%3D%222.5%22%20fill%3D%22%23ffffff%22%20stroke%3D%22%233498db%22%20stroke-width%3D%221%22%20/%3E%3Cpath%20d%3D%22M12%202v3M12%2021v2M2%2013.5h3M21%2013.5h2%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20/%3E%3C/g%3E%3C/svg%3E" }, "tome_atk": { "color": "#e74c3c", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23e74c3c%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%23e74c3c%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M14.5%2017.5L3%206V3h3l11.5%2011.5%20M13%2019l6-6%20M16%2016l4%204%20M19%2021l2-2%22%20/%3E%3C/g%3E%3C/svg%3E" }, "tome_exp": { "color": "#a855f7", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23a855f7%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%23a855f7%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%2210%22%20/%3E%3Cpath%20d%3D%22M12%206v6l4%202%22%20/%3E%3C/g%3E%3C/svg%3E" }, "tome_barrier": { "color": "#9b59b6", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%239b59b6%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%239b59b6%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%227%22%20y%3D%227%22%20width%3D%2210%22%20height%3D%2212%22%20rx%3D%221%22%20fill%3D%22%239b59b6%22%20fill-opacity%3D%220.4%22%20stroke%3D%22%239b59b6%22%20stroke-width%3D%221.5%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2213%22%20r%3D%229%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.8%22%20stroke-dasharray%3D%224%202%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2213%22%20r%3D%2211%22%20fill%3D%22none%22%20stroke%3D%22%239b59b6%22%20stroke-width%3D%221%22%20opacity%3D%220.6%22%20/%3E%3C/g%3E%3C/svg%3E" }, "tome_proc": { "color": "#00d2ff", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%2300d2ff%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%2300d2ff%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%226%22%20y%3D%226%22%20width%3D%2212%22%20height%3D%2214%22%20rx%3D%221.5%22%20fill%3D%22%2300d2ff%22%20fill-opacity%3D%220.3%22%20stroke%3D%22%2300d2ff%22%20stroke-width%3D%221.8%22%20/%3E%3Cpath%20d%3D%22M18%204L16%209h4l-2%205%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20fill%3D%22none%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2213%22%20r%3D%222%22%20fill%3D%22%23ffffff%22%20/%3E%3C/g%3E%3C/svg%3E" }, "tome_power": { "color": "#f1c40f", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23f1c40f%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%23f1c40f%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%228%22%20cy%3D%228%22%20r%3D%223%22%20fill%3D%22%23e74c3c%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221%22%20/%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%228%22%20r%3D%223%22%20fill%3D%22%233498db%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2215%22%20r%3D%223.5%22%20fill%3D%22%23f1c40f%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221%22%20/%3E%3Crect%20x%3D%226%22%20y%3D%2219%22%20width%3D%2212%22%20height%3D%223%22%20fill%3D%22%23333%22%20stroke%3D%22%23f1c40f%22%20stroke-width%3D%221%22%20/%3E%3C/g%3E%3C/svg%3E" }, "tome_keystone": { "color": "#e879f9", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23e879f9%22%20fill-opacity%3D%220.3%22%20stroke%3D%22%23e879f9%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%227%22%20y%3D%228%22%20width%3D%2210%22%20height%3D%2212%22%20rx%3D%221%22%20fill%3D%22%23e879f9%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.5%22%20/%3E%3Cpath%20d%3D%22M12%202L12%208%20M4%2018L8%2014%20M20%2018L16%2014%22%20stroke%3D%22%23e879f9%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2214%22%20r%3D%222%22%20fill%3D%22%23ffffff%22%20/%3E%3C/g%3E%3C/svg%3E" }, "utility_pioneer": { "color": "#2ecc71", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%232ecc71%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%232ecc71%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22%20fill%3D%22none%22%20stroke%3D%22%232ecc71%22%20stroke-width%3D%221.8%22%20/%3E%3Cpolygon%20points%3D%2212%2C5%2015%2C12%2012%2C19%209%2C12%22%20fill%3D%22%23ffffff%22%20stroke%3D%22%232ecc71%22%20stroke-width%3D%221%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%222%22%20fill%3D%22%23f1c40f%22%20/%3E%3C/g%3E%3C/svg%3E" }, "utility_start_weapon": { "color": "#f1c40f", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23f1c40f%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%23f1c40f%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M14.5%2017.5L3%206V3h3l11.5%2011.5%22%20/%3E%3Ccircle%20cx%3D%2218%22%20cy%3D%2218%22%20r%3D%223%22%20fill%3D%22%23f1c40f%22%20/%3E%3C/g%3E%3C/svg%3E" }, "utility_start_armor": { "color": "#3498db", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%233498db%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%233498db%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%202L4%205v6c0%205.55%203.84%2010.74%208%2012%204.16-1.26%208-6.45%208-12V5l-8-3z%22%20/%3E%3Cpath%20d%3D%22M12%206v12%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.5%22%20/%3E%3C/g%3E%3C/svg%3E" }, "utility_start_head_feet": { "color": "#2ecc71", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%232ecc71%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%232ecc71%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%205h12v6H6z%20M8%2013h8v6H8z%22%20/%3E%3C/g%3E%3C/svg%3E" }, "utility_start_ring": { "color": "#e879f9", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23e879f9%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%23e879f9%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%227%22%20stroke%3D%22%23e879f9%22%20stroke-width%3D%222%22%20fill%3D%22none%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%225%22%20r%3D%222%22%20fill%3D%22%23ffffff%22%20/%3E%3C/g%3E%3C/svg%3E" }, "utility_gold": { "color": "#f1c40f", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23f1c40f%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%23f1c40f%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22%20fill%3D%22%23f1c40f%22%20fill-opacity%3D%220.3%22%20stroke%3D%22%23f1c40f%22%20stroke-width%3D%222%22%20/%3E%3Cpath%20d%3D%22M12%207v10M9%209h6M9%2014h6%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.5%22%20/%3E%3C/g%3E%3C/svg%3E" }, "utility_vitality": { "color": "#2ecc71", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%232ecc71%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%232ecc71%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2021.35l-1.45-1.32C5.4%2015.36%202%2012.28%202%208.5%202%205.42%204.42%203%207.5%203c1.74%200%203.41.81%204.5%202.09C13.09%203.81%2014.76%203%2016.5%203%2019.58%203%2022%205.42%2022%208.5c0%203.78-3.4%206.86-8.55%2011.54L12%2021.35z%22%20/%3E%3C/g%3E%3C/svg%3E" }, "utility_quality": { "color": "#ec4899", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23ec4899%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%23ec4899%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M2%2012s4-7%2010-7%2010%207%2010%207-4%207-10%207-10-7-10-7z%22%20fill%3D%22none%22%20stroke%3D%22%23ec4899%22%20stroke-width%3D%221.8%22%20/%3E%3Cpolygon%20points%3D%2212%2C7%2015%2C12%2012%2C17%209%2C12%22%20fill%3D%22%23ffffff%22%20stroke%3D%22%23ec4899%22%20stroke-width%3D%221%22%20/%3E%3C/g%3E%3C/svg%3E" }, "utility_elixir": { "color": "#34d399", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%2334d399%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%2334d399%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M10%205h4v3l4%208a2%202%200%200%201-1.8%203H7.8A2%202%200%200%201%206%2016l4-8V5z%22%20fill%3D%22%2334d399%22%20fill-opacity%3D%220.3%22%20stroke%3D%22%2334d399%22%20stroke-width%3D%221.8%22%20stroke-linejoin%3D%22round%22%20/%3E%3Crect%20x%3D%229%22%20y%3D%223%22%20width%3D%226%22%20height%3D%222%22%20fill%3D%22%23a0522d%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2214%22%20r%3D%222%22%20fill%3D%22%23ffffff%22%20/%3E%3C/g%3E%3C/svg%3E" }, "utility_bag": { "color": "#38bdf8", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%2338bdf8%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%225%22%20y%3D%228%22%20width%3D%2214%22%20height%3D%2212%22%20rx%3D%222%22%20fill%3D%22%2338bdf8%22%20fill-opacity%3D%220.3%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%221.8%22%20/%3E%3Cpath%20d%3D%22M9%208V6a3%203%200%200%201%206%200v2%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.5%22%20/%3E%3Cline%20x1%3D%222%22%20y1%3D%2214%22%20x2%3D%224%22%20y2%3D%2214%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20/%3E%3Cline%20x1%3D%2220%22%20y1%3D%2214%22%20x2%3D%2222%22%20y2%3D%2214%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20/%3E%3C/g%3E%3C/svg%3E" }, "utility_insurance": { "color": "#f1c40f", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23f1c40f%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%23f1c40f%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%204h12v16H6z%22%20fill%3D%22%23f1c40f%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%23f1c40f%22%20stroke-width%3D%221.8%22%20/%3E%3Cpath%20d%3D%22M12%207l4%202v4c0%203-4%205-4%205s-4-2-4-5V9l4-2z%22%20fill%3D%22%23ffffff%22%20stroke%3D%22%23f1c40f%22%20stroke-width%3D%221%22%20/%3E%3C/g%3E%3C/svg%3E" }, "utility_keystone": { "color": "#ffd700", "url": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23ffd700%22%20fill-opacity%3D%220.35%22%20stroke%3D%22%23ffd700%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%2016l3-8%205%204%205-4%203%208H4z%22%20fill%3D%22%23ffd700%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%20/%3E%3Crect%20x%3D%224%22%20y%3D%2216%22%20width%3D%2216%22%20height%3D%223%22%20fill%3D%22%23ffd700%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221%22%20/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2211%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20/%3E%3C/g%3E%3C/svg%3E" } });
+
+// src/client/skill_tree_view_v2.js
+var TREES = ["shield", "dagger", "tome", "utility"];
+var TAB_NAMES = { shield: "Shield", dagger: "Dagger", tome: "Tome", utility: "Utility" };
+var TIER_NAMES = { 1: "Tier 1", 2: "Tier 2", 3: "Tier 3", 4: "Keystones \xB7 choose one", 5: "Endless" };
+var TIER_TAGS = { 1: "Tier 1", 2: "Tier 2", 3: "Tier 3", 4: "Keystone", 5: "Endless" };
+var skillGateV2 = (n) => n.tree === "utility" ? 0 : [0, 0, 3, 7, 12, 15][n.tier] ?? 0;
+function skillTreeLayoutV2(tree) {
+  const nodes = CONSTELLATIONS[tree].nodes.filter((n) => n.active), ys = [...new Set(nodes.map((n) => n.y))].sort((a, b) => b - a), reach = Math.max(1, ...nodes.map((n) => Math.abs(n.x - 50))), k = 39 / reach, place = {};
+  for (const n of nodes) {
+    const row2 = ys.indexOf(n.y);
+    place[n.id] = { row: row2, x: 50 + (n.x - 50) * k, y: ys.length > 1 ? row2 / (ys.length - 1) * 100 : 50 };
+  }
+  for (const n of nodes) {
+    const p = place[n.id];
+    p.label = Math.min(30, 2 * (p.x - 1), 2 * (99 - p.x), ...nodes.filter((o) => o !== n && place[o.id].row === p.row).map((o) => Math.abs(place[o.id].x - p.x)));
+  }
+  return { nodes, rows: ys.length, place };
+}
+function skillStateV2(d, n) {
+  const rank = nodeRank(d, n.id), owned = integerBigInt(rank) > 0n, maxed = n.maxRank !== "infinite" && integerBigInt(rank) >= BigInt(n.maxRank), offer = purchaseAvailability(d, n.id);
+  return { rank, owned, maxed, offer, available: offer.ok };
+}
+function skillBlockerV2(d, n, offer) {
+  const reason = offer.reason ?? "", names = (ids3) => ids3.map((id) => ACTIVE_NODES[id]?.name ?? id).join(" or ");
+  if (reason === "Requires Hero Level 2") return "Reach Hero Level 2 to open this tree.";
+  if (reason === "Requires one connected parent") return `Learn ${names(n.prereqs)} first.`;
+  if (reason.includes("paid points")) return `Spend ${skillGateV2(n)} SP in this tree first (${formatLarge(spentPoints(d, n.tree))} so far).`;
+  if (reason === "Other keystone selected") {
+    const other = CONSTELLATIONS[n.tree].nodes.find((o) => o.active && o.tier === 4 && o.id !== n.id && integerBigInt(nodeRank(d, o.id)) > 0n);
+    return `You chose ${other?.name ?? "another keystone"}. Only one keystone per tree.`;
+  }
+  if (reason === "Insufficient Skill Points") return `Needs ${formatLarge(offer.cost)} SP. You have ${formatLarge(pointBalances(d)[n.tree].unspent)}.`;
+  return reason;
+}
+function createSkillTreeViewV2({ document, send }) {
+  const el = (tag, text2 = "", cls = "") => {
+    const e = document.createElement(tag);
+    if (text2) e.textContent = text2;
+    if (cls) e.className = cls;
+    return e;
+  }, svgEl = (tag) => document.createElementNS("http://www.w3.org/2000/svg", tag);
+  const button = (text2, cls, fn) => {
+    const b = el("button", text2, cls);
+    b.type = "button";
+    b.onclick = fn;
+    return b;
+  }, retrigger = (e, cls) => {
+    e.classList.remove(cls);
+    void e.offsetWidth;
+    e.classList.add(cls);
+  };
+  const root = el("div", "", "skills-v2"), top = el("div", "", "skills-top"), tabs = el("nav", "", "skills-tabs"), tabButtons = {};
+  tabs.setAttribute("aria-label", "Constellations");
+  for (const name of TREES) {
+    const b = button("", "", () => choose(name)), badge = el("b");
+    b.style.setProperty("--tree", CONSTELLATIONS[name].color);
+    b.append(el("i"), el("span", TAB_NAMES[name]), badge);
+    tabButtons[name] = { b, badge };
+    tabs.append(b);
+  }
+  const head12 = el("div", "", "skills-head"), level = el("strong", "", "skills-level"), xpTrack = el("div", "", "skills-xp"), xpFill = el("i"), xpText2 = el("span"), sp = el("strong", "", "skills-sp"), mode = el("div", "", "skills-mode");
+  xpTrack.append(xpFill, xpText2);
+  const modeButtons = { tree: button("Tree", "", () => setView("tree")), list: button("List", "", () => setView("list")) };
+  mode.append(modeButtons.tree, modeButtons.list);
+  head12.append(level, xpTrack, sp, mode);
+  top.append(tabs, head12);
+  const body4 = el("div", "", "skills-body"), scroll = el("div", "", "skills-scroll"), list = el("div", "", "skills-list"), foot = el("div", "", "skills-foot"), sheet = el("section", "", "skills-sheet"), grab = el("div", "", "skills-sheet-grab"), sheetBody = el("div", "", "skills-sheet-body");
+  sheet.setAttribute("aria-label", "Skill details");
+  sheet.append(grab, sheetBody);
+  body4.append(scroll, sheet);
+  root.append(top, body4);
+  let tree = null, view = "tree", selected = null, open = false, confirmReset = false, d = null, ready = false, built = null, shown = null, lastRanks = {}, lastXp = null, drag = null;
+  function disc2(n, withRank = true) {
+    const art = PROGRESSION_ICONS[n.iconKey], wrap = el("span", "", "skill-disc"), rank = withRank && n.maxRank !== 1 ? el("small") : null;
+    if (art) {
+      const img = el("img");
+      img.src = art.url;
+      img.alt = "";
+      wrap.append(img);
+    }
+    if (rank) wrap.append(rank);
+    return { wrap, rank };
+  }
+  function stateClasses(e, n, s) {
+    e.classList.toggle("owned", s.owned);
+    e.classList.toggle("available", s.available);
+    e.classList.toggle("maxed", s.maxed);
+    e.classList.toggle("locked", !s.owned && !s.available);
+    e.classList.toggle("keystone", n.tier === 4);
+    e.classList.toggle("endless", n.maxRank === "infinite");
+    e.style.setProperty("--art", PROGRESSION_ICONS[n.iconKey]?.color ?? CONSTELLATIONS[n.tree].color);
+  }
+  const rankText = (n, rank) => n.maxRank === "infinite" ? `${formatLarge(rank)}/\u221E` : `${formatLarge(rank)}/${n.maxRank}`;
+  function build(name) {
+    const layout = skillTreeLayoutV2(name), wrap = el("div", "", "skills-tree"), plane = el("div", "", "skills-plane"), svg = svgEl("svg"), items = {}, lines = [];
+    wrap.style.setProperty("--rows", String(layout.rows));
+    svg.setAttribute("viewBox", "0 0 100 100");
+    svg.setAttribute("preserveAspectRatio", "none");
+    svg.setAttribute("aria-hidden", "true");
+    for (const n of layout.nodes) for (const parent of n.prereqs) {
+      const a = layout.place[parent], b = layout.place[n.id];
+      if (!a) continue;
+      const line11 = svgEl("line");
+      for (const [k, v] of Object.entries({ x1: a.x, y1: a.y, x2: b.x, y2: b.y })) line11.setAttribute(k, String(v));
+      lines.push({ line: line11, parent, child: n.id });
+      svg.append(line11);
+    }
+    plane.append(svg);
+    for (const n of layout.nodes) {
+      const p = layout.place[n.id], b = el("button", "", "skill-node"), icon = disc2(n), label3 = el("span", n.name, "skill-name");
+      b.type = "button";
+      b.dataset.node = n.id;
+      b.style.left = p.x.toFixed(2) + "%";
+      b.style.top = p.y.toFixed(2) + "%";
+      b.style.width = p.label.toFixed(2) + "%";
+      b.append(icon.wrap, label3);
+      b.onclick = () => select(n.id);
+      items[n.id] = { b, rank: icon.rank, n };
+      plane.append(b);
+    }
+    wrap.append(plane);
+    wrap.addEventListener("click", (e) => {
+      if (!e.target.closest?.(".skill-node")) close();
+    });
+    return { name, wrap, items, lines };
+  }
+  function defaultTree() {
+    const points2 = pointBalances(d), mastery = TREES.slice(0, 3);
+    return mastery.find((t) => integerBigInt(points2[t].unspent) > 0n) ?? mastery.reduce((a, b) => integerBigInt(d[b].level) > integerBigInt(d[a].level) ? b : a);
+  }
+  function choose(name) {
+    if (name === tree) return;
+    tree = name;
+    selected = null;
+    open = false;
+    confirmReset = false;
+    paint();
+    scroll.scrollTop = 0;
+  }
+  function setView(next) {
+    if (next === view) return;
+    view = next;
+    paint();
+    scroll.scrollTop = 0;
+  }
+  function select(id) {
+    selected = id;
+    open = true;
+    confirmReset = false;
+    paint();
+    const target = view === "tree" ? built?.items[id]?.b : [...list.children].find((r) => r.dataset?.node === id);
+    target?.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
+  }
+  function close() {
+    if (!open) return;
+    open = false;
+    paint();
+  }
+  grab.addEventListener("pointerdown", (e) => {
+    drag = { y: e.clientY };
+    grab.setPointerCapture?.(e.pointerId);
+    sheet.classList.add("dragging");
+  });
+  grab.addEventListener("pointermove", (e) => {
+    if (drag) sheet.style.transform = `translateY(${Math.max(0, e.clientY - drag.y)}px)`;
+  });
+  const release = (e) => {
+    if (!drag) return;
+    const dy = e.clientY - drag.y;
+    drag = null;
+    sheet.classList.remove("dragging");
+    sheet.style.transform = "";
+    if (dy > 48) close();
+  };
+  grab.addEventListener("pointerup", release);
+  grab.addEventListener("pointercancel", release);
+  function paintHead(points2) {
+    root.style.setProperty("--tree", CONSTELLATIONS[tree].color);
+    for (const name of TREES) {
+      const { b, badge } = tabButtons[name], unspent = points2[name].unspent;
+      b.setAttribute("aria-pressed", String(name === tree));
+      badge.textContent = integerBigInt(unspent) > 0n ? formatLarge(unspent) : "";
+      badge.hidden = integerBigInt(unspent) <= 0n;
+    }
+    sp.textContent = `${formatLarge(points2[tree].unspent)} SP`;
+    sp.classList.toggle("has", integerBigInt(points2[tree].unspent) > 0n);
+    for (const [name, b] of Object.entries(modeButtons)) b.setAttribute("aria-pressed", String(name === view));
+    if (tree === "utility") {
+      level.textContent = "Utility";
+      xpText2.textContent = "+1 SP per Hero level";
+      xpFill.style.transform = "scaleX(0)";
+      xpTrack.classList.add("flat");
+      return;
+    }
+    const branch = d[tree], req = masteryRequirement(branch.level), key2 = `${tree}/${branch.level}/${branch.xp}`;
+    level.textContent = `Lv. ${formatLarge(branch.level)}`;
+    xpText2.textContent = `${formatLarge(branch.xp)} / ${formatLarge(req)} XP`;
+    xpFill.style.transform = `scaleX(${Math.max(0, Math.min(1, integerRatio(branch.xp, req))).toFixed(4)})`;
+    xpTrack.classList.remove("flat");
+    if (lastXp && lastXp !== key2 && lastXp.startsWith(tree + "/")) retrigger(head12, "gained");
+    lastXp = key2;
+  }
+  function paintTree() {
+    if (built?.name !== tree) built = build(tree);
+    for (const item of Object.values(built.items)) {
+      const s = skillStateV2(d, item.n), before = lastRanks[item.n.id];
+      stateClasses(item.b, item.n, s);
+      item.b.classList.toggle("selected", item.n.id === selected && open);
+      if (item.rank) item.rank.textContent = rankText(item.n, s.rank);
+      item.b.setAttribute("aria-label", `${item.n.name}, rank ${rankText(item.n, s.rank)}${s.maxed ? ", mastered" : s.available ? ", can learn" : s.owned ? "" : ", locked"}`);
+      if (before !== void 0 && integerBigInt(s.rank) > integerBigInt(before)) retrigger(item.b, "learned");
+      lastRanks[item.n.id] = s.rank;
+    }
+    for (const { line: line11, parent, child } of built.lines) {
+      const a = integerBigInt(nodeRank(d, parent)) > 0n, b = integerBigInt(nodeRank(d, child)) > 0n;
+      line11.classList.toggle("lit", a && b);
+      line11.classList.toggle("reach", a && !b);
+    }
+  }
+  function paintList() {
+    const nodes = CONSTELLATIONS[tree].nodes.filter((n) => n.active).sort((a, b) => (a.tier ?? 0) - (b.tier ?? 0) || b.y - a.y || a.x - b.x), rows = [];
+    let group = null;
+    for (const n of nodes) {
+      const name = tree === "utility" ? "Utility" : TIER_NAMES[n.tier];
+      if (name !== group) {
+        group = name;
+        rows.push(el("h4", name));
+      }
+      const s = skillStateV2(d, n), row2 = el("button", "", "skills-row"), text2 = el("span");
+      row2.type = "button";
+      row2.dataset.node = n.id;
+      stateClasses(row2, n, s);
+      row2.classList.toggle("selected", n.id === selected && open);
+      text2.append(el("strong", n.name), el("small", s.maxed ? nodeEffect(n, s.rank) : `${s.owned ? "Next" : "Learn"}: ${nodeEffect(n, integerWire(integerBigInt(s.rank) + 1n))}`));
+      row2.append(disc2(n, false).wrap, text2, el("em", s.maxed ? "Max" : s.available ? s.owned ? "Upgrade" : "Learn" : rankText(n, s.rank)));
+      row2.onclick = () => select(n.id);
+      rows.push(row2);
+    }
+    list.replaceChildren(...rows);
+  }
+  function paintFoot() {
+    const spent = spentPoints(d, tree), parts = [];
+    if (tree === "utility") parts.push(el("p", `Inventory intake: ${inventoryIntakeCapacity(d)} items. More Utility branches arrive with new World systems.`, "skills-note"));
+    if (confirmReset) {
+      const row2 = el("div", "", "skills-reset-confirm"), yes = button(`Reset \xB7 refund ${formatLarge(spent)} SP`, "danger", () => {
+        confirmReset = false;
+        send({ kind: "tree.reset", tree });
+      }), no = button("Cancel", "", () => {
+        confirmReset = false;
+        paint();
+      });
+      yes.disabled = !ready;
+      row2.append(yes, no);
+      parts.push(el("p", `Unlearn every ${TAB_NAMES[tree]} skill? It's free.`, "skills-note"), row2);
+    } else {
+      const reset = button(`Reset ${TAB_NAMES[tree]} tree`, "skills-reset", () => {
+        confirmReset = true;
+        paint();
+      });
+      reset.disabled = !ready || !Object.keys(d[tree].nodeRanks).length;
+      parts.push(reset);
+    }
+    foot.replaceChildren(...parts);
+  }
+  function paintSheet() {
+    const n = selected ? ACTIVE_NODES[selected] : null;
+    sheet.classList.toggle("open", Boolean(open && n));
+    root.classList.toggle("sheet-open", Boolean(open && n));
+    if (!n) {
+      sheetBody.replaceChildren(el("p", "Tap a skill to see what it does and learn it.", "sheet-empty"));
+      return;
+    }
+    const s = skillStateV2(d, n), next = integerWire(integerBigInt(s.rank) + 1n), headRow = el("div", "", "sheet-head"), icon = disc2(n, false), title = el("div"), tags = el("div", "", "sheet-tags");
+    stateClasses(headRow, n, s);
+    tags.append(el("span", tree === "utility" ? "Utility" : TIER_TAGS[n.tier]), el("span", s.maxed ? "Mastered" : `Rank ${rankText(n, s.rank)}`, s.maxed ? "done" : ""));
+    title.append(el("h3", n.name), tags);
+    headRow.append(icon.wrap, title, button("\xD7", "sheet-close", close));
+    const parts = [headRow, el("p", nodeDescription(n), "sheet-desc")], effect = (label3, text2, cls = "") => {
+      const e = el("div", "", `sheet-effect ${cls}`);
+      e.append(el("b", label3), el("span", text2));
+      return e;
+    };
+    if (s.owned) parts.push(effect("NOW", nodeEffect(n, s.rank)));
+    if (!s.maxed) parts.push(effect(s.owned ? "NEXT" : "RANK 1", nodeEffect(n, next), "next"));
+    const needs = el("div", "", "sheet-needs");
+    if (n.isStarterToggle) {
+      const met = Number(d.highestHeroLevel) >= 2;
+      needs.append(el("span", `${met ? "\u2713 " : ""}Hero Level 2`, met ? "met" : ""));
+    }
+    if (n.prereqs.length) {
+      needs.append(el("small", n.prereqs.length > 1 ? "Needs one of" : "Needs"));
+      for (const id of n.prereqs) {
+        const p = ACTIVE_NODES[id];
+        if (!p) continue;
+        const met = integerBigInt(nodeRank(d, id)) > 0n, chip2 = button(`${met ? "\u2713 " : ""}${p.name}`, met ? "met" : "", () => select(id));
+        needs.append(chip2);
+      }
+    }
+    const gate = skillGateV2(n);
+    if (gate) {
+      const spent = integerBigInt(spentPoints(d, n.tree)), met = spent >= BigInt(gate);
+      needs.append(el("span", `${met ? "\u2713 " : ""}${formatLarge(integerWire(spent < BigInt(gate) ? spent : BigInt(gate)))}/${gate} SP spent in this tree`, met ? "met" : ""));
+    }
+    if (n.tier === 4) needs.append(el("span", "Only one keystone per tree", "note"));
+    if (needs.children.length) parts.push(needs);
+    const cost = s.offer.cost ?? (s.maxed ? null : nodeCost(n.id, next)), buy = button(s.maxed ? "Mastered" : `${s.owned ? `Upgrade to rank ${formatLarge(next)}` : "Learn"} \xB7 ${integerBigInt(cost) > 0n ? formatLarge(cost) + " SP" : "Free"}`, "sheet-buy", () => send({ kind: "node.purchase", nodeId: n.id }));
+    buy.disabled = s.maxed || !s.available || !ready;
+    parts.push(buy);
+    if (!s.maxed && !s.available) parts.push(el("p", skillBlockerV2(d, n, s.offer), "sheet-why"));
+    else if (!s.maxed && !ready) parts.push(el("p", "Skills can\u2019t change right now.", "sheet-why"));
+    sheetBody.replaceChildren(...parts);
+  }
+  function paint() {
+    if (!d) return;
+    if (!tree || !d[tree]) tree = defaultTree();
+    const points2 = pointBalances(d);
+    paintHead(points2);
+    if (view === "tree") paintTree();
+    else paintList();
+    paintFoot();
+    paintSheet();
+    const content = view === "tree" ? built.wrap : list, key2 = tree + "/" + view;
+    if (shown !== key2) {
+      shown = key2;
+      scroll.replaceChildren(content, foot);
+    }
+    const height = open && selected ? sheet.offsetHeight : 0;
+    scroll.style.setProperty("--sheet", `${Number.isFinite(height) ? height : 0}px`);
+  }
+  return Object.freeze({ root, render(next, isReady) {
+    d = next;
+    ready = isReady;
+    paint();
+  }, reset() {
+    tree = null;
+    selected = null;
+    open = false;
+    confirmReset = false;
+    built = null;
+    shown = null;
+    lastRanks = {};
+    lastXp = null;
+  }, inspect: () => ({ tree, view, selected, open }) });
+}
+
 // src/client/progression_presentation.js
 function createProgressionPresentation({ document, readModel, issue }) {
   const host = document.createElement("section");
@@ -26318,7 +26664,7 @@ function createProgressionPresentation({ document, readModel, issue }) {
   gain.hidden = true;
   gain.setAttribute("role", "status");
   document.body.append(gain);
-  let tree = "shield", selected = "shield_starter", attribute = "str", draft = { str: 0, dex: 0, int: 0 }, confirm = null, stamp2 = "", previous = null, message = "", messageUntil = 0, model = null, viewKey = "";
+  let attribute = "str", draft = { str: 0, dex: 0, int: 0 }, confirm = null, stamp2 = "", previous = null, message = "", messageUntil = 0, model = null, viewKey = "";
   const el = (tag, text2 = "", cls = "") => {
     const e = document.createElement(tag);
     e.textContent = text2;
@@ -26333,97 +26679,11 @@ function createProgressionPresentation({ document, readModel, issue }) {
   const attributes = el("section", "", "progression-attributes"), attrTitle = el("div", "", "progression-line"), attrRows = el("div", "", "attribute-rows"), attrDetails = el("details", "", "attribute-details"), summary = el("summary", "Allocate attributes"), attrBody = el("div");
   attrDetails.append(summary, attrBody);
   attributes.append(attrTitle, attrRows, attrDetails);
-  const tabs = el("nav", "", "progression-tabs");
-  tabs.setAttribute("aria-label", "Constellations");
-  const tabButtons = {};
-  for (const name of ["shield", "dagger", "tome", "utility"]) {
-    const b = button(name[0].toUpperCase() + name.slice(1), () => {
-      tree = name;
-      selected = CONSTELLATIONS[name].nodes.find((n) => n.active).id;
-      fit();
-      redraw();
-    });
-    tabButtons[name] = b;
-    tabs.append(b);
-  }
-  const header = el("div", "", "mastery-header"), level = el("strong"), balance = el("strong"), xp = el("span"), bar = el("div", "", "mastery-track"), fill4 = el("div");
-  bar.append(fill4);
-  header.append(level, balance, xp, bar);
-  const stage2 = el("div", "", "constellation-stage"), plane = el("div", "", "constellation-plane"), svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"), nodes = el("div", "", "constellation-nodes");
-  svg.setAttribute("viewBox", "0 0 1000 1000");
-  svg.setAttribute("preserveAspectRatio", "none");
-  svg.setAttribute("aria-hidden", "true");
-  plane.append(svg, nodes);
-  stage2.append(plane);
-  const zoom = el("div", "", "constellation-zoom");
-  zoom.append(button("\u2212", () => zoomAt(scale / 1.2, stage2.clientWidth / 2, stage2.clientHeight / 2)), button("Fit", fit), button("+", () => zoomAt(scale * 1.2, stage2.clientWidth / 2, stage2.clientHeight / 2)));
-  stage2.append(zoom);
-  const hint = el("p", "Drag the tree to explore \xB7 pinch or use + / \u2212 to zoom.", "constellation-hint");
-  const detail = el("section", "", "node-detail"), notice = el("p", "", "progression-notice"), reserved = el("small", "", "progression-reserved");
+  const skills = createSkillTreeViewV2({ document, send: (action2) => send(action2) }), notice = el("p", "", "progression-notice");
   notice.setAttribute("role", "status");
-  host.append(tabs, header, hint, stage2, detail, reserved, notice);
+  host.append(skills.root, notice);
   statsView.mountAttributes(attributes);
   attrDetails.open = false;
-  let scale = 1, tx = 0, ty = 0;
-  const pointers = /* @__PURE__ */ new Map();
-  let gesture = null;
-  function transform() {
-    plane.style.transform = `translate(${tx}px,${ty}px) scale(${scale})`;
-  }
-  function fit() {
-    scale = 1;
-    tx = plane.clientWidth > stage2.clientWidth ? (stage2.clientWidth - plane.clientWidth) / 2 - 14 : 0;
-    ty = 0;
-    transform();
-  }
-  function zoomAt(next, x, y) {
-    next = Math.min(2.5, Math.max(0.96, next));
-    tx = x - (x - tx) * next / scale;
-    ty = y - (y - ty) * next / scale;
-    scale = next;
-    transform();
-  }
-  stage2.addEventListener("pointerdown", (e) => {
-    if (e.target.closest(".constellation-zoom")) return;
-    const rect3 = stage2.getBoundingClientRect();
-    pointers.set(e.pointerId, { x: e.clientX - rect3.left, y: e.clientY - rect3.top });
-    stage2.setPointerCapture(e.pointerId);
-    gesture = { node: e.target.closest("[data-node]")?.dataset.node ?? null, moved: pointers.size > 1, startX: e.clientX, startY: e.clientY };
-    e.preventDefault();
-  });
-  stage2.addEventListener("pointermove", (e) => {
-    if (!pointers.has(e.pointerId)) return;
-    const rect3 = stage2.getBoundingClientRect(), before = [...pointers.values()], old2 = pointers.get(e.pointerId), now2 = { x: e.clientX - rect3.left, y: e.clientY - rect3.top };
-    pointers.set(e.pointerId, now2);
-    if (Math.hypot(e.clientX - gesture.startX, e.clientY - gesture.startY) > 6) gesture.moved = true;
-    if (pointers.size === 2) {
-      gesture.moved = true;
-      const after = [...pointers.values()], a = Math.hypot(before[0].x - before[1].x, before[0].y - before[1].y), b = Math.hypot(after[0].x - after[1].x, after[0].y - after[1].y);
-      if (a > 1) zoomAt(scale * b / a, (after[0].x + after[1].x) / 2, (after[0].y + after[1].y) / 2);
-    } else if (gesture.moved) {
-      tx += now2.x - old2.x;
-      ty += now2.y - old2.y;
-      transform();
-    }
-  });
-  const end = (e) => {
-    if (!pointers.has(e.pointerId)) return;
-    pointers.delete(e.pointerId);
-    if (e.type === "pointerup" && !gesture.moved && gesture.node) {
-      selected = gesture.node;
-      redraw();
-      detail.scrollIntoView({ block: "nearest", behavior: "smooth" });
-    }
-    if (pointers.size) gesture.moved = true;
-  };
-  stage2.addEventListener("pointerup", end);
-  stage2.addEventListener("pointercancel", end);
-  stage2.addEventListener("lostpointercapture", (e) => pointers.delete(e.pointerId));
-  stage2.addEventListener("wheel", (e) => {
-    e.preventDefault();
-    const r = stage2.getBoundingClientRect();
-    zoomAt(scale * (e.deltaY < 0 ? 1.1 : 1 / 1.1), e.clientX - r.left, e.clientY - r.top);
-  }, { passive: false });
   function redraw() {
     viewKey = "";
     if (model) refresh(model, !host.hidden, !statsView.host.hidden);
@@ -26437,10 +26697,8 @@ function createProgressionPresentation({ document, readModel, issue }) {
   }
   function refresh(m, visible3, statsVisible = false) {
     model = m;
-    const opening = host.hidden && visible3;
     host.hidden = !visible3;
     statsView.refresh(m, statsVisible);
-    if (opening) fit();
     const local5 = m.playersById[m.localPlayerId], d = local5.d8;
     if (!d) return;
     const identity2 = m.context.campaignId + "/" + m.localPlayerId, now2 = performance.now();
@@ -26449,7 +26707,7 @@ function createProgressionPresentation({ document, readModel, issue }) {
       previous = null;
       draft = { str: 0, dex: 0, int: 0 };
       confirm = null;
-      fit();
+      skills.reset();
       viewKey = "";
     }
     if (previous) {
@@ -26466,18 +26724,13 @@ function createProgressionPresentation({ document, readModel, issue }) {
         messageUntil = now2 + 1200;
         draft = { str: 0, dex: 0, int: 0 };
       }
-      if (d[tree]?.xp !== previous.xp && visible3) {
-        header.classList.remove("mastery-received");
-        void header.offsetWidth;
-        header.classList.add("mastery-received");
-      }
     }
-    previous = { highest: d.highestHeroLevel, shield: d.shield.level, dagger: d.dagger.level, tome: d.tome.level, change: d.lastChange?.authorityOrder, xp: d[tree]?.xp };
+    previous = { highest: d.highestHeroLevel, shield: d.shield.level, dagger: d.dagger.level, tome: d.tome.level, change: d.lastChange?.authorityOrder };
     notice.textContent = now2 < messageUntil ? message : "";
     gain.textContent = notice.textContent;
     gain.hidden = visible3 || statsVisible || !notice.textContent;
     if (!visible3 && !statsVisible) return;
-    const key2 = `${statsVisible}/${identity2}/${d.revision}/${m.inventory.revision}/${selected}/${tree}/${attribute}/${Object.values(draft).join()}/${confirm}/${m.persistence.phase}`;
+    const key2 = `${statsVisible}/${identity2}/${d.revision}/${m.inventory.revision}/${["shield", "dagger", "tome"].map((t) => d[t].level + ":" + d[t].xp).join()}/${attribute}/${Object.values(draft).join()}/${confirm}/${m.persistence.phase}`;
     if (key2 === viewKey) return;
     viewKey = key2;
     const points2 = pointBalances(d), remaining = points2.attributeUnspent - Object.values(draft).reduce((a, b) => a + b, 0), ready = m.persistence.phase === "encounter";
@@ -26524,77 +26777,7 @@ function createProgressionPresentation({ document, readModel, issue }) {
       redraw();
     }));
     if (!visible3) return;
-    for (const [name, b] of Object.entries(tabButtons)) b.setAttribute("aria-pressed", String(name === tree));
-    level.textContent = tree === "utility" ? "Utility" : `Mastery Lv. ${formatLarge(d[tree].level)}`;
-    balance.textContent = `${formatLarge(points2[tree].unspent)} ${tree === "utility" ? "Utility" : "Mastery"} SP`;
-    xp.hidden = bar.hidden = tree === "utility";
-    if (tree !== "utility") {
-      const req = masteryRequirement(d[tree].level);
-      xp.textContent = `${formatLarge(d[tree].xp)} / ${formatLarge(req)} XP`;
-      fill4.style.width = `${integerRatio(d[tree].xp, req) * 100}%`;
-    }
-    svg.replaceChildren();
-    nodes.replaceChildren();
-    const graph = CONSTELLATIONS[tree];
-    stage2.style.setProperty("--tree-color", graph.color);
-    for (const n of graph.nodes.filter((n2) => n2.active)) {
-      for (const parent of n.prereqs) {
-        const p = ACTIVE_NODES[parent];
-        if (!p) continue;
-        const line11 = document.createElementNS(svg.namespaceURI, "line");
-        for (const [k, v] of Object.entries({ x1: p.x * 10, y1: p.y * 10, x2: n.x * 10, y2: n.y * 10 })) line11.setAttribute(k, v);
-        line11.classList.toggle("lit", integerBigInt(nodeRank(d, parent)) > 0n && integerBigInt(nodeRank(d, n.id)) > 0n);
-        svg.append(line11);
-      }
-      const rank2 = nodeRank(d, n.id), offer2 = purchaseAvailability(d, n.id), b = el("button", "", "constellation-node");
-      b.type = "button";
-      b.dataset.node = n.id;
-      b.style.left = n.x + "%";
-      b.style.top = n.y + "%";
-      b.classList.toggle("purchased", integerBigInt(rank2) > 0n);
-      b.classList.toggle("available", offer2.ok);
-      b.classList.toggle("maxed", n.maxRank !== "infinite" && integerBigInt(rank2) >= BigInt(n.maxRank));
-      b.classList.toggle("selected", n.id === selected);
-      b.classList.toggle("keystone", n.tier === 4);
-      b.setAttribute("aria-label", `${n.name}, rank ${formatLarge(rank2)}. Select for details.`);
-      const art = PROGRESSION_ICONS[n.iconKey];
-      if (art) {
-        const img = el("img");
-        img.src = art.url;
-        img.alt = "";
-        b.style.setProperty("--node-color", art.color);
-        b.append(img);
-      }
-      b.append(el("small", `${formatLarge(rank2)}/${n.maxRank === "infinite" ? "\u221E" : n.maxRank}`));
-      b.onclick = (e) => {
-        if (e.detail === 0) {
-          selected = n.id;
-          redraw();
-        }
-      };
-      nodes.append(b);
-    }
-    const node = ACTIVE_NODES[selected], rank = nodeRank(d, selected), offer = purchaseAvailability(d, selected), next = integerWire(integerBigInt(rank) + 1n), maxed = node.maxRank !== "infinite" && integerBigInt(rank) >= BigInt(node.maxRank);
-    detail.replaceChildren(el("h3", node.name), el("small", `Rank ${formatLarge(rank)} / ${node.maxRank === "infinite" ? "\u221E" : node.maxRank}`), el("p", nodeDescription(node), "node-description"), el("p", `CURRENT RANK \xB7 ${nodeEffect(node, rank)}`, "node-rank-effect"));
-    if (!maxed) detail.append(el("p", `NEXT RANK \xB7 ${nodeEffect(node, next)}`, "node-rank-effect next-rank"));
-    const gate = tree === "utility" ? 0 : [0, 0, 3, 7, 12, 15][node.tier];
-    detail.append(el("small", `${node.prereqs.length ? "One parent: " + node.prereqs.map((id) => ACTIVE_NODES[id].name).join(" OR ") : "No parent required"} \xB7 ${gate} paid SP required`));
-    const buy = button(maxed ? "Maximum rank" : `Purchase \xB7 ${formatLarge(offer.cost ?? nodeCost(selected, next))} SP`, () => send({ kind: "node.purchase", nodeId: selected }));
-    buy.disabled = !ready || !offer.ok;
-    detail.append(el("p", offer.ok ? "Available" : offer.reason, "purchase-reason"), buy);
-    const reset = button(confirm === "tree" ? "Confirm constellation reset" : "Reset Tree \u2014 free", () => {
-      if (confirm !== "tree") {
-        confirm = "tree";
-        redraw();
-      } else send({ kind: "tree.reset", tree });
-    });
-    reset.disabled = !ready || !Object.keys(d[tree].nodeRanks).length;
-    detail.append(reset);
-    if (confirm === "tree") detail.append(button("Cancel", () => {
-      confirm = null;
-      redraw();
-    }));
-    reserved.textContent = tree === "utility" ? `Additional Utility branches await their World systems. Inventory intake: ${inventoryIntakeCapacity(d)} items.` : "";
+    skills.render(d, ready);
   }
   return { refresh, destroy: () => {
     host.remove();
@@ -27460,7 +27643,7 @@ function createInventoryPresentation({ document, environment, readModel, adapter
       comparison.hidden = true;
       document.getElementById("world-bag-title").textContent = section === "stats" ? "CHARACTER STATS" : "SKILLS";
       for (const id of ["equipment", "bag", "materials"]) document.getElementById(`world-${id}-tab`).setAttribute("aria-pressed", "false");
-      status2.textContent = error || (section === "stats" ? "Review your stats. Attribute changes require confirmation." : "Select a skill to review. Purchases require confirmation.");
+      status2.textContent = error || (section === "stats" ? "Review your stats. Attribute changes require confirmation." : "");
       return;
     }
     if (!inv.itemsById[selected]) selected = inv.equipped.weapon;

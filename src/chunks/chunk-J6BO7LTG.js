@@ -22507,6 +22507,7 @@ export {
   finiteNodeRank,
   masteryRequirement,
   nodeCost,
+  spentPoints,
   pointBalances,
   validateD8Progression,
   purchaseAvailability,
