@@ -1,0 +1,83 @@
+{
+  "version": "fort-art-pilot-v1",
+  "module": "src/client/fort_art_pilot_v1.js",
+  "parentRuntime": "5105de3db3266fc2",
+  "scope": {
+    "reservationId": "repeatable-slot:fort:grassland:small:01",
+    "siteId": "site:ffe8b1fc8cecccfdb3fb9d44dd6a9aea",
+    "biome": "grassland",
+    "band": 3
+  },
+  "files": [
+    {
+      "id": "keep",
+      "path": "keep-v1.png",
+      "width": 1341,
+      "height": 1173,
+      "crop": [
+        28,
+        57,
+        1287,
+        1019
+      ],
+      "bytes": 1564135,
+      "sha256": "43e70b76c2a564a1994a57ad201e860f9fd69cad9573ae3adfda553e251d3f77",
+      "source": "OpenAI built-in imagegen, original generated art; no third-party imagery",
+      "alpha": "generated genuine alpha, unmodified",
+      "decodedWidth": 768
+    },
+    {
+      "id": "tower",
+      "path": "tower-v1.png",
+      "width": 1254,
+      "height": 1254,
+      "crop": [
+        147,
+        47,
+        959,
+        1179
+      ],
+      "bytes": 1338474,
+      "sha256": "a04d7e822ae38bd25020ed342d8ea5619a40c66b974ca62471d9b481a8f33efa",
+      "source": "OpenAI built-in imagegen, original generated art; no third-party imagery",
+      "alpha": "generated genuine alpha, unmodified",
+      "decodedWidth": 320
+    },
+    {
+      "id": "masonry",
+      "path": "masonry-v1.png",
+      "width": 1254,
+      "height": 1254,
+      "crop": [
+        0,
+        0,
+        1254,
+        1254
+      ],
+      "bytes": 1484183,
+      "sha256": "a2c8380db2951851d88830c6f7b359761b81f0b1aa2c5a7a105daafc17750085",
+      "source": "OpenAI built-in imagegen, original generated art; no third-party imagery",
+      "alpha": "opaque tile material; no cutout alpha required",
+      "decodedWidth": 256
+    },
+    {
+      "id": "floor",
+      "path": "floor-v1.png",
+      "width": 1254,
+      "height": 1254,
+      "crop": [
+        0,
+        0,
+        1254,
+        1254
+      ],
+      "bytes": 1265080,
+      "sha256": "e0bf1464ea6f5d7c648f3e5e3c6417f9af2ad0b2398494bec777ce1493c218cb",
+      "source": "OpenAI built-in imagegen, original generated art; no third-party imagery",
+      "alpha": "opaque tile material; no cutout alpha required",
+      "decodedWidth": 256
+    }
+  ],
+  "presentationOnly": true,
+  "artDirection": "Cool neutral slate, simplified two-tone forms, worn enemy-occupied fort, patched blue roof, torn red enemy-helmet banners. No yellow tint."
+}

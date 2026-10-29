@@ -1,0 +1,831 @@
+:root { color-scheme: dark; font-family: system-ui, sans-serif; background: #080d16; color: #dce5ef; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; overscroll-behavior: none; }
+html[data-gameplay-hud-visible=false] [data-gameplay-hud] { visibility:hidden!important; pointer-events:none!important; }
+body { --world-safe-top: env(safe-area-inset-top, 0px); --world-safe-right: env(safe-area-inset-right, 0px); --world-safe-bottom: env(safe-area-inset-bottom, 0px); --world-safe-left: env(safe-area-inset-left, 0px); --world-action-right: calc(24px + var(--world-safe-right)); --world-action-bottom: calc(24px + var(--world-safe-bottom)); --world-action-gap: 12px; --world-attack-width: 112px; --world-context-bottom: calc(124px + var(--world-safe-bottom)); }
+/* Dungeon's fixed-container principle only; World retains its own inner layout. */
+#world-app { position: fixed; inset: 0; overflow: hidden; display: flex; flex-direction: column; background: #101927; }
+select, button { color: #e4edf7; background: #1b2c42; border: 1px solid #778ba7; border-radius: 5px; padding: 8px; min-height: 38px; touch-action: manipulation; }
+main { position: relative; flex: 1; min-height: 0; }
+canvas { display: block; width: 100%; height: 100%; touch-action: none; user-select: none; }
+/* Game-only gesture ownership; dialogs/HUD retain normal text zoom/selection. */
+#world-view, #primary-attack, #primary-attack *, #world-pickup, #world-pickup * {touch-action:none;overscroll-behavior:contain;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;}
+#world-status { color: #f4dca1; min-height: 18px; }
+#world-gate-alert:not([hidden]) { grid-column: 1 / -1; margin: 2px 0; padding: 5px 8px; color: #fff0c5; background: #5c271f; border: 1px solid #d7894f; border-radius: 5px; font-size: 12px; }
+#world-gate-alert button { margin-left: 8px; padding: 4px 8px; color: #fff0c5; background: #493423; border: 1px solid #d7894f; border-radius: 4px; }
+@media (hover: hover) and (pointer: fine) { button:hover, select:hover { background: #2a4260; } }
+
+#primary-attack { position:absolute; z-index:8; right:var(--world-action-right); bottom:var(--world-action-bottom); width:var(--world-attack-width); height:88px; border-radius:44px; border:2px solid #e5bd69; background:#26364deb; color:#ffe5af; touch-action:none; user-select:none; -webkit-user-select:none; }
+#primary-attack strong {display:block;font-size:19px;} #primary-attack small {display:block;font-size:10px;margin-top:4px;}
+#primary-attack[data-held="true"] { background:#75522b; box-shadow:0 0 0 4px #e5bd6930; }
+#primary-attack:disabled {opacity:.45;} #primary-attack[hidden] {display:none;}
+.world-dialog { position:absolute; z-index:5; width:min(520px,calc(100% - 32px - var(--world-safe-left) - var(--world-safe-right))); max-height:calc(100% - 16px - var(--world-safe-bottom)); overflow-y:auto; left:calc(50% + (var(--world-safe-left) - var(--world-safe-right)) / 2); top:calc((100% - var(--world-safe-bottom)) / 2); transform:translate(-50%,-50%); padding:20px; border:1px solid #d3ae68; border-radius:9px; background:#101927f5; box-shadow:0 14px 50px #000b; }
+.world-dialog h2 {margin:0 0 8px;color:#ffe3a3;font-size:20px}.world-dialog p{line-height:1.4}.world-dialog div{display:flex;gap:8px;flex-wrap:wrap}.world-dialog[data-busy="true"] button{pointer-events:none;opacity:.55}
+.danger {border-color:#b86c6c;color:#ffd2d2} details{margin-top:6px} details summary{cursor:pointer;color:#a2b3c7} details button{margin:6px 6px 0 0;min-height:32px;padding:5px 8px}#local-world-control-status{color:#f2b7a0}
+@media(max-height:450px) {#primary-attack {bottom:calc(12px + var(--world-safe-bottom));right:calc(16px + var(--world-safe-right));height:72px;width:104px;}}
+
+/* R2: one top HUD. Background is full bleed; content owns top/side safety. */
+#world-app { container-type: inline-size; }
+#world-hud { --hud-y: 4px; --hud-x: 10px; display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; align-items: center; gap: 6px; }
+#world-hud-title { min-width: 0; }
+#world-hud-title strong { display: block; color: #e5bd69; font-size: 12px; letter-spacing: .07em; white-space: nowrap; }
+#space-label { display: block; margin: 0; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#world-hud-vitals { min-width: 0; font-size: 11px; }
+#world-health { display: block; margin: 0; white-space: nowrap; }
+#world-status { margin: 0; min-height: 0; line-height: 16px; }
+#world-hud-movement { white-space: nowrap; font-size: 11px; }
+#world-hud-movement select { min-height: 40px; padding: 6px 8px; font-size: 12px; }
+#local-world-controls { margin: 0; min-width: 0; grid-column: 4; grid-row: 1; }
+#local-world-controls summary { min-height: 40px; line-height: 40px; white-space: nowrap; }
+#local-world-controls[open] { grid-column: 1 / -1; grid-row: 2; }
+#retry-travel { grid-column: 1 / -1; }
+#world-generation { overflow-wrap: anywhere; }
+.playtest-label-full { display: none; }
+.playtest-label-short { display: inline; }
+@container (max-width: 600px) { #world-hud-movement > span { display: none; } }
+@container (max-width: 360px) { #world-hud { --hud-x: 6px; gap: 4px; } #world-hud-title strong, #space-label { font-size: 10px; } }
+@media (min-width: 601px) and (max-height: 450px) { #world-hud { --hud-y: 2px; } #primary-attack { width: 96px; height: 64px; } }
+#world-hud { flex-shrink: 0; max-height: 48%; overflow-y: auto; background: #101927; border-bottom: 1px solid #344259; padding: calc(var(--hud-y) + var(--world-safe-top)) calc(var(--hud-x) + var(--world-safe-right)) var(--hud-y) calc(var(--hud-x) + var(--world-safe-left)); font-size: 12px; }
+#world-hud p { margin: 3px 0; } #world-hud small { display: block; color: #a2b3c7; }
+#world-hud #world-health, #world-hud #world-status { margin: 0; }
+#local-world-controls[open] { max-height: min(28dvh, 230px); overflow-y: auto; overscroll-behavior: contain; }
+
+/* D3 compact progression within the accepted top vitals; game remains full bleed. */
+#world-progression { font-size:10px; line-height:13px; white-space:nowrap; }
+#world-progression[hidden] { display:none; }
+#world-level { color:#eed286; font-weight:700; }
+#world-xp { color:#c6def4; }
+#world-xp-bar { display:block; width:100%; min-width:80px; height:3px; margin:2px 0; border:0; border-radius:2px; overflow:hidden; background:#304153; accent-color:#6dc8ed; }
+#world-xp-bar::-webkit-progress-bar { background:#304153; }
+#world-xp-bar::-webkit-progress-value { background:#6dc8ed; }
+#world-xp-bar::-moz-progress-bar { background:#6dc8ed; }
+#world-level-up { position:absolute; z-index:3; pointer-events:none; top:12px; left:calc(12px + var(--world-safe-left)); right:calc(12px + var(--world-safe-right)); margin:auto; width:fit-content; max-width:calc(100% - 24px - var(--world-safe-left) - var(--world-safe-right)); padding:8px 12px; border:1px solid #b49d57; border-radius:6px; background:#162533ed; color:#ffe5a3; font-size:12px; text-align:center; }
+#world-level-up[hidden] { display:none; }
+
+/* D3-R participant-local recovery; the world and top HUD remain visible. */
+#world-death {width:min(360px,calc(100% - 32px - var(--world-safe-left) - var(--world-safe-right)));text-align:center;}
+#world-death[hidden] {display:none;}
+#world-death h2 {letter-spacing:.08em;}
+#world-death p {margin:8px 0;font-size:13px;}
+#world-death .death-policy {color:#a8dac4;font-weight:600;}
+#world-death #world-death-anchor {color:#a2b3c7;font-size:12px;}
+#world-respawn {min-height:48px;min-width:160px;margin-top:6px;border-color:#e5bd69;background:#344b60;font-weight:700;font-size:16px;}
+#world-respawn:disabled {opacity:.55;}
+#world-death-status:empty {display:none;}
+@media(max-height:450px) {#world-death {padding:12px 16px;}#world-death p {margin:5px 0;}#world-death h2 {margin-bottom:5px;}}
+
+/* D4-R: Dungeon profile framing and vector equipment in a World-native layout. */
+#world-bag,#world-pickup {position:absolute;z-index:8;min-height:48px;border:1px solid #8c6d3b;background:linear-gradient(#241a32,#100b18);color:#fef08a;font-family:Georgia,'Times New Roman',serif;font-weight:700;box-shadow:inset 0 0 8px #0008,0 3px 10px #0005;}
+#world-bag {top:12px;left:calc(12px + var(--world-safe-left));display:flex;align-items:center;gap:7px;font-size:13px;}
+#world-bag .equipment-icon,#world-bag-summary .equipment-icon {width:24px;height:24px;}
+#world-pickup {bottom:var(--world-context-bottom);right:var(--world-action-right);max-width:min(240px,calc(100% - 32px - var(--world-safe-left) - var(--world-safe-right)));border-color:#d4af37;}
+#world-loot-notice {position:absolute;z-index:12;top:70px;left:calc(76px + var(--world-safe-left));right:calc(136px + var(--world-safe-right));margin:auto;width:fit-content;max-width:calc(100% - 224px - var(--world-safe-left) - var(--world-safe-right));display:flex;gap:9px;align-items:center;padding:8px 14px;background:linear-gradient(#23182fee,#100b18f5);border:1px solid #d4af37;border-left-width:4px;border-radius:5px;color:#fef08a;box-shadow:0 4px 18px #0008;font-size:13px;pointer-events:none;}
+#world-loot-notice .equipment-icon {width:32px;height:32px;}
+#world-level-up {z-index:12;top:70px;left:calc(76px + var(--world-safe-left));right:calc(136px + var(--world-safe-right));max-width:calc(100% - 224px - var(--world-safe-left) - var(--world-safe-right));}
+/* 1B: Dungeon paperdoll/stash framing and immediate item-card inspection. */
+/* 1B-R: Dungeon profile-card, profile-tab-bar, paperdoll/stash and tooltip composition.
+   Scoped adaptation of style.css, profile_stash.js and items.js; World owns commands. */
+#world-inventory {position:fixed;z-index:6;inset:calc(8px + var(--world-safe-top)) calc(8px + var(--world-safe-right)) calc(8px + var(--world-safe-bottom)) calc(8px + var(--world-safe-left));margin:auto;max-width:1200px;padding:14px 16px;display:flex;flex-direction:column;gap:9px;min-height:0;background:linear-gradient(180deg,#181226,#0c0814);border:3px solid #d4af37;outline:2px solid #5a4325;outline-offset:-6px;border-radius:10px;box-shadow:0 30px 90px #000f,inset 0 0 30px #000d;color:#e2e8f0;font-family:Georgia,'Times New Roman',serif;}
+#world-inventory .bag-heading {display:flex;align-items:center;justify-content:space-between;padding:9px 12px;gap:8px;border:1px solid #8c6d3b;border-bottom:2px solid #d4af37;border-radius:6px;background:linear-gradient(#2a2039,#100b1b);flex-shrink:0;}
+.bag-heading>div>small {display:none;}
+#world-inventory h2 {margin:0;color:#ffd700;font:bold 18px Georgia,serif;letter-spacing:1.4px;}
+#world-inventory button {cursor:pointer;touch-action:manipulation;color:#e2e8f0;font:800 11px system-ui;min-height:44px;border:1px solid #3a3247;border-radius:4px;background:linear-gradient(#241c30,#100c18);box-shadow:inset 0 1px #ffffff12,0 2px 4px #0009;}
+#world-inventory button:disabled {cursor:default;opacity:.55;}
+#world-inventory button:focus-visible {outline:2px solid #ffe680;outline-offset:2px;}
+#world-inventory #world-bag-close {width:44px;min-width:44px;font-size:0;background:linear-gradient(#7f1d1d,#450a0a);border-color:#ef4444;}
+#world-bag-close:after {content:'\00d7';font:24px system-ui;}
+#world-bag-summary {display:flex;align-items:center;gap:6px;flex-shrink:0;font:12px system-ui;color:#f1c40f;}
+#world-bag-summary svg,#world-bag-summary .equipment-icon {width:21px;height:21px;}
+#world-bag-summary>span {margin-left:auto;color:#a99bb7;font-size:11px;}
+#world-bag-stats {display:none;}
+.bag-section-tabs {display:flex;gap:6px;padding:4px;border:1px solid #8c6d3b;border-radius:6px;background:#0a0812b3;box-shadow:inset 0 0 8px #000c;flex-shrink:0;}
+#world-inventory .bag-section-tabs button {flex:1;letter-spacing:.8px;}
+#world-inventory .bag-section-tabs button[aria-pressed=true] {background:linear-gradient(#b45309,#78350f);color:#fff;border-color:#ffd700;box-shadow:0 0 10px #f1c40f40;text-shadow:0 1px 2px #000;}
+.bag-body {flex:1;min-height:0;position:relative;display:flex;}
+.inventory-scroll {flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;touch-action:pan-y;scrollbar-width:thin;scrollbar-color:#8c6d3b #100b18;background:linear-gradient(#110d1c,#080510);border:1.5px solid #5a4325;border-radius:6px;padding:10px;box-shadow:inset 0 4px 18px #000f;}
+#world-inventory[data-section=equipment] #world-bag-browse>section:nth-child(2),#world-inventory[data-section=bag] #world-bag-browse>section:first-child {display:none;}
+#world-inventory h3 {margin:0 0 9px;padding-bottom:6px;border-bottom:1px solid #d4af374d;font:bold 13px Georgia,serif;color:#ffd700;letter-spacing:1px;}
+#world-carried-count {font:11px monospace;letter-spacing:0;}
+#world-equipment,#world-items {display:flex;flex-direction:column;gap:7px;}
+.paperdoll-slot,.stash-card {display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;min-height:51px;padding:6px 10px;background:linear-gradient(#1c142b,#0d0918);border:1.5px solid #3a304a;border-left:3px solid #e2e8f0;border-radius:6px;box-shadow:0 3px 8px #000c,inset 0 1px 3px #ffffff14;}
+.paperdoll-slot:has(.empty-slot) {border-left:1.5px solid #3a304a;min-height:43px;}
+.paperdoll-slot:has([aria-pressed=true]),.stash-card:has([aria-pressed=true]),.paperdoll-slot:hover,.stash-card:hover {border-color:#8c6d3b;background:linear-gradient(#28193d,#120c22);}
+#world-inventory .inspect-item {display:flex;align-items:center;gap:10px;flex:1;min-width:0;text-align:left;padding:0;border:0;box-shadow:none;background:transparent;min-height:40px;}
+.item-info {flex:1;min-width:0;}
+.item-title {display:block;color:#fff;font:bold 14px/1.25 Georgia,serif;overflow-wrap:anywhere;}
+.item-sub {display:block;font:10px/1.4 monospace;color:#cbd5e1;}
+.gear-bonuses {color:#2ecc71;}
+.slot-label {display:block;color:#ffd700;font:bold 10px/1.4 monospace;letter-spacing:.5px;}
+.empty-slot {display:block;color:#7b8193;font:italic 11px Georgia,serif;}
+.equipment-icon {object-fit:contain;flex-shrink:0;filter:drop-shadow(0 1px 1px #0009);}
+.inspect-item .equipment-icon {width:32px;height:32px;border:1px solid #d9d2e1;border-radius:4px;background:#11101a;padding:3px;}
+#world-inventory .row-action {flex-shrink:0;padding:6px 9px;font-size:10px;letter-spacing:.3px;}
+#world-inventory .action-equip,#world-inventory .equip-action {background:linear-gradient(#059669,#047857);border-color:#34d399;color:white;}
+#world-inventory-status {margin:0;flex-shrink:0;color:#a99bb7;font:10px/1.4 system-ui;}
+.bag-empty {padding:20px 10px;text-align:center;font:italic 12px Georgia,serif;color:#94a3b8;border:1px dashed #334155;border-radius:6px;}
+/* Dungeon's current card -> candidate card -> Net Change. */
+#world-comparison {position:fixed;z-index:9;display:flex;max-height:76vh;border:2px solid #e2e8f0;border-radius:8px;background:#0a0e14;color:#fff;box-shadow:0 12px 35px #000e,inset 0 0 15px #ffffff05;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,monospace;}
+.item-detail-scroll {flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;touch-action:pan-y;scrollbar-width:thin;scrollbar-color:#695878 #0a0e14;}
+.tooltip-flex-container {display:flex;flex-direction:row;align-items:stretch;}
+.tooltip-card {position:relative;flex:1;min-width:0;padding:26px 12px 12px;background:radial-gradient(circle at top,#ffffff08,transparent 70%);}
+.tooltip-card .tt-title {margin:0 22px 5px 0;border-bottom:1px solid #333;padding-bottom:5px;font:700 15px/1.3 system-ui;color:#fff;}
+.tt-subtitle {margin:0 0 8px;font:italic 11px/1.4 system-ui;color:#aaa;}
+.equipped-ribbon {position:absolute;top:0;right:44px;border:1px solid #ff4d4d;border-top:0;border-radius:0 0 4px 4px;background:linear-gradient(#e74c3c,#c0392b);padding:2px 6px;color:white;font:bold 9px system-ui;letter-spacing:1px;}
+.current-card {background:#160506;box-shadow:inset 0 0 12px #c0392b30;border-right:1px solid #8f3333;}
+.current-card .equipped-ribbon {right:12px;}
+.current-card>.current-part {padding:0;background:none;}
+.current-part+.current-part {padding-top:10px;border-top:1px solid #623030;margin-top:9px;}
+.combined-label {font:italic 10px system-ui;color:#cda5a5;}
+.base-stats-grid {display:flex;gap:4px;margin:8px 0 0;padding:6px;background:#0007;border:1px solid #ffffff14;border-radius:6px;box-shadow:inset 0 0 10px #0008;}
+.base-stat {flex:1;min-width:0;padding:5px 2px;border-radius:4px;border:1px solid #ffffff0a;background:#ffffff05;text-align:center;}
+.base-stat>small {display:block;margin-bottom:4px;color:#aaa;font:9px system-ui;text-transform:uppercase;letter-spacing:.5px;}
+.base-stat>div {display:flex;justify-content:center;align-items:center;gap:4px;font:bold 15px system-ui;}
+.base-stat img,.net-change img {width:16px;height:16px;}
+.net-change {margin-top:12px;font:bold 12px/1.7 monospace;}
+.net-change h4 {font:bold 13px system-ui;color:#3498db;border-bottom:1px solid #333;margin:0 0 5px;padding-bottom:4px;}
+.net-change>div {display:flex;gap:6px;align-items:center;}
+.stat-gain {color:#2ecc71;}.stat-loss {color:#e74c3c;}
+.tt-muted {font:italic 11px system-ui;color:#7f8c8d;margin:4px 0;}
+#world-inventory .tooltip-close {position:absolute;z-index:1;top:1px;right:1px;min-width:32px;min-height:32px;padding:0;background:#0a0e14;border:0;box-shadow:none;font:20px system-ui;color:#ddd;}
+#world-inventory .equip-action {display:block;width:100%;margin-top:10px;min-height:44px;}
+.ring-destination {display:flex;gap:5px;padding:7px 40px 0 8px;}
+.ring-destination button {flex:1;}
+#world-inventory .ring-destination button[aria-pressed=true] {border-color:#d4af37;background:#563212;}
+#world-item-title:focus {outline:none;}
+#world-bag[hidden],#world-pickup[hidden],#world-loot-notice[hidden],#world-inventory[hidden],#world-comparison[hidden] {display:none;}
+@media(max-width:699px){
+ #world-inventory {padding:10px;gap:8px;}#world-inventory .bag-heading {padding:7px 9px;}
+ #world-inventory h2 {font-size:16px;}#world-inventory .row-action {padding:5px 7px;font-size:9px;}
+ .inventory-scroll {padding:8px;}.paperdoll-slot,.stash-card {padding:7px;gap:7px;}
+ .item-title {font-size:13px;}.item-sub {font-size:10px;}.tooltip-flex-container {flex-direction:column;}
+ .current-card {border-right:0;border-bottom:1px solid #8f3333;}.current-card .equipped-ribbon {right:44px;}.tooltip-card {padding:25px 10px 10px;}
+ .candidate-card {padding-top:12px;}.tooltip-card .tt-title {font-size:14px;}
+ #world-inventory .tooltip-close {min-width:40px;min-height:40px;}
+}
+@media(max-height:450px){
+ #world-inventory {padding:8px 10px;gap:5px;}#world-inventory .bag-heading {padding:3px 8px;}
+ #world-inventory h2 {font-size:15px;}.inventory-scroll {padding:7px;}
+ #world-inventory .bag-section-tabs button {min-height:36px;}
+ #world-pickup {bottom:calc(88px + var(--world-safe-bottom));right:calc(230px + var(--world-safe-right));max-width:180px;}#world-bag {top:8px;}#world-level-up,#world-loot-notice {top:8px;left:calc(180px + var(--world-safe-left));right:calc(12px + var(--world-safe-right));max-width:calc(100% - 200px - var(--world-safe-left) - var(--world-safe-right));}
+}
+
+/* SAQ presentation vocabulary: dark ink, bronze frames, hard color bands. */
+:root {--saq-ink:#140d20;--saq-panel:#251832;--saq-frame:#bd8530;--saq-text:#fff3cf;--saq-muted:#c9b6d8;--saq-gold:#ffd43c;--saq-hp:#f04e60;--saq-xp:#b46bff;--saq-positive:#6ee7b7;--saq-negative:#ff829a;--saq-outline:2px;}
+#world-hud {grid-template-columns:minmax(0,1fr) auto auto;gap:4px 10px;background:#140e20;border-bottom:3px solid #0a0710;padding-top:calc(6px + var(--world-safe-top));padding-bottom:6px;color:var(--saq-text);}
+#world-hud-title {grid-column:1;grid-row:2;display:flex;gap:8px;align-items:center;}
+#world-hud-title strong {font:bold 11px Georgia,serif;color:#edc775;}
+#space-label {font-size:10px;color:var(--saq-muted);}
+#world-hud-vitals {grid-column:1;grid-row:1;display:grid;grid-template-columns:30px minmax(85px,200px) auto;gap:7px;align-items:center;max-width:440px;padding:5px 7px;background:var(--saq-panel);border:2px solid var(--saq-frame);border-left:4px solid #efc663;border-radius:6px;box-shadow:inset 0 2px #654077,0 2px #08050c;}
+.hero-crest svg {width:30px;height:36px;display:block;}
+.vital-bars {min-width:0;}
+.hp-track {position:relative;height:19px;margin-bottom:3px;}
+#world-hp-bar {display:block;width:100%;height:19px;border:2px solid var(--saq-ink);border-radius:4px;overflow:hidden;background:#09060e;}
+#world-hp-bar::-webkit-progress-bar,#world-xp-bar::-webkit-progress-bar {background:#09060e;}
+#world-hp-bar::-webkit-progress-value {background:linear-gradient(#ff9b94 0 20%,#ef4f60 20% 68%,#a82646 68%);}
+#world-hp-bar::-moz-progress-bar {background:#ef4f60;}
+#world-health {position:absolute;inset:0;text-align:center;font:900 11px/19px ui-monospace,monospace;color:#fff6e2;text-shadow:1px 1px #140d20,-1px -1px #140d20;}
+#world-progression {display:grid;grid-template-columns:auto 1fr;position:relative;height:20px;align-items:center;gap:5px;font:800 10px ui-monospace,monospace;transform-origin:center;}
+#world-progression[hidden] {display:none;}
+#world-level {color:#fff1ba;font-size:10px;}
+#world-xp-bar {grid-column:2;grid-row:1;width:100%;min-width:0;height:18px;margin:0;border:2px solid var(--saq-ink);border-radius:4px;}
+#world-xp-bar::-webkit-progress-value {background:linear-gradient(#dab1ff 0 20%,#a95ced 20% 68%,#632eb0 68%);}
+#world-xp-bar::-moz-progress-bar {background:#a95ced;}
+#world-xp {grid-column:2;grid-row:1;z-index:1;text-align:center;font-size:9px;color:#fff6ff;text-shadow:1px 1px #140d20;pointer-events:none;}
+#world-wallet {display:flex;align-items:center;gap:3px;min-width:47px;color:var(--saq-gold);font:900 12px ui-monospace,monospace;background:#38231c;border:1px solid #996529;border-radius:4px;padding:4px;}
+#world-wallet svg {width:18px;height:22px;flex-shrink:0;}
+#world-status {grid-column:1 / -1;font-size:10px;color:#cdbdd9;}
+#world-hud-movement {grid-column:2;grid-row:1 / 3;}
+#world-hud-movement>span {display:none;}
+#world-hud-movement select {max-width:85px;background:#291b36;border-color:#8e6334;color:#f3debd;}
+#local-world-controls {grid-column:3;grid-row:1 / 3;}
+#local-world-controls[open] {grid-column:1 / -1;grid-row:3;}
+#reward-effects {position:absolute;inset:0;z-index:4;pointer-events:none;touch-action:auto;}
+#world-death,#startup-recovery {z-index:7;}
+@media(max-width:600px){#world-hud {grid-template-columns:minmax(0,1fr) auto;gap:4px 6px;}#world-hud-vitals {grid-column:1 / -1;max-width:none;grid-template-columns:28px minmax(80px,1fr) auto;}#world-hud-title {grid-column:1;grid-row:2;}#world-hud-movement {grid-column:2;grid-row:2;}#world-hud-movement select {min-height:28px;padding:2px 5px;font-size:10px;}#local-world-controls {grid-row:3;grid-column:1 / -1;font-size:10px;}#local-world-controls summary {min-height:24px;line-height:24px;}#world-status {display:none;}#world-wallet {font-size:11px;}#world-bag {min-width:56px;}}
+@media(min-width:601px) and (max-height:450px){#world-hud-vitals {padding:3px 6px;}#world-status {display:none;}#world-hud-title {display:none;}#world-hud-movement,#local-world-controls {grid-row:1;}#world-hud {padding-top:calc(3px + var(--world-safe-top));padding-bottom:3px;}}
+
+#world-wallet {justify-self:start;}
+@media(min-width:601px) and (max-height:450px){#world-hud {grid-template-columns:auto minmax(0,1fr) auto auto;}#world-hud-title {display:flex;grid-column:2;grid-row:1;flex-direction:column;align-items:flex-start;}#world-hud-movement {grid-column:3;}#local-world-controls {grid-column:4;}}
+
+/* Dungeon Forge hierarchy and source colors, within the accepted Hero Crest shell. */
+#world-materials-view,#world-forge-view{display:none;}
+#world-inventory[data-section=materials] #world-bag-browse,#world-inventory[data-section=forge] #world-bag-browse{display:none;}
+#world-inventory[data-section=materials] #world-materials-view,#world-inventory[data-section=forge] #world-forge-view{display:block;}
+.bag-section-tabs{overflow-x:auto;flex-shrink:0;}.bag-section-tabs button{white-space:nowrap;min-height:44px;}
+.forge-banner{padding:12px 15px;border:1px solid #8c6d3b;border-radius:7px;background:linear-gradient(115deg,#20132e,#101b2d);}
+.forge-banner small{color:#f4bc48;letter-spacing:2px;}.forge-banner h3{color:#ffdf68;margin:4px 0;}.forge-subtitle{color:#38bdf8;margin:0;}
+.forge-access,.forge-review-label{font-size:12px;line-height:1.5;}.forge-review-label{color:#ffdd73;border-left:3px solid #eab548;padding:7px 10px;background:#392919;}
+.forge-layout{display:grid;grid-template-columns:minmax(175px,1fr) minmax(240px,1.3fr);gap:12px;}.forge-slots{display:flex;flex-direction:column;gap:7px;}
+#world-inventory .forge-slot-card{display:flex;align-items:center;gap:8px;text-align:left;min-height:65px;padding:8px;background:linear-gradient(#22182f,#110d1b);border:1px solid #4c3c5d;border-left:4px solid #8c749d;border-radius:7px;color:#fff;}#world-inventory .forge-slot-card[aria-pressed=true]{border-color:#38bdf8;background:linear-gradient(#213750,#141b30);}.forge-rank{font:12px monospace;color:#ffdc76;white-space:nowrap;}
+.forge-details{padding:14px;border:1px solid #635035;border-radius:7px;background:#0e101a;align-self:start;}.forge-details h4{color:#38bdf8;margin:0 0 8px;}.forge-details progress{width:100%;height:10px;accent-color:#f59e0b;}.forge-requirements,.forge-preview{padding:12px;margin:13px 0;border:1px solid #334155;border-radius:6px;background:#101824;overflow-wrap:anywhere;}.forge-requirements p,.forge-preview p{margin:8px 0;font:13px monospace;}.forge-requirements small{color:#cbd5e1;}#world-inventory .forge-anvil-button{width:100%;min-height:48px;border:2px solid #38bdf8;background:linear-gradient(#087ca5,#123650);color:#fff;font-weight:bold;border-radius:6px;}#world-inventory .forge-anvil-button:disabled{opacity:.5;}.forge-deferred{color:#e5bb72;font-size:12px;}.material-card{display:flex;align-items:center;gap:12px;min-height:76px;padding:12px;border:1px solid #4c3c5d;border-left:4px solid #a0aec0;border-radius:7px;background:linear-gradient(#22182f,#110d1b);}.material-card .item-sub{white-space:normal;line-height:1.5;}
+@media(max-width:600px){.forge-layout{grid-template-columns:1fr;}.forge-slots{display:grid;grid-template-columns:1fr 1fr;gap:6px;}#world-inventory .forge-slot-card{min-height:64px;padding:7px;gap:5px;}#world-inventory .forge-slot-card img{width:27px;height:27px;}#world-inventory .forge-slot-card strong{font-size:11px;}#world-inventory .forge-slot-card .item-sub{font-size:9px;}.forge-rank{font-size:10px;}.forge-banner{padding:10px;}.forge-details{padding:12px;}.bag-section-tabs button{font-size:11px;padding:9px 10px;}}
+
+/* Physical review: compact Crest heading preserves the close touch target. */
+#world-inventory .bag-heading{min-height:44px;padding:3px 8px;gap:8px;border-width:0 0 1px;box-shadow:none;background:transparent;border-radius:0;}
+#world-inventory .bag-heading small{display:none;}
+#world-inventory .bag-heading h2{font-size:13px;margin:0;letter-spacing:1px;}
+#world-inventory #world-bag-close{min-width:44px;min-height:44px;width:44px;height:44px;padding:0;font-size:0;}
+
+#world-inventory .forge-banner{padding:6px 8px;}#world-inventory .forge-banner>small,#world-inventory .forge-subtitle{display:none;}#world-inventory .forge-banner h3{margin:0;padding:0;border:0;font-size:13px;}
+#world-inventory .tooltip-card .tt-title{margin-top:0;padding-top:0;}
+
+/* D5-R: station modal; inventory navigation is not Forge access. */
+#world-inventory[data-section=forge] .bag-section-tabs,
+#world-inventory[data-section=forge] #world-bag-summary,
+#world-inventory[data-section=forge] #world-bag-stats{display:none;}
+#world-inventory[data-section=forge] .bag-body{padding-top:6px;}
+#world-inventory .forge-slot-card[aria-pressed=true]{border:2px solid #ffc645;border-left:5px solid #ffe889;background:linear-gradient(115deg,#613616,#24192d);box-shadow:inset 0 1px #ffce7460,0 0 9px #ed9e1320;}
+#world-inventory .forge-slot-card img{flex-shrink:0;filter:drop-shadow(0 2px 2px #000);}
+.forge-requirements p,.forge-preview p{display:flex;align-items:center;gap:8px;}
+.forge-requirements img,.forge-preview img{flex-shrink:0;object-fit:contain;}
+.forge-preview p span{flex:1;color:#cbc1d6;font:12px system-ui;}
+.forge-preview p strong{white-space:nowrap;}
+.forge-details{border-color:#8c6d3b;background:linear-gradient(#211a26,#100d17);}
+.forge-details progress{height:12px;border:1px solid #946b2d;border-radius:4px;background:#08080e;}
+.forge-details progress::-webkit-progress-value{background:linear-gradient(#fff1ad,#e99821);}
+#world-inventory .forge-anvil-button{border-color:#ffcf55;background:linear-gradient(#ad570e,#76320a);box-shadow:inset 0 1px #ffe2a780,0 3px 0 #321a0c;letter-spacing:1px;}
+#world-inventory .forge-anvil-button:disabled{background:#26202c;border-color:#66556d;box-shadow:none;opacity:.65;}
+.forge-review-label{padding:3px 7px;font-size:10px;background:transparent;border-left:2px solid #8c6d3b;color:#baa888;margin:2px 0 8px;}
+.material-card>strong{font:700 23px ui-monospace,monospace;color:#f7eddb;margin-left:auto;}
+.material-card .item-info strong{color:#c2cfdf;}
+@media(max-width:600px){.forge-slots{display:flex;flex-direction:row;overflow-x:auto;scroll-snap-type:x proximity;padding-bottom:5px;}#world-inventory .forge-slot-card{min-width:142px;min-height:62px;scroll-snap-align:start;}.forge-layout{gap:6px;}.forge-details{padding:10px;}.forge-requirements,.forge-preview{margin:9px 0;padding:9px;}.forge-details h4{font-size:12px;}.forge-preview p{margin:7px 0;}.forge-rank{margin-left:auto;}}
+
+.forge-details progress::-webkit-progress-bar{background:#0a0710;border-radius:3px;}
+
+/* Dungeon style.css DPS badge: cyan monospace glass panel, gold drag state.
+   Omit backdrop blur to keep the diagnostic itself inexpensive. */
+.diagnostic-overlay{position:fixed;z-index:6;background:rgba(10,8,18,.9);border:1.5px solid rgba(0,210,255,.6);border-radius:6px;color:#00d2ff;font:900 11px/1.5 monospace;padding:6px 12px;min-height:32px;box-sizing:border-box;display:flex;align-items:center;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:none;box-shadow:0 4px 12px #0008,inset 0 0 6px #00d2ff18;text-shadow:0 1px 2px #000;white-space:pre;max-width:100vw;}
+.diagnostic-overlay[hidden]{display:none;}.diagnostic-overlay:active{cursor:grabbing;border-color:#ffd700;color:#ffd700;}.diagnostic-overlay.fps{width:218px;min-height:46px;}.diagnostic-overlay.dps{width:124px;}
+.diagnostic-controls{display:flex;gap:12px;flex-wrap:wrap;border:1px solid #625036;padding:6px 8px;margin:6px 0;}.diagnostic-controls legend{font-size:11px;color:#e5bd69;}.diagnostic-controls label{display:flex;align-items:center;gap:5px;font-size:12px;min-height:32px;}.diagnostic-controls input{accent-color:#00d2ff;}
+#local-world-controls[data-performance-enabled="true"] summary{display:list-item;width:max-content;max-width:100%;cursor:pointer;}
+#local-world-controls[data-performance-enabled="true"][open]{position:relative;z-index:10;}
+.performance-sample-state{display:inline-block;margin-left:7px;padding:1px 5px;border:1px solid #5d6470;border-radius:4px;color:#b4c0c9;font:700 10px/1.4 ui-monospace,monospace;vertical-align:middle;}
+.performance-sample-state[data-recording="true"]{border-color:#6f9c75;color:#a7f0a4;}
+.diagnostic-overlay.fps{flex-direction:column;align-items:stretch;gap:2px;}
+.diagnostic-metrics-header{display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.diagnostic-collapse{min-width:24px;min-height:24px;padding:0 5px;border:1px solid #52707c;border-radius:4px;background:#172734;color:#ccf4ff;font:900 15px/1 monospace;cursor:pointer;touch-action:manipulation;}
+.diagnostic-collapse:focus-visible{outline:2px solid #ffd700;outline-offset:1px;}
+.diagnostic-sample-state{font:800 10px/1.3 ui-monospace,monospace;}
+.diagnostic-metrics-body{white-space:pre;}
+.diagnostic-overlay.fps[data-collapsed="true"]{width:auto;min-width:88px;min-height:32px;padding:4px 7px;}
+.diagnostic-overlay.fps[data-collapsed="true"] .diagnostic-metrics-body{display:none;}
+@media(max-width:600px){#local-world-controls[data-performance-enabled="true"]:not([open]){grid-column:1;grid-row:3;justify-self:start;width:max-content;}#local-world-controls[data-performance-enabled="true"]:not([open]) summary{min-height:26px;line-height:26px;}}
+
+/* One local acknowledgement beneath the wallet, inside its existing HUD space. */
+#world-wallet {position:relative;}
+#world-gold-gain {position:absolute;right:0;top:100%;display:flex;align-items:center;gap:2px;max-width:110px;height:13px;pointer-events:none;white-space:nowrap;color:#ffd43c;font:700 10px/13px ui-monospace,monospace;text-shadow:0 1px 2px #140d20;}
+#world-gold-gain[hidden] {display:none;}
+#world-wallet #world-gold-gain svg {width:10px;height:12px;}
+#world-gold-gain-amount {overflow:hidden;text-overflow:ellipsis;}
+
+/* D6 family state stays beside the existing controls, without a new header. */
+.subweapon-hud{position:absolute;left:14px;top:86px;padding:6px 9px;background:#140d20e8;border:1px solid #9b7b35;border-radius:6px;color:#f1c40f;font:600 12px system-ui;pointer-events:none;max-width:75%;z-index:5}
+.subweapon-hud[data-family="tome"]{color:#57e6f2;border-color:#32b9cd}
+.shadow-dash{position:absolute;right:calc(var(--world-action-right) + var(--world-attack-width) + var(--world-action-gap));bottom:var(--world-action-bottom);width:82px;height:82px;border:2px solid #c084fc;border-radius:50%;background:#341450e8;color:#f3e8ff;font:700 12px system-ui;white-space:pre-line;touch-action:none;user-select:none;z-index:8}
+.shadow-dash:disabled{opacity:.6}.base-provisions{margin-top:18px;padding-top:10px;border-top:1px solid #75602b}.base-provisions button{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;margin:5px 0;text-align:left}.base-provisions h3{font-size:13px;color:#f1c40f}
+
+.base-provisions button{font-size:13px;line-height:1.4;padding:9px 12px}.base-provisions .equipment-icon{flex-shrink:0}
+
+.subweapon-hud[data-ready="true"]{border-color:#ffe174;box-shadow:0 0 9px #eebf4266}.subweapon-hud[data-family="shield"]{color:#ffe174}
+
+.subweapon-hud[data-family="shield"]{display:flex;align-items:center;gap:7px}.subweapon-hud[hidden]{display:none}
+.guard-pressure-pips{display:inline-flex;gap:4px}.guard-pressure-pips i{display:block;width:7px;height:12px;border:1px solid #86734b;border-radius:2px;background:#2c2534}.guard-pressure-pips i[data-filled="true"]{background:#f1c65e;border-color:#ffe7a3;box-shadow:inset 0 2px #fff0ba}
+.shadow-dash svg{display:block;margin:0 auto 2px}.shadow-dash span{display:block;white-space:pre-line}
+
+/* Shield-only held action. Steel/gold resource is separate from Pressure pips. */
+.shield-guard{position:absolute;right:calc(152px + var(--world-safe-right));bottom:calc(24px + var(--world-safe-bottom));width:104px;min-height:76px;border:2px solid #d7b65d;border-radius:20px;color:#fff0bf;background:linear-gradient(to top,#536679 var(--guard-fill,100%),#1a1c29 var(--guard-fill,100%));font:bold 13px/1.5 system-ui;white-space:pre-line;touch-action:none;user-select:none;z-index:8;box-shadow:0 3px 7px #0008}
+.shield-guard[data-raised="true"]{border-color:#fff0b0;box-shadow:0 0 0 2px #dfbc6550,0 3px 7px #0008}.shield-guard[data-empty="true"]{color:#e6afa1;border-color:#95655a}.shield-guard[hidden]{display:none}
+@media(max-height:450px){.shield-guard{bottom:16px;right:126px;width:92px;min-height:64px}}
+
+/* D7: item identity, not a panel-wide glow. */
+.rarity-item .item-title,.rarity-item>.tt-title{color:var(--rarity,#fff)}
+.stash-card.rarity-item,.paperdoll-slot.rarity-item{border-left:3px solid var(--rarity,#fff)}
+.rarity-item .equipment-icon{border-color:var(--rarity,#fff)}
+.tooltip-card.rarity-item{border-color:var(--rarity,#aaa)}
+.gear-effects{border-top:1px solid #ffffff20;margin-top:8px;padding-top:6px;color:#d7dae3;font-size:12px}
+.gear-effects p{margin:3px 0}.action-salvage{background:#712725!important;border:1px solid #e77966!important;color:#fff!important}
+.attune-badge{display:inline-flex;width:max-content;margin-top:3px;padding:2px 6px;border:1px solid #b7812b;border-radius:9px;background:#2a1c10;color:#ffd66a;font:700 9px/1.2 system-ui;letter-spacing:.35px}
+.item-layer{border-top:1px solid #ffffff20;margin-top:9px;padding-top:7px;color:#d7dae3;font-size:12px}.item-layer>strong{display:block;color:#f3d977;font:800 10px/1.4 system-ui;letter-spacing:1px}.item-layer p{margin:4px 0}.inherent-layer p{color:#bce5cb}.affix-layer p{color:#e5d8ff}.affix-range{display:block;margin:-2px 0 5px;color:#939aaa;font:10px/1.35 system-ui}
+.slot-attunement{margin:10px 12px 12px;padding:10px;border:1px solid #8c6d3b;border-radius:7px;background:linear-gradient(135deg,#261b11,#11131b);color:#f6e7bd}.slot-attunement>strong{display:block;margin:3px 0;color:#ffd66a;font:800 17px/1.2 system-ui}.slot-attunement progress{width:100%;height:9px;accent-color:#e9a62a}.slot-attunement p{margin:5px 0}.attunement-contribution{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}.attunement-contribution span{padding:3px 6px;border-radius:4px;background:#080b10;color:#9fe4bd;font:10px/1.3 monospace}.destination-attunement{margin:10px 0 0;background:#111824}
+.salvage-confirmation{padding:12px;margin-top:12px;border:1px solid #e77966;border-radius:8px;background:#211318}
+.salvage-confirmation h4{color:#ffbe9f;margin:0 0 6px}.salvage-confirmation p{font-size:13px;line-height:1.4}
+.salvage-output{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:13px}.salvage-confirmation button{min-height:40px;margin:8px 5px 0 0}
+
+.salvage-only{display:block!important}.salvage-item-heading{display:grid;grid-template-columns:44px 1fr;gap:4px 8px;padding:10px 24px 8px 4px}.salvage-item-heading img{grid-row:span 2;width:40px;height:40px}.salvage-item-heading strong{color:var(--rarity)}.salvage-item-heading small{color:#bfc6d2}.salvage-only .salvage-confirmation{margin-top:4px}
+/* D8: one shared, touch-first Progression / Constellation view. */
+#world-inventory[data-section=progression] #world-bag-browse,#world-inventory[data-section=progression] #world-materials-view,#world-inventory[data-section=progression] #world-forge-view,#world-inventory[data-section=progression] #world-bag-summary,#world-inventory[data-section=progression] #world-bag-stats{display:none;}
+#world-inventory .progression-view{overflow:auto;min-height:0;padding:8px 12px;grid-column:1/-1;color:#f1eef7;overscroll-behavior:contain;}
+#world-inventory .progression-view[hidden]{display:none;}
+.progression-line,.mastery-header{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.progression-attributes{border-bottom:1px solid #72582c;padding-bottom:10px;}.progression-line strong{color:#ffd756;font-size:13px;}
+.attribute-rows{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0;}.attribute-rows button{display:flex;flex-direction:column;gap:4px;align-items:center;min-height:52px;}.attribute-rows small{font-size:11px;color:#c4b9d5;}
+.progression-view button{min-height:44px;border:1px solid #645370;border-radius:6px;background:linear-gradient(#2b203c,#15101f);color:#fff;padding:7px 12px;cursor:pointer;}.progression-view button:disabled{opacity:.5;cursor:default;}.progression-view button[aria-pressed=true]{border-color:#ffd45d;background:linear-gradient(#79430d,#3a2418);}
+.attribute-details{font-size:12px;line-height:1.55;}.attribute-details summary{cursor:pointer;min-height:34px;display:flex;align-items:center;color:#d5c8e6;}.progression-actions{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;}
+.progression-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:10px 0;}.progression-tabs button{font-weight:bold;}
+.mastery-header{position:sticky;top:0;background:#151020ee;z-index:4;padding:9px 4px;color:#ffd45d;font-size:13px;backdrop-filter:blur(5px);}.mastery-header>span{width:100%;font:12px monospace;color:#cab8e4;}.mastery-track{height:5px;width:100%;background:#050409;border-radius:4px;overflow:hidden;}.mastery-track>div{height:100%;background:linear-gradient(90deg,#685cf0,#d582ff);transition:width .22s ease-out;}.mastery-received{animation:mastery-receive .35s ease-out;}@keyframes mastery-receive{0%{box-shadow:inset 0 0 15px #ce8dff65;}100%{box-shadow:inset 0 0 0 transparent;}}
+.constellation-stage{position:relative;height:550px;min-height:380px;overflow:hidden;touch-action:none;background:radial-gradient(ellipse at 50% 60%,#30204780,transparent 70%),#090711;border:1px solid #4e3b65;border-radius:8px;}
+.constellation-plane{position:absolute;inset:0;transform-origin:0 0;}.constellation-plane svg,.constellation-nodes{position:absolute;width:100%;height:100%;inset:0;}.constellation-plane line{stroke:#53485d;stroke-width:2;vector-effect:non-scaling-stroke;}.constellation-plane line.lit{stroke:var(--tree-color);filter:drop-shadow(0 0 3px var(--tree-color));}
+#world-inventory .constellation-node{position:absolute;transform:translate(-50%,-50%);width:50px;height:54px;min-height:44px;padding:5px;border-color:#58465f;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0;background:#15101e;box-shadow:0 3px 8px #0009;opacity:1;}.constellation-node img{width:27px;height:27px;}.constellation-node small{font:9px monospace;color:#d5c9df;white-space:nowrap;}.constellation-node.purchased{border-color:var(--node-color)!important;background:#231e34!important;box-shadow:0 0 10px color-mix(in srgb,var(--node-color) 35%,transparent)!important;}.constellation-node.available{border-color:#dec381!important;}.constellation-node.selected{outline:2px solid #fff1a9;outline-offset:4px;}.constellation-node.keystone{border-radius:10px!important;}.constellation-node.maxed:after{content:'✓';position:absolute;right:-3px;top:-2px;color:#8cffae;font-size:11px;}
+.constellation-zoom{position:absolute;left:8px;top:8px;display:flex;gap:4px;z-index:2;}.constellation-zoom button{min-width:40px;min-height:36px;padding:4px 9px;background:#14101be6;}
+.node-detail{padding:12px;margin-top:8px;background:linear-gradient(135deg,#211729,#11121c);border:1px solid #846433;border-radius:7px;font-size:13px;line-height:1.5;}.node-detail h3{margin:0 0 3px;color:#ffe286;}.node-detail small{color:#c8bdd3;display:block;}.node-detail p{margin:9px 0;}.node-detail button{margin-right:6px;margin-top:5px;}.node-detail button:not(:disabled):first-of-type{background:linear-gradient(#93600e,#553410);border-color:#ffd568;}.purchase-reason{color:#d9bb75;}.progression-reserved{display:block;color:#ada0bb;margin-top:10px;line-height:1.5;}.progression-notice{color:#d7bbff;min-height:18px;font-size:12px;}
+.node-description{color:#f0e8f6;font-size:14px;line-height:1.55}.node-rank-effect{padding:7px 8px;border-left:2px solid #9376c2;background:#0b0911;color:#cfc4dd;font:11px/1.45 monospace}.node-rank-effect.next-rank{border-left-color:#d4ad52;color:#e6d7b5}
+@media(max-width:600px){#world-inventory .progression-view{padding:5px;}.constellation-stage{height:440px;}.progression-tabs button{font-size:12px;padding:7px 3px;}.attribute-rows strong{font-size:13px;}.bag-section-tabs{overflow-x:auto;}.bag-section-tabs button{flex-shrink:0;}.node-detail{font-size:12px;}.constellation-node{width:46px!important;height:49px!important;}}
+@media(min-width:850px){#world-inventory .progression-view{display:grid;grid-template-columns:minmax(420px,1.6fr) minmax(260px,1fr);gap:8px;align-content:start;}.progression-attributes,.progression-tabs,.mastery-header{grid-column:1/-1;}.constellation-stage{grid-column:1;grid-row:4/7;}.node-detail{grid-column:2;margin-top:0;align-self:start;}.progression-reserved,.progression-notice{grid-column:2;}}
+
+#world-inventory .progression-view button[aria-pressed=true]{border-color:#ffd45d;background:linear-gradient(#79430d,#3a2418);}.constellation-plane{inset:28px 14px;}.constellation-zoom{top:auto;bottom:8px;}
+
+/* Source graph coordinates need enough vertical room for distinct touch targets. */
+.constellation-stage{height:660px;}
+@media(max-width:600px){.constellation-stage{height:640px;}}
+
+.progression-gain{position:fixed;left:18px;top:150px;z-index:12;max-width:280px;background:#20172ee8;border-left:2px solid #dfb956;color:#ffe5a3;padding:7px 10px;font:600 12px system-ui;pointer-events:none;}
+
+/* Wilderness V3: Dungeon-inspired life feedback. It never owns input or simulation. */
+.hp-track .saq-hp-echo-v3 {position:absolute;top:2px;bottom:2px;z-index:1;pointer-events:none;background:linear-gradient(180deg,#fff9d7,#ffb86c);box-shadow:0 0 5px #ffbd78b0;min-width:0;}
+.hp-track #world-health {z-index:2;pointer-events:none;}
+#world-app.saq-low-health-v3::after {content:"";position:fixed;inset:0;z-index:7;pointer-events:none;background:radial-gradient(ellipse at center,transparent 32%,rgba(91,6,17,.25) 57%,rgba(160,7,24,.92) 100%);opacity:var(--saq-injury-opacity,0);animation:saq-injury-heartbeat-v3 1.2s ease-in-out infinite;}
+#world-hud-vitals.saq-critical-health-v3 {border-color:#d54e50;box-shadow:inset 0 2px #654077,0 0 12px #bd233d7a;}
+#world-hud-vitals.saq-critical-health-v3 #world-hp-bar::-webkit-progress-value {background:linear-gradient(#ff9b94,#c82539);}
+#world-hud-vitals.saq-critical-health-v3 #world-hp-bar::-moz-progress-bar {background:#c82539;}
+@keyframes saq-injury-heartbeat-v3 {0%,100%{filter:brightness(.90)}35%{filter:brightness(1.16)}60%{filter:brightness(.95)}}
+@media(prefers-reduced-motion:reduce){#world-app.saq-low-health-v3::after {animation:none;}#world-hud-vitals.saq-critical-health-v3 {transition:none;}}
+
+/* SAQ Wilderness V3 · premium Stage 1 environment loading screen.
+   Landscape palette/geometry adapted from IdleSAQ Stage 1 (tier 0 in entities.js).
+   Isolated from combat, generation and save systems. */
+.saq-startup{position:fixed;inset:0;z-index:2500;overflow-x:hidden;overflow-y:auto;
+  background:#090e15;color:#f5e8d0;font-family:Georgia,'Times New Roman',serif;
+  padding:0;margin:0;overscroll-behavior:contain;isolation:isolate}
+.saq-startup[hidden]{display:none!important}
+.saq-load-landscape{position:absolute;inset:0 0 auto;height:clamp(310px,55vh,600px);overflow:hidden;
+  background:#191326;pointer-events:none;z-index:-2}
+.saq-load-stage1-art{display:block;width:100%;height:100%;}
+.saq-load-darken{position:absolute;inset:0;pointer-events:none;z-index:-1;
+  background:linear-gradient(180deg,rgba(7,10,16,.20) 0%,rgba(7,10,16,.03) 23%,
+    rgba(7,10,16,.16) 38%,#090e15 65%,#090e15 100%)}
+.saq-load-main{position:relative;display:flex;flex-direction:column;min-height:100%;min-height:100dvh;
+  width:min(740px,100%);margin:0 auto;padding:calc(30px + env(safe-area-inset-top,0px))
+  clamp(22px,5vw,68px) calc(22px + env(safe-area-inset-bottom,0px));box-sizing:border-box}
+.saq-load-brand{display:flex;gap:12px;justify-content:center;align-items:center;text-shadow:0 2px 16px #000b}
+.saq-load-mark{width:37px;flex:none;filter:drop-shadow(0 1px 2px #080b18);}
+.saq-load-mark svg{width:100%;display:block}
+.saq-load-brand-label{font-size:clamp(22px,5.7vw,30px);font-weight:700;letter-spacing:.21em;color:#fff1cf;line-height:1.1}
+.saq-load-brand-sub{font:600 clamp(8px,2vw,10px)/1.3 system-ui,sans-serif;letter-spacing:.29em;color:#e7ceaa;margin-top:5px}
+.saq-load-spacer{flex:1 1 auto;min-height:clamp(200px,34vh,440px)}
+.saq-load-content{flex:none;max-width:520px;width:100%;margin:0 auto 0;}
+.saq-load-chapter{display:flex;align-items:center;gap:12px;justify-content:center;
+  color:#c6ae80;font:600 10px system-ui,sans-serif;letter-spacing:.27em}
+.saq-load-rule{height:1px;width:38px;background:linear-gradient(90deg,transparent,#897044)}
+.saq-load-rule:last-child{transform:scaleX(-1)}
+.saq-load-heading{margin:13px auto 33px;max-width:510px;text-align:center;
+  color:#eee6d9;font-size:clamp(24px,6vw,38px);font-weight:400;font-style:normal;line-height:1.25;
+  letter-spacing:-.015em;text-shadow:0 1px 16px #07090e}
+.saq-load-controls{border-top:1px solid #8e7549;padding:20px 0 0;background:transparent}
+.saq-load-status-row{display:flex;align-items:baseline;gap:8px;min-height:24px;margin:0 0 12px;
+  font:500 13px/1.4 system-ui,sans-serif}
+.saq-load-stage{flex:1;min-width:0;color:#e9e4d8;overflow-wrap:anywhere}
+.saq-load-working{width:5px;height:5px;display:inline-block;flex:none;background:#d8b778;border-radius:50%;
+  opacity:.85;animation:saq-load-breath 2s ease-in-out infinite;align-self:center}
+.saq-load-activity{color:#ab9980;font:500 11px system-ui,sans-serif}
+#saq-startup-progress{display:block;width:100%;height:5px;appearance:none;-webkit-appearance:none;
+  border:0;border-radius:0;overflow:hidden;background:#273039;box-shadow:0 0 0 1px #8e754943}
+#saq-startup-progress::-webkit-progress-bar{background:#273039;border-radius:0}
+#saq-startup-progress::-webkit-progress-value{background:linear-gradient(90deg,#9f7845,#dbc28f);
+  border-radius:0;transition:width .36s ease;box-shadow:0 0 12px #f5d49566}
+#saq-startup-progress::-moz-progress-bar{background:#c6a575;border-radius:0}
+.saq-load-meta{display:flex;justify-content:space-between;gap:15px;margin-top:10px;
+  font:500 10px/1.3 system-ui,sans-serif;letter-spacing:.04em;color:#b4aa98}
+.saq-load-time{font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:.12em}
+.saq-load-tip{font:400 12px/1.6 system-ui,sans-serif;color:#a7aeb3;margin:22px 0 0;min-height:42px}
+.saq-load-tip[data-slow=true]::after{content:' Larger worlds can take longer on this device.';color:#cebc99}
+.saq-load-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  border-top:1px solid #75695336;padding-top:14px;margin-top:18px;
+  color:#858d95;font:400 10px/1.4 system-ui,sans-serif}
+.saq-load-footer button{font:600 11px/1.3 system-ui,sans-serif;background:transparent;
+  color:#d7c29c;border:1px solid #8a795a85;border-radius:0;padding:7px 10px;
+  min-height:32px;cursor:pointer;white-space:nowrap}
+.saq-load-footer button:focus-visible{outline:2px solid #d7c29c;outline-offset:3px}
+.saq-stage1-clouds{animation:saq-stage1-drift 85s linear infinite alternate}
+.saq-stage1-sun{animation:saq-stage1-breathe 8s ease-in-out infinite;transform-origin:180px 90px}
+.saq-stage1-firefly{animation:saq-stage1-fireflies 5s ease-in-out infinite}
+@keyframes saq-stage1-drift{from{transform:translateX(-12px)}to{transform:translateX(20px)}}
+@keyframes saq-stage1-breathe{0%,100%{opacity:.8}50%{opacity:1}}
+@keyframes saq-stage1-fireflies{0%,100%{opacity:.18}50%{opacity:.8}}
+@keyframes saq-load-breath{0%,100%{opacity:.35}50%{opacity:1}}
+@media(max-height:700px){.saq-load-main{padding-top:calc(16px + env(safe-area-inset-top,0px));}
+  .saq-load-spacer{min-height:145px}.saq-load-heading{margin-bottom:19px;font-size:24px}
+  .saq-load-tip{margin-top:10px;min-height:22px}.saq-load-footer{margin-top:8px}}
+@media(min-width:800px){.saq-load-landscape{height:60vh}.saq-load-spacer{min-height:41vh}}
+@media(max-width:370px){.saq-load-brand-label{letter-spacing:.12em}.saq-load-chapter{letter-spacing:.14em}
+  .saq-load-footer{font-size:9px}}
+@media(prefers-reduced-motion:reduce){.saq-stage1-clouds,.saq-stage1-sun,.saq-stage1-firefly,.saq-load-working{animation:none!important}
+  #saq-startup-progress::-webkit-progress-value{transition:none!important}}
+
+/* V3 UI refinement: charcoal, parchment and desaturated woodland pewter.
+   The Stage 1 sky is authentic IdleSAQ art, but the loading UI must not read as
+   a purple/gold card-pack reward screen. No gradients, glows or framed cards
+   on the controls; graphics are quiet until the world is ready. */
+.saq-startup-premium { background:#0b1113; color:#e6e9e1; }
+.saq-startup-premium .saq-load-landscape { background:#141b1d;filter:saturate(.73) brightness(.89); }
+.saq-startup-premium .saq-load-darken { background:linear-gradient(180deg,
+  rgba(7,12,15,.36) 0%, rgba(8,14,16,.05) 28%, rgba(8,14,16,.21) 42%,
+  #0b1113 68%,#0b1113 100%); }
+.saq-startup-premium .saq-load-brand { text-shadow:0 1px 12px #050a0c96; }
+.saq-startup-premium .saq-load-mark { width:31px; filter:drop-shadow(0 1px 2px #05090aaa); }
+.saq-startup-premium .saq-load-brand-label { color:#eeede5;letter-spacing:.18em;font-weight:600; }
+.saq-startup-premium .saq-load-brand-sub { color:#c0c8c2;letter-spacing:.23em;font-weight:500; }
+.saq-startup-premium .saq-load-chapter {color:#a4b5ab;font-size:9px;letter-spacing:.20em;}
+.saq-startup-premium .saq-load-rule {background:linear-gradient(90deg,transparent,#8b9e93);width:26px;opacity:.7;}
+.saq-startup-premium .saq-load-heading {color:#ebeae4;font-size:clamp(27px,6.4vw,41px);
+  letter-spacing:.035em;line-height:1.2;margin:10px auto 31px;text-shadow:0 1px 10px #090f12b0;}
+.saq-startup-premium .saq-load-controls {border-top:1px solid #8f9e9354;}
+.saq-startup-premium .saq-load-status-row {font-size:12px;}
+.saq-startup-premium .saq-load-stage {color:#e0e5df;}
+.saq-startup-premium .saq-load-working {background:#96b09c;box-shadow:none;}
+.saq-startup-premium .saq-load-activity {color:#a7b7ad;}
+.saq-startup-premium #saq-startup-progress {height:4px;background:#2b3735;box-shadow:none;}
+.saq-startup-premium #saq-startup-progress::-webkit-progress-bar {background:#2b3735;}
+.saq-startup-premium #saq-startup-progress::-webkit-progress-value {background:#a2b8a9;box-shadow:none;}
+.saq-startup-premium #saq-startup-progress::-moz-progress-bar {background:#a2b8a9;}
+.saq-startup-premium .saq-load-meta {color:#a2aaa6;letter-spacing:0;}
+.saq-startup-premium .saq-load-tip {color:#a5b1ad;}
+.saq-startup-premium .saq-load-tip[data-slow=true]::after {color:#b4c2b8;}
+.saq-startup-premium .saq-load-footer {border-top:1px solid #66766d38;color:#909a96;}
+.saq-startup-premium .saq-load-footer button {border:0;background:transparent;
+  border-bottom:1px solid #778d82;color:#c5d1c9;border-radius:0;padding:5px 0;min-height:30px;
+  font-size:10px;letter-spacing:.04em;}
+.saq-startup-premium .saq-load-footer button:hover {color:#edf2e9;border-color:#c5d1c9;}
+.saq-startup-premium .saq-load-footer button:focus-visible {outline:2px solid #c5d1c9;outline-offset:3px;}
+@media (max-height:700px) {.saq-startup-premium .saq-load-heading {font-size:26px;margin-bottom:17px;}}
+
+/* Source-authentic World hero + Rust Nibbler over IdleSAQ Stage 1. No title card. */
+.saq-startup-premium .saq-load-duel {position:absolute;top:0;left:0;width:100%;
+  height:clamp(310px,55vh,600px);z-index:0;display:block;pointer-events:none;
+  filter:saturate(.92) brightness(.96)}
+.saq-startup-premium .saq-load-main {z-index:1}
+.saq-startup-premium .saq-load-darken {background:linear-gradient(180deg,
+  rgba(7,12,15,.32) 0%,rgba(8,14,16,.03) 35%,rgba(8,14,16,.09) 55%,
+  #0b1113 97%,#0b1113 100%)}
+.saq-startup-premium .saq-load-content {padding-top:8px}
+.saq-startup-premium .saq-load-chapter {margin-bottom:14px}
+.saq-startup-premium .saq-load-spacer {min-height:clamp(255px,42vh,440px)}
+@media (max-height:700px){.saq-startup-premium .saq-load-spacer{min-height:clamp(215px,39vh,335px)}
+  .saq-startup-premium .saq-load-chapter{margin-bottom:9px}}
+
+/* RPG Interface V1 — presentation successor, 2026-10-27.
+   Static surfaces only: no blur filters, external fonts, image downloads or timers.
+   Existing IDs, hit targets, commands and dialog semantics are retained. */
+:root{--rpg-ink:#0c1219;--rpg-panel:#151d26;--rpg-raised:#202a34;--rpg-brass:#b7a077;--rpg-line:#766b55;--rpg-ivory:#eee7d9;--rpg-muted:#aeb5b6;--rpg-red:#b34e57;--rpg-green:#9dbca5;--rpg-ui:"Segoe UI",system-ui,sans-serif;--rpg-title:Georgia,"Times New Roman",serif;}
+body{color:var(--rpg-ivory);font-family:var(--rpg-ui);}
+body button,body select{font-family:var(--rpg-ui);border-radius:3px;cursor:pointer;}
+body button:focus-visible,body select:focus-visible,body summary:focus-visible,body input:focus-visible{outline:2px solid #dcc799!important;outline-offset:3px;}
+body button:disabled{cursor:default;}
+body #world-app>main{position:absolute;inset:0;min-height:0;}
+body #world-hud{position:absolute;inset:0;z-index:20;display:block;max-height:none;padding:0;overflow:visible;background:none;border:0;pointer-events:none;}
+body #world-hud button,body #world-hud select,body #world-hud summary,body #local-world-controls[open]{pointer-events:auto;}
+body #world-hud-vitals{position:absolute;top:calc(18px + var(--world-safe-top));left:calc(20px + var(--world-safe-left));width:326px;height:108px;max-width:none;display:grid;grid-template-columns:42px 1fr;align-items:center;gap:12px;padding:28px 16px 18px 14px;border:1px solid #a78f60;border-left-width:1px;border-radius:3px;background:linear-gradient(135deg,#202b35f5,#101820f5);box-shadow:0 4px 12px #0005,inset 0 0 0 3px #101720,inset 0 0 0 4px #74694e52;color:var(--rpg-ivory);}
+body #world-hud-vitals::before{content:"ADVENTURER";position:absolute;left:68px;top:13px;color:#ded2b9;font:600 10px var(--rpg-ui);letter-spacing:.17em;}
+body #world-hud-vitals::after{content:"";position:absolute;width:6px;height:6px;left:-4px;top:calc(50% - 3px);background:#c5ad7d;border:1px solid #111b25;transform:rotate(45deg);}
+body .hero-crest{align-self:center;margin-top:2px;filter:none;}
+body .hero-crest svg{width:40px;height:48px;}
+body .hero-crest svg>path:first-child{fill:#b29a6c;stroke:#101820;}
+body .hero-crest svg>path:nth-child(2){fill:#364b57;}
+body .hero-crest svg>path:nth-child(3){fill:#e7dbc1;}
+body .vital-bars{margin-top:9px;}
+body .hp-track{height:20px;margin:0 0 7px;}
+body #world-hp-bar{height:20px;border:1px solid #11171f;border-radius:1px;background:#331e27;box-shadow:0 0 0 1px #71565a;}
+body #world-hp-bar::-webkit-progress-bar{background:#321e27;}
+body #world-hp-bar::-webkit-progress-value{background:linear-gradient(#d47076,#a7424c 48%,#873440);border-top:1px solid #e7a7a4;}
+body #world-hp-bar::-moz-progress-bar{background:#b34e57;}
+body #world-health{font:600 11px/20px var(--rpg-ui);letter-spacing:.025em;color:#fff4e6;text-shadow:0 1px 2px #241014;}
+body #world-progression{display:grid;grid-template-columns:30px 1fr;height:19px;gap:2px 7px;font:10px var(--rpg-ui);}
+body #world-progression[hidden]{display:none;}
+body #world-level{grid-column:1;grid-row:1 / 3;font:600 10px var(--rpg-ui);color:#dfca9c;align-self:center;}
+body #world-xp-bar{grid-column:2;grid-row:1;height:4px;border:0;border-radius:0;margin:0;box-shadow:0 0 0 1px #7a71573d;background:#101820;}
+body #world-xp-bar::-webkit-progress-bar{background:#101820;}
+body #world-xp-bar::-webkit-progress-value{background:linear-gradient(90deg,#9b824f,#e6d39e);}
+body #world-xp-bar::-moz-progress-bar{background:#c4ad77;}
+body #world-xp{grid-row:2;align-self:start;text-align:right;font:9px var(--rpg-ui);letter-spacing:.03em;color:#b9b5a9;text-shadow:none;}
+body #world-wallet{position:absolute;right:15px;top:10px;min-width:0;padding:0;border:0;border-radius:0;background:none;gap:4px;color:#dfc690;font:600 11px var(--rpg-ui);}
+body #world-wallet svg{width:13px;height:15px;}
+body #world-status{position:absolute;bottom:6px;left:69px;max-width:225px;display:block;margin:0;color:#a4b5b0;font:9px/13px var(--rpg-ui);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+body #world-hud-title{position:absolute;left:50%;top:calc(20px + var(--world-safe-top));transform:translateX(-50%);display:flex;flex-direction:column;gap:6px;align-items:center;width:min(450px,36vw);text-align:center;padding:0 16px 12px;background:linear-gradient(#101820c4,#1018206b 65%,transparent);border:0;pointer-events:none;}
+body #world-hud-title strong{font:600 9px var(--rpg-ui);letter-spacing:.28em;color:#c9b58b;}
+body #space-label{max-width:100%;font:17px/1.3 var(--rpg-title);color:#f2eadc;white-space:normal;text-shadow:0 2px 4px #000;}
+body #world-time-clock{font:10px var(--rpg-ui)!important;letter-spacing:.05em;color:#d0cebf!important;}
+body #world-hud-movement{position:absolute;right:calc(235px + var(--world-safe-right));top:calc(20px + var(--world-safe-top));font-size:10px;}
+body #world-hud-movement select{max-width:96px;min-height:38px;padding:7px;background:#16212eea;color:#d5d3c5;border:1px solid #726a54;box-shadow:inset 0 0 0 2px #101820;}
+body #local-world-controls:not([open]){position:absolute;right:calc(20px + var(--world-safe-right));top:calc(20px + var(--world-safe-top));margin:0;max-height:none;width:66px;}
+body #local-world-controls:not([open])>summary{height:38px;min-height:38px;line-height:36px;text-align:center;list-style:none;width:66px;padding:0;border:1px solid #726a54;border-radius:3px;background:#16212eef;color:#d6c29a;font:600 10px/36px var(--rpg-ui);letter-spacing:.08em;box-shadow:inset 0 0 0 2px #101820;}
+body #local-world-controls>summary::-webkit-details-marker{display:none;}
+body #local-world-controls:not([open])>summary>*{display:none!important;}
+body #local-world-controls:not([open])>summary::after{content:"MENU";}
+body #local-world-controls[open]{position:fixed!important;z-index:65;inset:calc(72px + var(--world-safe-top)) calc(20px + var(--world-safe-right)) calc(20px + var(--world-safe-bottom)) auto;max-height:none!important;width:min(600px,calc(100vw - 40px));padding:18px 20px;overflow:auto;overscroll-behavior:contain;background:#131c26fa;border:1px solid #9d8961;border-radius:4px;box-shadow:0 16px 50px #000b,inset 0 0 0 4px #101820;color:#bbc3c9;}
+body #local-world-controls[open]>summary{position:sticky;top:-18px;z-index:2;margin:-18px -20px 16px;padding:16px 20px;background:#202b36;border-bottom:1px solid #615b4a;font:16px var(--rpg-title);color:#e0d2b3;list-style:none;}
+body #local-world-controls[open]>summary::after{content:" ×";float:right;font:22px/20px var(--rpg-ui);color:#c9b58b;}
+body #local-world-controls[open]>summary>*{display:none!important;}
+body #local-world-controls[open]>summary::before{content:"World menu & playtest";}
+body #local-world-controls details{padding:10px 0;border-bottom:1px solid #52607142;}
+body #local-world-controls details summary{color:#d5c6a7;font:13px var(--rpg-ui);line-height:1.5;min-height:32px;padding:6px 0;}
+body #local-world-controls button,body #local-world-controls select{background:#24313f;color:#e4dfd1;border-color:#68717a;font-size:12px;min-height:40px;box-shadow:none;}
+body #local-world-controls small{color:#9faeb6;font:11px/1.6 var(--rpg-ui);}
+body #world-gate-alert:not([hidden]){position:fixed;left:50%;top:140px;transform:translateX(-50%);width:min(680px,90vw);pointer-events:auto;}
+body #retry-travel:not([hidden]){position:fixed;top:132px;left:20px;}
+body .chart-mini{top:calc(68px + var(--world-safe-top));right:calc(20px + var(--world-safe-right));padding:7px 7px 5px;border:1px solid #b39a6c;border-radius:3px;background:#14202af5;box-shadow:0 4px 16px #0005,inset 0 0 0 3px #101820;color:#d4c7ac;}
+body .chart-mini canvas{width:172px;height:116px;border-radius:0;outline:1px solid #61716a70;outline-offset:-1px;}
+body .chart-mini footer{padding:5px 0 0;font:9px var(--rpg-ui);letter-spacing:.1em;}
+body .chart-mini footer button{min-height:25px;background:#202f3b;border:1px solid #6a735f;color:#d7ceb7;border-radius:2px;font-size:10px;padding:2px 7px;}
+body #world-bag,body #carried-rations{position:absolute!important;top:auto!important;bottom:calc(22px + var(--world-safe-bottom))!important;left:calc(20px + var(--world-safe-left))!important;height:54px;min-height:54px!important;min-width:82px;padding:10px 16px!important;border:1px solid #9b865e!important;border-radius:3px!important;background:linear-gradient(#2a3540f5,#151e28f5)!important;color:#e4d6b9!important;font:600 12px var(--rpg-ui)!important;box-shadow:inset 0 0 0 3px #17212c,0 4px 12px #0005!important;letter-spacing:.035em;}
+body #world-bag::before{content:"";display:block;width:20px;height:20px;background:center/contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23d5c29d' stroke-width='1.6' viewBox='0 0 24 24'%3E%3Cpath d='M6 7h12l2 14H4L6 7Zm3 0V5a3 3 0 0 1 6 0v2M4 15h16M9 13h6v4H9z'/%3E%3C/svg%3E");}
+body #carried-rations{left:calc(112px + var(--world-safe-left))!important;min-width:104px;font-size:11px!important;}
+body #world-bag{gap:8px;}
+body #primary-attack{right:calc(24px + var(--world-safe-right));bottom:calc(22px + var(--world-safe-bottom));width:104px;height:104px;border:1px solid #cab07c;border-radius:50%;background:radial-gradient(circle at 35% 20%,#3d4a53,#18232f 70%);box-shadow:inset 0 0 0 4px #111a23,inset 0 0 0 5px #8f7a50,0 5px 16px #0006;color:#efe3ca;}
+body #primary-attack strong{font:600 13px var(--rpg-ui);letter-spacing:.03em;}
+body #primary-attack small{font:9px var(--rpg-ui);color:#c3bfae;margin-top:5px;}
+body #primary-attack::before{content:"";display:block;width:28px;height:28px;margin:0 auto 6px;background:center/contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23e3d3b0' stroke-width='1.7' stroke-linejoin='round' viewBox='0 0 32 32'%3E%3Cpath d='m10 23 13-16 5-3-1 6-14 15M5 22l7 7M9 26l-5 5M9 23l5 4'/%3E%3C/svg%3E");}
+body #primary-attack[data-held=true]{background:radial-gradient(circle at 35% 20%,#697065,#283541 75%);border-color:#f0d6a0;box-shadow:inset 0 0 0 4px #111a23,inset 0 0 0 5px #d6bf8c,0 0 10px #bd9e4d44;}
+body .shield-guard,body .shadow-dash{right:calc(140px + var(--world-safe-right));bottom:calc(24px + var(--world-safe-bottom));width:72px;min-height:72px;height:72px;padding:7px;border:1px solid #9e8b68;border-radius:4px;background:#1c2a36ed;box-shadow:inset 0 0 0 3px #101b25;color:#d9d5ca;font:600 10px/1.5 var(--rpg-ui);}
+body .subweapon-hud{left:auto;right:calc(23px + var(--world-safe-right));top:auto;bottom:calc(140px + var(--world-safe-bottom));width:auto;max-width:min(300px,48vw);padding:6px 10px;border:1px solid #7c879077;border-radius:3px;background:#15212de8;color:#d5dce0;font:600 10px/1.4 var(--rpg-ui);box-shadow:none;}
+body #world-pickup{bottom:calc(198px + var(--world-safe-bottom));right:calc(22px + var(--world-safe-right));min-height:44px;padding:11px 15px;background:#202e3ef5;border:1px solid #b29b6b;color:#f2dfba;border-radius:3px;font:600 12px var(--rpg-ui);}
+body #world-event-hud-v3,body #woodland-clue-v3-8{position:absolute;top:calc(145px + var(--world-safe-top));left:calc(20px + var(--world-safe-left));width:258px;max-width:258px;padding:12px 15px;border:1px solid #7c817871;border-left:2px solid #b59a6c;border-radius:2px;background:linear-gradient(100deg,#141f2af2,#14202bd9);box-shadow:0 4px 12px #0003;color:#dddacb;font:12px/1.5 var(--rpg-ui);}
+body #world-event-hud-v3 strong{font:19px/1.25 var(--rpg-title);color:#efdfbd;margin:5px 0 9px;}
+body #world-event-hud-v3 small,body #woodland-clue-v3-8 strong{font:600 9px var(--rpg-ui);color:#c8b58c;letter-spacing:.13em;}
+body #world-event-hud-v3 progress{accent-color:#a5ba9b;height:6px;}
+body #world-event-hud-v3 button{border:1px solid #9e8d69;border-radius:2px;background:#2b3a45;color:#eadcbe;font:600 11px var(--rpg-ui);min-height:42px;}
+body #world-event-hud-v3>span{font:10px/1.5 var(--rpg-ui);color:#b6c1be;}
+body #world-loot-notice,body #world-level-up{top:calc(138px + var(--world-safe-top));left:50%;right:auto;transform:translateX(-50%);max-width:calc(100% - 450px);border:1px solid #a58c5f;border-radius:3px;background:#17232df0;color:#ead9b3;font:12px var(--rpg-ui);box-shadow:0 4px 16px #0004;}
+body .world-dialog,body #world-inventory,body .chart-atlas,body #settlement-services,body #ferry-destinations{border:1px solid #ad9568!important;border-radius:4px!important;background:linear-gradient(135deg,#202b36,#101922 72%)!important;color:#e8e1d3!important;box-shadow:0 18px 70px #000b,inset 0 0 0 4px #101821,inset 0 0 0 5px #786a4b55!important;outline:0!important;font-family:var(--rpg-ui)!important;}
+body #world-inventory,body .chart-atlas{inset:calc(24px + var(--world-safe-top)) calc(24px + var(--world-safe-right)) calc(24px + var(--world-safe-bottom)) calc(24px + var(--world-safe-left));max-width:1230px;padding:18px;z-index:70;}
+body #world-inventory .bag-heading{padding:12px 10px 17px;border:0;border-bottom:1px solid #86714c;background:none;border-radius:0;}
+body #world-inventory h2,body .world-dialog h2,body .chart-atlas header>strong{font:24px var(--rpg-title);font-weight:400;letter-spacing:.06em;color:#ead8b4;}
+body #world-inventory .bag-heading>div>small{display:block;font:600 9px var(--rpg-ui);letter-spacing:.18em;color:#9faeaf;margin-bottom:5px;}
+body #world-inventory #world-bag-close,body #settlement-services .close-btn,body .chart-atlas .chart-close{width:42px;min-width:42px;height:42px;background:#2a3540;border:1px solid #82755d;color:#d6c5a3;box-shadow:none;border-radius:2px;}
+body #world-inventory button,body .chart-atlas button,body #settlement-services button,body #ferry-destinations button,body .world-dialog button{min-height:42px;border-color:#5c6974;border-radius:3px;background:linear-gradient(#303d49,#222d38);color:#dddccf;box-shadow:inset 0 1px #ffffff0a;font:600 12px var(--rpg-ui);}
+body #world-inventory .bag-section-tabs{gap:0;padding:2px 0 8px;background:none;border-bottom:1px solid #76694766;}
+body #world-inventory .bag-section-tabs button{border:0;border-bottom:2px solid transparent;background:none;box-shadow:none;color:#a8b7bf;letter-spacing:.08em;font-size:10px;}
+body #world-inventory .bag-section-tabs button[aria-pressed=true]{border-bottom-color:#c6aa70;background:#ae945412;color:#f0dfb9;}
+body #world-inventory h3{color:#bdaf92;font:600 10px var(--rpg-ui);letter-spacing:.13em;padding:9px 0;}
+body #world-inventory .paperdoll-slot,body #world-inventory .stash-card{background:linear-gradient(110deg,#26323e,#19242e);border-top-color:#50606a6e;border-right-color:#50606a6e;border-bottom-color:#50606a6e;border-radius:3px;box-shadow:none;}
+body #world-inventory .paperdoll-slot .equipment-icon,body #world-inventory .stash-card .equipment-icon{background:#121c25;border-radius:3px;box-shadow:none;}
+body #world-inventory .item-title{font-family:var(--rpg-title);font-size:16px;}
+body #world-inventory .tooltip-card{background:#18232dfc;color:#e6e0d4;border-radius:4px;box-shadow:0 10px 30px #0009;font-family:var(--rpg-ui);}
+body #world-inventory .tooltip-card .tt-title{font-family:var(--rpg-title);font-size:19px;}
+body #world-inventory .tooltip-card h4,body #world-inventory .item-layer>strong{color:#c9b58b;font:600 10px var(--rpg-ui);letter-spacing:.1em;}
+body #world-inventory #world-bag-summary{font:12px var(--rpg-ui);color:#d5c498;padding:5px 3px;}
+body #world-inventory .slot-attunement,body #world-inventory .node-detail{background:#1a2732;border:1px solid #7a715b;border-radius:3px;}
+body #world-inventory .attribute-rows button{background:#243440;border:1px solid #66737a;}
+body #world-inventory .mastery-header{background:#17222df5;color:#d9c397;backdrop-filter:none;}
+body #world-inventory .constellation-stage{background:radial-gradient(ellipse at center,#263348,#111922 80%);border-color:#566573;border-radius:3px;}
+body #world-inventory .constellation-node{background:#233440;border-color:#6b7884;}
+body #world-inventory .progression-tabs button[aria-pressed=true]{background:#3c413d;border-color:#c3a774;}
+body #settlement-services{width:min(1020px,calc(100vw - 48px))!important;height:min(850px,calc(100dvh - 48px))!important;max-height:calc(100dvh - 48px)!important;padding:10px!important;}
+body #settlement-services::backdrop,body #ferry-destinations::backdrop{background:#070d16ad;}
+body #settlement-services .forge-header-banner,body #settlement-services .shop-header-banner{background:none;border:0;border-bottom:1px solid #8f7d56;border-radius:0;padding:14px 8px 18px;box-shadow:none;}
+body #settlement-services .forge-main-title{font:22px var(--rpg-title);letter-spacing:.02em;color:#ead8b4;}
+body #settlement-services .forge-sub-title{color:#adbdbe;font:11px var(--rpg-ui);letter-spacing:.06em;margin-top:5px;}
+body #settlement-services .forge-badge-icon{background:#2b3640;border:1px solid #8b7859;box-shadow:none;border-radius:3px;}
+body #settlement-services .service-grid article,body #settlement-services .shop-item-card{background:#202d38;border-color:#4f6370;border-radius:3px;box-shadow:none;}
+body #settlement-services .forge-tab,body #settlement-services .shop-tab{background:none;border:0;border-bottom:2px solid #4e5d65;border-radius:0;color:#acb9bf;box-shadow:none;}
+body #settlement-services .forge-tab.active,body #settlement-services .shop-tab.active,body #settlement-services [aria-pressed=true]{background:#a58c511a;border-bottom-color:#c5a974;color:#efdfba;}
+body #ferry-destinations{padding:25px!important;}
+body #ferry-destinations h2{font:26px var(--rpg-title);font-weight:400;color:#ecd9b3;margin:0 0 12px;}
+body #ferry-destinations p{font:13px/1.6 var(--rpg-ui);color:#b6c4cb;}
+body .chart-atlas{padding:0;}
+body .chart-atlas header{padding:18px 20px;background:#24313c;border-bottom:1px solid #8b7753;gap:8px;}
+body .chart-atlas header>strong{font-size:21px;margin-right:auto;}
+body .chart-atlas .chart-tools{background:#16232e;border-color:#536473;padding:8px 20px;color:#b8c4ca;}
+body .chart-atlas .chart-panel{background:#182631;border-color:#53616a;color:#c7d0cf;padding:20px;}
+body .chart-atlas .chart-panel h3{font:23px/1.25 var(--rpg-title);color:#e7d5b1;}
+body .chart-atlas .chart-panel p{font:13px/1.7 var(--rpg-ui);color:#b5c3c9;}
+body .chart-atlas footer{background:#202e39;color:#aebcbd;font:11px var(--rpg-ui);padding:10px 20px;}
+body .chart-toast{background:#1e2d36;border:1px solid #a18c61;border-radius:3px;color:#e6d7bb;box-shadow:0 5px 18px #0005;font:13px var(--rpg-ui);}
+body #world-death{padding:30px;z-index:80;}
+body #world-death h2{font-size:30px;letter-spacing:.18em;color:#d0a49b;}
+body #world-death .death-policy{font-weight:500;color:#b0c6b1;}
+body #world-respawn{background:linear-gradient(#576057,#303c3c);border-color:#b39c70;color:#efe1c1;}
+body #world-hud-vitals.saq-critical-health-v3{border-color:#d07072;box-shadow:inset 0 0 0 3px #182029,0 0 12px #a13d4240;}
+@media(hover:hover) and (pointer:fine){body #world-inventory button:hover,body #settlement-services button:hover,body #local-world-controls button:hover,body .chart-atlas button:hover{background:#394b58;border-color:#c3ab7c;}body #world-bag:hover,body #carried-rations:hover{border-color:#f0d49c!important;background:#34434ef5!important;}}
+@media(max-width:1100px){body #world-hud-title{top:calc(138px + var(--world-safe-top));left:calc(20px + var(--world-safe-left));transform:none;align-items:flex-start;text-align:left;background:linear-gradient(90deg,#101820c4,transparent);width:auto;max-width:calc(100vw - 240px);padding:7px 12px;border-left:1px solid #a18a5b88;}body #world-hud-title strong{display:none;}body #space-label{font-size:14px;}body #world-hud-movement{right:calc(98px + var(--world-safe-right));}body #world-event-hud-v3,body #woodland-clue-v3-8{top:calc(214px + var(--world-safe-top));}}
+@media(max-width:600px){body #world-hud-vitals{top:calc(12px + var(--world-safe-top));left:calc(12px + var(--world-safe-left));width:calc(100vw - 160px - var(--world-safe-left) - var(--world-safe-right));height:94px;grid-template-columns:27px 1fr;gap:9px;padding:25px 11px 16px 9px;}body #world-hud-vitals::before{left:45px;top:10px;font-size:8px;letter-spacing:.09em;}body .hero-crest svg{width:28px;height:34px;}body #world-wallet{top:8px;right:9px;font-size:10px;}body #world-wallet svg{width:11px;height:13px;}body #world-status{left:45px;bottom:4px;max-width:calc(100% - 55px);font-size:8px;}body #world-health{font-size:10px;}body #world-progression{grid-template-columns:26px 1fr;gap:2px 4px;}body #world-xp{font-size:8px;}body #world-level{font-size:9px;}body #world-hud-title{left:calc(12px + var(--world-safe-left));top:calc(113px + var(--world-safe-top));max-width:calc(100vw - 155px);padding:6px 9px;gap:4px;}body #space-label{font-size:12px;}body #world-time-clock{font-size:9px!important;}body .chart-mini{right:calc(12px + var(--world-safe-right));top:calc(12px + var(--world-safe-top));padding:5px;}body .chart-mini canvas{width:116px;height:82px;}body .chart-mini footer{font-size:8px;}body .chart-mini footer button{min-height:24px;font-size:9px;padding:2px 5px;}body #local-world-controls:not([open]){right:calc(12px + var(--world-safe-right));top:calc(137px + var(--world-safe-top));width:61px;}body #local-world-controls:not([open])>summary{width:61px;height:34px;min-height:34px;line-height:32px;font-size:9px;}body #world-hud-movement{right:calc(12px + var(--world-safe-right));top:calc(178px + var(--world-safe-top));}body #world-hud-movement select{max-width:69px;min-height:32px;font-size:9px;padding:4px;}body #world-event-hud-v3,body #woodland-clue-v3-8{left:calc(12px + var(--world-safe-left));top:calc(180px + var(--world-safe-top));width:min(224px,60vw);max-width:60vw;padding:10px 12px;font-size:11px;}body #world-event-hud-v3 strong{font-size:17px;}body #world-bag,body #carried-rations{left:calc(12px + var(--world-safe-left))!important;bottom:calc(15px + var(--world-safe-bottom))!important;min-width:64px;height:46px;min-height:46px!important;padding:8px 10px!important;font-size:11px!important;}body #carried-rations{left:calc(88px + var(--world-safe-left))!important;min-width:82px;font-size:10px!important;}body #world-bag::before{width:17px;height:17px;}body #primary-attack{width:86px;height:86px;right:calc(15px + var(--world-safe-right));bottom:calc(15px + var(--world-safe-bottom));}body #primary-attack::before{width:23px;height:23px;margin-bottom:4px;}body #primary-attack strong{font-size:12px;}body #primary-attack small{font-size:8px;}body .shield-guard,body .shadow-dash{right:calc(113px + var(--world-safe-right));bottom:calc(19px + var(--world-safe-bottom));width:62px;height:62px;min-height:62px;font-size:9px;}body .subweapon-hud{right:calc(14px + var(--world-safe-right));bottom:calc(112px + var(--world-safe-bottom));max-width:60vw;font-size:9px;}body #world-pickup{bottom:calc(170px + var(--world-safe-bottom));font-size:11px;max-width:60vw;}body #local-world-controls[open]{inset:calc(12px + var(--world-safe-top)) calc(12px + var(--world-safe-right)) calc(12px + var(--world-safe-bottom)) calc(12px + var(--world-safe-left));width:auto;}body #world-inventory,body .chart-atlas{inset:calc(8px + var(--world-safe-top)) calc(8px + var(--world-safe-right)) calc(8px + var(--world-safe-bottom)) calc(8px + var(--world-safe-left));padding:10px;}body #world-inventory h2{font-size:20px;}body #world-inventory .bag-heading{padding:5px 1px 12px;}body #world-inventory .bag-section-tabs{overflow-x:auto;}body #world-inventory .bag-section-tabs button{padding:10px 9px;min-height:43px;font-size:9px;}body #settlement-services{width:calc(100vw - 16px)!important;height:calc(100dvh - 16px)!important;max-height:calc(100dvh - 16px)!important;padding:4px!important;}body #settlement-services .forge-main-title{font-size:17px;}body #settlement-services .forge-header-banner,body #settlement-services .shop-header-banner{padding:8px 0 12px;}body .chart-atlas{padding:0;}body .chart-atlas header{padding:10px;gap:4px;}body .chart-atlas header>strong{font-size:17px;flex:1 1 100%;}body .chart-atlas header button{font-size:11px;padding:6px 9px;}body .chart-atlas .chart-tools{padding:6px 10px;font-size:11px;}body .chart-atlas .chart-panel{padding:12px;max-height:150px;}body .chart-atlas .chart-panel h3{font-size:19px;}body #world-loot-notice,body #world-level-up{max-width:80vw;top:calc(222px + var(--world-safe-top));font-size:11px;}body #world-loot-notice{z-index:24;}}
+@media(max-height:500px) and (min-width:601px){body #world-hud-vitals{top:calc(10px + var(--world-safe-top));height:87px;width:285px;padding-top:24px;padding-bottom:12px;}body #world-status{display:none;}body #world-hud-title{top:12px;left:50%;transform:translateX(-50%);align-items:center;max-width:27vw;font-size:11px;padding:0;background:none;}body #world-hud-title strong{display:none;}body #space-label{font-size:13px;}body #world-hud-movement{top:12px;right:98px;}body #local-world-controls:not([open]){top:12px;right:20px;}body .chart-mini{top:58px;}body .chart-mini canvas{height:80px;width:126px;}body #world-event-hud-v3,body #woodland-clue-v3-8{top:110px;font-size:10px;width:220px;}body #primary-attack{width:80px;height:80px;}body #primary-attack::before{height:20px;width:20px;margin-bottom:4px;}body .shield-guard,body .shadow-dash{min-height:58px;height:58px;width:58px;right:118px;}body .subweapon-hud{bottom:112px;}body #world-bag,body #carried-rations{height:44px;min-height:44px!important;}body #world-inventory,body .chart-atlas{inset:8px;}body #world-inventory .bag-heading{padding:4px 6px 8px;}body #settlement-services{height:calc(100dvh - 16px)!important;max-height:calc(100dvh - 16px)!important;}}
+@media(prefers-reduced-motion:reduce){body button,body progress{transition:none!important;}}
+/* END RPG_INTERFACE_V1 */
+
+/* RPG Interface V1 — final hierarchy and equipment board. */
+body #local-world-controls[data-performance-enabled=true][open]{z-index:65!important;}
+body:has(#local-world-controls[open]) .chart-mini{visibility:hidden;pointer-events:none;}
+body #world-inventory .bag-heading h2{font:26px var(--rpg-title);letter-spacing:.06em;color:#ead8b4;}
+body #world-inventory .inventory-scroll{background:#141f29;border:1px solid #5d6e784f;border-radius:3px;box-shadow:none;padding:16px;scrollbar-color:#7b806e #14202b;}
+body #world-inventory .bag-section-tabs{border:0;border-bottom:1px solid #76694766;border-radius:0;box-shadow:none;}
+body #world-equipment{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-content:start;}
+body #world-inventory .paperdoll-slot{min-height:106px;align-items:center;padding:14px 16px;background:linear-gradient(135deg,#263440,#1b2833);}
+body #world-inventory .paperdoll-slot:has(.empty-slot){min-height:106px;border-left-color:#69768155;background:linear-gradient(135deg,#202c37,#17232d);}
+body #world-inventory .paperdoll-slot .equipment-icon{width:46px;height:46px;flex:0 0 46px;padding:3px;background:#131e29;}
+body #world-inventory .slot-label{font:600 10px var(--rpg-ui);letter-spacing:.13em;color:#a8b6b7;margin-bottom:7px;}
+body #world-inventory .empty-slot{font:italic 12px var(--rpg-title);color:#71848d;}
+body #world-inventory .paperdoll-slot:has(.empty-slot)::before{content:"◇";font:32px var(--rpg-title);color:#60717a;line-height:1;margin-right:6px;}
+body #world-inventory .paperdoll-slot:has(.empty-slot) .item-info{flex:1;}
+body #world-inventory .item-sub{font:10px/1.5 var(--rpg-ui);color:#aebbc0;margin-top:3px;}
+body #world-inventory .attune-badge{border:1px solid #8d7a535e;background:#a88f4212;color:#c4b18b;border-radius:2px;font:9px var(--rpg-ui);padding:3px 6px;}
+body #world-inventory #world-items{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-content:start;}
+body #world-inventory #world-comparison{background:#17232dfc;border-radius:3px;}
+body #world-inventory #world-inventory-status{font:11px/1.5 var(--rpg-ui);color:#9caeb5;}
+body #settlement-services .item-card,body #settlement-services .forge-detail-panel{background:#1c2935;border-color:#5d6f79;border-radius:3px;box-shadow:none;}
+@media(max-width:850px){body #world-equipment{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}body #world-inventory .paperdoll-slot,body #world-inventory .paperdoll-slot:has(.empty-slot){min-height:90px;padding:11px;}body #world-inventory .paperdoll-slot .equipment-icon{width:37px;height:37px;flex-basis:37px;}}
+@media(max-width:600px){body #world-inventory .bag-heading h2{font-size:21px;}body #world-inventory .inventory-scroll{padding:9px;}body #world-equipment{gap:7px;}body #world-inventory .paperdoll-slot,body #world-inventory .paperdoll-slot:has(.empty-slot){min-height:88px;padding:9px;gap:7px;}body #world-inventory .paperdoll-slot .equipment-icon{width:30px;height:34px;flex-basis:30px;}body #world-inventory .item-title{font-size:13px;}body #world-inventory .slot-label{font-size:9px;letter-spacing:.06em;}body #world-inventory .empty-slot{font-size:10px;}body #world-inventory .paperdoll-slot:has(.empty-slot)::before{font-size:24px;margin-right:1px;}body #world-inventory #world-items{grid-template-columns:1fr;}}
+/* END RPG_INTERFACE_V1_REFINEMENT */
+
+/* RPG Interface V1 — player controls first, review tools on demand. */
+body #local-world-controls[open]{height:auto;min-height:330px;bottom:auto;max-height:calc(100dvh - 100px)!important;}
+body #local-world-controls[open]>summary{display:block;width:calc(100% + 40px)!important;max-width:none!important;}
+body #local-world-controls[open]>summary::before{content:"World menu";}
+body #local-world-controls #world-hud-movement{position:static;display:flex;gap:16px;align-items:center;margin:4px 0 18px;}
+body #local-world-controls #world-hud-movement>span{display:block;color:#c8d0cc;font:12px var(--rpg-ui);}
+body #local-world-controls #world-hud-movement select{max-width:none;min-width:120px;min-height:42px;margin-left:auto;}
+body #rpg-menu-actions{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px;}
+body #rpg-menu-actions button{margin:0;flex:1;min-width:150px;min-height:44px;}
+body #rpg-menu-actions button.danger{flex:1 1 100%;color:#d8b1a6;background:#34272a;border-color:#826158;}
+body #local-world-controls #rpg-review-tools{padding:12px 0 0;border-top:1px solid #74694d6b;border-bottom:0;}
+body #local-world-controls #rpg-review-tools>summary{font:12px var(--rpg-ui);color:#b4c0c5;letter-spacing:.03em;}
+body #local-world-controls #rpg-review-tools>details{margin-left:8px;}
+body #local-world-controls p:empty{display:none;}
+@media(max-width:600px){body #local-world-controls[open]{bottom:auto;max-height:calc(100dvh - 24px - var(--world-safe-top) - var(--world-safe-bottom))!important;min-height:320px;}body #rpg-menu-actions button{min-width:120px;}}
+/* END RPG_INTERFACE_V1_MENU */
+
+body #local-world-controls #rpg-campaign-options{border-bottom:0;padding:2px 0 8px;}
+body #rpg-campaign-options>summary{color:#b5c1c5;font:12px var(--rpg-ui);}
+body #rpg-campaign-options button{margin-right:8px;min-height:44px;}
+body #rpg-campaign-options button.danger{color:#d7b0a5;border-color:#805c54;background:#33272a;}
+body #rpg-menu-actions{margin:12px 0 8px;}
+body #rpg-menu-actions button{background:linear-gradient(#515646,#303c3c);color:#f0dfb8;border-color:#b19a6c;}
+
+/* RPG Interface V1 — normalize inherited Dungeon service accents. */
+body #settlement-services .forge-main-title,body #settlement-services .shop-main-title{color:#ead8b4!important;font-weight:400!important;}
+body #settlement-services .forge-mode-bar,body #settlement-services .shop-tab-bar{background:none!important;box-shadow:none!important;border-radius:0!important;border-bottom:1px solid #687269!important;}
+body #settlement-services .forge-mode-btn,body #settlement-services .shop-tab-btn{background:none!important;box-shadow:none!important;border:0!important;border-bottom:2px solid transparent!important;border-radius:0!important;font:600 11px var(--rpg-ui)!important;letter-spacing:.07em;color:#acb9bd!important;}
+body #settlement-services .forge-mode-btn[aria-pressed=true],body #settlement-services .shop-tab-btn.active{background:#bba06012!important;border-bottom-color:#bba060!important;color:#eee0c0!important;}
+body #settlement-services .forge-anvil-button{background:linear-gradient(#505b53,#2d3d40)!important;border:1px solid #a88f64!important;color:#eee1c4!important;border-radius:3px!important;box-shadow:inset 0 1px #ffffff10!important;font:600 12px var(--rpg-ui)!important;letter-spacing:.025em!important;}
+body #settlement-services .shop-wallet-bar,body #settlement-services .shop-wallet,body #settlement-services .forge-wallet{color:#d5c397!important;background:#1a2733!important;border-color:#5b6c77!important;box-shadow:none!important;}
+body #settlement-services:has([data-service-action="use-ration"]){height:auto!important;max-height:80dvh!important;width:min(580px,calc(100vw - 32px))!important;}
+body #settlement-services:has([data-service-action="use-ration"]) .service-shell{height:auto;}
+body #settlement-services:has([data-service-action="use-ration"]) .service-body{min-height:0;padding-bottom:12px;}
+body #world-inventory .progression-attributes .attribute-rows button[aria-pressed=true]{background:linear-gradient(#47554f,#2b3d3d)!important;border:1px solid #b49c6a;color:#eee0bf;box-shadow:none;}
+body #world-inventory .progression-line strong{color:#d4bd90;}
+
+/* Movement preferences live in the menu, including before its first open. */
+body #world-hud > #world-hud-movement{display:none;}
+/* RPG_INTERFACE_V2 — compact combat instruments and contextual action dock.
+   Original code-native glyphs. No raster downloads, blur, timers or authority changes. */
+body #world-hud-vitals{top:calc(16px + var(--world-safe-top));left:calc(16px + var(--world-safe-left));width:290px;height:88px;display:block;padding:18px 13px 12px 61px;border:0;border-radius:4px;background:#15212df2;box-shadow:none;}
+body #world-hud-vitals::before,body #world-hud-vitals::after{display:none;content:none;}
+body .vital-bars{margin:0;}
+body .hp-track{height:23px;margin:0 0 7px;}
+body #world-hp-bar{height:23px;border:2px solid #10161d;border-radius:3px;background:#392029;box-shadow:0 0 0 1px #ac817c;}
+body #world-hp-bar::-webkit-progress-bar{background:#392029;}
+body #world-hp-bar::-webkit-progress-value{background:linear-gradient(#e58c87 0 12%,#c24d59 12% 72%,#8b303f 72%);border-top:0;}
+body #world-hp-bar::-moz-progress-bar{background:#c24d59;}
+body #world-health{font:700 11px/23px var(--rpg-ui);letter-spacing:.015em;color:#fff3e1;text-shadow:0 1px #3a1822;}
+body #world-progression{position:static;display:grid;grid-template-columns:1fr;grid-template-rows:4px 11px;height:19px;gap:3px;}
+body #world-level{position:absolute;left:5px;top:18px;width:43px;height:43px;display:grid;place-items:center;grid-row:auto;grid-column:auto;border:3px solid #0f151e;border-radius:50%;background:linear-gradient(135deg,#53626a,#293843 50%,#17242e);box-shadow:inset 0 0 0 1px #b6a07e,0 3px 0 #0b121b;font:800 11px var(--rpg-ui);color:#f3e6cc;letter-spacing:.02em;}
+body #world-xp-bar{grid-column:1;grid-row:1;height:4px;background:#152329;box-shadow:0 0 0 1px #435d61;}
+body #world-xp-bar::-webkit-progress-bar{background:#152329;}
+body #world-xp-bar::-webkit-progress-value{background:linear-gradient(90deg,#5d9f9c,#a9d4bd);}
+body #world-xp-bar::-moz-progress-bar{background:#88bfb2;}
+body #world-xp{grid-column:1;grid-row:2;font:9px/11px var(--rpg-ui);color:#b8cbc8;letter-spacing:.015em;}
+body #world-wallet{top:auto;right:13px;bottom:5px;font-size:10px;color:#d9c18d;}
+body #world-wallet svg{width:12px;height:14px;}
+body #world-status{left:62px;bottom:5px;max-width:130px;font-size:9px;color:#a4b6b8;}
+body #world-hud-vitals.saq-critical-health-v3{border:0;background:#3e1a25f2;box-shadow:none;}
+body #world-hud-title{top:calc(19px + var(--world-safe-top));background:none;border:0;padding:0 8px 6px;gap:5px;width:auto;max-width:35vw;}
+body #world-hud-title strong{display:none;}
+body #space-label{font:16px/1.3 var(--rpg-title);color:#efe8d8;text-shadow:0 1px 3px #0b1219;}
+body #world-time-clock{font-size:9px!important;color:#c1c8c5!important;}
+body #world-bag{width:58px;height:58px;min-width:58px;min-height:58px!important;display:flex;flex-direction:column;justify-content:center;gap:3px;padding:4px!important;border:3px solid #10171f!important;border-radius:10px!important;background:linear-gradient(145deg,#40515b,#22343e)!important;color:#e6d6b6!important;box-shadow:inset 0 0 0 1px #9a8c71,0 3px 0 #0b1119!important;font-size:0!important;}
+body #world-bag::before{width:29px;height:29px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36' stroke='%23101820' stroke-width='2.3' stroke-linejoin='round'%3E%3Cpath fill='%23785b44' d='m9 12-3 17 4 4h17l4-4-4-17Z'/%3E%3Cpath fill='%23aa8260' d='m9 10 3-5h12l3 5-2 8H11Z'/%3E%3Cpath fill='%23c4a279' d='M13 5h10v6H13z'/%3E%3Cpath fill='%235a4236' d='M11 23h15v7H11z'/%3E%3Cpath fill='%23d2b676' d='M16 14h5v9h-5z'/%3E%3C/svg%3E");}
+body #world-bag::after{content:"BAG";font:800 8px/10px var(--rpg-ui);letter-spacing:.12em;color:#eee0c4;}
+body #carried-rations{left:calc(88px + var(--world-safe-left))!important;height:51px;min-height:51px!important;min-width:94px;bottom:calc(24px + var(--world-safe-bottom))!important;border:2px solid #10171f!important;border-radius:8px!important;background:linear-gradient(#394b4e,#26373d)!important;box-shadow:inset 0 0 0 1px #899b87,0 3px 0 #0b1119!important;}
+body #primary-attack{width:88px;height:88px;border:3px solid #10171f;border-radius:17px;background:linear-gradient(145deg,#53626c 0%,#2d414d 45%,#182c37 46%,#24333c 100%);box-shadow:inset 0 0 0 1px #b9a282,0 4px 0 #0b1119,0 7px 14px #0004;color:#f4e9d2;}
+body #primary-attack::before{width:32px;height:32px;margin:0 auto 3px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40' stroke='%23101922' stroke-width='2.2' stroke-linejoin='round'%3E%3Cpath fill='%23dbe3df' d='m12 27 17-21 6-2-1 7-19 19Z'/%3E%3Cpath fill='%2390a4aa' stroke='none' d='m15 28 18-22-3 2-17 20Z'/%3E%3Cpath fill='%23c5a96e' d='m7 25 4-4 12 11-4 3Z'/%3E%3Cpath fill='%238b6950' d='m7 29 4-3 5 5-4 4Z'/%3E%3Cpath fill='%23baa177' d='m3 32 4-4 6 7-4 3Z'/%3E%3C/svg%3E");}
+body #primary-attack strong{font:800 12px/15px var(--rpg-ui);text-shadow:0 1px #101820;}
+body #primary-attack small{font:600 8px/10px var(--rpg-ui);margin-top:2px;color:#b9c5c7;}
+body #primary-attack[data-held=true]{background:linear-gradient(145deg,#925956,#583b45 45%,#422d3b 46%,#2b2933);box-shadow:inset 0 0 0 1px #dfb78b,0 2px 0 #0b1119;color:#fff1d7;}
+body .shield-guard,body .shadow-dash{right:calc(128px + var(--world-safe-right));border:2px solid #10171f;border-radius:10px;background:#293d48;box-shadow:inset 0 0 0 1px #aa977a,0 3px #0d151d;}
+body .subweapon-hud{bottom:calc(126px + var(--world-safe-bottom));}
+body #world-event-hud-v3,body #woodland-clue-v3-8{top:calc(120px + var(--world-safe-top));}
+body[data-rpg-interaction=v2] #world-pickup{display:none!important;}
+body[data-rpg-interaction=v2] #world-event-hud-v3 button{display:none!important;}
+#rpg-interaction-v2{position:absolute;z-index:9;left:50%;bottom:calc(28px + var(--world-safe-bottom));transform:translateX(-50%);display:flex;align-items:center;gap:12px;width:max-content;min-width:230px;max-width:min(360px,calc(100vw - 440px));min-height:54px;padding:9px 13px 9px 10px;border:2px solid #101820;border-radius:8px;background:linear-gradient(100deg,#283b48f5,#152631ee);box-shadow:inset 0 0 0 1px #ad9b78,0 3px 0 #10182080;color:#ece4d0;text-align:left;touch-action:none;user-select:none;}
+#rpg-interaction-v2[hidden]{display:none!important;}
+#rpg-interaction-v2 kbd{display:grid;place-items:center;flex:none;width:30px;height:32px;padding:0;border:1px solid #b3a58b;border-bottom:3px solid #948369;border-radius:4px;background:#d0c7b2;color:#192630;font:900 15px var(--rpg-ui);box-shadow:0 1px 2px #0006;}
+#rpg-interaction-v2>span:not(.interaction-tap){display:flex;flex-direction:column;gap:3px;min-width:0;flex:1;}
+#rpg-interaction-v2 small{font:600 8px/10px var(--rpg-ui);letter-spacing:.13em;text-transform:uppercase;color:#aebfbd;}
+#rpg-interaction-v2 strong{font:600 13px/17px var(--rpg-ui);color:#efe6d2;overflow-wrap:anywhere;}
+#rpg-interaction-v2 .interaction-tap{font:600 9px var(--rpg-ui);color:#b8c8c4;border-left:1px solid #64777566;padding-left:10px;}
+@media(hover:hover) and (pointer:fine){#rpg-interaction-v2:hover{background:#334b57;border-color:#d4c5a5;}#rpg-interaction-v2 .interaction-tap{display:none;}}
+@media(max-width:1100px){body #world-hud-title{left:calc(16px + var(--world-safe-left));top:calc(111px + var(--world-safe-top));transform:none;align-items:flex-start;text-align:left;max-width:calc(100vw - 240px);padding:0;}body #space-label{font-size:13px;}body #world-event-hud-v3,body #woodland-clue-v3-8{top:calc(169px + var(--world-safe-top));}}
+@media(max-width:700px){#rpg-interaction-v2{bottom:calc(170px + var(--world-safe-bottom));min-width:220px;max-width:calc(100vw - 32px);padding:9px 12px;min-height:56px;}#rpg-interaction-v2 strong{font-size:12px;}body #world-loot-notice{top:calc(240px + var(--world-safe-top));}}
+@media(max-width:600px){body #world-hud-vitals{top:calc(12px + var(--world-safe-top));left:calc(12px + var(--world-safe-left));width:calc(100vw - 160px - var(--world-safe-left) - var(--world-safe-right));height:80px;padding:17px 10px 10px 48px;}body #world-level{left:4px;top:19px;width:35px;height:35px;font-size:9px;}body #world-hp-bar,body .hp-track{height:20px;}body #world-health{font-size:9px;line-height:20px;}body #world-progression{grid-template-columns:1fr;height:17px;}body #world-xp{font-size:8px;}body #world-status{left:48px;bottom:3px;font-size:8px;max-width:72px;}body #world-wallet{right:10px;bottom:3px;font-size:9px;}body #world-wallet svg{width:10px;height:11px;}body #world-hud-title{left:calc(12px + var(--world-safe-left));top:calc(102px + var(--world-safe-top));max-width:calc(100vw - 155px);gap:3px;}body #space-label{font-size:12px;}body #world-event-hud-v3,body #woodland-clue-v3-8{top:calc(171px + var(--world-safe-top));}body #world-bag{width:54px;height:54px;min-width:54px;min-height:54px!important;bottom:calc(16px + var(--world-safe-bottom))!important;padding:4px!important;}body #world-bag::before{width:27px;height:27px;}body #carried-rations{left:calc(77px + var(--world-safe-left))!important;min-width:86px;height:48px;min-height:48px!important;bottom:calc(20px + var(--world-safe-bottom))!important;}body #primary-attack{width:83px;height:83px;border-radius:15px;}body #primary-attack::before{width:31px;height:31px;}body .shield-guard,body .shadow-dash{right:calc(109px + var(--world-safe-right));width:60px;min-height:60px;height:60px;}body .subweapon-hud{bottom:calc(112px + var(--world-safe-bottom));}#rpg-interaction-v2{bottom:calc(174px + var(--world-safe-bottom));}}
+@media(max-height:500px) and (min-width:601px){body #world-hud-vitals{height:80px;width:266px;padding:15px 12px 10px 56px;top:10px;}body #world-level{width:36px;height:36px;top:18px;left:7px;font-size:10px;}body #world-status{display:none;}body #world-hud-title{top:12px;left:50%;transform:translateX(-50%);align-items:center;text-align:center;max-width:27vw;}body #space-label{font-size:12px;}body #primary-attack{width:76px;height:76px;}body #primary-attack::before{width:27px;height:27px;}body #world-event-hud-v3,body #woodland-clue-v3-8{top:106px;}#rpg-interaction-v2{bottom:calc(105px + var(--world-safe-bottom));min-width:230px;max-width:40vw;min-height:50px;padding:7px 10px;}body #carried-rations{height:46px;min-height:46px!important;}body #world-bag{height:50px;min-height:50px!important;width:54px;min-width:54px;}}
+@media(prefers-reduced-motion:reduce){#rpg-interaction-v2{transition:none;}}
+/* END RPG_INTERFACE_V2 */
+
+body #primary-attack .attack-touch{display:none;}
+@media(pointer:coarse){body #primary-attack .attack-key{display:none;}body #primary-attack .attack-touch{display:inline;}}
+
+@media(pointer:coarse){#rpg-interaction-v2 kbd{font-size:0;}#rpg-interaction-v2 kbd::after{content:"TAP";font:800 9px var(--rpg-ui);}#rpg-interaction-v2 .interaction-tap{display:none;}}
+
+/* RPG_INTERFACE_V3 — location card and separate character/skills screens. */
+body #world-hud-title{left:calc(20px + var(--world-safe-left));top:calc(112px + var(--world-safe-top));transform:none;align-items:flex-start;text-align:left;width:max-content;max-width:340px;padding:9px 14px 10px;gap:5px;border-left:2px solid #b8a37c;background:linear-gradient(90deg,#17242de8,#17242da8 80%,#17242d00);}
+body #space-label{font:600 15px/1.3 var(--rpg-title);color:#eee3ce;}
+body #world-time-clock{font:10px/1.4 var(--rpg-ui)!important;color:#c8c9ba!important;}
+body #world-inventory .bag-section-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));overflow:visible;gap:3px;}
+body #world-inventory .bag-section-tabs button{min-width:0;min-height:44px;white-space:normal;padding:7px 4px;font-size:10px;letter-spacing:.035em;}
+#world-inventory[data-section=stats] #world-bag-browse,#world-inventory[data-section=stats] #world-materials-view,#world-inventory[data-section=stats] #world-forge-view,#world-inventory[data-section=stats] #world-bag-summary,#world-inventory[data-section=stats] #world-bag-stats{display:none;}
+body #world-inventory .character-stats-view{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(240px,.8fr);align-content:start;align-items:start;gap:18px;overflow-y:auto;overflow-x:hidden;min-width:0;width:100%;padding:16px;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#6b817f #14212b;}
+body #world-inventory .character-stats-view[hidden]{display:none;}
+.character-stats-view>header{grid-column:1/-1;}
+.character-stats-view h3{margin:0 0 5px;font:23px var(--rpg-title);color:#e9d8b4;}
+.character-stats-view>header p,.character-stats-footnote{margin:0;color:#a7babd;font:12px/1.6 var(--rpg-ui);}
+.character-stat-groups{grid-column:1;grid-row:2;min-width:0;display:grid;gap:14px;}
+.character-stat-groups section{border:1px solid #526873;border-radius:4px;overflow:hidden;background:#14232d;}
+.character-stat-groups h4{margin:0;padding:10px 12px;background:#2b3e48;color:#ddceaf;font:700 11px var(--rpg-ui);text-transform:uppercase;letter-spacing:.1em;}
+.character-stat-groups dl{margin:0;padding:2px 12px;}
+.character-stat-groups dl>div{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:10px 0;border-bottom:1px solid #64787c33;font:13px/1.4 var(--rpg-ui);}
+.character-stat-groups dl>div:last-child{border:0;}
+.character-stat-groups dt{color:#b8c9ca;min-width:0;}
+.character-stat-groups dd{margin:0;text-align:right;font-weight:700;font-variant-numeric:tabular-nums;color:#f1e6cf;overflow-wrap:anywhere;}
+.character-stats-view .progression-attributes{grid-column:2;grid-row:2;position:sticky;top:0;min-width:0;border:1px solid #6c765e;border-radius:4px;background:#1e3036;padding:13px;}
+.character-stats-view .progression-line{align-items:center;}
+.character-stats-view .progression-line strong{font:700 11px var(--rpg-ui);color:#d9d5b7;}
+.character-stats-view .attribute-rows{gap:5px;}
+.character-stats-view .attribute-rows button{min-width:0;padding:10px 4px;min-height:65px;}
+.character-stats-view .attribute-rows strong{font-size:14px;}
+.character-stats-view .attribute-rows small{font-size:10px;color:#abbab9;}
+.character-stats-view .attribute-details{font:12px/1.6 var(--rpg-ui);color:#bbccca;}
+.character-stats-view .attribute-details summary{min-height:44px;color:#e7d5b4;}
+.character-stats-view .attribute-details p{margin:6px 0 10px;}
+.character-stats-view .progression-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
+.character-stats-view .progression-actions button{min-width:0;padding:7px 4px;}
+.character-stats-view .progression-actions button:nth-last-child(-n+2){grid-column:span 3;}
+.character-stats-footnote{grid-column:1/-1;padding:10px 0;border-top:1px solid #566c6e66;}
+body #world-inventory .progression-view{width:100%;min-width:0;}
+body #world-inventory .constellation-stage{grid-row:3/6;}
+body #world-inventory .mastery-header{backdrop-filter:none;}
+@media(max-width:700px){
+ body #world-inventory{inset:calc(6px + var(--world-safe-top)) calc(6px + var(--world-safe-right)) calc(6px + var(--world-safe-bottom)) calc(6px + var(--world-safe-left));width:auto;max-width:none;max-height:none;padding:8px;gap:7px;}
+ body #world-inventory .bag-heading{padding:7px 4px;min-height:48px;}
+ body #world-inventory .bag-heading h2{font-size:20px;letter-spacing:.02em;}
+ body #world-inventory #world-bag-close{min-width:44px;min-height:44px;}
+ body #world-inventory .bag-section-tabs button{font-size:9px;}
+ body #world-inventory .paperdoll-slot,body #world-inventory .paperdoll-slot:has(.empty-slot){min-height:72px;padding:10px;}
+ body #world-inventory #world-equipment{grid-template-columns:1fr;}
+ body #world-inventory .paperdoll-slot .equipment-icon{width:38px;height:38px;flex-basis:38px;}
+ body #world-inventory .item-title{font-size:14px;line-height:1.35;overflow-wrap:anywhere;}
+ body #world-inventory .row-action{min-width:64px;min-height:44px;font-size:10px;}
+ body #world-inventory .inventory-scroll{min-width:0;padding:8px 4px;}
+ body #world-inventory .character-stats-view{display:flex;flex-direction:column;gap:14px;padding:8px 3px;}
+ .character-stats-view>header,.character-stat-groups,.character-stats-view .progression-attributes{width:100%;box-sizing:border-box;}
+ .character-stats-view .progression-attributes{position:static;}
+ .character-stats-view .character-stat-groups{display:grid;}
+ .character-stats-view h3{font-size:21px;}
+ .character-stat-groups dl>div{font-size:13px;min-height:36px;padding:8px 0;}
+ body #world-inventory .progression-view{display:block;padding:5px 2px;}
+ body #world-inventory .constellation-stage{height:640px;min-height:640px;}
+ body #world-inventory .constellation-zoom button{min-height:44px;min-width:44px;}
+ body #world-inventory .node-detail{font-size:13px;line-height:1.6;}
+ body #world-inventory .node-detail button{min-height:44px;}
+}
+@media(max-width:600px){body #world-hud-title{left:calc(12px + var(--world-safe-left));top:calc(103px + var(--world-safe-top));max-width:calc(100vw - 158px);padding:7px 9px;gap:4px;}body #space-label{font-size:12px;}body #world-time-clock{font-size:9px!important;}}
+@media(max-height:500px) and (min-width:601px){body #world-hud-title{left:50%;top:10px;transform:translateX(-50%);max-width:27vw;padding:5px 10px;align-items:center;text-align:center;}body #space-label{font-size:12px;}body #world-inventory{inset:6px 12px;padding:7px 10px;gap:4px;}body #world-inventory .bag-heading{padding:2px 4px;min-height:44px;}body #world-inventory .bag-section-tabs button{min-height:38px;}body #world-inventory .character-stats-view{padding:8px;}}
+/* END RPG_INTERFACE_V3 */
+
+.constellation-hint{display:none;}
+body #world-inventory #world-bag-close{width:44px;min-width:44px;min-height:44px;}
+@media(max-width:700px){body #world-inventory .constellation-plane{width:400px;left:14px;right:auto;}body #world-inventory .constellation-hint{display:block;margin:5px 0 9px;font:11px/1.5 var(--rpg-ui);color:#a5b9bc;}}
+
+/* HIDDEN_HOLLOW_V1: event objectives share the restored location-card surface. */
+body #world-event-hud-v3[data-kind=hollow]{background:linear-gradient(90deg,#17242de8,#17242da8 80%,#17242d00);border:0;border-left:2px solid #b8a37c;border-radius:0;box-shadow:none;}
+
+body #world-event-hud-v3[data-kind=hollow]{top:calc(181px + var(--world-safe-top));}
+@media(max-width:600px){body #world-event-hud-v3[data-kind=hollow]{top:calc(180px + var(--world-safe-top));}}
+@media(max-height:500px) and (min-width:601px){body #world-event-hud-v3[data-kind=hollow]{top:106px;}}
+
+/* Defeat V2: visible, inert surroundings; a bounded dialog, no HUD fade. */
+body #world-hud-vitals{border:1px solid #a69470;box-shadow:0 0 0 2px #101922,0 3px 8px #0004;}
+body #world-hud-vitals.saq-critical-health-v3{border:1px solid #d47d7d;box-shadow:0 0 0 2px #201922,0 3px 8px #0004;}
+body #world-xp-bar{border-radius:2px;box-shadow:0 0 0 1px #7faba8,0 0 0 2px #101922;}
+html[data-defeated=true] [data-gameplay-hud],html[data-defeated=true] .chart-mini{pointer-events:none!important;}
+body #world-death{width:min(380px,calc(100% - 32px));padding:26px 28px 24px;isolation:isolate;border-color:#a68e69!important;background:linear-gradient(155deg,#26343f,#141e29 70%)!important;box-shadow:0 16px 50px #0009,inset 0 0 0 4px #101821,inset 0 0 0 5px #786a4b55!important;}
+body #world-death .death-emblem{display:block;color:#d58679;font-size:28px;line-height:36px;text-shadow:0 2px #090e16;}
+body #world-death .death-eyebrow{display:block;color:#a4b6bf;font:600 9px var(--rpg-ui);letter-spacing:.2em;margin:7px 0 12px;}
+body #world-death h2{font:34px var(--rpg-title);letter-spacing:.06em;color:#f1d2be;margin:0 0 8px;}
+body #world-death .death-intro{font-size:12px;color:#b9c5cb;margin-bottom:20px;}
+body #world-death #world-death-level{color:#e5d9bf;font-weight:700;}
+body #world-death #world-death-xp{font-size:11px;color:#a9bec6;}
+body #world-death .death-policy{display:block;padding:9px 0;margin:16px 0;border-block:1px solid #64716e66;color:#bed6b6;font:600 11px var(--rpg-ui);}
+body #world-death #world-death-anchor{font-size:12px;color:#ded3bd;margin:14px 0;}
+body #world-death #world-respawn{display:block;width:100%;min-height:46px;border:1px solid #bd9b67;background:linear-gradient(#65533d,#403b32);color:#fff0d1;letter-spacing:.05em;}
+body #world-death #world-respawn:focus-visible{outline:2px solid #f0d69e;outline-offset:3px;}
+body #world-death #world-death-download{margin:12px 0 0;background:none;border:0;min-height:32px;font-size:10px;color:#a7b9c3;text-decoration:underline;}
+body #world-death button:disabled{opacity:.5;}
+@media(max-height:500px){body #world-death{padding:14px 24px;}body #world-death .death-emblem,body #world-death .death-intro{display:none;}body #world-death h2{font-size:27px;}body #world-death .death-eyebrow{margin:2px 0 6px;}body #world-death p{margin:6px 0;}body #world-death .death-policy{padding:6px 0;margin:8px 0;}}

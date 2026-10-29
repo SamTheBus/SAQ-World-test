@@ -1,0 +1,22 @@
+{
+  "version": "world-roadside-encounters-v2",
+  "parentCombatHash": "a6bd45764908d58d1e1dff8e55e811a0d10876ee0b24ea4b15aa28ea6c94fc59",
+  "parentAccessHash": "48fd65d60a26a6403b36111e0d3622e366c26f6a07709e9d34ff013a013fcdeb",
+  "packChancePercent": 85,
+  "ordinaryPack": [
+    6,
+    12
+  ],
+  "maximumPacksPerChunk": 1,
+  "protectedReservationChunks": "all original settlement/site/faction/future/origin chunks; unchanged",
+  "wildernessSafetyCollarTiles": 8,
+  "previousCollar": "one whole chunk in every direction (32x26 tiles), including unused neighboring ground",
+  "spawnSafetyRadiusTiles": 32,
+  "ferrySafetyRadiusTiles": 32,
+  "eventCapacity": "all reserved event cells plus two-tile shoulder excluded",
+  "routeSafety": "no member on marked road/trail/bridge or its one-tile shoulder",
+  "actorSafety": "existing 384px activation no-spawn radius unchanged",
+  "simulation": "existing 60Hz, 192 active actors, retention, XP, loot, stats and dungeon rosters unchanged",
+  "selection": "domain-separated global chunk hash, maximum 24 center attempts, max 81 member probes per attempt, same-landmass clearance",
+  "scope": "reusable sampler; opted-in Alpha review only; fresh disposable namespace"
+}

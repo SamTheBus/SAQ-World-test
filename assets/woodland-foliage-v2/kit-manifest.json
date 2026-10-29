@@ -1,0 +1,156 @@
+{
+  "version": "woodland-foliage-v2",
+  "source": "Original built-in image_gen, references supplied by user; no extracted external game art. Original source PNG/alpha preserved. Runtime crops use alpha-bounded sprite regions, preserve aspect ratios and ground anchors.",
+  "files": [
+    {
+      "path": "trees.png",
+      "bytes": 1119515,
+      "sha256": "5fd4b6e7afb52432828b07a6335bf0144234a5db7f863ead55f503939dc5ba60",
+      "width": 1312,
+      "height": 1199,
+      "slots": [
+        {
+          "id": 0,
+          "x": 34,
+          "y": 34,
+          "width": 680,
+          "height": 590,
+          "sourceRegion": [
+            0,
+            0,
+            750,
+            630
+          ]
+        },
+        {
+          "id": 1,
+          "x": 799,
+          "y": 16,
+          "width": 421,
+          "height": 609,
+          "sourceRegion": [
+            780,
+            0,
+            532,
+            630
+          ]
+        },
+        {
+          "id": 2,
+          "x": 142,
+          "y": 632,
+          "width": 467,
+          "height": 558,
+          "sourceRegion": [
+            110,
+            630,
+            530,
+            569
+          ]
+        },
+        {
+          "id": 3,
+          "x": 755,
+          "y": 632,
+          "width": 483,
+          "height": 558,
+          "sourceRegion": [
+            740,
+            630,
+            572,
+            569
+          ]
+        }
+      ],
+      "transparentCorner": true
+    },
+    {
+      "path": "understory.png",
+      "bytes": 1664923,
+      "sha256": "93679f87de486ba7323535e5b9b4585f4d9dc5b027cb743dfe42d9d88bcf8bb9",
+      "width": 1536,
+      "height": 1024,
+      "slots": [
+        {
+          "id": 0,
+          "x": 36,
+          "y": 200,
+          "width": 484,
+          "height": 296,
+          "sourceRegion": [
+            0,
+            0,
+            525,
+            520
+          ]
+        },
+        {
+          "id": 1,
+          "x": 545,
+          "y": 85,
+          "width": 465,
+          "height": 425,
+          "sourceRegion": [
+            525,
+            0,
+            485,
+            520
+          ]
+        },
+        {
+          "id": 2,
+          "x": 1007,
+          "y": 185,
+          "width": 512,
+          "height": 319,
+          "sourceRegion": [
+            1000,
+            0,
+            536,
+            520
+          ]
+        },
+        {
+          "id": 3,
+          "x": 64,
+          "y": 654,
+          "width": 410,
+          "height": 259,
+          "sourceRegion": [
+            0,
+            550,
+            510,
+            474
+          ]
+        },
+        {
+          "id": 4,
+          "x": 526,
+          "y": 566,
+          "width": 471,
+          "height": 369,
+          "sourceRegion": [
+            512,
+            550,
+            495,
+            474
+          ]
+        },
+        {
+          "id": 5,
+          "x": 1020,
+          "y": 583,
+          "width": 483,
+          "height": 367,
+          "sourceRegion": [
+            1010,
+            550,
+            526,
+            474
+          ]
+        }
+      ],
+      "transparentCorner": true
+    }
+  ]
+}

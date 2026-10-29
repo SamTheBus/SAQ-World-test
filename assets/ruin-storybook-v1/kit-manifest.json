@@ -1,0 +1,534 @@
+{
+  "version": "ruin-purpose-built-modular-kit-groves-v2",
+  "files": [
+    {
+      "id": "entrance",
+      "path": "entrance-source.png",
+      "width": 1536,
+      "height": 1024,
+      "crop": [
+        148,
+        172,
+        1240,
+        673
+      ],
+      "bytes": 1269861,
+      "sha256": "d49d7de3b715a086ace39d3bafe3680a6a906227407b5f5357b384876d7ae92c"
+    },
+    {
+      "id": "modular",
+      "path": "modular-thin-source.png",
+      "width": 1536,
+      "height": 1024,
+      "crop": null,
+      "bytes": 1376494,
+      "sha256": "b15c2534086fc153e4a34f040ca353ddcb8a0f431e9caeb9b89baff7ffce6fc5"
+    },
+    {
+      "id": "vertical",
+      "path": "vertical-thin-source.png",
+      "width": 2172,
+      "height": 724,
+      "crop": null,
+      "bytes": 472319,
+      "sha256": "2910127c5761a334c166a2a92779bba69676302a2fb2d913ee850216a790e4ae"
+    },
+    {
+      "id": "grove",
+      "path": "grove-clean-source.png",
+      "width": 1536,
+      "height": 1024,
+      "crop": null,
+      "bytes": 1803272,
+      "sha256": "d6626d8a6a04c6b1a5a447379b15d874cb9de4a82a0e103b7d098fabdd1ea461"
+    },
+    {
+      "id": "materials",
+      "path": "materials-source.png",
+      "width": 1774,
+      "height": 887,
+      "crop": null,
+      "bytes": 1629836,
+      "sha256": "5534fd20c780154f7977385655bf4f7e83bec1d2ad843638b0fef00a3f52446a"
+    }
+  ],
+  "modules": {
+    "broken-end": {
+      "cells": [
+        [
+          0,
+          0
+        ],
+        [
+          2,
+          0
+        ]
+      ],
+      "clearCells": [
+        [
+          1,
+          0
+        ]
+      ],
+      "crop": [
+        45,
+        650,
+        329,
+        195
+      ],
+      "origin": [
+        34,
+        171
+      ],
+      "ports": {
+        "west": [
+          0,
+          0
+        ]
+      },
+      "scale": 0.27,
+      "sheet": "modular"
+    },
+    "broken-north-south": {
+      "cells": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "crop": [
+        1642,
+        73,
+        218,
+        587
+      ],
+      "origin": [
+        67,
+        78
+      ],
+      "ports": {
+        "north": [
+          0,
+          0
+        ]
+      },
+      "scale": 0.17,
+      "sheet": "vertical"
+    },
+    "collapsed": {
+      "cells": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ]
+      ],
+      "crop": [
+        421,
+        658,
+        328,
+        190
+      ],
+      "origin": [
+        34,
+        163
+      ],
+      "ports": {
+        "west": [
+          0,
+          0
+        ]
+      },
+      "scale": 0.27,
+      "sheet": "modular"
+    },
+    "corner": {
+      "cells": [
+        [
+          0,
+          -3
+        ],
+        [
+          0,
+          -2
+        ],
+        [
+          0,
+          -1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          0
+        ]
+      ],
+      "crop": [
+        858,
+        102,
+        478,
+        497
+      ],
+      "origin": [
+        82,
+        464
+      ],
+      "ports": {
+        "east": [
+          96,
+          0
+        ],
+        "north": [
+          0,
+          -91.92067988668555
+        ]
+      },
+      "scale": 0.2719546742209632,
+      "sheet": "vertical"
+    },
+    "door-collar": {
+      "cells": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          0
+        ]
+      ],
+      "crop": [
+        792,
+        583,
+        313,
+        276
+      ],
+      "origin": [
+        34,
+        244
+      ],
+      "ports": {
+        "east": [
+          96,
+          0
+        ],
+        "west": [
+          0,
+          0
+        ]
+      },
+      "scale": 0.43636363636363634,
+      "sheet": "modular"
+    },
+    "end-cap": {
+      "cells": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ]
+      ],
+      "crop": [
+        1176,
+        211,
+        321,
+        200
+      ],
+      "origin": [
+        34,
+        179
+      ],
+      "ports": {
+        "west": [
+          0,
+          0
+        ]
+      },
+      "scale": 0.3,
+      "sheet": "modular"
+    },
+    "foundation": {
+      "cells": [],
+      "crop": [
+        1159,
+        737,
+        341,
+        114
+      ],
+      "origin": [
+        170,
+        87
+      ],
+      "ports": {},
+      "scale": 0.23,
+      "sheet": "modular"
+    },
+    "north-south": {
+      "cells": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          3
+        ]
+      ],
+      "crop": [
+        367,
+        41,
+        181,
+        641
+      ],
+      "origin": [
+        69,
+        78
+      ],
+      "ports": {
+        "north": [
+          0,
+          0
+        ],
+        "south": [
+          0,
+          96
+        ]
+      },
+      "scale": 0.1951219512195122,
+      "sheet": "vertical",
+      "visualOffset": [
+        0,
+        4.079320113314452
+      ]
+    },
+    "straight-a": {
+      "cells": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          0
+        ]
+      ],
+      "crop": [
+        44,
+        232,
+        323,
+        177
+      ],
+      "origin": [
+        34,
+        153
+      ],
+      "ports": {
+        "east": [
+          96,
+          0
+        ],
+        "west": [
+          0,
+          0
+        ]
+      },
+      "scale": 0.375,
+      "sheet": "modular"
+    },
+    "straight-b": {
+      "cells": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          0
+        ]
+      ],
+      "crop": [
+        422,
+        233,
+        330,
+        177
+      ],
+      "origin": [
+        34,
+        152
+      ],
+      "ports": {
+        "east": [
+          96,
+          0
+        ],
+        "west": [
+          0,
+          0
+        ]
+      },
+      "scale": 0.35687732342007433,
+      "sheet": "modular"
+    }
+  },
+  "floraSlots": [
+    [
+      44,
+      60,
+      522,
+      488
+    ],
+    [
+      613,
+      35,
+      315,
+      516
+    ],
+    [
+      998,
+      138,
+      501,
+      418
+    ],
+    [
+      98,
+      658,
+      368,
+      285
+    ],
+    [
+      570,
+      628,
+      408,
+      318
+    ],
+    [
+      1089,
+      670,
+      353,
+      281
+    ]
+  ],
+  "scene": {
+    "reservationId": "repeatable-slot:ruin:woodland:small:01",
+    "bounds": {
+      "left": 2499,
+      "top": 6838,
+      "width": 26,
+      "height": 44
+    }
+  },
+  "scope": "New modular walls and landscape only in Small Woodland scene. Other cumulative destinations retain existing presentation.",
+  "sampling": {
+    "spriteDecode": "2.8x-world-display-pixels",
+    "aspectRatio": "one-uniform-scale-from-source",
+    "longWalls": "explicit-endpoint-joins-no-looped-stamps",
+    "backing": "none"
+  },
+  "groves": {
+    "version": "small-woodland-grove-composition-v1",
+    "composition": "seeded-shared-shrub-masses-and-grouped-trees",
+    "collision": "local-subset-of-native-foliage-only",
+    "rootScalePx": {
+      "treeWidths": [
+        72,
+        46,
+        74
+      ],
+      "shrubWidths": [
+        72,
+        80,
+        84
+      ]
+    },
+    "groundAnchor": "sprite-bottom-94-percent",
+    "viewportIndependent": true
+  },
+  "joinContract": {
+    "straightSpanPx": 96,
+    "northCornerOverlapPx": 4.079320113314452,
+    "maximumJoinResidualPx": 4.2,
+    "rule": "complete-sprites-overlap-at-endpoint-posts-no-cutout-clipping"
+  },
+  "blending": {
+    "scope": "inside-existing-Small-pilot-bounds-only",
+    "featherTiles": 4,
+    "edge": "coherent-irregular-inner-fade",
+    "grassAndRoad": "same-world-anchored-alpha-mask",
+    "preparedOnce": true
+  },
+  "standardStructureReview": {
+    "version": "planned-standard-ruin-authored-remnants-v1",
+    "reservationId": "repeatable-slot:ruin:upland:standard:01",
+    "bounds": {
+      "left": 2404,
+      "top": 5174,
+      "width": 56,
+      "height": 44
+    },
+    "scope": "Kit-only joined remnants with fitted collision masks; no legacy masonry underlays. Small pilot unchanged."
+  }
+}

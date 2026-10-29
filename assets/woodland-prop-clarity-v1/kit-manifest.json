@@ -1,0 +1,58 @@
+{
+  "version": "woodland-small-props-v1",
+  "source": "Original built-in image_gen, purpose-built small-scale cel assets. PNG/alpha copied unchanged; runtime crops only.",
+  "files": [
+    {
+      "path": "small-props.png",
+      "sha256": "22efa157688c606180083d28c54f390a04c1152a2f3795c67e39fcd32b2c9c48",
+      "bytes": 1536731,
+      "width": 1536,
+      "height": 1024,
+      "decodeLimit": 128,
+      "slots": [
+        {
+          "id": "log",
+          "x": 31,
+          "y": 188,
+          "width": 494,
+          "height": 270
+        },
+        {
+          "id": "stump",
+          "x": 566,
+          "y": 164,
+          "width": 398,
+          "height": 294
+        },
+        {
+          "id": "shrub-low",
+          "x": 993,
+          "y": 159,
+          "width": 513,
+          "height": 307
+        },
+        {
+          "id": "shrub-tall",
+          "x": 72,
+          "y": 585,
+          "width": 394,
+          "height": 368
+        },
+        {
+          "id": "shrub-open",
+          "x": 524,
+          "y": 576,
+          "width": 506,
+          "height": 378
+        },
+        {
+          "id": "grass-tuft",
+          "x": 1126,
+          "y": 667,
+          "width": 337,
+          "height": 250
+        }
+      ]
+    }
+  ]
+}

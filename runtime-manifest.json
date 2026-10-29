@@ -1,0 +1,361 @@
+{
+  "runtimeId": "34d1561c5b65390a",
+  "runtimeSha256": "34d1561c5b65390ac1c58004d1dd7732c50b408f700390c6d1a67c5151660782",
+  "files": [
+    {
+      "path": ".nojekyll",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "assets/alderwood-access-v1/alpha.json",
+      "bytes": 45906,
+      "sha256": "48fd65d60a26a6403b36111e0d3622e366c26f6a07709e9d34ff013a013fcdeb"
+    },
+    {
+      "path": "assets/alpha-site-population-v1.json",
+      "bytes": 140762,
+      "sha256": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e"
+    },
+    {
+      "path": "assets/breakable-props-v1/kit-manifest.json",
+      "bytes": 1392,
+      "sha256": "8c5f58ebaa6c53a5be6f113e8ef9f793b1966b54ecd9973a6e97ce79b69fca3c"
+    },
+    {
+      "path": "assets/breakable-props-v1/props-source-v1.png",
+      "bytes": 1394066,
+      "sha256": "585e8842fa178a3bceb44000bce6a9a5747f9b6f0728a37a45abf56f2f64e532"
+    },
+    {
+      "path": "assets/fort-art-pilot-v1/floor-v1.png",
+      "bytes": 1265080,
+      "sha256": "e0bf1464ea6f5d7c648f3e5e3c6417f9af2ad0b2398494bec777ce1493c218cb"
+    },
+    {
+      "path": "assets/fort-art-pilot-v1/keep-v1.png",
+      "bytes": 1564135,
+      "sha256": "43e70b76c2a564a1994a57ad201e860f9fd69cad9573ae3adfda553e251d3f77"
+    },
+    {
+      "path": "assets/fort-art-pilot-v1/kit-manifest.json",
+      "bytes": 2458,
+      "sha256": "6a046b99c3ec3141cf96f5f24c4cb563b4265e4a9000cdcf3222158e1f197d2b"
+    },
+    {
+      "path": "assets/fort-art-pilot-v1/masonry-v1.png",
+      "bytes": 1484183,
+      "sha256": "a2c8380db2951851d88830c6f7b359761b81f0b1aa2c5a7a105daafc17750085"
+    },
+    {
+      "path": "assets/fort-art-pilot-v1/tower-v1.png",
+      "bytes": 1338474,
+      "sha256": "a04d7e822ae38bd25020ed342d8ea5619a40c66b974ca62471d9b481a8f33efa"
+    },
+    {
+      "path": "assets/hidden-hollow-v1/hidden-hollow.png",
+      "bytes": 1153139,
+      "sha256": "146d578189fbc649b75c09dff5590bd2ca8e420b26ddee490f9965614125463e"
+    },
+    {
+      "path": "assets/hidden-hollow-v1/kit-manifest.json",
+      "bytes": 405,
+      "sha256": "13db6cad9cba21c5eec256a8ed41f03ba41c508dd27afad82bdd2df8c8626ba2"
+    },
+    {
+      "path": "assets/hidden-hollow-v1/provenance.json",
+      "bytes": 713,
+      "sha256": "88d67333acc5e03fe12ccd827b60388766925215cb0f0c0c9123b7f17e9c4143"
+    },
+    {
+      "path": "assets/hollow-ground-cover-v1/grass-tuft-a.png",
+      "bytes": 1043314,
+      "sha256": "ca84fcad774b7c47a59895c630dbc075913782458ad0ce838cc7a6f1cf8fc1bf"
+    },
+    {
+      "path": "assets/hollow-ground-cover-v1/grass-tuft-b.png",
+      "bytes": 1070102,
+      "sha256": "e6517fe1894a243d158f70b21ee8e869bf43d56699bd695c76361511e2878e34"
+    },
+    {
+      "path": "assets/hollow-ground-cover-v1/kit-manifest.json",
+      "bytes": 2284,
+      "sha256": "f68c5ac0969333b13415132ea26b2092eee5e28e4f12ac8b3bcae4d1d47094fd"
+    },
+    {
+      "path": "assets/hollow-ground-cover-v1/leaf-plant.png",
+      "bytes": 443248,
+      "sha256": "8e20f008d42d821b8c16a1dabbaed270e026d0d4535d2b330a5fda5570d61597"
+    },
+    {
+      "path": "assets/hollow-ground-cover-v1/low-fern.png",
+      "bytes": 979467,
+      "sha256": "f455bd307b7a5671f1417b145b0112c2d8b14c93e5bf51280ef054f431b6961c"
+    },
+    {
+      "path": "assets/hollow-ground-cover-v1/provenance.json",
+      "bytes": 797,
+      "sha256": "4d424c229ce8302652bad0b96327f3980c624720ea7e7b6d1c3abdb066d32572"
+    },
+    {
+      "path": "assets/hollow-ground-cover-v1/root-sprout.png",
+      "bytes": 399979,
+      "sha256": "8dd2d73c2cb7554a56ca6daa02c2eab5c3af5660c6f3159dccff9a32b53a1efe"
+    },
+    {
+      "path": "assets/hybrid-art-pilot-v1/journey.json",
+      "bytes": 18448,
+      "sha256": "452601819b2d7eb533f4732004a078ecc8fb5cbb86d18b5f17d3565f34115989"
+    },
+    {
+      "path": "assets/hybrid-art-pilot-v1/kit-manifest.json",
+      "bytes": 3339,
+      "sha256": "04981276c72260bfbfd36b9cac2c7ab45669679e6608dbcbe06c6f9864b12141"
+    },
+    {
+      "path": "assets/hybrid-art-pilot-v1/woodland-atlas-source.png",
+      "bytes": 1623361,
+      "sha256": "ed9fea4aecd769896e04990ee43506c95d96f55c74cf373ec1f88b182e21a5f7"
+    },
+    {
+      "path": "assets/hybrid-art-v2/bush-sprites-source.png",
+      "bytes": 940431,
+      "sha256": "b4e6660339cfe9d4ea70eea9074917799ae211f2ceeb216387c0e89a3a91d0ab"
+    },
+    {
+      "path": "assets/hybrid-art-v2/kit-manifest.json",
+      "bytes": 2063,
+      "sha256": "d28eecd8c03e5849a4e6c76292d26fac61a177de626f231764036f0f8a870024"
+    },
+    {
+      "path": "assets/hybrid-art-v2/material-atlas-source.png",
+      "bytes": 1751166,
+      "sha256": "f95347584d69cbe0b29cf552a6f8596ff7110fee9f187377d0fb7eddf5840b98"
+    },
+    {
+      "path": "assets/hydrology-v1/alpha.json",
+      "bytes": 754669,
+      "sha256": "4fb70faf18fe2ae53ec79c71e4c1c7d70f6f3769649b084dd8f66fce53cd8cc6"
+    },
+    {
+      "path": "assets/night-loot-v1/debris-source-v1.png",
+      "bytes": 1017473,
+      "sha256": "e114451398560e2f89ffc2455ec3d8965fc8bca5d5e9bb05f920093b0818a143"
+    },
+    {
+      "path": "assets/night-loot-v1/kit-manifest.json",
+      "bytes": 2369,
+      "sha256": "b1979b5dc13c6f8292ecbd45c35ff5b04d0e947a6ba0f52f60bf3521117ab81e"
+    },
+    {
+      "path": "assets/painted-paths-v1/flat-transition-source.png",
+      "bytes": 1633178,
+      "sha256": "af901ed6ec8b79c68a8a2aae498a2a499d4bbddb2e59bcb8d69892109bbc4d80"
+    },
+    {
+      "path": "assets/painted-paths-v1/junction-source.png",
+      "bytes": 1831205,
+      "sha256": "be6a4040a7adc596706aa541ca4bc7be557bdb618f332151c34a3d8fec136cf4"
+    },
+    {
+      "path": "assets/painted-paths-v1/kit-manifest.json",
+      "bytes": 2319,
+      "sha256": "445c49d6faf68b3b6e9f26373ef9697a995e30d0d619518a28c74717d52a33b3"
+    },
+    {
+      "path": "assets/planned-world-water-v3/alpha.json",
+      "bytes": 3204953,
+      "sha256": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a"
+    },
+    {
+      "path": "assets/planned-world-water-v3/registry.json",
+      "bytes": 562,
+      "sha256": "a5809efed1707681186767efde93b088d76bef890177216048edea69e08e90ac"
+    },
+    {
+      "path": "assets/roadside-encounters-v1/policy.json",
+      "bytes": 1207,
+      "sha256": "b45cc8e610b432ef59a91b345c9a0083b1ee8e4557cbf777dbfb6620f8f063c3"
+    },
+    {
+      "path": "assets/ruin-storybook-v1/entrance-source.png",
+      "bytes": 1269861,
+      "sha256": "d49d7de3b715a086ace39d3bafe3680a6a906227407b5f5357b384876d7ae92c"
+    },
+    {
+      "path": "assets/ruin-storybook-v1/grove-clean-source.png",
+      "bytes": 1803272,
+      "sha256": "d6626d8a6a04c6b1a5a447379b15d874cb9de4a82a0e103b7d098fabdd1ea461"
+    },
+    {
+      "path": "assets/ruin-storybook-v1/kit-manifest.json",
+      "bytes": 8548,
+      "sha256": "01fafed84c87911c6808a5a1c461660fdcf85760dd58701339fdbd6105668fd7"
+    },
+    {
+      "path": "assets/ruin-storybook-v1/materials-source.png",
+      "bytes": 1629836,
+      "sha256": "5534fd20c780154f7977385655bf4f7e83bec1d2ad843638b0fef00a3f52446a"
+    },
+    {
+      "path": "assets/ruin-storybook-v1/modular-thin-source.png",
+      "bytes": 1376494,
+      "sha256": "b15c2534086fc153e4a34f040ca353ddcb8a0f431e9caeb9b89baff7ffce6fc5"
+    },
+    {
+      "path": "assets/ruin-storybook-v1/provenance.json",
+      "bytes": 9754,
+      "sha256": "5031b97670823a1842b6f5297db245eded4cec3ebe05dc047423c2d1efe890bb"
+    },
+    {
+      "path": "assets/ruin-storybook-v1/vertical-thin-source.png",
+      "bytes": 472319,
+      "sha256": "2910127c5761a334c166a2a92779bba69676302a2fb2d913ee850216a790e4ae"
+    },
+    {
+      "path": "assets/spore-outbreak-v1/fungal-clump.png",
+      "bytes": 806829,
+      "sha256": "26627a492e72b83ac8056ca2415b5856ab604b77d66ed44af320de2382c6c503"
+    },
+    {
+      "path": "assets/spore-outbreak-v1/kit-manifest.json",
+      "bytes": 2468,
+      "sha256": "1ce28cb6a9c5bfbc0fd1a3b6453aa553b8b1284a0d242b2116756592458d9159"
+    },
+    {
+      "path": "assets/spore-outbreak-v1/spore-pod-open.png",
+      "bytes": 1050369,
+      "sha256": "ef906b2895969601a9589af052fede458d97e9e0c3583653b2cc28c5fff50901"
+    },
+    {
+      "path": "assets/spore-outbreak-v1/spore-pod.png",
+      "bytes": 1077055,
+      "sha256": "d31a923dc52bcbfbeb268e766552c11d581ca1fdf3c4217604615b808939a7c4"
+    },
+    {
+      "path": "assets/wilderness-v2/alpha.json",
+      "bytes": 1472485,
+      "sha256": "ed2f7fcafeac4305b6658242d232d8d79dade9ecb6b43ea74125fc1318cc282f"
+    },
+    {
+      "path": "assets/woodland-environment-v1/earth-source.png",
+      "bytes": 1516154,
+      "sha256": "73b75b04f2978c8592c16c6384ae83ddb8153af9a6d995bb0bcd756541623aca"
+    },
+    {
+      "path": "assets/woodland-environment-v1/grass-source.png",
+      "bytes": 1686271,
+      "sha256": "01b6fa1ec51a3d20cc78713ef0ec389bf2051d826ef9a4ff6d2e87445bdf8895"
+    },
+    {
+      "path": "assets/woodland-environment-v1/journey.json",
+      "bytes": 6786,
+      "sha256": "c2c36e935451174640f25e0218ac75575a61b726027cabdf6808922cdc00a381"
+    },
+    {
+      "path": "assets/woodland-environment-v1/kit-manifest.json",
+      "bytes": 1177,
+      "sha256": "17d2c4a2e52a3f052eda803568d271fae67d01e4a0959f2a224deb00ff79f9e8"
+    },
+    {
+      "path": "assets/woodland-foliage-v2/kit-manifest.json",
+      "bytes": 3288,
+      "sha256": "815e46a7bff815c98eba285628082a157646392df3a2da63539147c8f4b2d973"
+    },
+    {
+      "path": "assets/woodland-foliage-v2/trees.png",
+      "bytes": 1119515,
+      "sha256": "5fd4b6e7afb52432828b07a6335bf0144234a5db7f863ead55f503939dc5ba60"
+    },
+    {
+      "path": "assets/woodland-foliage-v2/understory.png",
+      "bytes": 1664923,
+      "sha256": "93679f87de486ba7323535e5b9b4585f4d9dc5b027cb743dfe42d9d88bcf8bb9"
+    },
+    {
+      "path": "assets/woodland-forest-v1/accents.png",
+      "bytes": 1822924,
+      "sha256": "b9edfed1aff6ee52085676516d2e5f5fffd7ef20299280ae8dbd7117928b8ac2"
+    },
+    {
+      "path": "assets/woodland-forest-v1/kit-manifest.json",
+      "bytes": 3465,
+      "sha256": "822b0cc05bc64859ff447482e9ec9efbfb7211745958f6eb40db36657cae9422"
+    },
+    {
+      "path": "assets/woodland-forest-v1/rocks.png",
+      "bytes": 933770,
+      "sha256": "b54cb0b043a11070426d55230c5056e774908023819a1718e3f929dfead378cc"
+    },
+    {
+      "path": "assets/woodland-forest-v1/trees.png",
+      "bytes": 1192450,
+      "sha256": "3f91d16de1c0df02067e261c4857fc2573179c2fa56b24d1f1e18a78ede0de79"
+    },
+    {
+      "path": "assets/woodland-forest-v1/understory.png",
+      "bytes": 1677936,
+      "sha256": "189de6b9b5bb63b0d21ac5c3128a5e62926df8e034a29ef2ec7f8e467a1a0e6b"
+    },
+    {
+      "path": "assets/woodland-prop-clarity-v1/kit-manifest.json",
+      "bytes": 1313,
+      "sha256": "501b8e29d8b1d6f161d8c29de56e3d177a071016a69ef15daafdeb23cbbce7e9"
+    },
+    {
+      "path": "assets/woodland-prop-clarity-v1/small-props.png",
+      "bytes": 1536731,
+      "sha256": "22efa157688c606180083d28c54f390a04c1152a2f3795c67e39fcd32b2c9c48"
+    },
+    {
+      "path": "index.html",
+      "bytes": 20048,
+      "sha256": "778b59b355b692c45b9a2797cf65848632357204f0a8db72cff544c51ff4bbb1"
+    },
+    {
+      "path": "manifest.webmanifest",
+      "bytes": 195,
+      "sha256": "9256b4a8863f6c1ce6d6846b9db558386298902e06e20a2bde38891d0adb9646"
+    },
+    {
+      "path": "save-worker.js",
+      "bytes": 2225779,
+      "sha256": "4e7d57f47dc3fe6381777ee39919c1793aa9c0bca171d3123219bfac5d92bdeb"
+    },
+    {
+      "path": "src/chunks/chunk-3Z435BXV.js",
+      "bytes": 1936795,
+      "sha256": "62286c8ad01d30dd075165d637a788059211fa53b022def5de9d53299b011dd6"
+    },
+    {
+      "path": "src/chunks/playable_browser-YU3L4YZB.js",
+      "bytes": 3922984,
+      "sha256": "535c4c1f0683648a3f5548c732edca709246d193860b2b9e0074557b5d3f984e"
+    },
+    {
+      "path": "src/chunks/world_browser-K2K7UCKA.js",
+      "bytes": 1416,
+      "sha256": "66988b1b1e917f0352ada70a10a00a77dbc9147d967ff3f8509b15c6a799ddde"
+    },
+    {
+      "path": "src/client/startup_combat_preview_v1.js",
+      "bytes": 13273,
+      "sha256": "fcfeac87c3a46d4cc9c7cc7a048822052ec47fba2655ae423dca5abc6a19e9c9"
+    },
+    {
+      "path": "src/client/startup_loading_v1.js",
+      "bytes": 4171,
+      "sha256": "a6836546cbe04ca54db3eddab099aa48eba2540c564ad231dc14aad65589b414"
+    },
+    {
+      "path": "src/entrypoints/browser_boot.js",
+      "bytes": 1862,
+      "sha256": "2874f018dbddb3c5b2fd199f52fc5a12bbe3e958ee3735bb7d1a383b019d8236"
+    },
+    {
+      "path": "world.css",
+      "bytes": 108967,
+      "sha256": "64eba15479f9d7bc76598112f6f79ec5d0c6843647ec5712940dc628f8edf5a6"
+    }
+  ]
+}

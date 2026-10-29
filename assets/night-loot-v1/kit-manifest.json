@@ -1,0 +1,125 @@
+{
+  "version": "night-loot-debris-art-v1",
+  "path": "debris-source-v1.png",
+  "width": 1254,
+  "height": 1254,
+  "bytes": 1017473,
+  "sha256": "e114451398560e2f89ffc2455ec3d8965fc8bca5d5e9bb05f920093b0818a143",
+  "slots": [
+    {
+      "x": 46,
+      "y": 82,
+      "width": 245,
+      "height": 219,
+      "material": "wood"
+    },
+    {
+      "x": 382,
+      "y": 45,
+      "width": 166,
+      "height": 290,
+      "material": "wood"
+    },
+    {
+      "x": 642,
+      "y": 111,
+      "width": 270,
+      "height": 183,
+      "material": "wood"
+    },
+    {
+      "x": 991,
+      "y": 46,
+      "width": 199,
+      "height": 278,
+      "material": "wood"
+    },
+    {
+      "x": 56,
+      "y": 353,
+      "width": 243,
+      "height": 251,
+      "material": "clay"
+    },
+    {
+      "x": 384,
+      "y": 359,
+      "width": 214,
+      "height": 252,
+      "material": "clay"
+    },
+    {
+      "x": 680,
+      "y": 375,
+      "width": 205,
+      "height": 236,
+      "material": "clay"
+    },
+    {
+      "x": 957,
+      "y": 402,
+      "width": 266,
+      "height": 179,
+      "material": "clay"
+    },
+    {
+      "x": 48,
+      "y": 660,
+      "width": 237,
+      "height": 263,
+      "material": "urn"
+    },
+    {
+      "x": 360,
+      "y": 656,
+      "width": 237,
+      "height": 268,
+      "material": "urn"
+    },
+    {
+      "x": 665,
+      "y": 691,
+      "width": 247,
+      "height": 215,
+      "material": "urn"
+    },
+    {
+      "x": 990,
+      "y": 666,
+      "width": 221,
+      "height": 247,
+      "material": "urn"
+    },
+    {
+      "x": 52,
+      "y": 992,
+      "width": 237,
+      "height": 188,
+      "material": "metal"
+    },
+    {
+      "x": 374,
+      "y": 979,
+      "width": 228,
+      "height": 226,
+      "material": "metal"
+    },
+    {
+      "x": 666,
+      "y": 1000,
+      "width": 237,
+      "height": 185,
+      "material": "metal"
+    },
+    {
+      "x": 985,
+      "y": 982,
+      "width": 221,
+      "height": 200,
+      "material": "metal"
+    }
+  ],
+  "decodeLongestEdge": 64,
+  "provenance": "Original generated with built-in image_gen, 2026-10-27. No third-party artwork. Prompt retained in review evidence.",
+  "boundsMethod": "Complete alpha-connected silhouettes, not grid-cell clipping"
+}

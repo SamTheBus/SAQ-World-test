@@ -1,0 +1,86 @@
+{
+  "version": "hollow-ground-cover-v1",
+  "decodeLongestEdge": 192,
+  "files": [
+    {
+      "id": "grass-tuft-a",
+      "path": "grass-tuft-a.png",
+      "targetScreenWidth": 32,
+      "width": 1536,
+      "height": 1024,
+      "crop": [
+        0,
+        70,
+        1418,
+        954
+      ],
+      "sha256": "ca84fcad774b7c47a59895c630dbc075913782458ad0ce838cc7a6f1cf8fc1bf",
+      "bytes": 1043314,
+      "processing": "Original built-in image_gen PNG/alpha unchanged; proportional draw only"
+    },
+    {
+      "id": "grass-tuft-b",
+      "path": "grass-tuft-b.png",
+      "targetScreenWidth": 36,
+      "width": 1536,
+      "height": 1024,
+      "crop": [
+        0,
+        25,
+        1506,
+        915
+      ],
+      "sha256": "e6517fe1894a243d158f70b21ee8e869bf43d56699bd695c76361511e2878e34",
+      "bytes": 1070102,
+      "processing": "Original built-in image_gen PNG/alpha unchanged; proportional draw only"
+    },
+    {
+      "id": "leaf-plant",
+      "path": "leaf-plant.png",
+      "targetScreenWidth": 40,
+      "width": 1774,
+      "height": 887,
+      "crop": [
+        57,
+        160,
+        1461,
+        727
+      ],
+      "sha256": "8e20f008d42d821b8c16a1dabbaed270e026d0d4535d2b330a5fda5570d61597",
+      "bytes": 443248,
+      "processing": "Original built-in image_gen PNG/alpha unchanged; proportional draw only"
+    },
+    {
+      "id": "root-sprout",
+      "path": "root-sprout.png",
+      "targetScreenWidth": 48,
+      "width": 1774,
+      "height": 887,
+      "crop": [
+        414,
+        198,
+        908,
+        623
+      ],
+      "sha256": "8dd2d73c2cb7554a56ca6daa02c2eab5c3af5660c6f3159dccff9a32b53a1efe",
+      "bytes": 399979,
+      "processing": "Original built-in image_gen PNG/alpha unchanged; proportional draw only"
+    },
+    {
+      "id": "low-fern",
+      "path": "low-fern.png",
+      "targetScreenWidth": 48,
+      "width": 1536,
+      "height": 1024,
+      "crop": [
+        33,
+        31,
+        1455,
+        931
+      ],
+      "sha256": "f455bd307b7a5671f1417b145b0112c2d8b14c93e5bf51280ef054f431b6961c",
+      "bytes": 979467,
+      "processing": "Original built-in image_gen PNG/alpha unchanged; proportional draw only"
+    }
+  ]
+}

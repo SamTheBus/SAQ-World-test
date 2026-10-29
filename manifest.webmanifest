@@ -1,0 +1,10 @@
+{
+  "id": "./",
+  "name": "SAQ World",
+  "short_name": "SAQ World",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#080d16",
+  "theme_color": "#080d16"
+}

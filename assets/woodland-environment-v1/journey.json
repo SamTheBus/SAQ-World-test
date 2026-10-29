@@ -1,0 +1,392 @@
+{
+  "version": "woodland-environment-review-v1",
+  "assetId": "alpha",
+  "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a",
+  "wildernessHash": "ed2f7fcafeac4305b6658242d232d8d79dade9ecb6b43ea74125fc1318cc282f",
+  "scope": {
+    "left": 2920,
+    "top": 6840,
+    "right": 3780,
+    "bottom": 7340,
+    "featherTiles": 24
+  },
+  "start": {
+    "id": "starter:arrival",
+    "name": "Alderwood",
+    "x": 3682,
+    "y": 6946
+  },
+  "destination": {
+    "id": "repeatable-slot:cave:woodland:small:089",
+    "band": 1,
+    "footprint": [
+      {
+        "x": 93,
+        "y": 279
+      }
+    ],
+    "approach": [
+      {
+        "x": 94,
+        "y": 279
+      }
+    ],
+    "target": {
+      "id": "repeatable-slot:cave:woodland:small:089:entrance",
+      "label": "Playable Small Woodland Cave / small / Band 1 - mouth (inspection)",
+      "tile": {
+        "x": 2989,
+        "y": 7260
+      }
+    }
+  },
+  "clearings": [
+    {
+      "eventSlotId": "density-v2-event-capacity-027",
+      "category": "pathside",
+      "biome": "woodland",
+      "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca",
+      "position": {
+        "x": 3424,
+        "y": 6942
+      },
+      "cells": [
+        {
+          "x": 3424,
+          "y": 6939
+        },
+        {
+          "x": 3422,
+          "y": 6940
+        },
+        {
+          "x": 3423,
+          "y": 6940
+        },
+        {
+          "x": 3424,
+          "y": 6940
+        },
+        {
+          "x": 3425,
+          "y": 6940
+        },
+        {
+          "x": 3426,
+          "y": 6940
+        },
+        {
+          "x": 3421,
+          "y": 6941
+        },
+        {
+          "x": 3422,
+          "y": 6941
+        },
+        {
+          "x": 3423,
+          "y": 6941
+        },
+        {
+          "x": 3424,
+          "y": 6941
+        },
+        {
+          "x": 3425,
+          "y": 6941
+        },
+        {
+          "x": 3426,
+          "y": 6941
+        },
+        {
+          "x": 3427,
+          "y": 6941
+        },
+        {
+          "x": 3420,
+          "y": 6942
+        },
+        {
+          "x": 3421,
+          "y": 6942
+        },
+        {
+          "x": 3422,
+          "y": 6942
+        },
+        {
+          "x": 3423,
+          "y": 6942
+        },
+        {
+          "x": 3424,
+          "y": 6942
+        },
+        {
+          "x": 3425,
+          "y": 6942
+        },
+        {
+          "x": 3426,
+          "y": 6942
+        },
+        {
+          "x": 3427,
+          "y": 6942
+        },
+        {
+          "x": 3428,
+          "y": 6942
+        },
+        {
+          "x": 3421,
+          "y": 6943
+        },
+        {
+          "x": 3422,
+          "y": 6943
+        },
+        {
+          "x": 3423,
+          "y": 6943
+        },
+        {
+          "x": 3424,
+          "y": 6943
+        },
+        {
+          "x": 3425,
+          "y": 6943
+        },
+        {
+          "x": 3426,
+          "y": 6943
+        },
+        {
+          "x": 3427,
+          "y": 6943
+        },
+        {
+          "x": 3422,
+          "y": 6944
+        },
+        {
+          "x": 3423,
+          "y": 6944
+        },
+        {
+          "x": 3424,
+          "y": 6944
+        },
+        {
+          "x": 3425,
+          "y": 6944
+        },
+        {
+          "x": 3426,
+          "y": 6944
+        },
+        {
+          "x": 3424,
+          "y": 6945
+        }
+      ]
+    },
+    {
+      "eventSlotId": "density-v2-event-capacity-123",
+      "category": "backcountry",
+      "biome": "woodland",
+      "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca",
+      "position": {
+        "x": 3232,
+        "y": 6994
+      },
+      "cells": [
+        {
+          "x": 3232,
+          "y": 6991
+        },
+        {
+          "x": 3230,
+          "y": 6992
+        },
+        {
+          "x": 3231,
+          "y": 6992
+        },
+        {
+          "x": 3232,
+          "y": 6992
+        },
+        {
+          "x": 3233,
+          "y": 6992
+        },
+        {
+          "x": 3234,
+          "y": 6992
+        },
+        {
+          "x": 3229,
+          "y": 6993
+        },
+        {
+          "x": 3230,
+          "y": 6993
+        },
+        {
+          "x": 3231,
+          "y": 6993
+        },
+        {
+          "x": 3232,
+          "y": 6993
+        },
+        {
+          "x": 3233,
+          "y": 6993
+        },
+        {
+          "x": 3234,
+          "y": 6993
+        },
+        {
+          "x": 3235,
+          "y": 6993
+        },
+        {
+          "x": 3228,
+          "y": 6994
+        },
+        {
+          "x": 3229,
+          "y": 6994
+        },
+        {
+          "x": 3230,
+          "y": 6994
+        },
+        {
+          "x": 3231,
+          "y": 6994
+        },
+        {
+          "x": 3232,
+          "y": 6994
+        },
+        {
+          "x": 3233,
+          "y": 6994
+        },
+        {
+          "x": 3234,
+          "y": 6994
+        },
+        {
+          "x": 3235,
+          "y": 6994
+        },
+        {
+          "x": 3236,
+          "y": 6994
+        },
+        {
+          "x": 3229,
+          "y": 6995
+        },
+        {
+          "x": 3230,
+          "y": 6995
+        },
+        {
+          "x": 3231,
+          "y": 6995
+        },
+        {
+          "x": 3232,
+          "y": 6995
+        },
+        {
+          "x": 3233,
+          "y": 6995
+        },
+        {
+          "x": 3234,
+          "y": 6995
+        },
+        {
+          "x": 3235,
+          "y": 6995
+        },
+        {
+          "x": 3230,
+          "y": 6996
+        },
+        {
+          "x": 3231,
+          "y": 6996
+        },
+        {
+          "x": 3232,
+          "y": 6996
+        },
+        {
+          "x": 3233,
+          "y": 6996
+        },
+        {
+          "x": 3234,
+          "y": 6996
+        },
+        {
+          "x": 3232,
+          "y": 6997
+        }
+      ]
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "woodland:town-edge",
+      "label": "Alderwood western approach",
+      "tile": {
+        "x": 3631,
+        "y": 6929
+      },
+      "biome": "w",
+      "band": 1
+    },
+    {
+      "id": "woodland:pathside",
+      "label": "Existing pathside event capacity",
+      "tile": {
+        "x": 3424,
+        "y": 6942
+      },
+      "biome": "w",
+      "band": 1
+    },
+    {
+      "id": "woodland:backcountry",
+      "label": "Existing backcountry event capacity",
+      "tile": {
+        "x": 3232,
+        "y": 6994
+      },
+      "biome": "w",
+      "band": 1
+    },
+    {
+      "id": "woodland:cave",
+      "label": "Small Woodland cave approach",
+      "tile": {
+        "x": 3024,
+        "y": 7267
+      },
+      "biome": "w",
+      "band": 1
+    }
+  ],
+  "scopeBoundary": "Review presentation mask only. Biome eligibility remains independent; no game geography/collision changes."
+}

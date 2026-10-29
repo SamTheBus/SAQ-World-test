@@ -1,0 +1,16 @@
+{
+  "version": "small-plant-raster-v1",
+  "preferred": "generated-raster",
+  "tool": "built-in image_gen",
+  "created": "2026-10-28",
+  "processing": "Original PNG pixels/alpha unchanged; runtime review draws proportionally into a bounded cache",
+  "originalSources": {
+    "grass-tuft-a": "exec-3e6041ee-ecda-4904-a16e-844766fc6365.png",
+    "grass-tuft-b": "exec-a63a5d59-cd41-43f0-b310-fd9569dc5a9a.png",
+    "leaf-plant": "exec-c4a07039-117c-49c4-9902-8da67a0b8b24.png",
+    "root-sprout": "exec-aab054a7-e43d-4948-a3aa-5f47592ad03d.png",
+    "low-fern": "exec-eb5f61e5-dc81-4c64-b2d6-7390bac7e5ca.png"
+  },
+  "svgTrial": "Original project-authored vector alternative retained for comparison; not the selected art direction",
+  "gameplayRuntimeUnchanged": "4b0569897ae2c640"
+}

@@ -1,0 +1,106 @@
+{
+  "version": "painted-paths-v1",
+  "assetId": "alpha",
+  "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a",
+  "files": [
+    {
+      "path": "flat-transition-source.png",
+      "bytes": 1633178,
+      "sha256": "af901ed6ec8b79c68a8a2aae498a2a499d4bbddb2e59bcb8d69892109bbc4d80",
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "path": "junction-source.png",
+      "bytes": 1831205,
+      "sha256": "be6a4040a7adc596706aa541ca4bc7be557bdb618f332151c34a3d8fec136cf4",
+      "width": 1254,
+      "height": 1254
+    }
+  ],
+  "scope": {
+    "left": 3576,
+    "top": 6896,
+    "right": 3718,
+    "bottom": 6982,
+    "featherWorldPixels": 64
+  },
+  "biomes": [
+    "w",
+    "a"
+  ],
+  "sourcePixelScale": 0.75,
+  "profiles": [
+    {
+      "id": "north-field",
+      "file": 0,
+      "x": 210,
+      "width": 840,
+      "top": 140,
+      "bottom": 380,
+      "reverse": false
+    },
+    {
+      "id": "south-field",
+      "file": 0,
+      "x": 210,
+      "width": 840,
+      "top": 820,
+      "bottom": 1090,
+      "reverse": true
+    },
+    {
+      "id": "junction-upper",
+      "file": 1,
+      "x": 8,
+      "width": 232,
+      "top": 180,
+      "bottom": 300,
+      "reverse": false
+    },
+    {
+      "id": "junction-lower",
+      "file": 1,
+      "x": 8,
+      "width": 610,
+      "top": 320,
+      "bottom": 435,
+      "reverse": true
+    }
+  ],
+  "material": {
+    "file": 0,
+    "x": 245,
+    "y": 350,
+    "width": 775,
+    "height": 550
+  },
+  "targets": [
+    {
+      "id": "painted:arrival",
+      "label": "Painted paths \u00b7 Alderwood arrival (inspection)",
+      "tile": {
+        "x": 3682,
+        "y": 6946
+      }
+    },
+    {
+      "id": "painted:junction",
+      "label": "Painted paths \u00b7 existing road/trail junction (inspection)",
+      "tile": {
+        "x": 3631,
+        "y": 6929
+      }
+    },
+    {
+      "id": "painted:trail",
+      "label": "Painted paths \u00b7 western narrow trail (inspection)",
+      "tile": {
+        "x": 3616,
+        "y": 6929
+      }
+    }
+  ],
+  "authorityChanged": false,
+  "originalArt": "OpenAI built-in image_gen.imagegen; approved flat terrain sheets from painted-path-edge-kit-v1; PNG pixels unchanged."
+}

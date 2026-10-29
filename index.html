@@ -1,0 +1,108 @@
+<!doctype html>
+<html data-world-release="wilderness-v3-compact-perftest-202" data-world-save-worker="save-worker.js" data-runtime-manifest="runtime-manifest.json?v=compact-perftest-202" lang="en">
+  <head>
+    <meta charset="utf-8">
+    <link rel="icon" href="data:,">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SAQ World">
+    <meta name="theme-color" content="#080d16">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <title>SAQ World · Hidden Hollow V1</title>
+    <link rel="stylesheet" href="./world.css?v=compact-perftest-202">
+  </head>
+  <body data-roadside-review="v1" data-hydrology-review="v1" data-first-journey="v1" data-world-build-balance="v2" data-woodland-environment="v1" data-woodland-forest="v1" data-starter-village="true" data-fort-art="v1" data-settlement-life="true" data-settlement-services="v2" data-world-combat="v1" data-wilderness-v2="true" data-wilderness-v3="true" data-cumulative-review="true" data-site-population="true" data-multiroom="true" data-ferry-review="true" data-crypt-review="true" data-crypt-version="v2" data-ruin-review="true" data-ruin-version="v2" data-planned-world-review="true" data-shoreline-review="true" data-water-review="true" data-art-pilot="true" data-storybook="true" data-art-v2="true" data-town-review="true" data-cave-review="true" data-cave-population="true" data-fort-review="true" data-fort-version="v2">
+    <div id="world-app">
+    <header id="world-hud"><div id="world-hud-title"><strong>SAQ WORLD</strong><span id="space-label">Starting local campaign…</span></div><div id="world-hud-vitals"><div class="vital-bars"><div class="hp-track"><progress id="world-hp-bar" max="100" value="100" aria-label="Health"></progress><p id="world-health"></p></div><div id="world-progression" hidden><span id="world-level"></span><progress id="world-xp-bar" max="100" value="0" aria-label="XP toward next level"></progress><span id="world-xp"></span></div></div><div id="world-wallet" aria-label="Gold"><svg aria-hidden="true" viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="9" ry="10" fill="#b96d17" stroke="#140d20" stroke-width="2.5"/><ellipse cx="11" cy="10" rx="6" ry="7" fill="#ffd43c"/><path d="M7 5h5v3H7Z" fill="#fff4a4"/><path d="M13 10h3v7h-3Z" fill="#d88a17"/></svg><span id="world-gold">0</span><span id="world-gold-gain" hidden aria-hidden="true"><svg aria-hidden="true" viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="9" ry="10" fill="#b96d17" stroke="#140d20" stroke-width="2.5"/><ellipse cx="11" cy="10" rx="6" ry="7" fill="#ffd43c"/><path d="M7 5h5v3H7Z" fill="#fff4a4"/><path d="M13 10h3v7h-3Z" fill="#d88a17"/></svg><span id="world-gold-gain-amount"></span></span></div><p id="world-status" role="status">Starting...</p></div><label id="world-hud-movement"><span>Movement </span><select id="control-mode" aria-label="Movement mode"><option value="joystick">Joystick</option><option value="cursor">Cursor</option></select></label><button id="retry-travel" hidden>Reconcile save</button>
+      <div id="world-gate-alert" role="alert" hidden><span id="world-gate-alert-text"></span><button id="world-gate-copy" type="button" hidden>Copy fatal diagnostic</button><button id="world-gate-download" type="button" hidden>Download fatal diagnostic</button><button id="world-gate-reopen" type="button" hidden>Reopen last saved</button></div><details id="local-world-controls" hidden><summary><span class="playtest-label-full">Local playtest data</span><span class="playtest-label-short">Playtest</span></summary>
+      <p id="world-status-detail"></p>
+      <p>WASD / arrows · Drag to move · Space / Attack · Internal boundaries are seamless</p>
+      <small id="world-generation"></small>
+      <small><span id="world-metrics"></span> · <span id="control-provenance"></span></small>
+      <small>Each campaign keeps its generated regions, roads, sites and artifact assignments permanently.</small>
+      <button id="start-new-campaign">Start New Campaign</button><button id="reset-local-world-data" class="danger">Reset Local World Data</button><span id="local-world-control-status" role="status"></span></details></header>
+    <main><div id="world-level-up" role="status" aria-live="polite" hidden></div><canvas id="world-view" tabindex="-1" aria-label="Generated campaign overworld. Move with WASD, arrows, joystick or pointer."></canvas><button id="primary-attack" aria-label="Primary Attack. Tap once or hold to chain." aria-pressed="false" disabled><strong>Attack</strong><small><span class="attack-key">SPACE</span><span class="attack-touch">HOLD</span></small></button>
+      <button id="world-bag" type="button" aria-label="Open inventory" hidden>Bag · 0 gold</button><button id="world-pickup" type="button" hidden>Pick up</button><div id="world-loot-notice" role="status" aria-live="polite" hidden></div>
+      <section id="world-inventory" role="dialog" aria-modal="true" aria-labelledby="world-bag-title" hidden>
+        <header class="bag-heading"><div><small>SAQ WORLD</small><h2 id="world-bag-title">HERO CREST</h2></div><button id="world-bag-close" type="button" aria-label="Close inventory">Close</button></header>
+        <div id="world-bag-summary"></div><p id="world-bag-stats"></p>
+        <nav class="bag-section-tabs" aria-label="Inventory sections"><button id="world-equipment-tab" type="button" aria-pressed="true">ARMORY</button><button id="world-bag-tab" type="button" aria-pressed="false">CARRIED GEAR</button><button id="world-materials-tab" type="button" aria-pressed="false">MATERIALS</button></nav><div class="bag-body"><div id="world-bag-browse" class="inventory-scroll"><section><h3>EQUIPPED GEAR</h3><div id="world-equipment"></div></section><section><h3>CARRIED GEAR <small id="world-carried-count"></small></h3><div id="world-items"></div></section></div><section id="world-materials-view" class="inventory-scroll"></section><section id="world-forge-view" class="inventory-scroll"></section><aside id="world-comparison" aria-label="Item tooltip" hidden></aside></div>
+        <p id="world-inventory-status" role="status"></p>
+      </section>
+      <section id="world-death" class="world-dialog" role="dialog" aria-modal="true" aria-labelledby="world-death-title" aria-describedby="world-death-anchor" hidden><div class="death-emblem" aria-hidden="true">◆</div><small class="death-eyebrow">THE JOURNEY CONTINUES</small><h2 id="world-death-title">Defeated</h2><p class="death-intro">Regroup, recover, and return stronger.</p><p id="world-death-level"></p><p id="world-death-xp"></p><p class="death-policy">No XP lost</p><p id="world-death-anchor"></p><button id="world-respawn" type="button">Return to safety</button><button id="world-death-download" type="button" hidden>Download performance sample</button><p id="world-death-status" role="status"></p></section>
+      <section id="startup-recovery" class="world-dialog" hidden aria-live="polite"><h2 id="startup-recovery-title">World could not start</h2><p id="startup-recovery-detail"></p><div><button id="startup-retry">Retry</button><button id="startup-new">Start New Campaign</button><button id="startup-forget">Forget Saved Resume</button><button id="startup-reset" class="danger">Reset Local World Data</button></div></section></main><canvas id="reward-effects" aria-hidden="true"></canvas>
+
+    </div>
+    <!-- Stage 1 environment is adapted from SamTheBus/IdleSAQ entities.js: tier 0 dawn sky, sun, violet peaks, pine forest and ground. Pure loading presentation. -->
+    <section id="saq-startup-scene" class="saq-startup saq-startup-premium" aria-label="SAQ World loading screen">
+      <div class="saq-load-landscape" aria-hidden="true"><svg class="saq-load-stage1-art" viewBox="0 0 750 320" preserveAspectRatio="xMinYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <!-- Exact IdleSAQ Stage 1 (tier 0) environment palette and sky stops. -->
+            <linearGradient id="saq-stage1-sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#121829"/><stop offset=".45" stop-color="#4a154b"/>
+              <stop offset=".80" stop-color="#ff7675"/><stop offset="1" stop-color="#ffeaa7"/>
+            </linearGradient>
+            <radialGradient id="saq-stage1-sun"><stop offset="0" stop-color="#fffdf1"/>
+              <stop offset=".20" stop-color="#ffe082"/><stop offset=".60" stop-color="#ff7675" stop-opacity=".20"/>
+              <stop offset="1" stop-color="#ff7675" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="saq-stage1-mist" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#ffeaa7" stop-opacity="0"/>
+              <stop offset=".70" stop-color="#ffeaa7" stop-opacity=".16"/>
+              <stop offset="1" stop-color="#ffeaa7" stop-opacity=".43"/>
+            </linearGradient>
+            <linearGradient id="saq-stage1-ground" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#194d22"/><stop offset=".15" stop-color="#223d1c"/>
+              <stop offset="1" stop-color="#0c1a0c"/>
+            </linearGradient>
+          </defs>
+          <rect width="750" height="230" fill="url(#saq-stage1-sky)"/>
+          <g class="saq-stage1-sun"><circle cx="180" cy="90" r="67" fill="url(#saq-stage1-sun)"/></g>
+          <g class="saq-stage1-clouds" fill="#fff" fill-opacity=".09" stroke="#fff" stroke-opacity=".12" stroke-width="1">
+            <path d="M35 61q-9-10 4-17 3-18 20-10 13-11 25 3 15-2 19 10 13 10-5 15Z"/>
+            <path d="M270 40q-5-13 16-13 9-16 25-6 16-6 21 10 18 0 17 11Z"/>
+          </g>
+          <!-- Same distant violet peak geometry as IdleSAQ forest Stage 1. -->
+          <path d="M0 230V150L100 90 180 160 290 75 390 150 510 65 610 160 680 105 800 230Z" fill="#271b3e" stroke="#100f23" stroke-width="1.6"/>
+          <rect x="0" y="120" width="750" height="110" fill="url(#saq-stage1-mist)"/>
+          <path d="M0 230 L0 175.0 L4 169.0 L2 169.8 L6 164.5 L4 165.2 L8 160.0 L12 165.2 L10 164.5 L14 169.8 L12 169.0 L16 175.0 L13 175.8 L17 170.8 L15 171.4 L19 167.1 L17 167.7 L21 163.4 L25 167.7 L23 167.1 L27 171.4 L25 170.8 L29 175.8 L27 176.6 L31 169.0 L29 170.0 L33 163.4 L31 164.3 L35 157.7 L39 164.3 L37 163.4 L41 170.0 L39 169.0 L43 176.6 L43 177.5 L47 172.2 L45 172.8 L49 168.2 L47 168.8 L51 164.2 L55 168.8 L53 168.2 L57 172.8 L55 172.2 L59 177.5 L59 178.3 L63 174.0 L61 174.6 L65 170.8 L63 171.3 L67 167.6 L71 171.3 L69 170.8 L73 174.6 L71 174.0 L75 178.3 L75 179.1 L79 174.0 L77 174.6 L81 170.2 L79 170.8 L83 166.4 L87 170.8 L85 170.2 L89 174.6 L87 174.0 L91 179.1 L91 179.7 L95 177.3 L93 177.6 L97 175.5 L95 175.8 L99 173.7 L103 175.8 L101 175.5 L105 177.6 L103 177.3 L107 179.7 L107 180.3 L111 177.5 L109 177.9 L113 175.5 L111 175.9 L115 173.5 L119 175.9 L117 175.5 L121 177.9 L119 177.5 L123 180.3 L123 180.7 L127 174.9 L125 175.6 L129 170.5 L127 171.3 L131 166.2 L135 171.3 L133 170.5 L137 175.6 L135 174.9 L139 180.7 L139 180.9 L143 175.9 L141 176.5 L145 172.2 L143 172.8 L147 168.4 L151 172.8 L149 172.2 L153 176.5 L151 175.9 L155 180.9 L155 181.0 L159 175.4 L157 176.1 L161 171.2 L159 171.9 L163 167.0 L167 171.9 L165 171.2 L169 176.1 L167 175.4 L171 181.0 L171 180.9 L175 173.7 L173 174.6 L177 168.3 L175 169.2 L179 162.9 L183 169.2 L181 168.3 L185 174.6 L183 173.7 L187 180.9 L187 180.7 L191 176.6 L189 177.1 L193 173.5 L191 174.0 L195 170.4 L199 174.0 L197 173.5 L201 177.1 L199 176.6 L203 180.7 L203 180.4 L207 177.4 L205 177.8 L209 175.2 L207 175.6 L211 173.0 L215 175.6 L213 175.2 L217 177.8 L215 177.4 L219 180.4 L219 179.9 L223 175.5 L221 176.0 L225 172.2 L223 172.7 L227 168.9 L231 172.7 L229 172.2 L233 176.0 L231 175.5 L235 179.9 L235 179.3 L239 176.4 L237 176.8 L241 174.3 L239 174.7 L243 172.2 L247 174.7 L245 174.3 L249 176.8 L247 176.4 L251 179.3 L251 178.5 L255 174.6 L253 175.1 L257 171.6 L255 172.1 L259 168.6 L263 172.1 L261 171.6 L265 175.1 L263 174.6 L267 178.5 L267 177.7 L271 170.6 L269 171.5 L273 165.2 L271 166.1 L275 159.9 L279 166.1 L277 165.2 L281 171.5 L279 170.6 L283 177.7 L283 176.8 L287 171.2 L285 171.9 L289 167.0 L287 167.7 L291 162.8 L295 167.7 L293 167.0 L297 171.9 L295 171.2 L299 176.8 L299 175.9 L303 170.8 L301 171.4 L305 167.0 L303 167.6 L307 163.2 L311 167.6 L309 167.0 L313 171.4 L311 170.8 L315 175.9 L315 174.9 L319 169.0 L317 169.8 L321 164.6 L319 165.3 L323 160.1 L327 165.3 L325 164.6 L329 169.8 L327 169.0 L331 174.9 L331 174.0 L335 171.2 L333 171.5 L337 169.1 L335 169.4 L339 167.0 L343 169.4 L341 169.1 L345 171.5 L343 171.2 L347 174.0 L347 173.1 L351 170.7 L349 171.0 L353 168.9 L351 169.2 L355 167.1 L359 169.2 L357 168.9 L361 171.0 L359 170.7 L363 173.1 L363 172.2 L367 167.2 L365 167.8 L369 163.5 L367 164.1 L371 159.8 L375 164.1 L373 163.5 L377 167.8 L375 167.2 L379 172.2 L379 171.4 L383 167.2 L381 167.7 L385 164.1 L383 164.6 L387 161.0 L391 164.6 L389 164.1 L393 167.7 L391 167.2 L395 171.4 L395 170.7 L399 165.4 L397 166.1 L401 161.5 L399 162.1 L403 157.5 L407 162.1 L405 161.5 L409 166.1 L407 165.4 L411 170.7 L411 170.1 L415 162.5 L413 163.4 L417 156.8 L415 157.7 L419 151.1 L423 157.7 L421 156.8 L425 163.4 L423 162.5 L427 170.1 L427 169.6 L431 164.6 L429 165.2 L433 160.9 L431 161.5 L435 157.2 L439 161.5 L437 160.9 L441 165.2 L439 164.6 L443 169.6 L443 169.2 L447 165.5 L445 166.0 L449 162.7 L447 163.1 L451 159.9 L455 163.1 L453 162.7 L457 166.0 L455 165.5 L459 169.2 L459 169.0 L463 164.4 L461 164.9 L465 160.8 L463 161.4 L467 157.3 L471 161.4 L469 160.8 L473 164.9 L471 164.4 L475 169.0 L475 169.0 L479 166.6 L477 166.9 L481 164.8 L479 165.1 L483 162.9 L487 165.1 L485 164.8 L489 166.9 L487 166.6 L491 169.0 L491 169.1 L495 166.0 L493 166.4 L497 163.7 L495 164.0 L499 161.3 L503 164.0 L501 163.7 L505 166.4 L503 166.0 L507 169.1 L507 169.4 L511 163.0 L509 163.8 L513 158.3 L511 159.1 L515 153.5 L519 159.1 L517 158.3 L521 163.8 L519 163.0 L523 169.4 L523 169.8 L527 164.4 L525 165.1 L529 160.4 L527 161.1 L531 156.4 L535 161.1 L533 160.4 L537 165.1 L535 164.4 L539 169.8 L539 170.3 L543 164.8 L541 165.5 L545 160.6 L543 161.3 L547 156.4 L551 161.3 L549 160.6 L553 165.5 L551 164.8 L555 170.3 L555 171.0 L559 164.2 L557 165.0 L561 159.1 L559 159.9 L563 154.0 L567 159.9 L565 159.1 L569 165.0 L567 164.2 L571 171.0 L571 171.7 L575 168.2 L573 168.6 L577 165.5 L575 166.0 L579 162.8 L583 166.0 L581 165.5 L585 168.6 L583 168.2 L587 171.7 L587 172.6 L591 170.0 L589 170.3 L593 168.1 L591 168.4 L595 166.1 L599 168.4 L597 168.1 L601 170.3 L599 170.0 L603 172.6 L603 173.5 L607 169.0 L605 169.6 L609 165.7 L607 166.2 L611 162.3 L615 166.2 L613 165.7 L617 169.6 L615 169.0 L619 173.5 L619 174.4 L623 171.2 L621 171.6 L625 168.7 L623 169.1 L627 166.2 L631 169.1 L629 168.7 L633 171.6 L631 171.2 L635 174.4 L635 175.4 L639 170.9 L637 171.4 L641 167.5 L639 168.0 L643 164.1 L647 168.0 L645 167.5 L649 171.4 L647 170.9 L651 175.4 L651 176.3 L655 168.9 L653 169.8 L657 163.3 L655 164.2 L659 157.7 L663 164.2 L661 163.3 L665 169.8 L663 168.9 L667 176.3 L667 177.3 L671 171.8 L669 172.5 L673 167.6 L671 168.3 L675 163.5 L679 168.3 L677 167.6 L681 172.5 L679 171.8 L683 177.3 L683 178.1 L687 173.5 L685 174.1 L689 170.0 L687 170.6 L691 166.5 L695 170.6 L693 170.0 L697 174.1 L695 173.5 L699 178.1 L699 178.9 L703 173.5 L701 174.2 L705 169.5 L703 170.1 L707 165.4 L711 170.1 L709 169.5 L713 174.2 L711 173.5 L715 178.9 L715 179.6 L719 177.1 L717 177.4 L721 175.2 L719 175.5 L723 173.3 L727 175.5 L725 175.2 L729 177.4 L727 177.1 L731 179.6 L731 180.1 L735 177.6 L733 177.9 L737 175.7 L735 176.0 L739 173.8 L743 176.0 L741 175.7 L745 177.9 L743 177.6 L747 180.1 L747 180.6 L751 175.1 L749 175.8 L753 171.0 L751 171.7 L755 166.9 L759 171.7 L757 171.0 L761 175.8 L759 175.1 L763 180.6 L763 180.9 L767 176.2 L765 176.7 L769 172.6 L767 173.2 L771 169.1 L775 173.2 L773 172.6 L777 176.7 L775 176.2 L779 180.9 L779 181.0 L783 175.5 L781 176.2 L785 171.3 L783 172.0 L787 167.2 L791 172.0 L789 171.3 L793 176.2 L791 175.5 L795 181.0 L750 230Z" fill="#0c1f13" stroke="#07130a" stroke-width="1"/>
+          <rect x="0" y="230" width="750" height="90" fill="url(#saq-stage1-ground)"/>
+          <path d="M0 232Q95 229 185 233T360 234T550 232T750 233" stroke="#476e33" opacity=".65" fill="none" stroke-width="1.5"/>
+          <g opacity=".9"><path d="M-52.0 245.0 L-39.4 211.4 L-47.8 211.4 L-31.0 169.4 L-39.4 169.4 L-10.0 89.6 L19.4 169.4 L11.0 169.4 L27.8 211.4 L19.4 211.4 L32.0 245.0Z" fill="#0a2016"/>
+<path d="M8.0 245.0 L16.4 222.6 L10.8 222.6 L22.0 194.6 L16.4 194.6 L36.0 141.4 L55.6 194.6 L50.0 194.6 L61.2 222.6 L55.6 222.6 L64.0 245.0Z" fill="#0e281c"/>
+<path d="M701.0 245.0 L711.2 217.8 L704.4 217.8 L718.0 183.8 L711.2 183.8 L735.0 119.2 L758.8 183.8 L752.0 183.8 L765.6 217.8 L758.8 217.8 L769.0 245.0Z" fill="#102819"/>
+<path d="M650.0 245.0 L659.0 221.0 L653.0 221.0 L665.0 191.0 L659.0 191.0 L680.0 134.0 L701.0 191.0 L695.0 191.0 L707.0 221.0 L701.0 221.0 L710.0 245.0Z" fill="#0b2219"/></g>
+          <!-- A restrained path into the wilderness. No invented hero or monster. -->
+          <path d="M330 320Q342 274 330 230L354 230Q372 274 407 320Z" fill="#253b2c" opacity=".72"/>
+          <path d="M334 320Q354 267 341 231" fill="none" stroke="#c6a56e" stroke-opacity=".18" stroke-width="1.5"/>
+          <g class="saq-stage1-firefly" fill="#fae4a5"><circle cx="88" cy="219" r="1.4"/><circle cx="260" cy="210" r="1"/><circle cx="412" cy="225" r="1.2"/></g>
+        </svg></div>
+      <!-- Baseline SAQ World hero and Woodland Rust Nibbler, drawn by the game's own painter code. -->
+      <canvas id="saq-startup-duel" class="saq-load-duel" aria-hidden="true" width="750" height="320"></canvas>
+      <div class="saq-load-darken" aria-hidden="true"></div>
+      <div class="saq-load-main">
+        <header class="saq-load-brand">
+          <div class="saq-load-mark" aria-hidden="true"><svg viewBox="0 0 32 38"><path d="M3 3h26v19L16 35 3 22Z" fill="#78857b" stroke="#111817" stroke-width="2"/><path d="M7 7h18v13l-9 9-9-9Z" fill="#26312e"/><path d="m16 9 3 6 6 1-5 5 1 6-5-3-5 3 1-6-5-5 6-1Z" fill="#e3e7d7"/></svg></div>
+          <div><div class="saq-load-brand-label">SAQ WORLD</div><div class="saq-load-brand-sub">AN OPEN-WORLD ADVENTURE</div></div>
+        </header>
+        <div class="saq-load-spacer" aria-hidden="true"></div>
+        <div class="saq-load-content">
+          <div class="saq-load-chapter"><span class="saq-load-rule"></span> PREPARING YOUR WORLD <span class="saq-load-rule"></span></div>
+          <div class="saq-load-controls">
+            <div class="saq-load-status-row"><span id="saq-startup-stage" class="saq-load-stage" role="status" aria-live="polite">Loading game files</span><span class="saq-load-working" aria-hidden="true"></span><span id="saq-startup-activity" class="saq-load-activity">Working</span></div>
+            <progress id="saq-startup-progress" max="6" value="0" aria-label="Completed startup steps" aria-valuetext="0 of 6 setup steps completed"></progress>
+            <div class="saq-load-meta"><span id="saq-startup-steps">0 of 6 setup steps completed</span><span class="saq-load-time">ELAPSED <span id="saq-startup-elapsed">0:00</span></span></div>
+            <p id="saq-startup-detail" class="saq-load-tip">Please keep SAQ World open while the nearby world is prepared.</p>
+            <div class="saq-load-footer"><span>Actual checkpoints · not an estimate</span><button id="saq-startup-copy" type="button">Copy timings</button></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <script src="./src/client/startup_loading_v1.js?v=startup-art-v1"></script>
+    <script src="./src/client/startup_combat_preview_v1.js?v=stage1-combat-v3"></script>
+    <script type="module" src="./src/entrypoints/browser_boot.js?v=compact-perftest-202"></script>
+  </body>
+</html>
+
+

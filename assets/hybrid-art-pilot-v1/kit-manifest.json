@@ -1,0 +1,146 @@
+{
+  "version": "hybrid-authored-art-kit-v1",
+  "source": "OpenAI built-in image generation, this session; SAQ screenshot used as style reference, not an edit target. No external asset pack.",
+  "sourceLicenseNote": "Generated project candidate. No third-party pack license is asserted. Existing SAQ source art is reused under the project provenance; no separate license file is present in the inspected runtime.",
+  "atlas": {
+    "path": "woodland-atlas-source.png",
+    "sha256": "ed9fea4aecd769896e04990ee43506c95d96f55c74cf373ec1f88b182e21a5f7",
+    "bytes": 1623361,
+    "width": 1254,
+    "height": 1254,
+    "gridColumns": 4,
+    "gridRows": 4
+  },
+  "slots": [
+    {
+      "id": "forest-grass",
+      "index": 0,
+      "kind": "surface",
+      "decodedWidth": 64,
+      "decodedHeight": 64,
+      "used": true
+    },
+    {
+      "id": "meadow-grass",
+      "index": 1,
+      "kind": "surface",
+      "decodedWidth": 64,
+      "decodedHeight": 64,
+      "used": true
+    },
+    {
+      "id": "leaf-litter",
+      "index": 2,
+      "kind": "surface",
+      "decodedWidth": 64,
+      "decodedHeight": 64,
+      "used": true
+    },
+    {
+      "id": "road-dirt",
+      "index": 3,
+      "kind": "surface",
+      "decodedWidth": 64,
+      "decodedHeight": 64,
+      "used": true
+    },
+    {
+      "id": "trail-dirt",
+      "index": 4,
+      "kind": "surface",
+      "decodedWidth": 64,
+      "decodedHeight": 64,
+      "used": true
+    },
+    {
+      "id": "sand-shore",
+      "index": 5,
+      "kind": "surface",
+      "decodedWidth": 64,
+      "decodedHeight": 64,
+      "used": true
+    },
+    {
+      "id": "mossy-bank",
+      "index": 6,
+      "kind": "surface",
+      "decodedWidth": 64,
+      "decodedHeight": 64,
+      "used": true
+    },
+    {
+      "id": "timber-planks",
+      "index": 7,
+      "kind": "surface",
+      "decodedWidth": 64,
+      "decodedHeight": 64,
+      "used": true
+    },
+    {
+      "id": "oak",
+      "index": 8,
+      "kind": "sprite",
+      "decodedWidth": 128,
+      "decodedHeight": 128,
+      "used": true
+    },
+    {
+      "id": "broadleaf",
+      "index": 9,
+      "kind": "sprite",
+      "decodedWidth": 128,
+      "decodedHeight": 128,
+      "used": true
+    },
+    {
+      "id": "conifer",
+      "index": 10,
+      "kind": "sprite",
+      "decodedWidth": 128,
+      "decodedHeight": 128,
+      "used": true
+    },
+    {
+      "id": "birch",
+      "index": 11,
+      "kind": "sprite",
+      "decodedWidth": 128,
+      "decodedHeight": 128,
+      "used": true
+    },
+    {
+      "id": "moss-boulder",
+      "index": 12,
+      "kind": "sprite",
+      "decodedWidth": 128,
+      "decodedHeight": 128,
+      "used": true
+    },
+    {
+      "id": "craggy-rocks",
+      "index": 13,
+      "kind": "sprite",
+      "decodedWidth": 128,
+      "decodedHeight": 128,
+      "used": true
+    },
+    {
+      "id": "rounded-stones",
+      "index": 14,
+      "kind": "sprite",
+      "decodedWidth": 128,
+      "decodedHeight": 128,
+      "used": true
+    },
+    {
+      "id": "fallen-log-unused",
+      "index": 15,
+      "kind": "sprite",
+      "decodedWidth": 128,
+      "decodedHeight": 128,
+      "used": false
+    }
+  ],
+  "journeyHash": "452601819b2d7eb533f4732004a078ecc8fb5cbb86d18b5f17d3565f34115989",
+  "bindings": "Presentation only; no changes to campaign authority or source planning assets."
+}

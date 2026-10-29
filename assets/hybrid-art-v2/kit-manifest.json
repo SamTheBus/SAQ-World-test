@@ -1,0 +1,68 @@
+{
+  "version": "hybrid-art-v2",
+  "source": "OpenAI built-in imagegen; V1 atlas as style reference; original file retained. No third-party pack or exclusive license asserted.",
+  "atlas": {
+    "path": "material-atlas-source.png",
+    "bytes": 1751166,
+    "sha256": "f95347584d69cbe0b29cf552a6f8596ff7110fee9f187377d0fb7eddf5840b98",
+    "width": 1254,
+    "height": 1254
+  },
+  "usedSlots": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "reusedSprites": "hybrid-art-pilot-v1 tree 8\u00e2\u20ac\u201c11, rocks 12\u00e2\u20ac\u201c14",
+  "geometry": "Exact V1 journey and V3 assets unchanged",
+  "temporary": "Limited grassland/woodland kit; water and other biomes remain existing candidate visuals",
+  "bushes": {
+    "path": "bush-sprites-source.png",
+    "bytes": 940431,
+    "sha256": "b4e6660339cfe9d4ea70eea9074917799ae211f2ceeb216387c0e89a3a91d0ab",
+    "width": 1254,
+    "height": 1254,
+    "slots": [
+      {
+        "index": 0,
+        "x": 45,
+        "y": 130,
+        "width": 572,
+        "height": 473,
+        "decodedHeight": 53
+      },
+      {
+        "index": 1,
+        "x": 659,
+        "y": 118,
+        "width": 557,
+        "height": 473,
+        "decodedHeight": 54
+      },
+      {
+        "index": 2,
+        "x": 51,
+        "y": 703,
+        "width": 556,
+        "height": 447,
+        "decodedHeight": 51
+      },
+      {
+        "index": 3,
+        "x": 646,
+        "y": 707,
+        "width": 566,
+        "height": 448,
+        "decodedHeight": 51
+      }
+    ],
+    "provenance": "OpenAI built-in imagegen; simple transparent four-sprite successor to rejected detailed sheet; original source retained.",
+    "originalGeneratedPath": "C:/Users/Sammy/.codex/generated_images/01a0c6fe-cfc3-7d62-81a6-13bee7d67d3c/exec-d1a132b5-1100-4ae7-be62-b6c01bc9cbb1.png",
+    "cropSemantics": "Per-quadrant alpha>=32 visible bounds plus four source pixels of fringe; original alpha preserved; aspect retained in bottom-aligned 64px sprite canvas."
+  }
+}

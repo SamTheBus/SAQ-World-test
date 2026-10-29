@@ -1,0 +1,26 @@
+{
+  "version": "breakable-props-art-v1",
+  "path": "props-source-v1.png",
+  "width": 1086,
+  "height": 1448,
+  "bytes": 1394066,
+  "sha256": "585e8842fa178a3bceb44000bce6a9a5747f9b6f0728a37a45abf56f2f64e532",
+  "decodeLongestEdge": 144,
+  "slots": [
+    {"key":"barrel:intact","x":45,"y":53,"width":272,"height":304},
+    {"key":"barrel:cracked","x":405,"y":53,"width":275,"height":304},
+    {"key":"barrel:broken","x":732,"y":161,"width":330,"height":211},
+    {"key":"pot:intact","x":42,"y":403,"width":276,"height":296},
+    {"key":"pot:cracked","x":404,"y":403,"width":277,"height":296},
+    {"key":"pot:broken","x":729,"y":490,"width":327,"height":219},
+    {"key":"urn:intact","x":48,"y":735,"width":267,"height":302},
+    {"key":"urn:cracked","x":407,"y":736,"width":271,"height":301},
+    {"key":"urn:broken","x":736,"y":832,"width":320,"height":213},
+    {"key":"chest:closed","x":30,"y":1126,"width":308,"height":288},
+    {"key":"chest:opening","x":392,"y":1098,"width":305,"height":316},
+    {"key":"chest:open","x":750,"y":1065,"width":313,"height":349}
+  ],
+  "provenance": "Original built-in image_gen, 2026-10-27, referenced accepted SAQ debris kit for style. No third-party artwork. Exact prompt in review provenance.",
+  "boundsMethod": "Complete alpha-connected sprites, grouped broken fragments, two-pixel gutters. No nominal grid clipping.",
+  "presentationOnly": true
+}

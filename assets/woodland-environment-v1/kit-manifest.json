@@ -1,0 +1,38 @@
+{
+  "version": "woodland-environment-v1",
+  "files": [
+    {
+      "path": "grass-source.png",
+      "bytes": 1686271,
+      "sha256": "01b6fa1ec51a3d20cc78713ef0ec389bf2051d826ef9a4ff6d2e87445bdf8895",
+      "size": [
+        1402,
+        1122
+      ]
+    },
+    {
+      "path": "earth-source.png",
+      "bytes": 1516154,
+      "sha256": "73b75b04f2978c8592c16c6384ae83ddb8153af9a6d995bb0bcd756541623aca",
+      "size": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "path": "journey.json",
+      "bytes": 6786,
+      "sha256": "c2c36e935451174640f25e0218ac75575a61b726027cabdf6808922cdc00a381"
+    }
+  ],
+  "originalTreeKit": "hybrid-art-pilot-v1 tree slots8\u201311 unchanged",
+  "scope": "Alpha Woodland journey only; biome eligibility separate from review coordinates",
+  "groundPeriodsWorldPixels": [
+    768,
+    1024
+  ],
+  "edgeFeatherSourcePixels": 24,
+  "runtimeAuthorityChanged": false,
+  "sourceTool": "OpenAI built-in image_gen.imagegen",
+  "note": "Generated originals retained unmodified. Renderer prepares periodic edge-feathered stamps once and blends world-anchored phases; no mirrored material quadrants."
+}

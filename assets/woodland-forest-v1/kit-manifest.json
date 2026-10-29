@@ -1,0 +1,160 @@
+{
+  "version": "woodland-forest-art-v1",
+  "source": "Original built-in image_gen. User-approved small sapling is palette/style reference. Generated PNGs and alpha copied unchanged; only proportional sprite crops at runtime. No third-party game assets.",
+  "files": [
+    {
+      "path": "trees.png",
+      "sha256": "3f91d16de1c0df02067e261c4857fc2573179c2fa56b24d1f1e18a78ede0de79",
+      "bytes": 1192450,
+      "width": 1312,
+      "height": 1199,
+      "decodeLimit": 192,
+      "slots": [
+        {
+          "x": 42,
+          "y": 31,
+          "width": 706,
+          "height": 594
+        },
+        {
+          "x": 791,
+          "y": 13,
+          "width": 439,
+          "height": 616
+        },
+        {
+          "x": 141,
+          "y": 633,
+          "width": 488,
+          "height": 557
+        },
+        {
+          "x": 751,
+          "y": 636,
+          "width": 500,
+          "height": 557
+        }
+      ]
+    },
+    {
+      "path": "understory.png",
+      "sha256": "189de6b9b5bb63b0d21ac5c3128a5e62926df8e034a29ef2ec7f8e467a1a0e6b",
+      "bytes": 1677936,
+      "width": 1536,
+      "height": 1024,
+      "decodeLimit": 128,
+      "slots": [
+        {
+          "x": 30,
+          "y": 196,
+          "width": 493,
+          "height": 302
+        },
+        {
+          "x": 542,
+          "y": 86,
+          "width": 468,
+          "height": 424
+        },
+        {
+          "x": 1007,
+          "y": 186,
+          "width": 513,
+          "height": 322
+        },
+        {
+          "x": 59,
+          "y": 653,
+          "width": 421,
+          "height": 262
+        },
+        {
+          "x": 523,
+          "y": 567,
+          "width": 480,
+          "height": 369
+        },
+        {
+          "x": 1019,
+          "y": 580,
+          "width": 487,
+          "height": 372
+        }
+      ]
+    },
+    {
+      "path": "rocks.png",
+      "sha256": "b54cb0b043a11070426d55230c5056e774908023819a1718e3f929dfead378cc",
+      "bytes": 933770,
+      "width": 2172,
+      "height": 724,
+      "decodeLimit": 128,
+      "slots": [
+        {
+          "x": 40,
+          "y": 123,
+          "width": 661,
+          "height": 493
+        },
+        {
+          "x": 763,
+          "y": 69,
+          "width": 641,
+          "height": 563
+        },
+        {
+          "x": 1472,
+          "y": 238,
+          "width": 665,
+          "height": 396
+        }
+      ]
+    },
+    {
+      "path": "accents.png",
+      "sha256": "b9edfed1aff6ee52085676516d2e5f5fffd7ef20299280ae8dbd7117928b8ac2",
+      "bytes": 1822924,
+      "width": 1536,
+      "height": 1024,
+      "decodeLimit": 128,
+      "slots": [
+        {
+          "x": 39,
+          "y": 201,
+          "width": 568,
+          "height": 298
+        },
+        {
+          "x": 634,
+          "y": 166,
+          "width": 433,
+          "height": 350
+        },
+        {
+          "x": 1123,
+          "y": 17,
+          "width": 360,
+          "height": 513
+        },
+        {
+          "x": 30,
+          "y": 546,
+          "width": 574,
+          "height": 424
+        },
+        {
+          "x": 649,
+          "y": 653,
+          "width": 380,
+          "height": 289
+        },
+        {
+          "x": 1080,
+          "y": 639,
+          "width": 439,
+          "height": 318
+        }
+      ]
+    }
+  ]
+}

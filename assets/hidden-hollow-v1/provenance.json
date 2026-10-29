@@ -1,0 +1,21 @@
+{
+  "version": "hidden-hollow-art-v1-enlarged",
+  "source": "Approved World Event Art Review V2 original image_gen hollow; PNG bytes unchanged",
+  "processing": "Same original detailed moss and silhouette. Enlarged to 300 world pixels, proportional crop and bounded 640px decode. Tiny separate fern/litter stamps removed. Simplified art experiment rejected and excluded.",
+  "assets": [
+    {
+      "id": "hidden-hollow",
+      "path": "hidden-hollow.png",
+      "sha256": "146d578189fbc649b75c09dff5590bd2ca8e420b26ddee490f9965614125463e",
+      "bytes": 1153139,
+      "width": 1774,
+      "height": 887,
+      "crop": [
+        0,
+        61,
+        1750,
+        826
+      ]
+    }
+  ]
+}

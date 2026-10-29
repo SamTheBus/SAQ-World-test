@@ -1,0 +1,94 @@
+{
+  "version": "spore-outbreak-art-v1",
+  "source": "Accepted original World Event Art Review V2; PNG bytes unchanged. Original image_gen, no third-party art.",
+  "decodeLongestEdge": 160,
+  "files": [
+    {
+      "id": "spore-pod",
+      "path": "spore-pod.png",
+      "bytes": 1077055,
+      "sha256": "d31a923dc52bcbfbeb268e766552c11d581ca1fdf3c4217604615b808939a7c4",
+      "width": 1295,
+      "height": 1215,
+      "crop": [
+        120,
+        44,
+        1056,
+        1146
+      ],
+      "displayWidthPixels": 76,
+      "displayWidthTiles": 2.375,
+      "groundAnchor": [
+        0.5,
+        0.96
+      ],
+      "transparentPixels": 719705,
+      "alphaCorners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "originalGeneratedFilename": "exec-16c846f1-a0fd-481b-af65-fa99116cf6e9.png",
+      "source": "Built-in image_gen. Original PNG/alpha unchanged; proportional display crop only."
+    },
+    {
+      "id": "spore-pod-open",
+      "path": "spore-pod-open.png",
+      "bytes": 1050369,
+      "sha256": "ef906b2895969601a9589af052fede458d97e9e0c3583653b2cc28c5fff50901",
+      "width": 1295,
+      "height": 1215,
+      "crop": [
+        96,
+        173,
+        1115,
+        1005
+      ],
+      "displayWidthPixels": 76,
+      "displayWidthTiles": 2.375,
+      "groundAnchor": [
+        0.5,
+        0.96
+      ],
+      "transparentPixels": 771643,
+      "alphaCorners": [
+        0,
+        0,
+        1,
+        0
+      ],
+      "originalGeneratedFilename": "exec-9df73a52-4693-47e7-a226-008e28626cc2.png",
+      "source": "Built-in image_gen. Original PNG/alpha unchanged; proportional display crop only."
+    },
+    {
+      "id": "fungal-clump",
+      "path": "fungal-clump.png",
+      "bytes": 806829,
+      "sha256": "26627a492e72b83ac8056ca2415b5856ab604b77d66ed44af320de2382c6c503",
+      "width": 1295,
+      "height": 1215,
+      "crop": [
+        128,
+        135,
+        1039,
+        957
+      ],
+      "displayWidthPixels": 42,
+      "displayWidthTiles": 1.3125,
+      "groundAnchor": [
+        0.5,
+        0.96
+      ],
+      "transparentPixels": 958589,
+      "alphaCorners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "originalGeneratedFilename": "exec-9e0b3866-9266-4dba-ac81-9bf26ce17ffc.png",
+      "source": "Built-in image_gen. Original PNG/alpha unchanged; proportional display crop only."
+    }
+  ]
+}
