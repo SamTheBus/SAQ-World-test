@@ -1184,6 +1184,28 @@ function skillLoadout(d8) {
   return slots2;
 }
 
+// src/shared/content/hero_looks_v1.js
+var HAIR_STYLES = Object.freeze(["short", "buzz", "spiky", "swept", "shaggy", "undercut", "curly", "bob", "long", "mane", "ponytail", "pigtails", "braid", "bun", "dreads", "mohawk", "bald"]);
+var FACIAL_HAIR = Object.freeze(["none", "stubble", "mustache", "handlebar", "goatee", "chinstrap", "chops", "short", "long", "bushy", "braided"]);
+var HAIR_COLORS = Object.freeze(["black", "soft-black", "dark-brown", "brown", "light-brown", "auburn", "copper", "strawberry", "dark-blonde", "blonde", "platinum", "gray", "silver", "white", "red", "pink", "blue", "teal", "green", "violet"]);
+var SKIN_TONES = Object.freeze(["porcelain", "fair", "light", "peach", "golden", "olive", "tan", "bronze", "brown", "chestnut", "deep", "ebony"]);
+var HERO_NAME_MAX = 16;
+var DEFAULT_LOOK = Object.freeze({ hair: "short", hairColor: "brown", skin: "light", facialHair: "none", helmet: true, name: "" });
+function validHeroName(name) {
+  return typeof name === "string" && name === name.trim() && [...name].length <= HERO_NAME_MAX && /^[\p{L}\p{M}\p{N} '’.-]*$/u.test(name) && !/\s\s/.test(name);
+}
+function validateHeroLook(look) {
+  closedRecord(look, ["hair", "hairColor", "skin", "facialHair", "helmet", "name"]);
+  requireContract(HAIR_STYLES.includes(look.hair), "Unknown hair style");
+  requireContract(HAIR_COLORS.includes(look.hairColor), "Unknown hair color");
+  requireContract(SKIN_TONES.includes(look.skin), "Unknown skin tone");
+  requireContract(FACIAL_HAIR.includes(look.facialHair), "Unknown facial hair");
+  requireContract(typeof look.helmet === "boolean", "Invalid helmet setting");
+  requireContract(validHeroName(look.name), "Names use up to 16 letters, numbers, spaces, hyphens or apostrophes");
+  return look;
+}
+var heroLookOf = (d8) => d8?.look ?? DEFAULT_LOOK;
+
 // src/shared/contracts/hashing.js
 function utf8(value) {
   requireContract(typeof value === "string" && !value.includes("\0"), "Invalid UTF-8 input");
@@ -1744,6 +1766,9 @@ function validateCommand(command) {
     } else if (a.kind === "skills.arrange") {
       closedRecord(a, ["kind", "slots"]);
       requireContract(Array.isArray(a.slots) && a.slots.length === SKILL_SLOT_COUNT && a.slots.every((s) => s === null || s === MOVE_SLOT || CLASS_SKILL_IDS.includes(s)), "Invalid skill wheel");
+    } else if (a.kind === "look.set") {
+      closedRecord(a, ["kind", "look"]);
+      validateHeroLook(a.look);
     } else if (a.kind === "class.choose") {
       closedRecord(a, ["kind", "heroClass"]);
       requireContract(HERO_CLASS_IDS.includes(a.heroClass), "Unknown hero class");
@@ -13806,8 +13831,9 @@ function pointBalances(state) {
 }
 function validateD8Progression(state, heroLevel) {
   validateWire(state);
-  closedRecord(state, ["version", "highestHeroLevel", "revision", "attributeResetCount", "lastChange", "causalXp", "transient", "allocated", "utility", ...MASTERY_FAMILIES], ["heroClass", "skillSlots"]);
+  closedRecord(state, ["version", "highestHeroLevel", "revision", "attributeResetCount", "lastChange", "causalXp", "transient", "allocated", "utility", ...MASTERY_FAMILIES], ["heroClass", "skillSlots", "look"]);
   if (state.heroClass !== void 0) requireContract(HERO_CLASS_IDS.includes(state.heroClass), "Unknown hero class");
+  if (state.look !== void 0) validateHeroLook(state.look);
   if (state.skillSlots !== void 0) validateSkillSlots(state, state.skillSlots);
   requireContract(state.version === D8_PROGRESSION_VERSION || state.version === D9_PARTICIPANT_VERSION, "Progression version");
   if (!isD9Progression(state)) safeInteger(state.highestHeroLevel, heroLevel, 50);
@@ -13913,6 +13939,9 @@ function prepareProgressionChange(state, expectedRevision, action) {
   } else if (action.kind === "skills.arrange") {
     validateSkillSlots(state, action.slots);
     next.skillSlots = [...action.slots];
+  } else if (action.kind === "look.set") {
+    validateHeroLook(action.look);
+    next.look = copyWire(action.look);
   } else if (action.kind === "class.choose") {
     requireContract(!state.heroClass, "Class already chosen");
     requireContract(HERO_CLASS_IDS.includes(action.heroClass), "Unknown hero class");
@@ -22136,6 +22165,10 @@ export {
   heroClassOf,
   classSkillsFor,
   skillLoadout,
+  HERO_NAME_MAX,
+  DEFAULT_LOOK,
+  validHeroName,
+  heroLookOf,
   SPACE_IDS,
   OLDWARD_SPACES,
   createOldwardSeamlessManifest,
