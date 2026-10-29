@@ -13183,6 +13183,23 @@ function sitePartyArrivalTarget(state, actor, spaceInstanceId, anchor) {
   return null;
 }
 
+// src/shared/contracts/key_enemy_extraction_v1.js
+function keyEnemyExtractionTickV1(state, groupId) {
+  const group = state.groupsById?.[groupId];
+  if (!group) return null;
+  const economy = state.encounterEconomy?.groups?.[groupId];
+  if (group.cleared && economy?.clearedTick !== null && economy?.clearedTick !== void 0) return economy.clearedTick;
+  const key5 = group.entityIds.filter((id) => state.bossCombat?.bossesByEntityId?.[id] || state.eliteCombat?.elitesByEntityId?.[id]);
+  if (!key5.length) return null;
+  let tick = -1;
+  for (const id of key5) {
+    const actor = state.entitiesById[id], defeated = actor?.ai?.defeatedTick;
+    if (!actor || actor.alive || defeated === void 0) return null;
+    tick = Math.max(tick, defeated);
+  }
+  return tick;
+}
+
 // src/shared/contracts/boss_floor_extraction_v2.js
 var BOSS_FLOOR_EXTRACTION_V2 = "boss-floor-extraction-v2";
 var positions = /* @__PURE__ */ new WeakMap();
@@ -13218,12 +13235,13 @@ function positionFor(site, floor) {
 function projectBossFloorExtractionV2(state, site, floor) {
   if (!site || !floor || !["site-family:fort", "site-family:ruin", "site-family:crypt"].includes(site.familyId) && !site.familyId?.includes("cave")) return null;
   const economy = state.encounterEconomy?.groups?.[floor.groupId], group = state.groupsById?.[floor.groupId];
-  if (!group?.cleared || economy?.clearedTick === null || economy?.clearedTick === void 0 || !floor.enemyIds.some((id) => state.bossCombat?.bossesByEntityId?.[id]?.groupId === floor.groupId) && !(floor.version === MULTIROOM_VERSION && floor.index === site.floorCount - 1)) return null;
+  const activatedTick = keyEnemyExtractionTickV1(state, floor.groupId);
+  if (activatedTick === null || !economy || !floor.enemyIds.some((id) => state.bossCombat?.bossesByEntityId?.[id]?.groupId === floor.groupId) && !(floor.version === MULTIROOM_VERSION && floor.index === site.floorCount - 1)) return null;
   const position = positionFor(site, floor);
   if (!position) return null;
   const destination = projectToLocalFrameD9(site.socket.entrance, state.d9World.runtime.frames);
   if (!destination) return null;
-  return freezeWire({ version: BOSS_FLOOR_EXTRACTION_V2, portalId: `extraction:${site.siteId}:${floor.floorId}:boss:${economy.episode}`, siteId: site.siteId, floorId: floor.floorId, groupId: floor.groupId, episode: economy.episode, spaceInstanceId: floor.spaceInstanceId, position: { ...position }, destination: { x: destination.x, y: destination.y }, visible: true, activatedTick: economy.clearedTick });
+  return freezeWire({ version: BOSS_FLOOR_EXTRACTION_V2, portalId: `extraction:${site.siteId}:${floor.floorId}:boss:${economy.episode}`, siteId: site.siteId, floorId: floor.floorId, groupId: floor.groupId, episode: economy.episode, spaceInstanceId: floor.spaceInstanceId, position: { ...position }, destination: { x: destination.x, y: destination.y }, visible: true, activatedTick });
 }
 
 // src/shared/contracts/boss_extraction_d12_5c.js
@@ -13256,8 +13274,8 @@ function projectArachnidTreantExtractionD12_5C(state, site, floor) {
   if (!boss) return null;
   const position = portalPosition(site, floor, boss);
   if (!position) return null;
-  const group = state.groupsById[boss.groupId], economy = state.encounterEconomy.groups[boss.groupId], visible = Boolean(group?.cleared && economy?.clearedTick !== null), portalId = `extraction:${site.siteId}:${floor.index}:${boss.bossId}`;
-  return freezeWire({ version: ARACHNID_TREANT_EXTRACTION_D12_5C, portalId, siteId: site.siteId, floorId: floor.floorId, groupId: boss.groupId, spaceInstanceId: floor.spaceInstanceId, position: copyWire(position), visible, activatedTick: visible ? economy.clearedTick : null });
+  const group = state.groupsById[boss.groupId], economy = state.encounterEconomy.groups[boss.groupId], activatedTick = keyEnemyExtractionTickV1(state, boss.groupId), visible = activatedTick !== null, portalId = `extraction:${site.siteId}:${floor.index}:${boss.bossId}`;
+  return freezeWire({ version: ARACHNID_TREANT_EXTRACTION_D12_5C, portalId, siteId: site.siteId, floorId: floor.floorId, groupId: boss.groupId, spaceInstanceId: floor.spaceInstanceId, position: copyWire(position), visible, activatedTick });
 }
 
 // src/shared/contracts/site_finale_completion_d13d.js
@@ -13423,9 +13441,9 @@ function projectSmallCaveFinaleExtractionD13D_C(state, site, floor) {
   if (floor.floorId !== reservation.finalFloorId) return null;
   const context = { site, reservation, floor, episode, deployment: state.campaign.siteFinaleDeploymentsById[site.siteId] }, position = portalPosition2(context);
   if (!position) return null;
-  const group = state.groupsById[floor.groupId], economy = state.encounterEconomy.groups[floor.groupId], visible = Boolean(group?.cleared && economy?.clearedTick !== null), portalId = `extraction:${site.siteId}:${floor.index}:finale:${episode.episode}`, destination = smallCaveFinaleExteriorDestinationD13D_C(state, site);
+  const group = state.groupsById[floor.groupId], economy = state.encounterEconomy.groups[floor.groupId], activatedTick = keyEnemyExtractionTickV1(state, floor.groupId), visible = activatedTick !== null, portalId = `extraction:${site.siteId}:${floor.index}:finale:${episode.episode}`, destination = smallCaveFinaleExteriorDestinationD13D_C(state, site);
   if (!destination) return null;
-  return freezeWire({ version: SMALL_CAVE_FINALE_EXTRACTION_D13D_C, portalId, siteId: site.siteId, floorId: floor.floorId, groupId: floor.groupId, episode: episode.episode, spaceInstanceId: floor.spaceInstanceId, position: copyWire(position), destination: copyWire(destination), visible, activatedTick: visible ? economy.clearedTick : null });
+  return freezeWire({ version: SMALL_CAVE_FINALE_EXTRACTION_D13D_C, portalId, siteId: site.siteId, floorId: floor.floorId, groupId: floor.groupId, episode: episode.episode, spaceInstanceId: floor.spaceInstanceId, position: copyWire(position), destination: copyWire(destination), visible, activatedTick });
 }
 function projectStandardCaveBossExtractionD13D_E(state, site, floor) {
   if (!site || !floor || !standardCaveBossCompletionActiveD13D_E(state, site)) return null;
@@ -13433,9 +13451,9 @@ function projectStandardCaveBossExtractionD13D_E(state, site, floor) {
   if (floor.floorId !== reservation.finalFloorId) return null;
   const context = { site, reservation, floor, episode, deployment: state.campaign.siteFinaleDeploymentsById[site.siteId] }, position = portalPosition2(context);
   if (!position) return null;
-  const group = state.groupsById[floor.groupId], economy = state.encounterEconomy.groups[floor.groupId], visible = Boolean(group?.cleared && economy?.clearedTick !== null), portalId = `extraction:${site.siteId}:${floor.index}:finale:${episode.episode}`, destination = smallCaveFinaleExteriorDestinationD13D_C(state, site);
+  const group = state.groupsById[floor.groupId], economy = state.encounterEconomy.groups[floor.groupId], activatedTick = keyEnemyExtractionTickV1(state, floor.groupId), visible = activatedTick !== null, portalId = `extraction:${site.siteId}:${floor.index}:finale:${episode.episode}`, destination = smallCaveFinaleExteriorDestinationD13D_C(state, site);
   if (!destination) return null;
-  return freezeWire({ version: STANDARD_CAVE_BOSS_EXTRACTION_D13D_E, portalId, siteId: site.siteId, floorId: floor.floorId, groupId: floor.groupId, episode: episode.episode, spaceInstanceId: floor.spaceInstanceId, position: copyWire(position), destination: copyWire(destination), visible, activatedTick: visible ? economy.clearedTick : null });
+  return freezeWire({ version: STANDARD_CAVE_BOSS_EXTRACTION_D13D_E, portalId, siteId: site.siteId, floorId: floor.floorId, groupId: floor.groupId, episode: episode.episode, spaceInstanceId: floor.spaceInstanceId, position: copyWire(position), destination: copyWire(destination), visible, activatedTick });
 }
 function projectLargeCaveFinaleExtractionD13D_G(state, site, floor) {
   if (!site || !floor || !largeCaveFinaleCompletionActiveD13D_G(state, site)) return null;
@@ -13443,9 +13461,9 @@ function projectLargeCaveFinaleExtractionD13D_G(state, site, floor) {
   if (floor.floorId !== reservation.finalFloorId) return null;
   const context = { site, reservation, floor, episode, deployment: state.campaign.siteFinaleDeploymentsById[site.siteId] }, position = portalPosition2(context);
   if (!position) return null;
-  const group = state.groupsById[floor.groupId], economy = state.encounterEconomy.groups[floor.groupId], visible = Boolean(group?.cleared && economy?.clearedTick !== null), portalId = `extraction:${site.siteId}:${floor.index}:finale:${episode.episode}`, destination = smallCaveFinaleExteriorDestinationD13D_C(state, site);
+  const group = state.groupsById[floor.groupId], economy = state.encounterEconomy.groups[floor.groupId], activatedTick = keyEnemyExtractionTickV1(state, floor.groupId), visible = activatedTick !== null, portalId = `extraction:${site.siteId}:${floor.index}:finale:${episode.episode}`, destination = smallCaveFinaleExteriorDestinationD13D_C(state, site);
   if (!destination) return null;
-  return freezeWire({ version: LARGE_CAVE_FINALE_EXTRACTION_D13D_G, portalId, siteId: site.siteId, floorId: floor.floorId, groupId: floor.groupId, episode: episode.episode, spaceInstanceId: floor.spaceInstanceId, position: copyWire(position), destination: copyWire(destination), visible, activatedTick: visible ? economy.clearedTick : null });
+  return freezeWire({ version: LARGE_CAVE_FINALE_EXTRACTION_D13D_G, portalId, siteId: site.siteId, floorId: floor.floorId, groupId: floor.groupId, episode: episode.episode, spaceInstanceId: floor.spaceInstanceId, position: copyWire(position), destination: copyWire(destination), visible, activatedTick });
 }
 
 // src/shared/contracts/settlement_workshop_v2.js
