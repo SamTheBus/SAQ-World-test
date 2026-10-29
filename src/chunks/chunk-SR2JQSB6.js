@@ -1163,13 +1163,26 @@ var CLASS_SKILLS = freezeWire({
   cast: { id: "cast", name: "Cast", classId: "mage", cooldownTicks: 240, description: "A heavy bolt of your Tome\u2019s element at the nearest enemy in front of you. Your Tome also fires on every 3rd swing." }
 });
 var CLASS_SKILL_IDS = Object.freeze(Object.keys(CLASS_SKILLS));
-var SKILL_SLOT_COUNT = 3;
+var SKILL_SLOT_COUNT = 8;
+var MOVE_SLOT = "move";
 var MAX_SKILL_COOLDOWN_TICKS = 1200;
 var heroClassOf = (d8) => HERO_CLASSES[d8?.heroClass] ?? null;
 var classSkillsFor = (d8) => {
   const c = heroClassOf(d8);
   return c ? [c.signature] : [];
 };
+var wheelEntriesFor = (d8) => heroClassOf(d8) ? [MOVE_SLOT, ...classSkillsFor(d8)] : [];
+function skillLoadout(d8) {
+  const known = wheelEntriesFor(d8), slots2 = Array.from({ length: SKILL_SLOT_COUNT }, (_, i) => {
+    const id = d8?.skillSlots?.[i] ?? null;
+    return known.includes(id) ? id : null;
+  });
+  for (const id of known) if (!slots2.includes(id)) {
+    const free = slots2.indexOf(null);
+    if (free >= 0) slots2[free] = id;
+  }
+  return slots2;
+}
 
 // src/shared/contracts/hashing.js
 function utf8(value) {
@@ -1728,6 +1741,9 @@ function validateCommand(command) {
     } else if (a.kind === "node.purchase") {
       closedRecord(a, ["kind", "nodeId"]);
       requireContract(typeof a.nodeId === "string" && a.nodeId.length <= 80, "Invalid node");
+    } else if (a.kind === "skills.arrange") {
+      closedRecord(a, ["kind", "slots"]);
+      requireContract(Array.isArray(a.slots) && a.slots.length === SKILL_SLOT_COUNT && a.slots.every((s) => s === null || s === MOVE_SLOT || CLASS_SKILL_IDS.includes(s)), "Invalid skill wheel");
     } else if (a.kind === "class.choose") {
       closedRecord(a, ["kind", "heroClass"]);
       requireContract(HERO_CLASS_IDS.includes(a.heroClass), "Unknown hero class");
@@ -13790,8 +13806,9 @@ function pointBalances(state) {
 }
 function validateD8Progression(state, heroLevel) {
   validateWire(state);
-  closedRecord(state, ["version", "highestHeroLevel", "revision", "attributeResetCount", "lastChange", "causalXp", "transient", "allocated", "utility", ...MASTERY_FAMILIES], ["heroClass"]);
+  closedRecord(state, ["version", "highestHeroLevel", "revision", "attributeResetCount", "lastChange", "causalXp", "transient", "allocated", "utility", ...MASTERY_FAMILIES], ["heroClass", "skillSlots"]);
   if (state.heroClass !== void 0) requireContract(HERO_CLASS_IDS.includes(state.heroClass), "Unknown hero class");
+  if (state.skillSlots !== void 0) validateSkillSlots(state, state.skillSlots);
   requireContract(state.version === D8_PROGRESSION_VERSION || state.version === D9_PARTICIPANT_VERSION, "Progression version");
   if (!isD9Progression(state)) safeInteger(state.highestHeroLevel, heroLevel, 50);
   safeInteger(state.revision);
@@ -13848,6 +13865,12 @@ function validateD8Progression(state, heroLevel) {
   pointBalances(state);
   return state;
 }
+function validateSkillSlots(state, slots2) {
+  requireContract(state.heroClass && Array.isArray(slots2) && slots2.length === SKILL_SLOT_COUNT, "Skill wheel needs a class and eight slots");
+  const known = wheelEntriesFor(state), placed = slots2.filter((s) => s !== null);
+  requireContract(placed.every((s) => typeof s === "string" && known.includes(s)) && new Set(placed).size === placed.length, "Skill wheel holds known skills once");
+  requireContract(placed.includes(MOVE_SLOT), "Skill wheel keeps the class move");
+}
 function purchaseAvailability(state, id) {
   const node = ACTIVE_NODES[id];
   if (!node) return { ok: false, reason: "Unavailable constellation node" };
@@ -13887,6 +13910,9 @@ function prepareProgressionChange(state, expectedRevision, action) {
     const offer = purchaseAvailability(state, action.nodeId);
     requireContract(offer.ok, offer.reason);
     next[ACTIVE_NODES[action.nodeId].tree].nodeRanks[action.nodeId] = copyWire(offer.nextRank);
+  } else if (action.kind === "skills.arrange") {
+    validateSkillSlots(state, action.slots);
+    next.skillSlots = [...action.slots];
   } else if (action.kind === "class.choose") {
     requireContract(!state.heroClass, "Class already chosen");
     requireContract(HERO_CLASS_IDS.includes(action.heroClass), "Unknown hero class");
@@ -22105,9 +22131,11 @@ export {
   CLASS_SKILLS,
   CLASS_SKILL_IDS,
   SKILL_SLOT_COUNT,
+  MOVE_SLOT,
   MAX_SKILL_COOLDOWN_TICKS,
   heroClassOf,
   classSkillsFor,
+  skillLoadout,
   SPACE_IDS,
   OLDWARD_SPACES,
   createOldwardSeamlessManifest,
@@ -22699,7 +22727,6 @@ export {
   installGroundOccupancyD9,
   D6_ACTIVITY_FORMAT,
   installSubweaponInventory,
-  provisionLevelAllowed,
   canClaimSubweapon,
   claimSubweapon,
   runtimeCollisionPageD92 as runtimeCollisionPageD9,

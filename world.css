@@ -1096,29 +1096,73 @@ body #world-xp{color:#bfe6f0}
  #world-inventory #world-progression-view .skills-tree{height:calc((var(--rows) - 1) * 88px + 96px)}
 }
 
-/* SKILL_BAR_V1: three skill slots arced around Attack (placed from its rect in
-   skill_bar_v1.js), plus the one-time class picker. */
-.skill-bar-v1{position:absolute;left:0;top:0;width:0;height:0;z-index:7;pointer-events:none}
-body.skill-arc-v1 .shield-guard,body.skill-arc-v1 .shadow-dash{left:var(--arc-guard-left);top:var(--arc-guard-top);right:auto;bottom:auto;width:60px;height:60px;min-height:60px}
-body.skill-arc-v1 .subweapon-hud{left:calc(12px + var(--world-safe-left));right:auto;bottom:calc(80px + var(--world-safe-bottom));max-width:min(300px,calc(100vw - 250px))}
-@media(max-width:600px){body.skill-arc-v1 #rpg-interaction-v2{bottom:calc(196px + var(--world-safe-bottom))!important}}
-.skill-bar-v1[hidden]{display:none}
-.skill-bar-v1 .skill-slot{position:absolute;left:0;top:0;width:var(--slot,52px);height:var(--slot,52px);margin:0;padding:0;border-radius:50%;border:2px solid #10171f;background:radial-gradient(circle at 38% 28%,#3a4853,#1a242d 72%);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--class) 70%,#b9a282),0 3px 0 #0b1119,0 6px 12px #0005;color:#f4ead6;pointer-events:auto;touch-action:none;-webkit-tap-highlight-color:transparent;overflow:hidden;display:grid;place-items:center;cursor:pointer;transition:filter .15s;transform:var(--at)}
-.skill-bar-v1 .skill-slot-icon{position:relative;z-index:1;width:58%;height:58%;display:grid;place-items:center;color:color-mix(in srgb,var(--class) 55%,#fff)}
-.skill-bar-v1 .skill-slot-icon svg{width:100%;height:100%}
-.skill-bar-v1 .skill-slot-sweep{position:absolute;inset:0;transform-origin:50% 0;transform:scaleY(0);background:#05080bb8;z-index:2;pointer-events:none}
-.skill-bar-v1 .skill-slot-time{position:absolute;z-index:3;font:700 14px var(--rpg-ui);color:#fff;text-shadow:0 1px 2px #000,0 0 4px #000}
-.skill-bar-v1 .skill-slot-key{position:absolute;z-index:3;right:7px;bottom:5px;font:700 9px var(--rpg-ui);color:#d9cfb9;opacity:.85}
-@media(pointer:coarse){.skill-bar-v1 .skill-slot-key{display:none}}
-.skill-bar-v1 .skill-slot[data-state=ready]{box-shadow:inset 0 0 0 2px var(--class),0 3px 0 #0b1119,0 0 14px color-mix(in srgb,var(--class) 55%,transparent)}
-.skill-bar-v1 .skill-slot[data-state=blocked] .skill-slot-icon{opacity:.45}
-.skill-bar-v1 .skill-slot[data-state=locked]{background:#151d24d9;box-shadow:inset 0 0 0 1px #3b4651,0 3px 0 #0b1119;cursor:default}
-.skill-bar-v1 .skill-slot[data-state=locked] .skill-slot-icon{color:#5d6973;width:42%;height:42%}
-.skill-bar-v1 .skill-slot[data-state=pick]{box-shadow:inset 0 0 0 2px #e9c46a,0 3px 0 #0b1119,0 0 14px #e9c46a80;animation:skill-pick 1.8s ease-in-out infinite}
-.skill-bar-v1 .skill-slot[data-state=pick] .skill-slot-icon{color:#f6dd9b}
-.skill-bar-v1 .skill-slot.fired{animation:skill-fired .32s ease-out}
+/* SKILL_WHEEL_V1: Attack hub inside one ring of eight slots, the class move
+   and skills, four turned past the screen edge. Positions come from
+   skill_wheel_v1.js; body.skill-arc-v1 marks the wheel layout and
+   body.wheel-arranging the arrange mode. */
+.skill-wheel-v1{position:absolute;left:0;top:0;width:0;height:0;z-index:7;pointer-events:none}
+.skill-wheel-v1[hidden]{display:none}
+.skill-wheel-ring{position:absolute;pointer-events:auto;touch-action:none;border-radius:50%;-webkit-tap-highlight-color:transparent;background:radial-gradient(circle,transparent calc(var(--hole) - 1px),#c9b58b26 var(--hole),#0a101640 calc(var(--hole) + 3px),#0a101640 calc(50% - 4px),#c9b58b26 calc(50% - 1px),transparent 50%)}
+.skill-wheel-v1 .skill-slot{position:absolute;left:0;top:0;width:var(--slot,52px);height:var(--slot,52px);margin:0;padding:0;border-radius:50%;border:2px solid #0b1015;background:radial-gradient(circle at 38% 28%,#3b4955,#18222b 70%);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--class) 70%,#c9b58b),inset 0 -6px 10px #0006,0 3px 0 #070b10,0 6px 12px #0006;color:#f4ead6;pointer-events:auto;touch-action:none;transform:var(--at);overflow:hidden;display:grid;place-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.skill-wheel-v1 .skill-slot-icon{position:relative;z-index:1;width:66%;height:66%;display:grid;place-items:center;color:color-mix(in srgb,var(--class) 55%,#fff);filter:drop-shadow(0 1px 1px #000a)}
+.skill-wheel-v1 .skill-slot-icon svg{width:100%;height:100%}
+.skill-wheel-v1 .skill-slot-sweep{position:absolute;inset:0;transform-origin:50% 0;transform:scaleY(0);background:#05080bc0;z-index:2;pointer-events:none}
+.skill-wheel-v1 .skill-slot-time{position:absolute;z-index:3;font:800 15px var(--rpg-ui);color:#fff;text-shadow:0 1px 2px #000,0 0 5px #000}
+.skill-wheel-v1 .skill-slot-key{position:absolute;z-index:3;right:8px;bottom:5px;font:700 9px var(--rpg-ui);color:#d9cfb9;opacity:.85}
+@media(pointer:coarse){.skill-wheel-v1 .skill-slot-key{display:none}}
+.skill-wheel-v1 .skill-slot[data-state=ready]{box-shadow:inset 0 0 0 2px var(--class),inset 0 -6px 10px #0006,0 3px 0 #070b10,0 0 16px color-mix(in srgb,var(--class) 55%,transparent)}
+.skill-wheel-v1 .skill-slot[data-state=blocked] .skill-slot-icon{opacity:.45;filter:grayscale(.6)}
+.skill-wheel-v1 .skill-slot[data-state=locked]{background:#10171db8;border-color:#0b101599;box-shadow:inset 0 0 0 1px #3a465166;cursor:default;opacity:.7;transform:var(--at) scale(.82)}
+.skill-wheel-v1 .skill-slot[data-state=locked] .skill-slot-icon{color:#6b7883;width:38%;height:38%;filter:none}
+.skill-wheel-v1 .skill-slot[data-state=pick]{box-shadow:inset 0 0 0 2px #e9c46a,0 3px 0 #070b10,0 0 16px #e9c46a80;animation:skill-pick 1.8s ease-in-out infinite}
+.skill-wheel-v1 .skill-slot[data-state=pick] .skill-slot-icon{color:#f6dd9b}
+.skill-wheel-v1 .skill-slot.fired{animation:skill-fired .32s ease-out}
 @keyframes skill-fired{0%{filter:brightness(2.2);transform:var(--at) scale(.9)}100%{filter:none;transform:var(--at) scale(1)}}
-@keyframes skill-pick{50%{box-shadow:inset 0 0 0 2px #e9c46a,0 3px 0 #0b1119,0 0 22px #e9c46acc}}
+@keyframes skill-pick{50%{box-shadow:inset 0 0 0 2px #e9c46a,0 3px 0 #070b10,0 0 24px #e9c46acc}}
+.skill-wheel-v1 .skill-slot[data-away=true]{visibility:hidden}
+.skill-wheel-v1:not([data-arranging]) .skill-slot[data-state=move]{visibility:hidden;pointer-events:none}
+.skill-wheel-v1[data-arranging=true] .skill-slot{animation:wheel-wiggle .9s ease-in-out infinite;cursor:grab}
+.skill-wheel-v1[data-arranging=true] .skill-slot:nth-of-type(2n){animation-delay:-.45s}
+.skill-wheel-v1[data-arranging=true] .skill-slot[data-state=empty]{background:#10171d8c;border:2px dashed #c9b58b88;box-shadow:none}
+.skill-wheel-v1[data-arranging=true] .skill-slot[data-state=move]{box-shadow:inset 0 0 0 1.5px #8fc4e8,0 3px 0 #070b10}
+.skill-wheel-v1 .skill-slot[data-picked=true]{animation:none;transform:var(--at) scale(1.12);box-shadow:0 0 0 3px #f4cf6a,0 0 20px #f4cf6aaa,0 3px 0 #070b10;z-index:2}
+@keyframes wheel-wiggle{0%,100%{transform:var(--at) rotate(-5deg)}50%{transform:var(--at) rotate(5deg)}}
+.skill-wheel-done{position:absolute;z-index:9;display:grid;place-items:center;align-content:center;margin:0;padding:0;border-radius:50%;border:3px solid #0b1015;background:radial-gradient(circle at 38% 28%,#f8dc86,#c98d1d 72%);color:#1f1404;font:800 11px var(--rpg-ui);letter-spacing:.04em;box-shadow:0 0 0 2px #ffe39a,0 6px 16px #0008;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.skill-wheel-done[hidden]{display:none}
+.skill-wheel-done svg{width:30px;height:30px}
+.skill-wheel-spin{position:absolute;left:0;top:0;width:34px;height:34px;margin:0;padding:0;border-radius:50%;border:2px solid #0b1015;background:radial-gradient(circle at 38% 28%,#33414c,#151d25 72%);color:#e3d6b8;transform:var(--at);pointer-events:auto;touch-action:none;display:grid;place-items:center;box-shadow:inset 0 0 0 1px #c9b58b66,0 2px 0 #070b10;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.skill-wheel-spin svg{width:18px;height:18px}
+.skill-wheel-spin i{position:absolute;top:-8px;width:5px;height:5px;border-radius:50%;background:#3b4651;box-shadow:0 0 0 1px #0b1015}
+.skill-wheel-spin i:nth-of-type(1){left:9px}.skill-wheel-spin i:nth-of-type(2){right:9px}
+.skill-wheel-spin[data-page="1"] i:nth-of-type(1),.skill-wheel-spin[data-page="2"] i:nth-of-type(2){background:#e9c46a}
+.skill-wheel-beat{position:absolute;left:0;top:0;width:var(--size);height:var(--size);transform:var(--at);pointer-events:none;z-index:1}
+.skill-wheel-beat[hidden]{display:none}
+.skill-wheel-beat i{position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;box-sizing:border-box;border-radius:50%;background:#0b1015;border:2px solid var(--element);transform:rotate(calc((var(--n) - (var(--count) - 1) / 2) * 19deg - 52deg)) translateY(calc(var(--size) / -2))}
+.skill-wheel-beat i[data-lit=true]{background:var(--element);box-shadow:0 0 7px var(--element)}
+.skill-wheel-beat i:last-child{width:14px;height:14px;margin:-7px 0 0 -7px;border-width:2.5px}
+
+body.skill-arc-v1 #primary-attack{width:84px;height:84px;border-radius:50%;border:3px solid #0b1015;background:radial-gradient(circle at 38% 26%,#5c6d78,#2b3b46 55%,#17242e);box-shadow:inset 0 0 0 1.5px #d4b98a,inset 0 -8px 14px #0007,0 4px 0 #070b10,0 8px 18px #0007}
+body.skill-arc-v1 #primary-attack strong{font-size:13px}
+body.skill-arc-v1 #primary-attack small{font-size:8px;opacity:.8}
+body.skill-arc-v1 .shield-guard,body.skill-arc-v1 .shadow-dash{z-index:8;left:var(--arc-guard-left);top:var(--arc-guard-top);right:auto;bottom:auto;width:var(--wheel-slot,52px);height:var(--wheel-slot,52px);min-width:0;min-height:0;margin:0;padding:0;border-radius:50%;border:2px solid #0b1015;background:radial-gradient(circle at 38% 28%,#3b4955,#18222b 70%);box-shadow:inset 0 -6px 10px #0006,0 3px 0 #070b10,0 6px 12px #0006;display:grid;place-items:center;overflow:visible;font-size:0;line-height:0;color:transparent;text-shadow:none;-webkit-tap-highlight-color:transparent}
+body.skill-arc-v1 .shield-guard[hidden],body.skill-arc-v1 .shadow-dash[hidden]{display:none}
+body.wheel-move-away .shield-guard,body.wheel-move-away .shadow-dash,body.wheel-arranging .shield-guard,body.wheel-arranging .shadow-dash{visibility:hidden;pointer-events:none}
+body.skill-arc-v1 .shield-guard::before{content:"";grid-area:1/1;width:calc(var(--wheel-slot,52px) * .66);height:calc(var(--wheel-slot,52px) * .66);background:var(--guard-icon) center/contain no-repeat;filter:drop-shadow(0 1px 1px #000a)}
+body.skill-arc-v1 .shield-guard::after,body.skill-arc-v1 .shadow-dash::after{content:"";position:absolute;inset:-6px;border-radius:50%;pointer-events:none;background:conic-gradient(var(--ring-color) var(--ring),#ffffff1a 0);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3.5px));mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3.5px))}
+body.skill-arc-v1 .shield-guard{--guard-icon:url("data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%2048%2048%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22mv-guard%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23e8f4ff%22%2F%3E%3Cstop%20offset%3D%22.55%22%20stop-color%3D%22%238fb6d4%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%233b5d78%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M24%204l17%206v12c0%2012-8%2019-17%2023C15%2041%207%2034%207%2022V10z%22%20fill%3D%22url(%23mv-guard)%22%20stroke%3D%22%230b1015%22%20stroke-width%3D%222.6%22%20stroke-linejoin%3D%22round%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M24%2010l11%204v8c0%208-5%2013-11%2016%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.7%22%2F%3E%3Cpath%20d%3D%22M24%2015v16M17%2022h14%22%20stroke%3D%22%232a4458%22%20stroke-width%3D%222.6%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.6%22%2F%3E%3C%2Fsvg%3E");--ring:var(--guard-fill,100%);--ring-color:#8fc4e8}
+body.skill-arc-v1 .shield-guard[data-raised=true]{background:radial-gradient(circle at 38% 28%,#4f6a80,#1f3242 70%);box-shadow:0 0 0 2px #cfe9ff,0 0 18px #8fc4e8aa,0 3px 0 #070b10}
+body.skill-arc-v1 .shield-guard[data-empty=true]::before{opacity:.4}
+body.skill-arc-v1 .shadow-dash{--ring:calc((1 - var(--cool,0)) * 100%);--ring-color:#b48cff}
+body.skill-arc-v1 .shadow-dash[data-move=blink]{--ring-color:#8fd0ff}
+body.skill-arc-v1 .shadow-dash svg{grid-area:1/1;width:calc(var(--wheel-slot,52px) * .64);height:calc(var(--wheel-slot,52px) * .64);filter:drop-shadow(0 1px 1px #000a)}
+body.skill-arc-v1 .shadow-dash[data-cooling=true] svg{opacity:.4}
+body.skill-arc-v1 .shadow-dash .move-label{display:none}
+body.skill-arc-v1 .shadow-dash .move-time{grid-area:1/1;z-index:1;font:800 13px/1 var(--rpg-ui);color:#fff;text-shadow:0 1px 2px #000,0 0 4px #000}
+body.skill-arc-v1 .subweapon-hud{left:calc(12px + var(--world-safe-left));right:auto;bottom:calc(80px + var(--world-safe-bottom));max-width:min(300px,calc(100vw - 250px))}
+@media(max-width:600px){body.skill-arc-v1 #rpg-interaction-v2{bottom:calc(252px + var(--world-safe-bottom))!important}}
+.vbar-barrier{position:absolute;left:8px;right:8px;top:-6px;height:4px;border-radius:2px;background:#0c161dd9;overflow:hidden;pointer-events:none;box-shadow:0 0 0 1px #0b1017}
+.vbar-barrier[hidden]{display:none}
+.vbar-barrier .vbar-fill{position:absolute;inset:0;transform-origin:0 50%;background:linear-gradient(90deg,#8fd8ff,#e6f8ff);box-shadow:0 0 6px #8fd8ff;transition:transform .25s ease-out}
 
 .class-picker-v1{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:calc(12px + var(--world-safe-top,0px)) calc(12px + var(--world-safe-right,0px)) calc(12px + var(--world-safe-bottom,0px)) calc(12px + var(--world-safe-left,0px));background:#060a0ecc;backdrop-filter:none}
 .class-picker-v1[hidden]{display:none}

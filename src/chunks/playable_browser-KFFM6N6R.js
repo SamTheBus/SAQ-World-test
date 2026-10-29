@@ -112,6 +112,7 @@ import {
   MASTERY_FAMILIES,
   MAX_PLAYER_XP,
   MAX_SKILL_COOLDOWN_TICKS,
+  MOVE_SLOT,
   MULTIROOM_HASH,
   MULTIROOM_VERSION,
   NULLIFICATION_RESISTANCE_D12_4I_VERSION,
@@ -565,7 +566,6 @@ import {
   proofClearingForState,
   propsFor,
   prototypeRewardProgression,
-  provisionLevelAllowed,
   purchaseAvailability,
   queuePacedSporeV5,
   readyPrimarySources,
@@ -615,6 +615,7 @@ import {
   siteRunEpisodeObservationRequiredD13B,
   siteSupportsResetD13C,
   siteTransitionTarget,
+  skillLoadout,
   spendGuard,
   spentPoints,
   sporeOrdinal,
@@ -712,7 +713,7 @@ import {
   worldLevelGapMultiplier,
   worldOrdinaryMeleeProfile,
   worldPointForArea
-} from "./chunk-CYUROK72.js";
+} from "./chunk-SR2JQSB6.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -2132,7 +2133,7 @@ function drawCanopy(ctx, x, y, size, n) {
     return;
   }
   if (variant % 4 === 2) {
-    const layer2 = (color28, parts, outline2 = false) => {
+    const layer2 = (color28, parts, outline3 = false) => {
       ctx.fillStyle = color28;
       ctx.beginPath();
       for (const [px, py, r] of parts) {
@@ -2140,7 +2141,7 @@ function drawCanopy(ctx, x, y, size, n) {
         ctx.arc(px, py, r, 0, TAU);
       }
       ctx.fill();
-      if (outline2) {
+      if (outline3) {
         ctx.strokeStyle = "#0c2a17";
         ctx.lineWidth = 3;
         ctx.stroke();
@@ -2158,7 +2159,7 @@ function drawCanopy(ctx, x, y, size, n) {
     ctx.restore();
     return;
   }
-  const layer = (color28, clumps, outline2 = false) => {
+  const layer = (color28, clumps, outline3 = false) => {
     ctx.fillStyle = color28;
     ctx.beginPath();
     for (const [x2, y2, r] of clumps) {
@@ -2166,7 +2167,7 @@ function drawCanopy(ctx, x, y, size, n) {
       ctx.arc(x2, y2, r, 0, TAU);
     }
     ctx.fill();
-    if (outline2) {
+    if (outline3) {
       ctx.strokeStyle = "#081d0c";
       ctx.lineWidth = 3;
       ctx.stroke();
@@ -4434,14 +4435,14 @@ function cursedBladeMotionV4(m, time, seed2) {
   const transform = (px, py) => ({ x: x + Math.cos(angle3) * px - Math.sin(angle3) * py, y: y + Math.sin(angle3) * px + Math.cos(angle3) * py });
   return { x, y, angle: angle3, weight: weight2, strike: strike2, wisps, tip: transform(0, -TIP), guard: transform(0, 14), pommel: transform(0, 28), transform };
 }
-function polygon2(c, points2, fill4, outline2 = true) {
+function polygon2(c, points2, fill4, outline3 = true) {
   c.fillStyle = fill4;
   c.beginPath();
   c.moveTo(...points2[0]);
   for (const p of points2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK3;
     c.lineWidth = LINE2;
     c.stroke();
@@ -4626,14 +4627,14 @@ function animatedArmorMotionV4(m, time, seed2) {
     helmetFollow: -shift * 0.35 + Math.sin(time / 260 + seed2 % 9) * 0.35 * (1 - walk) * (1 - weight2)
   };
 }
-function polygon3(c, points2, fill4, outline2 = true) {
+function polygon3(c, points2, fill4, outline3 = true) {
   c.fillStyle = fill4;
   c.beginPath();
   c.moveTo(...points2[0]);
   for (const p of points2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK4;
     c.lineWidth = LINE3;
     c.stroke();
@@ -4887,14 +4888,14 @@ function gargoyleMotionV4(m, time, seed2) {
     wings: [-1, 1].map((side) => (Math.sin(time / 180 + side) * 1.2 + Math.sin(step + side) * walk * 2) * (1 - weight2) + mix4(-4, 7, strike2) * weight2)
   };
 }
-function polygon4(c, points2, fill4, outline2 = true) {
+function polygon4(c, points2, fill4, outline3 = true) {
   c.fillStyle = fill4;
   c.beginPath();
   c.moveTo(...points2[0]);
   for (const p of points2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK5;
     c.lineWidth = LINE4;
     c.stroke();
@@ -4953,9 +4954,9 @@ function weapon2(c, m, cx, cy, flash) {
 }
 function drawGargoyleV4(c, m, presentationTime, seed2) {
   const time = presentationTime, action2 = m.familyAttack, motion = gargoyleMotionV4(m, time, seed2), cx = m.x + m.w / 2 + motion.x, cy = m.y + m.h - 12 + motion.y;
-  const flash = m.flashTimer > 0, outline2 = INK5, stone2 = flash ? "#fff" : "#60717a", stoneLight = flash ? "#fff" : "#8b9aa0", stoneDark = flash ? "#fff" : "#39474f", moss3 = flash ? "#fff" : "#42633a", core5 = "#e3a84a";
+  const flash = m.flashTimer > 0, outline3 = INK5, stone2 = flash ? "#fff" : "#60717a", stoneLight = flash ? "#fff" : "#8b9aa0", stoneDark = flash ? "#fff" : "#39474f", moss3 = flash ? "#fff" : "#42633a", core5 = "#e3a84a";
   c.save();
-  c.strokeStyle = outline2;
+  c.strokeStyle = outline3;
   c.lineWidth = LINE4;
   c.lineJoin = "round";
   c.lineCap = "round";
@@ -4980,7 +4981,7 @@ function drawGargoyleV4(c, m, presentationTime, seed2) {
       c.moveTo(cx + side * 8, cy - 2);
       c.lineTo(cx + side * 14, cy);
       c.stroke();
-      c.strokeStyle = outline2;
+      c.strokeStyle = outline3;
       c.lineWidth = LINE4;
     }
   }
@@ -5052,7 +5053,7 @@ function drawGargoyleV4(c, m, presentationTime, seed2) {
   c.closePath();
   c.fill();
   c.stroke();
-  c.strokeStyle = outline2;
+  c.strokeStyle = outline3;
   c.lineWidth = LINE4;
   c.beginPath();
   c.moveTo(cx - 6, headY - 1);
@@ -5775,14 +5776,14 @@ function voidCrawlerPoseV4(actor, pose, tick) {
   };
   return { ...a, body: body4, anchor: { x: body4.x, y: body4.y } };
 }
-function polygon5(c, points2, fill4, outline2 = true) {
+function polygon5(c, points2, fill4, outline3 = true) {
   c.beginPath();
   c.moveTo(...points2[0]);
   for (const p of points2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.fillStyle = fill4;
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK9;
     c.lineWidth = LINE8;
     c.stroke();
@@ -5944,14 +5945,14 @@ function gildedScuttlerLegsV4(time, seed2, walk = 0) {
   }
   return legs2;
 }
-function path(c, points2, fill4, outline2 = true) {
+function path(c, points2, fill4, outline3 = true) {
   c.fillStyle = fill4;
   c.beginPath();
   c.moveTo(...points2[0]);
   for (const p of points2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK10;
     c.lineWidth = LINE9;
     c.stroke();
@@ -6151,7 +6152,7 @@ function mimicShieldFaceV4(time, seed2, pose = null) {
   const blink = idleBlink + (1 - idleBlink) * weight2;
   const opening = (2.1 + (idleOpen - 2.8) * 0.3) * (1 - weight2) + (pose?.limb.open ?? 2.1) * weight2;
   const width = 8, center2 = { x: 0, y: 3.5 }, angle3 = 0;
-  const outline2 = [[-8, -0.4], [-6, -opening], [-2, -opening * 0.72], [2, -opening * 0.72], [6, -opening], [8, -0.4], [6, opening * 0.72], [2, opening], [-2, opening], [-6, opening * 0.72]];
+  const outline3 = [[-8, -0.4], [-6, -opening], [-2, -opening * 0.72], [2, -opening * 0.72], [6, -opening], [8, -0.4], [6, opening * 0.72], [2, opening], [-2, opening], [-6, opening * 0.72]];
   const teeth = [];
   for (const side of [-1, 1]) {
     for (const x of [-5.25, -1.75, 1.75, 5.25]) {
@@ -6159,9 +6160,9 @@ function mimicShieldFaceV4(time, seed2, pose = null) {
       teeth.push([[x - 0.95, edge(x - 0.95)], [x, edge(x) - side * Math.min(1.8, opening * 0.7)], [x + 0.95, edge(x + 0.95)]]);
     }
   }
-  return { blink, opening, center: center2, angle: angle3, width, outline: outline2, teeth };
+  return { blink, opening, center: center2, angle: angle3, width, outline: outline3, teeth };
 }
-function polygon6(c, points2, fill4, outline2 = true) {
+function polygon6(c, points2, fill4, outline3 = true) {
   c.fillStyle = fill4;
   c.beginPath();
   c.moveTo(...points2[0]);
@@ -6169,7 +6170,7 @@ function polygon6(c, points2, fill4, outline2 = true) {
   c.lineTo(...points2[0]);
   c.closePath();
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK11;
     c.lineWidth = LINE10;
     c.stroke();
@@ -7280,14 +7281,14 @@ var INK14 = "#11151a";
 var LINE13 = 1.26 / 0.78;
 var color13 = (flash, hex2) => flash ? "#fff" : hex2;
 var clamp11 = (x) => Math.max(0, Math.min(1, x));
-function polygon7(c, points2, fill4, outline2 = false) {
+function polygon7(c, points2, fill4, outline3 = false) {
   c.fillStyle = fill4;
   c.beginPath();
   c.moveTo(...points2[0]);
   for (const p of points2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK14;
     c.lineWidth = LINE13;
     c.stroke();
@@ -7412,14 +7413,14 @@ var TAU19 = Math.PI * 2;
 var INK15 = "#11151a";
 var LINE14 = 1.26 / 0.9;
 var color14 = (flash, hex2) => flash ? "#fff" : hex2;
-function plate2(c, points2, fill4, outline2 = true) {
+function plate2(c, points2, fill4, outline3 = true) {
   c.fillStyle = fill4;
   c.beginPath();
   c.moveTo(...points2[0]);
   for (const p of points2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK15;
     c.lineWidth = LINE14;
     c.stroke();
@@ -8370,14 +8371,14 @@ function frostWyrmlingMotionV4(m, time) {
   const muzzle = { x: mouth4.x + u.x, y: mouth4.y + u.y };
   return { segments, neckSegments, root, head: head12, mouth: mouth4, muzzle, weight: weight2 };
 }
-function polygon8(c, points2, fill4, outline2 = true) {
+function polygon8(c, points2, fill4, outline3 = true) {
   c.beginPath();
   c.moveTo(points2[0].x, points2[0].y);
   for (const p of points2.slice(1)) c.lineTo(p.x, p.y);
   c.closePath();
   c.fillStyle = fill4;
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK19;
     c.lineWidth = LINE17;
     c.stroke();
@@ -8571,14 +8572,14 @@ function corrodedGolemMotionV4(m, time, seed2 = 0) {
   });
   return { x, y, hands, weight: weight2, strike: strike2, pulse: 0.85 + Math.sin(time / 220 + seed2 % 11) * 0.15 };
 }
-function polygon9(c, points2, fill4, outline2 = true) {
+function polygon9(c, points2, fill4, outline3 = true) {
   c.fillStyle = fill4;
   c.beginPath();
   c.moveTo(...points2[0]);
   for (const p of points2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK20;
     c.lineWidth = LINE18;
     c.stroke();
@@ -8714,14 +8715,14 @@ function marshGhostMotionV4(m, time, seed2 = 0) {
     }))
   };
 }
-function polygon10(c, points2, fill4, outline2 = true) {
+function polygon10(c, points2, fill4, outline3 = true) {
   c.fillStyle = fill4;
   c.beginPath();
   c.moveTo(...points2[0]);
   for (const p of points2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK21;
     c.lineWidth = LINE19;
     c.stroke();
@@ -9021,14 +9022,14 @@ var smooth12 = (v) => {
   return p * p * (3 - 2 * p);
 };
 var color21 = (flash, hex2) => flash ? "#fff" : hex2;
-function polygon11(c, points2, fill4, outline2 = true) {
+function polygon11(c, points2, fill4, outline3 = true) {
   c.fillStyle = fill4;
   c.beginPath();
   c.moveTo(...points2[0]);
   for (const p of points2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK23;
     c.lineWidth = LINE21;
     c.stroke();
@@ -9308,14 +9309,14 @@ function hellBatMotionV4(m, time) {
   const flap = Math.sin(time / 85), attackFlap = mix11(0.95, -0.65, strike2);
   return { cx, cy, head: head12, nose, mouthAngle, weight: weight2, strike: strike2, flap: mix11(flap, attackFlap, weight2), gape: weight2 * (1 - strike2) * 0.48 };
 }
-function polygon13(c, points2, fill4, outline2 = true) {
+function polygon13(c, points2, fill4, outline3 = true) {
   c.fillStyle = fill4;
   c.beginPath();
   c.moveTo(...points2[0]);
   for (const p of points2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK25;
     c.lineWidth = LINE23;
     c.stroke();
@@ -9509,14 +9510,14 @@ function lavaSerpentMotionV4(m, time, seed2) {
   const segments = Array.from({ length: 6 }, (_, i) => ({ x: cx + i * 5.5 - i * 0.6 * weight2 * (1 - strike2), y: cy + wave(i), radius: 6.5 - i * 0.7 }));
   return { root, head: head12, nose, segments, weight: weight2, strike: strike2, castHeat: action2?.ranged ? weight2 : 0, heat: 0.92 + Math.sin(time / 220 + seed2 % 11) * 0.08 };
 }
-function polygon14(c, points2, fill4, outline2 = true) {
+function polygon14(c, points2, fill4, outline3 = true) {
   c.fillStyle = fill4;
   c.beginPath();
   c.moveTo(...points2[0]);
   for (const p of points2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK26;
     c.lineWidth = LINE24;
     c.stroke();
@@ -12329,16 +12330,16 @@ var attackPose2 = (m) => {
 };
 function draw_rust_nibbler(c, m, presentationTime, seed2) {
   const time = presentationTime, pose = attackPose2(m), active = Boolean(m.movedLastTick || pose.active), cx = m.x + m.w / 2 + (m.familyAttack ? 0 : pose.impact * 4 - pose.windup * 2), cy = m.y + m.h - 9;
-  const flash = m.flashTimer > 0, outline2 = "#11151a", dark = flash ? "#fff" : "#804122", rust = flash ? "#fff" : "#f27926";
+  const flash = m.flashTimer > 0, outline3 = "#11151a", dark = flash ? "#fff" : "#804122", rust = flash ? "#fff" : "#f27926";
   c.save();
   c.lineJoin = "round";
   c.lineCap = "round";
-  c.strokeStyle = outline2;
+  c.strokeStyle = outline3;
   c.lineWidth = 2.65;
   for (let side = -1; side <= 1; side += 2) for (let j = 0; j < 3; j++) {
     const phase = time / 75 + j * 1.4 + side, step = active ? Math.sin(phase) * 3 : Math.sin(phase) * 0.45;
     const rootX = cx + side * (5 + j * 2.5), rootY = cy + 1 + j * 0.7, jointX = rootX + side * (6 + j), jointY = cy + 5 + j * 1.2;
-    c.strokeStyle = outline2;
+    c.strokeStyle = outline3;
     c.lineWidth = 2.8;
     c.beginPath();
     c.moveTo(rootX, rootY);
@@ -12369,7 +12370,7 @@ function draw_rust_nibbler(c, m, presentationTime, seed2) {
     c.ellipse(cx - 4.5, cy - 3.3, 4.2, 1.65, -0.2, 0, Math.PI * 2);
     c.fill();
   }
-  c.strokeStyle = outline2;
+  c.strokeStyle = outline3;
   c.lineWidth = 2.65;
   c.beginPath();
   c.ellipse(cx, cy, 14, 8.5, 0, 0, Math.PI * 2);
@@ -12388,7 +12389,7 @@ function draw_rust_nibbler(c, m, presentationTime, seed2) {
   c.fill();
   c.stroke();
   if (!m.familyAttack) {
-    c.fillStyle = outline2;
+    c.fillStyle = outline3;
     c.beginPath();
     c.moveTo(cx + 16, cy + 1);
     c.lineTo(cx + 21 + pose.impact * 4, cy + (pose.windup ? -1 : pose.impact ? 6 : 2));
@@ -12404,7 +12405,7 @@ function draw_rust_nibbler(c, m, presentationTime, seed2) {
     c.fill();
   }
   const twitch = Math.sin(time / 85 + seed2 % 7) * (active ? 3 : 1.2);
-  c.strokeStyle = outline2;
+  c.strokeStyle = outline3;
   c.lineWidth = 2.4;
   for (let side = -1; side <= 1; side += 2) {
     c.beginPath();
@@ -16863,7 +16864,7 @@ function subweaponLineClear(collision, a, b) {
   for (let t = from; t <= to; t += 4) if (collidesWithTiles(collision, a.position.x + dx * t / d, a.position.y + dy * t / d, 4)) return false;
   return !collidesWithTiles(collision, a.position.x + dx * to / d, a.position.y + dy * to / d, 4);
 }
-var CLASS_MOVES = Object.freeze({ dagger: Object.freeze({ name: "Dash", frames: 8, distance: 64, cooldown: 90 }), tome: Object.freeze({ name: "Blink", frames: 4, distance: 72, cooldown: 150 }) });
+var CLASS_MOVES = Object.freeze({ dagger: Object.freeze({ name: "Dash", frames: 8, distance: 64, cooldown: 90 }), tome: Object.freeze({ name: "Blink", frames: 6, distance: 72, cooldown: 150 }) });
 var MAX_CLASS_MOVE = Object.freeze({ frames: 8, distance: 72, cooldown: 150 });
 function rhythmFires(sequence, chance) {
   const s = BigInt(sequence), n = BigInt(chance.n), d = BigInt(chance.d);
@@ -17179,7 +17180,7 @@ function validateSubweaponCombat(s) {
       requireContract(BASE_TOME_ELEMENTS.includes(b.delivery), "Unsupported Tome delivery");
       validateDamageSourceItem(b.sourceItem);
     }
-    requireContract(combatTargetV4(s, b.intendedTargetId)?.team === "hostile", "Invalid bolt target");
+    requireContract(b.intendedTargetId === null || combatTargetV4(s, b.intendedTargetId)?.team === "hostile", "Invalid bolt target");
     requireContract(id === b.id && c.actors[b.sourceId] && s.entitiesById[b.sourceId].alive && s.entitiesById[b.sourceId].residency.spaceInstanceId === b.spaceInstanceId && s.entitiesById[b.sourceId].residency.residencyRevision === b.residencyRevision, "Projectile owner/residency");
     safeInteger(b.frames, 1, 20);
     requireContract(Number.isFinite(b.remaining) && b.remaining > 0 && b.remaining <= 137, "Projectile range");
@@ -20764,7 +20765,7 @@ var unit3 = (v) => {
   const l = Math.hypot(v.x, v.y);
   return l > 1e-9 ? { x: v.x / l, y: v.y / l } : { x: 1, y: 0 };
 };
-function createClassSkills(s, { damage, effects: effects2, periodic, getStats, players, identity: identity2 }) {
+function createClassSkills(s, { damage, effects: effects2, periodic, getStats, players, identity: identity2, refreshStats }) {
   const c = s.subweaponCombat, owner = (a) => players.get(a.entityId), definition2 = (t) => s.content.definitionsById[t.contentDefinitionId] ?? {};
   const bearing = (a, t) => Math.atan2(t.position.y - a.position.y, t.position.x - a.position.x), distance8 = (a, t) => Math.hypot(t.position.x - a.position.x, t.position.y - a.position.y);
   const offAxis = (a, t, heading) => {
@@ -20810,25 +20811,23 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
   function cast(a, stats, aim2, commandId) {
     const range2 = Math.min(137, 128 + (a.hullRadius ?? 0)), heading = Math.atan2(aim2.y, aim2.x);
     if (Object.keys(c.projectiles).length >= 16) return false;
-    const target = effects2.nearby(a, a, range2 + 40).filter((t) => clearHullGap(a, t) <= 128).map((t) => ({ t, score: distance8(a, t) + (offAxis(a, t, heading) <= T3.cast.cone ? 0 : 1e3) })).sort((x, y) => x.score - y.score || x.t.entityId.localeCompare(y.t.entityId))[0]?.t;
-    if (!target) return false;
-    const dx = target.position.x - a.position.x, dy = target.position.y - a.position.y, d = Math.hypot(dx, dy);
-    if (!d) return false;
-    const element = stats.spellType ?? "fire", id = identity2("act");
+    const target = effects2.nearby(a, a, range2 + 40).filter((t) => clearHullGap(a, t) <= 128 && offAxis(a, t, heading) <= T3.cast.cone).sort((x, y) => distance8(a, x) - distance8(a, y) || x.entityId.localeCompare(y.entityId))[0] ?? null;
+    const toward2 = target ? unit3({ x: target.position.x - a.position.x, y: target.position.y - a.position.y }) : aim2, player = owner(a), recipe = player?.d8 ? captureTomeRecipe(player, effects2.area(a), stats) : null, element = recipe ? commitTomeAnchor(player, recipe) : stats.spellType ?? "fire", id = identity2("act");
     c.actors[a.entityId].delivery = { status: "launched", tick: s.tick };
+    refreshStats?.(player);
     c.projectiles[id] = {
       id,
-      intendedTargetId: target.entityId,
+      intendedTargetId: target?.entityId ?? null,
       sourceId: a.entityId,
       spaceInstanceId: a.residency.spaceInstanceId,
       residencyRevision: a.residency.residencyRevision,
       position: { ...a.position },
-      direction: { x: dx / d, y: dy / d },
+      direction: toward2,
       remaining: range2,
       frames: 20,
       delivery: element,
-      firePower: copyWire(stats.familyProperties?.tomePower ?? stats.familyProperties?.firePower ?? combatAmount(18, 10)),
-      sourceItem: damageSourceItem(owner(a), element),
+      ...recipe ? { tomeRecipe: recipe } : { firePower: copyWire(stats.familyProperties?.tomePower ?? stats.familyProperties?.firePower ?? combatAmount(18, 10)) },
+      sourceItem: damageSourceItem(player, element),
       attack: copyWire(combatInteger(multiplyCombat(stats.attack, ...T3.cast.attack))),
       rulesVersion: "combat-integer-v2",
       commandId
@@ -21088,7 +21087,7 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
     };
   }
   const suppressed = (id) => subweaponSuppressedD12_4I(s, id);
-  const skills = createClassSkills(s, { damage, effects: effects2, periodic, getStats: stats, players, identity: identity2 });
+  const skills = createClassSkills(s, { damage, effects: effects2, periodic, getStats: stats, players, identity: identity2, refreshStats });
   const heroClass = (a) => players.get(a.entityId)?.d8?.heroClass, swing = (a) => s.primary.actorsById[a.entityId]?.current?.sourceSequence ?? null;
   function successful(source3, target, captured) {
     const cls = heroClass(source3), outcome = successfulSubweaponHit({
@@ -25690,7 +25689,7 @@ function createActivityClientPort({ authority, localPlayerId, measure = (_n, fn)
           const eliteStatuses = projectTimedActorStatusesD12_4E(state, a.entityId), bossStatuses = projectBossStatusesD12_5A(state, a.entityId);
           entitiesById[a.entityId].timedStatuses = eliteStatuses && bossStatuses ? freezeProjection({ ...eliteStatuses, ...bossStatuses }) : eliteStatuses ?? bossStatuses;
           const p = state.primary.actorsById[a.entityId];
-          if (p) primaryActors[a.entityId] = { facing: { ...p.facing }, current: p.current ? { comboStep: p.current.comboStep, phase: p.current.phase, phaseStartedTick: p.current.phaseStartedTick, phaseEndsTick: p.current.phaseEndsTick, aim: { ...p.current.aim }, primaryActionId: p.current.primaryActionId } : null, held: p.heldCommandId !== null, queued: p.queuedCommandId !== null, nextComboStep: p.nextComboStep, comboDeadline: p.comboDeadline };
+          if (p) primaryActors[a.entityId] = { facing: { ...p.facing }, nextSourceSequence: p.nextSourceSequence, current: p.current ? { comboStep: p.current.comboStep, phase: p.current.phase, phaseStartedTick: p.current.phaseStartedTick, phaseEndsTick: p.current.phaseEndsTick, aim: { ...p.current.aim }, primaryActionId: p.current.primaryActionId } : null, held: p.heldCommandId !== null, queued: p.queuedCommandId !== null, nextComboStep: p.nextComboStep, comboDeadline: p.comboDeadline };
         }
         for (const id of creatureFacingViews.keys()) if (!entitiesById[id]) creatureFacingViews.delete(id);
         const history = engine.events(), nextEventKey = `${ctx.spaceInstanceId}/${history.at(-1)?.eventId}/${Object.keys(entitiesById).join("|")}`;
@@ -26247,184 +26246,19 @@ function createClassPickerV1({ document, environment, readModel, adapter, report
   } });
 }
 
-// src/client/skill_bar_v1.js
-var SKILL_ICONS = {
-  shield_bash: '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M13 5l9 4v7c0 6-4 10-9 12-5-2-9-6-9-12V9z" fill="currentColor" fill-opacity=".25" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="M24 11l5-2M25 16h5M24 21l5 2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
-  flurry: '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 24L20 10M10 27L25 12M15 29L28 16" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M20 10l3-5 1 6zM25 12l4-4v6zM28 16l3-2-1 4z" fill="currentColor"/></svg>',
-  cast: '<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="20" cy="12" r="6" fill="currentColor" fill-opacity=".35" stroke="currentColor" stroke-width="2.4"/><path d="M15 17L5 27M12 15l-6 2M17 20l-2 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>'
-};
-var LOCK = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="11" width="12" height="9" rx="2" fill="currentColor" fill-opacity=".25" stroke="currentColor" stroke-width="2"/><path d="M9 11V8a3 3 0 0 1 6 0v3" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
-function createSkillBarV1({ document, environment, readModel, adapter, isBlocked, openClassPicker, reportError = () => {
-} }) {
-  const bar = document.createElement("div");
-  bar.className = "skill-bar-v1";
-  bar.dataset.gameplayHud = "";
-  bar.setAttribute("aria-label", "Skills");
-  document.getElementById("world-bag").parentElement.append(bar);
-  const slots = [];
-  for (let i = 0; i < SKILL_SLOT_COUNT; i++) {
-    const b = document.createElement("button"), icon = document.createElement("span"), sweep = document.createElement("i"), time = document.createElement("b"), key2 = document.createElement("small");
-    b.type = "button";
-    b.className = "skill-slot";
-    b.dataset.slot = String(i + 1);
-    b.dataset.gameplayHud = "";
-    icon.className = "skill-slot-icon";
-    sweep.className = "skill-slot-sweep";
-    time.className = "skill-slot-time";
-    key2.className = "skill-slot-key";
-    key2.textContent = String(i + 1);
-    b.append(sweep, icon, time, key2);
-    bar.append(b);
-    slots.push({ b, icon, sweep, time, key: key2, skillId: void 0, paint: "" });
-  }
-  const listeners = [];
-  const listen = (el, type, fn, opts) => {
-    el.addEventListener(type, fn, opts);
-    listeners.push(() => el.removeEventListener(type, fn, opts));
-  };
-  const local5 = (m) => m.playersById[m.localPlayerId];
-  const loadout = (m) => {
-    const p = local5(m);
-    return Array.from({ length: SKILL_SLOT_COUNT }, (_, i) => classSkillsFor(p?.d8)[i] ?? null);
-  };
-  function ready(m, skillId) {
-    const p = local5(m), c = m.subweapon, heroClass = heroClassOf(p?.d8);
-    return Boolean(skillId && heroClass && c && !c.suppressed && m.entitiesById[p.entityId]?.alive && p.stats.subType === heroClass.offhand && !c.skills?.cooldowns?.[skillId] && !c.skills?.flurry && (skillId !== "cast" || m.tomeTarget === "READY") && m.persistence.phase === "encounter");
-  }
-  function activate(index) {
-    if (isBlocked()) return;
-    const m = readModel(), p = local5(m);
-    if (!heroClassOf(p?.d8)) {
-      openClassPicker?.();
-      return;
-    }
-    const skillId = loadout(m)[index];
-    if (!ready(m, skillId)) return;
-    try {
-      const pending = adapter.issue("combat.skill", { skillId, aim: m.primary.actorsById[p.entityId].facing }, m);
-      pending?.catch?.((e) => reportError(e.message));
-    } catch (e) {
-      reportError(e.message);
-    }
-    const s = slots[index].b;
-    s.classList.remove("fired");
-    void s.offsetWidth;
-    s.classList.add("fired");
-  }
-  slots.forEach((s, i) => {
-    listen(s.b, "pointerdown", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (e.button !== 0) return;
-      activate(i);
-    });
-    listen(s.b, "click", (e) => e.preventDefault());
-  });
-  listen(environment, "keydown", (e) => {
-    const i = ["Digit1", "Digit2", "Digit3", "Numpad1", "Numpad2", "Numpad3"].indexOf(e.code) % 3;
-    if (i < 0 || e.repeat || e.ctrlKey || e.metaKey || e.altKey || ["INPUT", "TEXTAREA", "SELECT"].includes(e.target?.tagName)) return;
-    e.preventDefault();
-    activate(i);
-  });
-  const ARC_DEGREES = [-146, -113, -82], GUARD_DEGREES = 180;
-  let placed = "";
-  function place() {
-    const attack = document.getElementById("primary-attack")?.getBoundingClientRect(), host = bar.parentElement?.getBoundingClientRect();
-    if (!attack?.width || !host) return false;
-    const size = Math.round(Math.min(56, Math.max(46, attack.width * 0.66))), radius = attack.width / 2 + size / 2 + 40, cx = attack.left + attack.width / 2 - host.left, cy = attack.top + attack.height / 2 - host.top, key2 = `${cx}/${cy}/${size}/${radius}`;
-    if (key2 === placed) return true;
-    placed = key2;
-    bar.style.setProperty("--slot", size + "px");
-    slots.forEach((s, i) => {
-      const angle3 = ARC_DEGREES[i] * Math.PI / 180, x = cx + Math.cos(angle3) * radius - size / 2, y = cy + Math.sin(angle3) * radius - size / 2;
-      s.b.style.setProperty("--at", `translate(${x.toFixed(1)}px,${y.toFixed(1)}px)`);
-    });
-    const body4 = document.body, guard = 60, gx = cx + Math.cos(GUARD_DEGREES * Math.PI / 180) * radius, gy = cy + Math.sin(GUARD_DEGREES * Math.PI / 180) * radius;
-    body4.style.setProperty("--arc-guard-left", (gx - guard / 2).toFixed(1) + "px");
-    body4.style.setProperty("--arc-guard-top", (gy - guard / 2).toFixed(1) + "px");
-    body4.classList.add("skill-arc-v1");
-    return true;
-  }
-  let placedAt = -1e9, placedOk = false;
-  function refresh(m, visible3 = true) {
-    const p = local5(m), heroClass = heroClassOf(p?.d8), skills = loadout(m), c = m.subweapon, now2 = environment.performance?.now?.() ?? Date.now();
-    if (visible3 && now2 - placedAt > 500) {
-      placedAt = now2;
-      placedOk = place();
-    }
-    bar.hidden = !visible3 || isBlocked() || !p || !placedOk;
-    if (bar.hidden) return;
-    bar.dataset.classId = heroClass?.id ?? "none";
-    bar.style.setProperty("--class", heroClass?.color ?? "#c9b58b");
-    slots.forEach((s, i) => {
-      const skillId = heroClass ? skills[i] : i === 0 ? "pick" : null, left = skillId && skillId !== "pick" ? c?.skills?.cooldowns?.[skillId] ?? 0 : 0, total = CLASS_SKILLS[skillId]?.cooldownTicks ?? 1, state = skillId === "pick" ? "pick" : !skillId ? "locked" : ready(m, skillId) ? "ready" : left ? "cooling" : "blocked";
-      const key2 = `${skillId}/${state}`;
-      if (s.paint !== key2) {
-        s.paint = key2;
-        s.b.dataset.state = state;
-        s.icon.innerHTML = skillId === "pick" ? classIconSvg("knight") : skillId ? SKILL_ICONS[skillId] : LOCK;
-        s.b.setAttribute("aria-label", skillId === "pick" ? "Choose your class" : skillId ? `${CLASS_SKILLS[skillId].name} \u2014 key ${i + 1}` : `Empty skill slot ${i + 1}. Learn skills in your class tree.`);
-        s.b.title = skillId === "pick" ? "Choose your class" : skillId ? CLASS_SKILLS[skillId].name : "Empty slot";
-      }
-      s.sweep.style.transform = `scaleY(${left ? Math.min(1, left / total).toFixed(3) : 0})`;
-      const label3 = left ? (left / 60).toFixed(left >= 600 ? 0 : 1) : "";
-      if (s.time.textContent !== label3) s.time.textContent = label3;
-      s.b.disabled = state === "locked";
-    });
-  }
-  return Object.freeze({ refresh, destroy() {
-    listeners.forEach((f) => f());
-    bar.remove();
-    document.body.classList.remove("skill-arc-v1");
-  } });
-}
-
-// src/client/level_up_celebration_v4.js
-var LEVEL_UP_CELEBRATION_V4 = Object.freeze({ durationMs: 3200, sparks: 22 });
-function createLevelUpCelebrationV4(doc) {
-  let root = null, timer = null;
-  function clear2() {
-    clearTimeout(timer);
-    root?.remove();
-    root = null;
-  }
-  function play(level, detail = "") {
-    clear2();
-    root = doc.createElement("div");
-    root.className = "level-up-v4";
-    root.setAttribute("role", "status");
-    root.setAttribute("aria-live", "assertive");
-    const flash = doc.createElement("div");
-    flash.className = "level-up-v4-flash";
-    const stage2 = doc.createElement("div");
-    stage2.className = "level-up-v4-stage";
-    const rays = doc.createElement("div");
-    rays.className = "level-up-v4-rays";
-    const burst = doc.createElement("div");
-    burst.className = "level-up-v4-burst";
-    for (let i = 0; i < LEVEL_UP_CELEBRATION_V4.sparks; i++) {
-      const s = doc.createElement("i"), a = i / LEVEL_UP_CELEBRATION_V4.sparks * Math.PI * 2 + i % 3 * 0.17, d = 90 + i % 5 * 26;
-      s.style.setProperty("--dx", Math.cos(a) * d + "px");
-      s.style.setProperty("--dy", Math.sin(a) * d * 0.8 + "px");
-      s.style.animationDelay = i % 4 * 40 + "ms";
-      burst.append(s);
-    }
-    const emblem = doc.createElement("div");
-    emblem.className = "level-up-v4-emblem";
-    const kicker = doc.createElement("small");
-    kicker.textContent = "LEVEL UP";
-    const number2 = doc.createElement("strong");
-    number2.textContent = String(level);
-    const sub = doc.createElement("span");
-    sub.textContent = detail;
-    emblem.append(kicker, number2);
-    stage2.append(rays, burst, emblem, sub);
-    root.append(flash, stage2);
-    doc.body.append(root);
-    timer = setTimeout(clear2, LEVEL_UP_CELEBRATION_V4.durationMs);
-  }
-  return Object.freeze({ play, destroy: clear2 });
-}
+// src/client/skill_icons_v1.js
+var outline = 'stroke="#0b1015" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"';
+var SKILL_ICONS_V1 = Object.freeze({
+  shield_bash: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="sk-bash" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1fbff"/><stop offset=".5" stop-color="#86cdf0"/><stop offset="1" stop-color="#2c6a94"/></linearGradient></defs><path d="M30 13l12-5M33 23h13M30 33l12 5" stroke="#0b1015" stroke-width="6" stroke-linecap="round"/><path d="M30 13l12-5M33 23h13M30 33l12 5" stroke="#fff4c8" stroke-width="3" stroke-linecap="round"/><path d="M17 5l14 5v11c0 10-6 17-14 21C9 38 3 31 3 21V10z" fill="url(#sk-bash)" ${outline}/><path d="M17 11v25M9 20h16" stroke="#173f5c" stroke-width="2.4" stroke-linecap="round" opacity=".55"/><path d="M8 13l9-3" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity=".8"/></svg>`,
+  flurry: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="sk-flurry" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#9aa6b8"/><stop offset=".6" stop-color="#eef2f8"/><stop offset="1" stop-color="#ffffff"/></linearGradient></defs><path d="M7 30C14 14 28 7 43 6M5 39C16 27 30 21 44 19M10 45C22 38 33 35 45 33" fill="none" stroke="#0b1015" stroke-width="5" stroke-linecap="round" opacity=".7"/><path d="M7 30C14 14 28 7 43 6M5 39C16 27 30 21 44 19M10 45C22 38 33 35 45 33" fill="none" stroke="#c9a6ff" stroke-width="2.4" stroke-linecap="round"/><path d="M20 30L38 12l3 3-18 18z" fill="url(#sk-flurry)" ${outline}/><path d="M14 30l8 8M17 35l-6 6" stroke="#0b1015" stroke-width="6" stroke-linecap="round"/><path d="M14 30l8 8M17 35l-6 6" stroke="#8a5bd6" stroke-width="3" stroke-linecap="round"/></svg>`,
+  cast: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><radialGradient id="sk-cast" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#ffe0a3"/><stop offset=".75" stop-color="#ff8a3d"/><stop offset="1" stop-color="#b8361d"/></radialGradient></defs><path d="M22 28L5 43M18 23L4 30M27 33l-6 13" stroke="#0b1015" stroke-width="6" stroke-linecap="round"/><path d="M22 28L5 43M18 23L4 30M27 33l-6 13" stroke="#ffb35c" stroke-width="3" stroke-linecap="round"/><circle cx="30" cy="18" r="13" fill="url(#sk-cast)" ${outline}/><path d="M24 13a8 8 0 0 1 9-4" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".9"/></svg>`,
+  guard: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="mv-guard" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8f4ff"/><stop offset=".55" stop-color="#8fb6d4"/><stop offset="1" stop-color="#3b5d78"/></linearGradient></defs><path d="M24 4l17 6v12c0 12-8 19-17 23C15 41 7 34 7 22V10z" fill="url(#mv-guard)" ${outline}/><path d="M24 10l11 4v8c0 8-5 13-11 16" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity=".7"/><path d="M24 15v16M17 22h14" stroke="#2a4458" stroke-width="2.6" stroke-linecap="round" opacity=".6"/></svg>`,
+  dash: `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 12l12 12-12 12M20 12l12 12-12 12M32 12l12 12-12 12" fill="none" stroke="#0b1015" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 12l12 12-12 12" fill="none" stroke="#7a52b8" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" opacity=".7"/><path d="M20 12l12 12-12 12" fill="none" stroke="#b48cff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 12l12 12-12 12" fill="none" stroke="#efe4ff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  blink: `<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="17" fill="none" stroke="#0b1015" stroke-width="5"/><circle cx="24" cy="24" r="17" fill="none" stroke="#8fd0ff" stroke-width="2.4" stroke-dasharray="6 5"/><path d="M24 6l4.5 13.5L42 24l-13.5 4.5L24 42l-4.5-13.5L6 24l13.5-4.5z" fill="#e9f7ff" ${outline}/><circle cx="24" cy="24" r="3.4" fill="#8fd0ff"/></svg>`,
+  lock: `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M16 21v-5a8 8 0 0 1 16 0v5" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><rect x="11" y="20" width="26" height="20" rx="5" fill="currentColor" fill-opacity=".22" stroke="currentColor" stroke-width="3"/><circle cx="24" cy="29" r="2.6" fill="currentColor"/></svg>`,
+  spin: `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M37 17a15 15 0 0 0-27 4M11 31a15 15 0 0 0 27-4" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="M38 8v10H28M10 40V30h10" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+});
+var MOVE_ICON_FOR = { shield: "guard", dagger: "dash", tome: "blink" };
 
 // src/client/toast_v1.js
 var MAX_VISIBLE = 3;
@@ -26558,6 +26392,431 @@ function laneFor(doc) {
 }
 function toastV1(doc, options) {
   return laneFor(doc).show(options);
+}
+
+// src/client/skill_wheel_v1.js
+var WHEEL_SLOTS = SKILL_SLOT_COUNT;
+var WHEEL_PAGE = 4;
+var PAGE_ANGLES = [[172, 207, 242, 277], [325, 360, 395, 430]];
+var TURN = -153;
+var SPACING = 35;
+var ELEMENT_COLORS = { fire: "#ff9a4a", lightning: "#c7a8ff", frost: "#8fd8ff" };
+var MOVE_NAMES = { shield: "Guard", dagger: "Dash", tome: "Blink" };
+var TIP_KEY = "saq-skill-wheel-arrange-tip-v1";
+function nextTomeElementV1(player) {
+  const spell = player?.stats?.spellType;
+  if (!spell) return null;
+  let elements;
+  try {
+    elements = tomeElements(spell);
+  } catch {
+    return null;
+  }
+  const t = player.d8?.transient, equipped = player.inventory?.equipped?.subweapon, cursor = t && t.rotationItemId === equipped ? t.rotationCursor ?? 0 : 0;
+  return elements[cursor % elements.length];
+}
+function swingsUntilBoltV1(nextSequence, chance) {
+  if (!Number.isSafeInteger(nextSequence) || !chance) return null;
+  for (let k = 0; k < 64; k++) if (rhythmFires(nextSequence + k, chance)) return k + 1;
+  return null;
+}
+function wheelEntriesV1(player) {
+  if (heroClassOf(player?.d8)) return skillLoadout(player.d8);
+  return Array.from({ length: WHEEL_SLOTS }, (_, i) => i === 0 ? MOVE_SLOT : i === 1 ? "pick" : null);
+}
+function wheelKeysV1(entries) {
+  let n = 0;
+  return entries.map((entry) => entry === MOVE_SLOT ? null : ++n);
+}
+function createSkillWheelV1({ document, environment, readModel, adapter, isBlocked, openClassPicker, reportError = () => {
+} }) {
+  const el = (tag, cls) => {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    return e;
+  };
+  const wheel = el("div", "skill-wheel-v1"), ring4 = el("div", "skill-wheel-ring"), spin = el("button", "skill-wheel-spin"), beat = el("div", "skill-wheel-beat"), done = el("button", "skill-wheel-done");
+  wheel.dataset.gameplayHud = "";
+  wheel.setAttribute("aria-label", "Skills");
+  spin.type = done.type = "button";
+  spin.dataset.gameplayHud = done.dataset.gameplayHud = "";
+  spin.innerHTML = SKILL_ICONS_V1.spin + "<i></i><i></i>";
+  spin.setAttribute("aria-label", "Turn the skill wheel (Q). Hold to arrange it.");
+  beat.setAttribute("aria-hidden", "true");
+  done.innerHTML = '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 25l8 8 16-18" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Done</span>';
+  done.setAttribute("aria-label", "Finish arranging the skill wheel");
+  done.hidden = true;
+  wheel.append(ring4, beat, spin);
+  document.getElementById("world-bag").parentElement.append(wheel, done);
+  const slots = [];
+  for (let i = 0; i < WHEEL_SLOTS; i++) {
+    const b = el("button", "skill-slot"), icon = el("span", "skill-slot-icon"), sweep = el("i", "skill-slot-sweep"), time = el("b", "skill-slot-time"), key2 = el("small", "skill-slot-key");
+    b.type = "button";
+    b.dataset.slot = String(i + 1);
+    b.dataset.gameplayHud = "";
+    b.append(sweep, icon, time, key2);
+    wheel.append(b);
+    slots.push({ b, icon, sweep, time, key: key2, paint: "" });
+  }
+  const listeners = [], listen = (t, type, fn, opts) => {
+    t.addEventListener(type, fn, opts);
+    listeners.push(() => t.removeEventListener(type, fn, opts));
+  };
+  const local5 = (m) => m.playersById[m.localPlayerId];
+  let arranging = false, draft = null, picked = null;
+  const entries = (m) => arranging && draft ? draft : wheelEntriesV1(local5(m));
+  function ready(m, skillId) {
+    const p = local5(m), c = m.subweapon, heroClass = heroClassOf(p?.d8);
+    return Boolean(CLASS_SKILLS[skillId] && heroClass && c && !c.suppressed && m.entitiesById[p.entityId]?.alive && p.stats.subType === heroClass.offhand && !c.skills?.cooldowns?.[skillId] && !c.skills?.flurry && m.persistence.phase === "encounter");
+  }
+  function activate(index) {
+    if (isBlocked()) return;
+    const m = readModel(), p = local5(m), entry = entries(m)[index];
+    if (entry === "pick") {
+      openClassPicker?.();
+      return;
+    }
+    if (!ready(m, entry)) return;
+    try {
+      adapter.issue("combat.skill", { skillId: entry, aim: m.primary.actorsById[p.entityId].facing }, m)?.catch?.((e) => reportError(e.message));
+    } catch (e) {
+      reportError(e.message);
+    }
+    const s = slots[index].b;
+    s.classList.remove("fired");
+    void s.offsetWidth;
+    s.classList.add("fired");
+  }
+  function startArranging() {
+    const m = readModel(), p = local5(m);
+    if (isBlocked() || !heroClassOf(p?.d8)) return;
+    arranging = true;
+    draft = [...wheelEntriesV1(p)];
+    picked = null;
+    wheel.dataset.arranging = "true";
+    document.body.classList.add("wheel-arranging");
+    done.hidden = false;
+    remember();
+    environment.navigator?.vibrate?.(12);
+    paintNow();
+  }
+  function stopArranging(save = true) {
+    if (!arranging) return;
+    const m = readModel(), p = local5(m), before = wheelEntriesV1(p), after = draft;
+    arranging = false;
+    draft = null;
+    picked = null;
+    delete wheel.dataset.arranging;
+    document.body.classList.remove("wheel-arranging");
+    done.hidden = true;
+    if (save && p?.d8 && after && after.some((entry, i) => entry !== before[i])) {
+      try {
+        adapter.issue("progression.change", { progressionRevision: p.d8.revision, action: { kind: "skills.arrange", slots: after } }, m)?.catch?.((e) => reportError(e.message));
+      } catch (e) {
+        reportError(e.message);
+      }
+    }
+    paintNow();
+  }
+  function arrangeTap(index) {
+    if (picked === null) {
+      picked = index;
+    } else if (picked === index) {
+      picked = null;
+    } else {
+      [draft[picked], draft[index]] = [draft[index], draft[picked]];
+      picked = null;
+    }
+    paintNow();
+  }
+  listen(done, "pointerdown", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    stopArranging(true);
+  });
+  listen(done, "click", (e) => e.preventDefault());
+  let page = 0, turn7 = 0, target = 0, drag = null, frame = null, geometry = null, hold = null, held = false;
+  const now2 = () => environment.performance?.now?.() ?? Date.now();
+  function animate() {
+    const step = () => {
+      const delta3 = target - turn7;
+      turn7 = Math.abs(delta3) < 2e-3 ? target : turn7 + delta3 * 0.28;
+      layout();
+      frame = turn7 === target ? null : environment.requestAnimationFrame(step);
+    };
+    if (!frame) frame = environment.requestAnimationFrame?.(step) ?? (turn7 = target, layout(), null);
+  }
+  function setPage(next) {
+    page = next;
+    target = next;
+    wheel.dataset.page = String(next + 1);
+    animate();
+  }
+  listen(spin, "pointerdown", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    held = false;
+    environment.clearTimeout(hold);
+    hold = environment.setTimeout(() => {
+      held = true;
+      if (arranging) stopArranging(true);
+      else startArranging();
+    }, 450);
+  });
+  const spinUp = (e) => {
+    environment.clearTimeout(hold);
+    hold = null;
+    if (e.type === "pointerup" && !held) setPage(page ? 0 : 1);
+    held = false;
+  };
+  listen(spin, "pointerup", spinUp);
+  listen(spin, "pointercancel", spinUp);
+  listen(spin, "click", (e) => e.preventDefault());
+  const angleAt = (e) => Math.atan2(e.clientY - geometry.cy - geometry.top, e.clientX - geometry.cx - geometry.left) * 180 / Math.PI;
+  listen(ring4, "pointerdown", (e) => {
+    if (!geometry) return;
+    e.preventDefault();
+    e.stopPropagation();
+    drag = { start: angleAt(e), turn: turn7, id: e.pointerId };
+    try {
+      ring4.setPointerCapture(e.pointerId);
+    } catch {
+    }
+  });
+  listen(ring4, "pointermove", (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    let d = angleAt(e) - drag.start;
+    if (d > 180) d -= 360;
+    if (d < -180) d += 360;
+    turn7 = Math.max(0, Math.min(1, drag.turn + d / TURN));
+    target = turn7;
+    layout();
+  });
+  const release = (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const moved = Math.abs(turn7 - drag.turn) > 0.04;
+    drag = null;
+    setPage(moved ? turn7 > 0.5 ? 1 : 0 : page ? 0 : 1);
+  };
+  listen(ring4, "pointerup", release);
+  listen(ring4, "pointercancel", release);
+  slots.forEach((s, i) => {
+    listen(s.b, "pointerdown", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.button !== 0) return;
+      if (arranging) arrangeTap(i);
+      else activate(i);
+    });
+    listen(s.b, "click", (e) => e.preventDefault());
+  });
+  listen(environment, "keydown", (e) => {
+    if (e.repeat || e.ctrlKey || e.metaKey || e.altKey || ["INPUT", "TEXTAREA", "SELECT"].includes(e.target?.tagName)) return;
+    if (e.code === "KeyQ") {
+      if (isBlocked()) return;
+      e.preventDefault();
+      setPage(page ? 0 : 1);
+      return;
+    }
+    if (e.code === "Escape" && arranging) {
+      stopArranging(true);
+      return;
+    }
+    const digit = /^(?:Digit|Numpad)([1-7])$/.exec(e.code);
+    if (!digit || arranging) return;
+    const index = wheelKeysV1(entries(readModel())).indexOf(Number(digit[1]));
+    if (index < 0) return;
+    e.preventDefault();
+    activate(index);
+  });
+  let placedAt = -1e9;
+  function measure() {
+    const attack = document.getElementById("primary-attack")?.getBoundingClientRect(), host = wheel.parentElement?.getBoundingClientRect();
+    if (!attack?.width || !host) return null;
+    const hub = attack.width / 2, slot = Math.round(Math.min(56, Math.max(48, attack.width * 0.62))), radius = Math.max(hub + slot / 2 + 18, (slot + 10) / (2 * Math.sin(SPACING * Math.PI / 360)));
+    return { left: host.left, top: host.top, cx: attack.left + hub - host.left, cy: attack.top + attack.height / 2 - host.top, hub, slot, radius };
+  }
+  let moveIndex = -1;
+  function layout() {
+    const g = geometry;
+    if (!g) return;
+    const at3 = (deg, r, size) => {
+      const a = deg * Math.PI / 180;
+      return { x: g.cx + Math.cos(a) * r - size / 2, y: g.cy + Math.sin(a) * r - size / 2 };
+    }, css = (p) => `translate(${p.x.toFixed(1)}px,${p.y.toFixed(1)}px)`, settled = turn7 === target && !drag;
+    slots.forEach((s, i) => {
+      const own = Math.floor(i / WHEEL_PAGE), p = at3(PAGE_ANGLES[own][i % WHEEL_PAGE] + turn7 * TURN, g.radius, g.slot), away = settled && own !== page;
+      s.b.style.setProperty("--at", css(p));
+      s.b.dataset.away = String(away);
+      s.b.tabIndex = away ? -1 : 0;
+      s.b.setAttribute("aria-hidden", String(away));
+      if (i === moveIndex) {
+        const body4 = document.body;
+        body4.style.setProperty("--arc-guard-left", p.x.toFixed(1) + "px");
+        body4.style.setProperty("--arc-guard-top", p.y.toFixed(1) + "px");
+        body4.classList.toggle("wheel-move-away", away);
+      }
+    });
+    const band = g.radius + g.slot / 2 + 10, hole = g.radius - g.slot / 2 - 10, circle8 = (r, c) => `M ${(c - r).toFixed(1)},${c.toFixed(1)} a ${r.toFixed(1)},${r.toFixed(1)} 0 1,0 ${(2 * r).toFixed(1)},0 a ${r.toFixed(1)},${r.toFixed(1)} 0 1,0 ${(-2 * r).toFixed(1)},0 Z`;
+    wheel.style.setProperty("--slot", g.slot + "px");
+    document.body.style.setProperty("--wheel-slot", g.slot + "px");
+    ring4.style.cssText = `left:${(g.cx - band).toFixed(1)}px;top:${(g.cy - band).toFixed(1)}px;width:${(band * 2).toFixed(1)}px;height:${(band * 2).toFixed(1)}px;--hole:${hole.toFixed(1)}px;clip-path:path(evenodd,"${circle8(band, band)} ${circle8(hole, band)}")`;
+    spin.style.setProperty("--at", css(at3(270, g.hub + 20, 34)));
+    beat.style.setProperty("--at", `translate(${(g.cx - g.hub - 6).toFixed(1)}px,${(g.cy - g.hub - 6).toFixed(1)}px)`);
+    beat.style.setProperty("--size", (g.hub * 2 + 12).toFixed(1) + "px");
+    done.style.cssText = `left:${(g.cx - g.hub).toFixed(1)}px;top:${(g.cy - g.hub).toFixed(1)}px;width:${(g.hub * 2).toFixed(1)}px;height:${(g.hub * 2).toFixed(1)}px`;
+    document.body.classList.add("skill-arc-v1");
+  }
+  function paintBeat(m, p) {
+    const heroClass = heroClassOf(p?.d8);
+    if (arranging || heroClass?.id !== "mage" || p.stats.subType !== "tome") {
+      beat.hidden = true;
+      return;
+    }
+    const element = nextTomeElementV1(p), chance = p.stats.familyProperties?.tomeChance ?? p.stats.familyProperties?.fireChance ?? { n: "1", d: "3" }, next = m.primary.actorsById[p.entityId]?.nextSourceSequence, left = swingsUntilBoltV1(next, chance), count = Math.max(2, Math.min(4, Math.ceil(Number(chance.d) / Number(chance.n))));
+    beat.hidden = !element || !left;
+    if (beat.hidden) return;
+    const key2 = `${element}/${left}/${count}`;
+    if (beat.dataset.key === key2) return;
+    beat.dataset.key = key2;
+    beat.style.setProperty("--element", ELEMENT_COLORS[element] ?? "#ffd29a");
+    beat.dataset.element = element;
+    beat.replaceChildren(...Array.from({ length: count }, (_, i) => {
+      const pip = el("i");
+      pip.dataset.lit = String(i < count - Math.min(left, count));
+      pip.style.setProperty("--n", String(i));
+      pip.style.setProperty("--count", String(count));
+      return pip;
+    }));
+    beat.setAttribute("title", `Next Tome bolt: ${element}, in ${left} swing${left === 1 ? "" : "s"}`);
+  }
+  function remember() {
+    try {
+      environment.localStorage?.setItem(TIP_KEY, "1");
+    } catch {
+    }
+  }
+  let tipped = false;
+  function tip(heroClass) {
+    if (tipped || !heroClass) return;
+    tipped = true;
+    let seen = false;
+    try {
+      seen = environment.localStorage?.getItem(TIP_KEY) === "1";
+    } catch {
+    }
+    if (seen) return;
+    remember();
+    toastV1(document, { kind: "mastery", title: "Arrange your skill wheel", sub: "Hold the spin button above Attack, then tap two slots to swap them.", accent: heroClass.color, key: "skill-wheel-tip", ms: 7e3 });
+  }
+  let lastModel = null;
+  const paintNow = () => {
+    if (lastModel) refresh(lastModel, !wheel.hidden || arranging);
+  };
+  function refresh(m, visible3 = true) {
+    lastModel = m;
+    const p = local5(m), heroClass = heroClassOf(p?.d8), c = m.subweapon, t = now2(), blocked3 = isBlocked();
+    if (arranging && (blocked3 || !heroClass || !visible3)) stopArranging(true);
+    const list = entries(m), keys2 = wheelKeysV1(list);
+    if (visible3 && t - placedAt > 500) {
+      placedAt = t;
+      const next = measure();
+      if (next && JSON.stringify(next) !== JSON.stringify(geometry)) {
+        geometry = next;
+        layout();
+      } else if (!next) geometry = null;
+    }
+    wheel.hidden = !visible3 || blocked3 || !p || !geometry;
+    if (wheel.hidden) {
+      document.body.classList.remove("wheel-move-away");
+      return;
+    }
+    wheel.dataset.classId = heroClass?.id ?? "none";
+    wheel.style.setProperty("--class", heroClass?.color ?? "#c9b58b");
+    const index = list.indexOf(MOVE_SLOT);
+    if (index !== moveIndex) {
+      moveIndex = index;
+      layout();
+    }
+    const moveName = MOVE_NAMES[p.stats.subType] ?? null;
+    slots.forEach((s, i) => {
+      const entry = list[i], isMove = entry === MOVE_SLOT, left = CLASS_SKILLS[entry] ? c?.skills?.cooldowns?.[entry] ?? 0 : 0, total = CLASS_SKILLS[entry]?.cooldownTicks ?? 1, state = isMove ? moveName ? "move" : "locked" : entry === "pick" ? "pick" : !entry ? arranging ? "empty" : "locked" : arranging ? "ready" : ready(m, entry) ? "ready" : left ? "cooling" : "blocked", pickedNow = arranging && picked === i;
+      const key2 = `${entry}/${state}/${pickedNow}/${arranging}/${moveName}/${keys2[i]}`;
+      if (s.paint !== key2) {
+        s.paint = key2;
+        s.b.dataset.state = state;
+        s.b.dataset.skill = entry ?? "";
+        s.b.dataset.picked = String(pickedNow);
+        s.icon.innerHTML = isMove ? moveName ? SKILL_ICONS_V1[MOVE_ICON_FOR[p.stats.subType]] : SKILL_ICONS_V1.lock : entry === "pick" ? classIconSvg("knight") : entry ? SKILL_ICONS_V1[entry] : arranging ? "" : SKILL_ICONS_V1.lock;
+        s.key.textContent = isMove ? "\u21E7" : keys2[i] ? String(keys2[i]) : "";
+        const name = isMove ? moveName ?? "Class move" : entry === "pick" ? "Choose your class" : entry ? CLASS_SKILLS[entry].name : "Empty slot";
+        s.b.title = name;
+        s.b.setAttribute("aria-label", arranging ? `${name}. Tap to ${picked === null ? "pick it up" : "swap it here"}.` : isMove ? `${name} \u2014 Shift` : entry === "pick" ? name : entry ? `${name} \u2014 key ${keys2[i]}` : `Empty skill slot. Learn skills in your class tree.`);
+      }
+      s.sweep.style.transform = `scaleY(${left && !arranging ? Math.min(1, left / total).toFixed(3) : 0})`;
+      const label3 = left && !arranging ? (left / 60).toFixed(left >= 600 ? 0 : 1) : "";
+      if (s.time.textContent !== label3) s.time.textContent = label3;
+      s.b.disabled = !arranging && state === "locked";
+    });
+    spin.dataset.page = String(page + 1);
+    paintBeat(m, p);
+    tip(heroClass);
+  }
+  return Object.freeze({ refresh, turn: setPage, arrange: startArranging, inspect: () => ({ page, turn: turn7, arranging, draft: draft ? [...draft] : null }), destroy() {
+    listeners.forEach((f) => f());
+    environment.clearTimeout(hold);
+    if (frame) environment.cancelAnimationFrame?.(frame);
+    wheel.remove();
+    done.remove();
+    document.body.classList.remove("skill-arc-v1", "wheel-move-away", "wheel-arranging");
+  } });
+}
+
+// src/client/level_up_celebration_v4.js
+var LEVEL_UP_CELEBRATION_V4 = Object.freeze({ durationMs: 3200, sparks: 22 });
+function createLevelUpCelebrationV4(doc) {
+  let root = null, timer = null;
+  function clear2() {
+    clearTimeout(timer);
+    root?.remove();
+    root = null;
+  }
+  function play(level, detail = "") {
+    clear2();
+    root = doc.createElement("div");
+    root.className = "level-up-v4";
+    root.setAttribute("role", "status");
+    root.setAttribute("aria-live", "assertive");
+    const flash = doc.createElement("div");
+    flash.className = "level-up-v4-flash";
+    const stage2 = doc.createElement("div");
+    stage2.className = "level-up-v4-stage";
+    const rays = doc.createElement("div");
+    rays.className = "level-up-v4-rays";
+    const burst = doc.createElement("div");
+    burst.className = "level-up-v4-burst";
+    for (let i = 0; i < LEVEL_UP_CELEBRATION_V4.sparks; i++) {
+      const s = doc.createElement("i"), a = i / LEVEL_UP_CELEBRATION_V4.sparks * Math.PI * 2 + i % 3 * 0.17, d = 90 + i % 5 * 26;
+      s.style.setProperty("--dx", Math.cos(a) * d + "px");
+      s.style.setProperty("--dy", Math.sin(a) * d * 0.8 + "px");
+      s.style.animationDelay = i % 4 * 40 + "ms";
+      burst.append(s);
+    }
+    const emblem = doc.createElement("div");
+    emblem.className = "level-up-v4-emblem";
+    const kicker = doc.createElement("small");
+    kicker.textContent = "LEVEL UP";
+    const number2 = doc.createElement("strong");
+    number2.textContent = String(level);
+    const sub = doc.createElement("span");
+    sub.textContent = detail;
+    emblem.append(kicker, number2);
+    stage2.append(rays, burst, emblem, sub);
+    root.append(flash, stage2);
+    doc.body.append(root);
+    timer = setTimeout(clear2, LEVEL_UP_CELEBRATION_V4.durationMs);
+  }
+  return Object.freeze({ play, destroy: clear2 });
 }
 
 // src/client/interaction_target_v2.js
@@ -28201,17 +28460,6 @@ function createInventoryPresentation({ document, environment, readModel, adapter
         row2.append(action3);
         list.append(row2);
       }
-      if (inv.subweapons) {
-        const provisions = element("section", "", "base-provisions");
-        provisions.append(element("h3", "BASE SUBWEAPON PROVISIONS"));
-        for (const [type, d2] of Object.entries(SUBWEAPONS)) {
-          const claimed = Boolean(inv.subweapons.claims[type]), b = button(claimed ? `${d2.name} \u2014 claimed` : `${d2.provision}: ${d2.name}`, () => issue("subweapon.claim", { subType: type }), claimed || !provisionLevelAllowed(local5, type) || Object.keys(inv.itemsById).length >= (local5.d8 ? inventoryIntakeCapacity(local5.d8) : 64));
-          b.prepend(icon(d2.definitionId));
-          provisions.append(b);
-        }
-        provisions.append(element("small", progressionBigInt(local5.progression.level) < 2n ? "Unlocks at Level 2." : "Claim each base subweapon once.", "tt-muted"));
-        list.append(provisions);
-      }
       if (!list.childElementCount) list.append(element("p", "Your gear is equipped. New finds will appear here.", "bag-empty"));
       document.getElementById("world-bag-tab").textContent = "BAG";
       document.getElementById("world-carried-count").textContent = `${Object.keys(inv.itemsById).length - [...equippedIds].filter(Boolean).length} items`;
@@ -29611,10 +29859,19 @@ function createVitalsHudV4(doc) {
       lastXp = r;
     }
   }
-  return Object.freeze({ update, destroy() {
+  const barrierBar = hpTrack ? bar("vbar-barrier", [part("vbar-fill")]) : null;
+  if (barrierBar) hpTrack.append(barrierBar);
+  function barrier(sub) {
+    if (!barrierBar) return;
+    const show = Boolean(sub && sub.maxBarrier && sub.maxBarrier !== "0");
+    barrierBar.hidden = !show;
+    if (show) scale(barrierBar.firstChild, Number(sub.barrierRatio) || 0);
+  }
+  return Object.freeze({ update, barrier, destroy() {
     view.clearTimeout(wrapTimer);
     hp?.remove();
     xp?.remove();
+    barrierBar?.remove();
   } });
 }
 
@@ -31406,7 +31663,7 @@ function createSubweaponHud({ document, environment, readModel, adapter, isBlock
   function refresh(m) {
     guard.refresh(m);
     const local5 = m.playersById[m.localPlayerId], c = m.subweapon, type = local5.stats.subType;
-    panel.hidden = !["shield", "tome"].includes(type) || type === "shield" && local5.d8?.heroClass === "knight" || isBlocked() || c?.suppressed;
+    panel.hidden = !["shield", "tome"].includes(type) || type === "shield" && local5.d8?.heroClass === "knight" || type === "tome" && local5.d8?.heroClass === "mage" || isBlocked() || c?.suppressed;
     dash.hidden = !CLASS_MOVES[type] || isBlocked() || c?.suppressed;
     if (!c) return;
     panel.dataset.ready = String(type === "shield" && c.pressure === 3);
@@ -31451,12 +31708,18 @@ ${(c.dash.cooldown / 60).toFixed(1)}s`;
     if (dash.dataset.label !== value2) {
       const label3 = document.createElement("span");
       label3.textContent = value2;
-      dash.innerHTML = blink ? '<svg aria-hidden="true" viewBox="-12 -12 24 24" width="26" height="26"><circle r="7" fill="none" stroke="#9fd0ff" stroke-width="2.4" stroke-dasharray="4 3"/><path d="M0-11v5M0 6v5M-11 0h5M6 0h5" stroke="#e3f2ff" stroke-width="2.2" stroke-linecap="round"/></svg>' : '<svg aria-hidden="true" viewBox="-25 -11 34 22" width="30" height="20"><path d="M-22 -7L5 0L-22 7" fill="none" stroke="#c9afff" stroke-width="3"/></svg>';
-      dash.append(label3);
+      label3.className = "move-label";
+      const time = document.createElement("b");
+      time.className = "move-time";
+      time.textContent = ready ? "" : (c.dash.cooldown / 60).toFixed(1);
+      dash.innerHTML = SKILL_ICONS_V1[blink ? "blink" : "dash"];
+      dash.append(time, label3);
       dash.dataset.label = value2;
       dash.dataset.move = blink ? "blink" : "dash";
       dash.setAttribute("aria-label", `${blink ? "Blink" : "Shadow Dash"} \u2014 Shift`);
     }
+    dash.style.setProperty("--cool", CLASS_MOVES[type] ? (c.dash.cooldown / CLASS_MOVES[type].cooldown).toFixed(3) : "0");
+    dash.dataset.cooling = String(!ready);
     dash.disabled = !ready || !m.entitiesById[local5.entityId].alive;
   }
   return { refresh, clear: guard.clear, destroy() {
@@ -32841,11 +33104,11 @@ function path2(c, points2) {
   for (const p of points2.slice(1)) c.lineTo(p.x, p.y);
   c.closePath();
 }
-function polygon15(c, points2, fill4, outline2 = true) {
+function polygon15(c, points2, fill4, outline3 = true) {
   path2(c, points2);
   c.fillStyle = fill4;
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK27;
     c.lineWidth = LINE25;
     c.stroke();
@@ -34233,7 +34496,7 @@ function corrosivePseudopodGeometryV7(side, pose, tick) {
     side
   };
 }
-function outline(c, g, close) {
+function outline2(c, g, close) {
   const { root, c1, c2, tip, rootNormal: n, tipNormal: e, capCenter, rootHalfWidth: w, tipRadius: r } = g;
   const a = shifted(root, n, w), b = shifted(capCenter, e, r), d = shifted(capCenter, e, -r), z = shifted(root, n, -w);
   c.beginPath();
@@ -34250,12 +34513,12 @@ function drawCorrosivePseudopodV7(c, side, pose, tick, flash = false) {
   c.save();
   c.lineCap = "round";
   c.lineJoin = "round";
-  outline(c, g, true);
+  outline2(c, g, true);
   c.fillStyle = flash ? "#fff" : GEL;
   c.fill();
   if (!flash) {
     c.save();
-    outline(c, g, true);
+    outline2(c, g, true);
     c.clip();
     const a = shifted(root, n, w * 0.47), b = shifted(capCenter, e, r * 0.45);
     c.beginPath();
@@ -34268,7 +34531,7 @@ function drawCorrosivePseudopodV7(c, side, pose, tick, flash = false) {
     c.fill();
     c.restore();
   }
-  outline(c, g, false);
+  outline2(c, g, false);
   c.strokeStyle = INK30;
   c.lineWidth = 1.45;
   c.stroke();
@@ -34303,31 +34566,31 @@ var hash10 = (s) => {
   for (const ch of String(s)) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
   return h >>> 0;
 };
-function ellipse3(c, x, y, rx, ry, color28, outline2 = false) {
+function ellipse3(c, x, y, rx, ry, color28, outline3 = false) {
   c.beginPath();
   c.ellipse(x, y, Math.max(0.01, rx), Math.max(0.01, ry), 0, 0, TAU38);
   c.fillStyle = color28;
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK31;
     c.lineWidth = 1.26;
     c.stroke();
   }
 }
-function fill2(c, color28, outline2 = false) {
+function fill2(c, color28, outline3 = false) {
   c.fillStyle = color28;
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK31;
     c.lineWidth = 1.26;
     c.lineJoin = "round";
     c.stroke();
   }
 }
-function fillSludge(c, color28, outline2 = false) {
+function fillSludge(c, color28, outline3 = false) {
   c.fillStyle = color28;
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = CORROSIVE_SLUDGE_PALETTE_V7.ink;
     c.lineWidth = 1.26;
     c.lineJoin = "round";
@@ -34713,21 +34976,21 @@ function unit6(x, y) {
   const d = Math.hypot(x, y) || 1;
   return point8(x / d, y / d);
 }
-function ellipse4(c, x, y, rx, ry, fill4, outline2 = true, line11 = 1.26) {
+function ellipse4(c, x, y, rx, ry, fill4, outline3 = true, line11 = 1.26) {
   c.beginPath();
   c.ellipse(x, y, Math.max(0.01, rx), Math.max(0.01, ry), 0, 0, TAU39);
   c.fillStyle = fill4;
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK32;
     c.lineWidth = line11;
     c.stroke();
   }
 }
-function fill3(c, color28, outline2 = true, line11 = 1.26) {
+function fill3(c, color28, outline3 = true, line11 = 1.26) {
   c.fillStyle = color28;
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK32;
     c.lineWidth = line11;
     c.lineJoin = "round";
@@ -35132,24 +35395,24 @@ function hash12(value2) {
   for (const ch of String(value2)) n = Math.imul(n ^ ch.charCodeAt(0), 16777619);
   return n >>> 0;
 }
-function ellipse5(c, x, y, rx, ry, color28, outline2 = false, width = 1.26) {
+function ellipse5(c, x, y, rx, ry, color28, outline3 = false, width = 1.26) {
   c.beginPath();
   c.ellipse(x, y, Math.max(1e-3, rx), Math.max(1e-3, ry), 0, 0, TAU40);
   c.fillStyle = color28;
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK33;
     c.lineWidth = width;
     c.stroke();
   }
 }
-function polygon16(c, points2, color28, outline2 = true, width = 1.26) {
+function polygon16(c, points2, color28, outline3 = true, width = 1.26) {
   c.beginPath();
   for (const [i, p] of points2.entries()) i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]);
   c.closePath();
   c.fillStyle = color28;
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK33;
     c.lineWidth = width;
     c.stroke();
@@ -36102,12 +36365,12 @@ function fraction2(value2, max) {
   const power = exponent(a.n) + exponent(b.d) - exponent(a.d) - exponent(b.n);
   return clamp34(head32(a.n) * head32(b.d) / (head32(a.d) * head32(b.n)) * 10 ** Math.max(-330, Math.min(330, power)));
 }
-function ellipse6(c, x, y, rx, ry, fill4, outline2 = false, width = 1.26) {
+function ellipse6(c, x, y, rx, ry, fill4, outline3 = false, width = 1.26) {
   c.beginPath();
   c.ellipse(x, y, Math.max(1e-3, rx), Math.max(1e-3, ry), 0, 0, TAU43);
   c.fillStyle = fill4;
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK35;
     c.lineWidth = width;
     c.stroke();
@@ -36120,13 +36383,13 @@ function circle3(c, x, y, r, color82, width = 1) {
   c.lineWidth = width;
   c.stroke();
 }
-function polygon18(c, points2, fill4, outline2 = true, width = 1.26) {
+function polygon18(c, points2, fill4, outline3 = true, width = 1.26) {
   c.beginPath();
   for (const [i, [x, y]] of points2.entries()) i ? c.lineTo(x, y) : c.moveTo(x, y);
   c.closePath();
   c.fillStyle = fill4;
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK35;
     c.lineWidth = width;
     c.stroke();
@@ -36496,12 +36759,12 @@ function fraction3(value2, max) {
   const power = exponent(a.n) + exponent(b.d) - exponent(a.d) - exponent(b.n);
   return clamp35(head32(a.n) * head32(b.d) / (head32(a.d) * head32(b.n)) * 10 ** Math.max(-330, Math.min(330, power)));
 }
-function ellipse7(c, x, y, rx, ry, fill4, outline2 = false, width = 1.26) {
+function ellipse7(c, x, y, rx, ry, fill4, outline3 = false, width = 1.26) {
   c.beginPath();
   c.ellipse(x, y, Math.max(1e-3, rx), Math.max(1e-3, ry), 0, 0, TAU44);
   c.fillStyle = fill4;
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK36;
     c.lineWidth = width;
     c.stroke();
@@ -36519,11 +36782,11 @@ function path3(c, points2, close = false) {
   for (const [i, p] of points2.entries()) i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]);
   if (close) c.closePath();
 }
-function polygon19(c, points2, fill4, outline2 = true, width = 1.26) {
+function polygon19(c, points2, fill4, outline3 = true, width = 1.26) {
   path3(c, points2, true);
   c.fillStyle = fill4;
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK36;
     c.lineWidth = width;
     c.stroke();
@@ -37088,11 +37351,11 @@ function path4(c, points2, closed = false) {
   for (const [i, p] of points2.entries()) i ? c.lineTo(...p) : c.moveTo(...p);
   if (closed) c.closePath();
 }
-function polygon20(c, p, fill4, outline2 = true, width = 1.3) {
+function polygon20(c, p, fill4, outline3 = true, width = 1.3) {
   path4(c, p, true);
   c.fillStyle = fill4;
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK37;
     c.lineWidth = width;
     c.stroke();
@@ -37104,12 +37367,12 @@ function line4(c, p, color82, width = 1) {
   c.lineWidth = width;
   c.stroke();
 }
-function ellipse8(c, x, y, rx, ry, fill4, outline2 = false, width = 1.3) {
+function ellipse8(c, x, y, rx, ry, fill4, outline3 = false, width = 1.3) {
   c.beginPath();
   c.ellipse(x, y, Math.max(0.01, rx), Math.max(0.01, ry), 0, 0, TAU45);
   c.fillStyle = fill4;
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK37;
     c.lineWidth = width;
     c.stroke();
@@ -38913,11 +39176,11 @@ function path6(c, points2, close = false) {
   for (const [i, p] of points2.entries()) i ? c.lineTo(...p) : c.moveTo(...p);
   if (close) c.closePath();
 }
-function polygon22(c, points2, fill4, outline2 = true, width = 1.26) {
+function polygon22(c, points2, fill4, outline3 = true, width = 1.26) {
   path6(c, points2, true);
   c.fillStyle = fill4;
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK40;
     c.lineWidth = width;
     c.stroke();
@@ -38929,12 +39192,12 @@ function line6(c, points2, stroke3, width = 1) {
   c.lineWidth = width;
   c.stroke();
 }
-function ellipse11(c, x, y, rx, ry, fill4, outline2 = false, width = 1.26) {
+function ellipse11(c, x, y, rx, ry, fill4, outline3 = false, width = 1.26) {
   c.beginPath();
   c.ellipse(x, y, Math.max(1e-3, rx), Math.max(1e-3, ry), 0, 0, TAU49);
   c.fillStyle = fill4;
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK40;
     c.lineWidth = width;
     c.stroke();
@@ -39709,12 +39972,12 @@ function boundedAmount(value2, limit) {
   const a = asCombatAmount(value2 ?? 0), n = BigInt(a.n) / BigInt(a.d);
   return Number(n > BigInt(limit) ? BigInt(limit) : n);
 }
-function ellipse12(c, x, y, rx, ry, fill4, outline2 = false, width = 1.26) {
+function ellipse12(c, x, y, rx, ry, fill4, outline3 = false, width = 1.26) {
   c.beginPath();
   c.ellipse(x, y, Math.max(1e-3, rx), Math.max(1e-3, ry), 0, 0, TAU50);
   c.fillStyle = fill4;
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK41;
     c.lineWidth = width;
     c.stroke();
@@ -39725,11 +39988,11 @@ function path7(c, points2, close = false) {
   for (const [i, [x, y]] of points2.entries()) i ? c.lineTo(x, y) : c.moveTo(x, y);
   if (close) c.closePath();
 }
-function polygon23(c, points2, fill4, outline2 = true, width = 1.26) {
+function polygon23(c, points2, fill4, outline3 = true, width = 1.26) {
   path7(c, points2, true);
   c.fillStyle = fill4;
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK41;
     c.lineWidth = width;
     c.stroke();
@@ -51120,14 +51383,14 @@ var BLUE3 = "#298eaa";
 var STONE6 = "#405469";
 var DARK7 = "#233346";
 var clamp45 = (v) => Math.max(0, Math.min(1, v));
-function plate3(c, points2, color28, outline2 = true) {
+function plate3(c, points2, color28, outline3 = true) {
   c.beginPath();
   c.moveTo(...points2[0]);
   for (const p of points2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.fillStyle = color28;
   c.fill();
-  if (outline2) {
+  if (outline3) {
     c.strokeStyle = INK46;
     c.lineWidth = 1.26;
     c.lineJoin = "round";
@@ -51678,7 +51941,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
           drawWebbedRearD12_4J(ctx2, drawn, model.tick);
           const leveling = id === model.playersById[model.localPlayerId].entityId && !canvas.ownerDocument.hidden && !model.siteActivationPending && !castingShadows;
           if (leveling) heroLevelUp.drawBack(ctx2, { ...drawn, entityId: id }, time);
-          drawWorldHero(ctx2, drawn, pose.facing, time, pose.primary, model.tick, Boolean(reaction?.flash), equipmentArt);
+          if (!(model.combatPresentation?.families?.[id]?.blink && model.combatPresentation.families[id].dash.frames > 0)) drawWorldHero(ctx2, drawn, pose.facing, time, pose.primary, model.tick, Boolean(reaction?.flash), equipmentArt);
           if (leveling) heroLevelUp.drawFront(ctx2, { ...drawn, entityId: id }, time);
           drawGlacialSnareFrontD12_4E(ctx2, drawn, model.tick);
           drawToxicPoisonFrontD12_4F(ctx2, drawn, model.tick);
@@ -52591,7 +52854,7 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
   classPicker = createClassPickerV1({ document: doc, environment, readModel, adapter, reportError: (text2) => {
     message = text2;
   }, onClose: restoreGameplayFocus });
-  skillBar = createSkillBarV1({ document: doc, environment, readModel, adapter, isBlocked: gameplayInputBlocked, openClassPicker: () => {
+  skillBar = createSkillWheelV1({ document: doc, environment, readModel, adapter, isBlocked: gameplayInputBlocked, openClassPicker: () => {
     subweaponHud?.clear();
     input.clear();
     primary?.clear();
@@ -52784,6 +53047,7 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
       const hpBar = doc.getElementById("world-hp-bar"), hpRatio = integerRatio(hero.hpExact ?? "0", hero.maxHpExact ?? "1"), hpData = playerHealthHudV3.update(hpRatio, time);
       if (hpBar) hpBar.value = 100 * hpRatio;
       vitalsHud.update(hpData);
+      vitalsHud.barrier(model.subweapon);
       setText(doc.getElementById("world-gold"), formatAmount(painted.walletDisplay ?? model.inventory?.gold ?? "0"));
       const health = doc.getElementById("world-health");
       if (health) setText(health, `HP ${formatLarge(hero.hpExact ?? String(Math.round(hero.hp.m * 10 ** hero.hp.e)))} / ${formatLarge(hero.maxHpExact ?? String(Math.round(hero.maxHp.m * 10 ** hero.maxHp.e)))}`);
