@@ -28629,6 +28629,84 @@ function createFerryMenu({ document: doc, adapter, clearInput, restoreFocus, rep
   } });
 }
 
+// src/client/health_bar_v4.js
+var ENEMY_HEALTH_FILL_V4 = Object.freeze(["#ff9a8f", "#f03b52", "#9c1530"]);
+var SHIELD_HEALTH_FILL_V4 = Object.freeze(["#d7efff", "#5ea8f0", "#2b5a9c"]);
+function capsule(c, x, y, w, h) {
+  const r = Math.min(h / 2, w / 2);
+  c.beginPath();
+  c.moveTo(x + r, y);
+  c.lineTo(x + w - r, y);
+  c.arc(x + w - r, y + r, r, -Math.PI / 2, Math.PI / 2);
+  c.lineTo(x + r, y + h);
+  c.arc(x + r, y + r, r, Math.PI / 2, Math.PI * 1.5);
+  c.closePath();
+}
+function accentFillV4(hex2) {
+  const n = parseInt(String(hex2).slice(1, 7), 16);
+  if (!Number.isFinite(n)) return ENEMY_HEALTH_FILL_V4;
+  const r = n >> 16 & 255, g = n >> 8 & 255, b = n & 255, mix24 = (t, k) => "#" + [r, g, b].map((v) => Math.round(t > 0 ? v + (255 - v) * t : v * (1 + t)).toString(16).padStart(2, "0")).join("");
+  return [mix24(0.45), hex2, mix24(-0.45)];
+}
+function drawHealthBarV4(c, { x, y, w, h, ratio, trail: trail2 = ratio, impact = 0, flash = false, fill: fill4 = ENEMY_HEALTH_FILL_V4, frame = "#0a0d12", edge = "#ffffff38", ticks = 0, marker = null, pad: padding = null }) {
+  const a = Math.max(0, Math.min(1, ratio)), t = Math.max(a, Math.min(1, trail2)), jolt = impact > 0 ? Math.sin(impact * 31) * impact * Math.min(2.4, 1 + h * 0.18) : 0, pad = padding ?? Math.max(1.5, h * 0.22);
+  c.save();
+  c.translate(jolt, 0);
+  capsule(c, x - pad, y - pad, w + pad * 2, h + pad * 2);
+  c.fillStyle = frame;
+  c.fill();
+  c.lineWidth = 1;
+  c.strokeStyle = edge;
+  c.stroke();
+  capsule(c, x, y, w, h);
+  c.fillStyle = "#2a1016";
+  c.fill();
+  c.save();
+  c.clip();
+  if (t > a + 5e-4) {
+    c.fillStyle = flash ? "#ffffff" : (() => {
+      const g = c.createLinearGradient(0, y, 0, y + h);
+      g.addColorStop(0, "#fff0b8");
+      g.addColorStop(1, "#ff9a3a");
+      return g;
+    })();
+    c.fillRect(x + w * a, y, w * (t - a) + 0.5, h);
+  }
+  if (a > 0) {
+    const g = c.createLinearGradient(0, y, 0, y + h);
+    g.addColorStop(0, fill4[0]);
+    g.addColorStop(0.45, fill4[1]);
+    g.addColorStop(1, fill4[2]);
+    c.fillStyle = g;
+    c.fillRect(x, y, w * a, h);
+  }
+  if (ticks > 1) {
+    c.fillStyle = "#14060a73";
+    for (let i = 1; i < ticks; i++) c.fillRect(x + w * i / ticks - 0.5, y, 1, h);
+  }
+  if (marker !== null) {
+    c.fillStyle = "#ffe9b0a8";
+    c.fillRect(x + w * marker - 0.5, y, 1, h);
+  }
+  c.fillStyle = "#ffffff3d";
+  c.fillRect(x, y, w, h * 0.42);
+  if (impact > 0 && a > 0) {
+    c.fillStyle = `rgba(255,255,255,${Math.min(1, impact * 1.1)})`;
+    c.fillRect(x + w * a - 1, y, 2, h);
+  }
+  c.restore();
+  c.restore();
+}
+var bossSlot = null;
+function setBossBarSlotV4(slot) {
+  bossSlot = slot;
+}
+function takeBossBarSlotV4() {
+  const slot = bossSlot;
+  bossSlot = null;
+  return slot;
+}
+
 // src/client/health_feedback_v3.js
 var clampHealthRatio = (value2) => Number.isFinite(value2) ? Math.min(1, Math.max(0, value2)) : 0;
 function actorHealthRatio(actor) {
@@ -28639,6 +28717,7 @@ function actorHealthRatio(actor) {
   }
   return clampHealthRatio(Number(hp) / Number(max));
 }
+var HIT_HOLD_MS = 380;
 function createHealthTrailsV3() {
   const entries = /* @__PURE__ */ new Map();
   function sample(id, ratio, time) {
@@ -28663,9 +28742,9 @@ function createHealthTrailsV3() {
     }
     item.actual = actual;
     item.at = now2;
-    if (now2 - item.hitAt > 100) item.trail = Math.max(actual, item.trail - dt * 9e-4);
+    if (now2 - item.hitAt > HIT_HOLD_MS) item.trail = Math.max(actual, item.trail - (item.trail - actual) * (1 - Math.exp(-dt / 150)) - dt * 12e-5);
     item.trail = Math.max(item.trail, actual);
-    return { actual, trail: item.trail, impact: Math.max(0, 1 - (now2 - item.hitAt) / 260) };
+    return { actual, trail: item.trail, impact: Math.max(0, 1 - (now2 - item.hitAt) / 300), flash: now2 - item.hitAt < 110 };
   }
   return Object.freeze({ sample, clear: () => entries.clear(), count: () => entries.size });
 }
@@ -28699,54 +28778,21 @@ function enemyHealthBarRectV3(actor, tick = 0) {
   const w = Math.max(18, Math.min(34, bodyWidth * 0.68));
   return { x: -w / 2, y: profile.labels.healthBarY, w, h: profile.visualScale < 0.72 ? 3 : 4 };
 }
+var ELITE_ACCENTS_V4 = Object.freeze({ vitality_weaver: "#63dc87", swift_commander: "#22c8f0", glacial_warden: "#8fdcff", toxic_decay: "#9be35a", iron_citadel: "#b9c3cd", blood_berserker: "#ff4a4a", nullifier: "#c084fc", web_weaver: "#e8e4d8", slag_shaper: "#f97316" });
 function drawEnemyHealthEchoV3(c, actor, reading, tick) {
-  if (!actor?.alive || reading.trail - reading.actual <= 1e-3 && reading.impact <= 0) return;
+  if (!actor?.alive) return;
   const bar = enemyHealthBarRectV3(actor, tick);
   if (!bar) return;
-  const { x, y, w, h } = bar, gap = Math.max(0, reading.trail - reading.actual);
+  const accent = ELITE_ACCENTS_V4[actor.elite?.affixId];
   c.save();
   c.translate(actor.position.x, actor.position.y);
-  if (gap > 1e-3) {
-    c.fillStyle = `rgba(251,248,235,${Math.min(1, 0.78 + reading.impact * 0.2)})`;
-    c.fillRect(x + w * reading.actual, y, w * gap, h);
-  }
-  if (reading.impact > 0) {
-    c.strokeStyle = `rgba(255,244,201,${reading.impact * 0.8})`;
-    c.lineWidth = 0.9;
-    c.strokeRect(x - 0.7, y - 0.7, w + 1.4, h + 1.4);
-  }
+  drawHealthBarV4(c, { ...bar, ratio: reading.actual, trail: reading.trail, impact: reading.impact, flash: reading.flash, fill: accent ? accentFillV4(accent) : ENEMY_HEALTH_FILL_V4, edge: accent ? "#e9c766" : "#ffffff38", ticks: accent ? 4 : 0, pad: accent ? 2.5 : 1.5 });
   c.restore();
 }
 function drawBossHealthEchoV3(c, canvas, actor, reading, time) {
-  if (!actor?.alive) return;
-  const id = actor.boss?.bossDefinitionId;
-  let bar;
-  if (id === "brimstone_colossus") {
-    const width = Math.min(480, canvas.width - 24);
-    bar = { x: (canvas.width - width) / 2 + 12, y: 34, w: width - 24, h: 8 };
-  } else if (id === "aegis_goliath") {
-    const width = Math.min(340, canvas.width - 32);
-    bar = { x: (canvas.width - width) / 2 + 10, y: 31, w: width - 20, h: 8 };
-  } else if (id === "arachnid_treant") {
-    const width = Math.min(430, canvas.width - 28);
-    bar = { x: (canvas.width - width) / 2 + 9, y: 33, w: width - 18, h: 8 };
-  } else return;
-  c.save();
-  const gap = Math.max(0, reading.trail - reading.actual);
-  if (gap > 1e-3) {
-    c.fillStyle = `rgba(251,248,235,${0.8 + reading.impact * 0.18})`;
-    c.fillRect(bar.x + bar.w * reading.actual, bar.y, bar.w * gap, bar.h);
-  }
-  if (reading.impact > 0) {
-    c.strokeStyle = `rgba(255,228,168,${reading.impact * 0.9})`;
-    c.lineWidth = 1.7;
-    c.strokeRect(bar.x - 1, bar.y - 1, bar.w + 2, bar.h + 2);
-    c.fillStyle = `rgba(255,252,222,${reading.impact * 0.8})`;
-    c.fillRect(bar.x + bar.w * reading.actual - 1, bar.y, 2, bar.h);
-  }
-  c.fillStyle = "#f6daac9b";
-  c.fillRect(bar.x + bar.w * 0.5 - 0.5, bar.y, 1, bar.h);
-  c.restore();
+  const slot = takeBossBarSlotV4();
+  if (!actor?.alive || !slot) return;
+  drawHealthBarV4(c, { x: slot.x, y: slot.y, w: slot.w, h: slot.h, ratio: reading.actual, trail: reading.trail, impact: reading.impact, flash: reading.flash, fill: actor.boss?.shieldActive ? SHIELD_HEALTH_FILL_V4 : ENEMY_HEALTH_FILL_V4, edge: slot.accent ?? "#e9d7a8", ticks: 10, marker: 0.5, pad: 2 });
 }
 function createPlayerHealthHudV3(doc) {
   const track = doc.querySelector(".hp-track"), root = doc.getElementById("world-app"), vitals = doc.getElementById("world-hud-vitals");
@@ -28789,6 +28835,107 @@ function createPlayerHealthHudV3(doc) {
       vitals?.classList.remove("saq-critical-health-v3");
     }
   });
+}
+
+// src/client/vitals_hud_v4.js
+function createVitalsHudV4(doc) {
+  const view = doc.defaultView ?? globalThis, part = (cls) => {
+    const i = doc.createElement("i");
+    i.className = cls;
+    return i;
+  };
+  const bar = (cls, children) => {
+    const e = doc.createElement("div");
+    e.className = "vbar " + cls;
+    e.setAttribute("aria-hidden", "true");
+    e.append(...children);
+    return e;
+  };
+  const hpTrack = doc.querySelector(".hp-track"), progression = doc.getElementById("world-progression"), xpBar = doc.getElementById("world-xp-bar");
+  const hpFill = part("vbar-fill"), hpTrail = part("vbar-trail"), hp = hpTrack ? bar("vbar-hp", [hpTrail, hpFill, part("vbar-ticks"), part("vbar-gloss")]) : null;
+  const xpFill = part("vbar-fill");
+  xpFill.append(part("vbar-shine"));
+  const xp = progression ? bar("vbar-xp", [xpFill, part("vbar-gloss")]) : null;
+  hpTrack?.prepend(hp);
+  progression?.prepend(xp);
+  let lastHp = null, lastXp = null, wrapTimer = null, shards = 0;
+  const painted = /* @__PURE__ */ new WeakMap();
+  function breakOff(at3, damage) {
+    if (!hpTrack) return;
+    const count = Math.min(6, 2 + Math.round(damage * 30));
+    for (let i = 0; i < count && shards < 14; i++) {
+      const s = doc.createElement("i");
+      s.className = "vbar-shard";
+      s.setAttribute("aria-hidden", "true");
+      s.style.left = (at3 * 100).toFixed(2) + "%";
+      s.style.setProperty("--dx", (6 + Math.random() * 18).toFixed(1) + "px");
+      s.style.setProperty("--dy", (-4 - Math.random() * 12).toFixed(1) + "px");
+      s.style.setProperty("--r", Math.round(Math.random() * 240 - 120) + "deg");
+      shards++;
+      s.addEventListener("animationend", () => {
+        s.remove();
+        shards--;
+      }, { once: true });
+      hpTrack.append(s);
+    }
+  }
+  const scale = (el, value2) => {
+    const text2 = `scaleX(${Math.max(0, Math.min(1, value2)).toFixed(4)})`;
+    if (painted.get(el) !== text2) {
+      painted.set(el, text2);
+      el.style.transform = text2;
+    }
+  };
+  const retrigger = (el, cls) => {
+    el.classList.remove(cls);
+    void el.offsetWidth;
+    el.classList.add(cls);
+  };
+  function update(hpData) {
+    if (hp && hpData) {
+      const a = hpData.actual;
+      scale(hpFill, a);
+      scale(hpTrail, Math.max(a, hpData.trail));
+      if (lastHp !== null) {
+        if (a > lastHp + 2e-3) retrigger(hp, "heal");
+        else if (a < lastHp - 2e-3) {
+          const damage = lastHp - a;
+          hp.style.setProperty("--jolt", Math.min(7, 2 + damage * 60).toFixed(1) + "px");
+          retrigger(hp, "hit");
+          breakOff(a, damage);
+        }
+      }
+      lastHp = a;
+      hp.classList.toggle("flash", Boolean(hpData.flash));
+      hp.classList.toggle("low", a > 0 && a <= 0.35);
+      hp.classList.toggle("critical", a > 0 && a <= 0.2);
+    }
+    if (xp && xpBar && !progression.hidden) {
+      const r = Math.max(0, Math.min(1, Number(xpBar.value) / Number(xpBar.max || 100)));
+      if (lastXp === null) scale(xpFill, r);
+      else if (r < lastXp - 0.02) {
+        view.clearTimeout(wrapTimer);
+        scale(xpFill, 1);
+        retrigger(xp, "gain");
+        wrapTimer = view.setTimeout(() => {
+          xpFill.classList.add("instant");
+          scale(xpFill, 0);
+          void xpFill.offsetWidth;
+          xpFill.classList.remove("instant");
+          scale(xpFill, lastXp);
+        }, 560);
+      } else if (r > lastXp + 5e-4) {
+        scale(xpFill, r);
+        retrigger(xp, "gain");
+      }
+      lastXp = r;
+    }
+  }
+  return Object.freeze({ update, destroy() {
+    view.clearTimeout(wrapTimer);
+    hp?.remove();
+    xp?.remove();
+  } });
 }
 
 // src/client/wilderness_event_clue_hud_v3_8.js
@@ -32633,6 +32780,7 @@ function drawArachnidTreantBossHudD12_5A(c, canvas, model) {
   c.strokeRect(x + 0.5, y + 0.5, width - 1, 33);
   c.fillStyle = "#2a1713";
   c.fillRect(x + 9, y + 19, width - 18, 8);
+  setBossBarSlotV4({ x: x + 9, y: y + 19, w: width - 18, h: 8, accent: "#8db46a" });
   c.fillStyle = boss.boss.shieldActive ? "#79b85c" : "#b64932";
   c.fillRect(x + 9, y + 19, (width - 18) * ratio, 8);
   c.strokeStyle = "#ead7a3";
@@ -33503,7 +33651,7 @@ function fillSludge(c, color28, outline2 = false) {
     c.stroke();
   }
 }
-function capsule(c, a, b, r) {
+function capsule2(c, a, b, r) {
   const angle3 = Math.atan2(b.y - a.y, b.x - a.x), nx = -Math.sin(angle3) * r, ny = Math.cos(angle3) * r;
   c.moveTo(a.x + nx, a.y + ny);
   c.lineTo(b.x + nx, b.y + ny);
@@ -33514,7 +33662,7 @@ function capsule(c, a, b, r) {
 }
 function footprint(c, rows) {
   c.beginPath();
-  for (const r of rows) capsule(c, r.from, r.to, r.radius);
+  for (const r of rows) capsule2(c, r.from, r.to, r.radius);
 }
 function sampleChain(rows) {
   const points2 = [];
@@ -34264,6 +34412,7 @@ function drawCorrosiveBossHud(c, canvas, model) {
   c.fillText("CORROSIVE ABOMINATION", canvas.width / 2, y + 17);
   c.fillStyle = "#263a29";
   c.fillRect(x + 12, y + 24, w - 24, 8);
+  setBossBarSlotV4({ x: x + 12, y: y + 24, w: w - 24, h: 8 });
   c.fillStyle = BASE;
   c.fillRect(x + 12, y + 24, (w - 24) * ratio, 8);
   c.fillStyle = MINT;
@@ -34784,6 +34933,7 @@ function drawVoidBossHud(c, canvas, model) {
   c.fillText("VOID OVERSEER", canvas.width / 2, y + 17);
   c.fillStyle = "#30203e";
   c.fillRect(x + 12, y + 24, w - 24, 8);
+  setBossBarSlotV4({ x: x + 12, y: y + 24, w: w - 24, h: 8 });
   c.fillStyle = PINK;
   c.fillRect(x + 12, y + 24, (w - 24) * ratio, 8);
   c.fillStyle = PALE3;
@@ -40213,6 +40363,7 @@ function drawRecoveredBossHudV1(c, canvas, model) {
   c.strokeRect(x + 0.5, y + 0.5, width - 1, 36);
   c.fillStyle = "#311e26";
   c.fillRect(x + 10, y + 20, width - 20, 8);
+  setBossBarSlotV4({ x: x + 10, y: y + 20, w: width - 20, h: 8, accent: spec.color });
   c.fillStyle = spec.color;
   c.fillRect(x + 10, y + 20, (width - 20) * ratio, 8);
   c.strokeStyle = "#eee0bb";
@@ -41046,6 +41197,7 @@ function drawBrimstoneBossHud(c, canvas, model) {
   c.fillText(BRIMSTONE.label, canvas.width / 2, y + 17);
   c.fillStyle = "#352d36";
   c.fillRect(x + 12, y + 24, w - 24, 8);
+  setBossBarSlotV4({ x: x + 12, y: y + 24, w: w - 24, h: 8 });
   c.fillStyle = "#e46e39";
   c.fillRect(x + 12, y + 24, (w - 24) * ratio, 8);
   c.font = "11px sans-serif";
@@ -45130,96 +45282,108 @@ function createLighting(canvas, { presentation = null } = {}) {
   }, draw, fixtures, emissive, ground, clear: clear2, resources: () => ({ lightingProfile: profile, lightFeatherStamps: torchStamps.size, lightFeatherBytes: torchStamps.size * 256 * 256 * 4, lightFieldBuilds: fieldBuilds, lightFieldStep: 16, lightMaxFieldNodes: maxFieldNodes, lightMaxFieldSamples: maxFieldSamples, lightWorstStaticBuildMs: worstStaticBuildMs, lightWorstPlayerLightMs: worstPlayerLightMs, playerLightsRendered: playerLights, ...clips.resources(), lightDescriptorPages: pages.size, lightDescriptors: [...pages.values()].reduce((n, p) => n + (p[previousLighting() ? "base" : "adapted"]?.length ?? 0), 0), lightDescriptorVariants: [...pages.values()].reduce((n, p) => n + (p.base?.length ?? 0) + (p.adapted?.length ?? 0), 0), lightStampBuilds: builds, lightDescriptorBuilds: descriptorBuilds, lightWorstDescriptorMs: worstDescriptorMs, lightStampBytes: stamps.size * 128 * 128 * 4, staticLightsRendered: statics, dynamicLightsConsidered: considered, dynamicLightsRendered: rendered, lightEmbers: embers, lightFixturesRendered: fixtureCount, lightFixturesAnimated: fixtureAnimations, outdoorLightClipPages: outdoorPages.size, outdoorLightClips: [...outdoorPages.values()].reduce((n, p) => n + p.size, 0), outdoorLightClipBuilds: outdoorBuilds, outdoorLightMaxRays: outdoorMaxRays, outdoorLightMaxBlockers: outdoorMaxBlockers }) });
 }
 
-// src/client/reward_token_art_v3.js
-function rewardTokenArtV3(doc) {
-  const result = {};
-  for (const kind of ["gold", "xp"]) {
-    const tile = doc.createElement("canvas");
-    tile.width = tile.height = 64;
-    const c = tile.getContext("2d");
-    c.scale(4, 4);
-    c.translate(8, 8);
-    c.lineJoin = "round";
-    c.lineCap = "round";
-    if (kind === "gold") {
-      c.fillStyle = "#784716";
-      c.strokeStyle = "#26232b";
-      c.lineWidth = 1;
-      c.beginPath();
-      c.ellipse(0.5, 0.9, 4.9, 5.5, -0.25, 0, Math.PI * 2);
-      c.fill();
-      c.stroke();
-      c.fillStyle = "#df9d31";
-      c.beginPath();
-      c.ellipse(-0.5, -0.2, 4.8, 5.5, -0.25, 0, Math.PI * 2);
-      c.fill();
-      c.stroke();
-      c.fillStyle = "#ffe18c";
-      c.beginPath();
-      c.ellipse(-0.8, -0.8, 3.5, 4.2, -0.25, 0, Math.PI * 2);
-      c.fill();
-      c.strokeStyle = "#9b6421";
-      c.lineWidth = 0.8;
-      c.beginPath();
-      c.moveTo(-0.4, -3);
-      c.lineTo(-1.5, 2.5);
-      c.moveTo(-2.6, -1.4);
-      c.lineTo(1.4, -0.6);
-      c.moveTo(-2.9, 0.5);
-      c.lineTo(1.1, 1.3);
-      c.stroke();
-      c.strokeStyle = "#fff5cd";
-      c.lineWidth = 0.9;
-      c.beginPath();
-      c.moveTo(-3.4, -3.6);
-      c.quadraticCurveTo(-1.7, -5.2, 0.2, -4.6);
-      c.stroke();
-    } else {
-      const glow6 = c.createRadialGradient(0, 0, 1, 0, 0, 7.5);
-      glow6.addColorStop(0, "#a5fff178");
-      glow6.addColorStop(1, "#76e8ed00");
-      c.fillStyle = glow6;
-      c.fillRect(-8, -8, 16, 16);
-      c.fillStyle = "#25454f";
-      c.strokeStyle = "#173039";
-      c.lineWidth = 1;
-      c.beginPath();
-      c.moveTo(0, -5.7);
-      c.lineTo(4.1, -0.6);
-      c.lineTo(2.8, 3.2);
-      c.lineTo(0, 5.5);
-      c.lineTo(-2.8, 3.2);
-      c.lineTo(-4.1, -0.6);
-      c.closePath();
-      c.fill();
-      c.stroke();
-      c.fillStyle = "#60c4cb";
-      c.beginPath();
-      c.moveTo(0, -4.8);
-      c.lineTo(0, 4.4);
-      c.lineTo(-3, -0.6);
-      c.closePath();
-      c.fill();
-      c.fillStyle = "#a9eee0";
-      c.beginPath();
-      c.moveTo(0, -4.8);
-      c.lineTo(3.1, -0.6);
-      c.lineTo(0, 1);
-      c.lineTo(-3, -0.6);
-      c.closePath();
-      c.fill();
-      c.fillStyle = "#eafff5";
-      c.beginPath();
-      c.moveTo(0, -3.6);
-      c.lineTo(1.3, -0.5);
-      c.lineTo(0, 1.4);
-      c.lineTo(-1.3, -0.5);
-      c.closePath();
-      c.fill();
+// src/client/reward_token_art_v4.js
+function rewardTokenArtV4(doc) {
+  const tile = (draw) => {
+    const c = doc.createElement("canvas");
+    c.width = c.height = 64;
+    const g = c.getContext("2d");
+    g.scale(4, 4);
+    g.translate(8, 8);
+    g.lineJoin = "round";
+    g.lineCap = "round";
+    draw(g);
+    return c;
+  };
+  const star = (g, r, inner) => {
+    g.beginPath();
+    for (let i = 0; i < 10; i++) {
+      const a = -Math.PI / 2 + i * Math.PI / 5, d = i % 2 ? inner : r;
+      g.lineTo(Math.cos(a) * d, Math.sin(a) * d);
     }
-    result[kind] = tile;
-  }
-  return result;
+    g.closePath();
+  };
+  const gold = tile((g) => {
+    g.fillStyle = "#5a3208";
+    g.beginPath();
+    g.arc(0, 0.7, 6.9, 0, Math.PI * 2);
+    g.fill();
+    let rim = g.createRadialGradient(-2.4, -2.6, 0.5, 0, 0, 7.2);
+    rim.addColorStop(0, "#fff1a8");
+    rim.addColorStop(0.45, "#f2b83a");
+    rim.addColorStop(1, "#a4600f");
+    g.fillStyle = rim;
+    g.strokeStyle = "#3d2205";
+    g.lineWidth = 0.8;
+    g.beginPath();
+    g.arc(0, 0, 6.6, 0, Math.PI * 2);
+    g.fill();
+    g.stroke();
+    let face3 = g.createRadialGradient(-1.8, -2, 0.3, 0, 0, 5.2);
+    face3.addColorStop(0, "#fff8cf");
+    face3.addColorStop(0.5, "#ffd25a");
+    face3.addColorStop(1, "#d18d1f");
+    g.fillStyle = face3;
+    g.strokeStyle = "#b0701a";
+    g.lineWidth = 0.6;
+    g.beginPath();
+    g.arc(0, 0, 4.8, 0, Math.PI * 2);
+    g.fill();
+    g.stroke();
+    g.fillStyle = "#c27e19";
+    star(g, 3, 1.3);
+    g.fill();
+    g.fillStyle = "#fff0b0";
+    g.save();
+    g.translate(-0.35, -0.4);
+    star(g, 2.5, 1.05);
+    g.fill();
+    g.restore();
+    g.strokeStyle = "#ffffffd0";
+    g.lineWidth = 0.9;
+    g.beginPath();
+    g.arc(0, 0, 5.7, Math.PI * 1.08, Math.PI * 1.42);
+    g.stroke();
+  });
+  const xp = tile((g) => {
+    let core5 = g.createRadialGradient(-1.5, -1.7, 0.2, 0, 0, 5);
+    core5.addColorStop(0, "#ffffff");
+    core5.addColorStop(0.28, "#d9fdff");
+    core5.addColorStop(0.62, "#4fd3f6");
+    core5.addColorStop(1, "#3a5fe0");
+    g.fillStyle = core5;
+    g.strokeStyle = "#183462";
+    g.lineWidth = 0.7;
+    g.beginPath();
+    g.arc(0, 0, 4.7, 0, Math.PI * 2);
+    g.fill();
+    g.stroke();
+    g.strokeStyle = "#ffffffa8";
+    g.lineWidth = 0.7;
+    g.beginPath();
+    g.arc(0.3, 0.4, 2.7, Math.PI * 0.15, Math.PI * 1.05);
+    g.stroke();
+    g.fillStyle = "#ffffff";
+    g.beginPath();
+    g.ellipse(-1.7, -1.9, 1.1, 0.75, -0.6, 0, Math.PI * 2);
+    g.fill();
+  });
+  const xpGlow = tile((g) => {
+    const glow6 = g.createRadialGradient(0, 0, 0.5, 0, 0, 8);
+    glow6.addColorStop(0, "#8ff4ffcc");
+    glow6.addColorStop(0.35, "#58c8ff66");
+    glow6.addColorStop(1, "#6a7cff00");
+    g.fillStyle = glow6;
+    g.fillRect(-8, -8, 16, 16);
+  });
+  const glint = tile((g) => {
+    g.fillStyle = "#ffffff";
+    g.beginPath();
+    for (const [x, y] of [[0, -6], [1, -1], [6, 0], [1, 1], [0, 6], [-1, 1], [-6, 0], [-1, -1]]) g.lineTo(x, y);
+    g.closePath();
+    g.fill();
+  });
+  return { gold, xp, xpGlow, glint };
 }
 
 // src/client/wallet_display.js
@@ -45354,6 +45518,51 @@ function createRewardFeedback(canvas) {
     doc.querySelector?.("#world-wallet > svg")?.animate?.([{ transform: "scale(1)" }, { transform: "scale(1.16)", offset: 0.25 }, { transform: "scale(.98)", offset: 0.7 }, { transform: "scale(1)" }], { duration: 340 });
     doc.getElementById("world-gold")?.animate?.([{ color: "#fff4ac", filter: "brightness(1.35)" }, { color: "#ffd43c", filter: "brightness(1)" }], { duration: 420 });
   }
+  function drawToken(p, pos, age) {
+    const trail2 = p.trail ??= [], alpha = ctx.globalAlpha, seed2 = p.born % 997 / 97;
+    trail2.push(pos.x, pos.y);
+    if (trail2.length > 12) trail2.splice(0, 2);
+    if (p.kind === "xp") {
+      const pulse2 = 1 + 0.12 * Math.sin(age / 70 + seed2);
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      for (let i = 0; i < trail2.length - 2; i += 2) {
+        const k = (i / 2 + 1) / (trail2.length / 2), s2 = 6 + 8 * k;
+        ctx.globalAlpha = alpha * 0.35 * k;
+        ctx.drawImage(stamps.xpGlow, trail2[i] - s2 / 2, trail2[i + 1] - s2 / 2, s2, s2);
+      }
+      const g = 30 * pulse2;
+      ctx.globalAlpha = alpha * 0.9;
+      ctx.drawImage(stamps.xpGlow, pos.x - g / 2, pos.y - g / 2, g, g);
+      ctx.restore();
+      const s = 15 * pulse2;
+      ctx.drawImage(stamps.xp, pos.x - s / 2, pos.y - s / 2, s, s);
+      return;
+    }
+    if (p.screen && trail2.length > 4) {
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      ctx.fillStyle = "#ffd86b";
+      for (let i = 0; i < trail2.length - 2; i += 2) {
+        const k = (i / 2 + 1) / (trail2.length / 2);
+        ctx.globalAlpha = alpha * 0.45 * k;
+        ctx.beginPath();
+        ctx.arc(trail2[i], trail2[i + 1], 1.5 + 2 * k, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+    const spin = Math.cos(age / 95 + seed2 * 6), w = 21 * (0.22 + 0.78 * Math.abs(spin));
+    ctx.drawImage(stamps.gold, pos.x - w / 2, pos.y - 10.5, w, 21);
+    const flash = (age / 380 + seed2) % 1;
+    if (flash < 0.18 && Math.abs(spin) > 0.7) {
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      ctx.globalAlpha = alpha * (1 - flash / 0.18);
+      ctx.drawImage(stamps.glint, pos.x - 9.5, pos.y - 9.5, 9, 9);
+      ctx.restore();
+    }
+  }
   function pushParticle(p) {
     if (particles.length >= REWARD_FEEDBACK.maxParticles) {
       const i = particles.findIndex((v) => v !== goldFlight);
@@ -45361,7 +45570,7 @@ function createRewardFeedback(canvas) {
     }
     particles.push(p);
   }
-  const stamps = ctx ? rewardTokenArtV3(doc) : {}, lastPulse = { gold: -Infinity, xp: -Infinity };
+  const stamps = ctx ? rewardTokenArtV4(doc) : {}, lastPulse = { gold: -Infinity, xp: -Infinity };
   if (ctx) {
     const img = doc.createElement("img");
     img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(MONSTER_SOUL_ART);
@@ -45479,23 +45688,9 @@ function createRewardFeedback(canvas) {
       }
       const pos = p.screen ? p : project2(p);
       ctx.globalAlpha = p.kind === "gold" ? 1 : Math.min(1, (REWARD_FEEDBACK.lifeMs - age) / 150);
-      if (p.kind === "xp") {
-        ctx.fillStyle = "#8de9e52b";
-        ctx.beginPath();
-        ctx.arc(pos.x, pos.y, 10, 0, Math.PI * 2);
-        ctx.fill();
-        if (p.screen) {
-          const dx = geometry.xp.x - p.x, dy = geometry.xp.y - p.y, d = Math.max(1, Math.hypot(dx, dy));
-          ctx.strokeStyle = "#b9fff082";
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.moveTo(pos.x - dx / d * 12, pos.y - dy / d * 12);
-          ctx.lineTo(pos.x, pos.y);
-          ctx.stroke();
-        }
-      }
-      if (!["soul", "heal"].includes(p.kind) || stamps[p.kind].complete && stamps[p.kind].naturalWidth) {
-        const size = p.kind === "soul" ? 21 : p.kind === "heal" ? 16 : p.kind === "gold" ? 21 : 22;
+      if (p.kind === "xp" || p.kind === "gold") drawToken(p, pos, age);
+      else if (stamps[p.kind].complete && stamps[p.kind].naturalWidth) {
+        const size = p.kind === "soul" ? 21 : 16;
         ctx.drawImage(stamps[p.kind], pos.x - size / 2, pos.y - size / 2, size, size);
       }
       return true;
@@ -50354,6 +50549,7 @@ function drawAegisBossHud(c, canvas, model) {
   c.strokeRect(x + 0.5, y + 0.5, width - 1, 41);
   c.fillStyle = "#090f19";
   c.fillRect(x + 10, y + 19, width - 20, 8);
+  setBossBarSlotV4({ x: x + 10, y: y + 19, w: width - 20, h: 8 });
   c.fillStyle = b.actionState === "dazed" ? "#e9cb78" : "#46b8c9";
   c.fillRect(x + 10, y + 19, (width - 20) * ratio, 8);
   c.textAlign = "center";
@@ -51471,7 +51667,7 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
     const m = port.getReadModel();
     renderer?.previewLevelUp?.(m.playersById[m.localPlayerId].entityId);
   }, 4e3);
-  const playerHealthHudV3 = createPlayerHealthHudV3(doc);
+  const playerHealthHudV3 = createPlayerHealthHudV3(doc), vitalsHud = createVitalsHudV4(doc);
   const woodlandClueHud = createWoodlandClueHudV3_8(doc), worldEventHud = createWorldEventHudV3(doc, (groupId) => {
     const exit = readModel().space.exits?.find((e) => e.eventAction?.groupId === groupId);
     if (exit?.available && !gameplayInputBlocked()) {
@@ -51771,9 +51967,9 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
           progressHud.title = `Max HP ${formatLarge(participant.stats.maxHp)} \xB7 Attack ${formatLarge(participant.stats.attack)} \xB7 Defense ${formatLarge(participant.stats.defense)}`;
         }
       }
-      const hpBar = doc.getElementById("world-hp-bar"), hpRatio = integerRatio(hero.hpExact ?? "0", hero.maxHpExact ?? "1");
-      playerHealthHudV3.update(hpRatio, time);
+      const hpBar = doc.getElementById("world-hp-bar"), hpRatio = integerRatio(hero.hpExact ?? "0", hero.maxHpExact ?? "1"), hpData = playerHealthHudV3.update(hpRatio, time);
       if (hpBar) hpBar.value = 100 * hpRatio;
+      vitalsHud.update(hpData);
       setText(doc.getElementById("world-gold"), formatAmount(painted.walletDisplay ?? model.inventory?.gold ?? "0"));
       const health = doc.getElementById("world-health");
       if (health) setText(health, `HP ${formatLarge(hero.hpExact ?? String(Math.round(hero.hp.m * 10 ** hero.hp.e)))} / ${formatLarge(hero.maxHpExact ?? String(Math.round(hero.maxHp.m * 10 ** hero.maxHp.e)))}`);
@@ -51849,6 +52045,7 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
       worldEventHud.destroy();
       woodlandClueHud.destroy();
       playerHealthHudV3.destroy();
+      vitalsHud.destroy();
       serviceMenu?.destroy();
       ferryMenu?.destroy();
       loading.remove();

@@ -933,3 +933,42 @@ body #world-loot-notice,body #world-level-up,body .progression-gain{display:none
    element; scroll lists keep their own pan-y. */
 html,body{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
 input,select,textarea{font-size:max(16px,1em);}
+
+/* Vitals v4: layered HP and XP bars drawn over the native progress bars, which
+   stay transparent in place as the value source and for assistive tech. */
+body #world-hud-vitals #world-hp-bar,body #world-hud-vitals #world-xp-bar{opacity:0;box-shadow:none}
+body .hp-track .saq-hp-echo-v3{display:none}
+body .hp-track{position:relative}
+body #world-progression{grid-template-rows:6px 11px}
+body #world-hud-vitals #world-xp-bar{height:6px}
+.vbar{position:absolute;left:0;right:0;overflow:hidden;pointer-events:none;border-radius:999px;z-index:0}
+.vbar>i,.vbar-fill>i{position:absolute;inset:0;display:block;transform-origin:left center}
+.vbar-hp{top:0;bottom:0;background:linear-gradient(180deg,#14090e,#28121b);box-shadow:inset 0 1px 3px #000d,0 0 0 1px #0b1017,0 0 0 2px #8a5b62}
+.vbar-hp .vbar-trail{background:linear-gradient(180deg,#fff0b8,#ff9a3a)}
+.vbar-hp.flash .vbar-trail{background:#fff}
+.vbar-hp .vbar-fill{border-radius:999px;background:linear-gradient(180deg,#ff9a92 0%,#f44a5c 42%,#c2213f 78%,#8e1530 100%);box-shadow:inset 0 -2px 0 #00000030,0 0 10px #ff4d6a70}
+.vbar-hp .vbar-ticks{background:repeating-linear-gradient(90deg,transparent 0 calc(25% - 1px),#1a0a1066 calc(25% - 1px) 25%)}
+.vbar-hp .vbar-gloss,.vbar-xp .vbar-gloss{background:linear-gradient(180deg,#ffffff4d 0,#ffffff12 45%,#ffffff00 60%)}
+.vbar-hp.hit .vbar-gloss{animation:vbar-hit .18s ease-out}
+.vbar-hp.hit{animation:vbar-jolt .34s cubic-bezier(.3,.8,.3,1)}
+.vbar-shard{position:absolute;top:50%;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:1px;background:linear-gradient(#fff3d6,#ff9a3a);box-shadow:0 0 4px #ffb86a;z-index:3;pointer-events:none;animation:vbar-shard .5s cubic-bezier(.2,.7,.4,1) forwards}
+@keyframes vbar-jolt{0%{transform:none}15%{transform:translateX(calc(var(--jolt,3px)*-1))}35%{transform:translateX(var(--jolt,3px))}55%{transform:translateX(calc(var(--jolt,3px)*-.5))}75%{transform:translateX(calc(var(--jolt,3px)*.25))}100%{transform:none}}
+@keyframes vbar-shard{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(var(--r));opacity:0}}
+.vbar-hp.heal .vbar-fill{animation:vbar-heal .7s ease-out}
+.vbar-hp.low .vbar-fill{animation:vbar-low 1.2s ease-in-out infinite}
+.vbar-hp.critical .vbar-fill{animation-duration:.75s}
+body .hp-track #world-health{z-index:2;font-weight:800;letter-spacing:.03em;text-shadow:0 1px 0 #3a0f1c,0 0 3px #00000080}
+/* The XP bar shares the progress element's grid cell: the level badge is
+   positioned against the vitals panel, so the row itself must stay static. */
+.vbar-xp{position:relative;left:auto;right:auto;grid-column:1;grid-row:1;width:100%;height:6px;background:#0c161d;box-shadow:inset 0 1px 2px #000c,0 0 0 1px #0b1017,0 0 0 2px #3e6e7a}
+.vbar-xp .vbar-fill{border-radius:999px;overflow:hidden;background:linear-gradient(90deg,#38cfff,#6f9bff 60%,#b48cff);box-shadow:0 0 8px #5fd6ff99;transition:transform .55s cubic-bezier(.25,.8,.25,1)}
+.vbar-xp .vbar-fill.instant{transition:none}
+.vbar-xp .vbar-shine{background:linear-gradient(100deg,transparent 30%,#ffffffd9 50%,transparent 70%);transform:translateX(-110%)}
+.vbar-xp.gain .vbar-shine{animation:vbar-shine .75s ease-out}
+.vbar-xp.gain{animation:vbar-xp-glow .75s ease-out}
+body #world-xp{color:#bfe6f0}
+@keyframes vbar-hit{0%{background:#ffffff59}100%{background:linear-gradient(180deg,#ffffff4d 0,#ffffff12 45%,#ffffff00 60%)}}
+@keyframes vbar-heal{0%{filter:brightness(1.7) saturate(.6) hue-rotate(95deg)}100%{filter:none}}
+@keyframes vbar-low{0%,100%{filter:brightness(1)}50%{filter:brightness(1.45)}}
+@keyframes vbar-shine{from{transform:translateX(-110%)}to{transform:translateX(110%)}}
+@keyframes vbar-xp-glow{0%{box-shadow:inset 0 1px 2px #000c,0 0 0 1px #0b1017,0 0 0 2px #9ff0ff,0 0 10px #7fe6ff}100%{box-shadow:inset 0 1px 2px #000c,0 0 0 1px #0b1017,0 0 0 2px #3e6e7a}}
