@@ -927,3 +927,8 @@ body #world-loot-notice,body #world-level-up,body .progression-gain{display:none
 @keyframes lu-shine{to{text-shadow:0 2px 0 #7a5513,0 0 28px #ffe28a,0 0 52px #ffb43a;}}
 @keyframes lu-sub{from{opacity:0;transform:translate(-50%,10px);}}
 @media(prefers-reduced-motion:reduce){.level-up-v4 *{animation-duration:.01ms!important;animation-iteration-count:1!important;}}
+
+/* No page zoom while playing: pinch and double-tap zoom are excluded for every
+   element; scroll lists keep their own pan-y. */
+html,body{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+input,select,textarea{font-size:max(16px,1em);}

@@ -30993,7 +30993,25 @@ function createHeroLevelUpV3() {
     }
     return { u: active.elapsed / HERO_LEVEL_UP_V3.durationMs, fade: Math.min(1, active.elapsed / 140 + 0.08) * Math.min(1, (HERO_LEVEL_UP_V3.durationMs - active.elapsed) / 450) };
   }
-  function draw(ctx, actor, now2) {
+  const RINGS = [[0, 0.8, 24], [0.12, 0.8, 21], [0.24, 0.76, 18]];
+  function ring4(ctx, u, [delay, span, radius], half) {
+    const t = (u - delay) / span;
+    if (t <= 0 || t >= 1) return;
+    const ease15 = t * t * (3 - 2 * t), y = 5 - 44 * ease15, r = radius + 6 * Math.sin(t * Math.PI), alpha = Math.min(1, t / 0.12) * (1 - t) ** 0.6;
+    const [a, b] = half === "back" ? [Math.PI, Math.PI * 2] : [0, Math.PI];
+    ctx.save();
+    ctx.globalAlpha *= alpha;
+    ctx.strokeStyle = "#4a3410";
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.ellipse(0, y, r, r * 0.34, 0, a, b);
+    ctx.stroke();
+    ctx.strokeStyle = half === "back" ? "#e9b94c" : "#fff1b8";
+    ctx.lineWidth = 2.4;
+    ctx.stroke();
+    ctx.restore();
+  }
+  function drawBack(ctx, actor, now2) {
     const s = state(actor, now2);
     if (!s) return false;
     const { u, fade } = s;
@@ -31027,19 +31045,21 @@ function createHeroLevelUpV3() {
       }
     }
     ctx.restore();
-    const radius = 22 + 8 * Math.sin(u * Math.PI);
-    for (const [a, b, color28] of [[Math.PI, Math.PI * 2, "#f0c862"], [0, Math.PI, "#fff1b8"]]) {
-      ctx.strokeStyle = "#4a3410";
-      ctx.lineWidth = 5;
-      ctx.beginPath();
-      ctx.ellipse(0, 5, radius, 8, 0, a, b);
-      ctx.stroke();
-      ctx.strokeStyle = color28;
-      ctx.lineWidth = 2;
-      ctx.stroke();
-    }
+    for (const r of RINGS) ring4(ctx, u, r, "back");
+    ctx.restore();
+    return true;
+  }
+  function drawFront(ctx, actor, now2) {
+    const s = state(actor, now2);
+    if (!s) return false;
+    const { u, fade } = s;
+    ctx.save();
+    ctx.translate(actor.position.x, actor.position.y);
+    ctx.globalAlpha = fade;
+    for (const r of RINGS) ring4(ctx, u, r, "front");
     for (let i = 0; i < HERO_LEVEL_UP_V3.maximumParticles; i++) {
       const angle3 = i * 2.399 + u * 3, climb = (u * 1.4 + i / HERO_LEVEL_UP_V3.maximumParticles) % 1, r = (10 + i % 5 * 6) * (1 - climb * 0.5), x = Math.cos(angle3) * r, y = 5 - climb * 150, size = 1.4 + i % 3 * 0.8;
+      if (Math.sin(angle3) < 0 && climb < 0.35) continue;
       ctx.globalAlpha = fade * (1 - climb);
       ctx.fillStyle = i % 4 ? "#ffe9a8" : "#fff8e6";
       ctx.beginPath();
@@ -31053,7 +31073,12 @@ function createHeroLevelUpV3() {
     ctx.restore();
     return true;
   }
-  return { observe, trigger, draw, inspect: () => ({ activeEffects: active ? 1 : 0, maximumParticles: HERO_LEVEL_UP_V3.maximumParticles, durationMs: HERO_LEVEL_UP_V3.durationMs, elapsedMs: active?.elapsed ?? 0 }) };
+  function draw(ctx, actor, now2) {
+    const drawn = drawBack(ctx, actor, now2);
+    if (drawn) drawFront(ctx, actor, now2);
+    return drawn;
+  }
+  return { observe, trigger, draw, drawBack, drawFront, inspect: () => ({ activeEffects: active ? 1 : 0, maximumParticles: HERO_LEVEL_UP_V3.maximumParticles, durationMs: HERO_LEVEL_UP_V3.durationMs, elapsedMs: active?.elapsed ?? 0 }) };
 }
 
 // src/client/creature_presentation_arachnid_treant_v4.js
@@ -49900,7 +49925,10 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
           drawToxicPoisonRearD12_4F(ctx2, drawn, model.tick);
           drawNullifiedRearD12_4I(ctx2, drawn, model.tick);
           drawWebbedRearD12_4J(ctx2, drawn, model.tick);
+          const leveling = id === model.playersById[model.localPlayerId].entityId && !canvas.ownerDocument.hidden && !model.siteActivationPending;
+          if (leveling) heroLevelUp.drawBack(ctx2, { ...drawn, entityId: id }, time);
           drawWorldHero(ctx2, drawn, pose.facing, time, pose.primary, model.tick, Boolean(reaction?.flash), equipmentArt);
+          if (leveling) heroLevelUp.drawFront(ctx2, { ...drawn, entityId: id }, time);
           drawGlacialSnareFrontD12_4E(ctx2, drawn, model.tick);
           drawToxicPoisonFrontD12_4F(ctx2, drawn, model.tick);
           drawNullifiedFrontD12_4I(ctx2, drawn, model.tick);
@@ -49984,8 +50012,6 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
       }
       groundItems.labels(ctx);
     }
-    const levelingId = model.playersById[model.localPlayerId].entityId, levelingActor = visualModel.entitiesById[levelingId];
-    if (levelingActor && !canvas.ownerDocument.hidden && !model.siteActivationPending) heroLevelUp.draw(ctx, { ...levelingActor, entityId: levelingId }, time);
     combatVfx.draw(ctx, visualModel, time, viewport);
     if (performanceProbe) performanceProbe.measure("combatFeedback", () => feedback.draw(ctx, time, equipmentArt, viewport));
     else feedback.draw(ctx, time, equipmentArt, viewport);
@@ -51713,7 +51739,8 @@ function applyWorldTransferPatchD9(state, patch) {
       parent = parent[key3];
     }
     const key2 = change.path.at(-1), exists = Object.hasOwn(parent, key2), bulk = revisionGuardedBulkPath(change.path);
-    requireContract(exists === change.before.exists && (!exists || bulk || same10(parent[key2], change.before.value)), "World state changed during preparation");
+    const unchanged = exists === change.before.exists && (!exists || bulk || same10(parent[key2], change.before.value));
+    requireContract(unchanged, unchanged ? "" : "World state changed during preparation: " + change.path.slice(0, 4).join("."));
     targets.push({ parent, key: key2, after: change.after, bulk });
   }
   const values = targets.map((t) => t.after.exists ? t.bulk ? t.after.value : copyWire(t.after.value) : null);
@@ -52197,10 +52224,25 @@ function actorFootprintPinsD9(s) {
 }
 function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, siteBootstrap = null, ruinSocket = null, fortParcel = null, caveParcel = null, caveParcels = [], record: record2 = () => {
 }, measure = (_name, fn) => fn(), now: now2 = () => Date.now() }) {
+  const SOFT_RESIDENT_CHUNKS = 64;
+  const RELEASE_COOLDOWN_TICKS = 900, releaseCooldown = /* @__PURE__ */ new Map();
+  const coolRelease = (v, release) => {
+    for (const [key2, c] of v.resident) if (release.includes(c.id)) releaseCooldown.set(key2, v.tick + RELEASE_COOLDOWN_TICKS);
+  };
+  const farthestFirst = (rows, v) => {
+    const gap = (row2) => Math.min(...v.players.map((p) => Math.max(Math.abs(Number(BigInt(row2.chunkX) - BigInt(p.position.chunkX))), Math.abs(Number(BigInt(row2.chunkY) - BigInt(p.position.chunkY))))));
+    return v.players.length ? rows.map((r) => [r, gap(r[1])]).sort((a, b) => b[1] - a[1]).map(([r]) => r) : rows;
+  };
   const LIVE_HANDOFF_CHUNKS = 2, LIVE_EVICT_CHUNKS = 2, parcelKeys = fortParcel?.pages.map((p) => chunkAddressKey(p.chunkX, p.chunkY)) ?? [];
   const prepared = /* @__PURE__ */ new Map(), evaluatedCaveRegions = new Set(caveParcels.filter((p) => p.version === WOODLAND_CAVE_FAMILY_PARCEL_D12_2).map((p) => p.regionKey));
   let reservationsDirty = false, busy = false, closed = false, error = null, generated = 0, discarded = 0, retries = 0, running = null, destinationTarget = null, lastEncounterKey = null, encounterPendingKey = null, encounterPendingSinceTick = null, encounterOffers = 0, encounterCompletions = 0, encounterRetries = 0, encounterLastLatencyTicks = 0, encounterMaxLatencyTicks = 0, urgentEncounterStreak = 0, lastDeadlineTick = -60, lastGroundKey = null, lastCollectTick = -600, lastNavigationTick = -30, navigationPreparing = null, navigationOffers = 0, navigationCompletions = 0, navigationCoalesced = 0, navigationRetries = 0, navigationRowsPrepared = 0, lastNavigationError = null, wantedAdmissions = 0, lastWantedAdmissionTick = null, lastWantedAdmissionAt = null, wantedMissingSinceTick = null, progressState = "idle", progressDetail = null;
   let workerCalls = 0, lastRunWorked = true;
+  const retryReasons = {};
+  const retry = (reason) => {
+    retries++;
+    const k = String(reason).replace(/ent:[0-9a-f]+/g, "ent").slice(0, 80);
+    retryReasons[k] = (retryReasons[k] ?? 0) + 1;
+  };
   const worker = Object.freeze(Object.fromEntries(Object.entries(rawWorker).map(([k, f]) => [k, typeof f === "function" ? (...args) => {
     workerCalls++;
     return f(...args);
@@ -52211,7 +52253,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
     if (error2?.code !== "WORLD_ACTOR_GEOMETRY_INVALID" && !/Invalid canonical actor geometry/.test(error2?.message ?? "")) return false;
     const live = borrow((s) => firstInvalidActorGeometryD9(s, { mutation: "stale worker result live-state probe", phase: "residency integration" }));
     if (live) return false;
-    retries++;
+    retry("stale-worker-geometry");
     progressState = "retrying";
     progressDetail = "stale-worker-geometry";
     record2("world.residencyRetry", { reason: "stale-worker-geometry" });
@@ -52320,7 +52362,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
       return true;
     } catch (e) {
       if (/changed|parent disappeared/.test(e.message)) {
-        retries++;
+        retry(e.message);
         encounterRetries++;
         return false;
       }
@@ -52447,7 +52489,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
           lastDeadlineTick = result.more ? v.tick - 60 : v.tick;
         } catch (e) {
           if (/changed|parent disappeared/.test(e.message)) {
-            retries++;
+            retry(e.message);
             return false;
           }
           throw e;
@@ -52459,7 +52501,8 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
       if (closed) return false;
       v = observedView();
       cleanCache(v);
-      const candidates = [...v.wanted].filter(([key2]) => !v.resident.has(key2) && prepared.has(key2)).sort((a, b) => priority(a[1], v) - priority(b[1], v) || a[1].distance - b[1].distance), free = Math.max(0, D9_RUNTIME_POLICY.residentChunks - v.resident.size), evictable = [...v.resident].filter(([key2]) => !v.wanted.has(key2) && !v.pinned.has(key2)), parcelWanted = parcelKeys.some((k) => v.wanted.has(k)), parcelResident = parcelKeys.filter((k) => v.resident.has(k)), parcelMissing = parcelKeys.filter((k) => !v.resident.has(k));
+      const candidates = [...v.wanted].filter(([key2]) => !v.resident.has(key2) && prepared.has(key2)).sort((a, b) => priority(a[1], v) - priority(b[1], v) || a[1].distance - b[1].distance), free = Math.max(0, D9_RUNTIME_POLICY.residentChunks - v.resident.size), evictable = farthestFirst([...v.resident].filter(([key2]) => !v.wanted.has(key2) && !v.pinned.has(key2) && !(releaseCooldown.get(key2) > v.tick)), v), parcelWanted = parcelKeys.some((k) => v.wanted.has(k)), parcelResident = parcelKeys.filter((k) => v.resident.has(k)), parcelMissing = parcelKeys.filter((k) => !v.resident.has(k));
+      for (const [key2, until] of releaseCooldown) if (until <= v.tick || !v.resident.has(key2)) releaseCooldown.delete(key2);
       let release = [], admit = [];
       if (parcelWanted && parcelMissing.length) {
         if (parcelMissing.every((k) => prepared.has(k))) {
@@ -52469,8 +52512,8 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
           else release = [];
         }
       } else {
-        const ordinaryCandidates = candidates.filter(([k]) => !parcelKeys.includes(k)), need = Math.max(0, Math.min(ordinaryCandidates.length, LIVE_HANDOFF_CHUNKS) - free), other = evictable.filter(([k]) => !parcelKeys.includes(k));
-        release = other.slice(0, Math.min(D9_RUNTIME_POLICY.evictChunks, LIVE_EVICT_CHUNKS, ordinaryCandidates.length ? need : pageBuffer.resources().dirtyPages > D9_RUNTIME_POLICY.flushPages ? 0 : LIVE_EVICT_CHUNKS)).map(([, c]) => c.id);
+        const ordinaryCandidates = candidates.filter(([k]) => !parcelKeys.includes(k)), need = Math.max(0, Math.min(ordinaryCandidates.length, LIVE_HANDOFF_CHUNKS) - free, pageBuffer.resources().dirtyPages > D9_RUNTIME_POLICY.flushPages ? 0 : Math.min(LIVE_EVICT_CHUNKS, v.resident.size - SOFT_RESIDENT_CHUNKS)), other = evictable.filter(([k]) => !parcelKeys.includes(k));
+        release = (ordinaryCandidates.length ? other : other.filter(([k]) => !v.preload.has(k))).slice(0, Math.min(D9_RUNTIME_POLICY.evictChunks, LIVE_EVICT_CHUNKS, ordinaryCandidates.length ? need : pageBuffer.resources().dirtyPages > D9_RUNTIME_POLICY.flushPages ? 0 : LIVE_EVICT_CHUNKS)).map(([, c]) => c.id);
         if (!release.length && parcelResident.length === parcelKeys.length && parcelKeys.every((k) => evictable.some(([id]) => id === k)) && (need > 0 || !ordinaryCandidates.length && pageBuffer.resources().dirtyPages <= D9_RUNTIME_POLICY.flushPages)) release = parcelKeys.map((k) => v.resident.get(k).id);
         admit = ordinaryCandidates.slice(0, Math.min(free + release.length, D9_RUNTIME_POLICY.handoffChunks - release.length, LIVE_HANDOFF_CHUNKS)).map(([k]) => prepared.get(k));
       }
@@ -52484,7 +52527,8 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
         if (closed) return false;
         const current = observedView();
         if (release.some((id) => [...current.resident].some(([key2, c]) => c.id === id && (current.wanted.has(key2) || current.pinned.has(key2)))) || admit.some((c) => !current.wanted.has(chunkAddressKey(c.chunkX, c.chunkY)))) {
-          retries++;
+          coolRelease(current, release);
+          retry("window moved during preparation");
           return false;
         }
         const installPages = pageBuffer.prepareStageDelta(result.pages, stagedPages);
@@ -52499,7 +52543,8 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
           }));
         } catch (e) {
           if (e.code === "WORLD_TRANSFER_STALE" || /changed|pins a prepared eviction|parent disappeared/.test(e.message)) {
-            retries++;
+            coolRelease(current, release);
+            retry(e.message);
             return false;
           }
           if (staleWorkerGeometry(e)) return false;
@@ -52530,7 +52575,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
           lastGroundKey = result.more ? null : v.groundKey;
         } catch (e) {
           if (/changed|parent disappeared/.test(e.message)) {
-            retries++;
+            retry(e.message);
             return false;
           }
           throw e;
@@ -52642,7 +52687,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
         return true;
       } catch (e) {
         if (/changed|parent disappeared/.test(e.message)) {
-          retries++;
+          retry(e.message);
           return false;
         }
         if (staleWorkerGeometry(e)) return false;
@@ -52700,7 +52745,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
     return worker.mapWindow({ ...request, ...snapshot });
   }, settled: () => running ?? Promise.resolve(), failure: () => error, inspect: () => {
     const v = observedView(), wantedMissing = [...v.wanted.keys()].filter((k) => !v.resident.has(k)), page = pageBuffer.resources(), at3 = now2();
-    return { busy, closed, error: error?.message ?? null, errorCode: error?.code ?? null, errorStack: error?.stack ?? null, generated, discarded, retries, prepared: prepared.size, preparedKeys: [...prepared.keys()], wantedKeys: [...v.wanted.keys()], wantedMissing, wantedReady: wantedMissing.length === 0, wantedMissingSinceTick, wantedAdmissions, lastWantedAdmissionTick, timeSinceWantedAdmissionMs: lastWantedAdmissionAt === null ? null : Math.max(0, at3 - lastWantedAdmissionAt), progressState, progressDetail, reviewPreparing: v.reviewPreparing, interactionReady: !v.approach || hasWorldCombat(v.plannedWorld), navigationPreparation: { pendingRows: v.navigation, inFlight: Boolean(navigationPreparing), offers: navigationOffers, completions: navigationCompletions, coalesced: navigationCoalesced, retries: navigationRetries, rowsPrepared: navigationRowsPrepared, lastError: lastNavigationError }, encounterPreparation: { approachPending: v.approach, blocksInitialReadiness: v.approach && !hasWorldCombat(v.plannedWorld), pending: Boolean(v.approach && v.encounterKey !== lastEncounterKey), offers: encounterOffers, completions: encounterCompletions, retries: encounterRetries, lastLatencyTicks: encounterLastLatencyTicks, maxLatencyTicks: encounterMaxLatencyTicks, pendingSinceTick: encounterPendingSinceTick }, needsSave: reservationsDirty || page.dirtyPages > D9_RUNTIME_POLICY.flushPages, regionalReservations: { evaluated: evaluatedCaveRegions.size, dirty: reservationsDirty }, pagePressure: { dirtyPages: page.dirtyPages, flushPages: D9_RUNTIME_POLICY.flushPages, capacity: page.capacity, oldestDirtyPageAgeMs: page.oldestDirtyPageAgeMs }, resident: v.resident.size, residentKeys: [...v.resident.keys()] };
+    return { busy, closed, error: error?.message ?? null, errorCode: error?.code ?? null, errorStack: error?.stack ?? null, generated, discarded, retries, retryReasons: { ...retryReasons }, pinnedCount: v.pinned.size, evictableCount: [...v.resident.keys()].filter((k) => !v.wanted.has(k) && !v.pinned.has(k)).length, prepared: prepared.size, preparedKeys: [...prepared.keys()], wantedKeys: [...v.wanted.keys()], wantedMissing, wantedReady: wantedMissing.length === 0, wantedMissingSinceTick, wantedAdmissions, lastWantedAdmissionTick, timeSinceWantedAdmissionMs: lastWantedAdmissionAt === null ? null : Math.max(0, at3 - lastWantedAdmissionAt), progressState, progressDetail, reviewPreparing: v.reviewPreparing, interactionReady: !v.approach || hasWorldCombat(v.plannedWorld), navigationPreparation: { pendingRows: v.navigation, inFlight: Boolean(navigationPreparing), offers: navigationOffers, completions: navigationCompletions, coalesced: navigationCoalesced, retries: navigationRetries, rowsPrepared: navigationRowsPrepared, lastError: lastNavigationError }, encounterPreparation: { approachPending: v.approach, blocksInitialReadiness: v.approach && !hasWorldCombat(v.plannedWorld), pending: Boolean(v.approach && v.encounterKey !== lastEncounterKey), offers: encounterOffers, completions: encounterCompletions, retries: encounterRetries, lastLatencyTicks: encounterLastLatencyTicks, maxLatencyTicks: encounterMaxLatencyTicks, pendingSinceTick: encounterPendingSinceTick }, needsSave: reservationsDirty || page.dirtyPages > D9_RUNTIME_POLICY.flushPages, regionalReservations: { evaluated: evaluatedCaveRegions.size, dirty: reservationsDirty }, pagePressure: { dirtyPages: page.dirtyPages, flushPages: D9_RUNTIME_POLICY.flushPages, capacity: page.capacity, oldestDirtyPageAgeMs: page.oldestDirtyPageAgeMs }, resident: v.resident.size, residentKeys: [...v.resident.keys()] };
   }, close() {
     closed = true;
     destinationTarget = null;
@@ -53757,7 +53802,8 @@ function measureWorldViewport(environment) {
   const standalone = environment.navigator?.standalone === true || environment.matchMedia?.("(display-mode: standalone)")?.matches === true, screen = environment.screen;
   if (standalone && valid(screen?.width) && valid(screen?.height)) {
     const landscape = width > height, fullWidth = landscape ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height), fullHeight = landscape ? Math.min(screen.width, screen.height) : Math.max(screen.width, screen.height);
-    if (Math.abs(width - fullWidth) <= 1 && fullHeight > height && fullHeight - height <= 80) height = fullHeight;
+    const scale = visual && valid(viewport.scale) ? viewport.scale : 1, shown = height * scale;
+    if (Math.abs(width * scale - fullWidth) <= 2 && fullHeight > shown && fullHeight - shown <= 80) height = Math.round(fullHeight / scale);
   }
   return Object.freeze({ left: visual ? offset2(viewport.offsetLeft) : 0, top: visual ? offset2(viewport.offsetTop) : 0, width, height });
 }
@@ -53865,9 +53911,30 @@ function cleanAndReload(environment, policy) {
   environment.history.replaceState(null, "", policy.cleanUrl().href);
   environment.location.reload();
 }
+function lockPageZoom(environment) {
+  const doc = environment.document, meta = doc.querySelector('meta[name="viewport"]'), vv = environment.visualViewport;
+  for (const type of ["gesturestart", "gesturechange", "gestureend"]) doc.addEventListener(type, (e) => e.preventDefault(), { passive: false });
+  doc.addEventListener("touchmove", (e) => {
+    if (e.touches?.length > 1) e.preventDefault();
+  }, { passive: false });
+  environment.addEventListener("wheel", (e) => {
+    if (e.ctrlKey || e.metaKey) e.preventDefault();
+  }, { passive: false });
+  environment.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && ["+", "=", "-", "_", "0"].includes(e.key)) e.preventDefault();
+  });
+  if (!meta || !vv?.addEventListener) return;
+  const content = meta.content;
+  vv.addEventListener("resize", () => {
+    if (Math.abs((vv.scale ?? 1) - 1) < 1e-3) return;
+    meta.content = content + ",";
+    meta.content = content;
+  });
+}
 async function startWorldClient(environment) {
   const startupLoading = environment.__SAQ_STARTUP_LOADING_V1__ ?? null;
   let client = null;
+  lockPageZoom(environment);
   coordinateWorldViewport({ environment, shell: environment.document.getElementById("world-app"), onResize: () => client?.resize() });
   if (new URL(environment.location.href).searchParams.get("debugViewport") === "1") {
     const doc = environment.document, box = doc.createElement("pre"), probe = doc.createElement("div");
