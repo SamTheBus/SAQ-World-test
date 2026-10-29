@@ -28847,7 +28847,7 @@ function createCivilianContextInput({ environment, readModel, activate, isBlocke
 }
 
 // src/client/chart_layers_v1.js
-var CHART_COLORS = { O: "#23495b", W: "#72a8b1", L: "#6698a8", B: "#b9bd91", w: "#52785d", a: "#8c9b65", m: "#628b7c", r: "#8d9283", d: "#c7af7d", s: "#c4d6d5", t: "#3e7764", l: "#887b83", o: "#63816b" };
+var CHART_COLORS = { O: "#1d4c6c", W: "#4698be", L: "#3a8aac", B: "#e0d09c", w: "#4f8946", a: "#87a656", m: "#5d8a6f", r: "#979381", d: "#d6be89", s: "#dde8ec", t: "#2f7c51", l: "#5f4c4a", o: "#6f8f63" };
 function chartPosition(p) {
   return { x: (Number(BigInt(p.chunkX) - 1024n) * 1024 + p.localX) / 32, y: (Number(BigInt(p.chunkY) - 1024n) * 832 + p.localY) / 32 };
 }
@@ -28871,10 +28871,12 @@ function chartMarkers(meta, knowledge, states, filters) {
   return out;
 }
 function groupChartMarkers(markers, view, width, height, radius = 22) {
-  const groups = [];
-  for (const m of [...markers].sort((a, b) => (a.kind === "settlement" ? -1 : 0) - (b.kind === "settlement" ? -1 : 0) || a.id.localeCompare(b.id))) {
+  const groups = [], inside3 = [];
+  for (const m of markers) {
     const p = projectChart(m, view, width, height);
-    if (p.x < 12 || p.y < 12 || p.x > width - 12 || p.y > height - 12) continue;
+    if (p.x >= 12 && p.y >= 12 && p.x <= width - 12 && p.y <= height - 12) inside3.push({ m, p });
+  }
+  for (const { m, p } of inside3.sort((a, b) => (a.m.kind === "settlement" ? -1 : 0) - (b.m.kind === "settlement" ? -1 : 0) || a.m.id.localeCompare(b.m.id))) {
     const near = groups.find((g) => Math.hypot(g.x - p.x, g.y - p.y) < radius);
     if (near) {
       near.members.push(m);
@@ -28902,106 +28904,332 @@ function layoutChartLabels(groups, ctx, width, height, span, selectedId = null) 
   return labels2;
 }
 function drawChartIcon(c, m, x, y, size = 9) {
+  const s = size, big = m.kind === "settlement" && (m.class === "capital-great-hold" || m.class === "city");
   c.save();
   c.translate(x, y);
-  c.strokeStyle = "#152c31";
-  c.lineWidth = 2;
-  c.fillStyle = m.state === "completed" ? "#9ad7ad" : m.kind === "ferry" ? "#9bd3e1" : m.state === "rumored" ? "#d1b5dc" : m.kind === "settlement" ? "#ead7a0" : "#f1d2a0";
+  c.strokeStyle = "#11181e";
+  c.lineWidth = Math.max(1.4, s * 0.24);
+  c.lineJoin = "round";
+  c.fillStyle = m.state === "completed" ? "#a6dcb4" : m.kind === "ferry" ? "#a3d8e8" : m.state === "rumored" ? "#cfaee6" : m.kind === "settlement" ? m.state === "unvisited" ? "#cbbd97" : big ? "#f3d47e" : "#f5e7bf" : { cave: "#d8c49b", fort: "#d3cbb8", ruin: "#cbc0a6", crypt: "#c5bcd4" }[m.family] ?? "#f1d2a0";
   c.beginPath();
-  if (m.kind === "settlement") {
-    c.moveTo(-size, size * 0.7);
-    c.lineTo(-size, -size * 0.5);
-    c.lineTo(-size * 0.45, -size * 0.5);
-    c.lineTo(-size * 0.45, -size);
-    c.lineTo(size * 0.45, -size);
-    c.lineTo(size * 0.45, -size * 0.5);
-    c.lineTo(size, -size * 0.5);
-    c.lineTo(size, size * 0.7);
+  if (m.kind === "settlement" && big) {
+    const t = s * 0.42;
+    c.moveTo(-s, s * 0.8);
+    c.lineTo(-s, -s * 0.55);
+    c.lineTo(-s + t, -s * 0.55);
+    c.lineTo(-s + t, -s * 0.95);
+    c.lineTo(-t * 0.5, -s * 0.95);
+    c.lineTo(-t * 0.5, -s * 0.55);
+    c.lineTo(t * 0.5, -s * 0.55);
+    c.lineTo(t * 0.5, -s * 0.95);
+    c.lineTo(s - t, -s * 0.95);
+    c.lineTo(s - t, -s * 0.55);
+    c.lineTo(s, -s * 0.55);
+    c.lineTo(s, s * 0.8);
     c.closePath();
-  } else if (m.kind === "site" && m.state !== "rumored") {
-    if (m.family === "cave") {
-      c.moveTo(-size, size * 0.7);
-      c.lineTo(0, -size);
-      c.lineTo(size, size * 0.7);
-      c.closePath();
-    } else {
-      c.rect(-size * 0.8, -size * 0.8, size * 1.6, size * 1.6);
-    }
-  } else c.arc(0, 0, size, 0, Math.PI * 2);
+  } else if (m.kind === "settlement") {
+    c.moveTo(-s * 0.82, s * 0.78);
+    c.lineTo(-s * 0.82, -s * 0.1);
+    c.lineTo(0, -s * 0.9);
+    c.lineTo(s * 0.82, -s * 0.1);
+    c.lineTo(s * 0.82, s * 0.78);
+    c.closePath();
+  } else if (m.kind === "ferry") c.arc(0, 0, s * 0.9, 0, Math.PI * 2);
+  else if (m.state === "rumored") {
+    c.moveTo(0, -s);
+    c.lineTo(s * 0.85, 0);
+    c.lineTo(0, s);
+    c.lineTo(-s * 0.85, 0);
+    c.closePath();
+  } else if (m.family === "cave") {
+    c.moveTo(-s, s * 0.75);
+    c.quadraticCurveTo(-s * 0.55, -s * 0.95, 0, -s * 0.95);
+    c.quadraticCurveTo(s * 0.55, -s * 0.95, s, s * 0.75);
+    c.closePath();
+  } else if (m.family === "fort") {
+    const t = s * 0.36;
+    c.moveTo(-s * 0.8, s * 0.8);
+    c.lineTo(-s * 0.8, -s * 0.9);
+    c.lineTo(-s * 0.8 + t, -s * 0.9);
+    c.lineTo(-s * 0.8 + t, -s * 0.55);
+    c.lineTo(-t * 0.5, -s * 0.55);
+    c.lineTo(-t * 0.5, -s * 0.9);
+    c.lineTo(t * 0.5, -s * 0.9);
+    c.lineTo(t * 0.5, -s * 0.55);
+    c.lineTo(s * 0.8 - t, -s * 0.55);
+    c.lineTo(s * 0.8 - t, -s * 0.9);
+    c.lineTo(s * 0.8, -s * 0.9);
+    c.lineTo(s * 0.8, s * 0.8);
+    c.closePath();
+  } else if (m.family === "ruin") {
+    c.moveTo(-s * 0.9, s * 0.8);
+    c.lineTo(-s * 0.9, -s * 0.5);
+    c.lineTo(-s * 0.45, -s * 0.85);
+    c.lineTo(-s * 0.1, -s * 0.35);
+    c.lineTo(s * 0.3, -s * 0.7);
+    c.lineTo(s * 0.9, -s * 0.2);
+    c.lineTo(s * 0.9, s * 0.8);
+    c.closePath();
+  } else if (m.family === "crypt") {
+    c.moveTo(-s * 0.7, s * 0.85);
+    c.lineTo(-s * 0.7, -s * 0.2);
+    c.arc(0, -s * 0.2, s * 0.7, Math.PI, 0);
+    c.lineTo(s * 0.7, s * 0.85);
+    c.closePath();
+  } else c.rect(-s * 0.8, -s * 0.8, s * 1.6, s * 1.6);
   c.fill();
   c.stroke();
-  c.fillStyle = "#203439";
-  c.font = "bold 10px system-ui";
-  c.textAlign = "center";
-  c.textBaseline = "middle";
-  c.fillText(m.kind === "ferry" ? "F" : m.state === "rumored" || m.state === "unvisited" ? "?" : m.kind === "site" ? { cave: "", fort: "F", ruin: "R", crypt: "\u2020" }[m.family] ?? "" : m.class === "capital-great-hold" ? "\u2605" : "", 0, 0);
-  if (m.state === "completed") {
-    c.strokeStyle = "#153c2b";
-    c.lineWidth = 2;
+  c.fillStyle = "#1b2329";
+  c.strokeStyle = "#1b2329";
+  c.lineWidth = Math.max(1, s * 0.16);
+  if (m.kind === "settlement" && !big && s >= 5) c.fillRect(-s * 0.2, s * 0.1, s * 0.4, s * 0.68);
+  if (m.kind === "site" && m.state !== "rumored") {
+    if (m.family === "cave") {
+      c.beginPath();
+      c.moveTo(-s * 0.42, s * 0.75);
+      c.quadraticCurveTo(0, -s * 0.55, s * 0.42, s * 0.75);
+      c.closePath();
+      c.fill();
+    } else if (m.family === "crypt" && s >= 5) {
+      c.beginPath();
+      c.moveTo(0, -s * 0.55);
+      c.lineTo(0, s * 0.45);
+      c.moveTo(-s * 0.32, -s * 0.15);
+      c.lineTo(s * 0.32, -s * 0.15);
+      c.stroke();
+    } else if (m.family === "fort" && s >= 5) c.fillRect(-s * 0.2, s * 0.15, s * 0.4, s * 0.65);
+  }
+  if (m.kind === "ferry" && s >= 5) {
     c.beginPath();
-    c.moveTo(-4, -1);
-    c.lineTo(-1, 3);
-    c.lineTo(5, -4);
+    c.moveTo(0, -s * 0.55);
+    c.lineTo(0, s * 0.5);
+    c.moveTo(-s * 0.45, s * 0.05);
+    c.quadraticCurveTo(0, s * 0.75, s * 0.45, s * 0.05);
+    c.stroke();
+  }
+  if (s >= 7 && (m.state === "rumored" || m.kind === "settlement" && m.state === "unvisited")) {
+    c.font = "bold " + Math.round(s * 1.1) + "px system-ui";
+    c.textAlign = "center";
+    c.textBaseline = "middle";
+    c.fillStyle = "#1b2329";
+    c.fillText("?", 0, m.kind === "settlement" ? s * 0.18 : s * 0.08);
+  }
+  if (m.state === "completed") {
+    const r = Math.max(3, s * 0.48);
+    c.translate(s * 0.8, -s * 0.8);
+    c.fillStyle = "#2f8a4c";
+    c.strokeStyle = "#0f2417";
+    c.lineWidth = 1.2;
+    c.beginPath();
+    c.arc(0, 0, r, 0, Math.PI * 2);
+    c.fill();
+    c.stroke();
+    c.strokeStyle = "#eafbe9";
+    c.lineWidth = Math.max(1, r * 0.32);
+    c.beginPath();
+    c.moveTo(-r * 0.5, 0);
+    c.lineTo(-r * 0.1, r * 0.42);
+    c.lineTo(r * 0.55, -r * 0.4);
     c.stroke();
   }
   c.restore();
 }
-function paintChartRaster(canvas, raster, meta, filters, cssWidth, cssHeight) {
-  const c = canvas.getContext("2d"), pixels = c.createImageData(raster.width, raster.height), rgb = Object.fromEntries(Object.entries(CHART_COLORS).map(([k, v]) => [k, [parseInt(v.slice(1, 3), 16), parseInt(v.slice(3, 5), 16), parseInt(v.slice(5, 7), 16)]]));
-  for (let y = 0; y < raster.height; y++) for (let x = 0; x < raster.width; x++) {
-    const code = raster.rows[y][x], color28 = rgb[code] ?? rgb.o, i = (y * raster.width + x) * 4;
-    pixels.data.set(color28, i);
-    pixels.data[i + 3] = 255;
-    if (!"OWL".includes(code) && (x && raster.rows[y][x - 1] === "O" || y && raster.rows[y - 1][x] === "O")) {
-      pixels.data[i] = 185;
-      pixels.data[i + 1] = 202;
-      pixels.data[i + 2] = 170;
+var NOISE = (() => {
+  const g = new Float32Array(4096);
+  let s = 2463534242;
+  for (let i = 0; i < 4096; i++) {
+    s ^= s << 13;
+    s ^= s >>> 17;
+    s ^= s << 5;
+    g[i] = (s >>> 0) / 4294967296;
+  }
+  return g;
+})();
+function noise(x, y) {
+  const xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fy = y - yi, u = fx * fx * (3 - 2 * fx), v = fy * fy * (3 - 2 * fy), x0 = xi & 63, x1 = xi + 1 & 63, y0 = (yi & 63) << 6, y1 = (yi + 1 & 63) << 6, a = NOISE[y0 + x0], b = NOISE[y0 + x1], c = NOISE[y1 + x0], d = NOISE[y1 + x1];
+  return a + (b - a) * u + (c - a + (a - b - c + d) * u) * v;
+}
+var PAINT = [];
+var PR = new Uint8Array(128);
+var PG = new Uint8Array(128);
+var PB = new Uint8Array(128);
+var MOTTLE = new Float32Array(128).fill(0.05);
+var SHALLOW = [70, 140, 164];
+var SAND = [228, 212, 162];
+var FOOTPRINT = { "capital-great-hold": 30, city: 24, town: 18, "village-outpost": 13 };
+for (let c = 0; c < 128; c++) {
+  PR[c] = 111;
+  PG[c] = 143;
+  PB[c] = 99;
+}
+for (const [k, v] of Object.entries(CHART_COLORS)) {
+  const c = k.charCodeAt(0);
+  PAINT[c] = [PR[c], PG[c], PB[c]] = [parseInt(v.slice(1, 3), 16), parseInt(v.slice(3, 5), 16), parseInt(v.slice(5, 7), 16)];
+}
+for (const [k, depth] of [["w", 0.09], ["t", 0.1], ["m", 0.06], ["r", 0.06], ["a", 0.04], ["d", 0.04], ["s", 0.03], ["l", 0.08], ["o", 0.05]]) MOTTLE[k.charCodeAt(0)] = depth;
+function boxBlur(a, t, sum, w, h, r) {
+  const inv = 1 / (2 * r + 1);
+  for (let y = 0; y < h; y++) {
+    const o = y * w;
+    let s = 0;
+    for (let x = -r; x <= r; x++) s += a[o + (x < 0 ? 0 : x >= w ? w - 1 : x)];
+    for (let x = 0; x < w; x++) {
+      t[o + x] = s * inv;
+      const add = x + r + 1, sub = x - r;
+      s += a[o + (add >= w ? w - 1 : add)] - a[o + (sub < 0 ? 0 : sub)];
     }
   }
-  const raw = canvas.ownerDocument.createElement("canvas");
-  raw.width = raster.width;
-  raw.height = raster.height;
-  raw.getContext("2d").putImageData(pixels, 0, 0);
-  c.imageSmoothingEnabled = false;
+  sum.fill(0);
+  for (let y = -r; y <= r; y++) {
+    const o = (y < 0 ? 0 : y >= h ? h - 1 : y) * w;
+    for (let x = 0; x < w; x++) sum[x] += t[o + x];
+  }
+  for (let y = 0; y < h; y++) {
+    const o = y * w, add = (y + r + 1 >= h ? h - 1 : y + r + 1) * w, sub = (y - r < 0 ? 0 : y - r) * w;
+    for (let x = 0; x < w; x++) {
+      a[o + x] = sum[x] * inv;
+      sum[x] += t[add + x] - t[sub + x];
+    }
+  }
+}
+function paintChartTerrain(data, raster, W3, H3) {
+  const rw = raster.width, rh = raster.height, view = raster.view, n = rw * rh, codes = new Uint8Array(n), R = new Float32Array(n), G = new Float32Array(n), B = new Float32Array(n), M = new Float32Array(n), S = new Float32Array(n), K = new Float32Array(n), t = new Float32Array(n), sum = new Float32Array(rw);
+  const tps = view.width / rw, tpx = view.width / W3, tpy = view.height / H3, clump = 1 / Math.max(4, tpx * 4);
+  for (let y = 0; y < rh; y++) {
+    const row2 = raster.rows[y], ty = view.y + (y + 0.5) * view.height / rh;
+    for (let x = 0; x < rw; x++) {
+      const c = row2.charCodeAt(x) & 127, i = y * rw + x, tx = view.x + (x + 0.5) * tps;
+      codes[i] = c;
+      if (c === 79 || c === 76 || c === 87) {
+        K[i] = 0.96 + 0.07 * noise(tx * 0.09, ty * 0.09);
+        if (c === 79) S[i] = 1;
+      } else {
+        R[i] = PR[c];
+        G[i] = PG[c];
+        B[i] = PB[c];
+        M[i] = 1;
+        K[i] = (0.94 + 0.12 * noise(tx * 0.03 + 50, ty * 0.03 + 50)) * (1 + MOTTLE[c] * (noise(tx * clump + 71, ty * clump + 13) - 0.5) * 2.4);
+      }
+    }
+  }
+  const landR = Math.max(1, Math.round(4 / tps)), seaR = Math.max(1, Math.round(9 / tps));
+  for (const a of [R, G, B, M]) boxBlur(a, t, sum, rw, rh, landR);
+  boxBlur(S, t, sum, rw, rh, seaR);
+  boxBlur(S, t, sum, rw, rh, seaR);
+  const wt = Math.min(12, Math.max(4, tpx * 2.5)), amp = wt / tps, f = 1 / (wt * 3.2), sx = rw / W3, sy = rh / H3, maxX = rw - 1.001, maxY = rh - 1.001, sea0 = PAINT[79];
+  for (let iy = 0; iy < H3; iy++) {
+    const ty = view.y + (iy + 0.5) * tpy, ry = Math.min(rh - 1, (iy + 0.5) * sy | 0) * rw, py = (iy + 0.5) * sy - 0.5;
+    for (let ix = 0; ix < W3; ix++) {
+      const tx = view.x + (ix + 0.5) * tpx, o = (iy * W3 + ix) * 4, n0 = ry + Math.min(rw - 1, (ix + 0.5) * sx | 0), c0 = codes[n0];
+      let r, g, b;
+      if (c0 === 76 || c0 === 87) {
+        const k = K[n0];
+        r = PR[c0] * k;
+        g = PG[c0] * k;
+        b = PB[c0] * k;
+      } else {
+        let fx = (ix + 0.5) * sx - 0.5 + (noise(tx * f, ty * f) - 0.5) * 2 * amp, fy = py + (noise(tx * f + 19, ty * f + 7) - 0.5) * 2 * amp;
+        fx = fx < 0 ? 0 : fx > maxX ? maxX : fx;
+        fy = fy < 0 ? 0 : fy > maxY ? maxY : fy;
+        const x0 = fx | 0, y0 = fy | 0, u = fx - x0, v = fy - y0, i = y0 * rw + x0, j = x0 < rw - 1 ? i + 1 : i, l = y0 < rh - 1 ? i + rw : i, q = l + j - i, w00 = (1 - u) * (1 - v), w10 = u * (1 - v), w01 = (1 - u) * v, w11 = u * v, sea = S[i] * w00 + S[j] * w10 + S[l] * w01 + S[q] * w11, k = K[i] * w00 + K[j] * w10 + K[l] * w01 + K[q] * w11;
+        if (sea > 0.5) {
+          const d = Math.min(1, (sea - 0.5) / 0.42);
+          r = (SHALLOW[0] + (sea0[0] - SHALLOW[0]) * d) * k;
+          g = (SHALLOW[1] + (sea0[1] - SHALLOW[1]) * d) * k;
+          b = (SHALLOW[2] + (sea0[2] - SHALLOW[2]) * d) * k;
+        } else {
+          const m = M[i] * w00 + M[j] * w10 + M[l] * w01 + M[q] * w11;
+          if (m > 1e-3) {
+            const im = k / m;
+            r = (R[i] * w00 + R[j] * w10 + R[l] * w01 + R[q] * w11) * im;
+            g = (G[i] * w00 + G[j] * w10 + G[l] * w01 + G[q] * w11) * im;
+            b = (B[i] * w00 + B[j] * w10 + B[l] * w01 + B[q] * w11) * im;
+          } else {
+            r = PR[111];
+            g = PG[111];
+            b = PB[111];
+          }
+          if (sea > 0.36) {
+            const e = (sea - 0.36) / 0.14 * 0.7;
+            r += (SAND[0] - r) * e;
+            g += (SAND[1] - g) * e;
+            b += (SAND[2] - b) * e;
+          }
+        }
+      }
+      data[o] = r;
+      data[o + 1] = g;
+      data[o + 2] = b;
+      data[o + 3] = 255;
+    }
+  }
+}
+function paintChartRaster(canvas, raster, meta, filters, cssWidth, cssHeight) {
+  const c = canvas.getContext("2d"), q = Math.min(1, Math.sqrt(9e4 / (cssWidth * cssHeight))), W3 = Math.max(1, Math.round(cssWidth * q)), H3 = Math.max(1, Math.round(cssHeight * q)), raw = canvas.ownerDocument.createElement("canvas");
+  raw.width = W3;
+  raw.height = H3;
+  const rc = raw.getContext("2d"), pixels = rc.createImageData(W3, H3);
+  paintChartTerrain(pixels.data, raster, W3, H3);
+  rc.putImageData(pixels, 0, 0);
+  c.imageSmoothingEnabled = true;
   c.drawImage(raw, 0, 0, canvas.width, canvas.height);
-  const ratio = canvas.width / cssWidth, view = raster.view, point13 = (p) => projectChart(p, view, canvas.width, canvas.height);
+  const ratio = canvas.width / cssWidth, view = raster.view, point13 = (p) => projectChart(p, view, canvas.width, canvas.height), k = ratio * Math.max(1, Math.min(2.2, cssWidth / view.width)), inView = (b) => !(b.right < view.x || b.x > view.x + view.width || b.bottom < view.y || b.y > view.y + view.height);
+  if (filters.settlements) for (const s of meta.settlements) {
+    if (!s.built) continue;
+    const p = point13(s), rad = (FOOTPRINT[s.class] ?? 9) * canvas.width / view.width;
+    if (p.x < -rad || p.y < -rad || p.x > canvas.width + rad || p.y > canvas.height + rad) continue;
+    const g = c.createRadialGradient(p.x, p.y, 0, p.x, p.y, rad);
+    if (!g) continue;
+    g.addColorStop(0, "rgba(236,216,168,.95)");
+    g.addColorStop(0.6, "rgba(220,196,146,.75)");
+    g.addColorStop(1, "rgba(216,192,142,0)");
+    c.fillStyle = g;
+    c.beginPath();
+    c.arc(p.x, p.y, rad, 0, Math.PI * 2);
+    c.fill();
+  }
   const line11 = (points2, color28, width, dash = []) => {
     c.strokeStyle = color28;
-    c.lineWidth = width * ratio;
-    c.setLineDash(dash.map((n) => n * ratio));
+    c.lineWidth = width * k;
+    c.setLineDash(dash.map((d) => d * k));
     c.lineJoin = "round";
     c.lineCap = "round";
     c.beginPath();
     let first = true;
     for (const p of points2) {
-      const q = point13(p);
-      if (first) c.moveTo(q.x, q.y);
-      else c.lineTo(q.x, q.y);
+      const q2 = point13(p);
+      if (first) c.moveTo(q2.x, q2.y);
+      else c.lineTo(q2.x, q2.y);
       first = false;
     }
     c.stroke();
   };
   if (filters.routes) {
-    for (const r of meta.routes) {
-      if (r.bounds && (r.bounds.right < view.x || r.bounds.x > view.x + view.width || r.bounds.bottom < view.y || r.bounds.y > view.y + view.height)) continue;
-      if (r.kind === "footpath" || r.kind === "trail") {
-        if (view.width > 1800) continue;
-      } else if (r.kind !== "main" && view.width > 4500) continue;
-      for (const p of r.paths) line11(p, r.kind === "main" ? "#e4d3a2" : r.kind === "secondary" ? "#c1b393" : "#bdc3a2", r.kind === "main" ? 2.2 : r.kind === "secondary" ? 1.6 : 1, r.kind === "main" || r.kind === "secondary" ? [] : [3, 3]);
-    }
+    const shown = meta.routes.filter((r) => (!r.bounds || inView(r.bounds)) && (r.kind === "footpath" || r.kind === "trail" ? view.width <= 1800 : r.kind === "main" || view.width <= 4500)), paved = shown.filter((r) => r.kind === "main" || r.kind === "secondary");
     if (view.width < 1e3) for (const r of meta.trailRuns) {
       if (r[1] < view.y || r[1] > view.y + view.height || r[2] < view.x || r[0] > view.x + view.width) continue;
-      line11([{ x: r[0] + 0.5, y: r[1] + 0.5 }, { x: r[2] + 0.5, y: r[3] + 0.5 }], "#b7bda0", 1);
+      line11([{ x: r[0] + 0.5, y: r[1] + 0.5 }, { x: r[2] + 0.5, y: r[3] + 0.5 }], "rgba(236,224,186,.6)", 0.9);
     }
-    for (const b of meta.bridges) line11([b.start, b.end], "#eef5dd", 3);
+    for (const r of shown) if (r.kind !== "main" && r.kind !== "secondary") for (const p of r.paths) line11(p, "rgba(240,230,196,.8)", 1, [2.4, 2]);
+    c.globalAlpha = 0.6;
+    for (const r of paved) for (const p of r.paths) line11(p, "#2a2116", r.kind === "main" ? 3.6 : 2.7);
+    c.globalAlpha = 1;
+    for (const r of paved) for (const p of r.paths) line11(p, r.kind === "main" ? "#f4e5b6" : "#e3d4a8", r.kind === "main" ? 1.9 : 1.25);
+    for (const b of meta.bridges) {
+      line11([b.start, b.end], "#2a2116", 4.2);
+      line11([b.start, b.end], "#caa876", 2.6);
+    }
   }
   if (filters.ferries) {
-    for (const f of meta.ferries) if (f.a && f.b) line11([f.a, f.b], "#9ecbd7", 1.3, [5, 5]);
+    for (const f of meta.ferries) if (f.a && f.b) line11([f.a, f.b], "rgba(206,234,242,.85)", 1.2, [4, 4]);
   }
   c.setLineDash([]);
 }
 
 // src/client/planned_map_v1.js
+var ICON = { plus: '<path d="M12 5v14M5 12h14"/>', minus: '<path d="M5 12h14"/>', locate: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4"/>', world: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>', layers: '<path d="M12 3 2.5 8 12 13l9.5-5L12 3zM2.5 12.5l9.5 5 9.5-5M2.5 16.5l9.5 5 9.5-5"/>', close: '<path d="M6 6l12 12M18 6 6 18"/>' };
+var MINI_TILES_PER_PX = 1.4;
+var MINI_PAD = 32;
 function createPlannedMapV1({ document: doc, environment: env, port, releaseInput }) {
   const el = (tag, text2) => {
     const e = doc.createElement(tag);
@@ -29009,39 +29237,51 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
     return e;
   }, style = el("style");
   style.textContent = `
-.chart-mini{position:fixed;right:calc(8px + var(--world-safe-right,0px));top:calc(78px + var(--world-safe-top,0px));z-index:6;padding:4px;background:#152a31eF;border:1px solid #b1a778;border-radius:9px;color:#e7e7ce;box-shadow:0 3px 10px #0006}.chart-mini canvas{display:block;width:176px;height:120px;border-radius:5px;cursor:pointer}.chart-mini footer{display:flex;align-items:center;justify-content:space-between;font:11px system-ui;padding-top:3px}.chart-mini button{font:11px system-ui;color:#e8e5cf;background:#203d46;border:1px solid #829c9e;border-radius:4px;padding:4px;min-height:28px}.chart-atlas{position:fixed;inset:calc(8px + var(--world-safe-top,0px)) calc(8px + var(--world-safe-right,0px)) calc(8px + var(--world-safe-bottom,0px)) calc(8px + var(--world-safe-left,0px));max-width:1400px;margin:auto;z-index:45;display:flex;flex-direction:column;background:#172d35;color:#e9eadb;border:2px solid #a9ad8c;border-radius:10px;overflow:hidden;box-shadow:0 10px 45px #000c;font:14px system-ui;overscroll-behavior:contain}.chart-atlas[hidden],.chart-mini[hidden]{display:none}.chart-atlas header{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:7px 10px;background:#213f47}.chart-atlas header strong{margin-right:auto;letter-spacing:.06em}.chart-atlas button,.chart-atlas select{min-height:40px;padding:6px 12px;border:1px solid #839c96;border-radius:5px;background:#2a4a50;color:#f0efd8;font:inherit}.chart-atlas button:focus-visible,.chart-atlas input:focus-visible{outline:2px solid #c6e7f3}.chart-atlas .chart-close{font-size:22px;min-width:44px}.chart-tools{padding:5px 10px;border-bottom:1px solid #45606a}.chart-tools summary{cursor:pointer;min-height:26px}.chart-filters{display:flex;gap:12px;flex-wrap:wrap;padding:6px 0}.chart-filters label{display:flex;gap:5px;align-items:center}.chart-main{display:flex;flex:1;min-height:0}.chart-main canvas{flex:1;width:0;min-width:0;min-height:0;touch-action:none;background:#23495b}.chart-panel{width:265px;flex:0 0 auto;padding:14px;overflow:auto;background:#1d353d;border-left:1px solid #45606a}.chart-panel h3{font-size:16px;margin:0 0 10px}.chart-panel p{line-height:1.5}.chart-atlas footer{padding:6px 12px;min-height:30px;background:#213d44;color:#ccd9d6;font-size:12px}.chart-panel button{display:block;width:100%;margin:5px 0;text-align:left}.chart-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:46;background:#203e43;color:#e9efd6;border:1px solid #a7c3a0;border-radius:8px;padding:12px;max-width:90vw;font:14px system-ui}.chart-toast[hidden]{display:none}@media(max-width:700px){.chart-mini canvas{width:142px;height:96px}.chart-main{flex-direction:column}.chart-main canvas{width:100%;height:0;flex:1;min-height:140px}.chart-panel{width:100%;max-height:145px;border-left:0;border-top:1px solid #45606a;padding:8px 12px}.chart-panel h3{margin-bottom:5px}.chart-panel p{margin:5px 0}.chart-atlas header{gap:4px;padding:5px}.chart-atlas button{padding:4px 8px}.chart-tools{font-size:12px}}@media(max-height:520px){.chart-panel{max-height:110px}.chart-mini{top:58px}.chart-mini canvas{height:72px}.chart-atlas header button{min-height:30px}.chart-tools{padding:1px 8px}}
+.chart-mini{position:fixed;right:calc(12px + var(--world-safe-right,0px));top:calc(12px + var(--world-safe-top,0px));z-index:6;padding:3px;border:1px solid #a78f60;border-radius:9px;background:linear-gradient(135deg,#202b35,#101820);box-shadow:0 4px 12px #0006,inset 0 0 0 2px #0d141b;color:#e8dcc0}.chart-mini canvas{display:block;border-radius:6px;cursor:pointer;-webkit-tap-highlight-color:transparent}.chart-mini::after{content:"";position:absolute;inset:3px;border-radius:6px;box-shadow:inset 0 0 0 1px #000a,inset 0 0 9px #08101580;pointer-events:none}.chart-mini::before{content:"N";position:absolute;left:50%;top:0;transform:translate(-50%,-55%);z-index:1;width:15px;height:13px;border:1px solid #a78f60;border-radius:7px;background:#141e27;color:#f2e2b6;font:700 8px/13px system-ui,sans-serif;text-align:center;pointer-events:none}
+.chart-atlas{position:fixed;inset:calc(8px + var(--world-safe-top,0px)) calc(8px + var(--world-safe-right,0px)) calc(8px + var(--world-safe-bottom,0px)) calc(8px + var(--world-safe-left,0px));max-width:1400px;margin:auto;z-index:45;overflow:hidden;background:#1d4c6c;color:#ece3cc;border:1px solid #a78f60;border-radius:10px;box-shadow:0 10px 45px #000c;font:14px system-ui,sans-serif;overscroll-behavior:contain}.chart-atlas[hidden],.chart-mini[hidden],.chart-atlas [hidden]{display:none!important}.chart-atlas>canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block;touch-action:none}.chart-atlas::after{content:"";position:absolute;inset:0;z-index:1;border-radius:inherit;box-shadow:inset 0 0 0 4px #101821,inset 0 0 0 5px #a78f6066,inset 0 0 44px #08111899;pointer-events:none}
+.chart-corner{position:absolute;left:12px;top:12px;z-index:2;display:flex;flex-direction:column;align-items:flex-start;gap:8px;max-width:calc(100% - 84px)}.chart-title{padding:7px 12px 8px;background:#101820e0;border:1px solid #a78f6080;border-radius:8px;pointer-events:none}.chart-title strong{display:block;font:17px/1.15 Georgia,serif;letter-spacing:.06em;color:#eedcb2}.chart-title span{display:block;margin-top:2px;font:11px/1.3 system-ui,sans-serif;color:#b5c1c3}.chart-atlas .chart-journal{min-height:36px;padding:6px 14px;border:1px solid #a78f60;border-radius:18px;background:#141e27e6;color:#f0e2bf;font:600 13px system-ui,sans-serif;box-shadow:0 3px 10px #0007}
+.chart-fab{position:absolute;right:10px;top:10px;z-index:2;display:flex;flex-direction:column;gap:8px}.chart-atlas .chart-fab button{width:44px;height:44px;min-height:44px;padding:0;display:grid;place-items:center;border:1px solid #a78f60;border-radius:50%;background:#141e27e6;color:#f0e2bf;box-shadow:0 3px 10px #0007}.chart-atlas .chart-fab .chart-close{width:44px;min-width:44px;height:44px;border-radius:50%;margin-bottom:6px;background:#35271dee;border-color:#c9a86b}.chart-atlas button[aria-pressed=true]{background:#5a4626;border-color:#e2c27e}.chart-fab svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.chart-layers{position:absolute;right:64px;top:10px;z-index:3;width:min(250px,calc(100% - 84px));max-height:calc(100% - 20px);box-sizing:border-box;overflow:auto;padding:10px 12px;background:#101820f2;border:1px solid #a78f6099;border-radius:10px;box-shadow:0 6px 24px #000a;font:13px system-ui,sans-serif}.chart-layers h4{margin:2px 0 4px;font:600 11px system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#c9b88f}.chart-layers h4+div{margin-bottom:8px}.chart-layers label{display:flex;gap:8px;align-items:center;min-height:30px}.chart-layers input{width:18px;height:18px;margin:0;accent-color:#c9a86b}.chart-key{display:grid;grid-template-columns:22px 1fr;gap:3px 8px;align-items:center;font-size:12px;color:#c9d1cf}.chart-key canvas{width:22px;height:22px}.chart-layers p{margin:8px 0 2px;font-size:12px;line-height:1.4;color:#aab6b6}
+.chart-atlas .chart-panel{position:absolute;left:10px;right:64px;bottom:10px;z-index:2;max-height:45%;box-sizing:border-box;overflow:auto;padding:12px 14px 10px;background:#101820f2;border:1px solid #a78f6099;border-radius:12px;box-shadow:0 6px 24px #000a}.chart-atlas .chart-panel h3{margin:0 34px 6px 0;font:18px/1.25 Georgia,serif;color:#eedcb2}.chart-atlas .chart-panel p{margin:4px 0;font:13px/1.45 system-ui,sans-serif;color:#c4cdcc}.chart-atlas .chart-panel button{display:block;width:100%;min-height:40px;margin:6px 0;padding:6px 10px;text-align:left;border:1px solid #6c6a5a;border-radius:8px;background:#1d2a35;color:#ece3cc;font:600 13px system-ui,sans-serif}.chart-atlas .chart-panel .chart-sheet-close{position:absolute;right:6px;top:6px;width:32px;height:32px;min-height:32px;margin:0;padding:0;text-align:center;border-radius:50%;font-size:18px;line-height:1}
+.chart-status{position:absolute;left:50%;bottom:14px;z-index:2;transform:translateX(-50%);padding:5px 12px;border-radius:14px;background:#101820e0;color:#cfd8d5;font:12px system-ui,sans-serif;white-space:nowrap;pointer-events:none}.chart-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:46;background:#203e43;color:#e9efd6;border:1px solid #a7c3a0;border-radius:8px;padding:12px;max-width:90vw;font:14px system-ui}.chart-toast[hidden]{display:none}
+@media(max-height:500px){.chart-atlas .chart-panel{left:auto;top:10px;width:min(290px,calc(100% - 200px));max-height:none}.chart-corner{flex-direction:row;align-items:center}.chart-title span{display:none}}
 `;
   doc.head.append(style);
-  const mini = el("section"), small = el("canvas"), miniFooter = el("footer"), atlas = el("section"), header = el("header"), tools = el("details"), filtersRow = el("div"), main = el("div"), large = el("canvas"), panel = el("aside"), status2 = el("footer"), toast = el("div");
+  const mini = el("section"), small = el("canvas"), atlas = el("section"), large = el("canvas"), corner = el("div"), title = el("div"), fab = el("div"), layers = el("div"), filtersRow = el("div"), legend = el("div"), panel = el("aside"), status2 = el("div"), toast = el("div");
   mini.className = "chart-mini";
   mini.dataset.gameplayHud = "";
   small.setAttribute("aria-label", "Minimap \u2014 open world map");
+  small.setAttribute("role", "button");
   small.tabIndex = 0;
-  miniFooter.append(el("span", "N \u2191"));
-  mini.append(small, miniFooter);
+  mini.append(small);
   atlas.className = "chart-atlas";
   atlas.hidden = true;
   atlas.setAttribute("role", "dialog");
   atlas.setAttribute("aria-modal", "true");
   atlas.setAttribute("aria-label", "World map");
-  header.append(el("strong", "WORLD ATLAS"));
-  tools.className = "chart-tools";
-  tools.append(el("summary", "Layers & map key"));
-  filtersRow.className = "chart-filters";
-  tools.append(filtersRow);
-  main.className = "chart-main";
   large.setAttribute("aria-label", "World geography and discovered destinations");
+  corner.className = "chart-corner";
+  title.className = "chart-title";
+  title.append(el("strong", "World map"), el("span", "Drag to pan \xB7 pinch to zoom \xB7 tap a marker"));
+  corner.append(title);
+  fab.className = "chart-fab";
+  layers.className = "chart-layers";
+  layers.hidden = true;
+  filtersRow.className = "chart-filters";
+  legend.className = "chart-key";
   panel.className = "chart-panel";
   panel.setAttribute("aria-live", "polite");
-  main.append(large, panel);
-  atlas.append(header, tools, main, status2);
+  panel.hidden = true;
+  status2.className = "chart-status";
+  status2.hidden = true;
+  atlas.append(large, corner, fab, layers, panel, status2);
   toast.className = "chart-toast";
   toast.hidden = true;
   doc.body.append(mini, atlas, toast);
-  let open = false, closed = false, meta = null, model = null, center2 = null, span = 512, miniSpan = 256, mode = "map", selected = null, hitGroups = [], lastPaint = -1, dirty = true, busy = false, wanted = null, metadataError = null, lastJournal = null, toastUntil = 0, requests = 0, rasterBuilds = 0, cacheHits = 0;
+  let open = false, closed = false, meta = null, model = null, center2 = null, span = 512, mode = "map", selected = null, hitGroups = [], lastPaint = -1, dirty = true, busy = false, wanted = null, metadataError = null, lastJournal = null, toastUntil = 0, requests = 0, rasterBuilds = 0, cacheHits = 0, paintMs = 0;
   const filters = { settlements: true, sites: true, completed: true, routes: true, ferries: true }, cache = /* @__PURE__ */ new Map(), pointers = /* @__PURE__ */ new Map();
   let gesture = null, atlasSize = null;
-  const mobileQuery = env.matchMedia?.("(max-width:700px)"), shortQuery = env.matchMedia?.("(max-height:520px)");
+  const phoneQuery = env.matchMedia?.("(max-width:600px)"), shortQuery = env.matchMedia?.("(max-height:500px)");
   const sizeObserver = typeof env.ResizeObserver === "function" ? new env.ResizeObserver((entries) => {
     const r = entries.find((e) => e.target === large)?.contentRect;
     if (r && r.width > 1 && r.height > 1) {
@@ -29056,10 +29296,11 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
   };
   env.addEventListener("resize", invalidateSize);
   env.addEventListener("orientationchange", invalidateSize);
-  const button = (text2, fn, parent = header, label3 = null) => {
+  const button = (text2, fn, parent, label3 = null, icon = null) => {
     const b = el("button", text2);
     b.type = "button";
     if (label3) b.setAttribute("aria-label", label3);
+    if (icon) b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICON[icon] + "</svg>";
     b.onclick = (e) => {
       e.preventDefault();
       fn();
@@ -29089,6 +29330,7 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
   function hide() {
     open = false;
     atlas.hidden = true;
+    layers.hidden = true;
     mini.hidden = !player();
     pointers.clear();
     gesture = null;
@@ -29113,48 +29355,67 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
     }
     dirty = true;
   }
-  button("\u2212", () => zoom(1.7), header, "Zoom out");
-  button("+", () => zoom(1 / 1.7), header, "Zoom in");
-  button("Whole world", () => {
-    if (!meta) return;
-    const r = large.getBoundingClientRect();
-    center2 = { x: meta.widthTiles / 2, y: meta.heightTiles / 2 };
-    span = Math.max(meta.widthTiles * 1.08, meta.heightTiles * r.width / r.height * 1.08);
-    dirty = true;
-  }, header);
-  button("Player", () => {
+  const close = button("", hide, fab, "Close world map", "close");
+  close.className = "chart-close";
+  button("", () => zoom(1 / 1.7), fab, "Zoom in", "plus");
+  button("", () => zoom(1.7), fab, "Zoom out", "minus");
+  button("", () => {
     center2 = { ...player() };
     span = 512;
     selected = null;
     mode = "map";
     dirty = true;
     renderPanel();
-  });
+  }, fab, "Centre on me", "locate");
+  button("", () => {
+    if (!meta) return;
+    const r = large.getBoundingClientRect();
+    center2 = { x: meta.widthTiles / 2, y: meta.heightTiles / 2 };
+    span = Math.max(meta.widthTiles * 1.08, meta.heightTiles * r.width / r.height * 1.08);
+    dirty = true;
+  }, fab, "Whole world", "world");
+  const layersButton = button("", () => {
+    layers.hidden = !layers.hidden;
+    layersButton.setAttribute("aria-pressed", String(!layers.hidden));
+  }, fab, "Layers and map key", "layers");
   const journalButton = button("Journal", () => {
     mode = mode === "journal" ? "map" : "journal";
     renderPanel();
-  });
-  const close = button("\xD7", hide, header, "Close world map");
-  close.className = "chart-close";
-  const miniZoom = button("Area", () => {
-    miniSpan = miniSpan === 256 ? 128 : miniSpan === 128 ? 512 : 256;
-    miniZoom.textContent = miniSpan === 128 ? "Near" : miniSpan === 256 ? "Area" : "Region";
-    dirty = true;
-  }, miniFooter, "Change minimap range");
-  for (const [key3, title] of Object.entries({ settlements: "Settlements", sites: "Known sites", completed: "Completed", routes: "Roads & trails", ferries: "Ferries" })) {
-    const label3 = el("label"), input = el("input");
+  }, corner);
+  journalButton.className = "chart-journal";
+  for (const [key3, label3] of Object.entries({ settlements: "Settlements", sites: "Known sites", completed: "Completed sites", routes: "Roads & trails", ferries: "Ferries" })) {
+    const row2 = el("label"), input = el("input");
     input.type = "checkbox";
     input.checked = true;
     input.onchange = () => {
       filters[key3] = input.checked;
       dirty = true;
     };
-    label3.append(input, el("span", title));
-    filtersRow.append(label3);
+    row2.append(input, el("span", label3));
+    filtersRow.append(row2);
   }
-  tools.append(el("p", "? Unvisited settlement / rumored site \xB7 \u25B3 Cave \xB7 F Fort / Ferry \xB7 R Ruin \xB7 \u2020 Crypt \xB7 \u2713 Completed \xB7 number = grouped locations. Gold roads \xB7 dashed trails \xB7 pale bridges \xB7 blue dashed ferry links. Detail increases as you zoom."));
+  for (const [m, text2] of [[{ kind: "settlement", class: "village-outpost", state: "visited" }, "Village or town"], [{ kind: "settlement", class: "city", state: "visited" }, "City or capital"], [{ kind: "settlement", class: "town", state: "unvisited" }, "Not visited yet"], [{ kind: "site", family: "cave", state: "discovered" }, "Cave"], [{ kind: "site", family: "fort", state: "discovered" }, "Fort"], [{ kind: "site", family: "ruin", state: "discovered" }, "Ruin"], [{ kind: "site", family: "crypt", state: "discovered" }, "Crypt"], [{ kind: "site", state: "rumored" }, "Rumored site"], [{ kind: "ferry", state: "visited" }, "Ferry landing"], [{ kind: "site", family: "cave", state: "completed" }, "Completed"]]) {
+    const icon = el("canvas");
+    icon.width = 44;
+    icon.height = 44;
+    const c = icon.getContext("2d");
+    c.scale(2, 2);
+    drawChartIcon(c, m, 11, 11, 7);
+    legend.append(icon, el("span", text2));
+  }
+  layers.append(el("h4", "Show"), filtersRow, el("h4", "Key"), legend, el("p", "Cream lines are roads, dashes are trails and blue dashes are ferry routes. Red dots on the minimap are nearby enemies."));
+  const sheetClose = () => {
+    const b = button("\xD7", () => {
+      selected = null;
+      mode = "map";
+      dirty = true;
+      renderPanel();
+    }, panel, "Close details");
+    b.className = "chart-sheet-close";
+  };
   function renderPanel() {
     panel.replaceChildren();
+    journalButton.setAttribute("aria-pressed", String(mode === "journal"));
     if (mode === "journal") {
       panel.append(el("h3", "Shared journal"));
       const notes = model?.navigation?.knowledge?.journal ?? [];
@@ -29172,6 +29433,8 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
         }, panel);
       }
       panel.append(el("p", "Knowledge is shared by this campaign\u2019s players and saved. Reading the note consumes no inventory space."));
+      sheetClose();
+      panel.hidden = false;
       return;
     }
     if (selected) {
@@ -29179,9 +29442,11 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
       panel.append(el("h3", state === "rumored" ? "Rumored " + selected.family : selected.label), el("p", (selected.kind === "site" ? selected.tier + " " + selected.family : selected.kind === "settlement" ? selected.class.replaceAll("-", " ") : "Ferry landing") + " \xB7 Band " + selected.band), el("p", state === "unvisited" ? "Location known \u2014 not visited" : state === "completed" ? "Completed \u2014 reset rules are unchanged" : state === "rumored" ? "Location learned from a note \u2014 not yet discovered" : "Discovered by your party"));
       if (selected.kind === "settlement") panel.append(el("p", selected.built ? "Populated review settlement." : "UNBUILT settlement reservation. Geography and location are established; buildings/services are not present."));
       if (selected.biome) panel.append(el("p", selected.biome.replaceAll("-", " ")));
+      sheetClose();
+      panel.hidden = false;
       return;
     }
-    panel.append(el("h3", "A charted world"), el("p", "The geography is fully visible. Settlements await a visit; sites appear when discovered or revealed by a clue."), el("p", "Drag to pan. Pinch, scroll, or use + / \u2212 to zoom. Select a marker; select a numbered group to inspect its locations."), el("p", "Roads, trails and ferries describe the current provisional travel network. They are not a new route plan."));
+    panel.hidden = true;
   }
   function metadata() {
     port.cartographyWindow({ op: "metadata" }).then((value2) => {
@@ -29193,11 +29458,12 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
     }).catch((error) => {
       metadataError = error.message;
       status2.textContent = "Map unavailable: " + error.message;
+      status2.hidden = false;
     });
   }
   metadata();
-  function requestRaster(view, width, height, cssWidth, cssHeight) {
-    const rounded2 = { x: Math.floor(view.x), y: Math.floor(view.y), width: Math.ceil(view.width), height: Math.ceil(view.height) }, key3 = JSON.stringify([rounded2, width, height, cssWidth, cssHeight]);
+  function requestRaster(view, width, height, cssWidth, cssHeight, ratio) {
+    const rounded2 = { x: Math.floor(view.x), y: Math.floor(view.y), width: Math.ceil(view.width), height: Math.ceil(view.height) }, key3 = JSON.stringify([rounded2, width, height, cssWidth, cssHeight, ratio]);
     wanted = { key: key3, view: rounded2, width, height, cssWidth, cssHeight };
     if (cache.has(key3)) {
       const v = cache.get(key3);
@@ -29214,15 +29480,14 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
         if (closed) return;
         metadataError = null;
         const surface = doc.createElement("canvas");
-        surface.width = Math.round(width * 2);
-        surface.height = Math.round(height * 2);
+        surface.width = Math.round(cssWidth * ratio);
+        surface.height = Math.round(cssHeight * ratio);
         const result = { key: request.key, raster, surface, cssWidth: request.cssWidth, cssHeight: request.cssHeight, filterKey: null };
         cache.set(request.key, result);
-        while (cache.size > 8) cache.delete(cache.keys().next().value);
+        while (cache.size > 6) cache.delete(cache.keys().next().value);
         dirty = true;
       }).catch((e) => {
         metadataError = e.message;
-        status2.textContent = "Map detail unavailable: " + e.message;
       }).finally(() => {
         busy = false;
       });
@@ -29237,9 +29502,16 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
       }
       return atlasSize;
     }
-    return { width: mobileQuery?.matches ? 142 : 176, height: shortQuery?.matches ? 72 : mobileQuery?.matches ? 96 : 120 };
+    return phoneQuery?.matches ? { width: 120, height: 86 } : shortQuery?.matches ? { width: 152, height: 79 } : { width: 184, height: 124 };
   }
-  function draw(time) {
+  function plate4(c, x, y, w, h, r) {
+    c.beginPath();
+    if (c.roundRect) c.roundRect(x, y, w, h, r);
+    else c.rect(x, y, w, h);
+    c.fill();
+    c.stroke();
+  }
+  function draw() {
     const p = player();
     if (!p || !meta) return;
     const canvas = open ? large : small, { width, height } = canvasDimensions(canvas, open), ratio = Math.min(2, env.devicePixelRatio || 1);
@@ -29247,90 +29519,148 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
     if (canvas.width !== Math.round(width * ratio) || canvas.height !== Math.round(height * ratio)) {
       canvas.width = Math.round(width * ratio);
       canvas.height = Math.round(height * ratio);
+      if (!open) {
+        small.style.width = width + "px";
+        small.style.height = height + "px";
+      }
       dirty = true;
     }
     const c = canvas.getContext("2d");
     c.setTransform(ratio, 0, 0, ratio, 0, 0);
-    c.fillStyle = "#23495b";
+    c.fillStyle = CHART_COLORS.O;
     c.fillRect(0, 0, width, height);
     if (open && !center2) center2 = { ...p };
-    const shown = chartView(open ? center2 : p, open ? span : miniSpan, width, height), pad = open ? 0 : 48, requestCenter = open ? center2 : { x: Math.floor(p.x / 32) * 32 + 16, y: Math.floor(p.y / 32) * 32 + 16 }, backingSpan = open ? span : miniSpan * (width + pad * 2) / width, backingView = chartView(requestCenter, backingSpan, width + pad * 2, height + pad * 2), rw = open ? Math.min(512, Math.round(width / 2)) : Math.round(width + pad * 2), rh = open ? Math.min(240, Math.round(height / 2)) : Math.min(240, Math.round(height + pad * 2));
-    let result = requestRaster(backingView, Math.max(32, rw), Math.max(32, rh), width + pad * 2, height + pad * 2);
-    if (!result) {
-      const old2 = [...cache.values()].reverse().find((v) => v.raster.view.width / shown.width < 3 && v.raster.view.width / shown.width > 0.4);
-      result = old2 ?? null;
-    }
+    const viewSpan = open ? span : width * MINI_TILES_PER_PX, shown = chartView(open ? center2 : p, viewSpan, width, height), pad = open ? 0 : MINI_PAD, requestCenter = open ? center2 : { x: Math.floor(p.x / 32) * 32 + 16, y: Math.floor(p.y / 32) * 32 + 16 }, backingView = chartView(requestCenter, viewSpan * (width + pad * 2) / width, width + pad * 2, height + pad * 2), rw = Math.min(512, Math.round(width + pad * 2)), rh = Math.min(240, Math.round(height + pad * 2));
+    let result = requestRaster(backingView, Math.max(32, rw), Math.max(32, rh), width + pad * 2, height + pad * 2, ratio);
+    const fresh = Boolean(result);
+    if (!result) result = [...cache.values()].reverse().find((v) => v.raster.view.width / shown.width < 3 && v.raster.view.width / shown.width > 0.4) ?? null;
     if (result) {
-      const filterKey = JSON.stringify([filters.routes, filters.ferries]);
+      const filterKey = JSON.stringify([filters.routes, filters.ferries, filters.settlements]);
       if (result.filterKey !== filterKey) {
+        const started = env.performance.now();
         paintChartRaster(result.surface, result.raster, meta, filters, result.cssWidth, result.cssHeight);
+        paintMs = env.performance.now() - started;
         result.filterKey = filterKey;
         rasterBuilds++;
       }
       const q = projectChart(result.raster.view, shown, width, height);
-      c.imageSmoothingEnabled = false;
+      c.imageSmoothingEnabled = true;
       c.drawImage(result.surface, q.x, q.y, result.raster.view.width * width / shown.width, result.raster.view.height * height / shown.height);
     }
-    const k = model.navigation.knowledge, raw = chartMarkers(meta, k, model.navigation.navigableSitesById, filters), groups = groupChartMarkers(raw, shown, width, height, open ? 25 : 15);
+    const k = model.navigation.knowledge, raw = chartMarkers(meta, k, model.navigation.navigableSitesById, filters), groups = groupChartMarkers(raw, shown, width, height, open ? 25 : 12), pos = projectChart(p, shown, width, height);
     hitGroups = groups;
     for (const g of groups) {
-      if (g.members.length > 1) {
-        c.fillStyle = "#d8e0c6";
-        c.strokeStyle = "#19353d";
-        c.lineWidth = 2;
+      if (!open && Math.hypot(g.x - pos.x, g.y - pos.y) < 7) continue;
+      if (open && selected && g.members.some((m) => m.id === selected.id)) {
+        c.strokeStyle = "#ffd77a";
+        c.lineWidth = 2.5;
         c.beginPath();
-        c.arc(g.x, g.y, open ? 12 : 8, 0, Math.PI * 2);
+        c.arc(g.x, g.y, 16, 0, Math.PI * 2);
+        c.stroke();
+      }
+      if (g.members.length > 1) {
+        c.fillStyle = "#f1e6c8";
+        c.strokeStyle = "#11181e";
+        c.lineWidth = 1.6;
+        c.beginPath();
+        c.arc(g.x, g.y, open ? 12 : 6.5, 0, Math.PI * 2);
         c.fill();
         c.stroke();
-        c.fillStyle = "#1d3b43";
-        c.font = "bold " + (open ? 11 : 9) + "px system-ui";
+        c.fillStyle = "#1b2329";
+        c.font = "bold " + (open ? 11 : 8) + "px system-ui";
         c.textAlign = "center";
         c.textBaseline = "middle";
-        c.fillText(String(g.members.length), g.x, g.y);
+        c.fillText(String(g.members.length), g.x, g.y + 0.5);
         c.textAlign = "left";
-      } else drawChartIcon(c, g.members[0], g.x, g.y, open ? 9 : 6);
+      } else drawChartIcon(c, g.members[0], g.x, g.y, open ? 9 : 5);
     }
     if (open) {
-      c.font = "12px system-ui";
+      c.font = "600 12px system-ui";
+      c.lineWidth = 1;
       for (const l of layoutChartLabels(groups, c, width, height, span, selected?.id)) {
-        c.fillStyle = "#152f38e8";
-        c.fillRect(l.x, l.y, l.w, l.h);
-        c.fillStyle = "#edf0d6";
+        c.fillStyle = "#101820d9";
+        c.strokeStyle = "#a78f6066";
+        plate4(c, l.x, l.y, l.w, l.h, 4);
+        c.fillStyle = "#f1e6c8";
         c.textAlign = "left";
         c.textBaseline = "middle";
-        c.fillText(l.text, l.x + 4, l.y + 9);
+        c.fillText(l.text, l.x + 4, l.y + 9.5);
       }
     }
-    const pos = projectChart(p, shown, width, height), a = model.primary?.actorsById?.[model.playersById[model.localPlayerId].entityId], f = a?.facing ?? { x: 0, y: -1 };
+    const entityId2 = model.playersById?.[model.localPlayerId]?.entityId, me = model.entitiesById?.[entityId2];
+    const outdoors = model.space && !model.space.site && !model.space.functionalSite && !model.space.settlementInterior;
+    if (!open && outdoors && me?.position) {
+      const s = width / viewSpan / 32;
+      c.fillStyle = "#ff4b3e";
+      c.strokeStyle = "#2a0b08";
+      c.lineWidth = 1.2;
+      let n = 0;
+      for (const a of Object.values(model.entitiesById)) {
+        if (!a?.alive || a.team !== "hostile" || !a.position) continue;
+        const x = pos.x + (a.position.x - me.position.x) * s, y = pos.y + (a.position.y - me.position.y) * s;
+        if (x < 3 || y < 3 || x > width - 3 || y > height - 3) continue;
+        c.beginPath();
+        c.arc(x, y, 2.3, 0, Math.PI * 2);
+        c.fill();
+        c.stroke();
+        if (++n >= 48) break;
+      }
+    }
+    const f = model.primary?.actorsById?.[entityId2]?.facing ?? { x: 0, y: -1 }, r = open ? 1.3 : 1;
     c.save();
     c.translate(pos.x, pos.y);
+    const glow6 = c.createRadialGradient?.(0, 0, 0, 0, 0, 11 * r);
+    if (glow6) {
+      glow6.addColorStop(0, "rgba(255,236,170,.55)");
+      glow6.addColorStop(1, "rgba(255,236,170,0)");
+      c.fillStyle = glow6;
+      c.beginPath();
+      c.arc(0, 0, 11 * r, 0, Math.PI * 2);
+      c.fill();
+    }
     c.rotate(Math.atan2(f.y, f.x) + Math.PI / 2);
-    c.fillStyle = "#f6f3cc";
-    c.strokeStyle = "#142b34";
-    c.lineWidth = 2;
+    c.scale(r, r);
+    c.strokeStyle = "#14100a";
+    c.lineWidth = 2.2;
+    c.lineJoin = "round";
+    c.fillStyle = "#fff3c9";
     c.beginPath();
-    c.moveTo(0, -8);
-    c.lineTo(6, 6);
+    c.moveTo(0, -7.5);
+    c.lineTo(5.5, 6);
     c.lineTo(0, 3);
-    c.lineTo(-6, 6);
+    c.lineTo(-5.5, 6);
+    c.closePath();
+    c.stroke();
+    c.fill();
+    c.fillStyle = "#e9b54a";
+    c.beginPath();
+    c.moveTo(0, -7.5);
+    c.lineTo(5.5, 6);
+    c.lineTo(0, 3);
     c.closePath();
     c.fill();
-    c.stroke();
     c.restore();
     if (open) {
       const units = [16, 32, 64, 128, 256, 512, 1024].find((n) => n * width / span >= 70) ?? 2048, len = units * width / span;
-      c.fillStyle = "#17313cdd";
-      c.fillRect(10, height - 35, Math.max(100, len + 16), 28);
-      c.strokeStyle = "#e3e7cd";
+      c.fillStyle = "#101820d9";
+      c.strokeStyle = "#a78f6080";
+      c.lineWidth = 1;
+      plate4(c, 12, height - 48, Math.max(96, len + 24), 36, 6);
+      c.strokeStyle = "#efe3c4";
       c.lineWidth = 2;
       c.beginPath();
-      c.moveTo(18, height - 14);
-      c.lineTo(18 + len, height - 14);
+      c.moveTo(24, height - 25);
+      c.lineTo(24, height - 21);
+      c.lineTo(24 + len, height - 21);
+      c.lineTo(24 + len, height - 25);
       c.stroke();
-      c.fillStyle = "#e3e7cd";
+      c.fillStyle = "#efe3c4";
       c.font = "11px system-ui";
-      c.fillText(units + " tiles", 18, height - 25);
-      const text2 = metadataError ? "Map detail error: " + metadataError : busy ? "Preparing chart detail\u2026" : "Fully charted geography \xB7 discoveries shared \xB7 " + Math.round(span) + "-tile view";
+      c.textAlign = "left";
+      c.textBaseline = "alphabetic";
+      c.fillText(units + " tiles", 24, height - 30);
+      const text2 = metadataError ? "Map detail error: " + metadataError : !result ? "Drawing the map\u2026" : !fresh && busy ? "Sharpening\u2026" : "";
+      status2.hidden = !text2;
       if (status2.textContent !== text2) status2.textContent = text2;
     }
   }
@@ -29384,6 +29714,7 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
     if (!gesture?.moved) {
       const q = relative(e), hit = hitGroups.find((g) => Math.hypot(g.x - q.x, g.y - q.y) <= 17);
       if (hit?.members.length > 1) {
+        mode = "map";
         panel.replaceChildren(el("h3", "Nearby locations"));
         for (const m of hit.members) button((m.state === "rumored" ? "Rumored " + m.family : m.label) + " \xB7 Band " + m.band, () => {
           center2 = { x: m.x, y: m.y };
@@ -29393,11 +29724,21 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
           dirty = true;
           renderPanel();
         }, panel);
+        sheetClose();
+        panel.hidden = false;
       } else if (hit) {
         selected = hit.members[0];
         mode = "map";
+        dirty = true;
+        renderPanel();
+      } else if (!panel.hidden) {
+        selected = null;
+        mode = "map";
+        dirty = true;
         renderPanel();
       }
+      layers.hidden = true;
+      layersButton.setAttribute("aria-pressed", "false");
     }
     pointers.delete(e.pointerId);
     if (!pointers.size) gesture = null;
@@ -29433,7 +29774,7 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
       lastPaint = time;
       dirty = false;
     }
-  }, resources: () => ({ cartographyMode: "seed-plan-layered-v1", mapLevel: span, mapMaximumLevel: meta ? Math.max(meta.widthTiles, meta.heightTiles) * 1.6 : 0, mapRasterRequests: requests, mapRasterCacheEntries: cache.size, mapRasterBuilds: rasterBuilds, mapRasterCacheHits: cacheHits, mapRasterBusy: busy }), destroy() {
+  }, resources: () => ({ cartographyMode: "seed-plan-layered-v1", mapLevel: span, mapMaximumLevel: meta ? Math.max(meta.widthTiles, meta.heightTiles) * 1.6 : 0, mapRasterRequests: requests, mapRasterCacheEntries: cache.size, mapRasterBuilds: rasterBuilds, mapRasterCacheHits: cacheHits, mapRasterBusy: busy, mapPaintMs: Math.round(paintMs * 10) / 10 }), destroy() {
     closed = true;
     sizeObserver?.disconnect();
     env.removeEventListener("resize", invalidateSize);
@@ -54988,6 +55329,7 @@ async function startWorldClient(environment) {
     const text2 = "Day " + t.dayNumber + " \xB7 " + t.timeLabel + (r.overrideMinute !== null ? " \xB7 lighting preview" : "");
     if (text2 !== lastClockText) {
       clockLabel.textContent = text2;
+      clockLabel.dataset.period = t.period;
       lastClockText = text2;
     }
     const nextTimeStatus = "Campaign: day " + t.dayNumber + " " + t.timeLabel + " (" + t.period + "). " + (r.overrideMinute === null ? "Following saved campaign time." : "Lighting preview " + String(Math.floor(r.overrideMinute / 60)).padStart(2, "0") + ":" + String(Math.floor(r.overrideMinute % 60)).padStart(2, "0") + "; campaign time continues normally.") + " A full cycle takes60 active minutes. Loading and suspension pause time. Sleeping/time skipping is not implemented.";
