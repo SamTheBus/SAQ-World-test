@@ -30913,58 +30913,86 @@ function createGroundItemPresentation() {
 }
 
 // src/client/dynamic_world_lights_v1.js
-var DYNAMIC_WORLD_LIGHTS_VERSION = "dynamic-world-lights-v1";
+var DYNAMIC_WORLD_LIGHTS_VERSION = "dynamic-world-lights-v2";
 var PORTAL_OUTER = "#67e8f9";
 var PORTAL_INNER = "#c4b5fd";
 var PLAYER = "#ffe9c4";
 var MAX_LOOT_LIGHTS = 12;
 function createDynamicWorldLightsV1(doc) {
   const stamps = /* @__PURE__ */ new Map();
-  let drawn = 0;
-  function stamp2(color28) {
-    let c = stamps.get(color28);
-    if (c) return c;
-    c = doc.createElement("canvas");
+  let drawn = 0, cores = 0;
+  function stamp2(color28, core5 = false) {
+    const key2 = color28 + (core5 ? "/core" : ""), cached = stamps.get(key2);
+    if (cached) return cached;
+    const c = doc.createElement("canvas");
     c.width = c.height = 128;
     const g = c.getContext("2d"), gradient = g.createRadialGradient(64, 64, 0, 64, 64, 64);
-    gradient.addColorStop(0, color28 + "d0");
-    gradient.addColorStop(0.35, color28 + "60");
-    gradient.addColorStop(1, color28 + "00");
+    if (core5) {
+      gradient.addColorStop(0, color28 + "ff");
+      gradient.addColorStop(0.3, color28 + "70");
+      gradient.addColorStop(1, color28 + "00");
+    } else {
+      gradient.addColorStop(0, color28 + "ff");
+      gradient.addColorStop(0.45, color28 + "9a");
+      gradient.addColorStop(0.8, color28 + "26");
+      gradient.addColorStop(1, color28 + "00");
+    }
     g.fillStyle = gradient;
     g.fillRect(0, 0, 128, 128);
-    stamps.set(color28, c);
+    stamps.set(key2, c);
     return c;
   }
-  function draw(ctx, model, view, frame, time, player) {
+  const darknessOf = (frame) => {
+    const [r, g, b] = frame.ambient;
+    return Math.max(0, 1 - (r + g + b) / 765);
+  };
+  function illuminate(lc, model, view, frame, time, player) {
     drawn = 0;
     if (!frame?.enabled) return;
-    const [r, g, b] = frame.ambient, darkness = Math.max(0, 1 - (r + g + b) / 765), interior2 = frame.profile === "interior", strength = Math.min(1, (interior2 ? 0.55 : 0) + darkness * 1.6);
-    if (strength < 0.04) return;
+    const interior2 = frame.profile === "interior";
     const pool = (x, y, radius, color28, alpha) => {
       if (x + radius < view.x || y + radius < view.y || x - radius > view.x + view.width || y - radius > view.y + view.height) return;
-      ctx.globalAlpha = Math.min(1, alpha * strength);
-      ctx.drawImage(stamp2(color28), x - radius, y - radius, radius * 2, radius * 2);
+      lc.globalAlpha = Math.min(1, alpha);
+      lc.drawImage(stamp2(color28), x - radius, y - radius, radius * 2, radius * 2);
       drawn++;
     };
-    ctx.save();
-    ctx.globalCompositeOperation = "screen";
-    const pulse = 0.9 + 0.1 * Math.sin(time * 4e-3);
+    lc.save();
+    lc.globalCompositeOperation = "screen";
+    const pulse = 0.94 + 0.06 * Math.sin(time * 4e-3);
     for (const portal of model.space.exits ?? []) {
       if (!portal.extractionPortal?.visible) continue;
-      pool(portal.x, portal.y, 160 * pulse, PORTAL_OUTER, 0.7);
-      pool(portal.x, portal.y - 6, 80, PORTAL_INNER, 0.55);
+      pool(portal.x, portal.y, 120 * pulse, PORTAL_OUTER, 0.7);
+      pool(portal.x, portal.y - 4, 56, PORTAL_INNER, 0.45);
     }
     let loot = 0;
     for (const drop of model.loot ?? []) {
       if (loot >= MAX_LOOT_LIGHTS) break;
       const tier2 = Math.max(0, Math.min(RARITY_COLORS.length - 1, groundItemPresentation(drop, time).rarity));
-      pool(drop.position.x, drop.position.y - 4, 56 + tier2 * 14, RARITY_COLORS[tier2], 0.32 + tier2 * 0.08);
+      pool(drop.position.x, drop.position.y - 4, 36 + tier2 * 8, RARITY_COLORS[tier2], 0.3 + tier2 * 0.07);
       loot++;
     }
-    if (player?.alive && !interior2) pool(player.position.x, player.position.y - 6, 120, PLAYER, 0.5);
+    if (player?.alive && !interior2) pool(player.position.x, player.position.y - 6, 104, PLAYER, 0.55);
+    lc.restore();
+  }
+  function glow6(ctx, model, view, frame, time) {
+    cores = 0;
+    if (!frame?.enabled) return;
+    const strength = Math.min(1, (frame.profile === "interior" ? 0.4 : 0) + darknessOf(frame) * 1.4);
+    if (strength < 0.04) return;
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    const pulse = 0.85 + 0.15 * Math.sin(time * 4e-3);
+    for (const portal of model.space.exits ?? []) {
+      if (!portal.extractionPortal?.visible) continue;
+      const r = 30;
+      if (portal.x + r < view.x || portal.y + r < view.y || portal.x - r > view.x + view.width || portal.y - r > view.y + view.height) continue;
+      ctx.globalAlpha = 0.32 * strength * pulse;
+      ctx.drawImage(stamp2(PORTAL_OUTER, true), portal.x - r, portal.y - r * 0.7, r * 2, r * 1.4);
+      cores++;
+    }
     ctx.restore();
   }
-  return Object.freeze({ draw, resources: () => ({ dynamicWorldLights: { version: DYNAMIC_WORLD_LIGHTS_VERSION, drawn } }) });
+  return Object.freeze({ illuminate, glow: glow6, resources: () => ({ dynamicWorldLights: { version: DYNAMIC_WORLD_LIGHTS_VERSION, drawn, cores } }) });
 }
 
 // src/client/hero_level_up_v3.js
@@ -43901,16 +43929,51 @@ function lightingFrameV1(model, review = null) {
   }
   return Object.freeze({ version: DAY_NIGHT_LIGHTING_VERSION, enabled, clock, minuteOfDay: minute, period: clock.period, preview: Number.isFinite(override), profile: room ? "interior" : "outdoor", ambient: ambient.map(Math.round), vector: vector2, shadowAlpha: enabled ? shadowAlpha : 0, tavern });
 }
-function drawAmbientV1(ctx, view, frame) {
+var LIGHT_MAP_SCALE = 0.5;
+var lightMaps = /* @__PURE__ */ new WeakMap();
+function composeLightMapV1(ctx, frame, paint) {
+  const target = ctx.canvas, doc = target?.ownerDocument;
+  if (typeof ctx.getTransform !== "function" || !doc?.createElement || !(target.width > 0 && target.height > 0)) return false;
+  const w = Math.max(1, Math.ceil(target.width * LIGHT_MAP_SCALE)), h = Math.max(1, Math.ceil(target.height * LIGHT_MAP_SCALE));
+  let map = lightMaps.get(target);
+  if (!map) {
+    map = doc.createElement("canvas");
+    lightMaps.set(target, map);
+  }
+  if (map.width !== w || map.height !== h) {
+    map.width = w;
+    map.height = h;
+  }
+  const lc = map.getContext("2d"), [r, g, b] = frame.ambient, sx = w / target.width, sy = h / target.height, m = ctx.getTransform();
+  lc.setTransform(1, 0, 0, 1, 0, 0);
+  lc.globalAlpha = 1;
+  lc.globalCompositeOperation = "source-over";
+  lc.fillStyle = `rgb(${r},${g},${b})`;
+  lc.fillRect(0, 0, w, h);
+  lc.save();
+  lc.setTransform(m.a * sx, m.b * sy, m.c * sx, m.d * sy, m.e * sx, m.f * sy);
+  paint(lc);
+  lc.restore();
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = "multiply";
+  ctx.drawImage(map, 0, 0, target.width, target.height);
+  ctx.restore();
+  return true;
+}
+function drawAmbientV1(ctx, view, frame, paintLights = null) {
   if (!frame.enabled) return;
   const [r, g, b] = frame.ambient;
   if (r === 255 && g === 255 && b === 255) return;
+  if (paintLights && composeLightMapV1(ctx, frame, paintLights)) return;
   ctx.save();
   ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = "multiply";
   ctx.fillStyle = `rgb(${r},${g},${b})`;
   ctx.fillRect(view.x, view.y, view.width, view.height);
   ctx.restore();
+  if (paintLights) paintLights(ctx);
 }
 function hull(points2) {
   const p = points2.sort((a, b) => a.x - b.x || a.y - b.y), cross = (a, b, c) => (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x), low = [], high = [];
@@ -44046,7 +44109,7 @@ function createDayNightLightingV1({ review = null } = {}) {
     visible3 = selected.length - dynamic;
     worstMs = Math.max(worstMs, performance.now() - at3);
   }
-  return Object.freeze({ begin, shadows, ambient: (ctx, view) => drawAmbientV1(ctx, view, frame), frame: () => frame, clear: () => pages.clear(), resources: () => ({ dayNightLighting: { version: DAY_NIGHT_LIGHTING_VERSION, enabled: frame?.enabled ?? false, profile: frame?.profile ?? null, minuteOfDay: frame?.minuteOfDay ?? null, period: frame?.period ?? null, previewOverride: frame?.preview ?? false, ambient: frame?.ambient ?? null, shadowDirection: frame?.vector ?? null, shadowAlpha: frame?.shadowAlpha ?? 0, descriptorPages: pages.size, descriptorBuilds, castersConsidered: considered, staticCasters: visible3, actorCasters: dynamic, worstShadowMs: worstMs, limits: DAY_NIGHT_LIMITS, approximation: "Conservative 2D footprints and presentation heights; not physical 3D shadows or gameplay visibility." } }) });
+  return Object.freeze({ begin, shadows, ambient: (ctx, view, paintLights = null) => drawAmbientV1(ctx, view, frame, paintLights), frame: () => frame, clear: () => pages.clear(), resources: () => ({ dayNightLighting: { version: DAY_NIGHT_LIGHTING_VERSION, enabled: frame?.enabled ?? false, profile: frame?.profile ?? null, minuteOfDay: frame?.minuteOfDay ?? null, period: frame?.period ?? null, previewOverride: frame?.preview ?? false, ambient: frame?.ambient ?? null, shadowDirection: frame?.vector ?? null, shadowAlpha: frame?.shadowAlpha ?? 0, descriptorPages: pages.size, descriptorBuilds, castersConsidered: considered, staticCasters: visible3, actorCasters: dynamic, worstShadowMs: worstMs, limits: DAY_NIGHT_LIMITS, approximation: "Conservative 2D footprints and presentation heights; not physical 3D shadows or gameplay visibility." } }) });
 }
 
 // src/client/lighting_presentation.js
@@ -44395,7 +44458,7 @@ function createLighting(canvas, { presentation = null } = {}) {
     }
   }
   function ground(ctx, actor, { unified = false } = {}) {
-    if (unified && actor.boss) return;
+    if (unified && (actor.boss || frame?.profile !== "interior")) return;
     ctx.save();
     ctx.fillStyle = unified ? "rgba(7,16,25,.13)" : "#07101938";
     ctx.beginPath();
@@ -49978,13 +50041,16 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
     drawFerryLandings(ctx, model.space.exits);
     drawDepthItems(ctx, depthItems2);
     if (unified) {
-      dayNight.ambient(ctx, lightView);
+      const paintLights = (lc) => {
+        if (!model.space.visual) return;
+        lighting.draw(lc, model.space, lightView, time, visualActor, { unified: true });
+        dynamicLights.illuminate(lc, model, lightView, frame, time, visualActor);
+      }, paintLight = () => dayNight.ambient(ctx, lightView, paintLights);
+      if (performanceProbe) performanceProbe.measure("lighting", paintLight);
+      else paintLight();
       if (model.space.visual) {
-        const paintLight = () => lighting.draw(ctx, model.space, lightView, time, visualActor, { unified: true });
-        if (performanceProbe) performanceProbe.measure("lighting", paintLight);
-        else paintLight();
         lighting.emissive(ctx, model.space, lightView, time);
-        dynamicLights.draw(ctx, model, lightView, frame, time, visualActor);
+        dynamicLights.glow(ctx, model, lightView, frame, time);
       }
       nightActors.draw(ctx, visualModel, lightView, frame);
       groundItems.emission(ctx, model, time, viewport, { frame });
