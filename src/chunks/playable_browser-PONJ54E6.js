@@ -24996,9 +24996,9 @@ function projectWorldTerrainD9(state, compiled, { x, y, width = 88, height = 88 
 
 // src/host/combat_presentation_projection.js
 function projectCombatPresentation(state, visibleIds) {
-  const ids3 = new Set(visibleIds), lanes = /* @__PURE__ */ new Map();
+  const ids3 = new Set(visibleIds), lanes2 = /* @__PURE__ */ new Map();
   const mastery = Object.values(state.subweaponCombat.mastery ?? {});
-  return { masteryHazards: mastery.flatMap((b) => Object.values(b.hazards)).filter((e) => ids3.has(e.sourceId)).map((e) => ({ position: { ...e.position }, radius: e.radius, expiresTick: e.expiresTick })), masteryRazors: mastery.flatMap((b) => Object.values(b.razors)).filter((e) => ids3.has(e.sourceId)).map((e) => ({ position: { ...e.position }, direction: { ...e.direction } })), statuses: [...Object.values(state.subweaponCombat.effects), ...mastery.flatMap((b) => [...Object.values(b.poisons).map((e) => ({ ...e, id: e.sourceId + "/" + e.id, kind: "poison" })), ...Object.values(b.statuses).map((e) => ({ ...e, id: e.sourceId + "/" + e.id, stacks: e.rank, nextTick: e.expiresTick, appliedTick: e.expiresTick - (e.kind === "expose" ? 300 : e.kind === "slow" ? 240 : 90) }))]), ...Object.values(state.subweaponCombat.controls ?? {}).map((e) => ({ ...e, kind: e.phase, nextTick: e.expiresTick }))].filter((e) => ids3.has(e.targetId) && e.expiresTick > state.tick).map((e) => ({ lane: (lanes.set(e.targetId, (lanes.get(e.targetId) ?? -1) + 1), lanes.get(e.targetId)), id: e.id, sourceId: e.sourceId, targetId: e.targetId, kind: e.kind, stacks: e.stacks, expiresTick: e.expiresTick, nextTick: e.nextTick, durationFrames: ["bleed", "poison"].includes(e.kind) ? 600 : e.kind === "burn" ? 240 : e.expiresTick - e.appliedTick })), families: Object.fromEntries(Object.entries(state.subweaponCombat.actors).filter(([id]) => ids3.has(id)).map(([id, c]) => [id, { mastery: (() => {
+  return { masteryHazards: mastery.flatMap((b) => Object.values(b.hazards)).filter((e) => ids3.has(e.sourceId)).map((e) => ({ position: { ...e.position }, radius: e.radius, expiresTick: e.expiresTick })), masteryRazors: mastery.flatMap((b) => Object.values(b.razors)).filter((e) => ids3.has(e.sourceId)).map((e) => ({ position: { ...e.position }, direction: { ...e.direction } })), statuses: [...Object.values(state.subweaponCombat.effects), ...mastery.flatMap((b) => [...Object.values(b.poisons).map((e) => ({ ...e, id: e.sourceId + "/" + e.id, kind: "poison" })), ...Object.values(b.statuses).map((e) => ({ ...e, id: e.sourceId + "/" + e.id, stacks: e.rank, nextTick: e.expiresTick, appliedTick: e.expiresTick - (e.kind === "expose" ? 300 : e.kind === "slow" ? 240 : 90) }))]), ...Object.values(state.subweaponCombat.controls ?? {}).map((e) => ({ ...e, kind: e.phase, nextTick: e.expiresTick }))].filter((e) => ids3.has(e.targetId) && e.expiresTick > state.tick).map((e) => ({ lane: (lanes2.set(e.targetId, (lanes2.get(e.targetId) ?? -1) + 1), lanes2.get(e.targetId)), id: e.id, sourceId: e.sourceId, targetId: e.targetId, kind: e.kind, stacks: e.stacks, expiresTick: e.expiresTick, nextTick: e.nextTick, durationFrames: ["bleed", "poison"].includes(e.kind) ? 600 : e.kind === "burn" ? 240 : e.expiresTick - e.appliedTick })), families: Object.fromEntries(Object.entries(state.subweaponCombat.actors).filter(([id]) => ids3.has(id)).map(([id, c]) => [id, { mastery: (() => {
     const p = Object.values(state.playersById).find((p2) => p2.entityId === id), d = p?.d8, t = d?.transient;
     return t ? { pulseBlocks: t.pulseBlocks, syphon: finiteNodeRank(d, "tome_arcane_syphon") > 0, earthBreaker: finiteNodeRank(d, "shield_earth_breaker_bash") > 0, singularity: finiteNodeRank(d, "tome_keystone_singularity") > 0, anchor: t.lastAnchor, fortitudeStacks: t.fortitudeStacks, retaliatoryReady: t.retaliatoryReady, colossus: t.colossusTicks > 0, shadowStep: t.shadowStepTicks > 0, syphonStacks: t.syphonStacks, weavingStacks: t.weavingStacks } : null;
   })(), element: Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.itemsById[Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.equipped.subweapon]?.generated?.definition.spellType ?? "fire", guard: c.guard ? { ...c.guard, integrity: presentCombat(c.guard.integrity), direction: { ...c.guard.direction } } : null, pressure: c.pressure, dash: { ...c.dash }, delivery: { ...c.delivery } }])) };
@@ -25881,6 +25881,140 @@ async function createLocalWorldSession({
   } });
 }
 
+// src/client/toast_v1.js
+var MAX_VISIBLE = 3;
+var DEFAULT_MS = 2600;
+var SVG = "http://www.w3.org/2000/svg";
+var ICONS = {
+  level: '<path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17l-6.1 3.4 1.5-6.8L2.2 9l6.9-.7z"/>',
+  mastery: '<path d="M12 2l2 6h6l-5 4 2 7-5-4-5 4 2-7-5-4h6z" opacity=".35"/><circle cx="12" cy="12" r="4"/>',
+  potion: '<path d="M9 2h6v2h-1v4.2a7 7 0 1 1-4 0V4H9z"/>',
+  loot: '<path d="M4 8h16l-1 12H5zM8 8V6a4 4 0 0 1 8 0v2"/>',
+  soul: '<path d="M12 2c3 4 6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 3-7 6-11z"/>',
+  event: '<path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm-1 5h2v6h-2zm0 8h2v2h-2z"/>'
+};
+var ACCENTS = { level: "#f5c451", mastery: "#e2b65c", potion: "#ff6a5c", loot: "#cfd8e3", soul: "#9fd6ff", event: "#c59cf0" };
+var lanes = /* @__PURE__ */ new WeakMap();
+function laneFor(doc) {
+  let lane = lanes.get(doc);
+  if (lane) return lane;
+  const root = doc.createElement("div");
+  root.className = "toast-lane-v1";
+  root.setAttribute("role", "status");
+  root.setAttribute("aria-live", "polite");
+  root.dataset.gameplayHud = "";
+  doc.body.append(root);
+  const cards = /* @__PURE__ */ new Map();
+  function remove(card, how = "fade") {
+    if (!card.isConnected) return;
+    clearTimeout(card.timer);
+    cards.delete(card.dataset.key);
+    card.dataset.leaving = how;
+    setTimeout(() => card.remove(), 240);
+  }
+  function arm5(card, ms) {
+    clearTimeout(card.timer);
+    card.style.setProperty("--toast-ms", ms + "ms");
+    card.classList.remove("timing");
+    void card.offsetWidth;
+    card.classList.add("timing");
+    card.timer = setTimeout(() => remove(card), ms);
+  }
+  function swipe(card) {
+    let start = null, dx = 0, dy = 0;
+    card.addEventListener("pointerdown", (e) => {
+      start = { x: e.clientX, y: e.clientY };
+      dx = dy = 0;
+      card.style.transition = "none";
+      try {
+        card.setPointerCapture(e.pointerId);
+      } catch {
+      }
+    });
+    card.addEventListener("pointermove", (e) => {
+      if (!start) return;
+      dx = e.clientX - start.x;
+      dy = Math.min(0, e.clientY - start.y);
+      const sideways = Math.abs(dx) > Math.abs(dy);
+      card.style.transform = sideways ? `translateX(${dx}px)` : `translateY(${dy}px)`;
+      card.style.opacity = String(Math.max(0, 1 - (sideways ? Math.abs(dx) / 160 : -dy / 80)));
+    });
+    const end = () => {
+      if (!start) return;
+      start = null;
+      card.style.transition = "";
+      if (Math.abs(dx) > 48 || dy < -28) remove(card, Math.abs(dx) > Math.abs(dy) ? "side" : "up");
+      else {
+        card.style.transform = "";
+        card.style.opacity = "";
+      }
+    };
+    card.addEventListener("pointerup", end);
+    card.addEventListener("pointercancel", end);
+  }
+  function show({ kind = "loot", title, sub = "", accent = null, image = null, key: key2 = null, ms = DEFAULT_MS }) {
+    const id = key2 ?? kind + "/" + title, prior = cards.get(id);
+    if (prior) {
+      const n = Number(prior.dataset.count || 1) + 1;
+      prior.dataset.count = String(n);
+      prior.querySelector(".toast-count").textContent = "\xD7" + n;
+      if (sub) prior.querySelector(".toast-sub").textContent = sub;
+      prior.classList.remove("bump");
+      void prior.offsetWidth;
+      prior.classList.add("bump");
+      arm5(prior, ms);
+      return prior;
+    }
+    const card = doc.createElement("div");
+    card.className = "toast-v1";
+    card.dataset.kind = kind;
+    card.dataset.key = id;
+    card.style.setProperty("--toast-accent", accent ?? ACCENTS[kind] ?? ACCENTS.loot);
+    const badge = doc.createElement("div");
+    badge.className = "toast-badge";
+    if (image) {
+      const img = doc.createElement("img");
+      img.src = image;
+      img.alt = "";
+      badge.append(img);
+    } else {
+      const svg = doc.createElementNS(SVG, "svg");
+      svg.setAttribute("viewBox", "0 0 24 24");
+      svg.setAttribute("aria-hidden", "true");
+      svg.innerHTML = ICONS[kind] ?? ICONS.loot;
+      badge.append(svg);
+    }
+    const text2 = doc.createElement("div");
+    text2.className = "toast-text";
+    const t = doc.createElement("strong");
+    t.textContent = title;
+    const s = doc.createElement("small");
+    s.className = "toast-sub";
+    s.textContent = sub;
+    text2.append(t, s);
+    const count = doc.createElement("span");
+    count.className = "toast-count";
+    card.append(badge, text2, count);
+    root.prepend(card);
+    cards.set(id, card);
+    swipe(card);
+    arm5(card, ms);
+    const visible3 = [...root.querySelectorAll(".toast-v1:not([data-leaving])")];
+    for (const old2 of visible3.slice(MAX_VISIBLE)) remove(old2);
+    return card;
+  }
+  lane = { show, destroy() {
+    for (const c of cards.values()) clearTimeout(c.timer);
+    root.remove();
+    lanes.delete(doc);
+  } };
+  lanes.set(doc, lane);
+  return lane;
+}
+function toastV1(doc, options) {
+  return laneFor(doc).show(options);
+}
+
 // src/client/interaction_target_v2.js
 function interactionExitV2(model) {
   const p = model.playersById?.[model.localPlayerId], actor = p && model.entitiesById?.[p.entityId];
@@ -26279,6 +26413,7 @@ function createProgressionPresentation({ document, readModel, issue }) {
         const t = ["shield", "dagger", "tome"].find((t2) => integerBigInt(d[t2].level) > integerBigInt(previous[t2]));
         message = `${CONSTELLATIONS[t].name}: Level ${formatLarge(d[t].level)} \xB7 +${formatLarge(integerWire(integerBigInt(d[t].level) - integerBigInt(previous[t])))} SP`;
         messageUntil = now2 + 1800;
+        toastV1(document, { kind: "mastery", title: `${CONSTELLATIONS[t].name} \xB7 Level ${formatLarge(d[t].level)}`, sub: `+${formatLarge(integerWire(integerBigInt(d[t].level) - integerBigInt(previous[t])))} skill point${integerBigInt(d[t].level) - integerBigInt(previous[t]) === 1n ? "" : "s"} to spend`, accent: CONSTELLATIONS[t].color, key: "mastery/" + t });
       } else if (d.lastChange?.authorityOrder !== previous.change && d.lastChange) {
         message = "Progression updated";
         messageUntil = now2 + 1200;
@@ -27248,7 +27383,8 @@ function createInventoryPresentation({ document, environment, readModel, adapter
     if (observed?.identity === identity2) {
       const added2 = Object.values(inv.itemsById).find((i) => !observed.ids.has(i.itemId));
       if (added2) {
-        document.getElementById("world-loot-notice").replaceChildren(icon(itemArtKey(added2)), element("span", itemDefinition(added2).name));
+        const tier2 = added2.generated?.rarityTier ?? 0;
+        toastV1(document, { kind: "loot", title: itemDefinition(added2).name, sub: (RARITY_NAMES[tier2] ?? "") + " \xB7 added to your bag", image: EQUIPMENT_ART[itemArtKey(added2)]?.url, accent: tier2 ? RARITY_COLORS[tier2] : null, key: "item/" + added2.itemId });
         toastUntil = time + 1800;
       }
     } else if (observed?.identity !== identity2) {
@@ -27258,7 +27394,7 @@ function createInventoryPresentation({ document, environment, readModel, adapter
     if (observed?.identity === identity2 && observed.revision !== inv.revision) {
       const gained = (inv.economy?.materials["Monster Soul"] ?? 0) - (observed.souls ?? 0);
       if (gained > 0) {
-        document.getElementById("world-loot-notice").replaceChildren(element("span", `+${gained} Monster Soul${gained === 1 ? "" : "s"}`));
+        toastV1(document, { kind: "soul", title: "Monster Soul", sub: `+${gained} \xB7 ${inv.economy?.materials["Monster Soul"] ?? 0} carried`, key: "soul" });
         toastUntil = time + 1600;
       }
     }
@@ -27686,6 +27822,20 @@ function createInventoryPresentation({ document, environment, readModel, adapter
       }
     }
   };
+  const crest = document.getElementById("world-level"), crestKey = (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      toggle();
+    }
+  };
+  if (crest) {
+    crest.classList.add("bag-crest");
+    crest.setAttribute("role", "button");
+    crest.tabIndex = 0;
+    crest.setAttribute("aria-label", "Open bag");
+    crest.addEventListener("click", toggle);
+    crest.addEventListener("keydown", crestKey);
+  }
   openButton.addEventListener("click", toggle);
   closeButton.addEventListener("click", close);
   environment.addEventListener("keydown", keyboard);
@@ -27698,6 +27848,8 @@ function createInventoryPresentation({ document, environment, readModel, adapter
     panel.removeEventListener("pointerdown", outside);
     environment.removeEventListener("resize", resized);
     openButton.removeEventListener("click", toggle);
+    crest?.removeEventListener("click", toggle);
+    crest?.removeEventListener("keydown", crestKey);
     closeButton.removeEventListener("click", close);
     environment.removeEventListener("keydown", keyboard);
   } });
@@ -27794,6 +27946,11 @@ function createWorldEventHudV3(document, onActivate = () => {
   style.textContent = `#world-event-hud-v3{position:absolute;z-index:7;top:76px;left:12px;width:min(258px,52vw);padding:10px 13px;border:1px solid #8863a6;border-left:3px solid #b282d7;border-radius:3px 8px 8px 3px;background:linear-gradient(120deg,#152330f2,#17212ae8);color:#eef4f4;font:12px/1.4 system-ui;pointer-events:none;box-sizing:border-box}#world-event-hud-v3 button{pointer-events:auto;touch-action:manipulation;margin-top:8px;padding:7px 10px;font:600 12px system-ui;border:1px solid #ab87cc;border-radius:4px;background:#32404f;color:#f0e7fa}#world-event-hud-v3 button:disabled{opacity:.6}#world-event-hud-v3[hidden]{display:none!important}#world-event-hud-v3 small{display:block;color:#ceabea;letter-spacing:.14em;font-size:9px;font-weight:800}#world-event-hud-v3 strong{display:block;font-size:16px;margin:2px 0 5px}#world-event-hud-v3 p{margin:4px 0 7px}#world-event-hud-v3>span{display:block;margin-top:7px;font-size:11px;color:#bbcfd4}#world-event-hud-v3>div>div{display:flex;align-items:center;gap:8px;margin:3px 0}#world-event-hud-v3 progress{width:100%;height:7px;accent-color:#afdf9d}#world-event-hud-v3 div span{min-width:47px;font-size:10px}#world-event-hud-v3[data-state=completed]{border-color:#7fbd95}#world-event-hud-v3[data-state=dormant]>div{display:none}@media(max-width:600px){#world-event-hud-v3{top:68px;left:8px;width:min(210px,51vw);padding:7px 9px;font-size:11px}#world-event-hud-v3 strong{font-size:14px}}@media(max-height:450px){#world-event-hud-v3{top:62px;padding:5px 9px}#world-event-hud-v3>div{display:none}}`;
   document.head.append(style);
   (document.getElementById("world-view")?.parentElement ?? document.body).append(root);
+  root.dataset.expanded = "false";
+  root.addEventListener?.("click", (e) => {
+    if (e.target === action2) return;
+    root.dataset.expanded = String(root.dataset.expanded !== "true");
+  });
   let previous = "", selected = null, enteredTick = 0, currentGroup = null;
   function refresh(model, visible3 = true) {
     const hero = model.entitiesById[model.playersById[model.localPlayerId].entityId];
@@ -28343,6 +28500,7 @@ function createSettlementServicesMenu2(options) {
       supplyButton.classList.remove("potion-gained");
       void supplyButton.offsetWidth;
       supplyButton.classList.add("potion-gained");
+      toastV1(doc, { kind: "potion", title: "Health potion", sub: belt.count + " / " + belt.capacity + " on your belt", key: "potion" });
     }
     lastPotionCount = belt.count;
     supplyButton.dataset.cooling = String(cooling);
@@ -50692,6 +50850,7 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
       const identity2 = `${model.context.campaignId}/${model.localPlayerId}`;
       if (observedProgression?.identity === identity2 && progressionBigInt(displayProgress.level) > progressionBigInt(observedProgression.level)) {
         if (levelNotice) levelNotice.textContent = `LEVEL UP! \xB7 ${progressionText(displayProgress.level)} \xB7 +${3n * (progressionBigInt(displayProgress.level) - progressionBigInt(observedProgression.level))} AP \xB7 +${progressionBigInt(displayProgress.level) - progressionBigInt(observedProgression.level)} Utility SP`;
+        toastV1(doc, { kind: "level", title: `Level ${progressionText(displayProgress.level)}!`, sub: `+${3n * (progressionBigInt(displayProgress.level) - progressionBigInt(observedProgression.level))} attribute points \xB7 +${progressionBigInt(displayProgress.level) - progressionBigInt(observedProgression.level)} utility SP`, ms: 3600, key: "level" });
         levelNoticeUntil = time + 3e3;
       } else if (observedProgression?.identity !== identity2) levelNoticeUntil = 0;
       observedProgression = { identity: identity2, level: displayProgress.level };
