@@ -1095,3 +1095,61 @@ body #world-xp{color:#bfe6f0}
  #world-inventory #world-progression-view .skills-head{flex:1;min-height:36px}
  #world-inventory #world-progression-view .skills-tree{height:calc((var(--rows) - 1) * 88px + 96px)}
 }
+
+/* SKILL_BAR_V1: three skill slots arced around Attack (placed from its rect in
+   skill_bar_v1.js), plus the one-time class picker. */
+.skill-bar-v1{position:absolute;left:0;top:0;width:0;height:0;z-index:7;pointer-events:none}
+body.skill-arc-v1 .shield-guard,body.skill-arc-v1 .shadow-dash{left:var(--arc-guard-left);top:var(--arc-guard-top);right:auto;bottom:auto;width:60px;height:60px;min-height:60px}
+body.skill-arc-v1 .subweapon-hud{left:calc(12px + var(--world-safe-left));right:auto;bottom:calc(80px + var(--world-safe-bottom));max-width:min(300px,calc(100vw - 250px))}
+@media(max-width:600px){body.skill-arc-v1 #rpg-interaction-v2{bottom:calc(196px + var(--world-safe-bottom))!important}}
+.skill-bar-v1[hidden]{display:none}
+.skill-bar-v1 .skill-slot{position:absolute;left:0;top:0;width:var(--slot,52px);height:var(--slot,52px);margin:0;padding:0;border-radius:50%;border:2px solid #10171f;background:radial-gradient(circle at 38% 28%,#3a4853,#1a242d 72%);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--class) 70%,#b9a282),0 3px 0 #0b1119,0 6px 12px #0005;color:#f4ead6;pointer-events:auto;touch-action:none;-webkit-tap-highlight-color:transparent;overflow:hidden;display:grid;place-items:center;cursor:pointer;transition:filter .15s;transform:var(--at)}
+.skill-bar-v1 .skill-slot-icon{position:relative;z-index:1;width:58%;height:58%;display:grid;place-items:center;color:color-mix(in srgb,var(--class) 55%,#fff)}
+.skill-bar-v1 .skill-slot-icon svg{width:100%;height:100%}
+.skill-bar-v1 .skill-slot-sweep{position:absolute;inset:0;transform-origin:50% 0;transform:scaleY(0);background:#05080bb8;z-index:2;pointer-events:none}
+.skill-bar-v1 .skill-slot-time{position:absolute;z-index:3;font:700 14px var(--rpg-ui);color:#fff;text-shadow:0 1px 2px #000,0 0 4px #000}
+.skill-bar-v1 .skill-slot-key{position:absolute;z-index:3;right:7px;bottom:5px;font:700 9px var(--rpg-ui);color:#d9cfb9;opacity:.85}
+@media(pointer:coarse){.skill-bar-v1 .skill-slot-key{display:none}}
+.skill-bar-v1 .skill-slot[data-state=ready]{box-shadow:inset 0 0 0 2px var(--class),0 3px 0 #0b1119,0 0 14px color-mix(in srgb,var(--class) 55%,transparent)}
+.skill-bar-v1 .skill-slot[data-state=blocked] .skill-slot-icon{opacity:.45}
+.skill-bar-v1 .skill-slot[data-state=locked]{background:#151d24d9;box-shadow:inset 0 0 0 1px #3b4651,0 3px 0 #0b1119;cursor:default}
+.skill-bar-v1 .skill-slot[data-state=locked] .skill-slot-icon{color:#5d6973;width:42%;height:42%}
+.skill-bar-v1 .skill-slot[data-state=pick]{box-shadow:inset 0 0 0 2px #e9c46a,0 3px 0 #0b1119,0 0 14px #e9c46a80;animation:skill-pick 1.8s ease-in-out infinite}
+.skill-bar-v1 .skill-slot[data-state=pick] .skill-slot-icon{color:#f6dd9b}
+.skill-bar-v1 .skill-slot.fired{animation:skill-fired .32s ease-out}
+@keyframes skill-fired{0%{filter:brightness(2.2);transform:var(--at) scale(.9)}100%{filter:none;transform:var(--at) scale(1)}}
+@keyframes skill-pick{50%{box-shadow:inset 0 0 0 2px #e9c46a,0 3px 0 #0b1119,0 0 22px #e9c46acc}}
+
+.class-picker-v1{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:calc(12px + var(--world-safe-top,0px)) calc(12px + var(--world-safe-right,0px)) calc(12px + var(--world-safe-bottom,0px)) calc(12px + var(--world-safe-left,0px));background:#060a0ecc;backdrop-filter:none}
+.class-picker-v1[hidden]{display:none}
+.class-picker-panel{width:min(720px,100%);max-height:100%;overflow:auto;box-sizing:border-box;padding:18px 16px 14px;border:1px solid var(--rpg-brass,#b7a077);border-radius:14px;background:linear-gradient(#1c2731,#121a22);box-shadow:0 20px 60px #000c;color:var(--rpg-ivory,#eee7d9)}
+.class-picker-panel h2{margin:0 0 4px;font:700 24px var(--rpg-title,Georgia,serif);color:#f4e7c4;text-align:center}
+.class-picker-intro{margin:0 0 14px;text-align:center;font:13px/1.5 var(--rpg-ui);color:#aeb7ba}
+.class-picker-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.class-picker-v1 .class-card{display:flex;flex-direction:column;align-items:stretch;gap:8px;min-height:0;padding:12px;text-align:left;border:1px solid #2e3a45;border-radius:12px;background:#131b23;color:inherit;cursor:pointer;font:inherit}
+.class-picker-v1 .class-card[aria-pressed=true]{border-color:var(--class);background:linear-gradient(#1b2630,#131b23);box-shadow:0 0 0 1px var(--class),0 0 18px color-mix(in srgb,var(--class) 35%,transparent)}
+.class-card-head{display:grid;grid-template-columns:44px 1fr;grid-template-rows:auto auto;column-gap:10px;align-items:center}
+.class-card-icon{grid-row:1/3;width:44px;height:44px;color:var(--class)}
+.class-card-icon svg{width:100%;height:100%}
+.class-card-head strong{font:700 18px var(--rpg-title,Georgia,serif);color:#f4e7c4}
+.class-card-head em{font:600 11px var(--rpg-ui);font-style:normal;letter-spacing:.08em;text-transform:uppercase;color:var(--class)}
+.class-card-role{font:12px/1.45 var(--rpg-ui);color:#c3ccd0}
+.class-card-skill{display:flex;flex-direction:column;gap:3px;padding:8px 9px;border-radius:8px;background:#0b1117;border-left:3px solid var(--class)}
+.class-card-skill b{font:700 11px var(--rpg-ui);color:#f0d68f}
+.class-card-skill small{font:11px/1.4 var(--rpg-ui);color:#aab4b8}
+.class-picker-status{min-height:18px;margin:10px 0 0;text-align:center;font:600 12px var(--rpg-ui);color:#e0bd6f}
+.class-picker-actions{display:flex;gap:10px;justify-content:center;margin-top:8px}
+.class-picker-actions button{min-height:46px;padding:0 18px;border-radius:12px;font:700 14px var(--rpg-ui);cursor:pointer}
+.class-picker-later{border:1px solid #3a4651;background:#161f27;color:#c3ccd0}
+.class-picker-confirm{flex:1;max-width:320px;border:1px solid #ffe39a;background:linear-gradient(#f4cf6a,#c98d1d);color:#1f1404}
+.class-picker-confirm:disabled{border-color:#33404b;background:#1b242d;color:#76838b}
+@media(max-width:600px){
+ .class-picker-cards{grid-template-columns:1fr;gap:8px}
+ .class-picker-v1 .class-card{padding:10px}
+ .class-picker-panel h2{font-size:21px}
+}
+@media(max-height:500px){
+ .class-picker-panel{padding:12px}
+ .class-picker-intro{margin-bottom:8px}
+ .class-card-skill small{display:none}
+}

@@ -1150,6 +1150,27 @@ var CONTENT_SCHEMA_VERSION = 1;
 var WORLD_COMBAT_CONTRACT_VERSION = 2;
 var SIMULATION_TICKS_PER_SECOND = 60;
 
+// src/shared/content/hero_classes_v1.js
+var HERO_CLASSES = freezeWire({
+  knight: { id: "knight", name: "Knight", offhand: "shield", signature: "shield_bash", color: "#73bedc", role: "The front line: guard, control space, then answer with a deliberate Bash." },
+  rogue: { id: "rogue", name: "Rogue", offhand: "dagger", signature: "flurry", color: "#b88cff", role: "Move through openings, focus targets and turn afflictions into crowd damage." },
+  mage: { id: "mage", name: "Mage", offhand: "tome", signature: "cast", color: "#f0a35a", role: "Choose an elemental style, combine elements and spend Barrier tactically." }
+});
+var HERO_CLASS_IDS = Object.freeze(Object.keys(HERO_CLASSES));
+var CLASS_SKILLS = freezeWire({
+  shield_bash: { id: "shield_bash", name: "Shield Bash", classId: "knight", cooldownTicks: 360, description: "Shove a forward cone: Attack plus Shield damage, knockback and a short stun on ordinary enemies." },
+  flurry: { id: "flurry", name: "Flurry", classId: "rogue", cooldownTicks: 300, description: "Three quick offhand cuts in front of you. Each cut can crit and Bleed." },
+  cast: { id: "cast", name: "Cast", classId: "mage", cooldownTicks: 240, description: "A heavy bolt of your Tome\u2019s element at the nearest enemy in front of you." }
+});
+var CLASS_SKILL_IDS = Object.freeze(Object.keys(CLASS_SKILLS));
+var SKILL_SLOT_COUNT = 3;
+var MAX_SKILL_COOLDOWN_TICKS = 1200;
+var heroClassOf = (d8) => HERO_CLASSES[d8?.heroClass] ?? null;
+var classSkillsFor = (d8) => {
+  const c = heroClassOf(d8);
+  return c ? [c.signature] : [];
+};
+
 // src/shared/contracts/hashing.js
 function utf8(value) {
   requireContract(typeof value === "string" && !value.includes("\0"), "Invalid UTF-8 input");
@@ -1707,6 +1728,9 @@ function validateCommand(command) {
     } else if (a.kind === "node.purchase") {
       closedRecord(a, ["kind", "nodeId"]);
       requireContract(typeof a.nodeId === "string" && a.nodeId.length <= 80, "Invalid node");
+    } else if (a.kind === "class.choose") {
+      closedRecord(a, ["kind", "heroClass"]);
+      requireContract(HERO_CLASS_IDS.includes(a.heroClass), "Unknown hero class");
     } else if (a.kind === "tree.reset") {
       closedRecord(a, ["kind", "tree"]);
       requireContract(["shield", "dagger", "tome", "utility"].includes(a.tree), "Invalid constellation");
@@ -1739,6 +1763,10 @@ function validateCommand(command) {
     requireContract(typeof command.payload.pressed === "boolean", "Guard press must be boolean");
   } else if (command.kind === "combat.shadowDash") {
     closedRecord(command.payload, ["aim"]);
+    validatePrimaryAim(command.payload.aim);
+  } else if (command.kind === "combat.skill") {
+    closedRecord(command.payload, ["skillId", "aim"]);
+    requireContract(CLASS_SKILL_IDS.includes(command.payload.skillId), "Unknown skill");
     validatePrimaryAim(command.payload.aim);
   } else if (command.kind === "player.respawn") {
     closedRecord(command.payload, []);
@@ -13762,7 +13790,8 @@ function pointBalances(state) {
 }
 function validateD8Progression(state, heroLevel) {
   validateWire(state);
-  closedRecord(state, ["version", "highestHeroLevel", "revision", "attributeResetCount", "lastChange", "causalXp", "transient", "allocated", "utility", ...MASTERY_FAMILIES]);
+  closedRecord(state, ["version", "highestHeroLevel", "revision", "attributeResetCount", "lastChange", "causalXp", "transient", "allocated", "utility", ...MASTERY_FAMILIES], ["heroClass"]);
+  if (state.heroClass !== void 0) requireContract(HERO_CLASS_IDS.includes(state.heroClass), "Unknown hero class");
   requireContract(state.version === D8_PROGRESSION_VERSION || state.version === D9_PARTICIPANT_VERSION, "Progression version");
   if (!isD9Progression(state)) safeInteger(state.highestHeroLevel, heroLevel, 50);
   safeInteger(state.revision);
@@ -13858,6 +13887,10 @@ function prepareProgressionChange(state, expectedRevision, action) {
     const offer = purchaseAvailability(state, action.nodeId);
     requireContract(offer.ok, offer.reason);
     next[ACTIVE_NODES[action.nodeId].tree].nodeRanks[action.nodeId] = copyWire(offer.nextRank);
+  } else if (action.kind === "class.choose") {
+    requireContract(!state.heroClass, "Class already chosen");
+    requireContract(HERO_CLASS_IDS.includes(action.heroClass), "Unknown hero class");
+    next.heroClass = action.heroClass;
   } else if (action.kind === "tree.reset") {
     requireContract(CONSTELLATIONS[action.tree], "Unknown constellation");
     requireContract(Object.keys(state[action.tree].nodeRanks).length > 0, "Constellation already empty");
@@ -19249,9 +19282,10 @@ function installSubweaponInventory(p) {
   i.equipped.subweapon = null;
   i.economy.slotLevels.subweapon = 0;
 }
+var provisionLevelAllowed = (p, type) => p.progression.level >= 2 || heroClassOf(p.d8)?.offhand === type;
 function canClaimSubweapon(s, p, payload) {
   const i = p.inventory, a = s.entitiesById[p.entityId], q = s.primary.actorsById[p.entityId];
-  return Boolean(i.subweapons && a.alive && p.progression.level >= 2 && SUBWEAPON_TYPES.includes(payload.subType) && !i.subweapons.claims[payload.subType] && i.revision === payload.inventoryRevision && Object.keys(i.itemsById).length < inventoryIntakeCapacity(p.d8) && !q.current && !q.heldCommandId && !q.queuedCommandId);
+  return Boolean(i.subweapons && a.alive && provisionLevelAllowed(p, payload.subType) && SUBWEAPON_TYPES.includes(payload.subType) && !i.subweapons.claims[payload.subType] && i.revision === payload.inventoryRevision && Object.keys(i.itemsById).length < inventoryIntakeCapacity(p.d8) && !q.current && !q.heldCommandId && !q.queuedCommandId);
 }
 function claimSubweapon(s, p, c, order) {
   const i = p.inventory, type = c.payload.subType, sourceEntityId = `ent:${safeInteger(++s.identitySequence, 1).toString(16).padStart(32, "0")}`, itemId2 = `item:${p.playerId}:${sourceEntityId}`;
@@ -19270,7 +19304,7 @@ function validateProvisions(p, s, validateCommand2) {
     requireContract(/^ent:[0-9a-f]{32}$/.test(r.sourceEntityId) && BigInt("0x" + r.sourceEntityId.slice(4)) <= BigInt(s.identitySequence), "Invalid provision identity fence");
     validateCommand2(r.command);
     const c = r.command;
-    requireContract(c.kind === "subweapon.claim" && c.payload.subType === type && c.playerId === p.playerId && c.sessionId === s.session.sessionId && c.campaignId === s.campaign.campaignId && p.progression.level >= 2, "Invalid provision receipt");
+    requireContract(c.kind === "subweapon.claim" && c.payload.subType === type && c.playerId === p.playerId && c.sessionId === s.session.sessionId && c.campaignId === s.campaign.campaignId && provisionLevelAllowed(p, type), "Invalid provision receipt");
     safeInteger(r.authorityOrder, 1, s.lastAppliedAuthorityOrder);
     safeInteger(r.tick, 0, s.tick);
     safeInteger(r.revision, 1, i.revision);
@@ -20007,12 +20041,16 @@ function canPickUp(state, p, sourceEntityId, radius) {
   for (let i = 0; i <= steps; i++) if (collidesWithTiles(c, a.position.x + dx * i / steps, a.position.y + dy * i / steps, 0)) return false;
   return !r.definitionId || Object.keys(p.inventory.itemsById).length < inventoryIntakeCapacity(p.d8);
 }
+function classOffhandAllowed(p, item) {
+  const heroClass = heroClassOf(p?.d8), definition = item ? itemDefinition(item) : null;
+  return !heroClass || definition?.slot !== "subweapon" || definition.subType === heroClass.offhand;
+}
 function equipmentActionAvailable(state, p, kind, payload) {
   const inv = p.inventory, primary = state.primary.actorsById[p.entityId];
   if (!inv || inv.revision !== payload.inventoryRevision || primary.current || primary.heldCommandId || primary.queuedCommandId) return false;
   if (kind === "equipment.equip") {
     const next = equipmentAfter(inv, payload.itemId, payload.slot);
-    return Boolean(next && equipmentLevelAllowed(p, inv.itemsById[payload.itemId]) && canonicalStringify(next) !== canonicalStringify(inv.equipped));
+    return Boolean(next && equipmentLevelAllowed(p, inv.itemsById[payload.itemId]) && classOffhandAllowed(p, inv.itemsById[payload.itemId]) && canonicalStringify(next) !== canonicalStringify(inv.equipped));
   }
   return payload.slot !== "weapon" && equipmentSlots(inv).includes(payload.slot) && inv.equipped[payload.slot] !== null;
 }
@@ -20576,7 +20614,7 @@ function validateEvent(event) {
         requireContract(compareCombat(b.absorbed, 0) > 0 && compareCombat(b.remaining, 0) >= 0 && compareCombat(b.capacity, 0) > 0 && compareCombat(b.remaining, b.capacity) <= 0, "Invalid Barrier absorption feedback");
       }
       if (event.payload.sourceItem !== void 0) validateDamageSourceItem(event.payload.sourceItem);
-      requireContract(event.payload.trigger === void 0 || event.payload.trigger === null || ["pressure", "reactive", "proc", "periodic", "mastery"].includes(event.payload.trigger), "Invalid damage trigger");
+      requireContract(event.payload.trigger === void 0 || event.payload.trigger === null || ["pressure", "reactive", "proc", "periodic", "mastery", "skill"].includes(event.payload.trigger), "Invalid damage trigger");
       validateAmount(event.payload.damage);
       validateAmount(event.payload.resultingHp);
       requireContract(event.payload.defenseKind == null || ["barrier", "block", "parry"].includes(event.payload.defenseKind), "Invalid defense feedback");
@@ -22063,6 +22101,13 @@ export {
   combatInteger,
   outgoingCombat,
   resolveCombatDamage,
+  HERO_CLASSES,
+  CLASS_SKILLS,
+  CLASS_SKILL_IDS,
+  SKILL_SLOT_COUNT,
+  MAX_SKILL_COOLDOWN_TICKS,
+  heroClassOf,
+  classSkillsFor,
   SPACE_IDS,
   OLDWARD_SPACES,
   createOldwardSeamlessManifest,
@@ -22654,6 +22699,7 @@ export {
   installGroundOccupancyD9,
   D6_ACTIVITY_FORMAT,
   installSubweaponInventory,
+  provisionLevelAllowed,
   canClaimSubweapon,
   claimSubweapon,
   runtimeCollisionPageD92 as runtimeCollisionPageD9,
@@ -22695,6 +22741,7 @@ export {
   equippedWeaponVisual,
   defeatReward2 as defeatReward,
   canPickUp,
+  classOffhandAllowed,
   equipmentActionAvailable,
   validatePlayerInventory2 as validatePlayerInventory,
   validateInventoryProgress,

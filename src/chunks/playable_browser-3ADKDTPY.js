@@ -31,6 +31,8 @@ import {
   BRIMSTONE_ID,
   BUILD_BALANCE_HASH,
   CAVE_INTERIOR_NAVIGATION_D12_3A,
+  CLASS_SKILLS,
+  CLASS_SKILL_IDS,
   COMBAT_RUNTIME_VERSION,
   COMPOSITION_ELITE_V1,
   CONQUEST_TIERS,
@@ -87,6 +89,7 @@ import {
   FUNCTIONAL_RUIN_FAMILY,
   GLACIAL_WARDEN_AFFIX_ID,
   GLACIAL_WARDEN_D12_4E,
+  HERO_CLASSES,
   HOLLOW_EVENT,
   HOLLOW_HASH,
   HOLLOW_LEDGER_VERSION,
@@ -108,6 +111,7 @@ import {
   MAJOR_NAME_POLICY_VERSION,
   MASTERY_FAMILIES,
   MAX_PLAYER_XP,
+  MAX_SKILL_COOLDOWN_TICKS,
   MULTIROOM_HASH,
   MULTIROOM_VERSION,
   NULLIFICATION_RESISTANCE_D12_4I_VERSION,
@@ -175,6 +179,7 @@ import {
   SITE_FINALE_RESERVATION_D13D_G,
   SITE_INTERACTION_RADIUS,
   SITE_RECIPE_VERSION,
+  SKILL_SLOT_COUNT,
   SLAG_BURN_STATUS_D12_4K_VERSION,
   SLAG_SHAPER_AFFIX_ID,
   SLAG_SHAPER_D12_4K,
@@ -311,6 +316,8 @@ import {
   certifyNumeric,
   chunkAddressKey,
   claimSubweapon,
+  classOffhandAllowed,
+  classSkillsFor,
   closedRecord,
   collectRenewableGear,
   collidesWithTiles,
@@ -415,6 +422,7 @@ import {
   hasWorldCombat,
   hashBytes,
   hashReward,
+  heroClassOf,
   historicalSiteContentD9,
   hollowOrdinal,
   hostileHazardIdD12_4J,
@@ -557,6 +565,7 @@ import {
   proofClearingForState,
   propsFor,
   prototypeRewardProgression,
+  provisionLevelAllowed,
   purchaseAvailability,
   queuePacedSporeV5,
   readyPrimarySources,
@@ -703,7 +712,7 @@ import {
   worldLevelGapMultiplier,
   worldOrdinaryMeleeProfile,
   worldPointForArea
-} from "./chunk-J6BO7LTG.js";
+} from "./chunk-BL3EJPM2.js";
 
 // src/client/authority_clock.js
 var AUTHORITY_CLOCK_PERIOD_MS = 1e3 / 60;
@@ -15488,6 +15497,61 @@ function mountPlannedReviewControlsV1({ environment, controls, review, session }
 var FORGE_REVIEW_BUILD = false;
 var ACTIVITY_SAVE_NAMESPACE = FORGE_REVIEW_BUILD ? "saq-world-forge-review-v1" : "saq-world-activity-campaigns-v1";
 
+// src/shared/contracts/class_skills_v1.js
+var FLURRY_CUTS = 3;
+var FLURRY_GAP_TICKS = 7;
+var SKILL_LAST_TICKS = 45;
+function skillCooldown(combat, skillId) {
+  return combat?.skills?.cooldowns?.[skillId] ?? 0;
+}
+function canUseClassSkill(player, actor, combat, stats, skillId, suppressed = false) {
+  const heroClass = heroClassOf(player?.d8), skill = CLASS_SKILLS[skillId];
+  return Boolean(heroClass && skill && combat && actor?.alive && !suppressed && skill.classId === heroClass.id && classSkillsFor(player.d8).includes(skillId) && stats.subType === heroClass.offhand && !skillCooldown(combat, skillId) && !combat.skills?.flurry);
+}
+function classSkillsRecord(combat) {
+  return combat.skills ??= { cooldowns: {} };
+}
+function prune(combat) {
+  const k = combat.skills;
+  if (k && !Object.keys(k.cooldowns).length && !k.last && !k.flurry) delete combat.skills;
+}
+function advanceClassSkillTimers(tick, combat) {
+  const k = combat.skills;
+  if (!k) return;
+  for (const [id, left] of Object.entries(k.cooldowns)) {
+    if (left <= 1) delete k.cooldowns[id];
+    else k.cooldowns[id] = left - 1;
+  }
+  if (k.last && tick - k.last.tick >= SKILL_LAST_TICKS) delete k.last;
+  prune(combat);
+}
+function cancelClassSkillAction(combat) {
+  if (combat?.skills) {
+    delete combat.skills.flurry;
+    prune(combat);
+  }
+}
+function validateClassSkillState(s, combat, actor) {
+  const k = combat.skills;
+  if (k === void 0) return;
+  closedRecord(k, ["cooldowns"], ["last", "flurry"]);
+  closedRecord(k.cooldowns, [], CLASS_SKILL_IDS);
+  for (const [id, left] of Object.entries(k.cooldowns)) safeInteger(left, 1, Math.min(MAX_SKILL_COOLDOWN_TICKS, CLASS_SKILLS[id].cooldownTicks));
+  const unit12 = (v) => Number.isFinite(v.x) && Number.isFinite(v.y) && Math.abs(Math.hypot(v.x, v.y) - 1) < 1e-9;
+  if (k.last) {
+    closedRecord(k.last, ["skillId", "tick", "x", "y"]);
+    requireContract(CLASS_SKILL_IDS.includes(k.last.skillId) && unit12(k.last), "Invalid skill use record");
+    safeInteger(k.last.tick, Math.max(0, s.tick - SKILL_LAST_TICKS - 2), s.tick);
+  }
+  if (k.flurry) {
+    closedRecord(k.flurry, ["cutsLeft", "nextTick", "x", "y"]);
+    safeInteger(k.flurry.cutsLeft, 1, FLURRY_CUTS - 1);
+    safeInteger(k.flurry.nextTick, Math.max(0, s.tick - 1), s.tick + FLURRY_GAP_TICKS);
+    requireContract(unit12(k.flurry) && actor.alive, "Invalid Flurry");
+  }
+  requireContract(Object.keys(k.cooldowns).length || k.last || k.flurry, "Empty skill record");
+}
+
 // src/shared/content/hidden_hollow_safety_v1.js
 var HOLLOW_SAFETY_VERSION = "hidden-hollow-v1-trunk-emergence";
 var HOLLOW_SAFETY_POLICY = Object.freeze({ version: HOLLOW_SAFETY_VERSION, parent: HOLLOW_HASH, collision: "trunk ground contact; open mouth and apron", pads: [[0, 48], [-80, 48], [80, 48], [-112, 80], [112, 80], [0, 112], [-48, 128], [48, 128], [-144, 32], [144, 32]], selection: "member-index rotation; collision, connected path, player and living-member clearance", waves: [6, 6, 1], playerClearance: 64, tellTicks: 45, spawnSpacingTicks: 24, blocked: "wait without spawning or granting invulnerability" });
@@ -16631,7 +16695,7 @@ function validateD9Root(root) {
 
 // src/shared/contracts/origin_egress_d9.js
 function originEgress(manifest, collision, resources = []) {
-  const w = collision.width, h = collision.height, T4 = collision.tileSize, walk = (x, y) => collision.tiles[y]?.[x] === "1", start = { x: Math.floor(manifest.start.position.x / T4), y: Math.floor(manifest.start.position.y / T4) }, seen = /* @__PURE__ */ new Set(), queue = [start];
+  const w = collision.width, h = collision.height, T5 = collision.tileSize, walk = (x, y) => collision.tiles[y]?.[x] === "1", start = { x: Math.floor(manifest.start.position.x / T5), y: Math.floor(manifest.start.position.y / T5) }, seen = /* @__PURE__ */ new Set(), queue = [start];
   for (let i = 0; i < queue.length; i++) {
     const p = queue[i], key2 = p.x + "," + p.y;
     if (seen.has(key2) || !walk(p.x, p.y)) continue;
@@ -16641,7 +16705,7 @@ function originEgress(manifest, collision, resources = []) {
       if (x >= 0 && y >= 0 && x < w && y < h && !seen.has(x + "," + y)) queue.push({ x, y });
     }
   }
-  const overlap = (x, y) => manifest.safeRegions.some((r) => x * T4 < r.x + r.width && (x + 1) * T4 > r.x && y * T4 < r.y + r.height && (y + 1) * T4 > r.y) || [...manifest.sites, ...resources].some((s) => s.position && Math.hypot((x + 0.5) * T4 - s.position.x, (y + 0.5) * T4 - s.position.y) < 96);
+  const overlap = (x, y) => manifest.safeRegions.some((r) => x * T5 < r.x + r.width && (x + 1) * T5 > r.x && y * T5 < r.y + r.height && (y + 1) * T5 > r.y) || [...manifest.sites, ...resources].some((s) => s.position && Math.hypot((x + 0.5) * T5 - s.position.x, (y + 0.5) * T5 - s.position.y) < 96);
   const openings = [];
   for (const side of ["north", "east", "south", "west"]) {
     const horizontal = side === "north" || side === "south", length = horizontal ? w : h, candidates = [];
@@ -16679,7 +16743,7 @@ function applyOriginEgress(collision, overlay) {
 }
 function originEgressGuidePaths(manifest, collision, overlay) {
   requireContract(overlay.version === "origin-egress-d9-v1", "Origin overlay version");
-  const applied = applyOriginEgress(collision, overlay), T4 = applied.tileSize, start = { x: Math.floor(manifest.start.position.x / T4), y: Math.floor(manifest.start.position.y / T4) }, key2 = (p) => p.x + "," + p.y, prior = /* @__PURE__ */ new Map([[key2(start), null]]), queue = [start];
+  const applied = applyOriginEgress(collision, overlay), T5 = applied.tileSize, start = { x: Math.floor(manifest.start.position.x / T5), y: Math.floor(manifest.start.position.y / T5) }, key2 = (p) => p.x + "," + p.y, prior = /* @__PURE__ */ new Map([[key2(start), null]]), queue = [start];
   for (let i = 0; i < queue.length; i++) {
     const p = queue[i];
     for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
@@ -16898,7 +16962,8 @@ function validateSubweaponCombat(s) {
   requireContract(Object.keys(c.actors).sort().join() === Object.values(s.playersById).map((p) => p.entityId).sort().join(), "Combat owners: " + Object.keys(c.actors).join() + " versus " + Object.values(s.playersById).map((p) => p.entityId).join());
   for (const p of Object.values(s.playersById)) {
     const a = s.entitiesById[p.entityId], v = c.actors[p.entityId], stats = resolvePlayerStats(p, { legacyMigration: !integer });
-    closedRecord(v, ["rng", "delivery", "pressure", "fatigue", "counterCooldown", "barrier", "dash", ...integer || c.version === "subweapon-combat-d6-v3" ? ["guard"] : [], ...integer ? ["barrierRechargeRemainder"] : []]);
+    closedRecord(v, ["rng", "delivery", "pressure", "fatigue", "counterCooldown", "barrier", "dash", ...integer || c.version === "subweapon-combat-d6-v3" ? ["guard"] : [], ...integer ? ["barrierRechargeRemainder"] : []], ["skills"]);
+    validateClassSkillState(s, v, a);
     if (integer || c.version === "subweapon-combat-d6-v3") validateShieldGuard(v.guard, a, stats, s.primary.actorsById[p.entityId], !integer);
     if (integer) {
       safeInteger(v.barrierRechargeRemainder, 0, 599);
@@ -16993,6 +17058,7 @@ function cancelSubweaponResidency(s, id) {
     a.dash.frames = 0;
     a.dash.remaining = 0;
     a.pressure = 0;
+    cancelClassSkillAction(a);
   }
   for (const [key2, b] of Object.entries(c.projectiles)) if (b.sourceId === id) delete c.projectiles[key2];
   for (const [key2, e] of Object.entries(c.effects)) if (e.sourceId === id || e.targetId === id) delete c.effects[key2];
@@ -17688,10 +17754,10 @@ var HOSTILE_PROJECTILE_STYLES = Object.freeze(["thorn", "frost", "fireball", "ma
 var HOSTILE_PROJECTILE_LIMITS = Object.freeze({ global: 128, perSource: 4, lifeTicks: 80, travelRange: 336, radius: 6, speed: 4.2 });
 var same4 = (a, b) => a === b || a !== void 0 && b !== void 0 && canonicalStringify(a) === canonicalStringify(b);
 var ranged = ordinaryRangedProfile;
-var vector = (v, unit11 = false) => {
+var vector = (v, unit12 = false) => {
   closedRecord(v, ["x", "y"]);
   requireContract(Number.isFinite(v.x) && Number.isFinite(v.y), "Hostile projectile vector");
-  if (unit11) requireContract(Math.abs(Math.hypot(v.x, v.y) - 1) < 1e-9, "Hostile projectile direction");
+  if (unit12) requireContract(Math.abs(Math.hypot(v.x, v.y) - 1) < 1e-9, "Hostile projectile direction");
 };
 var idleHostileRangedAction = (tick) => ({ phase: "idle", phaseStartedTick: tick, phaseEndsTick: tick, targetEntityId: null, aim: null, actionSequence: 0 });
 function installHostileProjectiles(state) {
@@ -18017,7 +18083,7 @@ function validateActivityCommand(command) {
   const { residencyRevision, ...legacy } = command;
   safeInteger(residencyRevision, 1);
   validateCommand(legacy);
-  requireContract(["worldEvent.activate", "discovery.readNote", "movement.setIntent", "combat.primaryIntent", "combat.guardIntent", "combat.shadowDash", "subweapon.claim", "service.modify", "service.material", "service.buy", "service.sell", "service.rest", "supply.use", "ferry.travel", "site.transition", "player.respawn", "loot.pickup", "gear.salvage", "gear.drop", "resource.interact", "progression.change", "forge.attune", "equipment.equip", "equipment.unequip"].includes(command.kind), "Unsupported activity command");
+  requireContract(["worldEvent.activate", "discovery.readNote", "movement.setIntent", "combat.primaryIntent", "combat.guardIntent", "combat.shadowDash", "combat.skill", "subweapon.claim", "service.modify", "service.material", "service.buy", "service.sell", "service.rest", "supply.use", "ferry.travel", "site.transition", "player.respawn", "loot.pickup", "gear.salvage", "gear.drop", "resource.interact", "progression.change", "forge.attune", "equipment.equip", "equipment.unequip"].includes(command.kind), "Unsupported activity command");
   return command;
 }
 function activityContextMatches(state, c) {
@@ -18040,6 +18106,7 @@ function validateActivityCommandForState(c, s) {
   }
   if (c.kind === "subweapon.claim") requireContract(canClaimSubweapon(s, s.playersById[c.playerId], c.payload), "Provision unavailable");
   if (c.kind === "combat.guardIntent" && c.payload.pressed) requireContract(resolvePlayerStats(s.playersById[c.playerId]).subType === "shield", "Guard requires Shield");
+  if (c.kind === "combat.skill") requireContract(s.subweaponCombat && canUseClassSkill(s.playersById[c.playerId], actor, s.subweaponCombat.actors[actor.entityId], resolvePlayerStats(s.playersById[c.playerId]), c.payload.skillId, subweaponSuppressedD12_4I(s, actor.entityId)), "Skill unavailable");
   if (c.kind === "combat.shadowDash") requireContract(s.subweaponCombat && canShadowDash(actor, s.subweaponCombat.actors[actor.entityId], resolvePlayerStats(s.playersById[c.playerId])), "Dash unavailable");
   if (c.kind === "loot.pickup") requireContract(s.playersById[c.playerId].inventory?.revision === c.payload.inventoryRevision && canPickUp(s, s.playersById[c.playerId], c.payload.sourceEntityId, resolvePlayerStats(s.playersById[c.playerId]).pickupRadius), "Loot unavailable: approach your drop");
   if (c.kind === "gear.salvage") requireContract(canSalvage(s, s.playersById[c.playerId], c.payload), "Salvage unavailable");
@@ -18048,6 +18115,7 @@ function validateActivityCommandForState(c, s) {
   if (c.kind === "forge.attune") requireContract(canAttune(s, s.playersById[c.playerId], c.payload, manifestForState(s)), "Forge unavailable: approach the Forge and check level and costs");
   if (c.kind === "equipment.equip") {
     const p = s.playersById[c.playerId], item = p.inventory?.itemsById[c.payload.itemId];
+    requireContract(classOffhandAllowed(p, item), `${heroClassOf(p.d8)?.name}s can\u2019t use this offhand`);
     requireContract(equipmentLevelAllowed(p, item), `Item requires hero level ${equipmentRequiredLevel(p, item)}`);
   }
   if (c.kind.startsWith("equipment.")) requireContract(equipmentActionAvailable(s, s.playersById[c.playerId], c.kind, c.payload), "Equipment unavailable: release Primary and finish the swing");
@@ -20650,6 +20718,112 @@ function selectTomeTarget(source3, candidates, collision, eligible2) {
   return candidates.filter((t) => t.kind === "actor" && t.alive && t.team === "hostile" && t.residency.spaceInstanceId === source3.residency.spaceInstanceId && eligible2(source3, t) && clearHullGap(source3, t) <= 128 && subweaponLineClear(collision, source3, t)).sort((a, b) => Math.hypot(a.position.x - source3.position.x, a.position.y - source3.position.y) - Math.hypot(b.position.x - source3.position.x, b.position.y - source3.position.y) || a.entityId.localeCompare(b.entityId))[0] ?? null;
 }
 
+// src/simulation/class_skills_v1.js
+var CLASS_SKILL_TUNING_V1 = Object.freeze({
+  bash: { reach: 48, cone: 0.85, targets: 5, attack: [3, 2], knockback: 22, eliteKnockback: 10, stun: 48, eliteStun: 24 },
+  flurry: { reach: 44, cone: 0.95, targets: 3, attack: [3, 4] },
+  cast: { cone: 1.05, attack: [22, 10] }
+});
+var T3 = CLASS_SKILL_TUNING_V1;
+var unit3 = (v) => {
+  const l = Math.hypot(v.x, v.y);
+  return l > 1e-9 ? { x: v.x / l, y: v.y / l } : { x: 1, y: 0 };
+};
+function createClassSkills(s, { damage, effects: effects2, periodic, getStats, players, identity: identity2 }) {
+  const c = s.subweaponCombat, owner = (a) => players.get(a.entityId), definition2 = (t) => s.content.definitionsById[t.contentDefinitionId] ?? {};
+  const bearing = (a, t) => Math.atan2(t.position.y - a.position.y, t.position.x - a.position.x), distance8 = (a, t) => Math.hypot(t.position.x - a.position.x, t.position.y - a.position.y);
+  const offAxis = (a, t, heading) => {
+    const angle3 = bearing(a, t);
+    return Math.abs(Math.atan2(Math.sin(angle3 - heading), Math.cos(angle3 - heading)));
+  };
+  function cone(a, aim2, reach, width, limit) {
+    const heading = Math.atan2(aim2.y, aim2.x), A = effects2.area(a);
+    return effects2.nearby(a, a, reach * A + 24).filter((t) => distance8(a, t) <= reach * A + (a.hullRadius ?? 0) + (t.hullRadius ?? 0) && (offAxis(a, t, heading) <= width || distance8(a, t) <= (a.hullRadius ?? 0) + (t.hullRadius ?? 0) + 6)).sort((x, y) => distance8(a, x) - distance8(a, y) || x.entityId.localeCompare(y.entityId)).slice(0, limit);
+  }
+  function knockback(a, t, amount) {
+    const dx = t.position.x - a.position.x, dy = t.position.y - a.position.y, l = Math.hypot(dx, dy);
+    if (!l) return;
+    const x = t.position.x + dx / l * amount, y = t.position.y + dy / l * amount;
+    if (!collidesWithTiles(s.spacesByInstanceId[t.residency.spaceInstanceId].collision, x, y, t.hullRadius)) t.position = { x, y };
+  }
+  const canStun = (a) => Boolean(s.subweaponCombat.mastery?.[a.entityId]);
+  function bash(a, stats, aim2, commandId) {
+    const raw = addCombat(multiplyCombat(stats.attack, ...T3.bash.attack), shieldPacket(stats));
+    for (const t of cone(a, aim2, T3.bash.reach, T3.bash.cone, T3.bash.targets)) {
+      damage(a, t, raw, "bash", commandId, { sourceItem: damageSourceItem(owner(a), "bash"), trigger: "skill", masteryArea: true });
+      if (!t.alive || isPodCombatTargetV4(t) || definition2(t).isBoss) continue;
+      const elite = Boolean(definition2(t).isElite || definition2(t).isMiniboss);
+      knockback(a, t, elite ? T3.bash.eliteKnockback : T3.bash.knockback);
+      if (canStun(a)) effects2.status(a, t, "stun", 1, elite ? T3.bash.eliteStun : T3.bash.stun);
+    }
+    return true;
+  }
+  function cut(a, stats, aim2, commandId) {
+    const combat = c.actors[a.entityId];
+    for (const t of cone(a, aim2, T3.flurry.reach, T3.flurry.cone, T3.flurry.targets)) {
+      damage(a, t, multiplyCombat(stats.attack, ...T3.flurry.attack), "offhand", commandId, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "skill" });
+      if (!t.alive) continue;
+      effects2.offhand(a, t, stats);
+      if (t.alive && combatRoll(combat, stats.familyProperties?.bleed ?? combatAmount(15, 100))) periodic(a, t, "bleed", stats.attack, stats);
+    }
+  }
+  function flurry(a, stats, aim2, commandId) {
+    cut(a, stats, aim2, commandId);
+    classSkillsRecord(c.actors[a.entityId]).flurry = { cutsLeft: FLURRY_CUTS - 1, nextTick: s.tick + FLURRY_GAP_TICKS, ...aim2 };
+    return true;
+  }
+  function cast(a, stats, aim2, commandId) {
+    const range2 = Math.min(137, 128 + (a.hullRadius ?? 0)), heading = Math.atan2(aim2.y, aim2.x);
+    if (Object.keys(c.projectiles).length >= 16) return false;
+    const target = effects2.nearby(a, a, range2 + 40).filter((t) => clearHullGap(a, t) <= 128).map((t) => ({ t, score: distance8(a, t) + (offAxis(a, t, heading) <= T3.cast.cone ? 0 : 1e3) })).sort((x, y) => x.score - y.score || x.t.entityId.localeCompare(y.t.entityId))[0]?.t;
+    if (!target) return false;
+    const dx = target.position.x - a.position.x, dy = target.position.y - a.position.y, d = Math.hypot(dx, dy);
+    if (!d) return false;
+    const element = stats.spellType ?? "fire", id = identity2("act");
+    c.actors[a.entityId].delivery = { status: "launched", tick: s.tick };
+    c.projectiles[id] = {
+      id,
+      intendedTargetId: target.entityId,
+      sourceId: a.entityId,
+      spaceInstanceId: a.residency.spaceInstanceId,
+      residencyRevision: a.residency.residencyRevision,
+      position: { ...a.position },
+      direction: { x: dx / d, y: dy / d },
+      remaining: range2,
+      frames: 20,
+      delivery: element,
+      firePower: copyWire(stats.familyProperties?.tomePower ?? stats.familyProperties?.firePower ?? combatAmount(18, 10)),
+      sourceItem: damageSourceItem(owner(a), element),
+      attack: copyWire(combatInteger(multiplyCombat(stats.attack, ...T3.cast.attack))),
+      rulesVersion: "combat-integer-v2",
+      commandId
+    };
+    return true;
+  }
+  const handlers = { shield_bash: bash, flurry, cast };
+  function use(a, skillId, aimInput, commandId = null) {
+    const stats = getStats(a.entityId), aim2 = unit3(aimInput);
+    if (!handlers[skillId]?.(a, stats, aim2, commandId)) return false;
+    const record2 = classSkillsRecord(c.actors[a.entityId]);
+    record2.cooldowns[skillId] = CLASS_SKILLS[skillId].cooldownTicks;
+    record2.last = { skillId, tick: s.tick, ...aim2 };
+    return true;
+  }
+  function step(a, suppressed) {
+    const combat = c.actors[a.entityId], string = combat.skills?.flurry;
+    if (!string || s.tick < string.nextTick) return;
+    const stats = getStats(a.entityId);
+    if (!a.alive || suppressed || stats.subType !== "dagger") {
+      cancelClassSkillAction(combat);
+      return;
+    }
+    cut(a, stats, { x: string.x, y: string.y }, null);
+    if (--string.cutsLeft <= 0) delete combat.skills.flurry;
+    else string.nextTick += FLURRY_GAP_TICKS;
+  }
+  return { use, step };
+}
+
 // src/simulation/mastery_effects.js
 var times = (a, b) => multiplyCombat(a, b.n, b.d);
 function periodicPacket(e) {
@@ -20879,6 +21053,7 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
     };
   }
   const suppressed = (id) => subweaponSuppressedD12_4I(s, id);
+  const skills = createClassSkills(s, { damage, effects: effects2, periodic, getStats: stats, players, identity: identity2 });
   function successful(source3, target, captured) {
     const outcome = successfulSubweaponHit({
       combat: c.actors[source3.entityId],
@@ -20968,6 +21143,8 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
       if (!a.alive) resetMasteryTransient(p);
       else if (advanceMasteryTransient(p)) refreshStats?.(p);
       advanceSubweaponTimers(a, c.actors[id], stats(id), { suppressed: suppressed(id) });
+      advanceClassSkillTimers(s.tick, c.actors[id]);
+      skills.step(a, suppressed(id));
       if (!a.alive) cancelSubweaponResidency(s, id);
     }
     for (const [id, b] of Object.entries(c.projectiles)) {
@@ -21021,7 +21198,7 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
     combat.dash.frames = 0;
     combat.dash.remaining = 0;
   }
-  return { main, proc, step, effects: effects2, enforceSuppression, reconcile: (id) => {
+  return { main, proc, step, effects: effects2, enforceSuppression, skill: (source3, skillId, aim2, commandId) => skills.use(source3, skillId, aim2, commandId), reconcile: (id) => {
     synchronizeTomeRotation(players.get(id));
     reconcileSubweapon(s.entitiesById[id], c.actors[id], stats(id));
   } };
@@ -23996,7 +24173,7 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
   }
   function apply2(command, authorityOrder) {
     requireContract(authorityOrder === state.lastAppliedAuthorityOrder + 1 && command.clientSequence === state.appliedClientSequences[command.playerId] + 1, "Noncontiguous applied command");
-    const player = state.playersById[command.playerId], actor = state.entitiesById[player.entityId], inventory = player.inventory, respawning = command.kind === "player.respawn", suppressed = subweaponSuppressedD12_4I(state, actor.entityId), target = command.kind === "ferry.travel" ? ferryTravelTarget(state, actor, command.payload) : command.kind === "site.transition" ? siteTransitionTarget(state, manifest, actor, command.payload) : null, progressionPlan = prepareD8Command(player, command), valid = (command.kind !== "worldEvent.activate" || canActivateWorldEvent(state, player, command.payload.groupId)) && (command.kind !== "discovery.readNote" || canReadTrailNote(state, player, command.payload)) && (!progressionPlan || !progressionPlan.error && command.expectedSaveRevision === state.campaign.saveRevision) && activityContextMatches(state, command) && (respawning ? !actor.alive : actor.alive) && (!["site.transition", "ferry.travel"].includes(command.kind) || Boolean(target)) && (command.kind !== "loot.pickup" || inventory?.revision === command.payload.inventoryRevision && canPickUp(state, player, command.payload.sourceEntityId, resolvePlayerStats(player).pickupRadius)) && (command.kind !== "subweapon.claim" || canClaimSubweapon(state, player, command.payload)) && (command.kind !== "combat.guardIntent" || !command.payload.pressed || !suppressed && resolvePlayerStats(player).subType === "shield") && (command.kind !== "combat.shadowDash" || canShadowDash(actor, state.subweaponCombat.actors[actor.entityId], resolvePlayerStats(player), suppressed)) && (command.kind !== "gear.salvage" || canSalvage(state, player, command.payload)) && (command.kind !== "gear.drop" || canDropGear(state, player, command.payload)) && (command.kind !== "resource.interact" || canUseResource(state, manifest, player, command.payload)) && (command.kind !== "forge.attune" || canAttune(state, player, command.payload, manifest)) && (!(command.kind.startsWith("service.") || command.kind === "supply.use") || serviceActionProblem(state, player, command.kind, command.payload) === null) && (!command.kind.startsWith("equipment.") || equipmentActionAvailable(state, player, command.kind, command.payload));
+    const player = state.playersById[command.playerId], actor = state.entitiesById[player.entityId], inventory = player.inventory, respawning = command.kind === "player.respawn", suppressed = subweaponSuppressedD12_4I(state, actor.entityId), target = command.kind === "ferry.travel" ? ferryTravelTarget(state, actor, command.payload) : command.kind === "site.transition" ? siteTransitionTarget(state, manifest, actor, command.payload) : null, progressionPlan = prepareD8Command(player, command), valid = (command.kind !== "worldEvent.activate" || canActivateWorldEvent(state, player, command.payload.groupId)) && (command.kind !== "discovery.readNote" || canReadTrailNote(state, player, command.payload)) && (!progressionPlan || !progressionPlan.error && command.expectedSaveRevision === state.campaign.saveRevision) && activityContextMatches(state, command) && (respawning ? !actor.alive : actor.alive) && (!["site.transition", "ferry.travel"].includes(command.kind) || Boolean(target)) && (command.kind !== "loot.pickup" || inventory?.revision === command.payload.inventoryRevision && canPickUp(state, player, command.payload.sourceEntityId, resolvePlayerStats(player).pickupRadius)) && (command.kind !== "subweapon.claim" || canClaimSubweapon(state, player, command.payload)) && (command.kind !== "combat.guardIntent" || !command.payload.pressed || !suppressed && resolvePlayerStats(player).subType === "shield") && (command.kind !== "combat.shadowDash" || canShadowDash(actor, state.subweaponCombat.actors[actor.entityId], resolvePlayerStats(player), suppressed)) && (command.kind !== "combat.skill" || canUseClassSkill(player, actor, state.subweaponCombat.actors[actor.entityId], resolvePlayerStats(player), command.payload.skillId, suppressed)) && (command.kind !== "gear.salvage" || canSalvage(state, player, command.payload)) && (command.kind !== "gear.drop" || canDropGear(state, player, command.payload)) && (command.kind !== "resource.interact" || canUseResource(state, manifest, player, command.payload)) && (command.kind !== "forge.attune" || canAttune(state, player, command.payload, manifest)) && (!(command.kind.startsWith("service.") || command.kind === "supply.use") || serviceActionProblem(state, player, command.kind, command.payload) === null) && (!command.kind.startsWith("equipment.") || equipmentActionAvailable(state, player, command.kind, command.payload));
     if (valid) {
       if (respawning) measure("playerRespawn", () => {
         state.encounterEconomy.outingsByPlayer[player.playerId].earnedOutside = false;
@@ -24032,6 +24209,8 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
         guardIntent(state.subweaponCombat.actors[actor.entityId].guard, command.payload.pressed, state.primary.actorsById[actor.entityId]);
       } else if (command.kind === "combat.shadowDash") {
         beginShadowDash(actor, state.subweaponCombat.actors[actor.entityId], resolvePlayerStats(player), command.payload.aim);
+      } else if (command.kind === "combat.skill") {
+        family.skill(actor, command.payload.skillId, command.payload.aim, command.commandId);
       } else if (command.kind === "gear.salvage") {
         applySalvage(state, player, command, authorityOrder);
       } else if (command.kind === "gear.drop") {
@@ -25002,7 +25181,7 @@ function projectCombatPresentation(state, visibleIds) {
   return { masteryHazards: mastery.flatMap((b) => Object.values(b.hazards)).filter((e) => ids3.has(e.sourceId)).map((e) => ({ position: { ...e.position }, radius: e.radius, expiresTick: e.expiresTick })), masteryRazors: mastery.flatMap((b) => Object.values(b.razors)).filter((e) => ids3.has(e.sourceId)).map((e) => ({ position: { ...e.position }, direction: { ...e.direction } })), statuses: [...Object.values(state.subweaponCombat.effects), ...mastery.flatMap((b) => [...Object.values(b.poisons).map((e) => ({ ...e, id: e.sourceId + "/" + e.id, kind: "poison" })), ...Object.values(b.statuses).map((e) => ({ ...e, id: e.sourceId + "/" + e.id, stacks: e.rank, nextTick: e.expiresTick, appliedTick: e.expiresTick - (e.kind === "expose" ? 300 : e.kind === "slow" ? 240 : 90) }))]), ...Object.values(state.subweaponCombat.controls ?? {}).map((e) => ({ ...e, kind: e.phase, nextTick: e.expiresTick }))].filter((e) => ids3.has(e.targetId) && e.expiresTick > state.tick).map((e) => ({ lane: (lanes2.set(e.targetId, (lanes2.get(e.targetId) ?? -1) + 1), lanes2.get(e.targetId)), id: e.id, sourceId: e.sourceId, targetId: e.targetId, kind: e.kind, stacks: e.stacks, expiresTick: e.expiresTick, nextTick: e.nextTick, durationFrames: ["bleed", "poison"].includes(e.kind) ? 600 : e.kind === "burn" ? 240 : e.expiresTick - e.appliedTick })), families: Object.fromEntries(Object.entries(state.subweaponCombat.actors).filter(([id]) => ids3.has(id)).map(([id, c]) => [id, { mastery: (() => {
     const p = Object.values(state.playersById).find((p2) => p2.entityId === id), d = p?.d8, t = d?.transient;
     return t ? { pulseBlocks: t.pulseBlocks, syphon: finiteNodeRank(d, "tome_arcane_syphon") > 0, earthBreaker: finiteNodeRank(d, "shield_earth_breaker_bash") > 0, singularity: finiteNodeRank(d, "tome_keystone_singularity") > 0, anchor: t.lastAnchor, fortitudeStacks: t.fortitudeStacks, retaliatoryReady: t.retaliatoryReady, colossus: t.colossusTicks > 0, shadowStep: t.shadowStepTicks > 0, syphonStacks: t.syphonStacks, weavingStacks: t.weavingStacks } : null;
-  })(), element: Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.itemsById[Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.equipped.subweapon]?.generated?.definition.spellType ?? "fire", guard: c.guard ? { ...c.guard, integrity: presentCombat(c.guard.integrity), direction: { ...c.guard.direction } } : null, pressure: c.pressure, dash: { ...c.dash }, delivery: { ...c.delivery } }])) };
+  })(), element: Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.itemsById[Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.equipped.subweapon]?.generated?.definition.spellType ?? "fire", guard: c.guard ? { ...c.guard, integrity: presentCombat(c.guard.integrity), direction: { ...c.guard.direction } } : null, pressure: c.pressure, dash: { ...c.dash }, delivery: { ...c.delivery }, skill: c.skills?.last ? { ...c.skills.last } : null }])) };
 }
 
 // src/shared/content/creatures_d11.js
@@ -25551,7 +25730,7 @@ function createActivityClientPort({ authority, localPlayerId, measure = (_n, fn)
           navigation: state.d9World ? freezeProjection({ frames: copyWire(state.d9World.runtime.frames), position: inOverworld ? localFramePositionD9(local5.position, state.d9World.runtime.frames) : null, revision: state.d9World.navigation.revision, knowledge: projectMapKnowledge(state), root: state.d9World.discoveryIndex, boundSitesById: Object.fromEntries(functionalSitesD10(state).map((site2) => [site2.siteId, { siteId: site2.siteId, label: mapSiteLabel(state, site2.siteId, site2.label), state: site2.conqueredTick === null ? "active" : "completed" }])), navigableSitesById: Object.fromEntries(siteTruth.sites.map((site2) => [site2.siteId, { siteId: site2.siteId, label: mapSiteLabel(state, site2.siteId, site2.label), state: site2.completed ? "completed" : site2.bound ? "active" : "unidentified" }])), pending: copyWire(state.d9World.navigation.pending.filter((r) => r.playerId === localPlayerId)), pips: inOverworld ? visible3.filter((a) => a.alive && a.entityId !== local5.entityId && Math.hypot(a.position.x - local5.position.x, a.position.y - local5.position.y) <= revealRadiusD9(playersById[localPlayerId].stats.attributes.int) * 32).map((a) => ({ position: localFramePositionD9(a.position, state.d9World.runtime.frames), kind: a.team === "party" ? "ally" : "hostile" })) : [] }) : null,
           combatPresentation: freezeProjection(projectCombatPresentation(state, Object.keys(entitiesById))),
           tomeTarget,
-          subweapon: freezeProjection({ suppressed: subweaponSuppressedD12_4I(state, local5.entityId), guard: { ...state.subweaponCombat.actors[local5.entityId].guard, integrity: presentCombat(state.subweaponCombat.actors[local5.entityId].guard.integrity), direction: { ...state.subweaponCombat.actors[local5.entityId].guard.direction } }, delivery: { ...state.subweaponCombat.actors[local5.entityId].delivery }, pressure: state.subweaponCombat.actors[local5.entityId].pressure, dash: { ...state.subweaponCombat.actors[local5.entityId].dash }, barrier: presentCombat(state.subweaponCombat.actors[local5.entityId].barrier), maxBarrier: playersById[localPlayerId].stats.maxBarrier, barrierRatio: integerRatio(state.subweaponCombat.actors[local5.entityId].barrier, playersById[localPlayerId].stats.maxBarrier), barrierLabel: formatLarge(state.subweaponCombat.actors[local5.entityId].barrier), maxBarrierLabel: formatLarge(playersById[localPlayerId].stats.maxBarrier) }),
+          subweapon: freezeProjection({ suppressed: subweaponSuppressedD12_4I(state, local5.entityId), guard: { ...state.subweaponCombat.actors[local5.entityId].guard, integrity: presentCombat(state.subweaponCombat.actors[local5.entityId].guard.integrity), direction: { ...state.subweaponCombat.actors[local5.entityId].guard.direction } }, delivery: { ...state.subweaponCombat.actors[local5.entityId].delivery }, pressure: state.subweaponCombat.actors[local5.entityId].pressure, dash: { ...state.subweaponCombat.actors[local5.entityId].dash }, skills: structuredClone(state.subweaponCombat.actors[local5.entityId].skills ?? { cooldowns: {} }), barrier: presentCombat(state.subweaponCombat.actors[local5.entityId].barrier), maxBarrier: playersById[localPlayerId].stats.maxBarrier, barrierRatio: integerRatio(state.subweaponCombat.actors[local5.entityId].barrier, playersById[localPlayerId].stats.maxBarrier), barrierLabel: formatLarge(state.subweaponCombat.actors[local5.entityId].barrier), maxBarrierLabel: formatLarge(playersById[localPlayerId].stats.maxBarrier) }),
           hostileProjectiles: freezeProjection(Object.values(state.hostileCombat?.projectiles ?? {}).filter((b) => b.spaceInstanceId === ctx.spaceInstanceId && Math.hypot(b.position.x - local5.position.x, b.position.y - local5.position.y) <= 1e3).map((b) => ({ id: b.id, sourceId: b.sourceId, sourceFamily: ordinaryEnemyForProfile(state.entitiesById[b.sourceId]?.contentDefinitionId)?.family ?? null, style: b.type, position: { ...b.position }, direction: { ...b.direction }, radius: b.radius, firedTick: b.firedTick }))),
           bolts: freezeProjection(Object.values(state.subweaponCombat.projectiles).filter((b) => b.spaceInstanceId === ctx.spaceInstanceId).map((b) => ({ id: b.id, sourceId: b.sourceId, frames: b.frames, delivery: b.delivery, position: { ...b.position }, direction: { ...b.direction } }))),
           tick: state.tick,
@@ -25879,6 +26058,286 @@ async function createLocalWorldSession({
   const clientPort = createWorldClientPort({ authority, localPlayerId });
   return Object.freeze({ clientPort, generationDiagnostics, step: () => {
     if (["safe", "encounter"].includes(authority.getPersistenceStatus().phase)) authority.advanceCommandTick();
+  } });
+}
+
+// src/client/class_picker_v1.js
+var OFFHAND_NAMES = { shield: "Shield", dagger: "Dagger", tome: "Tome" };
+var CLASS_ICONS = {
+  knight: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5l15 6v11c0 10-6 17-15 21C15 39 9 32 9 22V11z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M24 14v20M16 22h16" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
+  rogue: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M33 6l5 5-17 17-5-5z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M15 24l9 9M12 36l6-6M9 39l3-3" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
+  mage: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 9h22a6 6 0 0 1 6 6v24H16a6 6 0 0 1-6-6z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M24 15l2.5 6 6 2.5-6 2.5-2.5 6-2.5-6-6-2.5 6-2.5z" fill="currentColor"/></svg>'
+};
+var classIconSvg = (id) => CLASS_ICONS[id] ?? "";
+function createClassPickerV1({ document, environment, readModel, adapter, reportError = () => {
+}, onClose = () => {
+} }) {
+  const el = (tag, cls = "", text2 = "") => {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text2) e.textContent = text2;
+    return e;
+  };
+  const root = el("section", "class-picker-v1");
+  root.hidden = true;
+  root.setAttribute("role", "dialog");
+  root.setAttribute("aria-modal", "true");
+  root.setAttribute("aria-labelledby", "class-picker-title");
+  root.dataset.gameplayHud = "";
+  const panel = el("div", "class-picker-panel"), title = el("h2", "", "Choose your class"), intro = el("p", "class-picker-intro", "Your class decides your offhand and your skills. It\u2019s permanent for this character."), cards = el("div", "class-picker-cards"), status2 = el("p", "class-picker-status"), actions = el("div", "class-picker-actions"), later = el("button", "class-picker-later", "Decide later"), confirm = el("button", "class-picker-confirm");
+  title.id = "class-picker-title";
+  later.type = confirm.type = "button";
+  status2.setAttribute("role", "status");
+  actions.append(later, confirm);
+  panel.append(title, intro, cards, status2, actions);
+  root.append(panel);
+  document.body.append(root);
+  let selected = null, busy = false, dismissed = false, cardButtons = {};
+  for (const c of ["knight", "rogue", "mage"].map((id) => HERO_CLASSES[id])) {
+    const b = el("button", "class-card"), icon = el("span", "class-card-icon"), skill = CLASS_SKILLS[c.signature];
+    b.type = "button";
+    b.style.setProperty("--class", c.color);
+    b.dataset.classId = c.id;
+    icon.innerHTML = CLASS_ICONS[c.id];
+    const head12 = el("span", "class-card-head");
+    head12.append(icon, el("strong", "", c.name), el("em", "", OFFHAND_NAMES[c.offhand]));
+    const sk = el("span", "class-card-skill");
+    sk.append(el("b", "", `Free skill \xB7 ${skill.name}`), el("small", "", skill.description));
+    b.append(head12, el("span", "class-card-role", c.role), sk);
+    b.onclick = () => {
+      selected = c.id;
+      paint();
+    };
+    cardButtons[c.id] = b;
+    cards.append(b);
+  }
+  const wait = async (test, ms = 4e3) => {
+    const until = Date.now() + ms;
+    while (Date.now() < until) {
+      if (test(readModel())) return true;
+      await new Promise((r) => environment.setTimeout(r, 60));
+    }
+    return false;
+  };
+  const local5 = (m) => m.playersById[m.localPlayerId];
+  const offhandOf = (item) => {
+    const d = itemDefinition(item);
+    return d?.slot === "subweapon" ? d.subType : null;
+  };
+  async function choose(classId) {
+    const c = HERO_CLASSES[classId];
+    busy = true;
+    paint();
+    try {
+      let m = readModel(), inv = m.inventory, equipped = inv.itemsById[inv.equipped.subweapon];
+      if (equipped && offhandOf(equipped) !== c.offhand) {
+        status2.textContent = "Stowing your old offhand\u2026";
+        const rev = inv.revision;
+        await adapter.issue("equipment.unequip", { slot: "subweapon", inventoryRevision: rev });
+        await wait((x) => x.inventory.revision > rev);
+      }
+      m = readModel();
+      status2.textContent = `Becoming a ${c.name}\u2026`;
+      const d = local5(m).d8;
+      await adapter.issue("progression.change", { progressionRevision: d.revision, action: { kind: "class.choose", heroClass: classId } });
+      if (!await wait((x) => local5(x).d8?.heroClass === classId)) throw Error("The class choice did not save. Try again.");
+      const owned = () => Object.values(readModel().inventory.itemsById).find((i) => offhandOf(i) === c.offhand);
+      m = readModel();
+      inv = m.inventory;
+      if (!owned() && inv.subweapons && !inv.subweapons.claims[c.offhand]) {
+        status2.textContent = `Claiming your ${SUBWEAPONS[c.offhand].name}\u2026`;
+        const rev = inv.revision;
+        await adapter.issue("subweapon.claim", { subType: c.offhand, inventoryRevision: rev });
+        await wait((x) => x.inventory.revision > rev);
+      }
+      const item = owned();
+      m = readModel();
+      inv = m.inventory;
+      if (item && inv.equipped.subweapon !== item.itemId) {
+        status2.textContent = `Equipping your ${OFFHAND_NAMES[c.offhand]}\u2026`;
+        const rev = inv.revision;
+        await adapter.issue("equipment.equip", { itemId: item.itemId, slot: "subweapon", inventoryRevision: rev });
+        await wait((x) => x.inventory.revision > rev);
+      }
+      status2.textContent = "";
+      close();
+    } catch (e) {
+      status2.textContent = e.message;
+      reportError(e.message);
+    } finally {
+      busy = false;
+      paint();
+    }
+  }
+  later.onclick = () => {
+    dismissed = true;
+    close();
+  };
+  confirm.onclick = () => {
+    if (selected && !busy) choose(selected);
+  };
+  function paint() {
+    for (const [id, b] of Object.entries(cardButtons)) {
+      b.setAttribute("aria-pressed", String(id === selected));
+      b.disabled = busy;
+    }
+    confirm.disabled = !selected || busy;
+    confirm.textContent = busy ? "Working\u2026" : selected ? `Become a ${HERO_CLASSES[selected].name}` : "Pick a class";
+    later.disabled = busy;
+  }
+  function open() {
+    const m = readModel(), p = local5(m);
+    if (!p?.d8 || heroClassOf(p.d8)) return false;
+    const inv = m.inventory, current = offhandOf(inv?.itemsById[inv?.equipped.subweapon]);
+    selected = Object.values(HERO_CLASSES).find((c) => c.offhand === current)?.id ?? selected;
+    status2.textContent = "";
+    root.hidden = false;
+    paint();
+    return true;
+  }
+  function close() {
+    root.hidden = true;
+    onClose();
+  }
+  function refresh(m, available) {
+    const p = local5(m);
+    if (!root.hidden && p?.d8 && heroClassOf(p.d8) && !busy) close();
+    if (root.hidden && !dismissed && available && p?.d8 && !heroClassOf(p.d8) && m.persistence?.phase === "encounter" && m.entitiesById[p.entityId]?.alive) open();
+  }
+  return Object.freeze({ open, refresh, isOpen: () => !root.hidden, destroy() {
+    root.remove();
+  } });
+}
+
+// src/client/skill_bar_v1.js
+var SKILL_ICONS = {
+  shield_bash: '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M13 5l9 4v7c0 6-4 10-9 12-5-2-9-6-9-12V9z" fill="currentColor" fill-opacity=".25" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="M24 11l5-2M25 16h5M24 21l5 2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
+  flurry: '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 24L20 10M10 27L25 12M15 29L28 16" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M20 10l3-5 1 6zM25 12l4-4v6zM28 16l3-2-1 4z" fill="currentColor"/></svg>',
+  cast: '<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="20" cy="12" r="6" fill="currentColor" fill-opacity=".35" stroke="currentColor" stroke-width="2.4"/><path d="M15 17L5 27M12 15l-6 2M17 20l-2 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>'
+};
+var LOCK = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="11" width="12" height="9" rx="2" fill="currentColor" fill-opacity=".25" stroke="currentColor" stroke-width="2"/><path d="M9 11V8a3 3 0 0 1 6 0v3" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
+function createSkillBarV1({ document, environment, readModel, adapter, isBlocked, openClassPicker, reportError = () => {
+} }) {
+  const bar = document.createElement("div");
+  bar.className = "skill-bar-v1";
+  bar.dataset.gameplayHud = "";
+  bar.setAttribute("aria-label", "Skills");
+  document.getElementById("world-bag").parentElement.append(bar);
+  const slots = [];
+  for (let i = 0; i < SKILL_SLOT_COUNT; i++) {
+    const b = document.createElement("button"), icon = document.createElement("span"), sweep = document.createElement("i"), time = document.createElement("b"), key2 = document.createElement("small");
+    b.type = "button";
+    b.className = "skill-slot";
+    b.dataset.slot = String(i + 1);
+    b.dataset.gameplayHud = "";
+    icon.className = "skill-slot-icon";
+    sweep.className = "skill-slot-sweep";
+    time.className = "skill-slot-time";
+    key2.className = "skill-slot-key";
+    key2.textContent = String(i + 1);
+    b.append(sweep, icon, time, key2);
+    bar.append(b);
+    slots.push({ b, icon, sweep, time, key: key2, skillId: void 0, paint: "" });
+  }
+  const listeners = [];
+  const listen = (el, type, fn, opts) => {
+    el.addEventListener(type, fn, opts);
+    listeners.push(() => el.removeEventListener(type, fn, opts));
+  };
+  const local5 = (m) => m.playersById[m.localPlayerId];
+  const loadout = (m) => {
+    const p = local5(m);
+    return Array.from({ length: SKILL_SLOT_COUNT }, (_, i) => classSkillsFor(p?.d8)[i] ?? null);
+  };
+  function ready(m, skillId) {
+    const p = local5(m), c = m.subweapon, heroClass = heroClassOf(p?.d8);
+    return Boolean(skillId && heroClass && c && !c.suppressed && m.entitiesById[p.entityId]?.alive && p.stats.subType === heroClass.offhand && !c.skills?.cooldowns?.[skillId] && !c.skills?.flurry && (skillId !== "cast" || m.tomeTarget === "READY") && m.persistence.phase === "encounter");
+  }
+  function activate(index) {
+    if (isBlocked()) return;
+    const m = readModel(), p = local5(m);
+    if (!heroClassOf(p?.d8)) {
+      openClassPicker?.();
+      return;
+    }
+    const skillId = loadout(m)[index];
+    if (!ready(m, skillId)) return;
+    try {
+      const pending = adapter.issue("combat.skill", { skillId, aim: m.primary.actorsById[p.entityId].facing }, m);
+      pending?.catch?.((e) => reportError(e.message));
+    } catch (e) {
+      reportError(e.message);
+    }
+    const s = slots[index].b;
+    s.classList.remove("fired");
+    void s.offsetWidth;
+    s.classList.add("fired");
+  }
+  slots.forEach((s, i) => {
+    listen(s.b, "pointerdown", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.button !== 0) return;
+      activate(i);
+    });
+    listen(s.b, "click", (e) => e.preventDefault());
+  });
+  listen(environment, "keydown", (e) => {
+    const i = ["Digit1", "Digit2", "Digit3", "Numpad1", "Numpad2", "Numpad3"].indexOf(e.code) % 3;
+    if (i < 0 || e.repeat || e.ctrlKey || e.metaKey || e.altKey || ["INPUT", "TEXTAREA", "SELECT"].includes(e.target?.tagName)) return;
+    e.preventDefault();
+    activate(i);
+  });
+  const ARC_DEGREES = [-146, -113, -82], GUARD_DEGREES = 180;
+  let placed = "";
+  function place() {
+    const attack = document.getElementById("primary-attack")?.getBoundingClientRect(), host = bar.parentElement?.getBoundingClientRect();
+    if (!attack?.width || !host) return false;
+    const size = Math.round(Math.min(56, Math.max(46, attack.width * 0.66))), radius = attack.width / 2 + size / 2 + 40, cx = attack.left + attack.width / 2 - host.left, cy = attack.top + attack.height / 2 - host.top, key2 = `${cx}/${cy}/${size}/${radius}`;
+    if (key2 === placed) return true;
+    placed = key2;
+    bar.style.setProperty("--slot", size + "px");
+    slots.forEach((s, i) => {
+      const angle3 = ARC_DEGREES[i] * Math.PI / 180, x = cx + Math.cos(angle3) * radius - size / 2, y = cy + Math.sin(angle3) * radius - size / 2;
+      s.b.style.setProperty("--at", `translate(${x.toFixed(1)}px,${y.toFixed(1)}px)`);
+    });
+    const body4 = document.body, guard = 60, gx = cx + Math.cos(GUARD_DEGREES * Math.PI / 180) * radius, gy = cy + Math.sin(GUARD_DEGREES * Math.PI / 180) * radius;
+    body4.style.setProperty("--arc-guard-left", (gx - guard / 2).toFixed(1) + "px");
+    body4.style.setProperty("--arc-guard-top", (gy - guard / 2).toFixed(1) + "px");
+    body4.classList.add("skill-arc-v1");
+    return true;
+  }
+  let placedAt = -1e9, placedOk = false;
+  function refresh(m, visible3 = true) {
+    const p = local5(m), heroClass = heroClassOf(p?.d8), skills = loadout(m), c = m.subweapon, now2 = environment.performance?.now?.() ?? Date.now();
+    if (visible3 && now2 - placedAt > 500) {
+      placedAt = now2;
+      placedOk = place();
+    }
+    bar.hidden = !visible3 || isBlocked() || !p || !placedOk;
+    if (bar.hidden) return;
+    bar.dataset.classId = heroClass?.id ?? "none";
+    bar.style.setProperty("--class", heroClass?.color ?? "#c9b58b");
+    slots.forEach((s, i) => {
+      const skillId = heroClass ? skills[i] : i === 0 ? "pick" : null, left = skillId && skillId !== "pick" ? c?.skills?.cooldowns?.[skillId] ?? 0 : 0, total = CLASS_SKILLS[skillId]?.cooldownTicks ?? 1, state = skillId === "pick" ? "pick" : !skillId ? "locked" : ready(m, skillId) ? "ready" : left ? "cooling" : "blocked";
+      const key2 = `${skillId}/${state}`;
+      if (s.paint !== key2) {
+        s.paint = key2;
+        s.b.dataset.state = state;
+        s.icon.innerHTML = skillId === "pick" ? classIconSvg("knight") : skillId ? SKILL_ICONS[skillId] : LOCK;
+        s.b.setAttribute("aria-label", skillId === "pick" ? "Choose your class" : skillId ? `${CLASS_SKILLS[skillId].name} \u2014 key ${i + 1}` : `Empty skill slot ${i + 1}. Learn skills in your class tree.`);
+        s.b.title = skillId === "pick" ? "Choose your class" : skillId ? CLASS_SKILLS[skillId].name : "Empty slot";
+      }
+      s.sweep.style.transform = `scaleY(${left ? Math.min(1, left / total).toFixed(3) : 0})`;
+      const label3 = left ? (left / 60).toFixed(left >= 600 ? 0 : 1) : "";
+      if (s.time.textContent !== label3) s.time.textContent = label3;
+      s.b.disabled = state === "locked";
+    });
+  }
+  return Object.freeze({ refresh, destroy() {
+    listeners.forEach((f) => f());
+    bar.remove();
+    document.body.classList.remove("skill-arc-v1");
   } });
 }
 
@@ -27693,14 +28152,14 @@ function createInventoryPresentation({ document, environment, readModel, adapter
         copy.append(element("strong", d2.name, "item-title"), element("small", `${label2(d2.slot).toUpperCase()} \xB7 ${rarity(d2)}`, "item-sub"), element("span", Object.entries(d2.bonuses).filter(([, v]) => v).map(([k, v]) => `${{ attack: "ATK", defense: "DEF", maxHp: "HP" }[k]} +${statText(v)}`).join(" | ") || "No stat bonus", "item-sub gear-bonuses"));
         inspectButton.append(icon(itemArtKey(item2)), copy);
         row2.append(inspectButton);
-        const target = d2.slot === "ring" ? "ring1" : d2.slot, preview = equipmentComparison(inv, item2.itemId, target, local5.progression.totalXp, local5.d8), allowed = equipmentLevelAllowed(owner, item2), required = equipmentRequiredLevel(owner, item2), action3 = button(!allowed ? `REQUIRES LV. ${required}` : d2.slot === "ring" ? "EQUIP \u2026" : preview.displaced.length ? "SWAP" : "EQUIP", () => {
+        const target = d2.slot === "ring" ? "ring1" : d2.slot, preview = equipmentComparison(inv, item2.itemId, target, local5.progression.totalXp, local5.d8), classUser = classOffhandAllowed(owner, item2) ? null : Object.values(HERO_CLASSES).find((c) => c.offhand === d2.subType), allowed = equipmentLevelAllowed(owner, item2) && !classUser, required = equipmentRequiredLevel(owner, item2), action3 = button(classUser ? `${classUser.name.toUpperCase()} ONLY` : !allowed ? `REQUIRES LV. ${required}` : d2.slot === "ring" ? "EQUIP \u2026" : preview.displaced.length ? "SWAP" : "EQUIP", () => {
           if (d2.slot === "ring") select(item2.itemId, inspectButton);
           else issue("equipment.equip", { itemId: item2.itemId, slot: target });
         }, !allowed);
         action3.className = "row-action action-equip";
         action3.dataset.equipmentAction = "";
         action3.dataset.equipItemId = item2.itemId;
-        action3.setAttribute("aria-label", !allowed ? `${d2.name} requires hero level ${required}` : `${d2.slot === "ring" ? "Choose ring slot for" : "Equip"} ${d2.name}`);
+        action3.setAttribute("aria-label", classUser ? `${d2.name} is for the ${classUser.name} class` : !allowed ? `${d2.name} requires hero level ${required}` : `${d2.slot === "ring" ? "Choose ring slot for" : "Equip"} ${d2.name}`);
         row2.append(action3);
         list.append(row2);
       }
@@ -27708,7 +28167,7 @@ function createInventoryPresentation({ document, environment, readModel, adapter
         const provisions = element("section", "", "base-provisions");
         provisions.append(element("h3", "BASE SUBWEAPON PROVISIONS"));
         for (const [type, d2] of Object.entries(SUBWEAPONS)) {
-          const claimed = Boolean(inv.subweapons.claims[type]), b = button(claimed ? `${d2.name} \u2014 claimed` : `${d2.provision}: ${d2.name}`, () => issue("subweapon.claim", { subType: type }), claimed || progressionBigInt(local5.progression.level) < 2n || Object.keys(inv.itemsById).length >= (local5.d8 ? inventoryIntakeCapacity(local5.d8) : 64));
+          const claimed = Boolean(inv.subweapons.claims[type]), b = button(claimed ? `${d2.name} \u2014 claimed` : `${d2.provision}: ${d2.name}`, () => issue("subweapon.claim", { subType: type }), claimed || !provisionLevelAllowed(local5, type) || Object.keys(inv.itemsById).length >= (local5.d8 ? inventoryIntakeCapacity(local5.d8) : 64));
           b.prepend(icon(d2.definitionId));
           provisions.append(b);
         }
@@ -30248,13 +30707,13 @@ function drawCartographyD9(ctx, { pages, pending = [], viewport, width, height, 
       const road = /* @__PURE__ */ new Set();
       for (let py = 0; py < rows; py++) for (let px = 0; px < cols; px++) if (page.tiles[py * cols + px] === "p") road.add(px + "," + py);
       if (road.size && !planned) {
-        const unit11 = Math.min(cw, ch);
+        const unit12 = Math.min(cw, ch);
         ctx.beginPath();
-        addRoadShape(ctx, road, x, y, cw, ch, Math.max(1.5, unit11 * 0.3));
+        addRoadShape(ctx, road, x, y, cw, ch, Math.max(1.5, unit12 * 0.3));
         ctx.fillStyle = "#4b3825";
         ctx.fill();
         ctx.beginPath();
-        addRoadShape(ctx, road, x, y, cw, ch, Math.max(1, unit11 * 0.19));
+        addRoadShape(ctx, road, x, y, cw, ch, Math.max(1, unit12 * 0.19));
         ctx.fillStyle = "#c6aa70";
         ctx.fill();
       }
@@ -33676,7 +34135,7 @@ var clamp28 = (x) => Math.max(0, Math.min(1, x));
 var mix15 = (a, b, t) => a + (b - a) * t;
 var point6 = (x, y) => ({ x, y });
 var lerp3 = (a, b, t) => point6(mix15(a.x, b.x, t), mix15(a.y, b.y, t));
-var unit3 = (x, y) => {
+var unit4 = (x, y) => {
   const d = Math.hypot(x, y) || 1;
   return point6(x / d, y / d);
 };
@@ -33697,7 +34156,7 @@ function corrosivePseudopodGeometryV7(side, pose, tick) {
   let c2 = point6(side * 47 - drag * 0.45, 7 + bodyY + sway);
   if (targeted) {
     const quick = pose.ability === "strike";
-    const reach = unit3(tip.x - root.x, tip.y - root.y);
+    const reach = unit4(tip.x - root.x, tip.y - root.y);
     const bend1 = quick ? point6(mix15(root.x, tip.x, 0.34) + side * 7, mix15(root.y, tip.y, 0.34) + 7) : point6(root.x + side * 24, root.y - 32 - (pose.slamWeight ?? 0) * 7);
     const carry = 23 + (pose.slamWeight ?? 0) * 6;
     const bend2 = quick ? point6(tip.x - reach.x * 19, tip.y - reach.y * 19 + 4) : point6(tip.x - reach.x * carry, tip.y - reach.y * carry);
@@ -33712,7 +34171,7 @@ function corrosivePseudopodGeometryV7(side, pose, tick) {
     c1.y -= amount * 12;
     c2.y -= amount * 19;
   }
-  const start = unit3(c1.x - root.x, c1.y - root.y), end = unit3(tip.x - c2.x, tip.y - c2.y);
+  const start = unit4(c1.x - root.x, c1.y - root.y), end = unit4(tip.x - c2.x, tip.y - c2.y);
   const rootNormal = point6(-start.y, start.x), tipNormal = point6(-end.y, end.x);
   const rootHalfWidth = 11.5 + amount * 1.3;
   const tipRadius = 7.1 + (targeted ? amount * 2.1 : 0) + (pose.ability === "slam" && targeted ? (pose.slamWeight ?? 0) * 2.5 : 0);
@@ -33793,7 +34252,7 @@ var ease3 = (v) => {
 };
 var mix16 = (a, b, p) => a + (b - a) * p;
 var point7 = (x, y) => ({ x, y });
-var unit4 = (x, y) => {
+var unit5 = (x, y) => {
   const d = Math.hypot(x, y) || 1;
   return point7(x / d, y / d);
 };
@@ -33857,7 +34316,7 @@ function sampleChain(rows) {
     length += d;
   }
   for (let i = 0; i < points2.length; i++) {
-    const a = points2[Math.max(0, i - 1)], b = points2[Math.min(points2.length - 1, i + 1)], u = unit4(b.x - a.x, b.y - a.y);
+    const a = points2[Math.max(0, i - 1)], b = points2[Math.min(points2.length - 1, i + 1)], u = unit5(b.x - a.x, b.y - a.y);
     points2[i].nx = -u.y;
     points2[i].ny = u.x;
   }
@@ -33874,10 +34333,10 @@ function bankPath(c, points2, width, offset2, seed2) {
   c.beginPath();
   c.moveTo(left[0].x, left[0].y);
   for (let i = 1; i < left.length; i++) c.lineTo(left[i].x, left[i].y);
-  const end = points2.at(-1), u = unit4(end.x - points2.at(-2).x, end.y - points2.at(-2).y), tip = point7(end.x + u.x * end.r * 0.7, end.y + u.y * end.r * 0.7);
+  const end = points2.at(-1), u = unit5(end.x - points2.at(-2).x, end.y - points2.at(-2).y), tip = point7(end.x + u.x * end.r * 0.7, end.y + u.y * end.r * 0.7);
   c.quadraticCurveTo(tip.x, tip.y, right.at(-1).x, right.at(-1).y);
   for (let i = right.length - 2; i >= 0; i--) c.lineTo(right[i].x, right[i].y);
-  const start = points2[0], v = unit4(points2[1].x - start.x, points2[1].y - start.y);
+  const start = points2[0], v = unit5(points2[1].x - start.x, points2[1].y - start.y);
   c.quadraticCurveTo(start.x - v.x * start.r * 0.7, start.y - v.y * start.r * 0.7, left[0].x, left[0].y);
   c.closePath();
 }
@@ -34029,7 +34488,7 @@ function minionPose(row2, tick) {
   const air = clamp29((tick - row2.spawnedTick) / Math.max(1, row2.landsTick - row2.spawnedTick));
   const landing = clamp29((tick - row2.landsTick) / Math.max(1, row2.activatesTick - row2.landsTick));
   const height = (1 - air) * 33 + 4 * air * (1 - air) * (31 + (row2.volleyOrdinal ?? 0) * 2.5);
-  const launch = unit4(row2.landingPosition.x - row2.originPosition.x, row2.landingPosition.y - row2.originPosition.y);
+  const launch = unit5(row2.landingPosition.x - row2.originPosition.x, row2.landingPosition.y - row2.originPosition.y);
   return { air, landing, height, launch, age: tick - row2.spawnedTick, terminalAge: row2.stage === "dissolving" ? tick - (row2.retireTick - 24) : null };
 }
 function splatPath(c, r, seed2) {
@@ -34075,7 +34534,7 @@ function drawCorrosiveMinionGround(c, rows, tick) {
 }
 function strand(c, root, tip, amount) {
   if (amount <= 0) return;
-  const d = unit4(tip.x - root.x, tip.y - root.y), n = point7(-d.y, d.x), w = 3.8 * amount, thin = 0.8 * amount, m = point7(mix16(root.x, tip.x, 0.55), mix16(root.y, tip.y, 0.55) + 5 * amount);
+  const d = unit5(tip.x - root.x, tip.y - root.y), n = point7(-d.y, d.x), w = 3.8 * amount, thin = 0.8 * amount, m = point7(mix16(root.x, tip.x, 0.55), mix16(root.y, tip.y, 0.55) + 5 * amount);
   c.beginPath();
   c.moveTo(root.x + n.x * w, root.y + n.y * w);
   c.quadraticCurveTo(m.x + n.x * w * 0.4, m.y + n.y * w * 0.4, tip.x + n.x * thin, tip.y + n.y * thin);
@@ -34209,7 +34668,7 @@ function hash11(value2) {
   for (const ch of String(value2)) n = Math.imul(n ^ ch.charCodeAt(0), 16777619);
   return n >>> 0;
 }
-function unit5(x, y) {
+function unit6(x, y) {
   const d = Math.hypot(x, y) || 1;
   return point8(x / d, y / d);
 }
@@ -34247,10 +34706,10 @@ function corrosiveAttackPose(actor, tick) {
   const aim2 = pending ? localTarget(actor, pending) : recent ? localTarget(actor, recent) : point8(Math.cos(b.facingAngle ?? 1.57) * 40, Math.sin(b.facingAngle ?? 1.57) * 40);
   const committed = pending ?? recent, origin = committed?.originPosition ?? actor.position;
   const committedDirection = committed?.targetPosition ? point8(committed.targetPosition.x - origin.x, committed.targetPosition.y - origin.y) : aim2;
-  const direction3 = unit5(committedDirection.x, committedDirection.y), side = committedDirection.x < 0 ? -1 : 1;
+  const direction3 = unit6(committedDirection.x, committedDirection.y), side = committedDirection.x < 0 ? -1 : 1;
   const idle2 = Math.sin((tick + (actor.visualSeed ?? 0) * 0.7) * 0.045);
   const moving = actor.movedLastTick === true, hop = 0, goo = corrosiveGoopMotionV5(actor, tick);
-  const motion = unit5(actor.movementIntent?.x ?? direction3.x, actor.movementIntent?.y ?? direction3.y);
+  const motion = unit6(actor.movementIntent?.x ?? direction3.x, actor.movementIntent?.y ?? direction3.y);
   const pose = { goo, ability: pending?.ability ?? recent?.ability ?? null, p, age, side, aim: aim2, direction: direction3, bodyX: moving ? -motion.x * (1.1 + Math.abs(hop) * 1.4) : 0, bodyY: idle2 * 1.5 + Math.abs(hop) * 1.8, top: idle2 * 1.2 - Math.abs(hop) * 2, width: 1 + Math.abs(hop) * 0.025, pressure: b.phase === 2 ? 0.32 : 0, armAmount: 0, tip: null, slamWeight: 0 };
   if (!active) return pose;
   if (pending?.ability === "slam") {
@@ -34357,7 +34816,7 @@ function drawCorrosiveAbomination(c, actor, tick, flash = false, { gelOpacity = 
   c.save();
   c.translate(actor.position.x + pose.bodyX, actor.position.y + pose.bodyY + death * 15);
   c.globalAlpha *= 1 - death * 0.8;
-  const look = unit5(pose.aim.x, pose.aim.y + 32), open = pose.ability === "slam" && pose.p > 0 ? 1 - 0.13 * Math.sin(pose.p * Math.PI) : 1;
+  const look = unit6(pose.aim.x, pose.aim.y + 32), open = pose.ability === "slam" && pose.p > 0 ? 1 - 0.13 * Math.sin(pose.p * Math.PI) : 1;
   drawCorrosiveEmbeddedEyesV7(c, pose, look, open, flash);
   c.restore();
   return true;
@@ -34526,7 +34985,7 @@ function spore(c, row2, tick) {
   ellipse4(c, 3, -4, r * 0.8, r * 0.8, DARK4, false);
   c.restore();
   ellipse4(c, -1.6, -8.7, 1.4, 1.2, MINT, false);
-  const prev = row2.previousPosition ?? p, velocity = unit5(p.x - prev.x, p.y - prev.y);
+  const prev = row2.previousPosition ?? p, velocity = unit6(p.x - prev.x, p.y - prev.y);
   for (let i = 1; i <= 2; i++) {
     c.globalAlpha = 0.34 / i;
     ellipse4(c, -velocity.x * (r + 3 + i * 3), -7 - velocity.y * (r + 3 + i * 3), 1.1, 1.1, LIGHT5, false);
@@ -34623,7 +35082,7 @@ var ease5 = (x) => {
 };
 var mix18 = (a, b, p) => a + (b - a) * p;
 var point9 = (x, y) => ({ x, y });
-function unit6(x, y) {
+function unit7(x, y) {
   const d = Math.hypot(x, y) || 1;
   return point9(x / d, y / d);
 }
@@ -34674,7 +35133,7 @@ function voidAttackPose(actor, tick) {
   const pending = alive ? b.pendingAction : null, last = alive ? b.lastAction : null, age = last ? tick - last.resolvedTick : Infinity;
   const recent = age >= 0 && age < 40 ? last : null, p = pending ? castProgress(pending, tick) : 0;
   const record2 = pending ?? recent, aim2 = record2 ? localTarget2(actor, record2) : point9(Math.cos(b.facingAngle ?? Math.PI / 2) * 60, Math.sin(b.facingAngle ?? Math.PI / 2) * 60);
-  const origin = record2?.originPosition ?? actor.position, target = record2?.targetPosition ?? point9(actor.position.x + aim2.x, actor.position.y + aim2.y), direction3 = unit6(target.x - origin.x, target.y - origin.y);
+  const origin = record2?.originPosition ?? actor.position, target = record2?.targetPosition ?? point9(actor.position.x + aim2.x, actor.position.y + aim2.y), direction3 = unit7(target.x - origin.x, target.y - origin.y);
   const hover = Math.sin((tick + (actor.visualSeed ?? 0) * 0.13) / 8.4) * 4.2;
   const pose = { ability: record2?.ability ?? null, p, age, aim: aim2, direction: direction3, bodyX: 0, bodyY: -43 + hover, rotation: Math.sin(tick * 0.025) * 0.018, scaleX: 1, scaleY: 1, charge: 0, drive: 0, release: 0 };
   if (pending?.ability === "slam") {
@@ -34774,7 +35233,7 @@ function core4(c, pose, flash) {
     c.stroke();
   }
   const cos = Math.cos(pose.rotation), sin = Math.sin(pose.rotation), vx = pose.aim.x - pose.bodyX, vy = pose.aim.y - 17 - pose.bodyY;
-  const look = unit6(cos * vx + sin * vy, -sin * vx + cos * vy);
+  const look = unit7(cos * vx + sin * vy, -sin * vx + cos * vy);
   for (const [x, y, r] of [[-10.5, -11.5, 3], [10.5, -11.5, 3], [-10.5, 11.5, 3], [10.5, 11.5, 3], [0, 0, 6.4]]) eye2(c, x * sx, y * sy, r, look, pose.charge, flash, pose.pulse ?? 0);
 }
 function drawVoidOverseer(c, actor, tick, flash = false) {
@@ -35002,7 +35461,7 @@ function slamForce(c, row2, tick, pending, source3) {
 function strikeGlint(c, row2, tick) {
   const age = tick - row2.resolvedTick;
   if (age < 0 || age >= 16) return;
-  const p = row2.targetPosition, amount = 1 - ease5(age / 16), d = unit6(p.x - row2.originPosition.x, p.y - row2.originPosition.y);
+  const p = row2.targetPosition, amount = 1 - ease5(age / 16), d = unit7(p.x - row2.originPosition.x, p.y - row2.originPosition.y);
   c.save();
   c.translate(p.x, p.y - 17);
   c.rotate(Math.atan2(d.y, d.x));
@@ -35019,15 +35478,15 @@ function strikeGlint(c, row2, tick) {
 }
 function voidEyeLanceGeometry(row2, source3, tick) {
   const ground = row2.originPosition ?? source3?.position, target = row2.targetPosition;
-  const d = unit6(target.x - ground.x, target.y - ground.y), pose = source3 ? voidAttackPose(source3, tick) : { bodyX: 0, bodyY: -43, rotation: 0, scaleX: 1, scaleY: 1 };
-  const from = point9(ground.x + pose.bodyX, ground.y + pose.bodyY), to = point9(ground.x + d.x * 260, ground.y + d.y * 260), optical = unit6(to.x - from.x, to.y - from.y), cs = Math.cos(pose.rotation), sn = Math.sin(pose.rotation);
+  const d = unit7(target.x - ground.x, target.y - ground.y), pose = source3 ? voidAttackPose(source3, tick) : { bodyX: 0, bodyY: -43, rotation: 0, scaleX: 1, scaleY: 1 };
+  const from = point9(ground.x + pose.bodyX, ground.y + pose.bodyY), to = point9(ground.x + d.x * 260, ground.y + d.y * 260), optical = unit7(to.x - from.x, to.y - from.y), cs = Math.cos(pose.rotation), sn = Math.sin(pose.rotation);
   const eyes = [[-10.5, -11.5], [10.5, -11.5], [-10.5, 11.5], [10.5, 11.5], [0, 0]].map(([x, y]) => point9(from.x + x * pose.scaleX * cs - y * pose.scaleY * sn, from.y + x * pose.scaleX * sn + y * pose.scaleY * cs));
   return { ground, from, to, eyes, focus: point9(from.x + optical.x * 22, from.y + optical.y * 22), direction: d, halfWidth: 22 };
 }
 function eyeLance(c, row2, tick, source3) {
   const age = tick - row2.resolvedTick;
   if (age < 0 || age >= 20) return;
-  const { from: eyeCenter, focus: from, to, eyes } = voidEyeLanceGeometry(row2, source3, tick), d = unit6(to.x - from.x, to.y - from.y), n = point9(-d.y, d.x), fade = 1 - ease5(age / 20), kick = 1 - ease5(age / 7);
+  const { from: eyeCenter, focus: from, to, eyes } = voidEyeLanceGeometry(row2, source3, tick), d = unit7(to.x - from.x, to.y - from.y), n = point9(-d.y, d.x), fade = 1 - ease5(age / 20), kick = 1 - ease5(age / 7);
   c.save();
   c.globalAlpha *= fade;
   for (const eye4 of eyes) {
@@ -35590,7 +36049,7 @@ var ease7 = (x) => {
 var point22 = (x, y) => ({ x, y });
 var angleDelta = (a, b) => Math.atan2(Math.sin(b - a), Math.cos(b - a));
 var angleMix = (a, b, p) => a + angleDelta(a, b) * p;
-var unit7 = (x, y) => {
+var unit8 = (x, y) => {
   const d = Math.hypot(x, y) || 1;
   return point22(x / d, y / d);
 };
@@ -35667,7 +36126,7 @@ function chronosAttackPose(actor2, tick) {
   const pending = alive ? b.pendingAction : null, last = alive ? b.lastAction : null, age = last ? tick - last.resolvedTick : Infinity;
   const recent = age >= 0 && age < 40 ? last : null, record2 = pending ?? recent, p = pending ? progress2(pending, tick) : 0;
   const aim2 = record2?.targetPosition ?? point22(actor2.position.x + Math.cos(b.facingAngle ?? Math.PI / 2) * 60, actor2.position.y + Math.sin(b.facingAngle ?? Math.PI / 2) * 60);
-  const origin = record2?.originPosition ?? actor2.position, d = unit7(aim2.x - origin.x, aim2.y - origin.y), clock = mechanismTime(b, tick);
+  const origin = record2?.originPosition ?? actor2.position, d = unit8(aim2.x - origin.x, aim2.y - origin.y), clock = mechanismTime(b, tick);
   const pose = { ability: record2?.ability ?? null, p, age, bodyX: 0, bodyY: -47 + Math.sin((tick + (actor2.visualSeed ?? 0) * 0.11) / 12) * 3.3, rotation: Math.sin(tick / 53) * 0.018, charge: 0, slack: 0, mainAngle: clock / 90, silverAngle: -clock / 24, copperAngle: clock / 30 + 0.5, hourAngle: clock / 600, minuteAngle: clock / 108, direction: d };
   const rw = b.rewind, rwAge = rw?.resolvedTick == null ? Infinity : tick - rw.resolvedTick, rwHands = rewindHands(b, tick);
   if (rwHands) {
@@ -35979,7 +36438,7 @@ var ease8 = (x) => {
 };
 var mix19 = (a, b, p) => a + (b - a) * p;
 var point23 = (x, y) => ({ x, y });
-var unit8 = (x, y) => {
+var unit9 = (x, y) => {
   const d = Math.hypot(x, y) || 1;
   return point23(x / d, y / d);
 };
@@ -36063,7 +36522,7 @@ function nexusAttackPose(actor2, tick) {
   const recent = age >= 0 && age < 40 ? last : null, record2 = pending ?? recent, p = pending ? progress3(pending, tick) : 0;
   const origin = record2?.originPosition ?? actor2.position;
   const aim2 = record2?.targetPosition ?? point23(actor2.position.x + Math.cos(b.facingAngle ?? actor2.facingAngle ?? Math.PI / 2) * 60, actor2.position.y + Math.sin(b.facingAngle ?? actor2.facingAngle ?? Math.PI / 2) * 60);
-  const d = unit8(aim2.x - origin.x, aim2.y - origin.y), seed2 = Number.isFinite(actor2.visualSeed) ? actor2.visualSeed : hash13(actor2.id ?? actor2.entityId ?? ID4) % 997;
+  const d = unit9(aim2.x - origin.x, aim2.y - origin.y), seed2 = Number.isFinite(actor2.visualSeed) ? actor2.visualSeed : hash13(actor2.id ?? actor2.entityId ?? ID4) % 997;
   const pose = { ability: record2?.ability ?? null, p, age, direction: d, aim: aim2, bodyX: 0, bodyY: (decoy ? -21 : -40) + Math.sin((tick + seed2 * 0.13) / 11) * (decoy ? 1.7 : 3), rotation: 0.09 + Math.sin((tick + seed2 * 0.04) / 77) * 0.12, yaw: 0.72 * Math.sin((tick + seed2 * 0.31) / 42 + 0.6), scaleX: 1, scaleY: 1, charge: 0, release: 0, lock: 0, formTime: tick + seed2 % 180, decoy };
   if (decoy) {
     const shotAge = tick - (actor2.nexusDecoy.lastShotTick ?? -Infinity), ready = actor2.nexusDecoy.aggro ? 1 - ease8(((actor2.nexusDecoy.nextShotTick ?? tick + 60) - tick) / 16) : 0;
@@ -36138,7 +36597,7 @@ function nexusAttackPose(actor2, tick) {
   return pose;
 }
 function eye3(c, pose, size, flash) {
-  const r = 9.3 * size, look = unit8(pose.aim.x, pose.aim.y), heat = pose.charge, release = pose.release;
+  const r = 9.3 * size, look = unit9(pose.aim.x, pose.aim.y), heat = pose.charge, release = pose.release;
   glow2(c, 0, 0, (16 + heat * 5) * size, pose.decoy ? "#4ce5eb48" : `rgba(24,218,176,${0.22 + heat * 0.2})`);
   ellipse7(c, 0, 0, r + 1.5 * size, r + 1 * size, flash ? "#fff" : "#0b302e", true, 1.05);
   ellipse7(c, 0, 0, r, r * 0.98, flash ? "#fff" : pose.decoy ? "#60dfdf" : TEAL);
@@ -36446,7 +36905,7 @@ function barrierWard(c, row2, tick, model2) {
     }
   } else if (row2.outcome === "broken") {
     for (let i = 0; i < 6; i++) {
-      const a = shape2[i], b = shape2[(i + 1) % 6], cx = (a[0] + b[0]) / 2, cy = (a[1] + b[1]) / 2, d = unit8(cx, cy), travel = age * 0.7, fall = age * age * 0.018;
+      const a = shape2[i], b = shape2[(i + 1) % 6], cx = (a[0] + b[0]) / 2, cy = (a[1] + b[1]) / 2, d = unit9(cx, cy), travel = age * 0.7, fall = age * age * 0.018;
       c.save();
       c.translate(cx + d.x * travel, cy + d.y * travel + fall);
       c.rotate((i % 2 ? 1 : -1) * age * 0.025);
@@ -36477,7 +36936,7 @@ function tether(c, row2, decoy, tick, model2) {
 }
 function bolt(c, row2, tick) {
   if (tick < row2.createdTick || tick > row2.expiresTick) return;
-  const p = row2.position, v = row2.velocity ?? point23(p.x - (row2.previousPosition?.x ?? p.x), p.y - (row2.previousPosition?.y ?? p.y)), d = unit8(v.x, v.y), r = row2.radius ?? 6;
+  const p = row2.position, v = row2.velocity ?? point23(p.x - (row2.previousPosition?.x ?? p.x), p.y - (row2.previousPosition?.y ?? p.y)), d = unit9(v.x, v.y), r = row2.radius ?? 6;
   c.save();
   ellipse7(c, p.x, p.y + 2, r + 2, 2.3, "#11152235");
   c.translate(p.x, p.y - 14);
@@ -36517,7 +36976,7 @@ function glitchStatus(c, row2, tick) {
 function strikeGlint3(c, row2, tick) {
   const age = tick - row2.resolvedTick;
   if (age < 0 || age >= 15) return;
-  const p = row2.targetPosition, d = unit8(p.x - row2.originPosition.x, p.y - row2.originPosition.y);
+  const p = row2.targetPosition, d = unit9(p.x - row2.originPosition.x, p.y - row2.originPosition.y);
   c.save();
   c.translate(p.x, p.y - 17);
   c.rotate(Math.atan2(d.y, d.x));
@@ -38384,7 +38843,7 @@ var ease11 = (x) => {
 };
 var mix22 = (a, b, p) => a + (b - a) * p;
 var point25 = (x, y) => ({ x, y });
-var unit9 = (x, y) => {
+var unit10 = (x, y) => {
   const d = Math.hypot(x, y) || 1;
   return point25(x / d, y / d);
 };
@@ -38472,7 +38931,7 @@ function coin2(c, x, y, r = 3.7, angle22 = 0, flat2 = 0.69, flash = false) {
 }
 function marcusAttackPose(actor2, tick) {
   const b = actor2.boss ?? {}, alive = actor2.alive !== false, pending = alive ? b.pendingAction : null, last = alive ? b.lastAction : null, age = last ? tick - last.resolvedTick : Infinity, recent = age >= 0 && age < 40 ? last : null, record2 = pending ?? recent, p = pending ? progress6(pending, tick) : 0;
-  const origin = record2?.originPosition ?? actor2.position, aim2 = record2?.targetPosition ?? point25(actor2.position.x + Math.cos(b.facingAngle ?? Math.PI / 2) * 60, actor2.position.y + Math.sin(b.facingAngle ?? Math.PI / 2) * 60), d = unit9(aim2.x - origin.x, aim2.y - origin.y), seed2 = Number.isFinite(actor2.visualSeed) ? actor2.visualSeed : hash17(actor2.entityId ?? ID7) % 997;
+  const origin = record2?.originPosition ?? actor2.position, aim2 = record2?.targetPosition ?? point25(actor2.position.x + Math.cos(b.facingAngle ?? Math.PI / 2) * 60, actor2.position.y + Math.sin(b.facingAngle ?? Math.PI / 2) * 60), d = unit10(aim2.x - origin.x, aim2.y - origin.y), seed2 = Number.isFinite(actor2.visualSeed) ? actor2.visualSeed : hash17(actor2.entityId ?? ID7) % 997;
   const hover = Math.sin((tick + seed2 * 0.17) / 9) * 3.4, walk = actor2.movedLastTick ? 1 : 0;
   const pose = { ability: record2?.ability ?? null, p, age, direction: d, aim: aim2, bodyX: 0, bodyY: -9 + hover, rotation: Math.sin((tick + seed2) / 41) * 0.018, scaleX: 1, scaleY: 1, gather: 0, charge: 0, release: 0, slack: 0, headDrop: 0, orbitRadius: 45, orbitTilt: Math.sin(tick / 58) * 0.17, orbitPhase: tick * 0.014, walk };
   pose.rotation += Math.sin(tick * 0.25) * 0.022 * walk;
@@ -38833,7 +39292,7 @@ function caster(row2, model2, tick) {
   return { actor: actor2, p, pose, clasp: point25(p.x + pose.bodyX + offset2.x, p.y + pose.bodyY + offset2.y) };
 }
 function rope(c, from, to, bend = 0, alpha = 1) {
-  const d = unit9(to.x - from.x, to.y - from.y), control = point25((from.x + to.x) / 2 - d.y * bend, (from.y + to.y) / 2 + d.x * bend);
+  const d = unit10(to.x - from.x, to.y - from.y), control = point25((from.x + to.x) / 2 - d.y * bend, (from.y + to.y) / 2 + d.x * bend);
   c.save();
   c.globalAlpha *= alpha;
   c.lineCap = "round";
@@ -39084,7 +39543,7 @@ function payout(c, row2, tick) {
       c.restore();
     }
   } else if (tick < row2.landsTick) {
-    const age = tick - row2.createdTick, q = clamp39(age / Math.max(1, row2.landsTick - row2.createdTick)), from = payoutOrigin(row2), to = row2.position, d = unit9(to.x - row2.originPosition.x, to.y - row2.originPosition.y), n = point25(-d.y, d.x), arc3 = Math.sin(Math.PI * q), travel = 1 - Math.pow(1 - q, 1.18), coins = [];
+    const age = tick - row2.createdTick, q = clamp39(age / Math.max(1, row2.landsTick - row2.createdTick)), from = payoutOrigin(row2), to = row2.position, d = unit10(to.x - row2.originPosition.x, to.y - row2.originPosition.y), n = point25(-d.y, d.x), arc3 = Math.sin(Math.PI * q), travel = 1 - Math.pow(1 - q, 1.18), coins = [];
     if (age < 6) {
       c.save();
       c.globalAlpha *= 1 - ease11(age / 6);
@@ -39184,7 +39643,7 @@ var ease12 = (x) => {
 };
 var mix23 = (a, b, p) => a + (b - a) * p;
 var point26 = (x, y) => ({ x, y });
-var unit10 = (x, y) => {
+var unit11 = (x, y) => {
   const d = Math.hypot(x, y) || 1;
   return point26(x / d, y / d);
 };
@@ -39257,7 +39716,7 @@ function glow5(c, x, y, r, fill4) {
 function gildedAttackPose(actor2, tick) {
   const b = actor2.boss ?? {}, alive = actor2.alive !== false && b.bossDefinitionId === ID8, pending = alive ? b.pendingAction : null, last = alive ? b.lastAction : null;
   const age = last ? tick - last.resolvedTick : Infinity, recent = age >= 0 && age < 40 ? last : null, record2 = pending ?? recent, p = pending ? progress7(pending, tick) : 0;
-  const aim2 = record2?.targetPosition ?? point26(actor2.position.x + Math.cos(b.facingAngle ?? Math.PI / 2) * 60, actor2.position.y + Math.sin(b.facingAngle ?? Math.PI / 2) * 60), origin = record2?.originPosition ?? actor2.position, d = unit10(aim2.x - origin.x, aim2.y - origin.y);
+  const aim2 = record2?.targetPosition ?? point26(actor2.position.x + Math.cos(b.facingAngle ?? Math.PI / 2) * 60, actor2.position.y + Math.sin(b.facingAngle ?? Math.PI / 2) * 60), origin = record2?.originPosition ?? actor2.position, d = unit11(aim2.x - origin.x, aim2.y - origin.y);
   const seed2 = Number.isFinite(actor2.visualSeed) ? actor2.visualSeed : hash18(actor2.entityId ?? actor2.id ?? ID8) % 997, hover = Math.sin((tick + seed2 * 0.13) / 12) * 2;
   const pose = { ability: record2?.ability ?? null, p, age, direction: d, aim: aim2, bodyX: 0, bodyY: -38 + hover, rotation: Math.sin(tick / 47) * 0.018, jaw: 0.2 + 0.045 * Math.sin((tick + seed2) / 17), wing: 0.08 + 0.025 * Math.sin(tick / 13), armLift: 0, armFold: 0, charge: 0, release: 0, slack: 0, strike: 0, strikeSide: d.x < 0 ? -1 : 1 };
   const tax = b.taxation, taxAge = tax?.resolvedTick == null ? Infinity : tick - tax.resolvedTick;
@@ -39380,17 +39839,17 @@ function wing3(c, side, pose, flash) {
 function armGeometry(side, pose) {
   const root = point26(side * 25, 4), idle2 = point26(side * (32 - 11 * pose.armFold), 24 + pose.armLift), hand3 = { ...idle2 };
   if (side === pose.strikeSide && pose.strike > 0) {
-    const vx = pose.aim.x - pose.actorX - pose.bodyX, vy = pose.aim.y - pose.actorY - 17 - pose.bodyY, u = rotate4(vx, vy, -pose.rotation), d = unit10(u.x - root.x, u.y - root.y);
+    const vx = pose.aim.x - pose.actorX - pose.bodyX, vy = pose.aim.y - pose.actorY - 17 - pose.bodyY, u = rotate4(vx, vy, -pose.rotation), d = unit11(u.x - root.x, u.y - root.y);
     hand3.x = mix23(hand3.x, u.x - d.x * 10, pose.strike);
     hand3.y = mix23(hand3.y, u.y - d.y * 10, pose.strike);
   }
   const dx = hand3.x - root.x, dy = hand3.y - root.y, length = Math.hypot(dx, dy) || 1, bend = Math.max(4, Math.min(11, 19 - length * 0.18));
   const elbow22 = point26(root.x + dx * 0.45 + side * bend, root.y + dy * 0.45 - 3);
-  const direction3 = pose.strike > 0 && side === pose.strikeSide ? unit10(hand3.x - elbow22.x, hand3.y - elbow22.y) : unit10(side * 0.12, 1);
+  const direction3 = pose.strike > 0 && side === pose.strikeSide ? unit11(hand3.x - elbow22.x, hand3.y - elbow22.y) : unit11(side * 0.12, 1);
   return { root, elbow: elbow22, hand: hand3, angle: Math.atan2(direction3.y, direction3.x) - Math.PI / 2 };
 }
 function ingotLimb(c, a, b, width, flash) {
-  const d = unit10(b.x - a.x, b.y - a.y), n = point26(-d.y, d.x), p = [[a.x + n.x * width, a.y + n.y * width], [b.x + n.x * width * 0.85, b.y + n.y * width * 0.85], [b.x - n.x * width * 0.85, b.y - n.y * width * 0.85], [a.x - n.x * width, a.y - n.y * width]];
+  const d = unit11(b.x - a.x, b.y - a.y), n = point26(-d.y, d.x), p = [[a.x + n.x * width, a.y + n.y * width], [b.x + n.x * width * 0.85, b.y + n.y * width * 0.85], [b.x - n.x * width * 0.85, b.y - n.y * width * 0.85], [a.x - n.x * width, a.y - n.y * width]];
   polygon23(c, p, color26(flash, BRASS3));
   if (!flash) {
     polygon23(c, [p[0], p[1], [b.x, b.y], [a.x, a.y]], GOLD7, false);
@@ -39729,7 +40188,7 @@ function taxWard(c, row2, tick, model2) {
     }
   } else if (row2.outcome === "broken") {
     for (const [i, [a, b]] of WARD_SEGMENTS.entries()) {
-      const cx = (a[0] + b[0]) / 2, cy = (a[1] + b[1]) / 2, d = unit10(cx, cy), move2 = age * (0.55 + i % 3 * 0.1);
+      const cx = (a[0] + b[0]) / 2, cy = (a[1] + b[1]) / 2, d = unit11(cx, cy), move2 = age * (0.55 + i % 3 * 0.1);
       c.save();
       c.translate(cx + d.x * move2, cy + d.y * move2 + age * age * 0.026);
       c.rotate((i % 2 ? 1 : -1) * age * 0.027);
@@ -39812,7 +40271,7 @@ function payoutPile(c, row2, tick) {
 }
 function payoutFan(c, row2, tick) {
   const age = tick - row2.createdTick, q = clamp40(age / Math.max(1, row2.landsTick - row2.createdTick)), from = payoutOrigin2(row2), to = row2.position, count = payoutCount2(row2), seed2 = hash18(row2.id);
-  const d = unit10(to.x - row2.originPosition.x, to.y - row2.originPosition.y), n = point26(-d.y, d.x), arc3 = Math.sin(Math.PI * q), travel = 1 - Math.pow(1 - q, 1.18);
+  const d = unit11(to.x - row2.originPosition.x, to.y - row2.originPosition.y), n = point26(-d.y, d.x), arc3 = Math.sin(Math.PI * q), travel = 1 - Math.pow(1 - q, 1.18);
   c.save();
   if (age < 6) {
     c.save();
@@ -39883,7 +40342,7 @@ function payout2(c, row2, tick) {
 function strikeSpark(c, row2, tick) {
   const age = tick - row2.resolvedTick;
   if (age < 0 || age >= 15) return;
-  const p = row2.targetPosition, d = unit10(p.x - row2.originPosition.x, p.y - row2.originPosition.y);
+  const p = row2.targetPosition, d = unit11(p.x - row2.originPosition.x, p.y - row2.originPosition.y);
   c.save();
   c.translate(p.x, p.y - 17);
   c.rotate(Math.atan2(d.y, d.x));
@@ -41398,13 +41857,13 @@ var clamp43 = (v, a, b) => Math.max(a, Math.min(b, v));
 var styles = /* @__PURE__ */ new Set(["thorn", "frost", "fireball", "maelstrom", "void", "clockwork"]);
 function ordinaryHostileProjectilePose(projectile2, presentationTick) {
   const direction3 = projectile2.direction ?? { x: 1, y: 0 }, length = Math.hypot(direction3.x, direction3.y);
-  const unit11 = length > 1e-3 ? { x: direction3.x / length, y: direction3.y / length } : { x: 1, y: 0 };
+  const unit12 = length > 1e-3 ? { x: direction3.x / length, y: direction3.y / length } : { x: 1, y: 0 };
   const age = Number.isFinite(projectile2.firedTick) ? Math.max(0, presentationTick - projectile2.firedTick) : 3;
   const radius = clamp43(Number.isFinite(projectile2.radius) ? projectile2.radius : 6, 2, 8);
   return {
     position: { x: projectile2.position.x, y: projectile2.position.y - 8 },
-    direction: unit11,
-    angle: Math.atan2(unit11.y, unit11.x),
+    direction: unit12,
+    angle: Math.atan2(unit12.y, unit12.x),
     radius,
     age,
     style: styles.has(projectile2.style) ? projectile2.style : null
@@ -44243,6 +44702,82 @@ function drawPersistentStatus(ctx, e, target, tick, time, lane = 0) {
   }
   ctx.restore();
 }
+var SKILL_ELEMENT_COLORS = { fire: "#ffc27a", lightning: "#d6c8ff", frost: "#cfe9ff" };
+function drawSkillBurst(ctx, b, age) {
+  const heading = Math.atan2(b.dy, b.dx);
+  ctx.save();
+  if (b.kind === "skill:shield_bash" && age < 280) {
+    const t = age / 280, r = 20 + 44 * t;
+    ctx.translate(b.x, b.y - 6);
+    ctx.rotate(heading);
+    ctx.globalAlpha = (1 - t) * 0.9;
+    ctx.fillStyle = "#8fd3ff33";
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.arc(0, 0, r, -0.85, 0.85);
+    ctx.closePath();
+    ctx.fill();
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#2a6f99";
+    ctx.lineWidth = 7 * (1 - t) + 2;
+    ctx.beginPath();
+    ctx.arc(0, 0, r, -0.8, 0.8);
+    ctx.stroke();
+    ctx.strokeStyle = "#e6f6ff";
+    ctx.lineWidth = 3 * (1 - t) + 1;
+    ctx.stroke();
+    for (const a of [-0.45, 0, 0.45]) {
+      ctx.globalAlpha = (1 - t) * 0.7;
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(a) * (r * 0.45), Math.sin(a) * (r * 0.45));
+      ctx.lineTo(Math.cos(a) * (r + 8), Math.sin(a) * (r + 8));
+      ctx.stroke();
+    }
+  } else if (b.kind === "skill:flurry") {
+    ctx.translate(b.x, b.y - 8);
+    ctx.lineCap = "round";
+    for (let i = 0; i < 3; i++) {
+      const a = age - i * 117;
+      if (a < 0 || a > 170) continue;
+      const t = a / 170, tilt = (i % 2 ? 0.55 : -0.55) * (1 - 0.4 * t);
+      ctx.save();
+      ctx.rotate(heading + tilt);
+      ctx.globalAlpha = 1 - t;
+      ctx.strokeStyle = "#5b3592";
+      ctx.lineWidth = 6 * (1 - t) + 2;
+      ctx.beginPath();
+      ctx.arc(-6, 0, 24 + i * 3 + 6 * t, -0.95, 0.95);
+      ctx.stroke();
+      ctx.strokeStyle = "#efe6ff";
+      ctx.lineWidth = 2.2;
+      ctx.stroke();
+      ctx.restore();
+    }
+  } else if (b.kind === "skill:cast" && age < 260) {
+    const t = age / 260, x = b.x + b.dx * 12, y = b.y - 12 + b.dy * 4;
+    ctx.globalAlpha = 1 - t;
+    ctx.strokeStyle = b.color ?? "#ffc27a";
+    ctx.lineWidth = 3 * (1 - t) + 1;
+    ctx.beginPath();
+    ctx.arc(x, y, 5 + 20 * t, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.globalAlpha = (1 - t) * 0.8;
+    ctx.lineWidth = 2;
+    for (let k = 0; k < 6; k++) {
+      const a = k * Math.PI / 3 + t;
+      ctx.beginPath();
+      ctx.moveTo(x + Math.cos(a) * (6 + 10 * t), y + Math.sin(a) * (6 + 10 * t));
+      ctx.lineTo(x + Math.cos(a) * (10 + 18 * t), y + Math.sin(a) * (10 + 18 * t));
+      ctx.stroke();
+    }
+    ctx.globalAlpha = (1 - t) * 0.55;
+    ctx.fillStyle = b.color ?? "#ffc27a";
+    ctx.beginPath();
+    ctx.arc(x, y, 6 * (1 - t) + 2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
 function createCombatVfx() {
   let key2 = null, seen = false, lastModel = null;
   const statuses = /* @__PURE__ */ new Map(), families3 = /* @__PURE__ */ new Map(), bursts = [], live = /* @__PURE__ */ new Set();
@@ -44261,7 +44796,7 @@ function createCombatVfx() {
       bursts.length = 0;
       seen = false;
     }
-    for (let i = bursts.length - 1; i >= 0; i--) if (time - bursts[i].born > 300) bursts.splice(i, 1);
+    for (let i = bursts.length - 1; i >= 0; i--) if (time - bursts[i].born > (bursts[i].kind.startsWith("skill:") ? 560 : 300)) bursts.splice(i, 1);
     live.clear();
     for (const e of m.combatPresentation?.statuses ?? []) {
       live.add(e.id);
@@ -44280,8 +44815,12 @@ function createCombatVfx() {
         if (f.delivery.status === "launched" && f.delivery.tick !== old2.delivery) add(f.element === "fire" ? "ignite" : f.element, { position: tomeFocusPosition(a, poses[id]?.facing ?? 1, time, poses[id]?.primary, m.tick) }, time);
         if (f.dash.frames > old2.dash) add("dash", a, time, f.dash.x, f.dash.y);
         if (old2.dash > 0 && f.dash.frames === 0) add("dashEnd", a, time, old2.dx, old2.dy);
+        if (f.skill && f.skill.tick !== old2.skill) {
+          add("skill:" + f.skill.skillId, a, time, f.skill.x, f.skill.y);
+          bursts[bursts.length - 1].color = SKILL_ELEMENT_COLORS[f.element] ?? SKILL_ELEMENT_COLORS.fire;
+        }
       }
-      families3.set(id, { mastery: f.mastery, pressure: f.pressure, delivery: f.delivery.tick, dash: f.dash.frames, dx: f.dash.x, dy: f.dash.y });
+      families3.set(id, { mastery: f.mastery, pressure: f.pressure, delivery: f.delivery.tick, dash: f.dash.frames, dx: f.dash.x, dy: f.dash.y, skill: f.skill?.tick });
     }
     seen = true;
   }
@@ -44291,7 +44830,9 @@ function createCombatVfx() {
     for (const b of bursts) {
       if (!visible3(b)) continue;
       const age = time - b.born;
-      if (b.kind === "pressure") {
+      if (b.kind.startsWith("skill:")) {
+        drawSkillBurst(ctx, b, age);
+      } else if (b.kind === "pressure") {
         if (age < 220) {
           ctx.save();
           ctx.globalAlpha = 1 - age / 220;
@@ -51865,7 +52406,7 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
   const renderer = createWorldRenderer(canvas, { performanceProbe, environmentArt, actorCollisionProbe }), profile = createControlProfile(capabilities), queue = createPresentationQueue();
   const adapter = createClientCommandAdapter({ port, nextCommandToken });
   const restoreGameplayFocus = () => canvas.focus({ preventScroll: true });
-  let observedProgression = null, levelNoticeUntil = 0, inventory = null, diagnostics = null, subweaponHud = null, navigation = null, siteNavigator = null, ferryMenu = null, serviceMenu = null, renderModel = null;
+  let observedProgression = null, levelNoticeUntil = 0, inventory = null, diagnostics = null, subweaponHud = null, classPicker = null, skillBar = null, navigation = null, siteNavigator = null, ferryMenu = null, serviceMenu = null, renderModel = null;
   const readModel = () => renderModel ?? port.getReadModel(), viewPort = Object.freeze({ ...port, getReadModel: readModel });
   let message = "", key2 = spaceKey(port.getReadModel()), lastTravel = null;
   const presentationSpace = (m) => `${m.context.sessionId}/${m.localPlayerId}/${m.context.spaceInstanceId}`;
@@ -51896,7 +52437,7 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
   };
   const gameplayInputBlocked = () => {
     const m = readModel();
-    return !preparation.observe(presentationSpace(m), Boolean(m.siteActivationPending)) || Boolean(doc.getElementById("local-world-controls")?.open || inventory?.isOpen() || navigation?.isOpen() || diagnostics?.isDragging() || siteNavigator?.busy() || ferryMenu?.isOpen() || serviceMenu?.isOpen());
+    return !preparation.observe(presentationSpace(m), Boolean(m.siteActivationPending)) || Boolean(doc.getElementById("local-world-controls")?.open || inventory?.isOpen() || navigation?.isOpen() || diagnostics?.isDragging() || siteNavigator?.busy() || ferryMenu?.isOpen() || serviceMenu?.isOpen() || classPicker?.isOpen());
   };
   const input = createWorldInput({
     canvas,
@@ -51968,6 +52509,17 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
     if (primary?.read().owners.length || p?.held || p?.queued) primary?.clear();
   } });
   subweaponHud = createSubweaponHud({ clearPrimary: () => primary?.clear(), document: doc, environment, readModel, adapter, isBlocked: gameplayInputBlocked, reportError: (text2) => {
+    message = text2;
+  } });
+  classPicker = createClassPickerV1({ document: doc, environment, readModel, adapter, reportError: (text2) => {
+    message = text2;
+  }, onClose: restoreGameplayFocus });
+  skillBar = createSkillBarV1({ document: doc, environment, readModel, adapter, isBlocked: gameplayInputBlocked, openClassPicker: () => {
+    subweaponHud?.clear();
+    input.clear();
+    primary?.clear();
+    classPicker.open();
+  }, reportError: (text2) => {
     message = text2;
   } });
   const death = createDeathPresentation({ document: doc, readModel, adapter, restoreGameplayFocus, clearInput: () => {
@@ -52104,6 +52656,8 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
     woodlandClueHud.refresh(model, presentation.gameplayHudVisible && !worldEventHud.refresh(model, presentation.gameplayHudVisible));
     siteNavigator.refresh(model);
     subweaponHud.refresh(model);
+    classPicker.refresh(model, presentation.gameplayHudVisible && !presentation.defeated && !inventory?.isOpen());
+    skillBar.refresh(model, presentation.gameplayHudVisible && !presentation.defeated);
     primary?.refresh(model);
     const participant = model.playersById[model.localPlayerId], progress8 = participant.progression;
     const levelNotice = doc.getElementById("world-level-up");
@@ -52236,6 +52790,8 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
       navigation.destroy();
       siteNavigator.destroy();
       subweaponHud.destroy();
+      classPicker.destroy();
+      skillBar.destroy();
       diagnostics.destroy();
       inventory.destroy();
       death.destroy();
@@ -53307,7 +53863,7 @@ function overlayFunctionalSiteBootstrapD9(chunk2, plan) {
 
 // src/shared/generation/woodland_ruin_exterior_d11_3_2.js
 var WOODLAND_RUIN_EXTERIOR_D11_3_2 = "woodland-ruin-exterior-d11.3.2-v1";
-var T3 = 32;
+var T4 = 32;
 var ROWS = [
   "000000000",
   "000000000",
@@ -53323,7 +53879,7 @@ var TOP = -4;
 function overlayWoodlandRuinExteriorD11_3_2(chunk2, bootstrap) {
   const site = bootstrap?.bootstrap ?? bootstrap?.guaranteedCandidate ?? bootstrap;
   if (!site?.entrance || site.entrance.chunkX !== chunk2.chunkX || site.entrance.chunkY !== chunk2.chunkY) return chunk2;
-  const ex = Math.floor(site.entrance.localX / T3), ey = Math.floor(site.entrance.localY / T3);
+  const ex = Math.floor(site.entrance.localX / T4), ey = Math.floor(site.entrance.localY / T4);
   requireContract(ex + LEFT >= 0 && ex + LEFT + 9 <= 32 && ey + TOP >= 0 && ey + TOP + 8 <= 26, "Ruin exterior crosses page boundary");
   const collision = chunk2.collision.tiles.map((r) => [...r]), terrain = chunk2.visual.terrain.map((r) => [...r]), biomes = chunk2.visual.biomes.map((r) => [...r]), centerline = chunk2.visual.route.centerline.map((r) => [...r]), clearance = chunk2.visual.route.clearance.map((r) => [...r]);
   for (let ry = 0; ry < ROWS.length; ry++) for (let rx = 0; rx < ROWS[ry].length; rx++) {
@@ -53346,7 +53902,7 @@ function overlayWoodlandRuinExteriorD11_3_2(chunk2, bootstrap) {
     { x: ex - 4, y: ey + 3, width: 1, height: 1, detail: "left-root" },
     { x: ex + 4, y: ey + 3, width: 1, height: 1, detail: "right-root" }
   ]) blockers.push({ id: `ruin:${site.siteId}:${b.detail}`, ...b, kind: "ruin-exterior-masonry" });
-  const decorations = (chunk2.visual.decorations ?? []).filter((d) => !owns(Math.floor(d.x), Math.floor(d.y))), anchors = chunk2.anchors.filter((a) => !owns(Math.floor(a.position.x / T3), Math.floor(a.position.y / T3))), sites = chunk2.sites.filter((s) => s.siteId === site.siteId || !owns(Math.floor(s.entrance.localX / T3), Math.floor(s.entrance.localY / T3)));
+  const decorations = (chunk2.visual.decorations ?? []).filter((d) => !owns(Math.floor(d.x), Math.floor(d.y))), anchors = chunk2.anchors.filter((a) => !owns(Math.floor(a.position.x / T4), Math.floor(a.position.y / T4))), sites = chunk2.sites.filter((s) => s.siteId === site.siteId || !owns(Math.floor(s.entrance.localX / T4), Math.floor(s.entrance.localY / T4)));
   return freezeWire({ ...copyWire(chunk2), collision: { ...copyWire(chunk2.collision), tiles: collision.map((r) => r.join("")) }, visual: { ...copyWire(chunk2.visual), terrain: terrain.map((r) => r.join("")), biomes: biomes.map((r) => r.join("")), blockers, decorations, route: { centerline: centerline.map((r) => r.join("")), clearance: clearance.map((r) => r.join("")) } }, anchors, sites, ruinExterior: { version: WOODLAND_RUIN_EXTERIOR_D11_3_2, siteId: site.siteId, entranceTile: { x: ex, y: ey }, mask: [...ROWS] } });
 }
 
