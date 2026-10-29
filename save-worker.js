@@ -1,3 +1,18 @@
+// src/storage/save_channel_v1.js
+var TEST_SAVE_PREFIX = "saq-test-site:";
+function saveChannelPrefix(location) {
+  return /\/SAQ-World-test\//i.test(location?.pathname ?? "") ? TEST_SAVE_PREFIX : "";
+}
+function channelIndexedDb(indexedDB, prefix2) {
+  if (!prefix2 || !indexedDB) return indexedDB;
+  return Object.freeze({
+    open: (name, ...version) => indexedDB.open(prefix2 + name, ...version),
+    deleteDatabase: (name) => indexedDB.deleteDatabase(prefix2 + name),
+    cmp: (a, b) => indexedDB.cmp(a, b),
+    ...typeof indexedDB.databases === "function" ? { databases: async () => (await indexedDB.databases()).filter((d) => d.name?.startsWith(prefix2)).map((d) => ({ ...d, name: d.name.slice(prefix2.length) })) } : {}
+  });
+}
+
 // src/shared/contracts/wire.js
 function requireContract(condition, message) {
   if (!condition) throw new TypeError(message);
@@ -25547,6 +25562,7 @@ function resolveWildernessV3WorkerDatabaseName(workerUrl, legacyDatabaseName) {
   return `saq-world-wilderness-v3-${plan}`;
 }
 function startActivitySaveWorker(environment) {
+  const saveIndexedDb = channelIndexedDb(environment.indexedDB, saveChannelPrefix(environment.location));
   const population = new URL(environment.location.href).searchParams.get("sitePopulation") === "1";
   const review = new URL(environment.location.href).searchParams.get("plannedReview") === "1", databaseName = review ? (population ? new URL(environment.location.href).searchParams.get("worldCombat") === "1" ? "saq-world-combat-v2-" : new URL(environment.location.href).searchParams.get("settlementServices") === "2" ? "saq-world-settlement-services-v2-" : new URL(environment.location.href).searchParams.get("settlementLife") === "1" ? "saq-world-settlement-life-v1-" : new URL(environment.location.href).searchParams.get("ferryReview") === "1" ? "saq-world-ferry-v1-" : new URL(environment.location.href).searchParams.get("multiroom") === "1" ? "saq-world-multiroom-v1-" : "saq-world-alpha-site-population-v1-" : new URL(environment.location.href).searchParams.get("cryptReview") === "1" ? new URL(environment.location.href).searchParams.get("cryptVersion") === "2" ? "saq-world-planned-crypts-v2-" : "saq-world-planned-small-crypt-v1-" : new URL(environment.location.href).searchParams.get("ruinReview") === "1" ? new URL(environment.location.href).searchParams.get("ruinVersion") === "2" ? "saq-world-planned-ruins-v2-" : "saq-world-planned-ruins-v1-" : new URL(environment.location.href).searchParams.get("fortReview") === "1" ? new URL(environment.location.href).searchParams.get("fortVersion") === "2" ? "saq-world-planned-forts-v2-" : "saq-world-planned-forts-v1-" : new URL(environment.location.href).searchParams.get("cavePopulation") === "1" ? "saq-world-planned-caves-v2-" : new URL(environment.location.href).searchParams.get("caveReview") === "1" ? "saq-world-planned-cave-v1-" : new URL(environment.location.href).searchParams.get("townReview") === "1" ? "saq-world-town-start-art-v2-" : new URL(environment.location.href).searchParams.get("artV2") === "1" ? "saq-world-art-v2-" : new URL(environment.location.href).searchParams.get("artPilot") === "1" ? "saq-world-art-pilot-v1-" : new URL(environment.location.href).searchParams.get("waterReview") === "1" ? "saq-world-water-v3-" : new URL(environment.location.href).searchParams.get("shorelineReview") === "1" ? "saq-world-shoreline-v2-" : "saq-world-planned-foundation-v1-") + new URL(environment.location.href).searchParams.get("plan") : ACTIVITY_SAVE_NAMESPACE;
   const workerDatabaseName = resolveWildernessV3WorkerDatabaseName(environment.location.href, databaseName);
@@ -25585,7 +25601,7 @@ function startActivitySaveWorker(environment) {
   };
   const task = createActivitySaveTask({ sha256, measure, measureAsync, storeFactory: (options) => createLocalIndexedDbCampaignStore({
     ...options,
-    indexedDB: environment.indexedDB,
+    indexedDB: saveIndexedDb,
     databaseName: workerDatabaseName,
     codec: activityCampaignCodec,
     observe: timing,
@@ -25596,7 +25612,7 @@ function startActivitySaveWorker(environment) {
     if (!response.ok) throw new Error("Missing planned world asset");
     return response.text();
   } });
-  const worldTask = createWorldWorkerTaskD9({ sha256, plannedAssets, store: createLocalIndexedDbCampaignStore({ indexedDB: environment.indexedDB, sha256, databaseName: workerDatabaseName, codec: activityCampaignCodec }) });
+  const worldTask = createWorldWorkerTaskD9({ sha256, plannedAssets, store: createLocalIndexedDbCampaignStore({ indexedDB: saveIndexedDb, sha256, databaseName: workerDatabaseName, codec: activityCampaignCodec }) });
   let tail = Promise.resolve();
   environment.onmessage = ({ data }) => {
     tail = tail.then(async () => {

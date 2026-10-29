@@ -714,6 +714,21 @@ import {
   worldPointForArea
 } from "./chunk-BL3EJPM2.js";
 
+// src/storage/save_channel_v1.js
+var TEST_SAVE_PREFIX = "saq-test-site:";
+function saveChannelPrefix(location) {
+  return /\/SAQ-World-test\//i.test(location?.pathname ?? "") ? TEST_SAVE_PREFIX : "";
+}
+function channelIndexedDb(indexedDB, prefix2) {
+  if (!prefix2 || !indexedDB) return indexedDB;
+  return Object.freeze({
+    open: (name, ...version) => indexedDB.open(prefix2 + name, ...version),
+    deleteDatabase: (name) => indexedDB.deleteDatabase(prefix2 + name),
+    cmp: (a, b) => indexedDB.cmp(a, b),
+    ...typeof indexedDB.databases === "function" ? { databases: async () => (await indexedDB.databases()).filter((d) => d.name?.startsWith(prefix2)).map((d) => ({ ...d, name: d.name.slice(prefix2.length) })) } : {}
+  });
+}
+
 // src/client/authority_clock.js
 var AUTHORITY_CLOCK_PERIOD_MS = 1e3 / 60;
 var AUTHORITY_CLOCK_MAX_STEPS_PER_CALLBACK = 4;
@@ -55712,6 +55727,7 @@ function lockPageZoom(environment) {
   });
 }
 async function startWorldClient(environment) {
+  const saveIndexedDb = channelIndexedDb(environment.indexedDB, saveChannelPrefix(environment.location));
   const startupLoading = environment.__SAQ_STARTUP_LOADING_V1__ ?? null;
   let client = null;
   lockPageZoom(environment);
@@ -55756,13 +55772,13 @@ async function startWorldClient(environment) {
   const proofCase = location.searchParams.get("activityCase") ?? "A";
   const launcherKey = hasRoadsideEncounters(plannedReview?.binding) ? ROADSIDE_DATABASE : hasFirstJourney(plannedReview?.binding) ? ACCESS_DATABASE : hasHydrologyV1(plannedReview?.binding) ? HYDROLOGY_DATABASE : buildBalanceDatabaseV2(environment.document.body.dataset.worldBuildBalance === "v2", plannedReview?.asset.assetId, plannedReview ? plannedNamespace + plannedReview.asset.assetId : activity ? `${FORGE_REVIEW_BUILD ? "saq-world-forge-review" : "saq-world-activity-launcher-v1"}-${proofCase}` : scenario === "procedural" ? WORLD_PROCEDURAL_LAUNCHER_KEY : WORLD_SEAMLESS_LAUNCHER_KEY);
   const policy = createLocalLaunchPolicy({ launcherStore: launcherCapability(environment), url: location, launcherKey });
-  const launcherDatabase = activity ? createLocalIndexedDbCampaignStore({ indexedDB: environment.indexedDB, sha256, databaseName }) : null;
+  const launcherDatabase = activity ? createLocalIndexedDbCampaignStore({ indexedDB: saveIndexedDb, sha256, databaseName }) : null;
   const forget = async () => {
     await launcherDatabase?.writeLocalLauncher(proofCase, null);
     policy.forget();
   };
   const reset = async () => {
-    await deleteLocalWorldCampaignDatabase({ indexedDB: environment.indexedDB, ...activity ? { databaseName } : {} });
+    await deleteLocalWorldCampaignDatabase({ indexedDB: saveIndexedDb, ...activity ? { databaseName } : {} });
     policy.forget();
     cleanAndReload(environment, policy);
   };
@@ -55865,7 +55881,7 @@ async function startWorldClient(environment) {
       now: () => environment.performance.now(),
       reviewCapabilities: { siteNavigator: siteNavigatorRequested },
       entropy: async (size) => Array.from(environment.crypto.getRandomValues(new Uint8Array(size))),
-      storeFactory: (expectedContentFingerprint, expectedGenerationBinding, codec) => createLocalIndexedDbCampaignStore({ indexedDB: environment.indexedDB, sha256, expectedContentFingerprint, expectedGenerationBinding, codec, ...activity ? { databaseName } : {} })
+      storeFactory: (expectedContentFingerprint, expectedGenerationBinding, codec) => createLocalIndexedDbCampaignStore({ indexedDB: saveIndexedDb, sha256, expectedContentFingerprint, expectedGenerationBinding, codec, ...activity ? { databaseName } : {} })
     });
     if (worldBridge) {
       saveBridge?.destroy();
