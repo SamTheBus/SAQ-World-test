@@ -25881,6 +25881,53 @@ async function createLocalWorldSession({
   } });
 }
 
+// src/client/level_up_celebration_v4.js
+var LEVEL_UP_CELEBRATION_V4 = Object.freeze({ durationMs: 3200, sparks: 22 });
+function createLevelUpCelebrationV4(doc) {
+  let root = null, timer = null;
+  function clear2() {
+    clearTimeout(timer);
+    root?.remove();
+    root = null;
+  }
+  function play(level, detail = "") {
+    clear2();
+    root = doc.createElement("div");
+    root.className = "level-up-v4";
+    root.setAttribute("role", "status");
+    root.setAttribute("aria-live", "assertive");
+    const flash = doc.createElement("div");
+    flash.className = "level-up-v4-flash";
+    const stage2 = doc.createElement("div");
+    stage2.className = "level-up-v4-stage";
+    const rays = doc.createElement("div");
+    rays.className = "level-up-v4-rays";
+    const burst = doc.createElement("div");
+    burst.className = "level-up-v4-burst";
+    for (let i = 0; i < LEVEL_UP_CELEBRATION_V4.sparks; i++) {
+      const s = doc.createElement("i"), a = i / LEVEL_UP_CELEBRATION_V4.sparks * Math.PI * 2 + i % 3 * 0.17, d = 90 + i % 5 * 26;
+      s.style.setProperty("--dx", Math.cos(a) * d + "px");
+      s.style.setProperty("--dy", Math.sin(a) * d * 0.8 + "px");
+      s.style.animationDelay = i % 4 * 40 + "ms";
+      burst.append(s);
+    }
+    const emblem = doc.createElement("div");
+    emblem.className = "level-up-v4-emblem";
+    const kicker = doc.createElement("small");
+    kicker.textContent = "LEVEL UP";
+    const number2 = doc.createElement("strong");
+    number2.textContent = String(level);
+    const sub = doc.createElement("span");
+    sub.textContent = detail;
+    emblem.append(kicker, number2);
+    stage2.append(rays, burst, emblem, sub);
+    root.append(flash, stage2);
+    doc.body.append(root);
+    timer = setTimeout(clear2, LEVEL_UP_CELEBRATION_V4.durationMs);
+  }
+  return Object.freeze({ play, destroy: clear2 });
+}
+
 // src/client/toast_v1.js
 var MAX_VISIBLE = 3;
 var DEFAULT_MS = 2600;
@@ -30921,7 +30968,7 @@ function createDynamicWorldLightsV1(doc) {
 }
 
 // src/client/hero_level_up_v3.js
-var HERO_LEVEL_UP_V3 = Object.freeze({ durationMs: 2100, maximumParticles: 18 });
+var HERO_LEVEL_UP_V3 = Object.freeze({ durationMs: 2600, maximumParticles: 32 });
 function createHeroLevelUpV3() {
   let identity2 = null, level = 0n, active = null;
   function observe(model, now2) {
@@ -30933,6 +30980,9 @@ function createHeroLevelUpV3() {
     identity2 = key2;
     level = next;
   }
+  function trigger(entityId2) {
+    active = { id: entityId2, elapsed: 0, last: null };
+  }
   function state(actor, now2) {
     if (!active || active.id !== actor.entityId || !actor.alive) return null;
     if (active.last !== null) active.elapsed += Math.min(50, Math.max(0, now2 - active.last));
@@ -30941,7 +30991,7 @@ function createHeroLevelUpV3() {
       active = null;
       return null;
     }
-    return { u: active.elapsed / HERO_LEVEL_UP_V3.durationMs, fade: Math.min(1, active.elapsed / 140 + 0.08) * Math.min(1, (HERO_LEVEL_UP_V3.durationMs - active.elapsed) / 400) };
+    return { u: active.elapsed / HERO_LEVEL_UP_V3.durationMs, fade: Math.min(1, active.elapsed / 140 + 0.08) * Math.min(1, (HERO_LEVEL_UP_V3.durationMs - active.elapsed) / 450) };
   }
   function draw(ctx, actor, now2) {
     const s = state(actor, now2);
@@ -30950,9 +31000,36 @@ function createHeroLevelUpV3() {
     ctx.save();
     ctx.translate(actor.position.x, actor.position.y);
     ctx.globalAlpha = fade;
+    const rise = Math.min(1, u / 0.18), pillarH = 170 * rise, width = 34 * (1 - u * 0.55);
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    for (const [w, a] of [[width * 1.9, 0.22], [width, 0.5], [width * 0.38, 0.9]]) {
+      const g = ctx.createLinearGradient(0, 6, 0, 6 - pillarH);
+      g.addColorStop(0, `rgba(255,214,110,${a})`);
+      g.addColorStop(0.55, `rgba(255,236,170,${a * 0.6})`);
+      g.addColorStop(1, "rgba(255,248,220,0)");
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.ellipse(0, 6, w / 2, w / 5, 0, 0, Math.PI);
+      ctx.lineTo(-w / 2 * 0.6, 6 - pillarH);
+      ctx.lineTo(w / 2 * 0.6, 6 - pillarH);
+      ctx.closePath();
+      ctx.fill();
+    }
+    for (const [delay, speed, alpha] of [[0, 1, 0.85], [0.12, 0.8, 0.5]]) {
+      const t = Math.max(0, Math.min(1, (u - delay) / 0.45 * speed));
+      if (t > 0 && t < 1) {
+        ctx.strokeStyle = `rgba(255,215,120,${alpha * (1 - t)})`;
+        ctx.lineWidth = 5 * (1 - t) + 1;
+        ctx.beginPath();
+        ctx.ellipse(0, 6, 18 + 95 * t, 6 + 30 * t, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
+    ctx.restore();
     const radius = 22 + 8 * Math.sin(u * Math.PI);
-    for (const [a, b, color28] of [[Math.PI, Math.PI * 2, "#93cfe1"], [0, Math.PI, "#d2faff"]]) {
-      ctx.strokeStyle = "#223b54";
+    for (const [a, b, color28] of [[Math.PI, Math.PI * 2, "#f0c862"], [0, Math.PI, "#fff1b8"]]) {
+      ctx.strokeStyle = "#4a3410";
       ctx.lineWidth = 5;
       ctx.beginPath();
       ctx.ellipse(0, 5, radius, 8, 0, a, b);
@@ -30961,30 +31038,22 @@ function createHeroLevelUpV3() {
       ctx.lineWidth = 2;
       ctx.stroke();
     }
-    for (let i = 0; i < 18; i++) {
-      const angle3 = i * 2.399 + u * 0.8, r = 16 + i % 4 * 7, x = Math.cos(angle3) * r, y = 5 - Math.sin(Math.PI * ((u + i / 18) % 1)) * 64;
-      ctx.fillStyle = i % 3 ? "#c6edff" : "#c8b8f4";
+    for (let i = 0; i < HERO_LEVEL_UP_V3.maximumParticles; i++) {
+      const angle3 = i * 2.399 + u * 3, climb = (u * 1.4 + i / HERO_LEVEL_UP_V3.maximumParticles) % 1, r = (10 + i % 5 * 6) * (1 - climb * 0.5), x = Math.cos(angle3) * r, y = 5 - climb * 150, size = 1.4 + i % 3 * 0.8;
+      ctx.globalAlpha = fade * (1 - climb);
+      ctx.fillStyle = i % 4 ? "#ffe9a8" : "#fff8e6";
       ctx.beginPath();
-      ctx.moveTo(x, y - 2.2);
-      ctx.lineTo(x + 1.6, y);
-      ctx.lineTo(x, y + 2.2);
-      ctx.lineTo(x - 1.6, y);
+      ctx.moveTo(x, y - size * 1.6);
+      ctx.lineTo(x + size, y);
+      ctx.lineTo(x, y + size * 1.6);
+      ctx.lineTo(x - size, y);
       ctx.closePath();
       ctx.fill();
     }
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.font = "900 12px system-ui";
-    ctx.lineJoin = "round";
-    ctx.strokeStyle = "#203546";
-    ctx.lineWidth = 4;
-    ctx.strokeText("LEVEL UP", 0, -58 - u * 8);
-    ctx.fillStyle = "#e4faff";
-    ctx.fillText("LEVEL UP", 0, -58 - u * 8);
     ctx.restore();
     return true;
   }
-  return { observe, draw, inspect: () => ({ activeEffects: active ? 1 : 0, maximumParticles: 18, durationMs: HERO_LEVEL_UP_V3.durationMs, elapsedMs: active?.elapsed ?? 0 }) };
+  return { observe, trigger, draw, inspect: () => ({ activeEffects: active ? 1 : 0, maximumParticles: HERO_LEVEL_UP_V3.maximumParticles, durationMs: HERO_LEVEL_UP_V3.durationMs, elapsedMs: active?.elapsed ?? 0 }) };
 }
 
 // src/client/creature_presentation_arachnid_treant_v4.js
@@ -49915,8 +49984,8 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
       }
       groundItems.labels(ctx);
     }
-    const levelingActor = visualModel.entitiesById[model.playersById[model.localPlayerId].entityId];
-    if (!canvas.ownerDocument.hidden && !model.siteActivationPending) heroLevelUp.draw(ctx, levelingActor, time);
+    const levelingId = model.playersById[model.localPlayerId].entityId, levelingActor = visualModel.entitiesById[levelingId];
+    if (levelingActor && !canvas.ownerDocument.hidden && !model.siteActivationPending) heroLevelUp.draw(ctx, { ...levelingActor, entityId: levelingId }, time);
     combatVfx.draw(ctx, visualModel, time, viewport);
     if (performanceProbe) performanceProbe.measure("combatFeedback", () => feedback.draw(ctx, time, equipmentArt, viewport));
     else feedback.draw(ctx, time, equipmentArt, viewport);
@@ -49963,6 +50032,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
     resize,
     invalidate,
     observeBossEffects,
+    previewLevelUp: (entityId2) => heroLevelUp.trigger(entityId2),
     observeActors: actorMotion.observe,
     resetActors: actorMotion.clear,
     camera,
@@ -50596,6 +50666,12 @@ function createSpacePreparationGate(initialSpace) {
 var progressionText = (v) => formatLarge(integerWire(v));
 function mountPlayableClient({ port, environment, nextCommandToken, capabilities, performanceProbe = null, environmentArt = null, readRuntimeDiagnostics = () => null, readSaveStatus = () => null, evidenceMode = false, evidenceIntervalMs = 0, developerMode = false, actorCollisionProbe = null }) {
   const doc = environment.document, canvas = doc.getElementById("world-view"), status2 = doc.getElementById("world-status");
+  const levelUpCelebration = createLevelUpCelebrationV4(doc);
+  if (new URL(environment.location.href).searchParams.get("previewLevelUp") === "1") environment.setTimeout(() => {
+    levelUpCelebration.play("5", "+3 attribute points \xB7 +1 utility SP");
+    const m = port.getReadModel();
+    renderer?.previewLevelUp?.(m.playersById[m.localPlayerId].entityId);
+  }, 4e3);
   const playerHealthHudV3 = createPlayerHealthHudV3(doc);
   const woodlandClueHud = createWoodlandClueHudV3_8(doc), worldEventHud = createWorldEventHudV3(doc, (groupId) => {
     const exit = readModel().space.exits?.find((e) => e.eventAction?.groupId === groupId);
@@ -50859,7 +50935,7 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
       const identity2 = `${model.context.campaignId}/${model.localPlayerId}`;
       if (observedProgression?.identity === identity2 && progressionBigInt(displayProgress.level) > progressionBigInt(observedProgression.level)) {
         if (levelNotice) levelNotice.textContent = `LEVEL UP! \xB7 ${progressionText(displayProgress.level)} \xB7 +${3n * (progressionBigInt(displayProgress.level) - progressionBigInt(observedProgression.level))} AP \xB7 +${progressionBigInt(displayProgress.level) - progressionBigInt(observedProgression.level)} Utility SP`;
-        toastV1(doc, { kind: "level", title: `Level ${progressionText(displayProgress.level)}!`, sub: `+${3n * (progressionBigInt(displayProgress.level) - progressionBigInt(observedProgression.level))} attribute points \xB7 +${progressionBigInt(displayProgress.level) - progressionBigInt(observedProgression.level)} utility SP`, ms: 3600, key: "level" });
+        levelUpCelebration.play(progressionText(displayProgress.level), `+${3n * (progressionBigInt(displayProgress.level) - progressionBigInt(observedProgression.level))} attribute points \xB7 +${progressionBigInt(displayProgress.level) - progressionBigInt(observedProgression.level)} utility SP`);
         levelNoticeUntil = time + 3e3;
       } else if (observedProgression?.identity !== identity2) levelNoticeUntil = 0;
       observedProgression = { identity: identity2, level: displayProgress.level };
@@ -53793,6 +53869,22 @@ async function startWorldClient(environment) {
   const startupLoading = environment.__SAQ_STARTUP_LOADING_V1__ ?? null;
   let client = null;
   coordinateWorldViewport({ environment, shell: environment.document.getElementById("world-app"), onResize: () => client?.resize() });
+  if (new URL(environment.location.href).searchParams.get("debugViewport") === "1") {
+    const doc = environment.document, box = doc.createElement("pre"), probe = doc.createElement("div");
+    box.style.cssText = "position:fixed;left:8px;top:40%;z-index:99999;margin:0;background:#000d;color:#8f8;font:11px/1.35 monospace;padding:6px 8px;pointer-events:none;white-space:pre";
+    probe.style.cssText = "position:fixed;top:0;left:0;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);visibility:hidden;pointer-events:none";
+    doc.body.append(box, probe);
+    const r = (e) => {
+      const b = e?.getBoundingClientRect();
+      return b ? Math.round(b.x) + "," + Math.round(b.y) + " " + Math.round(b.width) + "x" + Math.round(b.height) : "-";
+    };
+    const update = () => {
+      const c = environment.getComputedStyle(probe), vv = environment.visualViewport;
+      box.textContent = ["inner " + environment.innerWidth + "x" + environment.innerHeight, "visual " + Math.round(vv?.width ?? 0) + "x" + Math.round(vv?.height ?? 0) + " @" + Math.round(vv?.offsetTop ?? 0), "screen " + environment.screen.width + "x" + environment.screen.height + " dpr " + environment.devicePixelRatio, "standalone nav=" + environment.navigator.standalone + " mq=" + environment.matchMedia("(display-mode: standalone)").matches, "safe t" + c.paddingTop + " r" + c.paddingRight + " b" + c.paddingBottom + " l" + c.paddingLeft, "docEl " + doc.documentElement.clientWidth + "x" + doc.documentElement.clientHeight, "app " + r(doc.getElementById("world-app")), "canvas " + r(doc.getElementById("world-view"))].join(String.fromCharCode(10));
+    };
+    environment.setInterval(update, 1e3);
+    update();
+  }
   const sha256 = async (bytes) => Array.from(new Uint8Array(await environment.crypto.subtle.digest("SHA-256", new Uint8Array(bytes))));
   const nextToken = () => Array.from(environment.crypto.getRandomValues(new Uint8Array(16)), (v) => v.toString(16).padStart(2, "0")).join("");
   const location = new URL(environment.location.href);
