@@ -15040,24 +15040,24 @@ function snowflake(c, col) {
   }
   c.lineCap = "butt";
 }
-function emblem(c, mark, x, y, s, rune2) {
+function emblem(c, mark, x, y, s, rune3) {
   c.save();
   c.translate(x, y);
   c.scale(s, s);
   if (mark === "flame") {
-    fillMark(c, MARKS.flame, rune2.d);
-    fillMark(c, MARKS.flameCore, rune2.b, 0.6);
-  } else if (mark === "snow") snowflake(c, rune2.b);
+    fillMark(c, MARKS.flame, rune3.d);
+    fillMark(c, MARKS.flameCore, rune3.b, 0.6);
+  } else if (mark === "snow") snowflake(c, rune3.b);
   else if (mark === "bolt") {
-    fillMark(c, MARKS.bolt, rune2.b);
+    fillMark(c, MARKS.bolt, rune3.b);
     c.fillStyle = tint("#ffffff");
     c.fillRect(0, -3.4, 0.6, 1.6);
   } else if (mark === "prism") {
-    G(c, [0, -2.9, 2.7, 1.8, -2.7, 1.8], rune2, { flat: true, lw: 1 });
+    G(c, [0, -2.9, 2.7, 1.8, -2.7, 1.8], rune3, { flat: true, lw: 1 });
     px(c, -1.5, 0.4, 1, 1, "#e74c3c");
     px(c, -0.5, 0.4, 1, 1, "#3498db");
     px(c, 0.5, 0.4, 1, 1, "#f1c40f");
-  } else gem(c, 0, 0, 3.2, rune2.b);
+  } else gem(c, 0, 0, 3.2, rune3.b);
   c.restore();
 }
 function phoenixWing(c, x, y, s, flap) {
@@ -47361,6 +47361,11 @@ function castPose(age) {
     offReach: lerp6(-2.7, -0.28, smooth21(age / 6) * (1 - smooth21((age - 34) / 16)))
   };
 }
+var BASH_POSE_TICKS = 24;
+function bashPose(age) {
+  if (!(age >= 0 && age < BASH_POSE_TICKS)) return null;
+  return { guard: true, guardY: 0, jab: 10 * smooth21(age / 3) * (1 - smooth21((age - 8) / 14)) };
+}
 function castCirclePosition(actor, facing2) {
   return { x: actor.position.x + 0.8 * facing2 * CAST_CIRCLE_LOCAL.x, y: actor.position.y - 8 + 0.8 * CAST_CIRCLE_LOCAL.y };
 }
@@ -47371,7 +47376,7 @@ function drawWorldHero(ctx, actor, facing2, presentationTime, primary = null, ti
     primary = { ...primary, facing: actor.guard.direction };
     guardY = actor.guard.direction.y;
   }
-  const pose = primaryPose(primary, tick), moving = actor.movedLastTick, riposteAge = tick - actor.shieldRiposteTick, blockAge = tick - actor.shieldBlockTick, cast = skill?.skillId === "cast" ? castPose(tick - skill.tick) : null;
+  const pose = primaryPose(primary, tick), moving = actor.movedLastTick, riposteAge = tick - actor.shieldRiposteTick, blockAge = tick - actor.shieldBlockTick, cast = skill?.skillId === "cast" ? castPose(tick - skill.tick) : skill?.skillId === "shield_bash" && actor.subType === "shield" ? bashPose(tick - skill.tick) : null;
   ctx.save();
   ctx.translate(actor.position.x, actor.position.y - 8);
   ctx.scale(0.8 * facing2, 0.8);
@@ -47415,18 +47420,7 @@ function drawProofSlime(ctx, actor, flash = false) {
   ctx.restore();
 }
 
-// src/client/mage_skill_art_v1.js
-var CAST_COLORS = Object.freeze({
-  fire: Object.freeze({ core: "#fff3d6", main: "#ff8a3d", deep: "#c2410c", spark: "#ffd27a" }),
-  frost: Object.freeze({ core: "#f2fbff", main: "#8fd8ff", deep: "#2f6f9e", spark: "#e6f8ff" }),
-  lightning: Object.freeze({ core: "#fffbe6", main: "#ffe45c", deep: "#7a5cff", spark: "#fff3a6" })
-});
-var CAST_IMPACT_LIFE = Object.freeze({ fire: 520, frost: 480, lightning: 420 });
-var CAST_SIGIL_LIFE = 520;
-var CAST_CHAIN_LIFE = 240;
-var BLINK_RING_LIFE = 240;
-var HERO = 0.64;
-var HIT = 0.72;
+// src/client/arcane_fx_v1.js
 var TAU57 = Math.PI * 2;
 var clamp44 = (v) => Math.max(0, Math.min(1, v));
 var smooth22 = (v) => {
@@ -47529,6 +47523,19 @@ function jag(ctx, x0, y0, x1, y1, seed2, amp) {
   }
   ctx.lineTo(x1, y1);
 }
+
+// src/client/mage_skill_art_v1.js
+var CAST_COLORS = Object.freeze({
+  fire: Object.freeze({ core: "#fff3d6", main: "#ff8a3d", deep: "#c2410c", spark: "#ffd27a" }),
+  frost: Object.freeze({ core: "#f2fbff", main: "#8fd8ff", deep: "#2f6f9e", spark: "#e6f8ff" }),
+  lightning: Object.freeze({ core: "#fffbe6", main: "#ffe45c", deep: "#7a5cff", spark: "#fff3a6" })
+});
+var CAST_IMPACT_LIFE = Object.freeze({ fire: 520, frost: 480, lightning: 420 });
+var CAST_SIGIL_LIFE = 520;
+var CAST_CHAIN_LIFE = 240;
+var BLINK_RING_LIFE = 240;
+var HERO = 0.64;
+var HIT = 0.72;
 function boltPoints(x0, y0, x1, y1, seed2, amp, n = 10) {
   const pts = [{ x: x0, y: y0 }], dx = x1 - x0, dy = y1 - y0, l = Math.hypot(dx, dy) || 1, nx = -dy / l, ny = dx / l;
   for (let i = 1; i < n; i++) {
@@ -47937,6 +47944,256 @@ function drawBlinkStreaks(ctx, x, y, dx, dy, time) {
   ctx.restore();
 }
 
+// src/client/knight_skill_art_v1.js
+var KNIGHT_BLUE = "#73bedc";
+var KNIGHT_CORE = "#e6f6ff";
+var BASH_WAVE_LIFE = 760;
+var BASH_IMPACT_LIFE = 450;
+var HERO2 = 0.64;
+function shieldTypeOf(kind) {
+  if (kind === "buckler" || kind === "tower") return kind;
+  for (const type of ["buckler", "kite", "tower"]) if (LOOK_POOLS[type]?.includes(kind)) return type;
+  return "kite";
+}
+var BASH_STYLES = Object.freeze({ buckler: { size: 0.8, ry: 17, width: 2.2, speed: 1.35 }, kite: { size: 1, ry: 24, width: 3, speed: 1 }, tower: { size: 1.3, ry: 32, width: 4.2, speed: 0.85 } });
+function drawBashWave(ctx, x, y, dx, dy, age, type = "kite") {
+  if (age < 0 || age >= BASH_WAVE_LIFE) return;
+  const v = BASH_STYLES[type] ?? BASH_STYLES.kite, u = age / 1e3 * v.speed, l = Math.hypot(dx, dy) || 1, ux = dx / l, uy = dy / l;
+  ctx.save();
+  ctx.translate(x, y - 11);
+  ctx.rotate(Math.atan2(uy, ux));
+  const face3 = 10;
+  if (u < 0.16) {
+    const k = 1 - u / 0.16, r = 4 * v.size;
+    bloom(ctx, face3, 0, (10 + 6 * v.size) * k, KNIGHT_BLUE, 0.5 * k);
+    glowStroke(ctx, KNIGHT_BLUE, 8, 1, () => {
+      ctx.beginPath();
+      ctx.moveTo(face3, -r);
+      ctx.lineTo(face3, r);
+      ctx.moveTo(face3 - r * 0.6, -r * 0.2);
+      ctx.lineTo(face3 + r * 0.6, -r * 0.2);
+    }, false);
+  }
+  const wave = u / 0.2;
+  if (wave >= 0 && wave <= 1.4) {
+    const k = Math.min(1, wave), wx = lerp7(face3 + 3, 46, smooth22(k)), fade = 1 - clamp44((wave - 0.7) / 0.7), ry = v.ry * HERO2;
+    for (let i = 0; i < 8; i++) {
+      const sy = -ry * 0.8 + i * ry * 0.23, len = 6 + 14 * smooth22(k) * rnd(i + 2);
+      glowStroke(ctx, KNIGHT_BLUE, 5, 0.8 * fade, () => {
+        ctx.beginPath();
+        ctx.moveTo(wx - len - 4, sy);
+        ctx.lineTo(wx - 4, sy);
+      }, false);
+    }
+    for (let i = 0; i < 3; i++) glowStroke(ctx, KNIGHT_BLUE, 10, (v.width * HERO2 * 1.3 - i * 0.45) * fade, () => {
+      ctx.beginPath();
+      ctx.ellipse(wx - i * 3.2, 0, 3.2 + i * 1.3, ry - i * 2, 0, -1.25, 1.25);
+    }, i === 0);
+  }
+  ctx.restore();
+  if (type === "tower" && u < 0.5) {
+    const a = 1 - u / 0.5, sx = ux < 0 ? -1 : 1;
+    for (const off of [-6, 3]) glowStroke(ctx, KNIGHT_BLUE, 6, 0.9 * a, () => jag(ctx, x + sx * 10, y + 7, x + sx * (34 + off), y + 8 + off * 0.3, Math.floor(age / 50) + off, 1.8));
+  }
+  if (type === "buckler") {
+    const k = (u - 0.25) / 0.5;
+    if (k >= 0 && k < 1) glowStroke(ctx, KNIGHT_BLUE, 6, 1, () => {
+      ctx.beginPath();
+      ctx.arc(x + ux * 8, y - 11, 6, -Math.PI / 2, -Math.PI / 2 + TAU57 * k);
+    }, false);
+  }
+}
+function drawBashImpact(ctx, x, y, dx, dy, age, crit = false) {
+  if (age < 0 || age >= BASH_IMPACT_LIFE) return;
+  const h = age / BASH_IMPACT_LIFE, cx = x - dx * 6, cy = y - 9, big = crit ? 1.25 : 1, back = Math.atan2(dy, dx) + Math.PI;
+  bloom(ctx, cx, cy, (8 + 19 * smooth22(h * 1.8)) * big, KNIGHT_BLUE, 1 - h);
+  glowStroke(ctx, KNIGHT_BLUE, 8, 1.4 * (1 - h), () => {
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, 2 + 6 * h, 4 + 10 * h * big, Math.atan2(dy, dx), 0, TAU57);
+  }, false);
+  for (let i = 0; i < 7; i++) {
+    const a = back + Math.PI + (i - 3) * 0.42, l = (6 + 10 * rnd(i + 9)) * smooth22(h * 2) * big;
+    glowStroke(ctx, KNIGHT_CORE, 5, 1 * (1 - h), () => {
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(a) * 4, cy + Math.sin(a) * 4);
+      ctx.lineTo(cx + Math.cos(a) * (4 + l), cy + Math.sin(a) * (4 + l));
+    }, false);
+  }
+  if (h < 0.15) {
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.globalAlpha = 0.25 * (1 - h / 0.15) * big;
+    ctx.fillStyle = KNIGHT_CORE;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 14 * big, 0, TAU57);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+function drawBashStun(ctx, x, y, time, halos = 1) {
+  const t = time / 1e3;
+  for (let ring4 = 0; ring4 < halos; ring4++) {
+    const hy = y - 26 - ring4 * 5, rx = 9 + ring4 * 2;
+    glowStroke(ctx, KNIGHT_BLUE, 6, 0.8, () => {
+      ctx.beginPath();
+      ctx.ellipse(x, hy, rx, 2.4, 0, 0, TAU57);
+    }, false);
+    for (let i = 0; i < 3; i++) {
+      const a = t * (ring4 ? -5 : 5) + i * TAU57 / 3;
+      star4(ctx, x + Math.cos(a) * rx, hy + Math.sin(a) * 2.4, 2.2, KNIGHT_BLUE, 1);
+    }
+  }
+}
+var WARDS = Object.freeze({ buckler: { shape: "round", ry: 23, bulge: 14 }, kite: { shape: "crest", ry: 25, bulge: 14 }, tower: { shape: "wall", ry: 33, bulge: 9 } });
+var RUNE_SPOTS = [0.2, -0.2, 0.6, -0.6];
+var IMPACT = 0.08;
+function wardEdge(w, s, open, flex) {
+  const o = smooth22(open), b = w.bulge * Math.sqrt(o) * (1 - flex), a = Math.abs(s);
+  const x = w.shape === "wall" ? b * (1 - a ** 6) : w.shape === "crest" && s > 0 ? b * (1 - s) ** 0.75 : b * Math.sqrt(Math.max(0, 1 - s * s));
+  return { x, y: s * w.ry * o * (w.shape === "crest" && s > 0 ? 1.2 : 1) };
+}
+function wardFront(ctx, w, cx, cy, open, flex, move2 = true) {
+  for (let i = 0; i <= 24; i++) {
+    const p = wardEdge(w, -1 + i / 12, open, flex);
+    if (i || !move2) ctx.lineTo(cx + p.x, cy + p.y);
+    else ctx.moveTo(cx + p.x, cy + p.y);
+  }
+}
+function wardShape(ctx, w, cx, cy, open, flex) {
+  ctx.beginPath();
+  ctx.moveTo(cx - 2, cy + wardEdge(w, -1, open, flex).y);
+  wardFront(ctx, w, cx, cy, open, flex, false);
+  ctx.lineTo(cx - 2, cy + wardEdge(w, 1, open, flex).y);
+  ctx.closePath();
+}
+function hexCells(ctx, cx, cy, ry, pick) {
+  const r = 2.3, dx = r * 1.5, dy = r * Math.sqrt(3), n = Math.ceil(ry / dy) + 2;
+  ctx.beginPath();
+  for (let q = 0; q <= 7; q++) for (let j = -n; j <= n; j++) {
+    const hx = cx - 2 + q * dx, hy = cy + j * dy + (q & 1 ? dy / 2 : 0);
+    if (!pick(hx, hy)) continue;
+    ctx.moveTo(hx + r, hy);
+    for (let k = 1; k < 6; k++) ctx.lineTo(hx + r * Math.cos(k * Math.PI / 3), hy + r * Math.sin(k * Math.PI / 3));
+    ctx.closePath();
+  }
+}
+function rune(ctx, x, y, r, lit, alpha2) {
+  if (alpha2 <= 0) return;
+  const path9 = () => {
+    ctx.beginPath();
+    ctx.moveTo(x, y - r);
+    ctx.lineTo(x + r * 0.7, y);
+    ctx.lineTo(x, y + r);
+    ctx.lineTo(x - r * 0.7, y);
+    ctx.closePath();
+    ctx.moveTo(x, y - r * 0.45);
+    ctx.lineTo(x, y + r * 0.45);
+  };
+  if (lit) {
+    ctx.save();
+    ctx.globalAlpha *= alpha2;
+    glowStroke(ctx, KNIGHT_BLUE, 6, 1.2, path9);
+    ctx.restore();
+    mote(ctx, x, y, 0.8, KNIGHT_CORE, alpha2);
+    return;
+  }
+  ctx.save();
+  ctx.globalAlpha *= alpha2;
+  path9();
+  ctx.fillStyle = "#132029";
+  ctx.fill();
+  ctx.strokeStyle = "#4e6b7a";
+  ctx.lineWidth = 0.8;
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x - r * 0.45, y - r * 0.55);
+  ctx.lineTo(x + r * 0.15, y - r * 0.05);
+  ctx.lineTo(x - r * 0.25, y + r * 0.65);
+  ctx.strokeStyle = "#8fb4c6";
+  ctx.lineWidth = 0.6;
+  ctx.stroke();
+  ctx.restore();
+}
+function guardFace(x, y, facing2, recoil = 0) {
+  return { x: x + 0.8 * facing2 * (11.8 - recoil), y: y - 8 + 0.8 * 5.6 };
+}
+function drawGuardWard(ctx, x, y, facing2, type, open, runes, blockAge, time, recoil = 0) {
+  if (open <= 0.01) return;
+  const w = WARDS[type] ?? WARDS.kite, face3 = guardFace(x, y, facing2, recoil), flex = blockAge >= 0 && blockAge < 220 ? 0.3 * Math.sin(Math.PI * blockAge / 220) : 0, cx = 5, cy = -4;
+  const edge = (s) => {
+    const p = wardEdge(w, s, open, flex);
+    return { x: cx + p.x, y: cy + p.y };
+  }, I = edge(IMPACT), t = time / 1e3;
+  ctx.save();
+  ctx.translate(face3.x, face3.y);
+  ctx.scale(facing2 * HERO2, HERO2);
+  if (open < 0.98) bloom(ctx, 0, 0, 8 + 10 * open, KNIGHT_BLUE, 0.5 * (1 - open));
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+  wardShape(ctx, w, cx, cy, open, flex);
+  const g = ctx.createLinearGradient(cx - 2, 0, cx + w.bulge, 0);
+  g.addColorStop(0, rgba(KNIGHT_BLUE, 0));
+  g.addColorStop(1, rgba(KNIGHT_BLUE, 0.34 * open));
+  ctx.fillStyle = g;
+  ctx.fill();
+  ctx.clip();
+  hexCells(ctx, cx, cy, w.ry * 1.25, () => true);
+  const lg = ctx.createLinearGradient(cx - 2, 0, cx + w.bulge, 0);
+  lg.addColorStop(0, rgba(KNIGHT_CORE, 0));
+  lg.addColorStop(1, rgba(KNIGHT_CORE, 0.26 * open));
+  ctx.strokeStyle = lg;
+  ctx.lineWidth = 0.5;
+  ctx.stroke();
+  const band = cy - w.ry * 1.2 + t * 0.8 % 1 * w.ry * 2.4, bg = ctx.createLinearGradient(0, band - 5, 0, band + 5);
+  bg.addColorStop(0, rgba(KNIGHT_BLUE, 0));
+  bg.addColorStop(0.5, rgba(KNIGHT_CORE, 0.28 * open));
+  bg.addColorStop(1, rgba(KNIGHT_BLUE, 0));
+  ctx.fillStyle = bg;
+  ctx.fillRect(cx - 4, band - 5, w.bulge + 8, 10);
+  if (blockAge >= 0 && blockAge < 500) {
+    const k = blockAge / 500, rr = 3 + 40 * k;
+    hexCells(ctx, cx, cy, w.ry * 1.25, (hx, hy) => Math.abs(Math.hypot(hx - I.x, hy - I.y) - rr) < 3.2);
+    ctx.fillStyle = rgba(KNIGHT_BLUE, 0.35 * (1 - k));
+    ctx.fill();
+    ctx.strokeStyle = rgba(KNIGHT_CORE, 0.9 * (1 - k));
+    ctx.lineWidth = 0.7;
+    ctx.stroke();
+  }
+  ctx.restore();
+  glowStroke(ctx, KNIGHT_BLUE, 10, 1.7, () => {
+    ctx.beginPath();
+    wardFront(ctx, w, cx, cy, open, flex);
+  });
+  RUNE_SPOTS.forEach((s, i) => {
+    const p = edge(s), pop = smooth22((open - 0.45 - i * 0.12) / 0.15);
+    rune(ctx, p.x - 3.2, p.y, 3 * (0.6 + 0.4 * pop), i < runes, pop);
+  });
+  if (blockAge >= 0 && blockAge < 500) {
+    const q = blockAge / 500;
+    bloom(ctx, I.x, I.y, 9 + 16 * q, KNIGHT_BLUE, 0.95 * (1 - q));
+    for (const [a, l] of [[-1.25, 12], [-1.6, 9], [1.3, 11], [1.65, 8], [-0.4, 7]]) glowStroke(ctx, KNIGHT_CORE, 6, 1.2 * (1 - q), () => {
+      const r0 = 3 + 14 * smooth22(q * 1.6);
+      ctx.beginPath();
+      ctx.moveTo(I.x + Math.cos(a) * r0, I.y + Math.sin(a) * r0);
+      ctx.lineTo(I.x + Math.cos(a) * (r0 + l * (1 - q)), I.y + Math.sin(a) * (r0 + l * (1 - q)));
+    }, false);
+  }
+  const r = (blockAge - 60) / 260;
+  if (r >= 0 && r < 1) for (let i = 0; i < 4; i++) {
+    const f = Math.max(0, r - i * 0.06), px2 = lerp7(I.x, 0, smooth22(f)), py = lerp7(I.y, 0, smooth22(f)) - Math.sin(f * Math.PI) * 6;
+    mote(ctx, px2, py, 1.4 - i * 0.25, i ? KNIGHT_BLUE : KNIGHT_CORE, 1 - i * 0.22);
+  }
+  const ring4 = (blockAge - 320) / 280;
+  if (ring4 >= 0 && ring4 < 1) {
+    bloom(ctx, 0, 0, 10, KNIGHT_BLUE, 0.5 * (1 - ring4));
+    glowStroke(ctx, KNIGHT_BLUE, 6, 1.3 * (1 - ring4 * 0.5), () => {
+      ctx.beginPath();
+      ctx.arc(0, 0, 7.5, -Math.PI / 2, -Math.PI / 2 + TAU57 * smooth22(ring4));
+    }, false);
+  }
+  ctx.restore();
+}
+
 // src/client/combat_vfx.js
 var INK44 = "#190f20";
 var MECHANIC_COLORS = Object.freeze({ ...MASTERY_COLORS, lightning: "#c7b5ff", frost: "#ced8ff", shieldRiposte: "#d5b666", offhand: "#dce5ef", riposte: "#c99cff", bash: "#ffe08a", fire: "#ff962e", burn: "#ff962e", bleed: "#f34a56", block: "#ffe6a0", parry: "#e4ceff" });
@@ -48330,34 +48587,8 @@ var SKILL_ELEMENT_COLORS = { fire: "#ffc27a", lightning: "#d6c8ff", frost: "#cfe
 function drawSkillBurst(ctx, b, age) {
   const heading = Math.atan2(b.dy, b.dx);
   ctx.save();
-  if (b.kind === "skill:shield_bash" && age < 280) {
-    const t = age / 280, r = 20 + 44 * t;
-    ctx.translate(b.x, b.y - 6);
-    ctx.rotate(heading);
-    ctx.globalAlpha = (1 - t) * 0.9;
-    ctx.fillStyle = "#8fd3ff33";
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.arc(0, 0, r, -0.85, 0.85);
-    ctx.closePath();
-    ctx.fill();
-    ctx.lineCap = "round";
-    ctx.strokeStyle = "#2a6f99";
-    ctx.lineWidth = 7 * (1 - t) + 2;
-    ctx.beginPath();
-    ctx.arc(0, 0, r, -0.8, 0.8);
-    ctx.stroke();
-    ctx.strokeStyle = "#e6f6ff";
-    ctx.lineWidth = 3 * (1 - t) + 1;
-    ctx.stroke();
-    for (const a of [-0.45, 0, 0.45]) {
-      ctx.globalAlpha = (1 - t) * 0.7;
-      ctx.beginPath();
-      ctx.moveTo(Math.cos(a) * (r * 0.45), Math.sin(a) * (r * 0.45));
-      ctx.lineTo(Math.cos(a) * (r + 8), Math.sin(a) * (r + 8));
-      ctx.stroke();
-    }
-  } else if (b.kind === "skill:flurry") {
+  if (b.kind === "skill:shield_bash") drawBashWave(ctx, b.x, b.y, b.dx, b.dy, age, b.shield ?? "kite");
+  else if (b.kind === "skill:flurry") {
     ctx.translate(b.x, b.y - 8);
     ctx.lineCap = "round";
     for (let i = 0; i < 3; i++) {
@@ -48394,7 +48625,23 @@ function drawBlinkGhost(ctx, m, b, age, time) {
 var castElement = (m, id, element) => (m.bolts ?? []).find((b) => b.sourceId === id)?.delivery ?? (["fire", "frost", "lightning"].includes(element) ? element : "fire");
 function createCombatVfx() {
   let key2 = null, seen = false, lastModel = null;
-  const statuses = /* @__PURE__ */ new Map(), families3 = /* @__PURE__ */ new Map(), bursts = [], live = /* @__PURE__ */ new Set();
+  const statuses = /* @__PURE__ */ new Map(), families3 = /* @__PURE__ */ new Map(), bursts = [], live = /* @__PURE__ */ new Set(), wards = /* @__PURE__ */ new Map();
+  function drawWard(ctx, m, id, a, time) {
+    const g = a.guard;
+    if (!g) return;
+    let w = wards.get(id);
+    if (!w) {
+      w = { open: 0, last: time, facing: 1 };
+      wards.set(id, w);
+    }
+    const dt = Math.max(0, Math.min(100, time - w.last));
+    w.last = time;
+    w.open = g.raised ? Math.min(1, w.open + dt / 250) : Math.max(0, w.open - dt / 300);
+    if (g.raised) w.facing = g.direction?.x < 0 ? -1 : 1;
+    if (w.open <= 0.01) return;
+    const blockAge = (m.tick - (a.shieldBlockTick ?? -1e9)) * 1e3 / 60, recoil = blockAge >= 0 && blockAge < 150 ? Math.sin(Math.PI * blockAge / 150) * 3 : 0, runes = Math.max(0, Math.min(4, Math.floor(Number(g.integrity) / 8) || 0));
+    drawGuardWard(ctx, a.position.x, a.position.y, w.facing, shieldTypeOf(a.heroLook?.gear?.off?.kind), w.open, runes, blockAge, time, recoil);
+  }
   function add(kind, target, time, dx = 1, dy = 0, extra = null) {
     if (bursts.length >= 32) bursts.shift();
     bursts.push({ kind, x: target.position.x, y: target.position.y, born: time, dx, dy, ...extra });
@@ -48407,10 +48654,11 @@ function createCombatVfx() {
       key2 = next;
       statuses.clear();
       families3.clear();
+      wards.clear();
       bursts.length = 0;
       seen = false;
     }
-    for (let i = bursts.length - 1; i >= 0; i--) if (time - bursts[i].born > (bursts[i].kind.startsWith("skill:") ? 560 : 300)) bursts.splice(i, 1);
+    for (let i = bursts.length - 1; i >= 0; i--) if (time - bursts[i].born > (bursts[i].kind.startsWith("skill:") ? 800 : 300)) bursts.splice(i, 1);
     live.clear();
     for (const e of m.combatPresentation?.statuses ?? []) {
       live.add(e.id);
@@ -48430,7 +48678,7 @@ function createCombatVfx() {
         if (old2.dash > 0 && f.dash.frames === 0) add(f.blink ? "blinkEnd" : "dashEnd", a, time, old2.dx, old2.dy);
         if (f.skill && f.skill.tick !== old2.skill) {
           const facing2 = poses[id]?.facing ?? 1, cast = f.skill.skillId === "cast";
-          add("skill:" + f.skill.skillId, cast ? { position: castCirclePosition(a, facing2) } : a, time, f.skill.x, f.skill.y, { facing: facing2, element: cast ? castElement(m, id, f.element) : null });
+          add("skill:" + f.skill.skillId, cast ? { position: castCirclePosition(a, facing2) } : a, time, f.skill.x, f.skill.y, { facing: facing2, element: cast ? castElement(m, id, f.element) : null, shield: f.skill.skillId === "shield_bash" ? shieldTypeOf(a.heroLook?.gear?.off?.kind) : null });
           bursts[bursts.length - 1].color = SKILL_ELEMENT_COLORS[f.element] ?? SKILL_ELEMENT_COLORS.fire;
         }
       }
@@ -48488,12 +48736,14 @@ function createCombatVfx() {
       const a = m.entitiesById[e.targetId];
       if (a?.alive && visible3(a.position)) {
         const lane = e.lane ?? 0;
+        if (e.kind === "stun") drawBashStun(ctx, a.position.x, a.position.y, time, shieldTypeOf(m.entitiesById[e.sourceId]?.heroLook?.gear?.off?.kind) === "tower" ? 2 : 1);
         drawPersistentStatus(ctx, e, a, m.tick, time, lane);
       }
     }
     for (const [id, f] of Object.entries(m.combatPresentation?.families ?? {})) {
       const a = m.entitiesById[id];
       if (!a || !visible3(a.position)) continue;
+      drawWard(ctx, m, id, a, time);
       if (f.dash.frames > 0 && f.blink) drawBlinkStreaks(ctx, a.position.x, a.position.y, f.dash.x, f.dash.y, time);
       else if (f.dash.frames > 0) {
         ctx.save();
@@ -48531,6 +48781,7 @@ function createCombatVfx() {
     bursts.length = 0;
     statuses.clear();
     families3.clear();
+    wards.clear();
     lastModel = null;
     seen = false;
   }, rebase(project2) {
@@ -52201,7 +52452,8 @@ function createCombatFeedback() {
         drawBarrierImpact(ctx, n.position.x, n.position.y, -n.direction.x, -n.direction.y, age, { remaining: integerRatio(combatInteger(b.remaining), combatInteger(b.capacity)), capacity: 1 });
       }
       if (n.mechanic !== "main" && !(n.mechanic === "hostile" && (n.hostileMelee || n.projectileContact)) && n.mechanic !== n.defenseKind) {
-        if (!drawCastImpact(ctx, n.mechanic, n.position.x, n.position.y, age, n.critical)) drawCombatImpact(ctx, n.mechanic === "bash" && n.trigger === "reactive" ? "shieldRiposte" : n.mechanic, n.position.x, n.position.y, n.direction.x, n.direction.y, age, n.critical);
+        if (n.mechanic === "bash" && n.trigger !== "reactive") drawBashImpact(ctx, n.position.x, n.position.y, n.direction.x, n.direction.y, age, n.critical);
+        else if (!drawCastImpact(ctx, n.mechanic, n.position.x, n.position.y, age, n.critical)) drawCombatImpact(ctx, n.mechanic === "bash" && n.trigger === "reactive" ? "shieldRiposte" : n.mechanic, n.position.x, n.position.y, n.direction.x, n.direction.y, age, n.critical);
       }
       if (n.defenseKind === "block" || n.defenseKind === "parry") drawCombatImpact(ctx, n.defenseKind, n.position.x, n.position.y, -n.direction.x, -n.direction.y, age);
     }
@@ -54673,7 +54925,7 @@ function hex(c, r) {
   }
   return points2;
 }
-function rune(c, x, y, scale = 1) {
+function rune2(c, x, y, scale = 1) {
   c.save();
   c.translate(x, y);
   c.scale(scale, scale);
@@ -54770,7 +55022,7 @@ function tower2(c, b, t, front2, flash) {
     const x2 = (i - 1) * 10;
     plate3(c, [[x2 - 4, -34], [x2 + 4, -34], [x2 + 4, -27], [x2 - 4, -27]], survivors.includes(i) ? CYAN4 : "#11151a");
   }
-  rune(c, 0, -22, 0.65);
+  rune2(c, 0, -22, 0.65);
   c.strokeStyle = INK46;
   c.lineWidth = 1.26 / s;
   c.beginPath();
