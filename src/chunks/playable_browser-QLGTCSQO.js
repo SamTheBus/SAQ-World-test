@@ -35,6 +35,7 @@ import {
   CLASS_KIT_PIECES,
   CLASS_SKILLS,
   CLASS_SKILL_IDS,
+  CLASS_TREE_SKILLS,
   COMBAT_RUNTIME_VERSION,
   COMPOSITION_ELITE_V1,
   CONQUEST_TIERS,
@@ -111,6 +112,7 @@ import {
   LEGACY_ORDINARY_PROFILES,
   LIFE_VILLAGE_ID,
   LIFE_VILLAGE_ORIGIN,
+  LIVE_CLASS_SKILLS,
   LOCATION_SITE_PROOF_CATALOG,
   MAJOR_NAME_POLICY_VERSION,
   MASTERY_FAMILIES,
@@ -325,7 +327,13 @@ import {
   claimSubweapon,
   classGearAllowed,
   classGearRefusal,
+  classRank,
   classSkillsFor,
+  classTierGate,
+  classTreeOf,
+  classTreePoints,
+  classTreeSpent,
+  classTreesFor,
   closedRecord,
   collectRenewableGear,
   collidesWithTiles,
@@ -471,6 +479,7 @@ import {
   isWorldPointSafe,
   itemDefinition,
   itemGearClass,
+  learnAvailability,
   legacyWorldPosition,
   lineToPoint,
   listedEquipmentSlots,
@@ -724,7 +733,7 @@ import {
   worldLevelGapMultiplier,
   worldOrdinaryMeleeProfile,
   worldPointForArea
-} from "./chunk-FGGQDVXV.js";
+} from "./chunk-HBWZVEAK.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -1832,13 +1841,13 @@ function drawFlower(ctx, x, y, n) {
   ctx.ellipse(-2, -6, 5, 2, Math.PI / 4, 0, TAU);
   ctx.ellipse(2, -10, 4.5, 1.8, -Math.PI / 4, 0, TAU);
   ctx.fill();
-  for (let ring4 = 0; ring4 < 2; ring4++) {
-    ctx.fillStyle = ring4 ? FLOWERS[n % 6] : "#7e1b1b";
+  for (let ring5 = 0; ring5 < 2; ring5++) {
+    ctx.fillStyle = ring5 ? FLOWERS[n % 6] : "#7e1b1b";
     ctx.beginPath();
     for (let i = 0; i < 6; i++) {
-      const a = i * Math.PI / 3, cx = Math.cos(a) * (ring4 ? 5 : 6), cy = -16 + Math.sin(a) * (ring4 ? 5 : 6);
-      ctx.moveTo(cx + (ring4 ? 4.2 : 5), cy);
-      ctx.arc(cx, cy, ring4 ? 4.2 : 5, 0, TAU);
+      const a = i * Math.PI / 3, cx = Math.cos(a) * (ring5 ? 5 : 6), cy = -16 + Math.sin(a) * (ring5 ? 5 : 6);
+      ctx.moveTo(cx + (ring5 ? 4.2 : 5), cy);
+      ctx.arc(cx, cy, ring5 ? 4.2 : 5, 0, TAU);
     }
     ctx.fill();
   }
@@ -4620,8 +4629,8 @@ function armorSwordGeometryV4(action2 = null, step = 0, death = 0, separate = 0)
   const angle3 = mix3(idleAngle, mix3(-2.8, goal, strike2), weight2);
   const dx = grip.x - shoulder2.x, dy = grip.y - shoulder2.y, d = Math.hypot(dx, dy) || 1, height = Math.sqrt(Math.max(0, ARM ** 2 - d * d / 4));
   const elbow3 = { x: shoulder2.x + dx / 2 + dy / d * height, y: shoulder2.y + dy / 2 - dx / d * height };
-  const blade = rotate(0, BLADE_REACH, angle3);
-  return { shoulder: shoulder2, elbow: elbow3, grip, angle: angle3, tip: { x: grip.x + blade.x, y: grip.y + blade.y }, upperLength: ARM, lowerLength: ARM };
+  const blade2 = rotate(0, BLADE_REACH, angle3);
+  return { shoulder: shoulder2, elbow: elbow3, grip, angle: angle3, tip: { x: grip.x + blade2.x, y: grip.y + blade2.y }, upperLength: ARM, lowerLength: ARM };
 }
 function animatedArmorMotionV4(m, time, seed2) {
   const action2 = m.familyAttack, weight2 = action2?.artWeight ?? 0, strike2 = action2?.strikeBlend ?? 0, walk = (m.motionBlend ?? 0) * (1 - weight2), cycle = m.stepPhase ?? 0, death = m.deathProgress ?? 0;
@@ -5175,25 +5184,25 @@ function riftDrifterMotionV4(m, time) {
     const side = i === 1 ? -1 : i === 2 ? 1 : 0;
     const brace = { x: x - aim2.x * (i === 0 ? 11 : 6) + normal2.x * side * 7, y: y - aim2.y * (i === 0 ? 11 : 6) + normal2.y * side * 7 };
     const rest = blend(idle2, brace, weight2);
-    let center2 = rest, angle3 = -Math.PI / 2;
+    let center3 = rest, angle3 = -Math.PI / 2;
     if (a) {
       angle3 += turn(targetAngle - angle3) * weight2;
       if (i === 0) {
         const goal = local(a, { x: a.direction.x * a.contactReach, y: a.direction.y * a.contactReach - 8 });
-        center2 = blend(rest, { x: goal.x - Math.cos(angle3) * 5, y: goal.y - Math.sin(angle3) * 5 }, reach);
+        center3 = blend(rest, { x: goal.x - Math.cos(angle3) * 5, y: goal.y - Math.sin(angle3) * 5 }, reach);
       } else {
         const guard = { x: x - aim2.x * 4 + normal2.x * side * 11, y: y - aim2.y * 4 + normal2.y * side * 11 };
-        center2 = blend(rest, guard, strike2);
+        center3 = blend(rest, guard, strike2);
       }
     }
     const u = { x: Math.cos(angle3), y: Math.sin(angle3) }, n = { x: -u.y, y: u.x };
     const vertices = [
-      { x: center2.x + u.x * 5, y: center2.y + u.y * 5 },
-      { x: center2.x + n.x * 3.5, y: center2.y + n.y * 3.5 },
-      { x: center2.x - u.x * 5, y: center2.y - u.y * 5 },
-      { x: center2.x - n.x * 3.5, y: center2.y - n.y * 3.5 }
+      { x: center3.x + u.x * 5, y: center3.y + u.y * 5 },
+      { x: center3.x + n.x * 3.5, y: center3.y + n.y * 3.5 },
+      { x: center3.x - u.x * 5, y: center3.y - u.y * 5 },
+      { x: center3.x - n.x * 3.5, y: center3.y - n.y * 3.5 }
     ];
-    return { index: i, center: center2, angle: angle3, vertices, leading: i === 0 };
+    return { index: i, center: center3, angle: angle3, vertices, leading: i === 0 };
   });
   return { x, y, shards };
 }
@@ -5350,11 +5359,11 @@ function voidWraithMotionV4(m, time, seed2 = 0) {
     let wrist = blend2(idle2, brace, weight2), angle3 = idleAngle, goals = null;
     if (attacking) {
       const d = a.direction, n = { x: -d.y, y: d.x }, sweep2 = mix6(4, -4, rake);
-      const center2 = { x: d.x * a.contactReach + n.x * sweep2, y: d.y * a.contactReach - 8 + n.y * sweep2 };
-      const tip = local2(a, center2);
+      const center3 = { x: d.x * a.contactReach + n.x * sweep2, y: d.y * a.contactReach - 8 + n.y * sweep2 };
+      const tip = local2(a, center3);
       angle3 = idleAngle + turn2(aimAngle - idleAngle) * weight2;
       wrist = blend2(wrist, { x: tip.x - Math.cos(angle3) * 7.5, y: tip.y - Math.sin(angle3) * 7.5 }, reach);
-      goals = [-1, 0, 1].map((i) => local2(a, { x: center2.x + n.x * i * 1.8, y: center2.y + n.y * i * 1.8 }));
+      goals = [-1, 0, 1].map((i) => local2(a, { x: center3.x + n.x * i * 1.8, y: center3.y + n.y * i * 1.8 }));
     }
     const aim2 = { x: Math.cos(angle3), y: Math.sin(angle3) }, normal2 = { x: -Math.sin(angle3), y: Math.cos(angle3) };
     const fingers = [-1, 0, 1].map((i, k) => {
@@ -5567,14 +5576,14 @@ function voidSpectreMotionV4(m, time, seed2 = 0) {
     let angle3 = idleAngle, wrist = rest, tip = { x: rest.x + Math.cos(angle3) * 6, y: rest.y + Math.sin(angle3) * 6 }, attackTips = null;
     if (a) {
       const d = a.direction, n2 = { x: -d.y, y: d.x }, spread = side * mix7(5, -5, rake);
-      const center2 = { x: d.x * a.contactReach + n2.x * spread, y: d.y * a.contactReach - 8 + n2.y * spread };
-      const goal = toLocal(a, center2), origin = toLocal(a, { x: 0, y: 0 }), direction3 = toLocal(a, d);
+      const center3 = { x: d.x * a.contactReach + n2.x * spread, y: d.y * a.contactReach - 8 + n2.y * spread };
+      const goal = toLocal(a, center3), origin = toLocal(a, { x: 0, y: 0 }), direction3 = toLocal(a, d);
       const targetAngle = Math.atan2(direction3.y - origin.y, direction3.x - origin.x);
       angle3 = idleAngle + turn3(targetAngle - idleAngle) * weight2;
       const forward = { x: Math.cos(angle3), y: Math.sin(angle3) };
       const targetWrist = { x: goal.x - forward.x * 6, y: goal.y - forward.y * 6 };
       wrist = pointMix(rest, targetWrist, strike2);
-      attackTips = [-1, 0, 1].map((i) => toLocal(a, { x: center2.x + n2.x * i * 1.25, y: center2.y + n2.y * i * 1.25 }));
+      attackTips = [-1, 0, 1].map((i) => toLocal(a, { x: center3.x + n2.x * i * 1.25, y: center3.y + n2.y * i * 1.25 }));
       tip = goal;
     }
     const u = { x: Math.cos(angle3), y: Math.sin(angle3) }, n = { x: -Math.sin(angle3), y: Math.cos(angle3) };
@@ -6164,7 +6173,7 @@ function mimicShieldFaceV4(time, seed2, pose = null) {
   const idleBlink = smooth5(Math.abs(cycle - 210) / 85), idleOpen = 2.8 + Math.sin(time / 240 + seed2 % 11 * 0.31) * 0.4;
   const blink = idleBlink + (1 - idleBlink) * weight2;
   const opening = (2.1 + (idleOpen - 2.8) * 0.3) * (1 - weight2) + (pose?.limb.open ?? 2.1) * weight2;
-  const width = 8, center2 = { x: 0, y: 3.5 }, angle3 = 0;
+  const width = 8, center3 = { x: 0, y: 3.5 }, angle3 = 0;
   const outline3 = [[-8, -0.4], [-6, -opening], [-2, -opening * 0.72], [2, -opening * 0.72], [6, -opening], [8, -0.4], [6, opening * 0.72], [2, opening], [-2, opening], [-6, opening * 0.72]];
   const teeth = [];
   for (const side of [-1, 1]) {
@@ -6173,7 +6182,7 @@ function mimicShieldFaceV4(time, seed2, pose = null) {
       teeth.push([[x - 0.95, edge(x - 0.95)], [x, edge(x) - side * Math.min(1.8, opening * 0.7)], [x + 0.95, edge(x + 0.95)]]);
     }
   }
-  return { blink, opening, center: center2, angle: angle3, width, outline: outline3, teeth };
+  return { blink, opening, center: center3, angle: angle3, width, outline: outline3, teeth };
 }
 function polygon6(c, points2, fill4, outline3 = true) {
   c.fillStyle = fill4;
@@ -7210,10 +7219,10 @@ function drawClockworkDroneV3(c, m, time, seed2) {
 var clockwork = /* @__PURE__ */ new Set(["clockwork_scarab", "temporal_watcher", "clockwork_drone"]);
 function drawClockworkAttackV3(c, pose, flash = false) {
   if (!pose || !clockwork.has(pose.family)) return false;
-  const { family, limb, lunge, bodyPivot, direction: d } = pose, time = (pose.presentationTick ?? 0) * 1e3 / 60;
+  const { family, limb, lunge: lunge2, bodyPivot, direction: d } = pose, time = (pose.presentationTick ?? 0) * 1e3 / 60;
   const bob = family === "clockwork_scarab" ? Math.sin(time / 180) * 0.6 * 0.9 : family === "temporal_watcher" ? Math.sin(time / 230) * 1.4 * 0.9 : Math.sin(time / 190) * 1.5 * 0.8;
   c.save();
-  c.translate(lunge.x + bodyPivot.x, lunge.y + bodyPivot.y + bob);
+  c.translate(lunge2.x + bodyPivot.x, lunge2.y + bodyPivot.y + bob);
   c.lineJoin = "round";
   c.lineCap = "round";
   if (family === "temporal_watcher") {
@@ -7655,11 +7664,11 @@ function cyberWraithMotionV4(m, time, seed2 = 0) {
     let wrist = blend3(idle2, brace, weight2), angle3 = idleAngle, goals = null;
     if (attacking) {
       const d = a.direction, n = { x: -d.y, y: d.x }, sweep2 = mix8(3, -3, rake);
-      const center2 = { x: d.x * a.contactReach + n.x * sweep2, y: d.y * a.contactReach - 17.84 + n.y * sweep2 };
-      const tip = local3(a, center2);
+      const center3 = { x: d.x * a.contactReach + n.x * sweep2, y: d.y * a.contactReach - 17.84 + n.y * sweep2 };
+      const tip = local3(a, center3);
       angle3 = idleAngle + turn4(aimAngle - idleAngle) * weight2;
       wrist = blend3(wrist, { x: tip.x - Math.cos(angle3) * 6.5, y: tip.y - Math.sin(angle3) * 6.5 }, reach);
-      goals = [-1, 1].map((i) => local3(a, { x: center2.x + n.x * i * 1.5, y: center2.y + n.y * i * 1.5 }));
+      goals = [-1, 1].map((i) => local3(a, { x: center3.x + n.x * i * 1.5, y: center3.y + n.y * i * 1.5 }));
     }
     const aim2 = { x: Math.cos(angle3), y: Math.sin(angle3) }, normal2 = { x: -Math.sin(angle3), y: Math.cos(angle3) };
     const tips = [-1, 1].map((i, k) => {
@@ -8400,9 +8409,9 @@ function polygon8(c, points2, fill4, outline3 = true) {
 function crystal(c, points2, flash) {
   polygon8(c, points2, color17(flash, "#81ecec"), false);
   if (!flash) {
-    const center2 = { x: (points2[0].x + points2[points2.length - 1].x) / 2, y: (points2[0].y + points2[points2.length - 1].y) / 2 };
-    polygon8(c, [points2[1], points2[2], center2], "#3b9fca", false);
-    polygon8(c, [points2[0], points2[1], center2], "#d2ffff", false);
+    const center3 = { x: (points2[0].x + points2[points2.length - 1].x) / 2, y: (points2[0].y + points2[points2.length - 1].y) / 2 };
+    polygon8(c, [points2[1], points2[2], center3], "#3b9fca", false);
+    polygon8(c, [points2[0], points2[1], center3], "#d2ffff", false);
   }
   c.strokeStyle = INK19;
   c.lineWidth = LINE17;
@@ -9842,9 +9851,9 @@ function drawDungeonMobMeleeLimbV2B(c, pose, flash = false) {
   if (!pose || !families2.has(pose.family)) return false;
   if (pose.family === "wireframe_orb") return true;
   if (pose.family === "cyber_wraith") return true;
-  const { family, limb, lunge, bodyPivot } = pose;
+  const { family, limb, lunge: lunge2, bodyPivot } = pose;
   c.save();
-  c.translate(lunge.x + bodyPivot.x, lunge.y + bodyPivot.y);
+  c.translate(lunge2.x + bodyPivot.x, lunge2.y + bodyPivot.y);
   c.rotate(Math.atan2(pose.direction.y, pose.direction.x));
   c.lineJoin = "round";
   c.lineCap = "round";
@@ -11697,7 +11706,7 @@ function drawWebWeaverPass(c, actor, tick, front2) {
   if (actor.elite?.affixId !== "web_weaver" || !actor.alive) return;
   const phase = (tick + actor.visualSeed % 53) * 0.052, gather = Math.max(0, Math.min(1, (18 - (actor.elite.nextPulseTick - tick)) / 18));
   c.save();
-  for (let ring4 = 1; ring4 <= 2; ring4++) webArc(c, 32, 23, 0.48 + ring4 * 0.25, front2, 0.5 + gather * 0.28, 1.3 + ring4 * 0.2);
+  for (let ring5 = 1; ring5 <= 2; ring5++) webArc(c, 32, 23, 0.48 + ring5 * 0.25, front2, 0.5 + gather * 0.28, 1.3 + ring5 * 0.2);
   for (let i = 0; i < 8; i++) {
     const a = i * TAU30 / 8 + actor.visualSeed % 11 * 0.012, isFront = Math.sin(a) >= 0;
     if (isFront !== front2) continue;
@@ -11761,14 +11770,14 @@ function groundWeb(c, row2, tick, pending) {
     if (row2.ageTicks < 10) contraction = 1.12 - row2.ageTicks * 0.012;
   }
   c.globalAlpha = Math.max(0, alpha2);
-  for (let ring4 = 1; ring4 <= 4; ring4++) {
-    const r = ring4 / 4 * contraction, crooked = (seed2 >> ring4 & 3) - 1.5;
+  for (let ring5 = 1; ring5 <= 4; ring5++) {
+    const r = ring5 / 4 * contraction, crooked = (seed2 >> ring5 & 3) - 1.5;
     c.strokeStyle = WEB_INDIGO;
     c.lineWidth = 4;
     c.beginPath();
     c.ellipse(crooked, 0, rx * r, ry * r, 0, 0, TAU30);
     c.stroke();
-    c.strokeStyle = ring4 % 2 ? WEB_SILVER : WEB_CYAN;
+    c.strokeStyle = ring5 % 2 ? WEB_SILVER : WEB_CYAN;
     c.lineWidth = 1.6;
     c.stroke();
   }
@@ -11808,7 +11817,7 @@ function drawWebbedPass(c, actor, tick, front2) {
   c.save();
   c.translate(actor.position.x, actor.position.y);
   c.globalAlpha = 0.74;
-  for (let ring4 = 1; ring4 <= 2; ring4++) webArc(c, 20, 14, 0.48 + ring4 * 0.28, front2, 0.66, 1.25);
+  for (let ring5 = 1; ring5 <= 2; ring5++) webArc(c, 20, 14, 0.48 + ring5 * 0.28, front2, 0.66, 1.25);
   for (let i = 0; i < 5; i++) {
     const a = phase + i * TAU30 / 5, isFront = Math.sin(a) >= 0;
     if (isFront !== front2) continue;
@@ -12096,11 +12105,11 @@ function webbedIcon(c, size) {
     c.moveTo(0, 0);
     c.lineTo(Math.cos(a) * r, Math.sin(a) * r);
   }
-  for (let ring4 = 1; ring4 <= 2; ring4++) {
-    c.moveTo(r * ring4 / 2, 0);
+  for (let ring5 = 1; ring5 <= 2; ring5++) {
+    c.moveTo(r * ring5 / 2, 0);
     for (let i = 1; i <= 8; i++) {
       const a = i * TAU31 / 8;
-      c.lineTo(Math.cos(a) * r * ring4 / 2, Math.sin(a) * r * ring4 / 2);
+      c.lineTo(Math.cos(a) * r * ring5 / 2, Math.sin(a) * r * ring5 / 2);
     }
   }
   c.stroke();
@@ -13446,8 +13455,8 @@ function routeContoursV2(at3, bounds2, seed2, o = { x: 0, y: 0 }) {
     const ids4 = cuts.map((p2, i) => p2 ? i : -1).filter((i) => i >= 0);
     if (ids4.length === 2) add(cuts[ids4[0]], cuts[ids4[1]]);
     else if (ids4.length === 4) {
-      const center2 = s.reduce((a, b) => a + b, 0) > 0;
-      if (mask === 5 === center2) {
+      const center3 = s.reduce((a, b) => a + b, 0) > 0;
+      if (mask === 5 === center3) {
         add(cuts[0], cuts[1]);
         add(cuts[2], cuts[3]);
       } else {
@@ -17986,6 +17995,7 @@ var FLURRY_CUTS = 3;
 var FLURRY_GAP_TICKS = 7;
 var SKILL_LAST_TICKS = 45;
 var PARRY_WINDOW_TICKS = 180;
+var COUNTER_WINDOW_TICKS = 120;
 function skillCooldown(combat, skillId) {
   return combat?.skills?.cooldowns?.[skillId] ?? 0;
 }
@@ -17998,7 +18008,7 @@ function classSkillsRecord(combat) {
 }
 function prune(combat) {
   const k = combat.skills;
-  if (k && !Object.keys(k.cooldowns).length && !k.last && !k.flurry && !k.parry) delete combat.skills;
+  if (k && !Object.keys(k.cooldowns).length && !k.last && !k.flurry && !k.parry && !k.counter) delete combat.skills;
 }
 function openParryWindow(combat) {
   classSkillsRecord(combat).parry = PARRY_WINDOW_TICKS;
@@ -18006,6 +18016,15 @@ function openParryWindow(combat) {
 function spendParryWindow(combat) {
   if (combat?.skills?.parry) {
     delete combat.skills.parry;
+    prune(combat);
+  }
+}
+function openCounterWindow(combat) {
+  classSkillsRecord(combat).counter = COUNTER_WINDOW_TICKS;
+}
+function spendCounterWindow(combat) {
+  if (combat?.skills?.counter) {
+    delete combat.skills.counter;
     prune(combat);
   }
 }
@@ -18020,6 +18039,10 @@ function advanceClassSkillTimers(tick, combat) {
   if (k.parry) {
     if (k.parry <= 1) delete k.parry;
     else k.parry--;
+  }
+  if (k.counter) {
+    if (k.counter <= 1) delete k.counter;
+    else k.counter--;
   }
   prune(combat);
 }
@@ -18043,8 +18066,9 @@ function cancelClassSkillAction(combat) {
 function validateClassSkillState(s, combat, actor) {
   const k = combat.skills;
   if (k === void 0) return;
-  closedRecord(k, ["cooldowns"], ["last", "flurry", "parry"]);
+  closedRecord(k, ["cooldowns"], ["last", "flurry", "parry", "counter"]);
   if (k.parry !== void 0) safeInteger(k.parry, 1, PARRY_WINDOW_TICKS);
+  if (k.counter !== void 0) safeInteger(k.counter, 1, COUNTER_WINDOW_TICKS);
   closedRecord(k.cooldowns, [], CLASS_SKILL_IDS);
   for (const [id, left] of Object.entries(k.cooldowns)) safeInteger(left, 1, Math.min(MAX_SKILL_COOLDOWN_TICKS, CLASS_SKILLS[id].cooldownTicks));
   const unit12 = (v) => Number.isFinite(v.x) && Number.isFinite(v.y) && Math.abs(Math.hypot(v.x, v.y) - 1) < 1e-9;
@@ -18059,7 +18083,7 @@ function validateClassSkillState(s, combat, actor) {
     safeInteger(k.flurry.nextTick, Math.max(0, s.tick - 1), s.tick + FLURRY_GAP_TICKS);
     requireContract(unit12(k.flurry) && actor.alive, "Invalid Flurry");
   }
-  requireContract(Object.keys(k.cooldowns).length || k.last || k.flurry || k.parry, "Empty skill record");
+  requireContract(Object.keys(k.cooldowns).length || k.last || k.flurry || k.parry || k.counter, "Empty skill record");
 }
 
 // src/shared/content/hidden_hollow_safety_v1.js
@@ -18272,8 +18296,8 @@ var lineOpen = (c, a, b) => {
   return true;
 };
 var triangleOpen = (c, pods) => {
-  const center2 = { x: pods.reduce((v, p) => v + p.x, 0) / 3, y: pods.reduce((v, p) => v + p.y, 0) / 3 };
-  return pods.every((p, n) => !collidesWithTiles(c, p.x, p.y, 28) && Array.from({ length: 8 }, (_, i) => i * Math.PI / 4).every((a) => !collidesWithTiles(c, p.x + Math.cos(a) * SPORE_V2_POLICY.podClearancePixels, p.y + Math.sin(a) * SPORE_V2_POLICY.podClearancePixels, SPORE_V2_POLICY.playerHullPixels)) && lineOpen(c, p, pods[(n + 1) % 3]) && lineOpen(c, p, center2));
+  const center3 = { x: pods.reduce((v, p) => v + p.x, 0) / 3, y: pods.reduce((v, p) => v + p.y, 0) / 3 };
+  return pods.every((p, n) => !collidesWithTiles(c, p.x, p.y, 28) && Array.from({ length: 8 }, (_, i) => i * Math.PI / 4).every((a) => !collidesWithTiles(c, p.x + Math.cos(a) * SPORE_V2_POLICY.podClearancePixels, p.y + Math.sin(a) * SPORE_V2_POLICY.podClearancePixels, SPORE_V2_POLICY.playerHullPixels)) && lineOpen(c, p, pods[(n + 1) % 3]) && lineOpen(c, p, center3));
 };
 function sporeTriangleV2(s, id) {
   const runtime = s.d9World.runtime, frameKey2 = canonicalStringify(runtime.frames ?? []);
@@ -18297,11 +18321,11 @@ function sporeTriangleV2(s, id) {
   for (let y = -2; y <= 2; y++) for (let x = -2; x <= 2; x++) offsets.push([x * 32, y * 32]);
   offsets.sort((a, b) => a[0] * a[0] + a[1] * a[1] - b[0] * b[0] - b[1] * b[1] || a[1] - b[1] || a[0] - b[0]);
   let chosen = null;
-  for (const center2 of centers) {
+  for (const center3 of centers) {
     for (const side of SPORE_V2_POLICY.triangleSidesPixels) {
       for (const [dx, dy] of offsets) {
         for (let turn7 = 0; turn7 < 12; turn7++) {
-          const angle3 = (hash8(id) % 12 + turn7) * Math.PI / 6, radius = side / Math.sqrt(3), pods = Array.from({ length: 3 }, (_, n) => ({ x: center2.x + dx + Math.cos(angle3 + n * 2 * Math.PI / 3) * radius, y: center2.y + dy + Math.sin(angle3 + n * 2 * Math.PI / 3) * radius }));
+          const angle3 = (hash8(id) % 12 + turn7) * Math.PI / 6, radius = side / Math.sqrt(3), pods = Array.from({ length: 3 }, (_, n) => ({ x: center3.x + dx + Math.cos(angle3 + n * 2 * Math.PI / 3) * radius, y: center3.y + dy + Math.sin(angle3 + n * 2 * Math.PI / 3) * radius }));
           const open = pods.every((p) => p.x >= bounds2.left && p.x <= bounds2.right && p.y >= bounds2.top && p.y <= bounds2.bottom && !collidesWithTiles(c, p.x, p.y, 28) && Array.from({ length: 8 }, (_, n) => n * Math.PI / 4).every((a) => !collidesWithTiles(c, p.x + Math.cos(a) * SPORE_V2_POLICY.podClearancePixels, p.y + Math.sin(a) * SPORE_V2_POLICY.podClearancePixels, SPORE_V2_POLICY.playerHullPixels)));
           if (!open || !pods.every((p, n) => lineOpen(c, p, pods[(n + 1) % 3]))) continue;
           const mid = { x: pods.reduce((v, p) => v + p.x, 0) / 3, y: pods.reduce((v, p) => v + p.y, 0) / 3 };
@@ -18881,9 +18905,9 @@ function validateMasteryCombat(s) {
           validateDamageSourceItem(e.sourceItem);
         } else if (name === "statuses") {
           closedRecord(e, ["id", "sourceId", "targetId", "spaceInstanceId", "kind", "rank", "expiresTick"]);
-          requireContract(["expose", "slow", "stun"].includes(e.kind), "Unknown mastery status");
-          safeInteger(e.rank, 1, e.kind === "expose" ? 3 : 2);
-          safeInteger(e.expiresTick, s.tick + 1, s.tick + (e.kind === "expose" ? 300 : e.kind === "slow" ? 240 : 90));
+          requireContract(["expose", "slow", "stun", "grudge", "weaken"].includes(e.kind), "Unknown mastery status");
+          safeInteger(e.rank, 1, e.kind === "expose" ? 3 : e.kind === "grudge" ? 5 : e.kind === "weaken" ? 1 : 2);
+          safeInteger(e.expiresTick, s.tick + 1, s.tick + (e.kind === "expose" ? 300 : e.kind === "slow" || e.kind === "grudge" ? 240 : e.kind === "weaken" ? 360 : 90));
         } else {
           closedRecord(e, ["id", "sourceId", "spaceInstanceId", "position", "attack", "rank", "sourceItem", ...name === "hazards" ? ["radius", "expiresTick"] : ["direction", "frames", "hitIds"]]);
           validateInteger(e.attack);
@@ -19352,12 +19376,12 @@ var MAX_CLASS_MOVE = Object.freeze({ frames: 8, distance: 72, cooldown: 150 });
 function canShadowDash(actor, combat, stats, suppressed = false) {
   return !suppressed && actor.alive && Boolean(CLASS_MOVES[stats.subType]) && combat.dash.frames === 0 && combat.dash.cooldown === 0;
 }
-function beginShadowDash(actor, combat, stats, aim2, suppressed = false) {
+function beginShadowDash(actor, combat, stats, aim2, suppressed = false, cooldownPercent = 100) {
   if (!canShadowDash(actor, combat, stats, suppressed)) return false;
   const intent = actor.movementIntent, direction3 = Math.hypot(intent.x, intent.y) > 0.01 ? intent : aim2, length = Math.hypot(direction3.x, direction3.y);
   if (!length) return false;
   const move2 = CLASS_MOVES[stats.subType];
-  Object.assign(combat.dash, { frames: move2.frames, cooldown: move2.cooldown, remaining: move2.distance, x: direction3.x / length, y: direction3.y / length });
+  Object.assign(combat.dash, { frames: move2.frames, cooldown: Math.round(move2.cooldown * cooldownPercent / 100), remaining: move2.distance, x: direction3.x / length, y: direction3.y / length });
   return true;
 }
 function advanceShadowDash(actor, combat, stats, collision, suppressed = false) {
@@ -19439,6 +19463,10 @@ var shieldPacket = (stats) => {
 };
 function incomingSubweaponHit({ combat, stats, raw, boss = false, actor = null, source: source3 = null, suppressed = false, knight = false }) {
   if (suppressed) return { damage: combatInteger(mitigateFractionalPlayerDamage(raw, stats.defense)), absorbed: "0", defense: null, counter: null, suppressed: true };
+  if (combat.skills?.counter) {
+    spendCounterWindow(combat);
+    return { damage: "0", absorbed: "0", prevented: raw, masteryCounterEligible: false, defense: "block", counter: "stance" };
+  }
   const absorbed = combatInteger(minCombat(combat.barrier, raw));
   combat.barrier = combatInteger(subtractCombat(combat.barrier, absorbed));
   raw = subtractCombat(raw, absorbed);
@@ -19684,9 +19712,9 @@ function validateSubweaponCombat(s) {
     requireContract(["chill", "freeze", "boss-slow"].includes(e.phase), "Invalid Frost phase");
     safeInteger(e.stacks, e.phase === "chill" ? 1 : 0, e.phase === "chill" ? 3 : 0);
     safeInteger(e.appliedTick, 0, s.tick);
-    safeInteger(e.expiresTick, s.tick + 1, e.appliedTick + 240);
+    safeInteger(e.expiresTick, s.tick + 1, e.appliedTick + 360);
     const def = s.content.definitionsById[t.contentDefinitionId] ?? {};
-    requireContract(e.expiresTick - e.appliedTick === (e.phase === "chill" ? 240 : e.phase === "boss-slow" ? 90 : def.isElite ? 30 : 60) && e.phase === "boss-slow" === (e.phase !== "chill" && def.isBoss === true), "Frost duration/classification");
+    requireContract((e.phase === "chill" ? e.expiresTick - e.appliedTick >= 240 && e.expiresTick - e.appliedTick <= 360 : e.expiresTick - e.appliedTick === (e.phase === "boss-slow" ? 90 : def.isElite ? 30 : 60)) && e.phase === "boss-slow" === (e.phase !== "chill" && def.isBoss === true), "Frost duration/classification");
   }
 }
 function cancelSubweaponResidency(s, id) {
@@ -21744,8 +21772,8 @@ var GLOBAL_LIMIT = 128;
 var SOURCE_LIMIT = 4;
 var idle = (tick) => ({ phase: "idle", phaseStartedTick: tick, phaseEndsTick: tick, targetEntityId: null, aim: null, actionSequence: 0 });
 var point3 = (p, d, t) => ({ x: p.x + d.x * t, y: p.y + d.y * t });
-function segmentCircle(start, delta3, center2, radius) {
-  const x = start.x - center2.x, y = start.y - center2.y, a = delta3.x * delta3.x + delta3.y * delta3.y, c = x * x + y * y - radius * radius;
+function segmentCircle(start, delta3, center3, radius) {
+  const x = start.x - center3.x, y = start.y - center3.y, a = delta3.x * delta3.x + delta3.y * delta3.y, c = x * x + y * y - radius * radius;
   if (c <= 0) return 0;
   if (a === 0) return null;
   const b = 2 * (x * delta3.x + y * delta3.y), discriminant = b * b - 4 * a * c;
@@ -22084,12 +22112,12 @@ function createMasteryAwards(state) {
 }
 
 // src/simulation/tome_element_rules.js
-function applyFrostControl(s, source3, target, stats) {
+function applyFrostControl(s, source3, target, stats, chillTicks = 240) {
   if (!target.alive) return null;
   const controls = s.subweaponCombat.controls ?? (s.subweaponCombat.controls = {}), id = source3.entityId + "/" + target.entityId, old2 = controls[id];
   if (Object.values(controls).some((e) => e.targetId === target.entityId && e.expiresTick > s.tick && e.phase !== "chill")) return null;
   const stacks = (old2 && old2.expiresTick > s.tick ? old2.stacks : 0) + 1, def = s.content.definitionsById[target.contentDefinitionId] ?? {}, boss = def.isBoss === true, elite = def.isElite === true;
-  const phase = stacks === 4 ? boss ? "boss-slow" : "freeze" : "chill", duration = phase === "chill" ? 240 : boss ? 90 : elite ? 30 : 60;
+  const phase = stacks === 4 ? boss ? "boss-slow" : "freeze" : "chill", duration = phase === "chill" ? chillTicks : boss ? 90 : elite ? 30 : 60;
   const effect = { id, sourceId: source3.entityId, targetId: target.entityId, spaceInstanceId: source3.residency.spaceInstanceId, phase, stacks: phase === "chill" ? stacks : 0, appliedTick: s.tick, expiresTick: s.tick + duration };
   controls[id] = effect;
   if (phase === "boss-slow") {
@@ -22101,7 +22129,7 @@ function applyFrostControl(s, source3, target, stats) {
 }
 function frostMovement(s, target) {
   let multiplier = 1;
-  for (const b of Object.values(s.subweaponCombat.mastery ?? {})) for (const e of Object.values(b.statuses)) if (e.targetId === target.entityId && e.expiresTick > s.tick && e.kind !== "expose") multiplier = Math.min(multiplier, e.kind === "stun" ? 0 : 1 - 0.2 * e.rank);
+  for (const b of Object.values(s.subweaponCombat.mastery ?? {})) for (const e of Object.values(b.statuses)) if (e.targetId === target.entityId && e.expiresTick > s.tick && (e.kind === "slow" || e.kind === "stun")) multiplier = Math.min(multiplier, e.kind === "stun" ? 0 : 1 - 0.2 * e.rank);
   for (const e of Object.values(s.subweaponCombat.controls ?? {})) if (e.targetId === target.entityId && e.expiresTick > s.tick) multiplier = Math.min(multiplier, e.phase === "freeze" ? 0 : e.phase === "boss-slow" ? 0.6 : 1 - e.stacks * 0.1);
   return multiplier;
 }
@@ -22113,7 +22141,7 @@ function expireFrost(s) {
 }
 function frostMovementRates(s) {
   const rates = /* @__PURE__ */ new Map();
-  for (const b of Object.values(s.subweaponCombat.mastery ?? {})) for (const e of Object.values(b.statuses)) if (e.expiresTick > s.tick && e.kind !== "expose") {
+  for (const b of Object.values(s.subweaponCombat.mastery ?? {})) for (const e of Object.values(b.statuses)) if (e.expiresTick > s.tick && (e.kind === "slow" || e.kind === "stun")) {
     const rate = e.kind === "stun" ? 0 : 1 - 0.2 * e.rank;
     rates.set(e.targetId, Math.min(rates.get(e.targetId) ?? 1, rate));
   }
@@ -23378,6 +23406,15 @@ var CLASS_SKILL_TUNING_V1 = Object.freeze({
   bash: { reach: 48, cone: 0.85, targets: 5, attack: [3, 2], knockback: 22, eliteKnockback: 10, stun: 48, eliteStun: 24 },
   flurry: { reach: 44, cone: 0.95, targets: 3, attack: [9, 4] },
   cast: { cone: 1.05, attack: [3, 1] },
+  earthBreaker: { radius: 70, targets: 8, attack: [2, 1], slow: 2, slowTicks: 180 },
+  rallyingCry: { heal: [15, 100], radius: 90, targets: 12, weakenTicks: 360 },
+  counter: { attack: [3, 1], stun: 60 },
+  lunge: { reach: 110, cone: 0.5, attack: [5, 2], step: 64 },
+  toxicFan: { reach: 120, cone: 0.6, targets: 5, attack: [4, 5] },
+  whirlingBlades: { radius: 60, targets: 8, hits: 3, attack: [3, 5] },
+  firebloom: { reach: 130, cone: 0.9, distance: 90, radius: 50, targets: 8, attack: [2, 1] },
+  flashfreeze: { radius: 80, targets: 10, attack: [1, 1] },
+  chainLightning: { reach: 140, cone: 1.05, jumps: 3, hop: 120, attack: [2, 1] },
   // What the offhand in hand adds: a Buckler recharges Bash a quarter faster; a Tower Shield stuns
   // half again as long and shoves harder; a Main-Gauche Flurry readies a parry; a Stiletto's cuts
   // crit more often; a Kris's cuts always Bleed. Tomes cast their own element.
@@ -23412,9 +23449,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (!collidesWithTiles(s.spacesByInstanceId[t.residency.spaceInstanceId].collision, x, y, t.hullRadius)) t.position = { x, y };
   }
   const canStun = (a) => Boolean(s.subweaponCombat.mastery?.[a.entityId]);
+  const rank = (a, id) => classRank(owner(a)?.d8, id), pct2 = (value2, percent) => multiplyCombat(value2, 100 + percent, 100);
   function bash(a, stats, aim2, commandId) {
-    const raw = addCombat(multiplyCombat(stats.attack, ...T3.bash.attack), shieldPacket(stats)), style = T3.styles[offhandStyle(owner(a))] ?? {};
-    for (const t of cone(a, aim2, T3.bash.reach, T3.bash.cone, T3.bash.targets)) {
+    const impact = rank(a, "impact_training"), base = addCombat(multiplyCombat(stats.attack, ...T3.bash.attack), shieldPacket(stats)), raw = impact ? pct2(base, 6 * impact) : base, style = T3.styles[offhandStyle(owner(a))] ?? {};
+    for (const t of cone(a, aim2, T3.bash.reach * (100 + 6 * rank(a, "seismic_reach")) / 100, T3.bash.cone, T3.bash.targets)) {
       damage(a, t, raw, "bash", commandId, { sourceItem: damageSourceItem(owner(a), "bash"), trigger: "skill", masteryArea: true });
       if (!t.alive || isPodCombatTargetV4(t) || definition2(t).isBoss) continue;
       const elite = Boolean(definition2(t).isElite || definition2(t).isMiniboss);
@@ -23430,7 +23468,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       if (!t.alive) continue;
       mastery?.primary(a, t, "proactive");
       if (!sword3) effects2.offhand(a, t, stats);
-      if (t.alive && (style.bleed || !sword3 && combatRoll(combat, stats.familyProperties?.bleed ?? combatAmount(15, 100)))) periodic(a, t, "bleed", stats.attack, stats);
+      const serrated = rank(a, "serrated_cuts");
+      if (t.alive && (style.bleed || !sword3 && combatRoll(combat, stats.familyProperties?.bleed ?? combatAmount(15, 100)))) periodic(a, t, "bleed", serrated ? combatInteger(pct2(stats.attack, 6 * serrated)) : stats.attack, stats);
+      const viper = rank(a, "vipers_coating");
+      if (viper && t.alive && combatRoll(combat, combatAmount(5 * viper, 100))) poison(a, t, stats);
     }
   }
   function flurry(a, stats, aim2, commandId) {
@@ -23471,7 +23512,102 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     }
     return true;
   }
-  const handlers = { shield_bash: bash, flurry, cast };
+  function earthBreaker2(a, stats, aim2, commandId) {
+    const E = T3.earthBreaker, impact = rank(a, "impact_training"), base = addCombat(multiplyCombat(stats.attack, ...E.attack), shieldPacket(stats)), raw = impact ? pct2(base, 6 * impact) : base;
+    for (const t of cone(a, aim2, E.radius * (100 + 6 * rank(a, "seismic_reach")) / 100, Math.PI, E.targets)) {
+      damage(a, t, raw, "bash", commandId, { sourceItem: damageSourceItem(owner(a), "bash"), trigger: "skill", masteryArea: true });
+      if (t.alive && canStun(a)) effects2.status(a, t, "slow", E.slow, E.slowTicks);
+    }
+    return true;
+  }
+  function rallyingCry2(a, stats, aim2) {
+    const R2 = T3.rallyingCry;
+    a.hp = combatInteger(minCombat(stats.maxHp, addCombat(a.hp, multiplyCombat(stats.maxHp, ...R2.heal))));
+    if (canStun(a)) {
+      for (const t of cone(a, aim2, R2.radius, Math.PI, R2.targets)) if (!isPodCombatTargetV4(t)) effects2.status(a, t, "weaken", 1, R2.weakenTicks);
+    }
+    return true;
+  }
+  function counterStance2(a) {
+    openCounterWindow(c.actors[a.entityId]);
+    return true;
+  }
+  function lunge2(a, stats, aim2, commandId) {
+    const L = T3.lunge, t = cone(a, aim2, L.reach, L.cone, 1)[0], combat = c.actors[a.entityId], toward2 = t ? { x: t.position.x - a.position.x, y: t.position.y - a.position.y } : aim2, l = Math.hypot(toward2.x, toward2.y);
+    const step2 = t ? Math.min(L.step, Math.max(0, l - (a.hullRadius ?? 0) - (t.hullRadius ?? 0) - 4)) : L.step / 2;
+    if (step2 >= 8 && l > 1e-9 && !combat.dash.frames) Object.assign(combat.dash, { frames: Math.ceil(step2 / 8), remaining: step2, x: toward2.x / l, y: toward2.y / l });
+    if (t) {
+      damage(a, t, multiplyCombat(stats.attack, ...L.attack), "offhand", commandId, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "skill", critBonus: copyWire(stats.critChance) });
+      if (t.alive) mastery?.primary(a, t, "proactive");
+    }
+    return true;
+  }
+  function poison(a, t, stats) {
+    const b = c.mastery?.[a.entityId];
+    if (!b || !t.alive || isPodCombatTargetV4(t)) return;
+    const old2 = b.poisons[t.entityId];
+    b.poisons[t.entityId] = { id: t.entityId, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, attack: copyWire(old2?.attack ?? stats.attack), rank: old2?.rank ?? 1, toxicRank: old2?.toxicRank ?? "0", stacks: Math.min(5, (old2?.stacks ?? 0) + 1), nextTick: old2?.nextTick ?? s.tick + 60, expiresTick: s.tick + 600, sourceItem: damageSourceItem(owner(a), "poison") };
+  }
+  function toxicFan2(a, stats, aim2, commandId) {
+    const F = T3.toxicFan;
+    for (const t of cone(a, aim2, F.reach, F.cone, F.targets)) {
+      damage(a, t, multiplyCombat(stats.attack, ...F.attack), "offhand", commandId, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "skill" });
+      poison(a, t, stats);
+    }
+    return true;
+  }
+  function whirlingBlades2(a, stats, aim2, commandId) {
+    const W3 = T3.whirlingBlades;
+    for (const t of cone(a, aim2, W3.radius, Math.PI, W3.targets)) for (let i = 0; i < W3.hits && t.alive; i++) damage(a, t, multiplyCombat(stats.attack, ...W3.attack), "offhand", commandId, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "skill" });
+    return true;
+  }
+  const spell = (a, stats, kind, attack) => {
+    const p = stats.familyProperties?.tomePower ?? combatAmount(18, 10), boost = kind === "fire" ? 5 * rank(a, "kindling") : kind === "lightning" ? 5 * rank(a, "overcharge") : 0, base = multiplyCombat(multiplyCombat(stats.attack, ...attack), p.n, p.d);
+    return boost ? pct2(base, boost) : base;
+  };
+  function landing(a, aim2, reach) {
+    const col = s.spacesByInstanceId[a.residency.spaceInstanceId].collision;
+    let d = 0;
+    while (d + 8 <= reach && !collidesWithTiles(col, a.position.x + aim2.x * (d + 8), a.position.y + aim2.y * (d + 8), 4)) d += 8;
+    return { position: { x: a.position.x + aim2.x * d, y: a.position.y + aim2.y * d } };
+  }
+  function firebloom2(a, stats, aim2, commandId) {
+    const B = T3.firebloom, mark = cone(a, aim2, B.reach, B.cone, 1)[0], origin = mark ? { position: { ...mark.position } } : landing(a, aim2, B.distance), raw = spell(a, stats, "fire", B.attack), kindling = rank(a, "kindling"), base = combatInteger(multiplyCombat(stats.attack, ...B.attack)), burn = kindling ? combatInteger(pct2(base, 5 * kindling)) : base, sourceItem = damageSourceItem(owner(a), "fire");
+    for (const t of effects2.nearby(a, origin, B.radius * effects2.area(a)).slice(0, B.targets)) {
+      damage(a, t, raw, "fire", commandId, { sourceItem, trigger: "skill" });
+      if (t.alive && !isPodCombatTargetV4(t)) periodic(a, t, "burn", burn, { sourceItem });
+    }
+    return true;
+  }
+  function flashfreeze2(a, stats, aim2, commandId) {
+    const F = T3.flashfreeze, raw = spell(a, stats, "frost", F.attack), chill = 240 + 24 * rank(a, "cold_snap");
+    c.controls ??= {};
+    for (const t of cone(a, aim2, F.radius, Math.PI, F.targets)) {
+      damage(a, t, raw, "frost", commandId, { sourceItem: damageSourceItem(owner(a), "frost"), trigger: "skill" });
+      if (!t.alive || isPodCombatTargetV4(t)) continue;
+      const def = definition2(t), phase = def.isBoss === true ? "boss-slow" : def.isElite === true || def.isMiniboss ? "chill" : "freeze", id = a.entityId + "/" + t.entityId;
+      c.controls[id] = { id, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, phase, stacks: phase === "chill" ? 3 : 0, appliedTick: s.tick, expiresTick: s.tick + (phase === "chill" ? chill : phase === "boss-slow" ? 90 : 60) };
+    }
+    return true;
+  }
+  function chainLightning2(a, stats, aim2, commandId) {
+    const L = T3.chainLightning, heading = Math.atan2(aim2.y, aim2.x), raw = spell(a, stats, "lightning", L.attack), sourceItem = damageSourceItem(owner(a), "lightning");
+    const first = effects2.nearby(a, a, L.reach + 40).filter((t) => clearHullGap(a, t) <= L.reach && offAxis(a, t, heading) <= L.cone).sort((x, y) => distance8(a, x) - distance8(a, y) || x.entityId.localeCompare(y.entityId))[0];
+    if (!first) return false;
+    const chain = [first];
+    while (chain.length <= L.jumps) {
+      const from2 = chain.at(-1), next = effects2.nearby(a, from2, L.hop).filter((t) => !chain.includes(t)).sort((x, y) => distance8(from2, x) - distance8(from2, y) || x.entityId.localeCompare(y.entityId))[0];
+      if (!next) break;
+      chain.push(next);
+    }
+    let from = a;
+    for (const t of chain) {
+      damage(a, t, raw, "lightning", commandId, { sourceItem, trigger: "skill", chainFrom: { entityId: from.entityId, position: { ...from.position } } });
+      from = t;
+    }
+    return true;
+  }
+  const handlers = { shield_bash: bash, flurry, cast, earth_breaker: earthBreaker2, rallying_cry: rallyingCry2, counter_stance: counterStance2, lunge: lunge2, toxic_fan: toxicFan2, whirling_blades: whirlingBlades2, firebloom: firebloom2, flashfreeze: flashfreeze2, chain_lightning: chainLightning2 };
   function use(a, skillId, aimInput, commandId = null) {
     const stats = getStats(a.entityId), aim2 = unit3(aimInput);
     if (!handlers[skillId]?.(a, stats, aim2, commandId)) return false;
@@ -23492,7 +23628,33 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (--string.cutsLeft <= 0) delete combat.skills.flurry;
     else string.nextTick += FLURRY_GAP_TICKS;
   }
-  return { use, step };
+  function weakened(source3) {
+    for (const b of Object.values(c.mastery ?? {})) for (const e of Object.values(b.statuses)) if (e.targetId === source3.entityId && e.kind === "weaken" && e.expiresTick > s.tick) return true;
+    return false;
+  }
+  function incoming(source3, target, raw) {
+    let out = weakened(source3) ? multiplyCombat(raw, 80, 100) : raw;
+    const thick = rank(target, "thick_skin"), def = definition2(source3);
+    if (thick && (def.isElite || def.isBoss || def.isMiniboss)) out = multiplyCombat(out, 100 - 3 * thick, 100);
+    return out;
+  }
+  function outgoing(source3, target, raw) {
+    const g = c.mastery?.[source3.entityId]?.statuses[target.entityId + "/grudge"];
+    return g && g.expiresTick > s.tick ? multiplyCombat(raw, 100 + 3 * g.rank, 100) : raw;
+  }
+  function defended(target, source3, defense, stats) {
+    const p = owner(target);
+    if (!p?.d8?.heroClass || !source3?.alive || source3.team !== "hostile") return;
+    if (defense.counter === "stance") {
+      damage(target, source3, multiplyCombat(stats.attack, ...T3.counter.attack), "riposte", null, { sourceItem: damageSourceItem(p, "bash"), trigger: "reactive" });
+      if (source3.alive && canStun(target) && !definition2(source3).isBoss) effects2.status(target, source3, "stun", 1, T3.counter.stun);
+    }
+    const retaliation = rank(target, "retaliation");
+    if (retaliation && defense.defense === "block" && source3.alive) damage(target, source3, multiplyCombat(stats.defense, retaliation, 10), "riposte", null, { sourceItem: damageSourceItem(p, "bash"), trigger: "reactive" });
+    const grudge = rank(target, "grudge");
+    if (grudge && source3.alive && canStun(target) && !isPodCombatTargetV4(source3)) effects2.status(target, source3, "grudge", grudge, 240);
+  }
+  return { use, step, incoming, outgoing, defended };
 }
 
 // src/simulation/mastery_effects.js
@@ -23716,13 +23878,14 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
     hit(source3, target, stats(source3.entityId));
   }
   function elementImpact(source3, target, b, element = b.delivery ?? "fire") {
-    const coefficient = b.tomeRecipe ? capturedTomePower(b.tomeRecipe) : b.firePower ?? combatAmount(18, 10), raw = multiplyCombat(b.attack, coefficient.n, coefficient.d), overload = b.tomeRecipe?.overload ?? 0, A = b.tomeRecipe?.areaScale ?? 1, origin = { position: { ...target.position }, hullRadius: target.hullRadius };
+    const tree = (id) => classRank(players.get(source3.entityId)?.d8, id), boost = element === "fire" ? 5 * tree("kindling") : element === "lightning" ? 5 * tree("overcharge") : 0, burnBoost = (100 + 5 * tree("kindling")) * (100 + 8 * tree("firebrand")), burnAttack = burnBoost === 1e4 ? b.attack : copyWire(combatInteger(multiplyCombat(b.attack, burnBoost, 1e4)));
+    const coefficient = b.tomeRecipe ? capturedTomePower(b.tomeRecipe) : b.firePower ?? combatAmount(18, 10), base = multiplyCombat(b.attack, coefficient.n, coefficient.d), raw = boost ? multiplyCombat(base, 100 + boost, 100) : base, overload = b.tomeRecipe?.overload ?? 0, A = b.tomeRecipe?.areaScale ?? 1, origin = { position: { ...target.position }, hullRadius: target.hullRadius };
     const neighbors = overload && element !== "lightning" ? effects2.nearby(source3, origin, 80 * A * (1 + 0.2 * overload)).filter((t) => t.entityId !== target.entityId) : [];
     const hops = [];
     if (element === "lightning") {
       let previous = target;
       const seen = /* @__PURE__ */ new Set([target.entityId]);
-      for (let n = 0; n < 1 + overload; n++) {
+      for (let n = 0; n < 1 + overload + tree("storm_conductor"); n++) {
         const next = combatTargetsV4(s).filter((t) => !seen.has(t.entityId) && eligible2(source3, t) && Math.hypot(t.position.x - previous.position.x, t.position.y - previous.position.y) <= 120 * (overload ? A : 1) && subweaponLineClear(s.spacesByInstanceId[source3.residency.spaceInstanceId].collision, previous, t)).sort((a, b2) => Math.hypot(a.position.x - previous.position.x, a.position.y - previous.position.y) - Math.hypot(b2.position.x - previous.position.x, b2.position.y - previous.position.y) || a.entityId.localeCompare(b2.entityId))[0];
         if (!next) break;
         hops.push({ target: next, from: { entityId: previous.entityId, position: { ...previous.position } } });
@@ -23732,7 +23895,7 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
     }
     damage(source3, target, raw, element, b.commandId, { sourceItem: b.sourceItem, trigger: "proc" });
     if (element === "fire") {
-      if (eligible2(source3, target)) periodic(source3, target, "burn", b.attack, { sourceItem: b.sourceItem });
+      if (eligible2(source3, target)) periodic(source3, target, "burn", burnAttack, { sourceItem: b.sourceItem });
       for (const t of neighbors) {
         damage(source3, t, multiplyCombat(raw, 35 * overload, 100), "fire", b.commandId, { sourceItem: b.sourceItem, trigger: "mastery" });
         if (eligible2(source3, t)) periodic(source3, t, "burn", b.attack, { sourceItem: b.sourceItem });
@@ -23740,7 +23903,7 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
     }
     if (element === "lightning") for (const hop of hops) damage(source3, hop.target, raw, "lightning", b.commandId, { sourceItem: b.sourceItem, trigger: "proc", chainFrom: hop.from });
     if (element === "frost") {
-      if (eligible2(source3, target) && !isPodCombatTargetV4(target)) applyFrostControl(s, source3, target, stats(source3.entityId));
+      if (eligible2(source3, target) && !isPodCombatTargetV4(target)) applyFrostControl(s, source3, target, stats(source3.entityId), 240 + 24 * tree("cold_snap"));
       for (const t of neighbors) effects2.status(source3, t, "slow", overload, 240);
     }
   }
@@ -23815,7 +23978,7 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
     combat.dash.frames = 0;
     combat.dash.remaining = 0;
   }
-  return { main, step, effects: effects2, enforceSuppression, skill: (source3, skillId, aim2, commandId) => skills.use(source3, skillId, aim2, commandId), reconcile: (id) => {
+  return { main, step, effects: effects2, classHooks: { incoming: skills.incoming, outgoing: skills.outgoing, defended: skills.defended }, enforceSuppression, skill: (source3, skillId, aim2, commandId) => skills.use(source3, skillId, aim2, commandId), reconcile: (id) => {
     synchronizeTomeRotation(players.get(id));
     reconcileSubweapon(s.entitiesById[id], c.actors[id], stats(id));
   } };
@@ -24550,8 +24713,8 @@ function createBrimstoneCombat(state, { applyDirectDamage, eligible: eligible2 =
         b.ventsById[id] = { id, position: copyWire(position4), createdTick: state.tick, detonatesTick: state.tick + 270, expiresTick: state.tick + 288, sequence: b.abilitySequence, ordinal, arms: brimstoneVentArms(c, position4), stage: "boiling", hitEntityIds: [] };
       }
     } else for (const t of targets) {
-      const center2 = ability === "strike" ? a.position : p, cfg = BRIMSTONE[ability];
-      if (dist(center2, t.position) > cfg.radius || !brimstoneLineClear(c, center2, t.position) || ability === "strike" && Math.abs(delta(aim(a.position, t.position), b.facingAngle)) > cfg.halfAngle) continue;
+      const center3 = ability === "strike" ? a.position : p, cfg = BRIMSTONE[ability];
+      if (dist(center3, t.position) > cfg.radius || !brimstoneLineClear(c, center3, t.position) || ability === "strike" && Math.abs(delta(aim(a.position, t.position), b.facingAngle)) > cfg.halfAngle) continue;
       const result = damage(a, t, cfg.damageNumerator, "brimstone_" + ability, b.abilitySequence);
       if (result !== void 0 && result !== false) {
         hits.push(t.entityId);
@@ -25218,9 +25381,9 @@ function originalArenaRing(collision, home, index) {
   const minColumn = Math.max(0, centerX - half + 2 + index), maxColumn = Math.min(cols - 1, centerX + half - 2 - index);
   const minRow = Math.max(0, centerY - half + 2 + index), maxRow = Math.min(rows - 1, centerY + half - 2 - index);
   if (minColumn >= maxColumn || minRow >= maxRow) return null;
-  const ring4 = { index, minColumn, maxColumn, minRow, maxRow, tileSize: s };
-  const tiles = originalRingTiles(ring4).filter((p) => !collidesWithTiles(collision, p.x + s / 2, p.y + s / 2, s / 5));
-  return tiles.length ? { ...ring4, tiles } : null;
+  const ring5 = { index, minColumn, maxColumn, minRow, maxRow, tileSize: s };
+  const tiles = originalRingTiles(ring5).filter((p) => !collidesWithTiles(collision, p.x + s / 2, p.y + s / 2, s / 5));
+  return tiles.length ? { ...ring5, tiles } : null;
 }
 function originalRingTiles(r) {
   const out = [], s = r.tileSize;
@@ -25416,9 +25579,9 @@ function createArchivedBossFightRuntime(state, { pool, damage, hit, clear: clear
   }
   function collapseRing(b, a, c) {
     if (b.bossDefinitionId !== "hooktail" || !b.archive) return false;
-    const idx = b.archive.collapsedRings.length, ring4 = originalArenaRing(c, b.homePosition, idx);
-    if (!ring4) return false;
-    b.archive.collapsedRings.push({ ...ring4, createdTick: state.tick });
+    const idx = b.archive.collapsedRings.length, ring5 = originalArenaRing(c, b.homePosition, idx);
+    if (!ring5) return false;
+    b.archive.collapsedRings.push({ ...ring5, createdTick: state.tick });
     b.collapseStep = Math.min(7, idx + 1);
     return true;
   }
@@ -25749,8 +25912,8 @@ function createRecoveredBossCombatV1(state, { applyDirectDamage, eligible: eligi
       if (b.archive) {
         const c = state.spacesByInstanceId[b.spaceInstanceId]?.collision;
         if (c) {
-          const center2 = { x: Math.floor(c.width / 2) * c.tileSize, y: Math.floor(c.height / 2) * c.tileSize };
-          if (!collidesWithTiles(c, center2.x, center2.y, a.hullRadius)) a.position = center2;
+          const center3 = { x: Math.floor(c.width / 2) * c.tileSize, y: Math.floor(c.height / 2) * c.tileSize };
+          if (!collidesWithTiles(c, center3.x, center3.y, a.hullRadius)) a.position = center3;
         }
         const t = players(a)[0];
         if (t) beginAbility(b, a, t, "chronos_rewind");
@@ -26628,7 +26791,7 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
       }
       const resolved = progression.resolvedStats(source3.entityId), packet = criticalDamagePacket(roll6, attribution?.critBonus ? { ...resolved, critChance: addCombat(resolved.critChance, attribution.critBonus) } : resolved, raw, mechanic, forced);
       if (state.d9World) pendingPlayerRng = roll6.rng;
-      raw = packet.damage;
+      raw = family.classHooks.outgoing(source3, target, packet.damage);
       critical = packet.critical;
     } else if (source3.team !== "party" && !periodic) mechanic = "hostile";
     if (source3.team === "hostile" && target.team === "party" && !periodic) {
@@ -26646,6 +26809,7 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
       raw = guarded.damage;
       eliteGuard = guarded.guard;
     }
+    if (source3.team === "hostile" && target.team === "party" && !periodic) raw = family.classHooks.incoming(source3, target, raw);
     if (target.team === "party" && !periodic) {
       const stats = progression.resolvedStats(target.entityId), suppressed = subweaponSuppressedD12_4I(state, target.entityId);
       defenseStats = stats;
@@ -26729,6 +26893,7 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
       if (reaction.pulse) mastery.defensiveActivation(target, source3, "shield", "pulse", attribution?.sourceActionSequence ?? source3.nextAttackActionSequence - 1, 25);
     }
     if (defense && !defense.suppressed && target.alive) family.effects.defended(target, source3, defense, attribution?.sourceActionSequence ?? source3.nextAttackActionSequence - 1, defenseStats);
+    if (defense && !defense.suppressed && target.alive) family.classHooks.defended(target, source3, defense, defenseStats);
     cancelDefeatedPrimaries(state);
     if (!target.alive) cancelSubweaponResidency(state, target.entityId);
     if (target.team === "party") family.reconcile(target.entityId);
@@ -26827,7 +26992,7 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
       } else if (command.kind === "combat.guardIntent") {
         guardIntent(state.subweaponCombat.actors[actor.entityId].guard, command.payload.pressed, state.primary.actorsById[actor.entityId]);
       } else if (command.kind === "combat.shadowDash") {
-        beginShadowDash(actor, state.subweaponCombat.actors[actor.entityId], resolvePlayerStats(player), command.payload.aim);
+        beginShadowDash(actor, state.subweaponCombat.actors[actor.entityId], resolvePlayerStats(player), command.payload.aim, false, 100 - 5 * classRank(player.d8, "quick_dash"));
       } else if (command.kind === "combat.skill") {
         family.skill(actor, command.payload.skillId, command.payload.aim, command.commandId);
       } else if (command.kind === "gear.salvage") {
@@ -27805,10 +27970,10 @@ function projectWorldTerrainD9(state, compiled, { x, y, width = 88, height = 88 
 function projectCombatPresentation(state, visibleIds) {
   const ids4 = new Set(visibleIds), lanes2 = /* @__PURE__ */ new Map();
   const mastery = Object.values(state.subweaponCombat.mastery ?? {});
-  return { masteryHazards: mastery.flatMap((b) => Object.values(b.hazards)).filter((e) => ids4.has(e.sourceId)).map((e) => ({ position: { ...e.position }, radius: e.radius, expiresTick: e.expiresTick })), masteryRazors: mastery.flatMap((b) => Object.values(b.razors)).filter((e) => ids4.has(e.sourceId)).map((e) => ({ position: { ...e.position }, direction: { ...e.direction } })), statuses: [...Object.values(state.subweaponCombat.effects), ...mastery.flatMap((b) => [...Object.values(b.poisons).map((e) => ({ ...e, id: e.sourceId + "/" + e.id, kind: "poison" })), ...Object.values(b.statuses).map((e) => ({ ...e, id: e.sourceId + "/" + e.id, stacks: e.rank, nextTick: e.expiresTick, appliedTick: e.expiresTick - (e.kind === "expose" ? 300 : e.kind === "slow" ? 240 : 90) }))]), ...Object.values(state.subweaponCombat.controls ?? {}).map((e) => ({ ...e, kind: e.phase, nextTick: e.expiresTick }))].filter((e) => ids4.has(e.targetId) && e.expiresTick > state.tick).map((e) => ({ lane: (lanes2.set(e.targetId, (lanes2.get(e.targetId) ?? -1) + 1), lanes2.get(e.targetId)), id: e.id, sourceId: e.sourceId, targetId: e.targetId, kind: e.kind, stacks: e.stacks, expiresTick: e.expiresTick, nextTick: e.nextTick, durationFrames: ["bleed", "poison"].includes(e.kind) ? 600 : e.kind === "burn" ? 240 : e.expiresTick - e.appliedTick })), families: Object.fromEntries(Object.entries(state.subweaponCombat.actors).filter(([id]) => ids4.has(id)).map(([id, c]) => [id, { mastery: (() => {
+  return { masteryHazards: mastery.flatMap((b) => Object.values(b.hazards)).filter((e) => ids4.has(e.sourceId)).map((e) => ({ position: { ...e.position }, radius: e.radius, expiresTick: e.expiresTick })), masteryRazors: mastery.flatMap((b) => Object.values(b.razors)).filter((e) => ids4.has(e.sourceId)).map((e) => ({ position: { ...e.position }, direction: { ...e.direction } })), statuses: [...Object.values(state.subweaponCombat.effects), ...mastery.flatMap((b) => [...Object.values(b.poisons).map((e) => ({ ...e, id: e.sourceId + "/" + e.id, kind: "poison" })), ...Object.values(b.statuses).filter((e) => e.kind !== "grudge" && e.kind !== "weaken").map((e) => ({ ...e, id: e.sourceId + "/" + e.id, stacks: e.rank, nextTick: e.expiresTick, appliedTick: e.expiresTick - (e.kind === "expose" ? 300 : e.kind === "slow" ? 240 : 90) }))]), ...Object.values(state.subweaponCombat.controls ?? {}).map((e) => ({ ...e, kind: e.phase, nextTick: e.expiresTick }))].filter((e) => ids4.has(e.targetId) && e.expiresTick > state.tick).map((e) => ({ lane: (lanes2.set(e.targetId, (lanes2.get(e.targetId) ?? -1) + 1), lanes2.get(e.targetId)), id: e.id, sourceId: e.sourceId, targetId: e.targetId, kind: e.kind, stacks: e.stacks, expiresTick: e.expiresTick, nextTick: e.nextTick, durationFrames: ["bleed", "poison"].includes(e.kind) ? 600 : e.kind === "burn" ? 240 : e.expiresTick - e.appliedTick })), families: Object.fromEntries(Object.entries(state.subweaponCombat.actors).filter(([id]) => ids4.has(id)).map(([id, c]) => [id, { mastery: (() => {
     const p = Object.values(state.playersById).find((p2) => p2.entityId === id), d = p?.d8, t = d?.transient;
     return t ? { pulseBlocks: t.pulseBlocks, syphon: finiteNodeRank(d, "tome_arcane_syphon") > 0, earthBreaker: finiteNodeRank(d, "shield_earth_breaker_bash") > 0, singularity: finiteNodeRank(d, "tome_keystone_singularity") > 0, anchor: t.lastAnchor, fortitudeStacks: t.fortitudeStacks, retaliatoryReady: t.retaliatoryReady, colossus: t.colossusTicks > 0, shadowStep: t.shadowStepTicks > 0, syphonStacks: t.syphonStacks, weavingStacks: t.weavingStacks } : null;
-  })(), element: Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.itemsById[Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.equipped.subweapon]?.generated?.definition.spellType ?? "fire", guard: c.guard ? { ...c.guard, integrity: presentCombat(c.guard.integrity), direction: { ...c.guard.direction } } : null, pressure: c.pressure, dash: { ...c.dash }, blink: itemDefinition(((p) => p?.inventory.itemsById[p.inventory.equipped.subweapon])(Object.values(state.playersById).find((p) => p.entityId === id)))?.subType === "tome", delivery: { ...c.delivery }, skill: c.skills?.last ? { ...c.skills.last } : null, parry: c.skills?.parry ?? 0 }])) };
+  })(), element: Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.itemsById[Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.equipped.subweapon]?.generated?.definition.spellType ?? "fire", guard: c.guard ? { ...c.guard, integrity: presentCombat(c.guard.integrity), direction: { ...c.guard.direction } } : null, pressure: c.pressure, dash: { ...c.dash }, blink: itemDefinition(((p) => p?.inventory.itemsById[p.inventory.equipped.subweapon])(Object.values(state.playersById).find((p) => p.entityId === id)))?.subType === "tome", delivery: { ...c.delivery }, skill: c.skills?.last ? { ...c.skills.last } : null, parry: c.skills?.parry ?? c.skills?.counter ?? 0 }])) };
 }
 
 // src/shared/content/creatures_d11.js
@@ -29263,8 +29428,16 @@ function createHeroCreatorV1({ document, environment, readModel, adapter, report
   } });
 }
 
+// src/client/class_tree_icons_v1.js
+var CLASS_TREE_ICONS_V1 = Object.freeze({ "ironclad": '<path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7z"/>', "rallying_cry": '<path d="M4 10v4l11 5V5zM15 9a3 3 0 0 1 0 6M19 7a7 7 0 0 1 0 10"/>', "thick_skin": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M9 12h6M12 9v6"/>', "heavy_plating": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/>', "battle_hymn": '<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>', "iron_wall": '<rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 12h16M12 5v14"/>', "hold_the_line": '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>', "war_banner": '<path d="M6 21V3M6 4l10 3-10 4"/><path d="M3 21h6"/>', "shield_wall": '<path d="M3 6h18v12H3zM3 12h18M8 6v6M16 6v6M12 12v6"/>', "second_breath": '<path d="M3 12h4l2-5 4 10 2-5h6"/>', "steadfast": '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>', "stalwart": '<path d="M4 21V9l8-5 8 5v12z"/><path d="M9 21v-6h6v6"/>', "last_stand": '<path d="M12 20l-7-7a4.5 4.5 0 0 1 7-5.6A4.5 4.5 0 0 1 19 13z"/><path d="M12 8l-1.5 3h3L12 14"/>', "aegis_pulse": '<path d="M12 6l4 1.7v3.4c0 2.3-1.7 4-4 5-2.3-1-4-2.7-4-5V7.7z"/><path d="M4 7a10 10 0 0 0 0 10M20 7a10 10 0 0 1 0 10"/>', "aegis_echo": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M12 8l3 1.3v2.5c0 1.8-1.3 3-3 3.8-1.7-.8-3-2-3-3.8V9.3z"/>', "bulwark_colossus": '<path d="M3 21V8l4 3V5l5 4 5-4v6l4-3v13z"/>', "impact_training": '<path d="M15 12l-8.5 8.5a2.1 2.1 0 1 1-3-3L12 9M14 4l6 6-3 3-6-6z"/>', "earth_breaker": '<path d="M3 20h18M5 20l4-8 3 4 2-3 4 7M12 3v4"/>', "seismic_reach": '<path d="M2 12h6M16 12h6M5 9l-3 3 3 3M19 9l3 3-3 3M10 17l2-10 2 10"/>', "aftershock": '<path d="M5 18a7 7 0 0 1 14 0M8 18a4 4 0 0 1 8 0M2 18a10 10 0 0 1 20 0"/>', "heavy_hands": '<path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="8"/><path d="M4 4l3 3"/>', "fault_line": '<path d="M3 11h5l2-3 3 6 2-3h6M3 18h18"/>', "momentum": '<path d="M7 17l5-5 5 5M7 11l5-5 5 5"/>', "shield_charge": '<path d="M14 4l6 2.5v5c0 3.5-2.5 6-6 7.5-3.5-1.5-6-4-6-7.5v-5z"/><path d="M2 9h4M3 13h3M2 17h4"/>', "shatterpoint": '<path d="M12 2l2 7 7 3-7 3-2 7-2-7-7-3 7-3z"/>', "battering_ram": '<path d="M3 12h12M11 6l6 6-6 6M20 5v14"/>', "concussion": '<circle cx="12" cy="14" r="6"/><path d="M6 5l1.2 2M12 3v2.5M18 5l-1.2 2"/>', "juggernaut": '<path d="M5 20v-9a7 7 0 0 1 14 0v9z"/><path d="M8 13h8M12 13v7"/>', "unstoppable": '<path d="M4 20l16-16M9 4h11v11"/>', "skyfall_leap": '<path d="M12 3v10M8 9l4 4 4-4M4 20h16M6 20l2-3M18 20l-2-3"/>', "crater": '<path d="M3 17c3-5 15-5 18 0M7 17c1.5-2 8.5-2 10 0M12 3v6M9 6l3 3 3-3"/>', "earthshaker": '<path d="M12 2l2.6 6.4L21 9l-5 4.6L17.5 21 12 17.3 6.5 21 8 13.6 3 9l6.4-.6z"/>', "retaliation": '<path d="M9 14L4 9l5-5M4 9h11a5 5 0 0 1 0 10h-3"/>', "counter_stance": '<path d="M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4"/>', "grudge": '<path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.5"/>', "resonant_aegis": '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/>', "spiked_shield": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M12 3v3M19 6l-2 2M5 6l2 2"/>', "unbroken": '<path d="M4 12h16M12 4v16"/><circle cx="12" cy="12" r="8"/>', "serrated_edge": '<path d="M3 14l3-3 3 3 3-3 3 3 3-3 3 3M3 19h18"/>', "shield_throw": '<circle cx="9" cy="12" r="5"/><path d="M15 8a6 6 0 0 1 0 8M19 6a9 9 0 0 1 0 12"/>', "blood_for_blood": '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/><path d="M10 14h4M12 12v4"/>', "ricochet": '<path d="M3 17l6-10 6 10 6-10"/>', "marked_foe": '<circle cx="12" cy="12" r="9"/><path d="M22 12h-4M6 12H2M12 6V2M12 22v-4"/>', "boomerang": '<path d="M4 18c4-1 6-5 8-12 2 7 4 11 8 12"/>', "vengeance": '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.4-.5-2-1-3-1-2.1-.2-4 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.2.4-2.3 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>', "retribution": '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/>', "wrath": '<path d="M12 2v5M12 17v5M2 12h5M17 12h5M5 5l3.5 3.5M15.5 15.5 19 19M5 19l3.5-3.5M15.5 8.5 19 5"/>', "reflective_bulwark": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M8 12h8M12 8l4 4-4 4"/>', "keen_edge": '<path d="M12 3l2 6.5 6.5 2.5-6.5 2.5L12 21l-2-6.5L3.5 12 10 9.5z"/>', "lunge": '<path d="M14 4l6 6-8 8-3-3zM9 15l-5 5M2 8h5M3 12h3"/>', "lethal_precision": '<circle cx="12" cy="12" r="8"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/>', "long_lunge": '<path d="M3 12h14M13 7l5 5-5 5M21 5v14"/>', "expose_weakness": '<path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.5"/>', "follow_through": '<path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/>', "swift_blades": '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/>', "riposte": '<path d="M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M9.5 14.5 6 18M4 16l4 4"/>', "opening_strike": '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>', "counter_cut": '<path d="M9 14L4 9l5-5M4 9h11a5 5 0 0 1 0 10h-3"/>', "en_garde": '<path d="M12 2v14M8 16h8M12 16v6M9 6l3-4 3 4"/>', "disengage": '<path d="M3 8h11a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h8"/>', "finisher": '<path d="M12 3a7 7 0 0 0-7 7c0 3 2 4 2 6v2h10v-2c0-2 2-3 2-6a7 7 0 0 0-7-7z"/><path d="M9 11h.01M15 11h.01M10 18v3M14 18v3"/>', "thousand_cuts": '<path d="M4 4l16 16M20 4L4 20M12 2v20"/>', "flourish": '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>', "master_duelist": '<path d="M3 18l2-10 5 5 2-8 2 8 5-5 2 10z"/><path d="M3 21h18"/>', "vipers_coating": '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>', "toxic_fan": '<path d="M12 21L5 7M12 21V4M12 21l7-14"/>', "serrated_cuts": '<path d="M3 14l3-3 3 3 3-3 3 3 3-3 3 3M3 19h18"/>', "wide_fan": '<path d="M12 21L3 10M12 21L7 5M12 21V4M12 21l5-16M12 21l9-11"/>', "lingering_venom": '<path d="M6 3h12M6 21h12M7 3c0 6 10 6 10 9s-10 3-10 9M17 3c0 6-10 6-10 9"/>', "paralytic": '<circle cx="12" cy="12" r="9"/><path d="M12 7v5h4M5 19l2-2"/>', "open_wounds": '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/><path d="M9 11l6 6"/>', "rupture": '<path d="M12 4s4.5 5 4.5 8.5a4.5 4.5 0 0 1-9 0C7.5 9 12 4 12 4zM3 20l3-3M21 20l-3-3M12 23v-3"/>', "hemorrhage": '<path d="M7 3s3 3.5 3 6a3 3 0 0 1-6 0c0-2.5 3-6 3-6zM17 3s3 3.5 3 6a3 3 0 0 1-6 0c0-2.5 3-6 3-6zM12 12s3 3.5 3 6a3 3 0 0 1-6 0c0-2.5 3-6 3-6z"/>', "chain_rupture": '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>', "bloodletting": '<path d="M12 20l-7-7a4.5 4.5 0 0 1 7-5.6A4.5 4.5 0 0 1 19 13z"/>', "deep_rupture": '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/><path d="M9.5 14h5M12 11.5v5"/>', "septic": '<path d="M12 3a7 7 0 0 0-7 7c0 3 2 4 2 6v2h10v-2c0-2 2-3 2-6a7 7 0 0 0-7-7z"/><path d="M9 11h.01M15 11h.01M10 18v3M14 18v3"/>', "noxious_bloom": '<circle cx="12" cy="12" r="2.5"/><path d="M12 3a3 3 0 0 1 0 6 3 3 0 0 1 0-6zM12 15a3 3 0 0 1 0 6 3 3 0 0 1 0-6zM3 12a3 3 0 0 1 6 0 3 3 0 0 1-6 0zM15 12a3 3 0 0 1 6 0 3 3 0 0 1-6 0z"/>', "contagion": '<circle cx="12" cy="7" r="3"/><circle cx="7" cy="16" r="3"/><circle cx="17" cy="16" r="3"/>', "virulent_bloom": '<path d="M3 18l2-10 5 5 2-8 2 8 5-5 2 10z"/><path d="M3 21h18"/>', "fleetfoot": '<path d="M7 3v10l-3 5v2h15v-2l-3-3-5-1V3z"/>', "whirling_blades": '<path d="M12 12a2 2 0 1 1 2-2 4 4 0 1 1-4-4 6 6 0 1 1-6 6"/>', "quick_dash": '<path d="M3 8h11a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h8"/>', "wide_arc": '<path d="M2 12h6M16 12h6M5 9l-3 3 3 3M19 9l3 3-3 3M12 8v8"/>', "crosscut": '<path d="M5 5l14 14M19 5L5 19M3 12h4M17 12h4"/>', "blade_ward": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/>', "slipstream": '<path d="M3 10h12M3 14h8M15 7l5 5-5 5"/>', "smoke_veil": '<path d="M7 18a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1.5A3.5 3.5 0 1 1 17 18z"/>', "opportunist": '<circle cx="12" cy="12" r="5"/><path d="M12 3v4M12 17v4M3 12h4M17 12h4"/>', "choking_smoke": '<path d="M7 14a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1.5A3.5 3.5 0 1 1 17 14z"/><path d="M8 18v2M12 17v4M16 18v2"/>', "exploit": '<path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.5"/>', "shrouded": '<path d="M5 8h14M3 12h18M6 16h12M9 20h6"/>', "evasive": '<path d="M6 20V10a6 6 0 0 1 12 0v10l-3-2-3 2-3-2z"/><path d="M10 10h.01M14 10h.01"/>', "shadowstep": '<path d="M12 3a9 9 0 1 0 0 18M8 12h12M16 8l4 4-4 4"/>', "assassinate": '<path d="M14.5 3.5l6 6-9 9-3-3zM8.5 15.5l-5 5M6 13l5 5"/>', "shadow_assassin": '<path d="M3 18l2-10 5 5 2-8 2 8 5-5 2 10z"/><path d="M3 21h18"/>', "kindling": '<path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-5 3-7 0 3 2 4 3 4-1-4 0-7 0-9z"/>', "firebloom": '<circle cx="12" cy="12" r="2.5"/><path d="M12 3a3 3 0 0 1 0 6 3 3 0 0 1 0-6zM12 15a3 3 0 0 1 0 6 3 3 0 0 1 0-6zM3 12a3 3 0 0 1 6 0 3 3 0 0 1-6 0zM15 12a3 3 0 0 1 6 0 3 3 0 0 1-6 0z"/>', "firebrand": '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5"/><path d="M12.5 6c.5 2 3 3 3 6a3 3 0 0 1-6 0c0-1.5 1-2.5 1.5-3.5 0 1.5 1 2 1.5 2-.5-2 0-3.5 0-4.5z"/>', "wildfire": '<path d="M2 12h6M16 12h6M5 9l-3 3 3 3M19 9l3 3-3 3M12 8v8"/>', "searing": '<path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-5 3-7 0 3 2 4 3 4-1-4 0-7 0-9z"/><path d="M3 22h18"/>', "lingering_flames": '<path d="M10 3c1 3 5 5 5 10a5 5 0 0 1-10 0c0-2.5 1.5-4 2.5-6 0 2.5 1.5 3.5 2.5 3.5-1-3 0-5.5 0-7.5z"/><circle cx="18" cy="18" r="4"/><path d="M18 16v2h1.5"/>', "cinder_step": '<path d="M8 20c-2 0-3-2-3-4s2-4 3-4 2 2 2 4-1 4-2 4zM16 12c-2 0-3-2-3-4s2-4 3-4 2 2 2 4-1 4-2 4z"/>', "flame_wall": '<path d="M3 21h18M5 21c0-4 2-5 2-8 1 2 2 2 2 4 0-3 1-5 3-7 0 3 2 4 2 7 1-1 1-2 1-3 1 2 2 4 2 7"/>', "focused_catalysts": '<circle cx="12" cy="12" r="8"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/>', "firewalker": '<path d="M8 20c-2 0-3-2-3-4s2-4 3-4 2 2 2 4-1 4-2 4zM16 12c-2 0-3-2-3-4s2-4 3-4 2 2 2 4-1 4-2 4z"/>', "thermal_shock": '<path d="M8 3c.7 2.8 4 4 4 8a4 4 0 0 1-8 0c0-2 1.3-3.5 2-5"/><path d="M17 12v10M13 15l8 4M21 15l-8 4"/>', "inferno": '<path d="M10 3c1 3 5 5 5 10a5 5 0 0 1-10 0c0-2.5 1.5-4 2.5-6 0 2.5 1.5 3.5 2.5 3.5-1-3 0-5.5 0-7.5z"/><circle cx="18" cy="18" r="4"/><path d="M18 16v2h1.5"/>', "volatile_wake": '<circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l2.5 2.5M16.5 16.5 19 19M5 19l2.5-2.5M16.5 7.5 19 5"/>', "meteor": '<circle cx="15.5" cy="15.5" r="5"/><path d="M3 3l8 8M7 3l6 6M3 7l6 6"/>', "impact_crater": '<path d="M3 17c3-5 15-5 18 0M7 17c1.5-2 8.5-2 10 0M12 3v6M9 6l3 3 3-3"/>', "phoenix": '<path d="M12 21c-1-4-1-7 0-10 1 3 1 6 0 10zM12 11C9 7 5 7 2 8c3 1 5 3 6 7M12 11c3-4 7-4 10-3-3 1-5 3-6 7M12 11V4M10 6l2-2 2 2"/>', "cold_snap": '<path d="M12 2v20M4 6l16 12M20 6L4 18M9 3l3 3 3-3M9 21l3-3 3 3"/>', "flashfreeze": '<path d="M12 3v18M5 7.5l14 9M19 7.5l-14 9"/><circle cx="12" cy="12" r="10" stroke-dasharray="2 3"/>', "frostbinder": '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5"/><path d="M12.5 6v8M9.5 8l6 4M15.5 8l-6 4"/>', "deep_freeze": '<path d="M12 3v18M4 7.5l16 9M20 7.5l-16 9"/><path d="M8 3h8M8 21h8"/>', "brittle": '<circle cx="12" cy="12" r="9"/><path d="M12 3l-2 5 4 3-3 4 1 6"/>', "shatter": '<path d="M12 2v5M12 17v5M2 12h5M17 12h5M5 5l3.5 3.5M15.5 15.5 19 19M5 19l3.5-3.5M15.5 8.5 19 5"/>', "glacial_skin": '<path d="M12 20l-7-7a4.5 4.5 0 0 1 7-5.6A4.5 4.5 0 0 1 19 13z"/>', "ice_barrier": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M12 8v8M9 10l6 4M15 10l-6 4"/>', "blink_ward": '<path d="M12 4l6 2.5v5c0 3.5-2.5 6-6 7.5-3.5-1.5-6-4-6-7.5v-5z"/><path d="M2 10h3M2 14h2"/>', "thick_ice": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M12 8v4M10 10h4"/>', "steady_mind": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M9 11h6M9 14h6"/>', "frost_ward": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M12 3l-1.5 6 3 2.5-2 4.5"/>', "arcane_syphon": '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5"/><path d="M14 7v7M11 11l3 3 3-3"/>', "glacial_burst": '<path d="M12 2v6M12 16v6M2 12h6M16 12h6M5 5l4 4M15 15l4 4M5 19l4-4M15 9l4-4"/><path d="M12 9l3 3-3 3-3-3z"/>', "echoing_burst": '<circle cx="12" cy="12" r="3"/><path d="M6 6a8.5 8.5 0 0 0 0 12M18 6a8.5 8.5 0 0 1 0 12"/>', "absolute_zero": '<circle cx="12" cy="12" r="9"/><path d="M12 6v12M7 9l10 6M17 9L7 15"/>', "overcharge": '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>', "chain_lightning": '<path d="M4 3l5 6-3 2 6 7M13 4l4 5-3 2 6 6"/>', "storm_conductor": '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5"/><path d="M13 6l-3 5h4l-3 5"/>', "arc_reach": '<path d="M2 12h6M16 12h6M5 9l-3 3 3 3M19 9l3 3-3 3M12 8v8"/>', "elemental_overload": '<circle cx="12" cy="7" r="3.5"/><circle cx="7" cy="16" r="3.5"/><circle cx="17" cy="16" r="3.5"/>', "forked_lightning": '<path d="M12 22v-8M12 14L5 4M12 14l7-10M12 14V3"/>', "spell_weaving": '<path d="M3 8c3 0 3 8 6 8s3-8 6-8 3 8 6 8M3 16c3 0 3-8 6-8"/>', "static_field": '<circle cx="12" cy="12" r="9" stroke-dasharray="3 3"/><path d="M13 6l-4 6h4l-2 6"/>', "static_blink": '<path d="M4 12h4M16 12h4M12 4v4M12 16v4"/><path d="M13 9l-3 4h4l-2 3"/>', "live_wire": '<path d="M3 12h3l2-5 3 10 3-10 2 5h5"/>', "resonance": '<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="10"/>', "magnetic": '<path d="M6 4v8a6 6 0 0 0 12 0V4M6 8h4M14 8h4M10 4v8a2 2 0 0 0 4 0V4"/>', "superconductor": '<path d="M13 2L6 12h5l-1 6M17 14a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"/>', "thunderfall": '<path d="M7 14a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1.5A3.5 3.5 0 1 1 17 14"/><path d="M12 12l-2 4h4l-2 5"/>', "storm_call": '<path d="M6 3L3 9h4l-2 5M13 3l-3 6h4l-2 5M20 3l-3 6h4l-2 5M3 21h18"/>', "living_storm": '<path d="M12 2l2.6 6.4L21 9l-5 4.6L17.5 21 12 17.3 6.5 21 8 13.6 3 9l6.4-.6z"/>' });
+
 // src/client/skill_icons_v1.js
 var outline = 'stroke="#0b1015" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"';
+var treeIcon = (s) => {
+  const color28 = classTreeOf(s.classId, s.tree).color, glyph = CLASS_TREE_ICONS_V1[s.id];
+  return `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><radialGradient id="sk-${s.id}" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="${color28}"/><stop offset="1" stop-color="#16202a"/></radialGradient></defs><circle cx="24" cy="24" r="19" fill="url(#sk-${s.id})" ${outline}/><g transform="translate(9 9) scale(1.25)" fill="none" stroke-linecap="round" stroke-linejoin="round"><g stroke="#0b1015" stroke-width="4">${glyph}</g><g stroke="#ffffff" stroke-width="2">${glyph}</g></g></svg>`;
+};
+var TREE_ACTIVE_ICONS = Object.fromEntries(Object.values(CLASS_TREE_SKILLS).filter((s) => s.kind === "active").map((s) => [s.id, treeIcon(s)]));
 var SKILL_ICONS_V1 = Object.freeze({
   shield_bash: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="sk-bash" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1fbff"/><stop offset=".5" stop-color="#86cdf0"/><stop offset="1" stop-color="#2c6a94"/></linearGradient></defs><path d="M30 13l12-5M33 23h13M30 33l12 5" stroke="#0b1015" stroke-width="6" stroke-linecap="round"/><path d="M30 13l12-5M33 23h13M30 33l12 5" stroke="#fff4c8" stroke-width="3" stroke-linecap="round"/><path d="M17 5l14 5v11c0 10-6 17-14 21C9 38 3 31 3 21V10z" fill="url(#sk-bash)" ${outline}/><path d="M17 11v25M9 20h16" stroke="#173f5c" stroke-width="2.4" stroke-linecap="round" opacity=".55"/><path d="M8 13l9-3" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity=".8"/></svg>`,
   flurry: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="sk-flurry" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#9aa6b8"/><stop offset=".6" stop-color="#eef2f8"/><stop offset="1" stop-color="#ffffff"/></linearGradient></defs><path d="M7 30C14 14 28 7 43 6M5 39C16 27 30 21 44 19M10 45C22 38 33 35 45 33" fill="none" stroke="#0b1015" stroke-width="5" stroke-linecap="round" opacity=".7"/><path d="M7 30C14 14 28 7 43 6M5 39C16 27 30 21 44 19M10 45C22 38 33 35 45 33" fill="none" stroke="#c9a6ff" stroke-width="2.4" stroke-linecap="round"/><path d="M20 30L38 12l3 3-18 18z" fill="url(#sk-flurry)" ${outline}/><path d="M14 30l8 8M17 35l-6 6" stroke="#0b1015" stroke-width="6" stroke-linecap="round"/><path d="M14 30l8 8M17 35l-6 6" stroke="#8a5bd6" stroke-width="3" stroke-linecap="round"/></svg>`,
@@ -29273,7 +29446,8 @@ var SKILL_ICONS_V1 = Object.freeze({
   dash: `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 12l12 12-12 12M20 12l12 12-12 12M32 12l12 12-12 12" fill="none" stroke="#0b1015" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 12l12 12-12 12" fill="none" stroke="#7a52b8" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" opacity=".7"/><path d="M20 12l12 12-12 12" fill="none" stroke="#b48cff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 12l12 12-12 12" fill="none" stroke="#efe4ff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
   blink: `<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="17" fill="none" stroke="#0b1015" stroke-width="5"/><circle cx="24" cy="24" r="17" fill="none" stroke="#8fd0ff" stroke-width="2.4" stroke-dasharray="6 5"/><path d="M24 6l4.5 13.5L42 24l-13.5 4.5L24 42l-4.5-13.5L6 24l13.5-4.5z" fill="#e9f7ff" ${outline}/><circle cx="24" cy="24" r="3.4" fill="#8fd0ff"/></svg>`,
   lock: `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M16 21v-5a8 8 0 0 1 16 0v5" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><rect x="11" y="20" width="26" height="20" rx="5" fill="currentColor" fill-opacity=".22" stroke="currentColor" stroke-width="3"/><circle cx="24" cy="29" r="2.6" fill="currentColor"/></svg>`,
-  spin: `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M37 17a15 15 0 0 0-27 4M11 31a15 15 0 0 0 27-4" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="M38 8v10H28M10 40V30h10" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+  spin: `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M37 17a15 15 0 0 0-27 4M11 31a15 15 0 0 0 27-4" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="M38 8v10H28M10 40V30h10" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  ...TREE_ACTIVE_ICONS
 });
 var MOVE_ICON_FOR = { shield: "guard", dagger: "dash", tome: "blink" };
 
@@ -29300,7 +29474,7 @@ function createSkillWheelV1({ document, environment, readModel, adapter, isBlock
     if (cls) e.className = cls;
     return e;
   };
-  const wheel = el("div", "skill-wheel-v1"), ring4 = el("div", "skill-wheel-ring"), spin = el("button", "skill-wheel-spin"), done = el("button", "skill-wheel-done");
+  const wheel = el("div", "skill-wheel-v1"), ring5 = el("div", "skill-wheel-ring"), spin = el("button", "skill-wheel-spin"), done = el("button", "skill-wheel-done");
   wheel.dataset.gameplayHud = "";
   wheel.setAttribute("aria-label", "Skills");
   spin.type = done.type = "button";
@@ -29310,7 +29484,7 @@ function createSkillWheelV1({ document, environment, readModel, adapter, isBlock
   done.innerHTML = '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 25l8 8 16-18" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Done</span>';
   done.setAttribute("aria-label", "Finish arranging the skill wheel");
   done.hidden = true;
-  wheel.append(ring4, spin);
+  wheel.append(ring5, spin);
   document.getElementById("world-bag").parentElement.append(wheel, done);
   const slots = [];
   for (let i = 0; i < WHEEL_SLOTS; i++) {
@@ -29437,17 +29611,17 @@ function createSkillWheelV1({ document, environment, readModel, adapter, isBlock
   listen(spin, "pointercancel", spinUp);
   listen(spin, "click", (e) => e.preventDefault());
   const angleAt = (e) => Math.atan2(e.clientY - geometry.cy - geometry.top, e.clientX - geometry.cx - geometry.left) * 180 / Math.PI;
-  listen(ring4, "pointerdown", (e) => {
+  listen(ring5, "pointerdown", (e) => {
     if (!geometry) return;
     e.preventDefault();
     e.stopPropagation();
     drag = { start: angleAt(e), turn: turn7, id: e.pointerId };
     try {
-      ring4.setPointerCapture(e.pointerId);
+      ring5.setPointerCapture(e.pointerId);
     } catch {
     }
   });
-  listen(ring4, "pointermove", (e) => {
+  listen(ring5, "pointermove", (e) => {
     if (!drag || e.pointerId !== drag.id) return;
     let d = angleAt(e) - drag.start;
     if (d > 180) d -= 360;
@@ -29462,8 +29636,8 @@ function createSkillWheelV1({ document, environment, readModel, adapter, isBlock
     drag = null;
     setPage(moved ? turn7 > 0.5 ? 1 : 0 : page ? 0 : 1);
   };
-  listen(ring4, "pointerup", release);
-  listen(ring4, "pointercancel", release);
+  listen(ring5, "pointerup", release);
+  listen(ring5, "pointercancel", release);
   slots.forEach((s, i) => {
     listen(s.b, "pointerdown", (e) => {
       e.preventDefault();
@@ -29524,7 +29698,7 @@ function createSkillWheelV1({ document, environment, readModel, adapter, isBlock
     const band = g.radius + g.slot / 2 + 10, hole = g.radius - g.slot / 2 - 10, circle8 = (r, c) => `M ${(c - r).toFixed(1)},${c.toFixed(1)} a ${r.toFixed(1)},${r.toFixed(1)} 0 1,0 ${(2 * r).toFixed(1)},0 a ${r.toFixed(1)},${r.toFixed(1)} 0 1,0 ${(-2 * r).toFixed(1)},0 Z`;
     wheel.style.setProperty("--slot", g.slot + "px");
     document.body.style.setProperty("--wheel-slot", g.slot + "px");
-    ring4.style.cssText = `left:${(g.cx - band).toFixed(1)}px;top:${(g.cy - band).toFixed(1)}px;width:${(band * 2).toFixed(1)}px;height:${(band * 2).toFixed(1)}px;--hole:${hole.toFixed(1)}px;clip-path:path(evenodd,"${circle8(band, band)} ${circle8(hole, band)}")`;
+    ring5.style.cssText = `left:${(g.cx - band).toFixed(1)}px;top:${(g.cy - band).toFixed(1)}px;width:${(band * 2).toFixed(1)}px;height:${(band * 2).toFixed(1)}px;--hole:${hole.toFixed(1)}px;clip-path:path(evenodd,"${circle8(band, band)} ${circle8(hole, band)}")`;
     spin.style.setProperty("--at", css(at3(270, g.hub + 20, 34)));
     done.style.cssText = `left:${(g.cx - g.hub).toFixed(1)}px;top:${(g.cy - g.hub).toFixed(1)}px;width:${(g.hub * 2).toFixed(1)}px;height:${(g.hub * 2).toFixed(1)}px`;
     document.body.classList.add("skill-arc-v1");
@@ -30052,7 +30226,7 @@ function skillBlockerV2(d, n, offer) {
   if (reason === "Insufficient Skill Points") return `Needs ${formatLarge(offer.cost)} SP. You have ${formatLarge(pointBalances(d)[n.tree].unspent)}.`;
   return reason;
 }
-function createSkillTreeViewV2({ document, send }) {
+function createSkillTreeViewV2({ document, send, only = null }) {
   const el = (tag, text2 = "", cls = "") => {
     const e = document.createElement(tag);
     if (text2) e.textContent = text2;
@@ -30069,9 +30243,9 @@ function createSkillTreeViewV2({ document, send }) {
     void e.offsetWidth;
     e.classList.add(cls);
   };
-  const root = el("div", "", "skills-v2"), top = el("div", "", "skills-top"), tabs = el("nav", "", "skills-tabs"), tabButtons = {};
+  const root = el("div", "", only ? "skills-v2 only" : "skills-v2"), top = el("div", "", "skills-top"), tabs = el("nav", "", "skills-tabs"), tabButtons = {};
   tabs.setAttribute("aria-label", "Constellations");
-  for (const name of TREES) {
+  for (const name of only ? [only] : TREES) {
     const b = button("", "", () => choose(name)), badge = el("b");
     b.style.setProperty("--tree", CONSTELLATIONS[name].color);
     b.append(el("i"), el("span", TAB_NAMES[name]), badge);
@@ -30196,8 +30370,8 @@ function createSkillTreeViewV2({ document, send }) {
   grab.addEventListener("pointercancel", release);
   function paintHead(points2) {
     root.style.setProperty("--tree", CONSTELLATIONS[tree].color);
-    for (const name of TREES) {
-      const { b, badge } = tabButtons[name], unspent = points2[name].unspent;
+    for (const [name, { b, badge }] of Object.entries(tabButtons)) {
+      const unspent = points2[name].unspent;
       b.setAttribute("aria-pressed", String(name === tree));
       badge.textContent = integerBigInt(unspent) > 0n ? formatLarge(unspent) : "";
       badge.hidden = integerBigInt(unspent) <= 0n;
@@ -30332,7 +30506,7 @@ function createSkillTreeViewV2({ document, send }) {
   }
   function paint() {
     if (!d) return;
-    if (!tree || !d[tree]) tree = defaultTree();
+    if (!tree || !d[tree]) tree = only ?? defaultTree();
     const points2 = pointBalances(d);
     paintHead(points2);
     if (view === "tree") paintTree();
@@ -30363,6 +30537,235 @@ function createSkillTreeViewV2({ document, send }) {
   }, inspect: () => ({ tree, view, selected, open }) });
 }
 
+// src/client/class_skills_view_v1.js
+var COL = 100;
+var ROW = 104;
+var TOP = 10;
+var TILE = 54;
+var ROWS = 6;
+var center2 = (row2, col) => ({ x: col * COL + COL / 2, y: row2 * ROW + TOP + TILE / 2 });
+var KIND_TAG = { active: "ACTIVE", passive: "PASSIVE", capstone: "PASSIVE" };
+function skillStateV1(d, id) {
+  const s = CLASS_TREE_SKILLS[id], rank = classRank(d, id), offer = learnAvailability(d, id), open = classTreeSpent(d, s.tree, s.tier) >= classTierGate(s.tier);
+  return { rank, offer, open, live: LIVE_CLASS_SKILLS.has(id), learned: rank > 0, maxed: rank >= s.maxRank, state: rank >= s.maxRank ? "maxed" : rank > 0 ? "learned" : !LIVE_CLASS_SKILLS.has(id) ? "soon" : offer.ok ? "available" : "locked" };
+}
+function createClassSkillsViewV1({ document, send, utility }) {
+  const el = (tag, cls = "", text2 = "") => {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text2) e.textContent = text2;
+    return e;
+  }, svgEl = (tag) => document.createElementNS("http://www.w3.org/2000/svg", tag);
+  const button = (cls, text2, fn) => {
+    const b = el("button", cls, text2);
+    b.type = "button";
+    b.onclick = fn;
+    return b;
+  }, retrigger = (e, cls) => {
+    e.classList.remove(cls);
+    void e.offsetWidth;
+    e.classList.add(cls);
+  };
+  const root = el("div", "cs-view"), head12 = el("div", "cs-head"), points2 = el("div", "cs-points"), tabs = el("nav", "cs-tabs"), body5 = el("div", "cs-body"), utilityWrap = el("div", "cs-utility");
+  tabs.setAttribute("aria-label", "Skill trees");
+  head12.append(points2, tabs);
+  root.append(head12, body5);
+  utilityWrap.append(utility.root);
+  let d = null, ready = false, classId = null, tree = null, selected = null, confirmReset = false, grids = {}, tabButtons = {}, lastRanks = {};
+  function icon(id, color28) {
+    const svg2 = svgEl("svg");
+    for (const [k, v] of Object.entries({ viewBox: "0 0 24 24", fill: "none", stroke: color28, "stroke-width": "1.9", "stroke-linecap": "round", "stroke-linejoin": "round", "aria-hidden": "true" })) svg2.setAttribute(k, v);
+    svg2.innerHTML = CLASS_TREE_ICONS_V1[id] ?? "";
+    return svg2;
+  }
+  function buildTabs(trees) {
+    tabButtons = {};
+    const list = [...trees.map((t) => ({ id: t.id, name: t.name, color: t.color })), { id: "utility", name: "Utility", color: "#b7a077" }];
+    tabs.replaceChildren(...list.map((t) => {
+      const b = button("cs-tab", "", () => choose(t.id)), badge = el("b");
+      b.style.setProperty("--tree", t.color);
+      b.append(el("span", "", t.name), badge);
+      tabButtons[t.id] = { b, badge };
+      return b;
+    }));
+  }
+  function buildGrid(t) {
+    const wrap = el("section", "cs-tree"), tagline = el("p", "cs-tagline"), grid = el("div", "cs-grid"), svg2 = svgEl("svg"), bubble = el("div", "cs-bubble"), foot = el("div", "cs-foot"), tiles = {}, lines = [], gates = [];
+    wrap.style.setProperty("--tree", t.color);
+    svg2.setAttribute("class", "cs-links");
+    svg2.setAttribute("viewBox", `0 0 ${3 * COL} ${ROWS * ROW}`);
+    svg2.setAttribute("aria-hidden", "true");
+    grid.append(svg2);
+    t.rows.forEach((ids4, row2) => {
+      if (row2 > 0) {
+        const g = el("span", "cs-gate", String(classTierGate(row2 + 1)));
+        g.style.top = `${row2 * ROW + TOP + TILE / 2}px`;
+        gates.push({ g, tier: row2 + 1 });
+        grid.append(g);
+      }
+      ids4.forEach((id, i) => {
+        const s = CLASS_TREE_SKILLS[id], col = ids4.length === 1 ? 1 : i, c = center2(row2, col), b = button("cs-skill", "", () => select(id)), tile = el("span", "cs-tile"), rank = el("b", "cs-rank");
+        b.dataset.kind = s.kind;
+        b.dataset.skill = id;
+        b.style.left = `${c.x - 39}px`;
+        b.style.top = `${row2 * ROW + TOP}px`;
+        tile.append(icon(id, "currentColor"), rank);
+        b.append(tile, el("span", "cs-name", s.name));
+        tiles[id] = { b, rank, row: row2, col };
+        grid.append(b);
+        if (s.requires) {
+          const p = CLASS_TREE_SKILLS[s.requires], pr = t.rows.findIndex((r) => r.includes(p.id)), pc2 = t.rows[pr].length === 1 ? 1 : t.rows[pr].indexOf(p.id), a = center2(pr, pc2), line13 = svgEl("line");
+          for (const [k, v] of Object.entries({ x1: a.x, y1: a.y, x2: c.x, y2: c.y })) line13.setAttribute(k, String(v));
+          svg2.append(line13);
+          lines.push({ line: line13, parent: p.id, child: id });
+        }
+      });
+    });
+    grid.style.height = `${ROWS * ROW}px`;
+    grid.append(bubble);
+    grid.addEventListener("click", (e) => {
+      if (!e.target.closest?.(".cs-skill,.cs-bubble")) close();
+    });
+    wrap.append(tagline, grid, foot);
+    return { tree: t, wrap, tagline, grid, bubble, foot, tiles, lines, gates };
+  }
+  function defaultTree(trees) {
+    return trees.reduce((a, b) => classTreeSpent(d, b.id) > classTreeSpent(d, a.id) ? b : a, trees[0]).id;
+  }
+  function choose(id) {
+    if (id === tree) return;
+    tree = id;
+    selected = null;
+    confirmReset = false;
+    paint();
+    body5.scrollTop = 0;
+  }
+  function select(id) {
+    selected = selected === id ? null : id;
+    confirmReset = false;
+    paint();
+  }
+  function close() {
+    if (!selected) return;
+    selected = null;
+    paint();
+  }
+  function paintHead(trees) {
+    const p = classTreePoints(d), unspent = p.unspent > 0n ? p.unspent : 0n;
+    points2.replaceChildren(el("b", "", String(unspent)), el("span", "", unspent === 1n ? " skill point" : " skill points"), el("small", "", " \xB7 1 per level"));
+    points2.classList.toggle("has", unspent > 0n);
+    for (const [id, { b, badge }] of Object.entries(tabButtons)) {
+      b.setAttribute("aria-pressed", String(id === tree));
+      const spent = id === "utility" ? 0 : classTreeSpent(d, id);
+      badge.textContent = spent ? String(spent) : "";
+      badge.hidden = !spent;
+    }
+    root.style.setProperty("--tree", trees.find((t) => t.id === tree)?.color ?? "#b7a077");
+  }
+  function paintGrid(g) {
+    const t = g.tree, spent = classTreeSpent(d, t.id);
+    g.tagline.textContent = `${t.tagline} \xB7 ${spent} point${spent === 1 ? "" : "s"} in ${t.name}`;
+    for (const [id, tile] of Object.entries(g.tiles)) {
+      const s = skillStateV1(d, id), before = lastRanks[id], skill = CLASS_TREE_SKILLS[id];
+      tile.b.dataset.state = s.state;
+      tile.b.classList.toggle("selected", id === selected);
+      tile.b.classList.toggle("closed", !s.open);
+      tile.rank.textContent = s.live ? `${s.rank}/${skill.maxRank}` : "Soon";
+      tile.b.setAttribute("aria-label", `${skill.name}, ${KIND_TAG[skill.kind].toLowerCase()}, ${s.live ? `rank ${s.rank} of ${skill.maxRank}` : "coming soon"}`);
+      if (before !== void 0 && s.rank > before) retrigger(tile.b, "learned");
+      lastRanks[id] = s.rank;
+    }
+    for (const { g: gate, tier: tier2 } of g.gates) gate.classList.toggle("open", classTreeSpent(d, t.id, tier2) >= classTierGate(tier2));
+    for (const { line: line13, parent } of g.lines) line13.classList.toggle("lit", classRank(d, parent) > 0);
+    paintBubble(g);
+    paintFoot(g, spent);
+  }
+  function paintBubble(g) {
+    const id = selected && g.tiles[selected] ? selected : null;
+    g.bubble.hidden = !id;
+    if (!id) return;
+    const s = CLASS_TREE_SKILLS[id], st = skillStateV1(d, id), { row: row2, col } = g.tiles[id], below = row2 <= 2, parts = [];
+    g.bubble.classList.toggle("below", below);
+    g.bubble.style.top = below ? `${(row2 + 1) * ROW - 4}px` : "";
+    g.bubble.style.bottom = below ? "" : `${(ROWS - row2) * ROW - TOP + 2}px`;
+    g.bubble.style.setProperty("--arrow", `${center2(row2, col).x}px`);
+    const head13 = el("div", "cs-bubble-head"), tag = el("span", "cs-kind", KIND_TAG[s.kind]);
+    tag.classList.toggle("active", s.kind === "active");
+    head13.append(tag, el("strong", "", s.name), el("em", "", `${st.rank}/${s.maxRank}`), button("cs-close", "\xD7", close));
+    parts.push(head13);
+    const gate = classTierGate(s.tier), inTree = classTreeSpent(d, s.tree, s.tier);
+    parts.push(el("p", "cs-meta", `${g.tree.name} \xB7 ${s.kind === "capstone" ? "Capstone" : `Tier ${s.tier}`}${inTree < gate ? ` \xB7 needs ${gate} points in ${g.tree.name}` : ""}`));
+    if (s.requires) {
+      const met = classRank(d, s.requires) > 0, req = el("p", "cs-req", `${met ? "\u2713 " : ""}Requires ${CLASS_TREE_SKILLS[s.requires].name}`);
+      req.classList.toggle("met", met);
+      parts.push(req);
+    }
+    parts.push(el("p", "cs-desc", s.description));
+    if (s.kind === "active" && st.learned) parts.push(el("p", "cs-note", "It\u2019s on your skill wheel."));
+    const label3 = st.maxed ? s.maxRank === 1 ? "Learned" : "Maxed" : !st.live ? "Coming soon" : st.offer.ok ? st.learned ? `Learn rank ${st.rank + 1} \xB7 1 point` : "Learn \xB7 1 point" : st.offer.reason, learn = button("cs-learn", label3, () => send({ kind: "skill.learn", skillId: id }));
+    learn.disabled = !st.offer.ok || !ready;
+    parts.push(learn);
+    if (st.offer.ok && !ready) parts.push(el("p", "cs-why", "Skills can\u2019t change right now."));
+    g.bubble.replaceChildren(...parts);
+  }
+  function paintFoot(g, spent) {
+    if (confirmReset) {
+      const row2 = el("div", "cs-reset-row"), yes = button("cs-reset danger", `Unlearn ${spent} point${spent === 1 ? "" : "s"}`, () => {
+        confirmReset = false;
+        send({ kind: "skill.reset", tree: g.tree.id });
+      }), no = button("cs-reset", "Cancel", () => {
+        confirmReset = false;
+        paint();
+      });
+      yes.disabled = !ready;
+      row2.append(yes, no);
+      g.foot.replaceChildren(el("p", "cs-note", `Unlearn every ${g.tree.name} skill? It\u2019s free.`), row2);
+      return;
+    }
+    const reset = button("cs-reset", `Reset ${g.tree.name}`, () => {
+      confirmReset = true;
+      paint();
+    });
+    reset.disabled = !ready || !spent;
+    g.foot.replaceChildren(reset);
+  }
+  function paint() {
+    if (!d?.heroClass) return;
+    const trees = classTreesFor(d.heroClass);
+    if (classId !== d.heroClass) {
+      classId = d.heroClass;
+      grids = {};
+      tree = null;
+      selected = null;
+      lastRanks = {};
+      buildTabs(trees);
+    }
+    if (!tree) tree = defaultTree(trees);
+    paintHead(trees);
+    if (tree === "utility") {
+      if (body5.firstChild !== utilityWrap) body5.replaceChildren(utilityWrap);
+      utility.render(d, ready);
+      return;
+    }
+    const g = grids[tree] ??= buildGrid(trees.find((t) => t.id === tree));
+    paintGrid(g);
+    if (body5.firstChild !== g.wrap) body5.replaceChildren(g.wrap);
+  }
+  return Object.freeze({ root, render(next, isReady) {
+    d = next;
+    ready = isReady;
+    paint();
+  }, reset() {
+    classId = null;
+    tree = null;
+    selected = null;
+    confirmReset = false;
+    grids = {};
+    lastRanks = {};
+    utility.reset();
+  }, inspect: () => ({ tree, selected }) });
+}
+
 // src/client/progression_presentation.js
 function createProgressionPresentation({ document, readModel, issue }) {
   const host = document.createElement("section");
@@ -30391,9 +30794,9 @@ function createProgressionPresentation({ document, readModel, issue }) {
   const attributes = el("section", "", "progression-attributes"), attrTitle = el("div", "", "progression-line"), attrRows = el("div", "", "attribute-rows"), attrDetails = el("details", "", "attribute-details"), summary = el("summary", "Allocate attributes"), attrBody = el("div");
   attrDetails.append(summary, attrBody);
   attributes.append(attrTitle, attrRows, attrDetails);
-  const skills = createSkillTreeViewV2({ document, send: (action2) => send(action2) }), notice = el("p", "", "progression-notice");
+  const skills = createSkillTreeViewV2({ document, send: (action2) => send(action2) }), classSkills = createClassSkillsViewV1({ document, send: (action2) => send(action2), utility: createSkillTreeViewV2({ document, send: (action2) => send(action2), only: "utility" }) }), notice = el("p", "", "progression-notice");
   notice.setAttribute("role", "status");
-  host.append(skills.root, notice);
+  host.append(skills.root, classSkills.root, notice);
   statsView.mountAttributes(attributes);
   attrDetails.open = false;
   function redraw() {
@@ -30420,13 +30823,15 @@ function createProgressionPresentation({ document, readModel, issue }) {
       draft = { str: 0, dex: 0, int: 0 };
       confirm = null;
       skills.reset();
+      classSkills.reset();
       viewKey = "";
     }
     if (previous) {
       if (d.highestHeroLevel > previous.highest) {
-        message = `+${3 * (d.highestHeroLevel - previous.highest)} Attribute Points \xB7 +${d.highestHeroLevel - previous.highest} Utility SP`;
+        const n = d.highestHeroLevel - previous.highest;
+        message = d.heroClass ? `+${3 * n} Attribute Points \xB7 +${n} skill point${n === 1 ? "" : "s"}` : `+${3 * n} Attribute Points \xB7 +${n} Utility SP`;
         messageUntil = now2 + 1800;
-      } else if (["shield", "dagger", "tome"].some((t) => integerBigInt(d[t].level) > integerBigInt(previous[t]))) {
+      } else if (!d.heroClass && ["shield", "dagger", "tome"].some((t) => integerBigInt(d[t].level) > integerBigInt(previous[t]))) {
         const t = ["shield", "dagger", "tome"].find((t2) => integerBigInt(d[t2].level) > integerBigInt(previous[t2]));
         message = `${CONSTELLATIONS[t].name}: Level ${formatLarge(d[t].level)} \xB7 +${formatLarge(integerWire(integerBigInt(d[t].level) - integerBigInt(previous[t])))} SP`;
         messageUntil = now2 + 1800;
@@ -30489,7 +30894,11 @@ function createProgressionPresentation({ document, readModel, issue }) {
       redraw();
     }));
     if (!visible3) return;
-    skills.render(d, ready);
+    const classHero = Boolean(d.heroClass);
+    skills.root.hidden = classHero;
+    classSkills.root.hidden = !classHero;
+    if (classHero) classSkills.render(d, ready);
+    else skills.render(d, ready);
   }
   return { refresh, destroy: () => {
     host.remove();
@@ -30866,7 +31275,7 @@ function drawWorldHero(ctx, actor, facing2, presentationTime, primary = null, ti
     primary = { ...primary, facing: actor.guard.direction };
     guardY = actor.guard.direction.y;
   }
-  const pose = primaryPose(primary, tick), moving = actor.movedLastTick, riposteAge = tick - actor.shieldRiposteTick, blockAge = tick - actor.shieldBlockTick, cast = skill?.skillId === "cast" ? castPose(tick - skill.tick) : skill?.skillId === "shield_bash" && actor.subType === "shield" ? bashPose(tick - skill.tick) : skill?.skillId === "flurry" && actor.subType === "dagger" ? flurryPose(tick - skill.tick, daggerTypeOf(actor.heroLook?.gear?.off?.kind)) : null;
+  const pose = primaryPose(primary, tick), moving = actor.movedLastTick, riposteAge = tick - actor.shieldRiposteTick, blockAge = tick - actor.shieldBlockTick, cast = ["cast", "firebloom", "flashfreeze", "chain_lightning"].includes(skill?.skillId) ? castPose(tick - skill.tick) : ["shield_bash", "earth_breaker"].includes(skill?.skillId) && actor.subType === "shield" ? bashPose(tick - skill.tick) : ["flurry", "lunge", "toxic_fan", "whirling_blades"].includes(skill?.skillId) && actor.subType === "dagger" ? flurryPose(tick - skill.tick, daggerTypeOf(actor.heroLook?.gear?.off?.kind)) : null;
   ctx.save();
   ctx.translate(actor.position.x, actor.position.y - 8);
   ctx.scale(0.8 * facing2, 0.8);
@@ -33697,8 +34106,8 @@ var CHART_COLORS = { O: "#1d4c6c", W: "#4698be", L: "#3a8aac", B: "#e0d09c", w: 
 function chartPosition(p) {
   return { x: (Number(BigInt(p.chunkX) - 1024n) * 1024 + p.localX) / 32, y: (Number(BigInt(p.chunkY) - 1024n) * 832 + p.localY) / 32 };
 }
-function chartView(center2, span, width, height) {
-  return { x: center2.x - span / 2, y: center2.y - span * height / width / 2, width: span, height: span * height / width };
+function chartView(center3, span, width, height) {
+  return { x: center3.x - span / 2, y: center3.y - span * height / width / 2, width: span, height: span * height / width };
 }
 function projectChart(p, view, width, height) {
   return { x: (p.x - view.x) * width / view.width, y: (p.y - view.y) * height / view.height };
@@ -34124,7 +34533,7 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
   toast.className = "chart-toast";
   toast.hidden = true;
   doc.body.append(mini, atlas, toast);
-  let open = false, closed = false, meta = null, model = null, center2 = null, span = 512, mode = "map", selected = null, hitGroups = [], lastPaint = -1, dirty = true, busy = false, wanted = null, metadataError = null, lastJournal = null, toastUntil = 0, requests = 0, rasterBuilds = 0, cacheHits = 0, paintMs = 0;
+  let open = false, closed = false, meta = null, model = null, center3 = null, span = 512, mode = "map", selected = null, hitGroups = [], lastPaint = -1, dirty = true, busy = false, wanted = null, metadataError = null, lastJournal = null, toastUntil = 0, requests = 0, rasterBuilds = 0, cacheHits = 0, paintMs = 0;
   const filters = { settlements: true, sites: true, completed: true, routes: true, ferries: true }, cache = /* @__PURE__ */ new Map(), pointers = /* @__PURE__ */ new Map();
   let gesture = null, atlasSize = null;
   const phoneQuery = env.matchMedia?.("(max-width:600px)"), shortQuery = env.matchMedia?.("(max-height:500px)");
@@ -34163,7 +34572,7 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
     open = true;
     atlasSize = null;
     mode = "map";
-    center2 = { ...player() };
+    center3 = { ...player() };
     span = 512;
     selected = null;
     dirty = true;
@@ -34185,19 +34594,19 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
     doc.documentElement.dataset.worldMapOpen = "false";
   }
   function clamp47() {
-    if (!meta || !center2) return;
-    center2.x = Math.max(-span * 0.15, Math.min(meta.widthTiles + span * 0.15, center2.x));
-    center2.y = Math.max(-span * 0.15, Math.min(meta.heightTiles + span * 0.15, center2.y));
+    if (!meta || !center3) return;
+    center3.x = Math.max(-span * 0.15, Math.min(meta.widthTiles + span * 0.15, center3.x));
+    center3.y = Math.max(-span * 0.15, Math.min(meta.heightTiles + span * 0.15, center3.y));
     span = Math.max(160, Math.min(Math.max(meta.widthTiles, meta.heightTiles) * 1.6, span));
   }
   function zoom(factor, point13 = null) {
-    if (!meta || !center2) return;
+    if (!meta || !center3) return;
     const rect3 = large.getBoundingClientRect(), old2 = span;
     span *= factor;
     clamp47();
     if (point13) {
-      center2.x += (point13.x / rect3.width - 0.5) * (old2 - span);
-      center2.y += (point13.y / rect3.height - 0.5) * (old2 - span) * rect3.height / rect3.width;
+      center3.x += (point13.x / rect3.width - 0.5) * (old2 - span);
+      center3.y += (point13.y / rect3.height - 0.5) * (old2 - span) * rect3.height / rect3.width;
     }
     dirty = true;
   }
@@ -34206,7 +34615,7 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
   button("", () => zoom(1 / 1.7), fab, "Zoom in", "plus");
   button("", () => zoom(1.7), fab, "Zoom out", "minus");
   button("", () => {
-    center2 = { ...player() };
+    center3 = { ...player() };
     span = 512;
     selected = null;
     mode = "map";
@@ -34216,7 +34625,7 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
   button("", () => {
     if (!meta) return;
     const r = large.getBoundingClientRect();
-    center2 = { x: meta.widthTiles / 2, y: meta.heightTiles / 2 };
+    center3 = { x: meta.widthTiles / 2, y: meta.heightTiles / 2 };
     span = Math.max(meta.widthTiles * 1.08, meta.heightTiles * r.width / r.height * 1.08);
     dirty = true;
   }, fab, "Whole world", "world");
@@ -34270,7 +34679,7 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
         panel.append(el("h3", "Woodland trail note"), el("p", TRAIL_NOTE_TEXT));
         const site = meta?.sites.find((s) => s.id === note.siteId);
         if (site) button("Show rumored cave", () => {
-          center2 = { x: site.x, y: site.y };
+          center3 = { x: site.x, y: site.y };
           span = 512;
           selected = site;
           mode = "map";
@@ -34375,8 +34784,8 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
     c.setTransform(ratio, 0, 0, ratio, 0, 0);
     c.fillStyle = CHART_COLORS.O;
     c.fillRect(0, 0, width, height);
-    if (open && !center2) center2 = { ...p };
-    const viewSpan = open ? span : width * MINI_TILES_PER_PX, shown = chartView(open ? center2 : p, viewSpan, width, height), pad = open ? 0 : MINI_PAD, requestCenter = open ? center2 : { x: Math.floor(p.x / 32) * 32 + 16, y: Math.floor(p.y / 32) * 32 + 16 }, backingView = chartView(requestCenter, viewSpan * (width + pad * 2) / width, width + pad * 2, height + pad * 2), rw = Math.min(512, Math.round(width + pad * 2)), rh = Math.min(240, Math.round(height + pad * 2));
+    if (open && !center3) center3 = { ...p };
+    const viewSpan = open ? span : width * MINI_TILES_PER_PX, shown = chartView(open ? center3 : p, viewSpan, width, height), pad = open ? 0 : MINI_PAD, requestCenter = open ? center3 : { x: Math.floor(p.x / 32) * 32 + 16, y: Math.floor(p.y / 32) * 32 + 16 }, backingView = chartView(requestCenter, viewSpan * (width + pad * 2) / width, width + pad * 2, height + pad * 2), rw = Math.min(512, Math.round(width + pad * 2)), rh = Math.min(240, Math.round(height + pad * 2));
     let result = requestRaster(backingView, Math.max(32, rw), Math.max(32, rh), width + pad * 2, height + pad * 2, ratio);
     const fresh = Boolean(result);
     if (!result) result = [...cache.values()].reverse().find((v) => v.raster.view.width / shown.width < 3 && v.raster.view.width / shown.width > 0.4) ?? null;
@@ -34539,13 +34948,13 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
     gesture = { moved: false, distance: null };
   };
   large.onpointermove = (e) => {
-    if (!pointers.has(e.pointerId) || !center2) return;
+    if (!pointers.has(e.pointerId) || !center3) return;
     const old2 = pointers.get(e.pointerId), q = relative(e);
     pointers.set(e.pointerId, q);
     const ps = [...pointers.values()];
     if (ps.length === 1) {
-      center2.x -= (q.x - old2.x) * span / q.width;
-      center2.y -= (q.y - old2.y) * span / q.width;
+      center3.x -= (q.x - old2.x) * span / q.width;
+      center3.y -= (q.y - old2.y) * span / q.width;
       gesture.moved ||= Math.hypot(q.x - old2.x, q.y - old2.y) > 2;
       clamp47();
       dirty = true;
@@ -34563,7 +34972,7 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
         mode = "map";
         panel.replaceChildren(el("h3", "Nearby locations"));
         for (const m of hit.members) button((m.state === "rumored" ? "Rumored " + m.family : m.label) + " \xB7 Band " + m.band, () => {
-          center2 = { x: m.x, y: m.y };
+          center3 = { x: m.x, y: m.y };
           span = Math.max(160, span / 3);
           selected = m;
           mode = "map";
@@ -34698,14 +35107,14 @@ var CARTOGRAPHY_STYLE = "world-cartography-d9-v1";
 var MINIMAP_PIXEL_RATIO = 2;
 var MINIMAP_CACHE_PADDING_PX = 64;
 var MINIMAP_RECENTER_SCREEN_PX = 32;
-function mapViewportD9(center2, level, width, height, scale) {
-  const size = 1n << BigInt(level), cx = floorDiv(BigInt(center2.chunkX), size), cy = floorDiv(BigInt(center2.chunkY), size), cellW = 1024 * Number(size) * scale, cellH = 832 * Number(size) * scale;
-  const localX = (Number(BigInt(center2.chunkX) - cx * size) * 1024 + center2.localX) * scale, localY = (Number(BigInt(center2.chunkY) - cy * size) * 832 + center2.localY) * scale;
+function mapViewportD9(center3, level, width, height, scale) {
+  const size = 1n << BigInt(level), cx = floorDiv(BigInt(center3.chunkX), size), cy = floorDiv(BigInt(center3.chunkY), size), cellW = 1024 * Number(size) * scale, cellH = 832 * Number(size) * scale;
+  const localX = (Number(BigInt(center3.chunkX) - cx * size) * 1024 + center3.localX) * scale, localY = (Number(BigInt(center3.chunkY) - cy * size) * 832 + center3.localY) * scale;
   const left = Math.floor((localX - width / 2) / cellW), top = Math.floor((localY - height / 2) / cellH), right = Math.floor((localX + width / 2) / cellW), bottom = Math.floor((localY + height / 2) / cellH);
   return { x: String(cx + BigInt(left)), y: String(cy + BigInt(top)), width: right - left + 1, height: bottom - top + 1, level, cellW, cellH, screenX: width / 2 + left * cellW - localX, screenY: height / 2 + top * cellH - localY };
 }
-function panMapD9(center2, dx, dy, scale) {
-  return normalizeWorldPosition({ ...center2, localX: center2.localX - dx / scale, localY: center2.localY - dy / scale });
+function panMapD9(center3, dx, dy, scale) {
+  return normalizeWorldPosition({ ...center3, localX: center3.localX - dx / scale, localY: center3.localY - dy / scale });
 }
 function worldScreenDeltaD9(position4, anchor, scale) {
   return { x: (Number(BigInt(position4.chunkX) - BigInt(anchor.chunkX)) * 1024 + position4.localX - anchor.localX) * scale, y: (Number(BigInt(position4.chunkY) - BigInt(anchor.chunkY)) * 832 + position4.localY - anchor.localY) * scale };
@@ -34956,7 +35365,7 @@ function createWorldMapD9({ document: doc, environment, port, releaseInput }) {
   footer.append(el("span", "N \u2191"));
   atlas.append(header, large, detail);
   doc.body.append(mini, atlas);
-  let open = false, hudAllowed = true, center2 = null, level = 0, miniZoom = 1, busy = false, closed = false, lastKey = null, cache = [], cacheRevision = 0, lastModel = null, marks2 = [], miniMarks = [], reviewMarks = [], terrainHits = [], lastTime = -1e3, staticLayer = null, staticKey = null, staticBuilds = 0, staticHits = 0, miniBackingCenter = null, miniRequestedCenter = null, miniRecenters = 0;
+  let open = false, hudAllowed = true, center3 = null, level = 0, miniZoom = 1, busy = false, closed = false, lastKey = null, cache = [], cacheRevision = 0, lastModel = null, marks2 = [], miniMarks = [], reviewMarks = [], terrainHits = [], lastTime = -1e3, staticLayer = null, staticKey = null, staticBuilds = 0, staticHits = 0, miniBackingCenter = null, miniRequestedCenter = null, miniRecenters = 0;
   const atlasSize = createMapCanvasSizeCacheD9(large, environment), pointers = /* @__PURE__ */ new Map();
   let gesture = null;
   function syncVisibility() {
@@ -34965,7 +35374,7 @@ function createWorldMapD9({ document: doc, environment, port, releaseInput }) {
     doc.documentElement.dataset.worldMapOpen = String(open);
   }
   function recenter() {
-    center2 = { ...lastModel.navigation.position };
+    center3 = { ...lastModel.navigation.position };
     lastKey = null;
     detail.textContent = "Centered on player";
   }
@@ -34991,7 +35400,7 @@ function createWorldMapD9({ document: doc, environment, port, releaseInput }) {
     const next = Math.max(0, Math.min(planned ? PLANNED_MAP_MAX_LEVEL : D9_RUNTIME_POLICY.mapOverviewLevels, level + delta3));
     if (next === level) return;
     const old2 = 0.25 / 2 ** level, fresh = 0.25 / 2 ** next;
-    if (anchor) center2 = panMapD9(center2, anchor.x * (1 - old2 / fresh), anchor.y * (1 - old2 / fresh), old2);
+    if (anchor) center3 = panMapD9(center3, anchor.x * (1 - old2 / fresh), anchor.y * (1 - old2 / fresh), old2);
     level = next;
     lastKey = null;
     if (planned) detail.textContent = "Observed terrain \xB7 zoom " + 2 ** level + "\xD7 span \xB7 solid gold road / dashed trail / white bridge";
@@ -35045,7 +35454,7 @@ function createWorldMapD9({ document: doc, environment, port, releaseInput }) {
     const after = [...pointers.values()];
     if (after.length === 1) {
       const dx = after[0].x - before[0].x, dy = after[0].y - before[0].y;
-      center2 = panMapD9(center2, dx, dy, 0.25 / 2 ** level);
+      center3 = panMapD9(center3, dx, dy, 0.25 / 2 ** level);
       gesture.moved ||= Math.hypot(dx, dy) > 1;
       lastKey = null;
     } else if (after.length === 2) {
@@ -35089,19 +35498,19 @@ function createWorldMapD9({ document: doc, environment, port, releaseInput }) {
     syncVisibility();
     if (!open && !hudAllowed) return;
     if (!open && !miniBackingCenter) miniBackingCenter = { ...n.position };
-    if (open && !center2) center2 = { ...n.position };
+    if (open && !center3) center3 = { ...n.position };
     const canvas = open ? large : small, rect3 = open ? atlasSize.read() : null, pixelRatio = open ? 1 : MINIMAP_PIXEL_RATIO, width = open ? Math.min(1200, Math.max(1, Math.round(rect3.width))) : 110 * pixelRatio, height = open ? Math.min(1e3, Math.max(1, Math.round(rect3.height))) : 76 * pixelRatio, scale = open ? 0.25 / 2 ** level : (planned ? 0.055 : 0.11) * miniZoom * pixelRatio, lod = open ? level : 0;
     if (canvas.width !== width || canvas.height !== height) {
       canvas.width = width;
       canvas.height = height;
       staticKey = null;
     }
-    const cachePadding = open ? MINIMAP_CACHE_PADDING_PX : MINIMAP_CACHE_PADDING_PX * pixelRatio, recenterDistance = open ? MINIMAP_RECENTER_SCREEN_PX : MINIMAP_RECENTER_SCREEN_PX * pixelRatio, backingWidth = open ? width : width + cachePadding * 2, backingHeight = open ? height : height + cachePadding * 2, displayCenter = open ? center2 : n.position, backingCenter = open ? center2 : miniBackingCenter;
+    const cachePadding = open ? MINIMAP_CACHE_PADDING_PX : MINIMAP_CACHE_PADDING_PX * pixelRatio, recenterDistance = open ? MINIMAP_RECENTER_SCREEN_PX : MINIMAP_RECENTER_SCREEN_PX * pixelRatio, backingWidth = open ? width : width + cachePadding * 2, backingHeight = open ? height : height + cachePadding * 2, displayCenter = open ? center3 : n.position, backingCenter = open ? center3 : miniBackingCenter;
     if (!open) {
       const drift = worldScreenDeltaD9(n.position, miniBackingCenter, scale);
       if (Math.abs(drift.x) >= recenterDistance || Math.abs(drift.y) >= recenterDistance) miniRequestedCenter = { ...n.position };
     }
-    const requestCenter = open ? center2 : miniRequestedCenter ?? miniBackingCenter, requestViewport = mapViewportD9(requestCenter, lod, backingWidth, backingHeight, scale), query = { playerId: model.localPlayerId, spaceInstanceId: model.context.spaceInstanceId, level: lod, x: requestViewport.x, y: requestViewport.y, width: requestViewport.width, height: requestViewport.height }, key2 = JSON.stringify([query, n.root, n.revision]), requestMode = open ? "atlas" : "minimap", requestedMiniCenter = !open ? { ...requestCenter } : null;
+    const requestCenter = open ? center3 : miniRequestedCenter ?? miniBackingCenter, requestViewport = mapViewportD9(requestCenter, lod, backingWidth, backingHeight, scale), query = { playerId: model.localPlayerId, spaceInstanceId: model.context.spaceInstanceId, level: lod, x: requestViewport.x, y: requestViewport.y, width: requestViewport.width, height: requestViewport.height }, key2 = JSON.stringify([query, n.root, n.revision]), requestMode = open ? "atlas" : "minimap", requestedMiniCenter = !open ? { ...requestCenter } : null;
     if (!busy && key2 !== lastKey && time - lastTime >= 150) {
       busy = true;
       lastTime = time;
@@ -35124,7 +35533,7 @@ function createWorldMapD9({ document: doc, environment, port, releaseInput }) {
         busy = false;
       });
     }
-    const renderCenter = open ? center2 : miniBackingCenter, v = mapViewportD9(renderCenter, lod, backingWidth, backingHeight, scale), ctx = canvas.getContext("2d"), nextStaticKey = JSON.stringify([CARTOGRAPHY_STYLE, open, lod, backingWidth, backingHeight, scale, v.x, v.y, v.width, v.height, v.screenX, v.screenY, open ? n.root : null, open ? n.revision : 0, n.boundSitesById ?? n.boundSite ?? null, n.navigableSitesById ?? null, cacheRevision]);
+    const renderCenter = open ? center3 : miniBackingCenter, v = mapViewportD9(renderCenter, lod, backingWidth, backingHeight, scale), ctx = canvas.getContext("2d"), nextStaticKey = JSON.stringify([CARTOGRAPHY_STYLE, open, lod, backingWidth, backingHeight, scale, v.x, v.y, v.width, v.height, v.screenX, v.screenY, open ? n.root : null, open ? n.revision : 0, n.boundSitesById ?? n.boundSite ?? null, n.navigableSitesById ?? null, cacheRevision]);
     if (!staticLayer || staticLayer.width !== backingWidth || staticLayer.height !== backingHeight) {
       staticLayer = doc.createElement("canvas");
       staticLayer.width = backingWidth;
@@ -35909,9 +36318,9 @@ function enemyDepthFocusPointsV1(model, view, pad = 96) {
 // src/client/ground_item_presentation.js
 var LOOT_VISUAL_BUDGET = Object.freeze({ rich: 12, motes: 24, labels: 4 });
 function groundItemPresentation(drop, time, establish = 1, collapse = 0) {
-  const artKey = itemArtKey(drop), art = EQUIPMENT_ART[artKey], center2 = art?.visibleCenter ?? { x: 17, y: 17 }, pivot2 = art?.pivot ?? { x: 17, y: 31 }, seed2 = gearHash(drop.itemId ?? drop.sourceEntityId), phase = seed2 % 6283 / 1e3, scale = 26 / 34 * (1 - collapse * 0.3), bob = Math.sin(time / 430 + phase) * 1.1 * establish;
-  const origin = { x: drop.position.x - center2.x * scale, y: drop.position.y - pivot2.y * scale - 3 + bob + (1 - establish) * 5 };
-  return { artKey, origin, scale, visibleCenter: { x: origin.x + center2.x * scale, y: origin.y + center2.y * scale }, contact: { x: origin.x + pivot2.x * scale, y: drop.position.y }, phase, alpha: establish * (1 - collapse), growth: establish, rarity: itemDefinition(drop)?.rarityTier ?? 0 };
+  const artKey = itemArtKey(drop), art = EQUIPMENT_ART[artKey], center3 = art?.visibleCenter ?? { x: 17, y: 17 }, pivot2 = art?.pivot ?? { x: 17, y: 31 }, seed2 = gearHash(drop.itemId ?? drop.sourceEntityId), phase = seed2 % 6283 / 1e3, scale = 26 / 34 * (1 - collapse * 0.3), bob = Math.sin(time / 430 + phase) * 1.1 * establish;
+  const origin = { x: drop.position.x - center3.x * scale, y: drop.position.y - pivot2.y * scale - 3 + bob + (1 - establish) * 5 };
+  return { artKey, origin, scale, visibleCenter: { x: origin.x + center3.x * scale, y: origin.y + center3.y * scale }, contact: { x: origin.x + pivot2.x * scale, y: drop.position.y }, phase, alpha: establish * (1 - collapse), growth: establish, rarity: itemDefinition(drop)?.rarityTier ?? 0 };
 }
 function createGroundItemPresentation() {
   let identity2 = null, records = /* @__PURE__ */ new Map(), sprites = /* @__PURE__ */ new Map(), counts = { rich: 0, motes: 0, labels: 0 };
@@ -36733,10 +37142,10 @@ function createHeroLevelUpV3() {
     return { u: active.elapsed / HERO_LEVEL_UP_V3.durationMs, fade: Math.min(1, active.elapsed / 140 + 0.08) * Math.min(1, (HERO_LEVEL_UP_V3.durationMs - active.elapsed) / 450) };
   }
   const RINGS = [[0, 0.8, 24], [0.12, 0.8, 21], [0.24, 0.76, 18]];
-  function ring4(ctx, u, [delay, span, radius], half) {
+  function ring5(ctx, u, [delay, span, radius], half) {
     const t = (u - delay) / span;
     if (t <= 0 || t >= 1) return;
-    const ease15 = t * t * (3 - 2 * t), y = 5 - 44 * ease15, r = radius + 6 * Math.sin(t * Math.PI), alpha2 = Math.min(1, t / 0.12) * (1 - t) ** 0.6;
+    const ease16 = t * t * (3 - 2 * t), y = 5 - 44 * ease16, r = radius + 6 * Math.sin(t * Math.PI), alpha2 = Math.min(1, t / 0.12) * (1 - t) ** 0.6;
     const [a, b] = half === "back" ? [Math.PI, Math.PI * 2] : [0, Math.PI];
     ctx.save();
     ctx.globalAlpha *= alpha2;
@@ -36784,7 +37193,7 @@ function createHeroLevelUpV3() {
       }
     }
     ctx.restore();
-    for (const r of RINGS) ring4(ctx, u, r, "back");
+    for (const r of RINGS) ring5(ctx, u, r, "back");
     ctx.restore();
     return true;
   }
@@ -36795,7 +37204,7 @@ function createHeroLevelUpV3() {
     ctx.save();
     ctx.translate(actor.position.x, actor.position.y);
     ctx.globalAlpha = fade;
-    for (const r of RINGS) ring4(ctx, u, r, "front");
+    for (const r of RINGS) ring5(ctx, u, r, "front");
     for (let i = 0; i < HERO_LEVEL_UP_V3.maximumParticles; i++) {
       const angle3 = i * 2.399 + u * 3, climb = (u * 1.4 + i / HERO_LEVEL_UP_V3.maximumParticles) % 1, r = (10 + i % 5 * 6) * (1 - climb * 0.5), x = Math.cos(angle3) * r, y = 5 - climb * 150, size = 1.4 + i % 3 * 0.8;
       if (Math.sin(angle3) < 0 && climb < 0.35) continue;
@@ -37453,11 +37862,11 @@ function rootWeb(c, row2, tick) {
   c.strokeStyle = WEB;
   c.lineWidth = 1.7;
   c.stroke();
-  for (let ring4 = 1; ring4 <= 3; ring4++) {
-    c.strokeStyle = ring4 % 2 ? ELDRITCH : WEB;
+  for (let ring5 = 1; ring5 <= 3; ring5++) {
+    c.strokeStyle = ring5 % 2 ? ELDRITCH : WEB;
     c.lineWidth = 1.2;
     c.beginPath();
-    c.ellipse(0, 0, rx * ring4 / 4, ry * ring4 / 4, 0, 0, TAU36);
+    c.ellipse(0, 0, rx * ring5 / 4, ry * ring5 / 4, 0, 0, TAU36);
     c.stroke();
   }
   for (let i = 0; i < 10; i++) {
@@ -37868,10 +38277,10 @@ function bossPolishDepthItems(model, tick, viewport = null) {
   for (const row2 of impacts(model, tick).slice(0, 8)) {
     const age = tick - row2.resolvedTick;
     if (age < 0 || age >= 42) continue;
-    const center2 = row2.position, magnetic = row2.ability === "magnetic_pull", bash = row2.ability === "shield_bash", snare = row2.ability === "root_snare";
+    const center3 = row2.position, magnetic = row2.ability === "magnetic_pull", bash = row2.ability === "shield_bash", snare = row2.ability === "root_snare";
     if (bash) {
       if (age >= 19) continue;
-      const angle3 = row2.angle, p = { x: center2.x + Math.cos(angle3) * 51, y: center2.y + Math.sin(angle3) * 51 };
+      const angle3 = row2.angle, p = { x: center3.x + Math.cos(angle3) * 51, y: center3.y + Math.sin(angle3) * 51 };
       add(row2.id + "/bash", p, (c) => {
         const q = clamp27(age / 19), rise = ease(age / 3);
         c.save();
@@ -37893,7 +38302,7 @@ function bossPolishDepthItems(model, tick, viewport = null) {
         c.restore();
       });
       for (let i = 0; i < 3; i++) {
-        const a = angle3 + (i - 1) * 0.28, q = age / 19, p2 = { x: center2.x + Math.cos(a) * (42 + q * 20), y: center2.y + Math.sin(a) * (42 + q * 20) };
+        const a = angle3 + (i - 1) * 0.28, q = age / 19, p2 = { x: center3.x + Math.cos(a) * (42 + q * 20), y: center3.y + Math.sin(a) * (42 + q * 20) };
         add(row2.id + "/bash-spark/" + i, p2, (c) => {
           c.save();
           c.translate(p2.x, p2.y - 15 - Math.sin(q * Math.PI) * 7);
@@ -37908,18 +38317,18 @@ function bossPolishDepthItems(model, tick, viewport = null) {
     if (!magnetic) {
       const reach = snare ? 48 : 40;
       for (let i = 0; i < 6; i++) {
-        const a = i * TAU37 / 6 + 0.25, delay = i % 3 * 1.1, local6 = age - delay, rise = ease(local6 / 6), fade = 1 - ease((local6 - 17) / 23), contact = { x: center2.x + Math.cos(a) * reach, y: center2.y + Math.sin(a) * reach };
+        const a = i * TAU37 / 6 + 0.25, delay = i % 3 * 1.1, local6 = age - delay, rise = ease(local6 / 6), fade = 1 - ease((local6 - 17) / 23), contact = { x: center3.x + Math.cos(a) * reach, y: center3.y + Math.sin(a) * reach };
         if (local6 < 0) continue;
         add(row2.id + "/root/" + i, contact, (c) => rootSpear(c, contact, ((snare ? 32 : 24) + i % 3 * 6) * rise * fade, Math.cos(a) * 9, fade));
       }
     }
     const life = magnetic ? 33 : 31;
     if (age < life) for (let i = 0; i < 7; i++) {
-      const q = age / life, a = i * TAU37 / 7 + 0.2, r = (magnetic ? 28 : 8) + q * (magnetic ? 27 + i % 3 * 6 : 35 + i % 3 * 8), contact = { x: center2.x + Math.cos(a) * r, y: center2.y + Math.sin(a) * r }, lift = Math.sin(q * Math.PI) * ((magnetic ? 29 : 21) + i % 3 * 5);
+      const q = age / life, a = i * TAU37 / 7 + 0.2, r = (magnetic ? 28 : 8) + q * (magnetic ? 27 + i % 3 * 6 : 35 + i % 3 * 8), contact = { x: center3.x + Math.cos(a) * r, y: center3.y + Math.sin(a) * r }, lift = Math.sin(q * Math.PI) * ((magnetic ? 29 : 21) + i % 3 * 5);
       add(row2.id + "/debris/" + i, contact, (c) => chip(c, contact, lift, a + q * (i % 2 ? 2.7 : -2.7), 3 + i % 3 * 0.8, magnetic ? "#38566a" : DARK_BARK, magnetic ? i % 3 ? CYAN : "#728998" : LIGHT_BARK, Math.min(1, age / 2) * (1 - ease((age - life * 0.6) / (life * 0.4)))));
     }
     if (!magnetic) for (let i = 0; i < 6; i++) {
-      const q = age / 42, a = i * 2.4, contact = { x: center2.x + Math.cos(a) * (8 + q * 43), y: center2.y + Math.sin(a) * (8 + q * 32) }, lift = Math.sin(q * Math.PI) * (19 + i % 3 * 8);
+      const q = age / 42, a = i * 2.4, contact = { x: center3.x + Math.cos(a) * (8 + q * 43), y: center3.y + Math.sin(a) * (8 + q * 32) }, lift = Math.sin(q * Math.PI) * (19 + i % 3 * 8);
       add(row2.id + "/leaf/" + i, contact, (c) => flyingLeaf(c, contact, lift, i, age, 42));
     }
   }
@@ -39437,8 +39846,8 @@ function collapseGround(c, row2, tick) {
   }
   if (age < 18) {
     c.globalAlpha = 1 - ease5(age / 18);
-    const ring4 = r * (1 - ease5(age / 15));
-    circle2(c, p.x, p.y, ring4, "#ec72c1", 1.8);
+    const ring5 = r * (1 - ease5(age / 15));
+    circle2(c, p.x, p.y, ring5, "#ec72c1", 1.8);
   }
   c.globalAlpha = 1;
   accretion(c, p, 1, tick, age / 18);
@@ -39901,14 +40310,14 @@ function marks(c, radius, alpha2 = 1, reverse = false) {
   c.restore();
 }
 function chronosSlamVisualV6(row2, tick, pending) {
-  const center2 = position2(row2), radius = row2.radius ?? 64;
-  if (!center2) return null;
+  const center3 = position2(row2), radius = row2.radius ?? 64;
+  if (!center3) return null;
   if (pending) {
     if (tick < row2.startedTick || tick > row2.resolvesTick) return null;
     const q = progress(row2, tick), gather = ease6((q - 0.13) / 0.23);
     const wind = ease6((q - 0.16) / 0.4), drop = ease6((q - 0.82) / 0.18);
     return {
-      center: center2,
+      center: center3,
       radius,
       pending: true,
       q,
@@ -39924,7 +40333,7 @@ function chronosSlamVisualV6(row2, tick, pending) {
   const age = tick - row2.resolvedTick;
   if (age < 0 || age >= 40) return null;
   return {
-    center: center2,
+    center: center3,
     radius,
     pending: false,
     q: 1,
@@ -39940,9 +40349,9 @@ function chronosSlamVisualV6(row2, tick, pending) {
 function drawChronosSlamGroundV6(c, row2, tick, pending) {
   const pose = chronosSlamVisualV6(row2, tick, pending);
   if (!pose) return;
-  const { center: center2, radius: r, q, age, fade } = pose;
+  const { center: center3, radius: r, q, age, fade } = pose;
   c.save();
-  c.translate(center2.x, center2.y);
+  c.translate(center3.x, center3.y);
   c.globalAlpha *= fade;
   if (pending) {
     disk2(c, r, "#bf8c2b15");
@@ -40006,9 +40415,9 @@ function spectralHand(c, length, alpha2 = 1) {
 function drawChronosSlamForceV6(c, row2, tick, pending) {
   const pose = chronosSlamVisualV6(row2, tick, pending);
   if (!pose || pose.gather <= 0) return;
-  const { center: center2, age, gather, handAngle, handLength, tipY } = pose;
+  const { center: center3, age, gather, handAngle, handLength, tipY } = pose;
   c.save();
-  c.translate(center2.x, center2.y);
+  c.translate(center3.x, center3.y);
   if (pending) {
     c.globalAlpha *= gather * 0.91;
     const px2 = -Math.cos(handAngle) * handLength;
@@ -41467,12 +41876,12 @@ function mouth2(actor2, p) {
   return point24(actor2.position.x + (p.bodyX - 15 + p.neckX + q.x) * p.orientation, actor2.position.y + p.bodyY - 31 + p.neckY + q.y);
 }
 function ringWarning(c, row2, tick) {
-  const ring4 = row2.ring;
-  if (!ring4) return;
+  const ring5 = row2.ring;
+  if (!ring5) return;
   const q = progress4(row2, tick), pulse = 0.7 + 0.3 * Math.sin(tick * 0.4);
   c.save();
-  for (const tile of ring4.tiles ?? []) {
-    const seed2 = (tile.column * 71 + tile.row * 97) % 19, x = tile.x, y = tile.y, s2 = tile.size ?? ring4.tileSize;
+  for (const tile of ring5.tiles ?? []) {
+    const seed2 = (tile.column * 71 + tile.row * 97) % 19, x = tile.x, y = tile.y, s2 = tile.size ?? ring5.tileSize;
     c.fillStyle = `rgba(170,45,37,${0.035 + 0.09 * q})`;
     c.fillRect(x + 0.5, y + 0.5, s2 - 1, s2 - 1);
     const reach = ease9((q - seed2 * 0.011) / 0.66), a = [[x + s2 * 0.08, y + s2 * 0.24], [x + s2 * 0.36, y + s2 * 0.48], [x + s2 * 0.52, y + s2 * 0.33], [x + s2 * 0.67, y + s2 * 0.68], [x + s2 * 0.94, y + s2 * 0.82]];
@@ -41490,7 +41899,7 @@ function ringWarning(c, row2, tick) {
       c.globalAlpha = 1;
     }
   }
-  const s = ring4.tileSize, l = ring4.minColumn * s, t = ring4.minRow * s, r = (ring4.maxColumn + 1) * s, b = (ring4.maxRow + 1) * s;
+  const s = ring5.tileSize, l = ring5.minColumn * s, t = ring5.minRow * s, r = (ring5.maxColumn + 1) * s, b = (ring5.maxRow + 1) * s;
   c.strokeStyle = "#e06c4b";
   c.lineWidth = 0.9;
   c.strokeRect(l + 0.4, t + 0.4, r - l - 0.8, b - t - 0.8);
@@ -41498,13 +41907,13 @@ function ringWarning(c, row2, tick) {
   c.restore();
 }
 function collapsedRing(c, row2, tick) {
-  const ring4 = row2.ring;
-  if (!ring4) return;
+  const ring5 = row2.ring;
+  if (!ring5) return;
   const age = tick - row2.createdTick;
   if (age < 0) return;
   c.save();
-  for (const tile of ring4.tiles ?? []) {
-    const s2 = tile.size ?? ring4.tileSize, x = tile.x, y = tile.y, seed2 = (tile.column * 71 + tile.row * 97) % 19;
+  for (const tile of ring5.tiles ?? []) {
+    const s2 = tile.size ?? ring5.tileSize, x = tile.x, y = tile.y, seed2 = (tile.column * 71 + tile.row * 97) % 19;
     c.fillStyle = "#070810";
     c.fillRect(x - 0.2, y - 0.2, s2 + 0.4, s2 + 0.4);
     c.save();
@@ -41550,7 +41959,7 @@ function collapsedRing(c, row2, tick) {
     }
     c.restore();
   }
-  const s = ring4.tileSize, l = ring4.minColumn * s, t = ring4.minRow * s, r = (ring4.maxColumn + 1) * s, b = (ring4.maxRow + 1) * s;
+  const s = ring5.tileSize, l = ring5.minColumn * s, t = ring5.minRow * s, r = (ring5.maxColumn + 1) * s, b = (ring5.maxRow + 1) * s;
   c.strokeStyle = age < 24 ? "#e48157" : "#663b53";
   c.lineWidth = age < 24 ? 1.4 : 0.9;
   c.strokeRect(l + s - 0.2, t + s - 0.2, r - l - 2 * s + 0.4, b - t - 2 * s + 0.4);
@@ -42612,15 +43021,15 @@ function archivedBossArtModel(model, tick) {
     };
   });
   const vTele = tele.filter((q) => isVoid(q.bossDefinitionId) && ["singularity", "eye_lance"].includes(q.ability)).map((q) => {
-    const b = byBossId.get(q.bossId), center2 = b?.position ?? q.position;
+    const b = byBossId.get(q.bossId), center3 = b?.position ?? q.position;
     return {
       ...q,
       id: q.bossId + ":cast:" + q.sequence,
       ability: q.ability,
       sourceEntityId: b?.entityId,
-      position: { ...q.ability === "singularity" ? center2 : q.position },
-      targetPosition: { ...q.ability === "singularity" ? center2 : q.position },
-      originPosition: { ...center2 },
+      position: { ...q.ability === "singularity" ? center3 : q.position },
+      targetPosition: { ...q.ability === "singularity" ? center3 : q.position },
+      originPosition: { ...center3 },
       radius: q.ability === "singularity" ? 93 : 24
     };
   });
@@ -42788,13 +43197,13 @@ function shellPath(c, rx, ry, time, front2) {
   }
   c.closePath();
 }
-function drawMarcusMoltenWardV5(c, row2, tick, { center: center2, ratio, front: front2 = false }) {
+function drawMarcusMoltenWardV5(c, row2, tick, { center: center3, ratio, front: front2 = false }) {
   const active = row2.outcome === "channeling", age = row2.resolvedTick == null ? 0 : tick - row2.resolvedTick;
   if (!active && (age < 0 || age >= 36) || tick < row2.startedTick) return;
   const entry2 = smooth22((tick - row2.startedTick) / 14), health = clamp39(ratio);
   const rx = mix22(24, 38, entry2), ry = mix22(30, 47, entry2);
   c.save();
-  c.translate(center2.x, center2.y);
+  c.translate(center3.x, center3.y);
   c.lineJoin = "round";
   c.lineCap = "round";
   c.globalAlpha *= active ? 1 : 1 - smooth22(age / 36);
@@ -45212,15 +45621,15 @@ function woodlandPilotEventDepthItems(model, viewport, time) {
   const status2 = new Map((model.woodlandPilotEvents ?? []).map((event) => [event.slotId, event.state]));
   const result = [];
   for (const event of WOODLAND_EVENT_PILOT_V3_7) {
-    const center2 = projectToLocalFrameD9(woodlandPilotWorldPosition(event), frames);
-    if (!center2 || center2.x < viewport.x - 125 || center2.y < viewport.y - 125 || center2.x > viewport.x + viewport.width + 125 || center2.y > viewport.y + viewport.height + 125) continue;
-    const near = Math.hypot(center2.x - hero.x, center2.y - hero.y) < 280;
+    const center3 = projectToLocalFrameD9(woodlandPilotWorldPosition(event), frames);
+    if (!center3 || center3.x < viewport.x - 125 || center3.y < viewport.y - 125 || center3.x > viewport.x + viewport.width + 125 || center3.y > viewport.y + viewport.height + 125) continue;
+    const near = Math.hypot(center3.x - hero.x, center3.y - hero.y) < 280;
     const completed = status2.get(event.slotId) === "completed";
     result.push(depthItem({
       id: "woodland-event/" + event.slotId,
-      anchorX: center2.x,
-      anchorY: center2.y + 22,
-      draw: (ctx) => drawLandmark(ctx, event, center2.x, center2.y, time, near, completed)
+      anchorX: center3.x,
+      anchorY: center3.y + 22,
+      draw: (ctx) => drawLandmark(ctx, event, center3.x, center3.y, time, near, completed)
     }));
   }
   return result;
@@ -48587,14 +48996,14 @@ function drawBashImpact(ctx, x, y, dx, dy, age, crit = false) {
 }
 function drawBashStun(ctx, x, y, time, halos = 1) {
   const t = time / 1e3;
-  for (let ring4 = 0; ring4 < halos; ring4++) {
-    const hy = y - 26 - ring4 * 5, rx = 9 + ring4 * 2;
+  for (let ring5 = 0; ring5 < halos; ring5++) {
+    const hy = y - 26 - ring5 * 5, rx = 9 + ring5 * 2;
     glowStroke(ctx, KNIGHT_BLUE, 6, 0.8, () => {
       ctx.beginPath();
       ctx.ellipse(x, hy, rx, 2.4, 0, 0, TAU34);
     }, false);
     for (let i = 0; i < 3; i++) {
-      const a = t * (ring4 ? -5 : 5) + i * TAU34 / 3;
+      const a = t * (ring5 ? -5 : 5) + i * TAU34 / 3;
       star4(ctx, x + Math.cos(a) * rx, hy + Math.sin(a) * 2.4, 2.2, KNIGHT_BLUE, 1);
     }
   }
@@ -48724,25 +49133,252 @@ function drawGuardWard(ctx, x, y, angle3, type, open, runes, blockAge, time, mov
     const f = Math.max(0, back - i * 0.06), px2 = lerp2(hit.x, face3.x, smooth19(f)), py = lerp2(hit.y, face3.y, smooth19(f)) - Math.sin(f * Math.PI) * 4;
     mote(ctx, px2, py, 1.1 - i * 0.2, i ? KNIGHT_BLUE : KNIGHT_CORE, 1 - i * 0.22);
   }
-  const ring4 = (blockAge - 320) / 280;
-  if (ring4 >= 0 && ring4 < 1) {
-    bloom(ctx, face3.x, face3.y, 7, KNIGHT_BLUE, 0.5 * (1 - ring4));
-    glowStroke(ctx, KNIGHT_BLUE, 5, 1 * (1 - ring4 * 0.5), () => {
+  const ring5 = (blockAge - 320) / 280;
+  if (ring5 >= 0 && ring5 < 1) {
+    bloom(ctx, face3.x, face3.y, 7, KNIGHT_BLUE, 0.5 * (1 - ring5));
+    glowStroke(ctx, KNIGHT_BLUE, 5, 1 * (1 - ring5 * 0.5), () => {
       ctx.beginPath();
-      ctx.arc(face3.x, face3.y, 5, -Math.PI / 2, -Math.PI / 2 + TAU34 * smooth19(ring4));
+      ctx.arc(face3.x, face3.y, 5, -Math.PI / 2, -Math.PI / 2 + TAU34 * smooth19(ring5));
     }, false);
   }
 }
 
+// src/client/class_tree_skill_art_v1.js
+var TAU58 = Math.PI * 2;
+var ease15 = (t) => 1 - (1 - t) ** 3;
+var INK44 = "#0b1015";
+var TREE_SKILL_BURST_MS = Object.freeze({ earth_breaker: 620, rallying_cry: 720, counter_stance: 420, lunge: 320, toxic_fan: 420, whirling_blades: 520, firebloom: 640, flashfreeze: 640, chain_lightning: 260 });
+function ring4(ctx, x, y, r, width, color28, alpha2) {
+  ctx.globalAlpha = alpha2;
+  ctx.strokeStyle = INK44;
+  ctx.lineWidth = width + 2.4;
+  ctx.beginPath();
+  ctx.ellipse(x, y, r, r * 0.62, 0, 0, TAU58);
+  ctx.stroke();
+  ctx.strokeStyle = color28;
+  ctx.lineWidth = width;
+  ctx.stroke();
+}
+function blade(ctx, x, y, angle3, length, color28) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angle3);
+  ctx.fillStyle = color28;
+  ctx.strokeStyle = INK44;
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.moveTo(length * 0.5, 0);
+  ctx.lineTo(-length * 0.2, -2.6);
+  ctx.lineTo(-length * 0.5, 0);
+  ctx.lineTo(-length * 0.2, 2.6);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+}
+function earthBreaker(ctx, x, y, t) {
+  const k = ease15(t);
+  ring4(ctx, x, y + 6, 14 + 58 * k, 5 * (1 - t) + 1, "#f2945f", 1 - t);
+  ctx.globalAlpha = Math.min(1, (1 - t) * 1.6);
+  ctx.strokeStyle = "#5a2f18";
+  ctx.lineWidth = 2.4;
+  ctx.beginPath();
+  for (let i = 0; i < 8; i++) {
+    const a = i * TAU58 / 8 + 0.3, r0 = 10, r1 = 10 + 46 * Math.min(1, k * 1.4);
+    ctx.moveTo(x + Math.cos(a) * r0, y + 6 + Math.sin(a) * r0 * 0.62);
+    ctx.lineTo(x + Math.cos(a + 0.12) * r1 * 0.6, y + 6 + Math.sin(a + 0.12) * r1 * 0.6 * 0.62);
+    ctx.lineTo(x + Math.cos(a) * r1, y + 6 + Math.sin(a) * r1 * 0.62);
+  }
+  ctx.stroke();
+  ctx.fillStyle = "#ffd2a8";
+  for (let i = 0; i < 6; i++) {
+    const a = i * TAU58 / 6, r = 20 + 40 * k;
+    ctx.globalAlpha = (1 - t) * 0.8;
+    ctx.beginPath();
+    ctx.arc(x + Math.cos(a) * r, y + 6 + Math.sin(a) * r * 0.62 - 10 * Math.sin(t * Math.PI), 2.4 * (1 - t) + 0.8, 0, TAU58);
+    ctx.fill();
+  }
+}
+function rallyingCry(ctx, x, y, t) {
+  for (const [delay, color28] of [[0, "#f2dfae"], [0.22, "#d9a441"]]) {
+    const u = Math.max(0, (t - delay) / (1 - delay));
+    if (u <= 0 || u >= 1) continue;
+    ring4(ctx, x, y - 4, 16 + 74 * ease15(u), 3 * (1 - u) + 1, color28, 1 - u);
+  }
+  ctx.globalAlpha = 1 - t;
+  ctx.strokeStyle = "#fff3cf";
+  ctx.lineWidth = 2.4;
+  ctx.lineCap = "round";
+  for (let i = -1; i <= 1; i++) {
+    const cx = x + i * 12, cy = y - 24 - 26 * ease15(t) - Math.abs(i) * 4;
+    ctx.beginPath();
+    ctx.moveTo(cx - 5, cy + 4);
+    ctx.lineTo(cx, cy);
+    ctx.lineTo(cx + 5, cy + 4);
+    ctx.stroke();
+  }
+}
+function counterStance(ctx, x, y, dx, dy, t) {
+  const a = Math.atan2(dy, dx), px2 = x + Math.cos(a) * 16, py = y - 8 + Math.sin(a) * 10;
+  ctx.save();
+  ctx.translate(px2, py);
+  const s = 1 + 0.25 * ease15(t);
+  ctx.scale(s, s);
+  ctx.globalAlpha = 1 - t;
+  ctx.lineWidth = 2.6;
+  ctx.strokeStyle = "#e8848c";
+  ctx.beginPath();
+  ctx.moveTo(0, -14);
+  ctx.lineTo(11, -9);
+  ctx.lineTo(11, 1);
+  ctx.quadraticCurveTo(10, 10, 0, 15);
+  ctx.quadraticCurveTo(-10, 10, -11, 1);
+  ctx.lineTo(-11, -9);
+  ctx.closePath();
+  ctx.stroke();
+  ctx.strokeStyle = "#fff1f2";
+  ctx.lineWidth = 1.2;
+  ctx.stroke();
+  ctx.restore();
+}
+function lunge(ctx, x, y, dx, dy, t) {
+  const k = ease15(Math.min(1, t * 1.6)), len = 90 * k;
+  ctx.globalAlpha = 1 - t;
+  ctx.lineCap = "round";
+  for (const [w, c] of [[6, INK44], [3.2, "#e9c46a"], [1.2, "#fffbe6"]]) {
+    ctx.strokeStyle = c;
+    ctx.lineWidth = w * (1 - t * 0.6);
+    ctx.beginPath();
+    ctx.moveTo(x + dx * len * 0.25, y - 6 + dy * len * 0.25);
+    ctx.lineTo(x + dx * len, y - 6 + dy * len);
+    ctx.stroke();
+  }
+}
+function toxicFan(ctx, x, y, dx, dy, t) {
+  const base = Math.atan2(dy, dx), d = 12 + 110 * ease15(t);
+  for (let i = 0; i < 5; i++) {
+    const a = base + (i - 2) * 0.15, kx = x + Math.cos(a) * d, ky = y - 6 + Math.sin(a) * d;
+    ctx.globalAlpha = (1 - t) * 0.5;
+    ctx.strokeStyle = "#8fd16a";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(kx - Math.cos(a) * 22, ky - Math.sin(a) * 22);
+    ctx.lineTo(kx, ky);
+    ctx.stroke();
+    ctx.globalAlpha = 1 - t * t;
+    blade(ctx, kx, ky, a, 16, "#e8f3dc");
+  }
+}
+function whirlingBlades(ctx, x, y, t) {
+  const spin = t * TAU58 * 3, r = 30 + 18 * Math.sin(t * Math.PI);
+  ctx.lineCap = "round";
+  for (let i = 0; i < 2; i++) {
+    const a = spin + i * Math.PI;
+    ctx.globalAlpha = (1 - t) * 0.7;
+    for (const [w, c] of [[6, INK44], [3, "#b08cff"], [1.2, "#f3ecff"]]) {
+      ctx.strokeStyle = c;
+      ctx.lineWidth = w;
+      ctx.beginPath();
+      ctx.ellipse(x, y - 4, r, r * 0.62, 0, a - 1.1, a);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1 - t;
+    blade(ctx, x + Math.cos(a) * r, y - 4 + Math.sin(a) * r * 0.62, a + Math.PI / 2, 14, "#eef2f8");
+  }
+}
+function firebloom(ctx, x, y, dx, dy, t) {
+  const cx = x + dx * 90, cy = y + dy * 90 * 0.8, k = ease15(Math.min(1, t * 1.5)), r = 50 * k;
+  ctx.globalAlpha = (1 - t) * 0.35;
+  ctx.fillStyle = "#ff6a1f";
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, r, r * 0.62, 0, 0, TAU58);
+  ctx.fill();
+  for (let i = 0; i < 6; i++) {
+    const a = i * TAU58 / 6 + t * 0.6, px2 = cx + Math.cos(a) * r * 0.55, py = cy + Math.sin(a) * r * 0.55 * 0.62;
+    ctx.globalAlpha = 1 - t;
+    ctx.fillStyle = i % 2 ? "#ffb347" : "#ff7a2e";
+    ctx.strokeStyle = "#7a2410";
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.ellipse(px2, py - 6 * k, 9 * k + 2, 15 * k + 2, a + Math.PI / 2, 0, TAU58);
+    ctx.fill();
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1 - t;
+  ctx.fillStyle = "#fff1b8";
+  ctx.beginPath();
+  ctx.arc(cx, cy - 4, 7 * (1 - t) + 2, 0, TAU58);
+  ctx.fill();
+}
+function flashfreeze(ctx, x, y, t) {
+  const k = ease15(Math.min(1, t * 1.8)), r = 12 + 70 * k;
+  ring4(ctx, x, y, r, 4 * (1 - t) + 1, "#cfe9ff", 1 - t);
+  ctx.globalAlpha = (1 - t) * 0.25;
+  ctx.fillStyle = "#bfe3ff";
+  ctx.beginPath();
+  ctx.ellipse(x, y, r, r * 0.62, 0, 0, TAU58);
+  ctx.fill();
+  for (let i = 0; i < 10; i++) {
+    const a = i * TAU58 / 10, sx = x + Math.cos(a) * r, sy = y + Math.sin(a) * r * 0.62;
+    ctx.globalAlpha = 1 - t;
+    ctx.fillStyle = "#f4fbff";
+    ctx.strokeStyle = "#3c6f96";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(sx, sy - 9 * (1 - t * 0.5));
+    ctx.lineTo(sx + 3, sy);
+    ctx.lineTo(sx, sy + 4);
+    ctx.lineTo(sx - 3, sy);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  }
+}
+function chainLightning(ctx, x, y, dx, dy, t) {
+  const cx = x + dx * 14, cy = y - 14 + dy * 8;
+  ctx.globalAlpha = 1 - t;
+  ctx.strokeStyle = "#f2d46b";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i < 6; i++) {
+    const a = i * TAU58 / 6 + t * 4, r = 6 + 10 * ease15(t);
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+  }
+  ctx.stroke();
+  ctx.fillStyle = "#fff8d6";
+  ctx.beginPath();
+  ctx.arc(cx, cy, 5 * (1 - t) + 1, 0, TAU58);
+  ctx.fill();
+}
+function drawTreeSkillBurst(ctx, skillId, x, y, dx, dy, age) {
+  const duration = TREE_SKILL_BURST_MS[skillId];
+  if (!duration) return false;
+  if (age < 0 || age >= duration) return true;
+  const t = age / duration;
+  ctx.save();
+  if (skillId === "earth_breaker") earthBreaker(ctx, x, y, t);
+  else if (skillId === "rallying_cry") rallyingCry(ctx, x, y, t);
+  else if (skillId === "counter_stance") counterStance(ctx, x, y, dx, dy, t);
+  else if (skillId === "lunge") lunge(ctx, x, y, dx, dy, t);
+  else if (skillId === "toxic_fan") toxicFan(ctx, x, y, dx, dy, t);
+  else if (skillId === "whirling_blades") whirlingBlades(ctx, x, y, t);
+  else if (skillId === "firebloom") firebloom(ctx, x, y, dx, dy, t);
+  else if (skillId === "flashfreeze") flashfreeze(ctx, x, y, t);
+  else chainLightning(ctx, x, y, dx, dy, t);
+  ctx.restore();
+  return true;
+}
+
 // src/client/combat_vfx.js
-var INK44 = "#190f20";
+var INK45 = "#190f20";
 var MECHANIC_COLORS = Object.freeze({ ...MASTERY_COLORS, lightning: "#c7b5ff", frost: "#ced8ff", shieldRiposte: "#d5b666", offhand: "#dce5ef", riposte: "#c99cff", bash: "#ffe08a", fire: "#ff962e", burn: "#ff962e", bleed: "#f34a56", block: "#ffe6a0", parry: "#e4ceff" });
 function drawStatusIcon(ctx, kind, x, y, size = 12) {
   if (drawMasteryGlyph(ctx, kind, x, y, size)) return;
   ctx.save();
   ctx.translate(x, y);
   ctx.scale(size / 18, size / 18);
-  ctx.strokeStyle = INK44;
+  ctx.strokeStyle = INK45;
   ctx.lineWidth = 2.5;
   ctx.lineJoin = "round";
   ctx.beginPath();
@@ -48839,7 +49475,7 @@ function drawCombatImpact(ctx, kind, x, y, dx, dy, age, crit = false) {
   }
   const duration = kind === "fire" ? 270 : kind === "bash" ? 240 : kind === "bleed" || kind === "burn" ? 170 : 150;
   if (age < 0 || age >= duration) return;
-  const t = age / duration, ease15 = 1 - (1 - t) ** 3, color28 = MECHANIC_COLORS[kind] ?? "#e4ceff";
+  const t = age / duration, ease16 = 1 - (1 - t) ** 3, color28 = MECHANIC_COLORS[kind] ?? "#e4ceff";
   ctx.save();
   ctx.translate(x, y - 9);
   ctx.rotate(Math.atan2(dy, dx));
@@ -48861,7 +49497,7 @@ function drawCombatImpact(ctx, kind, x, y, dx, dy, age, crit = false) {
     ctx.fillStyle = "#ff571d";
     ctx.beginPath();
     for (let i = 0; i < 16; i++) {
-      const a = i * Math.PI / 8, r = (i % 2 ? 13 : 23) * ease15 + 3;
+      const a = i * Math.PI / 8, r = (i % 2 ? 13 : 23) * ease16 + 3;
       ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r * 0.8);
     }
     ctx.closePath();
@@ -48880,7 +49516,7 @@ function drawCombatImpact(ctx, kind, x, y, dx, dy, age, crit = false) {
     ctx.strokeStyle = "#ffe29a";
     ctx.lineWidth = 2 * (1 - t);
     ctx.beginPath();
-    ctx.arc(0, 0, 8 + 23 * ease15, -1.2, 1.5);
+    ctx.arc(0, 0, 8 + 23 * ease16, -1.2, 1.5);
     ctx.stroke();
   } else if (kind === "bleed") {
     const reach = crit ? 1.18 : 1;
@@ -48906,7 +49542,7 @@ function drawCombatImpact(ctx, kind, x, y, dx, dy, age, crit = false) {
     ctx.stroke();
     ctx.restore();
     for (let i = 0; i < 4; i++) {
-      const a = -0.9 + i * 0.62, d = 4 + ease15 * (10 + i * 2);
+      const a = -0.9 + i * 0.62, d = 4 + ease16 * (10 + i * 2);
       ctx.save();
       ctx.translate(Math.cos(a) * d, Math.sin(a) * d + t * t * 9);
       ctx.rotate(a + 0.5);
@@ -48918,7 +49554,7 @@ function drawCombatImpact(ctx, kind, x, y, dx, dy, age, crit = false) {
     }
   } else if (kind === "burn") {
     ctx.rotate(-Math.atan2(dy, dx));
-    drawStatusIcon(ctx, "burn", 0, -5 - 6 * ease15, 12 + 5 * (1 - t));
+    drawStatusIcon(ctx, "burn", 0, -5 - 6 * ease16, 12 + 5 * (1 - t));
   } else if (kind === "block") {
     ctx.save();
     ctx.translate(10, 0);
@@ -48928,10 +49564,10 @@ function drawCombatImpact(ctx, kind, x, y, dx, dy, age, crit = false) {
     ctx.strokeStyle = "#78d8ff";
     ctx.lineWidth = 1.4 * (1 - t);
     ctx.beginPath();
-    ctx.arc(0, 0, 12 + 9 * ease15, -2.6, 0.9);
+    ctx.arc(0, 0, 12 + 9 * ease16, -2.6, 0.9);
     ctx.stroke();
     ctx.lineWidth = 1.7;
-    ctx.strokeStyle = INK44;
+    ctx.strokeStyle = INK45;
     ctx.fillStyle = "#edbd53";
     ctx.beginPath();
     ctx.moveTo(-7.5, -9);
@@ -48973,14 +49609,14 @@ function drawCombatImpact(ctx, kind, x, y, dx, dy, age, crit = false) {
     ctx.lineWidth = 2 * (1 - t);
     ctx.beginPath();
     ctx.moveTo(-16, 0);
-    ctx.lineTo(13 * ease15, 0);
-    ctx.moveTo(5 * ease15, -6);
-    ctx.lineTo(13 * ease15, 0);
-    ctx.lineTo(5 * ease15, 6);
+    ctx.lineTo(13 * ease16, 0);
+    ctx.moveTo(5 * ease16, -6);
+    ctx.lineTo(13 * ease16, 0);
+    ctx.lineTo(5 * ease16, 6);
     ctx.stroke();
-    diamond(ctx, 13 * ease15, 0, 5 * (1 - t), "#dfbc65");
+    diamond(ctx, 13 * ease16, 0, 5 * (1 - t), "#dfbc65");
   } else if (kind === "bash") {
-    const r = 10 + 20 * ease15;
+    const r = 10 + 20 * ease16;
     ctx.strokeStyle = "#785221";
     ctx.lineWidth = 8 * (1 - t) + 1;
     ctx.beginPath();
@@ -48997,7 +49633,7 @@ function drawCombatImpact(ctx, kind, x, y, dx, dy, age, crit = false) {
     ctx.moveTo(-r * 0.7, r * 0.45);
     ctx.lineTo(r * 0.7, -r * 0.45);
     ctx.stroke();
-    diamond(ctx, 7 * ease15, 0, 9 * (1 - t), "#fff5dc");
+    diamond(ctx, 7 * ease16, 0, 9 * (1 - t), "#fff5dc");
   } else if (kind === "parry") {
     ctx.save();
     ctx.rotate(-Math.atan2(dy, dx));
@@ -49005,7 +49641,7 @@ function drawCombatImpact(ctx, kind, x, y, dx, dy, age, crit = false) {
     ctx.strokeStyle = "#90efff";
     ctx.lineWidth = 1.4 * (1 - t);
     ctx.beginPath();
-    ctx.arc(0, 0, 8 + 13 * ease15, -2.2, -0.4);
+    ctx.arc(0, 0, 8 + 13 * ease16, -2.2, -0.4);
     ctx.stroke();
     diamond(ctx, 0, -8, 7 * (1 - t), "#e9ffff");
     ctx.restore();
@@ -49013,7 +49649,7 @@ function drawCombatImpact(ctx, kind, x, y, dx, dy, age, crit = false) {
     ctx.fillStyle = "#713eaa";
     ctx.beginPath();
     ctx.moveTo(-26, -4);
-    ctx.lineTo(25 * ease15 + 7, 0);
+    ctx.lineTo(25 * ease16 + 7, 0);
     ctx.lineTo(-24, 4);
     ctx.lineTo(-15, 0);
     ctx.closePath();
@@ -49022,7 +49658,7 @@ function drawCombatImpact(ctx, kind, x, y, dx, dy, age, crit = false) {
     ctx.lineWidth = 2 * (1 - t);
     ctx.beginPath();
     ctx.moveTo(-20, 0);
-    ctx.lineTo(27 * ease15, 0);
+    ctx.lineTo(27 * ease16, 0);
     ctx.stroke();
   } else if (kind === "offhand") {
     ctx.fillStyle = "#51375f";
@@ -49048,8 +49684,8 @@ function drawCombatImpact(ctx, kind, x, y, dx, dy, age, crit = false) {
     ctx.strokeStyle = "#4b2438";
     ctx.lineWidth = 6 * (1 - t);
     ctx.beginPath();
-    ctx.moveTo(-20 + ease15 * 9, 0);
-    ctx.lineTo(19 + ease15 * 8, 0);
+    ctx.moveTo(-20 + ease16 * 9, 0);
+    ctx.lineTo(19 + ease16 * 8, 0);
     ctx.stroke();
     ctx.strokeStyle = kind === "parry" ? "#e0c7ff" : "#fff6ed";
     ctx.lineWidth = 2 * (1 - t) + 0.7;
@@ -49063,7 +49699,7 @@ function drawCombatImpact(ctx, kind, x, y, dx, dy, age, crit = false) {
   }
   const count = kind === "bleed" || kind === "offhand" ? 0 : kind === "fire" ? 7 : kind === "bash" ? 6 : 4;
   for (let i = 0; i < count; i++) {
-    const a = (i - (count - 1) / 2) * 0.6 + (kind === "fire" ? i * 0.35 : 0), d = 5 + ease15 * (kind === "fire" ? 29 : 22);
+    const a = (i - (count - 1) / 2) * 0.6 + (kind === "fire" ? i * 0.35 : 0), d = 5 + ease16 * (kind === "fire" ? 29 : 22);
     diamond(ctx, Math.cos(a) * d, Math.sin(a) * d, (kind === "bash" ? 3 : 2) * (1 - t), i % 2 ? color28 : "#fff1cc");
   }
   if (crit) {
@@ -49130,6 +49766,7 @@ function drawSkillBurst(ctx, b, age) {
   if (b.kind === "skill:shield_bash") drawBashWave(ctx, b.x, b.y, b.dx, b.dy, age, b.shield ?? "kite");
   else if (b.kind === "skill:flurry") drawFlurry(ctx, b.x, b.y, b.dx, b.dy, age, b.dagger ?? null);
   else if (b.kind === "skill:cast") drawCastSigil(ctx, b.x, b.y, b.element ?? "fire", age, b.facing ?? 1);
+  else drawTreeSkillBurst(ctx, b.kind.slice(6), b.x, b.y, b.dx, b.dy, age);
   ctx.restore();
 }
 function drawBlinkBurst(ctx, b, age) {
@@ -49309,7 +49946,7 @@ function createCombatVfx() {
 }
 
 // src/client/economy_resource_presentation.js
-var TAU58 = Math.PI * 2;
+var TAU59 = Math.PI * 2;
 var BOSS_REVEAL_TICKS = 90;
 var stableVisualSeed = (id) => {
   let value2 = 2166136261;
@@ -49323,7 +49960,7 @@ function drawBossChestGroundD12_5B(ctx, x, y, age) {
   ctx.globalAlpha = fade * 0.42;
   ctx.fillStyle = "#6fb35a";
   ctx.beginPath();
-  ctx.ellipse(0, 0, 32 + progress8 * 13, 14 + progress8 * 5, 0, 0, TAU58);
+  ctx.ellipse(0, 0, 32 + progress8 * 13, 14 + progress8 * 5, 0, 0, TAU59);
   ctx.fill();
   ctx.globalAlpha = fade * 0.56;
   ctx.strokeStyle = "#e9bd58";
@@ -49517,7 +50154,7 @@ function createResourceDebrisV1({ art = null, presentation = null, remnants = nu
 }
 
 // src/client/resource_presentation_v2.js
-var TAU59 = Math.PI * 2;
+var TAU60 = Math.PI * 2;
 var BOSS_REVEAL_TICKS2 = 90;
 var stableVisualSeed2 = (id) => {
   let value2 = 2166136261;
@@ -49531,7 +50168,7 @@ function drawBossChestGroundD12_5B2(ctx, x, y, age) {
   ctx.globalAlpha = fade * 0.42;
   ctx.fillStyle = "#6fb35a";
   ctx.beginPath();
-  ctx.ellipse(0, 0, 32 + progress8 * 13, 14 + progress8 * 5, 0, 0, TAU59);
+  ctx.ellipse(0, 0, 32 + progress8 * 13, 14 + progress8 * 5, 0, 0, TAU60);
   ctx.fill();
   ctx.globalAlpha = fade * 0.56;
   ctx.strokeStyle = "#e9bd58";
@@ -50507,8 +51144,8 @@ function createWalletDisplay() {
       const [w, f = ""] = a2.split(".");
       return BigInt(w + f.padEnd(scale, "0"));
     };
-    const a = units(from), b = units(target), ease15 = BigInt(Math.floor((1 - (1 - t) ** 3) * 1e6));
-    let digits = (a + (b - a) * ease15 / 1000000n).toString().padStart(scale + 1, "0");
+    const a = units(from), b = units(target), ease16 = BigInt(Math.floor((1 - (1 - t) ** 3) * 1e6));
+    let digits = (a + (b - a) * ease16 / 1000000n).toString().padStart(scale + 1, "0");
     if (scale) digits = (digits.slice(0, -scale) + "." + digits.slice(-scale)).replace(/0+$/, "").replace(/\.$/, "");
     value2 = digits;
     return value2;
@@ -50919,7 +51556,7 @@ function drawFortEquipmentRack(ctx, x, y, variant = 0) {
 }
 
 // src/client/cave_art_d10.js
-var TAU60 = Math.PI * 2;
+var TAU61 = Math.PI * 2;
 var OUT2 = "#101816";
 var DEEP3 = "#070b0a";
 var ROCK_DARK = "#26322f";
@@ -50947,13 +51584,13 @@ var poly5 = (ctx, p, fill4, stroke3 = OUT2, w = 2) => {
 var shadow = (ctx, x, y, rx, ry, a = 0.42) => {
   ctx.fillStyle = `rgba(5,10,8,${a})`;
   ctx.beginPath();
-  ctx.ellipse(x, y, rx, ry, 0, 0, TAU60);
+  ctx.ellipse(x, y, rx, ry, 0, 0, TAU61);
   ctx.fill();
 };
 function roughShape(x, y, rx, ry, seed2, count = 8) {
   const p = [];
   for (let i = 0; i < count; i++) {
-    const a = i / count * TAU60, n = hash20(seed2, i, 17), r = 0.82 + n % 25 / 100;
+    const a = i / count * TAU61, n = hash20(seed2, i, 17), r = 0.82 + n % 25 / 100;
     p.push([x + Math.cos(a) * rx * r, y + Math.sin(a) * ry * (0.86 + (n >>> 8) % 22 / 100)]);
   }
   return p;
@@ -50994,12 +51631,12 @@ function drawGeneratedCaveSurfaceD12_1(ctx, space) {
     if (motif.kind === "earth-patch" || motif.kind === "damp-patch") {
       ctx.fillStyle = motif.kind === "earth-patch" ? "rgba(118,95,62,.26)" : "rgba(25,57,49,.34)";
       ctx.beginPath();
-      ctx.ellipse(0, 0, 58 * s, 25 * s, 0, 0, TAU60);
+      ctx.ellipse(0, 0, 58 * s, 25 * s, 0, 0, TAU61);
       ctx.fill();
     } else if (motif.kind === "floor-shadow") {
       ctx.fillStyle = "rgba(8,17,14,.22)";
       ctx.beginPath();
-      ctx.ellipse(0, 0, 72 * s, 30 * s, 0, 0, TAU60);
+      ctx.ellipse(0, 0, 72 * s, 30 * s, 0, 0, TAU61);
       ctx.fill();
     } else if (motif.kind === "light-shaft") {
       const g = ctx.createLinearGradient(0, -70 * s, 0, 55 * s);
@@ -51022,7 +51659,7 @@ function drawGeneratedCaveSurfaceD12_1(ctx, space) {
     if (n % 2 === 0) {
       ctx.fillStyle = "rgba(120,119,101,.42)";
       ctx.beginPath();
-      ctx.ellipse(x + 8, y + 7, 2.5 + s, 1.5 + s * 0.5, r, 0, TAU60);
+      ctx.ellipse(x + 8, y + 7, 2.5 + s, 1.5 + s * 0.5, r, 0, TAU61);
       ctx.fill();
     }
   }
@@ -51032,7 +51669,7 @@ function drawGeneratedCaveSurfaceD12_1(ctx, space) {
     if (n % 19) continue;
     ctx.fillStyle = n % 3 ? "#596158" : "#77766a";
     ctx.beginPath();
-    ctx.ellipse((x + 0.5) * t + (n % 9 - 4), (y + 0.5) * t + ((n >>> 5) % 7 - 3), 1.5 + n % 3, 1 + (n >>> 8) % 2, n % 10 * 0.16, 0, TAU60);
+    ctx.ellipse((x + 0.5) * t + (n % 9 - 4), (y + 0.5) * t + ((n >>> 5) % 7 - 3), 1.5 + n % 3, 1 + (n >>> 8) % 2, n % 10 * 0.16, 0, TAU61);
     ctx.fill();
   }
   ctx.restore();
@@ -51049,7 +51686,7 @@ function drawGeneratedCaveSurfaceD12_1(ctx, space) {
     if (n % 6 === 0) {
       ctx.fillStyle = MOSS2;
       ctx.beginPath();
-      ctx.ellipse((b.x + 0.42) * t, (b.y + 0.25) * t, 17 + n % 8, 5, (n % 5 - 2) * 0.08, 0, TAU60);
+      ctx.ellipse((b.x + 0.42) * t, (b.y + 0.25) * t, 17 + n % 8, 5, (n % 5 - 2) * 0.08, 0, TAU61);
       ctx.fill();
     }
   }
@@ -51089,7 +51726,7 @@ function drawCaveSurfaceD10(ctx, space) {
   for (const [x, y, rx, ry, r] of [[6.8, 11.2, 55, 24, -0.2], [16.2, 10.5, 66, 27, 0.18], [23.2, 8.7, 46, 20, -0.12]]) {
     ctx.fillStyle = "rgba(23,48,43,.35)";
     ctx.beginPath();
-    ctx.ellipse(x * t, y * t, rx, ry, r, 0, TAU60);
+    ctx.ellipse(x * t, y * t, rx, ry, r, 0, TAU61);
     ctx.fill();
     ctx.strokeStyle = "rgba(77,104,89,.22)";
     ctx.lineWidth = 3;
@@ -51100,7 +51737,7 @@ function drawCaveSurfaceD10(ctx, space) {
   for (const [x, y, rx, ry, r, c] of [[8.4, 7.1, 74, 22, -0.18, "rgba(93,84,64,.13)"], [11.7, 12.2, 88, 26, 0.12, "rgba(118,102,70,.10)"], [15.2, 8.2, 69, 18, -0.08, "rgba(92,112,92,.10)"], [13.8, 14.1, 57, 17, 0.18, "rgba(132,109,72,.09)"], [23.7, 6.2, 52, 16, -0.13, "rgba(106,118,95,.12)"]]) {
     ctx.fillStyle = c;
     ctx.beginPath();
-    ctx.ellipse(x * t, y * t, rx, ry, r, 0, TAU60);
+    ctx.ellipse(x * t, y * t, rx, ry, r, 0, TAU61);
     ctx.fill();
   }
   const cracks = [[[9.3, 6.1], [10, 6.7], [9.6, 7.4], [10.5, 8]], [[14.7, 10.2], [15.5, 10.8], [15.1, 11.7], [16, 12.3]], [[21.8, 7.2], [22.7, 7.7], [22.3, 8.4]]];
@@ -51116,7 +51753,7 @@ function drawCaveSurfaceD10(ctx, space) {
     if (!floorAt(rows, x, y)) continue;
     ctx.fillStyle = i % 4 ? "#596158" : "#77766a";
     ctx.beginPath();
-    ctx.ellipse(x * t, y * t, 1.5 + n % 4, 1 + (n >>> 5) % 3, n % 10 * 0.16, 0, TAU60);
+    ctx.ellipse(x * t, y * t, 1.5 + n % 4, 1 + (n >>> 5) % 3, n % 10 * 0.16, 0, TAU61);
     ctx.fill();
   }
   const shaft = ctx.createLinearGradient(0, h, 0, 12.7 * t);
@@ -51148,7 +51785,7 @@ function drawCaveSurfaceD10(ctx, space) {
     if (n % 5 === 0) {
       ctx.fillStyle = MOSS2;
       ctx.beginPath();
-      ctx.ellipse(cx - rx * 0.18, cy - ry * 0.48, rx * 0.42, ry * 0.17, (n % 7 - 3) * 0.1, 0, TAU60);
+      ctx.ellipse(cx - rx * 0.18, cy - ry * 0.48, rx * 0.42, ry * 0.17, (n % 7 - 3) * 0.1, 0, TAU61);
       ctx.fill();
     }
   }
@@ -51178,7 +51815,7 @@ function drawCaveBlockerD10(ctx, space, b, t) {
   for (let i = 0; i < Math.max(1, Math.ceil(w / 95)); i++) {
     const n = hash20(seed2, i, 22);
     ctx.beginPath();
-    ctx.ellipse(x + 24 + i * 91 + n % 12, y + 9 + n % 8, 22 + n % 10, 7, (n % 5 - 2) * 0.08, 0, TAU60);
+    ctx.ellipse(x + 24 + i * 91 + n % 12, y + 9 + n % 8, 22 + n % 10, 7, (n % 5 - 2) * 0.08, 0, TAU61);
     ctx.fill();
   }
   ctx.restore();
@@ -51229,7 +51866,7 @@ function mouth3(ctx, x, y) {
   ctx.fill();
   ctx.fillStyle = "rgba(22,35,30,.92)";
   ctx.beginPath();
-  ctx.ellipse(x - 2, y + 30, 39, 12, -0.05, 0, TAU60);
+  ctx.ellipse(x - 2, y + 30, 39, 12, -0.05, 0, TAU61);
   ctx.fill();
   rock(ctx, x - 56, y + 26, 34, 21, 101);
   rock(ctx, x + 50, y + 29, 38, 22, 117);
@@ -51237,7 +51874,7 @@ function mouth3(ctx, x, y) {
   ctx.fillStyle = MOSS2;
   for (const [dx, dy, rx, ry, r] of [[-75, -43, 31, 8, -0.2], [-29, -76, 27, 7, 0.08], [31, -77, 34, 9, -0.08], [76, -39, 24, 7, 0.15]]) {
     ctx.beginPath();
-    ctx.ellipse(x + dx, y + dy, rx, ry, r, 0, TAU60);
+    ctx.ellipse(x + dx, y + dy, rx, ry, r, 0, TAU61);
     ctx.fill();
   }
   ctx.strokeStyle = "#4e3524";
@@ -51256,20 +51893,20 @@ function shrub(ctx, x, y, v) {
   for (const [dx, dy, rx, ry] of [[-18, 2, 16, 13], [-3, -9, 20, 17], [16, 0, 16, 14], [4, 7, 18, 13]]) {
     ctx.fillStyle = dark;
     ctx.beginPath();
-    ctx.ellipse(x + dx, y + dy, rx, ry, 0, 0, TAU60);
+    ctx.ellipse(x + dx, y + dy, rx, ry, 0, 0, TAU61);
     ctx.fill();
     ctx.strokeStyle = OUT2;
     ctx.lineWidth = 2;
     ctx.stroke();
     ctx.fillStyle = mid;
     ctx.beginPath();
-    ctx.ellipse(x + dx - 3, y + dy - 4, rx * 0.7, ry * 0.48, -0.2, 0, TAU60);
+    ctx.ellipse(x + dx - 3, y + dy - 4, rx * 0.7, ry * 0.48, -0.2, 0, TAU61);
     ctx.fill();
   }
   ctx.fillStyle = light;
   for (const [dx, dy] of [[-14, -5], [-2, -17], [12, -8], [3, 0]]) {
     ctx.beginPath();
-    ctx.ellipse(x + dx, y + dy, 7, 3.5, -0.3, 0, TAU60);
+    ctx.ellipse(x + dx, y + dy, 7, 3.5, -0.3, 0, TAU61);
     ctx.fill();
   }
 }
@@ -51278,7 +51915,7 @@ function mushroomCluster(ctx, x, y, v) {
   shadow(ctx, x, y + 8, 34, 9, 0.3);
   ctx.fillStyle = "rgba(54,91,62,.55)";
   ctx.beginPath();
-  ctx.ellipse(x, y + 5, 31, 8, (v - 1) * 0.08, 0, TAU60);
+  ctx.ellipse(x, y + 5, 31, 8, (v - 1) * 0.08, 0, TAU61);
   ctx.fill();
   for (let i = 0; i < count; i++) {
     const n = hash20(i, v, 51), dx = -26 + i * (52 / (count - 1)) + (n % 7 - 3), h = 10 + (n >>> 4) % 18, wide = 5 + (n >>> 8) % 8, lean = (n >>> 12) % 9 - 4, tilt = lean * 0.035;
@@ -51307,11 +51944,11 @@ function mushroomCluster(ctx, x, y, v) {
     ctx.stroke();
     ctx.fillStyle = colors[1];
     ctx.beginPath();
-    ctx.ellipse(-wide * 0.18, -wide * 0.2, wide * 0.5, wide * 0.19, -0.18, 0, TAU60);
+    ctx.ellipse(-wide * 0.18, -wide * 0.2, wide * 0.5, wide * 0.19, -0.18, 0, TAU61);
     ctx.fill();
     ctx.fillStyle = colors[2];
     ctx.beginPath();
-    ctx.arc(-wide * 0.25, -wide * 0.3, 1.2 + n % 2, 0, TAU60);
+    ctx.arc(-wide * 0.25, -wide * 0.3, 1.2 + n % 2, 0, TAU61);
     ctx.fill();
     ctx.restore();
   }
@@ -51437,7 +52074,7 @@ function wallRoots(ctx, x, y) {
   }
   ctx.fillStyle = MOSS2;
   ctx.beginPath();
-  ctx.ellipse(x + 30, y - 31, 24, 6, -0.32, 0, TAU60);
+  ctx.ellipse(x + 30, y - 31, 24, 6, -0.32, 0, TAU61);
   ctx.fill();
   rock(ctx, x - 27, y + 15, 12, 7, 721);
   rock(ctx, x + 10, y + 27, 10, 6, 727);
@@ -51458,15 +52095,15 @@ function remains(ctx, x, y) {
   ctx.stroke();
   ctx.fillStyle = "#d8cfad";
   ctx.beginPath();
-  ctx.ellipse(x - 4, y + 2, 13, 11, -0.2, 0, TAU60);
+  ctx.ellipse(x - 4, y + 2, 13, 11, -0.2, 0, TAU61);
   ctx.fill();
   ctx.strokeStyle = OUT2;
   ctx.lineWidth = 2;
   ctx.stroke();
   ctx.fillStyle = "#2a2b25";
   ctx.beginPath();
-  ctx.arc(x - 9, y, 3, 0, TAU60);
-  ctx.arc(x + 1, y - 2, 3, 0, TAU60);
+  ctx.arc(x - 9, y, 3, 0, TAU61);
+  ctx.arc(x + 1, y - 2, 3, 0, TAU61);
   ctx.fill();
   ctx.fillStyle = "#b9b18f";
   ctx.fillRect(x - 8, y + 8, 11, 5);
@@ -51514,7 +52151,7 @@ function rewardNook(ctx, x, y) {
   shadow(ctx, x, y + 18, 76, 22, 0.44);
   ctx.fillStyle = "rgba(8,16,14,.72)";
   ctx.beginPath();
-  ctx.ellipse(x, y - 7, 68, 35, 0, Math.PI, TAU60);
+  ctx.ellipse(x, y - 7, 68, 35, 0, Math.PI, TAU61);
   ctx.fill();
   rock(ctx, x - 55, y - 11, 26, 32, 271);
   rock(ctx, x + 56, y - 14, 30, 35, 283);
@@ -51528,21 +52165,21 @@ function rewardNook(ctx, x, y) {
   ctx.stroke();
   ctx.fillStyle = MOSS2;
   ctx.beginPath();
-  ctx.ellipse(x + 18, y - 50, 35, 7, -0.08, 0, TAU60);
+  ctx.ellipse(x + 18, y - 50, 35, 7, -0.08, 0, TAU61);
   ctx.fill();
   shadow(ctx, x, y + 25, 42, 10, 0.38);
   poly5(ctx, roughShape(x, y + 17, 43, 14, 751, 9), "#435149", OUT2, 2);
   poly5(ctx, roughShape(x - 4, y + 12, 29, 6, 757, 8), "#748176", null);
   ctx.fillStyle = "rgba(122,224,184,.12)";
   ctx.beginPath();
-  ctx.ellipse(x, y + 4, 51, 28, 0, 0, TAU60);
+  ctx.ellipse(x, y + 4, 51, 28, 0, 0, TAU61);
   ctx.fill();
 }
 function caveStairs(ctx, x, y, up) {
   shadow(ctx, x, y + 13, 43, 13, 0.42);
   ctx.fillStyle = up ? "#24322d" : "#070c0b";
   ctx.beginPath();
-  ctx.ellipse(x, y + 3, 38, 25, 0, 0, TAU60);
+  ctx.ellipse(x, y + 3, 38, 25, 0, 0, TAU61);
   ctx.fill();
   ctx.strokeStyle = OUT2;
   ctx.lineWidth = 3;
@@ -51580,7 +52217,7 @@ function caveSlope(ctx, x, y, up, v = 0) {
   shadow(ctx, x, y + 17, 48, 13, 0.38);
   ctx.fillStyle = up ? "#26342f" : "#07100d";
   ctx.beginPath();
-  ctx.ellipse(x, y + 4, 44, 29, 0, 0, TAU60);
+  ctx.ellipse(x, y + 4, 44, 29, 0, 0, TAU61);
   ctx.fill();
   ctx.strokeStyle = OUT2;
   ctx.lineWidth = 3;
@@ -51595,12 +52232,12 @@ function caveSlope(ctx, x, y, up, v = 0) {
     rock(ctx, x + side * 40, y + 4, 15, 23, 811 + v * 13 + side * 7);
     ctx.fillStyle = MOSS2;
     ctx.beginPath();
-    ctx.ellipse(x + side * 38, y - 12, 14, 4, side * 0.14, 0, TAU60);
+    ctx.ellipse(x + side * 38, y - 12, 14, 4, side * 0.14, 0, TAU61);
     ctx.fill();
   }
   ctx.fillStyle = "rgba(121,224,189,.25)";
   ctx.beginPath();
-  ctx.ellipse(x, y + (up ? -18 : 21), 25, 8, 0, 0, TAU60);
+  ctx.ellipse(x, y + (up ? -18 : 21), 25, 8, 0, 0, TAU61);
   ctx.fill();
 }
 function drawCaveDecorationD10(ctx, d, t) {
@@ -51629,7 +52266,7 @@ function drawCaveDecorationD10(ctx, d, t) {
     ctx.fillStyle = "#6f9d58";
     for (const [dx, dy, r] of [[-9, -18, -0.4], [8, -4, 0.4], [-1, 12, -0.3], [21, 20, 0.5]]) {
       ctx.beginPath();
-      ctx.ellipse(x + dx, y + dy, 9, 4, r, 0, TAU60);
+      ctx.ellipse(x + dx, y + dy, 9, 4, r, 0, TAU61);
       ctx.fill();
     }
   } else if (d.kind === "cave-grass-tuft") {
@@ -51688,14 +52325,14 @@ function drawCaveInteriorExitD10(ctx, exit) {
   ctx.fill();
   ctx.fillStyle = MOSS2;
   ctx.beginPath();
-  ctx.ellipse(x - 5, y - 46, 34, 7, -0.1, 0, TAU60);
+  ctx.ellipse(x - 5, y - 46, 34, 7, -0.1, 0, TAU61);
   ctx.fill();
   ctx.restore();
 }
 
 // src/client/ruin_art_d11_3.js
-var TAU61 = Math.PI * 2;
-var INK45 = "#17201d";
+var TAU62 = Math.PI * 2;
+var INK46 = "#17201d";
 var VOID = "#09100e";
 var STONE_DARK = "#34413b";
 var STONE4 = "#667268";
@@ -51707,7 +52344,7 @@ var hash21 = (x, y, s = 0) => {
   n = Math.imul(n ^ n >>> 13, 1274126177) >>> 0;
   return n ^ n >>> 16;
 };
-var poly6 = (ctx, points2, fill4, stroke3 = INK45, width = 2) => {
+var poly6 = (ctx, points2, fill4, stroke3 = INK46, width = 2) => {
   ctx.beginPath();
   points2.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y));
   ctx.closePath();
@@ -51722,13 +52359,13 @@ var poly6 = (ctx, points2, fill4, stroke3 = INK45, width = 2) => {
 var shadow2 = (ctx, x, y, rx, ry, a = 0.36) => {
   ctx.fillStyle = `rgba(5,9,7,${a})`;
   ctx.beginPath();
-  ctx.ellipse(x, y, rx, ry, 0, 0, TAU61);
+  ctx.ellipse(x, y, rx, ry, 0, 0, TAU62);
   ctx.fill();
 };
 function stone(ctx, x, y, w, h, seed2) {
   const n = hash21(seed2, w | 0, h | 0), lean = n % 7 - 3;
   shadow2(ctx, x + w * 0.5, y + h * 0.91, w * 0.45, Math.max(4, h * 0.12), 0.3);
-  poly6(ctx, [[x + 2, y + h * 0.22], [x + w * 0.16 + lean, y + 2], [x + w * 0.75, y], [x + w - 2, y + h * 0.2], [x + w - 4, y + h - 2], [x + 4, y + h]], STONE_DARK, INK45, 2);
+  poly6(ctx, [[x + 2, y + h * 0.22], [x + w * 0.16 + lean, y + 2], [x + w * 0.75, y], [x + w - 2, y + h * 0.2], [x + w - 4, y + h - 2], [x + 4, y + h]], STONE_DARK, INK46, 2);
   poly6(ctx, [[x + w * 0.16 + lean, y + 3], [x + w * 0.75, y + 1], [x + w * 0.91, y + h * 0.2], [x + w * 0.31, y + h * 0.28]], STONE_LIGHT, null);
   poly6(ctx, [[x + 4, y + h * 0.42], [x + w * 0.33, y + h * 0.29], [x + w * 0.9, y + h * 0.22], [x + w - 4, y + h - 3], [x + 4, y + h]], STONE4, null);
 }
@@ -51747,7 +52384,7 @@ function weeds(ctx, x, y, seed2, count = 6) {
 function organicBlob(ctx, x, y, rx, ry, seed2, fill4, stroke3 = null, width = 1) {
   const count = 8 + hash21(seed2, 17, 3) % 4, points2 = [];
   for (let i = 0; i < count; i++) {
-    const a = TAU61 * i / count, n = hash21(seed2, i, 43), radius = 0.7 + n % 29 / 100;
+    const a = TAU62 * i / count, n = hash21(seed2, i, 43), radius = 0.7 + n % 29 / 100;
     points2.push([x + Math.cos(a) * rx * radius, y + Math.sin(a) * ry * (0.72 + (n >>> 7) % 35 / 100)]);
   }
   ctx.beginPath();
@@ -51772,7 +52409,7 @@ function moss2(ctx, x, y, scale, seed2, spread = 1) {
   const count = 3 + hash21(seed2, 5, 71) % 3;
   for (let i = 0; i < count; i++) {
     const n = hash21(seed2, i, 97), dx = (n % 101 - 50) / 50 * scale * 0.78 * spread, dy = ((n >>> 8) % 71 - 35) / 35 * scale * 0.24;
-    organicBlob(ctx, x + dx, y + dy, scale * (0.42 + (n >>> 15) % 23 / 100), scale * (0.16 + (n >>> 20) % 12 / 100), seed2 + i * 31, "#31543a", i === 0 ? INK45 : null, 1.2);
+    organicBlob(ctx, x + dx, y + dy, scale * (0.42 + (n >>> 15) % 23 / 100), scale * (0.16 + (n >>> 20) % 12 / 100), seed2 + i * 31, "#31543a", i === 0 ? INK46 : null, 1.2);
   }
   for (let i = 0; i < count + 1; i++) {
     const n = hash21(seed2, i, 137), dx = (n % 101 - 50) / 50 * scale * 0.75 * spread, dy = ((n >>> 9) % 61 - 30) / 30 * scale * 0.21;
@@ -51814,7 +52451,7 @@ function leaf(ctx, x, y, size, angle3, fill4) {
   ctx.closePath();
   ctx.fillStyle = fill4;
   ctx.fill();
-  ctx.strokeStyle = INK45;
+  ctx.strokeStyle = INK46;
   ctx.lineWidth = 2;
   ctx.stroke();
   ctx.restore();
@@ -51825,7 +52462,7 @@ function vine(ctx, x, y, height, seed2) {
   ctx.lineJoin = "round";
   const side = hash21(seed2, 3, 311) % 2 ? -1 : 1, n1 = hash21(seed2, 5, 317), n2 = hash21(seed2, 7, 331), points2 = [{ x, y }, { x: x + side * (11 + n1 % 7), y: y - height * 0.27 }, { x: x - side * (8 + n2 % 8), y: y - height * 0.52 }, { x: x + side * (12 + (n1 >>> 7) % 8), y: y - height * 0.76 }, { x: x + side * ((n2 >>> 8) % 9 - 4), y: y - height }];
   bentPath(ctx, points2);
-  ctx.strokeStyle = INK45;
+  ctx.strokeStyle = INK46;
   ctx.lineWidth = 9;
   ctx.stroke();
   bentPath(ctx, points2);
@@ -51836,7 +52473,7 @@ function vine(ctx, x, y, height, seed2) {
   for (const [i, b] of branches.entries()) {
     const end = { x: b.from.x + b.side * b.length, y: b.from.y - 8 - i * 4 }, branch = [b.from, { x: b.from.x + b.side * b.length * 0.55, y: b.from.y - 4 }, end];
     bentPath(ctx, branch);
-    ctx.strokeStyle = INK45;
+    ctx.strokeStyle = INK46;
     ctx.lineWidth = 6;
     ctx.stroke();
     bentPath(ctx, branch);
@@ -51862,7 +52499,7 @@ function rootCluster(ctx, x, y, height, seed2, bend = 0, scale = 1) {
   ctx.lineWidth = main + 6;
   ctx.stroke();
   bentPath(ctx, points2);
-  ctx.strokeStyle = INK45;
+  ctx.strokeStyle = INK46;
   ctx.lineWidth = main + 4;
   ctx.stroke();
   bentPath(ctx, points2);
@@ -51873,7 +52510,7 @@ function rootCluster(ctx, x, y, height, seed2, bend = 0, scale = 1) {
   for (const b of branches) {
     const end = { x: b.from.x + b.side * b.length, y: b.from.y + b.drop }, branch = [b.from, { x: b.from.x + b.side * b.length * 0.58, y: b.from.y + b.drop * 0.28 }, end];
     bentPath(ctx, branch);
-    ctx.strokeStyle = INK45;
+    ctx.strokeStyle = INK46;
     ctx.lineWidth = b.width + 4;
     ctx.stroke();
     bentPath(ctx, branch);
@@ -51916,7 +52553,7 @@ function ruinExteriorRootGeometryD11_3_4(x, y, seed2, side) {
 function exteriorRootMass(ctx, x, y, seed2, side) {
   const shapes = ruinExteriorRootGeometryD11_3_4(x, y, seed2, side), main = shapes[0].points;
   roundedMass(ctx, taperedMass(main, shapes[0].widths, 2, 3, 4), "rgba(8,13,10,.42)");
-  for (const shape2 of shapes) roundedMass(ctx, taperedMass(shape2.points, shape2.widths, 3), INK45);
+  for (const shape2 of shapes) roundedMass(ctx, taperedMass(shape2.points, shape2.widths, 3), INK46);
   for (const shape2 of shapes) roundedMass(ctx, taperedMass(shape2.points, shape2.widths), "#72492d");
   const a = main[0], b = main[Math.min(2, main.length - 1)];
   roundedMass(ctx, taperedMass([a, { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, b], [4, 3, 1]), "#a66e40");
@@ -51991,10 +52628,10 @@ function pillar(ctx, x, y, variant = 0) {
   stone(ctx, -21, -54, 42, 61, 501 + variant);
   ctx.fillStyle = STONE_DARK;
   ctx.fillRect(-26, -2, 52, 12);
-  ctx.strokeStyle = INK45;
+  ctx.strokeStyle = INK46;
   ctx.lineWidth = 2;
   ctx.strokeRect(-26, -2, 52, 12);
-  poly6(ctx, [[-23, -54], [-15, -67], [8, -64], [20, -51], [8, -44], [-17, -46]], STONE_LIGHT, INK45, 2);
+  poly6(ctx, [[-23, -54], [-15, -67], [8, -64], [20, -51], [8, -44], [-17, -46]], STONE_LIGHT, INK46, 2);
   moss2(ctx, -5, -59, 20, 551 + variant, 0.9);
   ctx.restore();
   weeds(ctx, x, y + 7, variant + 50, 5);
@@ -52011,7 +52648,7 @@ function shrine(ctx, x, y) {
   ctx.beginPath();
   ctx.roundRect(x - 35, y - 53, 70, 45, 7);
   ctx.fill();
-  ctx.strokeStyle = INK45;
+  ctx.strokeStyle = INK46;
   ctx.lineWidth = 3;
   ctx.stroke();
   ctx.fillStyle = "#9d7b43";
@@ -52024,7 +52661,7 @@ function shrine(ctx, x, y) {
   ctx.moveTo(x + 19, y - 42);
   ctx.lineTo(x - 15, y - 15);
   ctx.stroke();
-  ctx.strokeStyle = INK45;
+  ctx.strokeStyle = INK46;
   ctx.lineWidth = 1.5;
   ctx.stroke();
   moss2(ctx, x - 24, y - 44, 17, 733, 0.8);
@@ -52033,7 +52670,7 @@ function perch(ctx, x, y) {
   shadow2(ctx, x, y + 10, 38, 11, 0.34);
   stone(ctx, x - 36, y - 10, 72, 30, 811);
   ctx.fillStyle = "#252d2a";
-  ctx.strokeStyle = INK45;
+  ctx.strokeStyle = INK46;
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(x - 23, y - 12);
@@ -52069,7 +52706,7 @@ function rewardAlcove(ctx, x, y) {
   ctx.fill();
   ctx.fillStyle = "rgba(204,221,164,.13)";
   ctx.beginPath();
-  ctx.ellipse(x, y - 1, 36, 28, 0, 0, TAU61);
+  ctx.ellipse(x, y - 1, 36, 28, 0, 0, TAU62);
   ctx.fill();
   vine(ctx, x + 34, y - 9, 44, 913);
 }
@@ -52090,10 +52727,10 @@ function drawRuinSurfaceD11_3(ctx, space) {
   ctx.fillRect(0, 0, w, h);
   ctx.fillStyle = "rgba(111,84,52,.5)";
   ctx.beginPath();
-  ctx.ellipse(w * 0.5, h * 0.61, 244, 139, -0.04, 0, TAU61);
+  ctx.ellipse(w * 0.5, h * 0.61, 244, 139, -0.04, 0, TAU62);
   ctx.fill();
   ctx.beginPath();
-  ctx.ellipse(w * 0.51, h * 0.31, 182, 87, 0.04, 0, TAU61);
+  ctx.ellipse(w * 0.51, h * 0.31, 182, 87, 0.04, 0, TAU62);
   ctx.fill();
   ctx.strokeStyle = "rgba(153,126,79,.24)";
   ctx.lineWidth = 64;
@@ -52183,7 +52820,7 @@ function drawRuinExteriorGroundD11_3(ctx, exit, seed2 = 0, roadAnchor = null, ti
   drawRuinApproachD11_3_6(ctx, exit, seed2, roadAnchor, tileSize);
   for (const [dx, dy, w, h, s] of [[-18, 33, 20, 8, 1], [17, 57, 18, 7, 2], [-13, 84, 19, 7, 3], [14, 108, 17, 6, 4]]) stone(ctx, x + dx - w / 2, y + dy - h / 2, w, h, seed2 + 1500 + s);
   ctx.fillStyle = "#59645a";
-  poly6(ctx, [[x - 43, y - 1], [x + 43, y - 1], [x + 35, y + 24], [x - 37, y + 24]], "#59645a", INK45, 2);
+  poly6(ctx, [[x - 43, y - 1], [x + 43, y - 1], [x + 35, y + 24], [x - 37, y + 24]], "#59645a", INK46, 2);
   poly6(ctx, [[x - 37, y + 1], [x + 37, y + 1], [x + 31, y + 8], [x - 32, y + 8]], "#8f9887", null);
   for (const [dx, dy, w, h, s] of [[-84, 51, 25, 15, 1], [77, 55, 26, 16, 2], [-119, 76, 32, 18, 3], [113, 82, 29, 17, 4]]) stone(ctx, x + dx - w / 2, y + dy - h / 2, w, h, seed2 + 1550 + s);
   moss2(ctx, x - 68, y + 72, 17, seed2 + 1567, 1.1);
@@ -52197,7 +52834,7 @@ function drawRuinExteriorRearD11_3(ctx, exit, seed2 = 0) {
   ctx.save();
   ctx.lineJoin = "round";
   shadow2(ctx, x, y + 22, 148, 22, 0.48);
-  poly6(ctx, [[x - 145, y + 18], [x - 145, y - 83], [x - 126, y - 83], [x - 126, y - 121], [x - 91, y - 121], [x - 91, y - 151], [x - 54, y - 151], [x - 54, y - 166], [x - 14, y - 156], [x + 16, y - 174], [x + 49, y - 153], [x + 83, y - 153], [x + 83, y - 126], [x + 118, y - 126], [x + 118, y - 96], [x + 145, y - 96], [x + 145, y + 18]], STONE_DARK, INK45, 3);
+  poly6(ctx, [[x - 145, y + 18], [x - 145, y - 83], [x - 126, y - 83], [x - 126, y - 121], [x - 91, y - 121], [x - 91, y - 151], [x - 54, y - 151], [x - 54, y - 166], [x - 14, y - 156], [x + 16, y - 174], [x + 49, y - 153], [x + 83, y - 153], [x + 83, y - 126], [x + 118, y - 126], [x + 118, y - 96], [x + 145, y - 96], [x + 145, y + 18]], STONE_DARK, INK46, 3);
   const courses = [[-137, -109, 51, 35], [-82, -123, 49, 38], [-30, -136, 47, 34], [20, -137, 45, 35], [69, -122, 47, 36], [119, -91, 23, 35], [-139, -70, 50, 39], [-86, -80, 45, 40], [-38, -91, 41, 35], [7, -96, 43, 33], [54, -84, 47, 41], [105, -56, 36, 39]];
   for (let i = 0; i < courses.length; i++) {
     const [dx, dy, w, h] = courses[i];
@@ -52212,7 +52849,7 @@ function drawRuinExteriorRearD11_3(ctx, exit, seed2 = 0) {
   ctx.lineTo(x + 54, y + 20);
   ctx.closePath();
   ctx.fill();
-  ctx.strokeStyle = INK45;
+  ctx.strokeStyle = INK46;
   ctx.lineWidth = 5;
   ctx.stroke();
   const glow7 = ctx.createLinearGradient(x, y - 79, x, y + 23);
@@ -53303,7 +53940,7 @@ function* prepareEnvironmentLayout(space) {
 }
 
 // src/client/fort_art_d10.js
-var TAU62 = Math.PI * 2;
+var TAU63 = Math.PI * 2;
 var OUT3 = "#17211d";
 var STONE_DARK2 = "#3b4741";
 var STONE5 = "#647067";
@@ -53328,7 +53965,7 @@ var poly7 = (ctx, pts, fill4, stroke3 = OUT3, w = 2) => {
 var shadow3 = (ctx, x, y, rx, ry) => {
   ctx.fillStyle = "rgba(8,14,11,.40)";
   ctx.beginPath();
-  ctx.ellipse(x, y, rx, ry, 0, 0, TAU62);
+  ctx.ellipse(x, y, rx, ry, 0, 0, TAU63);
   ctx.fill();
 };
 var beam = (ctx, x, y, w, h) => {
@@ -53495,7 +54132,7 @@ function tent(ctx, d, t) {
     const ridge = y - 42, front2 = y + 20;
     ctx.fillStyle = "rgba(8,12,10,.40)";
     ctx.beginPath();
-    ctx.ellipse(x + 4, front2 + 7, 55, 13, 0, 0, TAU62);
+    ctx.ellipse(x + 4, front2 + 7, 55, 13, 0, 0, TAU63);
     ctx.fill();
     poly7(ctx, [[x - 48, front2], [x - 34, y - 22], [x, ridge], [x, front2]], CANVAS_LIGHT, OUT3, 2.5);
     poly7(ctx, [[x, ridge], [x + 34, y - 22], [x + 48, front2], [x, front2]], CANVAS, OUT3, 2.5);
@@ -53512,7 +54149,7 @@ function tent(ctx, d, t) {
       ctx.stroke();
       ctx.fillStyle = WOOD_LIGHT3;
       ctx.beginPath();
-      ctx.arc(x + side * 58, front2 + 13, 3, 0, TAU62);
+      ctx.arc(x + side * 58, front2 + 13, 3, 0, TAU63);
       ctx.fill();
       ctx.strokeStyle = OUT3;
       ctx.stroke();
@@ -53543,12 +54180,12 @@ function prop(ctx, d, t) {
     for (const dx of [-25, 13]) {
       ctx.fillStyle = "#2b2821";
       ctx.beginPath();
-      ctx.arc(x + dx, y + 15, 11, 0, TAU62);
+      ctx.arc(x + dx, y + 15, 11, 0, TAU63);
       ctx.fill();
       ctx.stroke();
       ctx.fillStyle = WOOD_LIGHT3;
       ctx.beginPath();
-      ctx.arc(x + dx, y + 15, 4, 0, TAU62);
+      ctx.arc(x + dx, y + 15, 4, 0, TAU63);
       ctx.fill();
     }
     return;
@@ -53557,14 +54194,14 @@ function prop(ctx, d, t) {
     masonry(ctx, x - 29, y - 3, 58, 18, 1001);
     ctx.fillStyle = "#13201e";
     ctx.beginPath();
-    ctx.ellipse(x, y - 4, 22, 8, 0, 0, TAU62);
+    ctx.ellipse(x, y - 4, 22, 8, 0, 0, TAU63);
     ctx.fill();
     beam(ctx, x - 28, y - 35, 6, 36);
     beam(ctx, x + 22, y - 35, 6, 36);
     beam(ctx, x - 31, y - 40, 62, 7);
     ctx.fillStyle = WOOD_LIGHT3;
     ctx.beginPath();
-    ctx.arc(x, y - 20, 7, 0, TAU62);
+    ctx.arc(x, y - 20, 7, 0, TAU63);
     ctx.fill();
     ctx.strokeStyle = OUT3;
     ctx.stroke();
@@ -53593,7 +54230,7 @@ function prop(ctx, d, t) {
       ctx.fillRect(x + dx - 11, y - 9, 22, 24);
       ctx.fillStyle = "#a66b38";
       ctx.beginPath();
-      ctx.ellipse(x + dx, y - 9, 11, 6, 0, 0, TAU62);
+      ctx.ellipse(x + dx, y - 9, 11, 6, 0, 0, TAU63);
       ctx.fill();
       ctx.strokeStyle = OUT3;
       ctx.lineWidth = 2;
@@ -53632,14 +54269,14 @@ function prop(ctx, d, t) {
     ctx.stroke();
     ctx.fillStyle = "#655033";
     ctx.beginPath();
-    ctx.ellipse(3, -10, 21, 25, 0, 0, TAU62);
+    ctx.ellipse(3, -10, 21, 25, 0, 0, TAU63);
     ctx.fill();
     ctx.strokeStyle = OUT3;
     ctx.lineWidth = 3;
     ctx.stroke();
     ctx.fillStyle = "#c3a660";
     ctx.beginPath();
-    ctx.ellipse(0, -13, 21, 25, 0, 0, TAU62);
+    ctx.ellipse(0, -13, 21, 25, 0, 0, TAU63);
     ctx.fill();
     ctx.stroke();
     ctx.strokeStyle = "#8d713d";
@@ -53653,19 +54290,19 @@ function prop(ctx, d, t) {
     ctx.strokeStyle = "#574326";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.ellipse(0, -13, 22, 12, 0, 0, TAU62);
+    ctx.ellipse(0, -13, 22, 12, 0, 0, TAU63);
     ctx.stroke();
     ctx.beginPath();
-    ctx.ellipse(0, -13, 22, 19, 0, 0, TAU62);
+    ctx.ellipse(0, -13, 22, 19, 0, 0, TAU63);
     ctx.stroke();
     ctx.strokeStyle = RED3;
     ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.ellipse(-1, -13, 13, 14, 0.08, 0, TAU62);
+    ctx.ellipse(-1, -13, 13, 14, 0.08, 0, TAU63);
     ctx.stroke();
     ctx.fillStyle = "#b8a15d";
     ctx.beginPath();
-    ctx.ellipse(1, -12, 5, 6, -0.15, 0, TAU62);
+    ctx.ellipse(1, -12, 5, 6, -0.15, 0, TAU63);
     ctx.fill();
     ctx.strokeStyle = "#493928";
     ctx.lineWidth = 2;
@@ -53688,7 +54325,7 @@ function prop(ctx, d, t) {
   }
   if (k === "fort-fire") {
     for (let i = 0; i < 10; i++) {
-      const a = i / 10 * TAU62, sx = x + Math.cos(a) * 21, sy = y + 6 + Math.sin(a) * 7;
+      const a = i / 10 * TAU63, sx = x + Math.cos(a) * 21, sy = y + 6 + Math.sin(a) * 7;
       ctx.save();
       ctx.translate(sx, sy);
       ctx.rotate(a);
@@ -53722,12 +54359,12 @@ function prop(ctx, d, t) {
     }
     ctx.fillStyle = "#6f1d12";
     ctx.beginPath();
-    ctx.ellipse(x, y + 3, 12, 5, 0, 0, TAU62);
+    ctx.ellipse(x, y + 3, 12, 5, 0, 0, TAU63);
     ctx.fill();
     for (const [dx, dy, r, c] of [[-6, 2, 2.5, "#ff6a18"], [1, 4, 3, "#ffb126"], [7, 1, 2, "#e33b13"], [-1, 0, 1.5, "#fff0a0"]]) {
       ctx.fillStyle = c;
       ctx.beginPath();
-      ctx.arc(x + dx, y + dy, r, 0, TAU62);
+      ctx.arc(x + dx, y + dy, r, 0, TAU63);
       ctx.fill();
     }
     return;
@@ -53749,7 +54386,7 @@ function prop(ctx, d, t) {
     ctx.fillStyle = ["#2b6738", "#397944", "#4e7d42"][d.variant % 3];
     for (const [dx, dy, r] of [[-14, 1, 13], [1, -8, 17], [16, 1, 12]]) {
       ctx.beginPath();
-      ctx.arc(x + dx, y + dy, r, 0, TAU62);
+      ctx.arc(x + dx, y + dy, r, 0, TAU63);
       ctx.fill();
       ctx.strokeStyle = "#173a22";
       ctx.lineWidth = 2;
@@ -53757,7 +54394,7 @@ function prop(ctx, d, t) {
     }
     ctx.fillStyle = "#7fa05d";
     ctx.beginPath();
-    ctx.arc(x - 3, y - 13, 7, 0, TAU62);
+    ctx.arc(x - 3, y - 13, 7, 0, TAU63);
     ctx.fill();
     return;
   }
@@ -53771,7 +54408,7 @@ function prop(ctx, d, t) {
     ctx.fillStyle = "#76a253";
     for (const [dx, dy, a] of [[8, -14, 0.4], [-2, 1, -0.4], [6, 17, 0.6]]) {
       ctx.beginPath();
-      ctx.ellipse(x + dx, y + dy, 8, 4, a, 0, TAU62);
+      ctx.ellipse(x + dx, y + dy, 8, 4, a, 0, TAU63);
       ctx.fill();
     }
     return;
@@ -53791,7 +54428,7 @@ function prop(ctx, d, t) {
     ctx.fillStyle = "#668a4b";
     for (const [dx, dy, rx] of [[-22, 0, 19], [5, -4, 22], [27, 3, 15]]) {
       ctx.beginPath();
-      ctx.ellipse(x + dx, y + dy, rx, 6, 0, 0, TAU62);
+      ctx.ellipse(x + dx, y + dy, rx, 6, 0, 0, TAU63);
       ctx.fill();
     }
   }
@@ -53829,7 +54466,7 @@ function drawFortKeepDoorD10(ctx, exit) {
   ctx.stroke();
   ctx.fillStyle = "#e0b552";
   ctx.beginPath();
-  ctx.arc(x + 10, y - 18, 3, 0, TAU62);
+  ctx.arc(x + 10, y - 18, 3, 0, TAU63);
   ctx.fill();
 }
 
@@ -54558,7 +55195,7 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
 }
 
 // src/client/environment_presentation.js
-var TAU63 = Math.PI * 2;
+var TAU64 = Math.PI * 2;
 function drawFortBlockerPresentation(ctx, space, b, t, pilot) {
   if (!pilot?.fort?.blocker?.(ctx, space, b, t)) drawFortBlockerD10(ctx, space, b, t);
 }
@@ -54672,8 +55309,8 @@ function drawGrassGround(ctx, bounds2, seed2, offset2 = { x: 0, y: 0 }, biomeAt 
       const along = -15 + i * 5 + (n >>> i * 3 % 24 & 3), cross = 3 + (n >>> (i * 4 + 1) % 24 & 7), toward2 = i % 2 === 0 ? a : b;
       ctx.fillStyle = palette(toward2)[1 + i % 2];
       ctx.beginPath();
-      if (vertical) ctx.ellipse(x + (toward2 === a ? cross : -cross), y + along, 6 + (n + i) % 6, 4 + (n >>> i) % 5, (i - 2.5) * 0.1, 0, TAU63);
-      else ctx.ellipse(x + along, y + (toward2 === a ? cross : -cross), 4 + (n >>> i) % 5, 6 + (n + i) % 6, (i - 2.5) * 0.1, 0, TAU63);
+      if (vertical) ctx.ellipse(x + (toward2 === a ? cross : -cross), y + along, 6 + (n + i) % 6, 4 + (n >>> i) % 5, (i - 2.5) * 0.1, 0, TAU64);
+      else ctx.ellipse(x + along, y + (toward2 === a ? cross : -cross), 4 + (n >>> i) % 5, 6 + (n + i) % 6, (i - 2.5) * 0.1, 0, TAU64);
       ctx.fill();
     }
   };
@@ -54692,7 +55329,7 @@ function drawGrassGround(ctx, bounds2, seed2, offset2 = { x: 0, y: 0 }, biomeAt 
       ctx.fillStyle = palette(biomeAt(cx, cy) ?? "w")[n % 2 ? 1 : 2];
       ctx.beginPath();
       const points2 = Array.from({ length: 10 }, (_, i) => {
-        const angle3 = i * TAU63 / 10, r = 0.78 + terrainHash(gx + i, gy, seed2 + 71) % 24 / 100;
+        const angle3 = i * TAU64 / 10, r = 0.78 + terrainHash(gx + i, gy, seed2 + 71) % 24 / 100;
         return [cx + Math.cos(angle3) * rx * r, cy + Math.sin(angle3) * ry * r];
       });
       const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
@@ -54704,7 +55341,7 @@ function drawGrassGround(ctx, bounds2, seed2, offset2 = { x: 0, y: 0 }, biomeAt 
         ctx.fillStyle = n % 2 ? "#536b39" : "#6f6134";
         ctx.globalAlpha = 0.32;
         ctx.beginPath();
-        ctx.ellipse(cx - rx * 0.18, cy + ry * 0.08, rx * 0.38, ry * 0.22, (n % 7 - 3) * 0.08, 0, TAU63);
+        ctx.ellipse(cx - rx * 0.18, cy + ry * 0.08, rx * 0.38, ry * 0.22, (n % 7 - 3) * 0.08, 0, TAU64);
         ctx.fill();
         ctx.globalAlpha = 1;
       }
@@ -54817,7 +55454,7 @@ function* prepareEnvironmentDrawing(ctx, space, viewport = null, layout = create
           if (biome === "r") {
             ctx.fillStyle = n % 2 ? "#b5a675" : "#504f45";
             ctx.beginPath();
-            ctx.ellipse(px2 + dx, py + dy, 2 + n % 3, 1.3, 0, 0, TAU63);
+            ctx.ellipse(px2 + dx, py + dy, 2 + n % 3, 1.3, 0, 0, TAU64);
             ctx.fill();
             paintedDecorations++;
             if (n % 7 === 0) drawGrass(ctx, px2 + dx - 5, py + dy + 3, n);
@@ -54885,7 +55522,7 @@ function* prepareEnvironmentDrawing(ctx, space, viewport = null, layout = create
     if (!pilot?.tree && !pilot?.treeShadow?.(ctx, space, x, y, size, n)) {
       ctx.fillStyle = tree.biome === "marsh" ? "#183f34" : "#214c2f";
       ctx.beginPath();
-      ctx.ellipse(x + size * 0.5, y + size * 0.68, size * 0.4, size * 0.24, -0.12, 0, TAU63);
+      ctx.ellipse(x + size * 0.5, y + size * 0.68, size * 0.4, size * 0.24, -0.12, 0, TAU64);
       ctx.fill();
     }
     if (tree.biome === "marsh") drawReeds(ctx, x + size * 0.24, y + size * 0.83, n);
@@ -54945,7 +55582,7 @@ function* prepareEnvironmentDrawing(ctx, space, viewport = null, layout = create
         ctx.fill();
         ctx.fillStyle = "#26382d";
         ctx.beginPath();
-        ctx.ellipse(x2, y2 + 30, 28, 8, 0, 0, TAU63);
+        ctx.ellipse(x2, y2 + 30, 28, 8, 0, 0, TAU64);
         ctx.fill();
         for (const side of [-1, 1]) {
           ctx.fillStyle = "#4c5751";
@@ -54973,7 +55610,7 @@ function* prepareEnvironmentDrawing(ctx, space, viewport = null, layout = create
         ctx.fillStyle = "#66a34f";
         for (const [dx, dy] of [[-24, -18], [-17, -23], [22, -22], [16, -15]]) {
           ctx.beginPath();
-          ctx.ellipse(x2 + dx, y2 + dy, 5, 3, (n % 5 - 2) * 0.08, 0, TAU63);
+          ctx.ellipse(x2 + dx, y2 + dy, 5, 3, (n % 5 - 2) * 0.08, 0, TAU64);
           ctx.fill();
         }
         ctx.fillStyle = "#e8dba6";
@@ -55051,7 +55688,7 @@ function* prepareEnvironmentDrawing(ctx, space, viewport = null, layout = create
     ctx.strokeStyle = "#dfc18a";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(exit.x, exit.y, 19, 0, TAU63);
+    ctx.arc(exit.x, exit.y, 19, 0, TAU64);
     ctx.stroke();
     ctx.fillStyle = "#e6d2a0";
     ctx.font = "bold 15px Georgia";
@@ -55091,7 +55728,7 @@ function drawEnvironmentMarkers(ctx, space) {
     ctx.strokeStyle = "#d4bc7a";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(marker.x, marker.y, 22, 0, TAU63);
+    ctx.arc(marker.x, marker.y, 22, 0, TAU64);
     ctx.stroke();
     ctx.font = "11px Georgia";
     ctx.fillStyle = "#eadca5";
@@ -55196,7 +55833,7 @@ function drawRequiredObstacleVisual(ctx, space, b, tx, ty, pilot = null) {
     const { x, y, size } = b.naturalClusterId ? naturalMarshPose(n, tx, ty, t) : { x: tx * t - 8 + (n % 3 - 1), y: ty * t - 15 + ((n >>> 4) % 3 - 1), size: t + 16 };
     ctx.fillStyle = "#183f34";
     ctx.beginPath();
-    ctx.ellipse(x + size * 0.5, y + size * 0.68, size * 0.4, size * 0.24, -0.12, 0, TAU63);
+    ctx.ellipse(x + size * 0.5, y + size * 0.68, size * 0.4, size * 0.24, -0.12, 0, TAU64);
     ctx.fill();
     drawReeds(ctx, x + size * 0.24, y + size * 0.83, n);
     drawCanopy(ctx, x, y, size, n);
@@ -55365,7 +56002,7 @@ function createEnvironmentCache2(canvas, { authoredArt = null, ...options } = {}
 }
 
 // src/client/aegis_mimic_presentation_v2.js
-var TAU64 = Math.PI * 2;
+var TAU65 = Math.PI * 2;
 var clamp45 = (v) => Math.max(0, Math.min(1, v));
 function drawAttachedAegisMimic(c, actor, tick, flash = false) {
   const m = actor.aegisMimic;
@@ -55375,7 +56012,7 @@ function drawAttachedAegisMimic(c, actor, tick, flash = false) {
   c.translate(actor.position.x, actor.position.y);
   c.fillStyle = "#0c142b44";
   c.beginPath();
-  c.ellipse(0, 8, 13, 5, 0, 0, TAU64);
+  c.ellipse(0, 8, 13, 5, 0, 0, TAU65);
   c.fill();
   c.translate(0, -lift);
   c.save();
@@ -55414,8 +56051,8 @@ function drawAegisMimicTethers(c, model, tick) {
 }
 
 // src/client/boss_presentation_aegis_v1.js
-var TAU65 = Math.PI * 2;
-var INK46 = "#11151a";
+var TAU66 = Math.PI * 2;
+var INK47 = "#11151a";
 var CYAN4 = "#65e6ec";
 var LIGHT10 = "#b1fcf0";
 var BLUE3 = "#298eaa";
@@ -55430,7 +56067,7 @@ function plate3(c, points2, color28, outline3 = true) {
   c.fillStyle = color28;
   c.fill();
   if (outline3) {
-    c.strokeStyle = INK46;
+    c.strokeStyle = INK47;
     c.lineWidth = 1.26;
     c.lineJoin = "round";
     c.stroke();
@@ -55439,7 +56076,7 @@ function plate3(c, points2, color28, outline3 = true) {
 function hex(c, r) {
   const points2 = [];
   for (let i = 0; i < 6; i++) {
-    const a = i * TAU65 / 6 - Math.PI / 6;
+    const a = i * TAU66 / 6 - Math.PI / 6;
     points2.push([Math.cos(a) * r, Math.sin(a) * r]);
   }
   return points2;
@@ -55487,10 +56124,10 @@ function chains2(c, t) {
       c.save();
       c.translate(x, y);
       c.rotate(side * 0.18 + Math.cos(t * 0.047 + side) * q * 0.14);
-      c.strokeStyle = INK46;
+      c.strokeStyle = INK47;
       c.lineWidth = 3.8;
       c.beginPath();
-      c.ellipse(0, 0, i % 2 ? 1.7 : 2.3, 3.7, 0, 0, TAU65);
+      c.ellipse(0, 0, i % 2 ? 1.7 : 2.3, 3.7, 0, 0, TAU66);
       c.stroke();
       c.strokeStyle = i % 4 === 1 ? CYAN4 : "#718b9d";
       c.lineWidth = 1.3;
@@ -55542,7 +56179,7 @@ function tower2(c, b, t, front2, flash) {
     plate3(c, [[x2 - 4, -34], [x2 + 4, -34], [x2 + 4, -27], [x2 - 4, -27]], survivors.includes(i) ? CYAN4 : "#11151a");
   }
   rune2(c, 0, -22, 0.65);
-  c.strokeStyle = INK46;
+  c.strokeStyle = INK47;
   c.lineWidth = 1.26 / s;
   c.beginPath();
   c.moveTo(...polygon27[0]);
@@ -55560,14 +56197,14 @@ function drawAegisGoliath(c, actor, tick, flash = false) {
   c.globalAlpha = 1 - death * 0.85;
   c.fillStyle = "#10192555";
   c.beginPath();
-  c.ellipse(0, 9, 37 + hover * 0.35, 15 + hover * 0.1, 0, 0, TAU65);
+  c.ellipse(0, 9, 37 + hover * 0.35, 15 + hover * 0.1, 0, 0, TAU66);
   c.fill();
   const pending = b.pendingAction, p = pending ? clamp46((tick - pending.startedTick) / (pending.resolvesTick - pending.startedTick)) : 0;
   const enraged = b.mimicEncounter && b.mimicEncounter.enragedTick !== null, pulse = 1 + Math.sin(tick * (enraged ? 0.21 : 0.11)) * (enraged ? 0.12 : 0.06) + (b.actionState === "recalling" ? 0.18 : 0);
   const impactAge = tick - (b.lastAction?.resolvedTick ?? -100), slamDrop = b.lastAction?.ability === "magnetic_pull" && impactAge >= 0 && impactAge < 18 ? Math.sin(impactAge / 18 * Math.PI) * 10 : 0;
   c.translate(0, -30 + hover + death * 16 + slamDrop - (pending?.ability === "magnetic_pull" ? p * 5 : 0));
   if (b.phase === 1 && !b.mimicEncounter) for (let i = 0; i < 3; i++) {
-    const a = tick / 60 + i * TAU65 / 3;
+    const a = tick / 60 + i * TAU66 / 3;
     if (Math.sin(a) < 0) shield3(c, Math.cos(a) * 55, Math.sin(a) * 16 - 3, 14, tick / 80 + i * 0.2, flash);
   }
   tower2(c, b, tick, false, flash);
@@ -55578,7 +56215,7 @@ function drawAegisGoliath(c, actor, tick, flash = false) {
   plate3(c, [[0, -24], [20, -22], [26, -2], [4, -8]], flash ? LIGHT10 : "#35485c", false);
   plate3(c, [[-26, -2], [0, 28], [0, 9], [-4, -8]], flash ? LIGHT10 : "#344557", false);
   plate3(c, [[26, -2], [0, 28], [0, 9], [4, -8]], flash ? LIGHT10 : "#1b2b3d", false);
-  plate3(c, [[0, -18], [12, -6], [0, 12], [-12, -6]], INK46);
+  plate3(c, [[0, -18], [12, -6], [0, 12], [-12, -6]], INK47);
   c.save();
   c.translate(0, -4);
   c.scale(pulse, pulse);
@@ -55603,18 +56240,18 @@ function drawAegisGoliath(c, actor, tick, flash = false) {
     c.lineWidth = 1.5;
     c.globalAlpha = 0.5 + p * 0.4;
     c.beginPath();
-    c.arc(0, -4, 15 + Math.sin(tick * 0.2) * 2, 0, TAU65);
+    c.arc(0, -4, 15 + Math.sin(tick * 0.2) * 2, 0, TAU66);
     c.stroke();
     c.globalAlpha = 1 - death * 0.85;
   }
   if (b.phase === 1 && !b.mimicEncounter) for (let i = 0; i < 3; i++) {
-    const a = tick / 60 + i * TAU65 / 3;
+    const a = tick / 60 + i * TAU66 / 3;
     if (Math.sin(a) >= 0) shield3(c, Math.cos(a) * 55, Math.sin(a) * 16 - 3, 14, tick / 80 + i * 0.2, flash);
   }
   tower2(c, b, tick, true, flash);
   if (b.actionState === "dazed") {
     for (let i = 0; i < 3; i++) {
-      const a = tick * 0.09 + i * TAU65 / 3;
+      const a = tick * 0.09 + i * TAU66 / 3;
       plate3(c, [[0, -3], [1, -1], [3, 0], [1, 1], [0, 3], [-1, 1], [-3, 0], [-1, -1]].map(([x, y]) => [x + Math.cos(a) * 20, y - 71 + Math.sin(a) * 5]), "#fff0a6");
     }
   }
@@ -55627,7 +56264,7 @@ function drawAegisProjectiles(c, model, tick) {
     c.translate(p.position.x, p.position.y);
     c.fillStyle = "#111b2a44";
     c.beginPath();
-    c.ellipse(0, 7, 10, 4, 0, 0, TAU65);
+    c.ellipse(0, 7, 10, 4, 0, 0, TAU66);
     c.fill();
     const n = Math.hypot(p.velocity.x, p.velocity.y) || 1;
     c.strokeStyle = "#65e6ec88";
@@ -57892,10 +58529,10 @@ function applyWorldTransferPatchD9(state, patch) {
 
 // src/storage/world_ground_window_d9.js
 async function readParticipantGroundWindowD9(state, p, { readPage, sha256, radius = D9_PROFILE.projectionRadius, center: requestedCenter = null }) {
-  const actor = state.entitiesById[p.entityId], spaceInstanceId = actor.residency.spaceInstanceId, actorCenter = spaceInstanceId === state.overworldInstanceId ? localFramePositionD9(actor.position, state.d9World.runtime.frames) : legacyWorldPosition(actor.position), center2 = requestedCenter ?? actorCenter, rows = [];
+  const actor = state.entitiesById[p.entityId], spaceInstanceId = actor.residency.spaceInstanceId, actorCenter = spaceInstanceId === state.overworldInstanceId ? localFramePositionD9(actor.position, state.d9World.runtime.frames) : legacyWorldPosition(actor.position), center3 = requestedCenter ?? actorCenter, rows = [];
   if (!state.d9World.groundIndex) return rows;
   for (let y = -2; y <= 2; y++) for (let x = -2; x <= 2; x++) {
-    const chunkX = addressWire(BigInt(center2.chunkX) + BigInt(x)), chunkY = addressWire(BigInt(center2.chunkY) + BigInt(y)), left = x * D9_PROFILE.chunkWidth - center2.localX, top = y * D9_PROFILE.chunkHeight - center2.localY;
+    const chunkX = addressWire(BigInt(center3.chunkX) + BigInt(x)), chunkY = addressWire(BigInt(center3.chunkY) + BigInt(y)), left = x * D9_PROFILE.chunkWidth - center3.localX, top = y * D9_PROFILE.chunkHeight - center3.localY;
     if (Math.hypot(Math.max(left, -left - D9_PROFILE.chunkWidth, 0), Math.max(top, -top - D9_PROFILE.chunkHeight, 0)) > radius) continue;
     const chunk2 = await readGroundChunkD9(state.d9World.groundIndex, { version: "world-ground-chunk-d9-v1", ownerPlayerId: p.playerId, spaceInstanceId, chunkX, chunkY }, { readPage, sha256 });
     if (!chunk2) continue;
@@ -57904,7 +58541,7 @@ async function readParticipantGroundWindowD9(state, p, { readPage, sha256, radiu
       if (Math.hypot(Math.max(cx, -cx - 128, 0), Math.max(cy, -cy - 128, 0)) > radius) continue;
       const cell = { version: "world-gear-cell-d9-v1", ownerPlayerId: p.playerId, spaceInstanceId, chunkX, chunkY, cellX, cellY };
       for (const row2 of await readGroundCellPageD9(id, cell, { readPage, sha256 })) {
-        const q = relativeWorldPosition(row2.location.position, center2, 4), distance8 = q ? Math.hypot(q.x - center2.localX, q.y - center2.localY) : Infinity;
+        const q = relativeWorldPosition(row2.location.position, center3, 4), distance8 = q ? Math.hypot(q.x - center3.localX, q.y - center3.localY) : Infinity;
         if (distance8 <= radius) {
           const a = relativeWorldPosition(row2.location.position, actorCenter, 4);
           rows.push({ row: row2, distance: a ? Math.hypot(a.x - actorCenter.localX, a.y - actorCenter.localY) : Infinity });
@@ -58044,7 +58681,7 @@ function revealNavigationD9(state) {
   for (const p of Object.values(state.playersById)) {
     const a = state.entitiesById[p.entityId];
     if (!a.alive || a.residency.spaceInstanceId !== state.overworldInstanceId) continue;
-    const center2 = localFramePositionD9(a.position, w.runtime.frames), radius = participantRadius(p), tx = BigInt(center2.chunkX) * 32n + BigInt(Math.floor(center2.localX / 32)), ty = BigInt(center2.chunkY) * 26n + BigInt(Math.floor(center2.localY / 32)), key2 = JSON.stringify([tx.toString(), ty.toString(), radius, w.runtime.revision]);
+    const center3 = localFramePositionD9(a.position, w.runtime.frames), radius = participantRadius(p), tx = BigInt(center3.chunkX) * 32n + BigInt(Math.floor(center3.localX / 32)), ty = BigInt(center3.chunkY) * 26n + BigInt(Math.floor(center3.localY / 32)), key2 = JSON.stringify([tx.toString(), ty.toString(), radius, w.runtime.revision]);
     nextKeys.set(p.playerId, key2);
     participants.push({ p, tx, ty, radius, key: key2 });
   }
@@ -58249,7 +58886,7 @@ function overlayFunctionalSiteBootstrapD9(chunk2, plan) {
 // src/shared/generation/woodland_ruin_exterior_d11_3_2.js
 var WOODLAND_RUIN_EXTERIOR_D11_3_2 = "woodland-ruin-exterior-d11.3.2-v1";
 var T4 = 32;
-var ROWS = [
+var ROWS2 = [
   "000000000",
   "000000000",
   "000111000",
@@ -58260,23 +58897,23 @@ var ROWS = [
   "011111110"
 ];
 var LEFT = -4;
-var TOP = -4;
+var TOP2 = -4;
 function overlayWoodlandRuinExteriorD11_3_2(chunk2, bootstrap) {
   const site = bootstrap?.bootstrap ?? bootstrap?.guaranteedCandidate ?? bootstrap;
   if (!site?.entrance || site.entrance.chunkX !== chunk2.chunkX || site.entrance.chunkY !== chunk2.chunkY) return chunk2;
   const ex = Math.floor(site.entrance.localX / T4), ey = Math.floor(site.entrance.localY / T4);
-  requireContract(ex + LEFT >= 0 && ex + LEFT + 9 <= 32 && ey + TOP >= 0 && ey + TOP + 8 <= 26, "Ruin exterior crosses page boundary");
+  requireContract(ex + LEFT >= 0 && ex + LEFT + 9 <= 32 && ey + TOP2 >= 0 && ey + TOP2 + 8 <= 26, "Ruin exterior crosses page boundary");
   const collision = chunk2.collision.tiles.map((r) => [...r]), terrain = chunk2.visual.terrain.map((r) => [...r]), biomes = chunk2.visual.biomes.map((r) => [...r]), centerline = chunk2.visual.route.centerline.map((r) => [...r]), clearance = chunk2.visual.route.clearance.map((r) => [...r]);
-  for (let ry = 0; ry < ROWS.length; ry++) for (let rx = 0; rx < ROWS[ry].length; rx++) {
-    const x = ex + LEFT + rx, y = ey + TOP + ry, walk = ROWS[ry][rx] === "1", path9 = walk && x === ex;
+  for (let ry = 0; ry < ROWS2.length; ry++) for (let rx = 0; rx < ROWS2[ry].length; rx++) {
+    const x = ex + LEFT + rx, y = ey + TOP2 + ry, walk = ROWS2[ry][rx] === "1", path9 = walk && x === ex;
     collision[y][x] = walk ? "1" : "0";
     terrain[y][x] = path9 ? "p" : "g";
     biomes[y][x] = "w";
     centerline[y][x] = path9 ? "1" : "0";
     clearance[y][x] = walk ? "1" : "0";
   }
-  const owns = (x, y) => x >= ex + LEFT && x < ex + LEFT + 9 && y >= ey + TOP && y < ey + TOP + 8;
-  const intersects5 = (b) => b.x < ex + LEFT + 9 && b.x + b.width > ex + LEFT && b.y < ey + TOP + 8 && b.y + b.height > ey + TOP;
+  const owns = (x, y) => x >= ex + LEFT && x < ex + LEFT + 9 && y >= ey + TOP2 && y < ey + TOP2 + 8;
+  const intersects5 = (b) => b.x < ex + LEFT + 9 && b.x + b.width > ex + LEFT && b.y < ey + TOP2 + 8 && b.y + b.height > ey + TOP2;
   const blockers = chunk2.visual.blockers.filter((b) => !intersects5(b));
   for (const b of [
     { x: ex - 4, y: ey - 4, width: 9, height: 2, detail: "rear-mass" },
@@ -58288,7 +58925,7 @@ function overlayWoodlandRuinExteriorD11_3_2(chunk2, bootstrap) {
     { x: ex + 4, y: ey + 3, width: 1, height: 1, detail: "right-root" }
   ]) blockers.push({ id: `ruin:${site.siteId}:${b.detail}`, ...b, kind: "ruin-exterior-masonry" });
   const decorations = (chunk2.visual.decorations ?? []).filter((d) => !owns(Math.floor(d.x), Math.floor(d.y))), anchors = chunk2.anchors.filter((a) => !owns(Math.floor(a.position.x / T4), Math.floor(a.position.y / T4))), sites = chunk2.sites.filter((s) => s.siteId === site.siteId || !owns(Math.floor(s.entrance.localX / T4), Math.floor(s.entrance.localY / T4)));
-  return freezeWire({ ...copyWire(chunk2), collision: { ...copyWire(chunk2.collision), tiles: collision.map((r) => r.join("")) }, visual: { ...copyWire(chunk2.visual), terrain: terrain.map((r) => r.join("")), biomes: biomes.map((r) => r.join("")), blockers, decorations, route: { centerline: centerline.map((r) => r.join("")), clearance: clearance.map((r) => r.join("")) } }, anchors, sites, ruinExterior: { version: WOODLAND_RUIN_EXTERIOR_D11_3_2, siteId: site.siteId, entranceTile: { x: ex, y: ey }, mask: [...ROWS] } });
+  return freezeWire({ ...copyWire(chunk2), collision: { ...copyWire(chunk2.collision), tiles: collision.map((r) => r.join("")) }, visual: { ...copyWire(chunk2.visual), terrain: terrain.map((r) => r.join("")), biomes: biomes.map((r) => r.join("")), blockers, decorations, route: { centerline: centerline.map((r) => r.join("")), clearance: clearance.map((r) => r.join("")) } }, anchors, sites, ruinExterior: { version: WOODLAND_RUIN_EXTERIOR_D11_3_2, siteId: site.siteId, entranceTile: { x: ex, y: ey }, mask: [...ROWS2] } });
 }
 
 // src/host/world_residency_d9.js
@@ -58301,8 +58938,8 @@ function actorFootprintPinsD9(s) {
   for (const a of Object.values(s.entitiesById)) if (a.residency.spaceInstanceId === s.overworldInstanceId) {
     const home = homes.get(groupByActor.get(a.entityId)), pageableHome = home ? chunkAddressKey(home.chunkX, home.chunkY) : null, r = a.hullRadius, homeOrigin = homeOrigins.get(groupByActor.get(a.entityId));
     if (homeOrigin && a.position.x - homeOrigin.x >= r && a.position.x - homeOrigin.x < D9_PROFILE.chunkWidth - r && a.position.y - homeOrigin.y >= r && a.position.y - homeOrigin.y < D9_PROFILE.chunkHeight - r) continue;
-    const center2 = localFramePositionD9(a.position, w.runtime.frames);
-    if (pageableHome && chunkAddressKey(center2.chunkX, center2.chunkY) === pageableHome && center2.localX >= r && center2.localX < D9_PROFILE.chunkWidth - r && center2.localY >= r && center2.localY < D9_PROFILE.chunkHeight - r) continue;
+    const center3 = localFramePositionD9(a.position, w.runtime.frames);
+    if (pageableHome && chunkAddressKey(center3.chunkX, center3.chunkY) === pageableHome && center3.localX >= r && center3.localX < D9_PROFILE.chunkWidth - r && center3.localY >= r && center3.localY < D9_PROFILE.chunkHeight - r) continue;
     for (const x of [a.position.x - r, a.position.x + r]) for (const y of [a.position.y - r, a.position.y + r]) {
       const q = localFramePositionD9({ x, y }, w.runtime.frames), key2 = chunkAddressKey(q.chunkX, q.chunkY), historical = BigInt(q.chunkX) >= 0n && BigInt(q.chunkY) >= 0n && BigInt(q.chunkX) < BigInt(w.origin.width / D9_PROFILE.chunkWidth) && BigInt(q.chunkY) < BigInt(w.origin.height / D9_PROFILE.chunkHeight);
       if (key2 !== pageableHome && !historical) pinned.add(key2);
@@ -59618,8 +60255,8 @@ async function createLocalEndlessSessionD9(options) {
     return false;
   };
   const landingFor = (record2, preferred = null, preparedTarget = null) => authority.withReadyAuthority((a) => a.withAuthorityState((s) => {
-    const player = s.playersById[localPlayerId], actor = s.entitiesById[player.entityId], entrance = record2.entrance, base = preferred?.position ?? preparedTarget ?? record2.approachAnchor, away = directionFromEntrance(record2, base), side = { x: -away.y, y: away.x }, starts = preferred ? [{ x: 0, y: 0 }] : [{ x: 0, y: 0 }, { x: away.x * D9_PROFILE.tileSize, y: away.y * D9_PROFILE.tileSize }, { x: side.x * D9_PROFILE.tileSize, y: side.y * D9_PROFILE.tileSize }, { x: -side.x * D9_PROFILE.tileSize, y: -side.y * D9_PROFILE.tileSize }, { x: away.x * D9_PROFILE.tileSize + side.x * D9_PROFILE.tileSize, y: away.y * D9_PROFILE.tileSize + side.y * D9_PROFILE.tileSize }, { x: away.x * D9_PROFILE.tileSize - side.x * D9_PROFILE.tileSize, y: away.y * D9_PROFILE.tileSize - side.y * D9_PROFILE.tileSize }], offsets = starts.concat(Array.from({ length: 4 }, (_, ring4) => {
-      const d = D9_PROFILE.tileSize * (ring4 + 2);
+    const player = s.playersById[localPlayerId], actor = s.entitiesById[player.entityId], entrance = record2.entrance, base = preferred?.position ?? preparedTarget ?? record2.approachAnchor, away = directionFromEntrance(record2, base), side = { x: -away.y, y: away.x }, starts = preferred ? [{ x: 0, y: 0 }] : [{ x: 0, y: 0 }, { x: away.x * D9_PROFILE.tileSize, y: away.y * D9_PROFILE.tileSize }, { x: side.x * D9_PROFILE.tileSize, y: side.y * D9_PROFILE.tileSize }, { x: -side.x * D9_PROFILE.tileSize, y: -side.y * D9_PROFILE.tileSize }, { x: away.x * D9_PROFILE.tileSize + side.x * D9_PROFILE.tileSize, y: away.y * D9_PROFILE.tileSize + side.y * D9_PROFILE.tileSize }, { x: away.x * D9_PROFILE.tileSize - side.x * D9_PROFILE.tileSize, y: away.y * D9_PROFILE.tileSize - side.y * D9_PROFILE.tileSize }], offsets = starts.concat(Array.from({ length: 4 }, (_, ring5) => {
+      const d = D9_PROFILE.tileSize * (ring5 + 2);
       return [{ x: away.x * d, y: away.y * d }, { x: side.x * d, y: side.y * d }, { x: -side.x * d, y: -side.y * d }];
     }).flat()), collision = s.spacesByInstanceId[s.overworldInstanceId].collision, revealDistance = navigatorRevealDistance(s);
     const rejected = { unprojected: 0, insideReveal: 0, blockedLanding: 0, blockedApproach: 0 };

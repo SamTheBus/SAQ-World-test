@@ -1342,3 +1342,77 @@ body #world-inventory #world-equipment,body #world-inventory #world-items{displa
  #world-inventory .gx-sheetfoot{padding:8px 14px 10px}
  #world-inventory button.gx-btn{min-height:40px;height:40px}
 }
+
+/* Class Skills screen v1 (src/client/class_skills_view_v1.js): three class trees behind tabs,
+   a 300px grid of five rows of three skills and a capstone, link lines behind the tiles and a
+   bubble that opens beside the tapped skill's row. */
+.cs-view{display:flex;flex-direction:column;gap:8px;flex:1;min-height:0;color:#eee7d9;font-family:system-ui,sans-serif}
+#world-inventory #world-progression-view .cs-view[hidden],#world-inventory #world-progression-view .skills-v2[hidden]{display:none}
+.cs-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.cs-points{flex:none;display:flex;align-items:baseline;gap:4px;padding:6px 12px;border-radius:999px;background:#151d26;border:1px solid #2f3a46;font-size:13px;color:#aeb5b6}
+.cs-points b{font-size:16px;color:#eee7d9}
+.cs-points small{font-size:12px;color:#7f8a93}
+.cs-points.has{background:#2a2418;border-color:#b7a077;color:#f2dfae}
+.cs-points.has b{color:#fff3cf}
+.cs-tabs{flex:1 1 320px;min-width:0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+#world-inventory #world-progression-view .cs-tab{flex:1 0 auto;min-height:40px;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 12px;border-radius:12px;border:1px solid #2f3a46;background:#151d26;color:#aeb5b6;font:600 13px/1 system-ui,sans-serif;box-shadow:none}
+#world-inventory #world-progression-view .cs-tab[aria-pressed=true]{color:#eee7d9;border-color:var(--tree);background:#1b232c;box-shadow:inset 0 -3px 0 var(--tree)}
+.cs-tab b{min-width:18px;padding:2px 5px;border-radius:8px;background:var(--tree);color:#0c1219;font:800 11px/1 system-ui,sans-serif}
+.cs-tab b[hidden]{display:none}
+.cs-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain}
+.cs-tree{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0 16px;background:#121a22;border:1px solid #1f2933;border-radius:16px}
+.cs-tagline{margin:0;font-size:12px;color:#8e979c;text-align:center;text-wrap:balance}
+.cs-grid{position:relative;left:15px;width:300px;flex:none}
+.cs-links{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.cs-links line{stroke:#2a3440;stroke-width:3;stroke-linecap:round}
+.cs-links line.lit{stroke:var(--tree)}
+#world-inventory #world-progression-view .cs-skill{position:absolute;z-index:1;width:78px;min-height:0;display:flex;flex-direction:column;align-items:center;gap:5px;padding:0;border:0;border-radius:0;background:none;color:#cfd5d6;font:600 11px/1.15 system-ui,sans-serif;text-align:center;cursor:pointer;box-shadow:none}
+.cs-tile{position:relative;width:54px;height:54px;flex:none;border-radius:12px;border:2px solid #3a4654;background:#151d26;display:flex;align-items:center;justify-content:center;box-sizing:border-box;color:#aeb5b6}
+.cs-tile svg{width:24px;height:24px}
+.cs-name{padding:1px 4px;border-radius:4px;background:#121a22}
+.cs-skill[data-kind=active] .cs-tile{border-radius:50%}
+.cs-skill[data-kind=active] .cs-tile::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:1px dashed var(--tree);opacity:.6}
+.cs-skill[data-kind=capstone] .cs-tile{width:52px;height:52px;margin:2px 0 11px;transform:rotate(45deg)}
+.cs-skill[data-kind=capstone] .cs-tile svg{transform:rotate(-45deg)}
+.cs-rank{position:absolute;right:-9px;bottom:-7px;min-width:26px;padding:2px 4px;border-radius:6px;background:#0c1219;border:1px solid #3a4654;font:800 10px/1 system-ui,sans-serif;color:#aeb5b6;text-align:center;box-sizing:border-box}
+.cs-skill[data-kind=capstone] .cs-rank{transform:rotate(-45deg);top:-10px;right:-14px;bottom:auto}
+.cs-skill[data-state=available] .cs-tile{border-color:#8e979c;color:#eee7d9}
+.cs-skill[data-state=learned] .cs-tile,.cs-skill[data-state=maxed] .cs-tile{border-color:var(--tree);background:#1b1f22;color:var(--tree)}
+.cs-skill[data-state=learned] .cs-rank{border-color:var(--tree);color:#eee7d9}
+.cs-skill[data-state=maxed] .cs-rank{border-color:var(--tree);background:var(--tree);color:#0c1219}
+.cs-skill[data-state=soon] .cs-tile{border-style:dashed}
+.cs-skill[data-state=soon] .cs-rank{font-size:9px;letter-spacing:.04em;color:#7f8a93}
+#world-inventory #world-progression-view .cs-skill.closed{color:#66717b}
+.cs-skill.closed .cs-tile{border-color:#2a3440;background:#121921;color:#56636f}
+.cs-skill.closed .cs-rank{border-color:#2a3440;color:#56636f}
+.cs-skill.selected .cs-tile{box-shadow:0 0 0 3px #f2dfaed9}
+.cs-skill.learned .cs-tile{animation:cs-learn .55s ease-out}
+@keyframes cs-learn{from{box-shadow:0 0 0 0 var(--tree)}to{box-shadow:0 0 0 16px transparent}}
+.cs-gate{position:absolute;left:-34px;transform:translateY(-50%);font:700 10px/1 system-ui,sans-serif;color:#8e979c;white-space:nowrap}
+.cs-gate::after{content:" pts"}
+.cs-gate.open{color:#3a4654}
+.cs-bubble{position:absolute;left:-36px;right:-6px;z-index:3;display:flex;flex-direction:column;gap:8px;padding:12px 14px 14px;background:#151d26;border:1px solid #2f3a46;border-top:3px solid var(--tree);border-radius:14px;box-shadow:0 14px 32px #000000a6;box-sizing:border-box}
+.cs-bubble[hidden]{display:none}
+.cs-bubble::before{content:"";position:absolute;left:calc(var(--arrow) + 29px);width:14px;height:14px;background:#151d26;transform:rotate(45deg);box-sizing:border-box}
+.cs-bubble.below::before{top:-10px;border-top:1px solid var(--tree);border-left:1px solid var(--tree)}
+.cs-bubble:not(.below)::before{bottom:-8px;border-right:1px solid #2f3a46;border-bottom:1px solid #2f3a46}
+.cs-bubble-head{display:flex;align-items:center;gap:8px}
+.cs-kind{padding:4px 7px;border-radius:6px;border:1px solid #3a4654;background:#1b2530;color:#cfd5d6;font:800 9px/1 system-ui,sans-serif;letter-spacing:.1em}
+.cs-kind.active{border-color:#b7a077;background:#2a2418;color:#f2dfae}
+.cs-bubble-head strong{flex:1;min-width:0;font:400 18px/1.1 Georgia,"Times New Roman",serif}
+.cs-bubble-head em{font:700 12px/1 system-ui,sans-serif;font-style:normal;color:#d9c49a}
+#world-inventory #world-progression-view .cs-close{width:32px;height:32px;min-height:0;padding:0;border:0;border-radius:10px;background:#1b2530;color:#eee7d9;font-size:18px;line-height:1;box-shadow:none}
+.cs-meta,.cs-req,.cs-desc,.cs-note,.cs-why{margin:0}
+.cs-meta{font:600 11px/1.3 system-ui,sans-serif;color:#8e979c}
+.cs-req{font:700 11px/1.2 system-ui,sans-serif;color:#d9c49a}
+.cs-req.met{color:#86d9a0}
+.cs-desc{font-size:13px;line-height:1.45;color:#dfe3e4}
+.cs-note,.cs-why{font-size:12px;color:#aeb5b6}
+#world-inventory #world-progression-view .cs-learn{min-height:44px;border:0;border-radius:12px;background:#b7a077;color:#14100a;font:700 14px/1 system-ui,sans-serif;box-shadow:none}
+#world-inventory #world-progression-view .cs-learn:disabled{border:1px solid #2f3a46;background:#1b2530;color:#8e979c;opacity:1;cursor:default}
+.cs-foot{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:4px}
+.cs-reset-row{display:flex;gap:8px}
+#world-inventory #world-progression-view .cs-reset{min-height:40px;border-radius:12px;border:1px solid #2f3a46;background:#151d26;color:#aeb5b6;box-shadow:none}
+#world-inventory #world-progression-view .cs-reset.danger{border-color:#8a3a3a;background:#2a1414;color:#f0a0a6}
+.cs-utility{display:flex;flex-direction:column;min-height:100%}
+#world-inventory #world-progression-view .skills-v2.only .skills-tabs{display:none}
