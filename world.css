@@ -1216,12 +1216,17 @@ body #world-inventory #world-equipment,body #world-inventory #world-items{displa
 #world-inventory button.gx-tile.is-locked img{opacity:.45}
 #world-inventory .gx-name{font:600 11px/1.25 system-ui,sans-serif;text-align:center;max-width:86px;color:color-mix(in srgb,var(--rarity,#eee7d9) 75%,#fff);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 #world-inventory .gx-hint,#world-inventory .gx-empty{margin:4px 0 0;text-align:center;font-size:13px;color:#7f8a93}
-#world-comparison.gx-sheet{position:fixed;z-index:12;left:0;right:0;bottom:0;top:auto;width:auto;max-width:none;max-height:88vh;transform:none;display:flex;flex-direction:column;background:#151d26;color:#eee7d9;border:0;border-top:1px solid #3a3122;border-radius:22px 22px 0 0;box-shadow:0 0 0 100vmax #000000a8,0 -10px 30px #0008;padding:0;font-family:system-ui,sans-serif;overflow:hidden}
-@media(min-width:700px){#world-comparison.gx-sheet{left:50%;right:auto;bottom:auto;top:50%;transform:translate(-50%,-50%);width:420px;max-height:86vh;border:1px solid #3a3122;border-radius:18px}}
+#world-comparison.gx-sheet{position:fixed;z-index:12;right:auto;bottom:auto;max-width:none;transform:none;display:flex;flex-direction:column;background:#151d26;color:#eee7d9;border:1px solid #3a3122;border-radius:18px;box-shadow:0 0 0 100vmax #00000073,0 18px 40px #000c;padding:0;font-family:system-ui,sans-serif;overflow:visible}
+#world-inventory .gx-arrow{position:absolute;left:var(--arrow-x,50%);width:14px;height:14px;margin-left:-7px;box-sizing:border-box;background:#151d26;border:1px solid #3a3122;transform:rotate(45deg);pointer-events:none}
 #world-comparison.gx-sheet[hidden]{display:none}
-#world-inventory .gx-grab{display:block;flex:none;width:40px;height:5px;border-radius:3px;background:#3a4654;margin:10px auto 0}
-@media(min-width:700px){#world-inventory .gx-grab{display:none}}
-#world-inventory .gx-sheetscroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:12px;padding:12px 16px 14px}
+#world-comparison.gx-sheet[data-side=below] .gx-arrow{top:-8px;border-right:0;border-bottom:0}
+#world-comparison.gx-sheet[data-side=above] .gx-arrow{bottom:-8px;border-left:0;border-top:0}
+#world-comparison.gx-sheet[data-side=right] .gx-arrow{left:-8px;top:var(--arrow-y,50%);margin:-7px 0 0;border-top:0;border-right:0}
+#world-comparison.gx-sheet[data-side=left] .gx-arrow{left:auto;right:-8px;top:var(--arrow-y,50%);margin:-7px 0 0;border-left:0;border-bottom:0}
+#world-comparison.gx-sheet[data-side=over] .gx-arrow{display:none}
+#world-comparison.gx-sheet.is-opening{animation:gx-pop .16s ease-out}
+@keyframes gx-pop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+#world-inventory .gx-sheetscroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:12px;padding:12px 16px 14px;border-radius:18px 18px 0 0}
 #world-inventory .gx-sheettop{display:flex;align-items:center;gap:8px}
 #world-inventory .gx-compareto{font-size:12px;color:#aeb5b6;flex:none}
 #world-inventory button.gx-ringtab{flex:1;min-height:48px;height:48px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;border:1px solid #2c3846;background:#1b2530;color:#aeb5b6;font:600 13px/1 system-ui,sans-serif;box-shadow:none;padding:0 8px}
@@ -1252,12 +1257,12 @@ body #world-inventory #world-equipment,body #world-inventory #world-items{displa
 #world-inventory .gx-roll.is-max{background:#3a1a16}
 #world-inventory .gx-roll.is-max>span{background:#e0533d;box-shadow:0 0 8px #e0533d8c}
 #world-inventory .gx-linewrap:has(.gx-roll.is-max) .gx-linetext{color:#ff8a70}
-#world-comparison.gx-sheet.is-perfect .gx-roll.is-max>span::after{content:"";position:absolute;top:0;bottom:0;width:45%;left:-45%;background:linear-gradient(90deg,#ffe2ce00,#ffe2cee6,#ffe2ce00);animation:gx-sweep 3.6s ease-in-out infinite}
+#world-inventory .gx-roll.is-max>span::after{content:"";position:absolute;top:0;bottom:0;width:45%;left:-45%;background:linear-gradient(90deg,#ffe2ce00,#ffe2cee6,#ffe2ce00);animation:gx-sweep 3.6s ease-in-out infinite}
 #world-comparison.gx-sheet.is-perfect .gx-itemicon{animation:gx-ember 3.6s ease-in-out infinite}
 #world-comparison.gx-sheet.is-perfect .gx-itemcard{border-top-color:#e0533d}
 @keyframes gx-sweep{0%{left:-45%}40%{left:105%}100%{left:105%}}
 @keyframes gx-ember{0%,100%{box-shadow:0 0 0 1px #e0533d73,0 0 10px #e0533d33}50%{box-shadow:0 0 0 1px #e0533dd9,0 0 22px #e0533d80}}
-@media(prefers-reduced-motion:reduce){#world-comparison.gx-sheet.is-perfect .gx-roll.is-max>span::after{display:none}#world-comparison.gx-sheet.is-perfect .gx-itemicon{animation:none;box-shadow:0 0 0 1px #e0533db3,0 0 14px #e0533d59}}
+@media(prefers-reduced-motion:reduce){#world-inventory .gx-roll.is-max>span::after{display:none}#world-comparison.gx-sheet.is-opening{animation:none}#world-comparison.gx-sheet.is-perfect .gx-itemicon{animation:none;box-shadow:0 0 0 1px #e0533db3,0 0 14px #e0533d59}}
 #world-inventory .gx-lost{background:#1a1214;border:1px solid #3a2226;border-radius:14px;padding:8px 14px}
 #world-inventory .gx-lost h5{margin:4px 0 2px;font:700 11px/1.3 system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#d98c93}
 #world-inventory .gx-lost .gx-line{padding:6px 0;color:#cfd5d6}
@@ -1289,7 +1294,7 @@ body #world-inventory #world-equipment,body #world-inventory #world-items{displa
 #world-inventory .gx-confirm{background:#1a1214;border:1px solid #3a2226;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px}
 #world-inventory .gx-confirm h4{margin:0;font:700 13px/1.2 system-ui,sans-serif;color:#f0a0a6}
 #world-inventory .gx-confirm p{margin:0;font-size:13px;color:#cfd5d6}
-#world-inventory .gx-sheetfoot{display:flex;gap:8px;flex:none;padding:12px 16px calc(16px + env(safe-area-inset-bottom,0px));border-top:1px solid #26313d;background:#151d26}
+#world-inventory .gx-sheetfoot{display:flex;gap:8px;flex:none;padding:12px 16px 14px;border-top:1px solid #26313d;background:#151d26;border-radius:0 0 18px 18px}
 #world-inventory button.gx-btn{flex:1;min-height:46px;height:46px;border-radius:12px;border:1px solid #3a4654;background:#1b2530;color:#eee7d9;font:600 14px/1 system-ui,sans-serif;box-shadow:none;padding:0 10px}
 #world-inventory button.gx-btn:hover{background:#243140;border-color:#56636f}
 #world-inventory button.gx-btn.is-primary{flex:2.4;border:0;background:#b7a077;color:#14100a;font-weight:700}

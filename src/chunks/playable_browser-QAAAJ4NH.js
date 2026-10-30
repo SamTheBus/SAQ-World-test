@@ -31970,9 +31970,14 @@ function createInventoryPresentation({ document, environment, readModel, adapter
     const previousAction = comparison.contains(document.activeElement) ? document.activeElement.dataset.action : null, sheetScroll = comparison.dataset.itemId === selected ? comparison.querySelector(".gx-sheetscroll")?.scrollTop ?? 0 : 0;
     comparison.replaceChildren();
     comparison.hidden = !inspect;
-    if (!inspect) return;
+    if (!inspect) {
+      delete comparison.dataset.itemId;
+      return;
+    }
+    const opening = comparison.dataset.itemId !== selected;
     buildSheet(m, inv, local6, owner, canEquip);
     comparison.dataset.itemId = selected;
+    placeSheet(opening);
     {
       const sheet = comparison.querySelector(".gx-sheetscroll");
       if (sheet) {
@@ -32323,7 +32328,40 @@ function createInventoryPresentation({ document, environment, readModel, adapter
       eq.dataset.action = "equip";
       foot.append(more, eq);
     }
-    comparison.append(element("span", "", "gx-grab"), scroll, foot);
+    comparison.append(element("span", "", "gx-arrow"), scroll, foot);
+  }
+  function placeSheet(opening) {
+    if (!inspect || comparison.hidden) return;
+    const vw = environment.innerWidth, vh = environment.innerHeight, pad = 12, gap = 12, width = Math.min(vw > 699 ? 400 : 380, vw - pad * 2), anchor = selectionOrigin?.isConnected ? selectionOrigin : panel.querySelector(`[data-item-id="${CSS.escape(selected)}"]`);
+    comparison.style.width = width + "px";
+    comparison.style.maxHeight = vh - pad * 2 + "px";
+    const r = anchor?.getBoundingClientRect() ?? { left: vw / 2, right: vw / 2, top: vh / 2, bottom: vh / 2, width: 0, height: 0 }, full = Math.min(comparison.offsetHeight, vh - pad * 2), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    let side = "over", h = full, left = Math.max(pad, Math.min(vw - pad - width, cx - width / 2)), top = Math.max(pad, Math.min(vh - pad - full, cy - full / 2));
+    const right = r.right + gap + width <= vw - pad, leftSide = r.left - gap - width >= pad, below = vh - pad - (r.bottom + gap), above = r.top - gap - pad;
+    if (vw > 699 && (right || leftSide)) {
+      side = right ? "right" : "left";
+      left = right ? r.right + gap : r.left - gap - width;
+    } else if (full <= below) {
+      side = "below";
+      top = r.bottom + gap;
+    } else if (full <= above) {
+      side = "above";
+      top = r.top - gap - full;
+    } else if (Math.max(below, above) >= 320) {
+      side = below >= above ? "below" : "above";
+      h = Math.max(below, above);
+      top = side === "below" ? r.bottom + gap : r.top - gap - h;
+    }
+    const ax = Math.max(22, Math.min(width - 22, cx - left)), ay = Math.max(22, Math.min(h - 22, cy - top)), origin = { below: `${ax}px 0`, above: `${ax}px 100%`, right: `0 ${ay}px`, left: `100% ${ay}px` }[side] ?? "50% 50%";
+    Object.assign(comparison.style, { maxHeight: h + "px", left: left + "px", top: top + "px", transformOrigin: origin });
+    comparison.style.setProperty("--arrow-x", ax + "px");
+    comparison.style.setProperty("--arrow-y", ay + "px");
+    comparison.dataset.side = side;
+    if (opening) {
+      comparison.classList.remove("is-opening");
+      void comparison.offsetWidth;
+      comparison.classList.add("is-opening");
+    }
   }
   function moreActions(item, d, local6, inv, canEquip) {
     const box = element("div", "", "gx-more"), row2 = element("div", "", "gx-morerow");
@@ -32435,6 +32473,8 @@ function createInventoryPresentation({ document, environment, readModel, adapter
     key2 = null;
     if (open) refresh(readModel());
   };
+  const browse = document.getElementById("world-bag-browse"), followAnchor = () => placeSheet(false);
+  browse?.addEventListener("scroll", followAnchor, { passive: true });
   environment.addEventListener("resize", resized);
   const keyboard = (e) => {
     if (e.repeat || ["INPUT", "TEXTAREA", "SELECT"].includes(e.target?.tagName)) return;
@@ -32485,6 +32525,7 @@ function createInventoryPresentation({ document, environment, readModel, adapter
     for (const { button: button2, listener } of sectionButtons) button2.removeEventListener("click", listener);
     panel.removeEventListener("pointerdown", outside);
     environment.removeEventListener("resize", resized);
+    browse?.removeEventListener("scroll", followAnchor);
     openButton.removeEventListener("click", toggle);
     crest?.removeEventListener("click", toggle);
     crest?.removeEventListener("keydown", crestKey);
