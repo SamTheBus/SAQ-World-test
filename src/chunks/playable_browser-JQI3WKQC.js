@@ -382,7 +382,6 @@ import {
   equipmentAfter,
   equipmentLevelAllowed,
   equipmentRequiredLevel,
-  equipmentSlots,
   equippedWeaponVisual,
   eventOrdinal,
   findRuntimeSiteSocketD9,
@@ -599,6 +598,7 @@ import {
   resolveSiteRunEpisodeD13B,
   retireEncounterRewards,
   retireSiteEpisodeAuthorityD13C1,
+  retiredGear,
   rewardClassForCompletionResourceD13D_C,
   rewardProfileD9,
   rewardProgression,
@@ -725,7 +725,7 @@ import {
   worldLevelGapMultiplier,
   worldOrdinaryMeleeProfile,
   worldPointForArea
-} from "./chunk-LVPM734K.js";
+} from "./chunk-XSFMNAZ5.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -31506,6 +31506,11 @@ function createInventoryPresentation({ document, environment, readModel, adapter
         copy.append(element("strong", d2.name, "item-title"), element("small", `${label2(d2.slot).toUpperCase()} \xB7 ${rarity(d2)}`, "item-sub"), element("span", Object.entries(d2.bonuses).filter(([, v]) => v).map(([k, v]) => `${{ attack: "ATK", defense: "DEF", maxHp: "HP" }[k]} +${statText(v)}`).join(" | ") || "No stat bonus", "item-sub gear-bonuses"));
         inspectButton.append(itemIcon(item2), copy);
         row2.append(inspectButton);
+        if (retiredGear(d2)) {
+          row2.append(element("span", "NO SLOT", "row-action retired-slot"));
+          list.append(row2);
+          continue;
+        }
         const target = d2.slot === "ring" ? "ring1" : d2.slot, preview = equipmentComparison(inv, item2.itemId, target, local6.progression.totalXp, local6.d8), classUser = classGearAllowed(owner, item2) ? null : HERO_CLASSES[itemGearClass(item2)] ?? Object.values(HERO_CLASSES).find((c) => c.offhand === d2.subType), allowed = equipmentLevelAllowed(owner, item2) && !classUser, required = equipmentRequiredLevel(owner, item2), action3 = button(classUser ? `${classUser.name.toUpperCase()} ONLY` : !allowed ? `REQUIRES LV. ${required}` : d2.slot === "ring" ? "EQUIP \u2026" : preview.displaced.length ? "SWAP" : "EQUIP", () => {
           if (d2.slot === "ring") select(item2.itemId, inspectButton);
           else issue("equipment.equip", { itemId: item2.itemId, slot: target });
@@ -31601,7 +31606,7 @@ function createInventoryPresentation({ document, environment, readModel, adapter
       }
       if (delta3.childElementCount === 1) delta3.append(element("p", "No net difference.", "tt-muted"));
       candidate.append(delta3);
-      const allowed = equipmentLevelAllowed(owner, item), required = equipmentRequiredLevel(owner, item), action3 = button(!allowed ? `Requires hero level ${required}` : `${preview.displaced.length ? "Swap" : "Equip"}${d.slot === "ring" ? ` to ${label2(target)}` : ""}`, () => issue("equipment.equip", { itemId: item.itemId, slot: target }), !canEquip || !allowed);
+      const allowed = equipmentLevelAllowed(owner, item), required = equipmentRequiredLevel(owner, item), retired = retiredGear(d), action3 = button(retired ? "Chest and leggings are retired: wear an Overall" : !allowed ? `Requires hero level ${required}` : `${preview.displaced.length ? "Swap" : "Equip"}${d.slot === "ring" ? ` to ${label2(target)}` : ""}`, () => issue("equipment.equip", { itemId: item.itemId, slot: target }), !canEquip || !allowed || retired);
       action3.className = "equip-action";
       action3.dataset.action = target;
       candidate.append(action3);
@@ -32444,8 +32449,8 @@ function createSettlementServicesMenu2(options) {
       layout.append(list, detail);
       body5.append(layout);
       if (mode === "attune") {
-        if (!equipmentSlots(inv).includes(selected)) selected = "weapon";
-        for (const slot of equipmentSlots(inv)) {
+        if (!listedEquipmentSlots(inv).includes(selected)) selected = "weapon";
+        for (const slot of listedEquipmentSlots(inv)) {
           const i2 = inv.itemsById[inv.equipped[slot]], b2 = i2 ? card(i2, "slot:" + slot, slot + " \xB7 Lv. " + inv.economy.slotLevels[slot], () => change(mode, slot)) : button(slot + " \xB7 empty \xB7 Lv. " + inv.economy.slotLevels[slot], () => change(mode, slot), "slot:" + slot, "service-card");
           b2.setAttribute("aria-pressed", String(slot === selected));
           list.append(b2);

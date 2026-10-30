@@ -8064,7 +8064,8 @@ function rewardProgressionD9(depth, sourceId) {
   return freezeWire(validateRewardProgressionD9({ version: D9_REWARD_PROGRESSION, policy: D9_PROFILE.progressionPolicy, sourceDepth: progressionWire(progressionBigInt(depth)), quality: 1, sourceId, tomeEligibility: "base-single-d7-v1" }));
 }
 function validateRewardProgressionD9(v) {
-  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "gearClass"]);
+  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "gearClass", "armor"]);
+  requireContract(v.armor === void 0 || v.armor === "overall" && v.gearClass === void 0 && v.combatHash === WORLD_COMBAT_HASH, "One-piece armor policy");
   requireContract(v.version === D9_REWARD_PROGRESSION && v.policy === D9_PROFILE.progressionPolicy, "D9 reward progression version");
   positiveProgression(v.sourceDepth);
   requireContract(typeof v.sourceId === "string" && v.sourceId.length > 0 && v.sourceId.length <= 240, "Invalid reward source");
@@ -8517,6 +8518,7 @@ var RARITY_NAMES = Object.freeze(["Common", "Rare", "Magic", "Epic", "Legendary"
 var RARITY_COLORS = Object.freeze(["#ffffff", "#3498db", "#9b59b6", "#e67e22", "#f1c40f", "#e74c3c"]);
 var SALVAGE_MATERIALS = Object.freeze(["Monster Soul", "Rare Scrap", "Magic Scrap", "Epic Scrap", "Legendary Scrap", "Mythic Scrap"]);
 var GEAR_FAMILIES = Object.freeze(["weapon", "subweapon", "helmet", "chest", "leggings", "overall", "boots", "ring"]);
+var ONE_PIECE_GEAR_FAMILIES = Object.freeze(GEAR_FAMILIES.filter((f2) => f2 !== "chest" && f2 !== "leggings"));
 var GEAR_NOUNS = Object.freeze({ weapon: ["Greatsword", "Longsword", "Halberd", "Warhammer", "Battleaxe", "Broadsword", "Flanged Mace", "Claymore"], shield: ["Kite Shield", "Tower Shield", "Buckler", "Aegis", "Heater Shield"], dagger: ["Kris", "Stiletto", "Baselard", "Dirk", "Main-Gauche"], tome: ["Grimoire", "Spellbook", "Codex", "Lexicon", "Chronicle"], helmet: ["Greathelm", "Armet", "Visor"], chest: ["Hauberk", "Cuirass", "Brigandine", "Plate Mail", "Chain Mail", "Doublet"], leggings: ["Greaves", "Legplates", "Chausses", "Cuisses"], boots: ["Sabatons", "Sollerets", "Steel Boots", "Treads"], overall: ["Exosuit", "Inquisitor Robes", "Full Plate Armor", "Trenchcoat"], ring: ["Signet Ring", "Loop Ring", "Band Ring", "Seal Ring"] });
 var AFFIX_POOLS = Object.freeze({ weapon: ["critChance", "critDamage", "activeSpd"], chest: ["maxHp", "def", "str", "dex", "int"], overall: ["maxHp", "def", "str", "dex", "int"], helmet: ["critChance", "activeSpd", "bonusAreaRadius"], leggings: ["maxHp", "def", "str", "dex", "int"], boots: ["moveSpeed", "activeSpd"], ring: ["atk", "maxHp", "def", "str", "dex", "int", "critChance", "moveSpeed", "bonusAreaRadius"], shield: ["block", "moveSpeed", "bonusAreaRadius"], dagger: ["parry", "critChance", "moveSpeed", "bonusAreaRadius"], tome: ["critDamage", "activeSpd", "critChance", "bonusAreaRadius"], gloves: ["atk", "critChance", "activeSpd", "str", "dex", "int"] });
 function gearHash(text) {
@@ -8563,9 +8565,9 @@ function generateAtPrecision(c, seed, input, { tier: tier2 = null, family: famil
   const rng2 = rewardStream(seed), random = () => rng2.random(), pick4 = (a) => a[Math.floor(random() * a.length)], power2 = progression.combatHash ? depth : progressionWire(progressionBigInt(depth) / 4n + 1n);
   const rarityRandom = progression.combatHash ? random() : null, rarityTier = tier2 ?? (progression.combatHash ? hasWorldRarityV2(progression) ? worldGearRarityV2(depth, progression.rarityHeroLevel, progression.rarityRole, rarityRandom, progression.modifiers?.qualityHundredths ?? 0) : worldGearRarity(depth, progression.combatQuality, rarityRandom, progression.modifiers?.qualityHundredths ?? 0) : rollRarityD9(depth, progression.quality, random));
   safeInteger(rarityTier, 0, 5);
-  const cls = progression.gearClass ?? null, classOffhand = cls ? CLASS_GEAR[cls].offhand : null;
-  const type = family2 ?? pick4(cls ? CLASS_GEAR_FAMILIES : GEAR_FAMILIES), sub = type === "subweapon" ? subType ?? (cls ? classOffhand : pick4(["shield", "dagger", "tome"])) : null, nouns = cls && type !== "ring" ? classGearNouns(cls, type) : GEAR_NOUNS[sub ?? type], n = noun ?? pick4(nouns);
-  requireContract((cls ? CLASS_GEAR_FAMILIES : GEAR_FAMILIES).includes(type) && (!cls || type !== "subweapon" || sub === classOffhand) && nouns?.includes(n), "Unknown generated family/noun");
+  const cls = progression.gearClass ?? null, classOffhand = cls ? CLASS_GEAR[cls].offhand : null, families = cls ? CLASS_GEAR_FAMILIES : progression.armor === "overall" ? ONE_PIECE_GEAR_FAMILIES : GEAR_FAMILIES;
+  const type = family2 ?? pick4(families), sub = type === "subweapon" ? subType ?? (cls ? classOffhand : pick4(["shield", "dagger", "tome"])) : null, nouns = cls && type !== "ring" ? classGearNouns(cls, type) : GEAR_NOUNS[sub ?? type], n = noun ?? pick4(nouns);
+  requireContract((family2 ? cls ? CLASS_GEAR_FAMILIES : GEAR_FAMILIES : families).includes(type) && (!cls || type !== "subweapon" || sub === classOffhand) && nouns?.includes(n), "Unknown generated family/noun");
   const E = c.dungeonScale(power2).E, R2 = c.q(100 + 7 * rarityTier, 100), P = c.q((100 + 15 * rarityTier) * (type === "overall" ? 18 : 10), 1e3), flatR = c.mul(R2, c.q(type === "overall" ? 18 : 10, 10));
   const I = (v) => {
     if (v && typeof v === "object" && "lo" in v) return v;
@@ -9841,6 +9843,7 @@ function SUBWEAPON_CATALOG() {
   return Object.fromEntries(Object.values(SUBWEAPONS).map((d) => [d.definitionId, d]));
 }
 var equipmentSlots = (inv) => inv?.subweapons || inv?.classKit ? [...EQUIPMENT_SLOTS, ...inv.subweapons ? ["subweapon"] : [], ...inv.classKit ? ["gloves"] : []] : EQUIPMENT_SLOTS;
+var RETIRED_SLOTS = Object.freeze(["chest", "leggings"]);
 var REWARD_POOLS = freezeWire([
   ["iron-sword", "padded-armor", "copper-charm", "coif", "greaves", "sabatons", "full-plate"],
   ["guard-sword", "chain-armor", "silver-charm", "coif", "greaves", "sabatons", "full-plate"],
@@ -10128,12 +10131,12 @@ function installSettlementServices(s) {
 }
 var stockCache = /* @__PURE__ */ new Map();
 var merchantPrice = (npc, offer) => String(Number(offer.price) * npc.band);
-function serviceStock(s, p, npc, gearClass = heroClassOf(p.d8)?.id ?? null) {
+function serviceStock(s, p, npc, gearClass = heroClassOf(p.d8)?.id ?? null, legacyChest = false) {
   const cls = hasWorldCombat(s) ? gearClass : null, offers = SETTLEMENT_LIFE_POLICY.stockByRole[npc.role] ?? [];
   return offers.map((base) => {
-    const offer = { ...base, price: merchantPrice(npc, base) }, sourceEntityId = "ent:" + token(SETTLEMENT_LIFE_POLICY.stockVersion + (hasWorldCombat(s) ? "/" + WORLD_COMBAT_HASH : "") + (cls ? "/" + cls : "") + "/" + s.campaign.seed.seedHex + "/" + p.playerId + "/" + npc.id + "/" + offer.id), key9 = sourceEntityId;
+    const offer = { ...base, price: merchantPrice(npc, base) }, sourceEntityId = "ent:" + token(SETTLEMENT_LIFE_POLICY.stockVersion + (hasWorldCombat(s) ? "/" + WORLD_COMBAT_HASH : "") + (cls ? "/" + cls : "") + "/" + s.campaign.seed.seedHex + "/" + p.playerId + "/" + npc.id + "/" + offer.id), key9 = sourceEntityId + (legacyChest ? "/legacy-chest" : "");
     if (!stockCache.has(key9)) {
-      const progression = hasWorldCombat(s) ? { ...rewardProgressionD9([0, 1, 6, 11, 21, 41][npc.band], sourceEntityId), combatHash: WORLD_COMBAT_HASH, combatQuality: "ordinary", ...cls ? { gearClass: cls } : {} } : rewardProgression(SETTLEMENT_LIFE_POLICY.bandSourceDepth[npc.band], sourceEntityId), generated = generateGear3(gearSeed(s, p, sourceEntityId), progression, { tier: SETTLEMENT_LIFE_POLICY.gearRarity, family: cls && offer.family === "chest" ? "overall" : offer.family });
+      const progression = hasWorldCombat(s) ? { ...rewardProgressionD9([0, 1, 6, 11, 21, 41][npc.band], sourceEntityId), combatHash: WORLD_COMBAT_HASH, combatQuality: "ordinary", ...cls ? { gearClass: cls } : {} } : rewardProgression(SETTLEMENT_LIFE_POLICY.bandSourceDepth[npc.band], sourceEntityId), generated = generateGear3(gearSeed(s, p, sourceEntityId), progression, { tier: SETTLEMENT_LIFE_POLICY.gearRarity, family: (cls || hasWorldCombat(s) && !legacyChest) && offer.family === "chest" ? "overall" : offer.family });
       if (stockCache.size >= 128) stockCache.delete(stockCache.keys().next().value);
       stockCache.set(key9, freezeWire({ offer, sourceEntityId, item: { itemId: `item:${p.playerId}:${sourceEntityId}`, definitionId: offer.definitionId, ownerPlayerId: p.playerId, sourceEntityId, generated: copyWire(generated) } }));
     }
@@ -10148,7 +10151,7 @@ function validateServiceOrigin(p, o, id) {
   requireContract(o.servicePurchase === id && servicePurchase(p, id), "Unknown purchased gear provenance");
 }
 function validateServiceItem(s, p, item) {
-  const r = servicePurchase(p, item.sourceEntityId), n = serviceNpcsFor(s.d9World?.plannedWorld).find((n2) => n2.id === r?.npcId), stock = n && [...serviceStock(s, p, n), ...heroClassOf(p.d8) ? serviceStock(s, p, n, null) : []].find((q) => q.offer.id === r.offerId && same(q.item, unmodifiedItem(item)));
+  const r = servicePurchase(p, item.sourceEntityId), n = serviceNpcsFor(s.d9World?.plannedWorld).find((n2) => n2.id === r?.npcId), stock = n && [...serviceStock(s, p, n), ...heroClassOf(p.d8) ? serviceStock(s, p, n, null) : [], ...hasWorldCombat(s) ? serviceStock(s, p, n, null, true) : []].find((q) => q.offer.id === r.offerId && same(q.item, unmodifiedItem(item)));
   requireContract(stock && same(r.item, unmodifiedItem(item)), "Purchased gear changed");
   return item;
 }
