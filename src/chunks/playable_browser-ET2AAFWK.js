@@ -30942,34 +30942,66 @@ function itemLines(d) {
   for (const [k, v] of Object.entries(d.effects ?? {})) add("fx:" + k, v);
   return [...lines].map(([key2, value2]) => ({ key: key2, value: value2, flat: FLAT.includes(key2) })).sort((a, b) => (a.flat ? FLAT.indexOf(a.key) : 99) - (b.flat ? FLAT.indexOf(b.key) : 99));
 }
-function affixRolls(generated) {
-  const rolls = /* @__PURE__ */ new Map();
-  if (!generated?.affixes) return { rolls, perfect: false };
-  for (const a of generated.affixes) {
-    const range2 = affixRollRange(generated, a.key), span = statDifference(range2.maximum, range2.minimum), fixed = zero3(span);
-    const quality = fixed ? 1 : Math.max(0, Math.min(1, Number(statValue(statDifference(a.value, range2.minimum))) / Number(statValue(span))));
-    rolls.set(affixLine(a.key), { fixed, quality, max: !fixed && sign(statDifference(a.value, range2.maximum)) >= 0 });
+function rollOf(generated, a) {
+  const range2 = affixRollRange(generated, a.key), span = statDifference(range2.maximum, range2.minimum), fixed = zero3(span);
+  return { fixed, quality: fixed ? 1 : Math.max(0, Math.min(1, Number(statValue(statDifference(a.value, range2.minimum))) / Number(statValue(span)))), max: !fixed && sign(statDifference(a.value, range2.maximum)) >= 0 };
+}
+function itemSections(d, generated) {
+  const affixes = (generated?.affixes ?? []).map((a) => {
+    const key2 = affixLine(a.key);
+    return { key: key2, value: a.value, flat: FLAT.includes(key2), roll: rollOf(generated, a) };
+  }), rolled = /* @__PURE__ */ new Map();
+  for (const a of affixes) rolled.set(a.key, rolled.has(a.key) ? sum(rolled.get(a.key), a.value) : a.value);
+  const base = [];
+  for (const l of itemLines(d)) {
+    const value2 = rolled.has(l.key) ? statDifference(l.value, rolled.get(l.key)) : l.value;
+    if (!zero3(value2) || l.key === "attack" && d.slot === "weapon") base.push({ ...l, value: value2 });
   }
-  const rolled = [...rolls.values()].filter((r) => !r.fixed);
-  return { rolls, perfect: rolled.length >= 2 && rolled.every((r) => r.max) };
+  const rolls = affixes.filter((a) => !a.roll.fixed);
+  return { base, affixes, perfect: rolls.length >= 2 && rolls.every((a) => a.roll.max) };
 }
-function compareLines(newLines, wornDefinitions) {
-  const worn = /* @__PURE__ */ new Map();
-  for (const d of wornDefinitions) for (const l of itemLines(d)) worn.set(l.key, worn.has(l.key) ? sum(worn.get(l.key), l.value) : l.value);
-  const marks2 = newLines.map((l) => {
-    if (!worn.has(l.key)) return { ...l, mark: "new" };
-    const diff = statDifference(l.value, worn.get(l.key)), s = sign(diff);
+function compareSections(sections, worn) {
+  const byKey = (list) => {
+    const m = /* @__PURE__ */ new Map();
+    for (const l of list) m.set(l.key, m.has(l.key) ? sum(m.get(l.key), l.value) : l.value);
+    return m;
+  };
+  const mark = (l, against) => {
+    if (!against.has(l.key)) return { ...l, mark: "new" };
+    const diff = statDifference(l.value, against.get(l.key)), s = sign(diff);
     return { ...l, mark: s > 0 ? "up" : s < 0 ? "down" : "same", diff: s < 0 ? statScale(diff, -1) : diff };
-  });
-  const lost = [...worn].filter(([k]) => !newLines.some((l) => l.key === k)).map(([key2, value2]) => ({ key: key2, value: value2, flat: FLAT.includes(key2) }));
-  return { marks: marks2, lost };
+  };
+  const wornBase = byKey(worn.flatMap((w) => w.base)), wornAffixes = byKey(worn.flatMap((w) => w.affixes)), gives = new Set([...sections.base, ...sections.affixes].map((l) => l.key));
+  const lost = [...byKey(worn.flatMap((w) => [...w.base, ...w.affixes]))].filter(([k]) => !gives.has(k)).map(([key2, value2]) => ({ key: key2, value: value2, flat: FLAT.includes(key2) }));
+  return { base: sections.base.map((l) => mark(l, wornBase)), affixes: sections.affixes.map((l) => mark(l, wornAffixes)), lost };
 }
-var HERO_ROWS = [["attack", "Attack"], ["defense", "Defense"], ["maxHp", "Max HP"], ["critChance", "Crit", "pct"], ["critMultiplier", "Crit damage", "x"], ["activeHaste", "Active Speed", "pct"], ["moveSpeed", "Speed"], ["str", "STR"], ["dex", "DEX"], ["int", "INT"]];
+var HERO_ROWS = [["attack", "Attack"], ["defense", "Defense"], ["maxHp", "Max HP"], ["critChance", "Crit", "pct", "critChance"], ["critMultiplier", "Crit damage", "x", "critDamage"], ["activeHaste", "Active Speed", "pct", "activeSpeed"], ["moveSpeed", "Speed", null, "moveSpeed"], ["str", "STR"], ["dex", "DEX"], ["int", "INT"]];
 var heroValue = (v, f) => f === "pct" ? statText(statScale(v, 100)) + "%" : f === "x" ? statText(v) + "\xD7" : statText(v);
 function heroChanges(preview) {
-  return HERO_ROWS.filter(([k]) => preview.difference[k] && !zero3(preview.difference[k])).map(([k, label3, f]) => ({ label: label3, before: heroValue(preview.before[k], f), after: heroValue(preview.after[k], f), up: sign(preview.difference[k]) > 0 }));
+  return HERO_ROWS.filter(([k]) => preview.difference[k] && !zero3(preview.difference[k])).map(([k, label3, f, icon]) => ({ label: label3, icon: icon ?? k, before: heroValue(preview.before[k], f), after: heroValue(preview.after[k], f), up: sign(preview.difference[k]) > 0 }));
 }
 var isUpgrade = (preview) => Boolean(preview) && Object.values(preview.difference).some((v) => sign(v) > 0) && !Object.values(preview.difference).some((v) => sign(v) < 0);
+var ICON_PATHS = {
+  attack: ["#e8848c", '<path d="M14.5 17.5 3 6V3h3l11.5 11.5"/><path d="M13 19l6-6M16 16l4 4M19 21l2-2"/>'],
+  defense: ["#79b8ec", '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>'],
+  maxHp: ["#ef6f7d", '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"/>'],
+  str: ["#ef9a5a", '<path d="M6.5 6.5l11 11M21 21l-1-1M3 3l1 1M18 22l4-4M2 6l4-4M3 10l7-7M14 21l7-7"/>'],
+  dex: ["#93d48a", '<circle cx="12" cy="12" r="9"/><path d="M22 12h-4M6 12H2M12 6V2M12 22v-4"/>'],
+  int: ["#a99cf5", '<path d="M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0"/><circle cx="12" cy="12" r="3"/>'],
+  critChance: ["#ecc75a", '<path d="M9.94 15.5A2 2 0 0 0 8.5 14.06l-6.14-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.14a.5.5 0 0 1 .96 0l1.58 6.14a2 2 0 0 0 1.44 1.44l6.14 1.58a.5.5 0 0 1 0 .96l-6.14 1.58a2 2 0 0 0-1.44 1.44l-1.58 6.14a.5.5 0 0 1-.96 0z"/>'],
+  critDamage: ["#f2945f", '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>'],
+  activeSpeed: ["#f1d36a", '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>'],
+  moveSpeed: ["#7fd3c9", '<path d="M12.8 19.6A2 2 0 1 0 14 16H2M17.5 8a2.5 2.5 0 1 1 2 4H2M9.8 4.4A2 2 0 1 1 11 8H2"/>'],
+  bonusAreaRadius: ["#67c7bb", '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>'],
+  block: ["#9cb4cc", '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M9 12l2 2 4-4"/>'],
+  parry: ["#c5ccd4", '<path d="M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M19 21l2-2M14.5 6.5 18 3h3v3l-3.5 3.5M5 14l4 4M7 17l-3 3M3 19l2 2"/>']
+};
+var ICON_ALIAS = { atkPct: "attack", defPct: "defense", maxHpPct: "maxHp", strPct: "str", dexPct: "dex", intPct: "int", moveSpeedPct: "moveSpeed", activeSpd: "activeSpeed" };
+function statIcon(key2, size = 16) {
+  const k = key2.startsWith("fx:") ? key2.slice(3) : key2, icon = ICON_PATHS[ICON_ALIAS[k] ?? k];
+  if (!icon) return "";
+  return `<svg class="gx-ic" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${icon[0]}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icon[1]}</svg>`;
+}
 function drawHeroPortrait(canvas, heroLook) {
   const ctx = canvas.getContext?.("2d");
   if (!ctx) return;
@@ -31995,6 +32027,7 @@ function createInventoryPresentation({ document, environment, readModel, adapter
     e.innerHTML = html;
     return e;
   };
+  const STAT_ROW_ICONS = { "Critical damage": "critDamage", "Active haste": "activeSpeed", "Block chance": "block", "Parry chance": "parry", "Area multiplier": "bonusAreaRadius", "Movement speed": "moveSpeed" };
   const SHOWN_ABOVE = /* @__PURE__ */ new Set(["Attack", "Defense", "Maximum health", "Critical chance"]);
   const TOME_LINE = { fire: "Infernal Fireball \xB7 single-target Burn", lightning: "Chain Lightning \xB7 one additional target", frost: "Glacial Frost \xB7 Chill builds to Freeze" };
   const CLOSE_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
@@ -32081,8 +32114,8 @@ function createInventoryPresentation({ document, environment, readModel, adapter
     const doll = element("div", "", "gx-doll");
     doll.append(col(DOLL_LEFT), hero, col(DOLL_RIGHT));
     const s = local6.stats, keys2 = element("div", "", "gx-keystats");
-    for (const [label3, v, pct2] of [["Attack", s.attack], ["Defense", s.defense], ["Max HP", s.maxHp], ["Crit", s.critChance, true]]) {
-      const t = element("div", "", "gx-keystat");
+    for (const [label3, v, pct2, ic] of [["Attack", s.attack, false, "attack"], ["Defense", s.defense, false, "defense"], ["Max HP", s.maxHp, false, "maxHp"], ["Crit", s.critChance, true, "critChance"]]) {
+      const t = markup(element("div", "", "gx-keystat"), statIcon(ic, 18));
       t.append(element("b", pct2 ? statText(statScale(v, 100), true) + "%" : statText(v, true)), element("span", label3));
       keys2.append(t);
     }
@@ -32099,7 +32132,7 @@ function createInventoryPresentation({ document, environment, readModel, adapter
     const attrs = element("section", "", "gx-card"), grid = element("div", "", "gx-attrs");
     attrs.setAttribute("aria-label", "Attributes");
     for (const k of ["str", "dex", "int"]) {
-      const t = element("div", "", "gx-attr");
+      const t = markup(element("div", "", "gx-attr"), statIcon(k, 18));
       t.append(element("b", statText(s.attributes?.[k] ?? s[k] ?? 0)), element("span", k.toUpperCase()));
       grid.append(t);
     }
@@ -32112,8 +32145,9 @@ function createInventoryPresentation({ document, environment, readModel, adapter
       card.setAttribute("aria-label", g.title);
       card.append(element("h4", g.title, "gx-cardtitle"));
       for (const r of rows) {
-        const row2 = element("div", "", "gx-statrow");
-        row2.append(element("span", r.label), element("b", r.value));
+        const row2 = element("div", "", "gx-statrow"), name = markup(element("span"), statIcon(STAT_ROW_ICONS[r.label] ?? "", 14));
+        name.append(r.label);
+        row2.append(name, element("b", r.value));
         card.append(row2);
       }
       parts.push(card);
@@ -32167,29 +32201,48 @@ function createInventoryPresentation({ document, environment, readModel, adapter
     }
     list.replaceChildren(chips, meta, shown.length ? grid : element("p", items.length ? "Nothing here with this filter." : "Your gear is equipped. New finds will appear here.", "gx-empty"), element("p", "Tap an item to compare it with what you\u2019re wearing.", "gx-hint"));
   }
-  function lineRow(text2, mark, diffText) {
-    const row2 = element("div", "", "gx-line");
-    row2.append(element("span", text2, "gx-linetext"));
-    if (mark) {
-      const mk = element("span", "", "gx-mark is-" + mark);
-      if (mark === "up" || mark === "new") mk.innerHTML = ARROW_UP;
-      if (mark === "down") mk.innerHTML = ARROW_DOWN;
-      mk.append(document.createTextNode(mark === "new" ? "new" : mark === "same" ? "same" : diffText));
-      row2.append(mk);
-    }
+  function markOf(key3, mark, diff, text2) {
+    const mk = element("span", "", "gx-mark is-" + mark);
+    if (mark === "up" || mark === "new") mk.innerHTML = ARROW_UP;
+    if (mark === "down") mk.innerHTML = ARROW_DOWN;
+    mk.append(text2 ?? (mark === "new" ? "new" : mark === "same" ? "same" : lineValue(key3, diff)));
+    return mk;
+  }
+  function lineRow(key3, value2, mark, diff, tag, markText) {
+    const row2 = element("div", "", "gx-line"), text2 = markup(element("span", "", "gx-linetext"), statIcon(key3));
+    text2.append(`+${lineValue(key3, value2)} ${lineLabel(key3)}`);
+    if (tag) text2.append(element("small", tag, "gx-tag"));
+    row2.append(text2);
+    if (mark) row2.append(markOf(key3, mark, diff, markText));
     return row2;
   }
+  function baseTile(l) {
+    const t = markup(element("div", "", "gx-base"), statIcon(l.key, 18));
+    t.append(element("b", lineValue(l.key, l.value)), element("small", lineLabel(l.key)));
+    if (l.mark) t.append(markOf(l.key, l.mark, l.diff));
+    return t;
+  }
   function buildSheet(m, inv, local6, owner, canEquip) {
-    const item = inv.itemsById[selected], d = itemDefinition(item), equippedSlot = Object.keys(inv.equipped).find((s) => inv.equipped[s] === item.itemId), gen = item.generated, { rolls, perfect } = affixRolls(gen), lock = equippedSlot ? null : gearLock(owner, item, d);
+    const item = inv.itemsById[selected], d = itemDefinition(item), equippedSlot = Object.keys(inv.equipped).find((s) => inv.equipped[s] === item.itemId), gen = item.generated, lock = equippedSlot ? null : gearLock(owner, item, d), sections = itemSections(d, gen);
     comparison.classList.add("gx-sheet");
-    comparison.classList.toggle("is-perfect", perfect);
+    comparison.classList.toggle("is-perfect", sections.perfect);
+    rarityVar(comparison, d);
     const target = equippedSlot || retiredGear(d) ? null : d.slot === "ring" ? ringSlot : d.slot, preview = target ? equipmentComparison(inv, item.itemId, target, local6.progression.totalXp, local6.d8) : null, worn = (preview?.displaced ?? []).map((id) => inv.itemsById[id]).filter(Boolean);
-    const scroll = element("div", "", "gx-sheetscroll"), top = element("div", "", "gx-sheettop"), close2 = markup(button("", () => dismissTooltip()), CLOSE_SVG);
+    const cmp = target ? compareSections(sections, worn.map((w) => itemSections(itemDefinition(w), w.generated))) : { ...sections, lost: [] };
+    const scroll = element("div", "", "gx-sheetscroll"), close2 = markup(button("", () => dismissTooltip()), CLOSE_SVG);
     close2.className = "gx-close";
     close2.dataset.action = "dismiss";
     close2.setAttribute("aria-label", "Close item");
+    const head12 = element("div", "", "gx-head"), frame = element("div", "", "gx-itemicon"), info = element("div", "", "gx-iteminfo"), title = element("h4", displayName(d), "gx-itemname");
+    title.id = "world-item-title";
+    title.tabIndex = -1;
+    frame.append(itemIcon(item));
+    info.append(title, element("span", [RARITY_NAMES[d.rarityTier ?? 0], `${d.rarityTier ?? 0}\u2605`, (SLOT_NAMES[equippedSlot ?? (d.slot === "ring" ? "ring1" : d.slot)] ?? label2(d.slot)).replace(/ \d$/, ""), gen?.itemPower != null ? "Lv " + statText(gen.itemPower) : null].filter(Boolean).join(" \xB7 "), "gx-itemsub"));
+    head12.append(frame, info, close2);
+    scroll.append(head12);
     if (target && d.slot === "ring") {
-      top.append(element("span", "Compare to", "gx-compareto"));
+      const tabs = element("div", "", "gx-ringtabs");
+      tabs.append(element("span", "Compare to", "gx-compareto"));
       for (const s of ["ring1", "ring2"]) {
         const w = inv.itemsById[inv.equipped[s]], tab = button("", () => {
           ringSlot = s;
@@ -32201,54 +32254,57 @@ function createInventoryPresentation({ document, environment, readModel, adapter
         tab.setAttribute("aria-pressed", String(s === ringSlot));
         tab.append(w ? itemIcon(w) : element("span", "", "gx-dash"), document.createTextNode(SLOT_NAMES[s]));
         tab.setAttribute("aria-label", `Compare to ${SLOT_NAMES[s]}: ${w ? displayName(itemDefinition(w)) : "empty"}`);
-        top.append(tab);
+        tabs.append(tab);
       }
+      scroll.append(tabs);
     } else {
       const note = element("div", "", "gx-compareline");
-      if (equippedSlot) note.append(document.createTextNode(`Worn in your ${SLOT_NAMES[equippedSlot].replace(/ \d$/, "")} slot`));
+      if (equippedSlot) note.append(`Worn in your ${SLOT_NAMES[equippedSlot].replace(/ \d$/, "")} slot`);
       else if (worn.length) {
-        note.append(document.createTextNode("Arrows compare with your worn "));
+        note.append("Arrows compare with your worn ");
         for (const w of worn) {
           const name = element("b", displayName(itemDefinition(w)));
           rarityVar(name, itemDefinition(w));
           note.append(itemIcon(w), name);
         }
-      } else if (target) note.append(document.createTextNode(`Your ${SLOT_NAMES[target].replace(/ \d$/, "")} slot is empty`));
-      top.append(note);
+      } else if (target) note.append(`Your ${SLOT_NAMES[target].replace(/ \d$/, "")} slot is empty`);
+      if (note.childNodes.length) scroll.append(note);
     }
-    top.append(close2);
-    scroll.append(top);
-    const card = element("div", "", "gx-itemcard"), head12 = element("div", "", "gx-itemhead"), frame = element("div", "", "gx-itemicon"), info = element("div", "", "gx-iteminfo"), title = element("h4", displayName(d), "gx-itemname");
-    rarityVar(card, d);
-    title.id = "world-item-title";
-    title.tabIndex = -1;
-    frame.append(itemIcon(item));
-    info.append(title, element("span", [RARITY_NAMES[d.rarityTier ?? 0], `${d.rarityTier ?? 0}\u2605`, (SLOT_NAMES[equippedSlot ?? (d.slot === "ring" ? "ring1" : d.slot)] ?? label2(d.slot)).replace(/ \d$/, ""), gen?.itemPower != null ? "Lv " + statText(gen.itemPower) : null].filter(Boolean).join(" \xB7 "), "gx-itemsub"));
-    head12.append(frame, info);
-    card.append(head12);
-    if (d.subType === "tome" && TOME_LINE[d.spellType]) card.append(element("p", TOME_LINE[d.spellType], "gx-itemnote"));
-    else if (d.description && !d.effects) card.append(element("p", d.description, "gx-itemnote"));
-    const lines = itemLines(d), { marks: marks2, lost } = target ? compareLines(lines, worn.map(itemDefinition)) : { marks: lines.map((l) => ({ ...l, mark: null })), lost: [] };
-    let flat2 = true;
-    for (const l of marks2) {
-      if (flat2 && !l.flat && card.querySelector(".gx-line")) card.append(element("div", "", "gx-divider"));
-      flat2 = l.flat;
-      const wrap = element("div", "", "gx-linewrap"), row2 = lineRow(`+${lineValue(l.key, l.value)} ${lineLabel(l.key)}`, l.mark, l.diff !== void 0 ? lineValue(l.key, l.diff) : ""), roll6 = rolls.get(l.key);
-      wrap.append(row2);
-      if (roll6 && !roll6.fixed) {
-        const bar = element("div", "", "gx-roll" + (roll6.max ? " is-max" : "")), fill4 = element("span", "");
-        fill4.style.width = (roll6.quality * 100).toFixed(1) + "%";
-        bar.append(fill4);
-        wrap.append(bar);
+    if (d.subType === "tome" && TOME_LINE[d.spellType]) scroll.append(element("p", TOME_LINE[d.spellType], "gx-itemnote"));
+    else if (d.description && !d.effects) scroll.append(element("p", d.description, "gx-itemnote"));
+    const tiles = cmp.base.filter((l) => l.flat), traits = cmp.base.filter((l) => !l.flat);
+    if (tiles.length || traits.length) {
+      const sec = element("section", "", "gx-section");
+      sec.append(element("h5", "Base stats", "gx-sectiontitle"));
+      if (tiles.length) {
+        const grid = element("div", "", "gx-basegrid");
+        for (const l of tiles) grid.append(baseTile(l));
+        sec.append(grid);
       }
-      card.append(wrap);
+      for (const l of traits) sec.append(lineRow(l.key, l.value, l.mark, l.diff, "trait"));
+      scroll.append(sec);
     }
-    if (!marks2.length) card.append(element("p", "No stat bonus", "gx-itemnote"));
-    scroll.append(card);
-    if (lost.length) {
+    if (cmp.affixes.length) {
+      const sec = element("section", "", "gx-section");
+      sec.append(element("h5", `Affixes \xB7 ${cmp.affixes.length}`, "gx-sectiontitle"));
+      for (const a of cmp.affixes) {
+        const wrap = element("div", "", "gx-linewrap");
+        wrap.append(lineRow(a.key, a.value, a.mark, a.diff, a.roll.fixed ? "fixed" : null));
+        if (!a.roll.fixed) {
+          const bar = element("div", "", "gx-roll" + (a.roll.max ? " is-max" : "")), fill4 = element("span", "");
+          fill4.style.width = (a.roll.quality * 100).toFixed(1) + "%";
+          bar.append(fill4);
+          wrap.append(bar);
+        }
+        sec.append(wrap);
+      }
+      scroll.append(sec);
+    }
+    if (!cmp.base.length && !cmp.affixes.length) scroll.append(element("p", "No stat bonus", "gx-itemnote"));
+    if (cmp.lost.length) {
       const box = element("div", "", "gx-lost");
       box.append(element("h5", `You lose from ${worn.map((w) => displayName(itemDefinition(w))).join(" + ")}`));
-      for (const l of lost) box.append(lineRow(`+${lineValue(l.key, l.value)} ${lineLabel(l.key)}`, "down", "gone"));
+      for (const l of cmp.lost) box.append(lineRow(l.key, l.value, "down", null, null, "gone"));
       scroll.append(box);
     }
     const changes = preview ? heroChanges(preview) : [];
@@ -32265,14 +32321,15 @@ function createInventoryPresentation({ document, environment, readModel, adapter
       sw.className = "gx-switch";
       sw.dataset.action = "hero-stats";
       sw.setAttribute("aria-pressed", String(heroStatsOpen));
-      sw.append(document.createTextNode("Hero stats"), element("span", "", "gx-knob"));
+      sw.append("Hero stats", element("span", "", "gx-knob"));
       scroll.append(sw);
       if (heroStatsOpen) {
         const strip = element("div", "", "gx-herostrip");
         for (const c of changes) {
-          const row2 = element("div", "", "gx-herorow"), v = element("span", "", "gx-heroval");
+          const row2 = element("div", "", "gx-herorow"), name = markup(element("span"), statIcon(c.icon, 13)), v = element("span", "", "gx-heroval");
+          name.append(c.label);
           v.append(element("span", c.before + " \u2192", "gx-was"), element("b", c.after, c.up ? "is-up" : "is-down"));
-          row2.append(element("span", c.label), v);
+          row2.append(name, v);
           strip.append(row2);
         }
         scroll.append(strip);
@@ -32289,7 +32346,7 @@ function createInventoryPresentation({ document, environment, readModel, adapter
         sw.className = "gx-switch is-row";
         sw.dataset.action = "helmet";
         sw.setAttribute("aria-pressed", String(shown));
-        sw.append(document.createTextNode("Show helmet on your hero"), element("span", "", "gx-knob"));
+        sw.append("Show helmet on your hero", element("span", "", "gx-knob"));
         scroll.append(sw);
       }
     }
@@ -32334,7 +32391,7 @@ function createInventoryPresentation({ document, environment, readModel, adapter
     if (!inspect || comparison.hidden) return;
     const vw = environment.innerWidth, vh = environment.innerHeight, pad = 12, gap = 12, width = Math.min(vw > 699 ? 400 : 380, vw - pad * 2), anchor = selectionOrigin?.isConnected ? selectionOrigin : panel.querySelector(`[data-item-id="${CSS.escape(selected)}"]`);
     comparison.style.width = width + "px";
-    comparison.style.maxHeight = vh - pad * 2 + "px";
+    comparison.style.maxHeight = "none";
     const r = anchor?.getBoundingClientRect() ?? { left: vw / 2, right: vw / 2, top: vh / 2, bottom: vh / 2, width: 0, height: 0 }, full = Math.min(comparison.offsetHeight, vh - pad * 2), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
     let side = "over", h = full, left = Math.max(pad, Math.min(vw - pad - width, cx - width / 2)), top = Math.max(pad, Math.min(vh - pad - full, cy - full / 2));
     const right = r.right + gap + width <= vw - pad, leftSide = r.left - gap - width >= pad, below = vh - pad - (r.bottom + gap), above = r.top - gap - pad;
@@ -32361,6 +32418,7 @@ function createInventoryPresentation({ document, environment, readModel, adapter
       comparison.classList.remove("is-opening");
       void comparison.offsetWidth;
       comparison.classList.add("is-opening");
+      environment.requestAnimationFrame?.(() => placeSheet(false));
     }
   }
   function moreActions(item, d, local6, inv, canEquip) {
