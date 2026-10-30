@@ -5350,8 +5350,8 @@ function voidWraithMotionV4(m, time, seed2 = 0) {
     const brace = side === lead ? { x: x + side * 18, y: y - 8 } : { x: x + side * 13, y: y + 1 };
     let wrist = blend2(idle2, brace, weight2), angle3 = idleAngle, goals = null;
     if (attacking) {
-      const d = a.direction, n = { x: -d.y, y: d.x }, sweep = mix6(4, -4, rake);
-      const center2 = { x: d.x * a.contactReach + n.x * sweep, y: d.y * a.contactReach - 8 + n.y * sweep };
+      const d = a.direction, n = { x: -d.y, y: d.x }, sweep2 = mix6(4, -4, rake);
+      const center2 = { x: d.x * a.contactReach + n.x * sweep2, y: d.y * a.contactReach - 8 + n.y * sweep2 };
       const tip = local2(a, center2);
       angle3 = idleAngle + turn2(aimAngle - idleAngle) * weight2;
       wrist = blend2(wrist, { x: tip.x - Math.cos(angle3) * 7.5, y: tip.y - Math.sin(angle3) * 7.5 }, reach);
@@ -7655,8 +7655,8 @@ function cyberWraithMotionV4(m, time, seed2 = 0) {
     const brace = side === lead ? { x: x + side * 15, y: y - 5 } : { x: x + side * 12, y: y + 3 };
     let wrist = blend3(idle2, brace, weight2), angle3 = idleAngle, goals = null;
     if (attacking) {
-      const d = a.direction, n = { x: -d.y, y: d.x }, sweep = mix8(3, -3, rake);
-      const center2 = { x: d.x * a.contactReach + n.x * sweep, y: d.y * a.contactReach - 17.84 + n.y * sweep };
+      const d = a.direction, n = { x: -d.y, y: d.x }, sweep2 = mix8(3, -3, rake);
+      const center2 = { x: d.x * a.contactReach + n.x * sweep2, y: d.y * a.contactReach - 17.84 + n.y * sweep2 };
       const tip = local3(a, center2);
       angle3 = idleAngle + turn4(aimAngle - idleAngle) * weight2;
       wrist = blend3(wrist, { x: tip.x - Math.cos(angle3) * 6.5, y: tip.y - Math.sin(angle3) * 6.5 }, reach);
@@ -23376,6 +23376,7 @@ function offhandStyle(player) {
   return T3.styles[type] ? type : null;
 }
 var T3 = CLASS_SKILL_TUNING_V1;
+var FLURRY_SWORD_CUT = 1;
 var scaled = (value2, f) => f ? Math.round(value2 * f[0] / f[1]) : value2;
 var unit3 = (v) => {
   const l = Math.hypot(v.x, v.y);
@@ -23410,14 +23411,14 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     }
     return true;
   }
-  function cut(a, stats, aim2, commandId) {
-    const combat = c.actors[a.entityId], style = T3.styles[offhandStyle(owner(a))] ?? {};
+  function cut(a, stats, aim2, commandId, index = 0) {
+    const combat = c.actors[a.entityId], style = T3.styles[offhandStyle(owner(a))] ?? {}, sword3 = index === FLURRY_SWORD_CUT;
     for (const t of cone(a, aim2, T3.flurry.reach, T3.flurry.cone, T3.flurry.targets)) {
-      damage(a, t, multiplyCombat(stats.attack, ...T3.flurry.attack), "offhand", commandId, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "skill", ...style.critBonus ? { critBonus: combatAmount(...style.critBonus) } : {} });
+      damage(a, t, multiplyCombat(stats.attack, ...T3.flurry.attack), "offhand", commandId, { sourceItem: damageSourceItem(owner(a), sword3 ? "main" : "offhand"), trigger: "skill", ...style.critBonus ? { critBonus: combatAmount(...style.critBonus) } : {} });
       if (!t.alive) continue;
       mastery?.primary(a, t, "proactive");
-      effects2.offhand(a, t, stats);
-      if (t.alive && (style.bleed || combatRoll(combat, stats.familyProperties?.bleed ?? combatAmount(15, 100)))) periodic(a, t, "bleed", stats.attack, stats);
+      if (!sword3) effects2.offhand(a, t, stats);
+      if (t.alive && (style.bleed || !sword3 && combatRoll(combat, stats.familyProperties?.bleed ?? combatAmount(15, 100)))) periodic(a, t, "bleed", stats.attack, stats);
     }
   }
   function flurry(a, stats, aim2, commandId) {
@@ -23475,7 +23476,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       cancelClassSkillAction(combat);
       return;
     }
-    cut(a, stats, { x: string.x, y: string.y }, null);
+    cut(a, stats, { x: string.x, y: string.y }, null, FLURRY_CUTS - string.cutsLeft);
     if (--string.cutsLeft <= 0) delete combat.skills.flurry;
     else string.nextTick += FLURRY_GAP_TICKS;
   }
@@ -27797,7 +27798,7 @@ function projectCombatPresentation(state, visibleIds) {
   return { masteryHazards: mastery.flatMap((b) => Object.values(b.hazards)).filter((e) => ids4.has(e.sourceId)).map((e) => ({ position: { ...e.position }, radius: e.radius, expiresTick: e.expiresTick })), masteryRazors: mastery.flatMap((b) => Object.values(b.razors)).filter((e) => ids4.has(e.sourceId)).map((e) => ({ position: { ...e.position }, direction: { ...e.direction } })), statuses: [...Object.values(state.subweaponCombat.effects), ...mastery.flatMap((b) => [...Object.values(b.poisons).map((e) => ({ ...e, id: e.sourceId + "/" + e.id, kind: "poison" })), ...Object.values(b.statuses).map((e) => ({ ...e, id: e.sourceId + "/" + e.id, stacks: e.rank, nextTick: e.expiresTick, appliedTick: e.expiresTick - (e.kind === "expose" ? 300 : e.kind === "slow" ? 240 : 90) }))]), ...Object.values(state.subweaponCombat.controls ?? {}).map((e) => ({ ...e, kind: e.phase, nextTick: e.expiresTick }))].filter((e) => ids4.has(e.targetId) && e.expiresTick > state.tick).map((e) => ({ lane: (lanes2.set(e.targetId, (lanes2.get(e.targetId) ?? -1) + 1), lanes2.get(e.targetId)), id: e.id, sourceId: e.sourceId, targetId: e.targetId, kind: e.kind, stacks: e.stacks, expiresTick: e.expiresTick, nextTick: e.nextTick, durationFrames: ["bleed", "poison"].includes(e.kind) ? 600 : e.kind === "burn" ? 240 : e.expiresTick - e.appliedTick })), families: Object.fromEntries(Object.entries(state.subweaponCombat.actors).filter(([id]) => ids4.has(id)).map(([id, c]) => [id, { mastery: (() => {
     const p = Object.values(state.playersById).find((p2) => p2.entityId === id), d = p?.d8, t = d?.transient;
     return t ? { pulseBlocks: t.pulseBlocks, syphon: finiteNodeRank(d, "tome_arcane_syphon") > 0, earthBreaker: finiteNodeRank(d, "shield_earth_breaker_bash") > 0, singularity: finiteNodeRank(d, "tome_keystone_singularity") > 0, anchor: t.lastAnchor, fortitudeStacks: t.fortitudeStacks, retaliatoryReady: t.retaliatoryReady, colossus: t.colossusTicks > 0, shadowStep: t.shadowStepTicks > 0, syphonStacks: t.syphonStacks, weavingStacks: t.weavingStacks } : null;
-  })(), element: Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.itemsById[Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.equipped.subweapon]?.generated?.definition.spellType ?? "fire", guard: c.guard ? { ...c.guard, integrity: presentCombat(c.guard.integrity), direction: { ...c.guard.direction } } : null, pressure: c.pressure, dash: { ...c.dash }, blink: itemDefinition(((p) => p?.inventory.itemsById[p.inventory.equipped.subweapon])(Object.values(state.playersById).find((p) => p.entityId === id)))?.subType === "tome", delivery: { ...c.delivery }, skill: c.skills?.last ? { ...c.skills.last } : null }])) };
+  })(), element: Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.itemsById[Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.equipped.subweapon]?.generated?.definition.spellType ?? "fire", guard: c.guard ? { ...c.guard, integrity: presentCombat(c.guard.integrity), direction: { ...c.guard.direction } } : null, pressure: c.pressure, dash: { ...c.dash }, blink: itemDefinition(((p) => p?.inventory.itemsById[p.inventory.equipped.subweapon])(Object.values(state.playersById).find((p) => p.entityId === id)))?.subType === "tome", delivery: { ...c.delivery }, skill: c.skills?.last ? { ...c.skills.last } : null, parry: c.skills?.parry ?? 0 }])) };
 }
 
 // src/shared/content/creatures_d11.js
@@ -29303,13 +29304,13 @@ function createSkillWheelV1({ document, environment, readModel, adapter, isBlock
   document.getElementById("world-bag").parentElement.append(wheel, done);
   const slots = [];
   for (let i = 0; i < WHEEL_SLOTS; i++) {
-    const b = el("button", "skill-slot"), icon = el("span", "skill-slot-icon"), sweep = el("i", "skill-slot-sweep"), time = el("b", "skill-slot-time"), key2 = el("small", "skill-slot-key");
+    const b = el("button", "skill-slot"), icon = el("span", "skill-slot-icon"), sweep2 = el("i", "skill-slot-sweep"), time = el("b", "skill-slot-time"), key2 = el("small", "skill-slot-key");
     b.type = "button";
     b.dataset.slot = String(i + 1);
     b.dataset.gameplayHud = "";
-    b.append(sweep, icon, time, key2);
+    b.append(sweep2, icon, time, key2);
     wheel.append(b);
-    slots.push({ b, icon, sweep, time, key: key2, paint: "" });
+    slots.push({ b, icon, sweep: sweep2, time, key: key2, paint: "" });
   }
   const listeners = [], listen = (t, type, fn, opts) => {
     t.addEventListener(type, fn, opts);
@@ -47360,106 +47361,14 @@ function drawFrostStatus(ctx, e, target, tick) {
   ctx.restore();
 }
 
-// src/client/hero_presentation.js
-function primaryPose(primary, tick) {
-  const a = primary?.current;
-  if (!a) return { body: 0, sword: -0.6, weight: 0, active: false, aim: primary?.facing ?? { x: 1, y: 0 } };
-  const progress8 = Math.max(0, Math.min(1, (tick - a.phaseStartedTick) / Math.max(1, a.phaseEndsTick - a.phaseStartedTick)));
-  const reverse = a.comboStep === 2 ? -1 : 1, heavy = a.comboStep === 3;
-  const wind = heavy ? -2.35 : -1.35, follow = heavy ? 1.35 : 1.05;
-  const sword3 = a.phase === "startup" ? -0.6 + (wind + 0.6) * progress8 : a.phase === "active" ? wind + (follow - wind) * progress8 : follow + (-0.6 - follow) * progress8;
-  return {
-    body: reverse * (a.phase === "startup" ? -0.18 * progress8 : a.phase === "active" ? 0.24 : 0.24 * (1 - progress8)) * (heavy ? 1.8 : 1),
-    sword: sword3 * reverse,
-    weight: heavy ? 3 : 1,
-    active: a.phase === "active",
-    aim: a.aim
-  };
-}
-var frontAngle = (pose, primary, facing2) => primary ? Math.atan2(pose.aim.y, pose.aim.x * facing2) + pose.sword : -0.6;
-var clamp01 = (v) => Math.max(0, Math.min(1, v));
-var smooth21 = (v) => {
-  v = clamp01(v);
-  return v * v * (3 - 2 * v);
-};
-var lerp6 = (a, b, k) => a + (b - a) * k;
-var CAST_POSE_TICKS = 52;
-var CAST_CIRCLE_LOCAL = Object.freeze({ x: 34, y: -10 });
-function castPose(age) {
-  if (!(age >= 0 && age < CAST_POSE_TICKS)) return null;
-  const out = smooth21(age / 7), back = smooth21((age - 34) / 16), k = out * (1 - back), kick = age >= 2 && age < 14 ? Math.sin((age - 2) / 12 * Math.PI) : 0;
-  return {
-    tome: { x: lerp6(TOME_ANCHOR.x, 21, k) - 2.2 * kick, y: lerp6(TOME_ANCHOR.y, -7, k) - Math.sin(k * Math.PI) * 7, open: smooth21((age - 1) / 6) * (1 - smooth21((age - 30) / 12)), glow: smooth21((age - 1) / 6) * (1 - smooth21((age - 26) / 14)) },
-    offReach: lerp6(-2.7, -0.28, smooth21(age / 6) * (1 - smooth21((age - 34) / 16)))
-  };
-}
-var BASH_POSE_TICKS = 24;
-function bashPose(age) {
-  if (!(age >= 0 && age < BASH_POSE_TICKS)) return null;
-  return { guard: true, guardY: 0, jab: 10 * smooth21(age / 3) * (1 - smooth21((age - 8) / 14)) };
-}
-function castCirclePosition(actor, facing2) {
-  return { x: actor.position.x + 0.8 * facing2 * CAST_CIRCLE_LOCAL.x, y: actor.position.y - 8 + 0.8 * CAST_CIRCLE_LOCAL.y };
-}
-function drawWorldHero(ctx, actor, facing2, presentationTime, primary = null, tick = 0, hurtFlash = false, skill = null) {
-  let guardY = 0;
-  if (actor.subType === "shield" && actor.guard?.raised) {
-    facing2 = actor.guard.direction.x < 0 ? -1 : 1;
-    primary = { ...primary, facing: actor.guard.direction };
-    guardY = actor.guard.direction.y;
-  }
-  const pose = primaryPose(primary, tick), moving = actor.movedLastTick, riposteAge = tick - actor.shieldRiposteTick, blockAge = tick - actor.shieldBlockTick, cast = skill?.skillId === "cast" ? castPose(tick - skill.tick) : skill?.skillId === "shield_bash" && actor.subType === "shield" ? bashPose(tick - skill.tick) : null;
-  ctx.save();
-  ctx.translate(actor.position.x, actor.position.y - 8);
-  ctx.scale(0.8 * facing2, 0.8);
-  if (primary) ctx.rotate(pose.body);
-  drawBlockyHero(ctx, heroSpecForActor(actor), {
-    t: presentationTime / 1e3,
-    bob: moving ? Math.sin(presentationTime / 90) * 0.9 : 0,
-    sway: Math.sin(presentationTime / 560) * 0.5,
-    step: moving ? Math.sin(presentationTime / 90) : 0,
-    front: frontAngle(pose, primary, facing2),
-    guard: Boolean(actor.guard?.raised),
-    guardY,
-    jab: riposteAge >= 0 && riposteAge < 12 ? Math.sin(Math.PI * riposteAge / 12) * 7 : 0,
-    recoil: blockAge >= 0 && blockAge < 9 ? Math.sin(Math.PI * blockAge / 9) * 3 : 0,
-    active: pose.active,
-    weight: pose.weight,
-    flash: hurtFlash,
-    ...cast ?? {}
-  });
-  ctx.restore();
-}
-function drawProofSlime(ctx, actor, flash = false) {
-  if (!actor.alive) return;
-  ctx.save();
-  ctx.translate(actor.position.x, actor.position.y);
-  ctx.fillStyle = flash ? "#fff1cc" : "#66ad63";
-  ctx.strokeStyle = "#203f35";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.ellipse(0, -5, 15, 11, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.stroke();
-  ctx.fillStyle = "#182d29";
-  ctx.fillRect(-6, -8, 3, 4);
-  ctx.fillRect(4, -8, 3, 4);
-  const ratio = actor.hp.m / actor.maxHp.m * 10 ** (actor.hp.e - actor.maxHp.e);
-  ctx.fillStyle = "#16232a";
-  ctx.fillRect(-18, -26, 36, 4);
-  ctx.fillStyle = "#b4e484";
-  ctx.fillRect(-18, -26, 36 * ratio, 4);
-  ctx.restore();
-}
-
 // src/client/arcane_fx_v1.js
 var TAU57 = Math.PI * 2;
 var clamp44 = (v) => Math.max(0, Math.min(1, v));
-var smooth22 = (v) => {
+var smooth21 = (v) => {
   v = clamp44(v);
   return v * v * (3 - 2 * v);
 };
-var lerp7 = (a, b, k) => a + (b - a) * k;
+var lerp6 = (a, b, k) => a + (b - a) * k;
 var easeOut = (v) => 1 - (1 - clamp44(v)) ** 3;
 var rnd = (i) => {
   const x = Math.sin(i * 127.1 + 311.7) * 43758.5453;
@@ -47551,9 +47460,317 @@ function jag(ctx, x0, y0, x1, y1, seed2, amp) {
   const nx = -(y1 - y0), ny = x1 - x0, l = Math.hypot(nx, ny) || 1;
   for (let i = 1; i < 7; i++) {
     const k = i / 7, o = (rnd(seed2 + i) - 0.5) * amp * 2;
-    ctx.lineTo(lerp7(x0, x1, k) + nx / l * o, lerp7(y0, y1, k) + ny / l * o);
+    ctx.lineTo(lerp6(x0, x1, k) + nx / l * o, lerp6(y0, y1, k) + ny / l * o);
   }
   ctx.lineTo(x1, y1);
+}
+
+// src/client/rogue_skill_art_v1.js
+var ROGUE_VIOLET = "#b88cff";
+var ROGUE_CORE = "#f3eaff";
+var ROGUE_STEEL = "#e4ecff";
+var DASH_DARK = "#392152";
+var DASH_LIGHT = "#ad77df";
+var DASH_PALE = "#d9b8ff";
+var DASH_GLOW_CORE = "#f0e3ff";
+var FLURRY_CUT_MS = Object.freeze([0, 7e3 / 60, 14e3 / 60]);
+var FLURRY_ART_LIFE = 640;
+var DASH_CHEVRON_LIFE = 260;
+var DASH_DUST_LIFE = 450;
+var AFTERIMAGE_LIFE = 320;
+function daggerTypeOf(kind) {
+  for (const type of ["main-gauche", "stiletto", "kris"]) if (kind === type || LOOK_POOLS[type]?.includes(kind)) return type;
+  return null;
+}
+function bez(p, u) {
+  const v = 1 - u;
+  return { x: v * v * v * p[0] + 3 * v * v * u * p[2] + 3 * v * u * u * p[4] + u * u * u * p[6], y: v * v * v * p[1] + 3 * v * v * u * p[3] + 3 * v * u * u * p[5] + u * u * u * p[7] };
+}
+var SLASHES = [[-34, -30, -8, -28, 12, 2, 28, 22], [-46, 24, -16, 22, 14, -12, 36, -38], [-28, 20, -8, 16, 8, -6, 22, -26], [-42, -36, -12, -32, 16, 8, 38, 30]].map((p) => p.map((v) => v * 0.6));
+var STRIKES = Object.freeze([{ cut: 0, blade: "dagger", curve: 0 }, { cut: 1, blade: "sword", curve: 1 }, { cut: 2, blade: "dagger", curve: 2 }, { cut: 2, blade: "sword", curve: 3 }]);
+function crescent(ctx, p, u0, u1, width, color28, alpha2, wave = 0) {
+  alpha2 *= smooth21((u1 - u0) / 0.4) ** 2;
+  if (u1 - u0 < 0.01 || alpha2 <= 0) return;
+  const n = 20, outer = [], inner = [];
+  for (let i = 0; i <= n; i++) {
+    const s = i / n, u = lerp6(u0, u1, s), a = bez(p, u), b = bez(p, Math.min(1, u + 0.01)), c = bez(p, Math.max(0, u - 0.01)), dx = b.x - c.x, dy = b.y - c.y, l = Math.hypot(dx, dy) || 1, nx = -dy / l, ny = dx / l;
+    const w = width * Math.sin(Math.PI * s) ** 0.7 * (1 + wave * 0.45 * Math.sin(s * Math.PI * 7));
+    outer.push([a.x + nx * w, a.y + ny * w]);
+    inner.push([a.x - nx * w * 0.3, a.y - ny * w * 0.3]);
+  }
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+  ctx.globalAlpha = Math.min(1, alpha2);
+  ctx.shadowBlur = 12;
+  ctx.shadowColor = color28;
+  ctx.fillStyle = color28;
+  ctx.beginPath();
+  ctx.moveTo(outer[0][0], outer[0][1]);
+  for (const q of outer) ctx.lineTo(q[0], q[1]);
+  for (const q of inner.reverse()) ctx.lineTo(q[0], q[1]);
+  ctx.closePath();
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = ROGUE_CORE;
+  ctx.lineWidth = 0.6;
+  ctx.beginPath();
+  for (let i = 0; i <= n; i++) {
+    const a = bez(p, lerp6(u0, u1, i / n));
+    if (i) ctx.lineTo(a.x, a.y);
+    else ctx.moveTo(a.x, a.y);
+  }
+  ctx.stroke();
+  ctx.restore();
+}
+function drawFlurry(ctx, x, y, dx, dy, age, style = null) {
+  if (age < 0 || age >= FLURRY_ART_LIFE) return;
+  const l = Math.hypot(dx, dy) || 1, ux = dx / l, uy = dy / l, facing2 = ux < 0 ? -1 : 1, cx = x + ux * 24, cy = y - 11 + uy * 12;
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.scale(facing2, 1);
+  for (const s of STRIKES) {
+    const t = age - FLURRY_CUT_MS[s.cut], k = t / 90, fade = 1 - smooth21((t - 90) / 250);
+    if (t < 0 || fade <= 0) continue;
+    const curve2 = SLASHES[s.curve];
+    if (s.blade === "dagger" && style === "stiletto") {
+      const yy = s.cut ? -1 : -4, head12 = lerp6(-20, 22, easeOut(k * 1.3)), tail2 = lerp6(-20, 22, smooth21((t - 60) / 200));
+      if (head12 > tail2 + 1) {
+        glowStroke(ctx, ROGUE_VIOLET, 8, 1.6 * fade, () => {
+          ctx.beginPath();
+          ctx.moveTo(tail2, yy);
+          ctx.lineTo(head12, yy);
+        });
+        mote(ctx, head12 + 2, yy, 1.2, "#ffffff", fade);
+      }
+    } else if (s.blade === "sword") {
+      const u0 = smooth21((t - 40) / 180), u1 = easeOut(k);
+      crescent(ctx, curve2, u0, u1, 6, ROGUE_VIOLET, fade * 0.45);
+      crescent(ctx, curve2, u0, u1, 2.8, ROGUE_STEEL, fade * 0.85);
+    } else crescent(ctx, curve2, smooth21((t - 40) / 180), easeOut(k), 4.2, ROGUE_VIOLET, fade, style === "kris" ? 1 : 0);
+  }
+  ctx.restore();
+}
+function drawParryWard(ctx, x, y, facing2, ready, time, spentAge = -1) {
+  const flare = spentAge >= 0 && spentAge < 300 ? 1 - spentAge / 300 : 0;
+  if (!ready && !flare) return;
+  const t = time / 1e3, wx = x + facing2 * 15, wy = y - 12, a = ready ? 1 : flare;
+  blob2(ctx, wx, wy, 12, ROGUE_VIOLET, 0.22 * a + 0.3 * flare);
+  ctx.save();
+  ctx.translate(wx, wy);
+  ctx.scale(facing2, 1);
+  glowStroke(ctx, ROGUE_VIOLET, 8, (1.2 + 1.4 * flare) * a, () => {
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 4, 12, 0, -1.25, 1.25);
+  }, true);
+  glowStroke(ctx, ROGUE_VIOLET, 5, 0.6 * a, () => {
+    ctx.beginPath();
+    ctx.ellipse(-2, 0, 2.6, 8.5, 0, -1.15, 1.15);
+  }, false);
+  ctx.save();
+  ctx.translate(4, 0);
+  ctx.rotate(t * 3);
+  glowStroke(ctx, ROGUE_CORE, 4, 0.7 * a, () => {
+    ctx.beginPath();
+    ctx.moveTo(0, -2);
+    ctx.lineTo(2, 0);
+    ctx.lineTo(0, 2);
+    ctx.lineTo(-2, 0);
+    ctx.closePath();
+  }, false);
+  ctx.restore();
+  for (let i = 0; i < 4; i++) {
+    const ang = t * 4 + i * Math.PI / 2;
+    mote(ctx, 2.5 + Math.cos(ang) * 2.5, Math.sin(ang) * 12, 0.7, ROGUE_CORE, a * 0.9);
+  }
+  ctx.restore();
+  if (flare) {
+    const q = 1 - flare;
+    bloom(ctx, wx + facing2 * 4, wy, 6 + 16 * q, ROGUE_VIOLET, 0.9 * flare);
+    star4(ctx, wx + facing2 * 4, wy, 7 * flare + 1, ROGUE_CORE, flare);
+  }
+}
+function drawDashChevron(ctx, x, y, dx, dy, age, landing) {
+  if (age < 0 || age >= DASH_CHEVRON_LIFE) return;
+  const t = age / DASH_CHEVRON_LIFE, a = 1 - t, l = Math.hypot(dx, dy) || 1, ux = dx / l, uy = dy / l;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(Math.atan2(uy, ux));
+  for (const [off, k] of [[0, 1], [-9, 0.45]]) {
+    const shape2 = () => {
+      ctx.beginPath();
+      ctx.moveTo(off - 22, -7);
+      ctx.lineTo(off + 4 + 4 * t, 0);
+      ctx.lineTo(off - 22, 7);
+    };
+    glowStroke(ctx, DASH_LIGHT, 8, (5 * a + 1) * k, shape2, false);
+    glowStroke(ctx, DASH_GLOW_CORE, 3, 2 * a * k, shape2, false);
+  }
+  if (landing) {
+    bloom(ctx, 2, -12, 14 * (1 - t * 0.4), DASH_LIGHT, 0.5 * a);
+    for (let i = 0; i < 6; i++) {
+      const ang = (i - 2.5) * 0.32, d = 6 + 16 * easeOut(t);
+      mote(ctx, 4 + Math.cos(ang) * d, -8 + Math.sin(ang) * d * 0.6, 1, DASH_GLOW_CORE, a);
+    }
+  }
+  ctx.restore();
+}
+function drawDashDust(ctx, x, y, dx, age, skid) {
+  if (age < 0 || age >= DASH_DUST_LIFE) return;
+  const q = age / DASH_DUST_LIFE, dir = dx < 0 ? -1 : 1;
+  ctx.save();
+  ctx.fillStyle = `rgba(190,180,160,${0.4 * (1 - q)})`;
+  for (let j = 0; j < 4; j++) {
+    const px2 = skid ? x + dir * (4 + j * 4) + dir * 10 * q : x - dir * (4 + j * 5 * q), py = y + 6 - j * 1.6 * q - (skid ? 2 * q : 0);
+    ctx.beginPath();
+    ctx.arc(px2, py, 1.6 + 2.6 * q, 0, TAU57);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+function drawDashStreaks(ctx, x, y, dx, dy, time) {
+  const l = Math.hypot(dx, dy) || 1, ux = dx / l, uy = dy / l, seed2 = Math.floor(time / 16);
+  ctx.save();
+  ctx.translate(x, y - 12);
+  ctx.rotate(Math.atan2(uy, ux));
+  glowStroke(ctx, DASH_LIGHT, 12, 7, () => {
+    ctx.beginPath();
+    ctx.moveTo(-40, 0);
+    ctx.lineTo(-6, 0);
+  }, false);
+  for (let i = 0; i < 5; i++) {
+    const yy = -14 + i * 7, len = 10 + 16 * rnd(i + seed2), back = 6 + rnd(i + 3) * 5;
+    glowStroke(ctx, DASH_PALE, 5, 1, () => {
+      ctx.beginPath();
+      ctx.moveTo(-back - len, yy);
+      ctx.lineTo(-back, yy);
+    }, false);
+  }
+  ctx.restore();
+}
+function makeAfterimage(document, drawHero, color28) {
+  if (!document?.createElement) return null;
+  const S = 3, c = document.createElement("canvas");
+  c.width = c.height = 64 * S;
+  const o = c.getContext("2d");
+  if (!o) return null;
+  o.setTransform(S, 0, 0, S, 0, 0);
+  drawHero(o);
+  o.setTransform(1, 0, 0, 1, 0, 0);
+  o.globalCompositeOperation = "source-atop";
+  o.fillStyle = color28;
+  o.fillRect(0, 0, c.width, c.height);
+  return c;
+}
+function drawAfterimage(ctx, image, x, y, age) {
+  if (!image || age < 0 || age >= AFTERIMAGE_LIFE) return;
+  ctx.save();
+  ctx.globalAlpha *= 0.5 * (1 - age / AFTERIMAGE_LIFE);
+  ctx.drawImage(image, x - 32, y - 52, 64, 64);
+  ctx.restore();
+}
+function sweep(t, start, keys2) {
+  let a = start;
+  for (const [at3, to, dur] of keys2) if (t >= at3) a = lerp6(a, to, (dur < 5 ? easeOut : smooth21)((t - at3) / dur));
+  return a;
+}
+var FLURRY_POSE_TICKS = 36;
+function flurryPose(age, style = null) {
+  if (!(age >= 0 && age < FLURRY_POSE_TICKS)) return null;
+  const REST = 1.98;
+  const offReach = style === "stiletto" ? sweep(age, REST, [[0, -0.6, 2], [2, -0.04, 3], [6, -0.6, 3], [14, -0.04, 3], [18, -0.6, 3], [24, REST, 12]]) : sweep(age, REST, [[0, -1.5, 2], [2, 0.7, 4], [14, -1.1, 5], [24, REST, 12]]);
+  return { offReach, front: sweep(age, -0.6, [[0, 0.6, 3], [7, -1.4, 5], [14, 0.8, 5], [24, -0.6, 12]]) };
+}
+
+// src/client/hero_presentation.js
+function primaryPose(primary, tick) {
+  const a = primary?.current;
+  if (!a) return { body: 0, sword: -0.6, weight: 0, active: false, aim: primary?.facing ?? { x: 1, y: 0 } };
+  const progress8 = Math.max(0, Math.min(1, (tick - a.phaseStartedTick) / Math.max(1, a.phaseEndsTick - a.phaseStartedTick)));
+  const reverse = a.comboStep === 2 ? -1 : 1, heavy = a.comboStep === 3;
+  const wind = heavy ? -2.35 : -1.35, follow = heavy ? 1.35 : 1.05;
+  const sword3 = a.phase === "startup" ? -0.6 + (wind + 0.6) * progress8 : a.phase === "active" ? wind + (follow - wind) * progress8 : follow + (-0.6 - follow) * progress8;
+  return {
+    body: reverse * (a.phase === "startup" ? -0.18 * progress8 : a.phase === "active" ? 0.24 : 0.24 * (1 - progress8)) * (heavy ? 1.8 : 1),
+    sword: sword3 * reverse,
+    weight: heavy ? 3 : 1,
+    active: a.phase === "active",
+    aim: a.aim
+  };
+}
+var frontAngle = (pose, primary, facing2) => primary ? Math.atan2(pose.aim.y, pose.aim.x * facing2) + pose.sword : -0.6;
+var clamp01 = (v) => Math.max(0, Math.min(1, v));
+var smooth22 = (v) => {
+  v = clamp01(v);
+  return v * v * (3 - 2 * v);
+};
+var lerp7 = (a, b, k) => a + (b - a) * k;
+var CAST_POSE_TICKS = 52;
+var CAST_CIRCLE_LOCAL = Object.freeze({ x: 34, y: -10 });
+function castPose(age) {
+  if (!(age >= 0 && age < CAST_POSE_TICKS)) return null;
+  const out = smooth22(age / 7), back = smooth22((age - 34) / 16), k = out * (1 - back), kick = age >= 2 && age < 14 ? Math.sin((age - 2) / 12 * Math.PI) : 0;
+  return {
+    tome: { x: lerp7(TOME_ANCHOR.x, 21, k) - 2.2 * kick, y: lerp7(TOME_ANCHOR.y, -7, k) - Math.sin(k * Math.PI) * 7, open: smooth22((age - 1) / 6) * (1 - smooth22((age - 30) / 12)), glow: smooth22((age - 1) / 6) * (1 - smooth22((age - 26) / 14)) },
+    offReach: lerp7(-2.7, -0.28, smooth22(age / 6) * (1 - smooth22((age - 34) / 16)))
+  };
+}
+var BASH_POSE_TICKS = 24;
+function bashPose(age) {
+  if (!(age >= 0 && age < BASH_POSE_TICKS)) return null;
+  return { guard: true, guardY: 0, jab: 10 * smooth22(age / 3) * (1 - smooth22((age - 8) / 14)) };
+}
+function castCirclePosition(actor, facing2) {
+  return { x: actor.position.x + 0.8 * facing2 * CAST_CIRCLE_LOCAL.x, y: actor.position.y - 8 + 0.8 * CAST_CIRCLE_LOCAL.y };
+}
+function drawWorldHero(ctx, actor, facing2, presentationTime, primary = null, tick = 0, hurtFlash = false, skill = null) {
+  let guardY = 0;
+  if (actor.subType === "shield" && actor.guard?.raised) {
+    facing2 = actor.guard.direction.x < 0 ? -1 : 1;
+    primary = { ...primary, facing: actor.guard.direction };
+    guardY = actor.guard.direction.y;
+  }
+  const pose = primaryPose(primary, tick), moving = actor.movedLastTick, riposteAge = tick - actor.shieldRiposteTick, blockAge = tick - actor.shieldBlockTick, cast = skill?.skillId === "cast" ? castPose(tick - skill.tick) : skill?.skillId === "shield_bash" && actor.subType === "shield" ? bashPose(tick - skill.tick) : skill?.skillId === "flurry" && actor.subType === "dagger" ? flurryPose(tick - skill.tick, daggerTypeOf(actor.heroLook?.gear?.off?.kind)) : null;
+  ctx.save();
+  ctx.translate(actor.position.x, actor.position.y - 8);
+  ctx.scale(0.8 * facing2, 0.8);
+  if (primary) ctx.rotate(pose.body);
+  drawBlockyHero(ctx, heroSpecForActor(actor), {
+    t: presentationTime / 1e3,
+    bob: moving ? Math.sin(presentationTime / 90) * 0.9 : 0,
+    sway: Math.sin(presentationTime / 560) * 0.5,
+    step: moving ? Math.sin(presentationTime / 90) : 0,
+    front: frontAngle(pose, primary, facing2),
+    guard: Boolean(actor.guard?.raised),
+    guardY,
+    jab: riposteAge >= 0 && riposteAge < 12 ? Math.sin(Math.PI * riposteAge / 12) * 7 : 0,
+    recoil: blockAge >= 0 && blockAge < 9 ? Math.sin(Math.PI * blockAge / 9) * 3 : 0,
+    active: pose.active,
+    weight: pose.weight,
+    flash: hurtFlash,
+    ...cast ?? {}
+  });
+  ctx.restore();
+}
+function drawProofSlime(ctx, actor, flash = false) {
+  if (!actor.alive) return;
+  ctx.save();
+  ctx.translate(actor.position.x, actor.position.y);
+  ctx.fillStyle = flash ? "#fff1cc" : "#66ad63";
+  ctx.strokeStyle = "#203f35";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.ellipse(0, -5, 15, 11, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = "#182d29";
+  ctx.fillRect(-6, -8, 3, 4);
+  ctx.fillRect(4, -8, 3, 4);
+  const ratio = actor.hp.m / actor.maxHp.m * 10 ** (actor.hp.e - actor.maxHp.e);
+  ctx.fillStyle = "#16232a";
+  ctx.fillRect(-18, -26, 36, 4);
+  ctx.fillStyle = "#b4e484";
+  ctx.fillRect(-18, -26, 36 * ratio, 4);
+  ctx.restore();
 }
 
 // src/client/mage_skill_art_v1.js
@@ -47598,7 +47815,7 @@ function lightning(ctx, x0, y0, x1, y1, seed2, amp, width, alpha2 = 1) {
 }
 function drawCastSigil(ctx, x, y, element, age, facing2 = 1) {
   if (age < 0 || age >= CAST_SIGIL_LIFE) return;
-  const C = CAST_COLORS[element] ?? CAST_COLORS.fire, t = age / 1e3, s = easeOut(age / 70) * (1 - smooth22((age - 380) / 140));
+  const C = CAST_COLORS[element] ?? CAST_COLORS.fire, t = age / 1e3, s = easeOut(age / 70) * (1 - smooth21((age - 380) / 140));
   if (s > 0) {
     const rx = 9 * HERO * s, ry = 22 * HERO * s;
     ctx.save();
@@ -47843,7 +48060,7 @@ function drawCastImpact(ctx, element, x, y, age, crit = false) {
       }
     }
     if (h < 0.5) {
-      const q = h / 0.5, e = easeOut(h / 0.3), R2 = (10 + 24 * e) * HIT * big, body5 = h < 0.16 ? 1 : 1 - smooth22((h - 0.16) / 0.26), sd = Math.floor(age / 70);
+      const q = h / 0.5, e = easeOut(h / 0.3), R2 = (10 + 24 * e) * HIT * big, body5 = h < 0.16 ? 1 : 1 - smooth21((h - 0.16) / 0.26), sd = Math.floor(age / 70);
       for (let i = 0; i < 9; i++) {
         const a = i * TAU57 / 9 + 0.4, d = (4 + 20 * e) * HIT;
         blob2(ctx, I.x + Math.cos(a) * d, I.y + Math.sin(a) * d * 0.75 - 10 * HIT * q, (8 + 10 * e) * HIT, q < 0.4 ? "#ff8a3d" : "#c2410c", (1 - q) * 0.9);
@@ -47874,7 +48091,7 @@ function drawCastImpact(ctx, element, x, y, age, crit = false) {
     const over = (v) => {
       v = clamp44(v);
       return 1 + 2.7 * (v - 1) ** 3 + 1.7 * (v - 1) ** 2;
-    }, grow = over(h / 0.14) * HIT * 1.3 * big, fade = 1 - smooth22((h - 0.3) / 0.18);
+    }, grow = over(h / 0.14) * HIT * 1.3 * big, fade = 1 - smooth21((h - 0.3) / 0.18);
     ctx.save();
     ctx.globalAlpha = 0.3 * Math.min(1, h * 6) * fade;
     ctx.fillStyle = "#d8f2ff";
@@ -48008,9 +48225,9 @@ function drawBashWave(ctx, x, y, dx, dy, age, type = "kite") {
   }
   const wave = u / 0.2;
   if (wave >= 0 && wave <= 1.4) {
-    const k = Math.min(1, wave), wx = lerp7(face3 + 3, 46, smooth22(k)), fade = 1 - clamp44((wave - 0.7) / 0.7), ry = v.ry * HERO2;
+    const k = Math.min(1, wave), wx = lerp6(face3 + 3, 46, smooth21(k)), fade = 1 - clamp44((wave - 0.7) / 0.7), ry = v.ry * HERO2;
     for (let i = 0; i < 8; i++) {
-      const sy = -ry * 0.8 + i * ry * 0.23, len = 6 + 14 * smooth22(k) * rnd(i + 2);
+      const sy = -ry * 0.8 + i * ry * 0.23, len = 6 + 14 * smooth21(k) * rnd(i + 2);
       glowStroke(ctx, KNIGHT_BLUE, 5, 0.8 * fade, () => {
         ctx.beginPath();
         ctx.moveTo(wx - len - 4, sy);
@@ -48038,13 +48255,13 @@ function drawBashWave(ctx, x, y, dx, dy, age, type = "kite") {
 function drawBashImpact(ctx, x, y, dx, dy, age, crit = false) {
   if (age < 0 || age >= BASH_IMPACT_LIFE) return;
   const h = age / BASH_IMPACT_LIFE, cx = x - dx * 6, cy = y - 9, big = crit ? 1.25 : 1, back = Math.atan2(dy, dx) + Math.PI;
-  bloom(ctx, cx, cy, (8 + 19 * smooth22(h * 1.8)) * big, KNIGHT_BLUE, 1 - h);
+  bloom(ctx, cx, cy, (8 + 19 * smooth21(h * 1.8)) * big, KNIGHT_BLUE, 1 - h);
   glowStroke(ctx, KNIGHT_BLUE, 8, 1.4 * (1 - h), () => {
     ctx.beginPath();
     ctx.ellipse(cx, cy, 2 + 6 * h, 4 + 10 * h * big, Math.atan2(dy, dx), 0, TAU57);
   }, false);
   for (let i = 0; i < 7; i++) {
-    const a = back + Math.PI + (i - 3) * 0.42, l = (6 + 10 * rnd(i + 9)) * smooth22(h * 2) * big;
+    const a = back + Math.PI + (i - 3) * 0.42, l = (6 + 10 * rnd(i + 9)) * smooth21(h * 2) * big;
     glowStroke(ctx, KNIGHT_CORE, 5, 1 * (1 - h), () => {
       ctx.beginPath();
       ctx.moveTo(cx + Math.cos(a) * 4, cy + Math.sin(a) * 4);
@@ -48080,7 +48297,7 @@ var WARDS = Object.freeze({ buckler: { shape: "round", ry: 23, bulge: 14 }, kite
 var RUNE_SPOTS = [0.2, -0.2, 0.6, -0.6];
 var IMPACT = 0.08;
 function wardEdge(w, s, open, flex) {
-  const o = smooth22(open), b = w.bulge * Math.sqrt(o) * (1 - flex), a = Math.abs(s);
+  const o = smooth21(open), b = w.bulge * Math.sqrt(o) * (1 - flex), a = Math.abs(s);
   const x = w.shape === "wall" ? b * (1 - a ** 6) : w.shape === "crest" && s > 0 ? b * (1 - s) ** 0.75 : b * Math.sqrt(Math.max(0, 1 - s * s));
   return { x, y: s * w.ry * o * (w.shape === "crest" && s > 0 ? 1.2 : 1) };
 }
@@ -48198,14 +48415,14 @@ function drawGuardWard(ctx, x, y, facing2, type, open, runes, blockAge, time, re
     wardFront(ctx, w, cx, cy, open, flex);
   });
   RUNE_SPOTS.forEach((s, i) => {
-    const p = edge(s), pop = smooth22((open - 0.45 - i * 0.12) / 0.15);
+    const p = edge(s), pop = smooth21((open - 0.45 - i * 0.12) / 0.15);
     rune(ctx, p.x - 3.2, p.y, 3 * (0.6 + 0.4 * pop), i < runes, pop);
   });
   if (blockAge >= 0 && blockAge < 500) {
     const q = blockAge / 500;
     bloom(ctx, I.x, I.y, 9 + 16 * q, KNIGHT_BLUE, 0.95 * (1 - q));
     for (const [a, l] of [[-1.25, 12], [-1.6, 9], [1.3, 11], [1.65, 8], [-0.4, 7]]) glowStroke(ctx, KNIGHT_CORE, 6, 1.2 * (1 - q), () => {
-      const r0 = 3 + 14 * smooth22(q * 1.6);
+      const r0 = 3 + 14 * smooth21(q * 1.6);
       ctx.beginPath();
       ctx.moveTo(I.x + Math.cos(a) * r0, I.y + Math.sin(a) * r0);
       ctx.lineTo(I.x + Math.cos(a) * (r0 + l * (1 - q)), I.y + Math.sin(a) * (r0 + l * (1 - q)));
@@ -48213,7 +48430,7 @@ function drawGuardWard(ctx, x, y, facing2, type, open, runes, blockAge, time, re
   }
   const r = (blockAge - 60) / 260;
   if (r >= 0 && r < 1) for (let i = 0; i < 4; i++) {
-    const f = Math.max(0, r - i * 0.06), px2 = lerp7(I.x, 0, smooth22(f)), py = lerp7(I.y, 0, smooth22(f)) - Math.sin(f * Math.PI) * 6;
+    const f = Math.max(0, r - i * 0.06), px2 = lerp6(I.x, 0, smooth21(f)), py = lerp6(I.y, 0, smooth21(f)) - Math.sin(f * Math.PI) * 6;
     mote(ctx, px2, py, 1.4 - i * 0.25, i ? KNIGHT_BLUE : KNIGHT_CORE, 1 - i * 0.22);
   }
   const ring4 = (blockAge - 320) / 280;
@@ -48221,7 +48438,7 @@ function drawGuardWard(ctx, x, y, facing2, type, open, runes, blockAge, time, re
     bloom(ctx, 0, 0, 10, KNIGHT_BLUE, 0.5 * (1 - ring4));
     glowStroke(ctx, KNIGHT_BLUE, 6, 1.3 * (1 - ring4 * 0.5), () => {
       ctx.beginPath();
-      ctx.arc(0, 0, 7.5, -Math.PI / 2, -Math.PI / 2 + TAU57 * smooth22(ring4));
+      ctx.arc(0, 0, 7.5, -Math.PI / 2, -Math.PI / 2 + TAU57 * smooth21(ring4));
     }, false);
   }
   ctx.restore();
@@ -48621,27 +48838,8 @@ function drawSkillBurst(ctx, b, age) {
   const heading = Math.atan2(b.dy, b.dx);
   ctx.save();
   if (b.kind === "skill:shield_bash") drawBashWave(ctx, b.x, b.y, b.dx, b.dy, age, b.shield ?? "kite");
-  else if (b.kind === "skill:flurry") {
-    ctx.translate(b.x, b.y - 8);
-    ctx.lineCap = "round";
-    for (let i = 0; i < 3; i++) {
-      const a = age - i * 117;
-      if (a < 0 || a > 170) continue;
-      const t = a / 170, tilt = (i % 2 ? 0.55 : -0.55) * (1 - 0.4 * t);
-      ctx.save();
-      ctx.rotate(heading + tilt);
-      ctx.globalAlpha = 1 - t;
-      ctx.strokeStyle = "#5b3592";
-      ctx.lineWidth = 6 * (1 - t) + 2;
-      ctx.beginPath();
-      ctx.arc(-6, 0, 24 + i * 3 + 6 * t, -0.95, 0.95);
-      ctx.stroke();
-      ctx.strokeStyle = "#efe6ff";
-      ctx.lineWidth = 2.2;
-      ctx.stroke();
-      ctx.restore();
-    }
-  } else if (b.kind === "skill:cast") drawCastSigil(ctx, b.x, b.y, b.element ?? "fire", age, b.facing ?? 1);
+  else if (b.kind === "skill:flurry") drawFlurry(ctx, b.x, b.y, b.dx, b.dy, age, b.dagger ?? null);
+  else if (b.kind === "skill:cast") drawCastSigil(ctx, b.x, b.y, b.element ?? "fire", age, b.facing ?? 1);
   ctx.restore();
 }
 function drawBlinkBurst(ctx, b, age) {
@@ -48658,7 +48856,16 @@ function drawBlinkGhost(ctx, m, b, age, time) {
 var castElement = (m, id, element) => (m.bolts ?? []).find((b) => b.sourceId === id)?.delivery ?? (["fire", "frost", "lightning"].includes(element) ? element : "fire");
 function createCombatVfx() {
   let key2 = null, seen = false, lastModel = null;
-  const statuses = /* @__PURE__ */ new Map(), families3 = /* @__PURE__ */ new Map(), bursts = [], live = /* @__PURE__ */ new Set(), wards = /* @__PURE__ */ new Map();
+  const statuses = /* @__PURE__ */ new Map(), families3 = /* @__PURE__ */ new Map(), bursts = [], live = /* @__PURE__ */ new Set(), wards = /* @__PURE__ */ new Map(), parrySpent = /* @__PURE__ */ new Map(), facings = /* @__PURE__ */ new Map(), afterimages = [];
+  function spawnAfterimage(ctx, id, a, f, time) {
+    const last = afterimages.findLast((i) => i.id === id);
+    if (last && time - last.born < 30) return;
+    const facing2 = f.dash.x < 0 ? -1 : 1, count = afterimages.filter((i) => i.id === id).length;
+    const image = makeAfterimage(ctx.canvas?.ownerDocument, (o) => drawWorldHero(o, { ...a, position: { x: 32, y: 52 }, movedLastTick: false }, facing2, time), count % 2 ? DASH_LIGHT : DASH_DARK);
+    if (!image) return;
+    afterimages.push({ id, image, x: a.position.x, y: a.position.y, born: time });
+    if (afterimages.length > 12) afterimages.shift();
+  }
   function drawWard(ctx, m, id, a, time) {
     const g = a.guard;
     if (!g) return;
@@ -48689,6 +48896,9 @@ function createCombatVfx() {
       statuses.clear();
       families3.clear();
       wards.clear();
+      parrySpent.clear();
+      facings.clear();
+      afterimages.length = 0;
       bursts.length = 0;
       seen = false;
     }
@@ -48712,16 +48922,27 @@ function createCombatVfx() {
         if (old2.dash > 0 && f.dash.frames === 0) add(f.blink ? "blinkEnd" : "dashEnd", a, time, old2.dx, old2.dy);
         if (f.skill && f.skill.tick !== old2.skill) {
           const facing2 = poses[id]?.facing ?? 1, cast = f.skill.skillId === "cast";
-          add("skill:" + f.skill.skillId, cast ? { position: castCirclePosition(a, facing2) } : a, time, f.skill.x, f.skill.y, { facing: facing2, element: cast ? castElement(m, id, f.element) : null, shield: f.skill.skillId === "shield_bash" ? shieldTypeOf(a.heroLook?.gear?.off?.kind) : null });
+          add("skill:" + f.skill.skillId, cast ? { position: castCirclePosition(a, facing2) } : a, time, f.skill.x, f.skill.y, { facing: facing2, element: cast ? castElement(m, id, f.element) : null, shield: f.skill.skillId === "shield_bash" ? shieldTypeOf(a.heroLook?.gear?.off?.kind) : null, dagger: f.skill.skillId === "flurry" ? daggerTypeOf(a.heroLook?.gear?.off?.kind) : null });
           bursts[bursts.length - 1].color = SKILL_ELEMENT_COLORS[f.element] ?? SKILL_ELEMENT_COLORS.fire;
         }
       }
-      families3.set(id, { mastery: f.mastery, pressure: f.pressure, delivery: f.delivery.tick, dash: f.dash.frames, dx: f.dash.x, dy: f.dash.y, skill: f.skill?.tick });
+      if (old2 && old2.parry > 1 && !f.parry) parrySpent.set(id, time);
+      facings.set(id, poses[id]?.facing ?? 1);
+      families3.set(id, { mastery: f.mastery, pressure: f.pressure, delivery: f.delivery.tick, dash: f.dash.frames, dx: f.dash.x, dy: f.dash.y, skill: f.skill?.tick, parry: f.parry ?? 0 });
     }
     seen = true;
   }
   function draw(ctx, m, time, viewport) {
     drawMasteryWorld(ctx, m, time);
+    for (let i = afterimages.length - 1; i >= 0; i--) {
+      const g = afterimages[i], age = time - g.born;
+      if (age >= AFTERIMAGE_LIFE) {
+        afterimages.splice(i, 1);
+        continue;
+      }
+      drawAfterimage(ctx, g.image, g.x, g.y, age);
+    }
+    for (const [id, at3] of parrySpent) if (time - at3 > 400) parrySpent.delete(id);
     const visible3 = (p) => !viewport || p.x >= viewport.x - 60 && p.y >= viewport.y - 80 && p.x <= viewport.x + viewport.width + 60 && p.y <= viewport.y + viewport.height + 80;
     for (const b of bursts) {
       if (!visible3(b)) continue;
@@ -48749,21 +48970,9 @@ function createCombatVfx() {
         drawStatusIcon(ctx, "burn", b.x, b.y, 19);
         ctx.restore();
       } else if (b.kind.startsWith("dash")) {
-        if (age < 150) {
-          ctx.save();
-          ctx.globalAlpha = 1 - age / 150;
-          ctx.strokeStyle = "#633b9a";
-          ctx.lineWidth = 5;
-          ctx.beginPath();
-          ctx.moveTo(b.x - b.dx * 22 + b.dy * 7, b.y - b.dy * 22 - b.dx * 7);
-          ctx.lineTo(b.x + b.dx * 4, b.y + b.dy * 4);
-          ctx.lineTo(b.x - b.dx * 22 - b.dy * 7, b.y - b.dy * 22 + b.dx * 7);
-          ctx.stroke();
-          ctx.strokeStyle = "#c9afff";
-          ctx.lineWidth = 2;
-          ctx.stroke();
-          ctx.restore();
-        }
+        const landing = b.kind === "dashEnd";
+        drawDashChevron(ctx, b.x, b.y, b.dx, b.dy, age, landing);
+        drawDashDust(ctx, b.x, b.y, b.dx, age, landing);
       } else drawCombatImpact(ctx, b.kind, b.x, b.y, b.dx, b.dy, age);
     }
     for (const e of m.combatPresentation?.statuses ?? []) {
@@ -48780,35 +48989,10 @@ function createCombatVfx() {
       drawWard(ctx, m, id, a, time);
       if (f.dash.frames > 0 && f.blink) drawBlinkStreaks(ctx, a.position.x, a.position.y, f.dash.x, f.dash.y, time);
       else if (f.dash.frames > 0) {
-        ctx.save();
-        for (let i = 3; i >= 1; i--) {
-          ctx.globalAlpha = 0.12 + (3 - i) * 0.07;
-          ctx.fillStyle = i % 2 ? "#392152" : "#ad77df";
-          ctx.save();
-          ctx.translate(a.position.x - f.dash.x * i * 9, a.position.y - f.dash.y * i * 9);
-          ctx.beginPath();
-          ctx.moveTo(-6, -25);
-          ctx.lineTo(5, -25);
-          ctx.lineTo(7, -14);
-          ctx.lineTo(10, -6);
-          ctx.lineTo(5, -3);
-          ctx.lineTo(3, 1);
-          ctx.lineTo(-3, 1);
-          ctx.lineTo(-8, -5);
-          ctx.lineTo(-11, -2);
-          ctx.lineTo(-7, -15);
-          ctx.closePath();
-          ctx.fill();
-          ctx.restore();
-          ctx.strokeStyle = "#d9b8ff";
-          ctx.lineWidth = 1.3;
-          ctx.beginPath();
-          ctx.moveTo(a.position.x - f.dash.x * i * 11, a.position.y - f.dash.y * i * 11);
-          ctx.lineTo(a.position.x - f.dash.x * (i * 11 + 8), a.position.y - f.dash.y * (i * 11 + 8));
-          ctx.stroke();
-        }
-        ctx.restore();
+        drawDashStreaks(ctx, a.position.x, a.position.y, f.dash.x, f.dash.y, time);
+        spawnAfterimage(ctx, id, a, f, time);
       }
+      drawParryWard(ctx, a.position.x, a.position.y, facings.get(id) ?? 1, f.parry > 0, time, parrySpent.has(id) ? time - parrySpent.get(id) : -1);
     }
   }
   return { clear() {
@@ -48816,6 +49000,9 @@ function createCombatVfx() {
     statuses.clear();
     families3.clear();
     wards.clear();
+    parrySpent.clear();
+    facings.clear();
+    afterimages.length = 0;
     lastModel = null;
     seen = false;
   }, rebase(project2) {
