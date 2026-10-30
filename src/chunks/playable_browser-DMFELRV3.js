@@ -26854,8 +26854,6 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
         actor.movementIntent = copyWire(command.payload);
         const primary = state.primary.actorsById[actor.entityId], length = Math.hypot(command.payload.x, command.payload.y);
         if (primary && length > 0) primary.facing = { x: command.payload.x / length, y: command.payload.y / length };
-        const guard = state.subweaponCombat?.actors[actor.entityId]?.guard;
-        if (guard?.raised && length > 0) guard.direction = { x: command.payload.x / length, y: command.payload.y / length };
       } else if (target) {
         const functional = state.d9World?.functionalSitesById?.[command.payload.siteId];
         if (command.payload.direction === "enter" && isGeneratedInteriorFamily(functional) && !functional.discoveredByPlayerIds.includes(command.playerId)) {
@@ -48293,36 +48291,17 @@ function drawBashStun(ctx, x, y, time, halos = 1) {
     }
   }
 }
-var WARDS = Object.freeze({ buckler: { shape: "round", ry: 23, bulge: 14 }, kite: { shape: "crest", ry: 25, bulge: 14 }, tower: { shape: "wall", ry: 33, bulge: 9 } });
-var RUNE_SPOTS = [0.2, -0.2, 0.6, -0.6];
-var IMPACT = 0.08;
-function wardEdge(w, s, open, flex) {
-  const o = smooth21(open), b = w.bulge * Math.sqrt(o) * (1 - flex), a = Math.abs(s);
-  const x = w.shape === "wall" ? b * (1 - a ** 6) : w.shape === "crest" && s > 0 ? b * (1 - s) ** 0.75 : b * Math.sqrt(Math.max(0, 1 - s * s));
-  return { x, y: s * w.ry * o * (w.shape === "crest" && s > 0 ? 1.2 : 1) };
-}
-function wardFront(ctx, w, cx, cy, open, flex, move2 = true) {
-  for (let i = 0; i <= 24; i++) {
-    const p = wardEdge(w, -1 + i / 12, open, flex);
-    if (i || !move2) ctx.lineTo(cx + p.x, cy + p.y);
-    else ctx.moveTo(cx + p.x, cy + p.y);
-  }
-}
-function wardShape(ctx, w, cx, cy, open, flex) {
+var WARDS = Object.freeze({ buckler: { r: 19, band: 3.2 }, kite: { r: 22, band: 4.2 }, tower: { r: 25, band: 5.6 } });
+var RUNE_SPOTS = [-0.38, -0.13, 0.13, 0.38];
+var ringPoint = (cx, cy, r, a, k = 1) => ({ x: cx + Math.cos(a) * r * k, y: cy + Math.sin(a) * r * 0.78 * k });
+function hexCells(ctx, x0, y0, x1, y1, pick) {
+  const r = 1.9, dx = r * 1.5, dy = r * Math.sqrt(3);
   ctx.beginPath();
-  ctx.moveTo(cx - 2, cy + wardEdge(w, -1, open, flex).y);
-  wardFront(ctx, w, cx, cy, open, flex, false);
-  ctx.lineTo(cx - 2, cy + wardEdge(w, 1, open, flex).y);
-  ctx.closePath();
-}
-function hexCells(ctx, cx, cy, ry, pick) {
-  const r = 2.3, dx = r * 1.5, dy = r * Math.sqrt(3), n = Math.ceil(ry / dy) + 2;
-  ctx.beginPath();
-  for (let q = 0; q <= 7; q++) for (let j = -n; j <= n; j++) {
-    const hx = cx - 2 + q * dx, hy = cy + j * dy + (q & 1 ? dy / 2 : 0);
-    if (!pick(hx, hy)) continue;
-    ctx.moveTo(hx + r, hy);
-    for (let k = 1; k < 6; k++) ctx.lineTo(hx + r * Math.cos(k * Math.PI / 3), hy + r * Math.sin(k * Math.PI / 3));
+  for (let q = 0; x0 + q * dx <= x1; q++) for (let y = y0 + (q & 1 ? dy / 2 : 0); y <= y1; y += dy) {
+    const hx = x0 + q * dx;
+    if (!pick(hx, y)) continue;
+    ctx.moveTo(hx + r, y);
+    for (let k = 1; k < 6; k++) ctx.lineTo(hx + r * Math.cos(k * Math.PI / 3), y + r * Math.sin(k * Math.PI / 3));
     ctx.closePath();
   }
 }
@@ -48341,9 +48320,9 @@ function rune(ctx, x, y, r, lit, alpha2) {
   if (lit) {
     ctx.save();
     ctx.globalAlpha *= alpha2;
-    glowStroke(ctx, KNIGHT_BLUE, 6, 1.2, path9);
+    glowStroke(ctx, KNIGHT_BLUE, 6, 1, path9);
     ctx.restore();
-    mote(ctx, x, y, 0.8, KNIGHT_CORE, alpha2);
+    mote(ctx, x, y, 0.7, KNIGHT_CORE, alpha2);
     return;
   }
   ctx.save();
@@ -48352,96 +48331,99 @@ function rune(ctx, x, y, r, lit, alpha2) {
   ctx.fillStyle = "#132029";
   ctx.fill();
   ctx.strokeStyle = "#4e6b7a";
-  ctx.lineWidth = 0.8;
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(x - r * 0.45, y - r * 0.55);
-  ctx.lineTo(x + r * 0.15, y - r * 0.05);
-  ctx.lineTo(x - r * 0.25, y + r * 0.65);
-  ctx.strokeStyle = "#8fb4c6";
-  ctx.lineWidth = 0.6;
+  ctx.lineWidth = 0.7;
   ctx.stroke();
   ctx.restore();
 }
-function guardFace(x, y, facing2, recoil = 0, guardY = 0) {
-  return { x: x + 0.8 * facing2 * (11.8 - recoil), y: y - 8 + 0.8 * (5.6 + guardY * 8) };
+function guardFace(x, y, facing2) {
+  return { x: x + 0.8 * facing2 * 11.8, y: y - 8 + 0.8 * 5.6 };
 }
-function drawGuardWard(ctx, x, y, facing2, type, open, runes, blockAge, time, recoil = 0, dir = null) {
+function drawGuardWard(ctx, x, y, angle3, type, open, runes, blockAge, time, move2 = null) {
   if (open <= 0.01) return;
-  const w = WARDS[type] ?? WARDS.kite, face3 = guardFace(x, y, facing2, recoil, dir?.y ?? 0), tilt = dir ? Math.atan2(dir.y, Math.abs(dir.x)) : 0, flex = blockAge >= 0 && blockAge < 220 ? 0.3 * Math.sin(Math.PI * blockAge / 220) : 0, cx = 5, cy = -4;
-  const edge = (s) => {
-    const p = wardEdge(w, s, open, flex);
-    return { x: cx + p.x, y: cy + p.y };
-  }, I = edge(IMPACT), t = time / 1e3;
-  ctx.save();
-  ctx.translate(face3.x, face3.y);
-  ctx.scale(facing2 * HERO2, HERO2);
-  ctx.rotate(tilt);
-  if (open < 0.98) bloom(ctx, 0, 0, 8 + 10 * open, KNIGHT_BLUE, 0.5 * (1 - open));
+  const w = WARDS[type] ?? WARDS.kite, t = time / 1e3, cx = x, cy = y - 12, span = Math.PI * smooth21(open);
+  const dent = blockAge >= 0 && blockAge < 260 ? Math.sin(Math.PI * blockAge / 260) : 0, mx = move2?.x ?? 0, my = move2?.y ?? 0, moving = Math.hypot(mx, my) > 0.05;
+  const radius = (a) => {
+    const off = a - angle3;
+    let r = w.r * (1 + 0.03 * Math.sin(t * 4 + off * 3)) - 5 * dent * Math.exp(-off * off / 0.18);
+    if (moving) {
+      const back2 = Math.cos(Math.atan2(my, mx) - (angle3 + Math.PI)) * Math.abs(Math.sin(off));
+      r += 3.5 * back2;
+    }
+    return r;
+  };
+  const N = 28, outer = [], inner = [];
+  for (let i = 0; i <= N; i++) {
+    const a = angle3 - span / 2 + span * i / N, r = radius(a);
+    outer.push(ringPoint(cx, cy, r + w.band / 2, a));
+    inner.push(ringPoint(cx, cy, r - w.band / 2, a));
+  }
+  const shape2 = () => {
+    ctx.beginPath();
+    ctx.moveTo(outer[0].x, outer[0].y);
+    for (const p of outer) ctx.lineTo(p.x, p.y);
+    for (let i = inner.length - 1; i >= 0; i--) ctx.lineTo(inner[i].x, inner[i].y);
+    ctx.closePath();
+  };
   ctx.save();
   ctx.globalCompositeOperation = "lighter";
-  wardShape(ctx, w, cx, cy, open, flex);
-  const g = ctx.createLinearGradient(cx - 2, 0, cx + w.bulge, 0);
-  g.addColorStop(0, rgba(KNIGHT_BLUE, 0));
-  g.addColorStop(1, rgba(KNIGHT_BLUE, 0.34 * open));
-  ctx.fillStyle = g;
+  shape2();
+  ctx.fillStyle = rgba(KNIGHT_BLUE, 0.3 * open);
   ctx.fill();
   ctx.clip();
-  hexCells(ctx, cx, cy, w.ry * 1.25, () => true);
-  const lg = ctx.createLinearGradient(cx - 2, 0, cx + w.bulge, 0);
-  lg.addColorStop(0, rgba(KNIGHT_CORE, 0));
-  lg.addColorStop(1, rgba(KNIGHT_CORE, 0.26 * open));
-  ctx.strokeStyle = lg;
-  ctx.lineWidth = 0.5;
+  hexCells(ctx, cx - w.r - 6, cy - w.r - 6, cx + w.r + 6, cy + w.r + 6, () => true);
+  ctx.strokeStyle = rgba(KNIGHT_CORE, 0.22 * open);
+  ctx.lineWidth = 0.45;
   ctx.stroke();
-  const band = cy - w.ry * 1.2 + t * 0.8 % 1 * w.ry * 2.4, bg = ctx.createLinearGradient(0, band - 5, 0, band + 5);
-  bg.addColorStop(0, rgba(KNIGHT_BLUE, 0));
-  bg.addColorStop(0.5, rgba(KNIGHT_CORE, 0.28 * open));
-  bg.addColorStop(1, rgba(KNIGHT_BLUE, 0));
-  ctx.fillStyle = bg;
-  ctx.fillRect(cx - 4, band - 5, w.bulge + 8, 10);
+  const slide = angle3 - span / 2 + span * (t * 0.7 % 1), sp = ringPoint(cx, cy, w.r, slide);
+  bloom(ctx, sp.x, sp.y, 7, KNIGHT_CORE, 0.35 * open);
+  const hit = ringPoint(cx, cy, radius(angle3), angle3);
   if (blockAge >= 0 && blockAge < 500) {
-    const k = blockAge / 500, rr = 3 + 40 * k;
-    hexCells(ctx, cx, cy, w.ry * 1.25, (hx, hy) => Math.abs(Math.hypot(hx - I.x, hy - I.y) - rr) < 3.2);
-    ctx.fillStyle = rgba(KNIGHT_BLUE, 0.35 * (1 - k));
+    const k = blockAge / 500, rr = 2 + 30 * k;
+    hexCells(ctx, cx - w.r - 6, cy - w.r - 6, cx + w.r + 6, cy + w.r + 6, (hx, hy) => Math.abs(Math.hypot(hx - hit.x, hy - hit.y) - rr) < 2.6);
+    ctx.fillStyle = rgba(KNIGHT_BLUE, 0.4 * (1 - k));
     ctx.fill();
     ctx.strokeStyle = rgba(KNIGHT_CORE, 0.9 * (1 - k));
-    ctx.lineWidth = 0.7;
+    ctx.lineWidth = 0.6;
     ctx.stroke();
   }
   ctx.restore();
-  glowStroke(ctx, KNIGHT_BLUE, 10, 1.7, () => {
+  glowStroke(ctx, KNIGHT_BLUE, 8, 1.3, () => {
     ctx.beginPath();
-    wardFront(ctx, w, cx, cy, open, flex);
+    outer.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y));
   });
+  glowStroke(ctx, KNIGHT_BLUE, 4, 0.6, () => {
+    ctx.beginPath();
+    inner.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y));
+  }, false);
   RUNE_SPOTS.forEach((s, i) => {
-    const p = edge(s), pop = smooth21((open - 0.45 - i * 0.12) / 0.15);
-    rune(ctx, p.x - 3.2, p.y, 3 * (0.6 + 0.4 * pop), i < runes, pop);
+    const a = angle3 + s * span, p = ringPoint(cx, cy, radius(a) + w.band / 2 + 2.4, a), pop = smooth21((open - 0.4 - i * 0.12) / 0.15);
+    rune(ctx, p.x, p.y, 2.4 * (0.6 + 0.4 * pop), i < runes, pop);
   });
   if (blockAge >= 0 && blockAge < 500) {
     const q = blockAge / 500;
-    bloom(ctx, I.x, I.y, 9 + 16 * q, KNIGHT_BLUE, 0.95 * (1 - q));
-    for (const [a, l] of [[-1.25, 12], [-1.6, 9], [1.3, 11], [1.65, 8], [-0.4, 7]]) glowStroke(ctx, KNIGHT_CORE, 6, 1.2 * (1 - q), () => {
-      const r0 = 3 + 14 * smooth21(q * 1.6);
-      ctx.beginPath();
-      ctx.moveTo(I.x + Math.cos(a) * r0, I.y + Math.sin(a) * r0);
-      ctx.lineTo(I.x + Math.cos(a) * (r0 + l * (1 - q)), I.y + Math.sin(a) * (r0 + l * (1 - q)));
-    }, false);
+    bloom(ctx, hit.x, hit.y, 6 + 12 * q, KNIGHT_BLUE, 0.95 * (1 - q));
+    for (const da of [-1.3, -0.7, 0.7, 1.3]) {
+      const a = angle3 + da, l = 7 * (1 - q), r0 = 2 + 9 * smooth21(q * 1.6);
+      glowStroke(ctx, KNIGHT_CORE, 5, 1 * (1 - q), () => {
+        ctx.beginPath();
+        ctx.moveTo(hit.x + Math.cos(a) * r0, hit.y + Math.sin(a) * r0);
+        ctx.lineTo(hit.x + Math.cos(a) * (r0 + l), hit.y + Math.sin(a) * (r0 + l));
+      }, false);
+    }
   }
-  const r = (blockAge - 60) / 260;
-  if (r >= 0 && r < 1) for (let i = 0; i < 4; i++) {
-    const f = Math.max(0, r - i * 0.06), px2 = lerp6(I.x, 0, smooth21(f)), py = lerp6(I.y, 0, smooth21(f)) - Math.sin(f * Math.PI) * 6;
-    mote(ctx, px2, py, 1.4 - i * 0.25, i ? KNIGHT_BLUE : KNIGHT_CORE, 1 - i * 0.22);
+  const face3 = guardFace(x, y, Math.cos(angle3) < 0 ? -1 : 1), back = (blockAge - 60) / 260;
+  if (back >= 0 && back < 1) for (let i = 0; i < 4; i++) {
+    const f = Math.max(0, back - i * 0.06), px2 = lerp6(hit.x, face3.x, smooth21(f)), py = lerp6(hit.y, face3.y, smooth21(f)) - Math.sin(f * Math.PI) * 4;
+    mote(ctx, px2, py, 1.1 - i * 0.2, i ? KNIGHT_BLUE : KNIGHT_CORE, 1 - i * 0.22);
   }
   const ring4 = (blockAge - 320) / 280;
   if (ring4 >= 0 && ring4 < 1) {
-    bloom(ctx, 0, 0, 10, KNIGHT_BLUE, 0.5 * (1 - ring4));
-    glowStroke(ctx, KNIGHT_BLUE, 6, 1.3 * (1 - ring4 * 0.5), () => {
+    bloom(ctx, face3.x, face3.y, 7, KNIGHT_BLUE, 0.5 * (1 - ring4));
+    glowStroke(ctx, KNIGHT_BLUE, 5, 1 * (1 - ring4 * 0.5), () => {
       ctx.beginPath();
-      ctx.arc(0, 0, 7.5, -Math.PI / 2, -Math.PI / 2 + TAU57 * smooth21(ring4));
+      ctx.arc(face3.x, face3.y, 5, -Math.PI / 2, -Math.PI / 2 + TAU57 * smooth21(ring4));
     }, false);
   }
-  ctx.restore();
 }
 
 // src/client/combat_vfx.js
@@ -48871,17 +48853,25 @@ function createCombatVfx() {
     if (!g) return;
     let w = wards.get(id);
     if (!w) {
-      w = { open: 0, last: time, facing: 1 };
+      w = { open: 0, last: time, angle: 0, x: a.position.x, y: a.position.y, move: { x: 0, y: 0 } };
       wards.set(id, w);
     }
     const dt = Math.max(0, Math.min(100, time - w.last));
     w.last = time;
+    const vx = a.position.x - w.x, vy = a.position.y - w.y, speed = Math.hypot(vx, vy);
+    w.x = a.position.x;
+    w.y = a.position.y;
+    const k = Math.min(1, dt / 120), target = speed > 0.2 ? { x: vx / speed, y: vy / speed } : { x: 0, y: 0 };
+    w.move = { x: lerp6(w.move.x, target.x, k), y: lerp6(w.move.y, target.y, k) };
+    if (g.raised && g.direction) {
+      const goal = Math.atan2(g.direction.y, g.direction.x);
+      if (w.open <= 0.01) w.angle = goal;
+      else w.angle += (((goal - w.angle) % TAU57 + 3 * Math.PI) % TAU57 - Math.PI) * Math.min(1, dt / 80);
+    }
     w.open = g.raised ? Math.min(1, w.open + dt / 250) : Math.max(0, w.open - dt / 300);
-    if (g.raised) w.facing = g.direction?.x < 0 ? -1 : 1;
     if (w.open <= 0.01) return;
-    const blockAge = (m.tick - (a.shieldBlockTick ?? -1e9)) * 1e3 / 60, recoil = blockAge >= 0 && blockAge < 150 ? Math.sin(Math.PI * blockAge / 150) * 3 : 0, runes = Math.max(0, Math.min(4, Math.floor(Number(g.integrity) / 8) || 0));
-    if (g.raised && g.direction) w.dir = { x: g.direction.x, y: g.direction.y };
-    drawGuardWard(ctx, a.position.x, a.position.y, w.facing, shieldTypeOf(a.heroLook?.gear?.off?.kind), w.open, runes, blockAge, time, recoil, w.dir);
+    const blockAge = (m.tick - (a.shieldBlockTick ?? -1e9)) * 1e3 / 60, runes = Math.max(0, Math.min(4, Math.floor(Number(g.integrity) / 8) || 0));
+    drawGuardWard(ctx, a.position.x, a.position.y, w.angle, shieldTypeOf(a.heroLook?.gear?.off?.kind), w.open, runes, blockAge, time, w.move);
   }
   function add(kind, target, time, dx = 1, dy = 0, extra = null) {
     if (bursts.length >= 32) bursts.shift();
