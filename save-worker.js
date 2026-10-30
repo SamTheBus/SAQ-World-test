@@ -17932,7 +17932,9 @@ function validateClassSkillState(s, combat, actor) {
   for (const [id, left] of Object.entries(k.cooldowns)) safeInteger(left, 1, Math.min(MAX_SKILL_COOLDOWN_TICKS, CLASS_SKILLS[id].cooldownTicks));
   const unit2 = (v) => Number.isFinite(v.x) && Number.isFinite(v.y) && Math.abs(Math.hypot(v.x, v.y) - 1) < 1e-9;
   if (k.last) {
-    closedRecord(k.last, ["skillId", "tick", "x", "y"]);
+    closedRecord(k.last, ["skillId", "tick", "x", "y"], ["r", "ox", "oy"]);
+    if (k.last.r !== void 0) requireContract(Number.isFinite(k.last.r) && k.last.r >= 0 && k.last.r <= 400, "Invalid skill reach");
+    for (const key9 of ["ox", "oy"]) if (k.last[key9] !== void 0) requireContract(Number.isFinite(k.last[key9]) && Math.abs(k.last[key9]) <= 400, "Invalid skill landing");
     requireContract(CLASS_SKILL_IDS.includes(k.last.skillId) && unit2(k.last), "Invalid skill use record");
     safeInteger(k.last.tick, Math.max(0, s.tick - SKILL_LAST_TICKS - 2), s.tick);
   }

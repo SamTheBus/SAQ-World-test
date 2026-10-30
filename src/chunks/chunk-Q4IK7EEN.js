@@ -20965,7 +20965,7 @@ function validateEvent(event) {
       validateAmount(event.payload.damage);
       validateAmount(event.payload.resultingHp);
       requireContract(event.payload.defenseKind == null || ["barrier", "block", "parry"].includes(event.payload.defenseKind), "Invalid defense feedback");
-      requireContract(typeof event.payload.critical === "boolean" && ["main", "bash", "riposte", "offhand", "fire", "lightning", "frost", "bleed", "burn", "poison", "slag", "bloom", "rupture", "shadowflurry", "windrazor", "assassin", "aegis", "shatter", "hostile", "barrier", "block", "parry"].includes(event.payload.mechanic), "Invalid fractional packet attribution");
+      requireContract(typeof event.payload.critical === "boolean" && ["main", "bash", "quake", "riposte", "offhand", "fire", "lightning", "frost", "bleed", "burn", "poison", "slag", "bloom", "rupture", "shadowflurry", "windrazor", "assassin", "aegis", "shatter", "hostile", "barrier", "block", "parry"].includes(event.payload.mechanic), "Invalid fractional packet attribution");
       requireContract(event.payload.targetAlive === compareCombat(event.payload.resultingHp, 0) > 0, "Fractional event liveness");
       requireContract(event.kind === "combat.defenseResolved" ? compareCombat(event.payload.damage, 0) === 0 : compareCombat(event.payload.damage, 0) > 0, "Fractional outcome kind");
       requireContract(event.kind !== "combat.actorDefeated" || !event.payload.targetAlive, "Defeat liveness");
