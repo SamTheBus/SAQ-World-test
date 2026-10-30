@@ -22930,6 +22930,7 @@ export {
   pageDigest,
   createPageTransaction,
   worldDocument,
+  WORLD_CAMPAIGN_DATABASE_NAME,
   deleteLocalWorldCampaignDatabase,
   createLocalIndexedDbCampaignStore
 };

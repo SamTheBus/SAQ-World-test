@@ -243,6 +243,7 @@ import {
   WOODLAND_RUIN_PACKAGE_ID,
   WORLD1C_GREEN_SLIME_PROFILE,
   WORLD1C_PLAYER_PROFILE,
+  WORLD_CAMPAIGN_DATABASE_NAME,
   WORLD_COMBAT_CONTRACT_VERSION,
   WORLD_COMBAT_HASH,
   WORLD_COMBAT_VERSION,
@@ -722,13 +723,15 @@ import {
   worldLevelGapMultiplier,
   worldOrdinaryMeleeProfile,
   worldPointForArea
-} from "./chunk-HRI7YJII.js";
+} from "./chunk-S55QUS3N.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
 function saveChannelPrefix(location) {
   return /\/SAQ-World-test\//i.test(location?.pathname ?? "") ? TEST_SAVE_PREFIX : "";
 }
+var HERO_SLOT_LIMIT = 5;
+var heroSavePrefix = (slot) => Number.isInteger(slot) && slot > 1 && slot <= HERO_SLOT_LIMIT ? `saq-hero-${slot}:` : "";
 function channelIndexedDb(indexedDB, prefix2) {
   if (!prefix2 || !indexedDB) return indexedDB;
   return Object.freeze({
@@ -15084,20 +15087,21 @@ function drawItemIcon(c, item, size = 48) {
   c.restore();
 }
 
-// src/client/camp_roster_v1.js
-var CAMP_ROSTER_VERSION = "camp-roster-v1";
-var CAMP_ROSTER_KEY = "saq-world-camp-v1";
+// src/client/hero_slots_v1.js
+var HERO_SLOTS_VERSION = "hero-slots-v1";
+var heroSlotsKey = (channel2) => `${channel2}saq-world-heroes-v1`;
 var CLASSES = ["knight", "rogue", "mage"];
 var OFFHANDS = ["shield", "dagger", "tome"];
 var SLOTS = ["helmet", "body", "legs", "gloves", "boots", "main", "off"];
 var KIND = /^[a-z][a-z-]{0,23}$/;
+var NAME = /^[\p{L}\p{M}\p{N} '’.-]{0,16}$/u;
 var ids2 = (list) => new Set(list.map((option) => option[0]));
 var HAIR = ids2(LOOK_OPTIONS.hairStyles);
 var FACIAL = ids2(LOOK_OPTIONS.facialHair);
 var HAIR_COLORS = ids2(LOOK_OPTIONS.hairColors);
 var SKINS = ids2(LOOK_OPTIONS.skins);
-function campHero(spec) {
-  if (!spec || typeof spec !== "object" || !CLASSES.includes(spec.cls)) return null;
+function heroCard(spec) {
+  if (!spec || typeof spec !== "object" || spec.cls != null && !CLASSES.includes(spec.cls)) return null;
   const l = spec.look;
   if (!l || !HAIR.has(l.hair) || !FACIAL.has(l.facialHair) || !HAIR_COLORS.has(l.hairColor) || !SKINS.has(l.skin) || typeof l.helmet !== "boolean") return null;
   if (spec.offType != null && !OFFHANDS.includes(spec.offType)) return null;
@@ -15108,28 +15112,78 @@ function campHero(spec) {
     if (!Number.isInteger(g.tier) || g.tier < 0 || g.tier > 5 || g.kind !== void 0 && !KIND.test(g.kind)) return null;
     gear2[slot] = g.kind ? { tier: g.tier, kind: g.kind } : { tier: g.tier };
   }
-  return { cls: spec.cls, look: { hair: l.hair, hairColor: l.hairColor, skin: l.skin, facialHair: l.facialHair, helmet: l.helmet, name: "" }, gear: gear2, offType: spec.offType ?? null };
+  return { cls: spec.cls ?? null, look: { hair: l.hair, hairColor: l.hairColor, skin: l.skin, facialHair: l.facialHair, helmet: l.helmet, name: "" }, gear: gear2, offType: spec.offType ?? null };
 }
-function createCampRosterWriter(storage) {
+var blank = (slot) => ({ slot, name: "", level: 1, hero: null });
+function entry(raw) {
+  if (!raw || typeof raw !== "object" || !Number.isInteger(raw.slot) || raw.slot < 1 || raw.slot > HERO_SLOT_LIMIT) return null;
+  return { slot: raw.slot, name: typeof raw.name === "string" && NAME.test(raw.name) ? raw.name : "", level: Number.isInteger(raw.level) && raw.level >= 1 && raw.level <= 999 ? raw.level : 1, hero: raw.hero == null ? null : heroCard(raw.hero) };
+}
+function parse(storage, channel2) {
+  let data = null;
+  try {
+    data = JSON.parse(storage?.getItem(heroSlotsKey(channel2)) ?? "null");
+  } catch {
+  }
+  return data?.version === HERO_SLOTS_VERSION && Array.isArray(data.heroes) ? data : null;
+}
+function readHeroSlots(storage, channel2 = "") {
+  const data = parse(storage, channel2), heroes = [];
+  for (const raw of data?.heroes.slice(0, HERO_SLOT_LIMIT) ?? []) {
+    const h = entry(raw);
+    if (h && !heroes.some((x) => x.slot === h.slot)) heroes.push(h);
+  }
+  if (!heroes.length) heroes.push(blank(1));
+  heroes.sort((a, b) => a.slot - b.slot);
+  return { active: heroes.some((h) => h.slot === data?.active) ? data.active : heroes[0].slot, heroes };
+}
+function write(storage, channel2, record2) {
+  try {
+    storage.setItem(heroSlotsKey(channel2), JSON.stringify({ version: HERO_SLOTS_VERSION, active: record2.active, heroes: record2.heroes }));
+    return true;
+  } catch {
+    return false;
+  }
+}
+function chooseHero(storage, channel2, slot) {
+  const r = readHeroSlots(storage, channel2);
+  return r.heroes.some((h) => h.slot === slot) && write(storage, channel2, { ...r, active: slot });
+}
+function addHero(storage, channel2) {
+  const r = readHeroSlots(storage, channel2);
+  let slot = 1;
+  while (r.heroes.some((h) => h.slot === slot)) slot++;
+  if (slot > HERO_SLOT_LIMIT) return null;
+  return write(storage, channel2, { active: slot, heroes: [...r.heroes, blank(slot)].sort((a, b) => a.slot - b.slot) }) ? slot : null;
+}
+function dropHero(storage, channel2, slot) {
+  const r = readHeroSlots(storage, channel2);
+  return slot !== r.active && r.heroes.some((h) => h.slot === slot) && write(storage, channel2, { ...r, heroes: r.heroes.filter((h) => h.slot !== slot) });
+}
+function restoreHeroes(storage, channel2, slots) {
+  const r = readHeroSlots(storage, channel2), missing = [...new Set(slots)].filter((slot) => Number.isInteger(slot) && slot >= 1 && slot <= HERO_SLOT_LIMIT && !r.heroes.some((h) => h.slot === slot));
+  return missing.length > 0 && write(storage, channel2, { ...r, heroes: [...r.heroes, ...missing.map(blank)].sort((a, b) => a.slot - b.slot) });
+}
+function createHeroRosterWriter({ storage, channel: channel2 = "", slot = 1 }) {
   let last = null;
+  const update = (next) => {
+    const r = readHeroSlots(storage, channel2), heroes = r.heroes.some((h) => h.slot === slot) ? r.heroes : [...r.heroes, blank(slot)];
+    write(storage, channel2, { ...r, heroes: heroes.map((h) => h.slot === slot ? { ...blank(slot), ...next } : h).sort((a, b) => a.slot - b.slot) });
+  };
   return Object.freeze({
     observe(model) {
-      const player = model?.playersById?.[model.localPlayerId], actor = player && model.entitiesById?.[player.entityId], hero = actor?.heroLook?.cls ? campHero(heroSpecForActor(actor)) : null;
-      if (!hero) return;
-      const text2 = JSON.stringify({ version: CAMP_ROSTER_VERSION, heroes: [hero] });
+      const player = model?.playersById?.[model.localPlayerId], actor = player && model.entitiesById?.[player.entityId];
+      if (!actor?.heroLook || !storage) return;
+      const name = actor.heroLook.look?.name, next = { name: typeof name === "string" && NAME.test(name) ? name : "", level: player.progression?.level ?? 1, hero: heroCard(heroSpecForActor(actor)) };
+      const text2 = JSON.stringify(next);
       if (text2 === last) return;
       last = text2;
-      try {
-        storage?.setItem(CAMP_ROSTER_KEY, text2);
-      } catch {
-      }
+      update(next);
     },
+    // The open hero's save was reset: keep the seat, forget how they looked.
     clear() {
       last = null;
-      try {
-        storage?.removeItem(CAMP_ROSTER_KEY);
-      } catch {
-      }
+      if (storage) update({});
     }
   });
 }
@@ -25852,8 +25906,8 @@ function createActivityAuthority({ initialState, measure, schedulerOptions, deve
     return { status: r.status };
   }) });
   function drainCommands() {
-    for (const entry of Object.values(gateway.admittedCommandsById).sort((a, b) => a.authorityOrder - b.authorityOrder)) {
-      simulation.apply(entry.command, entry.authorityOrder);
+    for (const entry2 of Object.values(gateway.admittedCommandsById).sort((a, b) => a.authorityOrder - b.authorityOrder)) {
+      simulation.apply(entry2.command, entry2.authorityOrder);
       gateway = simulation.withAuthorityState((s) => contracts.retireAppliedAdmissions(gateway, s));
     }
   }
@@ -28017,7 +28071,7 @@ function wheelEntriesV1(player) {
 }
 function wheelKeysV1(entries) {
   let n = 0;
-  return entries.map((entry) => entry === MOVE_SLOT ? null : ++n);
+  return entries.map((entry2) => entry2 === MOVE_SLOT ? null : ++n);
 }
 function createSkillWheelV1({ document, environment, readModel, adapter, isBlocked, openClassPicker, reportError = () => {
 } }) {
@@ -28062,14 +28116,14 @@ function createSkillWheelV1({ document, environment, readModel, adapter, isBlock
   }
   function activate(index) {
     if (isBlocked()) return;
-    const m = readModel(), p = local6(m), entry = entries(m)[index];
-    if (entry === "pick") {
+    const m = readModel(), p = local6(m), entry2 = entries(m)[index];
+    if (entry2 === "pick") {
       openClassPicker?.();
       return;
     }
-    if (!ready(m, entry)) return;
+    if (!ready(m, entry2)) return;
     try {
-      adapter.issue("combat.skill", { skillId: entry, aim: m.primary.actorsById[p.entityId].facing }, m)?.catch?.((e) => reportError(e.message));
+      adapter.issue("combat.skill", { skillId: entry2, aim: m.primary.actorsById[p.entityId].facing }, m)?.catch?.((e) => reportError(e.message));
     } catch (e) {
       reportError(e.message);
     }
@@ -28100,7 +28154,7 @@ function createSkillWheelV1({ document, environment, readModel, adapter, isBlock
     delete wheel.dataset.arranging;
     document.body.classList.remove("wheel-arranging");
     done.hidden = true;
-    if (save && p?.d8 && after && after.some((entry, i) => entry !== before[i])) {
+    if (save && p?.d8 && after && after.some((entry2, i) => entry2 !== before[i])) {
       try {
         adapter.issue("progression.change", { progressionRevision: p.d8.revision, action: { kind: "skills.arrange", slots: after } }, m)?.catch?.((e) => reportError(e.message));
       } catch (e) {
@@ -28331,18 +28385,18 @@ function createSkillWheelV1({ document, environment, readModel, adapter, isBlock
     }
     const moveName = MOVE_NAMES[p.stats.subType] ?? null;
     slots.forEach((s, i) => {
-      const entry = list[i], isMove = entry === MOVE_SLOT, left = CLASS_SKILLS[entry] ? c?.skills?.cooldowns?.[entry] ?? 0 : 0, total = CLASS_SKILLS[entry]?.cooldownTicks ?? 1, state = isMove ? moveName ? "move" : "locked" : entry === "pick" ? "pick" : !entry ? arranging ? "empty" : "locked" : arranging ? "ready" : ready(m, entry) ? "ready" : left ? "cooling" : "blocked", pickedNow = arranging && picked === i;
-      const key2 = `${entry}/${state}/${pickedNow}/${arranging}/${moveName}/${keys2[i]}`;
+      const entry2 = list[i], isMove = entry2 === MOVE_SLOT, left = CLASS_SKILLS[entry2] ? c?.skills?.cooldowns?.[entry2] ?? 0 : 0, total = CLASS_SKILLS[entry2]?.cooldownTicks ?? 1, state = isMove ? moveName ? "move" : "locked" : entry2 === "pick" ? "pick" : !entry2 ? arranging ? "empty" : "locked" : arranging ? "ready" : ready(m, entry2) ? "ready" : left ? "cooling" : "blocked", pickedNow = arranging && picked === i;
+      const key2 = `${entry2}/${state}/${pickedNow}/${arranging}/${moveName}/${keys2[i]}`;
       if (s.paint !== key2) {
         s.paint = key2;
         s.b.dataset.state = state;
-        s.b.dataset.skill = entry ?? "";
+        s.b.dataset.skill = entry2 ?? "";
         s.b.dataset.picked = String(pickedNow);
-        s.icon.innerHTML = isMove ? moveName ? SKILL_ICONS_V1[MOVE_ICON_FOR[p.stats.subType]] : SKILL_ICONS_V1.lock : entry === "pick" ? classIconSvg("knight") : entry ? SKILL_ICONS_V1[entry] : arranging ? "" : SKILL_ICONS_V1.lock;
+        s.icon.innerHTML = isMove ? moveName ? SKILL_ICONS_V1[MOVE_ICON_FOR[p.stats.subType]] : SKILL_ICONS_V1.lock : entry2 === "pick" ? classIconSvg("knight") : entry2 ? SKILL_ICONS_V1[entry2] : arranging ? "" : SKILL_ICONS_V1.lock;
         s.key.textContent = isMove ? "\u21E7" : keys2[i] ? String(keys2[i]) : "";
-        const name = isMove ? moveName ?? "Class move" : entry === "pick" ? "Choose your class" : entry ? CLASS_SKILLS[entry].name : "Empty slot";
+        const name = isMove ? moveName ?? "Class move" : entry2 === "pick" ? "Choose your class" : entry2 ? CLASS_SKILLS[entry2].name : "Empty slot";
         s.b.title = name;
-        s.b.setAttribute("aria-label", arranging ? `${name}. Tap to ${picked === null ? "pick it up" : "swap it here"}.` : isMove ? `${name} \u2014 Shift` : entry === "pick" ? name : entry ? `${name} \u2014 key ${keys2[i]}` : `Empty skill slot. Learn skills in your class tree.`);
+        s.b.setAttribute("aria-label", arranging ? `${name}. Tap to ${picked === null ? "pick it up" : "swap it here"}.` : isMove ? `${name} \u2014 Shift` : entry2 === "pick" ? name : entry2 ? `${name} \u2014 key ${keys2[i]}` : `Empty skill slot. Learn skills in your class tree.`);
       }
       s.sweep.style.transform = `scaleY(${left && !arranging ? Math.min(1, left / total).toFixed(3) : 0})`;
       const label3 = left && !arranging ? (left / 60).toFixed(left >= 600 ? 0 : 1) : "";
@@ -28438,6 +28492,106 @@ function drawInteractionCueV2(ctx, x, y) {
   ctx.lineWidth = 1.4;
   ctx.stroke();
   ctx.restore();
+}
+
+// src/client/hero_slots_view_v1.js
+var CLASS_NAMES = { knight: "Knight", rogue: "Rogue", mage: "Mage" };
+function createHeroSlotsView({ document, environment, heroSlots }) {
+  const root = document.createElement("section");
+  root.id = "world-heroes-view";
+  root.className = "hero-slots";
+  root.hidden = true;
+  let shown = false, confirming = null, busy = null, error = "";
+  function el(tag, cls, text2) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text2 != null) e.textContent = text2;
+    return e;
+  }
+  function button(text2, action2, cls = "") {
+    const b = el("button", cls, text2);
+    b.type = "button";
+    b.disabled = Boolean(busy);
+    b.addEventListener("click", action2);
+    return b;
+  }
+  function paint(canvas, hero) {
+    const r = canvas.getBoundingClientRect();
+    if (!r.width || !hero) return;
+    const dpr = Math.min(3, environment.devicePixelRatio || 1);
+    canvas.width = Math.round(r.width * dpr);
+    canvas.height = Math.round(r.height * dpr);
+    const c = canvas.getContext("2d"), s = r.height / 60;
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    c.translate(r.width * 0.42, r.height * 0.6);
+    c.scale(s, s);
+    drawBlockyHero(c, hero, { t: 0, still: true });
+  }
+  async function act(kind, work) {
+    if (busy) return;
+    busy = kind;
+    error = "";
+    render();
+    try {
+      if (await work() === false) error = "That didn\u2019t work. Try again.";
+    } catch (e) {
+      error = e?.message || "That didn\u2019t work. Try again.";
+    }
+    busy = null;
+    confirming = null;
+    render();
+  }
+  function render() {
+    const { active, heroes } = heroSlots.list(), grid = el("div", "hero-slots-grid"), portraits = [];
+    for (const h of heroes) {
+      const card = el("article", "hero-slot" + (h.slot === active ? " is-active" : "")), canvas = el("canvas", "hero-slot-portrait"), info = el("div", "hero-slot-info"), actions = el("div", "hero-slot-actions");
+      card.dataset.slot = String(h.slot);
+      canvas.setAttribute("aria-hidden", "true");
+      const name = h.name || (h.slot === active ? "Your hero" : "Unnamed hero");
+      info.append(el("strong", "hero-slot-name", name), el("small", "hero-slot-class", `${h.hero?.cls ? CLASS_NAMES[h.hero.cls] : "No class yet"} \xB7 Level ${h.level}`));
+      if (h.slot === active) actions.append(el("span", "hero-slot-badge", "Playing"));
+      else if (confirming === h.slot) actions.append(button("Delete", () => act("delete", () => heroSlots.remove(h.slot)), "is-danger"), button("Keep", () => {
+        confirming = null;
+        render();
+      }, "is-quiet"));
+      else actions.append(button("Play", () => act("play", () => heroSlots.play(h.slot))), button("Delete", () => {
+        confirming = h.slot;
+        render();
+      }, "is-quiet"));
+      card.append(canvas, info, actions);
+      if (confirming === h.slot) card.append(el("p", "hero-slot-confirm", `Delete ${name} for good? Their world, bag and gear go with them.`));
+      grid.append(card);
+      portraits.push([canvas, h.hero]);
+    }
+    if (heroes.length < HERO_SLOT_LIMIT) {
+      const card = el("article", "hero-slot is-new"), info = el("div", "hero-slot-info"), actions = el("div", "hero-slot-actions");
+      info.append(el("strong", "hero-slot-name", "New hero"), el("small", "hero-slot-class", `Starts in the hero creator \xB7 ${HERO_SLOT_LIMIT - heroes.length} open`));
+      actions.append(button("Create", () => act("new", () => heroSlots.create())));
+      card.append(el("span", "hero-slot-plus", "+"), info, actions);
+      grid.append(card);
+    }
+    const status2 = busy === "delete" ? "Deleting\u2026" : busy ? "Saving your hero\u2026" : error;
+    root.replaceChildren(el("p", "hero-slots-intro", "Each hero has their own world, bag and gear. Switching saves this hero first."), grid, ...status2 ? [el("p", "hero-slots-status", status2)] : []);
+    environment.requestAnimationFrame(() => {
+      for (const [canvas, hero] of portraits) paint(canvas, hero);
+    });
+  }
+  return Object.freeze({
+    root,
+    // The list is read when the tab opens; it only changes through this tab.
+    refresh(visible3) {
+      root.hidden = !visible3;
+      if (visible3 && !shown) render();
+      if (!visible3) {
+        confirming = null;
+        error = "";
+      }
+      shown = visible3;
+    },
+    destroy() {
+      root.remove();
+    }
+  });
 }
 
 // src/client/character_stats_v3.js
@@ -29822,24 +29976,24 @@ function equipmentComparison(inv, itemId, slot, totalXp = 0, d8 = void 0) {
   return { equipped, before, after, displaced: Object.values(inv.equipped).filter((id) => id && !Object.values(equipped).includes(id)), difference: Object.fromEntries(Object.keys(statLabel).map((k) => [k, statDifference(after[k], before[k])])) };
 }
 function contextActionForModel(model) {
-  const drop = model.loot?.find((entry) => entry.canPickUp);
+  const drop = model.loot?.find((entry2) => entry2.canPickUp);
   if (drop) return { kind: "loot.pickup", payload: { sourceEntityId: drop.sourceEntityId } };
-  const resource = model.resources?.find((entry) => entry.canUse);
+  const resource = model.resources?.find((entry2) => entry2.canUse);
   if (resource) return { kind: "resource.interact", payload: { groupId: resource.groupId, episode: resource.episode, ordinal: resource.ordinal } };
   return null;
 }
 function contextActionLabelForModel(model, action2 = contextActionForModel(model)) {
   if (!action2) return null;
   if (action2.kind === "loot.pickup") {
-    const drop = model.loot?.find((entry) => entry.sourceEntityId === action2.payload.sourceEntityId);
+    const drop = model.loot?.find((entry2) => entry2.sourceEntityId === action2.payload.sourceEntityId);
     return drop ? `Pick up: ${itemDefinition(drop).name}` : null;
   }
-  const resource = model.resources?.find((entry) => entry.groupId === action2.payload.groupId && entry.episode === action2.payload.episode && entry.ordinal === action2.payload.ordinal);
+  const resource = model.resources?.find((entry2) => entry2.groupId === action2.payload.groupId && entry2.episode === action2.payload.episode && entry2.ordinal === action2.payload.ordinal);
   if (!resource) return null;
   return resource.eventPod ? "Destroy spore pod" : resource.kind === "chest" ? model.space?.site?.siteKind === "woodland-cave" ? "Open Chest" : "Open chest" : resource.art === "barrel" ? "Break barrel" : resource.art === "urn" ? "Break urn" : "Break pot";
 }
 function createInventoryPresentation({ document, environment, readModel, adapter, clearInput, restoreGameplayFocus = () => {
-} }) {
+}, heroSlots = null }) {
   const panel = document.getElementById("world-inventory"), openButton = document.getElementById("world-bag"), pickup = document.getElementById("world-pickup");
   if (!panel || !openButton || !pickup) return { refresh() {
   }, isOpen: () => false, destroy() {
@@ -29871,6 +30025,18 @@ function createInventoryPresentation({ document, environment, readModel, adapter
   });
   statsButton.id = "world-stats-tab";
   panel.querySelector(".bag-section-tabs").insertBefore(statsButton, progressionButton);
+  const heroesView = heroSlots ? createHeroSlotsView({ document, environment, heroSlots }) : null, heroesButton = heroesView && button("HEROES", () => {
+    forgeSession = false;
+    section = "heroes";
+    inspect = false;
+    key2 = null;
+    refresh(readModel());
+  });
+  if (heroesView) {
+    heroesButton.id = "world-heroes-tab";
+    panel.querySelector(".bag-section-tabs").append(heroesButton);
+    document.querySelector(".bag-body").append(heroesView.root);
+  }
   for (const [name, text2] of [["equipment", "GEAR"], ["bag", "BAG"], ["materials", "MATERIALS"]]) document.getElementById(`world-${name}-tab`).textContent = text2;
   const forge = createForgePresentation({ document, issue, invalidate: () => {
     key2 = null;
@@ -30036,15 +30202,17 @@ function createInventoryPresentation({ document, environment, readModel, adapter
     progressionView.refresh(m, open && section === "progression", open && section === "stats");
     progressionButton.setAttribute("aria-pressed", String(section === "progression"));
     statsButton.setAttribute("aria-pressed", String(section === "stats"));
+    heroesView?.refresh(open && section === "heroes");
+    heroesButton?.setAttribute("aria-pressed", String(section === "heroes"));
     panel.hidden = !open;
     gearSwitch.hidden = !open || !forgeSession;
     gearSwitch.textContent = section === "forge" ? "Carried gear" : "Attunement";
     if (!open) return;
-    if (section === "progression" || section === "stats") {
+    if (section === "progression" || section === "stats" || section === "heroes") {
       panel.dataset.section = section;
       panel.classList.remove("is-inspecting");
       comparison.hidden = true;
-      document.getElementById("world-bag-title").textContent = section === "stats" ? "CHARACTER STATS" : "SKILLS";
+      document.getElementById("world-bag-title").textContent = section === "stats" ? "CHARACTER STATS" : section === "heroes" ? "HEROES" : "SKILLS";
       for (const id of ["equipment", "bag", "materials"]) document.getElementById(`world-${id}-tab`).setAttribute("aria-pressed", "false");
       status2.textContent = error || (section === "stats" ? "Review your stats. Attribute changes require confirmation." : "");
       return;
@@ -30466,6 +30634,8 @@ function createInventoryPresentation({ document, environment, readModel, adapter
     progressionView.destroy();
     progressionButton.remove();
     statsButton.remove();
+    heroesView?.destroy();
+    heroesButton?.remove();
     for (const { button: button2, listener } of sectionButtons) button2.removeEventListener("click", listener);
     panel.removeEventListener("pointerdown", outside);
     environment.removeEventListener("resize", resized);
@@ -30643,8 +30813,8 @@ function observeCanvasDisplaySize({ environment, canvas, onSize }) {
     onSize(size.width, size.height);
   }
   const observer = typeof environment.ResizeObserver === "function" ? new environment.ResizeObserver((entries) => {
-    const entry = entries.find((e) => e.target === canvas);
-    if (entry) apply2(entry.contentRect.width, entry.contentRect.height);
+    const entry2 = entries.find((e) => e.target === canvas);
+    if (entry2) apply2(entry2.contentRect.width, entry2.contentRect.height);
   }) : null;
   observer?.observe(canvas);
   const bounds2 = canvas.getBoundingClientRect();
@@ -32740,9 +32910,9 @@ function createMapCanvasSizeCacheD9(canvas, environment) {
   let size = null, dirty = true, closed = false, reads = 0, hits = 0, updates = 0;
   const observer = typeof environment.ResizeObserver === "function" ? new environment.ResizeObserver((entries) => {
     if (closed) return;
-    const entry = entries.find((e) => e.target === canvas);
-    if (entry) {
-      size = { width: entry.contentRect.width, height: entry.contentRect.height };
+    const entry2 = entries.find((e) => e.target === canvas);
+    if (entry2) {
+      size = { width: entry2.contentRect.width, height: entry2.contentRect.height };
       dirty = false;
       updates++;
     }
@@ -38495,12 +38665,12 @@ function nexusAttackPose(actor2, tick) {
     pose.charge = 0.7 * lift;
     pose.lock = lift;
     pose.ability = "cyber_barrier";
-    const entry = 1 - ease8((tick - barrier.startedTick) / 12);
-    if (entry > 0 && last && barrier.startedTick - last.resolvedTick >= 0 && barrier.startedTick - last.resolvedTick < 40) {
+    const entry2 = 1 - ease8((tick - barrier.startedTick) / 12);
+    if (entry2 > 0 && last && barrier.startedTick - last.resolvedTick >= 0 && barrier.startedTick - last.resolvedTick < 40) {
       const prior = nexusAttackPose({ ...actor2, position: barrier.originPosition, boss: { ...b, barrier: null, pendingAction: null } }, barrier.startedTick);
       const idleY = -40 + Math.sin((barrier.startedTick + seed2 * 0.13) / 11) * 3;
-      pose.bodyX += prior.bodyX * entry;
-      pose.bodyY += (prior.bodyY - idleY) * entry;
+      pose.bodyX += prior.bodyX * entry2;
+      pose.bodyY += (prior.bodyY - idleY) * entry2;
     }
     return pose;
   }
@@ -40677,8 +40847,8 @@ function shellPath(c, rx, ry, time, front2) {
 function drawMarcusMoltenWardV5(c, row2, tick, { center: center2, ratio, front: front2 = false }) {
   const active = row2.outcome === "channeling", age = row2.resolvedTick == null ? 0 : tick - row2.resolvedTick;
   if (!active && (age < 0 || age >= 36) || tick < row2.startedTick) return;
-  const entry = smooth20((tick - row2.startedTick) / 14), health = clamp38(ratio);
-  const rx = mix22(24, 38, entry), ry = mix22(30, 47, entry);
+  const entry2 = smooth20((tick - row2.startedTick) / 14), health = clamp38(ratio);
+  const rx = mix22(24, 38, entry2), ry = mix22(30, 47, entry2);
   c.save();
   c.translate(center2.x, center2.y);
   c.lineJoin = "round";
@@ -40901,11 +41071,11 @@ function marcusAttackPose(actor2, tick) {
       pose.headDrop = 4 * pose.slack;
       pose.orbitTilt += 0.28 * pose.slack;
     }
-    const entry = (1 - ease11((Math.min(tick, shield4.resolvedTick ?? tick) - shield4.startedTick) / 12)) * (shield4.outcome === "channeling" ? 1 : 1 - ease11(sa / 18));
-    if (entry > 0 && last && shield4.startedTick - last.resolvedTick >= 0 && shield4.startedTick - last.resolvedTick < 40) {
+    const entry2 = (1 - ease11((Math.min(tick, shield4.resolvedTick ?? tick) - shield4.startedTick) / 12)) * (shield4.outcome === "channeling" ? 1 : 1 - ease11(sa / 18));
+    if (entry2 > 0 && last && shield4.startedTick - last.resolvedTick >= 0 && shield4.startedTick - last.resolvedTick < 40) {
       const prior = marcusAttackPose({ ...actor2, position: shield4.originPosition, boss: { ...b, moltenShield: null, pendingAction: null, actionState: "idle" } }, shield4.startedTick), idle2 = -9 + Math.sin((shield4.startedTick + seed2 * 0.17) / 9) * 3.4;
-      pose.bodyX += prior.bodyX * entry;
-      pose.bodyY += (prior.bodyY - idle2) * entry;
+      pose.bodyX += prior.bodyX * entry2;
+      pose.bodyY += (prior.bodyY - idle2) * entry2;
     }
     pose.ability = b.actionState === "dazed" ? "dazed" : "molten_shield";
     pose.p = progress6(shield4, tick);
@@ -41689,12 +41859,12 @@ function gildedAttackPose(actor2, tick) {
       pose.wing += 0.38 * pose.slack;
       pose.armLift += 8 * pose.slack;
     }
-    const entry = (1 - ease12((Math.min(tick, tax.resolvedTick ?? tick) - tax.startedTick) / 12)) * (tax.outcome === "channeling" ? 1 : 1 - ease12(taxAge / 18));
-    if (entry > 0 && last && tax.startedTick - last.resolvedTick >= 0 && tax.startedTick - last.resolvedTick < 40) {
+    const entry2 = (1 - ease12((Math.min(tick, tax.resolvedTick ?? tick) - tax.startedTick) / 12)) * (tax.outcome === "channeling" ? 1 : 1 - ease12(taxAge / 18));
+    if (entry2 > 0 && last && tax.startedTick - last.resolvedTick >= 0 && tax.startedTick - last.resolvedTick < 40) {
       const prior = gildedAttackPose({ ...actor2, position: tax.originPosition, boss: { ...b, taxation: null, pendingAction: null, actionState: "idle" } }, tax.startedTick);
       const idle2 = -38 + Math.sin((tax.startedTick + seed2 * 0.13) / 12) * 2;
-      pose.bodyX += prior.bodyX * entry;
-      pose.bodyY += (prior.bodyY - idle2) * entry;
+      pose.bodyX += prior.bodyX * entry2;
+      pose.bodyY += (prior.bodyY - idle2) * entry2;
     }
     pose.ability = b.actionState === "dazed" ? "dazed" : "taxation";
     pose.p = progress7(tax, tick);
@@ -43131,8 +43301,8 @@ function createBrimstoneEruptionPresentation() {
     for (const v of current) {
       const owner = [...live].find((id) => v.id.startsWith(id + ":vent:"));
       if (!owner) continue;
-      const before = recent.get(v.id), entry = { vent: Object.freeze({ ...v, position: Object.freeze({ ...v.position }), arms: Object.freeze({ ...v.arms }), hitEntityIds: Object.freeze([...v.hitEntityIds ?? []]) }), owner, confirmed: before?.confirmed === true || v.stage === "erupting" };
-      recent.set(v.id, entry);
+      const before = recent.get(v.id), entry2 = { vent: Object.freeze({ ...v, position: Object.freeze({ ...v.position }), arms: Object.freeze({ ...v.arms }), hitEntityIds: Object.freeze([...v.hitEntityIds ?? []]) }), owner, confirmed: before?.confirmed === true || v.stage === "erupting" };
+      recent.set(v.id, entry2);
     }
     for (const [id, e] of recent) if (!live.has(e.owner) || tick >= e.vent.detonatesTick + 60 || !ids4.has(id) && (!e.confirmed || tick < e.vent.expiresTick)) recent.delete(id);
     const counts = /* @__PURE__ */ new Map();
@@ -47357,16 +47527,16 @@ function floorLightField(space, source3) {
   const open = (x2, y2) => x2 >= 0 && y2 >= 0 && x2 < side && y2 < side && floor(x0 + (x2 + 0.5) * step, y0 + (y2 + 0.5) * step);
   const distances = new Float32Array(n * 8).fill(Infinity), values = new Float32Array(n).fill(Infinity), heap = [];
   const push = (id, cost) => {
-    const entry = { id, cost };
+    const entry2 = { id, cost };
     let i = heap.length;
-    heap.push(entry);
+    heap.push(entry2);
     while (i) {
       const p = i - 1 >> 1;
       if (heap[p].cost <= cost) break;
       heap[i] = heap[p];
       i = p;
     }
-    heap[i] = entry;
+    heap[i] = entry2;
   };
   const pop = () => {
     const first = heap[0], last = heap.pop();
@@ -51881,10 +52051,10 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
     let screenCold = 0;
     let paintedTerrainTiles = 0, paintedBlockers = 0;
     for (const t of required) {
-      let entry = pages.get(t.id);
-      const sig = entry?.visual === space.visual ? entry.signature : signature(space, t.x, t.y);
-      if (!entry || entry.signature !== sig) {
-        const missReason = !entry ? "page-absent" : entry.visual !== space.visual ? "visual-projection-change" : "signature-change", task = { ...t, space, sig, scale: renderScale, missReason, visualGeneration };
+      let entry2 = pages.get(t.id);
+      const sig = entry2?.visual === space.visual ? entry2.signature : signature(space, t.x, t.y);
+      if (!entry2 || entry2.signature !== sig) {
+        const missReason = !entry2 ? "page-absent" : entry2.visual !== space.visual ? "visual-projection-change" : "signature-change", task = { ...t, space, sig, scale: renderScale, missReason, visualGeneration };
         requiredTasks.push(task);
         if (!queue.some((q) => q.id === task.id && q.sig === task.sig)) {
           queue.unshift(task);
@@ -51931,21 +52101,21 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
         continue;
       } else {
         if (returnedIds.has(t.id)) retentionHits++;
-        entry.visual = space.visual;
-        entry.visualGeneration = visualGeneration;
+        entry2.visual = space.visual;
+        entry2.visualGeneration = visualGeneration;
         emit("hit", { id: t.id });
       }
-      if (entry) {
+      if (entry2) {
         if (t.x + SIZE > screen.x && t.y + SIZE > screen.y && t.x < screen.x + screen.width && t.y < screen.y + screen.height) nextPathScreenIds.add(t.id);
         visibleRasterPages++;
-        touch(pages, t.id, entry);
+        touch(pages, t.id, entry2);
         const at3 = diagnostics ? performance.now() : 0;
-        composeSceneryPageV1(ctx, entry.raster, t.x, t.y, SIZE, composeTransform);
+        composeSceneryPageV1(ctx, entry2.raster, t.x, t.y, SIZE, composeTransform);
         emit("compose", { id: t.id, ms: diagnostics ? performance.now() - at3 : 0 });
-        paintedTerrainTiles += entry.result.paintedTerrainTiles;
-        paintedBlockers += entry.result.paintedBlockers;
-        lastFlowers.push(...entry.result.flowers);
-        for (const id of entry.result.obstacleVisualIds ?? []) if (requiredObstacleIds.get(id)?.ownerPageId === t.id) visibleObstacleIds.set(id, { pageId: t.id, visualGeneration: entry.visualGeneration, rasterGeneration: entry.rasterGeneration, source: "raster" });
+        paintedTerrainTiles += entry2.result.paintedTerrainTiles;
+        paintedBlockers += entry2.result.paintedBlockers;
+        lastFlowers.push(...entry2.result.flowers);
+        for (const id of entry2.result.obstacleVisualIds ?? []) if (requiredObstacleIds.get(id)?.ownerPageId === t.id) visibleObstacleIds.set(id, { pageId: t.id, visualGeneration: entry2.visualGeneration, rasterGeneration: entry2.rasterGeneration, source: "raster" });
       }
     }
     pathScreenIds = nextPathScreenIds;
@@ -51983,8 +52153,8 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
       const id = x + "/" + y;
       if (visibleIds.has(id)) continue;
       if (endless ? x - 64 < ox || y - 64 < oy || x + SIZE + 64 > right || y + SIZE + 64 > bottom : x - 64 < Math.max(0, ox) && ox > 0 || y - 64 < Math.max(0, oy) && oy > 0 || x + SIZE + 64 > right && right < xmax || y + SIZE + 64 > bottom && bottom < ymax) continue;
-      const entry = pages.get(id), sig = entry?.visual === v ? entry.signature : signature(space, x, y);
-      if (entry?.signature === sig) continue;
+      const entry2 = pages.get(id), sig = entry2?.visual === v ? entry2.signature : signature(space, x, y);
+      if (entry2?.signature === sig) continue;
       const distance8 = Math.max(0, view.x - x - SIZE, x - view.x - view.width) + Math.max(0, view.y - y - SIZE, y - view.y - view.height);
       const ahead = (x + SIZE / 2 - view.x - view.width / 2) * travelX + (y + SIZE / 2 - view.y - view.height / 2) * travelY;
       candidates.push({ id, x, y, space, sig, scale: renderScale, distance: distance8 - (ahead > 0 ? SIZE : 0), routeDistance: distance8 - (ahead > 0 ? SIZE * 2 : 0), near: x >= x0 - SIZE && y >= y0 - SIZE && x <= view.x + view.width + SIZE && y <= view.y + view.height + SIZE, visualGeneration });
@@ -52821,11 +52991,11 @@ function prepareEnvironmentShadowCasters(space, view, layout, pilot) {
     bases = new Set((layout.trees ?? []).map((p) => p.baseId));
     canopyBases.set(layout, bases);
   }
-  const once = (entry, make) => {
-    let c = shadowCasterCache.get(entry);
+  const once = (entry2, make) => {
+    let c = shadowCasterCache.get(entry2);
     if (!c) {
       c = make();
-      shadowCasterCache.set(entry, c);
+      shadowCasterCache.set(entry2, c);
     }
     return c;
   };
@@ -54248,7 +54418,7 @@ function createSpacePreparationGate(initialSpace) {
 
 // src/client/playable_client.js
 var progressionText = (v) => formatLarge(integerWire(v));
-function mountPlayableClient({ port, environment, nextCommandToken, capabilities, performanceProbe = null, environmentArt = null, readRuntimeDiagnostics = () => null, readSaveStatus = () => null, evidenceMode = false, evidenceIntervalMs = 0, developerMode = false, actorCollisionProbe = null }) {
+function mountPlayableClient({ port, environment, nextCommandToken, capabilities, performanceProbe = null, environmentArt = null, readRuntimeDiagnostics = () => null, readSaveStatus = () => null, evidenceMode = false, evidenceIntervalMs = 0, developerMode = false, actorCollisionProbe = null, heroSlots = null }) {
   const doc = environment.document, canvas = doc.getElementById("world-view"), status2 = doc.getElementById("world-status");
   const levelUpCelebration = createLevelUpCelebrationV4(doc);
   if (new URL(environment.location.href).searchParams.get("previewLevelUp") === "1") environment.setTimeout(() => {
@@ -54350,7 +54520,7 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
   const primary = button ? createPrimaryInput({ button, environment, adapter, readModel, isBlocked: gameplayInputBlocked, restoreGameplayFocus, reportError: (text2) => {
     message = text2;
   } }) : null;
-  inventory = createInventoryPresentation({ document: doc, environment, readModel, adapter, restoreGameplayFocus, clearInput: () => {
+  inventory = createInventoryPresentation({ document: doc, environment, readModel, adapter, restoreGameplayFocus, heroSlots, clearInput: () => {
     subweaponHud?.clear();
     input.clear();
     primary?.clear();
@@ -54376,12 +54546,7 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
   subweaponHud = createSubweaponHud({ clearPrimary: () => primary?.clear(), document: doc, environment, readModel, adapter, isBlocked: gameplayInputBlocked, reportError: (text2) => {
     message = text2;
   } });
-  let campStorage = null, campFrames = 0;
-  try {
-    campStorage = environment.localStorage;
-  } catch {
-  }
-  const campRoster = createCampRosterWriter(campStorage);
+  let campFrames = 0;
   heroCreator = createHeroCreatorV1({ document: doc, environment, readModel, adapter, reportError: (text2) => {
     message = text2;
   }, onClose: restoreGameplayFocus });
@@ -54528,7 +54693,7 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
     siteNavigator.refresh(model);
     subweaponHud.refresh(model);
     heroCreator.refresh(model, presentation.gameplayHudVisible && !presentation.defeated && !inventory?.isOpen());
-    if (campFrames++ % 60 === 0) campRoster.observe(model);
+    if (campFrames++ % 60 === 0) heroSlots?.observe(model);
     skillBar.refresh(model, presentation.gameplayHudVisible && !presentation.defeated);
     primary?.refresh(model);
     const participant = model.playersById[model.localPlayerId], progress8 = participant.progression;
@@ -55006,7 +55171,7 @@ function createActivitySaveBridge(worker, { record: record2 = () => {
     if (!pending || data.id !== pending.id) return;
     const request = pending;
     pending = null;
-    for (const entry of data.timings ?? []) record2(entry.name, entry.ms);
+    for (const entry2 of data.timings ?? []) record2(entry2.name, entry2.ms);
     if (data.error) request.reject(new Error(data.error));
     else request.resolve(data.result);
   };
@@ -56586,8 +56751,8 @@ function siteResetIdentityMatchesD13C(state, currentSite, nextSite) {
 }
 function transitioningPlayersForSiteD13C(gateway, siteId) {
   const players = [];
-  for (const entry of Object.values(gateway?.admittedCommandsById ?? {})) {
-    const command = entry.command;
+  for (const entry2 of Object.values(gateway?.admittedCommandsById ?? {})) {
+    const command = entry2.command;
     if (command?.kind === "site.transition" && command.payload?.siteId === siteId) players.push(command.playerId);
   }
   for (const [playerId, row2] of Object.entries(gateway?.playersById ?? {})) for (const command of row2.bufferedCommands ?? []) if (command?.kind === "site.transition" && command.payload?.siteId === siteId) players.push(playerId);
@@ -57116,12 +57281,12 @@ async function createLocalEndlessSessionD9(options) {
     }).flat()), collision = s.spacesByInstanceId[s.overworldInstanceId].collision, revealDistance = navigatorRevealDistance(s);
     const rejected = { unprojected: 0, insideReveal: 0, blockedLanding: 0, blockedApproach: 0 };
     for (const offset2 of offsets) {
-      const world = normalizeWorldPosition({ ...base, localX: base.localX + offset2.x, localY: base.localY + offset2.y }), local6 = projectToLocalFrameD9(world, s.d9World.runtime.frames), entry = projectToLocalFrameD9(entrance, s.d9World.runtime.frames);
-      if (!local6 || !entry) {
+      const world = normalizeWorldPosition({ ...base, localX: base.localX + offset2.x, localY: base.localY + offset2.y }), local6 = projectToLocalFrameD9(world, s.d9World.runtime.frames), entry2 = projectToLocalFrameD9(entrance, s.d9World.runtime.frames);
+      if (!local6 || !entry2) {
         rejected.unprojected++;
         continue;
       }
-      const distance8 = Math.hypot(local6.x - entry.x, local6.y - entry.y);
+      const distance8 = Math.hypot(local6.x - entry2.x, local6.y - entry2.y);
       if (!preferred && (distance8 <= revealDistance || distance8 <= SITE_INTERACTION_RADIUS)) {
         rejected.insideReveal++;
         continue;
@@ -57130,11 +57295,11 @@ async function createLocalEndlessSessionD9(options) {
         rejected.blockedLanding++;
         continue;
       }
-      if (!preferred && !connectedApproach(collision, local6, entry, actor.hullRadius)) {
+      if (!preferred && !connectedApproach(collision, local6, entry2, actor.hullRadius)) {
         rejected.blockedApproach++;
         continue;
       }
-      const face3 = { x: entry.x - local6.x, y: entry.y - local6.y };
+      const face3 = { x: entry2.x - local6.x, y: entry2.y - local6.y };
       return { world, local: { x: local6.x, y: local6.y }, facing: preferred?.facing ?? face3, revealDistance, distance: distance8 };
     }
     throw new Error("No walkable exterior landing is available for " + record2.label + " (" + Object.entries(rejected).map(([key2, value2]) => key2 + "=" + value2).join(", ") + ")");
@@ -57522,9 +57687,10 @@ function applyBossHostingWorkerBindingV1(workerUrl, binding) {
   if (hasBossHostingV1(binding)) workerUrl.searchParams.set("bossHosting", "1");
   return workerUrl;
 }
-function launcherCapability(environment) {
+function launcherCapability(environment, heroPrefix = "") {
   try {
-    return environment.localStorage;
+    const storage = environment.localStorage;
+    return heroPrefix ? Object.freeze({ getItem: (key2) => storage.getItem(heroPrefix + key2), setItem: (key2, value2) => storage.setItem(heroPrefix + key2, value2), removeItem: (key2) => storage.removeItem(heroPrefix + key2) }) : storage;
   } catch (error) {
     return Object.freeze({ getItem() {
       throw error;
@@ -57589,7 +57755,14 @@ function lockPageZoom(environment) {
   });
 }
 async function startWorldClient(environment) {
-  const saveIndexedDb = channelIndexedDb(environment.indexedDB, saveChannelPrefix(environment.location));
+  let deviceStorage = null;
+  try {
+    deviceStorage = environment.localStorage;
+  } catch {
+  }
+  const channel2 = saveChannelPrefix(environment.location), heroSlot = readHeroSlots(deviceStorage, channel2).active, heroPrefix = heroSavePrefix(heroSlot);
+  const roster = createHeroRosterWriter({ storage: deviceStorage, channel: channel2, slot: heroSlot });
+  const saveIndexedDb = channelIndexedDb(environment.indexedDB, channel2 + heroPrefix);
   const startupLoading = environment.__SAQ_STARTUP_LOADING_V1__ ?? null;
   let client = null;
   lockPageZoom(environment);
@@ -57633,14 +57806,9 @@ async function startWorldClient(environment) {
   const activity = scenario === "procedural" && location.searchParams.get("runtime") !== "legacy";
   const proofCase = location.searchParams.get("activityCase") ?? "A";
   const launcherKey = hasRoadsideEncounters(plannedReview?.binding) ? ROADSIDE_DATABASE : hasFirstJourney(plannedReview?.binding) ? ACCESS_DATABASE : hasHydrologyV1(plannedReview?.binding) ? HYDROLOGY_DATABASE : buildBalanceDatabaseV2(environment.document.body.dataset.worldBuildBalance === "v2", plannedReview?.asset.assetId, plannedReview ? plannedNamespace + plannedReview.asset.assetId : activity ? `${FORGE_REVIEW_BUILD ? "saq-world-forge-review" : "saq-world-activity-launcher-v1"}-${proofCase}` : scenario === "procedural" ? WORLD_PROCEDURAL_LAUNCHER_KEY : WORLD_SEAMLESS_LAUNCHER_KEY);
-  const policy = createLocalLaunchPolicy({ launcherStore: launcherCapability(environment), url: location, launcherKey });
+  const policy = createLocalLaunchPolicy({ launcherStore: launcherCapability(environment, heroPrefix), url: location, launcherKey });
   const launcherDatabase = activity ? createLocalIndexedDbCampaignStore({ indexedDB: saveIndexedDb, sha256, databaseName }) : null;
-  const forgetCamp = () => {
-    try {
-      environment.localStorage.removeItem(CAMP_ROSTER_KEY);
-    } catch {
-    }
-  };
+  const forgetCamp = () => roster.clear();
   const forget = async () => {
     await launcherDatabase?.writeLocalLauncher(proofCase, null);
     policy.forget();
@@ -57674,7 +57842,7 @@ async function startWorldClient(environment) {
     });
     return null;
   }
-  if (!FORGE_REVIEW_BUILD && activity && proofCase === "A" && !launch.resume && location.searchParams.get("activityNew") !== "1" && launcherCapability(environment).getItem(WORLD_PROCEDURAL_LAUNCHER_KEY)) {
+  if (!FORGE_REVIEW_BUILD && activity && proofCase === "A" && !launch.resume && location.searchParams.get("activityNew") !== "1" && launcherCapability(environment, heroPrefix).getItem(WORLD_PROCEDURAL_LAUNCHER_KEY)) {
     showStartupRecovery(environment, { title: "Earlier prototype campaign retained", detail: "This authority checkpoint uses a new save format. Your earlier campaign is still stored. Choose Start New Campaign to create a separate X-C campaign." }, {
       retry: () => environment.location.reload(),
       forget,
@@ -57694,6 +57862,7 @@ async function startWorldClient(environment) {
   try {
     if (activity) {
       const workerUrl = applyBossHostingWorkerBindingV1(new URL(environment.document.documentElement.dataset.worldSaveWorker ?? "./save-worker.js", location), plannedReview?.binding);
+      if (heroSlot > 1) workerUrl.searchParams.set("hero", String(heroSlot));
       if (plannedReview) {
         workerUrl.searchParams.set("plannedReview", "1");
         if (environment.document.body.dataset.worldCombat === "v1") workerUrl.searchParams.set("worldCombat", "1");
@@ -57952,9 +58121,46 @@ async function startWorldClient(environment) {
   environmentArt = await createBreakablePropArtV1(environment, environmentArt);
   environmentArt = await createSporeArtV1(environment, environmentArt);
   environmentArt = await createHollowArtV1(environment, environmentArt);
+  const saveNow = async () => {
+    try {
+      await Promise.race([Promise.resolve(activity ? session.save?.() : null), new Promise((resolve) => environment.setTimeout(resolve, 4e3))]);
+    } catch {
+    }
+  };
+  const heroSlots = Object.freeze({
+    active: heroSlot,
+    list: () => readHeroSlots(deviceStorage, channel2),
+    observe: (model) => roster.observe(model),
+    async play(slot) {
+      await saveNow();
+      if (!chooseHero(deviceStorage, channel2, slot)) return false;
+      environment.location.reload();
+    },
+    async create() {
+      await saveNow();
+      if (addHero(deviceStorage, channel2) === null) return false;
+      environment.location.reload();
+    },
+    async remove(slot) {
+      if (slot === heroSlot) return false;
+      const prefix2 = heroSavePrefix(slot), indexedDB = channelIndexedDb(environment.indexedDB, channel2 + prefix2), names = /* @__PURE__ */ new Set([activity ? databaseName : WORLD_CAMPAIGN_DATABASE_NAME]);
+      if (prefix2 && typeof environment.indexedDB?.databases === "function") {
+        for (const d of await environment.indexedDB.databases()) if (d.name?.startsWith(channel2 + prefix2)) names.add(d.name.slice(channel2.length + prefix2.length));
+      }
+      for (const name of names) await deleteLocalWorldCampaignDatabase({ indexedDB, databaseName: name });
+      try {
+        launcherCapability(environment, prefix2).removeItem(launcherKey);
+      } catch {
+      }
+      return dropHero(deviceStorage, channel2, slot);
+    }
+  });
+  if (typeof environment.indexedDB?.databases === "function") environment.indexedDB.databases().then((list) => restoreHeroes(deviceStorage, channel2, list.map((d) => d.name?.startsWith(channel2) && /^saq-hero-(\d):/.exec(d.name.slice(channel2.length))?.[1]).filter(Boolean).map(Number))).catch(() => {
+  });
   client = mountPlayableClient({
     port: clientPort,
     environment,
+    heroSlots,
     actorCollisionProbe: activity ? createActorPresentationCollisionProbeV1(session.authority) : null,
     nextCommandToken: nextToken,
     performanceProbe,
