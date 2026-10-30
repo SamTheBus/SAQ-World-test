@@ -29680,10 +29680,8 @@ var lookArt = null;
 function useLookArt(keyOf, urlOf) {
   lookArt = { keyOf, urlOf };
 }
-var itemArtKey = (item) => {
-  const key2 = generatedArtKey(item?.generated);
-  return key2 && !definitions2[key2] ? lookArt?.keyOf(item) ?? key2 : key2 ?? item?.definitionId;
-};
+var catalogArtKey = (item) => generatedArtKey(item?.generated) ?? item?.definitionId;
+var itemArtKey = (item) => lookArt?.keyOf(item) ?? catalogArtKey(item);
 Object.assign(definitions2, SUBWEAPON_ART, GENERATED_EQUIPMENT_ART, CLASS_KIT_ART);
 var EQUIPMENT_ART = Object.freeze(Object.fromEntries(Object.entries(definitions2).map(([key2, a]) => [key2, Object.freeze({ ...a, url: "data:image/svg+xml;charset=utf-8," + encodeURIComponent(a.svg) })])));
 var WEAPON_ART_KEYS = Object.freeze({ worn: "worn-sword", iron: "iron-sword", guard: "guard-sword", runic: "runic-sword" });
@@ -29744,7 +29742,7 @@ function itemIconUrl(item, document) {
     const url = iconUrl(i.slot, i.kind, i.tier, document);
     if (url) return url;
   }
-  return EQUIPMENT_ART[itemArtKey(item)]?.url ?? null;
+  return EQUIPMENT_ART[catalogArtKey(item)]?.url ?? null;
 }
 
 // src/client/forge_art.js
