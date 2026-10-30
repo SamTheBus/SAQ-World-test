@@ -23429,7 +23429,8 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
   function cast(a, stats, aim2, commandId) {
     const range2 = Math.min(137, 128 + (a.hullRadius ?? 0)), heading = Math.atan2(aim2.y, aim2.x);
     if (Object.keys(c.projectiles).length >= 16) return false;
-    const target = effects2.nearby(a, a, range2 + 40).filter((t) => clearHullGap(a, t) <= 128 && offAxis(a, t, heading) <= T3.cast.cone).sort((x, y) => distance8(a, x) - distance8(a, y) || x.entityId.localeCompare(y.entityId))[0] ?? null;
+    const ahead = (t) => offAxis(a, t, heading) <= T3.cast.cone ? 0 : 1;
+    const target = effects2.nearby(a, a, range2 + 40).filter((t) => clearHullGap(a, t) <= 128).sort((x, y) => ahead(x) - ahead(y) || distance8(a, x) - distance8(a, y) || x.entityId.localeCompare(y.entityId))[0] ?? null;
     const toward2 = target ? unit3({ x: target.position.x - a.position.x, y: target.position.y - a.position.y }) : aim2, player = owner(a), recipe = player?.d8 ? captureTomeRecipe(player, effects2.area(a), stats) : null, element = recipe ? commitTomeAnchor(player, recipe) : stats.spellType ?? "fire", id = identity2("act");
     c.actors[a.entityId].delivery = { status: "launched", tick: s.tick };
     refreshStats?.(player);
@@ -23667,6 +23668,7 @@ function createMasteryEffects(s, { damage, eligible: eligible2, identity: identi
 }
 
 // src/simulation/subweapon_simulation.js
+var BOLT_HOMING = 0.5;
 function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: identity2, getStats, mastery, refreshStats }) {
   const c = s.subweaponCombat, players = new Map(Object.values(s.playersById).map((p) => [p.entityId, p]));
   const stats = (id) => getStats ? getStats(id) : resolvePlayerStats(players.get(id));
@@ -23744,6 +23746,14 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
       if (!source3.alive || source3.residency.spaceInstanceId !== b.spaceInstanceId || source3.residency.residencyRevision !== b.residencyRevision) {
         delete c.projectiles[id];
         continue;
+      }
+      const goal = b.intendedTargetId ? combatTargetV4(s, b.intendedTargetId) : null;
+      if (goal && goal.alive !== false && eligible2(source3, goal)) {
+        const dx = goal.position.x - b.position.x, dy = goal.position.y - b.position.y, l = Math.hypot(dx, dy);
+        if (l > 1e-9) {
+          const x = b.direction.x + dx / l * BOLT_HOMING, y = b.direction.y + dy / l * BOLT_HOMING, m = Math.hypot(x, y);
+          if (m > 1e-9) b.direction = { x: x / m, y: y / m };
+        }
       }
       const step2 = Math.min(8, b.remaining);
       b.position.x += b.direction.x * step2;
