@@ -1416,3 +1416,28 @@ body #world-inventory #world-equipment,body #world-inventory #world-items{displa
 #world-inventory #world-progression-view .cs-reset.danger{border-color:#8a3a3a;background:#2a1414;color:#f0a0a6}
 .cs-utility{display:flex;flex-direction:column;min-height:100%}
 #world-inventory #world-progression-view .skills-v2.only .skills-tabs{display:none}
+
+/* Skill wheel with one page (five slots): no page dots on the spin button. A skill on the Attack
+   button shows its icon and cooldown over Attack; presses pass through to the button. */
+.skill-wheel-v1[data-pages="1"] .skill-wheel-spin i{display:none}
+.skill-wheel-attack{position:absolute;z-index:8;pointer-events:none;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:radial-gradient(circle,#1b2530 0 58%,#0b1015 59%);box-shadow:inset 0 0 0 3px var(--class,#c9b58b)}
+.skill-wheel-attack[hidden]{display:none}
+.skill-wheel-attack .skill-slot-icon{width:62%;height:62%;position:relative;z-index:1}
+.skill-wheel-attack .skill-slot-icon svg{width:100%;height:100%}
+.skill-wheel-attack .skill-slot-sweep{position:absolute;inset:0;transform-origin:50% 0;transform:scaleY(0);background:#05080bc0;z-index:2}
+.skill-wheel-attack .skill-slot-time{position:absolute;z-index:3;font:800 18px var(--rpg-ui);color:#fff;text-shadow:0 1px 2px #000,0 0 5px #000}
+
+/* Skills screen: augments in an active's bubble, the Attack button toggle, the trade-off tag. */
+.cs-kind.trade{border-color:#e8848c;background:#2a1418;color:#ffd0d8}
+.cs-augs{display:flex;flex-direction:column;gap:6px}
+.cs-augh{display:flex;justify-content:space-between;align-items:baseline;font:800 10px/1 system-ui,sans-serif;letter-spacing:.1em;color:#b7a077}
+.cs-augh small{font-weight:600;letter-spacing:0;color:#8e979c}
+#world-inventory #world-progression-view .cs-aug{display:flex;gap:9px;align-items:flex-start;min-height:0;padding:7px 10px;border-radius:10px;border:1px solid #2f3a46;background:#111820;color:#cfd5d6;text-align:left;font:400 12px/1.35 system-ui,sans-serif;box-shadow:none}
+#world-inventory #world-progression-view .cs-aug[data-on="true"]{border-color:#b7a077;background:#2a2418}
+#world-inventory #world-progression-view .cs-aug:disabled{opacity:1;cursor:default}
+#world-inventory #world-progression-view .cs-aug[data-open="false"]{opacity:.5}
+.cs-aug i{width:14px;height:14px;flex:none;margin-top:1px;border-radius:4px;border:1.5px solid #56636f;box-sizing:border-box}
+.cs-aug[data-on="true"] i{background:#b7a077;border-color:#f2dfae}
+.cs-aug b{display:block;font:700 12px/1.2 system-ui,sans-serif;color:#eee7d9}
+.cs-aug em{display:block;margin-top:2px;font:600 10.5px/1.2 system-ui,sans-serif;font-style:normal;color:#d9c49a}
+#world-inventory #world-progression-view .cs-attack{min-height:40px;border-radius:12px;border:1px dashed #b7a077;background:#151d26;color:#f2dfae;font:600 13px/1 system-ui,sans-serif;box-shadow:none}
