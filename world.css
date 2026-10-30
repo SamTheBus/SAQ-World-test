@@ -1159,3 +1159,140 @@ body.skill-arc-v1 .subweapon-hud{left:calc(12px + var(--world-safe-left));right:
 body #world-inventory .hero-slots button{min-height:40px;padding:0 16px;border:1px solid #6d5a3c;border-radius:999px;background:linear-gradient(#3a3222,#241f16);color:#fff3cf;font:600 13px var(--rpg-ui)}
 body #world-inventory .hero-slots button.is-quiet{border-color:#3a4652;background:transparent;color:#c9d0d3}
 body #world-inventory .hero-slots button.is-danger{border-color:#b34e57;background:linear-gradient(#5a2228,#2e1215);color:#fff}
+
+/* Gear screen v2 (gear_screen_v2.js, inventory_presentation.js). Mockup: claude.ai/artifact/VLkAtCyFHGUFcrnUZXxHkT */
+#world-inventory[data-section=equipment] #world-bag-browse,#world-inventory[data-section=bag] #world-bag-browse{width:100%;max-width:560px;margin:0 auto;box-sizing:border-box;background:transparent;border:0;padding:4px 2px 16px}
+#world-inventory[data-section=equipment] #world-bag-stats,#world-inventory[data-section=bag] #world-bag-stats{display:none}
+#world-inventory #world-bag-browse>section>h3{display:none}
+body #world-inventory #world-equipment,body #world-inventory #world-items{display:flex;flex-direction:column;gap:12px}
+#world-inventory .gx-doll{display:grid;grid-template-columns:76px minmax(0,1fr) 76px;align-items:center;gap:6px;background:#151d26;border:1px solid #26313d;border-radius:18px;padding:16px 10px}
+#world-inventory .gx-col{display:flex;flex-direction:column;align-items:center;gap:12px}
+#world-inventory .gx-slotwrap{display:flex;flex-direction:column;align-items:center;gap:5px}
+#world-inventory button.gx-slot,#world-inventory button.gx-tile{position:relative;display:flex;align-items:center;justify-content:center;padding:0;width:66px;height:66px;min-height:0;border-radius:14px;border:2px solid var(--rarity,#3a4654);background:#1b2530;box-shadow:none}
+#world-inventory button.gx-slot.is-empty{border:2px dashed #3a4654;background:#121a22}
+#world-inventory button.gx-slot:hover,#world-inventory button.gx-tile:hover{background:#243140;border-color:var(--rarity,#c3ab7c)}
+#world-inventory .gx-slot img,#world-inventory .gx-tile img{width:44px;height:44px;image-rendering:pixelated;border:0;background:none;box-shadow:none;margin:0}
+#world-inventory .gx-stars,#world-inventory .gx-lv{position:absolute;left:4px;font:700 10px/1 system-ui,sans-serif;color:#eee7d9;background:#0c1219d9;border-radius:6px;padding:2px 4px;pointer-events:none}
+#world-inventory .gx-slot .gx-stars{bottom:3px}
+#world-inventory .gx-tile .gx-stars{top:4px}
+#world-inventory .gx-lv{bottom:4px;color:#cfd5d6}
+#world-inventory .gx-up,#world-inventory .gx-lock{position:absolute;top:-7px;right:-7px;width:20px;height:20px;box-sizing:border-box;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #0c1219;pointer-events:none}
+#world-inventory .gx-up{background:#2f7d4a}
+#world-inventory .gx-lock{background:#3a4654}
+#world-inventory .gx-up.is-inline{position:static;width:16px;height:16px;border:0}
+#world-inventory .gx-slotlabel{font:600 11px/1 system-ui,sans-serif;color:#aeb5b6;letter-spacing:.04em}
+#world-inventory .gx-hero{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
+#world-inventory .gx-stage{position:relative;width:170px;max-width:100%;height:166px;display:flex;align-items:flex-end;justify-content:center}
+#world-inventory .gx-pedestal{position:absolute;bottom:12px;width:120px;height:20px;border-radius:50%;background:#b7a07729;border:1px solid #b7a07747}
+#world-inventory .gx-portrait{position:relative;width:170px;height:167px;max-width:100%;image-rendering:pixelated}
+#world-inventory .gx-heroname{font:400 18px/1.2 Georgia,'Times New Roman',serif;color:#eee7d9;text-align:center}
+#world-inventory .gx-herosub{font-size:12px;color:#aeb5b6}
+#world-inventory .gx-keystats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+#world-inventory .gx-keystat{background:#151d26;border:1px solid #26313d;border-radius:12px;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0}
+#world-inventory .gx-keystat b{font:700 16px/1 system-ui,sans-serif;color:#eee7d9}
+#world-inventory .gx-keystat span{font:600 10px/1 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#aeb5b6}
+#world-inventory .gx-retired{display:flex;align-items:center;gap:12px;background:#1a1214;border:1px solid #3a2226;border-radius:14px;padding:10px 12px}
+#world-inventory .gx-retired-tiles{display:flex;gap:10px}
+#world-inventory .gx-scrollhint{display:flex;flex-direction:column;align-items:center;gap:2px;color:#56636f;font:600 11px/1 system-ui,sans-serif;letter-spacing:.14em;padding-top:4px}
+#world-inventory .gx-card{background:#151d26;border:1px solid #26313d;border-radius:16px;padding:14px 16px 6px}
+#world-inventory .gx-cardtitle{margin:0 0 6px;font:700 11px/1 system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#b7a077}
+#world-inventory .gx-attrs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:6px 0 10px}
+#world-inventory .gx-attr{background:#1b2530;border-radius:12px;padding:12px 6px;display:flex;flex-direction:column;align-items:center;gap:5px}
+#world-inventory .gx-attr b{font:700 20px/1 system-ui,sans-serif;color:#eee7d9}
+#world-inventory .gx-attr span{font:700 11px/1 system-ui,sans-serif;letter-spacing:.1em;color:#aeb5b6}
+#world-inventory .gx-statrow{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid #222c37;font:600 14px/1.2 system-ui,sans-serif;color:#aeb5b6}
+#world-inventory .gx-statrow:last-child{border-bottom:0}
+#world-inventory .gx-statrow b{color:#eee7d9;font-variant-numeric:tabular-nums}
+#world-inventory .gx-filters{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+#world-inventory button.gx-chip{flex:none;min-height:36px;height:36px;padding:0 12px;border-radius:18px;border:1px solid #2c3846;background:#151d26;color:#aeb5b6;font:600 12px/1 system-ui,sans-serif;box-shadow:none}
+#world-inventory button.gx-chip[aria-pressed=true]{background:#2a2418;border-color:#b7a077;color:#eee7d9}
+#world-inventory .gx-chip i{font-style:normal;color:#7f8a93}
+#world-inventory .gx-bagmeta{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px;color:#aeb5b6}
+#world-inventory .gx-legend{display:flex;align-items:center;gap:6px}
+#world-inventory .gx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:16px 6px;justify-items:center}
+#world-inventory .gx-cell{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;width:100%}
+#world-inventory button.gx-tile{width:76px;height:76px;background:color-mix(in srgb,var(--rarity,#fff) 10%,#151d26)}
+#world-inventory button.gx-tile img{width:50px;height:50px}
+#world-inventory button.gx-tile.is-locked img{opacity:.45}
+#world-inventory .gx-name{font:600 11px/1.25 system-ui,sans-serif;text-align:center;max-width:86px;color:color-mix(in srgb,var(--rarity,#eee7d9) 75%,#fff);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+#world-inventory .gx-hint,#world-inventory .gx-empty{margin:4px 0 0;text-align:center;font-size:13px;color:#7f8a93}
+#world-comparison.gx-sheet{position:fixed;z-index:12;left:0;right:0;bottom:0;top:auto;width:auto;max-width:none;max-height:88vh;transform:none;display:flex;flex-direction:column;background:#151d26;color:#eee7d9;border:0;border-top:1px solid #3a3122;border-radius:22px 22px 0 0;box-shadow:0 0 0 100vmax #000000a8,0 -10px 30px #0008;padding:0;font-family:system-ui,sans-serif;overflow:hidden}
+@media(min-width:700px){#world-comparison.gx-sheet{left:50%;right:auto;bottom:auto;top:50%;transform:translate(-50%,-50%);width:420px;max-height:86vh;border:1px solid #3a3122;border-radius:18px}}
+#world-comparison.gx-sheet[hidden]{display:none}
+#world-inventory .gx-grab{display:block;flex:none;width:40px;height:5px;border-radius:3px;background:#3a4654;margin:10px auto 0}
+@media(min-width:700px){#world-inventory .gx-grab{display:none}}
+#world-inventory .gx-sheetscroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:12px;padding:12px 16px 14px}
+#world-inventory .gx-sheettop{display:flex;align-items:center;gap:8px}
+#world-inventory .gx-compareto{font-size:12px;color:#aeb5b6;flex:none}
+#world-inventory button.gx-ringtab{flex:1;min-height:48px;height:48px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;border:1px solid #2c3846;background:#1b2530;color:#aeb5b6;font:600 13px/1 system-ui,sans-serif;box-shadow:none;padding:0 8px}
+#world-inventory button.gx-ringtab[aria-pressed=true]{border:2px solid #b7a077;background:#211d15;color:#eee7d9}
+#world-inventory .gx-ringtab img{width:24px;height:24px;image-rendering:pixelated;border:0;background:none;margin:0}
+#world-inventory .gx-dash{width:22px;height:22px;box-sizing:border-box;border-radius:7px;border:2px dashed #56636f}
+#world-inventory .gx-compareline{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12px;color:#8e979c}
+#world-inventory .gx-compareline img{width:18px;height:18px;image-rendering:pixelated;border:0;background:none;margin:0}
+#world-inventory .gx-compareline b{color:color-mix(in srgb,var(--rarity,#eee7d9) 75%,#fff);font-weight:600}
+#world-inventory button.gx-close{flex:none;margin-left:auto;width:44px;height:44px;min-height:44px;padding:0;border-radius:12px;border:1px solid #3a4654;background:#1b2530;color:#eee7d9;display:flex;align-items:center;justify-content:center;box-shadow:none}
+#world-inventory .gx-itemcard{background:#111820;border:1px solid color-mix(in srgb,var(--rarity,#e67e22) 30%,#151d26);border-top:3px solid var(--rarity,#e67e22);border-radius:14px;padding:12px 14px 6px;display:flex;flex-direction:column}
+#world-inventory .gx-itemhead{display:flex;align-items:center;gap:12px;padding-bottom:10px;border-bottom:1px solid #222c37;margin-bottom:2px}
+#world-inventory .gx-itemicon{width:52px;height:52px;flex:none;box-sizing:border-box;border-radius:12px;border:2px solid var(--rarity,#3a4654);background:color-mix(in srgb,var(--rarity,#fff) 10%,#151d26);display:flex;align-items:center;justify-content:center}
+#world-inventory .gx-itemicon img{width:38px;height:38px;image-rendering:pixelated;border:0;background:none;margin:0}
+#world-inventory .gx-iteminfo{display:flex;flex-direction:column;gap:4px;min-width:0}
+#world-inventory .gx-itemname{margin:0;font:400 20px/1.15 Georgia,'Times New Roman',serif;color:color-mix(in srgb,var(--rarity,#eee7d9) 80%,#fff);text-transform:none;letter-spacing:0}
+#world-inventory .gx-itemsub{font-size:12px;color:#aeb5b6}
+#world-inventory .gx-itemnote{margin:8px 0 2px;font-size:12px;color:#aeb5b6;font-style:italic}
+#world-inventory .gx-linewrap{display:flex;flex-direction:column;gap:4px;padding:6px 0}
+#world-inventory .gx-line{display:flex;align-items:center;justify-content:space-between;gap:10px;font:600 14px/1.25 system-ui,sans-serif;color:#eee7d9}
+#world-inventory .gx-mark{display:flex;align-items:center;gap:4px;font:800 12px/1 system-ui,sans-serif;flex:none;font-variant-numeric:tabular-nums}
+#world-inventory .gx-mark.is-up,#world-inventory .gx-mark.is-new{color:#86d9a0}
+#world-inventory .gx-mark.is-down{color:#f0a0a6}
+#world-inventory .gx-mark.is-same{color:#7f8a93}
+#world-inventory .gx-divider{height:1px;background:#222c37;margin:4px 0}
+#world-inventory .gx-roll{height:4px;border-radius:2px;background:#26313d;overflow:hidden}
+#world-inventory .gx-roll>span{position:relative;display:block;height:100%;border-radius:2px;background:#b7a077;overflow:hidden}
+#world-inventory .gx-roll.is-max{background:#3a1a16}
+#world-inventory .gx-roll.is-max>span{background:#e0533d;box-shadow:0 0 8px #e0533d8c}
+#world-inventory .gx-linewrap:has(.gx-roll.is-max) .gx-linetext{color:#ff8a70}
+#world-comparison.gx-sheet.is-perfect .gx-roll.is-max>span::after{content:"";position:absolute;top:0;bottom:0;width:45%;left:-45%;background:linear-gradient(90deg,#ffe2ce00,#ffe2cee6,#ffe2ce00);animation:gx-sweep 3.6s ease-in-out infinite}
+#world-comparison.gx-sheet.is-perfect .gx-itemicon{animation:gx-ember 3.6s ease-in-out infinite}
+#world-comparison.gx-sheet.is-perfect .gx-itemcard{border-top-color:#e0533d}
+@keyframes gx-sweep{0%{left:-45%}40%{left:105%}100%{left:105%}}
+@keyframes gx-ember{0%,100%{box-shadow:0 0 0 1px #e0533d73,0 0 10px #e0533d33}50%{box-shadow:0 0 0 1px #e0533dd9,0 0 22px #e0533d80}}
+@media(prefers-reduced-motion:reduce){#world-comparison.gx-sheet.is-perfect .gx-roll.is-max>span::after{display:none}#world-comparison.gx-sheet.is-perfect .gx-itemicon{animation:none;box-shadow:0 0 0 1px #e0533db3,0 0 14px #e0533d59}}
+#world-inventory .gx-lost{background:#1a1214;border:1px solid #3a2226;border-radius:14px;padding:8px 14px}
+#world-inventory .gx-lost h5{margin:4px 0 2px;font:700 11px/1.3 system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#d98c93}
+#world-inventory .gx-lost .gx-line{padding:6px 0;color:#cfd5d6}
+#world-inventory button.gx-switch{align-self:flex-end;display:flex;align-items:center;gap:8px;min-height:44px;height:44px;margin:-6px 0 -8px;padding:0 2px;border:0;background:none;box-shadow:none;color:#aeb5b6;font:600 12px/1 system-ui,sans-serif}
+#world-inventory button.gx-switch:hover{background:none;color:#eee7d9}
+#world-inventory button.gx-switch.is-row{align-self:stretch;justify-content:space-between;margin:0;padding:0 12px;border-radius:12px;background:#1b2530}
+#world-inventory .gx-knob{position:relative;width:34px;height:20px;box-sizing:border-box;border-radius:10px;border:1px solid #3a4654;background:#1b2530;flex:none}
+#world-inventory .gx-knob::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#7f8a93;transition:left .15s}
+#world-inventory .gx-switch[aria-pressed=true] .gx-knob{background:#5c4d33}
+#world-inventory .gx-switch[aria-pressed=true] .gx-knob::after{left:16px;background:#e9d6a8}
+#world-inventory .gx-herostrip{border:1px solid #b7a07759;border-radius:14px;padding:4px 14px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:18px}
+#world-inventory .gx-herorow{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:2px 6px;padding:9px 0;border-bottom:1px solid #1d2631;font:600 13px/1 system-ui,sans-serif;color:#aeb5b6;font-variant-numeric:tabular-nums;min-width:0}
+#world-inventory .gx-herorow:last-child,#world-inventory .gx-herorow:nth-last-child(2):nth-child(odd){border-bottom:0}
+#world-inventory .gx-was{font-size:12px;color:#6f7a83;margin-right:4px}
+#world-inventory .gx-herorow>span:first-child{white-space:nowrap}
+#world-inventory .gx-heroval{margin-left:auto;white-space:nowrap}
+#world-inventory .gx-heroval b{font-size:15px;font-weight:800}
+#world-inventory .gx-heroval .is-up{color:#86d9a0}
+#world-inventory .gx-heroval .is-down{color:#f0a0a6}
+#world-inventory .gx-attune{display:flex;align-items:center;gap:10px;background:#1b2530;border-radius:12px;padding:10px 12px;font-size:12px;color:#aeb5b6}
+#world-inventory .gx-attune>span:first-child{flex:1}
+#world-inventory .gx-attunebar{width:70px;height:5px;border-radius:3px;background:#26313d;overflow:hidden}
+#world-inventory .gx-attunebar>span{display:block;height:100%;background:#b7a077}
+#world-inventory .gx-attune b{color:#eee7d9}
+#world-inventory .gx-locknote{margin:0;font-size:13px;color:#f0c08a;text-align:center}
+#world-inventory .gx-more{display:flex;flex-direction:column;gap:8px}
+#world-inventory .gx-morerow{display:flex;gap:8px}
+#world-inventory .gx-note{font-size:12px;color:#8e979c;margin:0}
+#world-inventory .gx-confirm{background:#1a1214;border:1px solid #3a2226;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px}
+#world-inventory .gx-confirm h4{margin:0;font:700 13px/1.2 system-ui,sans-serif;color:#f0a0a6}
+#world-inventory .gx-confirm p{margin:0;font-size:13px;color:#cfd5d6}
+#world-inventory .gx-sheetfoot{display:flex;gap:8px;flex:none;padding:12px 16px calc(16px + env(safe-area-inset-bottom,0px));border-top:1px solid #26313d;background:#151d26}
+#world-inventory button.gx-btn{flex:1;min-height:46px;height:46px;border-radius:12px;border:1px solid #3a4654;background:#1b2530;color:#eee7d9;font:600 14px/1 system-ui,sans-serif;box-shadow:none;padding:0 10px}
+#world-inventory button.gx-btn:hover{background:#243140;border-color:#56636f}
+#world-inventory button.gx-btn.is-primary{flex:2.4;border:0;background:#b7a077;color:#14100a;font-weight:700}
+#world-inventory button.gx-btn.is-primary:hover{background:#c9b48a}
+#world-inventory button.gx-btn.is-danger{color:#f0a0a6}
+#world-inventory button.gx-btn:disabled{opacity:.5}

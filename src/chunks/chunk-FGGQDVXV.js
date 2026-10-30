@@ -2711,7 +2711,6 @@ function captureWorldRarityV2(state, player, source3, progression) {
   requireContract(!hasWorldRarityV2(progression), "Reward rarity already captured");
   return { ...progression, rarityPolicyHash: WORLD_RARITY_HASH, rarityHeroLevel: progressionWire(progressionBigInt(player.progression.level)), rarityRole: rewardRarityRoleV2(state, source3) };
 }
-var WORLD_RARITY_PLAYER_RULE = "Natural drops: 3\u2605 Epic at hero + encounter level 15, 4\u2605 Legendary at 30, 5\u2605 Mythic at 45. Boss loot and the chest roll separately.";
 
 // src/shared/content/reward_modifiers.js
 function validateRewardModifiers(v) {
@@ -22440,7 +22439,6 @@ export {
   compareAmount,
   wholeAmount,
   formatAmount,
-  WORLD_RARITY_PLAYER_RULE,
   rewardProgressionD9,
   prototypeRewardProgression,
   rewardProgression,
