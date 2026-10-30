@@ -26909,6 +26909,7 @@ var CLASS_ICONS = {
 var classIconSvg = (id) => CLASS_ICONS[id] ?? "";
 var sameLook = (a, b) => Boolean(a && b) && Object.keys(DEFAULT_LOOK).every((k) => a[k] === b[k]);
 var cleanName = (text2) => [...String(text2).replace(/[^\p{L}\p{M}\p{N} '’.-]/gu, "").replace(/\s+/g, " ").trimStart()].slice(0, HERO_NAME_MAX).join("");
+var namedOk = (name) => name.length > 0 && validHeroName(name);
 function createHeroCreatorV1({ document, environment, readModel, adapter, reportError = () => {
 }, onClose = () => {
 } }) {
@@ -26935,15 +26936,12 @@ function createHeroCreatorV1({ document, environment, readModel, adapter, report
   const body5 = el("div", "hc-body"), preview = el("div", "hc-preview"), stage2 = el("canvas", "hc-stage"), bar = el("div", "hc-bar");
   stage2.setAttribute("role", "img");
   stage2.setAttribute("aria-label", "Preview of your hero");
-  const options = el("div", "hc-options"), foot = el("footer", "hc-foot"), status2 = el("p", "hc-status"), later = button("hc-later", "Later", () => {
-    if (!busy) {
-      dismissed = true;
-      close();
-    }
+  const options = el("div", "hc-options"), foot = el("footer", "hc-foot"), status2 = el("p", "hc-status"), cancel = button("hc-later", "Cancel", () => {
+    if (!busy) close();
   }), confirm = button("hc-confirm", "", () => save());
   status2.setAttribute("role", "status");
-  foot.append(status2, later, confirm);
-  let mode = "create", cls = null, look = { ...DEFAULT_LOOK }, facing2 = 1, showGear = true, busy = false, dismissed = false, thumbsKey = "", opener = null;
+  foot.append(status2, cancel, confirm);
+  let mode = "create", cls = null, deferClass = false, look = { ...DEFAULT_LOOK }, facing2 = 1, showGear = true, busy = false, thumbsKey = "", opener = null;
   const toggle = (text2, get, set) => {
     const b = button("hc-toggle", text2, () => {
       set(!get());
@@ -26958,9 +26956,10 @@ function createHeroCreatorV1({ document, environment, readModel, adapter, report
   }), helmToggle = toggle("Helmet", () => look.helmet, (v) => {
     look.helmet = v;
   });
+  const randomButton = button("hc-toggle", "Random look", randomLook);
   bar.append(button("hc-toggle", "Turn", () => {
     facing2 = -facing2;
-  }), gearToggle.b, helmToggle.b, button("hc-toggle", "Random look", randomLook));
+  }), gearToggle.b, helmToggle.b, randomButton);
   preview.append(stage2, bar);
   const field2 = (label3, content, id) => {
     const f = el("fieldset", "hc-field"), l = el("legend", "", label3), pick = el("span", "hc-pick");
@@ -26979,13 +26978,22 @@ function createHeroCreatorV1({ document, environment, readModel, adapter, report
     b.addEventListener("click", () => {
       if (!busy) {
         cls = c.id;
+        deferClass = false;
         paint();
       }
     });
     cardButtons[c.id] = { b, canvas };
     classCards.append(b);
   }
-  const classField = field2("Class", [classCards]);
+  const laterClass = button("hc-toggle hc-class-later", "Decide later", () => {
+    if (!busy) {
+      cls = null;
+      deferClass = true;
+      paint();
+    }
+  }), laterRow = el("div", "hc-class-later-row");
+  laterRow.append(laterClass, el("p", "hc-sub", "Pick a class any time from the skill wheel or Stats."));
+  const classField = field2("Class", [classCards, laterRow]);
   const nameInput = el("input", "hc-name");
   nameInput.type = "text";
   nameInput.maxLength = HERO_NAME_MAX * 2;
@@ -26997,8 +27005,9 @@ function createHeroCreatorV1({ document, environment, readModel, adapter, report
     const clean = cleanName(nameInput.value);
     if (clean !== nameInput.value) nameInput.value = clean;
     look.name = clean;
+    paint();
   });
-  field2("Name", [nameInput]);
+  const nameField = field2("Name", [nameInput]);
   const tiles = (list, key2, id) => {
     const box = el("div", "hc-tiles"), map = {};
     for (const [value2, name] of list) {
@@ -27032,24 +27041,22 @@ function createHeroCreatorV1({ document, environment, readModel, adapter, report
     return { box, map };
   };
   const hairTiles = tiles(LOOK_OPTIONS.hairStyles, "hair"), natural = swatches(LOOK_OPTIONS.hairColors.filter((x) => !x[3]), "hairColor"), bold = swatches(LOOK_OPTIONS.hairColors.filter((x) => x[3]), "hairColor"), skins = swatches(LOOK_OPTIONS.skins, "skin"), beardTiles = tiles(LOOK_OPTIONS.facialHair, "facialHair");
-  field2("Hair", [hairTiles.box]);
-  const hairColorField = field2("Hair color", [natural.box, el("p", "hc-sub", "Bold"), bold.box]);
-  const skinField = field2("Skin", [skins.box]);
-  field2("Facial hair", [beardTiles.box]);
+  const hairField = field2("Hair", [hairTiles.box]), hairColorField = field2("Hair color", [natural.box, el("p", "hc-sub", "Bold"), bold.box]), skinField = field2("Skin", [skins.box]), beardField = field2("Facial hair", [beardTiles.box]);
+  const lookFields = [nameField, hairField, hairColorField, skinField, beardField];
   body5.append(preview, options);
   panel.append(head12, body5, foot);
   root.append(panel);
   document.body.append(root);
   root.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !busy) {
+    if (e.key === "Escape" && !busy && mode !== "create") {
       e.preventDefault();
-      dismissed = true;
       close();
     }
   });
-  const onRequest = () => open(null);
+  const onRequest = (e) => open(e?.detail?.mode ?? null);
   document.addEventListener(HERO_CREATOR_OPEN_EVENT, onRequest);
   const local5 = (m) => m.playersById[m.localPlayerId];
+  const heroClass = () => heroClassOf(local5(readModel())?.d8);
   const wait = async (test, ms = 4e3) => {
     const until = Date.now() + ms;
     while (Date.now() < until) {
@@ -27068,9 +27075,9 @@ function createHeroCreatorV1({ document, environment, readModel, adapter, report
   };
   const specFor = (id, gear2) => ({ cls: id, look, gear: gear2, offType: id ? HERO_CLASSES[id].offhand : null });
   function previewGear() {
-    if (!showGear || mode === "create" && !cls) return {};
+    if (!showGear) return {};
     const gear2 = currentGear();
-    if (mode === "look") return gear2;
+    if (mode === "look" || heroClass() || !cls) return gear2;
     const inv = readModel().inventory, held = offhandOf(inv?.itemsById[inv?.equipped.subweapon]);
     return { ...gear2, off: held === HERO_CLASSES[cls].offhand && gear2.off ? gear2.off : { tier: 0 } };
   }
@@ -27100,7 +27107,7 @@ function createHeroCreatorV1({ document, environment, readModel, adapter, report
     c.scale(w / s, w / s);
   };
   function paintThumbs() {
-    const key2 = JSON.stringify([look, cls, mode]);
+    const key2 = JSON.stringify([{ ...look, name: "" }, cls, mode]);
     if (key2 === thumbsKey) return;
     thumbsKey = key2;
     for (const [value2, { canvas }] of Object.entries(hairTiles.map)) draw(canvas, { cls: null, look: { ...look, hair: value2, helmet: false }, gear: {} }, headFrame(8, 0.9, 25.5), null);
@@ -27112,20 +27119,36 @@ function createHeroCreatorV1({ document, environment, readModel, adapter, report
     }, null);
   }
   function paintStage(t) {
-    draw(stage2, specFor(mode === "look" ? local5(readModel())?.d8?.heroClass ?? null : cls, previewGear()), (c, w, h) => {
+    draw(stage2, specFor(heroClass() ?? (mode === "look" ? null : cls), previewGear()), (c, w, h) => {
       const s = Math.min(h / 56, w / 58);
       c.translate(w * 0.5 - (facing2 > 0 ? 3 : -3) * s, h - 22 - 20 * 0.8 * s);
       c.scale(0.8 * s * facing2, 0.8 * s);
     }, t);
   }
+  function confirmState() {
+    const named = namedOk(look.name.trim()), hasClass = Boolean(heroClass());
+    if (busy) return ["Working\u2026", false];
+    if (mode === "class") return cls ? [`Become a ${HERO_CLASSES[cls].name}`, true] : ["Pick a class", false];
+    if (!named) return ["Name your hero", false];
+    if (mode === "look") return ["Save look", true];
+    if (hasClass) return ["Begin", true];
+    if (cls) return [`Begin as a ${HERO_CLASSES[cls].name}`, true];
+    return deferClass ? ["Begin without a class", true] : ["Pick a class or decide later", false];
+  }
   function paint() {
-    classField.f.hidden = mode !== "create";
-    title.textContent = mode === "create" ? "Create your hero" : "Your hero\u2019s look";
-    intro.textContent = mode === "create" ? "Pick a class, then make your hero yours. The class is permanent for this character." : "Change how your hero looks. Your gear still goes on top.";
+    const hasClass = Boolean(heroClass());
+    classField.f.hidden = !(mode === "class" || mode === "create" && !hasClass);
+    laterRow.hidden = mode !== "create";
+    for (const f of lookFields) f.f.hidden = mode === "class";
+    helmToggle.b.hidden = randomButton.hidden = mode === "class";
+    title.textContent = mode === "create" ? "Create your hero" : mode === "class" ? "Choose your class" : "Your hero\u2019s look";
+    intro.textContent = mode === "create" ? "Name your hero and choose how they look. Pick a class now or later; once picked, it\u2019s permanent." : mode === "class" ? "Your class is permanent for this hero. Your name and look stay as they are." : "Change how your hero looks. Your gear still goes on top.";
     for (const [id, { b }] of Object.entries(cardButtons)) {
       b.setAttribute("aria-pressed", String(id === cls));
       b.disabled = busy;
     }
+    laterClass.setAttribute("aria-pressed", String(deferClass));
+    laterClass.disabled = busy;
     for (const [v, { b }] of Object.entries(hairTiles.map)) b.setAttribute("aria-pressed", String(v === look.hair));
     for (const [v, { b }] of Object.entries(beardTiles.map)) b.setAttribute("aria-pressed", String(v === look.facialHair));
     for (const map of [natural.map, bold.map]) for (const [v, b] of Object.entries(map)) b.setAttribute("aria-pressed", String(v === look.hairColor));
@@ -27134,10 +27157,11 @@ function createHeroCreatorV1({ document, environment, readModel, adapter, report
     skinField.pick.textContent = "\xB7 " + (LOOK_OPTIONS.skins.find((x) => x[0] === look.skin)?.[1] ?? "");
     gearToggle.sync();
     helmToggle.sync();
-    later.textContent = mode === "create" ? "Later" : "Cancel";
-    later.disabled = busy;
-    confirm.disabled = busy || mode === "create" && !cls;
-    confirm.textContent = busy ? "Working\u2026" : mode === "look" ? "Save look" : cls ? `Begin as a ${HERO_CLASSES[cls].name}` : "Pick a class";
+    cancel.hidden = mode === "create";
+    cancel.disabled = busy;
+    const [label3, ready] = confirmState();
+    confirm.textContent = label3;
+    confirm.disabled = !ready;
     if (!root.hidden) paintThumbs();
   }
   async function chooseClass(classId) {
@@ -27175,17 +27199,19 @@ function createHeroCreatorV1({ document, environment, readModel, adapter, report
   async function save() {
     if (busy) return;
     const next = { ...look, name: look.name.trim() };
-    if (!validHeroName(next.name)) {
-      status2.textContent = "Names use up to 16 letters, numbers, spaces, hyphens or apostrophes.";
+    if (mode !== "class" && !namedOk(next.name)) {
+      status2.textContent = "Give your hero a name: up to 16 letters, numbers, spaces, hyphens or apostrophes.";
       return;
     }
     busy = true;
     paint();
     try {
-      if (mode === "create" && !heroClassOf(local5(readModel()).d8)) await chooseClass(cls);
-      status2.textContent = "Saving your look\u2026";
-      await adapter.issue("progression.change", { progressionRevision: local5(readModel()).d8.revision, action: { kind: "look.set", look: next } });
-      if (!await wait((x) => sameLook(local5(x).d8?.look, next))) throw Error("Your look didn\u2019t save. Try again.");
+      if (mode !== "look" && cls && !heroClass()) await chooseClass(cls);
+      if (mode !== "class") {
+        status2.textContent = "Saving your look\u2026";
+        await adapter.issue("progression.change", { progressionRevision: local5(readModel()).d8.revision, action: { kind: "look.set", look: next } });
+        if (!await wait((x) => sameLook(local5(x).d8?.look, next))) throw Error("Your look didn\u2019t save. Try again.");
+      }
       status2.textContent = "";
       busy = false;
       close();
@@ -27200,13 +27226,14 @@ function createHeroCreatorV1({ document, environment, readModel, adapter, report
   function open(requested) {
     const m = readModel(), p = local5(m);
     if (!p?.d8 || busy) return false;
-    mode = requested ?? (heroClassOf(p.d8) ? "look" : "create");
-    if (mode === "look" && !heroClassOf(p.d8)) mode = "create";
+    const hasClass = Boolean(heroClassOf(p.d8));
+    mode = !p.d8.look ? "create" : requested === "look" || hasClass ? "look" : "class";
     look = { ...DEFAULT_LOOK, ...p.d8.look ?? {} };
     nameInput.value = look.name;
-    if (mode === "create") {
+    deferClass = false;
+    if (mode !== "look") {
       const inv = m.inventory, current = offhandOf(inv?.itemsById[inv?.equipped.subweapon]);
-      cls = Object.values(HERO_CLASSES).find((c) => c.offhand === current)?.id ?? cls;
+      cls = hasClass ? null : Object.values(HERO_CLASSES).find((c) => c.offhand === current)?.id ?? null;
     }
     showGear = true;
     facing2 = 1;
@@ -27228,7 +27255,7 @@ function createHeroCreatorV1({ document, environment, readModel, adapter, report
   function refresh(m, available) {
     const p = local5(m);
     if (root.hidden) {
-      if (!dismissed && available && p?.d8 && (!heroClassOf(p.d8) || !p.d8.look) && m.persistence?.phase === "encounter" && m.entitiesById[p.entityId]?.alive) open(null);
+      if (available && p?.d8 && !p.d8.look && m.persistence?.phase === "encounter" && m.entitiesById[p.entityId]?.alive) open(null);
       return;
     }
     paintStage((environment.performance?.now?.() ?? Date.now()) / 1e3);
@@ -27897,10 +27924,19 @@ function createCharacterStatsV3({ document: doc }) {
   look.type = "button";
   look.className = "hc-open-look";
   look.textContent = "Change look";
-  look.addEventListener("click", () => doc.dispatchEvent(new CustomEvent(HERO_CREATOR_OPEN_EVENT)));
+  look.addEventListener("click", () => doc.dispatchEvent(new CustomEvent(HERO_CREATOR_OPEN_EVENT, { detail: { mode: "look" } })));
+  const pickClass = doc.createElement("button");
+  pickClass.type = "button";
+  pickClass.className = "hc-open-look";
+  pickClass.textContent = "Choose class";
+  pickClass.hidden = true;
+  pickClass.addEventListener("click", () => doc.dispatchEvent(new CustomEvent(HERO_CREATOR_OPEN_EVENT, { detail: { mode: "class" } })));
+  const heroActions = doc.createElement("div");
+  heroActions.className = "hc-open-actions";
+  heroActions.append(look, pickClass);
   title.textContent = "Character statistics";
   subtitle.textContent = "Your equipped gear, attributes and active mastery bonuses.";
-  heading.append(title, subtitle, look);
+  heading.append(title, subtitle, heroActions);
   groups.className = "character-stat-groups";
   foot.className = "character-stats-footnote";
   foot.textContent = "Committed totals update after an allocation or equipment change. Draft points are not applied until confirmed. Movement and pickup values use World runtime units; haste is a bonus, not attacks per second.";
@@ -27911,7 +27947,9 @@ function createCharacterStatsV3({ document: doc }) {
   }, refresh(model, visible3) {
     host.hidden = !visible3;
     if (!visible3) return;
-    const d8 = model.playersById?.[model.localPlayerId]?.d8, name = d8?.look?.name, cls = HERO_CLASSES[d8?.heroClass]?.name, heading2 = name && cls ? name + " the " + cls : name || (cls ? "Your " + cls : "Character statistics");
+    const d8 = model.playersById?.[model.localPlayerId]?.d8;
+    pickClass.hidden = Boolean(d8?.heroClass);
+    const name = d8?.look?.name, cls = HERO_CLASSES[d8?.heroClass]?.name, heading2 = name && cls ? name + " the " + cls : name || (cls ? "Your " + cls : "Character statistics");
     if (title.textContent !== heading2) title.textContent = heading2;
     const next = JSON.stringify(characterStatGroupsV3(model));
     if (next === key2) return;

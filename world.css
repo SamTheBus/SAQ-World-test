@@ -1026,6 +1026,10 @@ body #world-xp{color:#bfe6f0}
    body.wheel-arranging the arrange mode. */
 .skill-wheel-v1{position:absolute;left:0;top:0;width:0;height:0;z-index:7;pointer-events:none}
 .skill-wheel-v1[hidden]{display:none}
+/* Holding the spin button arranges the wheel; keep iOS from selecting text, showing its callout or
+   flashing a tap highlight on any game control. Text fields keep normal editing. */
+.skill-wheel-v1,.skill-wheel-v1 *,.skill-wheel-done,[data-gameplay-hud],[data-gameplay-hud] *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+[data-gameplay-hud] input,[data-gameplay-hud] textarea{-webkit-user-select:text;user-select:text}
 .skill-wheel-ring{position:absolute;pointer-events:auto;touch-action:none;border-radius:50%;-webkit-tap-highlight-color:transparent;background:radial-gradient(circle,transparent calc(var(--hole) - 1px),#c9b58b26 var(--hole),#0a101640 calc(var(--hole) + 3px),#0a101640 calc(50% - 4px),#c9b58b26 calc(50% - 1px),transparent 50%)}
 .skill-wheel-v1 .skill-slot{position:absolute;left:0;top:0;width:var(--slot,52px);height:var(--slot,52px);margin:0;padding:0;border-radius:50%;border:2px solid #0b1015;background:radial-gradient(circle at 38% 28%,#3b4955,#18222b 70%);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--class) 70%,#c9b58b),inset 0 -6px 10px #0006,0 3px 0 #070b10,0 6px 12px #0006;color:#f4ead6;pointer-events:auto;touch-action:none;transform:var(--at);overflow:hidden;display:grid;place-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .skill-wheel-v1 .skill-slot-icon{position:relative;z-index:1;width:66%;height:66%;display:grid;place-items:center;color:color-mix(in srgb,var(--class) 55%,#fff);filter:drop-shadow(0 1px 1px #000a)}
@@ -1115,6 +1119,9 @@ body.skill-arc-v1 .subweapon-hud{left:calc(12px + var(--world-safe-left));right:
 .hc-class canvas{width:74px;height:84px}
 .hc-class strong{font:700 16px var(--rpg-title,Georgia,serif);color:#f4e7c4}
 .hc-class span,.hc-class small{font:11px/1.35 var(--rpg-ui);color:#aeb7ba}
+.hc-class-later-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:8px}
+.hc-class-later-row[hidden]{display:none}
+.hc-class-later-row .hc-sub{margin:0;font:12px/1.4 var(--rpg-ui);color:#aeb7ba}
 .hc-class[aria-pressed=true]{border-color:var(--class);background:linear-gradient(#1b2630,#131b23);box-shadow:0 0 0 1px var(--class),0 0 16px color-mix(in srgb,var(--class) 30%,transparent)}
 .hc-name{width:100%;box-sizing:border-box;min-height:44px;padding:0 14px;border-radius:12px;border:1px solid #33404b;background:#0f161d;color:var(--rpg-ivory,#eee7d9);font:600 16px var(--rpg-ui)}
 .hc-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px}
@@ -1131,6 +1138,7 @@ body.skill-arc-v1 .subweapon-hud{left:calc(12px + var(--world-safe-left));right:
 .hc-later{min-height:46px;padding:0 18px;border-radius:12px;border:1px solid #3a4651;background:#161f27;color:#c3ccd0}
 .hero-creator-v1 .hc-confirm{flex:1;max-width:340px;min-height:46px;padding:0 18px;border-radius:12px;border:1px solid #ffe39a;background:linear-gradient(#f4cf6a,#c98d1d);color:#1f1404;font-weight:700}
 .hero-creator-v1 .hc-confirm:disabled{border-color:#33404b;background:#1b242d;color:#76838b}
-.character-stats-view .hc-open-look{justify-self:start;margin-top:6px;min-height:36px;padding:0 14px;border-radius:999px;border:1px solid #e9c46a;background:#3a3222;color:#fff3cf;font:600 13px var(--rpg-ui);cursor:pointer}
+.character-stats-view .hc-open-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.character-stats-view .hc-open-look{justify-self:start;margin-top:0;min-height:36px;padding:0 14px;border-radius:999px;border:1px solid #e9c46a;background:#3a3222;color:#fff3cf;font:600 13px var(--rpg-ui);cursor:pointer}
 @media(min-width:760px){.hc-body{grid-template-columns:minmax(0,5fr) minmax(0,6fr);align-items:start}.hc-stage{height:440px}}
 @media(max-height:520px){.hc-head{padding:8px 12px 4px}.hc-intro{display:none}.hc-stage{height:140px}}
