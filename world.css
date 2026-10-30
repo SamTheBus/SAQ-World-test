@@ -120,6 +120,7 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; user-sel
 .equipment-icon {object-fit:contain;flex-shrink:0;filter:drop-shadow(0 1px 1px #0009);}
 .inspect-item .equipment-icon {width:32px;height:32px;border:1px solid #d9d2e1;border-radius:4px;background:#11101a;padding:3px;}
 #world-inventory .row-action {flex-shrink:0;padding:6px 9px;font-size:10px;letter-spacing:.3px;}
+#world-inventory .helmet-toggle {padding:6px 7px;line-height:0;}
 #world-inventory .action-equip,#world-inventory .equip-action {background:linear-gradient(#059669,#047857);border-color:#34d399;color:white;}
 #world-inventory-status {margin:0;flex-shrink:0;color:#a99bb7;font:10px/1.4 system-ui;}
 .bag-empty {padding:20px 10px;text-align:center;font:italic 12px Georgia,serif;color:#94a3b8;border:1px dashed #334155;border-radius:6px;}

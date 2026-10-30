@@ -23669,6 +23669,8 @@ function createMasteryEffects(s, { damage, eligible: eligible2, identity: identi
 
 // src/simulation/subweapon_simulation.js
 var BOLT_HOMING = 0.5;
+var BOLT_SPEED = 8;
+var LIGHTNING_SPEED = 20;
 function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: identity2, getStats, mastery, refreshStats }) {
   const c = s.subweaponCombat, players = new Map(Object.values(s.playersById).map((p) => [p.entityId, p]));
   const stats = (id) => getStats ? getStats(id) : resolvePlayerStats(players.get(id));
@@ -23755,7 +23757,7 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
           if (m > 1e-9) b.direction = { x: x / m, y: y / m };
         }
       }
-      const step2 = Math.min(8, b.remaining);
+      const step2 = Math.min(b.delivery === "lightning" ? LIGHTNING_SPEED : BOLT_SPEED, b.remaining);
       b.position.x += b.direction.x * step2;
       b.position.y += b.direction.y * step2;
       b.remaining -= step2;
@@ -26851,6 +26853,8 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
         actor.movementIntent = copyWire(command.payload);
         const primary = state.primary.actorsById[actor.entityId], length = Math.hypot(command.payload.x, command.payload.y);
         if (primary && length > 0) primary.facing = { x: command.payload.x / length, y: command.payload.y / length };
+        const guard = state.subweaponCombat?.actors[actor.entityId]?.guard;
+        if (guard?.raised && length > 0) guard.direction = { x: command.payload.x / length, y: command.payload.y / length };
       } else if (target) {
         const functional = state.d9World?.functionalSitesById?.[command.payload.siteId];
         if (command.payload.direction === "enter" && isGeneratedInteriorFamily(functional) && !functional.discoveredByPlayerIds.includes(command.playerId)) {
@@ -31332,6 +31336,26 @@ function createInventoryPresentation({ document, environment, readModel, adapter
     refresh(readModel());
     closeButton.focus();
   }
+  const HELMET_EYE = {
+    shown: '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>',
+    hidden: '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2" opacity=".55"/><path d="M4 4l16 16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>'
+  };
+  function toggleHelmet() {
+    const m = readModel(), p = m.playersById?.[m.localPlayerId], look = p?.d8?.look;
+    if (!look || !alive(m) || m.persistence.phase !== "encounter") return;
+    error = "";
+    try {
+      Promise.resolve(adapter.issue("progression.change", { progressionRevision: p.d8.revision, action: { kind: "look.set", look: { ...look, helmet: look.helmet === false } } }, m)).catch((e) => {
+        error = e.message;
+        key2 = null;
+        refresh(readModel());
+      });
+    } catch (e) {
+      error = e.message;
+    }
+    key2 = null;
+    refresh(readModel());
+  }
   function issue(kind, payload) {
     const m = readModel();
     if (!m.inventory || !alive(m) || m.persistence.phase !== "encounter") return;
@@ -31446,6 +31470,14 @@ function createInventoryPresentation({ document, environment, readModel, adapter
             unequip.setAttribute("aria-label", `Unequip ${label2(slot)}`);
             row2.append(unequip);
           }
+        }
+        if (slot === "helmet" && local6.d8?.look) {
+          const shown = local6.d8.look.helmet !== false, toggle2 = button("", toggleHelmet), tip = shown ? "Hide your helmet on your hero" : "Show your helmet on your hero";
+          toggle2.className = "row-action helmet-toggle";
+          toggle2.innerHTML = HELMET_EYE[shown ? "shown" : "hidden"];
+          toggle2.title = tip;
+          toggle2.setAttribute("aria-label", tip);
+          row2.append(toggle2);
         }
         slots.append(row2);
       }
@@ -48114,12 +48146,12 @@ function rune(ctx, x, y, r, lit, alpha2) {
   ctx.stroke();
   ctx.restore();
 }
-function guardFace(x, y, facing2, recoil = 0) {
-  return { x: x + 0.8 * facing2 * (11.8 - recoil), y: y - 8 + 0.8 * 5.6 };
+function guardFace(x, y, facing2, recoil = 0, guardY = 0) {
+  return { x: x + 0.8 * facing2 * (11.8 - recoil), y: y - 8 + 0.8 * (5.6 + guardY * 8) };
 }
-function drawGuardWard(ctx, x, y, facing2, type, open, runes, blockAge, time, recoil = 0) {
+function drawGuardWard(ctx, x, y, facing2, type, open, runes, blockAge, time, recoil = 0, dir = null) {
   if (open <= 0.01) return;
-  const w = WARDS[type] ?? WARDS.kite, face3 = guardFace(x, y, facing2, recoil), flex = blockAge >= 0 && blockAge < 220 ? 0.3 * Math.sin(Math.PI * blockAge / 220) : 0, cx = 5, cy = -4;
+  const w = WARDS[type] ?? WARDS.kite, face3 = guardFace(x, y, facing2, recoil, dir?.y ?? 0), tilt = dir ? Math.atan2(dir.y, Math.abs(dir.x)) : 0, flex = blockAge >= 0 && blockAge < 220 ? 0.3 * Math.sin(Math.PI * blockAge / 220) : 0, cx = 5, cy = -4;
   const edge = (s) => {
     const p = wardEdge(w, s, open, flex);
     return { x: cx + p.x, y: cy + p.y };
@@ -48127,6 +48159,7 @@ function drawGuardWard(ctx, x, y, facing2, type, open, runes, blockAge, time, re
   ctx.save();
   ctx.translate(face3.x, face3.y);
   ctx.scale(facing2 * HERO2, HERO2);
+  ctx.rotate(tilt);
   if (open < 0.98) bloom(ctx, 0, 0, 8 + 10 * open, KNIGHT_BLUE, 0.5 * (1 - open));
   ctx.save();
   ctx.globalCompositeOperation = "lighter";
@@ -48640,7 +48673,8 @@ function createCombatVfx() {
     if (g.raised) w.facing = g.direction?.x < 0 ? -1 : 1;
     if (w.open <= 0.01) return;
     const blockAge = (m.tick - (a.shieldBlockTick ?? -1e9)) * 1e3 / 60, recoil = blockAge >= 0 && blockAge < 150 ? Math.sin(Math.PI * blockAge / 150) * 3 : 0, runes = Math.max(0, Math.min(4, Math.floor(Number(g.integrity) / 8) || 0));
-    drawGuardWard(ctx, a.position.x, a.position.y, w.facing, shieldTypeOf(a.heroLook?.gear?.off?.kind), w.open, runes, blockAge, time, recoil);
+    if (g.raised && g.direction) w.dir = { x: g.direction.x, y: g.direction.y };
+    drawGuardWard(ctx, a.position.x, a.position.y, w.facing, shieldTypeOf(a.heroLook?.gear?.off?.kind), w.open, runes, blockAge, time, recoil, w.dir);
   }
   function add(kind, target, time, dx = 1, dy = 0, extra = null) {
     if (bursts.length >= 32) bursts.shift();
