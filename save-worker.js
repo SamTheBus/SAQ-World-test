@@ -7408,7 +7408,7 @@ var HERO_CLASS_IDS = Object.freeze(Object.keys(HERO_CLASSES));
 var CLASS_SKILLS = freezeWire({
   shield_bash: { id: "shield_bash", name: "Shield Bash", classId: "knight", cooldownTicks: 360, description: "Shove a forward cone: Attack plus Shield damage, knockback and a short stun on ordinary enemies. Every block takes 1 second off its cooldown. A Buckler recharges it faster; a Tower Shield stuns longer and shoves harder." },
   flurry: { id: "flurry", name: "Flurry", classId: "rogue", cooldownTicks: 300, description: "Three quick offhand cuts in front of you. Each cut can crit and Bleed. A Main-Gauche readies a parry for the next hit; a Stiletto crits more often; a Kris makes every cut Bleed." },
-  cast: { id: "cast", name: "Cast", classId: "mage", cooldownTicks: 240, description: "A heavy bolt of your Tome\u2019s element at the nearest enemy in front of you: Fire burns, Frost slows, Storm chains to nearby enemies." }
+  cast: { id: "cast", name: "Cast", classId: "mage", cooldownTicks: 300, description: "A heavy bolt of your Tome\u2019s element at the nearest enemy in front of you: Fire burns, Frost slows, Storm chains to nearby enemies." }
 });
 var CLASS_SKILL_IDS = Object.freeze(Object.keys(CLASS_SKILLS));
 var SKILL_SLOT_COUNT = 8;
@@ -18928,7 +18928,8 @@ function resolveD9PlayerStats(player) {
   const balanced = usesBuildBalanceV2(player), flatAttack = balanced ? addCombat(addCombat(base.attack, gear("attack")), addCombat(addCombat(str, dex), intel)) : addCombat(addCombat(addCombat(base.attack, gear("attack")), multiplyCombat(str, 5, 2)), dex);
   const attack = times2(flatAttack, addCombat(quantize(addCombat(1, effect("atkPct"))), multiplyCombat(family2 === "dagger" ? dex : family2 === "tome" ? intel : str, 1, 1e3)));
   const maxHp = roundCombat(times2(addCombat(addCombat(addCombat(base.maxHp, gear("maxHp")), balanced && family2 === "shield" ? BUILD_BALANCE_POLICY.attributes.shieldBaseHp : 0), multiplyCombat(str, balanced ? BUILD_BALANCE_POLICY.attributes.strHp : 10)), addCombat(quantize(addCombat(1, effect("maxHpPct"))), multiplyCombat(str, balanced ? 0 : 1, 1e3))));
-  const defense = pct2(addCombat(addCombat(base.defense, gear("defense")), multiplyCombat(intel, 1, 5)), "defPct"), tome = tomeProfile(definition?.spellType ?? "fire", definition?.rarityTier ?? 0), den = addCombat(intel, 150), barrier = balanced ? multiplyCombat(addCombat(times2(roundCombat(times2(addCombat(base.maxHp, gear("maxHp")), quantize(addCombat(1, effect("maxHpPct"))))), tome.barrier), times2(intel, exactDecimal(BUILD_BALANCE_POLICY.attributes.intFlatTomeBarrier))), BigInt(maxHp.d), BigInt(maxHp.n)) : addCombat(tome.barrier, multiplyCombat(intel, 15n * BigInt(den.d), 100n * BigInt(den.n)));
+  const defense = pct2(addCombat(addCombat(base.defense, gear("defense")), multiplyCombat(intel, 1, 5)), "defPct"), tome = tomeProfile(definition?.spellType ?? "fire", definition?.rarityTier ?? 0), den = addCombat(intel, 150);
+  const barrier = balanced ? combatAmount(0) : addCombat(tome.barrier, multiplyCombat(intel, 15n * BigInt(den.d), 100n * BigInt(den.n)));
   const chance = addCombat(addCombat(combatAmount(5, 100), effect("critChance")), balanced ? multiplyCombat(dex, BUILD_BALANCE_POLICY.attributes.dexCritChanceBasisPoints, 1e4) : 0), overflow = compareCombat(chance, 1) > 0 ? subtractCombat(chance, 1) : combatAmount(0);
   const rawBlock = addCombat(roundCombat(multiplyCombat(addCombat(effect("block"), exactDecimal(definition?.family ? 0 : 0.15)), 1e6)), multiplyCombat(str, 1e3)), rawParry = addCombat(roundCombat(multiplyCombat(addCombat(effect("parry"), exactDecimal(definition?.family ? 0 : 0.12)), 1e6)), multiplyCombat(dex, 1e3));
   const blockCap = Math.round((0.4 + (f2.blockCapBonus ?? 0.02)) * 1e6), parryCap = Math.round(((f2.subArchetype === "main_gauche" ? 0.45 : 0.35) + (f2.parryCapBonus ?? 0.02)) * 1e6);
@@ -19289,6 +19290,18 @@ function seedWords(text) {
   }
   if (words.every((x) => x === 0)) words[0] = 1;
   return words;
+}
+function fitBarriersToCapacity(s) {
+  for (const p of Object.values(s.playersById ?? {})) {
+    const c = s.subweaponCombat?.actors?.[p.entityId];
+    if (!c) continue;
+    const max2 = resolvePlayerStats(p).maxBarrier;
+    if (compareCombat(c.barrier, max2) > 0) {
+      c.barrier = copyWire(max2);
+      if ("barrierRechargeRemainder" in c) c.barrierRechargeRemainder = 0;
+    }
+  }
+  return s;
 }
 function installSubweaponCombat(s) {
   if (s.subweaponCombat) s.subweaponCombat.controls ??= {};
@@ -22217,6 +22230,7 @@ function upgradeActivityState(input) {
     installSiteRunEpisodesD13B(next, { inferHistory: true });
     installSiteFinaleReservationsD13D_A(next);
     installPersonalFinaleClaimsD13D_G1(next, { migration: true });
+    fitBarriersToCapacity(next);
     return createActivityState(next);
   }
   if (input.format === D6_ACTIVITY_FORMAT) return createActivityState(installD8(reconcileD7Migration(installD7(installSubweaponCombat(copyWire(createActivityState(input)))))));
@@ -24608,6 +24622,7 @@ async function openWorldSnapshotD9(publication, { sha256, readPage, generatePlan
   }
   state.spacesByInstanceId[state.overworldInstanceId].collision.pages = state.d9World.runtime.chunks.map(runtimeCollisionPageD92);
   await verifyContentFingerprint(state.content, { sha256 });
+  fitBarriersToCapacity(state);
   validateActivityState(state);
   for (const site of functionalSitesD10(state)) {
     const binding2 = await readSiteBindingD9(state.d9World.content, site.siteId, { sha256, readPage });
