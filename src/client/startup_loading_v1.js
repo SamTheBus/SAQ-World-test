@@ -31,7 +31,7 @@
     'Each block a Knight makes takes a second off Shield Bash.',
     'Armor you equip shows on your hero. Higher stars brighten the trim.',
     'Change your hero’s look any time from Bag, then Stats.',
-    'The marker on Attack shows when your Tome fires next.'
+    'Your offhand shapes your class skill: a Kris makes every Flurry cut Bleed.'
   ];
   const SLOW_MS = 45000, TIP_MS = 6000;
   const now = () => (typeof performance !== 'undefined' && typeof performance.now === 'function') ? performance.now() : Date.now();

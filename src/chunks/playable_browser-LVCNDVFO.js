@@ -324,7 +324,8 @@ import {
   chunkAddressKey,
   claimClassKit,
   claimSubweapon,
-  classOffhandAllowed,
+  classGearAllowed,
+  classGearRefusal,
   classSkillsFor,
   closedRecord,
   collectRenewableGear,
@@ -471,6 +472,7 @@ import {
   isStarterVillageSafe,
   isWorldPointSafe,
   itemDefinition,
+  itemGearClass,
   legacyWorldPosition,
   lineToPoint,
   listedEquipmentSlots,
@@ -723,7 +725,7 @@ import {
   worldLevelGapMultiplier,
   worldOrdinaryMeleeProfile,
   worldPointForArea
-} from "./chunk-S55QUS3N.js";
+} from "./chunk-5AIWOXBS.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -16772,6 +16774,7 @@ var ACTIVITY_SAVE_NAMESPACE = FORGE_REVIEW_BUILD ? "saq-world-forge-review-v1" :
 var FLURRY_CUTS = 3;
 var FLURRY_GAP_TICKS = 7;
 var SKILL_LAST_TICKS = 45;
+var PARRY_WINDOW_TICKS = 180;
 function skillCooldown(combat, skillId) {
   return combat?.skills?.cooldowns?.[skillId] ?? 0;
 }
@@ -16784,7 +16787,16 @@ function classSkillsRecord(combat) {
 }
 function prune(combat) {
   const k = combat.skills;
-  if (k && !Object.keys(k.cooldowns).length && !k.last && !k.flurry) delete combat.skills;
+  if (k && !Object.keys(k.cooldowns).length && !k.last && !k.flurry && !k.parry) delete combat.skills;
+}
+function openParryWindow(combat) {
+  classSkillsRecord(combat).parry = PARRY_WINDOW_TICKS;
+}
+function spendParryWindow(combat) {
+  if (combat?.skills?.parry) {
+    delete combat.skills.parry;
+    prune(combat);
+  }
 }
 function advanceClassSkillTimers(tick, combat) {
   const k = combat.skills;
@@ -16794,6 +16806,10 @@ function advanceClassSkillTimers(tick, combat) {
     else k.cooldowns[id] = left - 1;
   }
   if (k.last && tick - k.last.tick >= SKILL_LAST_TICKS) delete k.last;
+  if (k.parry) {
+    if (k.parry <= 1) delete k.parry;
+    else k.parry--;
+  }
   prune(combat);
 }
 var BLOCK_BASH_REFUND_TICKS = 60;
@@ -16816,7 +16832,8 @@ function cancelClassSkillAction(combat) {
 function validateClassSkillState(s, combat, actor) {
   const k = combat.skills;
   if (k === void 0) return;
-  closedRecord(k, ["cooldowns"], ["last", "flurry"]);
+  closedRecord(k, ["cooldowns"], ["last", "flurry", "parry"]);
+  if (k.parry !== void 0) safeInteger(k.parry, 1, PARRY_WINDOW_TICKS);
   closedRecord(k.cooldowns, [], CLASS_SKILL_IDS);
   for (const [id, left] of Object.entries(k.cooldowns)) safeInteger(left, 1, Math.min(MAX_SKILL_COOLDOWN_TICKS, CLASS_SKILLS[id].cooldownTicks));
   const unit12 = (v) => Number.isFinite(v.x) && Number.isFinite(v.y) && Math.abs(Math.hypot(v.x, v.y) - 1) < 1e-9;
@@ -16831,7 +16848,7 @@ function validateClassSkillState(s, combat, actor) {
     safeInteger(k.flurry.nextTick, Math.max(0, s.tick - 1), s.tick + FLURRY_GAP_TICKS);
     requireContract(unit12(k.flurry) && actor.alive, "Invalid Flurry");
   }
-  requireContract(Object.keys(k.cooldowns).length || k.last || k.flurry, "Empty skill record");
+  requireContract(Object.keys(k.cooldowns).length || k.last || k.flurry || k.parry, "Empty skill record");
 }
 
 // src/shared/content/hidden_hollow_safety_v1.js
@@ -18121,10 +18138,6 @@ function subweaponLineClear(collision, a, b) {
 }
 var CLASS_MOVES = Object.freeze({ dagger: Object.freeze({ name: "Dash", frames: 8, distance: 64, cooldown: 90 }), tome: Object.freeze({ name: "Blink", frames: 6, distance: 72, cooldown: 150 }) });
 var MAX_CLASS_MOVE = Object.freeze({ frames: 8, distance: 72, cooldown: 150 });
-function rhythmFires(sequence, chance) {
-  const s = BigInt(sequence), n = BigInt(chance.n), d = BigInt(chance.d);
-  return s > 0n && s * n / d > (s - 1n) * n / d;
-}
 function canShadowDash(actor, combat, stats, suppressed = false) {
   return !suppressed && actor.alive && Boolean(CLASS_MOVES[stats.subType]) && combat.dash.frames === 0 && combat.dash.cooldown === 0;
 }
@@ -18213,31 +18226,6 @@ var shieldPacket = (stats) => {
   const f = stats.familyProperties, defense = addCombat(f?.reflect ?? combatAmount(1), f?.bashDefense ?? combatAmount(0)), base = addCombat(multiplyCombat(stats.defense, defense.n, defense.d), multiplyCombat(stats.attack, f?.bashAttack?.n ?? 0, f?.bashAttack?.d ?? 1)), scale = f?.bashMultiplier ?? combatAmount(1);
   return multiplyCombat(base, scale.n, scale.d);
 };
-function successfulSubweaponHit({ combat, stats, target, damage, bleed, fire, offhand: offhand2 = () => {
-}, suppressed = false, knight = false, rhythm = null }) {
-  if (suppressed) return { proactive: false };
-  if (!knight && stats.subType === "shield" && combat.pressure === 3 && target.alive) {
-    damage(shieldPacket(stats), "bash");
-    combat.pressure = 0;
-  }
-  let proactive = false;
-  if (stats.subType === "dagger") {
-    if (combatRoll(combat, stats.familyProperties?.bleed ?? combatAmount(15, 100)) && target.alive) {
-      bleed(stats.attack);
-      proactive = true;
-    }
-    if ((rhythm === null ? combatRoll(combat, stats.familyProperties?.offhand ?? combatAmount(1, 2)) : rhythmFires(rhythm, stats.familyProperties?.offhand ?? combatAmount(1, 2))) && target.alive) {
-      proactive = true;
-      damage(multiplyCombat(stats.attack, stats.familyProperties?.offhandDamage?.n ?? 45, stats.familyProperties?.offhandDamage?.d ?? 100), "offhand");
-      offhand2();
-      if (combatRoll(combat, stats.familyProperties?.bleed ?? combatAmount(15, 100)) && target.alive) {
-        bleed(stats.attack);
-        proactive = true;
-      }
-    }
-  }
-  return { proactive };
-}
 function incomingSubweaponHit({ combat, stats, raw, boss = false, actor = null, source: source3 = null, suppressed = false, knight = false }) {
   if (suppressed) return { damage: combatInteger(mitigateFractionalPlayerDamage(raw, stats.defense)), absorbed: "0", defense: null, counter: null, suppressed: true };
   const absorbed = combatInteger(minCombat(combat.barrier, raw));
@@ -18247,19 +18235,18 @@ function incomingSubweaponHit({ combat, stats, raw, boss = false, actor = null, 
   const net = mitigateFractionalPlayerDamage(raw, stats.defense), family = stats.subType;
   const chance = family === "shield" ? stats.blockChance : family === "dagger" ? stats.parryChance : combatAmount(0);
   const activeGuard = family === "shield" && guardsSource(combat.guard, actor, source3);
-  const guarded = activeGuard || compareCombat(chance, 0) > 0 && combatRoll(combat, multiplyCombat(chance, (boss ? 65 : 100) * (combat.fatigue ? 50 : 100), 1e4));
+  const parryReady = family === "dagger" && Boolean(combat.skills?.parry);
+  if (parryReady) spendParryWindow(combat);
+  const guarded = activeGuard || parryReady || compareCombat(chance, 0) > 0 && combatRoll(combat, multiplyCombat(chance, (boss ? 65 : 100) * (combat.fatigue ? 50 : 100), 1e4));
   if (!guarded) return { damage: combatInteger(net), absorbed, defense: null, counter: null };
   if (activeGuard) spendGuard(combat.guard, net);
   combat.fatigue = 30;
   if (family === "shield" && knight) reduceSkillCooldown(combat, "shield_bash", BLOCK_BASH_REFUND_TICKS);
   else if (family === "shield") combat.pressure = Math.min(3, combat.pressure + 1);
-  const riposte = family !== "shield" || !knight && combatRoll(combat, combatAmount(1, 4));
   const mitigation = multiplyCombat(family === "shield" ? stats.familyProperties?.blockMitigation ?? combatAmount(7, 10) : stats.familyProperties?.parryMitigation ?? combatAmount(3, 5), boss ? 65 : 100, 100);
   const damage = combatInteger(multiplyCombat(net, subtractCombat(1, mitigation).n, subtractCombat(1, mitigation).d));
   const masteryCounterEligible = !boss || combat.counterCooldown === 0;
-  const counter = riposte && (!boss || combat.counterCooldown === 0) ? { damage: family === "shield" ? shieldPacket(stats) : multiplyCombat(stats.attack, stats.familyProperties?.riposte?.n ?? 80, stats.familyProperties?.riposte?.d ?? 100), mechanic: family === "shield" ? "bash" : "riposte" } : null;
-  if (counter && boss) combat.counterCooldown = 60;
-  return { damage, absorbed, prevented: subtractCombat(net, damage), masteryCounterEligible, defense: family === "shield" ? "block" : "parry", counter };
+  return { damage, absorbed, prevented: subtractCombat(net, damage), masteryCounterEligible, defense: family === "shield" ? "block" : "parry", counter: null };
 }
 
 // src/shared/contracts/tome_cast.js
@@ -19407,7 +19394,7 @@ function validateActivityCommandForState(c, s) {
   if (c.kind === "forge.attune") requireContract(canAttune(s, s.playersById[c.playerId], c.payload, manifestForState(s)), "Forge unavailable: approach the Forge and check level and costs");
   if (c.kind === "equipment.equip") {
     const p = s.playersById[c.playerId], item = p.inventory?.itemsById[c.payload.itemId];
-    requireContract(classOffhandAllowed(p, item), `${heroClassOf(p.d8)?.name}s can\u2019t use this offhand`);
+    requireContract(classGearAllowed(p, item), classGearRefusal(p, item));
     requireContract(equipmentLevelAllowed(p, item), `Item requires hero level ${equipmentRequiredLevel(p, item)}`);
   }
   if (c.kind.startsWith("equipment.")) requireContract(equipmentActionAvailable(s, s.playersById[c.playerId], c.kind, c.payload), "Equipment unavailable: release Primary and finish the swing");
@@ -20857,10 +20844,10 @@ function createMasteryAwards(state) {
     const r = (id) => finiteNodeRank(p.d8, id), base = kind === "proc" ? 3 + (r("tome_keystone_triad") ? 15 : 2 + r("tome_empowered_catalysts")) + (r("tome_arcane_syphon") ? 15 : 0) : 1;
     return award(p, kind === "proc" ? "tome" : "dagger", kind, source3.entityId, action2.sourceSequence, triggerScaledMasteryXp(String(base), d), d);
   }
-  function activation(source3, target, family, kind, sequence, base, scaled = true) {
+  function activation(source3, target, family, kind, sequence, base, scaled2 = true) {
     const d = depth(target);
     if (!d) return;
-    return award(players.get(source3.entityId), family, kind, source3.entityId, sequence, scaled ? triggerScaledMasteryXp(String(base), d) : base, d);
+    return award(players.get(source3.entityId), family, kind, source3.entityId, sequence, scaled2 ? triggerScaledMasteryXp(String(base), d) : base, d);
   }
   function defensiveActivation(target, source3, family, kind, sequence, base) {
     const d = depth(source3);
@@ -21064,8 +21051,8 @@ function createActivityProgression(state, manifest, measure) {
     });
   }
   function equipmentChanged(player) {
-    const actor = state.entitiesById[player.entityId], resolved = resolvePlayerStats(player);
-    actor.hp = state.subweaponCombat ? combatInteger(minCombat(actor.hp, resolved.maxHp)) : structuredClone(combatIntegerWire(Math.min(boundedCombatInteger(actor.hp), resolved.maxHp)));
+    const actor = state.entitiesById[player.entityId], resolved = resolvePlayerStats(player), full = actor.alive && compareCombat(actor.hp, actor.maxHp) >= 0;
+    actor.hp = state.subweaponCombat ? combatInteger(full ? resolved.maxHp : minCombat(actor.hp, resolved.maxHp)) : structuredClone(combatIntegerWire(Math.min(boundedCombatInteger(actor.hp), resolved.maxHp)));
     actor.maxHp = structuredClone(wire2(resolved.maxHp));
     actor.attackDamage = structuredClone(wire2(resolved.attack));
     actor.moveSpeed = resolved.moveSpeed;
@@ -22005,23 +21992,157 @@ function createActivityScheduler(state, options = {}, { beforeSleep = () => true
   }) };
 }
 
-// src/simulation/tome_targeting.js
-function selectTomeTarget(source3, candidates, collision, eligible2) {
-  return candidates.filter((t) => t.kind === "actor" && t.alive && t.team === "hostile" && t.residency.spaceInstanceId === source3.residency.spaceInstanceId && eligible2(source3, t) && clearHullGap(source3, t) <= 128 && subweaponLineClear(collision, source3, t)).sort((a, b) => Math.hypot(a.position.x - source3.position.x, a.position.y - source3.position.y) - Math.hypot(b.position.x - source3.position.x, b.position.y - source3.position.y) || a.entityId.localeCompare(b.entityId))[0] ?? null;
+// src/shared/content/item_looks_v1.js
+var BY_DEFINITION = Object.freeze({
+  "worn-sword": "sword",
+  "iron-sword": "sword",
+  "guard-sword": "sword",
+  "runic-sword": "sword",
+  "padded-armor": "doublet",
+  "chain-armor": "hauberk",
+  "plate-armor": "plate",
+  coif: "coif",
+  greaves: "greaves",
+  sabatons: "sabatons",
+  "full-plate": "plate",
+  "starter-shield": "kite",
+  "starter-dagger": "kris",
+  "kit-knight-longsword": "sword",
+  "kit-knight-coif": "coif",
+  "kit-knight-hauberk": "hauberk",
+  "kit-knight-gauntlets": "gauntlets",
+  "kit-knight-treads": "boots",
+  "kit-rogue-saber": "saber",
+  "kit-rogue-bandana": "bandana",
+  "kit-rogue-doublet": "doublet",
+  "kit-rogue-gloves": "gloves",
+  "kit-rogue-boots": "boots",
+  "kit-mage-staff": "staff",
+  "kit-mage-cowl": "cowl",
+  "kit-mage-robe": "apprentice-robe",
+  "kit-mage-wraps": "wraps",
+  "kit-mage-slippers": "apprentice-slippers"
+});
+var BY_NOUN = Object.freeze({
+  Greatsword: "greatsword",
+  Longsword: "sword",
+  Halberd: "halberd",
+  Warhammer: "warhammer",
+  Battleaxe: "axe",
+  Broadsword: "sword",
+  "Flanged Mace": "mace",
+  Claymore: "greatsword",
+  "Kite Shield": "kite",
+  "Tower Shield": "tower",
+  Buckler: "buckler",
+  Aegis: "kite",
+  "Heater Shield": "kite",
+  Kris: "kris",
+  Stiletto: "stiletto",
+  Baselard: "dagger",
+  Dirk: "dagger",
+  "Main-Gauche": "main-gauche",
+  Greathelm: "helm",
+  Armet: "helm",
+  Visor: "helm",
+  Hauberk: "hauberk",
+  "Chain Mail": "hauberk",
+  Cuirass: "plate",
+  Brigandine: "leather",
+  "Plate Mail": "plate",
+  Doublet: "doublet",
+  Greaves: "greaves",
+  Legplates: "greaves",
+  Chausses: "chausses",
+  Cuisses: "greaves",
+  Sabatons: "sabatons",
+  Sollerets: "sabatons",
+  "Steel Boots": "sabatons",
+  Treads: "boots",
+  Exosuit: "plate",
+  "Inquisitor Robes": "robe",
+  "Full Plate Armor": "plate",
+  Trenchcoat: "leather",
+  // Class gear (class_gear_v1.js).
+  Rapier: "rapier",
+  Saber: "saber",
+  Scimitar: "scimitar",
+  Wand: "wand",
+  Scepter: "scepter",
+  Staff: "staff",
+  "Chain Coif": "coif",
+  "Chain Gloves": "gauntlets",
+  "Chain Boots": "boots",
+  "Great Helm": "helm",
+  "Plate Armor": "plate",
+  Gauntlets: "gauntlets",
+  "Plate Boots": "sabatons",
+  Bandana: "bandana",
+  "Leather Armor": "doublet",
+  "Leather Gloves": "gloves",
+  "Leather Boots": "boots",
+  Hood: "hood",
+  "Studded Armor": "leather",
+  "Studded Gloves": "gloves",
+  "Studded Boots": "tall",
+  Cowl: "cowl",
+  "Cloth Robe": "apprentice-robe",
+  "Cloth Wraps": "wraps",
+  "Cloth Slippers": "apprentice-slippers",
+  "Wizard Hat": "hat",
+  "Silk Robe": "robe",
+  "Silk Wraps": "wraps",
+  "Silk Slippers": "slippers"
+});
+var OVERALL_LEGS = Object.freeze({ plate: "greaves", hauberk: "chausses", doublet: "breeches", leather: "trousers" });
+var TOME_LOOKS = Object.freeze({ fire: "tome-fire", lightning: "tome-storm", frost: "tome-frost" });
+function itemLook(item) {
+  const d = itemDefinition(item);
+  if (!d) return null;
+  if (d.slot === "subweapon" && d.subType === "tome") return TOME_LOOKS[d.spellType ?? "fire"] ?? "tome-prism";
+  return (item.generated ? BY_NOUN[d.noun ?? item.generated.definition?.noun] : BY_DEFINITION[item.definitionId]) ?? null;
+}
+
+// src/simulation/tome_sustain.js
+function settleTomeSustain(player, actor, combat, stats) {
+  if (!player.d8 || !actor.alive || compareCombat(stats.maxBarrier, 0) <= 0) return false;
+  const r = (id) => finiteNodeRank(player.d8, id), syphon = r("tome_arcane_syphon"), resilience = r("tome_resilience");
+  const restore = (requested, overflowHeal) => {
+    const gained = minCombat(requested, subtractCombat(stats.maxBarrier, combat.barrier));
+    combat.barrier = combatInteger(addCombat(combat.barrier, gained));
+    if (overflowHeal) actor.hp = combatInteger(minCombat(stats.maxHp, addCombat(actor.hp, combatInteger(multiplyCombat(subtractCombat(requested, gained), 1, 2)))));
+    if (compareCombat(combat.barrier, stats.maxBarrier) === 0) combat.barrierRechargeRemainder = 0;
+  };
+  if (syphon) {
+    restore(combatInteger(multiplyCombat(stats.maxBarrier, 15 * syphon, 1e3)), true);
+    player.d8.transient.syphonStacks = Math.min(3, player.d8.transient.syphonStacks + 1);
+    player.d8.transient.syphonTicks = 360;
+  }
+  if (resilience) restore(combatInteger(multiplyCombat(stats.maxBarrier, resilience, 100)), false);
+  return syphon > 0;
 }
 
 // src/simulation/class_skills_v1.js
 var CLASS_SKILL_TUNING_V1 = Object.freeze({
   bash: { reach: 48, cone: 0.85, targets: 5, attack: [3, 2], knockback: 22, eliteKnockback: 10, stun: 48, eliteStun: 24 },
-  flurry: { reach: 44, cone: 0.95, targets: 3, attack: [3, 4] },
-  cast: { cone: 1.05, attack: [22, 10] }
+  flurry: { reach: 44, cone: 0.95, targets: 3, attack: [9, 4] },
+  cast: { cone: 1.05, attack: [3, 1] },
+  // What the offhand in hand adds: a Buckler recharges Bash a quarter faster; a Tower Shield stuns
+  // half again as long and shoves harder; a Main-Gauche Flurry readies a parry; a Stiletto's cuts
+  // crit more often; a Kris's cuts always Bleed. Tomes cast their own element.
+  styles: { buckler: { cooldown: [3, 4] }, tower: { stun: [3, 2], knockback: [5, 4] }, "main-gauche": { parry: true }, stiletto: { critBonus: [25, 100] }, kris: { bleed: true } }
 });
+function offhandStyle(player) {
+  const inv = player?.inventory, item = inv?.itemsById[inv.equipped?.subweapon];
+  return T3.styles[item ? itemLook(item) : null] ? itemLook(item) : null;
+}
 var T3 = CLASS_SKILL_TUNING_V1;
+var scaled = (value2, f) => f ? Math.round(value2 * f[0] / f[1]) : value2;
 var unit3 = (v) => {
   const l = Math.hypot(v.x, v.y);
   return l > 1e-9 ? { x: v.x / l, y: v.y / l } : { x: 1, y: 0 };
 };
-function createClassSkills(s, { damage, effects: effects2, periodic, getStats, players, identity: identity2, refreshStats }) {
+function createClassSkills(s, { damage, effects: effects2, periodic, getStats, players, identity: identity2, refreshStats, mastery }) {
   const c = s.subweaponCombat, owner = (a) => players.get(a.entityId), definition2 = (t) => s.content.definitionsById[t.contentDefinitionId] ?? {};
   const bearing = (a, t) => Math.atan2(t.position.y - a.position.y, t.position.x - a.position.x), distance8 = (a, t) => Math.hypot(t.position.x - a.position.x, t.position.y - a.position.y);
   const offAxis = (a, t, heading) => {
@@ -22040,28 +22161,30 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
   }
   const canStun = (a) => Boolean(s.subweaponCombat.mastery?.[a.entityId]);
   function bash(a, stats, aim2, commandId) {
-    const raw = addCombat(multiplyCombat(stats.attack, ...T3.bash.attack), shieldPacket(stats));
+    const raw = addCombat(multiplyCombat(stats.attack, ...T3.bash.attack), shieldPacket(stats)), style = T3.styles[offhandStyle(owner(a))] ?? {};
     for (const t of cone(a, aim2, T3.bash.reach, T3.bash.cone, T3.bash.targets)) {
       damage(a, t, raw, "bash", commandId, { sourceItem: damageSourceItem(owner(a), "bash"), trigger: "skill", masteryArea: true });
       if (!t.alive || isPodCombatTargetV4(t) || definition2(t).isBoss) continue;
       const elite = Boolean(definition2(t).isElite || definition2(t).isMiniboss);
-      knockback(a, t, elite ? T3.bash.eliteKnockback : T3.bash.knockback);
-      if (canStun(a)) effects2.status(a, t, "stun", 1, elite ? T3.bash.eliteStun : T3.bash.stun);
+      knockback(a, t, scaled(elite ? T3.bash.eliteKnockback : T3.bash.knockback, style.knockback));
+      if (canStun(a)) effects2.status(a, t, "stun", 1, scaled(elite ? T3.bash.eliteStun : T3.bash.stun, style.stun));
     }
     return true;
   }
   function cut(a, stats, aim2, commandId) {
-    const combat = c.actors[a.entityId];
+    const combat = c.actors[a.entityId], style = T3.styles[offhandStyle(owner(a))] ?? {};
     for (const t of cone(a, aim2, T3.flurry.reach, T3.flurry.cone, T3.flurry.targets)) {
-      damage(a, t, multiplyCombat(stats.attack, ...T3.flurry.attack), "offhand", commandId, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "skill" });
+      damage(a, t, multiplyCombat(stats.attack, ...T3.flurry.attack), "offhand", commandId, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "skill", ...style.critBonus ? { critBonus: combatAmount(...style.critBonus) } : {} });
       if (!t.alive) continue;
+      mastery?.primary(a, t, "proactive");
       effects2.offhand(a, t, stats);
-      if (t.alive && combatRoll(combat, stats.familyProperties?.bleed ?? combatAmount(15, 100))) periodic(a, t, "bleed", stats.attack, stats);
+      if (t.alive && (style.bleed || combatRoll(combat, stats.familyProperties?.bleed ?? combatAmount(15, 100)))) periodic(a, t, "bleed", stats.attack, stats);
     }
   }
   function flurry(a, stats, aim2, commandId) {
     cut(a, stats, aim2, commandId);
     classSkillsRecord(c.actors[a.entityId]).flurry = { cutsLeft: FLURRY_CUTS - 1, nextTick: s.tick + FLURRY_GAP_TICKS, ...aim2 };
+    if (T3.styles[offhandStyle(owner(a))]?.parry) openParryWindow(c.actors[a.entityId]);
     return true;
   }
   function cast(a, stats, aim2, commandId) {
@@ -22088,6 +22211,11 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       rulesVersion: "combat-integer-v2",
       commandId
     };
+    if (target) mastery?.primary(a, target, "proc");
+    if (player) {
+      settleTomeSustain(player, a, c.actors[a.entityId], stats);
+      refreshStats?.(player);
+    }
     return true;
   }
   const handlers = { shield_bash: bash, flurry, cast };
@@ -22095,7 +22223,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     const stats = getStats(a.entityId), aim2 = unit3(aimInput);
     if (!handlers[skillId]?.(a, stats, aim2, commandId)) return false;
     const record2 = classSkillsRecord(c.actors[a.entityId]);
-    record2.cooldowns[skillId] = CLASS_SKILLS[skillId].cooldownTicks;
+    record2.cooldowns[skillId] = skillId === "shield_bash" ? Math.ceil(scaled(CLASS_SKILLS[skillId].cooldownTicks, T3.styles[offhandStyle(owner(a))]?.cooldown)) : CLASS_SKILLS[skillId].cooldownTicks;
     record2.last = { skillId, tick: s.tick, ...aim2 };
     return true;
   }
@@ -22299,27 +22427,7 @@ function createMasteryEffects(s, { damage, eligible: eligible2, identity: identi
   return { offhand: offhand2, main, mainMultiplier, bash, defended, defeated, step, status: status2, nearby, area };
 }
 
-// src/simulation/tome_sustain.js
-function settleTomeSustain(player, actor, combat, stats) {
-  if (!player.d8 || !actor.alive || compareCombat(stats.maxBarrier, 0) <= 0) return false;
-  const r = (id) => finiteNodeRank(player.d8, id), syphon = r("tome_arcane_syphon"), resilience = r("tome_resilience");
-  const restore = (requested, overflowHeal) => {
-    const gained = minCombat(requested, subtractCombat(stats.maxBarrier, combat.barrier));
-    combat.barrier = combatInteger(addCombat(combat.barrier, gained));
-    if (overflowHeal) actor.hp = combatInteger(minCombat(stats.maxHp, addCombat(actor.hp, combatInteger(multiplyCombat(subtractCombat(requested, gained), 1, 2)))));
-    if (compareCombat(combat.barrier, stats.maxBarrier) === 0) combat.barrierRechargeRemainder = 0;
-  };
-  if (syphon) {
-    restore(combatInteger(multiplyCombat(stats.maxBarrier, 15 * syphon, 1e3)), true);
-    player.d8.transient.syphonStacks = Math.min(3, player.d8.transient.syphonStacks + 1);
-    player.d8.transient.syphonTicks = 360;
-  }
-  if (resilience) restore(combatInteger(multiplyCombat(stats.maxBarrier, resilience, 100)), false);
-  return syphon > 0;
-}
-
 // src/simulation/subweapon_simulation.js
-var FIRE_TOME_PROC_CHANCE = Object.freeze(combatAmount(1, 3));
 function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: identity2, getStats, mastery, refreshStats }) {
   const c = s.subweaponCombat, players = new Map(Object.values(s.playersById).map((p) => [p.entityId, p]));
   const stats = (id) => getStats ? getStats(id) : resolvePlayerStats(players.get(id));
@@ -22343,61 +22451,13 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
     };
   }
   const suppressed = (id) => subweaponSuppressedD12_4I(s, id);
-  const skills = createClassSkills(s, { damage, effects: effects2, periodic, getStats: stats, players, identity: identity2, refreshStats });
-  const heroClass = (a) => players.get(a.entityId)?.d8?.heroClass, swing = (a) => s.primary.actorsById[a.entityId]?.current?.sourceSequence ?? null;
-  function successful(source3, target, captured) {
-    const cls = heroClass(source3), outcome = successfulSubweaponHit({
-      combat: c.actors[source3.entityId],
-      stats: captured,
-      target,
-      knight: cls === "knight",
-      rhythm: cls === "rogue" ? swing(source3) : null,
-      damage: (raw, kind) => damage(source3, target, raw, kind, null, { sourceItem: damageSourceItem(players.get(source3.entityId), kind), trigger: kind === "bash" ? "pressure" : null }),
-      bleed: (attack) => periodic(source3, target, "bleed", attack, captured),
-      offhand: () => effects2.offhand(source3, target, captured)
-    });
-    if (outcome.proactive) mastery?.primary(source3, target, "proactive");
-  }
+  const skills = createClassSkills(s, { damage, effects: effects2, periodic, getStats: stats, players, identity: identity2, refreshStats, mastery });
   function hit(source3, target, captured, commandId = s.primary.actorsById[source3.entityId].current?.commandId ?? null) {
     const result = damage(source3, target, captured.attack, "main", commandId);
-    if (!suppressed(source3.entityId)) {
-      effects2.main(source3, target, result?.critical === true);
-      successful(source3, target, captured);
-    }
+    if (!suppressed(source3.entityId)) effects2.main(source3, target, result?.critical === true);
   }
   function main(source3, target) {
     hit(source3, target, stats(source3.entityId));
-  }
-  function proc(source3, target) {
-    if (suppressed(source3.entityId)) return false;
-    const captured = stats(source3.entityId), chance = captured.familyProperties?.tomeChance ?? captured.familyProperties?.fireChance ?? FIRE_TOME_PROC_CHANCE, beat = heroClass(source3) === "mage" ? swing(source3) : null;
-    if (captured.subType !== "tome" || !(beat === null ? combatRoll(c.actors[source3.entityId], chance) : rhythmFires(beat, chance))) return false;
-    const dx = target.position.x - source3.position.x, dy = target.position.y - source3.position.y, d = Math.hypot(dx, dy);
-    if (!d) return false;
-    const owner = players.get(source3.entityId), recipe = owner.d8 ? captureTomeRecipe(owner, effects2.area(source3), captured) : null, anchor = recipe ? commitTomeAnchor(owner, recipe) : captured.spellType ?? "fire";
-    mastery?.primary(source3, target, "proc");
-    settleTomeSustain(owner, source3, c.actors[source3.entityId], captured);
-    refreshStats?.(owner);
-    const id = identity2("act");
-    c.actors[source3.entityId].delivery = { status: "launched", tick: s.tick };
-    c.projectiles[id] = {
-      id,
-      intendedTargetId: target.entityId,
-      sourceId: source3.entityId,
-      spaceInstanceId: source3.residency.spaceInstanceId,
-      residencyRevision: source3.residency.residencyRevision,
-      position: { ...source3.position },
-      direction: { x: dx / d, y: dy / d },
-      remaining: 128 + source3.hullRadius,
-      frames: 20,
-      delivery: anchor,
-      ...recipe ? { tomeRecipe: recipe } : { firePower: copyWire(captured.familyProperties?.tomePower ?? captured.familyProperties?.firePower ?? combatAmount(18, 10)) },
-      sourceItem: damageSourceItem(players.get(source3.entityId), captured.spellType ?? "fire"),
-      attack: copyWire(captured.attack),
-      rulesVersion: "combat-integer-v2",
-      commandId: s.primary.actorsById[source3.entityId].current?.commandId ?? null
-    };
-    return true;
   }
   function elementImpact(source3, target, b, element = b.delivery ?? "fire") {
     const coefficient = b.tomeRecipe ? capturedTomePower(b.tomeRecipe) : b.firePower ?? combatAmount(18, 10), raw = multiplyCombat(b.attack, coefficient.n, coefficient.d), overload = b.tomeRecipe?.overload ?? 0, A = b.tomeRecipe?.areaScale ?? 1, origin = { position: { ...target.position }, hullRadius: target.hullRadius };
@@ -22491,7 +22551,7 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
     combat.dash.frames = 0;
     combat.dash.remaining = 0;
   }
-  return { main, proc, step, effects: effects2, enforceSuppression, skill: (source3, skillId, aim2, commandId) => skills.use(source3, skillId, aim2, commandId), reconcile: (id) => {
+  return { main, step, effects: effects2, enforceSuppression, skill: (source3, skillId, aim2, commandId) => skills.use(source3, skillId, aim2, commandId), reconcile: (id) => {
     synchronizeTomeRotation(players.get(id));
     reconcileSubweapon(s.entitiesById[id], c.actors[id], stats(id));
   } };
@@ -25302,7 +25362,7 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
         if (state.d9World) pendingForcedTransient = transient;
         else transient.retaliatoryReady = false;
       }
-      const packet = criticalDamagePacket(roll6, progression.resolvedStats(source3.entityId), raw, mechanic, forced);
+      const resolved = progression.resolvedStats(source3.entityId), packet = criticalDamagePacket(roll6, attribution?.critBonus ? { ...resolved, critChance: addCombat(resolved.critChance, attribution.critBonus) } : resolved, raw, mechanic, forced);
       if (state.d9World) pendingPlayerRng = roll6.rng;
       raw = packet.damage;
       critical = packet.critical;
@@ -25666,7 +25726,6 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
       for (const p of Object.values(state.playersById)) settleGuard(state.subweaponCombat.actors[p.entityId].guard, state.primary.actorsById[p.entityId]);
       for (const id of pendingPrimaryHits(state)) {
         const a = state.entitiesById[id], action2 = state.primary.actorsById[id].current;
-        const tome2 = progression.resolvedStats(id).subType === "tome";
         const cleave = wildernessCleaveTuning(state, action2.comboStep), forwardMinimum = cleave?.forwardDotMinimum ?? primaryProfile(state, id).forwardDotMinimum;
         const targetLimit = cleave?.maxTargets ?? (hasWorldCombat(state) ? [4, 6, 8][action2.comboStep - 1] : 1);
         const targets = measure("targetQuery", () => selectForwardActors(a, query(a, 400).filter((t) => !isPodCombatTargetV4(t)), action2.aim, forwardMinimum, (source3, target) => canActivityTargetActor(state, manifest, source3, target) && clearHullGap(source3, target) <= (hasWorldCombat(state) ? a.attackReach : 20) && meleeLineClear(state.spacesByInstanceId[source3.residency.spaceInstanceId].collision, source3, target), targetLimit));
@@ -25686,10 +25745,6 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
               if (target) family.main(a, target);
             } else useEconomicResource(state, manifest, p, { groupId: r.groupId, episode: r.episode, ordinal: r.ordinal }, progression.prepareResource);
           }
-        }
-        if (tome2) {
-          const target = selectTomeTarget(a, query(a, 400), state.spacesByInstanceId[a.residency.spaceInstanceId].collision, (source3, target2) => canActivityTargetActor(state, manifest, source3, target2));
-          if (target) family.proc(a, target);
         }
       }
       for (const [id, targetId] of phaseImpacts) {
@@ -26422,87 +26477,6 @@ function statScale(v, n, d = 1) {
 function statText(v, detail = false) {
   const text2 = String(statValue(v)), negative = text2[0] === "-";
   return (negative ? "-" : "") + formatLarge(negative ? text2.slice(1) : text2, { significant: detail ? 6 : 4 });
-}
-
-// src/shared/content/item_looks_v1.js
-var BY_DEFINITION = Object.freeze({
-  "worn-sword": "sword",
-  "iron-sword": "sword",
-  "guard-sword": "sword",
-  "runic-sword": "sword",
-  "padded-armor": "doublet",
-  "chain-armor": "hauberk",
-  "plate-armor": "plate",
-  coif: "coif",
-  greaves: "greaves",
-  sabatons: "sabatons",
-  "full-plate": "plate",
-  "starter-shield": "kite",
-  "starter-dagger": "kris",
-  "kit-knight-longsword": "sword",
-  "kit-knight-coif": "coif",
-  "kit-knight-hauberk": "hauberk",
-  "kit-knight-gauntlets": "gauntlets",
-  "kit-knight-treads": "boots",
-  "kit-rogue-saber": "saber",
-  "kit-rogue-bandana": "bandana",
-  "kit-rogue-doublet": "doublet",
-  "kit-rogue-gloves": "gloves",
-  "kit-rogue-boots": "boots",
-  "kit-mage-staff": "staff",
-  "kit-mage-cowl": "cowl",
-  "kit-mage-robe": "apprentice-robe",
-  "kit-mage-wraps": "wraps",
-  "kit-mage-slippers": "apprentice-slippers"
-});
-var BY_NOUN = Object.freeze({
-  Greatsword: "greatsword",
-  Longsword: "sword",
-  Halberd: "halberd",
-  Warhammer: "warhammer",
-  Battleaxe: "axe",
-  Broadsword: "sword",
-  "Flanged Mace": "mace",
-  Claymore: "greatsword",
-  "Kite Shield": "kite",
-  "Tower Shield": "tower",
-  Buckler: "buckler",
-  Aegis: "kite",
-  "Heater Shield": "kite",
-  Kris: "kris",
-  Stiletto: "stiletto",
-  Baselard: "dagger",
-  Dirk: "dagger",
-  "Main-Gauche": "main-gauche",
-  Greathelm: "helm",
-  Armet: "helm",
-  Visor: "helm",
-  Hauberk: "hauberk",
-  "Chain Mail": "hauberk",
-  Cuirass: "plate",
-  Brigandine: "leather",
-  "Plate Mail": "plate",
-  Doublet: "doublet",
-  Greaves: "greaves",
-  Legplates: "greaves",
-  Chausses: "chausses",
-  Cuisses: "greaves",
-  Sabatons: "sabatons",
-  Sollerets: "sabatons",
-  "Steel Boots": "sabatons",
-  Treads: "boots",
-  Exosuit: "plate",
-  "Inquisitor Robes": "robe",
-  "Full Plate Armor": "plate",
-  Trenchcoat: "leather"
-});
-var OVERALL_LEGS = Object.freeze({ plate: "greaves", hauberk: "chausses", doublet: "breeches", leather: "trousers" });
-var TOME_LOOKS = Object.freeze({ fire: "tome-fire", lightning: "tome-storm", frost: "tome-frost" });
-function itemLook(item) {
-  const d = itemDefinition(item);
-  if (!d) return null;
-  if (d.slot === "subweapon" && d.subType === "tome") return TOME_LOOKS[d.spellType ?? "fire"] ?? "tome-prism";
-  return (item.generated ? BY_NOUN[d.noun ?? item.generated.definition?.noun] : BY_DEFINITION[item.definitionId]) ?? null;
 }
 
 // src/shared/contracts/hero_look_view.js
@@ -28045,26 +28019,8 @@ var WHEEL_PAGE = 4;
 var PAGE_ANGLES = [[172, 207, 242, 277], [325, 360, 395, 430]];
 var TURN = -153;
 var SPACING = 35;
-var ELEMENT_COLORS = { fire: "#ff9a4a", lightning: "#c7a8ff", frost: "#8fd8ff" };
 var MOVE_NAMES = { shield: "Guard", dagger: "Dash", tome: "Blink" };
 var TIP_KEY = "saq-skill-wheel-arrange-tip-v1";
-function nextTomeElementV1(player) {
-  const spell = player?.stats?.spellType;
-  if (!spell) return null;
-  let elements;
-  try {
-    elements = tomeElements(spell);
-  } catch {
-    return null;
-  }
-  const t = player.d8?.transient, equipped = player.inventory?.equipped?.subweapon, cursor = t && t.rotationItemId === equipped ? t.rotationCursor ?? 0 : 0;
-  return elements[cursor % elements.length];
-}
-function swingsUntilBoltV1(nextSequence, chance) {
-  if (!Number.isSafeInteger(nextSequence) || !chance) return null;
-  for (let k = 0; k < 64; k++) if (rhythmFires(nextSequence + k, chance)) return k + 1;
-  return null;
-}
 function wheelEntriesV1(player) {
   if (heroClassOf(player?.d8)) return skillLoadout(player.d8);
   return Array.from({ length: WHEEL_SLOTS }, (_, i) => i === 0 ? MOVE_SLOT : i === 1 ? "pick" : null);
@@ -28080,18 +28036,17 @@ function createSkillWheelV1({ document, environment, readModel, adapter, isBlock
     if (cls) e.className = cls;
     return e;
   };
-  const wheel = el("div", "skill-wheel-v1"), ring4 = el("div", "skill-wheel-ring"), spin = el("button", "skill-wheel-spin"), beat = el("div", "skill-wheel-beat"), done = el("button", "skill-wheel-done");
+  const wheel = el("div", "skill-wheel-v1"), ring4 = el("div", "skill-wheel-ring"), spin = el("button", "skill-wheel-spin"), done = el("button", "skill-wheel-done");
   wheel.dataset.gameplayHud = "";
   wheel.setAttribute("aria-label", "Skills");
   spin.type = done.type = "button";
   spin.dataset.gameplayHud = done.dataset.gameplayHud = "";
   spin.innerHTML = SKILL_ICONS_V1.spin + "<i></i><i></i>";
   spin.setAttribute("aria-label", "Turn the skill wheel (Q). Hold to arrange it.");
-  beat.setAttribute("aria-hidden", "true");
   done.innerHTML = '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 25l8 8 16-18" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Done</span>';
   done.setAttribute("aria-label", "Finish arranging the skill wheel");
   done.hidden = true;
-  wheel.append(ring4, beat, spin);
+  wheel.append(ring4, spin);
   document.getElementById("world-bag").parentElement.append(wheel, done);
   const slots = [];
   for (let i = 0; i < WHEEL_SLOTS; i++) {
@@ -28307,33 +28262,8 @@ function createSkillWheelV1({ document, environment, readModel, adapter, isBlock
     document.body.style.setProperty("--wheel-slot", g.slot + "px");
     ring4.style.cssText = `left:${(g.cx - band).toFixed(1)}px;top:${(g.cy - band).toFixed(1)}px;width:${(band * 2).toFixed(1)}px;height:${(band * 2).toFixed(1)}px;--hole:${hole.toFixed(1)}px;clip-path:path(evenodd,"${circle8(band, band)} ${circle8(hole, band)}")`;
     spin.style.setProperty("--at", css(at3(270, g.hub + 20, 34)));
-    beat.style.setProperty("--at", `translate(${(g.cx - g.hub - 6).toFixed(1)}px,${(g.cy - g.hub - 6).toFixed(1)}px)`);
-    beat.style.setProperty("--size", (g.hub * 2 + 12).toFixed(1) + "px");
     done.style.cssText = `left:${(g.cx - g.hub).toFixed(1)}px;top:${(g.cy - g.hub).toFixed(1)}px;width:${(g.hub * 2).toFixed(1)}px;height:${(g.hub * 2).toFixed(1)}px`;
     document.body.classList.add("skill-arc-v1");
-  }
-  function paintBeat(m, p) {
-    const heroClass = heroClassOf(p?.d8);
-    if (arranging || heroClass?.id !== "mage" || p.stats.subType !== "tome") {
-      beat.hidden = true;
-      return;
-    }
-    const element = nextTomeElementV1(p), chance = p.stats.familyProperties?.tomeChance ?? p.stats.familyProperties?.fireChance ?? { n: "1", d: "3" }, next = m.primary.actorsById[p.entityId]?.nextSourceSequence, left = swingsUntilBoltV1(next, chance), count = Math.max(2, Math.min(4, Math.ceil(Number(chance.d) / Number(chance.n))));
-    beat.hidden = !element || !left;
-    if (beat.hidden) return;
-    const key2 = `${element}/${left}/${count}`;
-    if (beat.dataset.key === key2) return;
-    beat.dataset.key = key2;
-    beat.style.setProperty("--element", ELEMENT_COLORS[element] ?? "#ffd29a");
-    beat.dataset.element = element;
-    beat.replaceChildren(...Array.from({ length: count }, (_, i) => {
-      const pip = el("i");
-      pip.dataset.lit = String(i < count - Math.min(left, count));
-      pip.style.setProperty("--n", String(i));
-      pip.style.setProperty("--count", String(count));
-      return pip;
-    }));
-    beat.setAttribute("title", `Next Tome bolt: ${element}, in ${left} swing${left === 1 ? "" : "s"}`);
   }
   function remember() {
     try {
@@ -28404,7 +28334,6 @@ function createSkillWheelV1({ document, environment, readModel, adapter, isBlock
       s.b.disabled = !arranging && state === "locked";
     });
     spin.dataset.page = String(page + 1);
-    paintBeat(m, p);
     tip(heroClass);
   }
   return Object.freeze({ refresh, turn: setPage, arrange: startArranging, inspect: () => ({ page, turn: turn7, arranging, draft: draft ? [...draft] : null }), destroy() {
@@ -29747,7 +29676,14 @@ var CLASS_KIT_ART = { "kit-knight-longsword": { "svg": '<svg xmlns="http://www.w
 
 // src/client/equipment_art.js
 var definitions2 = { "worn-sword": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="wp_hilt_worn-sword" x1="0" y1="0" x2="1" y2="0"> <stop offset="0%" stop-color="#8d5b38"/> <stop offset="45%" stop-color="#5c3a21"/> <stop offset="45%" stop-color="#2d1d0b"/> <stop offset="100%" stop-color="#1c0f07"/> </linearGradient> </defs> <defs> <linearGradient id="grad_weap_worn-sword" x1="0" y1="0" x2="1" y2="0"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="35%" stop-color="#ffffff"/> <stop offset="35%" stop-color="#95a5a6"/> <stop offset="65%" stop-color="#95a5a6"/> <stop offset="65%" stop-color="#2a3240"/> <stop offset="100%" stop-color="#121820"/> </linearGradient> </defs> <path d="M16 3 L19 8 L18 21 L14 21 L13 8 Z" fill="url(#grad_weap_worn-sword)" stroke="#000" stroke-width="1.8" /> <rect x="11" y="21" width="10" height="2.5" rx="0.5" fill="#f1c40f" stroke="#000" stroke-width="1.2" /> <rect x="14.5" y="23.5" width="3" height="5" fill="url(#wp_hilt_worn-sword)" stroke="#000" stroke-width="1" /> <circle cx="16" cy="29.5" r="1.5" fill="#f1c40f" stroke="#000" stroke-width="1" /></svg>', "color": "#95a5a6", "source": "weapon" }, "iron-sword": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="ls_blade_l_iron-sword" x1="0" y1="0" x2="1" y2="0"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="60%" stop-color="#cbd5e1"/> <stop offset="100%" stop-color="#94a3b8"/> </linearGradient> <linearGradient id="ls_blade_s_iron-sword" x1="0" y1="0" x2="1" y2="0"> <stop offset="0%" stop-color="#64748b"/> <stop offset="100%" stop-color="#475569"/> </linearGradient> <linearGradient id="ls_hilt_iron-sword" x1="0" y1="0" x2="1" y2="0"> <stop offset="0%" stop-color="#4a5568"/> <stop offset="35%" stop-color="#4a5568"/> <stop offset="35%" stop-color="#2d3748"/> <stop offset="70%" stop-color="#2d3748"/> <stop offset="70%" stop-color="#1a202c"/> <stop offset="100%" stop-color="#0f141d"/> </linearGradient> </defs> <path d="M16 2 L14.5 4 L14.5 21 L16 21 Z" fill="url(#ls_blade_s_iron-sword)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" /> <path d="M16 2 L17.5 4 L17.5 21 L16 21 Z" fill="url(#ls_blade_l_iron-sword)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" /> <polygon points="16,2 17.0,4 16.8,19 16,19" fill="rgba(255,255,255,0.4)" /> <path d="M9.5 20.5 Q16 18.5 22.5 20.5 L21.5 22.5 Q16 21.0 10.5 22.5 Z" fill="#94a3b8" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" /> <rect x="14.5" y="22.5" width="3" height="7.5" fill="url(#ls_hilt_iron-sword)" stroke="#05070a" stroke-width="1.2" /> <line x1="14.5" y1="24.5" x2="17.5" y2="24.5" stroke="#05070a" stroke-width="0.8" /> <line x1="14.5" y1="26.5" x2="17.5" y2="26.5" stroke="#05070a" stroke-width="0.8" /> <line x1="14.5" y1="28.5" x2="17.5" y2="28.5" stroke="#05070a" stroke-width="0.8" /> <polygon points="16,29.5 18.2,31 16,32.5 13.8,31" fill="#94a3b8" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" /> <circle cx="16" cy="31" r="0.8" fill="#ffffff" /></svg>', "color": "#94a3b8", "source": "longsword" }, "guard-sword": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="bs_blade_l_guard-sword" x1="0" y1="0" x2="1" y2="0"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="100%" stop-color="#bdc3c7"/> </linearGradient> <linearGradient id="bs_blade_s_guard-sword" x1="0" y1="0" x2="1" y2="0"> <stop offset="0%" stop-color="#95a5a6"/> <stop offset="100%" stop-color="#7f8c8d"/> </linearGradient> <linearGradient id="bs_hilt_guard-sword" x1="0" y1="0" x2="1" y2="0"> <stop offset="0%" stop-color="#785c4d"/> <stop offset="35%" stop-color="#785c4d"/> <stop offset="35%" stop-color="#4e3629"/> <stop offset="70%" stop-color="#4e3629"/> <stop offset="70%" stop-color="#2b1a11"/> <stop offset="100%" stop-color="#180e0a"/> </linearGradient> </defs> <path d="M11 20 L21 20 L19 23 L13 23 Z" fill="#d4af37" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <path d="M16 2 L13 3 L14 20 L16 20 Z" fill="url(#bs_blade_s_guard-sword)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <path d="M16 2 L19 3 L18 20 L16 20 Z" fill="url(#bs_blade_l_guard-sword)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <polygon points="16,2 17.5,3.2 16.8,18 16,18" fill="rgba(255,255,255,0.45)" /> <path d="M9 20h14v2.5H9z" fill="#d4af37" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <rect x="14" y="22.5" width="4" height="6" fill="url(#bs_hilt_guard-sword)" stroke="#05070a" stroke-width="1.5" /> <line x1="14" y1="24" x2="18" y2="24" stroke="#05070a" stroke-width="1" /> <line x1="14" y1="26" x2="18" y2="26" stroke="#05070a" stroke-width="1" /> <line x1="14" y1="28" x2="18" y2="28" stroke="#05070a" stroke-width="1" /> <circle cx="16" cy="29.5" r="2.2" fill="#d4af37" stroke="#05070a" stroke-width="1.8" /> <circle cx="15.2" cy="28.7" r="0.6" fill="#ffffff" /></svg>', "color": "#d4af37", "source": "broadsword" }, "runic-sword": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="cm_blade_l_runic-sword" x1="0" y1="0" x2="1" y2="0"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="40%" stop-color="#e2e8f0"/> <stop offset="100%" stop-color="#94a3b8"/> </linearGradient> <linearGradient id="cm_blade_s_runic-sword" x1="0" y1="0" x2="1" y2="0"> <stop offset="0%" stop-color="#64748b"/> <stop offset="100%" stop-color="#475569"/> </linearGradient> <linearGradient id="cm_hilt_runic-sword" x1="0" y1="0" x2="1" y2="0"> <stop offset="0%" stop-color="#8d5b38"/> <stop offset="35%" stop-color="#8d5b38"/> <stop offset="35%" stop-color="#5c3a21"/> <stop offset="70%" stop-color="#5c3a21"/> <stop offset="70%" stop-color="#3d1d0b"/> <stop offset="100%" stop-color="#221004"/> </linearGradient> </defs> <path d="M16 2 L13.5 3.5 L14 19 L16 19 Z" fill="url(#cm_blade_s_runic-sword)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <path d="M16 2 L18.5 3.5 L18 19 L16 19 Z" fill="url(#cm_blade_l_runic-sword)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <polygon points="16,2 18.0,3.5 17.2,18 16,18" fill="rgba(255,255,255,0.4)" /> <path d="M16 19 L8.5 22.8 L9.2 24.6 L16 21.2 Z" fill="#a855f7" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <circle cx="7.8" cy="23.4" r="1.8" fill="#a855f7" stroke="#05070a" stroke-width="1.5" /> <path d="M16 19 L23.5 22.8 L22.8 24.6 L16 21.2 Z" fill="#a855f7" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <circle cx="24.2" cy="23.4" r="1.8" fill="#a855f7" stroke="#05070a" stroke-width="1.5" /> <path d="M11.5 19h9v2.5h-9z" fill="#a855f7" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <rect x="14.2" y="21.5" width="3.6" height="6.5" fill="url(#cm_hilt_runic-sword)" stroke="#05070a" stroke-width="1.5" /> <line x1="14.2" y1="23.2" x2="17.8" y2="23.2" stroke="#05070a" stroke-width="1" /> <line x1="14.2" y1="25.0" x2="17.8" y2="25.0" stroke="#05070a" stroke-width="1" /> <line x1="14.2" y1="26.8" x2="17.8" y2="26.8" stroke="#05070a" stroke-width="1" /> <circle cx="16" cy="29.8" r="2.8" fill="#55555d" stroke="#05070a" stroke-width="1.8" /> <circle cx="16" cy="29.8" r="1.5" fill="#a855f7" stroke="#05070a" stroke-width="1.2" /> <circle cx="15.4" cy="29.2" r="0.5" fill="#ffffff" /></svg>', "color": "#a855f7", "source": "claymore" }, "padded-armor": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="db_fabric_l_padded-armor" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="40%" stop-color="#8c6d3b"/> <stop offset="100%" stop-color="#1e1b4b"/> </linearGradient> <linearGradient id="db_fabric_d_padded-armor" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#8c6d3b"/> <stop offset="100%" stop-color="#0f0f23"/> </linearGradient> <linearGradient id="db_gold_padded-armor" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffeaa7"/> <stop offset="50%" stop-color="#d4af37"/> <stop offset="100%" stop-color="#8a6d1c"/> </linearGradient> </defs> <path d="M4 11 C4 6, 11 7, 11 13 L8 16 Z" fill="url(#db_fabric_d_padded-armor)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" /> <path d="M4 11 Q8 9, 10 13" fill="none" stroke="url(#db_gold_padded-armor)" stroke-width="1.2" /> <path d="M28 11 C28 6, 21 7, 21 13 L24 16 Z" fill="url(#db_fabric_l_padded-armor)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" /> <path d="M28 11 Q24 9, 22 13" fill="none" stroke="url(#db_gold_padded-armor)" stroke-width="1.2" /> <path d="M16 6 L9 8 L8 21 L16 26 Z" fill="url(#db_fabric_d_padded-armor)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <path d="M16 6 L23 8 L24 21 L16 26 Z" fill="url(#db_fabric_l_padded-armor)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <polygon points="12,6 16,13 20,6" fill="#f8fafc" stroke="#05070a" stroke-width="1" /> <path d="M12 6 L16 13 L20 6" fill="none" stroke="url(#db_gold_padded-armor)" stroke-width="1.2" /> <line x1="16" y1="13" x2="16" y2="26" stroke="#05070a" stroke-width="1" opacity="0.5" /> <circle cx="16" cy="15.5" r="1.2" fill="url(#db_gold_padded-armor)" stroke="#05070a" stroke-width="0.5" /> <circle cx="15.7" cy="15.2" r="0.3" fill="#ffffff" /> <circle cx="16" cy="18.5" r="1.2" fill="url(#db_gold_padded-armor)" stroke="#05070a" stroke-width="0.5" /> <circle cx="15.7" cy="18.2" r="0.3" fill="#ffffff" /> <circle cx="16" cy="21.5" r="1.2" fill="url(#db_gold_padded-armor)" stroke="#05070a" stroke-width="0.5" /> <circle cx="15.7" cy="21.2" r="0.3" fill="#ffffff" /> <circle cx="16" cy="12" r="2.2" fill="url(#db_gold_padded-armor)" stroke="#05070a" stroke-width="0.8" /> <circle cx="16" cy="12" r="1.2" fill="#8c6d3b" stroke="#05070a" stroke-width="0.5" /> <circle cx="15.7" cy="11.7" r="0.4" fill="#ffffff" /> <path d="M8 21 Q16 24, 24 21 L23 23 Q16 25, 9 23 Z" fill="url(#db_gold_padded-armor)" stroke="#05070a" stroke-width="1" /></svg>', "color": "#8c6d3b", "source": "doublet" }, "chain-armor": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="hb_mail_l_chain-armor" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="50%" stop-color="#cbd5e1"/> <stop offset="100%" stop-color="#64748b"/> </linearGradient> <linearGradient id="hb_mail_d_chain-armor" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#475569"/> <stop offset="100%" stop-color="#1e293b"/> </linearGradient> <linearGradient id="hb_leather_chain-armor" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#8d5b38"/> <stop offset="35%" stop-color="#8d5b38"/> <stop offset="35%" stop-color="#5c3a21"/> <stop offset="70%" stop-color="#5c3a21"/> <stop offset="70%" stop-color="#2d1d0b"/> <stop offset="100%" stop-color="#1c0f07"/> </linearGradient> <linearGradient id="hb_brass_chain-armor" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffeaa7"/> <stop offset="50%" stop-color="#d4af37"/> <stop offset="100%" stop-color="#8a6d1c"/> </linearGradient> </defs> <path d="M5 9 L10 6 L10 24 L7 28 Z" fill="url(#hb_leather_chain-armor)" stroke="#05070a" stroke-width="1.5" /> <path d="M27 9 L22 6 L22 24 L25 28 Z" fill="url(#hb_leather_chain-armor)" stroke="#05070a" stroke-width="1.5" /> <path d="M16 6 L8 8 L7 22 L16 27 Z" fill="url(#hb_mail_d_chain-armor)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <path d="M16 6 L24 8 L25 22 L16 27 Z" fill="url(#hb_mail_l_chain-armor)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <path d="M9 11 H23 M8 14 H24 M8 17 H24 M8 20 H24 M9 23 H23" fill="none" stroke="#05070a" stroke-width="1" stroke-dasharray="2 1.5" opacity="0.65" /> <path d="M10 6 H22 V10 C22 12, 10 12, 10 10 Z" fill="url(#hb_leather_chain-armor)" stroke="#05070a" stroke-width="1.5" /> <path d="M10 6 H22 V8 H10 Z" fill="url(#hb_brass_chain-armor)" stroke="#05070a" stroke-width="0.8" /> <path d="M14 8 H18 V22 H14 Z" fill="url(#hb_leather_chain-armor)" stroke="#05070a" stroke-width="1" /> <circle cx="16" cy="12" r="2.2" fill="url(#hb_brass_chain-armor)" stroke="#05070a" stroke-width="0.8" /> <circle cx="16" cy="12" r="1.2" fill="#94a3b8" stroke="#05070a" stroke-width="0.5" /> <circle cx="15.7" cy="11.7" r="0.4" fill="#ffffff" /> <rect x="7" y="20" width="18" height="3" fill="url(#hb_leather_chain-armor)" stroke="#05070a" stroke-width="1" /> <rect x="14" y="19" width="4" height="5" rx="0.8" fill="url(#hb_brass_chain-armor)" stroke="#05070a" stroke-width="1" /> <rect x="15" y="20" width="2" height="3" fill="#05070a" /></svg>', "color": "#94a3b8", "source": "hauberk" }, "plate-armor": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="pm_steel_l_plate-armor" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="50%" stop-color="#cbd5e1"/> <stop offset="100%" stop-color="#64748b"/> </linearGradient> <linearGradient id="pm_steel_d_plate-armor" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#475569"/> <stop offset="100%" stop-color="#1e293b"/> </linearGradient> <linearGradient id="pm_leather_plate-armor" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#8d5b38"/> <stop offset="35%" stop-color="#8d5b38"/> <stop offset="35%" stop-color="#5c3a21"/> <stop offset="70%" stop-color="#5c3a21"/> <stop offset="70%" stop-color="#2d1d0b"/> <stop offset="100%" stop-color="#1c0f07"/> </linearGradient> <linearGradient id="pm_brass_plate-armor" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffeaa7"/> <stop offset="50%" stop-color="#d4af37"/> <stop offset="100%" stop-color="#8a6d1c"/> </linearGradient> </defs> <path d="M4 11 C4 6, 11 7, 11 13 L8 16 Z" fill="url(#pm_steel_d_plate-armor)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" /> <path d="M3 11 Q8 9, 10 13" fill="none" stroke="url(#pm_brass_plate-armor)" stroke-width="1.2" /> <path d="M28 11 C28 6, 21 7, 21 13 L24 16 Z" fill="url(#pm_steel_l_plate-armor)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" /> <path d="M29 11 Q24 9, 22 13" fill="none" stroke="url(#pm_brass_plate-armor)" stroke-width="1.2" /> <path d="M16 6 L9 8 L8.2 12 L16 12 Z" fill="url(#pm_steel_d_plate-armor)" stroke="#05070a" stroke-width="1.2" /> <path d="M16 11.5 L8.2 11.5 L8.5 16 L16 16 Z" fill="url(#pm_steel_d_plate-armor)" stroke="#05070a" stroke-width="1.2" /> <path d="M16 15.5 L8.5 15.5 L8.8 20 L16 20 Z" fill="url(#pm_steel_d_plate-armor)" stroke="#05070a" stroke-width="1.2" /> <path d="M16 19.5 L8.8 19.5 L9.5 24 L16 26 Z" fill="url(#pm_steel_d_plate-armor)" stroke="#05070a" stroke-width="1.2" /> <path d="M16 6 L23 8 L23.8 12 L16 12 Z" fill="url(#pm_steel_l_plate-armor)" stroke="#05070a" stroke-width="1.2" /> <path d="M16 11.5 L23.8 11.5 L23.5 16 L16 16 Z" fill="url(#pm_steel_l_plate-armor)" stroke="#05070a" stroke-width="1.2" /> <path d="M16 15.5 L23.5 15.5 L23.2 20 L16 20 Z" fill="url(#pm_steel_l_plate-armor)" stroke="#05070a" stroke-width="1.2" /> <path d="M16 19.5 L23.2 19.5 L22.5 24 L16 26 Z" fill="url(#pm_steel_l_plate-armor)" stroke="#05070a" stroke-width="1.2" /> <rect x="11.5" y="7" width="2" height="17" fill="url(#pm_leather_plate-armor)" stroke="#05070a" stroke-width="0.8" /> <rect x="18.5" y="7" width="2" height="17" fill="url(#pm_leather_plate-armor)" stroke="#05070a" stroke-width="0.8" /> <circle cx="12.5" cy="10" r="0.8" fill="url(#pm_brass_plate-armor)" stroke="#05070a" stroke-width="0.4" /> <circle cx="19.5" cy="10" r="0.8" fill="url(#pm_brass_plate-armor)" stroke="#05070a" stroke-width="0.4" /> <circle cx="12.5" cy="15" r="0.8" fill="url(#pm_brass_plate-armor)" stroke="#05070a" stroke-width="0.4" /> <circle cx="19.5" cy="15" r="0.8" fill="url(#pm_brass_plate-armor)" stroke="#05070a" stroke-width="0.4" /> <circle cx="12.5" cy="19" r="0.8" fill="url(#pm_brass_plate-armor)" stroke="#05070a" stroke-width="0.4" /> <circle cx="19.5" cy="19" r="0.8" fill="url(#pm_brass_plate-armor)" stroke="#05070a" stroke-width="0.4" /> <path d="M10 6 Q16 8.5, 22 6 L21 8.5 Q16 11, 11 8.5 Z" fill="url(#pm_brass_plate-armor)" stroke="#05070a" stroke-width="1" /> <circle cx="16" cy="13.5" r="2.2" fill="url(#pm_brass_plate-armor)" stroke="#05070a" stroke-width="0.8" /> <circle cx="16" cy="13.5" r="1.2" fill="#d4af37" stroke="#05070a" stroke-width="0.5" /> <circle cx="15.7" cy="13.2" r="0.4" fill="#ffffff" /></svg>', "color": "#d4af37", "source": "plate_mail" }, "copper-charm": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="bn_plat_copper-charm" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="40%" stop-color="#cbd5e1"/> <stop offset="80%" stop-color="#64748b"/> <stop offset="100%" stop-color="#334155"/> </linearGradient> <linearGradient id="bn_gold_copper-charm" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#fff275"/> <stop offset="50%" stop-color="#d4af37"/> <stop offset="100%" stop-color="#8a6d1c"/> </linearGradient> <radialGradient id="bn_gem_copper-charm" cx="35%" cy="30%" r="65%"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="50%" stop-color="#b87333"/> <stop offset="100%" stop-color="#05070a"/> </radialGradient> </defs> <ellipse cx="16" cy="17" rx="10.5" ry="10.5" fill="none" stroke="url(#bn_plat_copper-charm)" stroke-width="5" /> <ellipse cx="16" cy="17" rx="13" ry="13" fill="none" stroke="#05070a" stroke-width="1.2" /> <ellipse cx="16" cy="17" rx="8" ry="8" fill="none" stroke="#05070a" stroke-width="1.2" /> <ellipse cx="16" cy="17" rx="10.5" ry="10.5" fill="none" stroke="url(#bn_gold_copper-charm)" stroke-width="1.8" stroke-dasharray="3.5 2.5" /> <circle cx="16" cy="6.5" r="2.2" fill="url(#bn_gold_copper-charm)" stroke="#05070a" stroke-width="0.8" /> <circle cx="16" cy="6.5" r="1.4" fill="url(#bn_gem_copper-charm)" stroke="#05070a" stroke-width="0.5" /> <circle cx="15.6" cy="6.1" r="0.4" fill="#ffffff" /> <circle cx="9.2" cy="10" r="1.8" fill="url(#bn_gold_copper-charm)" stroke="#05070a" stroke-width="0.8" /> <circle cx="9.2" cy="10" r="1.1" fill="url(#bn_gem_copper-charm)" stroke="#05070a" stroke-width="0.5" /> <circle cx="8.9" cy="9.7" r="0.3" fill="#ffffff" /> <circle cx="22.8" cy="10" r="1.8" fill="url(#bn_gold_copper-charm)" stroke="#05070a" stroke-width="0.8" /> <circle cx="22.8" cy="10" r="1.1" fill="url(#bn_gem_copper-charm)" stroke="#05070a" stroke-width="0.5" /> <circle cx="22.5" cy="9.7" r="0.3" fill="#ffffff" /> <path d="M12 6 C14 5, 18 5, 20 6" fill="none" stroke="#ffffff" stroke-width="0.8" opacity="0.7" /></svg>', "color": "#b87333", "source": "band_ring" }, "silver-charm": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="lp_gold_silver-charm" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#fff275"/> <stop offset="40%" stop-color="#d4af37"/> <stop offset="80%" stop-color="#8a6d1c"/> <stop offset="100%" stop-color="#5a4504"/> </linearGradient> <radialGradient id="lp_gem_silver-charm" cx="35%" cy="30%" r="65%"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="50%" stop-color="#cbd5e1"/> <stop offset="100%" stop-color="#07090e"/> </radialGradient> <radialGradient id="lp_glow_silver-charm" cx="50%" cy="50%" r="50%"> <stop offset="0%" stop-color="#cbd5e1" stop-opacity="0.6"/> <stop offset="100%" stop-color="#cbd5e1" stop-opacity="0"/> </radialGradient> </defs> <circle cx="16" cy="10" r="7" fill="url(#lp_glow_silver-charm)" /> <ellipse cx="16" cy="19.5" rx="9" ry="8" fill="none" stroke="url(#lp_gold_silver-charm)" stroke-width="2.2" transform="rotate(-12 16 19.5)" /> <ellipse cx="16" cy="19.5" rx="9" ry="8" fill="none" stroke="url(#lp_gold_silver-charm)" stroke-width="2.2" transform="rotate(12 16 19.5)" /> <ellipse cx="16" cy="19.5" rx="7.5" ry="6.5" fill="none" stroke="#05070a" stroke-width="0.8" opacity="0.6" transform="rotate(-12 16 19.5)" /> <ellipse cx="16" cy="19.5" rx="7.5" ry="6.5" fill="none" stroke="#05070a" stroke-width="0.8" opacity="0.6" transform="rotate(12 16 19.5)" /> <circle cx="16" cy="10" r="5.2" fill="url(#lp_gold_silver-charm)" stroke="#05070a" stroke-width="1.2" /> <circle cx="16" cy="10" r="3.8" fill="url(#lp_gem_silver-charm)" stroke="#05070a" stroke-width="1" /> <ellipse cx="14.8" cy="8.8" rx="1" ry="0.6" fill="#ffffff" opacity="0.8" transform="rotate(-20 14.8 8.8)" /> <polygon points="16,3.5 17,9 16,10 15,9" fill="#ffffff" opacity="0.85" /> <polygon points="16,10 21.5,10 16,10 10.5,10" fill="#ffffff" opacity="0.5" /></svg>', "color": "#cbd5e1", "source": "loop_ring" }, "sun-charm": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="sn_gold_sun-charm" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#fff275"/> <stop offset="40%" stop-color="#d4af37"/> <stop offset="80%" stop-color="#8a6d1c"/> <stop offset="100%" stop-color="#5a4504"/> </linearGradient> <linearGradient id="sn_gem_sun-charm" x1="0" y1="0" x2="0" y2="1"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="45%" stop-color="#f1c40f"/> <stop offset="100%" stop-color="#05070a"/> </linearGradient> <radialGradient id="sn_glow_sun-charm" cx="50%" cy="30%" r="50%"> <stop offset="0%" stop-color="#f1c40f" stop-opacity="0.6"/> <stop offset="100%" stop-color="#f1c40f" stop-opacity="0"/> </radialGradient> </defs> <circle cx="16" cy="11" r="7" fill="url(#sn_glow_sun-charm)" /> <ellipse cx="16" cy="19" rx="8.5" ry="9.5" fill="none" stroke="url(#sn_gold_sun-charm)" stroke-width="3" /> <ellipse cx="16" cy="19" rx="7" ry="8" fill="none" stroke="#05070a" stroke-width="1.2" opacity="0.6" /> <path d="M9.5 8 L22.5 8 L24 13.5 L16 18.5 L8 13.5 Z" fill="url(#sn_gold_sun-charm)" stroke="#05070a" stroke-width="1.2" stroke-linejoin="round" /> <path d="M11 7.5 L21 7.5 L22.2 12.5 L16 16.5 L9.8 12.5 Z" fill="url(#sn_gem_sun-charm)" stroke="#05070a" stroke-width="1.2" stroke-linejoin="round" /> <polygon points="16,9.2 18.5,12 16,14.8 13.5,12" fill="none" stroke="#ffffff" stroke-width="0.8" opacity="0.85" /> <circle cx="16" cy="12" r="0.8" fill="#ffffff" /> <polygon points="11,7.8 14,7.8 12.5,11.5" fill="#ffffff" opacity="0.6" /> <ellipse cx="13.5" cy="9.5" rx="0.6" ry="1.2" fill="#ffffff" transform="rotate(-20 13.5 9.5)" /></svg>', "color": "#f1c40f", "source": "signet_ring" }, "coif": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="cf_mail_l_coif" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="50%" stop-color="#cbd5e1"/> <stop offset="100%" stop-color="#64748b"/> </linearGradient> <linearGradient id="cf_mail_d_coif" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#475569"/> <stop offset="100%" stop-color="#1e293b"/> </linearGradient> <linearGradient id="cf_leather_coif" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#8d5b38"/> <stop offset="35%" stop-color="#8d5b38"/> <stop offset="35%" stop-color="#5c3a21"/> <stop offset="70%" stop-color="#5c3a21"/> <stop offset="70%" stop-color="#2d1d0b"/> <stop offset="100%" stop-color="#1c0f07"/> </linearGradient> <linearGradient id="cf_brass_coif" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffeaa7"/> <stop offset="50%" stop-color="#d4af37"/> <stop offset="100%" stop-color="#8a6d1c"/> </linearGradient> </defs> <path d="M16 4 C10 4, 7 8, 7 14 L5 24 L16 29 Z" fill="url(#cf_mail_d_coif)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <path d="M16 4 C22 4, 25 8, 25 14 L27 24 L16 29 Z" fill="url(#cf_mail_l_coif)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <path d="M8 12 Q16 10, 24 12 M7 16 Q16 14, 25 16 M6 20 Q16 18, 26 20 M6 24 Q16 22, 26 24" fill="none" stroke="#05070a" stroke-width="1" stroke-dasharray="2 1.5" opacity="0.6" /> <path d="M12 11 C12 7, 20 7, 20 11 L20 19 C20 22, 12 22, 12 19 Z" fill="url(#cf_leather_coif)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" /> <path d="M13 10 L19 16 M13 14 L18 19 M17 10 L12 15 M19 13 L13 19" stroke="#3d1d0b" stroke-width="0.8" opacity="0.8" /> <ellipse cx="16" cy="14" rx="2.8" ry="3.8" fill="#05070a" /> <circle cx="15" cy="13.5" r="0.5" fill="#94a3b8" /> <circle cx="17" cy="13.5" r="0.5" fill="#94a3b8" /> <path d="M9.5 9 Q16 7.5, 22.5 9" fill="none" stroke="url(#cf_leather_coif)" stroke-width="2.2" stroke-linecap="round" /> <path d="M9.5 9 Q16 7.5, 22.5 9" fill="none" stroke="#94a3b8" stroke-width="0.8" stroke-linecap="round" stroke-dasharray="1.5 1.5" /> <polygon points="16,6.5 17.5,8.5 14.5,8.5" fill="url(#cf_brass_coif)" stroke="#05070a" stroke-width="0.8" /> <circle cx="16" cy="6.2" r="1" fill="#94a3b8" stroke="#05070a" stroke-width="0.5" /> <circle cx="15.7" cy="5.9" r="0.3" fill="#ffffff" /></svg>', "color": "#94a3b8", "source": "coif" }, "greaves": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="gr_steel_l_greaves" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="50%" stop-color="#cbd5e1"/> <stop offset="100%" stop-color="#64748b"/> </linearGradient> <linearGradient id="gr_steel_d_greaves" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#475569"/> <stop offset="100%" stop-color="#1e293b"/> </linearGradient> <linearGradient id="gr_leather_greaves" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#8d5b38"/> <stop offset="35%" stop-color="#8d5b38"/> <stop offset="35%" stop-color="#5c3a21"/> <stop offset="70%" stop-color="#5c3a21"/> <stop offset="70%" stop-color="#2d1d0b"/> <stop offset="100%" stop-color="#1c0f07"/> </linearGradient> <linearGradient id="gr_brass_greaves" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffeaa7"/> <stop offset="50%" stop-color="#d4af37"/> <stop offset="100%" stop-color="#8a6d1c"/> </linearGradient> </defs> <line x1="4" y1="14" x2="14" y2="14" stroke="url(#gr_leather_greaves)" stroke-width="2" stroke-linecap="round" /> <line x1="4" y1="22" x2="14" y2="22" stroke="url(#gr_leather_greaves)" stroke-width="2" stroke-linecap="round" /> <line x1="18" y1="14" x2="28" y2="14" stroke="url(#gr_leather_greaves)" stroke-width="2" stroke-linecap="round" /> <line x1="18" y1="22" x2="28" y2="22" stroke="url(#gr_leather_greaves)" stroke-width="2" stroke-linecap="round" /> <path d="M5 11 L13 11 L12 28 H6 Z" fill="url(#gr_steel_d_greaves)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <line x1="9" y1="11" x2="9" y2="28" stroke="#05070a" stroke-width="0.8" opacity="0.4" /> <path d="M4 8 Q9 5, 14 8 L13 12 H5 Z" fill="url(#gr_brass_greaves)" stroke="#05070a" stroke-width="1" stroke-linejoin="round" /> <circle cx="9" cy="9.5" r="1.5" fill="#94a3b8" stroke="#05070a" stroke-width="0.5" /> <circle cx="8.7" cy="9.2" r="0.4" fill="#ffffff" /> <path d="M19 11 L27 11 L26 28 H20 Z" fill="url(#gr_steel_l_greaves)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <line x1="23" y1="11" x2="23" y2="28" stroke="#05070a" stroke-width="0.8" opacity="0.4" /> <path d="M18 8 Q23 5, 28 8 L27 12 H19 Z" fill="url(#gr_brass_greaves)" stroke="#05070a" stroke-width="1" stroke-linejoin="round" /> <circle cx="23" cy="9.5" r="1.5" fill="#94a3b8" stroke="#05070a" stroke-width="0.5" /> <circle cx="22.7" cy="9.2" r="0.4" fill="#ffffff" /> <path d="M6 26 H12 V28 H6 Z" fill="url(#gr_brass_greaves)" stroke="#05070a" stroke-width="0.8" /> <path d="M20 26 H26 V28 H20 Z" fill="url(#gr_brass_greaves)" stroke="#05070a" stroke-width="0.8" /></svg>', "color": "#94a3b8", "source": "greaves" }, "sabatons": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="sb_steel_l_sabatons" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="50%" stop-color="#cbd5e1"/> <stop offset="100%" stop-color="#64748b"/> </linearGradient> <linearGradient id="sb_steel_d_sabatons" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#475569"/> <stop offset="100%" stop-color="#1e293b"/> </linearGradient> <linearGradient id="sb_brass_sabatons" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffeaa7"/> <stop offset="50%" stop-color="#d4af37"/> <stop offset="100%" stop-color="#8a6d1c"/> </linearGradient> <linearGradient id="sb_leather_sabatons" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#5c3a21"/> <stop offset="100%" stop-color="#2d1d0b"/> </linearGradient> </defs> <path d="M3 12 H11 L10 16 H4 Z" fill="url(#sb_brass_sabatons)" stroke="#05070a" stroke-width="1" /> <path d="M3.5 15 L10.5 13 L12 21 L15.5 25 L12.5 28 L3 27 Z" fill="url(#sb_steel_d_sabatons)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <path d="M4 18 H11 M4.2 21 H12 M4.5 24 H13.5" stroke="#05070a" stroke-width="1" opacity="0.6" /> <polygon points="15.5,25 12.5,28 10,27" fill="url(#sb_brass_sabatons)" stroke="#05070a" stroke-width="0.8" /> <circle cx="13.2" cy="26" r="1" fill="#94a3b8" stroke="#05070a" stroke-width="0.4" /> <circle cx="13" cy="25.8" r="0.3" fill="#ffffff" /> <path d="M16 12 H24 L23 16 H17 Z" fill="url(#sb_brass_sabatons)" stroke="#05070a" stroke-width="1" /> <path d="M16.5 15 L23.5 13 L25 21 L28.5 25 L25.5 28 L16 27 Z" fill="url(#sb_steel_l_sabatons)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <path d="M17 18 H24 M17.2 21 H25 M17.5 24 H26.5" stroke="#05070a" stroke-width="1" opacity="0.6" /> <polygon points="28.5,25 25.5,28 23,27" fill="url(#sb_brass_sabatons)" stroke="#05070a" stroke-width="0.8" /> <circle cx="26.2" cy="26" r="1" fill="#94a3b8" stroke="#05070a" stroke-width="0.4" /> <circle cx="26" cy="25.8" r="0.3" fill="#ffffff" /> <path d="M17 15 L22 13.5 L23.5 20 H18.5 Z" fill="#ffffff" opacity="0.2" /></svg>', "color": "#94a3b8", "source": "sabatons" }, "full-plate": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="fp_steel_l_full-plate" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="45%" stop-color="#cbd5e1"/> <stop offset="100%" stop-color="#64748b"/> </linearGradient> <linearGradient id="fp_steel_d_full-plate" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#475569"/> <stop offset="100%" stop-color="#1e293b"/> </linearGradient> <linearGradient id="fp_brass_full-plate" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffeaa7"/> <stop offset="50%" stop-color="#d4af37"/> <stop offset="100%" stop-color="#8a6d1c"/> </linearGradient> <linearGradient id="fp_leather_full-plate" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#8d5b38"/> <stop offset="35%" stop-color="#8d5b38"/> <stop offset="35%" stop-color="#5c3a21"/> <stop offset="70%" stop-color="#5c3a21"/> <stop offset="70%" stop-color="#2d1d0b"/> <stop offset="100%" stop-color="#1c0f07"/> </linearGradient> </defs> <path d="M3 10 C3 5, 11 6, 11 12 L7 16 Z" fill="url(#fp_steel_d_full-plate)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" /> <path d="M2 11 Q7 9, 10 13" fill="none" stroke="url(#fp_brass_full-plate)" stroke-width="1.5" /> <path d="M29 10 C29 5, 21 6, 21 12 L25 16 Z" fill="url(#fp_steel_l_full-plate)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" /> <path d="M30 11 Q25 9, 22 13" fill="none" stroke="url(#fp_brass_full-plate)" stroke-width="1.5" /> <path d="M16 5 L8 7 L7 20 L16 24 Z" fill="url(#fp_steel_d_full-plate)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <path d="M16 5 L24 7 L25 20 L16 24 Z" fill="url(#fp_steel_l_full-plate)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <path d="M8.5 20 L16 24 L23.5 20 L25 28 L16 30 L7 28 Z" fill="url(#fp_steel_d_full-plate)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" /> <path d="M16 24 L23.5 20 L25 28 L16 30 Z" fill="url(#fp_steel_l_full-plate)" stroke="#05070a" stroke-width="1.2" /> <path d="M11 9 L16 14 L21 9 M11 13 L16 18 L21 13" fill="none" stroke="#05070a" stroke-width="1.2" opacity="0.35" /> <path d="M10 5 Q16 7.5, 22 5 L21 7.5 Q16 10, 11 7.5 Z" fill="url(#fp_brass_full-plate)" stroke="#05070a" stroke-width="1" /> <rect x="8" y="18" width="16" height="3" fill="url(#fp_leather_full-plate)" stroke="#05070a" stroke-width="1" /> <rect x="14" y="17" width="4" height="5" rx="0.8" fill="url(#fp_brass_full-plate)" stroke="#05070a" stroke-width="1" /> <circle cx="16" cy="12" r="2.2" fill="url(#fp_brass_full-plate)" stroke="#05070a" stroke-width="0.8" /> <circle cx="16" cy="12" r="1.2" fill="#8c6d3b" stroke="#05070a" stroke-width="0.5" /> <circle cx="15.7" cy="11.7" r="0.4" fill="#ffffff" /></svg>', "color": "#8c6d3b", "source": "full_plate_armor" }, "gold": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="96" height="96"><g fill="#f1c40f" fill-opacity="0.15" stroke="#f1c40f" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10" /><path d="M12 8v8M9 10h6M9 13h6" /></g></svg>', "color": "#f1c40f", "source": "uiIcons.gold" } };
-var itemArtKey = (item) => generatedArtKey(item?.generated) ?? item?.definitionId;
+var lookArt = null;
+function useLookArt(keyOf, urlOf) {
+  lookArt = { keyOf, urlOf };
+}
+var itemArtKey = (item) => {
+  const key2 = generatedArtKey(item?.generated);
+  return key2 && !definitions2[key2] ? lookArt?.keyOf(item) ?? key2 : key2 ?? item?.definitionId;
+};
 Object.assign(definitions2, SUBWEAPON_ART, GENERATED_EQUIPMENT_ART, CLASS_KIT_ART);
 var EQUIPMENT_ART = Object.freeze(Object.fromEntries(Object.entries(definitions2).map(([key2, a]) => [key2, Object.freeze({ ...a, url: "data:image/svg+xml;charset=utf-8," + encodeURIComponent(a.svg) })])));
 var WEAPON_ART_KEYS = Object.freeze({ worn: "worn-sword", iron: "iron-sword", guard: "guard-sword", runic: "runic-sword" });
@@ -29755,9 +29691,10 @@ var SLOT_ART_KEYS = Object.freeze({ subweapon: "starter-shield", weapon: "worn-s
 function createEquipmentArtCache(document) {
   const images = /* @__PURE__ */ new Map();
   return (key2) => {
-    if (!images.has(key2) && EQUIPMENT_ART[key2] && document?.createElement) {
+    const url = !images.has(key2) && document?.createElement ? EQUIPMENT_ART[key2]?.url ?? lookArt?.urlOf(key2, document) : null;
+    if (url) {
       const image2 = document.createElement("img");
-      image2.src = EQUIPMENT_ART[key2].url;
+      image2.src = url;
       images.set(key2, image2);
     }
     const image = images.get(key2);
@@ -29770,27 +29707,41 @@ var EQUIPMENT_STAT_ART = Object.freeze(Object.fromEntries(Object.entries({ "atta
 var HERO_SLOT = Object.freeze({ weapon: "main", subweapon: "off", helmet: "helmet", chest: "body", overall: "body", leggings: "legs", gloves: "gloves", boots: "boots" });
 var PIXELS = 144;
 var urls = /* @__PURE__ */ new Map();
-function itemIconUrl(item, document) {
-  const d = itemDefinition(item), slot = HERO_SLOT[d?.slot], kind = slot ? itemLook(item) : null;
-  if (kind && document?.createElement) {
-    const tier2 = Number.isSafeInteger(d.rarityTier) ? Math.max(0, Math.min(5, d.rarityTier)) : 0, key2 = `${slot}/${kind}/${tier2}`;
-    if (!urls.has(key2)) {
-      let url2 = null;
-      try {
-        const canvas = document.createElement("canvas");
-        canvas.width = canvas.height = PIXELS;
-        const c = canvas.getContext("2d");
-        if (c) {
-          c.translate(PIXELS * 0.08, PIXELS * 0.08);
-          drawItemIcon(c, { slot, kind, tier: tier2 }, PIXELS * 0.84);
-          url2 = canvas.toDataURL("image/png");
-        }
-      } catch {
-        url2 = null;
+function iconUrl(slot, kind, tier2, document) {
+  const key2 = `${slot}/${kind}/${tier2}`;
+  if (!urls.has(key2)) {
+    let url = null;
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = PIXELS;
+      const c = canvas.getContext("2d");
+      if (c) {
+        c.translate(PIXELS * 0.08, PIXELS * 0.08);
+        drawItemIcon(c, { slot, kind, tier: tier2 }, PIXELS * 0.84);
+        url = canvas.toDataURL("image/png");
       }
-      urls.set(key2, url2);
+    } catch {
+      url = null;
     }
-    const url = urls.get(key2);
+    urls.set(key2, url);
+  }
+  return urls.get(key2);
+}
+var iconOf = (item) => {
+  const d = itemDefinition(item), slot = HERO_SLOT[d?.slot], kind = slot ? itemLook(item) : null;
+  return kind ? { slot, kind, tier: Number.isSafeInteger(d.rarityTier) ? Math.max(0, Math.min(5, d.rarityTier)) : 0 } : null;
+};
+useLookArt((item) => {
+  const i = iconOf(item);
+  return i ? `look/${i.slot}/${i.kind}/${i.tier}` : null;
+}, (key2, document) => {
+  const [tag, slot, kind, tier2] = key2.split("/");
+  return tag === "look" ? iconUrl(slot, kind, Number(tier2), document) : null;
+});
+function itemIconUrl(item, document) {
+  const i = iconOf(item);
+  if (i && document?.createElement) {
+    const url = iconUrl(i.slot, i.kind, i.tier, document);
     if (url) return url;
   }
   return EQUIPMENT_ART[itemArtKey(item)]?.url ?? null;
@@ -30264,7 +30215,7 @@ function createInventoryPresentation({ document, environment, readModel, adapter
         copy.append(element("strong", d2.name, "item-title"), element("small", `${label2(d2.slot).toUpperCase()} \xB7 ${rarity(d2)}`, "item-sub"), element("span", Object.entries(d2.bonuses).filter(([, v]) => v).map(([k, v]) => `${{ attack: "ATK", defense: "DEF", maxHp: "HP" }[k]} +${statText(v)}`).join(" | ") || "No stat bonus", "item-sub gear-bonuses"));
         inspectButton.append(itemIcon(item2), copy);
         row2.append(inspectButton);
-        const target = d2.slot === "ring" ? "ring1" : d2.slot, preview = equipmentComparison(inv, item2.itemId, target, local6.progression.totalXp, local6.d8), classUser = classOffhandAllowed(owner, item2) ? null : Object.values(HERO_CLASSES).find((c) => c.offhand === d2.subType), allowed = equipmentLevelAllowed(owner, item2) && !classUser, required = equipmentRequiredLevel(owner, item2), action3 = button(classUser ? `${classUser.name.toUpperCase()} ONLY` : !allowed ? `REQUIRES LV. ${required}` : d2.slot === "ring" ? "EQUIP \u2026" : preview.displaced.length ? "SWAP" : "EQUIP", () => {
+        const target = d2.slot === "ring" ? "ring1" : d2.slot, preview = equipmentComparison(inv, item2.itemId, target, local6.progression.totalXp, local6.d8), classUser = classGearAllowed(owner, item2) ? null : HERO_CLASSES[itemGearClass(item2)] ?? Object.values(HERO_CLASSES).find((c) => c.offhand === d2.subType), allowed = equipmentLevelAllowed(owner, item2) && !classUser, required = equipmentRequiredLevel(owner, item2), action3 = button(classUser ? `${classUser.name.toUpperCase()} ONLY` : !allowed ? `REQUIRES LV. ${required}` : d2.slot === "ring" ? "EQUIP \u2026" : preview.displaced.length ? "SWAP" : "EQUIP", () => {
           if (d2.slot === "ring") select(item2.itemId, inspectButton);
           else issue("equipment.equip", { itemId: item2.itemId, slot: target });
         }, !allowed);
@@ -30498,12 +30449,9 @@ function createInventoryPresentation({ document, environment, readModel, adapter
         inherent.append(element("p", display(key3, value2)));
         traits++;
       }
-      if (d.subType === "tome") {
-        const q = d.family?.tomeProfile?.chance, chance = q ? Number(q.n) / Number(q.d) : d.family?.fireChanceNumerator && d.family.fireChanceDenominator ? d.family.fireChanceNumerator / d.family.fireChanceDenominator : 0;
-        if (chance) {
-          inherent.append(element("p", `Spell proc chance ${Number((chance * 100).toFixed(1))}%`));
-          traits++;
-        }
+      if (d.subType === "tome" && d.spellType) {
+        inherent.append(element("p", `Cast element: ${{ fire: "Fire", lightning: "Storm", frost: "Frost" }[d.spellType] ?? "Mixed"}`));
+        traits++;
       }
       if (!traits) inherent.append(element("p", "None", "tt-muted"));
       card.append(inherent);
@@ -33480,7 +33428,7 @@ function createSubweaponHud({ document, environment, readModel, adapter, isBlock
   function refresh(m) {
     guard.refresh(m);
     const local6 = m.playersById[m.localPlayerId], c = m.subweapon, type = local6.stats.subType;
-    panel.hidden = !["shield", "tome"].includes(type) || type === "shield" && local6.d8?.heroClass === "knight" || type === "tome" && local6.d8?.heroClass === "mage" || isBlocked() || c?.suppressed;
+    panel.hidden = type !== "tome" || local6.d8?.heroClass === "mage" || isBlocked() || c?.suppressed;
     dash.hidden = !CLASS_MOVES[type] || isBlocked() || c?.suppressed;
     if (!c) return;
     panel.dataset.ready = String(type === "shield" && c.pressure === 3);
@@ -33488,19 +33436,17 @@ function createSubweaponHud({ document, environment, readModel, adapter, isBlock
       panel.animate?.([{ transform: "scale(1.07)", color: "#ffffff" }, { transform: "scale(1)", color: "#f1c40f" }], { duration: 220 });
     }
     lastPressure = c.pressure;
-    const chance = local6.stats.familyProperties?.tomeChance ?? local6.stats.familyProperties?.fireChance, firePercent = chance ? Math.round(Number(chance.n) / Number(chance.d) * 100) : 33;
-    const next = type === "shield" ? `GUARD ${"\u25CF".repeat(c.pressure)}${"\u25CB".repeat(3 - c.pressure)}${c.pressure === 3 ? " \xB7 BASH READY" : ""}` : type === "tome" ? `${(local6.stats.spellType ?? "fire").toUpperCase()} ${firePercent}% \xB7 Barrier ${c.barrierLabel} / ${c.maxBarrierLabel} \xB7 ${m.tomeTarget ?? "NO TARGET"}${c.delivery && m.tick - c.delivery.tick < 60 && c.delivery.status !== "idle" ? " \xB7 " + c.delivery.status.toUpperCase() : ""}` : "";
+    const element = (local6.stats.spellType ?? "fire") === "lightning" ? "STORM" : (local6.stats.spellType ?? "fire").toUpperCase();
+    const next = type === "tome" ? `${element} \xB7 Barrier ${c.barrierLabel} / ${c.maxBarrierLabel}` : "";
     if (next !== text2) {
       if (type === "tome") {
-        const fire = document.createElement("span"), barrier = document.createElement("span"), target = document.createElement("span");
-        fire.textContent = `${(local6.stats.spellType ?? "fire").toUpperCase()} ${firePercent}%`;
+        const fire = document.createElement("span"), barrier = document.createElement("span");
+        fire.textContent = element;
         fire.style.color = local6.stats.spellType === "lightning" ? "#c7b5ff" : local6.stats.spellType === "frost" ? "#ced8ff" : "#e67e22";
         barrier.innerHTML = barrierSvg();
         barrier.append(document.createTextNode(` BARRIER ${c.barrierLabel} / ${c.maxBarrierLabel}`));
         barrier.style.cssText = "color:#9b59b6;display:inline-flex;align-items:center;gap:3px";
-        target.textContent = `${m.tomeTarget ?? "NO TARGET"}${c.delivery && m.tick - c.delivery.tick < 60 && c.delivery.status !== "idle" ? " \xB7 " + c.delivery.status.toUpperCase() : ""}`;
-        target.style.color = "#e5dce9";
-        panel.replaceChildren(fire, document.createTextNode(" \xB7 "), barrier, document.createTextNode(" \xB7 "), target);
+        panel.replaceChildren(fire, document.createTextNode(" \xB7 "), barrier);
       } else if (type === "shield") {
         const icon = document.createElement("span"), label3 = document.createElement("span"), pips = document.createElement("span");
         icon.innerHTML = `<svg aria-hidden="true" viewBox="0 0 24 24" width="17" height="17" fill="#34475b" stroke="#f1c40f" stroke-width="2"><path d="${DUNGEON_COMBAT_ICONS.block.path}"/></svg>`;
@@ -46899,18 +46845,6 @@ function createCombatVfx() {
     for (const [id, f] of Object.entries(m.combatPresentation?.families ?? {})) {
       const a = m.entitiesById[id];
       if (!a || !visible3(a.position)) continue;
-      if (f.pressure === 3) {
-        ctx.save();
-        const side = m.primary?.actorsById[id]?.facing?.x < 0 ? -1 : 1;
-        ctx.globalAlpha = 0.65 + 0.15 * Math.sin(time / 240);
-        ctx.strokeStyle = "#ffe19a";
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.arc(a.position.x + side * 9, a.position.y - 8, 13, side < 0 ? 2.3 : -0.8, side < 0 ? 4 : 0.8);
-        ctx.stroke();
-        for (let i = 0; i < 3; i++) diamond(ctx, a.position.x + side * 19, a.position.y - 15 + i * 6, 2.2, "#ffd674");
-        ctx.restore();
-      }
       if (f.dash.frames > 0 && f.blink) {
         ctx.save();
         ctx.globalAlpha = 0.55;
