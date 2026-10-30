@@ -3,9 +3,9 @@
   "source": "Original built-in image_gen, references supplied by user; no extracted external game art. Original source PNG/alpha preserved. Runtime crops use alpha-bounded sprite regions, preserve aspect ratios and ground anchors.",
   "files": [
     {
-      "path": "trees.png",
-      "bytes": 1119515,
-      "sha256": "5fd4b6e7afb52432828b07a6335bf0144234a5db7f863ead55f503939dc5ba60",
+      "path": "trees.webp",
+      "bytes": 194056,
+      "sha256": "a140d1ac80f00acc15ddbdbde578a36c31d6ac12ead07641c0da284a95830457",
       "width": 1312,
       "height": 1199,
       "slots": [
@@ -65,9 +65,9 @@
       "transparentCorner": true
     },
     {
-      "path": "understory.png",
-      "bytes": 1664923,
-      "sha256": "93679f87de486ba7323535e5b9b4585f4d9dc5b027cb743dfe42d9d88bcf8bb9",
+      "path": "understory.webp",
+      "bytes": 216372,
+      "sha256": "ea441d16502e2820654641dd769a837d066a3978bad49c228c4e1f11f87fda34",
       "width": 1536,
       "height": 1024,
       "slots": [

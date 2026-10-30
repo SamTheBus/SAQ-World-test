@@ -3,9 +3,9 @@
   "source": "OpenAI built-in image generation, this session; SAQ screenshot used as style reference, not an edit target. No external asset pack.",
   "sourceLicenseNote": "Generated project candidate. No third-party pack license is asserted. Existing SAQ source art is reused under the project provenance; no separate license file is present in the inspected runtime.",
   "atlas": {
-    "path": "woodland-atlas-source.png",
-    "sha256": "ed9fea4aecd769896e04990ee43506c95d96f55c74cf373ec1f88b182e21a5f7",
-    "bytes": 1623361,
+    "path": "woodland-atlas-source.webp",
+    "sha256": "f3f3e3df6529b5fb20d109cbcb59009878e7fa8c5328096e1fb0b181397d9b40",
+    "bytes": 248822,
     "width": 1254,
     "height": 1254,
     "gridColumns": 4,

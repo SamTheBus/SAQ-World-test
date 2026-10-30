@@ -2,18 +2,18 @@
   "version": "woodland-environment-v1",
   "files": [
     {
-      "path": "grass-source.png",
-      "bytes": 1686271,
-      "sha256": "01b6fa1ec51a3d20cc78713ef0ec389bf2051d826ef9a4ff6d2e87445bdf8895",
+      "path": "grass-source.webp",
+      "bytes": 82308,
+      "sha256": "a22bf3eb33e22aebe1de4bf4c9775adc346b2379130c6f6ff536705fd0bcc04b",
       "size": [
         1402,
         1122
       ]
     },
     {
-      "path": "earth-source.png",
-      "bytes": 1516154,
-      "sha256": "73b75b04f2978c8592c16c6384ae83ddb8153af9a6d995bb0bcd756541623aca",
+      "path": "earth-source.webp",
+      "bytes": 37900,
+      "sha256": "5996c6bbda2f97625c46a673129e670563b4133c29cb0d93ec7ade37af5e78d6",
       "size": [
         1254,
         1254

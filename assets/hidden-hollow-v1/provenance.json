@@ -5,9 +5,9 @@
   "assets": [
     {
       "id": "hidden-hollow",
-      "path": "hidden-hollow.png",
-      "sha256": "146d578189fbc649b75c09dff5590bd2ca8e420b26ddee490f9965614125463e",
-      "bytes": 1153139,
+      "path": "hidden-hollow.webp",
+      "sha256": "0136bc1baa63e17395a74cdddd5801f2d07573de7f1507a716b208be18061cc7",
+      "bytes": 158386,
       "width": 1774,
       "height": 887,
       "crop": [

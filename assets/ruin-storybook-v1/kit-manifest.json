@@ -3,7 +3,7 @@
   "files": [
     {
       "id": "entrance",
-      "path": "entrance-source.png",
+      "path": "entrance-source.webp",
       "width": 1536,
       "height": 1024,
       "crop": [
@@ -12,44 +12,44 @@
         1240,
         673
       ],
-      "bytes": 1269861,
-      "sha256": "d49d7de3b715a086ace39d3bafe3680a6a906227407b5f5357b384876d7ae92c"
+      "bytes": 88174,
+      "sha256": "5774227c123426e2357899362356c3ee94a2ff2953ed24d67b17750c303e0d1f"
     },
     {
       "id": "modular",
-      "path": "modular-thin-source.png",
+      "path": "modular-thin-source.webp",
       "width": 1536,
       "height": 1024,
       "crop": null,
-      "bytes": 1376494,
-      "sha256": "b15c2534086fc153e4a34f040ca353ddcb8a0f431e9caeb9b89baff7ffce6fc5"
+      "bytes": 123630,
+      "sha256": "0f58388900afdd7634c3768ff5dede4ebc6570bdda37f9f9551e1ac7f7233cd4"
     },
     {
       "id": "vertical",
-      "path": "vertical-thin-source.png",
+      "path": "vertical-thin-source.webp",
       "width": 2172,
       "height": 724,
       "crop": null,
-      "bytes": 472319,
-      "sha256": "2910127c5761a334c166a2a92779bba69676302a2fb2d913ee850216a790e4ae"
+      "bytes": 61942,
+      "sha256": "29aabfb390c827491dd221f1351e993252f01dc8ab42ca45a2f9d09b625b791b"
     },
     {
       "id": "grove",
-      "path": "grove-clean-source.png",
+      "path": "grove-clean-source.webp",
       "width": 1536,
       "height": 1024,
       "crop": null,
-      "bytes": 1803272,
-      "sha256": "d6626d8a6a04c6b1a5a447379b15d874cb9de4a82a0e103b7d098fabdd1ea461"
+      "bytes": 218584,
+      "sha256": "aa8b408d5256f03b9908c3f1660aa9d4fbb78e9c35a61fbcc6ba1ebb8e9ce3dc"
     },
     {
       "id": "materials",
-      "path": "materials-source.png",
+      "path": "materials-source.webp",
       "width": 1774,
       "height": 887,
       "crop": null,
-      "bytes": 1629836,
-      "sha256": "5534fd20c780154f7977385655bf4f7e83bec1d2ad843638b0fef00a3f52446a"
+      "bytes": 33396,
+      "sha256": "0b61f2f1af6ebad64290931719968090e47451ba185a2579492146b1dc172833"
     }
   ],
   "modules": {

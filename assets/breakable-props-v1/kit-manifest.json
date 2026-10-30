@@ -1,10 +1,10 @@
 {
   "version": "breakable-props-art-v1",
-  "path": "props-source-v1.png",
+  "path": "props-source-v1.webp",
   "width": 1086,
   "height": 1448,
-  "bytes": 1394066,
-  "sha256": "585e8842fa178a3bceb44000bce6a9a5747f9b6f0728a37a45abf56f2f64e532",
+  "bytes": 250016,
+  "sha256": "3fabc992a42a50308f933f725793bb4d831b6770512e49cd1e09787d64deac6e",
   "decodeLongestEdge": 144,
   "slots": [
     {"key":"barrel:intact","x":45,"y":53,"width":272,"height":304},

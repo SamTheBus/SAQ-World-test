@@ -5,9 +5,9 @@
   "files": [
     {
       "id": "spore-pod",
-      "path": "spore-pod.png",
-      "bytes": 1077055,
-      "sha256": "d31a923dc52bcbfbeb268e766552c11d581ca1fdf3c4217604615b808939a7c4",
+      "path": "spore-pod.webp",
+      "bytes": 129620,
+      "sha256": "f959ddab9e34d5d4ecc0dfab50446bef0cd1ca9c7da60b3c207453100e10ba5d",
       "width": 1295,
       "height": 1215,
       "crop": [
@@ -34,9 +34,9 @@
     },
     {
       "id": "spore-pod-open",
-      "path": "spore-pod-open.png",
-      "bytes": 1050369,
-      "sha256": "ef906b2895969601a9589af052fede458d97e9e0c3583653b2cc28c5fff50901",
+      "path": "spore-pod-open.webp",
+      "bytes": 134890,
+      "sha256": "b967909312e759da15f5f211c70d8e8ddf1a637a0b0db9f2fd05b335a72f2673",
       "width": 1295,
       "height": 1215,
       "crop": [
@@ -63,9 +63,9 @@
     },
     {
       "id": "fungal-clump",
-      "path": "fungal-clump.png",
-      "bytes": 806829,
-      "sha256": "26627a492e72b83ac8056ca2415b5856ab604b77d66ed44af320de2382c6c503",
+      "path": "fungal-clump.webp",
+      "bytes": 103034,
+      "sha256": "ebda0fe78525470f85c41a85062e2b981f70855742e43b3475ed0b545e18c680",
       "width": 1295,
       "height": 1215,
       "crop": [

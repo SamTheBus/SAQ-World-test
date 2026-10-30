@@ -3,9 +3,9 @@
   "source": "Original built-in image_gen, purpose-built small-scale cel assets. PNG/alpha copied unchanged; runtime crops only.",
   "files": [
     {
-      "path": "small-props.png",
-      "sha256": "22efa157688c606180083d28c54f390a04c1152a2f3795c67e39fcd32b2c9c48",
-      "bytes": 1536731,
+      "path": "small-props.webp",
+      "sha256": "3b3d3acdd0e4c96f30db116cd65675fa7b1484affb1f756a602515b4516170bd",
+      "bytes": 161912,
       "width": 1536,
       "height": 1024,
       "decodeLimit": 128,

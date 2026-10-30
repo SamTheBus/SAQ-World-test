@@ -4,16 +4,16 @@
   "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a",
   "files": [
     {
-      "path": "flat-transition-source.png",
-      "bytes": 1633178,
-      "sha256": "af901ed6ec8b79c68a8a2aae498a2a499d4bbddb2e59bcb8d69892109bbc4d80",
+      "path": "flat-transition-source.webp",
+      "bytes": 85488,
+      "sha256": "c42ee463155acc214fbe9a6a5597211364d598c08da25869f85c75ebafafe0b8",
       "width": 1254,
       "height": 1254
     },
     {
-      "path": "junction-source.png",
-      "bytes": 1831205,
-      "sha256": "be6a4040a7adc596706aa541ca4bc7be557bdb618f332151c34a3d8fec136cf4",
+      "path": "junction-source.webp",
+      "bytes": 131456,
+      "sha256": "5d0536b6d53677a1234cd8d5586c854385f316ff89194c2821309927f7de4d90",
       "width": 1254,
       "height": 1254
     }

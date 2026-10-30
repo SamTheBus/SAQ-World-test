@@ -1,10 +1,10 @@
 {
   "version": "night-loot-debris-art-v1",
-  "path": "debris-source-v1.png",
+  "path": "debris-source-v1.webp",
   "width": 1254,
   "height": 1254,
-  "bytes": 1017473,
-  "sha256": "e114451398560e2f89ffc2455ec3d8965fc8bca5d5e9bb05f920093b0818a143",
+  "bytes": 202290,
+  "sha256": "e9e785649b1166d512cd35c123b860ed6318a16165491d7c3d8de48c1d8bef6c",
   "slots": [
     {
       "x": 46,

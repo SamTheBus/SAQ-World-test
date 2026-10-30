@@ -350,127 +350,51 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; user-sel
 @keyframes saq-injury-heartbeat-v3 {0%,100%{filter:brightness(.90)}35%{filter:brightness(1.16)}60%{filter:brightness(.95)}}
 @media(prefers-reduced-motion:reduce){#world-app.saq-low-health-v3::after {animation:none;}#world-hud-vitals.saq-critical-health-v3 {transition:none;}}
 
-/* SAQ Wilderness V3 · premium Stage 1 environment loading screen.
-   Landscape palette/geometry adapted from IdleSAQ Stage 1 (tier 0 in entities.js).
-   Isolated from combat, generation and save systems. */
-.saq-startup{position:fixed;inset:0;z-index:2500;overflow-x:hidden;overflow-y:auto;
-  background:#090e15;color:#f5e8d0;font-family:Georgia,'Times New Roman',serif;
-  padding:0;margin:0;overscroll-behavior:contain;isolation:isolate}
-.saq-startup[hidden]{display:none!important}
-.saq-load-landscape{position:absolute;inset:0 0 auto;height:clamp(310px,55vh,600px);overflow:hidden;
-  background:#191326;pointer-events:none;z-index:-2}
-.saq-load-stage1-art{display:block;width:100%;height:100%;}
-.saq-load-darken{position:absolute;inset:0;pointer-events:none;z-index:-1;
-  background:linear-gradient(180deg,rgba(7,10,16,.20) 0%,rgba(7,10,16,.03) 23%,
-    rgba(7,10,16,.16) 38%,#090e15 65%,#090e15 100%)}
-.saq-load-main{position:relative;display:flex;flex-direction:column;min-height:100%;min-height:100dvh;
-  width:min(740px,100%);margin:0 auto;padding:calc(30px + env(safe-area-inset-top,0px))
-  clamp(22px,5vw,68px) calc(22px + env(safe-area-inset-bottom,0px));box-sizing:border-box}
-.saq-load-brand{display:flex;gap:12px;justify-content:center;align-items:center;text-shadow:0 2px 16px #000b}
-.saq-load-mark{width:37px;flex:none;filter:drop-shadow(0 1px 2px #080b18);}
-.saq-load-mark svg{width:100%;display:block}
-.saq-load-brand-label{font-size:clamp(22px,5.7vw,30px);font-weight:700;letter-spacing:.21em;color:#fff1cf;line-height:1.1}
-.saq-load-brand-sub{font:600 clamp(8px,2vw,10px)/1.3 system-ui,sans-serif;letter-spacing:.29em;color:#e7ceaa;margin-top:5px}
-.saq-load-spacer{flex:1 1 auto;min-height:clamp(200px,34vh,440px)}
-.saq-load-content{flex:none;max-width:520px;width:100%;margin:0 auto 0;}
-.saq-load-chapter{display:flex;align-items:center;gap:12px;justify-content:center;
-  color:#c6ae80;font:600 10px system-ui,sans-serif;letter-spacing:.27em}
-.saq-load-rule{height:1px;width:38px;background:linear-gradient(90deg,transparent,#897044)}
-.saq-load-rule:last-child{transform:scaleX(-1)}
-.saq-load-heading{margin:13px auto 33px;max-width:510px;text-align:center;
-  color:#eee6d9;font-size:clamp(24px,6vw,38px);font-weight:400;font-style:normal;line-height:1.25;
-  letter-spacing:-.015em;text-shadow:0 1px 16px #07090e}
-.saq-load-controls{border-top:1px solid #8e7549;padding:20px 0 0;background:transparent}
-.saq-load-status-row{display:flex;align-items:baseline;gap:8px;min-height:24px;margin:0 0 12px;
-  font:500 13px/1.4 system-ui,sans-serif}
-.saq-load-stage{flex:1;min-width:0;color:#e9e4d8;overflow-wrap:anywhere}
-.saq-load-working{width:5px;height:5px;display:inline-block;flex:none;background:#d8b778;border-radius:50%;
-  opacity:.85;animation:saq-load-breath 2s ease-in-out infinite;align-self:center}
-.saq-load-activity{color:#ab9980;font:500 11px system-ui,sans-serif}
-#saq-startup-progress{display:block;width:100%;height:5px;appearance:none;-webkit-appearance:none;
-  border:0;border-radius:0;overflow:hidden;background:#273039;box-shadow:0 0 0 1px #8e754943}
-#saq-startup-progress::-webkit-progress-bar{background:#273039;border-radius:0}
-#saq-startup-progress::-webkit-progress-value{background:linear-gradient(90deg,#9f7845,#dbc28f);
-  border-radius:0;transition:width .36s ease;box-shadow:0 0 12px #f5d49566}
-#saq-startup-progress::-moz-progress-bar{background:#c6a575;border-radius:0}
-.saq-load-meta{display:flex;justify-content:space-between;gap:15px;margin-top:10px;
-  font:500 10px/1.3 system-ui,sans-serif;letter-spacing:.04em;color:#b4aa98}
-.saq-load-time{font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:.12em}
-.saq-load-tip{font:400 12px/1.6 system-ui,sans-serif;color:#a7aeb3;margin:22px 0 0;min-height:42px}
-.saq-load-tip[data-slow=true]::after{content:' Larger worlds can take longer on this device.';color:#cebc99}
-.saq-load-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;
-  border-top:1px solid #75695336;padding-top:14px;margin-top:18px;
-  color:#858d95;font:400 10px/1.4 system-ui,sans-serif}
-.saq-load-footer button{font:600 11px/1.3 system-ui,sans-serif;background:transparent;
-  color:#d7c29c;border:1px solid #8a795a85;border-radius:0;padding:7px 10px;
-  min-height:32px;cursor:pointer;white-space:nowrap}
-.saq-load-footer button:focus-visible{outline:2px solid #d7c29c;outline-offset:3px}
-.saq-stage1-clouds{animation:saq-stage1-drift 85s linear infinite alternate}
-.saq-stage1-sun{animation:saq-stage1-breathe 8s ease-in-out infinite;transform-origin:180px 90px}
-.saq-stage1-firefly{animation:saq-stage1-fireflies 5s ease-in-out infinite}
-@keyframes saq-stage1-drift{from{transform:translateX(-12px)}to{transform:translateX(20px)}}
-@keyframes saq-stage1-breathe{0%,100%{opacity:.8}50%{opacity:1}}
-@keyframes saq-stage1-fireflies{0%,100%{opacity:.18}50%{opacity:.8}}
-@keyframes saq-load-breath{0%,100%{opacity:.35}50%{opacity:1}}
-@media(max-height:700px){.saq-load-main{padding-top:calc(16px + env(safe-area-inset-top,0px));}
-  .saq-load-spacer{min-height:145px}.saq-load-heading{margin-bottom:19px;font-size:24px}
-  .saq-load-tip{margin-top:10px;min-height:22px}.saq-load-footer{margin-top:8px}}
-@media(min-width:800px){.saq-load-landscape{height:60vh}.saq-load-spacer{min-height:41vh}}
-@media(max-width:370px){.saq-load-brand-label{letter-spacing:.12em}.saq-load-chapter{letter-spacing:.14em}
-  .saq-load-footer{font-size:9px}}
-@media(prefers-reduced-motion:reduce){.saq-stage1-clouds,.saq-stage1-sun,.saq-stage1-firefly,.saq-load-working{animation:none!important}
-  #saq-startup-progress::-webkit-progress-value{transition:none!important}}
-
-/* V3 UI refinement: charcoal, parchment and desaturated woodland pewter.
-   The Stage 1 sky is authentic IdleSAQ art, but the loading UI must not read as
-   a purple/gold card-pack reward screen. No gradients, glows or framed cards
-   on the controls; graphics are quiet until the world is ready. */
-.saq-startup-premium { background:#0b1113; color:#e6e9e1; }
-.saq-startup-premium .saq-load-landscape { background:#141b1d;filter:saturate(.73) brightness(.89); }
-.saq-startup-premium .saq-load-darken { background:linear-gradient(180deg,
-  rgba(7,12,15,.36) 0%, rgba(8,14,16,.05) 28%, rgba(8,14,16,.21) 42%,
-  #0b1113 68%,#0b1113 100%); }
-.saq-startup-premium .saq-load-brand { text-shadow:0 1px 12px #050a0c96; }
-.saq-startup-premium .saq-load-mark { width:31px; filter:drop-shadow(0 1px 2px #05090aaa); }
-.saq-startup-premium .saq-load-brand-label { color:#eeede5;letter-spacing:.18em;font-weight:600; }
-.saq-startup-premium .saq-load-brand-sub { color:#c0c8c2;letter-spacing:.23em;font-weight:500; }
-.saq-startup-premium .saq-load-chapter {color:#a4b5ab;font-size:9px;letter-spacing:.20em;}
-.saq-startup-premium .saq-load-rule {background:linear-gradient(90deg,transparent,#8b9e93);width:26px;opacity:.7;}
-.saq-startup-premium .saq-load-heading {color:#ebeae4;font-size:clamp(27px,6.4vw,41px);
-  letter-spacing:.035em;line-height:1.2;margin:10px auto 31px;text-shadow:0 1px 10px #090f12b0;}
-.saq-startup-premium .saq-load-controls {border-top:1px solid #8f9e9354;}
-.saq-startup-premium .saq-load-status-row {font-size:12px;}
-.saq-startup-premium .saq-load-stage {color:#e0e5df;}
-.saq-startup-premium .saq-load-working {background:#96b09c;box-shadow:none;}
-.saq-startup-premium .saq-load-activity {color:#a7b7ad;}
-.saq-startup-premium #saq-startup-progress {height:4px;background:#2b3735;box-shadow:none;}
-.saq-startup-premium #saq-startup-progress::-webkit-progress-bar {background:#2b3735;}
-.saq-startup-premium #saq-startup-progress::-webkit-progress-value {background:#a2b8a9;box-shadow:none;}
-.saq-startup-premium #saq-startup-progress::-moz-progress-bar {background:#a2b8a9;}
-.saq-startup-premium .saq-load-meta {color:#a2aaa6;letter-spacing:0;}
-.saq-startup-premium .saq-load-tip {color:#a5b1ad;}
-.saq-startup-premium .saq-load-tip[data-slow=true]::after {color:#b4c2b8;}
-.saq-startup-premium .saq-load-footer {border-top:1px solid #66766d38;color:#909a96;}
-.saq-startup-premium .saq-load-footer button {border:0;background:transparent;
-  border-bottom:1px solid #778d82;color:#c5d1c9;border-radius:0;padding:5px 0;min-height:30px;
-  font-size:10px;letter-spacing:.04em;}
-.saq-startup-premium .saq-load-footer button:hover {color:#edf2e9;border-color:#c5d1c9;}
-.saq-startup-premium .saq-load-footer button:focus-visible {outline:2px solid #c5d1c9;outline-offset:3px;}
-@media (max-height:700px) {.saq-startup-premium .saq-load-heading {font-size:26px;margin-bottom:17px;}}
-
-/* Source-authentic World hero + Rust Nibbler over IdleSAQ Stage 1. No title card. */
-.saq-startup-premium .saq-load-duel {position:absolute;top:0;left:0;width:100%;
-  height:clamp(310px,55vh,600px);z-index:0;display:block;pointer-events:none;
-  filter:saturate(.92) brightness(.96)}
-.saq-startup-premium .saq-load-main {z-index:1}
-.saq-startup-premium .saq-load-darken {background:linear-gradient(180deg,
-  rgba(7,12,15,.32) 0%,rgba(8,14,16,.03) 35%,rgba(8,14,16,.09) 55%,
-  #0b1113 97%,#0b1113 100%)}
-.saq-startup-premium .saq-load-content {padding-top:8px}
-.saq-startup-premium .saq-load-chapter {margin-bottom:14px}
-.saq-startup-premium .saq-load-spacer {min-height:clamp(255px,42vh,440px)}
-@media (max-height:700px){.saq-startup-premium .saq-load-spacer{min-height:clamp(215px,39vh,335px)}
-  .saq-startup-premium .saq-load-chapter{margin-bottom:9px}}
+/* Loading screen: the campfire. The scene is one canvas (startup_camp_v1.js); the name sits on top
+   and the tip, status and bar along the bottom. Isolated from combat, generation and saves. */
+.saq-camp{position:fixed;inset:0;z-index:2500;overflow:hidden;margin:0;padding:0;background:#0a0d17;color:#f4ead6;isolation:isolate;
+  font-family:"Segoe UI",system-ui,-apple-system,sans-serif;transition:opacity .45s ease}
+.saq-camp[hidden]{display:none!important}
+.saq-camp.saq-camp-done{opacity:0;pointer-events:none}
+.saq-camp-scene{position:absolute;inset:0;width:100%;height:100%;display:block}
+.saq-camp-ui{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;max-width:640px;margin:0 auto;
+  padding:calc(64px + env(safe-area-inset-top,0px)) max(26px,env(safe-area-inset-right,0px)) calc(28px + env(safe-area-inset-bottom,0px)) max(26px,env(safe-area-inset-left,0px))}
+.saq-camp-brand{display:flex;flex-direction:column;align-items:center;gap:12px}
+.saq-camp-wordmark{margin:0;font:700 clamp(30px,8.4vw,40px)/1 Georgia,'Times New Roman',serif;letter-spacing:.16em;padding-left:.16em;text-align:center;color:#f4ead6;
+  background:linear-gradient(180deg,#fffaf0 0%,#f1dfb8 55%,#d9b979 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 2px 0 #0007) drop-shadow(0 10px 22px #0009)}
+.saq-camp-orn{display:flex;align-items:center;gap:8px;color:#dcb874;opacity:.85}
+.saq-camp-orn::before,.saq-camp-orn::after{content:"";width:46px;height:1px;background:linear-gradient(90deg,transparent,currentColor)}
+.saq-camp-orn::after{transform:scaleX(-1)}
+.saq-camp-orn i{display:block;width:5px;height:5px;transform:rotate(45deg);background:currentColor}
+.saq-camp-bottom{display:flex;flex-direction:column;gap:14px}
+.saq-camp-tip{margin:0 0 6px;min-height:68px;display:flex;flex-direction:column;gap:6px;transition:opacity .35s ease}
+.saq-camp-tip.saq-camp-tip-out{opacity:0}
+.saq-camp-tip-label{font-size:11px;font-weight:600;line-height:1;letter-spacing:.24em;text-transform:uppercase;color:#dcb874}
+.saq-camp-tip-text{max-width:31em;font-size:15px;line-height:1.45;color:#d3cad9;text-wrap:pretty}
+.saq-camp-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:13px;font-weight:500;line-height:1}
+.saq-camp-status{color:#f4ead6;opacity:.86}
+.saq-camp-pct{color:#dcb874;font-weight:600;font-variant-numeric:tabular-nums}
+.saq-camp-bar{position:relative;height:4px;border-radius:2px;background:#f4ead624}
+.saq-camp-fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:2px;background:linear-gradient(90deg,#9c7a3e,#dcb874 70%,#fff2cf);transition:width .3s linear}
+.saq-camp-fill::after{content:"";position:absolute;right:-3px;top:50%;width:8px;height:8px;margin-top:-4px;border-radius:50%;background:#fff6dc;box-shadow:0 0 10px 3px #ffd68ca6}
+.saq-camp-foot{display:flex;justify-content:space-between;align-items:center;min-height:20px;font-size:11px;line-height:1.3;color:#a59eb6}
+.saq-camp-foot button{min-height:30px;padding:4px 0;border:0;border-bottom:1px solid #d3cad966;border-radius:0;background:none;color:#d3cad9;font:inherit;font-weight:500;cursor:pointer}
+.saq-camp-foot button:focus-visible{outline:2px solid #dcb874;outline-offset:3px}
+/* Landscape: the tip and the bar share one strip along the bottom, clear of the camera cutout. */
+@media (min-aspect-ratio:21/20){
+  .saq-camp-ui{max-width:1100px;padding:calc(18px + env(safe-area-inset-top,0px)) max(64px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(64px,env(safe-area-inset-left,0px))}
+  .saq-camp-brand{gap:8px}
+  .saq-camp-wordmark{font-size:clamp(22px,3.2vw,34px)}
+  .saq-camp-orn::before,.saq-camp-orn::after{width:34px}
+  .saq-camp-bottom{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:40px;row-gap:9px;align-items:baseline}
+  .saq-camp-tip{grid-column:1;grid-row:1;flex-direction:row;align-items:baseline;gap:10px;min-height:0;margin:0}
+  .saq-camp-tip-text{max-width:none;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .saq-camp-row{grid-column:2;grid-row:1;gap:14px}
+  .saq-camp-bar{grid-column:1/-1;grid-row:2}
+  .saq-camp-foot{grid-column:1/-1;grid-row:3;min-height:16px}
+}
+@media (prefers-reduced-motion:reduce){.saq-camp,.saq-camp-tip,.saq-camp-fill{transition:none}}
 
 /* RPG Interface V1 — presentation successor, 2026-10-27.
    Static surfaces only: no blur filters, external fonts, image downloads or timers.

@@ -1,6 +1,6 @@
 {
-  "runtimeId": "b7f8db6e1fe3ec26",
-  "runtimeSha256": "b7f8db6e1fe3ec26e14cdf6eaac3a9d3de2172daa9286e5bad1e7ceae0baa612",
+  "runtimeId": "ededc65317611a35",
+  "runtimeSha256": "ededc65317611a35b2c5039509d4af8abc4a80f122581098e43e7037e56b3858",
   "files": [
     {
       "path": ".nojekyll",
@@ -20,77 +20,77 @@
     {
       "path": "assets/breakable-props-v1/kit-manifest.json",
       "bytes": 1392,
-      "sha256": "8c5f58ebaa6c53a5be6f113e8ef9f793b1966b54ecd9973a6e97ce79b69fca3c"
+      "sha256": "4ff954a64875c15c7ba1bfdf6fb24860815b4c55ef8e529184757783c3336093"
     },
     {
-      "path": "assets/breakable-props-v1/props-source-v1.png",
-      "bytes": 1394066,
-      "sha256": "585e8842fa178a3bceb44000bce6a9a5747f9b6f0728a37a45abf56f2f64e532"
+      "path": "assets/breakable-props-v1/props-source-v1.webp",
+      "bytes": 250016,
+      "sha256": "3fabc992a42a50308f933f725793bb4d831b6770512e49cd1e09787d64deac6e"
     },
     {
-      "path": "assets/fort-art-pilot-v1/floor-v1.png",
-      "bytes": 1265080,
-      "sha256": "e0bf1464ea6f5d7c648f3e5e3c6417f9af2ad0b2398494bec777ce1493c218cb"
+      "path": "assets/fort-art-pilot-v1/floor-v1.webp",
+      "bytes": 29546,
+      "sha256": "bda04884326685dd12cbf65ad45856c8a84a0b6a2e338575bd52745fdf72519b"
     },
     {
-      "path": "assets/fort-art-pilot-v1/keep-v1.png",
-      "bytes": 1564135,
-      "sha256": "43e70b76c2a564a1994a57ad201e860f9fd69cad9573ae3adfda553e251d3f77"
+      "path": "assets/fort-art-pilot-v1/keep-v1.webp",
+      "bytes": 155676,
+      "sha256": "15dcb0e040f304264a4a5ef92add9980279f7c7ea0776481d39e99af7a763fdf"
     },
     {
       "path": "assets/fort-art-pilot-v1/kit-manifest.json",
-      "bytes": 2458,
-      "sha256": "6a046b99c3ec3141cf96f5f24c4cb563b4265e4a9000cdcf3222158e1f197d2b"
+      "bytes": 2456,
+      "sha256": "da28f60ad0e692e0971fa8d0551bbef4869b15b3a173bf93f23f43d4d4a41faf"
     },
     {
-      "path": "assets/fort-art-pilot-v1/masonry-v1.png",
-      "bytes": 1484183,
-      "sha256": "a2c8380db2951851d88830c6f7b359761b81f0b1aa2c5a7a105daafc17750085"
+      "path": "assets/fort-art-pilot-v1/masonry-v1.webp",
+      "bytes": 69144,
+      "sha256": "af09bdc1959f7d9f8999415a32d991640080c2715ffc2d9c8519b58c5b336d34"
     },
     {
-      "path": "assets/fort-art-pilot-v1/tower-v1.png",
-      "bytes": 1338474,
-      "sha256": "a04d7e822ae38bd25020ed342d8ea5619a40c66b974ca62471d9b481a8f33efa"
+      "path": "assets/fort-art-pilot-v1/tower-v1.webp",
+      "bytes": 161324,
+      "sha256": "64be2b17e32db4f9b1326ddd84b768d82fcd15311166dfa2676668ffb2db2172"
     },
     {
-      "path": "assets/hidden-hollow-v1/hidden-hollow.png",
-      "bytes": 1153139,
-      "sha256": "146d578189fbc649b75c09dff5590bd2ca8e420b26ddee490f9965614125463e"
+      "path": "assets/hidden-hollow-v1/hidden-hollow.webp",
+      "bytes": 158386,
+      "sha256": "0136bc1baa63e17395a74cdddd5801f2d07573de7f1507a716b208be18061cc7"
     },
     {
       "path": "assets/hidden-hollow-v1/kit-manifest.json",
       "bytes": 405,
-      "sha256": "13db6cad9cba21c5eec256a8ed41f03ba41c508dd27afad82bdd2df8c8626ba2"
+      "sha256": "a7f56387e9349a68667cc6be6fb018448256317568d11be88cffd39de5c306b3"
     },
     {
       "path": "assets/hidden-hollow-v1/provenance.json",
       "bytes": 713,
-      "sha256": "88d67333acc5e03fe12ccd827b60388766925215cb0f0c0c9123b7f17e9c4143"
+      "sha256": "15a38c671c8e362fd882eb476a21e8721c346b95736d8047c86d1223194cf0a7"
     },
     {
-      "path": "assets/hollow-ground-cover-v1/grass-tuft-a.png",
-      "bytes": 1043314,
-      "sha256": "ca84fcad774b7c47a59895c630dbc075913782458ad0ce838cc7a6f1cf8fc1bf"
+      "path": "assets/hollow-ground-cover-v1/grass-tuft-a.webp",
+      "bytes": 81506,
+      "sha256": "e847b1be3a6b67d242190b80fc9836c9283e04b75de40bba355b436eada6a356"
     },
     {
-      "path": "assets/hollow-ground-cover-v1/grass-tuft-b.png",
-      "bytes": 1070102,
-      "sha256": "e6517fe1894a243d158f70b21ee8e869bf43d56699bd695c76361511e2878e34"
+      "path": "assets/hollow-ground-cover-v1/grass-tuft-b.webp",
+      "bytes": 74768,
+      "sha256": "afc9b02ed09e4b8cebf6c26066df3bb6a373e752efaa7295a1ae1b47c27e60ca"
     },
     {
       "path": "assets/hollow-ground-cover-v1/kit-manifest.json",
-      "bytes": 2284,
-      "sha256": "f68c5ac0969333b13415132ea26b2092eee5e28e4f12ac8b3bcae4d1d47094fd"
+      "bytes": 2282,
+      "sha256": "c1a8a4851791ac1570ff194cd0d68e029c4102da74c23e2f671bb3d044bbe4e4"
     },
     {
-      "path": "assets/hollow-ground-cover-v1/leaf-plant.png",
-      "bytes": 443248,
-      "sha256": "8e20f008d42d821b8c16a1dabbaed270e026d0d4535d2b330a5fda5570d61597"
+      "path": "assets/hollow-ground-cover-v1/leaf-plant.webp",
+      "bytes": 57322,
+      "sha256": "3a6e7cd8cb004816f09dc8a067128ff6c0b44fb511a6f68d76bbc4fe0c9c4e04"
     },
     {
-      "path": "assets/hollow-ground-cover-v1/low-fern.png",
-      "bytes": 979467,
-      "sha256": "f455bd307b7a5671f1417b145b0112c2d8b14c93e5bf51280ef054f431b6961c"
+      "path": "assets/hollow-ground-cover-v1/low-fern.webp",
+      "bytes": 75434,
+      "sha256": "a55b7ce6ed2954db2c11daa0ae1bdc2aca033d3f1bdadd6f51e161c424cb7f96"
     },
     {
       "path": "assets/hollow-ground-cover-v1/provenance.json",
@@ -98,9 +98,9 @@
       "sha256": "4d424c229ce8302652bad0b96327f3980c624720ea7e7b6d1c3abdb066d32572"
     },
     {
-      "path": "assets/hollow-ground-cover-v1/root-sprout.png",
-      "bytes": 399979,
-      "sha256": "8dd2d73c2cb7554a56ca6daa02c2eab5c3af5660c6f3159dccff9a32b53a1efe"
+      "path": "assets/hollow-ground-cover-v1/root-sprout.webp",
+      "bytes": 56628,
+      "sha256": "4de2c98f81f436854e39178f15bd61f6caf13f2964785a7f78053ad336175ac9"
     },
     {
       "path": "assets/hybrid-art-pilot-v1/journey.json",
@@ -110,27 +110,27 @@
     {
       "path": "assets/hybrid-art-pilot-v1/kit-manifest.json",
       "bytes": 3339,
-      "sha256": "04981276c72260bfbfd36b9cac2c7ab45669679e6608dbcbe06c6f9864b12141"
+      "sha256": "b0fed05ca0443571c1d839e37c29c5d5bc90ec3bd0d0536b54e717ed7579638a"
     },
     {
-      "path": "assets/hybrid-art-pilot-v1/woodland-atlas-source.png",
-      "bytes": 1623361,
-      "sha256": "ed9fea4aecd769896e04990ee43506c95d96f55c74cf373ec1f88b182e21a5f7"
+      "path": "assets/hybrid-art-pilot-v1/woodland-atlas-source.webp",
+      "bytes": 248822,
+      "sha256": "f3f3e3df6529b5fb20d109cbcb59009878e7fa8c5328096e1fb0b181397d9b40"
     },
     {
-      "path": "assets/hybrid-art-v2/bush-sprites-source.png",
-      "bytes": 940431,
-      "sha256": "b4e6660339cfe9d4ea70eea9074917799ae211f2ceeb216387c0e89a3a91d0ab"
+      "path": "assets/hybrid-art-v2/bush-sprites-source.webp",
+      "bytes": 132618,
+      "sha256": "44288d2c3b1568fdb81ed4ded14a4716bb968b3018be9c2ac82c26abc924ab76"
     },
     {
       "path": "assets/hybrid-art-v2/kit-manifest.json",
       "bytes": 2063,
-      "sha256": "d28eecd8c03e5849a4e6c76292d26fac61a177de626f231764036f0f8a870024"
+      "sha256": "529876eb5d6ac0c2c43681288b2e5836ce61486e400564e623d9a7bdd3dca752"
     },
     {
-      "path": "assets/hybrid-art-v2/material-atlas-source.png",
-      "bytes": 1751166,
-      "sha256": "f95347584d69cbe0b29cf552a6f8596ff7110fee9f187377d0fb7eddf5840b98"
+      "path": "assets/hybrid-art-v2/material-atlas-source.webp",
+      "bytes": 91244,
+      "sha256": "5928a0f5dc583a52c2482b96b24a11e5bfcd2c51b955cf62995a9d7ccfa351a7"
     },
     {
       "path": "assets/hydrology-v1/alpha.json",
@@ -138,29 +138,29 @@
       "sha256": "4fb70faf18fe2ae53ec79c71e4c1c7d70f6f3769649b084dd8f66fce53cd8cc6"
     },
     {
-      "path": "assets/night-loot-v1/debris-source-v1.png",
-      "bytes": 1017473,
-      "sha256": "e114451398560e2f89ffc2455ec3d8965fc8bca5d5e9bb05f920093b0818a143"
+      "path": "assets/night-loot-v1/debris-source-v1.webp",
+      "bytes": 202290,
+      "sha256": "e9e785649b1166d512cd35c123b860ed6318a16165491d7c3d8de48c1d8bef6c"
     },
     {
       "path": "assets/night-loot-v1/kit-manifest.json",
       "bytes": 2369,
-      "sha256": "b1979b5dc13c6f8292ecbd45c35ff5b04d0e947a6ba0f52f60bf3521117ab81e"
+      "sha256": "47f155a02f696b39ddb619b69ab1ead75d9a9ec1019c5fb9c3396c104da9185f"
     },
     {
-      "path": "assets/painted-paths-v1/flat-transition-source.png",
-      "bytes": 1633178,
-      "sha256": "af901ed6ec8b79c68a8a2aae498a2a499d4bbddb2e59bcb8d69892109bbc4d80"
+      "path": "assets/painted-paths-v1/flat-transition-source.webp",
+      "bytes": 85488,
+      "sha256": "c42ee463155acc214fbe9a6a5597211364d598c08da25869f85c75ebafafe0b8"
     },
     {
-      "path": "assets/painted-paths-v1/junction-source.png",
-      "bytes": 1831205,
-      "sha256": "be6a4040a7adc596706aa541ca4bc7be557bdb618f332151c34a3d8fec136cf4"
+      "path": "assets/painted-paths-v1/junction-source.webp",
+      "bytes": 131456,
+      "sha256": "5d0536b6d53677a1234cd8d5586c854385f316ff89194c2821309927f7de4d90"
     },
     {
       "path": "assets/painted-paths-v1/kit-manifest.json",
-      "bytes": 2319,
-      "sha256": "445c49d6faf68b3b6e9f26373ef9697a995e30d0d619518a28c74717d52a33b3"
+      "bytes": 2318,
+      "sha256": "9870585ce11e73d8d2f87d4511d0a846d5ce64aa484e553231b8c8cab11ebe5e"
     },
     {
       "path": "assets/planned-world-water-v3/alpha.json",
@@ -178,29 +178,29 @@
       "sha256": "b45cc8e610b432ef59a91b345c9a0083b1ee8e4557cbf777dbfb6620f8f063c3"
     },
     {
-      "path": "assets/ruin-storybook-v1/entrance-source.png",
-      "bytes": 1269861,
-      "sha256": "d49d7de3b715a086ace39d3bafe3680a6a906227407b5f5357b384876d7ae92c"
+      "path": "assets/ruin-storybook-v1/entrance-source.webp",
+      "bytes": 88174,
+      "sha256": "5774227c123426e2357899362356c3ee94a2ff2953ed24d67b17750c303e0d1f"
     },
     {
-      "path": "assets/ruin-storybook-v1/grove-clean-source.png",
-      "bytes": 1803272,
-      "sha256": "d6626d8a6a04c6b1a5a447379b15d874cb9de4a82a0e103b7d098fabdd1ea461"
+      "path": "assets/ruin-storybook-v1/grove-clean-source.webp",
+      "bytes": 218584,
+      "sha256": "aa8b408d5256f03b9908c3f1660aa9d4fbb78e9c35a61fbcc6ba1ebb8e9ce3dc"
     },
     {
       "path": "assets/ruin-storybook-v1/kit-manifest.json",
-      "bytes": 8548,
-      "sha256": "01fafed84c87911c6808a5a1c461660fdcf85760dd58701339fdbd6105668fd7"
+      "bytes": 8546,
+      "sha256": "8a62758bd7d5f10ddbcec66d4b6004949d798f682681677fa9d6e6d0696ce03d"
     },
     {
-      "path": "assets/ruin-storybook-v1/materials-source.png",
-      "bytes": 1629836,
-      "sha256": "5534fd20c780154f7977385655bf4f7e83bec1d2ad843638b0fef00a3f52446a"
+      "path": "assets/ruin-storybook-v1/materials-source.webp",
+      "bytes": 33396,
+      "sha256": "0b61f2f1af6ebad64290931719968090e47451ba185a2579492146b1dc172833"
     },
     {
-      "path": "assets/ruin-storybook-v1/modular-thin-source.png",
-      "bytes": 1376494,
-      "sha256": "b15c2534086fc153e4a34f040ca353ddcb8a0f431e9caeb9b89baff7ffce6fc5"
+      "path": "assets/ruin-storybook-v1/modular-thin-source.webp",
+      "bytes": 123630,
+      "sha256": "0f58388900afdd7634c3768ff5dede4ebc6570bdda37f9f9551e1ac7f7233cd4"
     },
     {
       "path": "assets/ruin-storybook-v1/provenance.json",
@@ -208,29 +208,29 @@
       "sha256": "5031b97670823a1842b6f5297db245eded4cec3ebe05dc047423c2d1efe890bb"
     },
     {
-      "path": "assets/ruin-storybook-v1/vertical-thin-source.png",
-      "bytes": 472319,
-      "sha256": "2910127c5761a334c166a2a92779bba69676302a2fb2d913ee850216a790e4ae"
+      "path": "assets/ruin-storybook-v1/vertical-thin-source.webp",
+      "bytes": 61942,
+      "sha256": "29aabfb390c827491dd221f1351e993252f01dc8ab42ca45a2f9d09b625b791b"
     },
     {
-      "path": "assets/spore-outbreak-v1/fungal-clump.png",
-      "bytes": 806829,
-      "sha256": "26627a492e72b83ac8056ca2415b5856ab604b77d66ed44af320de2382c6c503"
+      "path": "assets/spore-outbreak-v1/fungal-clump.webp",
+      "bytes": 103034,
+      "sha256": "ebda0fe78525470f85c41a85062e2b981f70855742e43b3475ed0b545e18c680"
     },
     {
       "path": "assets/spore-outbreak-v1/kit-manifest.json",
-      "bytes": 2468,
-      "sha256": "1ce28cb6a9c5bfbc0fd1a3b6453aa553b8b1284a0d242b2116756592458d9159"
+      "bytes": 2469,
+      "sha256": "4346c39adc5ca06d44dd54b9eb596e7953f5a3485678cf9f5cac06a2d9ad7780"
     },
     {
-      "path": "assets/spore-outbreak-v1/spore-pod-open.png",
-      "bytes": 1050369,
-      "sha256": "ef906b2895969601a9589af052fede458d97e9e0c3583653b2cc28c5fff50901"
+      "path": "assets/spore-outbreak-v1/spore-pod-open.webp",
+      "bytes": 134890,
+      "sha256": "b967909312e759da15f5f211c70d8e8ddf1a637a0b0db9f2fd05b335a72f2673"
     },
     {
-      "path": "assets/spore-outbreak-v1/spore-pod.png",
-      "bytes": 1077055,
-      "sha256": "d31a923dc52bcbfbeb268e766552c11d581ca1fdf3c4217604615b808939a7c4"
+      "path": "assets/spore-outbreak-v1/spore-pod.webp",
+      "bytes": 129620,
+      "sha256": "f959ddab9e34d5d4ecc0dfab50446bef0cd1ca9c7da60b3c207453100e10ba5d"
     },
     {
       "path": "assets/wilderness-v2/alpha.json",
@@ -238,14 +238,14 @@
       "sha256": "ed2f7fcafeac4305b6658242d232d8d79dade9ecb6b43ea74125fc1318cc282f"
     },
     {
-      "path": "assets/woodland-environment-v1/earth-source.png",
-      "bytes": 1516154,
-      "sha256": "73b75b04f2978c8592c16c6384ae83ddb8153af9a6d995bb0bcd756541623aca"
+      "path": "assets/woodland-environment-v1/earth-source.webp",
+      "bytes": 37900,
+      "sha256": "5996c6bbda2f97625c46a673129e670563b4133c29cb0d93ec7ade37af5e78d6"
     },
     {
-      "path": "assets/woodland-environment-v1/grass-source.png",
-      "bytes": 1686271,
-      "sha256": "01b6fa1ec51a3d20cc78713ef0ec389bf2051d826ef9a4ff6d2e87445bdf8895"
+      "path": "assets/woodland-environment-v1/grass-source.webp",
+      "bytes": 82308,
+      "sha256": "a22bf3eb33e22aebe1de4bf4c9775adc346b2379130c6f6ff536705fd0bcc04b"
     },
     {
       "path": "assets/woodland-environment-v1/journey.json",
@@ -254,63 +254,63 @@
     },
     {
       "path": "assets/woodland-environment-v1/kit-manifest.json",
-      "bytes": 1177,
-      "sha256": "17d2c4a2e52a3f052eda803568d271fae67d01e4a0959f2a224deb00ff79f9e8"
+      "bytes": 1175,
+      "sha256": "798c4b69c0d5191230f643a15a7edd4b14a355c166f5fb52146f374877faaa64"
     },
     {
       "path": "assets/woodland-foliage-v2/kit-manifest.json",
       "bytes": 3288,
-      "sha256": "815e46a7bff815c98eba285628082a157646392df3a2da63539147c8f4b2d973"
+      "sha256": "94f5682de5cd4a74ce619a1f6c8192f3605b5884396117ad1582ddc85a1865a1"
     },
     {
-      "path": "assets/woodland-foliage-v2/trees.png",
-      "bytes": 1119515,
-      "sha256": "5fd4b6e7afb52432828b07a6335bf0144234a5db7f863ead55f503939dc5ba60"
+      "path": "assets/woodland-foliage-v2/trees.webp",
+      "bytes": 194056,
+      "sha256": "a140d1ac80f00acc15ddbdbde578a36c31d6ac12ead07641c0da284a95830457"
     },
     {
-      "path": "assets/woodland-foliage-v2/understory.png",
-      "bytes": 1664923,
-      "sha256": "93679f87de486ba7323535e5b9b4585f4d9dc5b027cb743dfe42d9d88bcf8bb9"
+      "path": "assets/woodland-foliage-v2/understory.webp",
+      "bytes": 216372,
+      "sha256": "ea441d16502e2820654641dd769a837d066a3978bad49c228c4e1f11f87fda34"
     },
     {
-      "path": "assets/woodland-forest-v1/accents.png",
-      "bytes": 1822924,
-      "sha256": "b9edfed1aff6ee52085676516d2e5f5fffd7ef20299280ae8dbd7117928b8ac2"
+      "path": "assets/woodland-forest-v1/accents.webp",
+      "bytes": 225310,
+      "sha256": "73c32edb5f330d88b57cf47be89e229521de686ea31288edc748cb4190a6f1f8"
     },
     {
       "path": "assets/woodland-forest-v1/kit-manifest.json",
-      "bytes": 3465,
-      "sha256": "822b0cc05bc64859ff447482e9ec9efbfb7211745958f6eb40db36657cae9422"
+      "bytes": 3466,
+      "sha256": "3685be56523f1115bae14760bc77c1107efae9efa3dd9a93b72fd5a868fedad0"
     },
     {
-      "path": "assets/woodland-forest-v1/rocks.png",
-      "bytes": 933770,
-      "sha256": "b54cb0b043a11070426d55230c5056e774908023819a1718e3f929dfead378cc"
+      "path": "assets/woodland-forest-v1/rocks.webp",
+      "bytes": 124586,
+      "sha256": "f008030f0631902c18c27ada080d8de431d00cc269df30432645535be102b5d4"
     },
     {
-      "path": "assets/woodland-forest-v1/trees.png",
-      "bytes": 1192450,
-      "sha256": "3f91d16de1c0df02067e261c4857fc2573179c2fa56b24d1f1e18a78ede0de79"
+      "path": "assets/woodland-forest-v1/trees.webp",
+      "bytes": 187316,
+      "sha256": "12c7a3938fac0e9ecbffb0850f9a7ad4a0ef16198ea41c4f49c20e5d1936fc41"
     },
     {
-      "path": "assets/woodland-forest-v1/understory.png",
-      "bytes": 1677936,
-      "sha256": "189de6b9b5bb63b0d21ac5c3128a5e62926df8e034a29ef2ec7f8e467a1a0e6b"
+      "path": "assets/woodland-forest-v1/understory.webp",
+      "bytes": 200798,
+      "sha256": "d58c63c96268a65b9a90619adcff3047cc897c61d77f1f7bf09f85b47eed3945"
     },
     {
       "path": "assets/woodland-prop-clarity-v1/kit-manifest.json",
       "bytes": 1313,
-      "sha256": "501b8e29d8b1d6f161d8c29de56e3d177a071016a69ef15daafdeb23cbbce7e9"
+      "sha256": "682b06a672e778b19fa8d108e522898c905f0354c14e3d0e9522967fa38aa2e0"
     },
     {
-      "path": "assets/woodland-prop-clarity-v1/small-props.png",
-      "bytes": 1536731,
-      "sha256": "22efa157688c606180083d28c54f390a04c1152a2f3795c67e39fcd32b2c9c48"
+      "path": "assets/woodland-prop-clarity-v1/small-props.webp",
+      "bytes": 161912,
+      "sha256": "3b3d3acdd0e4c96f30db116cd65675fa7b1484affb1f756a602515b4516170bd"
     },
     {
       "path": "index.html",
-      "bytes": 20241,
-      "sha256": "2c29b475f8936a9f2fc7187629d96689b7c782f437e5fc704256d4f4757a1b63"
+      "bytes": 12010,
+      "sha256": "62241ca926e589e88cf76e3484b2f26fbee9ebf4a6bf8f2e4d354b9ceba9173d"
     },
     {
       "path": "manifest.webmanifest",
@@ -319,8 +319,8 @@
     },
     {
       "path": "save-worker.js",
-      "bytes": 2236114,
-      "sha256": "caf0e2fffaac14d95e379a27aaac58cb264b3c18409b641fde355c22a982cad7"
+      "bytes": 2236411,
+      "sha256": "fe6b5ddea4fafad29b1f60cc472e8d77ac73c06fe7c52178329e41fddedc06b4"
     },
     {
       "path": "src/chunks/chunk-DHKV2HSZ.js",
@@ -328,9 +328,9 @@
       "sha256": "39d8aca0253efbcbf313f9fc50e595870690e65f5faf75808c6747d34a5c88e4"
     },
     {
-      "path": "src/chunks/playable_browser-M34IUVEC.js",
-      "bytes": 4087248,
-      "sha256": "5706182f4448536feb3cdbd54fa59c3524e3af16f1e2f9396a12f2857732c990"
+      "path": "src/chunks/playable_browser-J4HDLAPD.js",
+      "bytes": 4092700,
+      "sha256": "005b8a5fd2f22170e5eab4fc2c546f620d16632f0eabc689d9f1d940593b38f7"
     },
     {
       "path": "src/chunks/world_browser-GCMNZ4SS.js",
@@ -338,24 +338,24 @@
       "sha256": "264bcf15bfc5d75e5d8edc70c4b40b78608e2bc35931b3956e104b6df8ab5aad"
     },
     {
-      "path": "src/client/startup_combat_preview_v1.js",
-      "bytes": 13273,
-      "sha256": "fcfeac87c3a46d4cc9c7cc7a048822052ec47fba2655ae423dca5abc6a19e9c9"
+      "path": "src/client/startup_camp_v1.js",
+      "bytes": 31666,
+      "sha256": "b82d224c77b62216587d806c85f78b52b20968c58b759d7a42cba36424b1ddcf"
     },
     {
       "path": "src/client/startup_loading_v1.js",
-      "bytes": 4171,
-      "sha256": "a6836546cbe04ca54db3eddab099aa48eba2540c564ad231dc14aad65589b414"
+      "bytes": 6059,
+      "sha256": "5382497ea68895a018617f1b855873a337a2e7987a49df031ce7d1dff93df6f7"
     },
     {
       "path": "src/entrypoints/browser_boot.js",
-      "bytes": 1862,
-      "sha256": "0d955165571e4951759e00d9c8f26fb3027c9748efce21c1f75bfb5ce847d54c"
+      "bytes": 2158,
+      "sha256": "0ae9983c9c8e1f801a1ad4bf74189a55ec3d47ad0e56dd58944edaba3953fc43"
     },
     {
       "path": "world.css",
-      "bytes": 158088,
-      "sha256": "77978dfce4f35561f52d54182846f28275681b7c9a3541ca3306fb6d1689716f"
+      "bytes": 153073,
+      "sha256": "4b3ab5c08553a11640f279c32cab54da76c386a954251779e78beaf3edd382b3"
     }
   ]
 }

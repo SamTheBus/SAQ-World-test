@@ -2,9 +2,9 @@
   "version": "hybrid-art-v2",
   "source": "OpenAI built-in imagegen; V1 atlas as style reference; original file retained. No third-party pack or exclusive license asserted.",
   "atlas": {
-    "path": "material-atlas-source.png",
-    "bytes": 1751166,
-    "sha256": "f95347584d69cbe0b29cf552a6f8596ff7110fee9f187377d0fb7eddf5840b98",
+    "path": "material-atlas-source.webp",
+    "bytes": 91244,
+    "sha256": "5928a0f5dc583a52c2482b96b24a11e5bfcd2c51b955cf62995a9d7ccfa351a7",
     "width": 1254,
     "height": 1254
   },
@@ -22,9 +22,9 @@
   "geometry": "Exact V1 journey and V3 assets unchanged",
   "temporary": "Limited grassland/woodland kit; water and other biomes remain existing candidate visuals",
   "bushes": {
-    "path": "bush-sprites-source.png",
-    "bytes": 940431,
-    "sha256": "b4e6660339cfe9d4ea70eea9074917799ae211f2ceeb216387c0e89a3a91d0ab",
+    "path": "bush-sprites-source.webp",
+    "bytes": 132618,
+    "sha256": "44288d2c3b1568fdb81ed4ded14a4716bb968b3018be9c2ac82c26abc924ab76",
     "width": 1254,
     "height": 1254,
     "slots": [

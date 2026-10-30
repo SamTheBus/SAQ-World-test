@@ -4,7 +4,7 @@
   "files": [
     {
       "id": "grass-tuft-a",
-      "path": "grass-tuft-a.png",
+      "path": "grass-tuft-a.webp",
       "targetScreenWidth": 32,
       "width": 1536,
       "height": 1024,
@@ -14,13 +14,13 @@
         1418,
         954
       ],
-      "sha256": "ca84fcad774b7c47a59895c630dbc075913782458ad0ce838cc7a6f1cf8fc1bf",
-      "bytes": 1043314,
+      "sha256": "e847b1be3a6b67d242190b80fc9836c9283e04b75de40bba355b436eada6a356",
+      "bytes": 81506,
       "processing": "Original built-in image_gen PNG/alpha unchanged; proportional draw only"
     },
     {
       "id": "grass-tuft-b",
-      "path": "grass-tuft-b.png",
+      "path": "grass-tuft-b.webp",
       "targetScreenWidth": 36,
       "width": 1536,
       "height": 1024,
@@ -30,13 +30,13 @@
         1506,
         915
       ],
-      "sha256": "e6517fe1894a243d158f70b21ee8e869bf43d56699bd695c76361511e2878e34",
-      "bytes": 1070102,
+      "sha256": "afc9b02ed09e4b8cebf6c26066df3bb6a373e752efaa7295a1ae1b47c27e60ca",
+      "bytes": 74768,
       "processing": "Original built-in image_gen PNG/alpha unchanged; proportional draw only"
     },
     {
       "id": "leaf-plant",
-      "path": "leaf-plant.png",
+      "path": "leaf-plant.webp",
       "targetScreenWidth": 40,
       "width": 1774,
       "height": 887,
@@ -46,13 +46,13 @@
         1461,
         727
       ],
-      "sha256": "8e20f008d42d821b8c16a1dabbaed270e026d0d4535d2b330a5fda5570d61597",
-      "bytes": 443248,
+      "sha256": "3a6e7cd8cb004816f09dc8a067128ff6c0b44fb511a6f68d76bbc4fe0c9c4e04",
+      "bytes": 57322,
       "processing": "Original built-in image_gen PNG/alpha unchanged; proportional draw only"
     },
     {
       "id": "root-sprout",
-      "path": "root-sprout.png",
+      "path": "root-sprout.webp",
       "targetScreenWidth": 48,
       "width": 1774,
       "height": 887,
@@ -62,13 +62,13 @@
         908,
         623
       ],
-      "sha256": "8dd2d73c2cb7554a56ca6daa02c2eab5c3af5660c6f3159dccff9a32b53a1efe",
-      "bytes": 399979,
+      "sha256": "4de2c98f81f436854e39178f15bd61f6caf13f2964785a7f78053ad336175ac9",
+      "bytes": 56628,
       "processing": "Original built-in image_gen PNG/alpha unchanged; proportional draw only"
     },
     {
       "id": "low-fern",
-      "path": "low-fern.png",
+      "path": "low-fern.webp",
       "targetScreenWidth": 48,
       "width": 1536,
       "height": 1024,
@@ -78,8 +78,8 @@
         1455,
         931
       ],
-      "sha256": "f455bd307b7a5671f1417b145b0112c2d8b14c93e5bf51280ef054f431b6961c",
-      "bytes": 979467,
+      "sha256": "a55b7ce6ed2954db2c11daa0ae1bdc2aca033d3f1bdadd6f51e161c424cb7f96",
+      "bytes": 75434,
       "processing": "Original built-in image_gen PNG/alpha unchanged; proportional draw only"
     }
   ]

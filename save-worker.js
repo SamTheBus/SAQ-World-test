@@ -7324,15 +7324,15 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
 // src/storage/planned_world_assets_v1.js
 var plannedWorldAssetCacheKey = (binding) => binding.assetId + "/" + binding.assetHash + "/" + (binding.townPrototype ?? "terrain-only") + "/" + (binding.cavePrototype ?? "no-cave") + "/" + (binding.fortPrototype ?? "no-fort") + "/" + (binding.ruinPrototype ?? "no-ruin") + "/" + (binding.cryptPrototype ?? "no-crypt") + "/" + (binding.sitePopulationHash ?? "base-roster") + "/" + (binding.interiorGenerationHash ?? "legacy-interiors") + "/" + (binding.ferryHash ?? "no-ferry") + "/" + (binding.settlementLifeHash ?? "no-services") + "/" + (binding.settlementServicesHash ?? "no-specialists") + "/" + (binding.combatHash ?? "legacy-combat") + "/" + (binding.wildernessHash ?? "no-wilderness") + "/" + (binding.bossHostingHash ?? "legacy-boss-hosting") + (binding.startHash ? "/" + binding.startHash : "") + (binding.woodlandForestHash ? "/" + binding.woodlandForestHash : "") + (binding.hydrologyHash ? "/" + binding.hydrologyHash : "") + (binding.accessHash ? "/" + binding.accessHash : "") + (binding.roadsideHash ? "/" + binding.roadsideHash : "");
 function createPlannedWorldAssetStore({ readText, sha256 }) {
-  const cache3 = /* @__PURE__ */ new Map();
-  async function load(binding) {
+  const cache3 = /* @__PURE__ */ new Map(), prepared = /* @__PURE__ */ new Map();
+  async function prepare(binding) {
     validatePlannedBinding(binding);
     if (hasRoadsideEncounters(binding)) {
       const policy = await readText("assets/roadside-encounters-v1/policy.json");
       requirePlan(bytesToHex(await sha256(new TextEncoder().encode(policy))) === ROADSIDE_HASH, "Roadside policy commitment mismatch");
     }
     const key9 = plannedWorldAssetCacheKey(binding);
-    if (!cache3.has(key9)) cache3.set(key9, (async () => {
+    if (!prepared.has(key9)) prepared.set(key9, (async () => {
       const text = await readText(plannedAssetDirectory(binding) + "/" + binding.assetId + ".json");
       requirePlan(bytesToHex(await sha256(new TextEncoder().encode(text))) === binding.assetHash, "Planned asset commitment mismatch");
       let asset = JSON.parse(text);
@@ -7370,12 +7370,19 @@ function createPlannedWorldAssetStore({ readText, sha256 }) {
         validateRuntimePlan(asset);
       }
       freezePlan(asset);
+      return asset;
+    })());
+    return prepared.get(key9);
+  }
+  async function load(binding) {
+    const asset = await prepare(binding), key9 = plannedWorldAssetCacheKey(binding);
+    if (!cache3.has(key9)) cache3.set(key9, (async () => {
       const generator = createPlannedChunkGenerator(asset, binding, sha256);
       return { asset, generator, caveReservation: await generator.caveReservation(), caveReservations: await generator.caveReservations(), fortReservations: await generator.fortReservations(), ruinReservations: await generator.ruinReservations(), cryptReservations: await generator.cryptReservations() };
     })());
     return cache3.get(key9);
   }
-  return Object.freeze({ load, sha256, async generate(request) {
+  return Object.freeze({ load, prepare, sha256, async generate(request) {
     const { generator } = await load(request.plannedWorld);
     return generator.generate(request);
   } });

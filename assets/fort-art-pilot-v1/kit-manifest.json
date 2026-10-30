@@ -11,7 +11,7 @@
   "files": [
     {
       "id": "keep",
-      "path": "keep-v1.png",
+      "path": "keep-v1.webp",
       "width": 1341,
       "height": 1173,
       "crop": [
@@ -20,15 +20,15 @@
         1287,
         1019
       ],
-      "bytes": 1564135,
-      "sha256": "43e70b76c2a564a1994a57ad201e860f9fd69cad9573ae3adfda553e251d3f77",
+      "bytes": 155676,
+      "sha256": "15dcb0e040f304264a4a5ef92add9980279f7c7ea0776481d39e99af7a763fdf",
       "source": "OpenAI built-in imagegen, original generated art; no third-party imagery",
       "alpha": "generated genuine alpha, unmodified",
       "decodedWidth": 768
     },
     {
       "id": "tower",
-      "path": "tower-v1.png",
+      "path": "tower-v1.webp",
       "width": 1254,
       "height": 1254,
       "crop": [
@@ -37,15 +37,15 @@
         959,
         1179
       ],
-      "bytes": 1338474,
-      "sha256": "a04d7e822ae38bd25020ed342d8ea5619a40c66b974ca62471d9b481a8f33efa",
+      "bytes": 161324,
+      "sha256": "64be2b17e32db4f9b1326ddd84b768d82fcd15311166dfa2676668ffb2db2172",
       "source": "OpenAI built-in imagegen, original generated art; no third-party imagery",
       "alpha": "generated genuine alpha, unmodified",
       "decodedWidth": 320
     },
     {
       "id": "masonry",
-      "path": "masonry-v1.png",
+      "path": "masonry-v1.webp",
       "width": 1254,
       "height": 1254,
       "crop": [
@@ -54,15 +54,15 @@
         1254,
         1254
       ],
-      "bytes": 1484183,
-      "sha256": "a2c8380db2951851d88830c6f7b359761b81f0b1aa2c5a7a105daafc17750085",
+      "bytes": 69144,
+      "sha256": "af09bdc1959f7d9f8999415a32d991640080c2715ffc2d9c8519b58c5b336d34",
       "source": "OpenAI built-in imagegen, original generated art; no third-party imagery",
       "alpha": "opaque tile material; no cutout alpha required",
       "decodedWidth": 256
     },
     {
       "id": "floor",
-      "path": "floor-v1.png",
+      "path": "floor-v1.webp",
       "width": 1254,
       "height": 1254,
       "crop": [
@@ -71,8 +71,8 @@
         1254,
         1254
       ],
-      "bytes": 1265080,
-      "sha256": "e0bf1464ea6f5d7c648f3e5e3c6417f9af2ad0b2398494bec777ce1493c218cb",
+      "bytes": 29546,
+      "sha256": "bda04884326685dd12cbf65ad45856c8a84a0b6a2e338575bd52745fdf72519b",
       "source": "OpenAI built-in imagegen, original generated art; no third-party imagery",
       "alpha": "opaque tile material; no cutout alpha required",
       "decodedWidth": 256
