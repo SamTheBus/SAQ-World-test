@@ -1185,7 +1185,7 @@ function skillLoadout(d8) {
 }
 
 // src/shared/content/hero_looks_v1.js
-var HAIR_STYLES = Object.freeze(["short", "buzz", "spiky", "swept", "shaggy", "undercut", "curly", "bob", "long", "mane", "ponytail", "pigtails", "braid", "bun", "dreads", "mohawk", "bald"]);
+var HAIR_STYLES = Object.freeze(["short", "buzz", "spiky", "swept", "shaggy", "undercut", "mullet", "curly", "bob", "long", "mane", "ponytail", "pigtails", "braid", "bun", "dreads", "mohawk", "bald"]);
 var FACIAL_HAIR = Object.freeze(["none", "stubble", "mustache", "handlebar", "goatee", "chinstrap", "chops", "short", "long", "bushy", "braided"]);
 var HAIR_COLORS = Object.freeze(["black", "soft-black", "dark-brown", "brown", "light-brown", "auburn", "copper", "strawberry", "dark-blonde", "blonde", "platinum", "gray", "silver", "white", "red", "pink", "blue", "teal", "green", "violet"]);
 var SKIN_TONES = Object.freeze(["porcelain", "fair", "light", "peach", "golden", "olive", "tan", "bronze", "brown", "chestnut", "deep", "ebony"]);

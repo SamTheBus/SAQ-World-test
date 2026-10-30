@@ -717,7 +717,7 @@ import {
   worldLevelGapMultiplier,
   worldOrdinaryMeleeProfile,
   worldPointForArea
-} from "./chunk-DHKV2HSZ.js";
+} from "./chunk-W22MIHEW.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -14004,7 +14004,7 @@ async function createPaintedRoutesV1(env, review, prior, { worldCoverage = false
 var TAU32 = Math.PI * 2;
 var K = "#000000";
 var LOOK_OPTIONS = Object.freeze({
-  hairStyles: [["short", "Short"], ["buzz", "Buzz cut"], ["spiky", "Spiky"], ["swept", "Swept"], ["shaggy", "Shaggy"], ["undercut", "Undercut"], ["curly", "Curly"], ["bob", "Bob"], ["long", "Long"], ["mane", "Mane"], ["ponytail", "Ponytail"], ["pigtails", "Pigtails"], ["braid", "Braid"], ["bun", "Bun"], ["dreads", "Dreadlocks"], ["mohawk", "Mohawk"], ["bald", "Bald"]],
+  hairStyles: [["short", "Short"], ["buzz", "Buzz cut"], ["spiky", "Spiky"], ["swept", "Swept"], ["shaggy", "Shaggy"], ["undercut", "Undercut"], ["mullet", "Mullet"], ["curly", "Curly"], ["bob", "Bob"], ["long", "Long"], ["mane", "Mane"], ["ponytail", "Ponytail"], ["pigtails", "Pigtails"], ["braid", "Braid"], ["bun", "Bun"], ["dreads", "Dreadlocks"], ["mohawk", "Mohawk"], ["bald", "Bald"]],
   facialHair: [["none", "None"], ["stubble", "Stubble"], ["mustache", "Mustache"], ["handlebar", "Handlebar"], ["goatee", "Goatee"], ["chinstrap", "Chin strap"], ["chops", "Mutton chops"], ["short", "Short beard"], ["long", "Long beard"], ["bushy", "Bushy beard"], ["braided", "Braided beard"]],
   hairColors: [
     ["black", "Black", "#1c1b20"],
@@ -14224,6 +14224,8 @@ var FRONT6 = {
   long: [[8.6, -11.4, 8.6, -13.6, 6.8, -15.6, -7.8, -15.6, -11.6, -12.8, -11.6, -3, -7.6, -2, -6.4, -9.8, -2.2, -10.8, 3.6, -10.6, 6.4, -11.8], [-6.8, -10, -3, -10.8, -3.2, -1.6, -4.6, 0.8, -6.8, -0.6]],
   mohawk: [[-9, -13.8, -10, -18.2, -7, -17, -6.4, -21.4, -3.4, -18.6, -2, -22.2, 0.8, -18.4, 2.8, -20.6, 4.4, -16.8, 7.4, -17.8, 6.8, -13.8]],
   shaggy: [[8.8, -11.2, 9.2, -13.8, 7.2, -15.8, -8, -16, -11.8, -13, -12.2, -6, -11, -3.2, -10.2, -5, -9.2, -1.8, -8.2, -4.4, -7, -2.4, -5.8, -4.6, -4.4, -3, -3.2, -6.2, -3.4, -9.8, -1.4, -10.8, 0.6, -9.4, 2.4, -10.8, 4.8, -9.4, 6.4, -11.2]],
+  // Mullet: a short textured top with a choppy fringe; the long back is drawn in hairBack.
+  mullet: [[9, -11.2, 9.4, -13.8, 7.6, -15.6, 6.2, -17.2, 4.6, -15.8, 2.6, -17.4, 0.6, -16, -1.8, -17.4, -3.8, -16, -6.2, -17, -8.4, -15.4, -11, -13.4, -11.6, -8, -11.4, -2, -9.8, -0.6, -8.6, -3.2, -7.2, -5, -6.6, -9.6, -2.6, -10.6, -0.6, -9.6, 1.4, -11, 3.4, -9.8, 5.2, -11.2, 7, -10]],
   undercut: [[9.8, -12.2, 8.8, -15.6, 6.2, -17.6, -6.8, -17.6, -9.6, -15.4, -9.8, -13.4, -6.4, -13.8, 2, -13.2, 6.8, -11.4]],
   curly: [curls()],
   bob: [[8.6, -11.4, 8.8, -13.8, 7, -15.6, -8, -15.6, -11.6, -12.8, -11.8, -1.2, -7.8, -1.2, -6.6, -9.6, -2.2, -10.8, 3.6, -10.6, 6.4, -11.8], [-6.8, -10, -3, -10.8, -2.8, -1.2, -6.8, -1.2]],
@@ -14234,6 +14236,7 @@ var FRONT6 = {
 var NO_EAR = /* @__PURE__ */ new Set(["long", "bob", "shaggy", "pigtails"]);
 function hairBack(c, st, H3, hat) {
   const o = { bottom: true, split: 0.66, lw: 1.3 };
+  if (st === "mullet") G(c, [-6.6, -11.6, -11.4, -12.6, -12.6, -7, -12.2, -1.6, -13.8, 1.8, -13.2, 4.8, -11.6, 3.2, -11, 5.8, -9.4, 3, -8, 4.6, -7.4, 1, -6.6, -2.6], H3, o);
   if (st === "long") G(c, [-6.4, -12, -11.8, -13, -12.8, -4, -12.6, 6.6, -10.2, 8.2, -7.8, 6.6, -6.4, 2], H3, o);
   if (st === "mane") G(c, [-6.4, -12.4, -11.6, -15.6, -13.6, -11.6, -15.8, -9.2, -14, -6.4, -15.8, -2.6, -13.6, 0.2, -14.6, 4.6, -11.6, 3.4, -11, 8.4, -8.8, 4.6, -7, 7, -6.2, 1.6], H3, o);
   if (st === "ponytail") {
@@ -14269,7 +14272,7 @@ function eyes(c, blink, y = -7.2) {
 }
 function bareHead(c, st, S, H3, blink, hat) {
   G(c, HEAD2, S, { bottom: true, split: 0.86, lw: 1.4 });
-  if (st === "mohawk" || st === "undercut") {
+  if (st === "mohawk" || st === "undercut" || st === "mullet") {
     c.save();
     c.clip(poly(HEAD2));
     alpha(c, H3.b, 0.22, () => c.fillRect(-10, -14, 11, 9));
