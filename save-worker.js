@@ -9724,6 +9724,32 @@ function effectiveEquipmentBonuses(definition, slot, level = 0, combat = false) 
   return bonus;
 }
 
+// src/shared/content/class_kits_v1.js
+var CLASS_KIT_VERSION = "class-kit-v1";
+var CLASS_KIT_PIECES = Object.freeze(["weapon", "helmet", "overall", "gloves", "boots"]);
+var CLASS_KITS = Object.freeze({
+  knight: Object.freeze({ weapon: "kit-knight-longsword", helmet: "kit-knight-coif", overall: "kit-knight-hauberk", gloves: "kit-knight-gauntlets", boots: "kit-knight-treads" }),
+  rogue: Object.freeze({ weapon: "kit-rogue-saber", helmet: "kit-rogue-bandana", overall: "kit-rogue-doublet", gloves: "kit-rogue-gloves", boots: "kit-rogue-boots" }),
+  mage: Object.freeze({ weapon: "kit-mage-staff", helmet: "kit-mage-cowl", overall: "kit-mage-robe", gloves: "kit-mage-wraps", boots: "kit-mage-slippers" })
+});
+var CLASS_KIT_EQUIPMENT = Object.freeze([
+  ["kit-knight-longsword", "Squire\u2019s Longsword", "weapon", 1, 0, 0, "iron"],
+  ["kit-knight-coif", "Squire\u2019s Coif", "helmet", 0, 5, 0, null],
+  ["kit-knight-hauberk", "Squire\u2019s Hauberk", "overall", 0, 10, 1, null],
+  ["kit-knight-gauntlets", "Squire\u2019s Gauntlets", "gloves", 0, 3, 0, null],
+  ["kit-knight-treads", "Squire\u2019s Treads", "boots", 0, 0, 1, null],
+  ["kit-rogue-saber", "Footpad\u2019s Saber", "weapon", 1, 0, 0, "iron"],
+  ["kit-rogue-bandana", "Footpad\u2019s Bandana", "helmet", 0, 5, 0, null],
+  ["kit-rogue-doublet", "Footpad\u2019s Doublet", "overall", 0, 10, 1, null],
+  ["kit-rogue-gloves", "Footpad\u2019s Gloves", "gloves", 0, 3, 0, null],
+  ["kit-rogue-boots", "Footpad\u2019s Boots", "boots", 0, 0, 1, null],
+  ["kit-mage-staff", "Apprentice\u2019s Staff", "weapon", 1, 0, 0, "iron"],
+  ["kit-mage-cowl", "Apprentice\u2019s Cowl", "helmet", 0, 5, 0, null],
+  ["kit-mage-robe", "Apprentice\u2019s Robe", "overall", 0, 10, 1, null],
+  ["kit-mage-wraps", "Apprentice\u2019s Wraps", "gloves", 0, 3, 0, null],
+  ["kit-mage-slippers", "Apprentice\u2019s Slippers", "boots", 0, 0, 1, null]
+]);
+
 // src/shared/content/equipment.js
 var itemDefinition = (item) => item?.workshop ? workshopResult(item).definition : item?.generated?.definition ?? EQUIPMENT[item?.definitionId];
 var equipmentRequiredLevel = (player, item) => combatPlayer(player) && item?.generated?.progression?.combatHash ? item.generated.itemPower : null;
@@ -9746,12 +9772,13 @@ var EQUIPMENT = freezeWire({ ...SUBWEAPON_CATALOG(), ...Object.fromEntries([
   ["greaves", "Greaves", "leggings", 0, 12, 1, null],
   ["sabatons", "Sabatons", "boots", 0, 0, 1, null],
   ["full-plate", "Full Plate Armor", "overall", 0, 45, 4, null],
-  ["sun-charm", "Sun Signet Ring", "ring", 3, 0, 3, null]
+  ["sun-charm", "Sun Signet Ring", "ring", 3, 0, 3, null],
+  ...CLASS_KIT_EQUIPMENT
 ].map(([definitionId, name, slot, attack, maxHp, defense, weaponVisual]) => [definitionId, { definitionId, name, slot, bonuses: { attack, maxHp, defense }, weaponVisual }])) });
 function SUBWEAPON_CATALOG() {
   return Object.fromEntries(Object.values(SUBWEAPONS).map((d) => [d.definitionId, d]));
 }
-var equipmentSlots = (inv) => inv?.subweapons ? [...EQUIPMENT_SLOTS, "subweapon"] : EQUIPMENT_SLOTS;
+var equipmentSlots = (inv) => inv?.subweapons || inv?.classKit ? [...EQUIPMENT_SLOTS, ...inv.subweapons ? ["subweapon"] : [], ...inv.classKit ? ["gloves"] : []] : EQUIPMENT_SLOTS;
 var REWARD_POOLS = freezeWire([
   ["iron-sword", "padded-armor", "copper-charm", "coif", "greaves", "sabatons", "full-plate"],
   ["guard-sword", "chain-armor", "silver-charm", "coif", "greaves", "sabatons", "full-plate"],
@@ -9941,6 +9968,40 @@ function validateWorldEventsProgress(a, b) {
   }
 }
 
+// src/shared/contracts/class_kit_inventory.js
+var isClassKitSource = (p, sourceEntityId) => Boolean(sourceEntityId) && Boolean(p.inventory?.classKit?.sourceEntityIds.includes(sourceEntityId));
+var classKitPiece = (p, sourceEntityId) => {
+  const ids = p.inventory?.classKit?.sourceEntityIds, i = ids ? ids.indexOf(sourceEntityId) : -1;
+  return i < 0 ? null : CLASS_KIT_PIECES[i];
+};
+function validateClassKit(p, s, validateCommand2) {
+  const i = p.inventory, k = i.classKit;
+  closedRecord(k, ["version", "heroClass", "sourceEntityIds", "command", "authorityOrder", "tick", "revision"]);
+  requireContract(s.format === D6_ACTIVITY_FORMAT && k.version === CLASS_KIT_VERSION && i.subweapons, "Invalid class kit version");
+  requireContract(heroClassOf(p.d8)?.id === k.heroClass && Boolean(CLASS_KITS[k.heroClass]), "Class kit for another class");
+  requireContract(Array.isArray(k.sourceEntityIds) && k.sourceEntityIds.length === CLASS_KIT_PIECES.length && new Set(k.sourceEntityIds).size === CLASS_KIT_PIECES.length, "Invalid class kit pieces");
+  for (const [n, id] of k.sourceEntityIds.entries()) {
+    requireContract(/^ent:[0-9a-f]{32}$/.test(id) && BigInt("0x" + id.slice(4)) <= BigInt(s.identitySequence), "Invalid class kit identity fence");
+    const item = i.itemsById[`item:${p.playerId}:${id}`] ?? i.renewal.groundBySourceId[id]?.item;
+    requireContract(item?.definitionId === CLASS_KITS[k.heroClass][CLASS_KIT_PIECES[n]], "Class kit piece lost or replaced");
+  }
+  validateCommand2(k.command);
+  const c = k.command;
+  requireContract(c.kind === "classkit.claim" && c.playerId === p.playerId && c.sessionId === s.session.sessionId && c.campaignId === s.campaign.campaignId, "Invalid class kit receipt");
+  safeInteger(k.authorityOrder, 1, s.lastAppliedAuthorityOrder);
+  safeInteger(k.tick, 0, s.tick);
+  safeInteger(k.revision, 1, i.revision);
+  requireContract(c.payload.inventoryRevision + 1 === k.revision, "Class kit revision mismatch");
+  safeInteger(c.clientSequence, 1, s.appliedClientSequences[p.playerId]);
+  safeInteger(c.residencyRevision, 1, s.entitiesById[p.entityId].residency.residencyRevision);
+  requireContract(s.spacesByInstanceId[c.spaceInstanceId]?.spaceRevision === c.spaceRevision, "Invalid class kit space");
+  const applied = s.appliedCommandsById[c.commandId];
+  if (applied) requireContract(applied.status === "applied" && applied.commandCanonical === canonicalStringify(c) && applied.authorityOrder === k.authorityOrder && applied.tick === k.tick, "Class kit applied receipt mismatch");
+}
+function validateClassKitProgress(a, b) {
+  if (a.classKit) requireContract(canonicalStringify(a.classKit) === canonicalStringify(b.classKit), "Class kit history rewritten");
+}
+
 // src/shared/contracts/potion_belt_v1.js
 var POTION_BELT_POLICY = Object.freeze({
   version: "potion-belt-v1",
@@ -10031,7 +10092,7 @@ function validateServiceItem(s, p, item) {
 }
 function saleQuote(p, item) {
   const d = itemDefinition(item), o = p.inventory.renewal?.originsByItemId[item?.itemId];
-  if (!item || item.ownerPlayerId !== p.playerId || !o || item.sourceEntityId === null || !ordinary.has(item.definitionId) || item.locked || item.protected || item.unique || d?.unique || d?.classification === "unique-landmark" || Object.values(p.inventory.equipped).includes(item.itemId) || Object.values(p.inventory.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item.sourceEntityId) || (item.generated?.rarityTier ?? 0) > SETTLEMENT_LIFE_POLICY.sale.maximumRarity) return null;
+  if (!item || item.ownerPlayerId !== p.playerId || !o || item.sourceEntityId === null || !ordinary.has(item.definitionId) || item.locked || item.protected || item.unique || d?.unique || d?.classification === "unique-landmark" || Object.values(p.inventory.equipped).includes(item.itemId) || Object.values(p.inventory.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item.sourceEntityId) || isClassKitSource(p, item.sourceEntityId) || (item.generated?.rarityTier ?? 0) > SETTLEMENT_LIFE_POLICY.sale.maximumRarity) return null;
   if (!o.servicePurchase && !o.groupId) return null;
   const power2 = progressionBigInt(item.generated?.itemPower ?? 1), bounded = Number(power2 > BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) ? BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) : power2);
   return String(SETTLEMENT_LIFE_POLICY.sale.baseGold + bounded * SETTLEMENT_LIFE_POLICY.sale.perItemPower + (item.generated?.rarityTier ?? 0) * SETTLEMENT_LIFE_POLICY.sale.perRarityTier);
@@ -10329,7 +10390,7 @@ function workshopQuote(p, item, op, line = 0) {
   if (!item?.generated) return { problem: "Select ordinary generated equipment" };
   const r = workshopResult(item), materials3 = {};
   let gold = "0", problem = null;
-  if (item.locked || item.protected || item.unique || item.generated.definition.unique || item.sourceEntityId === null || Object.values(p.inventory.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item.sourceEntityId)) problem = "Protected equipment cannot be modified or shattered";
+  if (item.locked || item.protected || item.unique || item.generated.definition.unique || item.sourceEntityId === null || Object.values(p.inventory.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item.sourceEntityId) || isClassKitSource(p, item.sourceEntityId)) problem = "Protected equipment cannot be modified or shattered";
   if (op === "awaken") {
     if (r.tier >= 5) problem = "Maximum five-star rarity";
     if (r.enchants) problem = "Purge enchantments before awakening";
@@ -15918,7 +15979,7 @@ function retireEncounterRewards(state, groupId) {
 }
 function validateRenewableInventory(p, state, validateCommand2, legacyDefeatReward) {
   const inv = p.inventory, n = inv.renewal;
-  closedRecord(inv, ["version", "economy", "revision", "gold", "goldAwardsByEntityId", "itemsById", "equipped", "rewardsByEntityId", "lastEquipmentChange", "topologyMigration", "renewal"], ["subweapons", "d7", "services"]);
+  closedRecord(inv, ["version", "economy", "revision", "gold", "goldAwardsByEntityId", "itemsById", "equipped", "rewardsByEntityId", "lastEquipmentChange", "topologyMigration", "renewal"], ["subweapons", "d7", "services", "classKit"]);
   validateSettlementServices(state, p, validateCommand2);
   closedRecord(n, ["version", "baseGold", "baseSouls", "retiredGold", "retiredSouls", "defeats", "groundBySourceId", "originsByItemId", "lastDrop", "lastGroundPickup"]);
   requireContract(n.version === "renewable-inventory-d5-v1", "Unsupported renewable inventory");
@@ -15930,11 +15991,18 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
   safeInteger(n.defeats);
   closedRecord(inv.equipped, equipmentSlots(inv));
   if (inv.subweapons) validateProvisions(p, state, validateCommand2);
+  if (inv.classKit) validateClassKit(p, state, validateCommand2);
   const items = Object.values(inv.itemsById), drops = Object.values(n.groundBySourceId), starter = itemId(p, null);
   requireContract(items.length >= 1 && items.length <= (p.d8 ? D8_OWNERSHIP_BOUND : 64) && inv.itemsById[starter]?.definitionId === "worn-sword", "Owned inventory/starter bound");
   function origin2(o, id) {
     if (o?.servicePurchase) {
       validateServiceOrigin(p, o, id);
+      return;
+    }
+    const kit = classKitPiece(p, id);
+    if (kit) {
+      closedRecord(o, ["kit", "sourceEntityId"]);
+      requireContract(o.kit === kit && o.sourceEntityId === id, "Unknown class kit provenance");
       return;
     }
     const t = provisionType(p, id);
@@ -16097,6 +16165,7 @@ function validateRenewableInventoryProgress(before, after, pid) {
   if (!a.subweapons && b.subweapons) installSubweaponInventory({ inventory: a });
   const x = a.renewal, y = b.renewal;
   if (a.subweapons) validateProvisionProgress(a, b);
+  validateClassKitProgress(a, b);
   requireContract(same19(x.baseGold, y.baseGold) && x.baseSouls === y.baseSouls && compareAmount(y.retiredGold, x.retiredGold) >= 0 && y.retiredSouls >= x.retiredSouls && y.defeats >= x.defeats && b.revision >= a.revision, "Economy baseline/counters regressed");
   for (const [id, item] of Object.entries(a.itemsById)) {
     const terminal = b.d7?.salvaged[id] ?? b.services?.salesByItemId[id], next = b.itemsById[id] ?? b.renewal.groundBySourceId[item.sourceEntityId]?.item ?? terminal?.item;
@@ -16675,7 +16744,7 @@ function validateForgeProgress(a, b, before) {
   if (!a.renewal) for (const [id, q] of Object.entries(a.economy.soulAwardsByEntityId)) requireContract(b.economy.soulAwardsByEntityId[id] === q, "Material history changed");
   let delta = 0;
   for (const slot of equipmentSlots(b)) {
-    const x = slot === "subweapon" && !a.subweapons ? 0 : a.economy.slotLevels[slot], y = b.economy.slotLevels[slot];
+    const x = slot === "subweapon" && !a.subweapons || slot === "gloves" && !a.classKit ? 0 : a.economy.slotLevels[slot], y = b.economy.slotLevels[slot];
     requireContract(y >= x, "Attunement regressed");
     delta += y - x;
     const r = b.economy.lastAttunementsBySlot[slot];
@@ -17450,17 +17519,20 @@ function validateCommand(command) {
     }
   } else if (command.kind === "forge.attune") {
     closedRecord(command.payload, ["slot", "expectedLevel", "inventoryRevision"]);
-    requireContract(["weapon", "helmet", "chest", "leggings", "overall", "boots", "ring1", "ring2", "subweapon"].includes(command.payload.slot), "Unknown Forge slot");
+    requireContract(["weapon", "helmet", "chest", "leggings", "overall", "boots", "ring1", "ring2", "subweapon", "gloves"].includes(command.payload.slot), "Unknown Forge slot");
     safeInteger(command.payload.expectedLevel, 0, 99);
     safeInteger(command.payload.inventoryRevision);
   } else if (command.kind === "equipment.equip") {
     closedRecord(command.payload, ["itemId", "inventoryRevision"], ["slot"]);
-    if (command.payload.slot !== void 0) requireContract(["weapon", "helmet", "chest", "leggings", "overall", "boots", "ring1", "ring2", "subweapon"].includes(command.payload.slot), "Unknown equipment slot");
+    if (command.payload.slot !== void 0) requireContract(["weapon", "helmet", "chest", "leggings", "overall", "boots", "ring1", "ring2", "subweapon", "gloves"].includes(command.payload.slot), "Unknown equipment slot");
     requireContract(typeof command.payload.itemId === "string" && /^item:ply:[0-9a-f]{32}:(?:ent:[0-9a-f]{32}|starter)$/.test(command.payload.itemId), "Invalid item ID");
     safeInteger(command.payload.inventoryRevision);
   } else if (command.kind === "equipment.unequip") {
     closedRecord(command.payload, ["slot", "inventoryRevision"]);
-    requireContract(["weapon", "helmet", "chest", "leggings", "overall", "boots", "ring1", "ring2", "subweapon", "armor", "charm"].includes(command.payload.slot), "Unknown equipment slot");
+    requireContract(["weapon", "helmet", "chest", "leggings", "overall", "boots", "ring1", "ring2", "subweapon", "gloves", "armor", "charm"].includes(command.payload.slot), "Unknown equipment slot");
+    safeInteger(command.payload.inventoryRevision);
+  } else if (command.kind === "classkit.claim") {
+    closedRecord(command.payload, ["inventoryRevision"]);
     safeInteger(command.payload.inventoryRevision);
   } else if (command.kind === "subweapon.claim") {
     closedRecord(command.payload, ["subType", "inventoryRevision"]);
@@ -21773,7 +21845,7 @@ function validateActivityCommand(command) {
   const { residencyRevision, ...legacy } = command;
   safeInteger(residencyRevision, 1);
   validateCommand(legacy);
-  requireContract(["worldEvent.activate", "discovery.readNote", "movement.setIntent", "combat.primaryIntent", "combat.guardIntent", "combat.shadowDash", "combat.skill", "subweapon.claim", "service.modify", "service.material", "service.buy", "service.sell", "service.rest", "supply.use", "ferry.travel", "site.transition", "player.respawn", "loot.pickup", "gear.salvage", "gear.drop", "resource.interact", "progression.change", "forge.attune", "equipment.equip", "equipment.unequip"].includes(command.kind), "Unsupported activity command");
+  requireContract(["worldEvent.activate", "discovery.readNote", "movement.setIntent", "combat.primaryIntent", "combat.guardIntent", "combat.shadowDash", "combat.skill", "subweapon.claim", "classkit.claim", "service.modify", "service.material", "service.buy", "service.sell", "service.rest", "supply.use", "ferry.travel", "site.transition", "player.respawn", "loot.pickup", "gear.salvage", "gear.drop", "resource.interact", "progression.change", "forge.attune", "equipment.equip", "equipment.unequip"].includes(command.kind), "Unsupported activity command");
   return command;
 }
 var same30 = (a, b) => canonicalStringify(a) === canonicalStringify(b);

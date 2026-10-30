@@ -31,6 +31,8 @@ import {
   BRIMSTONE_ID,
   BUILD_BALANCE_HASH,
   CAVE_INTERIOR_NAVIGATION_D12_3A,
+  CLASS_KITS,
+  CLASS_KIT_PIECES,
   CLASS_SKILLS,
   CLASS_SKILL_IDS,
   COMBAT_RUNTIME_VERSION,
@@ -308,6 +310,7 @@ import {
   campaignTavernExits,
   canActorAttack,
   canAttune,
+  canClaimClassKit,
   canClaimSubweapon,
   canDropGear,
   canPickUp,
@@ -318,6 +321,7 @@ import {
   captureWorldPositionsD9,
   certifyNumeric,
   chunkAddressKey,
+  claimClassKit,
   claimSubweapon,
   classOffhandAllowed,
   classSkillsFor,
@@ -468,6 +472,7 @@ import {
   itemDefinition,
   legacyWorldPosition,
   lineToPoint,
+  listedEquipmentSlots,
   livingFusedMimics,
   localFramePositionD9,
   lowerShield,
@@ -717,7 +722,7 @@ import {
   worldLevelGapMultiplier,
   worldOrdinaryMeleeProfile,
   worldPointForArea
-} from "./chunk-W22MIHEW.js";
+} from "./chunk-HRI7YJII.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -1121,8 +1126,8 @@ function createActorMotionPresentationV1({ collisionProbe = null, now: now2 = ()
       positions.set(id, candidate);
       interpolated++;
     }
-    const local5 = model.playersById[model.localPlayerId]?.entityId, q = positions.get(local5) ?? model.entitiesById[local5]?.position;
-    lastDisplay = q ? { tick: model.tick, displayTick, x: q.x, y: q.y, authorityX: model.entitiesById[local5].position.x, authorityY: model.entitiesById[local5].position.y } : null;
+    const local6 = model.playersById[model.localPlayerId]?.entityId, q = positions.get(local6) ?? model.entitiesById[local6]?.position;
+    lastDisplay = q ? { tick: model.tick, displayTick, x: q.x, y: q.y, authorityX: model.entitiesById[local6].position.x, authorityY: model.entitiesById[local6].position.y } : null;
     return positions;
   }
   return Object.freeze({ observe, sample, clear: clear2, inspect: () => ({ version: P.version, actors: records.size, samples: [...records.values()].reduce((n, r) => n + 1 + Number(Boolean(r.before)), 0), maximumActors: P.maximumActors, samplesPerActor: P.samplesPerActor, bufferTicks: P.bufferTicks, displayTick, latestTick: lastTick, lastDisplay, observations: observations2, resets, lastReset, snaps, interpolated, blocked: blocked3, axisFallbacks, probeCalls, probePoints, probeTotalMs, probeMaxMs }) });
@@ -8868,8 +8873,8 @@ function toxicFlyMotionV4(m, time) {
   let aim2 = { x: 0, y: -1 };
   if (cast) {
     const co = Math.cos(cast.body.rotation), si = Math.sin(cast.body.rotation), facing2 = cast.drawFacingX ?? 1;
-    const local5 = { x: (co * cast.direction.x + si * cast.direction.y) * facing2, y: -si * cast.direction.x + co * cast.direction.y };
-    const angle3 = -Math.PI / 2 + Math.atan2(local5.x, -local5.y) * weight2;
+    const local6 = { x: (co * cast.direction.x + si * cast.direction.y) * facing2, y: -si * cast.direction.x + co * cast.direction.y };
+    const angle3 = -Math.PI / 2 + Math.atan2(local6.x, -local6.y) * weight2;
     aim2 = { x: Math.cos(angle3), y: Math.sin(angle3) };
   }
   return {
@@ -14335,19 +14340,55 @@ function facialHair(c, b, H3) {
   }
 }
 var KITS = {
-  knight: { helmet: "helm", body: "plate", legs: "greaves", boots: "sabatons", main: "sword", off: "shield" },
-  rogue: { helmet: "hood", body: "leather", legs: "trousers", boots: "tall", main: "saber", off: "dagger" },
-  mage: { helmet: "hat", body: "robe", legs: "cloth", boots: "slippers", main: "staff", off: "tome" }
+  knight: { helmet: "helm", body: "plate", legs: "greaves", gloves: "gauntlets", boots: "sabatons", main: "sword", off: "shield" },
+  rogue: { helmet: "hood", body: "leather", legs: "trousers", gloves: "gloves", boots: "tall", main: "saber", off: "dagger" },
+  mage: { helmet: "hat", body: "robe", legs: "cloth", gloves: "wraps", boots: "slippers", main: "staff", off: "tome" }
 };
 var OFF_KINDS = { shield: "shield", dagger: "dagger", tome: "tome" };
+var OFF_FAMILY = {
+  shield: "shield",
+  kite: "shield",
+  buckler: "shield",
+  tower: "shield",
+  dagger: "dagger",
+  "main-gauche": "dagger",
+  stiletto: "dagger",
+  kris: "dagger",
+  tome: "tome",
+  "tome-fire": "tome",
+  "tome-frost": "tome",
+  "tome-storm": "tome",
+  "tome-prism": "tome"
+};
+var ROBES = /* @__PURE__ */ new Set(["robe", "apprentice-robe"]);
+var HATS = /* @__PURE__ */ new Set(["hat", "cowl", "bandana"]);
 function kit(spec) {
-  const k = KITS[spec.cls] ?? KITS.knight, g = spec.gear ?? {}, off = spec.offType ? OFF_KINDS[spec.offType] : k.off;
-  return { helmet: g.helmet && k.helmet, body: g.body ? k.body : "tunic", legs: g.body && k.body === "robe" ? null : g.legs ? k.legs : "pants", boots: g.boots ? k.boots : "shoes", main: g.main && k.main, off: g.off && off, g };
+  const k = KITS[spec.cls] ?? KITS.knight, g = spec.gear ?? {}, look = (slot, fallback) => g[slot] ? g[slot].kind ?? fallback : null;
+  const body5 = look("body", k.body) ?? "tunic", off = look("off", spec.offType ? OFF_KINDS[spec.offType] : k.off);
+  return { helmet: look("helmet", k.helmet), body: body5, legs: ROBES.has(body5) ? null : look("legs", k.legs) ?? "pants", gloves: look("gloves", k.gloves), boots: look("boots", k.boots) ?? "shoes", main: look("main", k.main), off, offFamily: off ? OFF_FAMILY[off] ?? "shield" : null, g };
+}
+var M = {
+  mail: { b: "#8f989e", d: "#737c82", l: "#b3bbc0" },
+  mailDot: "#5d656b",
+  doublet: { b: "#a0703f", d: "#7d5530", l: "#bd8a55" },
+  breeches: { b: "#6f5236", d: "#563f29", l: "#86664a" },
+  bandana: { b: "#a3392f", d: "#7c2a23", l: "#c24c40" },
+  blue: { b: "#3a6fb0", d: "#2b5487", l: "#5b8fd0" },
+  blueDark: { b: "#2b5487", d: "#22436b" },
+  blueInner: { b: "#d9e6f5", d: "#b8cde6" },
+  rope: { b: "#c8a46a", d: "#a5844f" },
+  steel: { b: "#a9b3ba", d: "#7f8a92", l: "#d0d7dc" },
+  darkSteel: { b: "#6c777e", d: "#545e64" },
+  oak: { b: "#7a4e27", d: "#5c3a1d" },
+  willow: { b: "#b08a55", d: "#8c6b3e" }
+};
+function mailRows(c, x, y, w, h) {
+  for (let r = 0, yy = y + 1.2; yy < y + h - 0.6; r++, yy += 1.6) for (let xx = x + 0.8 + r % 2 * 0.9; xx < x + w - 0.6; xx += 1.8) px(c, xx, yy, 0.9, 0.5, M.mailDot);
 }
 function legs2(c, w, S, step) {
   const lift = [Math.max(0, step) * 1.4, Math.max(0, -step) * 1.4];
   if (w.legs) {
-    const lp = w.legs === "greaves" ? P2.plate : w.legs === "trousers" || w.legs === "cloth" ? P2.darkPants : P2.pants, A2 = accOf(w.g.legs);
+    const lp = w.legs === "greaves" ? P2.plate : w.legs === "chausses" ? M.mail : w.legs === "breeches" ? M.breeches : w.legs === "trousers" || w.legs === "cloth" ? P2.darkPants : P2.pants, A2 = accOf(w.g.legs);
     c.save();
     c.translate(0, -lift[0]);
     R(c, -6.6, 12, 4.4, 5.6, { b: lp.d, d: lp.d }, { nohi: true });
@@ -14361,14 +14402,24 @@ function legs2(c, w, S, step) {
       px(c, -1.8, 14.2, 5.2, 0.6, A2.c);
     }
     if (w.legs === "trousers") px(c, -1.4, 13.8, 4.4, 0.9, P2.leather.b);
+    if (w.legs === "chausses") {
+      mailRows(c, -1.4, 12, 4.4, 5.6);
+      px(c, -1.4, 15.2, 4.4, 0.8, A2.c);
+    }
+    if (w.legs === "breeches") {
+      R(c, -1.8, 14.6, 5.2, 1.6, P2.strap, { flat: true, lw: 1 });
+      px(c, 0.6, 14.9, 1.2, 1, A2.c);
+    }
     c.restore();
   }
+  if (w.boots === "none") return;
   const A = accOf(w.g.boots);
   c.save();
   c.translate(0, -lift[0]);
   if (w.boots === "sabatons") R(c, -7.2, 16.6, 5.4, 3.4, P2.plateDark, { nohi: true });
   else if (w.boots === "tall") R(c, -7.2, 14.4, 5.4, 5.6, { b: P2.leather.d, d: P2.leather.d }, { nohi: true });
-  else if (w.boots === "slippers") R(c, -6.4, 18.2, 5, 1.8, { b: P2.cover.d }, { lw: 1.1 });
+  else if (w.boots === "boots") R(c, -7.2, 15.8, 5.4, 4.2, { b: P2.strap.b, d: P2.strap.b }, { nohi: true });
+  else if (w.boots === "slippers" || w.boots === "apprentice-slippers") R(c, -6.4, 18.2, 5, 1.8, { b: w.boots === "slippers" ? P2.cover.d : M.blue.d }, { lw: 1.1 });
   else R(c, -7, 17.4, 5, 2.6, { b: P2.shoe.d }, { lw: 1.2 });
   c.restore();
   c.save();
@@ -14380,12 +14431,40 @@ function legs2(c, w, S, step) {
     R(c, -2, 14.4, 6.8, 5.6, P2.leather);
     R(c, -2.3, 13.6, 7.4, 1.8, P2.leatherLight, { flat: true, lw: 1.1 });
     px(c, 0.6, 15.6, 1.4, 1.2, A.c);
-  } else if (w.boots === "slippers") {
-    R(c, -1.4, 18.2, 6.6, 1.8, P2.cover, { lw: 1.1, nohi: true });
-    R(c, 4.6, 17.2, 1.8, 1.8, P2.cover, { flat: true, lw: 1 });
+  } else if (w.boots === "boots") {
+    R(c, -2, 15.8, 6.8, 4.2, P2.strap, { split: 0.72 });
+    R(c, -2.3, 15.2, 7.4, 1.6, P2.leather, { flat: true, lw: 1.1 });
+    px(c, 3.2, 17.4, 1.2, 1.2, A.c);
+  } else if (w.boots === "slippers" || w.boots === "apprentice-slippers") {
+    const cloth = w.boots === "slippers" ? P2.cover : M.blue;
+    R(c, -1.4, 18.2, 6.6, 1.8, cloth, { lw: 1.1, nohi: true });
+    R(c, 4.6, 17.2, 1.8, 1.8, cloth, { flat: true, lw: 1 });
     px(c, 1.6, 18.6, 1.6, 0.9, A.c);
   } else R(c, -1.8, 17.4, 6.2, 2.6, P2.shoe, { lw: 1.2, nohi: true });
   c.restore();
+}
+function robeBody(c, A, acc, cloth, dark, inner, belt) {
+  const robe2 = [-8, 0, 6, 0, 6.9, 8.2, 9.8, 18.4, 2, 18.4, 0.7, 16.8, -0.6, 18.4, -10.6, 18.4, -8.9, 8.2], shape2 = poly(robe2);
+  G(c, robe2, cloth, { split: 0.68 });
+  G(c, [-0.9, 1.2, 2.3, 1.2, 3.1, 17.4, 1.6, 17.4, 0.7, 16.2, -0.3, 17.4, -1.9, 17.4], inner, { flat: true, lw: 1 });
+  c.save();
+  c.clip(shape2);
+  px(c, -11.2, 16.7, 21.6, 1.7, A.c);
+  R(c, -11, 7.9, 22, 2.3, belt ?? acc, { flat: true, lw: 1.2 });
+  c.restore();
+  c.lineWidth = 1.5;
+  c.strokeStyle = K;
+  c.stroke(shape2);
+  G(c, [3.4, 10.2, 5.4, 10.2, 5.9, 15.6, 3.7, 15.6], belt ?? acc, { flat: true, lw: 1 });
+  G(c, [-8.9, -0.8, 6.9, -0.8, 8, 3.6, -10, 3.6], dark, { split: 0.7, lw: 1.3 });
+  c.lineWidth = 1.3;
+  c.strokeStyle = K;
+  c.beginPath();
+  c.moveTo(-3.4, -0.8);
+  c.lineTo(-0.6, 3.4);
+  c.lineTo(2.2, -0.8);
+  c.stroke();
+  gem(c, -0.6, 5.8, 1.6, A.gem);
 }
 function body4(c, w, red) {
   const A = accOf(w.g.body), acc = accPal(A);
@@ -14395,6 +14474,13 @@ function body4(c, w, red) {
     gem(c, -0.7, 4.4, 1.8, A.gem);
     R(c, -8.4, 9.4, 14.8, 2.4, P2.leather, { flat: true, lw: 1.3 });
     R(c, -1.2, 9, 3, 3.2, acc, { flat: true, lw: 1.2 });
+  } else if (w.body === "hauberk") {
+    R(c, -8.2, 0, 14.4, 14, M.mail);
+    mailRows(c, -8.2, 0, 14.4, 14);
+    R(c, -8.6, 8.6, 15.2, 2.4, P2.leather, { flat: true, lw: 1.3 });
+    R(c, -1.4, 8.2, 3, 3.2, acc, { flat: true, lw: 1.2 });
+    R(c, -7, -1, 11.6, 2.2, M.darkSteel, { flat: true, lw: 1.1 });
+    gem(c, 0.1, 9.8, 1.4, A.gem);
   } else if (w.body === "leather") {
     R(c, -8, 0, 14, 12.6, P2.leather);
     G(c, [-8, 1.6, -6.4, 0, 6, 10, 6, 12, 4.6, 12.6], P2.strap, { flat: true, lw: 1.1 });
@@ -14402,29 +14488,26 @@ function body4(c, w, red) {
     R(c, -1.6, 4.4, 2.6, 2.6, acc, { flat: true, lw: 1 });
     R(c, 1.6, 9.2, 2.4, 3, acc, { flat: true, lw: 1 });
     R(c, -7.2, -1.2, 12.4, 2.8, P2.teal, { lw: 1.2 });
-  } else if (w.body === "robe") {
-    const robe2 = [-8, 0, 6, 0, 6.9, 8.2, 9.8, 18.4, 2, 18.4, 0.7, 16.8, -0.6, 18.4, -10.6, 18.4, -8.9, 8.2], shape2 = poly(robe2);
-    G(c, robe2, P2.purple, { split: 0.68 });
-    G(c, [-0.9, 1.2, 2.3, 1.2, 3.1, 17.4, 1.6, 17.4, 0.7, 16.2, -0.3, 17.4, -1.9, 17.4], P2.purpleInner, { flat: true, lw: 1 });
-    c.save();
-    c.clip(shape2);
-    px(c, -11.2, 16.7, 21.6, 1.7, A.c);
-    R(c, -11, 7.9, 22, 2.3, acc, { flat: true, lw: 1.2 });
-    c.restore();
-    c.lineWidth = 1.5;
-    c.strokeStyle = K;
-    c.stroke(shape2);
-    G(c, [3.4, 10.2, 5.4, 10.2, 5.9, 15.6, 3.7, 15.6], acc, { flat: true, lw: 1 });
-    G(c, [-8.9, -0.8, 6.9, -0.8, 8, 3.6, -10, 3.6], P2.purpleDark, { split: 0.7, lw: 1.3 });
-    c.lineWidth = 1.3;
-    c.strokeStyle = K;
+  } else if (w.body === "doublet") {
+    R(c, -8, 0, 14, 12.6, M.doublet);
+    c.lineWidth = 0.9;
+    c.strokeStyle = tint(P2.strap.d);
     c.beginPath();
-    c.moveTo(-3.4, -0.8);
-    c.lineTo(-0.6, 3.4);
-    c.lineTo(2.2, -0.8);
+    for (let y = 1.6; y < 8; y += 1.8) {
+      c.moveTo(-1.4, y);
+      c.lineTo(1.6, y + 1.2);
+      c.moveTo(1.6, y);
+      c.lineTo(-1.4, y + 1.2);
+    }
     c.stroke();
-    gem(c, -0.6, 5.8, 1.6, A.gem);
-  } else {
+    R(c, -6.8, -1, 11.2, 2.2, P2.strap, { flat: true, lw: 1.1 });
+    R(c, -8.4, 9.2, 14.8, 2.2, P2.strap, { flat: true, lw: 1.3 });
+    R(c, 2.4, 9.6, 3, 3.4, P2.leather, { flat: true, lw: 1 });
+    px(c, 3.3, 10.4, 1.2, 1, A.c);
+    gem(c, -6.6, 10.3, 1.3, A.gem);
+  } else if (w.body === "robe") robeBody(c, A, acc, P2.purple, P2.purpleDark, P2.purpleInner);
+  else if (w.body === "apprentice-robe") robeBody(c, A, acc, M.blue, M.blueDark, M.blueInner, M.rope);
+  else {
     R(c, -8, 0, 14, 12.6, P2.linen);
     c.lineWidth = 1.1;
     c.strokeStyle = tint("#8a6a45");
@@ -14450,11 +14533,104 @@ function saber(c, A) {
   G(c, [18, -1.6, 29, -2.8, 34.6, -5.8, 31.6, -0.4, 18, 1.6], P2.blade, { bottom: true, split: 0.5, lw: 1.4 });
   gem(c, 17, 0, 1.4, A.gem);
 }
+function axe(c, A) {
+  R(c, 10.6, -1.2, 1.6, 2.4, accPal(A), { flat: true, lw: 1.1 });
+  R(c, 12.2, -1, 19.6, 2, M.oak, { flat: true, lw: 1.2 });
+  R(c, 22.4, -1.5, 1.4, 3, accPal(A), { flat: true, lw: 1 });
+  G(c, [25, 1, 30.4, 1, 33.4, 2.6, 35, 6.4, 34.4, 10.2, 31.6, 11.6, 29.4, 8.8, 27.2, 5, 25, 3.6], M.steel, { lw: 1.3 });
+  px(c, 32.6, 4.4, 1, 5.4, M.steel.l);
+  R(c, 24.6, -2.2, 6, 3.2, M.darkSteel, { flat: true, lw: 1.1 });
+  gem(c, 27.6, 2.4, 1.4, A.gem);
+}
+function warhammer(c, A) {
+  R(c, 10.6, -1.2, 1.6, 2.4, accPal(A), { flat: true, lw: 1.1 });
+  R(c, 12.2, -1, 17.4, 2, M.oak, { flat: true, lw: 1.2 });
+  R(c, 25.2, -1.5, 1.4, 3, accPal(A), { flat: true, lw: 1 });
+  R(c, 26.8, -5.2, 6.4, 10.4, M.steel, { split: 0.6, lw: 1.4 });
+  px(c, 27.6, -4.4, 4.4, 0.8, M.steel.l);
+  G(c, [28.2, -5.2, 31.8, -5.2, 30, -9.4], M.darkSteel, { flat: true, lw: 1.1 });
+  gem(c, 30, 0, 1.6, A.gem);
+}
+function rapier(c, A) {
+  R(c, 10.6, -1, 1.6, 2, accPal(A), { flat: true, lw: 1 });
+  R(c, 12.2, -0.9, 3.8, 1.8, P2.leather, { flat: true, lw: 1.1 });
+  G(c, [15.6, -3.4, 17.2, -3.4, 17.2, 3.8, 13.2, 4.4, 12.8, 3, 15.6, 2.4], accPal(A), { flat: true, lw: 1 });
+  R(c, 16, -3.6, 1.4, 7.2, accPal(A), { flat: true, lw: 1 });
+  G(c, [17.4, -1, 36.4, -0.55, 38.6, 0, 36.4, 0.55, 17.4, 1], P2.blade, { flat: true, lw: 1 });
+  gem(c, 16.7, 0, 1.2, A.gem);
+}
+function scimitar(c, A) {
+  R(c, 12.4, -1.1, 3.6, 2.2, P2.leather, { flat: true, lw: 1.2 });
+  R(c, 15.8, -2.8, 1.8, 5.6, accPal(A), { flat: true, lw: 1.2 });
+  G(c, [17.6, -1.6, 25.6, -2.2, 30.6, -4, 34.8, -7.6, 34.4, -2.8, 30.6, 1.4, 22.6, 2.8, 17.6, 2], P2.blade, { bottom: true, split: 0.5, lw: 1.4 });
+  gem(c, 16.7, 0, 1.4, A.gem);
+}
+function wand(c, A, t = 0) {
+  R(c, 11.2, -0.9, 4.4, 1.8, M.oak, { flat: true, lw: 1.1 });
+  R(c, 15.4, -1.3, 1.2, 2.6, accPal(A), { flat: true, lw: 1 });
+  G(c, [16.6, -0.85, 25.4, -0.55, 25.4, 0.55, 16.6, 0.85], M.willow, { flat: true, lw: 1 });
+  const tip = A.gem ? { b: A.c, d: A.d } : { b: "#cfe8f2", d: "#9cc3d3" };
+  if (A.gem) {
+    const [r, g, b] = hexRgb(A.c);
+    glow2(c, 27.4, 0, 4.6, `${r},${g},${b}`, 0.28 + 0.14 * Math.sin(t * 3));
+  }
+  G(c, [25.2, 0, 27.4, -2.2, 29.6, 0, 27.4, 2.2], tip, { split: 0.5, lw: 1.1 });
+}
+function scepter(c, A) {
+  const gold = { b: "#d4b45a", d: "#a8893e", l: "#ecd38a" };
+  R(c, 11.2, -1, 4.4, 2, M.oak, { flat: true, lw: 1.1 });
+  R(c, 15.6, -0.9, 9, 1.8, accPal(A), { flat: true, lw: 1.1 });
+  R(c, 24.6, -3.4, 5.6, 6.8, gold, { split: 0.6, lw: 1.3 });
+  R(c, 26, -5, 2.8, 1.6, gold, { flat: true, lw: 1 });
+  R(c, 26, 3.4, 2.8, 1.6, gold, { flat: true, lw: 1 });
+  R(c, 30.2, -1, 1.6, 2, gold, { flat: true, lw: 1 });
+  gem(c, 27.4, 0, 2.2, A.gem ?? "#e8eef2");
+}
+function greatsword(c, A) {
+  R(c, 9.4, -1.6, 2, 3.2, accPal(A), { flat: true, lw: 1.2 });
+  R(c, 11.4, -1.2, 5, 2.4, P2.leather, { flat: true, lw: 1.2 });
+  R(c, 16.4, -4.8, 2.4, 9.6, accPal(A), { flat: true, lw: 1.3 });
+  G(c, [18.8, -2.3, 36, -2.3, 40.6, 0, 36, 2.3, 18.8, 2.3], P2.blade, { bottom: true, split: 0.5, lw: 1.4 });
+  px(c, 19.6, -0.4, 15, 0.8, "#00000040");
+  gem(c, 17.6, 0, 1.8, A.gem);
+}
+function halberd(c, A) {
+  R(c, 6, -1, 32, 2, M.oak, { flat: true, lw: 1.2 });
+  R(c, 26.4, -1.5, 1.4, 3, accPal(A), { flat: true, lw: 1 });
+  G(c, [29, 1, 34, 1, 35.8, 6.4, 32.4, 8, 30, 4], M.steel, { lw: 1.3 });
+  G(c, [29.6, -1, 33.2, -1, 31.6, -4.6], M.darkSteel, { flat: true, lw: 1.1 });
+  G(c, [38, -1.2, 43.4, 0, 38, 1.2], P2.blade, { flat: true, lw: 1.1 });
+  gem(c, 31.8, 3, 1.3, A.gem);
+}
+function mace(c, A) {
+  R(c, 10.6, -1.2, 1.6, 2.4, accPal(A), { flat: true, lw: 1.1 });
+  R(c, 12.2, -1, 13, 2, M.oak, { flat: true, lw: 1.2 });
+  R(c, 24.4, -3.6, 6.4, 7.2, M.steel, { split: 0.6, lw: 1.4 });
+  for (const [x, y, wd, h] of [[25.2, -5.6, 1.6, 2], [28.2, -5.6, 1.6, 2], [25.2, 3.6, 1.6, 2], [28.2, 3.6, 1.6, 2], [30.8, -1, 1.8, 2]]) R(c, x, y, wd, h, M.darkSteel, { flat: true, lw: 1 });
+  gem(c, 27.6, 0, 1.6, A.gem);
+}
+var WEAPONS = { sword, saber, axe, warhammer, rapier, scimitar, wand, scepter, greatsword, halberd, mace };
 function dagger(c, A) {
   R(c, 0, -1, 2.6, 2, P2.strap, { flat: true, lw: 1.1 });
   R(c, 2.6, -2.4, 1.4, 4.8, accPal(A), { flat: true, lw: 1 });
   G(c, [4, -1.2, 10.6, -1.2, 12.6, 0, 10.6, 1.2, 4, 1.2], P2.blade, { bottom: true, split: 0.5, lw: 1.2 });
 }
+function mainGauche(c, A) {
+  R(c, 0, -1, 2.6, 2, P2.strap, { flat: true, lw: 1.1 });
+  G(c, [2.4, -4.2, 4, -3.2, 4, 3.2, 2.4, 4.2], accPal(A), { flat: true, lw: 1 });
+  G(c, [4, -1.6, 11.8, -1.2, 13.6, 0, 11.8, 1.2, 4, 1.6], P2.blade, { bottom: true, split: 0.5, lw: 1.2 });
+}
+function stiletto(c, A) {
+  R(c, 0, -0.9, 2.8, 1.8, P2.strap, { flat: true, lw: 1.1 });
+  R(c, 2.8, -1.8, 1, 3.6, accPal(A), { flat: true, lw: 0.9 });
+  G(c, [3.8, -0.9, 13.4, -0.45, 15.2, 0, 13.4, 0.45, 3.8, 0.9], P2.blade, { flat: true, lw: 0.9 });
+}
+function kris(c, A) {
+  R(c, 0, -1, 2.6, 2, M.oak, { flat: true, lw: 1.1 });
+  G(c, [2.6, -2.6, 4.2, -1.2, 4.2, 1.2, 2.6, 2.2], accPal(A), { flat: true, lw: 1 });
+  G(c, [4.2, -1.1, 6, -1.8, 7.8, -0.8, 9.6, -1.6, 11.4, -0.6, 13.4, 0, 11.4, 0.9, 9.6, 0.1, 7.8, 1.1, 6, 0.3, 4.2, 1.1], P2.blade, { flat: true, lw: 1.1 });
+}
+var DAGGERS = { dagger, "main-gauche": mainGauche, stiletto, kris };
 var SHIELD = [-16, 5, -4.4, 5, -3, 11, -10.2, 19.8, -17.4, 11];
 var SHIELD_FIELD = [-14.6, 6.4, -5.8, 6.4, -4.6, 11, -10.2, 17.8, -15.8, 11];
 function shield(c, A, red) {
@@ -14464,6 +14640,26 @@ function shield(c, A, red) {
   R(c, -14.2, 10.2, 8, 1.6, accPal(A), { flat: true, lw: 0.9 });
   gem(c, -10.2, 11, 1.8, A.gem);
 }
+function buckler(c, A) {
+  G(c, oct(-15.6, 6.2, 11, 11, 3.2), M.steel, { lw: 1.6 });
+  G(c, oct(-12.8, 9, 5.4, 5.4, 1.6), M.darkSteel, { flat: true, lw: 1 });
+  px(c, -14.4, 7.4, 8.6, 0.9, M.steel.l);
+  c.lineWidth = 1.2;
+  c.strokeStyle = tint(A.c);
+  c.beginPath();
+  c.arc(-10.1, 11.7, 4.4, 0, TAU32);
+  c.stroke();
+  gem(c, -10.1, 11.7, 1.8, A.gem);
+}
+function tower(c, A, red) {
+  R(c, -18.2, 1.6, 15, 19.6, M.oak, { split: 0.7, lw: 1.7 });
+  R(c, -18.2, 1.6, 15, 2.2, M.steel, { flat: true, lw: 1.2 });
+  R(c, -18.2, 19, 15, 2.2, M.steel, { flat: true, lw: 1.2 });
+  R(c, -11.8, 3.8, 2.2, 15.2, red, { flat: true, lw: 1 });
+  for (const [x, y] of [[-16.6, 6], [-5.6, 6], [-16.6, 16.4], [-5.6, 16.4]]) px(c, x, y, 1.2, 1.2, A.c);
+  gem(c, -10.7, 11.4, 1.8, A.gem);
+}
+var shieldOf = (c, kind, A, red) => kind === "buckler" ? buckler(c, A) : kind === "tower" ? tower(c, A, red) : shield(c, A, red);
 var STAFF_REST = -0.6;
 var STAFF_TIP = -28;
 function staff(c, A, t) {
@@ -14480,12 +14676,42 @@ function staff(c, A, t) {
   px(c, -1, -30.4, 0.9, 1.6, "#ffffffb3");
 }
 var TOME_ANCHOR = Object.freeze({ x: -15.6, y: -12 });
-function tome(c, A, t) {
-  const f = Math.sin(t * 2), pulse = 0.5 + 0.5 * Math.sin(t * 2.6);
+var TOMES = {
+  tome: { cover: P2.cover, rune: { b: "#f39c12", d: "#d35400" }, glow: "230,126,34" },
+  "tome-fire": { cover: { b: "#9b2d20", d: "#6e1f16" }, rune: { b: "#ffb347", d: "#e8631c" }, glow: "255,120,40", mark: "flame" },
+  "tome-frost": { cover: { b: "#2f6f9e", d: "#22506f" }, rune: { b: "#e6f8ff", d: "#8fd3f0" }, glow: "130,205,255", mark: "snow" },
+  "tome-storm": { cover: { b: "#3b2f7a", d: "#291f56" }, rune: { b: "#ffe45c", d: "#d9b21f" }, glow: "255,228,92", mark: "bolt" },
+  "tome-prism": { cover: { b: "#e6e0ee", d: "#bdb4c9" }, rune: { b: "#ffffff", d: "#d8d0e6" }, glow: "235,225,255", mark: "prism" }
+};
+function tomeMark(c, T5, t) {
+  if (!T5.mark) {
+    R(c, -1.6, -9.8, 3.2, 3.2, T5.rune, { split: 0.5, lw: 1.1 });
+    return;
+  }
+  c.save();
+  c.translate(0, -8.2 + Math.sin(t * 3) * 0.4);
+  if (T5.mark === "flame") G(c, [0, -3.6, 1.9, -0.8, 1.5, 1.7, -1.5, 1.7, -1.9, -0.8], T5.rune, { split: 0.5, lw: 1 });
+  else if (T5.mark === "snow") for (const a of [0, Math.PI / 3, -Math.PI / 3]) {
+    c.save();
+    c.rotate(a);
+    R(c, -2.8, -0.45, 5.6, 0.9, T5.rune, { flat: true, lw: 0.7 });
+    c.restore();
+  }
+  else if (T5.mark === "bolt") G(c, [1, -3.6, -1.6, 0.2, 0.1, 0.2, -1, 3.6, 1.8, -0.6, 0.1, -0.6], T5.rune, { flat: true, lw: 0.9 });
+  else {
+    G(c, [0, -2.9, 2.7, 1.8, -2.7, 1.8], T5.rune, { flat: true, lw: 1 });
+    px(c, -1.5, 0.4, 1, 1, "#e74c3c");
+    px(c, -0.5, 0.4, 1, 1, "#3498db");
+    px(c, 0.5, 0.4, 1, 1, "#f1c40f");
+  }
+  c.restore();
+}
+function tome(c, A, t, kind = "tome", tier2 = 0) {
+  const T5 = TOMES[kind] ?? TOMES.tome, f = Math.sin(t * 2), pulse = 0.5 + 0.5 * Math.sin(t * 2.6);
   c.save();
   c.translate(TOME_ANCHOR.x, TOME_ANCHOR.y + f);
-  glow2(c, 0, -5, 9, "230,126,34", 0.16 + pulse * 0.12);
-  R(c, -6.2, -1, 12.4, 5.8, P2.cover, { lw: 1.3 });
+  glow2(c, 0, -5, 9, T5.glow, 0.16 + pulse * 0.12);
+  R(c, -6.2, -1, 12.4, 5.8, T5.cover, { lw: 1.3 });
   R(c, -5.4, -2.4, 5.2, 5.4, P2.page, { flat: true, lw: 1 });
   R(c, 0.2, -2.4, 5.2, 5.4, P2.page, { flat: true, lw: 1 });
   for (let i = 0; i < 3; i++) {
@@ -14493,24 +14719,141 @@ function tome(c, A, t) {
     px(c, 1, -1.4 + i * 1.4, 3.6, 0.6, "#c9b58b");
   }
   R(c, -1, 3.4, 2, 1.8, accPal(A), { flat: true, lw: 0.9 });
-  R(c, -1.6, -9.8, 3.2, 3.2, { b: "#f39c12", d: "#d35400" }, { split: 0.5, lw: 1.1 });
+  tomeMark(c, T5, t);
   gem(c, 0, 1.2, 1.4, A.gem);
+  for (let i = 0; i < tier2; i++) {
+    const a = t * 0.9 + i * TAU32 / tier2;
+    px(c, Math.cos(a) * 9.4 - 0.7, -2 + Math.sin(a) * 3.4 - 0.7, 1.4, 1.4, A.c);
+  }
   c.restore();
 }
 function sleeve3(c, w, S) {
   if (w.body === "plate") R(c, 0, -2.4, 8.6, 4.8, P2.plate, { split: 0.7 });
-  else if (w.body === "leather") {
+  else if (w.body === "hauberk") {
+    R(c, 0, -2.4, 8.4, 4.8, M.mail, { split: 0.7 });
+    mailRows(c, 0, -2.4, 8.4, 4.8);
+  } else if (w.body === "leather") {
     R(c, 0, -2.2, 8.4, 4.4, P2.mask, { split: 0.7 });
     R(c, 4.8, -2.6, 3.8, 5.2, P2.leather, { flat: true, lw: 1.1 });
-  } else if (w.body === "robe") G(c, [0, -2.4, 7.6, -3.8, 7.6, 3.8, 0, 2.4], P2.purple, { split: 0.6, lw: 1.3 });
+  } else if (w.body === "doublet") {
+    R(c, 0, -2.2, 8.4, 4.4, M.doublet, { split: 0.7 });
+    R(c, 5.4, -2.6, 3.2, 5.2, P2.strap, { flat: true, lw: 1.1 });
+  } else if (ROBES.has(w.body)) G(c, [0, -2.4, 7.6, -3.8, 7.6, 3.8, 0, 2.4], w.body === "robe" ? P2.purple : M.blue, { split: 0.6, lw: 1.3 });
   else {
     R(c, 4, -1.8, 4.6, 3.6, S, { lw: 1.2, nohi: true });
     R(c, 0, -2.4, 4.4, 4.8, P2.linen, { lw: 1.2 });
   }
 }
+var GLOVES = { gauntlets: P2.plateDark, gloves: P2.strap, wraps: M.blueDark };
 function hand3(c, w, S) {
-  if (w.body === "plate") R(c, 8.2, -2.8, 4.4, 5.6, P2.plateDark, { split: 0.6 });
-  else R(c, 7.8, -2.3, 4, 4.6, S, { lw: 1.2, nohi: true });
+  const g = w.gloves;
+  if (g === "gauntlets" || !g && w.body === "plate") R(c, 8.2, -2.8, 4.4, 5.6, P2.plateDark, { split: 0.6 });
+  else if (g === "gloves") R(c, 8, -2.6, 4.2, 5.2, P2.strap, { split: 0.6, lw: 1.2 });
+  else if (g === "wraps") {
+    R(c, 7.8, -2.4, 4.2, 4.8, M.blueDark, { split: 0.6, lw: 1.2 });
+    px(c, 8, -1.4, 3.8, 0.7, P2.linen.b);
+    px(c, 8, 0.4, 3.8, 0.7, P2.linen.b);
+  } else R(c, 7.8, -2.3, 4, 4.6, S, { lw: 1.2, nohi: true });
+}
+var palm = (c, w, S, x, y, wd) => GLOVES[w.gloves] ? R(c, x, y, wd, 4.6, GLOVES[w.gloves], { split: 0.6, lw: 1.2 }) : R(c, x, y, wd, 4.6, S, { lw: 1.2, nohi: true });
+function pauldron(c, w, far) {
+  const A = accOf(w.g.body);
+  if (w.body === "plate") {
+    if (far) {
+      R(c, -9.6, -0.8, 6.2, 4.4, P2.plate, { split: 0.6, lw: 1.3 });
+      px(c, -9.6, 2.6, 6.2, 1, A.c);
+    } else {
+      R(c, 2.2, -1.4, 6.4, 4.4, P2.plate, { split: 0.6, lw: 1.3 });
+      px(c, 2.2, 1.6, 6.4, 1, A.c);
+    }
+  } else if (w.body === "hauberk") {
+    if (far) R(c, -9.4, -0.6, 5.6, 3.8, M.mail, { split: 0.6, lw: 1.2 });
+    else R(c, 2.4, -1.2, 6, 4, M.mail, { split: 0.6, lw: 1.2 });
+  } else if (w.body === "leather") {
+    if (far) R(c, -9.4, -0.6, 5.6, 3.6, P2.leather, { split: 0.6, lw: 1.2 });
+    else R(c, 2.6, -1, 5.4, 3.6, P2.leather, { split: 0.6, lw: 1.2 });
+  } else if (w.body === "doublet") {
+    if (far) R(c, -9.2, -0.4, 5.2, 3.4, M.doublet, { split: 0.6, lw: 1.2 });
+    else R(c, 2.6, -1, 5.4, 3.4, M.doublet, { split: 0.6, lw: 1.2 });
+  }
+}
+var OPENING = "#1d232b";
+function helmetPiece(c, kind, A, red, sway, face3) {
+  if (kind === "helm") {
+    R(c, -12.6 + sway, -17.2, 4.6, 3.2, red, { lw: 1.3 });
+    R(c, -8.6 + sway * 0.5, -19.2, 5, 5, red, { lw: 1.3 });
+    R(c, -4.4, -21, 4.2, 7, red, { lw: 1.3 });
+    R(c, -10, -14, 18, 15, P2.helm, { split: 0.7 });
+    R(c, -10, -10.8, 18, 1.8, accPal(A), { flat: true, lw: 1.1 });
+    R(c, 0.4, -8.4, 6.6, 3.6, P2.visor, { lw: 1.3 });
+    for (const x of [1.6, 3.6, 5.6]) px(c, x, -3.4, 1, 1.6, "#2c3e50");
+    px(c, -7.6, -2.6, 1.4, 1.4, A.c);
+    gem(c, -1.4, -9.9, 1.6, A.gem);
+  } else if (kind === "hood") {
+    G(c, [-10, -14, -13.4, -19, -4.2, -14], P2.hood, { lw: 1.4 });
+    R(c, -10, -14, 18, 15, P2.hood, { split: 0.75 });
+    const after = face3 ? face3(c) : R(c, -1.2, -10.4, 8.6, 9.6, { b: OPENING }, { lw: 1.2, flat: true });
+    R(c, -1.2, -5.6, 8.6, 4.8, P2.mask, { lw: 1.2, nohi: true });
+    px(c, -1.2, -11.6, 8.6, 1.2, A.c);
+    after?.();
+  } else if (kind === "coif") {
+    R(c, -10.4, -14.8, 18.8, 16.6, M.mail, { split: 0.74 });
+    mailRows(c, -10.4, -14.8, 18.8, 16.6);
+    if (face3) face3(c);
+    else R(c, -1.4, -10.6, 8.8, 10.2, { b: OPENING }, { lw: 1.2, flat: true });
+    px(c, -10.4, -2.4, 9, 1, A.c);
+    gem(c, -6, -8, 1.4, A.gem);
+  } else if (kind === "hat") {
+    R(c, -11.4 + sway * 0.6, -32.6, 4.8, 2.6, P2.purple, { lw: 1.2, flat: true });
+    R(c, -7.2, -31.4, 5.6, 3.2, P2.purple, { lw: 1.3 });
+    R(c, -6.8, -28.4, 8.4, 4.6, P2.purple, { lw: 1.3 });
+    R(c, -7.6, -24, 11.4, 5.4, P2.purple, { lw: 1.3 });
+    R(c, -7.8, -19.2, 12, 2.8, accPal(A), { flat: true, lw: 1.2 });
+    gem(c, -1.8, -17.8, 1.8, A.gem);
+    R(c, -13.8, -16.6, 24.4, 2.8, P2.purple, { lw: 1.3 });
+  } else if (kind === "cowl") {
+    G(c, [-12.6, -15.2, 9.4, -15.2, 8, -17.6, 2.4, -19.2, -0.4, -24.6, -4.4 + sway * 0.4, -28, -9.8 + sway * 0.6, -27.2, -6.4, -25, -6.8, -19.4, -11.4, -17.4], M.blue, { split: 0.7, lw: 1.3 });
+    R(c, -9.6, -19, 13.2, 2.4, M.rope, { flat: true, lw: 1.1 });
+    gem(c, -3, -17.8, 1.6, A.gem);
+    px(c, -9.4 + sway * 0.6, -27.6, 1.6, 1.6, A.c);
+  } else if (kind === "bandana") {
+    G(c, [-10.8, -15.4, 6.8, -15.4, 8.6, -13.4, 8.2, -11.8, -10.8, -11.6], M.bandana, { split: 0.7, lw: 1.3 });
+    G(c, [-10.6, -13.6, -15.2 + sway * 0.5, -15.2, -14.2, -11.4, -10.6, -12], M.bandana, { flat: true, lw: 1.1 });
+    G(c, [-10.6, -12.4, -14.6 + sway * 0.5, -9.4, -12.4, -8.4, -10.4, -11.4], M.bandana, { flat: true, lw: 1.1 });
+    for (const x of [-6, -1, 4]) px(c, x, -14.4, 1.4, 1.4, "#f3e2c8");
+    px(c, -10.4, -12.8, 1.2, 1.2, A.c);
+  }
+}
+var BOOT_SHAFT = { boots: 7.4, tall: 10, sabatons: 7.4 };
+var BOOT_COLORS = { boots: [P2.strap, P2.leather], tall: [P2.leather, P2.leatherLight], sabatons: [P2.helm, P2.plateDark], slippers: [P2.cover, P2.purple], "apprentice-slippers": [M.blue, M.rope] };
+function bootIcon(c, kind, A) {
+  const h = BOOT_SHAFT[kind], [col, cuff] = BOOT_COLORS[kind] ?? [P2.shoe, P2.leather];
+  if (h) {
+    G(c, [-2.4, -h, 2, -h, 2, -3.6, 4.8, -3.4, 6, -2.2, 6, 0, -2.4, 0], col, { split: 0.62, lw: 1.2 });
+    R(c, -2.8, -h - 0.8, 5.2, 1.8, cuff, { flat: true, lw: 1.1 });
+    if (kind === "sabatons") {
+      px(c, 2.6, -2.8, 0.6, 2.6, "#00000040");
+      px(c, -1.8, -5.6, 3.2, 0.6, "#00000040");
+    }
+    px(c, -0.4, -h + 2.4, 1.4, 1.2, A.c);
+  } else {
+    G(c, [-2.4, -3.4, 3, -3.4, 5, -2.2, 6.6, -3.4, 6.6, 0, -2.4, 0], col, { split: 0.62, lw: 1.2 });
+    px(c, -1.8, -2.6, 4.4, 0.8, cuff.b);
+    px(c, 1.4, -2.6, 1.2, 0.8, A.c);
+  }
+  R(c, -2.6, 0, 8.8, 1.2, { b: "#2a1f17" }, { flat: true, lw: 1 });
+}
+function gloveIcon(c, kind, A) {
+  const col = GLOVES[kind] ?? P2.strap, cuff = kind === "wraps" ? P2.linen : kind === "gauntlets" ? M.steel : P2.leather;
+  G(c, [-2.8, 1.8, -2.8, -4, -2.2, -4.8, 2, -4.8, 2.6, -4, 2.6, -0.8, 4.2, -2.4, 5, -1.6, 2.6, 1.8], col, { split: 0.6, lw: 1.2 });
+  for (const fx of [-1.4, 0, 1.3]) px(c, fx, -4.8, 0.5, 2.2, "#00000059");
+  if (kind === "gauntlets") px(c, -2.4, -2.2, 4.6, 0.7, M.steel.l);
+  else if (kind === "wraps") {
+    px(c, -2.4, -1.8, 4.6, 0.7, P2.linen.b);
+    px(c, -2.4, -0.2, 4.6, 0.7, P2.linen.b);
+  }
+  R(c, -3.2, 1.8, 6.2, 2.4, cuff, { flat: true, lw: 1.1 });
+  px(c, -0.8, 2.5, 1.6, 1, A.c);
 }
 var BACK_ANGLE = { shield: 2.05, dagger: 1.98, tome: -2.7, none: 1.92 };
 var toLook = (look) => ({ ...DEFAULT_LOOK, ...look ?? {} });
@@ -14519,15 +14862,14 @@ function heroSpecForActor(actor) {
   if (v) return { cls: v.cls, look: toLook(v.look), gear: v.gear ?? {}, offType: actor.subType ?? null };
   return { cls: null, look: toLook(null), gear: { main: { tier: 0 }, off: actor?.subType ? { tier: 0 } : null }, offType: actor?.subType ?? null };
 }
-var starterHeroGear = () => ({ helmet: { tier: 0 }, body: { tier: 0 }, legs: { tier: 0 }, boots: { tier: 0 }, main: { tier: 0 }, off: { tier: 0 } });
 function staffTipLocal(front2) {
   const hx = 4.6 + Math.cos(front2) * 10.2, hy = 3.6 + Math.sin(front2) * 10.2, a = front2 - STAFF_REST;
   return { x: hx - Math.sin(a) * STAFF_TIP, y: hy + Math.cos(a) * STAFF_TIP };
 }
 function drawBlockyHero(c, spec, pose = {}) {
   const w = kit(spec), look = toLook(spec.look), S = skinPal(look.skin), H3 = hairPal(look.hairColor), st = look.hair, t = pose.t ?? 0;
-  const covered = Boolean(w.helmet) && look.helmet, hatOn = covered && w.helmet === "hat", red = P2.red, bob = pose.bob ?? 0, sway = pose.sway ?? 0;
-  const blink = pose.still ? false : pose.blink ?? (t + 1.9) % 3.9 < 0.12, front2 = w.main || pose.active ? pose.front ?? -0.6 : 1.25, guard = Boolean(pose.guard) && w.off === "shield";
+  const covered = Boolean(w.helmet) && look.helmet, hatOn = covered && HATS.has(w.helmet), red = P2.red, bob = pose.bob ?? 0, sway = pose.sway ?? 0;
+  const blink = pose.still ? false : pose.blink ?? (t + 1.9) % 3.9 < 0.12, front2 = w.main || pose.active ? pose.front ?? -0.6 : 1.25, guard = Boolean(pose.guard) && w.offFamily === "shield";
   FLASH = Boolean(pose.flash);
   c.save();
   c.lineJoin = "miter";
@@ -14538,98 +14880,32 @@ function drawBlockyHero(c, spec, pose = {}) {
   }
   if (w.body === "leather") G(c, [-7, -1, -16, 2.4, -15, 4.6, -7, 2.2], P2.teal, { lw: 1.3 });
   if (!covered || hatOn) hairBack(c, st, H3, hatOn);
+  const offA = accOf(w.g.off);
   const farArm = () => {
     c.save();
     c.translate(-5.4, 2.6);
-    c.rotate(guard ? -0.05 : BACK_ANGLE[w.off || "none"]);
+    c.rotate(guard ? -0.05 : BACK_ANGLE[w.offFamily || "none"]);
     sleeve3(c, w, S);
     hand3(c, w, S);
-    if (w.off === "dagger") {
+    if (w.offFamily === "dagger") {
       c.save();
       c.translate(10, 0);
       c.rotate(Math.PI / 2 - BACK_ANGLE.dagger + 0.25);
-      dagger(c, accOf(w.g.off));
+      (DAGGERS[w.off] ?? dagger)(c, offA);
       c.restore();
-      R(c, 7.8, -2.3, 4, 4.6, S, { lw: 1.2, nohi: true });
+      palm(c, w, S, 7.8, -2.3, 4);
     }
     c.restore();
   };
-  c.save();
-  c.translate(0, bob);
-  if (!guard) {
-    farArm();
-    if (w.off === "shield") shield(c, accOf(w.g.off), red);
-  }
-  if (w.body === "plate") {
-    R(c, -9.6, -0.8, 6.2, 4.4, P2.plate, { split: 0.6, lw: 1.3 });
-    px(c, -9.6, 2.6, 6.2, 1, accOf(w.g.body).c);
-  }
-  if (w.body === "leather") R(c, -9.4, -0.6, 5.6, 3.6, P2.leather, { split: 0.6, lw: 1.2 });
-  c.restore();
-  legs2(c, w, S, pose.step ?? 0);
-  c.save();
-  c.translate(0, bob);
-  body4(c, w, red);
-  c.save();
-  c.translate(0, bob * 0.5);
-  if (covered && w.helmet === "helm") {
-    const A2 = accOf(w.g.helmet);
-    R(c, -12.6 + sway, -17.2, 4.6, 3.2, red, { lw: 1.3 });
-    R(c, -8.6 + sway * 0.5, -19.2, 5, 5, red, { lw: 1.3 });
-    R(c, -4.4, -21, 4.2, 7, red, { lw: 1.3 });
-    R(c, -10, -14, 18, 15, P2.helm, { split: 0.7 });
-    R(c, -10, -10.8, 18, 1.8, accPal(A2), { flat: true, lw: 1.1 });
-    R(c, 0.4, -8.4, 6.6, 3.6, P2.visor, { lw: 1.3 });
-    for (const x of [1.6, 3.6, 5.6]) px(c, x, -3.4, 1, 1.6, "#2c3e50");
-    px(c, -7.6, -2.6, 1.4, 1.4, A2.c);
-    gem(c, -1.4, -9.9, 1.6, A2.gem);
-  } else if (covered && w.helmet === "hood") {
-    const A2 = accOf(w.g.helmet);
-    G(c, [-10, -14, -13.4, -19, -4.2, -14], P2.hood, { lw: 1.4 });
-    R(c, -10, -14, 18, 15, P2.hood, { split: 0.75 });
-    R(c, -1.2, -10.4, 8.6, 9.6, S, { lw: 1.2, flat: true });
-    G(c, [-1.2, -10.4, 7.4, -10.4, 7.4, -9.2, 5.6, -8.2, 3.8, -9.2, 1.8, -8.2, -1.2, -9.2], H3, { flat: true, lw: 1 });
-    R(c, -1.2, -5.6, 8.6, 4.8, P2.mask, { lw: 1.2, nohi: true });
-    px(c, -1.2, -11.6, 8.6, 1.2, A2.c);
-    eyes(c, blink, -8.6);
-  } else {
-    bareHead(c, st, S, H3, blink, hatOn);
-    facialHair(c, look.facialHair, H3);
-    if (hatOn) {
-      const A2 = accOf(w.g.helmet);
-      R(c, -11.4 + sway * 0.6, -32.6, 4.8, 2.6, P2.purple, { lw: 1.2, flat: true });
-      R(c, -7.2, -31.4, 5.6, 3.2, P2.purple, { lw: 1.3 });
-      R(c, -6.8, -28.4, 8.4, 4.6, P2.purple, { lw: 1.3 });
-      R(c, -7.6, -24, 11.4, 5.4, P2.purple, { lw: 1.3 });
-      R(c, -7.8, -19.2, 12, 2.8, accPal(A2), { flat: true, lw: 1.2 });
-      gem(c, -1.8, -17.8, 1.8, A2.gem);
-      R(c, -13.8, -16.6, 24.4, 2.8, P2.purple, { lw: 1.3 });
-    }
-  }
-  c.restore();
-  if (w.off === "tome") tome(c, accOf(w.g.off), t);
-  if (guard) {
-    farArm();
-    c.save();
-    c.translate(22 + (pose.jab ?? 0) - (pose.recoil ?? 0), -6 + (pose.guardY ?? 0) * 8);
-    shield(c, accOf(w.g.off), red);
-    c.restore();
-  }
   const A = accOf(w.g.main);
+  c.save();
+  c.translate(0, bob);
   c.save();
   c.translate(4.6, 3.6);
   c.rotate(front2);
   sleeve3(c, w, S);
   if (w.main !== "staff") hand3(c, w, S);
-  if (w.main === "sword") sword(c, A);
-  if (w.main === "saber") saber(c, A);
-  if (pose.active && w.main !== "staff") {
-    c.strokeStyle = FLASH ? "#ffffffa0" : "#fff0bba0";
-    c.lineWidth = (pose.weight ?? 1) + 1;
-    c.beginPath();
-    c.arc(8, 0, 32, -0.75, 0.3);
-    c.stroke();
-  }
+  WEAPONS[w.main]?.(c, A, t);
   c.restore();
   if (w.main === "staff") {
     const hx = 4.6 + Math.cos(front2) * 10.2, hy = 3.6 + Math.sin(front2) * 10.2;
@@ -14638,13 +14914,65 @@ function drawBlockyHero(c, spec, pose = {}) {
     c.rotate(front2 - STAFF_REST);
     staff(c, A, t);
     c.restore();
-    R(c, hx - 2.2, hy - 2.2, 4.4, 4.6, S, { lw: 1.2, nohi: true });
+    palm(c, w, S, hx - 2.2, hy - 2.2, 4.4);
   }
-  if (w.body === "plate") {
-    R(c, 2.2, -1.4, 6.4, 4.4, P2.plate, { split: 0.6, lw: 1.3 });
-    px(c, 2.2, 1.6, 6.4, 1, accOf(w.g.body).c);
+  pauldron(c, w, false);
+  c.restore();
+  legs2(c, w, S, pose.step ?? 0);
+  c.save();
+  c.translate(0, bob);
+  body4(c, w, red);
+  c.save();
+  c.translate(0, bob * 0.5);
+  if (covered && !hatOn) {
+    const A2 = accOf(w.g.helmet);
+    const hoodFace = () => {
+      R(c, -1.2, -10.4, 8.6, 9.6, S, { lw: 1.2, flat: true });
+      G(c, [-1.2, -10.4, 7.4, -10.4, 7.4, -9.2, 5.6, -8.2, 3.8, -9.2, 1.8, -8.2, -1.2, -9.2], H3, { flat: true, lw: 1 });
+      return () => eyes(c, blink, -8.6);
+    };
+    const coifFace = () => {
+      R(c, -1.4, -10.6, 8.8, 10.2, S, { lw: 1.2, flat: true });
+      px(c, 0.8, -9.4, 2.6, 1, H3.d);
+      px(c, 4.4, -9.4, 2.4, 1, H3.d);
+      eyes(c, blink);
+      c.save();
+      c.beginPath();
+      c.rect(-1.4, -10.6, 8.8, 10.2);
+      c.clip();
+      facialHair(c, look.facialHair, H3);
+      c.restore();
+    };
+    helmetPiece(c, w.helmet, A2, red, sway, w.helmet === "hood" ? hoodFace : w.helmet === "coif" ? coifFace : null);
+  } else {
+    bareHead(c, st, S, H3, blink, hatOn);
+    facialHair(c, look.facialHair, H3);
+    if (hatOn) helmetPiece(c, w.helmet, accOf(w.g.helmet), red, sway, null);
   }
-  if (w.body === "leather") R(c, 2.6, -1, 5.4, 3.6, P2.leather, { split: 0.6, lw: 1.2 });
+  c.restore();
+  if (w.offFamily === "tome") tome(c, offA, t, w.off, w.g.off?.tier ?? 0);
+  if (guard) {
+    farArm();
+    c.save();
+    c.translate(22 + (pose.jab ?? 0) - (pose.recoil ?? 0), -6 + (pose.guardY ?? 0) * 8);
+    shieldOf(c, w.off, offA, red);
+    c.restore();
+  } else {
+    farArm();
+    if (w.offFamily === "shield") shieldOf(c, w.off, offA, red);
+  }
+  pauldron(c, w, true);
+  if (pose.active && w.main !== "staff") {
+    c.save();
+    c.translate(4.6, 3.6);
+    c.rotate(front2);
+    c.strokeStyle = FLASH ? "#ffffffa0" : "#fff0bba0";
+    c.lineWidth = (pose.weight ?? 1) + 1;
+    c.beginPath();
+    c.arc(8, 0, 32, -0.75, 0.3);
+    c.stroke();
+    c.restore();
+  }
   c.restore();
   if (!pose.still && Object.values(w.g).some((p) => p?.tier === 5)) {
     c.fillStyle = "#ff6b4a";
@@ -14670,13 +14998,99 @@ function drawBlockyHero(c, spec, pose = {}) {
   c.restore();
   FLASH = false;
 }
+var LEG_COLORS = { greaves: P2.plate, chausses: M.mail, breeches: M.breeches, trousers: P2.darkPants };
+var WEAPON_SPAN = { greatsword: [9.4, 40.6], halberd: [6, 43.4], mace: [10.6, 32.6], sword: [10.6, 34.4], saber: [12.4, 34.6], axe: [10.6, 35], warhammer: [10.6, 33.2], rapier: [10.6, 38.4], scimitar: [12.4, 34.8], wand: [11.2, 29.6], scepter: [11.2, 31.8] };
+function drawItemIcon(c, item, size = 48) {
+  const kind = item.kind, tier2 = item.tier ?? 0, A = ACC[tier2] ?? ACC[0], red = P2.red, S = skinPal("light");
+  c.save();
+  c.lineJoin = "miter";
+  c.miterLimit = 2;
+  FLASH = false;
+  const fit = (cx, cy, span, rot = 0) => {
+    c.translate(size / 2, size / 2);
+    c.rotate(rot);
+    c.scale(size / span, size / span);
+    c.translate(-cx, -cy);
+  };
+  if (item.slot === "main") {
+    if (kind === "staff") {
+      fit(0, -12, 31, Math.PI / 4);
+      staff(c, A, 0);
+    } else {
+      const [a, b] = WEAPON_SPAN[kind] ?? WEAPON_SPAN.sword;
+      fit((a + b) / 2, 0, (b - a) * 0.8, -Math.PI / 4);
+      (WEAPONS[kind] ?? sword)(c, A, 0);
+    }
+  } else if (item.slot === "off") {
+    const fam = OFF_FAMILY[kind] ?? "shield";
+    if (fam === "shield") {
+      fit(-10.6, 11.4, kind === "tower" ? 25 : 19.5);
+      shieldOf(c, kind, A, red);
+    } else if (fam === "dagger") {
+      fit(7.4, 0, 12.6, -Math.PI / 4);
+      (DAGGERS[kind] ?? dagger)(c, A);
+    } else {
+      fit(TOME_ANCHOR.x, TOME_ANCHOR.y - 3.4, 19);
+      tome(c, A, 0, kind, tier2);
+    }
+  } else {
+    const w = { helmet: kind, body: kind, legs: kind, boots: kind, g: { body: { tier: tier2 }, legs: { tier: tier2 }, boots: { tier: tier2 }, helmet: { tier: tier2 } } };
+    if (item.slot === "helmet") {
+      const tall = kind === "hat" || kind === "cowl", wrap = kind === "bandana";
+      fit(wrap ? -3.3 : -1.4, tall ? -21 : wrap ? -12 : -10, tall ? 24 : wrap ? 26 : 23);
+      helmetPiece(c, kind, A, red, 0, null);
+    } else if (item.slot === "body") {
+      const robe2 = ROBES.has(kind);
+      fit(-1, robe2 ? 8.4 : 5.8, robe2 ? 26 : 21.5);
+      c.save();
+      c.translate(-5.4, 1.8);
+      c.rotate(1.95);
+      sleeve3(c, w, S);
+      c.restore();
+      pauldron(c, w, true);
+      body4(c, w, red);
+      c.save();
+      c.translate(4.4, 1.8);
+      c.rotate(1.2);
+      sleeve3(c, w, S);
+      c.restore();
+      pauldron(c, w, false);
+    } else if (item.slot === "legs") {
+      fit(-1.8, 13.6, 15);
+      const lp = LEG_COLORS[kind] ?? P2.pants;
+      R(c, -7, 9.8, 10.6, 3.4, lp, { split: 0.7, lw: 1.3 });
+      legs2(c, { ...w, boots: "none" }, S, 0);
+      px(c, -6.8, 10.6, 10.2, 0.9, "#00000033");
+    } else if (item.slot === "boots") {
+      const low = !BOOT_SHAFT[kind];
+      fit(1, low ? -1.4 : -4.8, low ? 14 : 17.5);
+      for (const [x, y] of [[-3.6, -1.2], [1.2, 1.4]]) {
+        c.save();
+        c.translate(x, y);
+        bootIcon(c, kind, A);
+        c.restore();
+      }
+    } else if (item.slot === "gloves") {
+      fit(-0.2, -0.2, 18);
+      for (const [x, y, flip] of [[-3.4, -1, -1], [3, 1.2, 1]]) {
+        c.save();
+        c.translate(x, y);
+        c.scale(flip, 1);
+        gloveIcon(c, kind, A);
+        c.restore();
+      }
+    }
+  }
+  c.restore();
+}
 
 // src/client/camp_roster_v1.js
 var CAMP_ROSTER_VERSION = "camp-roster-v1";
 var CAMP_ROSTER_KEY = "saq-world-camp-v1";
 var CLASSES = ["knight", "rogue", "mage"];
 var OFFHANDS = ["shield", "dagger", "tome"];
-var SLOTS = ["helmet", "body", "legs", "boots", "main", "off"];
+var SLOTS = ["helmet", "body", "legs", "gloves", "boots", "main", "off"];
+var KIND = /^[a-z][a-z-]{0,23}$/;
 var ids2 = (list) => new Set(list.map((option) => option[0]));
 var HAIR = ids2(LOOK_OPTIONS.hairStyles);
 var FACIAL = ids2(LOOK_OPTIONS.facialHair);
@@ -14691,8 +15105,8 @@ function campHero(spec) {
   for (const slot of SLOTS) {
     const g = spec.gear?.[slot];
     if (g == null) continue;
-    if (!Number.isInteger(g.tier) || g.tier < 0 || g.tier > 5) return null;
-    gear2[slot] = { tier: g.tier };
+    if (!Number.isInteger(g.tier) || g.tier < 0 || g.tier > 5 || g.kind !== void 0 && !KIND.test(g.kind)) return null;
+    gear2[slot] = g.kind ? { tier: g.tier, kind: g.kind } : { tier: g.tier };
   }
   return { cls: spec.cls, look: { hair: l.hair, hairColor: l.hairColor, skin: l.skin, facialHair: l.facialHair, helmet: l.helmet, name: "" }, gear: gear2, offType: spec.offType ?? null };
 }
@@ -17092,10 +17506,10 @@ function ferryTravelTarget(s, actor, payload) {
   if (!ferrySourceEligible(s, actor, payload)) return null;
   const destination = ferryLanding(payload.toLandingId), players = [...s.session.playerIds].sort(), pid = players.find((id) => s.playersById[id].entityId === actor.entityId), index = players.indexOf(pid);
   for (let i = 0; i < destination.arrivals.length; i++) {
-    const world = address(destination.arrivals[(index + i) % destination.arrivals.length]), local5 = projectToLocalFrameD9(world, s.d9World.runtime.frames);
-    if (!local5 || collidesWithTiles(s.spacesByInstanceId[s.overworldInstanceId].collision, local5.x, local5.y, actor.hullRadius)) continue;
-    if (Object.values(s.entitiesById).some((a) => a.entityId !== actor.entityId && a.alive && a.residency.spaceInstanceId === s.overworldInstanceId && Math.hypot(a.position.x - local5.x, a.position.y - local5.y) < a.hullRadius + actor.hullRadius + 4)) continue;
-    return { spaceInstanceId: s.overworldInstanceId, position: { x: local5.x, y: local5.y }, world };
+    const world = address(destination.arrivals[(index + i) % destination.arrivals.length]), local6 = projectToLocalFrameD9(world, s.d9World.runtime.frames);
+    if (!local6 || collidesWithTiles(s.spacesByInstanceId[s.overworldInstanceId].collision, local6.x, local6.y, actor.hullRadius)) continue;
+    if (Object.values(s.entitiesById).some((a) => a.entityId !== actor.entityId && a.alive && a.residency.spaceInstanceId === s.overworldInstanceId && Math.hypot(a.position.x - local6.x, a.position.y - local6.y) < a.hullRadius + actor.hullRadius + 4)) continue;
+    return { spaceInstanceId: s.overworldInstanceId, position: { x: local6.x, y: local6.y }, world };
   }
   return null;
 }
@@ -18906,7 +19320,7 @@ function validateActivityCommand(command) {
   const { residencyRevision, ...legacy } = command;
   safeInteger(residencyRevision, 1);
   validateCommand(legacy);
-  requireContract(["worldEvent.activate", "discovery.readNote", "movement.setIntent", "combat.primaryIntent", "combat.guardIntent", "combat.shadowDash", "combat.skill", "subweapon.claim", "service.modify", "service.material", "service.buy", "service.sell", "service.rest", "supply.use", "ferry.travel", "site.transition", "player.respawn", "loot.pickup", "gear.salvage", "gear.drop", "resource.interact", "progression.change", "forge.attune", "equipment.equip", "equipment.unequip"].includes(command.kind), "Unsupported activity command");
+  requireContract(["worldEvent.activate", "discovery.readNote", "movement.setIntent", "combat.primaryIntent", "combat.guardIntent", "combat.shadowDash", "combat.skill", "subweapon.claim", "classkit.claim", "service.modify", "service.material", "service.buy", "service.sell", "service.rest", "supply.use", "ferry.travel", "site.transition", "player.respawn", "loot.pickup", "gear.salvage", "gear.drop", "resource.interact", "progression.change", "forge.attune", "equipment.equip", "equipment.unequip"].includes(command.kind), "Unsupported activity command");
   return command;
 }
 function activityContextMatches(state, c) {
@@ -18928,6 +19342,7 @@ function validateActivityCommandForState(c, s) {
     requireContract(plan && !plan.error, plan?.error ?? "Progression unavailable");
   }
   if (c.kind === "subweapon.claim") requireContract(canClaimSubweapon(s, s.playersById[c.playerId], c.payload), "Provision unavailable");
+  if (c.kind === "classkit.claim") requireContract(canClaimClassKit(s, s.playersById[c.playerId], c.payload), "Class kit unavailable");
   if (c.kind === "combat.guardIntent" && c.payload.pressed) requireContract(resolvePlayerStats(s.playersById[c.playerId]).subType === "shield", "Guard requires Shield");
   if (c.kind === "combat.skill") requireContract(s.subweaponCombat && canUseClassSkill(s.playersById[c.playerId], actor, s.subweaponCombat.actors[actor.entityId], resolvePlayerStats(s.playersById[c.playerId]), c.payload.skillId, subweaponSuppressedD12_4I(s, actor.entityId)), "Skill unavailable");
   if (c.kind === "combat.shadowDash") requireContract(s.subweaponCombat && canShadowDash(actor, s.subweaponCombat.actors[actor.entityId], resolvePlayerStats(s.playersById[c.playerId])), "Dash unavailable");
@@ -19443,8 +19858,8 @@ function breadthFirstSlots(slots, start) {
   requireContract(result.length === slots.length, "Procedural layout template is disconnected");
   return result;
 }
-function worldPoint(slot, local5) {
-  return { x: slot[0] * CHUNK_WIDTH_TILES * TILE_SIZE + local5.x, y: slot[1] * CHUNK_HEIGHT_TILES * TILE_SIZE + local5.y };
+function worldPoint(slot, local6) {
+  return { x: slot[0] * CHUNK_WIDTH_TILES * TILE_SIZE + local6.x, y: slot[1] * CHUNK_HEIGHT_TILES * TILE_SIZE + local6.y };
 }
 function connectedRegionCut(bfs, slots, settlementNeighbor, random, minimumHomeChunks = 2) {
   const children = new Map(bfs.map((slot) => [keyFor(slot), []])), roadPairs = /* @__PURE__ */ new Set();
@@ -19571,7 +19986,7 @@ async function generateProceduralOverworld({ campaignSeed, sha256, populationEna
   const sites = [];
   for (let index = 0; index < LOCATION_SITE_PROOF_CATALOG.length; index++) {
     const definition2 = LOCATION_SITE_PROOF_CATALOG[index], macro = wildernessMacros[index], chunk2 = chunkBySlot.get(keyFor(macro.slot));
-    const local5 = SITE_ANCHORS[index], position4 = worldPoint(macro.slot, local5);
+    const local6 = SITE_ANCHORS[index], position4 = worldPoint(macro.slot, local6);
     sites.push({
       locationId: await derivedId("locationId", identity2, "location", definition2.locationKey, sha256),
       locationDefinitionId: definition2.contentDefinitionId,
@@ -24997,7 +25412,7 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
   }
   function apply2(command, authorityOrder) {
     requireContract(authorityOrder === state.lastAppliedAuthorityOrder + 1 && command.clientSequence === state.appliedClientSequences[command.playerId] + 1, "Noncontiguous applied command");
-    const player = state.playersById[command.playerId], actor = state.entitiesById[player.entityId], inventory = player.inventory, respawning = command.kind === "player.respawn", suppressed = subweaponSuppressedD12_4I(state, actor.entityId), target = command.kind === "ferry.travel" ? ferryTravelTarget(state, actor, command.payload) : command.kind === "site.transition" ? siteTransitionTarget(state, manifest, actor, command.payload) : null, progressionPlan = prepareD8Command(player, command), valid = (command.kind !== "worldEvent.activate" || canActivateWorldEvent(state, player, command.payload.groupId)) && (command.kind !== "discovery.readNote" || canReadTrailNote(state, player, command.payload)) && (!progressionPlan || !progressionPlan.error && command.expectedSaveRevision === state.campaign.saveRevision) && activityContextMatches(state, command) && (respawning ? !actor.alive : actor.alive) && (!["site.transition", "ferry.travel"].includes(command.kind) || Boolean(target)) && (command.kind !== "loot.pickup" || inventory?.revision === command.payload.inventoryRevision && canPickUp(state, player, command.payload.sourceEntityId, resolvePlayerStats(player).pickupRadius)) && (command.kind !== "subweapon.claim" || canClaimSubweapon(state, player, command.payload)) && (command.kind !== "combat.guardIntent" || !command.payload.pressed || !suppressed && resolvePlayerStats(player).subType === "shield") && (command.kind !== "combat.shadowDash" || canShadowDash(actor, state.subweaponCombat.actors[actor.entityId], resolvePlayerStats(player), suppressed)) && (command.kind !== "combat.skill" || canUseClassSkill(player, actor, state.subweaponCombat.actors[actor.entityId], resolvePlayerStats(player), command.payload.skillId, suppressed)) && (command.kind !== "gear.salvage" || canSalvage(state, player, command.payload)) && (command.kind !== "gear.drop" || canDropGear(state, player, command.payload)) && (command.kind !== "resource.interact" || canUseResource(state, manifest, player, command.payload)) && (command.kind !== "forge.attune" || canAttune(state, player, command.payload, manifest)) && (!(command.kind.startsWith("service.") || command.kind === "supply.use") || serviceActionProblem(state, player, command.kind, command.payload) === null) && (!command.kind.startsWith("equipment.") || equipmentActionAvailable(state, player, command.kind, command.payload));
+    const player = state.playersById[command.playerId], actor = state.entitiesById[player.entityId], inventory = player.inventory, respawning = command.kind === "player.respawn", suppressed = subweaponSuppressedD12_4I(state, actor.entityId), target = command.kind === "ferry.travel" ? ferryTravelTarget(state, actor, command.payload) : command.kind === "site.transition" ? siteTransitionTarget(state, manifest, actor, command.payload) : null, progressionPlan = prepareD8Command(player, command), valid = (command.kind !== "worldEvent.activate" || canActivateWorldEvent(state, player, command.payload.groupId)) && (command.kind !== "discovery.readNote" || canReadTrailNote(state, player, command.payload)) && (!progressionPlan || !progressionPlan.error && command.expectedSaveRevision === state.campaign.saveRevision) && activityContextMatches(state, command) && (respawning ? !actor.alive : actor.alive) && (!["site.transition", "ferry.travel"].includes(command.kind) || Boolean(target)) && (command.kind !== "loot.pickup" || inventory?.revision === command.payload.inventoryRevision && canPickUp(state, player, command.payload.sourceEntityId, resolvePlayerStats(player).pickupRadius)) && (command.kind !== "subweapon.claim" || canClaimSubweapon(state, player, command.payload)) && (command.kind !== "classkit.claim" || canClaimClassKit(state, player, command.payload)) && (command.kind !== "combat.guardIntent" || !command.payload.pressed || !suppressed && resolvePlayerStats(player).subType === "shield") && (command.kind !== "combat.shadowDash" || canShadowDash(actor, state.subweaponCombat.actors[actor.entityId], resolvePlayerStats(player), suppressed)) && (command.kind !== "combat.skill" || canUseClassSkill(player, actor, state.subweaponCombat.actors[actor.entityId], resolvePlayerStats(player), command.payload.skillId, suppressed)) && (command.kind !== "gear.salvage" || canSalvage(state, player, command.payload)) && (command.kind !== "gear.drop" || canDropGear(state, player, command.payload)) && (command.kind !== "resource.interact" || canUseResource(state, manifest, player, command.payload)) && (command.kind !== "forge.attune" || canAttune(state, player, command.payload, manifest)) && (!(command.kind.startsWith("service.") || command.kind === "supply.use") || serviceActionProblem(state, player, command.kind, command.payload) === null) && (!command.kind.startsWith("equipment.") || equipmentActionAvailable(state, player, command.kind, command.payload));
     if (valid) {
       if (respawning) measure("playerRespawn", () => {
         state.encounterEconomy.outingsByPlayer[player.playerId].earnedOutside = false;
@@ -25027,6 +25442,8 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
           inventory.revision++;
           r.pickup = { command: copyWire(command), authorityOrder, tick: state.tick, revision: inventory.revision };
         }
+      } else if (command.kind === "classkit.claim") {
+        claimClassKit(state, player, command, authorityOrder);
       } else if (command.kind === "subweapon.claim") {
         claimSubweapon(state, player, command, authorityOrder);
       } else if (command.kind === "combat.guardIntent") {
@@ -25953,17 +26370,98 @@ function statText(v, detail = false) {
   return (negative ? "-" : "") + formatLarge(negative ? text2.slice(1) : text2, { significant: detail ? 6 : 4 });
 }
 
+// src/shared/content/item_looks_v1.js
+var BY_DEFINITION = Object.freeze({
+  "worn-sword": "sword",
+  "iron-sword": "sword",
+  "guard-sword": "sword",
+  "runic-sword": "sword",
+  "padded-armor": "doublet",
+  "chain-armor": "hauberk",
+  "plate-armor": "plate",
+  coif: "coif",
+  greaves: "greaves",
+  sabatons: "sabatons",
+  "full-plate": "plate",
+  "starter-shield": "kite",
+  "starter-dagger": "kris",
+  "kit-knight-longsword": "sword",
+  "kit-knight-coif": "coif",
+  "kit-knight-hauberk": "hauberk",
+  "kit-knight-gauntlets": "gauntlets",
+  "kit-knight-treads": "boots",
+  "kit-rogue-saber": "saber",
+  "kit-rogue-bandana": "bandana",
+  "kit-rogue-doublet": "doublet",
+  "kit-rogue-gloves": "gloves",
+  "kit-rogue-boots": "boots",
+  "kit-mage-staff": "staff",
+  "kit-mage-cowl": "cowl",
+  "kit-mage-robe": "apprentice-robe",
+  "kit-mage-wraps": "wraps",
+  "kit-mage-slippers": "apprentice-slippers"
+});
+var BY_NOUN = Object.freeze({
+  Greatsword: "greatsword",
+  Longsword: "sword",
+  Halberd: "halberd",
+  Warhammer: "warhammer",
+  Battleaxe: "axe",
+  Broadsword: "sword",
+  "Flanged Mace": "mace",
+  Claymore: "greatsword",
+  "Kite Shield": "kite",
+  "Tower Shield": "tower",
+  Buckler: "buckler",
+  Aegis: "kite",
+  "Heater Shield": "kite",
+  Kris: "kris",
+  Stiletto: "stiletto",
+  Baselard: "dagger",
+  Dirk: "dagger",
+  "Main-Gauche": "main-gauche",
+  Greathelm: "helm",
+  Armet: "helm",
+  Visor: "helm",
+  Hauberk: "hauberk",
+  "Chain Mail": "hauberk",
+  Cuirass: "plate",
+  Brigandine: "leather",
+  "Plate Mail": "plate",
+  Doublet: "doublet",
+  Greaves: "greaves",
+  Legplates: "greaves",
+  Chausses: "chausses",
+  Cuisses: "greaves",
+  Sabatons: "sabatons",
+  Sollerets: "sabatons",
+  "Steel Boots": "sabatons",
+  Treads: "boots",
+  Exosuit: "plate",
+  "Inquisitor Robes": "robe",
+  "Full Plate Armor": "plate",
+  Trenchcoat: "leather"
+});
+var OVERALL_LEGS = Object.freeze({ plate: "greaves", hauberk: "chausses", doublet: "breeches", leather: "trousers" });
+var TOME_LOOKS = Object.freeze({ fire: "tome-fire", lightning: "tome-storm", frost: "tome-frost" });
+function itemLook(item) {
+  const d = itemDefinition(item);
+  if (!d) return null;
+  if (d.slot === "subweapon" && d.subType === "tome") return TOME_LOOKS[d.spellType ?? "fire"] ?? "tome-prism";
+  return (item.generated ? BY_NOUN[d.noun ?? item.generated.definition?.noun] : BY_DEFINITION[item.definitionId]) ?? null;
+}
+
 // src/shared/contracts/hero_look_view.js
 function heroLookView(player) {
   const inv = player?.inventory, equipped = inv?.equipped ?? {};
   const piece = (slot) => {
-    const id = equipped[slot];
-    if (!id || !inv.itemsById[id]) return null;
-    const tier2 = itemDefinition(inv.itemsById[id])?.rarityTier;
-    return { tier: Number.isSafeInteger(tier2) ? Math.max(0, Math.min(5, tier2)) : 0 };
+    const id = equipped[slot], item = id ? inv.itemsById[id] : null;
+    if (!item) return null;
+    const tier2 = itemDefinition(item)?.rarityTier, kind = itemLook(item);
+    return { tier: Number.isSafeInteger(tier2) ? Math.max(0, Math.min(5, tier2)) : 0, ...kind ? { kind } : {} };
   };
-  const overall = piece("overall");
-  return { cls: player?.d8?.heroClass ?? null, look: copyWire(heroLookOf(player?.d8)), gear: { helmet: piece("helmet"), body: piece("chest") ?? overall, legs: piece("leggings") ?? overall, boots: piece("boots"), main: piece("weapon"), off: piece("subweapon") } };
+  const overall = piece("overall"), overallLegs = overall && (overall.kind ? OVERALL_LEGS[overall.kind] ? { tier: overall.tier, kind: OVERALL_LEGS[overall.kind] } : null : overall);
+  return { cls: player?.d8?.heroClass ?? null, look: copyWire(heroLookOf(player?.d8)), gear: { helmet: piece("helmet"), body: piece("chest") ?? overall, legs: piece("leggings") ?? overallLegs, gloves: piece("gloves"), boots: piece("boots"), main: piece("weapon"), off: piece("subweapon") } };
 }
 
 // src/host/world_terrain_projection_d9.js
@@ -26398,8 +26896,8 @@ function createActivityClientPort({ authority, localPlayerId, measure = (_n, fn)
       return measure("interestProjection", () => {
         const player = state.playersById[localPlayerId];
         requireContract(player, "Missing local controller");
-        const local5 = state.entitiesById[player.entityId], ctx = actorContext(state, local5.entityId), space = state.spacesByInstanceId[ctx.spaceInstanceId], m = manifestForState(state);
-        const slowKey = `${ctx.spaceInstanceId}/${Math.floor(local5.position.x / 16)},${Math.floor(local5.position.y / 16)}/${local5.alive}/${player.inventory?.revision}/${state.d9World?.runtime.revision ?? 0}/${Math.floor(state.tick / SLOW_REFRESH_TICKS)}`;
+        const local6 = state.entitiesById[player.entityId], ctx = actorContext(state, local6.entityId), space = state.spacesByInstanceId[ctx.spaceInstanceId], m = manifestForState(state);
+        const slowKey = `${ctx.spaceInstanceId}/${Math.floor(local6.position.x / 16)},${Math.floor(local6.position.y / 16)}/${local6.alive}/${player.inventory?.revision}/${state.d9World?.runtime.revision ?? 0}/${Math.floor(state.tick / SLOW_REFRESH_TICKS)}`;
         if (slowKey !== slowViewKey || state !== slowViewState) {
           slowView = /* @__PURE__ */ new Map();
           slowViewKey = slowKey;
@@ -26416,7 +26914,7 @@ function createActivityClientPort({ authority, localPlayerId, measure = (_n, fn)
           compiled = compileBoundOverworld(state);
           safeRegions = m.safeRegions.map((r) => freezeWire(r));
         }
-        const size = 8, px2 = Math.floor(local5.position.x / c.tileSize / size) * size, py = Math.floor(local5.position.y / c.tileSize / size) * size;
+        const size = 8, px2 = Math.floor(local6.position.x / c.tileSize / size) * size, py = Math.floor(local6.position.y / c.tileSize / size) * size;
         const visualWindowKey = state.d9World && inOverworld ? (() => {
           const left = px2 - 40, top = py - 40, right = left + 88, bottom = top + 88, frames = state.d9World.runtime.frames.map((f) => `${f.id}:${f.chunkX},${f.chunkY}:${f.offsetX},${f.offsetY}`).join("|"), chunks2 = state.d9World.runtime.chunks.flatMap((chunk2) => {
             const p = projectToLocalFrameD9({ chunkX: chunk2.chunkX, chunkY: chunk2.chunkY, localX: 0, localY: 0 }, state.d9World.runtime.frames);
@@ -26452,16 +26950,16 @@ function createActivityClientPort({ authority, localPlayerId, measure = (_n, fn)
           inventory = player.inventory ? inventoryReadModel(player) : null;
           inventoryKey = invKey;
         }
-        const loot = groundGear(player).filter((r) => r.definitionId && !r.claimed && r.spaceInstanceId === ctx.spaceInstanceId && Math.hypot(r.position.x - local5.position.x, r.position.y - local5.position.y) <= 900).map((r) => ({ sourceEntityId: r.sourceEntityId, itemId: `item:${player.playerId}:${r.sourceEntityId}`, position: { ...r.position }, definitionId: r.definitionId, ...r.generated ? { generated: r.generated } : {}, ...r.workshop ? { workshop: r.workshop } : {}, canPickUp: canPickUp(state, player, r.sourceEntityId, playersById[localPlayerId].stats.pickupRadius) })).sort((a, b) => Math.hypot(a.position.x - local5.position.x, a.position.y - local5.position.y) - Math.hypot(b.position.x - local5.position.x, b.position.y - local5.position.y) || a.sourceEntityId.localeCompare(b.sourceEntityId));
-        const resources = slowCached("resources", () => economicResources(state, m, localPlayerId, ctx.spaceInstanceId).filter((r) => r.spaceInstanceId === ctx.spaceInstanceId && Math.hypot(r.position.x - local5.position.x, r.position.y - local5.position.y) <= 900).flatMap((r) => {
+        const loot = groundGear(player).filter((r) => r.definitionId && !r.claimed && r.spaceInstanceId === ctx.spaceInstanceId && Math.hypot(r.position.x - local6.position.x, r.position.y - local6.position.y) <= 900).map((r) => ({ sourceEntityId: r.sourceEntityId, itemId: `item:${player.playerId}:${r.sourceEntityId}`, position: { ...r.position }, definitionId: r.definitionId, ...r.generated ? { generated: r.generated } : {}, ...r.workshop ? { workshop: r.workshop } : {}, canPickUp: canPickUp(state, player, r.sourceEntityId, playersById[localPlayerId].stats.pickupRadius) })).sort((a, b) => Math.hypot(a.position.x - local6.position.x, a.position.y - local6.position.y) - Math.hypot(b.position.x - local6.position.x, b.position.y - local6.position.y) || a.sourceEntityId.localeCompare(b.sourceEntityId));
+        const resources = slowCached("resources", () => economicResources(state, m, localPlayerId, ctx.spaceInstanceId).filter((r) => r.spaceInstanceId === ctx.spaceInstanceId && Math.hypot(r.position.x - local6.position.x, r.position.y - local6.position.y) <= 900).flatMap((r) => {
           const bossCompletion = projectBrimstoneCompletionChest(state, r) ?? projectAegisCompletionChest(state, r) ?? projectArachnidTreantCompletionChestD12_5B(state, r) ?? projectStandardCaveBossCompletionChestD13D_E(state, r), finaleCompletion = projectSmallCaveFinaleCompletionChestD13D_C(state, r) ?? projectLargeCaveFinaleCompletionChestD13D_G(state, r), completion = bossCompletion ?? finaleCompletion;
           if (completion && !completion.visible) return [];
           return [{ ...r, ...bossCompletion ? { bossCompletion } : {}, ...finaleCompletion ? { finaleCompletion } : {}, canUse: canUseResource(state, m, player, { groupId: r.groupId, episode: r.episode, ordinal: r.ordinal, inventoryRevision: player.inventory.revision }) }];
         }));
         const hostileHazards = projectHostileHazardsD12_4J(state, ctx.spaceInstanceId), bossHazards = projectBossHazardsD12_5A(state, ctx.spaceInstanceId);
-        const visible3 = engine.nearby(local5, 900).filter((a) => !eventActorDormant(state, a.entityId) && bossActorTargetableD12_5A(state, a.entityId));
-        for (const defeated of Object.values(state.entitiesById)) if (!defeated.alive && defeated.ai?.defeatedTick !== void 0 && state.tick - defeated.ai.defeatedTick <= 36 && defeated.residency.spaceInstanceId === ctx.spaceInstanceId && Math.hypot(defeated.position.x - local5.position.x, defeated.position.y - local5.position.y) <= 900 && !visible3.some((a) => a.entityId === defeated.entityId)) visible3.push(defeated);
-        if (!visible3.some((a) => a.entityId === local5.entityId)) visible3.push(local5);
+        const visible3 = engine.nearby(local6, 900).filter((a) => !eventActorDormant(state, a.entityId) && bossActorTargetableD12_5A(state, a.entityId));
+        for (const defeated of Object.values(state.entitiesById)) if (!defeated.alive && defeated.ai?.defeatedTick !== void 0 && state.tick - defeated.ai.defeatedTick <= 36 && defeated.residency.spaceInstanceId === ctx.spaceInstanceId && Math.hypot(defeated.position.x - local6.position.x, defeated.position.y - local6.position.y) <= 900 && !visible3.some((a) => a.entityId === defeated.entityId)) visible3.push(defeated);
+        if (!visible3.some((a) => a.entityId === local6.entityId)) visible3.push(local6);
         for (const a of visible3) {
           const creature = creatureDefinitionForProfile(a.contentDefinitionId), family = creature?.family ?? ordinaryEnemyForProfile(a.contentDefinitionId)?.family ?? null, group = Object.values(state.groupsById).find((g) => g.entityIds.includes(a.entityId)), prior = creatureFacingViews.get(a.entityId), attackTarget = a.ai?.melee?.targetEntityId ? state.entitiesById[a.ai.melee.targetEntityId] : null, presentationFacingX = a.team === "hostile" && family ? rustNibblerFacingD11_2({ position: a.position, previousPosition: prior?.position ?? null, movementIntentX: a.movementIntent?.x ?? 0, attackTargetPosition: attackTarget?.position ?? null, meleePhase: a.ai?.melee?.phase ?? "idle", lastFacing: prior?.facingX ?? 1, alive: a.alive }) : 1;
           creatureFacingViews.set(a.entityId, { position: { ...a.position }, facingX: presentationFacingX });
@@ -26498,7 +26996,7 @@ function createActivityClientPort({ authority, localPlayerId, measure = (_n, fn)
           eventKey = nextEventKey;
         }
         const events = eventView;
-        const place = inOverworld ? semanticPlaceAtWorldPosition(m, local5.position) : null, area = inOverworld ? areaAtWorldPosition(m, local5.position) : null, d = state.campaign.overworld.discovery, truthKey = state.d9World ? `${state.d9World.runtime.revision}/${ctx.spaceInstanceId}/${d.discoveredSiteIds.length}` : null;
+        const place = inOverworld ? semanticPlaceAtWorldPosition(m, local6.position) : null, area = inOverworld ? areaAtWorldPosition(m, local6.position) : null, d = state.campaign.overworld.discovery, truthKey = state.d9World ? `${state.d9World.runtime.revision}/${ctx.spaceInstanceId}/${d.discoveredSiteIds.length}` : null;
         if (state.d9World && (state !== siteTruthState || truthKey !== siteTruthKey || state.tick - siteTruthTick >= SITE_TRUTH_REFRESH_TICKS || state.tick < siteTruthTick)) {
           siteTruthView = presentationSiteTruth(state);
           siteTruthState = state;
@@ -26514,61 +27012,61 @@ function createActivityClientPort({ authority, localPlayerId, measure = (_n, fn)
             x: anchor.x,
             y: anchor.y,
             radius: SITE_INTERACTION_RADIUS,
-            available: Boolean(siteTransitionTarget(state, m, local5, payload)),
+            available: Boolean(siteTransitionTarget(state, m, local6, payload)),
             label: inOverworld ? `Enter ${semantic.properName ?? semantic.label}` : `Leave ${semantic.properName ?? semantic.label}`
           };
         });
         if (state.d9World) {
-          exits.push(...slowCached("trailNotes", () => trailNoteExits(state, local5)));
-          for (const e of projectWorldEvents(state, local5)) if (e.status === "dormant") exits.push({ exitId: "event:" + e.groupId, eventAction: { groupId: e.groupId }, x: (e.interactionPosition ?? e.position).x, y: (e.interactionPosition ?? e.position).y, radius: 96, available: e.canActivate, label: e.activeCount >= 4 ? "Four events active \u2014 finish one first" : (e.kind === "hollow" ? "Investigate " : "Disturb ") + e.label });
+          exits.push(...slowCached("trailNotes", () => trailNoteExits(state, local6)));
+          for (const e of projectWorldEvents(state, local6)) if (e.status === "dormant") exits.push({ exitId: "event:" + e.groupId, eventAction: { groupId: e.groupId }, x: (e.interactionPosition ?? e.position).x, y: (e.interactionPosition ?? e.position).y, radius: 96, available: e.canActivate, label: e.activeCount >= 4 ? "Four events active \u2014 finish one first" : (e.kind === "hollow" ? "Investigate " : "Disturb ") + e.label });
           if (inFunctional) {
             if (isGeneratedInteriorFamily(functional)) {
               if (functionalFloor.index === 0) {
                 const payload = { siteId: functional.siteId, direction: "exit" }, anchor = functionalFloor.entrance;
-                exits.push({ exitId: `site-exit:${functional.siteId}`, siteAction: payload, siteKind: functional.siteKind, x: anchor.x, y: anchor.y, radius: SITE_INTERACTION_RADIUS, available: Boolean(functionalSiteTransitionTargetD9(state, local5, payload)), label: functional.siteKind === "procedural-fort" ? "Leave Fort" : functional.siteKind === "procedural-ruin" ? "Leave Ruin" : functional.siteKind === "procedural-crypt" ? "Leave Crypt" : `Leave Cave` });
+                exits.push({ exitId: `site-exit:${functional.siteId}`, siteAction: payload, siteKind: functional.siteKind, x: anchor.x, y: anchor.y, radius: SITE_INTERACTION_RADIUS, available: Boolean(functionalSiteTransitionTargetD9(state, local6, payload)), label: functional.siteKind === "procedural-fort" ? "Leave Fort" : functional.siteKind === "procedural-ruin" ? "Leave Ruin" : functional.siteKind === "procedural-crypt" ? "Leave Crypt" : `Leave Cave` });
               }
               for (const direction3 of ["up", "down"]) {
                 const transition2 = functionalFloor.transitions[direction3];
                 if (!transition2) continue;
                 const payload = { siteId: functional.siteId, direction: direction3, transitionId: transition2.transitionId }, anchor = transition2.anchor;
-                exits.push({ exitId: `site-${direction3}:${transition2.transitionId}`, siteAction: payload, siteKind: functional.siteKind, ...functionalFloor.graph?.navigation?.arrivalFacing !== void 0 ? { stairFacing: functionalFloor.graph.navigation[direction3 === "up" ? "arrivalFacing" : "onwardFacing"] } : {}, x: anchor.x, y: anchor.y, radius: SITE_INTERACTION_RADIUS, available: Boolean(functionalSiteTransitionTargetD9(state, local5, payload)), label: transition2.label ?? (direction3 === "down" ? "Descend" : "Ascend") });
+                exits.push({ exitId: `site-${direction3}:${transition2.transitionId}`, siteAction: payload, siteKind: functional.siteKind, ...functionalFloor.graph?.navigation?.arrivalFacing !== void 0 ? { stairFacing: functionalFloor.graph.navigation[direction3 === "up" ? "arrivalFacing" : "onwardFacing"] } : {}, x: anchor.x, y: anchor.y, radius: SITE_INTERACTION_RADIUS, available: Boolean(functionalSiteTransitionTargetD9(state, local6, payload)), label: transition2.label ?? (direction3 === "down" ? "Descend" : "Ascend") });
               }
               const extraction = projectSmallCaveFinaleExtractionD13D_C(state, functional, functionalFloor) ?? projectStandardCaveBossExtractionD13D_E(state, functional, functionalFloor) ?? projectLargeCaveFinaleExtractionD13D_G(state, functional, functionalFloor) ?? projectArachnidTreantExtractionD12_5C(state, functional, functionalFloor);
               if (extraction?.visible) {
                 const payload = { siteId: functional.siteId, direction: "extract", extractionId: extraction.portalId }, anchor = extraction.position;
-                exits.push({ exitId: extraction.portalId, siteAction: payload, siteKind: "cave-extraction", extractionPortal: extraction, x: anchor.x, y: anchor.y, radius: SITE_INTERACTION_RADIUS, available: Boolean(functionalSiteTransitionTargetD9(state, local5, payload)), label: functional.siteKind === "procedural-fort" ? "Return to Fort Entrance" : functional.siteKind === "procedural-ruin" ? "Return to Ruin Entrance" : functional.siteKind === "procedural-crypt" ? "Return to Crypt Entrance" : "Return to Cave Mouth" });
+                exits.push({ exitId: extraction.portalId, siteAction: payload, siteKind: "cave-extraction", extractionPortal: extraction, x: anchor.x, y: anchor.y, radius: SITE_INTERACTION_RADIUS, available: Boolean(functionalSiteTransitionTargetD9(state, local6, payload)), label: functional.siteKind === "procedural-fort" ? "Return to Fort Entrance" : functional.siteKind === "procedural-ruin" ? "Return to Ruin Entrance" : functional.siteKind === "procedural-crypt" ? "Return to Crypt Entrance" : "Return to Cave Mouth" });
               }
             } else {
               const payload = { siteId: functional.siteId, direction: "exit" }, anchor = functional.interior.entrance;
-              exits.push({ exitId: `site-exit:${functional.siteId}`, siteAction: payload, siteKind: functional.siteKind, x: anchor.x, y: anchor.y, radius: SITE_INTERACTION_RADIUS, available: Boolean(functionalSiteTransitionTargetD9(state, local5, payload)), label: functional.siteKind === "woodland-fort" ? "Leave Keep" : `Leave ${functional.label}` });
+              exits.push({ exitId: `site-exit:${functional.siteId}`, siteAction: payload, siteKind: functional.siteKind, x: anchor.x, y: anchor.y, radius: SITE_INTERACTION_RADIUS, available: Boolean(functionalSiteTransitionTargetD9(state, local6, payload)), label: functional.siteKind === "woodland-fort" ? "Leave Keep" : `Leave ${functional.label}` });
             }
           } else if (inOverworld) {
             for (const { truth, anchor } of presentationSiteAnchors(siteTruth, state.d9World.runtime.frames)) {
               const bound = state.d9World.functionalSitesById[truth.siteId], keep2 = bound?.siteKind === "woodland-fort" || truth.packageId === "procedural-fort-family";
-              if (Math.hypot(anchor.x - local5.position.x, anchor.y - local5.position.y) > 900) continue;
-              const payload = { siteId: truth.siteId, direction: "enter" }, available = bound ? Boolean(functionalSiteTransitionTargetD9(state, local5, payload)) : local5.alive && !state.primary.actorsById[local5.entityId].current && Math.hypot(anchor.x - local5.position.x, anchor.y - local5.position.y) <= SITE_INTERACTION_RADIUS;
+              if (Math.hypot(anchor.x - local6.position.x, anchor.y - local6.position.y) > 900) continue;
+              const payload = { siteId: truth.siteId, direction: "enter" }, available = bound ? Boolean(functionalSiteTransitionTargetD9(state, local6, payload)) : local6.alive && !state.primary.actorsById[local6.entityId].current && Math.hypot(anchor.x - local6.position.x, anchor.y - local6.position.y) <= SITE_INTERACTION_RADIUS;
               exits.push({ exitId: `site-enter:${truth.siteId}`, siteAction: payload, siteKind: keep2 ? "woodland-fort-keep" : truth.packageId === "procedural-ruin-family" ? "procedural-ruin" : truth.siteType, ...truth.packageId === "procedural-fort-family" ? { proceduralFort: true } : {}, ...["procedural-ruin-family", "procedural-crypt-family"].includes(truth.packageId) ? { proceduralRuin: true } : {}, x: anchor.x, y: anchor.y, radius: SITE_INTERACTION_RADIUS, available, label: bound?.siteKind === "woodland-fort" ? "Enter Keep" : bound ? `Enter ${truth.label}` : `Enter ${truth.label}` });
             }
           }
         }
         const station = slowCached("forge", () => nearbyForge(state, player));
-        exits.push(...slowCached("tavernFerry", () => [...campaignTavernExits(state, local5), ...ferryExits(state, local5)]));
+        exits.push(...slowCached("tavernFerry", () => [...campaignTavernExits(state, local6), ...ferryExits(state, local6)]));
         if (inOverworld) for (const s of state.campaign.forgeStations?.stations ?? []) exits.push({ exitId: s.stationId, forgeAction: true, x: s.interaction.x, y: s.interaction.y, radius: FORGE_INTERACTION_RADIUS, available: s.stationId === station?.stationId, label: "Use Forge" });
-        const nearest = visible3.filter((a) => a.alive && a.team === "hostile").sort((a, b) => clearHullGap(local5, a) - clearHullGap(local5, b))[0], tomeTarget = !nearest ? "NO TARGET" : clearHullGap(local5, nearest) > 128 ? "OUT OF RANGE" : visible3.some((a) => a.alive && a.team === "hostile" && clearHullGap(local5, a) <= 128 && subweaponLineClear(c, local5, a)) ? "READY" : "LOS BLOCKED";
-        const plannedPosition = state.d9World?.plannedWorld && inOverworld ? localFramePositionD9(local5.position, state.d9World.runtime.frames) : null, plannedRegion = plannedPosition ? state.d9World.runtime.chunks.find((c2) => c2.chunkX === plannedPosition.chunkX && c2.chunkY === plannedPosition.chunkY)?.region : null;
+        const nearest = visible3.filter((a) => a.alive && a.team === "hostile").sort((a, b) => clearHullGap(local6, a) - clearHullGap(local6, b))[0], tomeTarget = !nearest ? "NO TARGET" : clearHullGap(local6, nearest) > 128 ? "OUT OF RANGE" : visible3.some((a) => a.alive && a.team === "hostile" && clearHullGap(local6, a) <= 128 && subweaponLineClear(c, local6, a)) ? "READY" : "LOS BLOCKED";
+        const plannedPosition = state.d9World?.plannedWorld && inOverworld ? localFramePositionD9(local6.position, state.d9World.runtime.frames) : null, plannedRegion = plannedPosition ? state.d9World.runtime.chunks.find((c2) => c2.chunkX === plannedPosition.chunkX && c2.chunkY === plannedPosition.chunkY)?.region : null;
         for (const n of [...serviceNpcs].reverse()) exits.unshift({ exitId: n.id, serviceNpcId: n.id, x: n.position.x, y: n.position.y, radius: 72, available: n.available, label: "Talk to " + n.name + " \xB7 " + n.roleLabel });
         const woodlandPilotEvents = state.d9World?.plannedWorld && inOverworld ? WOODLAND_EVENT_PILOT_V3_7.map((event) => {
           const anchor = state.d9World.runtime.chunks.flatMap((chunk2) => chunk2.anchors).find((a) => a.ordinal === event.ordinal && isWoodlandPilotEventAnchor(a)), groupId = anchor ? "ordinary:" + anchor.id.split(":").at(-1) : null, group = groupId ? state.groupsById[groupId] : null;
           return { slotId: event.slotId, state: group?.cleared ? "completed" : eventRecord(state, groupId) ? "active" : "undiscovered" };
         }) : [];
         cachedModel = Object.freeze({
-          worldEvents: freezeProjection(projectWorldEvents(state, local5)),
+          worldEvents: freezeProjection(projectWorldEvents(state, local6)),
           serviceNpcs: freezeProjection(serviceNpcs),
-          navigation: state.d9World ? freezeProjection({ frames: copyWire(state.d9World.runtime.frames), position: inOverworld ? localFramePositionD9(local5.position, state.d9World.runtime.frames) : null, revision: state.d9World.navigation.revision, knowledge: projectMapKnowledge(state), root: state.d9World.discoveryIndex, boundSitesById: Object.fromEntries(functionalSitesD10(state).map((site2) => [site2.siteId, { siteId: site2.siteId, label: mapSiteLabel(state, site2.siteId, site2.label), state: site2.conqueredTick === null ? "active" : "completed" }])), navigableSitesById: Object.fromEntries(siteTruth.sites.map((site2) => [site2.siteId, { siteId: site2.siteId, label: mapSiteLabel(state, site2.siteId, site2.label), state: site2.completed ? "completed" : site2.bound ? "active" : "unidentified" }])), pending: copyWire(state.d9World.navigation.pending.filter((r) => r.playerId === localPlayerId)), pips: inOverworld ? visible3.filter((a) => a.alive && a.entityId !== local5.entityId && Math.hypot(a.position.x - local5.position.x, a.position.y - local5.position.y) <= revealRadiusD9(playersById[localPlayerId].stats.attributes.int) * 32).map((a) => ({ position: localFramePositionD9(a.position, state.d9World.runtime.frames), kind: a.team === "party" ? "ally" : "hostile" })) : [] }) : null,
+          navigation: state.d9World ? freezeProjection({ frames: copyWire(state.d9World.runtime.frames), position: inOverworld ? localFramePositionD9(local6.position, state.d9World.runtime.frames) : null, revision: state.d9World.navigation.revision, knowledge: projectMapKnowledge(state), root: state.d9World.discoveryIndex, boundSitesById: Object.fromEntries(functionalSitesD10(state).map((site2) => [site2.siteId, { siteId: site2.siteId, label: mapSiteLabel(state, site2.siteId, site2.label), state: site2.conqueredTick === null ? "active" : "completed" }])), navigableSitesById: Object.fromEntries(siteTruth.sites.map((site2) => [site2.siteId, { siteId: site2.siteId, label: mapSiteLabel(state, site2.siteId, site2.label), state: site2.completed ? "completed" : site2.bound ? "active" : "unidentified" }])), pending: copyWire(state.d9World.navigation.pending.filter((r) => r.playerId === localPlayerId)), pips: inOverworld ? visible3.filter((a) => a.alive && a.entityId !== local6.entityId && Math.hypot(a.position.x - local6.position.x, a.position.y - local6.position.y) <= revealRadiusD9(playersById[localPlayerId].stats.attributes.int) * 32).map((a) => ({ position: localFramePositionD9(a.position, state.d9World.runtime.frames), kind: a.team === "party" ? "ally" : "hostile" })) : [] }) : null,
           combatPresentation: freezeProjection(projectCombatPresentation(state, Object.keys(entitiesById))),
           tomeTarget,
-          subweapon: freezeProjection({ suppressed: subweaponSuppressedD12_4I(state, local5.entityId), guard: { ...state.subweaponCombat.actors[local5.entityId].guard, integrity: presentCombat(state.subweaponCombat.actors[local5.entityId].guard.integrity), direction: { ...state.subweaponCombat.actors[local5.entityId].guard.direction } }, delivery: { ...state.subweaponCombat.actors[local5.entityId].delivery }, pressure: state.subweaponCombat.actors[local5.entityId].pressure, dash: { ...state.subweaponCombat.actors[local5.entityId].dash }, skills: structuredClone(state.subweaponCombat.actors[local5.entityId].skills ?? { cooldowns: {} }), barrier: presentCombat(state.subweaponCombat.actors[local5.entityId].barrier), maxBarrier: playersById[localPlayerId].stats.maxBarrier, barrierRatio: integerRatio(state.subweaponCombat.actors[local5.entityId].barrier, playersById[localPlayerId].stats.maxBarrier), barrierLabel: formatLarge(state.subweaponCombat.actors[local5.entityId].barrier), maxBarrierLabel: formatLarge(playersById[localPlayerId].stats.maxBarrier) }),
-          hostileProjectiles: freezeProjection(Object.values(state.hostileCombat?.projectiles ?? {}).filter((b) => b.spaceInstanceId === ctx.spaceInstanceId && Math.hypot(b.position.x - local5.position.x, b.position.y - local5.position.y) <= 1e3).map((b) => ({ id: b.id, sourceId: b.sourceId, sourceFamily: ordinaryEnemyForProfile(state.entitiesById[b.sourceId]?.contentDefinitionId)?.family ?? null, style: b.type, position: { ...b.position }, direction: { ...b.direction }, radius: b.radius, firedTick: b.firedTick }))),
+          subweapon: freezeProjection({ suppressed: subweaponSuppressedD12_4I(state, local6.entityId), guard: { ...state.subweaponCombat.actors[local6.entityId].guard, integrity: presentCombat(state.subweaponCombat.actors[local6.entityId].guard.integrity), direction: { ...state.subweaponCombat.actors[local6.entityId].guard.direction } }, delivery: { ...state.subweaponCombat.actors[local6.entityId].delivery }, pressure: state.subweaponCombat.actors[local6.entityId].pressure, dash: { ...state.subweaponCombat.actors[local6.entityId].dash }, skills: structuredClone(state.subweaponCombat.actors[local6.entityId].skills ?? { cooldowns: {} }), barrier: presentCombat(state.subweaponCombat.actors[local6.entityId].barrier), maxBarrier: playersById[localPlayerId].stats.maxBarrier, barrierRatio: integerRatio(state.subweaponCombat.actors[local6.entityId].barrier, playersById[localPlayerId].stats.maxBarrier), barrierLabel: formatLarge(state.subweaponCombat.actors[local6.entityId].barrier), maxBarrierLabel: formatLarge(playersById[localPlayerId].stats.maxBarrier) }),
+          hostileProjectiles: freezeProjection(Object.values(state.hostileCombat?.projectiles ?? {}).filter((b) => b.spaceInstanceId === ctx.spaceInstanceId && Math.hypot(b.position.x - local6.position.x, b.position.y - local6.position.y) <= 1e3).map((b) => ({ id: b.id, sourceId: b.sourceId, sourceFamily: ordinaryEnemyForProfile(state.entitiesById[b.sourceId]?.contentDefinitionId)?.family ?? null, style: b.type, position: { ...b.position }, direction: { ...b.direction }, radius: b.radius, firedTick: b.firedTick }))),
           bolts: freezeProjection(Object.values(state.subweaponCombat.projectiles).filter((b) => b.spaceInstanceId === ctx.spaceInstanceId).map((b) => ({ id: b.id, sourceId: b.sourceId, frames: b.frames, delivery: b.delivery, position: { ...b.position }, direction: { ...b.direction } }))),
           tick: state.tick,
           worldTime: worldTimeAtTick(state.tick),
@@ -26585,10 +27083,10 @@ function createActivityClientPort({ authority, localPlayerId, measure = (_n, fn)
           bossHazards,
           context: freezeProjection({ protocolVersion: 1, campaignId: state.campaign.campaignId, sessionId: state.session.sessionId, expectedSaveRevision: state.campaign.saveRevision, ...ctx, nextClientSequence: engine.nextClientSequence(localPlayerId) }),
           woodlandPilotEvents: freezeProjection(woodlandPilotEvents),
-          woodlandPilotClues: freezeProjection(state.d9World?.plannedWorld && inOverworld ? woodlandEventCluesV3_8(localFramePositionD9(local5.position, state.d9World.runtime.frames), woodlandPilotEvents) : []),
+          woodlandPilotClues: freezeProjection(state.d9World?.plannedWorld && inOverworld ? woodlandEventCluesV3_8(localFramePositionD9(local6.position, state.d9World.runtime.frames), woodlandPilotEvents) : []),
           primary: freezeProjection({ actorsById: primaryActors, events }),
           encounter: null,
-          recovery: Object.freeze({ canRespawn: !local5.alive, anchorLabel: plannedStartLabel(state.d9World?.plannedWorld, m.settlements.find((s) => s.settlementId === m.start.settlementId).label) }),
+          recovery: Object.freeze({ canRespawn: !local6.alive, anchorLabel: plannedStartLabel(state.d9World?.plannedWorld, m.settlements.find((s) => s.settlementId === m.start.settlementId).label) }),
           space: Object.freeze({
             ...inOverworld && hasSettlementLife(state.d9World?.plannedWorld) ? { plannedVillage: projectToLocalFrameD9({ chunkX: "1164", chunkY: "1316", localX: 0, localY: 0 }, state.d9World.runtime.frames), plannedVillages: villagePlacements(state.d9World.plannedWorld).flatMap((v) => {
               const p = projectToLocalFrameD9(tileAddress(v.origin.x, v.origin.y), state.d9World.runtime.frames);
@@ -26604,10 +27102,10 @@ function createActivityClientPort({ authority, localPlayerId, measure = (_n, fn)
             exits: freezeProjection(exits),
             functionalSite: inFunctional && functional.siteKind === "woodland-fort" ? freezeProjection({ siteId: functional.siteId, label: functional.label, siteKind: functional.siteKind, siteTier: null, contentHash: functional.instanceHash, conqueredTick: functional.conqueredTick }) : null,
             site: interior2 && functional?.siteKind !== "woodland-fort" ? freezeProjection(inFunctional ? { siteId: functional.siteId, label: functional.label, siteKind: functional.siteKind, siteTier: functional.sizeTier ?? null, floorIndex: functionalFloor?.index ?? 0, floorCount: functional.floorCount ?? 1, contentHash: interior2.contentHash, conqueredTick: functional.conqueredTick } : { siteId: site.locationId, label: site.properName ?? site.label, siteKind: site.siteKind, siteTier: site.siteTier, contentHash: interior2.contentHash, conqueredTick: state.campaign.sitesById[site.locationId].conqueredTick }) : null,
-            settlementSafe: inOverworld && (isStarterVillageSafe(state, local5.position) || isWorldPointSafe(m, local5.position)),
+            settlementSafe: inOverworld && (isStarterVillageSafe(state, local6.position) || isWorldPointSafe(m, local6.position)),
             visitedCount: d.discoveredRegionIds.length + d.discoveredSettlementIds.length + d.discoveredSiteIds.length,
             visitedTotal: m.regions.length + m.settlements.length + m.sites.length,
-            overworld: Object.freeze({ manifestId: m.manifestId, manifestHash: m.manifestHash, manifestVersion: 2, regionThreatTier: inOverworld ? populationRegionAt(m, local5.position)?.threatTier ?? null : null, populationGroups: m.population?.groups.length ?? 0, safeRegions: freezeProjection(inOverworld ? safeRegions.filter((r) => local5.position.x >= r.x && local5.position.x < r.x + r.width && local5.position.y >= r.y && local5.position.y < r.y + r.height) : []), egresses: freezeProjection(inOverworld && state.d9World ? state.d9World.origin.egress.openings.map((opening) => {
+            overworld: Object.freeze({ manifestId: m.manifestId, manifestHash: m.manifestHash, manifestVersion: 2, regionThreatTier: inOverworld ? populationRegionAt(m, local6.position)?.threatTier ?? null : null, populationGroups: m.population?.groups.length ?? 0, safeRegions: freezeProjection(inOverworld ? safeRegions.filter((r) => local6.position.x >= r.x && local6.position.x < r.x + r.width && local6.position.y >= r.y && local6.position.y < r.y + r.height) : []), egresses: freezeProjection(inOverworld && state.d9World ? state.d9World.origin.egress.openings.map((opening) => {
               const p = opening.cells[Math.floor(opening.cells.length / 2)];
               return { side: opening.side, x: (p.x + 0.5) * 32, y: (p.y + 0.5) * 32, label: "Frontier trail" };
             }) : []), seedHex: m.generation.seedHex, generatorVersion: m.generation.generatorVersion, currentAreaId: inOverworld && area ? technicalChunkId(area) : null, currentPlaceId: place?.placeId ?? null })
@@ -26898,387 +27396,36 @@ async function createLocalWorldSession({
   } });
 }
 
-// src/client/hero_creator_v1.js
-var HERO_CREATOR_OPEN_EVENT = "hero-creator:open";
-var OFFHAND_NAMES = { shield: "Shield", dagger: "Dagger", tome: "Tome" };
-var CLASS_ICONS = {
-  knight: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5l15 6v11c0 10-6 17-15 21C15 39 9 32 9 22V11z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M24 14v20M16 22h16" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
-  rogue: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M33 6l5 5-17 17-5-5z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M15 24l9 9M12 36l6-6M9 39l3-3" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
-  mage: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 9h22a6 6 0 0 1 6 6v24H16a6 6 0 0 1-6-6z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M24 15l2.5 6 6 2.5-6 2.5-2.5 6-2.5-6-6-2.5 6-2.5z" fill="currentColor"/></svg>'
-};
-var classIconSvg = (id) => CLASS_ICONS[id] ?? "";
-var sameLook = (a, b) => Boolean(a && b) && Object.keys(DEFAULT_LOOK).every((k) => a[k] === b[k]);
-var cleanName = (text2) => [...String(text2).replace(/[^\p{L}\p{M}\p{N} '’.-]/gu, "").replace(/\s+/g, " ").trimStart()].slice(0, HERO_NAME_MAX).join("");
-var namedOk = (name) => name.length > 0 && validHeroName(name);
-function createHeroCreatorV1({ document, environment, readModel, adapter, reportError = () => {
-}, onClose = () => {
-} }) {
-  const el = (tag, cls2 = "", text2 = "") => {
-    const e = document.createElement(tag);
-    if (cls2) e.className = cls2;
-    if (text2) e.textContent = text2;
-    return e;
-  };
-  const button = (cls2, text2, onClick) => {
-    const b = el("button", cls2, text2);
-    b.type = "button";
-    b.addEventListener("click", onClick);
-    return b;
-  };
-  const root = el("section", "hero-creator-v1");
-  root.hidden = true;
-  root.setAttribute("role", "dialog");
-  root.setAttribute("aria-modal", "true");
-  root.setAttribute("aria-labelledby", "hero-creator-title");
-  const panel = el("div", "hc-panel"), head12 = el("header", "hc-head"), title = el("h2", "", "Create your hero"), intro = el("p", "hc-intro");
-  title.id = "hero-creator-title";
-  head12.append(title, intro);
-  const body5 = el("div", "hc-body"), preview = el("div", "hc-preview"), stage2 = el("canvas", "hc-stage"), bar = el("div", "hc-bar");
-  stage2.setAttribute("role", "img");
-  stage2.setAttribute("aria-label", "Preview of your hero");
-  const options = el("div", "hc-options"), foot = el("footer", "hc-foot"), status2 = el("p", "hc-status"), cancel = button("hc-later", "Cancel", () => {
-    if (!busy) close();
-  }), confirm = button("hc-confirm", "", () => save());
-  status2.setAttribute("role", "status");
-  foot.append(status2, cancel, confirm);
-  let mode = "create", cls = null, deferClass = false, look = { ...DEFAULT_LOOK }, facing2 = 1, showGear = true, busy = false, thumbsKey = "", opener = null;
-  const toggle = (text2, get, set) => {
-    const b = button("hc-toggle", text2, () => {
-      set(!get());
-      paint();
-    });
-    return { b, sync() {
-      b.setAttribute("aria-pressed", String(get()));
-    } };
-  };
-  const gearToggle = toggle("Gear", () => showGear, (v) => {
-    showGear = v;
-  }), helmToggle = toggle("Helmet", () => look.helmet, (v) => {
-    look.helmet = v;
-  });
-  const randomButton = button("hc-toggle", "Random look", randomLook);
-  bar.append(button("hc-toggle", "Turn", () => {
-    facing2 = -facing2;
-  }), gearToggle.b, helmToggle.b, randomButton);
-  preview.append(stage2, bar);
-  const field2 = (label3, content, id) => {
-    const f = el("fieldset", "hc-field"), l = el("legend", "", label3), pick = el("span", "hc-pick");
-    if (id) pick.id = id;
-    l.append(" ", pick);
-    f.append(l, ...content);
-    options.append(f);
-    return { f, pick };
-  };
-  const classCards = el("div", "hc-classes"), cardButtons = {};
-  for (const c of ["knight", "rogue", "mage"].map((id) => HERO_CLASSES[id])) {
-    const b = el("button", "hc-class"), canvas = el("canvas"), skill = CLASS_SKILLS[c.signature];
-    b.type = "button";
-    b.style.setProperty("--class", c.color);
-    b.append(canvas, el("strong", "", c.name), el("span", "", `${OFFHAND_NAMES[c.offhand]} \xB7 ${c.move.name} on Shift`), el("small", "", `Free skill: ${skill.name}`));
-    b.addEventListener("click", () => {
-      if (!busy) {
-        cls = c.id;
-        deferClass = false;
-        paint();
-      }
-    });
-    cardButtons[c.id] = { b, canvas };
-    classCards.append(b);
-  }
-  const laterClass = button("hc-toggle hc-class-later", "Decide later", () => {
-    if (!busy) {
-      cls = null;
-      deferClass = true;
-      paint();
-    }
-  }), laterRow = el("div", "hc-class-later-row");
-  laterRow.append(laterClass, el("p", "hc-sub", "Pick a class any time from the skill wheel or Stats."));
-  const classField = field2("Class", [classCards, laterRow]);
-  const nameInput = el("input", "hc-name");
-  nameInput.type = "text";
-  nameInput.maxLength = HERO_NAME_MAX * 2;
-  nameInput.placeholder = "Name your hero";
-  nameInput.autocomplete = "off";
-  nameInput.spellcheck = false;
-  nameInput.setAttribute("aria-label", "Hero name");
-  nameInput.addEventListener("input", () => {
-    const clean = cleanName(nameInput.value);
-    if (clean !== nameInput.value) nameInput.value = clean;
-    look.name = clean;
-    paint();
-  });
-  const nameField = field2("Name", [nameInput]);
-  const tiles = (list, key2, id) => {
-    const box = el("div", "hc-tiles"), map = {};
-    for (const [value2, name] of list) {
-      const b = el("button", "hc-tile"), canvas = el("canvas");
-      b.type = "button";
-      b.append(canvas, el("span", "", name));
-      b.addEventListener("click", () => {
-        look[key2] = value2;
-        paint();
-      });
-      map[value2] = { b, canvas };
-      box.append(b);
-    }
-    return { box, map };
-  };
-  const swatches = (list, key2) => {
-    const box = el("div", "hc-swatches"), map = {};
-    for (const [value2, name, hex2] of list) {
-      const b = el("button", "hc-swatch");
-      b.type = "button";
-      b.style.background = hex2;
-      b.title = name;
-      b.setAttribute("aria-label", name);
-      b.addEventListener("click", () => {
-        look[key2] = value2;
-        paint();
-      });
-      map[value2] = b;
-      box.append(b);
-    }
-    return { box, map };
-  };
-  const hairTiles = tiles(LOOK_OPTIONS.hairStyles, "hair"), natural = swatches(LOOK_OPTIONS.hairColors.filter((x) => !x[3]), "hairColor"), bold = swatches(LOOK_OPTIONS.hairColors.filter((x) => x[3]), "hairColor"), skins = swatches(LOOK_OPTIONS.skins, "skin"), beardTiles = tiles(LOOK_OPTIONS.facialHair, "facialHair");
-  const hairField = field2("Hair", [hairTiles.box]), hairColorField = field2("Hair color", [natural.box, el("p", "hc-sub", "Bold"), bold.box]), skinField = field2("Skin", [skins.box]), beardField = field2("Facial hair", [beardTiles.box]);
-  const lookFields = [nameField, hairField, hairColorField, skinField, beardField];
-  body5.append(preview, options);
-  panel.append(head12, body5, foot);
-  root.append(panel);
-  document.body.append(root);
-  root.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !busy && mode !== "create") {
-      e.preventDefault();
-      close();
-    }
-  });
-  const onRequest = (e) => open(e?.detail?.mode ?? null);
-  document.addEventListener(HERO_CREATOR_OPEN_EVENT, onRequest);
-  const local5 = (m) => m.playersById[m.localPlayerId];
-  const heroClass = () => heroClassOf(local5(readModel())?.d8);
-  const wait = async (test, ms = 4e3) => {
-    const until = Date.now() + ms;
-    while (Date.now() < until) {
-      if (test(readModel())) return true;
-      await new Promise((r) => environment.setTimeout(r, 60));
-    }
-    return false;
-  };
-  const offhandOf = (item) => {
-    const d = itemDefinition(item);
-    return d?.slot === "subweapon" ? d.subType : null;
-  };
-  const currentGear = () => {
-    const m = readModel(), p = local5(m);
-    return m.entitiesById?.[p?.entityId]?.heroLook?.gear ?? {};
-  };
-  const specFor = (id, gear2) => ({ cls: id, look, gear: gear2, offType: id ? HERO_CLASSES[id].offhand : null });
-  function previewGear() {
-    if (!showGear) return {};
-    const gear2 = currentGear();
-    if (mode === "look" || heroClass() || !cls) return gear2;
-    const inv = readModel().inventory, held = offhandOf(inv?.itemsById[inv?.equipped.subweapon]);
-    return { ...gear2, off: held === HERO_CLASSES[cls].offhand && gear2.off ? gear2.off : { tier: 0 } };
-  }
-  function randomLook() {
-    const pick = (list) => list[Math.floor(Math.random() * list.length)][0];
-    look = { ...look, hair: pick(LOOK_OPTIONS.hairStyles), hairColor: pick(LOOK_OPTIONS.hairColors), skin: pick(LOOK_OPTIONS.skins), facialHair: Math.random() < 0.55 ? "none" : pick(LOOK_OPTIONS.facialHair) };
-    paint();
-  }
-  function draw(canvas, spec, frame, t) {
-    const r = canvas.getBoundingClientRect();
-    if (!r.width) return;
-    const dpr = Math.min(3, environment.devicePixelRatio || 1), W3 = Math.round(r.width * dpr), H3 = Math.round(r.height * dpr);
-    if (canvas.width !== W3 || canvas.height !== H3) {
-      canvas.width = W3;
-      canvas.height = H3;
-    }
-    const c = canvas.getContext("2d");
-    c.setTransform(dpr, 0, 0, dpr, 0, 0);
-    c.clearRect(0, 0, r.width, r.height);
-    c.save();
-    frame(c, r.width, r.height);
-    drawBlockyHero(c, spec, { t, still: t === null });
-    c.restore();
-  }
-  const headFrame = (x, y, s) => (c, w, h) => {
-    c.translate(w / 2 + x, h * y);
-    c.scale(w / s, w / s);
-  };
-  function paintThumbs() {
-    const key2 = JSON.stringify([{ ...look, name: "" }, cls, mode]);
-    if (key2 === thumbsKey) return;
-    thumbsKey = key2;
-    for (const [value2, { canvas }] of Object.entries(hairTiles.map)) draw(canvas, { cls: null, look: { ...look, hair: value2, helmet: false }, gear: {} }, headFrame(8, 0.9, 25.5), null);
-    for (const [value2, { canvas }] of Object.entries(beardTiles.map)) draw(canvas, { cls: null, look: { ...look, facialHair: value2, helmet: false }, gear: {} }, headFrame(2, 0.6, 22), null);
-    for (const [id, { canvas }] of Object.entries(cardButtons)) draw(canvas, specFor(id, starterHeroGear()), (c, w, h) => {
-      const s = Math.min(w / 46, h / 58);
-      c.translate(w * 0.46, h - 6 - 20 * 0.8 * s);
-      c.scale(0.8 * s, 0.8 * s);
-    }, null);
-  }
-  function paintStage(t) {
-    draw(stage2, specFor(heroClass() ?? (mode === "look" ? null : cls), previewGear()), (c, w, h) => {
-      const s = Math.min(h / 56, w / 58);
-      c.translate(w * 0.5 - (facing2 > 0 ? 3 : -3) * s, h - 22 - 20 * 0.8 * s);
-      c.scale(0.8 * s * facing2, 0.8 * s);
-    }, t);
-  }
-  function confirmState() {
-    const named = namedOk(look.name.trim()), hasClass = Boolean(heroClass());
-    if (busy) return ["Working\u2026", false];
-    if (mode === "class") return cls ? [`Become a ${HERO_CLASSES[cls].name}`, true] : ["Pick a class", false];
-    if (!named) return ["Name your hero", false];
-    if (mode === "look") return ["Save look", true];
-    if (hasClass) return ["Begin", true];
-    if (cls) return [`Begin as a ${HERO_CLASSES[cls].name}`, true];
-    return deferClass ? ["Begin without a class", true] : ["Pick a class or decide later", false];
-  }
-  function paint() {
-    const hasClass = Boolean(heroClass());
-    classField.f.hidden = !(mode === "class" || mode === "create" && !hasClass);
-    laterRow.hidden = mode !== "create";
-    for (const f of lookFields) f.f.hidden = mode === "class";
-    helmToggle.b.hidden = randomButton.hidden = mode === "class";
-    title.textContent = mode === "create" ? "Create your hero" : mode === "class" ? "Choose your class" : "Your hero\u2019s look";
-    intro.textContent = mode === "create" ? "Name your hero and choose how they look. Pick a class now or later; once picked, it\u2019s permanent." : mode === "class" ? "Your class is permanent for this hero. Your name and look stay as they are." : "Change how your hero looks. Your gear still goes on top.";
-    for (const [id, { b }] of Object.entries(cardButtons)) {
-      b.setAttribute("aria-pressed", String(id === cls));
-      b.disabled = busy;
-    }
-    laterClass.setAttribute("aria-pressed", String(deferClass));
-    laterClass.disabled = busy;
-    for (const [v, { b }] of Object.entries(hairTiles.map)) b.setAttribute("aria-pressed", String(v === look.hair));
-    for (const [v, { b }] of Object.entries(beardTiles.map)) b.setAttribute("aria-pressed", String(v === look.facialHair));
-    for (const map of [natural.map, bold.map]) for (const [v, b] of Object.entries(map)) b.setAttribute("aria-pressed", String(v === look.hairColor));
-    for (const [v, b] of Object.entries(skins.map)) b.setAttribute("aria-pressed", String(v === look.skin));
-    hairColorField.pick.textContent = "\xB7 " + (LOOK_OPTIONS.hairColors.find((x) => x[0] === look.hairColor)?.[1] ?? "");
-    skinField.pick.textContent = "\xB7 " + (LOOK_OPTIONS.skins.find((x) => x[0] === look.skin)?.[1] ?? "");
-    gearToggle.sync();
-    helmToggle.sync();
-    cancel.hidden = mode === "create";
-    cancel.disabled = busy;
-    const [label3, ready] = confirmState();
-    confirm.textContent = label3;
-    confirm.disabled = !ready;
-    if (!root.hidden) paintThumbs();
-  }
-  async function chooseClass(classId) {
-    const c = HERO_CLASSES[classId];
-    let m = readModel(), inv = m.inventory, equipped = inv.itemsById[inv.equipped.subweapon];
-    if (equipped && offhandOf(equipped) !== c.offhand) {
-      status2.textContent = "Stowing your old offhand\u2026";
-      const rev = inv.revision;
-      await adapter.issue("equipment.unequip", { slot: "subweapon", inventoryRevision: rev });
-      await wait((x) => x.inventory.revision > rev);
-    }
-    m = readModel();
-    status2.textContent = `Becoming a ${c.name}\u2026`;
-    await adapter.issue("progression.change", { progressionRevision: local5(m).d8.revision, action: { kind: "class.choose", heroClass: classId } });
-    if (!await wait((x) => local5(x).d8?.heroClass === classId)) throw Error("The class choice didn\u2019t save. Try again.");
-    const owned = () => Object.values(readModel().inventory.itemsById).find((i) => offhandOf(i) === c.offhand);
-    m = readModel();
-    inv = m.inventory;
-    if (!owned() && inv.subweapons && !inv.subweapons.claims[c.offhand]) {
-      status2.textContent = `Claiming your ${SUBWEAPONS[c.offhand].name}\u2026`;
-      const rev = inv.revision;
-      await adapter.issue("subweapon.claim", { subType: c.offhand, inventoryRevision: rev });
-      await wait((x) => x.inventory.revision > rev);
-    }
-    const item = owned();
-    m = readModel();
-    inv = m.inventory;
-    if (item && inv.equipped.subweapon !== item.itemId) {
-      status2.textContent = `Equipping your ${OFFHAND_NAMES[c.offhand]}\u2026`;
-      const rev = inv.revision;
-      await adapter.issue("equipment.equip", { itemId: item.itemId, slot: "subweapon", inventoryRevision: rev });
-      await wait((x) => x.inventory.revision > rev);
-    }
-  }
-  async function save() {
-    if (busy) return;
-    const next = { ...look, name: look.name.trim() };
-    if (mode !== "class" && !namedOk(next.name)) {
-      status2.textContent = "Give your hero a name: up to 16 letters, numbers, spaces, hyphens or apostrophes.";
-      return;
-    }
-    busy = true;
-    paint();
-    try {
-      if (mode !== "look" && cls && !heroClass()) await chooseClass(cls);
-      if (mode !== "class") {
-        status2.textContent = "Saving your look\u2026";
-        await adapter.issue("progression.change", { progressionRevision: local5(readModel()).d8.revision, action: { kind: "look.set", look: next } });
-        if (!await wait((x) => sameLook(local5(x).d8?.look, next))) throw Error("Your look didn\u2019t save. Try again.");
-      }
-      status2.textContent = "";
-      busy = false;
-      close();
-    } catch (e) {
-      status2.textContent = e.message;
-      reportError(e.message);
-    } finally {
-      busy = false;
-      paint();
-    }
-  }
-  function open(requested) {
-    const m = readModel(), p = local5(m);
-    if (!p?.d8 || busy) return false;
-    const hasClass = Boolean(heroClassOf(p.d8));
-    mode = !p.d8.look ? "create" : requested === "look" || hasClass ? "look" : "class";
-    look = { ...DEFAULT_LOOK, ...p.d8.look ?? {} };
-    nameInput.value = look.name;
-    deferClass = false;
-    if (mode !== "look") {
-      const inv = m.inventory, current = offhandOf(inv?.itemsById[inv?.equipped.subweapon]);
-      cls = hasClass ? null : Object.values(HERO_CLASSES).find((c) => c.offhand === current)?.id ?? null;
-    }
-    showGear = true;
-    facing2 = 1;
-    status2.textContent = "";
-    thumbsKey = "";
-    opener = document.activeElement;
-    root.hidden = false;
-    paint();
-    paintStage(environment.performance?.now?.() / 1e3 || 0);
-    return true;
-  }
-  function close() {
-    root.hidden = true;
-    const back = opener;
-    opener = null;
-    if (back?.isConnected && back.closest("[role=dialog]:not([hidden])")) back.focus({ preventScroll: true });
-    else onClose();
-  }
-  function refresh(m, available) {
-    const p = local5(m);
-    if (root.hidden) {
-      if (available && p?.d8 && !p.d8.look && m.persistence?.phase === "encounter" && m.entitiesById[p.entityId]?.alive) open(null);
-      return;
-    }
-    paintStage((environment.performance?.now?.() ?? Date.now()) / 1e3);
-  }
-  return Object.freeze({ open, refresh, isOpen: () => !root.hidden, destroy() {
-    document.removeEventListener(HERO_CREATOR_OPEN_EVENT, onRequest);
-    root.remove();
-  } });
+// src/client/class_kit_v1.js
+var local5 = (m) => m?.playersById?.[m.localPlayerId];
+function classKitDue(m) {
+  const p = local5(m), inv = m?.inventory;
+  return Boolean(p && inv && heroClassOf(p.d8) && inv.subweapons && !inv.classKit && m.entitiesById?.[p.entityId]?.alive && m.persistence?.phase === "encounter");
 }
-
-// src/client/skill_icons_v1.js
-var outline = 'stroke="#0b1015" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"';
-var SKILL_ICONS_V1 = Object.freeze({
-  shield_bash: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="sk-bash" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1fbff"/><stop offset=".5" stop-color="#86cdf0"/><stop offset="1" stop-color="#2c6a94"/></linearGradient></defs><path d="M30 13l12-5M33 23h13M30 33l12 5" stroke="#0b1015" stroke-width="6" stroke-linecap="round"/><path d="M30 13l12-5M33 23h13M30 33l12 5" stroke="#fff4c8" stroke-width="3" stroke-linecap="round"/><path d="M17 5l14 5v11c0 10-6 17-14 21C9 38 3 31 3 21V10z" fill="url(#sk-bash)" ${outline}/><path d="M17 11v25M9 20h16" stroke="#173f5c" stroke-width="2.4" stroke-linecap="round" opacity=".55"/><path d="M8 13l9-3" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity=".8"/></svg>`,
-  flurry: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="sk-flurry" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#9aa6b8"/><stop offset=".6" stop-color="#eef2f8"/><stop offset="1" stop-color="#ffffff"/></linearGradient></defs><path d="M7 30C14 14 28 7 43 6M5 39C16 27 30 21 44 19M10 45C22 38 33 35 45 33" fill="none" stroke="#0b1015" stroke-width="5" stroke-linecap="round" opacity=".7"/><path d="M7 30C14 14 28 7 43 6M5 39C16 27 30 21 44 19M10 45C22 38 33 35 45 33" fill="none" stroke="#c9a6ff" stroke-width="2.4" stroke-linecap="round"/><path d="M20 30L38 12l3 3-18 18z" fill="url(#sk-flurry)" ${outline}/><path d="M14 30l8 8M17 35l-6 6" stroke="#0b1015" stroke-width="6" stroke-linecap="round"/><path d="M14 30l8 8M17 35l-6 6" stroke="#8a5bd6" stroke-width="3" stroke-linecap="round"/></svg>`,
-  cast: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><radialGradient id="sk-cast" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#ffe0a3"/><stop offset=".75" stop-color="#ff8a3d"/><stop offset="1" stop-color="#b8361d"/></radialGradient></defs><path d="M22 28L5 43M18 23L4 30M27 33l-6 13" stroke="#0b1015" stroke-width="6" stroke-linecap="round"/><path d="M22 28L5 43M18 23L4 30M27 33l-6 13" stroke="#ffb35c" stroke-width="3" stroke-linecap="round"/><circle cx="30" cy="18" r="13" fill="url(#sk-cast)" ${outline}/><path d="M24 13a8 8 0 0 1 9-4" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".9"/></svg>`,
-  guard: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="mv-guard" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8f4ff"/><stop offset=".55" stop-color="#8fb6d4"/><stop offset="1" stop-color="#3b5d78"/></linearGradient></defs><path d="M24 4l17 6v12c0 12-8 19-17 23C15 41 7 34 7 22V10z" fill="url(#mv-guard)" ${outline}/><path d="M24 10l11 4v8c0 8-5 13-11 16" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity=".7"/><path d="M24 15v16M17 22h14" stroke="#2a4458" stroke-width="2.6" stroke-linecap="round" opacity=".6"/></svg>`,
-  dash: `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 12l12 12-12 12M20 12l12 12-12 12M32 12l12 12-12 12" fill="none" stroke="#0b1015" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 12l12 12-12 12" fill="none" stroke="#7a52b8" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" opacity=".7"/><path d="M20 12l12 12-12 12" fill="none" stroke="#b48cff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 12l12 12-12 12" fill="none" stroke="#efe4ff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-  blink: `<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="17" fill="none" stroke="#0b1015" stroke-width="5"/><circle cx="24" cy="24" r="17" fill="none" stroke="#8fd0ff" stroke-width="2.4" stroke-dasharray="6 5"/><path d="M24 6l4.5 13.5L42 24l-13.5 4.5L24 42l-4.5-13.5L6 24l13.5-4.5z" fill="#e9f7ff" ${outline}/><circle cx="24" cy="24" r="3.4" fill="#8fd0ff"/></svg>`,
-  lock: `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M16 21v-5a8 8 0 0 1 16 0v5" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><rect x="11" y="20" width="26" height="20" rx="5" fill="currentColor" fill-opacity=".22" stroke="currentColor" stroke-width="3"/><circle cx="24" cy="29" r="2.6" fill="currentColor"/></svg>`,
-  spin: `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M37 17a15 15 0 0 0-27 4M11 31a15 15 0 0 0 27-4" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="M38 8v10H28M10 40V30h10" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`
-});
-var MOVE_ICON_FOR = { shield: "guard", dagger: "dash", tome: "blink" };
+var classKitRoom = (m) => Object.keys(m.inventory.itemsById).length + CLASS_KIT_PIECES.length <= inventoryIntakeCapacity(local5(m).d8);
+var kitPieceFits = (inv, piece) => piece === "weapon" ? inv.itemsById[inv.equipped.weapon]?.definitionId === "worn-sword" : piece === "overall" ? !inv.equipped.overall && !inv.equipped.chest && !inv.equipped.leggings : !inv.equipped[piece];
+async function claimClassKit2({ readModel, adapter, wait, say = () => {
+} }) {
+  let m = readModel();
+  if (!classKitDue(m) || !classKitRoom(m)) return null;
+  const cls = heroClassOf(local5(m).d8).id;
+  say("Unpacking your starting gear\u2026");
+  const rev = m.inventory.revision;
+  await adapter.issue("classkit.claim", { inventoryRevision: rev });
+  if (!await wait((x) => Boolean(x.inventory?.classKit))) throw Error("Your starting gear didn\u2019t arrive. Try again.");
+  let worn = 0;
+  const ids4 = readModel().inventory.classKit.sourceEntityIds;
+  for (const [n, piece] of CLASS_KIT_PIECES.entries()) {
+    m = readModel();
+    const inv = m.inventory, itemId = `item:${m.localPlayerId}:${ids4[n]}`, item = inv.itemsById[itemId];
+    if (!item || !kitPieceFits(inv, piece)) continue;
+    say(`Putting on your ${itemDefinition(item).name}\u2026`);
+    const before = inv.revision;
+    await adapter.issue("equipment.equip", { itemId, slot: piece, inventoryRevision: before });
+    if (await wait((x) => x.inventory.revision > before) && readModel().inventory.equipped[piece] === itemId) worn++;
+  }
+  return { name: HERO_CLASSES[cls].name, worn };
+}
 
 // src/client/toast_v1.js
 var MAX_VISIBLE = 3;
@@ -27414,6 +27561,430 @@ function toastV1(doc, options) {
   return laneFor(doc).show(options);
 }
 
+// src/client/hero_creator_v1.js
+var HERO_CREATOR_OPEN_EVENT = "hero-creator:open";
+var OFFHAND_NAMES = { shield: "Shield", dagger: "Dagger", tome: "Tome" };
+var CLASS_ICONS = {
+  knight: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5l15 6v11c0 10-6 17-15 21C15 39 9 32 9 22V11z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M24 14v20M16 22h16" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
+  rogue: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M33 6l5 5-17 17-5-5z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M15 24l9 9M12 36l6-6M9 39l3-3" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
+  mage: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 9h22a6 6 0 0 1 6 6v24H16a6 6 0 0 1-6-6z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M24 15l2.5 6 6 2.5-6 2.5-2.5 6-2.5-6-6-2.5 6-2.5z" fill="currentColor"/></svg>'
+};
+var classIconSvg = (id) => CLASS_ICONS[id] ?? "";
+var KIT_GEAR_SLOT = { weapon: "main", helmet: "helmet", overall: "body", gloves: "gloves", boots: "boots" };
+function kitGear(id) {
+  const k = CLASS_KITS[id], piece = (definitionId) => ({ tier: 0, kind: itemLook({ definitionId }) }), gear2 = { off: piece("starter-" + HERO_CLASSES[id].offhand) };
+  for (const p of CLASS_KIT_PIECES) gear2[KIT_GEAR_SLOT[p]] = piece(k[p]);
+  const legs3 = OVERALL_LEGS[gear2.body.kind];
+  gear2.legs = legs3 ? { tier: 0, kind: legs3 } : null;
+  return gear2;
+}
+var sameLook = (a, b) => Boolean(a && b) && Object.keys(DEFAULT_LOOK).every((k) => a[k] === b[k]);
+var cleanName = (text2) => [...String(text2).replace(/[^\p{L}\p{M}\p{N} '’.-]/gu, "").replace(/\s+/g, " ").trimStart()].slice(0, HERO_NAME_MAX).join("");
+var namedOk = (name) => name.length > 0 && validHeroName(name);
+function createHeroCreatorV1({ document, environment, readModel, adapter, reportError = () => {
+}, onClose = () => {
+} }) {
+  const el = (tag, cls2 = "", text2 = "") => {
+    const e = document.createElement(tag);
+    if (cls2) e.className = cls2;
+    if (text2) e.textContent = text2;
+    return e;
+  };
+  const button = (cls2, text2, onClick) => {
+    const b = el("button", cls2, text2);
+    b.type = "button";
+    b.addEventListener("click", onClick);
+    return b;
+  };
+  const root = el("section", "hero-creator-v1");
+  root.hidden = true;
+  root.setAttribute("role", "dialog");
+  root.setAttribute("aria-modal", "true");
+  root.setAttribute("aria-labelledby", "hero-creator-title");
+  const panel = el("div", "hc-panel"), head12 = el("header", "hc-head"), title = el("h2", "", "Create your hero"), intro = el("p", "hc-intro");
+  title.id = "hero-creator-title";
+  head12.append(title, intro);
+  const body5 = el("div", "hc-body"), preview = el("div", "hc-preview"), stage2 = el("canvas", "hc-stage"), bar = el("div", "hc-bar");
+  stage2.setAttribute("role", "img");
+  stage2.setAttribute("aria-label", "Preview of your hero");
+  const options = el("div", "hc-options"), foot = el("footer", "hc-foot"), status2 = el("p", "hc-status"), cancel = button("hc-later", "Cancel", () => {
+    if (!busy) close();
+  }), confirm = button("hc-confirm", "", () => save());
+  status2.setAttribute("role", "status");
+  foot.append(status2, cancel, confirm);
+  let mode = "create", cls = null, deferClass = false, look = { ...DEFAULT_LOOK }, facing2 = 1, showGear = true, busy = false, thumbsKey = "", opener = null, kitBusy = false, kitRetryAt = 0, roomNoticed = false;
+  const toggle = (text2, get, set) => {
+    const b = button("hc-toggle", text2, () => {
+      set(!get());
+      paint();
+    });
+    return { b, sync() {
+      b.setAttribute("aria-pressed", String(get()));
+    } };
+  };
+  const gearToggle = toggle("Gear", () => showGear, (v) => {
+    showGear = v;
+  }), helmToggle = toggle("Helmet", () => look.helmet, (v) => {
+    look.helmet = v;
+  });
+  const randomButton = button("hc-toggle", "Random look", randomLook);
+  bar.append(button("hc-toggle", "Turn", () => {
+    facing2 = -facing2;
+  }), gearToggle.b, helmToggle.b, randomButton);
+  preview.append(stage2, bar);
+  const field2 = (label3, content, id) => {
+    const f = el("fieldset", "hc-field"), l = el("legend", "", label3), pick = el("span", "hc-pick");
+    if (id) pick.id = id;
+    l.append(" ", pick);
+    f.append(l, ...content);
+    options.append(f);
+    return { f, pick };
+  };
+  const classCards = el("div", "hc-classes"), cardButtons = {};
+  for (const c of ["knight", "rogue", "mage"].map((id) => HERO_CLASSES[id])) {
+    const b = el("button", "hc-class"), canvas = el("canvas"), skill = CLASS_SKILLS[c.signature];
+    b.type = "button";
+    b.style.setProperty("--class", c.color);
+    b.append(canvas, el("strong", "", c.name), el("span", "", `${OFFHAND_NAMES[c.offhand]} \xB7 ${c.move.name} on Shift`), el("small", "", `Free skill: ${skill.name}`));
+    b.addEventListener("click", () => {
+      if (!busy) {
+        cls = c.id;
+        deferClass = false;
+        paint();
+      }
+    });
+    cardButtons[c.id] = { b, canvas };
+    classCards.append(b);
+  }
+  const laterClass = button("hc-toggle hc-class-later", "Decide later", () => {
+    if (!busy) {
+      cls = null;
+      deferClass = true;
+      paint();
+    }
+  }), laterRow = el("div", "hc-class-later-row");
+  laterRow.append(laterClass, el("p", "hc-sub", "Pick a class any time from the skill wheel or Stats."));
+  const classField = field2("Class", [classCards, laterRow]);
+  const nameInput = el("input", "hc-name");
+  nameInput.type = "text";
+  nameInput.maxLength = HERO_NAME_MAX * 2;
+  nameInput.placeholder = "Name your hero";
+  nameInput.autocomplete = "off";
+  nameInput.spellcheck = false;
+  nameInput.setAttribute("aria-label", "Hero name");
+  nameInput.addEventListener("input", () => {
+    const clean = cleanName(nameInput.value);
+    if (clean !== nameInput.value) nameInput.value = clean;
+    look.name = clean;
+    paint();
+  });
+  const nameField = field2("Name", [nameInput]);
+  const tiles = (list, key2, id) => {
+    const box = el("div", "hc-tiles"), map = {};
+    for (const [value2, name] of list) {
+      const b = el("button", "hc-tile"), canvas = el("canvas");
+      b.type = "button";
+      b.append(canvas, el("span", "", name));
+      b.addEventListener("click", () => {
+        look[key2] = value2;
+        paint();
+      });
+      map[value2] = { b, canvas };
+      box.append(b);
+    }
+    return { box, map };
+  };
+  const swatches = (list, key2) => {
+    const box = el("div", "hc-swatches"), map = {};
+    for (const [value2, name, hex2] of list) {
+      const b = el("button", "hc-swatch");
+      b.type = "button";
+      b.style.background = hex2;
+      b.title = name;
+      b.setAttribute("aria-label", name);
+      b.addEventListener("click", () => {
+        look[key2] = value2;
+        paint();
+      });
+      map[value2] = b;
+      box.append(b);
+    }
+    return { box, map };
+  };
+  const hairTiles = tiles(LOOK_OPTIONS.hairStyles, "hair"), natural = swatches(LOOK_OPTIONS.hairColors.filter((x) => !x[3]), "hairColor"), bold = swatches(LOOK_OPTIONS.hairColors.filter((x) => x[3]), "hairColor"), skins = swatches(LOOK_OPTIONS.skins, "skin"), beardTiles = tiles(LOOK_OPTIONS.facialHair, "facialHair");
+  const hairField = field2("Hair", [hairTiles.box]), hairColorField = field2("Hair color", [natural.box, el("p", "hc-sub", "Bold"), bold.box]), skinField = field2("Skin", [skins.box]), beardField = field2("Facial hair", [beardTiles.box]);
+  const lookFields = [nameField, hairField, hairColorField, skinField, beardField];
+  body5.append(preview, options);
+  panel.append(head12, body5, foot);
+  root.append(panel);
+  document.body.append(root);
+  root.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !busy && mode !== "create") {
+      e.preventDefault();
+      close();
+    }
+  });
+  const onRequest = (e) => open(e?.detail?.mode ?? null);
+  document.addEventListener(HERO_CREATOR_OPEN_EVENT, onRequest);
+  const local6 = (m) => m.playersById[m.localPlayerId];
+  const heroClass = () => heroClassOf(local6(readModel())?.d8);
+  const wait = async (test, ms = 4e3) => {
+    const until = Date.now() + ms;
+    while (Date.now() < until) {
+      if (test(readModel())) return true;
+      await new Promise((r) => environment.setTimeout(r, 60));
+    }
+    return false;
+  };
+  const offhandOf = (item) => {
+    const d = itemDefinition(item);
+    return d?.slot === "subweapon" ? d.subType : null;
+  };
+  const currentGear = () => {
+    const m = readModel(), p = local6(m);
+    return m.entitiesById?.[p?.entityId]?.heroLook?.gear ?? {};
+  };
+  const specFor = (id, gear2) => ({ cls: id, look, gear: gear2, offType: id ? HERO_CLASSES[id].offhand : null });
+  function previewGear() {
+    if (!showGear) return {};
+    const gear2 = currentGear();
+    if (mode === "look" || heroClass() || !cls) return gear2;
+    const inv = readModel().inventory, held = offhandOf(inv?.itemsById[inv?.equipped.subweapon]), kit2 = kitGear(cls), next = { ...gear2, off: held === HERO_CLASSES[cls].offhand && gear2.off ? gear2.off : kit2.off };
+    if (inv && !inv.classKit) {
+      for (const p of CLASS_KIT_PIECES) if (kitPieceFits(inv, p)) {
+        next[KIT_GEAR_SLOT[p]] = kit2[KIT_GEAR_SLOT[p]];
+        if (p === "overall") next.legs = kit2.legs;
+      }
+    }
+    return next;
+  }
+  function randomLook() {
+    const pick = (list) => list[Math.floor(Math.random() * list.length)][0];
+    look = { ...look, hair: pick(LOOK_OPTIONS.hairStyles), hairColor: pick(LOOK_OPTIONS.hairColors), skin: pick(LOOK_OPTIONS.skins), facialHair: Math.random() < 0.55 ? "none" : pick(LOOK_OPTIONS.facialHair) };
+    paint();
+  }
+  function draw(canvas, spec, frame, t) {
+    const r = canvas.getBoundingClientRect();
+    if (!r.width) return;
+    const dpr = Math.min(3, environment.devicePixelRatio || 1), W3 = Math.round(r.width * dpr), H3 = Math.round(r.height * dpr);
+    if (canvas.width !== W3 || canvas.height !== H3) {
+      canvas.width = W3;
+      canvas.height = H3;
+    }
+    const c = canvas.getContext("2d");
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    c.clearRect(0, 0, r.width, r.height);
+    c.save();
+    frame(c, r.width, r.height);
+    drawBlockyHero(c, spec, { t, still: t === null });
+    c.restore();
+  }
+  const headFrame = (x, y, s) => (c, w, h) => {
+    c.translate(w / 2 + x, h * y);
+    c.scale(w / s, w / s);
+  };
+  function paintThumbs() {
+    const key2 = JSON.stringify([{ ...look, name: "" }, cls, mode]);
+    if (key2 === thumbsKey) return;
+    thumbsKey = key2;
+    for (const [value2, { canvas }] of Object.entries(hairTiles.map)) draw(canvas, { cls: null, look: { ...look, hair: value2, helmet: false }, gear: {} }, headFrame(8, 0.9, 25.5), null);
+    for (const [value2, { canvas }] of Object.entries(beardTiles.map)) draw(canvas, { cls: null, look: { ...look, facialHair: value2, helmet: false }, gear: {} }, headFrame(2, 0.6, 22), null);
+    for (const [id, { canvas }] of Object.entries(cardButtons)) draw(canvas, specFor(id, kitGear(id)), (c, w, h) => {
+      const s = Math.min(w / 46, h / 58);
+      c.translate(w * 0.46, h - 6 - 20 * 0.8 * s);
+      c.scale(0.8 * s, 0.8 * s);
+    }, null);
+  }
+  function paintStage(t) {
+    draw(stage2, specFor(heroClass() ?? (mode === "look" ? null : cls), previewGear()), (c, w, h) => {
+      const s = Math.min(h / 56, w / 58);
+      c.translate(w * 0.5 - (facing2 > 0 ? 3 : -3) * s, h - 22 - 20 * 0.8 * s);
+      c.scale(0.8 * s * facing2, 0.8 * s);
+    }, t);
+  }
+  function confirmState() {
+    const named = namedOk(look.name.trim()), hasClass = Boolean(heroClass());
+    if (busy) return ["Working\u2026", false];
+    if (mode === "class") return cls ? [`Become a ${HERO_CLASSES[cls].name}`, true] : ["Pick a class", false];
+    if (!named) return ["Name your hero", false];
+    if (mode === "look") return ["Save look", true];
+    if (hasClass) return ["Begin", true];
+    if (cls) return [`Begin as a ${HERO_CLASSES[cls].name}`, true];
+    return deferClass ? ["Begin without a class", true] : ["Pick a class or decide later", false];
+  }
+  function paint() {
+    const hasClass = Boolean(heroClass());
+    classField.f.hidden = !(mode === "class" || mode === "create" && !hasClass);
+    laterRow.hidden = mode !== "create";
+    for (const f of lookFields) f.f.hidden = mode === "class";
+    helmToggle.b.hidden = randomButton.hidden = mode === "class";
+    title.textContent = mode === "create" ? "Create your hero" : mode === "class" ? "Choose your class" : "Your hero\u2019s look";
+    intro.textContent = mode === "create" ? "Name your hero and choose how they look. Pick a class now or later; once picked, it\u2019s permanent." : mode === "class" ? "Your class is permanent for this hero. Your name and look stay as they are." : "Change how your hero looks. Your gear still goes on top.";
+    for (const [id, { b }] of Object.entries(cardButtons)) {
+      b.setAttribute("aria-pressed", String(id === cls));
+      b.disabled = busy;
+    }
+    laterClass.setAttribute("aria-pressed", String(deferClass));
+    laterClass.disabled = busy;
+    for (const [v, { b }] of Object.entries(hairTiles.map)) b.setAttribute("aria-pressed", String(v === look.hair));
+    for (const [v, { b }] of Object.entries(beardTiles.map)) b.setAttribute("aria-pressed", String(v === look.facialHair));
+    for (const map of [natural.map, bold.map]) for (const [v, b] of Object.entries(map)) b.setAttribute("aria-pressed", String(v === look.hairColor));
+    for (const [v, b] of Object.entries(skins.map)) b.setAttribute("aria-pressed", String(v === look.skin));
+    hairColorField.pick.textContent = "\xB7 " + (LOOK_OPTIONS.hairColors.find((x) => x[0] === look.hairColor)?.[1] ?? "");
+    skinField.pick.textContent = "\xB7 " + (LOOK_OPTIONS.skins.find((x) => x[0] === look.skin)?.[1] ?? "");
+    gearToggle.sync();
+    helmToggle.sync();
+    cancel.hidden = mode === "create";
+    cancel.disabled = busy;
+    const [label3, ready] = confirmState();
+    confirm.textContent = label3;
+    confirm.disabled = !ready;
+    if (!root.hidden) paintThumbs();
+  }
+  async function chooseClass(classId) {
+    const c = HERO_CLASSES[classId];
+    let m = readModel(), inv = m.inventory, equipped = inv.itemsById[inv.equipped.subweapon];
+    if (equipped && offhandOf(equipped) !== c.offhand) {
+      status2.textContent = "Stowing your old offhand\u2026";
+      const rev = inv.revision;
+      await adapter.issue("equipment.unequip", { slot: "subweapon", inventoryRevision: rev });
+      await wait((x) => x.inventory.revision > rev);
+    }
+    m = readModel();
+    status2.textContent = `Becoming a ${c.name}\u2026`;
+    await adapter.issue("progression.change", { progressionRevision: local6(m).d8.revision, action: { kind: "class.choose", heroClass: classId } });
+    if (!await wait((x) => local6(x).d8?.heroClass === classId)) throw Error("The class choice didn\u2019t save. Try again.");
+    const owned = () => Object.values(readModel().inventory.itemsById).find((i) => offhandOf(i) === c.offhand);
+    m = readModel();
+    inv = m.inventory;
+    if (!owned() && inv.subweapons && !inv.subweapons.claims[c.offhand]) {
+      status2.textContent = `Claiming your ${SUBWEAPONS[c.offhand].name}\u2026`;
+      const rev = inv.revision;
+      await adapter.issue("subweapon.claim", { subType: c.offhand, inventoryRevision: rev });
+      await wait((x) => x.inventory.revision > rev);
+    }
+    const item = owned();
+    m = readModel();
+    inv = m.inventory;
+    if (item && inv.equipped.subweapon !== item.itemId) {
+      status2.textContent = `Equipping your ${OFFHAND_NAMES[c.offhand]}\u2026`;
+      const rev = inv.revision;
+      await adapter.issue("equipment.equip", { itemId: item.itemId, slot: "subweapon", inventoryRevision: rev });
+      await wait((x) => x.inventory.revision > rev);
+    }
+    try {
+      kitToast(await claimClassKit2({ readModel, adapter, wait, say: (text2) => {
+        status2.textContent = text2;
+      } }));
+    } catch {
+    }
+  }
+  function kitToast(r) {
+    if (r) toastV1(document, { kind: "loot", title: `${r.name} starting gear`, sub: r.worn === CLASS_KIT_PIECES.length ? "Equipped and ready" : "Worn where your slots were free \xB7 the rest is in your bag", key: "classkit/ready", ms: 4200 });
+  }
+  function grantKit(m) {
+    const now2 = Date.now();
+    if (now2 < kitRetryAt) return;
+    if (!classKitRoom(m)) {
+      kitRetryAt = now2 + 5e3;
+      if (!roomNoticed) {
+        roomNoticed = true;
+        toastV1(document, { kind: "loot", title: "Make room for your starting gear", sub: `Your bag needs ${CLASS_KIT_PIECES.length} free spaces.`, key: "classkit/room", ms: 5200 });
+      }
+      return;
+    }
+    kitBusy = true;
+    claimClassKit2({ readModel, adapter, wait }).then(kitToast, () => {
+      kitRetryAt = Date.now() + 15e3;
+    }).finally(() => {
+      kitBusy = false;
+    });
+  }
+  async function save() {
+    if (busy) return;
+    const next = { ...look, name: look.name.trim() };
+    if (mode !== "class" && !namedOk(next.name)) {
+      status2.textContent = "Give your hero a name: up to 16 letters, numbers, spaces, hyphens or apostrophes.";
+      return;
+    }
+    busy = true;
+    paint();
+    try {
+      if (mode !== "look" && cls && !heroClass()) await chooseClass(cls);
+      if (mode !== "class") {
+        status2.textContent = "Saving your look\u2026";
+        await adapter.issue("progression.change", { progressionRevision: local6(readModel()).d8.revision, action: { kind: "look.set", look: next } });
+        if (!await wait((x) => sameLook(local6(x).d8?.look, next))) throw Error("Your look didn\u2019t save. Try again.");
+      }
+      status2.textContent = "";
+      busy = false;
+      close();
+    } catch (e) {
+      status2.textContent = e.message;
+      reportError(e.message);
+    } finally {
+      busy = false;
+      paint();
+    }
+  }
+  function open(requested) {
+    const m = readModel(), p = local6(m);
+    if (!p?.d8 || busy) return false;
+    const hasClass = Boolean(heroClassOf(p.d8));
+    mode = !p.d8.look ? "create" : requested === "look" || hasClass ? "look" : "class";
+    look = { ...DEFAULT_LOOK, ...p.d8.look ?? {} };
+    nameInput.value = look.name;
+    deferClass = false;
+    if (mode !== "look") {
+      const inv = m.inventory, current = offhandOf(inv?.itemsById[inv?.equipped.subweapon]);
+      cls = hasClass ? null : Object.values(HERO_CLASSES).find((c) => c.offhand === current)?.id ?? null;
+    }
+    showGear = true;
+    facing2 = 1;
+    status2.textContent = "";
+    thumbsKey = "";
+    opener = document.activeElement;
+    root.hidden = false;
+    paint();
+    paintStage(environment.performance?.now?.() / 1e3 || 0);
+    return true;
+  }
+  function close() {
+    root.hidden = true;
+    const back = opener;
+    opener = null;
+    if (back?.isConnected && back.closest("[role=dialog]:not([hidden])")) back.focus({ preventScroll: true });
+    else onClose();
+  }
+  function refresh(m, available) {
+    const p = local6(m);
+    if (root.hidden) {
+      if (available && p?.d8 && !p.d8.look && m.persistence?.phase === "encounter" && m.entitiesById[p.entityId]?.alive) open(null);
+      else if (available && !busy && !kitBusy && classKitDue(m)) grantKit(m);
+      return;
+    }
+    paintStage((environment.performance?.now?.() ?? Date.now()) / 1e3);
+  }
+  return Object.freeze({ open, refresh, isOpen: () => !root.hidden, destroy() {
+    document.removeEventListener(HERO_CREATOR_OPEN_EVENT, onRequest);
+    root.remove();
+  } });
+}
+
+// src/client/skill_icons_v1.js
+var outline = 'stroke="#0b1015" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"';
+var SKILL_ICONS_V1 = Object.freeze({
+  shield_bash: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="sk-bash" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1fbff"/><stop offset=".5" stop-color="#86cdf0"/><stop offset="1" stop-color="#2c6a94"/></linearGradient></defs><path d="M30 13l12-5M33 23h13M30 33l12 5" stroke="#0b1015" stroke-width="6" stroke-linecap="round"/><path d="M30 13l12-5M33 23h13M30 33l12 5" stroke="#fff4c8" stroke-width="3" stroke-linecap="round"/><path d="M17 5l14 5v11c0 10-6 17-14 21C9 38 3 31 3 21V10z" fill="url(#sk-bash)" ${outline}/><path d="M17 11v25M9 20h16" stroke="#173f5c" stroke-width="2.4" stroke-linecap="round" opacity=".55"/><path d="M8 13l9-3" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity=".8"/></svg>`,
+  flurry: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="sk-flurry" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#9aa6b8"/><stop offset=".6" stop-color="#eef2f8"/><stop offset="1" stop-color="#ffffff"/></linearGradient></defs><path d="M7 30C14 14 28 7 43 6M5 39C16 27 30 21 44 19M10 45C22 38 33 35 45 33" fill="none" stroke="#0b1015" stroke-width="5" stroke-linecap="round" opacity=".7"/><path d="M7 30C14 14 28 7 43 6M5 39C16 27 30 21 44 19M10 45C22 38 33 35 45 33" fill="none" stroke="#c9a6ff" stroke-width="2.4" stroke-linecap="round"/><path d="M20 30L38 12l3 3-18 18z" fill="url(#sk-flurry)" ${outline}/><path d="M14 30l8 8M17 35l-6 6" stroke="#0b1015" stroke-width="6" stroke-linecap="round"/><path d="M14 30l8 8M17 35l-6 6" stroke="#8a5bd6" stroke-width="3" stroke-linecap="round"/></svg>`,
+  cast: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><radialGradient id="sk-cast" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#ffe0a3"/><stop offset=".75" stop-color="#ff8a3d"/><stop offset="1" stop-color="#b8361d"/></radialGradient></defs><path d="M22 28L5 43M18 23L4 30M27 33l-6 13" stroke="#0b1015" stroke-width="6" stroke-linecap="round"/><path d="M22 28L5 43M18 23L4 30M27 33l-6 13" stroke="#ffb35c" stroke-width="3" stroke-linecap="round"/><circle cx="30" cy="18" r="13" fill="url(#sk-cast)" ${outline}/><path d="M24 13a8 8 0 0 1 9-4" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".9"/></svg>`,
+  guard: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="mv-guard" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8f4ff"/><stop offset=".55" stop-color="#8fb6d4"/><stop offset="1" stop-color="#3b5d78"/></linearGradient></defs><path d="M24 4l17 6v12c0 12-8 19-17 23C15 41 7 34 7 22V10z" fill="url(#mv-guard)" ${outline}/><path d="M24 10l11 4v8c0 8-5 13-11 16" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity=".7"/><path d="M24 15v16M17 22h14" stroke="#2a4458" stroke-width="2.6" stroke-linecap="round" opacity=".6"/></svg>`,
+  dash: `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 12l12 12-12 12M20 12l12 12-12 12M32 12l12 12-12 12" fill="none" stroke="#0b1015" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 12l12 12-12 12" fill="none" stroke="#7a52b8" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" opacity=".7"/><path d="M20 12l12 12-12 12" fill="none" stroke="#b48cff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 12l12 12-12 12" fill="none" stroke="#efe4ff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  blink: `<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="17" fill="none" stroke="#0b1015" stroke-width="5"/><circle cx="24" cy="24" r="17" fill="none" stroke="#8fd0ff" stroke-width="2.4" stroke-dasharray="6 5"/><path d="M24 6l4.5 13.5L42 24l-13.5 4.5L24 42l-4.5-13.5L6 24l13.5-4.5z" fill="#e9f7ff" ${outline}/><circle cx="24" cy="24" r="3.4" fill="#8fd0ff"/></svg>`,
+  lock: `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M16 21v-5a8 8 0 0 1 16 0v5" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><rect x="11" y="20" width="26" height="20" rx="5" fill="currentColor" fill-opacity=".22" stroke="currentColor" stroke-width="3"/><circle cx="24" cy="29" r="2.6" fill="currentColor"/></svg>`,
+  spin: `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M37 17a15 15 0 0 0-27 4M11 31a15 15 0 0 0 27-4" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="M38 8v10H28M10 40V30h10" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+});
+var MOVE_ICON_FOR = { shield: "guard", dagger: "dash", tome: "blink" };
+
 // src/client/skill_wheel_v1.js
 var WHEEL_SLOTS = SKILL_SLOT_COUNT;
 var WHEEL_PAGE = 4;
@@ -27482,16 +28053,16 @@ function createSkillWheelV1({ document, environment, readModel, adapter, isBlock
     t.addEventListener(type, fn, opts);
     listeners.push(() => t.removeEventListener(type, fn, opts));
   };
-  const local5 = (m) => m.playersById[m.localPlayerId];
+  const local6 = (m) => m.playersById[m.localPlayerId];
   let arranging = false, draft = null, picked = null;
-  const entries = (m) => arranging && draft ? draft : wheelEntriesV1(local5(m));
+  const entries = (m) => arranging && draft ? draft : wheelEntriesV1(local6(m));
   function ready(m, skillId) {
-    const p = local5(m), c = m.subweapon, heroClass = heroClassOf(p?.d8);
+    const p = local6(m), c = m.subweapon, heroClass = heroClassOf(p?.d8);
     return Boolean(CLASS_SKILLS[skillId] && heroClass && c && !c.suppressed && m.entitiesById[p.entityId]?.alive && p.stats.subType === heroClass.offhand && !c.skills?.cooldowns?.[skillId] && !c.skills?.flurry && m.persistence.phase === "encounter");
   }
   function activate(index) {
     if (isBlocked()) return;
-    const m = readModel(), p = local5(m), entry = entries(m)[index];
+    const m = readModel(), p = local6(m), entry = entries(m)[index];
     if (entry === "pick") {
       openClassPicker?.();
       return;
@@ -27508,7 +28079,7 @@ function createSkillWheelV1({ document, environment, readModel, adapter, isBlock
     s.classList.add("fired");
   }
   function startArranging() {
-    const m = readModel(), p = local5(m);
+    const m = readModel(), p = local6(m);
     if (isBlocked() || !heroClassOf(p?.d8)) return;
     arranging = true;
     draft = [...wheelEntriesV1(p)];
@@ -27522,7 +28093,7 @@ function createSkillWheelV1({ document, environment, readModel, adapter, isBlock
   }
   function stopArranging(save = true) {
     if (!arranging) return;
-    const m = readModel(), p = local5(m), before = wheelEntriesV1(p), after = draft;
+    const m = readModel(), p = local6(m), before = wheelEntriesV1(p), after = draft;
     arranging = false;
     draft = null;
     picked = null;
@@ -27735,7 +28306,7 @@ function createSkillWheelV1({ document, environment, readModel, adapter, isBlock
   };
   function refresh(m, visible3 = true) {
     lastModel = m;
-    const p = local5(m), heroClass = heroClassOf(p?.d8), c = m.subweapon, t = now2(), blocked3 = isBlocked();
+    const p = local6(m), heroClass = heroClassOf(p?.d8), c = m.subweapon, t = now2(), blocked3 = isBlocked();
     if (arranging && (blocked3 || !heroClass || !visible3)) stopArranging(true);
     const list = entries(m), keys2 = wheelKeysV1(list);
     if (visible3 && t - placedAt > 500) {
@@ -28493,7 +29064,7 @@ function createProgressionPresentation({ document, readModel, issue }) {
     model = m;
     host.hidden = !visible3;
     statsView.refresh(m, statsVisible);
-    const local5 = m.playersById[m.localPlayerId], d = local5.d8;
+    const local6 = m.playersById[m.localPlayerId], d = local6.d8;
     if (!d) return;
     const identity2 = m.context.campaignId + "/" + m.localPlayerId, now2 = performance.now();
     if (stamp2 !== identity2) {
@@ -28537,7 +29108,7 @@ function createProgressionPresentation({ document, readModel, issue }) {
         redraw();
       });
       b.setAttribute("aria-pressed", String(name === attribute));
-      b.append(el("strong", `${name.toUpperCase()} ${statText(local5.stats.attributes[name])}`), el("small", `${d.allocated[name]} allocated${draft[name] ? ` \xB7 +${draft[name]} draft` : ""}`));
+      b.append(el("strong", `${name.toUpperCase()} ${statText(local6.stats.attributes[name])}`), el("small", `${d.allocated[name]} allocated${draft[name] ? ` \xB7 +${draft[name]} draft` : ""}`));
       attrRows.append(b);
     }
     attrBody.replaceChildren(el("p", (usesBuildBalanceV2({ inventory: m.inventory }) ? { str: "Each STR above 5: +1 Attack and +6 HP; Shield/main-family Attack scaling and raw Block bonus. Equipping a Shield also grants +20 Max HP.", dex: "Each DEX above 5: +1 Attack and +0.25 percentage points Crit chance; Dagger-family Attack scaling and raw Parry bonus.", int: "Each INT above 5: +1 Attack, +0.2 Defense, +0.25% Tome spell power and +0.5 flat Tome Barrier before mastery HP scaling. Tome-family Attack scaling is retained." } : ATTRIBUTE_MEANINGS)[attribute]), el("p", `Draft ${Object.values(draft).reduce((a, b) => a + b, 0)} \xB7 ${remaining} AP remaining`));
@@ -29017,13 +29588,16 @@ var generatedArtKey = (g) => g ? `d7/${g.definition.noun}/${g.rarityTier}` : nul
 // src/client/subweapon_art.js
 var SUBWEAPON_ART = { "starter-shield": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">\n        \n              <defs>\n                <linearGradient id="grad_sh_starter-shield" x1="0" y1="0" x2="0" y2="1">\n                  <stop offset="0%" stop-color="#ffffff"/>\n                  <stop offset="25%" stop-color="#ffffff"/>\n                  <stop offset="25%" stop-color="#dddddd"/>\n                  <stop offset="65%" stop-color="#dddddd"/>\n                  <stop offset="65%" stop-color="#182030"/>\n                  <stop offset="100%" stop-color="#0a0d18"/>\n                </linearGradient>\n              </defs>\n            \n        <path d="M6 6 Q16 4, 26 6 Q25 18, 16 28 Q7 18, 6 6 Z" fill="url(#grad_sh_starter-shield)" stroke="#000" stroke-width="1.8" />\n        <path d="M11 11 Q16 9, 21 11 L19 19 Q16 23, 16 23 Q16 23, 13 19 Z" fill="none" stroke="#ffffff" stroke-width="1.2" opacity="0.55" />\n      </svg>', "color": "#dddddd", "source": "AssetCatalog.genericEquipment.shield" }, "starter-dagger": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">\n            <defs>\n              <linearGradient id="dg_blade_starter-dagger" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="45%" stop-color="#bdc3c7"/>\n                <stop offset="45%" stop-color="#7f8c8d"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <linearGradient id="dg_hilt_starter-dagger" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#475569"/>\n                <stop offset="45%" stop-color="#3b2f2f"/>\n                <stop offset="45%" stop-color="#1e1a1a"/>\n                <stop offset="100%" stop-color="#0d0a0a"/>\n              </linearGradient>\n            </defs>\n            <path d="M16 4 L18 9 L17 19 L15 19 L14 9 Z" fill="url(#dg_blade_starter-dagger)" stroke="#000" stroke-width="1.8" />\n            <rect x="12" y="19" width="8" height="2" fill="#dddddd" stroke="#000" stroke-width="1.2" />\n            <rect x="14.5" y="21" width="3" height="4" fill="url(#dg_hilt_starter-dagger)" stroke="#000" stroke-width="1" />\n          </svg>', "color": "#dddddd", "source": "AssetCatalog.genericEquipment.dagger" }, "starter-tome": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">\n            <!-- Heavy Leather Bound Cover -->\n            <rect x="6" y="4" width="20" height="24" rx="2" fill="#2d1a0d" stroke="#000" stroke-width="1.8" />\n            <!-- Book Spine Binding -->\n            <rect x="6" y="4" width="4" height="24" fill="#1c0f07" stroke="#000" stroke-width="1" />\n            <!-- Gold Corner Brackets -->\n            <polygon points="10,4 12,4 10,6" fill="#f1c40f" />\n            <polygon points="26,4 24,4 26,6" fill="#f1c40f" />\n            <polygon points="10,28 12,28 10,26" fill="#f1c40f" />\n            <polygon points="26,28 24,28 26,26" fill="#f1c40f" />\n            <!-- Inner Page Edge line details -->\n            <line x1="25" y1="5" x2="25" y2="27" stroke="#eaeaea" stroke-width="1.2" />\n            <!-- Central Mystical Sphere scaling with Tier Color -->\n            <circle cx="17" cy="16" r="4.5" fill="#dddddd" stroke="#000" stroke-width="1.2" />\n            <circle cx="15.5" cy="14.5" r="1" fill="#fff" opacity="0.6" />\n          </svg>', "color": "#dddddd", "source": "AssetCatalog.genericEquipment.tome" } };
 
+// src/client/class_kit_art.js
+var CLASS_KIT_ART = { "kit-knight-longsword": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs><clipPath id="k1"><path d="M10.64 19.76L24.21 6.18L29.62 4.38L27.82 9.79L14.24 23.36Z"/></clipPath></defs><path d="M2.79 28.03L4.8 26.02L7.98 29.2L5.97 31.21Z" fill="#8d999b"/><path d="M2.79 28.03L4.8 26.02L7.98 29.2L5.97 31.21Z" fill="none" stroke="#000000" stroke-width="1.8" stroke-miterlimit="2"/><path d="M5.12 26.55L9.36 22.3L11.7 24.64L7.45 28.88Z" fill="#8e5a2b"/><path d="M5.12 26.55L9.36 22.3L11.7 24.64L7.45 28.88Z" fill="none" stroke="#000000" stroke-width="1.8" stroke-miterlimit="2"/><path d="M6.08 19.86L8.41 17.53L16.47 25.59L14.14 27.92Z" fill="#8d999b"/><path d="M6.08 19.86L8.41 17.53L16.47 25.59L14.14 27.92Z" fill="none" stroke="#000000" stroke-width="1.95" stroke-miterlimit="2"/><path d="M10.64 19.76L24.21 6.18L29.62 4.38L27.82 9.79L14.24 23.36Z" fill="#d6dde2"/><g clip-path="url(#k1)"><path d="M12.44 21.56L29.62 4.38L31.42 6.18L14.24 23.36Z" fill="#a9b6c1"/></g><path d="M10.64 19.76L24.21 6.18L29.62 4.38L27.82 9.79L14.24 23.36Z" fill="none" stroke="#000000" stroke-width="2.1" stroke-miterlimit="2"/><path d="M12.92 20.34L25.11 8.14L25.86 8.89L13.66 21.08Z" fill="#00000040"/></svg>', "color": "#8d999b", "source": "class-kit", "bounds": { "x": 2.79, "y": 4.38, "width": 28.64, "height": 26.83 }, "visibleCenter": { "x": 17.11, "y": 17.8 }, "pivot": { "x": 17.11, "y": 31.21 } }, "kit-knight-coif": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><path d="M5.82 11.04L29.17 11.04L29.17 31.65L5.82 31.65Z" fill="#8f989e"/><path d="M23.1 11.04L29.17 11.04L29.17 31.65L23.1 31.65Z" fill="#737c82"/><path d="M6.94 12.16L22.23 12.16L22.23 13.4L6.94 13.4Z" fill="#b3bbc0"/><path d="M5.82 11.04L29.17 11.04L29.17 31.65L5.82 31.65Z" fill="none" stroke="#000000" stroke-width="1.86" stroke-miterlimit="2"/><path d="M6.82 12.53L7.94 12.53L7.94 13.15L6.82 13.15Z" fill="#5d656b"/><path d="M9.05 12.53L10.17 12.53L10.17 13.15L9.05 13.15Z" fill="#5d656b"/><path d="M11.29 12.53L12.41 12.53L12.41 13.15L11.29 13.15Z" fill="#5d656b"/><path d="M13.52 12.53L14.64 12.53L14.64 13.15L13.52 13.15Z" fill="#5d656b"/><path d="M15.76 12.53L16.88 12.53L16.88 13.15L15.76 13.15Z" fill="#5d656b"/><path d="M17.99 12.53L19.11 12.53L19.11 13.15L17.99 13.15Z" fill="#5d656b"/><path d="M20.23 12.53L21.35 12.53L21.35 13.15L20.23 13.15Z" fill="#5d656b"/><path d="M22.46 12.53L23.58 12.53L23.58 13.15L22.46 13.15Z" fill="#5d656b"/><path d="M24.7 12.53L25.82 12.53L25.82 13.15L24.7 13.15Z" fill="#5d656b"/><path d="M26.93 12.53L28.05 12.53L28.05 13.15L26.93 13.15Z" fill="#5d656b"/><path d="M7.94 14.52L9.05 14.52L9.05 15.14L7.94 15.14Z" fill="#5d656b"/><path d="M10.17 14.52L11.29 14.52L11.29 15.14L10.17 15.14Z" fill="#5d656b"/><path d="M12.41 14.52L13.52 14.52L13.52 15.14L12.41 15.14Z" fill="#5d656b"/><path d="M14.64 14.52L15.76 14.52L15.76 15.14L14.64 15.14Z" fill="#5d656b"/><path d="M16.88 14.52L17.99 14.52L17.99 15.14L16.88 15.14Z" fill="#5d656b"/><path d="M19.11 14.52L20.23 14.52L20.23 15.14L19.11 15.14Z" fill="#5d656b"/><path d="M21.35 14.52L22.46 14.52L22.46 15.14L21.35 15.14Z" fill="#5d656b"/><path d="M23.58 14.52L24.7 14.52L24.7 15.14L23.58 15.14Z" fill="#5d656b"/><path d="M25.82 14.52L26.93 14.52L26.93 15.14L25.82 15.14Z" fill="#5d656b"/><path d="M28.05 14.52L29.17 14.52L29.17 15.14L28.05 15.14Z" fill="#5d656b"/><path d="M6.82 16.5L7.94 16.5L7.94 17.12L6.82 17.12Z" fill="#5d656b"/><path d="M9.05 16.5L10.17 16.5L10.17 17.12L9.05 17.12Z" fill="#5d656b"/><path d="M11.29 16.5L12.41 16.5L12.41 17.12L11.29 17.12Z" fill="#5d656b"/><path d="M13.52 16.5L14.64 16.5L14.64 17.12L13.52 17.12Z" fill="#5d656b"/><path d="M15.76 16.5L16.88 16.5L16.88 17.12L15.76 17.12Z" fill="#5d656b"/><path d="M17.99 16.5L19.11 16.5L19.11 17.12L17.99 17.12Z" fill="#5d656b"/><path d="M20.23 16.5L21.35 16.5L21.35 17.12L20.23 17.12Z" fill="#5d656b"/><path d="M22.46 16.5L23.58 16.5L23.58 17.12L22.46 17.12Z" fill="#5d656b"/><path d="M24.7 16.5L25.82 16.5L25.82 17.12L24.7 17.12Z" fill="#5d656b"/><path d="M26.93 16.5L28.05 16.5L28.05 17.12L26.93 17.12Z" fill="#5d656b"/><path d="M7.94 18.49L9.05 18.49L9.05 19.11L7.94 19.11Z" fill="#5d656b"/><path d="M10.17 18.49L11.29 18.49L11.29 19.11L10.17 19.11Z" fill="#5d656b"/><path d="M12.41 18.49L13.52 18.49L13.52 19.11L12.41 19.11Z" fill="#5d656b"/><path d="M14.64 18.49L15.76 18.49L15.76 19.11L14.64 19.11Z" fill="#5d656b"/><path d="M16.88 18.49L17.99 18.49L17.99 19.11L16.88 19.11Z" fill="#5d656b"/><path d="M19.11 18.49L20.23 18.49L20.23 19.11L19.11 19.11Z" fill="#5d656b"/><path d="M21.35 18.49L22.46 18.49L22.46 19.11L21.35 19.11Z" fill="#5d656b"/><path d="M23.58 18.49L24.7 18.49L24.7 19.11L23.58 19.11Z" fill="#5d656b"/><path d="M25.82 18.49L26.93 18.49L26.93 19.11L25.82 19.11Z" fill="#5d656b"/><path d="M28.05 18.49L29.17 18.49L29.17 19.11L28.05 19.11Z" fill="#5d656b"/><path d="M6.82 20.48L7.94 20.48L7.94 21.1L6.82 21.1Z" fill="#5d656b"/><path d="M9.05 20.48L10.17 20.48L10.17 21.1L9.05 21.1Z" fill="#5d656b"/><path d="M11.29 20.48L12.41 20.48L12.41 21.1L11.29 21.1Z" fill="#5d656b"/><path d="M13.52 20.48L14.64 20.48L14.64 21.1L13.52 21.1Z" fill="#5d656b"/><path d="M15.76 20.48L16.88 20.48L16.88 21.1L15.76 21.1Z" fill="#5d656b"/><path d="M17.99 20.48L19.11 20.48L19.11 21.1L17.99 21.1Z" fill="#5d656b"/><path d="M20.23 20.48L21.35 20.48L21.35 21.1L20.23 21.1Z" fill="#5d656b"/><path d="M22.46 20.48L23.58 20.48L23.58 21.1L22.46 21.1Z" fill="#5d656b"/><path d="M24.7 20.48L25.82 20.48L25.82 21.1L24.7 21.1Z" fill="#5d656b"/><path d="M26.93 20.48L28.05 20.48L28.05 21.1L26.93 21.1Z" fill="#5d656b"/><path d="M7.94 22.46L9.05 22.46L9.05 23.08L7.94 23.08Z" fill="#5d656b"/><path d="M10.17 22.46L11.29 22.46L11.29 23.08L10.17 23.08Z" fill="#5d656b"/><path d="M12.41 22.46L13.52 22.46L13.52 23.08L12.41 23.08Z" fill="#5d656b"/><path d="M14.64 22.46L15.76 22.46L15.76 23.08L14.64 23.08Z" fill="#5d656b"/><path d="M16.88 22.46L17.99 22.46L17.99 23.08L16.88 23.08Z" fill="#5d656b"/><path d="M19.11 22.46L20.23 22.46L20.23 23.08L19.11 23.08Z" fill="#5d656b"/><path d="M21.35 22.46L22.46 22.46L22.46 23.08L21.35 23.08Z" fill="#5d656b"/><path d="M23.58 22.46L24.7 22.46L24.7 23.08L23.58 23.08Z" fill="#5d656b"/><path d="M25.82 22.46L26.93 22.46L26.93 23.08L25.82 23.08Z" fill="#5d656b"/><path d="M28.05 22.46L29.17 22.46L29.17 23.08L28.05 23.08Z" fill="#5d656b"/><path d="M6.82 24.45L7.94 24.45L7.94 25.07L6.82 25.07Z" fill="#5d656b"/><path d="M9.05 24.45L10.17 24.45L10.17 25.07L9.05 25.07Z" fill="#5d656b"/><path d="M11.29 24.45L12.41 24.45L12.41 25.07L11.29 25.07Z" fill="#5d656b"/><path d="M13.52 24.45L14.64 24.45L14.64 25.07L13.52 25.07Z" fill="#5d656b"/><path d="M15.76 24.45L16.88 24.45L16.88 25.07L15.76 25.07Z" fill="#5d656b"/><path d="M17.99 24.45L19.11 24.45L19.11 25.07L17.99 25.07Z" fill="#5d656b"/><path d="M20.23 24.45L21.35 24.45L21.35 25.07L20.23 25.07Z" fill="#5d656b"/><path d="M22.46 24.45L23.58 24.45L23.58 25.07L22.46 25.07Z" fill="#5d656b"/><path d="M24.7 24.45L25.82 24.45L25.82 25.07L24.7 25.07Z" fill="#5d656b"/><path d="M26.93 24.45L28.05 24.45L28.05 25.07L26.93 25.07Z" fill="#5d656b"/><path d="M7.94 26.44L9.05 26.44L9.05 27.06L7.94 27.06Z" fill="#5d656b"/><path d="M10.17 26.44L11.29 26.44L11.29 27.06L10.17 27.06Z" fill="#5d656b"/><path d="M12.41 26.44L13.52 26.44L13.52 27.06L12.41 27.06Z" fill="#5d656b"/><path d="M14.64 26.44L15.76 26.44L15.76 27.06L14.64 27.06Z" fill="#5d656b"/><path d="M16.88 26.44L17.99 26.44L17.99 27.06L16.88 27.06Z" fill="#5d656b"/><path d="M19.11 26.44L20.23 26.44L20.23 27.06L19.11 27.06Z" fill="#5d656b"/><path d="M21.35 26.44L22.46 26.44L22.46 27.06L21.35 27.06Z" fill="#5d656b"/><path d="M23.58 26.44L24.7 26.44L24.7 27.06L23.58 27.06Z" fill="#5d656b"/><path d="M25.82 26.44L26.93 26.44L26.93 27.06L25.82 27.06Z" fill="#5d656b"/><path d="M28.05 26.44L29.17 26.44L29.17 27.06L28.05 27.06Z" fill="#5d656b"/><path d="M6.82 28.42L7.94 28.42L7.94 29.04L6.82 29.04Z" fill="#5d656b"/><path d="M9.05 28.42L10.17 28.42L10.17 29.04L9.05 29.04Z" fill="#5d656b"/><path d="M11.29 28.42L12.41 28.42L12.41 29.04L11.29 29.04Z" fill="#5d656b"/><path d="M13.52 28.42L14.64 28.42L14.64 29.04L13.52 29.04Z" fill="#5d656b"/><path d="M15.76 28.42L16.88 28.42L16.88 29.04L15.76 29.04Z" fill="#5d656b"/><path d="M17.99 28.42L19.11 28.42L19.11 29.04L17.99 29.04Z" fill="#5d656b"/><path d="M20.23 28.42L21.35 28.42L21.35 29.04L20.23 29.04Z" fill="#5d656b"/><path d="M22.46 28.42L23.58 28.42L23.58 29.04L22.46 29.04Z" fill="#5d656b"/><path d="M24.7 28.42L25.82 28.42L25.82 29.04L24.7 29.04Z" fill="#5d656b"/><path d="M26.93 28.42L28.05 28.42L28.05 29.04L26.93 29.04Z" fill="#5d656b"/><path d="M7.94 30.41L9.05 30.41L9.05 31.03L7.94 31.03Z" fill="#5d656b"/><path d="M10.17 30.41L11.29 30.41L11.29 31.03L10.17 31.03Z" fill="#5d656b"/><path d="M12.41 30.41L13.52 30.41L13.52 31.03L12.41 31.03Z" fill="#5d656b"/><path d="M14.64 30.41L15.76 30.41L15.76 31.03L14.64 31.03Z" fill="#5d656b"/><path d="M16.88 30.41L17.99 30.41L17.99 31.03L16.88 31.03Z" fill="#5d656b"/><path d="M19.11 30.41L20.23 30.41L20.23 31.03L19.11 31.03Z" fill="#5d656b"/><path d="M21.35 30.41L22.46 30.41L22.46 31.03L21.35 31.03Z" fill="#5d656b"/><path d="M23.58 30.41L24.7 30.41L24.7 31.03L23.58 31.03Z" fill="#5d656b"/><path d="M25.82 30.41L26.93 30.41L26.93 31.03L25.82 31.03Z" fill="#5d656b"/><path d="M28.05 30.41L29.17 30.41L29.17 31.03L28.05 31.03Z" fill="#5d656b"/><path d="M17 16.25L27.93 16.25L27.93 28.92L17 28.92Z" fill="#1d232b"/><path d="M17 16.25L27.93 16.25L27.93 28.92L17 28.92Z" fill="none" stroke="#000000" stroke-width="1.49" stroke-miterlimit="2"/><path d="M5.82 26.44L17 26.44L17 27.68L5.82 27.68Z" fill="#8d999b"/></svg>', "color": "#8d999b", "source": "class-kit", "bounds": { "x": 5.82, "y": 11.04, "width": 23.34, "height": 20.61 }, "visibleCenter": { "x": 17.5, "y": 21.35 }, "pivot": { "x": 17.5, "y": 31.65 } }, "kit-knight-hauberk": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><path d="M14.12 12.87L9.99 23.23L4.06 20.87L8.19 10.51Z" fill="#8f989e"/><path d="M11.23 20.12L9.99 23.23L4.06 20.87L5.3 17.76Z" fill="#737c82"/><path d="M12.56 13.53L10.46 18.82L9.22 18.32L11.33 13.04Z" fill="#b3bbc0"/><path d="M14.12 12.87L9.99 23.23L4.06 20.87L8.19 10.51Z" fill="none" stroke="#000000" stroke-width="1.99" stroke-miterlimit="2"/><path d="M12.24 13.26L11.8 14.37L11.18 14.13L11.63 13.02Z" fill="#5d656b"/><path d="M11.36 15.49L10.91 16.6L10.3 16.35L10.74 15.24Z" fill="#5d656b"/><path d="M10.47 17.71L10.03 18.82L9.41 18.57L9.86 17.46Z" fill="#5d656b"/><path d="M9.59 19.93L9.14 21.04L8.53 20.79L8.97 19.68Z" fill="#5d656b"/><path d="M9.83 13.59L9.38 14.7L8.77 14.45L9.21 13.34Z" fill="#5d656b"/><path d="M8.94 15.81L8.5 16.92L7.88 16.67L8.32 15.56Z" fill="#5d656b"/><path d="M8.06 18.03L7.61 19.14L7 18.89L7.44 17.78Z" fill="#5d656b"/><path d="M7.17 20.25L6.73 21.36L6.11 21.12L6.55 20.01Z" fill="#5d656b"/><path d="M5.84 8.5L13.28 8.5L13.28 13.55L5.84 13.55Z" fill="#8f989e"/><path d="M10.31 8.5L13.28 8.5L13.28 13.55L10.31 13.55Z" fill="#737c82"/><path d="M7.04 9.69L9.38 9.69L9.38 11.02L7.04 11.02Z" fill="#b3bbc0"/><path d="M5.84 8.5L13.28 8.5L13.28 13.55L5.84 13.55Z" fill="none" stroke="#000000" stroke-width="1.59" stroke-miterlimit="2"/><path d="M7.44 9.3L26.56 9.3L26.56 27.89L7.44 27.89Z" fill="#8f989e"/><path d="M20.06 9.3L26.56 9.3L26.56 27.89L20.06 27.89Z" fill="#737c82"/><path d="M8.63 10.49L19.13 10.49L19.13 11.82L8.63 11.82Z" fill="#b3bbc0"/><path d="M7.44 9.3L26.56 9.3L26.56 27.89L7.44 27.89Z" fill="none" stroke="#000000" stroke-width="1.99" stroke-miterlimit="2"/><path d="M8.5 10.89L9.69 10.89L9.69 11.55L8.5 11.55Z" fill="#5d656b"/><path d="M10.89 10.89L12.09 10.89L12.09 11.55L10.89 11.55Z" fill="#5d656b"/><path d="M13.28 10.89L14.48 10.89L14.48 11.55L13.28 11.55Z" fill="#5d656b"/><path d="M15.67 10.89L16.87 10.89L16.87 11.55L15.67 11.55Z" fill="#5d656b"/><path d="M18.06 10.89L19.26 10.89L19.26 11.55L18.06 11.55Z" fill="#5d656b"/><path d="M20.45 10.89L21.65 10.89L21.65 11.55L20.45 11.55Z" fill="#5d656b"/><path d="M22.84 10.89L24.04 10.89L24.04 11.55L22.84 11.55Z" fill="#5d656b"/><path d="M25.24 10.89L26.43 10.89L26.43 11.55L25.24 11.55Z" fill="#5d656b"/><path d="M9.69 13.01L10.89 13.01L10.89 13.68L9.69 13.68Z" fill="#5d656b"/><path d="M12.09 13.01L13.28 13.01L13.28 13.68L12.09 13.68Z" fill="#5d656b"/><path d="M14.48 13.01L15.67 13.01L15.67 13.68L14.48 13.68Z" fill="#5d656b"/><path d="M16.87 13.01L18.06 13.01L18.06 13.68L16.87 13.68Z" fill="#5d656b"/><path d="M19.26 13.01L20.45 13.01L20.45 13.68L19.26 13.68Z" fill="#5d656b"/><path d="M21.65 13.01L22.84 13.01L22.84 13.68L21.65 13.68Z" fill="#5d656b"/><path d="M24.04 13.01L25.24 13.01L25.24 13.68L24.04 13.68Z" fill="#5d656b"/><path d="M8.5 15.14L9.69 15.14L9.69 15.8L8.5 15.8Z" fill="#5d656b"/><path d="M10.89 15.14L12.09 15.14L12.09 15.8L10.89 15.8Z" fill="#5d656b"/><path d="M13.28 15.14L14.48 15.14L14.48 15.8L13.28 15.8Z" fill="#5d656b"/><path d="M15.67 15.14L16.87 15.14L16.87 15.8L15.67 15.8Z" fill="#5d656b"/><path d="M18.06 15.14L19.26 15.14L19.26 15.8L18.06 15.8Z" fill="#5d656b"/><path d="M20.45 15.14L21.65 15.14L21.65 15.8L20.45 15.8Z" fill="#5d656b"/><path d="M22.84 15.14L24.04 15.14L24.04 15.8L22.84 15.8Z" fill="#5d656b"/><path d="M25.24 15.14L26.43 15.14L26.43 15.8L25.24 15.8Z" fill="#5d656b"/><path d="M9.69 17.27L10.89 17.27L10.89 17.93L9.69 17.93Z" fill="#5d656b"/><path d="M12.09 17.27L13.28 17.27L13.28 17.93L12.09 17.93Z" fill="#5d656b"/><path d="M14.48 17.27L15.67 17.27L15.67 17.93L14.48 17.93Z" fill="#5d656b"/><path d="M16.87 17.27L18.06 17.27L18.06 17.93L16.87 17.93Z" fill="#5d656b"/><path d="M19.26 17.27L20.45 17.27L20.45 17.93L19.26 17.93Z" fill="#5d656b"/><path d="M21.65 17.27L22.84 17.27L22.84 17.93L21.65 17.93Z" fill="#5d656b"/><path d="M24.04 17.27L25.24 17.27L25.24 17.93L24.04 17.93Z" fill="#5d656b"/><path d="M8.5 19.39L9.69 19.39L9.69 20.06L8.5 20.06Z" fill="#5d656b"/><path d="M10.89 19.39L12.09 19.39L12.09 20.06L10.89 20.06Z" fill="#5d656b"/><path d="M13.28 19.39L14.48 19.39L14.48 20.06L13.28 20.06Z" fill="#5d656b"/><path d="M15.67 19.39L16.87 19.39L16.87 20.06L15.67 20.06Z" fill="#5d656b"/><path d="M18.06 19.39L19.26 19.39L19.26 20.06L18.06 20.06Z" fill="#5d656b"/><path d="M20.45 19.39L21.65 19.39L21.65 20.06L20.45 20.06Z" fill="#5d656b"/><path d="M22.84 19.39L24.04 19.39L24.04 20.06L22.84 20.06Z" fill="#5d656b"/><path d="M25.24 19.39L26.43 19.39L26.43 20.06L25.24 20.06Z" fill="#5d656b"/><path d="M9.69 21.52L10.89 21.52L10.89 22.18L9.69 22.18Z" fill="#5d656b"/><path d="M12.09 21.52L13.28 21.52L13.28 22.18L12.09 22.18Z" fill="#5d656b"/><path d="M14.48 21.52L15.67 21.52L15.67 22.18L14.48 22.18Z" fill="#5d656b"/><path d="M16.87 21.52L18.06 21.52L18.06 22.18L16.87 22.18Z" fill="#5d656b"/><path d="M19.26 21.52L20.45 21.52L20.45 22.18L19.26 22.18Z" fill="#5d656b"/><path d="M21.65 21.52L22.84 21.52L22.84 22.18L21.65 22.18Z" fill="#5d656b"/><path d="M24.04 21.52L25.24 21.52L25.24 22.18L24.04 22.18Z" fill="#5d656b"/><path d="M8.5 23.64L9.69 23.64L9.69 24.31L8.5 24.31Z" fill="#5d656b"/><path d="M10.89 23.64L12.09 23.64L12.09 24.31L10.89 24.31Z" fill="#5d656b"/><path d="M13.28 23.64L14.48 23.64L14.48 24.31L13.28 24.31Z" fill="#5d656b"/><path d="M15.67 23.64L16.87 23.64L16.87 24.31L15.67 24.31Z" fill="#5d656b"/><path d="M18.06 23.64L19.26 23.64L19.26 24.31L18.06 24.31Z" fill="#5d656b"/><path d="M20.45 23.64L21.65 23.64L21.65 24.31L20.45 24.31Z" fill="#5d656b"/><path d="M22.84 23.64L24.04 23.64L24.04 24.31L22.84 24.31Z" fill="#5d656b"/><path d="M25.24 23.64L26.43 23.64L26.43 24.31L25.24 24.31Z" fill="#5d656b"/><path d="M9.69 25.77L10.89 25.77L10.89 26.43L9.69 26.43Z" fill="#5d656b"/><path d="M12.09 25.77L13.28 25.77L13.28 26.43L12.09 26.43Z" fill="#5d656b"/><path d="M14.48 25.77L15.67 25.77L15.67 26.43L14.48 26.43Z" fill="#5d656b"/><path d="M16.87 25.77L18.06 25.77L18.06 26.43L16.87 26.43Z" fill="#5d656b"/><path d="M19.26 25.77L20.45 25.77L20.45 26.43L19.26 26.43Z" fill="#5d656b"/><path d="M21.65 25.77L22.84 25.77L22.84 26.43L21.65 26.43Z" fill="#5d656b"/><path d="M24.04 25.77L25.24 25.77L25.24 26.43L24.04 26.43Z" fill="#5d656b"/><path d="M6.9 20.72L27.1 20.72L27.1 23.91L6.9 23.91Z" fill="#8e5a2b"/><path d="M6.9 20.72L27.1 20.72L27.1 23.91L6.9 23.91Z" fill="none" stroke="#000000" stroke-width="1.73" stroke-miterlimit="2"/><path d="M16.47 20.19L20.45 20.19L20.45 24.44L16.47 24.44Z" fill="#8d999b"/><path d="M16.47 20.19L20.45 20.19L20.45 24.44L16.47 24.44Z" fill="none" stroke="#000000" stroke-width="1.59" stroke-miterlimit="2"/><path d="M9.03 7.97L24.44 7.97L24.44 10.89L9.03 10.89Z" fill="#6c777e"/><path d="M9.03 7.97L24.44 7.97L24.44 10.89L9.03 10.89Z" fill="none" stroke="#000000" stroke-width="1.46" stroke-miterlimit="2"/><path d="M27.14 10.53L31.19 20.93L25.25 23.24L21.2 12.84Z" fill="#8f989e"/><path d="M29.97 17.81L31.19 20.93L25.25 23.24L24.03 20.12Z" fill="#737c82"/><path d="M26.46 12.08L28.52 17.38L27.29 17.86L25.23 12.56Z" fill="#b3bbc0"/><path d="M27.14 10.53L31.19 20.93L25.25 23.24L21.2 12.84Z" fill="none" stroke="#000000" stroke-width="1.99" stroke-miterlimit="2"/><path d="M26.04 12.1L26.48 13.21L25.86 13.45L25.42 12.34Z" fill="#5d656b"/><path d="M26.91 14.33L27.34 15.44L26.72 15.68L26.29 14.57Z" fill="#5d656b"/><path d="M27.78 16.56L28.21 17.67L27.59 17.91L27.16 16.8Z" fill="#5d656b"/><path d="M28.64 18.79L29.08 19.9L28.46 20.14L28.02 19.03Z" fill="#5d656b"/><path d="M24.5 13.98L24.93 15.1L24.31 15.34L23.88 14.22Z" fill="#5d656b"/><path d="M25.36 16.21L25.8 17.33L25.18 17.57L24.74 16.45Z" fill="#5d656b"/><path d="M26.23 18.44L26.66 19.56L26.04 19.8L25.61 18.68Z" fill="#5d656b"/><path d="M27.1 20.67L27.53 21.78L26.91 22.02L26.48 20.91Z" fill="#5d656b"/><path d="M21.52 7.7L29.49 7.7L29.49 13.01L21.52 13.01Z" fill="#8f989e"/><path d="M26.3 7.7L29.49 7.7L29.49 13.01L26.3 13.01Z" fill="#737c82"/><path d="M22.71 8.9L25.37 8.9L25.37 10.23L22.71 10.23Z" fill="#b3bbc0"/><path d="M21.52 7.7L29.49 7.7L29.49 13.01L21.52 13.01Z" fill="none" stroke="#000000" stroke-width="1.59" stroke-miterlimit="2"/></svg>', "color": "#8d999b", "source": "class-kit", "bounds": { "x": 4.06, "y": 7.7, "width": 27.12, "height": 20.19 }, "visibleCenter": { "x": 17.63, "y": 17.8 }, "pivot": { "x": 17.63, "y": 27.89 } }, "kit-knight-gauntlets": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs><clipPath id="k1"><path d="M16.37 18.59L16.37 9.38L15.41 8.11L8.75 8.11L7.8 9.38L7.8 14.46L5.26 11.92L3.99 13.19L7.8 18.59Z"/></clipPath><clipPath id="k2"><path d="M17.63 22.08L17.63 12.87L18.59 11.61L25.25 11.61L26.2 12.87L26.2 17.95L28.74 15.41L30.01 16.68L26.2 22.08Z"/></clipPath></defs><path d="M16.37 18.59L16.37 9.38L15.41 8.11L8.75 8.11L7.8 9.38L7.8 14.46L5.26 11.92L3.99 13.19L7.8 18.59Z" fill="#7f8c8d"/><g clip-path="url(#k1)"><path d="M8.94 8.11L3.99 8.11L3.99 18.59L8.94 18.59Z" fill="#6c7a7b"/></g><path d="M16.37 18.59L16.37 9.38L15.41 8.11L8.75 8.11L7.8 9.38L7.8 14.46L5.26 11.92L3.99 13.19L7.8 18.59Z" fill="none" stroke="#000000" stroke-width="1.9" stroke-miterlimit="2"/><path d="M14.14 8.11L13.35 8.11L13.35 11.61L14.14 11.61Z" fill="#00000059"/><path d="M11.92 8.11L11.13 8.11L11.13 11.61L11.92 11.61Z" fill="#00000059"/><path d="M9.86 8.11L9.07 8.11L9.07 11.61L9.86 11.61Z" fill="#00000059"/><path d="M15.73 12.24L8.43 12.24L8.43 13.35L15.73 13.35Z" fill="#d0d7dc"/><path d="M17 18.59L7.16 18.59L7.16 22.39L17 22.39Z" fill="#a9b3ba"/><path d="M17 18.59L7.16 18.59L7.16 22.39L17 22.39Z" fill="none" stroke="#000000" stroke-width="1.75" stroke-miterlimit="2"/><path d="M13.19 19.7L10.65 19.7L10.65 21.28L13.19 21.28Z" fill="#8d999b"/><path d="M17.63 22.08L17.63 12.87L18.59 11.61L25.25 11.61L26.2 12.87L26.2 17.95L28.74 15.41L30.01 16.68L26.2 22.08Z" fill="#7f8c8d"/><g clip-path="url(#k2)"><path d="M25.06 11.61L30.01 11.61L30.01 22.08L25.06 22.08Z" fill="#6c7a7b"/></g><path d="M17.63 22.08L17.63 12.87L18.59 11.61L25.25 11.61L26.2 12.87L26.2 17.95L28.74 15.41L30.01 16.68L26.2 22.08Z" fill="none" stroke="#000000" stroke-width="1.9" stroke-miterlimit="2"/><path d="M19.86 11.61L20.65 11.61L20.65 15.1L19.86 15.1Z" fill="#00000059"/><path d="M22.08 11.61L22.87 11.61L22.87 15.1L22.08 15.1Z" fill="#00000059"/><path d="M24.14 11.61L24.93 11.61L24.93 15.1L24.14 15.1Z" fill="#00000059"/><path d="M18.27 15.73L25.57 15.73L25.57 16.84L18.27 16.84Z" fill="#d0d7dc"/><path d="M17 22.08L26.84 22.08L26.84 25.89L17 25.89Z" fill="#a9b3ba"/><path d="M17 22.08L26.84 22.08L26.84 25.89L17 25.89Z" fill="none" stroke="#000000" stroke-width="1.75" stroke-miterlimit="2"/><path d="M20.81 23.19L23.35 23.19L23.35 24.77L20.81 24.77Z" fill="#8d999b"/></svg>', "color": "#8d999b", "source": "class-kit", "bounds": { "x": 3.99, "y": 8.11, "width": 26.02, "height": 17.77 }, "visibleCenter": { "x": 17, "y": 17 }, "pivot": { "x": 17, "y": 25.89 } }, "kit-knight-treads": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs><clipPath id="k1"><path d="M5.58 10.8L12.76 10.8L12.76 17L17.33 17.33L19.28 19.28L19.28 22.88L5.58 22.88Z"/></clipPath><clipPath id="k2"><path d="M13.41 15.04L20.59 15.04L20.59 21.24L25.16 21.57L27.12 23.53L27.12 27.12L13.41 27.12Z"/></clipPath></defs><path d="M5.58 10.8L12.76 10.8L12.76 17L17.33 17.33L19.28 19.28L19.28 22.88L5.58 22.88Z" fill="#5a3a1d"/><g clip-path="url(#k1)"><path d="M14.08 10.8L19.28 10.8L19.28 22.88L14.08 22.88Z" fill="#43291a"/></g><path d="M5.58 10.8L12.76 10.8L12.76 17L17.33 17.33L19.28 19.28L19.28 22.88L5.58 22.88Z" fill="none" stroke="#000000" stroke-width="1.96" stroke-miterlimit="2"/><path d="M4.92 9.49L13.41 9.49L13.41 12.43L4.92 12.43Z" fill="#8e5a2b"/><path d="M4.92 9.49L13.41 9.49L13.41 12.43L4.92 12.43Z" fill="none" stroke="#000000" stroke-width="1.8" stroke-miterlimit="2"/><path d="M8.84 14.72L11.12 14.72L11.12 16.67L8.84 16.67Z" fill="#8d999b"/><path d="M5.25 22.88L19.61 22.88L19.61 24.83L5.25 24.83Z" fill="#2a1f17"/><path d="M5.25 22.88L19.61 22.88L19.61 24.83L5.25 24.83Z" fill="none" stroke="#000000" stroke-width="1.63" stroke-miterlimit="2"/><path d="M13.41 15.04L20.59 15.04L20.59 21.24L25.16 21.57L27.12 23.53L27.12 27.12L13.41 27.12Z" fill="#5a3a1d"/><g clip-path="url(#k2)"><path d="M21.91 15.04L27.12 15.04L27.12 27.12L21.91 27.12Z" fill="#43291a"/></g><path d="M13.41 15.04L20.59 15.04L20.59 21.24L25.16 21.57L27.12 23.53L27.12 27.12L13.41 27.12Z" fill="none" stroke="#000000" stroke-width="1.96" stroke-miterlimit="2"/><path d="M12.76 13.74L21.24 13.74L21.24 16.67L12.76 16.67Z" fill="#8e5a2b"/><path d="M12.76 13.74L21.24 13.74L21.24 16.67L12.76 16.67Z" fill="none" stroke="#000000" stroke-width="1.8" stroke-miterlimit="2"/><path d="M16.67 18.96L18.96 18.96L18.96 20.92L16.67 20.92Z" fill="#8d999b"/><path d="M13.08 27.12L27.44 27.12L27.44 29.08L13.08 29.08Z" fill="#2a1f17"/><path d="M13.08 27.12L27.44 27.12L27.44 29.08L13.08 29.08Z" fill="none" stroke="#000000" stroke-width="1.63" stroke-miterlimit="2"/></svg>', "color": "#8d999b", "source": "class-kit", "bounds": { "x": 4.92, "y": 9.49, "width": 22.52, "height": 19.58 }, "visibleCenter": { "x": 16.18, "y": 19.28 }, "pivot": { "x": 16.18, "y": 29.08 } }, "kit-rogue-saber": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs><clipPath id="k1"><path d="M8.93 21.43L20.07 7.56L23.03 -2.22L25.76 7.33L12.57 25.07Z"/></clipPath></defs><path d="M3.13 28.37L7.68 23.82L10.18 26.32L5.63 30.87Z" fill="#8e5a2b"/><path d="M3.13 28.37L7.68 23.82L10.18 26.32L5.63 30.87Z" fill="none" stroke="#000000" stroke-width="1.93" stroke-miterlimit="2"/><path d="M5.06 22.12L7.33 19.84L14.16 26.67L11.88 28.94Z" fill="#8d999b"/><path d="M5.06 22.12L7.33 19.84L14.16 26.67L11.88 28.94Z" fill="none" stroke="#000000" stroke-width="1.93" stroke-miterlimit="2"/><path d="M8.93 21.43L20.07 7.56L23.03 -2.22L25.76 7.33L12.57 25.07Z" fill="#d6dde2"/><g clip-path="url(#k1)"><path d="M8.36 20.87L27.23 1.99L31.44 6.2L12.57 25.07Z" fill="#a9b6c1"/></g><path d="M8.93 21.43L20.07 7.56L23.03 -2.22L25.76 7.33L12.57 25.07Z" fill="none" stroke="#000000" stroke-width="2.25" stroke-miterlimit="2"/></svg>', "color": "#8d999b", "source": "class-kit", "bounds": { "x": 3.13, "y": -2.22, "width": 28.31, "height": 33.09 }, "visibleCenter": { "x": 17.28, "y": 14.33 }, "pivot": { "x": 17.28, "y": 30.87 } }, "kit-rogue-bandana": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs><clipPath id="k1"><path d="M8.76 13.27L28.09 13.27L30.07 15.46L29.63 17.22L8.76 17.44Z"/></clipPath></defs><path d="M8.76 13.27L28.09 13.27L30.07 15.46L29.63 17.22L8.76 17.44Z" fill="#a3392f"/><g clip-path="url(#k1)"><path d="M23.68 13.27L30.07 13.27L30.07 17.44L23.68 17.44Z" fill="#7c2a23"/></g><path d="M8.76 13.27L28.09 13.27L30.07 15.46L29.63 17.22L8.76 17.44Z" fill="none" stroke="#000000" stroke-width="1.43" stroke-miterlimit="2"/><path d="M8.98 15.24L3.93 13.48L5.03 17.66L8.98 17Z" fill="#a3392f"/><path d="M8.98 15.24L3.93 13.48L5.03 17.66L8.98 17Z" fill="none" stroke="#000000" stroke-width="1.21" stroke-miterlimit="2"/><path d="M8.98 16.56L4.59 19.86L7 20.95L9.2 17.66Z" fill="#a3392f"/><path d="M8.98 16.56L4.59 19.86L7 20.95L9.2 17.66Z" fill="none" stroke="#000000" stroke-width="1.21" stroke-miterlimit="2"/><path d="M14.03 14.36L15.57 14.36L15.57 15.9L14.03 15.9Z" fill="#f3e2c8"/><path d="M19.53 14.36L21.06 14.36L21.06 15.9L19.53 15.9Z" fill="#f3e2c8"/><path d="M25.02 14.36L26.56 14.36L26.56 15.9L25.02 15.9Z" fill="#f3e2c8"/><path d="M9.2 16.12L10.52 16.12L10.52 17.44L9.2 17.44Z" fill="#8d999b"/></svg>', "color": "#8d999b", "source": "class-kit", "bounds": { "x": 3.93, "y": 13.27, "width": 26.14, "height": 7.69 }, "visibleCenter": { "x": 17, "y": 17.11 }, "pivot": { "x": 17, "y": 20.95 } }, "kit-rogue-doublet": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><path d="M13.87 12.77L9.74 23.13L4.31 20.97L8.44 10.6Z" fill="#a0703f"/><path d="M10.98 20.02L9.74 23.13L4.31 20.97L5.55 17.86Z" fill="#7d5530"/><path d="M12.32 13.44L10.21 18.72L8.98 18.23L11.08 12.94Z" fill="#bd8a55"/><path d="M13.87 12.77L9.74 23.13L4.31 20.97L8.44 10.6Z" fill="none" stroke="#000000" stroke-width="1.99" stroke-miterlimit="2"/><path d="M11.71 19.63L10.13 23.58L3.72 21.02L5.29 17.07Z" fill="#5a3a1d"/><path d="M11.71 19.63L10.13 23.58L3.72 21.02L5.29 17.07Z" fill="none" stroke="#000000" stroke-width="1.46" stroke-miterlimit="2"/><path d="M6.11 8.76L13.01 8.76L13.01 13.28L6.11 13.28Z" fill="#a0703f"/><path d="M10.25 8.76L13.01 8.76L13.01 13.28L10.25 13.28Z" fill="#7d5530"/><path d="M7.3 9.96L9.32 9.96L9.32 11.29L7.3 11.29Z" fill="#bd8a55"/><path d="M6.11 8.76L13.01 8.76L13.01 13.28L6.11 13.28Z" fill="none" stroke="#000000" stroke-width="1.59" stroke-miterlimit="2"/><path d="M7.7 9.3L26.3 9.3L26.3 26.03L7.7 26.03Z" fill="#a0703f"/><path d="M19.98 9.3L26.3 9.3L26.3 26.03L19.98 26.03Z" fill="#7d5530"/><path d="M8.9 10.49L19.05 10.49L19.05 11.82L8.9 11.82Z" fill="#bd8a55"/><path d="M7.7 9.3L26.3 9.3L26.3 26.03L7.7 26.03Z" fill="none" stroke="#000000" stroke-width="1.99" stroke-miterlimit="2"/><path d="M16.47 11.42L20.45 13.01M20.45 11.42L16.47 13.01M16.47 13.81L20.45 15.41M20.45 13.81L16.47 15.41M16.47 16.2L20.45 17.8M20.45 16.2L16.47 17.8M16.47 18.59L20.45 20.19M20.45 18.59L16.47 20.19" fill="none" stroke="#43291a" stroke-width="1.2" stroke-miterlimit="2"/><path d="M9.3 7.97L24.17 7.97L24.17 10.89L9.3 10.89Z" fill="#5a3a1d"/><path d="M9.3 7.97L24.17 7.97L24.17 10.89L9.3 10.89Z" fill="none" stroke="#000000" stroke-width="1.46" stroke-miterlimit="2"/><path d="M7.17 21.52L26.83 21.52L26.83 24.44L7.17 24.44Z" fill="#5a3a1d"/><path d="M7.17 21.52L26.83 21.52L26.83 24.44L7.17 24.44Z" fill="none" stroke="#000000" stroke-width="1.73" stroke-miterlimit="2"/><path d="M21.52 22.05L25.5 22.05L25.5 26.56L21.52 26.56Z" fill="#8e5a2b"/><path d="M21.52 22.05L25.5 22.05L25.5 26.56L21.52 26.56Z" fill="none" stroke="#000000" stroke-width="1.33" stroke-miterlimit="2"/><path d="M22.71 23.11L24.31 23.11L24.31 24.44L22.71 24.44Z" fill="#8d999b"/><path d="M26.9 10.63L30.94 21.03L25.49 23.15L21.45 12.75Z" fill="#a0703f"/><path d="M29.73 17.91L30.94 21.03L25.49 23.15L24.28 20.03Z" fill="#7d5530"/><path d="M26.22 12.18L28.28 17.47L27.04 17.96L24.98 12.66Z" fill="#bd8a55"/><path d="M26.9 10.63L30.94 21.03L25.49 23.15L21.45 12.75Z" fill="none" stroke="#000000" stroke-width="1.99" stroke-miterlimit="2"/><path d="M29.99 17.12L31.53 21.08L25.09 23.59L23.55 19.62Z" fill="#5a3a1d"/><path d="M29.99 17.12L31.53 21.08L25.09 23.59L23.55 19.62Z" fill="none" stroke="#000000" stroke-width="1.46" stroke-miterlimit="2"/><path d="M21.78 7.97L28.96 7.97L28.96 12.48L21.78 12.48Z" fill="#a0703f"/><path d="M26.09 7.97L28.96 7.97L28.96 12.48L26.09 12.48Z" fill="#7d5530"/><path d="M22.98 9.16L25.16 9.16L25.16 10.49L22.98 10.49Z" fill="#bd8a55"/><path d="M21.78 7.97L28.96 7.97L28.96 12.48L21.78 12.48Z" fill="none" stroke="#000000" stroke-width="1.59" stroke-miterlimit="2"/></svg>', "color": "#8d999b", "source": "class-kit", "bounds": { "x": 3.72, "y": 7.97, "width": 27.81, "height": 18.6 }, "visibleCenter": { "x": 17.62, "y": 17.27 }, "pivot": { "x": 17.62, "y": 26.56 } }, "kit-rogue-gloves": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs><clipPath id="k1"><path d="M16.37 18.59L16.37 9.38L15.41 8.11L8.75 8.11L7.8 9.38L7.8 14.46L5.26 11.92L3.99 13.19L7.8 18.59Z"/></clipPath><clipPath id="k2"><path d="M17.63 22.08L17.63 12.87L18.59 11.61L25.25 11.61L26.2 12.87L26.2 17.95L28.74 15.41L30.01 16.68L26.2 22.08Z"/></clipPath></defs><path d="M16.37 18.59L16.37 9.38L15.41 8.11L8.75 8.11L7.8 9.38L7.8 14.46L5.26 11.92L3.99 13.19L7.8 18.59Z" fill="#5a3a1d"/><g clip-path="url(#k1)"><path d="M8.94 8.11L3.99 8.11L3.99 18.59L8.94 18.59Z" fill="#43291a"/></g><path d="M16.37 18.59L16.37 9.38L15.41 8.11L8.75 8.11L7.8 9.38L7.8 14.46L5.26 11.92L3.99 13.19L7.8 18.59Z" fill="none" stroke="#000000" stroke-width="1.9" stroke-miterlimit="2"/><path d="M14.14 8.11L13.35 8.11L13.35 11.61L14.14 11.61Z" fill="#00000059"/><path d="M11.92 8.11L11.13 8.11L11.13 11.61L11.92 11.61Z" fill="#00000059"/><path d="M9.86 8.11L9.07 8.11L9.07 11.61L9.86 11.61Z" fill="#00000059"/><path d="M17 18.59L7.16 18.59L7.16 22.39L17 22.39Z" fill="#8e5a2b"/><path d="M17 18.59L7.16 18.59L7.16 22.39L17 22.39Z" fill="none" stroke="#000000" stroke-width="1.75" stroke-miterlimit="2"/><path d="M13.19 19.7L10.65 19.7L10.65 21.28L13.19 21.28Z" fill="#8d999b"/><path d="M17.63 22.08L17.63 12.87L18.59 11.61L25.25 11.61L26.2 12.87L26.2 17.95L28.74 15.41L30.01 16.68L26.2 22.08Z" fill="#5a3a1d"/><g clip-path="url(#k2)"><path d="M25.06 11.61L30.01 11.61L30.01 22.08L25.06 22.08Z" fill="#43291a"/></g><path d="M17.63 22.08L17.63 12.87L18.59 11.61L25.25 11.61L26.2 12.87L26.2 17.95L28.74 15.41L30.01 16.68L26.2 22.08Z" fill="none" stroke="#000000" stroke-width="1.9" stroke-miterlimit="2"/><path d="M19.86 11.61L20.65 11.61L20.65 15.1L19.86 15.1Z" fill="#00000059"/><path d="M22.08 11.61L22.87 11.61L22.87 15.1L22.08 15.1Z" fill="#00000059"/><path d="M24.14 11.61L24.93 11.61L24.93 15.1L24.14 15.1Z" fill="#00000059"/><path d="M17 22.08L26.84 22.08L26.84 25.89L17 25.89Z" fill="#8e5a2b"/><path d="M17 22.08L26.84 22.08L26.84 25.89L17 25.89Z" fill="none" stroke="#000000" stroke-width="1.75" stroke-miterlimit="2"/><path d="M20.81 23.19L23.35 23.19L23.35 24.77L20.81 24.77Z" fill="#8d999b"/></svg>', "color": "#8d999b", "source": "class-kit", "bounds": { "x": 3.99, "y": 8.11, "width": 26.02, "height": 17.77 }, "visibleCenter": { "x": 17, "y": 17 }, "pivot": { "x": 17, "y": 25.89 } }, "kit-rogue-boots": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs><clipPath id="k1"><path d="M5.58 10.8L12.76 10.8L12.76 17L17.33 17.33L19.28 19.28L19.28 22.88L5.58 22.88Z"/></clipPath><clipPath id="k2"><path d="M13.41 15.04L20.59 15.04L20.59 21.24L25.16 21.57L27.12 23.53L27.12 27.12L13.41 27.12Z"/></clipPath></defs><path d="M5.58 10.8L12.76 10.8L12.76 17L17.33 17.33L19.28 19.28L19.28 22.88L5.58 22.88Z" fill="#5a3a1d"/><g clip-path="url(#k1)"><path d="M14.08 10.8L19.28 10.8L19.28 22.88L14.08 22.88Z" fill="#43291a"/></g><path d="M5.58 10.8L12.76 10.8L12.76 17L17.33 17.33L19.28 19.28L19.28 22.88L5.58 22.88Z" fill="none" stroke="#000000" stroke-width="1.96" stroke-miterlimit="2"/><path d="M4.92 9.49L13.41 9.49L13.41 12.43L4.92 12.43Z" fill="#8e5a2b"/><path d="M4.92 9.49L13.41 9.49L13.41 12.43L4.92 12.43Z" fill="none" stroke="#000000" stroke-width="1.8" stroke-miterlimit="2"/><path d="M8.84 14.72L11.12 14.72L11.12 16.67L8.84 16.67Z" fill="#8d999b"/><path d="M5.25 22.88L19.61 22.88L19.61 24.83L5.25 24.83Z" fill="#2a1f17"/><path d="M5.25 22.88L19.61 22.88L19.61 24.83L5.25 24.83Z" fill="none" stroke="#000000" stroke-width="1.63" stroke-miterlimit="2"/><path d="M13.41 15.04L20.59 15.04L20.59 21.24L25.16 21.57L27.12 23.53L27.12 27.12L13.41 27.12Z" fill="#5a3a1d"/><g clip-path="url(#k2)"><path d="M21.91 15.04L27.12 15.04L27.12 27.12L21.91 27.12Z" fill="#43291a"/></g><path d="M13.41 15.04L20.59 15.04L20.59 21.24L25.16 21.57L27.12 23.53L27.12 27.12L13.41 27.12Z" fill="none" stroke="#000000" stroke-width="1.96" stroke-miterlimit="2"/><path d="M12.76 13.74L21.24 13.74L21.24 16.67L12.76 16.67Z" fill="#8e5a2b"/><path d="M12.76 13.74L21.24 13.74L21.24 16.67L12.76 16.67Z" fill="none" stroke="#000000" stroke-width="1.8" stroke-miterlimit="2"/><path d="M16.67 18.96L18.96 18.96L18.96 20.92L16.67 20.92Z" fill="#8d999b"/><path d="M13.08 27.12L27.44 27.12L27.44 29.08L13.08 29.08Z" fill="#2a1f17"/><path d="M13.08 27.12L27.44 27.12L27.44 29.08L13.08 29.08Z" fill="none" stroke="#000000" stroke-width="1.63" stroke-miterlimit="2"/></svg>', "color": "#8d999b", "source": "class-kit", "bounds": { "x": 4.92, "y": 9.49, "width": 22.52, "height": 19.58 }, "visibleCenter": { "x": 16.18, "y": 19.28 }, "pivot": { "x": 16.18, "y": 29.08 } }, "kit-mage-staff": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs><clipPath id="k1"><path d="M30.55 3.45L29.25 8.4L24.43 9.57L25.6 4.75Z"/></clipPath></defs><path d="M24.1 8.47L25.53 9.9L4.17 31.27L2.73 29.83Z" fill="#8e5a2b"/><path d="M24.1 8.47L25.53 9.9L4.17 31.27L2.73 29.83Z" fill="none" stroke="#000000" stroke-width="1.11" stroke-miterlimit="2"/><path d="M21.76 10.81L23.19 12.24L22.41 13.03L20.97 11.59Z" fill="#8d999b"/><path d="M24.82 4.49L25.86 5.53L22.86 8.53L21.82 7.49Z" fill="#8d999b"/><path d="M24.82 4.49L25.86 5.53L22.86 8.53L21.82 7.49Z" fill="none" stroke="#000000" stroke-width="0.92" stroke-miterlimit="2"/><path d="M28.47 8.14L29.51 9.18L26.51 12.18L25.47 11.14Z" fill="#8d999b"/><path d="M28.47 8.14L29.51 9.18L26.51 12.18L25.47 11.14Z" fill="none" stroke="#000000" stroke-width="0.92" stroke-miterlimit="2"/><path d="M30.55 3.45L29.25 8.4L24.43 9.57L25.6 4.75Z" fill="#b8c4cc"/><g clip-path="url(#k1)"><path d="M30.55 3.45L32.37 5.27L26.25 11.4L24.43 9.57Z" fill="#8d999b"/></g><path d="M30.55 3.45L29.25 8.4L24.43 9.57L25.6 4.75Z" fill="none" stroke="#000000" stroke-width="1.2" stroke-miterlimit="2"/><path d="M28.34 4.36L28.92 4.95L27.88 5.99L27.29 5.4Z" fill="#ffffffb3"/></svg>', "color": "#8d999b", "source": "class-kit", "bounds": { "x": 2.73, "y": 3.45, "width": 29.64, "height": 27.82 }, "visibleCenter": { "x": 17.55, "y": 17.36 }, "pivot": { "x": 17.55, "y": 31.27 } }, "kit-mage-cowl": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs><clipPath id="k1"><path d="M3.67 23.9L29.85 23.9L28.19 21.05L21.52 19.14L18.19 12.72L13.43 8.67L7 9.62L11.05 12.24L10.57 18.9L5.1 21.28Z"/></clipPath></defs><path d="M3.67 23.9L29.85 23.9L28.19 21.05L21.52 19.14L18.19 12.72L13.43 8.67L7 9.62L11.05 12.24L10.57 18.9L5.1 21.28Z" fill="#3a6fb0"/><g clip-path="url(#k1)"><path d="M22 8.67L29.85 8.67L29.85 23.9L22 23.9Z" fill="#2b5487"/></g><path d="M3.67 23.9L29.85 23.9L28.19 21.05L21.52 19.14L18.19 12.72L13.43 8.67L7 9.62L11.05 12.24L10.57 18.9L5.1 21.28Z" fill="none" stroke="#000000" stroke-width="1.55" stroke-miterlimit="2"/><path d="M7.24 19.38L22.95 19.38L22.95 22.24L7.24 22.24Z" fill="#c8a46a"/><path d="M7.24 19.38L22.95 19.38L22.95 22.24L7.24 22.24Z" fill="none" stroke="#000000" stroke-width="1.31" stroke-miterlimit="2"/><path d="M7.48 9.15L9.38 9.15L9.38 11.05L7.48 11.05Z" fill="#8d999b"/></svg>', "color": "#8d999b", "source": "class-kit", "bounds": { "x": 3.67, "y": 8.67, "width": 26.18, "height": 15.23 }, "visibleCenter": { "x": 16.76, "y": 16.29 }, "pivot": { "x": 16.76, "y": 23.9 } }, "kit-mage-robe": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs><clipPath id="k1"><path d="M14.62 10.73L12.95 19.05L5.2 15.96L9.72 8.77Z"/></clipPath><clipPath id="k2"><path d="M9.31 7.77L24.69 7.77L25.68 16.78L28.86 27.98L20.3 27.98L18.87 26.23L17.44 27.98L6.45 27.98L8.32 16.78Z"/></clipPath><clipPath id="k3"><path d="M9.31 7.77L24.69 7.77L25.68 16.78L28.86 27.98L20.3 27.98L18.87 26.23L17.44 27.98L6.45 27.98L8.32 16.78Z"/></clipPath><clipPath id="k4"><path d="M8.32 6.89L25.68 6.89L26.89 11.73L7.11 11.73Z"/></clipPath><clipPath id="k5"><path d="M25.39 8.79L29.85 16.02L22.07 19.04L20.47 10.71Z"/></clipPath></defs><path d="M14.62 10.73L12.95 19.05L5.2 15.96L9.72 8.77Z" fill="#3a6fb0"/><g clip-path="url(#k1)"><path d="M14.19 15.95L12.95 19.05L5.2 15.96L6.43 12.86Z" fill="#2b5487"/></g><path d="M14.62 10.73L12.95 19.05L5.2 15.96L9.72 8.77Z" fill="none" stroke="#000000" stroke-width="1.43" stroke-miterlimit="2"/><path d="M9.31 7.77L24.69 7.77L25.68 16.78L28.86 27.98L20.3 27.98L18.87 26.23L17.44 27.98L6.45 27.98L8.32 16.78Z" fill="#3a6fb0"/><g clip-path="url(#k2)"><path d="M21.69 7.77L28.86 7.77L28.86 27.98L21.69 27.98Z" fill="#2b5487"/></g><path d="M9.31 7.77L24.69 7.77L25.68 16.78L28.86 27.98L20.3 27.98L18.87 26.23L17.44 27.98L6.45 27.98L8.32 16.78Z" fill="none" stroke="#000000" stroke-width="1.65" stroke-miterlimit="2"/><path d="M17.11 9.09L20.62 9.09L21.5 26.89L19.86 26.89L18.87 25.57L17.77 26.89L16.01 26.89Z" fill="#d9e6f5"/><path d="M17.11 9.09L20.62 9.09L21.5 26.89L19.86 26.89L18.87 25.57L17.77 26.89L16.01 26.89Z" fill="none" stroke="#000000" stroke-width="1.1" stroke-miterlimit="2"/><g clip-path="url(#k3)"><path d="M5.8 26.12L29.52 26.12L29.52 27.98L5.8 27.98Z" fill="#8d999b"/><path d="M6.02 16.45L30.18 16.45L30.18 18.98L6.02 18.98Z" fill="#c8a46a"/><path d="M6.02 16.45L30.18 16.45L30.18 18.98L6.02 18.98Z" fill="none" stroke="#000000" stroke-width="1.32" stroke-miterlimit="2"/></g><path d="M9.31 7.77L24.69 7.77L25.68 16.78L28.86 27.98L20.3 27.98L18.87 26.23L17.44 27.98L6.45 27.98L8.32 16.78Z" fill="none" stroke="#000000" stroke-width="1.65" stroke-miterlimit="2"/><path d="M21.83 18.98L24.03 18.98L24.58 24.91L22.16 24.91Z" fill="#c8a46a"/><path d="M21.83 18.98L24.03 18.98L24.58 24.91L22.16 24.91Z" fill="none" stroke="#000000" stroke-width="1.1" stroke-miterlimit="2"/><path d="M8.32 6.89L25.68 6.89L26.89 11.73L7.11 11.73Z" fill="#2b5487"/><g clip-path="url(#k4)"><path d="M20.95 6.89L26.89 6.89L26.89 11.73L20.95 11.73Z" fill="#22436b"/></g><path d="M8.32 6.89L25.68 6.89L26.89 11.73L7.11 11.73Z" fill="none" stroke="#000000" stroke-width="1.43" stroke-miterlimit="2"/><path d="M14.36 6.89L17.44 11.51L20.52 6.89" fill="none" stroke="#000000" stroke-width="1.43" stroke-miterlimit="2"/><path d="M25.39 8.79L29.85 16.02L22.07 19.04L20.47 10.71Z" fill="#3a6fb0"/><g clip-path="url(#k5)"><path d="M28.64 12.91L29.85 16.02L22.07 19.04L20.86 15.93Z" fill="#2b5487"/></g><path d="M25.39 8.79L29.85 16.02L22.07 19.04L20.47 10.71Z" fill="none" stroke="#000000" stroke-width="1.43" stroke-miterlimit="2"/></svg>', "color": "#8d999b", "source": "class-kit", "bounds": { "x": 5.2, "y": 6.89, "width": 24.98, "height": 21.09 }, "visibleCenter": { "x": 17.69, "y": 17.44 }, "pivot": { "x": 17.69, "y": 27.98 } }, "kit-mage-wraps": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs><clipPath id="k1"><path d="M16.37 18.59L16.37 9.38L15.41 8.11L8.75 8.11L7.8 9.38L7.8 14.46L5.26 11.92L3.99 13.19L7.8 18.59Z"/></clipPath><clipPath id="k2"><path d="M17.63 22.08L17.63 12.87L18.59 11.61L25.25 11.61L26.2 12.87L26.2 17.95L28.74 15.41L30.01 16.68L26.2 22.08Z"/></clipPath></defs><path d="M16.37 18.59L16.37 9.38L15.41 8.11L8.75 8.11L7.8 9.38L7.8 14.46L5.26 11.92L3.99 13.19L7.8 18.59Z" fill="#2b5487"/><g clip-path="url(#k1)"><path d="M8.94 8.11L3.99 8.11L3.99 18.59L8.94 18.59Z" fill="#22436b"/></g><path d="M16.37 18.59L16.37 9.38L15.41 8.11L8.75 8.11L7.8 9.38L7.8 14.46L5.26 11.92L3.99 13.19L7.8 18.59Z" fill="none" stroke="#000000" stroke-width="1.9" stroke-miterlimit="2"/><path d="M14.14 8.11L13.35 8.11L13.35 11.61L14.14 11.61Z" fill="#00000059"/><path d="M11.92 8.11L11.13 8.11L11.13 11.61L11.92 11.61Z" fill="#00000059"/><path d="M9.86 8.11L9.07 8.11L9.07 11.61L9.86 11.61Z" fill="#00000059"/><path d="M15.73 12.87L8.43 12.87L8.43 13.99L15.73 13.99Z" fill="#e3d3b0"/><path d="M15.73 15.41L8.43 15.41L8.43 16.52L15.73 16.52Z" fill="#e3d3b0"/><path d="M17 18.59L7.16 18.59L7.16 22.39L17 22.39Z" fill="#e3d3b0"/><path d="M17 18.59L7.16 18.59L7.16 22.39L17 22.39Z" fill="none" stroke="#000000" stroke-width="1.75" stroke-miterlimit="2"/><path d="M13.19 19.7L10.65 19.7L10.65 21.28L13.19 21.28Z" fill="#8d999b"/><path d="M17.63 22.08L17.63 12.87L18.59 11.61L25.25 11.61L26.2 12.87L26.2 17.95L28.74 15.41L30.01 16.68L26.2 22.08Z" fill="#2b5487"/><g clip-path="url(#k2)"><path d="M25.06 11.61L30.01 11.61L30.01 22.08L25.06 22.08Z" fill="#22436b"/></g><path d="M17.63 22.08L17.63 12.87L18.59 11.61L25.25 11.61L26.2 12.87L26.2 17.95L28.74 15.41L30.01 16.68L26.2 22.08Z" fill="none" stroke="#000000" stroke-width="1.9" stroke-miterlimit="2"/><path d="M19.86 11.61L20.65 11.61L20.65 15.1L19.86 15.1Z" fill="#00000059"/><path d="M22.08 11.61L22.87 11.61L22.87 15.1L22.08 15.1Z" fill="#00000059"/><path d="M24.14 11.61L24.93 11.61L24.93 15.1L24.14 15.1Z" fill="#00000059"/><path d="M18.27 16.37L25.57 16.37L25.57 17.48L18.27 17.48Z" fill="#e3d3b0"/><path d="M18.27 18.9L25.57 18.9L25.57 20.01L18.27 20.01Z" fill="#e3d3b0"/><path d="M17 22.08L26.84 22.08L26.84 25.89L17 25.89Z" fill="#e3d3b0"/><path d="M17 22.08L26.84 22.08L26.84 25.89L17 25.89Z" fill="none" stroke="#000000" stroke-width="1.75" stroke-miterlimit="2"/><path d="M20.81 23.19L23.35 23.19L23.35 24.77L20.81 24.77Z" fill="#8d999b"/></svg>', "color": "#8d999b", "source": "class-kit", "bounds": { "x": 3.99, "y": 8.11, "width": 26.02, "height": 17.77 }, "visibleCenter": { "x": 17, "y": 17 }, "pivot": { "x": 17, "y": 25.89 } }, "kit-mage-slippers": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs><clipPath id="k1"><path d="M2.72 10.47L13.74 10.47L17.82 12.92L21.08 10.47L21.08 17.41L2.72 17.41Z"/></clipPath><clipPath id="k2"><path d="M12.51 15.78L23.53 15.78L27.61 18.22L30.87 15.78L30.87 22.71L12.51 22.71Z"/></clipPath></defs><path d="M2.72 10.47L13.74 10.47L17.82 12.92L21.08 10.47L21.08 17.41L2.72 17.41Z" fill="#3a6fb0"/><g clip-path="url(#k1)"><path d="M14.1 10.47L21.08 10.47L21.08 17.41L14.1 17.41Z" fill="#2b5487"/></g><path d="M2.72 10.47L13.74 10.47L17.82 12.92L21.08 10.47L21.08 17.41L2.72 17.41Z" fill="none" stroke="#000000" stroke-width="2.45" stroke-miterlimit="2"/><path d="M3.94 12.1L12.92 12.1L12.92 13.74L3.94 13.74Z" fill="#c8a46a"/><path d="M10.47 12.1L12.92 12.1L12.92 13.74L10.47 13.74Z" fill="#8d999b"/><path d="M2.31 17.41L20.26 17.41L20.26 19.86L2.31 19.86Z" fill="#2a1f17"/><path d="M2.31 17.41L20.26 17.41L20.26 19.86L2.31 19.86Z" fill="none" stroke="#000000" stroke-width="2.04" stroke-miterlimit="2"/><path d="M12.51 15.78L23.53 15.78L27.61 18.22L30.87 15.78L30.87 22.71L12.51 22.71Z" fill="#3a6fb0"/><g clip-path="url(#k2)"><path d="M23.9 15.78L30.87 15.78L30.87 22.71L23.9 22.71Z" fill="#2b5487"/></g><path d="M12.51 15.78L23.53 15.78L27.61 18.22L30.87 15.78L30.87 22.71L12.51 22.71Z" fill="none" stroke="#000000" stroke-width="2.45" stroke-miterlimit="2"/><path d="M13.74 17.41L22.71 17.41L22.71 19.04L13.74 19.04Z" fill="#c8a46a"/><path d="M20.26 17.41L22.71 17.41L22.71 19.04L20.26 19.04Z" fill="#8d999b"/><path d="M12.1 22.71L30.06 22.71L30.06 25.16L12.1 25.16Z" fill="#2a1f17"/><path d="M12.1 22.71L30.06 22.71L30.06 25.16L12.1 25.16Z" fill="none" stroke="#000000" stroke-width="2.04" stroke-miterlimit="2"/></svg>', "color": "#8d999b", "source": "class-kit", "bounds": { "x": 2.31, "y": 10.47, "width": 28.56, "height": 14.69 }, "visibleCenter": { "x": 16.59, "y": 17.82 }, "pivot": { "x": 16.59, "y": 25.16 } } };
+
 // src/client/equipment_art.js
 var definitions2 = { "worn-sword": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="wp_hilt_worn-sword" x1="0" y1="0" x2="1" y2="0"> <stop offset="0%" stop-color="#8d5b38"/> <stop offset="45%" stop-color="#5c3a21"/> <stop offset="45%" stop-color="#2d1d0b"/> <stop offset="100%" stop-color="#1c0f07"/> </linearGradient> </defs> <defs> <linearGradient id="grad_weap_worn-sword" x1="0" y1="0" x2="1" y2="0"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="35%" stop-color="#ffffff"/> <stop offset="35%" stop-color="#95a5a6"/> <stop offset="65%" stop-color="#95a5a6"/> <stop offset="65%" stop-color="#2a3240"/> <stop offset="100%" stop-color="#121820"/> </linearGradient> </defs> <path d="M16 3 L19 8 L18 21 L14 21 L13 8 Z" fill="url(#grad_weap_worn-sword)" stroke="#000" stroke-width="1.8" /> <rect x="11" y="21" width="10" height="2.5" rx="0.5" fill="#f1c40f" stroke="#000" stroke-width="1.2" /> <rect x="14.5" y="23.5" width="3" height="5" fill="url(#wp_hilt_worn-sword)" stroke="#000" stroke-width="1" /> <circle cx="16" cy="29.5" r="1.5" fill="#f1c40f" stroke="#000" stroke-width="1" /></svg>', "color": "#95a5a6", "source": "weapon" }, "iron-sword": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="ls_blade_l_iron-sword" x1="0" y1="0" x2="1" y2="0"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="60%" stop-color="#cbd5e1"/> <stop offset="100%" stop-color="#94a3b8"/> </linearGradient> <linearGradient id="ls_blade_s_iron-sword" x1="0" y1="0" x2="1" y2="0"> <stop offset="0%" stop-color="#64748b"/> <stop offset="100%" stop-color="#475569"/> </linearGradient> <linearGradient id="ls_hilt_iron-sword" x1="0" y1="0" x2="1" y2="0"> <stop offset="0%" stop-color="#4a5568"/> <stop offset="35%" stop-color="#4a5568"/> <stop offset="35%" stop-color="#2d3748"/> <stop offset="70%" stop-color="#2d3748"/> <stop offset="70%" stop-color="#1a202c"/> <stop offset="100%" stop-color="#0f141d"/> </linearGradient> </defs> <path d="M16 2 L14.5 4 L14.5 21 L16 21 Z" fill="url(#ls_blade_s_iron-sword)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" /> <path d="M16 2 L17.5 4 L17.5 21 L16 21 Z" fill="url(#ls_blade_l_iron-sword)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" /> <polygon points="16,2 17.0,4 16.8,19 16,19" fill="rgba(255,255,255,0.4)" /> <path d="M9.5 20.5 Q16 18.5 22.5 20.5 L21.5 22.5 Q16 21.0 10.5 22.5 Z" fill="#94a3b8" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" /> <rect x="14.5" y="22.5" width="3" height="7.5" fill="url(#ls_hilt_iron-sword)" stroke="#05070a" stroke-width="1.2" /> <line x1="14.5" y1="24.5" x2="17.5" y2="24.5" stroke="#05070a" stroke-width="0.8" /> <line x1="14.5" y1="26.5" x2="17.5" y2="26.5" stroke="#05070a" stroke-width="0.8" /> <line x1="14.5" y1="28.5" x2="17.5" y2="28.5" stroke="#05070a" stroke-width="0.8" /> <polygon points="16,29.5 18.2,31 16,32.5 13.8,31" fill="#94a3b8" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" /> <circle cx="16" cy="31" r="0.8" fill="#ffffff" /></svg>', "color": "#94a3b8", "source": "longsword" }, "guard-sword": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="bs_blade_l_guard-sword" x1="0" y1="0" x2="1" y2="0"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="100%" stop-color="#bdc3c7"/> </linearGradient> <linearGradient id="bs_blade_s_guard-sword" x1="0" y1="0" x2="1" y2="0"> <stop offset="0%" stop-color="#95a5a6"/> <stop offset="100%" stop-color="#7f8c8d"/> </linearGradient> <linearGradient id="bs_hilt_guard-sword" x1="0" y1="0" x2="1" y2="0"> <stop offset="0%" stop-color="#785c4d"/> <stop offset="35%" stop-color="#785c4d"/> <stop offset="35%" stop-color="#4e3629"/> <stop offset="70%" stop-color="#4e3629"/> <stop offset="70%" stop-color="#2b1a11"/> <stop offset="100%" stop-color="#180e0a"/> </linearGradient> </defs> <path d="M11 20 L21 20 L19 23 L13 23 Z" fill="#d4af37" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <path d="M16 2 L13 3 L14 20 L16 20 Z" fill="url(#bs_blade_s_guard-sword)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <path d="M16 2 L19 3 L18 20 L16 20 Z" fill="url(#bs_blade_l_guard-sword)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <polygon points="16,2 17.5,3.2 16.8,18 16,18" fill="rgba(255,255,255,0.45)" /> <path d="M9 20h14v2.5H9z" fill="#d4af37" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <rect x="14" y="22.5" width="4" height="6" fill="url(#bs_hilt_guard-sword)" stroke="#05070a" stroke-width="1.5" /> <line x1="14" y1="24" x2="18" y2="24" stroke="#05070a" stroke-width="1" /> <line x1="14" y1="26" x2="18" y2="26" stroke="#05070a" stroke-width="1" /> <line x1="14" y1="28" x2="18" y2="28" stroke="#05070a" stroke-width="1" /> <circle cx="16" cy="29.5" r="2.2" fill="#d4af37" stroke="#05070a" stroke-width="1.8" /> <circle cx="15.2" cy="28.7" r="0.6" fill="#ffffff" /></svg>', "color": "#d4af37", "source": "broadsword" }, "runic-sword": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="cm_blade_l_runic-sword" x1="0" y1="0" x2="1" y2="0"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="40%" stop-color="#e2e8f0"/> <stop offset="100%" stop-color="#94a3b8"/> </linearGradient> <linearGradient id="cm_blade_s_runic-sword" x1="0" y1="0" x2="1" y2="0"> <stop offset="0%" stop-color="#64748b"/> <stop offset="100%" stop-color="#475569"/> </linearGradient> <linearGradient id="cm_hilt_runic-sword" x1="0" y1="0" x2="1" y2="0"> <stop offset="0%" stop-color="#8d5b38"/> <stop offset="35%" stop-color="#8d5b38"/> <stop offset="35%" stop-color="#5c3a21"/> <stop offset="70%" stop-color="#5c3a21"/> <stop offset="70%" stop-color="#3d1d0b"/> <stop offset="100%" stop-color="#221004"/> </linearGradient> </defs> <path d="M16 2 L13.5 3.5 L14 19 L16 19 Z" fill="url(#cm_blade_s_runic-sword)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <path d="M16 2 L18.5 3.5 L18 19 L16 19 Z" fill="url(#cm_blade_l_runic-sword)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <polygon points="16,2 18.0,3.5 17.2,18 16,18" fill="rgba(255,255,255,0.4)" /> <path d="M16 19 L8.5 22.8 L9.2 24.6 L16 21.2 Z" fill="#a855f7" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <circle cx="7.8" cy="23.4" r="1.8" fill="#a855f7" stroke="#05070a" stroke-width="1.5" /> <path d="M16 19 L23.5 22.8 L22.8 24.6 L16 21.2 Z" fill="#a855f7" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <circle cx="24.2" cy="23.4" r="1.8" fill="#a855f7" stroke="#05070a" stroke-width="1.5" /> <path d="M11.5 19h9v2.5h-9z" fill="#a855f7" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <rect x="14.2" y="21.5" width="3.6" height="6.5" fill="url(#cm_hilt_runic-sword)" stroke="#05070a" stroke-width="1.5" /> <line x1="14.2" y1="23.2" x2="17.8" y2="23.2" stroke="#05070a" stroke-width="1" /> <line x1="14.2" y1="25.0" x2="17.8" y2="25.0" stroke="#05070a" stroke-width="1" /> <line x1="14.2" y1="26.8" x2="17.8" y2="26.8" stroke="#05070a" stroke-width="1" /> <circle cx="16" cy="29.8" r="2.8" fill="#55555d" stroke="#05070a" stroke-width="1.8" /> <circle cx="16" cy="29.8" r="1.5" fill="#a855f7" stroke="#05070a" stroke-width="1.2" /> <circle cx="15.4" cy="29.2" r="0.5" fill="#ffffff" /></svg>', "color": "#a855f7", "source": "claymore" }, "padded-armor": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="db_fabric_l_padded-armor" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="40%" stop-color="#8c6d3b"/> <stop offset="100%" stop-color="#1e1b4b"/> </linearGradient> <linearGradient id="db_fabric_d_padded-armor" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#8c6d3b"/> <stop offset="100%" stop-color="#0f0f23"/> </linearGradient> <linearGradient id="db_gold_padded-armor" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffeaa7"/> <stop offset="50%" stop-color="#d4af37"/> <stop offset="100%" stop-color="#8a6d1c"/> </linearGradient> </defs> <path d="M4 11 C4 6, 11 7, 11 13 L8 16 Z" fill="url(#db_fabric_d_padded-armor)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" /> <path d="M4 11 Q8 9, 10 13" fill="none" stroke="url(#db_gold_padded-armor)" stroke-width="1.2" /> <path d="M28 11 C28 6, 21 7, 21 13 L24 16 Z" fill="url(#db_fabric_l_padded-armor)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" /> <path d="M28 11 Q24 9, 22 13" fill="none" stroke="url(#db_gold_padded-armor)" stroke-width="1.2" /> <path d="M16 6 L9 8 L8 21 L16 26 Z" fill="url(#db_fabric_d_padded-armor)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <path d="M16 6 L23 8 L24 21 L16 26 Z" fill="url(#db_fabric_l_padded-armor)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <polygon points="12,6 16,13 20,6" fill="#f8fafc" stroke="#05070a" stroke-width="1" /> <path d="M12 6 L16 13 L20 6" fill="none" stroke="url(#db_gold_padded-armor)" stroke-width="1.2" /> <line x1="16" y1="13" x2="16" y2="26" stroke="#05070a" stroke-width="1" opacity="0.5" /> <circle cx="16" cy="15.5" r="1.2" fill="url(#db_gold_padded-armor)" stroke="#05070a" stroke-width="0.5" /> <circle cx="15.7" cy="15.2" r="0.3" fill="#ffffff" /> <circle cx="16" cy="18.5" r="1.2" fill="url(#db_gold_padded-armor)" stroke="#05070a" stroke-width="0.5" /> <circle cx="15.7" cy="18.2" r="0.3" fill="#ffffff" /> <circle cx="16" cy="21.5" r="1.2" fill="url(#db_gold_padded-armor)" stroke="#05070a" stroke-width="0.5" /> <circle cx="15.7" cy="21.2" r="0.3" fill="#ffffff" /> <circle cx="16" cy="12" r="2.2" fill="url(#db_gold_padded-armor)" stroke="#05070a" stroke-width="0.8" /> <circle cx="16" cy="12" r="1.2" fill="#8c6d3b" stroke="#05070a" stroke-width="0.5" /> <circle cx="15.7" cy="11.7" r="0.4" fill="#ffffff" /> <path d="M8 21 Q16 24, 24 21 L23 23 Q16 25, 9 23 Z" fill="url(#db_gold_padded-armor)" stroke="#05070a" stroke-width="1" /></svg>', "color": "#8c6d3b", "source": "doublet" }, "chain-armor": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="hb_mail_l_chain-armor" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="50%" stop-color="#cbd5e1"/> <stop offset="100%" stop-color="#64748b"/> </linearGradient> <linearGradient id="hb_mail_d_chain-armor" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#475569"/> <stop offset="100%" stop-color="#1e293b"/> </linearGradient> <linearGradient id="hb_leather_chain-armor" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#8d5b38"/> <stop offset="35%" stop-color="#8d5b38"/> <stop offset="35%" stop-color="#5c3a21"/> <stop offset="70%" stop-color="#5c3a21"/> <stop offset="70%" stop-color="#2d1d0b"/> <stop offset="100%" stop-color="#1c0f07"/> </linearGradient> <linearGradient id="hb_brass_chain-armor" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffeaa7"/> <stop offset="50%" stop-color="#d4af37"/> <stop offset="100%" stop-color="#8a6d1c"/> </linearGradient> </defs> <path d="M5 9 L10 6 L10 24 L7 28 Z" fill="url(#hb_leather_chain-armor)" stroke="#05070a" stroke-width="1.5" /> <path d="M27 9 L22 6 L22 24 L25 28 Z" fill="url(#hb_leather_chain-armor)" stroke="#05070a" stroke-width="1.5" /> <path d="M16 6 L8 8 L7 22 L16 27 Z" fill="url(#hb_mail_d_chain-armor)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <path d="M16 6 L24 8 L25 22 L16 27 Z" fill="url(#hb_mail_l_chain-armor)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <path d="M9 11 H23 M8 14 H24 M8 17 H24 M8 20 H24 M9 23 H23" fill="none" stroke="#05070a" stroke-width="1" stroke-dasharray="2 1.5" opacity="0.65" /> <path d="M10 6 H22 V10 C22 12, 10 12, 10 10 Z" fill="url(#hb_leather_chain-armor)" stroke="#05070a" stroke-width="1.5" /> <path d="M10 6 H22 V8 H10 Z" fill="url(#hb_brass_chain-armor)" stroke="#05070a" stroke-width="0.8" /> <path d="M14 8 H18 V22 H14 Z" fill="url(#hb_leather_chain-armor)" stroke="#05070a" stroke-width="1" /> <circle cx="16" cy="12" r="2.2" fill="url(#hb_brass_chain-armor)" stroke="#05070a" stroke-width="0.8" /> <circle cx="16" cy="12" r="1.2" fill="#94a3b8" stroke="#05070a" stroke-width="0.5" /> <circle cx="15.7" cy="11.7" r="0.4" fill="#ffffff" /> <rect x="7" y="20" width="18" height="3" fill="url(#hb_leather_chain-armor)" stroke="#05070a" stroke-width="1" /> <rect x="14" y="19" width="4" height="5" rx="0.8" fill="url(#hb_brass_chain-armor)" stroke="#05070a" stroke-width="1" /> <rect x="15" y="20" width="2" height="3" fill="#05070a" /></svg>', "color": "#94a3b8", "source": "hauberk" }, "plate-armor": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="pm_steel_l_plate-armor" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="50%" stop-color="#cbd5e1"/> <stop offset="100%" stop-color="#64748b"/> </linearGradient> <linearGradient id="pm_steel_d_plate-armor" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#475569"/> <stop offset="100%" stop-color="#1e293b"/> </linearGradient> <linearGradient id="pm_leather_plate-armor" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#8d5b38"/> <stop offset="35%" stop-color="#8d5b38"/> <stop offset="35%" stop-color="#5c3a21"/> <stop offset="70%" stop-color="#5c3a21"/> <stop offset="70%" stop-color="#2d1d0b"/> <stop offset="100%" stop-color="#1c0f07"/> </linearGradient> <linearGradient id="pm_brass_plate-armor" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffeaa7"/> <stop offset="50%" stop-color="#d4af37"/> <stop offset="100%" stop-color="#8a6d1c"/> </linearGradient> </defs> <path d="M4 11 C4 6, 11 7, 11 13 L8 16 Z" fill="url(#pm_steel_d_plate-armor)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" /> <path d="M3 11 Q8 9, 10 13" fill="none" stroke="url(#pm_brass_plate-armor)" stroke-width="1.2" /> <path d="M28 11 C28 6, 21 7, 21 13 L24 16 Z" fill="url(#pm_steel_l_plate-armor)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" /> <path d="M29 11 Q24 9, 22 13" fill="none" stroke="url(#pm_brass_plate-armor)" stroke-width="1.2" /> <path d="M16 6 L9 8 L8.2 12 L16 12 Z" fill="url(#pm_steel_d_plate-armor)" stroke="#05070a" stroke-width="1.2" /> <path d="M16 11.5 L8.2 11.5 L8.5 16 L16 16 Z" fill="url(#pm_steel_d_plate-armor)" stroke="#05070a" stroke-width="1.2" /> <path d="M16 15.5 L8.5 15.5 L8.8 20 L16 20 Z" fill="url(#pm_steel_d_plate-armor)" stroke="#05070a" stroke-width="1.2" /> <path d="M16 19.5 L8.8 19.5 L9.5 24 L16 26 Z" fill="url(#pm_steel_d_plate-armor)" stroke="#05070a" stroke-width="1.2" /> <path d="M16 6 L23 8 L23.8 12 L16 12 Z" fill="url(#pm_steel_l_plate-armor)" stroke="#05070a" stroke-width="1.2" /> <path d="M16 11.5 L23.8 11.5 L23.5 16 L16 16 Z" fill="url(#pm_steel_l_plate-armor)" stroke="#05070a" stroke-width="1.2" /> <path d="M16 15.5 L23.5 15.5 L23.2 20 L16 20 Z" fill="url(#pm_steel_l_plate-armor)" stroke="#05070a" stroke-width="1.2" /> <path d="M16 19.5 L23.2 19.5 L22.5 24 L16 26 Z" fill="url(#pm_steel_l_plate-armor)" stroke="#05070a" stroke-width="1.2" /> <rect x="11.5" y="7" width="2" height="17" fill="url(#pm_leather_plate-armor)" stroke="#05070a" stroke-width="0.8" /> <rect x="18.5" y="7" width="2" height="17" fill="url(#pm_leather_plate-armor)" stroke="#05070a" stroke-width="0.8" /> <circle cx="12.5" cy="10" r="0.8" fill="url(#pm_brass_plate-armor)" stroke="#05070a" stroke-width="0.4" /> <circle cx="19.5" cy="10" r="0.8" fill="url(#pm_brass_plate-armor)" stroke="#05070a" stroke-width="0.4" /> <circle cx="12.5" cy="15" r="0.8" fill="url(#pm_brass_plate-armor)" stroke="#05070a" stroke-width="0.4" /> <circle cx="19.5" cy="15" r="0.8" fill="url(#pm_brass_plate-armor)" stroke="#05070a" stroke-width="0.4" /> <circle cx="12.5" cy="19" r="0.8" fill="url(#pm_brass_plate-armor)" stroke="#05070a" stroke-width="0.4" /> <circle cx="19.5" cy="19" r="0.8" fill="url(#pm_brass_plate-armor)" stroke="#05070a" stroke-width="0.4" /> <path d="M10 6 Q16 8.5, 22 6 L21 8.5 Q16 11, 11 8.5 Z" fill="url(#pm_brass_plate-armor)" stroke="#05070a" stroke-width="1" /> <circle cx="16" cy="13.5" r="2.2" fill="url(#pm_brass_plate-armor)" stroke="#05070a" stroke-width="0.8" /> <circle cx="16" cy="13.5" r="1.2" fill="#d4af37" stroke="#05070a" stroke-width="0.5" /> <circle cx="15.7" cy="13.2" r="0.4" fill="#ffffff" /></svg>', "color": "#d4af37", "source": "plate_mail" }, "copper-charm": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="bn_plat_copper-charm" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="40%" stop-color="#cbd5e1"/> <stop offset="80%" stop-color="#64748b"/> <stop offset="100%" stop-color="#334155"/> </linearGradient> <linearGradient id="bn_gold_copper-charm" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#fff275"/> <stop offset="50%" stop-color="#d4af37"/> <stop offset="100%" stop-color="#8a6d1c"/> </linearGradient> <radialGradient id="bn_gem_copper-charm" cx="35%" cy="30%" r="65%"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="50%" stop-color="#b87333"/> <stop offset="100%" stop-color="#05070a"/> </radialGradient> </defs> <ellipse cx="16" cy="17" rx="10.5" ry="10.5" fill="none" stroke="url(#bn_plat_copper-charm)" stroke-width="5" /> <ellipse cx="16" cy="17" rx="13" ry="13" fill="none" stroke="#05070a" stroke-width="1.2" /> <ellipse cx="16" cy="17" rx="8" ry="8" fill="none" stroke="#05070a" stroke-width="1.2" /> <ellipse cx="16" cy="17" rx="10.5" ry="10.5" fill="none" stroke="url(#bn_gold_copper-charm)" stroke-width="1.8" stroke-dasharray="3.5 2.5" /> <circle cx="16" cy="6.5" r="2.2" fill="url(#bn_gold_copper-charm)" stroke="#05070a" stroke-width="0.8" /> <circle cx="16" cy="6.5" r="1.4" fill="url(#bn_gem_copper-charm)" stroke="#05070a" stroke-width="0.5" /> <circle cx="15.6" cy="6.1" r="0.4" fill="#ffffff" /> <circle cx="9.2" cy="10" r="1.8" fill="url(#bn_gold_copper-charm)" stroke="#05070a" stroke-width="0.8" /> <circle cx="9.2" cy="10" r="1.1" fill="url(#bn_gem_copper-charm)" stroke="#05070a" stroke-width="0.5" /> <circle cx="8.9" cy="9.7" r="0.3" fill="#ffffff" /> <circle cx="22.8" cy="10" r="1.8" fill="url(#bn_gold_copper-charm)" stroke="#05070a" stroke-width="0.8" /> <circle cx="22.8" cy="10" r="1.1" fill="url(#bn_gem_copper-charm)" stroke="#05070a" stroke-width="0.5" /> <circle cx="22.5" cy="9.7" r="0.3" fill="#ffffff" /> <path d="M12 6 C14 5, 18 5, 20 6" fill="none" stroke="#ffffff" stroke-width="0.8" opacity="0.7" /></svg>', "color": "#b87333", "source": "band_ring" }, "silver-charm": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="lp_gold_silver-charm" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#fff275"/> <stop offset="40%" stop-color="#d4af37"/> <stop offset="80%" stop-color="#8a6d1c"/> <stop offset="100%" stop-color="#5a4504"/> </linearGradient> <radialGradient id="lp_gem_silver-charm" cx="35%" cy="30%" r="65%"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="50%" stop-color="#cbd5e1"/> <stop offset="100%" stop-color="#07090e"/> </radialGradient> <radialGradient id="lp_glow_silver-charm" cx="50%" cy="50%" r="50%"> <stop offset="0%" stop-color="#cbd5e1" stop-opacity="0.6"/> <stop offset="100%" stop-color="#cbd5e1" stop-opacity="0"/> </radialGradient> </defs> <circle cx="16" cy="10" r="7" fill="url(#lp_glow_silver-charm)" /> <ellipse cx="16" cy="19.5" rx="9" ry="8" fill="none" stroke="url(#lp_gold_silver-charm)" stroke-width="2.2" transform="rotate(-12 16 19.5)" /> <ellipse cx="16" cy="19.5" rx="9" ry="8" fill="none" stroke="url(#lp_gold_silver-charm)" stroke-width="2.2" transform="rotate(12 16 19.5)" /> <ellipse cx="16" cy="19.5" rx="7.5" ry="6.5" fill="none" stroke="#05070a" stroke-width="0.8" opacity="0.6" transform="rotate(-12 16 19.5)" /> <ellipse cx="16" cy="19.5" rx="7.5" ry="6.5" fill="none" stroke="#05070a" stroke-width="0.8" opacity="0.6" transform="rotate(12 16 19.5)" /> <circle cx="16" cy="10" r="5.2" fill="url(#lp_gold_silver-charm)" stroke="#05070a" stroke-width="1.2" /> <circle cx="16" cy="10" r="3.8" fill="url(#lp_gem_silver-charm)" stroke="#05070a" stroke-width="1" /> <ellipse cx="14.8" cy="8.8" rx="1" ry="0.6" fill="#ffffff" opacity="0.8" transform="rotate(-20 14.8 8.8)" /> <polygon points="16,3.5 17,9 16,10 15,9" fill="#ffffff" opacity="0.85" /> <polygon points="16,10 21.5,10 16,10 10.5,10" fill="#ffffff" opacity="0.5" /></svg>', "color": "#cbd5e1", "source": "loop_ring" }, "sun-charm": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="sn_gold_sun-charm" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#fff275"/> <stop offset="40%" stop-color="#d4af37"/> <stop offset="80%" stop-color="#8a6d1c"/> <stop offset="100%" stop-color="#5a4504"/> </linearGradient> <linearGradient id="sn_gem_sun-charm" x1="0" y1="0" x2="0" y2="1"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="45%" stop-color="#f1c40f"/> <stop offset="100%" stop-color="#05070a"/> </linearGradient> <radialGradient id="sn_glow_sun-charm" cx="50%" cy="30%" r="50%"> <stop offset="0%" stop-color="#f1c40f" stop-opacity="0.6"/> <stop offset="100%" stop-color="#f1c40f" stop-opacity="0"/> </radialGradient> </defs> <circle cx="16" cy="11" r="7" fill="url(#sn_glow_sun-charm)" /> <ellipse cx="16" cy="19" rx="8.5" ry="9.5" fill="none" stroke="url(#sn_gold_sun-charm)" stroke-width="3" /> <ellipse cx="16" cy="19" rx="7" ry="8" fill="none" stroke="#05070a" stroke-width="1.2" opacity="0.6" /> <path d="M9.5 8 L22.5 8 L24 13.5 L16 18.5 L8 13.5 Z" fill="url(#sn_gold_sun-charm)" stroke="#05070a" stroke-width="1.2" stroke-linejoin="round" /> <path d="M11 7.5 L21 7.5 L22.2 12.5 L16 16.5 L9.8 12.5 Z" fill="url(#sn_gem_sun-charm)" stroke="#05070a" stroke-width="1.2" stroke-linejoin="round" /> <polygon points="16,9.2 18.5,12 16,14.8 13.5,12" fill="none" stroke="#ffffff" stroke-width="0.8" opacity="0.85" /> <circle cx="16" cy="12" r="0.8" fill="#ffffff" /> <polygon points="11,7.8 14,7.8 12.5,11.5" fill="#ffffff" opacity="0.6" /> <ellipse cx="13.5" cy="9.5" rx="0.6" ry="1.2" fill="#ffffff" transform="rotate(-20 13.5 9.5)" /></svg>', "color": "#f1c40f", "source": "signet_ring" }, "coif": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="cf_mail_l_coif" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="50%" stop-color="#cbd5e1"/> <stop offset="100%" stop-color="#64748b"/> </linearGradient> <linearGradient id="cf_mail_d_coif" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#475569"/> <stop offset="100%" stop-color="#1e293b"/> </linearGradient> <linearGradient id="cf_leather_coif" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#8d5b38"/> <stop offset="35%" stop-color="#8d5b38"/> <stop offset="35%" stop-color="#5c3a21"/> <stop offset="70%" stop-color="#5c3a21"/> <stop offset="70%" stop-color="#2d1d0b"/> <stop offset="100%" stop-color="#1c0f07"/> </linearGradient> <linearGradient id="cf_brass_coif" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffeaa7"/> <stop offset="50%" stop-color="#d4af37"/> <stop offset="100%" stop-color="#8a6d1c"/> </linearGradient> </defs> <path d="M16 4 C10 4, 7 8, 7 14 L5 24 L16 29 Z" fill="url(#cf_mail_d_coif)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <path d="M16 4 C22 4, 25 8, 25 14 L27 24 L16 29 Z" fill="url(#cf_mail_l_coif)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <path d="M8 12 Q16 10, 24 12 M7 16 Q16 14, 25 16 M6 20 Q16 18, 26 20 M6 24 Q16 22, 26 24" fill="none" stroke="#05070a" stroke-width="1" stroke-dasharray="2 1.5" opacity="0.6" /> <path d="M12 11 C12 7, 20 7, 20 11 L20 19 C20 22, 12 22, 12 19 Z" fill="url(#cf_leather_coif)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" /> <path d="M13 10 L19 16 M13 14 L18 19 M17 10 L12 15 M19 13 L13 19" stroke="#3d1d0b" stroke-width="0.8" opacity="0.8" /> <ellipse cx="16" cy="14" rx="2.8" ry="3.8" fill="#05070a" /> <circle cx="15" cy="13.5" r="0.5" fill="#94a3b8" /> <circle cx="17" cy="13.5" r="0.5" fill="#94a3b8" /> <path d="M9.5 9 Q16 7.5, 22.5 9" fill="none" stroke="url(#cf_leather_coif)" stroke-width="2.2" stroke-linecap="round" /> <path d="M9.5 9 Q16 7.5, 22.5 9" fill="none" stroke="#94a3b8" stroke-width="0.8" stroke-linecap="round" stroke-dasharray="1.5 1.5" /> <polygon points="16,6.5 17.5,8.5 14.5,8.5" fill="url(#cf_brass_coif)" stroke="#05070a" stroke-width="0.8" /> <circle cx="16" cy="6.2" r="1" fill="#94a3b8" stroke="#05070a" stroke-width="0.5" /> <circle cx="15.7" cy="5.9" r="0.3" fill="#ffffff" /></svg>', "color": "#94a3b8", "source": "coif" }, "greaves": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="gr_steel_l_greaves" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="50%" stop-color="#cbd5e1"/> <stop offset="100%" stop-color="#64748b"/> </linearGradient> <linearGradient id="gr_steel_d_greaves" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#475569"/> <stop offset="100%" stop-color="#1e293b"/> </linearGradient> <linearGradient id="gr_leather_greaves" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#8d5b38"/> <stop offset="35%" stop-color="#8d5b38"/> <stop offset="35%" stop-color="#5c3a21"/> <stop offset="70%" stop-color="#5c3a21"/> <stop offset="70%" stop-color="#2d1d0b"/> <stop offset="100%" stop-color="#1c0f07"/> </linearGradient> <linearGradient id="gr_brass_greaves" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffeaa7"/> <stop offset="50%" stop-color="#d4af37"/> <stop offset="100%" stop-color="#8a6d1c"/> </linearGradient> </defs> <line x1="4" y1="14" x2="14" y2="14" stroke="url(#gr_leather_greaves)" stroke-width="2" stroke-linecap="round" /> <line x1="4" y1="22" x2="14" y2="22" stroke="url(#gr_leather_greaves)" stroke-width="2" stroke-linecap="round" /> <line x1="18" y1="14" x2="28" y2="14" stroke="url(#gr_leather_greaves)" stroke-width="2" stroke-linecap="round" /> <line x1="18" y1="22" x2="28" y2="22" stroke="url(#gr_leather_greaves)" stroke-width="2" stroke-linecap="round" /> <path d="M5 11 L13 11 L12 28 H6 Z" fill="url(#gr_steel_d_greaves)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <line x1="9" y1="11" x2="9" y2="28" stroke="#05070a" stroke-width="0.8" opacity="0.4" /> <path d="M4 8 Q9 5, 14 8 L13 12 H5 Z" fill="url(#gr_brass_greaves)" stroke="#05070a" stroke-width="1" stroke-linejoin="round" /> <circle cx="9" cy="9.5" r="1.5" fill="#94a3b8" stroke="#05070a" stroke-width="0.5" /> <circle cx="8.7" cy="9.2" r="0.4" fill="#ffffff" /> <path d="M19 11 L27 11 L26 28 H20 Z" fill="url(#gr_steel_l_greaves)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <line x1="23" y1="11" x2="23" y2="28" stroke="#05070a" stroke-width="0.8" opacity="0.4" /> <path d="M18 8 Q23 5, 28 8 L27 12 H19 Z" fill="url(#gr_brass_greaves)" stroke="#05070a" stroke-width="1" stroke-linejoin="round" /> <circle cx="23" cy="9.5" r="1.5" fill="#94a3b8" stroke="#05070a" stroke-width="0.5" /> <circle cx="22.7" cy="9.2" r="0.4" fill="#ffffff" /> <path d="M6 26 H12 V28 H6 Z" fill="url(#gr_brass_greaves)" stroke="#05070a" stroke-width="0.8" /> <path d="M20 26 H26 V28 H20 Z" fill="url(#gr_brass_greaves)" stroke="#05070a" stroke-width="0.8" /></svg>', "color": "#94a3b8", "source": "greaves" }, "sabatons": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="sb_steel_l_sabatons" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="50%" stop-color="#cbd5e1"/> <stop offset="100%" stop-color="#64748b"/> </linearGradient> <linearGradient id="sb_steel_d_sabatons" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#475569"/> <stop offset="100%" stop-color="#1e293b"/> </linearGradient> <linearGradient id="sb_brass_sabatons" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffeaa7"/> <stop offset="50%" stop-color="#d4af37"/> <stop offset="100%" stop-color="#8a6d1c"/> </linearGradient> <linearGradient id="sb_leather_sabatons" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#5c3a21"/> <stop offset="100%" stop-color="#2d1d0b"/> </linearGradient> </defs> <path d="M3 12 H11 L10 16 H4 Z" fill="url(#sb_brass_sabatons)" stroke="#05070a" stroke-width="1" /> <path d="M3.5 15 L10.5 13 L12 21 L15.5 25 L12.5 28 L3 27 Z" fill="url(#sb_steel_d_sabatons)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <path d="M4 18 H11 M4.2 21 H12 M4.5 24 H13.5" stroke="#05070a" stroke-width="1" opacity="0.6" /> <polygon points="15.5,25 12.5,28 10,27" fill="url(#sb_brass_sabatons)" stroke="#05070a" stroke-width="0.8" /> <circle cx="13.2" cy="26" r="1" fill="#94a3b8" stroke="#05070a" stroke-width="0.4" /> <circle cx="13" cy="25.8" r="0.3" fill="#ffffff" /> <path d="M16 12 H24 L23 16 H17 Z" fill="url(#sb_brass_sabatons)" stroke="#05070a" stroke-width="1" /> <path d="M16.5 15 L23.5 13 L25 21 L28.5 25 L25.5 28 L16 27 Z" fill="url(#sb_steel_l_sabatons)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <path d="M17 18 H24 M17.2 21 H25 M17.5 24 H26.5" stroke="#05070a" stroke-width="1" opacity="0.6" /> <polygon points="28.5,25 25.5,28 23,27" fill="url(#sb_brass_sabatons)" stroke="#05070a" stroke-width="0.8" /> <circle cx="26.2" cy="26" r="1" fill="#94a3b8" stroke="#05070a" stroke-width="0.4" /> <circle cx="26" cy="25.8" r="0.3" fill="#ffffff" /> <path d="M17 15 L22 13.5 L23.5 20 H18.5 Z" fill="#ffffff" opacity="0.2" /></svg>', "color": "#94a3b8", "source": "sabatons" }, "full-plate": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="136" height="136"><defs> <linearGradient id="fp_steel_l_full-plate" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffffff"/> <stop offset="45%" stop-color="#cbd5e1"/> <stop offset="100%" stop-color="#64748b"/> </linearGradient> <linearGradient id="fp_steel_d_full-plate" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#475569"/> <stop offset="100%" stop-color="#1e293b"/> </linearGradient> <linearGradient id="fp_brass_full-plate" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#ffeaa7"/> <stop offset="50%" stop-color="#d4af37"/> <stop offset="100%" stop-color="#8a6d1c"/> </linearGradient> <linearGradient id="fp_leather_full-plate" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#8d5b38"/> <stop offset="35%" stop-color="#8d5b38"/> <stop offset="35%" stop-color="#5c3a21"/> <stop offset="70%" stop-color="#5c3a21"/> <stop offset="70%" stop-color="#2d1d0b"/> <stop offset="100%" stop-color="#1c0f07"/> </linearGradient> </defs> <path d="M3 10 C3 5, 11 6, 11 12 L7 16 Z" fill="url(#fp_steel_d_full-plate)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" /> <path d="M2 11 Q7 9, 10 13" fill="none" stroke="url(#fp_brass_full-plate)" stroke-width="1.5" /> <path d="M29 10 C29 5, 21 6, 21 12 L25 16 Z" fill="url(#fp_steel_l_full-plate)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" /> <path d="M30 11 Q25 9, 22 13" fill="none" stroke="url(#fp_brass_full-plate)" stroke-width="1.5" /> <path d="M16 5 L8 7 L7 20 L16 24 Z" fill="url(#fp_steel_d_full-plate)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <path d="M16 5 L24 7 L25 20 L16 24 Z" fill="url(#fp_steel_l_full-plate)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" /> <path d="M8.5 20 L16 24 L23.5 20 L25 28 L16 30 L7 28 Z" fill="url(#fp_steel_d_full-plate)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" /> <path d="M16 24 L23.5 20 L25 28 L16 30 Z" fill="url(#fp_steel_l_full-plate)" stroke="#05070a" stroke-width="1.2" /> <path d="M11 9 L16 14 L21 9 M11 13 L16 18 L21 13" fill="none" stroke="#05070a" stroke-width="1.2" opacity="0.35" /> <path d="M10 5 Q16 7.5, 22 5 L21 7.5 Q16 10, 11 7.5 Z" fill="url(#fp_brass_full-plate)" stroke="#05070a" stroke-width="1" /> <rect x="8" y="18" width="16" height="3" fill="url(#fp_leather_full-plate)" stroke="#05070a" stroke-width="1" /> <rect x="14" y="17" width="4" height="5" rx="0.8" fill="url(#fp_brass_full-plate)" stroke="#05070a" stroke-width="1" /> <circle cx="16" cy="12" r="2.2" fill="url(#fp_brass_full-plate)" stroke="#05070a" stroke-width="0.8" /> <circle cx="16" cy="12" r="1.2" fill="#8c6d3b" stroke="#05070a" stroke-width="0.5" /> <circle cx="15.7" cy="11.7" r="0.4" fill="#ffffff" /></svg>', "color": "#8c6d3b", "source": "full_plate_armor" }, "gold": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="96" height="96"><g fill="#f1c40f" fill-opacity="0.15" stroke="#f1c40f" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10" /><path d="M12 8v8M9 10h6M9 13h6" /></g></svg>', "color": "#f1c40f", "source": "uiIcons.gold" } };
 var itemArtKey = (item) => generatedArtKey(item?.generated) ?? item?.definitionId;
-Object.assign(definitions2, SUBWEAPON_ART, GENERATED_EQUIPMENT_ART);
+Object.assign(definitions2, SUBWEAPON_ART, GENERATED_EQUIPMENT_ART, CLASS_KIT_ART);
 var EQUIPMENT_ART = Object.freeze(Object.fromEntries(Object.entries(definitions2).map(([key2, a]) => [key2, Object.freeze({ ...a, url: "data:image/svg+xml;charset=utf-8," + encodeURIComponent(a.svg) })])));
 var WEAPON_ART_KEYS = Object.freeze({ worn: "worn-sword", iron: "iron-sword", guard: "guard-sword", runic: "runic-sword" });
-var SLOT_ART_KEYS = Object.freeze({ subweapon: "starter-shield", weapon: "worn-sword", helmet: "coif", chest: "chain-armor", leggings: "greaves", overall: "full-plate", boots: "sabatons", ring1: "silver-charm", ring2: "sun-charm" });
+var SLOT_ART_KEYS = Object.freeze({ subweapon: "starter-shield", weapon: "worn-sword", helmet: "coif", chest: "chain-armor", leggings: "greaves", overall: "full-plate", boots: "sabatons", gloves: "kit-knight-gauntlets", ring1: "silver-charm", ring2: "sun-charm" });
 function createEquipmentArtCache(document) {
   const images = /* @__PURE__ */ new Map();
   return (key2) => {
@@ -29037,6 +29611,36 @@ function createEquipmentArtCache(document) {
   };
 }
 var EQUIPMENT_STAT_ART = Object.freeze(Object.fromEntries(Object.entries({ "attack": '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#e74c3c" fill-opacity="0" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5L3 6V3h3l11.5 11.5 M13 19l6-6 M16 16l4 4 M19 21l2-2" /></svg>', "defense": '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#3498db" fill-opacity="0.15" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>', "maxHp": '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#e74c3c" fill-opacity="0.15" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>' }).map(([key2, svg]) => [key2, "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg)])));
+
+// src/client/item_icon_v1.js
+var HERO_SLOT = Object.freeze({ weapon: "main", subweapon: "off", helmet: "helmet", chest: "body", overall: "body", leggings: "legs", gloves: "gloves", boots: "boots" });
+var PIXELS = 144;
+var urls = /* @__PURE__ */ new Map();
+function itemIconUrl(item, document) {
+  const d = itemDefinition(item), slot = HERO_SLOT[d?.slot], kind = slot ? itemLook(item) : null;
+  if (kind && document?.createElement) {
+    const tier2 = Number.isSafeInteger(d.rarityTier) ? Math.max(0, Math.min(5, d.rarityTier)) : 0, key2 = `${slot}/${kind}/${tier2}`;
+    if (!urls.has(key2)) {
+      let url2 = null;
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = canvas.height = PIXELS;
+        const c = canvas.getContext("2d");
+        if (c) {
+          c.translate(PIXELS * 0.08, PIXELS * 0.08);
+          drawItemIcon(c, { slot, kind, tier: tier2 }, PIXELS * 0.84);
+          url2 = canvas.toDataURL("image/png");
+        }
+      } catch {
+        url2 = null;
+      }
+      urls.set(key2, url2);
+    }
+    const url = urls.get(key2);
+    if (url) return url;
+  }
+  return EQUIPMENT_ART[itemArtKey(item)]?.url ?? null;
+}
 
 // src/client/forge_art.js
 var MONSTER_SOUL_ART = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">\n        <defs><linearGradient id="g_ms_world-d5" x1="0%" y1="100%" x2="0%" y2="0%"><stop offset="0%" stop-color="#2d3436" /><stop offset="100%" stop-color="#636e72" /></linearGradient></defs>\n        <path d="M16 3 C16 3, 6 15, 6 22 C6 27, 10.5 30, 16 30 C21.5 30, 26 27, 26 22 C26 15, 16 3, 16 3 Z" fill="url(#g_ms_world-d5)" stroke="#000" stroke-width="2" stroke-linejoin="round"/>\n        <path d="M11 19 L14 17" stroke="#e74c3c" stroke-width="1.8" stroke-linecap="round"/><path d="M21 19 L18 17" stroke="#e74c3c" stroke-width="1.8" stroke-linecap="round"/>\n      </svg>';
@@ -29092,7 +29696,7 @@ function createForgePresentation({ document, issue, invalidate }) {
     if (review) root.append(el("p", "FUNDED FORGE REVIEW \u2014 starting funds are for testing only.", "forge-review-label"));
     if (!m.forgeAccess) root.append(el("p", "Approach the Forge to attune.", "forge-access"));
     const layout = el("div", "", "forge-layout"), list = el("div", "", "forge-slots"), details = el("div", "", "forge-details");
-    for (const slot of equipmentSlots(inv)) {
+    for (const slot of listedEquipmentSlots(inv)) {
       const item2 = inv.itemsById[inv.equipped[slot]], d2 = itemDefinition(item2), b = el("button", "", "forge-slot-card");
       b.type = "button";
       b.dataset.forgeAction = slot;
@@ -29100,7 +29704,7 @@ function createForgePresentation({ document, issue, invalidate }) {
       b.setAttribute("aria-label", `${label(slot)} slot, level ${e.slotLevels[slot]}`);
       {
         const img = document.createElement("img");
-        img.src = EQUIPMENT_ART[itemArtKey(item2) ?? SLOT_ART_KEYS[slot]].url;
+        img.src = (item2 && itemIconUrl(item2, document)) ?? EQUIPMENT_ART[SLOT_ART_KEYS[slot]].url;
         img.alt = "";
         img.width = 36;
         img.height = 36;
@@ -29297,6 +29901,11 @@ function createInventoryPresentation({ document, environment, readModel, adapter
     img.height = 48;
     return img;
   }
+  function itemIcon(item) {
+    const img = icon("worn-sword");
+    img.src = itemIconUrl(item, document) ?? img.src;
+    return img;
+  }
   function button(caption, action2, disabled = false) {
     const b = element("button", caption);
     b.type = "button";
@@ -29396,7 +30005,7 @@ function createInventoryPresentation({ document, environment, readModel, adapter
       salvagePending = null;
       error = "Inventory changed. Review the item again.";
     }
-    const inv = m.inventory, local5 = m.playersById[m.localPlayerId], ready = m.persistence.phase === "encounter" && alive(m), primary = m.primary?.actorsById[local5.entityId], canEquip = ready && !primary?.current && !primary?.held && !primary?.queued;
+    const inv = m.inventory, local6 = m.playersById[m.localPlayerId], ready = m.persistence.phase === "encounter" && alive(m), primary = m.primary?.actorsById[local6.entityId], canEquip = ready && !primary?.current && !primary?.held && !primary?.queued;
     const action2 = contextActionForModel(m), actionLabel = contextActionLabelForModel(m, action2);
     if (action2 && actionLabel && !open && ready) {
       pickup.hidden = false;
@@ -29408,7 +30017,7 @@ function createInventoryPresentation({ document, environment, readModel, adapter
       const added2 = Object.values(inv.itemsById).find((i) => !observed.ids.has(i.itemId));
       if (added2) {
         const tier2 = added2.generated?.rarityTier ?? 0;
-        toastV1(document, { kind: "loot", title: itemDefinition(added2).name, sub: (RARITY_NAMES[tier2] ?? "") + " \xB7 added to your bag", image: EQUIPMENT_ART[itemArtKey(added2)]?.url, accent: tier2 ? RARITY_COLORS[tier2] : null, key: "item/" + added2.itemId });
+        toastV1(document, { kind: "loot", title: itemDefinition(added2).name, sub: (RARITY_NAMES[tier2] ?? "") + " \xB7 added to your bag", image: itemIconUrl(added2, document), accent: tier2 ? RARITY_COLORS[tier2] : null, key: "item/" + added2.itemId });
         toastUntil = time + 1800;
       }
     } else if (observed?.identity !== identity2) {
@@ -29441,13 +30050,13 @@ function createInventoryPresentation({ document, environment, readModel, adapter
       return;
     }
     if (!inv.itemsById[selected]) selected = inv.equipped.weapon;
-    const owner = { ...local5, inventory: inv }, nextGridKey = `${identity2}/${inv.revision}/${local5.progression.level}/${local5.d8?.revision ?? 0}/${JSON.stringify(local5.stats)}`;
+    const owner = { ...local6, inventory: inv }, nextGridKey = `${identity2}/${inv.revision}/${local6.progression.level}/${local6.d8?.revision ?? 0}/${JSON.stringify(local6.stats)}`;
     if (gridKey !== nextGridKey) {
       gridKey = nextGridKey;
       slots.replaceChildren();
       list.replaceChildren();
       const equippedIds = new Set(Object.values(inv.equipped));
-      for (const slot of equipmentSlots(inv)) {
+      for (const slot of listedEquipmentSlots(inv)) {
         const id = inv.equipped[slot], d2 = itemDefinition(inv.itemsById[id]), row2 = element("article", "", "paperdoll-slot");
         row2.dataset.slot = slot;
         if (d2) tint2(row2, d2);
@@ -29462,7 +30071,7 @@ function createInventoryPresentation({ document, environment, readModel, adapter
           inspectButton.setAttribute("aria-label", `Inspect ${d2.name}, ${label2(slot)}`);
           const copy = element("div", "", "item-info");
           copy.append(element("strong", d2.name, "item-title"), element("small", `${label2(slot).toUpperCase()} \xB7 ${rarity(d2)}`, "item-sub"), element("span", `Attune Lv. ${inv.economy?.slotLevels[slot] ?? 0}`, "attune-badge"));
-          inspectButton.append(icon(itemArtKey(inv.itemsById[id])), copy);
+          inspectButton.append(itemIcon(inv.itemsById[id]), copy);
           row2.append(inspectButton);
           if (slot !== "weapon") {
             const unequip = button("UNEQUIP", () => issue("equipment.unequip", { slot }));
@@ -29485,9 +30094,9 @@ function createInventoryPresentation({ document, environment, readModel, adapter
         inspectButton.setAttribute("aria-label", `Inspect ${d2.name}`);
         const copy = element("div", "", "item-info");
         copy.append(element("strong", d2.name, "item-title"), element("small", `${label2(d2.slot).toUpperCase()} \xB7 ${rarity(d2)}`, "item-sub"), element("span", Object.entries(d2.bonuses).filter(([, v]) => v).map(([k, v]) => `${{ attack: "ATK", defense: "DEF", maxHp: "HP" }[k]} +${statText(v)}`).join(" | ") || "No stat bonus", "item-sub gear-bonuses"));
-        inspectButton.append(icon(itemArtKey(item2)), copy);
+        inspectButton.append(itemIcon(item2), copy);
         row2.append(inspectButton);
-        const target = d2.slot === "ring" ? "ring1" : d2.slot, preview = equipmentComparison(inv, item2.itemId, target, local5.progression.totalXp, local5.d8), classUser = classOffhandAllowed(owner, item2) ? null : Object.values(HERO_CLASSES).find((c) => c.offhand === d2.subType), allowed = equipmentLevelAllowed(owner, item2) && !classUser, required = equipmentRequiredLevel(owner, item2), action3 = button(classUser ? `${classUser.name.toUpperCase()} ONLY` : !allowed ? `REQUIRES LV. ${required}` : d2.slot === "ring" ? "EQUIP \u2026" : preview.displaced.length ? "SWAP" : "EQUIP", () => {
+        const target = d2.slot === "ring" ? "ring1" : d2.slot, preview = equipmentComparison(inv, item2.itemId, target, local6.progression.totalXp, local6.d8), classUser = classOffhandAllowed(owner, item2) ? null : Object.values(HERO_CLASSES).find((c) => c.offhand === d2.subType), allowed = equipmentLevelAllowed(owner, item2) && !classUser, required = equipmentRequiredLevel(owner, item2), action3 = button(classUser ? `${classUser.name.toUpperCase()} ONLY` : !allowed ? `REQUIRES LV. ${required}` : d2.slot === "ring" ? "EQUIP \u2026" : preview.displaced.length ? "SWAP" : "EQUIP", () => {
           if (d2.slot === "ring") select(item2.itemId, inspectButton);
           else issue("equipment.equip", { itemId: item2.itemId, slot: target });
         }, !allowed);
@@ -29502,12 +30111,12 @@ function createInventoryPresentation({ document, environment, readModel, adapter
       document.getElementById("world-bag-tab").textContent = "BAG";
       document.getElementById("world-carried-count").textContent = `${Object.keys(inv.itemsById).length - [...equippedIds].filter(Boolean).length} items`;
       const goldArt = document.querySelector("#world-wallet svg")?.cloneNode(true) ?? icon("gold");
-      document.getElementById("world-bag-summary").replaceChildren(goldArt, element("strong", `${formatAmount(inv.gold)} gold`), element("span", `${Object.keys(inv.itemsById).length} / ${local5.d8 ? inventoryIntakeCapacity(local5.d8) : 64} owned`));
+      document.getElementById("world-bag-summary").replaceChildren(goldArt, element("strong", `${formatAmount(inv.gold)} gold`), element("span", `${Object.keys(inv.itemsById).length} / ${local6.d8 ? inventoryIntakeCapacity(local6.d8) : 64} owned`));
     }
-    const nextKey = `${nextGridKey}/${local5.progression.level}/${canEquip}/${m.persistence.phase}/${selected}/${inspect}/${salvagePending?.fingerprint ?? ""}/${error}/${section}/${ringSlot}/${m.forgeAccess}`;
+    const nextKey = `${nextGridKey}/${local6.progression.level}/${canEquip}/${m.persistence.phase}/${selected}/${inspect}/${salvagePending?.fingerprint ?? ""}/${error}/${section}/${ringSlot}/${m.forgeAccess}`;
     if (key2 === nextKey) return;
     key2 = nextKey;
-    document.getElementById("world-bag-stats").textContent = `Attack ${statText(local5.stats.attack)}  \xB7  Defense ${statText(local5.stats.defense)}  \xB7  Max HP ${statText(local5.stats.maxHp)}`;
+    document.getElementById("world-bag-stats").textContent = `Attack ${statText(local6.stats.attack)}  \xB7  Defense ${statText(local6.stats.defense)}  \xB7  Max HP ${statText(local6.stats.maxHp)}`;
     document.getElementById("world-bag-title").textContent = section === "forge" ? "BLACKSMITH FORGE" : "INVENTORY";
     forge.render(m, section);
     status2.textContent = error || (section === "forge" ? "Attunement is permanent. Each press applies one level." : !canEquip ? "Finish your swing before changing equipment." : combatPlayer(owner) ? WORLD_RARITY_PLAYER_RULE + " The world keeps moving." : "The world keeps moving while your Bag is open.");
@@ -29534,7 +30143,7 @@ function createInventoryPresentation({ document, environment, readModel, adapter
       if (inv.economy) equippedCard.append(attunementPanel(d, equippedSlot, inv.economy.slotLevels[equippedSlot]));
       cards.append(equippedCard);
     } else {
-      const target = d.slot === "ring" ? ringSlot : d.slot, preview = equipmentComparison(inv, item.itemId, target, local5.progression.totalXp, local5.d8);
+      const target = d.slot === "ring" ? ringSlot : d.slot, preview = equipmentComparison(inv, item.itemId, target, local6.progression.totalXp, local6.d8);
       if (d.slot === "ring") {
         const choice = element("div", "", "ring-destination");
         for (const slot of ["ring1", "ring2"]) {
@@ -29556,7 +30165,7 @@ function createInventoryPresentation({ document, environment, readModel, adapter
         if (replaced.length > 1) {
           const without = { ...inv.equipped };
           for (const slot of Object.keys(without)) if (replaced.includes(without[slot])) without[slot] = null;
-          const rest = resolvePlayerStats3({ progression: progressionAtXp(local5.progression.totalXp, local5.d8), d8: local5.d8, inventory: { ...inv, equipped: without } }), combined = { name: "Equipped Chest + Leggings", slot: "overall", bonuses: Object.fromEntries(Object.keys(statLabel).map((k) => [k, statDifference(preview.before[k], rest[k])])) };
+          const rest = resolvePlayerStats3({ progression: progressionAtXp(local6.progression.totalXp, local6.d8), d8: local6.d8, inventory: { ...inv, equipped: without } }), combined = { name: "Equipped Chest + Leggings", slot: "overall", bonuses: Object.fromEntries(Object.keys(statLabel).map((k) => [k, statDifference(preview.before[k], rest[k])])) };
           const part = itemCard(combined);
           part.classList.add("current-part");
           current.append(part, element("small", replaced.map((id) => itemDefinition(inv.itemsById[id]).name).join(" + "), "combined-label"));
@@ -29600,7 +30209,7 @@ function createInventoryPresentation({ document, environment, readModel, adapter
         const protectedItem = Object.values(inv.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item.sourceEntityId);
         if (!protectedItem) {
           const salvage = button("Salvage", () => {
-            salvagePending = { ...salvageQuote(local5, item), itemId: item.itemId, inventoryRevision: inv.revision };
+            salvagePending = { ...salvageQuote(local6, item), itemId: item.itemId, inventoryRevision: inv.revision };
             key2 = null;
             refresh(readModel());
           }, !canEquip);
@@ -29649,7 +30258,7 @@ function createInventoryPresentation({ document, environment, readModel, adapter
       const confirm = cards.querySelector(".salvage-confirmation");
       if (confirm) {
         const heading = element("div", "", "salvage-item-heading");
-        heading.append(icon(itemArtKey(item)), element("strong", d.name), element("small", rarity(d)));
+        heading.append(itemIcon(item), element("strong", d.name), element("small", rarity(d)));
         tint2(heading, d);
         cards.replaceChildren(heading, confirm);
         cards.classList.add("salvage-only");
@@ -30246,7 +30855,7 @@ function createSettlementServicesMenu2(options) {
   };
   const image = (item, slot) => {
     const i = el("img");
-    i.src = EQUIPMENT_ART[itemArtKey(item) ?? SLOT_ART_KEYS[slot] ?? "worn-sword"].url;
+    i.src = (item && itemIconUrl(item, doc)) ?? EQUIPMENT_ART[SLOT_ART_KEYS[slot] ?? "worn-sword"].url;
     i.alt = "";
     return i;
   };
@@ -31215,7 +31824,7 @@ function boxBlur(a, t, sum, w, h, r) {
   }
 }
 function paintChartTerrain(data, raster, W3, H3) {
-  const rw = raster.width, rh = raster.height, view = raster.view, n = rw * rh, codes = new Uint8Array(n), R2 = new Float32Array(n), G2 = new Float32Array(n), B = new Float32Array(n), M = new Float32Array(n), S = new Float32Array(n), K2 = new Float32Array(n), t = new Float32Array(n), sum = new Float32Array(rw);
+  const rw = raster.width, rh = raster.height, view = raster.view, n = rw * rh, codes = new Uint8Array(n), R2 = new Float32Array(n), G2 = new Float32Array(n), B = new Float32Array(n), M2 = new Float32Array(n), S = new Float32Array(n), K2 = new Float32Array(n), t = new Float32Array(n), sum = new Float32Array(rw);
   const tps = view.width / rw, tpx = view.width / W3, tpy = view.height / H3, clump = 1 / Math.max(4, tpx * 4);
   for (let y = 0; y < rh; y++) {
     const row2 = raster.rows[y], ty = view.y + (y + 0.5) * view.height / rh;
@@ -31229,13 +31838,13 @@ function paintChartTerrain(data, raster, W3, H3) {
         R2[i] = PR[c];
         G2[i] = PG[c];
         B[i] = PB[c];
-        M[i] = 1;
+        M2[i] = 1;
         K2[i] = (0.94 + 0.12 * noise(tx * 0.03 + 50, ty * 0.03 + 50)) * (1 + MOTTLE[c] * (noise(tx * clump + 71, ty * clump + 13) - 0.5) * 2.4);
       }
     }
   }
   const landR = Math.max(1, Math.round(4 / tps)), seaR = Math.max(1, Math.round(9 / tps));
-  for (const a of [R2, G2, B, M]) boxBlur(a, t, sum, rw, rh, landR);
+  for (const a of [R2, G2, B, M2]) boxBlur(a, t, sum, rw, rh, landR);
   boxBlur(S, t, sum, rw, rh, seaR);
   boxBlur(S, t, sum, rw, rh, seaR);
   const wt = Math.min(12, Math.max(4, tpx * 2.5)), amp = wt / tps, f = 1 / (wt * 3.2), sx = rw / W3, sy = rh / H3, maxX = rw - 1.001, maxY = rh - 1.001, sea0 = PAINT[79];
@@ -31260,7 +31869,7 @@ function paintChartTerrain(data, raster, W3, H3) {
           g = (SHALLOW[1] + (sea0[1] - SHALLOW[1]) * d) * k;
           b = (SHALLOW[2] + (sea0[2] - SHALLOW[2]) * d) * k;
         } else {
-          const m = M[i] * w00 + M[j] * w10 + M[l] * w01 + M[q] * w11;
+          const m = M2[i] * w00 + M2[j] * w10 + M2[l] * w01 + M2[q] * w11;
           if (m > 1e-3) {
             const im = k / m;
             r = (R2[i] * w00 + R2[j] * w10 + R2[l] * w01 + R2[q] * w11) * im;
@@ -32482,7 +33091,7 @@ function createWorldMapD9({ document: doc, environment, port, releaseInput }) {
       if (open) reviewMarks.push({ x, y, label: label3 + " \xB7 woodland discovery" });
       else miniMarks.push({ x, y, label: label3 + " \xB7 woodland discovery" });
     }
-    const actual = n.position, local5 = model.playersById[model.localPlayerId], facing2 = model.primary?.actorsById?.[local5.entityId]?.facing;
+    const actual = n.position, local6 = model.playersById[model.localPlayerId], facing2 = model.primary?.actorsById?.[local6.entityId]?.facing;
     if (!open) drawPlayer(ctx, width / 2, height / 2, facing2, planned ? 16 : 8);
     else {
       const size = 1n << BigInt(lod), cx = floorDiv(BigInt(actual.chunkX), size), cy = floorDiv(BigInt(actual.chunkY), size), dx = cx - BigInt(v.x), dy = cy - BigInt(v.y);
@@ -32700,8 +33309,8 @@ function createSubweaponHud({ document, environment, readModel, adapter, isBlock
   let text2 = "", lastPressure = 0;
   function refresh(m) {
     guard.refresh(m);
-    const local5 = m.playersById[m.localPlayerId], c = m.subweapon, type = local5.stats.subType;
-    panel.hidden = !["shield", "tome"].includes(type) || type === "shield" && local5.d8?.heroClass === "knight" || type === "tome" && local5.d8?.heroClass === "mage" || isBlocked() || c?.suppressed;
+    const local6 = m.playersById[m.localPlayerId], c = m.subweapon, type = local6.stats.subType;
+    panel.hidden = !["shield", "tome"].includes(type) || type === "shield" && local6.d8?.heroClass === "knight" || type === "tome" && local6.d8?.heroClass === "mage" || isBlocked() || c?.suppressed;
     dash.hidden = !CLASS_MOVES[type] || isBlocked() || c?.suppressed;
     if (!c) return;
     panel.dataset.ready = String(type === "shield" && c.pressure === 3);
@@ -32709,13 +33318,13 @@ function createSubweaponHud({ document, environment, readModel, adapter, isBlock
       panel.animate?.([{ transform: "scale(1.07)", color: "#ffffff" }, { transform: "scale(1)", color: "#f1c40f" }], { duration: 220 });
     }
     lastPressure = c.pressure;
-    const chance = local5.stats.familyProperties?.tomeChance ?? local5.stats.familyProperties?.fireChance, firePercent = chance ? Math.round(Number(chance.n) / Number(chance.d) * 100) : 33;
-    const next = type === "shield" ? `GUARD ${"\u25CF".repeat(c.pressure)}${"\u25CB".repeat(3 - c.pressure)}${c.pressure === 3 ? " \xB7 BASH READY" : ""}` : type === "tome" ? `${(local5.stats.spellType ?? "fire").toUpperCase()} ${firePercent}% \xB7 Barrier ${c.barrierLabel} / ${c.maxBarrierLabel} \xB7 ${m.tomeTarget ?? "NO TARGET"}${c.delivery && m.tick - c.delivery.tick < 60 && c.delivery.status !== "idle" ? " \xB7 " + c.delivery.status.toUpperCase() : ""}` : "";
+    const chance = local6.stats.familyProperties?.tomeChance ?? local6.stats.familyProperties?.fireChance, firePercent = chance ? Math.round(Number(chance.n) / Number(chance.d) * 100) : 33;
+    const next = type === "shield" ? `GUARD ${"\u25CF".repeat(c.pressure)}${"\u25CB".repeat(3 - c.pressure)}${c.pressure === 3 ? " \xB7 BASH READY" : ""}` : type === "tome" ? `${(local6.stats.spellType ?? "fire").toUpperCase()} ${firePercent}% \xB7 Barrier ${c.barrierLabel} / ${c.maxBarrierLabel} \xB7 ${m.tomeTarget ?? "NO TARGET"}${c.delivery && m.tick - c.delivery.tick < 60 && c.delivery.status !== "idle" ? " \xB7 " + c.delivery.status.toUpperCase() : ""}` : "";
     if (next !== text2) {
       if (type === "tome") {
         const fire = document.createElement("span"), barrier = document.createElement("span"), target = document.createElement("span");
-        fire.textContent = `${(local5.stats.spellType ?? "fire").toUpperCase()} ${firePercent}%`;
-        fire.style.color = local5.stats.spellType === "lightning" ? "#c7b5ff" : local5.stats.spellType === "frost" ? "#ced8ff" : "#e67e22";
+        fire.textContent = `${(local6.stats.spellType ?? "fire").toUpperCase()} ${firePercent}%`;
+        fire.style.color = local6.stats.spellType === "lightning" ? "#c7b5ff" : local6.stats.spellType === "frost" ? "#ced8ff" : "#e67e22";
         barrier.innerHTML = barrierSvg();
         barrier.append(document.createTextNode(` BARRIER ${c.barrierLabel} / ${c.maxBarrierLabel}`));
         barrier.style.cssText = "color:#9b59b6;display:inline-flex;align-items:center;gap:3px";
@@ -32758,7 +33367,7 @@ ${(c.dash.cooldown / 60).toFixed(1)}s`;
     }
     dash.style.setProperty("--cool", CLASS_MOVES[type] ? (c.dash.cooldown / CLASS_MOVES[type].cooldown).toFixed(3) : "0");
     dash.dataset.cooling = String(!ready);
-    dash.disabled = !ready || !m.entitiesById[local5.entityId].alive;
+    dash.disabled = !ready || !m.entitiesById[local6.entityId].alive;
   }
   return { refresh, clear: guard.clear, destroy() {
     guard.destroy();
@@ -34171,7 +34780,7 @@ function finish(c, shape2, fill4, flash, planes) {
 function leg(c, l, flash) {
   c.save();
   c.scale(l.side, 1);
-  const local5 = (p) => point5(p.x * l.side, p.y), r = local5(l.root), k = local5(l.knee), a = local5(l.ankle), f = local5(l.foot), s = 1;
+  const local6 = (p) => point5(p.x * l.side, p.y), r = local6(l.root), k = local6(l.knee), a = local6(l.ankle), f = local6(l.foot), s = 1;
   const n1 = normal(r, k), n2 = normal(k, a), n3 = normal(a, f);
   const d = Math.hypot(n1.x + n2.x, n1.y + n2.y) || 1, n = { x: (n1.x + n2.x) / d, y: (n1.y + n2.y) / d };
   const outer = [
@@ -35185,8 +35794,8 @@ function bossPolishDepthItems(model, tick, viewport = null) {
     if (!magnetic) {
       const reach = snare ? 48 : 40;
       for (let i = 0; i < 6; i++) {
-        const a = i * TAU36 / 6 + 0.25, delay = i % 3 * 1.1, local5 = age - delay, rise = ease(local5 / 6), fade = 1 - ease((local5 - 17) / 23), contact = { x: center2.x + Math.cos(a) * reach, y: center2.y + Math.sin(a) * reach };
-        if (local5 < 0) continue;
+        const a = i * TAU36 / 6 + 0.25, delay = i % 3 * 1.1, local6 = age - delay, rise = ease(local6 / 6), fade = 1 - ease((local6 - 17) / 23), contact = { x: center2.x + Math.cos(a) * reach, y: center2.y + Math.sin(a) * reach };
+        if (local6 < 0) continue;
         add(row2.id + "/root/" + i, contact, (c) => rootSpear(c, contact, ((snare ? 32 : 24) + i % 3 * 6) * rise * fade, Math.cos(a) * 9, fade));
       }
     }
@@ -35798,7 +36407,7 @@ function drawCorrosiveBodyRuptures(c, actor, tick, bodyPose = null) {
     const age = tick - row2.createdTick, open = 1 - ease3((age - 5) / 23), d = row2.direction;
     if (open <= 0 || d.y < -0.65) continue;
     const count = row2.spawnedMinionIds?.length ?? row2.chunkCount, w = 5 + Math.min(3, count) * 1.1;
-    const local5 = tearOffset(row2), at3 = corrosiveGoopPointV5(bodyPose ?? {}, local5.x, local5.y - 33);
+    const local6 = tearOffset(row2), at3 = corrosiveGoopPointV5(bodyPose ?? {}, local6.x, local6.y - 33);
     c.save();
     c.translate(at3.x, at3.y);
     c.rotate(Math.atan2(d.y, d.x));
@@ -35928,8 +36537,8 @@ function minionBody(c, row2, tick, model, bodyPoseForActor) {
   if (row2.stage === "airborne") {
     const event = (model.bossHazards?.corrosiveSheds ?? []).find((s) => s.spawnedMinionIds.includes(row2.id));
     if (event && pose.age < 8) {
-      const boss = model.entitiesById?.[row2.sourceEntityId] ?? Object.values(model.entitiesById ?? {}).find((a) => a.boss?.bossId === row2.bossId), local5 = tearOffset(event), body5 = boss && bodyPoseForActor ? bodyPoseForActor(boss, tick) : { bodyX: 0, bodyY: 0 };
-      const anchor = corrosiveGoopPointV5(body5, local5.x, local5.y - 33), root = boss ? point7(boss.position.x + anchor.x + body5.bodyX, boss.position.y + anchor.y + body5.bodyY) : point7(event.originPosition.x, event.originPosition.y - 33);
+      const boss = model.entitiesById?.[row2.sourceEntityId] ?? Object.values(model.entitiesById ?? {}).find((a) => a.boss?.bossId === row2.bossId), local6 = tearOffset(event), body5 = boss && bodyPoseForActor ? bodyPoseForActor(boss, tick) : { bodyX: 0, bodyY: 0 };
+      const anchor = corrosiveGoopPointV5(body5, local6.x, local6.y - 33), root = boss ? point7(boss.position.x + anchor.x + body5.bodyX, boss.position.y + anchor.y + body5.bodyY) : point7(event.originPosition.x, event.originPosition.y - 33);
       strand(c, root, point7(row2.position.x, row2.position.y - pose.height), 1 - ease3((pose.age - 3) / 5));
     }
     chunk(c, row2, pose);
@@ -42918,12 +43527,12 @@ function brimstoneEffectDepthItems(model, tick, viewport = null) {
       if (envelope.localAge >= 0 && envelope.height > 0) {
         const pulse = 0.92 + Math.sin(envelope.localAge * 0.55 + p.ordinal) * 0.08;
         lavaJet(c, p, (p.center ? 58 : 26 + (seed2 + p.ordinal * 7) % 16) * envelope.height * pulse, p.center ? 17 : 8, envelope.localAge, seed2 + p.ordinal, envelope.opacity);
-        const local5 = envelope.localAge;
-        for (let i = 0; i < (p.center ? 5 : 2); i++) ember(c, p, i + p.ordinal * 3, local5, Math.min(40, duration));
-        if (local5 < 24) for (let i = 0; i < 2; i++) {
-          const q = local5 / 24, x = p.x + (i ? 1 : -1) * (3 + q * 12), y = p.y - Math.sin(q * Math.PI) * 15;
+        const local6 = envelope.localAge;
+        for (let i = 0; i < (p.center ? 5 : 2); i++) ember(c, p, i + p.ordinal * 3, local6, Math.min(40, duration));
+        if (local6 < 24) for (let i = 0; i < 2; i++) {
+          const q = local6 / 24, x = p.x + (i ? 1 : -1) * (3 + q * 12), y = p.y - Math.sin(q * Math.PI) * 15;
           c.save();
-          c.globalAlpha *= 1 - ease14((local5 - 14) / 10);
+          c.globalAlpha *= 1 - ease14((local6 - 14) / 10);
           polygon24(c, [[x - 3, y], [x - 2, y - 4], [x + 3, y - 2], [x + 3, y + 2]], COAL2);
           c.restore();
         }
@@ -47731,7 +48340,7 @@ function sword2(ctx, x, y, angle3 = 0, scale = 1) {
   path8(ctx, [[0, 25], [4, 29], [0, 32], [-4, 29]], STEEL);
   ctx.restore();
 }
-function axe(ctx, x, y, angle3 = 0, scale = 1) {
+function axe2(ctx, x, y, angle3 = 0, scale = 1) {
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(angle3);
@@ -47789,9 +48398,9 @@ function drawFortEquipmentRack(ctx, x, y, variant = 0) {
   if (variant % 2) {
     sword2(ctx, x - 17, y - 2, -0.12, s);
     shield2(ctx, x + 2, y - 1, s);
-    axe(ctx, x + 20, y, 0.13, s * 0.92);
+    axe2(ctx, x + 20, y, 0.13, s * 0.92);
   } else {
-    axe(ctx, x - 19, y, -0.12, s * 0.92);
+    axe2(ctx, x - 19, y, -0.12, s * 0.92);
     shield2(ctx, x, y - 1, s);
     sword2(ctx, x + 19, y - 2, 0.13, s);
   }
@@ -50092,8 +50701,8 @@ var blockerIdentity = (b) => b.id ?? `legacy-obstacle:${b.kind}:${b.x}:${b.y}:${
 var obstacleTileVisualId = (b, tx, ty, visualKind = b.kind === "rock" ? "rock" : "base") => `${blockerIdentity(b)}/${visualKind}/${tx},${ty}`;
 var obstacleTileVisualCoverage = (_b, visualKind) => visualKind === "solid" ? 1 : visualKind === "tree" ? 0.92 : visualKind === "rock" ? 0.86 : 0.88;
 var woodlandCanopyAt = (n, tx, ty, seed2 = 0) => {
-  const pocket = terrainHash(Math.floor(tx / 3), Math.floor(ty / 3), seed2 + 409) % 100, local5 = (n >>> 8) % 100, threshold = pocket < 28 ? 82 : pocket > 76 ? 34 : 58;
-  return local5 < threshold;
+  const pocket = terrainHash(Math.floor(tx / 3), Math.floor(ty / 3), seed2 + 409) % 100, local6 = (n >>> 8) % 100, threshold = pocket < 28 ? 82 : pocket > 76 ? 34 : 58;
+  return local6 < threshold;
 };
 var naturalCanopyAt = (n, tx, ty, seed2 = 0) => {
   const score = terrainHash(tx, ty, seed2 + 419);
@@ -52377,7 +52986,7 @@ function chains2(c, t) {
     plate3(c, [[side * 22 - 4, -65], [side * 22, -70], [side * 22 + 4, -65], [side * 22, -60]], BLUE3);
   }
 }
-function tower(c, b, t, front2, flash) {
+function tower2(c, b, t, front2, flash) {
   const a = b.shieldAngle ?? Math.PI / 2;
   if (Math.sin(a) >= 0 !== front2 || b.phase !== 2 || b.mimicEncounter && !b.mimicEncounter.fusedOrdinals.length) return;
   const dazed = b.actionState === "dazed", age = t - (b.lastAction?.resolvedTick ?? -100), bash = b.lastAction?.ability === "shield_bash" && age >= 0 && age < 18 ? Math.sin(age / 18 * Math.PI) * 12 : 0, s = 0.55 + 0.45 * Math.abs(Math.sin(a)), x = dazed ? 48 : Math.cos(a) * (43 + bash), y = dazed ? 24 : Math.sin(a) * (18 + bash * 0.5) - 18;
@@ -52447,7 +53056,7 @@ function drawAegisGoliath(c, actor, tick, flash = false) {
     const a = tick / 60 + i * TAU64 / 3;
     if (Math.sin(a) < 0) shield3(c, Math.cos(a) * 55, Math.sin(a) * 16 - 3, 14, tick / 80 + i * 0.2, flash);
   }
-  tower(c, b, tick, false, flash);
+  tower2(c, b, tick, false, flash);
   chains2(c, tick);
   const body5 = [[0, -24], [20, -22], [26, -2], [0, 28], [-26, -2], [-20, -22]];
   plate3(c, body5, flash ? LIGHT10 : STONE6);
@@ -52488,7 +53097,7 @@ function drawAegisGoliath(c, actor, tick, flash = false) {
     const a = tick / 60 + i * TAU64 / 3;
     if (Math.sin(a) >= 0) shield3(c, Math.cos(a) * 55, Math.sin(a) * 16 - 3, 14, tick / 80 + i * 0.2, flash);
   }
-  tower(c, b, tick, true, flash);
+  tower2(c, b, tick, true, flash);
   if (b.actionState === "dazed") {
     for (let i = 0; i < 3; i++) {
       const a = tick * 0.09 + i * TAU64 / 3;
@@ -56507,26 +57116,26 @@ async function createLocalEndlessSessionD9(options) {
     }).flat()), collision = s.spacesByInstanceId[s.overworldInstanceId].collision, revealDistance = navigatorRevealDistance(s);
     const rejected = { unprojected: 0, insideReveal: 0, blockedLanding: 0, blockedApproach: 0 };
     for (const offset2 of offsets) {
-      const world = normalizeWorldPosition({ ...base, localX: base.localX + offset2.x, localY: base.localY + offset2.y }), local5 = projectToLocalFrameD9(world, s.d9World.runtime.frames), entry = projectToLocalFrameD9(entrance, s.d9World.runtime.frames);
-      if (!local5 || !entry) {
+      const world = normalizeWorldPosition({ ...base, localX: base.localX + offset2.x, localY: base.localY + offset2.y }), local6 = projectToLocalFrameD9(world, s.d9World.runtime.frames), entry = projectToLocalFrameD9(entrance, s.d9World.runtime.frames);
+      if (!local6 || !entry) {
         rejected.unprojected++;
         continue;
       }
-      const distance8 = Math.hypot(local5.x - entry.x, local5.y - entry.y);
+      const distance8 = Math.hypot(local6.x - entry.x, local6.y - entry.y);
       if (!preferred && (distance8 <= revealDistance || distance8 <= SITE_INTERACTION_RADIUS)) {
         rejected.insideReveal++;
         continue;
       }
-      if (collidesWithTiles(collision, local5.x, local5.y, actor.hullRadius)) {
+      if (collidesWithTiles(collision, local6.x, local6.y, actor.hullRadius)) {
         rejected.blockedLanding++;
         continue;
       }
-      if (!preferred && !connectedApproach(collision, local5, entry, actor.hullRadius)) {
+      if (!preferred && !connectedApproach(collision, local6, entry, actor.hullRadius)) {
         rejected.blockedApproach++;
         continue;
       }
-      const face3 = { x: entry.x - local5.x, y: entry.y - local5.y };
-      return { world, local: { x: local5.x, y: local5.y }, facing: preferred?.facing ?? face3, revealDistance, distance: distance8 };
+      const face3 = { x: entry.x - local6.x, y: entry.y - local6.y };
+      return { world, local: { x: local6.x, y: local6.y }, facing: preferred?.facing ?? face3, revealDistance, distance: distance8 };
     }
     throw new Error("No walkable exterior landing is available for " + record2.label + " (" + Object.entries(rejected).map(([key2, value2]) => key2 + "=" + value2).join(", ") + ")");
   }));
@@ -56696,8 +57305,8 @@ async function createLocalEndlessSessionD9(options) {
           const actor = s.entitiesById[s.playersById[localPlayerId].entityId], collision = s.spacesByInstanceId[s.overworldInstanceId].collision;
           for (let r = 0; r <= 8; r++) for (let y = -r; y <= r; y++) for (let x = -r; x <= r; x++) {
             if (Math.max(Math.abs(x), Math.abs(y)) !== r) continue;
-            const p = normalizeWorldPosition({ ...position4, localX: position4.localX + x * 32, localY: position4.localY + y * 32 }), local5 = projectToLocalFrameD9(p, s.d9World.runtime.frames);
-            if (local5 && !collidesWithTiles(collision, local5.x, local5.y, actor.hullRadius)) return local5;
+            const p = normalizeWorldPosition({ ...position4, localX: position4.localX + x * 32, localY: position4.localY + y * 32 }), local6 = projectToLocalFrameD9(p, s.d9World.runtime.frames);
+            if (local6 && !collidesWithTiles(collision, local6.x, local6.y, actor.hullRadius)) return local6;
           }
           throw new Error("Review target has no collision-safe landing");
         }));

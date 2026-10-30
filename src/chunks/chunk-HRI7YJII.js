@@ -1783,17 +1783,20 @@ function validateCommand(command) {
     }
   } else if (command.kind === "forge.attune") {
     closedRecord(command.payload, ["slot", "expectedLevel", "inventoryRevision"]);
-    requireContract(["weapon", "helmet", "chest", "leggings", "overall", "boots", "ring1", "ring2", "subweapon"].includes(command.payload.slot), "Unknown Forge slot");
+    requireContract(["weapon", "helmet", "chest", "leggings", "overall", "boots", "ring1", "ring2", "subweapon", "gloves"].includes(command.payload.slot), "Unknown Forge slot");
     safeInteger(command.payload.expectedLevel, 0, 99);
     safeInteger(command.payload.inventoryRevision);
   } else if (command.kind === "equipment.equip") {
     closedRecord(command.payload, ["itemId", "inventoryRevision"], ["slot"]);
-    if (command.payload.slot !== void 0) requireContract(["weapon", "helmet", "chest", "leggings", "overall", "boots", "ring1", "ring2", "subweapon"].includes(command.payload.slot), "Unknown equipment slot");
+    if (command.payload.slot !== void 0) requireContract(["weapon", "helmet", "chest", "leggings", "overall", "boots", "ring1", "ring2", "subweapon", "gloves"].includes(command.payload.slot), "Unknown equipment slot");
     requireContract(typeof command.payload.itemId === "string" && /^item:ply:[0-9a-f]{32}:(?:ent:[0-9a-f]{32}|starter)$/.test(command.payload.itemId), "Invalid item ID");
     safeInteger(command.payload.inventoryRevision);
   } else if (command.kind === "equipment.unequip") {
     closedRecord(command.payload, ["slot", "inventoryRevision"]);
-    requireContract(["weapon", "helmet", "chest", "leggings", "overall", "boots", "ring1", "ring2", "subweapon", "armor", "charm"].includes(command.payload.slot), "Unknown equipment slot");
+    requireContract(["weapon", "helmet", "chest", "leggings", "overall", "boots", "ring1", "ring2", "subweapon", "gloves", "armor", "charm"].includes(command.payload.slot), "Unknown equipment slot");
+    safeInteger(command.payload.inventoryRevision);
+  } else if (command.kind === "classkit.claim") {
+    closedRecord(command.payload, ["inventoryRevision"]);
     safeInteger(command.payload.inventoryRevision);
   } else if (command.kind === "subweapon.claim") {
     closedRecord(command.payload, ["subType", "inventoryRevision"]);
@@ -4483,6 +4486,32 @@ function effectiveEquipmentBonuses(definition, slot, level = 0, combat = false) 
   return bonus;
 }
 
+// src/shared/content/class_kits_v1.js
+var CLASS_KIT_VERSION = "class-kit-v1";
+var CLASS_KIT_PIECES = Object.freeze(["weapon", "helmet", "overall", "gloves", "boots"]);
+var CLASS_KITS = Object.freeze({
+  knight: Object.freeze({ weapon: "kit-knight-longsword", helmet: "kit-knight-coif", overall: "kit-knight-hauberk", gloves: "kit-knight-gauntlets", boots: "kit-knight-treads" }),
+  rogue: Object.freeze({ weapon: "kit-rogue-saber", helmet: "kit-rogue-bandana", overall: "kit-rogue-doublet", gloves: "kit-rogue-gloves", boots: "kit-rogue-boots" }),
+  mage: Object.freeze({ weapon: "kit-mage-staff", helmet: "kit-mage-cowl", overall: "kit-mage-robe", gloves: "kit-mage-wraps", boots: "kit-mage-slippers" })
+});
+var CLASS_KIT_EQUIPMENT = Object.freeze([
+  ["kit-knight-longsword", "Squire\u2019s Longsword", "weapon", 1, 0, 0, "iron"],
+  ["kit-knight-coif", "Squire\u2019s Coif", "helmet", 0, 5, 0, null],
+  ["kit-knight-hauberk", "Squire\u2019s Hauberk", "overall", 0, 10, 1, null],
+  ["kit-knight-gauntlets", "Squire\u2019s Gauntlets", "gloves", 0, 3, 0, null],
+  ["kit-knight-treads", "Squire\u2019s Treads", "boots", 0, 0, 1, null],
+  ["kit-rogue-saber", "Footpad\u2019s Saber", "weapon", 1, 0, 0, "iron"],
+  ["kit-rogue-bandana", "Footpad\u2019s Bandana", "helmet", 0, 5, 0, null],
+  ["kit-rogue-doublet", "Footpad\u2019s Doublet", "overall", 0, 10, 1, null],
+  ["kit-rogue-gloves", "Footpad\u2019s Gloves", "gloves", 0, 3, 0, null],
+  ["kit-rogue-boots", "Footpad\u2019s Boots", "boots", 0, 0, 1, null],
+  ["kit-mage-staff", "Apprentice\u2019s Staff", "weapon", 1, 0, 0, "iron"],
+  ["kit-mage-cowl", "Apprentice\u2019s Cowl", "helmet", 0, 5, 0, null],
+  ["kit-mage-robe", "Apprentice\u2019s Robe", "overall", 0, 10, 1, null],
+  ["kit-mage-wraps", "Apprentice\u2019s Wraps", "gloves", 0, 3, 0, null],
+  ["kit-mage-slippers", "Apprentice\u2019s Slippers", "boots", 0, 0, 1, null]
+]);
+
 // src/shared/content/equipment.js
 var itemDefinition = (item) => item?.workshop ? workshopResult(item).definition : item?.generated?.definition ?? EQUIPMENT[item?.definitionId];
 var equipmentRequiredLevel = (player, item) => combatPlayer(player) && item?.generated?.progression?.combatHash ? item.generated.itemPower : null;
@@ -4505,12 +4534,18 @@ var EQUIPMENT = freezeWire({ ...SUBWEAPON_CATALOG(), ...Object.fromEntries([
   ["greaves", "Greaves", "leggings", 0, 12, 1, null],
   ["sabatons", "Sabatons", "boots", 0, 0, 1, null],
   ["full-plate", "Full Plate Armor", "overall", 0, 45, 4, null],
-  ["sun-charm", "Sun Signet Ring", "ring", 3, 0, 3, null]
+  ["sun-charm", "Sun Signet Ring", "ring", 3, 0, 3, null],
+  ...CLASS_KIT_EQUIPMENT
 ].map(([definitionId, name, slot, attack, maxHp, defense, weaponVisual]) => [definitionId, { definitionId, name, slot, bonuses: { attack, maxHp, defense }, weaponVisual }])) });
 function SUBWEAPON_CATALOG() {
   return Object.fromEntries(Object.values(SUBWEAPONS).map((d) => [d.definitionId, d]));
 }
-var equipmentSlots = (inv) => inv?.subweapons ? [...EQUIPMENT_SLOTS, "subweapon"] : EQUIPMENT_SLOTS;
+var equipmentSlots = (inv) => inv?.subweapons || inv?.classKit ? [...EQUIPMENT_SLOTS, ...inv.subweapons ? ["subweapon"] : [], ...inv.classKit ? ["gloves"] : []] : EQUIPMENT_SLOTS;
+var listedEquipmentSlots = (inv) => {
+  const slots2 = equipmentSlots(inv).filter((s) => s !== "gloves");
+  if (slots2.length < equipmentSlots(inv).length) slots2.splice(slots2.indexOf("boots"), 0, "gloves");
+  return slots2;
+};
 var REWARD_POOLS = freezeWire([
   ["iron-sword", "padded-armor", "copper-charm", "coif", "greaves", "sabatons", "full-plate"],
   ["guard-sword", "chain-armor", "silver-charm", "coif", "greaves", "sabatons", "full-plate"],
@@ -13535,226 +13570,6 @@ function projectLargeCaveFinaleExtractionD13D_G(state, site, floor) {
   return freezeWire({ version: LARGE_CAVE_FINALE_EXTRACTION_D13D_G, portalId, siteId: site.siteId, floorId: floor.floorId, groupId: floor.groupId, episode: episode.episode, spaceInstanceId: floor.spaceInstanceId, position: copyWire(position), destination: copyWire(destination), visible, activatedTick });
 }
 
-// src/shared/contracts/settlement_workshop_v2.js
-var combatMaterialPrices = Object.freeze({ "Eridium Shard": "30", "Overlord's Sigil": "20", "Astral Essence": "60", "Rare Scrap": "8", "Magic Scrap": "16", "Epic Scrap": "32", "Legendary Scrap": "64", "Mythic Scrap": "128", "Luminous Soul": "20", "Astral Shards": "40" });
-var workshopMaterialPrices = (p) => combatPlayer(p) ? combatMaterialPrices : WORKSHOP_MATERIAL_PRICES;
-var same14 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
-var WORKSHOP_MATERIAL_PRICES = Object.freeze({ ...WORKSHOP_POLICY.materials, "Rare Scrap": "40", "Magic Scrap": "80", "Epic Scrap": "160", "Legendary Scrap": "320", "Mythic Scrap": "640", "Luminous Soul": "100", "Astral Shards": "200" });
-function power(item) {
-  const n = progressionBigInt(item.generated.itemPower);
-  requireContract(n <= 1000n, "Workshop price domain exceeds supported progression");
-  return Number(n);
-}
-function exponentialCost(base, item, tierBase) {
-  const n = BigInt(5 * Math.max(0, power(item) - 1)), tier = workshopResult(item).tier;
-  return (BigInt(base) * 1045n ** n * BigInt(tierBase[0]) ** BigInt(tier) / (1000n ** n * BigInt(tierBase[1]) ** BigInt(tier))).toString();
-}
-function workshopQuote(p, item, op, line = 0) {
-  if (!item?.generated) return { problem: "Select ordinary generated equipment" };
-  const r = workshopResult(item), materials2 = {};
-  let gold = "0", problem = null;
-  if (item.locked || item.protected || item.unique || item.generated.definition.unique || item.sourceEntityId === null || Object.values(p.inventory.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item.sourceEntityId)) problem = "Protected equipment cannot be modified or shattered";
-  if (op === "awaken") {
-    if (r.tier >= 5) problem = "Maximum five-star rarity";
-    if (r.enchants) problem = "Purge enchantments before awakening";
-    const n = r.tier + 1;
-    gold = String(combatPlayer(p) ? 150 * n * (1 + Math.floor(power(item) / 10)) : 2500 * n);
-    materials2["Eridium Shard"] = n;
-    materials2[["Monster Soul", "Rare Scrap", "Magic Scrap", "Epic Scrap", "Legendary Scrap", "Mythic Scrap"][n]] = 5 * n;
-  } else if (op === "reforge") {
-    if (!r.affixes.length) problem = "This item has no affix lines. Awaken it first.";
-    if (r.enchants) problem = "Purge enchantments before reforging";
-    if (!Number.isInteger(line) || line < 0 || line >= r.affixes.length || r.lockedLine !== null && r.lockedLine !== line) problem = "Select the unlocked reforge line";
-    gold = combatPlayer(p) ? String(30 + 5 * power(item) + 25 * r.tier) : exponentialCost(150, item, [2, 1]);
-    materials2["Overlord's Sigil"] = 1;
-  } else if (op === "enchant") {
-    const slot = item.generated.definition.slot === "ring" ? "ring1" : item.generated.definition.slot, attunement = Math.max(p.inventory.economy.slotLevels[slot] ?? 0, slot === "ring1" ? p.inventory.economy.slotLevels.ring2 ?? 0 : 0);
-    if (r.tier < 2) problem = "Magic (2-star) or better equipment required";
-    else if (attunement < (combatPlayer(p) ? 3 : 50)) problem = "Slot Attunement Level " + (combatPlayer(p) ? 3 : 50) + " required";
-    else if (r.enchants >= r.tier - 1) problem = "Maximum enchantments reached; purge to replace them";
-    materials2["Astral Essence"] = 1;
-  } else if (op === "purge") {
-    if (!r.enchants) problem = "No enchantments to purge";
-    gold = String((combatPlayer(p) ? 5 : 1e3) * power(item) * Math.max(1, r.tier));
-  } else if (op === "resonance") {
-    gold = combatPlayer(p) ? String(40 + 8 * power(item) + 30 * r.tier) : exponentialCost(100, item, [3, 2]);
-    materials2["Monster Soul"] = combatPlayer(p) ? 3 + 3 * r.tier : 25 + 25 * r.tier;
-  } else if (op === "shatter") {
-    if (Object.values(p.inventory.equipped).includes(item.itemId)) problem = "Unequip before shattering";
-  } else problem = "Unknown workshop operation";
-  if ((item.workshop?.steps.length ?? 0) >= MAX_WORKSHOP_STEPS && op !== "shatter") problem = "This item has reached its bounded modification history";
-  return { gold, materials: materials2, problem, preview: op === "shatter" ? salvageQuote(p, item).materials : op === "enchant" ? "One random active stat +25%" : op === "purge" ? "Restore the pre-enchantment stats" : op === "resonance" ? "A different supported two/three-piece set" : op === "awaken" ? `${r.tier} \u2192 ${r.tier + 1} stars; one additional modifier` : "Reroll only the selected affix; other lines remain locked" };
-}
-function workshopProblem(s, p, n, kind, payload) {
-  if (!hasServicesV2(s.d9World?.plannedWorld) || !p.inventory.services?.workshop) return "Workshop unavailable";
-  if (kind === "service.material") {
-    if (!n.services?.includes("materials")) return "This civilian does not sell materials";
-    if (!Object.hasOwn(WORKSHOP_MATERIAL_PRICES, payload.material)) return "Unknown material";
-    if ((p.inventory.services.workshop.materialPurchases[payload.material] ?? 0) + payload.quantity > 1e6) return "Material purchase bound";
-    return compareAmount(p.inventory.gold, multiplyAmount(workshopMaterialPrices(p)[payload.material], String(payload.quantity))) < 0 ? "Insufficient gold" : null;
-  }
-  const op = payload.operation;
-  if (!n.services?.includes(op)) return "This specialist does not provide that operation";
-  const item = p.inventory.itemsById[payload.itemId];
-  if (!item || item.ownerPlayerId !== p.playerId) return "Select carried equipment";
-  let q;
-  try {
-    q = workshopQuote(p, item, op, payload.line);
-  } catch (e) {
-    return e.message;
-  }
-  if (q.problem) return q.problem;
-  if (op === "shatter") return canSalvage(s, p, { itemId: item.itemId, inventoryRevision: p.inventory.revision, fingerprint: salvageQuote(p, item).fingerprint }) ? null : "Item cannot be shattered";
-  if (!p.inventory.services.workshop.records[item.itemId] && Object.keys(p.inventory.services.workshop.records).length >= MAX_WORKSHOP_ITEMS) return "Workshop record bound reached";
-  if (compareAmount(p.inventory.gold, q.gold) < 0) return "Insufficient gold";
-  if (!Object.entries(q.materials).every(([k, n2]) => (p.inventory.economy.materials[k] ?? 0) >= n2)) return "Insufficient materials";
-  return null;
-}
-function applyWorkshop(s, p, c, order) {
-  const inv = p.inventory, w = inv.services.workshop;
-  if (c.kind === "service.material") {
-    const key5 = c.payload.material;
-    inv.gold = subtractAmount(inv.gold, multiplyAmount(workshopMaterialPrices(p)[key5], String(c.payload.quantity)));
-    inv.economy.materials[key5] = (inv.economy.materials[key5] ?? 0) + c.payload.quantity;
-    w.materialPurchases[key5] = (w.materialPurchases[key5] ?? 0) + c.payload.quantity;
-    inv.revision++;
-    w.materialReceipts[key5] = { command: copyWire(c), authorityOrder: order, tick: s.tick, revision: inv.revision };
-    return;
-  }
-  const item = inv.itemsById[c.payload.itemId], op = c.payload.operation;
-  if (op === "shatter") {
-    const surrogate = copyWire(c);
-    surrogate.kind = "gear.salvage";
-    surrogate.payload = { itemId: item.itemId, inventoryRevision: inv.revision, fingerprint: salvageQuote(p, item).fingerprint };
-    applySalvage(s, p, surrogate, order);
-    inv.d7.salvaged[item.itemId].command = copyWire(c);
-    return;
-  }
-  const q = workshopQuote(p, item, op, c.payload.line);
-  inv.gold = subtractAmount(inv.gold, q.gold);
-  for (const [k, n] of Object.entries(q.materials)) {
-    inv.economy.materials[k] -= n;
-    if (!inv.economy.materials[k]) delete inv.economy.materials[k];
-  }
-  const record = w.records[item.itemId] ??= { baseItem: copyWire(unmodifiedItem(item)), receipts: [] };
-  inv.revision++;
-  record.receipts.push({ command: copyWire(c), authorityOrder: order, tick: s.tick, revision: inv.revision });
-  item.workshop ??= { version: WORKSHOP_VERSION, steps: [] };
-  item.workshop.steps.push({ kind: op, ...op === "reforge" ? { line: c.payload.line } : {} });
-  workshopResult(item);
-}
-function workshopAccounting(p) {
-  let gold = "0";
-  const materials2 = {}, w = p.inventory.services?.workshop;
-  if (!w) return { gold, materials: materials2 };
-  for (const [k, n] of Object.entries(w.materialPurchases)) {
-    gold = addAmount(gold, multiplyAmount(workshopMaterialPrices(p)[k], String(n)));
-    materials2[k] = n;
-  }
-  for (const r of Object.values(w.records)) {
-    let item = copyWire(r.baseItem);
-    for (const receipt of r.receipts) {
-      const c = receipt.command, q = workshopQuote(p, item, c.payload.operation, c.payload.line);
-      requireContract(!q.problem, q.problem ?? "Invalid modification");
-      gold = addAmount(gold, q.gold);
-      for (const [k, n] of Object.entries(q.materials)) materials2[k] = (materials2[k] ?? 0) - n;
-      item.workshop ??= { version: WORKSHOP_VERSION, steps: [] };
-      item.workshop.steps.push({ kind: c.payload.operation, ...c.payload.operation === "reforge" ? { line: c.payload.line } : {} });
-    }
-  }
-  return { gold, materials: materials2 };
-}
-function validateWorkshopItem(p, item) {
-  const w = p.inventory.services?.workshop, r = w?.records[item.itemId];
-  if (!item.workshop) {
-    requireContract(!r, "Modified item lost its overlay");
-    return;
-  }
-  requireContract(r && same14(r.baseItem, unmodifiedItem(item)), "Modification lacks original ownership");
-  closedRecord(item.workshop, ["version", "steps"]);
-  requireContract(item.workshop.version === WORKSHOP_VERSION, "Unknown modification version");
-  const expected = r.receipts.map((q) => ({ kind: q.command.payload.operation, ...q.command.payload.operation === "reforge" ? { line: q.command.payload.line } : {} }));
-  requireContract(same14(expected, item.workshop.steps), "Modification history mismatch");
-  workshopResult(item);
-}
-function validateWorkshop(s, p, validateCommand2) {
-  const w = p.inventory.services?.workshop;
-  if (!hasServicesV2(s.d9World?.plannedWorld)) {
-    requireContract(!w, "Unsolicited workshop");
-    return;
-  }
-  requireContract(w, "Missing workshop");
-  closedRecord(w, ["version", "records", "materialPurchases", "materialReceipts"]);
-  requireContract(w.version === WORKSHOP_VERSION && Object.keys(w.records).length <= MAX_WORKSHOP_ITEMS, "Workshop version/bound");
-  const orders = /* @__PURE__ */ new Set();
-  function stamp(r, kind) {
-    closedRecord(r, ["command", "authorityOrder", "tick", "revision"]);
-    validateCommand2(r.command);
-    requireContract(r.command.kind === kind && r.command.playerId === p.playerId && r.command.campaignId === s.campaign.campaignId && r.command.sessionId === s.session.sessionId, "Workshop command identity");
-    safeInteger(r.authorityOrder, 1, s.lastAppliedAuthorityOrder);
-    requireContract(!orders.has(r.authorityOrder), "Duplicate workshop authority order");
-    orders.add(r.authorityOrder);
-    const applied = s.appliedCommandsById[r.command.commandId];
-    if (applied) requireContract(applied.status === "applied" && applied.authorityOrder === r.authorityOrder && applied.commandCanonical === canonicalStringify(r.command), "Workshop applied receipt mismatch");
-    safeInteger(r.tick, 0, s.tick);
-    safeInteger(r.revision, 1, p.inventory.revision);
-    requireContract(r.command.payload.inventoryRevision + 1 === r.revision, "Workshop revision");
-    safeInteger(r.command.clientSequence, 1, s.appliedClientSequences[p.playerId]);
-  }
-  closedRecord(w.materialPurchases, [], Object.keys(WORKSHOP_MATERIAL_PRICES));
-  closedRecord(w.materialReceipts, Object.keys(w.materialPurchases));
-  for (const [k, n] of Object.entries(w.materialPurchases)) {
-    safeInteger(n, 1, 1e6);
-    const r = w.materialReceipts[k];
-    stamp(r, "service.material");
-    requireContract(r.command.payload.material === k, "Material receipt identity");
-  }
-  for (const [id, r] of Object.entries(w.records)) {
-    closedRecord(r, ["baseItem", "receipts"]);
-    requireContract(r.baseItem.itemId === id && r.baseItem.ownerPlayerId === p.playerId && !r.baseItem.workshop && r.receipts.length > 0 && r.receipts.length <= MAX_WORKSHOP_STEPS, "Workshop item record");
-    if (servicePurchase(p, r.baseItem.sourceEntityId)) validateServiceItem(s, p, r.baseItem);
-    else validateGeneratedGear(r.baseItem.generated, gearSeed(s, p, r.baseItem.sourceEntityId), r.baseItem.generated.progression ?? r.baseItem.generated.contentDepth);
-    let order = 0;
-    for (const a of r.receipts) {
-      stamp(a, "service.modify");
-      requireContract(a.command.payload.itemId === id && a.authorityOrder > order && a.command.payload.operation !== "shatter" && serviceNpcsFor(s.d9World.plannedWorld).find((n) => n.id === a.command.payload.npcId)?.services.includes(a.command.payload.operation), "Modification receipt order/specialist");
-      order = a.authorityOrder;
-    }
-    const current = p.inventory.itemsById[id] ?? p.inventory.renewal.groundBySourceId[r.baseItem.sourceEntityId]?.item ?? p.inventory.d7.salvaged[id]?.item ?? p.inventory.services.salesByItemId[id]?.item ?? s.d9World.paging.remoteGearByPlayer[p.playerId]?.[id]?.item;
-    if (current) validateWorkshopItem(p, current);
-    else requireContract(!p.inventory.rewardsByEntityId[r.baseItem.sourceEntityId], "Live modified reward disappeared");
-  }
-  workshopAccounting(p);
-}
-function validateWorkshopProgress(before, after, pid) {
-  const a = before.playersById[pid].inventory.services?.workshop, b = after.playersById[pid].inventory.services?.workshop;
-  if (!a) {
-    requireContract(!b || before.tick === 0 && after.tick === 0 && !before.d9World?.plannedWorld, "Workshop installation is genesis-only");
-    return;
-  }
-  requireContract(b, "Workshop removed");
-  for (const [id, r] of Object.entries(a.records)) {
-    const next = b.records[id];
-    requireContract(next && same14(r.baseItem, next.baseItem) && same14(r.receipts, next.receipts.slice(0, r.receipts.length)), "Workshop history rewritten");
-  }
-  for (const [id, r] of Object.entries(b.records)) for (const stamp of r.receipts.slice(a.records[id]?.receipts.length ?? 0)) {
-    requireContract(stamp.authorityOrder > before.lastAppliedAuthorityOrder && stamp.revision > before.playersById[pid].inventory.revision, "Modification lacks later command");
-    const old = before.playersById[pid].inventory.itemsById[id];
-    const source3 = r.baseItem.sourceEntityId;
-    requireContract(old || a.records[id] || before.playersById[pid].inventory.renewal.groundBySourceId[source3] || after.playersById[pid].inventory.services.purchasesBySourceId[source3] || after.playersById[pid].inventory.rewardsByEntityId[source3]?.claimed, "Modification lost ownership");
-  }
-  for (const [k, n] of Object.entries(a.materialPurchases)) requireContract((b.materialPurchases[k] ?? 0) >= n, "Material purchase history removed");
-  for (const [k, n] of Object.entries(b.materialPurchases)) {
-    const old = a.materialPurchases[k] ?? 0;
-    requireContract(n >= old, "Material history regressed");
-    if (n > old) requireContract(b.materialReceipts[k].authorityOrder > before.lastAppliedAuthorityOrder, "Material purchase lacks command");
-    else requireContract(same14(a.materialReceipts[k], b.materialReceipts[k]), "Material receipt rewritten");
-  }
-}
-function validWorkshopChange(p, a, b) {
-  return Boolean(b && workshopExtension(a, b) && p.inventory.services?.workshop?.records[b.itemId] && same14(b.workshop?.steps, p.inventory.services.workshop.records[b.itemId].receipts.map((r) => ({ kind: r.command.payload.operation, ...r.command.payload.operation === "reforge" ? { line: r.command.payload.line } : {} }))));
-}
-
 // src/shared/content/constellations.js
 var CONSTELLATIONS = freezeWire({ "shield": { "id": "shield", "name": "Shield Mastery", "subtitle": "Bulwark & Counter Strike", "color": "#38bdf8", "nodes": [{ "id": "shield_starter", "name": "Vanguard Provision", "iconKey": "shield_starter", "x": 50, "y": 88, "tier": 1, "maxRank": 1, "costPerRank": 0, "isStarterToggle": true, "starterType": "shield", "prereqs": [], "desc": "Unlock this base combat constellation. Requires Hero Level 2. Base equipment claims remain separate and one-time.", "active": true }, { "id": "shield_hp", "name": "Ironclad Resilience", "iconKey": "shield_hp", "x": 25, "y": 72, "tier": 1, "maxRank": 3, "costPerRank": 1, "prereqs": ["shield_starter"], "desc": "Increases Maximum HP by +4% per rank.", "active": true }, { "id": "shield_def", "name": "Heavy Plating", "iconKey": "shield_def", "x": 75, "y": 72, "tier": 1, "maxRank": 3, "costPerRank": 1, "prereqs": ["shield_starter"], "desc": "Increases Defense by +3% per rank.", "active": true }, { "id": "shield_iron_wall", "name": "Iron Wall", "iconKey": "shield_block", "x": 15, "y": 48, "tier": 2, "maxRank": 3, "costPerRank": 1, "prereqs": ["shield_hp"], "desc": "Increases base Block Rate by +1% and maximum Block Cap by +2% per rank.", "active": true }, { "id": "shield_fortified_guard", "name": "Fortified Guard", "iconKey": "shield_def", "x": 35, "y": 48, "tier": 2, "maxRank": 3, "costPerRank": 1, "prereqs": ["shield_hp"], "desc": "Taking damage builds Fortitude (+4%/+8%/+12% Defense per stack, max 5 stacks, 6s duration).", "active": true }, { "id": "shield_impact_tremor", "name": "Resonant Aegis", "iconKey": "shield_starter", "x": 65, "y": 48, "tier": 2, "maxRank": 2, "costPerRank": 1, "prereqs": ["shield_def"], "desc": "Blocking has a 20%/40% chance to trigger Resonant Aegis, releasing a vibrational ring dealing 120% Defense as AoE physical damage and pushing enemies back.", "active": true }, { "id": "shield_fortitude", "name": "Fortified Stance", "iconKey": "shield_fortitude", "x": 85, "y": 48, "tier": 2, "maxRank": 3, "costPerRank": 1, "prereqs": ["shield_def"], "desc": "Reduces incoming damage taken when Blocking by +10% per rank.", "active": true }, { "id": "shield_retaliatory_strike", "name": "Retaliatory Strike", "iconKey": "shield_fortitude", "x": 15, "y": 28, "tier": 3, "maxRank": 1, "costPerRank": 2, "prereqs": ["shield_fortified_guard"], "desc": "Successful blocks guarantee a Critical Strike on your next main-hand attack.", "active": true }, { "id": "shield_aegis_pulse", "name": "Aegis Pulse", "iconKey": "shield_hp", "x": 35, "y": 28, "tier": 3, "maxRank": 2, "costPerRank": 2, "prereqs": ["shield_fortified_guard"], "desc": "Every 5th successful block emits a wave restoring 3%/6% Max HP.", "active": true }, { "id": "shield_earth_breaker_bash", "name": "Earth-Breaker Bash", "iconKey": "shield_bash", "x": 65, "y": 28, "tier": 3, "maxRank": 2, "costPerRank": 2, "prereqs": ["shield_impact_tremor"], "desc": "Shield Bashes trigger ground tremors, expanding your bash into a 45-degree frontal cone and granting a 15%/30% chance to stun enemies for 1.5s.", "active": true }, { "id": "shield_retaliation", "name": "Spike Retaliation", "iconKey": "shield_bash", "x": 85, "y": 28, "tier": 3, "maxRank": 3, "costPerRank": 2, "prereqs": ["shield_fortitude"], "desc": "Shield Bashes deal +15% base damage and additional +12% Defense-scaling counter damage per rank.", "active": true }, { "id": "shield_stalwart_bastion", "name": "Stalwart Bastion", "iconKey": "shield_block", "x": 50, "y": 28, "tier": 3, "maxRank": 3, "costPerRank": 2, "prereqs": ["shield_fortified_guard", "shield_impact_tremor"], "desc": "Increases base Block Mitigation by +5% per rank (base block mitigation increases from 70% up to 85%).", "active": true }, { "id": "shield_keystone_colossus", "name": "Bulwark Colossus", "iconKey": "shield_keystone", "x": 30, "y": 12, "tier": 4, "maxRank": 1, "costPerRank": 5, "isKeystone": true, "prereqs": ["shield_retaliatory_strike"], "desc": "Blocking mitigates 100% of damage (instead of 70%). Converts 10% of blocked damage into bonus Attack Power for 10s.", "active": true }, { "id": "shield_keystone_reflect", "name": "Reflective Singularity", "iconKey": "shield_keystone", "x": 70, "y": 12, "tier": 4, "maxRank": 1, "costPerRank": 5, "isKeystone": true, "prereqs": ["shield_earth_breaker_bash"], "desc": "Adds 40% of total Defense directly to main weapon Attack Power, and Shield Bash reflects 180% Defense on block.", "active": true }, { "id": "shield_filler_hp_flat", "name": "Bastion's Grace", "iconKey": "shield_hp", "x": 50, "y": 58, "maxRank": 3, "costPerRank": 1, "tier": 2, "prereqs": ["shield_starter"], "desc": "Augments the shield arm with physical conditioning, increasing Maximum HP by +4% and Defense by +3% per rank.", "active": true }, { "id": "shield_filler_flat_def", "name": "Unyielding Fortitude", "iconKey": "shield_def", "x": 50, "y": 38, "maxRank": 3, "costPerRank": 2, "tier": 3, "prereqs": ["shield_filler_hp_flat"], "desc": "Forges thick defensive resilience, granting +5 flat Defense and +25 flat Max HP per rank.", "active": true }, { "id": "shield_inf_defense", "name": "Endless Bastion", "iconKey": "shield_def", "x": 30, "y": 3, "maxRank": "infinite", "isInfinite": true, "tier": 5, "prereqs": ["shield_keystone_colossus"], "desc": "Ascend with the Endless Bastion to infinitely compound your total Defense.", "active": true }, { "id": "shield_inf_bash", "name": "Spike Resonance", "iconKey": "shield_bash", "x": 70, "y": 3, "maxRank": "infinite", "isInfinite": true, "tier": 5, "prereqs": ["shield_keystone_reflect"], "desc": "Ascend with the Spike Resonance to infinitely compound your Shield Bash & Counter-Attack damage.", "active": true }] }, "dagger": { "id": "dagger", "name": "Dagger Mastery", "subtitle": "Lethality & Riposte", "color": "#a855f7", "nodes": [{ "id": "dagger_starter", "name": "Shadow Blade Provision", "iconKey": "dagger_starter", "x": 50, "y": 88, "tier": 1, "maxRank": 1, "costPerRank": 0, "isStarterToggle": true, "starterType": "dagger", "prereqs": [], "desc": "Unlock this base combat constellation. Requires Hero Level 2. Base equipment claims remain separate and one-time.", "active": true }, { "id": "dagger_crit_chance", "name": "Lethal Precision", "iconKey": "dagger_crit", "x": 25, "y": 72, "tier": 1, "maxRank": 3, "costPerRank": 1, "prereqs": ["dagger_starter"], "desc": "Increases Critical Strike Chance by +1.5% per rank.", "active": true }, { "id": "dagger_crit_dmg", "name": "Critical Ferocity", "iconKey": "dagger_crit_dmg", "x": 75, "y": 72, "tier": 1, "maxRank": 3, "costPerRank": 1, "prereqs": ["dagger_starter"], "desc": "Increases Critical Strike Damage multiplier by +6% per rank.", "active": true }, { "id": "dagger_offhand_precision", "name": "Offhand Precision", "iconKey": "dagger_starter", "x": 15, "y": 48, "tier": 2, "maxRank": 3, "costPerRank": 1, "prereqs": ["dagger_crit_chance"], "desc": "Offhand strikes deal +8% damage, and increase offhand flurry double-strike damage by +10% per rank.", "active": true }, { "id": "dagger_vipers_coating", "name": "Viper's Coating", "iconKey": "dagger_bleed", "x": 35, "y": 48, "tier": 2, "maxRank": 3, "costPerRank": 1, "prereqs": ["dagger_crit_chance"], "desc": "Offhand Strikes apply stacking Poison (10%/20%/30% Atk/sec) and have a +5% chance per rank to cause Sanguine Bleeding.", "active": true }, { "id": "dagger_parry", "name": "Nimble Reflexes", "iconKey": "dagger_parry", "x": 65, "y": 48, "tier": 2, "maxRank": 3, "costPerRank": 1, "prereqs": ["dagger_crit_dmg"], "desc": "Increases base Parry Rate by +1% and maximum Parry Cap by +2% per rank.", "active": true }, { "id": "dagger_expose_weakness", "name": "Expose Weakness", "iconKey": "dagger_crit", "x": 85, "y": 48, "tier": 2, "maxRank": 3, "costPerRank": 1, "prereqs": ["dagger_crit_dmg"], "desc": "Offhand strikes shred 4%/8%/12% of enemy Defense for 5s.", "active": true }, { "id": "dagger_shadow_flurry", "name": "Shadow Flurry", "iconKey": "dagger_riposte", "x": 15, "y": 28, "tier": 3, "maxRank": 1, "costPerRank": 2, "prereqs": ["dagger_offhand_precision"], "desc": "Main weapon Critical Strikes trigger a guaranteed Offhand Strike with +50% Critical Damage.", "active": true }, { "id": "dagger_shadow_step", "name": "Shadow Step", "iconKey": "dagger_parry", "x": 35, "y": 28, "tier": 3, "maxRank": 2, "costPerRank": 2, "prereqs": ["dagger_parry"], "desc": "Parrying increases Movement Speed by +15%/+30% and Attack Speed by +10%/+20% for 4s. Boosts Riposte damage by +20% per rank.", "active": true }, { "id": "dagger_noxious_bloom", "name": "Noxious Bloom", "iconKey": "dagger_bleed", "x": 50, "y": 28, "tier": 3, "maxRank": 2, "costPerRank": 2, "prereqs": ["dagger_vipers_coating", "dagger_parry"], "desc": "Slaying an enemy suffering from Bleed or Poison triggers a Noxious Bloom, releasing a toxic gas cloud that reduces adjacent enemy Defenses by 15% and ticks damage.", "active": true }, { "id": "dagger_sanguine_rupture", "name": "Sanguine Rupture", "iconKey": "dagger_bleed", "x": 65, "y": 28, "tier": 3, "maxRank": 2, "costPerRank": 2, "prereqs": ["dagger_expose_weakness"], "desc": "Parrying a poisoned or bleeding target detonates DoTs for 150%/300% remaining damage instantly.", "active": true }, { "id": "dagger_wind_razor_flurry", "name": "Wind-Razor Flurry", "iconKey": "dagger_riposte", "x": 85, "y": 28, "tier": 3, "maxRank": 2, "costPerRank": 2, "prereqs": ["dagger_parry"], "desc": "Landing 3 critical strikes in a row or executing a perfect parry unleashes a forward-flying Crescent Wind Razor that pierces through all enemies.", "active": true }, { "id": "dagger_keystone_assassin", "name": "Shadow Assassin", "iconKey": "dagger_keystone", "x": 30, "y": 12, "tier": 4, "maxRank": 1, "costPerRank": 5, "isKeystone": true, "prereqs": ["dagger_shadow_flurry"], "desc": "Reaching 5 Poison stacks triggers a 3-strike Shadow Flurry (100% Attack Power per strike, bypassing 50% Defense).", "active": true }, { "id": "dagger_keystone_duellist", "name": "Master Duellist", "iconKey": "dagger_keystone", "x": 70, "y": 12, "tier": 4, "maxRank": 1, "costPerRank": 5, "isKeystone": true, "prereqs": ["dagger_shadow_step"], "desc": "Raises Parry Cap to 40%. Parries negate 100% damage AND spawn a Shadow Decoy that attacks alongside you for 4 seconds.", "active": true }, { "id": "dagger_filler_haste", "name": "Fleetfoot", "iconKey": "dagger_parry", "x": 50, "y": 58, "maxRank": 3, "costPerRank": 1, "tier": 2, "prereqs": ["dagger_starter"], "desc": "Develops swift offensive movements, increasing Movement Speed by +4 and Parry Rate by +1% per rank.", "active": true }, { "id": "dagger_filler_armor_pen", "name": "Serrated Blades", "iconKey": "dagger_crit", "x": 50, "y": 38, "maxRank": 3, "costPerRank": 2, "tier": 3, "prereqs": ["dagger_filler_haste"], "desc": "Sharpens blade edges to locate anatomical weaknesses, increasing Attack Power by +4% and Critical Strike Damage multiplier by +3% per rank.", "active": true }, { "id": "dagger_inf_crit", "name": "Lethal Infinitum", "iconKey": "dagger_crit_dmg", "x": 30, "y": 3, "maxRank": "infinite", "isInfinite": true, "tier": 5, "prereqs": ["dagger_keystone_assassin"], "desc": "Ascend with the Lethal Infinitum to infinitely compound your Critical Strike Damage multiplier.", "active": true }, { "id": "dagger_inf_poison", "name": "Toxic Osmosis", "iconKey": "dagger_bleed", "x": 70, "y": 3, "maxRank": "infinite", "isInfinite": true, "tier": 5, "prereqs": ["dagger_keystone_duellist"], "desc": "Ascend with the Toxic Osmosis to infinitely compound your Poison and Bleed DoT tick damage.", "active": true }] }, "tome": { "id": "tome", "name": "Tome Mastery", "subtitle": "Arcane & Spellcraft", "color": "#3498db", "nodes": [{ "id": "tome_starter", "name": "Codex Apprentice Provision", "iconKey": "tome_starter", "x": 50, "y": 88, "tier": 1, "maxRank": 1, "costPerRank": 0, "isStarterToggle": true, "starterType": "tome", "prereqs": [], "desc": "Unlock this base combat constellation. Requires Hero Level 2. Base equipment claims remain separate and one-time.", "active": true }, { "id": "tome_atk", "name": "Arcane Focus", "iconKey": "tome_atk", "x": 25, "y": 70, "tier": 1, "maxRank": 3, "costPerRank": 1, "prereqs": ["tome_starter"], "desc": "Increases All Attack and Spell Power by +3.5% per rank.", "active": true }, { "id": "tome_exp", "name": "Mind Expansion", "iconKey": "tome_exp", "x": 75, "y": 70, "tier": 1, "maxRank": 3, "costPerRank": 1, "prereqs": ["tome_starter"], "desc": "Increases experience gained from defeated monsters by +3% per rank.", "active": true }, { "id": "tome_empowered_catalysts", "name": "Empowered Catalysts", "iconKey": "tome_starter", "x": 15, "y": 48, "tier": 2, "maxRank": 3, "costPerRank": 1, "prereqs": ["tome_atk"], "desc": "Increases Tome Spell Proc Chance to 40%/45%/50% and Spell Power to 175%/200%/225% Attack.", "active": true }, { "id": "tome_runic_barrier", "name": "Runic Shielding", "iconKey": "tome_barrier", "x": 38, "y": 48, "tier": 2, "maxRank": 3, "costPerRank": 1, "prereqs": ["tome_atk"], "desc": "Grants +10%/+20%/+30% Max HP as Arcane Shield Capacity.", "active": true }, { "id": "tome_elemental_overload", "name": "Elemental Overload", "iconKey": "tome_proc", "x": 62, "y": 48, "tier": 2, "maxRank": 2, "costPerRank": 1, "prereqs": ["tome_exp"], "desc": "Fireball deals 35%/70% splash; Chain Zap bounces +1/+2 times; Frost Nova applies a non-stacking 20%/40% slow (80%/60% movement). Repeated Frost procs reapply the same rank magnitude but do not deepen it. Increases Area Radius by +20% per rank.", "active": true }, { "id": "tome_arcane_syphon", "name": "Arcane Syphon", "iconKey": "tome_power", "x": 85, "y": 48, "tier": 2, "maxRank": 3, "costPerRank": 1, "prereqs": ["tome_exp"], "desc": "Spell procs recharge 1.5%/3.0%/4.5% Arcane Shield (50% overflows to HP if Shield is full) & grant +4%/+8%/+12% INT for 6s.", "active": true }, { "id": "tome_barrier_shatter", "name": "Shield Shatter", "iconKey": "tome_keystone", "x": 20, "y": 28, "tier": 3, "maxRank": 1, "costPerRank": 2, "prereqs": ["tome_runic_barrier"], "desc": "When Arcane Shield is fully depleted by an attack, it detonates an Arcane Nova dealing 250% INT as AoE Magic Damage.", "active": true }, { "id": "tome_spell_weaving", "name": "Spell Weaving", "iconKey": "tome_proc", "x": 50, "y": 28, "tier": 3, "maxRank": 2, "costPerRank": 2, "prereqs": ["tome_elemental_overload"], "desc": "Shifting between different elemental spell casts boosts Spell Power by +15%/+30% per shift.", "active": true }, { "id": "tome_resilience", "name": "Mana Shielding", "iconKey": "tome_power", "x": 80, "y": 28, "tier": 3, "maxRank": 3, "costPerRank": 2, "prereqs": ["tome_arcane_syphon"], "desc": "Casting any spell instantly recharges 1%/2%/3% Arcane Shield.", "active": true }, { "id": "tome_keystone_triad", "name": "Triad Convergence", "iconKey": "tome_keystone", "x": 35, "y": 12, "tier": 4, "maxRank": 1, "costPerRank": 5, "isKeystone": true, "prereqs": ["tome_spell_weaving"], "desc": "Each successful Tome spell proc is one cast that produces exactly three packets: Fire + Lightning + Frost.", "active": true }, { "id": "tome_keystone_singularity", "name": "Aetheric Singularity", "iconKey": "tome_keystone", "x": 65, "y": 12, "tier": 4, "maxRank": 1, "costPerRank": 5, "isKeystone": true, "prereqs": ["tome_barrier_shatter"], "desc": "Grants +50% Max HP as Arcane Shield Capacity. 80% of total INT is added directly to Attack Power.", "active": true }, { "id": "tome_filler_barrier_regen", "name": "Aether Flow", "iconKey": "tome_barrier", "x": 50, "y": 58, "maxRank": 3, "costPerRank": 1, "tier": 2, "prereqs": ["tome_starter"], "desc": "Refines mana channels to stabilize spell output, increasing Spell Power by +4%, Arcane Barrier by +1%, and Area Radius by +5% per rank.", "active": true }, { "id": "tome_filler_spell_crit", "name": "Runic Spark", "iconKey": "tome_proc", "x": 50, "y": 38, "maxRank": 3, "costPerRank": 2, "tier": 3, "prereqs": ["tome_filler_barrier_regen"], "desc": "Engraves unstable elemental runes, increasing Critical Strike Chance by +1.5% and Attack Power by +2% per rank.", "active": true }, { "id": "tome_inf_spell", "name": "Arcane Singularity", "iconKey": "tome_atk", "x": 35, "y": 3, "maxRank": "infinite", "isInfinite": true, "tier": 5, "prereqs": ["tome_keystone_triad"], "desc": "Ascend with the Arcane Singularity to infinitely compound your overall Spell Power.", "active": true }, { "id": "tome_inf_intel", "name": "Aetheric Infusion", "iconKey": "tome_power", "x": 65, "y": 3, "maxRank": "infinite", "isInfinite": true, "tier": 5, "prereqs": ["tome_keystone_singularity"], "desc": "Ascend with the Aetheric Infusion to infinitely compound your Intelligence & Magic damage.", "active": true }] }, "utility": { "id": "utility", "name": "Utility & Survival", "subtitle": "Explorer & Adventurer", "color": "#2ecc71", "nodes": [{ "id": "utility_pioneer", "name": "Pioneer's Instinct", "iconKey": "utility_pioneer", "x": 50, "y": 88, "currency": "global", "maxRank": 1, "costPerRank": 2, "prereqs": [], "desc": "Grants +5% Gold Multiplier and +5% to eligible random monster equipment, material, sigil, and card chance multiplier. Each chance caps at 100%; guaranteed and direct rewards are unchanged.", "active": true }, { "id": "utility_start_weapon", "name": "Blade Provisioner", "iconKey": "utility_start_weapon", "x": 18, "y": 68, "currency": "global", "maxRank": 3, "prereqs": ["utility_pioneer"], "desc": "Start dungeon runs with a Main Hand Weapon if empty (Rank 1: 0\u2605 Common, Rank 2: 1\u2605 Rare, Rank 3: 2\u2605 Magic).", "active": false }, { "id": "utility_start_armor", "name": "Armorsmith Provisioner", "iconKey": "utility_start_armor", "x": 36, "y": 68, "currency": "global", "maxRank": 3, "prereqs": ["utility_pioneer"], "desc": "Start dungeon runs with Chest/Overall Armor if empty (Rank 1: 0\u2605 Common, Rank 2: 1\u2605 Rare, Rank 3: 2\u2605 Magic).", "active": false }, { "id": "utility_start_head_feet", "name": "Vanguard Helm & Greaves", "iconKey": "utility_start_head_feet", "x": 64, "y": 68, "currency": "global", "maxRank": 3, "prereqs": ["utility_pioneer"], "desc": "Start dungeon runs with Helmet and Boots if empty (Rank 1: 0\u2605 Common, Rank 2: 1\u2605 Rare, Rank 3: 2\u2605 Magic).", "active": false }, { "id": "utility_start_ring", "name": "Signet Provisioner", "iconKey": "utility_start_ring", "x": 82, "y": 68, "currency": "global", "maxRank": 3, "prereqs": ["utility_pioneer"], "desc": "Start dungeon runs with Ring(s) if empty (Rank 1: 0\u2605 Common, Rank 2: 1\u2605 Rare, Rank 3: 2\u2605 Magic).", "active": false }, { "id": "utility_gold", "name": "Scavenger's Avarice", "iconKey": "utility_gold", "x": 22, "y": 46, "currency": "global", "maxRank": 5, "costPerRank": 2, "prereqs": ["utility_pioneer"], "desc": "Increases Gold Multiplier by +5% per rank.", "active": true }, { "id": "utility_quality", "name": "Scavenger's Eye", "iconKey": "utility_quality", "x": 40, "y": 46, "currency": "global", "maxRank": 5, "costPerRank": 2, "prereqs": ["utility_pioneer"], "desc": "Adds +2% Drop Quality per rank, improving higher equipment-rarity odds among tiers already unlocked. Does not unlock rarity tiers.", "active": true }, { "id": "utility_vitality", "name": "Pioneer's Vigor", "iconKey": "utility_vitality", "x": 60, "y": 46, "currency": "global", "maxRank": 5, "costPerRank": 2, "prereqs": ["utility_pioneer"], "desc": "Increases Max Health by +3% and Movement Speed by +2 per rank.", "active": true }, { "id": "utility_elixir", "name": "Field Medic", "iconKey": "utility_elixir", "x": 78, "y": 46, "currency": "global", "maxRank": 3, "costPerRank": 4, "prereqs": ["utility_start_head_feet", "utility_start_ring"], "desc": "Start every run with active Basic Elixir effects (+10% Atk/HP/Def/Speed) for the entire run duration.", "active": false }, { "id": "utility_bag", "name": "Satchel Expansion", "iconKey": "utility_bag", "x": 32, "y": 28, "currency": "global", "maxRank": 3, "costPerRank": 4, "prereqs": ["utility_quality"], "desc": "Increases carried expedition-item capacity by +5 slots per rank.", "active": true }, { "id": "utility_soul_beacon", "name": "Soul Beacon", "iconKey": "utility_vitality", "x": 50, "y": 28, "currency": "global", "maxRank": 1, "costPerRank": 5, "prereqs": ["utility_quality", "utility_vitality"], "desc": "Guarantees that your dropped Recovery Chest always spawns safely inside the exit Portal Room, farthest from the portal.", "active": false }, { "id": "utility_insurance", "name": "Insurance Underwriter", "iconKey": "utility_insurance", "x": 68, "y": 28, "currency": "global", "maxRank": 3, "costPerRank": 4, "prereqs": ["utility_vitality", "utility_elixir"], "desc": "Reduces Gold insurance premium costs by -10% per rank.", "active": false }, { "id": "utility_emergency_salvage", "name": "Emergency Evac", "iconKey": "utility_insurance", "x": 18, "y": 28, "currency": "global", "maxRank": 5, "costPerRank": 1, "prereqs": ["utility_gold", "utility_quality"], "desc": "Retains a portion of carried Run Gold, Scraps, and Monster Souls upon defeat in dungeons.", "active": false }, { "id": "utility_fairy_sanctuary", "name": "Fairy Sanctuary", "iconKey": "utility_pioneer", "x": 82, "y": 28, "currency": "global", "maxRank": 5, "costPerRank": 1, "prereqs": ["utility_vitality", "utility_elixir"], "desc": "Grants a chance for a Glimmering Fairy to spawn on each dungeon floor.", "active": false }, { "id": "utility_treasure_hunter", "name": "Relic Hunter", "iconKey": "utility_quality", "x": 32, "y": 12, "currency": "global", "maxRank": 3, "prereqs": ["utility_bag"], "desc": "Increases the chance for chests found in runs to spawn as prestigious Gilded Reliquaries or Astral Vaults.", "active": false }, { "id": "utility_keystone", "name": "Fortune's Favor", "iconKey": "utility_keystone", "x": 50, "y": 12, "currency": "global", "maxRank": 1, "costPerRank": 10, "isKeystone": true, "prereqs": ["utility_treasure_hunter", "utility_insurance"], "desc": "Slaying a Rare or Boss monster grants +50% Gold Multiplier for 15 seconds.", "active": false }, { "id": "utility_inf_gold", "name": "Gilded Emperor", "iconKey": "utility_gold", "x": 35, "y": 3, "currency": "global", "maxRank": "infinite", "isInfinite": true, "tier": 5, "prereqs": ["utility_keystone"], "desc": "Ascend with the Gilded Emperor to infinitely scale your Gold Multiplier with a soft-cap curve.", "active": false }, { "id": "utility_inf_drop", "name": "Astral Prospector", "iconKey": "utility_quality", "x": 65, "y": 3, "currency": "global", "maxRank": "infinite", "isInfinite": true, "tier": 5, "prereqs": ["utility_keystone"], "desc": "Infinitely scales overall Drop Quality with a soft-cap curve. Quality improves higher equipment-rarity odds only among tiers already unlocked; named minimums and guarantees remain separate.", "active": false }] } });
 var ACTIVE_NODES = Object.freeze(Object.fromEntries(Object.entries(CONSTELLATIONS).flatMap(([tree, graph]) => graph.nodes.filter((n) => n.active).map((n) => [n.id, Object.freeze({ ...n, tree })]))));
@@ -14052,6 +13867,332 @@ function validateD8Advance(before, after, oldLevel, newLevel, oldAuthorityOrder)
   if (purchases(prior) !== purchases(after)) requireContract(after.revision > prior.revision && after.lastChange?.authorityOrder > oldAuthorityOrder, "Progression changes require a later authoritative command");
 }
 
+// src/shared/contracts/subweapon_inventory.js
+var D6_ACTIVITY_FORMAT = "saq-world-activity-d6-1";
+function provisionSourceId(p, type) {
+  return p.inventory?.subweapons?.claims[type]?.sourceEntityId ?? null;
+}
+function provisionType(p, id) {
+  return SUBWEAPON_TYPES.find((t) => provisionSourceId(p, t) === id) ?? null;
+}
+function installSubweaponInventory(p) {
+  const i = p.inventory;
+  if (i.subweapons) return;
+  i.subweapons = { version: "base-provisions-d6-1", claims: {} };
+  i.equipped.subweapon = null;
+  i.economy.slotLevels.subweapon = 0;
+}
+var provisionLevelAllowed = (p, type) => p.progression.level >= 2 || heroClassOf(p.d8)?.offhand === type;
+function canClaimSubweapon(s, p, payload) {
+  const i = p.inventory, a = s.entitiesById[p.entityId], q = s.primary.actorsById[p.entityId];
+  return Boolean(i.subweapons && a.alive && provisionLevelAllowed(p, payload.subType) && SUBWEAPON_TYPES.includes(payload.subType) && !i.subweapons.claims[payload.subType] && i.revision === payload.inventoryRevision && Object.keys(i.itemsById).length < inventoryIntakeCapacity(p.d8) && !q.current && !q.heldCommandId && !q.queuedCommandId);
+}
+function claimSubweapon(s, p, c, order) {
+  const i = p.inventory, type = c.payload.subType, sourceEntityId = `ent:${safeInteger(++s.identitySequence, 1).toString(16).padStart(32, "0")}`, itemId2 = `item:${p.playerId}:${sourceEntityId}`;
+  i.itemsById[itemId2] = { itemId: itemId2, definitionId: SUBWEAPONS[type].definitionId, ownerPlayerId: p.playerId, sourceEntityId };
+  i.renewal.originsByItemId[itemId2] = { provision: type, sourceEntityId };
+  i.revision++;
+  i.subweapons.claims[type] = { sourceEntityId, command: copyWire(c), authorityOrder: order, tick: s.tick, revision: i.revision };
+}
+function validateProvisions(p, s, validateCommand2) {
+  const i = p.inventory, b = i.subweapons;
+  closedRecord(b, ["version", "claims"]);
+  requireContract(s.format === D6_ACTIVITY_FORMAT && b.version === "base-provisions-d6-1", "Invalid provision version");
+  closedRecord(b.claims, [], SUBWEAPON_TYPES);
+  for (const [type, r] of Object.entries(b.claims)) {
+    closedRecord(r, ["sourceEntityId", "command", "authorityOrder", "tick", "revision"]);
+    requireContract(/^ent:[0-9a-f]{32}$/.test(r.sourceEntityId) && BigInt("0x" + r.sourceEntityId.slice(4)) <= BigInt(s.identitySequence), "Invalid provision identity fence");
+    validateCommand2(r.command);
+    const c = r.command;
+    requireContract(c.kind === "subweapon.claim" && c.payload.subType === type && c.playerId === p.playerId && c.sessionId === s.session.sessionId && c.campaignId === s.campaign.campaignId && provisionLevelAllowed(p, type), "Invalid provision receipt");
+    safeInteger(r.authorityOrder, 1, s.lastAppliedAuthorityOrder);
+    safeInteger(r.tick, 0, s.tick);
+    safeInteger(r.revision, 1, i.revision);
+    requireContract(c.payload.inventoryRevision + 1 === r.revision, "Provision revision mismatch");
+    safeInteger(c.clientSequence, 1, s.appliedClientSequences[p.playerId]);
+    safeInteger(c.residencyRevision, 1, s.entitiesById[p.entityId].residency.residencyRevision);
+    requireContract(s.spacesByInstanceId[c.spaceInstanceId]?.spaceRevision === c.spaceRevision, "Invalid provision space");
+    const applied = s.appliedCommandsById[c.commandId];
+    if (applied) requireContract(applied.status === "applied" && applied.commandCanonical === canonicalStringify(c) && applied.authorityOrder === r.authorityOrder && applied.tick === r.tick, "Provision applied receipt mismatch");
+    const id = provisionSourceId(p, type), item = i.itemsById[`item:${p.playerId}:${id}`] ?? i.renewal.groundBySourceId[id]?.item;
+    requireContract(item?.definitionId === SUBWEAPONS[type].definitionId, "Claimed subweapon lost or replaced");
+  }
+}
+function validateProvisionProgress(a, b) {
+  for (const [t, r] of Object.entries(a.subweapons.claims)) requireContract(canonicalStringify(r) === canonicalStringify(b.subweapons.claims[t]), "Provision history rewritten");
+}
+
+// src/shared/contracts/class_kit_inventory.js
+var isClassKitSource = (p, sourceEntityId) => Boolean(sourceEntityId) && Boolean(p.inventory?.classKit?.sourceEntityIds.includes(sourceEntityId));
+var classKitPiece = (p, sourceEntityId) => {
+  const ids = p.inventory?.classKit?.sourceEntityIds, i = ids ? ids.indexOf(sourceEntityId) : -1;
+  return i < 0 ? null : CLASS_KIT_PIECES[i];
+};
+function canClaimClassKit(s, p, payload) {
+  const i = p.inventory, a = s.entitiesById[p.entityId], q = s.primary.actorsById[p.entityId], cls = heroClassOf(p.d8)?.id;
+  return Boolean(cls && CLASS_KITS[cls] && i?.subweapons && !i.classKit && a.alive && i.revision === payload.inventoryRevision && Object.keys(i.itemsById).length + CLASS_KIT_PIECES.length <= inventoryIntakeCapacity(p.d8) && !q.current && !q.heldCommandId && !q.queuedCommandId);
+}
+function claimClassKit(s, p, c, order) {
+  const i = p.inventory, cls = heroClassOf(p.d8).id, kit = CLASS_KITS[cls], sourceEntityIds = [];
+  for (const piece of CLASS_KIT_PIECES) {
+    const sourceEntityId = `ent:${safeInteger(++s.identitySequence, 1).toString(16).padStart(32, "0")}`, itemId2 = `item:${p.playerId}:${sourceEntityId}`;
+    sourceEntityIds.push(sourceEntityId);
+    i.itemsById[itemId2] = { itemId: itemId2, definitionId: kit[piece], ownerPlayerId: p.playerId, sourceEntityId };
+    i.renewal.originsByItemId[itemId2] = { kit: piece, sourceEntityId };
+  }
+  i.equipped.gloves = null;
+  i.economy.slotLevels.gloves = 0;
+  i.revision++;
+  i.classKit = { version: CLASS_KIT_VERSION, heroClass: cls, sourceEntityIds, command: copyWire(c), authorityOrder: order, tick: s.tick, revision: i.revision };
+}
+function validateClassKit(p, s, validateCommand2) {
+  const i = p.inventory, k = i.classKit;
+  closedRecord(k, ["version", "heroClass", "sourceEntityIds", "command", "authorityOrder", "tick", "revision"]);
+  requireContract(s.format === D6_ACTIVITY_FORMAT && k.version === CLASS_KIT_VERSION && i.subweapons, "Invalid class kit version");
+  requireContract(heroClassOf(p.d8)?.id === k.heroClass && Boolean(CLASS_KITS[k.heroClass]), "Class kit for another class");
+  requireContract(Array.isArray(k.sourceEntityIds) && k.sourceEntityIds.length === CLASS_KIT_PIECES.length && new Set(k.sourceEntityIds).size === CLASS_KIT_PIECES.length, "Invalid class kit pieces");
+  for (const [n, id] of k.sourceEntityIds.entries()) {
+    requireContract(/^ent:[0-9a-f]{32}$/.test(id) && BigInt("0x" + id.slice(4)) <= BigInt(s.identitySequence), "Invalid class kit identity fence");
+    const item = i.itemsById[`item:${p.playerId}:${id}`] ?? i.renewal.groundBySourceId[id]?.item;
+    requireContract(item?.definitionId === CLASS_KITS[k.heroClass][CLASS_KIT_PIECES[n]], "Class kit piece lost or replaced");
+  }
+  validateCommand2(k.command);
+  const c = k.command;
+  requireContract(c.kind === "classkit.claim" && c.playerId === p.playerId && c.sessionId === s.session.sessionId && c.campaignId === s.campaign.campaignId, "Invalid class kit receipt");
+  safeInteger(k.authorityOrder, 1, s.lastAppliedAuthorityOrder);
+  safeInteger(k.tick, 0, s.tick);
+  safeInteger(k.revision, 1, i.revision);
+  requireContract(c.payload.inventoryRevision + 1 === k.revision, "Class kit revision mismatch");
+  safeInteger(c.clientSequence, 1, s.appliedClientSequences[p.playerId]);
+  safeInteger(c.residencyRevision, 1, s.entitiesById[p.entityId].residency.residencyRevision);
+  requireContract(s.spacesByInstanceId[c.spaceInstanceId]?.spaceRevision === c.spaceRevision, "Invalid class kit space");
+  const applied = s.appliedCommandsById[c.commandId];
+  if (applied) requireContract(applied.status === "applied" && applied.commandCanonical === canonicalStringify(c) && applied.authorityOrder === k.authorityOrder && applied.tick === k.tick, "Class kit applied receipt mismatch");
+}
+function validateClassKitProgress(a, b) {
+  if (a.classKit) requireContract(canonicalStringify(a.classKit) === canonicalStringify(b.classKit), "Class kit history rewritten");
+}
+
+// src/shared/contracts/settlement_workshop_v2.js
+var combatMaterialPrices = Object.freeze({ "Eridium Shard": "30", "Overlord's Sigil": "20", "Astral Essence": "60", "Rare Scrap": "8", "Magic Scrap": "16", "Epic Scrap": "32", "Legendary Scrap": "64", "Mythic Scrap": "128", "Luminous Soul": "20", "Astral Shards": "40" });
+var workshopMaterialPrices = (p) => combatPlayer(p) ? combatMaterialPrices : WORKSHOP_MATERIAL_PRICES;
+var same14 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var WORKSHOP_MATERIAL_PRICES = Object.freeze({ ...WORKSHOP_POLICY.materials, "Rare Scrap": "40", "Magic Scrap": "80", "Epic Scrap": "160", "Legendary Scrap": "320", "Mythic Scrap": "640", "Luminous Soul": "100", "Astral Shards": "200" });
+function power(item) {
+  const n = progressionBigInt(item.generated.itemPower);
+  requireContract(n <= 1000n, "Workshop price domain exceeds supported progression");
+  return Number(n);
+}
+function exponentialCost(base, item, tierBase) {
+  const n = BigInt(5 * Math.max(0, power(item) - 1)), tier = workshopResult(item).tier;
+  return (BigInt(base) * 1045n ** n * BigInt(tierBase[0]) ** BigInt(tier) / (1000n ** n * BigInt(tierBase[1]) ** BigInt(tier))).toString();
+}
+function workshopQuote(p, item, op, line = 0) {
+  if (!item?.generated) return { problem: "Select ordinary generated equipment" };
+  const r = workshopResult(item), materials2 = {};
+  let gold = "0", problem = null;
+  if (item.locked || item.protected || item.unique || item.generated.definition.unique || item.sourceEntityId === null || Object.values(p.inventory.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item.sourceEntityId) || isClassKitSource(p, item.sourceEntityId)) problem = "Protected equipment cannot be modified or shattered";
+  if (op === "awaken") {
+    if (r.tier >= 5) problem = "Maximum five-star rarity";
+    if (r.enchants) problem = "Purge enchantments before awakening";
+    const n = r.tier + 1;
+    gold = String(combatPlayer(p) ? 150 * n * (1 + Math.floor(power(item) / 10)) : 2500 * n);
+    materials2["Eridium Shard"] = n;
+    materials2[["Monster Soul", "Rare Scrap", "Magic Scrap", "Epic Scrap", "Legendary Scrap", "Mythic Scrap"][n]] = 5 * n;
+  } else if (op === "reforge") {
+    if (!r.affixes.length) problem = "This item has no affix lines. Awaken it first.";
+    if (r.enchants) problem = "Purge enchantments before reforging";
+    if (!Number.isInteger(line) || line < 0 || line >= r.affixes.length || r.lockedLine !== null && r.lockedLine !== line) problem = "Select the unlocked reforge line";
+    gold = combatPlayer(p) ? String(30 + 5 * power(item) + 25 * r.tier) : exponentialCost(150, item, [2, 1]);
+    materials2["Overlord's Sigil"] = 1;
+  } else if (op === "enchant") {
+    const slot = item.generated.definition.slot === "ring" ? "ring1" : item.generated.definition.slot, attunement = Math.max(p.inventory.economy.slotLevels[slot] ?? 0, slot === "ring1" ? p.inventory.economy.slotLevels.ring2 ?? 0 : 0);
+    if (r.tier < 2) problem = "Magic (2-star) or better equipment required";
+    else if (attunement < (combatPlayer(p) ? 3 : 50)) problem = "Slot Attunement Level " + (combatPlayer(p) ? 3 : 50) + " required";
+    else if (r.enchants >= r.tier - 1) problem = "Maximum enchantments reached; purge to replace them";
+    materials2["Astral Essence"] = 1;
+  } else if (op === "purge") {
+    if (!r.enchants) problem = "No enchantments to purge";
+    gold = String((combatPlayer(p) ? 5 : 1e3) * power(item) * Math.max(1, r.tier));
+  } else if (op === "resonance") {
+    gold = combatPlayer(p) ? String(40 + 8 * power(item) + 30 * r.tier) : exponentialCost(100, item, [3, 2]);
+    materials2["Monster Soul"] = combatPlayer(p) ? 3 + 3 * r.tier : 25 + 25 * r.tier;
+  } else if (op === "shatter") {
+    if (Object.values(p.inventory.equipped).includes(item.itemId)) problem = "Unequip before shattering";
+  } else problem = "Unknown workshop operation";
+  if ((item.workshop?.steps.length ?? 0) >= MAX_WORKSHOP_STEPS && op !== "shatter") problem = "This item has reached its bounded modification history";
+  return { gold, materials: materials2, problem, preview: op === "shatter" ? salvageQuote(p, item).materials : op === "enchant" ? "One random active stat +25%" : op === "purge" ? "Restore the pre-enchantment stats" : op === "resonance" ? "A different supported two/three-piece set" : op === "awaken" ? `${r.tier} \u2192 ${r.tier + 1} stars; one additional modifier` : "Reroll only the selected affix; other lines remain locked" };
+}
+function workshopProblem(s, p, n, kind, payload) {
+  if (!hasServicesV2(s.d9World?.plannedWorld) || !p.inventory.services?.workshop) return "Workshop unavailable";
+  if (kind === "service.material") {
+    if (!n.services?.includes("materials")) return "This civilian does not sell materials";
+    if (!Object.hasOwn(WORKSHOP_MATERIAL_PRICES, payload.material)) return "Unknown material";
+    if ((p.inventory.services.workshop.materialPurchases[payload.material] ?? 0) + payload.quantity > 1e6) return "Material purchase bound";
+    return compareAmount(p.inventory.gold, multiplyAmount(workshopMaterialPrices(p)[payload.material], String(payload.quantity))) < 0 ? "Insufficient gold" : null;
+  }
+  const op = payload.operation;
+  if (!n.services?.includes(op)) return "This specialist does not provide that operation";
+  const item = p.inventory.itemsById[payload.itemId];
+  if (!item || item.ownerPlayerId !== p.playerId) return "Select carried equipment";
+  let q;
+  try {
+    q = workshopQuote(p, item, op, payload.line);
+  } catch (e) {
+    return e.message;
+  }
+  if (q.problem) return q.problem;
+  if (op === "shatter") return canSalvage(s, p, { itemId: item.itemId, inventoryRevision: p.inventory.revision, fingerprint: salvageQuote(p, item).fingerprint }) ? null : "Item cannot be shattered";
+  if (!p.inventory.services.workshop.records[item.itemId] && Object.keys(p.inventory.services.workshop.records).length >= MAX_WORKSHOP_ITEMS) return "Workshop record bound reached";
+  if (compareAmount(p.inventory.gold, q.gold) < 0) return "Insufficient gold";
+  if (!Object.entries(q.materials).every(([k, n2]) => (p.inventory.economy.materials[k] ?? 0) >= n2)) return "Insufficient materials";
+  return null;
+}
+function applyWorkshop(s, p, c, order) {
+  const inv = p.inventory, w = inv.services.workshop;
+  if (c.kind === "service.material") {
+    const key5 = c.payload.material;
+    inv.gold = subtractAmount(inv.gold, multiplyAmount(workshopMaterialPrices(p)[key5], String(c.payload.quantity)));
+    inv.economy.materials[key5] = (inv.economy.materials[key5] ?? 0) + c.payload.quantity;
+    w.materialPurchases[key5] = (w.materialPurchases[key5] ?? 0) + c.payload.quantity;
+    inv.revision++;
+    w.materialReceipts[key5] = { command: copyWire(c), authorityOrder: order, tick: s.tick, revision: inv.revision };
+    return;
+  }
+  const item = inv.itemsById[c.payload.itemId], op = c.payload.operation;
+  if (op === "shatter") {
+    const surrogate = copyWire(c);
+    surrogate.kind = "gear.salvage";
+    surrogate.payload = { itemId: item.itemId, inventoryRevision: inv.revision, fingerprint: salvageQuote(p, item).fingerprint };
+    applySalvage(s, p, surrogate, order);
+    inv.d7.salvaged[item.itemId].command = copyWire(c);
+    return;
+  }
+  const q = workshopQuote(p, item, op, c.payload.line);
+  inv.gold = subtractAmount(inv.gold, q.gold);
+  for (const [k, n] of Object.entries(q.materials)) {
+    inv.economy.materials[k] -= n;
+    if (!inv.economy.materials[k]) delete inv.economy.materials[k];
+  }
+  const record = w.records[item.itemId] ??= { baseItem: copyWire(unmodifiedItem(item)), receipts: [] };
+  inv.revision++;
+  record.receipts.push({ command: copyWire(c), authorityOrder: order, tick: s.tick, revision: inv.revision });
+  item.workshop ??= { version: WORKSHOP_VERSION, steps: [] };
+  item.workshop.steps.push({ kind: op, ...op === "reforge" ? { line: c.payload.line } : {} });
+  workshopResult(item);
+}
+function workshopAccounting(p) {
+  let gold = "0";
+  const materials2 = {}, w = p.inventory.services?.workshop;
+  if (!w) return { gold, materials: materials2 };
+  for (const [k, n] of Object.entries(w.materialPurchases)) {
+    gold = addAmount(gold, multiplyAmount(workshopMaterialPrices(p)[k], String(n)));
+    materials2[k] = n;
+  }
+  for (const r of Object.values(w.records)) {
+    let item = copyWire(r.baseItem);
+    for (const receipt of r.receipts) {
+      const c = receipt.command, q = workshopQuote(p, item, c.payload.operation, c.payload.line);
+      requireContract(!q.problem, q.problem ?? "Invalid modification");
+      gold = addAmount(gold, q.gold);
+      for (const [k, n] of Object.entries(q.materials)) materials2[k] = (materials2[k] ?? 0) - n;
+      item.workshop ??= { version: WORKSHOP_VERSION, steps: [] };
+      item.workshop.steps.push({ kind: c.payload.operation, ...c.payload.operation === "reforge" ? { line: c.payload.line } : {} });
+    }
+  }
+  return { gold, materials: materials2 };
+}
+function validateWorkshopItem(p, item) {
+  const w = p.inventory.services?.workshop, r = w?.records[item.itemId];
+  if (!item.workshop) {
+    requireContract(!r, "Modified item lost its overlay");
+    return;
+  }
+  requireContract(r && same14(r.baseItem, unmodifiedItem(item)), "Modification lacks original ownership");
+  closedRecord(item.workshop, ["version", "steps"]);
+  requireContract(item.workshop.version === WORKSHOP_VERSION, "Unknown modification version");
+  const expected = r.receipts.map((q) => ({ kind: q.command.payload.operation, ...q.command.payload.operation === "reforge" ? { line: q.command.payload.line } : {} }));
+  requireContract(same14(expected, item.workshop.steps), "Modification history mismatch");
+  workshopResult(item);
+}
+function validateWorkshop(s, p, validateCommand2) {
+  const w = p.inventory.services?.workshop;
+  if (!hasServicesV2(s.d9World?.plannedWorld)) {
+    requireContract(!w, "Unsolicited workshop");
+    return;
+  }
+  requireContract(w, "Missing workshop");
+  closedRecord(w, ["version", "records", "materialPurchases", "materialReceipts"]);
+  requireContract(w.version === WORKSHOP_VERSION && Object.keys(w.records).length <= MAX_WORKSHOP_ITEMS, "Workshop version/bound");
+  const orders = /* @__PURE__ */ new Set();
+  function stamp(r, kind) {
+    closedRecord(r, ["command", "authorityOrder", "tick", "revision"]);
+    validateCommand2(r.command);
+    requireContract(r.command.kind === kind && r.command.playerId === p.playerId && r.command.campaignId === s.campaign.campaignId && r.command.sessionId === s.session.sessionId, "Workshop command identity");
+    safeInteger(r.authorityOrder, 1, s.lastAppliedAuthorityOrder);
+    requireContract(!orders.has(r.authorityOrder), "Duplicate workshop authority order");
+    orders.add(r.authorityOrder);
+    const applied = s.appliedCommandsById[r.command.commandId];
+    if (applied) requireContract(applied.status === "applied" && applied.authorityOrder === r.authorityOrder && applied.commandCanonical === canonicalStringify(r.command), "Workshop applied receipt mismatch");
+    safeInteger(r.tick, 0, s.tick);
+    safeInteger(r.revision, 1, p.inventory.revision);
+    requireContract(r.command.payload.inventoryRevision + 1 === r.revision, "Workshop revision");
+    safeInteger(r.command.clientSequence, 1, s.appliedClientSequences[p.playerId]);
+  }
+  closedRecord(w.materialPurchases, [], Object.keys(WORKSHOP_MATERIAL_PRICES));
+  closedRecord(w.materialReceipts, Object.keys(w.materialPurchases));
+  for (const [k, n] of Object.entries(w.materialPurchases)) {
+    safeInteger(n, 1, 1e6);
+    const r = w.materialReceipts[k];
+    stamp(r, "service.material");
+    requireContract(r.command.payload.material === k, "Material receipt identity");
+  }
+  for (const [id, r] of Object.entries(w.records)) {
+    closedRecord(r, ["baseItem", "receipts"]);
+    requireContract(r.baseItem.itemId === id && r.baseItem.ownerPlayerId === p.playerId && !r.baseItem.workshop && r.receipts.length > 0 && r.receipts.length <= MAX_WORKSHOP_STEPS, "Workshop item record");
+    if (servicePurchase(p, r.baseItem.sourceEntityId)) validateServiceItem(s, p, r.baseItem);
+    else validateGeneratedGear(r.baseItem.generated, gearSeed(s, p, r.baseItem.sourceEntityId), r.baseItem.generated.progression ?? r.baseItem.generated.contentDepth);
+    let order = 0;
+    for (const a of r.receipts) {
+      stamp(a, "service.modify");
+      requireContract(a.command.payload.itemId === id && a.authorityOrder > order && a.command.payload.operation !== "shatter" && serviceNpcsFor(s.d9World.plannedWorld).find((n) => n.id === a.command.payload.npcId)?.services.includes(a.command.payload.operation), "Modification receipt order/specialist");
+      order = a.authorityOrder;
+    }
+    const current = p.inventory.itemsById[id] ?? p.inventory.renewal.groundBySourceId[r.baseItem.sourceEntityId]?.item ?? p.inventory.d7.salvaged[id]?.item ?? p.inventory.services.salesByItemId[id]?.item ?? s.d9World.paging.remoteGearByPlayer[p.playerId]?.[id]?.item;
+    if (current) validateWorkshopItem(p, current);
+    else requireContract(!p.inventory.rewardsByEntityId[r.baseItem.sourceEntityId], "Live modified reward disappeared");
+  }
+  workshopAccounting(p);
+}
+function validateWorkshopProgress(before, after, pid) {
+  const a = before.playersById[pid].inventory.services?.workshop, b = after.playersById[pid].inventory.services?.workshop;
+  if (!a) {
+    requireContract(!b || before.tick === 0 && after.tick === 0 && !before.d9World?.plannedWorld, "Workshop installation is genesis-only");
+    return;
+  }
+  requireContract(b, "Workshop removed");
+  for (const [id, r] of Object.entries(a.records)) {
+    const next = b.records[id];
+    requireContract(next && same14(r.baseItem, next.baseItem) && same14(r.receipts, next.receipts.slice(0, r.receipts.length)), "Workshop history rewritten");
+  }
+  for (const [id, r] of Object.entries(b.records)) for (const stamp of r.receipts.slice(a.records[id]?.receipts.length ?? 0)) {
+    requireContract(stamp.authorityOrder > before.lastAppliedAuthorityOrder && stamp.revision > before.playersById[pid].inventory.revision, "Modification lacks later command");
+    const old = before.playersById[pid].inventory.itemsById[id];
+    const source3 = r.baseItem.sourceEntityId;
+    requireContract(old || a.records[id] || before.playersById[pid].inventory.renewal.groundBySourceId[source3] || after.playersById[pid].inventory.services.purchasesBySourceId[source3] || after.playersById[pid].inventory.rewardsByEntityId[source3]?.claimed, "Modification lost ownership");
+  }
+  for (const [k, n] of Object.entries(a.materialPurchases)) requireContract((b.materialPurchases[k] ?? 0) >= n, "Material purchase history removed");
+  for (const [k, n] of Object.entries(b.materialPurchases)) {
+    const old = a.materialPurchases[k] ?? 0;
+    requireContract(n >= old, "Material history regressed");
+    if (n > old) requireContract(b.materialReceipts[k].authorityOrder > before.lastAppliedAuthorityOrder, "Material purchase lacks command");
+    else requireContract(same14(a.materialReceipts[k], b.materialReceipts[k]), "Material receipt rewritten");
+  }
+}
+function validWorkshopChange(p, a, b) {
+  return Boolean(b && workshopExtension(a, b) && p.inventory.services?.workshop?.records[b.itemId] && same14(b.workshop?.steps, p.inventory.services.workshop.records[b.itemId].receipts.map((r) => ({ kind: r.command.payload.operation, ...r.command.payload.operation === "reforge" ? { line: r.command.payload.line } : {} }))));
+}
+
 // src/shared/contracts/potion_belt_v1.js
 var POTION_BELT_POLICY = Object.freeze({
   version: "potion-belt-v1",
@@ -14185,7 +14326,7 @@ function validateServiceItem(s, p, item) {
 }
 function saleQuote(p, item) {
   const d = itemDefinition(item), o = p.inventory.renewal?.originsByItemId[item?.itemId];
-  if (!item || item.ownerPlayerId !== p.playerId || !o || item.sourceEntityId === null || !ordinary.has(item.definitionId) || item.locked || item.protected || item.unique || d?.unique || d?.classification === "unique-landmark" || Object.values(p.inventory.equipped).includes(item.itemId) || Object.values(p.inventory.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item.sourceEntityId) || (item.generated?.rarityTier ?? 0) > SETTLEMENT_LIFE_POLICY.sale.maximumRarity) return null;
+  if (!item || item.ownerPlayerId !== p.playerId || !o || item.sourceEntityId === null || !ordinary.has(item.definitionId) || item.locked || item.protected || item.unique || d?.unique || d?.classification === "unique-landmark" || Object.values(p.inventory.equipped).includes(item.itemId) || Object.values(p.inventory.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item.sourceEntityId) || isClassKitSource(p, item.sourceEntityId) || (item.generated?.rarityTier ?? 0) > SETTLEMENT_LIFE_POLICY.sale.maximumRarity) return null;
   if (!o.servicePurchase && !o.groupId) return null;
   const power2 = progressionBigInt(item.generated?.itemPower ?? 1), bounded = Number(power2 > BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) ? BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) : power2);
   return String(SETTLEMENT_LIFE_POLICY.sale.baseGold + bounded * SETTLEMENT_LIFE_POLICY.sale.perItemPower + (item.generated?.rarityTier ?? 0) * SETTLEMENT_LIFE_POLICY.sale.perRarityTier);
@@ -14431,7 +14572,7 @@ var salvageQuote = (p, item) => {
 };
 function canSalvage(s, p, payload) {
   const i = p.inventory, item = i.itemsById[payload.itemId], a = s.entitiesById[p.entityId], q = s.primary.actorsById[p.entityId];
-  return Boolean(i.d7 && item && a.alive && p.connectionStatus === "connected" && i.revision === payload.inventoryRevision && item.sourceEntityId !== null && item.definitionId !== "worn-sword" && !Object.values(i.equipped).includes(item.itemId) && !Object.values(i.subweapons.claims).some((c) => c.sourceEntityId === item.sourceEntityId) && !item.locked && !item.protected && !item.unique && !item.generated?.definition?.unique && !q.current && !q.heldCommandId && !q.queuedCommandId && salvageQuote(p, item).fingerprint === payload.fingerprint);
+  return Boolean(i.d7 && item && a.alive && p.connectionStatus === "connected" && i.revision === payload.inventoryRevision && item.sourceEntityId !== null && item.definitionId !== "worn-sword" && !Object.values(i.equipped).includes(item.itemId) && !Object.values(i.subweapons.claims).some((c) => c.sourceEntityId === item.sourceEntityId) && !isClassKitSource(p, item.sourceEntityId) && !item.locked && !item.protected && !item.unique && !item.generated?.definition?.unique && !q.current && !q.heldCommandId && !q.queuedCommandId && salvageQuote(p, item).fingerprint === payload.fingerprint);
 }
 function applySalvage(s, p, c, order) {
   requireContract(canSalvage(s, p, c.payload), "Ineligible salvage");
@@ -19143,7 +19284,7 @@ function validateForgeProgress(a, b, before) {
   if (!a.renewal) for (const [id, q] of Object.entries(a.economy.soulAwardsByEntityId)) requireContract(b.economy.soulAwardsByEntityId[id] === q, "Material history changed");
   let delta = 0;
   for (const slot of equipmentSlots(b)) {
-    const x = slot === "subweapon" && !a.subweapons ? 0 : a.economy.slotLevels[slot], y = b.economy.slotLevels[slot];
+    const x = slot === "subweapon" && !a.subweapons || slot === "gloves" && !a.classKit ? 0 : a.economy.slotLevels[slot], y = b.economy.slotLevels[slot];
     requireContract(y >= x, "Attunement regressed");
     delta += y - x;
     const r = b.economy.lastAttunementsBySlot[slot];
@@ -19320,61 +19461,6 @@ function validateSporeGenerationProgressV4(a, b) {
     if (n.generation > t.generation) requireContract(a.status === "active" && b.pods[i % 3] && n.firstRecycleTick !== null, "Spore recycle outside active event");
   }
   return true;
-}
-
-// src/shared/contracts/subweapon_inventory.js
-var D6_ACTIVITY_FORMAT = "saq-world-activity-d6-1";
-function provisionSourceId(p, type) {
-  return p.inventory?.subweapons?.claims[type]?.sourceEntityId ?? null;
-}
-function provisionType(p, id) {
-  return SUBWEAPON_TYPES.find((t) => provisionSourceId(p, t) === id) ?? null;
-}
-function installSubweaponInventory(p) {
-  const i = p.inventory;
-  if (i.subweapons) return;
-  i.subweapons = { version: "base-provisions-d6-1", claims: {} };
-  i.equipped.subweapon = null;
-  i.economy.slotLevels.subweapon = 0;
-}
-var provisionLevelAllowed = (p, type) => p.progression.level >= 2 || heroClassOf(p.d8)?.offhand === type;
-function canClaimSubweapon(s, p, payload) {
-  const i = p.inventory, a = s.entitiesById[p.entityId], q = s.primary.actorsById[p.entityId];
-  return Boolean(i.subweapons && a.alive && provisionLevelAllowed(p, payload.subType) && SUBWEAPON_TYPES.includes(payload.subType) && !i.subweapons.claims[payload.subType] && i.revision === payload.inventoryRevision && Object.keys(i.itemsById).length < inventoryIntakeCapacity(p.d8) && !q.current && !q.heldCommandId && !q.queuedCommandId);
-}
-function claimSubweapon(s, p, c, order) {
-  const i = p.inventory, type = c.payload.subType, sourceEntityId = `ent:${safeInteger(++s.identitySequence, 1).toString(16).padStart(32, "0")}`, itemId2 = `item:${p.playerId}:${sourceEntityId}`;
-  i.itemsById[itemId2] = { itemId: itemId2, definitionId: SUBWEAPONS[type].definitionId, ownerPlayerId: p.playerId, sourceEntityId };
-  i.renewal.originsByItemId[itemId2] = { provision: type, sourceEntityId };
-  i.revision++;
-  i.subweapons.claims[type] = { sourceEntityId, command: copyWire(c), authorityOrder: order, tick: s.tick, revision: i.revision };
-}
-function validateProvisions(p, s, validateCommand2) {
-  const i = p.inventory, b = i.subweapons;
-  closedRecord(b, ["version", "claims"]);
-  requireContract(s.format === D6_ACTIVITY_FORMAT && b.version === "base-provisions-d6-1", "Invalid provision version");
-  closedRecord(b.claims, [], SUBWEAPON_TYPES);
-  for (const [type, r] of Object.entries(b.claims)) {
-    closedRecord(r, ["sourceEntityId", "command", "authorityOrder", "tick", "revision"]);
-    requireContract(/^ent:[0-9a-f]{32}$/.test(r.sourceEntityId) && BigInt("0x" + r.sourceEntityId.slice(4)) <= BigInt(s.identitySequence), "Invalid provision identity fence");
-    validateCommand2(r.command);
-    const c = r.command;
-    requireContract(c.kind === "subweapon.claim" && c.payload.subType === type && c.playerId === p.playerId && c.sessionId === s.session.sessionId && c.campaignId === s.campaign.campaignId && provisionLevelAllowed(p, type), "Invalid provision receipt");
-    safeInteger(r.authorityOrder, 1, s.lastAppliedAuthorityOrder);
-    safeInteger(r.tick, 0, s.tick);
-    safeInteger(r.revision, 1, i.revision);
-    requireContract(c.payload.inventoryRevision + 1 === r.revision, "Provision revision mismatch");
-    safeInteger(c.clientSequence, 1, s.appliedClientSequences[p.playerId]);
-    safeInteger(c.residencyRevision, 1, s.entitiesById[p.entityId].residency.residencyRevision);
-    requireContract(s.spacesByInstanceId[c.spaceInstanceId]?.spaceRevision === c.spaceRevision, "Invalid provision space");
-    const applied = s.appliedCommandsById[c.commandId];
-    if (applied) requireContract(applied.status === "applied" && applied.commandCanonical === canonicalStringify(c) && applied.authorityOrder === r.authorityOrder && applied.tick === r.tick, "Provision applied receipt mismatch");
-    const id = provisionSourceId(p, type), item = i.itemsById[`item:${p.playerId}:${id}`] ?? i.renewal.groundBySourceId[id]?.item;
-    requireContract(item?.definitionId === SUBWEAPONS[type].definitionId, "Claimed subweapon lost or replaced");
-  }
-}
-function validateProvisionProgress(a, b) {
-  for (const [t, r] of Object.entries(a.subweapons.claims)) requireContract(canonicalStringify(r) === canonicalStringify(b.subweapons.claims[t]), "Provision history rewritten");
 }
 
 // src/shared/contracts/hollow_mouth_clearance_v3.js
@@ -19700,7 +19786,7 @@ function retireEncounterRewards(state, groupId) {
 }
 function validateRenewableInventory(p, state, validateCommand2, legacyDefeatReward) {
   const inv = p.inventory, n = inv.renewal;
-  closedRecord(inv, ["version", "economy", "revision", "gold", "goldAwardsByEntityId", "itemsById", "equipped", "rewardsByEntityId", "lastEquipmentChange", "topologyMigration", "renewal"], ["subweapons", "d7", "services"]);
+  closedRecord(inv, ["version", "economy", "revision", "gold", "goldAwardsByEntityId", "itemsById", "equipped", "rewardsByEntityId", "lastEquipmentChange", "topologyMigration", "renewal"], ["subweapons", "d7", "services", "classKit"]);
   validateSettlementServices(state, p, validateCommand2);
   closedRecord(n, ["version", "baseGold", "baseSouls", "retiredGold", "retiredSouls", "defeats", "groundBySourceId", "originsByItemId", "lastDrop", "lastGroundPickup"]);
   requireContract(n.version === "renewable-inventory-d5-v1", "Unsupported renewable inventory");
@@ -19712,11 +19798,18 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
   safeInteger(n.defeats);
   closedRecord(inv.equipped, equipmentSlots(inv));
   if (inv.subweapons) validateProvisions(p, state, validateCommand2);
+  if (inv.classKit) validateClassKit(p, state, validateCommand2);
   const items = Object.values(inv.itemsById), drops = Object.values(n.groundBySourceId), starter = itemId(p, null);
   requireContract(items.length >= 1 && items.length <= (p.d8 ? D8_OWNERSHIP_BOUND : 64) && inv.itemsById[starter]?.definitionId === "worn-sword", "Owned inventory/starter bound");
   function origin2(o, id) {
     if (o?.servicePurchase) {
       validateServiceOrigin(p, o, id);
+      return;
+    }
+    const kit = classKitPiece(p, id);
+    if (kit) {
+      closedRecord(o, ["kit", "sourceEntityId"]);
+      requireContract(o.kit === kit && o.sourceEntityId === id, "Unknown class kit provenance");
       return;
     }
     const t = provisionType(p, id);
@@ -19879,6 +19972,7 @@ function validateRenewableInventoryProgress(before, after, pid) {
   if (!a.subweapons && b.subweapons) installSubweaponInventory({ inventory: a });
   const x = a.renewal, y = b.renewal;
   if (a.subweapons) validateProvisionProgress(a, b);
+  validateClassKitProgress(a, b);
   requireContract(same24(x.baseGold, y.baseGold) && x.baseSouls === y.baseSouls && compareAmount(y.retiredGold, x.retiredGold) >= 0 && y.retiredSouls >= x.retiredSouls && y.defeats >= x.defeats && b.revision >= a.revision, "Economy baseline/counters regressed");
   for (const [id, item] of Object.entries(a.itemsById)) {
     const terminal = b.d7?.salvaged[id] ?? b.services?.salesByItemId[id], next = b.itemsById[id] ?? b.renewal.groundBySourceId[item.sourceEntityId]?.item ?? terminal?.item;
@@ -22292,10 +22386,13 @@ export {
   SUBWEAPONS,
   attunementCost,
   effectiveEquipmentBonuses,
+  CLASS_KIT_PIECES,
+  CLASS_KITS,
   itemDefinition,
   equipmentRequiredLevel,
   equipmentLevelAllowed,
   equipmentSlots,
+  listedEquipmentSlots,
   equipmentAfter,
   CONTENT_REWARD_VERSION,
   hashReward,
@@ -22602,8 +22699,6 @@ export {
   projectSmallCaveFinaleExtractionD13D_C,
   projectStandardCaveBossExtractionD13D_E,
   projectLargeCaveFinaleExtractionD13D_G,
-  workshopMaterialPrices,
-  workshopQuote,
   CONSTELLATIONS,
   ACTIVE_NODES,
   MASTERY_FAMILIES,
@@ -22624,6 +22719,14 @@ export {
   inventoryIntakeCapacity,
   emptyMasteryTransient,
   validateD8Advance,
+  D6_ACTIVITY_FORMAT,
+  installSubweaponInventory,
+  canClaimSubweapon,
+  claimSubweapon,
+  canClaimClassKit,
+  claimClassKit,
+  workshopMaterialPrices,
+  workshopQuote,
   POTION_BELT_POLICY,
   potionCapacity,
   potionHealPercent,
@@ -22758,10 +22861,6 @@ export {
   participantGroundCoverageRefreshDueD9,
   groundCoverageStatusD9,
   installGroundOccupancyD9,
-  D6_ACTIVITY_FORMAT,
-  installSubweaponInventory,
-  canClaimSubweapon,
-  claimSubweapon,
   runtimeCollisionPageD92 as runtimeCollisionPageD9,
   runtimeHollowVisualV4,
   acceptedEventGearGeographyV2,
