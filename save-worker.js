@@ -9295,8 +9295,8 @@ function validateGenerationIdentity(identity) {
 
 // src/shared/content/generated_gear_d9.js
 var GEAR_VERSION = "dungeon-gear-d9-v1";
-var RARITY_NAMES = Object.freeze(["Common", "Rare", "Magic", "Epic", "Legendary", "Mythic"]);
-var RARITY_COLORS = Object.freeze(["#ffffff", "#3498db", "#9b59b6", "#e67e22", "#f1c40f", "#e74c3c"]);
+var RARITY_NAMES = Object.freeze(["Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic"]);
+var RARITY_COLORS = Object.freeze(["#ffffff", "#2ecc71", "#3498db", "#9b59b6", "#e67e22", "#e74c3c"]);
 var SALVAGE_MATERIALS = Object.freeze(["Monster Soul", "Rare Scrap", "Magic Scrap", "Epic Scrap", "Legendary Scrap", "Mythic Scrap"]);
 var GEAR_FAMILIES = Object.freeze(["weapon", "subweapon", "helmet", "chest", "leggings", "overall", "boots", "ring"]);
 var ONE_PIECE_GEAR_FAMILIES = Object.freeze(GEAR_FAMILIES.filter((f2) => f2 !== "chest" && f2 !== "leggings"));
@@ -9813,8 +9813,8 @@ function rollEquipmentRarity(options) {
 
 // src/shared/content/generated_gear_v1.js
 var GEAR_VERSION2 = "dungeon-gear-d7-v1";
-var RARITY_NAMES2 = Object.freeze(["Common", "Rare", "Magic", "Epic", "Legendary", "Mythic"]);
-var RARITY_COLORS2 = Object.freeze(["#ffffff", "#3498db", "#9b59b6", "#e67e22", "#f1c40f", "#e74c3c"]);
+var RARITY_NAMES2 = Object.freeze(["Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic"]);
+var RARITY_COLORS2 = Object.freeze(["#ffffff", "#2ecc71", "#3498db", "#9b59b6", "#e67e22", "#e74c3c"]);
 var SALVAGE_MATERIALS2 = Object.freeze(["Monster Soul", "Rare Scrap", "Magic Scrap", "Epic Scrap", "Legendary Scrap", "Mythic Scrap"]);
 var GEAR_FAMILIES2 = Object.freeze(["weapon", "subweapon", "helmet", "chest", "leggings", "overall", "boots", "ring"]);
 var GEAR_NOUNS2 = Object.freeze({ weapon: ["Greatsword", "Longsword", "Halberd", "Warhammer", "Battleaxe", "Broadsword", "Flanged Mace", "Claymore"], shield: ["Kite Shield", "Tower Shield", "Buckler", "Aegis", "Heater Shield"], dagger: ["Kris", "Stiletto", "Baselard", "Dirk", "Main-Gauche"], tome: ["Grimoire", "Spellbook", "Codex", "Lexicon", "Chronicle"], helmet: ["Greathelm", "Armet", "Visor"], chest: ["Hauberk", "Cuirass", "Brigandine", "Plate Mail", "Chain Mail", "Doublet"], leggings: ["Greaves", "Legplates", "Chausses", "Cuisses"], boots: ["Sabatons", "Sollerets", "Steel Boots", "Treads"], overall: ["Exosuit", "Inquisitor Robes", "Full Plate Armor", "Trenchcoat"], ring: ["Signet Ring", "Loop Ring", "Band Ring", "Seal Ring"] });
@@ -10129,8 +10129,8 @@ function dungeonItemBases2(item, stageScale) {
 
 // src/shared/content/generated_gear_d7_v2.js
 var GEAR_VERSION3 = "dungeon-gear-d7-v2";
-var RARITY_NAMES3 = Object.freeze(["Common", "Rare", "Magic", "Epic", "Legendary", "Mythic"]);
-var RARITY_COLORS3 = Object.freeze(["#ffffff", "#3498db", "#9b59b6", "#e67e22", "#f1c40f", "#e74c3c"]);
+var RARITY_NAMES3 = Object.freeze(["Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic"]);
+var RARITY_COLORS3 = Object.freeze(["#ffffff", "#2ecc71", "#3498db", "#9b59b6", "#e67e22", "#e74c3c"]);
 var SALVAGE_MATERIALS3 = Object.freeze(["Monster Soul", "Rare Scrap", "Magic Scrap", "Epic Scrap", "Legendary Scrap", "Mythic Scrap"]);
 var GEAR_FAMILIES3 = Object.freeze(["weapon", "subweapon", "helmet", "chest", "leggings", "overall", "boots", "ring"]);
 var GEAR_NOUNS3 = Object.freeze({ weapon: ["Greatsword", "Longsword", "Halberd", "Warhammer", "Battleaxe", "Broadsword", "Flanged Mace", "Claymore"], shield: ["Kite Shield", "Tower Shield", "Buckler", "Aegis", "Heater Shield"], dagger: ["Kris", "Stiletto", "Baselard", "Dirk", "Main-Gauche"], tome: ["Grimoire", "Spellbook", "Codex", "Lexicon", "Chronicle"], helmet: ["Greathelm", "Armet", "Visor"], chest: ["Hauberk", "Cuirass", "Brigandine", "Plate Mail", "Chain Mail", "Doublet"], leggings: ["Greaves", "Legplates", "Chausses", "Cuisses"], boots: ["Sabatons", "Sollerets", "Steel Boots", "Treads"], overall: ["Exosuit", "Inquisitor Robes", "Full Plate Armor", "Trenchcoat"], ring: ["Signet Ring", "Loop Ring", "Band Ring", "Seal Ring"] });
@@ -10207,8 +10207,8 @@ function generateGear2(seed, input, { tier: tier2 = null, family: family2 = null
 
 // src/shared/content/generated_gear.js
 var GEAR_VERSION4 = "dungeon-gear-d8-v1";
-var RARITY_NAMES4 = Object.freeze(["Common", "Rare", "Magic", "Epic", "Legendary", "Mythic"]);
-var RARITY_COLORS4 = Object.freeze(["#ffffff", "#3498db", "#9b59b6", "#e67e22", "#f1c40f", "#e74c3c"]);
+var RARITY_NAMES4 = Object.freeze(["Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic"]);
+var RARITY_COLORS4 = Object.freeze(["#ffffff", "#2ecc71", "#3498db", "#9b59b6", "#e67e22", "#e74c3c"]);
 var SALVAGE_MATERIALS4 = Object.freeze(["Monster Soul", "Rare Scrap", "Magic Scrap", "Epic Scrap", "Legendary Scrap", "Mythic Scrap"]);
 var GEAR_FAMILIES4 = Object.freeze(["weapon", "subweapon", "helmet", "chest", "leggings", "overall", "boots", "ring"]);
 var GEAR_NOUNS4 = Object.freeze({ weapon: ["Greatsword", "Longsword", "Halberd", "Warhammer", "Battleaxe", "Broadsword", "Flanged Mace", "Claymore"], shield: ["Kite Shield", "Tower Shield", "Buckler", "Aegis", "Heater Shield"], dagger: ["Kris", "Stiletto", "Baselard", "Dirk", "Main-Gauche"], tome: ["Grimoire", "Spellbook", "Codex", "Lexicon", "Chronicle"], helmet: ["Greathelm", "Armet", "Visor"], chest: ["Hauberk", "Cuirass", "Brigandine", "Plate Mail", "Chain Mail", "Doublet"], leggings: ["Greaves", "Legplates", "Chausses", "Cuisses"], boots: ["Sabatons", "Sollerets", "Steel Boots", "Treads"], overall: ["Exosuit", "Inquisitor Robes", "Full Plate Armor", "Trenchcoat"], ring: ["Signet Ring", "Loop Ring", "Band Ring", "Seal Ring"] });

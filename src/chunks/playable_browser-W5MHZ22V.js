@@ -768,7 +768,7 @@ import {
   worldLevelGapMultiplier,
   worldOrdinaryMeleeProfile,
   worldPointForArea
-} from "./chunk-CDF34YLZ.js";
+} from "./chunk-VOHHVSOZ.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -15565,10 +15565,10 @@ var P2 = {
 };
 var ACC = [
   { c: "#8d999b", d: "#6f7a7c", gem: null },
+  { c: "#2ecc71", d: "#1e8449", gem: "#2ecc71" },
   { c: "#3498db", d: "#21618c", gem: "#3498db" },
   { c: "#a569bd", d: "#6c3483", gem: "#9b59b6" },
   { c: "#e67e22", d: "#a04000", gem: "#e67e22" },
-  { c: "#f1c40f", d: "#b7950b", gem: "#f1c40f" },
   { c: "#e74c3c", d: "#922b21", gem: "#e74c3c" }
 ];
 var accOf = (piece2) => ACC[piece2?.tier ?? 0] ?? ACC[0];
