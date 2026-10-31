@@ -869,7 +869,7 @@ body #world-hud-vitals #world-xp-bar{height:6px}
 .vbar{position:absolute;left:0;right:0;overflow:hidden;pointer-events:none;border-radius:999px;z-index:0}
 .vbar>i,.vbar-fill>i{position:absolute;inset:0;display:block;transform-origin:left center}
 .vbar-hp{top:0;bottom:0;background:linear-gradient(180deg,#14090e,#28121b);box-shadow:inset 0 1px 3px #000d,0 0 0 1px #0b1017,0 0 0 2px #8a5b62}
-.vbar-hp .vbar-trail{background:linear-gradient(180deg,#fff0b8,#ff9a3a)}
+.vbar-hp .vbar-trail{border-radius:999px;background:linear-gradient(180deg,#fff0b8,#ff9a3a)}
 .vbar-hp.flash .vbar-trail{background:#fff}
 .vbar-hp .vbar-fill{border-radius:999px;background:linear-gradient(180deg,#ff9a92 0%,#f44a5c 42%,#c2213f 78%,#8e1530 100%);box-shadow:inset 0 -2px 0 #00000030,0 0 10px #ff4d6a70}
 .vbar-hp .vbar-ticks{background:repeating-linear-gradient(90deg,transparent 0 calc(25% - 1px),#1a0a1066 calc(25% - 1px) 25%)}
@@ -1083,7 +1083,9 @@ body.skill-arc-v1 .shadow-dash[data-cooling=true] svg{opacity:.4}
 body.skill-arc-v1 .shadow-dash .move-label{display:none}
 body.skill-arc-v1 .shadow-dash .move-time{grid-area:1/1;z-index:1;font:800 13px/1 var(--rpg-ui);color:#fff;text-shadow:0 1px 2px #000,0 0 4px #000}
 body.skill-arc-v1 .subweapon-hud{left:calc(12px + var(--world-safe-left));right:auto;bottom:calc(80px + var(--world-safe-bottom));max-width:min(300px,calc(100vw - 250px))}
-@media(max-width:600px){body.skill-arc-v1 #rpg-interaction-v2{bottom:calc(252px + var(--world-safe-bottom))!important}}
+/* Phone portrait: the wheel fills the lower right, so the pickup prompt sits low
+   on the left, just above the Potion button, clear of the hero and the slots. */
+@media(max-width:600px){body.skill-arc-v1 #rpg-interaction-v2{left:calc(12px + var(--world-safe-left));transform:none;bottom:calc(120px + var(--world-safe-bottom))!important;min-width:0;max-width:calc(100vw - 172px - var(--world-safe-left) - var(--world-safe-right))}}
 .vbar-barrier{position:absolute;left:8px;right:8px;top:-6px;height:4px;border-radius:2px;background:#0c161dd9;overflow:hidden;pointer-events:none;box-shadow:0 0 0 1px #0b1017}
 .vbar-barrier[hidden]{display:none}
 .vbar-barrier .vbar-fill{position:absolute;inset:0;transform-origin:0 50%;background:linear-gradient(90deg,#8fd8ff,#e6f8ff);box-shadow:0 0 6px #8fd8ff;transition:transform .25s ease-out}

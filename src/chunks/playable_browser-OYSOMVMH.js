@@ -35212,11 +35212,8 @@ function createSettlementServicesMenu2(options) {
     i.alt = "";
     return i;
   };
-  const supplyButton = button("", () => {
-    const m = readModel();
-    if (!m.potions?.count || m.potions.cooldownTicks > 0 || busy) return;
-    issue("supply.use", {});
-  }, "drink-potion");
+  const supplyButton = button("", drink, "drink-potion");
+  supplyButton.addEventListener("mousedown", (e) => e.preventDefault());
   supplyButton.id = "carried-rations";
   supplyButton.classList.add("potion-button");
   supplyButton.style.cssText = "position:absolute;left:78px;top:12px;z-index:8;padding:10px;background:#282033;color:#f2db9d;border:1px solid #ad9359;border-radius:6px";
@@ -35229,6 +35226,16 @@ function createSettlementServicesMenu2(options) {
     confirm = null;
     key2 = null;
     refresh(readModel());
+  }
+  async function drink() {
+    const m = readModel();
+    if (!m.potions?.count || m.potions.cooldownTicks > 0 || busy) return;
+    try {
+      const result = await adapter.issue("supply.use", { inventoryRevision: m.inventory.revision });
+      if (!["admitted", "alreadyApplied"].includes(result?.status)) throw Error("Could not drink the potion. Try again.");
+    } catch (e) {
+      reportError(e.message);
+    }
   }
   async function issue(kind, payload) {
     if (busy) return;
@@ -35807,13 +35814,14 @@ function createVitalsHudV4(doc) {
       hpTrack.append(s);
     }
   }
-  const scale = (el, value2) => {
-    const text2 = `scaleX(${Math.max(0, Math.min(1, value2)).toFixed(4)})`;
+  const paint = (el, text2) => {
     if (painted.get(el) !== text2) {
       painted.set(el, text2);
       el.style.transform = text2;
     }
   };
+  const scale = (el, value2) => paint(el, `scaleX(${Math.max(0, Math.min(1, value2)).toFixed(4)})`);
+  const slide = (el, value2) => paint(el, `translateX(${((Math.max(0, Math.min(1, value2)) - 1) * 100).toFixed(2)}%)`);
   const retrigger = (el, cls) => {
     el.classList.remove(cls);
     void el.offsetWidth;
@@ -35821,9 +35829,9 @@ function createVitalsHudV4(doc) {
   };
   function update(hpData) {
     if (hp && hpData) {
-      const a = hpData.actual;
-      scale(hpFill, a);
-      scale(hpTrail, Math.max(a, hpData.trail));
+      const a = hpData.actual, t = Math.max(a, hpData.trail);
+      slide(hpFill, a);
+      slide(hpTrail, t > a + 1e-3 ? t : 0);
       if (lastHp !== null) {
         if (a > lastHp + 2e-3) retrigger(hp, "heal");
         else if (a < lastHp - 2e-3) {
@@ -62569,7 +62577,7 @@ async function createLocalEndlessSessionD9(options) {
   let ferryPending = null, servicePending = null, respawnPending = null, reviewTravelPending = false;
   const saveAwarePort = Object.freeze({ ...clientPort, send(command) {
     if (servicePending || ferryPending || respawnPending) return { status: "busy" };
-    if (command.kind === "discovery.readNote" || command.kind.startsWith("service.") || command.kind === "supply.use" || command.kind === "forge.attune") {
+    if (command.kind === "discovery.readNote" || command.kind.startsWith("service.") || command.kind === "forge.attune") {
       servicePending = (async () => {
         try {
           if (saving) await saving;
