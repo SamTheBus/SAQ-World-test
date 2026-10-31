@@ -1,0 +1,350 @@
+{
+  "version": "frostland-nature-v1",
+  "source": "Code-drawn biome nature art v3 (the SAQ World overworld biome mockups), baked with Chromium canvas at 5 px per mockup unit (1 unit = 1 game px at 32 px tiles). No ground shadows; anchor = [x, y] of the ground point inside each slot. No third-party game art.",
+  "pxPerUnit": 5,
+  "files": [
+    {
+      "path": "trees.webp",
+      "sha256": "edcea2e32524792507bb18febb5bdde2f52b69dfa39421b615009ce0d07e80b7",
+      "bytes": 155920,
+      "width": 1830,
+      "height": 904,
+      "decodeLimit": 256,
+      "role": "trees",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "pine",
+          "seed": 3,
+          "x": 694,
+          "y": 12,
+          "width": 270,
+          "height": 409,
+          "anchor": [
+            135,
+            389
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "pine",
+          "seed": 11,
+          "x": 976,
+          "y": 12,
+          "width": 264,
+          "height": 409,
+          "anchor": [
+            132,
+            389
+          ]
+        },
+        {
+          "id": 2,
+          "kind": "pine",
+          "seed": 29,
+          "x": 1252,
+          "y": 12,
+          "width": 256,
+          "height": 409,
+          "anchor": [
+            128,
+            389
+          ]
+        },
+        {
+          "id": 3,
+          "kind": "fir",
+          "seed": 3,
+          "x": 12,
+          "y": 12,
+          "width": 210,
+          "height": 514,
+          "anchor": [
+            105,
+            496
+          ]
+        },
+        {
+          "id": 4,
+          "kind": "fir",
+          "seed": 11,
+          "x": 234,
+          "y": 12,
+          "width": 218,
+          "height": 514,
+          "anchor": [
+            109,
+            496
+          ]
+        },
+        {
+          "id": 5,
+          "kind": "fir",
+          "seed": 29,
+          "x": 464,
+          "y": 12,
+          "width": 218,
+          "height": 514,
+          "anchor": [
+            109,
+            496
+          ]
+        },
+        {
+          "id": 6,
+          "kind": "snowbirch",
+          "seed": 3,
+          "x": 372,
+          "y": 538,
+          "width": 288,
+          "height": 337,
+          "anchor": [
+            144,
+            320
+          ]
+        },
+        {
+          "id": 7,
+          "kind": "snowbirch",
+          "seed": 11,
+          "x": 1520,
+          "y": 12,
+          "width": 298,
+          "height": 368,
+          "anchor": [
+            149,
+            351
+          ]
+        },
+        {
+          "id": 8,
+          "kind": "snowbirch",
+          "seed": 29,
+          "x": 12,
+          "y": 538,
+          "width": 348,
+          "height": 354,
+          "anchor": [
+            174,
+            337
+          ]
+        }
+      ]
+    },
+    {
+      "path": "understory.webp",
+      "sha256": "a9ff93ae25a88c6c652cc3e223639c304016ddf1a68887e675c6ef4aa1076b3c",
+      "bytes": 50374,
+      "width": 1828,
+      "height": 184,
+      "decodeLimit": 128,
+      "role": "understory",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "bush",
+          "seed": 3,
+          "x": 812,
+          "y": 12,
+          "width": 256,
+          "height": 156,
+          "anchor": [
+            128,
+            149
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "bush",
+          "seed": 17,
+          "x": 12,
+          "y": 12,
+          "width": 250,
+          "height": 160,
+          "anchor": [
+            125,
+            152
+          ]
+        },
+        {
+          "id": 2,
+          "kind": "holly",
+          "seed": 3,
+          "x": 274,
+          "y": 12,
+          "width": 256,
+          "height": 159,
+          "anchor": [
+            128,
+            153
+          ]
+        },
+        {
+          "id": 3,
+          "kind": "holly",
+          "seed": 17,
+          "x": 542,
+          "y": 12,
+          "width": 258,
+          "height": 159,
+          "anchor": [
+            129,
+            153
+          ]
+        },
+        {
+          "id": 4,
+          "kind": "deadbush",
+          "seed": 3,
+          "x": 1080,
+          "y": 12,
+          "width": 236,
+          "height": 138,
+          "anchor": [
+            118,
+            123
+          ]
+        },
+        {
+          "id": 5,
+          "kind": "deadbush",
+          "seed": 17,
+          "x": 1328,
+          "y": 12,
+          "width": 234,
+          "height": 130,
+          "anchor": [
+            117,
+            115
+          ]
+        },
+        {
+          "id": 6,
+          "kind": "tuft",
+          "seed": 3,
+          "x": 1704,
+          "y": 12,
+          "width": 112,
+          "height": 80,
+          "anchor": [
+            56,
+            68
+          ]
+        },
+        {
+          "id": 7,
+          "kind": "tuft",
+          "seed": 17,
+          "x": 1574,
+          "y": 12,
+          "width": 118,
+          "height": 93,
+          "anchor": [
+            59,
+            80
+          ]
+        }
+      ]
+    },
+    {
+      "path": "rocks.webp",
+      "sha256": "a6d15d9e8ef1dd3014809eae6134e7dd50ee3752536ad28af1dd4047cf2e45f7",
+      "bytes": 50342,
+      "width": 1024,
+      "height": 253,
+      "decodeLimit": 128,
+      "role": "rocks",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "snowrock",
+          "seed": 3,
+          "x": 528,
+          "y": 12,
+          "width": 236,
+          "height": 173,
+          "anchor": [
+            118,
+            166
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "snowrock",
+          "seed": 17,
+          "x": 776,
+          "y": 12,
+          "width": 236,
+          "height": 162,
+          "anchor": [
+            118,
+            158
+          ]
+        },
+        {
+          "id": 2,
+          "kind": "crystals",
+          "seed": 3,
+          "x": 12,
+          "y": 12,
+          "width": 246,
+          "height": 229,
+          "anchor": [
+            123,
+            178
+          ]
+        },
+        {
+          "id": 3,
+          "kind": "crystals",
+          "seed": 17,
+          "x": 270,
+          "y": 12,
+          "width": 246,
+          "height": 229,
+          "anchor": [
+            123,
+            178
+          ]
+        }
+      ]
+    },
+    {
+      "path": "accents.webp",
+      "sha256": "dc6c13ad973850a461caf0a7b49be7ac7c8fae9e926e723580a6d2dd49d7f263",
+      "bytes": 12978,
+      "width": 660,
+      "height": 160,
+      "decodeLimit": 128,
+      "role": "accents",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "log",
+          "seed": 3,
+          "x": 12,
+          "y": 12,
+          "width": 312,
+          "height": 136,
+          "anchor": [
+            156,
+            121
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "log",
+          "seed": 17,
+          "x": 336,
+          "y": 12,
+          "width": 312,
+          "height": 136,
+          "anchor": [
+            156,
+            121
+          ]
+        }
+      ]
+    }
+  ]
+}

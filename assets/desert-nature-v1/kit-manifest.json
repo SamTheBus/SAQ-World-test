@@ -1,0 +1,376 @@
+{
+  "version": "desert-nature-v1",
+  "source": "Code-drawn biome nature art v3 (the SAQ World overworld biome mockups), baked with Chromium canvas at 5 px per mockup unit (1 unit = 1 game px at 32 px tiles). No ground shadows; anchor = [x, y] of the ground point inside each slot. No third-party game art.",
+  "pxPerUnit": 5,
+  "files": [
+    {
+      "path": "trees.webp",
+      "sha256": "c181ca6947794dc1217ca88e46020800d7fca68a8c84dab0d5e0c986850c875f",
+      "bytes": 117544,
+      "width": 1942,
+      "height": 655,
+      "decodeLimit": 256,
+      "role": "trees",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "saguaro",
+          "seed": 3,
+          "x": 12,
+          "y": 12,
+          "width": 224,
+          "height": 328,
+          "anchor": [
+            112,
+            310
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "saguaro",
+          "seed": 11,
+          "x": 484,
+          "y": 12,
+          "width": 224,
+          "height": 327,
+          "anchor": [
+            112,
+            309
+          ]
+        },
+        {
+          "id": 2,
+          "kind": "saguaro",
+          "seed": 29,
+          "x": 248,
+          "y": 12,
+          "width": 224,
+          "height": 328,
+          "anchor": [
+            112,
+            310
+          ]
+        },
+        {
+          "id": 3,
+          "kind": "joshua",
+          "seed": 3,
+          "x": 334,
+          "y": 352,
+          "width": 324,
+          "height": 289,
+          "anchor": [
+            162,
+            261
+          ]
+        },
+        {
+          "id": 4,
+          "kind": "joshua",
+          "seed": 11,
+          "x": 670,
+          "y": 352,
+          "width": 314,
+          "height": 289,
+          "anchor": [
+            157,
+            261
+          ]
+        },
+        {
+          "id": 5,
+          "kind": "joshua",
+          "seed": 29,
+          "x": 12,
+          "y": 352,
+          "width": 310,
+          "height": 291,
+          "anchor": [
+            155,
+            263
+          ]
+        },
+        {
+          "id": 6,
+          "kind": "mesquite",
+          "seed": 3,
+          "x": 720,
+          "y": 12,
+          "width": 398,
+          "height": 299,
+          "anchor": [
+            199,
+            281
+          ]
+        },
+        {
+          "id": 7,
+          "kind": "mesquite",
+          "seed": 11,
+          "x": 1130,
+          "y": 12,
+          "width": 392,
+          "height": 295,
+          "anchor": [
+            196,
+            277
+          ]
+        },
+        {
+          "id": 8,
+          "kind": "mesquite",
+          "seed": 29,
+          "x": 1534,
+          "y": 12,
+          "width": 396,
+          "height": 292,
+          "anchor": [
+            198,
+            274
+          ]
+        }
+      ]
+    },
+    {
+      "path": "understory.webp",
+      "sha256": "7ce53abcacdb9782c16cd5fcb1ac4a887c60a2abb99c4cdd941c5b1b819ec65c",
+      "bytes": 67748,
+      "width": 1876,
+      "height": 223,
+      "decodeLimit": 128,
+      "role": "understory",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "barrel",
+          "seed": 3,
+          "x": 492,
+          "y": 12,
+          "width": 144,
+          "height": 146,
+          "anchor": [
+            72,
+            130
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "barrel",
+          "seed": 17,
+          "x": 648,
+          "y": 12,
+          "width": 144,
+          "height": 146,
+          "anchor": [
+            72,
+            130
+          ]
+        },
+        {
+          "id": 2,
+          "kind": "pricklypear",
+          "seed": 3,
+          "x": 12,
+          "y": 12,
+          "width": 228,
+          "height": 199,
+          "anchor": [
+            114,
+            189
+          ]
+        },
+        {
+          "id": 3,
+          "kind": "pricklypear",
+          "seed": 17,
+          "x": 252,
+          "y": 12,
+          "width": 228,
+          "height": 199,
+          "anchor": [
+            114,
+            189
+          ]
+        },
+        {
+          "id": 4,
+          "kind": "agave",
+          "seed": 3,
+          "x": 1406,
+          "y": 12,
+          "width": 194,
+          "height": 116,
+          "anchor": [
+            97,
+            102
+          ]
+        },
+        {
+          "id": 5,
+          "kind": "agave",
+          "seed": 17,
+          "x": 1204,
+          "y": 12,
+          "width": 190,
+          "height": 118,
+          "anchor": [
+            95,
+            104
+          ]
+        },
+        {
+          "id": 6,
+          "kind": "shrub",
+          "seed": 3,
+          "x": 804,
+          "y": 12,
+          "width": 190,
+          "height": 139,
+          "anchor": [
+            95,
+            126
+          ]
+        },
+        {
+          "id": 7,
+          "kind": "shrub",
+          "seed": 17,
+          "x": 1006,
+          "y": 12,
+          "width": 186,
+          "height": 139,
+          "anchor": [
+            93,
+            126
+          ]
+        },
+        {
+          "id": 8,
+          "kind": "tuft",
+          "seed": 3,
+          "x": 1746,
+          "y": 12,
+          "width": 118,
+          "height": 86,
+          "anchor": [
+            59,
+            73
+          ]
+        },
+        {
+          "id": 9,
+          "kind": "tuft",
+          "seed": 17,
+          "x": 1612,
+          "y": 12,
+          "width": 122,
+          "height": 99,
+          "anchor": [
+            61,
+            86
+          ]
+        }
+      ]
+    },
+    {
+      "path": "rocks.webp",
+      "sha256": "6307af7cbba56860660a0e2491b60ce6c957e9b6a2a95cf7c685d8de968e32f2",
+      "bytes": 24962,
+      "width": 866,
+      "height": 275,
+      "decodeLimit": 128,
+      "role": "rocks",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "pillar",
+          "seed": 3,
+          "x": 12,
+          "y": 12,
+          "width": 178,
+          "height": 251,
+          "anchor": [
+            89,
+            225
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "pillar",
+          "seed": 17,
+          "x": 202,
+          "y": 12,
+          "width": 178,
+          "height": 251,
+          "anchor": [
+            89,
+            225
+          ]
+        },
+        {
+          "id": 2,
+          "kind": "rock",
+          "seed": 3,
+          "x": 392,
+          "y": 12,
+          "width": 226,
+          "height": 143,
+          "anchor": [
+            113,
+            114
+          ]
+        },
+        {
+          "id": 3,
+          "kind": "rock",
+          "seed": 17,
+          "x": 630,
+          "y": 12,
+          "width": 224,
+          "height": 141,
+          "anchor": [
+            112,
+            113
+          ]
+        }
+      ]
+    },
+    {
+      "path": "accents.webp",
+      "sha256": "19205470757bc909766caa0afd3605264e8b1177761ef6a4dfc8ab846f735b76",
+      "bytes": 14188,
+      "width": 628,
+      "height": 157,
+      "decodeLimit": 128,
+      "role": "accents",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "bones",
+          "seed": 3,
+          "x": 12,
+          "y": 12,
+          "width": 296,
+          "height": 133,
+          "anchor": [
+            148,
+            109
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "bones",
+          "seed": 17,
+          "x": 320,
+          "y": 12,
+          "width": 296,
+          "height": 132,
+          "anchor": [
+            148,
+            109
+          ]
+        }
+      ]
+    }
+  ]
+}

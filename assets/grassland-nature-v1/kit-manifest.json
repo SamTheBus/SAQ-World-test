@@ -1,0 +1,376 @@
+{
+  "version": "grassland-nature-v1",
+  "source": "Code-drawn biome nature art v3 (the SAQ World overworld biome mockups), baked with Chromium canvas at 5 px per mockup unit (1 unit = 1 game px at 32 px tiles). No ground shadows; anchor = [x, y] of the ground point inside each slot. No third-party game art.",
+  "pxPerUnit": 5,
+  "files": [
+    {
+      "path": "trees.webp",
+      "sha256": "abf293a11b97d8b99e4447ee96654ec2951ad66c30d1b05ccc91a7b535372d84",
+      "bytes": 224046,
+      "width": 1936,
+      "height": 1067,
+      "decodeLimit": 256,
+      "role": "trees",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "oak",
+          "seed": 3,
+          "x": 544,
+          "y": 12,
+          "width": 516,
+          "height": 512,
+          "anchor": [
+            258,
+            490
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "oak",
+          "seed": 11,
+          "x": 1072,
+          "y": 12,
+          "width": 518,
+          "height": 510,
+          "anchor": [
+            259,
+            488
+          ]
+        },
+        {
+          "id": 2,
+          "kind": "oak",
+          "seed": 29,
+          "x": 12,
+          "y": 12,
+          "width": 520,
+          "height": 523,
+          "anchor": [
+            260,
+            501
+          ]
+        },
+        {
+          "id": 3,
+          "kind": "birch",
+          "seed": 3,
+          "x": 1602,
+          "y": 12,
+          "width": 322,
+          "height": 509,
+          "anchor": [
+            161,
+            491
+          ]
+        },
+        {
+          "id": 4,
+          "kind": "birch",
+          "seed": 11,
+          "x": 12,
+          "y": 547,
+          "width": 320,
+          "height": 508,
+          "anchor": [
+            160,
+            490
+          ]
+        },
+        {
+          "id": 5,
+          "kind": "birch",
+          "seed": 29,
+          "x": 344,
+          "y": 547,
+          "width": 318,
+          "height": 504,
+          "anchor": [
+            159,
+            486
+          ]
+        },
+        {
+          "id": 6,
+          "kind": "apple",
+          "seed": 3,
+          "x": 674,
+          "y": 547,
+          "width": 390,
+          "height": 404,
+          "anchor": [
+            195,
+            383
+          ]
+        },
+        {
+          "id": 7,
+          "kind": "apple",
+          "seed": 11,
+          "x": 1076,
+          "y": 547,
+          "width": 400,
+          "height": 399,
+          "anchor": [
+            200,
+            378
+          ]
+        },
+        {
+          "id": 8,
+          "kind": "apple",
+          "seed": 29,
+          "x": 1488,
+          "y": 547,
+          "width": 388,
+          "height": 397,
+          "anchor": [
+            194,
+            376
+          ]
+        }
+      ]
+    },
+    {
+      "path": "understory.webp",
+      "sha256": "8f21d44e44cdcab65ce4c791f873e8b4c7fe93fb9a05243dedcf8714a990f59a",
+      "bytes": 83758,
+      "width": 1706,
+      "height": 274,
+      "decodeLimit": 128,
+      "role": "understory",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "bush",
+          "seed": 3,
+          "x": 480,
+          "y": 12,
+          "width": 272,
+          "height": 169,
+          "anchor": [
+            136,
+            160
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "bush",
+          "seed": 17,
+          "x": 764,
+          "y": 12,
+          "width": 270,
+          "height": 168,
+          "anchor": [
+            135,
+            161
+          ]
+        },
+        {
+          "id": 2,
+          "kind": "flowers",
+          "seed": 3,
+          "x": 1364,
+          "y": 12,
+          "width": 160,
+          "height": 118,
+          "anchor": [
+            80,
+            106
+          ]
+        },
+        {
+          "id": 3,
+          "kind": "flowers",
+          "seed": 17,
+          "x": 1536,
+          "y": 12,
+          "width": 158,
+          "height": 118,
+          "anchor": [
+            79,
+            106
+          ]
+        },
+        {
+          "id": 4,
+          "kind": "sunflowers",
+          "seed": 3,
+          "x": 12,
+          "y": 12,
+          "width": 222,
+          "height": 250,
+          "anchor": [
+            111,
+            238
+          ]
+        },
+        {
+          "id": 5,
+          "kind": "sunflowers",
+          "seed": 17,
+          "x": 246,
+          "y": 12,
+          "width": 222,
+          "height": 250,
+          "anchor": [
+            111,
+            238
+          ]
+        },
+        {
+          "id": 6,
+          "kind": "tuft",
+          "seed": 3,
+          "x": 1046,
+          "y": 12,
+          "width": 148,
+          "height": 167,
+          "anchor": [
+            74,
+            152
+          ]
+        },
+        {
+          "id": 7,
+          "kind": "tuft",
+          "seed": 17,
+          "x": 1206,
+          "y": 12,
+          "width": 146,
+          "height": 167,
+          "anchor": [
+            73,
+            152
+          ]
+        }
+      ]
+    },
+    {
+      "path": "rocks.webp",
+      "sha256": "16cb2ee503c049f8c21bf5e0bb5ec47be48c51fb05bc0c0cc2c05ac2cd840a23",
+      "bytes": 25894,
+      "width": 832,
+      "height": 244,
+      "decodeLimit": 128,
+      "role": "rocks",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "stone",
+          "seed": 3,
+          "x": 200,
+          "y": 12,
+          "width": 178,
+          "height": 218,
+          "anchor": [
+            89,
+            202
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "stone",
+          "seed": 17,
+          "x": 12,
+          "y": 12,
+          "width": 176,
+          "height": 220,
+          "anchor": [
+            88,
+            204
+          ]
+        },
+        {
+          "id": 2,
+          "kind": "rocks",
+          "seed": 3,
+          "x": 614,
+          "y": 12,
+          "width": 206,
+          "height": 117,
+          "anchor": [
+            103,
+            96
+          ]
+        },
+        {
+          "id": 3,
+          "kind": "rocks",
+          "seed": 17,
+          "x": 390,
+          "y": 12,
+          "width": 212,
+          "height": 119,
+          "anchor": [
+            106,
+            98
+          ]
+        }
+      ]
+    },
+    {
+      "path": "accents.webp",
+      "sha256": "f07c823ffaa25405da3f674fcde34dc72ea4474b2b304a71de443e50d0d7159d",
+      "bytes": 31454,
+      "width": 1064,
+      "height": 178,
+      "decodeLimit": 128,
+      "role": "accents",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "hay",
+          "seed": 3,
+          "x": 864,
+          "y": 12,
+          "width": 188,
+          "height": 138,
+          "anchor": [
+            94,
+            114
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "hay",
+          "seed": 17,
+          "x": 664,
+          "y": 12,
+          "width": 188,
+          "height": 140,
+          "anchor": [
+            94,
+            114
+          ]
+        },
+        {
+          "id": 2,
+          "kind": "fence",
+          "seed": 3,
+          "x": 12,
+          "y": 12,
+          "width": 314,
+          "height": 154,
+          "anchor": [
+            157,
+            138
+          ]
+        },
+        {
+          "id": 3,
+          "kind": "fence",
+          "seed": 17,
+          "x": 338,
+          "y": 12,
+          "width": 314,
+          "height": 154,
+          "anchor": [
+            157,
+            138
+          ]
+        }
+      ]
+    }
+  ]
+}

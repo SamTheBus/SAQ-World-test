@@ -1,0 +1,326 @@
+{
+  "version": "tropical-nature-v1",
+  "source": "Code-drawn biome nature art v3 (the SAQ World overworld biome mockups), baked with Chromium canvas at 5 px per mockup unit (1 unit = 1 game px at 32 px tiles). No ground shadows; anchor = [x, y] of the ground point inside each slot. No third-party game art.",
+  "pxPerUnit": 5,
+  "files": [
+    {
+      "path": "trees.webp",
+      "sha256": "4b383ad64379b43ca1743fdf69ae1651a189d559e8cf4555142cfd1a7f201e82",
+      "bytes": 258354,
+      "width": 1872,
+      "height": 1384,
+      "decodeLimit": 256,
+      "role": "trees",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "palm",
+          "seed": 3,
+          "x": 12,
+          "y": 582,
+          "width": 478,
+          "height": 420,
+          "anchor": [
+            239,
+            402
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "palm",
+          "seed": 11,
+          "x": 502,
+          "y": 582,
+          "width": 478,
+          "height": 420,
+          "anchor": [
+            239,
+            402
+          ]
+        },
+        {
+          "id": 2,
+          "kind": "palm",
+          "seed": 29,
+          "x": 992,
+          "y": 582,
+          "width": 478,
+          "height": 420,
+          "anchor": [
+            239,
+            402
+          ]
+        },
+        {
+          "id": 3,
+          "kind": "jungletree",
+          "seed": 3,
+          "x": 568,
+          "y": 12,
+          "width": 546,
+          "height": 553,
+          "anchor": [
+            273,
+            529
+          ]
+        },
+        {
+          "id": 4,
+          "kind": "jungletree",
+          "seed": 11,
+          "x": 1126,
+          "y": 12,
+          "width": 546,
+          "height": 552,
+          "anchor": [
+            273,
+            528
+          ]
+        },
+        {
+          "id": 5,
+          "kind": "jungletree",
+          "seed": 29,
+          "x": 12,
+          "y": 12,
+          "width": 544,
+          "height": 558,
+          "anchor": [
+            272,
+            534
+          ]
+        },
+        {
+          "id": 6,
+          "kind": "banana",
+          "seed": 3,
+          "x": 1482,
+          "y": 582,
+          "width": 378,
+          "height": 358,
+          "anchor": [
+            189,
+            342
+          ]
+        },
+        {
+          "id": 7,
+          "kind": "banana",
+          "seed": 11,
+          "x": 12,
+          "y": 1014,
+          "width": 378,
+          "height": 358,
+          "anchor": [
+            189,
+            342
+          ]
+        },
+        {
+          "id": 8,
+          "kind": "banana",
+          "seed": 29,
+          "x": 402,
+          "y": 1014,
+          "width": 378,
+          "height": 358,
+          "anchor": [
+            189,
+            342
+          ]
+        },
+        {
+          "id": 9,
+          "kind": "bamboo",
+          "seed": 3,
+          "x": 1028,
+          "y": 1014,
+          "width": 242,
+          "height": 348,
+          "anchor": [
+            121,
+            332
+          ]
+        },
+        {
+          "id": 10,
+          "kind": "bamboo",
+          "seed": 11,
+          "x": 792,
+          "y": 1014,
+          "width": 224,
+          "height": 354,
+          "anchor": [
+            112,
+            338
+          ]
+        },
+        {
+          "id": 11,
+          "kind": "bamboo",
+          "seed": 29,
+          "x": 1282,
+          "y": 1014,
+          "width": 232,
+          "height": 348,
+          "anchor": [
+            116,
+            332
+          ]
+        }
+      ]
+    },
+    {
+      "path": "understory.webp",
+      "sha256": "2439a7dd54260a921edb56bfaed4770d8776647bf9b9ef58e9a6963a886951e1",
+      "bytes": 63058,
+      "width": 1770,
+      "height": 190,
+      "decodeLimit": 128,
+      "role": "understory",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "fern",
+          "seed": 3,
+          "x": 266,
+          "y": 12,
+          "width": 248,
+          "height": 163,
+          "anchor": [
+            124,
+            145
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "fern",
+          "seed": 17,
+          "x": 12,
+          "y": 12,
+          "width": 242,
+          "height": 166,
+          "anchor": [
+            121,
+            148
+          ]
+        },
+        {
+          "id": 2,
+          "kind": "bloom",
+          "seed": 3,
+          "x": 526,
+          "y": 12,
+          "width": 180,
+          "height": 147,
+          "anchor": [
+            90,
+            114
+          ]
+        },
+        {
+          "id": 3,
+          "kind": "bloom",
+          "seed": 17,
+          "x": 718,
+          "y": 12,
+          "width": 180,
+          "height": 147,
+          "anchor": [
+            90,
+            114
+          ]
+        },
+        {
+          "id": 4,
+          "kind": "bush",
+          "seed": 3,
+          "x": 1144,
+          "y": 12,
+          "width": 234,
+          "height": 138,
+          "anchor": [
+            117,
+            111
+          ]
+        },
+        {
+          "id": 5,
+          "kind": "bush",
+          "seed": 17,
+          "x": 910,
+          "y": 12,
+          "width": 222,
+          "height": 142,
+          "anchor": [
+            111,
+            118
+          ]
+        },
+        {
+          "id": 6,
+          "kind": "bromeliad",
+          "seed": 3,
+          "x": 1578,
+          "y": 12,
+          "width": 180,
+          "height": 107,
+          "anchor": [
+            90,
+            92
+          ]
+        },
+        {
+          "id": 7,
+          "kind": "bromeliad",
+          "seed": 17,
+          "x": 1390,
+          "y": 12,
+          "width": 176,
+          "height": 109,
+          "anchor": [
+            88,
+            94
+          ]
+        }
+      ]
+    },
+    {
+      "path": "rocks.webp",
+      "sha256": "1f2b7123aeed86c03d5f64c8f24e0d4f81ca9a603bc9c3565cd019ac110b75c9",
+      "bytes": 14298,
+      "width": 456,
+      "height": 174,
+      "decodeLimit": 128,
+      "role": "rocks",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "rock",
+          "seed": 3,
+          "x": 12,
+          "y": 12,
+          "width": 208,
+          "height": 150,
+          "anchor": [
+            104,
+            134
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "rock",
+          "seed": 17,
+          "x": 232,
+          "y": 12,
+          "width": 212,
+          "height": 147,
+          "anchor": [
+            106,
+            131
+          ]
+        }
+      ]
+    }
+  ]
+}

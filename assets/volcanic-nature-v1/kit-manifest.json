@@ -1,0 +1,311 @@
+{
+  "version": "volcanic-nature-v1",
+  "source": "Code-drawn biome nature art v3 (the SAQ World overworld biome mockups), baked with Chromium canvas at 5 px per mockup unit (1 unit = 1 game px at 32 px tiles). No ground shadows; anchor = [x, y] of the ground point inside each slot. No third-party game art.",
+  "pxPerUnit": 5,
+  "files": [
+    {
+      "path": "trees.webp",
+      "sha256": "e226d3773ba7cafdd29983bcbf90389f6153c127f3b41182e291942b5281e531",
+      "bytes": 54590,
+      "width": 1158,
+      "height": 359,
+      "decodeLimit": 256,
+      "role": "trees",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "charred",
+          "seed": 3,
+          "x": 758,
+          "y": 12,
+          "width": 188,
+          "height": 298,
+          "anchor": [
+            94,
+            275
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "charred",
+          "seed": 11,
+          "x": 558,
+          "y": 12,
+          "width": 188,
+          "height": 299,
+          "anchor": [
+            94,
+            275
+          ]
+        },
+        {
+          "id": 2,
+          "kind": "charred",
+          "seed": 29,
+          "x": 958,
+          "y": 12,
+          "width": 188,
+          "height": 298,
+          "anchor": [
+            94,
+            275
+          ]
+        },
+        {
+          "id": 3,
+          "kind": "deadpine",
+          "seed": 3,
+          "x": 362,
+          "y": 12,
+          "width": 184,
+          "height": 334,
+          "anchor": [
+            92,
+            312
+          ]
+        },
+        {
+          "id": 4,
+          "kind": "deadpine",
+          "seed": 11,
+          "x": 12,
+          "y": 12,
+          "width": 172,
+          "height": 335,
+          "anchor": [
+            86,
+            312
+          ]
+        },
+        {
+          "id": 5,
+          "kind": "deadpine",
+          "seed": 29,
+          "x": 196,
+          "y": 12,
+          "width": 154,
+          "height": 335,
+          "anchor": [
+            77,
+            312
+          ]
+        }
+      ]
+    },
+    {
+      "path": "understory.webp",
+      "sha256": "41530a93bf393d9d97a79dd57995f96c68b250dfba01a99ebd158b77e6c1cd56",
+      "bytes": 53474,
+      "width": 1068,
+      "height": 221,
+      "decodeLimit": 128,
+      "role": "understory",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "emberlily",
+          "seed": 3,
+          "x": 12,
+          "y": 12,
+          "width": 178,
+          "height": 197,
+          "anchor": [
+            89,
+            189
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "emberlily",
+          "seed": 17,
+          "x": 202,
+          "y": 12,
+          "width": 178,
+          "height": 197,
+          "anchor": [
+            89,
+            189
+          ]
+        },
+        {
+          "id": 2,
+          "kind": "ashfern",
+          "seed": 3,
+          "x": 608,
+          "y": 12,
+          "width": 208,
+          "height": 127,
+          "anchor": [
+            104,
+            111
+          ]
+        },
+        {
+          "id": 3,
+          "kind": "ashfern",
+          "seed": 17,
+          "x": 392,
+          "y": 12,
+          "width": 204,
+          "height": 133,
+          "anchor": [
+            102,
+            118
+          ]
+        },
+        {
+          "id": 4,
+          "kind": "tuft",
+          "seed": 3,
+          "x": 950,
+          "y": 12,
+          "width": 106,
+          "height": 82,
+          "anchor": [
+            53,
+            70
+          ]
+        },
+        {
+          "id": 5,
+          "kind": "tuft",
+          "seed": 17,
+          "x": 828,
+          "y": 12,
+          "width": 110,
+          "height": 87,
+          "anchor": [
+            55,
+            75
+          ]
+        }
+      ]
+    },
+    {
+      "path": "rocks.webp",
+      "sha256": "7742c2cdaa78f5432835910ab5e547e40e3860af7fe97acc6b6379a260cf1d58",
+      "bytes": 16556,
+      "width": 820,
+      "height": 249,
+      "decodeLimit": 128,
+      "role": "rocks",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "obsidian",
+          "seed": 3,
+          "x": 12,
+          "y": 12,
+          "width": 188,
+          "height": 225,
+          "anchor": [
+            94,
+            213
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "obsidian",
+          "seed": 17,
+          "x": 212,
+          "y": 12,
+          "width": 188,
+          "height": 225,
+          "anchor": [
+            94,
+            213
+          ]
+        },
+        {
+          "id": 2,
+          "kind": "basalt",
+          "seed": 3,
+          "x": 412,
+          "y": 12,
+          "width": 192,
+          "height": 191,
+          "anchor": [
+            96,
+            175
+          ]
+        },
+        {
+          "id": 3,
+          "kind": "basalt",
+          "seed": 17,
+          "x": 616,
+          "y": 12,
+          "width": 192,
+          "height": 191,
+          "anchor": [
+            96,
+            175
+          ]
+        }
+      ]
+    },
+    {
+      "path": "accents.webp",
+      "sha256": "61dca366f736b556407889ecef92be7621d6b9fbc45b9cdf0ddc7ea937276a9b",
+      "bytes": 66936,
+      "width": 1194,
+      "height": 309,
+      "decodeLimit": 128,
+      "role": "accents",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "lavapool",
+          "seed": 3,
+          "x": 788,
+          "y": 12,
+          "width": 394,
+          "height": 255,
+          "anchor": [
+            197,
+            133
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "lavapool",
+          "seed": 17,
+          "x": 388,
+          "y": 12,
+          "width": 388,
+          "height": 257,
+          "anchor": [
+            194,
+            124
+          ]
+        },
+        {
+          "id": 2,
+          "kind": "vent",
+          "seed": 3,
+          "x": 12,
+          "y": 12,
+          "width": 176,
+          "height": 285,
+          "anchor": [
+            88,
+            261
+          ]
+        },
+        {
+          "id": 3,
+          "kind": "vent",
+          "seed": 17,
+          "x": 200,
+          "y": 12,
+          "width": 176,
+          "height": 285,
+          "anchor": [
+            88,
+            261
+          ]
+        }
+      ]
+    }
+  ]
+}

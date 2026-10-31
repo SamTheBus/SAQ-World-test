@@ -1,0 +1,350 @@
+{
+  "version": "upland-nature-v1",
+  "source": "Code-drawn biome nature art v3 (the SAQ World overworld biome mockups), baked with Chromium canvas at 5 px per mockup unit (1 unit = 1 game px at 32 px tiles). No ground shadows; anchor = [x, y] of the ground point inside each slot. No third-party game art.",
+  "pxPerUnit": 5,
+  "files": [
+    {
+      "path": "trees.webp",
+      "sha256": "948e782834df235768896cc2a508d6fc0ac53e453cbee572f98a203998ed63b0",
+      "bytes": 160886,
+      "width": 1790,
+      "height": 942,
+      "decodeLimit": 256,
+      "role": "trees",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "pine",
+          "seed": 3,
+          "x": 12,
+          "y": 524,
+          "width": 270,
+          "height": 406,
+          "anchor": [
+            135,
+            386
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "pine",
+          "seed": 11,
+          "x": 294,
+          "y": 524,
+          "width": 264,
+          "height": 406,
+          "anchor": [
+            132,
+            386
+          ]
+        },
+        {
+          "id": 2,
+          "kind": "pine",
+          "seed": 29,
+          "x": 570,
+          "y": 524,
+          "width": 256,
+          "height": 406,
+          "anchor": [
+            128,
+            386
+          ]
+        },
+        {
+          "id": 3,
+          "kind": "spruce",
+          "seed": 3,
+          "x": 12,
+          "y": 12,
+          "width": 214,
+          "height": 500,
+          "anchor": [
+            107,
+            482
+          ]
+        },
+        {
+          "id": 4,
+          "kind": "spruce",
+          "seed": 11,
+          "x": 238,
+          "y": 12,
+          "width": 212,
+          "height": 500,
+          "anchor": [
+            106,
+            482
+          ]
+        },
+        {
+          "id": 5,
+          "kind": "spruce",
+          "seed": 29,
+          "x": 462,
+          "y": 12,
+          "width": 222,
+          "height": 500,
+          "anchor": [
+            111,
+            482
+          ]
+        },
+        {
+          "id": 6,
+          "kind": "rowan",
+          "seed": 3,
+          "x": 1064,
+          "y": 12,
+          "width": 350,
+          "height": 415,
+          "anchor": [
+            175,
+            396
+          ]
+        },
+        {
+          "id": 7,
+          "kind": "rowan",
+          "seed": 11,
+          "x": 696,
+          "y": 12,
+          "width": 356,
+          "height": 417,
+          "anchor": [
+            178,
+            398
+          ]
+        },
+        {
+          "id": 8,
+          "kind": "rowan",
+          "seed": 29,
+          "x": 1426,
+          "y": 12,
+          "width": 352,
+          "height": 414,
+          "anchor": [
+            176,
+            395
+          ]
+        }
+      ]
+    },
+    {
+      "path": "understory.webp",
+      "sha256": "7ad67317589a4f3a7a2894efae8a39406900495187e588275468e828b3160197",
+      "bytes": 53876,
+      "width": 1724,
+      "height": 207,
+      "decodeLimit": 128,
+      "role": "understory",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "heather",
+          "seed": 3,
+          "x": 1210,
+          "y": 12,
+          "width": 226,
+          "height": 122,
+          "anchor": [
+            113,
+            117
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "heather",
+          "seed": 17,
+          "x": 972,
+          "y": 12,
+          "width": 226,
+          "height": 126,
+          "anchor": [
+            113,
+            120
+          ]
+        },
+        {
+          "id": 2,
+          "kind": "juniper",
+          "seed": 3,
+          "x": 360,
+          "y": 12,
+          "width": 292,
+          "height": 140,
+          "anchor": [
+            146,
+            129
+          ]
+        },
+        {
+          "id": 3,
+          "kind": "juniper",
+          "seed": 17,
+          "x": 664,
+          "y": 12,
+          "width": 296,
+          "height": 137,
+          "anchor": [
+            148,
+            126
+          ]
+        },
+        {
+          "id": 4,
+          "kind": "thistle",
+          "seed": 3,
+          "x": 12,
+          "y": 12,
+          "width": 162,
+          "height": 183,
+          "anchor": [
+            81,
+            170
+          ]
+        },
+        {
+          "id": 5,
+          "kind": "thistle",
+          "seed": 17,
+          "x": 186,
+          "y": 12,
+          "width": 162,
+          "height": 183,
+          "anchor": [
+            81,
+            170
+          ]
+        },
+        {
+          "id": 6,
+          "kind": "tuft",
+          "seed": 3,
+          "x": 1448,
+          "y": 12,
+          "width": 130,
+          "height": 98,
+          "anchor": [
+            65,
+            84
+          ]
+        },
+        {
+          "id": 7,
+          "kind": "tuft",
+          "seed": 17,
+          "x": 1590,
+          "y": 12,
+          "width": 122,
+          "height": 98,
+          "anchor": [
+            61,
+            84
+          ]
+        }
+      ]
+    },
+    {
+      "path": "rocks.webp",
+      "sha256": "e3efa7922878dac95c466716bee5f300fee54aea4e102cd573f30ccf6b93907d",
+      "bytes": 49676,
+      "width": 1590,
+      "height": 230,
+      "decodeLimit": 128,
+      "role": "rocks",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "boulders",
+          "seed": 3,
+          "x": 12,
+          "y": 12,
+          "width": 304,
+          "height": 206,
+          "anchor": [
+            152,
+            175
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "boulders",
+          "seed": 17,
+          "x": 328,
+          "y": 12,
+          "width": 318,
+          "height": 205,
+          "anchor": [
+            159,
+            174
+          ]
+        },
+        {
+          "id": 2,
+          "kind": "ledge",
+          "seed": 3,
+          "x": 658,
+          "y": 12,
+          "width": 438,
+          "height": 197,
+          "anchor": [
+            219,
+            176
+          ]
+        },
+        {
+          "id": 3,
+          "kind": "ledge",
+          "seed": 17,
+          "x": 1108,
+          "y": 12,
+          "width": 470,
+          "height": 192,
+          "anchor": [
+            235,
+            172
+          ]
+        }
+      ]
+    },
+    {
+      "path": "accents.webp",
+      "sha256": "275f1ecfdd4828f4a676a3f804ebc76137e6f0c5ea8e9e99f7d3a626213da0b0",
+      "bytes": 12726,
+      "width": 384,
+      "height": 206,
+      "decodeLimit": 128,
+      "role": "accents",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "cairn",
+          "seed": 3,
+          "x": 200,
+          "y": 12,
+          "width": 172,
+          "height": 181,
+          "anchor": [
+            86,
+            165
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "cairn",
+          "seed": 17,
+          "x": 12,
+          "y": 12,
+          "width": 176,
+          "height": 182,
+          "anchor": [
+            88,
+            166
+          ]
+        }
+      ]
+    }
+  ]
+}
