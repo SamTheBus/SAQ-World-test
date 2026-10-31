@@ -302,7 +302,7 @@ var RECOVERED_BOSSES = Object.freeze({
   }),
   marcus: Object.freeze({
     id: "marcus",
-    label: "MARCUS THE OUTLAW",
+    label: "GOLDSPUR THE OUTLAW",
     site: "repeatable-slot:fort:grassland:standard:040",
     family: "fort",
     biome: "grassland",
@@ -313,7 +313,7 @@ var RECOVERED_BOSSES = Object.freeze({
   }),
   hooktail: Object.freeze({
     id: "hooktail",
-    label: "HOOKTAIL",
+    label: "ASHFANG",
     site: "repeatable-slot:ruin:desert:standard:056",
     family: "ruin",
     biome: "desert",
@@ -3307,8 +3307,15 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
 ].map((u) => [u.id, u])));
 var UNIQUE_IDS = Object.freeze(Object.keys(UNIQUE_ITEMS));
 var uniqueOf = (definition) => UNIQUE_ITEMS[definition?.unique] ?? null;
+var uniquesFrom = (source4, cls) => UNIQUE_IDS.filter((id) => UNIQUE_ITEMS[id].from === source4 && (UNIQUE_ITEMS[id].cls === null || UNIQUE_ITEMS[id].cls === cls));
 var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh"]);
 var UNIQUE_DROP_CHANCE = Object.freeze({ boss: 0.15, named: 0.25, world: 2e-3 });
+function uniqueDropV1({ from = null, biome = null, cls }, chance, pick4) {
+  const own2 = from ? uniquesFrom(from, cls) : [];
+  if (own2.length && chance < (UNIQUE_BOSSES.includes(from) ? UNIQUE_DROP_CHANCE.boss : UNIQUE_DROP_CHANCE.named)) return own2[Math.floor(pick4 * own2.length)];
+  const pool = biome ? UNIQUE_IDS.filter((id) => UNIQUE_ITEMS[id].biome === biome && (UNIQUE_ITEMS[id].cls === null || UNIQUE_ITEMS[id].cls === cls)) : [];
+  return pool.length && chance >= 1 - UNIQUE_DROP_CHANCE.world ? pool[Math.floor(pick4 * pool.length)] : null;
+}
 
 // src/shared/content/reward_modifiers.js
 function validateRewardModifiers(v) {
@@ -8817,6 +8824,15 @@ function applyEliteActorStatsD12_4(profile2, elite) {
   };
 }
 
+// src/shared/content/named_elites_v1.js
+var NAMED_ELITES_V1 = Object.freeze({
+  old_bristleback: Object.freeze({ id: "old_bristleback", label: "OLD BRISTLEBACK", family: "tusk_boar", biome: "grassland", affixId: "swift_commander" }),
+  hollow_jack: Object.freeze({ id: "hollow_jack", label: "HOLLOW JACK", family: "field_scarecrow", biome: "grassland", affixId: "glacial_warden" }),
+  queen_kheptra: Object.freeze({ id: "queen_kheptra", label: "QUEEN KHEPTRA", family: "sand_scarab", biome: "desert", affixId: "web_weaver" }),
+  glasstail: Object.freeze({ id: "glasstail", label: "GLASSTAIL", family: "dune_scorpion", biome: "desert", affixId: "slag_shaper" })
+});
+var NAMED_ELITE_IDS_V1 = Object.freeze(Object.keys(NAMED_ELITES_V1));
+
 // src/shared/contracts/elite_combat_d12_4.js
 var ELITE_COMBAT_D12_4_VERSION = "elite-combat-d12.4-v1";
 var ELITE_RECORD_D12_4_VERSION = "elite-record-d12.4-v1";
@@ -8989,7 +9005,8 @@ function validateEliteCombatD12_4(state) {
   closedRecord(root, ["version", "elitesByEntityId"], ["hasteByEntityId", "timedStatusesByEntityId", "guardByEntityId", "attackAuraByEntityId", "nullificationResistanceByEntityId", "pendingHazardsBySourceEliteId", "hazardsById", "webbedByEntityId", "slagBurnByEntityId"]);
   requireContract(root.version === ELITE_COMBAT_D12_4_VERSION, "Unsupported elite combat state");
   for (const [entityId, e] of Object.entries(root.elitesByEntityId)) {
-    closedRecord(e, ["version", "eliteId", "entityId", "groupId", "siteId", "floorId", "roomId", "tier", "affixIds", "identitySource", "activatedTick", "nextPulseTick", "pulseSequence", "lastPulse"], ["composition"]);
+    closedRecord(e, ["version", "eliteId", "entityId", "groupId", "siteId", "floorId", "roomId", "tier", "affixIds", "identitySource", "activatedTick", "nextPulseTick", "pulseSequence", "lastPulse"], ["composition", "namedEliteId"]);
+    if (e.namedEliteId !== void 0) requireContract(Object.hasOwn(NAMED_ELITES_V1, e.namedEliteId) && NAMED_ELITES_V1[e.namedEliteId].affixId === e.affixIds[0], "Unknown named elite");
     requireContract([ELITE_RECORD_D12_4_VERSION, COMPOSITION_ELITE_V1].includes(e.version) && /^elite:[a-f0-9]{32}$/.test(e.eliteId) && entityId === e.entityId && e.tier === "elite", "Invalid elite identity");
     if (e.version === COMPOSITION_ELITE_V1) validateCompositionEliteV1(state, e);
     else requireContract(e.composition === void 0 && e.affixIds.length === 1, "Unsupported elite affix loadout");
@@ -9220,7 +9237,7 @@ function projectEliteCombatD12_4(state, entityId) {
   const affixId = e.affixIds[0], definition = eliteAffixDefinitionD12_4(affixId);
   const pulse = e.lastPulse && state.tick - e.lastPulse.tick <= Math.max(42, definition.pulse.windupTicks ?? 0) ? { tick: e.lastPulse.tick, sequence: e.lastPulse.sequence, recipients: e.lastPulse.recipients.map((row) => ({ ...copyWire(row), position: copyWire(row.position ?? state.entitiesById[row.entityId].position) })) } : null;
   const supportLinks = affixId === SWIFT_COMMANDER_AFFIX_ID ? Object.values(state.eliteCombat.hasteByEntityId ?? {}).filter((h) => h.sourceEliteIds.includes(e.eliteId) && state.entitiesById[h.entityId]?.alive).sort((a, b) => a.entityId.localeCompare(b.entityId)).map((h) => ({ entityId: h.entityId, stacks: h.stacks, position: copyWire(state.entitiesById[h.entityId].position) })) : affixId === IRON_CITADEL_AFFIX_ID ? Object.values(state.eliteCombat.guardByEntityId ?? {}).filter((g) => g.sourceEliteIds.includes(e.eliteId) && state.entitiesById[g.entityId]?.alive).sort((a, b) => a.entityId.localeCompare(b.entityId)).map((g) => ({ entityId: g.entityId, stacks: g.stacks, position: copyWire(state.entitiesById[g.entityId].position) })) : affixId === BLOOD_BERSERKER_AFFIX_ID ? Object.values(state.eliteCombat.attackAuraByEntityId ?? {}).filter((aura) => aura.sourceEliteIds.includes(e.eliteId) && state.entitiesById[aura.entityId]?.alive).sort((a, b) => a.entityId.localeCompare(b.entityId)).map((aura) => ({ entityId: aura.entityId, stacks: aura.stacks, position: copyWire(state.entitiesById[aura.entityId].position) })) : [];
-  return freezeWire({ eliteId: e.eliteId, tier: e.tier, affixId, label: compositionEliteLabelV1(e, definition.label), affixIds: copyWire(e.affixIds), scale: definition.presentation.scale, accent: copyWire(definition.presentation), nextPulseTick: e.nextPulseTick, pulse, supportLinks });
+  return freezeWire({ eliteId: e.eliteId, tier: e.tier, affixId, label: compositionEliteLabelV1(e, definition.label), affixIds: copyWire(e.affixIds), scale: definition.presentation.scale, accent: copyWire(definition.presentation), nextPulseTick: e.nextPulseTick, pulse, supportLinks, ...e.namedEliteId ? { namedEliteId: e.namedEliteId } : {} });
 }
 function projectEliteHasteD12_4D(state, entityId) {
   const h = state.eliteCombat?.hasteByEntityId?.[entityId];
@@ -20680,6 +20697,24 @@ function validateSporeGenerationProgressV4(a, b) {
   return true;
 }
 
+// src/shared/contracts/unique_rewards_v1.js
+function uniqueRewardV1(state, source4, cls, key5) {
+  if (source4?.kind !== "enemy" || !cls) return null;
+  const id = state.groupsById[source4.groupId]?.entityIds[source4.spawnOrdinal ?? source4.ordinal];
+  const from = state.bossCombat?.bossesByEntityId?.[id]?.bossDefinitionId ?? state.eliteCombat?.elitesByEntityId?.[id]?.namedEliteId ?? null;
+  let biome = null;
+  for (const site of Object.values(state.d9World?.functionalSitesById ?? {})) if (site.floors?.some((f2) => f2.groupId === source4.groupId)) {
+    biome = site.socket?.region?.biome ?? null;
+    break;
+  }
+  if (!biome) {
+    const family2 = state.content?.definitionsById?.[state.entitiesById?.[id]?.contentDefinitionId]?.family, biomes = BIOME_CREATURES_V1_METADATA[family2]?.eligibility?.biomes;
+    if (biomes?.length === 1) biome = biomes[0];
+  }
+  const r = rewardStream("unique-drop-v1/" + key5);
+  return uniqueDropV1({ from, biome, cls }, r.random(), r.random());
+}
+
 // src/shared/contracts/hollow_mouth_clearance_v3.js
 function runtimeCollisionPageD9(page) {
   const tiles3 = [...page.collision.tiles], blockers2 = page.visual?.blockers ?? [], decorations3 = page.visual?.decorations ?? [];
@@ -20968,8 +21003,9 @@ function prepareEpisodeReward(state, p, source4, position, spaceInstanceId) {
   if (inv.rewardsByEntityId[id]) return null;
   const worldProgression = captureSiteRewardV1(state, source4, captureWorldRarityV2(state, p, source4, source4.progression ?? prototypeRewardProgression(source4.rank, id))), heroClass = heroClassOf(p.d8)?.id, world = worldProgression.combatHash === WORLD_COMBAT_HASH, baseProgression = heroClass && world ? { ...worldProgression, gearClass: heroClass, wardrobe: WARDROBE_V1 } : world ? { ...worldProgression, armor: "overall" } : worldProgression, modifiers = p.d8 ? progressionRewardWitness(p.d8) : null, progression = modifiers ? { ...baseProgression, quality: 1 + modifiers.qualityHundredths / 100, tomeEligibility: "personal-tome-d8-v1", modifiers } : baseProgression;
   const ordinal = source4.kind === "enemy" ? safeInteger(inv.renewal.defeats + 1, 1) : 0, reward = rollContentReward(state, p, { ...source4, ordinal, modifiers }), dropPosition = reward.definitionId ? freeGearPosition(state, p, spaceInstanceId, position) : { ...position };
-  const generated = inv.d7 && reward.definitionId ? generateGear3(gearSeed(state, p, id), progression) : null;
-  const record = { ...generated ? { generated } : {}, sourceEntityId: id, ordinal, defeatedTick: state.tick, spaceInstanceId, position: dropPosition, definitionId: reward.definitionId, claimed: false, pickup: null, autoSalvageEligibleTick: generated ? safeInteger(state.tick + AUTO_SALVAGE_ACTIVE_TICKS, 1) : null, autoSalvage: null, rewardVersion: CONTENT_REWARD_VERSION, episodeSource: { groupId: source4.groupId, episode: source4.episode, kind: source4.kind, ordinal: source4.spawnOrdinal, rank: source4.rank, progression: copyWire(progression), ...source4.rewardClass ? { rewardClass: source4.rewardClass } : {} }, healing: reward.healing, spawnEntityId: source4.kind === "enemy" ? state.groupsById[source4.groupId].entityIds[source4.spawnOrdinal] : null };
+  const unique2 = inv.d7 && reward.definitionId && heroClass && world ? uniqueRewardV1(state, source4, heroClass, gearSeed(state, p, id)) : null, dropped = unique2 ? { ...progression, unique: unique2 } : progression;
+  const generated = inv.d7 && reward.definitionId ? generateGear3(gearSeed(state, p, id), dropped) : null;
+  const record = { ...generated ? { generated } : {}, sourceEntityId: id, ordinal, defeatedTick: state.tick, spaceInstanceId, position: dropPosition, definitionId: reward.definitionId, claimed: false, pickup: null, autoSalvageEligibleTick: generated ? safeInteger(state.tick + AUTO_SALVAGE_ACTIVE_TICKS, 1) : null, autoSalvage: null, rewardVersion: CONTENT_REWARD_VERSION, episodeSource: { groupId: source4.groupId, episode: source4.episode, kind: source4.kind, ordinal: source4.spawnOrdinal, rank: source4.rank, progression: copyWire(dropped), ...source4.rewardClass ? { rewardClass: source4.rewardClass } : {} }, healing: reward.healing, spawnEntityId: source4.kind === "enemy" ? state.groupsById[source4.groupId].entityIds[source4.spawnOrdinal] : null };
   return { playerId: p.playerId, id, expectedRevision: inv.revision, nextRevision: safeInteger(inv.revision + 1), record, reward, nextGold: addAmount(inv.gold, rewardAmount(reward.gold)), nextSouls: safeInteger((inv.economy.materials["Monster Soul"] ?? 0) + reward.souls), nextDefeats: source4.kind === "enemy" ? ordinal : inv.renewal.defeats };
 }
 function applyEpisodeReward(state, p, plan) {
@@ -23847,6 +23883,7 @@ export {
   WEB_WEAVER_D12_4J,
   SLAG_SHAPER_D12_4K,
   eliteAffixDefinitionD12_4,
+  NAMED_ELITES_V1,
   ELITE_HASTE_D12_4D_VERSION,
   TIMED_ACTOR_STATUS_D12_4E_VERSION,
   TIMED_PLAYER_POISON_D12_4F_VERSION,

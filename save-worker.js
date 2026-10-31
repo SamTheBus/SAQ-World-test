@@ -906,7 +906,7 @@ var RECOVERED_BOSSES = Object.freeze({
   }),
   marcus: Object.freeze({
     id: "marcus",
-    label: "MARCUS THE OUTLAW",
+    label: "GOLDSPUR THE OUTLAW",
     site: "repeatable-slot:fort:grassland:standard:040",
     family: "fort",
     biome: "grassland",
@@ -917,7 +917,7 @@ var RECOVERED_BOSSES = Object.freeze({
   }),
   hooktail: Object.freeze({
     id: "hooktail",
-    label: "HOOKTAIL",
+    label: "ASHFANG",
     site: "repeatable-slot:ruin:desert:standard:056",
     family: "ruin",
     biome: "desert",
@@ -6312,6 +6312,15 @@ function validateCompositionEliteV1(s, e) {
   }
 }
 
+// src/shared/content/named_elites_v1.js
+var NAMED_ELITES_V1 = Object.freeze({
+  old_bristleback: Object.freeze({ id: "old_bristleback", label: "OLD BRISTLEBACK", family: "tusk_boar", biome: "grassland", affixId: "swift_commander" }),
+  hollow_jack: Object.freeze({ id: "hollow_jack", label: "HOLLOW JACK", family: "field_scarecrow", biome: "grassland", affixId: "glacial_warden" }),
+  queen_kheptra: Object.freeze({ id: "queen_kheptra", label: "QUEEN KHEPTRA", family: "sand_scarab", biome: "desert", affixId: "web_weaver" }),
+  glasstail: Object.freeze({ id: "glasstail", label: "GLASSTAIL", family: "dune_scorpion", biome: "desert", affixId: "slag_shaper" })
+});
+var NAMED_ELITE_IDS_V1 = Object.freeze(Object.keys(NAMED_ELITES_V1));
+
 // src/shared/contracts/elite_combat_d12_4.js
 var ELITE_COMBAT_D12_4_VERSION = "elite-combat-d12.4-v1";
 var ELITE_RECORD_D12_4_VERSION = "elite-record-d12.4-v1";
@@ -6463,7 +6472,8 @@ function validateEliteCombatD12_4(state) {
   closedRecord(root, ["version", "elitesByEntityId"], ["hasteByEntityId", "timedStatusesByEntityId", "guardByEntityId", "attackAuraByEntityId", "nullificationResistanceByEntityId", "pendingHazardsBySourceEliteId", "hazardsById", "webbedByEntityId", "slagBurnByEntityId"]);
   requireContract(root.version === ELITE_COMBAT_D12_4_VERSION, "Unsupported elite combat state");
   for (const [entityId2, e] of Object.entries(root.elitesByEntityId)) {
-    closedRecord(e, ["version", "eliteId", "entityId", "groupId", "siteId", "floorId", "roomId", "tier", "affixIds", "identitySource", "activatedTick", "nextPulseTick", "pulseSequence", "lastPulse"], ["composition"]);
+    closedRecord(e, ["version", "eliteId", "entityId", "groupId", "siteId", "floorId", "roomId", "tier", "affixIds", "identitySource", "activatedTick", "nextPulseTick", "pulseSequence", "lastPulse"], ["composition", "namedEliteId"]);
+    if (e.namedEliteId !== void 0) requireContract(Object.hasOwn(NAMED_ELITES_V1, e.namedEliteId) && NAMED_ELITES_V1[e.namedEliteId].affixId === e.affixIds[0], "Unknown named elite");
     requireContract([ELITE_RECORD_D12_4_VERSION, COMPOSITION_ELITE_V1].includes(e.version) && /^elite:[a-f0-9]{32}$/.test(e.eliteId) && entityId2 === e.entityId && e.tier === "elite", "Invalid elite identity");
     if (e.version === COMPOSITION_ELITE_V1) validateCompositionEliteV1(state, e);
     else requireContract(e.composition === void 0 && e.affixIds.length === 1, "Unsupported elite affix loadout");

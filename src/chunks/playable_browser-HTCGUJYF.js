@@ -132,6 +132,7 @@ import {
   MOVE_SLOT,
   MULTIROOM_HASH,
   MULTIROOM_VERSION,
+  NAMED_ELITES_V1,
   NULLIFICATION_RESISTANCE_D12_4I_VERSION,
   NULLIFIER_AFFIX_ID,
   NULLIFIER_D12_4I,
@@ -766,7 +767,7 @@ import {
   worldLevelGapMultiplier,
   worldOrdinaryMeleeProfile,
   worldPointForArea
-} from "./chunk-WQLIVZMK.js";
+} from "./chunk-ES2AOZAJ.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -13224,7 +13225,7 @@ function drawCreatureD11(c, actor, presentationTick, flash = false, _equipmentAr
   if (!actor.alive && (actor.enemyFamily !== "animated_armor" || actor.deathAge === null || actor.deathAge > 36)) return;
   const presentationTime = presentationTick * (1e3 / 60), seed2 = actor.visualSeed >>> 0, profile = creaturePresentationForRenderV3(actor.enemyFamily) ?? creaturePresentationForRenderV3("sprout"), frame = profile.painterFrame;
   const melee = actor.meleePhase, phaseSpan = Math.max(1, (melee?.phaseEndsTick ?? presentationTick) - (melee?.phaseStartedTick ?? presentationTick)), phaseProgress = !melee || melee.phase === "idle" ? 0 : Math.max(0, Math.min(1, (presentationTick - melee.phaseStartedTick) / phaseSpan)), started = actor.motion?.startedTick, lastMoved = actor.motion?.lastMovedTick, stopAge = lastMoved === null || lastMoved === void 0 ? 99 : presentationTick - lastMoved, startAge = started === null || started === void 0 ? 99 : presentationTick - started, motionBlend = stopAge <= 1 ? Math.min(1, startAge / 6) : Math.max(0, 1 - (stopAge - 1) / 6), stepPhase = (started ?? presentationTick) * -0.66 + presentationTick * 0.66 + seed2 % 17 * 0.13;
-  const m = { x: frame.x, y: frame.y, w: frame.width, h: frame.height, flashTimer: flash ? 1 : 0, movedLastTick: Boolean(actor.movedLastTick), motionBlend, stepPhase, meleeAction: Boolean(actor.meleeAction), meleePhase: melee, phaseProgress, deathProgress: actor.alive ? 0 : Math.max(0, Math.min(1, (actor.deathAge ?? 0) / 24)), presentationTick, paletteKey: profile.paletteKey };
+  const m = { x: frame.x, y: frame.y, w: frame.width, h: frame.height, flashTimer: flash ? 1 : 0, movedLastTick: Boolean(actor.movedLastTick), motionBlend, stepPhase, meleeAction: Boolean(actor.meleeAction), meleePhase: melee, phaseProgress, deathProgress: actor.alive ? 0 : Math.max(0, Math.min(1, (actor.deathAge ?? 0) / 24)), presentationTick, paletteKey: profile.paletteKey, namedEliteId: actor.elite?.namedEliteId ?? null };
   c.save();
   c.translate(actor.position.x, actor.position.y);
   const drawScale = creatureDrawScaleD11(actor);
@@ -13253,6 +13254,7 @@ function drawCreatureD11(c, actor, presentationTick, flash = false, _equipmentAr
     c.ellipse(shadow4.x, shadow4.y, shadow4.rx, shadow4.ry, 0, 0, Math.PI * 2);
     c.fill();
   }
+  if (NAMED_ELITES_V1[m.namedEliteId]) drawNamedEliteRingD11(c, profile.contactShadow, actor.elite.scale ?? 1, presentationTick);
   const attackArt = hostileMeleePose(actor, presentationTick) ?? hostileRangedPose(actor, presentationTick);
   m.familyAttack = attackArt;
   m.rangedPose = attackArt?.ranged ? attackArt : null;
@@ -13314,6 +13316,11 @@ function drawCreatureD11(c, actor, presentationTick, flash = false, _equipmentAr
     c.shadowColor = "#f97316";
     c.shadowBlur = 2;
   }
+  if (NAMED_ELITES_V1[m.namedEliteId]) {
+    c.filter = "none";
+    c.shadowColor = "#ffd75a";
+    c.shadowBlur = 2;
+  }
   const paintBody = (target) => (CREATURE_PAINTERS_D11[actor.enemyFamily] ?? drawMushroomV9)(target, m, presentationTime, seed2);
   const boundedFilter = actor.elite?.affixId === "swift_commander" && actor.enemyFamily === "animated_armor" || actor.enemyFamily === "golem" && ["slag_shaper", "iron_citadel"].includes(actor.elite?.affixId);
   if (boundedFilter) drawFilteredCreatureSurface(c, frame, paintBody);
@@ -13333,7 +13340,35 @@ function drawCreatureD11(c, actor, presentationTick, flash = false, _equipmentAr
   }
   c.restore();
 }
+function drawNamedEliteRingD11(c, shadow4, scale, tick) {
+  const rx = shadow4.rx * scale * 1.3 + 3, ry = shadow4.ry * scale * 1.3 + 1.5, glow8 = 0.2 + 0.1 * Math.sin(tick * 0.08);
+  c.save();
+  c.lineWidth = 3.2;
+  c.strokeStyle = `rgba(255,215,90,${glow8})`;
+  c.beginPath();
+  c.ellipse(shadow4.x, shadow4.y, rx + 1.8, ry + 1, 0, 0, Math.PI * 2);
+  c.stroke();
+  c.lineWidth = 1.5;
+  c.strokeStyle = "#ffd75a";
+  c.beginPath();
+  c.ellipse(shadow4.x, shadow4.y, rx, ry, 0, 0, Math.PI * 2);
+  c.stroke();
+  c.restore();
+}
+function drawNamedEliteNameD11(c, named, profile) {
+  const y = profile.labels.healthBarY - 10;
+  c.textAlign = "center";
+  c.font = "800 8px system-ui";
+  c.lineWidth = 2.6;
+  c.strokeStyle = "#2a1a04";
+  c.strokeText(named.label, 0, y);
+  c.fillStyle = "#ffd75a";
+  c.fillText(named.label, 0, y);
+  c.textAlign = "left";
+}
 function drawCreatureLabelsLocalD11(c, actor, profile) {
+  const named = actor.alive ? NAMED_ELITES_V1[actor.elite?.namedEliteId] : null;
+  if (named) actor = Object.create(actor, { elite: { value: { ...actor.elite, label: "" }, enumerable: true } });
   const ratio = actor.hp.m / actor.maxHp.m * 10 ** (actor.hp.e - actor.maxHp.e);
   const barWidth = Math.max(18, Math.min(34, profile.visualBounds.width * 0.68)), barHeight = profile.visualScale < 0.72 ? 3 : 4, barX = -barWidth / 2, barY = profile.labels.healthBarY;
   if (actor.alive) {
@@ -13356,6 +13391,7 @@ function drawCreatureLabelsLocalD11(c, actor, profile) {
     drawEliteAffixIdentitySlot(c, actor, profile);
     drawActorStatusRow(c, actor, profile);
   }
+  if (named) drawNamedEliteNameD11(c, named, profile);
 }
 function drawCreatureLabelsD11(c, actor) {
   if (!actor.alive) return;
