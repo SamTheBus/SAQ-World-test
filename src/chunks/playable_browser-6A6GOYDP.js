@@ -2056,9 +2056,9 @@ function drawRockCluster(ctx, x, y, size, n, biome = "r", organic = false) {
     ctx.fill();
   }
   ctx.fillStyle = "#c0ae77";
-  for (const [px2, py] of [[-size * 0.43, size * 0.3], [size * 0.4, size * 0.25], [size * 0.31, size * 0.38]]) {
+  for (const [px3, py] of [[-size * 0.43, size * 0.3], [size * 0.4, size * 0.25], [size * 0.31, size * 0.38]]) {
     ctx.beginPath();
-    ctx.arc(px2, py, 1.4, 0, TAU);
+    ctx.arc(px3, py, 1.4, 0, TAU);
     ctx.fill();
   }
   ctx.restore();
@@ -2162,15 +2162,15 @@ function drawCanopy(ctx, x, y, size, n) {
     return;
   }
   if (variant % 4 === 2) {
-    const layer2 = (color28, parts, outline3 = false) => {
+    const layer2 = (color28, parts, outline4 = false) => {
       ctx.fillStyle = color28;
       ctx.beginPath();
-      for (const [px2, py, r] of parts) {
-        ctx.moveTo(px2 + r, py);
-        ctx.arc(px2, py, r, 0, TAU);
+      for (const [px3, py, r] of parts) {
+        ctx.moveTo(px3 + r, py);
+        ctx.arc(px3, py, r, 0, TAU);
       }
       ctx.fill();
-      if (outline3) {
+      if (outline4) {
         ctx.strokeStyle = "#0c2a17";
         ctx.lineWidth = 3;
         ctx.stroke();
@@ -2180,15 +2180,15 @@ function drawCanopy(ctx, x, y, size, n) {
     layer2(variant > 7 ? "#287c43" : "#236d3b", [[-18, -2, 18], [2, -15, 22], [22, -3, 16], [2, 7, 20]]);
     layer2("#56ad58", [[-10, -17, 10], [12, -20, 11], [24, -8, 8]]);
     ctx.fillStyle = "#a5cf65";
-    for (const [px2, py] of [[-17, -11], [7, -27], [27, -12]]) {
+    for (const [px3, py] of [[-17, -11], [7, -27], [27, -12]]) {
       ctx.beginPath();
-      ctx.arc(px2, py, 3, 0, TAU);
+      ctx.arc(px3, py, 3, 0, TAU);
       ctx.fill();
     }
     ctx.restore();
     return;
   }
-  const layer = (color28, clumps, outline3 = false) => {
+  const layer = (color28, clumps, outline4 = false) => {
     ctx.fillStyle = color28;
     ctx.beginPath();
     for (const [x2, y2, r] of clumps) {
@@ -2196,7 +2196,7 @@ function drawCanopy(ctx, x, y, size, n) {
       ctx.arc(x2, y2, r, 0, TAU);
     }
     ctx.fill();
-    if (outline3) {
+    if (outline4) {
       ctx.strokeStyle = "#081d0c";
       ctx.lineWidth = 3;
       ctx.stroke();
@@ -2219,10 +2219,10 @@ function drawWoodlandLandmark(ctx, landmark) {
     ctx.fillStyle = "#626b60";
     ctx.strokeStyle = "#26322b";
     ctx.lineWidth = 1.4;
-    for (const [px2, py, w, h] of [[-16, 1, 12, 7], [-2, -3, 14, 10], [11, 3, 8, 6]]) {
+    for (const [px3, py, w, h] of [[-16, 1, 12, 7], [-2, -3, 14, 10], [11, 3, 8, 6]]) {
       ctx.save();
-      ctx.translate(px2, py);
-      ctx.rotate(((n + px2) % 5 - 2) * 0.06);
+      ctx.translate(px3, py);
+      ctx.rotate(((n + px3) % 5 - 2) * 0.06);
       ctx.fillRect(-w / 2, -h, w, h);
       ctx.strokeRect(-w / 2, -h, w, h);
       ctx.restore();
@@ -2290,15 +2290,15 @@ function drawWoodlandLandmark(ctx, landmark) {
     ctx.moveTo(10, 1);
     ctx.lineTo(25, -5);
     ctx.stroke();
-    for (const px2 of [-11, 7]) {
+    for (const px3 of [-11, 7]) {
       ctx.fillStyle = "#403022";
       ctx.beginPath();
-      ctx.arc(px2, 7, 7, 0, TAU);
+      ctx.arc(px3, 7, 7, 0, TAU);
       ctx.fill();
       ctx.stroke();
       ctx.fillStyle = "#a06a34";
       ctx.beginPath();
-      ctx.arc(px2, 7, 2, 0, TAU);
+      ctx.arc(px3, 7, 2, 0, TAU);
       ctx.fill();
     }
   } else {
@@ -2327,20 +2327,20 @@ function drawEnvironmentAmbient(ctx, space, view, time) {
   ctx.save();
   ctx.fillStyle = "#e4f2b5";
   for (let y = Math.floor((view.y + offset2.y) / 256); y <= Math.floor((view.y + view.height + offset2.y) / 256) && count < 8; y++) for (let x = Math.floor((view.x + offset2.x) / 256); x <= Math.floor((view.x + view.width + offset2.x) / 256) && count < 8; x++) {
-    const n = terrainHash(x, y, seed2), px2 = x * 256 - offset2.x + 32 + n % 192 + Math.sin(time / 2400 + n) * 5, py = y * 256 - offset2.y + 32 + (n >>> 8) % 192 - Math.sin(time / 3400 + n) * 9;
-    if (px2 < view.x || py < view.y || px2 > view.x + view.width || py > view.y + view.height) continue;
-    const terrain = v.terrain[Math.floor(py / t) - (v.originTile?.y ?? 0)]?.[Math.floor(px2 / t) - (v.originTile?.x ?? 0)];
+    const n = terrainHash(x, y, seed2), px3 = x * 256 - offset2.x + 32 + n % 192 + Math.sin(time / 2400 + n) * 5, py = y * 256 - offset2.y + 32 + (n >>> 8) % 192 - Math.sin(time / 3400 + n) * 9;
+    if (px3 < view.x || py < view.y || px3 > view.x + view.width || py > view.y + view.height) continue;
+    const terrain = v.terrain[Math.floor(py / t) - (v.originTile?.y ?? 0)]?.[Math.floor(px3 / t) - (v.originTile?.x ?? 0)];
     if (terrain !== "f" && terrain !== "g") continue;
     ctx.globalAlpha = 0.2 + 0.35 * (0.5 + 0.5 * Math.sin(time / 1900 + n));
-    ctx.fillRect(px2, py, 1.4, 1.4);
+    ctx.fillRect(px3, py, 1.4, 1.4);
     count++;
   }
   ctx.restore();
   return count;
 }
-var drawDungeonProp = function(ctx, prop2, px2, py, tileSize) {
+var drawDungeonProp = function(ctx, prop2, px3, py, tileSize) {
   if (!prop2) return;
-  let cx = px2 + tileSize / 2;
+  let cx = px3 + tileSize / 2;
   let cy = py + tileSize / 2;
   const isFlash = false;
   ctx.save();
@@ -2575,21 +2575,21 @@ async function createFortArtPilotV1(environment, review, prior) {
   }
   function interiorTile(c, space, x, y, t, type) {
     if (mode !== "candidate" || !inside3(space)) return false;
-    const px2 = x * t, py = y * t;
+    const px3 = x * t, py = y * t;
     if (type === "1") {
-      texture(c, "floor", px2, py, t, t);
+      texture(c, "floor", px3, py, t, t);
     } else if (type === "0") {
-      texture(c, "masonry", px2, py, t, t);
+      texture(c, "masonry", px3, py, t, t);
       const v = space.visual, ox = v.originTile.x, oy = v.originTile.y;
       if (v.terrain[y + 1 - oy]?.[x - ox] === "1") {
         c.fillStyle = "#31414f";
-        c.fillRect(px2, py + t - 6, t, 5);
+        c.fillRect(px3, py + t - 6, t, 5);
         c.fillStyle = "#202c36";
-        c.fillRect(px2, py + t - 1, t, 1);
+        c.fillRect(px3, py + t - 1, t, 1);
       }
     } else {
       c.fillStyle = "#101820";
-      c.fillRect(px2, py, t, t);
+      c.fillRect(px3, py, t, t);
     }
     draws.interior++;
     return true;
@@ -2656,7 +2656,7 @@ function worldLightDescriptors(space, base = [], { authoredFort = true } = {}) {
     for (const b of template.buildings) {
       if (!(space.visual?.blockers ?? []).some((q) => q.id?.includes(placement.id ? placement.id + ":" + b.id : b.id))) continue;
       const x = placement.x + b.x * t, y = placement.y + b.y * t, w = b.w * t, front2 = y + b.h * t;
-      for (let px2 = x + 23, i = 0; px2 < x + w - 15; px2 += 61, i++) add(name + "/" + b.id + "/window/" + i, px2 + 9, front2 - 20, { type: "window", width: 14, height: 15 }, { radius: 88, intensity: 0.48, anchorY: front2 + 2, occlusionOrigin: { x: px2 + 9, y: front2 + 6 }, facing: "south" });
+      for (let px3 = x + 23, i = 0; px3 < x + w - 15; px3 += 61, i++) add(name + "/" + b.id + "/window/" + i, px3 + 9, front2 - 20, { type: "window", width: 14, height: 15 }, { radius: 88, intensity: 0.48, anchorY: front2 + 2, occlusionOrigin: { x: px3 + 9, y: front2 + 6 }, facing: "south" });
       if (b.kind !== "home") {
         const dx = placement.x + b.doorPoint[0] * t + 16, dy = placement.y + b.doorPoint[1] * t;
         const binding = b.doorSide === "west" ? { x: x - 16, y: dy + 17, ox: x - 24, oy: dy + 17 } : b.doorSide === "east" ? { x: x + w + 16, y: dy + 17, ox: x + w + 24, oy: dy + 17 } : b.doorSide === "north" ? { x: dx + 34, y: y - 35, ox: dx + 34, oy: y - 38 } : { x: dx + 34, y: dy - 13, ox: dx + 34, oy: dy + 12 };
@@ -2954,14 +2954,14 @@ function sporeDepthItems(model, viewport, art) {
           ctx.save();
           ctx.globalAlpha = 1 - q;
           for (let n = 0; n < 12; n++) {
-            const a = n * 2.399 + pod.ordinal, r = 12 + q * (28 + n % 4 * 9), px2 = x + Math.cos(a) * r, py = y - 26 + Math.sin(a) * r * 0.48 - Math.sin(q * Math.PI) * (25 + n % 3 * 6) + q * q * 30;
+            const a = n * 2.399 + pod.ordinal, r = 12 + q * (28 + n % 4 * 9), px3 = x + Math.cos(a) * r, py = y - 26 + Math.sin(a) * r * 0.48 - Math.sin(q * Math.PI) * (25 + n % 3 * 6) + q * q * 30;
             ctx.fillStyle = n % 3 === 0 ? "#e8dcca" : n % 2 ? "#d95059" : "#9acfc5";
             ctx.strokeStyle = "#34394b";
             ctx.lineWidth = 1.5;
             ctx.beginPath();
-            ctx.moveTo(px2 - 4, py - 3);
-            ctx.lineTo(px2 + 4, py - 2);
-            ctx.lineTo(px2 + 1, py + 4);
+            ctx.moveTo(px3 - 4, py - 3);
+            ctx.lineTo(px3 + 4, py - 2);
+            ctx.lineTo(px3 + 1, py + 4);
             ctx.closePath();
             ctx.fill();
             ctx.stroke();
@@ -3567,12 +3567,12 @@ function drawRoadCell(ctx, at3, x, y, t, seed2, offset2 = { x: 0, y: 0 }, textur
   if (at3(x, y) === "H" || at3(x, y) === "V") return roadMask(at3, x, y);
   const mask = roadMask(at3, x, y), n = terrainHash(x + offset2.x / t, y + offset2.y / t, seed2), north = mask & 1, east = mask & 2, south = mask & 4, west = mask & 8;
   const trail2 = at3(x, y) === "p", inset = trail2 ? 6 : 2, body5 = trail2 ? trailDirt : dirt;
-  const px2 = x * t, py = y * t;
+  const px3 = x * t, py = y * t;
   const nwRoad = !trail2 && at3(x - 1, y - 1) === "r", neRoad = !trail2 && at3(x + 1, y - 1) === "r", swRoad = !trail2 && at3(x - 1, y + 1) === "r", seRoad = !trail2 && at3(x + 1, y + 1) === "r";
   const l = west || nwRoad || swRoad ? -1 : inset + n % 2, r = east || neRoad || seRoad ? t + 1 : t - inset - (n >>> 4) % 2, top = north || nwRoad || neRoad ? -1 : inset + (n >>> 8) % 2, bottom = south || swRoad || seRoad ? t + 1 : t - inset - (n >>> 12) % 2;
   const nw = !north && !west ? 9 : 0, ne = !north && !east ? 9 : 0, se = !south && !east ? 9 : 0, sw = !south && !west ? 9 : 0;
   ctx.save();
-  ctx.translate(px2, py);
+  ctx.translate(px3, py);
   ctx.beginPath();
   ctx.moveTo(l + nw, top);
   ctx.lineTo(r - ne, top);
@@ -3589,7 +3589,7 @@ function drawRoadCell(ctx, at3, x, y, t, seed2, offset2 = { x: 0, y: 0 }, textur
   if (texture) {
     ctx.save();
     ctx.clip();
-    texture(ctx, trail2 ? "p" : "r", n, t, px2 + offset2.x, py + offset2.y);
+    texture(ctx, trail2 ? "p" : "r", n, t, px3 + offset2.x, py + offset2.y);
     ctx.restore();
   }
   if (trail2) {
@@ -3651,13 +3651,13 @@ function drawRoadCell(ctx, at3, x, y, t, seed2, offset2 = { x: 0, y: 0 }, textur
   return mask;
 }
 function drawRoadFillets(ctx, at3, x, y, t) {
-  const px2 = x * t, py = y * t;
+  const px3 = x * t, py = y * t;
   for (const [dx, dy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
     if (!isRoad(at3(x + dx, y)) || !isRoad(at3(x, y + dy)) || !isRoad(at3(x + dx, y + dy))) continue;
     const trail2 = at3(x + dx, y) === "p" || at3(x, y + dy) === "p", r = trail2 ? 4 : 10;
     ctx.fillStyle = trail2 ? trailDirt : dirt;
     ctx.save();
-    ctx.translate(px2 + (dx > 0 ? t : 0), py + (dy > 0 ? t : 0));
+    ctx.translate(px3 + (dx > 0 ? t : 0), py + (dy > 0 ? t : 0));
     ctx.scale(-dx, -dy);
     ctx.beginPath();
     ctx.moveTo(0, 0);
@@ -3799,8 +3799,8 @@ async function createHybridArtV2(environment, review, initialMode = "candidate")
         if (at3(x, y) !== type || !prior.eligible(space, x * t, y * t)) continue;
         count++;
         const mask = roadMask(at3, x, y), n = terrainHash(x + o.x / t, y + o.y / t, seed2), north = mask & 1, east = mask & 2, south = mask & 4, west = mask & 8, trail2 = type === "p", inset = trail2 ? 6 : 2;
-        const nwRoad = !trail2 && at3(x - 1, y - 1) === "r", neRoad = !trail2 && at3(x + 1, y - 1) === "r", swRoad = !trail2 && at3(x - 1, y + 1) === "r", seRoad = !trail2 && at3(x + 1, y + 1) === "r", px2 = x * t, py = y * t;
-        const l = px2 + (west || nwRoad || swRoad ? -1 : inset + n % 2), r = px2 + (east || neRoad || seRoad ? t + 1 : t - inset - (n >>> 4) % 2), top = py + (north || nwRoad || neRoad ? -1 : inset + (n >>> 8) % 2), bottom = py + (south || swRoad || seRoad ? t + 1 : t - inset - (n >>> 12) % 2), nw = !north && !west ? 9 : 0, ne = !north && !east ? 9 : 0, se = !south && !east ? 9 : 0, sw = !south && !west ? 9 : 0;
+        const nwRoad = !trail2 && at3(x - 1, y - 1) === "r", neRoad = !trail2 && at3(x + 1, y - 1) === "r", swRoad = !trail2 && at3(x - 1, y + 1) === "r", seRoad = !trail2 && at3(x + 1, y + 1) === "r", px3 = x * t, py = y * t;
+        const l = px3 + (west || nwRoad || swRoad ? -1 : inset + n % 2), r = px3 + (east || neRoad || seRoad ? t + 1 : t - inset - (n >>> 4) % 2), top = py + (north || nwRoad || neRoad ? -1 : inset + (n >>> 8) % 2), bottom = py + (south || swRoad || seRoad ? t + 1 : t - inset - (n >>> 12) % 2), nw = !north && !west ? 9 : 0, ne = !north && !east ? 9 : 0, se = !south && !east ? 9 : 0, sw = !south && !west ? 9 : 0;
         c.moveTo(l + nw, top);
         c.lineTo(r - ne, top);
         c.quadraticCurveTo(r, top, r, top + ne);
@@ -4461,17 +4461,17 @@ function cursedBladeMotionV4(m, time, seed2) {
     const phase = time / 330 + seed2 % 97 * 0.031 + i * TAU6 / 3, radius = 10 + i * 1.8;
     return { index: i, x: x + Math.cos(phase) * radius, y: y + Math.sin(phase) * radius * 0.72, radius: 2 - i * 0.2, front: Math.sin(phase) >= 0, alpha: 0.34 - i * 0.055 };
   });
-  const transform = (px2, py) => ({ x: x + Math.cos(angle3) * px2 - Math.sin(angle3) * py, y: y + Math.sin(angle3) * px2 + Math.cos(angle3) * py });
+  const transform = (px3, py) => ({ x: x + Math.cos(angle3) * px3 - Math.sin(angle3) * py, y: y + Math.sin(angle3) * px3 + Math.cos(angle3) * py });
   return { x, y, angle: angle3, weight: weight2, strike: strike2, wisps, tip: transform(0, -TIP), guard: transform(0, 14), pommel: transform(0, 28), transform };
 }
-function polygon2(c, points2, fill4, outline3 = true) {
+function polygon2(c, points2, fill4, outline4 = true) {
   c.fillStyle = fill4;
   c.beginPath();
   c.moveTo(...points2[0]);
   for (const p of points2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK3;
     c.lineWidth = LINE2;
     c.stroke();
@@ -4656,14 +4656,14 @@ function animatedArmorMotionV4(m, time, seed2) {
     helmetFollow: -shift * 0.35 + Math.sin(time / 260 + seed2 % 9) * 0.35 * (1 - walk) * (1 - weight2)
   };
 }
-function polygon3(c, points2, fill4, outline3 = true) {
+function polygon3(c, points2, fill4, outline4 = true) {
   c.fillStyle = fill4;
   c.beginPath();
   c.moveTo(...points2[0]);
   for (const p of points2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK4;
     c.lineWidth = LINE3;
     c.stroke();
@@ -4917,14 +4917,14 @@ function gargoyleMotionV4(m, time, seed2) {
     wings: [-1, 1].map((side) => (Math.sin(time / 180 + side) * 1.2 + Math.sin(step + side) * walk * 2) * (1 - weight2) + mix4(-4, 7, strike2) * weight2)
   };
 }
-function polygon4(c, points2, fill4, outline3 = true) {
+function polygon4(c, points2, fill4, outline4 = true) {
   c.fillStyle = fill4;
   c.beginPath();
   c.moveTo(...points2[0]);
   for (const p of points2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK5;
     c.lineWidth = LINE4;
     c.stroke();
@@ -4983,9 +4983,9 @@ function weapon2(c, m, cx, cy, flash) {
 }
 function drawGargoyleV4(c, m, presentationTime, seed2) {
   const time = presentationTime, action2 = m.familyAttack, motion = gargoyleMotionV4(m, time, seed2), cx = m.x + m.w / 2 + motion.x, cy = m.y + m.h - 12 + motion.y;
-  const flash = m.flashTimer > 0, outline3 = INK5, stone2 = flash ? "#fff" : "#60717a", stoneLight = flash ? "#fff" : "#8b9aa0", stoneDark = flash ? "#fff" : "#39474f", moss3 = flash ? "#fff" : "#42633a", core5 = "#e3a84a";
+  const flash = m.flashTimer > 0, outline4 = INK5, stone2 = flash ? "#fff" : "#60717a", stoneLight = flash ? "#fff" : "#8b9aa0", stoneDark = flash ? "#fff" : "#39474f", moss3 = flash ? "#fff" : "#42633a", core5 = "#e3a84a";
   c.save();
-  c.strokeStyle = outline3;
+  c.strokeStyle = outline4;
   c.lineWidth = LINE4;
   c.lineJoin = "round";
   c.lineCap = "round";
@@ -5010,7 +5010,7 @@ function drawGargoyleV4(c, m, presentationTime, seed2) {
       c.moveTo(cx + side * 8, cy - 2);
       c.lineTo(cx + side * 14, cy);
       c.stroke();
-      c.strokeStyle = outline3;
+      c.strokeStyle = outline4;
       c.lineWidth = LINE4;
     }
   }
@@ -5082,7 +5082,7 @@ function drawGargoyleV4(c, m, presentationTime, seed2) {
   c.closePath();
   c.fill();
   c.stroke();
-  c.strokeStyle = outline3;
+  c.strokeStyle = outline4;
   c.lineWidth = LINE4;
   c.beginPath();
   c.moveTo(cx - 6, headY - 1);
@@ -5795,24 +5795,24 @@ function voidCrawlerPoseV4(actor, pose, tick) {
   const flip = -idleFacingX, b = pose.body, pivot2 = pose.bodyPivot, co = Math.cos(b.rotation), si = Math.sin(b.rotation);
   const x = (tip.x * SCALE8 * size * flip - pivot2.x) * b.scaleX, y = (tip.y * SCALE8 * size - pivot2.y) * b.scaleY;
   const impactTravel = pose.contactReach - pose.frontExtent;
-  const px2 = pose.direction.x * impactTravel + pivot2.x + co * x - si * y;
+  const px3 = pose.direction.x * impactTravel + pivot2.x + co * x - si * y;
   const py = pose.direction.y * impactTravel + pivot2.y + si * x + co * y;
   const weight2 = pose.strikeBlend;
   const body5 = {
     ...b,
-    x: b.x + (pose.direction.x * pose.contactReach - px2) * weight2,
+    x: b.x + (pose.direction.x * pose.contactReach - px3) * weight2,
     y: b.y + (pose.direction.y * pose.contactReach - 8 - py) * weight2
   };
   return { ...a, body: body5, anchor: { x: body5.x, y: body5.y } };
 }
-function polygon5(c, points2, fill4, outline3 = true) {
+function polygon5(c, points2, fill4, outline4 = true) {
   c.beginPath();
   c.moveTo(...points2[0]);
   for (const p of points2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.fillStyle = fill4;
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK9;
     c.lineWidth = LINE8;
     c.stroke();
@@ -5974,14 +5974,14 @@ function gildedScuttlerLegsV4(time, seed2, walk = 0) {
   }
   return legs3;
 }
-function path(c, points2, fill4, outline3 = true) {
+function path(c, points2, fill4, outline4 = true) {
   c.fillStyle = fill4;
   c.beginPath();
   c.moveTo(...points2[0]);
   for (const p of points2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK10;
     c.lineWidth = LINE9;
     c.stroke();
@@ -6179,19 +6179,19 @@ function mimicShieldFaceV4(time, seed2, pose = null) {
   const weight2 = pose?.artWeight ?? 0, cycle = ((time + seed2 % 23 * 137) % 4200 + 4200) % 4200;
   const idleBlink = smooth5(Math.abs(cycle - 210) / 85), idleOpen = 2.8 + Math.sin(time / 240 + seed2 % 11 * 0.31) * 0.4;
   const blink = idleBlink + (1 - idleBlink) * weight2;
-  const opening = (2.1 + (idleOpen - 2.8) * 0.3) * (1 - weight2) + (pose?.limb.open ?? 2.1) * weight2;
+  const opening2 = (2.1 + (idleOpen - 2.8) * 0.3) * (1 - weight2) + (pose?.limb.open ?? 2.1) * weight2;
   const width = 8, center3 = { x: 0, y: 3.5 }, angle3 = 0;
-  const outline3 = [[-8, -0.4], [-6, -opening], [-2, -opening * 0.72], [2, -opening * 0.72], [6, -opening], [8, -0.4], [6, opening * 0.72], [2, opening], [-2, opening], [-6, opening * 0.72]];
+  const outline4 = [[-8, -0.4], [-6, -opening2], [-2, -opening2 * 0.72], [2, -opening2 * 0.72], [6, -opening2], [8, -0.4], [6, opening2 * 0.72], [2, opening2], [-2, opening2], [-6, opening2 * 0.72]];
   const teeth = [];
   for (const side of [-1, 1]) {
     for (const x of [-5.25, -1.75, 1.75, 5.25]) {
-      const edge = (xx) => side * opening * (side < 0 ? 0.72 + 0.28 * clamp9((Math.abs(xx) - 2) / 4) : 1 - 0.28 * clamp9((Math.abs(xx) - 2) / 4));
-      teeth.push([[x - 0.95, edge(x - 0.95)], [x, edge(x) - side * Math.min(1.8, opening * 0.7)], [x + 0.95, edge(x + 0.95)]]);
+      const edge = (xx) => side * opening2 * (side < 0 ? 0.72 + 0.28 * clamp9((Math.abs(xx) - 2) / 4) : 1 - 0.28 * clamp9((Math.abs(xx) - 2) / 4));
+      teeth.push([[x - 0.95, edge(x - 0.95)], [x, edge(x) - side * Math.min(1.8, opening2 * 0.7)], [x + 0.95, edge(x + 0.95)]]);
     }
   }
-  return { blink, opening, center: center3, angle: angle3, width, outline: outline3, teeth };
+  return { blink, opening: opening2, center: center3, angle: angle3, width, outline: outline4, teeth };
 }
-function polygon6(c, points2, fill4, outline3 = true) {
+function polygon6(c, points2, fill4, outline4 = true) {
   c.fillStyle = fill4;
   c.beginPath();
   c.moveTo(...points2[0]);
@@ -6199,7 +6199,7 @@ function polygon6(c, points2, fill4, outline3 = true) {
   c.lineTo(...points2[0]);
   c.closePath();
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK11;
     c.lineWidth = LINE10;
     c.stroke();
@@ -6935,8 +6935,8 @@ function gearCase(c, x, y, m, angle3) {
   c.fillStyle = ink(m, "#b87a26");
   c.beginPath();
   for (let n = 0; n < 48; n++) {
-    const a = n * TAU17 / 48, r = n % 4 < 2 ? 15.5 : 13.4, px2 = Math.cos(a) * r, py = Math.sin(a) * r;
-    n ? c.lineTo(px2, py) : c.moveTo(px2, py);
+    const a = n * TAU17 / 48, r = n % 4 < 2 ? 15.5 : 13.4, px3 = Math.cos(a) * r, py = Math.sin(a) * r;
+    n ? c.lineTo(px3, py) : c.moveTo(px3, py);
   }
   c.closePath();
   c.fill();
@@ -7028,23 +7028,23 @@ function drawTemporalWatcherV3(c, m, time, seed2) {
   gearCase(c, p.x, cy, m, motion.gearAngle);
   c.strokeStyle = WATCHER_INK;
   c.lineWidth = WATCHER_LINE;
-  const eyeY = cy - 3.9, eyeHeight = Math.max(2.8, 3.4 - q * 0.35), eye4 = watcherEyePose(time * 60 / 1e3, seed2, m.lookDirection, a?.phase ?? "idle", Boolean(m.flashTimer)), opening = eyeHeight * eye4.openness;
-  if (opening > 0.22) {
+  const eyeY = cy - 3.9, eyeHeight = Math.max(2.8, 3.4 - q * 0.35), eye4 = watcherEyePose(time * 60 / 1e3, seed2, m.lookDirection, a?.phase ?? "idle", Boolean(m.flashTimer)), opening2 = eyeHeight * eye4.openness;
+  if (opening2 > 0.22) {
     c.fillStyle = ink(m, "#35b9a5");
     c.beginPath();
     c.moveTo(p.x - 6.4, eyeY);
-    c.lineTo(p.x - 4.8, eyeY - opening);
-    c.lineTo(p.x + 4.8, eyeY - opening);
+    c.lineTo(p.x - 4.8, eyeY - opening2);
+    c.lineTo(p.x + 4.8, eyeY - opening2);
     c.lineTo(p.x + 6.4, eyeY);
-    c.lineTo(p.x + 4.8, eyeY + opening);
-    c.lineTo(p.x - 4.8, eyeY + opening);
+    c.lineTo(p.x + 4.8, eyeY + opening2);
+    c.lineTo(p.x - 4.8, eyeY + opening2);
     c.closePath();
     c.fill();
     c.stroke();
     c.save();
     c.clip();
     c.fillStyle = ink(m, "#86e8d1");
-    c.fillRect(p.x - 7, eyeY - opening, 14, opening);
+    c.fillRect(p.x - 7, eyeY - opening2, 14, opening2);
     c.fillStyle = ink(m, "#267c77");
     c.beginPath();
     c.ellipse(p.x + eye4.gazeX, eyeY + eye4.gazeY, 2.55, Math.min(2.45, eyeHeight - 0.7), 0, 0, TAU17);
@@ -7055,7 +7055,7 @@ function drawTemporalWatcherV3(c, m, time, seed2) {
     c.fill();
     if (!m.flashTimer) {
       c.fillStyle = "#d0fff1";
-      c.fillRect(p.x - 3.9, eyeY - opening * 0.65, 2.2, 0.45);
+      c.fillRect(p.x - 3.9, eyeY - opening2 * 0.65, 2.2, 0.45);
     }
     c.restore();
   } else {
@@ -7310,14 +7310,14 @@ var INK14 = "#11151a";
 var LINE13 = 1.26 / 0.78;
 var color13 = (flash, hex2) => flash ? "#fff" : hex2;
 var clamp11 = (x) => Math.max(0, Math.min(1, x));
-function polygon7(c, points2, fill4, outline3 = false) {
+function polygon7(c, points2, fill4, outline4 = false) {
   c.fillStyle = fill4;
   c.beginPath();
   c.moveTo(...points2[0]);
   for (const p of points2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK14;
     c.lineWidth = LINE13;
     c.stroke();
@@ -7442,14 +7442,14 @@ var TAU19 = Math.PI * 2;
 var INK15 = "#11151a";
 var LINE14 = 1.26 / 0.9;
 var color14 = (flash, hex2) => flash ? "#fff" : hex2;
-function plate2(c, points2, fill4, outline3 = true) {
+function plate2(c, points2, fill4, outline4 = true) {
   c.fillStyle = fill4;
   c.beginPath();
   c.moveTo(...points2[0]);
   for (const p of points2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK15;
     c.lineWidth = LINE14;
     c.stroke();
@@ -8400,14 +8400,14 @@ function frostWyrmlingMotionV4(m, time) {
   const muzzle = { x: mouth4.x + u.x, y: mouth4.y + u.y };
   return { segments, neckSegments, root, head: head12, mouth: mouth4, muzzle, weight: weight2 };
 }
-function polygon8(c, points2, fill4, outline3 = true) {
+function polygon8(c, points2, fill4, outline4 = true) {
   c.beginPath();
   c.moveTo(points2[0].x, points2[0].y);
   for (const p of points2.slice(1)) c.lineTo(p.x, p.y);
   c.closePath();
   c.fillStyle = fill4;
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK19;
     c.lineWidth = LINE17;
     c.stroke();
@@ -8601,14 +8601,14 @@ function corrodedGolemMotionV4(m, time, seed2 = 0) {
   });
   return { x, y, hands, weight: weight2, strike: strike2, pulse: 0.85 + Math.sin(time / 220 + seed2 % 11) * 0.15 };
 }
-function polygon9(c, points2, fill4, outline3 = true) {
+function polygon9(c, points2, fill4, outline4 = true) {
   c.fillStyle = fill4;
   c.beginPath();
   c.moveTo(...points2[0]);
   for (const p of points2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK20;
     c.lineWidth = LINE18;
     c.stroke();
@@ -8744,14 +8744,14 @@ function marshGhostMotionV4(m, time, seed2 = 0) {
     }))
   };
 }
-function polygon10(c, points2, fill4, outline3 = true) {
+function polygon10(c, points2, fill4, outline4 = true) {
   c.fillStyle = fill4;
   c.beginPath();
   c.moveTo(...points2[0]);
   for (const p of points2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK21;
     c.lineWidth = LINE19;
     c.stroke();
@@ -9051,14 +9051,14 @@ var smooth12 = (v) => {
   return p * p * (3 - 2 * p);
 };
 var color21 = (flash, hex2) => flash ? "#fff" : hex2;
-function polygon11(c, points2, fill4, outline3 = true) {
+function polygon11(c, points2, fill4, outline4 = true) {
   c.fillStyle = fill4;
   c.beginPath();
   c.moveTo(...points2[0]);
   for (const p of points2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK23;
     c.lineWidth = LINE21;
     c.stroke();
@@ -9338,14 +9338,14 @@ function hellBatMotionV4(m, time) {
   const flap = Math.sin(time / 85), attackFlap = mix11(0.95, -0.65, strike2);
   return { cx, cy, head: head12, nose, mouthAngle, weight: weight2, strike: strike2, flap: mix11(flap, attackFlap, weight2), gape: weight2 * (1 - strike2) * 0.48 };
 }
-function polygon13(c, points2, fill4, outline3 = true) {
+function polygon13(c, points2, fill4, outline4 = true) {
   c.fillStyle = fill4;
   c.beginPath();
   c.moveTo(...points2[0]);
   for (const p of points2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK25;
     c.lineWidth = LINE23;
     c.stroke();
@@ -9539,14 +9539,14 @@ function lavaSerpentMotionV4(m, time, seed2) {
   const segments = Array.from({ length: 6 }, (_, i) => ({ x: cx + i * 5.5 - i * 0.6 * weight2 * (1 - strike2), y: cy + wave(i), radius: 6.5 - i * 0.7 }));
   return { root, head: head12, nose, segments, weight: weight2, strike: strike2, castHeat: action2?.ranged ? weight2 : 0, heat: 0.92 + Math.sin(time / 220 + seed2 % 11) * 0.08 };
 }
-function polygon14(c, points2, fill4, outline3 = true) {
+function polygon14(c, points2, fill4, outline4 = true) {
   c.fillStyle = fill4;
   c.beginPath();
   c.moveTo(...points2[0]);
   for (const p of points2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK26;
     c.lineWidth = LINE24;
     c.stroke();
@@ -12359,16 +12359,16 @@ var attackPose2 = (m) => {
 };
 function draw_rust_nibbler(c, m, presentationTime, seed2) {
   const time = presentationTime, pose = attackPose2(m), active = Boolean(m.movedLastTick || pose.active), cx = m.x + m.w / 2 + (m.familyAttack ? 0 : pose.impact * 4 - pose.windup * 2), cy = m.y + m.h - 9;
-  const flash = m.flashTimer > 0, outline3 = "#11151a", dark = flash ? "#fff" : "#804122", rust = flash ? "#fff" : "#f27926";
+  const flash = m.flashTimer > 0, outline4 = "#11151a", dark = flash ? "#fff" : "#804122", rust = flash ? "#fff" : "#f27926";
   c.save();
   c.lineJoin = "round";
   c.lineCap = "round";
-  c.strokeStyle = outline3;
+  c.strokeStyle = outline4;
   c.lineWidth = 2.65;
   for (let side = -1; side <= 1; side += 2) for (let j = 0; j < 3; j++) {
     const phase = time / 75 + j * 1.4 + side, step = active ? Math.sin(phase) * 3 : Math.sin(phase) * 0.45;
     const rootX = cx + side * (5 + j * 2.5), rootY = cy + 1 + j * 0.7, jointX = rootX + side * (6 + j), jointY = cy + 5 + j * 1.2;
-    c.strokeStyle = outline3;
+    c.strokeStyle = outline4;
     c.lineWidth = 2.8;
     c.beginPath();
     c.moveTo(rootX, rootY);
@@ -12399,7 +12399,7 @@ function draw_rust_nibbler(c, m, presentationTime, seed2) {
     c.ellipse(cx - 4.5, cy - 3.3, 4.2, 1.65, -0.2, 0, Math.PI * 2);
     c.fill();
   }
-  c.strokeStyle = outline3;
+  c.strokeStyle = outline4;
   c.lineWidth = 2.65;
   c.beginPath();
   c.ellipse(cx, cy, 14, 8.5, 0, 0, Math.PI * 2);
@@ -12418,7 +12418,7 @@ function draw_rust_nibbler(c, m, presentationTime, seed2) {
   c.fill();
   c.stroke();
   if (!m.familyAttack) {
-    c.fillStyle = outline3;
+    c.fillStyle = outline4;
     c.beginPath();
     c.moveTo(cx + 16, cy + 1);
     c.lineTo(cx + 21 + pose.impact * 4, cy + (pose.windup ? -1 : pose.impact ? 6 : 2));
@@ -12434,7 +12434,7 @@ function draw_rust_nibbler(c, m, presentationTime, seed2) {
     c.fill();
   }
   const twitch = Math.sin(time / 85 + seed2 % 7) * (active ? 3 : 1.2);
-  c.strokeStyle = outline3;
+  c.strokeStyle = outline4;
   c.lineWidth = 2.4;
   for (let side = -1; side <= 1; side += 2) {
     c.beginPath();
@@ -12971,8 +12971,8 @@ function roadsideDetailV1(space, x, y, occupied, protection) {
     if (d >= 2 && ["r", "p"].includes(t)) road = true;
   }
   if (!road) return null;
-  const role = ["fern", "tuft", "flowers", "litter"][(n + member) % 4], px2 = x * 32 + 8 + (n >>> 4) % 16, py = y * 32 + 13 + (n >>> 9) % 12;
-  return { id: ROADSIDE_FLAVOR_VERSION + "/" + wx + "," + wy, x: px2, y: py, motionX: px2 + o.x, motionY: py + o.y, n: n ^ member, kind: role === "fern" ? 3 : role === "tuft" ? 0 : role === "litter" ? 5 : 9, roadsideRole: role };
+  const role = ["fern", "tuft", "flowers", "litter"][(n + member) % 4], px3 = x * 32 + 8 + (n >>> 4) % 16, py = y * 32 + 13 + (n >>> 9) % 12;
+  return { id: ROADSIDE_FLAVOR_VERSION + "/" + wx + "," + wy, x: px3, y: py, motionX: px3 + o.x, motionY: py + o.y, n: n ^ member, kind: role === "fern" ? 3 : role === "tuft" ? 0 : role === "litter" ? 5 : 9, roadsideRole: role };
 }
 
 // src/client/woodland_environment_rules_v1.js
@@ -13127,7 +13127,7 @@ async function createWoodlandEnvironmentV1(environment, review, prior, initial =
       if (at3(x, y) !== type) continue;
       const alpha2 = groundWeight(space, x * t + 16, y * t + 16);
       if (!alpha2) continue;
-      const mask = roadMask(at3, x, y), n = terrainHash(x + o.x / t, y + o.y / t, seed2), north = mask & 1, east = mask & 2, south = mask & 4, west = mask & 8, trail2 = type === "p", inset = trail2 ? 6 : 2, nwRoad = !trail2 && at3(x - 1, y - 1) === "r", neRoad = !trail2 && at3(x + 1, y - 1) === "r", swRoad = !trail2 && at3(x - 1, y + 1) === "r", seRoad = !trail2 && at3(x + 1, y + 1) === "r", px2 = x * t, py = y * t, l = px2 + (west || nwRoad || swRoad ? -1 : inset + n % 2), r = px2 + (east || neRoad || seRoad ? t + 1 : t - inset - (n >>> 4) % 2), top = py + (north || nwRoad || neRoad ? -1 : inset + (n >>> 8) % 2), bottom = py + (south || swRoad || seRoad ? t + 1 : t - inset - (n >>> 12) % 2), nw = !north && !west ? 9 : 0, ne = !north && !east ? 9 : 0, se = !south && !east ? 9 : 0, sw = !south && !west ? 9 : 0;
+      const mask = roadMask(at3, x, y), n = terrainHash(x + o.x / t, y + o.y / t, seed2), north = mask & 1, east = mask & 2, south = mask & 4, west = mask & 8, trail2 = type === "p", inset = trail2 ? 6 : 2, nwRoad = !trail2 && at3(x - 1, y - 1) === "r", neRoad = !trail2 && at3(x + 1, y - 1) === "r", swRoad = !trail2 && at3(x - 1, y + 1) === "r", seRoad = !trail2 && at3(x + 1, y + 1) === "r", px3 = x * t, py = y * t, l = px3 + (west || nwRoad || swRoad ? -1 : inset + n % 2), r = px3 + (east || neRoad || seRoad ? t + 1 : t - inset - (n >>> 4) % 2), top = py + (north || nwRoad || neRoad ? -1 : inset + (n >>> 8) % 2), bottom = py + (south || swRoad || seRoad ? t + 1 : t - inset - (n >>> 12) % 2), nw = !north && !west ? 9 : 0, ne = !north && !east ? 9 : 0, se = !south && !east ? 9 : 0, sw = !south && !west ? 9 : 0;
       c.save();
       c.beginPath();
       c.moveTo(l + nw, top);
@@ -13141,7 +13141,7 @@ async function createWoodlandEnvironmentV1(environment, review, prior, initial =
       c.quadraticCurveTo(l, top, l + nw, top);
       c.closePath();
       c.clip();
-      paint(c, 1, px2 - 1, py - 1, t + 2, t + 2, px2 - 1 + o.x, py - 1 + o.y, alpha2, seed2);
+      paint(c, 1, px3 - 1, py - 1, t + 2, t + 2, px3 - 1 + o.x, py - 1 + o.y, alpha2, seed2);
       c.restore();
       draws.road++;
     }
@@ -13164,8 +13164,8 @@ async function createWoodlandEnvironmentV1(environment, review, prior, initial =
     const n = woodlandDetailChoiceV1(Math.floor(p.x), Math.floor(p.y), environmentSeed(space));
     if (!n) return null;
     draws.details++;
-    const px2 = x * 32 + n.dx, py = y * 32 + n.dy, o = p.o;
-    return { id: "woodland-v1/" + Math.floor(p.x) + "," + Math.floor(p.y) + ":" + n.kind, x: px2, y: py, motionX: px2 + o.x, motionY: py + o.y, n: n.n, kind: n.kind };
+    const px3 = x * 32 + n.dx, py = y * 32 + n.dy, o = p.o;
+    return { id: "woodland-v1/" + Math.floor(p.x) + "," + Math.floor(p.y) + ":" + n.kind, x: px3, y: py, motionX: px3 + o.x, motionY: py + o.y, n: n.n, kind: n.kind };
   }
   function baseArt(c, space, x, y, size, n, biome) {
     if (weight2(space, x + size / 2, y + size / 2) > 0.5 && prior.baseWithoutContactShadow) {
@@ -13452,7 +13452,7 @@ function routeContoursV2(at3, bounds2, seed2, o = { x: 0, y: 0 }) {
   for (let y = 0; y < rows - 1; y++) for (let x = 0; x < cols - 1; x++) {
     const s = [samples[y * cols + x], samples[y * cols + x + 1], samples[(y + 1) * cols + x + 1], samples[(y + 1) * cols + x]], mask = s.reduce((n, v, i) => n | (v > 0 ? 1 << i : 0), 0);
     if (mask === 0 || mask === 15) continue;
-    const px2 = left + x * step, py = top + y * step, p = [[px2, py], [px2 + step, py], [px2 + step, py + step], [px2, py + step]], cuts = [];
+    const px3 = left + x * step, py = top + y * step, p = [[px3, py], [px3 + step, py], [px3 + step, py + step], [px3, py + step]], cuts = [];
     for (let k = 0; k < 4; k++) {
       const j = (k + 1) % 4;
       if (s[k] > 0 === s[j] > 0) continue;
@@ -13560,12 +13560,12 @@ function drawStyledRoutes(c, space, bounds2, at3, material = null) {
   c.beginPath();
   c.rect(bounds2.x, bounds2.y, bounds2.width, bounds2.height);
   c.clip();
-  for (let py = Math.floor((bounds2.y + o.y) / PAGE) * PAGE - o.y; py < bounds2.y + bounds2.height; py += PAGE) for (let px2 = Math.floor((bounds2.x + o.x) / PAGE) * PAGE - o.x; px2 < bounds2.x + bounds2.width; px2 += PAGE) {
-    const contours = fixedContours(at3, px2, py, seed2, o);
+  for (let py = Math.floor((bounds2.y + o.y) / PAGE) * PAGE - o.y; py < bounds2.y + bounds2.height; py += PAGE) for (let px3 = Math.floor((bounds2.x + o.x) / PAGE) * PAGE - o.x; px3 < bounds2.x + bounds2.width; px3 += PAGE) {
+    const contours = fixedContours(at3, px3, py, seed2, o);
     if (!contours.loops.length) continue;
     segments += contours.segments;
     let biomeKey = "";
-    for (let y = Math.floor((py - 96) / 32); y <= Math.ceil((py + PAGE + 96) / 32); y++) for (let x = Math.floor((px2 - 96) / 32); x <= Math.ceil((px2 + PAGE + 96) / 32); x++) biomeKey += v.biomes?.[y - oy]?.[x - ox] ?? "?";
+    for (let y = Math.floor((py - 96) / 32); y <= Math.ceil((py + PAGE + 96) / 32); y++) for (let x = Math.floor((px3 - 96) / 32); x <= Math.ceil((px3 + PAGE + 96) / 32); x++) biomeKey += v.biomes?.[y - oy]?.[x - ox] ?? "?";
     const cache = stampCache(material), key2 = contours.cacheKey + "/" + biomeKey;
     let stamp2 = cache.get(key2);
     if (stamp2) {
@@ -13576,24 +13576,24 @@ function drawStyledRoutes(c, space, bounds2, at3, material = null) {
       const g = surface ? surface.getContext("2d") : c;
       if (surface) {
         surface.width = surface.height = PAGE;
-        g.translate(-px2, -py);
+        g.translate(-px3, -py);
       }
       g.save();
       g.beginPath();
-      g.rect(px2, py, PAGE, PAGE);
+      g.rect(px3, py, PAGE, PAGE);
       g.clip();
       g.beginPath();
-      g.rect(px2 - 1, py - 1, PAGE + 2, PAGE + 2);
-      for (let y = Math.floor(py / 32); y < Math.ceil((py + PAGE) / 32); y++) for (let x = Math.floor(px2 / 32); x < Math.ceil((px2 + PAGE) / 32); x++) if (water.has(at3(x, y))) g.rect(x * 32, y * 32, 32, 32);
+      g.rect(px3 - 1, py - 1, PAGE + 2, PAGE + 2);
+      for (let y = Math.floor(py / 32); y < Math.ceil((py + PAGE) / 32); y++) for (let x = Math.floor(px3 / 32); x < Math.ceil((px3 + PAGE) / 32); x++) if (water.has(at3(x, y))) g.rect(x * 32, y * 32, 32, 32);
       g.clip("evenodd");
       g.save();
       g.beginPath();
       traceRouteContoursV2(g, contours.loops);
       g.clip("evenodd");
-      if (material) material(g, px2, py, PAGE, PAGE, px2 + o.x, py + o.y, seed2);
+      if (material) material(g, px3, py, PAGE, PAGE, px3 + o.x, py + o.y, seed2);
       else {
         g.fillStyle = "#cda480";
-        g.fillRect(px2, py, PAGE, PAGE);
+        g.fillRect(px3, py, PAGE, PAGE);
       }
       g.restore();
       for (const points2 of contours.loops) {
@@ -13615,7 +13615,7 @@ function drawStyledRoutes(c, space, bounds2, at3, material = null) {
         }
       }
     }
-    if (stamp2) c.drawImage(stamp2, px2, py, PAGE, PAGE);
+    if (stamp2) c.drawImage(stamp2, px3, py, PAGE, PAGE);
   }
   c.restore();
   return segments;
@@ -13752,13 +13752,13 @@ function createRouteSampleTablesV3() {
     tables.push(data);
   }
   const digit = (c) => paintedRouteValue(c) === 1 ? 2 : c === "p" ? 1 : 0;
-  function page(at3, px2, py) {
-    if (!Number.isInteger(px2) || !Number.isInteger(py)) return (x, y, out) => paintedRouteSample(at3, px2 + x + 0.5, py + y + 0.5, out);
-    const ix0 = Math.floor(px2 / 32 - 0.5), iy0 = Math.floor(py / 32 - 0.5), xs = new Uint8Array(64), ys = new Uint8Array(64), xu = new Uint8Array(64), yu = new Uint8Array(64), samples = [];
+  function page(at3, px3, py) {
+    if (!Number.isInteger(px3) || !Number.isInteger(py)) return (x, y, out) => paintedRouteSample(at3, px3 + x + 0.5, py + y + 0.5, out);
+    const ix0 = Math.floor(px3 / 32 - 0.5), iy0 = Math.floor(py / 32 - 0.5), xs = new Uint8Array(64), ys = new Uint8Array(64), xu = new Uint8Array(64), yu = new Uint8Array(64), samples = [];
     for (let i = 0; i < 64; i++) {
-      xs[i] = Math.floor((px2 + i + 0.5) / 32 - 0.5) - ix0;
+      xs[i] = Math.floor((px3 + i + 0.5) / 32 - 0.5) - ix0;
       ys[i] = Math.floor((py + i + 0.5) / 32 - 0.5) - iy0;
-      xu[i] = ((px2 + i + 16) % 32 + 32) % 32;
+      xu[i] = ((px3 + i + 16) % 32 + 32) % 32;
       yu[i] = ((py + i + 16) % 32 + 32) % 32;
     }
     for (let y = 0; y < 3; y++) for (let x = 0; x < 3; x++) {
@@ -13828,15 +13828,15 @@ async function createPaintedRoutesV1(env, review, prior, { worldCoverage = false
     const o = environmentWorldOffset(s);
     return { x: o.x - 1048576, y: o.y - 851968 };
   };
-  function pageKey(space, px2, py, at3, o, seed2) {
+  function pageKey(space, px3, py, at3, o, seed2) {
     const v = space.visual, ox = v.originTile?.x ?? 0, oy = v.originTile?.y ?? 0;
     let signature = "", near = false;
-    for (let y = Math.floor(py / 32) - 1; y <= Math.ceil((py + PAINTED_PAGE_SIZE) / 32); y++) for (let x = Math.floor(px2 / 32) - 1; x <= Math.ceil((px2 + PAINTED_PAGE_SIZE) / 32); x++) {
+    for (let y = Math.floor(py / 32) - 1; y <= Math.ceil((py + PAINTED_PAGE_SIZE) / 32); y++) for (let x = Math.floor(px3 / 32) - 1; x <= Math.ceil((px3 + PAINTED_PAGE_SIZE) / 32); x++) {
       const code = at3(x, y);
       signature += (code ?? "?") + (v.biomes?.[y - oy]?.[x - ox] ?? "?");
       if ((code === "r" || code === "p") && kit2.biomes.includes(v.biomes?.[y - oy]?.[x - ox])) near = true;
     }
-    return near ? seed2 + "/" + (px2 + o.x) + "/" + (py + o.y) + "/" + signature : null;
+    return near ? seed2 + "/" + (px3 + o.x) + "/" + (py + o.y) + "/" + signature : null;
   }
   function* pagePositions(b, o) {
     for (let y = Math.floor((b.y + o.y) / PAINTED_PAGE_SIZE) * PAINTED_PAGE_SIZE - o.y; y < b.y + b.height; y += PAINTED_PAGE_SIZE) for (let x = Math.floor((b.x + o.x) / PAINTED_PAGE_SIZE) * PAINTED_PAGE_SIZE - o.x; x < b.x + b.width; x += PAINTED_PAGE_SIZE) if (paintedPageIntersects(scope, x, y, PAINTED_PAGE_SIZE, PAINTED_PAGE_SIZE, o)) yield [x, y];
@@ -13869,8 +13869,8 @@ async function createPaintedRoutesV1(env, review, prior, { worldCoverage = false
       }
     })();
   }
-  function* makePage(space, px2, py, at3, o, seed2, build = true) {
-    const v = space.visual, ox = v.originTile?.x ?? 0, oy = v.originTile?.y ?? 0, key2 = pageKey(space, px2, py, at3, o, seed2);
+  function* makePage(space, px3, py, at3, o, seed2, build = true) {
+    const v = space.visual, ox = v.originTile?.x ?? 0, oy = v.originTile?.y ?? 0, key2 = pageKey(space, px3, py, at3, o, seed2);
     if (key2 === null) return null;
     let page = cache.get(key2);
     if (page) {
@@ -13885,19 +13885,19 @@ async function createPaintedRoutesV1(env, review, prior, { worldCoverage = false
     const g = c.getContext("2d"), im = g.createImageData(PAINTED_PAGE_SIZE, PAINTED_PAGE_SIZE), out = im.data, s = {}, edge = new Float64Array(4), lip = new Float64Array(4);
     const stride = PAINTED_PAGE_SIZE / 32 + 1, warp = [];
     for (let y = 0; y < stride; y++) for (let x = 0; x < stride; x++) {
-      const wx = px2 + o.x + x * 32, wy = py + o.y + y * 32;
+      const wx = px3 + o.x + x * 32, wy = py + o.y + y * 32;
       warp.push([48 * (woodlandFieldV1(wx / 367, wy / 367, seed2 + 3101) - 0.5), 48 * (woodlandFieldV1(wx / 431 + 19, wy / 431 + 7, seed2 + 3102) - 0.5)]);
     }
-    const stencil = routeSamples.page(at3, px2, py), aligned = Number.isInteger(px2 / 32) && Number.isInteger(py / 32), allowed = [];
+    const stencil = routeSamples.page(at3, px3, py), aligned = Number.isInteger(px3 / 32) && Number.isInteger(py / 32), allowed = [];
     if (aligned) for (let y = 0; y < 2; y++) for (let x = 0; x < 2; x++) {
-      const tx = px2 / 32 + x, ty = py / 32 + y;
+      const tx = px3 / 32 + x, ty = py / 32 + y;
       allowed.push(!blocked2.has(at3(tx, ty)) && kit2.biomes.includes(v.biomes?.[ty - oy]?.[tx - ox]));
     }
     const choices = [];
     for (let axis = 0; axis < 4; axis++) {
       const horizontal = axis >= 2, positive3 = axis % 2 === 1, indices = new Uint8Array(PAINTED_PAGE_SIZE), u = new Float64Array(PAINTED_PAGE_SIZE);
       for (let i = 0; i < PAINTED_PAGE_SIZE; i++) {
-        const t = (horizontal ? px2 + o.x : py + o.y) + i + 0.5, variant = terrainHash(Math.floor(t / 384), horizontal ? 1 : 2, seed2 + 3110) >>> 4 & 1, index = positive3 ? variant ? 2 : 0 : variant ? 3 : 1, p = profiles2[index];
+        const t = (horizontal ? px3 + o.x : py + o.y) + i + 0.5, variant = terrainHash(Math.floor(t / 384), horizontal ? 1 : 2, seed2 + 3110) >>> 4 & 1, index = positive3 ? variant ? 2 : 0 : variant ? 3 : 1, p = profiles2[index];
         indices[i] = index;
         u[i] = t / kit2.sourcePixelScale + terrainHash(positive3 ? 1 : 2, horizontal ? 1 : 2, seed2 + 3111) % p.width;
       }
@@ -13916,7 +13916,7 @@ async function createPaintedRoutesV1(env, review, prior, { worldCoverage = false
         sliceStart = env.performance.now();
       }
       for (let x = 0; x < PAINTED_PAGE_SIZE; x++) {
-        const lx = px2 + x + 0.5, ly = py + y + 0.5;
+        const lx = px3 + x + 0.5, ly = py + y + 0.5;
         if (aligned) {
           if (!allowed[(y >>> 5) * 2 + (x >>> 5)]) continue;
         } else {
@@ -14088,16 +14088,16 @@ function poly(pts) {
   }
   return p;
 }
-function R(c, x, y, w, h, P5, o) {
+function R(c, x, y, w, h, P6, o) {
   o = o || {};
-  c.fillStyle = tint(P5.b);
+  c.fillStyle = tint(P6.b);
   c.fillRect(x, y, w, h);
-  if (!o.flat && P5.d) {
+  if (!o.flat && P6.d) {
     const s = o.split ?? 0.66;
-    c.fillStyle = tint(P5.d);
+    c.fillStyle = tint(P6.d);
     c.fillRect(x + w * s, y, w * (1 - s), h);
-    if (!o.nohi && P5.l) {
-      c.fillStyle = tint(P5.l);
+    if (!o.nohi && P6.l) {
+      c.fillStyle = tint(P6.l);
       c.fillRect(x + 0.9, y + 0.9, Math.max(0, w * s - 1.6), 1);
     }
   }
@@ -14107,12 +14107,12 @@ function R(c, x, y, w, h, P5, o) {
     c.strokeRect(x, y, w, h);
   }
 }
-function G(c, pts, P5, o) {
+function G(c, pts, P6, o) {
   o = o || {};
   const p = poly(pts);
-  c.fillStyle = tint(P5.b);
+  c.fillStyle = tint(P6.b);
   c.fill(p);
-  if (!o.flat && P5.d) {
+  if (!o.flat && P6.d) {
     let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
     for (let i = 0; i < pts.length; i += 2) {
       x0 = Math.min(x0, pts[i]);
@@ -14123,7 +14123,7 @@ function G(c, pts, P5, o) {
     const s = o.split ?? 0.66;
     c.save();
     c.clip(p);
-    c.fillStyle = tint(P5.d);
+    c.fillStyle = tint(P6.d);
     if (o.bottom) c.fillRect(x0, y0 + (y1 - y0) * s, x1 - x0, (y1 - y0) * (1 - s));
     else c.fillRect(x0 + (x1 - x0) * s, y0, (x1 - x0) * (1 - s), y1 - y0);
     c.restore();
@@ -14324,7 +14324,7 @@ function bareHead(c, st, S, H3, blink, hat) {
     c.rect(-30, -13.6, 60, 40);
     c.clip();
   }
-  for (const shape2 of FRONT6[st] ?? FRONT6.short) G(c, shape2, H3, { bottom: true, split: 0.64, lw: 1.3 });
+  for (const shape3 of FRONT6[st] ?? FRONT6.short) G(c, shape3, H3, { bottom: true, split: 0.64, lw: 1.3 });
   if (st === "pigtails") R(c, -7.8, -9.8, 3.6, 2.2, P2.tie, { flat: true, lw: 1 });
   if (!["bald", "mohawk", "buzz", "curly", "undercut"].includes(st)) px(c, -6.4, -14.4, 7, 0.9, H3.l);
   c.restore();
@@ -14488,17 +14488,17 @@ function legs2(c, w, S, step) {
   c.restore();
 }
 function robeBody(c, A, acc, cloth, dark, inner, belt) {
-  const robe2 = [-8, 0, 6, 0, 6.9, 8.2, 9.8, 18.4, 2, 18.4, 0.7, 16.8, -0.6, 18.4, -10.6, 18.4, -8.9, 8.2], shape2 = poly(robe2);
-  G(c, robe2, cloth, { split: 0.68 });
+  const robe3 = [-8, 0, 6, 0, 6.9, 8.2, 9.8, 18.4, 2, 18.4, 0.7, 16.8, -0.6, 18.4, -10.6, 18.4, -8.9, 8.2], shape3 = poly(robe3);
+  G(c, robe3, cloth, { split: 0.68 });
   G(c, [-0.9, 1.2, 2.3, 1.2, 3.1, 17.4, 1.6, 17.4, 0.7, 16.2, -0.3, 17.4, -1.9, 17.4], inner, { flat: true, lw: 1 });
   c.save();
-  c.clip(shape2);
+  c.clip(shape3);
   px(c, -11.2, 16.7, 21.6, 1.7, A.c);
   R(c, -11, 7.9, 22, 2.3, belt ?? acc, { flat: true, lw: 1.2 });
   c.restore();
   c.lineWidth = 1.5;
   c.strokeStyle = K;
-  c.stroke(shape2);
+  c.stroke(shape3);
   G(c, [3.4, 10.2, 5.4, 10.2, 5.9, 15.6, 3.7, 15.6], belt ?? acc, { flat: true, lw: 1 });
   G(c, [-8.9, -0.8, 6.9, -0.8, 8, 3.6, -10, 3.6], dark, { split: 0.7, lw: 1.3 });
   c.lineWidth = 1.3;
@@ -16231,6 +16231,7 @@ function drawBlockyHero(c, spec, pose = {}) {
 }
 var LEG_COLORS = { greaves: P2.plate, chausses: M.mail, breeches: M.breeches, trousers: P2.darkPants };
 var WEAPON_SPAN = { greatsword: [9.4, 40.6], halberd: [6, 43.4], mace: [10.6, 32.6], sword: [10.6, 34.4], saber: [12.4, 34.6], axe: [10.6, 35], warhammer: [10.6, 33.2], rapier: [10.6, 38.4], scimitar: [12.4, 34.8], wand: [11.2, 29.6], scepter: [11.2, 31.8] };
+var HERO_COLORS = Object.freeze({ P: P2, M, ACC });
 function drawItemIcon(c, item, size = 48) {
   const kind = item.kind, tier2 = item.tier ?? 0, A = ACC[tier2] ?? ACC[0], red = P2.red, S = skinPal("light");
   c.save();
@@ -16272,8 +16273,8 @@ function drawItemIcon(c, item, size = 48) {
       fit(wrap ? -3.3 : -1.4, tall ? -21 : wrap ? -12 : -10, tall ? 24 : wrap ? 26 : 23);
       helmetPiece(c, kind, A, red, 0, null);
     } else if (item.slot === "body") {
-      const robe2 = ROBES.has(kind);
-      fit(-1, robe2 ? 8.4 : 5.8, robe2 ? 26 : 21.5);
+      const robe3 = ROBES.has(kind);
+      fit(-1, robe3 ? 8.4 : 5.8, robe3 ? 26 : 21.5);
       c.save();
       c.translate(-5.4, 1.8);
       c.rotate(1.95);
@@ -19332,8 +19333,8 @@ function originEgress(manifest, collision, resources = []) {
     }
     candidates.sort((a, b) => a.score - b.score || a.cells[1].x - b.cells[1].x || a.cells[1].y - b.cells[1].y);
     if (candidates.length) {
-      const { score, ...opening } = candidates[0];
-      openings.push(opening);
+      const { score, ...opening2 } = candidates[0];
+      openings.push(opening2);
     }
   }
   requireContract(openings.length > 0, "D9 origin has no safe perimeter egress; explicit migration decision required");
@@ -19360,14 +19361,14 @@ function originEgressGuidePaths(manifest, collision, overlay) {
       queue.push(n);
     }
   }
-  return freezeWire(overlay.openings.map((opening) => {
-    const target = opening.inside[Math.floor(opening.inside.length / 2)], cells = [];
+  return freezeWire(overlay.openings.map((opening2) => {
+    const target = opening2.inside[Math.floor(opening2.inside.length / 2)], cells = [];
     requireContract(prior.has(key2(target)), "Origin egress lost its reachable approach");
     for (let p = target; p; p = prior.get(key2(p))) cells.push({ x: p.x, y: p.y });
     cells.reverse();
-    const edge = opening.cells[Math.floor(opening.cells.length / 2)];
+    const edge = opening2.cells[Math.floor(opening2.cells.length / 2)];
     cells.push({ x: edge.x, y: edge.y });
-    return { side: opening.side, cells };
+    return { side: opening2.side, cells };
   }));
 }
 
@@ -23664,12 +23665,12 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     return { r: extent(a, reach) };
   }
   function rallyingCry2(a, stats, aim2) {
-    const R2 = T3.rallyingCry, secondWind = aug(a, "rallying_cry", 0);
-    a.hp = combatInteger(minCombat(stats.maxHp, addCombat(a.hp, multiplyCombat(stats.maxHp, ...secondWind ? R2.secondWind : R2.heal))));
-    const near = cone(a, aim2, R2.radius, Math.PI, R2.targets).filter((t) => !isPodCombatTargetV4(t));
-    if (aug(a, "rallying_cry", 1)) for (const t of near) pull(a, t, R2.pull);
-    if (!secondWind && canStun(a)) for (const t of near) effects2.status(a, t, "weaken", 1, R2.weakenTicks);
-    return { r: extent(a, R2.radius) };
+    const R3 = T3.rallyingCry, secondWind = aug(a, "rallying_cry", 0);
+    a.hp = combatInteger(minCombat(stats.maxHp, addCombat(a.hp, multiplyCombat(stats.maxHp, ...secondWind ? R3.secondWind : R3.heal))));
+    const near = cone(a, aim2, R3.radius, Math.PI, R3.targets).filter((t) => !isPodCombatTargetV4(t));
+    if (aug(a, "rallying_cry", 1)) for (const t of near) pull(a, t, R3.pull);
+    if (!secondWind && canStun(a)) for (const t of near) effects2.status(a, t, "weaken", 1, R3.weakenTicks);
+    return { r: extent(a, R3.radius) };
   }
   function counterStance2(a) {
     openCounterWindow(c.actors[a.entityId], aug(a, "counter_stance", 1) ? COUNTER_WINDOW_MAX : COUNTER_WINDOW_TICKS);
@@ -23845,10 +23846,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
   function critBonus(source3, target) {
     const k = record2(source3);
     let n = 0;
-    const focus = rank(source3, "focus"), charge = rank(source3, "static_charge"), opening = rank(source3, "opening_strike");
+    const focus = rank(source3, "focus"), charge = rank(source3, "static_charge"), opening2 = rank(source3, "opening_strike");
     if (focus && k?.focus?.target === target.entityId) n += focus * k.focus.hits;
     if (charge && k?.charge) n += charge * k.charge.stacks;
-    if (opening && target.maxHp !== void 0 && compareCombat(target.hp, target.maxHp) >= 0) n += 10 * opening;
+    if (opening2 && target.maxHp !== void 0 && compareCombat(target.hp, target.maxHp) >= 0) n += 10 * opening2;
     return n ? combatAmount(n, 100) : null;
   }
   let enGardeHit = null;
@@ -24865,7 +24866,7 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
       if (engaged) {
         const target = selectWebWeaverTargetD12_4J(state, e, { lineClear: lineClear2 });
         if (target) {
-          const hazardId = hostileHazardIdD12_4J(e.eliteId, e.pulseSequence), shape2 = webShape(), pending = { version: PENDING_HOSTILE_HAZARD_D12_4J_VERSION, hazardId, ...shape2, sourceEliteId: e.eliteId, sourceEntityId: e.entityId, targetEntityId: target.entityId, spaceInstanceId: source3.residency.spaceInstanceId, position: copyWire(target.position), startedTick: state.tick, resolvesTick: state.tick + definition2.pulse.windupTicks };
+          const hazardId = hostileHazardIdD12_4J(e.eliteId, e.pulseSequence), shape3 = webShape(), pending = { version: PENDING_HOSTILE_HAZARD_D12_4J_VERSION, hazardId, ...shape3, sourceEliteId: e.eliteId, sourceEntityId: e.entityId, targetEntityId: target.entityId, spaceInstanceId: source3.residency.spaceInstanceId, position: copyWire(target.position), startedTick: state.tick, resolvesTick: state.tick + definition2.pulse.windupTicks };
           root.pendingHazardsBySourceEliteId[e.eliteId] = pending;
           recipients = [{ entityId: target.entityId, hazardId, resolvesTick: pending.resolvesTick, position: copyWire(target.position) }];
           counters.webCasts++;
@@ -24889,7 +24890,7 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
       const group = state.groupsById[e.groupId], nav = source3.ai?.interiorNavigation, melee = source3.ai?.melee, engaged = group?.containment?.mode === "engaged" || Boolean(nav?.targetEntityId) || Boolean(melee && melee.phase !== "idle");
       let recipients = [];
       if (engaged) {
-        const hazardId = hostileHazardIdD12_4J(e.eliteId, e.pulseSequence), shape2 = slagShape(), pending = { version: PENDING_HOSTILE_HAZARD_D12_4J_VERSION, hazardId, ...shape2, sourceEliteId: e.eliteId, sourceEntityId: e.entityId, spaceInstanceId: source3.residency.spaceInstanceId, position: copyWire(source3.position), startedTick: state.tick, resolvesTick: state.tick + definition2.pulse.windupTicks };
+        const hazardId = hostileHazardIdD12_4J(e.eliteId, e.pulseSequence), shape3 = slagShape(), pending = { version: PENDING_HOSTILE_HAZARD_D12_4J_VERSION, hazardId, ...shape3, sourceEliteId: e.eliteId, sourceEntityId: e.entityId, spaceInstanceId: source3.residency.spaceInstanceId, position: copyWire(source3.position), startedTick: state.tick, resolvesTick: state.tick + definition2.pulse.windupTicks };
         root.pendingHazardsBySourceEliteId[e.eliteId] = pending;
         recipients = [{ hazardId, resolvesTick: pending.resolvesTick, position: copyWire(source3.position) }];
         counters.slagCasts++;
@@ -28239,27 +28240,27 @@ function projectWorldTerrainD9(state, compiled, { x, y, width = 88, height = 88 
       biomes[gy - y][gx - x] = Array.isArray(biome) ? biome[gy - offsetY]?.[gx - offsetX] ?? "o" : biome;
     }
     for (const b of features) {
-      const px2 = b.x + offsetX, py = b.y + offsetY;
-      if (px2 + b.width >= x && py + b.height >= y && px2 < x + width && py < y + height) {
+      const px3 = b.x + offsetX, py = b.y + offsetY;
+      if (px3 + b.width >= x && py + b.height >= y && px3 < x + width && py < y + height) {
         const planned = b.kind === "ruin-exterior-masonry" && plannedRuinArt(b.id);
         if (planned && ruinWalls.has(b.id)) continue;
         if (planned) ruinWalls.add(b.id);
-        blockers.push({ ...b, x: px2, y: py, ...planned ? { plannedRuinExterior: true } : {} });
+        blockers.push({ ...b, x: px3, y: py, ...planned ? { plannedRuinExterior: true } : {} });
       }
     }
     for (const d of details) {
-      const px2 = d.x + offsetX, py = d.y + offsetY;
-      if (px2 >= x - 20 && py >= y - 20 && px2 < x + width + 20 && py < y + height + 20) decorations.push({ ...d, x: px2, y: py, ...plannedRuinArt(d.id) ? { plannedRuinExterior: true } : {} });
+      const px3 = d.x + offsetX, py = d.y + offsetY;
+      if (px3 >= x - 20 && py >= y - 20 && px3 < x + width + 20 && py < y + height + 20) decorations.push({ ...d, x: px3, y: py, ...plannedRuinArt(d.id) ? { plannedRuinExterior: true } : {} });
     }
   }
   let originBlockers = compiled.visual.blockers;
-  for (const opening of state.d9World.origin.egress.openings) for (const p of opening.cells) originBlockers = originBlockers.flatMap((b) => {
+  for (const opening2 of state.d9World.origin.egress.openings) for (const p of opening2.cells) originBlockers = originBlockers.flatMap((b) => {
     if (p.x < b.x || p.y < b.y || p.x >= b.x + b.width || p.y >= b.y + b.height) return [b];
     return [{ ...b, height: p.y - b.y }, { ...b, y: p.y + 1, height: b.y + b.height - p.y - 1 }, { ...b, y: p.y, height: 1, width: p.x - b.x }, { ...b, x: p.x + 1, y: p.y, height: 1, width: b.x + b.width - p.x - 1 }].filter((r) => r.width > 0 && r.height > 0);
   });
   paint(compiled.visual.terrain, 0, 0, originBlockers, "o");
   for (const route of originEgressGuidePaths(compiled, compiled.collision, state.d9World.origin.egress)) for (const p of route.cells) if (p.x >= x && p.y >= y && p.x < x + width && p.y < y + height) grid[p.y - y][p.x - x] = "r";
-  for (const opening of state.d9World.origin.egress.openings) for (const p of opening.cells) if (p.x >= x && p.y >= y && p.x < x + width && p.y < y + height) grid[p.y - y][p.x - x] = "r";
+  for (const opening2 of state.d9World.origin.egress.openings) for (const p of opening2.cells) if (p.x >= x && p.y >= y && p.x < x + width && p.y < y + height) grid[p.y - y][p.x - x] = "r";
   for (const chunk2 of state.d9World.runtime.chunks) {
     const position4 = projectToLocalFrameD9({ chunkX: chunk2.chunkX, chunkY: chunk2.chunkY, localX: 0, localY: 0 }, state.d9World.runtime.frames);
     if (!position4) continue;
@@ -28675,21 +28676,21 @@ function createActivityClientPort({ authority, localPlayerId, measure = (_n, fn)
           compiled = compileBoundOverworld(state);
           safeRegions = m.safeRegions.map((r) => freezeWire(r));
         }
-        const size = 8, px2 = Math.floor(local6.position.x / c.tileSize / size) * size, py = Math.floor(local6.position.y / c.tileSize / size) * size;
+        const size = 8, px3 = Math.floor(local6.position.x / c.tileSize / size) * size, py = Math.floor(local6.position.y / c.tileSize / size) * size;
         const visualWindowKey = state.d9World && inOverworld ? (() => {
-          const left = px2 - 40, top = py - 40, right = left + 88, bottom = top + 88, frames = state.d9World.runtime.frames.map((f) => `${f.id}:${f.chunkX},${f.chunkY}:${f.offsetX},${f.offsetY}`).join("|"), chunks2 = state.d9World.runtime.chunks.flatMap((chunk2) => {
+          const left = px3 - 40, top = py - 40, right = left + 88, bottom = top + 88, frames = state.d9World.runtime.frames.map((f) => `${f.id}:${f.chunkX},${f.chunkY}:${f.offsetX},${f.offsetY}`).join("|"), chunks2 = state.d9World.runtime.chunks.flatMap((chunk2) => {
             const p = projectToLocalFrameD9({ chunkX: chunk2.chunkX, chunkY: chunk2.chunkY, localX: 0, localY: 0 }, state.d9World.runtime.frames);
             return p && p.x / c.tileSize + 32 > left && p.y / c.tileSize + 26 > top && p.x / c.tileSize < right && p.y / c.tileSize < bottom ? [chunk2.identity.id] : [];
           }).sort().join("|");
           return `${frames}/${chunks2}`;
         })() : state.d9World?.runtime.revision ?? 0;
-        const pk = `${ctx.spaceInstanceId}/${ctx.spaceRevision}/${visualWindowKey}/${interior2 ? interior2.contentHash : px2 + "/" + py}`;
+        const pk = `${ctx.spaceInstanceId}/${ctx.spaceRevision}/${visualWindowKey}/${interior2 ? interior2.contentHash : px3 + "/" + py}`;
         if (pk !== pageKey && inOverworld && state.d9World) {
-          page = freezeProjection(projectWorldTerrainD9(state, compiled, { x: px2 - 40, y: py - 40 }));
+          page = freezeProjection(projectWorldTerrainD9(state, compiled, { x: px3 - 40, y: py - 40 }));
           pageKey = pk;
         }
         if (pk !== pageKey) {
-          const radius = 40, x = Math.max(0, px2 - radius), y = Math.max(0, py - radius), right = Math.min(c.width, px2 + size + radius), bottom = Math.min(c.height, py + size + radius);
+          const radius = 40, x = Math.max(0, px3 - radius), y = Math.max(0, py - radius), right = Math.min(c.width, px3 + size + radius), bottom = Math.min(c.height, py + size + radius);
           const visual = inOverworld ? compiled.visual : interior2 ? { terrain: c.tiles, blockers: [] } : { terrain: c.tiles.map((row2) => row2.replace(/1/g, "g").replace(/0/g, "w")), blockers: [] };
           page = interior2 ? freezeWire(interior2.visual ?? { originTile: { x: 0, y: 0 }, terrain: c.tiles, blockers: [], decorations: interior2.decorations }) : freezeWire({ originTile: { x, y }, terrain: visual.terrain.slice(y, bottom).map((row2) => row2.slice(x, right)), blockers: visual.blockers.filter((b) => b.x + b.width >= x && b.y + b.height >= y && b.x < right && b.y < bottom) });
           pageKey = pk;
@@ -28866,9 +28867,9 @@ function createActivityClientPort({ authority, localPlayerId, measure = (_n, fn)
             settlementSafe: inOverworld && (isStarterVillageSafe(state, local6.position) || isWorldPointSafe(m, local6.position)),
             visitedCount: d.discoveredRegionIds.length + d.discoveredSettlementIds.length + d.discoveredSiteIds.length,
             visitedTotal: m.regions.length + m.settlements.length + m.sites.length,
-            overworld: Object.freeze({ manifestId: m.manifestId, manifestHash: m.manifestHash, manifestVersion: 2, regionThreatTier: inOverworld ? populationRegionAt(m, local6.position)?.threatTier ?? null : null, populationGroups: m.population?.groups.length ?? 0, safeRegions: freezeProjection(inOverworld ? safeRegions.filter((r) => local6.position.x >= r.x && local6.position.x < r.x + r.width && local6.position.y >= r.y && local6.position.y < r.y + r.height) : []), egresses: freezeProjection(inOverworld && state.d9World ? state.d9World.origin.egress.openings.map((opening) => {
-              const p = opening.cells[Math.floor(opening.cells.length / 2)];
-              return { side: opening.side, x: (p.x + 0.5) * 32, y: (p.y + 0.5) * 32, label: "Frontier trail" };
+            overworld: Object.freeze({ manifestId: m.manifestId, manifestHash: m.manifestHash, manifestVersion: 2, regionThreatTier: inOverworld ? populationRegionAt(m, local6.position)?.threatTier ?? null : null, populationGroups: m.population?.groups.length ?? 0, safeRegions: freezeProjection(inOverworld ? safeRegions.filter((r) => local6.position.x >= r.x && local6.position.x < r.x + r.width && local6.position.y >= r.y && local6.position.y < r.y + r.height) : []), egresses: freezeProjection(inOverworld && state.d9World ? state.d9World.origin.egress.openings.map((opening2) => {
+              const p = opening2.cells[Math.floor(opening2.cells.length / 2)];
+              return { side: opening2.side, x: (p.x + 0.5) * 32, y: (p.y + 0.5) * 32, label: "Frontier trail" };
             }) : []), seedHex: m.generation.seedHex, generatorVersion: m.generation.generatorVersion, currentAreaId: inOverworld && area2 ? technicalChunkId(area2) : null, currentPlaceId: place?.placeId ?? null })
           }),
           persistence: freezeProjection({ phase: status2.phase === "ready" ? "encounter" : status2.phase, saving: Boolean(status2.saving), confirmedSaveRevision: status2.confirmedSaveRevision }),
@@ -30017,10 +30018,10 @@ function createSkillWheelV1({ document, environment, readModel, adapter, isBlock
         body5.classList.toggle("wheel-move-away", away);
       }
     });
-    const band = g.radius + g.slot / 2 + 10, hole = g.radius - g.slot / 2 - 10, circle9 = (r, c) => `M ${(c - r).toFixed(1)},${c.toFixed(1)} a ${r.toFixed(1)},${r.toFixed(1)} 0 1,0 ${(2 * r).toFixed(1)},0 a ${r.toFixed(1)},${r.toFixed(1)} 0 1,0 ${(-2 * r).toFixed(1)},0 Z`;
+    const band2 = g.radius + g.slot / 2 + 10, hole = g.radius - g.slot / 2 - 10, circle9 = (r, c) => `M ${(c - r).toFixed(1)},${c.toFixed(1)} a ${r.toFixed(1)},${r.toFixed(1)} 0 1,0 ${(2 * r).toFixed(1)},0 a ${r.toFixed(1)},${r.toFixed(1)} 0 1,0 ${(-2 * r).toFixed(1)},0 Z`;
     wheel.style.setProperty("--slot", g.slot + "px");
     document.body.style.setProperty("--wheel-slot", g.slot + "px");
-    ring4.style.cssText = `left:${(g.cx - band).toFixed(1)}px;top:${(g.cy - band).toFixed(1)}px;width:${(band * 2).toFixed(1)}px;height:${(band * 2).toFixed(1)}px;--hole:${hole.toFixed(1)}px;clip-path:path(evenodd,"${circle9(band, band)} ${circle9(hole, band)}")`;
+    ring4.style.cssText = `left:${(g.cx - band2).toFixed(1)}px;top:${(g.cy - band2).toFixed(1)}px;width:${(band2 * 2).toFixed(1)}px;height:${(band2 * 2).toFixed(1)}px;--hole:${hole.toFixed(1)}px;clip-path:path(evenodd,"${circle9(band2, band2)} ${circle9(hole, band2)}")`;
     spin.style.setProperty("--at", css(at3(270, g.hub + 20, 34)));
     done.style.cssText = `left:${(g.cx - g.hub).toFixed(1)}px;top:${(g.cy - g.hub).toFixed(1)}px;width:${(g.hub * 2).toFixed(1)}px;height:${(g.hub * 2).toFixed(1)}px`;
     attackSkill.style.left = done.style.left;
@@ -31512,14 +31513,14 @@ function drawDashChevron(ctx, x, y, dx, dy, age, landing) {
   ctx.translate(x, y);
   ctx.rotate(Math.atan2(uy, ux));
   for (const [off, k] of [[0, 1], [-9, 0.45]]) {
-    const shape2 = () => {
+    const shape3 = () => {
       ctx.beginPath();
       ctx.moveTo(off - 22, -7);
       ctx.lineTo(off + 4 + 4 * t, 0);
       ctx.lineTo(off - 22, 7);
     };
-    glowStroke(ctx, DASH_LIGHT, 8, (5 * a + 1) * k, shape2, false);
-    glowStroke(ctx, DASH_GLOW_CORE, 3, 2 * a * k, shape2, false);
+    glowStroke(ctx, DASH_LIGHT, 8, (5 * a + 1) * k, shape3, false);
+    glowStroke(ctx, DASH_GLOW_CORE, 3, 2 * a * k, shape3, false);
   }
   if (landing) {
     bloom(ctx, 2, -12, 14 * (1 - t * 0.4), DASH_LIGHT, 0.5 * a);
@@ -31536,9 +31537,9 @@ function drawDashDust(ctx, x, y, dx, age, skid) {
   ctx.save();
   ctx.fillStyle = `rgba(190,180,160,${0.4 * (1 - q)})`;
   for (let j = 0; j < 4; j++) {
-    const px2 = skid ? x + dir * (4 + j * 4) + dir * 10 * q : x - dir * (4 + j * 5 * q), py = y + 6 - j * 1.6 * q - (skid ? 2 * q : 0);
+    const px3 = skid ? x + dir * (4 + j * 4) + dir * 10 * q : x - dir * (4 + j * 5 * q), py = y + 6 - j * 1.6 * q - (skid ? 2 * q : 0);
     ctx.beginPath();
-    ctx.arc(px2, py, 1.6 + 2.6 * q, 0, TAU34);
+    ctx.arc(px3, py, 1.6 + 2.6 * q, 0, TAU34);
     ctx.fill();
   }
   ctx.restore();
@@ -31816,6 +31817,415 @@ var ARROW_DOWN = '<svg width="9" height="9" viewBox="0 0 12 12" aria-hidden="tru
 
 // src/client/salvage_material_art.js
 var SALVAGE_MATERIAL_ART = { "Monster Soul": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g_ms_999%22%20x1%3D%220%25%22%20y1%3D%22100%25%22%20x2%3D%220%25%22%20y2%3D%220%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%232d3436%22%20%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23636e72%22%20%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M16%203%20C16%203%2C%206%2015%2C%206%2022%20C6%2027%2C%2010.5%2030%2C%2016%2030%20C21.5%2030%2C%2026%2027%2C%2026%2022%20C26%2015%2C%2016%203%2C%2016%203%20Z%22%20fill%3D%22url(%23g_ms_999)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M11%2019%20L14%2017%22%20stroke%3D%22%23e74c3c%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M21%2019%20L18%2017%22%20stroke%3D%22%23e74c3c%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%2F%3E%0A%20%20%20%20%20%20%3C%2Fsvg%3E", "Rare Scrap": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g_sc_999%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%22100%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%235fa7e8%22%20%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%233498db%22%20%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M6%2014%20L16%204%20L28%2012%20L22%2026%20L10%2024%20Z%22%20fill%3D%22url(%23g_sc_999)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M12%2010%20L18%2020%22%20stroke%3D%22rgba(255%2C255%2C255%2C0.4)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%0A%20%20%20%20%20%20%3C%2Fsvg%3E", "Magic Scrap": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g_sc_999%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%22100%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23c397eb%22%20%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%239b59b6%22%20%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M6%2014%20L16%204%20L28%2012%20L22%2026%20L10%2024%20Z%22%20fill%3D%22url(%23g_sc_999)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M12%2010%20L18%2020%22%20stroke%3D%22rgba(255%2C255%2C255%2C0.4)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%0A%20%20%20%20%20%20%3C%2Fsvg%3E", "Epic Scrap": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g_sc_999%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%22100%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23f3b05a%22%20%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23e67e22%22%20%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M6%2014%20L16%204%20L28%2012%20L22%2026%20L10%2024%20Z%22%20fill%3D%22url(%23g_sc_999)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M12%2010%20L18%2020%22%20stroke%3D%22rgba(255%2C255%2C255%2C0.4)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%0A%20%20%20%20%20%20%3C%2Fsvg%3E", "Legendary Scrap": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g_sc_999%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%22100%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23fbe374%22%20%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23f1c40f%22%20%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M6%2014%20L16%204%20L28%2012%20L22%2026%20L10%2024%20Z%22%20fill%3D%22url(%23g_sc_999)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M12%2010%20L18%2020%22%20stroke%3D%22rgba(255%2C255%2C255%2C0.4)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%0A%20%20%20%20%20%20%3C%2Fsvg%3E", "Mythic Scrap": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g_sc_999%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%22100%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23f19086%22%20%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23e74c3c%22%20%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M6%2014%20L16%204%20L28%2012%20L22%2026%20L10%2024%20Z%22%20fill%3D%22url(%23g_sc_999)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M12%2010%20L18%2020%22%20stroke%3D%22rgba(255%2C255%2C255%2C0.4)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%0A%20%20%20%20%20%20%3C%2Fsvg%3E" };
+
+// src/client/item_icon_art_v1.js
+var { P: P3, M: M2, ACC: ACC2 } = HERO_COLORS;
+var K2 = "#000000";
+var LW = 1.35;
+var OPENING2 = "#1d232b";
+var MAIL_DOT = "#5d656b";
+var DOT = "#f3e2c8";
+var GOLD2 = { b: "#c9a227", d: "#9c7d1e", l: "#e8c95a" };
+var COPPER2 = { b: "#c47a3a", d: "#9a5a26", l: "#e0965a" };
+var SOLE = { b: "#2a1f17" };
+var shape = (c, pts) => {
+  c.beginPath();
+  c.moveTo(pts[0], pts[1]);
+  for (let i = 2; i < pts.length; i += 2) c.lineTo(pts[i], pts[i + 1]);
+  c.closePath();
+};
+var outline2 = (c, lw = LW) => {
+  c.lineWidth = lw;
+  c.lineJoin = "miter";
+  c.miterLimit = 2;
+  c.strokeStyle = K2;
+  c.stroke();
+};
+function R2(c, x, y, w, h, Pl, o = {}) {
+  c.fillStyle = Pl.b;
+  c.fillRect(x, y, w, h);
+  if (!o.flat && Pl.d) {
+    const s = o.split ?? 0.66;
+    c.fillStyle = Pl.d;
+    c.fillRect(x + w * s, y, w * (1 - s), h);
+    if (!o.nohi && Pl.l) {
+      c.fillStyle = Pl.l;
+      c.fillRect(x + LW * 0.6, y + LW * 0.6, Math.max(0, w * s - LW), LW * 0.55);
+    }
+  }
+  if (o.line !== false) {
+    c.lineWidth = o.lw ?? LW;
+    c.strokeStyle = K2;
+    c.strokeRect(x, y, w, h);
+  }
+}
+function G2(c, pts, Pl, o = {}) {
+  if (o.fill === false) {
+    shape(c, pts);
+    outline2(c, o.lw);
+    return;
+  }
+  shape(c, pts);
+  c.fillStyle = Pl.b;
+  c.fill();
+  if (!o.flat && Pl.d) {
+    let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+    for (let i = 0; i < pts.length; i += 2) {
+      x0 = Math.min(x0, pts[i]);
+      x1 = Math.max(x1, pts[i]);
+      y0 = Math.min(y0, pts[i + 1]);
+      y1 = Math.max(y1, pts[i + 1]);
+    }
+    const s = o.split ?? 0.66;
+    c.save();
+    shape(c, pts);
+    c.clip();
+    c.fillStyle = Pl.d;
+    c.fillRect(x0 + (x1 - x0) * s, y0, x1 - x0, y1 - y0);
+    if (!o.nohi && Pl.l) {
+      c.fillStyle = Pl.l;
+      c.fillRect(x0, y0 + LW * 0.6, (x1 - x0) * s, LW * 0.55);
+    }
+    c.restore();
+  }
+  if (o.line !== false) {
+    shape(c, pts);
+    outline2(c, o.lw);
+  }
+}
+var px2 = (c, x, y, w, h, col) => {
+  c.fillStyle = col;
+  c.fillRect(x, y, w, h);
+};
+var accPal2 = (A) => ({ b: A.c, d: A.d });
+function gem2(c, x, y, s, col) {
+  if (!col) return;
+  c.save();
+  c.translate(x, y);
+  c.rotate(Math.PI / 4);
+  c.fillStyle = col;
+  c.fillRect(-s / 2, -s / 2, s, s);
+  c.lineWidth = 0.9;
+  c.strokeStyle = K2;
+  c.strokeRect(-s / 2, -s / 2, s, s);
+  c.restore();
+}
+function trim(c, x, y, w, A, h = 1.6) {
+  R2(c, x, y, w, h, accPal2(A), { split: 0.7, lw: 0.9 });
+  gem2(c, x + w / 2, y + h / 2, 2.4, A.gem);
+}
+function mailRows2(c, x, y, w, h) {
+  for (let r = 0, yy = y + 1.4; yy < y + h - 0.8; r++, yy += 1.8) for (let xx = x + 1 + r % 2; xx < x + w - 0.8; xx += 2) px2(c, xx, yy, 1, 0.6, MAIL_DOT);
+}
+function opening(c, x, y, w, h) {
+  G2(c, [x, y + h, x, y + 2, x + 2, y, x + w - 2, y, x + w, y + 2, x + w, y + h], { b: OPENING2 }, { flat: true, lw: 1.1 });
+}
+function glove(c, A, { hand: hand4, cuff, joints = false, strips = null }) {
+  G2(c, [9.6, 21, 4.8, 16.6, 4.4, 13.4, 7.2, 12.6, 10.4, 16], hand4, { split: 0.62 });
+  for (const [x, top] of [[9.2, 6.6], [12.6, 4.8], [16, 5.6], [19.4, 7.8]]) {
+    R2(c, x, top, 3.4, 15 - top, hand4, { split: 0.62 });
+    if (joints) px2(c, x + 0.7, top + (15 - top) * 0.45, 2, 0.7, "#00000055");
+  }
+  R2(c, 8.8, 13.4, 14, 8.6, hand4, { split: 0.62 });
+  if (strips) for (const y of strips) R2(c, 8.8, y, 14, 1.8, P3.linen, { split: 0.7, lw: 0.9 });
+  G2(c, [8.2, 21.6, 23.4, 21.6, 25.4, 29, 6.2, 29], cuff, { split: 0.62 });
+  trim(c, 7.2, 25.2, 17.2, A);
+}
+var GLOVES2 = { gauntlets: (c, A) => glove(c, A, { hand: M2.steel, cuff: P3.plate, joints: true }), gloves: (c, A) => {
+  glove(c, A, { hand: P3.strap, cuff: P3.leather });
+  px2(c, 11, 15.4, 10, 0.7, "#ffffff22");
+}, wraps: (c, A) => glove(c, A, { hand: M2.blueDark, cuff: P3.linen, strips: [11.6, 15.6, 18.6] }) };
+function boot(c, A, { body: body5, cuff, low = false, tall = false, lines = false }) {
+  const top = tall ? 3.4 : 6;
+  if (!low) R2(c, 9, top, 8.6, 20.4 - top, body5, { split: 0.62 });
+  if (low) G2(c, [5, 18.6, 14.4, 18.6, 19, 20.6, 24, 20.2, 27.2, 15.4, 29.2, 16.8, 28.4, 22.6, 25.6, 26.4, 5, 26.4], body5, { split: 0.62 });
+  else G2(c, [8.8, 19.4, 17.6, 19.4, 22.4, 20.2, 26.8, 21.8, 28.4, 24.4, 28.4, 26.4, 8.8, 26.4], body5, { split: 0.62 });
+  if (lines) {
+    px2(c, 9.8, 10.8, 6.8, 0.7, "#00000040");
+    px2(c, 9.8, 15, 6.8, 0.7, "#00000040");
+    px2(c, 21.2, 20.8, 0.7, 5, "#00000040");
+    px2(c, 24.6, 22.2, 0.7, 3.6, "#00000040");
+  }
+  if (low) {
+    R2(c, 5, 17, 9.6, 2.2, cuff, { flat: true, lw: 1 });
+    R2(c, 27.4, 13.6, 2.6, 2.6, GOLD2, { split: 0.6, lw: 0.9 });
+  } else R2(c, 8, top - 2.6, 10.6, 4, cuff, { split: 0.62 });
+  R2(c, low ? 4.4 : 8.2, 26.2, low ? 22.6 : 20.6, 2.2, SOLE, { flat: true, lw: 1 });
+  trim(c, low ? 8 : 9.6, low ? 22 : top + 6.4, low ? 8 : 7.4, A);
+}
+var BOOTS = {
+  sabatons: (c, A) => boot(c, A, { body: P3.helm, cuff: P3.plateDark, lines: true }),
+  boots: (c, A) => boot(c, A, { body: P3.strap, cuff: P3.leather }),
+  tall: (c, A) => boot(c, A, { body: P3.leather, cuff: P3.leatherLight, tall: true }),
+  slippers: (c, A) => boot(c, A, { body: P3.cover, cuff: P3.purple, low: true }),
+  "apprentice-slippers": (c, A) => boot(c, A, { body: M2.blue, cuff: M2.rope, low: true })
+};
+var HELMETS = {
+  // The steel box, visor and breathing holes on the face side, the rarity band, the red plume stepping up from the back.
+  helm(c, A) {
+    R2(c, 3.2, 7.6, 5.2, 3.6, P3.red, { lw: 1.2 });
+    R2(c, 7.6, 5.4, 5.6, 5.6, P3.red, { lw: 1.2 });
+    R2(c, 12.2, 3.4, 4.8, 7.8, P3.red, { lw: 1.2 });
+    R2(c, 6, 11, 20, 16.4, P3.helm, { split: 0.7 });
+    R2(c, 6, 14.6, 20, 2, { b: A.c }, { flat: true, lw: 1.1 });
+    gem2(c, 15.4, 15.6, 2.4, A.gem);
+    R2(c, 17.4, 17.4, 7.4, 4, P3.visor, { lw: 1.2 });
+    px2(c, 18.4, 18.4, 4.4, 0.8, "#ffffff30");
+    for (const x of [19.2, 21.4, 23.6]) px2(c, x, 23, 1.1, 1.9, "#2c3e50");
+    px2(c, 8.6, 24, 1.6, 1.6, A.c);
+  },
+  // The mail hood side-on, opening on the face side, a mantle over the shoulders.
+  coif(c, A) {
+    const pts = [4.4, 29, 4.4, 24.2, 6, 22.2, 6, 11, 9.2, 7.6, 24.4, 7.6, 26, 9.2, 26, 22.2, 27.6, 24.2, 27.6, 29];
+    G2(c, pts, M2.mail, { split: 0.74, line: false });
+    c.save();
+    shape(c, pts);
+    c.clip();
+    mailRows2(c, 4.4, 7.6, 23.2, 21.4);
+    c.restore();
+    G2(c, pts, M2.mail, { fill: false });
+    opening(c, 15.8, 11.4, 10.2, 11.2);
+    trim(c, 4.4, 24.2, 23.2, A);
+  },
+  // Red cloth with cream dots and a fold, knotted at the side with two tails.
+  bandana(c, A) {
+    G2(c, [23.4, 16.6, 29.4, 13.6, 28.8, 18.4], M2.bandana, { flat: true, lw: 1.1 });
+    G2(c, [23.6, 18, 29.6, 23.6, 26.6, 24.6], M2.bandana, { flat: true, lw: 1.1 });
+    G2(c, [6.4, 21.4, 6.4, 13.6, 9, 9.4, 13, 7.6, 19, 7.6, 23, 9.4, 25.6, 13.6, 25.6, 21.4], M2.bandana, { split: 0.7 });
+    for (const [x, y] of [[10.2, 12.6], [15.4, 10.4], [20.6, 12.6], [12.8, 16], [18.2, 16]]) px2(c, x, y, 1.6, 1.6, DOT);
+    R2(c, 6, 18.6, 20, 3.4, M2.bandana, { split: 0.7 });
+    R2(c, 22.6, 15.8, 3.6, 3.6, M2.bandana, { flat: true, lw: 1.1 });
+    trim(c, 8.4, 19.6, 10, A, 1.4);
+  },
+  // Dark green, its point sticking out behind, the mask over the lower half of the opening.
+  hood(c, A) {
+    G2(c, [6.4, 11.4, 1.6, 4.2, 13.6, 11.4], P3.hood, { lw: 1.3 });
+    G2(c, [4.4, 29.4, 4.4, 24.6, 6, 22.6, 6, 10.8, 26, 10.8, 26, 22.6, 27.6, 24.6, 27.6, 29.4], P3.hood, { split: 0.75 });
+    opening(c, 15.4, 13.6, 10.6, 10.4);
+    R2(c, 15.4, 18.8, 10.6, 5.2, P3.mask, { flat: true, lw: 1.1 });
+    trim(c, 15.4, 11.8, 10.6, A, 1.4);
+  },
+  // The stepped purple cone with its tip bent over, a rarity band and a wide brim.
+  hat(c, A) {
+    R2(c, 18.6, 2.6, 5.6, 2.6, P3.purple, { flat: true, lw: 1.1 });
+    R2(c, 14.6, 4.4, 5.6, 3.4, P3.purple, { lw: 1.2 });
+    R2(c, 12.8, 7.6, 7.4, 4.8, P3.purple, { lw: 1.2 });
+    R2(c, 11.4, 12.2, 9.6, 5.4, P3.purple, { lw: 1.2 });
+    R2(c, 10.2, 17.4, 11.8, 4.4, P3.purple, { lw: 1.2 });
+    trim(c, 10, 18, 12.2, A, 2.6);
+    R2(c, 3, 21.8, 26, 3.6, P3.purple, { lw: 1.3 });
+  },
+  // A soft blue pointed hat, its tip curled back, with a rope band and a wide brim.
+  cowl(c, A) {
+    G2(c, [2.2, 26, 29.8, 26, 28, 23, 21, 21, 17.5, 14.2, 12.5, 10, 5.8, 11, 10, 13.8, 9.5, 20.8, 3.8, 23.2], M2.blue, { split: 0.7 });
+    px2(c, 5.4, 9.8, 2, 2, A.c);
+    R2(c, 6, 21.2, 16.6, 3, M2.rope, { flat: true, lw: 1.1 });
+    gem2(c, 14.3, 22.7, 2.6, A.gem);
+  }
+};
+function outfit(c, { torso: torso2, sleeve: sleeve4, legs: legs3, mail = false, cuff = null }) {
+  for (const x of [10, 16.8]) {
+    R2(c, x, 19, 5.2, 9.8, legs3, { split: 0.62 });
+    if (mail) mailRows2(c, x, 19, 5.2, 9.8);
+  }
+  for (const x of [4.4, 22.6]) {
+    R2(c, x, 9.6, 5, 8.4, sleeve4, { split: 0.62 });
+    if (mail) mailRows2(c, x, 9.6, 5, 8.4);
+    if (cuff) R2(c, x - 0.2, 15.6, 5.4, 2.6, cuff, { flat: true, lw: 1.1 });
+  }
+  R2(c, 8.8, 6.6, 14.4, 12.6, torso2, { split: 0.68 });
+  if (mail) mailRows2(c, 8.8, 6.6, 14.4, 12.6);
+}
+function robe2(cloth, dark, inner, belt) {
+  return (c, A) => {
+    const b = belt ?? accPal2(A);
+    for (const s of [-1, 1]) {
+      const x = s < 0 ? 9.4 : 22.6;
+      G2(c, [x, 7.6, x + s * 5.2, 9.4, x + s * 6.4, 19.4, x + s * 1.6, 19.4], cloth, { split: 0.6, lw: 1.2 });
+    }
+    const pts = [9.4, 6.6, 22.6, 6.6, 23.6, 15.2, 26.6, 29.4, 5.4, 29.4, 8.4, 15.2];
+    G2(c, pts, cloth, { split: 0.68 });
+    G2(c, [14.6, 8, 17.4, 8, 18.2, 29.4, 13.8, 29.4], inner, { flat: true, lw: 1 });
+    c.save();
+    shape(c, pts);
+    c.clip();
+    px2(c, 4, 27.4, 24, 2, A.c);
+    R2(c, 6, 15, 20, 2.6, b, { flat: true, lw: 1.1 });
+    c.restore();
+    G2(c, pts, cloth, { fill: false });
+    G2(c, [19.4, 17.4, 21.6, 17.4, 22.2, 22.6, 19.8, 22.6], b, { flat: true, lw: 1 });
+    G2(c, [8.6, 5.6, 23.4, 5.6, 24.6, 10, 7.4, 10], dark, { split: 0.7, lw: 1.2 });
+    c.lineWidth = 1.2;
+    c.strokeStyle = K2;
+    c.beginPath();
+    c.moveTo(13.2, 5.6);
+    c.lineTo(16, 9.6);
+    c.lineTo(18.8, 5.6);
+    c.stroke();
+    gem2(c, 16, 12.4, 2.2, A.gem);
+  };
+}
+var BODIES = {
+  plate(c, A) {
+    outfit(c, { torso: P3.plate, sleeve: P3.plate, legs: P3.plate });
+    for (const x of [10.6, 17.4]) px2(c, x, 23.2, 4, 0.8, "#00000040");
+    R2(c, 14.2, 7.6, 3.6, 10.4, P3.red, { flat: true, lw: 1 });
+    gem2(c, 16, 10.6, 2.2, A.gem);
+    R2(c, 8.4, 16.2, 15.2, 2.6, P3.leather, { flat: true, lw: 1.2 });
+    R2(c, 14.4, 15.8, 3.2, 3.4, accPal2(A), { flat: true, lw: 1.1 });
+    for (const x of [3.8, 21.6]) {
+      R2(c, x, 5.8, 6.6, 4.8, P3.plate, { split: 0.6, lw: 1.2 });
+      px2(c, x + 0.8, 9.2, 5, 0.9, A.c);
+    }
+  },
+  hauberk(c, A) {
+    outfit(c, { torso: M2.mail, sleeve: M2.mail, legs: M2.mail, mail: true });
+    R2(c, 10, 5.4, 12, 2.4, M2.darkSteel, { flat: true, lw: 1.1 });
+    R2(c, 8.4, 15.6, 15.2, 2.6, P3.leather, { flat: true, lw: 1.2 });
+    R2(c, 14.4, 15.2, 3.2, 3.4, accPal2(A), { flat: true, lw: 1.1 });
+    gem2(c, 16, 16.9, 1.6, A.gem);
+  },
+  doublet(c, A) {
+    outfit(c, { torso: M2.doublet, sleeve: M2.doublet, legs: M2.breeches, cuff: P3.strap });
+    c.lineWidth = 0.9;
+    c.strokeStyle = P3.strap.d;
+    c.beginPath();
+    for (let y = 8.4; y < 14.6; y += 1.9) {
+      c.moveTo(14.4, y);
+      c.lineTo(17.6, y + 1.3);
+      c.moveTo(17.6, y);
+      c.lineTo(14.4, y + 1.3);
+    }
+    c.stroke();
+    R2(c, 10.2, 5.6, 11.6, 2.4, P3.strap, { flat: true, lw: 1.1 });
+    R2(c, 8.4, 15.6, 15.2, 2.4, P3.strap, { flat: true, lw: 1.2 });
+    R2(c, 18.4, 16.4, 3.6, 3.8, P3.leather, { flat: true, lw: 1 });
+    px2(c, 19.6, 17.4, 1.2, 1.2, A.c);
+    gem2(c, 10.6, 16.8, 1.8, A.gem);
+  },
+  leather(c, A) {
+    outfit(c, { torso: P3.leather, sleeve: P3.mask, legs: P3.darkPants, cuff: P3.leather });
+    G2(c, [8.8, 8.6, 10.6, 6.6, 23.2, 16.6, 23.2, 18.6, 21.4, 19.2], P3.strap, { flat: true, lw: 1.1 });
+    R2(c, 8.4, 15.6, 15.2, 2.4, P3.strap, { flat: true, lw: 1.2 });
+    R2(c, 13, 10.6, 2.8, 2.8, accPal2(A), { flat: true, lw: 1 });
+    R2(c, 17, 15.2, 2.6, 3.2, accPal2(A), { flat: true, lw: 1 });
+    R2(c, 9.4, 5, 13.2, 2.8, P3.teal, { lw: 1.2 });
+    gem2(c, 11.4, 16.8, 1.6, A.gem);
+  },
+  "apprentice-robe": robe2(M2.blue, M2.blueDark, M2.blueInner, M2.rope),
+  robe: robe2(P3.purple, P3.purpleDark, P3.purpleInner, null)
+};
+var RING_SCALE = 1.22;
+function band(c, metal, { cx = 16, cy = 20, rx = 6.4, ry = 4.6, thick = 1.9 } = {}) {
+  const ring4 = () => {
+    c.beginPath();
+    c.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+    c.ellipse(cx, cy, rx - thick, ry - thick * 0.8, 0, 0, Math.PI * 2);
+  };
+  ring4();
+  c.fillStyle = metal.b;
+  c.fill("evenodd");
+  c.save();
+  ring4();
+  c.clip("evenodd");
+  c.fillStyle = metal.d;
+  c.fillRect(cx + rx * 0.32, cy - ry - 1, rx, ry * 2 + 2);
+  if (metal.l) {
+    c.fillStyle = metal.l;
+    c.fillRect(cx - rx * 0.55, cy - ry + 0.35, rx * 0.6, 0.7);
+  }
+  c.restore();
+  c.lineWidth = 1.1;
+  c.strokeStyle = K2;
+  c.beginPath();
+  c.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+  c.stroke();
+  c.beginPath();
+  c.ellipse(cx, cy, rx - thick, ry - thick * 0.8, 0, 0, Math.PI * 2);
+  c.stroke();
+}
+var RINGS = {
+  // A gold band with a flat square face carrying the gem (a plain crest mark when Common).
+  signet(c, A) {
+    band(c, GOLD2);
+    R2(c, 12.8, 11.6, 6.4, 4.6, GOLD2, { split: 0.62, lw: 1.1 });
+    if (A.gem) gem2(c, 16, 13.9, 2.4, A.gem);
+    else px2(c, 15.2, 13.1, 1.6, 1.6, GOLD2.d);
+  },
+  // A thin silver loop with a small gem in a gold setting.
+  loop(c, A) {
+    band(c, M2.steel, { thick: 1.75 });
+    R2(c, 14.4, 13.2, 3.2, 2.4, GOLD2, { flat: true, lw: 0.9 });
+    gem2(c, 16, 13, 2.6, A.gem ?? "#d6eaf8");
+  },
+  // A broad gold band with a rarity-colored inlay and a gem at the front.
+  band(c, A) {
+    band(c, GOLD2, { rx: 6.8, ry: 5, thick: 2.4 });
+    c.beginPath();
+    c.ellipse(16, 20, 5.6, 4, 0, 0.15 * Math.PI, 0.85 * Math.PI);
+    c.strokeStyle = A.c;
+    c.lineWidth = 0.9;
+    c.stroke();
+    gem2(c, 16, 23.8, 2.2, A.gem);
+  },
+  // A silver band with a round dark seal stamped with the rarity color.
+  seal(c, A) {
+    band(c, M2.steel);
+    c.beginPath();
+    c.arc(16, 13.4, 3.4, 0, Math.PI * 2);
+    c.fillStyle = P3.mask.b;
+    c.fill();
+    c.lineWidth = 1.1;
+    c.strokeStyle = K2;
+    c.stroke();
+    px2(c, 15, 12.4, 2, 2, A.c);
+    gem2(c, 16, 13.4, 1.6, A.gem);
+  },
+  copper(c, A) {
+    band(c, COPPER2);
+    R2(c, 14.6, 13.4, 2.8, 2.2, COPPER2, { flat: true, lw: 0.9 });
+    gem2(c, 16, 13.2, 2.4, A.gem ?? "#58d68d");
+  },
+  silver(c, A) {
+    band(c, M2.steel);
+    R2(c, 14.6, 13.4, 2.8, 2.2, M2.steel, { flat: true, lw: 0.9 });
+    gem2(c, 16, 13.2, 2.4, A.gem ?? "#85c1e9");
+  },
+  // A gold signet with a sun face: a round plate ringed by short rays.
+  sun(c, A) {
+    band(c, GOLD2);
+    for (let i = 0; i < 8; i++) {
+      const a = i * Math.PI / 4;
+      px2(c, 16 + Math.cos(a) * 4.4 - 0.6, 13.4 + Math.sin(a) * 4.4 - 0.6, 1.2, 1.2, "#e67e22");
+    }
+    c.beginPath();
+    c.arc(16, 13.4, 3.2, 0, Math.PI * 2);
+    c.fillStyle = GOLD2.b;
+    c.fill();
+    c.lineWidth = 1.1;
+    c.strokeStyle = K2;
+    c.stroke();
+    gem2(c, 16, 13.4, 2, A.gem ?? "#e67e22");
+  }
+};
+var ART = { gloves: GLOVES2, boots: BOOTS, helmet: HELMETS, body: BODIES, ring: RINGS };
+var hasObjectIcon = (item) => Boolean(ART[item?.slot]?.[item.kind]);
+function drawObjectIcon(c, item, size = 48) {
+  const draw = ART[item.slot]?.[item.kind];
+  if (!draw) return false;
+  c.save();
+  c.scale(size / 32, size / 32);
+  if (item.slot === "ring") {
+    c.translate(16, 18);
+    c.scale(RING_SCALE, RING_SCALE);
+    c.translate(-16, -18);
+  }
+  c.lineJoin = "miter";
+  c.miterLimit = 2;
+  draw(c, ACC2[item.tier ?? 0] ?? ACC2[0]);
+  c.restore();
+  return true;
+}
 
 // src/client/generated_equipment_art.js
 var definitions = { "d7/Greatsword/0": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Massive blade light facet -->\n              <linearGradient id="gs_blade_l_d7_Greatsword_0" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="45%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Massive blade shadow facet -->\n              <linearGradient id="gs_blade_s_d7_Greatsword_0" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#475569"/>\n                <stop offset="100%" stop-color="#334155"/>\n              </linearGradient>\n              <!-- Ricasso dark steel leather wrap -->\n                            <linearGradient id="gs_ricasso_d7_Greatsword_0" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#718096"/>\n                              <stop offset="35%" stop-color="#718096"/>\n                              <stop offset="35%" stop-color="#475569"/>\n                              <stop offset="70%" stop-color="#475569"/>\n                              <stop offset="70%" stop-color="#2c3e50"/>\n                              <stop offset="100%" stop-color="#1a202c"/>\n                            </linearGradient>\n                            <!-- Long grip leather wrap -->\n                            <linearGradient id="gs_hilt_d7_Greatsword_0" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#8d5b38"/>\n                              <stop offset="35%" stop-color="#8d5b38"/>\n                              <stop offset="35%" stop-color="#5c3a21"/>\n                              <stop offset="70%" stop-color="#5c3a21"/>\n                              <stop offset="70%" stop-color="#2d1d0b"/>\n                              <stop offset="100%" stop-color="#1c0f07"/>\n                            </linearGradient>\n            </defs>\n\n            <!-- Left Heavy Blade (Shadow + Parierhaken parrying hook) -->\n            <path d="M16 2 L13.5 3.5 L13.5 14 L11.5 14.5 L14 15 L14 19 L16 19 Z" fill="url(#gs_blade_s_d7_Greatsword_0)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Right Heavy Blade (Light + Parierhaken parrying hook) -->\n            <path d="M16 2 L18.5 3.5 L18.5 14 L20.5 14.5 L18 15 L18 19 L16 19 Z" fill="url(#gs_blade_l_d7_Greatsword_0)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Specular Highlight Sheen -->\n            <polygon points="16,2 18.0,3.5 17.5,13.5 16,13.5" fill="rgba(255,255,255,0.45)" />\n\n            <!-- Ricasso (Blunt base wrap) -->\n            <rect x="14" y="15.8" width="4" height="3.2" fill="url(#gs_ricasso_d7_Greatsword_0)" stroke="#05070a" stroke-width="1.5" />\n\n            <!-- Left Guard Side Ring (Seitenring) -->\n            <circle cx="10" cy="19.5" r="3.2" fill="none" stroke="#ffffff" stroke-width="1.8" />\n\n            <!-- Right Guard Side Ring (Seitenring) -->\n            <circle cx="22" cy="19.5" r="3.2" fill="none" stroke="#ffffff" stroke-width="1.8" />\n\n            <!-- Imposing Straight Crossguard -->\n            <path d="M7 19.5 L25 19.5 L23 21.5 L9 21.5 Z" fill="#ffffff" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Long Two-Handed Grip -->\n            <rect x="14.2" y="21.5" width="3.6" height="7" fill="url(#gs_hilt_d7_Greatsword_0)" stroke="#05070a" stroke-width="1.5" />\n            <!-- Grip Ribs/Spacers -->\n            <line x1="14.2" y1="23.2" x2="17.8" y2="23.2" stroke="#05070a" stroke-width="1" />\n            <line x1="14.2" y1="25.0" x2="17.8" y2="25.0" stroke="#05070a" stroke-width="1" />\n            <line x1="14.2" y1="26.8" x2="17.8" y2="26.8" stroke="#05070a" stroke-width="1" />\n\n            <!-- Faceted Octagonal Pommel with Inset Gem -->\n            <polygon points="16,28.5 18.8,30 16,31.5 13.2,30" fill="#ffffff" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n            <circle cx="16" cy="30" r="0.8" fill="#ffffff" />\n          </svg>', "color": "#ffffff", "source": "greatsword", "bounds": { "x": 6.800000190734863, "y": 2, "width": 18.400001525878906, "height": 29.5 }, "visibleCenter": { "x": 16.000000953674316, "y": 16.75 }, "pivot": { "x": 16.000000953674316, "y": 31.5 } }, "d7/Greatsword/1": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Massive blade light facet -->\n              <linearGradient id="gs_blade_l_d7_Greatsword_1" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="45%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Massive blade shadow facet -->\n              <linearGradient id="gs_blade_s_d7_Greatsword_1" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#475569"/>\n                <stop offset="100%" stop-color="#334155"/>\n              </linearGradient>\n              <!-- Ricasso dark steel leather wrap -->\n                            <linearGradient id="gs_ricasso_d7_Greatsword_1" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#718096"/>\n                              <stop offset="35%" stop-color="#718096"/>\n                              <stop offset="35%" stop-color="#475569"/>\n                              <stop offset="70%" stop-color="#475569"/>\n                              <stop offset="70%" stop-color="#2c3e50"/>\n                              <stop offset="100%" stop-color="#1a202c"/>\n                            </linearGradient>\n                            <!-- Long grip leather wrap -->\n                            <linearGradient id="gs_hilt_d7_Greatsword_1" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#8d5b38"/>\n                              <stop offset="35%" stop-color="#8d5b38"/>\n                              <stop offset="35%" stop-color="#5c3a21"/>\n                              <stop offset="70%" stop-color="#5c3a21"/>\n                              <stop offset="70%" stop-color="#2d1d0b"/>\n                              <stop offset="100%" stop-color="#1c0f07"/>\n                            </linearGradient>\n            </defs>\n\n            <!-- Left Heavy Blade (Shadow + Parierhaken parrying hook) -->\n            <path d="M16 2 L13.5 3.5 L13.5 14 L11.5 14.5 L14 15 L14 19 L16 19 Z" fill="url(#gs_blade_s_d7_Greatsword_1)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Right Heavy Blade (Light + Parierhaken parrying hook) -->\n            <path d="M16 2 L18.5 3.5 L18.5 14 L20.5 14.5 L18 15 L18 19 L16 19 Z" fill="url(#gs_blade_l_d7_Greatsword_1)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Specular Highlight Sheen -->\n            <polygon points="16,2 18.0,3.5 17.5,13.5 16,13.5" fill="rgba(255,255,255,0.45)" />\n\n            <!-- Ricasso (Blunt base wrap) -->\n            <rect x="14" y="15.8" width="4" height="3.2" fill="url(#gs_ricasso_d7_Greatsword_1)" stroke="#05070a" stroke-width="1.5" />\n\n            <!-- Left Guard Side Ring (Seitenring) -->\n            <circle cx="10" cy="19.5" r="3.2" fill="none" stroke="#3498db" stroke-width="1.8" />\n\n            <!-- Right Guard Side Ring (Seitenring) -->\n            <circle cx="22" cy="19.5" r="3.2" fill="none" stroke="#3498db" stroke-width="1.8" />\n\n            <!-- Imposing Straight Crossguard -->\n            <path d="M7 19.5 L25 19.5 L23 21.5 L9 21.5 Z" fill="#3498db" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Long Two-Handed Grip -->\n            <rect x="14.2" y="21.5" width="3.6" height="7" fill="url(#gs_hilt_d7_Greatsword_1)" stroke="#05070a" stroke-width="1.5" />\n            <!-- Grip Ribs/Spacers -->\n            <line x1="14.2" y1="23.2" x2="17.8" y2="23.2" stroke="#05070a" stroke-width="1" />\n            <line x1="14.2" y1="25.0" x2="17.8" y2="25.0" stroke="#05070a" stroke-width="1" />\n            <line x1="14.2" y1="26.8" x2="17.8" y2="26.8" stroke="#05070a" stroke-width="1" />\n\n            <!-- Faceted Octagonal Pommel with Inset Gem -->\n            <polygon points="16,28.5 18.8,30 16,31.5 13.2,30" fill="#3498db" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n            <circle cx="16" cy="30" r="0.8" fill="#ffffff" />\n          </svg>', "color": "#3498db", "source": "greatsword", "bounds": { "x": 6.800000190734863, "y": 2, "width": 18.400001525878906, "height": 29.5 }, "visibleCenter": { "x": 16.000000953674316, "y": 16.75 }, "pivot": { "x": 16.000000953674316, "y": 31.5 } }, "d7/Greatsword/2": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Massive blade light facet -->\n              <linearGradient id="gs_blade_l_d7_Greatsword_2" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="45%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Massive blade shadow facet -->\n              <linearGradient id="gs_blade_s_d7_Greatsword_2" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#475569"/>\n                <stop offset="100%" stop-color="#334155"/>\n              </linearGradient>\n              <!-- Ricasso dark steel leather wrap -->\n                            <linearGradient id="gs_ricasso_d7_Greatsword_2" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#718096"/>\n                              <stop offset="35%" stop-color="#718096"/>\n                              <stop offset="35%" stop-color="#475569"/>\n                              <stop offset="70%" stop-color="#475569"/>\n                              <stop offset="70%" stop-color="#2c3e50"/>\n                              <stop offset="100%" stop-color="#1a202c"/>\n                            </linearGradient>\n                            <!-- Long grip leather wrap -->\n                            <linearGradient id="gs_hilt_d7_Greatsword_2" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#8d5b38"/>\n                              <stop offset="35%" stop-color="#8d5b38"/>\n                              <stop offset="35%" stop-color="#5c3a21"/>\n                              <stop offset="70%" stop-color="#5c3a21"/>\n                              <stop offset="70%" stop-color="#2d1d0b"/>\n                              <stop offset="100%" stop-color="#1c0f07"/>\n                            </linearGradient>\n            </defs>\n\n            <!-- Left Heavy Blade (Shadow + Parierhaken parrying hook) -->\n            <path d="M16 2 L13.5 3.5 L13.5 14 L11.5 14.5 L14 15 L14 19 L16 19 Z" fill="url(#gs_blade_s_d7_Greatsword_2)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Right Heavy Blade (Light + Parierhaken parrying hook) -->\n            <path d="M16 2 L18.5 3.5 L18.5 14 L20.5 14.5 L18 15 L18 19 L16 19 Z" fill="url(#gs_blade_l_d7_Greatsword_2)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Specular Highlight Sheen -->\n            <polygon points="16,2 18.0,3.5 17.5,13.5 16,13.5" fill="rgba(255,255,255,0.45)" />\n\n            <!-- Ricasso (Blunt base wrap) -->\n            <rect x="14" y="15.8" width="4" height="3.2" fill="url(#gs_ricasso_d7_Greatsword_2)" stroke="#05070a" stroke-width="1.5" />\n\n            <!-- Left Guard Side Ring (Seitenring) -->\n            <circle cx="10" cy="19.5" r="3.2" fill="none" stroke="#9b59b6" stroke-width="1.8" />\n\n            <!-- Right Guard Side Ring (Seitenring) -->\n            <circle cx="22" cy="19.5" r="3.2" fill="none" stroke="#9b59b6" stroke-width="1.8" />\n\n            <!-- Imposing Straight Crossguard -->\n            <path d="M7 19.5 L25 19.5 L23 21.5 L9 21.5 Z" fill="#9b59b6" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Long Two-Handed Grip -->\n            <rect x="14.2" y="21.5" width="3.6" height="7" fill="url(#gs_hilt_d7_Greatsword_2)" stroke="#05070a" stroke-width="1.5" />\n            <!-- Grip Ribs/Spacers -->\n            <line x1="14.2" y1="23.2" x2="17.8" y2="23.2" stroke="#05070a" stroke-width="1" />\n            <line x1="14.2" y1="25.0" x2="17.8" y2="25.0" stroke="#05070a" stroke-width="1" />\n            <line x1="14.2" y1="26.8" x2="17.8" y2="26.8" stroke="#05070a" stroke-width="1" />\n\n            <!-- Faceted Octagonal Pommel with Inset Gem -->\n            <polygon points="16,28.5 18.8,30 16,31.5 13.2,30" fill="#9b59b6" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n            <circle cx="16" cy="30" r="0.8" fill="#ffffff" />\n          </svg>', "color": "#9b59b6", "source": "greatsword", "bounds": { "x": 6.800000190734863, "y": 2, "width": 18.400001525878906, "height": 29.5 }, "visibleCenter": { "x": 16.000000953674316, "y": 16.75 }, "pivot": { "x": 16.000000953674316, "y": 31.5 } }, "d7/Greatsword/3": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Massive blade light facet -->\n              <linearGradient id="gs_blade_l_d7_Greatsword_3" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="45%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Massive blade shadow facet -->\n              <linearGradient id="gs_blade_s_d7_Greatsword_3" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#475569"/>\n                <stop offset="100%" stop-color="#334155"/>\n              </linearGradient>\n              <!-- Ricasso dark steel leather wrap -->\n                            <linearGradient id="gs_ricasso_d7_Greatsword_3" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#718096"/>\n                              <stop offset="35%" stop-color="#718096"/>\n                              <stop offset="35%" stop-color="#475569"/>\n                              <stop offset="70%" stop-color="#475569"/>\n                              <stop offset="70%" stop-color="#2c3e50"/>\n                              <stop offset="100%" stop-color="#1a202c"/>\n                            </linearGradient>\n                            <!-- Long grip leather wrap -->\n                            <linearGradient id="gs_hilt_d7_Greatsword_3" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#8d5b38"/>\n                              <stop offset="35%" stop-color="#8d5b38"/>\n                              <stop offset="35%" stop-color="#5c3a21"/>\n                              <stop offset="70%" stop-color="#5c3a21"/>\n                              <stop offset="70%" stop-color="#2d1d0b"/>\n                              <stop offset="100%" stop-color="#1c0f07"/>\n                            </linearGradient>\n            </defs>\n\n            <!-- Left Heavy Blade (Shadow + Parierhaken parrying hook) -->\n            <path d="M16 2 L13.5 3.5 L13.5 14 L11.5 14.5 L14 15 L14 19 L16 19 Z" fill="url(#gs_blade_s_d7_Greatsword_3)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Right Heavy Blade (Light + Parierhaken parrying hook) -->\n            <path d="M16 2 L18.5 3.5 L18.5 14 L20.5 14.5 L18 15 L18 19 L16 19 Z" fill="url(#gs_blade_l_d7_Greatsword_3)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Specular Highlight Sheen -->\n            <polygon points="16,2 18.0,3.5 17.5,13.5 16,13.5" fill="rgba(255,255,255,0.45)" />\n\n            <!-- Ricasso (Blunt base wrap) -->\n            <rect x="14" y="15.8" width="4" height="3.2" fill="url(#gs_ricasso_d7_Greatsword_3)" stroke="#05070a" stroke-width="1.5" />\n\n            <!-- Left Guard Side Ring (Seitenring) -->\n            <circle cx="10" cy="19.5" r="3.2" fill="none" stroke="#e67e22" stroke-width="1.8" />\n\n            <!-- Right Guard Side Ring (Seitenring) -->\n            <circle cx="22" cy="19.5" r="3.2" fill="none" stroke="#e67e22" stroke-width="1.8" />\n\n            <!-- Imposing Straight Crossguard -->\n            <path d="M7 19.5 L25 19.5 L23 21.5 L9 21.5 Z" fill="#e67e22" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Long Two-Handed Grip -->\n            <rect x="14.2" y="21.5" width="3.6" height="7" fill="url(#gs_hilt_d7_Greatsword_3)" stroke="#05070a" stroke-width="1.5" />\n            <!-- Grip Ribs/Spacers -->\n            <line x1="14.2" y1="23.2" x2="17.8" y2="23.2" stroke="#05070a" stroke-width="1" />\n            <line x1="14.2" y1="25.0" x2="17.8" y2="25.0" stroke="#05070a" stroke-width="1" />\n            <line x1="14.2" y1="26.8" x2="17.8" y2="26.8" stroke="#05070a" stroke-width="1" />\n\n            <!-- Faceted Octagonal Pommel with Inset Gem -->\n            <polygon points="16,28.5 18.8,30 16,31.5 13.2,30" fill="#e67e22" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n            <circle cx="16" cy="30" r="0.8" fill="#ffffff" />\n          </svg>', "color": "#e67e22", "source": "greatsword", "bounds": { "x": 6.800000190734863, "y": 2, "width": 18.400001525878906, "height": 29.5 }, "visibleCenter": { "x": 16.000000953674316, "y": 16.75 }, "pivot": { "x": 16.000000953674316, "y": 31.5 } }, "d7/Greatsword/4": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Massive blade light facet -->\n              <linearGradient id="gs_blade_l_d7_Greatsword_4" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="45%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Massive blade shadow facet -->\n              <linearGradient id="gs_blade_s_d7_Greatsword_4" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#475569"/>\n                <stop offset="100%" stop-color="#334155"/>\n              </linearGradient>\n              <!-- Ricasso dark steel leather wrap -->\n                            <linearGradient id="gs_ricasso_d7_Greatsword_4" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#718096"/>\n                              <stop offset="35%" stop-color="#718096"/>\n                              <stop offset="35%" stop-color="#475569"/>\n                              <stop offset="70%" stop-color="#475569"/>\n                              <stop offset="70%" stop-color="#2c3e50"/>\n                              <stop offset="100%" stop-color="#1a202c"/>\n                            </linearGradient>\n                            <!-- Long grip leather wrap -->\n                            <linearGradient id="gs_hilt_d7_Greatsword_4" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#8d5b38"/>\n                              <stop offset="35%" stop-color="#8d5b38"/>\n                              <stop offset="35%" stop-color="#5c3a21"/>\n                              <stop offset="70%" stop-color="#5c3a21"/>\n                              <stop offset="70%" stop-color="#2d1d0b"/>\n                              <stop offset="100%" stop-color="#1c0f07"/>\n                            </linearGradient>\n            </defs>\n\n            <!-- Left Heavy Blade (Shadow + Parierhaken parrying hook) -->\n            <path d="M16 2 L13.5 3.5 L13.5 14 L11.5 14.5 L14 15 L14 19 L16 19 Z" fill="url(#gs_blade_s_d7_Greatsword_4)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Right Heavy Blade (Light + Parierhaken parrying hook) -->\n            <path d="M16 2 L18.5 3.5 L18.5 14 L20.5 14.5 L18 15 L18 19 L16 19 Z" fill="url(#gs_blade_l_d7_Greatsword_4)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Specular Highlight Sheen -->\n            <polygon points="16,2 18.0,3.5 17.5,13.5 16,13.5" fill="rgba(255,255,255,0.45)" />\n\n            <!-- Ricasso (Blunt base wrap) -->\n            <rect x="14" y="15.8" width="4" height="3.2" fill="url(#gs_ricasso_d7_Greatsword_4)" stroke="#05070a" stroke-width="1.5" />\n\n            <!-- Left Guard Side Ring (Seitenring) -->\n            <circle cx="10" cy="19.5" r="3.2" fill="none" stroke="#f1c40f" stroke-width="1.8" />\n\n            <!-- Right Guard Side Ring (Seitenring) -->\n            <circle cx="22" cy="19.5" r="3.2" fill="none" stroke="#f1c40f" stroke-width="1.8" />\n\n            <!-- Imposing Straight Crossguard -->\n            <path d="M7 19.5 L25 19.5 L23 21.5 L9 21.5 Z" fill="#f1c40f" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Long Two-Handed Grip -->\n            <rect x="14.2" y="21.5" width="3.6" height="7" fill="url(#gs_hilt_d7_Greatsword_4)" stroke="#05070a" stroke-width="1.5" />\n            <!-- Grip Ribs/Spacers -->\n            <line x1="14.2" y1="23.2" x2="17.8" y2="23.2" stroke="#05070a" stroke-width="1" />\n            <line x1="14.2" y1="25.0" x2="17.8" y2="25.0" stroke="#05070a" stroke-width="1" />\n            <line x1="14.2" y1="26.8" x2="17.8" y2="26.8" stroke="#05070a" stroke-width="1" />\n\n            <!-- Faceted Octagonal Pommel with Inset Gem -->\n            <polygon points="16,28.5 18.8,30 16,31.5 13.2,30" fill="#f1c40f" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n            <circle cx="16" cy="30" r="0.8" fill="#ffffff" />\n          </svg>', "color": "#f1c40f", "source": "greatsword", "bounds": { "x": 6.800000190734863, "y": 2, "width": 18.400001525878906, "height": 29.5 }, "visibleCenter": { "x": 16.000000953674316, "y": 16.75 }, "pivot": { "x": 16.000000953674316, "y": 31.5 } }, "d7/Greatsword/5": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Massive blade light facet -->\n              <linearGradient id="gs_blade_l_d7_Greatsword_5" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="45%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Massive blade shadow facet -->\n              <linearGradient id="gs_blade_s_d7_Greatsword_5" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#475569"/>\n                <stop offset="100%" stop-color="#334155"/>\n              </linearGradient>\n              <!-- Ricasso dark steel leather wrap -->\n                            <linearGradient id="gs_ricasso_d7_Greatsword_5" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#718096"/>\n                              <stop offset="35%" stop-color="#718096"/>\n                              <stop offset="35%" stop-color="#475569"/>\n                              <stop offset="70%" stop-color="#475569"/>\n                              <stop offset="70%" stop-color="#2c3e50"/>\n                              <stop offset="100%" stop-color="#1a202c"/>\n                            </linearGradient>\n                            <!-- Long grip leather wrap -->\n                            <linearGradient id="gs_hilt_d7_Greatsword_5" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#8d5b38"/>\n                              <stop offset="35%" stop-color="#8d5b38"/>\n                              <stop offset="35%" stop-color="#5c3a21"/>\n                              <stop offset="70%" stop-color="#5c3a21"/>\n                              <stop offset="70%" stop-color="#2d1d0b"/>\n                              <stop offset="100%" stop-color="#1c0f07"/>\n                            </linearGradient>\n            </defs>\n\n            <!-- Left Heavy Blade (Shadow + Parierhaken parrying hook) -->\n            <path d="M16 2 L13.5 3.5 L13.5 14 L11.5 14.5 L14 15 L14 19 L16 19 Z" fill="url(#gs_blade_s_d7_Greatsword_5)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Right Heavy Blade (Light + Parierhaken parrying hook) -->\n            <path d="M16 2 L18.5 3.5 L18.5 14 L20.5 14.5 L18 15 L18 19 L16 19 Z" fill="url(#gs_blade_l_d7_Greatsword_5)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Specular Highlight Sheen -->\n            <polygon points="16,2 18.0,3.5 17.5,13.5 16,13.5" fill="rgba(255,255,255,0.45)" />\n\n            <!-- Ricasso (Blunt base wrap) -->\n            <rect x="14" y="15.8" width="4" height="3.2" fill="url(#gs_ricasso_d7_Greatsword_5)" stroke="#05070a" stroke-width="1.5" />\n\n            <!-- Left Guard Side Ring (Seitenring) -->\n            <circle cx="10" cy="19.5" r="3.2" fill="none" stroke="#e74c3c" stroke-width="1.8" />\n\n            <!-- Right Guard Side Ring (Seitenring) -->\n            <circle cx="22" cy="19.5" r="3.2" fill="none" stroke="#e74c3c" stroke-width="1.8" />\n\n            <!-- Imposing Straight Crossguard -->\n            <path d="M7 19.5 L25 19.5 L23 21.5 L9 21.5 Z" fill="#e74c3c" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Long Two-Handed Grip -->\n            <rect x="14.2" y="21.5" width="3.6" height="7" fill="url(#gs_hilt_d7_Greatsword_5)" stroke="#05070a" stroke-width="1.5" />\n            <!-- Grip Ribs/Spacers -->\n            <line x1="14.2" y1="23.2" x2="17.8" y2="23.2" stroke="#05070a" stroke-width="1" />\n            <line x1="14.2" y1="25.0" x2="17.8" y2="25.0" stroke="#05070a" stroke-width="1" />\n            <line x1="14.2" y1="26.8" x2="17.8" y2="26.8" stroke="#05070a" stroke-width="1" />\n\n            <!-- Faceted Octagonal Pommel with Inset Gem -->\n            <polygon points="16,28.5 18.8,30 16,31.5 13.2,30" fill="#e74c3c" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n            <circle cx="16" cy="30" r="0.8" fill="#ffffff" />\n          </svg>', "color": "#e74c3c", "source": "greatsword", "bounds": { "x": 6.800000190734863, "y": 2, "width": 18.400001525878906, "height": 29.5 }, "visibleCenter": { "x": 16.000000953674316, "y": 16.75 }, "pivot": { "x": 16.000000953674316, "y": 31.5 } }, "d7/Longsword/0": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel blade light gradient (slender sheen) -->\n              <linearGradient id="ls_blade_l_d7_Longsword_0" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="60%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Steel blade shadow gradient -->\n              <linearGradient id="ls_blade_s_d7_Longsword_0" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Slender handle leather wrap -->\n                            <linearGradient id="ls_hilt_d7_Longsword_0" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#4a5568"/>\n                              <stop offset="35%" stop-color="#4a5568"/>\n                              <stop offset="35%" stop-color="#2d3748"/>\n                              <stop offset="70%" stop-color="#2d3748"/>\n                              <stop offset="70%" stop-color="#1a202c"/>\n                              <stop offset="100%" stop-color="#0f141d"/>\n                            </linearGradient>\n            </defs>\n\n            <!-- Left Slender Blade Side (Shadow Side) -->\n            <path d="M16 2 L14.5 4 L14.5 21 L16 21 Z" fill="url(#ls_blade_s_d7_Longsword_0)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Right Slender Blade Side (Light Side) -->\n            <path d="M16 2 L17.5 4 L17.5 21 L16 21 Z" fill="url(#ls_blade_l_d7_Longsword_0)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Specular Highlight Sheen -->\n            <polygon points="16,2 17.0,4 16.8,19 16,19" fill="rgba(255,255,255,0.4)" />\n\n            <!-- Slender Curved Crossguard (Gold/Iron accent base) -->\n            <path d="M9.5 20.5 Q16 18.5 22.5 20.5 L21.5 22.5 Q16 21.0 10.5 22.5 Z" fill="#ffffff" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Hand-and-a-Half Grip -->\n            <rect x="14.5" y="22.5" width="3" height="7.5" fill="url(#ls_hilt_d7_Longsword_0)" stroke="#05070a" stroke-width="1.2" />\n            <!-- Grip cord wraps -->\n            <line x1="14.5" y1="24.5" x2="17.5" y2="24.5" stroke="#05070a" stroke-width="0.8" />\n            <line x1="14.5" y1="26.5" x2="17.5" y2="26.5" stroke="#05070a" stroke-width="0.8" />\n            <line x1="14.5" y1="28.5" x2="17.5" y2="28.5" stroke="#05070a" stroke-width="0.8" />\n\n            <!-- Diamond Pommel (Scales with rarity color) -->\n            <polygon points="16,29.5 18.2,31 16,32.5 13.8,31" fill="#ffffff" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n            <circle cx="16" cy="31" r="0.8" fill="#ffffff" />\n          </svg>', "color": "#ffffff", "source": "longsword", "bounds": { "x": 9.5, "y": 2, "width": 13, "height": 30.5 }, "visibleCenter": { "x": 16, "y": 17.25 }, "pivot": { "x": 16, "y": 32.5 } }, "d7/Longsword/1": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel blade light gradient (slender sheen) -->\n              <linearGradient id="ls_blade_l_d7_Longsword_1" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="60%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Steel blade shadow gradient -->\n              <linearGradient id="ls_blade_s_d7_Longsword_1" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Slender handle leather wrap -->\n                            <linearGradient id="ls_hilt_d7_Longsword_1" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#4a5568"/>\n                              <stop offset="35%" stop-color="#4a5568"/>\n                              <stop offset="35%" stop-color="#2d3748"/>\n                              <stop offset="70%" stop-color="#2d3748"/>\n                              <stop offset="70%" stop-color="#1a202c"/>\n                              <stop offset="100%" stop-color="#0f141d"/>\n                            </linearGradient>\n            </defs>\n\n            <!-- Left Slender Blade Side (Shadow Side) -->\n            <path d="M16 2 L14.5 4 L14.5 21 L16 21 Z" fill="url(#ls_blade_s_d7_Longsword_1)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Right Slender Blade Side (Light Side) -->\n            <path d="M16 2 L17.5 4 L17.5 21 L16 21 Z" fill="url(#ls_blade_l_d7_Longsword_1)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Specular Highlight Sheen -->\n            <polygon points="16,2 17.0,4 16.8,19 16,19" fill="rgba(255,255,255,0.4)" />\n\n            <!-- Slender Curved Crossguard (Gold/Iron accent base) -->\n            <path d="M9.5 20.5 Q16 18.5 22.5 20.5 L21.5 22.5 Q16 21.0 10.5 22.5 Z" fill="#3498db" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Hand-and-a-Half Grip -->\n            <rect x="14.5" y="22.5" width="3" height="7.5" fill="url(#ls_hilt_d7_Longsword_1)" stroke="#05070a" stroke-width="1.2" />\n            <!-- Grip cord wraps -->\n            <line x1="14.5" y1="24.5" x2="17.5" y2="24.5" stroke="#05070a" stroke-width="0.8" />\n            <line x1="14.5" y1="26.5" x2="17.5" y2="26.5" stroke="#05070a" stroke-width="0.8" />\n            <line x1="14.5" y1="28.5" x2="17.5" y2="28.5" stroke="#05070a" stroke-width="0.8" />\n\n            <!-- Diamond Pommel (Scales with rarity color) -->\n            <polygon points="16,29.5 18.2,31 16,32.5 13.8,31" fill="#3498db" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n            <circle cx="16" cy="31" r="0.8" fill="#ffffff" />\n          </svg>', "color": "#3498db", "source": "longsword", "bounds": { "x": 9.5, "y": 2, "width": 13, "height": 30.5 }, "visibleCenter": { "x": 16, "y": 17.25 }, "pivot": { "x": 16, "y": 32.5 } }, "d7/Longsword/2": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel blade light gradient (slender sheen) -->\n              <linearGradient id="ls_blade_l_d7_Longsword_2" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="60%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Steel blade shadow gradient -->\n              <linearGradient id="ls_blade_s_d7_Longsword_2" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Slender handle leather wrap -->\n                            <linearGradient id="ls_hilt_d7_Longsword_2" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#4a5568"/>\n                              <stop offset="35%" stop-color="#4a5568"/>\n                              <stop offset="35%" stop-color="#2d3748"/>\n                              <stop offset="70%" stop-color="#2d3748"/>\n                              <stop offset="70%" stop-color="#1a202c"/>\n                              <stop offset="100%" stop-color="#0f141d"/>\n                            </linearGradient>\n            </defs>\n\n            <!-- Left Slender Blade Side (Shadow Side) -->\n            <path d="M16 2 L14.5 4 L14.5 21 L16 21 Z" fill="url(#ls_blade_s_d7_Longsword_2)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Right Slender Blade Side (Light Side) -->\n            <path d="M16 2 L17.5 4 L17.5 21 L16 21 Z" fill="url(#ls_blade_l_d7_Longsword_2)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Specular Highlight Sheen -->\n            <polygon points="16,2 17.0,4 16.8,19 16,19" fill="rgba(255,255,255,0.4)" />\n\n            <!-- Slender Curved Crossguard (Gold/Iron accent base) -->\n            <path d="M9.5 20.5 Q16 18.5 22.5 20.5 L21.5 22.5 Q16 21.0 10.5 22.5 Z" fill="#9b59b6" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Hand-and-a-Half Grip -->\n            <rect x="14.5" y="22.5" width="3" height="7.5" fill="url(#ls_hilt_d7_Longsword_2)" stroke="#05070a" stroke-width="1.2" />\n            <!-- Grip cord wraps -->\n            <line x1="14.5" y1="24.5" x2="17.5" y2="24.5" stroke="#05070a" stroke-width="0.8" />\n            <line x1="14.5" y1="26.5" x2="17.5" y2="26.5" stroke="#05070a" stroke-width="0.8" />\n            <line x1="14.5" y1="28.5" x2="17.5" y2="28.5" stroke="#05070a" stroke-width="0.8" />\n\n            <!-- Diamond Pommel (Scales with rarity color) -->\n            <polygon points="16,29.5 18.2,31 16,32.5 13.8,31" fill="#9b59b6" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n            <circle cx="16" cy="31" r="0.8" fill="#ffffff" />\n          </svg>', "color": "#9b59b6", "source": "longsword", "bounds": { "x": 9.5, "y": 2, "width": 13, "height": 30.5 }, "visibleCenter": { "x": 16, "y": 17.25 }, "pivot": { "x": 16, "y": 32.5 } }, "d7/Longsword/3": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel blade light gradient (slender sheen) -->\n              <linearGradient id="ls_blade_l_d7_Longsword_3" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="60%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Steel blade shadow gradient -->\n              <linearGradient id="ls_blade_s_d7_Longsword_3" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Slender handle leather wrap -->\n                            <linearGradient id="ls_hilt_d7_Longsword_3" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#4a5568"/>\n                              <stop offset="35%" stop-color="#4a5568"/>\n                              <stop offset="35%" stop-color="#2d3748"/>\n                              <stop offset="70%" stop-color="#2d3748"/>\n                              <stop offset="70%" stop-color="#1a202c"/>\n                              <stop offset="100%" stop-color="#0f141d"/>\n                            </linearGradient>\n            </defs>\n\n            <!-- Left Slender Blade Side (Shadow Side) -->\n            <path d="M16 2 L14.5 4 L14.5 21 L16 21 Z" fill="url(#ls_blade_s_d7_Longsword_3)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Right Slender Blade Side (Light Side) -->\n            <path d="M16 2 L17.5 4 L17.5 21 L16 21 Z" fill="url(#ls_blade_l_d7_Longsword_3)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Specular Highlight Sheen -->\n            <polygon points="16,2 17.0,4 16.8,19 16,19" fill="rgba(255,255,255,0.4)" />\n\n            <!-- Slender Curved Crossguard (Gold/Iron accent base) -->\n            <path d="M9.5 20.5 Q16 18.5 22.5 20.5 L21.5 22.5 Q16 21.0 10.5 22.5 Z" fill="#e67e22" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Hand-and-a-Half Grip -->\n            <rect x="14.5" y="22.5" width="3" height="7.5" fill="url(#ls_hilt_d7_Longsword_3)" stroke="#05070a" stroke-width="1.2" />\n            <!-- Grip cord wraps -->\n            <line x1="14.5" y1="24.5" x2="17.5" y2="24.5" stroke="#05070a" stroke-width="0.8" />\n            <line x1="14.5" y1="26.5" x2="17.5" y2="26.5" stroke="#05070a" stroke-width="0.8" />\n            <line x1="14.5" y1="28.5" x2="17.5" y2="28.5" stroke="#05070a" stroke-width="0.8" />\n\n            <!-- Diamond Pommel (Scales with rarity color) -->\n            <polygon points="16,29.5 18.2,31 16,32.5 13.8,31" fill="#e67e22" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n            <circle cx="16" cy="31" r="0.8" fill="#ffffff" />\n          </svg>', "color": "#e67e22", "source": "longsword", "bounds": { "x": 9.5, "y": 2, "width": 13, "height": 30.5 }, "visibleCenter": { "x": 16, "y": 17.25 }, "pivot": { "x": 16, "y": 32.5 } }, "d7/Longsword/4": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel blade light gradient (slender sheen) -->\n              <linearGradient id="ls_blade_l_d7_Longsword_4" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="60%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Steel blade shadow gradient -->\n              <linearGradient id="ls_blade_s_d7_Longsword_4" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Slender handle leather wrap -->\n                            <linearGradient id="ls_hilt_d7_Longsword_4" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#4a5568"/>\n                              <stop offset="35%" stop-color="#4a5568"/>\n                              <stop offset="35%" stop-color="#2d3748"/>\n                              <stop offset="70%" stop-color="#2d3748"/>\n                              <stop offset="70%" stop-color="#1a202c"/>\n                              <stop offset="100%" stop-color="#0f141d"/>\n                            </linearGradient>\n            </defs>\n\n            <!-- Left Slender Blade Side (Shadow Side) -->\n            <path d="M16 2 L14.5 4 L14.5 21 L16 21 Z" fill="url(#ls_blade_s_d7_Longsword_4)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Right Slender Blade Side (Light Side) -->\n            <path d="M16 2 L17.5 4 L17.5 21 L16 21 Z" fill="url(#ls_blade_l_d7_Longsword_4)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Specular Highlight Sheen -->\n            <polygon points="16,2 17.0,4 16.8,19 16,19" fill="rgba(255,255,255,0.4)" />\n\n            <!-- Slender Curved Crossguard (Gold/Iron accent base) -->\n            <path d="M9.5 20.5 Q16 18.5 22.5 20.5 L21.5 22.5 Q16 21.0 10.5 22.5 Z" fill="#f1c40f" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Hand-and-a-Half Grip -->\n            <rect x="14.5" y="22.5" width="3" height="7.5" fill="url(#ls_hilt_d7_Longsword_4)" stroke="#05070a" stroke-width="1.2" />\n            <!-- Grip cord wraps -->\n            <line x1="14.5" y1="24.5" x2="17.5" y2="24.5" stroke="#05070a" stroke-width="0.8" />\n            <line x1="14.5" y1="26.5" x2="17.5" y2="26.5" stroke="#05070a" stroke-width="0.8" />\n            <line x1="14.5" y1="28.5" x2="17.5" y2="28.5" stroke="#05070a" stroke-width="0.8" />\n\n            <!-- Diamond Pommel (Scales with rarity color) -->\n            <polygon points="16,29.5 18.2,31 16,32.5 13.8,31" fill="#f1c40f" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n            <circle cx="16" cy="31" r="0.8" fill="#ffffff" />\n          </svg>', "color": "#f1c40f", "source": "longsword", "bounds": { "x": 9.5, "y": 2, "width": 13, "height": 30.5 }, "visibleCenter": { "x": 16, "y": 17.25 }, "pivot": { "x": 16, "y": 32.5 } }, "d7/Longsword/5": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel blade light gradient (slender sheen) -->\n              <linearGradient id="ls_blade_l_d7_Longsword_5" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="60%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Steel blade shadow gradient -->\n              <linearGradient id="ls_blade_s_d7_Longsword_5" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Slender handle leather wrap -->\n                            <linearGradient id="ls_hilt_d7_Longsword_5" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#4a5568"/>\n                              <stop offset="35%" stop-color="#4a5568"/>\n                              <stop offset="35%" stop-color="#2d3748"/>\n                              <stop offset="70%" stop-color="#2d3748"/>\n                              <stop offset="70%" stop-color="#1a202c"/>\n                              <stop offset="100%" stop-color="#0f141d"/>\n                            </linearGradient>\n            </defs>\n\n            <!-- Left Slender Blade Side (Shadow Side) -->\n            <path d="M16 2 L14.5 4 L14.5 21 L16 21 Z" fill="url(#ls_blade_s_d7_Longsword_5)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Right Slender Blade Side (Light Side) -->\n            <path d="M16 2 L17.5 4 L17.5 21 L16 21 Z" fill="url(#ls_blade_l_d7_Longsword_5)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Specular Highlight Sheen -->\n            <polygon points="16,2 17.0,4 16.8,19 16,19" fill="rgba(255,255,255,0.4)" />\n\n            <!-- Slender Curved Crossguard (Gold/Iron accent base) -->\n            <path d="M9.5 20.5 Q16 18.5 22.5 20.5 L21.5 22.5 Q16 21.0 10.5 22.5 Z" fill="#e74c3c" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Hand-and-a-Half Grip -->\n            <rect x="14.5" y="22.5" width="3" height="7.5" fill="url(#ls_hilt_d7_Longsword_5)" stroke="#05070a" stroke-width="1.2" />\n            <!-- Grip cord wraps -->\n            <line x1="14.5" y1="24.5" x2="17.5" y2="24.5" stroke="#05070a" stroke-width="0.8" />\n            <line x1="14.5" y1="26.5" x2="17.5" y2="26.5" stroke="#05070a" stroke-width="0.8" />\n            <line x1="14.5" y1="28.5" x2="17.5" y2="28.5" stroke="#05070a" stroke-width="0.8" />\n\n            <!-- Diamond Pommel (Scales with rarity color) -->\n            <polygon points="16,29.5 18.2,31 16,32.5 13.8,31" fill="#e74c3c" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n            <circle cx="16" cy="31" r="0.8" fill="#ffffff" />\n          </svg>', "color": "#e74c3c", "source": "longsword", "bounds": { "x": 9.5, "y": 2, "width": 13, "height": 30.5 }, "visibleCenter": { "x": 16, "y": 17.25 }, "pivot": { "x": 16, "y": 32.5 } }, "d7/Halberd/0": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="hb_handle_d7_Halberd_0" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#5c3a21"/>\n                    <stop offset="45%" stop-color="#2d1d0b"/>\n                    <stop offset="100%" stop-color="#1c0f07"/>\n                  </linearGradient>\n                  <linearGradient id="hb_steel_d7_Halberd_0" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                </defs>\n                <rect x="15" y="12" width="2" height="18" fill="url(#hb_handle_d7_Halberd_0)" stroke="#05070a" stroke-width="1" rx="0.3" />\n                <path d="M16 2 L18 8 H14 Z" fill="url(#hb_steel_d7_Halberd_0)" stroke="#000" stroke-width="1.2" />\n                <path d="M16 8 Q23 6, 22 13 Q18 15, 16 14 Z" fill="#ffffff" stroke="#000" stroke-width="1.2" />\n                <path d="M16 9 L11 11 L16 13 Z" fill="url(#hb_steel_d7_Halberd_0)" stroke="#000" stroke-width="1.2" />\n              </svg>', "color": "#ffffff", "source": "halberd", "bounds": { "x": 11, "y": 2, "width": 11.125, "height": 28 }, "visibleCenter": { "x": 16.5625, "y": 16 }, "pivot": { "x": 16.5625, "y": 30 } }, "d7/Halberd/1": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="hb_handle_d7_Halberd_1" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#5c3a21"/>\n                    <stop offset="45%" stop-color="#2d1d0b"/>\n                    <stop offset="100%" stop-color="#1c0f07"/>\n                  </linearGradient>\n                  <linearGradient id="hb_steel_d7_Halberd_1" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                </defs>\n                <rect x="15" y="12" width="2" height="18" fill="url(#hb_handle_d7_Halberd_1)" stroke="#05070a" stroke-width="1" rx="0.3" />\n                <path d="M16 2 L18 8 H14 Z" fill="url(#hb_steel_d7_Halberd_1)" stroke="#000" stroke-width="1.2" />\n                <path d="M16 8 Q23 6, 22 13 Q18 15, 16 14 Z" fill="#3498db" stroke="#000" stroke-width="1.2" />\n                <path d="M16 9 L11 11 L16 13 Z" fill="url(#hb_steel_d7_Halberd_1)" stroke="#000" stroke-width="1.2" />\n              </svg>', "color": "#3498db", "source": "halberd", "bounds": { "x": 11, "y": 2, "width": 11.125, "height": 28 }, "visibleCenter": { "x": 16.5625, "y": 16 }, "pivot": { "x": 16.5625, "y": 30 } }, "d7/Halberd/2": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="hb_handle_d7_Halberd_2" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#5c3a21"/>\n                    <stop offset="45%" stop-color="#2d1d0b"/>\n                    <stop offset="100%" stop-color="#1c0f07"/>\n                  </linearGradient>\n                  <linearGradient id="hb_steel_d7_Halberd_2" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                </defs>\n                <rect x="15" y="12" width="2" height="18" fill="url(#hb_handle_d7_Halberd_2)" stroke="#05070a" stroke-width="1" rx="0.3" />\n                <path d="M16 2 L18 8 H14 Z" fill="url(#hb_steel_d7_Halberd_2)" stroke="#000" stroke-width="1.2" />\n                <path d="M16 8 Q23 6, 22 13 Q18 15, 16 14 Z" fill="#9b59b6" stroke="#000" stroke-width="1.2" />\n                <path d="M16 9 L11 11 L16 13 Z" fill="url(#hb_steel_d7_Halberd_2)" stroke="#000" stroke-width="1.2" />\n              </svg>', "color": "#9b59b6", "source": "halberd", "bounds": { "x": 11, "y": 2, "width": 11.125, "height": 28 }, "visibleCenter": { "x": 16.5625, "y": 16 }, "pivot": { "x": 16.5625, "y": 30 } }, "d7/Halberd/3": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="hb_handle_d7_Halberd_3" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#5c3a21"/>\n                    <stop offset="45%" stop-color="#2d1d0b"/>\n                    <stop offset="100%" stop-color="#1c0f07"/>\n                  </linearGradient>\n                  <linearGradient id="hb_steel_d7_Halberd_3" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                </defs>\n                <rect x="15" y="12" width="2" height="18" fill="url(#hb_handle_d7_Halberd_3)" stroke="#05070a" stroke-width="1" rx="0.3" />\n                <path d="M16 2 L18 8 H14 Z" fill="url(#hb_steel_d7_Halberd_3)" stroke="#000" stroke-width="1.2" />\n                <path d="M16 8 Q23 6, 22 13 Q18 15, 16 14 Z" fill="#e67e22" stroke="#000" stroke-width="1.2" />\n                <path d="M16 9 L11 11 L16 13 Z" fill="url(#hb_steel_d7_Halberd_3)" stroke="#000" stroke-width="1.2" />\n              </svg>', "color": "#e67e22", "source": "halberd", "bounds": { "x": 11, "y": 2, "width": 11.125, "height": 28 }, "visibleCenter": { "x": 16.5625, "y": 16 }, "pivot": { "x": 16.5625, "y": 30 } }, "d7/Halberd/4": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="hb_handle_d7_Halberd_4" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#5c3a21"/>\n                    <stop offset="45%" stop-color="#2d1d0b"/>\n                    <stop offset="100%" stop-color="#1c0f07"/>\n                  </linearGradient>\n                  <linearGradient id="hb_steel_d7_Halberd_4" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                </defs>\n                <rect x="15" y="12" width="2" height="18" fill="url(#hb_handle_d7_Halberd_4)" stroke="#05070a" stroke-width="1" rx="0.3" />\n                <path d="M16 2 L18 8 H14 Z" fill="url(#hb_steel_d7_Halberd_4)" stroke="#000" stroke-width="1.2" />\n                <path d="M16 8 Q23 6, 22 13 Q18 15, 16 14 Z" fill="#f1c40f" stroke="#000" stroke-width="1.2" />\n                <path d="M16 9 L11 11 L16 13 Z" fill="url(#hb_steel_d7_Halberd_4)" stroke="#000" stroke-width="1.2" />\n              </svg>', "color": "#f1c40f", "source": "halberd", "bounds": { "x": 11, "y": 2, "width": 11.125, "height": 28 }, "visibleCenter": { "x": 16.5625, "y": 16 }, "pivot": { "x": 16.5625, "y": 30 } }, "d7/Halberd/5": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="hb_handle_d7_Halberd_5" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#5c3a21"/>\n                    <stop offset="45%" stop-color="#2d1d0b"/>\n                    <stop offset="100%" stop-color="#1c0f07"/>\n                  </linearGradient>\n                  <linearGradient id="hb_steel_d7_Halberd_5" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                </defs>\n                <rect x="15" y="12" width="2" height="18" fill="url(#hb_handle_d7_Halberd_5)" stroke="#05070a" stroke-width="1" rx="0.3" />\n                <path d="M16 2 L18 8 H14 Z" fill="url(#hb_steel_d7_Halberd_5)" stroke="#000" stroke-width="1.2" />\n                <path d="M16 8 Q23 6, 22 13 Q18 15, 16 14 Z" fill="#e74c3c" stroke="#000" stroke-width="1.2" />\n                <path d="M16 9 L11 11 L16 13 Z" fill="url(#hb_steel_d7_Halberd_5)" stroke="#000" stroke-width="1.2" />\n              </svg>', "color": "#e74c3c", "source": "halberd", "bounds": { "x": 11, "y": 2, "width": 11.125, "height": 28 }, "visibleCenter": { "x": 16.5625, "y": 16 }, "pivot": { "x": 16.5625, "y": 30 } }, "d7/Warhammer/0": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="wh_handle_d7_Warhammer_0" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#5c3a21"/>\n                    <stop offset="45%" stop-color="#2d1d0b"/>\n                    <stop offset="100%" stop-color="#1c0f07"/>\n                  </linearGradient>\n                  <linearGradient id="wh_head_d7_Warhammer_0" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="45%" stop-color="#475569"/>\n                    <stop offset="100%" stop-color="#1e293b"/>\n                  </linearGradient>\n                </defs>\n                <rect x="14.8" y="12" width="2.4" height="18" fill="url(#wh_handle_d7_Warhammer_0)" stroke="#05070a" stroke-width="1" rx="0.5" />\n                <rect x="9" y="4" width="14" height="8" rx="2" fill="url(#wh_head_d7_Warhammer_0)" stroke="#000" stroke-width="1.8" />\n                <line x1="16" y1="4.2" x2="16" y2="11.8" stroke="#05070a" stroke-width="1" opacity="0.3" />\n                <path d="M7 6 L9 6 L9 10 L7 10 Z" fill="#ffffff" stroke="#000" stroke-width="1" />\n                <path d="M23 6 L25 6 L25 10 L23 10 Z" fill="#ffffff" stroke="#000" stroke-width="1" />\n                <polygon points="16,1 18,4 14,4" fill="#ffffff" stroke="#000" stroke-width="1" />\n                <rect x="15.2" y="12" width="1.6" height="8" fill="#ffffff" stroke="#05070a" stroke-width="0.5" />\n              </svg>', "color": "#ffffff", "source": "warhammer", "bounds": { "x": 7, "y": 1, "width": 18, "height": 29 }, "visibleCenter": { "x": 16, "y": 15.5 }, "pivot": { "x": 16, "y": 30 } }, "d7/Warhammer/1": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="wh_handle_d7_Warhammer_1" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#5c3a21"/>\n                    <stop offset="45%" stop-color="#2d1d0b"/>\n                    <stop offset="100%" stop-color="#1c0f07"/>\n                  </linearGradient>\n                  <linearGradient id="wh_head_d7_Warhammer_1" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="45%" stop-color="#475569"/>\n                    <stop offset="100%" stop-color="#1e293b"/>\n                  </linearGradient>\n                </defs>\n                <rect x="14.8" y="12" width="2.4" height="18" fill="url(#wh_handle_d7_Warhammer_1)" stroke="#05070a" stroke-width="1" rx="0.5" />\n                <rect x="9" y="4" width="14" height="8" rx="2" fill="url(#wh_head_d7_Warhammer_1)" stroke="#000" stroke-width="1.8" />\n                <line x1="16" y1="4.2" x2="16" y2="11.8" stroke="#05070a" stroke-width="1" opacity="0.3" />\n                <path d="M7 6 L9 6 L9 10 L7 10 Z" fill="#3498db" stroke="#000" stroke-width="1" />\n                <path d="M23 6 L25 6 L25 10 L23 10 Z" fill="#3498db" stroke="#000" stroke-width="1" />\n                <polygon points="16,1 18,4 14,4" fill="#3498db" stroke="#000" stroke-width="1" />\n                <rect x="15.2" y="12" width="1.6" height="8" fill="#3498db" stroke="#05070a" stroke-width="0.5" />\n              </svg>', "color": "#3498db", "source": "warhammer", "bounds": { "x": 7, "y": 1, "width": 18, "height": 29 }, "visibleCenter": { "x": 16, "y": 15.5 }, "pivot": { "x": 16, "y": 30 } }, "d7/Warhammer/2": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="wh_handle_d7_Warhammer_2" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#5c3a21"/>\n                    <stop offset="45%" stop-color="#2d1d0b"/>\n                    <stop offset="100%" stop-color="#1c0f07"/>\n                  </linearGradient>\n                  <linearGradient id="wh_head_d7_Warhammer_2" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="45%" stop-color="#475569"/>\n                    <stop offset="100%" stop-color="#1e293b"/>\n                  </linearGradient>\n                </defs>\n                <rect x="14.8" y="12" width="2.4" height="18" fill="url(#wh_handle_d7_Warhammer_2)" stroke="#05070a" stroke-width="1" rx="0.5" />\n                <rect x="9" y="4" width="14" height="8" rx="2" fill="url(#wh_head_d7_Warhammer_2)" stroke="#000" stroke-width="1.8" />\n                <line x1="16" y1="4.2" x2="16" y2="11.8" stroke="#05070a" stroke-width="1" opacity="0.3" />\n                <path d="M7 6 L9 6 L9 10 L7 10 Z" fill="#9b59b6" stroke="#000" stroke-width="1" />\n                <path d="M23 6 L25 6 L25 10 L23 10 Z" fill="#9b59b6" stroke="#000" stroke-width="1" />\n                <polygon points="16,1 18,4 14,4" fill="#9b59b6" stroke="#000" stroke-width="1" />\n                <rect x="15.2" y="12" width="1.6" height="8" fill="#9b59b6" stroke="#05070a" stroke-width="0.5" />\n              </svg>', "color": "#9b59b6", "source": "warhammer", "bounds": { "x": 7, "y": 1, "width": 18, "height": 29 }, "visibleCenter": { "x": 16, "y": 15.5 }, "pivot": { "x": 16, "y": 30 } }, "d7/Warhammer/3": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="wh_handle_d7_Warhammer_3" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#5c3a21"/>\n                    <stop offset="45%" stop-color="#2d1d0b"/>\n                    <stop offset="100%" stop-color="#1c0f07"/>\n                  </linearGradient>\n                  <linearGradient id="wh_head_d7_Warhammer_3" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="45%" stop-color="#475569"/>\n                    <stop offset="100%" stop-color="#1e293b"/>\n                  </linearGradient>\n                </defs>\n                <rect x="14.8" y="12" width="2.4" height="18" fill="url(#wh_handle_d7_Warhammer_3)" stroke="#05070a" stroke-width="1" rx="0.5" />\n                <rect x="9" y="4" width="14" height="8" rx="2" fill="url(#wh_head_d7_Warhammer_3)" stroke="#000" stroke-width="1.8" />\n                <line x1="16" y1="4.2" x2="16" y2="11.8" stroke="#05070a" stroke-width="1" opacity="0.3" />\n                <path d="M7 6 L9 6 L9 10 L7 10 Z" fill="#e67e22" stroke="#000" stroke-width="1" />\n                <path d="M23 6 L25 6 L25 10 L23 10 Z" fill="#e67e22" stroke="#000" stroke-width="1" />\n                <polygon points="16,1 18,4 14,4" fill="#e67e22" stroke="#000" stroke-width="1" />\n                <rect x="15.2" y="12" width="1.6" height="8" fill="#e67e22" stroke="#05070a" stroke-width="0.5" />\n              </svg>', "color": "#e67e22", "source": "warhammer", "bounds": { "x": 7, "y": 1, "width": 18, "height": 29 }, "visibleCenter": { "x": 16, "y": 15.5 }, "pivot": { "x": 16, "y": 30 } }, "d7/Warhammer/4": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="wh_handle_d7_Warhammer_4" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#5c3a21"/>\n                    <stop offset="45%" stop-color="#2d1d0b"/>\n                    <stop offset="100%" stop-color="#1c0f07"/>\n                  </linearGradient>\n                  <linearGradient id="wh_head_d7_Warhammer_4" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="45%" stop-color="#475569"/>\n                    <stop offset="100%" stop-color="#1e293b"/>\n                  </linearGradient>\n                </defs>\n                <rect x="14.8" y="12" width="2.4" height="18" fill="url(#wh_handle_d7_Warhammer_4)" stroke="#05070a" stroke-width="1" rx="0.5" />\n                <rect x="9" y="4" width="14" height="8" rx="2" fill="url(#wh_head_d7_Warhammer_4)" stroke="#000" stroke-width="1.8" />\n                <line x1="16" y1="4.2" x2="16" y2="11.8" stroke="#05070a" stroke-width="1" opacity="0.3" />\n                <path d="M7 6 L9 6 L9 10 L7 10 Z" fill="#f1c40f" stroke="#000" stroke-width="1" />\n                <path d="M23 6 L25 6 L25 10 L23 10 Z" fill="#f1c40f" stroke="#000" stroke-width="1" />\n                <polygon points="16,1 18,4 14,4" fill="#f1c40f" stroke="#000" stroke-width="1" />\n                <rect x="15.2" y="12" width="1.6" height="8" fill="#f1c40f" stroke="#05070a" stroke-width="0.5" />\n              </svg>', "color": "#f1c40f", "source": "warhammer", "bounds": { "x": 7, "y": 1, "width": 18, "height": 29 }, "visibleCenter": { "x": 16, "y": 15.5 }, "pivot": { "x": 16, "y": 30 } }, "d7/Warhammer/5": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="wh_handle_d7_Warhammer_5" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#5c3a21"/>\n                    <stop offset="45%" stop-color="#2d1d0b"/>\n                    <stop offset="100%" stop-color="#1c0f07"/>\n                  </linearGradient>\n                  <linearGradient id="wh_head_d7_Warhammer_5" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="45%" stop-color="#475569"/>\n                    <stop offset="100%" stop-color="#1e293b"/>\n                  </linearGradient>\n                </defs>\n                <rect x="14.8" y="12" width="2.4" height="18" fill="url(#wh_handle_d7_Warhammer_5)" stroke="#05070a" stroke-width="1" rx="0.5" />\n                <rect x="9" y="4" width="14" height="8" rx="2" fill="url(#wh_head_d7_Warhammer_5)" stroke="#000" stroke-width="1.8" />\n                <line x1="16" y1="4.2" x2="16" y2="11.8" stroke="#05070a" stroke-width="1" opacity="0.3" />\n                <path d="M7 6 L9 6 L9 10 L7 10 Z" fill="#e74c3c" stroke="#000" stroke-width="1" />\n                <path d="M23 6 L25 6 L25 10 L23 10 Z" fill="#e74c3c" stroke="#000" stroke-width="1" />\n                <polygon points="16,1 18,4 14,4" fill="#e74c3c" stroke="#000" stroke-width="1" />\n                <rect x="15.2" y="12" width="1.6" height="8" fill="#e74c3c" stroke="#05070a" stroke-width="0.5" />\n              </svg>', "color": "#e74c3c", "source": "warhammer", "bounds": { "x": 7, "y": 1, "width": 18, "height": 29 }, "visibleCenter": { "x": 16, "y": 15.5 }, "pivot": { "x": 16, "y": 30 } }, "d7/Battleaxe/0": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="ax_handle_d7_Battleaxe_0" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#4d2f12"/>\n                    <stop offset="45%" stop-color="#2d1d0b"/>\n                    <stop offset="100%" stop-color="#1c0f07"/>\n                  </linearGradient>\n                  <linearGradient id="ax_spike_d7_Battleaxe_0" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                </defs>\n                <rect x="14.8" y="6" width="2.4" height="24" fill="url(#ax_handle_d7_Battleaxe_0)" stroke="#05070a" stroke-width="1" rx="0.5" />\n                <path d="M16 8 Q7 4, 10 14 Q14 18, 16 16" fill="#ffffff" stroke="#000" stroke-width="1.8" />\n                <path d="M16 8 Q25 4, 22 14 Q18 18, 16 16" fill="#ffffff" stroke="#000" stroke-width="1.8" />\n                <circle cx="16" cy="12" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="1.2" />\n                <polygon points="16,2 18,6 14,6" fill="url(#ax_spike_d7_Battleaxe_0)" stroke="#000" stroke-width="1.2" />\n              </svg>', "color": "#ffffff", "source": "battleaxe", "bounds": { "x": 9.25, "y": 2, "width": 13.5, "height": 28 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 30 } }, "d7/Battleaxe/1": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="ax_handle_d7_Battleaxe_1" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#4d2f12"/>\n                    <stop offset="45%" stop-color="#2d1d0b"/>\n                    <stop offset="100%" stop-color="#1c0f07"/>\n                  </linearGradient>\n                  <linearGradient id="ax_spike_d7_Battleaxe_1" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                </defs>\n                <rect x="14.8" y="6" width="2.4" height="24" fill="url(#ax_handle_d7_Battleaxe_1)" stroke="#05070a" stroke-width="1" rx="0.5" />\n                <path d="M16 8 Q7 4, 10 14 Q14 18, 16 16" fill="#3498db" stroke="#000" stroke-width="1.8" />\n                <path d="M16 8 Q25 4, 22 14 Q18 18, 16 16" fill="#3498db" stroke="#000" stroke-width="1.8" />\n                <circle cx="16" cy="12" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="1.2" />\n                <polygon points="16,2 18,6 14,6" fill="url(#ax_spike_d7_Battleaxe_1)" stroke="#000" stroke-width="1.2" />\n              </svg>', "color": "#3498db", "source": "battleaxe", "bounds": { "x": 9.25, "y": 2, "width": 13.5, "height": 28 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 30 } }, "d7/Battleaxe/2": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="ax_handle_d7_Battleaxe_2" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#4d2f12"/>\n                    <stop offset="45%" stop-color="#2d1d0b"/>\n                    <stop offset="100%" stop-color="#1c0f07"/>\n                  </linearGradient>\n                  <linearGradient id="ax_spike_d7_Battleaxe_2" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                </defs>\n                <rect x="14.8" y="6" width="2.4" height="24" fill="url(#ax_handle_d7_Battleaxe_2)" stroke="#05070a" stroke-width="1" rx="0.5" />\n                <path d="M16 8 Q7 4, 10 14 Q14 18, 16 16" fill="#9b59b6" stroke="#000" stroke-width="1.8" />\n                <path d="M16 8 Q25 4, 22 14 Q18 18, 16 16" fill="#9b59b6" stroke="#000" stroke-width="1.8" />\n                <circle cx="16" cy="12" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="1.2" />\n                <polygon points="16,2 18,6 14,6" fill="url(#ax_spike_d7_Battleaxe_2)" stroke="#000" stroke-width="1.2" />\n              </svg>', "color": "#9b59b6", "source": "battleaxe", "bounds": { "x": 9.25, "y": 2, "width": 13.5, "height": 28 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 30 } }, "d7/Battleaxe/3": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="ax_handle_d7_Battleaxe_3" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#4d2f12"/>\n                    <stop offset="45%" stop-color="#2d1d0b"/>\n                    <stop offset="100%" stop-color="#1c0f07"/>\n                  </linearGradient>\n                  <linearGradient id="ax_spike_d7_Battleaxe_3" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                </defs>\n                <rect x="14.8" y="6" width="2.4" height="24" fill="url(#ax_handle_d7_Battleaxe_3)" stroke="#05070a" stroke-width="1" rx="0.5" />\n                <path d="M16 8 Q7 4, 10 14 Q14 18, 16 16" fill="#e67e22" stroke="#000" stroke-width="1.8" />\n                <path d="M16 8 Q25 4, 22 14 Q18 18, 16 16" fill="#e67e22" stroke="#000" stroke-width="1.8" />\n                <circle cx="16" cy="12" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="1.2" />\n                <polygon points="16,2 18,6 14,6" fill="url(#ax_spike_d7_Battleaxe_3)" stroke="#000" stroke-width="1.2" />\n              </svg>', "color": "#e67e22", "source": "battleaxe", "bounds": { "x": 9.25, "y": 2, "width": 13.5, "height": 28 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 30 } }, "d7/Battleaxe/4": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="ax_handle_d7_Battleaxe_4" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#4d2f12"/>\n                    <stop offset="45%" stop-color="#2d1d0b"/>\n                    <stop offset="100%" stop-color="#1c0f07"/>\n                  </linearGradient>\n                  <linearGradient id="ax_spike_d7_Battleaxe_4" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                </defs>\n                <rect x="14.8" y="6" width="2.4" height="24" fill="url(#ax_handle_d7_Battleaxe_4)" stroke="#05070a" stroke-width="1" rx="0.5" />\n                <path d="M16 8 Q7 4, 10 14 Q14 18, 16 16" fill="#f1c40f" stroke="#000" stroke-width="1.8" />\n                <path d="M16 8 Q25 4, 22 14 Q18 18, 16 16" fill="#f1c40f" stroke="#000" stroke-width="1.8" />\n                <circle cx="16" cy="12" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="1.2" />\n                <polygon points="16,2 18,6 14,6" fill="url(#ax_spike_d7_Battleaxe_4)" stroke="#000" stroke-width="1.2" />\n              </svg>', "color": "#f1c40f", "source": "battleaxe", "bounds": { "x": 9.25, "y": 2, "width": 13.5, "height": 28 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 30 } }, "d7/Battleaxe/5": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="ax_handle_d7_Battleaxe_5" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#4d2f12"/>\n                    <stop offset="45%" stop-color="#2d1d0b"/>\n                    <stop offset="100%" stop-color="#1c0f07"/>\n                  </linearGradient>\n                  <linearGradient id="ax_spike_d7_Battleaxe_5" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                </defs>\n                <rect x="14.8" y="6" width="2.4" height="24" fill="url(#ax_handle_d7_Battleaxe_5)" stroke="#05070a" stroke-width="1" rx="0.5" />\n                <path d="M16 8 Q7 4, 10 14 Q14 18, 16 16" fill="#e74c3c" stroke="#000" stroke-width="1.8" />\n                <path d="M16 8 Q25 4, 22 14 Q18 18, 16 16" fill="#e74c3c" stroke="#000" stroke-width="1.8" />\n                <circle cx="16" cy="12" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="1.2" />\n                <polygon points="16,2 18,6 14,6" fill="url(#ax_spike_d7_Battleaxe_5)" stroke="#000" stroke-width="1.2" />\n              </svg>', "color": "#e74c3c", "source": "battleaxe", "bounds": { "x": 9.25, "y": 2, "width": 13.5, "height": 28 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 30 } }, "d7/Broadsword/0": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel blade light gradient -->\n              <linearGradient id="bs_blade_l_d7_Broadsword_0" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="100%" stop-color="#bdc3c7"/>\n              </linearGradient>\n              <!-- Steel blade shadow gradient -->\n              <linearGradient id="bs_blade_s_d7_Broadsword_0" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#95a5a6"/>\n                <stop offset="100%" stop-color="#7f8c8d"/>\n              </linearGradient>\n              <!-- Hilt leather wrap gradient -->\n                            <linearGradient id="bs_hilt_d7_Broadsword_0" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#785c4d"/>\n                              <stop offset="35%" stop-color="#785c4d"/>\n                              <stop offset="35%" stop-color="#4e3629"/>\n                              <stop offset="70%" stop-color="#4e3629"/>\n                              <stop offset="70%" stop-color="#2b1a11"/>\n                              <stop offset="100%" stop-color="#180e0a"/>\n                            </linearGradient>\n            </defs>\n\n            <!-- Basket crossguard backplate -->\n            <path d="M11 20 L21 20 L19 23 L13 23 Z" fill="#ffffff" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Left Blade Side (Shadow Side) -->\n            <path d="M16 2 L13 3 L14 20 L16 20 Z" fill="url(#bs_blade_s_d7_Broadsword_0)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Right Blade Side (Light Side) -->\n            <path d="M16 2 L19 3 L18 20 L16 20 Z" fill="url(#bs_blade_l_d7_Broadsword_0)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Specular Highlight Sheen (Gleam) -->\n            <polygon points="16,2 17.5,3.2 16.8,18 16,18" fill="rgba(255,255,255,0.45)" />\n\n            <!-- Heavy crossguard overlay -->\n            <path d="M9 20h14v2.5H9z" fill="#ffffff" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Wrapped Leather Grip -->\n            <rect x="14" y="22.5" width="4" height="6" fill="url(#bs_hilt_d7_Broadsword_0)" stroke="#05070a" stroke-width="1.5" />\n            <!-- Grip Ribs -->\n            <line x1="14" y1="24" x2="18" y2="24" stroke="#05070a" stroke-width="1" />\n            <line x1="14" y1="26" x2="18" y2="26" stroke="#05070a" stroke-width="1" />\n            <line x1="14" y1="28" x2="18" y2="28" stroke="#05070a" stroke-width="1" />\n\n            <!-- Weighted Pommel Gem (Scales with rarity color) -->\n            <circle cx="16" cy="29.5" r="2.2" fill="#ffffff" stroke="#05070a" stroke-width="1.8" />\n            <circle cx="15.2" cy="28.7" r="0.6" fill="#ffffff" />\n          </svg>', "color": "#ffffff", "source": "broadsword", "bounds": { "x": 9, "y": 2, "width": 14, "height": 29.69999885559082 }, "visibleCenter": { "x": 16, "y": 16.84999942779541 }, "pivot": { "x": 16, "y": 31.69999885559082 } }, "d7/Broadsword/1": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel blade light gradient -->\n              <linearGradient id="bs_blade_l_d7_Broadsword_1" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="100%" stop-color="#bdc3c7"/>\n              </linearGradient>\n              <!-- Steel blade shadow gradient -->\n              <linearGradient id="bs_blade_s_d7_Broadsword_1" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#95a5a6"/>\n                <stop offset="100%" stop-color="#7f8c8d"/>\n              </linearGradient>\n              <!-- Hilt leather wrap gradient -->\n                            <linearGradient id="bs_hilt_d7_Broadsword_1" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#785c4d"/>\n                              <stop offset="35%" stop-color="#785c4d"/>\n                              <stop offset="35%" stop-color="#4e3629"/>\n                              <stop offset="70%" stop-color="#4e3629"/>\n                              <stop offset="70%" stop-color="#2b1a11"/>\n                              <stop offset="100%" stop-color="#180e0a"/>\n                            </linearGradient>\n            </defs>\n\n            <!-- Basket crossguard backplate -->\n            <path d="M11 20 L21 20 L19 23 L13 23 Z" fill="#3498db" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Left Blade Side (Shadow Side) -->\n            <path d="M16 2 L13 3 L14 20 L16 20 Z" fill="url(#bs_blade_s_d7_Broadsword_1)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Right Blade Side (Light Side) -->\n            <path d="M16 2 L19 3 L18 20 L16 20 Z" fill="url(#bs_blade_l_d7_Broadsword_1)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Specular Highlight Sheen (Gleam) -->\n            <polygon points="16,2 17.5,3.2 16.8,18 16,18" fill="rgba(255,255,255,0.45)" />\n\n            <!-- Heavy crossguard overlay -->\n            <path d="M9 20h14v2.5H9z" fill="#3498db" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Wrapped Leather Grip -->\n            <rect x="14" y="22.5" width="4" height="6" fill="url(#bs_hilt_d7_Broadsword_1)" stroke="#05070a" stroke-width="1.5" />\n            <!-- Grip Ribs -->\n            <line x1="14" y1="24" x2="18" y2="24" stroke="#05070a" stroke-width="1" />\n            <line x1="14" y1="26" x2="18" y2="26" stroke="#05070a" stroke-width="1" />\n            <line x1="14" y1="28" x2="18" y2="28" stroke="#05070a" stroke-width="1" />\n\n            <!-- Weighted Pommel Gem (Scales with rarity color) -->\n            <circle cx="16" cy="29.5" r="2.2" fill="#3498db" stroke="#05070a" stroke-width="1.8" />\n            <circle cx="15.2" cy="28.7" r="0.6" fill="#ffffff" />\n          </svg>', "color": "#3498db", "source": "broadsword", "bounds": { "x": 9, "y": 2, "width": 14, "height": 29.69999885559082 }, "visibleCenter": { "x": 16, "y": 16.84999942779541 }, "pivot": { "x": 16, "y": 31.69999885559082 } }, "d7/Broadsword/2": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel blade light gradient -->\n              <linearGradient id="bs_blade_l_d7_Broadsword_2" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="100%" stop-color="#bdc3c7"/>\n              </linearGradient>\n              <!-- Steel blade shadow gradient -->\n              <linearGradient id="bs_blade_s_d7_Broadsword_2" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#95a5a6"/>\n                <stop offset="100%" stop-color="#7f8c8d"/>\n              </linearGradient>\n              <!-- Hilt leather wrap gradient -->\n                            <linearGradient id="bs_hilt_d7_Broadsword_2" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#785c4d"/>\n                              <stop offset="35%" stop-color="#785c4d"/>\n                              <stop offset="35%" stop-color="#4e3629"/>\n                              <stop offset="70%" stop-color="#4e3629"/>\n                              <stop offset="70%" stop-color="#2b1a11"/>\n                              <stop offset="100%" stop-color="#180e0a"/>\n                            </linearGradient>\n            </defs>\n\n            <!-- Basket crossguard backplate -->\n            <path d="M11 20 L21 20 L19 23 L13 23 Z" fill="#9b59b6" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Left Blade Side (Shadow Side) -->\n            <path d="M16 2 L13 3 L14 20 L16 20 Z" fill="url(#bs_blade_s_d7_Broadsword_2)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Right Blade Side (Light Side) -->\n            <path d="M16 2 L19 3 L18 20 L16 20 Z" fill="url(#bs_blade_l_d7_Broadsword_2)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Specular Highlight Sheen (Gleam) -->\n            <polygon points="16,2 17.5,3.2 16.8,18 16,18" fill="rgba(255,255,255,0.45)" />\n\n            <!-- Heavy crossguard overlay -->\n            <path d="M9 20h14v2.5H9z" fill="#9b59b6" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Wrapped Leather Grip -->\n            <rect x="14" y="22.5" width="4" height="6" fill="url(#bs_hilt_d7_Broadsword_2)" stroke="#05070a" stroke-width="1.5" />\n            <!-- Grip Ribs -->\n            <line x1="14" y1="24" x2="18" y2="24" stroke="#05070a" stroke-width="1" />\n            <line x1="14" y1="26" x2="18" y2="26" stroke="#05070a" stroke-width="1" />\n            <line x1="14" y1="28" x2="18" y2="28" stroke="#05070a" stroke-width="1" />\n\n            <!-- Weighted Pommel Gem (Scales with rarity color) -->\n            <circle cx="16" cy="29.5" r="2.2" fill="#9b59b6" stroke="#05070a" stroke-width="1.8" />\n            <circle cx="15.2" cy="28.7" r="0.6" fill="#ffffff" />\n          </svg>', "color": "#9b59b6", "source": "broadsword", "bounds": { "x": 9, "y": 2, "width": 14, "height": 29.69999885559082 }, "visibleCenter": { "x": 16, "y": 16.84999942779541 }, "pivot": { "x": 16, "y": 31.69999885559082 } }, "d7/Broadsword/3": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel blade light gradient -->\n              <linearGradient id="bs_blade_l_d7_Broadsword_3" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="100%" stop-color="#bdc3c7"/>\n              </linearGradient>\n              <!-- Steel blade shadow gradient -->\n              <linearGradient id="bs_blade_s_d7_Broadsword_3" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#95a5a6"/>\n                <stop offset="100%" stop-color="#7f8c8d"/>\n              </linearGradient>\n              <!-- Hilt leather wrap gradient -->\n                            <linearGradient id="bs_hilt_d7_Broadsword_3" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#785c4d"/>\n                              <stop offset="35%" stop-color="#785c4d"/>\n                              <stop offset="35%" stop-color="#4e3629"/>\n                              <stop offset="70%" stop-color="#4e3629"/>\n                              <stop offset="70%" stop-color="#2b1a11"/>\n                              <stop offset="100%" stop-color="#180e0a"/>\n                            </linearGradient>\n            </defs>\n\n            <!-- Basket crossguard backplate -->\n            <path d="M11 20 L21 20 L19 23 L13 23 Z" fill="#e67e22" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Left Blade Side (Shadow Side) -->\n            <path d="M16 2 L13 3 L14 20 L16 20 Z" fill="url(#bs_blade_s_d7_Broadsword_3)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Right Blade Side (Light Side) -->\n            <path d="M16 2 L19 3 L18 20 L16 20 Z" fill="url(#bs_blade_l_d7_Broadsword_3)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Specular Highlight Sheen (Gleam) -->\n            <polygon points="16,2 17.5,3.2 16.8,18 16,18" fill="rgba(255,255,255,0.45)" />\n\n            <!-- Heavy crossguard overlay -->\n            <path d="M9 20h14v2.5H9z" fill="#e67e22" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Wrapped Leather Grip -->\n            <rect x="14" y="22.5" width="4" height="6" fill="url(#bs_hilt_d7_Broadsword_3)" stroke="#05070a" stroke-width="1.5" />\n            <!-- Grip Ribs -->\n            <line x1="14" y1="24" x2="18" y2="24" stroke="#05070a" stroke-width="1" />\n            <line x1="14" y1="26" x2="18" y2="26" stroke="#05070a" stroke-width="1" />\n            <line x1="14" y1="28" x2="18" y2="28" stroke="#05070a" stroke-width="1" />\n\n            <!-- Weighted Pommel Gem (Scales with rarity color) -->\n            <circle cx="16" cy="29.5" r="2.2" fill="#e67e22" stroke="#05070a" stroke-width="1.8" />\n            <circle cx="15.2" cy="28.7" r="0.6" fill="#ffffff" />\n          </svg>', "color": "#e67e22", "source": "broadsword", "bounds": { "x": 9, "y": 2, "width": 14, "height": 29.69999885559082 }, "visibleCenter": { "x": 16, "y": 16.84999942779541 }, "pivot": { "x": 16, "y": 31.69999885559082 } }, "d7/Broadsword/4": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel blade light gradient -->\n              <linearGradient id="bs_blade_l_d7_Broadsword_4" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="100%" stop-color="#bdc3c7"/>\n              </linearGradient>\n              <!-- Steel blade shadow gradient -->\n              <linearGradient id="bs_blade_s_d7_Broadsword_4" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#95a5a6"/>\n                <stop offset="100%" stop-color="#7f8c8d"/>\n              </linearGradient>\n              <!-- Hilt leather wrap gradient -->\n                            <linearGradient id="bs_hilt_d7_Broadsword_4" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#785c4d"/>\n                              <stop offset="35%" stop-color="#785c4d"/>\n                              <stop offset="35%" stop-color="#4e3629"/>\n                              <stop offset="70%" stop-color="#4e3629"/>\n                              <stop offset="70%" stop-color="#2b1a11"/>\n                              <stop offset="100%" stop-color="#180e0a"/>\n                            </linearGradient>\n            </defs>\n\n            <!-- Basket crossguard backplate -->\n            <path d="M11 20 L21 20 L19 23 L13 23 Z" fill="#f1c40f" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Left Blade Side (Shadow Side) -->\n            <path d="M16 2 L13 3 L14 20 L16 20 Z" fill="url(#bs_blade_s_d7_Broadsword_4)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Right Blade Side (Light Side) -->\n            <path d="M16 2 L19 3 L18 20 L16 20 Z" fill="url(#bs_blade_l_d7_Broadsword_4)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Specular Highlight Sheen (Gleam) -->\n            <polygon points="16,2 17.5,3.2 16.8,18 16,18" fill="rgba(255,255,255,0.45)" />\n\n            <!-- Heavy crossguard overlay -->\n            <path d="M9 20h14v2.5H9z" fill="#f1c40f" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Wrapped Leather Grip -->\n            <rect x="14" y="22.5" width="4" height="6" fill="url(#bs_hilt_d7_Broadsword_4)" stroke="#05070a" stroke-width="1.5" />\n            <!-- Grip Ribs -->\n            <line x1="14" y1="24" x2="18" y2="24" stroke="#05070a" stroke-width="1" />\n            <line x1="14" y1="26" x2="18" y2="26" stroke="#05070a" stroke-width="1" />\n            <line x1="14" y1="28" x2="18" y2="28" stroke="#05070a" stroke-width="1" />\n\n            <!-- Weighted Pommel Gem (Scales with rarity color) -->\n            <circle cx="16" cy="29.5" r="2.2" fill="#f1c40f" stroke="#05070a" stroke-width="1.8" />\n            <circle cx="15.2" cy="28.7" r="0.6" fill="#ffffff" />\n          </svg>', "color": "#f1c40f", "source": "broadsword", "bounds": { "x": 9, "y": 2, "width": 14, "height": 29.69999885559082 }, "visibleCenter": { "x": 16, "y": 16.84999942779541 }, "pivot": { "x": 16, "y": 31.69999885559082 } }, "d7/Broadsword/5": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel blade light gradient -->\n              <linearGradient id="bs_blade_l_d7_Broadsword_5" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="100%" stop-color="#bdc3c7"/>\n              </linearGradient>\n              <!-- Steel blade shadow gradient -->\n              <linearGradient id="bs_blade_s_d7_Broadsword_5" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#95a5a6"/>\n                <stop offset="100%" stop-color="#7f8c8d"/>\n              </linearGradient>\n              <!-- Hilt leather wrap gradient -->\n                            <linearGradient id="bs_hilt_d7_Broadsword_5" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#785c4d"/>\n                              <stop offset="35%" stop-color="#785c4d"/>\n                              <stop offset="35%" stop-color="#4e3629"/>\n                              <stop offset="70%" stop-color="#4e3629"/>\n                              <stop offset="70%" stop-color="#2b1a11"/>\n                              <stop offset="100%" stop-color="#180e0a"/>\n                            </linearGradient>\n            </defs>\n\n            <!-- Basket crossguard backplate -->\n            <path d="M11 20 L21 20 L19 23 L13 23 Z" fill="#e74c3c" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Left Blade Side (Shadow Side) -->\n            <path d="M16 2 L13 3 L14 20 L16 20 Z" fill="url(#bs_blade_s_d7_Broadsword_5)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Right Blade Side (Light Side) -->\n            <path d="M16 2 L19 3 L18 20 L16 20 Z" fill="url(#bs_blade_l_d7_Broadsword_5)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Specular Highlight Sheen (Gleam) -->\n            <polygon points="16,2 17.5,3.2 16.8,18 16,18" fill="rgba(255,255,255,0.45)" />\n\n            <!-- Heavy crossguard overlay -->\n            <path d="M9 20h14v2.5H9z" fill="#e74c3c" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Wrapped Leather Grip -->\n            <rect x="14" y="22.5" width="4" height="6" fill="url(#bs_hilt_d7_Broadsword_5)" stroke="#05070a" stroke-width="1.5" />\n            <!-- Grip Ribs -->\n            <line x1="14" y1="24" x2="18" y2="24" stroke="#05070a" stroke-width="1" />\n            <line x1="14" y1="26" x2="18" y2="26" stroke="#05070a" stroke-width="1" />\n            <line x1="14" y1="28" x2="18" y2="28" stroke="#05070a" stroke-width="1" />\n\n            <!-- Weighted Pommel Gem (Scales with rarity color) -->\n            <circle cx="16" cy="29.5" r="2.2" fill="#e74c3c" stroke="#05070a" stroke-width="1.8" />\n            <circle cx="15.2" cy="28.7" r="0.6" fill="#ffffff" />\n          </svg>', "color": "#e74c3c", "source": "broadsword", "bounds": { "x": 9, "y": 2, "width": 14, "height": 29.69999885559082 }, "visibleCenter": { "x": 16, "y": 16.84999942779541 }, "pivot": { "x": 16, "y": 31.69999885559082 } }, "d7/Flanged Mace/0": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="fm_handle_d7_Flanged_Mace_0" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#94a3b8"/>\n                    <stop offset="45%" stop-color="#475569"/>\n                    <stop offset="45%" stop-color="#1e293b"/>\n                    <stop offset="100%" stop-color="#0f172a"/>\n                  </linearGradient>\n                  <linearGradient id="fm_steel_d7_Flanged_Mace_0" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                </defs>\n                <rect x="14.8" y="12" width="2.4" height="18" fill="url(#fm_handle_d7_Flanged_Mace_0)" stroke="#05070a" stroke-width="1" rx="0.5" />\n                <rect x="13" y="4" width="6" height="10" rx="1" fill="url(#fm_steel_d7_Flanged_Mace_0)" stroke="#000" stroke-width="1.5" />\n                <path d="M10 5 L13 7 V11 L10 13 Z" fill="#ffffff" stroke="#000" stroke-width="1" />\n                <path d="M22 5 L19 7 V11 L22 13 Z" fill="#ffffff" stroke="#000" stroke-width="1" />\n                <polygon points="16,1 18,4 14,4" fill="url(#fm_steel_d7_Flanged_Mace_0)" stroke="#000" stroke-width="1" />\n              </svg>', "color": "#ffffff", "source": "flanged_mace", "bounds": { "x": 10, "y": 1, "width": 12, "height": 29 }, "visibleCenter": { "x": 16, "y": 15.5 }, "pivot": { "x": 16, "y": 30 } }, "d7/Flanged Mace/1": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="fm_handle_d7_Flanged_Mace_1" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#94a3b8"/>\n                    <stop offset="45%" stop-color="#475569"/>\n                    <stop offset="45%" stop-color="#1e293b"/>\n                    <stop offset="100%" stop-color="#0f172a"/>\n                  </linearGradient>\n                  <linearGradient id="fm_steel_d7_Flanged_Mace_1" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                </defs>\n                <rect x="14.8" y="12" width="2.4" height="18" fill="url(#fm_handle_d7_Flanged_Mace_1)" stroke="#05070a" stroke-width="1" rx="0.5" />\n                <rect x="13" y="4" width="6" height="10" rx="1" fill="url(#fm_steel_d7_Flanged_Mace_1)" stroke="#000" stroke-width="1.5" />\n                <path d="M10 5 L13 7 V11 L10 13 Z" fill="#3498db" stroke="#000" stroke-width="1" />\n                <path d="M22 5 L19 7 V11 L22 13 Z" fill="#3498db" stroke="#000" stroke-width="1" />\n                <polygon points="16,1 18,4 14,4" fill="url(#fm_steel_d7_Flanged_Mace_1)" stroke="#000" stroke-width="1" />\n              </svg>', "color": "#3498db", "source": "flanged_mace", "bounds": { "x": 10, "y": 1, "width": 12, "height": 29 }, "visibleCenter": { "x": 16, "y": 15.5 }, "pivot": { "x": 16, "y": 30 } }, "d7/Flanged Mace/2": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="fm_handle_d7_Flanged_Mace_2" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#94a3b8"/>\n                    <stop offset="45%" stop-color="#475569"/>\n                    <stop offset="45%" stop-color="#1e293b"/>\n                    <stop offset="100%" stop-color="#0f172a"/>\n                  </linearGradient>\n                  <linearGradient id="fm_steel_d7_Flanged_Mace_2" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                </defs>\n                <rect x="14.8" y="12" width="2.4" height="18" fill="url(#fm_handle_d7_Flanged_Mace_2)" stroke="#05070a" stroke-width="1" rx="0.5" />\n                <rect x="13" y="4" width="6" height="10" rx="1" fill="url(#fm_steel_d7_Flanged_Mace_2)" stroke="#000" stroke-width="1.5" />\n                <path d="M10 5 L13 7 V11 L10 13 Z" fill="#9b59b6" stroke="#000" stroke-width="1" />\n                <path d="M22 5 L19 7 V11 L22 13 Z" fill="#9b59b6" stroke="#000" stroke-width="1" />\n                <polygon points="16,1 18,4 14,4" fill="url(#fm_steel_d7_Flanged_Mace_2)" stroke="#000" stroke-width="1" />\n              </svg>', "color": "#9b59b6", "source": "flanged_mace", "bounds": { "x": 10, "y": 1, "width": 12, "height": 29 }, "visibleCenter": { "x": 16, "y": 15.5 }, "pivot": { "x": 16, "y": 30 } }, "d7/Flanged Mace/3": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="fm_handle_d7_Flanged_Mace_3" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#94a3b8"/>\n                    <stop offset="45%" stop-color="#475569"/>\n                    <stop offset="45%" stop-color="#1e293b"/>\n                    <stop offset="100%" stop-color="#0f172a"/>\n                  </linearGradient>\n                  <linearGradient id="fm_steel_d7_Flanged_Mace_3" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                </defs>\n                <rect x="14.8" y="12" width="2.4" height="18" fill="url(#fm_handle_d7_Flanged_Mace_3)" stroke="#05070a" stroke-width="1" rx="0.5" />\n                <rect x="13" y="4" width="6" height="10" rx="1" fill="url(#fm_steel_d7_Flanged_Mace_3)" stroke="#000" stroke-width="1.5" />\n                <path d="M10 5 L13 7 V11 L10 13 Z" fill="#e67e22" stroke="#000" stroke-width="1" />\n                <path d="M22 5 L19 7 V11 L22 13 Z" fill="#e67e22" stroke="#000" stroke-width="1" />\n                <polygon points="16,1 18,4 14,4" fill="url(#fm_steel_d7_Flanged_Mace_3)" stroke="#000" stroke-width="1" />\n              </svg>', "color": "#e67e22", "source": "flanged_mace", "bounds": { "x": 10, "y": 1, "width": 12, "height": 29 }, "visibleCenter": { "x": 16, "y": 15.5 }, "pivot": { "x": 16, "y": 30 } }, "d7/Flanged Mace/4": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="fm_handle_d7_Flanged_Mace_4" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#94a3b8"/>\n                    <stop offset="45%" stop-color="#475569"/>\n                    <stop offset="45%" stop-color="#1e293b"/>\n                    <stop offset="100%" stop-color="#0f172a"/>\n                  </linearGradient>\n                  <linearGradient id="fm_steel_d7_Flanged_Mace_4" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                </defs>\n                <rect x="14.8" y="12" width="2.4" height="18" fill="url(#fm_handle_d7_Flanged_Mace_4)" stroke="#05070a" stroke-width="1" rx="0.5" />\n                <rect x="13" y="4" width="6" height="10" rx="1" fill="url(#fm_steel_d7_Flanged_Mace_4)" stroke="#000" stroke-width="1.5" />\n                <path d="M10 5 L13 7 V11 L10 13 Z" fill="#f1c40f" stroke="#000" stroke-width="1" />\n                <path d="M22 5 L19 7 V11 L22 13 Z" fill="#f1c40f" stroke="#000" stroke-width="1" />\n                <polygon points="16,1 18,4 14,4" fill="url(#fm_steel_d7_Flanged_Mace_4)" stroke="#000" stroke-width="1" />\n              </svg>', "color": "#f1c40f", "source": "flanged_mace", "bounds": { "x": 10, "y": 1, "width": 12, "height": 29 }, "visibleCenter": { "x": 16, "y": 15.5 }, "pivot": { "x": 16, "y": 30 } }, "d7/Flanged Mace/5": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="fm_handle_d7_Flanged_Mace_5" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#94a3b8"/>\n                    <stop offset="45%" stop-color="#475569"/>\n                    <stop offset="45%" stop-color="#1e293b"/>\n                    <stop offset="100%" stop-color="#0f172a"/>\n                  </linearGradient>\n                  <linearGradient id="fm_steel_d7_Flanged_Mace_5" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                </defs>\n                <rect x="14.8" y="12" width="2.4" height="18" fill="url(#fm_handle_d7_Flanged_Mace_5)" stroke="#05070a" stroke-width="1" rx="0.5" />\n                <rect x="13" y="4" width="6" height="10" rx="1" fill="url(#fm_steel_d7_Flanged_Mace_5)" stroke="#000" stroke-width="1.5" />\n                <path d="M10 5 L13 7 V11 L10 13 Z" fill="#e74c3c" stroke="#000" stroke-width="1" />\n                <path d="M22 5 L19 7 V11 L22 13 Z" fill="#e74c3c" stroke="#000" stroke-width="1" />\n                <polygon points="16,1 18,4 14,4" fill="url(#fm_steel_d7_Flanged_Mace_5)" stroke="#000" stroke-width="1" />\n              </svg>', "color": "#e74c3c", "source": "flanged_mace", "bounds": { "x": 10, "y": 1, "width": 12, "height": 29 }, "visibleCenter": { "x": 16, "y": 15.5 }, "pivot": { "x": 16, "y": 30 } }, "d7/Claymore/0": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Broad, imposing blade light facet -->\n              <linearGradient id="cm_blade_l_d7_Claymore_0" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="40%" stop-color="#e2e8f0"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Broad blade shadow facet -->\n              <linearGradient id="cm_blade_s_d7_Claymore_0" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Heavy leather-wrapped grip -->\n                            <linearGradient id="cm_hilt_d7_Claymore_0" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#8d5b38"/>\n                              <stop offset="35%" stop-color="#8d5b38"/>\n                              <stop offset="35%" stop-color="#5c3a21"/>\n                              <stop offset="70%" stop-color="#5c3a21"/>\n                              <stop offset="70%" stop-color="#3d1d0b"/>\n                              <stop offset="100%" stop-color="#221004"/>\n                            </linearGradient>\n            </defs>\n\n            <!-- Left Heavy Blade Side (Shadow Side) -->\n            <path d="M16 2 L13.5 3.5 L14 19 L16 19 Z" fill="url(#cm_blade_s_d7_Claymore_0)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Right Heavy Blade Side (Light Side) -->\n            <path d="M16 2 L18.5 3.5 L18 19 L16 19 Z" fill="url(#cm_blade_l_d7_Claymore_0)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Specular Highlight Sheen -->\n            <polygon points="16,2 18.0,3.5 17.2,18 16,18" fill="rgba(255,255,255,0.4)" />\n\n            <!-- Left Forward-Sloping Quillon -->\n            <path d="M16 19 L8.5 22.8 L9.2 24.6 L16 21.2 Z" fill="#ffffff" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n            <circle cx="7.8" cy="23.4" r="1.8" fill="#ffffff" stroke="#05070a" stroke-width="1.5" />\n\n            <!-- Right Forward-Sloping Quillon -->\n            <path d="M16 19 L23.5 22.8 L22.8 24.6 L16 21.2 Z" fill="#ffffff" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n            <circle cx="24.2" cy="23.4" r="1.8" fill="#ffffff" stroke="#05070a" stroke-width="1.5" />\n\n            <!-- Center Guard Block -->\n            <path d="M11.5 19h9v2.5h-9z" fill="#ffffff" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Long Two-Handed Grip -->\n            <rect x="14.2" y="21.5" width="3.6" height="6.5" fill="url(#cm_hilt_d7_Claymore_0)" stroke="#05070a" stroke-width="1.5" />\n            <line x1="14.2" y1="23.2" x2="17.8" y2="23.2" stroke="#05070a" stroke-width="1" />\n            <line x1="14.2" y1="25.0" x2="17.8" y2="25.0" stroke="#05070a" stroke-width="1" />\n            <line x1="14.2" y1="26.8" x2="17.8" y2="26.8" stroke="#05070a" stroke-width="1" />\n\n            <!-- Weighted Wheel Pommel with Inset Rarity Gem -->\n            <circle cx="16" cy="29.8" r="2.8" fill="#55555d" stroke="#05070a" stroke-width="1.8" />\n            <circle cx="16" cy="29.8" r="1.5" fill="#ffffff" stroke="#05070a" stroke-width="1.2" />\n            <circle cx="15.4" cy="29.2" r="0.5" fill="#ffffff" />\n          </svg>', "color": "#ffffff", "source": "claymore", "bounds": { "x": 6, "y": 2, "width": 20.000001907348633, "height": 30.599998474121094 }, "visibleCenter": { "x": 16.000000953674316, "y": 17.299999237060547 }, "pivot": { "x": 16.000000953674316, "y": 32.599998474121094 } }, "d7/Claymore/1": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Broad, imposing blade light facet -->\n              <linearGradient id="cm_blade_l_d7_Claymore_1" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="40%" stop-color="#e2e8f0"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Broad blade shadow facet -->\n              <linearGradient id="cm_blade_s_d7_Claymore_1" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Heavy leather-wrapped grip -->\n                            <linearGradient id="cm_hilt_d7_Claymore_1" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#8d5b38"/>\n                              <stop offset="35%" stop-color="#8d5b38"/>\n                              <stop offset="35%" stop-color="#5c3a21"/>\n                              <stop offset="70%" stop-color="#5c3a21"/>\n                              <stop offset="70%" stop-color="#3d1d0b"/>\n                              <stop offset="100%" stop-color="#221004"/>\n                            </linearGradient>\n            </defs>\n\n            <!-- Left Heavy Blade Side (Shadow Side) -->\n            <path d="M16 2 L13.5 3.5 L14 19 L16 19 Z" fill="url(#cm_blade_s_d7_Claymore_1)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Right Heavy Blade Side (Light Side) -->\n            <path d="M16 2 L18.5 3.5 L18 19 L16 19 Z" fill="url(#cm_blade_l_d7_Claymore_1)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Specular Highlight Sheen -->\n            <polygon points="16,2 18.0,3.5 17.2,18 16,18" fill="rgba(255,255,255,0.4)" />\n\n            <!-- Left Forward-Sloping Quillon -->\n            <path d="M16 19 L8.5 22.8 L9.2 24.6 L16 21.2 Z" fill="#3498db" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n            <circle cx="7.8" cy="23.4" r="1.8" fill="#3498db" stroke="#05070a" stroke-width="1.5" />\n\n            <!-- Right Forward-Sloping Quillon -->\n            <path d="M16 19 L23.5 22.8 L22.8 24.6 L16 21.2 Z" fill="#3498db" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n            <circle cx="24.2" cy="23.4" r="1.8" fill="#3498db" stroke="#05070a" stroke-width="1.5" />\n\n            <!-- Center Guard Block -->\n            <path d="M11.5 19h9v2.5h-9z" fill="#3498db" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Long Two-Handed Grip -->\n            <rect x="14.2" y="21.5" width="3.6" height="6.5" fill="url(#cm_hilt_d7_Claymore_1)" stroke="#05070a" stroke-width="1.5" />\n            <line x1="14.2" y1="23.2" x2="17.8" y2="23.2" stroke="#05070a" stroke-width="1" />\n            <line x1="14.2" y1="25.0" x2="17.8" y2="25.0" stroke="#05070a" stroke-width="1" />\n            <line x1="14.2" y1="26.8" x2="17.8" y2="26.8" stroke="#05070a" stroke-width="1" />\n\n            <!-- Weighted Wheel Pommel with Inset Rarity Gem -->\n            <circle cx="16" cy="29.8" r="2.8" fill="#55555d" stroke="#05070a" stroke-width="1.8" />\n            <circle cx="16" cy="29.8" r="1.5" fill="#3498db" stroke="#05070a" stroke-width="1.2" />\n            <circle cx="15.4" cy="29.2" r="0.5" fill="#ffffff" />\n          </svg>', "color": "#3498db", "source": "claymore", "bounds": { "x": 6, "y": 2, "width": 20.000001907348633, "height": 30.599998474121094 }, "visibleCenter": { "x": 16.000000953674316, "y": 17.299999237060547 }, "pivot": { "x": 16.000000953674316, "y": 32.599998474121094 } }, "d7/Claymore/2": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Broad, imposing blade light facet -->\n              <linearGradient id="cm_blade_l_d7_Claymore_2" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="40%" stop-color="#e2e8f0"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Broad blade shadow facet -->\n              <linearGradient id="cm_blade_s_d7_Claymore_2" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Heavy leather-wrapped grip -->\n                            <linearGradient id="cm_hilt_d7_Claymore_2" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#8d5b38"/>\n                              <stop offset="35%" stop-color="#8d5b38"/>\n                              <stop offset="35%" stop-color="#5c3a21"/>\n                              <stop offset="70%" stop-color="#5c3a21"/>\n                              <stop offset="70%" stop-color="#3d1d0b"/>\n                              <stop offset="100%" stop-color="#221004"/>\n                            </linearGradient>\n            </defs>\n\n            <!-- Left Heavy Blade Side (Shadow Side) -->\n            <path d="M16 2 L13.5 3.5 L14 19 L16 19 Z" fill="url(#cm_blade_s_d7_Claymore_2)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Right Heavy Blade Side (Light Side) -->\n            <path d="M16 2 L18.5 3.5 L18 19 L16 19 Z" fill="url(#cm_blade_l_d7_Claymore_2)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Specular Highlight Sheen -->\n            <polygon points="16,2 18.0,3.5 17.2,18 16,18" fill="rgba(255,255,255,0.4)" />\n\n            <!-- Left Forward-Sloping Quillon -->\n            <path d="M16 19 L8.5 22.8 L9.2 24.6 L16 21.2 Z" fill="#9b59b6" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n            <circle cx="7.8" cy="23.4" r="1.8" fill="#9b59b6" stroke="#05070a" stroke-width="1.5" />\n\n            <!-- Right Forward-Sloping Quillon -->\n            <path d="M16 19 L23.5 22.8 L22.8 24.6 L16 21.2 Z" fill="#9b59b6" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n            <circle cx="24.2" cy="23.4" r="1.8" fill="#9b59b6" stroke="#05070a" stroke-width="1.5" />\n\n            <!-- Center Guard Block -->\n            <path d="M11.5 19h9v2.5h-9z" fill="#9b59b6" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Long Two-Handed Grip -->\n            <rect x="14.2" y="21.5" width="3.6" height="6.5" fill="url(#cm_hilt_d7_Claymore_2)" stroke="#05070a" stroke-width="1.5" />\n            <line x1="14.2" y1="23.2" x2="17.8" y2="23.2" stroke="#05070a" stroke-width="1" />\n            <line x1="14.2" y1="25.0" x2="17.8" y2="25.0" stroke="#05070a" stroke-width="1" />\n            <line x1="14.2" y1="26.8" x2="17.8" y2="26.8" stroke="#05070a" stroke-width="1" />\n\n            <!-- Weighted Wheel Pommel with Inset Rarity Gem -->\n            <circle cx="16" cy="29.8" r="2.8" fill="#55555d" stroke="#05070a" stroke-width="1.8" />\n            <circle cx="16" cy="29.8" r="1.5" fill="#9b59b6" stroke="#05070a" stroke-width="1.2" />\n            <circle cx="15.4" cy="29.2" r="0.5" fill="#ffffff" />\n          </svg>', "color": "#9b59b6", "source": "claymore", "bounds": { "x": 6, "y": 2, "width": 20.000001907348633, "height": 30.599998474121094 }, "visibleCenter": { "x": 16.000000953674316, "y": 17.299999237060547 }, "pivot": { "x": 16.000000953674316, "y": 32.599998474121094 } }, "d7/Claymore/3": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Broad, imposing blade light facet -->\n              <linearGradient id="cm_blade_l_d7_Claymore_3" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="40%" stop-color="#e2e8f0"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Broad blade shadow facet -->\n              <linearGradient id="cm_blade_s_d7_Claymore_3" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Heavy leather-wrapped grip -->\n                            <linearGradient id="cm_hilt_d7_Claymore_3" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#8d5b38"/>\n                              <stop offset="35%" stop-color="#8d5b38"/>\n                              <stop offset="35%" stop-color="#5c3a21"/>\n                              <stop offset="70%" stop-color="#5c3a21"/>\n                              <stop offset="70%" stop-color="#3d1d0b"/>\n                              <stop offset="100%" stop-color="#221004"/>\n                            </linearGradient>\n            </defs>\n\n            <!-- Left Heavy Blade Side (Shadow Side) -->\n            <path d="M16 2 L13.5 3.5 L14 19 L16 19 Z" fill="url(#cm_blade_s_d7_Claymore_3)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Right Heavy Blade Side (Light Side) -->\n            <path d="M16 2 L18.5 3.5 L18 19 L16 19 Z" fill="url(#cm_blade_l_d7_Claymore_3)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Specular Highlight Sheen -->\n            <polygon points="16,2 18.0,3.5 17.2,18 16,18" fill="rgba(255,255,255,0.4)" />\n\n            <!-- Left Forward-Sloping Quillon -->\n            <path d="M16 19 L8.5 22.8 L9.2 24.6 L16 21.2 Z" fill="#e67e22" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n            <circle cx="7.8" cy="23.4" r="1.8" fill="#e67e22" stroke="#05070a" stroke-width="1.5" />\n\n            <!-- Right Forward-Sloping Quillon -->\n            <path d="M16 19 L23.5 22.8 L22.8 24.6 L16 21.2 Z" fill="#e67e22" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n            <circle cx="24.2" cy="23.4" r="1.8" fill="#e67e22" stroke="#05070a" stroke-width="1.5" />\n\n            <!-- Center Guard Block -->\n            <path d="M11.5 19h9v2.5h-9z" fill="#e67e22" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Long Two-Handed Grip -->\n            <rect x="14.2" y="21.5" width="3.6" height="6.5" fill="url(#cm_hilt_d7_Claymore_3)" stroke="#05070a" stroke-width="1.5" />\n            <line x1="14.2" y1="23.2" x2="17.8" y2="23.2" stroke="#05070a" stroke-width="1" />\n            <line x1="14.2" y1="25.0" x2="17.8" y2="25.0" stroke="#05070a" stroke-width="1" />\n            <line x1="14.2" y1="26.8" x2="17.8" y2="26.8" stroke="#05070a" stroke-width="1" />\n\n            <!-- Weighted Wheel Pommel with Inset Rarity Gem -->\n            <circle cx="16" cy="29.8" r="2.8" fill="#55555d" stroke="#05070a" stroke-width="1.8" />\n            <circle cx="16" cy="29.8" r="1.5" fill="#e67e22" stroke="#05070a" stroke-width="1.2" />\n            <circle cx="15.4" cy="29.2" r="0.5" fill="#ffffff" />\n          </svg>', "color": "#e67e22", "source": "claymore", "bounds": { "x": 6, "y": 2, "width": 20.000001907348633, "height": 30.599998474121094 }, "visibleCenter": { "x": 16.000000953674316, "y": 17.299999237060547 }, "pivot": { "x": 16.000000953674316, "y": 32.599998474121094 } }, "d7/Claymore/4": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Broad, imposing blade light facet -->\n              <linearGradient id="cm_blade_l_d7_Claymore_4" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="40%" stop-color="#e2e8f0"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Broad blade shadow facet -->\n              <linearGradient id="cm_blade_s_d7_Claymore_4" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Heavy leather-wrapped grip -->\n                            <linearGradient id="cm_hilt_d7_Claymore_4" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#8d5b38"/>\n                              <stop offset="35%" stop-color="#8d5b38"/>\n                              <stop offset="35%" stop-color="#5c3a21"/>\n                              <stop offset="70%" stop-color="#5c3a21"/>\n                              <stop offset="70%" stop-color="#3d1d0b"/>\n                              <stop offset="100%" stop-color="#221004"/>\n                            </linearGradient>\n            </defs>\n\n            <!-- Left Heavy Blade Side (Shadow Side) -->\n            <path d="M16 2 L13.5 3.5 L14 19 L16 19 Z" fill="url(#cm_blade_s_d7_Claymore_4)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Right Heavy Blade Side (Light Side) -->\n            <path d="M16 2 L18.5 3.5 L18 19 L16 19 Z" fill="url(#cm_blade_l_d7_Claymore_4)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Specular Highlight Sheen -->\n            <polygon points="16,2 18.0,3.5 17.2,18 16,18" fill="rgba(255,255,255,0.4)" />\n\n            <!-- Left Forward-Sloping Quillon -->\n            <path d="M16 19 L8.5 22.8 L9.2 24.6 L16 21.2 Z" fill="#f1c40f" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n            <circle cx="7.8" cy="23.4" r="1.8" fill="#f1c40f" stroke="#05070a" stroke-width="1.5" />\n\n            <!-- Right Forward-Sloping Quillon -->\n            <path d="M16 19 L23.5 22.8 L22.8 24.6 L16 21.2 Z" fill="#f1c40f" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n            <circle cx="24.2" cy="23.4" r="1.8" fill="#f1c40f" stroke="#05070a" stroke-width="1.5" />\n\n            <!-- Center Guard Block -->\n            <path d="M11.5 19h9v2.5h-9z" fill="#f1c40f" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Long Two-Handed Grip -->\n            <rect x="14.2" y="21.5" width="3.6" height="6.5" fill="url(#cm_hilt_d7_Claymore_4)" stroke="#05070a" stroke-width="1.5" />\n            <line x1="14.2" y1="23.2" x2="17.8" y2="23.2" stroke="#05070a" stroke-width="1" />\n            <line x1="14.2" y1="25.0" x2="17.8" y2="25.0" stroke="#05070a" stroke-width="1" />\n            <line x1="14.2" y1="26.8" x2="17.8" y2="26.8" stroke="#05070a" stroke-width="1" />\n\n            <!-- Weighted Wheel Pommel with Inset Rarity Gem -->\n            <circle cx="16" cy="29.8" r="2.8" fill="#55555d" stroke="#05070a" stroke-width="1.8" />\n            <circle cx="16" cy="29.8" r="1.5" fill="#f1c40f" stroke="#05070a" stroke-width="1.2" />\n            <circle cx="15.4" cy="29.2" r="0.5" fill="#ffffff" />\n          </svg>', "color": "#f1c40f", "source": "claymore", "bounds": { "x": 6, "y": 2, "width": 20.000001907348633, "height": 30.599998474121094 }, "visibleCenter": { "x": 16.000000953674316, "y": 17.299999237060547 }, "pivot": { "x": 16.000000953674316, "y": 32.599998474121094 } }, "d7/Claymore/5": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Broad, imposing blade light facet -->\n              <linearGradient id="cm_blade_l_d7_Claymore_5" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="40%" stop-color="#e2e8f0"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Broad blade shadow facet -->\n              <linearGradient id="cm_blade_s_d7_Claymore_5" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Heavy leather-wrapped grip -->\n                            <linearGradient id="cm_hilt_d7_Claymore_5" x1="0" y1="0" x2="1" y2="0">\n                              <stop offset="0%" stop-color="#8d5b38"/>\n                              <stop offset="35%" stop-color="#8d5b38"/>\n                              <stop offset="35%" stop-color="#5c3a21"/>\n                              <stop offset="70%" stop-color="#5c3a21"/>\n                              <stop offset="70%" stop-color="#3d1d0b"/>\n                              <stop offset="100%" stop-color="#221004"/>\n                            </linearGradient>\n            </defs>\n\n            <!-- Left Heavy Blade Side (Shadow Side) -->\n            <path d="M16 2 L13.5 3.5 L14 19 L16 19 Z" fill="url(#cm_blade_s_d7_Claymore_5)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Right Heavy Blade Side (Light Side) -->\n            <path d="M16 2 L18.5 3.5 L18 19 L16 19 Z" fill="url(#cm_blade_l_d7_Claymore_5)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Specular Highlight Sheen -->\n            <polygon points="16,2 18.0,3.5 17.2,18 16,18" fill="rgba(255,255,255,0.4)" />\n\n            <!-- Left Forward-Sloping Quillon -->\n            <path d="M16 19 L8.5 22.8 L9.2 24.6 L16 21.2 Z" fill="#e74c3c" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n            <circle cx="7.8" cy="23.4" r="1.8" fill="#e74c3c" stroke="#05070a" stroke-width="1.5" />\n\n            <!-- Right Forward-Sloping Quillon -->\n            <path d="M16 19 L23.5 22.8 L22.8 24.6 L16 21.2 Z" fill="#e74c3c" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n            <circle cx="24.2" cy="23.4" r="1.8" fill="#e74c3c" stroke="#05070a" stroke-width="1.5" />\n\n            <!-- Center Guard Block -->\n            <path d="M11.5 19h9v2.5h-9z" fill="#e74c3c" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Long Two-Handed Grip -->\n            <rect x="14.2" y="21.5" width="3.6" height="6.5" fill="url(#cm_hilt_d7_Claymore_5)" stroke="#05070a" stroke-width="1.5" />\n            <line x1="14.2" y1="23.2" x2="17.8" y2="23.2" stroke="#05070a" stroke-width="1" />\n            <line x1="14.2" y1="25.0" x2="17.8" y2="25.0" stroke="#05070a" stroke-width="1" />\n            <line x1="14.2" y1="26.8" x2="17.8" y2="26.8" stroke="#05070a" stroke-width="1" />\n\n            <!-- Weighted Wheel Pommel with Inset Rarity Gem -->\n            <circle cx="16" cy="29.8" r="2.8" fill="#55555d" stroke="#05070a" stroke-width="1.8" />\n            <circle cx="16" cy="29.8" r="1.5" fill="#e74c3c" stroke="#05070a" stroke-width="1.2" />\n            <circle cx="15.4" cy="29.2" r="0.5" fill="#ffffff" />\n          </svg>', "color": "#e74c3c", "source": "claymore", "bounds": { "x": 6, "y": 2, "width": 20.000001907348633, "height": 30.599998474121094 }, "visibleCenter": { "x": 16.000000953674316, "y": 17.299999237060547 }, "pivot": { "x": 16.000000953674316, "y": 32.599998474121094 } }, "d7/Kite Shield/0": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel rim gradient -->\n              <linearGradient id="ks_rim_d7_Kite_Shield_0" x1="0" y1="0" x2="0" y2="1">\n                <stop offset="0%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Inner plate light gradient -->\n              <linearGradient id="ks_face_l_d7_Kite_Shield_0" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Inner plate shadow gradient -->\n              <linearGradient id="ks_face_s_d7_Kite_Shield_0" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#1e293b"/>\n              </linearGradient>\n            </defs>\n\n            <!-- Outer Steel Rim -->\n            <path d="M7 5 Q16 3, 25 5 Q23 18, 16 29 Q9 18, 7 5 Z" fill="url(#ks_rim_d7_Kite_Shield_0)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Inner Plate (Shadow - Left side) -->\n            <path d="M16 5.5 Q11.5 4.5, 8.5 6 Q10.2 17.5, 16 27 Z" fill="url(#ks_face_s_d7_Kite_Shield_0)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Inner Plate (Light - Right side) -->\n            <path d="M16 5.5 Q20.5 4.5, 23.5 6 Q21.8 17.5, 16 27 Z" fill="url(#ks_face_l_d7_Kite_Shield_0)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Specular Highlight (Gleam) -->\n            <path d="M16 5.5 Q19.5 4.5, 21.5 6 Q20.2 15, 16 23 Z" fill="rgba(255,255,255,0.22)" />\n\n            <!-- Central Heraldic Cross (Scales with Rarity Color) -->\n            <path d="M15 8 H17 V12 H21 V14 H17 V24 H15 V14 H11 V12 H15 Z" fill="#ffffff" stroke="#05070a" stroke-width="1.2" stroke-linejoin="round" />\n\n            <!-- Center Core Gem Glistening -->\n            <circle cx="16" cy="13" r="1.5" fill="#ffffff" opacity="0.8" />\n\n            <!-- Steel Rim Rivets (Left side) -->\n            <circle cx="9" cy="7" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="10.5" cy="13" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="12.8" cy="19" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="14.8" cy="24" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n\n            <!-- Steel Rim Rivets (Right side) -->\n            <circle cx="23" cy="7" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="21.5" cy="13" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="19.2" cy="19" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="17.2" cy="24" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n          </svg>', "color": "#ffffff", "source": "kite_shield", "bounds": { "x": 7, "y": 4, "width": 18, "height": 25 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 29 } }, "d7/Kite Shield/1": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel rim gradient -->\n              <linearGradient id="ks_rim_d7_Kite_Shield_1" x1="0" y1="0" x2="0" y2="1">\n                <stop offset="0%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Inner plate light gradient -->\n              <linearGradient id="ks_face_l_d7_Kite_Shield_1" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Inner plate shadow gradient -->\n              <linearGradient id="ks_face_s_d7_Kite_Shield_1" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#1e293b"/>\n              </linearGradient>\n            </defs>\n\n            <!-- Outer Steel Rim -->\n            <path d="M7 5 Q16 3, 25 5 Q23 18, 16 29 Q9 18, 7 5 Z" fill="url(#ks_rim_d7_Kite_Shield_1)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Inner Plate (Shadow - Left side) -->\n            <path d="M16 5.5 Q11.5 4.5, 8.5 6 Q10.2 17.5, 16 27 Z" fill="url(#ks_face_s_d7_Kite_Shield_1)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Inner Plate (Light - Right side) -->\n            <path d="M16 5.5 Q20.5 4.5, 23.5 6 Q21.8 17.5, 16 27 Z" fill="url(#ks_face_l_d7_Kite_Shield_1)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Specular Highlight (Gleam) -->\n            <path d="M16 5.5 Q19.5 4.5, 21.5 6 Q20.2 15, 16 23 Z" fill="rgba(255,255,255,0.22)" />\n\n            <!-- Central Heraldic Cross (Scales with Rarity Color) -->\n            <path d="M15 8 H17 V12 H21 V14 H17 V24 H15 V14 H11 V12 H15 Z" fill="#3498db" stroke="#05070a" stroke-width="1.2" stroke-linejoin="round" />\n\n            <!-- Center Core Gem Glistening -->\n            <circle cx="16" cy="13" r="1.5" fill="#ffffff" opacity="0.8" />\n\n            <!-- Steel Rim Rivets (Left side) -->\n            <circle cx="9" cy="7" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="10.5" cy="13" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="12.8" cy="19" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="14.8" cy="24" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n\n            <!-- Steel Rim Rivets (Right side) -->\n            <circle cx="23" cy="7" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="21.5" cy="13" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="19.2" cy="19" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="17.2" cy="24" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n          </svg>', "color": "#3498db", "source": "kite_shield", "bounds": { "x": 7, "y": 4, "width": 18, "height": 25 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 29 } }, "d7/Kite Shield/2": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel rim gradient -->\n              <linearGradient id="ks_rim_d7_Kite_Shield_2" x1="0" y1="0" x2="0" y2="1">\n                <stop offset="0%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Inner plate light gradient -->\n              <linearGradient id="ks_face_l_d7_Kite_Shield_2" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Inner plate shadow gradient -->\n              <linearGradient id="ks_face_s_d7_Kite_Shield_2" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#1e293b"/>\n              </linearGradient>\n            </defs>\n\n            <!-- Outer Steel Rim -->\n            <path d="M7 5 Q16 3, 25 5 Q23 18, 16 29 Q9 18, 7 5 Z" fill="url(#ks_rim_d7_Kite_Shield_2)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Inner Plate (Shadow - Left side) -->\n            <path d="M16 5.5 Q11.5 4.5, 8.5 6 Q10.2 17.5, 16 27 Z" fill="url(#ks_face_s_d7_Kite_Shield_2)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Inner Plate (Light - Right side) -->\n            <path d="M16 5.5 Q20.5 4.5, 23.5 6 Q21.8 17.5, 16 27 Z" fill="url(#ks_face_l_d7_Kite_Shield_2)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Specular Highlight (Gleam) -->\n            <path d="M16 5.5 Q19.5 4.5, 21.5 6 Q20.2 15, 16 23 Z" fill="rgba(255,255,255,0.22)" />\n\n            <!-- Central Heraldic Cross (Scales with Rarity Color) -->\n            <path d="M15 8 H17 V12 H21 V14 H17 V24 H15 V14 H11 V12 H15 Z" fill="#9b59b6" stroke="#05070a" stroke-width="1.2" stroke-linejoin="round" />\n\n            <!-- Center Core Gem Glistening -->\n            <circle cx="16" cy="13" r="1.5" fill="#ffffff" opacity="0.8" />\n\n            <!-- Steel Rim Rivets (Left side) -->\n            <circle cx="9" cy="7" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="10.5" cy="13" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="12.8" cy="19" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="14.8" cy="24" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n\n            <!-- Steel Rim Rivets (Right side) -->\n            <circle cx="23" cy="7" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="21.5" cy="13" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="19.2" cy="19" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="17.2" cy="24" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n          </svg>', "color": "#9b59b6", "source": "kite_shield", "bounds": { "x": 7, "y": 4, "width": 18, "height": 25 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 29 } }, "d7/Kite Shield/3": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel rim gradient -->\n              <linearGradient id="ks_rim_d7_Kite_Shield_3" x1="0" y1="0" x2="0" y2="1">\n                <stop offset="0%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Inner plate light gradient -->\n              <linearGradient id="ks_face_l_d7_Kite_Shield_3" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Inner plate shadow gradient -->\n              <linearGradient id="ks_face_s_d7_Kite_Shield_3" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#1e293b"/>\n              </linearGradient>\n            </defs>\n\n            <!-- Outer Steel Rim -->\n            <path d="M7 5 Q16 3, 25 5 Q23 18, 16 29 Q9 18, 7 5 Z" fill="url(#ks_rim_d7_Kite_Shield_3)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Inner Plate (Shadow - Left side) -->\n            <path d="M16 5.5 Q11.5 4.5, 8.5 6 Q10.2 17.5, 16 27 Z" fill="url(#ks_face_s_d7_Kite_Shield_3)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Inner Plate (Light - Right side) -->\n            <path d="M16 5.5 Q20.5 4.5, 23.5 6 Q21.8 17.5, 16 27 Z" fill="url(#ks_face_l_d7_Kite_Shield_3)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Specular Highlight (Gleam) -->\n            <path d="M16 5.5 Q19.5 4.5, 21.5 6 Q20.2 15, 16 23 Z" fill="rgba(255,255,255,0.22)" />\n\n            <!-- Central Heraldic Cross (Scales with Rarity Color) -->\n            <path d="M15 8 H17 V12 H21 V14 H17 V24 H15 V14 H11 V12 H15 Z" fill="#e67e22" stroke="#05070a" stroke-width="1.2" stroke-linejoin="round" />\n\n            <!-- Center Core Gem Glistening -->\n            <circle cx="16" cy="13" r="1.5" fill="#ffffff" opacity="0.8" />\n\n            <!-- Steel Rim Rivets (Left side) -->\n            <circle cx="9" cy="7" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="10.5" cy="13" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="12.8" cy="19" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="14.8" cy="24" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n\n            <!-- Steel Rim Rivets (Right side) -->\n            <circle cx="23" cy="7" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="21.5" cy="13" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="19.2" cy="19" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="17.2" cy="24" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n          </svg>', "color": "#e67e22", "source": "kite_shield", "bounds": { "x": 7, "y": 4, "width": 18, "height": 25 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 29 } }, "d7/Kite Shield/4": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel rim gradient -->\n              <linearGradient id="ks_rim_d7_Kite_Shield_4" x1="0" y1="0" x2="0" y2="1">\n                <stop offset="0%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Inner plate light gradient -->\n              <linearGradient id="ks_face_l_d7_Kite_Shield_4" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Inner plate shadow gradient -->\n              <linearGradient id="ks_face_s_d7_Kite_Shield_4" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#1e293b"/>\n              </linearGradient>\n            </defs>\n\n            <!-- Outer Steel Rim -->\n            <path d="M7 5 Q16 3, 25 5 Q23 18, 16 29 Q9 18, 7 5 Z" fill="url(#ks_rim_d7_Kite_Shield_4)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Inner Plate (Shadow - Left side) -->\n            <path d="M16 5.5 Q11.5 4.5, 8.5 6 Q10.2 17.5, 16 27 Z" fill="url(#ks_face_s_d7_Kite_Shield_4)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Inner Plate (Light - Right side) -->\n            <path d="M16 5.5 Q20.5 4.5, 23.5 6 Q21.8 17.5, 16 27 Z" fill="url(#ks_face_l_d7_Kite_Shield_4)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Specular Highlight (Gleam) -->\n            <path d="M16 5.5 Q19.5 4.5, 21.5 6 Q20.2 15, 16 23 Z" fill="rgba(255,255,255,0.22)" />\n\n            <!-- Central Heraldic Cross (Scales with Rarity Color) -->\n            <path d="M15 8 H17 V12 H21 V14 H17 V24 H15 V14 H11 V12 H15 Z" fill="#f1c40f" stroke="#05070a" stroke-width="1.2" stroke-linejoin="round" />\n\n            <!-- Center Core Gem Glistening -->\n            <circle cx="16" cy="13" r="1.5" fill="#ffffff" opacity="0.8" />\n\n            <!-- Steel Rim Rivets (Left side) -->\n            <circle cx="9" cy="7" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="10.5" cy="13" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="12.8" cy="19" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="14.8" cy="24" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n\n            <!-- Steel Rim Rivets (Right side) -->\n            <circle cx="23" cy="7" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="21.5" cy="13" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="19.2" cy="19" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="17.2" cy="24" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n          </svg>', "color": "#f1c40f", "source": "kite_shield", "bounds": { "x": 7, "y": 4, "width": 18, "height": 25 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 29 } }, "d7/Kite Shield/5": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel rim gradient -->\n              <linearGradient id="ks_rim_d7_Kite_Shield_5" x1="0" y1="0" x2="0" y2="1">\n                <stop offset="0%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Inner plate light gradient -->\n              <linearGradient id="ks_face_l_d7_Kite_Shield_5" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Inner plate shadow gradient -->\n              <linearGradient id="ks_face_s_d7_Kite_Shield_5" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#1e293b"/>\n              </linearGradient>\n            </defs>\n\n            <!-- Outer Steel Rim -->\n            <path d="M7 5 Q16 3, 25 5 Q23 18, 16 29 Q9 18, 7 5 Z" fill="url(#ks_rim_d7_Kite_Shield_5)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Inner Plate (Shadow - Left side) -->\n            <path d="M16 5.5 Q11.5 4.5, 8.5 6 Q10.2 17.5, 16 27 Z" fill="url(#ks_face_s_d7_Kite_Shield_5)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Inner Plate (Light - Right side) -->\n            <path d="M16 5.5 Q20.5 4.5, 23.5 6 Q21.8 17.5, 16 27 Z" fill="url(#ks_face_l_d7_Kite_Shield_5)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Specular Highlight (Gleam) -->\n            <path d="M16 5.5 Q19.5 4.5, 21.5 6 Q20.2 15, 16 23 Z" fill="rgba(255,255,255,0.22)" />\n\n            <!-- Central Heraldic Cross (Scales with Rarity Color) -->\n            <path d="M15 8 H17 V12 H21 V14 H17 V24 H15 V14 H11 V12 H15 Z" fill="#e74c3c" stroke="#05070a" stroke-width="1.2" stroke-linejoin="round" />\n\n            <!-- Center Core Gem Glistening -->\n            <circle cx="16" cy="13" r="1.5" fill="#ffffff" opacity="0.8" />\n\n            <!-- Steel Rim Rivets (Left side) -->\n            <circle cx="9" cy="7" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="10.5" cy="13" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="12.8" cy="19" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="14.8" cy="24" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n\n            <!-- Steel Rim Rivets (Right side) -->\n            <circle cx="23" cy="7" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="21.5" cy="13" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="19.2" cy="19" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="17.2" cy="24" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n          </svg>', "color": "#e74c3c", "source": "kite_shield", "bounds": { "x": 7, "y": 4, "width": 18, "height": 25 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 29 } }, "d7/Tower Shield/0": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Heavy steel rim gradient -->\n              <linearGradient id="ts_rim_d7_Tower_Shield_0" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#cbd5e1"/>\n                <stop offset="50%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#334155"/>\n              </linearGradient>\n              <!-- Face light gradient -->\n              <linearGradient id="ts_face_l_d7_Tower_Shield_0" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#475569"/>\n                <stop offset="100%" stop-color="#1e293b"/>\n              </linearGradient>\n              <!-- Face shadow gradient -->\n              <linearGradient id="ts_face_s_d7_Tower_Shield_0" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#1e293b"/>\n                <stop offset="100%" stop-color="#0f172a"/>\n              </linearGradient>\n            </defs>\n\n            <!-- Heavy Rectangular Rim -->\n            <rect x="7" y="4" width="18" height="24" rx="3" fill="url(#ts_rim_d7_Tower_Shield_0)" stroke="#05070a" stroke-width="1.8" />\n\n            <!-- Inner Plate (Shadow - Left side) -->\n            <path d="M16 6 V26 H9.5 V6 Z" fill="url(#ts_face_s_d7_Tower_Shield_0)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Inner Plate (Light - Right side) -->\n            <path d="M16 6 V26 H22.5 V6 Z" fill="url(#ts_face_l_d7_Tower_Shield_0)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Specular Highlight (Gleam) -->\n            <polygon points="16,6.5 21,6.5 21,25.5 16,25.5" fill="rgba(255,255,255,0.15)" />\n\n            <!-- Reinforced Horizontal Plate Band (Rarity Colored) -->\n            <path d="M7 14.5 H25 V17.5 H7 Z" fill="#ffffff" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Reinforced Vertical Plate Band (Rarity Colored) -->\n            <path d="M14.5 4 H17.5 V28 H14.5 Z" fill="#ffffff" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Heavy Central Boss Dome -->\n            <circle cx="16" cy="16" r="3.8" fill="url(#ts_rim_d7_Tower_Shield_0)" stroke="#05070a" stroke-width="1.5" />\n            <circle cx="16" cy="16" r="1.8" fill="#ffffff" stroke="#05070a" stroke-width="1.2" />\n            <circle cx="15.2" cy="15.2" r="0.6" fill="#ffffff" />\n\n            <!-- Heavy Corner Rivets (Left) -->\n            <circle cx="9" cy="6" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="9" cy="16" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="9" cy="26" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n\n            <!-- Heavy Corner Rivets (Right) -->\n            <circle cx="23" cy="6" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="23" cy="16" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="23" cy="26" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n          </svg>', "color": "#ffffff", "source": "tower_shield", "bounds": { "x": 7, "y": 4, "width": 18, "height": 24 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 28 } }, "d7/Tower Shield/1": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Heavy steel rim gradient -->\n              <linearGradient id="ts_rim_d7_Tower_Shield_1" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#cbd5e1"/>\n                <stop offset="50%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#334155"/>\n              </linearGradient>\n              <!-- Face light gradient -->\n              <linearGradient id="ts_face_l_d7_Tower_Shield_1" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#475569"/>\n                <stop offset="100%" stop-color="#1e293b"/>\n              </linearGradient>\n              <!-- Face shadow gradient -->\n              <linearGradient id="ts_face_s_d7_Tower_Shield_1" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#1e293b"/>\n                <stop offset="100%" stop-color="#0f172a"/>\n              </linearGradient>\n            </defs>\n\n            <!-- Heavy Rectangular Rim -->\n            <rect x="7" y="4" width="18" height="24" rx="3" fill="url(#ts_rim_d7_Tower_Shield_1)" stroke="#05070a" stroke-width="1.8" />\n\n            <!-- Inner Plate (Shadow - Left side) -->\n            <path d="M16 6 V26 H9.5 V6 Z" fill="url(#ts_face_s_d7_Tower_Shield_1)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Inner Plate (Light - Right side) -->\n            <path d="M16 6 V26 H22.5 V6 Z" fill="url(#ts_face_l_d7_Tower_Shield_1)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Specular Highlight (Gleam) -->\n            <polygon points="16,6.5 21,6.5 21,25.5 16,25.5" fill="rgba(255,255,255,0.15)" />\n\n            <!-- Reinforced Horizontal Plate Band (Rarity Colored) -->\n            <path d="M7 14.5 H25 V17.5 H7 Z" fill="#3498db" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Reinforced Vertical Plate Band (Rarity Colored) -->\n            <path d="M14.5 4 H17.5 V28 H14.5 Z" fill="#3498db" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Heavy Central Boss Dome -->\n            <circle cx="16" cy="16" r="3.8" fill="url(#ts_rim_d7_Tower_Shield_1)" stroke="#05070a" stroke-width="1.5" />\n            <circle cx="16" cy="16" r="1.8" fill="#3498db" stroke="#05070a" stroke-width="1.2" />\n            <circle cx="15.2" cy="15.2" r="0.6" fill="#ffffff" />\n\n            <!-- Heavy Corner Rivets (Left) -->\n            <circle cx="9" cy="6" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="9" cy="16" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="9" cy="26" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n\n            <!-- Heavy Corner Rivets (Right) -->\n            <circle cx="23" cy="6" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="23" cy="16" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="23" cy="26" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n          </svg>', "color": "#3498db", "source": "tower_shield", "bounds": { "x": 7, "y": 4, "width": 18, "height": 24 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 28 } }, "d7/Tower Shield/2": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Heavy steel rim gradient -->\n              <linearGradient id="ts_rim_d7_Tower_Shield_2" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#cbd5e1"/>\n                <stop offset="50%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#334155"/>\n              </linearGradient>\n              <!-- Face light gradient -->\n              <linearGradient id="ts_face_l_d7_Tower_Shield_2" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#475569"/>\n                <stop offset="100%" stop-color="#1e293b"/>\n              </linearGradient>\n              <!-- Face shadow gradient -->\n              <linearGradient id="ts_face_s_d7_Tower_Shield_2" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#1e293b"/>\n                <stop offset="100%" stop-color="#0f172a"/>\n              </linearGradient>\n            </defs>\n\n            <!-- Heavy Rectangular Rim -->\n            <rect x="7" y="4" width="18" height="24" rx="3" fill="url(#ts_rim_d7_Tower_Shield_2)" stroke="#05070a" stroke-width="1.8" />\n\n            <!-- Inner Plate (Shadow - Left side) -->\n            <path d="M16 6 V26 H9.5 V6 Z" fill="url(#ts_face_s_d7_Tower_Shield_2)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Inner Plate (Light - Right side) -->\n            <path d="M16 6 V26 H22.5 V6 Z" fill="url(#ts_face_l_d7_Tower_Shield_2)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Specular Highlight (Gleam) -->\n            <polygon points="16,6.5 21,6.5 21,25.5 16,25.5" fill="rgba(255,255,255,0.15)" />\n\n            <!-- Reinforced Horizontal Plate Band (Rarity Colored) -->\n            <path d="M7 14.5 H25 V17.5 H7 Z" fill="#9b59b6" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Reinforced Vertical Plate Band (Rarity Colored) -->\n            <path d="M14.5 4 H17.5 V28 H14.5 Z" fill="#9b59b6" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Heavy Central Boss Dome -->\n            <circle cx="16" cy="16" r="3.8" fill="url(#ts_rim_d7_Tower_Shield_2)" stroke="#05070a" stroke-width="1.5" />\n            <circle cx="16" cy="16" r="1.8" fill="#9b59b6" stroke="#05070a" stroke-width="1.2" />\n            <circle cx="15.2" cy="15.2" r="0.6" fill="#ffffff" />\n\n            <!-- Heavy Corner Rivets (Left) -->\n            <circle cx="9" cy="6" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="9" cy="16" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="9" cy="26" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n\n            <!-- Heavy Corner Rivets (Right) -->\n            <circle cx="23" cy="6" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="23" cy="16" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="23" cy="26" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n          </svg>', "color": "#9b59b6", "source": "tower_shield", "bounds": { "x": 7, "y": 4, "width": 18, "height": 24 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 28 } }, "d7/Tower Shield/3": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Heavy steel rim gradient -->\n              <linearGradient id="ts_rim_d7_Tower_Shield_3" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#cbd5e1"/>\n                <stop offset="50%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#334155"/>\n              </linearGradient>\n              <!-- Face light gradient -->\n              <linearGradient id="ts_face_l_d7_Tower_Shield_3" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#475569"/>\n                <stop offset="100%" stop-color="#1e293b"/>\n              </linearGradient>\n              <!-- Face shadow gradient -->\n              <linearGradient id="ts_face_s_d7_Tower_Shield_3" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#1e293b"/>\n                <stop offset="100%" stop-color="#0f172a"/>\n              </linearGradient>\n            </defs>\n\n            <!-- Heavy Rectangular Rim -->\n            <rect x="7" y="4" width="18" height="24" rx="3" fill="url(#ts_rim_d7_Tower_Shield_3)" stroke="#05070a" stroke-width="1.8" />\n\n            <!-- Inner Plate (Shadow - Left side) -->\n            <path d="M16 6 V26 H9.5 V6 Z" fill="url(#ts_face_s_d7_Tower_Shield_3)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Inner Plate (Light - Right side) -->\n            <path d="M16 6 V26 H22.5 V6 Z" fill="url(#ts_face_l_d7_Tower_Shield_3)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Specular Highlight (Gleam) -->\n            <polygon points="16,6.5 21,6.5 21,25.5 16,25.5" fill="rgba(255,255,255,0.15)" />\n\n            <!-- Reinforced Horizontal Plate Band (Rarity Colored) -->\n            <path d="M7 14.5 H25 V17.5 H7 Z" fill="#e67e22" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Reinforced Vertical Plate Band (Rarity Colored) -->\n            <path d="M14.5 4 H17.5 V28 H14.5 Z" fill="#e67e22" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Heavy Central Boss Dome -->\n            <circle cx="16" cy="16" r="3.8" fill="url(#ts_rim_d7_Tower_Shield_3)" stroke="#05070a" stroke-width="1.5" />\n            <circle cx="16" cy="16" r="1.8" fill="#e67e22" stroke="#05070a" stroke-width="1.2" />\n            <circle cx="15.2" cy="15.2" r="0.6" fill="#ffffff" />\n\n            <!-- Heavy Corner Rivets (Left) -->\n            <circle cx="9" cy="6" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="9" cy="16" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="9" cy="26" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n\n            <!-- Heavy Corner Rivets (Right) -->\n            <circle cx="23" cy="6" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="23" cy="16" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="23" cy="26" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n          </svg>', "color": "#e67e22", "source": "tower_shield", "bounds": { "x": 7, "y": 4, "width": 18, "height": 24 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 28 } }, "d7/Tower Shield/4": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Heavy steel rim gradient -->\n              <linearGradient id="ts_rim_d7_Tower_Shield_4" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#cbd5e1"/>\n                <stop offset="50%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#334155"/>\n              </linearGradient>\n              <!-- Face light gradient -->\n              <linearGradient id="ts_face_l_d7_Tower_Shield_4" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#475569"/>\n                <stop offset="100%" stop-color="#1e293b"/>\n              </linearGradient>\n              <!-- Face shadow gradient -->\n              <linearGradient id="ts_face_s_d7_Tower_Shield_4" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#1e293b"/>\n                <stop offset="100%" stop-color="#0f172a"/>\n              </linearGradient>\n            </defs>\n\n            <!-- Heavy Rectangular Rim -->\n            <rect x="7" y="4" width="18" height="24" rx="3" fill="url(#ts_rim_d7_Tower_Shield_4)" stroke="#05070a" stroke-width="1.8" />\n\n            <!-- Inner Plate (Shadow - Left side) -->\n            <path d="M16 6 V26 H9.5 V6 Z" fill="url(#ts_face_s_d7_Tower_Shield_4)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Inner Plate (Light - Right side) -->\n            <path d="M16 6 V26 H22.5 V6 Z" fill="url(#ts_face_l_d7_Tower_Shield_4)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Specular Highlight (Gleam) -->\n            <polygon points="16,6.5 21,6.5 21,25.5 16,25.5" fill="rgba(255,255,255,0.15)" />\n\n            <!-- Reinforced Horizontal Plate Band (Rarity Colored) -->\n            <path d="M7 14.5 H25 V17.5 H7 Z" fill="#f1c40f" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Reinforced Vertical Plate Band (Rarity Colored) -->\n            <path d="M14.5 4 H17.5 V28 H14.5 Z" fill="#f1c40f" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Heavy Central Boss Dome -->\n            <circle cx="16" cy="16" r="3.8" fill="url(#ts_rim_d7_Tower_Shield_4)" stroke="#05070a" stroke-width="1.5" />\n            <circle cx="16" cy="16" r="1.8" fill="#f1c40f" stroke="#05070a" stroke-width="1.2" />\n            <circle cx="15.2" cy="15.2" r="0.6" fill="#ffffff" />\n\n            <!-- Heavy Corner Rivets (Left) -->\n            <circle cx="9" cy="6" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="9" cy="16" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="9" cy="26" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n\n            <!-- Heavy Corner Rivets (Right) -->\n            <circle cx="23" cy="6" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="23" cy="16" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="23" cy="26" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n          </svg>', "color": "#f1c40f", "source": "tower_shield", "bounds": { "x": 7, "y": 4, "width": 18, "height": 24 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 28 } }, "d7/Tower Shield/5": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Heavy steel rim gradient -->\n              <linearGradient id="ts_rim_d7_Tower_Shield_5" x1="0" y1="0" x2="1" y2="0">\n                <stop offset="0%" stop-color="#cbd5e1"/>\n                <stop offset="50%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#334155"/>\n              </linearGradient>\n              <!-- Face light gradient -->\n              <linearGradient id="ts_face_l_d7_Tower_Shield_5" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#475569"/>\n                <stop offset="100%" stop-color="#1e293b"/>\n              </linearGradient>\n              <!-- Face shadow gradient -->\n              <linearGradient id="ts_face_s_d7_Tower_Shield_5" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#1e293b"/>\n                <stop offset="100%" stop-color="#0f172a"/>\n              </linearGradient>\n            </defs>\n\n            <!-- Heavy Rectangular Rim -->\n            <rect x="7" y="4" width="18" height="24" rx="3" fill="url(#ts_rim_d7_Tower_Shield_5)" stroke="#05070a" stroke-width="1.8" />\n\n            <!-- Inner Plate (Shadow - Left side) -->\n            <path d="M16 6 V26 H9.5 V6 Z" fill="url(#ts_face_s_d7_Tower_Shield_5)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Inner Plate (Light - Right side) -->\n            <path d="M16 6 V26 H22.5 V6 Z" fill="url(#ts_face_l_d7_Tower_Shield_5)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Specular Highlight (Gleam) -->\n            <polygon points="16,6.5 21,6.5 21,25.5 16,25.5" fill="rgba(255,255,255,0.15)" />\n\n            <!-- Reinforced Horizontal Plate Band (Rarity Colored) -->\n            <path d="M7 14.5 H25 V17.5 H7 Z" fill="#e74c3c" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Reinforced Vertical Plate Band (Rarity Colored) -->\n            <path d="M14.5 4 H17.5 V28 H14.5 Z" fill="#e74c3c" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n            <!-- Heavy Central Boss Dome -->\n            <circle cx="16" cy="16" r="3.8" fill="url(#ts_rim_d7_Tower_Shield_5)" stroke="#05070a" stroke-width="1.5" />\n            <circle cx="16" cy="16" r="1.8" fill="#e74c3c" stroke="#05070a" stroke-width="1.2" />\n            <circle cx="15.2" cy="15.2" r="0.6" fill="#ffffff" />\n\n            <!-- Heavy Corner Rivets (Left) -->\n            <circle cx="9" cy="6" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="9" cy="16" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="9" cy="26" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n\n            <!-- Heavy Corner Rivets (Right) -->\n            <circle cx="23" cy="6" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="23" cy="16" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="23" cy="26" r="1.2" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n          </svg>', "color": "#e74c3c", "source": "tower_shield", "bounds": { "x": 7, "y": 4, "width": 18, "height": 24 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 28 } }, "d7/Buckler/0": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel rim gradient -->\n              <linearGradient id="bk_rim_d7_Buckler_0" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Inner face light gradient -->\n              <linearGradient id="bk_face_l_d7_Buckler_0" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Inner face shadow gradient -->\n              <linearGradient id="bk_face_s_d7_Buckler_0" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#1e293b"/>\n              </linearGradient>\n            </defs>\n\n            <!-- Outer Steel Rim -->\n            <circle cx="16" cy="16" r="11" fill="url(#bk_rim_d7_Buckler_0)" stroke="#05070a" stroke-width="1.8" />\n\n            <!-- Inner Face (Shadow - Left side) -->\n            <circle cx="16" cy="16" r="8.2" fill="url(#bk_face_s_d7_Buckler_0)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Inner Face (Light - Right side, drawn via arc boundary) -->\n            <path d="M16 7.8 A8.2 8.2 0 0 1 16 24.2 Z" fill="url(#bk_face_l_d7_Buckler_0)" />\n\n            <!-- Specular Highlight (Gleam) -->\n            <path d="M16 7.8 A8.2 8.2 0 0 1 21.8 11.8 Z" fill="rgba(255,255,255,0.22)" />\n\n            <!-- Radiating Reinforcing Spikes (Crosshair array, Rarity Colored) -->\n            <!-- Top Spike -->\n            <polygon points="16,4.5 17.5,8 14.5,8" fill="#ffffff" stroke="#05070a" stroke-width="1.0" stroke-linejoin="round" />\n            <!-- Right Spike -->\n            <polygon points="27.5,16 24,17.5 24,14.5" fill="#ffffff" stroke="#05070a" stroke-width="1.0" stroke-linejoin="round" />\n            <!-- Bottom Spike -->\n            <polygon points="16,27.5 17.5,24 14.5,24" fill="#ffffff" stroke="#05070a" stroke-width="1.0" stroke-linejoin="round" />\n            <!-- Left Spike -->\n            <polygon points="4.5,16 8,17.5 8,14.5" fill="#ffffff" stroke="#05070a" stroke-width="1.0" stroke-linejoin="round" />\n\n            <!-- Central Heavy Steel Boss Dome -->\n            <circle cx="16" cy="16" r="4.2" fill="url(#bk_rim_d7_Buckler_0)" stroke="#05070a" stroke-width="1.2" />\n            <circle cx="16" cy="16" r="2.2" fill="#ffffff" stroke="#05070a" stroke-width="1.0" />\n            <circle cx="15.2" cy="15.2" r="0.6" fill="#ffffff" />\n\n            <!-- Spike Rivets -->\n            <circle cx="16" cy="10" r="0.8" fill="#cbd5e1" stroke="#05070a" stroke-width="0.5" />\n            <circle cx="22" cy="16" r="0.8" fill="#cbd5e1" stroke="#05070a" stroke-width="0.5" />\n            <circle cx="16" cy="22" r="0.8" fill="#cbd5e1" stroke="#05070a" stroke-width="0.5" />\n            <circle cx="10" cy="16" r="0.8" fill="#cbd5e1" stroke="#05070a" stroke-width="0.5" />\n          </svg>', "color": "#ffffff", "source": "buckler", "bounds": { "x": 4.5, "y": 4.5, "width": 23, "height": 23 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 27.5 } }, "d7/Buckler/1": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel rim gradient -->\n              <linearGradient id="bk_rim_d7_Buckler_1" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Inner face light gradient -->\n              <linearGradient id="bk_face_l_d7_Buckler_1" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Inner face shadow gradient -->\n              <linearGradient id="bk_face_s_d7_Buckler_1" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#1e293b"/>\n              </linearGradient>\n            </defs>\n\n            <!-- Outer Steel Rim -->\n            <circle cx="16" cy="16" r="11" fill="url(#bk_rim_d7_Buckler_1)" stroke="#05070a" stroke-width="1.8" />\n\n            <!-- Inner Face (Shadow - Left side) -->\n            <circle cx="16" cy="16" r="8.2" fill="url(#bk_face_s_d7_Buckler_1)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Inner Face (Light - Right side, drawn via arc boundary) -->\n            <path d="M16 7.8 A8.2 8.2 0 0 1 16 24.2 Z" fill="url(#bk_face_l_d7_Buckler_1)" />\n\n            <!-- Specular Highlight (Gleam) -->\n            <path d="M16 7.8 A8.2 8.2 0 0 1 21.8 11.8 Z" fill="rgba(255,255,255,0.22)" />\n\n            <!-- Radiating Reinforcing Spikes (Crosshair array, Rarity Colored) -->\n            <!-- Top Spike -->\n            <polygon points="16,4.5 17.5,8 14.5,8" fill="#3498db" stroke="#05070a" stroke-width="1.0" stroke-linejoin="round" />\n            <!-- Right Spike -->\n            <polygon points="27.5,16 24,17.5 24,14.5" fill="#3498db" stroke="#05070a" stroke-width="1.0" stroke-linejoin="round" />\n            <!-- Bottom Spike -->\n            <polygon points="16,27.5 17.5,24 14.5,24" fill="#3498db" stroke="#05070a" stroke-width="1.0" stroke-linejoin="round" />\n            <!-- Left Spike -->\n            <polygon points="4.5,16 8,17.5 8,14.5" fill="#3498db" stroke="#05070a" stroke-width="1.0" stroke-linejoin="round" />\n\n            <!-- Central Heavy Steel Boss Dome -->\n            <circle cx="16" cy="16" r="4.2" fill="url(#bk_rim_d7_Buckler_1)" stroke="#05070a" stroke-width="1.2" />\n            <circle cx="16" cy="16" r="2.2" fill="#3498db" stroke="#05070a" stroke-width="1.0" />\n            <circle cx="15.2" cy="15.2" r="0.6" fill="#ffffff" />\n\n            <!-- Spike Rivets -->\n            <circle cx="16" cy="10" r="0.8" fill="#cbd5e1" stroke="#05070a" stroke-width="0.5" />\n            <circle cx="22" cy="16" r="0.8" fill="#cbd5e1" stroke="#05070a" stroke-width="0.5" />\n            <circle cx="16" cy="22" r="0.8" fill="#cbd5e1" stroke="#05070a" stroke-width="0.5" />\n            <circle cx="10" cy="16" r="0.8" fill="#cbd5e1" stroke="#05070a" stroke-width="0.5" />\n          </svg>', "color": "#3498db", "source": "buckler", "bounds": { "x": 4.5, "y": 4.5, "width": 23, "height": 23 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 27.5 } }, "d7/Buckler/2": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel rim gradient -->\n              <linearGradient id="bk_rim_d7_Buckler_2" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Inner face light gradient -->\n              <linearGradient id="bk_face_l_d7_Buckler_2" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Inner face shadow gradient -->\n              <linearGradient id="bk_face_s_d7_Buckler_2" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#1e293b"/>\n              </linearGradient>\n            </defs>\n\n            <!-- Outer Steel Rim -->\n            <circle cx="16" cy="16" r="11" fill="url(#bk_rim_d7_Buckler_2)" stroke="#05070a" stroke-width="1.8" />\n\n            <!-- Inner Face (Shadow - Left side) -->\n            <circle cx="16" cy="16" r="8.2" fill="url(#bk_face_s_d7_Buckler_2)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Inner Face (Light - Right side, drawn via arc boundary) -->\n            <path d="M16 7.8 A8.2 8.2 0 0 1 16 24.2 Z" fill="url(#bk_face_l_d7_Buckler_2)" />\n\n            <!-- Specular Highlight (Gleam) -->\n            <path d="M16 7.8 A8.2 8.2 0 0 1 21.8 11.8 Z" fill="rgba(255,255,255,0.22)" />\n\n            <!-- Radiating Reinforcing Spikes (Crosshair array, Rarity Colored) -->\n            <!-- Top Spike -->\n            <polygon points="16,4.5 17.5,8 14.5,8" fill="#9b59b6" stroke="#05070a" stroke-width="1.0" stroke-linejoin="round" />\n            <!-- Right Spike -->\n            <polygon points="27.5,16 24,17.5 24,14.5" fill="#9b59b6" stroke="#05070a" stroke-width="1.0" stroke-linejoin="round" />\n            <!-- Bottom Spike -->\n            <polygon points="16,27.5 17.5,24 14.5,24" fill="#9b59b6" stroke="#05070a" stroke-width="1.0" stroke-linejoin="round" />\n            <!-- Left Spike -->\n            <polygon points="4.5,16 8,17.5 8,14.5" fill="#9b59b6" stroke="#05070a" stroke-width="1.0" stroke-linejoin="round" />\n\n            <!-- Central Heavy Steel Boss Dome -->\n            <circle cx="16" cy="16" r="4.2" fill="url(#bk_rim_d7_Buckler_2)" stroke="#05070a" stroke-width="1.2" />\n            <circle cx="16" cy="16" r="2.2" fill="#9b59b6" stroke="#05070a" stroke-width="1.0" />\n            <circle cx="15.2" cy="15.2" r="0.6" fill="#ffffff" />\n\n            <!-- Spike Rivets -->\n            <circle cx="16" cy="10" r="0.8" fill="#cbd5e1" stroke="#05070a" stroke-width="0.5" />\n            <circle cx="22" cy="16" r="0.8" fill="#cbd5e1" stroke="#05070a" stroke-width="0.5" />\n            <circle cx="16" cy="22" r="0.8" fill="#cbd5e1" stroke="#05070a" stroke-width="0.5" />\n            <circle cx="10" cy="16" r="0.8" fill="#cbd5e1" stroke="#05070a" stroke-width="0.5" />\n          </svg>', "color": "#9b59b6", "source": "buckler", "bounds": { "x": 4.5, "y": 4.5, "width": 23, "height": 23 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 27.5 } }, "d7/Buckler/3": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel rim gradient -->\n              <linearGradient id="bk_rim_d7_Buckler_3" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Inner face light gradient -->\n              <linearGradient id="bk_face_l_d7_Buckler_3" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Inner face shadow gradient -->\n              <linearGradient id="bk_face_s_d7_Buckler_3" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#1e293b"/>\n              </linearGradient>\n            </defs>\n\n            <!-- Outer Steel Rim -->\n            <circle cx="16" cy="16" r="11" fill="url(#bk_rim_d7_Buckler_3)" stroke="#05070a" stroke-width="1.8" />\n\n            <!-- Inner Face (Shadow - Left side) -->\n            <circle cx="16" cy="16" r="8.2" fill="url(#bk_face_s_d7_Buckler_3)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Inner Face (Light - Right side, drawn via arc boundary) -->\n            <path d="M16 7.8 A8.2 8.2 0 0 1 16 24.2 Z" fill="url(#bk_face_l_d7_Buckler_3)" />\n\n            <!-- Specular Highlight (Gleam) -->\n            <path d="M16 7.8 A8.2 8.2 0 0 1 21.8 11.8 Z" fill="rgba(255,255,255,0.22)" />\n\n            <!-- Radiating Reinforcing Spikes (Crosshair array, Rarity Colored) -->\n            <!-- Top Spike -->\n            <polygon points="16,4.5 17.5,8 14.5,8" fill="#e67e22" stroke="#05070a" stroke-width="1.0" stroke-linejoin="round" />\n            <!-- Right Spike -->\n            <polygon points="27.5,16 24,17.5 24,14.5" fill="#e67e22" stroke="#05070a" stroke-width="1.0" stroke-linejoin="round" />\n            <!-- Bottom Spike -->\n            <polygon points="16,27.5 17.5,24 14.5,24" fill="#e67e22" stroke="#05070a" stroke-width="1.0" stroke-linejoin="round" />\n            <!-- Left Spike -->\n            <polygon points="4.5,16 8,17.5 8,14.5" fill="#e67e22" stroke="#05070a" stroke-width="1.0" stroke-linejoin="round" />\n\n            <!-- Central Heavy Steel Boss Dome -->\n            <circle cx="16" cy="16" r="4.2" fill="url(#bk_rim_d7_Buckler_3)" stroke="#05070a" stroke-width="1.2" />\n            <circle cx="16" cy="16" r="2.2" fill="#e67e22" stroke="#05070a" stroke-width="1.0" />\n            <circle cx="15.2" cy="15.2" r="0.6" fill="#ffffff" />\n\n            <!-- Spike Rivets -->\n            <circle cx="16" cy="10" r="0.8" fill="#cbd5e1" stroke="#05070a" stroke-width="0.5" />\n            <circle cx="22" cy="16" r="0.8" fill="#cbd5e1" stroke="#05070a" stroke-width="0.5" />\n            <circle cx="16" cy="22" r="0.8" fill="#cbd5e1" stroke="#05070a" stroke-width="0.5" />\n            <circle cx="10" cy="16" r="0.8" fill="#cbd5e1" stroke="#05070a" stroke-width="0.5" />\n          </svg>', "color": "#e67e22", "source": "buckler", "bounds": { "x": 4.5, "y": 4.5, "width": 23, "height": 23 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 27.5 } }, "d7/Buckler/4": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel rim gradient -->\n              <linearGradient id="bk_rim_d7_Buckler_4" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Inner face light gradient -->\n              <linearGradient id="bk_face_l_d7_Buckler_4" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Inner face shadow gradient -->\n              <linearGradient id="bk_face_s_d7_Buckler_4" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#1e293b"/>\n              </linearGradient>\n            </defs>\n\n            <!-- Outer Steel Rim -->\n            <circle cx="16" cy="16" r="11" fill="url(#bk_rim_d7_Buckler_4)" stroke="#05070a" stroke-width="1.8" />\n\n            <!-- Inner Face (Shadow - Left side) -->\n            <circle cx="16" cy="16" r="8.2" fill="url(#bk_face_s_d7_Buckler_4)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Inner Face (Light - Right side, drawn via arc boundary) -->\n            <path d="M16 7.8 A8.2 8.2 0 0 1 16 24.2 Z" fill="url(#bk_face_l_d7_Buckler_4)" />\n\n            <!-- Specular Highlight (Gleam) -->\n            <path d="M16 7.8 A8.2 8.2 0 0 1 21.8 11.8 Z" fill="rgba(255,255,255,0.22)" />\n\n            <!-- Radiating Reinforcing Spikes (Crosshair array, Rarity Colored) -->\n            <!-- Top Spike -->\n            <polygon points="16,4.5 17.5,8 14.5,8" fill="#f1c40f" stroke="#05070a" stroke-width="1.0" stroke-linejoin="round" />\n            <!-- Right Spike -->\n            <polygon points="27.5,16 24,17.5 24,14.5" fill="#f1c40f" stroke="#05070a" stroke-width="1.0" stroke-linejoin="round" />\n            <!-- Bottom Spike -->\n            <polygon points="16,27.5 17.5,24 14.5,24" fill="#f1c40f" stroke="#05070a" stroke-width="1.0" stroke-linejoin="round" />\n            <!-- Left Spike -->\n            <polygon points="4.5,16 8,17.5 8,14.5" fill="#f1c40f" stroke="#05070a" stroke-width="1.0" stroke-linejoin="round" />\n\n            <!-- Central Heavy Steel Boss Dome -->\n            <circle cx="16" cy="16" r="4.2" fill="url(#bk_rim_d7_Buckler_4)" stroke="#05070a" stroke-width="1.2" />\n            <circle cx="16" cy="16" r="2.2" fill="#f1c40f" stroke="#05070a" stroke-width="1.0" />\n            <circle cx="15.2" cy="15.2" r="0.6" fill="#ffffff" />\n\n            <!-- Spike Rivets -->\n            <circle cx="16" cy="10" r="0.8" fill="#cbd5e1" stroke="#05070a" stroke-width="0.5" />\n            <circle cx="22" cy="16" r="0.8" fill="#cbd5e1" stroke="#05070a" stroke-width="0.5" />\n            <circle cx="16" cy="22" r="0.8" fill="#cbd5e1" stroke="#05070a" stroke-width="0.5" />\n            <circle cx="10" cy="16" r="0.8" fill="#cbd5e1" stroke="#05070a" stroke-width="0.5" />\n          </svg>', "color": "#f1c40f", "source": "buckler", "bounds": { "x": 4.5, "y": 4.5, "width": 23, "height": 23 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 27.5 } }, "d7/Buckler/5": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel rim gradient -->\n              <linearGradient id="bk_rim_d7_Buckler_5" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Inner face light gradient -->\n              <linearGradient id="bk_face_l_d7_Buckler_5" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Inner face shadow gradient -->\n              <linearGradient id="bk_face_s_d7_Buckler_5" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#1e293b"/>\n              </linearGradient>\n            </defs>\n\n            <!-- Outer Steel Rim -->\n            <circle cx="16" cy="16" r="11" fill="url(#bk_rim_d7_Buckler_5)" stroke="#05070a" stroke-width="1.8" />\n\n            <!-- Inner Face (Shadow - Left side) -->\n            <circle cx="16" cy="16" r="8.2" fill="url(#bk_face_s_d7_Buckler_5)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Inner Face (Light - Right side, drawn via arc boundary) -->\n            <path d="M16 7.8 A8.2 8.2 0 0 1 16 24.2 Z" fill="url(#bk_face_l_d7_Buckler_5)" />\n\n            <!-- Specular Highlight (Gleam) -->\n            <path d="M16 7.8 A8.2 8.2 0 0 1 21.8 11.8 Z" fill="rgba(255,255,255,0.22)" />\n\n            <!-- Radiating Reinforcing Spikes (Crosshair array, Rarity Colored) -->\n            <!-- Top Spike -->\n            <polygon points="16,4.5 17.5,8 14.5,8" fill="#e74c3c" stroke="#05070a" stroke-width="1.0" stroke-linejoin="round" />\n            <!-- Right Spike -->\n            <polygon points="27.5,16 24,17.5 24,14.5" fill="#e74c3c" stroke="#05070a" stroke-width="1.0" stroke-linejoin="round" />\n            <!-- Bottom Spike -->\n            <polygon points="16,27.5 17.5,24 14.5,24" fill="#e74c3c" stroke="#05070a" stroke-width="1.0" stroke-linejoin="round" />\n            <!-- Left Spike -->\n            <polygon points="4.5,16 8,17.5 8,14.5" fill="#e74c3c" stroke="#05070a" stroke-width="1.0" stroke-linejoin="round" />\n\n            <!-- Central Heavy Steel Boss Dome -->\n            <circle cx="16" cy="16" r="4.2" fill="url(#bk_rim_d7_Buckler_5)" stroke="#05070a" stroke-width="1.2" />\n            <circle cx="16" cy="16" r="2.2" fill="#e74c3c" stroke="#05070a" stroke-width="1.0" />\n            <circle cx="15.2" cy="15.2" r="0.6" fill="#ffffff" />\n\n            <!-- Spike Rivets -->\n            <circle cx="16" cy="10" r="0.8" fill="#cbd5e1" stroke="#05070a" stroke-width="0.5" />\n            <circle cx="22" cy="16" r="0.8" fill="#cbd5e1" stroke="#05070a" stroke-width="0.5" />\n            <circle cx="16" cy="22" r="0.8" fill="#cbd5e1" stroke="#05070a" stroke-width="0.5" />\n            <circle cx="10" cy="16" r="0.8" fill="#cbd5e1" stroke="#05070a" stroke-width="0.5" />\n          </svg>', "color": "#e74c3c", "source": "buckler", "bounds": { "x": 4.5, "y": 4.5, "width": 23, "height": 23 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 27.5 } }, "d7/Aegis/0": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n              \n              <defs>\n                <linearGradient id="grad_sh_d7_Aegis_0" x1="0" y1="0" x2="0" y2="1">\n                  <stop offset="0%" stop-color="#ffffff"/>\n                  <stop offset="25%" stop-color="#ffffff"/>\n                  <stop offset="25%" stop-color="#ffffff"/>\n                  <stop offset="65%" stop-color="#ffffff"/>\n                  <stop offset="65%" stop-color="#182030"/>\n                  <stop offset="100%" stop-color="#0a0d18"/>\n                </linearGradient>\n              </defs>\n            \n              <path d="M16 3 L27 8 L24 22 L16 29 L8 22 L5 8 Z" fill="url(#grad_sh_d7_Aegis_0)" stroke="#000" stroke-width="2" stroke-linejoin="round" />\n              <circle cx="16" cy="16" r="5" fill="none" stroke="#fff" stroke-dasharray="3 1.5" stroke-width="1.2" />\n              <circle cx="16" cy="16" r="3.2" fill="#ffffff" stroke="#000" stroke-width="1" />\n            </svg>', "color": "#ffffff", "source": "aegis", "bounds": { "x": 5, "y": 3, "width": 22, "height": 26 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 29 } }, "d7/Aegis/1": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n              \n              <defs>\n                <linearGradient id="grad_sh_d7_Aegis_1" x1="0" y1="0" x2="0" y2="1">\n                  <stop offset="0%" stop-color="#ffffff"/>\n                  <stop offset="25%" stop-color="#ffffff"/>\n                  <stop offset="25%" stop-color="#3498db"/>\n                  <stop offset="65%" stop-color="#3498db"/>\n                  <stop offset="65%" stop-color="#182030"/>\n                  <stop offset="100%" stop-color="#0a0d18"/>\n                </linearGradient>\n              </defs>\n            \n              <path d="M16 3 L27 8 L24 22 L16 29 L8 22 L5 8 Z" fill="url(#grad_sh_d7_Aegis_1)" stroke="#000" stroke-width="2" stroke-linejoin="round" />\n              <circle cx="16" cy="16" r="5" fill="none" stroke="#fff" stroke-dasharray="3 1.5" stroke-width="1.2" />\n              <circle cx="16" cy="16" r="3.2" fill="#3498db" stroke="#000" stroke-width="1" />\n            </svg>', "color": "#3498db", "source": "aegis", "bounds": { "x": 5, "y": 3, "width": 22, "height": 26 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 29 } }, "d7/Aegis/2": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n              \n              <defs>\n                <linearGradient id="grad_sh_d7_Aegis_2" x1="0" y1="0" x2="0" y2="1">\n                  <stop offset="0%" stop-color="#ffffff"/>\n                  <stop offset="25%" stop-color="#ffffff"/>\n                  <stop offset="25%" stop-color="#9b59b6"/>\n                  <stop offset="65%" stop-color="#9b59b6"/>\n                  <stop offset="65%" stop-color="#182030"/>\n                  <stop offset="100%" stop-color="#0a0d18"/>\n                </linearGradient>\n              </defs>\n            \n              <path d="M16 3 L27 8 L24 22 L16 29 L8 22 L5 8 Z" fill="url(#grad_sh_d7_Aegis_2)" stroke="#000" stroke-width="2" stroke-linejoin="round" />\n              <circle cx="16" cy="16" r="5" fill="none" stroke="#fff" stroke-dasharray="3 1.5" stroke-width="1.2" />\n              <circle cx="16" cy="16" r="3.2" fill="#9b59b6" stroke="#000" stroke-width="1" />\n            </svg>', "color": "#9b59b6", "source": "aegis", "bounds": { "x": 5, "y": 3, "width": 22, "height": 26 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 29 } }, "d7/Aegis/3": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n              \n              <defs>\n                <linearGradient id="grad_sh_d7_Aegis_3" x1="0" y1="0" x2="0" y2="1">\n                  <stop offset="0%" stop-color="#ffffff"/>\n                  <stop offset="25%" stop-color="#ffffff"/>\n                  <stop offset="25%" stop-color="#e67e22"/>\n                  <stop offset="65%" stop-color="#e67e22"/>\n                  <stop offset="65%" stop-color="#182030"/>\n                  <stop offset="100%" stop-color="#0a0d18"/>\n                </linearGradient>\n              </defs>\n            \n              <path d="M16 3 L27 8 L24 22 L16 29 L8 22 L5 8 Z" fill="url(#grad_sh_d7_Aegis_3)" stroke="#000" stroke-width="2" stroke-linejoin="round" />\n              <circle cx="16" cy="16" r="5" fill="none" stroke="#fff" stroke-dasharray="3 1.5" stroke-width="1.2" />\n              <circle cx="16" cy="16" r="3.2" fill="#e67e22" stroke="#000" stroke-width="1" />\n            </svg>', "color": "#e67e22", "source": "aegis", "bounds": { "x": 5, "y": 3, "width": 22, "height": 26 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 29 } }, "d7/Aegis/4": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n              \n              <defs>\n                <linearGradient id="grad_sh_d7_Aegis_4" x1="0" y1="0" x2="0" y2="1">\n                  <stop offset="0%" stop-color="#ffffff"/>\n                  <stop offset="25%" stop-color="#ffffff"/>\n                  <stop offset="25%" stop-color="#f1c40f"/>\n                  <stop offset="65%" stop-color="#f1c40f"/>\n                  <stop offset="65%" stop-color="#182030"/>\n                  <stop offset="100%" stop-color="#0a0d18"/>\n                </linearGradient>\n              </defs>\n            \n              <path d="M16 3 L27 8 L24 22 L16 29 L8 22 L5 8 Z" fill="url(#grad_sh_d7_Aegis_4)" stroke="#000" stroke-width="2" stroke-linejoin="round" />\n              <circle cx="16" cy="16" r="5" fill="none" stroke="#fff" stroke-dasharray="3 1.5" stroke-width="1.2" />\n              <circle cx="16" cy="16" r="3.2" fill="#f1c40f" stroke="#000" stroke-width="1" />\n            </svg>', "color": "#f1c40f", "source": "aegis", "bounds": { "x": 5, "y": 3, "width": 22, "height": 26 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 29 } }, "d7/Aegis/5": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n              \n              <defs>\n                <linearGradient id="grad_sh_d7_Aegis_5" x1="0" y1="0" x2="0" y2="1">\n                  <stop offset="0%" stop-color="#ffffff"/>\n                  <stop offset="25%" stop-color="#ffffff"/>\n                  <stop offset="25%" stop-color="#e74c3c"/>\n                  <stop offset="65%" stop-color="#e74c3c"/>\n                  <stop offset="65%" stop-color="#182030"/>\n                  <stop offset="100%" stop-color="#0a0d18"/>\n                </linearGradient>\n              </defs>\n            \n              <path d="M16 3 L27 8 L24 22 L16 29 L8 22 L5 8 Z" fill="url(#grad_sh_d7_Aegis_5)" stroke="#000" stroke-width="2" stroke-linejoin="round" />\n              <circle cx="16" cy="16" r="5" fill="none" stroke="#fff" stroke-dasharray="3 1.5" stroke-width="1.2" />\n              <circle cx="16" cy="16" r="3.2" fill="#e74c3c" stroke="#000" stroke-width="1" />\n            </svg>', "color": "#e74c3c", "source": "aegis", "bounds": { "x": 5, "y": 3, "width": 22, "height": 26 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 29 } }, "d7/Heater Shield/0": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel rim gradient -->\n              <linearGradient id="hs_rim_d7_Heater_Shield_0" x1="0" y1="0" x2="0" y2="1">\n                <stop offset="0%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Inner plate light gradient -->\n              <linearGradient id="hs_face_l_d7_Heater_Shield_0" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Inner plate shadow gradient -->\n              <linearGradient id="hs_face_s_d7_Heater_Shield_0" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#1e293b"/>\n              </linearGradient>\n            </defs>\n\n            <!-- Outer Steel Rim -->\n            <path d="M6 5 H26 V14 C26 22, 16 29, 16 29 C16 29, 6 22, 6 14 Z" fill="url(#hs_rim_d7_Heater_Shield_0)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Inner Plate (Shadow - Left side) -->\n            <path d="M16 6.5 H8 V14 C8 20.8, 16 27, 16 27 Z" fill="url(#hs_face_s_d7_Heater_Shield_0)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Inner Plate (Light - Right side) -->\n            <path d="M16 6.5 H24 V14 C24 20.8, 16 27, 16 27 Z" fill="url(#hs_face_l_d7_Heater_Shield_0)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Specular Highlight (Gleam) -->\n            <path d="M16 6.5 H22 V14 C22 19, 16 24, 16 24 Z" fill="rgba(255,255,255,0.22)" />\n\n            <!-- Central Heraldic Cross (Scales with Rarity Color) -->\n            <path d="M15 8 H17 V12 H20 V14 H17 V21 H15 V14 H12 V12 H15 Z" fill="#ffffff" stroke="#05070a" stroke-width="1.2" stroke-linejoin="round" />\n\n            <!-- Center Core Gem Glistening -->\n            <circle cx="16" cy="13" r="1.5" fill="#ffffff" opacity="0.8" />\n\n            <!-- Steel Rim Rivets (Left side) -->\n            <circle cx="8" cy="7" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="8" cy="13" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="11" cy="20" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="14" cy="25" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n\n            <!-- Steel Rim Rivets (Right side) -->\n            <circle cx="24" cy="7" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="24" cy="13" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="21" cy="20" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="18" cy="25" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n          </svg>', "color": "#ffffff", "source": "heater_shield", "bounds": { "x": 6, "y": 5, "width": 20, "height": 24 }, "visibleCenter": { "x": 16, "y": 17 }, "pivot": { "x": 16, "y": 29 } }, "d7/Heater Shield/1": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel rim gradient -->\n              <linearGradient id="hs_rim_d7_Heater_Shield_1" x1="0" y1="0" x2="0" y2="1">\n                <stop offset="0%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Inner plate light gradient -->\n              <linearGradient id="hs_face_l_d7_Heater_Shield_1" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Inner plate shadow gradient -->\n              <linearGradient id="hs_face_s_d7_Heater_Shield_1" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#1e293b"/>\n              </linearGradient>\n            </defs>\n\n            <!-- Outer Steel Rim -->\n            <path d="M6 5 H26 V14 C26 22, 16 29, 16 29 C16 29, 6 22, 6 14 Z" fill="url(#hs_rim_d7_Heater_Shield_1)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Inner Plate (Shadow - Left side) -->\n            <path d="M16 6.5 H8 V14 C8 20.8, 16 27, 16 27 Z" fill="url(#hs_face_s_d7_Heater_Shield_1)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Inner Plate (Light - Right side) -->\n            <path d="M16 6.5 H24 V14 C24 20.8, 16 27, 16 27 Z" fill="url(#hs_face_l_d7_Heater_Shield_1)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Specular Highlight (Gleam) -->\n            <path d="M16 6.5 H22 V14 C22 19, 16 24, 16 24 Z" fill="rgba(255,255,255,0.22)" />\n\n            <!-- Central Heraldic Cross (Scales with Rarity Color) -->\n            <path d="M15 8 H17 V12 H20 V14 H17 V21 H15 V14 H12 V12 H15 Z" fill="#3498db" stroke="#05070a" stroke-width="1.2" stroke-linejoin="round" />\n\n            <!-- Center Core Gem Glistening -->\n            <circle cx="16" cy="13" r="1.5" fill="#ffffff" opacity="0.8" />\n\n            <!-- Steel Rim Rivets (Left side) -->\n            <circle cx="8" cy="7" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="8" cy="13" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="11" cy="20" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="14" cy="25" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n\n            <!-- Steel Rim Rivets (Right side) -->\n            <circle cx="24" cy="7" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="24" cy="13" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="21" cy="20" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="18" cy="25" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n          </svg>', "color": "#3498db", "source": "heater_shield", "bounds": { "x": 6, "y": 5, "width": 20, "height": 24 }, "visibleCenter": { "x": 16, "y": 17 }, "pivot": { "x": 16, "y": 29 } }, "d7/Heater Shield/2": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel rim gradient -->\n              <linearGradient id="hs_rim_d7_Heater_Shield_2" x1="0" y1="0" x2="0" y2="1">\n                <stop offset="0%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Inner plate light gradient -->\n              <linearGradient id="hs_face_l_d7_Heater_Shield_2" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Inner plate shadow gradient -->\n              <linearGradient id="hs_face_s_d7_Heater_Shield_2" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#1e293b"/>\n              </linearGradient>\n            </defs>\n\n            <!-- Outer Steel Rim -->\n            <path d="M6 5 H26 V14 C26 22, 16 29, 16 29 C16 29, 6 22, 6 14 Z" fill="url(#hs_rim_d7_Heater_Shield_2)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Inner Plate (Shadow - Left side) -->\n            <path d="M16 6.5 H8 V14 C8 20.8, 16 27, 16 27 Z" fill="url(#hs_face_s_d7_Heater_Shield_2)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Inner Plate (Light - Right side) -->\n            <path d="M16 6.5 H24 V14 C24 20.8, 16 27, 16 27 Z" fill="url(#hs_face_l_d7_Heater_Shield_2)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Specular Highlight (Gleam) -->\n            <path d="M16 6.5 H22 V14 C22 19, 16 24, 16 24 Z" fill="rgba(255,255,255,0.22)" />\n\n            <!-- Central Heraldic Cross (Scales with Rarity Color) -->\n            <path d="M15 8 H17 V12 H20 V14 H17 V21 H15 V14 H12 V12 H15 Z" fill="#9b59b6" stroke="#05070a" stroke-width="1.2" stroke-linejoin="round" />\n\n            <!-- Center Core Gem Glistening -->\n            <circle cx="16" cy="13" r="1.5" fill="#ffffff" opacity="0.8" />\n\n            <!-- Steel Rim Rivets (Left side) -->\n            <circle cx="8" cy="7" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="8" cy="13" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="11" cy="20" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="14" cy="25" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n\n            <!-- Steel Rim Rivets (Right side) -->\n            <circle cx="24" cy="7" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="24" cy="13" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="21" cy="20" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="18" cy="25" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n          </svg>', "color": "#9b59b6", "source": "heater_shield", "bounds": { "x": 6, "y": 5, "width": 20, "height": 24 }, "visibleCenter": { "x": 16, "y": 17 }, "pivot": { "x": 16, "y": 29 } }, "d7/Heater Shield/3": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel rim gradient -->\n              <linearGradient id="hs_rim_d7_Heater_Shield_3" x1="0" y1="0" x2="0" y2="1">\n                <stop offset="0%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Inner plate light gradient -->\n              <linearGradient id="hs_face_l_d7_Heater_Shield_3" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Inner plate shadow gradient -->\n              <linearGradient id="hs_face_s_d7_Heater_Shield_3" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#1e293b"/>\n              </linearGradient>\n            </defs>\n\n            <!-- Outer Steel Rim -->\n            <path d="M6 5 H26 V14 C26 22, 16 29, 16 29 C16 29, 6 22, 6 14 Z" fill="url(#hs_rim_d7_Heater_Shield_3)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Inner Plate (Shadow - Left side) -->\n            <path d="M16 6.5 H8 V14 C8 20.8, 16 27, 16 27 Z" fill="url(#hs_face_s_d7_Heater_Shield_3)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Inner Plate (Light - Right side) -->\n            <path d="M16 6.5 H24 V14 C24 20.8, 16 27, 16 27 Z" fill="url(#hs_face_l_d7_Heater_Shield_3)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Specular Highlight (Gleam) -->\n            <path d="M16 6.5 H22 V14 C22 19, 16 24, 16 24 Z" fill="rgba(255,255,255,0.22)" />\n\n            <!-- Central Heraldic Cross (Scales with Rarity Color) -->\n            <path d="M15 8 H17 V12 H20 V14 H17 V21 H15 V14 H12 V12 H15 Z" fill="#e67e22" stroke="#05070a" stroke-width="1.2" stroke-linejoin="round" />\n\n            <!-- Center Core Gem Glistening -->\n            <circle cx="16" cy="13" r="1.5" fill="#ffffff" opacity="0.8" />\n\n            <!-- Steel Rim Rivets (Left side) -->\n            <circle cx="8" cy="7" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="8" cy="13" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="11" cy="20" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="14" cy="25" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n\n            <!-- Steel Rim Rivets (Right side) -->\n            <circle cx="24" cy="7" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="24" cy="13" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="21" cy="20" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="18" cy="25" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n          </svg>', "color": "#e67e22", "source": "heater_shield", "bounds": { "x": 6, "y": 5, "width": 20, "height": 24 }, "visibleCenter": { "x": 16, "y": 17 }, "pivot": { "x": 16, "y": 29 } }, "d7/Heater Shield/4": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel rim gradient -->\n              <linearGradient id="hs_rim_d7_Heater_Shield_4" x1="0" y1="0" x2="0" y2="1">\n                <stop offset="0%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Inner plate light gradient -->\n              <linearGradient id="hs_face_l_d7_Heater_Shield_4" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Inner plate shadow gradient -->\n              <linearGradient id="hs_face_s_d7_Heater_Shield_4" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#1e293b"/>\n              </linearGradient>\n            </defs>\n\n            <!-- Outer Steel Rim -->\n            <path d="M6 5 H26 V14 C26 22, 16 29, 16 29 C16 29, 6 22, 6 14 Z" fill="url(#hs_rim_d7_Heater_Shield_4)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Inner Plate (Shadow - Left side) -->\n            <path d="M16 6.5 H8 V14 C8 20.8, 16 27, 16 27 Z" fill="url(#hs_face_s_d7_Heater_Shield_4)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Inner Plate (Light - Right side) -->\n            <path d="M16 6.5 H24 V14 C24 20.8, 16 27, 16 27 Z" fill="url(#hs_face_l_d7_Heater_Shield_4)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Specular Highlight (Gleam) -->\n            <path d="M16 6.5 H22 V14 C22 19, 16 24, 16 24 Z" fill="rgba(255,255,255,0.22)" />\n\n            <!-- Central Heraldic Cross (Scales with Rarity Color) -->\n            <path d="M15 8 H17 V12 H20 V14 H17 V21 H15 V14 H12 V12 H15 Z" fill="#f1c40f" stroke="#05070a" stroke-width="1.2" stroke-linejoin="round" />\n\n            <!-- Center Core Gem Glistening -->\n            <circle cx="16" cy="13" r="1.5" fill="#ffffff" opacity="0.8" />\n\n            <!-- Steel Rim Rivets (Left side) -->\n            <circle cx="8" cy="7" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="8" cy="13" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="11" cy="20" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="14" cy="25" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n\n            <!-- Steel Rim Rivets (Right side) -->\n            <circle cx="24" cy="7" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="24" cy="13" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="21" cy="20" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="18" cy="25" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n          </svg>', "color": "#f1c40f", "source": "heater_shield", "bounds": { "x": 6, "y": 5, "width": 20, "height": 24 }, "visibleCenter": { "x": 16, "y": 17 }, "pivot": { "x": 16, "y": 29 } }, "d7/Heater Shield/5": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <defs>\n              <!-- Steel rim gradient -->\n              <linearGradient id="hs_rim_d7_Heater_Shield_5" x1="0" y1="0" x2="0" y2="1">\n                <stop offset="0%" stop-color="#cbd5e1"/>\n                <stop offset="100%" stop-color="#475569"/>\n              </linearGradient>\n              <!-- Inner plate light gradient -->\n              <linearGradient id="hs_face_l_d7_Heater_Shield_5" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#ffffff"/>\n                <stop offset="100%" stop-color="#94a3b8"/>\n              </linearGradient>\n              <!-- Inner plate shadow gradient -->\n              <linearGradient id="hs_face_s_d7_Heater_Shield_5" x1="0" y1="0" x2="1" y2="1">\n                <stop offset="0%" stop-color="#64748b"/>\n                <stop offset="100%" stop-color="#1e293b"/>\n              </linearGradient>\n            </defs>\n\n            <!-- Outer Steel Rim -->\n            <path d="M6 5 H26 V14 C26 22, 16 29, 16 29 C16 29, 6 22, 6 14 Z" fill="url(#hs_rim_d7_Heater_Shield_5)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n            <!-- Inner Plate (Shadow - Left side) -->\n            <path d="M16 6.5 H8 V14 C8 20.8, 16 27, 16 27 Z" fill="url(#hs_face_s_d7_Heater_Shield_5)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Inner Plate (Light - Right side) -->\n            <path d="M16 6.5 H24 V14 C24 20.8, 16 27, 16 27 Z" fill="url(#hs_face_l_d7_Heater_Shield_5)" stroke="#05070a" stroke-width="1.2" />\n\n            <!-- Specular Highlight (Gleam) -->\n            <path d="M16 6.5 H22 V14 C22 19, 16 24, 16 24 Z" fill="rgba(255,255,255,0.22)" />\n\n            <!-- Central Heraldic Cross (Scales with Rarity Color) -->\n            <path d="M15 8 H17 V12 H20 V14 H17 V21 H15 V14 H12 V12 H15 Z" fill="#e74c3c" stroke="#05070a" stroke-width="1.2" stroke-linejoin="round" />\n\n            <!-- Center Core Gem Glistening -->\n            <circle cx="16" cy="13" r="1.5" fill="#ffffff" opacity="0.8" />\n\n            <!-- Steel Rim Rivets (Left side) -->\n            <circle cx="8" cy="7" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="8" cy="13" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="11" cy="20" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="14" cy="25" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n\n            <!-- Steel Rim Rivets (Right side) -->\n            <circle cx="24" cy="7" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="24" cy="13" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="21" cy="20" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n            <circle cx="18" cy="25" r="1.0" fill="#cbd5e1" stroke="#05070a" stroke-width="0.8" />\n          </svg>', "color": "#e74c3c", "source": "heater_shield", "bounds": { "x": 6, "y": 5, "width": 20, "height": 24 }, "visibleCenter": { "x": 16, "y": 17 }, "pivot": { "x": 16, "y": 29 } }, "d7/Kris/0": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="kr_blade_d7_Kris_0" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="kr_hilt_d7_Kris_0" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#4a2711"/>\n                    <stop offset="45%" stop-color="#241309"/>\n                    <stop offset="100%" stop-color="#140a04"/>\n                  </linearGradient>\n                </defs>\n                <path d="M16 4 Q19 7, 16 10 Q13 13, 16 16 L17 19 L15 19 L14 16 Q17 13, 14 10 Q11 7, 14 4 Z" fill="url(#kr_blade_d7_Kris_0)" stroke="#000" stroke-width="1.5" stroke-linejoin="round" />\n                <rect x="11" y="19" width="10" height="2.2" rx="0.5" fill="#ffffff" stroke="#000" stroke-width="1" />\n                <path d="M14.5 21 L13 26 Q16 29, 19 26 L17.5 21 Z" fill="url(#kr_hilt_d7_Kris_0)" stroke="#000" stroke-width="1" />\n              </svg>', "color": "#ffffff", "source": "kris", "bounds": { "x": 11, "y": 4, "width": 10, "height": 23.5 }, "visibleCenter": { "x": 16, "y": 15.75 }, "pivot": { "x": 16, "y": 27.5 } }, "d7/Kris/1": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="kr_blade_d7_Kris_1" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="kr_hilt_d7_Kris_1" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#4a2711"/>\n                    <stop offset="45%" stop-color="#241309"/>\n                    <stop offset="100%" stop-color="#140a04"/>\n                  </linearGradient>\n                </defs>\n                <path d="M16 4 Q19 7, 16 10 Q13 13, 16 16 L17 19 L15 19 L14 16 Q17 13, 14 10 Q11 7, 14 4 Z" fill="url(#kr_blade_d7_Kris_1)" stroke="#000" stroke-width="1.5" stroke-linejoin="round" />\n                <rect x="11" y="19" width="10" height="2.2" rx="0.5" fill="#3498db" stroke="#000" stroke-width="1" />\n                <path d="M14.5 21 L13 26 Q16 29, 19 26 L17.5 21 Z" fill="url(#kr_hilt_d7_Kris_1)" stroke="#000" stroke-width="1" />\n              </svg>', "color": "#3498db", "source": "kris", "bounds": { "x": 11, "y": 4, "width": 10, "height": 23.5 }, "visibleCenter": { "x": 16, "y": 15.75 }, "pivot": { "x": 16, "y": 27.5 } }, "d7/Kris/2": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="kr_blade_d7_Kris_2" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="kr_hilt_d7_Kris_2" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#4a2711"/>\n                    <stop offset="45%" stop-color="#241309"/>\n                    <stop offset="100%" stop-color="#140a04"/>\n                  </linearGradient>\n                </defs>\n                <path d="M16 4 Q19 7, 16 10 Q13 13, 16 16 L17 19 L15 19 L14 16 Q17 13, 14 10 Q11 7, 14 4 Z" fill="url(#kr_blade_d7_Kris_2)" stroke="#000" stroke-width="1.5" stroke-linejoin="round" />\n                <rect x="11" y="19" width="10" height="2.2" rx="0.5" fill="#9b59b6" stroke="#000" stroke-width="1" />\n                <path d="M14.5 21 L13 26 Q16 29, 19 26 L17.5 21 Z" fill="url(#kr_hilt_d7_Kris_2)" stroke="#000" stroke-width="1" />\n              </svg>', "color": "#9b59b6", "source": "kris", "bounds": { "x": 11, "y": 4, "width": 10, "height": 23.5 }, "visibleCenter": { "x": 16, "y": 15.75 }, "pivot": { "x": 16, "y": 27.5 } }, "d7/Kris/3": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="kr_blade_d7_Kris_3" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="kr_hilt_d7_Kris_3" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#4a2711"/>\n                    <stop offset="45%" stop-color="#241309"/>\n                    <stop offset="100%" stop-color="#140a04"/>\n                  </linearGradient>\n                </defs>\n                <path d="M16 4 Q19 7, 16 10 Q13 13, 16 16 L17 19 L15 19 L14 16 Q17 13, 14 10 Q11 7, 14 4 Z" fill="url(#kr_blade_d7_Kris_3)" stroke="#000" stroke-width="1.5" stroke-linejoin="round" />\n                <rect x="11" y="19" width="10" height="2.2" rx="0.5" fill="#e67e22" stroke="#000" stroke-width="1" />\n                <path d="M14.5 21 L13 26 Q16 29, 19 26 L17.5 21 Z" fill="url(#kr_hilt_d7_Kris_3)" stroke="#000" stroke-width="1" />\n              </svg>', "color": "#e67e22", "source": "kris", "bounds": { "x": 11, "y": 4, "width": 10, "height": 23.5 }, "visibleCenter": { "x": 16, "y": 15.75 }, "pivot": { "x": 16, "y": 27.5 } }, "d7/Kris/4": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="kr_blade_d7_Kris_4" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="kr_hilt_d7_Kris_4" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#4a2711"/>\n                    <stop offset="45%" stop-color="#241309"/>\n                    <stop offset="100%" stop-color="#140a04"/>\n                  </linearGradient>\n                </defs>\n                <path d="M16 4 Q19 7, 16 10 Q13 13, 16 16 L17 19 L15 19 L14 16 Q17 13, 14 10 Q11 7, 14 4 Z" fill="url(#kr_blade_d7_Kris_4)" stroke="#000" stroke-width="1.5" stroke-linejoin="round" />\n                <rect x="11" y="19" width="10" height="2.2" rx="0.5" fill="#f1c40f" stroke="#000" stroke-width="1" />\n                <path d="M14.5 21 L13 26 Q16 29, 19 26 L17.5 21 Z" fill="url(#kr_hilt_d7_Kris_4)" stroke="#000" stroke-width="1" />\n              </svg>', "color": "#f1c40f", "source": "kris", "bounds": { "x": 11, "y": 4, "width": 10, "height": 23.5 }, "visibleCenter": { "x": 16, "y": 15.75 }, "pivot": { "x": 16, "y": 27.5 } }, "d7/Kris/5": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="kr_blade_d7_Kris_5" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="kr_hilt_d7_Kris_5" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#4a2711"/>\n                    <stop offset="45%" stop-color="#241309"/>\n                    <stop offset="100%" stop-color="#140a04"/>\n                  </linearGradient>\n                </defs>\n                <path d="M16 4 Q19 7, 16 10 Q13 13, 16 16 L17 19 L15 19 L14 16 Q17 13, 14 10 Q11 7, 14 4 Z" fill="url(#kr_blade_d7_Kris_5)" stroke="#000" stroke-width="1.5" stroke-linejoin="round" />\n                <rect x="11" y="19" width="10" height="2.2" rx="0.5" fill="#e74c3c" stroke="#000" stroke-width="1" />\n                <path d="M14.5 21 L13 26 Q16 29, 19 26 L17.5 21 Z" fill="url(#kr_hilt_d7_Kris_5)" stroke="#000" stroke-width="1" />\n              </svg>', "color": "#e74c3c", "source": "kris", "bounds": { "x": 11, "y": 4, "width": 10, "height": 23.5 }, "visibleCenter": { "x": 16, "y": 15.75 }, "pivot": { "x": 16, "y": 27.5 } }, "d7/Stiletto/0": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="st_blade_d7_Stiletto_0" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="st_hilt_d7_Stiletto_0" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#475569"/>\n                    <stop offset="45%" stop-color="#1e293b"/>\n                    <stop offset="45%" stop-color="#0f172a"/>\n                    <stop offset="100%" stop-color="#020617"/>\n                  </linearGradient>\n                </defs>\n                <path d="M15.5 3 H16.5 L17 19 H15 Z" fill="url(#st_blade_d7_Stiletto_0)" stroke="#000" stroke-width="1.5" />\n                <rect x="11" y="19" width="10" height="2" rx="0.5" fill="#ffffff" stroke="#000" stroke-width="1" />\n                <rect x="14.5" y="21" width="3" height="7" rx="0.5" fill="url(#st_hilt_d7_Stiletto_0)" stroke="#000" stroke-width="1" />\n                <circle cx="16" cy="28.5" r="1.5" fill="#ffffff" stroke="#000" stroke-width="0.8" />\n              </svg>', "color": "#ffffff", "source": "stiletto", "bounds": { "x": 11, "y": 3, "width": 10, "height": 27 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 30 } }, "d7/Stiletto/1": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="st_blade_d7_Stiletto_1" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="st_hilt_d7_Stiletto_1" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#475569"/>\n                    <stop offset="45%" stop-color="#1e293b"/>\n                    <stop offset="45%" stop-color="#0f172a"/>\n                    <stop offset="100%" stop-color="#020617"/>\n                  </linearGradient>\n                </defs>\n                <path d="M15.5 3 H16.5 L17 19 H15 Z" fill="url(#st_blade_d7_Stiletto_1)" stroke="#000" stroke-width="1.5" />\n                <rect x="11" y="19" width="10" height="2" rx="0.5" fill="#3498db" stroke="#000" stroke-width="1" />\n                <rect x="14.5" y="21" width="3" height="7" rx="0.5" fill="url(#st_hilt_d7_Stiletto_1)" stroke="#000" stroke-width="1" />\n                <circle cx="16" cy="28.5" r="1.5" fill="#3498db" stroke="#000" stroke-width="0.8" />\n              </svg>', "color": "#3498db", "source": "stiletto", "bounds": { "x": 11, "y": 3, "width": 10, "height": 27 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 30 } }, "d7/Stiletto/2": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="st_blade_d7_Stiletto_2" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="st_hilt_d7_Stiletto_2" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#475569"/>\n                    <stop offset="45%" stop-color="#1e293b"/>\n                    <stop offset="45%" stop-color="#0f172a"/>\n                    <stop offset="100%" stop-color="#020617"/>\n                  </linearGradient>\n                </defs>\n                <path d="M15.5 3 H16.5 L17 19 H15 Z" fill="url(#st_blade_d7_Stiletto_2)" stroke="#000" stroke-width="1.5" />\n                <rect x="11" y="19" width="10" height="2" rx="0.5" fill="#9b59b6" stroke="#000" stroke-width="1" />\n                <rect x="14.5" y="21" width="3" height="7" rx="0.5" fill="url(#st_hilt_d7_Stiletto_2)" stroke="#000" stroke-width="1" />\n                <circle cx="16" cy="28.5" r="1.5" fill="#9b59b6" stroke="#000" stroke-width="0.8" />\n              </svg>', "color": "#9b59b6", "source": "stiletto", "bounds": { "x": 11, "y": 3, "width": 10, "height": 27 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 30 } }, "d7/Stiletto/3": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="st_blade_d7_Stiletto_3" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="st_hilt_d7_Stiletto_3" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#475569"/>\n                    <stop offset="45%" stop-color="#1e293b"/>\n                    <stop offset="45%" stop-color="#0f172a"/>\n                    <stop offset="100%" stop-color="#020617"/>\n                  </linearGradient>\n                </defs>\n                <path d="M15.5 3 H16.5 L17 19 H15 Z" fill="url(#st_blade_d7_Stiletto_3)" stroke="#000" stroke-width="1.5" />\n                <rect x="11" y="19" width="10" height="2" rx="0.5" fill="#e67e22" stroke="#000" stroke-width="1" />\n                <rect x="14.5" y="21" width="3" height="7" rx="0.5" fill="url(#st_hilt_d7_Stiletto_3)" stroke="#000" stroke-width="1" />\n                <circle cx="16" cy="28.5" r="1.5" fill="#e67e22" stroke="#000" stroke-width="0.8" />\n              </svg>', "color": "#e67e22", "source": "stiletto", "bounds": { "x": 11, "y": 3, "width": 10, "height": 27 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 30 } }, "d7/Stiletto/4": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="st_blade_d7_Stiletto_4" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="st_hilt_d7_Stiletto_4" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#475569"/>\n                    <stop offset="45%" stop-color="#1e293b"/>\n                    <stop offset="45%" stop-color="#0f172a"/>\n                    <stop offset="100%" stop-color="#020617"/>\n                  </linearGradient>\n                </defs>\n                <path d="M15.5 3 H16.5 L17 19 H15 Z" fill="url(#st_blade_d7_Stiletto_4)" stroke="#000" stroke-width="1.5" />\n                <rect x="11" y="19" width="10" height="2" rx="0.5" fill="#f1c40f" stroke="#000" stroke-width="1" />\n                <rect x="14.5" y="21" width="3" height="7" rx="0.5" fill="url(#st_hilt_d7_Stiletto_4)" stroke="#000" stroke-width="1" />\n                <circle cx="16" cy="28.5" r="1.5" fill="#f1c40f" stroke="#000" stroke-width="0.8" />\n              </svg>', "color": "#f1c40f", "source": "stiletto", "bounds": { "x": 11, "y": 3, "width": 10, "height": 27 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 30 } }, "d7/Stiletto/5": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="st_blade_d7_Stiletto_5" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#cbd5e1"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="st_hilt_d7_Stiletto_5" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#475569"/>\n                    <stop offset="45%" stop-color="#1e293b"/>\n                    <stop offset="45%" stop-color="#0f172a"/>\n                    <stop offset="100%" stop-color="#020617"/>\n                  </linearGradient>\n                </defs>\n                <path d="M15.5 3 H16.5 L17 19 H15 Z" fill="url(#st_blade_d7_Stiletto_5)" stroke="#000" stroke-width="1.5" />\n                <rect x="11" y="19" width="10" height="2" rx="0.5" fill="#e74c3c" stroke="#000" stroke-width="1" />\n                <rect x="14.5" y="21" width="3" height="7" rx="0.5" fill="url(#st_hilt_d7_Stiletto_5)" stroke="#000" stroke-width="1" />\n                <circle cx="16" cy="28.5" r="1.5" fill="#e74c3c" stroke="#000" stroke-width="0.8" />\n              </svg>', "color": "#e74c3c", "source": "stiletto", "bounds": { "x": 11, "y": 3, "width": 10, "height": 27 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 30 } }, "d7/Baselard/0": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="bl_blade_d7_Baselard_0" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#95a5a6"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="bl_hilt_d7_Baselard_0" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#4a2306"/>\n                    <stop offset="45%" stop-color="#241002"/>\n                    <stop offset="100%" stop-color="#140801"/>\n                  </linearGradient>\n                </defs>\n                <path d="M16 4 L18 8 L17 19 H15 L14 8 Z" fill="url(#bl_blade_d7_Baselard_0)" stroke="#000" stroke-width="1.8" />\n                <rect x="10" y="19" width="12" height="2.5" fill="#ffffff" stroke="#000" stroke-width="1" />\n                <rect x="14.5" y="21.5" width="3" height="5" fill="url(#bl_hilt_d7_Baselard_0)" stroke="#000" stroke-width="1" />\n                <rect x="11" y="26.5" width="10" height="2.5" fill="#ffffff" stroke="#000" stroke-width="1" />\n              </svg>', "color": "#ffffff", "source": "baselard", "bounds": { "x": 10, "y": 4, "width": 12, "height": 25 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 29 } }, "d7/Baselard/1": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="bl_blade_d7_Baselard_1" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#95a5a6"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="bl_hilt_d7_Baselard_1" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#4a2306"/>\n                    <stop offset="45%" stop-color="#241002"/>\n                    <stop offset="100%" stop-color="#140801"/>\n                  </linearGradient>\n                </defs>\n                <path d="M16 4 L18 8 L17 19 H15 L14 8 Z" fill="url(#bl_blade_d7_Baselard_1)" stroke="#000" stroke-width="1.8" />\n                <rect x="10" y="19" width="12" height="2.5" fill="#3498db" stroke="#000" stroke-width="1" />\n                <rect x="14.5" y="21.5" width="3" height="5" fill="url(#bl_hilt_d7_Baselard_1)" stroke="#000" stroke-width="1" />\n                <rect x="11" y="26.5" width="10" height="2.5" fill="#3498db" stroke="#000" stroke-width="1" />\n              </svg>', "color": "#3498db", "source": "baselard", "bounds": { "x": 10, "y": 4, "width": 12, "height": 25 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 29 } }, "d7/Baselard/2": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="bl_blade_d7_Baselard_2" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#95a5a6"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="bl_hilt_d7_Baselard_2" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#4a2306"/>\n                    <stop offset="45%" stop-color="#241002"/>\n                    <stop offset="100%" stop-color="#140801"/>\n                  </linearGradient>\n                </defs>\n                <path d="M16 4 L18 8 L17 19 H15 L14 8 Z" fill="url(#bl_blade_d7_Baselard_2)" stroke="#000" stroke-width="1.8" />\n                <rect x="10" y="19" width="12" height="2.5" fill="#9b59b6" stroke="#000" stroke-width="1" />\n                <rect x="14.5" y="21.5" width="3" height="5" fill="url(#bl_hilt_d7_Baselard_2)" stroke="#000" stroke-width="1" />\n                <rect x="11" y="26.5" width="10" height="2.5" fill="#9b59b6" stroke="#000" stroke-width="1" />\n              </svg>', "color": "#9b59b6", "source": "baselard", "bounds": { "x": 10, "y": 4, "width": 12, "height": 25 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 29 } }, "d7/Baselard/3": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="bl_blade_d7_Baselard_3" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#95a5a6"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="bl_hilt_d7_Baselard_3" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#4a2306"/>\n                    <stop offset="45%" stop-color="#241002"/>\n                    <stop offset="100%" stop-color="#140801"/>\n                  </linearGradient>\n                </defs>\n                <path d="M16 4 L18 8 L17 19 H15 L14 8 Z" fill="url(#bl_blade_d7_Baselard_3)" stroke="#000" stroke-width="1.8" />\n                <rect x="10" y="19" width="12" height="2.5" fill="#e67e22" stroke="#000" stroke-width="1" />\n                <rect x="14.5" y="21.5" width="3" height="5" fill="url(#bl_hilt_d7_Baselard_3)" stroke="#000" stroke-width="1" />\n                <rect x="11" y="26.5" width="10" height="2.5" fill="#e67e22" stroke="#000" stroke-width="1" />\n              </svg>', "color": "#e67e22", "source": "baselard", "bounds": { "x": 10, "y": 4, "width": 12, "height": 25 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 29 } }, "d7/Baselard/4": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="bl_blade_d7_Baselard_4" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#95a5a6"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="bl_hilt_d7_Baselard_4" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#4a2306"/>\n                    <stop offset="45%" stop-color="#241002"/>\n                    <stop offset="100%" stop-color="#140801"/>\n                  </linearGradient>\n                </defs>\n                <path d="M16 4 L18 8 L17 19 H15 L14 8 Z" fill="url(#bl_blade_d7_Baselard_4)" stroke="#000" stroke-width="1.8" />\n                <rect x="10" y="19" width="12" height="2.5" fill="#f1c40f" stroke="#000" stroke-width="1" />\n                <rect x="14.5" y="21.5" width="3" height="5" fill="url(#bl_hilt_d7_Baselard_4)" stroke="#000" stroke-width="1" />\n                <rect x="11" y="26.5" width="10" height="2.5" fill="#f1c40f" stroke="#000" stroke-width="1" />\n              </svg>', "color": "#f1c40f", "source": "baselard", "bounds": { "x": 10, "y": 4, "width": 12, "height": 25 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 29 } }, "d7/Baselard/5": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="bl_blade_d7_Baselard_5" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#95a5a6"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="bl_hilt_d7_Baselard_5" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#4a2306"/>\n                    <stop offset="45%" stop-color="#241002"/>\n                    <stop offset="100%" stop-color="#140801"/>\n                  </linearGradient>\n                </defs>\n                <path d="M16 4 L18 8 L17 19 H15 L14 8 Z" fill="url(#bl_blade_d7_Baselard_5)" stroke="#000" stroke-width="1.8" />\n                <rect x="10" y="19" width="12" height="2.5" fill="#e74c3c" stroke="#000" stroke-width="1" />\n                <rect x="14.5" y="21.5" width="3" height="5" fill="url(#bl_hilt_d7_Baselard_5)" stroke="#000" stroke-width="1" />\n                <rect x="11" y="26.5" width="10" height="2.5" fill="#e74c3c" stroke="#000" stroke-width="1" />\n              </svg>', "color": "#e74c3c", "source": "baselard", "bounds": { "x": 10, "y": 4, "width": 12, "height": 25 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 29 } }, "d7/Dirk/0": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="dk_blade_d7_Dirk_0" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#bdc3c7"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="dk_hilt_d7_Dirk_0" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#5c3a21"/>\n                    <stop offset="45%" stop-color="#2d1d0b"/>\n                    <stop offset="100%" stop-color="#1c0f07"/>\n                  </linearGradient>\n                </defs>\n                <path d="M15 4 L17.5 7 L17.5 19 H14.5 Z" fill="url(#dk_blade_d7_Dirk_0)" stroke="#000" stroke-width="1.8" />\n                <rect x="12" y="19" width="8" height="2" fill="#ffffff" stroke="#000" stroke-width="1" />\n                <rect x="14" y="21" width="4" height="6.5" fill="url(#dk_hilt_d7_Dirk_0)" stroke="#000" stroke-width="1" />\n                <circle cx="16" cy="28" r="1.8" fill="#ffffff" stroke="#000" stroke-width="0.8" />\n              </svg>', "color": "#ffffff", "source": "dirk", "bounds": { "x": 12, "y": 4, "width": 8, "height": 25.80000114440918 }, "visibleCenter": { "x": 16, "y": 16.90000057220459 }, "pivot": { "x": 16, "y": 29.80000114440918 } }, "d7/Dirk/1": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="dk_blade_d7_Dirk_1" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#bdc3c7"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="dk_hilt_d7_Dirk_1" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#5c3a21"/>\n                    <stop offset="45%" stop-color="#2d1d0b"/>\n                    <stop offset="100%" stop-color="#1c0f07"/>\n                  </linearGradient>\n                </defs>\n                <path d="M15 4 L17.5 7 L17.5 19 H14.5 Z" fill="url(#dk_blade_d7_Dirk_1)" stroke="#000" stroke-width="1.8" />\n                <rect x="12" y="19" width="8" height="2" fill="#3498db" stroke="#000" stroke-width="1" />\n                <rect x="14" y="21" width="4" height="6.5" fill="url(#dk_hilt_d7_Dirk_1)" stroke="#000" stroke-width="1" />\n                <circle cx="16" cy="28" r="1.8" fill="#3498db" stroke="#000" stroke-width="0.8" />\n              </svg>', "color": "#3498db", "source": "dirk", "bounds": { "x": 12, "y": 4, "width": 8, "height": 25.80000114440918 }, "visibleCenter": { "x": 16, "y": 16.90000057220459 }, "pivot": { "x": 16, "y": 29.80000114440918 } }, "d7/Dirk/2": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="dk_blade_d7_Dirk_2" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#bdc3c7"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="dk_hilt_d7_Dirk_2" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#5c3a21"/>\n                    <stop offset="45%" stop-color="#2d1d0b"/>\n                    <stop offset="100%" stop-color="#1c0f07"/>\n                  </linearGradient>\n                </defs>\n                <path d="M15 4 L17.5 7 L17.5 19 H14.5 Z" fill="url(#dk_blade_d7_Dirk_2)" stroke="#000" stroke-width="1.8" />\n                <rect x="12" y="19" width="8" height="2" fill="#9b59b6" stroke="#000" stroke-width="1" />\n                <rect x="14" y="21" width="4" height="6.5" fill="url(#dk_hilt_d7_Dirk_2)" stroke="#000" stroke-width="1" />\n                <circle cx="16" cy="28" r="1.8" fill="#9b59b6" stroke="#000" stroke-width="0.8" />\n              </svg>', "color": "#9b59b6", "source": "dirk", "bounds": { "x": 12, "y": 4, "width": 8, "height": 25.80000114440918 }, "visibleCenter": { "x": 16, "y": 16.90000057220459 }, "pivot": { "x": 16, "y": 29.80000114440918 } }, "d7/Dirk/3": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="dk_blade_d7_Dirk_3" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#bdc3c7"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="dk_hilt_d7_Dirk_3" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#5c3a21"/>\n                    <stop offset="45%" stop-color="#2d1d0b"/>\n                    <stop offset="100%" stop-color="#1c0f07"/>\n                  </linearGradient>\n                </defs>\n                <path d="M15 4 L17.5 7 L17.5 19 H14.5 Z" fill="url(#dk_blade_d7_Dirk_3)" stroke="#000" stroke-width="1.8" />\n                <rect x="12" y="19" width="8" height="2" fill="#e67e22" stroke="#000" stroke-width="1" />\n                <rect x="14" y="21" width="4" height="6.5" fill="url(#dk_hilt_d7_Dirk_3)" stroke="#000" stroke-width="1" />\n                <circle cx="16" cy="28" r="1.8" fill="#e67e22" stroke="#000" stroke-width="0.8" />\n              </svg>', "color": "#e67e22", "source": "dirk", "bounds": { "x": 12, "y": 4, "width": 8, "height": 25.80000114440918 }, "visibleCenter": { "x": 16, "y": 16.90000057220459 }, "pivot": { "x": 16, "y": 29.80000114440918 } }, "d7/Dirk/4": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="dk_blade_d7_Dirk_4" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#bdc3c7"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="dk_hilt_d7_Dirk_4" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#5c3a21"/>\n                    <stop offset="45%" stop-color="#2d1d0b"/>\n                    <stop offset="100%" stop-color="#1c0f07"/>\n                  </linearGradient>\n                </defs>\n                <path d="M15 4 L17.5 7 L17.5 19 H14.5 Z" fill="url(#dk_blade_d7_Dirk_4)" stroke="#000" stroke-width="1.8" />\n                <rect x="12" y="19" width="8" height="2" fill="#f1c40f" stroke="#000" stroke-width="1" />\n                <rect x="14" y="21" width="4" height="6.5" fill="url(#dk_hilt_d7_Dirk_4)" stroke="#000" stroke-width="1" />\n                <circle cx="16" cy="28" r="1.8" fill="#f1c40f" stroke="#000" stroke-width="0.8" />\n              </svg>', "color": "#f1c40f", "source": "dirk", "bounds": { "x": 12, "y": 4, "width": 8, "height": 25.80000114440918 }, "visibleCenter": { "x": 16, "y": 16.90000057220459 }, "pivot": { "x": 16, "y": 29.80000114440918 } }, "d7/Dirk/5": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="dk_blade_d7_Dirk_5" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#bdc3c7"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="dk_hilt_d7_Dirk_5" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#8d5b38"/>\n                    <stop offset="45%" stop-color="#5c3a21"/>\n                    <stop offset="45%" stop-color="#2d1d0b"/>\n                    <stop offset="100%" stop-color="#1c0f07"/>\n                  </linearGradient>\n                </defs>\n                <path d="M15 4 L17.5 7 L17.5 19 H14.5 Z" fill="url(#dk_blade_d7_Dirk_5)" stroke="#000" stroke-width="1.8" />\n                <rect x="12" y="19" width="8" height="2" fill="#e74c3c" stroke="#000" stroke-width="1" />\n                <rect x="14" y="21" width="4" height="6.5" fill="url(#dk_hilt_d7_Dirk_5)" stroke="#000" stroke-width="1" />\n                <circle cx="16" cy="28" r="1.8" fill="#e74c3c" stroke="#000" stroke-width="0.8" />\n              </svg>', "color": "#e74c3c", "source": "dirk", "bounds": { "x": 12, "y": 4, "width": 8, "height": 25.80000114440918 }, "visibleCenter": { "x": 16, "y": 16.90000057220459 }, "pivot": { "x": 16, "y": 29.80000114440918 } }, "d7/Main-Gauche/0": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="mg_blade_d7_Main_Gauche_0" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#bdc3c7"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="mg_hilt_d7_Main_Gauche_0" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#475569"/>\n                    <stop offset="45%" stop-color="#1e293b"/>\n                    <stop offset="45%" stop-color="#0f172a"/>\n                    <stop offset="100%" stop-color="#020617"/>\n                  </linearGradient>\n                </defs>\n                <path d="M16 4 L17.8 8 L17 19 H15 L14.2 8 Z" fill="url(#mg_blade_d7_Main_Gauche_0)" stroke="#000" stroke-width="1.8" />\n                <path d="M9 19 Q16 16, 23 19" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />\n                <path d="M13 19 C13 23, 19 23, 19 19" fill="none" stroke="#ffffff" stroke-width="1.5" />\n                <rect x="14.5" y="21" width="3" height="6" fill="url(#mg_hilt_d7_Main_Gauche_0)" stroke="#000" stroke-width="1" />\n              </svg>', "color": "#ffffff", "source": "main_gauche", "bounds": { "x": 9, "y": 4, "width": 14, "height": 23 }, "visibleCenter": { "x": 16, "y": 15.5 }, "pivot": { "x": 16, "y": 27 } }, "d7/Main-Gauche/1": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="mg_blade_d7_Main_Gauche_1" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#bdc3c7"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="mg_hilt_d7_Main_Gauche_1" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#475569"/>\n                    <stop offset="45%" stop-color="#1e293b"/>\n                    <stop offset="45%" stop-color="#0f172a"/>\n                    <stop offset="100%" stop-color="#020617"/>\n                  </linearGradient>\n                </defs>\n                <path d="M16 4 L17.8 8 L17 19 H15 L14.2 8 Z" fill="url(#mg_blade_d7_Main_Gauche_1)" stroke="#000" stroke-width="1.8" />\n                <path d="M9 19 Q16 16, 23 19" fill="none" stroke="#3498db" stroke-width="2" stroke-linecap="round" />\n                <path d="M13 19 C13 23, 19 23, 19 19" fill="none" stroke="#3498db" stroke-width="1.5" />\n                <rect x="14.5" y="21" width="3" height="6" fill="url(#mg_hilt_d7_Main_Gauche_1)" stroke="#000" stroke-width="1" />\n              </svg>', "color": "#3498db", "source": "main_gauche", "bounds": { "x": 9, "y": 4, "width": 14, "height": 23 }, "visibleCenter": { "x": 16, "y": 15.5 }, "pivot": { "x": 16, "y": 27 } }, "d7/Main-Gauche/2": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="mg_blade_d7_Main_Gauche_2" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#bdc3c7"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="mg_hilt_d7_Main_Gauche_2" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#475569"/>\n                    <stop offset="45%" stop-color="#1e293b"/>\n                    <stop offset="45%" stop-color="#0f172a"/>\n                    <stop offset="100%" stop-color="#020617"/>\n                  </linearGradient>\n                </defs>\n                <path d="M16 4 L17.8 8 L17 19 H15 L14.2 8 Z" fill="url(#mg_blade_d7_Main_Gauche_2)" stroke="#000" stroke-width="1.8" />\n                <path d="M9 19 Q16 16, 23 19" fill="none" stroke="#9b59b6" stroke-width="2" stroke-linecap="round" />\n                <path d="M13 19 C13 23, 19 23, 19 19" fill="none" stroke="#9b59b6" stroke-width="1.5" />\n                <rect x="14.5" y="21" width="3" height="6" fill="url(#mg_hilt_d7_Main_Gauche_2)" stroke="#000" stroke-width="1" />\n              </svg>', "color": "#9b59b6", "source": "main_gauche", "bounds": { "x": 9, "y": 4, "width": 14, "height": 23 }, "visibleCenter": { "x": 16, "y": 15.5 }, "pivot": { "x": 16, "y": 27 } }, "d7/Main-Gauche/3": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="mg_blade_d7_Main_Gauche_3" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#bdc3c7"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="mg_hilt_d7_Main_Gauche_3" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#475569"/>\n                    <stop offset="45%" stop-color="#1e293b"/>\n                    <stop offset="45%" stop-color="#0f172a"/>\n                    <stop offset="100%" stop-color="#020617"/>\n                  </linearGradient>\n                </defs>\n                <path d="M16 4 L17.8 8 L17 19 H15 L14.2 8 Z" fill="url(#mg_blade_d7_Main_Gauche_3)" stroke="#000" stroke-width="1.8" />\n                <path d="M9 19 Q16 16, 23 19" fill="none" stroke="#e67e22" stroke-width="2" stroke-linecap="round" />\n                <path d="M13 19 C13 23, 19 23, 19 19" fill="none" stroke="#e67e22" stroke-width="1.5" />\n                <rect x="14.5" y="21" width="3" height="6" fill="url(#mg_hilt_d7_Main_Gauche_3)" stroke="#000" stroke-width="1" />\n              </svg>', "color": "#e67e22", "source": "main_gauche", "bounds": { "x": 9, "y": 4, "width": 14, "height": 23 }, "visibleCenter": { "x": 16, "y": 15.5 }, "pivot": { "x": 16, "y": 27 } }, "d7/Main-Gauche/4": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="mg_blade_d7_Main_Gauche_4" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#bdc3c7"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="mg_hilt_d7_Main_Gauche_4" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#475569"/>\n                    <stop offset="45%" stop-color="#1e293b"/>\n                    <stop offset="45%" stop-color="#0f172a"/>\n                    <stop offset="100%" stop-color="#020617"/>\n                  </linearGradient>\n                </defs>\n                <path d="M16 4 L17.8 8 L17 19 H15 L14.2 8 Z" fill="url(#mg_blade_d7_Main_Gauche_4)" stroke="#000" stroke-width="1.8" />\n                <path d="M9 19 Q16 16, 23 19" fill="none" stroke="#f1c40f" stroke-width="2" stroke-linecap="round" />\n                <path d="M13 19 C13 23, 19 23, 19 19" fill="none" stroke="#f1c40f" stroke-width="1.5" />\n                <rect x="14.5" y="21" width="3" height="6" fill="url(#mg_hilt_d7_Main_Gauche_4)" stroke="#000" stroke-width="1" />\n              </svg>', "color": "#f1c40f", "source": "main_gauche", "bounds": { "x": 9, "y": 4, "width": 14, "height": 23 }, "visibleCenter": { "x": 16, "y": 15.5 }, "pivot": { "x": 16, "y": 27 } }, "d7/Main-Gauche/5": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <linearGradient id="mg_blade_d7_Main_Gauche_5" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#ffffff"/>\n                    <stop offset="45%" stop-color="#bdc3c7"/>\n                    <stop offset="45%" stop-color="#7f8c8d"/>\n                    <stop offset="100%" stop-color="#475569"/>\n                  </linearGradient>\n                  <linearGradient id="mg_hilt_d7_Main_Gauche_5" x1="0" y1="0" x2="1" y2="0">\n                    <stop offset="0%" stop-color="#475569"/>\n                    <stop offset="45%" stop-color="#1e293b"/>\n                    <stop offset="45%" stop-color="#0f172a"/>\n                    <stop offset="100%" stop-color="#020617"/>\n                  </linearGradient>\n                </defs>\n                <path d="M16 4 L17.8 8 L17 19 H15 L14.2 8 Z" fill="url(#mg_blade_d7_Main_Gauche_5)" stroke="#000" stroke-width="1.8" />\n                <path d="M9 19 Q16 16, 23 19" fill="none" stroke="#e74c3c" stroke-width="2" stroke-linecap="round" />\n                <path d="M13 19 C13 23, 19 23, 19 19" fill="none" stroke="#e74c3c" stroke-width="1.5" />\n                <rect x="14.5" y="21" width="3" height="6" fill="url(#mg_hilt_d7_Main_Gauche_5)" stroke="#000" stroke-width="1" />\n              </svg>', "color": "#e74c3c", "source": "main_gauche", "bounds": { "x": 9, "y": 4, "width": 14, "height": 23 }, "visibleCenter": { "x": 16, "y": 15.5 }, "pivot": { "x": 16, "y": 27 } }, "d7/Grimoire/0": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Cel-shaded cover face: light and dark splits -->\n                  <linearGradient id="gr_cover_l_d7_Grimoire_0" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#2d0044" />\n                    <stop offset="100%" stop-color="#1b002c" />\n                  </linearGradient>\n                  <linearGradient id="gr_cover_s_d7_Grimoire_0" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#140020" />\n                    <stop offset="100%" stop-color="#08000d" />\n                  </linearGradient>\n                  <!-- Metal plating corner guards & clasps -->\n                  <linearGradient id="gr_brass_d7_Grimoire_0" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffe875" />\n                    <stop offset="50%" stop-color="#9c7a10" />\n                    <stop offset="100%" stop-color="#5a4504" />\n                  </linearGradient>\n                  <!-- Dynamic core magic aura glow -->\n                  <radialGradient id="gr_glow_core_d7_Grimoire_0" cx="50%" cy="50%" r="50%">\n                    <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />\n                    <stop offset="40%" stop-color="#ffffff" stop-opacity="0.8" />\n                    <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />\n                  </radialGradient>\n                </defs>\n\n                <!-- Drop projection shadow (Subtle back lift) -->\n                <rect x="6" y="5" width="22" height="24" rx="2.5" fill="rgba(0,0,0,0.4)" />\n\n                <!-- Book spine base & bind wraps -->\n                <rect x="5" y="4" width="5" height="24" rx="1.5" fill="#08000d" stroke="#05070a" stroke-width="1.8" />\n                <!-- Spine Horizontal Ribbing -->\n                <line x1="5" y1="8" x2="10" y2="8" stroke="url(#gr_brass_d7_Grimoire_0)" stroke-width="1.5" />\n                <line x1="5" y1="13" x2="10" y2="13" stroke="url(#gr_brass_d7_Grimoire_0)" stroke-width="1.5" />\n                <line x1="5" y1="18" x2="10" y2="18" stroke="url(#gr_brass_d7_Grimoire_0)" stroke-width="1.5" />\n                <line x1="5" y1="23" x2="10" y2="23" stroke="url(#gr_brass_d7_Grimoire_0)" stroke-width="1.5" />\n\n                <!-- Stacked Parchment Page Edges (Visible at the right and bottom) -->\n                <!-- Base page block -->\n                <rect x="9.5" y="4.5" width="16.5" height="23" fill="#eae1c8" />\n                <!-- Page layering lines -->\n                <line x1="26" y1="5" x2="26" y2="27" stroke="#9e957e" stroke-width="1" stroke-dasharray="1 1" />\n                <line x1="10" y1="27.5" x2="26" y2="27.5" stroke="#9e957e" stroke-width="1" stroke-dasharray="1 1" />\n\n                <!-- Main Leather Cover Face (Highlight / Light Side) -->\n                <path d="M10 4 L25.5 4 L25.5 28 L10 28 Z" fill="url(#gr_cover_l_d7_Grimoire_0)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n                <!-- Cel-shaded Cover Split (Shadow / Dark Side overlay) -->\n                <path d="M10 4 L17 4 L10 28 Z" fill="url(#gr_cover_s_d7_Grimoire_0)" stroke="#05070a" stroke-width="1.2" opacity="0.9" />\n\n                <!-- Gilded Corner Brackets (Top-Right & Bottom-Right Protection Plates) -->\n                <!-- Top Right Guard -->\n                <polygon points="21,4 25.5,4 25.5,8.5" fill="url(#gr_brass_d7_Grimoire_0)" stroke="#05070a" stroke-width="1" stroke-linejoin="round" />\n                <circle cx="23.5" cy="6" r="0.6" fill="#fff" />\n                <!-- Bottom Right Guard -->\n                <polygon points="21,28 25.5,28 25.5,23.5" fill="url(#gr_brass_d7_Grimoire_0)" stroke="#05070a" stroke-width="1" stroke-linejoin="round" />\n                <circle cx="23.5" cy="26" r="0.6" fill="#fff" />\n\n                <!-- Dynamic Magic Spell Circle Radial Glow -->\n                <circle cx="18" cy="16" r="7.5" fill="url(#gr_glow_core_d7_Grimoire_0)" opacity="0.85" />\n\n                <!-- Central Occult Hex-Ring / Runic Sigil -->\n                <circle cx="18" cy="16" r="5" fill="none" stroke="url(#gr_brass_d7_Grimoire_0)" stroke-width="1" />\n                <circle cx="18" cy="16" r="3.8" fill="none" stroke="#ffffff" stroke-width="0.8" stroke-dasharray="1.5 1.5" />\n                <!-- Star of Knowledge glyph -->\n                <polygon points="18,12.5 19.5,15.5 21.5,16 19.8,17.5 20.2,19.5 18,18.2 15.8,19.5 16.2,17.5 14.5,16 16.5,15.5" fill="#ffffff" stroke="#ffffff" stroke-width="0.6" />\n                <circle cx="18" cy="16" r="1" fill="#ffffff" />\n\n                <!-- Strap-lock plate & lock mechanism -->\n                <!-- Leather security strap -->\n                <rect x="23.5" y="13.5" width="3" height="5" fill="#5c3a21" stroke="#05070a" stroke-width="1" />\n                <!-- Forbidden Padlock Base -->\n                <rect x="24.5" y="11.5" width="4" height="9" rx="1" fill="url(#gr_brass_d7_Grimoire_0)" stroke="#05070a" stroke-width="1.2" />\n                <!-- Central Seal Gem (Pulsating Tier Color) -->\n                <circle cx="26.5" cy="16" r="1" fill="#ffffff" stroke="#05070a" stroke-width="0.6" />\n                <circle cx="26.2" cy="15.7" r="0.3" fill="#fff" />\n              </svg>', "color": "#ffffff", "source": "grimoire", "bounds": { "x": 5, "y": 4, "width": 23.5, "height": 25 }, "visibleCenter": { "x": 16.75, "y": 16.5 }, "pivot": { "x": 16.75, "y": 29 } }, "d7/Grimoire/1": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Cel-shaded cover face: light and dark splits -->\n                  <linearGradient id="gr_cover_l_d7_Grimoire_1" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#2d0044" />\n                    <stop offset="100%" stop-color="#1b002c" />\n                  </linearGradient>\n                  <linearGradient id="gr_cover_s_d7_Grimoire_1" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#140020" />\n                    <stop offset="100%" stop-color="#08000d" />\n                  </linearGradient>\n                  <!-- Metal plating corner guards & clasps -->\n                  <linearGradient id="gr_brass_d7_Grimoire_1" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffe875" />\n                    <stop offset="50%" stop-color="#9c7a10" />\n                    <stop offset="100%" stop-color="#5a4504" />\n                  </linearGradient>\n                  <!-- Dynamic core magic aura glow -->\n                  <radialGradient id="gr_glow_core_d7_Grimoire_1" cx="50%" cy="50%" r="50%">\n                    <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />\n                    <stop offset="40%" stop-color="#3498db" stop-opacity="0.8" />\n                    <stop offset="100%" stop-color="#3498db" stop-opacity="0" />\n                  </radialGradient>\n                </defs>\n\n                <!-- Drop projection shadow (Subtle back lift) -->\n                <rect x="6" y="5" width="22" height="24" rx="2.5" fill="rgba(0,0,0,0.4)" />\n\n                <!-- Book spine base & bind wraps -->\n                <rect x="5" y="4" width="5" height="24" rx="1.5" fill="#08000d" stroke="#05070a" stroke-width="1.8" />\n                <!-- Spine Horizontal Ribbing -->\n                <line x1="5" y1="8" x2="10" y2="8" stroke="url(#gr_brass_d7_Grimoire_1)" stroke-width="1.5" />\n                <line x1="5" y1="13" x2="10" y2="13" stroke="url(#gr_brass_d7_Grimoire_1)" stroke-width="1.5" />\n                <line x1="5" y1="18" x2="10" y2="18" stroke="url(#gr_brass_d7_Grimoire_1)" stroke-width="1.5" />\n                <line x1="5" y1="23" x2="10" y2="23" stroke="url(#gr_brass_d7_Grimoire_1)" stroke-width="1.5" />\n\n                <!-- Stacked Parchment Page Edges (Visible at the right and bottom) -->\n                <!-- Base page block -->\n                <rect x="9.5" y="4.5" width="16.5" height="23" fill="#eae1c8" />\n                <!-- Page layering lines -->\n                <line x1="26" y1="5" x2="26" y2="27" stroke="#9e957e" stroke-width="1" stroke-dasharray="1 1" />\n                <line x1="10" y1="27.5" x2="26" y2="27.5" stroke="#9e957e" stroke-width="1" stroke-dasharray="1 1" />\n\n                <!-- Main Leather Cover Face (Highlight / Light Side) -->\n                <path d="M10 4 L25.5 4 L25.5 28 L10 28 Z" fill="url(#gr_cover_l_d7_Grimoire_1)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n                <!-- Cel-shaded Cover Split (Shadow / Dark Side overlay) -->\n                <path d="M10 4 L17 4 L10 28 Z" fill="url(#gr_cover_s_d7_Grimoire_1)" stroke="#05070a" stroke-width="1.2" opacity="0.9" />\n\n                <!-- Gilded Corner Brackets (Top-Right & Bottom-Right Protection Plates) -->\n                <!-- Top Right Guard -->\n                <polygon points="21,4 25.5,4 25.5,8.5" fill="url(#gr_brass_d7_Grimoire_1)" stroke="#05070a" stroke-width="1" stroke-linejoin="round" />\n                <circle cx="23.5" cy="6" r="0.6" fill="#fff" />\n                <!-- Bottom Right Guard -->\n                <polygon points="21,28 25.5,28 25.5,23.5" fill="url(#gr_brass_d7_Grimoire_1)" stroke="#05070a" stroke-width="1" stroke-linejoin="round" />\n                <circle cx="23.5" cy="26" r="0.6" fill="#fff" />\n\n                <!-- Dynamic Magic Spell Circle Radial Glow -->\n                <circle cx="18" cy="16" r="7.5" fill="url(#gr_glow_core_d7_Grimoire_1)" opacity="0.85" />\n\n                <!-- Central Occult Hex-Ring / Runic Sigil -->\n                <circle cx="18" cy="16" r="5" fill="none" stroke="url(#gr_brass_d7_Grimoire_1)" stroke-width="1" />\n                <circle cx="18" cy="16" r="3.8" fill="none" stroke="#3498db" stroke-width="0.8" stroke-dasharray="1.5 1.5" />\n                <!-- Star of Knowledge glyph -->\n                <polygon points="18,12.5 19.5,15.5 21.5,16 19.8,17.5 20.2,19.5 18,18.2 15.8,19.5 16.2,17.5 14.5,16 16.5,15.5" fill="#ffffff" stroke="#3498db" stroke-width="0.6" />\n                <circle cx="18" cy="16" r="1" fill="#ffffff" />\n\n                <!-- Strap-lock plate & lock mechanism -->\n                <!-- Leather security strap -->\n                <rect x="23.5" y="13.5" width="3" height="5" fill="#5c3a21" stroke="#05070a" stroke-width="1" />\n                <!-- Forbidden Padlock Base -->\n                <rect x="24.5" y="11.5" width="4" height="9" rx="1" fill="url(#gr_brass_d7_Grimoire_1)" stroke="#05070a" stroke-width="1.2" />\n                <!-- Central Seal Gem (Pulsating Tier Color) -->\n                <circle cx="26.5" cy="16" r="1" fill="#3498db" stroke="#05070a" stroke-width="0.6" />\n                <circle cx="26.2" cy="15.7" r="0.3" fill="#fff" />\n              </svg>', "color": "#3498db", "source": "grimoire", "bounds": { "x": 5, "y": 4, "width": 23.5, "height": 25 }, "visibleCenter": { "x": 16.75, "y": 16.5 }, "pivot": { "x": 16.75, "y": 29 } }, "d7/Grimoire/2": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Cel-shaded cover face: light and dark splits -->\n                  <linearGradient id="gr_cover_l_d7_Grimoire_2" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#2d0044" />\n                    <stop offset="100%" stop-color="#1b002c" />\n                  </linearGradient>\n                  <linearGradient id="gr_cover_s_d7_Grimoire_2" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#140020" />\n                    <stop offset="100%" stop-color="#08000d" />\n                  </linearGradient>\n                  <!-- Metal plating corner guards & clasps -->\n                  <linearGradient id="gr_brass_d7_Grimoire_2" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffe875" />\n                    <stop offset="50%" stop-color="#9c7a10" />\n                    <stop offset="100%" stop-color="#5a4504" />\n                  </linearGradient>\n                  <!-- Dynamic core magic aura glow -->\n                  <radialGradient id="gr_glow_core_d7_Grimoire_2" cx="50%" cy="50%" r="50%">\n                    <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />\n                    <stop offset="40%" stop-color="#9b59b6" stop-opacity="0.8" />\n                    <stop offset="100%" stop-color="#9b59b6" stop-opacity="0" />\n                  </radialGradient>\n                </defs>\n\n                <!-- Drop projection shadow (Subtle back lift) -->\n                <rect x="6" y="5" width="22" height="24" rx="2.5" fill="rgba(0,0,0,0.4)" />\n\n                <!-- Book spine base & bind wraps -->\n                <rect x="5" y="4" width="5" height="24" rx="1.5" fill="#08000d" stroke="#05070a" stroke-width="1.8" />\n                <!-- Spine Horizontal Ribbing -->\n                <line x1="5" y1="8" x2="10" y2="8" stroke="url(#gr_brass_d7_Grimoire_2)" stroke-width="1.5" />\n                <line x1="5" y1="13" x2="10" y2="13" stroke="url(#gr_brass_d7_Grimoire_2)" stroke-width="1.5" />\n                <line x1="5" y1="18" x2="10" y2="18" stroke="url(#gr_brass_d7_Grimoire_2)" stroke-width="1.5" />\n                <line x1="5" y1="23" x2="10" y2="23" stroke="url(#gr_brass_d7_Grimoire_2)" stroke-width="1.5" />\n\n                <!-- Stacked Parchment Page Edges (Visible at the right and bottom) -->\n                <!-- Base page block -->\n                <rect x="9.5" y="4.5" width="16.5" height="23" fill="#eae1c8" />\n                <!-- Page layering lines -->\n                <line x1="26" y1="5" x2="26" y2="27" stroke="#9e957e" stroke-width="1" stroke-dasharray="1 1" />\n                <line x1="10" y1="27.5" x2="26" y2="27.5" stroke="#9e957e" stroke-width="1" stroke-dasharray="1 1" />\n\n                <!-- Main Leather Cover Face (Highlight / Light Side) -->\n                <path d="M10 4 L25.5 4 L25.5 28 L10 28 Z" fill="url(#gr_cover_l_d7_Grimoire_2)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n                <!-- Cel-shaded Cover Split (Shadow / Dark Side overlay) -->\n                <path d="M10 4 L17 4 L10 28 Z" fill="url(#gr_cover_s_d7_Grimoire_2)" stroke="#05070a" stroke-width="1.2" opacity="0.9" />\n\n                <!-- Gilded Corner Brackets (Top-Right & Bottom-Right Protection Plates) -->\n                <!-- Top Right Guard -->\n                <polygon points="21,4 25.5,4 25.5,8.5" fill="url(#gr_brass_d7_Grimoire_2)" stroke="#05070a" stroke-width="1" stroke-linejoin="round" />\n                <circle cx="23.5" cy="6" r="0.6" fill="#fff" />\n                <!-- Bottom Right Guard -->\n                <polygon points="21,28 25.5,28 25.5,23.5" fill="url(#gr_brass_d7_Grimoire_2)" stroke="#05070a" stroke-width="1" stroke-linejoin="round" />\n                <circle cx="23.5" cy="26" r="0.6" fill="#fff" />\n\n                <!-- Dynamic Magic Spell Circle Radial Glow -->\n                <circle cx="18" cy="16" r="7.5" fill="url(#gr_glow_core_d7_Grimoire_2)" opacity="0.85" />\n\n                <!-- Central Occult Hex-Ring / Runic Sigil -->\n                <circle cx="18" cy="16" r="5" fill="none" stroke="url(#gr_brass_d7_Grimoire_2)" stroke-width="1" />\n                <circle cx="18" cy="16" r="3.8" fill="none" stroke="#9b59b6" stroke-width="0.8" stroke-dasharray="1.5 1.5" />\n                <!-- Star of Knowledge glyph -->\n                <polygon points="18,12.5 19.5,15.5 21.5,16 19.8,17.5 20.2,19.5 18,18.2 15.8,19.5 16.2,17.5 14.5,16 16.5,15.5" fill="#ffffff" stroke="#9b59b6" stroke-width="0.6" />\n                <circle cx="18" cy="16" r="1" fill="#ffffff" />\n\n                <!-- Strap-lock plate & lock mechanism -->\n                <!-- Leather security strap -->\n                <rect x="23.5" y="13.5" width="3" height="5" fill="#5c3a21" stroke="#05070a" stroke-width="1" />\n                <!-- Forbidden Padlock Base -->\n                <rect x="24.5" y="11.5" width="4" height="9" rx="1" fill="url(#gr_brass_d7_Grimoire_2)" stroke="#05070a" stroke-width="1.2" />\n                <!-- Central Seal Gem (Pulsating Tier Color) -->\n                <circle cx="26.5" cy="16" r="1" fill="#9b59b6" stroke="#05070a" stroke-width="0.6" />\n                <circle cx="26.2" cy="15.7" r="0.3" fill="#fff" />\n              </svg>', "color": "#9b59b6", "source": "grimoire", "bounds": { "x": 5, "y": 4, "width": 23.5, "height": 25 }, "visibleCenter": { "x": 16.75, "y": 16.5 }, "pivot": { "x": 16.75, "y": 29 } }, "d7/Grimoire/3": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Cel-shaded cover face: light and dark splits -->\n                  <linearGradient id="gr_cover_l_d7_Grimoire_3" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#2d0044" />\n                    <stop offset="100%" stop-color="#1b002c" />\n                  </linearGradient>\n                  <linearGradient id="gr_cover_s_d7_Grimoire_3" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#140020" />\n                    <stop offset="100%" stop-color="#08000d" />\n                  </linearGradient>\n                  <!-- Metal plating corner guards & clasps -->\n                  <linearGradient id="gr_brass_d7_Grimoire_3" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffe875" />\n                    <stop offset="50%" stop-color="#9c7a10" />\n                    <stop offset="100%" stop-color="#5a4504" />\n                  </linearGradient>\n                  <!-- Dynamic core magic aura glow -->\n                  <radialGradient id="gr_glow_core_d7_Grimoire_3" cx="50%" cy="50%" r="50%">\n                    <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />\n                    <stop offset="40%" stop-color="#e67e22" stop-opacity="0.8" />\n                    <stop offset="100%" stop-color="#e67e22" stop-opacity="0" />\n                  </radialGradient>\n                </defs>\n\n                <!-- Drop projection shadow (Subtle back lift) -->\n                <rect x="6" y="5" width="22" height="24" rx="2.5" fill="rgba(0,0,0,0.4)" />\n\n                <!-- Book spine base & bind wraps -->\n                <rect x="5" y="4" width="5" height="24" rx="1.5" fill="#08000d" stroke="#05070a" stroke-width="1.8" />\n                <!-- Spine Horizontal Ribbing -->\n                <line x1="5" y1="8" x2="10" y2="8" stroke="url(#gr_brass_d7_Grimoire_3)" stroke-width="1.5" />\n                <line x1="5" y1="13" x2="10" y2="13" stroke="url(#gr_brass_d7_Grimoire_3)" stroke-width="1.5" />\n                <line x1="5" y1="18" x2="10" y2="18" stroke="url(#gr_brass_d7_Grimoire_3)" stroke-width="1.5" />\n                <line x1="5" y1="23" x2="10" y2="23" stroke="url(#gr_brass_d7_Grimoire_3)" stroke-width="1.5" />\n\n                <!-- Stacked Parchment Page Edges (Visible at the right and bottom) -->\n                <!-- Base page block -->\n                <rect x="9.5" y="4.5" width="16.5" height="23" fill="#eae1c8" />\n                <!-- Page layering lines -->\n                <line x1="26" y1="5" x2="26" y2="27" stroke="#9e957e" stroke-width="1" stroke-dasharray="1 1" />\n                <line x1="10" y1="27.5" x2="26" y2="27.5" stroke="#9e957e" stroke-width="1" stroke-dasharray="1 1" />\n\n                <!-- Main Leather Cover Face (Highlight / Light Side) -->\n                <path d="M10 4 L25.5 4 L25.5 28 L10 28 Z" fill="url(#gr_cover_l_d7_Grimoire_3)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n                <!-- Cel-shaded Cover Split (Shadow / Dark Side overlay) -->\n                <path d="M10 4 L17 4 L10 28 Z" fill="url(#gr_cover_s_d7_Grimoire_3)" stroke="#05070a" stroke-width="1.2" opacity="0.9" />\n\n                <!-- Gilded Corner Brackets (Top-Right & Bottom-Right Protection Plates) -->\n                <!-- Top Right Guard -->\n                <polygon points="21,4 25.5,4 25.5,8.5" fill="url(#gr_brass_d7_Grimoire_3)" stroke="#05070a" stroke-width="1" stroke-linejoin="round" />\n                <circle cx="23.5" cy="6" r="0.6" fill="#fff" />\n                <!-- Bottom Right Guard -->\n                <polygon points="21,28 25.5,28 25.5,23.5" fill="url(#gr_brass_d7_Grimoire_3)" stroke="#05070a" stroke-width="1" stroke-linejoin="round" />\n                <circle cx="23.5" cy="26" r="0.6" fill="#fff" />\n\n                <!-- Dynamic Magic Spell Circle Radial Glow -->\n                <circle cx="18" cy="16" r="7.5" fill="url(#gr_glow_core_d7_Grimoire_3)" opacity="0.85" />\n\n                <!-- Central Occult Hex-Ring / Runic Sigil -->\n                <circle cx="18" cy="16" r="5" fill="none" stroke="url(#gr_brass_d7_Grimoire_3)" stroke-width="1" />\n                <circle cx="18" cy="16" r="3.8" fill="none" stroke="#e67e22" stroke-width="0.8" stroke-dasharray="1.5 1.5" />\n                <!-- Star of Knowledge glyph -->\n                <polygon points="18,12.5 19.5,15.5 21.5,16 19.8,17.5 20.2,19.5 18,18.2 15.8,19.5 16.2,17.5 14.5,16 16.5,15.5" fill="#ffffff" stroke="#e67e22" stroke-width="0.6" />\n                <circle cx="18" cy="16" r="1" fill="#ffffff" />\n\n                <!-- Strap-lock plate & lock mechanism -->\n                <!-- Leather security strap -->\n                <rect x="23.5" y="13.5" width="3" height="5" fill="#5c3a21" stroke="#05070a" stroke-width="1" />\n                <!-- Forbidden Padlock Base -->\n                <rect x="24.5" y="11.5" width="4" height="9" rx="1" fill="url(#gr_brass_d7_Grimoire_3)" stroke="#05070a" stroke-width="1.2" />\n                <!-- Central Seal Gem (Pulsating Tier Color) -->\n                <circle cx="26.5" cy="16" r="1" fill="#e67e22" stroke="#05070a" stroke-width="0.6" />\n                <circle cx="26.2" cy="15.7" r="0.3" fill="#fff" />\n              </svg>', "color": "#e67e22", "source": "grimoire", "bounds": { "x": 5, "y": 4, "width": 23.5, "height": 25 }, "visibleCenter": { "x": 16.75, "y": 16.5 }, "pivot": { "x": 16.75, "y": 29 } }, "d7/Grimoire/4": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Cel-shaded cover face: light and dark splits -->\n                  <linearGradient id="gr_cover_l_d7_Grimoire_4" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#2d0044" />\n                    <stop offset="100%" stop-color="#1b002c" />\n                  </linearGradient>\n                  <linearGradient id="gr_cover_s_d7_Grimoire_4" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#140020" />\n                    <stop offset="100%" stop-color="#08000d" />\n                  </linearGradient>\n                  <!-- Metal plating corner guards & clasps -->\n                  <linearGradient id="gr_brass_d7_Grimoire_4" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffe875" />\n                    <stop offset="50%" stop-color="#9c7a10" />\n                    <stop offset="100%" stop-color="#5a4504" />\n                  </linearGradient>\n                  <!-- Dynamic core magic aura glow -->\n                  <radialGradient id="gr_glow_core_d7_Grimoire_4" cx="50%" cy="50%" r="50%">\n                    <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />\n                    <stop offset="40%" stop-color="#f1c40f" stop-opacity="0.8" />\n                    <stop offset="100%" stop-color="#f1c40f" stop-opacity="0" />\n                  </radialGradient>\n                </defs>\n\n                <!-- Drop projection shadow (Subtle back lift) -->\n                <rect x="6" y="5" width="22" height="24" rx="2.5" fill="rgba(0,0,0,0.4)" />\n\n                <!-- Book spine base & bind wraps -->\n                <rect x="5" y="4" width="5" height="24" rx="1.5" fill="#08000d" stroke="#05070a" stroke-width="1.8" />\n                <!-- Spine Horizontal Ribbing -->\n                <line x1="5" y1="8" x2="10" y2="8" stroke="url(#gr_brass_d7_Grimoire_4)" stroke-width="1.5" />\n                <line x1="5" y1="13" x2="10" y2="13" stroke="url(#gr_brass_d7_Grimoire_4)" stroke-width="1.5" />\n                <line x1="5" y1="18" x2="10" y2="18" stroke="url(#gr_brass_d7_Grimoire_4)" stroke-width="1.5" />\n                <line x1="5" y1="23" x2="10" y2="23" stroke="url(#gr_brass_d7_Grimoire_4)" stroke-width="1.5" />\n\n                <!-- Stacked Parchment Page Edges (Visible at the right and bottom) -->\n                <!-- Base page block -->\n                <rect x="9.5" y="4.5" width="16.5" height="23" fill="#eae1c8" />\n                <!-- Page layering lines -->\n                <line x1="26" y1="5" x2="26" y2="27" stroke="#9e957e" stroke-width="1" stroke-dasharray="1 1" />\n                <line x1="10" y1="27.5" x2="26" y2="27.5" stroke="#9e957e" stroke-width="1" stroke-dasharray="1 1" />\n\n                <!-- Main Leather Cover Face (Highlight / Light Side) -->\n                <path d="M10 4 L25.5 4 L25.5 28 L10 28 Z" fill="url(#gr_cover_l_d7_Grimoire_4)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n                <!-- Cel-shaded Cover Split (Shadow / Dark Side overlay) -->\n                <path d="M10 4 L17 4 L10 28 Z" fill="url(#gr_cover_s_d7_Grimoire_4)" stroke="#05070a" stroke-width="1.2" opacity="0.9" />\n\n                <!-- Gilded Corner Brackets (Top-Right & Bottom-Right Protection Plates) -->\n                <!-- Top Right Guard -->\n                <polygon points="21,4 25.5,4 25.5,8.5" fill="url(#gr_brass_d7_Grimoire_4)" stroke="#05070a" stroke-width="1" stroke-linejoin="round" />\n                <circle cx="23.5" cy="6" r="0.6" fill="#fff" />\n                <!-- Bottom Right Guard -->\n                <polygon points="21,28 25.5,28 25.5,23.5" fill="url(#gr_brass_d7_Grimoire_4)" stroke="#05070a" stroke-width="1" stroke-linejoin="round" />\n                <circle cx="23.5" cy="26" r="0.6" fill="#fff" />\n\n                <!-- Dynamic Magic Spell Circle Radial Glow -->\n                <circle cx="18" cy="16" r="7.5" fill="url(#gr_glow_core_d7_Grimoire_4)" opacity="0.85" />\n\n                <!-- Central Occult Hex-Ring / Runic Sigil -->\n                <circle cx="18" cy="16" r="5" fill="none" stroke="url(#gr_brass_d7_Grimoire_4)" stroke-width="1" />\n                <circle cx="18" cy="16" r="3.8" fill="none" stroke="#f1c40f" stroke-width="0.8" stroke-dasharray="1.5 1.5" />\n                <!-- Star of Knowledge glyph -->\n                <polygon points="18,12.5 19.5,15.5 21.5,16 19.8,17.5 20.2,19.5 18,18.2 15.8,19.5 16.2,17.5 14.5,16 16.5,15.5" fill="#ffffff" stroke="#f1c40f" stroke-width="0.6" />\n                <circle cx="18" cy="16" r="1" fill="#ffffff" />\n\n                <!-- Strap-lock plate & lock mechanism -->\n                <!-- Leather security strap -->\n                <rect x="23.5" y="13.5" width="3" height="5" fill="#5c3a21" stroke="#05070a" stroke-width="1" />\n                <!-- Forbidden Padlock Base -->\n                <rect x="24.5" y="11.5" width="4" height="9" rx="1" fill="url(#gr_brass_d7_Grimoire_4)" stroke="#05070a" stroke-width="1.2" />\n                <!-- Central Seal Gem (Pulsating Tier Color) -->\n                <circle cx="26.5" cy="16" r="1" fill="#f1c40f" stroke="#05070a" stroke-width="0.6" />\n                <circle cx="26.2" cy="15.7" r="0.3" fill="#fff" />\n              </svg>', "color": "#f1c40f", "source": "grimoire", "bounds": { "x": 5, "y": 4, "width": 23.5, "height": 25 }, "visibleCenter": { "x": 16.75, "y": 16.5 }, "pivot": { "x": 16.75, "y": 29 } }, "d7/Grimoire/5": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Cel-shaded cover face: light and dark splits -->\n                  <linearGradient id="gr_cover_l_d7_Grimoire_5" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#2d0044" />\n                    <stop offset="100%" stop-color="#1b002c" />\n                  </linearGradient>\n                  <linearGradient id="gr_cover_s_d7_Grimoire_5" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#140020" />\n                    <stop offset="100%" stop-color="#08000d" />\n                  </linearGradient>\n                  <!-- Metal plating corner guards & clasps -->\n                  <linearGradient id="gr_brass_d7_Grimoire_5" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffe875" />\n                    <stop offset="50%" stop-color="#9c7a10" />\n                    <stop offset="100%" stop-color="#5a4504" />\n                  </linearGradient>\n                  <!-- Dynamic core magic aura glow -->\n                  <radialGradient id="gr_glow_core_d7_Grimoire_5" cx="50%" cy="50%" r="50%">\n                    <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />\n                    <stop offset="40%" stop-color="#e74c3c" stop-opacity="0.8" />\n                    <stop offset="100%" stop-color="#e74c3c" stop-opacity="0" />\n                  </radialGradient>\n                </defs>\n\n                <!-- Drop projection shadow (Subtle back lift) -->\n                <rect x="6" y="5" width="22" height="24" rx="2.5" fill="rgba(0,0,0,0.4)" />\n\n                <!-- Book spine base & bind wraps -->\n                <rect x="5" y="4" width="5" height="24" rx="1.5" fill="#08000d" stroke="#05070a" stroke-width="1.8" />\n                <!-- Spine Horizontal Ribbing -->\n                <line x1="5" y1="8" x2="10" y2="8" stroke="url(#gr_brass_d7_Grimoire_5)" stroke-width="1.5" />\n                <line x1="5" y1="13" x2="10" y2="13" stroke="url(#gr_brass_d7_Grimoire_5)" stroke-width="1.5" />\n                <line x1="5" y1="18" x2="10" y2="18" stroke="url(#gr_brass_d7_Grimoire_5)" stroke-width="1.5" />\n                <line x1="5" y1="23" x2="10" y2="23" stroke="url(#gr_brass_d7_Grimoire_5)" stroke-width="1.5" />\n\n                <!-- Stacked Parchment Page Edges (Visible at the right and bottom) -->\n                <!-- Base page block -->\n                <rect x="9.5" y="4.5" width="16.5" height="23" fill="#eae1c8" />\n                <!-- Page layering lines -->\n                <line x1="26" y1="5" x2="26" y2="27" stroke="#9e957e" stroke-width="1" stroke-dasharray="1 1" />\n                <line x1="10" y1="27.5" x2="26" y2="27.5" stroke="#9e957e" stroke-width="1" stroke-dasharray="1 1" />\n\n                <!-- Main Leather Cover Face (Highlight / Light Side) -->\n                <path d="M10 4 L25.5 4 L25.5 28 L10 28 Z" fill="url(#gr_cover_l_d7_Grimoire_5)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n                <!-- Cel-shaded Cover Split (Shadow / Dark Side overlay) -->\n                <path d="M10 4 L17 4 L10 28 Z" fill="url(#gr_cover_s_d7_Grimoire_5)" stroke="#05070a" stroke-width="1.2" opacity="0.9" />\n\n                <!-- Gilded Corner Brackets (Top-Right & Bottom-Right Protection Plates) -->\n                <!-- Top Right Guard -->\n                <polygon points="21,4 25.5,4 25.5,8.5" fill="url(#gr_brass_d7_Grimoire_5)" stroke="#05070a" stroke-width="1" stroke-linejoin="round" />\n                <circle cx="23.5" cy="6" r="0.6" fill="#fff" />\n                <!-- Bottom Right Guard -->\n                <polygon points="21,28 25.5,28 25.5,23.5" fill="url(#gr_brass_d7_Grimoire_5)" stroke="#05070a" stroke-width="1" stroke-linejoin="round" />\n                <circle cx="23.5" cy="26" r="0.6" fill="#fff" />\n\n                <!-- Dynamic Magic Spell Circle Radial Glow -->\n                <circle cx="18" cy="16" r="7.5" fill="url(#gr_glow_core_d7_Grimoire_5)" opacity="0.85" />\n\n                <!-- Central Occult Hex-Ring / Runic Sigil -->\n                <circle cx="18" cy="16" r="5" fill="none" stroke="url(#gr_brass_d7_Grimoire_5)" stroke-width="1" />\n                <circle cx="18" cy="16" r="3.8" fill="none" stroke="#e74c3c" stroke-width="0.8" stroke-dasharray="1.5 1.5" />\n                <!-- Star of Knowledge glyph -->\n                <polygon points="18,12.5 19.5,15.5 21.5,16 19.8,17.5 20.2,19.5 18,18.2 15.8,19.5 16.2,17.5 14.5,16 16.5,15.5" fill="#ffffff" stroke="#e74c3c" stroke-width="0.6" />\n                <circle cx="18" cy="16" r="1" fill="#ffffff" />\n\n                <!-- Strap-lock plate & lock mechanism -->\n                <!-- Leather security strap -->\n                <rect x="23.5" y="13.5" width="3" height="5" fill="#5c3a21" stroke="#05070a" stroke-width="1" />\n                <!-- Forbidden Padlock Base -->\n                <rect x="24.5" y="11.5" width="4" height="9" rx="1" fill="url(#gr_brass_d7_Grimoire_5)" stroke="#05070a" stroke-width="1.2" />\n                <!-- Central Seal Gem (Pulsating Tier Color) -->\n                <circle cx="26.5" cy="16" r="1" fill="#e74c3c" stroke="#05070a" stroke-width="0.6" />\n                <circle cx="26.2" cy="15.7" r="0.3" fill="#fff" />\n              </svg>', "color": "#e74c3c", "source": "grimoire", "bounds": { "x": 5, "y": 4, "width": 23.5, "height": 25 }, "visibleCenter": { "x": 16.75, "y": 16.5 }, "pivot": { "x": 16.75, "y": 29 } }, "d7/Spellbook/0": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <!-- Heavy Leather Bound Cover -->\n            <rect x="6" y="4" width="20" height="24" rx="2" fill="#2d1a0d" stroke="#000" stroke-width="1.8" />\n            <!-- Book Spine Binding -->\n            <rect x="6" y="4" width="4" height="24" fill="#1c0f07" stroke="#000" stroke-width="1" />\n            <!-- Gold Corner Brackets -->\n            <polygon points="10,4 12,4 10,6" fill="#f1c40f" />\n            <polygon points="26,4 24,4 26,6" fill="#f1c40f" />\n            <polygon points="10,28 12,28 10,26" fill="#f1c40f" />\n            <polygon points="26,28 24,28 26,26" fill="#f1c40f" />\n            <!-- Inner Page Edge line details -->\n            <line x1="25" y1="5" x2="25" y2="27" stroke="#eaeaea" stroke-width="1.2" />\n            <!-- Central Mystical Sphere scaling with Tier Color -->\n            <circle cx="17" cy="16" r="4.5" fill="#ffffff" stroke="#000" stroke-width="1.2" />\n            <circle cx="15.5" cy="14.5" r="1" fill="#fff" opacity="0.6" />\n          </svg>', "color": "#ffffff", "source": "tome", "bounds": { "x": 6, "y": 4, "width": 20, "height": 24 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 28 } }, "d7/Spellbook/1": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <!-- Heavy Leather Bound Cover -->\n            <rect x="6" y="4" width="20" height="24" rx="2" fill="#2d1a0d" stroke="#000" stroke-width="1.8" />\n            <!-- Book Spine Binding -->\n            <rect x="6" y="4" width="4" height="24" fill="#1c0f07" stroke="#000" stroke-width="1" />\n            <!-- Gold Corner Brackets -->\n            <polygon points="10,4 12,4 10,6" fill="#f1c40f" />\n            <polygon points="26,4 24,4 26,6" fill="#f1c40f" />\n            <polygon points="10,28 12,28 10,26" fill="#f1c40f" />\n            <polygon points="26,28 24,28 26,26" fill="#f1c40f" />\n            <!-- Inner Page Edge line details -->\n            <line x1="25" y1="5" x2="25" y2="27" stroke="#eaeaea" stroke-width="1.2" />\n            <!-- Central Mystical Sphere scaling with Tier Color -->\n            <circle cx="17" cy="16" r="4.5" fill="#3498db" stroke="#000" stroke-width="1.2" />\n            <circle cx="15.5" cy="14.5" r="1" fill="#fff" opacity="0.6" />\n          </svg>', "color": "#3498db", "source": "tome", "bounds": { "x": 6, "y": 4, "width": 20, "height": 24 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 28 } }, "d7/Spellbook/2": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <!-- Heavy Leather Bound Cover -->\n            <rect x="6" y="4" width="20" height="24" rx="2" fill="#2d1a0d" stroke="#000" stroke-width="1.8" />\n            <!-- Book Spine Binding -->\n            <rect x="6" y="4" width="4" height="24" fill="#1c0f07" stroke="#000" stroke-width="1" />\n            <!-- Gold Corner Brackets -->\n            <polygon points="10,4 12,4 10,6" fill="#f1c40f" />\n            <polygon points="26,4 24,4 26,6" fill="#f1c40f" />\n            <polygon points="10,28 12,28 10,26" fill="#f1c40f" />\n            <polygon points="26,28 24,28 26,26" fill="#f1c40f" />\n            <!-- Inner Page Edge line details -->\n            <line x1="25" y1="5" x2="25" y2="27" stroke="#eaeaea" stroke-width="1.2" />\n            <!-- Central Mystical Sphere scaling with Tier Color -->\n            <circle cx="17" cy="16" r="4.5" fill="#9b59b6" stroke="#000" stroke-width="1.2" />\n            <circle cx="15.5" cy="14.5" r="1" fill="#fff" opacity="0.6" />\n          </svg>', "color": "#9b59b6", "source": "tome", "bounds": { "x": 6, "y": 4, "width": 20, "height": 24 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 28 } }, "d7/Spellbook/3": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <!-- Heavy Leather Bound Cover -->\n            <rect x="6" y="4" width="20" height="24" rx="2" fill="#2d1a0d" stroke="#000" stroke-width="1.8" />\n            <!-- Book Spine Binding -->\n            <rect x="6" y="4" width="4" height="24" fill="#1c0f07" stroke="#000" stroke-width="1" />\n            <!-- Gold Corner Brackets -->\n            <polygon points="10,4 12,4 10,6" fill="#f1c40f" />\n            <polygon points="26,4 24,4 26,6" fill="#f1c40f" />\n            <polygon points="10,28 12,28 10,26" fill="#f1c40f" />\n            <polygon points="26,28 24,28 26,26" fill="#f1c40f" />\n            <!-- Inner Page Edge line details -->\n            <line x1="25" y1="5" x2="25" y2="27" stroke="#eaeaea" stroke-width="1.2" />\n            <!-- Central Mystical Sphere scaling with Tier Color -->\n            <circle cx="17" cy="16" r="4.5" fill="#e67e22" stroke="#000" stroke-width="1.2" />\n            <circle cx="15.5" cy="14.5" r="1" fill="#fff" opacity="0.6" />\n          </svg>', "color": "#e67e22", "source": "tome", "bounds": { "x": 6, "y": 4, "width": 20, "height": 24 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 28 } }, "d7/Spellbook/4": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <!-- Heavy Leather Bound Cover -->\n            <rect x="6" y="4" width="20" height="24" rx="2" fill="#2d1a0d" stroke="#000" stroke-width="1.8" />\n            <!-- Book Spine Binding -->\n            <rect x="6" y="4" width="4" height="24" fill="#1c0f07" stroke="#000" stroke-width="1" />\n            <!-- Gold Corner Brackets -->\n            <polygon points="10,4 12,4 10,6" fill="#f1c40f" />\n            <polygon points="26,4 24,4 26,6" fill="#f1c40f" />\n            <polygon points="10,28 12,28 10,26" fill="#f1c40f" />\n            <polygon points="26,28 24,28 26,26" fill="#f1c40f" />\n            <!-- Inner Page Edge line details -->\n            <line x1="25" y1="5" x2="25" y2="27" stroke="#eaeaea" stroke-width="1.2" />\n            <!-- Central Mystical Sphere scaling with Tier Color -->\n            <circle cx="17" cy="16" r="4.5" fill="#f1c40f" stroke="#000" stroke-width="1.2" />\n            <circle cx="15.5" cy="14.5" r="1" fill="#fff" opacity="0.6" />\n          </svg>', "color": "#f1c40f", "source": "tome", "bounds": { "x": 6, "y": 4, "width": 20, "height": 24 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 28 } }, "d7/Spellbook/5": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n            <!-- Heavy Leather Bound Cover -->\n            <rect x="6" y="4" width="20" height="24" rx="2" fill="#2d1a0d" stroke="#000" stroke-width="1.8" />\n            <!-- Book Spine Binding -->\n            <rect x="6" y="4" width="4" height="24" fill="#1c0f07" stroke="#000" stroke-width="1" />\n            <!-- Gold Corner Brackets -->\n            <polygon points="10,4 12,4 10,6" fill="#f1c40f" />\n            <polygon points="26,4 24,4 26,6" fill="#f1c40f" />\n            <polygon points="10,28 12,28 10,26" fill="#f1c40f" />\n            <polygon points="26,28 24,28 26,26" fill="#f1c40f" />\n            <!-- Inner Page Edge line details -->\n            <line x1="25" y1="5" x2="25" y2="27" stroke="#eaeaea" stroke-width="1.2" />\n            <!-- Central Mystical Sphere scaling with Tier Color -->\n            <circle cx="17" cy="16" r="4.5" fill="#e74c3c" stroke="#000" stroke-width="1.2" />\n            <circle cx="15.5" cy="14.5" r="1" fill="#fff" opacity="0.6" />\n          </svg>', "color": "#e74c3c", "source": "tome", "bounds": { "x": 6, "y": 4, "width": 20, "height": 24 }, "visibleCenter": { "x": 16, "y": 16 }, "pivot": { "x": 16, "y": 28 } }, "d7/Codex/0": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Cel-shaded Wood cover grain -->\n                                    <linearGradient id="cx_wood_d7_Codex_0" x1="0" y1="0" x2="1" y2="1">\n                                      <stop offset="0%" stop-color="#7d4e21" />\n                                      <stop offset="35%" stop-color="#7d4e21" />\n                                      <stop offset="35%" stop-color="#4d290c" />\n                                      <stop offset="70%" stop-color="#4d290c" />\n                                      <stop offset="70%" stop-color="#2e1805" />\n                                      <stop offset="100%" stop-color="#180a01" />\n                                    </linearGradient>\n                  <!-- Heavy brass frame and fixtures -->\n                  <linearGradient id="cx_brass_d7_Codex_0" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffe875" />\n                    <stop offset="50%" stop-color="#9c7a10" />\n                    <stop offset="100%" stop-color="#5a4504" />\n                  </linearGradient>\n                  <!-- Dynamic steam-engine kinetic glow -->\n                  <radialGradient id="cx_glow_d7_Codex_0" cx="50%" cy="50%" r="50%">\n                    <stop offset="0%" stop-color="#ffffff" />\n                    <stop offset="45%" stop-color="#ffffff" />\n                    <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />\n                  </radialGradient>\n                </defs>\n\n                <!-- Drop shadow projection -->\n                <rect x="6" y="5" width="21" height="24" rx="2.5" fill="rgba(0,0,0,0.4)" />\n\n                <!-- Spine binding wraps -->\n                <rect x="5" y="4" width="5" height="24" rx="1.5" fill="#1c0f07" stroke="#05070a" stroke-width="1.8" />\n                <line x1="5" y1="9" x2="10" y2="9" stroke="url(#cx_brass_d7_Codex_0)" stroke-width="1.2" />\n                <line x1="5" y1="16" x2="10" y2="16" stroke="url(#cx_brass_d7_Codex_0)" stroke-width="1.2" />\n                <line x1="5" y1="23" x2="10" y2="23" stroke="url(#cx_brass_d7_Codex_0)" stroke-width="1.2" />\n\n                <!-- Yellowed Relic Parchment Sheet Layers (Visible right & bottom) -->\n                <rect x="9.5" y="4.5" width="16" height="23" fill="#eae1c8" />\n                <line x1="25.5" y1="5" x2="25.5" y2="27" stroke="#9e957e" stroke-width="1" stroke-dasharray="1 1" />\n                <line x1="10" y1="27" x2="25.5" y2="27" stroke="#9e957e" stroke-width="1" stroke-dasharray="1 1" />\n\n                <!-- Core Wood Cover Face -->\n                <path d="M10 4 L25 4 L25 28 L10 28 Z" fill="url(#cx_wood_d7_Codex_0)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n                <!-- Heavy Brass Binding Plates (Top & Bottom reinforcing bands) -->\n                <path d="M10 4 H25 V7.5 H10 Z" fill="url(#cx_brass_d7_Codex_0)" stroke="#05070a" stroke-width="1.2" />\n                <path d="M10 24.5 H25 V28 H10 Z" fill="url(#cx_brass_d7_Codex_0)" stroke="#05070a" stroke-width="1.2" />\n                <!-- Rivet Details -->\n                <circle cx="12" cy="5.8" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="17.5" cy="5.8" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="23" cy="5.8" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="12" cy="26.2" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="17.5" cy="26.2" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="23" cy="26.2" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n\n                <!-- Steampunk Conduit Pipe Accents -->\n                <path d="M10 11.5 H14" stroke="#05070a" stroke-width="1" stroke-linecap="round" />\n                <path d="M22 11.5 H25" stroke="#05070a" stroke-width="1" stroke-linecap="round" />\n\n                <!-- Dynamic Kinetic Pressure Center Core Glow -->\n                <circle cx="18" cy="16" r="6" fill="url(#cx_glow_d7_Codex_0)" opacity="0.85" />\n\n                <!-- Master Brass 8-Tooth Cog Assembly -->\n                <g stroke="url(#cx_brass_d7_Codex_0)" stroke-width="1.8" stroke-linecap="round">\n                  <line x1="18" y1="10" x2="18" y2="22" />\n                  <line x1="12" y1="16" x2="24" y2="16" />\n                  <line x1="13.7" y1="11.7" x2="22.3" y2="20.3" />\n                  <line x1="13.7" y1="20.3" x2="22.3" y2="11.7" />\n                </g>\n                <!-- Solid gear plate covering the crosshairs to create teeth spokes -->\n                <circle cx="18" cy="16" r="4.5" fill="#0c0702" stroke="#05070a" stroke-width="1.2" />\n                <!-- Hot glowing energy core matching rarity -->\n                <circle cx="18" cy="16" r="2.2" fill="#ffffff" stroke="#fff" stroke-width="0.8" />\n\n                <!-- Secondary Interlocking Mini Brass Cog Assembly -->\n                <g stroke="url(#cx_brass_d7_Codex_0)" stroke-width="1.2" stroke-linecap="round" opacity="0.85">\n                  <line x1="13" y1="18.5" x2="13" y2="24.5" />\n                  <line x1="10" y1="21.5" x2="16" y2="21.5" />\n                  <line x1="10.8" y1="19.3" x2="15.2" y2="23.7" />\n                  <line x1="10.8" y1="23.7" x2="15.2" y2="19.3" />\n                </g>\n                <circle cx="13" cy="21.5" r="2.2" fill="#0c0702" stroke="#05070a" stroke-width="1" />\n                <circle cx="13" cy="21.5" r="0.8" fill="#fff" />\n              </svg>', "color": "#ffffff", "source": "codex", "bounds": { "x": 5, "y": 4, "width": 22, "height": 25 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 29 } }, "d7/Codex/1": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Cel-shaded Wood cover grain -->\n                                    <linearGradient id="cx_wood_d7_Codex_1" x1="0" y1="0" x2="1" y2="1">\n                                      <stop offset="0%" stop-color="#7d4e21" />\n                                      <stop offset="35%" stop-color="#7d4e21" />\n                                      <stop offset="35%" stop-color="#4d290c" />\n                                      <stop offset="70%" stop-color="#4d290c" />\n                                      <stop offset="70%" stop-color="#2e1805" />\n                                      <stop offset="100%" stop-color="#180a01" />\n                                    </linearGradient>\n                  <!-- Heavy brass frame and fixtures -->\n                  <linearGradient id="cx_brass_d7_Codex_1" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffe875" />\n                    <stop offset="50%" stop-color="#9c7a10" />\n                    <stop offset="100%" stop-color="#5a4504" />\n                  </linearGradient>\n                  <!-- Dynamic steam-engine kinetic glow -->\n                  <radialGradient id="cx_glow_d7_Codex_1" cx="50%" cy="50%" r="50%">\n                    <stop offset="0%" stop-color="#ffffff" />\n                    <stop offset="45%" stop-color="#3498db" />\n                    <stop offset="100%" stop-color="#3498db" stop-opacity="0" />\n                  </radialGradient>\n                </defs>\n\n                <!-- Drop shadow projection -->\n                <rect x="6" y="5" width="21" height="24" rx="2.5" fill="rgba(0,0,0,0.4)" />\n\n                <!-- Spine binding wraps -->\n                <rect x="5" y="4" width="5" height="24" rx="1.5" fill="#1c0f07" stroke="#05070a" stroke-width="1.8" />\n                <line x1="5" y1="9" x2="10" y2="9" stroke="url(#cx_brass_d7_Codex_1)" stroke-width="1.2" />\n                <line x1="5" y1="16" x2="10" y2="16" stroke="url(#cx_brass_d7_Codex_1)" stroke-width="1.2" />\n                <line x1="5" y1="23" x2="10" y2="23" stroke="url(#cx_brass_d7_Codex_1)" stroke-width="1.2" />\n\n                <!-- Yellowed Relic Parchment Sheet Layers (Visible right & bottom) -->\n                <rect x="9.5" y="4.5" width="16" height="23" fill="#eae1c8" />\n                <line x1="25.5" y1="5" x2="25.5" y2="27" stroke="#9e957e" stroke-width="1" stroke-dasharray="1 1" />\n                <line x1="10" y1="27" x2="25.5" y2="27" stroke="#9e957e" stroke-width="1" stroke-dasharray="1 1" />\n\n                <!-- Core Wood Cover Face -->\n                <path d="M10 4 L25 4 L25 28 L10 28 Z" fill="url(#cx_wood_d7_Codex_1)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n                <!-- Heavy Brass Binding Plates (Top & Bottom reinforcing bands) -->\n                <path d="M10 4 H25 V7.5 H10 Z" fill="url(#cx_brass_d7_Codex_1)" stroke="#05070a" stroke-width="1.2" />\n                <path d="M10 24.5 H25 V28 H10 Z" fill="url(#cx_brass_d7_Codex_1)" stroke="#05070a" stroke-width="1.2" />\n                <!-- Rivet Details -->\n                <circle cx="12" cy="5.8" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="17.5" cy="5.8" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="23" cy="5.8" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="12" cy="26.2" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="17.5" cy="26.2" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="23" cy="26.2" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n\n                <!-- Steampunk Conduit Pipe Accents -->\n                <path d="M10 11.5 H14" stroke="#05070a" stroke-width="1" stroke-linecap="round" />\n                <path d="M22 11.5 H25" stroke="#05070a" stroke-width="1" stroke-linecap="round" />\n\n                <!-- Dynamic Kinetic Pressure Center Core Glow -->\n                <circle cx="18" cy="16" r="6" fill="url(#cx_glow_d7_Codex_1)" opacity="0.85" />\n\n                <!-- Master Brass 8-Tooth Cog Assembly -->\n                <g stroke="url(#cx_brass_d7_Codex_1)" stroke-width="1.8" stroke-linecap="round">\n                  <line x1="18" y1="10" x2="18" y2="22" />\n                  <line x1="12" y1="16" x2="24" y2="16" />\n                  <line x1="13.7" y1="11.7" x2="22.3" y2="20.3" />\n                  <line x1="13.7" y1="20.3" x2="22.3" y2="11.7" />\n                </g>\n                <!-- Solid gear plate covering the crosshairs to create teeth spokes -->\n                <circle cx="18" cy="16" r="4.5" fill="#0c0702" stroke="#05070a" stroke-width="1.2" />\n                <!-- Hot glowing energy core matching rarity -->\n                <circle cx="18" cy="16" r="2.2" fill="#3498db" stroke="#fff" stroke-width="0.8" />\n\n                <!-- Secondary Interlocking Mini Brass Cog Assembly -->\n                <g stroke="url(#cx_brass_d7_Codex_1)" stroke-width="1.2" stroke-linecap="round" opacity="0.85">\n                  <line x1="13" y1="18.5" x2="13" y2="24.5" />\n                  <line x1="10" y1="21.5" x2="16" y2="21.5" />\n                  <line x1="10.8" y1="19.3" x2="15.2" y2="23.7" />\n                  <line x1="10.8" y1="23.7" x2="15.2" y2="19.3" />\n                </g>\n                <circle cx="13" cy="21.5" r="2.2" fill="#0c0702" stroke="#05070a" stroke-width="1" />\n                <circle cx="13" cy="21.5" r="0.8" fill="#fff" />\n              </svg>', "color": "#3498db", "source": "codex", "bounds": { "x": 5, "y": 4, "width": 22, "height": 25 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 29 } }, "d7/Codex/2": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Cel-shaded Wood cover grain -->\n                                    <linearGradient id="cx_wood_d7_Codex_2" x1="0" y1="0" x2="1" y2="1">\n                                      <stop offset="0%" stop-color="#7d4e21" />\n                                      <stop offset="35%" stop-color="#7d4e21" />\n                                      <stop offset="35%" stop-color="#4d290c" />\n                                      <stop offset="70%" stop-color="#4d290c" />\n                                      <stop offset="70%" stop-color="#2e1805" />\n                                      <stop offset="100%" stop-color="#180a01" />\n                                    </linearGradient>\n                  <!-- Heavy brass frame and fixtures -->\n                  <linearGradient id="cx_brass_d7_Codex_2" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffe875" />\n                    <stop offset="50%" stop-color="#9c7a10" />\n                    <stop offset="100%" stop-color="#5a4504" />\n                  </linearGradient>\n                  <!-- Dynamic steam-engine kinetic glow -->\n                  <radialGradient id="cx_glow_d7_Codex_2" cx="50%" cy="50%" r="50%">\n                    <stop offset="0%" stop-color="#ffffff" />\n                    <stop offset="45%" stop-color="#9b59b6" />\n                    <stop offset="100%" stop-color="#9b59b6" stop-opacity="0" />\n                  </radialGradient>\n                </defs>\n\n                <!-- Drop shadow projection -->\n                <rect x="6" y="5" width="21" height="24" rx="2.5" fill="rgba(0,0,0,0.4)" />\n\n                <!-- Spine binding wraps -->\n                <rect x="5" y="4" width="5" height="24" rx="1.5" fill="#1c0f07" stroke="#05070a" stroke-width="1.8" />\n                <line x1="5" y1="9" x2="10" y2="9" stroke="url(#cx_brass_d7_Codex_2)" stroke-width="1.2" />\n                <line x1="5" y1="16" x2="10" y2="16" stroke="url(#cx_brass_d7_Codex_2)" stroke-width="1.2" />\n                <line x1="5" y1="23" x2="10" y2="23" stroke="url(#cx_brass_d7_Codex_2)" stroke-width="1.2" />\n\n                <!-- Yellowed Relic Parchment Sheet Layers (Visible right & bottom) -->\n                <rect x="9.5" y="4.5" width="16" height="23" fill="#eae1c8" />\n                <line x1="25.5" y1="5" x2="25.5" y2="27" stroke="#9e957e" stroke-width="1" stroke-dasharray="1 1" />\n                <line x1="10" y1="27" x2="25.5" y2="27" stroke="#9e957e" stroke-width="1" stroke-dasharray="1 1" />\n\n                <!-- Core Wood Cover Face -->\n                <path d="M10 4 L25 4 L25 28 L10 28 Z" fill="url(#cx_wood_d7_Codex_2)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n                <!-- Heavy Brass Binding Plates (Top & Bottom reinforcing bands) -->\n                <path d="M10 4 H25 V7.5 H10 Z" fill="url(#cx_brass_d7_Codex_2)" stroke="#05070a" stroke-width="1.2" />\n                <path d="M10 24.5 H25 V28 H10 Z" fill="url(#cx_brass_d7_Codex_2)" stroke="#05070a" stroke-width="1.2" />\n                <!-- Rivet Details -->\n                <circle cx="12" cy="5.8" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="17.5" cy="5.8" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="23" cy="5.8" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="12" cy="26.2" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="17.5" cy="26.2" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="23" cy="26.2" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n\n                <!-- Steampunk Conduit Pipe Accents -->\n                <path d="M10 11.5 H14" stroke="#05070a" stroke-width="1" stroke-linecap="round" />\n                <path d="M22 11.5 H25" stroke="#05070a" stroke-width="1" stroke-linecap="round" />\n\n                <!-- Dynamic Kinetic Pressure Center Core Glow -->\n                <circle cx="18" cy="16" r="6" fill="url(#cx_glow_d7_Codex_2)" opacity="0.85" />\n\n                <!-- Master Brass 8-Tooth Cog Assembly -->\n                <g stroke="url(#cx_brass_d7_Codex_2)" stroke-width="1.8" stroke-linecap="round">\n                  <line x1="18" y1="10" x2="18" y2="22" />\n                  <line x1="12" y1="16" x2="24" y2="16" />\n                  <line x1="13.7" y1="11.7" x2="22.3" y2="20.3" />\n                  <line x1="13.7" y1="20.3" x2="22.3" y2="11.7" />\n                </g>\n                <!-- Solid gear plate covering the crosshairs to create teeth spokes -->\n                <circle cx="18" cy="16" r="4.5" fill="#0c0702" stroke="#05070a" stroke-width="1.2" />\n                <!-- Hot glowing energy core matching rarity -->\n                <circle cx="18" cy="16" r="2.2" fill="#9b59b6" stroke="#fff" stroke-width="0.8" />\n\n                <!-- Secondary Interlocking Mini Brass Cog Assembly -->\n                <g stroke="url(#cx_brass_d7_Codex_2)" stroke-width="1.2" stroke-linecap="round" opacity="0.85">\n                  <line x1="13" y1="18.5" x2="13" y2="24.5" />\n                  <line x1="10" y1="21.5" x2="16" y2="21.5" />\n                  <line x1="10.8" y1="19.3" x2="15.2" y2="23.7" />\n                  <line x1="10.8" y1="23.7" x2="15.2" y2="19.3" />\n                </g>\n                <circle cx="13" cy="21.5" r="2.2" fill="#0c0702" stroke="#05070a" stroke-width="1" />\n                <circle cx="13" cy="21.5" r="0.8" fill="#fff" />\n              </svg>', "color": "#9b59b6", "source": "codex", "bounds": { "x": 5, "y": 4, "width": 22, "height": 25 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 29 } }, "d7/Codex/3": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Cel-shaded Wood cover grain -->\n                                    <linearGradient id="cx_wood_d7_Codex_3" x1="0" y1="0" x2="1" y2="1">\n                                      <stop offset="0%" stop-color="#7d4e21" />\n                                      <stop offset="35%" stop-color="#7d4e21" />\n                                      <stop offset="35%" stop-color="#4d290c" />\n                                      <stop offset="70%" stop-color="#4d290c" />\n                                      <stop offset="70%" stop-color="#2e1805" />\n                                      <stop offset="100%" stop-color="#180a01" />\n                                    </linearGradient>\n                  <!-- Heavy brass frame and fixtures -->\n                  <linearGradient id="cx_brass_d7_Codex_3" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffe875" />\n                    <stop offset="50%" stop-color="#9c7a10" />\n                    <stop offset="100%" stop-color="#5a4504" />\n                  </linearGradient>\n                  <!-- Dynamic steam-engine kinetic glow -->\n                  <radialGradient id="cx_glow_d7_Codex_3" cx="50%" cy="50%" r="50%">\n                    <stop offset="0%" stop-color="#ffffff" />\n                    <stop offset="45%" stop-color="#e67e22" />\n                    <stop offset="100%" stop-color="#e67e22" stop-opacity="0" />\n                  </radialGradient>\n                </defs>\n\n                <!-- Drop shadow projection -->\n                <rect x="6" y="5" width="21" height="24" rx="2.5" fill="rgba(0,0,0,0.4)" />\n\n                <!-- Spine binding wraps -->\n                <rect x="5" y="4" width="5" height="24" rx="1.5" fill="#1c0f07" stroke="#05070a" stroke-width="1.8" />\n                <line x1="5" y1="9" x2="10" y2="9" stroke="url(#cx_brass_d7_Codex_3)" stroke-width="1.2" />\n                <line x1="5" y1="16" x2="10" y2="16" stroke="url(#cx_brass_d7_Codex_3)" stroke-width="1.2" />\n                <line x1="5" y1="23" x2="10" y2="23" stroke="url(#cx_brass_d7_Codex_3)" stroke-width="1.2" />\n\n                <!-- Yellowed Relic Parchment Sheet Layers (Visible right & bottom) -->\n                <rect x="9.5" y="4.5" width="16" height="23" fill="#eae1c8" />\n                <line x1="25.5" y1="5" x2="25.5" y2="27" stroke="#9e957e" stroke-width="1" stroke-dasharray="1 1" />\n                <line x1="10" y1="27" x2="25.5" y2="27" stroke="#9e957e" stroke-width="1" stroke-dasharray="1 1" />\n\n                <!-- Core Wood Cover Face -->\n                <path d="M10 4 L25 4 L25 28 L10 28 Z" fill="url(#cx_wood_d7_Codex_3)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n                <!-- Heavy Brass Binding Plates (Top & Bottom reinforcing bands) -->\n                <path d="M10 4 H25 V7.5 H10 Z" fill="url(#cx_brass_d7_Codex_3)" stroke="#05070a" stroke-width="1.2" />\n                <path d="M10 24.5 H25 V28 H10 Z" fill="url(#cx_brass_d7_Codex_3)" stroke="#05070a" stroke-width="1.2" />\n                <!-- Rivet Details -->\n                <circle cx="12" cy="5.8" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="17.5" cy="5.8" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="23" cy="5.8" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="12" cy="26.2" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="17.5" cy="26.2" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="23" cy="26.2" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n\n                <!-- Steampunk Conduit Pipe Accents -->\n                <path d="M10 11.5 H14" stroke="#05070a" stroke-width="1" stroke-linecap="round" />\n                <path d="M22 11.5 H25" stroke="#05070a" stroke-width="1" stroke-linecap="round" />\n\n                <!-- Dynamic Kinetic Pressure Center Core Glow -->\n                <circle cx="18" cy="16" r="6" fill="url(#cx_glow_d7_Codex_3)" opacity="0.85" />\n\n                <!-- Master Brass 8-Tooth Cog Assembly -->\n                <g stroke="url(#cx_brass_d7_Codex_3)" stroke-width="1.8" stroke-linecap="round">\n                  <line x1="18" y1="10" x2="18" y2="22" />\n                  <line x1="12" y1="16" x2="24" y2="16" />\n                  <line x1="13.7" y1="11.7" x2="22.3" y2="20.3" />\n                  <line x1="13.7" y1="20.3" x2="22.3" y2="11.7" />\n                </g>\n                <!-- Solid gear plate covering the crosshairs to create teeth spokes -->\n                <circle cx="18" cy="16" r="4.5" fill="#0c0702" stroke="#05070a" stroke-width="1.2" />\n                <!-- Hot glowing energy core matching rarity -->\n                <circle cx="18" cy="16" r="2.2" fill="#e67e22" stroke="#fff" stroke-width="0.8" />\n\n                <!-- Secondary Interlocking Mini Brass Cog Assembly -->\n                <g stroke="url(#cx_brass_d7_Codex_3)" stroke-width="1.2" stroke-linecap="round" opacity="0.85">\n                  <line x1="13" y1="18.5" x2="13" y2="24.5" />\n                  <line x1="10" y1="21.5" x2="16" y2="21.5" />\n                  <line x1="10.8" y1="19.3" x2="15.2" y2="23.7" />\n                  <line x1="10.8" y1="23.7" x2="15.2" y2="19.3" />\n                </g>\n                <circle cx="13" cy="21.5" r="2.2" fill="#0c0702" stroke="#05070a" stroke-width="1" />\n                <circle cx="13" cy="21.5" r="0.8" fill="#fff" />\n              </svg>', "color": "#e67e22", "source": "codex", "bounds": { "x": 5, "y": 4, "width": 22, "height": 25 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 29 } }, "d7/Codex/4": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Cel-shaded Wood cover grain -->\n                                    <linearGradient id="cx_wood_d7_Codex_4" x1="0" y1="0" x2="1" y2="1">\n                                      <stop offset="0%" stop-color="#7d4e21" />\n                                      <stop offset="35%" stop-color="#7d4e21" />\n                                      <stop offset="35%" stop-color="#4d290c" />\n                                      <stop offset="70%" stop-color="#4d290c" />\n                                      <stop offset="70%" stop-color="#2e1805" />\n                                      <stop offset="100%" stop-color="#180a01" />\n                                    </linearGradient>\n                  <!-- Heavy brass frame and fixtures -->\n                  <linearGradient id="cx_brass_d7_Codex_4" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffe875" />\n                    <stop offset="50%" stop-color="#9c7a10" />\n                    <stop offset="100%" stop-color="#5a4504" />\n                  </linearGradient>\n                  <!-- Dynamic steam-engine kinetic glow -->\n                  <radialGradient id="cx_glow_d7_Codex_4" cx="50%" cy="50%" r="50%">\n                    <stop offset="0%" stop-color="#ffffff" />\n                    <stop offset="45%" stop-color="#f1c40f" />\n                    <stop offset="100%" stop-color="#f1c40f" stop-opacity="0" />\n                  </radialGradient>\n                </defs>\n\n                <!-- Drop shadow projection -->\n                <rect x="6" y="5" width="21" height="24" rx="2.5" fill="rgba(0,0,0,0.4)" />\n\n                <!-- Spine binding wraps -->\n                <rect x="5" y="4" width="5" height="24" rx="1.5" fill="#1c0f07" stroke="#05070a" stroke-width="1.8" />\n                <line x1="5" y1="9" x2="10" y2="9" stroke="url(#cx_brass_d7_Codex_4)" stroke-width="1.2" />\n                <line x1="5" y1="16" x2="10" y2="16" stroke="url(#cx_brass_d7_Codex_4)" stroke-width="1.2" />\n                <line x1="5" y1="23" x2="10" y2="23" stroke="url(#cx_brass_d7_Codex_4)" stroke-width="1.2" />\n\n                <!-- Yellowed Relic Parchment Sheet Layers (Visible right & bottom) -->\n                <rect x="9.5" y="4.5" width="16" height="23" fill="#eae1c8" />\n                <line x1="25.5" y1="5" x2="25.5" y2="27" stroke="#9e957e" stroke-width="1" stroke-dasharray="1 1" />\n                <line x1="10" y1="27" x2="25.5" y2="27" stroke="#9e957e" stroke-width="1" stroke-dasharray="1 1" />\n\n                <!-- Core Wood Cover Face -->\n                <path d="M10 4 L25 4 L25 28 L10 28 Z" fill="url(#cx_wood_d7_Codex_4)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n                <!-- Heavy Brass Binding Plates (Top & Bottom reinforcing bands) -->\n                <path d="M10 4 H25 V7.5 H10 Z" fill="url(#cx_brass_d7_Codex_4)" stroke="#05070a" stroke-width="1.2" />\n                <path d="M10 24.5 H25 V28 H10 Z" fill="url(#cx_brass_d7_Codex_4)" stroke="#05070a" stroke-width="1.2" />\n                <!-- Rivet Details -->\n                <circle cx="12" cy="5.8" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="17.5" cy="5.8" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="23" cy="5.8" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="12" cy="26.2" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="17.5" cy="26.2" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="23" cy="26.2" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n\n                <!-- Steampunk Conduit Pipe Accents -->\n                <path d="M10 11.5 H14" stroke="#05070a" stroke-width="1" stroke-linecap="round" />\n                <path d="M22 11.5 H25" stroke="#05070a" stroke-width="1" stroke-linecap="round" />\n\n                <!-- Dynamic Kinetic Pressure Center Core Glow -->\n                <circle cx="18" cy="16" r="6" fill="url(#cx_glow_d7_Codex_4)" opacity="0.85" />\n\n                <!-- Master Brass 8-Tooth Cog Assembly -->\n                <g stroke="url(#cx_brass_d7_Codex_4)" stroke-width="1.8" stroke-linecap="round">\n                  <line x1="18" y1="10" x2="18" y2="22" />\n                  <line x1="12" y1="16" x2="24" y2="16" />\n                  <line x1="13.7" y1="11.7" x2="22.3" y2="20.3" />\n                  <line x1="13.7" y1="20.3" x2="22.3" y2="11.7" />\n                </g>\n                <!-- Solid gear plate covering the crosshairs to create teeth spokes -->\n                <circle cx="18" cy="16" r="4.5" fill="#0c0702" stroke="#05070a" stroke-width="1.2" />\n                <!-- Hot glowing energy core matching rarity -->\n                <circle cx="18" cy="16" r="2.2" fill="#f1c40f" stroke="#fff" stroke-width="0.8" />\n\n                <!-- Secondary Interlocking Mini Brass Cog Assembly -->\n                <g stroke="url(#cx_brass_d7_Codex_4)" stroke-width="1.2" stroke-linecap="round" opacity="0.85">\n                  <line x1="13" y1="18.5" x2="13" y2="24.5" />\n                  <line x1="10" y1="21.5" x2="16" y2="21.5" />\n                  <line x1="10.8" y1="19.3" x2="15.2" y2="23.7" />\n                  <line x1="10.8" y1="23.7" x2="15.2" y2="19.3" />\n                </g>\n                <circle cx="13" cy="21.5" r="2.2" fill="#0c0702" stroke="#05070a" stroke-width="1" />\n                <circle cx="13" cy="21.5" r="0.8" fill="#fff" />\n              </svg>', "color": "#f1c40f", "source": "codex", "bounds": { "x": 5, "y": 4, "width": 22, "height": 25 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 29 } }, "d7/Codex/5": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Cel-shaded Wood cover grain -->\n                                    <linearGradient id="cx_wood_d7_Codex_5" x1="0" y1="0" x2="1" y2="1">\n                                      <stop offset="0%" stop-color="#7d4e21" />\n                                      <stop offset="35%" stop-color="#7d4e21" />\n                                      <stop offset="35%" stop-color="#4d290c" />\n                                      <stop offset="70%" stop-color="#4d290c" />\n                                      <stop offset="70%" stop-color="#2e1805" />\n                                      <stop offset="100%" stop-color="#180a01" />\n                                    </linearGradient>\n                  <!-- Heavy brass frame and fixtures -->\n                  <linearGradient id="cx_brass_d7_Codex_5" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffe875" />\n                    <stop offset="50%" stop-color="#9c7a10" />\n                    <stop offset="100%" stop-color="#5a4504" />\n                  </linearGradient>\n                  <!-- Dynamic steam-engine kinetic glow -->\n                  <radialGradient id="cx_glow_d7_Codex_5" cx="50%" cy="50%" r="50%">\n                    <stop offset="0%" stop-color="#ffffff" />\n                    <stop offset="45%" stop-color="#e74c3c" />\n                    <stop offset="100%" stop-color="#e74c3c" stop-opacity="0" />\n                  </radialGradient>\n                </defs>\n\n                <!-- Drop shadow projection -->\n                <rect x="6" y="5" width="21" height="24" rx="2.5" fill="rgba(0,0,0,0.4)" />\n\n                <!-- Spine binding wraps -->\n                <rect x="5" y="4" width="5" height="24" rx="1.5" fill="#1c0f07" stroke="#05070a" stroke-width="1.8" />\n                <line x1="5" y1="9" x2="10" y2="9" stroke="url(#cx_brass_d7_Codex_5)" stroke-width="1.2" />\n                <line x1="5" y1="16" x2="10" y2="16" stroke="url(#cx_brass_d7_Codex_5)" stroke-width="1.2" />\n                <line x1="5" y1="23" x2="10" y2="23" stroke="url(#cx_brass_d7_Codex_5)" stroke-width="1.2" />\n\n                <!-- Yellowed Relic Parchment Sheet Layers (Visible right & bottom) -->\n                <rect x="9.5" y="4.5" width="16" height="23" fill="#eae1c8" />\n                <line x1="25.5" y1="5" x2="25.5" y2="27" stroke="#9e957e" stroke-width="1" stroke-dasharray="1 1" />\n                <line x1="10" y1="27" x2="25.5" y2="27" stroke="#9e957e" stroke-width="1" stroke-dasharray="1 1" />\n\n                <!-- Core Wood Cover Face -->\n                <path d="M10 4 L25 4 L25 28 L10 28 Z" fill="url(#cx_wood_d7_Codex_5)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n                <!-- Heavy Brass Binding Plates (Top & Bottom reinforcing bands) -->\n                <path d="M10 4 H25 V7.5 H10 Z" fill="url(#cx_brass_d7_Codex_5)" stroke="#05070a" stroke-width="1.2" />\n                <path d="M10 24.5 H25 V28 H10 Z" fill="url(#cx_brass_d7_Codex_5)" stroke="#05070a" stroke-width="1.2" />\n                <!-- Rivet Details -->\n                <circle cx="12" cy="5.8" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="17.5" cy="5.8" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="23" cy="5.8" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="12" cy="26.2" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="17.5" cy="26.2" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n                <circle cx="23" cy="26.2" r="0.6" fill="#fff" stroke="#05070a" stroke-width="0.3" />\n\n                <!-- Steampunk Conduit Pipe Accents -->\n                <path d="M10 11.5 H14" stroke="#05070a" stroke-width="1" stroke-linecap="round" />\n                <path d="M22 11.5 H25" stroke="#05070a" stroke-width="1" stroke-linecap="round" />\n\n                <!-- Dynamic Kinetic Pressure Center Core Glow -->\n                <circle cx="18" cy="16" r="6" fill="url(#cx_glow_d7_Codex_5)" opacity="0.85" />\n\n                <!-- Master Brass 8-Tooth Cog Assembly -->\n                <g stroke="url(#cx_brass_d7_Codex_5)" stroke-width="1.8" stroke-linecap="round">\n                  <line x1="18" y1="10" x2="18" y2="22" />\n                  <line x1="12" y1="16" x2="24" y2="16" />\n                  <line x1="13.7" y1="11.7" x2="22.3" y2="20.3" />\n                  <line x1="13.7" y1="20.3" x2="22.3" y2="11.7" />\n                </g>\n                <!-- Solid gear plate covering the crosshairs to create teeth spokes -->\n                <circle cx="18" cy="16" r="4.5" fill="#0c0702" stroke="#05070a" stroke-width="1.2" />\n                <!-- Hot glowing energy core matching rarity -->\n                <circle cx="18" cy="16" r="2.2" fill="#e74c3c" stroke="#fff" stroke-width="0.8" />\n\n                <!-- Secondary Interlocking Mini Brass Cog Assembly -->\n                <g stroke="url(#cx_brass_d7_Codex_5)" stroke-width="1.2" stroke-linecap="round" opacity="0.85">\n                  <line x1="13" y1="18.5" x2="13" y2="24.5" />\n                  <line x1="10" y1="21.5" x2="16" y2="21.5" />\n                  <line x1="10.8" y1="19.3" x2="15.2" y2="23.7" />\n                  <line x1="10.8" y1="23.7" x2="15.2" y2="19.3" />\n                </g>\n                <circle cx="13" cy="21.5" r="2.2" fill="#0c0702" stroke="#05070a" stroke-width="1" />\n                <circle cx="13" cy="21.5" r="0.8" fill="#fff" />\n              </svg>', "color": "#e74c3c", "source": "codex", "bounds": { "x": 5, "y": 4, "width": 22, "height": 25 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 29 } }, "d7/Lexicon/0": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Academic royal velvet cover gradient -->\n                  <linearGradient id="lx_velvet_d7_Lexicon_0" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#255182" />\n                    <stop offset="100%" stop-color="#0e2035" />\n                  </linearGradient>\n                  <!-- Polished gold emboss/filigrees -->\n                  <linearGradient id="lx_gold_d7_Lexicon_0" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffe875" />\n                    <stop offset="50%" stop-color="#d4af37" />\n                    <stop offset="100%" stop-color="#8a6d1c" />\n                  </linearGradient>\n                  <!-- Dynamic magical iris lens glow -->\n                  <radialGradient id="lx_iris_d7_Lexicon_0" cx="50%" cy="50%" r="50%">\n                    <stop offset="0%" stop-color="#ffffff" />\n                    <stop offset="55%" stop-color="#ffffff" />\n                    <stop offset="100%" stop-color="#05070a" />\n                  </radialGradient>\n                </defs>\n\n                <!-- Drop shadow projection -->\n                <rect x="6" y="5" width="21" height="24" rx="2.5" fill="rgba(0,0,0,0.4)" />\n\n                <!-- Hanging Silk Bookmark Ribbon (Dangles from page margins) -->\n                <path d="M13.5 25.5 L13.5 30.5 Q14.5 31.5, 15.5 30.5 L15.5 25.5 Z" fill="#e74c3c" stroke="#05070a" stroke-width="0.8" />\n\n                <!-- Spine binding wraps -->\n                <rect x="5" y="4" width="5" height="24" rx="1.5" fill="#0b172a" stroke="#05070a" stroke-width="1.8" />\n                <!-- Heavy Gilded Spine Ribs -->\n                <line x1="5" y1="9" x2="10" y2="9" stroke="url(#lx_gold_d7_Lexicon_0)" stroke-width="1.5" />\n                <line x1="5" y1="16" x2="10" y2="16" stroke="url(#lx_gold_d7_Lexicon_0)" stroke-width="1.5" />\n                <line x1="5" y1="23" x2="10" y2="23" stroke="url(#lx_gold_d7_Lexicon_0)" stroke-width="1.5" />\n\n                <!-- Layered Academic Ivory Page Edges (Visible right & bottom) -->\n                <rect x="9.5" y="4.5" width="16" height="23" fill="#faf6eb" />\n                <line x1="25.5" y1="5" x2="25.5" y2="27" stroke="#c2bdae" stroke-width="1" stroke-dasharray="1 1" />\n                <line x1="10" y1="27" x2="25.5" y2="27" stroke="#c2bdae" stroke-width="1" stroke-dasharray="1 1" />\n\n                <!-- Royal Blue Velvet Cover Plate -->\n                <path d="M10 4 L25 4 L25 28 L10 28 Z" fill="url(#lx_velvet_d7_Lexicon_0)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n                <!-- Ornate Gold-Embossed Corner Reinforcements -->\n                <!-- Top Right Guard -->\n                <polygon points="21,4 25,4 25,8" fill="url(#lx_gold_d7_Lexicon_0)" stroke="#05070a" stroke-width="0.8" />\n                <circle cx="23.5" cy="5.5" r="0.4" fill="#fff" />\n                <!-- Bottom Right Guard -->\n                <polygon points="21,28 25,28 25,24" fill="url(#lx_gold_d7_Lexicon_0)" stroke="#05070a" stroke-width="0.8" />\n                <circle cx="23.5" cy="26.5" r="0.4" fill="#fff" />\n\n                <!-- Gilded Scholarly Eye of Wisdom Frame -->\n                <path d="M11.5 16 Q17.5 10.5, 23.5 16 Q17.5 21.5, 11.5 16 Z" fill="none" stroke="url(#lx_gold_d7_Lexicon_0)" stroke-width="1.5" stroke-linejoin="round" />\n                <!-- Eye Whites (Sclera) -->\n                <path d="M12.5 16 Q17.5 11.5, 22.5 16 Q17.5 20.5, 12.5 16 Z" fill="#ffffff" stroke="#05070a" stroke-width="0.8" />\n                <!-- Dynamic Glowing Iris (Reflects rarity color with reflective white gloss) -->\n                <circle cx="17.5" cy="16" r="3.2" fill="url(#lx_iris_d7_Lexicon_0)" stroke="#05070a" stroke-width="0.8" />\n                <!-- Piercing Pupil -->\n                <circle cx="17.5" cy="16" r="1.2" fill="#000000" />\n                <!-- Specular Light Reflection Glint -->\n                <circle cx="16.5" cy="15" r="0.6" fill="#ffffff" />\n              </svg>', "color": "#ffffff", "source": "lexicon", "bounds": { "x": 5, "y": 4, "width": 22, "height": 27 }, "visibleCenter": { "x": 16, "y": 17.5 }, "pivot": { "x": 16, "y": 31 } }, "d7/Lexicon/1": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Academic royal velvet cover gradient -->\n                  <linearGradient id="lx_velvet_d7_Lexicon_1" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#255182" />\n                    <stop offset="100%" stop-color="#0e2035" />\n                  </linearGradient>\n                  <!-- Polished gold emboss/filigrees -->\n                  <linearGradient id="lx_gold_d7_Lexicon_1" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffe875" />\n                    <stop offset="50%" stop-color="#d4af37" />\n                    <stop offset="100%" stop-color="#8a6d1c" />\n                  </linearGradient>\n                  <!-- Dynamic magical iris lens glow -->\n                  <radialGradient id="lx_iris_d7_Lexicon_1" cx="50%" cy="50%" r="50%">\n                    <stop offset="0%" stop-color="#ffffff" />\n                    <stop offset="55%" stop-color="#3498db" />\n                    <stop offset="100%" stop-color="#05070a" />\n                  </radialGradient>\n                </defs>\n\n                <!-- Drop shadow projection -->\n                <rect x="6" y="5" width="21" height="24" rx="2.5" fill="rgba(0,0,0,0.4)" />\n\n                <!-- Hanging Silk Bookmark Ribbon (Dangles from page margins) -->\n                <path d="M13.5 25.5 L13.5 30.5 Q14.5 31.5, 15.5 30.5 L15.5 25.5 Z" fill="#e74c3c" stroke="#05070a" stroke-width="0.8" />\n\n                <!-- Spine binding wraps -->\n                <rect x="5" y="4" width="5" height="24" rx="1.5" fill="#0b172a" stroke="#05070a" stroke-width="1.8" />\n                <!-- Heavy Gilded Spine Ribs -->\n                <line x1="5" y1="9" x2="10" y2="9" stroke="url(#lx_gold_d7_Lexicon_1)" stroke-width="1.5" />\n                <line x1="5" y1="16" x2="10" y2="16" stroke="url(#lx_gold_d7_Lexicon_1)" stroke-width="1.5" />\n                <line x1="5" y1="23" x2="10" y2="23" stroke="url(#lx_gold_d7_Lexicon_1)" stroke-width="1.5" />\n\n                <!-- Layered Academic Ivory Page Edges (Visible right & bottom) -->\n                <rect x="9.5" y="4.5" width="16" height="23" fill="#faf6eb" />\n                <line x1="25.5" y1="5" x2="25.5" y2="27" stroke="#c2bdae" stroke-width="1" stroke-dasharray="1 1" />\n                <line x1="10" y1="27" x2="25.5" y2="27" stroke="#c2bdae" stroke-width="1" stroke-dasharray="1 1" />\n\n                <!-- Royal Blue Velvet Cover Plate -->\n                <path d="M10 4 L25 4 L25 28 L10 28 Z" fill="url(#lx_velvet_d7_Lexicon_1)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n                <!-- Ornate Gold-Embossed Corner Reinforcements -->\n                <!-- Top Right Guard -->\n                <polygon points="21,4 25,4 25,8" fill="url(#lx_gold_d7_Lexicon_1)" stroke="#05070a" stroke-width="0.8" />\n                <circle cx="23.5" cy="5.5" r="0.4" fill="#fff" />\n                <!-- Bottom Right Guard -->\n                <polygon points="21,28 25,28 25,24" fill="url(#lx_gold_d7_Lexicon_1)" stroke="#05070a" stroke-width="0.8" />\n                <circle cx="23.5" cy="26.5" r="0.4" fill="#fff" />\n\n                <!-- Gilded Scholarly Eye of Wisdom Frame -->\n                <path d="M11.5 16 Q17.5 10.5, 23.5 16 Q17.5 21.5, 11.5 16 Z" fill="none" stroke="url(#lx_gold_d7_Lexicon_1)" stroke-width="1.5" stroke-linejoin="round" />\n                <!-- Eye Whites (Sclera) -->\n                <path d="M12.5 16 Q17.5 11.5, 22.5 16 Q17.5 20.5, 12.5 16 Z" fill="#ffffff" stroke="#05070a" stroke-width="0.8" />\n                <!-- Dynamic Glowing Iris (Reflects rarity color with reflective white gloss) -->\n                <circle cx="17.5" cy="16" r="3.2" fill="url(#lx_iris_d7_Lexicon_1)" stroke="#05070a" stroke-width="0.8" />\n                <!-- Piercing Pupil -->\n                <circle cx="17.5" cy="16" r="1.2" fill="#000000" />\n                <!-- Specular Light Reflection Glint -->\n                <circle cx="16.5" cy="15" r="0.6" fill="#ffffff" />\n              </svg>', "color": "#3498db", "source": "lexicon", "bounds": { "x": 5, "y": 4, "width": 22, "height": 27 }, "visibleCenter": { "x": 16, "y": 17.5 }, "pivot": { "x": 16, "y": 31 } }, "d7/Lexicon/2": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Academic royal velvet cover gradient -->\n                  <linearGradient id="lx_velvet_d7_Lexicon_2" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#255182" />\n                    <stop offset="100%" stop-color="#0e2035" />\n                  </linearGradient>\n                  <!-- Polished gold emboss/filigrees -->\n                  <linearGradient id="lx_gold_d7_Lexicon_2" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffe875" />\n                    <stop offset="50%" stop-color="#d4af37" />\n                    <stop offset="100%" stop-color="#8a6d1c" />\n                  </linearGradient>\n                  <!-- Dynamic magical iris lens glow -->\n                  <radialGradient id="lx_iris_d7_Lexicon_2" cx="50%" cy="50%" r="50%">\n                    <stop offset="0%" stop-color="#ffffff" />\n                    <stop offset="55%" stop-color="#9b59b6" />\n                    <stop offset="100%" stop-color="#05070a" />\n                  </radialGradient>\n                </defs>\n\n                <!-- Drop shadow projection -->\n                <rect x="6" y="5" width="21" height="24" rx="2.5" fill="rgba(0,0,0,0.4)" />\n\n                <!-- Hanging Silk Bookmark Ribbon (Dangles from page margins) -->\n                <path d="M13.5 25.5 L13.5 30.5 Q14.5 31.5, 15.5 30.5 L15.5 25.5 Z" fill="#e74c3c" stroke="#05070a" stroke-width="0.8" />\n\n                <!-- Spine binding wraps -->\n                <rect x="5" y="4" width="5" height="24" rx="1.5" fill="#0b172a" stroke="#05070a" stroke-width="1.8" />\n                <!-- Heavy Gilded Spine Ribs -->\n                <line x1="5" y1="9" x2="10" y2="9" stroke="url(#lx_gold_d7_Lexicon_2)" stroke-width="1.5" />\n                <line x1="5" y1="16" x2="10" y2="16" stroke="url(#lx_gold_d7_Lexicon_2)" stroke-width="1.5" />\n                <line x1="5" y1="23" x2="10" y2="23" stroke="url(#lx_gold_d7_Lexicon_2)" stroke-width="1.5" />\n\n                <!-- Layered Academic Ivory Page Edges (Visible right & bottom) -->\n                <rect x="9.5" y="4.5" width="16" height="23" fill="#faf6eb" />\n                <line x1="25.5" y1="5" x2="25.5" y2="27" stroke="#c2bdae" stroke-width="1" stroke-dasharray="1 1" />\n                <line x1="10" y1="27" x2="25.5" y2="27" stroke="#c2bdae" stroke-width="1" stroke-dasharray="1 1" />\n\n                <!-- Royal Blue Velvet Cover Plate -->\n                <path d="M10 4 L25 4 L25 28 L10 28 Z" fill="url(#lx_velvet_d7_Lexicon_2)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n                <!-- Ornate Gold-Embossed Corner Reinforcements -->\n                <!-- Top Right Guard -->\n                <polygon points="21,4 25,4 25,8" fill="url(#lx_gold_d7_Lexicon_2)" stroke="#05070a" stroke-width="0.8" />\n                <circle cx="23.5" cy="5.5" r="0.4" fill="#fff" />\n                <!-- Bottom Right Guard -->\n                <polygon points="21,28 25,28 25,24" fill="url(#lx_gold_d7_Lexicon_2)" stroke="#05070a" stroke-width="0.8" />\n                <circle cx="23.5" cy="26.5" r="0.4" fill="#fff" />\n\n                <!-- Gilded Scholarly Eye of Wisdom Frame -->\n                <path d="M11.5 16 Q17.5 10.5, 23.5 16 Q17.5 21.5, 11.5 16 Z" fill="none" stroke="url(#lx_gold_d7_Lexicon_2)" stroke-width="1.5" stroke-linejoin="round" />\n                <!-- Eye Whites (Sclera) -->\n                <path d="M12.5 16 Q17.5 11.5, 22.5 16 Q17.5 20.5, 12.5 16 Z" fill="#ffffff" stroke="#05070a" stroke-width="0.8" />\n                <!-- Dynamic Glowing Iris (Reflects rarity color with reflective white gloss) -->\n                <circle cx="17.5" cy="16" r="3.2" fill="url(#lx_iris_d7_Lexicon_2)" stroke="#05070a" stroke-width="0.8" />\n                <!-- Piercing Pupil -->\n                <circle cx="17.5" cy="16" r="1.2" fill="#000000" />\n                <!-- Specular Light Reflection Glint -->\n                <circle cx="16.5" cy="15" r="0.6" fill="#ffffff" />\n              </svg>', "color": "#9b59b6", "source": "lexicon", "bounds": { "x": 5, "y": 4, "width": 22, "height": 27 }, "visibleCenter": { "x": 16, "y": 17.5 }, "pivot": { "x": 16, "y": 31 } }, "d7/Lexicon/3": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Academic royal velvet cover gradient -->\n                  <linearGradient id="lx_velvet_d7_Lexicon_3" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#255182" />\n                    <stop offset="100%" stop-color="#0e2035" />\n                  </linearGradient>\n                  <!-- Polished gold emboss/filigrees -->\n                  <linearGradient id="lx_gold_d7_Lexicon_3" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffe875" />\n                    <stop offset="50%" stop-color="#d4af37" />\n                    <stop offset="100%" stop-color="#8a6d1c" />\n                  </linearGradient>\n                  <!-- Dynamic magical iris lens glow -->\n                  <radialGradient id="lx_iris_d7_Lexicon_3" cx="50%" cy="50%" r="50%">\n                    <stop offset="0%" stop-color="#ffffff" />\n                    <stop offset="55%" stop-color="#e67e22" />\n                    <stop offset="100%" stop-color="#05070a" />\n                  </radialGradient>\n                </defs>\n\n                <!-- Drop shadow projection -->\n                <rect x="6" y="5" width="21" height="24" rx="2.5" fill="rgba(0,0,0,0.4)" />\n\n                <!-- Hanging Silk Bookmark Ribbon (Dangles from page margins) -->\n                <path d="M13.5 25.5 L13.5 30.5 Q14.5 31.5, 15.5 30.5 L15.5 25.5 Z" fill="#e74c3c" stroke="#05070a" stroke-width="0.8" />\n\n                <!-- Spine binding wraps -->\n                <rect x="5" y="4" width="5" height="24" rx="1.5" fill="#0b172a" stroke="#05070a" stroke-width="1.8" />\n                <!-- Heavy Gilded Spine Ribs -->\n                <line x1="5" y1="9" x2="10" y2="9" stroke="url(#lx_gold_d7_Lexicon_3)" stroke-width="1.5" />\n                <line x1="5" y1="16" x2="10" y2="16" stroke="url(#lx_gold_d7_Lexicon_3)" stroke-width="1.5" />\n                <line x1="5" y1="23" x2="10" y2="23" stroke="url(#lx_gold_d7_Lexicon_3)" stroke-width="1.5" />\n\n                <!-- Layered Academic Ivory Page Edges (Visible right & bottom) -->\n                <rect x="9.5" y="4.5" width="16" height="23" fill="#faf6eb" />\n                <line x1="25.5" y1="5" x2="25.5" y2="27" stroke="#c2bdae" stroke-width="1" stroke-dasharray="1 1" />\n                <line x1="10" y1="27" x2="25.5" y2="27" stroke="#c2bdae" stroke-width="1" stroke-dasharray="1 1" />\n\n                <!-- Royal Blue Velvet Cover Plate -->\n                <path d="M10 4 L25 4 L25 28 L10 28 Z" fill="url(#lx_velvet_d7_Lexicon_3)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n                <!-- Ornate Gold-Embossed Corner Reinforcements -->\n                <!-- Top Right Guard -->\n                <polygon points="21,4 25,4 25,8" fill="url(#lx_gold_d7_Lexicon_3)" stroke="#05070a" stroke-width="0.8" />\n                <circle cx="23.5" cy="5.5" r="0.4" fill="#fff" />\n                <!-- Bottom Right Guard -->\n                <polygon points="21,28 25,28 25,24" fill="url(#lx_gold_d7_Lexicon_3)" stroke="#05070a" stroke-width="0.8" />\n                <circle cx="23.5" cy="26.5" r="0.4" fill="#fff" />\n\n                <!-- Gilded Scholarly Eye of Wisdom Frame -->\n                <path d="M11.5 16 Q17.5 10.5, 23.5 16 Q17.5 21.5, 11.5 16 Z" fill="none" stroke="url(#lx_gold_d7_Lexicon_3)" stroke-width="1.5" stroke-linejoin="round" />\n                <!-- Eye Whites (Sclera) -->\n                <path d="M12.5 16 Q17.5 11.5, 22.5 16 Q17.5 20.5, 12.5 16 Z" fill="#ffffff" stroke="#05070a" stroke-width="0.8" />\n                <!-- Dynamic Glowing Iris (Reflects rarity color with reflective white gloss) -->\n                <circle cx="17.5" cy="16" r="3.2" fill="url(#lx_iris_d7_Lexicon_3)" stroke="#05070a" stroke-width="0.8" />\n                <!-- Piercing Pupil -->\n                <circle cx="17.5" cy="16" r="1.2" fill="#000000" />\n                <!-- Specular Light Reflection Glint -->\n                <circle cx="16.5" cy="15" r="0.6" fill="#ffffff" />\n              </svg>', "color": "#e67e22", "source": "lexicon", "bounds": { "x": 5, "y": 4, "width": 22, "height": 27 }, "visibleCenter": { "x": 16, "y": 17.5 }, "pivot": { "x": 16, "y": 31 } }, "d7/Lexicon/4": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Academic royal velvet cover gradient -->\n                  <linearGradient id="lx_velvet_d7_Lexicon_4" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#255182" />\n                    <stop offset="100%" stop-color="#0e2035" />\n                  </linearGradient>\n                  <!-- Polished gold emboss/filigrees -->\n                  <linearGradient id="lx_gold_d7_Lexicon_4" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffe875" />\n                    <stop offset="50%" stop-color="#d4af37" />\n                    <stop offset="100%" stop-color="#8a6d1c" />\n                  </linearGradient>\n                  <!-- Dynamic magical iris lens glow -->\n                  <radialGradient id="lx_iris_d7_Lexicon_4" cx="50%" cy="50%" r="50%">\n                    <stop offset="0%" stop-color="#ffffff" />\n                    <stop offset="55%" stop-color="#f1c40f" />\n                    <stop offset="100%" stop-color="#05070a" />\n                  </radialGradient>\n                </defs>\n\n                <!-- Drop shadow projection -->\n                <rect x="6" y="5" width="21" height="24" rx="2.5" fill="rgba(0,0,0,0.4)" />\n\n                <!-- Hanging Silk Bookmark Ribbon (Dangles from page margins) -->\n                <path d="M13.5 25.5 L13.5 30.5 Q14.5 31.5, 15.5 30.5 L15.5 25.5 Z" fill="#e74c3c" stroke="#05070a" stroke-width="0.8" />\n\n                <!-- Spine binding wraps -->\n                <rect x="5" y="4" width="5" height="24" rx="1.5" fill="#0b172a" stroke="#05070a" stroke-width="1.8" />\n                <!-- Heavy Gilded Spine Ribs -->\n                <line x1="5" y1="9" x2="10" y2="9" stroke="url(#lx_gold_d7_Lexicon_4)" stroke-width="1.5" />\n                <line x1="5" y1="16" x2="10" y2="16" stroke="url(#lx_gold_d7_Lexicon_4)" stroke-width="1.5" />\n                <line x1="5" y1="23" x2="10" y2="23" stroke="url(#lx_gold_d7_Lexicon_4)" stroke-width="1.5" />\n\n                <!-- Layered Academic Ivory Page Edges (Visible right & bottom) -->\n                <rect x="9.5" y="4.5" width="16" height="23" fill="#faf6eb" />\n                <line x1="25.5" y1="5" x2="25.5" y2="27" stroke="#c2bdae" stroke-width="1" stroke-dasharray="1 1" />\n                <line x1="10" y1="27" x2="25.5" y2="27" stroke="#c2bdae" stroke-width="1" stroke-dasharray="1 1" />\n\n                <!-- Royal Blue Velvet Cover Plate -->\n                <path d="M10 4 L25 4 L25 28 L10 28 Z" fill="url(#lx_velvet_d7_Lexicon_4)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n                <!-- Ornate Gold-Embossed Corner Reinforcements -->\n                <!-- Top Right Guard -->\n                <polygon points="21,4 25,4 25,8" fill="url(#lx_gold_d7_Lexicon_4)" stroke="#05070a" stroke-width="0.8" />\n                <circle cx="23.5" cy="5.5" r="0.4" fill="#fff" />\n                <!-- Bottom Right Guard -->\n                <polygon points="21,28 25,28 25,24" fill="url(#lx_gold_d7_Lexicon_4)" stroke="#05070a" stroke-width="0.8" />\n                <circle cx="23.5" cy="26.5" r="0.4" fill="#fff" />\n\n                <!-- Gilded Scholarly Eye of Wisdom Frame -->\n                <path d="M11.5 16 Q17.5 10.5, 23.5 16 Q17.5 21.5, 11.5 16 Z" fill="none" stroke="url(#lx_gold_d7_Lexicon_4)" stroke-width="1.5" stroke-linejoin="round" />\n                <!-- Eye Whites (Sclera) -->\n                <path d="M12.5 16 Q17.5 11.5, 22.5 16 Q17.5 20.5, 12.5 16 Z" fill="#ffffff" stroke="#05070a" stroke-width="0.8" />\n                <!-- Dynamic Glowing Iris (Reflects rarity color with reflective white gloss) -->\n                <circle cx="17.5" cy="16" r="3.2" fill="url(#lx_iris_d7_Lexicon_4)" stroke="#05070a" stroke-width="0.8" />\n                <!-- Piercing Pupil -->\n                <circle cx="17.5" cy="16" r="1.2" fill="#000000" />\n                <!-- Specular Light Reflection Glint -->\n                <circle cx="16.5" cy="15" r="0.6" fill="#ffffff" />\n              </svg>', "color": "#f1c40f", "source": "lexicon", "bounds": { "x": 5, "y": 4, "width": 22, "height": 27 }, "visibleCenter": { "x": 16, "y": 17.5 }, "pivot": { "x": 16, "y": 31 } }, "d7/Lexicon/5": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Academic royal velvet cover gradient -->\n                  <linearGradient id="lx_velvet_d7_Lexicon_5" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#255182" />\n                    <stop offset="100%" stop-color="#0e2035" />\n                  </linearGradient>\n                  <!-- Polished gold emboss/filigrees -->\n                  <linearGradient id="lx_gold_d7_Lexicon_5" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffe875" />\n                    <stop offset="50%" stop-color="#d4af37" />\n                    <stop offset="100%" stop-color="#8a6d1c" />\n                  </linearGradient>\n                  <!-- Dynamic magical iris lens glow -->\n                  <radialGradient id="lx_iris_d7_Lexicon_5" cx="50%" cy="50%" r="50%">\n                    <stop offset="0%" stop-color="#ffffff" />\n                    <stop offset="55%" stop-color="#e74c3c" />\n                    <stop offset="100%" stop-color="#05070a" />\n                  </radialGradient>\n                </defs>\n\n                <!-- Drop shadow projection -->\n                <rect x="6" y="5" width="21" height="24" rx="2.5" fill="rgba(0,0,0,0.4)" />\n\n                <!-- Hanging Silk Bookmark Ribbon (Dangles from page margins) -->\n                <path d="M13.5 25.5 L13.5 30.5 Q14.5 31.5, 15.5 30.5 L15.5 25.5 Z" fill="#e74c3c" stroke="#05070a" stroke-width="0.8" />\n\n                <!-- Spine binding wraps -->\n                <rect x="5" y="4" width="5" height="24" rx="1.5" fill="#0b172a" stroke="#05070a" stroke-width="1.8" />\n                <!-- Heavy Gilded Spine Ribs -->\n                <line x1="5" y1="9" x2="10" y2="9" stroke="url(#lx_gold_d7_Lexicon_5)" stroke-width="1.5" />\n                <line x1="5" y1="16" x2="10" y2="16" stroke="url(#lx_gold_d7_Lexicon_5)" stroke-width="1.5" />\n                <line x1="5" y1="23" x2="10" y2="23" stroke="url(#lx_gold_d7_Lexicon_5)" stroke-width="1.5" />\n\n                <!-- Layered Academic Ivory Page Edges (Visible right & bottom) -->\n                <rect x="9.5" y="4.5" width="16" height="23" fill="#faf6eb" />\n                <line x1="25.5" y1="5" x2="25.5" y2="27" stroke="#c2bdae" stroke-width="1" stroke-dasharray="1 1" />\n                <line x1="10" y1="27" x2="25.5" y2="27" stroke="#c2bdae" stroke-width="1" stroke-dasharray="1 1" />\n\n                <!-- Royal Blue Velvet Cover Plate -->\n                <path d="M10 4 L25 4 L25 28 L10 28 Z" fill="url(#lx_velvet_d7_Lexicon_5)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n                <!-- Ornate Gold-Embossed Corner Reinforcements -->\n                <!-- Top Right Guard -->\n                <polygon points="21,4 25,4 25,8" fill="url(#lx_gold_d7_Lexicon_5)" stroke="#05070a" stroke-width="0.8" />\n                <circle cx="23.5" cy="5.5" r="0.4" fill="#fff" />\n                <!-- Bottom Right Guard -->\n                <polygon points="21,28 25,28 25,24" fill="url(#lx_gold_d7_Lexicon_5)" stroke="#05070a" stroke-width="0.8" />\n                <circle cx="23.5" cy="26.5" r="0.4" fill="#fff" />\n\n                <!-- Gilded Scholarly Eye of Wisdom Frame -->\n                <path d="M11.5 16 Q17.5 10.5, 23.5 16 Q17.5 21.5, 11.5 16 Z" fill="none" stroke="url(#lx_gold_d7_Lexicon_5)" stroke-width="1.5" stroke-linejoin="round" />\n                <!-- Eye Whites (Sclera) -->\n                <path d="M12.5 16 Q17.5 11.5, 22.5 16 Q17.5 20.5, 12.5 16 Z" fill="#ffffff" stroke="#05070a" stroke-width="0.8" />\n                <!-- Dynamic Glowing Iris (Reflects rarity color with reflective white gloss) -->\n                <circle cx="17.5" cy="16" r="3.2" fill="url(#lx_iris_d7_Lexicon_5)" stroke="#05070a" stroke-width="0.8" />\n                <!-- Piercing Pupil -->\n                <circle cx="17.5" cy="16" r="1.2" fill="#000000" />\n                <!-- Specular Light Reflection Glint -->\n                <circle cx="16.5" cy="15" r="0.6" fill="#ffffff" />\n              </svg>', "color": "#e74c3c", "source": "lexicon", "bounds": { "x": 5, "y": 4, "width": 22, "height": 27 }, "visibleCenter": { "x": 16, "y": 17.5 }, "pivot": { "x": 16, "y": 31 } }, "d7/Chronicle/0": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Aged mahogany relic leather gradient -->\n                                    <linearGradient id="ch_relic_d7_Chronicle_0" x1="0" y1="0" x2="1" y2="1">\n                                      <stop offset="0%" stop-color="#7c2e0b" />\n                                      <stop offset="35%" stop-color="#7c2e0b" />\n                                      <stop offset="35%" stop-color="#4a1a02" />\n                                      <stop offset="70%" stop-color="#4a1a02" />\n                                      <stop offset="70%" stop-color="#140600" />\n                                      <stop offset="100%" stop-color="#0a0300" />\n                                    </linearGradient>\n                  <!-- Antique gold/brass for hourglass frames -->\n                  <linearGradient id="ch_gold_d7_Chronicle_0" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffd54f" />\n                    <stop offset="50%" stop-color="#b7950b" />\n                    <stop offset="100%" stop-color="#5d4037" />\n                  </linearGradient>\n                  <!-- Glowing cosmic sand reserves -->\n                  <linearGradient id="ch_sand_d7_Chronicle_0" x1="0" y1="0" x2="0" y2="1">\n                    <stop offset="0%" stop-color="#ffffff" />\n                    <stop offset="100%" stop-color="#ffffff" />\n                  </linearGradient>\n                </defs>\n\n                <!-- Drop shadow projection -->\n                <rect x="6" y="5" width="21" height="24" rx="2.5" fill="rgba(0,0,0,0.4)" />\n\n                <!-- Spine binding wraps with antique gold rivets -->\n                <rect x="5" y="4" width="5" height="24" rx="1.5" fill="#1c0700" stroke="#05070a" stroke-width="1.8" />\n                <circle cx="7.5" cy="8" r="0.8" fill="url(#ch_gold_d7_Chronicle_0)" stroke="#05070a" stroke-width="0.4" />\n                <circle cx="7.5" cy="16" r="0.8" fill="url(#ch_gold_d7_Chronicle_0)" stroke="#05070a" stroke-width="0.4" />\n                <circle cx="7.5" cy="24" r="0.8" fill="url(#ch_gold_d7_Chronicle_0)" stroke="#05070a" stroke-width="0.4" />\n\n                <!-- Yellowed & Weathered Stacked Pages (Visible right & bottom) -->\n                <rect x="9" y="4.5" width="16" height="23" fill="#dfd0b0" />\n                <!-- Uneven aging layers -->\n                <line x1="25" y1="5" x2="25" y2="27" stroke="#8c7a56" stroke-width="1.2" stroke-dasharray="2 1.5" />\n                <line x1="10" y1="27" x2="25" y2="27" stroke="#8c7a56" stroke-width="1.2" stroke-dasharray="2 1.5" />\n\n                <!-- Mahogany Relic Leather Cover Face -->\n                <path d="M10 4 L24 4 L24 28 L10 28 Z" fill="url(#ch_relic_d7_Chronicle_0)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n                <!-- Cracked Leather Creases (Visual aging detail) -->\n                <path d="M10 10 L14 7" stroke="#05070a" stroke-width="1.2" opacity="0.65" stroke-linecap="round" />\n                <path d="M11 22 L14 25" stroke="#05070a" stroke-width="1.2" opacity="0.65" stroke-linecap="round" />\n                <path d="M19 5 L22 8" stroke="#05070a" stroke-width="1.2" opacity="0.65" stroke-linecap="round" />\n                <path d="M19 27 L22 24" stroke="#05070a" stroke-width="1.2" opacity="0.65" stroke-linecap="round" />\n\n                <!-- Temporal Gravity Orbit Halo (Dotted background cycle) -->\n                <circle cx="17" cy="16" r="7.5" fill="none" stroke="#ffffff" stroke-width="1" stroke-dasharray="2 3" opacity="0.75" />\n\n                <!-- Hourglass Support Frame (Braces & Pillars) -->\n                <!-- Top & Bottom Braces -->\n                <rect x="13.5" y="9" width="7" height="1.8" fill="url(#ch_gold_d7_Chronicle_0)" stroke="#05070a" stroke-width="0.8" rx="0.3" />\n                <rect x="13.5" y="21.2" width="7" height="1.8" fill="url(#ch_gold_d7_Chronicle_0)" stroke="#05070a" stroke-width="0.8" rx="0.3" />\n                <!-- Left & Right Bracing Pillars -->\n                <line x1="14" y1="10.8" x2="14" y2="21.2" stroke="url(#ch_gold_d7_Chronicle_0)" stroke-width="1" />\n                <line x1="20" y1="10.8" x2="20" y2="21.2" stroke="url(#ch_gold_d7_Chronicle_0)" stroke-width="1" />\n\n                <!-- Hourglass Glass Bulbs Shape -->\n                <path d="M14.5 10.8 Q17 16, 14.5 21.2 M19.5 10.8 Q17 16, 19.5 21.2" stroke="rgba(255,255,255,0.4)" stroke-width="1" fill="none" />\n\n                <!-- Glowing Cosmic Sand Reserves -->\n                <!-- Upper sand funnel (Draining downwards) -->\n                <polygon points="14.8,11.2 19.2,11.2 17.5,14.5" fill="url(#ch_sand_d7_Chronicle_0)" stroke="#05070a" stroke-width="0.5" />\n                <!-- Lower sand pile (Amassing in the base) -->\n                <path d="M15,20.8 C15,19 19,19 19,20.8 Z" fill="url(#ch_sand_d7_Chronicle_0)" stroke="#05070a" stroke-width="0.5" />\n                <!-- Sand trickle flow line -->\n                <line x1="17" y1="14.5" x2="17" y2="19.2" stroke="#ffffff" stroke-width="0.8" stroke-dasharray="1.5 1" opacity="0.9" />\n\n                <!-- Glass Reflection glare highlights -->\n                <path d="M15.5 11.5 Q16.5 13, 16 13.8" stroke="#fff" stroke-width="0.6" stroke-linecap="round" opacity="0.6" fill="none" />\n                <path d="M18.5 20.5 Q17.5 19, 18 18.2" stroke="#fff" stroke-width="0.6" stroke-linecap="round" opacity="0.6" fill="none" />\n              </svg>', "color": "#ffffff", "source": "chronicle", "bounds": { "x": 5, "y": 4, "width": 22, "height": 25 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 29 } }, "d7/Chronicle/1": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Aged mahogany relic leather gradient -->\n                                    <linearGradient id="ch_relic_d7_Chronicle_1" x1="0" y1="0" x2="1" y2="1">\n                                      <stop offset="0%" stop-color="#7c2e0b" />\n                                      <stop offset="35%" stop-color="#7c2e0b" />\n                                      <stop offset="35%" stop-color="#4a1a02" />\n                                      <stop offset="70%" stop-color="#4a1a02" />\n                                      <stop offset="70%" stop-color="#140600" />\n                                      <stop offset="100%" stop-color="#0a0300" />\n                                    </linearGradient>\n                  <!-- Antique gold/brass for hourglass frames -->\n                  <linearGradient id="ch_gold_d7_Chronicle_1" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffd54f" />\n                    <stop offset="50%" stop-color="#b7950b" />\n                    <stop offset="100%" stop-color="#5d4037" />\n                  </linearGradient>\n                  <!-- Glowing cosmic sand reserves -->\n                  <linearGradient id="ch_sand_d7_Chronicle_1" x1="0" y1="0" x2="0" y2="1">\n                    <stop offset="0%" stop-color="#ffffff" />\n                    <stop offset="100%" stop-color="#3498db" />\n                  </linearGradient>\n                </defs>\n\n                <!-- Drop shadow projection -->\n                <rect x="6" y="5" width="21" height="24" rx="2.5" fill="rgba(0,0,0,0.4)" />\n\n                <!-- Spine binding wraps with antique gold rivets -->\n                <rect x="5" y="4" width="5" height="24" rx="1.5" fill="#1c0700" stroke="#05070a" stroke-width="1.8" />\n                <circle cx="7.5" cy="8" r="0.8" fill="url(#ch_gold_d7_Chronicle_1)" stroke="#05070a" stroke-width="0.4" />\n                <circle cx="7.5" cy="16" r="0.8" fill="url(#ch_gold_d7_Chronicle_1)" stroke="#05070a" stroke-width="0.4" />\n                <circle cx="7.5" cy="24" r="0.8" fill="url(#ch_gold_d7_Chronicle_1)" stroke="#05070a" stroke-width="0.4" />\n\n                <!-- Yellowed & Weathered Stacked Pages (Visible right & bottom) -->\n                <rect x="9" y="4.5" width="16" height="23" fill="#dfd0b0" />\n                <!-- Uneven aging layers -->\n                <line x1="25" y1="5" x2="25" y2="27" stroke="#8c7a56" stroke-width="1.2" stroke-dasharray="2 1.5" />\n                <line x1="10" y1="27" x2="25" y2="27" stroke="#8c7a56" stroke-width="1.2" stroke-dasharray="2 1.5" />\n\n                <!-- Mahogany Relic Leather Cover Face -->\n                <path d="M10 4 L24 4 L24 28 L10 28 Z" fill="url(#ch_relic_d7_Chronicle_1)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n                <!-- Cracked Leather Creases (Visual aging detail) -->\n                <path d="M10 10 L14 7" stroke="#05070a" stroke-width="1.2" opacity="0.65" stroke-linecap="round" />\n                <path d="M11 22 L14 25" stroke="#05070a" stroke-width="1.2" opacity="0.65" stroke-linecap="round" />\n                <path d="M19 5 L22 8" stroke="#05070a" stroke-width="1.2" opacity="0.65" stroke-linecap="round" />\n                <path d="M19 27 L22 24" stroke="#05070a" stroke-width="1.2" opacity="0.65" stroke-linecap="round" />\n\n                <!-- Temporal Gravity Orbit Halo (Dotted background cycle) -->\n                <circle cx="17" cy="16" r="7.5" fill="none" stroke="#3498db" stroke-width="1" stroke-dasharray="2 3" opacity="0.75" />\n\n                <!-- Hourglass Support Frame (Braces & Pillars) -->\n                <!-- Top & Bottom Braces -->\n                <rect x="13.5" y="9" width="7" height="1.8" fill="url(#ch_gold_d7_Chronicle_1)" stroke="#05070a" stroke-width="0.8" rx="0.3" />\n                <rect x="13.5" y="21.2" width="7" height="1.8" fill="url(#ch_gold_d7_Chronicle_1)" stroke="#05070a" stroke-width="0.8" rx="0.3" />\n                <!-- Left & Right Bracing Pillars -->\n                <line x1="14" y1="10.8" x2="14" y2="21.2" stroke="url(#ch_gold_d7_Chronicle_1)" stroke-width="1" />\n                <line x1="20" y1="10.8" x2="20" y2="21.2" stroke="url(#ch_gold_d7_Chronicle_1)" stroke-width="1" />\n\n                <!-- Hourglass Glass Bulbs Shape -->\n                <path d="M14.5 10.8 Q17 16, 14.5 21.2 M19.5 10.8 Q17 16, 19.5 21.2" stroke="rgba(255,255,255,0.4)" stroke-width="1" fill="none" />\n\n                <!-- Glowing Cosmic Sand Reserves -->\n                <!-- Upper sand funnel (Draining downwards) -->\n                <polygon points="14.8,11.2 19.2,11.2 17.5,14.5" fill="url(#ch_sand_d7_Chronicle_1)" stroke="#05070a" stroke-width="0.5" />\n                <!-- Lower sand pile (Amassing in the base) -->\n                <path d="M15,20.8 C15,19 19,19 19,20.8 Z" fill="url(#ch_sand_d7_Chronicle_1)" stroke="#05070a" stroke-width="0.5" />\n                <!-- Sand trickle flow line -->\n                <line x1="17" y1="14.5" x2="17" y2="19.2" stroke="#3498db" stroke-width="0.8" stroke-dasharray="1.5 1" opacity="0.9" />\n\n                <!-- Glass Reflection glare highlights -->\n                <path d="M15.5 11.5 Q16.5 13, 16 13.8" stroke="#fff" stroke-width="0.6" stroke-linecap="round" opacity="0.6" fill="none" />\n                <path d="M18.5 20.5 Q17.5 19, 18 18.2" stroke="#fff" stroke-width="0.6" stroke-linecap="round" opacity="0.6" fill="none" />\n              </svg>', "color": "#3498db", "source": "chronicle", "bounds": { "x": 5, "y": 4, "width": 22, "height": 25 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 29 } }, "d7/Chronicle/2": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Aged mahogany relic leather gradient -->\n                                    <linearGradient id="ch_relic_d7_Chronicle_2" x1="0" y1="0" x2="1" y2="1">\n                                      <stop offset="0%" stop-color="#7c2e0b" />\n                                      <stop offset="35%" stop-color="#7c2e0b" />\n                                      <stop offset="35%" stop-color="#4a1a02" />\n                                      <stop offset="70%" stop-color="#4a1a02" />\n                                      <stop offset="70%" stop-color="#140600" />\n                                      <stop offset="100%" stop-color="#0a0300" />\n                                    </linearGradient>\n                  <!-- Antique gold/brass for hourglass frames -->\n                  <linearGradient id="ch_gold_d7_Chronicle_2" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffd54f" />\n                    <stop offset="50%" stop-color="#b7950b" />\n                    <stop offset="100%" stop-color="#5d4037" />\n                  </linearGradient>\n                  <!-- Glowing cosmic sand reserves -->\n                  <linearGradient id="ch_sand_d7_Chronicle_2" x1="0" y1="0" x2="0" y2="1">\n                    <stop offset="0%" stop-color="#ffffff" />\n                    <stop offset="100%" stop-color="#9b59b6" />\n                  </linearGradient>\n                </defs>\n\n                <!-- Drop shadow projection -->\n                <rect x="6" y="5" width="21" height="24" rx="2.5" fill="rgba(0,0,0,0.4)" />\n\n                <!-- Spine binding wraps with antique gold rivets -->\n                <rect x="5" y="4" width="5" height="24" rx="1.5" fill="#1c0700" stroke="#05070a" stroke-width="1.8" />\n                <circle cx="7.5" cy="8" r="0.8" fill="url(#ch_gold_d7_Chronicle_2)" stroke="#05070a" stroke-width="0.4" />\n                <circle cx="7.5" cy="16" r="0.8" fill="url(#ch_gold_d7_Chronicle_2)" stroke="#05070a" stroke-width="0.4" />\n                <circle cx="7.5" cy="24" r="0.8" fill="url(#ch_gold_d7_Chronicle_2)" stroke="#05070a" stroke-width="0.4" />\n\n                <!-- Yellowed & Weathered Stacked Pages (Visible right & bottom) -->\n                <rect x="9" y="4.5" width="16" height="23" fill="#dfd0b0" />\n                <!-- Uneven aging layers -->\n                <line x1="25" y1="5" x2="25" y2="27" stroke="#8c7a56" stroke-width="1.2" stroke-dasharray="2 1.5" />\n                <line x1="10" y1="27" x2="25" y2="27" stroke="#8c7a56" stroke-width="1.2" stroke-dasharray="2 1.5" />\n\n                <!-- Mahogany Relic Leather Cover Face -->\n                <path d="M10 4 L24 4 L24 28 L10 28 Z" fill="url(#ch_relic_d7_Chronicle_2)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n                <!-- Cracked Leather Creases (Visual aging detail) -->\n                <path d="M10 10 L14 7" stroke="#05070a" stroke-width="1.2" opacity="0.65" stroke-linecap="round" />\n                <path d="M11 22 L14 25" stroke="#05070a" stroke-width="1.2" opacity="0.65" stroke-linecap="round" />\n                <path d="M19 5 L22 8" stroke="#05070a" stroke-width="1.2" opacity="0.65" stroke-linecap="round" />\n                <path d="M19 27 L22 24" stroke="#05070a" stroke-width="1.2" opacity="0.65" stroke-linecap="round" />\n\n                <!-- Temporal Gravity Orbit Halo (Dotted background cycle) -->\n                <circle cx="17" cy="16" r="7.5" fill="none" stroke="#9b59b6" stroke-width="1" stroke-dasharray="2 3" opacity="0.75" />\n\n                <!-- Hourglass Support Frame (Braces & Pillars) -->\n                <!-- Top & Bottom Braces -->\n                <rect x="13.5" y="9" width="7" height="1.8" fill="url(#ch_gold_d7_Chronicle_2)" stroke="#05070a" stroke-width="0.8" rx="0.3" />\n                <rect x="13.5" y="21.2" width="7" height="1.8" fill="url(#ch_gold_d7_Chronicle_2)" stroke="#05070a" stroke-width="0.8" rx="0.3" />\n                <!-- Left & Right Bracing Pillars -->\n                <line x1="14" y1="10.8" x2="14" y2="21.2" stroke="url(#ch_gold_d7_Chronicle_2)" stroke-width="1" />\n                <line x1="20" y1="10.8" x2="20" y2="21.2" stroke="url(#ch_gold_d7_Chronicle_2)" stroke-width="1" />\n\n                <!-- Hourglass Glass Bulbs Shape -->\n                <path d="M14.5 10.8 Q17 16, 14.5 21.2 M19.5 10.8 Q17 16, 19.5 21.2" stroke="rgba(255,255,255,0.4)" stroke-width="1" fill="none" />\n\n                <!-- Glowing Cosmic Sand Reserves -->\n                <!-- Upper sand funnel (Draining downwards) -->\n                <polygon points="14.8,11.2 19.2,11.2 17.5,14.5" fill="url(#ch_sand_d7_Chronicle_2)" stroke="#05070a" stroke-width="0.5" />\n                <!-- Lower sand pile (Amassing in the base) -->\n                <path d="M15,20.8 C15,19 19,19 19,20.8 Z" fill="url(#ch_sand_d7_Chronicle_2)" stroke="#05070a" stroke-width="0.5" />\n                <!-- Sand trickle flow line -->\n                <line x1="17" y1="14.5" x2="17" y2="19.2" stroke="#9b59b6" stroke-width="0.8" stroke-dasharray="1.5 1" opacity="0.9" />\n\n                <!-- Glass Reflection glare highlights -->\n                <path d="M15.5 11.5 Q16.5 13, 16 13.8" stroke="#fff" stroke-width="0.6" stroke-linecap="round" opacity="0.6" fill="none" />\n                <path d="M18.5 20.5 Q17.5 19, 18 18.2" stroke="#fff" stroke-width="0.6" stroke-linecap="round" opacity="0.6" fill="none" />\n              </svg>', "color": "#9b59b6", "source": "chronicle", "bounds": { "x": 5, "y": 4, "width": 22, "height": 25 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 29 } }, "d7/Chronicle/3": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Aged mahogany relic leather gradient -->\n                                    <linearGradient id="ch_relic_d7_Chronicle_3" x1="0" y1="0" x2="1" y2="1">\n                                      <stop offset="0%" stop-color="#7c2e0b" />\n                                      <stop offset="35%" stop-color="#7c2e0b" />\n                                      <stop offset="35%" stop-color="#4a1a02" />\n                                      <stop offset="70%" stop-color="#4a1a02" />\n                                      <stop offset="70%" stop-color="#140600" />\n                                      <stop offset="100%" stop-color="#0a0300" />\n                                    </linearGradient>\n                  <!-- Antique gold/brass for hourglass frames -->\n                  <linearGradient id="ch_gold_d7_Chronicle_3" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffd54f" />\n                    <stop offset="50%" stop-color="#b7950b" />\n                    <stop offset="100%" stop-color="#5d4037" />\n                  </linearGradient>\n                  <!-- Glowing cosmic sand reserves -->\n                  <linearGradient id="ch_sand_d7_Chronicle_3" x1="0" y1="0" x2="0" y2="1">\n                    <stop offset="0%" stop-color="#ffffff" />\n                    <stop offset="100%" stop-color="#e67e22" />\n                  </linearGradient>\n                </defs>\n\n                <!-- Drop shadow projection -->\n                <rect x="6" y="5" width="21" height="24" rx="2.5" fill="rgba(0,0,0,0.4)" />\n\n                <!-- Spine binding wraps with antique gold rivets -->\n                <rect x="5" y="4" width="5" height="24" rx="1.5" fill="#1c0700" stroke="#05070a" stroke-width="1.8" />\n                <circle cx="7.5" cy="8" r="0.8" fill="url(#ch_gold_d7_Chronicle_3)" stroke="#05070a" stroke-width="0.4" />\n                <circle cx="7.5" cy="16" r="0.8" fill="url(#ch_gold_d7_Chronicle_3)" stroke="#05070a" stroke-width="0.4" />\n                <circle cx="7.5" cy="24" r="0.8" fill="url(#ch_gold_d7_Chronicle_3)" stroke="#05070a" stroke-width="0.4" />\n\n                <!-- Yellowed & Weathered Stacked Pages (Visible right & bottom) -->\n                <rect x="9" y="4.5" width="16" height="23" fill="#dfd0b0" />\n                <!-- Uneven aging layers -->\n                <line x1="25" y1="5" x2="25" y2="27" stroke="#8c7a56" stroke-width="1.2" stroke-dasharray="2 1.5" />\n                <line x1="10" y1="27" x2="25" y2="27" stroke="#8c7a56" stroke-width="1.2" stroke-dasharray="2 1.5" />\n\n                <!-- Mahogany Relic Leather Cover Face -->\n                <path d="M10 4 L24 4 L24 28 L10 28 Z" fill="url(#ch_relic_d7_Chronicle_3)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n                <!-- Cracked Leather Creases (Visual aging detail) -->\n                <path d="M10 10 L14 7" stroke="#05070a" stroke-width="1.2" opacity="0.65" stroke-linecap="round" />\n                <path d="M11 22 L14 25" stroke="#05070a" stroke-width="1.2" opacity="0.65" stroke-linecap="round" />\n                <path d="M19 5 L22 8" stroke="#05070a" stroke-width="1.2" opacity="0.65" stroke-linecap="round" />\n                <path d="M19 27 L22 24" stroke="#05070a" stroke-width="1.2" opacity="0.65" stroke-linecap="round" />\n\n                <!-- Temporal Gravity Orbit Halo (Dotted background cycle) -->\n                <circle cx="17" cy="16" r="7.5" fill="none" stroke="#e67e22" stroke-width="1" stroke-dasharray="2 3" opacity="0.75" />\n\n                <!-- Hourglass Support Frame (Braces & Pillars) -->\n                <!-- Top & Bottom Braces -->\n                <rect x="13.5" y="9" width="7" height="1.8" fill="url(#ch_gold_d7_Chronicle_3)" stroke="#05070a" stroke-width="0.8" rx="0.3" />\n                <rect x="13.5" y="21.2" width="7" height="1.8" fill="url(#ch_gold_d7_Chronicle_3)" stroke="#05070a" stroke-width="0.8" rx="0.3" />\n                <!-- Left & Right Bracing Pillars -->\n                <line x1="14" y1="10.8" x2="14" y2="21.2" stroke="url(#ch_gold_d7_Chronicle_3)" stroke-width="1" />\n                <line x1="20" y1="10.8" x2="20" y2="21.2" stroke="url(#ch_gold_d7_Chronicle_3)" stroke-width="1" />\n\n                <!-- Hourglass Glass Bulbs Shape -->\n                <path d="M14.5 10.8 Q17 16, 14.5 21.2 M19.5 10.8 Q17 16, 19.5 21.2" stroke="rgba(255,255,255,0.4)" stroke-width="1" fill="none" />\n\n                <!-- Glowing Cosmic Sand Reserves -->\n                <!-- Upper sand funnel (Draining downwards) -->\n                <polygon points="14.8,11.2 19.2,11.2 17.5,14.5" fill="url(#ch_sand_d7_Chronicle_3)" stroke="#05070a" stroke-width="0.5" />\n                <!-- Lower sand pile (Amassing in the base) -->\n                <path d="M15,20.8 C15,19 19,19 19,20.8 Z" fill="url(#ch_sand_d7_Chronicle_3)" stroke="#05070a" stroke-width="0.5" />\n                <!-- Sand trickle flow line -->\n                <line x1="17" y1="14.5" x2="17" y2="19.2" stroke="#e67e22" stroke-width="0.8" stroke-dasharray="1.5 1" opacity="0.9" />\n\n                <!-- Glass Reflection glare highlights -->\n                <path d="M15.5 11.5 Q16.5 13, 16 13.8" stroke="#fff" stroke-width="0.6" stroke-linecap="round" opacity="0.6" fill="none" />\n                <path d="M18.5 20.5 Q17.5 19, 18 18.2" stroke="#fff" stroke-width="0.6" stroke-linecap="round" opacity="0.6" fill="none" />\n              </svg>', "color": "#e67e22", "source": "chronicle", "bounds": { "x": 5, "y": 4, "width": 22, "height": 25 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 29 } }, "d7/Chronicle/4": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Aged mahogany relic leather gradient -->\n                                    <linearGradient id="ch_relic_d7_Chronicle_4" x1="0" y1="0" x2="1" y2="1">\n                                      <stop offset="0%" stop-color="#7c2e0b" />\n                                      <stop offset="35%" stop-color="#7c2e0b" />\n                                      <stop offset="35%" stop-color="#4a1a02" />\n                                      <stop offset="70%" stop-color="#4a1a02" />\n                                      <stop offset="70%" stop-color="#140600" />\n                                      <stop offset="100%" stop-color="#0a0300" />\n                                    </linearGradient>\n                  <!-- Antique gold/brass for hourglass frames -->\n                  <linearGradient id="ch_gold_d7_Chronicle_4" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffd54f" />\n                    <stop offset="50%" stop-color="#b7950b" />\n                    <stop offset="100%" stop-color="#5d4037" />\n                  </linearGradient>\n                  <!-- Glowing cosmic sand reserves -->\n                  <linearGradient id="ch_sand_d7_Chronicle_4" x1="0" y1="0" x2="0" y2="1">\n                    <stop offset="0%" stop-color="#ffffff" />\n                    <stop offset="100%" stop-color="#f1c40f" />\n                  </linearGradient>\n                </defs>\n\n                <!-- Drop shadow projection -->\n                <rect x="6" y="5" width="21" height="24" rx="2.5" fill="rgba(0,0,0,0.4)" />\n\n                <!-- Spine binding wraps with antique gold rivets -->\n                <rect x="5" y="4" width="5" height="24" rx="1.5" fill="#1c0700" stroke="#05070a" stroke-width="1.8" />\n                <circle cx="7.5" cy="8" r="0.8" fill="url(#ch_gold_d7_Chronicle_4)" stroke="#05070a" stroke-width="0.4" />\n                <circle cx="7.5" cy="16" r="0.8" fill="url(#ch_gold_d7_Chronicle_4)" stroke="#05070a" stroke-width="0.4" />\n                <circle cx="7.5" cy="24" r="0.8" fill="url(#ch_gold_d7_Chronicle_4)" stroke="#05070a" stroke-width="0.4" />\n\n                <!-- Yellowed & Weathered Stacked Pages (Visible right & bottom) -->\n                <rect x="9" y="4.5" width="16" height="23" fill="#dfd0b0" />\n                <!-- Uneven aging layers -->\n                <line x1="25" y1="5" x2="25" y2="27" stroke="#8c7a56" stroke-width="1.2" stroke-dasharray="2 1.5" />\n                <line x1="10" y1="27" x2="25" y2="27" stroke="#8c7a56" stroke-width="1.2" stroke-dasharray="2 1.5" />\n\n                <!-- Mahogany Relic Leather Cover Face -->\n                <path d="M10 4 L24 4 L24 28 L10 28 Z" fill="url(#ch_relic_d7_Chronicle_4)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n                <!-- Cracked Leather Creases (Visual aging detail) -->\n                <path d="M10 10 L14 7" stroke="#05070a" stroke-width="1.2" opacity="0.65" stroke-linecap="round" />\n                <path d="M11 22 L14 25" stroke="#05070a" stroke-width="1.2" opacity="0.65" stroke-linecap="round" />\n                <path d="M19 5 L22 8" stroke="#05070a" stroke-width="1.2" opacity="0.65" stroke-linecap="round" />\n                <path d="M19 27 L22 24" stroke="#05070a" stroke-width="1.2" opacity="0.65" stroke-linecap="round" />\n\n                <!-- Temporal Gravity Orbit Halo (Dotted background cycle) -->\n                <circle cx="17" cy="16" r="7.5" fill="none" stroke="#f1c40f" stroke-width="1" stroke-dasharray="2 3" opacity="0.75" />\n\n                <!-- Hourglass Support Frame (Braces & Pillars) -->\n                <!-- Top & Bottom Braces -->\n                <rect x="13.5" y="9" width="7" height="1.8" fill="url(#ch_gold_d7_Chronicle_4)" stroke="#05070a" stroke-width="0.8" rx="0.3" />\n                <rect x="13.5" y="21.2" width="7" height="1.8" fill="url(#ch_gold_d7_Chronicle_4)" stroke="#05070a" stroke-width="0.8" rx="0.3" />\n                <!-- Left & Right Bracing Pillars -->\n                <line x1="14" y1="10.8" x2="14" y2="21.2" stroke="url(#ch_gold_d7_Chronicle_4)" stroke-width="1" />\n                <line x1="20" y1="10.8" x2="20" y2="21.2" stroke="url(#ch_gold_d7_Chronicle_4)" stroke-width="1" />\n\n                <!-- Hourglass Glass Bulbs Shape -->\n                <path d="M14.5 10.8 Q17 16, 14.5 21.2 M19.5 10.8 Q17 16, 19.5 21.2" stroke="rgba(255,255,255,0.4)" stroke-width="1" fill="none" />\n\n                <!-- Glowing Cosmic Sand Reserves -->\n                <!-- Upper sand funnel (Draining downwards) -->\n                <polygon points="14.8,11.2 19.2,11.2 17.5,14.5" fill="url(#ch_sand_d7_Chronicle_4)" stroke="#05070a" stroke-width="0.5" />\n                <!-- Lower sand pile (Amassing in the base) -->\n                <path d="M15,20.8 C15,19 19,19 19,20.8 Z" fill="url(#ch_sand_d7_Chronicle_4)" stroke="#05070a" stroke-width="0.5" />\n                <!-- Sand trickle flow line -->\n                <line x1="17" y1="14.5" x2="17" y2="19.2" stroke="#f1c40f" stroke-width="0.8" stroke-dasharray="1.5 1" opacity="0.9" />\n\n                <!-- Glass Reflection glare highlights -->\n                <path d="M15.5 11.5 Q16.5 13, 16 13.8" stroke="#fff" stroke-width="0.6" stroke-linecap="round" opacity="0.6" fill="none" />\n                <path d="M18.5 20.5 Q17.5 19, 18 18.2" stroke="#fff" stroke-width="0.6" stroke-linecap="round" opacity="0.6" fill="none" />\n              </svg>', "color": "#f1c40f", "source": "chronicle", "bounds": { "x": 5, "y": 4, "width": 22, "height": 25 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 29 } }, "d7/Chronicle/5": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Aged mahogany relic leather gradient -->\n                                    <linearGradient id="ch_relic_d7_Chronicle_5" x1="0" y1="0" x2="1" y2="1">\n                                      <stop offset="0%" stop-color="#7c2e0b" />\n                                      <stop offset="35%" stop-color="#7c2e0b" />\n                                      <stop offset="35%" stop-color="#4a1a02" />\n                                      <stop offset="70%" stop-color="#4a1a02" />\n                                      <stop offset="70%" stop-color="#140600" />\n                                      <stop offset="100%" stop-color="#0a0300" />\n                                    </linearGradient>\n                  <!-- Antique gold/brass for hourglass frames -->\n                  <linearGradient id="ch_gold_d7_Chronicle_5" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffd54f" />\n                    <stop offset="50%" stop-color="#b7950b" />\n                    <stop offset="100%" stop-color="#5d4037" />\n                  </linearGradient>\n                  <!-- Glowing cosmic sand reserves -->\n                  <linearGradient id="ch_sand_d7_Chronicle_5" x1="0" y1="0" x2="0" y2="1">\n                    <stop offset="0%" stop-color="#ffffff" />\n                    <stop offset="100%" stop-color="#e74c3c" />\n                  </linearGradient>\n                </defs>\n\n                <!-- Drop shadow projection -->\n                <rect x="6" y="5" width="21" height="24" rx="2.5" fill="rgba(0,0,0,0.4)" />\n\n                <!-- Spine binding wraps with antique gold rivets -->\n                <rect x="5" y="4" width="5" height="24" rx="1.5" fill="#1c0700" stroke="#05070a" stroke-width="1.8" />\n                <circle cx="7.5" cy="8" r="0.8" fill="url(#ch_gold_d7_Chronicle_5)" stroke="#05070a" stroke-width="0.4" />\n                <circle cx="7.5" cy="16" r="0.8" fill="url(#ch_gold_d7_Chronicle_5)" stroke="#05070a" stroke-width="0.4" />\n                <circle cx="7.5" cy="24" r="0.8" fill="url(#ch_gold_d7_Chronicle_5)" stroke="#05070a" stroke-width="0.4" />\n\n                <!-- Yellowed & Weathered Stacked Pages (Visible right & bottom) -->\n                <rect x="9" y="4.5" width="16" height="23" fill="#dfd0b0" />\n                <!-- Uneven aging layers -->\n                <line x1="25" y1="5" x2="25" y2="27" stroke="#8c7a56" stroke-width="1.2" stroke-dasharray="2 1.5" />\n                <line x1="10" y1="27" x2="25" y2="27" stroke="#8c7a56" stroke-width="1.2" stroke-dasharray="2 1.5" />\n\n                <!-- Mahogany Relic Leather Cover Face -->\n                <path d="M10 4 L24 4 L24 28 L10 28 Z" fill="url(#ch_relic_d7_Chronicle_5)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n                <!-- Cracked Leather Creases (Visual aging detail) -->\n                <path d="M10 10 L14 7" stroke="#05070a" stroke-width="1.2" opacity="0.65" stroke-linecap="round" />\n                <path d="M11 22 L14 25" stroke="#05070a" stroke-width="1.2" opacity="0.65" stroke-linecap="round" />\n                <path d="M19 5 L22 8" stroke="#05070a" stroke-width="1.2" opacity="0.65" stroke-linecap="round" />\n                <path d="M19 27 L22 24" stroke="#05070a" stroke-width="1.2" opacity="0.65" stroke-linecap="round" />\n\n                <!-- Temporal Gravity Orbit Halo (Dotted background cycle) -->\n                <circle cx="17" cy="16" r="7.5" fill="none" stroke="#e74c3c" stroke-width="1" stroke-dasharray="2 3" opacity="0.75" />\n\n                <!-- Hourglass Support Frame (Braces & Pillars) -->\n                <!-- Top & Bottom Braces -->\n                <rect x="13.5" y="9" width="7" height="1.8" fill="url(#ch_gold_d7_Chronicle_5)" stroke="#05070a" stroke-width="0.8" rx="0.3" />\n                <rect x="13.5" y="21.2" width="7" height="1.8" fill="url(#ch_gold_d7_Chronicle_5)" stroke="#05070a" stroke-width="0.8" rx="0.3" />\n                <!-- Left & Right Bracing Pillars -->\n                <line x1="14" y1="10.8" x2="14" y2="21.2" stroke="url(#ch_gold_d7_Chronicle_5)" stroke-width="1" />\n                <line x1="20" y1="10.8" x2="20" y2="21.2" stroke="url(#ch_gold_d7_Chronicle_5)" stroke-width="1" />\n\n                <!-- Hourglass Glass Bulbs Shape -->\n                <path d="M14.5 10.8 Q17 16, 14.5 21.2 M19.5 10.8 Q17 16, 19.5 21.2" stroke="rgba(255,255,255,0.4)" stroke-width="1" fill="none" />\n\n                <!-- Glowing Cosmic Sand Reserves -->\n                <!-- Upper sand funnel (Draining downwards) -->\n                <polygon points="14.8,11.2 19.2,11.2 17.5,14.5" fill="url(#ch_sand_d7_Chronicle_5)" stroke="#05070a" stroke-width="0.5" />\n                <!-- Lower sand pile (Amassing in the base) -->\n                <path d="M15,20.8 C15,19 19,19 19,20.8 Z" fill="url(#ch_sand_d7_Chronicle_5)" stroke="#05070a" stroke-width="0.5" />\n                <!-- Sand trickle flow line -->\n                <line x1="17" y1="14.5" x2="17" y2="19.2" stroke="#e74c3c" stroke-width="0.8" stroke-dasharray="1.5 1" opacity="0.9" />\n\n                <!-- Glass Reflection glare highlights -->\n                <path d="M15.5 11.5 Q16.5 13, 16 13.8" stroke="#fff" stroke-width="0.6" stroke-linecap="round" opacity="0.6" fill="none" />\n                <path d="M18.5 20.5 Q17.5 19, 18 18.2" stroke="#fff" stroke-width="0.6" stroke-linecap="round" opacity="0.6" fill="none" />\n              </svg>', "color": "#e74c3c", "source": "chronicle", "bounds": { "x": 5, "y": 4, "width": 22, "height": 25 }, "visibleCenter": { "x": 16, "y": 16.5 }, "pivot": { "x": 16, "y": 29 } }, "d7/Greathelm/0": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Right side: bright polished steel plates -->\n                  <linearGradient id="gh_steel_l_d7_Greathelm_0" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#f8fafc" />\n                    <stop offset="60%" stop-color="#94a3b8" />\n                    <stop offset="100%" stop-color="#475569" />\n                  </linearGradient>\n                  <!-- Left side: cold, shadowed dark iron plates -->\n                  <linearGradient id="gh_steel_d_d7_Greathelm_0" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#475569" />\n                    <stop offset="100%" stop-color="#1e293b" />\n                  </linearGradient>\n                  <!-- Crusader cross plate: gold/bronze trim -->\n                  <linearGradient id="gh_brass_d7_Greathelm_0" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffeaa7" />\n                    <stop offset="50%" stop-color="#d4af37" />\n                    <stop offset="100%" stop-color="#8a6d1c" />\n                  </linearGradient>\n                  <!-- Plume crest color interpolation matching tier rarity -->\n                  <linearGradient id="gh_plume_d7_Greathelm_0" x1="0" y1="1" x2="0" y2="0">\n                    <stop offset="0%" stop-color="#ffffff" />\n                    <stop offset="70%" stop-color="#ffffff" stop-opacity="0.8" />\n                    <stop offset="100%" stop-color="#ffffff" />\n                  </linearGradient>\n                </defs>\n\n                <!-- Flowing Feather Plume Crest (Flowing backwards & left) -->\n                <path d="M16 8 C11 4, 7 5, 4 10 C8 5, 12 6, 16 8 Z" fill="url(#gh_plume_d7_Greathelm_0)" stroke="#05070a" stroke-width="1.2" stroke-linejoin="round" />\n                <path d="M16 8 C13 2, 9 2, 6 6 C10 2, 13 4, 16 8 Z" fill="url(#gh_plume_d7_Greathelm_0)" stroke="#05070a" stroke-width="1" stroke-linejoin="round" />\n\n                <!-- Left Helmet Plate (Shadowed Side) -->\n                <path d="M16 8 H9 V23 L16 29 Z" fill="url(#gh_steel_d_d7_Greathelm_0)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n                <!-- Right Helmet Plate (Highlighted Side) -->\n                <path d="M16 8 H23 V23 L16 29 Z" fill="url(#gh_steel_l_d7_Greathelm_0)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n                <!-- Center welding weld seam line -->\n                <line x1="16" y1="8" x2="16" y2="29" stroke="#05070a" stroke-width="1" opacity="0.4" />\n\n                <!-- Solid Crusader Cross Visor Plate (Reinforcement Brass Overlay) -->\n                <path d="M14.5 9 H17.5 V12 H21.5 V15 H17.5 V23.5 H14.5 V15 H10.5 V12 H14.5 Z" fill="url(#gh_brass_d7_Greathelm_0)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n                <!-- Narrow Vision Eye Slits (Inset inside the crossbar) -->\n                <rect x="11.2" y="13" width="3.2" height="1.2" fill="#05070a" rx="0.3" />\n                <rect x="17.6" y="13" width="3.2" height="1.2" fill="#05070a" rx="0.3" />\n                <!-- Glowing Eyes of Power (Pulsating dynamic rarity color) -->\n                                <circle cx="12.8" cy="13.6" r="0.6" fill="#ffffff" />\n                                <circle cx="19.2" cy="13.6" r="0.6" fill="#ffffff" />\n                              </svg>', "color": "#ffffff", "source": "greathelm", "bounds": { "x": 4, "y": 3.2122459411621094, "width": 19, "height": 25.78775405883789 }, "visibleCenter": { "x": 13.5, "y": 16.106122970581055 }, "pivot": { "x": 13.5, "y": 29 } }, "d7/Greathelm/1": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Right side: bright polished steel plates -->\n                  <linearGradient id="gh_steel_l_d7_Greathelm_1" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#f8fafc" />\n                    <stop offset="60%" stop-color="#94a3b8" />\n                    <stop offset="100%" stop-color="#475569" />\n                  </linearGradient>\n                  <!-- Left side: cold, shadowed dark iron plates -->\n                  <linearGradient id="gh_steel_d_d7_Greathelm_1" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#475569" />\n                    <stop offset="100%" stop-color="#1e293b" />\n                  </linearGradient>\n                  <!-- Crusader cross plate: gold/bronze trim -->\n                  <linearGradient id="gh_brass_d7_Greathelm_1" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffeaa7" />\n                    <stop offset="50%" stop-color="#d4af37" />\n                    <stop offset="100%" stop-color="#8a6d1c" />\n                  </linearGradient>\n                  <!-- Plume crest color interpolation matching tier rarity -->\n                  <linearGradient id="gh_plume_d7_Greathelm_1" x1="0" y1="1" x2="0" y2="0">\n                    <stop offset="0%" stop-color="#3498db" />\n                    <stop offset="70%" stop-color="#3498db" stop-opacity="0.8" />\n                    <stop offset="100%" stop-color="#ffffff" />\n                  </linearGradient>\n                </defs>\n\n                <!-- Flowing Feather Plume Crest (Flowing backwards & left) -->\n                <path d="M16 8 C11 4, 7 5, 4 10 C8 5, 12 6, 16 8 Z" fill="url(#gh_plume_d7_Greathelm_1)" stroke="#05070a" stroke-width="1.2" stroke-linejoin="round" />\n                <path d="M16 8 C13 2, 9 2, 6 6 C10 2, 13 4, 16 8 Z" fill="url(#gh_plume_d7_Greathelm_1)" stroke="#05070a" stroke-width="1" stroke-linejoin="round" />\n\n                <!-- Left Helmet Plate (Shadowed Side) -->\n                <path d="M16 8 H9 V23 L16 29 Z" fill="url(#gh_steel_d_d7_Greathelm_1)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n                <!-- Right Helmet Plate (Highlighted Side) -->\n                <path d="M16 8 H23 V23 L16 29 Z" fill="url(#gh_steel_l_d7_Greathelm_1)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n                <!-- Center welding weld seam line -->\n                <line x1="16" y1="8" x2="16" y2="29" stroke="#05070a" stroke-width="1" opacity="0.4" />\n\n                <!-- Solid Crusader Cross Visor Plate (Reinforcement Brass Overlay) -->\n                <path d="M14.5 9 H17.5 V12 H21.5 V15 H17.5 V23.5 H14.5 V15 H10.5 V12 H14.5 Z" fill="url(#gh_brass_d7_Greathelm_1)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n                <!-- Narrow Vision Eye Slits (Inset inside the crossbar) -->\n                <rect x="11.2" y="13" width="3.2" height="1.2" fill="#05070a" rx="0.3" />\n                <rect x="17.6" y="13" width="3.2" height="1.2" fill="#05070a" rx="0.3" />\n                <!-- Glowing Eyes of Power (Pulsating dynamic rarity color) -->\n                                <circle cx="12.8" cy="13.6" r="0.6" fill="#3498db" />\n                                <circle cx="19.2" cy="13.6" r="0.6" fill="#3498db" />\n                              </svg>', "color": "#3498db", "source": "greathelm", "bounds": { "x": 4, "y": 3.2122459411621094, "width": 19, "height": 25.78775405883789 }, "visibleCenter": { "x": 13.5, "y": 16.106122970581055 }, "pivot": { "x": 13.5, "y": 29 } }, "d7/Greathelm/2": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Right side: bright polished steel plates -->\n                  <linearGradient id="gh_steel_l_d7_Greathelm_2" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#f8fafc" />\n                    <stop offset="60%" stop-color="#94a3b8" />\n                    <stop offset="100%" stop-color="#475569" />\n                  </linearGradient>\n                  <!-- Left side: cold, shadowed dark iron plates -->\n                  <linearGradient id="gh_steel_d_d7_Greathelm_2" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#475569" />\n                    <stop offset="100%" stop-color="#1e293b" />\n                  </linearGradient>\n                  <!-- Crusader cross plate: gold/bronze trim -->\n                  <linearGradient id="gh_brass_d7_Greathelm_2" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffeaa7" />\n                    <stop offset="50%" stop-color="#d4af37" />\n                    <stop offset="100%" stop-color="#8a6d1c" />\n                  </linearGradient>\n                  <!-- Plume crest color interpolation matching tier rarity -->\n                  <linearGradient id="gh_plume_d7_Greathelm_2" x1="0" y1="1" x2="0" y2="0">\n                    <stop offset="0%" stop-color="#9b59b6" />\n                    <stop offset="70%" stop-color="#9b59b6" stop-opacity="0.8" />\n                    <stop offset="100%" stop-color="#ffffff" />\n                  </linearGradient>\n                </defs>\n\n                <!-- Flowing Feather Plume Crest (Flowing backwards & left) -->\n                <path d="M16 8 C11 4, 7 5, 4 10 C8 5, 12 6, 16 8 Z" fill="url(#gh_plume_d7_Greathelm_2)" stroke="#05070a" stroke-width="1.2" stroke-linejoin="round" />\n                <path d="M16 8 C13 2, 9 2, 6 6 C10 2, 13 4, 16 8 Z" fill="url(#gh_plume_d7_Greathelm_2)" stroke="#05070a" stroke-width="1" stroke-linejoin="round" />\n\n                <!-- Left Helmet Plate (Shadowed Side) -->\n                <path d="M16 8 H9 V23 L16 29 Z" fill="url(#gh_steel_d_d7_Greathelm_2)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n                <!-- Right Helmet Plate (Highlighted Side) -->\n                <path d="M16 8 H23 V23 L16 29 Z" fill="url(#gh_steel_l_d7_Greathelm_2)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n                <!-- Center welding weld seam line -->\n                <line x1="16" y1="8" x2="16" y2="29" stroke="#05070a" stroke-width="1" opacity="0.4" />\n\n                <!-- Solid Crusader Cross Visor Plate (Reinforcement Brass Overlay) -->\n                <path d="M14.5 9 H17.5 V12 H21.5 V15 H17.5 V23.5 H14.5 V15 H10.5 V12 H14.5 Z" fill="url(#gh_brass_d7_Greathelm_2)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n                <!-- Narrow Vision Eye Slits (Inset inside the crossbar) -->\n                <rect x="11.2" y="13" width="3.2" height="1.2" fill="#05070a" rx="0.3" />\n                <rect x="17.6" y="13" width="3.2" height="1.2" fill="#05070a" rx="0.3" />\n                <!-- Glowing Eyes of Power (Pulsating dynamic rarity color) -->\n                                <circle cx="12.8" cy="13.6" r="0.6" fill="#9b59b6" />\n                                <circle cx="19.2" cy="13.6" r="0.6" fill="#9b59b6" />\n                              </svg>', "color": "#9b59b6", "source": "greathelm", "bounds": { "x": 4, "y": 3.2122459411621094, "width": 19, "height": 25.78775405883789 }, "visibleCenter": { "x": 13.5, "y": 16.106122970581055 }, "pivot": { "x": 13.5, "y": 29 } }, "d7/Greathelm/3": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Right side: bright polished steel plates -->\n                  <linearGradient id="gh_steel_l_d7_Greathelm_3" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#f8fafc" />\n                    <stop offset="60%" stop-color="#94a3b8" />\n                    <stop offset="100%" stop-color="#475569" />\n                  </linearGradient>\n                  <!-- Left side: cold, shadowed dark iron plates -->\n                  <linearGradient id="gh_steel_d_d7_Greathelm_3" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#475569" />\n                    <stop offset="100%" stop-color="#1e293b" />\n                  </linearGradient>\n                  <!-- Crusader cross plate: gold/bronze trim -->\n                  <linearGradient id="gh_brass_d7_Greathelm_3" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffeaa7" />\n                    <stop offset="50%" stop-color="#d4af37" />\n                    <stop offset="100%" stop-color="#8a6d1c" />\n                  </linearGradient>\n                  <!-- Plume crest color interpolation matching tier rarity -->\n                  <linearGradient id="gh_plume_d7_Greathelm_3" x1="0" y1="1" x2="0" y2="0">\n                    <stop offset="0%" stop-color="#e67e22" />\n                    <stop offset="70%" stop-color="#e67e22" stop-opacity="0.8" />\n                    <stop offset="100%" stop-color="#ffffff" />\n                  </linearGradient>\n                </defs>\n\n                <!-- Flowing Feather Plume Crest (Flowing backwards & left) -->\n                <path d="M16 8 C11 4, 7 5, 4 10 C8 5, 12 6, 16 8 Z" fill="url(#gh_plume_d7_Greathelm_3)" stroke="#05070a" stroke-width="1.2" stroke-linejoin="round" />\n                <path d="M16 8 C13 2, 9 2, 6 6 C10 2, 13 4, 16 8 Z" fill="url(#gh_plume_d7_Greathelm_3)" stroke="#05070a" stroke-width="1" stroke-linejoin="round" />\n\n                <!-- Left Helmet Plate (Shadowed Side) -->\n                <path d="M16 8 H9 V23 L16 29 Z" fill="url(#gh_steel_d_d7_Greathelm_3)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n                <!-- Right Helmet Plate (Highlighted Side) -->\n                <path d="M16 8 H23 V23 L16 29 Z" fill="url(#gh_steel_l_d7_Greathelm_3)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n                <!-- Center welding weld seam line -->\n                <line x1="16" y1="8" x2="16" y2="29" stroke="#05070a" stroke-width="1" opacity="0.4" />\n\n                <!-- Solid Crusader Cross Visor Plate (Reinforcement Brass Overlay) -->\n                <path d="M14.5 9 H17.5 V12 H21.5 V15 H17.5 V23.5 H14.5 V15 H10.5 V12 H14.5 Z" fill="url(#gh_brass_d7_Greathelm_3)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n                <!-- Narrow Vision Eye Slits (Inset inside the crossbar) -->\n                <rect x="11.2" y="13" width="3.2" height="1.2" fill="#05070a" rx="0.3" />\n                <rect x="17.6" y="13" width="3.2" height="1.2" fill="#05070a" rx="0.3" />\n                <!-- Glowing Eyes of Power (Pulsating dynamic rarity color) -->\n                                <circle cx="12.8" cy="13.6" r="0.6" fill="#e67e22" />\n                                <circle cx="19.2" cy="13.6" r="0.6" fill="#e67e22" />\n                              </svg>', "color": "#e67e22", "source": "greathelm", "bounds": { "x": 4, "y": 3.2122459411621094, "width": 19, "height": 25.78775405883789 }, "visibleCenter": { "x": 13.5, "y": 16.106122970581055 }, "pivot": { "x": 13.5, "y": 29 } }, "d7/Greathelm/4": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Right side: bright polished steel plates -->\n                  <linearGradient id="gh_steel_l_d7_Greathelm_4" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#f8fafc" />\n                    <stop offset="60%" stop-color="#94a3b8" />\n                    <stop offset="100%" stop-color="#475569" />\n                  </linearGradient>\n                  <!-- Left side: cold, shadowed dark iron plates -->\n                  <linearGradient id="gh_steel_d_d7_Greathelm_4" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#475569" />\n                    <stop offset="100%" stop-color="#1e293b" />\n                  </linearGradient>\n                  <!-- Crusader cross plate: gold/bronze trim -->\n                  <linearGradient id="gh_brass_d7_Greathelm_4" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffeaa7" />\n                    <stop offset="50%" stop-color="#d4af37" />\n                    <stop offset="100%" stop-color="#8a6d1c" />\n                  </linearGradient>\n                  <!-- Plume crest color interpolation matching tier rarity -->\n                  <linearGradient id="gh_plume_d7_Greathelm_4" x1="0" y1="1" x2="0" y2="0">\n                    <stop offset="0%" stop-color="#f1c40f" />\n                    <stop offset="70%" stop-color="#f1c40f" stop-opacity="0.8" />\n                    <stop offset="100%" stop-color="#ffffff" />\n                  </linearGradient>\n                </defs>\n\n                <!-- Flowing Feather Plume Crest (Flowing backwards & left) -->\n                <path d="M16 8 C11 4, 7 5, 4 10 C8 5, 12 6, 16 8 Z" fill="url(#gh_plume_d7_Greathelm_4)" stroke="#05070a" stroke-width="1.2" stroke-linejoin="round" />\n                <path d="M16 8 C13 2, 9 2, 6 6 C10 2, 13 4, 16 8 Z" fill="url(#gh_plume_d7_Greathelm_4)" stroke="#05070a" stroke-width="1" stroke-linejoin="round" />\n\n                <!-- Left Helmet Plate (Shadowed Side) -->\n                <path d="M16 8 H9 V23 L16 29 Z" fill="url(#gh_steel_d_d7_Greathelm_4)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n                <!-- Right Helmet Plate (Highlighted Side) -->\n                <path d="M16 8 H23 V23 L16 29 Z" fill="url(#gh_steel_l_d7_Greathelm_4)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n                <!-- Center welding weld seam line -->\n                <line x1="16" y1="8" x2="16" y2="29" stroke="#05070a" stroke-width="1" opacity="0.4" />\n\n                <!-- Solid Crusader Cross Visor Plate (Reinforcement Brass Overlay) -->\n                <path d="M14.5 9 H17.5 V12 H21.5 V15 H17.5 V23.5 H14.5 V15 H10.5 V12 H14.5 Z" fill="url(#gh_brass_d7_Greathelm_4)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n                <!-- Narrow Vision Eye Slits (Inset inside the crossbar) -->\n                <rect x="11.2" y="13" width="3.2" height="1.2" fill="#05070a" rx="0.3" />\n                <rect x="17.6" y="13" width="3.2" height="1.2" fill="#05070a" rx="0.3" />\n                <!-- Glowing Eyes of Power (Pulsating dynamic rarity color) -->\n                                <circle cx="12.8" cy="13.6" r="0.6" fill="#f1c40f" />\n                                <circle cx="19.2" cy="13.6" r="0.6" fill="#f1c40f" />\n                              </svg>', "color": "#f1c40f", "source": "greathelm", "bounds": { "x": 4, "y": 3.2122459411621094, "width": 19, "height": 25.78775405883789 }, "visibleCenter": { "x": 13.5, "y": 16.106122970581055 }, "pivot": { "x": 13.5, "y": 29 } }, "d7/Greathelm/5": { "svg": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">\n                <defs>\n                  <!-- Right side: bright polished steel plates -->\n                  <linearGradient id="gh_steel_l_d7_Greathelm_5" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#f8fafc" />\n                    <stop offset="60%" stop-color="#94a3b8" />\n                    <stop offset="100%" stop-color="#475569" />\n                  </linearGradient>\n                  <!-- Left side: cold, shadowed dark iron plates -->\n                  <linearGradient id="gh_steel_d_d7_Greathelm_5" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#475569" />\n                    <stop offset="100%" stop-color="#1e293b" />\n                  </linearGradient>\n                  <!-- Crusader cross plate: gold/bronze trim -->\n                  <linearGradient id="gh_brass_d7_Greathelm_5" x1="0" y1="0" x2="1" y2="1">\n                    <stop offset="0%" stop-color="#ffeaa7" />\n                    <stop offset="50%" stop-color="#d4af37" />\n                    <stop offset="100%" stop-color="#8a6d1c" />\n                  </linearGradient>\n                  <!-- Plume crest color interpolation matching tier rarity -->\n                  <linearGradient id="gh_plume_d7_Greathelm_5" x1="0" y1="1" x2="0" y2="0">\n                    <stop offset="0%" stop-color="#e74c3c" />\n                    <stop offset="70%" stop-color="#e74c3c" stop-opacity="0.8" />\n                    <stop offset="100%" stop-color="#ffffff" />\n                  </linearGradient>\n                </defs>\n\n                <!-- Flowing Feather Plume Crest (Flowing backwards & left) -->\n                <path d="M16 8 C11 4, 7 5, 4 10 C8 5, 12 6, 16 8 Z" fill="url(#gh_plume_d7_Greathelm_5)" stroke="#05070a" stroke-width="1.2" stroke-linejoin="round" />\n                <path d="M16 8 C13 2, 9 2, 6 6 C10 2, 13 4, 16 8 Z" fill="url(#gh_plume_d7_Greathelm_5)" stroke="#05070a" stroke-width="1" stroke-linejoin="round" />\n\n                <!-- Left Helmet Plate (Shadowed Side) -->\n                <path d="M16 8 H9 V23 L16 29 Z" fill="url(#gh_steel_d_d7_Greathelm_5)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n                <!-- Right Helmet Plate (Highlighted Side) -->\n                <path d="M16 8 H23 V23 L16 29 Z" fill="url(#gh_steel_l_d7_Greathelm_5)" stroke="#05070a" stroke-width="1.8" stroke-linejoin="round" />\n\n                <!-- Center welding weld seam line -->\n                <line x1="16" y1="8" x2="16" y2="29" stroke="#05070a" stroke-width="1" opacity="0.4" />\n\n                <!-- Solid Crusader Cross Visor Plate (Reinforcement Brass Overlay) -->\n                <path d="M14.5 9 H17.5 V12 H21.5 V15 H17.5 V23.5 H14.5 V15 H10.5 V12 H14.5 Z" fill="url(#gh_brass_d7_Greathelm_5)" stroke="#05070a" stroke-width="1.5" stroke-linejoin="round" />\n\n                <!-- Narrow Vision Eye Slits (Inset inside the crossbar) -->\n                <rect x="11.2" y="13" width="3.2" height="1.2" fill="#05070a" rx="0.3" />\n                <rect x="17.6" y="13" width="3.2" height="1.2" fill="#05070a" rx="0.3" />\n                <!-- Glowing Eyes of Power (Pulsating dynamic rarity color) -->\n                                <circle cx="12.8" cy="13.6" r="0.6" fill="#e74c3c" />\n                                <circle cx="19.2" cy="13.6" r="0.6" fill="#e74c3c" />\n                              </svg>', "color": "#e74c3c", "source": "greathelm", "bounds": { "x": 4, "y": 3.2122459411621094, "width": 19, "height": 25.78775405883789 }, "visibleCenter": { "x": 13.5, "y": 16.106122970581055 }, "pivot": { "x": 13.5, "y": 29 } }, "d7/Armet/0": { "svg": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34">
@@ -32282,22 +32692,61 @@ function createEquipmentArtCache(document) {
 var EQUIPMENT_STAT_ART = Object.freeze(Object.fromEntries(Object.entries({ "attack": '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#e74c3c" fill-opacity="0" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5L3 6V3h3l11.5 11.5 M13 19l6-6 M16 16l4 4 M19 21l2-2" /></svg>', "defense": '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#3498db" fill-opacity="0.15" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>', "maxHp": '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#e74c3c" fill-opacity="0.15" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>' }).map(([key2, svg2]) => [key2, "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg2)])));
 
 // src/client/item_icon_v1.js
-var HERO_SLOT = Object.freeze({ weapon: "main", subweapon: "off", helmet: "helmet", chest: "body", overall: "body", leggings: "legs", gloves: "gloves", boots: "boots" });
+var HERO_SLOT = Object.freeze({ weapon: "main", subweapon: "off", helmet: "helmet", chest: "body", overall: "body", leggings: "legs", gloves: "gloves", boots: "boots", ring: "ring" });
+var RING_KINDS = Object.freeze({ "Signet Ring": "signet", "Loop Ring": "loop", "Band Ring": "band", "Seal Ring": "seal", "copper-charm": "copper", "silver-charm": "silver", "sun-charm": "sun" });
 var PIXELS = 144;
 var urls = /* @__PURE__ */ new Map();
+function fittedOffhand(document, item) {
+  const W3 = PIXELS * 2, src = document.createElement("canvas");
+  src.width = src.height = W3;
+  const s = src.getContext("2d");
+  if (!s) return null;
+  s.translate(W3 * 0.08, W3 * 0.08);
+  drawItemIcon(s, item, W3 * 0.84);
+  const d = s.getImageData(0, 0, W3, W3).data;
+  let x0 = W3, y0 = W3, x1 = -1, y1 = -1;
+  for (let y = 0; y < W3; y++) for (let x = 0; x < W3; x++) if (d[(y * W3 + x) * 4 + 3] > 160) {
+    if (x < x0) x0 = x;
+    if (x > x1) x1 = x;
+    if (y < y0) y0 = y;
+    if (y > y1) y1 = y;
+  }
+  const out = document.createElement("canvas");
+  out.width = out.height = PIXELS;
+  const o = out.getContext("2d");
+  if (x1 < 0) {
+    o.drawImage(src, 0, 0, PIXELS, PIXELS);
+    return out;
+  }
+  const bw = x1 - x0 + 1, bh = y1 - y0 + 1, k = Math.min(PIXELS * 0.88 / Math.max(bw, bh), PIXELS / W3 * 1.7);
+  o.drawImage(src, x0 + bw / 2 - PIXELS / k / 2, y0 + bh / 2 - PIXELS / k / 2, PIXELS / k, PIXELS / k, 0, 0, PIXELS, PIXELS);
+  return out;
+}
 function iconUrl(slot, kind, tier2, document) {
   const key2 = `${slot}/${kind}/${tier2}`;
   if (!urls.has(key2)) {
     let url = null;
     try {
-      const canvas = document.createElement("canvas");
-      canvas.width = canvas.height = PIXELS;
-      const c = canvas.getContext("2d");
-      if (c) {
-        c.translate(PIXELS * 0.08, PIXELS * 0.08);
-        drawItemIcon(c, { slot, kind, tier: tier2 }, PIXELS * 0.84);
-        url = canvas.toDataURL("image/png");
+      const item = { slot, kind, tier: tier2 };
+      let canvas = null;
+      if (hasObjectIcon(item)) {
+        canvas = document.createElement("canvas");
+        canvas.width = canvas.height = PIXELS;
+        const c = canvas.getContext("2d");
+        if (!c) canvas = null;
+        else drawObjectIcon(c, item, PIXELS);
+      } else if (slot === "off") canvas = fittedOffhand(document, item);
+      else {
+        canvas = document.createElement("canvas");
+        canvas.width = canvas.height = PIXELS;
+        const c = canvas.getContext("2d");
+        if (!c) canvas = null;
+        else {
+          c.translate(PIXELS * 0.08, PIXELS * 0.08);
+          drawItemIcon(c, item, PIXELS * 0.84);
+        }
       }
+      url = canvas ? canvas.toDataURL("image/png") : null;
     } catch {
       url = null;
     }
@@ -32306,7 +32755,7 @@ function iconUrl(slot, kind, tier2, document) {
   return urls.get(key2);
 }
 var iconOf = (item) => {
-  const d = itemDefinition(item), slot = HERO_SLOT[d?.slot], kind = slot ? itemLook(item) : null;
+  const d = itemDefinition(item), slot = HERO_SLOT[d?.slot], kind = slot === "ring" ? RING_KINDS[item.generated?.definition?.noun ?? item.definitionId] : slot ? itemLook(item) : null;
   return kind ? { slot, kind, tier: Number.isSafeInteger(d.rarityTier) ? Math.max(0, Math.min(5, d.rarityTier)) : 0 } : null;
 };
 useLookArt((item) => {
@@ -32785,10 +33234,10 @@ function createInventoryPresentation({ document, environment, readModel, adapter
       delete comparison.dataset.itemId;
       return;
     }
-    const opening = comparison.dataset.itemId !== selected;
+    const opening2 = comparison.dataset.itemId !== selected;
     buildSheet(m, inv, local6, owner, canEquip);
     comparison.dataset.itemId = selected;
-    placeSheet(opening);
+    placeSheet(opening2);
     {
       const sheet = comparison.querySelector(".gx-sheetscroll");
       if (sheet) {
@@ -33166,7 +33615,7 @@ function createInventoryPresentation({ document, environment, readModel, adapter
     }
     comparison.append(element("span", "", "gx-arrow"), scroll, foot);
   }
-  function placeSheet(opening) {
+  function placeSheet(opening2) {
     if (!inspect || comparison.hidden) return;
     const vw = environment.innerWidth, vh = environment.innerHeight, pad = 12, gap = 12, width = Math.min(vw > 699 ? 400 : 380, vw - pad * 2), anchor = selectionOrigin?.isConnected ? selectionOrigin : panel.querySelector(`[data-item-id="${CSS.escape(selected)}"]`);
     comparison.style.width = width + "px";
@@ -33193,7 +33642,7 @@ function createInventoryPresentation({ document, environment, readModel, adapter
     comparison.style.setProperty("--arrow-x", ax + "px");
     comparison.style.setProperty("--arrow-y", ay + "px");
     comparison.dataset.side = side;
-    if (opening) {
+    if (opening2) {
       comparison.classList.remove("is-opening");
       void comparison.offsetWidth;
       comparison.classList.add("is-opening");
@@ -34718,7 +35167,7 @@ function boxBlur(a, t, sum2, w, h, r) {
   }
 }
 function paintChartTerrain(data, raster, W3, H3) {
-  const rw = raster.width, rh = raster.height, view = raster.view, n = rw * rh, codes = new Uint8Array(n), R2 = new Float32Array(n), G2 = new Float32Array(n), B = new Float32Array(n), M2 = new Float32Array(n), S = new Float32Array(n), K2 = new Float32Array(n), t = new Float32Array(n), sum2 = new Float32Array(rw);
+  const rw = raster.width, rh = raster.height, view = raster.view, n = rw * rh, codes = new Uint8Array(n), R3 = new Float32Array(n), G3 = new Float32Array(n), B = new Float32Array(n), M3 = new Float32Array(n), S = new Float32Array(n), K3 = new Float32Array(n), t = new Float32Array(n), sum2 = new Float32Array(rw);
   const tps = view.width / rw, tpx = view.width / W3, tpy = view.height / H3, clump = 1 / Math.max(4, tpx * 4);
   for (let y = 0; y < rh; y++) {
     const row2 = raster.rows[y], ty = view.y + (y + 0.5) * view.height / rh;
@@ -34726,19 +35175,19 @@ function paintChartTerrain(data, raster, W3, H3) {
       const c = row2.charCodeAt(x) & 127, i = y * rw + x, tx = view.x + (x + 0.5) * tps;
       codes[i] = c;
       if (c === 79 || c === 76 || c === 87) {
-        K2[i] = 0.96 + 0.07 * noise(tx * 0.09, ty * 0.09);
+        K3[i] = 0.96 + 0.07 * noise(tx * 0.09, ty * 0.09);
         if (c === 79) S[i] = 1;
       } else {
-        R2[i] = PR[c];
-        G2[i] = PG[c];
+        R3[i] = PR[c];
+        G3[i] = PG[c];
         B[i] = PB[c];
-        M2[i] = 1;
-        K2[i] = (0.94 + 0.12 * noise(tx * 0.03 + 50, ty * 0.03 + 50)) * (1 + MOTTLE[c] * (noise(tx * clump + 71, ty * clump + 13) - 0.5) * 2.4);
+        M3[i] = 1;
+        K3[i] = (0.94 + 0.12 * noise(tx * 0.03 + 50, ty * 0.03 + 50)) * (1 + MOTTLE[c] * (noise(tx * clump + 71, ty * clump + 13) - 0.5) * 2.4);
       }
     }
   }
   const landR = Math.max(1, Math.round(4 / tps)), seaR = Math.max(1, Math.round(9 / tps));
-  for (const a of [R2, G2, B, M2]) boxBlur(a, t, sum2, rw, rh, landR);
+  for (const a of [R3, G3, B, M3]) boxBlur(a, t, sum2, rw, rh, landR);
   boxBlur(S, t, sum2, rw, rh, seaR);
   boxBlur(S, t, sum2, rw, rh, seaR);
   const wt = Math.min(12, Math.max(4, tpx * 2.5)), amp = wt / tps, f = 1 / (wt * 3.2), sx = rw / W3, sy = rh / H3, maxX = rw - 1.001, maxY = rh - 1.001, sea0 = PAINT[79];
@@ -34748,7 +35197,7 @@ function paintChartTerrain(data, raster, W3, H3) {
       const tx = view.x + (ix + 0.5) * tpx, o = (iy * W3 + ix) * 4, n0 = ry + Math.min(rw - 1, (ix + 0.5) * sx | 0), c0 = codes[n0];
       let r, g, b;
       if (c0 === 76 || c0 === 87) {
-        const k = K2[n0];
+        const k = K3[n0];
         r = PR[c0] * k;
         g = PG[c0] * k;
         b = PB[c0] * k;
@@ -34756,18 +35205,18 @@ function paintChartTerrain(data, raster, W3, H3) {
         let fx = (ix + 0.5) * sx - 0.5 + (noise(tx * f, ty * f) - 0.5) * 2 * amp, fy = py + (noise(tx * f + 19, ty * f + 7) - 0.5) * 2 * amp;
         fx = fx < 0 ? 0 : fx > maxX ? maxX : fx;
         fy = fy < 0 ? 0 : fy > maxY ? maxY : fy;
-        const x0 = fx | 0, y0 = fy | 0, u = fx - x0, v = fy - y0, i = y0 * rw + x0, j = x0 < rw - 1 ? i + 1 : i, l = y0 < rh - 1 ? i + rw : i, q = l + j - i, w00 = (1 - u) * (1 - v), w10 = u * (1 - v), w01 = (1 - u) * v, w11 = u * v, sea = S[i] * w00 + S[j] * w10 + S[l] * w01 + S[q] * w11, k = K2[i] * w00 + K2[j] * w10 + K2[l] * w01 + K2[q] * w11;
+        const x0 = fx | 0, y0 = fy | 0, u = fx - x0, v = fy - y0, i = y0 * rw + x0, j = x0 < rw - 1 ? i + 1 : i, l = y0 < rh - 1 ? i + rw : i, q = l + j - i, w00 = (1 - u) * (1 - v), w10 = u * (1 - v), w01 = (1 - u) * v, w11 = u * v, sea = S[i] * w00 + S[j] * w10 + S[l] * w01 + S[q] * w11, k = K3[i] * w00 + K3[j] * w10 + K3[l] * w01 + K3[q] * w11;
         if (sea > 0.5) {
           const d = Math.min(1, (sea - 0.5) / 0.42);
           r = (SHALLOW[0] + (sea0[0] - SHALLOW[0]) * d) * k;
           g = (SHALLOW[1] + (sea0[1] - SHALLOW[1]) * d) * k;
           b = (SHALLOW[2] + (sea0[2] - SHALLOW[2]) * d) * k;
         } else {
-          const m = M2[i] * w00 + M2[j] * w10 + M2[l] * w01 + M2[q] * w11;
+          const m = M3[i] * w00 + M3[j] * w10 + M3[l] * w01 + M3[q] * w11;
           if (m > 1e-3) {
             const im = k / m;
-            r = (R2[i] * w00 + R2[j] * w10 + R2[l] * w01 + R2[q] * w11) * im;
-            g = (G2[i] * w00 + G2[j] * w10 + G2[l] * w01 + G2[q] * w11) * im;
+            r = (R3[i] * w00 + R3[j] * w10 + R3[l] * w01 + R3[q] * w11) * im;
+            g = (G3[i] * w00 + G3[j] * w10 + G3[l] * w01 + G3[q] * w11) * im;
             b = (B[i] * w00 + B[j] * w10 + B[l] * w01 + B[q] * w11) * im;
           } else {
             r = PR[111];
@@ -35419,21 +35868,21 @@ var WATER = /* @__PURE__ */ new Set(["O", "W", "L"]);
 var PLANNED_MAP_MAX_LEVEL = 3;
 var plannedMapFeature = (c) => c === "H" || c === "V" ? "bridge" : c === "R" ? "road" : c === "T" ? "trail" : null;
 function drawPlannedCartographyV2(ctx, page, x, y, cw, ch, cols, rows, neighbor = null) {
-  const outside = (px2, py) => px2 < 0 || py < 0 || px2 >= cols || py >= rows, at3 = (px2, py) => outside(px2, py) ? neighbor?.(px2, py, "tiles") ?? "?" : page.tiles[py * cols + px2], feature = (px2, py) => outside(px2, py) ? neighbor?.(px2, py, "features") ?? "?" : page.features?.[py * cols + px2] ?? at3(px2, py);
-  for (let py = 0; py < rows; py++) for (let px2 = 0; px2 < cols; px2++) {
-    const c = at3(px2, py);
+  const outside = (px3, py) => px3 < 0 || py < 0 || px3 >= cols || py >= rows, at3 = (px3, py) => outside(px3, py) ? neighbor?.(px3, py, "tiles") ?? "?" : page.tiles[py * cols + px3], feature = (px3, py) => outside(px3, py) ? neighbor?.(px3, py, "features") ?? "?" : page.features?.[py * cols + px3] ?? at3(px3, py);
+  for (let py = 0; py < rows; py++) for (let px3 = 0; px3 < cols; px3++) {
+    const c = at3(px3, py);
     if (c === "?") continue;
     ctx.fillStyle = COLORS[c] ?? "#56785d";
-    ctx.fillRect(x + px2 * cw, y + py * ch, cw + 0.2, ch + 0.2);
+    ctx.fillRect(x + px3 * cw, y + py * ch, cw + 0.2, ch + 0.2);
   }
   ctx.strokeStyle = "#a9c4c5";
   ctx.lineWidth = 0.8;
   ctx.beginPath();
-  for (let py = 0; py < rows; py++) for (let px2 = 0; px2 < cols; px2++) {
-    const c = at3(px2, py);
+  for (let py = 0; py < rows; py++) for (let px3 = 0; px3 < cols; px3++) {
+    const c = at3(px3, py);
     if (c === "?" || WATER.has(c)) continue;
-    const xx = x + px2 * cw, yy = y + py * ch;
-    for (const [dx, dy] of [[0, -1], [1, 0], [0, 1], [-1, 0]]) if (WATER.has(at3(px2 + dx, py + dy))) {
+    const xx = x + px3 * cw, yy = y + py * ch;
+    for (const [dx, dy] of [[0, -1], [1, 0], [0, 1], [-1, 0]]) if (WATER.has(at3(px3 + dx, py + dy))) {
       if (dx) {
         ctx.moveTo(xx + (dx > 0 ? cw : 0), yy);
         ctx.lineTo(xx + (dx > 0 ? cw : 0), yy + ch);
@@ -35450,12 +35899,12 @@ function drawPlannedCartographyV2(ctx, page, x, y, cw, ch, cols, rows, neighbor 
     ctx.lineCap = "round";
     ctx.setLineDash(kind === "trail" ? [2.5, 2] : []);
     ctx.beginPath();
-    for (let py = 0; py < rows; py++) for (let px2 = 0; px2 < cols; px2++) {
-      const f = feature(px2, py);
+    for (let py = 0; py < rows; py++) for (let px3 = 0; px3 < cols; px3++) {
+      const f = feature(px3, py);
       if (plannedMapFeature(f) !== kind) continue;
-      const xx = x + (px2 + 0.5) * cw, yy = y + (py + 0.5) * ch;
+      const xx = x + (px3 + 0.5) * cw, yy = y + (py + 0.5) * ch;
       let linked = false;
-      for (const [dx, dy] of [[0, -1], [1, 0], [0, 1], [-1, 0]]) if (plannedMapFeature(feature(px2 + dx, py + dy))) {
+      for (const [dx, dy] of [[0, -1], [1, 0], [0, 1], [-1, 0]]) if (plannedMapFeature(feature(px3 + dx, py + dy))) {
         ctx.moveTo(xx, yy);
         ctx.lineTo(xx + dx * cw * 0.55, yy + dy * ch * 0.55);
         linked = true;
@@ -35489,23 +35938,23 @@ function panMapD9(center3, dx, dy, scale) {
 function worldScreenDeltaD9(position4, anchor, scale) {
   return { x: (Number(BigInt(position4.chunkX) - BigInt(anchor.chunkX)) * 1024 + position4.localX - anchor.localX) * scale, y: (Number(BigInt(position4.chunkY) - BigInt(anchor.chunkY)) * 832 + position4.localY - anchor.localY) * scale };
 }
-function addLandBlob(ctx, x, y, w, h, px2, py) {
-  const n = Math.imul(px2 + 17, 73856093) ^ Math.imul(py + 29, 19349663), jx = (n >>> 3 & 3) - 1.5, jy = (n >>> 7 & 3) - 1.5;
+function addLandBlob(ctx, x, y, w, h, px3, py) {
+  const n = Math.imul(px3 + 17, 73856093) ^ Math.imul(py + 29, 19349663), jx = (n >>> 3 & 3) - 1.5, jy = (n >>> 7 & 3) - 1.5;
   ctx.ellipse(x + w / 2 + jx * w * 0.035, y + h / 2 + jy * h * 0.035, w * 0.79, h * 0.79, (n >>> 11 & 7) * 0.025, 0, Math.PI * 2);
 }
 function addJoinedKnowledge(ctx, page, x, y, cw, ch, cols, rows, predicate) {
-  for (let py = 0; py < rows; py++) for (let px2 = 0; px2 < cols; px2++) {
-    const index = py * cols + px2;
+  for (let py = 0; py < rows; py++) for (let px3 = 0; px3 < cols; px3++) {
+    const index = py * cols + px3;
     if (!predicate(page.tiles[index])) continue;
-    addLandBlob(ctx, x + px2 * cw, y + py * ch, cw, ch, px2, py);
-    if (px2 + 1 < cols && predicate(page.tiles[index + 1])) ctx.rect(x + (px2 + 0.45) * cw, y + (py + 0.16) * ch, cw * 1.1, ch * 0.68);
-    if (py + 1 < rows && predicate(page.tiles[index + cols])) ctx.rect(x + (px2 + 0.16) * cw, y + (py + 0.45) * ch, cw * 0.68, ch * 1.1);
+    addLandBlob(ctx, x + px3 * cw, y + py * ch, cw, ch, px3, py);
+    if (px3 + 1 < cols && predicate(page.tiles[index + 1])) ctx.rect(x + (px3 + 0.45) * cw, y + (py + 0.16) * ch, cw * 1.1, ch * 0.68);
+    if (py + 1 < rows && predicate(page.tiles[index + cols])) ctx.rect(x + (px3 + 0.16) * cw, y + (py + 0.45) * ch, cw * 0.68, ch * 1.1);
   }
 }
 function addRoadShape(ctx, road, x, y, cw, ch, radius) {
   for (const key2 of road) {
-    const [px2, py] = key2.split(",").map(Number);
-    ctx.roundRect(x + px2 * cw - radius * 0.35, y + py * ch - radius * 0.35, cw + radius * 0.7, ch + radius * 0.7, radius);
+    const [px3, py] = key2.split(",").map(Number);
+    ctx.roundRect(x + px3 * cw - radius * 0.35, y + py * ch - radius * 0.35, cw + radius * 0.7, ch + radius * 0.7, radius);
   }
 }
 function drawCartographyD9(ctx, { pages, pending = [], viewport, width, height, scale = 1, level = 0, boundSite = null, boundSitesById = null, navigableSitesById = null, planned = false }) {
@@ -35523,8 +35972,8 @@ function drawCartographyD9(ctx, { pages, pending = [], viewport, width, height, 
     const x = viewport.screenX + Number(dx) * viewport.cellW, y = viewport.screenY + Number(dy) * viewport.cellH, cols = level === 0 ? 32 : 8, rows = level === 0 ? 26 : 8, cw = viewport.cellW / cols, ch = viewport.cellH / rows;
     visible3.push({ page, x, y, w: viewport.cellW, h: viewport.cellH });
     if (planned) {
-      drawPlannedCartographyV2(ctx, page, x, y, cw, ch, cols, rows, (px2, py, channel2) => {
-        const dx2 = Math.floor(px2 / cols), dy2 = Math.floor(py / rows), next = byKey.get(String(BigInt(page.chunkX) + BigInt(dx2)) + "," + String(BigInt(page.chunkY) + BigInt(dy2))), index = (py % rows + rows) % rows * cols + (px2 % cols + cols) % cols;
+      drawPlannedCartographyV2(ctx, page, x, y, cw, ch, cols, rows, (px3, py, channel2) => {
+        const dx2 = Math.floor(px3 / cols), dy2 = Math.floor(py / rows), next = byKey.get(String(BigInt(page.chunkX) + BigInt(dx2)) + "," + String(BigInt(page.chunkY) + BigInt(dy2))), index = (py % rows + rows) % rows * cols + (px3 % cols + cols) % cols;
         return next?.[channel2]?.[index] ?? (channel2 === "features" ? next?.tiles?.[index] : null) ?? "?";
       });
     } else {
@@ -35541,7 +35990,7 @@ function drawCartographyD9(ctx, { pages, pending = [], viewport, width, height, 
     }
     if (level === 0) {
       const road = /* @__PURE__ */ new Set();
-      for (let py = 0; py < rows; py++) for (let px2 = 0; px2 < cols; px2++) if (page.tiles[py * cols + px2] === "p") road.add(px2 + "," + py);
+      for (let py = 0; py < rows; py++) for (let px3 = 0; px3 < cols; px3++) if (page.tiles[py * cols + px3] === "p") road.add(px3 + "," + py);
       if (road.size && !planned) {
         const unit12 = Math.min(cw, ch);
         ctx.beginPath();
@@ -37149,8 +37598,8 @@ function outdoorLightClipV1(space, light) {
   const rectangles = (space.visual?.blockers ?? []).filter(solid).map((b) => ({ x: b.x * t, y: b.y * t, w: b.width * t, h: b.height * t })).filter((b) => b.x <= x + radius && b.x + b.w >= x - radius && b.y <= y + radius && b.y + b.h >= y - radius).sort((a, b) => Math.hypot(a.x + a.w * 0.5 - x, a.y + a.h * 0.5 - y) - Math.hypot(b.x + b.w * 0.5 - x, b.y + b.h * 0.5 - y) || a.x - b.x || a.y - b.y).slice(0, DAY_NIGHT_LIMITS.outdoorLightBlockers);
   const facing2 = { south: [0, Math.PI], north: [-Math.PI, 0], east: [-Math.PI / 2, Math.PI / 2], west: [Math.PI / 2, Math.PI * 1.5] }[light.facing], start = facing2?.[0] ?? -Math.PI, end = facing2?.[1] ?? Math.PI, angles = [];
   for (let i = 0; i <= 64; i++) angles.push(start + (end - start) * i / 64);
-  for (const b of rectangles) for (const [px2, py] of [[b.x, b.y], [b.x + b.w, b.y], [b.x + b.w, b.y + b.h], [b.x, b.y + b.h]]) {
-    let angle3 = Math.atan2(py - y, px2 - x);
+  for (const b of rectangles) for (const [px3, py] of [[b.x, b.y], [b.x + b.w, b.y], [b.x + b.w, b.y + b.h], [b.x, b.y + b.h]]) {
+    let angle3 = Math.atan2(py - y, px3 - x);
     while (angle3 < start) angle3 += Math.PI * 2;
     while (angle3 > end) angle3 -= Math.PI * 2;
     if (angle3 >= start && angle3 <= end && angles.length + 3 <= DAY_NIGHT_LIMITS.outdoorLightRays) angles.push(Math.max(start, angle3 - 1e-4), angle3, Math.min(end, angle3 + 1e-4));
@@ -37381,7 +37830,7 @@ function createSilhouetteShadowsV1(doc, limits = SILHOUETTE_LIMITS) {
     for (const d of r.draws) {
       const s = silhouetteFor(d.image), bottomSrc = Math.min(d.sy + d.sh, Math.max(d.sy, s.bottom * d.image.height)), y = d.dy + d.dh * (bottomSrc - d.sy) / d.sh;
       ground = Math.max(ground, apply(d.m, d.dx + d.dw / 2, y).y);
-      for (const [px2, py] of [[d.dx, d.dy], [d.dx + d.dw, d.dy]]) top = Math.min(top, apply(d.m, px2, py).y);
+      for (const [px3, py] of [[d.dx, d.dy], [d.dx + d.dw, d.dy]]) top = Math.min(top, apply(d.m, px3, py).y);
     }
     r.ground = Number.isFinite(ground) ? ground : r.base;
     maxGroundGap = Math.max(maxGroundGap, r.base - r.ground);
@@ -37559,7 +38008,7 @@ function createHeroLevelUpV3() {
     }
     return { u: active.elapsed / HERO_LEVEL_UP_V3.durationMs, fade: Math.min(1, active.elapsed / 140 + 0.08) * Math.min(1, (HERO_LEVEL_UP_V3.durationMs - active.elapsed) / 450) };
   }
-  const RINGS = [[0, 0.8, 24], [0.12, 0.8, 21], [0.24, 0.76, 18]];
+  const RINGS2 = [[0, 0.8, 24], [0.12, 0.8, 21], [0.24, 0.76, 18]];
   function ring4(ctx, u, [delay, span, radius], half) {
     const t = (u - delay) / span;
     if (t <= 0 || t >= 1) return;
@@ -37611,7 +38060,7 @@ function createHeroLevelUpV3() {
       }
     }
     ctx.restore();
-    for (const r of RINGS) ring4(ctx, u, r, "back");
+    for (const r of RINGS2) ring4(ctx, u, r, "back");
     ctx.restore();
     return true;
   }
@@ -37622,7 +38071,7 @@ function createHeroLevelUpV3() {
     ctx.save();
     ctx.translate(actor.position.x, actor.position.y);
     ctx.globalAlpha = fade;
-    for (const r of RINGS) ring4(ctx, u, r, "front");
+    for (const r of RINGS2) ring4(ctx, u, r, "front");
     for (let i = 0; i < HERO_LEVEL_UP_V3.maximumParticles; i++) {
       const angle3 = i * 2.399 + u * 3, climb = (u * 1.4 + i / HERO_LEVEL_UP_V3.maximumParticles) % 1, r = (10 + i % 5 * 6) * (1 - climb * 0.5), x = Math.cos(angle3) * r, y = 5 - climb * 150, size = 1.4 + i % 3 * 0.8;
       if (Math.sin(angle3) < 0 && climb < 0.35) continue;
@@ -37692,28 +38141,28 @@ function path2(c, points2) {
   for (const p of points2.slice(1)) c.lineTo(p.x, p.y);
   c.closePath();
 }
-function polygon15(c, points2, fill4, outline3 = true) {
+function polygon15(c, points2, fill4, outline4 = true) {
   path2(c, points2);
   c.fillStyle = fill4;
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK27;
     c.lineWidth = LINE25;
     c.stroke();
   }
 }
-function finish(c, shape2, fill4, flash, planes) {
-  shape2(c);
+function finish(c, shape3, fill4, flash, planes) {
+  shape3(c);
   c.fillStyle = color25(flash, fill4);
   c.fill();
   if (!flash && planes) {
     c.save();
-    shape2(c);
+    shape3(c);
     c.clip();
     planes();
     c.restore();
   }
-  shape2(c);
+  shape3(c);
   c.strokeStyle = INK27;
   c.lineWidth = LINE25;
   c.stroke();
@@ -38826,7 +39275,7 @@ function corrosiveGoopPointV5(pose, x, y) {
 // src/client/corrosive_sludge_body_v7.js
 var TAU39 = Math.PI * 2;
 var CORROSIVE_SLUDGE_PALETTE_V7 = Object.freeze({ ink: "#142b25", base: "#3c8e56", light: "#83b66b", wet: "#c0d995", dark: "#256249", deep: "#173f33", acid: "#b5d774", socket: "#214e3b", sclera: "#c9cf8a", iris: "#ba8b3d" });
-var P3 = CORROSIVE_SLUDGE_PALETTE_V7;
+var P4 = CORROSIVE_SLUDGE_PALETTE_V7;
 function at2(p, x, y) {
   return corrosiveGoopPointV5(p, x * p.width, y + p.top * Math.max(0, Math.min(1, -y / 86)));
 }
@@ -38879,7 +39328,7 @@ function corrosiveEyeLayoutV7(pose) {
 }
 function drawCorrosiveSludgeBodyV7(c, actor, tick, pose, flash = false) {
   corrosiveSludgePathV7(c, pose);
-  c.fillStyle = flash ? "#fff" : P3.base;
+  c.fillStyle = flash ? "#fff" : P4.base;
   c.fill();
   if (!flash) {
     c.save();
@@ -38892,7 +39341,7 @@ function drawCorrosiveSludgeBodyV7(c, actor, tick, pose, flash = false) {
     quad(c, pose, 39, 9, 56, -1);
     line3(c, pose, 64, -95);
     c.closePath();
-    fill(c, P3.dark);
+    fill(c, P4.dark);
     c.beginPath();
     move(c, pose, -30, -77);
     curve(c, pose, -47, -52, -23, -40, -35, -21);
@@ -38901,7 +39350,7 @@ function drawCorrosiveSludgeBodyV7(c, actor, tick, pose, flash = false) {
     curve(c, pose, -23, -61, -3, -66, 3, -77);
     curve(c, pose, -7, -84, -22, -82, -30, -77);
     c.closePath();
-    fill(c, P3.light);
+    fill(c, P4.light);
     c.beginPath();
     move(c, pose, -35, -9);
     curve(c, pose, -21, -16, -22, -2, -10, -3);
@@ -38910,7 +39359,7 @@ function drawCorrosiveSludgeBodyV7(c, actor, tick, pose, flash = false) {
     line3(c, pose, 56, 22);
     line3(c, pose, -57, 23);
     c.closePath();
-    fill(c, P3.deep);
+    fill(c, P4.deep);
     c.beginPath();
     move(c, pose, -43, -4);
     curve(c, pose, -34, -7, -35, 3, -23, 4);
@@ -38918,7 +39367,7 @@ function drawCorrosiveSludgeBodyV7(c, actor, tick, pose, flash = false) {
     quad(c, pose, -13, 14, -24, 9);
     curve(c, pose, -33, 12, -42, 5, -43, -4);
     c.closePath();
-    fill(c, P3.dark);
+    fill(c, P4.dark);
     c.beginPath();
     move(c, pose, 5, 0);
     curve(c, pose, 15, -10, 21, 3, 32, -2);
@@ -38926,12 +39375,12 @@ function drawCorrosiveSludgeBodyV7(c, actor, tick, pose, flash = false) {
     curve(c, pose, 41, 7, 26, 11, 20, 7);
     quad(c, pose, 13, 9, 5, 0);
     c.closePath();
-    fill(c, P3.base);
+    fill(c, P4.base);
     c.save();
     c.globalAlpha *= 0.27;
     for (const [x, y, rx, ry] of [[6, -31, 13, 19], [-23, -58, 5, 7], [25, -23, 6, 8]]) {
       const q = at2(pose, x, y);
-      ellipse2(c, q.x, q.y, rx, ry, P3.deep);
+      ellipse2(c, q.x, q.y, rx, ry, P4.deep);
     }
     c.restore();
     c.save();
@@ -38939,7 +39388,7 @@ function drawCorrosiveSludgeBodyV7(c, actor, tick, pose, flash = false) {
     for (const [x, y, r] of [[-20, -66, 3.7], [18, -56, 4.8], [-30, -15, 2.5]]) {
       const q = at2(pose, x, y);
       const swell = 1 + pose.pressure * 0.24;
-      ellipse2(c, q.x, q.y, r * swell, r * 0.78 * swell, P3.light);
+      ellipse2(c, q.x, q.y, r * swell, r * 0.78 * swell, P4.light);
     }
     c.restore();
     c.beginPath();
@@ -38948,27 +39397,27 @@ function drawCorrosiveSludgeBodyV7(c, actor, tick, pose, flash = false) {
     curve(c, pose, -14, -78, -18, -72, -21, -68);
     quad(c, pose, -25, -65, -25, -72);
     c.closePath();
-    fill(c, P3.wet);
+    fill(c, P4.wet);
     c.beginPath();
     move(c, pose, -38, -13);
     quad(c, pose, -40, -2, -29, 0);
     quad(c, pose, -37, 4, -41, -2);
     quad(c, pose, -43, -10, -38, -13);
     c.closePath();
-    fill(c, P3.light);
+    fill(c, P4.light);
     if (actor.boss?.phase === 2) {
       c.save();
       c.globalAlpha *= 0.23 + 0.08 * Math.sin(tick / 15);
       const q = at2(pose, 4, -35);
-      ellipse2(c, q.x, q.y, 16 + pose.pressure * 4, 21, P3.acid);
+      ellipse2(c, q.x, q.y, 16 + pose.pressure * 4, 21, P4.acid);
       c.restore();
     }
     for (const e of corrosiveEyeLayoutV7(pose)) {
-      ellipse2(c, e.x, e.y + 0.7, e.rx + 4, e.ry + 3, P3.dark);
+      ellipse2(c, e.x, e.y + 0.7, e.rx + 4, e.ry + 3, P4.dark);
       c.beginPath();
       c.moveTo(e.x - e.rx - 2, e.y + 2);
       c.quadraticCurveTo(e.x, e.y + e.ry + 6, e.x + e.rx + 2, e.y + 2);
-      c.strokeStyle = P3.light;
+      c.strokeStyle = P4.light;
       c.lineWidth = 1.8;
       c.lineCap = "round";
       c.stroke();
@@ -38976,7 +39425,7 @@ function drawCorrosiveSludgeBodyV7(c, actor, tick, pose, flash = false) {
     c.restore();
   }
   corrosiveSludgePathV7(c, pose);
-  c.strokeStyle = P3.ink;
+  c.strokeStyle = P4.ink;
   c.lineWidth = 1.55;
   c.lineJoin = "round";
   c.stroke();
@@ -38995,24 +39444,24 @@ function drawCorrosiveEmbeddedEyesV7(c, pose, look, open = 1, flash = false) {
       c.closePath();
     };
     lensPath();
-    c.fillStyle = flash ? "#fff" : P3.sclera;
+    c.fillStyle = flash ? "#fff" : P4.sclera;
     c.fill();
     if (!flash) {
       c.save();
       c.clip();
       const ix = look.x * rx * 0.17, iy = look.y * ry * 0.16;
       ellipse2(c, ix, iy, rx * 0.6, ry * 0.83, e.iris);
-      ellipse2(c, ix, iy, rx * 0.23, ry * 0.63, P3.ink);
+      ellipse2(c, ix, iy, rx * 0.23, ry * 0.63, P4.ink);
       ellipse2(c, ix - rx * 0.18, iy - ry * 0.29, Math.max(0.65, rx * 0.13), Math.max(0.6, ry * 0.14), "#f3eed2");
       c.restore();
       lensPath();
-      c.strokeStyle = P3.ink;
+      c.strokeStyle = P4.ink;
       c.lineWidth = 1.2;
       c.stroke();
       c.beginPath();
       c.moveTo(-rx - 1, -0.5);
       c.bezierCurveTo(-rx * 0.64, -ry * 1.03, rx * 0.48, -ry * 1.16, rx + 1, 0);
-      c.strokeStyle = P3.dark;
+      c.strokeStyle = P4.dark;
       c.lineWidth = 3 - e.depth;
       c.lineCap = "round";
       c.stroke();
@@ -39084,7 +39533,7 @@ function corrosivePseudopodGeometryV7(side, pose, tick) {
     side
   };
 }
-function outline2(c, g, close) {
+function outline3(c, g, close) {
   const { root, c1, c2, tip, rootNormal: n, tipNormal: e, capCenter, rootHalfWidth: w, tipRadius: r } = g;
   const a = shifted(root, n, w), b = shifted(capCenter, e, r), d = shifted(capCenter, e, -r), z = shifted(root, n, -w);
   c.beginPath();
@@ -39101,12 +39550,12 @@ function drawCorrosivePseudopodV7(c, side, pose, tick, flash = false) {
   c.save();
   c.lineCap = "round";
   c.lineJoin = "round";
-  outline2(c, g, true);
+  outline3(c, g, true);
   c.fillStyle = flash ? "#fff" : GEL;
   c.fill();
   if (!flash) {
     c.save();
-    outline2(c, g, true);
+    outline3(c, g, true);
     c.clip();
     const a = shifted(root, n, w * 0.47), b = shifted(capCenter, e, r * 0.45);
     c.beginPath();
@@ -39119,7 +39568,7 @@ function drawCorrosivePseudopodV7(c, side, pose, tick, flash = false) {
     c.fill();
     c.restore();
   }
-  outline2(c, g, false);
+  outline3(c, g, false);
   c.strokeStyle = INK30;
   c.lineWidth = 1.45;
   c.stroke();
@@ -39154,31 +39603,31 @@ var hash10 = (s) => {
   for (const ch of String(s)) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
   return h >>> 0;
 };
-function ellipse3(c, x, y, rx, ry, color28, outline3 = false) {
+function ellipse3(c, x, y, rx, ry, color28, outline4 = false) {
   c.beginPath();
   c.ellipse(x, y, Math.max(0.01, rx), Math.max(0.01, ry), 0, 0, TAU40);
   c.fillStyle = color28;
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK31;
     c.lineWidth = 1.26;
     c.stroke();
   }
 }
-function fill2(c, color28, outline3 = false) {
+function fill2(c, color28, outline4 = false) {
   c.fillStyle = color28;
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK31;
     c.lineWidth = 1.26;
     c.lineJoin = "round";
     c.stroke();
   }
 }
-function fillSludge(c, color28, outline3 = false) {
+function fillSludge(c, color28, outline4 = false) {
   c.fillStyle = color28;
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = CORROSIVE_SLUDGE_PALETTE_V7.ink;
     c.lineWidth = 1.26;
     c.lineJoin = "round";
@@ -39564,21 +40013,21 @@ function unit6(x, y) {
   const d = Math.hypot(x, y) || 1;
   return point8(x / d, y / d);
 }
-function ellipse4(c, x, y, rx, ry, fill4, outline3 = true, line13 = 1.26) {
+function ellipse4(c, x, y, rx, ry, fill4, outline4 = true, line13 = 1.26) {
   c.beginPath();
   c.ellipse(x, y, Math.max(0.01, rx), Math.max(0.01, ry), 0, 0, TAU41);
   c.fillStyle = fill4;
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK32;
     c.lineWidth = line13;
     c.stroke();
   }
 }
-function fill3(c, color28, outline3 = true, line13 = 1.26) {
+function fill3(c, color28, outline4 = true, line13 = 1.26) {
   c.fillStyle = color28;
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK32;
     c.lineWidth = line13;
     c.lineJoin = "round";
@@ -39716,8 +40165,8 @@ function drawCorrosiveAbomination(c, actor, tick, flash = false, { gelOpacity = 
 function irregularPool(c, x, y, r, seed2) {
   c.beginPath();
   for (let i = 0; i <= 20; i++) {
-    const a = i / 20 * TAU41, f = 0.91 + 0.055 * Math.sin(i * 2.2 + seed2) + 0.03 * Math.cos(i * 4.3 + seed2), px2 = x + Math.cos(a) * r * f, py = y + Math.sin(a) * r * f;
-    i ? c.lineTo(px2, py) : c.moveTo(px2, py);
+    const a = i / 20 * TAU41, f = 0.91 + 0.055 * Math.sin(i * 2.2 + seed2) + 0.03 * Math.cos(i * 4.3 + seed2), px3 = x + Math.cos(a) * r * f, py = y + Math.sin(a) * r * f;
+    i ? c.lineTo(px3, py) : c.moveTo(px3, py);
   }
   c.closePath();
 }
@@ -39983,24 +40432,24 @@ function hash12(value2) {
   for (const ch of String(value2)) n = Math.imul(n ^ ch.charCodeAt(0), 16777619);
   return n >>> 0;
 }
-function ellipse5(c, x, y, rx, ry, color28, outline3 = false, width = 1.26) {
+function ellipse5(c, x, y, rx, ry, color28, outline4 = false, width = 1.26) {
   c.beginPath();
   c.ellipse(x, y, Math.max(1e-3, rx), Math.max(1e-3, ry), 0, 0, TAU42);
   c.fillStyle = color28;
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK33;
     c.lineWidth = width;
     c.stroke();
   }
 }
-function polygon16(c, points2, color28, outline3 = true, width = 1.26) {
+function polygon16(c, points2, color28, outline4 = true, width = 1.26) {
   c.beginPath();
   for (const [i, p] of points2.entries()) i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]);
   c.closePath();
   c.fillStyle = color28;
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK33;
     c.lineWidth = width;
     c.stroke();
@@ -40102,15 +40551,15 @@ function eye2(c, x, y, r, look, charge, flash, pulse = 0) {
   }
 }
 function core4(c, pose, flash) {
-  const sx = pose.scaleX, sy = pose.scaleY, shape2 = (points2) => points2.map(([x, y]) => [x * sx, y * sy]);
-  polygon16(c, shape2([[0, -33], [32, 0], [4, 37], [-28, 3]]), flash ? "#fff" : DARK5);
-  polygon16(c, shape2([[0, -34], [29, 0], [0, 34], [-29, 0]]), flash ? "#fff" : STONE2);
+  const sx = pose.scaleX, sy = pose.scaleY, shape3 = (points2) => points2.map(([x, y]) => [x * sx, y * sy]);
+  polygon16(c, shape3([[0, -33], [32, 0], [4, 37], [-28, 3]]), flash ? "#fff" : DARK5);
+  polygon16(c, shape3([[0, -34], [29, 0], [0, 34], [-29, 0]]), flash ? "#fff" : STONE2);
   if (!flash) {
-    polygon16(c, shape2([[0, -34], [-4, -4], [-29, 0]]), LIGHT6, false);
-    polygon16(c, shape2([[0, -34], [29, 0], [22, -1], [0, -25]]), "#382047", false);
-    polygon16(c, shape2([[-29, 0], [-4, -4], [0, 34]]), "#321b45", false);
-    polygon16(c, shape2([[0, 34], [29, 0], [21, 1], [0, 25]]), "#0a0612", false);
-    polygon16(c, shape2([[0, -25], [21, 0], [0, 25], [-21, 0]]), "#190b29", false);
+    polygon16(c, shape3([[0, -34], [-4, -4], [-29, 0]]), LIGHT6, false);
+    polygon16(c, shape3([[0, -34], [29, 0], [22, -1], [0, -25]]), "#382047", false);
+    polygon16(c, shape3([[-29, 0], [-4, -4], [0, 34]]), "#321b45", false);
+    polygon16(c, shape3([[0, 34], [29, 0], [21, 1], [0, 25]]), "#0a0612", false);
+    polygon16(c, shape3([[0, -25], [21, 0], [0, 25], [-21, 0]]), "#190b29", false);
     c.strokeStyle = "#785895";
     c.lineWidth = 0.85;
     c.beginPath();
@@ -40480,20 +40929,20 @@ function drawVoidBossHud(c, canvas, model) {
 
 // src/client/chronos_assembly_v6.js
 var TAU43 = Math.PI * 2;
-var P4 = Object.freeze({ ink: "#14202a", navy: "#263a4b", deep: "#182632", brass: "#ad7737", gold: "#d9b05a", light: "#f7dc94", ivory: "#eee4c9", shade: "#baab87", cyan: "#9fe4e1", blue: "#508c9b" });
+var P5 = Object.freeze({ ink: "#14202a", navy: "#263a4b", deep: "#182632", brass: "#ad7737", gold: "#d9b05a", light: "#f7dc94", ivory: "#eee4c9", shade: "#baab87", cyan: "#9fe4e1", blue: "#508c9b" });
 var clamp33 = (x) => Math.max(0, Math.min(1, x));
 var smooth21 = (x) => {
   x = clamp33(x);
   return x * x * (3 - 2 * x);
 };
-function shape(c, pts, fill4, width = 1.65) {
+function shape2(c, pts, fill4, width = 1.65) {
   c.beginPath();
   pts.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y));
   c.closePath();
   c.fillStyle = fill4;
   c.fill();
   if (width) {
-    c.strokeStyle = P4.ink;
+    c.strokeStyle = P5.ink;
     c.lineWidth = width;
     c.stroke();
   }
@@ -40504,7 +40953,7 @@ function oval(c, x, y, rx, ry, fill4, width = 0) {
   c.fillStyle = fill4;
   c.fill();
   if (width) {
-    c.strokeStyle = P4.ink;
+    c.strokeStyle = P5.ink;
     c.lineWidth = width;
     c.stroke();
   }
@@ -40526,7 +40975,7 @@ function sector(c, r, inner, a, b, fill4, width = 1.5) {
     const q = a + (b - a) * i / 8;
     pts.push([Math.cos(q) * inner, Math.sin(q) * inner]);
   }
-  shape(c, pts, fill4, width);
+  shape2(c, pts, fill4, width);
 }
 function chronosAssemblyStateV6(actor, tick, pose) {
   const seed2 = (actor.visualSeed ?? 0) % 997;
@@ -40555,8 +41004,8 @@ function clockHand(c, angle3, length, color28, wide = 2.8) {
   c.save();
   c.translate(0, 10);
   c.rotate(angle3);
-  shape(c, [[-7, -2.1], [-3, -wide], [length - 9, -wide], [length - 5, -wide - 2], [length, 0], [length - 5, wide + 2], [length - 9, wide], [0, wide]], color28, 1.3);
-  line4(c, [[3, -0.8], [length - 7, -0.8]], P4.light, 0.8);
+  shape2(c, [[-7, -2.1], [-3, -wide], [length - 9, -wide], [length - 5, -wide - 2], [length, 0], [length - 5, wide + 2], [length - 9, wide], [0, wide]], color28, 1.3);
+  line4(c, [[3, -0.8], [length - 7, -0.8]], P5.light, 0.8);
   c.restore();
 }
 function smallGear(c, x, y, r, angle3, flash) {
@@ -40568,13 +41017,13 @@ function smallGear(c, x, y, r, angle3, flash) {
     const a = i * TAU43 / 32, rr = i % 4 < 2 ? r : r - 3;
     pts.push([Math.cos(a) * rr, Math.sin(a) * rr]);
   }
-  shape(c, pts, flash ? "#fff" : P4.brass, 1.4);
-  oval(c, 0, 0, r * 0.53, r * 0.53, flash ? "#fff" : P4.deep, 1.1);
-  oval(c, 0, 0, 3, 3, flash ? "#fff" : P4.gold, 1);
+  shape2(c, pts, flash ? "#fff" : P5.brass, 1.4);
+  oval(c, 0, 0, r * 0.53, r * 0.53, flash ? "#fff" : P5.deep, 1.1);
+  oval(c, 0, 0, 3, 3, flash ? "#fff" : P5.gold, 1);
   c.restore();
 }
 function halo(c, s, flash) {
-  const f = flash ? "#fff" : P4.gold;
+  const f = flash ? "#fff" : P5.gold;
   c.save();
   c.rotate(s.haloAngle);
   for (let i = 0; i < 3; i++) {
@@ -40582,10 +41031,10 @@ function halo(c, s, flash) {
     c.save();
     c.translate(Math.cos(a + 0.75) * sep, Math.sin(a + 0.75) * sep);
     sector(c, 52, 44, a, a + 1.65, f);
-    sector(c, 49, 46, a + 0.08, a + 1.54, flash ? "#fff" : P4.brass, 0);
+    sector(c, 49, 46, a + 0.08, a + 1.54, flash ? "#fff" : P5.brass, 0);
     for (let j = 0; j < 4; j++) {
       const q = a + 0.2 + j * 0.38;
-      line4(c, [[Math.cos(q) * 45, Math.sin(q) * 45], [Math.cos(q) * 49, Math.sin(q) * 49]], flash ? "#fff" : P4.light, 1.4);
+      line4(c, [[Math.cos(q) * 45, Math.sin(q) * 45], [Math.cos(q) * 49, Math.sin(q) * 49]], flash ? "#fff" : P5.light, 1.4);
     }
     c.restore();
   }
@@ -40597,51 +41046,51 @@ function mantle(c, s, flash) {
     c.save();
     c.translate(side * (sep + 1), lift);
     c.scale(side, 1);
-    shape(c, [[23, -21], [39, -13], [43, 11], [37, 31], [30, 37], [27, 12]], flash ? "#fff" : P4.navy);
-    shape(c, [[24, -23], [38, -18], [42, -7], [32, -5]], flash ? "#fff" : P4.gold);
-    shape(c, [[30, 20], [40, 16], [40, 30], [32, 40], [27, 35]], flash ? "#fff" : P4.brass);
-    line4(c, [[34, -12], [37, 9], [33, 26]], flash ? "#fff" : P4.blue, 1.4);
+    shape2(c, [[23, -21], [39, -13], [43, 11], [37, 31], [30, 37], [27, 12]], flash ? "#fff" : P5.navy);
+    shape2(c, [[24, -23], [38, -18], [42, -7], [32, -5]], flash ? "#fff" : P5.gold);
+    shape2(c, [[30, 20], [40, 16], [40, 30], [32, 40], [27, 35]], flash ? "#fff" : P5.brass);
+    line4(c, [[34, -12], [37, 9], [33, 26]], flash ? "#fff" : P5.blue, 1.4);
     c.restore();
   }
   c.save();
   c.translate(0, 38);
   c.rotate(s.pendulum);
-  line4(c, [[0, 0], [0, 17]], flash ? "#fff" : P4.brass, 3);
-  shape(c, [[0, 12], [6, 19], [0, 28], [-6, 19]], flash ? "#fff" : P4.gold, 1.4);
-  oval(c, 0, 19, 1.7, 3, flash ? "#fff" : P4.cyan);
+  line4(c, [[0, 0], [0, 17]], flash ? "#fff" : P5.brass, 3);
+  shape2(c, [[0, 12], [6, 19], [0, 28], [-6, 19]], flash ? "#fff" : P5.gold, 1.4);
+  oval(c, 0, 19, 1.7, 3, flash ? "#fff" : P5.cyan);
   c.restore();
 }
 function face2(c, s, pose, flash) {
   const white = flash ? "#fff" : null;
-  shape(c, [[-18, -35], [0, -41], [18, -35], [26, -17], [24, 24], [12, 36], [0, 41], [-12, 36], [-24, 24], [-26, -17]], white ?? P4.brass, 1.9);
-  shape(c, [[-16, -32], [0, -37], [16, -32], [22, -15], [20, 23], [10, 32], [0, 36], [-10, 32], [-20, 23], [-22, -15]], white ?? P4.deep, 1.2);
+  shape2(c, [[-18, -35], [0, -41], [18, -35], [26, -17], [24, 24], [12, 36], [0, 41], [-12, 36], [-24, 24], [-26, -17]], white ?? P5.brass, 1.9);
+  shape2(c, [[-16, -32], [0, -37], [16, -32], [22, -15], [20, 23], [10, 32], [0, 36], [-10, 32], [-20, 23], [-22, -15]], white ?? P5.deep, 1.2);
   if (s.phaseTwo) {
-    oval(c, 0, 5, 16, 27, white ?? P4.blue);
-    oval(c, 0, 5, 10, 22, white ?? P4.cyan);
+    oval(c, 0, 5, 16, 27, white ?? P5.blue);
+    oval(c, 0, 5, 10, 22, white ?? P5.cyan);
   }
   for (const side of [-1, 1]) {
     c.save();
     c.translate(side * (s.phaseTwo ? 3 : 0), 0);
     c.scale(side, 1);
-    shape(c, [[1, -31], [14, -28], [18, -13], [15, 19], [7, 29], [1, 31], [4, 13], [1, 3], [4, -12]], white ?? P4.ivory, 1.15);
-    shape(c, [[14, -26], [18, -13], [15, 19], [7, 29], [9, 10], [7, -6]], white ?? P4.shade, 0);
-    line4(c, [[10, -23], [7, -17], [10, -11]], white ?? P4.brass, 0.9);
+    shape2(c, [[1, -31], [14, -28], [18, -13], [15, 19], [7, 29], [1, 31], [4, 13], [1, 3], [4, -12]], white ?? P5.ivory, 1.15);
+    shape2(c, [[14, -26], [18, -13], [15, 19], [7, 29], [9, 10], [7, -6]], white ?? P5.shade, 0);
+    line4(c, [[10, -23], [7, -17], [10, -11]], white ?? P5.brass, 0.9);
     c.restore();
   }
   for (let i = 0; i < 12; i++) {
     const a = i * TAU43 / 12 - Math.PI / 2;
-    line4(c, [[Math.cos(a) * 19, Math.sin(a) * 28], [Math.cos(a) * (i % 3 ? 21 : 22), Math.sin(a) * (i % 3 ? 30 : 32)]], white ?? P4.gold, i % 3 ? 1 : 1.5);
+    line4(c, [[Math.cos(a) * 19, Math.sin(a) * 28], [Math.cos(a) * (i % 3 ? 21 : 22), Math.sin(a) * (i % 3 ? 30 : 32)]], white ?? P5.gold, i % 3 ? 1 : 1.5);
   }
   for (const side of [-1, 1]) {
     const x = side * 8;
-    shape(c, [[x - 5, -10], [x + 5, -10], [x + 4, -3], [x, -1], [x - 4, -3]], white ?? P4.deep, 1);
-    oval(c, x, -6, 2.7, 3.3, white ?? P4.cyan);
+    shape2(c, [[x - 5, -10], [x + 5, -10], [x + 4, -3], [x, -1], [x - 4, -3]], white ?? P5.deep, 1);
+    oval(c, x, -6, 2.7, 3.3, white ?? P5.cyan);
     oval(c, x - 0.4, -7, 1.1, 1.5, "#fff");
   }
-  clockHand(c, pose.hourAngle, 19, white ?? P4.brass, 2.6);
-  clockHand(c, pose.minuteAngle, 34, white ?? P4.gold, 2.5);
-  oval(c, 0, 10, 4.5, 4.5, white ?? P4.deep, 1);
-  oval(c, 0, 10, 2.3, 2.3, white ?? P4.cyan);
+  clockHand(c, pose.hourAngle, 19, white ?? P5.brass, 2.6);
+  clockHand(c, pose.minuteAngle, 34, white ?? P5.gold, 2.5);
+  oval(c, 0, 10, 4.5, 4.5, white ?? P5.deep, 1);
+  oval(c, 0, 10, 2.3, 2.3, white ?? P5.cyan);
 }
 function drawChronosAssemblyV6(c, actor, tick, pose, flash = false) {
   const s = chronosAssemblyStateV6(actor, tick, pose);
@@ -40669,7 +41118,7 @@ function drawChronosAssemblyV6(c, actor, tick, pose, flash = false) {
 // src/client/chronos_time_effects_v6.js
 var TAU44 = Math.PI * 2;
 var INK34 = "#172531";
-var GOLD2 = "#dca942";
+var GOLD3 = "#dca942";
 var IVORY = "#fff1c7";
 var CYAN2 = "#9edfe3";
 var BRASS = "#93612d";
@@ -40716,7 +41165,7 @@ function marks(c, radius, alpha2 = 1, reverse = false) {
   for (let i = 0; i < 12; i++) {
     const a = i * TAU44 / 12 - Math.PI / 2, major = i % 3 === 0;
     const r1 = radius - (major ? 11 : 6), r2 = radius - 3;
-    line5(c, [[Math.cos(a) * r1, Math.sin(a) * r1], [Math.cos(a) * r2, Math.sin(a) * r2]], major ? IVORY : GOLD2, major ? 2.4 : 1.4);
+    line5(c, [[Math.cos(a) * r1, Math.sin(a) * r1], [Math.cos(a) * r2, Math.sin(a) * r2]], major ? IVORY : GOLD3, major ? 2.4 : 1.4);
     if (major && reverse) {
       c.save();
       c.translate(Math.cos(a) * (radius - 17), Math.sin(a) * (radius - 17));
@@ -40774,7 +41223,7 @@ function drawChronosSlamGroundV6(c, row2, tick, pending) {
   if (pending) {
     disk2(c, r, "#bf8c2b15");
     ring(c, r, INK34, 3.3);
-    ring(c, r, GOLD2, 1.6);
+    ring(c, r, GOLD3, 1.6);
     marks(c, r, 0.56 + 0.44 * q);
     ring(c, r - 3, IVORY, 2.1, -Math.PI / 2, -Math.PI / 2 + TAU44 * q);
     c.save();
@@ -40783,7 +41232,7 @@ function drawChronosSlamGroundV6(c, row2, tick, pending) {
     line5(c, [[Math.cos(angle3) * r * -0.13, Math.sin(angle3) * r * -0.13], [Math.cos(angle3) * r * 0.58, Math.sin(angle3) * r * 0.58]], IVORY, 2.6);
     const other = angle3 * 0.25;
     line5(c, [[0, 0], [Math.cos(other) * r * 0.31, Math.sin(other) * r * 0.31]], CYAN2, 2);
-    disk2(c, 4, GOLD2);
+    disk2(c, 4, GOLD3);
     c.restore();
     if (q >= 0.72) {
       c.save();
@@ -40804,8 +41253,8 @@ function drawChronosSlamGroundV6(c, row2, tick, pending) {
       const split = 2.5 + 6 * ease6(age / 16), inner = Math.max(2, wave - 12);
       c.translate(0, -split);
       c.globalAlpha *= 0.68;
-      ring(c, Math.max(1, wave - split - 1), i % 3 === 0 ? IVORY : GOLD2, i % 3 === 0 ? 3.2 : 2.1, 0.09, TAU44 / 12 - 0.09);
-      line5(c, [[inner, 0], [Math.max(inner, wave - split - 1), 0]], GOLD2, 1.2);
+      ring(c, Math.max(1, wave - split - 1), i % 3 === 0 ? IVORY : GOLD3, i % 3 === 0 ? 3.2 : 2.1, 0.09, TAU44 / 12 - 0.09);
+      line5(c, [[inner, 0], [Math.max(inner, wave - split - 1), 0]], GOLD3, 1.2);
       c.restore();
     }
     if (age < 15) {
@@ -40822,7 +41271,7 @@ function drawChronosSlamGroundV6(c, row2, tick, pending) {
 function spectralHand(c, length, alpha2 = 1) {
   c.save();
   c.globalAlpha *= alpha2;
-  polygon17(c, [[-20, -5], [-11, -9], [-3, -5], [length - 27, -5], [length - 23, -11], [length, 0], [length - 23, 11], [length - 27, 5], [-3, 5], [-11, 9], [-20, 5]], GOLD2, 2.5);
+  polygon17(c, [[-20, -5], [-11, -9], [-3, -5], [length - 27, -5], [length - 23, -11], [length, 0], [length - 23, 11], [length - 27, 5], [-3, 5], [-11, 9], [-20, 5]], GOLD3, 2.5);
   polygon17(c, [[8, -2], [length - 27, -2], [length - 23, -7], [length - 5, 0], [length - 23, 4], [length - 27, 1], [8, 1]], IVORY, 0.6);
   line5(c, [[11, 3], [length - 28, 3]], BRASS, 1.4);
   disk2(c, 8.5, INK34);
@@ -40838,19 +41287,19 @@ function drawChronosSlamForceV6(c, row2, tick, pending) {
   c.translate(center3.x, center3.y);
   if (pending) {
     c.globalAlpha *= gather * 0.91;
-    const px2 = -Math.cos(handAngle) * handLength;
+    const px3 = -Math.cos(handAngle) * handLength;
     const py = tipY - Math.sin(handAngle) * handLength;
     if (pose.q < 0.58) {
       for (const [delta3, alpha2] of [[-0.14, 0.12], [-0.27, 0.065]]) {
         c.save();
-        c.translate(px2, py);
+        c.translate(px3, py);
         c.rotate(handAngle + delta3);
         spectralHand(c, handLength, alpha2);
         c.restore();
       }
     }
     c.save();
-    c.translate(px2, py);
+    c.translate(px3, py);
     c.rotate(handAngle);
     spectralHand(c, handLength);
     c.restore();
@@ -40879,7 +41328,7 @@ function drawChronosSlamForceV6(c, row2, tick, pending) {
       c.globalAlpha *= fade;
       c.translate(Math.cos(a) * radial, Math.sin(a) * radial * 0.74 - height);
       c.rotate(a + age * (i % 2 ? -0.046 : 0.046));
-      polygon17(c, [[-5, -3], [3, -4], [6, 1], [1, 4], [-5, 2]], i % 3 === 0 ? CYAN2 : GOLD2, 1.1);
+      polygon17(c, [[-5, -3], [3, -4], [6, 1], [1, 4], [-5, 2]], i % 3 === 0 ? CYAN2 : GOLD3, 1.1);
       line5(c, [[-3, -2], [2, -2]], IVORY, 0.9);
       c.restore();
     }
@@ -40898,14 +41347,14 @@ function drawChronosFieldV6(c, row2, tick, pending) {
   c.globalAlpha *= fade;
   disk2(c, radius, "#43677d22");
   ring(c, radius, INK34, 3.1);
-  ring(c, radius, GOLD2, 1.3);
+  ring(c, radius, GOLD3, 1.3);
   marks(c, radius, pending ? ease6(q / 0.72) : 0.83, true);
   c.save();
   c.globalAlpha *= 0.35 + 0.32 * q;
   const angle3 = -Math.PI / 2 + (pending ? TAU44 * ease6(q) : TAU44 - age * 0.012);
   line5(c, [[0, 0], [Math.cos(angle3) * radius * 0.57, Math.sin(angle3) * radius * 0.57]], IVORY, 2);
   line5(c, [[0, 0], [Math.cos(angle3 * 0.24) * radius * 0.34, Math.sin(angle3 * 0.24) * radius * 0.34]], CYAN2, 1.7);
-  disk2(c, 3, GOLD2);
+  disk2(c, 3, GOLD3);
   c.restore();
   if (pending) ring(c, radius - 3, IVORY, 1.7, -Math.PI / 2, -Math.PI / 2 + TAU44 * q);
   else {
@@ -40931,7 +41380,7 @@ function drawChronosFieldV6(c, row2, tick, pending) {
 var ID3 = "chronos_arbitrator";
 var TAU45 = Math.PI * 2;
 var INK35 = "#11151a";
-var GOLD3 = "#e2ac43";
+var GOLD4 = "#e2ac43";
 var PALE4 = "#ffe8ad";
 var clamp35 = (x) => Math.max(0, Math.min(1, x));
 var ease7 = (x) => {
@@ -40953,12 +41402,12 @@ function fraction2(value2, max) {
   const power = exponent(a.n) + exponent(b.d) - exponent(a.d) - exponent(b.n);
   return clamp35(head32(a.n) * head32(b.d) / (head32(a.d) * head32(b.n)) * 10 ** Math.max(-330, Math.min(330, power)));
 }
-function ellipse6(c, x, y, rx, ry, fill4, outline3 = false, width = 1.26) {
+function ellipse6(c, x, y, rx, ry, fill4, outline4 = false, width = 1.26) {
   c.beginPath();
   c.ellipse(x, y, Math.max(1e-3, rx), Math.max(1e-3, ry), 0, 0, TAU45);
   c.fillStyle = fill4;
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK35;
     c.lineWidth = width;
     c.stroke();
@@ -40971,13 +41420,13 @@ function circle3(c, x, y, r, color82, width = 1) {
   c.lineWidth = width;
   c.stroke();
 }
-function polygon18(c, points2, fill4, outline3 = true, width = 1.26) {
+function polygon18(c, points2, fill4, outline4 = true, width = 1.26) {
   c.beginPath();
   for (const [i, [x, y]] of points2.entries()) i ? c.lineTo(x, y) : c.moveTo(x, y);
   c.closePath();
   c.fillStyle = fill4;
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK35;
     c.lineWidth = width;
     c.stroke();
@@ -41145,7 +41594,7 @@ function teleportGround(c, row2, tick) {
   c.globalAlpha *= 1 - ease7(age / 18);
   for (const [at3, reverse] of [[origin, false], [p, true]]) {
     const r = reverse ? 12 + 34 * ease7(age / 18) : 42 - 28 * ease7(age / 18);
-    circle3(c, at3.x, at3.y, r, GOLD3, 1.3);
+    circle3(c, at3.x, at3.y, r, GOLD4, 1.3);
     for (let i = 0; i < 8; i++) {
       const a = i * TAU45 / 8;
       c.strokeStyle = PALE4;
@@ -41194,7 +41643,7 @@ function rewindWard(c, row2, tick, actor2) {
       c.beginPath();
       c.arc(0, 0, radius, a + 0.027, a + 0.027 + span * health);
       c.stroke();
-      c.strokeStyle = GOLD3;
+      c.strokeStyle = GOLD4;
       c.lineWidth = 2.5;
       c.stroke();
       c.strokeStyle = PALE4;
@@ -41252,7 +41701,7 @@ function rewindWard(c, row2, tick, actor2) {
       c.save();
       c.translate(Math.cos(a) * r, Math.sin(a) * r + fall);
       c.rotate(a + Math.PI / 2 + age * (i % 2 ? 0.024 : -0.024));
-      polygon18(c, [[-5, -1.5], [5, -1], [4, 2], [-4, 1.6]], GOLD3, true, 0.8);
+      polygon18(c, [[-5, -1.5], [5, -1], [4, 2], [-4, 1.6]], GOLD4, true, 0.8);
       c.restore();
     }
   } else {
@@ -41347,12 +41796,12 @@ function fraction3(value2, max) {
   const power = exponent(a.n) + exponent(b.d) - exponent(a.d) - exponent(b.n);
   return clamp36(head32(a.n) * head32(b.d) / (head32(a.d) * head32(b.n)) * 10 ** Math.max(-330, Math.min(330, power)));
 }
-function ellipse7(c, x, y, rx, ry, fill4, outline3 = false, width = 1.26) {
+function ellipse7(c, x, y, rx, ry, fill4, outline4 = false, width = 1.26) {
   c.beginPath();
   c.ellipse(x, y, Math.max(1e-3, rx), Math.max(1e-3, ry), 0, 0, TAU46);
   c.fillStyle = fill4;
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK36;
     c.lineWidth = width;
     c.stroke();
@@ -41370,11 +41819,11 @@ function path3(c, points2, close = false) {
   for (const [i, p] of points2.entries()) i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]);
   if (close) c.closePath();
 }
-function polygon19(c, points2, fill4, outline3 = true, width = 1.26) {
+function polygon19(c, points2, fill4, outline4 = true, width = 1.26) {
   path3(c, points2, true);
   c.fillStyle = fill4;
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK36;
     c.lineWidth = width;
     c.stroke();
@@ -41501,8 +41950,8 @@ function eye3(c, pose, size, flash) {
   ellipse7(c, -r * 0.22, -r * 0.32, r * 0.93, r * 0.72, pose.decoy ? "#bbffff" : "#66e8bd");
   ellipse7(c, r * 0.33, r * 0.68, r * 0.95, r * 0.55, pose.decoy ? "#30989f" : "#0a827c");
   c.restore();
-  const px2 = look.x * 1.5 * size, py = look.y * 1.1 * size, w = (1.7 - 0.5 * heat) * size, h = (6.4 + heat * 0.8) * size;
-  polygon19(c, [[px2, py - h], [px2 + w, py - h * 0.45], [px2 + w, py + h * 0.55], [px2, py + h], [px2 - w, py + h * 0.45], [px2 - w, py - h * 0.55]], release > 0.3 ? PALE5 : PINK2, true, 0.75);
+  const px3 = look.x * 1.5 * size, py = look.y * 1.1 * size, w = (1.7 - 0.5 * heat) * size, h = (6.4 + heat * 0.8) * size;
+  polygon19(c, [[px3, py - h], [px3 + w, py - h * 0.45], [px3 + w, py + h * 0.55], [px3, py + h], [px3 - w, py + h * 0.45], [px3 - w, py - h * 0.55]], release > 0.3 ? PALE5 : PINK2, true, 0.75);
   ellipse7(c, -r * 0.34, -r * 0.45, 1.8 * size, 1.2 * size, PALE5);
   if (release > 0) {
     c.save();
@@ -41781,30 +42230,30 @@ function barrierWard(c, row2, tick, model2) {
   c.save();
   c.translate(p.x + pose.bodyX, p.y + pose.bodyY);
   c.globalAlpha *= fade;
-  const shape2 = [[-38, -31], [0, -45], [39, -29], [43, 24], [0, 40], [-42, 25]];
+  const shape3 = [[-38, -31], [0, -45], [39, -29], [43, 24], [0, 40], [-42, 25]];
   if (active) {
-    polygon19(c, shape2, "#2fbfd60b", false);
-    wire(c, shape2, CYAN3, 1.35, true, true);
+    polygon19(c, shape3, "#2fbfd60b", false);
+    wire(c, shape3, CYAN3, 1.35, true, true);
     for (let i = 0; i < 6; i++) {
-      const a = shape2[i], b = shape2[(i + 1) % 6];
+      const a = shape3[i], b = shape3[(i + 1) % 6];
       wire(c, [[mix20(a[0], b[0], 0.08), mix20(a[1], b[1], 0.08)], [mix20(a[0], b[0], 0.08 + 0.28 * charge), mix20(a[1], b[1], 0.08 + 0.28 * charge)]], i % 2 ? HOT : PALE5, 0.8, false);
     }
     if (hitAge >= 0 && hitAge < 8) {
       c.save();
       c.globalAlpha *= 1 - ease8(hitAge / 8);
-      wire(c, shape2, PALE5, 2, false, true);
+      wire(c, shape3, PALE5, 2, false, true);
       c.restore();
     }
   } else if (row2.outcome === "broken") {
     for (let i = 0; i < 6; i++) {
-      const a = shape2[i], b = shape2[(i + 1) % 6], cx = (a[0] + b[0]) / 2, cy = (a[1] + b[1]) / 2, d = unit9(cx, cy), travel = age * 0.7, fall = age * age * 0.018;
+      const a = shape3[i], b = shape3[(i + 1) % 6], cx = (a[0] + b[0]) / 2, cy = (a[1] + b[1]) / 2, d = unit9(cx, cy), travel = age * 0.7, fall = age * age * 0.018;
       c.save();
       c.translate(cx + d.x * travel, cy + d.y * travel + fall);
       c.rotate((i % 2 ? 1 : -1) * age * 0.025);
       wire(c, [[a[0] - cx, a[1] - cy], [b[0] - cx, b[1] - cy]], i % 2 ? CYAN3 : HOT, 1.15, true);
       c.restore();
     }
-  } else wire(c, shape2, CYAN3, 1, false, true);
+  } else wire(c, shape3, CYAN3, 1, false, true);
   c.restore();
 }
 function tether(c, row2, decoy, tick, model2) {
@@ -41939,11 +42388,11 @@ function path4(c, points2, closed = false) {
   for (const [i, p] of points2.entries()) i ? c.lineTo(...p) : c.moveTo(...p);
   if (closed) c.closePath();
 }
-function polygon20(c, p, fill4, outline3 = true, width = 1.3) {
+function polygon20(c, p, fill4, outline4 = true, width = 1.3) {
   path4(c, p, true);
   c.fillStyle = fill4;
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK37;
     c.lineWidth = width;
     c.stroke();
@@ -41955,12 +42404,12 @@ function line6(c, p, color82, width = 1) {
   c.lineWidth = width;
   c.stroke();
 }
-function ellipse8(c, x, y, rx, ry, fill4, outline3 = false, width = 1.3) {
+function ellipse8(c, x, y, rx, ry, fill4, outline4 = false, width = 1.3) {
   c.beginPath();
   c.ellipse(x, y, Math.max(0.01, rx), Math.max(0.01, ry), 0, 0, TAU47);
   c.fillStyle = fill4;
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK37;
     c.lineWidth = width;
     c.stroke();
@@ -42495,10 +42944,10 @@ function fireBurst(c, row2, tick, model2) {
   c.globalAlpha = fade * 0.8;
   glow4(c, 0, 0, 15 + 8 * burn, "#ffd070aa");
   for (let i = 0; i < 14; i++) {
-    const t = (age * 0.049 + i * 0.077) % 1, a = (i % 7 - 3) / 3, px2 = length * t, py = dy * t + a * width * t * 0.77 + Math.sin(t * 9 + i) * 4;
+    const t = (age * 0.049 + i * 0.077) % 1, a = (i % 7 - 3) / 3, px3 = length * t, py = dy * t + a * width * t * 0.77 + Math.sin(t * 9 + i) * 4;
     c.beginPath();
-    c.moveTo(px2 - 5, py);
-    c.quadraticCurveTo(px2, py - 2, px2 + 4, py + a * 2);
+    c.moveTo(px3 - 5, py);
+    c.quadraticCurveTo(px3, py - 2, px3 + 4, py + a * 2);
     c.strokeStyle = i % 3 ? "#ffd475" : "#fff3c8";
     c.lineWidth = 0.8;
     c.stroke();
@@ -42552,7 +43001,7 @@ var DARK6 = "#191c23";
 var EDGE = "#59504b";
 var RED = "#ba442a";
 var FIRE3 = "#f27632";
-var GOLD4 = "#ffc36b";
+var GOLD5 = "#ffc36b";
 var HOT2 = "#fff0b5";
 var clamp38 = (x) => Math.max(0, Math.min(1, x));
 var ease10 = (x) => {
@@ -42633,7 +43082,7 @@ function tongue(c, x, y, width, height, tick, seed2 = 0, heat = 1) {
   c.quadraticCurveTo(-width * 0.33, -height * 0.14, width * 0.03, -height * 0.3);
   c.quadraticCurveTo(width * 0.25, -height * 0.14, width * 0.2, 0);
   c.closePath();
-  c.fillStyle = heat > 0.6 ? HOT2 : GOLD4;
+  c.fillStyle = heat > 0.6 ? HOT2 : GOLD5;
   c.fill();
   c.restore();
 }
@@ -42763,7 +43212,7 @@ function stagHead(c, p, tick, flash) {
     polygon21(c, [[5, 7], [15, 11], [24, 10], [24, 13], [15, 14], [6, 10]], "#935439", null);
     line7(c, [[-6, -3], [-1, -0.7], [3, -4], [6, -1]], FIRE3, 1.1);
     ellipse9(c, 9, -2, 3.7, 2.25, "#0e1118");
-    ellipse9(c, 10, -2, 2.35, 1.65, p.pulse > 0.15 ? HOT2 : GOLD4);
+    ellipse9(c, 10, -2, 2.35, 1.65, p.pulse > 0.15 ? HOT2 : GOLD5);
     ellipse9(c, 11, -2.3, 0.7, 0.8, "#fff8d8");
     polygon21(c, [[22, 3], [28, 5], [28, 11], [24, 12], [21, 9]], "#10141b", null);
     line7(c, [[13, 9], [20, 11], [26, 10]], "#0c1017", 0.8);
@@ -42800,7 +43249,7 @@ function stagBody(c, p, tick, flash) {
     polygon21(c, [[-32, -35], [-17, -38], [-7, -32], [-10, -23], [-25, -26]], "#343238", null);
     polygon21(c, [[5, -49], [22, -43], [26, -30], [17, -21], [4, -22], [9, -34]], "#181c25", null);
     line7(c, [[-28, -43], [-20, -42], [-18, -33], [-12, -29]], "#c36235", 1.3);
-    line7(c, [[-15, -49], [-11, -40], [-3, -35], [-4, -28]], p.heat > 0.6 ? GOLD4 : FIRE3, 1.4);
+    line7(c, [[-15, -49], [-11, -40], [-3, -35], [-4, -28]], p.heat > 0.6 ? GOLD5 : FIRE3, 1.4);
     line7(c, [[-10, -40], [-2, -44], [4, -42]], RED, 1);
     line7(c, [[-30, -42], [-25, -46], [-20, -47]], "#84715c", 0.8);
   }
@@ -42809,7 +43258,7 @@ function stagBody(c, p, tick, flash) {
     polygon21(c, [[16, -49], [20, -64], [26, -69], [31, -66], [30, -55], [25, -46], [23, -30], [16, -26]], "#121720", null);
     polygon21(c, [[21, -60], [27, -65], [28, -55], [24, -46], [22, -32], [18, -29], [18, -43]], RED, null);
     polygon21(c, [[23, -57], [26, -59], [25, -49], [22, -40], [20, -33], [21, -48]], FIRE3, null);
-    polygon21(c, [[23, -52], [25, -55], [23, -44], [21, -40]], p.pulse > 0.1 ? HOT2 : GOLD4, null);
+    polygon21(c, [[23, -52], [25, -55], [23, -44], [21, -40]], p.pulse > 0.1 ? HOT2 : GOLD5, null);
     for (const [y, x] of [[-58, 17], [-49, 14], [-39, 13], [-29, 14]]) polygon21(c, [[x, y], [x + 8, y + 3], [x + 10, y + 6], [x + 1, y + 4]], "#5b4b42", null);
     line7(c, [[30, -67], [33, -59], [28, -43], [26, -28]], "#9c7048", 1);
   }
@@ -42843,7 +43292,7 @@ function drawCinderhart(c, actor2, tick, flash = false) {
       const u = (tick + i * 17) % 77 / 77, x = 9 + i * 5 + Math.sin(u * 8 + i) * 3, y = -48 - i * 2 - u * 27;
       c.save();
       c.globalAlpha *= Math.sin(u * Math.PI) * (0.28 + p.heat * 0.5);
-      ellipse9(c, x, y, 0.7 + i % 2 * 0.3, 1.1, i % 2 ? GOLD4 : FIRE3);
+      ellipse9(c, x, y, 0.7 + i % 2 * 0.3, 1.1, i % 2 ? GOLD5 : FIRE3);
       c.restore();
     }
     if (p.callRelease > 0) {
@@ -42851,7 +43300,7 @@ function drawCinderhart(c, actor2, tick, flash = false) {
         const u = 1 - p.callRelease, a = i * 2.3999, r = 18 + u * 48;
         c.save();
         c.globalAlpha *= p.callRelease * 0.8;
-        ellipse9(c, Math.cos(a) * r, -34 + Math.sin(a) * r * 0.4 - u * 18, 1.2, 1.7, i % 2 ? FIRE3 : GOLD4);
+        ellipse9(c, Math.cos(a) * r, -34 + Math.sin(a) * r * 0.4 - u * 18, 1.2, 1.7, i % 2 ? FIRE3 : GOLD5);
         c.restore();
       }
     }
@@ -42900,7 +43349,7 @@ function drawCinderBunny(c, actor2, tick, flash = false) {
   c.translate(8, -10);
   c.rotate(-earLean + 0.24);
   ellipse9(c, 0, -7, 2.8, 9.6, flash ? HOT2 : COAL, INK38, 0.8);
-  if (!flash) ellipse9(c, 0.1, -7.2, 1.15, 6.8, GOLD4);
+  if (!flash) ellipse9(c, 0.1, -7.2, 1.15, 6.8, GOLD5);
   c.restore();
   ellipse9(c, 7, -7.5, 6.3, 5.8, flash ? HOT2 : COAL, INK38, 1);
   if (!flash) {
@@ -42919,7 +43368,7 @@ function drawCinderBunny(c, actor2, tick, flash = false) {
       const a = i * 2.3999, r = age * 0.52;
       c.save();
       c.globalAlpha *= 1 - clamp38(age / 24);
-      ellipse9(c, Math.cos(a) * r, -6 + Math.sin(a) * r * 0.6 - age * 0.35, 0.8, 1.1, i % 2 ? GOLD4 : FIRE3);
+      ellipse9(c, Math.cos(a) * r, -6 + Math.sin(a) * r * 0.6 - age * 0.35, 0.8, 1.1, i % 2 ? GOLD5 : FIRE3);
       c.restore();
     }
   }
@@ -42944,7 +43393,7 @@ function fireGround(c, row2, tick) {
   for (let i = 0; i < 4; i++) {
     const a = i * 2.3999 + seed2, rr = r * (0.33 + i * 0.11), x = Math.cos(a) * rr, y = Math.sin(a) * rr;
     c.globalAlpha = fade * (active ? 0.75 : ignite * 0.5);
-    line7(c, [[x - 2, y], [x + 1, y - 1], [x + 2, y + 1]], active ? FIRE3 : GOLD4, 0.8);
+    line7(c, [[x - 2, y], [x + 1, y - 1], [x + 2, y + 1]], active ? FIRE3 : GOLD5, 0.8);
   }
   c.restore();
 }
@@ -42958,7 +43407,7 @@ function fireTongues(c, row2, tick) {
     c.globalAlpha *= ignite * 0.6;
     for (let i = 0; i < 3; i++) {
       const a = i * 2.3999 + seed2;
-      ellipse9(c, Math.cos(a) * 8, Math.sin(a) * 5 - 1, 1, 1.6, GOLD4);
+      ellipse9(c, Math.cos(a) * 8, Math.sin(a) * 5 - 1, 1, 1.6, GOLD5);
     }
     c.restore();
     return;
@@ -42972,7 +43421,7 @@ function fireTongues(c, row2, tick) {
     const u = (tick + seed2 * 3 + i * 19) % 53 / 53;
     c.save();
     c.globalAlpha *= (1 - u) * fade * 0.6;
-    ellipse9(c, Math.sin(u * 8 + seed2 + i) * 9, -5 - u * (h + 7), 0.65, 0.95, i ? GOLD4 : FIRE3);
+    ellipse9(c, Math.sin(u * 8 + seed2 + i) * 9, -5 - u * (h + 7), 0.65, 0.95, i ? GOLD5 : FIRE3);
     c.restore();
   }
   c.restore();
@@ -42988,7 +43437,7 @@ function landingWarning(c, row2, tick) {
   c.setLineDash([]);
   for (let i = 0; i < 3; i++) {
     const a = i * TAU48 / 3 - Math.PI / 2, rr = r * (0.5 + 0.32 * (1 - u));
-    line7(c, [[Math.cos(a) * rr, Math.sin(a) * rr], [Math.cos(a) * (rr + 3), Math.sin(a) * (rr + 3)]], GOLD4, 0.8);
+    line7(c, [[Math.cos(a) * rr, Math.sin(a) * rr], [Math.cos(a) * (rr + 3), Math.sin(a) * (rr + 3)]], GOLD5, 0.8);
   }
   c.restore();
 }
@@ -43000,7 +43449,7 @@ function rushWarning(c, row2, tick) {
   c.lineCap = "round";
   line7(c, [[from.x, from.y], [end.x, end.y]], `rgba(212,79,35,${0.06 + 0.07 * q})`, r * 2);
   const dx = end.x - from.x, dy = end.y - from.y, n = Math.hypot(dx, dy) || 1, nx = -dy / n, ny = dx / n;
-  for (const s of [-1, 1]) line7(c, [[from.x + nx * r * s, from.y + ny * r * s], [end.x + nx * r * s, end.y + ny * r * s]], q > 0.84 ? GOLD4 : "#e7894b", 0.85);
+  for (const s of [-1, 1]) line7(c, [[from.x + nx * r * s, from.y + ny * r * s], [end.x + nx * r * s, end.y + ny * r * s]], q > 0.84 ? GOLD5 : "#e7894b", 0.85);
   c.beginPath();
   c.arc(end.x, end.y, r, Math.atan2(dy, dx) - Math.PI / 2, Math.atan2(dy, dx) + Math.PI / 2);
   c.strokeStyle = "#e7894b";
@@ -43011,7 +43460,7 @@ function rushWarning(c, row2, tick) {
   c.rotate(a);
   for (let i = 0; i < 3; i++) {
     c.globalAlpha = 0.2 + 0.6 * q;
-    line7(c, [[-13 - i * 17, -5], [-7 - i * 17, 0], [-13 - i * 17, 5]], GOLD4, 1);
+    line7(c, [[-13 - i * 17, -5], [-7 - i * 17, 0], [-13 - i * 17, 5]], GOLD5, 1);
   }
   c.restore();
 }
@@ -43025,7 +43474,7 @@ function callWarning(c, row2, tick) {
     c.save();
     c.translate(x, y);
     c.rotate(a);
-    line7(c, [[-2, -4], [1, 0], [-2, 4]], GOLD4, 1);
+    line7(c, [[-2, -4], [1, 0], [-2, 4]], GOLD5, 1);
     c.restore();
   }
   c.restore();
@@ -43071,7 +43520,7 @@ function rushWake(c, actor2, tick) {
     const u = (tick + i * 5) % 23 / 23, spread = (i % 3 - 1) * 8, x = -nx * (10 + u * 33) - ny * spread, y = -ny * (10 + u * 33) + nx * spread - 2 - u * 7;
     c.save();
     c.globalAlpha *= (1 - u) * 0.65;
-    line7(c, [[x - nx * 5, y - ny * 5], [x, y]], i % 2 ? GOLD4 : "#ba593a", 1.1);
+    line7(c, [[x - nx * 5, y - ny * 5], [x, y]], i % 2 ? GOLD5 : "#ba593a", 1.1);
     c.restore();
   }
   c.restore();
@@ -43496,7 +43945,7 @@ var drawArchivedBossSummon = drawExtendedSummonActor;
 // src/client/marcus_molten_presentation_v5.js
 var TAU50 = Math.PI * 2;
 var INK39 = "#34251b";
-var GOLD5 = "#e5ae39";
+var GOLD6 = "#e5ae39";
 var PALE7 = "#fff0ad";
 var clamp39 = (v) => Math.max(0, Math.min(1, v));
 var smooth22 = (v) => {
@@ -43530,7 +43979,7 @@ function closedCurve(c, points2) {
   }
   c.closePath();
 }
-function bead(c, x, y, size, age, fill4 = GOLD5) {
+function bead(c, x, y, size, age, fill4 = GOLD6) {
   const wobble = Math.sin(age * 0.09 + x * 0.11) * 0.12;
   ellipse10(c, x, y, size * (1 + wobble), size * (0.7 - wobble), INK39);
   ellipse10(c, x, y - size * 0.18, size * 0.81, size * 0.56, fill4);
@@ -43696,7 +44145,7 @@ function drawMarcusMoltenWardV5(c, row2, tick, { center: center3, ratio, front: 
       c.beginPath();
       c.moveTo(x - 2.3, y - 2);
       c.bezierCurveTo(x - 2.6, y + length, x + 2.7, y + length, x + 2.3, y - 2);
-      c.fillStyle = GOLD5;
+      c.fillStyle = GOLD6;
       c.fill();
       c.beginPath();
       c.moveTo(x - 0.55, y);
@@ -43721,7 +44170,7 @@ var CLOTH = "#261a36";
 var FOLD = "#493253";
 var SHADOW2 = "#160f25";
 var DEEP = "#090711";
-var GOLD6 = "#edbf43";
+var GOLD7 = "#edbf43";
 var LIGHT8 = "#ffe094";
 var PALE8 = "#fff1c3";
 var BRASS2 = "#b07729";
@@ -43764,11 +44213,11 @@ function path6(c, points2, close = false) {
   for (const [i, p] of points2.entries()) i ? c.lineTo(...p) : c.moveTo(...p);
   if (close) c.closePath();
 }
-function polygon22(c, points2, fill4, outline3 = true, width = 1.26) {
+function polygon22(c, points2, fill4, outline4 = true, width = 1.26) {
   path6(c, points2, true);
   c.fillStyle = fill4;
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK40;
     c.lineWidth = width;
     c.stroke();
@@ -43780,12 +44229,12 @@ function line8(c, points2, stroke3, width = 1) {
   c.lineWidth = width;
   c.stroke();
 }
-function ellipse11(c, x, y, rx, ry, fill4, outline3 = false, width = 1.26) {
+function ellipse11(c, x, y, rx, ry, fill4, outline4 = false, width = 1.26) {
   c.beginPath();
   c.ellipse(x, y, Math.max(1e-3, rx), Math.max(1e-3, ry), 0, 0, TAU51);
   c.fillStyle = fill4;
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK40;
     c.lineWidth = width;
     c.stroke();
@@ -43809,7 +44258,7 @@ function coin2(c, x, y, r = 3.7, angle22 = 0, flat2 = 0.69, flash = false) {
   c.translate(x, y);
   c.rotate(angle22);
   ellipse11(c, 0, 0.8, r, r * flat2, flash ? "#fff" : BRASS2, true, 1);
-  ellipse11(c, -0.25, -0.4, r * 0.87, r * flat2 * 0.87, flash ? "#fff" : GOLD6);
+  ellipse11(c, -0.25, -0.4, r * 0.87, r * flat2 * 0.87, flash ? "#fff" : GOLD7);
   if (!flash) {
     ellipse11(c, -r * 0.22, -r * flat2 * 0.25, r * 0.5, r * flat2 * 0.31, LIGHT8);
     c.beginPath();
@@ -44000,7 +44449,7 @@ function cloak(c, pose, flash) {
     line8(c, [[7, -21], [10, -10], [8, -2]], "#4d3455", 0.65);
   }
   if (!flash && pose.charge > 0) glow5(c, 0, -24, 9 + pose.charge * 3, `rgba(245,184,58,${0.17 + pose.charge * 0.22})`);
-  ellipse11(c, 0, -24, 3.3, 3.5, fill4(GOLD6), true);
+  ellipse11(c, 0, -24, 3.3, 3.5, fill4(GOLD7), true);
   if (!flash) {
     polygon22(c, [[-1.8, -25.4], [0.1, -27], [1.4, -24.5], [0, -23]], PALE8, false);
     ellipse11(c, 0.4, -23.2, 1.1, 1.2, BRASS2);
@@ -44066,7 +44515,7 @@ function drawMarcusTheOutlaw(c, actor2, tick, flash = false) {
   c.restore();
   return true;
 }
-function warning2(c, p, r, q, color82 = GOLD6) {
+function warning2(c, p, r, q, color82 = GOLD7) {
   ellipse11(c, p.x, p.y, r, r, color82 === VIOLET2 ? "#9f64d20b" : "#e3b5430b");
   ring3(c, p.x, p.y, r, INK40, 2.5);
   ring3(c, p.x, p.y, r, color82, 1.05);
@@ -44172,7 +44621,7 @@ function drawMarcusGround(c, model2, tick) {
     c.globalAlpha *= 1 - ease11(age / 22);
     ring3(c, row2.position.x, row2.position.y, 12 + 24 * ease11(age / 22), MOLTEN, 1.2);
     if (Math.hypot(row2.originPosition.x - row2.position.x, row2.originPosition.y - row2.position.y) > 1) {
-      ring3(c, row2.originPosition.x, row2.originPosition.y, 27 * (1 - ease11(age / 22)) + 3, GOLD6, 1);
+      ring3(c, row2.originPosition.x, row2.originPosition.y, 27 * (1 - ease11(age / 22)) + 3, GOLD7, 1);
     }
     c.restore();
   }
@@ -44194,7 +44643,7 @@ function rope(c, from, to, bend = 0, alpha2 = 1) {
   c.strokeStyle = INK40;
   c.lineWidth = 3.1;
   c.stroke();
-  c.strokeStyle = GOLD6;
+  c.strokeStyle = GOLD7;
   c.lineWidth = 1.7;
   c.stroke();
   c.strokeStyle = PALE8;
@@ -44212,7 +44661,7 @@ function ropeLoop(c, p, rx, ry, angle22 = 0, alpha2 = 1) {
   c.strokeStyle = INK40;
   c.lineWidth = 2.9;
   c.stroke();
-  c.strokeStyle = GOLD6;
+  c.strokeStyle = GOLD7;
   c.lineWidth = 1.5;
   c.stroke();
   c.strokeStyle = PALE8;
@@ -44284,7 +44733,7 @@ function activeDash(c, row2, tick) {
     c.save();
     c.globalAlpha *= 0.3;
     c.translate(p.x, p.y - 9);
-    polygon22(c, [[-18, 4], [-12, -22], [0, -48], [12, -22], [18, 4], [0, 9]], GOLD6, false);
+    polygon22(c, [[-18, 4], [-12, -22], [0, -48], [12, -22], [18, 4], [0, 9]], GOLD7, false);
     c.restore();
   }
   c.restore();
@@ -44306,7 +44755,7 @@ function dashEcho(c, row2, tick) {
     c.globalAlpha *= fade * 0.55;
     for (let j = 1; j <= 6; j++) {
       const q = j / 7, x = mix23(p.x, to.x, q), y = mix23(p.y, to.y, q) - 5;
-      line8(c, [[x - 2, y], [x + 2, y]], j % 2 ? GOLD6 : MOLTEN, 0.9);
+      line8(c, [[x - 2, y], [x + 2, y]], j % 2 ? GOLD7 : MOLTEN, 0.9);
     }
     c.restore();
   }
@@ -44518,7 +44967,7 @@ function marcusDepthItems(model2, tick, viewport = null) {
 var ID8 = "gilded_vault_keeper";
 var TAU52 = Math.PI * 2;
 var INK41 = "#11151a";
-var GOLD7 = "#e9b747";
+var GOLD8 = "#e9b747";
 var LIGHT9 = "#f9d976";
 var PALE9 = "#fff0b4";
 var BRASS3 = "#ad752d";
@@ -44560,12 +45009,12 @@ function boundedAmount(value2, limit) {
   const a = asCombatAmount(value2 ?? 0), n = BigInt(a.n) / BigInt(a.d);
   return Number(n > BigInt(limit) ? BigInt(limit) : n);
 }
-function ellipse12(c, x, y, rx, ry, fill4, outline3 = false, width = 1.26) {
+function ellipse12(c, x, y, rx, ry, fill4, outline4 = false, width = 1.26) {
   c.beginPath();
   c.ellipse(x, y, Math.max(1e-3, rx), Math.max(1e-3, ry), 0, 0, TAU52);
   c.fillStyle = fill4;
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK41;
     c.lineWidth = width;
     c.stroke();
@@ -44576,11 +45025,11 @@ function path7(c, points2, close = false) {
   for (const [i, [x, y]] of points2.entries()) i ? c.lineTo(x, y) : c.moveTo(x, y);
   if (close) c.closePath();
 }
-function polygon23(c, points2, fill4, outline3 = true, width = 1.26) {
+function polygon23(c, points2, fill4, outline4 = true, width = 1.26) {
   path7(c, points2, true);
   c.fillStyle = fill4;
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK41;
     c.lineWidth = width;
     c.stroke();
@@ -44694,7 +45143,7 @@ function coin3(c, x, y, rx, ry, angle22 = 0, flash = false) {
   c.translate(x, y);
   c.rotate(angle22);
   ellipse12(c, 0, 0.8, rx, ry, color26(flash, BRASS3), true, 1);
-  ellipse12(c, -0.35, -0.4, rx * 0.87, ry * 0.83, color26(flash, GOLD7));
+  ellipse12(c, -0.35, -0.4, rx * 0.87, ry * 0.83, color26(flash, GOLD8));
   if (!flash) {
     ellipse12(c, -rx * 0.2, -ry * 0.27, rx * 0.55, ry * 0.36, LIGHT9);
     c.strokeStyle = "#9b6729";
@@ -44719,7 +45168,7 @@ function wing3(c, side, pose, flash) {
   const p = [[0, 0], [side * 33, -28], [side * 29, -5], [side * 37, 18], [side * 15, 11], [side * 5, 20]];
   polygon23(c, p, color26(flash, BRASS3));
   if (!flash) {
-    polygon23(c, [[side * 4, -1], [side * 29, -24], [side * 24, -5], [side * 11, 9]], GOLD7, false);
+    polygon23(c, [[side * 4, -1], [side * 29, -24], [side * 24, -5], [side * 11, 9]], GOLD8, false);
     polygon23(c, [[side * 8, 1], [side * 26, -17], [side * 22, -5]], LIGHT9, false);
     polygon23(c, [[side * 26, 0], [side * 33, 14], [side * 17, 8]], DARK_GOLD, false);
     line9(c, [[side * 5, 1], [side * 12, 8], [side * 29, 13]], "#e2b356", 0.8);
@@ -44744,7 +45193,7 @@ function ingotLimb(c, a, b, width, flash) {
   const d = unit11(b.x - a.x, b.y - a.y), n = point26(-d.y, d.x), p = [[a.x + n.x * width, a.y + n.y * width], [b.x + n.x * width * 0.85, b.y + n.y * width * 0.85], [b.x - n.x * width * 0.85, b.y - n.y * width * 0.85], [a.x - n.x * width, a.y - n.y * width]];
   polygon23(c, p, color26(flash, BRASS3));
   if (!flash) {
-    polygon23(c, [p[0], p[1], [b.x, b.y], [a.x, a.y]], GOLD7, false);
+    polygon23(c, [p[0], p[1], [b.x, b.y], [a.x, a.y]], GOLD8, false);
     line9(c, [[a.x + n.x * (width - 0.9), a.y + n.y * (width - 0.9)], [b.x + n.x * (width * 0.85 - 0.9), b.y + n.y * (width * 0.85 - 0.9)]], LIGHT9, 0.8);
   }
 }
@@ -44759,7 +45208,7 @@ function arm3(c, g, flash, handOnly = false) {
   c.save();
   c.translate(g.hand.x, g.hand.y);
   c.rotate(g.angle);
-  polygon23(c, [[-5, -3], [4.5, -3], [5.5, 4], [3, 7], [-3, 7], [-5.5, 3]], color26(flash, GOLD7));
+  polygon23(c, [[-5, -3], [4.5, -3], [5.5, 4], [3, 7], [-3, 7], [-5.5, 3]], color26(flash, GOLD8));
   for (const s of [-1, 1]) polygon23(c, [[s * 3, 3], [s * 5.2, 5], [s * 5.3, 11], [s * 1.2, 14], [s * 2.8, 7]], color26(flash, s < 0 ? LIGHT9 : BRASS3));
   if (!flash) polygon23(c, [[-3.8, -1], [-0.8, -1], [-0.8, 4], [-3.2, 4]], PALE9, false);
   c.restore();
@@ -44768,7 +45217,7 @@ function crown2(c, flash, slack) {
   c.save();
   c.translate(0, -25);
   c.rotate(-slack * 0.13);
-  polygon23(c, [[-12, 1], [-16, -11], [-7, -7], [0, -19], [7, -7], [16, -11], [12, 1]], color26(flash, GOLD7));
+  polygon23(c, [[-12, 1], [-16, -11], [-7, -7], [0, -19], [7, -7], [16, -11], [12, 1]], color26(flash, GOLD8));
   if (!flash) {
     polygon23(c, [[-12, 1], [-9, -3], [9, -3], [12, 1]], BRASS3, false);
     polygon23(c, [[-11, -8], [-7, -5], [0, -15], [-1, -6], [-4, -3]], PALE9, false);
@@ -44808,7 +45257,7 @@ function chest(c, pose, flash) {
       for (const y of [3, 17]) ellipse12(c, x + 3, y, 1.15, 1.15, BRASS3, true, 0.6);
     }
   }
-  for (const x of [-16, -8, 0, 8, 16]) polygon23(c, [[x - 2, -0.8], [x, -5.6], [x + 2, -0.8]], color26(flash, GOLD7), true, 0.75);
+  for (const x of [-16, -8, 0, 8, 16]) polygon23(c, [[x - 2, -0.8], [x, -5.6], [x + 2, -0.8]], color26(flash, GOLD8), true, 0.75);
   for (const side of [-1, 1]) {
     const top = side < 0 ? upperA : upperB;
     ingotLimb(c, point26(side * 23, -1), point26(top.x, top.y + 1), 1.5, flash);
@@ -44838,10 +45287,10 @@ function chest(c, pose, flash) {
     c.restore();
   }
   for (const x of [-23, 17]) {
-    polygon23(c, [[x, -18], [x + 5, -21], [x + 5, 0], [x, 0]], color26(flash, GOLD7));
+    polygon23(c, [[x, -18], [x + 5, -21], [x + 5, 0], [x, 0]], color26(flash, GOLD8));
     if (!flash) line9(c, [[x + 1, -17], [x + 1, -2]], PALE9, 0.8);
   }
-  polygon23(c, [[-4, -7], [4, -7], [4, 4], [-4, 4]], color26(flash, GOLD7));
+  polygon23(c, [[-4, -7], [4, -7], [4, 4], [-4, 4]], color26(flash, GOLD8));
   if (!flash) {
     ellipse12(c, 0, -2, 1.5, 1.5, INK41);
     polygon23(c, [[-0.8, -2], [0.8, -2], [1, 1], [-1, 1]], INK41, false);
@@ -44882,19 +45331,19 @@ function sealMark(c, x, y, r, alpha2 = 1) {
   c.save();
   c.translate(x, y);
   c.globalAlpha *= alpha2;
-  circle6(c, 0, 0, r, GOLD7, 1);
+  circle6(c, 0, 0, r, GOLD8, 1);
   circle6(c, 0, 0, r * 0.78, "#b4803466", 0.7);
-  c.fillStyle = GOLD7;
+  c.fillStyle = GOLD8;
   c.beginPath();
   c.arc(0, -r * 0.11, r * 0.17, 0, TAU52);
   c.fill();
-  polygon23(c, [[-r * 0.08, -r * 0.03], [r * 0.08, -r * 0.03], [r * 0.14, r * 0.26], [-r * 0.14, r * 0.26]], GOLD7, false);
+  polygon23(c, [[-r * 0.08, -r * 0.03], [r * 0.08, -r * 0.03], [r * 0.14, r * 0.26], [-r * 0.14, r * 0.26]], GOLD8, false);
   c.restore();
 }
 function warning3(c, p, r, q) {
   ellipse12(c, p.x, p.y, r, r, "#d6a13a0d");
   circle6(c, p.x, p.y, r, INK41, 2.5);
-  circle6(c, p.x, p.y, r, GOLD7, 1.05);
+  circle6(c, p.x, p.y, r, GOLD8, 1.05);
   c.strokeStyle = PALE9;
   c.lineWidth = 1.3;
   c.beginPath();
@@ -44927,7 +45376,7 @@ function impactGround2(c, row2, tick) {
       circle6(c, p.x, p.y, r, PALE9, 1.45);
       c.restore();
     }
-    circle6(c, p.x, p.y, 5 + (r - 5) * ease12(age / 15), GOLD7, 1.15);
+    circle6(c, p.x, p.y, 5 + (r - 5) * ease12(age / 15), GOLD8, 1.15);
     for (let i = 0; i < 6; i++) {
       const a = i * TAU52 / 6 + 0.35, dist3 = 8 + (r - 8) * ease12(age / 18);
       line9(c, [[p.x + Math.cos(a) * (dist3 - 4), p.y + Math.sin(a) * (dist3 - 4)], [p.x + Math.cos(a) * dist3, p.y + Math.sin(a) * dist3]], i % 2 ? LIGHT9 : BRASS3, 0.8);
@@ -44975,7 +45424,7 @@ function stamp(c, row2, tick, pending) {
   c.globalAlpha *= fade;
   c.translate(p.x, p.y - height);
   ellipse12(c, 0, 4, 31 * build, ry, color26(false, DARK_GOLD), true);
-  ellipse12(c, 0, -2, 31 * build, ry, GOLD7, true);
+  ellipse12(c, 0, -2, 31 * build, ry, GOLD8, true);
   ellipse12(c, -2, -4, 25 * build, ry * 0.69, LIGHT9);
   c.save();
   c.scale(1, 0.43);
@@ -44995,7 +45444,7 @@ function goldIngot(c, x, y, scale, angle22 = 0, flash = false) {
   const p = (arr) => arr.map(([x2, y2]) => [x2 * scale, y2 * scale]);
   polygon23(c, p([[-12, -3], [6, -7], [13, -2], [13, 6], [-5, 10], [-12, 5]]), color26(flash, BRASS3));
   polygon23(c, p([[-12, -3], [6, -7], [13, -2], [-5, 3]]), color26(flash, LIGHT9));
-  polygon23(c, p([[-5, 3], [13, -2], [13, 6], [-5, 10]]), color26(flash, GOLD7));
+  polygon23(c, p([[-5, 3], [13, -2], [13, 6], [-5, 10]]), color26(flash, GOLD8));
   if (!flash) {
     line9(c, p([[-10, -3], [5, -6], [9, -3]]), PALE9, 0.8);
     line9(c, p([[-3, 5], [9, 1]]), "#c38b32", 0.7);
@@ -45047,7 +45496,7 @@ function taxWard(c, row2, tick, model2) {
     c.save();
     c.globalAlpha *= 0.22;
     path7(c, WARD, true);
-    c.strokeStyle = GOLD7;
+    c.strokeStyle = GOLD8;
     c.lineWidth = 0.8;
     c.stroke();
     c.restore();
@@ -45085,7 +45534,7 @@ function taxWard(c, row2, tick, model2) {
       c.translate(cx + d.x * move2, cy + d.y * move2 + age * age * 0.026);
       c.rotate((i % 2 ? 1 : -1) * age * 0.027);
       line9(c, [[a[0] - cx, a[1] - cy], [b[0] - cx, b[1] - cy]], INK41, 4.6);
-      line9(c, [[a[0] - cx, a[1] - cy], [b[0] - cx, b[1] - cy]], GOLD7, 2.4);
+      line9(c, [[a[0] - cx, a[1] - cy], [b[0] - cx, b[1] - cy]], GOLD8, 2.4);
       c.restore();
     }
   } else {
@@ -46105,7 +46554,7 @@ var COAL2 = "#292b37";
 var STONE3 = "#555561";
 var RUST = "#a04f35";
 var LAVA = "#f6662c";
-var GOLD8 = "#ffbd53";
+var GOLD9 = "#ffbd53";
 var WHITE = "#fff0b0";
 var clamp42 = (v) => Math.max(0, Math.min(1, v));
 var lerp7 = (a, b, p) => a + (b - a) * p;
@@ -46205,7 +46654,7 @@ function spokes(c, seed2, r, progress8) {
     const pts = [[Math.cos(angle3) * 7, Math.sin(angle3) * 7], [Math.cos(angle3 + j) * length * 0.45, Math.sin(angle3 + j) * length * 0.45], [Math.cos(angle3 - j) * length * progress8, Math.sin(angle3 - j) * length * progress8]];
     line11(c, pts, "#713c36", 5);
     line11(c, pts, LAVA, 2.4);
-    line11(c, pts, progress8 > 0.8 ? GOLD8 : "#ee8140", 0.8);
+    line11(c, pts, progress8 > 0.8 ? GOLD9 : "#ee8140", 0.8);
     if (i % 2 === 0) {
       const m = pts[1];
       line11(c, [m, [m[0] + Math.cos(angle3 + 0.8) * 11, m[1] + Math.sin(angle3 + 0.8) * 11]], LAVA, 1.3);
@@ -46241,14 +46690,14 @@ function moltenTarget(c, p, r, progress8, seed2) {
     const a = i * TAU54 / 8;
     c.save();
     c.rotate(a);
-    polygon24(c, [[r - 9, -2], [r - 1, -4], [r, 0], [r - 1, 4], [r - 9, 2], [r - 5, 0]], progress8 > i / 9 ? GOLD8 : RUST, INK42, 1);
+    polygon24(c, [[r - 9, -2], [r - 1, -4], [r, 0], [r - 1, 4], [r - 9, 2], [r - 5, 0]], progress8 > i / 9 ? GOLD9 : RUST, INK42, 1);
     c.restore();
   }
   for (let i = 0; i < 12; i++) {
     const a = i * TAU54 / 12 + 0.03;
     c.beginPath();
     c.arc(0, 0, r - 5, a, a + TAU54 / 12 - 0.13);
-    c.strokeStyle = i / 12 < progress8 ? GOLD8 : "#824e3f";
+    c.strokeStyle = i / 12 < progress8 ? GOLD9 : "#824e3f";
     c.lineWidth = 2.2;
     c.stroke();
   }
@@ -46271,7 +46720,7 @@ function ventMouthGround(c, p, q, tick) {
   c.fill();
   c.beginPath();
   c.ellipse(-2, -2, 4 + q * 3, 2.5 + q, 0, 0, TAU54);
-  c.fillStyle = GOLD8;
+  c.fillStyle = GOLD9;
   c.fill();
   for (let i = 0; i < 5; i++) {
     const a = i * TAU54 / 5, x = Math.cos(a) * 15, y = Math.sin(a) * 9;
@@ -46310,7 +46759,7 @@ function ventFissure(c, v, q, erupt, tick) {
       c.save();
       c.globalAlpha *= cooling;
       line11(c, path9, LAVA, 3.5 + cooling * 3);
-      line11(c, path9, GOLD8, 1 + cooling * 2.4);
+      line11(c, path9, GOLD9, 1 + cooling * 2.4);
       if (age < 18) {
         c.globalAlpha *= 1 - ease14(age / 18);
         line11(c, path9, WHITE, 1.2);
@@ -46319,7 +46768,7 @@ function ventFissure(c, v, q, erupt, tick) {
     } else line11(c, path9, "#fa7239", 1.4 + q * 2);
     for (let d = 19; d < opened - 4; d += 25) {
       const sign2 = Math.sin(d + seed2) > 0 ? 1 : -1, y = Math.sin(d * 0.19 + seed2) * 4;
-      line11(c, [[d, y], [d + 4, sign2 * 7], [d + 11, sign2 * 11]], erupt ? cooling > 0.5 ? GOLD8 : "#754935" : q > 0.8 ? GOLD8 : "#c47443", erupt ? 1.7 : 1);
+      line11(c, [[d, y], [d + 4, sign2 * 7], [d + 11, sign2 * 11]], erupt ? cooling > 0.5 ? GOLD9 : "#754935" : q > 0.8 ? GOLD9 : "#c47443", erupt ? 1.7 : 1);
     }
     if (!erupt) for (const side of [-1, 1]) for (let d = 0; d < a.length; d += 19) line11(c, [[d, side * 11.5], [Math.min(a.length, d + 10), side * 11.5]], q > 0.78 ? "#ffd36e" : "#9d6347", q > 0.78 ? 1.3 : 0.9);
     c.restore();
@@ -46354,7 +46803,7 @@ function slamGround4(c, s, tick) {
   disc2(c, 0, 0, 55 * (1 - burst * 0.45), "#ff923b" + (age < 4 ? "7a" : "28"));
   spokes(c, 17, 62, 1);
   c.globalAlpha = fade * (1 - clamp42(age / 21));
-  c.strokeStyle = GOLD8;
+  c.strokeStyle = GOLD9;
   c.lineWidth = 4 * (1 - burst) + 1;
   c.beginPath();
   c.arc(0, 0, 12 + 52 * Math.sin(burst * Math.PI * 0.5), 0, TAU54);
@@ -46383,7 +46832,7 @@ function drawBrimstoneAttackGround(c, model, tick) {
       for (let i = -1; i <= 1; i++) {
         c.save();
         c.rotate(i * 0.56);
-        polygon24(c, [[37, -1.8], [49, -3.6], [45, 0], [49, 3.6], [37, 1.8], [41, 0]], q > 0.55 ? GOLD8 : RUST, null);
+        polygon24(c, [[37, -1.8], [49, -3.6], [45, 0], [49, 3.6], [37, 1.8], [41, 0]], q > 0.55 ? GOLD9 : RUST, null);
         c.restore();
       }
       c.restore();
@@ -46428,7 +46877,7 @@ function lavaJet(c, p, height, width, age, seed2, opacity = 1) {
   c.quadraticCurveTo(width * 0.25, -height * 0.36, width * 0.23, -height * 0.2);
   c.lineTo(width * 0.25, -1);
   c.closePath();
-  c.fillStyle = GOLD8;
+  c.fillStyle = GOLD9;
   c.fill();
   polygon24(c, [[-width * 0.1, -1], [0, -height * 0.23], [width * 0.12, -1]], WHITE, null);
   c.restore();
@@ -46437,7 +46886,7 @@ function ember(c, p, seed2, age, life = 30) {
   const q = clamp42(age / life), a = seed2 * 2.39996, x = p.x + Math.cos(a) * (7 + q * 25), y = p.y - Math.sin(q * Math.PI) * (17 + seed2 % 4 * 6) - q * 8, r = 1.5 + seed2 % 3 * 0.25;
   c.save();
   c.globalAlpha *= Math.sin(q * Math.PI);
-  polygon24(c, [[x - r, y], [x, y - r * 2], [x + r, y], [x, y + r]], seed2 % 2 ? GOLD8 : LAVA, null);
+  polygon24(c, [[x - r, y], [x, y - r * 2], [x + r, y], [x, y + r]], seed2 % 2 ? GOLD9 : LAVA, null);
   c.restore();
 }
 function brimstoneEffectDepthItems(model, tick, viewport = null) {
@@ -46520,7 +46969,7 @@ function brimstoneEffectDepthItems(model, tick, viewport = null) {
         c.strokeStyle = INK42;
         c.lineWidth = 1.26;
         c.stroke();
-        line11(c, [[-12, -4], [5, -3], [13, 0]], GOLD8, 2.2);
+        line11(c, [[-12, -4], [5, -3], [13, 0]], GOLD9, 2.2);
         c.restore();
       });
     }
@@ -47159,9 +47608,9 @@ function drawSettlementBuilding(c, b) {
   c.fillRect(x, y - 18, w, h + 18);
   c.fillStyle = "#837358";
   c.fillRect(x, y + h - 42, w, 42);
-  for (let px2 = x + 8; px2 < x + w; px2 += 48) {
+  for (let px3 = x + 8; px3 < x + w; px3 += 48) {
     c.fillStyle = "#574936";
-    c.fillRect(px2, y + h - 40, 7, 40);
+    c.fillRect(px3, y + h - 40, 7, 40);
   }
   polygon25(c, [[x - 4, y - 26], [x + w + 4, y - 26], [x + w + 4, ridge], [x - 4, ridge]], color28);
   polygon25(c, [[x - 4, ridge], [x + w + 4, ridge], [x + w + 4, y + h - 44], [x - 4, y + h - 44]], color28);
@@ -47174,10 +47623,10 @@ function drawSettlementBuilding(c, b) {
     c.moveTo(x, py);
     c.lineTo(x + w, py);
     c.stroke();
-    for (let px2 = x + Math.floor(py / 13) % 2 * 10; px2 < x + w; px2 += 28) {
+    for (let px3 = x + Math.floor(py / 13) % 2 * 10; px3 < x + w; px3 += 28) {
       c.beginPath();
-      c.moveTo(px2, py);
-      c.lineTo(px2 + 3, py + 10);
+      c.moveTo(px3, py);
+      c.lineTo(px3 + 3, py + 10);
       c.stroke();
     }
   }
@@ -47191,14 +47640,14 @@ function drawSettlementBuilding(c, b) {
   c.fillRect(x + w * 0.72, y + h * 0.22 - 38, 21, 34);
   c.fillStyle = "#b7ad98";
   c.fillRect(x + w * 0.72 - 3, y + h * 0.22 - 40, 27, 7);
-  for (let px2 = x + 23; px2 < x + w - 15; px2 += 61) {
+  for (let px3 = x + 23; px3 < x + w - 15; px3 += 61) {
     c.fillStyle = "#3b443a";
-    c.fillRect(px2, y + h - 31, 18, 21);
+    c.fillRect(px3, y + h - 31, 18, 21);
     c.fillStyle = "#cfb975";
-    c.fillRect(px2 + 2, y + h - 28, 6, 15);
-    c.fillRect(px2 + 10, y + h - 28, 6, 15);
+    c.fillRect(px3 + 2, y + h - 28, 6, 15);
+    c.fillRect(px3 + 10, y + h - 28, 6, 15);
     c.fillStyle = "#867352";
-    c.fillRect(px2 - 3, y + h - 10, 24, 5);
+    c.fillRect(px3 - 3, y + h - 10, 24, 5);
   }
   if (b.kind === "home" && n % 3 === 0) {
     polygon25(c, [[x + w * 0.3 - 19, ridge + 10], [x + w * 0.3, ridge - 15], [x + w * 0.3 + 19, ridge + 10]], "#aaa387");
@@ -47470,10 +47919,10 @@ function drawFerryLandings(ctx, exits) {
 }
 
 // src/client/iron_chest_art.js
-function drawIronChest(ctx, cx, cy, time, P5) {
-  const tier2 = "iron_bound", isOpen = P5 >= 1;
-  let closedScaleY = Math.max(0, Math.cos(P5 * Math.PI / 2));
-  let openScaleY = Math.max(0, Math.sin(P5 * Math.PI / 2));
+function drawIronChest(ctx, cx, cy, time, P6) {
+  const tier2 = "iron_bound", isOpen = P6 >= 1;
+  let closedScaleY = Math.max(0, Math.cos(P6 * Math.PI / 2));
+  let openScaleY = Math.max(0, Math.sin(P6 * Math.PI / 2));
   ctx.save();
   let baseShadowW = 13 + (tier2 !== "iron_bound" ? 1 : 0);
   ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
@@ -47651,9 +48100,9 @@ function drawIronChest(ctx, cx, cy, time, P5) {
   ctx.fillRect(x + w - 6.5, y_hinge, 3.5, bodyH);
   ctx.strokeRect(x + w - 6.5, y_hinge, 3.5, bodyH);
   if (tier2 === "astral") ctx.restore();
-  if (P5 > 0.01) {
+  if (P6 > 0.01) {
     ctx.save();
-    let revealH = Math.round(4 * P5);
+    let revealH = Math.round(4 * P6);
     if (tier2 === "iron_bound") {
       ctx.fillStyle = "#050201";
       ctx.fillRect(x + 1.5, y_hinge + 1, w - 3, revealH);
@@ -47661,7 +48110,7 @@ function drawIronChest(ctx, cx, cy, time, P5) {
       ctx.fillStyle = "#e5c158";
       ctx.fillRect(x + 1.5, y_hinge + 1, w - 3, revealH);
     } else {
-      let swirlR = (3 + Math.sin(time / 180) * 1) * P5;
+      let swirlR = (3 + Math.sin(time / 180) * 1) * P6;
       let swirlGrad = ctx.createRadialGradient(
         cx,
         y_hinge + 2,
@@ -47682,10 +48131,10 @@ function drawIronChest(ctx, cx, cy, time, P5) {
     }
     ctx.restore();
   }
-  if (P5 > 0.01) {
+  if (P6 > 0.01) {
     ctx.save();
     ctx.translate(cx, y_hinge);
-    let latchAngle = P5 * (35 * Math.PI / 180);
+    let latchAngle = P6 * (35 * Math.PI / 180);
     ctx.rotate(-latchAngle);
     ctx.fillStyle = tier2 === "iron_bound" ? "#475569" : tier2 === "gilded" ? "#ffd700" : "#00ffff";
     ctx.strokeStyle = tier2 === "iron_bound" ? "#0f172a" : tier2 === "gilded" ? "#855800" : "#ffffff";
@@ -47791,13 +48240,13 @@ function drawIronChest(ctx, cx, cy, time, P5) {
     }
     ctx.restore();
   }
-  if (!isOpen && P5 < 0.99) {
+  if (!isOpen && P6 < 0.99) {
     let numSparks = tier2 === "iron_bound" ? 3 : tier2 === "gilded" ? 3 : 4;
     for (let i = 0; i < numSparks; i++) {
       let sparkProgress = (time / (tier2 === "iron_bound" ? 800 + i * 200 : tier2 === "gilded" ? 600 + i * 200 : 500 + i * 150) + i * (tier2 === "astral" ? 0.25 : 0.33)) % 1;
       let sx = cx + Math.sin(time / 150 + i * 2.5) * (tier2 === "astral" ? 11 : 8);
       let sy = cy - sparkProgress * (tier2 === "astral" ? 20 : 15);
-      let alpha2 = (1 - sparkProgress) * 0.8 * (1 - P5);
+      let alpha2 = (1 - sparkProgress) * 0.8 * (1 - P6);
       if (tier2 === "iron_bound") {
         ctx.fillStyle = `rgba(230, 126, 34, ${alpha2})`;
       } else if (tier2 === "gilded") {
@@ -48970,9 +49419,9 @@ function drawCastSigil(ctx, x, y, element, age, facing2 = 1) {
     glowStroke(ctx, C2.main, 7, 0.8, () => {
       ctx.beginPath();
       for (let i = 0; i <= 5; i++) {
-        const a = -t * 2.6 + i * Math.PI * 4 / 5, px2 = Math.cos(a) * rx * 0.55, py = Math.sin(a) * ry * 0.55;
-        if (i) ctx.lineTo(px2, py);
-        else ctx.moveTo(px2, py);
+        const a = -t * 2.6 + i * Math.PI * 4 / 5, px3 = Math.cos(a) * rx * 0.55, py = Math.sin(a) * ry * 0.55;
+        if (i) ctx.lineTo(px3, py);
+        else ctx.moveTo(px3, py);
       }
     });
     ctx.restore();
@@ -49022,7 +49471,7 @@ function iceLance(ctx, x, y, dir, len) {
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(dir);
-  const w = len * 0.22, outline3 = () => {
+  const w = len * 0.22, outline4 = () => {
     ctx.beginPath();
     ctx.moveTo(len * 0.55, 0);
     ctx.lineTo(len * 0.1, -w);
@@ -49048,7 +49497,7 @@ function iceLance(ctx, x, y, dir, len) {
     ctx.lineWidth = 0.7;
     ctx.stroke();
   }
-  outline3();
+  outline4();
   ctx.fillStyle = g;
   ctx.fill();
   ctx.lineWidth = 0.9;
@@ -49107,15 +49556,15 @@ function drawCastBolt(ctx, element, p, origin, time) {
   if (element === "frost") iceLance(ctx, p.x, p.y, dir, 19);
   else fireball(ctx, p.x, p.y, 4.6, t, dir, 1);
 }
-function starburst(ctx, x, y, R2, color28, alpha2, seed2) {
-  if (R2 <= 0 || alpha2 <= 0) return;
+function starburst(ctx, x, y, R3, color28, alpha2, seed2) {
+  if (R3 <= 0 || alpha2 <= 0) return;
   ctx.save();
   ctx.globalAlpha *= Math.min(1, alpha2);
   ctx.beginPath();
   for (let i = 0; i < 22; i++) {
-    const a = i * Math.PI / 11 + 0.2, rr = R2 * (i % 2 ? 0.6 + 0.12 * rnd(seed2 + i) : 0.9 + 0.25 * rnd(seed2 + i + 40)), px2 = x + Math.cos(a) * rr, py = y + Math.sin(a) * rr * 0.85;
-    if (i) ctx.lineTo(px2, py);
-    else ctx.moveTo(px2, py);
+    const a = i * Math.PI / 11 + 0.2, rr = R3 * (i % 2 ? 0.6 + 0.12 * rnd(seed2 + i) : 0.9 + 0.25 * rnd(seed2 + i + 40)), px3 = x + Math.cos(a) * rr, py = y + Math.sin(a) * rr * 0.85;
+    if (i) ctx.lineTo(px3, py);
+    else ctx.moveTo(px3, py);
   }
   ctx.closePath();
   ctx.fillStyle = color28;
@@ -49128,7 +49577,7 @@ function crystal2(ctx, x, y, ht, wd, lean, alpha2) {
   ctx.globalAlpha *= alpha2;
   ctx.translate(x, y);
   ctx.rotate(lean);
-  const shape2 = () => {
+  const shape3 = () => {
     ctx.beginPath();
     ctx.moveTo(-wd, 0);
     ctx.lineTo(-wd * 0.55, -ht * 0.78);
@@ -49137,7 +49586,7 @@ function crystal2(ctx, x, y, ht, wd, lean, alpha2) {
     ctx.lineTo(wd, 0);
     ctx.closePath();
   };
-  shape2();
+  shape3();
   ctx.fillStyle = "#7cc4ec";
   ctx.fill();
   ctx.beginPath();
@@ -49148,7 +49597,7 @@ function crystal2(ctx, x, y, ht, wd, lean, alpha2) {
   ctx.closePath();
   ctx.fillStyle = "#d4f1ff";
   ctx.fill();
-  shape2();
+  shape3();
   ctx.lineWidth = 0.8;
   ctx.strokeStyle = "#123650";
   ctx.stroke();
@@ -49179,7 +49628,7 @@ function drawCastImpact(ctx, element, x, y, age, crit = false) {
   const life = CAST_IMPACT_LIFE[element];
   if (!life) return false;
   if (age < 0 || age >= life) return true;
-  const C2 = CAST_COLORS[element], h = age / 1e3, I = { x, y: y - 9 }, G2 = y + 4, big = crit ? 1.25 : 1;
+  const C2 = CAST_COLORS[element], h = age / 1e3, I = { x, y: y - 9 }, G3 = y + 4, big = crit ? 1.25 : 1;
   ctx.save();
   if (element === "fire") {
     if (h > 0.12) {
@@ -49193,17 +49642,17 @@ function drawCastImpact(ctx, element, x, y, age, crit = false) {
       }
     }
     if (h < 0.5) {
-      const q = h / 0.5, e = easeOut(h / 0.3), R2 = (10 + 24 * e) * HIT * big, body5 = h < 0.16 ? 1 : 1 - smooth19((h - 0.16) / 0.26), sd = Math.floor(age / 70);
+      const q = h / 0.5, e = easeOut(h / 0.3), R3 = (10 + 24 * e) * HIT * big, body5 = h < 0.16 ? 1 : 1 - smooth19((h - 0.16) / 0.26), sd = Math.floor(age / 70);
       for (let i = 0; i < 9; i++) {
         const a = i * TAU34 / 9 + 0.4, d = (4 + 20 * e) * HIT;
         blob(ctx, I.x + Math.cos(a) * d, I.y + Math.sin(a) * d * 0.75 - 10 * HIT * q, (8 + 10 * e) * HIT, q < 0.4 ? "#ff8a3d" : "#c2410c", (1 - q) * 0.9);
       }
-      starburst(ctx, I.x, I.y - 6 * HIT * q, R2, "#c2410c", body5, sd);
-      starburst(ctx, I.x, I.y - 6 * HIT * q, R2 * 0.78, "#ff7a1f", body5, sd + 7);
-      starburst(ctx, I.x, I.y - 6 * HIT * q, R2 * 0.56, "#ffc94d", body5, sd + 13);
-      starburst(ctx, I.x, I.y - 6 * HIT * q, R2 * 0.32 * (1 - q), "#fff6dc", body5, sd + 19);
+      starburst(ctx, I.x, I.y - 6 * HIT * q, R3, "#c2410c", body5, sd);
+      starburst(ctx, I.x, I.y - 6 * HIT * q, R3 * 0.78, "#ff7a1f", body5, sd + 7);
+      starburst(ctx, I.x, I.y - 6 * HIT * q, R3 * 0.56, "#ffc94d", body5, sd + 13);
+      starburst(ctx, I.x, I.y - 6 * HIT * q, R3 * 0.32 * (1 - q), "#fff6dc", body5, sd + 19);
       if (h < 0.3) for (let i = 0; i < 9; i++) {
-        const a = i * TAU34 / 9 + 0.1, l0 = R2 * 0.7, l = R2 * (1.1 + 0.5 * rnd(i + 70)) * (1 + h * 2);
+        const a = i * TAU34 / 9 + 0.1, l0 = R3 * 0.7, l = R3 * (1.1 + 0.5 * rnd(i + 70)) * (1 + h * 2);
         glowStroke(ctx, C2.main, 7, 1.8 * (1 - h / 0.3), () => {
           ctx.beginPath();
           ctx.moveTo(I.x + Math.cos(a) * l0, I.y + Math.sin(a) * l0 * 0.85);
@@ -49213,7 +49662,7 @@ function drawCastImpact(ctx, element, x, y, age, crit = false) {
       bloom(ctx, I.x, I.y, (10 + 16 * e) * HIT, "#ffffff", 1 - q * 2);
       glowStroke(ctx, C2.main, 8, 1.6 * (1 - q), () => {
         ctx.beginPath();
-        ctx.ellipse(I.x + 3, G2, (8 + 46 * e) * HIT, (2 + 8 * e) * HIT, 0, 0, TAU34);
+        ctx.ellipse(I.x + 3, G3, (8 + 46 * e) * HIT, (2 + 8 * e) * HIT, 0, 0, TAU34);
       }, false);
     }
     if (h < 0.5) for (let i = 0; i < 12; i++) {
@@ -49229,23 +49678,23 @@ function drawCastImpact(ctx, element, x, y, age, crit = false) {
     ctx.globalAlpha = 0.3 * Math.min(1, h * 6) * fade;
     ctx.fillStyle = "#d8f2ff";
     ctx.beginPath();
-    ctx.ellipse(x, G2, 36 * HIT, 6 * HIT, 0, 0, TAU34);
+    ctx.ellipse(x, G3, 36 * HIT, 6 * HIT, 0, 0, TAU34);
     ctx.fill();
     ctx.restore();
-    for (const [dx, ht, lean] of FROST_BACK) crystal2(ctx, x + dx * HIT, G2, ht * grow, 5.2 * HIT, lean, fade);
+    for (const [dx, ht, lean] of FROST_BACK) crystal2(ctx, x + dx * HIT, G3, ht * grow, 5.2 * HIT, lean, fade);
     bloom(ctx, I.x, I.y, (10 + 22 * easeOut(h / 0.3)) * HIT, C2.main, 1 - h / 0.5 * 1.6);
-    for (const [dx, ht, lean] of FROST_FRONT) crystal2(ctx, x + dx * HIT, G2 + 1, ht * grow, 4.4 * HIT, lean, fade);
+    for (const [dx, ht, lean] of FROST_FRONT) crystal2(ctx, x + dx * HIT, G3 + 1, ht * grow, 4.4 * HIT, lean, fade);
     if (h < 0.45) for (let i = 0; i < 10; i++) {
       const a = Math.PI + (rnd(i + 40) - 0.5) * 2.6, v = (40 + 50 * rnd(i + 45)) * HIT;
       shard2(ctx, I.x + Math.cos(a) * v * h * 0.7, I.y + Math.sin(a) * v * h * 0.7 + 70 * HIT * h * h, 1.5, age / 110 + i, 1 - h / 0.45);
     }
     glowStroke(ctx, C2.main, 8, 1.4 * (1 - h / 0.48), () => {
       ctx.beginPath();
-      ctx.ellipse(x, G2, (10 + 34 * easeOut(h / 0.3)) * HIT, (3 + 6 * easeOut(h / 0.3)) * HIT, 0, 0, TAU34);
+      ctx.ellipse(x, G3, (10 + 34 * easeOut(h / 0.3)) * HIT, (3 + 6 * easeOut(h / 0.3)) * HIT, 0, 0, TAU34);
     }, false);
     for (let i = 0; i < 5; i++) {
       const a = i * Math.PI / 2.5, d = (10 + 22 * easeOut(h / 0.3)) * HIT;
-      blob(ctx, x + Math.cos(a) * d, G2 - 2 + Math.sin(a) * 2, (8 + 6 * h) * HIT, "#e6f8ff", 0.35 * (1 - h / 0.48));
+      blob(ctx, x + Math.cos(a) * d, G3 - 2 + Math.sin(a) * 2, (8 + 6 * h) * HIT, "#e6f8ff", 0.35 * (1 - h / 0.48));
     }
   } else {
     const q = h / 0.42, seed2 = Math.floor(age / 20);
@@ -49266,11 +49715,11 @@ function drawCastImpact(ctx, element, x, y, age, crit = false) {
     }
     for (let i = 0; i < 10; i++) {
       const a = -Math.PI / 2 + (rnd(i + 120) - 0.5) * 2.6, v = (40 + 60 * rnd(i + 130)) * HIT, py = I.y + Math.sin(a) * v * h + 120 * HIT * h * h;
-      if (py < G2 + 3) mote(ctx, I.x + Math.cos(a) * v * h, py, 0.8, C2.spark, 1 - q);
+      if (py < G3 + 3) mote(ctx, I.x + Math.cos(a) * v * h, py, 0.8, C2.spark, 1 - q);
     }
     glowStroke(ctx, C2.deep, 8, 1.3 * (1 - q), () => {
       ctx.beginPath();
-      ctx.ellipse(x, G2, (8 + 26 * easeOut(h / 0.3)) * HIT * big, (2 + 5 * q) * HIT, 0, 0, TAU34);
+      ctx.ellipse(x, G3, (8 + 26 * easeOut(h / 0.3)) * HIT * big, (2 + 5 * q) * HIT, 0, 0, TAU34);
     }, false);
   }
   ctx.restore();
@@ -49492,7 +49941,7 @@ function drawGuardWard(ctx, x, y, angle3, type, open, runes, blockAge, time, mov
     outer.push(ringPoint(cx, cy, r + w.band / 2, a));
     inner.push(ringPoint(cx, cy, r - w.band / 2, a));
   }
-  const shape2 = () => {
+  const shape3 = () => {
     ctx.beginPath();
     ctx.moveTo(outer[0].x, outer[0].y);
     for (const p of outer) ctx.lineTo(p.x, p.y);
@@ -49501,7 +49950,7 @@ function drawGuardWard(ctx, x, y, angle3, type, open, runes, blockAge, time, mov
   };
   ctx.save();
   ctx.globalCompositeOperation = "lighter";
-  shape2();
+  shape3();
   ctx.fillStyle = rgba(KNIGHT_BLUE, 0.3 * open);
   ctx.fill();
   ctx.clip();
@@ -49548,8 +49997,8 @@ function drawGuardWard(ctx, x, y, angle3, type, open, runes, blockAge, time, mov
   }
   const face3 = guardFace(x, y, Math.cos(angle3) < 0 ? -1 : 1), back = (blockAge - 60) / 260;
   if (back >= 0 && back < 1) for (let i = 0; i < 4; i++) {
-    const f = Math.max(0, back - i * 0.06), px2 = lerp2(hit.x, face3.x, smooth19(f)), py = lerp2(hit.y, face3.y, smooth19(f)) - Math.sin(f * Math.PI) * 4;
-    mote(ctx, px2, py, 1.1 - i * 0.2, i ? KNIGHT_BLUE : KNIGHT_CORE, 1 - i * 0.22);
+    const f = Math.max(0, back - i * 0.06), px3 = lerp2(hit.x, face3.x, smooth19(f)), py = lerp2(hit.y, face3.y, smooth19(f)) - Math.sin(f * Math.PI) * 4;
+    mote(ctx, px3, py, 1.1 - i * 0.2, i ? KNIGHT_BLUE : KNIGHT_CORE, 1 - i * 0.22);
   }
   const ring4 = (blockAge - 320) / 280;
   if (ring4 >= 0 && ring4 < 1) {
@@ -49587,33 +50036,33 @@ function area(ctx, x, y, r, color28, alpha2) {
   ctx.fill();
   ctx.restore();
 }
-function runeRing(ctx, x, y, r, K2, alpha2, spin = 0, count = 12) {
+function runeRing(ctx, x, y, r, K3, alpha2, spin = 0, count = 12) {
   if (alpha2 <= 0) return;
-  neon(ctx, K2, 1.3, () => circle8(ctx, x, y, r), alpha2);
+  neon(ctx, K3, 1.3, () => circle8(ctx, x, y, r), alpha2);
   for (let i = 0; i < count; i++) {
-    const a = spin + i * TAU34 / count, px2 = x + Math.cos(a) * r, py = y + Math.sin(a) * r;
-    neon(ctx, K2, 1.1, () => {
+    const a = spin + i * TAU34 / count, px3 = x + Math.cos(a) * r, py = y + Math.sin(a) * r;
+    neon(ctx, K3, 1.1, () => {
       ctx.beginPath();
-      ctx.moveTo(px2 - Math.cos(a) * 3.5, py - Math.sin(a) * 3.5);
-      ctx.lineTo(px2 + Math.cos(a) * 3.5, py + Math.sin(a) * 3.5);
-      ctx.moveTo(px2 - Math.sin(a) * 2.4, py + Math.cos(a) * 2.4);
-      ctx.lineTo(px2 + Math.sin(a) * 2.4, py - Math.cos(a) * 2.4);
+      ctx.moveTo(px3 - Math.cos(a) * 3.5, py - Math.sin(a) * 3.5);
+      ctx.lineTo(px3 + Math.cos(a) * 3.5, py + Math.sin(a) * 3.5);
+      ctx.moveTo(px3 - Math.sin(a) * 2.4, py + Math.cos(a) * 2.4);
+      ctx.lineTo(px3 + Math.sin(a) * 2.4, py - Math.cos(a) * 2.4);
     }, alpha2);
   }
 }
-function neon(ctx, K2, width, draw, alpha2 = 1) {
+function neon(ctx, K3, width, draw, alpha2 = 1) {
   if (alpha2 <= 0 || width <= 0) return;
   ctx.save();
   ctx.globalAlpha *= Math.min(1, alpha2);
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
-  ctx.strokeStyle = rgba(K2.deep, 0.55);
+  ctx.strokeStyle = rgba(K3.deep, 0.55);
   ctx.lineWidth = width * 2.2;
   draw();
   ctx.stroke();
   ctx.restore();
-  glowStroke(ctx, K2.main, 10, width * Math.min(1, alpha2), draw, false);
-  glowStroke(ctx, K2.spark, 0, Math.max(0.5, width * 0.32) * Math.min(1, alpha2), draw, false);
+  glowStroke(ctx, K3.main, 10, width * Math.min(1, alpha2), draw, false);
+  glowStroke(ctx, K3.spark, 0, Math.max(0.5, width * 0.32) * Math.min(1, alpha2), draw, false);
 }
 function withAlpha(ctx, alpha2, draw) {
   if (alpha2 <= 0) return;
@@ -49640,17 +50089,17 @@ function bladeShape(ctx, len, width, steel = "#e9eef5") {
   ctx.fillRect(-len * 0.32, -width * 1.1, len * 0.05, width * 2.2);
 }
 function earthBreaker(ctx, b, age) {
-  const { x, y } = b, R2 = b.reach ?? 89, K2 = C.breaker, go = easeOut(age / 340), rr = R2 * go, fade = 1 - smooth19((age - 440) / 340);
-  area(ctx, x, y, rr, K2.deep, fade * 1.4);
-  area(ctx, x, y, rr, K2.main, fade * 0.7);
+  const { x, y } = b, R3 = b.reach ?? 89, K3 = C.breaker, go = easeOut(age / 340), rr = R3 * go, fade = 1 - smooth19((age - 440) / 340);
+  area(ctx, x, y, rr, K3.deep, fade * 1.4);
+  area(ctx, x, y, rr, K3.main, fade * 0.7);
   if (age < 220) {
     const k = 1 - age / 220;
-    blob(ctx, x, y - 4, 34 * k + 8, K2.main, 0.9 * k);
-    if (age < 70) bloom(ctx, x, y - 6, 14, K2.core, 1 - age / 70);
-    neon(ctx, K2, 2.4 * k + 0.4, () => circle8(ctx, x, y, 10 + 10 * (1 - k)));
+    blob(ctx, x, y - 4, 34 * k + 8, K3.main, 0.9 * k);
+    if (age < 70) bloom(ctx, x, y - 6, 14, K3.core, 1 - age / 70);
+    neon(ctx, K3, 2.4 * k + 0.4, () => circle8(ctx, x, y, 10 + 10 * (1 - k)));
     for (let i = 0; i < 8; i++) {
       const a = i * TAU34 / 8 + 0.3;
-      neon(ctx, K2, 1.4 * k, () => {
+      neon(ctx, K3, 1.4 * k, () => {
         ctx.beginPath();
         ctx.moveTo(x + Math.cos(a) * 14, y + Math.sin(a) * 14);
         ctx.lineTo(x + Math.cos(a) * 22, y + Math.sin(a) * 22);
@@ -49659,7 +50108,7 @@ function earthBreaker(ctx, b, age) {
   }
   const crack = easeOut(age / 260);
   for (let i = 0; i < 9; i++) {
-    const a = i * TAU34 / 9 + rnd(i + 3) * 0.4, len = R2 * (0.5 + 0.42 * rnd(i + 11)) * crack, x0 = x + Math.cos(a) * 9, y0 = y + Math.sin(a) * 9, x1 = x + Math.cos(a) * len, y1 = y + Math.sin(a) * len, side = rnd(i + 17) < 0.5 ? -1 : 1, mx = lerp2(x0, x1, 0.55), my = lerp2(y0, y1, 0.55), bl = len * 0.3;
+    const a = i * TAU34 / 9 + rnd(i + 3) * 0.4, len = R3 * (0.5 + 0.42 * rnd(i + 11)) * crack, x0 = x + Math.cos(a) * 9, y0 = y + Math.sin(a) * 9, x1 = x + Math.cos(a) * len, y1 = y + Math.sin(a) * len, side = rnd(i + 17) < 0.5 ? -1 : 1, mx = lerp2(x0, x1, 0.55), my = lerp2(y0, y1, 0.55), bl = len * 0.3;
     for (const draw of [() => jag(ctx, x0, y0, x1, y1, i * 13, 2.2), () => jag(ctx, mx, my, mx + Math.cos(a + side * 0.6) * bl, my + Math.sin(a + side * 0.6) * bl, i * 29, 1.4)]) {
       withAlpha(ctx, 0.9 * fade, () => {
         ctx.strokeStyle = "#1d0f07";
@@ -49669,22 +50118,22 @@ function earthBreaker(ctx, b, age) {
         draw();
         ctx.stroke();
       });
-      glowStroke(ctx, K2.main, 6, 1.5 * fade, draw, false);
+      glowStroke(ctx, K3.main, 6, 1.5 * fade, draw, false);
     }
   }
   if (age < 540) {
     const k = age / 540;
-    neon(ctx, K2, 4.2 * (1 - k) + 0.8, () => circle8(ctx, x, y, rr));
-    neon(ctx, K2, 1.4 * (1 - k), () => circle8(ctx, x, y, rr * 0.8), 0.8);
+    neon(ctx, K3, 4.2 * (1 - k) + 0.8, () => circle8(ctx, x, y, rr));
+    neon(ctx, K3, 1.4 * (1 - k), () => circle8(ctx, x, y, rr * 0.8), 0.8);
   }
-  if (age > 240) runeRing(ctx, x, y, R2, K2, fade * smooth19((age - 240) / 120), age / 900, 14);
+  if (age > 240) runeRing(ctx, x, y, R3, K3, fade * smooth19((age - 240) / 120), age / 900, 14);
   for (let i = 0; i < 12; i++) {
-    const a = rnd(i + 40) * TAU34, d = R2 * (0.3 + 0.6 * rnd(i + 50)), start = d / R2 * 300, h = clamp25((age - start) / 380);
+    const a = rnd(i + 40) * TAU34, d = R3 * (0.3 + 0.6 * rnd(i + 50)), start = d / R3 * 300, h = clamp25((age - start) / 380);
     if (h <= 0 || h >= 1) continue;
-    const px2 = x + Math.cos(a) * d, py = y + Math.sin(a) * d - 30 * (1 + rnd(i + 60)) * 4 * h * (1 - h), s = 1.4 + 1.3 * rnd(i + 70);
+    const px3 = x + Math.cos(a) * d, py = y + Math.sin(a) * d - 30 * (1 + rnd(i + 60)) * 4 * h * (1 - h), s = 1.4 + 1.3 * rnd(i + 70);
     withAlpha(ctx, 1 - h * h, () => {
       ctx.save();
-      ctx.translate(px2, py);
+      ctx.translate(px3, py);
       ctx.rotate(h * 7 + i);
       ctx.fillStyle = "#5a3d29";
       ctx.strokeStyle = "#1b0f07";
@@ -49714,29 +50163,29 @@ function earthBreaker(ctx, b, age) {
   }
 }
 function rallyingCry(ctx, b, age) {
-  const { x, y } = b, R2 = b.reach ?? 109, K2 = C.rally, fade = 1 - smooth19((age - 560) / 340);
-  area(ctx, x, y, R2 * easeOut(age / 420), K2.main, fade);
+  const { x, y } = b, R3 = b.reach ?? 109, K3 = C.rally, fade = 1 - smooth19((age - 560) / 340);
+  area(ctx, x, y, R3 * easeOut(age / 420), K3.main, fade);
   for (const [delay, width] of [[0, 3.6], [140, 2.2], [280, 1.3]]) {
     const k = (age - delay) / 480;
     if (k <= 0 || k >= 1) continue;
-    neon(ctx, K2, width * (1 - k) + 0.5, () => circle8(ctx, x, y, R2 * easeOut(k)));
+    neon(ctx, K3, width * (1 - k) + 0.5, () => circle8(ctx, x, y, R3 * easeOut(k)));
   }
   if (age > 320) {
     const k = smooth19((age - 320) / 160) * fade;
-    neon(ctx, K2, 1.2, () => circle8(ctx, x, y, R2), k);
+    neon(ctx, K3, 1.2, () => circle8(ctx, x, y, R3), k);
     for (let i = 0; i < 16; i++) {
-      const a = i * TAU34 / 16 + 0.1, px2 = x + Math.cos(a) * (R2 - 5), py = y + Math.sin(a) * (R2 - 5), ix = -Math.cos(a), iy = -Math.sin(a);
-      neon(ctx, K2, 1.3, () => {
+      const a = i * TAU34 / 16 + 0.1, px3 = x + Math.cos(a) * (R3 - 5), py = y + Math.sin(a) * (R3 - 5), ix = -Math.cos(a), iy = -Math.sin(a);
+      neon(ctx, K3, 1.3, () => {
         ctx.beginPath();
-        ctx.moveTo(px2 - iy * 3.5 - ix * 2, py + ix * 3.5 - iy * 2);
-        ctx.lineTo(px2 + ix * 2, py + iy * 2);
-        ctx.lineTo(px2 + iy * 3.5 - ix * 2, py - ix * 3.5 - iy * 2);
+        ctx.moveTo(px3 - iy * 3.5 - ix * 2, py + ix * 3.5 - iy * 2);
+        ctx.lineTo(px3 + ix * 2, py + iy * 2);
+        ctx.lineTo(px3 + iy * 3.5 - ix * 2, py - ix * 3.5 - iy * 2);
       }, k);
     }
   }
   const c = clamp25(age / 700), cy = y - 30 - 14 * easeOut(c), s = 0.6 + 0.5 * easeOut(age / 160), ca = age < 120 ? 1 : 1 - smooth19((age - 380) / 320);
   if (ca > 0) {
-    blob(ctx, x, cy, 22 * s, K2.main, 0.55 * ca);
+    blob(ctx, x, cy, 22 * s, K3.main, 0.55 * ca);
     const badge = () => {
       ctx.beginPath();
       ctx.moveTo(x - 9 * s, cy - 9 * s);
@@ -49748,44 +50197,44 @@ function rallyingCry(ctx, b, age) {
     };
     withAlpha(ctx, ca, () => {
       badge();
-      ctx.fillStyle = rgba(K2.deep, 0.75);
+      ctx.fillStyle = rgba(K3.deep, 0.75);
       ctx.fill();
     });
-    neon(ctx, K2, 1.6, badge, ca);
-    neon(ctx, K2, 1.4, () => {
+    neon(ctx, K3, 1.6, badge, ca);
+    neon(ctx, K3, 1.4, () => {
       ctx.beginPath();
       ctx.moveTo(x - 5 * s, cy + 3 * s);
       ctx.lineTo(x, cy - 3 * s);
       ctx.lineTo(x + 5 * s, cy + 3 * s);
     }, ca);
-    if (age < 260) star4(ctx, x, cy - 12 * s, 6 + 8 * easeOut(age / 260), K2.spark, 1 - age / 260);
+    if (age < 260) star4(ctx, x, cy - 12 * s, 6 + 8 * easeOut(age / 260), K3.spark, 1 - age / 260);
   }
   for (let i = 0; i < 10; i++) {
     const h = clamp25((age - 40 - i * 40) / 560);
     if (h <= 0 || h >= 1) continue;
-    const a = i * 2.4 + h * 3, r = 10 + 6 * rnd(i), px2 = x + Math.cos(a) * r, py = y - 6 - 44 * easeOut(h) + Math.sin(a) * r * 0.3, s2 = 2.6 * (1 - h * 0.4);
-    const G2 = { deep: "#1f6b33", main: "#7be38c", spark: "#d6ffd9" };
-    if (i % 2) neon(ctx, G2, 1.1, () => {
+    const a = i * 2.4 + h * 3, r = 10 + 6 * rnd(i), px3 = x + Math.cos(a) * r, py = y - 6 - 44 * easeOut(h) + Math.sin(a) * r * 0.3, s2 = 2.6 * (1 - h * 0.4);
+    const G3 = { deep: "#1f6b33", main: "#7be38c", spark: "#d6ffd9" };
+    if (i % 2) neon(ctx, G3, 1.1, () => {
       ctx.beginPath();
-      ctx.moveTo(px2 - s2, py);
-      ctx.lineTo(px2 + s2, py);
-      ctx.moveTo(px2, py - s2);
-      ctx.lineTo(px2, py + s2);
+      ctx.moveTo(px3 - s2, py);
+      ctx.lineTo(px3 + s2, py);
+      ctx.moveTo(px3, py - s2);
+      ctx.lineTo(px3, py + s2);
     }, 1 - h);
-    else mote(ctx, px2, py, 1.4, G2.main, 1 - h);
+    else mote(ctx, px3, py, 1.4, G3.main, 1 - h);
   }
 }
 function counterStance(ctx, b, age) {
-  const { x, y } = b, K2 = C.reprisal, f = b.dx < 0 ? -1 : 1, k = age / 480, s = easeOut(age / 160);
-  blob(ctx, x + f * 15, y - 14, 26 * (1 - k) + 4, K2.main, 0.7 * (1 - k));
-  neon(ctx, K2, 2.2 * (1 - k) + 0.4, () => circle8(ctx, x, y - 6, 34 - 18 * s));
-  sealShape(ctx, x + f * 15, y - 14, s * (1.45 - 0.3 * k), K2, (1 - k) * 1.3);
+  const { x, y } = b, K3 = C.reprisal, f = b.dx < 0 ? -1 : 1, k = age / 480, s = easeOut(age / 160);
+  blob(ctx, x + f * 15, y - 14, 26 * (1 - k) + 4, K3.main, 0.7 * (1 - k));
+  neon(ctx, K3, 2.2 * (1 - k) + 0.4, () => circle8(ctx, x, y - 6, 34 - 18 * s));
+  sealShape(ctx, x + f * 15, y - 14, s * (1.45 - 0.3 * k), K3, (1 - k) * 1.3);
   for (let i = 0; i < 8; i++) {
     const a = i * TAU34 / 8, d = 12 + 20 * easeOut(k);
-    mote(ctx, x + f * 15 + Math.cos(a) * d, y - 14 + Math.sin(a) * d, 1.4 * (1 - k), K2.spark, 1 - k);
+    mote(ctx, x + f * 15 + Math.cos(a) * d, y - 14 + Math.sin(a) * d, 1.4 * (1 - k), K3.spark, 1 - k);
   }
 }
-function sealShape(ctx, x, y, s, K2, alpha2) {
+function sealShape(ctx, x, y, s, K3, alpha2) {
   if (alpha2 <= 0 || s <= 0) return;
   const path9 = () => {
     ctx.beginPath();
@@ -49800,13 +50249,13 @@ function sealShape(ctx, x, y, s, K2, alpha2) {
   withAlpha(ctx, alpha2, () => {
     path9();
     const g = ctx.createLinearGradient(x, y - 13 * s, x, y + 13 * s);
-    g.addColorStop(0, rgba(K2.main, 0.55));
-    g.addColorStop(1, rgba(K2.deep, 0.65));
+    g.addColorStop(0, rgba(K3.main, 0.55));
+    g.addColorStop(1, rgba(K3.deep, 0.65));
     ctx.fillStyle = g;
     ctx.fill();
   });
-  neon(ctx, K2, 1.5, path9, alpha2);
-  neon(ctx, K2, 1.1, () => {
+  neon(ctx, K3, 1.5, path9, alpha2);
+  neon(ctx, K3, 1.1, () => {
     ctx.beginPath();
     ctx.moveTo(x - 4.5 * s, y - 1 * s);
     ctx.lineTo(x + 4.5 * s, y - 1 * s);
@@ -49816,29 +50265,29 @@ function sealShape(ctx, x, y, s, K2, alpha2) {
   }, alpha2);
 }
 function drawCounterWard(ctx, x, y, facing2, ready, time, spentAge = -1) {
-  const K2 = C.reprisal, flare = spentAge >= 0 && spentAge < 380 ? spentAge / 380 : -1;
+  const K3 = C.reprisal, flare = spentAge >= 0 && spentAge < 380 ? spentAge / 380 : -1;
   if (!ready && flare < 0) return;
   const t = time / 1e3, cx = x + facing2 * 15, cy = y - 14;
   if (ready) {
     const breathe = 1.2 + 0.07 * Math.sin(t * 7);
-    blob(ctx, cx, cy, 18, K2.main, 0.35);
-    sealShape(ctx, cx, cy, breathe, K2, 1);
+    blob(ctx, cx, cy, 18, K3.main, 0.35);
+    sealShape(ctx, cx, cy, breathe, K3, 1);
     for (let i = 0; i < 2; i++) {
       const a = t * 4 + i * Math.PI;
-      mote(ctx, cx + Math.cos(a) * 16, cy + Math.sin(a) * 17, 1.6, K2.spark, 1);
+      mote(ctx, cx + Math.cos(a) * 16, cy + Math.sin(a) * 17, 1.6, K3.spark, 1);
     }
-    neon(ctx, K2, 1, () => {
+    neon(ctx, K3, 1, () => {
       ctx.beginPath();
       ctx.ellipse(x, y + 1, 15, 4.5, 0, 0, TAU34);
     }, 0.8);
   }
   if (flare >= 0) {
     const k = flare;
-    blob(ctx, cx, cy, 18 + 22 * k, K2.main, 0.9 * (1 - k));
-    sealShape(ctx, cx, cy, 1.2 + 0.7 * k, K2, 1 - k);
+    blob(ctx, cx, cy, 18 + 22 * k, K3.main, 0.9 * (1 - k));
+    sealShape(ctx, cx, cy, 1.2 + 0.7 * k, K3, 1 - k);
     for (let i = 0; i < 10; i++) {
       const a = i * TAU34 / 10 + 0.2, d = 8 + 30 * easeOut(k);
-      neon(ctx, K2, 1.4 * (1 - k), () => {
+      neon(ctx, K3, 1.4 * (1 - k), () => {
         ctx.beginPath();
         ctx.moveTo(cx + Math.cos(a) * d * 0.6, cy + Math.sin(a) * d * 0.6);
         ctx.lineTo(cx + Math.cos(a) * d, cy + Math.sin(a) * d);
@@ -49847,56 +50296,56 @@ function drawCounterWard(ctx, x, y, facing2, ready, time, spentAge = -1) {
   }
 }
 function lunge(ctx, b, age) {
-  const K2 = C.duelist, sx = b.x, sy = b.y - 10, has = Number.isFinite(b.ox), tx = has ? b.x + b.ox : b.x + b.dx * 60, ty = (has ? b.y + b.oy : b.y + b.dy * 60) - 10, k = age / 440, drive = easeOut(age / 120), px2 = lerp2(sx, tx, drive), py = lerp2(sy, ty, drive), a = Math.atan2(ty - sy, tx - sx);
+  const K3 = C.duelist, sx = b.x, sy = b.y - 10, has = Number.isFinite(b.ox), tx = has ? b.x + b.ox : b.x + b.dx * 60, ty = (has ? b.y + b.oy : b.y + b.dy * 60) - 10, k = age / 440, drive = easeOut(age / 120), px3 = lerp2(sx, tx, drive), py = lerp2(sy, ty, drive), a = Math.atan2(ty - sy, tx - sx);
   for (let i = 0; i < 5; i++) {
     const off = (i - 2) * 4.4, len = (18 + 18 * rnd(i + 3)) * (1 - k), nx = -Math.sin(a) * off, ny = Math.cos(a) * off;
-    neon(ctx, K2, 0.9, () => {
+    neon(ctx, K3, 0.9, () => {
       ctx.beginPath();
-      ctx.moveTo(px2 + nx - Math.cos(a) * (len + 12), py + ny - Math.sin(a) * (len + 12));
-      ctx.lineTo(px2 + nx - Math.cos(a) * 12, py + ny - Math.sin(a) * 12);
+      ctx.moveTo(px3 + nx - Math.cos(a) * (len + 12), py + ny - Math.sin(a) * (len + 12));
+      ctx.lineTo(px3 + nx - Math.cos(a) * 12, py + ny - Math.sin(a) * 12);
     }, 0.9 * (1 - k));
   }
-  neon(ctx, K2, 3.4 * (1 - k) + 0.5, () => {
+  neon(ctx, K3, 3.4 * (1 - k) + 0.5, () => {
     ctx.beginPath();
-    ctx.moveTo(lerp2(sx, px2, smooth19(k * 1.6)), lerp2(sy, py, smooth19(k * 1.6)));
-    ctx.lineTo(px2, py);
+    ctx.moveTo(lerp2(sx, px3, smooth19(k * 1.6)), lerp2(sy, py, smooth19(k * 1.6)));
+    ctx.lineTo(px3, py);
   });
   withAlpha(ctx, 1 - smooth19((age - 260) / 180), () => {
     ctx.save();
-    ctx.translate(px2, py);
+    ctx.translate(px3, py);
     ctx.rotate(a);
     bladeShape(ctx, 20, 3, "#fff4cf");
     ctx.restore();
   });
   if (age > 90 && age < 400) {
     const h = (age - 90) / 310;
-    blob(ctx, tx, ty, 12 + 14 * h, K2.main, 0.8 * (1 - h));
-    star4(ctx, tx, ty, 7 + 15 * easeOut(h), K2.spark, 1 - h);
-    neon(ctx, K2, 1.8 * (1 - h), () => circle8(ctx, tx, ty, 4 + 16 * easeOut(h)));
+    blob(ctx, tx, ty, 12 + 14 * h, K3.main, 0.8 * (1 - h));
+    star4(ctx, tx, ty, 7 + 15 * easeOut(h), K3.spark, 1 - h);
+    neon(ctx, K3, 1.8 * (1 - h), () => circle8(ctx, tx, ty, 4 + 16 * easeOut(h)));
   }
 }
 function toxicFan(ctx, b, age) {
-  const K2 = C.venom, R2 = b.reach ?? 139, spread = b.spread ?? 0.6, count = spread > 0.7 ? 7 : 5, base = Math.atan2(b.dy, b.dx), hx = b.x + Math.cos(base) * 8, hy = b.y - 12, fly = easeOut(age / 300), fade = 1 - smooth19((age - 340) / 220);
+  const K3 = C.venom, R3 = b.reach ?? 139, spread = b.spread ?? 0.6, count = spread > 0.7 ? 7 : 5, base = Math.atan2(b.dy, b.dx), hx = b.x + Math.cos(base) * 8, hy = b.y - 12, fly = easeOut(age / 300), fade = 1 - smooth19((age - 340) / 220);
   ctx.save();
   ctx.globalAlpha = fade;
-  const g = ctx.createRadialGradient(b.x, b.y, 8, b.x, b.y, R2);
-  g.addColorStop(0, rgba(K2.main, 0));
-  g.addColorStop(0.8, rgba(K2.main, 0.1));
-  g.addColorStop(1, rgba(K2.main, 0.26));
+  const g = ctx.createRadialGradient(b.x, b.y, 8, b.x, b.y, R3);
+  g.addColorStop(0, rgba(K3.main, 0));
+  g.addColorStop(0.8, rgba(K3.main, 0.1));
+  g.addColorStop(1, rgba(K3.main, 0.26));
   ctx.fillStyle = g;
   ctx.beginPath();
   ctx.moveTo(b.x, b.y);
-  ctx.arc(b.x, b.y, R2 * fly, base - spread, base + spread);
+  ctx.arc(b.x, b.y, R3 * fly, base - spread, base + spread);
   ctx.closePath();
   ctx.fill();
   ctx.restore();
   if (age < 180) {
     const k = age / 180;
-    neon(ctx, K2, 2.6 * (1 - k) + 0.5, () => circle8(ctx, hx, hy, 14 + 6 * k, base - spread - 0.1, base + spread + 0.1));
+    neon(ctx, K3, 2.6 * (1 - k) + 0.5, () => circle8(ctx, hx, hy, 14 + 6 * k, base - spread - 0.1, base + spread + 0.1));
   }
   for (let i = 0; i < count; i++) {
-    const a = base + (i / (count - 1) * 2 - 1) * spread, d = 10 + (R2 - 10) * fly, kx = b.x + Math.cos(a) * d, ky = b.y - 8 + Math.sin(a) * d, tail2 = Math.min(d - 8, 34);
-    neon(ctx, K2, 1.8, () => {
+    const a = base + (i / (count - 1) * 2 - 1) * spread, d = 10 + (R3 - 10) * fly, kx = b.x + Math.cos(a) * d, ky = b.y - 8 + Math.sin(a) * d, tail2 = Math.min(d - 8, 34);
+    neon(ctx, K3, 1.8, () => {
       ctx.beginPath();
       ctx.moveTo(kx - Math.cos(a) * tail2, ky - Math.sin(a) * tail2);
       ctx.lineTo(kx, ky);
@@ -49904,8 +50353,8 @@ function toxicFan(ctx, b, age) {
     for (let j = 0; j < 3; j++) {
       const q = clamp25((age - 60 - j * 70 - i * 12) / 260);
       if (q <= 0 || q >= 1) continue;
-      const dd = 10 + (R2 - 10) * easeOut((60 + j * 70 + i * 12) / 300);
-      mote(ctx, b.x + Math.cos(a) * dd, b.y - 8 + Math.sin(a) * dd + 16 * q * q, 1.5 * (1 - q), K2.main, 1 - q);
+      const dd = 10 + (R3 - 10) * easeOut((60 + j * 70 + i * 12) / 300);
+      mote(ctx, b.x + Math.cos(a) * dd, b.y - 8 + Math.sin(a) * dd + 16 * q * q, 1.5 * (1 - q), K3.main, 1 - q);
     }
     withAlpha(ctx, fade, () => {
       ctx.save();
@@ -49917,31 +50366,31 @@ function toxicFan(ctx, b, age) {
     if (age > 270) {
       const h = clamp25((age - 270) / 290);
       ctx.save();
-      ctx.fillStyle = rgba(K2.deep, 0.45 * (1 - h));
+      ctx.fillStyle = rgba(K3.deep, 0.45 * (1 - h));
       ctx.beginPath();
-      ctx.arc(b.x + Math.cos(a) * R2, b.y - 8 + Math.sin(a) * R2 - 4 * h, 5 + 9 * h, 0, TAU34);
+      ctx.arc(b.x + Math.cos(a) * R3, b.y - 8 + Math.sin(a) * R3 - 4 * h, 5 + 9 * h, 0, TAU34);
       ctx.fill();
       ctx.restore();
-      blob(ctx, b.x + Math.cos(a) * R2, b.y - 10 + Math.sin(a) * R2 - 6 * h, 4 + 7 * h, K2.main, 0.6 * (1 - h));
+      blob(ctx, b.x + Math.cos(a) * R3, b.y - 10 + Math.sin(a) * R3 - 6 * h, 4 + 7 * h, K3.main, 0.6 * (1 - h));
     }
   }
 }
 function whirlingBlades(ctx, b, age) {
-  const K2 = C.skirmish, R2 = b.reach ?? 79, k = age / 620, spin = TAU34 * 3 * easeOut(age / 520), rr = R2 * (0.66 + 0.3 * smooth19(age / 140)), cy = b.y - 4, fade = 1 - smooth19((age - 470) / 150);
-  area(ctx, b.x, b.y, R2, K2.main, fade);
-  neon(ctx, K2, 1.1, () => circle8(ctx, b.x, b.y, R2), 0.8 * fade);
+  const K3 = C.skirmish, R3 = b.reach ?? 79, k = age / 620, spin = TAU34 * 3 * easeOut(age / 520), rr = R3 * (0.66 + 0.3 * smooth19(age / 140)), cy = b.y - 4, fade = 1 - smooth19((age - 470) / 150);
+  area(ctx, b.x, b.y, R3, K3.main, fade);
+  neon(ctx, K3, 1.1, () => circle8(ctx, b.x, b.y, R3), 0.8 * fade);
   for (let i = 0; i < 3; i++) {
     const a = -spin * 1.3 + i * TAU34 / 3;
-    neon(ctx, K2, 1.2, () => circle8(ctx, b.x, cy, 7 + 5 * i, a, a + 2.1), fade);
+    neon(ctx, K3, 1.2, () => circle8(ctx, b.x, cy, 7 + 5 * i, a, a + 2.1), fade);
   }
   for (let blade = 0; blade < 2; blade++) {
     const lead = spin + blade * Math.PI, arc3 = 1.3, inner = rr - 14;
     withAlpha(ctx, fade, () => {
       ctx.save();
       const g = ctx.createLinearGradient(b.x + Math.cos(lead - arc3) * rr, cy + Math.sin(lead - arc3) * rr, b.x + Math.cos(lead) * rr, cy + Math.sin(lead) * rr);
-      g.addColorStop(0, rgba(K2.deep, 0));
-      g.addColorStop(0.6, rgba(K2.main, 0.55));
-      g.addColorStop(1, rgba(K2.spark, 0.95));
+      g.addColorStop(0, rgba(K3.deep, 0));
+      g.addColorStop(0.6, rgba(K3.main, 0.55));
+      g.addColorStop(1, rgba(K3.spark, 0.95));
       ctx.fillStyle = g;
       ctx.beginPath();
       ctx.arc(b.x, cy, rr, lead - arc3, lead);
@@ -49950,8 +50399,8 @@ function whirlingBlades(ctx, b, age) {
       ctx.fill();
       ctx.restore();
     });
-    neon(ctx, K2, 2.8, () => circle8(ctx, b.x, cy, rr, lead - arc3 * 0.75, lead), fade);
-    neon(ctx, K2, 1.2, () => circle8(ctx, b.x, cy, inner + 2, lead - arc3 * 0.5, lead - 0.1), fade * 0.8);
+    neon(ctx, K3, 2.8, () => circle8(ctx, b.x, cy, rr, lead - arc3 * 0.75, lead), fade);
+    neon(ctx, K3, 1.2, () => circle8(ctx, b.x, cy, inner + 2, lead - arc3 * 0.5, lead - 0.1), fade * 0.8);
     const tx = b.x + Math.cos(lead) * rr, ty = cy + Math.sin(lead) * rr;
     withAlpha(ctx, fade, () => {
       ctx.save();
@@ -49962,31 +50411,31 @@ function whirlingBlades(ctx, b, age) {
     });
     for (let s = 0; s < 3; s++) {
       const q = (age / 90 + s / 3 + blade * 0.5) % 1, a = lead - 0.3 - q * 0.6, d = rr + q * 18;
-      mote(ctx, b.x + Math.cos(a) * d, cy + Math.sin(a) * d, 1.4 * (1 - q), K2.spark, (1 - q) * fade);
+      mote(ctx, b.x + Math.cos(a) * d, cy + Math.sin(a) * d, 1.4 * (1 - q), K3.spark, (1 - q) * fade);
     }
   }
-  if (k < 0.25) blob(ctx, b.x, cy, 26 * (1 - k * 4), K2.main, 0.6 * (1 - k * 4));
+  if (k < 0.25) blob(ctx, b.x, cy, 26 * (1 - k * 4), K3.main, 0.6 * (1 - k * 4));
 }
 function firebloom(ctx, b, age) {
   bloomAt(ctx, b.x + (Number.isFinite(b.ox) ? b.ox : b.dx * 90), b.y + (Number.isFinite(b.oy) ? b.oy : b.dy * 90), b.reach ?? 50, age);
   if (Number.isFinite(b.ox2)) bloomAt(ctx, b.x + b.ox2, b.y + b.oy2, b.reach ?? 50, age - 60);
 }
-function bloomAt(ctx, cx, cy, R2, age) {
+function bloomAt(ctx, cx, cy, R3, age) {
   if (age < 0) return;
-  const F = CAST_COLORS.fire, K2 = { deep: "#8a2a0c", main: F.main, spark: F.spark }, fade = 1 - smooth19((age - 560) / 260), seal = easeOut(age / 160);
-  area(ctx, cx, cy, R2 * seal, K2.deep, fade * 1.2);
-  runeRing(ctx, cx, cy, R2 * seal, K2, fade, -age / 700, 10);
-  neon(ctx, K2, 1.1, () => {
+  const F = CAST_COLORS.fire, K3 = { deep: "#8a2a0c", main: F.main, spark: F.spark }, fade = 1 - smooth19((age - 560) / 260), seal = easeOut(age / 160);
+  area(ctx, cx, cy, R3 * seal, K3.deep, fade * 1.2);
+  runeRing(ctx, cx, cy, R3 * seal, K3, fade, -age / 700, 10);
+  neon(ctx, K3, 1.1, () => {
     ctx.beginPath();
     for (let i = 0; i <= 6; i++) {
-      const a = -age / 500 + i * TAU34 * 2 / 6 + Math.PI / 2, px2 = cx + Math.cos(a) * R2 * 0.62 * seal, py = cy + Math.sin(a) * R2 * 0.62 * seal;
-      if (i) ctx.lineTo(px2, py);
-      else ctx.moveTo(px2, py);
+      const a = -age / 500 + i * TAU34 * 2 / 6 + Math.PI / 2, px3 = cx + Math.cos(a) * R3 * 0.62 * seal, py = cy + Math.sin(a) * R3 * 0.62 * seal;
+      if (i) ctx.lineTo(px3, py);
+      else ctx.moveTo(px3, py);
     }
   }, fade);
   const open = easeOut((age - 90) / 260), wilt = 1 - smooth19((age - 420) / 300);
   if (age > 90 && wilt > 0) for (let i = 0; i < 8; i++) {
-    const a = i * TAU34 / 8 + 0.2, len = R2 * 0.85 * open, w = R2 * 0.24 * open;
+    const a = i * TAU34 / 8 + 0.2, len = R3 * 0.85 * open, w = R3 * 0.24 * open;
     ctx.save();
     ctx.translate(cx, cy - 4);
     ctx.rotate(a);
@@ -50009,27 +50458,27 @@ function bloomAt(ctx, cx, cy, R2, age) {
   }
   if (age > 80 && age < 520) {
     const q = (age - 80) / 440, sd = Math.floor(age / 70);
-    starburst(ctx, cx, cy - 6, R2 * 0.55 * easeOut(q * 2), "#e8551a", 1 - q, sd);
-    starburst(ctx, cx, cy - 6, R2 * 0.34 * easeOut(q * 2), "#ffc94d", 1 - q, sd + 7);
-    blob(ctx, cx, cy - 6, R2 * 0.45, "#ffe2a0", 0.8 * (1 - q * 1.6));
+    starburst(ctx, cx, cy - 6, R3 * 0.55 * easeOut(q * 2), "#e8551a", 1 - q, sd);
+    starburst(ctx, cx, cy - 6, R3 * 0.34 * easeOut(q * 2), "#ffc94d", 1 - q, sd + 7);
+    blob(ctx, cx, cy - 6, R3 * 0.45, "#ffe2a0", 0.8 * (1 - q * 1.6));
   }
   if (age > 180) for (let i = 0; i < 14; i++) {
-    const a = i * TAU34 / 14, fl = 0.7 + 0.3 * Math.sin(age / 55 + i * 2.1), h = (6 + 6 * rnd(i + 5)) * fl * fade, px2 = cx + Math.cos(a) * R2, py = cy + Math.sin(a) * R2;
+    const a = i * TAU34 / 14, fl = 0.7 + 0.3 * Math.sin(age / 55 + i * 2.1), h = (6 + 6 * rnd(i + 5)) * fl * fade, px3 = cx + Math.cos(a) * R3, py = cy + Math.sin(a) * R3;
     withAlpha(ctx, fade * smooth19((age - 180) / 120), () => {
       ctx.fillStyle = i % 2 ? "#ff7a1f" : "#ffc94d";
       ctx.strokeStyle = "#8a2a0c";
       ctx.lineWidth = 0.6;
       ctx.beginPath();
-      ctx.moveTo(px2 - 3, py);
-      ctx.quadraticCurveTo(px2 - 1, py - h * 0.6, px2, py - h);
-      ctx.quadraticCurveTo(px2 + 1, py - h * 0.6, px2 + 3, py);
+      ctx.moveTo(px3 - 3, py);
+      ctx.quadraticCurveTo(px3 - 1, py - h * 0.6, px3, py - h);
+      ctx.quadraticCurveTo(px3 + 1, py - h * 0.6, px3 + 3, py);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
     });
   }
   for (let i = 0; i < 12; i++) {
-    const h = clamp25(((age - 120) / 600 + rnd(i + 30) * 0.4) % 1), a = rnd(i + 40) * TAU34, d = R2 * rnd(i + 20) * 0.9;
+    const h = clamp25(((age - 120) / 600 + rnd(i + 30) * 0.4) % 1), a = rnd(i + 40) * TAU34, d = R3 * rnd(i + 20) * 0.9;
     mote(ctx, cx + Math.cos(a) * d + Math.sin(h * 6 + i) * 3, cy + Math.sin(a) * d - 6 - 34 * h, 1.2 * (1 - h), i % 3 ? F.spark : F.main, fade * (1 - h));
   }
   if (age > 500) {
@@ -50038,14 +50487,14 @@ function bloomAt(ctx, cx, cy, R2, age) {
       ctx.save();
       ctx.fillStyle = `rgba(52,40,36,${0.24 * (1 - q)})`;
       ctx.beginPath();
-      ctx.arc(cx + (i - 2) * R2 * 0.25, cy - 8 - 18 * q - 4 * rnd(i), 5 + 8 * q, 0, TAU34);
+      ctx.arc(cx + (i - 2) * R3 * 0.25, cy - 8 - 18 * q - 4 * rnd(i), 5 + 8 * q, 0, TAU34);
       ctx.fill();
       ctx.restore();
     }
   }
 }
 function flashfreeze(ctx, b, age) {
-  const F = CAST_COLORS.frost, K2 = { deep: "#1f5680", main: F.main, spark: "#e6f8ff" }, R2 = b.reach ?? 99, x = b.x, y = b.y, front2 = easeOut(age / 230), rr = R2 * front2, fade = 1 - smooth19((age - 520) / 280);
+  const F = CAST_COLORS.frost, K3 = { deep: "#1f5680", main: F.main, spark: "#e6f8ff" }, R3 = b.reach ?? 99, x = b.x, y = b.y, front2 = easeOut(age / 230), rr = R3 * front2, fade = 1 - smooth19((age - 520) / 280);
   ctx.save();
   ctx.globalAlpha = fade;
   const g = ctx.createRadialGradient(x, y, rr * 0.1, x, y, Math.max(1, rr));
@@ -50059,21 +50508,21 @@ function flashfreeze(ctx, b, age) {
   withAlpha(ctx, 0.55 * fade, () => {
     for (let i = 0; i < 6; i++) {
       const a = i * TAU34 / 6 + 0.26, l = Math.min(rr, 26);
-      neon(ctx, K2, 0.8, () => {
+      neon(ctx, K3, 0.8, () => {
         ctx.beginPath();
         ctx.moveTo(x + Math.cos(a) * 6, y + Math.sin(a) * 6);
         ctx.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l);
-        const px2 = x + Math.cos(a) * l * 0.6, py = y + Math.sin(a) * l * 0.6;
-        ctx.moveTo(px2, py);
-        ctx.lineTo(px2 + Math.cos(a + 0.7) * 6, py + Math.sin(a + 0.7) * 6);
-        ctx.moveTo(px2, py);
-        ctx.lineTo(px2 + Math.cos(a - 0.7) * 6, py + Math.sin(a - 0.7) * 6);
+        const px3 = x + Math.cos(a) * l * 0.6, py = y + Math.sin(a) * l * 0.6;
+        ctx.moveTo(px3, py);
+        ctx.lineTo(px3 + Math.cos(a + 0.7) * 6, py + Math.sin(a + 0.7) * 6);
+        ctx.moveTo(px3, py);
+        ctx.lineTo(px3 + Math.cos(a - 0.7) * 6, py + Math.sin(a - 0.7) * 6);
       });
     }
   });
   if (age < 440) {
     const k = age / 440;
-    neon(ctx, K2, 3.4 * (1 - k) + 0.7, () => {
+    neon(ctx, K3, 3.4 * (1 - k) + 0.7, () => {
       ctx.beginPath();
       for (let i = 0; i <= 40; i++) {
         const a = i * TAU34 / 40, j = rr * (1 + (i % 2 ? 0.04 : -0.025));
@@ -50082,9 +50531,9 @@ function flashfreeze(ctx, b, age) {
       }
     });
   }
-  if (age > 180) runeRing(ctx, x, y, R2, K2, fade * smooth19((age - 180) / 120), age / 1200, 18);
+  if (age > 180) runeRing(ctx, x, y, R3, K3, fade * smooth19((age - 180) / 120), age / 1200, 18);
   for (let i = 0; i < 14; i++) {
-    const a = i * TAU34 / 14 + rnd(i + 2) * 0.3, d = R2 * (0.45 + 0.48 * rnd(i + 8)), born = d / R2 * 230, h = (age - born) / 1e3;
+    const a = i * TAU34 / 14 + rnd(i + 2) * 0.3, d = R3 * (0.45 + 0.48 * rnd(i + 8)), born = d / R3 * 230, h = (age - born) / 1e3;
     if (h < 0) continue;
     const grow = h < 0.12 ? 1 + 2.7 * (h / 0.12 - 1) ** 3 + 1.7 * (h / 0.12 - 1) ** 2 : 1, f2 = 1 - smooth19((age - born - 300) / 200);
     crystal2(ctx, x + Math.cos(a) * d, y + Math.sin(a) * d, (11 + 9 * rnd(i + 4)) * grow, 3.8, Math.cos(a) * 0.35, f2);
@@ -50096,7 +50545,7 @@ function flashfreeze(ctx, b, age) {
   if (age < 320) {
     const k = age / 320, s = 7 + 12 * easeOut(k);
     blob(ctx, x, y - 14, 20 * (1 - k) + 8, F.main, 0.8 * (1 - k));
-    neon(ctx, K2, 1.5 * (1 - k) + 0.3, () => {
+    neon(ctx, K3, 1.5 * (1 - k) + 0.3, () => {
       ctx.beginPath();
       for (let i = 0; i < 6; i++) {
         const a = i * Math.PI / 3;
@@ -50107,14 +50556,14 @@ function flashfreeze(ctx, b, age) {
   }
 }
 function ballLightningCast(ctx, b, age) {
-  const F = CAST_COLORS.lightning, K2 = { deep: "#5b3fd6", main: F.main, spark: F.spark }, f = b.dx < 0 ? -1 : 1, hx = b.x + f * 12, hy = b.y - 16, k = age / 360, seal = easeOut(age / 90) * (1 - smooth19((age - 220) / 140));
+  const F = CAST_COLORS.lightning, K3 = { deep: "#5b3fd6", main: F.main, spark: F.spark }, f = b.dx < 0 ? -1 : 1, hx = b.x + f * 12, hy = b.y - 16, k = age / 360, seal = easeOut(age / 90) * (1 - smooth19((age - 220) / 140));
   if (seal > 0) {
     blob(ctx, hx, hy, 18 * seal, F.main, 0.6 * seal);
-    neon(ctx, K2, 1.4, () => {
+    neon(ctx, K3, 1.4, () => {
       ctx.beginPath();
       ctx.ellipse(hx, hy, 6 * seal, 12 * seal, 0, 0, TAU34);
     }, seal);
-    neon(ctx, K2, 1, () => {
+    neon(ctx, K3, 1, () => {
       ctx.beginPath();
       ctx.moveTo(hx - 3 * seal, hy - 6 * seal);
       ctx.lineTo(hx + 2 * seal, hy - 1 * seal);
@@ -50131,7 +50580,7 @@ function ballLightningCast(ctx, b, age) {
 var QUAKE_IMPACT_LIFE = 440;
 function drawQuakeImpact(ctx, x, y, age, crit = false) {
   if (age < 0 || age >= QUAKE_IMPACT_LIFE) return;
-  const K2 = C.breaker, h = age / QUAKE_IMPACT_LIFE, big = crit ? 1.3 : 1;
+  const K3 = C.breaker, h = age / QUAKE_IMPACT_LIFE, big = crit ? 1.3 : 1;
   ctx.save();
   ctx.fillStyle = `rgba(112,88,64,${0.4 * (1 - h)})`;
   ctx.beginPath();
@@ -50139,8 +50588,8 @@ function drawQuakeImpact(ctx, x, y, age, crit = false) {
   ctx.fill();
   if (h < 0.4) {
     const q = h / 0.4;
-    blob(ctx, x, y - 6, (14 + 10 * q) * big, K2.main, 0.85 * (1 - q));
-    neon(ctx, K2, 1.6 * (1 - q), () => {
+    blob(ctx, x, y - 6, (14 + 10 * q) * big, K3.main, 0.85 * (1 - q));
+    neon(ctx, K3, 1.6 * (1 - q), () => {
       ctx.beginPath();
       for (let i = 0; i < 5; i++) {
         const a = -Math.PI / 2 + (i - 2) * 0.38, l = (10 + 12 * easeOut(q)) * big;
@@ -50150,15 +50599,15 @@ function drawQuakeImpact(ctx, x, y, age, crit = false) {
     });
   }
   for (let i = 0; i < 5; i++) {
-    const a = -Math.PI / 2 + (rnd(i + 3) - 0.5) * 2.2, v = 30 + 30 * rnd(i + 8), px2 = x + Math.cos(a) * v * h, py = y - 4 + Math.sin(a) * v * h + 90 * h * h, s = 1.6 + 1.2 * rnd(i);
+    const a = -Math.PI / 2 + (rnd(i + 3) - 0.5) * 2.2, v = 30 + 30 * rnd(i + 8), px3 = x + Math.cos(a) * v * h, py = y - 4 + Math.sin(a) * v * h + 90 * h * h, s = 1.6 + 1.2 * rnd(i);
     withAlpha(ctx, 1 - h, () => {
       ctx.fillStyle = "#5a3d29";
       ctx.strokeStyle = "#1b0f07";
       ctx.lineWidth = 0.6;
       ctx.beginPath();
-      ctx.moveTo(px2 - s, py);
-      ctx.lineTo(px2, py - s);
-      ctx.lineTo(px2 + s, py + s * 0.4);
+      ctx.moveTo(px3 - s, py);
+      ctx.lineTo(px3, py - s);
+      ctx.lineTo(px3 + s, py + s * 0.4);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
@@ -50188,7 +50637,7 @@ function drawLightningOrb(ctx, o, time) {
   ctx.restore();
 }
 function drawCinderTrail(ctx, tr, time) {
-  const F = CAST_COLORS.fire, K2 = { deep: "#8a2a0c", main: F.main, spark: F.spark }, fade = Math.min(1, (tr.ticks ?? 60) / 30), dx = tr.x2 - tr.x, dy = tr.y2 - tr.y, len = Math.hypot(dx, dy);
+  const F = CAST_COLORS.fire, K3 = { deep: "#8a2a0c", main: F.main, spark: F.spark }, fade = Math.min(1, (tr.ticks ?? 60) / 30), dx = tr.x2 - tr.x, dy = tr.y2 - tr.y, len = Math.hypot(dx, dy);
   if (fade <= 0) return;
   ctx.save();
   ctx.globalAlpha *= fade;
@@ -50200,22 +50649,22 @@ function drawCinderTrail(ctx, tr, time) {
   ctx.lineTo(tr.x2, tr.y2);
   ctx.stroke();
   ctx.restore();
-  neon(ctx, K2, 1.2, () => {
+  neon(ctx, K3, 1.2, () => {
     ctx.beginPath();
     ctx.moveTo(tr.x, tr.y);
     ctx.lineTo(tr.x2, tr.y2);
   }, fade * 0.9);
   const n = Math.max(2, Math.round(len / 9));
   for (let i = 0; i <= n; i++) {
-    const k = i / n, px2 = tr.x + dx * k + (rnd(i + 11) - 0.5) * 5, py = tr.y + dy * k + (rnd(i + 23) - 0.5) * 4, h = (5 + 6 * rnd(i + 5)) * (0.7 + 0.3 * Math.sin(time / 55 + i * 2.1));
+    const k = i / n, px3 = tr.x + dx * k + (rnd(i + 11) - 0.5) * 5, py = tr.y + dy * k + (rnd(i + 23) - 0.5) * 4, h = (5 + 6 * rnd(i + 5)) * (0.7 + 0.3 * Math.sin(time / 55 + i * 2.1));
     withAlpha(ctx, fade, () => {
       ctx.fillStyle = i % 2 ? "#ff7a1f" : "#ffc94d";
       ctx.strokeStyle = "#8a2a0c";
       ctx.lineWidth = 0.6;
       ctx.beginPath();
-      ctx.moveTo(px2 - 2.6, py);
-      ctx.quadraticCurveTo(px2 - 1, py - h * 0.6, px2, py - h);
-      ctx.quadraticCurveTo(px2 + 1, py - h * 0.6, px2 + 2.6, py);
+      ctx.moveTo(px3 - 2.6, py);
+      ctx.quadraticCurveTo(px3 - 1, py - h * 0.6, px3, py - h);
+      ctx.quadraticCurveTo(px3 + 1, py - h * 0.6, px3 + 2.6, py);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
@@ -50754,11 +51203,11 @@ function createCombatVfx() {
       if (age < 220) {
         ctx.save();
         ctx.globalAlpha = 1 - age / 220;
-        const px2 = b.x + b.dx * 18, py = b.y - 8;
+        const px3 = b.x + b.dx * 18, py = b.y - 8;
         ctx.strokeStyle = "#ffe19a";
         ctx.lineWidth = 1.4;
         ctx.beginPath();
-        ctx.arc(px2, py, 3 + 5 * age / 220, 0, Math.PI * 2);
+        ctx.arc(px3, py, 3 + 5 * age / 220, 0, Math.PI * 2);
         ctx.stroke();
         ctx.restore();
       }
@@ -50907,7 +51356,7 @@ function drawBossChestParticlesD12_5B(ctx, x, y, age, seed2, front2) {
   for (let i = 0; i < 14; i++) {
     const delay = i % 5 * 3, travel = Math.max(0, Math.min(1, (age - delay) / 58));
     if (travel <= 0) continue;
-    const angle3 = i * 2.399963 + seed2 % 97 * 0.017, radius = 8 + travel * (24 + i % 4 * 4), px2 = x + Math.cos(angle3) * radius, py = y + 5 + Math.sin(angle3) * radius * 0.44 - Math.sin(travel * Math.PI) * (10 + i % 3 * 4), isFront = py >= y + 4;
+    const angle3 = i * 2.399963 + seed2 % 97 * 0.017, radius = 8 + travel * (24 + i % 4 * 4), px3 = x + Math.cos(angle3) * radius, py = y + 5 + Math.sin(angle3) * radius * 0.44 - Math.sin(travel * Math.PI) * (10 + i % 3 * 4), isFront = py >= y + 4;
     if (isFront !== front2) continue;
     const alpha2 = fade * Math.sin(travel * Math.PI);
     if (alpha2 <= 0) continue;
@@ -50916,10 +51365,10 @@ function drawBossChestParticlesD12_5B(ctx, x, y, age, seed2, front2) {
     ctx.strokeStyle = "#26351f";
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(px2, py - 3);
-    ctx.lineTo(px2 + 2.5, py);
-    ctx.lineTo(px2, py + 3);
-    ctx.lineTo(px2 - 2.5, py);
+    ctx.moveTo(px3, py - 3);
+    ctx.lineTo(px3 + 2.5, py);
+    ctx.lineTo(px3, py + 3);
+    ctx.lineTo(px3 - 2.5, py);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
@@ -50983,13 +51432,13 @@ function createResourcePresentation() {
         for (let n = 0; n < 22; n++) {
           const fly = n < 16;
           if (fly && age > 600) continue;
-          const progress8 = Math.min(age / 1e3, fly ? 0.6 : 0.5), angle3 = n * 2.39996 + r.ordinal, speed = fly ? 60 + n % 5 * 18 : 10 + n % 5 * 5, px2 = x + Math.cos(angle3) * speed * progress8, py = y + Math.sin(angle3) * speed * progress8 - (fly ? 75 * progress8 - 140 * progress8 * progress8 : 0);
+          const progress8 = Math.min(age / 1e3, fly ? 0.6 : 0.5), angle3 = n * 2.39996 + r.ordinal, speed = fly ? 60 + n % 5 * 18 : 10 + n % 5 * 5, px3 = x + Math.cos(angle3) * speed * progress8, py = y + Math.sin(angle3) * speed * progress8 - (fly ? 75 * progress8 - 140 * progress8 * progress8 : 0);
           ctx.globalAlpha = Math.max(0, 1 - age / (fly ? 600 : 4500));
           ctx.fillStyle = palette[n % 3];
           ctx.beginPath();
-          ctx.moveTo(px2 - 2, py);
-          ctx.lineTo(px2 + 1, py - 3);
-          ctx.lineTo(px2 + 3, py + 1);
+          ctx.moveTo(px3 - 2, py);
+          ctx.lineTo(px3 + 1, py - 3);
+          ctx.lineTo(px3 + 3, py + 1);
           ctx.closePath();
           ctx.fill();
         }
@@ -51115,7 +51564,7 @@ function drawBossChestParticlesD12_5B2(ctx, x, y, age, seed2, front2) {
   for (let i = 0; i < 14; i++) {
     const delay = i % 5 * 3, travel = Math.max(0, Math.min(1, (age - delay) / 58));
     if (travel <= 0) continue;
-    const angle3 = i * 2.399963 + seed2 % 97 * 0.017, radius = 8 + travel * (24 + i % 4 * 4), px2 = x + Math.cos(angle3) * radius, py = y + 5 + Math.sin(angle3) * radius * 0.44 - Math.sin(travel * Math.PI) * (10 + i % 3 * 4), isFront = py >= y + 4;
+    const angle3 = i * 2.399963 + seed2 % 97 * 0.017, radius = 8 + travel * (24 + i % 4 * 4), px3 = x + Math.cos(angle3) * radius, py = y + 5 + Math.sin(angle3) * radius * 0.44 - Math.sin(travel * Math.PI) * (10 + i % 3 * 4), isFront = py >= y + 4;
     if (isFront !== front2) continue;
     const alpha2 = fade * Math.sin(travel * Math.PI);
     if (alpha2 <= 0) continue;
@@ -51124,10 +51573,10 @@ function drawBossChestParticlesD12_5B2(ctx, x, y, age, seed2, front2) {
     ctx.strokeStyle = "#26351f";
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(px2, py - 3);
-    ctx.lineTo(px2 + 2.5, py);
-    ctx.lineTo(px2, py + 3);
-    ctx.lineTo(px2 - 2.5, py);
+    ctx.moveTo(px3, py - 3);
+    ctx.lineTo(px3 + 2.5, py);
+    ctx.lineTo(px3, py + 3);
+    ctx.lineTo(px3 - 2.5, py);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
@@ -51193,13 +51642,13 @@ function createResourcePresentationV2({ art = null } = {}) {
         for (let n = 0; n < 22; n++) {
           const fly = n < 16;
           if (fly && age > 600) continue;
-          const progress8 = Math.min(age / 1e3, fly ? 0.6 : 0.5), angle3 = n * 2.39996 + r.ordinal, speed = fly ? 60 + n % 5 * 18 : 10 + n % 5 * 5, px2 = x + Math.cos(angle3) * speed * progress8, py = y + Math.sin(angle3) * speed * progress8 - (fly ? 75 * progress8 - 140 * progress8 * progress8 : 0);
+          const progress8 = Math.min(age / 1e3, fly ? 0.6 : 0.5), angle3 = n * 2.39996 + r.ordinal, speed = fly ? 60 + n % 5 * 18 : 10 + n % 5 * 5, px3 = x + Math.cos(angle3) * speed * progress8, py = y + Math.sin(angle3) * speed * progress8 - (fly ? 75 * progress8 - 140 * progress8 * progress8 : 0);
           ctx.globalAlpha = Math.max(0, 1 - age / (fly ? 600 : 4500));
           ctx.fillStyle = palette[n % 3];
           ctx.beginPath();
-          ctx.moveTo(px2 - 2, py);
-          ctx.lineTo(px2 + 1, py - 3);
-          ctx.lineTo(px2 + 3, py + 1);
+          ctx.moveTo(px3 - 2, py);
+          ctx.lineTo(px3 + 1, py - 3);
+          ctx.lineTo(px3 + 3, py + 1);
           ctx.closePath();
           ctx.fill();
         }
@@ -51555,9 +52004,9 @@ function createInteriorLightClips() {
           break;
         }
       }
-      const px2 = sx + dx * dist3, py = sy + dy * dist3;
-      if (i === 0) path9.moveTo(px2, py);
-      else path9.lineTo(px2, py);
+      const px3 = sx + dx * dist3, py = sy + dy * dist3;
+      if (i === 0) path9.moveTo(px3, py);
+      else path9.lineTo(px3, py);
     }
     path9.closePath();
     builds++;
@@ -51732,17 +52181,17 @@ function createLighting(canvas, { presentation = null } = {}) {
     for (let i = 0; i < field2.values.length; i++) {
       const distance8 = field2.values[i];
       if (!Number.isFinite(distance8)) continue;
-      const x = i % field2.side, y = Math.floor(i / field2.side), px2 = field2.x0 + x * field2.step, py = field2.y0 + y * field2.step;
+      const x = i % field2.side, y = Math.floor(i / field2.side), px3 = field2.x0 + x * field2.step, py = field2.y0 + y * field2.step;
       c.globalAlpha = 0.36 * Math.pow(1 - distance8 / field2.reach, 1.25);
       c.fillStyle = "#dfbf87";
       c.fillRect(x, y, 1, 1);
-      mask.rect(px2, py, field2.step, field2.step);
+      mask.rect(px3, py, field2.step, field2.step);
       g.fillStyle = "#dfbf87";
       g.globalAlpha = c.globalAlpha * 0.28;
-      if (!field2.floor(px2 - 1, py + 8)) g.fillRect(px2 - 2, py, 2, 16);
-      if (!field2.floor(px2 + 16, py + 8)) g.fillRect(px2 + 16, py, 2, 16);
-      if (!field2.floor(px2 + 8, py - 1)) g.fillRect(px2, py - 2, 16, 2);
-      if (!field2.floor(px2 + 8, py + 16)) g.fillRect(px2, py + 16, 16, 2);
+      if (!field2.floor(px3 - 1, py + 8)) g.fillRect(px3 - 2, py, 2, 16);
+      if (!field2.floor(px3 + 16, py + 8)) g.fillRect(px3 + 16, py, 2, 16);
+      if (!field2.floor(px3 + 8, py - 1)) g.fillRect(px3, py - 2, 16, 2);
+      if (!field2.floor(px3 + 8, py + 16)) g.fillRect(px3, py + 16, 16, 2);
     }
     g.globalAlpha = 1;
     g.save();
@@ -52603,10 +53052,10 @@ function drawGeneratedCaveSurfaceD12_1(ctx, space) {
   ctx.restore();
   const boundary2 = [];
   for (let y = 0; y < rows.length; y++) for (let x = 0; x < rows[y].length; x++) if (rows[y][x] === "0" && [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => rows[y + dy]?.[x + dx] === "1")) boundary2.push({ x, y });
-  const band = new Path2D();
-  for (const b of boundary2) band.roundRect(b.x * t - 3, b.y * t - 3, t + 6, t + 6, 10);
+  const band2 = new Path2D();
+  for (const b of boundary2) band2.roundRect(b.x * t - 3, b.y * t - 3, t + 6, t + 6, 10);
   ctx.fillStyle = "#222e2a";
-  ctx.fill(band);
+  ctx.fill(band2);
   for (const b of boundary2) {
     const n = hash20(b.x, b.y, space.visual.motifs?.length ?? 0) >>> 0;
     if (n % 100 > 62) continue;
@@ -52699,10 +53148,10 @@ function drawCaveSurfaceD10(ctx, space) {
   ctx.restore();
   const boundary2 = [];
   for (let y = 0; y < rows.length; y++) for (let x = 0; x < rows[y].length; x++) if (rows[y][x] === "0" && [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, 1], [1, -1], [-1, -1]].some(([dx, dy]) => rows[y + dy]?.[x + dx] === "1")) boundary2.push({ x, y });
-  const band = new Path2D();
-  for (const b of boundary2) band.roundRect(b.x * t - 4, b.y * t - 4, t + 8, t + 8, 12);
+  const band2 = new Path2D();
+  for (const b of boundary2) band2.roundRect(b.x * t - 4, b.y * t - 4, t + 8, t + 8, 12);
   ctx.fillStyle = "#222e2a";
-  ctx.fill(band);
+  ctx.fill(band2);
   const faces = [[[[5.5, 4.4], [8.2, 2.8], [14.6, 2.7], [18.1, 4.6], [17.4, 5.5], [9.1, 4.7]], "#3d4b45"], [[[3.1, 7], [4.3, 5.5], [5.1, 6.4], [4.2, 12.3], [6.2, 14.2], [5, 15.1], [3.2, 12.6]], "#34413c"], [[[6.2, 13.4], [8.8, 14.6], [11.2, 13.8], [13, 14.8], [12.2, 15.8], [7.1, 15.8]], "#3b4842"], [[[20.3, 4.8], [22.1, 3.4], [25.3, 3.7], [27, 5.7], [26.7, 9.8], [25.6, 10.9], [25.4, 5.3]], "#3a4842"], [[[19.3, 10], [22, 10.3], [24.7, 11.2], [26.1, 10], [26.7, 11.1], [24.9, 12.1], [21.1, 11.4]], "#303d38"]];
   for (const [points2, color28] of faces) poly5(ctx, points2.map(([x, y]) => [x * t, y * t]), color28, null);
   for (const b of boundary2) {
@@ -53061,14 +53510,14 @@ function mineral(ctx, x, y) {
   ctx.stroke();
   const colors = ["#4b9d91", "#6ac7b4", "#9de6d0"];
   for (const [dx, h, w, c, tilt] of [[-15, 18, 7, 0, -3], [-3, 29, 9, 1, 2], [10, 22, 8, 2, -2], [20, 14, 6, 0, 2]]) {
-    const top = y - h, px2 = x + dx;
-    poly5(ctx, [[px2 - w, y + 5], [px2 - w * 0.72, y - h * 0.55], [px2 + tilt - w * 0.32, top], [px2 + tilt + w * 0.5, top + 3], [px2 + w * 0.7, y - h * 0.48], [px2 + w, y + 5]], colors[c], OUT2, 1.7);
+    const top = y - h, px3 = x + dx;
+    poly5(ctx, [[px3 - w, y + 5], [px3 - w * 0.72, y - h * 0.55], [px3 + tilt - w * 0.32, top], [px3 + tilt + w * 0.5, top + 3], [px3 + w * 0.7, y - h * 0.48], [px3 + w, y + 5]], colors[c], OUT2, 1.7);
     ctx.fillStyle = "rgba(222,255,244,.28)";
     ctx.beginPath();
-    ctx.moveTo(px2 + tilt - w * 0.25, top + 3);
-    ctx.lineTo(px2 + tilt + w * 0.38, top + 5);
-    ctx.lineTo(px2 + w * 0.3, y - 2);
-    ctx.lineTo(px2, y - 6);
+    ctx.moveTo(px3 + tilt - w * 0.25, top + 3);
+    ctx.lineTo(px3 + tilt + w * 0.38, top + 5);
+    ctx.lineTo(px3 + w * 0.3, y - 2);
+    ctx.lineTo(px3, y - 6);
     ctx.closePath();
     ctx.fill();
   }
@@ -53354,8 +53803,8 @@ function moss2(ctx, x, y, scale, seed2, spread = 1) {
     ctx.stroke();
   }
   for (let i = 0; i < 8; i++) {
-    const n = hash21(seed2, i, 263), px2 = x + (n % 101 - 50) * scale / 62 * spread, py = y + ((n >>> 8) % 41 - 20) * scale / 75, s = 1 + (n >>> 14) % 3;
-    poly6(ctx, [[px2, py - s], [px2 + s, py], [px2, py + s], [px2 - s, py]], i % 3 ? MOSS_LIGHT2 : "#b0aa68", null);
+    const n = hash21(seed2, i, 263), px3 = x + (n % 101 - 50) * scale / 62 * spread, py = y + ((n >>> 8) % 41 - 20) * scale / 75, s = 1 + (n >>> 14) % 3;
+    poly6(ctx, [[px3, py - s], [px3 + s, py], [px3, py + s], [px3 - s, py]], i % 3 ? MOSS_LIGHT2 : "#b0aa68", null);
   }
   ctx.restore();
 }
@@ -53476,13 +53925,13 @@ function roundedMass(ctx, points2, fill4) {
 }
 function ruinExteriorRootGeometryD11_3_4(x, y, seed2, side) {
   const n = hash21(seed2, side, 523), j = n % 7 - 3, main = side < 0 ? [{ x: x - 67, y: y + 27 }, { x: x - 89 + j, y: y + 43 }, { x: x - 124, y: y + 52 + j }, { x: x - 157, y: y + 61 + j }] : [{ x: x + 108, y: y + 33 }, { x: x + 124, y: y + 40 + j }, { x: x + 143 + j, y: y + 38 }, { x: x + 160, y: y + 40 + j }], fork = side < 0 ? [main[1], { x: x - 110, y: y + 70 + j }, { x: x - 134 - j, y: y + 86 }] : [main[1], { x: x + 142 + j, y: y + 51 }, { x: x + 160, y: y + 54 - j }];
-  return Object.freeze([{ points: main, widths: side < 0 ? [18, 16, 9, 2] : [11, 8, 4, 1.5] }, { points: fork, widths: side < 0 ? [9, 5, 1.5] : [5, 2.5, 1] }].map((shape2) => Object.freeze({ points: Object.freeze(shape2.points.map(Object.freeze)), widths: Object.freeze(shape2.widths) })));
+  return Object.freeze([{ points: main, widths: side < 0 ? [18, 16, 9, 2] : [11, 8, 4, 1.5] }, { points: fork, widths: side < 0 ? [9, 5, 1.5] : [5, 2.5, 1] }].map((shape3) => Object.freeze({ points: Object.freeze(shape3.points.map(Object.freeze)), widths: Object.freeze(shape3.widths) })));
 }
 function exteriorRootMass(ctx, x, y, seed2, side) {
   const shapes = ruinExteriorRootGeometryD11_3_4(x, y, seed2, side), main = shapes[0].points;
   roundedMass(ctx, taperedMass(main, shapes[0].widths, 2, 3, 4), "rgba(8,13,10,.42)");
-  for (const shape2 of shapes) roundedMass(ctx, taperedMass(shape2.points, shape2.widths, 3), INK45);
-  for (const shape2 of shapes) roundedMass(ctx, taperedMass(shape2.points, shape2.widths), "#72492d");
+  for (const shape3 of shapes) roundedMass(ctx, taperedMass(shape3.points, shape3.widths, 3), INK45);
+  for (const shape3 of shapes) roundedMass(ctx, taperedMass(shape3.points, shape3.widths), "#72492d");
   const a = main[0], b = main[Math.min(2, main.length - 1)];
   roundedMass(ctx, taperedMass([a, { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, b], [4, 3, 1]), "#a66e40");
 }
@@ -53682,9 +54131,9 @@ function drawRuinSurfaceD11_3(ctx, space) {
   }
   ctx.restore();
   for (let y = 0; y < rows.length; y++) for (let x = 0; x < rows[y].length; x++) if (rows[y][x] === "0" && [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => rows[y + dy]?.[x + dx] === "1")) {
-    const n = hash21(x, y, 77), px2 = x * t + 2 + n % 5, py = y * t + 3 + (n >>> 4) % 4, south = rows[y + 1]?.[x] === "1";
-    stone(ctx, px2, py, t - 4, t - (south ? 1 : 7), n);
-    if (n % 4 === 0) moss2(ctx, px2 + 14, py + 6, 11, n + 1301, 0.82);
+    const n = hash21(x, y, 77), px3 = x * t + 2 + n % 5, py = y * t + 3 + (n >>> 4) % 4, south = rows[y + 1]?.[x] === "1";
+    stone(ctx, px3, py, t - 4, t - (south ? 1 : 7), n);
+    if (n % 4 === 0) moss2(ctx, px3 + 14, py + 6, 11, n + 1301, 0.82);
   }
   for (const d of space.visual.decorations ?? []) {
     const x = d.x * t, y = d.y * t;
@@ -53822,41 +54271,41 @@ function createSiteEnvironment(canvas, { authoredArt = null } = {}) {
   const pages = /* @__PURE__ */ new Map();
   let identity2 = null, builds = 0, caveSurface = null, ruinSurface = null;
   function drawTile(ctx, v, x, y, t, mode = "standard", space = null) {
-    const ox = v.originTile.x, oy = v.originTile.y, at3 = (cx, cy) => v.terrain[cy - oy]?.[cx - ox], type = at3(x, y), px2 = x * t, py = y * t;
+    const ox = v.originTile.x, oy = v.originTile.y, at3 = (cx, cy) => v.terrain[cy - oy]?.[cx - ox], type = at3(x, y), px3 = x * t, py = y * t;
     const ruin = mode === "ruin", fort = mode === "fort", cave = mode === "cave";
     if (fort && authoredArt?.fort?.interiorTile?.(ctx, space, x, y, t, type)) return;
     if (cave) {
       const n = x * 71 + y * 137 >>> 0;
       ctx.fillStyle = "#070c0d";
-      ctx.fillRect(px2, py, t, t);
+      ctx.fillRect(px3, py, t, t);
       if (type === "1") {
         ctx.fillStyle = ["#26332f", "#2d3a35", "#32403a"][n % 3];
         ctx.beginPath();
-        ctx.moveTo(px2, py + 2 + n % 4);
-        ctx.lineTo(px2 + t - 2, py);
-        ctx.lineTo(px2 + t, py + t - 3);
-        ctx.lineTo(px2 + 2, py + t);
+        ctx.moveTo(px3, py + 2 + n % 4);
+        ctx.lineTo(px3 + t - 2, py);
+        ctx.lineTo(px3 + t, py + t - 3);
+        ctx.lineTo(px3 + 2, py + t);
         ctx.closePath();
         ctx.fill();
         ctx.fillStyle = "rgba(116,137,119,.15)";
         ctx.beginPath();
-        ctx.ellipse(px2 + 8 + n % 17, py + 9 + (n >>> 5) % 15, 8 + n % 6, 3 + n % 3, (n % 7 - 3) * 0.08, 0, Math.PI * 2);
+        ctx.ellipse(px3 + 8 + n % 17, py + 9 + (n >>> 5) % 15, 8 + n % 6, 3 + n % 3, (n % 7 - 3) * 0.08, 0, Math.PI * 2);
         ctx.fill();
         if (n % 5 === 0) {
           ctx.strokeStyle = "rgba(12,18,17,.48)";
           ctx.beginPath();
-          ctx.moveTo(px2 + 3, py + 24);
-          ctx.quadraticCurveTo(px2 + 15, py + 17, px2 + 29, py + 26);
+          ctx.moveTo(px3 + 3, py + 24);
+          ctx.quadraticCurveTo(px3 + 15, py + 17, px3 + 29, py + 26);
           ctx.stroke();
         }
       } else {
         ctx.fillStyle = ["#26312f", "#303b37", "#38443e"][n % 3];
         ctx.beginPath();
-        ctx.moveTo(px2 + 1, py + 5);
-        ctx.lineTo(px2 + 9 + n % 7, py + 1);
-        ctx.lineTo(px2 + t - 2, py + 6);
-        ctx.lineTo(px2 + t - 5, py + t - 2);
-        ctx.lineTo(px2 + 3, py + t - 5);
+        ctx.moveTo(px3 + 1, py + 5);
+        ctx.lineTo(px3 + 9 + n % 7, py + 1);
+        ctx.lineTo(px3 + t - 2, py + 6);
+        ctx.lineTo(px3 + t - 5, py + t - 2);
+        ctx.lineTo(px3 + 3, py + t - 5);
         ctx.closePath();
         ctx.fill();
         ctx.strokeStyle = "#111a18";
@@ -53864,74 +54313,74 @@ function createSiteEnvironment(canvas, { authoredArt = null } = {}) {
         ctx.stroke();
         ctx.fillStyle = "#59675e";
         ctx.beginPath();
-        ctx.moveTo(px2 + 5, py + 7);
-        ctx.lineTo(px2 + 18, py + 3);
-        ctx.lineTo(px2 + 27, py + 8);
-        ctx.lineTo(px2 + 14, py + 12);
+        ctx.moveTo(px3 + 5, py + 7);
+        ctx.lineTo(px3 + 18, py + 3);
+        ctx.lineTo(px3 + 27, py + 8);
+        ctx.lineTo(px3 + 14, py + 12);
         ctx.closePath();
         ctx.fill();
         if (at3(x, y + 1) === "1") {
           ctx.fillStyle = "#161f1c";
-          ctx.fillRect(px2, py + t - 10, t, 8);
+          ctx.fillRect(px3, py + t - 10, t, 8);
           ctx.fillStyle = "#0b1110";
-          ctx.fillRect(px2, py + t - 2, t, 2);
+          ctx.fillRect(px3, py + t - 2, t, 2);
         }
       }
       return;
     }
     ctx.fillStyle = fort ? "#090806" : "#05030a";
-    ctx.fillRect(px2, py, t, t);
+    ctx.fillRect(px3, py, t, t);
     if (type === "1") {
       if (fort) {
         const n = x * 71 + y * 137 >>> 0;
         ctx.fillStyle = ["#4b4435", "#544a37", "#484133"][n % 3];
-        ctx.fillRect(px2, py, t, t);
+        ctx.fillRect(px3, py, t, t);
         ctx.fillStyle = "rgba(218,181,112,.11)";
         ctx.beginPath();
-        ctx.moveTo(px2 + 2, py + 4);
-        ctx.lineTo(px2 + t - 3, py + 2 + n % 3);
-        ctx.lineTo(px2 + t - 8, py + 7 + n % 3);
-        ctx.lineTo(px2 + 5, py + 9);
+        ctx.moveTo(px3 + 2, py + 4);
+        ctx.lineTo(px3 + t - 3, py + 2 + n % 3);
+        ctx.lineTo(px3 + t - 8, py + 7 + n % 3);
+        ctx.lineTo(px3 + 5, py + 9);
         ctx.closePath();
         ctx.fill();
         if (n % 4 === 0) {
           ctx.strokeStyle = "rgba(31,24,17,.28)";
           ctx.lineWidth = 1.2;
           ctx.beginPath();
-          ctx.moveTo(px2 + 4, py + t - 5);
-          ctx.quadraticCurveTo(px2 + t * 0.45, py + t - 10, px2 + t - 3, py + t - 6);
+          ctx.moveTo(px3 + 4, py + t - 5);
+          ctx.quadraticCurveTo(px3 + t * 0.45, py + t - 10, px3 + t - 3, py + t - 6);
           ctx.stroke();
         }
       } else {
         ctx.fillStyle = ruin ? "#17251f" : "#121822";
-        ctx.fillRect(px2, py, t, t);
+        ctx.fillRect(px3, py, t, t);
         ctx.fillStyle = (ruin ? ["#34463a", "#2b3d34", "#25362f"] : ["#222a38", "#1d2532", "#161c28"])[(x * 71 + y * 137) % 3];
-        ctx.fillRect(px2 + 1, py + 1, t - 2, t - 2);
+        ctx.fillRect(px3 + 1, py + 1, t - 2, t - 2);
         ctx.fillStyle = ruin ? "rgba(190,215,164,.10)" : "rgba(224,242,254,.06)";
-        ctx.fillRect(px2 + 2, py + 2, t - 4, 1);
+        ctx.fillRect(px3 + 2, py + 2, t - 4, 1);
         ctx.fillStyle = "rgba(0,0,0,.25)";
-        ctx.fillRect(px2 + 2, py + t - 3, t - 3, 2);
+        ctx.fillRect(px3 + 2, py + t - 3, t - 3, 2);
         if (ruin && (x * 31 + y * 17) % 7 === 0) {
           ctx.fillStyle = "#52734a";
           ctx.beginPath();
-          ctx.ellipse(px2 + 7 + (x * 5 + y) % 18, py + 13 + (x + y * 3) % 12, 5, 2.5, (x - y) * 0.2, 0, Math.PI * 2);
+          ctx.ellipse(px3 + 7 + (x * 5 + y) % 18, py + 13 + (x + y * 3) % 12, 5, 2.5, (x - y) * 0.2, 0, Math.PI * 2);
           ctx.fill();
         }
       }
       if (at3(x, y - 1) === "0") {
         ctx.fillStyle = "rgba(0,0,0,.32)";
-        ctx.fillRect(px2, py, t, 7);
+        ctx.fillRect(px3, py, t, 7);
       }
     } else if (type === "0") {
       const south = at3(x, y + 1) === "1";
       ctx.fillStyle = fort ? "#30352f" : ruin ? "#293632" : "#2a3548";
-      ctx.fillRect(px2, py, t, t);
+      ctx.fillRect(px3, py, t, t);
       ctx.fillStyle = fort ? ["#657065", "#737b6e", "#59645c"][(x * 13 + y * 7) % 3] : ruin ? "#617067" : "#3a475c";
       ctx.beginPath();
-      ctx.moveTo(px2 + 2, py + 3);
-      ctx.lineTo(px2 + t - 3, py + 1);
-      ctx.lineTo(px2 + t - 1, py + t - 4);
-      ctx.lineTo(px2 + 3, py + t - 2);
+      ctx.moveTo(px3 + 2, py + 3);
+      ctx.lineTo(px3 + t - 3, py + 1);
+      ctx.lineTo(px3 + t - 1, py + t - 4);
+      ctx.lineTo(px3 + 3, py + t - 2);
       ctx.closePath();
       ctx.fill();
       ctx.strokeStyle = fort ? "#28312c" : "#0a0e17";
@@ -53940,65 +54389,65 @@ function createSiteEnvironment(canvas, { authoredArt = null } = {}) {
       if (fort) {
         ctx.fillStyle = "#92998a";
         ctx.beginPath();
-        ctx.moveTo(px2 + 4, py + 4);
-        ctx.lineTo(px2 + t - 5, py + 3);
-        ctx.lineTo(px2 + t - 8, py + 7);
-        ctx.lineTo(px2 + 6, py + 8);
+        ctx.moveTo(px3 + 4, py + 4);
+        ctx.lineTo(px3 + t - 5, py + 3);
+        ctx.lineTo(px3 + t - 8, py + 7);
+        ctx.lineTo(px3 + 6, py + 8);
         ctx.closePath();
         ctx.fill();
         ctx.strokeStyle = "#414c45";
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(px2 + 3, py + 17 + (x + y) % 3);
-        ctx.lineTo(px2 + t - 3, py + 15 + (x * 3 + y) % 4);
+        ctx.moveTo(px3 + 3, py + 17 + (x + y) % 3);
+        ctx.lineTo(px3 + t - 3, py + 15 + (x * 3 + y) % 4);
         ctx.stroke();
       }
       if (south) {
         ctx.fillStyle = fort ? "#343a34" : "#161e2b";
-        ctx.fillRect(px2, py + t - 10, t, 8);
+        ctx.fillRect(px3, py + t - 10, t, 8);
         ctx.fillStyle = fort ? "#1b211d" : "#0a0e17";
-        ctx.fillRect(px2, py + t - 2, t, 2);
+        ctx.fillRect(px3, py + t - 2, t, 2);
       }
     }
-    if (!fort) for (const d of v.decorations?.filter((p) => p.x === x && p.y === y) ?? []) drawLegacyDecoration(ctx, d, px2, py);
+    if (!fort) for (const d of v.decorations?.filter((p) => p.x === x && p.y === y) ?? []) drawLegacyDecoration(ctx, d, px3, py);
   }
-  function drawLegacyDecoration(ctx, d, px2, py) {
+  function drawLegacyDecoration(ctx, d, px3, py) {
     if (d.kind === "sconce") {
       ctx.fillStyle = "#090e16";
-      ctx.fillRect(px2 + 12, py + 17, 8, 12);
+      ctx.fillRect(px3 + 12, py + 17, 8, 12);
       ctx.fillStyle = "#967443";
-      ctx.fillRect(px2 + 14, py + 19, 4, 8);
+      ctx.fillRect(px3 + 14, py + 19, 4, 8);
       ctx.fillStyle = "#e7ba66";
-      ctx.fillRect(px2 + 12, py + 12, 8, 9);
+      ctx.fillRect(px3 + 12, py + 12, 8, 9);
       ctx.fillStyle = "#ffedb1";
-      ctx.fillRect(px2 + 15, py + 13, 3, 6);
+      ctx.fillRect(px3 + 15, py + 13, 3, 6);
     } else if (d.kind === "vine") {
       ctx.strokeStyle = "#3f733e";
       ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.moveTo(px2 + 5, py + 1);
-      ctx.bezierCurveTo(px2 + 20, py + 8, px2 + 4, py + 18, px2 + 24, py + 31);
+      ctx.moveTo(px3 + 5, py + 1);
+      ctx.bezierCurveTo(px3 + 20, py + 8, px3 + 4, py + 18, px3 + 24, py + 31);
       ctx.stroke();
     } else if (d.kind === "roots") {
       ctx.strokeStyle = "#655036";
       ctx.lineWidth = 3;
       for (let i = 0; i < 3; i++) {
         ctx.beginPath();
-        ctx.moveTo(px2 + 16, py + 8);
-        ctx.quadraticCurveTo(px2 + 8 + i * 9, py + 17, px2 + 3 + i * 12, py + 30);
+        ctx.moveTo(px3 + 16, py + 8);
+        ctx.quadraticCurveTo(px3 + 8 + i * 9, py + 17, px3 + 3 + i * 12, py + 30);
         ctx.stroke();
       }
     } else if (d.kind === "rubble") {
       ctx.fillStyle = "#68736c";
-      for (let i = 0; i < 4; i++) ctx.fillRect(px2 + 5 + i * 6, py + 19 - i % 2 * 4, 7, 6);
+      for (let i = 0; i < 4; i++) ctx.fillRect(px3 + 5 + i * 6, py + 19 - i % 2 * 4, 7, 6);
     } else if (d.kind === "mushrooms") {
       ctx.fillStyle = "#d9c69a";
-      ctx.fillRect(px2 + 10, py + 22, 2, 6);
-      ctx.fillRect(px2 + 18, py + 19, 2, 8);
+      ctx.fillRect(px3 + 10, py + 22, 2, 6);
+      ctx.fillRect(px3 + 18, py + 19, 2, 8);
       ctx.fillStyle = "#a96a58";
       ctx.beginPath();
-      ctx.arc(px2 + 11, py + 21, 4, Math.PI, 0);
-      ctx.arc(px2 + 19, py + 18, 5, Math.PI, 0);
+      ctx.arc(px3 + 11, py + 21, 4, Math.PI, 0);
+      ctx.arc(px3 + 19, py + 18, 5, Math.PI, 0);
       ctx.fill();
     }
   }
@@ -54213,8 +54662,8 @@ function createSiteEnvironment(canvas, { authoredArt = null } = {}) {
       return { paintedTerrainTiles: space.collision.width * space.collision.height, paintedBlockers: space.visual.blockers?.length ?? 0, totalTerrainTiles: space.collision.width * space.collision.height };
     }
     let painted = 0;
-    for (let py = Math.max(0, Math.floor(view.y / extent)); py <= Math.min(Math.ceil(space.collision.height / size) - 1, Math.floor((view.y + view.height) / extent)); py++) for (let px2 = Math.max(0, Math.floor(view.x / extent)); px2 <= Math.min(Math.ceil(space.collision.width / size) - 1, Math.floor((view.x + view.width) / extent)); px2++) {
-      const key2 = px2 + "," + py;
+    for (let py = Math.max(0, Math.floor(view.y / extent)); py <= Math.min(Math.ceil(space.collision.height / size) - 1, Math.floor((view.y + view.height) / extent)); py++) for (let px3 = Math.max(0, Math.floor(view.x / extent)); px3 <= Math.min(Math.ceil(space.collision.width / size) - 1, Math.floor((view.x + view.width) / extent)); px3++) {
+      const key2 = px3 + "," + py;
       let page = pages.get(key2);
       if (page) pages.delete(key2);
       else {
@@ -54222,13 +54671,13 @@ function createSiteEnvironment(canvas, { authoredArt = null } = {}) {
         page.width = extent;
         page.height = extent;
         const pc2 = page.getContext("2d");
-        pc2.translate(-px2 * extent, -py * extent);
-        for (let y = py * size; y < Math.min(space.collision.height, (py + 1) * size); y++) for (let x = px2 * size; x < Math.min(space.collision.width, (px2 + 1) * size); x++) drawTile(pc2, v, x, y, t, mode, space);
+        pc2.translate(-px3 * extent, -py * extent);
+        for (let y = py * size; y < Math.min(space.collision.height, (py + 1) * size); y++) for (let x = px3 * size; x < Math.min(space.collision.width, (px3 + 1) * size); x++) drawTile(pc2, v, x, y, t, mode, space);
         builds++;
       }
       pages.set(key2, page);
       while (pages.size > 24) pages.delete(pages.keys().next().value);
-      ctx.drawImage(page, px2 * extent, py * extent);
+      ctx.drawImage(page, px3 * extent, py * extent);
       painted += size * size;
     }
     if (site.siteKind === "procedural-fort") {
@@ -54678,21 +55127,21 @@ function line12(c, points2, color28, width) {
 }
 function drawInlandWater(c, type, x, y, t, seed2, offset2, at3) {
   if (!inland(type)) return false;
-  const px2 = x * t, py = y * t, gx = x + offset2.x / t, gy = y + offset2.y / t, n = terrainHash(gx, gy, seed2 + 1709);
+  const px3 = x * t, py = y * t, gx = x + offset2.x / t, gy = y + offset2.y / t, n = terrainHash(gx, gy, seed2 + 1709);
   c.save();
   c.beginPath();
-  c.rect(px2, py, t, t);
+  c.rect(px3, py, t, t);
   c.clip();
   c.fillStyle = type === "L" ? "#397e8b" : "#3f8895";
-  c.fillRect(px2, py, t, t);
+  c.fillRect(px3, py, t, t);
   if (n % 4 === 0) {
     const yy = py + 9 + (n >>> 8) % 14;
     c.globalAlpha = 0.28;
     c.strokeStyle = "#9ac7ca";
     c.lineWidth = 1.5;
     c.beginPath();
-    c.moveTo(px2 + 5, yy);
-    c.quadraticCurveTo(px2 + t * 0.5, yy - 2, px2 + t - 5, yy + 0.5);
+    c.moveTo(px3 + 5, yy);
+    c.quadraticCurveTo(px3 + t * 0.5, yy - 2, px3 + t - 5, yy + 0.5);
     c.stroke();
   }
   c.globalAlpha = 1;
@@ -54700,35 +55149,35 @@ function drawInlandWater(c, type, x, y, t, seed2, offset2, at3) {
     const [dx, dy] = directions[side], neighbor = at3(x + dx, y + dy);
     if (!neighbor || water2(neighbor) || neighbor === "v") continue;
     if (deck(neighbor)) {
-      line12(c, edgePoints(px2, py, t, side, 1, n), "#285765", 2);
+      line12(c, edgePoints(px3, py, t, side, 1, n), "#285765", 2);
       continue;
     }
-    line12(c, edgePoints(px2, py, t, side, 4, n), "#64a0a5", 5);
-    line12(c, edgePoints(px2, py, t, side, 1.2, n), "#315e62", 2.2);
+    line12(c, edgePoints(px3, py, t, side, 4, n), "#64a0a5", 5);
+    line12(c, edgePoints(px3, py, t, side, 1.2, n), "#315e62", 2.2);
   }
   c.restore();
   return true;
 }
 function drawInlandDryBank(c, type, biome, x, y, t, seed2, offset2, at3) {
   if (type !== "g") return false;
-  const px2 = x * t, py = y * t, n = terrainHash(x + offset2.x / t, y + offset2.y / t, seed2 + 1907);
+  const px3 = x * t, py = y * t, n = terrainHash(x + offset2.x / t, y + offset2.y / t, seed2 + 1907);
   let drawn = false;
   for (let side = 0; side < 4; side++) {
     const [dx, dy] = directions[side];
     if (!inland(at3(x + dx, y + dy))) continue;
     c.save();
     c.beginPath();
-    c.rect(px2, py, t, t);
+    c.rect(px3, py, t, t);
     c.clip();
     c.beginPath();
-    const inner = edgePoints(px2, py, t, side, 5 + n % 3, n), outer = edgePoints(px2, py, t, side, 0, n);
+    const inner = edgePoints(px3, py, t, side, 5 + n % 3, n), outer = edgePoints(px3, py, t, side, 0, n);
     [...outer, ...inner.reverse()].forEach(([a, b], i) => i ? c.lineTo(a, b) : c.moveTo(a, b));
     c.closePath();
     c.fillStyle = biome === "s" ? "#8faeb1" : biome === "l" ? "#626a6b" : biome === "d" ? "#938775" : "#557b66";
     c.globalAlpha = 0.72;
     c.fill();
     c.globalAlpha = 1;
-    line12(c, edgePoints(px2, py, t, side, 0.9, n), "#3d6257", 1.4);
+    line12(c, edgePoints(px3, py, t, side, 0.9, n), "#3d6257", 1.4);
     c.restore();
     drawn = true;
   }
@@ -54740,10 +55189,10 @@ var plannedGroundPalette = (code) => ({ a: ["#768b43", "#8e9c54", "#637b39"], d:
 function drawPlannedSurfaceCell(c, type, biome, x, y, t, seed2, offset2, at3) {
   if (drawInlandWater(c, type, x, y, t, seed2, offset2, at3)) return true;
   if (!["O", "W", "L", "C", "K", "H", "V"].includes(type)) return false;
-  const px2 = x * t, py = y * t, n = terrainHash(x + offset2.x / t, y + offset2.y / t, seed2 + 1301), water3 = ["O", "W", "L"].includes(type);
+  const px3 = x * t, py = y * t, n = terrainHash(x + offset2.x / t, y + offset2.y / t, seed2 + 1301), water3 = ["O", "W", "L"].includes(type);
   if (type === "H" || type === "V") {
     c.fillStyle = "#725237";
-    c.fillRect(px2, py, t, t);
+    c.fillRect(px3, py, t, t);
     c.fillStyle = "#a28053";
     c.strokeStyle = "#503e30";
     c.lineWidth = 1;
@@ -54751,11 +55200,11 @@ function drawPlannedSurfaceCell(c, type, biome, x, y, t, seed2, offset2, at3) {
       const k = i * 8;
       c.fillStyle = (n + i) % 3 ? "#a28053" : "#947149";
       if (type === "H") {
-        c.fillRect(px2 + k + 1, py, 6, t);
-        c.strokeRect(px2 + k + 1, py + 1, 6, t - 2);
+        c.fillRect(px3 + k + 1, py, 6, t);
+        c.strokeRect(px3 + k + 1, py + 1, 6, t - 2);
       } else {
-        c.fillRect(px2, py + k + 1, t, 6);
-        c.strokeRect(px2 + 1, py + k + 1, t - 2, 6);
+        c.fillRect(px3, py + k + 1, t, 6);
+        c.strokeRect(px3 + 1, py + k + 1, t - 2, 6);
       }
     }
     c.fillStyle = "#483e32";
@@ -54763,43 +55212,43 @@ function drawPlannedSurfaceCell(c, type, biome, x, y, t, seed2, offset2, at3) {
     const sides = type === "H" ? [[0, -1], [0, 1]] : [[-1, 0], [1, 0]];
     for (const [dx, dy] of sides) if (at3(x + dx, y + dy) !== type) {
       if (dx) {
-        c.fillRect(px2 + (dx > 0 ? t - 4 : 0), py, 4, t);
+        c.fillRect(px3 + (dx > 0 ? t - 4 : 0), py, 4, t);
         c.fillStyle = "#c3a76e";
-        c.fillRect(px2 + (dx > 0 ? t - 3 : 1), py, 1, t);
+        c.fillRect(px3 + (dx > 0 ? t - 3 : 1), py, 1, t);
       } else {
-        c.fillRect(px2, py + (dy > 0 ? t - 4 : 0), t, 4);
+        c.fillRect(px3, py + (dy > 0 ? t - 4 : 0), t, 4);
         c.fillStyle = "#c3a76e";
-        c.fillRect(px2, py + (dy > 0 ? t - 3 : 1), t, 1);
+        c.fillRect(px3, py + (dy > 0 ? t - 3 : 1), t, 1);
       }
       c.fillStyle = "#483e32";
     }
   } else if (water3) {
     c.fillStyle = type === "O" ? "#23536a" : type === "L" ? "#326d76" : "#3e7b83";
-    c.fillRect(px2, py, t, t);
+    c.fillRect(px3, py, t, t);
     c.strokeStyle = type === "O" ? "#397285" : "#73a5a5";
     c.globalAlpha = 0.38;
     c.lineWidth = 1.3;
     c.beginPath();
     const yy = py + 7 + n % 19;
-    c.moveTo(px2 + 3, yy);
-    c.quadraticCurveTo(px2 + 13, yy - 3, px2 + 25, yy + 1);
+    c.moveTo(px3 + 3, yy);
+    c.quadraticCurveTo(px3 + 13, yy - 3, px3 + 25, yy + 1);
     c.stroke();
     c.globalAlpha = 1;
     for (const [dx, dy] of [[0, -1], [1, 0], [0, 1], [-1, 0]]) if (at3(x + dx, y + dy) && !["O", "W", "L", "v"].includes(at3(x + dx, y + dy))) {
       c.fillStyle = "#82a49b";
       c.globalAlpha = 0.55;
-      if (dx) c.fillRect(px2 + (dx > 0 ? t - 3 : 0), py, 3, t);
-      else c.fillRect(px2, py + (dy > 0 ? t - 3 : 0), t, 3);
+      if (dx) c.fillRect(px3 + (dx > 0 ? t - 3 : 0), py, 3, t);
+      else c.fillRect(px3, py + (dy > 0 ? t - 3 : 0), t, 3);
       c.globalAlpha = 1;
     }
   } else {
     c.fillStyle = type === "K" ? biome === "l" ? "#656064" : "#7e847b" : biome === "m" ? "#7a8364" : biome === "s" ? "#c3d2d5" : biome === "l" ? "#5b5250" : "#b0a071";
-    c.fillRect(px2, py, t, t);
+    c.fillRect(px3, py, t, t);
     c.fillStyle = type === "K" ? "#a8afa2" : "#d0be96";
     for (let i = 0; i < 3; i++) {
       const dx = 5 + (n >>> i * 4) % 23, dy = 5 + (n >>> i * 5) % 23;
       c.beginPath();
-      c.ellipse(px2 + dx, py + dy, type === "K" ? 3 + i : 1.5, type === "K" ? 2 : 1, 0, 0, Math.PI * 2);
+      c.ellipse(px3 + dx, py + dy, type === "K" ? 3 + i : 1.5, type === "K" ? 2 : 1, 0, 0, Math.PI * 2);
       c.fill();
     }
   }
@@ -55053,7 +55502,7 @@ function gatehouse(ctx, d, t) {
   beam(ctx, x - 59, y - 38, 118, 15);
   ctx.fillStyle = "#b2753d";
   ctx.fillRect(x - 51, y - 34, 102, 4);
-  for (const px2 of [-48, -22, 22, 48]) beam(ctx, x + px2 - 3, y - 30, 6, 53);
+  for (const px3 of [-48, -22, 22, 48]) beam(ctx, x + px3 - 3, y - 30, 6, 53);
 }
 function watchtower(ctx, d, t) {
   const x = d.x * t, y = d.y * t, east = d.variant % 2 === 1, south = d.variant >= 2;
@@ -56333,8 +56782,8 @@ function woodlandGroundDetail(space, x, y, blockedTiles = null) {
   if (!(biome === "w" && (type === "g" || type === "f") || biome === "o" && type === "f") || isRoad(type) || (blockedTiles ?? projectedBlockerTiles(v.blockers)).has(x + "," + y)) return null;
   const seed2 = environmentSeed(space), offset2 = environmentWorldOffset(space), wx = x + offset2.x / t, wy = y + offset2.y / t, n = terrainHash(wx, wy, seed2), cluster = terrainHash(Math.floor(wx / 4), Math.floor(wy / 4), seed2 + 19);
   if (cluster % 7 > 1 || n % 4 !== 0) return null;
-  const px2 = x * t, py = y * t, dx = 7 + n % 19, dy = 11 + (n >>> 8) % 17, kind = (n >>> 13) % 10;
-  return { id: `${x},${y}:${kind}`, x: px2 + dx, y: py + dy, motionX: px2 + dx + offset2.x, motionY: py + dy + offset2.y, n, kind };
+  const px3 = x * t, py = y * t, dx = 7 + n % 19, dy = 11 + (n >>> 8) % 17, kind = (n >>> 13) % 10;
+  return { id: `${x},${y}:${kind}`, x: px3 + dx, y: py + dy, motionX: px3 + dx + offset2.x, motionY: py + dy + offset2.y, n, kind };
 }
 function drawWoodlandDetail(ctx, detail, bounds2, flowers, art, pilot = null, space = null) {
   if (!detail) return 0;
@@ -56387,11 +56836,11 @@ function* prepareEnvironmentDrawing(ctx, space, viewport = null, layout = create
     yield;
     if (terrainAt(x, y) === void 0) continue;
     paintedTerrainTiles++;
-    const type = terrainAt(x, y), n = terrainHash(x + offset2.x / t, y + offset2.y / t, seed2), px2 = x * t, py = y * t;
+    const type = terrainAt(x, y), n = terrainHash(x + offset2.x / t, y + offset2.y / t, seed2), px3 = x * t, py = y * t;
     drawInlandDryBank(ctx, type, v.biomes?.[y - oy]?.[x - ox], x, y, t, seed2, offset2, terrainAt);
     if (type === "v") {
       ctx.fillStyle = "#070b12";
-      ctx.fillRect(px2, py, t, t);
+      ctx.fillRect(px3, py, t, t);
       continue;
     }
     if (drawPlannedSurfaceCell(ctx, type, v.biomes?.[y - oy]?.[x - ox], x, y, t, seed2, offset2, terrainAt)) {
@@ -56409,20 +56858,20 @@ function* prepareEnvironmentDrawing(ctx, space, viewport = null, layout = create
         }
       } else {
         const density = biome === "m" ? 4 : 6;
-        if (cluster % 4 !== 0 && n % density !== 0 && layout.allowsSmall(px2 + 8 + n % 17, py + 12 + (n >>> 8) % 16)) {
+        if (cluster % 4 !== 0 && n % density !== 0 && layout.allowsSmall(px3 + 8 + n % 17, py + 12 + (n >>> 8) % 16)) {
           const dx = 8 + n % 17, dy = 12 + (n >>> 8) % 16;
           if (biome === "r") {
             ctx.fillStyle = n % 2 ? "#b5a675" : "#504f45";
             ctx.beginPath();
-            ctx.ellipse(px2 + dx, py + dy, 2 + n % 3, 1.3, 0, 0, TAU63);
+            ctx.ellipse(px3 + dx, py + dy, 2 + n % 3, 1.3, 0, 0, TAU63);
             ctx.fill();
             paintedDecorations++;
-            if (n % 7 === 0) drawGrass(ctx, px2 + dx - 5, py + dy + 3, n);
+            if (n % 7 === 0) drawGrass(ctx, px3 + dx - 5, py + dy + 3, n);
           } else if (biome === "m") {
-            drawReeds(ctx, px2 + dx, py + dy, n);
+            drawReeds(ctx, px3 + dx, py + dy, n);
             paintedDecorations++;
             if (cluster % 5 === 0 && n % 3 === 1) {
-              drawMushrooms(ctx, px2 + dx + 7, py + dy + 2);
+              drawMushrooms(ctx, px3 + dx + 7, py + dy + 2);
               paintedDecorations++;
             }
           }
@@ -57019,14 +57468,14 @@ var BLUE3 = "#298eaa";
 var STONE6 = "#405469";
 var DARK7 = "#233346";
 var clamp46 = (v) => Math.max(0, Math.min(1, v));
-function plate3(c, points2, color28, outline3 = true) {
+function plate3(c, points2, color28, outline4 = true) {
   c.beginPath();
   c.moveTo(...points2[0]);
   for (const p of points2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.fillStyle = color28;
   c.fill();
-  if (outline3) {
+  if (outline4) {
     c.strokeStyle = INK46;
     c.lineWidth = 1.26;
     c.lineJoin = "round";
@@ -61856,7 +62305,7 @@ async function startWorldClient(environment) {
       saveBridge = createActivitySaveBridge(new environment.Worker(workerUrl, { type: "module" }), { record: performanceProbe?.record, now: performanceProbe ? () => environment.performance.now() : null, expectedDatabaseName: environment.document.body.dataset.wildernessV3 === "true" ? databaseName : null });
       if (["A", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O"].includes(proofCase)) worldBridge = createWorldWorkerBridgeD9(new environment.Worker(workerUrl, { type: "module" }), { record: performanceProbe?.record, diagnostics: () => performanceProbe?.isRecording() === true, now: () => environment.performance.now(), expectedDatabaseName: environment.document.body.dataset.wildernessV3 === "true" ? databaseName : null });
     }
-    const opening = (worldBridge ? createLocalEndlessSessionD9 : activity ? createLocalActivitySession : createLocalWorldSession)({
+    const opening2 = (worldBridge ? createLocalEndlessSessionD9 : activity ? createLocalActivitySession : createLocalWorldSession)({
       sha256,
       nextToken,
       scenario,
@@ -61877,12 +62326,12 @@ async function startWorldClient(environment) {
       storeFactory: (expectedContentFingerprint, expectedGenerationBinding, codec) => createLocalIndexedDbCampaignStore({ indexedDB: saveIndexedDb, sha256, expectedContentFingerprint, expectedGenerationBinding, codec, ...activity ? { databaseName } : {} })
     });
     if (plannedReview) {
-      if (worldBridge) await Promise.race([worldBridge.started(), opening.catch(() => {
+      if (worldBridge) await Promise.race([worldBridge.started(), opening2.catch(() => {
       })]);
       plannedReview.forArt().catch(() => {
       });
     }
-    session = await opening;
+    session = await opening2;
     if (worldBridge) {
       saveBridge?.destroy();
       saveBridge = null;
