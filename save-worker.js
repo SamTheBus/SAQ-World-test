@@ -8201,6 +8201,50 @@ function rewardRarityRoleV2(state, source4, spawnEntityId = null) {
   return source4.kind === "enemy" && state.bossCombat?.bossesByEntityId[id] ? "boss" : source4.kind === "enemy" && state.eliteCombat?.elitesByEntityId[id] ? "elite" : "ordinary";
 }
 
+// src/shared/content/class_gear_v1.js
+var CLASS_GEAR_FAMILIES = Object.freeze(["weapon", "subweapon", "helmet", "overall", "gloves", "boots", "ring"]);
+var WARDROBE_V1 = "capes-v1";
+var CLASS_GEAR_FAMILIES_V2 = Object.freeze([...CLASS_GEAR_FAMILIES, "cape"]);
+var CAPE_NOUNS = Object.freeze(["Cape", "Cloak", "Mantle"]);
+var SHARED_HELMET_NOUNS = Object.freeze(["Backwards Cap"]);
+var sharedGear = (family2, noun) => family2 === "cape" || family2 === "helmet" && SHARED_HELMET_NOUNS.includes(noun);
+var set = (helmet, overall, gloves, boots) => Object.freeze({ helmet, overall, gloves, boots });
+var CLASS_GEAR = Object.freeze({
+  knight: Object.freeze({
+    offhand: "shield",
+    weapon: ["Longsword", "Battleaxe", "Warhammer"],
+    subweapon: ["Buckler", "Kite Shield", "Tower Shield"],
+    sets: [set("Chain Coif", "Chain Mail", "Chain Gloves", "Chain Boots"), set("Great Helm", "Plate Armor", "Gauntlets", "Plate Boots")]
+  }),
+  rogue: Object.freeze({
+    offhand: "dagger",
+    weapon: ["Rapier", "Saber", "Scimitar"],
+    subweapon: ["Main-Gauche", "Stiletto", "Kris"],
+    sets: [set("Bandana", "Leather Armor", "Leather Gloves", "Leather Boots"), set("Hood", "Studded Armor", "Studded Gloves", "Studded Boots")]
+  }),
+  mage: Object.freeze({
+    offhand: "tome",
+    weapon: ["Wand", "Scepter", "Staff"],
+    subweapon: ["Fire Tome", "Frost Tome", "Storm Tome"],
+    sets: [set("Cowl", "Cloth Robe", "Cloth Wraps", "Cloth Slippers"), set("Wizard Hat", "Silk Robe", "Silk Wraps", "Silk Slippers")]
+  })
+});
+var CLASS_GEAR_IDS = Object.freeze(Object.keys(CLASS_GEAR));
+var TOME_NOUN_ELEMENTS = Object.freeze({ "Fire Tome": "fire", "Frost Tome": "frost", "Storm Tome": "lightning" });
+function classGearNouns(cls, family2) {
+  const g = CLASS_GEAR[cls];
+  if (!g) return null;
+  if (family2 === "weapon" || family2 === "subweapon") return g[family2];
+  return ["helmet", "overall", "gloves", "boots"].includes(family2) ? g.sets.map((s) => s[family2]) : null;
+}
+function classGearFlavor(cls, family2, noun) {
+  const g = CLASS_GEAR[cls];
+  if (!g) return {};
+  if (family2 === "weapon") return [{ critChance: 0.05 }, { critDamage: 0.15 }, { attackScale: [6, 5] }][g.weapon.indexOf(noun)] ?? {};
+  if (["helmet", "overall", "gloves", "boots"].includes(family2)) return [{ maxHpScale: [5, 4] }, { defenseScale: [5, 4] }][g.sets.findIndex((s) => s[family2] === noun)] ?? {};
+  return {};
+}
+
 // src/shared/content/reward_modifiers.js
 function validateRewardModifiers(v) {
   closedRecord(v, ["version", "goldHundredths", "occurrenceHundredths", "qualityHundredths", "dualEligible", "triEligible"]);
@@ -8218,8 +8262,9 @@ function rewardProgressionD9(depth, sourceId) {
   return freezeWire(validateRewardProgressionD9({ version: D9_REWARD_PROGRESSION, policy: D9_PROFILE.progressionPolicy, sourceDepth: progressionWire(progressionBigInt(depth)), quality: 1, sourceId, tomeEligibility: "base-single-d7-v1" }));
 }
 function validateRewardProgressionD9(v) {
-  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "gearClass", "armor"]);
+  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "gearClass", "armor", "wardrobe"]);
   requireContract(v.armor === void 0 || v.armor === "overall" && v.gearClass === void 0 && v.combatHash === WORLD_COMBAT_HASH, "One-piece armor policy");
+  requireContract(v.wardrobe === void 0 || v.wardrobe === WARDROBE_V1 && v.gearClass !== void 0, "Wardrobe policy");
   requireContract(v.version === D9_REWARD_PROGRESSION && v.policy === D9_PROFILE.progressionPolicy, "D9 reward progression version");
   positiveProgression(v.sourceDepth);
   requireContract(typeof v.sourceId === "string" && v.sourceId.length > 0 && v.sourceId.length <= 240, "Invalid reward source");
@@ -8627,45 +8672,6 @@ function validateGenerationIdentity(identity) {
   return identity;
 }
 
-// src/shared/content/class_gear_v1.js
-var CLASS_GEAR_FAMILIES = Object.freeze(["weapon", "subweapon", "helmet", "overall", "gloves", "boots", "ring"]);
-var set = (helmet, overall, gloves, boots) => Object.freeze({ helmet, overall, gloves, boots });
-var CLASS_GEAR = Object.freeze({
-  knight: Object.freeze({
-    offhand: "shield",
-    weapon: ["Longsword", "Battleaxe", "Warhammer"],
-    subweapon: ["Buckler", "Kite Shield", "Tower Shield"],
-    sets: [set("Chain Coif", "Chain Mail", "Chain Gloves", "Chain Boots"), set("Great Helm", "Plate Armor", "Gauntlets", "Plate Boots")]
-  }),
-  rogue: Object.freeze({
-    offhand: "dagger",
-    weapon: ["Rapier", "Saber", "Scimitar"],
-    subweapon: ["Main-Gauche", "Stiletto", "Kris"],
-    sets: [set("Bandana", "Leather Armor", "Leather Gloves", "Leather Boots"), set("Hood", "Studded Armor", "Studded Gloves", "Studded Boots")]
-  }),
-  mage: Object.freeze({
-    offhand: "tome",
-    weapon: ["Wand", "Scepter", "Staff"],
-    subweapon: ["Fire Tome", "Frost Tome", "Storm Tome"],
-    sets: [set("Cowl", "Cloth Robe", "Cloth Wraps", "Cloth Slippers"), set("Wizard Hat", "Silk Robe", "Silk Wraps", "Silk Slippers")]
-  })
-});
-var CLASS_GEAR_IDS = Object.freeze(Object.keys(CLASS_GEAR));
-var TOME_NOUN_ELEMENTS = Object.freeze({ "Fire Tome": "fire", "Frost Tome": "frost", "Storm Tome": "lightning" });
-function classGearNouns(cls, family2) {
-  const g = CLASS_GEAR[cls];
-  if (!g) return null;
-  if (family2 === "weapon" || family2 === "subweapon") return g[family2];
-  return ["helmet", "overall", "gloves", "boots"].includes(family2) ? g.sets.map((s) => s[family2]) : null;
-}
-function classGearFlavor(cls, family2, noun) {
-  const g = CLASS_GEAR[cls];
-  if (!g) return {};
-  if (family2 === "weapon") return [{ critChance: 0.05 }, { critDamage: 0.15 }, { attackScale: [6, 5] }][g.weapon.indexOf(noun)] ?? {};
-  if (["helmet", "overall", "gloves", "boots"].includes(family2)) return [{ maxHpScale: [5, 4] }, { defenseScale: [5, 4] }][g.sets.findIndex((s) => s[family2] === noun)] ?? {};
-  return {};
-}
-
 // src/shared/content/generated_gear_d9.js
 var GEAR_VERSION = "dungeon-gear-d9-v1";
 var RARITY_NAMES = Object.freeze(["Common", "Rare", "Magic", "Epic", "Legendary", "Mythic"]);
@@ -8674,7 +8680,7 @@ var SALVAGE_MATERIALS = Object.freeze(["Monster Soul", "Rare Scrap", "Magic Scra
 var GEAR_FAMILIES = Object.freeze(["weapon", "subweapon", "helmet", "chest", "leggings", "overall", "boots", "ring"]);
 var ONE_PIECE_GEAR_FAMILIES = Object.freeze(GEAR_FAMILIES.filter((f2) => f2 !== "chest" && f2 !== "leggings"));
 var GEAR_NOUNS = Object.freeze({ weapon: ["Greatsword", "Longsword", "Halberd", "Warhammer", "Battleaxe", "Broadsword", "Flanged Mace", "Claymore"], shield: ["Kite Shield", "Tower Shield", "Buckler", "Aegis", "Heater Shield"], dagger: ["Kris", "Stiletto", "Baselard", "Dirk", "Main-Gauche"], tome: ["Grimoire", "Spellbook", "Codex", "Lexicon", "Chronicle"], helmet: ["Greathelm", "Armet", "Visor"], chest: ["Hauberk", "Cuirass", "Brigandine", "Plate Mail", "Chain Mail", "Doublet"], leggings: ["Greaves", "Legplates", "Chausses", "Cuisses"], boots: ["Sabatons", "Sollerets", "Steel Boots", "Treads"], overall: ["Exosuit", "Inquisitor Robes", "Full Plate Armor", "Trenchcoat"], ring: ["Signet Ring", "Loop Ring", "Band Ring", "Seal Ring"] });
-var AFFIX_POOLS = Object.freeze({ weapon: ["critChance", "critDamage", "activeSpd"], chest: ["maxHp", "def", "str", "dex", "int"], overall: ["maxHp", "def", "str", "dex", "int"], helmet: ["critChance", "activeSpd", "bonusAreaRadius"], leggings: ["maxHp", "def", "str", "dex", "int"], boots: ["moveSpeed", "activeSpd"], ring: ["atk", "maxHp", "def", "str", "dex", "int", "critChance", "moveSpeed", "bonusAreaRadius"], shield: ["block", "moveSpeed", "bonusAreaRadius"], dagger: ["parry", "critChance", "moveSpeed", "bonusAreaRadius"], tome: ["critDamage", "activeSpd", "critChance", "bonusAreaRadius"], gloves: ["atk", "critChance", "activeSpd", "str", "dex", "int"] });
+var AFFIX_POOLS = Object.freeze({ weapon: ["critChance", "critDamage", "activeSpd"], chest: ["maxHp", "def", "str", "dex", "int"], overall: ["maxHp", "def", "str", "dex", "int"], helmet: ["critChance", "activeSpd", "bonusAreaRadius"], leggings: ["maxHp", "def", "str", "dex", "int"], boots: ["moveSpeed", "activeSpd"], ring: ["atk", "maxHp", "def", "str", "dex", "int", "critChance", "moveSpeed", "bonusAreaRadius"], shield: ["block", "moveSpeed", "bonusAreaRadius"], dagger: ["parry", "critChance", "moveSpeed", "bonusAreaRadius"], tome: ["critDamage", "activeSpd", "critChance", "bonusAreaRadius"], gloves: ["atk", "critChance", "activeSpd", "str", "dex", "int"], cape: ["maxHp", "def", "str", "dex", "int", "moveSpeed"] });
 function gearHash(text) {
   let h = 2166136261;
   for (let i = 0; i < text.length; i++) {
@@ -8719,9 +8725,9 @@ function generateAtPrecision(c, seed, input, { tier: tier2 = null, family: famil
   const rng2 = rewardStream(seed), random = () => rng2.random(), pick4 = (a) => a[Math.floor(random() * a.length)], power2 = progression.combatHash ? depth : progressionWire(progressionBigInt(depth) / 4n + 1n);
   const rarityRandom = progression.combatHash ? random() : null, rarityTier = tier2 ?? (progression.combatHash ? hasWorldRarityV2(progression) ? worldGearRarityV2(depth, progression.rarityHeroLevel, progression.rarityRole, rarityRandom, progression.modifiers?.qualityHundredths ?? 0) : worldGearRarity(depth, progression.combatQuality, rarityRandom, progression.modifiers?.qualityHundredths ?? 0) : rollRarityD9(depth, progression.quality, random));
   safeInteger(rarityTier, 0, 5);
-  const cls = progression.gearClass ?? null, classOffhand = cls ? CLASS_GEAR[cls].offhand : null, families = cls ? CLASS_GEAR_FAMILIES : progression.armor === "overall" ? ONE_PIECE_GEAR_FAMILIES : GEAR_FAMILIES;
-  const type = family2 ?? pick4(families), sub = type === "subweapon" ? subType ?? (cls ? classOffhand : pick4(["shield", "dagger", "tome"])) : null, nouns = cls && type !== "ring" ? classGearNouns(cls, type) : GEAR_NOUNS[sub ?? type], n = noun ?? pick4(nouns);
-  requireContract((family2 ? cls ? CLASS_GEAR_FAMILIES : GEAR_FAMILIES : families).includes(type) && (!cls || type !== "subweapon" || sub === classOffhand) && nouns?.includes(n), "Unknown generated family/noun");
+  const cls = progression.gearClass ?? null, classOffhand = cls ? CLASS_GEAR[cls].offhand : null, wardrobe = Boolean(cls) && progression.wardrobe === WARDROBE_V1, classFamilies = wardrobe ? CLASS_GEAR_FAMILIES_V2 : CLASS_GEAR_FAMILIES, families = cls ? classFamilies : progression.armor === "overall" ? ONE_PIECE_GEAR_FAMILIES : GEAR_FAMILIES;
+  const type = family2 ?? pick4(families), sub = type === "subweapon" ? subType ?? (cls ? classOffhand : pick4(["shield", "dagger", "tome"])) : null, own2 = type === "cape" ? CAPE_NOUNS : cls && type !== "ring" ? classGearNouns(cls, type) : GEAR_NOUNS[sub ?? type], shared = wardrobe && type === "helmet" ? SHARED_HELMET_NOUNS : [], nouns = [...own2 ?? [], ...shared], n = noun ?? (shared.length && random() < 0.2 ? pick4(shared) : pick4(own2));
+  requireContract((family2 ? cls ? classFamilies : GEAR_FAMILIES : families).includes(type) && (!cls || type !== "subweapon" || sub === classOffhand) && nouns?.includes(n), "Unknown generated family/noun");
   const E = c.dungeonScale(power2).E, R2 = c.q(100 + 7 * rarityTier, 100), P = c.q((100 + 15 * rarityTier) * (type === "overall" ? 18 : 10), 1e3), flatR = c.mul(R2, c.q(type === "overall" ? 18 : 10, 10));
   const I = (v) => {
     if (v && typeof v === "object" && "lo" in v) return v;
@@ -8748,6 +8754,10 @@ function generateAtPrecision(c, seed, input, { tier: tier2 = null, family: famil
       const factor = type === "overall" ? 2n : 1n;
       raw.baseDef = v((2n + l) * factor);
       raw.baseMaxHp = v((10n + 4n * l) * factor);
+    }
+    if (type === "cape") {
+      raw.baseDef = v((2n + l) / 2n);
+      raw.baseMaxHp = v((10n + 4n * l) / 2n);
     }
     if (type === "ring") {
       raw.baseAtk = v(1n + l / 3n);
@@ -8778,7 +8788,7 @@ function generateAtPrecision(c, seed, input, { tier: tier2 = null, family: famil
   }
   const adj = { atk: "Fierce", maxHp: "Grizzled", def: "Hardened", moveSpeed: "Fleet", critChance: "Precise", critDamage: "Savage", block: "Stalwart", parry: "Nimble", str: "Heavy", dex: "Swift", int: "Erudite", activeSpd: "Hasty" };
   const dominant = Object.keys(adj).reduce((a, k) => compareCombat(exactDecimal(bonus[k] ?? 0), exactDecimal(bonus[a] ?? 0)) > 0 ? k : a, "");
-  const definition = { numericVersion: "generated-numeric-d9-v1", definitionId: `d7-${type}-${sub ?? "ordinary"}`, name: `${dominant ? adj[dominant] : "Standard"} ${n} (Lv. ${power2})`, slot: type, subType: sub, spellType: raw.spellType ?? null, noun: n, rarityTier, itemPower: power2, bonuses: { attack: sumGear(raw.baseAtk, bonus.atk ?? 0), maxHp: sumGear(raw.baseMaxHp, bonus.maxHp ?? 0), defense: sumGear(raw.baseDef, bonus.def ?? 0) }, attributes: { str: sumGear(raw.baseStr, bonus.str ?? 0), dex: sumGear(raw.baseDex, bonus.dex ?? 0), int: sumGear(raw.baseInt, bonus.int ?? 0) }, effects: { moveSpeed: sumGear(raw.baseMoveSpeed, bonus.moveSpeed ?? 0), critChance: sumGear(raw.baseCritChance, bonus.critChance ?? 0), critDamage: sumGear(raw.baseCritDamage, bonus.critDamage ?? 0), block: sumGear(raw.baseBlock, bonus.block ?? 0), parry: sumGear(raw.baseParry, bonus.parry ?? 0), activeSpeed: bonus.activeSpd ?? 0, bonusAreaRadius: bonus.bonusAreaRadius ?? 0, ...Object.fromEntries(["atkPct", "maxHpPct", "defPct", "moveSpeedPct", "strPct", "dexPct", "intPct"].map((k) => [k, raw[k] ?? 0])) }, family: { ...Object.fromEntries(["subArchetype", "blockCapBonus", "reflectDamage", "bashAtkBonus", "parryCapBonus", "parryMitigation", "riposteDamage", "bleedChance", "offhandChance", "offhandDmg"].map((k) => [k, raw[k] ?? null])), fireChanceNumerator: 50 + 3 * rarityTier, fireChanceDenominator: 150, firePowerNumerator: 18 + 2 * rarityTier }, weaponVisual: type === "weapon" ? "iron" : null, ...cls ? { gearClass: cls } : {} };
+  const definition = { numericVersion: "generated-numeric-d9-v1", definitionId: `d7-${type}-${sub ?? "ordinary"}`, name: `${dominant ? adj[dominant] : "Standard"} ${n} (Lv. ${power2})`, slot: type, subType: sub, spellType: raw.spellType ?? null, noun: n, rarityTier, itemPower: power2, bonuses: { attack: sumGear(raw.baseAtk, bonus.atk ?? 0), maxHp: sumGear(raw.baseMaxHp, bonus.maxHp ?? 0), defense: sumGear(raw.baseDef, bonus.def ?? 0) }, attributes: { str: sumGear(raw.baseStr, bonus.str ?? 0), dex: sumGear(raw.baseDex, bonus.dex ?? 0), int: sumGear(raw.baseInt, bonus.int ?? 0) }, effects: { moveSpeed: sumGear(raw.baseMoveSpeed, bonus.moveSpeed ?? 0), critChance: sumGear(raw.baseCritChance, bonus.critChance ?? 0), critDamage: sumGear(raw.baseCritDamage, bonus.critDamage ?? 0), block: sumGear(raw.baseBlock, bonus.block ?? 0), parry: sumGear(raw.baseParry, bonus.parry ?? 0), activeSpeed: bonus.activeSpd ?? 0, bonusAreaRadius: bonus.bonusAreaRadius ?? 0, ...Object.fromEntries(["atkPct", "maxHpPct", "defPct", "moveSpeedPct", "strPct", "dexPct", "intPct"].map((k) => [k, raw[k] ?? 0])) }, family: { ...Object.fromEntries(["subArchetype", "blockCapBonus", "reflectDamage", "bashAtkBonus", "parryCapBonus", "parryMitigation", "riposteDamage", "bleedChance", "offhandChance", "offhandDmg"].map((k) => [k, raw[k] ?? null])), fireChanceNumerator: 50 + 3 * rarityTier, fireChanceDenominator: 150, firePowerNumerator: 18 + 2 * rarityTier }, weaponVisual: type === "weapon" ? "iron" : null, ...cls && !sharedGear(type, n) ? { gearClass: cls } : {} };
   if (sub === "tome" && raw.spellType !== "fire") {
     delete definition.family.fireChanceNumerator;
     delete definition.family.fireChanceDenominator;
@@ -9996,7 +10006,8 @@ var EQUIPMENT = freezeWire({ ...SUBWEAPON_CATALOG(), ...Object.fromEntries([
 function SUBWEAPON_CATALOG() {
   return Object.fromEntries(Object.values(SUBWEAPONS).map((d) => [d.definitionId, d]));
 }
-var equipmentSlots = (inv) => inv?.subweapons || inv?.classKit ? [...EQUIPMENT_SLOTS, ...inv.subweapons ? ["subweapon"] : [], ...inv.classKit ? ["gloves"] : []] : EQUIPMENT_SLOTS;
+var capeSlotOpen = (inv) => Boolean(inv?.equipped) && Object.hasOwn(inv.equipped, "cape");
+var equipmentSlots = (inv) => inv?.subweapons || inv?.classKit ? [...EQUIPMENT_SLOTS, ...inv.subweapons ? ["subweapon"] : [], ...inv.classKit ? ["gloves"] : [], ...capeSlotOpen(inv) ? ["cape"] : []] : EQUIPMENT_SLOTS;
 var RETIRED_SLOTS = Object.freeze(["chest", "leggings"]);
 var REWARD_POOLS = freezeWire([
   ["iron-sword", "padded-armor", "copper-charm", "coif", "greaves", "sabatons", "full-plate"],
@@ -16925,6 +16936,11 @@ var BY_NOUN = Object.freeze({
   "Studded Boots": "tall",
   Cowl: "cowl",
   "Cloth Robe": "apprentice-robe",
+  // Shared by every class.
+  Cape: "cape",
+  Cloak: "cloak",
+  Mantle: "mantle",
+  "Backwards Cap": "backwards-cap",
   "Cloth Wraps": "wraps",
   "Cloth Slippers": "apprentice-slippers",
   "Wizard Hat": "hat",
@@ -16947,9 +16963,12 @@ var LOOK_POOLS = Object.freeze({
   helm: Object.freeze(["helm", "barbute", "sallet"]),
   coif: Object.freeze(["coif", "kettle-hat", "nasal-helm"]),
   bandana: Object.freeze(["bandana", "leather-cap", "feathered-cap"]),
+  cape: Object.freeze(["traveler-cape", "ragged-cape", "magic-cape"]),
+  cloak: Object.freeze(["hooded-cloak", "fur-cloak", "scalloped-cloak"]),
+  mantle: Object.freeze(["royal-mantle", "capelet", "banner-cape"]),
   hood: Object.freeze(["hood", "bandit-hood", "scout-hood"]),
   hat: Object.freeze(["hat", "wide-brim-hat", "circlet"]),
-  cowl: Object.freeze(["cowl", "mage-hood", "head-wrap"]),
+  cowl: Object.freeze(["cowl", "mage-hood", "moon-hat"]),
   buckler: Object.freeze(["buckler", "targe", "roundel"]),
   kite: Object.freeze(["kite", "heater", "iron-kite"]),
   tower: Object.freeze(["tower", "pavise", "bulwark"]),
@@ -17096,7 +17115,7 @@ function validateForgeProgress(a, b, before) {
   if (!a.renewal) for (const [id, q] of Object.entries(a.economy.soulAwardsByEntityId)) requireContract(b.economy.soulAwardsByEntityId[id] === q, "Material history changed");
   let delta = 0;
   for (const slot of equipmentSlots(b)) {
-    const x = slot === "subweapon" && !a.subweapons || slot === "gloves" && !a.classKit ? 0 : a.economy.slotLevels[slot], y = b.economy.slotLevels[slot];
+    const x = slot === "subweapon" && !a.subweapons || slot === "gloves" && !a.classKit || slot === "cape" && !Object.hasOwn(a.economy.slotLevels, "cape") ? 0 : a.economy.slotLevels[slot], y = b.economy.slotLevels[slot];
     requireContract(y >= x, "Attunement regressed");
     delta += y - x;
     const r = b.economy.lastAttunementsBySlot[slot];
@@ -17887,17 +17906,17 @@ function validateCommand(command) {
     }
   } else if (command.kind === "forge.attune") {
     closedRecord(command.payload, ["slot", "expectedLevel", "inventoryRevision"]);
-    requireContract(["weapon", "helmet", "chest", "leggings", "overall", "boots", "ring1", "ring2", "subweapon", "gloves"].includes(command.payload.slot), "Unknown Forge slot");
+    requireContract(["weapon", "helmet", "chest", "leggings", "overall", "boots", "ring1", "ring2", "subweapon", "gloves", "cape"].includes(command.payload.slot), "Unknown Forge slot");
     safeInteger(command.payload.expectedLevel, 0, 99);
     safeInteger(command.payload.inventoryRevision);
   } else if (command.kind === "equipment.equip") {
     closedRecord(command.payload, ["itemId", "inventoryRevision"], ["slot"]);
-    if (command.payload.slot !== void 0) requireContract(["weapon", "helmet", "chest", "leggings", "overall", "boots", "ring1", "ring2", "subweapon", "gloves"].includes(command.payload.slot), "Unknown equipment slot");
+    if (command.payload.slot !== void 0) requireContract(["weapon", "helmet", "chest", "leggings", "overall", "boots", "ring1", "ring2", "subweapon", "gloves", "cape"].includes(command.payload.slot), "Unknown equipment slot");
     requireContract(typeof command.payload.itemId === "string" && /^item:ply:[0-9a-f]{32}:(?:ent:[0-9a-f]{32}|starter)$/.test(command.payload.itemId), "Invalid item ID");
     safeInteger(command.payload.inventoryRevision);
   } else if (command.kind === "equipment.unequip") {
     closedRecord(command.payload, ["slot", "inventoryRevision"]);
-    requireContract(["weapon", "helmet", "chest", "leggings", "overall", "boots", "ring1", "ring2", "subweapon", "gloves", "armor", "charm"].includes(command.payload.slot), "Unknown equipment slot");
+    requireContract(["weapon", "helmet", "chest", "leggings", "overall", "boots", "ring1", "ring2", "subweapon", "gloves", "cape", "armor", "charm"].includes(command.payload.slot), "Unknown equipment slot");
     safeInteger(command.payload.inventoryRevision);
   } else if (command.kind === "classkit.claim") {
     closedRecord(command.payload, ["inventoryRevision"]);

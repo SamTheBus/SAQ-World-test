@@ -1168,6 +1168,8 @@ body #world-inventory .hero-slots button.is-danger{border-color:#b34e57;backgrou
 body #world-inventory #world-equipment,body #world-inventory #world-items{display:flex;flex-direction:column;gap:12px}
 #world-inventory .gx-doll{display:grid;grid-template-columns:76px minmax(0,1fr) 76px;align-items:center;gap:6px;background:#151d26;border:1px solid #26313d;border-radius:18px;padding:16px 10px}
 #world-inventory .gx-col{display:flex;flex-direction:column;align-items:center;gap:12px}
+/* Five slots tall with the cape: the doll's tiles and spacing are a little tighter so it still fits a short window. */
+#world-inventory .gx-doll{padding:10px}#world-inventory .gx-doll .gx-col{gap:7px}#world-inventory .gx-doll .gx-slotwrap{gap:3px}#world-inventory .gx-doll button.gx-slot{width:58px;height:58px}#world-inventory .gx-doll .gx-slot img{width:40px;height:40px}
 #world-inventory .gx-slotwrap{display:flex;flex-direction:column;align-items:center;gap:5px}
 #world-inventory button.gx-slot,#world-inventory button.gx-tile{position:relative;display:flex;align-items:center;justify-content:center;padding:0;width:66px;height:66px;min-height:0;border-radius:14px;border:2px solid var(--rarity,#3a4654);background:#1b2530;box-shadow:none}
 #world-inventory button.gx-slot.is-empty{border:2px dashed #3a4654;background:#121a22}

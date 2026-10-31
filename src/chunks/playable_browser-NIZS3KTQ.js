@@ -326,6 +326,7 @@ import {
   canTargetActor,
   cancelDefeatedPrimaries,
   canonicalStringify,
+  capeSlotAvailable,
   captureWorldPositionsD9,
   certifyNumeric,
   chunkAddressKey,
@@ -744,7 +745,7 @@ import {
   worldLevelGapMultiplier,
   worldOrdinaryMeleeProfile,
   worldPointForArea
-} from "./chunk-UAXSWGVA.js";
+} from "./chunk-HGRR6GYD.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -4598,8 +4599,8 @@ function localDirection(direction3, rotation, facing2) {
   return { x: (co * direction3.x + si * direction3.y) * facing2, y: -si * direction3.x + co * direction3.y };
 }
 function swordRay(u) {
-  const dot = STRIKE_GRIP.x * u.x + STRIKE_GRIP.y * u.y, perp2 = STRIKE_GRIP.x ** 2 + STRIKE_GRIP.y ** 2 - dot * dot;
-  return dot + Math.sqrt(Math.max(0, BLADE_REACH ** 2 - perp2));
+  const dot2 = STRIKE_GRIP.x * u.x + STRIKE_GRIP.y * u.y, perp2 = STRIKE_GRIP.x ** 2 + STRIKE_GRIP.y ** 2 - dot2 * dot2;
+  return dot2 + Math.sqrt(Math.max(0, BLADE_REACH ** 2 - perp2));
 }
 function armorSwordFrontV4(direction3, rotation, facing2 = 1, size = 1) {
   return swordRay(localDirection(direction3, rotation, facing2)) * SCALE3 * size;
@@ -4868,8 +4869,8 @@ function localDirection2(direction3, rotation, facing2) {
   return { x: (co * direction3.x + si * direction3.y) * facing2, y: -si * direction3.x + co * direction3.y };
 }
 function swordRay2(u) {
-  const dot = STRIKE_GRIP2.x * u.x + STRIKE_GRIP2.y * u.y, perp2 = STRIKE_GRIP2.x ** 2 + STRIKE_GRIP2.y ** 2 - dot * dot;
-  return dot + Math.sqrt(Math.max(0, BLADE_REACH2 ** 2 - perp2));
+  const dot2 = STRIKE_GRIP2.x * u.x + STRIKE_GRIP2.y * u.y, perp2 = STRIKE_GRIP2.x ** 2 + STRIKE_GRIP2.y ** 2 - dot2 * dot2;
+  return dot2 + Math.sqrt(Math.max(0, BLADE_REACH2 ** 2 - perp2));
 }
 function gargoyleSwordFrontV4(direction3, rotation, facing2 = 1, size = 1) {
   return swordRay2(localDirection2(direction3, rotation, facing2)) * SCALE4 * size;
@@ -13887,10 +13888,10 @@ async function createPaintedRoutesV1(env, review, prior, { worldCoverage = false
     const started = env.performance.now(), c = env.document.createElement("canvas");
     c.width = c.height = PAINTED_PAGE_SIZE;
     const g = c.getContext("2d"), im = g.createImageData(PAINTED_PAGE_SIZE, PAINTED_PAGE_SIZE), out = im.data, s = {}, edge = new Float64Array(4), lip = new Float64Array(4);
-    const stride = PAINTED_PAGE_SIZE / 32 + 1, warp = [];
+    const stride = PAINTED_PAGE_SIZE / 32 + 1, warp2 = [];
     for (let y = 0; y < stride; y++) for (let x = 0; x < stride; x++) {
       const wx = px3 + o.x + x * 32, wy = py + o.y + y * 32;
-      warp.push([48 * (woodlandFieldV1(wx / 367, wy / 367, seed2 + 3101) - 0.5), 48 * (woodlandFieldV1(wx / 431 + 19, wy / 431 + 7, seed2 + 3102) - 0.5)]);
+      warp2.push([48 * (woodlandFieldV1(wx / 367, wy / 367, seed2 + 3101) - 0.5), 48 * (woodlandFieldV1(wx / 431 + 19, wy / 431 + 7, seed2 + 3102) - 0.5)]);
     }
     const stencil = routeSamples.page(at4, px3, py), aligned = Number.isInteger(px3 / 32) && Number.isInteger(py / 32), allowed = [];
     if (aligned) for (let y = 0; y < 2; y++) for (let x = 0; x < 2; x++) {
@@ -13934,7 +13935,7 @@ async function createPaintedRoutesV1(env, review, prior, { worldCoverage = false
         if (d < -30) continue;
         let rr = 0, gg = 0, bb = 0, a = 0;
         if (d >= -18) {
-          const ix = x >> 5, iy = y >> 5, fx = (x % 32 + 0.5) / 32, fy = (y % 32 + 0.5) / 32, A = warp[iy * stride + ix], B2 = warp[iy * stride + ix + 1], C2 = warp[(iy + 1) * stride + ix], D2 = warp[(iy + 1) * stride + ix + 1], du = (A[0] * (1 - fx) + B2[0] * fx) * (1 - fy) + (C2[0] * (1 - fx) + D2[0] * fx) * fy, dv = (A[1] * (1 - fx) + B2[1] * fx) * (1 - fy) + (C2[1] * (1 - fx) + D2[1] * fx) * fy, mx = Math.floor(((wx * 2 + du) % material.width + material.width) % material.width), my = Math.floor(((wy * 2 + dv) % material.height + material.height) % material.height), mi = (my * material.width + mx) * 4;
+          const ix = x >> 5, iy = y >> 5, fx = (x % 32 + 0.5) / 32, fy = (y % 32 + 0.5) / 32, A = warp2[iy * stride + ix], B2 = warp2[iy * stride + ix + 1], C2 = warp2[(iy + 1) * stride + ix], D2 = warp2[(iy + 1) * stride + ix + 1], du = (A[0] * (1 - fx) + B2[0] * fx) * (1 - fy) + (C2[0] * (1 - fx) + D2[0] * fx) * fy, dv = (A[1] * (1 - fx) + B2[1] * fx) * (1 - fy) + (C2[1] * (1 - fx) + D2[1] * fx) * fy, mx = Math.floor(((wx * 2 + du) % material.width + material.width) % material.width), my = Math.floor(((wy * 2 + dv) % material.height + material.height) % material.height), mi = (my * material.width + mx) * 4;
           rr = material.data[mi];
           gg = material.data[mi + 1];
           bb = material.data[mi + 2];
@@ -14409,7 +14410,7 @@ var OFF_FAMILY = {
   "tome-tempest": "tome"
 };
 var ROBES = /* @__PURE__ */ new Set(["robe", "apprentice-robe"]);
-var HATS = /* @__PURE__ */ new Set(["hat", "cowl", "bandana", "leather-cap", "feathered-cap", "wide-brim-hat", "circlet", "head-wrap"]);
+var HATS = /* @__PURE__ */ new Set(["hat", "cowl", "bandana", "leather-cap", "feathered-cap", "wide-brim-hat", "circlet", "moon-hat", "backwards-cap"]);
 var HOOD_FACE = /* @__PURE__ */ new Set(["hood", "bandit-hood"]);
 var COIF_FACE = /* @__PURE__ */ new Set(["coif", "kettle-hat", "nasal-helm", "barbute"]);
 var OPEN_HOOD_FACE = /* @__PURE__ */ new Set(["scout-hood", "mage-hood"]);
@@ -14417,7 +14418,7 @@ var HAIR_SHOWS = /* @__PURE__ */ new Set(["circlet"]);
 function kit(spec) {
   const k = KITS[spec.cls] ?? KITS.knight, g = spec.gear ?? {}, look = (slot, fallback) => g[slot] ? g[slot].kind ?? fallback : null;
   const body5 = look("body", k.body) ?? "tunic", off = look("off", spec.offType ? OFF_KINDS[spec.offType] : k.off);
-  return { helmet: look("helmet", k.helmet), body: body5, legs: ROBES.has(body5) ? null : look("legs", k.legs) ?? "pants", gloves: look("gloves", k.gloves), boots: look("boots", k.boots) ?? "shoes", main: look("main", k.main), off, offFamily: off ? OFF_FAMILY[off] ?? "shield" : null, g };
+  return { cape: g.cape?.kind ?? null, helmet: look("helmet", k.helmet), body: body5, legs: ROBES.has(body5) ? null : look("legs", k.legs) ?? "pants", gloves: look("gloves", k.gloves), boots: look("boots", k.boots) ?? "shoes", main: look("main", k.main), off, offFamily: off ? OFF_FAMILY[off] ?? "shield" : null, g };
 }
 var M = {
   mail: { b: "#8f989e", d: "#737c82", l: "#b3bbc0" },
@@ -14488,16 +14489,16 @@ function legs2(c, w, S2, step) {
     R(c, -2.3, 15.2, 7.4, 1.6, P2.leather, { flat: true, lw: 1.1 });
     px(c, 3.2, 17.4, 1.2, 1.2, A.c);
   } else if (w.boots === "slippers" || w.boots === "apprentice-slippers") {
-    const cloth = w.boots === "slippers" ? P2.cover : M.blue;
-    R(c, -1.4, 18.2, 6.6, 1.8, cloth, { lw: 1.1, nohi: true });
-    R(c, 4.6, 17.2, 1.8, 1.8, cloth, { flat: true, lw: 1 });
+    const cloth2 = w.boots === "slippers" ? P2.cover : M.blue;
+    R(c, -1.4, 18.2, 6.6, 1.8, cloth2, { lw: 1.1, nohi: true });
+    R(c, 4.6, 17.2, 1.8, 1.8, cloth2, { flat: true, lw: 1 });
     px(c, 1.6, 18.6, 1.6, 0.9, A.c);
   } else R(c, -1.8, 17.4, 6.2, 2.6, P2.shoe, { lw: 1.2, nohi: true });
   c.restore();
 }
-function robeBody(c, A, acc2, cloth, dark, inner, belt) {
+function robeBody(c, A, acc2, cloth2, dark, inner, belt) {
   const robe3 = [-8, 0, 6, 0, 6.9, 8.2, 9.8, 18.4, 2, 18.4, 0.7, 16.8, -0.6, 18.4, -10.6, 18.4, -8.9, 8.2], shape3 = poly(robe3);
-  G(c, robe3, cloth, { split: 0.68 });
+  G(c, robe3, cloth2, { split: 0.68 });
   G(c, [-0.9, 1.2, 2.3, 1.2, 3.1, 17.4, 1.6, 17.4, 0.7, 16.2, -0.3, 17.4, -1.9, 17.4], inner, { flat: true, lw: 1 });
   c.save();
   c.clip(shape3);
@@ -14571,6 +14572,164 @@ function body4(c, w, red) {
     R(c, -8.4, 9.6, 14.8, 1.6, { b: "#8a6a45" }, { flat: true, lw: 1.1 });
   }
 }
+var CAPE_CLOTH = {
+  travel: { b: "#7a5236", d: "#5e3e28", l: "#94694a" },
+  rag: { b: "#4a4f57", d: "#383c43", l: "#5d636c" },
+  magic: { b: "#2c4f8f", d: "#213b6b", l: "#3d66b0" },
+  moss: { b: "#5b6b4a", d: "#46533a", l: "#71835d" },
+  wine: { b: "#6e2f2a", d: "#53231f", l: "#8a3d36" },
+  teal: { b: "#1f6f6a", d: "#17524f", l: "#2a8a84" },
+  tealLight: { b: "#2a8a84", d: "#1f6f6a", l: "#3aa39c" },
+  royal: { b: "#a3332b", d: "#7c2620", l: "#c24a40" },
+  navy: { b: "#2c3e66", d: "#22304f", l: "#3d5487" },
+  banner: { b: "#d8c7a0", d: "#b9a780", l: "#ece0c2" },
+  fur: { b: "#efe6d6", d: "#d2c6b0" },
+  gold: { b: "#d4b45a", d: "#a8893e", l: "#ecd38a" },
+  lining: { b: "#e9dcb8", d: "#cdbd92" }
+};
+var capeMove = { sx: 0, push: 0, lift: 0, ripple: 0, phase: 0 };
+function capeMotion(pose, t, sway) {
+  const moving = Boolean(pose.moving || pose.step), step = pose.step ?? 0, swing = pose.active ? Math.sqrt(pose.weight ?? 1) : 0;
+  return { sx: sway * 1.6, push: (moving ? 5 + step : 0) + swing * 2.2, lift: (moving ? 4.4 + 0.8 * Math.abs(step) : 0) + swing * 1.2, ripple: moving ? 1.1 : 0.4 + swing * 0.3, phase: t * (moving ? 11.1 : 2.8) };
+}
+function warp(pts) {
+  const { sx, push, lift, ripple, phase } = capeMove, out = new Array(pts.length);
+  for (let i = 0; i < pts.length; i += 2) {
+    const x = pts[i], y = pts[i + 1], k = Math.max(0, Math.min(1, (y + 1) / 20)), k2 = k * k, far = Math.min(1, Math.max(0, -x - 8) / 14);
+    out[i] = x + sx * k - push * k2 * (0.7 + 0.3 * far) + Math.sin(phase + y * 0.5) * ripple * k;
+    out[i + 1] = y - lift * k2 * (0.6 + 0.4 * far) + Math.sin(phase * 1.2 + x * 0.55) * ripple * 0.6 * k;
+  }
+  return out;
+}
+function clothPath(c, q) {
+  c.beginPath();
+  c.moveTo(q[0], q[1]);
+  for (let i = 2; i < q.length; i += 2) c.lineTo(q[i], q[i + 1]);
+  c.closePath();
+}
+function cloth(c, pts, P6, { split = 0.8, lw = 1.3, flat: flat2 = false } = {}) {
+  const q = warp(pts);
+  clothPath(c, q);
+  c.fillStyle = tint(P6.b);
+  c.fill();
+  if (!flat2 && P6.d) {
+    let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+    for (let i = 0; i < q.length; i += 2) {
+      x0 = Math.min(x0, q[i]);
+      x1 = Math.max(x1, q[i]);
+      y0 = Math.min(y0, q[i + 1]);
+      y1 = Math.max(y1, q[i + 1]);
+    }
+    c.save();
+    clothPath(c, q);
+    c.clip();
+    c.fillStyle = tint(P6.d);
+    c.fillRect(x0 + (x1 - x0) * split, y0, x1 - x0, y1 - y0);
+    c.restore();
+  }
+  clothPath(c, q);
+  c.lineWidth = lw;
+  c.strokeStyle = K;
+  c.stroke();
+}
+var rectPts = (x, y, w, h) => [x, y, x + w, y, x + w, y + h, x, y + h];
+function dot(c, x, y, w, h, col) {
+  const [qx, qy] = warp([x, y]);
+  px(c, qx, qy, w, h, col);
+}
+var drapeOf = (len, back) => [-2.4, -0.8, -8.8, -1.2, -11, 0.6, -11.4 + back * 0.22, len * 0.42, back, len, -2, len + 0.6];
+function folds(c, len, back) {
+  const q = warp([-10.4, 2.4, back + 3.4, len - 1.6, -8.4, 4.4, back + 8, len - 1.2]);
+  c.save();
+  c.strokeStyle = tint("#0000002e");
+  c.lineWidth = 0.8;
+  c.beginPath();
+  c.moveTo(q[0], q[1]);
+  c.lineTo(q[2], q[3]);
+  c.moveTo(q[4], q[5]);
+  c.lineTo(q[6], q[7]);
+  c.stroke();
+  c.restore();
+}
+function hemTrim(c, A, len, back) {
+  cloth(c, [back, len, -2, len + 0.6, -2, len - 0.8, back + 0.3, len - 1.4], accPal(A), { flat: true, lw: 1 });
+}
+function collar(c, A, fabric, clasp = CAPE_CLOTH.gold) {
+  R(c, -8.4, 0.8, 13.6, 1.8, fabric, { split: 0.75, lw: 1.1 });
+  R(c, 3, 0.4, 2.6, 2.6, clasp, { flat: true, lw: 1 });
+  gem(c, 4.3, 1.7, 1.5, A.gem);
+}
+function plainCape(c, A, fabric, len, back, lined) {
+  if (lined) cloth(c, drapeOf(len, back), lined, { flat: true });
+  cloth(c, drapeOf(len - (lined ? 0.4 : 0), back + (lined ? 1.6 : 0)), fabric);
+  folds(c, len, back);
+  hemTrim(c, A, len, back + (lined ? 1.6 : 0));
+}
+var CAPES = {
+  // Cape: a plain traveler's cape; a ragged one with a torn hem and a stitched patch; a magic cape with its lining showing.
+  "traveler-cape": { back: (c, A) => plainCape(c, A, CAPE_CLOTH.travel, 14, -20, null), front: (c, A) => collar(c, A, CAPE_CLOTH.travel) },
+  "ragged-cape": {
+    back(c, A) {
+      const len = 13.6, back = -20.2, hem = [];
+      for (let i = 0; i <= 8; i++) hem.push(back + 18.2 * i / 8, len + (i % 2 ? -1.8 : 0.4));
+      cloth(c, [-2.4, -0.8, -8.8, -1.2, -11, 0.6, -11.4 + back * 0.22, len * 0.42, ...hem.slice(0, -2), -2, len], CAPE_CLOTH.rag);
+      folds(c, len, back);
+      dot(c, -14.6, 9, 1.2, 1.2, "#1d232b");
+      cloth(c, rectPts(-14.6, 3.6, 2.8, 2.8), accPal(A), { flat: true, lw: 0.9 });
+    },
+    front(c, A) {
+      R(c, -8.4, 0.8, 13.6, 1.8, CAPE_CLOTH.rag, { split: 0.75, lw: 1.1 });
+      R(c, 3.2, 0.2, 2.2, 3.2, P2.strap, { flat: true, lw: 1 });
+      gem(c, 4.3, 1.7, 1.4, A.gem);
+    }
+  },
+  "magic-cape": { back: (c, A) => plainCape(c, A, CAPE_CLOTH.magic, 15.8, -21.6, CAPE_CLOTH.lining), front: (c, A) => collar(c, A, CAPE_CLOTH.magic) },
+  // Cloak: a hooded cloak, the hood down at the back; a cloak with a fur ruff; a cloak with a scalloped short layer over it.
+  "hooded-cloak": {
+    back(c, A) {
+      plainCape(c, A, CAPE_CLOTH.moss, 19.2, -21.8, null);
+      cloth(c, [-5.6, -1.4, -11, -2.4, -13.8, 1.2, -12.6, 5.2, -8.2, 4.2], { b: CAPE_CLOTH.moss.d, d: "#38432e" }, { split: 0.6, lw: 1.2 });
+    },
+    front: (c, A) => collar(c, A, CAPE_CLOTH.moss)
+  },
+  "fur-cloak": {
+    back(c, A) {
+      plainCape(c, A, CAPE_CLOTH.wine, 18.6, -22.2, null);
+      cloth(c, [-4, -2, -7, -3, -10, -2.6, -12.6, -0.6, -13.8, 2.4, -12.2, 4.8, -9.4, 4, -6.4, 4.6, -3.6, 3], CAPE_CLOTH.fur, { split: 0.7, lw: 1.2 });
+    },
+    front(c, A) {
+      G(c, [-8.4, 0.4, -5, -0.2, 0, 0.2, 4.8, 0.4, 5.8, 2.6, 1, 3.6, -4, 3.2, -8.4, 2.8], CAPE_CLOTH.fur, { split: 0.75, lw: 1.1 });
+      gem(c, 4.3, 2, 1.6, A.gem);
+    }
+  },
+  "scalloped-cloak": { back(c, A) {
+    plainCape(c, A, CAPE_CLOTH.teal, 18, -21.8, null);
+    const hem = [];
+    for (let i = 0; i <= 8; i++) hem.push(-16 + i * 1.7, i % 2 ? 10.8 : 9.2);
+    cloth(c, [-2.4, -0.8, -8.8, -1.2, -11, 0.6, -14, 4.6, ...hem, -2, 9.2], CAPE_CLOTH.tealLight, { lw: 1.2 });
+    cloth(c, rectPts(-15.4, 8.4, 12, 0.8), { b: A.c }, { flat: true, lw: 0 });
+  }, front: (c, A) => collar(c, A, CAPE_CLOTH.teal) },
+  // Mantle: a red mantle edged in gold; a short navy capelet with a gold fringe; a long narrow banner cape with a swallowtail hem and a stitched crest.
+  "royal-mantle": { back: (c, A) => plainCape(c, A, CAPE_CLOTH.royal, 16.6, -22.2, CAPE_CLOTH.gold), front: (c, A) => collar(c, A, CAPE_CLOTH.royal) },
+  capelet: {
+    back(c, A) {
+      cloth(c, [-2.4, -0.8, -8.8, -1.2, -11, 0.4, -14.6, 3.4, -16, 6.6, -2, 7], CAPE_CLOTH.navy);
+      for (let x = -15.4; x < -2.6; x += 1.3) dot(c, x, 6.6, 0.6, 1.6, CAPE_CLOTH.gold.b);
+      cloth(c, rectPts(-15.6, 5.6, 13.2, 0.8), { b: A.c }, { flat: true, lw: 0 });
+    },
+    front(c, A) {
+      G(c, [-8.4, 0.6, 5.8, 0.6, 6.2, 3.6, -8.6, 3.8], CAPE_CLOTH.navy, { split: 0.75, lw: 1.1 });
+      for (let x = -8; x < 5.8; x += 1.3) px(c, x, 3.7, 0.6, 1.4, CAPE_CLOTH.gold.b);
+      gem(c, 4.3, 1.8, 1.5, A.gem);
+    }
+  },
+  "banner-cape": { back(c, A) {
+    cloth(c, [-2.4, -0.8, -8.8, -1.2, -11, 0.6, -14.4, 8, -18.4, 18.6, -14.4, 16.2, -10.4, 18.8, -2, 18.8], CAPE_CLOTH.banner);
+    folds(c, 18, -18.4);
+    cloth(c, [-15.4, 7.2, -12.2, 7.2, -12.2, 10.2, -13.8, 11.8, -15.4, 10.2], accPal(A), { flat: true, lw: 1 });
+    dot(c, -14.2, 8.2, 0.8, 2.4, CAPE_CLOTH.banner.l);
+  }, front: (c, A) => collar(c, A, CAPE_CLOTH.banner) }
+};
 function sword(c, A) {
   R(c, 10.6, -1.5, 1.9, 3, accPal(A), { flat: true, lw: 1.2 });
   R(c, 12.4, -1.1, 4, 2.2, P2.leather, { flat: true, lw: 1.2 });
@@ -16273,6 +16432,7 @@ function mailHood(c, A, face3, trim2) {
   px(c, -10.4, -2.4, 9, 1, A.c);
   if (trim2) gem(c, -6, -8, 1.4, A.gem);
 }
+var CAP_RED = { b: "#b8473c", d: "#8f362e", l: "#d3655a" };
 var SHADOW = { b: "#3a3f4b", d: "#2a2e37", l: "#4c5260" };
 var RUST = { b: "#7b3b2a", d: "#5e2c20", l: "#9a4e39" };
 var GOLD_BAND = { b: "#d4b45a", d: "#a8893e", l: "#ecd38a" };
@@ -16373,7 +16533,7 @@ var HELMET_LOOKS = {
     gem(c, 7.2, -13.4, 2.2, A.gem ?? "#e8eef2");
     px(c, -6, -12.4, 1.4, 1, A.c);
   },
-  // Cowl: a blue hood with a rope-trimmed opening and a drooping point; a cloth head wrap pinned with a stone.
+  // Cowl: a blue hood with a rope-trimmed opening and a drooping point.
   "mage-hood"(c, A, face3) {
     G(c, [-10, -14, -15.4, -16.6, -16, -11.4, -10, -8.6], M.blue, { split: 0.6, lw: 1.3 });
     R(c, -10, -14, 18, 15, M.blue, { split: 0.75 });
@@ -16383,13 +16543,20 @@ var HELMET_LOOKS = {
     R(c, -2.8, -12, 1.4, 12.2, M.rope, { flat: true, lw: 1 });
     gem(c, -2.1, -1.2, 1.8, A.gem);
   },
-  "head-wrap"(c, A, face3, sway = 0) {
-    G(c, [-10.6, -12, -14.4 + sway * 0.5, -6, -12.6, -5.2, -9.6, -10.4], M.blueInner, { flat: true, lw: 1.1 });
-    G(c, [-11, -10.6, -11.2, -14.4, -8.6, -17.2, -2, -18.4, 4.4, -17.2, 8.2, -14.2, 8.4, -10.8], M.blueInner, { split: 0.7, lw: 1.3 });
-    px(c, -9, -14.6, 15, 0.7, "#00000026");
-    px(c, -8.6, -12.4, 15.6, 0.7, "#00000026");
-    R(c, 5.4, -15.6, 3.4, 3.4, GOLD_BAND, { flat: true, lw: 1 });
-    gem(c, 7.1, -13.9, 2.2, A.gem ?? "#3a6fb0");
+  // Cowl: a moon hat, a soft blue cone with a gold crescent badge.
+  "moon-hat"(c, A, face3, sway = 0) {
+    G(c, [-12, -15.4, 9, -15.4, 7.4, -17.8, 2.4, -19.6, -0.6 + sway * 0.3, -28.6, -4.6 + sway * 0.4, -27, -6.8, -19.6, -11, -17.6], M.blue, { split: 0.7, lw: 1.3 });
+    R(c, -9.4, -19, 13.4, 2.4, M.rope, { flat: true, lw: 1.1 });
+    G(c, [0.2, -25.6, 2.6, -24.6, 3.4, -22.4, 2.4, -20.4, 0.4, -19.8, 1.8, -21.6, 1.8, -23.6], GOLD_BAND, { flat: true, lw: 0.9 });
+    gem(c, -3, -17.8, 1.6, A.gem);
+  },
+  // Any class: a cap worn backwards, its brim over the neck and a snap strap at the front.
+  "backwards-cap"(c, A) {
+    G(c, [-10.6, -11.6, -16.4, -10.8, -16.2, -9.2, -10.4, -9.8], CAP_RED, { split: 0.7, lw: 1.2 });
+    G(c, [-11, -10, -11.2, -14.4, -8.6, -17.2, -2, -18.4, 4.4, -17.2, 8.2, -14.2, 8.4, -10], CAP_RED, { split: 0.7, lw: 1.3 });
+    px(c, -2.6, -18.6, 2.2, 1.2, A.c);
+    R(c, 5, -13.4, 3.6, 2.6, P2.strap, { flat: true, lw: 1 });
+    gem(c, 6.8, -12.1, 1.6, A.gem);
   }
 };
 var BOOT_SHAFT = { boots: 7.4, tall: 10, sabatons: 7.4 };
@@ -16438,7 +16605,11 @@ function drawBlockyHero(c, spec, pose = {}) {
   c.save();
   c.lineJoin = "miter";
   c.miterLimit = 2;
-  if (w.body === "plate") {
+  const cape = CAPES[w.cape], capeA = accOf(w.g.cape);
+  if (cape) {
+    capeMove = capeMotion(pose, t, sway);
+    cape.back(c, capeA);
+  } else if (w.body === "plate") {
     G(c, [-6, 0, -16.5, 15.5, -13.5, 19.6, -2.5, 18.4], red, { split: 0.55 });
     px(c, -15.2, 17.2, 12.2, 1.2, accOf(w.g.body).c);
   }
@@ -16487,6 +16658,7 @@ function drawBlockyHero(c, spec, pose = {}) {
   c.save();
   c.translate(0, bob);
   body4(c, w, red);
+  cape?.front(c, capeA);
   c.save();
   c.translate(0, bob * 0.5);
   if (covered && !hatOn) {
@@ -16668,7 +16840,7 @@ var HERO_SLOTS_VERSION = "hero-slots-v1";
 var heroSlotsKey = (channel2) => `${channel2}saq-world-heroes-v1`;
 var CLASSES = ["knight", "rogue", "mage"];
 var OFFHANDS = ["shield", "dagger", "tome"];
-var SLOTS = ["helmet", "body", "legs", "gloves", "boots", "main", "off"];
+var SLOTS = ["helmet", "body", "legs", "gloves", "boots", "main", "off", "cape"];
 var KIND = /^[a-z][a-z-]{0,23}$/;
 var NAME = /^[\p{L}\p{M}\p{N} '’.-]{0,16}$/u;
 var ids2 = (list) => new Set(list.map((option) => option[0]));
@@ -25860,10 +26032,10 @@ function segmentDistance(p, a, b) {
 function originalFireCone(origin, target, person, rangeLimit = 110, halfAngle = 0.8, hull2 = 9) {
   const dx = person.x - origin.x, dy = person.y - origin.y, d = Math.hypot(dx, dy);
   if (d > rangeLimit + hull2) return false;
-  const s = facing(origin, target), dot = dx * s;
-  if (dot < -hull2) return false;
+  const s = facing(origin, target), dot2 = dx * s;
+  if (dot2 < -hull2) return false;
   if (d <= hull2) return true;
-  const angular = Math.atan2(Math.abs(dy), dot);
+  const angular = Math.atan2(Math.abs(dy), dot2);
   return angular <= halfAngle + Math.asin(Math.min(1, hull2 / d));
 }
 function originalCinderRushEndpoint(collision, origin, target, radius = 28) {
@@ -27535,6 +27707,7 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
       } else if (command.kind.startsWith("equipment.")) {
         if (command.kind === "equipment.equip") {
           inventory.equipped = equipmentAfter(inventory, command.payload.itemId, command.payload.slot);
+          if (Object.hasOwn(inventory.equipped, "cape") && inventory.economy && !Object.hasOwn(inventory.economy.slotLevels, "cape")) inventory.economy.slotLevels.cape = 0;
         } else inventory.equipped[command.payload.slot] = null;
         inventory.revision++;
         inventory.lastEquipmentChange = { command: copyWire(command), authorityOrder, tick: state.tick, revision: inventory.revision };
@@ -28430,8 +28603,8 @@ function heroLookView(player) {
     const tier2 = itemDefinition(item)?.rarityTier, kind = itemLook(item);
     return { tier: Number.isSafeInteger(tier2) ? Math.max(0, Math.min(5, tier2)) : 0, ...kind ? { kind } : {} };
   };
-  const overall = piece2("overall"), overallLegs = overall && (overall.kind ? OVERALL_LEGS[overall.kind] ? { tier: overall.tier, kind: OVERALL_LEGS[overall.kind] } : null : overall);
-  return { cls: player?.d8?.heroClass ?? null, look: copyWire(heroLookOf(player?.d8)), gear: { helmet: piece2("helmet"), body: piece2("chest") ?? overall, legs: piece2("leggings") ?? overallLegs, gloves: piece2("gloves"), boots: piece2("boots"), main: piece2("weapon"), off: piece2("subweapon") } };
+  const cape = piece2("cape"), overall = piece2("overall"), overallLegs = overall && (overall.kind ? OVERALL_LEGS[overall.kind] ? { tier: overall.tier, kind: OVERALL_LEGS[overall.kind] } : null : overall);
+  return { cls: player?.d8?.heroClass ?? null, look: copyWire(heroLookOf(player?.d8)), gear: { helmet: piece2("helmet"), body: piece2("chest") ?? overall, legs: piece2("leggings") ?? overallLegs, gloves: piece2("gloves"), boots: piece2("boots"), main: piece2("weapon"), off: piece2("subweapon"), ...cape ? { cape } : {} } };
 }
 
 // src/host/world_terrain_projection_d9.js
@@ -31864,6 +32037,7 @@ function drawWorldHero(ctx, actor, facing2, presentationTime, primary = null, ti
     bob: moving ? Math.sin(presentationTime / 90) * 0.9 : 0,
     sway: Math.sin(presentationTime / 560) * 0.5,
     step: moving ? Math.sin(presentationTime / 90) : 0,
+    moving: Boolean(moving),
     front: frontAngle(pose, primary, facing2),
     guard: Boolean(actor.guard?.raised),
     guardY,
@@ -31899,9 +32073,9 @@ function drawProofSlime(ctx, actor, flash = false) {
 }
 
 // src/client/gear_screen_v2.js
-var SLOT_NAMES = Object.freeze({ weapon: "Weapon", subweapon: "Offhand", helmet: "Helmet", overall: "Armor", gloves: "Gloves", boots: "Boots", ring1: "Ring 1", ring2: "Ring 2", chest: "Chest", leggings: "Leggings" });
-var DOLL_LEFT = Object.freeze(["helmet", "overall", "gloves", "boots"]);
-var DOLL_RIGHT = Object.freeze(["weapon", "subweapon", "ring1", "ring2"]);
+var SLOT_NAMES = Object.freeze({ weapon: "Weapon", subweapon: "Offhand", helmet: "Helmet", overall: "Armor", gloves: "Gloves", cape: "Cape", boots: "Boots", ring1: "Ring 1", ring2: "Ring 2", chest: "Chest", leggings: "Leggings" });
+var DOLL_LEFT = Object.freeze(["weapon", "helmet", "overall", "gloves", "boots"]);
+var DOLL_RIGHT = Object.freeze(["cape", "subweapon", "ring1", "ring2"]);
 var BAG_FILTERS = Object.freeze([["all", "All"], ["weapon", "Weapons"], ["offhand", "Offhand"], ["armor", "Armor"], ["ring", "Rings"]]);
 var bagFilterOf = (d) => d.slot === "weapon" ? "weapon" : d.slot === "subweapon" ? "offhand" : d.slot === "ring" ? "ring" : "armor";
 var slotFilterOf = (slot) => slot === "weapon" ? "weapon" : slot === "subweapon" ? "offhand" : slot.startsWith("ring") ? "ring" : "armor";
@@ -32008,6 +32182,7 @@ var svg = (body5, size = 26) => `<svg width="${size}" height="${size}" viewBox="
 var line2 = 'fill="none" stroke="#56636f" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"';
 var EMPTY_SLOT_SVG = Object.freeze({
   helmet: svg(`<path d="M5 15a7 7 0 0114 0v3H5z" ${line2}/><path d="M9 15h6" ${line2}/>`),
+  cape: svg(`<path d="M8 3h8l1 3 3 15H4L7 6z" ${line2}/><path d="M9 6h6" ${line2}/>`),
   overall: svg(`<path d="M8 3l4 2 4-2 4 4-2 3v10H6V10L4 7z" ${line2}/>`),
   gloves: svg(`<path d="M7 21v-8l-2-4 2-1 2 3V5a1.5 1.5 0 013 0v5V4a1.5 1.5 0 013 0v6V5.5a1.5 1.5 0 013 0V15l-2 6z" ${line2}/>`),
   boots: svg(`<path d="M8 3h6v9l5 3v4H5v-4l3-2z" ${line2}/>`),
@@ -32245,6 +32420,7 @@ var at2 = (cx, cy, k, draw) => (c, A) => {
     c.restore();
   }
 };
+var CAP_RED2 = { b: "#b8473c", d: "#8f362e", l: "#d3655a" };
 var SHADOW2 = { b: "#3a3f4b", d: "#2a2e37", l: "#4c5260" };
 var RUST2 = { b: "#7b3b2a", d: "#5e2c20", l: "#9a4e39" };
 var FEATHER2 = { b: "#f3e2c8", d: "#cdbb9c" };
@@ -32352,7 +32528,7 @@ Object.assign(HELMETS, {
     px2(c, 6.2, 19.4, 1.4, 1.4, A.c);
     px2(c, 24.4, 19.4, 1.4, 1.4, A.c);
   },
-  // Cowl: a blue hood with a rope-trimmed opening and a drooping point; a cloth head wrap pinned with a stone.
+  // Cowl: a blue hood with a rope-trimmed opening and a drooping point; a moon hat with a gold crescent.
   "mage-hood": at2(-4, -7.8, 1.05, (c, A) => {
     G2(c, [-10, -14, -15.4, -16.6, -16, -11.4, -10, -8.6], M2.blue, { split: 0.6 });
     R2(c, -10, -14, 18, 15, M2.blue, { split: 0.75 });
@@ -32361,13 +32537,19 @@ Object.assign(HELMETS, {
     R2(c, -2.8, -12, 1.4, 12.2, M2.rope, { flat: true, lw: 1 });
     gem2(c, -2.1, -1.2, 2, A.gem);
   }),
-  "head-wrap": at2(-3, -11.6, 1.15, (c, A) => {
-    G2(c, [-10.6, -12, -14.4, -6, -12.6, -5.2, -9.6, -10.4], M2.blueInner, { flat: true, lw: 1.1 });
-    G2(c, [-11, -8.6, -11.2, -14.4, -8.6, -17.2, -2, -18.4, 4.4, -17.2, 8.2, -14.2, 8.4, -8.6], M2.blueInner, { split: 0.7 });
-    px2(c, -9, -14.6, 15, 0.7, "#00000026");
-    px2(c, -8.6, -11.6, 15.6, 0.7, "#00000026");
-    R2(c, 5.4, -15.6, 3.4, 3.4, CIRCLET_GOLD, { flat: true, lw: 1 });
-    gem2(c, 7.1, -13.9, 2.4, A.gem ?? "#3a6fb0");
+  "moon-hat": at2(-2, -21.6, 1.2, (c, A) => {
+    G2(c, [-12, -15.4, 9, -15.4, 7.4, -17.8, 2.4, -19.6, -0.6, -28.6, -4.6, -27, -6.8, -19.6, -11, -17.6], M2.blue, { split: 0.7 });
+    R2(c, -9.4, -19, 13.4, 2.4, M2.rope, { flat: true, lw: 1.1 });
+    G2(c, [0.2, -25.6, 2.6, -24.6, 3.4, -22.4, 2.4, -20.4, 0.4, -19.8, 1.8, -21.6, 1.8, -23.6], CIRCLET_GOLD, { flat: true, lw: 0.9 });
+    gem2(c, -3, -17.8, 2, A.gem);
+  }),
+  // Any class: a cap worn backwards, its brim at the back.
+  "backwards-cap": at2(-4, -13.6, 1.18, (c, A) => {
+    G2(c, [-10.6, -11.6, -16.4, -10.8, -16.2, -9.2, -10.4, -9.8], CAP_RED2, { split: 0.7 });
+    G2(c, [-11, -9.4, -11.2, -14.4, -8.6, -17.2, -2, -18.4, 4.4, -17.2, 8.2, -14.2, 8.4, -9.4], CAP_RED2, { split: 0.7 });
+    px2(c, -2.6, -18.6, 2.2, 1.2, A.c);
+    R2(c, 5, -13.4, 3.6, 2.6, P3.strap, { flat: true, lw: 1 });
+    gem2(c, 6.8, -12.1, 2, A.gem);
   })
 });
 function outfit(c, { torso: torso2, sleeve: sleeve4, legs: legs3, mail = false, cuff = null }) {
@@ -32383,15 +32565,15 @@ function outfit(c, { torso: torso2, sleeve: sleeve4, legs: legs3, mail = false, 
   R2(c, 8.8, 6.6, 14.4, 12.6, torso2, { split: 0.68 });
   if (mail) mailRows2(c, 8.8, 6.6, 14.4, 12.6);
 }
-function robe2(cloth, dark, inner, belt) {
+function robe2(cloth2, dark, inner, belt) {
   return (c, A) => {
     const b = belt ?? accPal2(A);
     for (const s of [-1, 1]) {
       const x = s < 0 ? 9.4 : 22.6;
-      G2(c, [x, 7.6, x + s * 5.2, 9.4, x + s * 6.4, 19.4, x + s * 1.6, 19.4], cloth, { split: 0.6, lw: 1.2 });
+      G2(c, [x, 7.6, x + s * 5.2, 9.4, x + s * 6.4, 19.4, x + s * 1.6, 19.4], cloth2, { split: 0.6, lw: 1.2 });
     }
     const pts = [9.4, 6.6, 22.6, 6.6, 23.6, 15.2, 26.6, 29.4, 5.4, 29.4, 8.4, 15.2];
-    G2(c, pts, cloth, { split: 0.68 });
+    G2(c, pts, cloth2, { split: 0.68 });
     G2(c, [14.6, 8, 17.4, 8, 18.2, 29.4, 13.8, 29.4], inner, { flat: true, lw: 1 });
     c.save();
     shape(c, pts);
@@ -32399,7 +32581,7 @@ function robe2(cloth, dark, inner, belt) {
     px2(c, 4, 27.4, 24, 2, A.c);
     R2(c, 6, 15, 20, 2.6, b, { flat: true, lw: 1.1 });
     c.restore();
-    G2(c, pts, cloth, { fill: false });
+    G2(c, pts, cloth2, { fill: false });
     G2(c, [19.4, 17.4, 21.6, 17.4, 22.2, 22.6, 19.8, 22.6], b, { flat: true, lw: 1 });
     G2(c, [8.6, 5.6, 23.4, 5.6, 24.6, 10, 7.4, 10], dark, { split: 0.7, lw: 1.2 });
     c.lineWidth = 1.2;
@@ -32935,7 +33117,102 @@ function weaponBox(kind) {
   }
   return b;
 }
-var ART = { main: WEAPONS2, gloves: GLOVES2, boots: BOOTS, helmet: HELMETS, body: BODIES, ring: RINGS };
+var CAPE_COLORS = {
+  travel: { b: "#7a5236", d: "#5e3e28", l: "#94694a" },
+  rag: { b: "#4a4f57", d: "#383c43", l: "#5d636c" },
+  magic: { b: "#2c4f8f", d: "#213b6b", l: "#3d66b0" },
+  moss: { b: "#5b6b4a", d: "#46533a", l: "#71835d" },
+  wine: { b: "#6e2f2a", d: "#53231f", l: "#8a3d36" },
+  teal: { b: "#1f6f6a", d: "#17524f", l: "#2a8a84" },
+  tealLight: { b: "#2a8a84", d: "#1f6f6a", l: "#3aa39c" },
+  royal: { b: "#a3332b", d: "#7c2620", l: "#c24a40" },
+  navy: { b: "#2c3e66", d: "#22304f", l: "#3d5487" },
+  banner: { b: "#d8c7a0", d: "#b9a780", l: "#ece0c2" },
+  fur: { b: "#efe6d6", d: "#d2c6b0" },
+  gold: { b: "#d4b45a", d: "#a8893e", l: "#ecd38a" },
+  lining: { b: "#e9dcb8", d: "#cdbd92" }
+};
+var capeBody = (top = 7, hem = 27.4, w = 10.6) => [16 - w / 2, top, 16 + w / 2, top, 16 + w + 0.4, hem, 16, hem + 1.2, 16 - w - 0.4, hem];
+function capeCollar(c, A, cloth2) {
+  R2(c, 10.2, 4.4, 11.6, 3.2, cloth2, { split: 0.72 });
+  gem2(c, 16, 6, 2.4, A.gem);
+}
+function capeHem(c, A, hem = 27.4, w = 10.6) {
+  G2(c, [16 - w - 0.4, hem, 16, hem + 1.2, 16 + w + 0.4, hem, 16 + w + 0.2, hem - 1.4, 16, hem - 0.2, 16 - w - 0.2, hem - 1.4], accPal2(A), { flat: true, lw: 1 });
+}
+function capeFolds(c) {
+  px2(c, 12.4, 10, 0.8, 15, "#0000002a");
+  px2(c, 19, 10, 0.8, 15, "#0000002a");
+}
+var CAPE_ICONS = {
+  "traveler-cape"(c, A) {
+    G2(c, capeBody(), CAPE_COLORS.travel, { split: 0.68 });
+    capeFolds(c);
+    capeHem(c, A);
+    capeCollar(c, A, CAPE_COLORS.travel);
+  },
+  "ragged-cape"(c, A) {
+    const hem = [];
+    for (let i = 0; i <= 8; i++) hem.push(26.6 - 21.2 * i / 8, i % 2 ? 24.6 : 27.6);
+    G2(c, [10.7, 7, 21.3, 7, ...hem], CAPE_COLORS.rag, { split: 0.68 });
+    capeFolds(c);
+    px2(c, 18.4, 19, 1.4, 1.4, "#1d232b");
+    R2(c, 11.4, 13, 3.4, 3.4, accPal2(A), { flat: true, lw: 0.9 });
+    px2(c, 11.4, 14.5, 3.4, 0.5, "#00000040");
+    capeCollar(c, A, CAPE_COLORS.rag);
+  },
+  "magic-cape"(c, A) {
+    G2(c, capeBody(), CAPE_COLORS.lining, { flat: true });
+    G2(c, capeBody(7, 27, 8.4), CAPE_COLORS.magic, { split: 0.68 });
+    capeFolds(c);
+    capeHem(c, A, 27, 8.4);
+    capeCollar(c, A, CAPE_COLORS.magic);
+  },
+  "hooded-cloak"(c, A) {
+    G2(c, capeBody(7, 28.6, 11), CAPE_COLORS.moss, { split: 0.68 });
+    capeFolds(c);
+    capeHem(c, A, 28.6, 11);
+    G2(c, [11, 4.4, 21, 4.4, 22.4, 8.6, 20, 13.4, 12, 13.4, 9.6, 8.6], { b: CAPE_COLORS.moss.d, d: "#38432e" }, { split: 0.6 });
+    px2(c, 13.4, 8.4, 5.2, 0.8, "#00000033");
+    gem2(c, 16, 5.6, 2.4, A.gem);
+  },
+  "fur-cloak"(c, A) {
+    G2(c, capeBody(7, 28.6, 11.4), CAPE_COLORS.wine, { split: 0.68 });
+    capeFolds(c);
+    capeHem(c, A, 28.6, 11.4);
+    G2(c, [8.6, 6.4, 10.4, 3.6, 13, 4.6, 16, 3.2, 19, 4.6, 21.6, 3.6, 23.4, 6.4, 22.4, 9.4, 19.4, 8.6, 16, 10, 12.6, 8.6, 9.6, 9.4], CAPE_COLORS.fur, { split: 0.72 });
+    gem2(c, 16, 6.6, 2.4, A.gem);
+  },
+  "scalloped-cloak"(c, A) {
+    G2(c, capeBody(7, 28.2, 11), CAPE_COLORS.teal, { split: 0.68 });
+    capeHem(c, A, 28.2, 11);
+    const hem = [];
+    for (let i = 0; i <= 8; i++) hem.push(24.6 - 17.2 * i / 8, i % 2 ? 17.8 : 16);
+    G2(c, [10.6, 7, 21.4, 7, ...hem], CAPE_COLORS.tealLight, { split: 0.68 });
+    px2(c, 8.2, 15, 15.6, 0.9, A.c);
+    capeCollar(c, A, CAPE_COLORS.teal);
+  },
+  "royal-mantle"(c, A) {
+    G2(c, capeBody(7, 28, 11), CAPE_COLORS.gold, { split: 0.68 });
+    G2(c, capeBody(7, 26.8, 9.2), CAPE_COLORS.royal, { split: 0.68 });
+    capeFolds(c);
+    capeHem(c, A, 26.8, 9.2);
+    capeCollar(c, A, CAPE_COLORS.royal);
+  },
+  capelet(c, A) {
+    G2(c, [10.2, 7, 21.8, 7, 26.2, 17.4, 16, 18.6, 5.8, 17.4], CAPE_COLORS.navy, { split: 0.68 });
+    for (let x = 6.6; x < 25.6; x += 1.6) px2(c, x, 17.6, 0.8, 2.6, CAPE_COLORS.gold.b);
+    px2(c, 6.6, 15.6, 19, 0.9, A.c);
+    capeCollar(c, A, CAPE_COLORS.navy);
+  },
+  "banner-cape"(c, A) {
+    G2(c, [11, 7, 21, 7, 22.4, 28.4, 19.4, 25.8, 16, 28.6, 12.6, 25.8, 9.6, 28.4], CAPE_COLORS.banner, { split: 0.68 });
+    G2(c, [13, 11.6, 19, 11.6, 19, 17, 16, 19.8, 13, 17], accPal2(A), { flat: true, lw: 1 });
+    px2(c, 15.4, 12.8, 1.2, 4.4, CAPE_COLORS.banner.l);
+    capeCollar(c, A, CAPE_COLORS.banner);
+  }
+};
+var ART = { main: WEAPONS2, gloves: GLOVES2, boots: BOOTS, helmet: HELMETS, body: BODIES, ring: RINGS, cape: CAPE_ICONS };
 var hasObjectIcon = (item) => Boolean(ART[item?.slot]?.[item.kind]);
 function drawObjectIcon(c, item, size = 48) {
   const draw = ART[item.slot]?.[item.kind];
@@ -33425,7 +33702,7 @@ function createEquipmentArtCache(document) {
 var EQUIPMENT_STAT_ART = Object.freeze(Object.fromEntries(Object.entries({ "attack": '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#e74c3c" fill-opacity="0" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5L3 6V3h3l11.5 11.5 M13 19l6-6 M16 16l4 4 M19 21l2-2" /></svg>', "defense": '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#3498db" fill-opacity="0.15" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>', "maxHp": '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#e74c3c" fill-opacity="0.15" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>' }).map(([key2, svg2]) => [key2, "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg2)])));
 
 // src/client/item_icon_v1.js
-var HERO_SLOT = Object.freeze({ weapon: "main", subweapon: "off", helmet: "helmet", chest: "body", overall: "body", leggings: "legs", gloves: "gloves", boots: "boots", ring: "ring" });
+var HERO_SLOT = Object.freeze({ weapon: "main", subweapon: "off", helmet: "helmet", chest: "body", overall: "body", leggings: "legs", gloves: "gloves", boots: "boots", ring: "ring", cape: "cape" });
 var RING_KINDS = Object.freeze({ "Signet Ring": "signet", "Loop Ring": "loop", "Band Ring": "band", "Seal Ring": "seal", "copper-charm": "copper", "silver-charm": "silver", "sun-charm": "sun" });
 var PIXELS = 144;
 var urls = /* @__PURE__ */ new Map();
@@ -34060,7 +34337,7 @@ function createInventoryPresentation({ document, environment, readModel, adapter
   function buildGear(m, inv, local6, scan) {
     const here = listedEquipmentSlots(inv), col = (names) => {
       const c = element("div", "", "gx-col");
-      for (const s2 of names) if (here.includes(s2) || s2 === "gloves") c.append(slotTile(s2, inv, scan));
+      for (const s2 of names) if (here.includes(s2) || s2 === "gloves" || s2 === "cape" && capeSlotAvailable(inv)) c.append(slotTile(s2, inv, scan));
       return c;
     };
     const look = m.entitiesById[local6.entityId]?.heroLook, stage2 = element("div", "", "gx-stage"), canvas = document.createElement("canvas");
