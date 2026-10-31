@@ -1463,3 +1463,10 @@ body #world-inventory #world-equipment,body #world-inventory #world-items{displa
 .cs-aug b{display:block;font:700 12px/1.2 system-ui,sans-serif;color:#eee7d9}
 .cs-aug em{display:block;margin-top:2px;font:600 10.5px/1.2 system-ui,sans-serif;font-style:normal;color:#d9c49a}
 #world-inventory #world-progression-view .cs-attack{min-height:40px;border-radius:12px;border:1px dashed #b7a077;background:#151d26;color:#f2dfae;font:600 13px/1 system-ui,sans-serif;box-shadow:none}
+/* Uniques (uniques_v1.js): the name in unique gold with a tag, the effect in its own box, the flavor line in red. */
+#world-inventory .gx-name.is-unique{color:#e8c37a}
+#world-inventory .gx-itemname.is-unique{color:#e8c37a}
+#world-inventory .gx-uniquetag{display:inline-block;margin-left:8px;padding:2px 6px;border-radius:4px;background:#e8c37a;color:#1a1408;font:800 10px/1.2 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;vertical-align:middle}
+#world-inventory .gx-unique{margin:8px 0 6px;padding:10px 12px;border-radius:10px;background:rgba(232,195,122,.08);border:1px solid rgba(232,195,122,.3)}
+#world-inventory .gx-uniqueeffect{margin:0;color:#f1e6c8;font:500 13px/1.45 system-ui,sans-serif}
+#world-inventory .gx-flavor{margin:6px 0 0;color:#ff6b5b;font:italic 500 12.5px/1.4 system-ui,sans-serif}

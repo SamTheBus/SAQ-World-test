@@ -1,6 +1,6 @@
 {
-  "runtimeId": "6088199c31f71ca9",
-  "runtimeSha256": "6088199c31f71ca9b311ad3886233792aabf8dc521b4d608413f0f3802ee0f96",
+  "runtimeId": "e5d3a7ee43663c5b",
+  "runtimeSha256": "e5d3a7ee43663c5ba0a659156e9cdd96483bca8974f5866c7ae61ad165c1db0d",
   "files": [
     {
       "path": ".nojekyll",
@@ -468,6 +468,31 @@
       "sha256": "d58c63c96268a65b9a90619adcff3047cc897c61d77f1f7bf09f85b47eed3945"
     },
     {
+      "path": "assets/woodland-nature-v1/accents.webp",
+      "bytes": 42964,
+      "sha256": "794700fa93b37b10c27a707b3c15cc5db43b1f0863bce5b2bc6f516b822e7b56"
+    },
+    {
+      "path": "assets/woodland-nature-v1/kit-manifest.json",
+      "bytes": 9791,
+      "sha256": "c217e6e2d3790e5c170196ebfe3bcd2c89f66f78fafcbc1010cef78a6af8126d"
+    },
+    {
+      "path": "assets/woodland-nature-v1/rocks.webp",
+      "bytes": 27514,
+      "sha256": "9d44001d01ff72b5045315cf1df537326e5d97c22d11bc91b22ad5aa258fd62d"
+    },
+    {
+      "path": "assets/woodland-nature-v1/trees.webp",
+      "bytes": 289128,
+      "sha256": "077413e1b217adf2481beb1871df34e2219942e369a8d3f83d75813b9b97fa05"
+    },
+    {
+      "path": "assets/woodland-nature-v1/understory.webp",
+      "bytes": 94918,
+      "sha256": "5be4b5f98866c1519b0e1bae0db49e39531532bff227daa3d6aab01234e26895"
+    },
+    {
       "path": "assets/woodland-prop-clarity-v1/kit-manifest.json",
       "bytes": 1313,
       "sha256": "682b06a672e778b19fa8d108e522898c905f0354c14e3d0e9522967fa38aa2e0"
@@ -479,18 +504,18 @@
     },
     {
       "path": "assets/world-reshape-v2/alpha.json",
-      "bytes": 208823,
-      "sha256": "4f6205602f00cd6bcd4d44ab48b5e8a49d6133b4fe13f2a110f7fab7882d9d2b"
+      "bytes": 209054,
+      "sha256": "ac15d856c2dbbe38203480172b32aae7d19ccdd61cef10eee16aade24a0900d2"
     },
     {
       "path": "assets/world-reshape-v2/hydrology.json",
-      "bytes": 697141,
-      "sha256": "8c8c829db6b3ebda16ec4fc4cf54977315b2e32bad30bbca9eb37879131aeeb5"
+      "bytes": 697115,
+      "sha256": "e12fd26221c55e0357b674d4beaf28cc522ef5f9dde420b073373f0ef7be1b65"
     },
     {
       "path": "index.html",
-      "bytes": 13441,
-      "sha256": "dc4072adb8961a21f8e113301ab895da6bb37948fbbfab9ac7143055afb41633"
+      "bytes": 13650,
+      "sha256": "b3e05dd5206c37b02b34df8aa45a3fb11fd0f174eb66f04503de9b91ef4d47e9"
     },
     {
       "path": "manifest.webmanifest",
@@ -499,28 +524,28 @@
     },
     {
       "path": "save-worker.js",
-      "bytes": 2685967,
-      "sha256": "8adf5d91d6a99d998ee84631f89a94803c391aab28de859500e75b57d5e86745"
+      "bytes": 2705563,
+      "sha256": "84f9749a18821b35b3e612fccb81d31ea7f82216a317827d81542908485bd0d6"
     },
     {
-      "path": "src/chunks/chunk-3KBDSRHW.js",
-      "bytes": 2403851,
-      "sha256": "4ca50eff8651cbe5de9a5e04687d729a40850a602c4696bc3a9312de63e044cf"
+      "path": "src/chunks/chunk-WQLIVZMK.js",
+      "bytes": 2422850,
+      "sha256": "a45dc6d08ccf45276dcc3c28abd8d13cda8f0e43f50ab86d4f4f5dce4253edf5"
     },
     {
-      "path": "src/chunks/playable_browser-6L3OQTA3.js",
-      "bytes": 4560502,
-      "sha256": "ceb240fc6ee642f03474c6cd14de661e109a02c9a0445cb0e4f103c6e5008c52"
+      "path": "src/chunks/playable_browser-7ZEPXGOA.js",
+      "bytes": 4598971,
+      "sha256": "585e2292cfb93cb60c9eebbf00a5f8d4fae3c52abd95c84b0938e7579151359f"
     },
     {
-      "path": "src/chunks/world_browser-A7MGMBZK.js",
+      "path": "src/chunks/world_browser-GND5WCWN.js",
       "bytes": 1416,
-      "sha256": "c01230d42c001f5fa3eb93a902332b461f728e4998af4a57f055815d2ba5f830"
+      "sha256": "1566eaca145f7f38b68e352a0adaeceae11a6f8a49979904892bf63339aa0657"
     },
     {
       "path": "src/client/startup_camp_v1.js",
-      "bytes": 86952,
-      "sha256": "e064831fe8472af95ef792e9bce90aaf0baf6e1dc517d58ca06806a6b2e86772"
+      "bytes": 91749,
+      "sha256": "4cbcbd5de37c91a540ee239dacb3c7a3393e72811f6da919a4e1271d951d0984"
     },
     {
       "path": "src/client/startup_loading_v1.js",
@@ -530,12 +555,12 @@
     {
       "path": "src/entrypoints/browser_boot.js",
       "bytes": 2158,
-      "sha256": "54c2b03db84fdf153d935310318aff6525b92bf417c5acbbe57578acd1f28b53"
+      "sha256": "3fafbe6a68b71f911c5d10965e4e80b42025f685f14ec9dc1979b7f105c457c3"
     },
     {
       "path": "world.css",
-      "bytes": 189499,
-      "sha256": "654113c7054c33f232f7222bf14d47864cb2730b66f7583885629c64e4fdb2e9"
+      "bytes": 190324,
+      "sha256": "3acfcd3d256311da6260fa6eefc8ce76948681e0ff5eccca656bba4b0d0ce3b9"
     }
   ]
 }

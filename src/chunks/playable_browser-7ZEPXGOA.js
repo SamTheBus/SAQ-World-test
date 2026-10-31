@@ -237,6 +237,7 @@ import {
   TOXIC_DECAY_AFFIX_ID,
   TOXIC_DECAY_D12_4F,
   TransactionPayloadConflictError,
+  UNIQUE_ITEMS,
   VITALITY_WEAVER_AFFIX_ID,
   VITALITY_WEAVER_D12_4,
   WEBBED_STATUS_D12_4J_VERSION,
@@ -538,6 +539,7 @@ import {
   nodeRank,
   normalizeSeedInput,
   normalizeWorldPosition,
+  nounLookType,
   observeSiteRunEpisodesD13B,
   oldwardAreaDefinition,
   oldwardSpace,
@@ -683,6 +685,7 @@ import {
   townChunkBlockers,
   triggerScaledMasteryXp,
   unfrozenEpisodeD9,
+  uniqueOf,
   updateHighestHeroLevel,
   usesBuildBalanceV2,
   usesMultiroom,
@@ -763,7 +766,7 @@ import {
   worldLevelGapMultiplier,
   worldOrdinaryMeleeProfile,
   worldPointForArea
-} from "./chunk-3KBDSRHW.js";
+} from "./chunk-WQLIVZMK.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -3029,12 +3032,12 @@ function sporeDepthItems(model, viewport, art) {
           ctx.fillRect(x - 40, y - 86, 80 * Math.max(0, health), 6);
           ctx.font = "bold 11px system-ui";
           ctx.textAlign = "center";
-          const label3 = pod.hp !== void 0 ? `${formatLarge(pod.hp)} / ${formatLarge(pod.maxHp)}` : `${Math.round(health * 100)}%`;
+          const label4 = pod.hp !== void 0 ? `${formatLarge(pod.hp)} / ${formatLarge(pod.maxHp)}` : `${Math.round(health * 100)}%`;
           ctx.lineWidth = 3;
           ctx.strokeStyle = "#102331";
-          ctx.strokeText(label3, x, y - 96);
+          ctx.strokeText(label4, x, y - 96);
           ctx.fillStyle = "#f1f7f6";
-          ctx.fillText(label3, x, y - 96);
+          ctx.fillText(label4, x, y - 96);
           ctx.textAlign = "left";
         }
         if (pod.hitDamage !== null && pod.hitDamage !== void 0 && pod.hitAge !== null && pod.hitAge < 42) {
@@ -7487,11 +7490,11 @@ function neonSpiderWalkingLegsV4(time, seed2, walk = 0) {
   }
   return legs3;
 }
-function strut(c, a, b, rootWidth, tipWidth, neon2, flash) {
+function strut(c, a, b, rootWidth, tipWidth, neon3, flash) {
   const d = Math.hypot(b.x - a.x, b.y - a.y) || 1, ux = (b.x - a.x) / d, uy = (b.y - a.y) / d, nx = -uy, ny = ux;
   plate2(c, [[a.x + nx * rootWidth, a.y + ny * rootWidth], [b.x + nx * tipWidth, b.y + ny * tipWidth], [b.x - nx * tipWidth, b.y - ny * tipWidth], [a.x - nx * rootWidth, a.y - ny * rootWidth]], color14(flash, "#514761"));
   plate2(c, [[a.x + nx * rootWidth * 0.6, a.y + ny * rootWidth * 0.6], [b.x + nx * tipWidth * 0.6, b.y + ny * tipWidth * 0.6], [b.x, b.y], [a.x, a.y]], color14(flash, "#9384a6"), false);
-  c.strokeStyle = color14(flash, neon2);
+  c.strokeStyle = color14(flash, neon3);
   c.lineWidth = 1.15;
   c.lineCap = "butt";
   c.beginPath();
@@ -7502,9 +7505,9 @@ function strut(c, a, b, rootWidth, tipWidth, neon2, flash) {
 function supports2(c, m, time, seed2, cx, cy) {
   const at4 = (p) => ({ x: cx + p.x, y: cy + p.y });
   for (const [i, l] of neonSpiderWalkingLegsV4(time, seed2, m.motionBlend ?? 0).entries()) {
-    const neon2 = i % 2 ? "#ff4acb" : "#47f3ef";
-    strut(c, at4(l.joint), at4(l.foot), 1.4, 0.45, neon2, m.flashTimer);
-    strut(c, at4(l.root), at4(l.joint), 1.65, 1.3, neon2, m.flashTimer);
+    const neon3 = i % 2 ? "#ff4acb" : "#47f3ef";
+    strut(c, at4(l.joint), at4(l.foot), 1.4, 0.45, neon3, m.flashTimer);
+    strut(c, at4(l.root), at4(l.joint), 1.65, 1.3, neon3, m.flashTimer);
     c.strokeStyle = INK15;
     c.lineWidth = LINE14;
     c.fillStyle = color14(m.flashTimer, "#888095");
@@ -10511,6 +10514,129 @@ var ART = {
     }
   }
 };
+function arrow(c, x, y, a, len) {
+  const tx = x + Math.cos(a) * len, ty = y + Math.sin(a) * len;
+  strokes(c, [[[x, y], [tx, ty]]], OC, 2);
+  strokes(c, [[[x, y], [tx, ty]]], "#a77b4a", 0.9);
+  for (const s of [-1, 1]) part(c, [[poly([[tx, ty], [tx + Math.cos(a + s * 0.5) * 3, ty + Math.sin(a + s * 0.5) * 3], [tx - Math.cos(a) * 1.4, ty - Math.sin(a) * 1.4]]), "#e9e2d0"]], 0.6);
+}
+var NAMED_ART = {
+  old_bristleback: { family: "tusk_boar", bounds: [-24, -34, 50, 36], darken: 0.22, over(c) {
+    strokes(c, [[[-11, -14], [-5, -9]], [[-8, -16], [-3, -11.6]]], "#e2a59a", 0.9);
+    strokes(c, [[[16, -16], [19.6, -11.4]]], "#e2a59a", 0.8);
+    arrow(c, -8, -19.4, -2.3, 8);
+    arrow(c, -2.6, -21.4, -1.95, 9);
+    arrow(c, 3.4, -21, -1.45, 7.4);
+    part(c, [[poly([[-12.6, -19.4], [-13.6, -24], [-11, -21], [-9.8, -25.4], [-8.4, -21.2]]), "#2a1a10"]], 1);
+  } },
+  hollow_jack: { family: "field_scarecrow", bounds: [-27, -56, 54, 59], over(c) {
+    aura2(c, 0, -34, 14, "rgba(255,170,60,.35)");
+    const head12 = ell(0, -33.6, 8.4, 7);
+    const P6 = solid(c, head12, "#e8892e", 1.5, 2.2, "#5a1e00", "#ffe0a0");
+    c.save();
+    c.clip(head12);
+    strokes(c, [[[-3.6, -40.4], [-4.4, -27]], [[0, -40.8], [0, -26.6]], [[3.6, -40.4], [4.4, -27]]], P6.d, 1, 0.8);
+    c.restore();
+    for (const s of [-1, 1]) part(c, [[poly([[s * 1.2, -36.6], [s * 4.2, -36.6], [s * 2.7, -34]]), "#ffd75a"]], 0.7);
+    part(c, [[poly([[-4.6, -31], [-3, -30], [-1.6, -31], [0, -29.8], [1.6, -31], [3, -30], [4.6, -31], [3.4, -28.6], [-3.4, -28.6]]), "#ffd75a"]], 0.7);
+    const brim = ell(0, -39.6, 12.6, 3);
+    solid(c, brim, "#d8b45a", 1.5, 1.4);
+    const crown3 = sm([[-6.6, -39.8], [-5.6, -45.2], [-1.5, -49], [2.5, -48.2], [6, -44.2], [6.6, -39.8]]);
+    solid(c, crown3, "#ddb95e", 1.5, 1.8);
+    c.save();
+    c.clip(crown3);
+    c.fillStyle = "#3a2a40";
+    c.fillRect(-8, -42.6, 16, 2.2);
+    c.restore();
+    const crow = sm([[-9.6, -25.6], [-11.4, -29.6], [-14.6, -30.4], [-16.2, -28], [-15.4, -25.6], [-12.4, -24.8]]);
+    solid(c, crow, "#2f3140", 1.2, 1.2);
+    solid(c, circ(-15.6, -30.6, 2.2), "#2f3140", 1.1, 0.8);
+    part(c, [[poly([[-17.4, -31.2], [-20.2, -30.4], [-17.4, -29.6]]), "#e6b23a"]], 0.8);
+    eye2(c, -16, -31, 0.55, "#ffde5a");
+  } },
+  queen_kheptra: { family: "sand_scarab", bounds: [-16, -24, 38, 27], over(c) {
+    const shell = sm([[-11, -6], [-10, -12], [-4.6, -15.6], [2.6, -15.8], [8.2, -12.6], [9.6, -6.6], [6, -4.2], [-7, -4]]);
+    part(c, [[shell, "#e9b93a"]], 1.6);
+    c.save();
+    c.clip(shell);
+    const g = c.createLinearGradient(-10, -16, 8, -4);
+    g.addColorStop(0, "#fff0a8");
+    g.addColorStop(0.5, "#e9b93a");
+    g.addColorStop(1, "#a8781c");
+    c.fillStyle = g;
+    c.fillRect(-12, -17, 23, 14);
+    for (const [x, y, r] of [[-6, -9, 1.6], [-3, -12.6, 1.2], [4, -12.4, 1.2], [5.6, -8.4, 1.6], [-1, -7.4, 1.2]]) {
+      c.fillStyle = "#2f5fa8";
+      c.beginPath();
+      c.arc(x, y, r, 0, TAU30);
+      c.fill();
+      c.lineWidth = 0.6;
+      c.strokeStyle = OC;
+      c.stroke();
+    }
+    c.fillStyle = "rgba(60,30,0,.25)";
+    c.beginPath();
+    c.ellipse(2, -5, 11, 4, 0, 0, TAU30);
+    c.fill();
+    c.restore();
+    strokes(c, [[[-0.6, -15.6], [-1.4, -4.4]]], OC, 1.1);
+    shine(c, -5, -12.6, 2.6, 1.2, -0.5, 0.9);
+    for (const [x, h] of [[9.6, 3], [11.4, 4.2], [13.2, 3]]) part(c, [[poly([[x - 0.9, -10.2], [x, -10.2 - h], [x + 0.9, -10.2]]), "#ffd75a"]], 0.7);
+  } },
+  glasstail: { family: "dune_scorpion", bounds: [-24, -36, 52, 39], over(c) {
+    aura2(c, -12, -18, 14, "rgba(140,240,235,.28)");
+    for (const [x, y, r] of [[-10, -7, 3.6], [-14, -11, 3.4], [-15.6, -16.6, 3.2], [-14.4, -22, 3], [-10.4, -25.6, 2.8]]) {
+      const p = ell(x, y, r, r * 0.9);
+      part(c, [[p, "#8fe3e0"]], 1.3);
+      c.save();
+      c.clip(p);
+      const g = c.createLinearGradient(x - r, y - r, x + r, y + r);
+      g.addColorStop(0, "#e6ffff");
+      g.addColorStop(0.5, "#8fe3e0");
+      g.addColorStop(1, "#3f9aa4");
+      c.fillStyle = g;
+      c.fillRect(x - r, y - r, r * 2, r * 2);
+      c.restore();
+      shine(c, x - r * 0.35, y - r * 0.35, r * 0.35, r * 0.2, -0.6, 0.95);
+    }
+    const sting = new Path2D();
+    sting.moveTo(-8.4, -27.6);
+    sting.quadraticCurveTo(-3, -29.4, -2.6, -24.4);
+    sting.quadraticCurveTo(-4.4, -26.6, -7, -23.8);
+    sting.closePath();
+    part(c, [[sting, "#d8ffff"]], 1.1);
+    for (const [x, y] of [[-19, -20], [-5, -31], [-18, -8]]) {
+      c.fillStyle = "#ffffff";
+      c.beginPath();
+      c.moveTo(x, y - 2);
+      c.lineTo(x + 0.5, y - 0.5);
+      c.lineTo(x + 2, y);
+      c.lineTo(x + 0.5, y + 0.5);
+      c.lineTo(x, y + 2);
+      c.lineTo(x - 0.5, y + 0.5);
+      c.lineTo(x - 2, y);
+      c.lineTo(x - 0.5, y - 0.5);
+      c.fill();
+    }
+  } }
+};
+var NAMED_ELITE_ART_IDS_V1 = Object.freeze(Object.keys(NAMED_ART));
+var artFor = (key2) => {
+  const n = NAMED_ART[key2];
+  if (!n) return ART[key2];
+  return (c) => {
+    const [x, y, w, h] = n.bounds;
+    ART[n.family](c);
+    if (n.darken) {
+      c.save();
+      c.globalCompositeOperation = "source-atop";
+      c.fillStyle = `rgba(28,14,6,${n.darken})`;
+      c.fillRect(x, y, w, h);
+      c.restore();
+    }
+    n.over(c);
+  };
+};
 var RES = 4;
 var BOUNDS = { tusk_boar: [-22, -29, 50, 32], field_scarecrow: [-25, -52, 50, 55], barrow_wight: [-26, -46, 52, 52], sand_scarab: [-15, -20, 37, 23], dune_scorpion: [-22, -33, 51, 36], tomb_mummy: [-16, -43, 36, 46] };
 var GAIT = { tusk_boar: { bob: 1.3, tilt: 0.045, rate: 1 }, field_scarecrow: { hop: 3.2 }, barrow_wight: { float: 1.6 }, sand_scarab: { bob: 0.6, tilt: 0.03, rate: 1.5 }, dune_scorpion: { bob: 0.7, tilt: 0.03, rate: 1.2 }, tomb_mummy: { bob: 0.9, tilt: 0.07, rate: 0.6 } };
@@ -10527,17 +10653,17 @@ function surface(w, h) {
   }
   return null;
 }
-function sprite(family, white) {
-  const key2 = family + (white ? "/flash" : "");
+function sprite(art, white) {
+  const key2 = art + (white ? "/flash" : "");
   if (cache.has(key2)) return cache.get(key2);
   let out = null;
   try {
     if (typeof Path2D === "function" && typeof DOMMatrix === "function") {
-      const [x, y, w, h] = BOUNDS[family], canvas = surface(Math.ceil(w * RES), Math.ceil(h * RES)), c = canvas?.getContext("2d");
+      const [x, y, w, h] = NAMED_ART[art]?.bounds ?? BOUNDS[art], canvas = surface(Math.ceil(w * RES), Math.ceil(h * RES)), c = canvas?.getContext("2d");
       if (c) {
         c.scale(RES, RES);
         c.translate(-x, -y);
-        ART[family](c);
+        artFor(art)(c);
         if (white) {
           c.setTransform(1, 0, 0, 1, 0, 0);
           c.globalCompositeOperation = "source-atop";
@@ -10591,12 +10717,12 @@ function painter(family) {
     c.translate(m.x + m.w / 2, m.y + m.h + dy);
     c.rotate(rot);
     c.scale(sx, sy);
-    const s = sprite(family, false);
+    const art = NAMED_ART[m.namedEliteId]?.family === family ? m.namedEliteId : family, s = sprite(art, false);
     if (s) {
       c.imageSmoothingEnabled = true;
       c.drawImage(s.canvas, s.x, s.y, s.w, s.h);
       if (m.flashTimer) {
-        const f = sprite(family, true);
+        const f = sprite(art, true);
         if (f) {
           c.globalAlpha *= 0.85;
           c.drawImage(f.canvas, f.x, f.y, f.w, f.h);
@@ -13086,6 +13212,14 @@ function draw_rust_nibbler(c, m, presentationTime, seed2) {
   c.restore();
 }
 var CREATURE_PAINTERS_D11 = Object.freeze({ sprout: drawMushroomV9, golem: drawStoneGolemV4, slime: drawGreenSlimeV10, gargoyle: drawGargoyleV4, rust_nibbler: draw_rust_nibbler, animated_armor: drawAnimatedArmorV4, cursed_blade: drawCursedBladeV4, ...DUNGEON_MOB_PAINTERS_V1, ...DUNGEON_MOB_PAINTERS_V2A, ...DUNGEON_MOB_PAINTERS_V2B, ...BIOME_CREATURE_PAINTERS_V1 });
+var BODY_HULL_D11 = new Map(ORDINARY_ENEMIES.map((e) => [e.family, e.body.hullRadius]));
+function creatureDrawScaleD11(actor) {
+  const base = BODY_HULL_D11.get(actor.enemyFamily), ratio = base && actor.hullRadius ? actor.hullRadius / base : 1;
+  return ratio > 1.05 ? Math.min(2, ratio) : 1;
+}
+function liftedLabelsD11(profile, scale) {
+  return scale === 1 ? profile : { ...profile, labels: { ...profile.labels, healthBarY: profile.labels.healthBarY * scale, levelLabelY: profile.labels.levelLabelY * scale } };
+}
 function drawCreatureD11(c, actor, presentationTick, flash = false, _equipmentArt = null, lookTarget = void 0) {
   if (!actor.alive && (actor.enemyFamily !== "animated_armor" || actor.deathAge === null || actor.deathAge > 36)) return;
   const presentationTime = presentationTick * (1e3 / 60), seed2 = actor.visualSeed >>> 0, profile = creaturePresentationForRenderV3(actor.enemyFamily) ?? creaturePresentationForRenderV3("sprout"), frame = profile.painterFrame;
@@ -13093,6 +13227,8 @@ function drawCreatureD11(c, actor, presentationTick, flash = false, _equipmentAr
   const m = { x: frame.x, y: frame.y, w: frame.width, h: frame.height, flashTimer: flash ? 1 : 0, movedLastTick: Boolean(actor.movedLastTick), motionBlend, stepPhase, meleeAction: Boolean(actor.meleeAction), meleePhase: melee, phaseProgress, deathProgress: actor.alive ? 0 : Math.max(0, Math.min(1, (actor.deathAge ?? 0) / 24)), presentationTick, paletteKey: profile.paletteKey };
   c.save();
   c.translate(actor.position.x, actor.position.y);
+  const drawScale = creatureDrawScaleD11(actor);
+  if (drawScale !== 1) c.scale(drawScale, drawScale);
   drawVitalityWeaverPulseD12_4(c, actor, presentationTick);
   drawVitalityWeaverSigilD12_4(c, actor, presentationTick);
   drawVitalityWeaverAuraD12_4(c, actor, presentationTick);
@@ -13191,7 +13327,10 @@ function drawCreatureD11(c, actor, presentationTick, flash = false, _equipmentAr
   drawNullifierFrontD12_4I(c, actor, presentationTick);
   drawWebWeaverFrontD12_4J(c, actor, presentationTick);
   drawSlagShaperFrontD12_4K(c, actor, presentationTick);
-  if (!actor.presentationDeferLabels) drawCreatureLabelsLocalD11(c, actor, profile);
+  if (!actor.presentationDeferLabels) {
+    if (drawScale !== 1) c.scale(1 / drawScale, 1 / drawScale);
+    drawCreatureLabelsLocalD11(c, actor, liftedLabelsD11(profile, drawScale));
+  }
   c.restore();
 }
 function drawCreatureLabelsLocalD11(c, actor, profile) {
@@ -13223,7 +13362,7 @@ function drawCreatureLabelsD11(c, actor) {
   const profile = creaturePresentationForRenderV3(actor.enemyFamily) ?? creaturePresentationForRenderV3("sprout");
   c.save();
   c.translate(actor.position.x, actor.position.y);
-  drawCreatureLabelsLocalD11(c, actor, profile);
+  drawCreatureLabelsLocalD11(c, actor, liftedLabelsD11(profile, creatureDrawScaleD11(actor)));
   c.restore();
 }
 
@@ -14298,7 +14437,7 @@ function* prepareEnvironmentLayout(space) {
 
 // src/client/biome_nature_art_v1.js
 var BIOME_NATURE_VERSION = "biome-nature-art-v1";
-var BIOME_NATURE_KITS = Object.freeze({ a: "grassland", m: "wetland", r: "upland", d: "desert", s: "frostland", t: "tropical", l: "volcanic" });
+var BIOME_NATURE_KITS = Object.freeze({ a: "grassland", m: "wetland", r: "upland", d: "desert", s: "frostland", t: "tropical", l: "volcanic", w: "woodland" });
 var ROLES = /* @__PURE__ */ new Set(["trees", "understory", "rocks", "accents"]);
 var PICK = {
   a: { tree: ["oak", 3, "birch", 2, "apple", 2], base: ["bush", 7, "sunflowers", 1, "rocks", 1], rock: ["stone", 2, "rocks", 2, "bush", 1], ground: [["tuft", 0.62, 4], ["flowers", 0.72, 3], ["rocks", 0.45, 1]] },
@@ -14307,8 +14446,11 @@ var PICK = {
   d: { tree: ["saguaro", 4, "joshua", 3, "mesquite", 2], rock: ["rock", 3, "pillar", 2, "barrel", 2, "pricklypear", 2, "agave", 2, "shrub", 2, "bones", 1], ground: [["tuft", 0.7, 8], ["agave", 0.45, 3], ["rock", 0.35, 3], ["bones", 0.5, 1]] },
   s: { tree: ["pine", 3, "fir", 3, "snowbirch", 2], rock: ["snowrock", 4, "crystals", 2, "bush", 2, "holly", 2, "deadbush", 2, "log", 1], ground: [["tuft", 0.7, 3], ["deadbush", 0.5, 1], ["snowrock", 0.35, 1]] },
   t: { tree: ["palm", 3, "jungletree", 3, "banana", 2, "bamboo", 2], base: ["fern", 4, "bush", 3, "bloom", 2, "bromeliad", 2], rock: ["rock", 3, "fern", 1], ground: [["bromeliad", 0.6, 2], ["bloom", 0.55, 2], ["fern", 0.5, 2]] },
+  w: { tree: ["oak", 3, "linden", 2, "fir", 3, "birch", 2], base: ["bush", 6, "fern", 3, "mushrooms", 1, "log", 1, "stump", 1, "sapling", 1], rock: ["mossrock", 3, "rocks", 2, "fern", 1], ground: [["tuft", 0.62, 4], ["fern", 0.42, 2], ["flowers", 0.6, 2], ["mushrooms", 0.45, 1], ["litter", 0.45, 1]] },
   l: { tree: ["charred", 3, "deadpine", 3], rock: ["obsidian", 3, "basalt", 3, "emberlily", 1, "ashfern", 1, "vent", 1, "lavapool", 1], ground: [["tuft", 0.7, 3], ["ashfern", 0.55, 2], ["emberlily", 0.4, 1]] }
 };
+var WOODLAND_DETAIL = [["tuft", 0.62], ["tuft", 0.62], ["litter", 0.45], ["fern", 0.42], ["fern", 0.42], ["litter", 0.45], ["rocks", 0.32], ["mushrooms", 0.45], ["flowers", 0.6], ["flowers", 0.6]];
+var WOODLAND_ROADSIDE = { fern: ["fern", 0.5], tuft: ["tuft", 0.7], flowers: ["flowers", 0.66], litter: ["litter", 0.5] };
 var pick = (list, h) => {
   let total = 0;
   for (let i = 1; i < list.length; i += 2) total += list[i];
@@ -14391,6 +14533,12 @@ async function createBiomeNatureArtV1(env, review, prior) {
     const cx = x + size * 0.5, code = owned(s, cx, y + size * 0.78);
     if (!code) return prior.tree(c, s, x, y, size, n, info, focus);
     const t = s.collision.tileSize, o = environmentWorldOffset(s), tx = info?.tileX ?? Math.floor(cx / t), ty = info?.tileY ?? Math.floor((y + size * 0.78) / t), gx = (tx + 0.5) * t + ((n >>> 3) % 9 - 4), gy = (ty + 0.86) * t;
+    if (code === "w" && info?.forestRole === "sapling") {
+      const p2 = sprite3(code, "sapling", n >>> 15);
+      stamp3(c, p2, gx, gy, 0.72 + (n >>> 5) % 3 * 0.04);
+      draws.tree++;
+      return true;
+    }
     if (code === "m" && !naturalCanopyAt(n, tx + o.x / t, ty + o.y / t, environmentSeed(s))) {
       const p2 = sprite3(code, pick(PICK.m.base, n >>> 9), n >>> 15);
       stamp3(c, p2, gx, gy, fit(p2, 44, n));
@@ -14407,7 +14555,7 @@ async function createBiomeNatureArtV1(env, review, prior) {
     const code = owned(s, x + size / 2, y + size / 2);
     if (!code || !PICK[code].base) return prior.base(c, s, x, y, size, n, biome, info);
     if (info?.hasCanopy) return true;
-    const p = sprite3(code, pick(PICK[code].base, n >>> 9), n >>> 15);
+    const role = info?.forestRole, kind = code === "w" && (role === "log" || role === "stump") ? role : pick(PICK[code].base, n >>> 9), p = sprite3(code, kind, n >>> 15);
     stamp3(c, p, x + size * 0.5, y + size * 0.84, fit(p, 44, n));
     draws.base++;
     return true;
@@ -14437,9 +14585,16 @@ async function createBiomeNatureArtV1(env, review, prior) {
     draws.ground++;
     return 1;
   }
+  function drawGroundDetail(c, s, d) {
+    if (owned(s, d.x, d.y) !== "w") return Boolean(prior.drawGroundDetail?.(c, s, d));
+    const [kind, k] = WOODLAND_ROADSIDE[d.roadsideRole] ?? WOODLAND_DETAIL[d.kind] ?? WOODLAND_DETAIL[0], p = sprite3("w", kind, d.n >>> 17);
+    stamp3(c, p, d.x, d.y, k * (0.9 + (d.n >>> 7) % 3 * 0.05));
+    draws.ground++;
+    return true;
+  }
   const natureTile = (s, x, y) => Boolean(owned(s, x, y));
   const hasTree = (s, x, y, size, n) => natureTile(s, x + size * 0.5, y + size * 0.78) || (prior.hasTree ? prior.hasTree(s, x, y, size, n) : true);
-  return Object.freeze({ ...prior, tree, base, rock: rock2, biomeDetail, natureTile, hasTree, resources: () => ({ ...prior.resources(), biomeNature: { version: BIOME_NATURE_VERSION, kits: Object.values(BIOME_NATURE_KITS), draws: { ...draws }, decodedBytes, downloadBytes } }) });
+  return Object.freeze({ ...prior, tree, base, rock: rock2, biomeDetail, drawGroundDetail, natureTile, hasTree, resources: () => ({ ...prior.resources(), biomeNature: { version: BIOME_NATURE_VERSION, kits: Object.values(BIOME_NATURE_KITS), draws: { ...draws }, decodedBytes, downloadBytes } }) });
 }
 
 // src/client/route_contours_v2.js
@@ -14958,7 +15113,7 @@ async function createPaintedRoutesV1(env, review, prior, { worldCoverage = false
         if (d < -30) continue;
         let rr = 0, gg = 0, bb = 0, a = 0;
         if (d >= -18) {
-          const ix = x >> 5, iy = y >> 5, fx = (x % 32 + 0.5) / 32, fy = (y % 32 + 0.5) / 32, A = warp2[iy * stride + ix], B2 = warp2[iy * stride + ix + 1], C2 = warp2[(iy + 1) * stride + ix], D2 = warp2[(iy + 1) * stride + ix + 1], du = (A[0] * (1 - fx) + B2[0] * fx) * (1 - fy) + (C2[0] * (1 - fx) + D2[0] * fx) * fy, dv = (A[1] * (1 - fx) + B2[1] * fx) * (1 - fy) + (C2[1] * (1 - fx) + D2[1] * fx) * fy, mx = Math.floor(((wx * 2 + du) % material.width + material.width) % material.width), my = Math.floor(((wy * 2 + dv) % material.height + material.height) % material.height), mi = (my * material.width + mx) * 4;
+          const ix = x >> 5, iy = y >> 5, fx = (x % 32 + 0.5) / 32, fy = (y % 32 + 0.5) / 32, A = warp2[iy * stride + ix], B2 = warp2[iy * stride + ix + 1], C3 = warp2[(iy + 1) * stride + ix], D2 = warp2[(iy + 1) * stride + ix + 1], du = (A[0] * (1 - fx) + B2[0] * fx) * (1 - fy) + (C3[0] * (1 - fx) + D2[0] * fx) * fy, dv = (A[1] * (1 - fx) + B2[1] * fx) * (1 - fy) + (C3[1] * (1 - fx) + D2[1] * fx) * fy, mx = Math.floor(((wx * 2 + du) % material.width + material.width) % material.width), my = Math.floor(((wy * 2 + dv) % material.height + material.height) % material.height), mi = (my * material.width + mx) * 4;
           rr = material.data[mi];
           gg = material.data[mi + 1];
           bb = material.data[mi + 2];
@@ -15394,6 +15549,8 @@ var KITS = {
 };
 var OFF_KINDS = { shield: "shield", dagger: "dagger", tome: "tome" };
 var OFF_FAMILY = {
+  wightfang: "dagger",
+  sunshield: "shield",
   shield: "shield",
   kite: "shield",
   buckler: "shield",
@@ -15689,6 +15846,45 @@ function plainCape(c, A, fabric, len, back, lined) {
   hemTrim(c, A, len, back + (lined ? 1.6 : 0));
 }
 var CAPES = {
+  // Uniques (uniques_v1.js): Barrowshroud, a torn violet burial shroud stitched with ghostfire runes and a bone clasp;
+  // the Bristleback Mantle, boar hide with a ridge of bristles and a tusk clasp; the Glasstail Cloak, sand-colored with desert glass sewn into the hem.
+  barrowshroud: {
+    back(c, A) {
+      const len = 17.4, back = -21.6, hem = [];
+      for (let i = 0; i <= 10; i++) hem.push(back + 19.6 * i / 10, len + (i % 2 ? -2.6 : 0.6));
+      cloth(c, [-2.4, -0.8, -8.8, -1.2, -11, 0.6, -11.4 + back * 0.22, len * 0.42, ...hem.slice(0, -2), -2, len], UQ.violet);
+      folds(c, len, back);
+      for (const [x, y] of [[-12.6, 5.6], [-15.4, 9.4], [-12, 12.6], [-18, 13.6], [-9, 9]]) dot(c, x, y, 1.1, 1.1, "#9be37a");
+    },
+    front(c, A) {
+      R(c, -8.4, 0.8, 13.6, 1.8, UQ.violet, { split: 0.75, lw: 1.1 });
+      R(c, 2.8, -0.2, 3.2, 3.2, UQ.bone, { flat: true, lw: 1 });
+      px(c, 3.4, 0.7, 0.7, 0.7, "#1d232b");
+      px(c, 4.9, 0.7, 0.7, 0.7, "#1d232b");
+      gem(c, 4.4, 3.4, 1.2, A.gem);
+    }
+  },
+  "bristleback-mantle": {
+    back(c, A) {
+      plainCape(c, A, UQ.hide, 15.4, -20.8, null);
+      for (let i = 0; i < 7; i++) {
+        const x = -2.6 - i * 1.9;
+        cloth(c, [x, -0.4, x - 1, -3 - i % 2 * 0.9, x - 2, -0.2], UQ.bristle, { flat: true, lw: 0.8 });
+      }
+    },
+    front(c, A) {
+      R(c, -8.4, 0.6, 13.6, 2, UQ.hide, { split: 0.75, lw: 1.1 });
+      G(c, [2.6, 0.4, 6.6, -0.8, 7.6, 0.8, 5.2, 1.6, 3, 2.6], UQ.bone, { flat: true, lw: 0.9 });
+      gem(c, 3.8, 1.5, 1.2, A.gem);
+    }
+  },
+  "glasstail-cloak": {
+    back(c, A) {
+      plainCape(c, A, UQ.sand, 18.4, -21.8, null);
+      for (const [x, y] of [[-5.2, 17.6], [-9, 18], [-13, 18.2], [-17, 18.4], [-8, 13.8], [-15, 14.6], [-11.6, 9.6]]) cloth(c, [x, y, x - 1, y - 2.4, x - 2, y], UQ.glass, { flat: true, lw: 0.7 });
+    },
+    front: (c, A) => collar(c, A, UQ.sand, UQ.glass)
+  },
   // Cape: a plain traveler's cape; a ragged one with a torn hem and a stitched patch; a magic cape with its lining showing.
   "traveler-cape": { back: (c, A) => plainCape(c, A, CAPE_CLOTH.travel, 14, -20, null), front: (c, A) => collar(c, A, CAPE_CLOTH.travel) },
   "ragged-cape": {
@@ -15983,7 +16179,62 @@ function crescentScepter(c, A) {
   G(c, [24.2, -1.2, 26, -4.6, 29, -6.2, 31.8, -5.8, 29.2, -4.4, 27.8, -2.4, 27.6, 0, 27.8, 2.4, 29.2, 4.4, 31.8, 5.8, 29, 6.2, 26, 4.6, 24.2, 1.2], SCEPTER_GOLD, { split: 0.55, lw: 1.2 });
   gem(c, 30, 0, 2.6, A.gem ?? "#e8eef2");
 }
+var UQ = {
+  bone: { b: "#e6dcc4", d: "#c2b596", l: "#f6f0e2" },
+  violet: { b: "#5a2f6e", d: "#43224f", l: "#74408c" },
+  iron: { b: "#4a4f57", d: "#33373d", l: "#6b727c" },
+  ghost: { b: "#9be37a", d: "#5fbf68", l: "#d8ffc4" },
+  gold: { b: "#e9b93a", d: "#b98c22", l: "#ffe08a" },
+  lapis: { b: "#2f5fa8", d: "#224680", l: "#4a7bc6" },
+  bronze: { b: "#d39a45", d: "#a2702c", l: "#f0c27a" },
+  hide: { b: "#6b4a33", d: "#523826", l: "#86603f" },
+  sand: { b: "#cdb07a", d: "#a88d5c", l: "#e3cb98" },
+  glass: { b: "#8fe3e0", d: "#4fb3b8", l: "#e6ffff" },
+  straw: { b: "#d9b65a", d: "#b08e3c", l: "#f0d78a" },
+  sunface: { b: "#ffd970", d: "#e6b23a" },
+  bristle: { b: "#2e221a", d: "#21180f" }
+};
+function gravecleaver(c, A, t = 0) {
+  const pulse = 0.5 + 0.5 * Math.sin(t * 3);
+  R(c, 9.4, -2, 2.8, 4, UQ.bone, { flat: true, lw: 1.1 });
+  px(c, 9.9, -1.1, 0.8, 0.8, "#1d232b");
+  px(c, 9.9, 0.3, 0.8, 0.8, "#1d232b");
+  R(c, 12.2, -1.1, 3.8, 2.2, UQ.violet, { flat: true, lw: 1.2 });
+  px(c, 13.4, -1.1, 0.5, 2.2, "#00000044");
+  px(c, 14.7, -1.1, 0.5, 2.2, "#00000044");
+  glow2(c, 27, 0, 9 + pulse * 2, "155,227,122", 0.22 + pulse * 0.12);
+  G(c, [18, -2.8, 28.6, -2.8, 29.6, -1.7, 30.8, -2.8, 33.2, -2.8, 36.6, 0, 33.2, 2.8, 18, 2.8], UQ.iron, { bottom: true, split: 0.5, lw: 1.4 });
+  px(c, 19, -0.45, 13.4, 0.9, "#9be37a");
+  px(c, 19, -0.45, 13.4, 0.3, "#eaffd8");
+  G(c, [16, -4.2, 16.5, -6.2, 17.3, -4.8, 18.1, -6.2, 18.6, -4.2, 18.6, 4.2, 18.1, 6.2, 17.3, 4.8, 16.5, 6.2, 16, 4.2], UQ.gold, { flat: true, lw: 1.1 });
+  R(c, 15.4, -1.6, 0.8, 3.2, accPal(A), { flat: true, lw: 0.7 });
+  gem(c, 17.3, 0, 1.7, A.gem ?? "#9be37a");
+}
+function pharaohKhopesh(c, A) {
+  R(c, 12.4, -1.1, 3.6, 2.2, UQ.lapis, { flat: true, lw: 1.2 });
+  px(c, 13.6, -1.1, 0.6, 2.2, UQ.gold.b);
+  px(c, 14.6, -1.1, 0.5, 2.2, A.c);
+  R(c, 10.8, -1.6, 1.6, 3.2, UQ.gold, { flat: true, lw: 1 });
+  G(c, [17.4, -1, 23.6, -1.2, 25.6, -3.6, 28.6, -5.6, 32.2, -6, 35, -4.6, 36.2, -2, 35.6, 1, 33.8, 2.8, 34.4, 0.4, 33.6, -1.8, 31.4, -2.8, 28.6, -2.4, 26.4, -0.6, 25, 1.2, 17.4, 1], UQ.bronze, { bottom: true, split: 0.5, lw: 1.2 });
+  R(c, 15.8, -3, 1.6, 6, UQ.gold, { flat: true, lw: 1.1 });
+  gem(c, 16.6, 0, 1.3, A.gem ?? "#2f5fa8");
+}
+function crownflameScepter(c, A, t = 0) {
+  const pulse = 0.5 + 0.5 * Math.sin(t * 4);
+  R(c, 11.2, -1, 4.4, 2, UQ.violet, { flat: true, lw: 1.1 });
+  R(c, 15.6, -0.9, 8, 1.8, UQ.iron, { flat: true, lw: 1.1 });
+  px(c, 19, -0.9, 1, 1.8, A.c);
+  glow2(c, 31, 0, 7 + pulse * 2, "155,227,122", 0.35 + pulse * 0.2);
+  G(c, [28.4, -2.6, 31.2, -1.6, 33.6, -2.4, 32.4, -0.8, 35.6, 0, 32.4, 0.8, 33.6, 2.4, 31.2, 1.6, 28.4, 2.6], UQ.ghost, { flat: true, lw: 1 });
+  px(c, 29.4, -0.5, 3, 1, "#eaffd8");
+  G(c, [23.4, -3.8, 26.4, -3.8, 26.4, 3.8, 23.4, 3.8], UQ.gold, { split: 0.6, lw: 1.1 });
+  G(c, [26.4, -3.8, 29.2, -4.8, 27.6, -2.4, 29.6, 0, 27.6, 2.4, 29.2, 4.8, 26.4, 3.8], UQ.gold, { flat: true, lw: 1 });
+  gem(c, 24.9, 0, 1.6, A.gem ?? "#9be37a");
+}
 var WEAPONS = {
+  gravecleaver,
+  "pharaoh-khopesh": pharaohKhopesh,
+  "crownflame-scepter": crownflameScepter,
   sword,
   saber,
   axe,
@@ -16097,7 +16348,16 @@ function serratedDagger(c, A) {
   G(c, pts, P2.blade, { bottom: true, split: 0.45, lw: 1 });
   px(c, 4.6, -0.5, 6.4, 0.5, "#00000040");
 }
-var DAGGERS = { dagger, "main-gauche": mainGauche, stiletto, kris, "sword-breaker": swordBreaker, "trident-dagger": tridentDagger, rondel, misericorde, karambit, "serrated-dagger": serratedDagger };
+function wightfang(c, A) {
+  glow2(c, 9, 0, 5.4, "155,227,122", 0.32);
+  R(c, 0, -1, 2.6, 2, UQ.violet, { flat: true, lw: 1.1 });
+  px(c, 0.8, -1, 0.5, 2, A.c);
+  G(c, [2.6, -2.8, 4.4, -1.6, 4.4, 1.6, 2.6, 2.8], UQ.bone, { flat: true, lw: 1 });
+  px(c, 3.1, -0.7, 0.6, 0.6, "#1d232b");
+  G(c, [4.4, -1.2, 6.2, -2, 8, -0.9, 9.8, -1.8, 11.8, -0.7, 14.2, 0, 11.8, 1, 9.8, 0.1, 8, 1.2, 6.2, 0.4, 4.4, 1.2], UQ.bone, { flat: true, lw: 1.1 });
+  px(c, 5, -0.2, 7.6, 0.4, "#9be37a");
+}
+var DAGGERS = { wightfang, dagger, "main-gauche": mainGauche, stiletto, kris, "sword-breaker": swordBreaker, "trident-dagger": tridentDagger, rondel, misericorde, karambit, "serrated-dagger": serratedDagger };
 var SHIELD = [-16, 5, -4.4, 5, -3, 11, -10.2, 19.8, -17.4, 11];
 var SHIELD_FIELD = [-14.6, 6.4, -5.8, 6.4, -4.6, 11, -10.2, 17.8, -15.8, 11];
 function shield(c, A, red) {
@@ -16251,7 +16511,26 @@ function bulwark(c, A) {
   for (const [x, y] of [[-17.4, 2.3], [-4.6, 2.3], [-17.4, 19.8], [-4.6, 19.8]]) px(c, x, y, 1.1, 1.1, A.c);
   gem(c, -10.7, 12.2, 1.8, A.gem);
 }
+function sunshield(c, A) {
+  const x = -10.1, y = 11.7;
+  for (let i = 0; i < 12; i++) {
+    const a = i * TAU33 / 12 + 0.26, w = 0.2, r0 = 5.4, r1 = i % 2 ? 7 : 8;
+    G(c, [x + Math.cos(a - w) * r0, y + Math.sin(a - w) * r0, x + Math.cos(a) * r1, y + Math.sin(a) * r1, x + Math.cos(a + w) * r0, y + Math.sin(a + w) * r0], UQ.gold, { flat: true, lw: 0.9 });
+  }
+  roundFace(c, x, y, 5.8, UQ.gold);
+  c.lineWidth = 1.3;
+  c.strokeStyle = tint(UQ.lapis.b);
+  c.beginPath();
+  c.arc(x, y, 4.6, 0, TAU33);
+  c.stroke();
+  roundFace(c, x, y, 3.2, UQ.sunface, 0.9);
+  px(c, x - 1.4, y - 0.9, 0.8, 0.8, "#7a4a12");
+  px(c, x + 0.6, y - 0.9, 0.8, 0.8, "#7a4a12");
+  px(c, x - 0.9, y + 1, 1.8, 0.45, "#7a4a12");
+  gem(c, x, y - 4.6, 1.4, A.gem);
+}
 var SHIELD_LOOKS = {
+  sunshield: { type: "buckler", draw: sunshield },
   buckler: { type: "buckler", draw: buckler },
   targe: { type: "buckler", draw: targe },
   roundel: { type: "buckler", draw: roundel },
@@ -16334,7 +16613,21 @@ function gnarledStaff(c, A, t) {
   px(c, -1.3, -19.6, 2.6, 1.2, A.c);
   px(c, -1, -29.6, 0.9, 1.6, "#ffffffb3");
 }
-var STAVES = { staff, "crook-staff": crookStaff, "gnarled-staff": gnarledStaff };
+function undyingSunStaff(c, A, t) {
+  const pulse = 0.5 + 0.5 * Math.sin(t * 2.2), cy = -29.6;
+  R(c, -1.1, -24, 2.2, 32.8, UQ.lapis, { flat: true, lw: 1.2 });
+  for (const y of [-20.4, -9, 2]) px(c, -1.1, y, 2.2, 1.2, UQ.gold.b);
+  px(c, -1.1, -15, 2.2, 1, A.c);
+  glow2(c, 0, cy, 9 + pulse * 2, "255,214,90", 0.3 + pulse * 0.2);
+  for (let i = 0; i < 12; i++) {
+    const a = i * TAU33 / 12, w = 0.24, r0 = 4.2, r1 = i % 2 ? 6.4 : 7.8;
+    G(c, [Math.cos(a - w) * r0, cy + Math.sin(a - w) * r0, Math.cos(a) * r1, cy + Math.sin(a) * r1, Math.cos(a + w) * r0, cy + Math.sin(a + w) * r0], UQ.gold, { flat: true, lw: 0.8 });
+  }
+  R(c, -2.2, -25.6, 4.4, 2, UQ.gold, { flat: true, lw: 1 });
+  roundFace(c, 0, cy, 4.6, UQ.gold, 1.2);
+  gem(c, 0, cy, 2.6, A.gem ?? "#2f5fa8");
+}
+var STAVES = { "undying-sun-staff": undyingSunStaff, staff, "crook-staff": crookStaff, "gnarled-staff": gnarledStaff };
 var TOME_ANCHOR = Object.freeze({ x: -19.4, y: -11 });
 var rand = (n) => {
   const v = Math.sin(n * 12.9898) * 43758.5453;
@@ -18712,6 +19005,7 @@ function createPopulationCryptExterior(asset, id, terrain) {
   const r = asset.sites.find((r2) => r2.id === id), g = (r.tier === "small" ? createPlannedCryptExterior : createPlannedCryptExteriorV2)(asset, id, terrain);
   return newPopulationSelection(id) ? Object.freeze({ ...g, realizationVersion: CRYPT_POPULATION_VERSION }) : g;
 }
+var label = (tier2, biome, family) => tier2[0].toUpperCase() + tier2.slice(1) + " " + biome[0].toUpperCase() + biome.slice(1) + " " + family[0].toUpperCase() + family.slice(1);
 async function completePopulationReservation(r, asset, binding, sha256) {
   const p = r.socket.provenance, s = newPopulationSelection(p.reservationId);
   if (!s || !hasAlphaPopulation(binding)) return r;
@@ -18723,7 +19017,7 @@ async function completePopulationReservation(r, asset, binding, sha256) {
     n.socket.provenance.placementVersion = n.parcel.version = CRYPT_POPULATION_VERSION;
   }
   n.socket.provenance.populationHash = ALPHA_POPULATION_HASH;
-  n.parcel.label = s.id === "repeatable-slot:cave:woodland:small:109" ? "Alderwood Outskirts Cave" : s.tier[0].toUpperCase() + s.tier.slice(1) + " " + s.biome[0].toUpperCase() + s.biome.slice(1) + " " + family[0].toUpperCase() + family.slice(1);
+  n.parcel.label = s.id === "repeatable-slot:cave:woodland:small:109" ? "Alderwood Outskirts Cave" : label(n.parcel.tier ?? s.tier, plannedSiteBiome(asset, s.id), family);
   const version = n.socket.provenance.placementVersion, extra = family === "ruin" || family === "crypt" ? "/" + PLANNED_RUIN_EXTERIOR_VERSION2 + (family === "ruin" && s.tier === "standard" ? "/" + STANDARD_RUIN_KIT_VERSION : "") : "";
   const c = await worldIdentity(PLANNED_WORLD_VERSION + "/" + NATURAL_CLUSTER_VERSION + "/" + asset.campaignSeedHex + "/" + binding.assetHash + (binding.townPrototype ? "/" + binding.townPrototype : "") + "/" + version + extra, "chunk", [n.socket.entrance.chunkX, n.socket.entrance.chunkY], sha256);
   n.socket.provenance.chunkId = c.id;
@@ -19263,8 +19557,8 @@ async function plannedReviewTargetsV1(environment, assetId, { get, binding }, { 
   }
   for (const r of cryptReservations) {
     const road = asset.routes.destinations.find((d) => d.id === r.socket.provenance.reservationId).point, s = r.socket.entrance;
-    const tier2 = r.parcel.tier, prefix2 = newPopulationSelection(r.socket.provenance.reservationId) ? r.socket.provenance.reservationId : tier2 === "small" ? "crypt" : "crypt:" + tier2, label3 = tier2[0].toUpperCase() + tier2.slice(1) + " " + r.parcel.label;
-    targets.unshift({ id: prefix2 + ":approach", label: label3 + " / Band " + r.socket.provenance.band + " / existing approach", tile: road }, { id: prefix2 + ":entrance", label: label3 + " / PLAYABLE entrance", tile: { x: (Number(s.chunkX) - 1024) * 32 + s.localX / 32 - 0.5, y: (Number(s.chunkY) - 1024) * 26 + s.localY / 32 - 0.5 } });
+    const tier2 = r.parcel.tier, prefix2 = newPopulationSelection(r.socket.provenance.reservationId) ? r.socket.provenance.reservationId : tier2 === "small" ? "crypt" : "crypt:" + tier2, Tier = tier2[0].toUpperCase() + tier2.slice(1), label4 = r.parcel.label.startsWith(Tier + " ") ? r.parcel.label : Tier + " " + r.parcel.label;
+    targets.unshift({ id: prefix2 + ":approach", label: label4 + " / Band " + r.socket.provenance.band + " / existing approach", tile: road }, { id: prefix2 + ":entrance", label: label4 + " / PLAYABLE entrance", tile: { x: (Number(s.chunkX) - 1024) * 32 + s.localX / 32 - 0.5, y: (Number(s.chunkY) - 1024) * 26 + s.localY / 32 - 0.5 } });
   }
   if (binding.ferryVersion) for (const l of FERRY_NETWORK.landings) targets.push({ id: l.id, label: "FERRY " + l.name + " / " + l.biomeId + " / Band " + l.band, tile: l.tile });
   if (binding.hydrologyHash) targets.unshift(...HYDROLOGY_REVIEW_TARGETS);
@@ -19380,11 +19674,11 @@ function mountPlannedReviewControlsV1({ environment, controls, review, session }
   };
   section.append(visit, status2);
   if (review.binding.townPrototype) {
-    const label3 = doc.createElement("label"), box2 = doc.createElement("input");
+    const label4 = doc.createElement("label"), box2 = doc.createElement("input");
     box2.type = "checkbox";
     box2.id = "town-reservation-overlay";
-    label3.append(box2, doc.createTextNode(" Town reservation / collision overlay"));
-    section.append(label3);
+    label4.append(box2, doc.createTextNode(" Town reservation / collision overlay"));
+    section.append(label4);
     Object.defineProperty(environment, "__SAQ_TOWN_REVIEW__", { configurable: true, value: Object.freeze({ overlay: () => box2.checked }) });
   }
   const links = doc.createElement("p");
@@ -19422,8 +19716,16 @@ var MAX_ORBS = 2;
 var RUSH_TICKS = 180;
 var TRAIL_TICKS = 120;
 var TRAIL_PULSE_TICKS = 30;
-var TIMED = ["surge", "enGarde", "rush"];
-var LIVE = ["last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail"];
+var POOL_TICKS = 180;
+var POOL_PULSE_TICKS = 30;
+var WAIL_TICKS = 1800;
+var SHELL_TICKS = 600;
+var HIDE_TICKS = 300;
+var MAX_SUN = 3;
+var MAX_HIDE = 5;
+var SUNFALL_CASTS = 3;
+var TIMED = ["surge", "enGarde", "rush", "wail", "shell"];
+var LIVE = ["last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts"];
 function skillCooldown(combat, skillId) {
   return combat?.skills?.cooldowns?.[skillId] ?? 0;
 }
@@ -19476,7 +19778,7 @@ function advanceClassSkillTimers(tick, combat) {
     if (k[key2] <= 1) delete k[key2];
     else k[key2]--;
   }
-  for (const key2 of ["bulwark", "charge"]) if (k[key2]) {
+  for (const key2 of ["bulwark", "charge", "hide"]) if (k[key2]) {
     if (k[key2].ticks <= 1) delete k[key2];
     else k[key2].ticks--;
   }
@@ -19505,11 +19807,18 @@ function clearTrail(combat) {
     prune(combat);
   }
 }
+function clearPool(combat) {
+  if (combat?.skills) {
+    delete combat.skills.pool;
+    prune(combat);
+  }
+}
 function cancelClassSkillAction(combat) {
   if (combat?.skills) {
     delete combat.skills.flurry;
     delete combat.skills.orbs;
     delete combat.skills.trail;
+    delete combat.skills.pool;
     prune(combat);
   }
 }
@@ -19528,7 +19837,17 @@ function validateClassSkillState(s, combat, actor) {
     safeInteger(k.trail.ticks, 1, TRAIL_TICKS);
     safeInteger(k.trail.next, 1, TRAIL_PULSE_TICKS);
   }
-  for (const [key2, stacks, ticks] of [["bulwark", 3, BULWARK_TICKS], ["charge", 5, CHARGE_TICKS]]) if (k[key2] !== void 0) {
+  if (k.pool !== void 0) {
+    closedRecord(k.pool, ["x", "y", "ticks", "next"]);
+    requireContract(Number.isFinite(k.pool.x) && Number.isFinite(k.pool.y) && actor.alive, "Invalid pool");
+    safeInteger(k.pool.ticks, 1, POOL_TICKS);
+    safeInteger(k.pool.next, 1, POOL_PULSE_TICKS);
+  }
+  if (k.wail !== void 0) safeInteger(k.wail, 1, WAIL_TICKS);
+  if (k.shell !== void 0) safeInteger(k.shell, 1, SHELL_TICKS);
+  if (k.sun !== void 0) safeInteger(k.sun, 1, MAX_SUN);
+  if (k.casts !== void 0) safeInteger(k.casts, 1, SUNFALL_CASTS - 1);
+  for (const [key2, stacks, ticks] of [["bulwark", 3, BULWARK_TICKS], ["charge", 5, CHARGE_TICKS], ["hide", MAX_HIDE, HIDE_TICKS]]) if (k[key2] !== void 0) {
     closedRecord(k[key2], ["stacks", "ticks"]);
     safeInteger(k[key2].stacks, 1, stacks);
     safeInteger(k[key2].ticks, 1, ticks);
@@ -21201,7 +21520,7 @@ function validateSubweaponCombat(s) {
     requireContract(e.id === id && c.actors[e.sourceId] && combatTargetV4(s, e.targetId)?.alive && ["bleed", "burn"].includes(e.kind), "Periodic ownership");
     safeInteger(e.stacks, 1, e.kind === "bleed" ? 5 : 1);
     safeInteger(e.nextTick, s.tick + 1, s.tick + 60);
-    safeInteger(e.expiresTick, s.tick + 1, s.tick + (e.kind === "bleed" ? 900 : 360));
+    safeInteger(e.expiresTick, s.tick + 1, s.tick + (e.kind === "bleed" ? 900 : 540));
     amount(integer ? e.attack : e.damage);
     if (integer) requireContract(e.rulesVersion === "combat-integer-v2", "Effect rules version");
   }
@@ -24759,6 +25078,20 @@ function createActivityScheduler(state, options = {}, { beforeSleep = () => true
   }) };
 }
 
+// src/simulation/unique_effects_v1.js
+function wearsUnique(player, id) {
+  const inv = player?.inventory;
+  if (!inv?.equipped) return false;
+  for (const itemId of Object.values(inv.equipped)) {
+    const item = itemId ? inv.itemsById[itemId] : null;
+    if (item && itemDefinition(item)?.unique === id) return true;
+  }
+  return false;
+}
+function knockbackImmuneV1(state, entity) {
+  return wearsUnique(Object.values(state.playersById).find((p) => p.entityId === entity.entityId), "bristleback-mantle");
+}
+
 // src/simulation/tome_sustain.js
 function settleTomeSustain(player, actor, combat, stats) {
   if (!player.d8 || !actor.alive || compareCombat(stats.maxBarrier, 0) <= 0) return false;
@@ -24803,6 +25136,7 @@ var CLASS_SKILL_TUNING_V1 = Object.freeze({
   // crit more often; a Kris's cuts always Bleed. Tomes cast their own element.
   styles: { buckler: { cooldown: [3, 4] }, tower: { stun: [3, 2], knockback: [5, 4] }, "main-gauche": { parry: true }, stiletto: { critBonus: [25, 100] }, kris: { bleed: true } }
 });
+var U = Object.freeze({ ring: 64, burst: 56, pool: 40, beam: { reach: 200, attack: [1, 1] }, sunfall: { radius: 40, attack: [1, 1] }, wail: { radius: 110, slow: 2, ticks: 180, below: 30 }, hide: 5, eyeBurn: 10, heal: 3 });
 function offhandStyle(player) {
   const inv = player?.inventory, item = inv?.itemsById[inv.equipped?.subweapon], type = item ? itemLookType(item) : null;
   return T3.styles[type] ? type : null;
@@ -24841,6 +25175,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
   }
   const canStun = (a) => Boolean(s.subweaponCombat.mastery?.[a.entityId]);
   const rank = (a, id) => classRank(owner(a)?.d8, id), aug = (a, id, index) => hasAugment(owner(a)?.d8, id, index), pct2 = (value2, percent) => multiplyCombat(value2, 100 + percent, 100);
+  const wears = (a, id) => wearsUnique(owner(a), id), burn = (a, t, sourceItem) => {
+    if (t.alive && !isPodCombatTargetV4(t)) periodic(a, t, "burn", getStats(a.entityId).attack, { sourceItem });
+  };
+  const around2 = (a, p, radius) => effects2.nearby(a, { position: p }, radius + 40).filter((t) => t.alive && Math.hypot(t.position.x - p.x, t.position.y - p.y) <= radius + (t.hullRadius ?? 0));
   const ordinary = (t) => {
     const d = definition2(t);
     return !isPodCombatTargetV4(t) && !d.isBoss && !d.isElite && !d.isMiniboss;
@@ -24867,6 +25205,17 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       const elite = Boolean(definition2(t).isElite || definition2(t).isMiniboss);
       knockback(a, t, scaled(elite ? T3.bash.eliteKnockback : T3.bash.knockback, style.knockback));
       if (canStun(a)) effects2.status(a, t, "stun", 1, stunTicks(a, scaled(elite ? T3.bash.eliteStun : T3.bash.stun, style.stun)));
+    }
+    const sourceItem = damageSourceItem(owner(a), "bash"), combat = c.actors[a.entityId], sun = combat?.skills?.sun;
+    if (wears(a, "gravecleaver")) for (const t of around2(a, a.position, U.ring)) burn(a, t, sourceItem);
+    if (sun && wears(a, "sunshield")) {
+      delete combat.skills.sun;
+      const end = pathEnd(a, { x: aim2.x, y: aim2.y, remaining: U.beam.reach });
+      for (const t of alongPath(a, a.position, end)) {
+        damage(a, t, multiplyCombat(stats.attack, U.beam.attack[0] * sun, U.beam.attack[1]), "bash", commandId, { sourceItem, trigger: "skill" });
+        burn(a, t, sourceItem);
+      }
+      return landingOffset(a, end);
     }
     return true;
   }
@@ -24919,6 +25268,21 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       settleTomeSustain(player, a, c.actors[a.entityId], stats);
       refreshStats?.(player);
     }
+    if (wears(a, "undying-sun-staff")) {
+      const k = classSkillsRecord(c.actors[a.entityId]), n = (k.casts ?? 0) + 1;
+      if (n < SUNFALL_CASTS) {
+        k.casts = n;
+        return true;
+      }
+      delete k.casts;
+      const at4 = target ? { ...target.position } : { x: a.position.x + toward2.x * 96, y: a.position.y + toward2.y * 96 }, hit = /* @__PURE__ */ new Set(), sourceItem = damageSourceItem(player, "fire");
+      for (const d of sunfallDiscsV1(s.tick, 0, at4)) for (const t of around2(a, d, U.sunfall.radius)) if (!hit.has(t.entityId)) {
+        hit.add(t.entityId);
+        damage(a, t, multiplyCombat(stats.attack, ...U.sunfall.attack), "fire", commandId, { sourceItem, trigger: "skill" });
+        burn(a, t, sourceItem);
+      }
+      return landingOffset(a, at4);
+    }
     return true;
   }
   function earthBreaker2(a, stats, aim2, commandId) {
@@ -24949,7 +25313,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
   function lunge2(a, stats, aim2, commandId) {
     const L = T3.lunge, reach = aug(a, "lunge", 0) ? scaled(L.reach, T3.wider) : L.reach, t = cone(a, aim2, reach, L.cone, 1)[0], combat = c.actors[a.entityId], toward2 = t ? { x: t.position.x - a.position.x, y: t.position.y - a.position.y } : aim2, l = Math.hypot(toward2.x, toward2.y);
     const step2 = t ? Math.min(L.step, Math.max(0, l - (a.hullRadius ?? 0) - (t.hullRadius ?? 0) - 4)) : L.step / 2;
-    if (step2 >= 8 && l > 1e-9 && !combat.dash.frames) Object.assign(combat.dash, { frames: Math.ceil(step2 / 8), remaining: step2, x: toward2.x / l, y: toward2.y / l });
+    if (step2 >= 8 && l > 1e-9 && !combat.dash.frames) {
+      Object.assign(combat.dash, { frames: Math.ceil(step2 / 8), remaining: step2, x: toward2.x / l, y: toward2.y / l });
+      sunTrail(a, combat);
+    }
     if (t) {
       const at4 = landingOffset(a, t.position), hit = damage(a, t, multiplyCombat(stats.attack, ...L.attack), "offhand", commandId, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "skill", critBonus: copyWire(stats.critChance) }), footwork = rank(a, "footwork");
       if (footwork && hit?.critical) refund = 18 * footwork;
@@ -24991,11 +25358,11 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     return { position: { x: a.position.x + aim2.x * d, y: a.position.y + aim2.y * d } };
   }
   function firebloom2(a, stats, aim2, commandId) {
-    const B2 = T3.firebloom, marks2 = cone(a, aim2, B2.reach, B2.cone, aug(a, "firebloom", 1) ? 2 : 1), radius = (aug(a, "firebloom", 0) ? scaled(B2.radius, T3.wide) : B2.radius) * effects2.area(a), raw = spell(stats, B2.attack), kindling = rank(a, "kindling"), base = combatInteger(multiplyCombat(stats.attack, ...B2.attack)), burn = kindling ? combatInteger(pct2(base, 6 * kindling)) : base, sourceItem = damageSourceItem(owner(a), "fire");
+    const B2 = T3.firebloom, marks2 = cone(a, aim2, B2.reach, B2.cone, aug(a, "firebloom", 1) ? 2 : 1), radius = (aug(a, "firebloom", 0) ? scaled(B2.radius, T3.wide) : B2.radius) * effects2.area(a), raw = spell(stats, B2.attack), kindling = rank(a, "kindling"), base = combatInteger(multiplyCombat(stats.attack, ...B2.attack)), burn2 = kindling ? combatInteger(pct2(base, 6 * kindling)) : base, sourceItem = damageSourceItem(owner(a), "fire");
     const origins = marks2.length ? marks2.map((t) => ({ position: { ...t.position } })) : [landing(a, aim2, B2.distance)];
     for (const origin of origins) for (const t of effects2.nearby(a, origin, radius).slice(0, B2.targets)) {
       damage(a, t, raw, "fire", commandId, { sourceItem, trigger: "skill" });
-      if (t.alive && !isPodCombatTargetV4(t)) periodic(a, t, "burn", burn, { sourceItem });
+      if (t.alive && !isPodCombatTargetV4(t)) periodic(a, t, "burn", burn2, { sourceItem });
     }
     return { r: Math.min(400, radius), ...landingOffset(a, origins[0].position), ...origins[1] ? landingOffset(a, origins[1].position, "2") : {} };
   }
@@ -25060,8 +25427,37 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       trail2.next = TRAIL_PULSE_TICKS;
       const r = rank(a, "cinder_step"), stats = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "fire");
       if (r) for (const t of alongPath(a, { x: trail2.x, y: trail2.y }, { x: trail2.x2, y: trail2.y2 })) damage(a, t, multiplyCombat(stats.attack, T3.cinderStep.attack[0] * r, T3.cinderStep.attack[1]), "fire", null, { sourceItem, trigger: "proc" });
+      if (wears(a, "pharaoh-khopesh")) for (const t of alongPath(a, { x: trail2.x, y: trail2.y }, { x: trail2.x2, y: trail2.y2 })) burn(a, t, sourceItem);
     }
     if (--trail2.ticks <= 0) clearTrail(combat);
+  }
+  function sunTrail(a, combat) {
+    if (!wears(a, "pharaoh-khopesh")) return;
+    const to = pathEnd(a, combat.dash);
+    classSkillsRecord(combat).trail = { x: a.position.x, y: a.position.y, x2: to.x, y2: to.y, ticks: TRAIL_TICKS, next: 1 };
+  }
+  function stepPool(a, combat) {
+    const pool = combat.skills?.pool;
+    if (!pool) return;
+    if (!a.alive) {
+      clearPool(combat);
+      return;
+    }
+    if (--pool.next <= 0) {
+      pool.next = POOL_PULSE_TICKS;
+      const sourceItem = damageSourceItem(owner(a), "fire");
+      for (const t of around2(a, pool, U.pool)) burn(a, t, sourceItem);
+    }
+    if (--pool.ticks <= 0) clearPool(combat);
+  }
+  function wail(a, combat) {
+    if (!a.alive || combat.skills?.wail || !wears(a, "barrowshroud")) return;
+    const stats = getStats(a.entityId);
+    if (compareCombat(multiplyCombat(a.hp, 100, 1), multiplyCombat(stats.maxHp, U.wail.below, 1)) >= 0) return;
+    classSkillsRecord(combat).wail = WAIL_TICKS;
+    if (canStun(a)) {
+      for (const t of around2(a, a.position, U.wail.radius)) if (!isPodCombatTargetV4(t)) effects2.status(a, t, "slow", U.wail.slow, U.wail.ticks);
+    }
   }
   const handlers = { shield_bash: bash, flurry, cast: cast2, earth_breaker: earthBreaker2, rallying_cry: rallyingCry2, counter_stance: counterStance2, lunge: lunge2, toxic_fan: toxicFan2, whirling_blades: whirlingBlades2, firebloom: firebloom2, flashfreeze: flashfreeze2, ball_lightning: ballLightning };
   function use(a, skillId, aimInput, commandId = null) {
@@ -25088,6 +25484,8 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     ironWill(a, combat);
     stepOrbs(a, combat);
     stepTrail(a, combat);
+    stepPool(a, combat);
+    wail(a, combat);
     const string = combat.skills?.flurry;
     if (!string || s.tick < string.nextTick) return;
     const stats = getStats(a.entityId);
@@ -25110,6 +25508,11 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (thick && (def.isElite || def.isBoss || def.isMiniboss)) out = multiplyCombat(out, 100 - 3 * thick, 100);
     const bulwark2 = record2(target)?.bulwark, stance = rank(target, "bulwark_stance");
     if (bulwark2 && stance) out = multiplyCombat(out, 100 - 2 * stance * bulwark2.stacks, 100);
+    const shellCombat = c.actors[target.entityId];
+    if (shellCombat && !shellCombat.skills?.shell && wears(target, "kheptra-signet")) {
+      out = multiplyCombat(out, 50, 100);
+      classSkillsRecord(shellCombat).shell = SHELL_TICKS;
+    }
     return out;
   }
   function critBonus(source3, target) {
@@ -25146,12 +25549,16 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       const r = rank(source3, id);
       if (r && applies(marks2, target, mechanic)) out = pct2(out, percent * r);
     }
+    if (marks2.ticking(target, "burn") && wears(source3, "eye-of-the-sun")) out = pct2(out, U.eyeBurn);
+    const hide = record2(source3)?.hide;
+    if (hide && wears(source3, "bristleback-mantle")) out = pct2(out, U.hide * hide.stacks);
     if (enGardeHit === target.entityId) {
       enGardeHit = null;
       out = pct2(out, 8 * rank(source3, "en_garde"));
     }
     const combat = c.actors[source3.entityId];
     if (!combat || trigger === "periodic") return whole(out);
+    if (critical && target.alive && wears(source3, "glasstail-cloak")) bleed(source3, target, getStats(source3.entityId));
     const run = rank(source3, "hit_and_run");
     if (run && (combat.skills?.rush ?? 0) > RUSH_TICKS - 60) out = pct2(out, 6 * run);
     if (rank(source3, "fencers_grace")) out = pct2(out, critical ? 40 : -20);
@@ -25186,6 +25593,14 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (defense.defense === "parry" && rank(target, "en_garde") && combat) classSkillsRecord(combat).enGarde = EN_GARDE_TICKS;
     const grudge = rank(target, "grudge");
     if (grudge && source3.alive && canStun(target) && !isPodCombatTargetV4(source3)) effects2.status(target, source3, "grudge", grudge, 240);
+    if (combat && defense.defense === "block" && wears(target, "sunshield")) {
+      const k = classSkillsRecord(combat);
+      k.sun = Math.min(MAX_SUN, (k.sun ?? 0) + 1);
+    }
+    if (combat && wears(target, "bristleback-mantle")) {
+      const k = classSkillsRecord(combat);
+      k.hide = { stacks: Math.min(MAX_HIDE, (k.hide?.stacks ?? 0) + 1), ticks: HIDE_TICKS };
+    }
   }
   function speed(entityId2) {
     const p = players.get(entityId2);
@@ -25217,9 +25632,25 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       const stats = getStats(a.entityId);
       for (const t of alongPath(a, from, to)) damage(a, t, multiplyCombat(stats.attack, T3.crosscut.attack[0] * cross, T3.crosscut.attack[1]), "offhand", null, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "proc" });
     }
-    if (rank(a, "cinder_step")) classSkillsRecord(combat).trail = { x: from.x, y: from.y, x2: to.x, y2: to.y, ticks: TRAIL_TICKS, next: 1 };
+    if (rank(a, "cinder_step") || wears(a, "pharaoh-khopesh")) classSkillsRecord(combat).trail = { x: from.x, y: from.y, x2: to.x, y2: to.y, ticks: TRAIL_TICKS, next: 1 };
   }
-  return { use, step, incoming, outgoing, defended, critBonus, forceCrit, speed, dashed };
+  function landed(a, target) {
+    const combat = c.actors[a.entityId];
+    if (!combat || !a.alive || !target || !wears(a, "crownflame-scepter")) return;
+    classSkillsRecord(combat).pool = { x: target.position.x, y: target.position.y, ticks: POOL_TICKS, next: 1 };
+  }
+  function defeated(a, target) {
+    if (!players.get(a.entityId)) return;
+    if (wears(a, "wightfang") && Object.values(c.effects).some((e) => e.targetId === target.entityId && e.kind === "bleed")) {
+      const sourceItem = damageSourceItem(owner(a), "offhand");
+      for (const t of around2(a, target.position, U.burst)) if (t !== target) burn(a, t, sourceItem);
+    }
+    if (a.alive && wears(a, "jacks-band")) {
+      const stats = getStats(a.entityId);
+      a.hp = combatInteger(minCombat(stats.maxHp, addCombat(a.hp, multiplyCombat(stats.maxHp, U.heal, 100))));
+    }
+  }
+  return { use, step, incoming, outgoing, defended, critBonus, forceCrit, speed, dashed, landed, defeated };
 }
 
 // src/simulation/mastery_effects.js
@@ -25417,7 +25848,7 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
   const effects2 = createMasteryEffects(s, { damage, eligible: eligible2, identity: identity2, getStats: stats, awards: mastery, bleed: (a, t, captured) => periodic(a, t, "bleed", captured.attack, captured) });
   function periodic(source3, target, kind, attack, captured) {
     if (!target.alive) return;
-    const id = `${source3.entityId}/${target.entityId}/${kind}`, old2 = c.effects[id], longer = classRank(players.get(source3.entityId)?.d8, kind === "bleed" ? "serrated_edge" : "searing"), life = Math.round((kind === "bleed" ? 600 : 240) * (100 + 10 * longer) / 100);
+    const id = `${source3.entityId}/${target.entityId}/${kind}`, old2 = c.effects[id], longer = classRank(players.get(source3.entityId)?.d8, kind === "bleed" ? "serrated_edge" : "searing"), eye6 = kind === "burn" && wearsUnique(players.get(source3.entityId), "eye-of-the-sun"), life = Math.round((kind === "bleed" ? 600 : 240) * (100 + 10 * longer) * (eye6 ? 150 : 100) / 1e4);
     c.effects[id] = {
       id,
       sourceId: source3.entityId,
@@ -25443,6 +25874,7 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
     hit(source3, target, stats(source3.entityId));
   }
   function elementImpact(source3, target, b, element = b.delivery ?? "fire") {
+    skills.landed(source3, target);
     const tree = (id) => classRank(players.get(source3.entityId)?.d8, id), boost = 0, burnBoost = (100 + 6 * tree("kindling")) * (100 + 8 * tree("firebrand")), burnAttack = burnBoost === 1e4 ? b.attack : copyWire(combatInteger(multiplyCombat(b.attack, burnBoost, 1e4)));
     const coefficient = b.tomeRecipe ? capturedTomePower(b.tomeRecipe) : b.firePower ?? combatAmount(18, 10), base = multiplyCombat(b.attack, coefficient.n, coefficient.d), raw = boost ? multiplyCombat(base, 100 + boost, 100) : base, overload = b.tomeRecipe?.overload ?? 0, A = b.tomeRecipe?.areaScale ?? 1, origin = { position: { ...target.position }, hullRadius: target.hullRadius };
     const neighbors = overload && element !== "lightning" ? effects2.nearby(source3, origin, 80 * A * (1 + 0.2 * overload)).filter((t) => t.entityId !== target.entityId) : [];
@@ -25552,7 +25984,7 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
     combat.dash.frames = 0;
     combat.dash.remaining = 0;
   }
-  return { main, step, effects: effects2, classHooks: { incoming: skills.incoming, outgoing: skills.outgoing, defended: skills.defended, critBonus: skills.critBonus, forceCrit: skills.forceCrit, speed: skills.speed, dashed: skills.dashed }, enforceSuppression, skill: (source3, skillId, aim2, commandId) => skills.use(source3, skillId, aim2, commandId), reconcile: (id) => {
+  return { main, step, effects: effects2, classHooks: { landed: skills.landed, defeated: skills.defeated, incoming: skills.incoming, outgoing: skills.outgoing, defended: skills.defended, critBonus: skills.critBonus, forceCrit: skills.forceCrit, speed: skills.speed, dashed: skills.dashed }, enforceSuppression, skill: (source3, skillId, aim2, commandId) => skills.use(source3, skillId, aim2, commandId), reconcile: (id) => {
     synchronizeTomeRotation(players.get(id));
     reconcileSubweapon(s.entitiesById[id], c.actors[id], stats(id));
   } };
@@ -26756,7 +27188,7 @@ function createAegisGoliathCombat(state, { applyDirectDamage, eligible: eligible
       const result = applyDirectDamage(a, t, combatInteger(multiplyCombat(a.attackDamage, cfg.damageNumerator, 10), "round"), "aegis_" + ability);
       if (result !== void 0 && result !== false) {
         hits.push(t.entityId);
-        if (ability === "shield_bash" && t.alive) b.knockbacksByEntityId[t.entityId] = { velocity: { x: Math.cos(b.shieldAngle) * 10, y: Math.sin(b.shieldAngle) * 10 }, expiresTick: state.tick + 12, residencyRevision: t.residency.residencyRevision };
+        if (ability === "shield_bash" && t.alive && !knockbackImmuneV1(state, t)) b.knockbacksByEntityId[t.entityId] = { velocity: { x: Math.cos(b.shieldAngle) * 10, y: Math.sin(b.shieldAngle) * 10 }, expiresTick: state.tick + 12, residencyRevision: t.residency.residencyRevision };
       }
     }
     b.lastAction = { ability, resolvedTick: state.tick, targetPosition: ability === "boomerang_shield" ? pos : copyWire(a.position), hitEntityIds: hits };
@@ -28449,6 +28881,7 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
         mastery.defeat(source3, target, sourceItem?.subType);
         family.effects.defeated(source3, target, sourceItem?.subType);
       }
+      if (source3.team === "party") family.classHooks.defeated(source3, target);
       if (target.team === "party") measure("playerDeath", () => {
         clearWildernessCrowdGrace(state, target.entityId);
         target.movementIntent = { x: 0, y: 0 };
@@ -29568,7 +30001,7 @@ function projectCombatPresentation(state, visibleIds) {
   return { masteryHazards: mastery.flatMap((b) => Object.values(b.hazards)).filter((e) => ids4.has(e.sourceId)).map((e) => ({ position: { ...e.position }, radius: e.radius, expiresTick: e.expiresTick })), masteryRazors: mastery.flatMap((b) => Object.values(b.razors)).filter((e) => ids4.has(e.sourceId)).map((e) => ({ position: { ...e.position }, direction: { ...e.direction } })), statuses: [...Object.values(state.subweaponCombat.effects), ...mastery.flatMap((b) => [...Object.values(b.poisons).map((e) => ({ ...e, id: e.sourceId + "/" + e.id, kind: "poison" })), ...Object.values(b.statuses).filter((e) => e.kind !== "grudge" && e.kind !== "weaken").map((e) => ({ ...e, id: e.sourceId + "/" + e.id, stacks: e.rank, nextTick: e.expiresTick, appliedTick: e.expiresTick - (e.kind === "expose" ? 300 : e.kind === "slow" ? 240 : 90) }))]), ...Object.values(state.subweaponCombat.controls ?? {}).map((e) => ({ ...e, kind: e.phase, nextTick: e.expiresTick }))].filter((e) => ids4.has(e.targetId) && e.expiresTick > state.tick).map((e) => ({ lane: (lanes2.set(e.targetId, (lanes2.get(e.targetId) ?? -1) + 1), lanes2.get(e.targetId)), id: e.id, sourceId: e.sourceId, targetId: e.targetId, kind: e.kind, stacks: e.stacks, expiresTick: e.expiresTick, nextTick: e.nextTick, durationFrames: ["bleed", "poison"].includes(e.kind) ? 600 : e.kind === "burn" ? 240 : e.expiresTick - e.appliedTick })), families: Object.fromEntries(Object.entries(state.subweaponCombat.actors).filter(([id]) => ids4.has(id)).map(([id, c]) => [id, { mastery: (() => {
     const p = Object.values(state.playersById).find((p2) => p2.entityId === id), d = p?.d8, t = d?.transient;
     return t ? { pulseBlocks: t.pulseBlocks, syphon: finiteNodeRank(d, "tome_arcane_syphon") > 0, earthBreaker: finiteNodeRank(d, "shield_earth_breaker_bash") > 0, singularity: finiteNodeRank(d, "tome_keystone_singularity") > 0, anchor: t.lastAnchor, fortitudeStacks: t.fortitudeStacks, retaliatoryReady: t.retaliatoryReady, colossus: t.colossusTicks > 0, shadowStep: t.shadowStepTicks > 0, syphonStacks: t.syphonStacks, weavingStacks: t.weavingStacks } : null;
-  })(), element: Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.itemsById[Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.equipped.subweapon]?.generated?.definition.spellType ?? "fire", guard: c.guard ? { ...c.guard, integrity: presentCombat(c.guard.integrity), direction: { ...c.guard.direction } } : null, pressure: c.pressure, dash: { ...c.dash }, blink: itemDefinition(((p) => p?.inventory.itemsById[p.inventory.equipped.subweapon])(Object.values(state.playersById).find((p) => p.entityId === id)))?.subType === "tome", delivery: { ...c.delivery }, skill: c.skills?.last ? { ...c.skills.last } : null, parry: c.skills?.parry ?? c.skills?.counter ?? 0, orbs: c.skills?.orbs?.map((o) => ({ x: o.x, y: o.y, dx: o.dx, dy: o.dy, ticks: o.ticks })) ?? null, trail: c.skills?.trail ? { x: c.skills.trail.x, y: c.skills.trail.y, x2: c.skills.trail.x2, y2: c.skills.trail.y2, ticks: c.skills.trail.ticks } : null, wall: classRank(Object.values(state.playersById).find((p) => p.entityId === id)?.d8, "iron_wall") }])) };
+  })(), element: Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.itemsById[Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.equipped.subweapon]?.generated?.definition.spellType ?? "fire", guard: c.guard ? { ...c.guard, integrity: presentCombat(c.guard.integrity), direction: { ...c.guard.direction } } : null, pressure: c.pressure, dash: { ...c.dash }, blink: itemDefinition(((p) => p?.inventory.itemsById[p.inventory.equipped.subweapon])(Object.values(state.playersById).find((p) => p.entityId === id)))?.subType === "tome", delivery: { ...c.delivery }, skill: c.skills?.last ? { ...c.skills.last } : null, parry: c.skills?.parry ?? c.skills?.counter ?? 0, orbs: c.skills?.orbs?.map((o) => ({ x: o.x, y: o.y, dx: o.dx, dy: o.dy, ticks: o.ticks })) ?? null, trail: c.skills?.trail ? { x: c.skills.trail.x, y: c.skills.trail.y, x2: c.skills.trail.x2, y2: c.skills.trail.y2, ticks: c.skills.trail.ticks } : null, pool: c.skills?.pool ? { x: c.skills.pool.x, y: c.skills.pool.y, ticks: c.skills.pool.ticks } : null, sun: c.skills?.sun ?? 0, wail: c.skills?.wail ?? 0, shell: c.skills?.shell ?? 0, wall: classRank(Object.values(state.playersById).find((p) => p.entityId === id)?.d8, "iron_wall") }])) };
 }
 
 // src/shared/content/creatures_d11.js
@@ -29910,10 +30343,10 @@ function freezeProjection(value2) {
   }
   return value2;
 }
-var mapSiteLabel = (state, id, label3) => {
+var mapSiteLabel = (state, id, label4) => {
   const tier2 = state.d9World?.siteReservationsById?.[id]?.parcel?.tier;
-  if (!tier2 || label3.toLowerCase().startsWith(tier2 + " ")) return label3;
-  return label3 + " / " + tier2[0].toUpperCase() + tier2.slice(1);
+  if (!tier2 || label4.toLowerCase().startsWith(tier2 + " ")) return label4;
+  return label4 + " / " + tier2[0].toUpperCase() + tier2.slice(1);
 };
 function rustNibblerFacingD11_2({ position: position4, previousPosition = null, movementIntentX = 0, attackTargetPosition = null, meleePhase = "idle", lastFacing = 1, alive = true }) {
   let facing2 = lastFacing === -1 ? -1 : 1;
@@ -30639,7 +31072,7 @@ var cleanName = (text2) => [...String(text2).replace(/[^\p{L}\p{M}\p{N} '’.-]/
 var namedOk = (name) => name.length > 0 && validHeroName(name);
 function createHeroCreatorV1({ document: document2, environment, readModel, adapter, reportError = () => {
 }, onClose = () => {
-} }) {
+}, openHeroes = null, otherHeroes = () => false }) {
   const el = (tag, cls2 = "", text2 = "") => {
     const e = document2.createElement(tag);
     if (cls2) e.className = cls2;
@@ -30666,8 +31099,15 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
   const options = el("div", "hc-options"), foot = el("footer", "hc-foot"), status2 = el("p", "hc-status"), cancel = button("hc-later", "Cancel", () => {
     if (!busy) close();
   }), confirm = button("hc-confirm", "", () => save());
+  const switchHero = button("hc-later", "Switch hero", () => {
+    if (!busy && openHeroes) {
+      root.hidden = true;
+      opener = null;
+      openHeroes();
+    }
+  });
   status2.setAttribute("role", "status");
-  foot.append(status2, cancel, confirm);
+  foot.append(status2, switchHero, cancel, confirm);
   let mode = "create", cls = null, deferClass = false, look = { ...DEFAULT_LOOK }, facing2 = 1, showGear = true, busy = false, thumbsKey = "", opener = null, kitBusy = false, kitRetryAt = 0, roomNoticed = false;
   const toggle = (text2, get, set) => {
     const b = button("hc-toggle", text2, () => {
@@ -30688,8 +31128,8 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
     facing2 = -facing2;
   }), gearToggle.b, helmToggle.b, randomButton);
   preview.append(stage2, bar);
-  const field2 = (label3, content, id) => {
-    const f = el("fieldset", "hc-field"), l = el("legend", "", label3), pick2 = el("span", "hc-pick");
+  const field2 = (label4, content, id) => {
+    const f = el("fieldset", "hc-field"), l = el("legend", "", label4), pick2 = el("span", "hc-pick");
     if (id) pick2.id = id;
     l.append(" ", pick2);
     f.append(l, ...content);
@@ -30892,8 +31332,10 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
     helmToggle.sync();
     cancel.hidden = mode === "create";
     cancel.disabled = busy;
-    const [label3, ready] = confirmState();
-    confirm.textContent = label3;
+    switchHero.hidden = !(mode === "create" && openHeroes && otherHeroes());
+    switchHero.disabled = busy;
+    const [label4, ready] = confirmState();
+    confirm.textContent = label4;
     confirm.disabled = !ready;
     if (!root.hidden) paintThumbs();
   }
@@ -31388,8 +31830,8 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
         s.b.setAttribute("aria-label", arranging ? `${name}. Tap to ${picked === null ? "pick it up" : "swap it here"}.` : isMove ? `${name} \u2014 Shift` : entry2 === "pick" ? name : entry2 ? `${name} \u2014 key ${keys2[i]}` : `Empty skill slot. Learn skills in your class tree.`);
       }
       s.sweep.style.transform = `scaleY(${left && !arranging ? Math.min(1, left / total).toFixed(3) : 0})`;
-      const label3 = left && !arranging ? (left / 60).toFixed(left >= 600 ? 0 : 1) : "";
-      if (s.time.textContent !== label3) s.time.textContent = label3;
+      const label4 = left && !arranging ? (left / 60).toFixed(left >= 600 ? 0 : 1) : "";
+      if (s.time.textContent !== label4) s.time.textContent = label4;
       s.b.disabled = !arranging && state === "locked";
     });
     spin.dataset.page = String(page + 1);
@@ -31405,8 +31847,8 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
         attackSkill.style.setProperty("--class", heroClass.color);
       }
       attackSweep.style.transform = `scaleY(${attackLeft ? Math.min(1, attackLeft / (CLASS_SKILLS[onAttack]?.cooldownTicks ?? 1)).toFixed(3) : 0})`;
-      const label3 = attackLeft ? (attackLeft / 60).toFixed(attackLeft >= 600 ? 0 : 1) : "";
-      if (attackTime.textContent !== label3) attackTime.textContent = label3;
+      const label4 = attackLeft ? (attackLeft / 60).toFixed(attackLeft >= 600 ? 0 : 1) : "";
+      if (attackTime.textContent !== label4) attackTime.textContent = label4;
     }
   }
   return Object.freeze({ refresh, turn: setPage, arrange: startArranging, inspect: () => ({ page, turn: turn7, arranging, draft: draft ? [...draft] : null }), destroy() {
@@ -31601,7 +32043,7 @@ function createHeroSlotsView({ document: document2, environment, heroSlots }) {
 function characterStatGroupsV3(model) {
   const p = model.playersById[model.localPlayerId], s = p.stats, f = s.familyProperties ?? {}, groups = [];
   const value2 = (v) => v === void 0 ? "\u2014" : statText(v, true), pct2 = (v) => v === void 0 ? "\u2014" : statText(statScale(v, 100), true) + "%", mult = (v) => v === void 0 ? "\u2014" : statText(v, true) + "\xD7";
-  const group = (title, rows) => groups.push({ title, rows: rows.filter((r) => r[1] !== void 0).map(([label3, v, format = value2]) => ({ label: label3, value: format(v) })) });
+  const group = (title, rows) => groups.push({ title, rows: rows.filter((r) => r[1] !== void 0).map(([label4, v, format = value2]) => ({ label: label4, value: format(v) })) });
   group("Combat", [
     ["Attack", s.attack],
     ["Defense", s.defense],
@@ -31937,13 +32379,13 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
     }
     plane.append(svg2);
     for (const n of layout.nodes) {
-      const p = layout.place[n.id], b = el("button", "", "skill-node"), icon = disc4(n), label3 = el("span", n.name, "skill-name");
+      const p = layout.place[n.id], b = el("button", "", "skill-node"), icon = disc4(n), label4 = el("span", n.name, "skill-name");
       b.type = "button";
       b.dataset.node = n.id;
       b.style.left = p.x.toFixed(2) + "%";
       b.style.top = p.y.toFixed(2) + "%";
       b.style.width = p.label.toFixed(2) + "%";
-      b.append(icon.wrap, label3);
+      b.append(icon.wrap, label4);
       b.onclick = () => select(n.id);
       items[n.id] = { b, rank: icon.rank, n };
       plane.append(b);
@@ -32105,9 +32547,9 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
     tags.append(el("span", tree === "utility" ? "Utility" : TIER_TAGS[n.tier]), el("span", s.maxed ? "Mastered" : `Rank ${rankText(n, s.rank)}`, s.maxed ? "done" : ""));
     title.append(el("h3", n.name), tags);
     headRow.append(icon.wrap, title, button("\xD7", "sheet-close", close));
-    const parts = [headRow, el("p", nodeDescription(n), "sheet-desc")], effect = (label3, text2, cls = "") => {
+    const parts = [headRow, el("p", nodeDescription(n), "sheet-desc")], effect = (label4, text2, cls = "") => {
       const e = el("div", "", `sheet-effect ${cls}`);
-      e.append(el("b", label3), el("span", text2));
+      e.append(el("b", label4), el("span", text2));
       return e;
     };
     if (s.owned) parts.push(effect("NOW", nodeEffect(n, s.rank)));
@@ -32347,7 +32789,7 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
       swap.disabled = !ready;
       parts.push(swap);
     }
-    const label3 = st.maxed ? s.maxRank === 1 ? "Learned" : "Maxed" : !st.live ? "Coming soon" : st.offer.ok ? st.learned ? `Learn rank ${st.rank + 1} \xB7 1 point` : "Learn \xB7 1 point" : st.offer.reason, learn = button("cs-learn", label3, () => send({ kind: "skill.learn", skillId: id }));
+    const label4 = st.maxed ? s.maxRank === 1 ? "Learned" : "Maxed" : !st.live ? "Coming soon" : st.offer.ok ? st.learned ? `Learn rank ${st.rank + 1} \xB7 1 point` : "Learn \xB7 1 point" : st.offer.reason, learn = button("cs-learn", label4, () => send({ kind: "skill.learn", skillId: id }));
     learn.disabled = !st.offer.ok || !ready;
     parts.push(learn);
     if (st.offer.ok && !ready) parts.push(el("p", "cs-why", "Skills can\u2019t change right now."));
@@ -32530,8 +32972,8 @@ function createProgressionPresentation({ document: document2, readModel, issue }
     }
     attrBody.replaceChildren(el("p", (usesBuildBalanceV2({ inventory: m.inventory }) ? { str: "Each STR above 5: +1 Attack and +6 HP; Shield/main-family Attack scaling and raw Block bonus. Equipping a Shield also grants +20 Max HP.", dex: "Each DEX above 5: +1 Attack and +0.25 percentage points Crit chance; Dagger-family Attack scaling and raw Parry bonus.", int: "Each INT above 5: +1 Attack, +0.2 Defense, and +0.25% Tome spell power. Tome-family Attack scaling is retained." } : ATTRIBUTE_MEANINGS)[attribute]), el("p", `Draft ${Object.values(draft).reduce((a, b) => a + b, 0)} \xB7 ${remaining} AP remaining`));
     const actions = el("div", "", "progression-actions");
-    for (const [label3, n] of [["+1", 1], ["+5", 5], ["MAX", remaining]]) {
-      const b = button(label3, () => {
+    for (const [label4, n] of [["+1", 1], ["+5", 5], ["MAX", remaining]]) {
+      const b = button(label4, () => {
         draft[attribute] += Math.min(n, remaining);
         redraw();
       });
@@ -32690,6 +33132,8 @@ var DASH_CHEVRON_LIFE = 260;
 var DASH_DUST_LIFE = 450;
 var AFTERIMAGE_LIFE = 320;
 function daggerTypeOf(kind) {
+  const unique = UNIQUE_ITEMS[kind];
+  if (unique) kind = nounLookType(unique.noun);
   for (const type of ["main-gauche", "stiletto", "kris"]) if (kind === type || LOOK_POOLS[type]?.includes(kind)) return type;
   return null;
 }
@@ -33053,7 +33497,7 @@ function compareSections(sections, worn) {
 var HERO_ROWS = [["attack", "Attack"], ["defense", "Defense"], ["maxHp", "Max HP"], ["critChance", "Crit", "pct", "critChance"], ["critMultiplier", "Crit damage", "x", "critDamage"], ["activeHaste", "Active Speed", "pct", "activeSpeed"], ["moveSpeed", "Speed", null, "moveSpeed"], ["str", "STR"], ["dex", "DEX"], ["int", "INT"]];
 var heroValue = (v, f) => f === "pct" ? statText(statScale(v, 100)) + "%" : f === "x" ? statText(v) + "\xD7" : statText(v);
 function heroChanges(preview) {
-  return HERO_ROWS.filter(([k]) => preview.difference[k] && !zero3(preview.difference[k])).map(([k, label3, f, icon]) => ({ label: label3, icon: icon ?? k, before: heroValue(preview.before[k], f), after: heroValue(preview.after[k], f), up: sign(preview.difference[k]) > 0 }));
+  return HERO_ROWS.filter(([k]) => preview.difference[k] && !zero3(preview.difference[k])).map(([k, label4, f, icon]) => ({ label: label4, icon: icon ?? k, before: heroValue(preview.before[k], f), after: heroValue(preview.after[k], f), up: sign(preview.difference[k]) > 0 }));
 }
 var isUpgrade = (preview) => Boolean(preview) && Object.values(preview.difference).some((v) => sign(v) > 0) && !Object.values(preview.difference).some((v) => sign(v) < 0);
 var ICON_PATHS = {
@@ -34125,6 +34569,179 @@ var CAPE_ICONS = {
     capeCollar(c, A, CAPE_COLORS.banner);
   }
 };
+var UQ2 = {
+  bone: { b: "#e6dcc4", d: "#c2b596", l: "#f6f0e2" },
+  violet: { b: "#5a2f6e", d: "#43224f", l: "#74408c" },
+  iron: { b: "#4a4f57", d: "#33373d", l: "#6b727c" },
+  ghost: { b: "#9be37a", d: "#5fbf68", l: "#d8ffc4" },
+  gold: { b: "#e9b93a", d: "#b98c22", l: "#ffe08a" },
+  lapis: { b: "#2f5fa8", d: "#224680", l: "#4a7bc6" },
+  bronze: { b: "#d39a45", d: "#a2702c", l: "#f0c27a" },
+  hide: { b: "#6b4a33", d: "#523826", l: "#86603f" },
+  sand: { b: "#cdb07a", d: "#a88d5c", l: "#e3cb98" },
+  glass: { b: "#8fe3e0", d: "#4fb3b8", l: "#e6ffff" },
+  straw: { b: "#d9b65a", d: "#b08e3c", l: "#f0d78a" },
+  sunface: { b: "#ffd970", d: "#e6b23a" },
+  bristle: { b: "#2e221a", d: "#21180f" }
+};
+Object.assign(WEAPONS2, {
+  "gravecleaver"(c, A) {
+    glow3(c, 27, 0, 12, "#9be37a", 0.3);
+    B(c, 0, -2.8, 3.8, 5.6, UQ2.bone, { dark: 1.8, lw: SM });
+    px2(c, 0.8, -1.4, 0.9, 0.9, "#1d232b");
+    px2(c, 0.8, 0.5, 0.9, 0.9, "#1d232b");
+    B(c, 3.8, -1.8, 6, 3.6, UQ2.violet);
+    px2(c, 6, -1.8, 0.8, 3.6, "#00000044");
+    S(c, [13.6, -3.6, 28, -3.6, 29.4, -2.2, 31, -3.6, 34.4, -3.6, 39.4, 0, 34.4, 3.6, 13.6, 3.6], UQ2.iron, { dark: 3.4 });
+    px2(c, 15, -0.5, 17, 1, "#9be37a");
+    px2(c, 15, -0.5, 17, 0.4, "#eaffd8");
+    S(c, [9.8, -6.6, 10.6, -9, 11.8, -7, 13, -9, 13.8, -6.6, 13.8, 6.6, 13, 9, 11.8, 7, 10.6, 9, 9.8, 6.6], UQ2.gold, { dark: 2.4, lw: SM });
+    B(c, 9.4, -1.8, 0.9, 3.6, acc(A), { dark: 0.6, lw: SM * 0.8 });
+    gem2(c, 11.8, 0, 2.6, A.gem ?? "#9be37a");
+  },
+  "pharaoh-khopesh"(c, A) {
+    B(c, 0, -1.8, 6.8, 3.6, UQ2.lapis);
+    px2(c, 2.4, -1.8, 0.8, 3.6, UQ2.gold.b);
+    px2(c, 4.4, -1.8, 0.7, 3.6, A.c);
+    B(c, -1.2, -2.6, 2.4, 5.2, UQ2.gold, { dark: 1.6, lw: SM });
+    S(c, [9.8, -1.6, 19, -1.8, 22, -5, 26.4, -8.4, 31.6, -9, 35.6, -6.6, 37, -2.4, 36, 2, 33.4, 4.4, 34, 1, 32.6, -2.4, 29.6, -3.8, 26, -3, 22.8, -0.2, 20.6, 2, 9.8, 1.8], UQ2.bronze, { dark: 2.6 });
+    B(c, 6.6, -4.8, 3.2, 9.6, UQ2.gold, { dark: 2.8, lw: SM });
+    gem2(c, 8.2, 0, 2.4, A.gem ?? "#2f5fa8");
+  },
+  "crownflame-scepter"(c, A) {
+    glow3(c, 32, 0, 11, "#9be37a", 0.45);
+    B(c, 0, -2, 9, 4, UQ2.violet, { dark: 1.5 });
+    B(c, 9, -1.7, 12, 3.4, UQ2.iron, { dark: 1.4 });
+    px2(c, 14, -1.7, 1.4, 3.4, A.c);
+    S(c, [29, -3.4, 33, -2, 36.4, -3.4, 34.6, -1.2, 39, 0, 34.6, 1.2, 36.4, 3.4, 33, 2, 29, 3.4], UQ2.ghost, { dark: 1.6 });
+    px2(c, 30.4, -0.6, 4.2, 1.2, "#eaffd8");
+    S(c, [21, -5.2, 25.6, -5.2, 25.6, 5.2, 21, 5.2], UQ2.gold, { dark: 3 });
+    S(c, [25.6, -5.2, 29.6, -7, 27.4, -3.2, 30.4, 0, 27.4, 3.2, 29.6, 7, 25.6, 5.2], UQ2.gold, { dark: 2.6 });
+    gem2(c, 23.3, 0, 2.8, A.gem ?? "#9be37a");
+  },
+  "undying-sun-staff"(c, A) {
+    glow3(c, 34, 0, 12, "#ffd65a", 0.42);
+    B(c, 0, -1.7, 28, 3.4, UQ2.lapis, { dark: 1.3 });
+    for (const x of [6, 14, 22]) B(c, x, -1.9, 1.6, 3.8, UQ2.gold, { dark: 1.4, lw: SM });
+    px2(c, 18, -1.7, 1.2, 3.4, A.c);
+    for (let i = 0; i < 12; i++) {
+      const a = i * Math.PI / 6, w = 0.24, r0 = 5.2, r1 = i % 2 ? 8 : 9.6;
+      S(c, [34 + Math.cos(a - w) * r0, Math.sin(a - w) * r0, 34 + Math.cos(a) * r1, Math.sin(a) * r1, 34 + Math.cos(a + w) * r0, Math.sin(a + w) * r0], UQ2.gold, { dark: 0.8, lw: SM * 0.8 });
+    }
+    S(c, oct2(28.6, -5.4, 10.8, 10.8, 3.2), UQ2.gold, { dark: 3 });
+    gem2(c, 34, 0, 3.6, A.gem ?? "#2f5fa8");
+  }
+});
+Object.assign(CAPE_ICONS, {
+  barrowshroud(c, A) {
+    const hem = [];
+    for (let i = 0; i <= 10; i++) hem.push(27.4 - 22.8 * i / 10, i % 2 ? 24.4 : 28.6);
+    G2(c, [10.4, 7, 21.6, 7, ...hem], UQ2.violet, { split: 0.68 });
+    capeFolds(c);
+    for (const [x, y] of [[12.6, 13], [18.4, 15.4], [14.6, 19.4], [19.6, 21], [11.4, 22]]) px2(c, x, y, 1.4, 1.4, "#9be37a");
+    R2(c, 10.2, 4.4, 11.6, 3.2, UQ2.violet, { split: 0.72 });
+    R2(c, 14.2, 3.4, 3.6, 3.8, UQ2.bone, { flat: true, lw: 0.9 });
+    px2(c, 14.8, 4.6, 0.8, 0.8, "#1d232b");
+    px2(c, 16.4, 4.6, 0.8, 0.8, "#1d232b");
+    gem2(c, 16, 9, 1.8, A.gem);
+  },
+  "bristleback-mantle"(c, A) {
+    G2(c, capeBody(7, 25.6, 10.8), UQ2.hide, { split: 0.68 });
+    capeFolds(c);
+    capeHem(c, A, 25.6, 10.8);
+    for (let i = 0; i < 7; i++) {
+      const x = 9.4 + i * 1.9;
+      G2(c, [x, 7.6, x + 0.95, 3.2 + i % 2 * 1.4, x + 1.9, 7.6], UQ2.bristle, { flat: true, lw: 0.8 });
+    }
+    R2(c, 10.2, 6.2, 11.6, 2.4, UQ2.hide, { split: 0.72 });
+    G2(c, [13.4, 6.4, 18.8, 5, 19.8, 6.8, 17, 7.8, 14, 8.6], UQ2.bone, { flat: true, lw: 0.9 });
+    gem2(c, 15.4, 7.4, 1.6, A.gem);
+  },
+  "glasstail-cloak"(c, A) {
+    G2(c, capeBody(7, 28.4, 11), UQ2.sand, { split: 0.68 });
+    capeFolds(c);
+    capeHem(c, A, 28.4, 11);
+    for (const [x, y] of [[8.4, 25.6], [12.2, 26.4], [15.4, 27], [18.8, 26.4], [22.4, 25.6], [11, 20.6], [19.6, 20.6], [15.2, 15.6]]) G2(c, [x, y, x + 1.2, y - 2.8, x + 2.4, y], UQ2.glass, { flat: true, lw: 0.8 });
+    capeCollar(c, A, UQ2.sand);
+  }
+});
+Object.assign(RINGS, {
+  // Eye of the Sun: a gold band carrying a lapis eye with a sun for a pupil, rayed in gold.
+  "eye-of-the-sun"(c, A) {
+    band(c, GOLD2);
+    for (let i = 0; i < 8; i++) {
+      const a = i * Math.PI / 4;
+      px2(c, 16 + Math.cos(a) * 6.2 - 0.6, 13 + Math.sin(a) * 4.6 - 0.6, 1.2, 1.2, "#f5c542");
+    }
+    G2(c, [10.8, 13, 13.4, 10.4, 16, 9.8, 18.6, 10.4, 21.2, 13, 18.6, 15.6, 16, 16.2, 13.4, 15.6], { b: "#2f5fa8", d: "#224680" }, { split: 0.62 });
+    c.beginPath();
+    c.arc(16, 13, 2.2, 0, Math.PI * 2);
+    c.fillStyle = "#ffcf4a";
+    c.fill();
+    c.lineWidth = 0.9;
+    c.strokeStyle = K2;
+    c.stroke();
+    gem2(c, 16, 13, 1.4, A.gem);
+  },
+  // Jack's Harvest Band: braided straw with a tiny carved pumpkin.
+  "jacks-band"(c, A) {
+    band(c, UQ2.straw, { thick: 2.2 });
+    for (let i = 0; i < 9; i++) {
+      const a = Math.PI * (0.1 + i * 0.2);
+      px2(c, 16 + Math.cos(a) * 5.3 - 0.3, 20 + Math.sin(a) * 3.7 - 0.6, 0.6, 1.2, "#8a6a2a");
+    }
+    c.beginPath();
+    c.ellipse(16, 13.4, 4, 3.4, 0, 0, Math.PI * 2);
+    c.fillStyle = "#e8892e";
+    c.fill();
+    c.save();
+    c.clip();
+    c.fillStyle = "#c46a1c";
+    c.fillRect(17.4, 9, 4, 9);
+    c.restore();
+    c.lineWidth = 1;
+    c.strokeStyle = K2;
+    c.stroke();
+    R2(c, 15.4, 9.2, 1.2, 1.4, { b: "#5b7a2a" }, { flat: true, lw: 0.7 });
+    px2(c, 14.2, 12.6, 1, 1, "#ffdc6a");
+    px2(c, 16.8, 12.6, 1, 1, "#ffdc6a");
+    px2(c, 14.4, 14.6, 3.2, 0.7, "#ffdc6a");
+    gem2(c, 16, 23.4, 1.6, A.gem);
+  },
+  // Kheptra's Signet: a gold band with a lapis scarab.
+  "kheptra-signet"(c, A) {
+    band(c, GOLD2);
+    c.strokeStyle = K2;
+    c.lineWidth = 0.9;
+    for (const s of [-1, 1]) for (const dy of [-2.2, 0, 2.2]) {
+      c.beginPath();
+      c.moveTo(16 + s * 3, 13.8 + dy);
+      c.lineTo(16 + s * 6, 13.8 + dy * 1.5);
+      c.stroke();
+    }
+    c.beginPath();
+    c.ellipse(16, 9.4, 2.3, 1.7, 0, 0, Math.PI * 2);
+    c.fillStyle = "#e9b93a";
+    c.fill();
+    c.lineWidth = 1;
+    c.strokeStyle = K2;
+    c.stroke();
+    c.beginPath();
+    c.ellipse(16, 14, 4.4, 4.6, 0, 0, Math.PI * 2);
+    c.fillStyle = "#2f5fa8";
+    c.fill();
+    c.save();
+    c.clip();
+    c.fillStyle = "#224680";
+    c.fillRect(17.2, 9, 5, 10);
+    c.restore();
+    c.lineWidth = 1;
+    c.strokeStyle = K2;
+    c.stroke();
+    px2(c, 15.7, 10.6, 0.6, 7.6, "#e9b93a");
+    gem2(c, 16, 14.4, 1.4, A.gem);
+  }
+});
 var ART2 = { main: WEAPONS2, gloves: GLOVES2, boots: BOOTS, helmet: HELMETS, body: BODIES, ring: RINGS, cape: CAPE_ICONS };
 var hasObjectIcon = (item) => Boolean(ART2[item?.slot]?.[item.kind]);
 function drawObjectIcon(c, item, size = 48) {
@@ -34678,7 +35295,7 @@ function iconUrl(slot, kind, tier2, document2) {
   return urls.get(key2);
 }
 var iconOf = (item) => {
-  const d = itemDefinition(item), slot = HERO_SLOT[d?.slot], kind = slot === "ring" ? RING_KINDS[item.generated?.definition?.noun ?? item.definitionId] : slot ? itemLook(item) : null;
+  const d = itemDefinition(item), slot = HERO_SLOT[d?.slot], kind = slot === "ring" ? uniqueOf(d)?.look ?? RING_KINDS[item.generated?.definition?.noun ?? item.definitionId] : slot ? itemLook(item) : null;
   return kind ? { slot, kind, tier: Number.isSafeInteger(d.rarityTier) ? Math.max(0, Math.min(5, d.rarityTier)) : 0 } : null;
 };
 useLookArt((item) => {
@@ -34702,7 +35319,7 @@ var MONSTER_SOUL_ART = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 
 
 // src/client/forge_presentation.js
 var resolvePlayerStats2 = (p) => Object.fromEntries(Object.entries(resolvePlayerStats(p)).map(([k, v]) => [k, v?.n !== void 0 ? statValue(v) : v]));
-var label = (k) => ({ ring1: "Ring 1", ring2: "Ring 2", subweapon: "Offhand" })[k] ?? k[0].toUpperCase() + k.slice(1);
+var label2 = (k) => ({ ring1: "Ring 1", ring2: "Ring 2", subweapon: "Offhand" })[k] ?? k[0].toUpperCase() + k.slice(1);
 var speedUrl = "data:image/svg+xml;charset=utf-8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2.5" stroke-linejoin="round"><path d="M6 5h5v6l8 4c2 1 2 4-1 4H6V5zm3 2h2M9 9h2" /></svg>');
 var soulUrl = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(MONSTER_SOUL_ART);
 function createForgePresentation({ document: document2, issue, invalidate }) {
@@ -34744,7 +35361,7 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
     root.replaceChildren();
     const latest = Object.values(e.lastAttunementsBySlot).sort((a, b) => b.authorityOrder - a.authorityOrder)[0];
     if (latest) {
-      const notice = el("p", `Attuned ${label(latest.command.payload.slot)} to Lv. ${e.slotLevels[latest.command.payload.slot]}!`, "stat-gain");
+      const notice = el("p", `Attuned ${label2(latest.command.payload.slot)} to Lv. ${e.slotLevels[latest.command.payload.slot]}!`, "stat-gain");
       notice.setAttribute("role", "status");
       root.append(notice);
     }
@@ -34756,7 +35373,7 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
       b.type = "button";
       b.dataset.forgeAction = slot;
       b.setAttribute("aria-pressed", String(slot === selected));
-      b.setAttribute("aria-label", `${label(slot)} slot, level ${e.slotLevels[slot]}`);
+      b.setAttribute("aria-label", `${label2(slot)} slot, level ${e.slotLevels[slot]}`);
       {
         const img = document2.createElement("img");
         img.src = (item2 && itemIconUrl(item2, document2)) ?? EQUIPMENT_ART[SLOT_ART_KEYS[slot]].url;
@@ -34766,7 +35383,7 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
         b.append(img);
       }
       const info = el("span", "", "item-info");
-      info.append(el("strong", label(slot)), el("small", d2?.name ?? "[EMPTY SLOT]", "item-sub"));
+      info.append(el("strong", label2(slot)), el("small", d2?.name ?? "[EMPTY SLOT]", "item-sub"));
       b.append(info, el("span", `${e.slotLevels[slot]}/100`, "forge-rank"));
       b.onclick = () => {
         selected = slot;
@@ -34775,7 +35392,7 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
       list.append(b);
     }
     const level = e.slotLevels[selected], item = inv.itemsById[inv.equipped[selected]], d = itemDefinition(item);
-    details.append(el("h4", label(selected).toUpperCase() + " SLOT ATTUNEMENT"), el("p", `Lv. ${level} / 100`));
+    details.append(el("h4", label2(selected).toUpperCase() + " SLOT ATTUNEMENT"), el("p", `Lv. ${level} / 100`));
     const progress8 = document2.createElement("progress");
     progress8.max = 100;
     progress8.value = level;
@@ -34866,7 +35483,7 @@ var resolvePlayerStats3 = (p) => {
   const stats = resolvePlayerStats(p);
   return Object.fromEntries(Object.entries({ ...stats, ...stats.attributes }).map(([k, v]) => [k, v?.n !== void 0 ? statValue(v) : v]));
 };
-var label2 = (s) => ({ ring1: "Ring 1", ring2: "Ring 2", subweapon: "Offhand" })[s] ?? s[0].toUpperCase() + s.slice(1);
+var label3 = (s) => ({ ring1: "Ring 1", ring2: "Ring 2", subweapon: "Offhand" })[s] ?? s[0].toUpperCase() + s.slice(1);
 var statLabel = { maxHp: "Max HP", attack: "Attack", defense: "Defense", moveSpeed: "Movement speed", critChance: "Critical chance", critMultiplier: "Critical damage", activeHaste: "Active Speed", str: "STR", dex: "DEX", int: "INT" };
 function equipmentComparison(inv, itemId, slot, totalXp = 0, d8 = void 0) {
   const equipped = equipmentAfter(inv, itemId, slot);
@@ -35004,6 +35621,20 @@ function createInventoryPresentation({ document: document2, environment, readMod
     key2 = null;
     refresh(readModel());
     closeButton.focus();
+  }
+  function openHeroes() {
+    const m = readModel();
+    if (!heroesView || !m.inventory) return false;
+    clearInput();
+    forgeSession = false;
+    section = "heroes";
+    open = true;
+    inspect = false;
+    error = "";
+    key2 = null;
+    refresh(readModel());
+    closeButton.focus();
+    return true;
   }
   function toggle() {
     if (open) return close();
@@ -35265,9 +35896,9 @@ function createInventoryPresentation({ document: document2, environment, readMod
     const doll = element("div", "", "gx-doll");
     doll.append(col(DOLL_LEFT), hero, col(DOLL_RIGHT));
     const s = local6.stats, keys2 = element("div", "", "gx-keystats");
-    for (const [label3, v, pct2, ic] of [["Attack", s.attack, false, "attack"], ["Defense", s.defense, false, "defense"], ["Max HP", s.maxHp, false, "maxHp"], ["Crit", s.critChance, true, "critChance"]]) {
+    for (const [label4, v, pct2, ic] of [["Attack", s.attack, false, "attack"], ["Defense", s.defense, false, "defense"], ["Max HP", s.maxHp, false, "maxHp"], ["Crit", s.critChance, true, "critChance"]]) {
       const t = markup(element("div", "", "gx-keystat"), statIcon(ic, 18));
-      t.append(element("b", pct2 ? statText(statScale(v, 100), true) + "%" : statText(v, true)), element("span", label3));
+      t.append(element("b", pct2 ? statText(statScale(v, 100), true) + "%" : statText(v, true)), element("span", label4));
       keys2.append(t);
     }
     const parts = [doll, keys2], retired = ["chest", "leggings"].filter((sl) => inv.equipped[sl]);
@@ -35347,7 +35978,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
       if (lock) t.append(markup(element("span", "", "gx-lock"), LOCK_BADGE));
       else if (scan.upItems.has(item.itemId)) t.append(markup(element("span", "", "gx-up"), UP_BADGE));
       t.setAttribute("aria-label", `${displayName(d)}, ${rarity(d)}${lv != null ? ", level " + statText(lv) : ""}${lock ? ", " + lock.text : scan.upItems.has(item.itemId) ? ", upgrade" : ""}`);
-      cell.append(t, element("span", displayName(d), "gx-name"));
+      cell.append(t, element("span", displayName(d), "gx-name" + (uniqueOf(d) ? " is-unique" : "")));
       grid.append(cell);
     }
     list.replaceChildren(chips, meta, shown.length ? grid : element("p", items.length ? "Nothing here with this filter." : "Your gear is equipped. New finds will appear here.", "gx-empty"), element("p", "Tap an item to compare it with what you\u2019re wearing.", "gx-hint"));
@@ -35388,7 +36019,12 @@ function createInventoryPresentation({ document: document2, environment, readMod
     title.id = "world-item-title";
     title.tabIndex = -1;
     frame.append(itemIcon(item));
-    info.append(title, element("span", [RARITY_NAMES[d.rarityTier ?? 0], `${d.rarityTier ?? 0}\u2605`, (SLOT_NAMES[equippedSlot ?? (d.slot === "ring" ? "ring1" : d.slot)] ?? label2(d.slot)).replace(/ \d$/, ""), gen?.itemPower != null ? "Lv " + statText(gen.itemPower) : null].filter(Boolean).join(" \xB7 "), "gx-itemsub"));
+    const unique = uniqueOf(d);
+    if (unique) {
+      title.classList.add("is-unique");
+      title.append(element("span", "Unique", "gx-uniquetag"));
+    }
+    info.append(title, element("span", [RARITY_NAMES[d.rarityTier ?? 0], `${d.rarityTier ?? 0}\u2605`, (SLOT_NAMES[equippedSlot ?? (d.slot === "ring" ? "ring1" : d.slot)] ?? label3(d.slot)).replace(/ \d$/, ""), gen?.itemPower != null ? "Lv " + statText(gen.itemPower) : null].filter(Boolean).join(" \xB7 "), "gx-itemsub"));
     head12.append(frame, info, close2);
     scroll.append(head12);
     if (target && d.slot === "ring") {
@@ -35420,6 +36056,11 @@ function createInventoryPresentation({ document: document2, environment, readMod
         }
       } else if (target) note.append(`Your ${SLOT_NAMES[target].replace(/ \d$/, "")} slot is empty`);
       if (note.childNodes.length) scroll.append(note);
+    }
+    if (unique) {
+      const box2 = element("div", "", "gx-unique");
+      box2.append(element("p", unique.effect, "gx-uniqueeffect"), element("p", "\u201C" + unique.flavor + "\u201D", "gx-flavor"));
+      scroll.append(box2);
     }
     if (d.subType === "tome" && TOME_LINE[d.spellType]) scroll.append(element("p", TOME_LINE[d.spellType], "gx-itemnote"));
     else if (d.description && !d.effects) scroll.append(element("p", d.description, "gx-itemnote"));
@@ -35724,7 +36365,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
   openButton.addEventListener("click", toggle);
   closeButton.addEventListener("click", close);
   environment.addEventListener("keydown", keyboard);
-  return Object.freeze({ refresh, openForge, isOpen: () => open, destroy() {
+  return Object.freeze({ refresh, openForge, openHeroes, isOpen: () => open, destroy() {
     contextInput.destroy();
     progressionView.destroy();
     progressionButton.remove();
@@ -35753,8 +36394,8 @@ function interactionChoiceV2(model) {
   if (model.persistence.phase !== "encounter" || !model.inventory) return null;
   const action2 = contextActionForModel(model);
   if (action2?.kind === "resource.interact" && model.resources?.some((r) => r.eventPod && r.groupId === action2.payload.groupId && r.ordinal === action2.payload.ordinal)) return null;
-  const label3 = contextActionLabelForModel(model, action2);
-  return action2 && label3 ? { exitId: PICKUP_CONTEXT_V2, label: label3, kind: action2.kind === "loot.pickup" ? "Ground loot" : "Nearby object" } : null;
+  const label4 = contextActionLabelForModel(model, action2);
+  return action2 && label4 ? { exitId: PICKUP_CONTEXT_V2, label: label4, kind: action2.kind === "loot.pickup" ? "Ground loot" : "Nearby object" } : null;
 }
 function createInteractionHudV2({ document: doc, readModel, activate, isBlocked = () => false }) {
   const button = doc.createElement("button");
@@ -35762,11 +36403,11 @@ function createInteractionHudV2({ document: doc, readModel, activate, isBlocked 
   button.id = "rpg-interaction-v2";
   button.hidden = true;
   button.dataset.gameplayHud = "";
-  const key2 = doc.createElement("kbd"), copy = doc.createElement("span"), kind = doc.createElement("small"), label3 = doc.createElement("strong"), tap = doc.createElement("span");
+  const key2 = doc.createElement("kbd"), copy = doc.createElement("span"), kind = doc.createElement("small"), label4 = doc.createElement("strong"), tap = doc.createElement("span");
   key2.textContent = "E";
   tap.className = "interaction-tap";
   tap.textContent = "Tap";
-  copy.append(kind, label3);
+  copy.append(kind, label4);
   button.append(key2, copy, tap);
   doc.getElementById("world-view").parentElement.append(button);
   doc.body.dataset.rpgInteraction = "v2";
@@ -35791,7 +36432,7 @@ function createInteractionHudV2({ document: doc, readModel, activate, isBlocked 
     if (signature !== previous) {
       previous = signature;
       kind.textContent = target.kind;
-      label3.textContent = target.label;
+      label4.textContent = target.label;
       button.setAttribute("aria-label", target.label + "; press E or tap");
       writes++;
     }
@@ -35815,14 +36456,14 @@ function createWorldEventHudV3(document2, onActivate = () => {
   root.setAttribute("aria-label", "Local event objectives");
   const tag = document2.createElement("small"), title = document2.createElement("strong"), objective = document2.createElement("p"), bars = document2.createElement("div"), detail = document2.createElement("span");
   const pods = Array.from({ length: 3 }, (_, n) => {
-    const row2 = document2.createElement("div"), label3 = document2.createElement("span"), bar = document2.createElement("progress");
-    label3.textContent = "Pod " + (n + 1);
+    const row2 = document2.createElement("div"), label4 = document2.createElement("span"), bar = document2.createElement("progress");
+    label4.textContent = "Pod " + (n + 1);
     bar.max = 100;
     bar.value = 100;
     bar.setAttribute("aria-label", "Pod " + (n + 1) + " health");
-    row2.append(label3, bar);
+    row2.append(label4, bar);
     bars.append(row2);
-    return { label: label3, bar };
+    return { label: label4, bar };
   });
   const action2 = document2.createElement("button");
   action2.type = "button";
@@ -35883,8 +36524,8 @@ function createWorldEventHudV3(document2, onActivate = () => {
     tag.textContent = event.status === "dormant" ? "LOCAL EVENT" : event.status === "completed" ? "EVENT COMPLETE" : model.tick - enteredTick < 150 ? "EVENT STARTED" : "LOCAL EVENT \xB7 ACTIVE";
     title.textContent = "Spore Outbreak";
     objective.textContent = event.status === "dormant" ? "E / tap near a pod to disturb it." : event.status === "completed" ? event.rewardClaimed ? "Reward claimed." : "Claim your reward chest." : `Destroy the spore pods \xB7 ${destroyed}/3`;
-    pods.forEach(({ label: label3, bar }, n) => {
-      label3.textContent = event.pods[n]?.used ? "Broken" : "Pod " + (n + 1);
+    pods.forEach(({ label: label4, bar }, n) => {
+      label4.textContent = event.pods[n]?.used ? "Broken" : "Pod " + (n + 1);
       bar.value = health[n] ?? 0;
     });
     bars.hidden = event.status !== "active";
@@ -36224,8 +36865,8 @@ function createSettlementServicesMenu2(options) {
     shell.append(wallet);
     const tabs = el("nav", void 0, "forge-mode-bar"), modes = isAltar ? [["enchant", "Enchantment"], ["purge", "Purge"], ["resonance", "Resonance"], ["shatter", "Shatter"], ["materials", "Materials"]] : isSmith ? [["attune", "Attunement"], ["reforge", "Reforge"], ["awaken", "Awaken"], ["gear", "Trade"], ["materials", "Materials"]] : npc?.role === "innkeeper" ? [["rest", "Rest"]] : [["gear", "Equipment"], ["supplies", "Potions"], ["sell", "Sell"]];
     if (!npcId) modes.splice(0, modes.length, ["supplies", "Supplies"]);
-    for (const [id, label3] of modes) {
-      const b = button(label3, () => change(id), "tab:" + id, "forge-mode-btn");
+    for (const [id, label4] of modes) {
+      const b = button(label4, () => change(id), "tab:" + id, "forge-mode-btn");
       b.setAttribute("aria-pressed", String(mode === id));
       tabs.append(b);
     }
@@ -37306,10 +37947,10 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
   };
   env.addEventListener("resize", invalidateSize);
   env.addEventListener("orientationchange", invalidateSize);
-  const button = (text2, fn, parent, label3 = null, icon = null) => {
+  const button = (text2, fn, parent, label4 = null, icon = null) => {
     const b = el("button", text2);
     b.type = "button";
-    if (label3) b.setAttribute("aria-label", label3);
+    if (label4) b.setAttribute("aria-label", label4);
     if (icon) b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICON[icon] + "</svg>";
     b.onclick = (e) => {
       e.preventDefault();
@@ -37393,7 +38034,7 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
     renderPanel();
   }, corner);
   journalButton.className = "chart-journal";
-  for (const [key3, label3] of Object.entries({ settlements: "Settlements", sites: "Known sites", completed: "Completed sites", routes: "Roads & trails", ferries: "Ferries" })) {
+  for (const [key3, label4] of Object.entries({ settlements: "Settlements", sites: "Known sites", completed: "Completed sites", routes: "Roads & trails", ferries: "Ferries" })) {
     const row2 = el("label"), input = el("input");
     input.type = "checkbox";
     input.checked = true;
@@ -37401,7 +38042,7 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
       filters[key3] = input.checked;
       dirty = true;
     };
-    row2.append(input, el("span", label3));
+    row2.append(input, el("span", label4));
     filtersRow.append(row2);
   }
   for (const [m, text2] of [[{ kind: "settlement", class: "village-outpost", state: "visited" }, "Village or town"], [{ kind: "settlement", class: "city", state: "visited" }, "City or capital"], [{ kind: "settlement", class: "town", state: "unvisited" }, "Not visited yet"], [{ kind: "site", family: "cave", state: "discovered" }, "Cave"], [{ kind: "site", family: "fort", state: "discovered" }, "Fort"], [{ kind: "site", family: "ruin", state: "discovered" }, "Ruin"], [{ kind: "site", family: "crypt", state: "discovered" }, "Crypt"], [{ kind: "site", state: "rumored" }, "Rumored site"], [{ kind: "ferry", state: "visited" }, "Ferry landing"], [{ kind: "site", family: "cave", state: "completed" }, "Completed"]]) {
@@ -38351,7 +38992,7 @@ function createWorldMapD9({ document: doc, environment, port, releaseInput }) {
         y = height / 2 + delta3.y;
       }
       if (x < 8 || y < 8 || x > width - 8 || y > height - 8) continue;
-      const completed = clue.state === "completed", label3 = clue.text;
+      const completed = clue.state === "completed", label4 = clue.text;
       ctx.save();
       ctx.translate(x, y);
       ctx.fillStyle = completed ? "#657267" : "#cba970";
@@ -38367,8 +39008,8 @@ function createWorldMapD9({ document: doc, environment, port, releaseInput }) {
       ctx.textBaseline = "middle";
       ctx.fillText(completed ? "\u2713" : "?", 0, 0.5);
       ctx.restore();
-      if (open) reviewMarks.push({ x, y, label: label3 + " \xB7 woodland discovery" });
-      else miniMarks.push({ x, y, label: label3 + " \xB7 woodland discovery" });
+      if (open) reviewMarks.push({ x, y, label: label4 + " \xB7 woodland discovery" });
+      else miniMarks.push({ x, y, label: label4 + " \xB7 woodland discovery" });
     }
     const actual = n.position, local6 = model.playersById[model.localPlayerId], facing2 = model.primary?.actorsById?.[local6.entityId]?.facing;
     if (!open) drawPlayer(ctx, width / 2, height / 2, facing2, planned ? 16 : 8);
@@ -38614,9 +39255,9 @@ function createSubweaponHud({ document: document2, environment, readModel, adapt
         if (shielded) panel.replaceChildren(fire, document2.createTextNode(" \xB7 "), barrier);
         else panel.replaceChildren(fire);
       } else if (type === "shield") {
-        const icon = document2.createElement("span"), label3 = document2.createElement("span"), pips = document2.createElement("span");
+        const icon = document2.createElement("span"), label4 = document2.createElement("span"), pips = document2.createElement("span");
         icon.innerHTML = `<svg aria-hidden="true" viewBox="0 0 24 24" width="17" height="17" fill="#34475b" stroke="#f1c40f" stroke-width="2"><path d="${DUNGEON_COMBAT_ICONS.block.path}"/></svg>`;
-        label3.textContent = "PRESSURE";
+        label4.textContent = "PRESSURE";
         pips.className = "guard-pressure-pips";
         pips.setAttribute("aria-label", `${c.pressure} of 3 Guard Pressure`);
         for (let i = 0; i < 3; i++) {
@@ -38626,7 +39267,7 @@ function createSubweaponHud({ document: document2, environment, readModel, adapt
         }
         const ready2 = document2.createElement("span");
         ready2.textContent = c.pressure === 3 ? "BASH READY" : "";
-        panel.replaceChildren(icon, label3, pips, ready2);
+        panel.replaceChildren(icon, label4, pips, ready2);
       } else panel.textContent = next;
       text2 = next;
     }
@@ -38635,14 +39276,14 @@ function createSubweaponHud({ document: document2, environment, readModel, adapt
 Shift` : `${name}
 ${(c.dash.cooldown / 60).toFixed(1)}s`;
     if (dash.dataset.label !== value2) {
-      const label3 = document2.createElement("span");
-      label3.textContent = value2;
-      label3.className = "move-label";
+      const label4 = document2.createElement("span");
+      label4.textContent = value2;
+      label4.className = "move-label";
       const time = document2.createElement("b");
       time.className = "move-time";
       time.textContent = ready ? "" : (c.dash.cooldown / 60).toFixed(1);
       dash.innerHTML = SKILL_ICONS_V1[blink ? "blink" : "dash"];
-      dash.append(time, label3);
+      dash.append(time, label4);
       dash.dataset.label = value2;
       dash.dataset.move = blink ? "blink" : "dash";
       dash.setAttribute("aria-label", `${blink ? "Blink" : "Shadow Dash"} \u2014 Shift`);
@@ -38771,13 +39412,13 @@ function createDiagnosticOverlays({ document: document2, environment, releaseInp
     w.el.style.left = w.x + "px";
     w.el.style.top = w.y + "px";
   }
-  for (const [kind, label3] of [["fps", "FPS / frame time"], ["dps", "Dungeon DPS"]]) {
+  for (const [kind, label4] of [["fps", "FPS / frame time"], ["dps", "Dungeon DPS"]]) {
     const pref = preferences?.[kind], el = document2.createElement("div");
     el.id = "world-" + kind + "-overlay";
     el.className = "diagnostic-overlay " + kind;
     el.title = "Drag to move";
     el.tabIndex = 0;
-    el.setAttribute("aria-label", label3 + " overlay; drag or use arrow keys to move");
+    el.setAttribute("aria-label", label4 + " overlay; drag or use arrow keys to move");
     document2.getElementById("world-app").append(el);
     const w = { el, enabled: pref?.enabled === true, collapsed: kind === "fps" && pref?.collapsed === true, x: Number.isFinite(pref?.x) ? pref.x : Math.max(0, environment.innerWidth - 220), y: Number.isFinite(pref?.y) ? pref.y : kind === "fps" ? 110 : 175 };
     widgets[kind] = w;
@@ -38818,7 +39459,7 @@ function createDiagnosticOverlays({ document: document2, environment, releaseInp
     toggle.type = "checkbox";
     toggle.id = "world-" + kind + "-toggle";
     toggle.checked = w.enabled;
-    row2.append(toggle, document2.createTextNode(label3));
+    row2.append(toggle, document2.createTextNode(label4));
     controls.append(row2);
     el.hidden = !w.enabled;
     if (w.enabled) {
@@ -39952,7 +40593,7 @@ function createHeroLevelUpV3() {
   function ring5(ctx, u, [delay, span, radius], half) {
     const t = (u - delay) / span;
     if (t <= 0 || t >= 1) return;
-    const ease17 = t * t * (3 - 2 * t), y = 5 - 44 * ease17, r = radius + 6 * Math.sin(t * Math.PI), alpha2 = Math.min(1, t / 0.12) * (1 - t) ** 0.6;
+    const ease18 = t * t * (3 - 2 * t), y = 5 - 44 * ease18, r = radius + 6 * Math.sin(t * Math.PI), alpha2 = Math.min(1, t / 0.12) * (1 - t) ** 0.6;
     const [a, b] = half === "back" ? [Math.PI, Math.PI * 2] : [0, Math.PI];
     ctx.save();
     ctx.globalAlpha *= alpha2;
@@ -47340,15 +47981,15 @@ function payout(c, row2, tick) {
         const a2 = i * TAU53 / 4 + 0.35, r = 4 + 8 * ease13(q);
         line8(c, [[to.x + Math.cos(a2) * r, to.y + Math.sin(a2) * r], [to.x + Math.cos(a2) * (r + 3), to.y + Math.sin(a2) * (r + 3)]], PALE8, 0.9);
       }
-      const a = asCombatAmount(row2.amount), digits = (BigInt(a.n) / BigInt(a.d)).toString(), label3 = digits.length <= 7 ? "+" + digits + " G" : "+ GOLD";
+      const a = asCombatAmount(row2.amount), digits = (BigInt(a.n) / BigInt(a.d)).toString(), label4 = digits.length <= 7 ? "+" + digits + " G" : "+ GOLD";
       c.font = "bold 8px sans-serif";
       c.textAlign = "center";
       c.textBaseline = "middle";
       c.strokeStyle = "#201a13";
       c.lineWidth = 2.3;
-      c.strokeText(label3, to.x, to.y - 13 - q * 7);
+      c.strokeText(label4, to.x, to.y - 13 - q * 7);
       c.fillStyle = PALE8;
-      c.fillText(label3, to.x, to.y - 13 - q * 7);
+      c.fillText(label4, to.x, to.y - 13 - q * 7);
       c.restore();
     }
   } else if (tick < row2.landsTick) {
@@ -48128,16 +48769,16 @@ function payoutPickup(c, row2, tick) {
       const a = i * TAU54 / 4 + 0.35, r = 4 + 8 * ease14(pop);
       line9(c, [[to.x + Math.cos(a) * r, to.y + Math.sin(a) * r], [to.x + Math.cos(a) * (r + 3), to.y + Math.sin(a) * (r + 3)]], i % 2 ? LIGHT9 : PALE9, 0.9);
     }
-    const amount2 = asCombatAmount(row2.amount), digits = (BigInt(amount2.n) / BigInt(amount2.d)).toString(), label3 = digits.length <= 7 ? "+" + digits + " G" : "+ GOLD";
+    const amount2 = asCombatAmount(row2.amount), digits = (BigInt(amount2.n) / BigInt(amount2.d)).toString(), label4 = digits.length <= 7 ? "+" + digits + " G" : "+ GOLD";
     c.font = "bold 8px sans-serif";
     c.textAlign = "center";
     c.textBaseline = "middle";
     c.lineJoin = "round";
     c.strokeStyle = "#201a13";
     c.lineWidth = 2.3;
-    c.strokeText(label3, to.x, to.y - 13 - pop * 7);
+    c.strokeText(label4, to.x, to.y - 13 - pop * 7);
     c.fillStyle = PALE9;
-    c.fillText(label3, to.x, to.y - 13 - pop * 7);
+    c.fillText(label4, to.x, to.y - 13 - pop * 7);
     c.restore();
   }
   c.restore();
@@ -48935,10 +49576,10 @@ function drawLandmark(ctx, event, x, y, time, near, completed) {
     ctx.fill();
   }
   if (near) {
-    const label3 = completed ? event.label + " \xB7 Cleared" : event.label;
+    const label4 = completed ? event.label + " \xB7 Cleared" : event.label;
     ctx.font = "bold 13px Georgia, serif";
     ctx.textAlign = "center";
-    const w = ctx.measureText(label3).width + 22;
+    const w = ctx.measureText(label4).width + 22;
     ctx.fillStyle = "rgba(11,18,20,.84)";
     ctx.strokeStyle = completed ? "#7b8266" : "#c9a86c";
     ctx.lineWidth = 1;
@@ -48947,7 +49588,7 @@ function drawLandmark(ctx, event, x, y, time, near, completed) {
     ctx.fill();
     ctx.stroke();
     ctx.fillStyle = completed ? "#b1b7a0" : "#f1d4a0";
-    ctx.fillText(label3, 0, -52);
+    ctx.fillText(label4, 0, -52);
   }
   ctx.restore();
 }
@@ -50381,10 +51022,10 @@ function drawFerryLandings(ctx, exits) {
     ctx.fillText("FERRY", e.x, e.y - 27);
     ctx.fillStyle = "#13262be8";
     ctx.font = "600 12px system-ui";
-    const label3 = e.label.replace("Ferry \xB7 ", ""), w = ctx.measureText(label3).width + 16;
+    const label4 = e.label.replace("Ferry \xB7 ", ""), w = ctx.measureText(label4).width + 16;
     ctx.fillRect(e.x - w / 2, e.y + 24, w, 23);
     ctx.fillStyle = "#f0dfb4";
-    ctx.fillText(label3, e.x, e.y + 40);
+    ctx.fillText(label4, e.x, e.y + 40);
     ctx.restore();
   }
 }
@@ -51820,7 +52461,7 @@ function drawMasteryWorld(ctx, m, time) {
     ctx.save();
     ctx.font = "bold 8px system-ui";
     ctx.textAlign = "center";
-    badges.forEach(([color28, label3], i) => {
+    badges.forEach(([color28, label4], i) => {
       const x = a.position.x + (i - (badges.length - 1) / 2) * 12, y = a.position.y + 14;
       ctx.fillStyle = "#13111dcc";
       ctx.fillRect(x - 5, y - 5, 10, 10);
@@ -51828,7 +52469,7 @@ function drawMasteryWorld(ctx, m, time) {
       ctx.lineWidth = 1;
       ctx.strokeRect(x - 5, y - 5, 10, 10);
       ctx.fillStyle = color28;
-      ctx.fillText(label3, x, y + 3);
+      ctx.fillText(label4, x, y + 3);
     });
     ctx.restore();
   }
@@ -51980,9 +52621,9 @@ function drawFrostStatus(ctx, e, target, tick) {
   ctx.fillStyle = "#e1e6ff";
   ctx.strokeStyle = "#211d34";
   ctx.lineWidth = 2.5;
-  const label3 = (freeze2 ? "FROZEN" : e.kind === "boss-slow" ? "SLOW" : "CHILL " + e.stacks) + " " + Math.max(0, (e.expiresTick - tick) / 60).toFixed(1) + "s";
-  ctx.strokeText(label3, -12, y + 3);
-  ctx.fillText(label3, -12, y + 3);
+  const label4 = (freeze2 ? "FROZEN" : e.kind === "boss-slow" ? "SLOW" : "CHILL " + e.stacks) + " " + Math.max(0, (e.expiresTick - tick) / 60).toFixed(1) + "s";
+  ctx.strokeText(label4, -12, y + 3);
+  ctx.fillText(label4, -12, y + 3);
   ctx.restore();
 }
 
@@ -52014,40 +52655,40 @@ function strokePoints(ctx, pts) {
 }
 function lightning(ctx, x0, y0, x1, y1, seed2, amp, width, alpha2 = 1) {
   if (alpha2 <= 0) return;
-  const C2 = CAST_COLORS.lightning, pts = boltPoints(x0, y0, x1, y1, seed2, amp);
+  const C3 = CAST_COLORS.lightning, pts = boltPoints(x0, y0, x1, y1, seed2, amp);
   ctx.save();
   ctx.globalAlpha *= Math.min(1, alpha2);
-  glowStroke(ctx, C2.deep, 14, width * 2.2, () => strokePoints(ctx, pts), false);
-  glowStroke(ctx, C2.main, 8, width, () => strokePoints(ctx, pts));
+  glowStroke(ctx, C3.deep, 14, width * 2.2, () => strokePoints(ctx, pts), false);
+  glowStroke(ctx, C3.main, 8, width, () => strokePoints(ctx, pts));
   for (let f = 0; f < 2; f++) {
     const p = pts[2 + Math.floor(rnd(seed2 + f * 5) * (pts.length - 4))], a = Math.atan2(y1 - y0, x1 - x0) + (rnd(seed2 + f * 9) < 0.5 ? -1 : 1) * (0.5 + 0.5 * rnd(seed2 + f * 3)), l = 6 + 8 * rnd(seed2 + f * 7);
     const q = boltPoints(p.x, p.y, p.x + Math.cos(a) * l, p.y + Math.sin(a) * l, seed2 + f * 31, 1.8, 4);
-    glowStroke(ctx, C2.main, 5, width * 0.45, () => strokePoints(ctx, q));
+    glowStroke(ctx, C3.main, 5, width * 0.45, () => strokePoints(ctx, q));
   }
   ctx.restore();
 }
 function drawCastSigil(ctx, x, y, element, age, facing2 = 1) {
   if (age < 0 || age >= CAST_SIGIL_LIFE) return;
-  const C2 = CAST_COLORS[element] ?? CAST_COLORS.fire, t = age / 1e3, s = easeOut(age / 70) * (1 - smooth19((age - 380) / 140));
+  const C3 = CAST_COLORS[element] ?? CAST_COLORS.fire, t = age / 1e3, s = easeOut(age / 70) * (1 - smooth19((age - 380) / 140));
   if (s > 0) {
     const rx = 9 * HERO * s, ry = 22 * HERO * s;
     ctx.save();
     ctx.translate(x, y);
     ctx.scale(facing2, 1);
-    bloom(ctx, 0, 0, ry * 1.2, C2.main, 0.35 * s);
-    glowStroke(ctx, C2.main, 10, 1.6, () => {
+    bloom(ctx, 0, 0, ry * 1.2, C3.main, 0.35 * s);
+    glowStroke(ctx, C3.main, 10, 1.6, () => {
       ctx.beginPath();
       ctx.ellipse(0, 0, rx, ry, 0, 0, TAU35);
     });
-    glowStroke(ctx, C2.main, 6, 0.9, () => {
+    glowStroke(ctx, C3.main, 6, 0.9, () => {
       ctx.beginPath();
       ctx.ellipse(0, 0, rx * 0.62, ry * 0.62, 0, 0, TAU35);
     }, false);
     for (let i = 0; i < 8; i++) {
       const a = t * 4 + i * Math.PI / 4;
-      mote(ctx, Math.cos(a) * rx * 0.82, Math.sin(a) * ry * 0.82, 0.8 + 0.4 * (i % 2), C2.spark, 0.9 * s);
+      mote(ctx, Math.cos(a) * rx * 0.82, Math.sin(a) * ry * 0.82, 0.8 + 0.4 * (i % 2), C3.spark, 0.9 * s);
     }
-    glowStroke(ctx, C2.main, 7, 0.8, () => {
+    glowStroke(ctx, C3.main, 7, 0.8, () => {
       ctx.beginPath();
       for (let i = 0; i <= 5; i++) {
         const a = -t * 2.6 + i * Math.PI * 4 / 5, px3 = Math.cos(a) * rx * 0.55, py = Math.sin(a) * ry * 0.55;
@@ -52059,8 +52700,8 @@ function drawCastSigil(ctx, x, y, element, age, facing2 = 1) {
   }
   if (age < 300) {
     const q = age / 300;
-    bloom(ctx, x, y, (7 + 17 * q) * HERO * 1.4, C2.main, 0.8 * (1 - q));
-    glowStroke(ctx, C2.main, 8, 1.6 * (1 - q), () => {
+    bloom(ctx, x, y, (7 + 17 * q) * HERO * 1.4, C3.main, 0.8 * (1 - q));
+    glowStroke(ctx, C3.main, 8, 1.6 * (1 - q), () => {
       ctx.beginPath();
       ctx.ellipse(x + facing2 * 6 * q, y, (4 + 10 * q) * HERO, (16 + 16 * q) * HERO, 0, 0, TAU35);
     }, false);
@@ -52159,20 +52800,20 @@ function snowStar(ctx, x, y, r, alpha2) {
   mote(ctx, x, y, 0.4, "#ffffff", alpha2);
 }
 function drawCastBolt(ctx, element, p, origin, time) {
-  const t = time / 1e3, dir = Math.atan2(p.vy, p.vx), bx = -Math.cos(dir), by = -Math.sin(dir), C2 = CAST_COLORS[element] ?? CAST_COLORS.fire;
+  const t = time / 1e3, dir = Math.atan2(p.vy, p.vx), bx = -Math.cos(dir), by = -Math.sin(dir), C3 = CAST_COLORS[element] ?? CAST_COLORS.fire;
   if (element === "lightning") {
     const o = origin ?? { x: p.x + bx * 30, y: p.y + by * 30 }, seed2 = Math.floor(time / 40);
     lightning(ctx, o.x, o.y, p.x, p.y, seed2, 5, 1.8);
-    blob(ctx, p.x, p.y, 11, C2.deep, 0.5);
-    blob(ctx, p.x, p.y, 6, C2.main, 0.9);
+    blob(ctx, p.x, p.y, 11, C3.deep, 0.5);
+    blob(ctx, p.x, p.y, 6, C3.main, 0.9);
     for (let i = 0; i < 3; i++) {
       const s = seed2 + i * 11, a = rnd(s) * TAU35;
-      glowStroke(ctx, C2.main, 5, 0.8, () => jag(ctx, p.x, p.y, p.x + Math.cos(a) * 8, p.y + Math.sin(a) * 8, s, 1.6));
+      glowStroke(ctx, C3.main, 5, 0.8, () => jag(ctx, p.x, p.y, p.x + Math.cos(a) * 8, p.y + Math.sin(a) * 8, s, 1.6));
     }
     mote(ctx, p.x, p.y, 2.4, "#ffffff", 1);
     return;
   }
-  for (const off of element === "frost" ? [-2, 2] : [-3, 0, 3]) glowStroke(ctx, C2.main, 4, 0.6, () => {
+  for (const off of element === "frost" ? [-2, 2] : [-3, 0, 3]) glowStroke(ctx, C3.main, 4, 0.6, () => {
     ctx.beginPath();
     ctx.moveTo(p.x + bx * 26 - by * off, p.y + by * 26 + bx * off);
     ctx.lineTo(p.x + bx * 9 - by * off, p.y + by * 9 + bx * off);
@@ -52182,7 +52823,7 @@ function drawCastBolt(ctx, element, p, origin, time) {
     if (element === "frost") {
       snowStar(ctx, p.x + bx * d - by * j, p.y + by * d + bx * j + 4 * ph, 1.3 * (1 - ph) + 0.3, 1 - ph);
       blob(ctx, p.x + bx * d * 0.7, p.y + by * d * 0.7, 5 * (1 - ph) + 2, "#e6f8ff", 0.4 * (1 - ph));
-    } else mote(ctx, p.x + bx * d - by * j, p.y + by * d + bx * j + 10 * ph * ph, 0.9 * (1 - ph) + 0.2, C2.spark, 1 - ph);
+    } else mote(ctx, p.x + bx * d - by * j, p.y + by * d + bx * j + 10 * ph * ph, 0.9 * (1 - ph) + 0.2, C3.spark, 1 - ph);
   }
   if (element === "frost") iceLance(ctx, p.x, p.y, dir, 19);
   else fireball(ctx, p.x, p.y, 4.6, t, dir, 1);
@@ -52259,7 +52900,7 @@ function drawCastImpact(ctx, element, x, y, age, crit = false) {
   const life = CAST_IMPACT_LIFE[element];
   if (!life) return false;
   if (age < 0 || age >= life) return true;
-  const C2 = CAST_COLORS[element], h = age / 1e3, I = { x, y: y - 9 }, G3 = y + 4, big = crit ? 1.25 : 1;
+  const C3 = CAST_COLORS[element], h = age / 1e3, I = { x, y: y - 9 }, G3 = y + 4, big = crit ? 1.25 : 1;
   ctx.save();
   if (element === "fire") {
     if (h > 0.12) {
@@ -52284,21 +52925,21 @@ function drawCastImpact(ctx, element, x, y, age, crit = false) {
       starburst(ctx, I.x, I.y - 6 * HIT * q, R3 * 0.32 * (1 - q), "#fff6dc", body5, sd + 19);
       if (h < 0.3) for (let i = 0; i < 9; i++) {
         const a = i * TAU35 / 9 + 0.1, l0 = R3 * 0.7, l = R3 * (1.1 + 0.5 * rnd(i + 70)) * (1 + h * 2);
-        glowStroke(ctx, C2.main, 7, 1.8 * (1 - h / 0.3), () => {
+        glowStroke(ctx, C3.main, 7, 1.8 * (1 - h / 0.3), () => {
           ctx.beginPath();
           ctx.moveTo(I.x + Math.cos(a) * l0, I.y + Math.sin(a) * l0 * 0.85);
           ctx.lineTo(I.x + Math.cos(a) * l, I.y + Math.sin(a) * l * 0.85);
         }, false);
       }
       bloom(ctx, I.x, I.y, (10 + 16 * e) * HIT, "#ffffff", 1 - q * 2);
-      glowStroke(ctx, C2.main, 8, 1.6 * (1 - q), () => {
+      glowStroke(ctx, C3.main, 8, 1.6 * (1 - q), () => {
         ctx.beginPath();
         ctx.ellipse(I.x + 3, G3, (8 + 46 * e) * HIT, (2 + 8 * e) * HIT, 0, 0, TAU35);
       }, false);
     }
     if (h < 0.5) for (let i = 0; i < 12; i++) {
       const a = -Math.PI / 2 + (rnd(i + 20) - 0.5) * 2.8, v = (50 + 80 * rnd(i + 30)) * HIT;
-      mote(ctx, I.x + Math.cos(a) * v * h, I.y + Math.sin(a) * v * h + 110 * HIT * h * h, 1.1 * (1 - h / 0.5) + 0.2, i % 3 ? C2.spark : C2.main, 1 - h / 0.5);
+      mote(ctx, I.x + Math.cos(a) * v * h, I.y + Math.sin(a) * v * h + 110 * HIT * h * h, 1.1 * (1 - h / 0.5) + 0.2, i % 3 ? C3.spark : C3.main, 1 - h / 0.5);
     }
   } else if (element === "frost") {
     const over = (v) => {
@@ -52313,13 +52954,13 @@ function drawCastImpact(ctx, element, x, y, age, crit = false) {
     ctx.fill();
     ctx.restore();
     for (const [dx, ht, lean] of FROST_BACK) crystal2(ctx, x + dx * HIT, G3, ht * grow, 5.2 * HIT, lean, fade);
-    bloom(ctx, I.x, I.y, (10 + 22 * easeOut(h / 0.3)) * HIT, C2.main, 1 - h / 0.5 * 1.6);
+    bloom(ctx, I.x, I.y, (10 + 22 * easeOut(h / 0.3)) * HIT, C3.main, 1 - h / 0.5 * 1.6);
     for (const [dx, ht, lean] of FROST_FRONT) crystal2(ctx, x + dx * HIT, G3 + 1, ht * grow, 4.4 * HIT, lean, fade);
     if (h < 0.45) for (let i = 0; i < 10; i++) {
       const a = Math.PI + (rnd(i + 40) - 0.5) * 2.6, v = (40 + 50 * rnd(i + 45)) * HIT;
       shard2(ctx, I.x + Math.cos(a) * v * h * 0.7, I.y + Math.sin(a) * v * h * 0.7 + 70 * HIT * h * h, 1.5, age / 110 + i, 1 - h / 0.45);
     }
-    glowStroke(ctx, C2.main, 8, 1.4 * (1 - h / 0.48), () => {
+    glowStroke(ctx, C3.main, 8, 1.4 * (1 - h / 0.48), () => {
       ctx.beginPath();
       ctx.ellipse(x, G3, (10 + 34 * easeOut(h / 0.3)) * HIT, (3 + 6 * easeOut(h / 0.3)) * HIT, 0, 0, TAU35);
     }, false);
@@ -52329,10 +52970,10 @@ function drawCastImpact(ctx, element, x, y, age, crit = false) {
     }
   } else {
     const q = h / 0.42, seed2 = Math.floor(age / 20);
-    bloom(ctx, I.x, I.y, (14 + 26 * easeOut(h / 0.2)) * HIT * big, C2.main, 1 - q * 1.4);
+    bloom(ctx, I.x, I.y, (14 + 26 * easeOut(h / 0.2)) * HIT * big, C3.main, 1 - q * 1.4);
     if (h < 0.2) {
       const k = 1 - h / 0.2;
-      glowStroke(ctx, C2.core, 8, 1.3 * k, () => {
+      glowStroke(ctx, C3.core, 8, 1.3 * k, () => {
         ctx.beginPath();
         ctx.moveTo(I.x - 34 * HIT * big * k, I.y);
         ctx.lineTo(I.x + 34 * HIT * big * k, I.y);
@@ -52342,13 +52983,13 @@ function drawCastImpact(ctx, element, x, y, age, crit = false) {
     }
     if (h < 0.3) for (let i = 0; i < 6; i++) {
       const a = i * Math.PI / 3 + rnd(i + seed2) * 0.6, l = (10 + 12 * rnd(i + 3)) * HIT * big;
-      glowStroke(ctx, C2.main, 6, 0.9 * (1 - h / 0.3), () => jag(ctx, I.x, I.y, I.x + Math.cos(a) * l, I.y + Math.sin(a) * l, seed2 + i * 5, 1.6));
+      glowStroke(ctx, C3.main, 6, 0.9 * (1 - h / 0.3), () => jag(ctx, I.x, I.y, I.x + Math.cos(a) * l, I.y + Math.sin(a) * l, seed2 + i * 5, 1.6));
     }
     for (let i = 0; i < 10; i++) {
       const a = -Math.PI / 2 + (rnd(i + 120) - 0.5) * 2.6, v = (40 + 60 * rnd(i + 130)) * HIT, py = I.y + Math.sin(a) * v * h + 120 * HIT * h * h;
-      if (py < G3 + 3) mote(ctx, I.x + Math.cos(a) * v * h, py, 0.8, C2.spark, 1 - q);
+      if (py < G3 + 3) mote(ctx, I.x + Math.cos(a) * v * h, py, 0.8, C3.spark, 1 - q);
     }
-    glowStroke(ctx, C2.deep, 8, 1.3 * (1 - q), () => {
+    glowStroke(ctx, C3.deep, 8, 1.3 * (1 - q), () => {
       ctx.beginPath();
       ctx.ellipse(x, G3, (8 + 26 * easeOut(h / 0.3)) * HIT * big, (2 + 5 * q) * HIT, 0, 0, TAU35);
     }, false);
@@ -52413,6 +53054,8 @@ var BASH_WAVE_LIFE = 760;
 var BASH_IMPACT_LIFE = 450;
 var HERO2 = 0.64;
 function shieldTypeOf(kind) {
+  const unique = UNIQUE_ITEMS[kind];
+  if (unique) kind = nounLookType(unique.noun);
   if (kind === "buckler" || kind === "tower") return kind;
   for (const type of ["buckler", "kite", "tower"]) if (LOOK_POOLS[type]?.includes(kind)) return type;
   return "kite";
@@ -53317,6 +53960,168 @@ function drawTreeSkillBurst(ctx, skillId, b, age) {
   return true;
 }
 
+// src/client/unique_art_v1.js
+var UNIQUE_COLORS = Object.freeze({ ghost: "#c4ffa0", ghostDark: "#0b2412", sun: "#ffcf4a", sunDark: "#6a2e08", violet: "#b48cf0", violetDark: "#2a1838", gold: "#ffd75a", goldDark: "#5a3a0a" });
+var C2 = UNIQUE_COLORS;
+var ease17 = (k) => 1 - (1 - k) * (1 - k);
+function neon2(ctx, color28, dark, width, draw, alpha2 = 1) {
+  ctx.save();
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.globalAlpha *= 0.8 * alpha2;
+  ctx.strokeStyle = dark;
+  ctx.lineWidth = width * 2.6;
+  draw();
+  ctx.stroke();
+  ctx.globalAlpha = Math.min(1, ctx.globalAlpha / 0.8);
+  ctx.shadowBlur = 8;
+  ctx.shadowColor = color28;
+  ctx.strokeStyle = color28;
+  ctx.lineWidth = width;
+  draw();
+  ctx.stroke();
+  ctx.restore();
+}
+function flameRing(ctx, x, y, r, time, count = 14, height = 8) {
+  for (let i = 0; i < count; i++) {
+    const a = i / count * TAU35 + time / 900, px3 = x + Math.cos(a) * r, py = y + Math.sin(a) * r * 0.45, h = height * (0.6 + 0.4 * Math.sin(time / 80 + i * 1.7));
+    neon2(ctx, C2.ghost, C2.ghostDark, 1.8, () => {
+      ctx.beginPath();
+      ctx.moveTo(px3 - 2, py);
+      ctx.quadraticCurveTo(px3 - 0.4, py - h * 0.6, px3 + 0.4, py - h);
+      ctx.quadraticCurveTo(px3 + 1.2, py - h * 0.5, px3 + 2, py);
+    });
+  }
+}
+function drawUniqueBurst(ctx, b, age, time) {
+  const k = Math.min(1, age / 700), fade = 1 - k;
+  if (fade <= 0) return;
+  ctx.save();
+  if (b.kind === "uq:ring") {
+    const r = lerp2(16, 64, ease17(Math.min(1, age / 260)));
+    ctx.globalAlpha = fade;
+    bloom(ctx, b.x, b.y, r, C2.ghost, 0.18 * fade);
+    neon2(ctx, C2.ghost, C2.ghostDark, 2.6, () => {
+      ctx.beginPath();
+      ctx.ellipse(b.x, b.y + 2, r, r * 0.45, 0, 0, TAU35);
+    });
+    flameRing(ctx, b.x, b.y + 2, r, time);
+  } else if (b.kind === "uq:beam") {
+    const w = lerp2(9, 3, k), y0 = b.y - 10, y1 = b.ty - 10, line13 = () => {
+      ctx.beginPath();
+      ctx.moveTo(b.x, y0);
+      ctx.lineTo(b.tx, y1);
+    };
+    ctx.globalAlpha = fade;
+    neon2(ctx, C2.sun, C2.sunDark, w, line13);
+    for (let i = 0; i < 6; i++) {
+      const t = (i + age / 90) % 6 / 6;
+      mote(ctx, lerp2(b.x, b.tx, t), lerp2(y0, y1, t) + Math.sin(i * 2.1 + age / 60) * 4, 1.6, C2.gold, fade);
+    }
+    bloom(ctx, b.tx, y1, 16 * fade + 6, C2.sun, 0.5 * fade);
+  } else if (b.kind === "uq:sunfall") {
+    for (let i = 0; i < 3; i++) {
+      const a = i * 2.4 + 0.6, x = b.tx + (i ? Math.cos(a) * 58 : 0), y = b.ty + (i ? Math.sin(a) * 58 : 0), local6 = age - i * 90;
+      if (local6 < 0) continue;
+      const drop = Math.min(1, local6 / 220), sy = lerp2(y - 120, y, ease17(drop)), hit = Math.max(0, 1 - (local6 - 220) / 420);
+      if (drop < 1) {
+        neon2(ctx, C2.sun, C2.sunDark, 2.4, () => {
+          ctx.beginPath();
+          ctx.moveTo(x, sy - 26);
+          ctx.lineTo(x, sy);
+        });
+        bloom(ctx, x, sy, 12, C2.sun, 0.6);
+        mote(ctx, x, sy, 3.4, C2.gold, 1);
+      } else if (hit > 0) {
+        const s = 1.2 - hit * 0.2;
+        bloom(ctx, x, y, 36 * hit + 8, C2.sun, 0.45 * hit);
+        neon2(ctx, C2.sun, C2.sunDark, 2.4, () => {
+          ctx.beginPath();
+          ctx.ellipse(x, y, 40 * s, 18 * s, 0, 0, TAU35);
+        }, hit);
+        for (let n = 0; n < 8; n++) {
+          const q = n / 8 * TAU35;
+          star4(ctx, x + Math.cos(q) * 30 * (1.3 - hit), y + Math.sin(q) * 14 * (1.3 - hit), 3 * hit, C2.gold, hit);
+        }
+      }
+    }
+  } else if (b.kind === "uq:wail") {
+    for (let i = 0; i < 3; i++) {
+      if (age < i * 110) continue;
+      const r = lerp2(14, 110, ease17(Math.min(1, (age - i * 110) / 520))), a = Math.max(0, fade - i * 0.15);
+      neon2(ctx, i % 2 ? C2.ghost : C2.violet, i % 2 ? C2.ghostDark : C2.violetDark, 2, () => {
+        ctx.beginPath();
+        ctx.ellipse(b.x, b.y, r, r * 0.5, 0, 0, TAU35);
+      }, a);
+    }
+    for (let i = 0; i < 10; i++) {
+      const q = i / 10 * TAU35, r = lerp2(10, 80, k);
+      mote(ctx, b.x + Math.cos(q) * r, b.y - 18 + Math.sin(q) * r * 0.5 - k * 16, 1.6, C2.violet, fade);
+    }
+  } else if (b.kind === "uq:shell") {
+    const r = lerp2(12, 22, ease17(k)), cy = b.y - 14;
+    bloom(ctx, b.x, cy, r + 8, C2.gold, 0.4 * fade);
+    neon2(ctx, C2.gold, C2.goldDark, 2.2, () => {
+      ctx.beginPath();
+      for (let i = 0; i <= 6; i++) {
+        const q = i / 6 * TAU35 - Math.PI / 2, px3 = b.x + Math.cos(q) * r, py = cy + Math.sin(q) * r;
+        i ? ctx.lineTo(px3, py) : ctx.moveTo(px3, py);
+      }
+    }, fade);
+  }
+  ctx.restore();
+}
+function drawGhostPool(ctx, pool, time) {
+  const fade = Math.min(1, (pool.ticks ?? 60) / 30);
+  if (fade <= 0) return;
+  ctx.save();
+  ctx.globalAlpha = fade;
+  ctx.fillStyle = rgba(C2.ghostDark, 0.45);
+  ctx.beginPath();
+  ctx.ellipse(pool.x, pool.y, 40, 18, 0, 0, TAU35);
+  ctx.fill();
+  const g = ctx.createRadialGradient(pool.x, pool.y, 0, pool.x, pool.y, 40);
+  g.addColorStop(0, rgba(C2.ghost, 0.45));
+  g.addColorStop(1, rgba(C2.ghost, 0));
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.ellipse(pool.x, pool.y, 40, 18, 0, 0, TAU35);
+  ctx.fill();
+  neon2(ctx, C2.ghost, C2.ghostDark, 1.6, () => {
+    ctx.beginPath();
+    ctx.ellipse(pool.x, pool.y, 38, 17, 0, 0, TAU35);
+  }, 0.8);
+  flameRing(ctx, pool.x, pool.y, 28, time, 12, 12);
+  flameRing(ctx, pool.x, pool.y, 13, time * 1.3, 7, 10);
+  ctx.restore();
+}
+function drawSunPips(ctx, x, y, count, time) {
+  for (let i = 0; i < count; i++) {
+    const px3 = x + (i - (count - 1) / 2) * 10, py = y - 36 + Math.sin(time / 240 + i) * 1.2;
+    bloom(ctx, px3, py, 8, C2.sun, 0.4);
+    ctx.save();
+    ctx.strokeStyle = C2.goldDark;
+    ctx.lineWidth = 1;
+    for (let n = 0; n < 8; n++) {
+      const q = n / 8 * TAU35 + time / 700;
+      ctx.beginPath();
+      ctx.moveTo(px3 + Math.cos(q) * 3.6, py + Math.sin(q) * 3.6);
+      ctx.lineTo(px3 + Math.cos(q) * 5.4, py + Math.sin(q) * 5.4);
+      ctx.stroke();
+    }
+    ctx.beginPath();
+    ctx.arc(px3, py, 3, 0, TAU35);
+    ctx.fillStyle = C2.sun;
+    ctx.fill();
+    ctx.lineWidth = 1.1;
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+function uniqueBurstLight(b) {
+  return b.kind === "uq:ring" ? { r: 80, color: C2.ghost, alpha: 0.6, life: 700 } : b.kind === "uq:beam" ? { r: 90, color: C2.sun, alpha: 0.8, life: 600 } : b.kind === "uq:sunfall" ? { r: 90, color: C2.sun, alpha: 0.8, life: 900 } : b.kind === "uq:wail" ? { r: 90, color: C2.violet, alpha: 0.5, life: 700 } : null;
+}
+
 // src/client/combat_vfx.js
 var INK45 = "#190f20";
 var MECHANIC_COLORS = Object.freeze({ ...MASTERY_COLORS, lightning: "#c7b5ff", frost: "#ced8ff", shieldRiposte: "#d5b666", offhand: "#dce5ef", riposte: "#c99cff", bash: "#ffe08a", fire: "#ff962e", burn: "#ff962e", bleed: "#f34a56", block: "#ffe6a0", parry: "#e4ceff" });
@@ -53422,7 +54227,7 @@ function drawCombatImpact(ctx, kind, x, y, dx, dy, age, crit = false) {
   }
   const duration = kind === "fire" ? 270 : kind === "bash" ? 240 : kind === "bleed" || kind === "burn" ? 170 : 150;
   if (age < 0 || age >= duration) return;
-  const t = age / duration, ease17 = 1 - (1 - t) ** 3, color28 = MECHANIC_COLORS[kind] ?? "#e4ceff";
+  const t = age / duration, ease18 = 1 - (1 - t) ** 3, color28 = MECHANIC_COLORS[kind] ?? "#e4ceff";
   ctx.save();
   ctx.translate(x, y - 9);
   ctx.rotate(Math.atan2(dy, dx));
@@ -53444,7 +54249,7 @@ function drawCombatImpact(ctx, kind, x, y, dx, dy, age, crit = false) {
     ctx.fillStyle = "#ff571d";
     ctx.beginPath();
     for (let i = 0; i < 16; i++) {
-      const a = i * Math.PI / 8, r = (i % 2 ? 13 : 23) * ease17 + 3;
+      const a = i * Math.PI / 8, r = (i % 2 ? 13 : 23) * ease18 + 3;
       ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r * 0.8);
     }
     ctx.closePath();
@@ -53463,7 +54268,7 @@ function drawCombatImpact(ctx, kind, x, y, dx, dy, age, crit = false) {
     ctx.strokeStyle = "#ffe29a";
     ctx.lineWidth = 2 * (1 - t);
     ctx.beginPath();
-    ctx.arc(0, 0, 8 + 23 * ease17, -1.2, 1.5);
+    ctx.arc(0, 0, 8 + 23 * ease18, -1.2, 1.5);
     ctx.stroke();
   } else if (kind === "bleed") {
     const reach = crit ? 1.18 : 1;
@@ -53489,7 +54294,7 @@ function drawCombatImpact(ctx, kind, x, y, dx, dy, age, crit = false) {
     ctx.stroke();
     ctx.restore();
     for (let i = 0; i < 4; i++) {
-      const a = -0.9 + i * 0.62, d = 4 + ease17 * (10 + i * 2);
+      const a = -0.9 + i * 0.62, d = 4 + ease18 * (10 + i * 2);
       ctx.save();
       ctx.translate(Math.cos(a) * d, Math.sin(a) * d + t * t * 9);
       ctx.rotate(a + 0.5);
@@ -53501,7 +54306,7 @@ function drawCombatImpact(ctx, kind, x, y, dx, dy, age, crit = false) {
     }
   } else if (kind === "burn") {
     ctx.rotate(-Math.atan2(dy, dx));
-    drawStatusIcon(ctx, "burn", 0, -5 - 6 * ease17, 12 + 5 * (1 - t));
+    drawStatusIcon(ctx, "burn", 0, -5 - 6 * ease18, 12 + 5 * (1 - t));
   } else if (kind === "block") {
     ctx.save();
     ctx.translate(10, 0);
@@ -53511,7 +54316,7 @@ function drawCombatImpact(ctx, kind, x, y, dx, dy, age, crit = false) {
     ctx.strokeStyle = "#78d8ff";
     ctx.lineWidth = 1.4 * (1 - t);
     ctx.beginPath();
-    ctx.arc(0, 0, 12 + 9 * ease17, -2.6, 0.9);
+    ctx.arc(0, 0, 12 + 9 * ease18, -2.6, 0.9);
     ctx.stroke();
     ctx.lineWidth = 1.7;
     ctx.strokeStyle = INK45;
@@ -53556,14 +54361,14 @@ function drawCombatImpact(ctx, kind, x, y, dx, dy, age, crit = false) {
     ctx.lineWidth = 2 * (1 - t);
     ctx.beginPath();
     ctx.moveTo(-16, 0);
-    ctx.lineTo(13 * ease17, 0);
-    ctx.moveTo(5 * ease17, -6);
-    ctx.lineTo(13 * ease17, 0);
-    ctx.lineTo(5 * ease17, 6);
+    ctx.lineTo(13 * ease18, 0);
+    ctx.moveTo(5 * ease18, -6);
+    ctx.lineTo(13 * ease18, 0);
+    ctx.lineTo(5 * ease18, 6);
     ctx.stroke();
-    diamond(ctx, 13 * ease17, 0, 5 * (1 - t), "#dfbc65");
+    diamond(ctx, 13 * ease18, 0, 5 * (1 - t), "#dfbc65");
   } else if (kind === "bash") {
-    const r = 10 + 20 * ease17;
+    const r = 10 + 20 * ease18;
     ctx.strokeStyle = "#785221";
     ctx.lineWidth = 8 * (1 - t) + 1;
     ctx.beginPath();
@@ -53580,7 +54385,7 @@ function drawCombatImpact(ctx, kind, x, y, dx, dy, age, crit = false) {
     ctx.moveTo(-r * 0.7, r * 0.45);
     ctx.lineTo(r * 0.7, -r * 0.45);
     ctx.stroke();
-    diamond(ctx, 7 * ease17, 0, 9 * (1 - t), "#fff5dc");
+    diamond(ctx, 7 * ease18, 0, 9 * (1 - t), "#fff5dc");
   } else if (kind === "parry") {
     ctx.save();
     ctx.rotate(-Math.atan2(dy, dx));
@@ -53588,7 +54393,7 @@ function drawCombatImpact(ctx, kind, x, y, dx, dy, age, crit = false) {
     ctx.strokeStyle = "#90efff";
     ctx.lineWidth = 1.4 * (1 - t);
     ctx.beginPath();
-    ctx.arc(0, 0, 8 + 13 * ease17, -2.2, -0.4);
+    ctx.arc(0, 0, 8 + 13 * ease18, -2.2, -0.4);
     ctx.stroke();
     diamond(ctx, 0, -8, 7 * (1 - t), "#e9ffff");
     ctx.restore();
@@ -53596,7 +54401,7 @@ function drawCombatImpact(ctx, kind, x, y, dx, dy, age, crit = false) {
     ctx.fillStyle = "#713eaa";
     ctx.beginPath();
     ctx.moveTo(-26, -4);
-    ctx.lineTo(25 * ease17 + 7, 0);
+    ctx.lineTo(25 * ease18 + 7, 0);
     ctx.lineTo(-24, 4);
     ctx.lineTo(-15, 0);
     ctx.closePath();
@@ -53605,7 +54410,7 @@ function drawCombatImpact(ctx, kind, x, y, dx, dy, age, crit = false) {
     ctx.lineWidth = 2 * (1 - t);
     ctx.beginPath();
     ctx.moveTo(-20, 0);
-    ctx.lineTo(27 * ease17, 0);
+    ctx.lineTo(27 * ease18, 0);
     ctx.stroke();
   } else if (kind === "offhand") {
     ctx.fillStyle = "#51375f";
@@ -53631,8 +54436,8 @@ function drawCombatImpact(ctx, kind, x, y, dx, dy, age, crit = false) {
     ctx.strokeStyle = "#4b2438";
     ctx.lineWidth = 6 * (1 - t);
     ctx.beginPath();
-    ctx.moveTo(-20 + ease17 * 9, 0);
-    ctx.lineTo(19 + ease17 * 8, 0);
+    ctx.moveTo(-20 + ease18 * 9, 0);
+    ctx.lineTo(19 + ease18 * 8, 0);
     ctx.stroke();
     ctx.strokeStyle = kind === "parry" ? "#e0c7ff" : "#fff6ed";
     ctx.lineWidth = 2 * (1 - t) + 0.7;
@@ -53646,7 +54451,7 @@ function drawCombatImpact(ctx, kind, x, y, dx, dy, age, crit = false) {
   }
   const count = kind === "bleed" || kind === "offhand" ? 0 : kind === "fire" ? 7 : kind === "bash" ? 6 : 4;
   for (let i = 0; i < count; i++) {
-    const a = (i - (count - 1) / 2) * 0.6 + (kind === "fire" ? i * 0.35 : 0), d = 5 + ease17 * (kind === "fire" ? 29 : 22);
+    const a = (i - (count - 1) / 2) * 0.6 + (kind === "fire" ? i * 0.35 : 0), d = 5 + ease18 * (kind === "fire" ? 29 : 22);
     diamond(ctx, Math.cos(a) * d, Math.sin(a) * d, (kind === "bash" ? 3 : 2) * (1 - t), i % 2 ? color28 : "#fff1cc");
   }
   if (crit) {
@@ -53690,12 +54495,12 @@ function drawPersistentStatus(ctx, e, target, tick, time, lane = 0) {
   ctx.fillStyle = MASTERY_COLORS[e.kind] ?? (e.kind === "bleed" ? "#ff747c" : "#ffd073");
   ctx.font = "700 9px system-ui";
   ctx.textAlign = "left";
-  const label3 = (["bleed", "poison"].includes(e.kind) ? "\xD7" + e.stacks + " " : "") + (remaining / 60).toFixed(1) + "s";
+  const label4 = (["bleed", "poison"].includes(e.kind) ? "\xD7" + e.stacks + " " : "") + (remaining / 60).toFixed(1) + "s";
   ctx.strokeStyle = "#190f20";
   ctx.lineWidth = 2.5;
   ctx.lineJoin = "round";
-  ctx.strokeText(label3, x - 13, top + 2);
-  ctx.fillText(label3, x - 13, top + 2);
+  ctx.strokeText(label4, x - 13, top + 2);
+  ctx.fillText(label4, x - 13, top + 2);
   ctx.fillStyle = "#453043";
   ctx.fillRect(x - 13, top + 5, 39, 2);
   ctx.fillStyle = e.kind === "bleed" ? "#ef4557" : "#ff9a25";
@@ -53710,6 +54515,7 @@ var SKILL_ELEMENT_COLORS = { fire: "#ffc27a", lightning: "#d6c8ff", frost: "#cfe
 var LIGHT10 = Object.freeze({ fire: "#ff8a3d", frost: "#8fd8ff", lightning: "#ffe45c", knight: "#73bedc", breaker: "#ff9d5c", rally: "#ffd36b", reprisal: "#ff8fa0", duelist: "#f5cf6a", venom: "#9be36a", skirmish: "#b48cff", parry: "#e4ceff", blink: "#8fd0ff" });
 var SKILL_LIGHT = Object.freeze({ shield_bash: [LIGHT10.knight, 56, 320, 0.55], flurry: [LIGHT10.skirmish, 46, 400, 0.4], earth_breaker: [LIGHT10.breaker, null, 780, 0.45], rallying_cry: [LIGHT10.rally, null, 900, 0.45], counter_stance: [LIGHT10.reprisal, 50, 480, 0.45], lunge: [LIGHT10.duelist, 44, 440, 0.35], toxic_fan: [LIGHT10.venom, null, 560, 0.3], whirling_blades: [LIGHT10.skirmish, null, 620, 0.35], firebloom: [LIGHT10.fire, null, 820, 0.75], flashfreeze: [LIGHT10.frost, null, 800, 0.55], ball_lightning: [LIGHT10.lightning, 44, 360, 0.5] });
 function burstLight(b) {
+  if (b.kind.startsWith("uq:")) return uniqueBurstLight(b);
   if (b.kind === "blink" || b.kind === "blinkEnd") return { color: LIGHT10.blink, r: 40, life: 300, alpha: 0.45 };
   if (b.kind === "skill:cast") return { color: LIGHT10[b.element] ?? LIGHT10.fire, r: 44, life: 420, alpha: 0.55 };
   const s = b.kind.startsWith("skill:") ? SKILL_LIGHT[b.kind.slice(6)] : null;
@@ -53792,7 +54598,7 @@ function createCombatVfx() {
       bursts.length = 0;
       seen = false;
     }
-    for (let i = bursts.length - 1; i >= 0; i--) if (time - bursts[i].born > (bursts[i].kind.startsWith("skill:") ? 1e3 : 300)) bursts.splice(i, 1);
+    for (let i = bursts.length - 1; i >= 0; i--) if (time - bursts[i].born > (bursts[i].kind.startsWith("skill:") || bursts[i].kind.startsWith("uq:") ? 1e3 : 300)) bursts.splice(i, 1);
     live.clear();
     for (const e of m.combatPresentation?.statuses ?? []) {
       live.add(e.id);
@@ -53809,23 +54615,30 @@ function createCombatVfx() {
         if (f.delivery.status === "launched" && f.delivery.tick !== old2.delivery && f.mastery?.syphon) add("syphon", a, time);
         if (f.pressure > old2.pressure) add("pressure", a, time, poses[id]?.facing ?? 1, f.pressure);
         if (f.dash.frames > old2.dash) add(f.blink ? "blink" : "dash", a, time, f.dash.x, f.dash.y, { id, facing: poses[id]?.facing ?? 1 });
+        if ((f.wail ?? 0) > (old2.wail ?? 0)) add("uq:wail", a, time);
+        if ((f.shell ?? 0) > (old2.shell ?? 0)) add("uq:shell", a, time);
         if (old2.dash > 0 && f.dash.frames === 0) add(f.blink ? "blinkEnd" : "dashEnd", a, time, old2.dx, old2.dy);
         if (f.skill && f.skill.tick !== old2.skill) {
-          const facing2 = poses[id]?.facing ?? 1, cast2 = f.skill.skillId === "cast";
-          add("skill:" + f.skill.skillId, cast2 ? { position: castCirclePosition(a, facing2) } : a, time, f.skill.x, f.skill.y, { facing: facing2, ground: a.position.y, reach: f.skill.r, ox: f.skill.ox, oy: f.skill.oy, ox2: f.skill.ox2, oy2: f.skill.oy2, spread: f.skill.spread, subType: a.subType, element: cast2 ? castElement(m, id, f.element) : null, shield: f.skill.skillId === "shield_bash" ? shieldTypeOf(a.heroLook?.gear?.off?.kind) : null, dagger: f.skill.skillId === "flurry" ? daggerTypeOf(a.heroLook?.gear?.off?.kind) : null });
+          const facing2 = poses[id]?.facing ?? 1, cast2 = f.skill.skillId === "cast", own = !cast2 && f.skill.skillId !== "shield_bash";
+          add("skill:" + f.skill.skillId, cast2 ? { position: castCirclePosition(a, facing2) } : a, time, f.skill.x, f.skill.y, { facing: facing2, ground: a.position.y, reach: f.skill.r, ox: own ? f.skill.ox : void 0, oy: own ? f.skill.oy : void 0, ox2: f.skill.ox2, oy2: f.skill.oy2, spread: f.skill.spread, subType: a.subType, element: cast2 ? castElement(m, id, f.element) : null, shield: f.skill.skillId === "shield_bash" ? shieldTypeOf(a.heroLook?.gear?.off?.kind) : null, dagger: f.skill.skillId === "flurry" ? daggerTypeOf(a.heroLook?.gear?.off?.kind) : null });
           bursts[bursts.length - 1].color = SKILL_ELEMENT_COLORS[f.element] ?? SKILL_ELEMENT_COLORS.fire;
+          const gear2 = a.heroLook?.gear, landing = f.skill.ox !== void 0 ? { tx: a.position.x + f.skill.ox, ty: a.position.y + f.skill.oy } : null;
+          if (f.skill.skillId === "shield_bash" && gear2?.main?.kind === "gravecleaver") add("uq:ring", a, time);
+          if (f.skill.skillId === "shield_bash" && gear2?.off?.kind === "sunshield" && landing) add("uq:beam", a, time, 1, 0, landing);
+          if (cast2 && gear2?.main?.kind === "undying-sun-staff" && landing) add("uq:sunfall", a, time, 1, 0, { ...landing, ground: landing.ty });
         }
       }
       if (old2 && old2.parry > 1 && !f.parry) parrySpent.set(id, time);
       facings.set(id, poses[id]?.facing ?? 1);
-      families3.set(id, { mastery: f.mastery, pressure: f.pressure, delivery: f.delivery.tick, dash: f.dash.frames, dx: f.dash.x, dy: f.dash.y, skill: f.skill?.tick, parry: f.parry ?? 0 });
+      families3.set(id, { mastery: f.mastery, pressure: f.pressure, delivery: f.delivery.tick, dash: f.dash.frames, dx: f.dash.x, dy: f.dash.y, skill: f.skill?.tick, parry: f.parry ?? 0, wail: f.wail ?? 0, shell: f.shell ?? 0 });
     }
     seen = true;
   }
   const visibleIn = (viewport) => (p) => !viewport || p.x >= viewport.x - 60 && p.y >= viewport.y - 80 && p.x <= viewport.x + viewport.width + 60 && p.y <= viewport.y + viewport.height + 80;
   const foot = (a) => a.position.y + (a.groundAnchorY ?? (a.hullRadius ?? 10) * 0.45) + 0.5, AFTER = 5;
   function drawBurst(ctx, m, b, age, time) {
-    if (b.kind.startsWith("skill:")) {
+    if (b.kind.startsWith("uq:")) drawUniqueBurst(ctx, b, age, time);
+    else if (b.kind.startsWith("skill:")) {
       drawSkillBurst(ctx, b, age);
     } else if (b.kind.startsWith("blink")) {
       drawBlinkGhost(ctx, m, b, age, time);
@@ -53885,12 +54698,15 @@ function createCombatVfx() {
           spawnAfterimage(ctx, id, a, f, time);
         }
         (a.subType === "shield" ? drawCounterWard : drawParryWard)(ctx, a.position.x, a.position.y, facings.get(id) ?? 1, f.parry > 0, time, parrySpent.has(id) ? time - parrySpent.get(id) : -1);
+        if (f.sun > 0) drawSunPips(ctx, a.position.x, a.position.y, f.sun, time);
       });
       (f.orbs ?? []).forEach((o, k) => {
         if (visible3(o)) put2("orb/" + id + "/" + k, o.x, o.y + 1, (ctx) => drawLightningOrb(ctx, o, time));
       });
       const tr = f.trail;
       if (tr && (visible3(tr) || visible3({ x: tr.x2, y: tr.y2 }))) put2("trail/" + id, (tr.x + tr.x2) / 2, Math.max(tr.y, tr.y2), (ctx) => drawCinderTrail(ctx, tr, time));
+      const pool = f.pool;
+      if (pool && visible3(pool)) put2("pool/" + id, pool.x, pool.y, (ctx) => drawGhostPool(ctx, pool, time));
     }
     return items;
   }
@@ -53913,6 +54729,8 @@ function createCombatVfx() {
       const w = wards.get(id);
       if (w?.open > 0.05) at4(a.position.x, a.position.y, 48, LIGHT10.knight, 0.4 * w.open);
       if (f.parry > 0) at4(a.position.x, a.position.y, 40, a.subType === "shield" ? LIGHT10.reprisal : LIGHT10.parry, 0.35);
+      const pool = f.pool;
+      if (pool) at4(pool.x, pool.y, 56, "#9be37a", 0.5 * Math.min(1, (pool.ticks ?? 60) / 30));
       const tr = f.trail;
       if (tr) {
         const fade = Math.min(1, (tr.ticks ?? 60) / 30), n = Math.max(1, Math.round(Math.hypot(tr.x2 - tr.x, tr.y2 - tr.y) / 36));
@@ -55152,8 +55970,8 @@ function createWalletDisplay() {
       const [w, f = ""] = a2.split(".");
       return BigInt(w + f.padEnd(scale, "0"));
     };
-    const a = units(from), b = units(target), ease17 = BigInt(Math.floor((1 - (1 - t) ** 3) * 1e6));
-    let digits = (a + (b - a) * ease17 / 1000000n).toString().padStart(scale + 1, "0");
+    const a = units(from), b = units(target), ease18 = BigInt(Math.floor((1 - (1 - t) ** 3) * 1e6));
+    let digits = (a + (b - a) * ease18 / 1000000n).toString().padStart(scale + 1, "0");
     if (scale) digits = (digits.slice(0, -scale) + "." + digits.slice(-scale)).replace(/0+$/, "").replace(/\.$/, "");
     value2 = digits;
     return value2;
@@ -57562,11 +58380,11 @@ function createCombatFeedback() {
       if (impacts2.length >= 128) impacts2.shift();
       impacts2.push(numbers[numbers.length - 1]);
       if (e.payload.barrierAbsorption) {
-        const b = e.payload.barrierAbsorption, n = numbers[numbers.length - 1], label3 = { ...n, labelKind: "absorption", mechanic: "barrier", defenseKind: "barrier", critical: false, text: "BARRIER -" + formatLarge(combatInteger(b.absorbed)) };
-        if (presentCombat(e.payload.damage) === 0) numbers[numbers.length - 1] = label3;
+        const b = e.payload.barrierAbsorption, n = numbers[numbers.length - 1], label4 = { ...n, labelKind: "absorption", mechanic: "barrier", defenseKind: "barrier", critical: false, text: "BARRIER -" + formatLarge(combatInteger(b.absorbed)) };
+        if (presentCombat(e.payload.damage) === 0) numbers[numbers.length - 1] = label4;
         else {
           if (numbers.length >= HIT_FEEDBACK.maxNumbers) numbers.shift();
-          numbers.push(label3);
+          numbers.push(label4);
         }
       }
       peak = Math.max(peak, numbers.length);
@@ -60068,12 +60886,12 @@ function building(ctx, b, tile) {
   drawGuildBanner(ctx, x + w * 0.72, y + h * 0.53);
   ctx.font = "600 10px Georgia";
   ctx.textAlign = "center";
-  const label3 = b.detail;
-  const width = ctx.measureText(label3).width + 10;
+  const label4 = b.detail;
+  const width = ctx.measureText(label4).width + 10;
   ctx.fillStyle = "#1d2233";
   ctx.fillRect(x + w / 2 - width / 2, y + h - 17, width, 14);
   ctx.fillStyle = "#f2dda4";
-  ctx.fillText(label3, x + w / 2, y + h - 6);
+  ctx.fillText(label4, x + w / 2, y + h - 6);
   ctx.textAlign = "left";
 }
 function drawGrassGround(ctx, bounds2, seed2, offset2 = { x: 0, y: 0 }, biomeAt = () => null) {
@@ -60466,15 +61284,15 @@ function* prepareEnvironmentDrawing(ctx, space, viewport = null, layout = create
       ctx.restore();
       ctx.font = "bold 12px Georgia";
       ctx.textAlign = "center";
-      const label3 = exit.label.replace(/^Enter /, "");
-      const width = ctx.measureText(label3).width + 14;
+      const label4 = exit.label.replace(/^Enter /, "");
+      const width = ctx.measureText(label4).width + 14;
       ctx.fillStyle = "#192233";
       ctx.fillRect(x - width / 2, y + 30, width, 19);
       ctx.strokeStyle = "#d4af37";
       ctx.lineWidth = 1;
       ctx.strokeRect(x - width / 2, y + 30, width, 19);
       ctx.fillStyle = "#f1c40f";
-      ctx.fillText(label3, x, y + 44);
+      ctx.fillText(label4, x, y + 44);
       ctx.textAlign = "left";
       continue;
     }
@@ -60493,27 +61311,27 @@ function* prepareEnvironmentDrawing(ctx, space, viewport = null, layout = create
 }
 function drawEnvironmentMarkers(ctx, space) {
   for (const exit of space.exits ?? []) if (exit.siteAction && exit.proceduralRuin) {
-    const label3 = exit.label.replace(/^Enter /, ""), y = exit.y - 196;
+    const label4 = exit.label.replace(/^Enter /, ""), y = exit.y - 196;
     ctx.font = "600 11px Georgia";
     ctx.textAlign = "center";
-    const width = ctx.measureText(label3).width + 12;
+    const width = ctx.measureText(label4).width + 12;
     ctx.fillStyle = "#19241fdd";
     ctx.fillRect(exit.x - width / 2, y, width, 17);
     ctx.fillStyle = "#e8dba6";
-    ctx.fillText(label3, exit.x, y + 12);
+    ctx.fillText(label4, exit.x, y + 12);
     ctx.textAlign = "left";
   }
   for (const exit of space.exits ?? []) if (exit.siteAction && !exit.proceduralRuin && ["woodland-site-candidate", "woodland-ruin"].includes(exit.siteKind)) {
-    const ruin = exit.siteKind === "woodland-ruin", label3 = ruin ? "Overgrown Ruin" : "Unidentified Woodland Site", labelY = ruin ? exit.y - 196 : exit.y + 51;
+    const ruin = exit.siteKind === "woodland-ruin", label4 = ruin ? "Overgrown Ruin" : "Unidentified Woodland Site", labelY = ruin ? exit.y - 196 : exit.y + 51;
     ctx.font = ruin ? "600 10px Georgia" : "bold 12px Georgia";
     ctx.textAlign = "center";
-    const width = ctx.measureText(label3).width + (ruin ? 10 : 12);
+    const width = ctx.measureText(label4).width + (ruin ? 10 : 12);
     ctx.fillStyle = "#19241fdd";
     ctx.fillRect(exit.x - width / 2, labelY, width, ruin ? 15 : 17);
     ctx.strokeStyle = "#91a36c";
     ctx.strokeRect(exit.x - width / 2, labelY, width, ruin ? 15 : 17);
     ctx.fillStyle = "#e8dba6";
-    ctx.fillText(label3, exit.x, labelY + (ruin ? 11 : 12));
+    ctx.fillText(label4, exit.x, labelY + (ruin ? 11 : 12));
     ctx.textAlign = "left";
   }
   if (space.settlementSafe) {
@@ -62226,7 +63044,7 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
   });
   doc.documentElement.dataset.gameplayHudVisible = "false";
   for (const id of ["world-hud", "world-level-up", "primary-attack", "world-bag", "world-pickup", "world-loot-notice"]) doc.getElementById(id)?.setAttribute("data-gameplay-hud", "");
-  const label3 = doc.getElementById("space-label"), mode = doc.getElementById("control-mode"), provenance = doc.getElementById("control-provenance");
+  const label4 = doc.getElementById("space-label"), mode = doc.getElementById("control-mode"), provenance = doc.getElementById("control-provenance");
   const generation = doc.getElementById("world-generation");
   const renderer = createWorldRenderer(canvas, { performanceProbe, environmentArt, actorCollisionProbe }), profile = createControlProfile(capabilities), queue = createPresentationQueue();
   const adapter = createClientCommandAdapter({ port, nextCommandToken });
@@ -62339,7 +63157,10 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
   let campFrames = 0;
   heroCreator = createHeroCreatorV1({ document: doc, environment, readModel, adapter, reportError: (text2) => {
     message = text2;
-  }, onClose: restoreGameplayFocus });
+  }, onClose: restoreGameplayFocus, openHeroes: heroSlots ? () => inventory.openHeroes() : null, otherHeroes: () => {
+    const l = heroSlots?.list();
+    return Boolean(l?.heroes.some((h) => h.slot !== l.active));
+  } });
   skillBar = createSkillWheelV1({ document: doc, environment, readModel, adapter, isBlocked: gameplayInputBlocked, openClassPicker: () => {
     subweaponHud?.clear();
     input.clear();
@@ -62501,7 +63322,7 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
     }
     if (levelNotice) levelNotice.hidden = inventory.isOpen() || !model.entitiesById[participant.entityId].alive || !(time < levelNoticeUntil);
     const updateDom = () => {
-      setText(label3, model.space.label);
+      setText(label4, model.space.label);
       if (generation) setText(generation, model.space.overworld?.seedHex ? `World ${model.space.overworld.manifestId.slice(-8)} \xB7 Seed ${model.space.overworld.seedHex}${model.space.overworld.regionThreatTier ? ` \xB7 Region threat ${model.space.overworld.regionThreatTier} \xB7 ${model.space.overworld.populationGroups} ordinary groups` : ""}` : "");
       setText(provenance, profile.read().provenance);
       const activeSite = model.space.site ?? model.space.functionalSite, conquered = activeSite?.conqueredTick !== null && activeSite?.conqueredTick !== void 0 && model.tick - activeSite.conqueredTick < 180;
@@ -65993,18 +66814,18 @@ async function startWorldClient(environment) {
     }
     group.append(status2);
     if (environmentArt.setSpecimens) {
-      const label3 = environment.document.createElement("label"), box2 = environment.document.createElement("input");
+      const label4 = environment.document.createElement("label"), box2 = environment.document.createElement("input");
       box2.type = "checkbox";
       box2.onchange = () => environmentArt.setSpecimens(box2.checked);
-      label3.append(box2, " Existing enemy art specimens (presentation only; no encounter actors)");
-      group.append(label3);
+      label4.append(box2, " Existing enemy art specimens (presentation only; no encounter actors)");
+      group.append(label4);
     }
     controls.prepend(group);
     sync();
     if (environmentArt.setFoliageMode) {
-      const label3 = environment.document.createElement("p");
-      label3.textContent = "Foliage V2 \xB7 greener trees, lower shrubs and grass tufts; same world/collision.";
-      group.append(label3);
+      const label4 = environment.document.createElement("p");
+      label4.textContent = "Foliage V2 \xB7 greener trees, lower shrubs and grass tufts; same world/collision.";
+      group.append(label4);
       for (const [value2, name] of [["existing", "Woodland V1 foliage"], ["candidate", "Woodland V2 foliage"]]) {
         const b = environment.document.createElement("button");
         b.textContent = plannedReview?.binding.woodlandForestVersion ? value2 === "existing" ? "Previous foliage kit" : "Forest art candidate" : name;
@@ -66012,7 +66833,7 @@ async function startWorldClient(environment) {
           client.releaseInput();
           environmentArt.setFoliageMode(value2);
           client.invalidateArt();
-          label3.textContent = "Foliage " + (value2 === "candidate" ? "V2 candidate" : "V1 comparison") + " \xB7 same world/collision";
+          label4.textContent = "Foliage " + (value2 === "candidate" ? "V2 candidate" : "V1 comparison") + " \xB7 same world/collision";
         };
         group.append(b);
       }
@@ -66033,9 +66854,9 @@ async function startWorldClient(environment) {
       group.append(evidence);
     }
     if (environmentArt.setRouteMode) {
-      const row2 = environment.document.createElement("div"), label3 = environment.document.createElement("p");
-      label3.textContent = "Road, path and trail presentation only";
-      row2.append(label3);
+      const row2 = environment.document.createElement("div"), label4 = environment.document.createElement("p");
+      label4.textContent = "Road, path and trail presentation only";
+      row2.append(label4);
       for (const value2 of ["existing", "candidate"]) {
         const b = environment.document.createElement("button");
         b.textContent = value2 === "existing" ? "Previous route art" : environmentArt.paintedJourney ? "Painted path pilot" : "Styled roads and trails";
@@ -66097,9 +66918,9 @@ async function startWorldClient(environment) {
     vfxStatus.textContent = (r.enabled ? "Candidate" : "Previous comparison") + " \xB7 loot labels/emission, subtle actor fill and breakable debris only. " + (r.ready ? "16 original debris sprites ready." : "Debris fallback active: " + r.error) + " No item, reward, time or collision changes.";
     for (const b of vfxGroup.querySelectorAll("[data-night-vfx]")) b.setAttribute("aria-pressed", String(b.dataset.nightVfx === String(r.enabled)));
   };
-  for (const [label3, value2] of [["Previous loot & debris", false], ["Night readability candidate", true]]) {
+  for (const [label4, value2] of [["Previous loot & debris", false], ["Night readability candidate", true]]) {
     const b = environment.document.createElement("button");
-    b.textContent = label3;
+    b.textContent = label4;
     b.dataset.nightVfx = String(value2);
     b.onclick = () => {
       client.releaseInput();
@@ -66128,9 +66949,9 @@ async function startWorldClient(environment) {
     propStatus.textContent = (r.enabled ? "Original sprite kit" : "Previous prop art") + " \xB7 " + (r.ready ? "12 prop/chest sprites ready." : "Fallback: " + r.error) + " Cosmetic wear and debris only; collision, loot and chest ownership unchanged.";
     for (const b of propGroup.querySelectorAll("button")) b.setAttribute("aria-pressed", String(b.dataset.propArt === String(r.enabled)));
   };
-  for (const [label3, value2] of [["Previous prop art", false], ["New prop art", true]]) {
+  for (const [label4, value2] of [["Previous prop art", false], ["New prop art", true]]) {
     const b = environment.document.createElement("button");
-    b.textContent = label3;
+    b.textContent = label4;
     b.dataset.propArt = String(value2);
     b.onclick = () => {
       client.releaseInput();
@@ -66177,9 +66998,9 @@ async function startWorldClient(environment) {
     dayNightReview.setEnabled(value2);
     syncTime();
   };
-  for (const [label3, value2] of [["Follow campaign", null], ["Dawn \xB706:00", 360], ["Noon \xB712:00", 720], ["Dusk \xB720:00", 1200], ["Night \xB700:00", 0]]) {
+  for (const [label4, value2] of [["Follow campaign", null], ["Dawn \xB706:00", 360], ["Noon \xB712:00", 720], ["Dusk \xB720:00", 1200], ["Night \xB700:00", 0]]) {
     const b = environment.document.createElement("button");
-    b.textContent = label3;
+    b.textContent = label4;
     b.dataset.timeMinute = value2 === null ? "campaign" : String(value2);
     b.onclick = () => setMinute(value2);
     timeGroup.append(b);
@@ -66194,9 +67015,9 @@ async function startWorldClient(environment) {
   timeRange.setAttribute("aria-label", "Lighting preview time of day");
   timeRange.oninput = () => setMinute(Number(timeRange.value));
   timeGroup.append(timeRange);
-  for (const [label3, value2] of [["Day/night lighting", true], ["Previous lighting comparison", false]]) {
+  for (const [label4, value2] of [["Day/night lighting", true], ["Previous lighting comparison", false]]) {
     const b = environment.document.createElement("button");
-    b.textContent = label3;
+    b.textContent = label4;
     b.dataset.lightingEnabled = String(value2);
     b.onclick = () => setLighting(value2);
     timeGroup.append(b);

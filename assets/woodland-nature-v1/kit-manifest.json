@@ -1,0 +1,493 @@
+{
+  "version": "woodland-nature-v1",
+  "source": "Code-drawn biome nature art v3 (scratchpad wg/art/biome-art.js; woodland in the nature art session copy), baked with Chromium canvas at 5 px per mockup unit (1 unit = 1 px at 32 px tiles). No ground shadows; each slot is centered on its ground point, ground at the slot bottom; anchor = [x, y] of that point inside the slot. No third-party game art.",
+  "pxPerUnit": 5,
+  "files": [
+    {
+      "path": "trees.webp",
+      "sha256": "077413e1b217adf2481beb1871df34e2219942e369a8d3f83d75813b9b97fa05",
+      "bytes": 289128,
+      "width": 2046,
+      "height": 1663,
+      "decodeLimit": 256,
+      "role": "trees",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "oak",
+          "seed": 3,
+          "x": 1488,
+          "y": 616,
+          "width": 546,
+          "height": 525,
+          "anchor": [
+            273,
+            502
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "oak",
+          "seed": 11,
+          "x": 378,
+          "y": 616,
+          "width": 544,
+          "height": 535,
+          "anchor": [
+            272,
+            512
+          ]
+        },
+        {
+          "id": 2,
+          "kind": "oak",
+          "seed": 29,
+          "x": 934,
+          "y": 616,
+          "width": 542,
+          "height": 530,
+          "anchor": [
+            271,
+            507
+          ]
+        },
+        {
+          "id": 3,
+          "kind": "linden",
+          "seed": 3,
+          "x": 12,
+          "y": 12,
+          "width": 370,
+          "height": 592,
+          "anchor": [
+            185,
+            570
+          ]
+        },
+        {
+          "id": 4,
+          "kind": "linden",
+          "seed": 11,
+          "x": 782,
+          "y": 12,
+          "width": 382,
+          "height": 588,
+          "anchor": [
+            191,
+            566
+          ]
+        },
+        {
+          "id": 5,
+          "kind": "linden",
+          "seed": 29,
+          "x": 394,
+          "y": 12,
+          "width": 376,
+          "height": 589,
+          "anchor": [
+            188,
+            567
+          ]
+        },
+        {
+          "id": 6,
+          "kind": "fir",
+          "seed": 3,
+          "x": 12,
+          "y": 1168,
+          "width": 266,
+          "height": 483,
+          "anchor": [
+            133,
+            463
+          ]
+        },
+        {
+          "id": 7,
+          "kind": "fir",
+          "seed": 11,
+          "x": 290,
+          "y": 1168,
+          "width": 278,
+          "height": 483,
+          "anchor": [
+            139,
+            463
+          ]
+        },
+        {
+          "id": 8,
+          "kind": "fir",
+          "seed": 29,
+          "x": 580,
+          "y": 1168,
+          "width": 276,
+          "height": 483,
+          "anchor": [
+            138,
+            463
+          ]
+        },
+        {
+          "id": 9,
+          "kind": "birch",
+          "seed": 3,
+          "x": 12,
+          "y": 616,
+          "width": 354,
+          "height": 540,
+          "anchor": [
+            177,
+            522
+          ]
+        },
+        {
+          "id": 10,
+          "kind": "birch",
+          "seed": 11,
+          "x": 1176,
+          "y": 12,
+          "width": 352,
+          "height": 545,
+          "anchor": [
+            176,
+            527
+          ]
+        },
+        {
+          "id": 11,
+          "kind": "birch",
+          "seed": 29,
+          "x": 1540,
+          "y": 12,
+          "width": 368,
+          "height": 542,
+          "anchor": [
+            184,
+            524
+          ]
+        }
+      ]
+    },
+    {
+      "path": "understory.webp",
+      "sha256": "5be4b5f98866c1519b0e1bae0db49e39531532bff227daa3d6aab01234e26895",
+      "bytes": 94918,
+      "width": 1982,
+      "height": 440,
+      "decodeLimit": 128,
+      "role": "understory",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "bush",
+          "seed": 3,
+          "x": 960,
+          "y": 12,
+          "width": 282,
+          "height": 166,
+          "anchor": [
+            141,
+            160
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "bush",
+          "seed": 17,
+          "x": 1254,
+          "y": 12,
+          "width": 280,
+          "height": 165,
+          "anchor": [
+            140,
+            161
+          ]
+        },
+        {
+          "id": 2,
+          "kind": "fern",
+          "seed": 3,
+          "x": 698,
+          "y": 12,
+          "width": 250,
+          "height": 168,
+          "anchor": [
+            125,
+            155
+          ]
+        },
+        {
+          "id": 3,
+          "kind": "fern",
+          "seed": 17,
+          "x": 444,
+          "y": 12,
+          "width": 242,
+          "height": 171,
+          "anchor": [
+            121,
+            158
+          ]
+        },
+        {
+          "id": 4,
+          "kind": "flowers",
+          "seed": 3,
+          "x": 12,
+          "y": 317,
+          "width": 166,
+          "height": 111,
+          "anchor": [
+            83,
+            98
+          ]
+        },
+        {
+          "id": 5,
+          "kind": "flowers",
+          "seed": 17,
+          "x": 190,
+          "y": 317,
+          "width": 164,
+          "height": 111,
+          "anchor": [
+            82,
+            98
+          ]
+        },
+        {
+          "id": 6,
+          "kind": "mushrooms",
+          "seed": 3,
+          "x": 1546,
+          "y": 12,
+          "width": 206,
+          "height": 117,
+          "anchor": [
+            103,
+            100
+          ]
+        },
+        {
+          "id": 7,
+          "kind": "mushrooms",
+          "seed": 17,
+          "x": 1764,
+          "y": 12,
+          "width": 206,
+          "height": 117,
+          "anchor": [
+            103,
+            100
+          ]
+        },
+        {
+          "id": 8,
+          "kind": "tuft",
+          "seed": 3,
+          "x": 366,
+          "y": 317,
+          "width": 138,
+          "height": 104,
+          "anchor": [
+            69,
+            89
+          ]
+        },
+        {
+          "id": 9,
+          "kind": "tuft",
+          "seed": 17,
+          "x": 516,
+          "y": 317,
+          "width": 134,
+          "height": 104,
+          "anchor": [
+            67,
+            89
+          ]
+        },
+        {
+          "id": 10,
+          "kind": "sapling",
+          "seed": 3,
+          "x": 12,
+          "y": 12,
+          "width": 206,
+          "height": 293,
+          "anchor": [
+            103,
+            277
+          ]
+        },
+        {
+          "id": 11,
+          "kind": "sapling",
+          "seed": 17,
+          "x": 230,
+          "y": 12,
+          "width": 202,
+          "height": 290,
+          "anchor": [
+            101,
+            274
+          ]
+        }
+      ]
+    },
+    {
+      "path": "rocks.webp",
+      "sha256": "9d44001d01ff72b5045315cf1df537326e5d97c22d11bc91b22ad5aa258fd62d",
+      "bytes": 27514,
+      "width": 1006,
+      "height": 191,
+      "decodeLimit": 128,
+      "role": "rocks",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "mossrock",
+          "seed": 3,
+          "x": 12,
+          "y": 12,
+          "width": 276,
+          "height": 167,
+          "anchor": [
+            138,
+            151
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "mossrock",
+          "seed": 17,
+          "x": 300,
+          "y": 12,
+          "width": 276,
+          "height": 166,
+          "anchor": [
+            138,
+            150
+          ]
+        },
+        {
+          "id": 2,
+          "kind": "rocks",
+          "seed": 3,
+          "x": 798,
+          "y": 12,
+          "width": 196,
+          "height": 112,
+          "anchor": [
+            98,
+            91
+          ]
+        },
+        {
+          "id": 3,
+          "kind": "rocks",
+          "seed": 17,
+          "x": 588,
+          "y": 12,
+          "width": 198,
+          "height": 114,
+          "anchor": [
+            99,
+            93
+          ]
+        }
+      ]
+    },
+    {
+      "path": "accents.webp",
+      "sha256": "794700fa93b37b10c27a707b3c15cc5db43b1f0863bce5b2bc6f516b822e7b56",
+      "bytes": 42964,
+      "width": 1674,
+      "height": 174,
+      "decodeLimit": 128,
+      "role": "accents",
+      "slots": [
+        {
+          "id": 0,
+          "kind": "log",
+          "seed": 3,
+          "x": 12,
+          "y": 12,
+          "width": 356,
+          "height": 150,
+          "anchor": [
+            178,
+            129
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "log",
+          "seed": 17,
+          "x": 380,
+          "y": 12,
+          "width": 356,
+          "height": 150,
+          "anchor": [
+            178,
+            129
+          ]
+        },
+        {
+          "id": 2,
+          "kind": "stump",
+          "seed": 3,
+          "x": 748,
+          "y": 12,
+          "width": 210,
+          "height": 137,
+          "anchor": [
+            105,
+            116
+          ]
+        },
+        {
+          "id": 3,
+          "kind": "stump",
+          "seed": 17,
+          "x": 970,
+          "y": 12,
+          "width": 208,
+          "height": 137,
+          "anchor": [
+            104,
+            116
+          ]
+        },
+        {
+          "id": 4,
+          "kind": "litter",
+          "seed": 3,
+          "x": 1190,
+          "y": 12,
+          "width": 224,
+          "height": 90,
+          "anchor": [
+            112,
+            55
+          ]
+        },
+        {
+          "id": 5,
+          "kind": "litter",
+          "seed": 17,
+          "x": 1426,
+          "y": 12,
+          "width": 236,
+          "height": 90,
+          "anchor": [
+            118,
+            55
+          ]
+        }
+      ]
+    }
+  ]
+}
