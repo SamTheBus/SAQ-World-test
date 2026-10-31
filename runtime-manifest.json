@@ -1,6 +1,6 @@
 {
-  "runtimeId": "a65f46bd2a2edbcd",
-  "runtimeSha256": "a65f46bd2a2edbcd39e235c8881b82e3d06f7a0c87ba40c2375206b73a778ee0",
+  "runtimeId": "c54bd5534ba1f20a",
+  "runtimeSha256": "c54bd5534ba1f20afd6d0bc670a5e78aabca67bdf035c55ab026ebd5a5d59822",
   "files": [
     {
       "path": ".nojekyll",
@@ -515,7 +515,7 @@
     {
       "path": "index.html",
       "bytes": 13650,
-      "sha256": "bb2d477b05ead903f59c11b8768fc0410fd4077eaf34c369ab589810abc08ccf"
+      "sha256": "c8e47c67b798280619d00a23ea2ce4aadc8e1271ccef7ca8ff552a77f1ce4d19"
     },
     {
       "path": "manifest.webmanifest",
@@ -524,23 +524,23 @@
     },
     {
       "path": "save-worker.js",
-      "bytes": 2706501,
-      "sha256": "fb451a1ff1caeed0eca71834b0cda71c21f4b76170e78b730f0fe76ada8d0c09"
+      "bytes": 2711091,
+      "sha256": "97e097b40eb9c6e6d00dd8865cae849fc0078bd8fcb6555dbffc0717b7e2879a"
     },
     {
-      "path": "src/chunks/chunk-ES2AOZAJ.js",
-      "bytes": 2425786,
-      "sha256": "2ce26983003a67236be50d818fd08f625e6bdfcc3242e82ec0a38f0aec34c8d2"
+      "path": "src/chunks/chunk-CDF34YLZ.js",
+      "bytes": 2430786,
+      "sha256": "ba52f23a7b1bd7f2a0ae93e641139f0c4a9c8b3958aac8caaa7687386c4405b7"
     },
     {
-      "path": "src/chunks/playable_browser-HTCGUJYF.js",
-      "bytes": 4600389,
-      "sha256": "8cffe0bc0124a9d7c8a127a9a9805bdbd2ac546315ee19c744f9794859f49e43"
+      "path": "src/chunks/playable_browser-IZU6IQLN.js",
+      "bytes": 4613443,
+      "sha256": "c8e456b6374d30567c27fc4d1a9bf338d897b8492e6f40bb5771ce6d7c4c5b26"
     },
     {
-      "path": "src/chunks/world_browser-3XWLSDPN.js",
+      "path": "src/chunks/world_browser-JSQ3VWV2.js",
       "bytes": 1416,
-      "sha256": "83a9e7de15c205640c06e8435ef973f3ea5477e2e40a1eb17caefe167a061b50"
+      "sha256": "1ebecd8e60e9f9018baea446eaca1a8b680cc3c03d735f57b88c5dc24bebd02c"
     },
     {
       "path": "src/client/startup_camp_v1.js",
@@ -555,7 +555,7 @@
     {
       "path": "src/entrypoints/browser_boot.js",
       "bytes": 2158,
-      "sha256": "08305dfabd1c925bafbb121d48717dae16cb72a7d36d59c1a50ced0e776f5cb5"
+      "sha256": "d7a6bd9f3480c9ce8472b5f3f075ac75c65946c23add5c60382339d48cdbe0fd"
     },
     {
       "path": "world.css",
