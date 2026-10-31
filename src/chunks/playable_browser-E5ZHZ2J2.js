@@ -740,7 +740,7 @@ import {
   worldLevelGapMultiplier,
   worldOrdinaryMeleeProfile,
   worldPointForArea
-} from "./chunk-TZOK4SN5.js";
+} from "./chunk-72PFUHGB.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -18011,8 +18011,11 @@ var CHARGE_TICKS = 180;
 var ORB_TICKS = 240;
 var ORB_ZAP_TICKS = 30;
 var MAX_ORBS = 2;
-var TIMED = ["surge", "enGarde"];
-var LIVE = ["last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs"];
+var RUSH_TICKS = 180;
+var TRAIL_TICKS = 120;
+var TRAIL_PULSE_TICKS = 30;
+var TIMED = ["surge", "enGarde", "rush"];
+var LIVE = ["last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail"];
 function skillCooldown(combat, skillId) {
   return combat?.skills?.cooldowns?.[skillId] ?? 0;
 }
@@ -18088,10 +18091,17 @@ function clearOrbs(combat) {
     prune(combat);
   }
 }
+function clearTrail(combat) {
+  if (combat?.skills) {
+    delete combat.skills.trail;
+    prune(combat);
+  }
+}
 function cancelClassSkillAction(combat) {
   if (combat?.skills) {
     delete combat.skills.flurry;
     delete combat.skills.orbs;
+    delete combat.skills.trail;
     prune(combat);
   }
 }
@@ -18103,6 +18113,13 @@ function validateClassSkillState(s, combat, actor) {
   if (k.counter !== void 0) safeInteger(k.counter, 1, COUNTER_WINDOW_MAX);
   if (k.surge !== void 0) safeInteger(k.surge, 1, SURGE_TICKS);
   if (k.enGarde !== void 0) safeInteger(k.enGarde, 1, EN_GARDE_TICKS);
+  if (k.rush !== void 0) safeInteger(k.rush, 1, RUSH_TICKS);
+  if (k.trail !== void 0) {
+    closedRecord(k.trail, ["x", "y", "x2", "y2", "ticks", "next"]);
+    requireContract(["x", "y", "x2", "y2"].every((key2) => Number.isFinite(k.trail[key2])) && actor.alive, "Invalid trail");
+    safeInteger(k.trail.ticks, 1, TRAIL_TICKS);
+    safeInteger(k.trail.next, 1, TRAIL_PULSE_TICKS);
+  }
   for (const [key2, stacks, ticks] of [["bulwark", 3, BULWARK_TICKS], ["charge", 5, CHARGE_TICKS]]) if (k[key2] !== void 0) {
     closedRecord(k[key2], ["stacks", "ticks"]);
     safeInteger(k[key2].stacks, 1, stacks);
@@ -18961,8 +18978,8 @@ function validateMasteryCombat(s) {
           validateDamageSourceItem(e.sourceItem);
         } else if (name === "statuses") {
           closedRecord(e, ["id", "sourceId", "targetId", "spaceInstanceId", "kind", "rank", "expiresTick"]);
-          requireContract(["expose", "slow", "stun", "grudge", "weaken"].includes(e.kind), "Unknown mastery status");
-          safeInteger(e.rank, 1, e.kind === "expose" ? 3 : e.kind === "grudge" ? 5 : e.kind === "weaken" ? 1 : 2);
+          requireContract(["expose", "slow", "stun", "grudge", "weaken", "daze"].includes(e.kind), "Unknown mastery status");
+          safeInteger(e.rank, 1, e.kind === "expose" ? 3 : e.kind === "grudge" || e.kind === "daze" ? 5 : e.kind === "weaken" ? 1 : 2);
           safeInteger(e.expiresTick, s.tick + 1, s.tick + (e.kind === "expose" ? 300 : e.kind === "slow" || e.kind === "grudge" ? 240 : e.kind === "weaken" ? 360 : 90));
         } else {
           closedRecord(e, ["id", "sourceId", "spaceInstanceId", "position", "attack", "rank", "sourceItem", ...name === "hazards" ? ["radius", "expiresTick"] : ["direction", "frames", "hitIds"]]);
@@ -19517,7 +19534,7 @@ var shieldPacket = (stats) => {
   const f = stats.familyProperties, defense = addCombat(f?.reflect ?? combatAmount(1), f?.bashDefense ?? combatAmount(0)), base = addCombat(multiplyCombat(stats.defense, defense.n, defense.d), multiplyCombat(stats.attack, f?.bashAttack?.n ?? 0, f?.bashAttack?.d ?? 1)), scale = f?.bashMultiplier ?? combatAmount(1);
   return multiplyCombat(base, scale.n, scale.d);
 };
-function incomingSubweaponHit({ combat, stats, raw, boss = false, actor = null, source: source3 = null, suppressed = false, knight = false }) {
+function incomingSubweaponHit({ combat, stats, raw, boss = false, actor = null, source: source3 = null, suppressed = false, knight = false, wall = 0 }) {
   if (suppressed) return { damage: combatInteger(mitigateFractionalPlayerDamage(raw, stats.defense)), absorbed: "0", defense: null, counter: null, suppressed: true };
   if (combat.skills?.counter) {
     spendCounterWindow(combat);
@@ -19529,7 +19546,7 @@ function incomingSubweaponHit({ combat, stats, raw, boss = false, actor = null, 
   if (compareCombat(raw, 0) === 0) return { damage: "0", absorbed, defense: "barrier", counter: null };
   const net = mitigateFractionalPlayerDamage(raw, stats.defense), family = stats.subType;
   const chance = family === "shield" ? stats.blockChance : family === "dagger" ? stats.parryChance : combatAmount(0);
-  const activeGuard = family === "shield" && guardsSource(combat.guard, actor, source3);
+  const activeGuard = family === "shield" && guardsSource(combat.guard, actor, source3, wall);
   const parryReady = family === "dagger" && Boolean(combat.skills?.parry);
   if (parryReady) spendParryWindow(combat);
   const guarded = activeGuard || parryReady || compareCombat(chance, 0) > 0 && combatRoll(combat, multiplyCombat(chance, (boss ? 65 : 100) * (combat.fatigue ? 50 : 100), 1e4));
@@ -19776,7 +19793,7 @@ function validateSubweaponCombat(s) {
     requireContract(e.id === id && c.actors[e.sourceId] && combatTargetV4(s, e.targetId)?.alive && ["bleed", "burn"].includes(e.kind), "Periodic ownership");
     safeInteger(e.stacks, 1, e.kind === "bleed" ? 5 : 1);
     safeInteger(e.nextTick, s.tick + 1, s.tick + 60);
-    safeInteger(e.expiresTick, s.tick + 1, s.tick + (e.kind === "bleed" ? 600 : 240));
+    safeInteger(e.expiresTick, s.tick + 1, s.tick + (e.kind === "bleed" ? 900 : 360));
     amount(integer ? e.attack : e.damage);
     if (integer) requireContract(e.rulesVersion === "combat-integer-v2", "Effect rules version");
   }
@@ -19794,7 +19811,7 @@ function validateSubweaponCombat(s) {
     safeInteger(e.appliedTick, 0, s.tick);
     safeInteger(e.expiresTick, s.tick + 1, e.appliedTick + 360);
     const def = s.content.definitionsById[t.contentDefinitionId] ?? {};
-    requireContract((e.phase === "chill" ? e.expiresTick - e.appliedTick >= 240 && e.expiresTick - e.appliedTick <= 360 : e.phase === "boss-slow" ? e.expiresTick - e.appliedTick === 90 : e.expiresTick - e.appliedTick >= (def.isElite ? 30 : 60) && e.expiresTick - e.appliedTick <= (def.isElite ? 45 : 90)) && e.phase === "boss-slow" === (e.phase !== "chill" && def.isBoss === true), "Frost duration/classification");
+    requireContract((e.phase === "chill" ? e.expiresTick - e.appliedTick >= 240 && e.expiresTick - e.appliedTick <= 360 : e.phase === "boss-slow" ? e.expiresTick - e.appliedTick === 90 : e.expiresTick - e.appliedTick >= (def.isElite ? 30 : 60) && e.expiresTick - e.appliedTick <= (def.isElite ? 68 : 135)) && e.phase === "boss-slow" === (e.phase !== "chill" && def.isBoss === true), "Frost duration/classification");
   }
 }
 function cancelSubweaponResidency(s, id) {
@@ -22192,12 +22209,12 @@ function createMasteryAwards(state) {
 }
 
 // src/simulation/tome_element_rules.js
-function applyFrostControl(s, source3, target, stats, chillTicks = 240, boost = 0) {
+function applyFrostControl(s, source3, target, stats, chillTicks = 240, boost = 0, longer = 0) {
   if (!target.alive) return null;
   const controls = s.subweaponCombat.controls ?? (s.subweaponCombat.controls = {}), id = source3.entityId + "/" + target.entityId, old2 = controls[id];
   if (Object.values(controls).some((e) => e.targetId === target.entityId && e.expiresTick > s.tick && e.phase !== "chill")) return null;
   const stacks = (old2 && old2.expiresTick > s.tick ? old2.stacks : 0) + 1, def = s.content.definitionsById[target.contentDefinitionId] ?? {}, boss = def.isBoss === true, elite = def.isElite === true;
-  const phase = stacks === 4 ? boss ? "boss-slow" : "freeze" : "chill", duration = phase === "chill" ? chillTicks : boss ? 90 : elite ? 30 : 60;
+  const phase = stacks === 4 ? boss ? "boss-slow" : "freeze" : "chill", duration = phase === "chill" ? chillTicks : boss ? 90 : Math.round((elite ? 30 : 60) * (100 + longer) / 100);
   const effect = { id, sourceId: source3.entityId, targetId: target.entityId, spaceInstanceId: source3.residency.spaceInstanceId, phase, stacks: phase === "chill" ? stacks : 0, appliedTick: s.tick, expiresTick: s.tick + duration, ...boost && phase === "chill" ? { boost } : {} };
   controls[id] = effect;
   if (phase === "boss-slow") {
@@ -22207,9 +22224,22 @@ function applyFrostControl(s, source3, target, stats, chillTicks = 240, boost = 
   }
   return effect;
 }
+var STATUS_RATE = { stun: () => 0, slow: (r) => 1 - 0.2 * r, daze: (r) => 1 - 0.06 * r };
+function statusRates(s, visit) {
+  const owners = new Map(Object.values(s.playersById ?? {}).map((p) => [p.entityId, p]));
+  for (const [owner, b] of Object.entries(s.subweaponCombat.mastery ?? {})) {
+    for (const e of Object.values(b.statuses)) if (e.expiresTick > s.tick && STATUS_RATE[e.kind]) visit(e.targetId, STATUS_RATE[e.kind](e.rank));
+    const paralytic = classRank(owners.get(owner)?.d8, "paralytic");
+    if (paralytic) {
+      for (const e of Object.values(b.poisons)) if (e.expiresTick > s.tick) visit(e.targetId, 1 - 0.04 * paralytic);
+    }
+  }
+}
 function frostMovement(s, target) {
   let multiplier = 1;
-  for (const b of Object.values(s.subweaponCombat.mastery ?? {})) for (const e of Object.values(b.statuses)) if (e.targetId === target.entityId && e.expiresTick > s.tick && (e.kind === "slow" || e.kind === "stun")) multiplier = Math.min(multiplier, e.kind === "stun" ? 0 : 1 - 0.2 * e.rank);
+  statusRates(s, (id, rate) => {
+    if (id === target.entityId) multiplier = Math.min(multiplier, rate);
+  });
   for (const e of Object.values(s.subweaponCombat.controls ?? {})) if (e.targetId === target.entityId && e.expiresTick > s.tick) multiplier = Math.min(multiplier, e.phase === "freeze" ? 0 : e.phase === "boss-slow" ? 0.6 : Math.max(0, 1 - e.stacks * 0.1 - 0.05 * (e.boost ?? 0)));
   return multiplier;
 }
@@ -22221,10 +22251,7 @@ function expireFrost(s) {
 }
 function frostMovementRates(s) {
   const rates = /* @__PURE__ */ new Map();
-  for (const b of Object.values(s.subweaponCombat.mastery ?? {})) for (const e of Object.values(b.statuses)) if (e.expiresTick > s.tick && (e.kind === "slow" || e.kind === "stun")) {
-    const rate = e.kind === "stun" ? 0 : 1 - 0.2 * e.rank;
-    rates.set(e.targetId, Math.min(rates.get(e.targetId) ?? 1, rate));
-  }
+  statusRates(s, (id, rate) => rates.set(id, Math.min(rates.get(id) ?? 1, rate)));
   for (const e of Object.values(s.subweaponCombat.controls ?? {})) if (e.expiresTick > s.tick) {
     const rate = e.phase === "freeze" ? 0 : e.phase === "boss-slow" ? 0.6 : Math.max(0, 1 - e.stacks * 0.1 - 0.05 * (e.boost ?? 0));
     rates.set(e.targetId, Math.min(rates.get(e.targetId) ?? 1, rate));
@@ -23495,6 +23522,9 @@ var CLASS_SKILL_TUNING_V1 = Object.freeze({
   firebloom: { reach: 130, cone: 0.9, distance: 90, radius: 50, targets: 8, attack: [2, 1] },
   flashfreeze: { radius: 80, targets: 10, attack: [1, 1] },
   ballLightning: { speed: 1, radius: 46, targets: 4, attack: [3, 5], hop: 100 },
+  // Row-two passives that hit: Crosscut cuts along a Dash, Cinder Step's trail burns (per rank).
+  crosscut: { attack: [15, 100] },
+  cinderStep: { attack: [10, 100] },
   // What an augment widens: Long Lunge, Wide Arc, Wildfire and Wide Freeze.
   wider: [3, 2],
   wide: [7, 5],
@@ -23546,6 +23576,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     return !isPodCombatTargetV4(t) && !d.isBoss && !d.isElite && !d.isMiniboss;
   };
   const stunTicks = (a, base) => Math.min(90, Math.round(base * (100 + 10 * rank(a, "heavy_hands")) / 100));
+  const daze = (a, t, base) => {
+    const r = rank(a, "concussion");
+    if (r && t.alive && canStun(a)) effects2.status(a, t, "daze", r, stunTicks(a, base));
+  };
   const bleed = (a, t, stats, boost = 0) => {
     if (t.alive && !isPodCombatTargetV4(t)) periodic(a, t, "bleed", boost ? combatInteger(pct2(stats.attack, boost)) : stats.attack, stats);
   };
@@ -23555,7 +23589,11 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     for (const t of cone(a, aim2, T3.bash.reach * (100 + 6 * rank(a, "seismic_reach")) / 100, T3.bash.cone, T3.bash.targets)) {
       damage(a, t, raw, "bash", commandId, { sourceItem: damageSourceItem(owner(a), "bash"), trigger: "skill", masteryArea: true });
       if (spiked) bleed(a, t, stats, 10 * spiked);
-      if (!t.alive || isPodCombatTargetV4(t) || definition2(t).isBoss) continue;
+      if (!t.alive || isPodCombatTargetV4(t)) continue;
+      if (definition2(t).isBoss) {
+        daze(a, t, scaled(T3.bash.stun, style.stun));
+        continue;
+      }
       const elite = Boolean(definition2(t).isElite || definition2(t).isMiniboss);
       knockback(a, t, scaled(elite ? T3.bash.eliteKnockback : T3.bash.knockback, style.knockback));
       if (canStun(a)) effects2.status(a, t, "stun", 1, stunTicks(a, scaled(elite ? T3.bash.eliteStun : T3.bash.stun, style.stun)));
@@ -23637,13 +23675,14 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     openCounterWindow(c.actors[a.entityId], aug(a, "counter_stance", 1) ? COUNTER_WINDOW_MAX : COUNTER_WINDOW_TICKS);
     return true;
   }
+  let refund = 0;
   function lunge2(a, stats, aim2, commandId) {
     const L = T3.lunge, reach = aug(a, "lunge", 0) ? scaled(L.reach, T3.wider) : L.reach, t = cone(a, aim2, reach, L.cone, 1)[0], combat = c.actors[a.entityId], toward2 = t ? { x: t.position.x - a.position.x, y: t.position.y - a.position.y } : aim2, l = Math.hypot(toward2.x, toward2.y);
     const step2 = t ? Math.min(L.step, Math.max(0, l - (a.hullRadius ?? 0) - (t.hullRadius ?? 0) - 4)) : L.step / 2;
     if (step2 >= 8 && l > 1e-9 && !combat.dash.frames) Object.assign(combat.dash, { frames: Math.ceil(step2 / 8), remaining: step2, x: toward2.x / l, y: toward2.y / l });
     if (t) {
-      const at3 = landingOffset(a, t.position);
-      damage(a, t, multiplyCombat(stats.attack, ...L.attack), "offhand", commandId, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "skill", critBonus: copyWire(stats.critChance) });
+      const at3 = landingOffset(a, t.position), hit = damage(a, t, multiplyCombat(stats.attack, ...L.attack), "offhand", commandId, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "skill", critBonus: copyWire(stats.critChance) }), footwork = rank(a, "footwork");
+      if (footwork && hit?.critical) refund = 18 * footwork;
       if (aug(a, "lunge", 1)) bleed(a, t, stats);
       if (t.alive) mastery?.primary(a, t, "proactive");
       return at3;
@@ -23697,7 +23736,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       damage(a, t, raw, "frost", commandId, { sourceItem: damageSourceItem(owner(a), "frost"), trigger: "skill" });
       if (!t.alive || isPodCombatTargetV4(t)) continue;
       const def = definition2(t), phase = def.isBoss === true ? "boss-slow" : def.isElite === true || def.isMiniboss ? "chill" : "freeze", id = a.entityId + "/" + t.entityId;
-      c.controls[id] = { id, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, phase, stacks: phase === "chill" ? 3 : 0, appliedTick: s.tick, expiresTick: s.tick + (phase === "chill" ? chill : phase === "boss-slow" ? 90 : deep ? 90 : 60) };
+      c.controls[id] = { id, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, phase, stacks: phase === "chill" ? 3 : 0, appliedTick: s.tick, expiresTick: s.tick + (phase === "chill" ? chill : phase === "boss-slow" ? 90 : Math.round((deep ? 90 : 60) * (100 + 10 * rank(a, "deep_freeze")) / 100)) };
     }
     return { r: extent(a, reach) };
   }
@@ -23740,6 +23779,20 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (left.length) combat.skills.orbs = left;
     else clearOrbs(combat);
   }
+  function stepTrail(a, combat) {
+    const trail2 = combat.skills?.trail;
+    if (!trail2) return;
+    if (!a.alive) {
+      clearTrail(combat);
+      return;
+    }
+    if (--trail2.next <= 0) {
+      trail2.next = TRAIL_PULSE_TICKS;
+      const r = rank(a, "cinder_step"), stats = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "fire");
+      if (r) for (const t of alongPath(a, { x: trail2.x, y: trail2.y }, { x: trail2.x2, y: trail2.y2 })) damage(a, t, multiplyCombat(stats.attack, T3.cinderStep.attack[0] * r, T3.cinderStep.attack[1]), "fire", null, { sourceItem, trigger: "proc" });
+    }
+    if (--trail2.ticks <= 0) clearTrail(combat);
+  }
   const handlers = { shield_bash: bash, flurry, cast, earth_breaker: earthBreaker2, rallying_cry: rallyingCry2, counter_stance: counterStance2, lunge: lunge2, toxic_fan: toxicFan2, whirling_blades: whirlingBlades2, firebloom: firebloom2, flashfreeze: flashfreeze2, ball_lightning: ballLightning };
   function use(a, skillId, aimInput, commandId = null) {
     const stats = getStats(a.entityId), aim2 = unit3(aimInput), done = handlers[skillId]?.(a, stats, aim2, commandId);
@@ -23747,6 +23800,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     const record3 = classSkillsRecord(c.actors[a.entityId]);
     record3.cooldowns[skillId] = skillId === "shield_bash" ? Math.ceil(scaled(CLASS_SKILLS[skillId].cooldownTicks, T3.styles[offhandStyle(owner(a))]?.cooldown)) : CLASS_SKILLS[skillId].cooldownTicks;
     record3.last = { skillId, tick: s.tick, ...aim2, ...typeof done === "object" ? done : {} };
+    if (refund) {
+      reduceSkillCooldown(c.actors[a.entityId], skillId, refund);
+      refund = 0;
+    }
     if (rank(a, "momentum")) record3.surge = SURGE_TICKS;
     return true;
   }
@@ -23760,6 +23817,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     const combat = c.actors[a.entityId];
     ironWill(a, combat);
     stepOrbs(a, combat);
+    stepTrail(a, combat);
     const string = combat.skills?.flurry;
     if (!string || s.tick < string.nextTick) return;
     const stats = getStats(a.entityId);
@@ -23786,11 +23844,11 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
   }
   function critBonus(source3, target) {
     const k = record2(source3);
-    if (!k) return null;
     let n = 0;
-    const focus = rank(source3, "focus"), charge = rank(source3, "static_charge");
-    if (focus && k.focus?.target === target.entityId) n += focus * k.focus.hits;
-    if (charge && k.charge) n += charge * k.charge.stacks;
+    const focus = rank(source3, "focus"), charge = rank(source3, "static_charge"), opening = rank(source3, "opening_strike");
+    if (focus && k?.focus?.target === target.entityId) n += focus * k.focus.hits;
+    if (charge && k?.charge) n += charge * k.charge.stacks;
+    if (opening && target.maxHp !== void 0 && compareCombat(target.hp, target.maxHp) >= 0) n += 10 * opening;
     return n ? combatAmount(n, 100) : null;
   }
   let enGardeHit = null;
@@ -23801,16 +23859,32 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     enGardeHit = target.entityId;
     return true;
   }
-  function outgoing(source3, target, raw, mechanic, trigger) {
+  const TAKES_MORE = [["intimidate", 4, (k, t) => k.on(t, "weaken")], ["shatterpoint", 5, (k, t) => k.on(t, "stun")], ["open_wounds", 3, (k, t) => k.ticking(t, "bleed")], ["fan_the_flames", 3, (k, t) => k.ticking(t, "burn")], ["brittle", 4, (k, t) => k.frosted(t)], ["superconductor", 5, (k, t, mechanic) => mechanic === "lightning" && (k.ticking(t, "burn") || k.frosted(t))]];
+  function outgoing(source3, target, raw, mechanic, trigger, critical = false) {
     let out = raw;
-    const g = c.mastery?.[source3.entityId]?.statuses[target.entityId + "/grudge"];
+    const whole = (v) => v === raw ? v : outgoingCombat(v);
+    const bucket = c.mastery?.[source3.entityId], g = bucket?.statuses[target.entityId + "/grudge"];
     if (g && g.expiresTick > s.tick) out = multiplyCombat(out, 100 + 3 * g.rank, 100);
+    const marks2 = { on: (t, kind) => {
+      const e = bucket?.statuses[t.entityId + "/" + kind];
+      return Boolean(e && e.expiresTick > s.tick);
+    }, ticking: (t, kind) => Boolean(c.effects[source3.entityId + "/" + t.entityId + "/" + kind]), frosted: (t) => {
+      const e = c.controls?.[source3.entityId + "/" + t.entityId];
+      return Boolean(e && e.expiresTick > s.tick);
+    } };
+    for (const [id, percent, applies] of TAKES_MORE) {
+      const r = rank(source3, id);
+      if (r && applies(marks2, target, mechanic)) out = pct2(out, percent * r);
+    }
     if (enGardeHit === target.entityId) {
       enGardeHit = null;
       out = pct2(out, 8 * rank(source3, "en_garde"));
     }
     const combat = c.actors[source3.entityId];
-    if (!combat || trigger === "periodic") return out;
+    if (!combat || trigger === "periodic") return whole(out);
+    const run = rank(source3, "hit_and_run");
+    if (run && (combat.skills?.rush ?? 0) > RUSH_TICKS - 60) out = pct2(out, 6 * run);
+    if (rank(source3, "fencers_grace")) out = pct2(out, critical ? 40 : -20);
     if (rank(source3, "focus")) {
       const k = classSkillsRecord(combat);
       k.focus = k.focus?.target === target.entityId ? { target: target.entityId, hits: Math.min(5, k.focus.hits + 1) } : { target: target.entityId, hits: 1 };
@@ -23819,7 +23893,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       const k = classSkillsRecord(combat);
       k.charge = { stacks: Math.min(5, (k.charge?.stacks ?? 0) + 1), ticks: CHARGE_TICKS };
     }
-    return out;
+    return whole(out);
   }
   function defended(target, source3, defense, stats) {
     const p = owner(target);
@@ -23828,7 +23902,8 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (defense.counter === "stance") {
       damage(target, source3, multiplyCombat(stats.attack, ...T3.counter.attack), "riposte", null, { sourceItem: damageSourceItem(p, "bash"), trigger: "reactive" });
       if (aug(target, "counter_stance", 0)) bleed(target, source3, stats);
-      if (source3.alive && canStun(target) && !definition2(source3).isBoss) effects2.status(target, source3, "stun", 1, stunTicks(target, T3.counter.stun));
+      if (definition2(source3).isBoss) daze(target, source3, T3.counter.stun);
+      else if (source3.alive && canStun(target)) effects2.status(target, source3, "stun", 1, stunTicks(target, T3.counter.stun));
     }
     const retaliation = rank(target, "retaliation");
     if (retaliation && defense.defense === "block" && source3.alive) damage(target, source3, multiplyCombat(stats.defense, retaliation, 10), "riposte", null, { sourceItem: damageSourceItem(p, "bash"), trigger: "reactive" });
@@ -23836,17 +23911,43 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       const k = classSkillsRecord(combat);
       k.bulwark = { stacks: Math.min(3, (k.bulwark?.stacks ?? 0) + 1), ticks: BULWARK_TICKS };
     }
+    const unbroken = rank(target, "unbroken");
+    if (unbroken && defense.defense === "block" && combat) for (const id of ["counter_stance", "retribution"]) reduceSkillCooldown(combat, id, 12 * unbroken);
     if (defense.defense === "parry" && rank(target, "en_garde") && combat) classSkillsRecord(combat).enGarde = EN_GARDE_TICKS;
     const grudge = rank(target, "grudge");
     if (grudge && source3.alive && canStun(target) && !isPodCombatTargetV4(source3)) effects2.status(target, source3, "grudge", grudge, 240);
   }
   function speed(entityId2) {
-    const p = players.get(entityId2), surge = c.actors[entityId2]?.skills?.surge;
-    if (!p || !surge) return 1;
-    return 1 + (4 * classRank(p.d8, "momentum") + 5 * classRank(p.d8, "light_step")) / 100;
+    const p = players.get(entityId2);
+    if (!p) return 1;
+    const surge = c.actors[entityId2]?.skills?.surge, plating = classRank(p.d8, "heavy_plating") ? 0.9 : 1;
+    return surge ? plating * (1 + (4 * classRank(p.d8, "momentum") + 5 * classRank(p.d8, "light_step")) / 100) : plating;
+  }
+  function pathEnd(a, d) {
+    const col = space(a), r = a.hullRadius ?? 4;
+    let n = 0;
+    while (n + 8 <= d.remaining && !collidesWithTiles(col, a.position.x + d.x * (n + 8), a.position.y + d.y * (n + 8), r)) n += 8;
+    return { x: a.position.x + d.x * n, y: a.position.y + d.y * n };
+  }
+  function alongPath(a, from, to) {
+    const dx = to.x - from.x, dy = to.y - from.y, l2 = dx * dx + dy * dy, mid = { position: { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 } };
+    return effects2.nearby(a, mid, Math.sqrt(l2) / 2 + 40).filter((t) => {
+      const k = l2 ? Math.max(0, Math.min(1, ((t.position.x - from.x) * dx + (t.position.y - from.y) * dy) / l2)) : 0;
+      return Math.hypot(t.position.x - from.x - dx * k, t.position.y - from.y - dy * k) <= (a.hullRadius ?? 0) + (t.hullRadius ?? 0) + 6;
+    });
   }
   function dashed(a) {
-    if (rank(a, "light_step") && c.actors[a.entityId]) classSkillsRecord(c.actors[a.entityId]).surge = SURGE_TICKS;
+    const combat = c.actors[a.entityId];
+    if (!combat) return;
+    const from = { ...a.position }, to = pathEnd(a, combat.dash);
+    if (rank(a, "light_step")) classSkillsRecord(combat).surge = SURGE_TICKS;
+    if (rank(a, "slipstream") || rank(a, "hit_and_run")) classSkillsRecord(combat).rush = RUSH_TICKS;
+    const cross = rank(a, "crosscut");
+    if (cross) {
+      const stats = getStats(a.entityId);
+      for (const t of alongPath(a, from, to)) damage(a, t, multiplyCombat(stats.attack, T3.crosscut.attack[0] * cross, T3.crosscut.attack[1]), "offhand", null, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "proc" });
+    }
+    if (rank(a, "cinder_step")) classSkillsRecord(combat).trail = { x: from.x, y: from.y, x2: to.x, y2: to.y, ticks: TRAIL_TICKS, next: 1 };
   }
   return { use, step, incoming, outgoing, defended, critBonus, forceCrit, speed, dashed };
 }
@@ -24046,7 +24147,7 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
   const effects2 = createMasteryEffects(s, { damage, eligible: eligible2, identity: identity2, getStats: stats, awards: mastery, bleed: (a, t, captured) => periodic(a, t, "bleed", captured.attack, captured) });
   function periodic(source3, target, kind, attack, captured) {
     if (!target.alive) return;
-    const id = `${source3.entityId}/${target.entityId}/${kind}`, old2 = c.effects[id];
+    const id = `${source3.entityId}/${target.entityId}/${kind}`, old2 = c.effects[id], longer = classRank(players.get(source3.entityId)?.d8, kind === "bleed" ? "serrated_edge" : "searing"), life = Math.round((kind === "bleed" ? 600 : 240) * (100 + 10 * longer) / 100);
     c.effects[id] = {
       id,
       sourceId: source3.entityId,
@@ -24056,7 +24157,7 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
       ...kind === "bleed" && players.get(source3.entityId)?.d8 ? { toxicRank: copyWire(nodeRank(players.get(source3.entityId).d8, "dagger_inf_poison")) } : {},
       stacks: kind === "bleed" ? Math.min(5, (old2?.stacks ?? 0) + 1) : 1,
       nextTick: old2?.nextTick ?? s.tick + 60,
-      expiresTick: s.tick + (kind === "bleed" ? 600 : 240),
+      expiresTick: s.tick + life,
       sourceItem: copyWire(captured.sourceItem ?? damageSourceItem(players.get(source3.entityId), kind)),
       attack: copyWire(attack),
       rulesVersion: "combat-integer-v2"
@@ -24077,13 +24178,22 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
     const neighbors = overload && element !== "lightning" ? effects2.nearby(source3, origin, 80 * A * (1 + 0.2 * overload)).filter((t) => t.entityId !== target.entityId) : [];
     const hops = [];
     if (element === "lightning") {
+      const reach = 120 * (overload ? A : 1) * (100 + 10 * tree("arc_reach")) / 100, fork = tree("forked_lightning"), seen = /* @__PURE__ */ new Set([target.entityId]);
+      const closest = (from) => combatTargetsV4(s).filter((t) => !seen.has(t.entityId) && eligible2(source3, t) && Math.hypot(t.position.x - from.position.x, t.position.y - from.position.y) <= reach && subweaponLineClear(s.spacesByInstanceId[source3.residency.spaceInstanceId].collision, from, t)).sort((a, b2) => Math.hypot(a.position.x - from.position.x, a.position.y - from.position.y) - Math.hypot(b2.position.x - from.position.x, b2.position.y - from.position.y) || a.entityId.localeCompare(b2.entityId))[0];
       let previous = target;
-      const seen = /* @__PURE__ */ new Set([target.entityId]);
       for (let n = 0; n < 1 + overload + tree("storm_conductor"); n++) {
-        const next = combatTargetsV4(s).filter((t) => !seen.has(t.entityId) && eligible2(source3, t) && Math.hypot(t.position.x - previous.position.x, t.position.y - previous.position.y) <= 120 * (overload ? A : 1) && subweaponLineClear(s.spacesByInstanceId[source3.residency.spaceInstanceId].collision, previous, t)).sort((a, b2) => Math.hypot(a.position.x - previous.position.x, a.position.y - previous.position.y) - Math.hypot(b2.position.x - previous.position.x, b2.position.y - previous.position.y) || a.entityId.localeCompare(b2.entityId))[0];
+        const next = closest(previous);
         if (!next) break;
-        hops.push({ target: next, from: { entityId: previous.entityId, position: { ...previous.position } } });
+        const from = { entityId: previous.entityId, position: { ...previous.position } };
+        hops.push({ target: next, from });
         seen.add(next.entityId);
+        if (fork && combatRoll(c.actors[source3.entityId], combatAmount(10 * fork, 100))) {
+          const extra = closest(previous);
+          if (extra) {
+            hops.push({ target: extra, from });
+            seen.add(extra.entityId);
+          }
+        }
         previous = next;
       }
     }
@@ -24097,7 +24207,7 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
     }
     if (element === "lightning") for (const hop of hops) damage(source3, hop.target, raw, "lightning", b.commandId, { sourceItem: b.sourceItem, trigger: "proc", chainFrom: hop.from });
     if (element === "frost") {
-      if (eligible2(source3, target) && !isPodCombatTargetV4(target)) applyFrostControl(s, source3, target, stats(source3.entityId), 240 + 24 * tree("cold_snap"), tree("frostbinder"));
+      if (eligible2(source3, target) && !isPodCombatTargetV4(target)) applyFrostControl(s, source3, target, stats(source3.entityId), 240 + 24 * tree("cold_snap"), tree("frostbinder"), 10 * tree("deep_freeze"));
       for (const t of neighbors) effects2.status(source3, t, "slow", overload, 240);
     }
   }
@@ -26985,7 +27095,7 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
       }
       const resolved = progression.resolvedStats(source3.entityId), treeCrit = family.classHooks.critBonus(source3, target), critChance = [attribution?.critBonus, treeCrit].filter(Boolean).reduce((sum2, bonus) => addCombat(sum2, bonus), resolved.critChance), packet = criticalDamagePacket(roll6, critChance === resolved.critChance ? resolved : { ...resolved, critChance }, raw, mechanic, forced || family.classHooks.forceCrit(source3, target, attribution?.trigger));
       if (state.d9World) pendingPlayerRng = roll6.rng;
-      raw = family.classHooks.outgoing(source3, target, packet.damage, mechanic, attribution?.trigger);
+      raw = family.classHooks.outgoing(source3, target, packet.damage, mechanic, attribution?.trigger, packet.critical);
       critical = packet.critical;
     } else if (source3.team !== "party" && !periodic) mechanic = "hostile";
     if (source3.team === "hostile" && target.team === "party" && !periodic) {
@@ -27008,7 +27118,7 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
       const stats = progression.resolvedStats(target.entityId), suppressed = subweaponSuppressedD12_4I(state, target.entityId);
       defenseStats = stats;
       const defenseSource = attribution?.projectileDirection ? { ...source3, position: { x: target.position.x - attribution.projectileDirection.x * 32, y: target.position.y - attribution.projectileDirection.y * 32 } } : source3;
-      defense = incomingSubweaponHit({ combat: state.subweaponCombat.actors[target.entityId], stats, raw, actor: target, source: defenseSource, knight: playerFor(target.entityId)?.d8?.heroClass === "knight", boss: bossCombat.isBoss(source3.entityId) || Boolean(state.content.definitionsById[source3.contentDefinitionId]?.isBoss), suppressed });
+      defense = incomingSubweaponHit({ combat: state.subweaponCombat.actors[target.entityId], stats, raw, actor: target, source: defenseSource, knight: playerFor(target.entityId)?.d8?.heroClass === "knight", wall: classRank(playerFor(target.entityId)?.d8, "iron_wall"), boss: bossCombat.isBoss(source3.entityId) || Boolean(state.content.definitionsById[source3.contentDefinitionId]?.isBoss), suppressed });
       raw = defense.damage;
       if (compareCombat(defense.absorbed, 0) > 0) barrierAbsorption = { absorbed: copyWire(defense.absorbed), remaining: copyWire(state.subweaponCombat.actors[target.entityId].barrier), capacity: copyWire(stats.maxBarrier) };
     }
@@ -28167,7 +28277,7 @@ function projectCombatPresentation(state, visibleIds) {
   return { masteryHazards: mastery.flatMap((b) => Object.values(b.hazards)).filter((e) => ids4.has(e.sourceId)).map((e) => ({ position: { ...e.position }, radius: e.radius, expiresTick: e.expiresTick })), masteryRazors: mastery.flatMap((b) => Object.values(b.razors)).filter((e) => ids4.has(e.sourceId)).map((e) => ({ position: { ...e.position }, direction: { ...e.direction } })), statuses: [...Object.values(state.subweaponCombat.effects), ...mastery.flatMap((b) => [...Object.values(b.poisons).map((e) => ({ ...e, id: e.sourceId + "/" + e.id, kind: "poison" })), ...Object.values(b.statuses).filter((e) => e.kind !== "grudge" && e.kind !== "weaken").map((e) => ({ ...e, id: e.sourceId + "/" + e.id, stacks: e.rank, nextTick: e.expiresTick, appliedTick: e.expiresTick - (e.kind === "expose" ? 300 : e.kind === "slow" ? 240 : 90) }))]), ...Object.values(state.subweaponCombat.controls ?? {}).map((e) => ({ ...e, kind: e.phase, nextTick: e.expiresTick }))].filter((e) => ids4.has(e.targetId) && e.expiresTick > state.tick).map((e) => ({ lane: (lanes2.set(e.targetId, (lanes2.get(e.targetId) ?? -1) + 1), lanes2.get(e.targetId)), id: e.id, sourceId: e.sourceId, targetId: e.targetId, kind: e.kind, stacks: e.stacks, expiresTick: e.expiresTick, nextTick: e.nextTick, durationFrames: ["bleed", "poison"].includes(e.kind) ? 600 : e.kind === "burn" ? 240 : e.expiresTick - e.appliedTick })), families: Object.fromEntries(Object.entries(state.subweaponCombat.actors).filter(([id]) => ids4.has(id)).map(([id, c]) => [id, { mastery: (() => {
     const p = Object.values(state.playersById).find((p2) => p2.entityId === id), d = p?.d8, t = d?.transient;
     return t ? { pulseBlocks: t.pulseBlocks, syphon: finiteNodeRank(d, "tome_arcane_syphon") > 0, earthBreaker: finiteNodeRank(d, "shield_earth_breaker_bash") > 0, singularity: finiteNodeRank(d, "tome_keystone_singularity") > 0, anchor: t.lastAnchor, fortitudeStacks: t.fortitudeStacks, retaliatoryReady: t.retaliatoryReady, colossus: t.colossusTicks > 0, shadowStep: t.shadowStepTicks > 0, syphonStacks: t.syphonStacks, weavingStacks: t.weavingStacks } : null;
-  })(), element: Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.itemsById[Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.equipped.subweapon]?.generated?.definition.spellType ?? "fire", guard: c.guard ? { ...c.guard, integrity: presentCombat(c.guard.integrity), direction: { ...c.guard.direction } } : null, pressure: c.pressure, dash: { ...c.dash }, blink: itemDefinition(((p) => p?.inventory.itemsById[p.inventory.equipped.subweapon])(Object.values(state.playersById).find((p) => p.entityId === id)))?.subType === "tome", delivery: { ...c.delivery }, skill: c.skills?.last ? { ...c.skills.last } : null, parry: c.skills?.parry ?? c.skills?.counter ?? 0, orbs: c.skills?.orbs?.map((o) => ({ x: o.x, y: o.y, dx: o.dx, dy: o.dy, ticks: o.ticks })) ?? null }])) };
+  })(), element: Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.itemsById[Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.equipped.subweapon]?.generated?.definition.spellType ?? "fire", guard: c.guard ? { ...c.guard, integrity: presentCombat(c.guard.integrity), direction: { ...c.guard.direction } } : null, pressure: c.pressure, dash: { ...c.dash }, blink: itemDefinition(((p) => p?.inventory.itemsById[p.inventory.equipped.subweapon])(Object.values(state.playersById).find((p) => p.entityId === id)))?.subType === "tome", delivery: { ...c.delivery }, skill: c.skills?.last ? { ...c.skills.last } : null, parry: c.skills?.parry ?? c.skills?.counter ?? 0, orbs: c.skills?.orbs?.map((o) => ({ x: o.x, y: o.y, dx: o.dx, dy: o.dy, ticks: o.ticks })) ?? null, trail: c.skills?.trail ? { x: c.skills.trail.x, y: c.skills.trail.y, x2: c.skills.trail.x2, y2: c.skills.trail.y2, ticks: c.skills.trail.ticks } : null, wall: classRank(Object.values(state.playersById).find((p) => p.entityId === id)?.d8, "iron_wall") }])) };
 }
 
 // src/shared/content/creatures_d11.js
@@ -36872,6 +36982,54 @@ function createDynamicWorldLightsV1(doc) {
     ctx.restore();
   }
   return Object.freeze({ illuminate, glow: glow7, resources: () => ({ dynamicWorldLights: { version: DYNAMIC_WORLD_LIGHTS_VERSION, drawn, cores } }) });
+}
+
+// src/client/skill_lights_v1.js
+var SKILL_LIGHTS_VERSION = "skill-lights-v1";
+var WASH = 0.32;
+var MAX_LIGHTS = 48;
+function createSkillLightsV1(doc) {
+  const stamps = /* @__PURE__ */ new Map();
+  let drawn = 0;
+  function stamp2(color28) {
+    const cached = stamps.get(color28);
+    if (cached) return cached;
+    const c = doc.createElement("canvas");
+    c.width = c.height = 128;
+    const g = c.getContext("2d"), gradient = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+    gradient.addColorStop(0, color28 + "ff");
+    gradient.addColorStop(0.4, color28 + "a0");
+    gradient.addColorStop(0.75, color28 + "30");
+    gradient.addColorStop(1, color28 + "00");
+    g.fillStyle = gradient;
+    g.fillRect(0, 0, 128, 128);
+    stamps.set(color28, c);
+    return c;
+  }
+  function paint(ctx, lights, view, strength) {
+    drawn = 0;
+    if (!lights.length) return;
+    ctx.save();
+    ctx.globalCompositeOperation = "screen";
+    for (const l of lights.slice(0, MAX_LIGHTS)) {
+      if (!(l.alpha > 0.01) || !(l.r > 0)) continue;
+      if (view && (l.x + l.r < view.x || l.y + l.r < view.y || l.x - l.r > view.x + view.width || l.y - l.r > view.y + view.height)) continue;
+      ctx.globalAlpha = Math.min(1, l.alpha * strength);
+      ctx.drawImage(stamp2(l.color), l.x - l.r, l.y - l.r * 0.8, l.r * 2, l.r * 1.6);
+      drawn++;
+    }
+    ctx.restore();
+  }
+  return Object.freeze({
+    wash: (ctx, lights, view) => paint(ctx, lights, view, WASH),
+    illuminate: (lc, lights, view) => paint(lc, lights, view, 1),
+    resources: () => ({ skillLights: { version: SKILL_LIGHTS_VERSION, drawn } })
+  });
+}
+function lightEnvelope(age, life) {
+  if (age < 0 || age >= life) return 0;
+  const k = age / life;
+  return Math.min(1, k * 6) * (1 - k);
 }
 
 // src/client/day_night_lighting_v1.js
@@ -49315,9 +49473,9 @@ function rune(ctx, x, y, r, lit, alpha2) {
 function guardFace(x, y, facing2) {
   return { x: x + 0.8 * facing2 * 11.8, y: y - 8 + 0.8 * 5.6 };
 }
-function drawGuardWard(ctx, x, y, angle3, type, open, runes, blockAge, time, move2 = null) {
+function drawGuardWard(ctx, x, y, angle3, type, open, runes, blockAge, time, move2 = null, wall = 0) {
   if (open <= 0.01) return;
-  const w = WARDS[type] ?? WARDS.kite, t = time / 1e3, cx = x, cy = y - 12, span = Math.PI * smooth19(open);
+  const w = WARDS[type] ?? WARDS.kite, t = time / 1e3, cx = x, cy = y - 12, span = Math.PI * (1 + 0.1 * wall) * smooth19(open);
   const dent = blockAge >= 0 && blockAge < 260 ? Math.sin(Math.PI * blockAge / 260) : 0, mx = move2?.x ?? 0, my = move2?.y ?? 0, moving = Math.hypot(mx, my) > 0.05;
   const radius = (a) => {
     const off = a - angle3;
@@ -50029,6 +50187,45 @@ function drawLightningOrb(ctx, o, time) {
   }
   ctx.restore();
 }
+function drawCinderTrail(ctx, tr, time) {
+  const F = CAST_COLORS.fire, K2 = { deep: "#8a2a0c", main: F.main, spark: F.spark }, fade = Math.min(1, (tr.ticks ?? 60) / 30), dx = tr.x2 - tr.x, dy = tr.y2 - tr.y, len = Math.hypot(dx, dy);
+  if (fade <= 0) return;
+  ctx.save();
+  ctx.globalAlpha *= fade;
+  ctx.lineCap = "round";
+  ctx.strokeStyle = "rgba(60,30,14,.32)";
+  ctx.lineWidth = 9;
+  ctx.beginPath();
+  ctx.moveTo(tr.x, tr.y);
+  ctx.lineTo(tr.x2, tr.y2);
+  ctx.stroke();
+  ctx.restore();
+  neon(ctx, K2, 1.2, () => {
+    ctx.beginPath();
+    ctx.moveTo(tr.x, tr.y);
+    ctx.lineTo(tr.x2, tr.y2);
+  }, fade * 0.9);
+  const n = Math.max(2, Math.round(len / 9));
+  for (let i = 0; i <= n; i++) {
+    const k = i / n, px2 = tr.x + dx * k + (rnd(i + 11) - 0.5) * 5, py = tr.y + dy * k + (rnd(i + 23) - 0.5) * 4, h = (5 + 6 * rnd(i + 5)) * (0.7 + 0.3 * Math.sin(time / 55 + i * 2.1));
+    withAlpha(ctx, fade, () => {
+      ctx.fillStyle = i % 2 ? "#ff7a1f" : "#ffc94d";
+      ctx.strokeStyle = "#8a2a0c";
+      ctx.lineWidth = 0.6;
+      ctx.beginPath();
+      ctx.moveTo(px2 - 2.6, py);
+      ctx.quadraticCurveTo(px2 - 1, py - h * 0.6, px2, py - h);
+      ctx.quadraticCurveTo(px2 + 1, py - h * 0.6, px2 + 2.6, py);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    });
+  }
+  for (let i = 0; i < 6; i++) {
+    const cycle = time / 700 + rnd(i + 3), round = Math.floor(cycle), rise = cycle - round, k = rnd(i * 7 + round * 13);
+    mote(ctx, tr.x + dx * k, tr.y + dy * k - 4 - 16 * rise, 1, F.spark, fade * (1 - rise));
+  }
+}
 var DRAW = Object.freeze({ earth_breaker: earthBreaker, rallying_cry: rallyingCry, counter_stance: counterStance, lunge, toxic_fan: toxicFan, whirling_blades: whirlingBlades, firebloom, flashfreeze, ball_lightning: ballLightningCast });
 function drawTreeSkillBurst(ctx, skillId, b, age) {
   const draw = DRAW[skillId], life = TREE_SKILL_BURST_MS[skillId];
@@ -50430,6 +50627,14 @@ function drawPersistentStatus(ctx, e, target, tick, time, lane = 0) {
   ctx.restore();
 }
 var SKILL_ELEMENT_COLORS = { fire: "#ffc27a", lightning: "#d6c8ff", frost: "#cfe9ff" };
+var LIGHT10 = Object.freeze({ fire: "#ff8a3d", frost: "#8fd8ff", lightning: "#ffe45c", knight: "#73bedc", breaker: "#ff9d5c", rally: "#ffd36b", reprisal: "#ff8fa0", duelist: "#f5cf6a", venom: "#9be36a", skirmish: "#b48cff", parry: "#e4ceff", blink: "#8fd0ff" });
+var SKILL_LIGHT = Object.freeze({ shield_bash: [LIGHT10.knight, 56, 320, 0.55], flurry: [LIGHT10.skirmish, 46, 400, 0.4], earth_breaker: [LIGHT10.breaker, null, 780, 0.45], rallying_cry: [LIGHT10.rally, null, 900, 0.45], counter_stance: [LIGHT10.reprisal, 50, 480, 0.45], lunge: [LIGHT10.duelist, 44, 440, 0.35], toxic_fan: [LIGHT10.venom, null, 560, 0.3], whirling_blades: [LIGHT10.skirmish, null, 620, 0.35], firebloom: [LIGHT10.fire, null, 820, 0.75], flashfreeze: [LIGHT10.frost, null, 800, 0.55], ball_lightning: [LIGHT10.lightning, 44, 360, 0.5] });
+function burstLight(b) {
+  if (b.kind === "blink" || b.kind === "blinkEnd") return { color: LIGHT10.blink, r: 40, life: 300, alpha: 0.45 };
+  if (b.kind === "skill:cast") return { color: LIGHT10[b.element] ?? LIGHT10.fire, r: 44, life: 420, alpha: 0.55 };
+  const s = b.kind.startsWith("skill:") ? SKILL_LIGHT[b.kind.slice(6)] : null;
+  return s ? { color: s[0], r: s[1] ?? Math.max(40, (b.reach ?? 60) * 1.3), life: s[2], alpha: s[3] } : null;
+}
 function drawSkillBurst(ctx, b, age) {
   const heading = Math.atan2(b.dy, b.dx);
   ctx.save();
@@ -50463,7 +50668,7 @@ function createCombatVfx() {
     afterimages.push({ id, image, x: a.position.x, y: a.position.y, born: time });
     if (afterimages.length > 12) afterimages.shift();
   }
-  function drawWard(ctx, m, id, a, time) {
+  function drawWard(ctx, m, id, a, time, wall = 0) {
     const g = a.guard;
     if (!g) return;
     let w = wards.get(id);
@@ -50486,7 +50691,7 @@ function createCombatVfx() {
     w.open = g.raised ? Math.min(1, w.open + dt / 250) : Math.max(0, w.open - dt / 300);
     if (w.open <= 0.01) return;
     const blockAge = (m.tick - (a.shieldBlockTick ?? -1e9)) * 1e3 / 60, runes = Math.max(0, Math.min(4, Math.floor(Number(g.integrity) / 8) || 0));
-    drawGuardWard(ctx, a.position.x, a.position.y, w.angle, shieldTypeOf(a.heroLook?.gear?.off?.kind), w.open, runes, blockAge, time, w.move);
+    drawGuardWard(ctx, a.position.x, a.position.y, w.angle, shieldTypeOf(a.heroLook?.gear?.off?.kind), w.open, runes, blockAge, time, w.move, wall);
   }
   function add(kind, target, time, dx = 1, dy = 0, extra = null) {
     if (bursts.length >= 32) bursts.shift();
@@ -50527,7 +50732,7 @@ function createCombatVfx() {
         if (old2.dash > 0 && f.dash.frames === 0) add(f.blink ? "blinkEnd" : "dashEnd", a, time, old2.dx, old2.dy);
         if (f.skill && f.skill.tick !== old2.skill) {
           const facing2 = poses[id]?.facing ?? 1, cast = f.skill.skillId === "cast";
-          add("skill:" + f.skill.skillId, cast ? { position: castCirclePosition(a, facing2) } : a, time, f.skill.x, f.skill.y, { facing: facing2, reach: f.skill.r, ox: f.skill.ox, oy: f.skill.oy, ox2: f.skill.ox2, oy2: f.skill.oy2, spread: f.skill.spread, subType: a.subType, element: cast ? castElement(m, id, f.element) : null, shield: f.skill.skillId === "shield_bash" ? shieldTypeOf(a.heroLook?.gear?.off?.kind) : null, dagger: f.skill.skillId === "flurry" ? daggerTypeOf(a.heroLook?.gear?.off?.kind) : null });
+          add("skill:" + f.skill.skillId, cast ? { position: castCirclePosition(a, facing2) } : a, time, f.skill.x, f.skill.y, { facing: facing2, ground: a.position.y, reach: f.skill.r, ox: f.skill.ox, oy: f.skill.oy, ox2: f.skill.ox2, oy2: f.skill.oy2, spread: f.skill.spread, subType: a.subType, element: cast ? castElement(m, id, f.element) : null, shield: f.skill.skillId === "shield_bash" ? shieldTypeOf(a.heroLook?.gear?.off?.kind) : null, dagger: f.skill.skillId === "flurry" ? daggerTypeOf(a.heroLook?.gear?.off?.kind) : null });
           bursts[bursts.length - 1].color = SKILL_ELEMENT_COLORS[f.element] ?? SKILL_ELEMENT_COLORS.fire;
         }
       }
@@ -50537,70 +50742,116 @@ function createCombatVfx() {
     }
     seen = true;
   }
-  function draw(ctx, m, time, viewport) {
-    drawMasteryWorld(ctx, m, time);
+  const visibleIn = (viewport) => (p) => !viewport || p.x >= viewport.x - 60 && p.y >= viewport.y - 80 && p.x <= viewport.x + viewport.width + 60 && p.y <= viewport.y + viewport.height + 80;
+  const foot = (a) => a.position.y + (a.groundAnchorY ?? (a.hullRadius ?? 10) * 0.45) + 0.5, AFTER = 5;
+  function drawBurst(ctx, m, b, age, time) {
+    if (b.kind.startsWith("skill:")) {
+      drawSkillBurst(ctx, b, age);
+    } else if (b.kind.startsWith("blink")) {
+      drawBlinkGhost(ctx, m, b, age, time);
+      drawBlinkBurst(ctx, b, age);
+    } else if (b.kind === "pressure") {
+      if (age < 220) {
+        ctx.save();
+        ctx.globalAlpha = 1 - age / 220;
+        const px2 = b.x + b.dx * 18, py = b.y - 8;
+        ctx.strokeStyle = "#ffe19a";
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.arc(px2, py, 3 + 5 * age / 220, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+    } else if (b.kind === "ignite") {
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, 1 - age / 220);
+      drawStatusIcon(ctx, "burn", b.x, b.y, 19);
+      ctx.restore();
+    } else if (b.kind.startsWith("dash")) {
+      const landing = b.kind === "dashEnd";
+      drawDashChevron(ctx, b.x, b.y, b.dx, b.dy, age, landing);
+      drawDashDust(ctx, b.x, b.y, b.dx, age, landing);
+    } else drawCombatImpact(ctx, b.kind, b.x, b.y, b.dx, b.dy, age);
+  }
+  function depthItems2(m, time, viewport) {
+    const visible3 = visibleIn(viewport), items = [], put2 = (id, x, y, paint) => items.push(depthItem({ id: "vfx/" + id, anchorX: x, anchorY: y, draw: paint }));
     for (let i = afterimages.length - 1; i >= 0; i--) {
       const g = afterimages[i], age = time - g.born;
       if (age >= AFTERIMAGE_LIFE) {
         afterimages.splice(i, 1);
         continue;
       }
-      drawAfterimage(ctx, g.image, g.x, g.y, age);
+      put2("after/" + g.id + "/" + g.born, g.x, g.y + AFTER - 0.5, (ctx) => drawAfterimage(ctx, g.image, g.x, g.y, age));
     }
     for (const [id, at3] of parrySpent) if (time - at3 > 400) parrySpent.delete(id);
-    const visible3 = (p) => !viewport || p.x >= viewport.x - 60 && p.y >= viewport.y - 80 && p.x <= viewport.x + viewport.width + 60 && p.y <= viewport.y + viewport.height + 80;
-    for (const b of bursts) {
-      if (!visible3(b)) continue;
+    bursts.forEach((b, i) => {
+      if (!visible3(b)) return;
       const age = time - b.born;
-      if (b.kind.startsWith("skill:")) {
-        drawSkillBurst(ctx, b, age);
-      } else if (b.kind.startsWith("blink")) {
-        drawBlinkGhost(ctx, m, b, age, time);
-        drawBlinkBurst(ctx, b, age);
-      } else if (b.kind === "pressure") {
-        if (age < 220) {
-          ctx.save();
-          ctx.globalAlpha = 1 - age / 220;
-          const px2 = b.x + b.dx * 18, py = b.y - 8;
-          ctx.strokeStyle = "#ffe19a";
-          ctx.lineWidth = 1.4;
-          ctx.beginPath();
-          ctx.arc(px2, py, 3 + 5 * age / 220, 0, Math.PI * 2);
-          ctx.stroke();
-          ctx.restore();
-        }
-      } else if (b.kind === "ignite") {
-        ctx.save();
-        ctx.globalAlpha = Math.max(0, 1 - age / 220);
-        drawStatusIcon(ctx, "burn", b.x, b.y, 19);
-        ctx.restore();
-      } else if (b.kind.startsWith("dash")) {
-        const landing = b.kind === "dashEnd";
-        drawDashChevron(ctx, b.x, b.y, b.dx, b.dy, age, landing);
-        drawDashDust(ctx, b.x, b.y, b.dx, age, landing);
-      } else drawCombatImpact(ctx, b.kind, b.x, b.y, b.dx, b.dy, age);
-    }
+      put2("burst/" + i, b.x + (b.ox ?? 0), (b.ground ?? b.y) + (b.oy ?? 0) + AFTER, (ctx) => drawBurst(ctx, m, b, age, time));
+    });
     for (const e of m.combatPresentation?.statuses ?? []) {
+      if (e.kind !== "stun") continue;
       const a = m.entitiesById[e.targetId];
-      if (a?.alive && visible3(a.position)) {
-        const lane = e.lane ?? 0;
-        if (e.kind === "stun") drawBashStun(ctx, a.position.x, a.position.y, time, shieldTypeOf(m.entitiesById[e.sourceId]?.heroLook?.gear?.off?.kind) === "tower" ? 2 : 1);
-        drawPersistentStatus(ctx, e, a, m.tick, time, lane);
-      }
+      if (a?.alive && visible3(a.position)) put2("stun/" + e.id, a.position.x, foot(a), (ctx) => drawBashStun(ctx, a.position.x, a.position.y, time, shieldTypeOf(m.entitiesById[e.sourceId]?.heroLook?.gear?.off?.kind) === "tower" ? 2 : 1));
     }
     for (const [id, f] of Object.entries(m.combatPresentation?.families ?? {})) {
       const a = m.entitiesById[id];
       if (!a || !visible3(a.position)) continue;
-      drawWard(ctx, m, id, a, time);
-      if (f.dash.frames > 0 && f.blink) drawBlinkStreaks(ctx, a.position.x, a.position.y, f.dash.x, f.dash.y, time);
-      else if (f.dash.frames > 0) {
-        drawDashStreaks(ctx, a.position.x, a.position.y, f.dash.x, f.dash.y, time);
-        spawnAfterimage(ctx, id, a, f, time);
+      put2("hero/" + id, a.position.x, foot(a), (ctx) => {
+        drawWard(ctx, m, id, a, time, f.wall ?? 0);
+        if (f.dash.frames > 0 && f.blink) drawBlinkStreaks(ctx, a.position.x, a.position.y, f.dash.x, f.dash.y, time);
+        else if (f.dash.frames > 0) {
+          drawDashStreaks(ctx, a.position.x, a.position.y, f.dash.x, f.dash.y, time);
+          spawnAfterimage(ctx, id, a, f, time);
+        }
+        (a.subType === "shield" ? drawCounterWard : drawParryWard)(ctx, a.position.x, a.position.y, facings.get(id) ?? 1, f.parry > 0, time, parrySpent.has(id) ? time - parrySpent.get(id) : -1);
+      });
+      (f.orbs ?? []).forEach((o, k) => {
+        if (visible3(o)) put2("orb/" + id + "/" + k, o.x, o.y + 1, (ctx) => drawLightningOrb(ctx, o, time));
+      });
+      const tr = f.trail;
+      if (tr && (visible3(tr) || visible3({ x: tr.x2, y: tr.y2 }))) put2("trail/" + id, (tr.x + tr.x2) / 2, Math.max(tr.y, tr.y2), (ctx) => drawCinderTrail(ctx, tr, time));
+    }
+    return items;
+  }
+  function lights(m, time) {
+    const out = [], at3 = (x, y, r, color28, alpha2) => {
+      if (alpha2 > 0.01) out.push({ x, y, r, color: color28, alpha: alpha2 });
+    };
+    for (const b of bursts) {
+      const l = burstLight(b), k = l ? lightEnvelope(time - b.born, l.life) : 0;
+      if (!k) continue;
+      const y = b.ground ?? b.y;
+      at3(b.x + (b.ox ?? 0), y + (b.oy ?? 0), l.r, l.color, l.alpha * k);
+      if (b.ox2 !== void 0) at3(b.x + b.ox2, y + b.oy2, l.r, l.color, l.alpha * k);
+    }
+    for (const bolt2 of m.bolts ?? []) at3(bolt2.position.x, bolt2.position.y, 52, LIGHT10[bolt2.delivery] ?? LIGHT10.fire, 0.6);
+    for (const [id, f] of Object.entries(m.combatPresentation?.families ?? {})) {
+      const a = m.entitiesById[id];
+      if (!a?.alive) continue;
+      for (const o of f.orbs ?? []) at3(o.x, o.y, 70, LIGHT10.lightning, 0.65 * Math.min(1, (o.ticks ?? 60) / 30));
+      const w = wards.get(id);
+      if (w?.open > 0.05) at3(a.position.x, a.position.y, 48, LIGHT10.knight, 0.4 * w.open);
+      if (f.parry > 0) at3(a.position.x, a.position.y, 40, a.subType === "shield" ? LIGHT10.reprisal : LIGHT10.parry, 0.35);
+      const tr = f.trail;
+      if (tr) {
+        const fade = Math.min(1, (tr.ticks ?? 60) / 30), n = Math.max(1, Math.round(Math.hypot(tr.x2 - tr.x, tr.y2 - tr.y) / 36));
+        for (let i = 0; i <= n; i++) at3(tr.x + (tr.x2 - tr.x) * i / n, tr.y + (tr.y2 - tr.y) * i / n, 30, LIGHT10.fire, 0.45 * fade * (0.85 + 0.15 * Math.sin(time / 90 + i * 1.7)));
       }
-      if (f.orbs) {
-        for (const o of f.orbs) if (visible3(o)) drawLightningOrb(ctx, o, time);
-      }
-      (a.subType === "shield" ? drawCounterWard : drawParryWard)(ctx, a.position.x, a.position.y, facings.get(id) ?? 1, f.parry > 0, time, parrySpent.has(id) ? time - parrySpent.get(id) : -1);
+    }
+    for (const e of m.combatPresentation?.statuses ?? []) {
+      if (e.kind !== "burn") continue;
+      const a = m.entitiesById[e.targetId];
+      if (a?.alive) at3(a.position.x, a.position.y, 30, LIGHT10.fire, 0.3 * (0.85 + 0.15 * Math.sin(time / 90 + a.position.x)));
+    }
+    return out;
+  }
+  function draw(ctx, m, time, viewport) {
+    drawMasteryWorld(ctx, m, time);
+    const visible3 = visibleIn(viewport);
+    for (const e of m.combatPresentation?.statuses ?? []) {
+      const a = m.entitiesById[e.targetId];
+      if (a?.alive && visible3(a.position)) drawPersistentStatus(ctx, e, a, m.tick, time, e.lane ?? 0);
     }
   }
   return { clear() {
@@ -50614,8 +50865,12 @@ function createCombatVfx() {
     lastModel = null;
     seen = false;
   }, rebase(project2) {
-    for (const b of bursts) Object.assign(b, project2(b));
-  }, update, draw, inspect: () => ({ bursts: bursts.length, statuses: statuses.size }) };
+    for (const b of bursts) {
+      const p = project2(b);
+      if (b.ground !== void 0) b.ground += p.y - b.y;
+      Object.assign(b, p);
+    }
+  }, update, depthItems: depthItems2, lights, draw, inspect: () => ({ bursts: bursts.length, statuses: statuses.size }) };
 }
 
 // src/client/economy_resource_presentation.js
@@ -54172,6 +54427,7 @@ function chooseTextPath(anchor, size, occupied, reserved, view, sequence, scale 
 
 // src/client/combat_feedback.js
 var HIT_FEEDBACK = Object.freeze({ flashMs: 100, recoilMs: 180, sparksMs: 170, placementMs: 120, numberMs: 750, maxNumbers: 128, maxPerTarget: 128, maxReactions: 32 });
+var IMPACT_LIGHT = Object.freeze({ fire: ["#ff8a3d", 46, 520, 0.6], lightning: ["#ffe45c", 44, 420, 0.6], frost: ["#8fd8ff", 40, 480, 0.45], quake: ["#ff9d5c", 38, 500, 0.35], bash: ["#73bedc", 36, 300, 0.4] });
 var boundedSet = (map, key2, value2) => {
   map.delete(key2);
   if (map.size >= HIT_FEEDBACK.maxReactions) map.delete(map.keys().next().value);
@@ -54242,51 +54498,79 @@ function createCombatFeedback() {
     const age = Math.max(0, time - r.born), strength = r.player ? 0 : r.heavy ? 8 : 5, decay = (1 - age / HIT_FEEDBACK.recoilMs) ** 2;
     return { offsetX: r.direction.x * strength * decay, offsetY: r.direction.y * strength * decay, flash: age < HIT_FEEDBACK.flashMs, player: r.player };
   }
+  function drawSparks(ctx, r, age) {
+    ctx.save();
+    const t = age / HIT_FEEDBACK.sparksMs, p = r.position, base = Math.atan2(r.direction.y, r.direction.x), count = r.heavy ? 7 : 5;
+    ctx.globalAlpha = 1 - t;
+    ctx.strokeStyle = r.player ? "#ff947c" : "#fff0b0";
+    ctx.lineWidth = r.heavy ? 2.3 : 1.8;
+    for (let n = 0; n < count; n++) {
+      const angle3 = base + (n - (count - 1) / 2) * 0.46, near = 5 + t * 13, far = near + (r.heavy ? 12 : 8) * (1 - t);
+      ctx.beginPath();
+      ctx.moveTo(p.x + Math.cos(angle3) * near, p.y - 12 + Math.sin(angle3) * near);
+      ctx.lineTo(p.x + Math.cos(angle3) * far, p.y - 12 + Math.sin(angle3) * far);
+      ctx.stroke();
+    }
+    if (r.player && !r.defended) {
+      ctx.strokeStyle = "#ff806b";
+      ctx.beginPath();
+      ctx.ellipse(p.x, p.y - 13, 13 + t * 5, 18 + t * 5, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+  function drawImpact(ctx, n, age, earthDrawn) {
+    if (n.projectileContact) drawOrdinaryHostileProjectileImpact(ctx, { position: n.position, style: n.projectileContact.style }, age);
+    if (n.hostileMelee && n.sourcePosition) drawHostileContact(ctx, { ...n.hostileMelee, sourcePosition: n.sourcePosition, targetPosition: n.position }, age);
+    if (n.earthBreaker && n.sourcePosition && !earthDrawn.has(n.sourceId + "/" + n.eventTick)) {
+      earthDrawn.add(n.sourceId + "/" + n.eventTick);
+      drawEarthBreaker(ctx, n.sourcePosition, n.direction, age);
+    }
+    if (n.chainFrom) drawCastChain(ctx, n.chainFrom.position, n.position, age);
+    if (n.barrierAbsorption) {
+      const b = n.barrierAbsorption;
+      drawBarrierImpact(ctx, n.position.x, n.position.y, -n.direction.x, -n.direction.y, age, { remaining: integerRatio(combatInteger(b.remaining), combatInteger(b.capacity)), capacity: 1 });
+    }
+    if (n.mechanic !== "main" && !(n.mechanic === "hostile" && (n.hostileMelee || n.projectileContact)) && n.mechanic !== n.defenseKind) {
+      if (n.mechanic === "quake") drawQuakeImpact(ctx, n.position.x, n.position.y, age, n.critical);
+      else if (n.mechanic === "bash" && n.trigger !== "reactive") drawBashImpact(ctx, n.position.x, n.position.y, n.direction.x, n.direction.y, age, n.critical);
+      else if (!drawCastImpact(ctx, n.mechanic, n.position.x, n.position.y, age, n.critical)) drawCombatImpact(ctx, n.mechanic === "bash" && n.trigger === "reactive" ? "shieldRiposte" : n.mechanic, n.position.x, n.position.y, n.direction.x, n.direction.y, age, n.critical);
+    }
+    if (n.defenseKind === "block" || n.defenseKind === "parry") drawCombatImpact(ctx, n.defenseKind, n.position.x, n.position.y, -n.direction.x, -n.direction.y, age);
+  }
+  const enemySide = (n) => !n.player;
+  function depthItems2(time, viewport = null) {
+    const items = [], earthDrawn = /* @__PURE__ */ new Set(), seen = (p) => !viewport || p.x >= viewport.x - 60 && p.y >= viewport.y - 80 && p.x <= viewport.x + viewport.width + 60 && p.y <= viewport.y + viewport.height + 80;
+    for (const [id, r] of reactions) {
+      const age = time - r.born;
+      if (r.defended || !enemySide(r) || age < 0 || age >= HIT_FEEDBACK.sparksMs || !seen(r.position)) continue;
+      items.push(depthItem({ id: "spark/" + id, anchorX: r.position.x, anchorY: r.position.y + 5, draw: (ctx) => drawSparks(ctx, r, age) }));
+    }
+    impacts2.forEach((n, i) => {
+      if (!enemySide(n) || !seen(n.position)) return;
+      const age = time - n.born;
+      items.push(depthItem({ id: "impact/" + n.eventSequence + "/" + i, anchorX: n.position.x, anchorY: n.position.y + 5, draw: (ctx) => drawImpact(ctx, n, age, earthDrawn) }));
+    });
+    return items;
+  }
+  function lights(time) {
+    const out = [];
+    for (const n of impacts2) {
+      const l = IMPACT_LIGHT[n.mechanic], k = l ? lightEnvelope(time - n.born, l[2]) : 0;
+      if (k) out.push({ x: n.position.x, y: n.position.y, r: l[1], color: l[0], alpha: l[3] * k });
+    }
+    return out;
+  }
   function draw(ctx, time, art = () => null, viewport = null) {
     ctx.save();
     for (const r of reactions.values()) {
-      if (r.defended) continue;
+      if (r.defended || enemySide(r)) continue;
       const age = time - r.born;
       if (age < 0 || age >= HIT_FEEDBACK.sparksMs) continue;
-      const t = age / HIT_FEEDBACK.sparksMs, p = r.position, base = Math.atan2(r.direction.y, r.direction.x), count = r.heavy ? 7 : 5;
-      ctx.globalAlpha = 1 - t;
-      ctx.strokeStyle = r.player ? "#ff947c" : "#fff0b0";
-      ctx.lineWidth = r.heavy ? 2.3 : 1.8;
-      for (let n = 0; n < count; n++) {
-        const angle3 = base + (n - (count - 1) / 2) * 0.46, near = 5 + t * 13, far = near + (r.heavy ? 12 : 8) * (1 - t);
-        ctx.beginPath();
-        ctx.moveTo(p.x + Math.cos(angle3) * near, p.y - 12 + Math.sin(angle3) * near);
-        ctx.lineTo(p.x + Math.cos(angle3) * far, p.y - 12 + Math.sin(angle3) * far);
-        ctx.stroke();
-      }
-      if (r.player && !r.defended) {
-        ctx.strokeStyle = "#ff806b";
-        ctx.beginPath();
-        ctx.ellipse(p.x, p.y - 13, 13 + t * 5, 18 + t * 5, 0, 0, Math.PI * 2);
-        ctx.stroke();
-      }
+      drawSparks(ctx, r, age);
     }
     const earthDrawn = /* @__PURE__ */ new Set();
-    for (const n of impacts2) {
-      const age = time - n.born;
-      if (n.projectileContact) drawOrdinaryHostileProjectileImpact(ctx, { position: n.position, style: n.projectileContact.style }, age);
-      if (n.hostileMelee && n.sourcePosition) drawHostileContact(ctx, { ...n.hostileMelee, sourcePosition: n.sourcePosition, targetPosition: n.position }, age);
-      if (n.earthBreaker && n.sourcePosition && !earthDrawn.has(n.sourceId + "/" + n.eventTick)) {
-        earthDrawn.add(n.sourceId + "/" + n.eventTick);
-        drawEarthBreaker(ctx, n.sourcePosition, n.direction, age);
-      }
-      if (n.chainFrom) drawCastChain(ctx, n.chainFrom.position, n.position, age);
-      if (n.barrierAbsorption) {
-        const b = n.barrierAbsorption;
-        drawBarrierImpact(ctx, n.position.x, n.position.y, -n.direction.x, -n.direction.y, age, { remaining: integerRatio(combatInteger(b.remaining), combatInteger(b.capacity)), capacity: 1 });
-      }
-      if (n.mechanic !== "main" && !(n.mechanic === "hostile" && (n.hostileMelee || n.projectileContact)) && n.mechanic !== n.defenseKind) {
-        if (n.mechanic === "quake") drawQuakeImpact(ctx, n.position.x, n.position.y, age, n.critical);
-        else if (n.mechanic === "bash" && n.trigger !== "reactive") drawBashImpact(ctx, n.position.x, n.position.y, n.direction.x, n.direction.y, age, n.critical);
-        else if (!drawCastImpact(ctx, n.mechanic, n.position.x, n.position.y, age, n.critical)) drawCombatImpact(ctx, n.mechanic === "bash" && n.trigger === "reactive" ? "shieldRiposte" : n.mechanic, n.position.x, n.position.y, n.direction.x, n.direction.y, age, n.critical);
-      }
-      if (n.defenseKind === "block" || n.defenseKind === "parry") drawCombatImpact(ctx, n.defenseKind, n.position.x, n.position.y, -n.direction.x, -n.direction.y, age);
-    }
+    for (const n of impacts2) if (!enemySide(n)) drawImpact(ctx, n, time - n.born, earthDrawn);
     const transform = ctx.getTransform(), point13 = (p) => ({ x: p.x * transform.a + transform.e, y: p.y * transform.d + transform.f }), scale = ctx.canvas.width / (ctx.canvas.clientWidth || ctx.canvas.width), view = { x: 4 * scale, y: 4 * scale, width: ctx.canvas.width - 8 * scale, height: ctx.canvas.height - 8 * scale };
     const reserved = [], occupied = [];
     lastLayout = [];
@@ -54363,6 +54647,8 @@ function createCombatFeedback() {
     },
     update,
     reaction,
+    depthItems: depthItems2,
+    lights,
     draw,
     resources: () => ({ floatingNumbers: numbers.length, hitReactions: reactions.size, peakFloatingNumbers: peak }),
     // Explicit inspection is for evidence; normal rendering never serializes it.
@@ -56728,7 +57014,7 @@ function drawAegisMimicTethers(c, model, tick) {
 var TAU65 = Math.PI * 2;
 var INK46 = "#11151a";
 var CYAN4 = "#65e6ec";
-var LIGHT10 = "#b1fcf0";
+var LIGHT11 = "#b1fcf0";
 var BLUE3 = "#298eaa";
 var STONE6 = "#405469";
 var DARK7 = "#233346";
@@ -56777,11 +57063,11 @@ function shield3(c, x, y, r, spin, flash = false) {
   c.save();
   c.translate(x, y);
   c.rotate(spin);
-  plate3(c, hex(c, r), flash ? LIGHT10 : STONE6);
+  plate3(c, hex(c, r), flash ? LIGHT11 : STONE6);
   plate3(c, [[0, -r], ...[0, 1, 2].map((i) => hex(c, r)[i]), [0, 0]], "#6d8798", false);
   plate3(c, hex(c, r * 0.72), DARK7);
   plate3(c, [[-r * 0.42, 0], [0, -r * 0.48], [r * 0.42, 0], [0, r * 0.48]], flash ? "#f2ffed" : CYAN4);
-  c.strokeStyle = LIGHT10;
+  c.strokeStyle = LIGHT11;
   c.lineWidth = 1;
   c.beginPath();
   c.moveTo(-r * 0.2, -r * 0.04);
@@ -56841,7 +57127,7 @@ function tower2(c, b, t, front2, flash) {
     return;
   }
   const polygon27 = [[-22, -39], [0, -46], [22, -39], [25, 24], [0, 43], [-25, 24]];
-  plate3(c, polygon27, flash ? LIGHT10 : STONE6);
+  plate3(c, polygon27, flash ? LIGHT11 : STONE6);
   plate3(c, [[-22, -39], [0, -46], [0, 43], [-25, 24]], "#617c8c", false);
   plate3(c, [[0, -46], [22, -39], [25, 24], [0, 43]], DARK7, false);
   plate3(c, [[-15, -32], [0, -37], [15, -32], [17, 20], [0, 32], [-17, 20]], "#263f51");
@@ -56884,11 +57170,11 @@ function drawAegisGoliath(c, actor, tick, flash = false) {
   tower2(c, b, tick, false, flash);
   chains2(c, tick);
   const body5 = [[0, -24], [20, -22], [26, -2], [0, 28], [-26, -2], [-20, -22]];
-  plate3(c, body5, flash ? LIGHT10 : STONE6);
-  plate3(c, [[0, -24], [-20, -22], [-26, -2], [-4, -8]], flash ? LIGHT10 : "#698695", false);
-  plate3(c, [[0, -24], [20, -22], [26, -2], [4, -8]], flash ? LIGHT10 : "#35485c", false);
-  plate3(c, [[-26, -2], [0, 28], [0, 9], [-4, -8]], flash ? LIGHT10 : "#344557", false);
-  plate3(c, [[26, -2], [0, 28], [0, 9], [4, -8]], flash ? LIGHT10 : "#1b2b3d", false);
+  plate3(c, body5, flash ? LIGHT11 : STONE6);
+  plate3(c, [[0, -24], [-20, -22], [-26, -2], [-4, -8]], flash ? LIGHT11 : "#698695", false);
+  plate3(c, [[0, -24], [20, -22], [26, -2], [4, -8]], flash ? LIGHT11 : "#35485c", false);
+  plate3(c, [[-26, -2], [0, 28], [0, 9], [-4, -8]], flash ? LIGHT11 : "#344557", false);
+  plate3(c, [[26, -2], [0, 28], [0, 9], [4, -8]], flash ? LIGHT11 : "#1b2b3d", false);
   plate3(c, [[0, -18], [12, -6], [0, 12], [-12, -6]], INK46);
   c.save();
   c.translate(0, -4);
@@ -57033,7 +57319,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
     if (event.kind === "build") performanceProbe.record("environment.rasterBuild", event.ms ?? 0);
     if (event.kind === "compose") performanceProbe.record("environment.rasterDraw", event.ms ?? 0);
   } }), lighting = createLighting(canvas, { presentation: environmentArt?.worldLightsV1 }), dayNight = createDayNightLightingV1({ review: environmentArt?.dayNightReview });
-  const dynamicLights = createDynamicWorldLightsV1(canvas.ownerDocument), silhouetteShadows = createSilhouetteShadowsV1(canvas.ownerDocument);
+  const dynamicLights = createDynamicWorldLightsV1(canvas.ownerDocument), skillLights = createSkillLightsV1(canvas.ownerDocument), silhouetteShadows = createSilhouetteShadowsV1(canvas.ownerDocument);
   let castingShadows = false;
   const camera = createCamera(), prompt = createPaintedPrompt(), actorMotion = createActorMotionPresentationV1({ collisionProbe: actorCollisionProbe });
   const seamDebug = new URLSearchParams(canvas.ownerDocument.defaultView?.location?.search ?? "").get("debugSeams") === "1";
@@ -57258,8 +57544,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
         drawCastBolt(ctx, bolt2.delivery, { x: bolt2.position.x + (offset2?.x ?? 0) * weight2, y: bolt2.position.y + (offset2?.y ?? 0) * weight2, vx: bolt2.direction.x, vy: bolt2.direction.y }, offset2?.origin, time);
         ctx.restore();
       };
-      if (unified) foreground.push(paintBolt);
-      else paintBolt();
+      depthItems2.push(depthItem({ id: "bolt/" + bolt2.id, anchorX: bolt2.position.x, anchorY: bolt2.position.y + 5, draw: paintBolt }));
     }
     if (unified) foreground.push(() => drawBerserkerTransfersD12_4H_A(ctx, model, model.tick));
     else drawBerserkerTransfersD12_4H_A(ctx, model, model.tick);
@@ -57354,12 +57639,16 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
       if (performanceProbe) performanceProbe.measure("directionalShadows", drawShadows);
       else drawShadows();
     }
+    depthItems2.push(...combatVfx.depthItems(visualModel, time, viewport), ...feedback.depthItems(time, viewport));
+    const glowing = [...combatVfx.lights(visualModel, time), ...feedback.lights(time)];
+    skillLights.wash(ctx, glowing, viewport);
     drawDepthItems(ctx, depthItems2);
     if (unified) {
       const paintLights = (lc) => {
         if (!model.space.visual) return;
         lighting.draw(lc, model.space, lightView, time, visualActor, { unified: true });
         dynamicLights.illuminate(lc, model, lightView, frame, time, visualActor);
+        skillLights.illuminate(lc, glowing, lightView);
       }, paintLight = () => dayNight.ambient(ctx, lightView, paintLights);
       if (performanceProbe) performanceProbe.measure("lighting", paintLight);
       else paintLight();
@@ -57446,6 +57735,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
     prompt,
     resources: () => Object.freeze({
       ...dynamicLights.resources(),
+      ...skillLights.resources(),
       ...silhouetteShadows.resources(),
       groundItems: groundItems.inspect(),
       resourceDebris: resourceArt.resources(),
