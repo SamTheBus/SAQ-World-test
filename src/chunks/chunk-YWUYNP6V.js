@@ -19642,6 +19642,154 @@ function resolveMasterySpellPower(r) {
   return times(times(times(times(addCombat(r.basePower, combatAmount(r.catalyst, 4)), combatAmount(1e3 + 35 * r.atk, 1e3)), combatAmount(100 + 4 * r.filler, 100)), masteryPower(28, 25, r.infinite)), combatAmount(100 + 15 * r.weaving * r.stacks, 100));
 }
 
+// src/shared/content/item_looks_v1.js
+var BY_DEFINITION = Object.freeze({
+  "worn-sword": "sword",
+  "iron-sword": "sword",
+  "guard-sword": "sword",
+  "runic-sword": "sword",
+  "padded-armor": "doublet",
+  "chain-armor": "hauberk",
+  "plate-armor": "plate",
+  coif: "coif",
+  greaves: "greaves",
+  sabatons: "sabatons",
+  "full-plate": "plate",
+  "starter-shield": "kite",
+  "starter-dagger": "kris",
+  "kit-knight-longsword": "sword",
+  "kit-knight-coif": "coif",
+  "kit-knight-hauberk": "hauberk",
+  "kit-knight-gauntlets": "gauntlets",
+  "kit-knight-treads": "boots",
+  "kit-rogue-saber": "saber",
+  "kit-rogue-bandana": "bandana",
+  "kit-rogue-doublet": "doublet",
+  "kit-rogue-gloves": "gloves",
+  "kit-rogue-boots": "boots",
+  "kit-mage-staff": "staff",
+  "kit-mage-cowl": "cowl",
+  "kit-mage-robe": "apprentice-robe",
+  "kit-mage-wraps": "wraps",
+  "kit-mage-slippers": "apprentice-slippers"
+});
+var BY_NOUN = Object.freeze({
+  Greatsword: "greatsword",
+  Longsword: "sword",
+  Halberd: "halberd",
+  Warhammer: "warhammer",
+  Battleaxe: "axe",
+  Broadsword: "sword",
+  "Flanged Mace": "mace",
+  Claymore: "greatsword",
+  "Kite Shield": "kite",
+  "Tower Shield": "tower",
+  Buckler: "buckler",
+  Aegis: "kite",
+  "Heater Shield": "heater",
+  Kris: "kris",
+  Stiletto: "stiletto",
+  Baselard: "dagger",
+  Dirk: "dagger",
+  "Main-Gauche": "main-gauche",
+  Greathelm: "helm",
+  Armet: "helm",
+  Visor: "helm",
+  Hauberk: "hauberk",
+  "Chain Mail": "hauberk",
+  Cuirass: "plate",
+  Brigandine: "leather",
+  "Plate Mail": "plate",
+  Doublet: "doublet",
+  Greaves: "greaves",
+  Legplates: "greaves",
+  Chausses: "chausses",
+  Cuisses: "greaves",
+  Sabatons: "sabatons",
+  Sollerets: "sabatons",
+  "Steel Boots": "sabatons",
+  Treads: "boots",
+  Exosuit: "plate",
+  "Inquisitor Robes": "robe",
+  "Full Plate Armor": "plate",
+  Trenchcoat: "leather",
+  // Class gear (class_gear_v1.js).
+  Rapier: "rapier",
+  Saber: "saber",
+  Scimitar: "scimitar",
+  Wand: "wand",
+  Scepter: "scepter",
+  Staff: "staff",
+  "Chain Coif": "coif",
+  "Chain Gloves": "gauntlets",
+  "Chain Boots": "boots",
+  "Great Helm": "helm",
+  "Plate Armor": "plate",
+  Gauntlets: "gauntlets",
+  "Plate Boots": "sabatons",
+  Bandana: "bandana",
+  "Leather Armor": "doublet",
+  "Leather Gloves": "gloves",
+  "Leather Boots": "boots",
+  Hood: "hood",
+  "Studded Armor": "leather",
+  "Studded Gloves": "gloves",
+  "Studded Boots": "tall",
+  Cowl: "cowl",
+  "Cloth Robe": "apprentice-robe",
+  "Cloth Wraps": "wraps",
+  "Cloth Slippers": "apprentice-slippers",
+  "Wizard Hat": "hat",
+  "Silk Robe": "robe",
+  "Silk Wraps": "wraps",
+  "Silk Slippers": "slippers"
+});
+var OVERALL_LEGS = Object.freeze({ plate: "greaves", hauberk: "chausses", doublet: "breeches", leather: "trousers" });
+var TOME_LOOKS = Object.freeze({ fire: "tome-fire", lightning: "tome-storm", frost: "tome-frost" });
+var LOOK_POOLS = Object.freeze({
+  sword: Object.freeze(["sword", "broadsword", "leaf-sword"]),
+  axe: Object.freeze(["axe", "double-axe", "broad-axe"]),
+  warhammer: Object.freeze(["warhammer", "maul", "war-pick"]),
+  rapier: Object.freeze(["rapier", "cup-rapier", "estoc"]),
+  saber: Object.freeze(["saber", "cutlass", "talwar"]),
+  scimitar: Object.freeze(["scimitar", "shamshir", "falchion"]),
+  wand: Object.freeze(["wand", "branch-wand", "rune-rod"]),
+  scepter: Object.freeze(["scepter", "orb-scepter", "crescent-scepter"]),
+  staff: Object.freeze(["staff", "crook-staff", "gnarled-staff"]),
+  buckler: Object.freeze(["buckler", "targe", "roundel"]),
+  kite: Object.freeze(["kite", "heater", "iron-kite"]),
+  tower: Object.freeze(["tower", "pavise", "bulwark"]),
+  "main-gauche": Object.freeze(["main-gauche", "sword-breaker", "trident-dagger"]),
+  stiletto: Object.freeze(["stiletto", "rondel", "misericorde"]),
+  kris: Object.freeze(["kris", "karambit", "serrated-dagger"]),
+  "tome-fire": Object.freeze(["tome-cinder", "tome-magma", "tome-hearth"]),
+  "tome-frost": Object.freeze(["tome-rime", "tome-winter", "tome-tundra"]),
+  "tome-storm": Object.freeze(["tome-spark", "tome-thunder", "tome-gale"])
+});
+function seedHash(text) {
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 16777619) >>> 0;
+  }
+  return h;
+}
+function fromPool(look, item) {
+  const pool = LOOK_POOLS[look], seed = item.generated?.seed;
+  return pool && typeof seed === "string" ? pool[seedHash(seed) % pool.length] : look;
+}
+function itemLookType(item) {
+  const d = itemDefinition(item);
+  if (!d) return null;
+  if (d.slot === "subweapon" && d.subType === "tome") return TOME_LOOKS[d.spellType ?? "fire"] ?? "tome-prism";
+  return (item.generated ? BY_NOUN[d.noun ?? item.generated.definition?.noun] : BY_DEFINITION[item.definitionId]) ?? null;
+}
+function itemLook(item) {
+  const look = itemLookType(item);
+  return look && fromPool(look, item);
+}
+var nounLookType = (noun) => BY_NOUN[noun] ?? null;
+
 // src/shared/contracts/spore_pacing_v5.js
 var isSporeV5 = (r) => r?.rulesVersion === SPORE_V5;
 var adoptingSporeV5 = (a, b) => a?.rulesVersion === SPORE_V4 && a.status === "active" && isSporeV5(b);
@@ -20471,14 +20619,30 @@ function itemGearClass(item) {
   const definition = item ? itemDefinition(item) : null;
   return definition?.gearClass ?? KIT_CLASS[item?.definitionId] ?? null;
 }
+var ARMOR_SLOTS = /* @__PURE__ */ new Set(["helmet", "chest", "overall", "leggings", "gloves", "boots"]);
+var ARMOR_CLASSES = {};
+for (const cls of Object.keys(CLASS_GEAR)) for (const family2 of ["helmet", "overall", "gloves", "boots"]) for (const noun of classGearNouns(cls, family2)) {
+  const type = nounLookType(noun);
+  if (type && !ARMOR_CLASSES[type]?.includes(cls)) (ARMOR_CLASSES[type] ??= []).push(cls);
+}
+function itemGearClasses(item) {
+  const own2 = itemGearClass(item);
+  if (own2) return [own2];
+  const definition = item ? itemDefinition(item) : null;
+  return ARMOR_SLOTS.has(definition?.slot) ? ARMOR_CLASSES[itemLookType(item)] ?? null : null;
+}
 function classGearAllowed(p, item) {
   const heroClass = heroClassOf(p?.d8), definition = item ? itemDefinition(item) : null, own2 = itemGearClass(item);
   if (own2) return heroClass?.id === own2;
-  return !heroClass || definition?.slot !== "subweapon" || definition.subType === heroClass.offhand;
+  if (!heroClass) return true;
+  const fits = itemGearClasses(item);
+  if (fits) return fits.includes(heroClass.id);
+  return definition?.slot !== "subweapon" || definition.subType === heroClass.offhand;
 }
+var classNames = (ids) => ids.map((id) => HERO_CLASSES[id].name + "s").join(" and ");
 function classGearRefusal(p, item) {
-  const own2 = itemGearClass(item);
-  return own2 ? `Only ${HERO_CLASSES[own2].name}s can use this` : `${heroClassOf(p?.d8)?.name}s can\u2019t use this offhand`;
+  const fits = itemGearClasses(item);
+  return fits ? `Only ${classNames(fits)} can use this` : `${heroClassOf(p?.d8)?.name}s can\u2019t use this offhand`;
 }
 function equipmentActionAvailable(state, p, kind, payload) {
   const inv = p.inventory, primary = state.primary.actorsById[p.entityId];
@@ -23150,6 +23314,10 @@ export {
   validateAttackTiming,
   masteryPower,
   resolveMasterySpellPower,
+  OVERALL_LEGS,
+  LOOK_POOLS,
+  itemLookType,
+  itemLook,
   SPORE_V5,
   SPORE_V5_POLICY,
   SPORE_V4,
@@ -23207,7 +23375,7 @@ export {
   equippedWeaponVisual,
   defeatReward2 as defeatReward,
   canPickUp,
-  itemGearClass,
+  itemGearClasses,
   classGearAllowed,
   classGearRefusal,
   equipmentActionAvailable,

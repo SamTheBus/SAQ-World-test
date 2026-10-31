@@ -117,6 +117,7 @@ import {
   LIFE_VILLAGE_ORIGIN,
   LIVE_CLASS_SKILLS,
   LOCATION_SITE_PROOF_CATALOG,
+  LOOK_POOLS,
   MAJOR_NAME_POLICY_VERSION,
   MASTERY_FAMILIES,
   MAX_PLAYER_XP,
@@ -134,6 +135,7 @@ import {
   ORDINARY_ACTIVITY_RADII,
   ORDINARY_ENEMIES,
   ORDINARY_PROFILES,
+  OVERALL_LEGS,
   PENDING_HOSTILE_HAZARD_D12_4J_VERSION,
   PLANNED_ADDRESS_OFFSET,
   PLANNED_CAVE_ID,
@@ -485,7 +487,9 @@ import {
   isStarterVillageSafe,
   isWorldPointSafe,
   itemDefinition,
-  itemGearClass,
+  itemGearClasses,
+  itemLook,
+  itemLookType,
   learnAvailability,
   legacyWorldPosition,
   lineToPoint,
@@ -740,7 +744,7 @@ import {
   worldLevelGapMultiplier,
   worldOrdinaryMeleeProfile,
   worldPointForArea
-} from "./chunk-72PFUHGB.js";
+} from "./chunk-YWUYNP6V.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -14653,7 +14657,175 @@ function mace(c, A) {
   for (const [x, y, wd, h] of [[25.2, -5.6, 1.6, 2], [28.2, -5.6, 1.6, 2], [25.2, 3.6, 1.6, 2], [28.2, 3.6, 1.6, 2], [30.8, -1, 1.8, 2]]) R(c, x, y, wd, h, M.darkSteel, { flat: true, lw: 1 });
   gem(c, 27.6, 0, 1.6, A.gem);
 }
-var WEAPONS = { sword, saber, axe, warhammer, rapier, scimitar, wand, scepter, greatsword, halberd, mace };
+function broadsword(c, A) {
+  R(c, 10.4, -1.7, 2, 3.4, accPal(A), { flat: true, lw: 1.2 });
+  R(c, 12.4, -1.1, 3.6, 2.2, P2.leather, { flat: true, lw: 1.2 });
+  G(c, [18, -2.1, 31.4, -2.1, 33.6, -0.9, 33.6, 0.9, 31.4, 2.1, 18, 2.1], P2.blade, { bottom: true, split: 0.5, lw: 1.4 });
+  px(c, 18.8, -0.35, 11.6, 0.7, "#00000040");
+  G(c, [16, -1.4, 16.4, -4.4, 18.8, -5.4, 18.2, -3.2, 18.2, 3.2, 18.8, 5.4, 16.4, 4.4, 16, 1.4], accPal(A), { flat: true, lw: 1.2 });
+  gem(c, 17.1, 0, 1.6, A.gem);
+}
+function leafSword(c, A) {
+  R(c, 9.4, -1.8, 2.8, 3.6, accPal(A), { flat: true, lw: 1.2 });
+  px(c, 10.3, -0.6, 1, 1.2, "#1d232b");
+  R(c, 12.2, -1, 4.2, 2, P2.leather, { flat: true, lw: 1.2 });
+  G(c, [17.8, -1.1, 22, -2.3, 27, -2.6, 31.4, -1.4, 35, 0, 31.4, 1.4, 27, 2.6, 22, 2.3, 17.8, 1.1], P2.blade, { bottom: true, split: 0.5, lw: 1.4 });
+  px(c, 18.8, -0.3, 13, 0.6, "#00000040");
+  R(c, 16.4, -2.8, 1.6, 5.6, accPal(A), { flat: true, lw: 1.1 });
+  gem(c, 17.2, 0, 1.4, A.gem);
+}
+function doubleAxe(c, A) {
+  R(c, 10.6, -1.2, 1.6, 2.4, accPal(A), { flat: true, lw: 1.1 });
+  R(c, 12.2, -1, 20.4, 2, M.oak, { flat: true, lw: 1.2 });
+  R(c, 21.6, -1.5, 1.4, 3, accPal(A), { flat: true, lw: 1 });
+  for (const s of [-1, 1]) G(c, [24.4, s * 1, 30.4, s * 1, 33, s * 7.2, 31, s * 9.6, 27.4, s * 10.2, 23.8, s * 9.6, 21.8, s * 7.2], M.steel, { lw: 1.3 });
+  px(c, 31.4, -6.8, 1, 4.4, M.steel.l);
+  px(c, 31.4, 2.4, 1, 4.4, M.steel.l);
+  R(c, 25.2, -1.8, 4.4, 3.6, M.darkSteel, { flat: true, lw: 1.1 });
+  gem(c, 27.4, 0, 1.4, A.gem);
+}
+function broadAxe(c, A) {
+  R(c, 10.6, -1.2, 1.6, 2.4, accPal(A), { flat: true, lw: 1.1 });
+  R(c, 12.2, -1, 19.6, 2, M.oak, { flat: true, lw: 1.2 });
+  R(c, 21.8, -1.5, 1.4, 3, accPal(A), { flat: true, lw: 1 });
+  G(c, [24.4, 1, 32.2, 1, 33.6, 10.6, 26.4, 11.6, 26.4, 5.4, 24.4, 3.6], M.steel, { lw: 1.3 });
+  px(c, 27.2, 9.4, 5.8, 1, M.steel.l);
+  G(c, [26, -1, 30, -1, 28, -4.8], M.darkSteel, { flat: true, lw: 1.1 });
+  R(c, 24, -2.2, 8.4, 3.2, M.darkSteel, { flat: true, lw: 1.1 });
+  gem(c, 29.6, 4.6, 1.4, A.gem);
+}
+function maul(c, A) {
+  R(c, 10.6, -1.2, 1.6, 2.4, accPal(A), { flat: true, lw: 1.1 });
+  R(c, 12.2, -1, 14.8, 2, M.oak, { flat: true, lw: 1.2 });
+  R(c, 13, -1.3, 4, 2.6, P2.leather, { flat: true, lw: 1.1 });
+  R(c, 25.4, -6.4, 8.8, 12.8, M.steel, { split: 0.6, lw: 1.4 });
+  R(c, 25.4, -6.4, 8.8, 2.2, M.darkSteel, { flat: true, lw: 1.1 });
+  R(c, 25.4, 4.2, 8.8, 2.2, M.darkSteel, { flat: true, lw: 1.1 });
+  R(c, 23.6, -1.5, 1.8, 3, accPal(A), { flat: true, lw: 1 });
+  gem(c, 29.8, 0, 1.8, A.gem);
+}
+function warPick(c, A) {
+  R(c, 10.6, -1.2, 1.6, 2.4, accPal(A), { flat: true, lw: 1.1 });
+  R(c, 12.2, -1, 18.8, 2, M.oak, { flat: true, lw: 1.2 });
+  R(c, 24.6, -1.5, 1.4, 3, accPal(A), { flat: true, lw: 1 });
+  G(c, [27, 1.6, 30.2, 1.6, 32, 6.4, 33.2, 12, 30.8, 8, 27.6, 5], M.darkSteel, { lw: 1.2 });
+  R(c, 26.2, -5.8, 4.8, 4, M.steel, { split: 0.6, lw: 1.3 });
+  R(c, 26.6, -2.2, 4, 4.2, M.steel, { split: 0.6, lw: 1.2 });
+  gem(c, 28.6, 0, 1.4, A.gem);
+}
+function cupRapier(c, A) {
+  R(c, 10.6, -1, 1.6, 2, accPal(A), { flat: true, lw: 1 });
+  R(c, 12.2, -0.9, 3.8, 1.8, P2.leather, { flat: true, lw: 1.1 });
+  G(c, [17.6, -1, 36.4, -0.55, 38.6, 0, 36.4, 0.55, 17.6, 1], P2.blade, { flat: true, lw: 1 });
+  G(c, [15.6, -3.8, 17, -3.4, 18.2, -2, 18.6, 0, 18.2, 2, 17, 3.4, 15.6, 3.8], accPal(A), { split: 0.6, lw: 1.1 });
+  gem(c, 16.9, 0, 1.2, A.gem);
+}
+function estoc(c, A) {
+  G(c, [10, -1.3, 11.8, -1.3, 12.4, 0, 11.8, 1.3, 10, 1.3], accPal(A), { flat: true, lw: 1 });
+  R(c, 12.4, -0.9, 3.8, 1.8, P2.leather, { flat: true, lw: 1.1 });
+  G(c, [17.6, -1.6, 38.8, 0, 17.6, 1.6], P2.blade, { bottom: true, split: 0.5, lw: 1.1 });
+  R(c, 16.2, -3.6, 1.6, 7.2, accPal(A), { flat: true, lw: 1.1 });
+  gem(c, 17, 0, 1.3, A.gem);
+}
+function cutlass(c, A) {
+  R(c, 12.4, -1.1, 3.8, 2.2, P2.leather, { flat: true, lw: 1.2 });
+  G(c, [11.6, 1, 17.8, 1, 17.8, 4.4, 12.8, 4.4, 11.6, 2.8], accPal(A), { flat: true, lw: 1 });
+  G(c, [17.8, -2, 24.6, -2.6, 29.6, -4.2, 32.6, -6.6, 31.4, -1, 26.6, 2.2, 17.8, 2.2], P2.blade, { bottom: true, split: 0.5, lw: 1.4 });
+  R(c, 16.2, -3.4, 1.8, 6.8, accPal(A), { flat: true, lw: 1.2 });
+  gem(c, 17.1, 0, 1.4, A.gem);
+}
+function talwar(c, A) {
+  R(c, 10.4, -2.2, 1.4, 4.4, accPal(A), { flat: true, lw: 1.1 });
+  R(c, 9.6, -0.6, 0.8, 1.2, accPal(A), { flat: true, lw: 0.8 });
+  G(c, [11.8, -0.9, 13.9, -1.3, 16, -0.9, 16, 0.9, 13.9, 1.3, 11.8, 0.9], P2.leather, { flat: true, lw: 1.1 });
+  G(c, [17.6, -1.4, 27, -2.2, 32, -3.8, 35.4, -6.6, 34.2, -2.2, 29.6, 1.2, 17.6, 1.4], P2.blade, { bottom: true, split: 0.5, lw: 1.3 });
+  R(c, 16, -2.8, 1.6, 5.6, accPal(A), { flat: true, lw: 1.1 });
+  R(c, 15.8, -3.8, 2, 1.2, accPal(A), { flat: true, lw: 0.9 });
+  R(c, 15.8, 2.6, 2, 1.2, accPal(A), { flat: true, lw: 0.9 });
+  gem(c, 16.8, 0, 1.3, A.gem);
+}
+function shamshir(c, A) {
+  R(c, 12.4, -1.1, 3.6, 2.2, P2.leather, { flat: true, lw: 1.2 });
+  R(c, 11.2, -1.4, 1.2, 2.8, accPal(A), { flat: true, lw: 1 });
+  G(c, [17.4, -1.2, 24, -1.8, 29, -3.6, 32.6, -6.6, 34.8, -10.6, 34.2, -6.4, 31.2, -2.4, 25.6, 0.6, 17.4, 1.2], P2.blade, { bottom: true, split: 0.5, lw: 1.2 });
+  R(c, 15.8, -3, 1.6, 6, accPal(A), { flat: true, lw: 1.1 });
+  gem(c, 16.6, 0, 1.2, A.gem);
+}
+function falchion(c, A) {
+  R(c, 12.4, -1.1, 3.6, 2.2, P2.leather, { flat: true, lw: 1.2 });
+  R(c, 11, -1.4, 1.4, 2.8, accPal(A), { flat: true, lw: 1 });
+  G(c, [17.6, -1.6, 30.4, -1.6, 34.6, -3.6, 33.6, 0.8, 29.6, 3.6, 17.6, 2], P2.blade, { bottom: true, split: 0.5, lw: 1.4 });
+  px(c, 18.4, -0.6, 10, 0.7, "#00000040");
+  R(c, 15.8, -3.2, 1.8, 6.4, accPal(A), { flat: true, lw: 1.2 });
+  gem(c, 16.7, 0, 1.4, A.gem);
+}
+var LEAF = { b: "#58a55c", d: "#3f7d43" };
+var stoneOf = (A, plain) => A.gem ? { b: A.c, d: A.d } : plain;
+function stoneGlow(c, A, x, y, r, t, speed = 3) {
+  if (!A.gem) return;
+  const [cr, cg, cb] = hexRgb(A.c);
+  glow2(c, x, y, r, `${cr},${cg},${cb}`, 0.28 + 0.14 * Math.sin(t * speed));
+}
+function branchWand(c, A, t = 0) {
+  R(c, 11.2, -1, 4.6, 2, M.oak, { flat: true, lw: 1.1 });
+  G(c, [15.6, -0.9, 19.4, -1.1, 22, -1.9, 25.8, -1.3, 25.8, 0.1, 22.2, -0.4, 19.4, 0.9, 15.6, 0.9], M.oak, { flat: true, lw: 1 });
+  G(c, [19.6, -1.2, 20.8, -3.6, 21.8, -3.2, 21, -1.4], M.oak, { flat: true, lw: 0.9 });
+  G(c, [20.8, -3.6, 23.6, -5, 22.8, -3, 21.8, -3.2], LEAF, { flat: true, lw: 0.9 });
+  stoneGlow(c, A, 27.6, -0.6, 4.4, t);
+  G(c, oct(25.4, -2.8, 4.4, 4.4, 1.3), stoneOf(A, { b: "#9be7a0", d: "#5fbf68" }), { split: 0.55, lw: 1.1 });
+  R(c, 15.2, -1.3, 1.2, 2.6, accPal(A), { flat: true, lw: 1 });
+}
+function runeRod(c, A, t = 0) {
+  R(c, 11.2, -1, 4.4, 2, P2.strap, { flat: true, lw: 1.1 });
+  R(c, 15.6, -0.8, 10, 1.6, M.steel, { flat: true, lw: 1 });
+  for (const x of [17.6, 20.6, 23.6]) R(c, x, -1.2, 1, 2.4, accPal(A), { flat: true, lw: 0.8 });
+  R(c, 25.4, -1.8, 1.4, 3.6, M.darkSteel, { flat: true, lw: 1 });
+  stoneGlow(c, A, 28.4, 0, 4.6, t);
+  R(c, 26.8, -1.6, 3.2, 3.2, stoneOf(A, { b: "#cfe8f2", d: "#9cc3d3" }), { split: 0.55, lw: 1.1 });
+}
+var SCEPTER_GOLD = { b: "#d4b45a", d: "#a8893e", l: "#ecd38a" };
+function orbScepter(c, A) {
+  R(c, 11.2, -1, 4.4, 2, M.oak, { flat: true, lw: 1.1 });
+  R(c, 15.6, -0.9, 8.4, 1.8, accPal(A), { flat: true, lw: 1.1 });
+  G(c, [23.6, -1.2, 25, -3.6, 27.4, -3.6, 27.4, 3.6, 25, 3.6, 23.6, 1.2], SCEPTER_GOLD, { split: 0.6, lw: 1.2 });
+  G(c, oct(27, -3.4, 6.8, 6.8, 2), stoneOf(A, { b: "#e8eef2", d: "#b9c4cc" }), { split: 0.6, lw: 1.3 });
+  px(c, 28.4, -2.2, 1.4, 1, "#ffffffb3");
+}
+function crescentScepter(c, A) {
+  R(c, 11.2, -1, 4.4, 2, M.oak, { flat: true, lw: 1.1 });
+  R(c, 15.6, -0.9, 8.8, 1.8, accPal(A), { flat: true, lw: 1.1 });
+  G(c, [24.2, -1.2, 26, -4.6, 29, -6.2, 31.8, -5.8, 29.2, -4.4, 27.8, -2.4, 27.6, 0, 27.8, 2.4, 29.2, 4.4, 31.8, 5.8, 29, 6.2, 26, 4.6, 24.2, 1.2], SCEPTER_GOLD, { split: 0.55, lw: 1.2 });
+  gem(c, 30, 0, 2.6, A.gem ?? "#e8eef2");
+}
+var WEAPONS = {
+  sword,
+  saber,
+  axe,
+  warhammer,
+  rapier,
+  scimitar,
+  wand,
+  scepter,
+  greatsword,
+  halberd,
+  mace,
+  broadsword,
+  "leaf-sword": leafSword,
+  "double-axe": doubleAxe,
+  "broad-axe": broadAxe,
+  maul,
+  "war-pick": warPick,
+  "cup-rapier": cupRapier,
+  estoc,
+  cutlass,
+  talwar,
+  shamshir,
+  falchion,
+  "branch-wand": branchWand,
+  "rune-rod": runeRod,
+  "orb-scepter": orbScepter,
+  "crescent-scepter": crescentScepter
+};
 function dagger(c, A) {
   R(c, 0, -1, 2.6, 2, P2.strap, { flat: true, lw: 1.1 });
   R(c, 2.6, -2.4, 1.4, 4.8, accPal(A), { flat: true, lw: 1 });
@@ -14941,6 +15113,42 @@ function staff(c, A, t) {
   G(c, [0, -32.8, 2.8, -28, 0, -23.4, -2.8, -28], crystal3, { split: 0.5, lw: 1.3 });
   px(c, -1, -30.4, 0.9, 1.6, "#ffffffb3");
 }
+function arcBand(cx, cy, r0, r1, a0, a1, n = 12) {
+  const pts = [];
+  for (let i = 0; i <= n; i++) {
+    const a = a0 + (a1 - a0) * i / n;
+    pts.push(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1);
+  }
+  for (let i = n; i >= 0; i--) {
+    const a = a0 + (a1 - a0) * i / n;
+    pts.push(cx + Math.cos(a) * r0, cy + Math.sin(a) * r0);
+  }
+  return pts;
+}
+function crookStaff(c, A, t) {
+  const pulse = 0.5 + 0.5 * Math.sin(t * 2.6), stone2 = A.gem ? { b: A.c, d: A.d } : { b: "#b8c4cc", d: "#8d999b" };
+  R(c, -1.1, -27, 2.2, 35.8, P2.wood, { flat: true, lw: 1.2 });
+  G(c, arcBand(3.5, -27, 2.4, 4.6, Math.PI, Math.PI * 2.33), P2.wood, { flat: true, lw: 1.2 });
+  px(c, -1.1, -20.4, 2.2, 1.2, A.c);
+  if (A.gem) {
+    const [r, g, b] = hexRgb(A.c);
+    glow2(c, 3.5, -27, 6 + pulse * 2, `${r},${g},${b}`, 0.3 + pulse * 0.2);
+  }
+  G(c, [3.5, -29, 5.4, -27, 3.5, -25, 1.6, -27], stone2, { split: 0.5, lw: 1.1 });
+}
+function gnarledStaff(c, A, t) {
+  const pulse = 0.5 + 0.5 * Math.sin(t * 2.6), stone2 = A.gem ? { b: A.c, d: A.d } : { b: "#b8c4cc", d: "#8d999b" };
+  if (A.gem) {
+    const [r, g, b] = hexRgb(A.c);
+    glow2(c, 0, STAFF_TIP, 7 + pulse * 2, `${r},${g},${b}`, 0.3 + pulse * 0.2);
+  }
+  G(c, oct(-2.6, -30.6, 5.2, 5.2, 1.6), stone2, { split: 0.55, lw: 1.3 });
+  G(c, [-1.3, 8.8, -1.3, -21.6, -3, -24.4, -4.4, -29, -3.4, -32.4, -2.4, -29.4, -1.6, -26.4, 1.6, -26.4, 2.4, -29.4, 3.4, -32.4, 4.4, -29, 3, -24.4, 1.3, -21.6, 1.3, 8.8], P2.wood, { flat: true, lw: 1.2 });
+  px(c, -0.4, -12, 0.8, 4, "#00000030");
+  px(c, -1.3, -19.6, 2.6, 1.2, A.c);
+  px(c, -1, -29.6, 0.9, 1.6, "#ffffffb3");
+}
+var STAVES = { staff, "crook-staff": crookStaff, "gnarled-staff": gnarledStaff };
 var TOME_ANCHOR = Object.freeze({ x: -19.4, y: -11 });
 var rand = (n) => {
   const v = Math.sin(n * 12.9898) * 43758.5453;
@@ -16135,15 +16343,15 @@ function drawBlockyHero(c, spec, pose = {}) {
   c.translate(4.6, 3.6);
   c.rotate(front2);
   sleeve3(c, w, S2);
-  if (w.main !== "staff") hand3(c, w, S2);
+  if (!STAVES[w.main]) hand3(c, w, S2);
   WEAPONS[w.main]?.(c, A, t);
   c.restore();
-  if (w.main === "staff") {
+  if (STAVES[w.main]) {
     const hx = 4.6 + Math.cos(front2) * 10.2, hy = 3.6 + Math.sin(front2) * 10.2;
     c.save();
     c.translate(hx, hy);
     c.rotate(front2 - STAFF_REST);
-    staff(c, A, t);
+    STAVES[w.main](c, A, t);
     c.restore();
     palm(c, w, S2, hx - 2.2, hy - 2.2, 4.4);
   }
@@ -16193,7 +16401,7 @@ function drawBlockyHero(c, spec, pose = {}) {
     if (w.offFamily === "shield") shieldOf(c, w.off, offA, red);
   }
   pauldron(c, w, true);
-  if (pose.active && w.main !== "staff") {
+  if (pose.active && !STAVES[w.main]) {
     c.save();
     c.translate(4.6, 3.6);
     c.rotate(front2);
@@ -16214,7 +16422,7 @@ function drawBlockyHero(c, spec, pose = {}) {
     }
     c.globalAlpha = 1;
   }
-  if (!pose.still && w.g.main?.tier === 4 && w.main !== "staff") {
+  if (!pose.still && w.g.main?.tier === 4 && !STAVES[w.main]) {
     const ph = t * 0.8 % 1;
     if (ph < 0.35) {
       const a = Math.sin(ph / 0.35 * Math.PI), x = 4.6 + Math.cos(front2) * 33, y = 3.6 + Math.sin(front2) * 33;
@@ -16245,9 +16453,9 @@ function drawItemIcon(c, item, size = 48) {
     c.translate(-cx, -cy);
   };
   if (item.slot === "main") {
-    if (kind === "staff") {
+    if (STAVES[kind]) {
       fit(0, -12, 31, Math.PI / 4);
-      staff(c, A, 0);
+      STAVES[kind](c, A, 0);
     } else {
       const [a, b] = WEAPON_SPAN[kind] ?? WEAPON_SPAN.sword;
       fit((a + b) / 2, 0, (b - a) * 0.8, -Math.PI / 4);
@@ -23350,144 +23558,6 @@ function createActivityScheduler(state, options = {}, { beforeSleep = () => true
     wakes,
     sleeps
   }) };
-}
-
-// src/shared/content/item_looks_v1.js
-var BY_DEFINITION = Object.freeze({
-  "worn-sword": "sword",
-  "iron-sword": "sword",
-  "guard-sword": "sword",
-  "runic-sword": "sword",
-  "padded-armor": "doublet",
-  "chain-armor": "hauberk",
-  "plate-armor": "plate",
-  coif: "coif",
-  greaves: "greaves",
-  sabatons: "sabatons",
-  "full-plate": "plate",
-  "starter-shield": "kite",
-  "starter-dagger": "kris",
-  "kit-knight-longsword": "sword",
-  "kit-knight-coif": "coif",
-  "kit-knight-hauberk": "hauberk",
-  "kit-knight-gauntlets": "gauntlets",
-  "kit-knight-treads": "boots",
-  "kit-rogue-saber": "saber",
-  "kit-rogue-bandana": "bandana",
-  "kit-rogue-doublet": "doublet",
-  "kit-rogue-gloves": "gloves",
-  "kit-rogue-boots": "boots",
-  "kit-mage-staff": "staff",
-  "kit-mage-cowl": "cowl",
-  "kit-mage-robe": "apprentice-robe",
-  "kit-mage-wraps": "wraps",
-  "kit-mage-slippers": "apprentice-slippers"
-});
-var BY_NOUN = Object.freeze({
-  Greatsword: "greatsword",
-  Longsword: "sword",
-  Halberd: "halberd",
-  Warhammer: "warhammer",
-  Battleaxe: "axe",
-  Broadsword: "sword",
-  "Flanged Mace": "mace",
-  Claymore: "greatsword",
-  "Kite Shield": "kite",
-  "Tower Shield": "tower",
-  Buckler: "buckler",
-  Aegis: "kite",
-  "Heater Shield": "heater",
-  Kris: "kris",
-  Stiletto: "stiletto",
-  Baselard: "dagger",
-  Dirk: "dagger",
-  "Main-Gauche": "main-gauche",
-  Greathelm: "helm",
-  Armet: "helm",
-  Visor: "helm",
-  Hauberk: "hauberk",
-  "Chain Mail": "hauberk",
-  Cuirass: "plate",
-  Brigandine: "leather",
-  "Plate Mail": "plate",
-  Doublet: "doublet",
-  Greaves: "greaves",
-  Legplates: "greaves",
-  Chausses: "chausses",
-  Cuisses: "greaves",
-  Sabatons: "sabatons",
-  Sollerets: "sabatons",
-  "Steel Boots": "sabatons",
-  Treads: "boots",
-  Exosuit: "plate",
-  "Inquisitor Robes": "robe",
-  "Full Plate Armor": "plate",
-  Trenchcoat: "leather",
-  // Class gear (class_gear_v1.js).
-  Rapier: "rapier",
-  Saber: "saber",
-  Scimitar: "scimitar",
-  Wand: "wand",
-  Scepter: "scepter",
-  Staff: "staff",
-  "Chain Coif": "coif",
-  "Chain Gloves": "gauntlets",
-  "Chain Boots": "boots",
-  "Great Helm": "helm",
-  "Plate Armor": "plate",
-  Gauntlets: "gauntlets",
-  "Plate Boots": "sabatons",
-  Bandana: "bandana",
-  "Leather Armor": "doublet",
-  "Leather Gloves": "gloves",
-  "Leather Boots": "boots",
-  Hood: "hood",
-  "Studded Armor": "leather",
-  "Studded Gloves": "gloves",
-  "Studded Boots": "tall",
-  Cowl: "cowl",
-  "Cloth Robe": "apprentice-robe",
-  "Cloth Wraps": "wraps",
-  "Cloth Slippers": "apprentice-slippers",
-  "Wizard Hat": "hat",
-  "Silk Robe": "robe",
-  "Silk Wraps": "wraps",
-  "Silk Slippers": "slippers"
-});
-var OVERALL_LEGS = Object.freeze({ plate: "greaves", hauberk: "chausses", doublet: "breeches", leather: "trousers" });
-var TOME_LOOKS = Object.freeze({ fire: "tome-fire", lightning: "tome-storm", frost: "tome-frost" });
-var LOOK_POOLS = Object.freeze({
-  buckler: Object.freeze(["buckler", "targe", "roundel"]),
-  kite: Object.freeze(["kite", "heater", "iron-kite"]),
-  tower: Object.freeze(["tower", "pavise", "bulwark"]),
-  "main-gauche": Object.freeze(["main-gauche", "sword-breaker", "trident-dagger"]),
-  stiletto: Object.freeze(["stiletto", "rondel", "misericorde"]),
-  kris: Object.freeze(["kris", "karambit", "serrated-dagger"]),
-  "tome-fire": Object.freeze(["tome-cinder", "tome-magma", "tome-hearth"]),
-  "tome-frost": Object.freeze(["tome-rime", "tome-winter", "tome-tundra"]),
-  "tome-storm": Object.freeze(["tome-spark", "tome-thunder", "tome-gale"])
-});
-function seedHash(text2) {
-  let h = 2166136261;
-  for (let i = 0; i < text2.length; i++) {
-    h ^= text2.charCodeAt(i);
-    h = Math.imul(h, 16777619) >>> 0;
-  }
-  return h;
-}
-function fromPool(look, item) {
-  const pool = LOOK_POOLS[look], seed2 = item.generated?.seed;
-  return pool && typeof seed2 === "string" ? pool[seedHash(seed2) % pool.length] : look;
-}
-function itemLookType(item) {
-  const d = itemDefinition(item);
-  if (!d) return null;
-  if (d.slot === "subweapon" && d.subType === "tome") return TOME_LOOKS[d.spellType ?? "fire"] ?? "tome-prism";
-  return (item.generated ? BY_NOUN[d.noun ?? item.generated.definition?.noun] : BY_DEFINITION[item.definitionId]) ?? null;
-}
-function itemLook(item) {
-  const look = itemLookType(item);
-  return look && fromPool(look, item);
 }
 
 // src/simulation/tome_sustain.js
@@ -32215,7 +32285,7 @@ var WILLOW = { b: "#b08a55", d: "#8c6b3e", l: "#c9a673" };
 var STEEL = M2.steel;
 var DARK3 = { ...M2.darkSteel, l: "#87929a" };
 var LEATHER = P3.leather;
-var SCEPTER_GOLD = { b: "#d4b45a", d: "#a8893e", l: "#ecd38a" };
+var SCEPTER_GOLD2 = { b: "#d4b45a", d: "#a8893e", l: "#ecd38a" };
 var SM = 1.15;
 var rect2 = (x, y, w, h) => [x, y, x + w, y, x + w, y + h, x, y + h];
 var box = null;
@@ -32366,10 +32436,10 @@ var WEAPONS2 = {
   scepter(c, A) {
     B(c, 0, -2, 9, 4, OAK, { dark: 1.5 });
     B(c, 9, -1.7, 13, 3.4, acc(A), { dark: 1.4, lw: SM });
-    B(c, 24.2, -6.8, 4.4, 2.6, SCEPTER_GOLD, { dark: 1 });
-    B(c, 24.2, 4.2, 4.4, 2.6, SCEPTER_GOLD, { dark: 1 });
-    B(c, 30.6, -1.7, 2.8, 3.4, SCEPTER_GOLD, { dark: 1.3 });
-    B(c, 21.2, -4.6, 9.8, 9.2, SCEPTER_GOLD, { dark: 3.4 });
+    B(c, 24.2, -6.8, 4.4, 2.6, SCEPTER_GOLD2, { dark: 1 });
+    B(c, 24.2, 4.2, 4.4, 2.6, SCEPTER_GOLD2, { dark: 1 });
+    B(c, 30.6, -1.7, 2.8, 3.4, SCEPTER_GOLD2, { dark: 1.3 });
+    B(c, 21.2, -4.6, 9.8, 9.2, SCEPTER_GOLD2, { dark: 3.4 });
     gem2(c, 26.1, 0, 3.6, A.gem ?? "#e8eef2");
   },
   // A long wooden staff, a collar and two prongs in the rarity color holding the crystal, which glows from Rare up.
@@ -32384,6 +32454,195 @@ var WEAPONS2 = {
     px2(c, 33.4, -2.6, 3, 0.9, "#ffffffb3");
   }
 };
+var LEAF2 = { b: "#58a55c", d: "#3f7d43", l: "#79c47c" };
+var OPEN = "#1d232b";
+var stoneOf2 = (A, plain) => A.gem ? { b: A.c, d: A.d, l: "#ffffff" } : plain;
+function arcBand2(cx, cy, r0, r1, a0, a1, n = 12) {
+  const pts = [];
+  for (let i = 0; i <= n; i++) {
+    const a = a0 + (a1 - a0) * i / n;
+    pts.push(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1);
+  }
+  for (let i = n; i >= 0; i--) {
+    const a = a0 + (a1 - a0) * i / n;
+    pts.push(cx + Math.cos(a) * r0, cy + Math.sin(a) * r0);
+  }
+  return pts;
+}
+var oct2 = (x, y, w, h, k) => [x + k, y, x + w - k, y, x + w, y + k, x + w, y + h - k, x + w - k, y + h, x + k, y + h, x, y + h - k, x, y + k];
+Object.assign(WEAPONS2, {
+  // Down-swept quillons and a broad blade with a blunt clipped point.
+  broadsword(c, A) {
+    B(c, 0, -2.6, 3.6, 5.2, acc(A), { dark: 1.8, lw: SM });
+    B(c, 3.6, -1.7, 5.8, 3.4, LEATHER);
+    S(c, [12.6, -3.2, 34, -3.2, 37.6, -1.4, 37.6, 1.4, 34, 3.2, 12.6, 3.2], BLADE, { dark: 3 });
+    px2(c, 14.2, -0.45, 17.6, 0.9, "#00000030");
+    S(c, [9.4, -2, 9.6, -6, 13, -7.6, 12.6, -4.6, 12.6, 4.6, 13, 7.6, 9.6, 6, 9.4, 2], acc(A), { dark: 3, lw: SM });
+    gem2(c, 11.4, 0, 2.6, A.gem);
+  },
+  // A ring pommel and a leaf-shaped blade.
+  "leaf-sword"(c, A) {
+    B(c, -0.4, -2.8, 3.8, 5.6, acc(A), { dark: 2, lw: SM });
+    px2(c, 0.9, -0.9, 1.2, 1.8, OPEN);
+    B(c, 3.4, -1.6, 6, 3.2, LEATHER);
+    S(c, [12.4, -1.8, 18.6, -3.6, 26, -4, 32.6, -2.2, 38.4, 0, 32.6, 2.2, 26, 4, 18.6, 3.6, 12.4, 1.8], BLADE, { dark: 3 });
+    px2(c, 14, -0.4, 19, 0.8, "#00000030");
+    B(c, 9.4, -4.4, 3, 8.8, acc(A), { dark: 2.8, lw: SM });
+    gem2(c, 10.9, 0, 2.4, A.gem);
+  },
+  // Two blades fanning out on either side of the haft.
+  "double-axe"(c, A) {
+    B(c, 0, -2.1, 2.8, 4.2, acc(A), { dark: 1.6, lw: SM });
+    B(c, 2.8, -1.6, 29.4, 3.2, OAK, { dark: 1.2 });
+    B(c, 15.6, -2.3, 2.4, 4.6, acc(A), { dark: 1.8, lw: SM });
+    for (const k of [-1, 1]) S(c, [19.6, k * 1.6, 27.4, k * 1.6, 30.6, k * 9.4, 28.4, k * 12.2, 23.5, k * 13, 18.6, k * 12.2, 16.4, k * 9.4], STEEL, { dark: 2.2 });
+    px2(c, 28.4, -9.4, 1.1, 5.6, STEEL.l);
+    px2(c, 28.4, 3.8, 1.1, 5.6, STEEL.l);
+    B(c, 20.4, -3, 6.2, 6, DARK3, { dark: 2 });
+    gem2(c, 23.5, 0, 2.4, A.gem);
+  },
+  // A square-cut blade below a long socket, a spike behind.
+  "broad-axe"(c, A) {
+    B(c, 0, -2.1, 2.8, 4.2, acc(A), { dark: 1.6, lw: SM });
+    B(c, 2.8, -1.6, 28.2, 3.2, OAK, { dark: 1.2 });
+    B(c, 16.4, -2.3, 2.4, 4.6, acc(A), { dark: 1.8, lw: SM });
+    S(c, [20.4, 1.4, 30.2, 1.4, 32.2, 13, 22.8, 14.4, 22.8, 6.6, 20.4, 4.4], STEEL, { dark: 2.6 });
+    px2(c, 24, 11.6, 7.4, 1.1, STEEL.l);
+    S(c, [22, -1.4, 27, -1.4, 24.5, -7.2], DARK3, { dark: 1.4 });
+    B(c, 19.6, -3.4, 9.6, 4.8, DARK3, { dark: 1.8 });
+    gem2(c, 26.6, 6.2, 2.4, A.gem);
+  },
+  // A huge banded head on a wrapped haft.
+  maul(c, A) {
+    B(c, 0, -2.1, 2.8, 4.2, acc(A), { dark: 1.6, lw: SM });
+    B(c, 2.8, -1.6, 20.6, 3.2, OAK, { dark: 1.2 });
+    B(c, 4, -2, 6.4, 4, LEATHER, { dark: 1.4 });
+    B(c, 19.4, -2.3, 2.4, 4.6, acc(A), { dark: 1.8, lw: SM });
+    B(c, 21.8, -8.4, 11.6, 16.8, STEEL, { dark: 5.6 });
+    B(c, 21.8, -8.4, 11.6, 3.2, DARK3, { dark: 1.2 });
+    B(c, 21.8, 5.2, 11.6, 3.2, DARK3, { dark: 1.2 });
+    gem2(c, 27.6, 0, 3, A.gem);
+  },
+  // A small hammer face on top, a long curved spike below.
+  "war-pick"(c, A) {
+    B(c, 0, -2.1, 2.8, 4.2, acc(A), { dark: 1.6, lw: SM });
+    B(c, 2.8, -1.6, 28, 3.2, OAK, { dark: 1.2 });
+    B(c, 17.6, -2.3, 2.4, 4.6, acc(A), { dark: 1.8, lw: SM });
+    S(c, [22.2, 2.4, 27, 2.4, 29.8, 8.6, 31.6, 16.4, 27.4, 11.2, 23.4, 6.6], DARK3, { dark: 1.8 });
+    B(c, 21.2, -8.6, 7.6, 6, STEEL, { dark: 2 });
+    B(c, 21.8, -3.2, 6.4, 6.4, STEEL, { dark: 2.2 });
+    gem2(c, 25, 0, 2.4, A.gem);
+  },
+  // A round cup guard over the hand.
+  "cup-rapier"(c, A) {
+    B(c, 0, -2, 2.8, 4, acc(A), { dark: 1.4, lw: SM });
+    B(c, 2.8, -1.5, 5.8, 3, LEATHER);
+    S(c, [12.4, -1.5, 36.6, -1.1, 40.8, 0, 36.6, 1.1, 12.4, 1.5], BLADE, { dark: 1.3, hi: 0.45 });
+    S(c, [8.6, -5.2, 10.8, -4.8, 12.4, -3, 13, 0, 12.4, 3, 10.8, 4.8, 8.6, 5.2], acc(A), { dark: 3.4, lw: SM });
+    gem2(c, 10.8, 0, 2.3, A.gem);
+  },
+  // A stiff three-sided blade, a disk guard and a pear pommel.
+  estoc(c, A) {
+    S(c, [0, -2.2, 2.8, -2.2, 3.8, 0, 2.8, 2.2, 0, 2.2], acc(A), { dark: 1.6, lw: SM });
+    B(c, 3.8, -1.5, 5.6, 3, LEATHER);
+    S(c, [12, -2.8, 41.4, 0, 12, 2.8], BLADE, { dark: 2.6, hi: 0.45 });
+    B(c, 9.4, -5.4, 2.6, 10.8, acc(A), { dark: 3.4, lw: SM });
+    gem2(c, 10.7, 0, 2.2, A.gem);
+  },
+  // A shell guard over the hand and a short, broad curved blade.
+  cutlass(c, A) {
+    B(c, 0, -1.8, 7.4, 3.6, LEATHER);
+    S(c, [-0.6, 1.4, 1.8, 1.4, 1.8, 4, 7.4, 4, 7.4, 1.8, 10.2, 1.8, 10.2, 6.4, -0.6, 6.4], acc(A), { dark: 1.2, lw: SM });
+    S(c, [10.2, -3.2, 21.6, -4, 28.6, -6.6, 34.2, -10.6, 32.8, -2.4, 26.4, 3, 10.2, 3.2], BLADE, { dark: 3 });
+    B(c, 7.4, -5.6, 2.8, 11.2, acc(A), { dark: 3.2, lw: SM });
+    gem2(c, 8.8, 0, 2.4, A.gem);
+  },
+  // A disk pommel, a swelling grip and short quillons with knobbed ends.
+  talwar(c, A) {
+    B(c, -1.2, -4.2, 2.4, 8.4, acc(A), { dark: 2.6, lw: SM });
+    B(c, -2.6, -1, 1.4, 2, acc(A), { dark: 0.6, lw: SM });
+    S(c, [1.2, -1.5, 4.4, -2.1, 7.6, -1.5, 7.6, 1.5, 4.4, 2.1, 1.2, 1.5], LEATHER, { dark: 1.3 });
+    S(c, [10, -2.2, 22, -3, 30, -5.6, 37.4, -10.8, 35, -3, 27.4, 1.8, 10, 2.2], BLADE, { dark: 2.1 });
+    B(c, 7.6, -4.4, 2.4, 8.8, acc(A), { dark: 2.6, lw: SM });
+    B(c, 7.2, -6.4, 3.2, 2.2, acc(A), { dark: 0.8, lw: SM });
+    B(c, 7.2, 4.2, 3.2, 2.2, acc(A), { dark: 0.8, lw: SM });
+    gem2(c, 8.8, 0, 2.2, A.gem);
+  },
+  // Narrow and deeply curved.
+  shamshir(c, A) {
+    B(c, 0, -1.7, 6.6, 3.4, LEATHER);
+    B(c, -1.6, -2.2, 1.8, 4.4, acc(A), { dark: 1.4, lw: SM });
+    S(c, [9.4, -1.8, 18.6, -2.6, 25.6, -5.2, 30.6, -9.4, 33.8, -15, 34.2, -9.6, 30.6, -4.2, 24, -0.2, 17.6, 1.6, 9.4, 1.8], BLADE, { dark: 1.7 });
+    B(c, 6.6, -4.6, 2.8, 9.2, acc(A), { dark: 2.8, lw: SM });
+    gem2(c, 8, 0, 2.2, A.gem);
+  },
+  // A straight back, a belly that widens toward a clipped point.
+  falchion(c, A) {
+    B(c, 0, -1.8, 6.8, 3.6, LEATHER);
+    B(c, -1.6, -2.2, 1.8, 4.4, acc(A), { dark: 1.4, lw: SM });
+    S(c, [9.6, -2.4, 29.6, -2.4, 37, -5.6, 35.8, 1.2, 30.4, 5.4, 9.6, 3], BLADE, { dark: 3.4 });
+    px2(c, 11, -1, 13, 0.9, "#00000030");
+    B(c, 6.8, -4.8, 3, 9.6, acc(A), { dark: 3, lw: SM });
+    gem2(c, 8.3, 0, 2.4, A.gem);
+  },
+  // A crooked branch with a leaf, tipped with a seed stone.
+  "branch-wand"(c, A) {
+    const stone2 = stoneOf2(A, { b: "#9be7a0", d: "#5fbf68", l: "#d4f7d6" });
+    if (A.gem) glow3(c, 31, -1.2, 7.4, A.c, 0.42);
+    B(c, 0, -2, 9.4, 4, OAK, { dark: 1.5 });
+    S(c, [11.6, -1.5, 18, -1.6, 22, -2.8, 28.6, -2, 28.6, 0.2, 22.4, -0.6, 18, 1.5, 11.6, 1.5], OAK, { dark: 1 });
+    S(c, [18.6, -1.6, 20.4, -5.6, 22, -5, 20.8, -1.8], OAK, { dark: 0.6 });
+    S(c, [20.4, -5.6, 25.4, -8, 24, -4.6, 22, -5], LEAF2, { dark: 1 });
+    B(c, 9.4, -2.8, 2.6, 5.6, acc(A), { dark: 2, lw: SM });
+    S(c, oct2(27.8, -4.4, 6.4, 6.4, 1.9), stone2, { dark: 2.2 });
+    px2(c, 29.6, -3.2, 1.8, 0.8, "#ffffffb3");
+  },
+  // An iron rod in rune bands, a cube stone in a dark cap.
+  "rune-rod"(c, A) {
+    const stone2 = stoneOf2(A, { b: "#cfe8f2", d: "#9cc3d3", l: "#f2fbff" });
+    if (A.gem) glow3(c, 31.8, 0, 7.4, A.c, 0.42);
+    B(c, 0, -2, 9.2, 4, P3.strap, { dark: 1.5 });
+    B(c, 9.2, -1.4, 18, 2.8, STEEL, { dark: 1 });
+    for (const x of [12, 16.4, 20.8]) B(c, x, -2.2, 1.8, 4.4, acc(A), { dark: 1.6, lw: SM });
+    B(c, 26.6, -2.8, 2.2, 5.6, DARK3, { dark: 1.8 });
+    B(c, 28.8, -3, 6, 6, stone2, { dark: 2.4 });
+    px2(c, 30, -1.8, 2, 0.8, "#ffffffb3");
+  },
+  // A stone orb in a gold cup.
+  "orb-scepter"(c, A) {
+    B(c, 0, -2, 9, 4, OAK, { dark: 1.5 });
+    B(c, 9, -1.7, 12, 3.4, acc(A), { dark: 1.4, lw: SM });
+    S(c, [20.4, -1.8, 22.4, -5, 26, -5, 26, 5, 22.4, 5, 20.4, 1.8], SCEPTER_GOLD2, { dark: 3 });
+    S(c, oct2(25.4, -5.2, 10.4, 10.4, 3), stoneOf2(A, { b: "#e8eef2", d: "#b9c4cc", l: "#ffffff" }), { dark: 3.6 });
+    px2(c, 27.4, -3.6, 2.4, 1.2, "#ffffffb3");
+  },
+  // A gold crescent cradling the stone.
+  "crescent-scepter"(c, A) {
+    B(c, 0, -2, 9, 4, OAK, { dark: 1.5 });
+    B(c, 9, -1.7, 12.6, 3.4, acc(A), { dark: 1.4, lw: SM });
+    S(c, [21.4, -1.8, 24, -6.6, 28.4, -9, 32.6, -8.4, 28.8, -6.4, 26.6, -3.4, 26.4, 0, 26.6, 3.4, 28.8, 6.4, 32.6, 8.4, 28.4, 9, 24, 6.6, 21.4, 1.8], SCEPTER_GOLD2, { dark: 2.6 });
+    gem2(c, 29.4, 0, 3.6, A.gem ?? "#e8eef2");
+  },
+  // A shepherd's crook, its stone in the curl.
+  "crook-staff"(c, A) {
+    const stone2 = stoneOf2(A, { b: "#b8c4cc", d: "#8d999b", l: "#e3e9ec" });
+    if (A.gem) glow3(c, 29, -4.7, 8.4, A.c, 0.42);
+    B(c, 0, -1.7, 29, 3.4, WOOD, { dark: 1.3 });
+    S(c, arcBand2(29, -4.7, 3, 6.4, Math.PI / 2, -Math.PI * 0.85), WOOD, { dark: 1.3 });
+    B(c, 19.6, -2.1, 1.8, 4.2, acc(A), { dark: 1.6, lw: SM });
+    S(c, [29, -7.2, 31.5, -4.7, 29, -2.2, 26.5, -4.7], stone2, { dark: 2 });
+  },
+  // A gnarled staff whose split top clutches a round stone.
+  "gnarled-staff"(c, A) {
+    const stone2 = stoneOf2(A, { b: "#b8c4cc", d: "#8d999b", l: "#e3e9ec" });
+    if (A.gem) glow3(c, 33.6, 0, 9, A.c, 0.42);
+    S(c, oct2(30.2, -3.4, 6.8, 6.8, 2), stone2, { dark: 2.6 });
+    S(c, [0, -1.9, 26.4, -1.9, 29.6, -3.4, 33.8, -5.2, 38, -4.2, 34.6, -3, 31.6, -1.8, 31.6, 1.8, 34.6, 3, 38, 4.2, 33.8, 5.2, 29.6, 3.4, 26.4, 1.9, 0, 1.9], WOOD, { dark: 1.4 });
+    px2(c, 8, -0.4, 6, 0.8, "#00000030");
+    B(c, 20, -2.3, 2, 4.6, acc(A), { dark: 1.8, lw: SM });
+    px2(c, 32, -2.2, 1.8, 0.9, "#ffffffb3");
+  }
+});
 var ANY = new Proxy(function() {
 }, { get: () => ANY, set: () => true, apply: () => ANY });
 var boxes = /* @__PURE__ */ new Map();
@@ -33467,8 +33726,8 @@ function createInventoryPresentation({ document, environment, readModel, adapter
   }
   function gearLock(owner, item, d) {
     if (retiredGear(d)) return { text: "Chest and leggings are retired: wear an Overall" };
-    const cls = classGearAllowed(owner, item) ? null : HERO_CLASSES[itemGearClass(item)] ?? Object.values(HERO_CLASSES).find((c) => c.offhand === d.subType);
-    if (cls) return { text: `${cls.name} only` };
+    const fits = classGearAllowed(owner, item) ? null : itemGearClasses(item) ?? [Object.values(HERO_CLASSES).find((c) => c.offhand === d.subType)?.id].filter(Boolean);
+    if (fits?.length) return { text: `${fits.map((id) => HERO_CLASSES[id].name).join(" and ")} only` };
     if (!equipmentLevelAllowed(owner, item)) return { text: `Requires hero level ${equipmentRequiredLevel(owner, item)}` };
     return null;
   }
@@ -38988,7 +39247,7 @@ var AMBER = "#ffc77b";
 var BARK2 = "#71503a";
 var LIGHT_BARK = "#a8784d";
 var DARK_BARK = "#433025";
-var LEAF = "#8ab75c";
+var LEAF3 = "#8ab75c";
 var GREEN = "#a0ed75";
 var clamp27 = (v) => Math.max(0, Math.min(1, v));
 var ease = (v) => {
@@ -39225,7 +39484,7 @@ function rootVine(c, row2, angle3, amount, growth) {
   stroke(c, points2, LIGHT_BARK, 1.6);
   if (growth > 0.4) for (let i = 3; i < 8; i += 3) {
     const p = points2[i], side = i % 2 ? 1 : -1;
-    poly2(c, [[p[0], p[1]], [p[0] + side * 6, p[1] - 3], [p[0] + side * 8, p[1] + 1], [p[0] + side * 3, p[1] + 3]], LEAF, INK29, 0.8);
+    poly2(c, [[p[0], p[1]], [p[0] + side * 6, p[1] - 3], [p[0] + side * 8, p[1] + 1], [p[0] + side * 3, p[1] + 3]], LEAF3, INK29, 0.8);
   }
   c.restore();
 }
@@ -39308,7 +39567,7 @@ function rootSpear(c, p, height, lean, opacity) {
   poly2(c, [[-7, 0], [-5, -height * 0.29], [lean, -height], [lean - 2, -height * 0.48], [0, 0]], LIGHT_BARK, null);
   poly2(c, [[1, -height * 0.36], [6, -height * 0.25], [8, 0], [1, 0]], DARK_BARK, null);
   if (height > 13) {
-    poly2(c, [[lean * 0.5, -height * 0.53], [lean * 0.5 - 8, -height * 0.61], [lean * 0.5 - 11, -height * 0.51], [lean * 0.5 - 3, -height * 0.44]], LEAF, INK29, 0.85);
+    poly2(c, [[lean * 0.5, -height * 0.53], [lean * 0.5 - 8, -height * 0.61], [lean * 0.5 - 11, -height * 0.51], [lean * 0.5 - 3, -height * 0.44]], LEAF3, INK29, 0.85);
     stroke(c, [[lean * 0.5 - 2, -height * 0.5], [lean * 0.5 - 7, -height * 0.54]], "#d2e494", 0.8);
   }
   c.restore();
@@ -39319,7 +39578,7 @@ function flyingLeaf(c, contact, lift, index, age, life) {
   c.translate(contact.x, contact.y - lift);
   c.rotate(index * 2.4 + q * 3.1);
   c.globalAlpha *= Math.min(1, age / 3) * (1 - ease((age - life * 0.65) / (life * 0.35)));
-  poly2(c, [[-5, 0], [-1, -3], [6, 0], [2, 4]], index % 2 ? LEAF : "#c6d57c", INK29, 0.85);
+  poly2(c, [[-5, 0], [-1, -3], [6, 0], [2, 4]], index % 2 ? LEAF3 : "#c6d57c", INK29, 0.85);
   stroke(c, [[-3, 0], [3, 0]], "#53723c", 0.8);
   c.restore();
 }

@@ -16830,6 +16830,132 @@ function validateEncounterEconomyProgress(a, b) {
   }
 }
 
+// src/shared/content/item_looks_v1.js
+var BY_DEFINITION = Object.freeze({
+  "worn-sword": "sword",
+  "iron-sword": "sword",
+  "guard-sword": "sword",
+  "runic-sword": "sword",
+  "padded-armor": "doublet",
+  "chain-armor": "hauberk",
+  "plate-armor": "plate",
+  coif: "coif",
+  greaves: "greaves",
+  sabatons: "sabatons",
+  "full-plate": "plate",
+  "starter-shield": "kite",
+  "starter-dagger": "kris",
+  "kit-knight-longsword": "sword",
+  "kit-knight-coif": "coif",
+  "kit-knight-hauberk": "hauberk",
+  "kit-knight-gauntlets": "gauntlets",
+  "kit-knight-treads": "boots",
+  "kit-rogue-saber": "saber",
+  "kit-rogue-bandana": "bandana",
+  "kit-rogue-doublet": "doublet",
+  "kit-rogue-gloves": "gloves",
+  "kit-rogue-boots": "boots",
+  "kit-mage-staff": "staff",
+  "kit-mage-cowl": "cowl",
+  "kit-mage-robe": "apprentice-robe",
+  "kit-mage-wraps": "wraps",
+  "kit-mage-slippers": "apprentice-slippers"
+});
+var BY_NOUN = Object.freeze({
+  Greatsword: "greatsword",
+  Longsword: "sword",
+  Halberd: "halberd",
+  Warhammer: "warhammer",
+  Battleaxe: "axe",
+  Broadsword: "sword",
+  "Flanged Mace": "mace",
+  Claymore: "greatsword",
+  "Kite Shield": "kite",
+  "Tower Shield": "tower",
+  Buckler: "buckler",
+  Aegis: "kite",
+  "Heater Shield": "heater",
+  Kris: "kris",
+  Stiletto: "stiletto",
+  Baselard: "dagger",
+  Dirk: "dagger",
+  "Main-Gauche": "main-gauche",
+  Greathelm: "helm",
+  Armet: "helm",
+  Visor: "helm",
+  Hauberk: "hauberk",
+  "Chain Mail": "hauberk",
+  Cuirass: "plate",
+  Brigandine: "leather",
+  "Plate Mail": "plate",
+  Doublet: "doublet",
+  Greaves: "greaves",
+  Legplates: "greaves",
+  Chausses: "chausses",
+  Cuisses: "greaves",
+  Sabatons: "sabatons",
+  Sollerets: "sabatons",
+  "Steel Boots": "sabatons",
+  Treads: "boots",
+  Exosuit: "plate",
+  "Inquisitor Robes": "robe",
+  "Full Plate Armor": "plate",
+  Trenchcoat: "leather",
+  // Class gear (class_gear_v1.js).
+  Rapier: "rapier",
+  Saber: "saber",
+  Scimitar: "scimitar",
+  Wand: "wand",
+  Scepter: "scepter",
+  Staff: "staff",
+  "Chain Coif": "coif",
+  "Chain Gloves": "gauntlets",
+  "Chain Boots": "boots",
+  "Great Helm": "helm",
+  "Plate Armor": "plate",
+  Gauntlets: "gauntlets",
+  "Plate Boots": "sabatons",
+  Bandana: "bandana",
+  "Leather Armor": "doublet",
+  "Leather Gloves": "gloves",
+  "Leather Boots": "boots",
+  Hood: "hood",
+  "Studded Armor": "leather",
+  "Studded Gloves": "gloves",
+  "Studded Boots": "tall",
+  Cowl: "cowl",
+  "Cloth Robe": "apprentice-robe",
+  "Cloth Wraps": "wraps",
+  "Cloth Slippers": "apprentice-slippers",
+  "Wizard Hat": "hat",
+  "Silk Robe": "robe",
+  "Silk Wraps": "wraps",
+  "Silk Slippers": "slippers"
+});
+var OVERALL_LEGS = Object.freeze({ plate: "greaves", hauberk: "chausses", doublet: "breeches", leather: "trousers" });
+var TOME_LOOKS = Object.freeze({ fire: "tome-fire", lightning: "tome-storm", frost: "tome-frost" });
+var LOOK_POOLS = Object.freeze({
+  sword: Object.freeze(["sword", "broadsword", "leaf-sword"]),
+  axe: Object.freeze(["axe", "double-axe", "broad-axe"]),
+  warhammer: Object.freeze(["warhammer", "maul", "war-pick"]),
+  rapier: Object.freeze(["rapier", "cup-rapier", "estoc"]),
+  saber: Object.freeze(["saber", "cutlass", "talwar"]),
+  scimitar: Object.freeze(["scimitar", "shamshir", "falchion"]),
+  wand: Object.freeze(["wand", "branch-wand", "rune-rod"]),
+  scepter: Object.freeze(["scepter", "orb-scepter", "crescent-scepter"]),
+  staff: Object.freeze(["staff", "crook-staff", "gnarled-staff"]),
+  buckler: Object.freeze(["buckler", "targe", "roundel"]),
+  kite: Object.freeze(["kite", "heater", "iron-kite"]),
+  tower: Object.freeze(["tower", "pavise", "bulwark"]),
+  "main-gauche": Object.freeze(["main-gauche", "sword-breaker", "trident-dagger"]),
+  stiletto: Object.freeze(["stiletto", "rondel", "misericorde"]),
+  kris: Object.freeze(["kris", "karambit", "serrated-dagger"]),
+  "tome-fire": Object.freeze(["tome-cinder", "tome-magma", "tome-hearth"]),
+  "tome-frost": Object.freeze(["tome-rime", "tome-winter", "tome-tundra"]),
+  "tome-storm": Object.freeze(["tome-spark", "tome-thunder", "tome-gale"])
+});
+var nounLookType = (noun) => BY_NOUN[noun] ?? null;
+
 // src/shared/contracts/forge_stations.js
 var layouts3 = /* @__PURE__ */ new WeakMap();
 function forgeStationLayout(manifest, collision2) {
@@ -17131,6 +17257,11 @@ function defeatReward2(state, p, enemy, ordinal, rewardVersion = PLAYER_INVENTOR
   return { gold, definitionId };
 }
 var KIT_CLASS = Object.fromEntries(Object.entries(CLASS_KITS).flatMap(([cls, kit]) => Object.values(kit).map((id) => [id, cls])));
+var ARMOR_CLASSES = {};
+for (const cls of Object.keys(CLASS_GEAR)) for (const family2 of ["helmet", "overall", "gloves", "boots"]) for (const noun of classGearNouns(cls, family2)) {
+  const type = nounLookType(noun);
+  if (type && !ARMOR_CLASSES[type]?.includes(cls)) (ARMOR_CLASSES[type] ??= []).push(cls);
+}
 function validatePlayerInventory2(p, state, validateCommand2) {
   const inv = p.inventory;
   if (inv.renewal) {
