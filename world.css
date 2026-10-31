@@ -743,13 +743,31 @@ body #world-death #world-death-download{margin:12px 0 0;background:none;border:0
 body #world-death button:disabled{opacity:.5;}
 @media(max-height:500px){body #world-death{padding:14px 24px;}body #world-death .death-emblem,body #world-death .death-intro{display:none;}body #world-death h2{font-size:27px;}body #world-death .death-eyebrow{margin:2px 0 6px;}body #world-death p{margin:6px 0;}body #world-death .death-policy{padding:6px 0;margin:8px 0;}}
 
-/* Potion belt: one-tap health potion in the old rations slot. */
-body #carried-rations.potion-button{overflow:hidden;color:#ffe3e0!important;border-color:#c0574f!important;background:linear-gradient(180deg,#5a2430f2,#3a1820f5)!important;font-weight:700;}
-body #carried-rations.potion-button::before{content:"";display:inline-block;width:10px;height:13px;margin-right:6px;vertical-align:-2px;border-radius:2px 2px 5px 5px;background:linear-gradient(180deg,#ffd6d0 0 22%,#e2463f 22%);box-shadow:0 0 6px #ff5b4f;}
-body #carried-rations.potion-button::after{content:"";position:absolute;inset:0;background:#0b0f16b8;transform-origin:bottom;transform:scaleY(var(--potion-cooldown,0));pointer-events:none;}
-body #carried-rations.potion-button[data-empty=true]{opacity:.55;filter:saturate(.4);}
+/* Potion belt: one-tap health potion in the old rations slot. A flask sits in a dark
+ socket and its liquid shows how full the belt is (--potion-fill); while the potion
+ cools down a shade sweeps around the socket (--potion-cooldown) over the seconds left. */
+body #carried-rations.potion-button{display:flex;align-items:center;justify-content:flex-start;gap:7px;padding:0 11px 0 6px!important;color:#fff1ea!important;border:2px solid #14080c!important;border-radius:8px!important;background:radial-gradient(130% 100% at 28% 0%,#9c3445 0,#6a1d2c 48%,#3a0f19 100%)!important;box-shadow:inset 0 0 0 1px #d9b77a,inset 0 2px 0 1px #ffe2b833,inset 0 -8px 12px #1c050c99,0 3px 0 #0b1119,0 6px 14px #0006!important;text-shadow:0 1px 0 #2a0710;font-weight:700;transition:filter .2s,transform .08s;}
+body #carried-rations.potion-button[hidden]{display:none!important;}
+body #carried-rations.potion-button::before{content:"";position:absolute;left:3px;right:3px;top:3px;height:42%;border-radius:5px 5px 12px 12px/5px 5px 6px 6px;background:linear-gradient(#ffffff24,#ffffff00);pointer-events:none;}
+body #carried-rations.potion-button::after{content:"";position:absolute;inset:-2px;border-radius:9px;pointer-events:none;}
+body #carried-rations .potion-socket{position:relative;flex:0 0 auto;display:grid;place-items:center;width:34px;height:34px;border-radius:7px;background:radial-gradient(circle at 50% 62%,#3a1018,#14060a 70%);box-shadow:inset 0 0 0 1px #050203,inset 0 3px 5px #000b,0 1px 0 #ffd9a833;}
+body #carried-rations .potion-socket svg{width:24px;height:31px;margin-top:-2px;overflow:visible;filter:drop-shadow(0 0 4px #ff4d5a66);}
+body #carried-rations .potion-liquid{transform:translateY(calc((1 - var(--potion-fill,1))*12px));transition:transform .45s cubic-bezier(.3,1.35,.5,1);}
+body #carried-rations .potion-socket::after{content:"";position:absolute;inset:0;border-radius:inherit;background:conic-gradient(#06080dd0 calc(var(--potion-cooldown,0)*360deg),#0000 0);pointer-events:none;}
+body #carried-rations .potion-socket b{position:absolute;inset:0;z-index:1;display:grid;place-items:center;font:800 15px/1 var(--rpg-ui);color:#fff;text-shadow:0 0 3px #000,0 1px 0 #000;}
+body #carried-rations .potion-socket b:empty{display:none;}
+body #carried-rations .potion-copy{display:grid;gap:4px;line-height:1;text-align:left;white-space:nowrap;}
+body #carried-rations .potion-copy small{font:700 8px/1 var(--rpg-ui);letter-spacing:.16em;text-transform:uppercase;color:#f1c9a4;}
+body #carried-rations .potion-copy strong{font:800 16px/1 var(--rpg-ui);letter-spacing:.01em;color:#fff4ee;}
+body #carried-rations .potion-copy strong span+span{font-size:11px;font-weight:700;color:#e8b3a8;}
+@media(hover:hover) and (pointer:fine){body #carried-rations.potion-button:hover{filter:brightness(1.12);border-color:#14080c!important;background:radial-gradient(130% 100% at 28% 0%,#b03c4f 0,#76202f 48%,#3f101b 100%)!important;}}
+body #carried-rations.potion-button:active{transform:translateY(1px);}
+body #carried-rations.potion-button[data-empty=true]{filter:saturate(.35) brightness(.78);}
+body #carried-rations.potion-button[data-empty=true] .potion-socket svg{filter:none;}
 body #carried-rations.potion-button.potion-gained{animation:potion-gained .7s ease-out;}
-@keyframes potion-gained{0%{box-shadow:0 0 0 0 #ff6b5fcc;transform:scale(1.12);}100%{box-shadow:0 0 0 14px #ff6b5f00;transform:scale(1);}}
+body #carried-rations.potion-button.potion-gained::after{animation:potion-gained-ring .7s ease-out;}
+@keyframes potion-gained{0%{transform:scale(1.1);filter:brightness(1.45);}100%{transform:scale(1);filter:none;}}
+@keyframes potion-gained-ring{0%{box-shadow:0 0 0 0 #ff7a6acc;}100%{box-shadow:0 0 0 12px #ff7a6a00;}}
 
 /* HUD layout v2: the minimap is a framed map with the clock hanging from its bottom edge;
  BAG and MENU sit as a pair just under it on phones (MENU alone in landscape); the area tab hangs right under the HP/XP panel. */

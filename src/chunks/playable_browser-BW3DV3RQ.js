@@ -343,6 +343,7 @@ import {
   classTreeSpent,
   classTreesFor,
   closedRecord,
+  collectGroundPotions,
   collectRenewableGear,
   collidesWithTiles,
   collisionBlockDetail,
@@ -384,6 +385,7 @@ import {
   deriveWoodlandCaveFinaleReservationD13D_G,
   deriveWoodlandCaveIdentityD12_2,
   discoverOverworldActors,
+  dropPotions,
   effectiveEquipmentBonuses,
   eligibleFunctionalSocketD10,
   eligibleNearbyParticipants,
@@ -430,6 +432,8 @@ import {
   groundCoverageStatusD9,
   groundGear,
   groundOccupancyWindowD9,
+  groundPotionPosition,
+  groundPotions,
   guardIntent,
   guardsSource,
   hasAlphaPopulation,
@@ -745,7 +749,7 @@ import {
   worldLevelGapMultiplier,
   worldOrdinaryMeleeProfile,
   worldPointForArea
-} from "./chunk-HGRR6GYD.js";
+} from "./chunk-XOVAK57K.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -22873,7 +22877,7 @@ function createActivityProgression(state, manifest, measure) {
       for (const row2 of rows) {
         const { player, next, d8, resolved } = row2;
         applyEpisodeReward(state, player, row2.inventoryPlan);
-        grantPotions(player, potionDropCount(state, player, target));
+        dropPotions(state, player, target, potionDropCount(state, player, target));
         markEarning(state, manifest, player);
         player.progression = copyWire(next);
         if (d8) player.d8 = d8;
@@ -27743,6 +27747,7 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
         const a = state.entitiesById[p.entityId];
         if (a?.alive && a.residency.spaceInstanceId === state.overworldInstanceId && (isStarterVillageSafe(state, a.position) || isWorldPointSafe(manifest, a.position))) grantPotions(p, POTION_BELT_POLICY.maxCapacityUpgrades + POTION_BELT_POLICY.baseCharges);
       }
+      if (state.d9World) for (const p of Object.values(state.playersById)) collectGroundPotions(state, p);
       expireWildernessCrowdGrace(state);
       for (const [id, until] of Object.entries(state.siteExitProtectionByEntityId ?? {})) if (state.tick >= until) delete state.siteExitProtectionByEntityId[id];
       eliteCombat.beginTick();
@@ -29093,6 +29098,10 @@ function createActivityClientPort({ authority, localPlayerId, measure = (_n, fn)
           inventory = player.inventory ? inventoryReadModel(player) : null;
           inventoryKey = invKey;
         }
+        const potionDrops = Object.entries(groundPotions(player)).flatMap(([id, d2]) => {
+          const at4 = d2.spaceInstanceId === ctx.spaceInstanceId ? groundPotionPosition(state, d2) : null;
+          return at4 && Math.hypot(at4.x - local6.position.x, at4.y - local6.position.y) <= 900 ? [{ id, position: { x: at4.x, y: at4.y }, count: d2.count, age: state.tick - d2.tick }] : [];
+        });
         const loot = groundGear(player).filter((r) => r.definitionId && !r.claimed && r.spaceInstanceId === ctx.spaceInstanceId && Math.hypot(r.position.x - local6.position.x, r.position.y - local6.position.y) <= 900).map((r) => ({ sourceEntityId: r.sourceEntityId, itemId: `item:${player.playerId}:${r.sourceEntityId}`, position: { ...r.position }, definitionId: r.definitionId, ...r.generated ? { generated: r.generated } : {}, ...r.workshop ? { workshop: r.workshop } : {}, canPickUp: canPickUp(state, player, r.sourceEntityId, playersById[localPlayerId].stats.pickupRadius) })).sort((a, b) => Math.hypot(a.position.x - local6.position.x, a.position.y - local6.position.y) - Math.hypot(b.position.x - local6.position.x, b.position.y - local6.position.y) || a.sourceEntityId.localeCompare(b.sourceEntityId));
         const resources = slowCached("resources", () => economicResources(state, m, localPlayerId, ctx.spaceInstanceId).filter((r) => r.spaceInstanceId === ctx.spaceInstanceId && Math.hypot(r.position.x - local6.position.x, r.position.y - local6.position.y) <= 900).flatMap((r) => {
           const bossCompletion = projectBrimstoneCompletionChest(state, r) ?? projectAegisCompletionChest(state, r) ?? projectArachnidTreantCompletionChestD12_5B(state, r) ?? projectStandardCaveBossCompletionChestD13D_E(state, r), finaleCompletion = projectSmallCaveFinaleCompletionChestD13D_C(state, r) ?? projectLargeCaveFinaleCompletionChestD13D_G(state, r), completion = bossCompletion ?? finaleCompletion;
@@ -29215,7 +29224,7 @@ function createActivityClientPort({ authority, localPlayerId, measure = (_n, fn)
           worldTime: worldTimeAtTick(state.tick),
           localPlayerId,
           inventory,
-          potions: Object.freeze({ count: potionCount(player), capacity: potionCapacity(player), healPercent: potionHealPercent(player), cooldownTicks: potionCooldownTicks(state, player), cooldownTotal: POTION_BELT_POLICY.cooldownTicks, enabled: Boolean(player.inventory?.services) }),
+          potions: Object.freeze({ count: potionCount(player), capacity: potionCapacity(player), healPercent: potionHealPercent(player), cooldownTicks: potionCooldownTicks(state, player), cooldownTotal: POTION_BELT_POLICY.cooldownTicks, enabled: Boolean(player.inventory?.services), drops: freezeProjection(potionDrops) }),
           forgeAccess: forgeAccess(state, player, m),
           loot: freezeProjection(loot),
           resources: freezeProjection(resources),
@@ -35216,6 +35225,8 @@ function createSettlementServicesMenu2(options) {
   supplyButton.addEventListener("mousedown", (e) => e.preventDefault());
   supplyButton.id = "carried-rations";
   supplyButton.classList.add("potion-button");
+  supplyButton.innerHTML = '<span class="potion-socket" aria-hidden="true"><svg viewBox="0 0 20 26"><defs><clipPath id="potion-flask-glass"><path d="M7.4 7.6H12.6V11.6A6.6 6.6 0 1 1 7.4 11.6Z"/></clipPath><linearGradient id="potion-flask-red" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8a78"/><stop offset=".4" stop-color="#ee3b45"/><stop offset="1" stop-color="#a3122c"/></linearGradient></defs><path d="M7.4 7.6H12.6V11.6A6.6 6.6 0 1 1 7.4 11.6Z" fill="#f6d9d3" fill-opacity=".16"/><g clip-path="url(#potion-flask-glass)"><g class="potion-liquid"><rect x="2" y="12.6" width="16" height="13" fill="url(#potion-flask-red)"/><rect x="2" y="12.6" width="16" height="1.1" fill="#ffb3a6"/></g><rect x="2" y="7" width="16" height="5" fill="#fff" fill-opacity=".12"/></g><path d="M7.4 7.6H12.6V11.6A6.6 6.6 0 1 1 7.4 11.6Z" fill="none" stroke="#1b0f13" stroke-width="1.6" stroke-linejoin="round"/><rect x="6.1" y="6.3" width="7.8" height="2.4" fill="#1b0f13"/><rect x="6.9" y="6.9" width="6.2" height="1.2" fill="#e9d7c8"/><rect x="7.4" y="2.5" width="5.2" height="4.2" fill="#1b0f13"/><rect x="8.1" y="3.2" width="3.8" height="3" fill="#a8743f"/><rect x="8.1" y="3.2" width="1.3" height="3" fill="#d39a5b"/><rect x="5.4" y="15.6" width="1.5" height="3.2" fill="#fff" fill-opacity=".82"/><rect x="6.6" y="14" width="1.3" height="1.2" fill="#fff" fill-opacity=".82"/></svg><b></b></span><span class="potion-copy" aria-hidden="true"><small>Potion</small><strong><span></span><span></span></strong></span>';
+  const potionTimer = supplyButton.querySelector(".potion-socket b"), [potionHave, potionOf] = supplyButton.querySelectorAll(".potion-copy strong span");
   supplyButton.style.cssText = "position:absolute;left:78px;top:12px;z-index:8;padding:10px;background:#282033;color:#f2db9d;border:1px solid #ad9359;border-radius:6px";
   supplyButton.setAttribute("data-gameplay-hud", "");
   doc.getElementById("world-bag").after(supplyButton);
@@ -35475,8 +35486,11 @@ function createSettlementServicesMenu2(options) {
   function refresh(m) {
     supplyButton.hidden = !m.potions?.enabled;
     if (supplyButton.hidden) return;
-    const belt = m.potions, cooling = belt.cooldownTicks > 0, label3 = cooling ? "Potion \xB7 " + Math.ceil(belt.cooldownTicks / 60) + "s" : "Potion \xB7 " + belt.count + "/" + belt.capacity;
-    if (supplyButton.textContent !== label3) supplyButton.textContent = label3;
+    const belt = m.potions, cooling = belt.cooldownTicks > 0, seconds = cooling ? String(Math.ceil(belt.cooldownTicks / 60)) : "";
+    if (potionHave.textContent !== String(belt.count)) potionHave.textContent = belt.count;
+    if (potionOf.textContent !== "/" + belt.capacity) potionOf.textContent = "/" + belt.capacity;
+    if (potionTimer.textContent !== seconds) potionTimer.textContent = seconds;
+    supplyButton.style.setProperty("--potion-fill", String(Math.min(1, belt.count / Math.max(1, belt.capacity))));
     supplyButton.dataset.empty = String(belt.count < 1);
     if (lastPotionCount !== null && belt.count > lastPotionCount) {
       supplyButton.classList.remove("potion-gained");
@@ -50050,6 +50064,166 @@ function createNightGroundItemsV1({ enabled = () => true } = {}) {
   }, inspect: () => ({ version: "night-loot-presentation-v1.2-energy-columns", enabled: enabled(), ...enabled() ? counts : legacy.inspect(), lights: enabled() ? counts.lights : 0, records: enabled() ? records.size : legacy.inspect().records, stamps: stamps.size, stampBytes: stamps.size * (64 * 128 + 64 * 24 + 96 * 96) * 4, labelStamps: labelStamps.size, labelStampBytes: [...labelStamps.values()].reduce((n, s) => n + s.image.width * s.image.height * 4, 0), labelsAfterAmbient: enabled(), commonReadability: "Short white beam, contact cue, bright label and self-lit pickup sprite", beamPriority: "Visible higher rarities first; nearest pickup labels retain their separate budget", labelBoxes: enabled() ? lastLabelBoxes.map((b) => ({ ...b })) : [], clips: clips.resources(), limits: NIGHT_LOOT_LIMITS }) };
 }
 
+// src/client/potion_drop_art_v1.js
+var POTION_DROP_ART_VERSION = "potion-drop-art-v1";
+var SETTLE_MS = 500;
+var GONE_MS = 260;
+var TICK_MS = 1e3 / 60;
+function createPotionDropsV1() {
+  const records = /* @__PURE__ */ new Map();
+  let identity2 = null, sprite = null, pool = null, drawn = 0;
+  function sprites(doc) {
+    if (sprite) return;
+    const s = 3, flask = doc.createElement("canvas");
+    flask.width = 20 * s;
+    flask.height = 26 * s;
+    const c = flask.getContext("2d");
+    c.scale(s, s);
+    c.translate(10, 25);
+    const body5 = () => {
+      c.beginPath();
+      c.moveTo(-2.6, -17);
+      c.lineTo(-2.6, -13.4);
+      c.arc(0, -7.5, 6.6, -Math.PI / 2 - 0.4, Math.PI * 1.5 + 0.4);
+      c.lineTo(2.6, -17);
+      c.closePath();
+    };
+    c.lineJoin = "round";
+    body5();
+    c.fillStyle = "#f6d9d3";
+    c.fill();
+    c.save();
+    body5();
+    c.clip();
+    const liquid = c.createLinearGradient(0, -11, 0, -1);
+    liquid.addColorStop(0, "#ff8a78");
+    liquid.addColorStop(0.45, "#ee3b45");
+    liquid.addColorStop(1, "#a3122c");
+    c.fillStyle = liquid;
+    c.fillRect(-8, -10.6, 16, 11);
+    c.fillStyle = "#ffb3a6";
+    c.fillRect(-8, -10.9, 16, 1.1);
+    c.fillStyle = "#ffffff2e";
+    c.fillRect(-8, -17, 16, 6.1);
+    c.restore();
+    body5();
+    c.lineWidth = 1.7;
+    c.strokeStyle = "#1b0f13";
+    c.stroke();
+    c.fillStyle = "#1b0f13";
+    c.fillRect(-3.9, -18.6, 7.8, 2.4);
+    c.fillStyle = "#e9d7c8";
+    c.fillRect(-3.1, -18, 6.2, 1.2);
+    c.fillStyle = "#1b0f13";
+    c.fillRect(-2.6, -22.4, 5.2, 4.2);
+    c.fillStyle = "#a8743f";
+    c.fillRect(-1.9, -21.7, 3.8, 3);
+    c.fillStyle = "#d39a5b";
+    c.fillRect(-1.9, -21.7, 1.3, 3);
+    c.fillStyle = "#ffffffd0";
+    c.fillRect(-4.6, -9.6, 1.5, 3.2);
+    c.fillRect(-3.4, -11.2, 1.3, 1.2);
+    c.fillStyle = "#ffffff80";
+    c.fillRect(-1.6, -16.2, 1, 2.2);
+    const glow8 = doc.createElement("canvas");
+    glow8.width = 64;
+    glow8.height = 24;
+    const g = glow8.getContext("2d"), r = g.createRadialGradient(32, 12, 0, 32, 12, 30);
+    r.addColorStop(0, "#ff7a6ab0");
+    r.addColorStop(0.35, "#ff4d5a55");
+    r.addColorStop(1, "#ff4d5a00");
+    g.save();
+    g.translate(0, 12);
+    g.scale(1, 0.4);
+    g.translate(0, -12);
+    g.fillStyle = r;
+    g.fillRect(0, -20, 64, 64);
+    g.restore();
+    sprite = flask;
+    pool = glow8;
+  }
+  function update(model, time) {
+    const next = model.context.campaignId + "/" + model.localPlayerId + "/" + model.context.spaceInstanceId, first = next !== identity2;
+    if (first) {
+      records.clear();
+      identity2 = next;
+    }
+    const live = /* @__PURE__ */ new Set();
+    for (const drop of model.potions?.drops ?? []) {
+      live.add(drop.id);
+      const r = records.get(drop.id);
+      if (!r) records.set(drop.id, { drop, born: time - drop.age * TICK_MS, gone: null });
+      else {
+        r.drop = drop;
+        r.gone = null;
+      }
+    }
+    for (const [id, r] of records) if (!live.has(id)) {
+      r.gone ??= time;
+      if (time - r.gone >= GONE_MS) records.delete(id);
+    }
+  }
+  function place(r, time) {
+    const age = time - r.born, settle = Math.min(1, age / SETTLE_MS), seed2 = r.drop.id.length * 37 + r.drop.id.charCodeAt(r.drop.id.length - 1), phase = seed2 % 628 / 100;
+    const hop = settle < 1 ? Math.sin(settle * Math.PI) * 15 * (1 - settle * 0.35) : Math.max(0, Math.sin((age - SETTLE_MS) / 90) * 2.2 * Math.exp(-(age - SETTLE_MS) / 140)), bob = settle < 1 ? 0 : Math.sin(time / 420 + phase) * 1.1;
+    const gone = r.gone === null ? 0 : Math.min(1, (time - r.gone) / GONE_MS);
+    return { x: r.drop.position.x, y: r.drop.position.y, lift: hop + bob * (1 - gone) + gone * 12, tilt: settle < 1 ? (1 - settle) * (seed2 % 2 ? 1 : -1) * 0.9 : 0, scale: (0.6 + 0.4 * Math.min(1, age / 180)) * (1 + gone * 0.25), alpha: 1 - gone, phase, settled: settle >= 1 };
+  }
+  function draw(ctx, model, time, viewport) {
+    update(model, time);
+    drawn = 0;
+    if (!records.size) return;
+    sprites(ctx.canvas.ownerDocument);
+    const full = model.potions && model.potions.count >= model.potions.capacity;
+    for (const r of records.values()) {
+      const p = place(r, time);
+      if (p.x < viewport.x - 24 || p.y < viewport.y - 30 || p.x > viewport.x + viewport.width + 24 || p.y > viewport.y + viewport.height + 30) continue;
+      drawn++;
+      ctx.save();
+      ctx.globalAlpha = p.alpha;
+      const pulse = 0.75 + 0.25 * Math.sin(time / 520 + p.phase), shrink = 1 / (1 + p.lift / 30);
+      ctx.globalAlpha = p.alpha * (full ? 0.35 : 0.7) * pulse;
+      ctx.drawImage(pool, p.x - 16, p.y - 6, 32, 12);
+      ctx.globalAlpha = p.alpha * 0.5;
+      ctx.fillStyle = "#000";
+      ctx.beginPath();
+      ctx.ellipse(p.x, p.y + 1, 6 * shrink, 2.2 * shrink, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = p.alpha * (full ? 0.72 : 1);
+      ctx.translate(p.x, p.y - p.lift);
+      ctx.rotate(p.tilt);
+      ctx.scale(p.scale, p.scale);
+      ctx.drawImage(sprite, -10, -25, 20, 26);
+      const glint = (time / 1e3 + p.phase) % 3.2;
+      if (p.settled && r.gone === null && glint < 0.35) {
+        const k = Math.sin(glint / 0.35 * Math.PI);
+        ctx.globalAlpha = k * 0.9;
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(3.2, -13, 1.2, 1.2);
+        ctx.globalAlpha = k * 0.55;
+        ctx.fillRect(2.2, -12.6, 3.2, 0.5);
+        ctx.fillRect(3.55, -14, 0.5, 3.2);
+      }
+      ctx.restore();
+    }
+  }
+  function emission(ctx, model, time, viewport, { frame } = {}) {
+    const k = nightReadabilityStrength(frame);
+    if (!k || !records.size || !pool) return;
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    for (const r of records.values()) {
+      const p = place(r, time);
+      if (p.x < viewport.x - 24 || p.y < viewport.y - 30 || p.x > viewport.x + viewport.width + 24 || p.y > viewport.y + viewport.height + 30) continue;
+      ctx.globalAlpha = p.alpha * k * 0.55 * (0.8 + 0.2 * Math.sin(time / 520 + p.phase));
+      ctx.drawImage(pool, p.x - 18, p.y - 7, 36, 14);
+      ctx.drawImage(pool, p.x - 11, p.y - p.lift - 12 * p.scale, 22, 9);
+    }
+    ctx.restore();
+  }
+  return Object.freeze({ draw, emission, inspect: () => ({ version: POTION_DROP_ART_VERSION, records: records.size, drawn }) });
+}
+
 // src/client/mastery_art.js
 var MASTERY_COLORS = Object.freeze({ pulse: "#80f6ad", syphon: "#6addfa", weaving: "#ed9dff", poison: "#6fe6a0", bloom: "#68cd98", rupture: "#ff426b", shadowflurry: "#d5a2ff", windrazor: "#c4fff4", assassin: "#ff83ce", aegis: "#ffdc7a", shatter: "#9fd9ff", expose: "#ffbc64", slow: "#a8deff", stun: "#ffe787" });
 function drawMasteryGlyph(ctx, kind, x, y, size = 12) {
@@ -58776,7 +58950,7 @@ function createBossEffectsObserver() {
 function createWorldRenderer(canvas, { performanceProbe = null, developmentScene = null, environmentArt = null, actorCollisionProbe = null } = {}) {
   const completionPreparation = createCompletionArtPreparation(canvas), heroLevelUp = createHeroLevelUpV3();
   let ctx = canvas.getContext("2d"), layout = 0, facing2 = 1, previous = null;
-  const nightVfxEnabled = () => environmentArt?.nightLootArt?.enabled?.() !== false, groundItems = createNightGroundItemsV1({ enabled: nightVfxEnabled }), nightActors = createNightActorReadabilityV1(canvas.ownerDocument, { enabled: nightVfxEnabled });
+  const nightVfxEnabled = () => environmentArt?.nightLootArt?.enabled?.() !== false, groundItems = createNightGroundItemsV1({ enabled: nightVfxEnabled }), potionDrops = createPotionDropsV1(), nightActors = createNightActorReadabilityV1(canvas.ownerDocument, { enabled: nightVfxEnabled });
   const boltOrigins = /* @__PURE__ */ new Map(), combatVfx = createCombatVfx();
   const resourceArt = createResourceDebrisV1({ art: environmentArt?.nightLootArt, presentation: createResourcePresentationV2({ art: environmentArt?.breakableProps }), remnants: environmentArt?.breakableProps }), portalArt = createExtractionPortalPresentationD12_5C(), rewards = createRewardFeedback(canvas);
   const equipmentArt = createEquipmentArtCache(canvas.ownerDocument);
@@ -58996,6 +59170,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
     addEffects(treasuryBossDepthItems(model, model.tick, viewport));
     addEffects(brimstoneEffectDepthItems(brimstoneView, model.tick, viewport));
     groundItems.draw(ctx, model, time, viewport, equipmentArt, { deferEmission: unified, frame });
+    potionDrops.draw(ctx, model, time, viewport);
     for (const shot of model.hostileProjectiles ?? []) addEffects([depthItem({ id: "hostile-shot/" + shot.id, anchorX: shot.position.x, anchorY: shot.position.y + 4.5, draw: (ctx2) => drawOrdinaryHostileProjectile(ctx2, shot, model.tick) })]);
     const liveBolts = new Set((model.bolts ?? []).map((b) => b.id));
     for (const id of boltOrigins.keys()) if (!liveBolts.has(id)) boltOrigins.delete(id);
@@ -59125,6 +59300,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
       }
       nightActors.draw(ctx, visualModel, lightView, frame);
       groundItems.emission(ctx, model, time, viewport, { frame });
+      potionDrops.emission(ctx, model, time, viewport, { frame });
       for (const paint of foreground) paint();
       drawDepthItems(ctx, protectedEffects);
       for (const [id, drawn] of Object.entries(visualModel.entitiesById)) {
@@ -59205,6 +59381,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
       ...skillLights.resources(),
       ...silhouetteShadows.resources(),
       groundItems: groundItems.inspect(),
+      potionDrops: potionDrops.inspect(),
       resourceDebris: resourceArt.resources(),
       ...nightActors.resources(),
       actorMotionPresentation: actorMotion.inspect(),

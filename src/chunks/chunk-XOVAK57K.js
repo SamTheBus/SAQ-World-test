@@ -14496,10 +14496,13 @@ var POTION_BELT_POLICY = Object.freeze({
   bossBonusPercent: 25,
   refillIntervalTicks: 60,
   offers: Object.freeze({ capacity: "potion-capacity", potency: "potion-potency" }),
-  maximumGrants: 1e6
+  maximumGrants: 1e6,
+  ground: Object.freeze({ settleTicks: 30, pickupRadius: 30, lifetimeTicks: 7200, maximum: 12, spread: 16, maximumCount: 2 })
 });
 var B = POTION_BELT_POLICY;
+var G = B.ground;
 var EMPTY = Object.freeze({ grants: 0, capacityUpgrades: 0, potencyUpgrades: 0, lastUseTick: null });
+var NO_GROUND = Object.freeze({});
 var potionBelt = (p) => p.inventory.services?.potions ?? EMPTY;
 var potionCapacity = (p) => B.baseCharges + potionBelt(p).capacityUpgrades;
 var potionHealPercent = (p) => B.baseHealPercent + B.potencyStep * potionBelt(p).potencyUpgrades;
@@ -14524,6 +14527,53 @@ function grantPotions(p, count) {
 }
 function markPotionUsed(state, p) {
   writable(p).lastUseTick = state.tick;
+}
+var groundPotions = (p) => potionBelt(p).ground ?? NO_GROUND;
+var clearLine = (c, from, to) => {
+  const dx = to.x - from.x, dy = to.y - from.y, steps = Math.max(1, Math.ceil(Math.hypot(dx, dy) / (c.tileSize / 4)));
+  for (let i = 0; i <= steps; i++) if (collidesWithTiles(c, from.x + dx * i / steps, from.y + dy * i / steps, 0)) return false;
+  return true;
+};
+function groundPotionPosition(state, drop) {
+  if (drop.position) return drop.position;
+  const frames = state.d9World?.runtime?.frames, q = frames && projectToLocalFrameD9(drop.world, frames);
+  return q ? { x: q.x, y: q.y } : null;
+}
+function dropPotions(state, p, target, count) {
+  if (!count || !p.inventory.services) return 0;
+  const space = target.residency.spaceInstanceId, from = target.position, collision2 = state.spacesByInstanceId[space]?.collision, angle = gearHash4(B.version + "/ground/" + target.entityId + "/" + state.tick) % 360 * Math.PI / 180;
+  let at = { x: from.x + Math.cos(angle) * G.spread, y: from.y + Math.sin(angle) * G.spread };
+  if (!collision2 || !clearLine(collision2, from, at)) at = { x: from.x, y: from.y };
+  const frames = space === state.overworldInstanceId ? state.d9World?.runtime?.frames : null, w = frames && localFramePositionD9(at, frames);
+  const drop = { spaceInstanceId: space, tick: state.tick, count: Math.min(G.maximumCount, count), ...w ? { world: { chunkX: w.chunkX, chunkY: w.chunkY, localX: w.localX, localY: w.localY } } : { position: at } };
+  const ground = writable(p).ground ??= {};
+  ground[target.entityId + "/" + state.tick] = drop;
+  const ids = Object.keys(ground);
+  if (ids.length > G.maximum) for (const id of ids.sort((a, b) => ground[a].tick - ground[b].tick).slice(0, ids.length - G.maximum)) delete ground[id];
+  return drop.count;
+}
+function collectGroundPotions(state, p) {
+  const belt = p.inventory.services?.potions, ground = belt?.ground;
+  if (!ground) return 0;
+  const a = state.entitiesById[p.entityId];
+  let gained = 0;
+  for (const [id, drop] of Object.entries(ground)) {
+    const age = state.tick - drop.tick;
+    if (age >= G.lifetimeTicks) {
+      delete ground[id];
+      continue;
+    }
+    if (!a?.alive || age < G.settleTicks || a.residency.spaceInstanceId !== drop.spaceInstanceId) continue;
+    const at = groundPotionPosition(state, drop), collision2 = state.spacesByInstanceId[drop.spaceInstanceId]?.collision;
+    if (!at || Math.hypot(at.x - a.position.x, at.y - a.position.y) > G.pickupRadius || collision2 && !clearLine(collision2, a.position, at)) continue;
+    const taken = grantPotions(p, drop.count);
+    if (!taken) continue;
+    gained += taken;
+    if (taken < drop.count) drop.count -= taken;
+    else delete ground[id];
+  }
+  if (!Object.keys(ground).length) delete belt.ground;
+  return gained;
 }
 function potionDropCount(state, player, target) {
   const boss = Boolean(state.bossCombat?.bossesByEntityId?.[target.entityId]), elite = Boolean(state.eliteCombat?.elitesByEntityId?.[target.entityId]);
@@ -14553,13 +14603,32 @@ function potionUpgradeSpent(p) {
 function validatePotionBelt(state, p, legacyMaximum) {
   const r = p.inventory.services?.potions;
   if (r) {
-    closedRecord(r, ["grants", "capacityUpgrades", "potencyUpgrades", "lastUseTick"]);
+    closedRecord(r, ["grants", "capacityUpgrades", "potencyUpgrades", "lastUseTick"], ["ground"]);
+    if (r.ground !== void 0) validateGroundPotions(state, r.ground);
     safeInteger(r.grants, 0, B.maximumGrants);
     safeInteger(r.capacityUpgrades, 0, B.maxCapacityUpgrades);
     safeInteger(r.potencyUpgrades, 0, B.maxPotencyUpgrades);
     if (r.lastUseTick !== null) safeInteger(r.lastUseTick, 0, state.tick);
   }
   safeInteger(potionCount(p), 0, Math.max(potionCapacity(p), legacyMaximum));
+}
+function validateGroundPotions(state, ground) {
+  const ids = Object.keys(ground);
+  requireContract(ids.length <= G.maximum, "Too many ground potions");
+  for (const id of ids) {
+    const d = ground[id];
+    requireContract(id.length <= 240, "Ground potion id");
+    closedRecord(d, ["spaceInstanceId", "tick", "count"], ["world", "position"]);
+    requireContract(typeof d.spaceInstanceId === "string" && d.spaceInstanceId.length <= 240, "Ground potion space");
+    safeInteger(d.tick, 0, state.tick);
+    safeInteger(d.count, 1, G.maximumCount);
+    requireContract(d.world === void 0 !== (d.position === void 0), "Ground potion place");
+    if (d.world) validateWorldPosition(d.world);
+    else {
+      closedRecord(d.position, ["x", "y"]);
+      requireContract(Number.isFinite(d.position.x) && Number.isFinite(d.position.y), "Ground potion position");
+    }
+  }
 }
 function validatePotionProgress(x, y) {
   const a = x?.potions ?? EMPTY, b = y?.potions ?? EMPTY;
@@ -23232,6 +23301,10 @@ export {
   potionCount,
   potionCooldownTicks,
   grantPotions,
+  groundPotions,
+  groundPotionPosition,
+  dropPotions,
+  collectGroundPotions,
   potionDropCount,
   potionUpgrade,
   saleQuote,

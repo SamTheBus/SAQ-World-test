@@ -10247,10 +10247,13 @@ var POTION_BELT_POLICY = Object.freeze({
   bossBonusPercent: 25,
   refillIntervalTicks: 60,
   offers: Object.freeze({ capacity: "potion-capacity", potency: "potion-potency" }),
-  maximumGrants: 1e6
+  maximumGrants: 1e6,
+  ground: Object.freeze({ settleTicks: 30, pickupRadius: 30, lifetimeTicks: 7200, maximum: 12, spread: 16, maximumCount: 2 })
 });
 var B = POTION_BELT_POLICY;
+var G = B.ground;
 var EMPTY = Object.freeze({ grants: 0, capacityUpgrades: 0, potencyUpgrades: 0, lastUseTick: null });
+var NO_GROUND = Object.freeze({});
 var potionBelt = (p) => p.inventory.services?.potions ?? EMPTY;
 var potionCapacity = (p) => B.baseCharges + potionBelt(p).capacityUpgrades;
 function potionCount(p) {
@@ -10267,13 +10270,32 @@ function potionUpgradeSpent(p) {
 function validatePotionBelt(state, p, legacyMaximum) {
   const r = p.inventory.services?.potions;
   if (r) {
-    closedRecord(r, ["grants", "capacityUpgrades", "potencyUpgrades", "lastUseTick"]);
+    closedRecord(r, ["grants", "capacityUpgrades", "potencyUpgrades", "lastUseTick"], ["ground"]);
+    if (r.ground !== void 0) validateGroundPotions(state, r.ground);
     safeInteger(r.grants, 0, B.maximumGrants);
     safeInteger(r.capacityUpgrades, 0, B.maxCapacityUpgrades);
     safeInteger(r.potencyUpgrades, 0, B.maxPotencyUpgrades);
     if (r.lastUseTick !== null) safeInteger(r.lastUseTick, 0, state.tick);
   }
   safeInteger(potionCount(p), 0, Math.max(potionCapacity(p), legacyMaximum));
+}
+function validateGroundPotions(state, ground) {
+  const ids = Object.keys(ground);
+  requireContract(ids.length <= G.maximum, "Too many ground potions");
+  for (const id of ids) {
+    const d = ground[id];
+    requireContract(id.length <= 240, "Ground potion id");
+    closedRecord(d, ["spaceInstanceId", "tick", "count"], ["world", "position"]);
+    requireContract(typeof d.spaceInstanceId === "string" && d.spaceInstanceId.length <= 240, "Ground potion space");
+    safeInteger(d.tick, 0, state.tick);
+    safeInteger(d.count, 1, G.maximumCount);
+    requireContract(d.world === void 0 !== (d.position === void 0), "Ground potion place");
+    if (d.world) validateWorldPosition(d.world);
+    else {
+      closedRecord(d.position, ["x", "y"]);
+      requireContract(Number.isFinite(d.position.x) && Number.isFinite(d.position.y), "Ground potion position");
+    }
+  }
 }
 function validatePotionProgress(x, y) {
   const a = x?.potions ?? EMPTY, b = y?.potions ?? EMPTY;
