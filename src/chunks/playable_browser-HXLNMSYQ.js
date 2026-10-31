@@ -37491,7 +37491,7 @@ function createWorldMapD9({ document: doc, environment, port, releaseInput }) {
 // src/client/shield_guard_input.js
 function createShieldGuardInput({ button, environment, readModel, adapter, isBlocked, clearPrimary, reportError }) {
   const owners = /* @__PURE__ */ new Set(), listeners = [];
-  let context = null;
+  let context = null, shown = null;
   const listen = (el, type, fn) => {
     el.addEventListener(type, fn);
     listeners.push(() => el.removeEventListener(type, fn));
@@ -37556,9 +37556,13 @@ function createShieldGuardInput({ button, environment, readModel, adapter, isBlo
       context = k;
     }
     if (isBlocked() || m.subweapon?.suppressed || !m.entitiesById[p.entityId].alive) clear2();
-    button.hidden = p.stats.subType !== "shield" || isBlocked() || m.subweapon?.suppressed;
-    if (button.hidden) return;
-    button.disabled = !m.entitiesById[p.entityId].alive;
+    const hide = Boolean(p.stats.subType !== "shield" || isBlocked() || m.subweapon?.suppressed);
+    if (button.hidden !== hide) button.hidden = hide;
+    if (hide) return;
+    const alive = m.entitiesById[p.entityId].alive, next = `${alive}/${Boolean(g?.raised)}/${Boolean(g?.mustRelease)}/${Boolean(g?.requested)}/${(g?.integrity ?? 0).toFixed(1)}`;
+    if (next === shown) return;
+    shown = next;
+    button.disabled = !alive;
     button.setAttribute("aria-pressed", String(Boolean(g?.raised)));
     button.setAttribute("aria-label", `Raise Shield \u2014 hold Shift or touch. Guard Integrity ${Math.floor(g?.integrity ?? 0)} of 32`);
     button.style.setProperty("--guard-fill", `${100 * (g?.integrity ?? 0) / 32}%`);
@@ -37567,7 +37571,7 @@ function createShieldGuardInput({ button, environment, readModel, adapter, isBlo
     const text2 = `${g?.raised ? "RAISED" : g?.mustRelease ? "RELEASE" : g?.requested ? "RAISING\u2026" : "GUARD"}
 INTEGRITY
 ${(g?.integrity ?? 0).toFixed(1)} / 32`;
-    if (button.innerText !== text2) button.innerText = text2;
+    button.innerText = text2;
   }
   return { refresh, clear: clear2, read: () => ({ owners: [...owners] }), destroy() {
     clear2();
