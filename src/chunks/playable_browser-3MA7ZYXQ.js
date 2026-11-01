@@ -4138,8 +4138,8 @@ var TAU4 = Math.PI * 2;
 var clamp3 = (v) => Math.max(0, Math.min(1, v));
 function greenSlimeShapeV10(m, time) {
   const original = greenSlimeShapeV9(m, time), a = m.familyAttack;
-  const p = clamp3(a?.progress ?? 0), smooth23 = p * p * (3 - 2 * p);
-  const attackBlend = !a ? 0 : a.phase === "windup" ? smooth23 : a.phase === "recovery" ? 1 - smooth23 : 1;
+  const p = clamp3(a?.progress ?? 0), smooth24 = p * p * (3 - 2 * p);
+  const attackBlend = !a ? 0 : a.phase === "windup" ? smooth24 : a.phase === "recovery" ? 1 - smooth24 : 1;
   const motion = clamp3(m.motionBlend ?? (m.movedLastTick ? 1 : 0)) * (1 - attackBlend), step = m.stepPhase ?? time / 100;
   const recoveryBounce = a?.phase === "recovery" ? 0.55 * Math.sin(p * TAU4 * 2) * 4 * p * (1 - p) : 0;
   return {
@@ -9537,7 +9537,7 @@ function lavaSerpentRangedPoseV4(actor, tick) {
   const r = actor.ranged;
   if (!actor.alive || !r || r.phase === "idle") return null;
   const aim2 = r.aim ?? { x: actor.presentationFacingX ?? 1, y: 0 }, d = Math.hypot(aim2.x, aim2.y), direction3 = d > 1e-3 ? { x: aim2.x / d, y: aim2.y / d } : { x: 1, y: 0 };
-  const p = clamp17((tick - r.phaseStartedTick) / Math.max(1, r.phaseEndsTick - r.phaseStartedTick)), smooth23 = (x) => x * x * (3 - 2 * x), weight2 = r.phase === "windup" ? smooth23(p) : 1 - smooth23(p), size = actor.elite?.scale ?? 1;
+  const p = clamp17((tick - r.phaseStartedTick) / Math.max(1, r.phaseEndsTick - r.phaseStartedTick)), smooth24 = (x) => x * x * (3 - 2 * x), weight2 = r.phase === "windup" ? smooth24(p) : 1 - smooth24(p), size = actor.elite?.scale ?? 1;
   return {
     family: "lava_serpent",
     ranged: true,
@@ -11490,12 +11490,12 @@ function drawVitalityWeaverPulseD12_4(c, actor, tick) {
   c.lineCap = "round";
   c.lineJoin = "round";
   for (const [index, target] of pulse.recipients.entries()) {
-    const dx = target.position.x - actor.position.x, dy = target.position.y - actor.position.y, bend = (seed2 >>> index & 1 ? 1 : -1) * (14 + index * 4), length = Math.hypot(dx, dy) || 1, nx = -dy / length, ny = dx / length, endX = dx * travel, endY = dy * travel, green = new Path2D(), gold = new Path2D();
-    green.moveTo(-3, -8);
-    green.bezierCurveTo(dx * 0.3 + nx * bend, dy * 0.3 + ny * bend - 12, dx * 0.66 - nx * bend * 0.55, dy * 0.66 - ny * bend * 0.55 - 4, endX, endY - 8);
+    const dx = target.position.x - actor.position.x, dy = target.position.y - actor.position.y, bend = (seed2 >>> index & 1 ? 1 : -1) * (14 + index * 4), length = Math.hypot(dx, dy) || 1, nx = -dy / length, ny = dx / length, endX = dx * travel, endY = dy * travel, green2 = new Path2D(), gold = new Path2D();
+    green2.moveTo(-3, -8);
+    green2.bezierCurveTo(dx * 0.3 + nx * bend, dy * 0.3 + ny * bend - 12, dx * 0.66 - nx * bend * 0.55, dy * 0.66 - ny * bend * 0.55 - 4, endX, endY - 8);
     gold.moveTo(3, -10);
     gold.bezierCurveTo(dx * 0.28 - nx * bend * 0.7, dy * 0.28 - ny * bend * 0.7 - 7, dx * 0.7 + nx * bend * 0.45, dy * 0.7 + ny * bend * 0.45 - 10, endX, endY - 10);
-    knotStroke(c, green, EMERALD, 3.2);
+    knotStroke(c, green2, EMERALD, 3.2);
     knotStroke(c, gold, PALE_GOLD, 1.8);
     if (travel > 0.82) {
       const burst = Math.min(1, (travel - 0.82) / 0.18);
@@ -14788,9 +14788,17 @@ async function createBiomeNatureArtV1(env, review, prior) {
     draws.ground++;
     return true;
   }
+  const codeOf = Object.fromEntries(Object.entries(BIOME_NATURE_KITS).map(([code, name]) => [name, code]));
+  function drawNatureProp(c, biome, kind, x, y, scale = 1, n = 0) {
+    const list = kits[codeOf[biome]]?.[kind];
+    if (!list?.length) return false;
+    stamp4(c, list[(n >>> 0) % list.length], x, y, scale);
+    draws.ground++;
+    return true;
+  }
   const natureTile = (s, x, y) => Boolean(owned2(s, x, y));
   const hasTree = (s, x, y, size, n) => natureTile(s, x + size * 0.5, y + size * 0.78) || (prior.hasTree ? prior.hasTree(s, x, y, size, n) : true);
-  return Object.freeze({ ...prior, tree, base, rock: rock2, biomeDetail, drawGroundDetail, natureTile, hasTree, resources: () => ({ ...prior.resources(), biomeNature: { version: BIOME_NATURE_VERSION, kits: Object.values(BIOME_NATURE_KITS), draws: { ...draws }, decodedBytes, downloadBytes } }) });
+  return Object.freeze({ ...prior, tree, base, rock: rock2, biomeDetail, drawGroundDetail, natureTile, hasTree, drawNatureProp, resources: () => ({ ...prior.resources(), biomeNature: { version: BIOME_NATURE_VERSION, kits: Object.values(BIOME_NATURE_KITS), draws: { ...draws }, decodedBytes, downloadBytes } }) });
 }
 
 // src/client/route_contours_v2.js
@@ -15074,7 +15082,7 @@ function extractPaintedEdge(pixels, width, height, spec) {
     data[i + 1] = pixels[j + 1];
     data[i + 2] = pixels[j + 2];
     data[i + 3] = Math.round(a * 255);
-    const green = pixels[j + 1] > pixels[j] + 6 && pixels[j + 1] > pixels[j + 2] + 12, fringe = green ? smoothPaintedWeight((8 - (edge[x] - t)) / 8) : 1;
+    const green2 = pixels[j + 1] > pixels[j] + 6 && pixels[j + 1] > pixels[j + 2] + 12, fringe = green2 ? smoothPaintedWeight((8 - (edge[x] - t)) / 8) : 1;
     if (fringe > 0) {
       lipData[i] = pixels[j];
       lipData[i + 1] = pixels[j + 1];
@@ -59230,20 +59238,20 @@ function paintCryptEntranceV3(c, x, y, biome, seed2 = 21) {
   c.save();
   shadow3(c, x, y - 14, 170, 30, 0.28);
   if (biome === "desert") return desertTomb(c, x, y, b, seed2), c.restore();
-  const M4 = biome === "frostland" ? SNOW : biome === "volcanic" ? ASH : pal(b.mound, { warm: "#fff6b0" }), mound = new Path2D();
+  const M4 = biome === "frostland" ? SNOW : biome === "volcanic" ? ASH : pal(b.mound, { warm: "#fff6b0" }), mound2 = new Path2D();
   const hump = [[x - 192, y - 8], [x - 176, y - 58], [x - 150, y - 104], [x - 104, y - 146], [x - 50, y - 168], [x + 8, y - 176], [x + 66, y - 170], [x + 118, y - 150], [x + 158, y - 112], [x + 180, y - 62], [x + 194, y - 8]];
-  mound.moveTo(...hump[0]);
+  mound2.moveTo(...hump[0]);
   for (let i = 1; i < hump.length; i++) {
     const [px3, py] = hump[i - 1], [qx, qy] = hump[i];
-    mound.quadraticCurveTo(px3, py, (px3 + qx) / 2, (py + qy) / 2);
+    mound2.quadraticCurveTo(px3, py, (px3 + qx) / 2, (py + qy) / 2);
   }
-  mound.lineTo(...hump.at(-1));
-  mound.closePath();
-  prop(c, [[mound, M4.m]], 2.6);
+  mound2.lineTo(...hump.at(-1));
+  mound2.closePath();
+  prop(c, [[mound2, M4.m]], 2.6);
   c.save();
-  c.clip(mound);
+  c.clip(mound2);
   c.fillStyle = M4.d;
-  c.fill(mound);
+  c.fill(mound2);
   const lit = new Path2D();
   lit.ellipse(x - 30, y - 118, 150, 70, -0.08, 0, TAU66);
   c.fillStyle = M4.m;
@@ -59552,281 +59560,277 @@ function paintRuinEntranceV3(c, x, y, biome, seed2 = 31) {
   for (const [sx, sy, w] of [[-170, -6, 20], [156, -4, 22], [-128, 6, 14], [132, 8, 12]]) stone2(c, x + sx, y + sy, w, w * 0.7, b.stone, seed2 + sx, { n: 7, o: 1.8, pal: S2 });
   c.restore();
 }
-var lerpAt = (pts, X) => {
-  for (let i = 1; i < pts.length; i++) if (X <= pts[i][0]) {
-    const t = (X - pts[i - 1][0]) / (pts[i][0] - pts[i - 1][0] || 1);
-    return pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * t;
-  }
-  return pts.at(-1)[1];
+function smooth23(pts) {
+  const p = new Path2D(), n = pts.length, m = (i) => [(pts[i][0] + pts[(i + 1) % n][0]) / 2, (pts[i][1] + pts[(i + 1) % n][1]) / 2];
+  p.moveTo(...m(n - 1));
+  for (let i = 0; i < n; i++) p.quadraticCurveTo(pts[i][0], pts[i][1], ...m(i));
+  p.closePath();
+  return p;
+}
+var coverPal = (b) => b.cover === "snow" ? SNOW : b.cover === "sand" ? SAND2 : b.cover === "ash" ? ASH : b.cover === "heather" ? pal("#8c8a5e") : pal(b.leaf, { warm: "#fff6a0" });
+var green = (b) => b.cover === "grass" || b.cover === "moss";
+var SOIL = { woodland: "#7a5e3e", grassland: "#8a6440", wetland: "#5f5a40", upland: "#86775c", desert: "#c98a4e", frostland: "#7d8a98", tropical: "#6e5638", volcanic: "#3c3331" };
+var DEEP4 = { woodland: "#5fd0a0", grassland: "#6fd39a", wetland: "#7fd0b0", upland: "#9fb0ff", desert: "#ffb35a", frostland: "#8fd8ff", tropical: "#5fe0b8", volcanic: "#ff7a2a" };
+var FLORA = {
+  grassland: [["grassland", "oak", -132, null, 0.86], ["grassland", "bush", 176, null, 0.9], ["grassland", "flowers", -150, null, 0.9], ["grassland", "flowers", 120, null, 0.8], ["grassland", "bush", -188, 64, 0.8], ["grassland", "tuft", -122, 74, 1], ["grassland", "tuft", 150, 80, 1], ["grassland", "rocks", 214, 92, 0.8], ["woodland", "mushrooms", -88, 42, 0.8], ["woodland", "log", 148, 84, 0.9]],
+  woodland: [["woodland", "oak", -132, null, 0.9], ["woodland", "birch", 184, null, 0.8], ["woodland", "bush", -188, 64, 0.8], ["woodland", "flowers", 120, null, 0.8], ["woodland", "tuft", -122, 74, 1], ["woodland", "rocks", 214, 92, 0.8], ["woodland", "mushrooms", -88, 42, 0.8], ["woodland", "log", 148, 84, 0.9]],
+  wetland: [["wetland", "willow", -136, null, 0.78], ["wetland", "bush", 176, null, 0.85], ["wetland", "irises", -150, null, 0.9], ["wetland", "cattails", -196, 70, 0.8], ["wetland", "sedge", 150, 80, 1], ["wetland", "mossrock", 214, 92, 0.8], ["wetland", "mushrooms", -88, 42, 0.8], ["wetland", "log", 148, 84, 0.9]],
+  upland: [["upland", "pine", -136, null, 0.8], ["upland", "juniper", 176, null, 0.9], ["upland", "heather", -150, null, 0.9], ["upland", "heather", 120, null, 0.8], ["upland", "boulders", -196, 74, 0.7], ["upland", "thistle", 150, 80, 1]],
+  desert: [["desert", "saguaro", -136, null, 0.85], ["desert", "barrel", 176, null, 0.9], ["desert", "agave", -150, null, 0.8], ["desert", "shrub", 120, null, 0.8], ["desert", "bones", -150, 86, 0.8], ["desert", "rock", 214, 92, 0.8], ["desert", "agave", 176, 84, 0.8]],
+  frostland: [["frostland", "fir", -136, null, 0.82], ["frostland", "holly", 176, null, 0.9], ["frostland", "snowrock", -150, null, 0.8], ["frostland", "deadbush", 124, null, 0.8], ["frostland", "crystals", -196, 74, 0.7], ["frostland", "snowrock", 214, 92, 0.8]],
+  tropical: [["tropical", "palm", -138, null, 0.82], ["tropical", "bush", 176, null, 0.9], ["tropical", "bloom", -150, null, 0.9], ["tropical", "bromeliad", 120, null, 0.8], ["tropical", "fern", -196, 72, 0.9], ["tropical", "fern", 190, 82, 0.9], ["woodland", "mushrooms", -88, 42, 0.8], ["woodland", "log", 148, 84, 0.9]],
+  volcanic: [["volcanic", "charred", -136, null, 0.85], ["volcanic", "obsidian", 176, null, 0.8], ["volcanic", "ashfern", -150, null, 0.9], ["volcanic", "emberlily", 120, null, 0.8], ["volcanic", "basalt", -196, 74, 0.7], ["volcanic", "emberlily", 190, 84, 0.8]]
 };
-function cliffHill(c, x, y, top, foot, b, biome, seed2) {
-  const P6 = pal(b.rock), R3 = rng3(seed2), lip = 26, topAt = (X) => lerpAt(top, X), footAt = (X) => lerpAt([...foot].reverse(), X);
-  const out = new Path2D();
-  out.moveTo(...top[0]);
-  for (let i = 1; i < top.length; i++) {
-    const [px3, py] = top[i - 1], [qx, qy] = top[i];
-    out.quadraticCurveTo(px3, py, (px3 + qx) / 2, (py + qy) / 2);
+function mound(c, cx, base, w, h, b, seed2) {
+  const R3 = rng3(seed2), top = [];
+  for (let i = 0; i <= 18; i++) {
+    const t = i / 18 * 2 - 1, X = cx + t * w / 2, arch = Math.pow(Math.max(0, 1 - t * t), 0.55);
+    top.push([X, base - h * arch + (arch > 0.15 ? (R3() - 0.5) * 5 + 4 * Math.sin(X * 0.09 + seed2) : 0)]);
   }
-  out.lineTo(...top.at(-1));
-  for (const p of foot) out.lineTo(...p);
-  out.closePath();
-  prop(c, [[out, P6.m]], 2.8);
+  const foot = [];
+  for (let i = 1; i < 6; i++) {
+    const X = cx + w / 2 - i * w / 6;
+    foot.push([X, base + 5 + R3() * 7]);
+  }
+  const out = smooth23([...top, ...foot]), T6 = coverPal(b), topAt = (X) => {
+    for (let i = 1; i < top.length; i++) if (X <= top[i][0]) {
+      const k = (X - top[i - 1][0]) / (top[i][0] - top[i - 1][0]);
+      return top[i - 1][1] + (top[i][1] - top[i - 1][1]) * k;
+    }
+    return base;
+  };
+  prop(c, [[out, T6.m]], 2.6);
   c.save();
   c.clip(out);
-  c.fillStyle = P6.d;
+  c.fillStyle = T6.d;
   c.fill(out);
-  if (biome === "desert") {
-    for (let yy = -190; yy < 100; yy += 9) {
-      c.fillStyle = [P6.m, P6.l, P6.m, P6.d, P6.l][Math.abs((yy + 190) / 9 | 0) % 5];
-      c.beginPath();
-      c.moveTo(x - 260, y + yy);
-      for (let k = 0; k <= 12; k++) c.lineTo(x - 260 + k * 45, y + yy + Math.sin(k * 1.7 + yy) * 2.2);
-      c.lineTo(x + 280, y + yy + 10);
-      c.lineTo(x - 260, y + yy + 10);
-      c.fill();
-    }
-    c.strokeStyle = P6.d2;
-    c.globalAlpha = 0.5;
-    c.lineWidth = 1.2;
-    for (let yy = -186; yy < 100; yy += 18) {
-      c.beginPath();
-      c.moveTo(x - 260, y + yy);
-      for (let k = 0; k <= 12; k++) c.lineTo(x - 260 + k * 45, y + yy + Math.sin(k * 1.7 + yy) * 2.2);
-      c.stroke();
-    }
-    c.globalAlpha = 1;
-    for (let i = 0; i < 14; i++) {
-      const sx = x - 180 + R3() * 400;
-      c.fillStyle = P6.d2;
-      c.globalAlpha = 0.6;
-      c.beginPath();
-      c.ellipse(sx, footAt(sx) - 10 - R3() * (footAt(sx) - topAt(sx) - 40), 2.5 + R3() * 2, 1.6 + R3(), 0, 0, TAU66);
-      c.fill();
-      c.globalAlpha = 1;
-    }
-  } else {
-    let X = top[0][0];
-    while (X < top.at(-1)[0]) {
-      const w = 20 + R3() * 26, x1 = Math.min(top.at(-1)[0], X + w), lean = (R3() - 0.5) * 8, lf = (x - X) / 240, tones = [P6.h, P6.l, P6.m, P6.m, P6.d], k = Math.max(0, Math.min(4, Math.round(2.2 - lf * 1.8 + (R3() - 0.5) * 1.6)));
-      c.fillStyle = tones[k];
-      c.fill(poly9([[X, topAt(X) + lip - 4], [x1, topAt(x1) + lip - 4], [x1 + lean, footAt(x1) + 4], [X + lean, footAt(X) + 4]]));
-      c.fillStyle = P6.d;
-      c.fill(poly9([[x1 - 5, topAt(x1) + lip], [x1, topAt(x1) + lip], [x1 + lean, footAt(x1) + 4], [x1 + lean - 5, footAt(x1) + 4]]));
-      c.strokeStyle = P6.d2;
-      c.lineWidth = 1.3;
-      c.beginPath();
-      c.moveTo(x1, topAt(x1) + lip);
-      c.lineTo(x1 + lean, footAt(x1) + 4);
-      c.stroke();
-      if (R3() < 0.7) {
-        const cy = topAt(X) + lip + 8 + R3() * (footAt(X) - topAt(X) - lip - 20);
-        c.beginPath();
-        c.moveTo(X + 3, cy);
-        c.lineTo(X + w * 0.5, cy + 3 + R3() * 4);
-        c.lineTo(x1 - 2, cy + 1);
-        c.stroke();
-        c.strokeStyle = P6.h;
-        c.globalAlpha = 0.6;
-        c.lineWidth = 1;
-        c.beginPath();
-        c.moveTo(X + 3, cy - 1.5);
-        c.lineTo(X + w * 0.5, cy + 1.5);
-        c.stroke();
-        c.globalAlpha = 1;
-      }
-      if (k <= 1) {
-        c.strokeStyle = P6.h;
-        c.lineWidth = 1;
-        c.beginPath();
-        c.moveTo(X + 1.5, topAt(X) + lip);
-        c.lineTo(X + 1.5 + lean * 0.8, footAt(X) - 6);
-        c.stroke();
-      }
-      X = x1;
-    }
-  }
-  const shade3 = new Path2D();
-  foot.forEach(([fx, fy], i) => i ? shade3.lineTo(fx, fy - 12) : shade3.moveTo(fx, fy - 12));
-  for (let i = foot.length - 1; i >= 0; i--) shade3.lineTo(foot[i][0], foot[i][1] + 6);
-  c.fillStyle = "rgba(10,14,20,.3)";
-  c.fill(shade3);
-  const plane = new Path2D();
-  top.forEach(([tx, ty], i) => i ? plane.lineTo(tx, ty) : plane.moveTo(tx, ty));
-  for (let i = top.length - 1; i >= 0; i--) plane.lineTo(top[i][0], top[i][1] + lip + (i % 2 ? 2 : -2));
-  plane.closePath();
-  c.fillStyle = P6.l;
-  c.fill(plane);
-  c.strokeStyle = P6.d2;
-  c.lineWidth = 1.4;
+  const lit = new Path2D();
+  lit.addPath(out, new DOMMatrix([1, 0, 0, 1, -w * 0.035, -h * 0.1]));
+  c.fillStyle = T6.m;
+  c.fill(lit);
+  c.fillStyle = T6.l;
   c.beginPath();
-  top.forEach(([tx, ty], i) => {
-    const yy = ty + lip + (i % 2 ? 2 : -2);
-    i ? c.lineTo(tx, yy) : c.moveTo(tx, yy);
-  });
-  c.stroke();
-  if (biome === "volcanic") for (let i = 0; i < 4; i++) {
-    const sx = x - 150 + i * 100 + R3() * 30;
-    embers(c, out, sx, footAt(sx) - 8, 40, footAt(sx) - topAt(sx) - 30, seed2 + i, b.glow);
+  c.ellipse(cx - w * 0.14, base - h * 0.66, w * 0.34, h * 0.3, -0.15, 0, TAU66);
+  c.fill();
+  c.fillStyle = T6.h;
+  c.globalAlpha = 0.6;
+  c.beginPath();
+  c.ellipse(cx - w * 0.2, base - h * 0.84, w * 0.17, h * 0.08, -0.2, 0, TAU66);
+  c.fill();
+  c.globalAlpha = 1;
+  if (green(b) || b.cover === "heather") {
+    const n = Math.round(w * h / 70);
+    for (let i = 0; i < n; i++) {
+      const X = cx - w / 2 + R3() * w, Y = topAt(X) + 4 + R3() * (base - topAt(X));
+      c.fillStyle = [T6.d, T6.l, T6.m, T6.h, T6.d, T6.m][R3() * 6 | 0];
+      c.fill(leaf2(X, Y, 4 + R3() * 4, -Math.PI / 2 + (R3() - 0.5) * 1.5, 1.4));
+    }
+    if (b.cover === "heather") for (let i = 0; i < w * h / 900; i++) {
+      c.fillStyle = R3() < 0.5 ? "#c58bd6" : "#9d6bb3";
+      c.beginPath();
+      c.arc(cx - w / 2 + R3() * w, base - R3() * h * 0.8, 1.8, 0, TAU66);
+      c.fill();
+    }
+  } else if (b.cover === "sand") {
+    c.strokeStyle = T6.d;
+    c.lineWidth = 1.2;
+    for (let i = 0; i < h / 18; i++) {
+      const ry = base - 8 - i * 18;
+      c.beginPath();
+      c.moveTo(cx - w / 2, ry);
+      c.quadraticCurveTo(cx - w * 0.2, ry - 10, cx + w * 0.05, ry + 1);
+      c.quadraticCurveTo(cx + w * 0.3, ry + 9, cx + w / 2, ry - 3);
+      c.stroke();
+    }
+  } else if (b.cover === "snow") {
+    c.strokeStyle = "rgba(144,167,188,.5)";
+    c.lineWidth = 2;
+    for (let i = 0; i < h / 26; i++) {
+      const ry = base - 14 - i * 26, sx = cx - w * 0.35 + R3() * w * 0.4;
+      c.beginPath();
+      c.moveTo(sx, ry);
+      c.quadraticCurveTo(sx + w * 0.12, ry - 6, sx + w * 0.28, ry + 2);
+      c.stroke();
+    }
+    for (let i = 0; i < w * h / 500; i++) {
+      c.fillStyle = "rgba(255,255,255,.9)";
+      c.fillRect(cx - w / 2 + R3() * w, base - R3() * h, 1.4, 1.4);
+    }
+  } else if (b.cover === "ash") {
+    for (let i = 0; i < w * h / 400; i++) {
+      c.fillStyle = R3() < 0.82 ? "rgba(20,16,15,.4)" : "rgba(255,140,60,.85)";
+      c.fillRect(cx - w / 2 + R3() * w, base - R3() * h, 2, 1.3);
+    }
   }
+  const g = c.createLinearGradient(0, base - h * 0.3, 0, base + 10);
+  g.addColorStop(0, "rgba(8,14,20,0)");
+  g.addColorStop(1, "rgba(8,14,20,.3)");
+  c.fillStyle = g;
+  c.fillRect(cx - w / 2 - 10, base - h, w + 20, h + 30);
   c.restore();
-  const cap = new Path2D();
-  top.forEach(([tx, ty], i) => i ? cap.lineTo(tx, ty - 2) : cap.moveTo(tx, ty - 2));
-  for (let i = top.length - 1; i >= 0; i--) {
-    const tx = top[i][0], ty = top[i][1];
-    cap.lineTo(tx + 6, ty + lip + 2 + R3() * 10);
-    cap.lineTo(tx - 6, ty + lip - 2 + R3() * 6);
+  if (green(b)) {
+    for (let i = 1; i < top.length - 1; i++) if (R3() < 0.45) grass(c, top[i][0], top[i][1] + 6, 7 + R3() * 5, b.leaf, 4, seed2 + i, 1.1, 1.1);
   }
-  cap.closePath();
-  if (biome === "desert") return { out, topAt, footAt };
-  const CAP2 = b.cover === "snow" ? SNOW : b.cover === "ash" ? ASH : b.cover === "heather" ? pal("#8a8a60") : pal(b.cover === "moss" ? tone2(b.leaf, -0.06) : b.leaf, { warm: "#fff6a0" });
+  return { out, topAt };
+}
+function mossCap(c, b, o, d = 9) {
+  if (b.cover === "snow") capTop(c, o, d, SNOW);
+  else if (b.cover === "sand") capTop(c, o, d * 0.6, SAND2);
+  else if (b.cover === "ash") capTop(c, o, d * 0.5, ASH);
+  else if (b.cover === "heather") capTop(c, o, d * 0.7, pal("#8a8a60"));
+  else capTop(c, o, d, pal(tone2(b.leaf, -0.05), { warm: "#fff6a0" }), 1.2);
+}
+function lichen(c, o, x, y, w, h, seed2) {
+  const R3 = rng3(seed2);
   c.save();
-  c.clip(out);
-  prop(c, [[cap, CAP2.m]], 1.3);
-  c.save();
-  c.clip(cap);
-  c.fillStyle = CAP2.d;
-  c.fill(cap);
-  const lt = new Path2D();
-  lt.addPath(cap, new DOMMatrix([1, 0, 0, 1, -2, -4]));
-  c.fillStyle = CAP2.m;
-  c.fill(lt);
-  const lt2 = new Path2D();
-  lt2.addPath(cap, new DOMMatrix([1, 0, 0, 1, -3, -10]));
-  c.fillStyle = CAP2.l;
-  c.fill(lt2);
-  if (b.cover !== "snow" && b.cover !== "ash") for (let i = 0; i < 110; i++) {
-    const tx = top[0][0] + R3() * (top.at(-1)[0] - top[0][0]);
-    c.fillStyle = [CAP2.d, CAP2.h, CAP2.m, CAP2.l][R3() * 4 | 0];
-    c.fill(leaf2(tx, topAt(tx) + 5 + R3() * 22, 4 + R3() * 3, -Math.PI / 2 + (R3() - 0.5) * 1.4, 1.3));
-  }
-  if (b.cover === "heather") for (let i = 0; i < 34; i++) {
-    const tx = top[0][0] + R3() * (top.at(-1)[0] - top[0][0]);
-    c.fillStyle = R3() < 0.5 ? "#c58bd6" : "#9d6bb3";
+  c.clip(o);
+  for (let i = 0; i < 8; i++) {
+    c.fillStyle = R3() < 0.5 ? "rgba(214,220,140,.75)" : "rgba(170,190,110,.7)";
     c.beginPath();
-    c.arc(tx, topAt(tx) + 5 + R3() * 18, 1.7, 0, TAU66);
+    c.arc(x + (R3() - 0.5) * w * 0.8, y - R3() * h * 0.8, 1 + R3() * 1.6, 0, TAU66);
     c.fill();
   }
-  if (b.cover === "ash") for (let i = 0; i < 24; i++) {
-    const tx = top[0][0] + R3() * (top.at(-1)[0] - top[0][0]);
-    c.fillStyle = "rgba(255,140,60,.8)";
-    c.fillRect(tx, topAt(tx) + 6 + R3() * 16, 2, 1.2);
-  }
   c.restore();
-  c.restore();
-  if (b.cover === "grass" || b.cover === "moss") for (let tx = top[0][0] + 12; tx < top.at(-1)[0] - 8; tx += 24 + R3() * 20) grass(c, tx, topAt(tx) + lip + 4, 9 + R3() * 5, b.leaf, 5, seed2 + tx | 0, 1.3, 1.1);
-  if (b.cover === "snow") for (let tx = top[0][0] + 16; tx < top.at(-1)[0] - 10; tx += 20 + R3() * 18) {
-    const ty = topAt(tx) + lip + 2, p = new Path2D();
-    p.ellipse(tx, ty, 4 + R3() * 3, 3 + R3() * 6, 0, 0, Math.PI);
-    prop(c, [[p, SNOW.m]], 1);
-    c.fillStyle = SNOW.d;
-    c.fill(new Path2D(`M${tx + 1} ${ty}h4a4 6 0 0 1 -4 5z`));
-  }
-  if (b.cover === "grass" || b.cover === "moss") {
-    for (const bx of [-150, 30, 170]) if (R3() < 0.8) clumps(c, [[x + bx, topAt(x + bx) + 6, 9], [x + bx + 12, topAt(x + bx + 12) + 8, 7]], b.leaf, seed2 + bx, 1.4);
-  }
-  return { out, topAt, footAt };
 }
-function paintCaveEntranceV3(c, x, y, biome, seed2 = 11) {
-  const b = SITE_BIOMES[biome], R3 = rng3(seed2), mx = x + 16, P6 = pal(b.rock);
+function paintCaveEntranceV3(c, x, y, biome, seed2 = 11, plant = null) {
+  const b = SITE_BIOMES[biome] ?? SITE_BIOMES.grassland, R3 = rng3(seed2), mx = x + 16, P6 = pal(b.rock), S2 = pal(SOIL[biome] ?? SOIL.grassland), glow9 = DEEP4[biome] ?? DEEP4.grassland;
   c.save();
-  shadow3(c, x + 16, y + 10, 224, 30, 0.2);
-  const top = [[x - 196, y - 26], [x - 190, y - 80], [x - 168, y - 112], [x - 130, y - 118], [x - 100, y - 138], [x - 62, y - 140], [x - 30, y - 160], [x + 12, y - 166], [x + 54, y - 154], [x + 92, y - 150], [x + 124, y - 132], [x + 160, y - 128], [x + 196, y - 108], [x + 218, y - 78], [x + 228, y - 30]];
-  const foot = [[x + 228, y + 30], [x + 214, y + 48], [x + 176, y + 56], [x + 150, y + 40], [x + 112, y + 34], [x + 80, y + 20], [x + 60, y + 18], [x - 28, y + 18], [x - 58, y + 26], [x - 96, y + 30], [x - 132, y + 44], [x - 162, y + 56], [x - 186, y + 46], [x - 196, y + 28]];
-  const hill = cliffHill(c, x, y, top, foot, b, biome, seed2);
-  for (const [sx, w, h, sd] of [[-150, 64, 58, 41], [-96, 46, 40, 42], [150, 58, 52, 43], [96, 40, 34, 44]]) {
-    const fy = hill.footAt(x + sx) - 2, o = stone2(c, x + sx, fy, w, h, b.rock, seed2 + sd, { n: 9, pal: P6 });
-    if (biome === "desert") strata(c, o, x + sx, fy, w, h, P6.d, sd, 2);
-    if (biome === "volcanic") embers(c, o, x + sx, fy, w, h, sd, b.glow);
-  }
-  for (const [sx, w, h, sd] of [[-74, 40, 40, 51], [108, 46, 36, 52]]) {
-    const ty = hill.topAt(x + sx) + 14, o = stone2(c, x + sx, ty, w, h, b.rock, seed2 + sd, { n: 8, pal: P6 });
-    if (b.cover === "snow") capTop(c, o, 9, SNOW);
-    else if (b.cover === "ash") capTop(c, o, 5, ASH);
-    else if (biome === "desert") strata(c, o, x + sx, ty, w, h, P6.d, sd, 2);
-    else clumps(c, [[x + sx - 6, ty - h * 0.86, 6], [x + sx + 8, ty - h * 0.82, 5]], b.cover === "heather" ? "#8a8a60" : b.leaf, seed2 + sd, 1.3);
-  }
-  const rim = new Path2D();
-  rim.moveTo(mx - 52, y + 18);
-  rim.lineTo(mx - 50, y - 22);
-  rim.quadraticCurveTo(mx - 46, y - 90, mx, y - 92);
-  rim.quadraticCurveTo(mx + 46, y - 90, mx + 50, y - 22);
-  rim.lineTo(mx + 52, y + 18);
-  rim.closePath();
-  prop(c, [[rim, P6.m]], 2.4);
+  shadow3(c, x + 24, y + 60, 246, 24, 0.22);
+  const hillC = mound(c, mx + 4, y + 46, 392, 236, b, seed2);
+  const collar2 = smooth23([[mx - 112, y + 34], [mx - 104, y - 40], [mx - 80, y - 104], [mx - 30, y - 132], [mx + 30, y - 136], [mx + 84, y - 112], [mx + 112, y - 50], [mx + 118, y + 34]]);
+  prop(c, [[collar2, S2.m]], 2.2);
   c.save();
-  c.clip(rim);
-  c.fillStyle = P6.d;
-  c.fill(rim);
-  const rl = new Path2D();
-  rl.addPath(rim, new DOMMatrix([1, 0, 0, 1, -3, -4]));
-  c.fillStyle = P6.m;
-  c.fill(rl);
-  const rh = new Path2D();
-  rh.addPath(rim, new DOMMatrix([1, 0, 0, 1, -6, -9]));
-  c.fillStyle = P6.l;
-  c.globalAlpha = 0.7;
-  c.fill(rh);
-  c.globalAlpha = 1;
-  c.strokeStyle = P6.d2;
-  c.lineWidth = 1.4;
-  for (let a = 0.08; a < 1; a += 0.16) {
-    const ang = Math.PI * (1 + a);
+  c.clip(collar2);
+  c.fillStyle = S2.d;
+  c.fill(collar2);
+  const cl = new Path2D();
+  cl.addPath(collar2, new DOMMatrix([1, 0, 0, 1, -6, -8]));
+  c.fillStyle = S2.m;
+  c.fill(cl);
+  for (let yy = y - 140, k = 0; yy < y + 40; yy += 11, k++) {
+    c.strokeStyle = k % 2 ? S2.d2 : S2.l;
+    c.globalAlpha = 0.45;
+    c.lineWidth = 1.2;
     c.beginPath();
-    c.moveTo(mx + Math.cos(ang) * 36, y - 20 + Math.sin(ang) * 62);
-    c.lineTo(mx + Math.cos(ang) * 54, y - 20 + Math.sin(ang) * 78);
+    c.moveTo(mx - 120, yy);
+    c.quadraticCurveTo(mx, yy - 8 + Math.sin(k) * 3, mx + 120, yy + 2);
     c.stroke();
   }
+  c.globalAlpha = 1;
+  for (let i = 0; i < 14; i++) {
+    const sx = mx - 100 + R3() * 200, sy = y - 120 + R3() * 150;
+    stone2(c, sx, sy, 7 + R3() * 9, 5 + R3() * 6, b.rock, seed2 + 40 + i, { n: 7, o: 1.2, crack: false, pal: P6 });
+  }
   c.restore();
-  const m = new Path2D();
-  m.moveTo(mx - 38, y + 18);
-  m.lineTo(mx - 38, y - 20);
-  m.quadraticCurveTo(mx - 34, y - 74, mx, y - 76);
-  m.quadraticCurveTo(mx + 34, y - 74, mx + 38, y - 20);
-  m.lineTo(mx + 40, y + 18);
-  m.closePath();
-  opening2(c, m, mx, y - 76, y + 18, biome === "volcanic" ? "rgba(255,110,40,.45)" : null);
-  for (const [dx, L] of [[-18, 6], [-4, 9], [14, 5]]) {
-    const ty = y - 72 + Math.abs(dx) * 0.55, t = poly9([[mx + dx - 3, ty], [mx + dx + 3, ty], [mx + dx + 0.5, ty + L]]);
-    c.fillStyle = P6.d2;
-    c.fill(t);
+  if (green(b)) for (let a = 0.02; a < 1; a += 0.07 + R3() * 0.09) {
+    const ang = Math.PI * (1.04 + a * 0.92), X = mx + Math.cos(ang) * 112, Y = y - 14 + Math.sin(ang) * 118;
+    if (Y > y - 24) continue;
+    grass(c, X, Y + 6, 7 + R3() * 6, b.leaf, 4 + (R3() * 3 | 0), seed2 + (a * 100 | 0), 1.3, 1.1);
   }
-  c.fillStyle = "rgba(150,135,105,.28)";
-  c.beginPath();
-  c.ellipse(mx, y + 12, 30, 6, 0, 0, TAU66);
-  c.fill();
-  for (const [sx, w, h, sd] of [[-56, 34, 48, 3], [58, 36, 44, 4]]) {
-    const o = stone2(c, mx + sx, y + 20, w, h, b.rock, seed2 + sd, { n: 8, top: 0.7, pal: P6 });
-    if (b.cover === "snow") capTop(c, o, 8, SNOW);
-    else if (b.cover === "sand") capTop(c, o, 5, SAND2);
-    else if (b.cover === "ash") capTop(c, o, 5, ASH);
-    else if (b.cover !== "heather") clumps(c, [[mx + sx - 4, y + 20 - h * 0.88, 5]], b.leaf, seed2 + sd, 1.2);
-  }
-  if (b.cover === "snow") icicles(c, mx - 30, mx + 30, y - 86, seed2 + 7);
-  if (b.vine) {
-    vines(c, mx - 36, y - 88, 46, b.leaf, seed2 + 5, 2);
-    vines(c, mx + 32, y - 90, 34, b.leaf, seed2 + 9, 1);
-    vines(c, x - 130, y - 104, 40, b.leaf, seed2 + 13, 1);
-    vines(c, x + 150, y - 106, 38, b.leaf, seed2 + 17, 2);
-  }
-  for (const [sx, sy, w, h, sd] of [[-150, 54, 58, 44, 14], [-102, 40, 40, 30, 15], [138, 48, 52, 40, 16], [188, 60, 56, 42, 17], [-186, 86, 38, 28, 18], [214, 88, 38, 28, 19]]) {
-    const o = stone2(c, x + sx, y + sy, w, h, b.rock, seed2 * 31 + sd, { n: 8, pal: P6 });
-    if (biome === "desert") strata(c, o, x + sx, y + sy, w, h, P6.d, sd, 2);
-    if (b.cover === "snow") capTop(c, o, 9, SNOW);
-    else if (b.cover === "sand" && R3() < 0.6) capTop(c, o, 4, SAND2);
-    else if (b.cover === "ash") capTop(c, o, 4, ASH);
-    else if ((b.cover === "grass" || b.cover === "moss") && R3() < 0.6) clumps(c, [[x + sx - w * 0.12, y + sy - h * 0.86, 5], [x + sx + w * 0.1, y + sy - h * 0.9, 4.4]], b.leaf, seed2 + sd, 1.2);
-  }
-  if (b.cover === "grass" || b.cover === "moss") {
-    for (const [gx, gy] of [[-128, 62], [-60, 34], [96, 36], [160, 64], [-200, 92], [230, 94]]) grass(c, x + gx, y + gy, 13, b.leaf, 6, seed2 + gx, 1.2, 1.3);
-  } else if (b.cover === "heather") for (const [gx, gy] of [[-120, 56], [100, 44]]) cover(c, b, x + gx, y + gy - 6, 40, seed2 + gx);
-  else if (b.cover !== "snow") {
-    const col = b.cover === "sand" ? "rgba(241,217,166,.55)" : "rgba(118,108,102,.45)";
-    c.fillStyle = col;
-    for (const [gx, gy, rx] of [[-130, 62, 34], [150, 64, 38], [-60, 36, 24], [200, 94, 22]]) {
-      c.beginPath();
-      c.ellipse(x + gx, y + gy, rx, rx * 0.24, 0, 0, TAU66);
-      c.fill();
+  else if (b.cover === "snow") {
+    const lip = new Path2D();
+    for (let a = 0; a <= 1.0001; a += 0.05) {
+      const ang = Math.PI * (1.04 + a * 0.92), X = mx + Math.cos(ang) * 114, Y = y - 14 + Math.sin(ang) * 120;
+      a ? lip.lineTo(X, Y) : lip.moveTo(X, Y);
     }
+    c.strokeStyle = OL;
+    c.lineWidth = 7;
+    c.lineCap = "round";
+    c.stroke(lip);
+    c.strokeStyle = SNOW.m;
+    c.lineWidth = 4.5;
+    c.stroke(lip);
+    c.strokeStyle = SNOW.h;
+    c.lineWidth = 1.6;
+    c.stroke(lip);
+  }
+  const m = smooth23([[mx - 46, y + 18], [mx - 50, y - 22], [mx - 38, y - 62], [mx - 10, y - 80], [mx + 20, y - 82], [mx + 44, y - 62], [mx + 52, y - 22], [mx + 48, y + 18]]);
+  opening2(c, m, mx, y - 82, y + 18, biome === "volcanic" ? "rgba(255,110,40,.45)" : null);
+  c.save();
+  c.clip(m);
+  {
+    const g = c.createRadialGradient(mx + 4, y - 24, 2, mx + 4, y - 24, 40), [r, gg, bb] = [1, 3, 5].map((i) => parseInt(glow9.slice(i, i + 2), 16));
+    g.addColorStop(0, `rgba(${r},${gg},${bb},.22)`);
+    g.addColorStop(1, `rgba(${r},${gg},${bb},0)`);
+    c.fillStyle = g;
+    c.fillRect(mx - 60, y - 90, 120, 120);
+  }
+  for (const [i, x0, x1, ly] of [[0, -40, 30, 12], [1, -18, 44, -4], [2, -30, 14, -20]]) {
+    const pts = [[mx + x0, ly + y], [mx + x0 + 6, ly + y - 5], [mx + (x0 + x1) / 2, ly + y - 7], [mx + x1 - 4, ly + y - 4], [mx + x1, ly + y + 1], [mx + x1 - 6, ly + y + 5], [mx + x0 + 4, ly + y + 5]];
+    c.fillStyle = mix28(P6.d2, "#050606", 0.3 + i * 0.25);
+    c.fill(poly9(pts));
+    c.strokeStyle = `rgba(255,246,220,${0.22 - i * 0.07})`;
+    c.lineWidth = 1;
+    c.beginPath();
+    c.moveTo(...pts[0]);
+    c.lineTo(...pts[1]);
+    c.lineTo(...pts[2]);
+    c.lineTo(...pts[3]);
+    c.stroke();
+  }
+  const ao = c.createRadialGradient(mx, y - 30, 30, mx, y - 30, 70);
+  ao.addColorStop(0, "rgba(0,0,0,0)");
+  ao.addColorStop(1, "rgba(0,0,0,.55)");
+  c.fillStyle = ao;
+  c.fillRect(mx - 70, y - 100, 140, 130);
+  c.restore();
+  for (const [dx, dy, w] of [[-8, 30, 22], [14, 44, 18], [-4, 58, 20]]) {
+    const o = ell3(mx + dx, y + dy, w, w * 0.36);
+    prop(c, [[o, P6.m]], 1.4);
+    c.save();
+    c.clip(o);
+    c.fillStyle = P6.l;
+    c.fill(ell3(mx + dx - 2, y + dy - 2, w * 0.8, w * 0.24));
+    c.fillStyle = P6.h;
+    c.fill(ell3(mx + dx - w * 0.3, y + dy - w * 0.12, w * 0.3, w * 0.08));
+    c.restore();
+  }
+  const L = stone2(c, mx - 68, y + 24, 60, 96, b.rock, seed2 + 1, { n: 10, top: 0.82, inner: 0.42, pal: P6 }), Rt = stone2(c, mx + 72, y + 24, 62, 88, b.rock, seed2 + 2, { n: 10, top: 0.82, inner: 0.42, pal: P6 });
+  const capS = stone2(c, mx + 4, y - 60, 160, 56, b.rock, seed2 + 3, { n: 12, top: 0.55, inner: 0.6, pal: P6 }), peb = stone2(c, mx - 44, y - 106, 44, 28, b.rock, seed2 + 4, { n: 8, pal: P6 });
+  for (const [o, sx, sy, w, h, sd] of [[L, mx - 68, y + 24, 60, 96, 1], [Rt, mx + 72, y + 24, 62, 88, 2], [capS, mx + 4, y - 60, 160, 56, 3], [peb, mx - 44, y - 106, 44, 28, 4]]) {
+    if (biome === "desert") strata(c, o, sx, sy, w, h, P6.d, sd, 3);
+    if (biome === "volcanic") embers(c, o, sx, sy, w, h, sd, b.glow);
+    if (green(b)) lichen(c, o, sx, sy, w, h, seed2 + sd);
+    mossCap(c, b, o, sd === 3 ? 11 : 8);
+  }
+  c.lineCap = "round";
+  if (green(b)) {
+    for (const [rx, len, w, bend] of [[-30, 36, 3, 9], [-6, 18, 2, -5], [26, 44, 2.4, -10]]) {
+      const X = mx + rx, Y = y - 64;
+      for (const [lw, col] of [[w + 2.2, OL], [w, "#7a5434"]]) {
+        c.strokeStyle = col;
+        c.lineWidth = lw;
+        c.beginPath();
+        c.moveTo(X, Y);
+        c.bezierCurveTo(X + bend, Y + len * 0.35, X - bend * 0.6, Y + len * 0.7, X + bend * 0.4, Y + len);
+        c.stroke();
+      }
+      c.strokeStyle = "#7a5434";
+      c.lineWidth = 1;
+      c.beginPath();
+      c.moveTo(X + bend * 0.2, Y + len * 0.5);
+      c.lineTo(X + bend * 0.2 + 6, Y + len * 0.5 + 7);
+      c.stroke();
+    }
+    vines(c, mx - 62, y - 72, 58, b.leaf, seed2 + 5, 2);
+    vines(c, mx + 66, y - 70, 46, b.leaf, seed2 + 9, 1);
+  } else if (b.vine) vines(c, mx - 62, y - 72, 50, b.leaf, seed2 + 5, 1);
+  const left = mound(c, x - 128, y + 64, 250, 80, b, seed2 + 21), right = mound(c, x + 170, y + 66, 262, 88, b, seed2 + 22);
+  if (plant) {
+    const on = [];
+    for (const [kit2, kind, dx, dy, s] of FLORA[biome] ?? FLORA.grassland) {
+      const X = x + dx, Y = dy === null ? (X < x - 20 ? left : X > x + 60 ? right : hillC).topAt(X) + 10 : y + dy;
+      on.push([Y, kit2, kind, X, s]);
+    }
+    on.sort((p, q) => p[0] - q[0]);
+    for (const [Y, kit2, kind, X, s] of on) plant(c, kit2, kind, X, Y, s, seed2 * 31 + X | 0);
+  }
+  if (biome === "volcanic") {
+    const g = c.createRadialGradient(mx, y + 10, 4, mx, y + 10, 60);
+    g.addColorStop(0, "rgba(255,120,40,.35)");
+    g.addColorStop(1, "rgba(255,120,40,0)");
+    c.fillStyle = g;
+    c.fillRect(mx - 60, y - 50, 120, 120);
   }
   c.restore();
 }
@@ -60247,7 +60251,7 @@ function paintFortStairsV3(c, x, y, k, biome, dir = "up", seed2 = 17) {
 }
 
 // src/client/site_art_v3.js
-var BOX = Object.freeze({ cave: [-262, -205, 302, 112], crypt: [-226, -220, 230, 28], ruin: [-226, -220, 230, 28], exit: [-104, -134, 104, 44], stairs: [-72, -82, 72, 52] });
+var BOX = Object.freeze({ cave: [-268, -218, 336, 116], crypt: [-226, -220, 230, 28], ruin: [-226, -220, 230, 28], exit: [-104, -134, 104, 44], stairs: [-72, -82, 72, 52] });
 var ANCHOR = Object.freeze({ cave: -24, crypt: -84, ruin: -84 });
 var ENTRANCE = { cave: paintCaveEntranceV3, crypt: paintCryptEntranceV3, ruin: paintRuinEntranceV3 };
 var SCALE24 = 1.5;
@@ -60330,18 +60334,20 @@ function siteArtV3OwnsDecoration(space, d) {
   const m = /^(cave-decoration|ruin-art):site:([0-9a-f]+):/.exec(d.id ?? "");
   return Boolean(m) && (m[1] === "cave-decoration" || d.kind === "ruin-entry-facade") && owned(space).has(m[2]);
 }
-var entranceSprite = (e) => sprite3(e.family + "/" + e.biome + "/" + e.seed, BOX[e.family], (c) => ENTRANCE[e.family](c, 0, 0, e.biome, e.seed));
-function drawSiteEntranceV3(ctx, e) {
-  stamp3(ctx, entranceSprite(e), e.x, e.y);
+var plantsOf = (art) => art?.drawNatureProp ? (c, kit2, kind, x, y, s, n) => art.drawNatureProp(c, kit2, kind, x, y, s, n) : null;
+var entranceKey = (e, art) => e.family + "/" + e.biome + "/" + e.seed + (e.family === "cave" && plantsOf(art) ? "/planted" : "");
+var entranceSprite = (e, art) => sprite3(entranceKey(e, art), BOX[e.family], (c) => ENTRANCE[e.family](c, 0, 0, e.biome, e.seed, plantsOf(art)));
+function drawSiteEntranceV3(ctx, e, art = null) {
+  stamp3(ctx, entranceSprite(e, art), e.x, e.y);
 }
 var queued = /* @__PURE__ */ new Set();
-function prewarmSiteEntranceV3(e) {
-  const key2 = e.family + "/" + e.biome + "/" + e.seed;
+function prewarmSiteEntranceV3(e, art = null) {
+  const key2 = entranceKey(e, art);
   if (sprites.has(key2) || queued.has(key2)) return;
   queued.add(key2);
   const run = () => {
     queued.delete(key2);
-    entranceSprite(e);
+    entranceSprite(e, art);
   };
   if (typeof requestIdleCallback === "function") requestIdleCallback(run, { timeout: 1500 });
   else setTimeout(run, 0);
@@ -64470,8 +64476,8 @@ function prepareEnvironmentDepthItems(space, view2, layout, art, time, pilot = n
       }
     } }));
   }
-  for (const e of siteEntranceArtV3(space)) if (inside4(e.x, e.y, 320)) items.push(depthItem({ id: "environment/" + e.id, anchorX: e.x, anchorY: e.anchorY, draw: (ctx) => drawSiteEntranceV3(ctx, e) }));
-  else if (inside4(e.x, e.y, 1400)) prewarmSiteEntranceV3(e);
+  for (const e of siteEntranceArtV3(space)) if (inside4(e.x, e.y, 320)) items.push(depthItem({ id: "environment/" + e.id, anchorX: e.x, anchorY: e.anchorY, draw: (ctx) => drawSiteEntranceV3(ctx, e, pilot) }));
+  else if (inside4(e.x, e.y, 1400)) prewarmSiteEntranceV3(e, pilot);
   for (const d of space.visual?.decorations ?? []) {
     if (!d.kind.startsWith("fort-") && !d.kind.startsWith("cave-") || d.kind === "cave-trail-stones" || siteArtV3OwnsDecoration(space, d)) continue;
     const x = d.x * t, y = d.y * t;
