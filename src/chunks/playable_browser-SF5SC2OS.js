@@ -135,6 +135,10 @@ import {
   MULTIROOM_VERSION,
   NAMED_ELITES_V1,
   NAMED_ELITE_TRICKS_V1,
+  NESTS_VERSION,
+  NEST_LABELS,
+  NEST_MEMBERS,
+  NEST_POLICY,
   NULLIFICATION_RESISTANCE_D12_4I_VERSION,
   NULLIFIER_AFFIX_ID,
   NULLIFIER_D12_4I,
@@ -544,6 +548,7 @@ import {
   mixPlan,
   multiplyCombat,
   nearbyForge,
+  nestSkinOfV1,
   newPopulationSelection,
   nextBoundedInteger,
   nextUint32,
@@ -572,6 +577,7 @@ import {
   planLocalFramesD9,
   plannedAssetDirectory,
   plannedCaveIds,
+  plannedEventFamiliesV1,
   plannedEventKindV1,
   plannedEventOrdinal,
   plannedEventOrdinalFor,
@@ -795,7 +801,7 @@ import {
   worldPointForArea,
   worldRolesV1,
   wrathDamageV1
-} from "./chunk-E3VS4EPK.js";
+} from "./chunk-F5W4KRZL.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -949,12 +955,12 @@ function gameplayPresentationState(model, { foregroundModalOpen = false, fullScr
   });
 }
 function applyGameplayPresentationState(document2, state) {
-  const root = document2.documentElement;
-  root.dataset.activeGameplay = String(state.activeGameplay);
-  root.dataset.defeated = String(Boolean(state.defeated));
-  root.dataset.foregroundModalOpen = String(state.foregroundModalOpen);
-  root.dataset.fullScreenPanelOpen = String(state.fullScreenPanelOpen);
-  root.dataset.gameplayHudVisible = String(state.gameplayHudVisible);
+  const root2 = document2.documentElement;
+  root2.dataset.activeGameplay = String(state.activeGameplay);
+  root2.dataset.defeated = String(Boolean(state.defeated));
+  root2.dataset.foregroundModalOpen = String(state.foregroundModalOpen);
+  root2.dataset.fullScreenPanelOpen = String(state.fullScreenPanelOpen);
+  root2.dataset.gameplayHudVisible = String(state.gameplayHudVisible);
   return state;
 }
 function selectedActor(model) {
@@ -1030,16 +1036,16 @@ function createCamera() {
   } });
 }
 function createPaintedPrompt() {
-  let painted3 = null;
+  let painted4 = null;
   return Object.freeze({
     clear: () => {
-      painted3 = null;
+      painted4 = null;
     },
-    read: () => painted3,
+    read: () => painted4,
     record: (box2) => {
-      painted3 = Object.freeze({ ...box2 });
+      painted4 = Object.freeze({ ...box2 });
     },
-    hit: (x, y, key2, layout, context) => painted3 && painted3.key === key2 && painted3.layout === layout && painted3.context === context && x >= painted3.x && x <= painted3.x + painted3.width && y >= painted3.y && y <= painted3.y + painted3.height ? painted3.exitId : null
+    hit: (x, y, key2, layout, context) => painted4 && painted4.key === key2 && painted4.layout === layout && painted4.context === context && x >= painted4.x && x <= painted4.x + painted4.width && y >= painted4.y && y <= painted4.y + painted4.height ? painted4.exitId : null
   });
 }
 function createPresentationQueue() {
@@ -1080,7 +1086,7 @@ function rect(element) {
   return { left: number(r.left), top: number(r.top), width: number(r.width), height: number(r.height) };
 }
 function capturePerformanceContextV1(environment, { batteryPresentation = false } = {}) {
-  const doc = environment?.document, nav = environment?.navigator ?? {}, root = doc?.documentElement, viewport = environment?.visualViewport;
+  const doc = environment?.document, nav = environment?.navigator ?? {}, root2 = doc?.documentElement, viewport = environment?.visualViewport;
   const get = (id) => doc?.getElementById?.(id) ?? null, canvas = get("world-view"), playtest = get("local-world-controls"), navigator = get("site-navigator-d12-4c"), fps = get("world-fps-overlay"), dps = get("world-dps-overlay");
   const backingWidth = number(canvas?.width, { positive: true }), backingHeight = number(canvas?.height, { positive: true });
   return freeze({
@@ -1088,7 +1094,7 @@ function capturePerformanceContextV1(environment, { batteryPresentation = false 
     scope: "local diagnostic snapshot only",
     browser: { userAgent: text(nav.userAgent), platform: text(nav.platform), hardwareConcurrency: number(nav.hardwareConcurrency, { positive: true }), deviceMemoryGiB: number(nav.deviceMemory, { positive: true }) },
     devicePixelRatio: number(environment?.devicePixelRatio, { positive: true }),
-    viewportCss: { innerWidth: number(environment?.innerWidth), innerHeight: number(environment?.innerHeight), rootClientWidth: number(root?.clientWidth), rootClientHeight: number(root?.clientHeight) },
+    viewportCss: { innerWidth: number(environment?.innerWidth), innerHeight: number(environment?.innerHeight), rootClientWidth: number(root2?.clientWidth), rootClientHeight: number(root2?.clientHeight) },
     visualViewportCss: viewport ? { width: number(viewport.width), height: number(viewport.height), offsetLeft: number(viewport.offsetLeft), offsetTop: number(viewport.offsetTop), scale: number(viewport.scale, { positive: true }) } : null,
     canvas: canvas ? { cssBounds: rect(canvas), backingPixels: { width: backingWidth, height: backingHeight } } : null,
     camera: { actualZoom: null, derivedProfileZoom: backingWidth && backingHeight ? cameraZoomForViewport(backingWidth, backingHeight) : null, basis: "Accepted viewport profile derived from backing dimensions; actual camera was not queried." },
@@ -2514,7 +2520,7 @@ var FORT_ART_PILOT_VERSION = "fort-art-pilot-v1";
 var FORT_ART_PILOT_SITE = "site:ffe8b1fc8cecccfdb3fb9d44dd6a9aea";
 var FORT_ART_PILOT_RESERVATION = "repeatable-slot:fort:grassland:small:01";
 async function createFortArtPilotV1(environment, review, prior) {
-  const root = new URL("../../assets/fort-art-pilot-v1/", import.meta.url), response = await environment.fetch(new URL("kit-manifest.json", root));
+  const root2 = new URL("../../assets/fort-art-pilot-v1/", import.meta.url), response = await environment.fetch(new URL("kit-manifest.json", root2));
   if (!response.ok) throw Error("Missing fort art manifest");
   const manifest = await response.json();
   if (manifest.version !== FORT_ART_PILOT_VERSION || manifest.scope.siteId !== FORT_ART_PILOT_SITE) throw Error("Invalid fort art binding");
@@ -2522,7 +2528,7 @@ async function createFortArtPilotV1(environment, review, prior) {
   let decodedBytes = 0, downloadBytes = 0, mode = "candidate", switches = 0;
   const draws = { blocker: 0, keep: 0, tower: 0, door: 0, interior: 0, interiorDoor: 0, banner: 0 };
   for (const file of manifest.files) {
-    const response2 = await environment.fetch(new URL(file.path, root));
+    const response2 = await environment.fetch(new URL(file.path, root2));
     if (!response2.ok) throw Error("Missing fort art " + file.id);
     const bytes = await response2.arrayBuffer(), hash26 = Array.from(new Uint8Array(await environment.crypto.subtle.digest("SHA-256", bytes)), (n) => n.toString(16).padStart(2, "0")).join("");
     if (hash26 !== file.sha256 || bytes.byteLength !== file.bytes) throw Error("Fort art commitment mismatch " + file.id);
@@ -2581,7 +2587,7 @@ async function createFortArtPilotV1(environment, review, prior) {
       yy += hh;
     }
   }
-  function sprite5(c, id, cx, bottom, width) {
+  function sprite6(c, id, cx, bottom, width) {
     const a = images2[id], height = width * a.height / a.width;
     c.drawImage(a, cx - width / 2, bottom - height, width, height);
   }
@@ -2608,12 +2614,12 @@ async function createFortArtPilotV1(environment, review, prior) {
     if (!part3(space, d)) return false;
     if (d.kind === "fort-keep-facade") {
       const width = d.width * t * 1.1;
-      sprite5(c, "keep", d.x * t + t / 2, (d.y + d.height / 2) * t + 16, width);
+      sprite6(c, "keep", d.x * t + t / 2, (d.y + d.height / 2) * t + 16, width);
       draws.keep++;
       return true;
     }
     if (d.kind === "fort-watchtower") {
-      sprite5(c, "tower", d.x * t, d.y * t + 80, 180);
+      sprite6(c, "tower", d.x * t, d.y * t + 80, 180);
       draws.tower++;
       return true;
     }
@@ -2818,16 +2824,16 @@ function createWorldLightSourcesV1(prior, review) {
 
 // src/client/night_loot_art_v1.js
 var NIGHT_LOOT_ART_VERSION = "night-loot-art-v1";
-async function loadNightDebrisArtV1(env, { root = new URL("../../assets/night-loot-v1/", import.meta.url) } = {}) {
-  const response = await env.fetch(new URL("kit-manifest.json", root));
+async function loadNightDebrisArtV1(env, { root: root2 = new URL("../../assets/night-loot-v1/", import.meta.url) } = {}) {
+  const response = await env.fetch(new URL("kit-manifest.json", root2));
   if (!response.ok) throw Error("Missing night-loot art manifest");
   const manifest = await response.json();
   if (manifest.version !== "night-loot-debris-art-v1" || manifest.slots.length !== 16 || manifest.decodeLongestEdge !== 64) throw Error("Invalid night-loot art contract");
-  const r = await env.fetch(new URL(manifest.path, root));
+  const r = await env.fetch(new URL(manifest.path, root2));
   if (!r.ok) throw Error("Missing debris atlas");
   const bytes = await r.arrayBuffer(), digest2 = Array.from(new Uint8Array(await env.crypto.subtle.digest("SHA-256", bytes)), (n) => n.toString(16).padStart(2, "0")).join("");
   if (digest2 !== manifest.sha256 || bytes.byteLength !== manifest.bytes) throw Error("Debris atlas commitment mismatch");
-  const bitmap = await env.createImageBitmap(new Blob([bytes], { type: "image/webp" })), sprites3 = [];
+  const bitmap = await env.createImageBitmap(new Blob([bytes], { type: "image/webp" })), sprites4 = [];
   let retainedBytes = 0;
   try {
     if (bitmap.width !== manifest.width || bitmap.height !== manifest.height) throw Error("Debris atlas dimensions mismatch");
@@ -2841,12 +2847,12 @@ async function loadNightDebrisArtV1(env, { root = new URL("../../assets/night-lo
       ctx.imageSmoothingQuality = "high";
       ctx.drawImage(bitmap, slot.x, slot.y, slot.width, slot.height, 0, 0, c.width, c.height);
       retainedBytes += c.width * c.height * 4;
-      sprites3.push({ image: c, material: slot.material });
+      sprites4.push({ image: c, material: slot.material });
     }
   } finally {
     bitmap.close();
   }
-  return { sprites: sprites3, downloadBytes: bytes.byteLength, retainedBytes, sourceTransientBytes: manifest.width * manifest.height * 4, sourceSha256: digest2 };
+  return { sprites: sprites4, downloadBytes: bytes.byteLength, retainedBytes, sourceTransientBytes: manifest.width * manifest.height * 4, sourceSha256: digest2 };
 }
 async function createNightLootArtV1(env, prior, options = {}) {
   let enabled = true, data = null, error = null;
@@ -2867,14 +2873,14 @@ async function createNightLootArtV1(env, prior, options = {}) {
       if (!enabled || !data) return false;
       const row2 = { wood: 0, clay: 4, urn: 8, metal: 12 }[material];
       if (row2 === void 0) return false;
-      const sprite5 = data.sprites[row2 + (index & 3)].image, scale = size / Math.max(sprite5.width, sprite5.height);
+      const sprite6 = data.sprites[row2 + (index & 3)].image, scale = size / Math.max(sprite6.width, sprite6.height);
       ctx.save();
       ctx.globalAlpha = alpha2;
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
       ctx.translate(x, y);
       ctx.rotate(rotation);
-      ctx.drawImage(sprite5, -sprite5.width * scale / 2, -sprite5.height * scale / 2, sprite5.width * scale, sprite5.height * scale);
+      ctx.drawImage(sprite6, -sprite6.width * scale / 2, -sprite6.height * scale / 2, sprite6.width * scale, sprite6.height * scale);
       ctx.restore();
       return true;
     },
@@ -2932,17 +2938,17 @@ var SPORE_V2_POLICY = freezeWire({
 });
 
 // src/client/spore_art_v1.js
-async function createSporeArtV1(env, prior, { root = new URL("../../assets/spore-outbreak-v1/", import.meta.url) } = {}) {
-  const sprites3 = /* @__PURE__ */ new Map();
-  let error = null, bytes = 0, retainedBytes = 0, painted3 = 0;
+async function createSporeArtV1(env, prior, { root: root2 = new URL("../../assets/spore-outbreak-v1/", import.meta.url) } = {}) {
+  const sprites4 = /* @__PURE__ */ new Map();
+  let error = null, bytes = 0, retainedBytes = 0, painted4 = 0;
   try {
-    const response = await env.fetch(new URL("kit-manifest.json", root));
+    const response = await env.fetch(new URL("kit-manifest.json", root2));
     if (!response.ok) throw Error("Missing Spore art manifest");
     const m = await response.json();
     if (m.version !== "spore-outbreak-art-v1" || m.decodeLongestEdge !== 160 || m.files.length !== 3) throw Error("Invalid Spore kit");
     for (const row2 of m.files) {
       if (!["spore-pod", "spore-pod-open", "fungal-clump"].includes(row2.id) || row2.path !== row2.id + ".webp") throw Error("Invalid Spore sprite");
-      const r = await env.fetch(new URL(row2.path, root));
+      const r = await env.fetch(new URL(row2.path, root2));
       if (!r.ok) throw Error("Missing Spore sprite");
       const b = await r.arrayBuffer(), sha = Array.from(new Uint8Array(await env.crypto.subtle.digest("SHA-256", b)), (n) => n.toString(16).padStart(2, "0")).join("");
       if (sha !== row2.sha256 || b.byteLength !== row2.bytes) throw Error("Spore art commitment mismatch");
@@ -2959,7 +2965,7 @@ async function createSporeArtV1(env, prior, { root = new URL("../../assets/spore
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = "high";
         ctx.drawImage(image, x, y, w, h, 0, 0, c.width, c.height);
-        sprites3.set(row2.id, c);
+        sprites4.set(row2.id, c);
         retainedBytes += c.width * c.height * 4;
       } finally {
         image.close();
@@ -2969,13 +2975,13 @@ async function createSporeArtV1(env, prior, { root = new URL("../../assets/spore
     error = e.message;
   }
   const art = { paint(ctx, key2, x, y, width) {
-    const image = sprites3.get(key2);
+    const image = sprites4.get(key2);
     if (!image) return false;
     const h = width * image.height / image.width;
     ctx.drawImage(image, x - width / 2, y - h * 0.94, width, h);
-    painted3++;
+    painted4++;
     return true;
-  }, resources: () => ({ version: "spore-outbreak-art-v1", ready: !error && sprites3.size === 3, error, downloadBytes: bytes, retainedBytes, sprites: sprites3.size, painted: painted3 }) };
+  }, resources: () => ({ version: "spore-outbreak-art-v1", ready: !error && sprites4.size === 3, error, downloadBytes: bytes, retainedBytes, sprites: sprites4.size, painted: painted4 }) };
   return { ...prior, sporeArt: art, resources: () => ({ ...prior.resources(), sporeArt: art.resources() }) };
 }
 function sporeDepthItems(model, viewport, art) {
@@ -3146,17 +3152,17 @@ var HOLLOW_PLANT_LAYOUT = Object.freeze([
   ["leaf-plant", 113, 110, 22]
 ].map(Object.freeze));
 var ids = ["grass-tuft-a", "grass-tuft-b", "leaf-plant", "root-sprout", "low-fern"];
-async function createHollowGroundCoverV1(env, { root = new URL("../../assets/hollow-ground-cover-v1/", import.meta.url) } = {}) {
+async function createHollowGroundCoverV1(env, { root: root2 = new URL("../../assets/hollow-ground-cover-v1/", import.meta.url) } = {}) {
   const images2 = /* @__PURE__ */ new Map();
-  let error = null, downloadBytes = 0, retainedBytes = 0, painted3 = 0;
+  let error = null, downloadBytes = 0, retainedBytes = 0, painted4 = 0;
   try {
-    const response = await env.fetch(new URL("kit-manifest.json", root));
+    const response = await env.fetch(new URL("kit-manifest.json", root2));
     if (!response.ok) throw Error("Missing Hollow plant manifest");
     const m = await response.json();
     if (m.version !== HOLLOW_GROUND_COVER_VERSION || m.decodeLongestEdge !== 192 || m.files.length !== 5 || new Set(m.files.map((r) => r.id)).size !== 5 || new Set(m.files.map((r) => r.sha256)).size !== 5) throw Error("Invalid Hollow plant inventory");
     for (const row2 of m.files) {
       if (!ids.includes(row2.id) || row2.path !== row2.id + ".webp") throw Error("Unrecognized Hollow plant");
-      const response2 = await env.fetch(new URL(row2.path, root));
+      const response2 = await env.fetch(new URL(row2.path, root2));
       if (!response2.ok) throw Error("Missing Hollow plant");
       const b = await response2.arrayBuffer(), hash26 = Array.from(new Uint8Array(await env.crypto.subtle.digest("SHA-256", b)), (n) => n.toString(16).padStart(2, "0")).join("");
       if (hash26 !== row2.sha256 || b.byteLength !== row2.bytes) throw Error("Hollow plant hash mismatch");
@@ -3190,9 +3196,9 @@ async function createHollowGroundCoverV1(env, { root = new URL("../../assets/hol
     ctx.imageSmoothingQuality = "high";
     ctx.drawImage(c, x - width / 2, y - width * c.height / c.width, width, width * c.height / c.width);
     ctx.restore();
-    painted3++;
+    painted4++;
     return true;
-  }, resources: () => ({ version: HOLLOW_GROUND_COVER_VERSION, ready: !error && images2.size === 5, error, sprites: images2.size, downloadBytes, retainedBytes, painted: painted3 }) });
+  }, resources: () => ({ version: HOLLOW_GROUND_COVER_VERSION, ready: !error && images2.size === 5, error, sprites: images2.size, downloadBytes, retainedBytes, painted: painted4 }) });
 }
 var placements = /* @__PURE__ */ new WeakMap();
 function hollowPlantPlacements(space, event) {
@@ -3223,17 +3229,17 @@ function hollowGroundCoverDepthItems(model, event, art) {
 }
 
 // src/client/hidden_hollow_art_v1.js
-async function createHollowArtV1(env, prior, { root = new URL("../../assets/hidden-hollow-v1/", import.meta.url) } = {}) {
-  const sprites3 = /* @__PURE__ */ new Map();
-  let error = null, bytes = 0, retainedBytes = 0, painted3 = 0;
+async function createHollowArtV1(env, prior, { root: root2 = new URL("../../assets/hidden-hollow-v1/", import.meta.url) } = {}) {
+  const sprites4 = /* @__PURE__ */ new Map();
+  let error = null, bytes = 0, retainedBytes = 0, painted4 = 0;
   try {
-    const response = await env.fetch(new URL("kit-manifest.json", root));
+    const response = await env.fetch(new URL("kit-manifest.json", root2));
     if (!response.ok) throw Error("Missing Hollow kit");
     const m = await response.json();
     if (m.version !== "hidden-hollow-art-v1" || m.decodeLongestEdge !== 640 || m.files.length !== 1) throw Error("Invalid Hollow kit");
     for (const row2 of m.files) {
       if (row2.id !== "hidden-hollow" || row2.path !== "hidden-hollow.webp") throw Error("Invalid Hollow sprite");
-      const res = await env.fetch(new URL(row2.path, root));
+      const res = await env.fetch(new URL(row2.path, root2));
       if (!res.ok) throw Error("Missing Hollow sprite");
       const b = await res.arrayBuffer(), sha = Array.from(new Uint8Array(await env.crypto.subtle.digest("SHA-256", b)), (n) => n.toString(16).padStart(2, "0")).join("");
       if (sha !== row2.sha256 || b.byteLength !== row2.bytes) throw Error("Hollow art commitment");
@@ -3250,7 +3256,7 @@ async function createHollowArtV1(env, prior, { root = new URL("../../assets/hidd
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = "high";
         ctx.drawImage(image, x, y, w, h, 0, 0, c.width, c.height);
-        sprites3.set(row2.id, c);
+        sprites4.set(row2.id, c);
         retainedBytes += c.width * c.height * 4;
       } finally {
         image.close();
@@ -3261,12 +3267,12 @@ async function createHollowArtV1(env, prior, { root = new URL("../../assets/hidd
   }
   const groundCover = await createHollowGroundCoverV1(env);
   const art = { groundCover, paint(ctx, key2, x, y, width) {
-    const image = sprites3.get(key2);
+    const image = sprites4.get(key2);
     if (!image) return false;
     ctx.drawImage(image, x - width / 2, y - width * image.height / image.width, width, width * image.height / image.width);
-    painted3++;
+    painted4++;
     return true;
-  }, resources: () => ({ version: "hidden-hollow-art-v1", ready: !error && sprites3.size === 1, error, downloadBytes: bytes, retainedBytes, sprites: sprites3.size, painted: painted3, groundCover: groundCover.resources() }) };
+  }, resources: () => ({ version: "hidden-hollow-art-v1", ready: !error && sprites4.size === 1, error, downloadBytes: bytes, retainedBytes, sprites: sprites4.size, painted: painted4, groundCover: groundCover.resources() }) };
   return { ...prior, hollowArt: art, resources: () => ({ ...prior.resources(), hollowArt: art.resources() }) };
 }
 function hollowDepthItems(model, viewport, art) {
@@ -3338,16 +3344,16 @@ function breakablePropVariantV1(id) {
   for (let i = 0; i < id.length; i++) h = Math.imul(h ^ id.charCodeAt(i), 16777619) >>> 0;
   return h % 4 === 1 ? "cracked" : "intact";
 }
-async function loadBreakablePropArtV1(env, { root = new URL("../../assets/breakable-props-v1/", import.meta.url) } = {}) {
-  const r = await env.fetch(new URL("kit-manifest.json", root));
+async function loadBreakablePropArtV1(env, { root: root2 = new URL("../../assets/breakable-props-v1/", import.meta.url) } = {}) {
+  const r = await env.fetch(new URL("kit-manifest.json", root2));
   if (!r.ok) throw Error("Missing breakable art manifest");
   const m = await r.json();
   if (m.version !== BREAKABLE_PROP_ART_VERSION || m.decodeLongestEdge !== 144 || m.slots.length !== 12 || new Set(m.slots.map((s) => s.key)).size !== 12 || m.slots.some((s) => !keys.includes(s.key))) throw Error("Invalid breakable art contract");
-  const image = await env.fetch(new URL(m.path, root));
+  const image = await env.fetch(new URL(m.path, root2));
   if (!image.ok) throw Error("Missing breakable atlas");
   const bytes = await image.arrayBuffer(), digest2 = Array.from(new Uint8Array(await env.crypto.subtle.digest("SHA-256", bytes)), (n) => n.toString(16).padStart(2, "0")).join("");
   if (bytes.byteLength !== m.bytes || digest2 !== m.sha256) throw Error("Breakable atlas commitment mismatch");
-  const bitmap = await env.createImageBitmap(new Blob([bytes], { type: "image/webp" })), sprites3 = /* @__PURE__ */ new Map();
+  const bitmap = await env.createImageBitmap(new Blob([bytes], { type: "image/webp" })), sprites4 = /* @__PURE__ */ new Map();
   let retainedBytes = 0;
   try {
     if (bitmap.width !== m.width || bitmap.height !== m.height) throw Error("Breakable atlas dimensions mismatch");
@@ -3360,13 +3366,13 @@ async function loadBreakablePropArtV1(env, { root = new URL("../../assets/breaka
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
       ctx.drawImage(bitmap, s.x, s.y, s.width, s.height, 0, 0, c.width, c.height);
-      sprites3.set(s.key, c);
+      sprites4.set(s.key, c);
       retainedBytes += c.width * c.height * 4;
     }
   } finally {
     bitmap.close();
   }
-  return { sprites: sprites3, retainedBytes, downloadBytes: bytes.byteLength, sourceTransientBytes: m.width * m.height * 4, sourceSha256: digest2 };
+  return { sprites: sprites4, retainedBytes, downloadBytes: bytes.byteLength, sourceTransientBytes: m.width * m.height * 4, sourceSha256: digest2 };
 }
 async function createBreakablePropArtV1(env, prior, options = {}) {
   let enabled = true, data = null, error = null;
@@ -3536,7 +3542,7 @@ async function createHybridArtPilotV1(environment, review, initialMode = "candid
     }
     return chunks2.has(Math.floor(tx / 32) + "," + Math.floor(ty / 26));
   }
-  function stamp5(c, index, x, y, w, h, n = 0) {
+  function stamp6(c, index, x, y, w, h, n = 0) {
     const image = tiles[index];
     if (!image) return;
     c.save();
@@ -3558,11 +3564,11 @@ async function createHybridArtPilotV1(environment, review, initialMode = "candid
         started = true;
       }
       const n = terrainHash(x + o.x / t, y + o.y / t, 701);
-      stamp5(c, biome === "a" ? 1 : 0, x * t, y * t, t, t, n);
+      stamp6(c, biome === "a" ? 1 : 0, x * t, y * t, t, t, n);
       if (biome === "w" && n % 11 === 0) {
         c.save();
         c.globalAlpha = 0.14;
-        stamp5(c, 2, x * t, y * t, t, t, n);
+        stamp6(c, 2, x * t, y * t, t, t, n);
         c.restore();
         c.globalAlpha = 1;
       }
@@ -3573,7 +3579,7 @@ async function createHybridArtPilotV1(environment, review, initialMode = "candid
           c.beginPath();
           c.rect(x * t + (dx > 0 ? 24 : 0), y * t + (dy > 0 ? 24 : 0), dx ? 8 : t, dy ? 8 : t);
           c.clip();
-          stamp5(c, 6, x * t, y * t, t, t, n);
+          stamp6(c, 6, x * t, y * t, t, t, n);
           c.restore();
         }
       }
@@ -3585,12 +3591,12 @@ async function createHybridArtPilotV1(environment, review, initialMode = "candid
     for (let y = Math.floor(bounds2.y / 32); y <= Math.floor((bounds2.y + bounds2.height) / 32); y++) for (let x = Math.floor(bounds2.x / 32); x <= Math.floor((bounds2.x + bounds2.width) / 32); x++) if (!["w", "a"].includes(v?.biomes?.[y - oy]?.[x - ox]) || !eligible2(space, x * 32, y * 32)) return false;
     return true;
   }
-  const road = (c, type, n, t) => stamp5(c, type === "r" ? 3 : 4, -1, -1, t + 2, t + 2, n);
+  const road = (c, type, n, t) => stamp6(c, type === "r" ? 3 : 4, -1, -1, t + 2, t + 2, n);
   function drawSurface(c, space, type, x, y, t, at4) {
     if (!eligible2(space, x * t, y * t)) return;
     const v = space.visual, biome = v.biomes?.[y - (v.originTile?.y ?? 0)]?.[x - (v.originTile?.x ?? 0)];
     if (!["w", "a"].includes(biome)) return;
-    if (type === "C") stamp5(c, 5, x * t, y * t, t, t, 0);
+    if (type === "C") stamp6(c, 5, x * t, y * t, t, t, 0);
     if (type === "H" || type === "V") {
       const horizontal = type === "H", top = at4(x + (horizontal ? 0 : -1), y + (horizontal ? -1 : 0)) === type ? 0 : 4, bottom = at4(x + (horizontal ? 0 : 1), y + (horizontal ? 1 : 0)) === type ? 0 : 4;
       c.save();
@@ -3602,12 +3608,12 @@ async function createHybridArtPilotV1(environment, review, initialMode = "candid
   }
   function tree(c, space, x, y, size, n) {
     if (!eligible2(space, x + size / 2, y + size * 0.78)) return false;
-    stamp5(c, 8 + n % 4, x, y, size, size, n);
+    stamp6(c, 8 + n % 4, x, y, size, size, n);
     return true;
   }
   function rock2(c, space, x, y, size, n) {
     if (!eligible2(space, x + size / 2, y + size / 2)) return false;
-    stamp5(c, 12 + n % 3, x, y, size, size, n);
+    stamp6(c, 12 + n % 3, x, y, size, size, n);
     return true;
   }
   await setMode(initialMode);
@@ -3773,11 +3779,11 @@ async function createHybridArtV2(environment, review, initialMode = "candidate")
       try {
         if (foliage.width !== manifest.bushes.width || foliage.height !== manifest.bushes.height) throw Error("V2 bush dimensions");
         for (let i = 0; i < 4; i++) {
-          const sprite5 = environment.document.createElement("canvas");
-          sprite5.width = sprite5.height = 64;
+          const sprite6 = environment.document.createElement("canvas");
+          sprite6.width = sprite6.height = 64;
           const s = manifest.bushes.slots[i];
-          sprite5.getContext("2d").drawImage(foliage, s.x, s.y, s.width, s.height, 0, 64 - s.decodedHeight, 64, s.decodedHeight);
-          bushes[i] = sprite5;
+          sprite6.getContext("2d").drawImage(foliage, s.x, s.y, s.width, s.height, 0, 64 - s.decodedHeight, 64, s.decodedHeight);
+          bushes[i] = sprite6;
         }
       } finally {
         foliage.close();
@@ -5400,11 +5406,11 @@ function local2(a, p) {
     y: ((-si * x + co * y) / b.scaleY + v.y) / (SCALE6 * size)
   };
 }
-function elbow(root, wrist, side) {
-  const x = wrist.x - root.x, y = wrist.y - root.y, d = Math.hypot(x, y);
-  if (d < 1e-6) return { x: root.x + side * BONE, y: root.y };
+function elbow(root2, wrist, side) {
+  const x = wrist.x - root2.x, y = wrist.y - root2.y, d = Math.hypot(x, y);
+  if (d < 1e-6) return { x: root2.x + side * BONE, y: root2.y };
   const h = Math.sqrt(Math.max(0, BONE * BONE - d * d / 4));
-  return { x: root.x + x / 2 + y / d * h * side, y: root.y + y / 2 - x / d * h * side };
+  return { x: root2.x + x / 2 + y / d * h * side, y: root2.y + y / 2 - x / d * h * side };
 }
 function voidWraithMotionV4(m, time, seed2 = 0) {
   const x = m.x + m.w / 2, y = m.y + m.h / 2 - 4 + Math.sin(time / 180) * 3.5, a = m.familyAttack;
@@ -5417,7 +5423,7 @@ function voidWraithMotionV4(m, time, seed2 = 0) {
   }
   const rake = a?.phase === "impact" ? smooth3(a.progress) : a?.phase === "recovery" ? 1 : 0;
   const arms = [-1, 1].map((side) => {
-    const attacking = !!a && side === lead, root = { x: x + side * 8, y: y - 2 };
+    const attacking = !!a && side === lead, root2 = { x: x + side * 8, y: y - 2 };
     const idleAngle = side > 0 ? 1.05 : Math.PI - 1.05;
     const idle2 = { x: x + side * (16 + Math.sin(time / 330 + side) * 0.35), y: y + 8 + Math.sin(time / 370 + side) * 0.4 };
     const brace = side === lead ? { x: x + side * 18, y: y - 8 } : { x: x + side * 13, y: y + 1 };
@@ -5435,7 +5441,7 @@ function voidWraithMotionV4(m, time, seed2 = 0) {
       const p = { x: wrist.x + aim2.x * (7.5 - Math.abs(i) * 0.8) + normal2.x * i * 2.8, y: wrist.y + aim2.y * (7.5 - Math.abs(i) * 0.8) + normal2.y * i * 2.8 };
       return goals ? blend2(p, goals[k], reach) : p;
     });
-    return { side, attacking, root, wrist, elbow: elbow(root, wrist, side), aim: aim2, normal: normal2, fingers };
+    return { side, attacking, root: root2, wrist, elbow: elbow(root2, wrist, side), aim: aim2, normal: normal2, fingers };
   });
   return { x, y, weight: weight2, strike: strike2, drift: Math.sin(time / 330 + seed2 % 13 * 0.17) * 1.6, arms };
 }
@@ -5620,13 +5626,13 @@ function toLocal(a, point13) {
     y: ((-si * x + co * y) / b.scaleY + pivot2.y) / (SCALE7 * size)
   };
 }
-function joint(root, wrist, side) {
-  const dx = wrist.x - root.x, dy = wrist.y - root.y, d = Math.hypot(dx, dy);
+function joint(root2, wrist, side) {
+  const dx = wrist.x - root2.x, dy = wrist.y - root2.y, d = Math.hypot(dx, dy);
   const upper = 15.5, lower = 15.5;
-  if (d < 1e-6) return { x: root.x + side * upper, y: root.y };
+  if (d < 1e-6) return { x: root2.x + side * upper, y: root2.y };
   const along2 = (upper * upper - lower * lower + d * d) / (2 * d);
   const height = Math.sqrt(Math.max(0, upper * upper - along2 * along2));
-  return { x: root.x + dx / d * along2 - dy / d * height * side, y: root.y + dy / d * along2 + dx / d * height * side };
+  return { x: root2.x + dx / d * along2 - dy / d * height * side, y: root2.y + dy / d * along2 + dx / d * height * side };
 }
 function voidSpectreMotionV4(m, time, seed2 = 0) {
   const x = m.x + m.w / 2, y = m.y + m.h / 2 + Math.sin(time / 150) * 5, a = m.familyAttack;
@@ -5634,7 +5640,7 @@ function voidSpectreMotionV4(m, time, seed2 = 0) {
   const rake = a?.phase === "impact" ? smooth4(a.progress) : a?.phase === "recovery" ? 1 : 0;
   const sway = Math.sin(time / 410 + seed2 % 13 * 0.17) * 1.5;
   const arms = [-1, 1].map((side) => {
-    const root = { x: x + side * 8, y: y - 3 }, idleAngle = Math.atan2(-0.4, side * 0.9);
+    const root2 = { x: x + side * 8, y: y - 3 }, idleAngle = Math.atan2(-0.4, side * 0.9);
     const idleHand = { x: x + side * (19 + Math.sin(time / 310 + side) * 0.8), y: y - 1 + Math.sin(time / 370 + side) * 0.6 };
     const braceHand = { x: x + side * 22, y: y - 11 };
     const rest = pointMix(idleHand, braceHand, weight2);
@@ -5656,7 +5662,7 @@ function voidSpectreMotionV4(m, time, seed2 = 0) {
       const idle2 = { x: wrist.x + u.x * (6 - Math.abs(i) * 0.6) + n.x * i * 1.8, y: wrist.y + u.y * (6 - Math.abs(i) * 0.6) + n.y * i * 1.8 };
       return attackTips ? pointMix(idle2, attackTips[k], strike2) : idle2;
     });
-    return { side, root, wrist, elbow: joint(root, wrist, side), aim: u, normal: n, fingers, tip };
+    return { side, root: root2, wrist, elbow: joint(root2, wrist, side), aim: u, normal: n, fingers, tip };
   });
   return { x, y, sway, weight: weight2, strike: strike2, arms };
 }
@@ -5829,8 +5835,8 @@ function voidCrawlerMotionV4(m, time, seed2 = 0) {
     const x = (co * a.direction.x + si * a.direction.y) / a.body.scaleX * flip, y = (-si * a.direction.x + co * a.direction.y) / a.body.scaleY;
     turn7 = Math.atan2(-y, -x) * a.artWeight;
   }
-  const u = { x: -Math.cos(turn7), y: -Math.sin(turn7) }, root = segments[0];
-  const head12 = { x: root.x + u.x * 5, y: root.y + u.y * 5, turn: turn7, open: a ? a.limb.open * (1 - a.strikeBlend) : 1.2 };
+  const u = { x: -Math.cos(turn7), y: -Math.sin(turn7) }, root2 = segments[0];
+  const head12 = { x: root2.x + u.x * 5, y: root2.y + u.y * 5, turn: turn7, open: a ? a.limb.open * (1 - a.strikeBlend) : 1.2 };
   const tip = { x: head12.x + u.x * 15, y: head12.y + u.y * 15 };
   const walk = Math.max(0, Math.min(1, m.motionBlend ?? 0)), legs3 = [];
   for (const near of [false, true]) for (let i = 0; i < 6; i++) {
@@ -7438,10 +7444,10 @@ function claws(c, tip, open2, scale, flash) {
   c.save();
   c.lineJoin = "round";
   for (const side of [-1, 1]) {
-    const root = { x: 6.6 * scale, y: side * 4.4 * scale }, joint3 = { x: 10.8 * scale + (tip - 13.2 * scale) * 0.2, y: side * (5.4 + 2.3 * open2) * scale }, end = { x: tip, y: side * (0.25 + 0.85 * open2) * scale };
+    const root2 = { x: 6.6 * scale, y: side * 4.4 * scale }, joint3 = { x: 10.8 * scale + (tip - 13.2 * scale) * 0.2, y: side * (5.4 + 2.3 * open2) * scale }, end = { x: tip, y: side * (0.25 + 0.85 * open2) * scale };
     c.save();
     c.scale(scale, scale);
-    bone(c, { x: root.x / scale, y: root.y / scale }, { x: joint3.x / scale, y: joint3.y / scale }, 1.55, 1.15, flash);
+    bone(c, { x: root2.x / scale, y: root2.y / scale }, { x: joint3.x / scale, y: joint3.y / scale }, 1.55, 1.15, flash);
     polygon7(c, [[joint3.x / scale - 1.2, joint3.y / scale], [joint3.x / scale + 1.1, joint3.y / scale + side * 0.9], [end.x / scale, end.y / scale], [end.x / scale - 2.4, side * 0.2], [joint3.x / scale - 1.2, joint3.y / scale - side * 1.1]], color13(flash, "#69afd9"), true);
     polygon7(c, [[joint3.x / scale, joint3.y / scale - side * 0.65], [end.x / scale, end.y / scale], [end.x / scale - 2.4, side * 0.2]], color13(flash, "#d3f0ff"));
     c.fillStyle = color13(flash, "#3875a5");
@@ -7722,7 +7728,7 @@ function cyberWraithMotionV4(m, time, seed2 = 0) {
   }
   const rake = a?.phase === "impact" ? smooth6(a.progress) : a?.phase === "recovery" ? 1 : 0;
   const arms = [-1, 1].map((side) => {
-    const attacking = !!a && side === lead, root = { x: x + side * 7, y: y - 1 };
+    const attacking = !!a && side === lead, root2 = { x: x + side * 7, y: y - 1 };
     const idleAngle = side > 0 ? 1 : Math.PI - 1;
     const idle2 = { x: x + side * (13 + Math.sin(time / 330 + side) * 0.3), y: y + 8 + Math.sin(time / 370 + side) * 0.4 };
     const brace = side === lead ? { x: x + side * 15, y: y - 5 } : { x: x + side * 12, y: y + 3 };
@@ -7740,7 +7746,7 @@ function cyberWraithMotionV4(m, time, seed2 = 0) {
       const p = { x: wrist.x + aim2.x * 6.5 + normal2.x * i * 1.8, y: wrist.y + aim2.y * 6.5 + normal2.y * i * 1.8 };
       return goals ? blend3(p, goals[k], reach) : p;
     });
-    return { side, attacking, root, wrist, elbow: elbow2(root, wrist, side), aim: aim2, normal: normal2, tips };
+    return { side, attacking, root: root2, wrist, elbow: elbow2(root2, wrist, side), aim: aim2, normal: normal2, tips };
   });
   return { x, y, glitch, visorHeight: Math.max(1, 2 - (a?.limb.open ?? 0)), arms };
 }
@@ -8211,15 +8217,15 @@ function thornWyrmMotionV4(m, time) {
   const a = m.rangedPose, weight2 = a?.artWeight ?? 0, walk = m.motionBlend ?? 0, step = m.stepPhase ?? 0;
   const wave = (i) => Math.sin(t - i * 0.8) * 3 * (1 - weight2 * (i === 0 ? 1 : 0.25)) + Math.sin(step - i * 0.65) * walk * 0.6 * (1 - weight2);
   const segments = Array.from({ length: 5 }, (_, i) => ({ index: i, x: x + i * 5.5, y: y + wave(i), radius: 6.2 - i * 0.7 }));
-  const root = { x, y: y + wave(0) }, target = a ? Math.atan2(a.direction.y, a.direction.x * a.drawFacingX) : Math.PI;
+  const root2 = { x, y: y + wave(0) }, target = a ? Math.atan2(a.direction.y, a.direction.x * a.drawFacingX) : Math.PI;
   const angle3 = Math.PI + turn5(target - Math.PI) * weight2, u = { x: Math.cos(angle3), y: Math.sin(angle3) };
-  const head12 = { x: root.x + u.x * NECK, y: root.y + u.y * NECK, radius: HEAD, aim: u, angle: angle3, gape: weight2 };
+  const head12 = { x: root2.x + u.x * NECK, y: root2.y + u.y * NECK, radius: HEAD, aim: u, angle: angle3, gape: weight2 };
   const muzzle = { x: head12.x + u.x * HEAD, y: head12.y + u.y * HEAD };
   const legs3 = segments.map((s) => {
     const stride = Math.sin(t * 2 + s.index) * (1 + walk * 0.65) * (1 - weight2 * 0.65);
     return { root: { x: s.x, y: s.y + s.radius - 1 }, knee: { x: s.x - 2 + stride * 0.3, y: s.y + 6 }, foot: { x: s.x - 3 + stride, y: s.y + 8 + Math.cos(t * 2 + s.index) * 0.6 } };
   });
-  return { segments, root, head: head12, muzzle, legs: legs3, weight: weight2 };
+  return { segments, root: root2, head: head12, muzzle, legs: legs3, weight: weight2 };
 }
 function thorn(c, s, flash) {
   const { x, y, radius: r } = s;
@@ -8444,19 +8450,19 @@ function frostWyrmlingMotionV4(m, time) {
     y: y + Math.sin(time / 200 - i * 0.8) * 6 * (1 - weight2 * (i === 0 ? 1 : 0.25)) + Math.sin(step - i * 0.7) * walk * 0.65 * (1 - weight2),
     radius: 8 - i * 1.2
   }));
-  const root = { x: segments[0].x, y: segments[0].y };
+  const root2 = { x: segments[0].x, y: segments[0].y };
   const target = a ? { x: a.direction.x * a.drawFacingX, y: a.direction.y } : { x: 0, y: 1 };
   const angle3 = Math.PI / 2 + turn6(Math.atan2(target.y, target.x) - Math.PI / 2) * weight2;
   const u = { x: Math.cos(angle3), y: Math.sin(angle3) };
-  const head12 = { x: mix9(x, root.x + target.x * NECK_REACH, weight2), y: mix9(y - 14, root.y + target.y * NECK_REACH, weight2), aim: u, gape: weight2 };
+  const head12 = { x: mix9(x, root2.x + target.x * NECK_REACH, weight2), y: mix9(y - 14, root2.y + target.y * NECK_REACH, weight2), aim: u, gape: weight2 };
   const neckSegments = [{ t: 0.34, radius: 5.5 }, { t: 0.68, radius: 4.8 }].map((s) => ({
-    x: mix9(root.x, head12.x, s.t) - 1.2 * Math.sin(Math.PI * s.t) * (1 - weight2 * 0.5),
-    y: mix9(root.y, head12.y, s.t),
+    x: mix9(root2.x, head12.x, s.t) - 1.2 * Math.sin(Math.PI * s.t) * (1 - weight2 * 0.5),
+    y: mix9(root2.y, head12.y, s.t),
     radius: s.radius
   }));
   const mouth4 = { x: head12.x + u.x * (4 + 2 * weight2), y: head12.y + u.y * (4 + 2 * weight2), angle: angle3 };
   const muzzle = { x: mouth4.x + u.x, y: mouth4.y + u.y };
-  return { segments, neckSegments, root, head: head12, mouth: mouth4, muzzle, weight: weight2 };
+  return { segments, neckSegments, root: root2, head: head12, mouth: mouth4, muzzle, weight: weight2 };
 }
 function polygon8(c, points2, fill4, outline4 = true) {
   c.beginPath();
@@ -9590,12 +9596,12 @@ function lavaSerpentRangedPoseV4(actor, tick) {
 function lavaSerpentMotionV4(m, time, seed2) {
   const action2 = m.familyAttack, weight2 = action2?.artWeight ?? 0, strike2 = action2?.strikeBlend ?? 0, walk = m.motionBlend ?? 0, step = m.stepPhase ?? 0, cx = m.x + m.w / 2, cy = m.y + m.h / 2 + 2, t = time / 140;
   const wave = (i) => Math.sin(t - i * 0.8) * (3.5 + walk * 0.8) * (1 - weight2 * (i === 0 ? 1 : 0.25)) + Math.sin(step - i * 0.7) * walk * 0.55 * (1 - weight2);
-  const root = { x: cx, y: cy + wave(0) }, u = action2 ? localDirection4(action2.direction, action2.body.rotation, action2.drawFacingX) : { x: -1, y: 0 };
+  const root2 = { x: cx, y: cy + wave(0) }, u = action2 ? localDirection4(action2.direction, action2.body.rotation, action2.drawFacingX) : { x: -1, y: 0 };
   const aim2 = Math.atan2(-u.y, -u.x), neckAngle = mix12(0.12, aim2, strike2) * weight2, angle3 = mix12(-0.22, aim2 + Math.atan2(1, 8), strike2) * weight2;
-  const head12 = { x: root.x - Math.cos(neckAngle) * NECK3, y: root.y - Math.sin(neckAngle) * NECK3, angle: angle3, gape: action2?.ranged ? weight2 * 0.28 : weight2 * (1 - strike2) * 0.34 };
+  const head12 = { x: root2.x - Math.cos(neckAngle) * NECK3, y: root2.y - Math.sin(neckAngle) * NECK3, angle: angle3, gape: action2?.ranged ? weight2 * 0.28 : weight2 * (1 - strike2) * 0.34 };
   const nose = { x: head12.x - Math.cos(angle3) * 8 - Math.sin(angle3), y: head12.y - Math.sin(angle3) * 8 + Math.cos(angle3) };
   const segments = Array.from({ length: 6 }, (_, i) => ({ x: cx + i * 5.5 - i * 0.6 * weight2 * (1 - strike2), y: cy + wave(i), radius: 6.5 - i * 0.7 }));
-  return { root, head: head12, nose, segments, weight: weight2, strike: strike2, castHeat: action2?.ranged ? weight2 : 0, heat: 0.92 + Math.sin(time / 220 + seed2 % 11) * 0.08 };
+  return { root: root2, head: head12, nose, segments, weight: weight2, strike: strike2, castHeat: action2?.ranged ? weight2 : 0, heat: 0.92 + Math.sin(time / 220 + seed2 % 11) * 0.08 };
 }
 function polygon14(c, points2, fill4, outline4 = true) {
   c.fillStyle = fill4;
@@ -10494,16 +10500,16 @@ var ART = {
     }
   },
   tomb_mummy(c) {
-    const wrap = "#e0d2ad", W3 = ramp(wrap, "#2a2010", "#fffbe8");
+    const wrap = "#e0d2ad", W4 = ramp(wrap, "#2a2010", "#fffbe8");
     const band2 = (p, seed2, dense = 2.2) => {
-      part(c, [[p, W3.m]], 1.5);
-      shade(c, p, W3, 1.8);
+      part(c, [[p, W4.m]], 1.5);
+      shade(c, p, W4, 1.8);
       const R3 = rng(seed2);
       c.save();
       c.clip(p);
       for (let y = -50; y < 6; y += dense) {
         const t = (R3() - 0.5) * 1.4;
-        strokes(c, [[[-20, y + t], [20, y + t + 4.6]]], W3.d, 0.75, 0.85);
+        strokes(c, [[[-20, y + t], [20, y + t + 4.6]]], W4.d, 0.75, 0.85);
         if (R3() < 0.35) {
           c.fillStyle = "rgba(60,40,20,.35)";
           c.fillRect(-20 + R3() * 40, y, 2.4, 1.2);
@@ -10533,7 +10539,7 @@ var ART = {
     loose.lineTo(-11.6, -4.4);
     loose.bezierCurveTo(-8, -8.6, -9.4, -13, -5.6, -15.4);
     loose.closePath();
-    part(c, [[loose, W3.l]], 1);
+    part(c, [[loose, W4.l]], 1);
     const head12 = sm([[-5.4, -28.6], [-6.4, -34], [-4, -38.4], [1, -39.2], [5.4, -36.6], [6.2, -31.4], [4.6, -28.2], [0, -27.4]]);
     band2(head12, 6, 1.9);
     part(c, [[sm([[0.2, -34], [5.6, -33.6], [5.4, -31.6], [0.4, -31.8]]), "#2a2018"]], 0.7);
@@ -11555,12 +11561,12 @@ function drawVitalityWeaverPulseD12_4(c, actor, tick) {
     knotStroke(c, green2, EMERALD, 3.2);
     knotStroke(c, gold, PALE_GOLD, 1.8);
     if (travel > 0.82) {
-      const burst = Math.min(1, (travel - 0.82) / 0.18);
+      const burst2 = Math.min(1, (travel - 0.82) / 0.18);
       for (let n = 0; n < 4; n++) {
         const a = n * TAU31 / 4 + seed2 % 19 * 0.07, r = 6 + n % 2 * 3 + age * 0.18;
-        runeShard(c, dx + Math.cos(a) * r, dy - 12 + Math.sin(a) * r, a + 0.45, burst * (0.32 + n * 0.035), n % 2 ? PALE_GOLD : PALE2);
+        runeShard(c, dx + Math.cos(a) * r, dy - 12 + Math.sin(a) * r, a + 0.45, burst2 * (0.32 + n * 0.035), n % 2 ? PALE_GOLD : PALE2);
       }
-      energyNode(c, dx, dy - 13, age * 0.08, 0.55 + burst * 0.28, PALE2);
+      energyNode(c, dx, dy - 13, age * 0.08, 0.55 + burst2 * 0.28, PALE2);
     }
   }
   c.restore();
@@ -13462,6 +13468,7 @@ function draw_rust_nibbler(c, m, presentationTime, seed2) {
 var CREATURE_PAINTERS_D11 = Object.freeze({ sprout: drawMushroomV9, golem: drawStoneGolemV4, slime: drawGreenSlimeV10, gargoyle: drawGargoyleV4, rust_nibbler: draw_rust_nibbler, animated_armor: drawAnimatedArmorV4, cursed_blade: drawCursedBladeV4, ...DUNGEON_MOB_PAINTERS_V1, ...DUNGEON_MOB_PAINTERS_V2A, ...DUNGEON_MOB_PAINTERS_V2B, ...BIOME_CREATURE_PAINTERS_V1 });
 var BODY_HULL_D11 = new Map(ORDINARY_ENEMIES.map((e) => [e.family, e.body.hullRadius]));
 function creatureDrawScaleD11(actor) {
+  if (actor.presentationScale) return actor.presentationScale;
   const base = BODY_HULL_D11.get(actor.enemyFamily), ratio = base && actor.hullRadius ? actor.hullRadius / base : 1;
   return ratio > 1.05 ? Math.min(2, ratio) : 1;
 }
@@ -14290,12 +14297,12 @@ function woodlandFoliagePoseV2(n, size, hasCanopy) {
   return Object.freeze({ treeHeight: size * 1.36, treeAnchor: 0.94, bushIndex: (n >>> 3) % 3, bushWidth: hasCanopy ? size * 0.4 : size * (0.96 + n % 3 * 0.04), tuftIndex: 3 + (n >>> 7) % 2, hasCanopy: Boolean(hasCanopy) });
 }
 async function createWoodlandFoliageV2(environment, prior) {
-  const root = new URL("../../assets/woodland-foliage-v2/", import.meta.url), r = await environment.fetch(new URL("kit-manifest.json", root));
+  const root2 = new URL("../../assets/woodland-foliage-v2/", import.meta.url), r = await environment.fetch(new URL("kit-manifest.json", root2));
   if (!r.ok) throw Error("Missing Woodland foliage manifest");
-  const manifest = await r.json(), sprites3 = [], draws = { tree: 0, bush: 0, rootTuft: 0, groundTuft: 0 };
+  const manifest = await r.json(), sprites4 = [], draws = { tree: 0, bush: 0, rootTuft: 0, groundTuft: 0 };
   let mode = "candidate", bytes = 0, decodedBytes = 0;
   for (const f of manifest.files) {
-    const r2 = await environment.fetch(new URL(f.path, root));
+    const r2 = await environment.fetch(new URL(f.path, root2));
     if (!r2.ok) throw Error("Missing Woodland foliage " + f.path);
     const b = await r2.arrayBuffer(), hash26 = Array.from(new Uint8Array(await environment.crypto.subtle.digest("SHA-256", b)), (n) => n.toString(16).padStart(2, "0")).join("");
     if (b.byteLength !== f.bytes || hash26 !== f.sha256) throw Error("Woodland foliage commitment mismatch");
@@ -14312,7 +14319,7 @@ async function createWoodlandFoliageV2(environment, prior) {
         decodedBytes += c.width * c.height * 4;
         group.push(c);
       }
-      sprites3.push(group);
+      sprites4.push(group);
     } finally {
       image.close();
     }
@@ -14327,7 +14334,7 @@ async function createWoodlandFoliageV2(environment, prior) {
       let count = 0;
       const sides = isTree ? variant < 2 ? [variant === 0 ? -1 : 1] : [-1, 1] : variant === 3 ? [] : [variant === 1 ? 1 : -1];
       for (const side of sides) {
-        const tuft = sprites3[1][3 + (variant + Number(side > 0)) % 2], width = (isTree ? 25 : 32) + variant * 3 % 8, height = width * tuft.height / tuft.width, x = image.width * 0.5 + side * image.width * (isTree ? 0.105 : 0.23), ground = image.height + 3 - variant % 2;
+        const tuft = sprites4[1][3 + (variant + Number(side > 0)) % 2], width = (isTree ? 25 : 32) + variant * 3 % 8, height = width * tuft.height / tuft.width, x = image.width * 0.5 + side * image.width * (isTree ? 0.105 : 0.23), ground = image.height + 3 - variant % 2;
         g.drawImage(tuft, x - width / 2, ground - height, width, height);
         count++;
       }
@@ -14335,13 +14342,13 @@ async function createWoodlandFoliageV2(environment, prior) {
       return { image: c, sourceHeight: image.height, contactCount: count };
     });
   }
-  const treeContacts = sprites3[0].map((image) => contacts(image, true)), bushContacts = sprites3[1].slice(0, 3).map((image) => contacts(image, false));
+  const treeContacts = sprites4[0].map((image) => contacts(image, true)), bushContacts = sprites4[1].slice(0, 3).map((image) => contacts(image, false));
   const active = (space, x, y) => {
     if (mode !== "candidate" || prior.mode() !== "woodland" || space.site || space.settlementInterior || !space.visual?.worldAddress) return false;
     const v = space.visual, b = v.biomes?.[Math.floor(y / 32) - (v.originTile?.y ?? 0)]?.[Math.floor(x / 32) - (v.originTile?.x ?? 0)], o = environmentWorldOffset(space);
     return b === "w" && woodlandScopeWeightV1(prior.woodlandJourney.scope, (x + o.x - 1048576) / 32, (y + o.y - 851968) / 32) > 0.5;
   };
-  function stamp5(c, image, x, ground, width, flip = false) {
+  function stamp6(c, image, x, ground, width, flip = false) {
     const height = width * image.height / image.width;
     c.save();
     c.globalAlpha = 1;
@@ -14354,7 +14361,7 @@ async function createWoodlandFoliageV2(environment, prior) {
   function tree(c, s, x, y, size, n) {
     if (!active(s, x + size / 2, y + size * 0.78)) return prior.tree(c, s, x, y, size, n);
     const contact = treeContacts[n % 4][(n >>> 5) % 4], image = contact.image, pose = woodlandFoliagePoseV2(n, size, true), height = pose.treeHeight, width = height * image.width / contact.sourceHeight;
-    stamp5(c, image, x + size * 0.5, y + size * pose.treeAnchor + 8 * height / contact.sourceHeight, width, Boolean(n & 1));
+    stamp6(c, image, x + size * 0.5, y + size * pose.treeAnchor + 8 * height / contact.sourceHeight, width, Boolean(n & 1));
     draws.tree++;
     draws.rootTuft += contact.contactCount;
     return true;
@@ -14365,7 +14372,7 @@ async function createWoodlandFoliageV2(environment, prior) {
     if (pose.hasCanopy) {
     } else {
       const contact = bushContacts[pose.bushIndex][(n >>> 10) % 4];
-      stamp5(c, contact.image, cx, ground + 8 * pose.bushWidth / contact.image.width, pose.bushWidth, Boolean(n & 1));
+      stamp6(c, contact.image, cx, ground + 8 * pose.bushWidth / contact.image.width, pose.bushWidth, Boolean(n & 1));
       draws.bush++;
       draws.rootTuft += contact.contactCount;
     }
@@ -14373,8 +14380,8 @@ async function createWoodlandFoliageV2(environment, prior) {
   }
   function drawGroundDetail(c, s, d) {
     if (!active(s, d.x, d.y) || d.kind > 4) return Boolean(prior.drawGroundDetail?.(c, s, d));
-    const image = sprites3[1][d.kind > 2 ? 5 : 3 + d.n % 2];
-    stamp5(c, image, d.x, d.y, 9 + (d.n >>> 9) % 7, Boolean(d.n & 1));
+    const image = sprites4[1][d.kind > 2 ? 5 : 3 + d.n % 2];
+    stamp6(c, image, d.x, d.y, 9 + (d.n >>> 9) % 7, Boolean(d.n & 1));
     draws.groundTuft++;
     return true;
   }
@@ -14394,7 +14401,7 @@ function smoothSpriteContext(ctx) {
 // src/client/woodland_forest_art_v1.js
 async function createWoodlandForestArtV1(env, review, prior) {
   if (!hasWoodlandForest(review.binding)) throw Error("Forest artwork requires its explicit terrain successor");
-  const root = new URL("../../assets/woodland-forest-v1/", import.meta.url), response = await env.fetch(new URL("kit-manifest.json", root));
+  const root2 = new URL("../../assets/woodland-forest-v1/", import.meta.url), response = await env.fetch(new URL("kit-manifest.json", root2));
   if (!response.ok) throw Error("Missing forest kit");
   const manifest = await response.json(), groups = [], draws = { tree: 0, shrub: 0, rock: 0, log: 0, stump: 0, sapling: 0, ground: 0 };
   let decodedBytes = 0, downloadBytes = 0;
@@ -14421,7 +14428,7 @@ async function createWoodlandForestArtV1(env, review, prior) {
       image.close();
     }
   }
-  for (const [i, f] of manifest.files.entries()) groups.push(await decode(f, root, i === 0 ? 384 : f.decodeLimit));
+  for (const [i, f] of manifest.files.entries()) groups.push(await decode(f, root2, i === 0 ? 384 : f.decodeLimit));
   const propsRoot = new URL("../../assets/woodland-prop-clarity-v1/", import.meta.url), propsResponse = await env.fetch(new URL("kit-manifest.json", propsRoot));
   if (!propsResponse.ok) throw Error("Missing small prop kit");
   const propsManifest = await propsResponse.json();
@@ -14433,7 +14440,7 @@ async function createWoodlandForestArtV1(env, review, prior) {
     const v = space.visual, b = v.biomes?.[Math.floor(y / 32) - (v.originTile?.y ?? 0)]?.[Math.floor(x / 32) - (v.originTile?.x ?? 0)], o = environmentWorldOffset(space), tx = (x + o.x - 1048576) / 32, ty = (y + o.y - 851968) / 32, s = WOODLAND_FOREST_POLICY.scope;
     return b === "w" && tx >= s.left && tx < s.right && ty >= s.top && ty < s.bottom;
   };
-  function stamp5(c, image, cx, ground, width, flip, alpha2 = 1) {
+  function stamp6(c, image, cx, ground, width, flip, alpha2 = 1) {
     const h = width * image.height / image.width;
     c.save();
     smoothSpriteContext(c);
@@ -14447,7 +14454,7 @@ async function createWoodlandForestArtV1(env, review, prior) {
   function tree(c, s, x, y, size, n, info2, focus) {
     if (!active(s, x + size * 0.5, y + size * 0.78)) return prior.tree(c, s, x, y, size, n, info2);
     const small = info2?.forestRole === "sapling", species = n % 10 < 4 ? 0 : n % 10 < 8 ? 1 : n % 10 === 8 ? 2 : 3, p = small ? sapling : crowns[species], height = size * (small ? 1.05 : 1.7), width = height * p.width / p.height, cx = x + size * 0.5, ground = y + size * 0.94, occludes = (Array.isArray(focus) ? focus : focus ? [focus] : []).some((f) => Math.abs(f.x - cx) < width * 0.42 && f.y > ground - height * 0.84 && f.y < ground - 10);
-    stamp5(c, p, cx, ground, width, Boolean(n & 1), occludes ? 0.38 : 1);
+    stamp6(c, p, cx, ground, width, Boolean(n & 1), occludes ? 0.38 : 1);
     draws[small ? "sapling" : "tree"]++;
     return true;
   }
@@ -14456,25 +14463,25 @@ async function createWoodlandForestArtV1(env, review, prior) {
     if (info2?.hasCanopy) return true;
     const role = info2?.forestRole, cx = x + size * 0.5, ground = y + size * 0.84;
     if (role === "log" || role === "stump") {
-      stamp5(c, smallProps[role === "log" ? 0 : 1], cx, ground, size * (role === "log" ? 1.08 : 0.87), Boolean(n & 1));
+      stamp6(c, smallProps[role === "log" ? 0 : 1], cx, ground, size * (role === "log" ? 1.08 : 0.87), Boolean(n & 1));
       draws[role]++;
       return true;
     }
     const p = shrubs[(n >>> 3) % 3], width = size * (0.86 + n % 4 * 0.04);
-    stamp5(c, p, cx, ground, width, Boolean(n & 1));
+    stamp6(c, p, cx, ground, width, Boolean(n & 1));
     draws.shrub++;
     return true;
   }
   function rock2(c, s, x, y, size, n, info2) {
     if (!active(s, x + size / 2, y + size / 2)) return prior.rock(c, s, x, y, size, n, info2);
-    stamp5(c, rocks[(n >>> 4) % 3], x + size * 0.5, y + size * 0.95, size * (1 + n % 3 * 0.04), Boolean(n & 1));
+    stamp6(c, rocks[(n >>> 4) % 3], x + size * 0.5, y + size * 0.95, size * (1 + n % 3 * 0.04), Boolean(n & 1));
     draws.rock++;
     return true;
   }
   function drawGroundDetail(c, s, d) {
     if (d.roadsideRole && prior.mode() === "woodland" && (prior.foliageMode?.() ?? "candidate") === "candidate" && !s.site && !s.settlementInterior) {
       const p = d.roadsideRole === "fern" ? accents[3] : d.roadsideRole === "tuft" ? smallProps[5] : d.roadsideRole === "flowers" ? accents[4] : accents[5];
-      stamp5(c, p, d.x, d.y, d.roadsideRole === "fern" ? 24 : d.roadsideRole === "flowers" ? 20 : 17, Boolean(d.n & 1));
+      stamp6(c, p, d.x, d.y, d.roadsideRole === "fern" ? 24 : d.roadsideRole === "flowers" ? 20 : 17, Boolean(d.n & 1));
       draws.ground++;
       return true;
     }
@@ -14493,7 +14500,7 @@ async function createWoodlandForestArtV1(env, review, prior) {
       image = accents[4];
       width = 12 + (d.n >>> 9) % 6;
     } else return Boolean(prior.drawGroundDetail?.(c, s, d));
-    stamp5(c, image, d.x, d.y, width, Boolean(d.n & 1));
+    stamp6(c, image, d.x, d.y, width, Boolean(d.n & 1));
     draws.ground++;
     return true;
   }
@@ -14782,8 +14789,8 @@ var pickGround = (list, h) => {
 async function createBiomeNatureArtV1(env, review, prior) {
   const kits = {}, draws = { tree: 0, base: 0, rock: 0, ground: 0 };
   let decodedBytes = 0, downloadBytes = 0;
-  async function decode(f, root) {
-    const r = await env.fetch(new URL(f.path, root));
+  async function decode(f, root2) {
+    const r = await env.fetch(new URL(f.path, root2));
     if (!r.ok) throw Error("Missing nature sprite source");
     const bytes = await r.arrayBuffer(), sha = Array.from(new Uint8Array(await env.crypto.subtle.digest("SHA-256", bytes)), (n) => n.toString(16).padStart(2, "0")).join("");
     if (sha !== f.sha256 || bytes.byteLength !== f.bytes) throw Error("Nature sprite commitment mismatch");
@@ -14806,12 +14813,12 @@ async function createBiomeNatureArtV1(env, review, prior) {
     }
   }
   for (const [code, name] of Object.entries(BIOME_NATURE_KITS)) {
-    const root = new URL(`../../assets/${name}-nature-v1/`, import.meta.url), response = await env.fetch(new URL("kit-manifest.json", root));
+    const root2 = new URL(`../../assets/${name}-nature-v1/`, import.meta.url), response = await env.fetch(new URL("kit-manifest.json", root2));
     if (!response.ok) throw Error("Missing " + name + " nature kit");
     const manifest = await response.json();
     if (manifest.version !== name + "-nature-v1" || !(manifest.pxPerUnit > 0) || !manifest.files?.length || manifest.files.some((f) => !ROLES.has(f.role) || !f.slots?.length)) throw Error("Invalid " + name + " nature kit");
     const ppu = manifest.pxPerUnit, byKind = {};
-    for (const f of manifest.files) for (const { kind, s, image } of await decode(f, root)) (byKind[kind] ??= []).push(Object.freeze({ image, w: s.width / ppu, h: s.height / ppu, ax: s.anchor[0] / ppu, ay: s.anchor[1] / ppu }));
+    for (const f of manifest.files) for (const { kind, s, image } of await decode(f, root2)) (byKind[kind] ??= []).push(Object.freeze({ image, w: s.width / ppu, h: s.height / ppu, ax: s.anchor[0] / ppu, ay: s.anchor[1] / ppu }));
     for (const kind of new Set([...PICK[code].tree, ...PICK[code].base ?? [], ...PICK[code].rock].filter((k) => typeof k === "string").concat(PICK[code].ground.map((g) => g[0])))) if (!byKind[kind]) throw Error("Nature kit " + name + " lacks " + kind);
     kits[code] = byKind;
   }
@@ -14824,11 +14831,11 @@ async function createBiomeNatureArtV1(env, review, prior) {
     const code = biomeAt(space, x, y);
     return kits[code] ? code : null;
   };
-  const sprite5 = (code, kind, h) => {
+  const sprite6 = (code, kind, h) => {
     const list = kits[code][kind];
     return list[h % list.length];
   };
-  function stamp5(c, p, gx, gy, k, alpha2 = 1) {
+  function stamp6(c, p, gx, gy, k, alpha2 = 1) {
     c.save();
     smoothSpriteContext(c);
     c.globalAlpha = alpha2;
@@ -14842,20 +14849,20 @@ async function createBiomeNatureArtV1(env, review, prior) {
     if (!code) return prior.tree(c, s, x, y, size, n, info2, focus);
     const t = s.collision.tileSize, o = environmentWorldOffset(s), tx = info2?.tileX ?? Math.floor(cx / t), ty = info2?.tileY ?? Math.floor((y + size * 0.78) / t), gx = (tx + 0.5) * t + ((n >>> 3) % 9 - 4), gy = (ty + 0.86) * t;
     if (code === "w" && info2?.forestRole === "sapling") {
-      const p2 = sprite5(code, "sapling", n >>> 15);
-      stamp5(c, p2, gx, gy, 0.72 + (n >>> 5) % 3 * 0.04);
+      const p2 = sprite6(code, "sapling", n >>> 15);
+      stamp6(c, p2, gx, gy, 0.72 + (n >>> 5) % 3 * 0.04);
       draws.tree++;
       return true;
     }
     if (code === "m" && !naturalCanopyAt(n, tx + o.x / t, ty + o.y / t, environmentSeed(s))) {
-      const p2 = sprite5(code, pick(PICK.m.base, n >>> 9), n >>> 15);
-      stamp5(c, p2, gx, gy, fit(p2, 44, n));
+      const p2 = sprite6(code, pick(PICK.m.base, n >>> 9), n >>> 15);
+      stamp6(c, p2, gx, gy, fit(p2, 44, n));
       draws.base++;
       return true;
     }
-    const p = sprite5(code, pick(PICK[code].tree, n >>> 9), n >>> 15), k = 0.84 + (n >>> 5) % 5 * 0.04, w = p.w * k, h = p.h * k;
+    const p = sprite6(code, pick(PICK[code].tree, n >>> 9), n >>> 15), k = 0.84 + (n >>> 5) % 5 * 0.04, w = p.w * k, h = p.h * k;
     const occludes = (Array.isArray(focus) ? focus : focus ? [focus] : []).some((f) => Math.abs(f.x - gx) < w * 0.4 && f.y > gy - h * 0.84 && f.y < gy - 10);
-    stamp5(c, p, gx, gy, k, occludes ? 0.38 : 1);
+    stamp6(c, p, gx, gy, k, occludes ? 0.38 : 1);
     draws.tree++;
     return true;
   }
@@ -14863,8 +14870,8 @@ async function createBiomeNatureArtV1(env, review, prior) {
     const code = owned2(s, x + size / 2, y + size / 2);
     if (!code || !PICK[code].base) return prior.base(c, s, x, y, size, n, biome, info2);
     if (info2?.hasCanopy) return true;
-    const role = info2?.forestRole, kind = code === "w" && (role === "log" || role === "stump") ? role : pick(PICK[code].base, n >>> 9), p = sprite5(code, kind, n >>> 15);
-    stamp5(c, p, x + size * 0.5, y + size * 0.84, fit(p, 44, n));
+    const role = info2?.forestRole, kind = code === "w" && (role === "log" || role === "stump") ? role : pick(PICK[code].base, n >>> 9), p = sprite6(code, kind, n >>> 15);
+    stamp6(c, p, x + size * 0.5, y + size * 0.84, fit(p, 44, n));
     draws.base++;
     return true;
   }
@@ -14872,13 +14879,13 @@ async function createBiomeNatureArtV1(env, review, prior) {
     const code = owned2(s, x + size / 2, y + size / 2);
     if (!code) return prior.rock(c, s, x, y, size, n, info2);
     if (info2?.canopy) {
-      const g = PICK[code].ground[0], p2 = sprite5(code, g[0], n >>> 15);
-      stamp5(c, p2, x + size * 0.5 - 8, y + size * 0.95, g[1]);
+      const g = PICK[code].ground[0], p2 = sprite6(code, g[0], n >>> 15);
+      stamp6(c, p2, x + size * 0.5 - 8, y + size * 0.95, g[1]);
       draws.ground++;
       return true;
     }
-    const p = sprite5(code, pick(PICK[code].rock, n >>> 9), n >>> 15);
-    stamp5(c, p, x + size * 0.5, y + size * 0.95, fit(p, 46, n));
+    const p = sprite6(code, pick(PICK[code].rock, n >>> 9), n >>> 15);
+    stamp6(c, p, x + size * 0.5, y + size * 0.95, fit(p, 46, n));
     draws.rock++;
     return true;
   }
@@ -14888,15 +14895,15 @@ async function createBiomeNatureArtV1(env, review, prior) {
     if ((n >>> 3) % 7 !== 0 && !(cluster % 5 === 0 && n % 3 === 0)) return 0;
     const x = tx * t + 6 + n % 20, y = ty * t + 12 + (n >>> 8) % 16;
     if (!layout.allowsSmall(x, y)) return 0;
-    const [kind, k] = pickGround(PICK[code].ground, n >>> 11), p = sprite5(code, kind, n >>> 17);
-    stamp5(c, p, x, y, k);
+    const [kind, k] = pickGround(PICK[code].ground, n >>> 11), p = sprite6(code, kind, n >>> 17);
+    stamp6(c, p, x, y, k);
     draws.ground++;
     return 1;
   }
   function drawGroundDetail(c, s, d) {
     if (owned2(s, d.x, d.y) !== "w") return Boolean(prior.drawGroundDetail?.(c, s, d));
-    const [kind, k] = WOODLAND_ROADSIDE[d.roadsideRole] ?? WOODLAND_DETAIL[d.kind] ?? WOODLAND_DETAIL[0], p = sprite5("w", kind, d.n >>> 17);
-    stamp5(c, p, d.x, d.y, k * (0.9 + (d.n >>> 7) % 3 * 0.05));
+    const [kind, k] = WOODLAND_ROADSIDE[d.roadsideRole] ?? WOODLAND_DETAIL[d.kind] ?? WOODLAND_DETAIL[0], p = sprite6("w", kind, d.n >>> 17);
+    stamp6(c, p, d.x, d.y, k * (0.9 + (d.n >>> 7) % 3 * 0.05));
     draws.ground++;
     return true;
   }
@@ -14904,7 +14911,7 @@ async function createBiomeNatureArtV1(env, review, prior) {
   function drawNatureProp(c, biome, kind, x, y, scale = 1, n = 0) {
     const list = kits[codeOf[biome]]?.[kind];
     if (!list?.length) return false;
-    stamp5(c, list[(n >>> 0) % list.length], x, y, scale);
+    stamp6(c, list[(n >>> 0) % list.length], x, y, scale);
     draws.ground++;
     return true;
   }
@@ -15066,10 +15073,10 @@ function drawStyledRoutes(c, space, bounds2, at4, material = null) {
     let biomeKey = "";
     for (let y = Math.floor((py - 96) / 32); y <= Math.ceil((py + PAGE + 96) / 32); y++) for (let x = Math.floor((px3 - 96) / 32); x <= Math.ceil((px3 + PAGE + 96) / 32); x++) biomeKey += v.biomes?.[y - oy]?.[x - ox] ?? "?";
     const cache4 = stampCache(material), key2 = contours.cacheKey + "/" + biomeKey;
-    let stamp5 = cache4.get(key2);
-    if (stamp5) {
+    let stamp6 = cache4.get(key2);
+    if (stamp6) {
       cache4.delete(key2);
-      cache4.set(key2, stamp5);
+      cache4.set(key2, stamp6);
     } else {
       const surface3 = typeof OffscreenCanvas === "function" ? new OffscreenCanvas(PAGE, PAGE) : c.canvas?.ownerDocument?.createElement?.("canvas");
       const g = surface3 ? surface3.getContext("2d") : c;
@@ -15105,8 +15112,8 @@ function drawStyledRoutes(c, space, bounds2, at4, material = null) {
       }
       g.restore();
       if (surface3) {
-        stamp5 = surface3;
-        cache4.set(key2, stamp5);
+        stamp6 = surface3;
+        cache4.set(key2, stamp6);
         while (cache4.size > 32) {
           const first = cache4.keys().next().value, old2 = cache4.get(first);
           cache4.delete(first);
@@ -15114,7 +15121,7 @@ function drawStyledRoutes(c, space, bounds2, at4, material = null) {
         }
       }
     }
-    if (stamp5) c.drawImage(stamp5, px3, py, PAGE, PAGE);
+    if (stamp6) c.drawImage(stamp6, px3, py, PAGE, PAGE);
   }
   c.restore();
   return segments;
@@ -15292,14 +15299,14 @@ function cropMaterial(p, w, s) {
   return { width: s.width, height: s.height, data: out };
 }
 async function createPaintedRoutesV1(env, review, prior, { worldCoverage = false } = {}) {
-  const root = new URL("../../assets/painted-paths-v1/", import.meta.url), r = await env.fetch(new URL("kit-manifest.json", root));
+  const root2 = new URL("../../assets/painted-paths-v1/", import.meta.url), r = await env.fetch(new URL("kit-manifest.json", root2));
   if (!r.ok) throw Error("Missing painted path kit");
   const kit2 = await r.json();
   if (JSON.stringify(kit2.targets) !== JSON.stringify(PAINTED_REVIEW_TARGETS) || kit2.version !== PAINTED_ROUTE_VERSION || !isSeededBindingV1(review.binding) && (review.asset.assetId !== kit2.assetId || review.binding.assetHash !== kit2.assetHash)) throw Error("Painted path pilot input commitment mismatch");
   const begin = env.performance.now(), profiles2 = [], downloads = kit2.files.reduce((n, f) => n + f.bytes, 0);
   let material;
   for (const [file, f] of kit2.files.entries()) {
-    const response = await env.fetch(new URL(f.path, root));
+    const response = await env.fetch(new URL(f.path, root2));
     if (!response.ok) throw Error("Missing painted path source");
     const bytes = await response.arrayBuffer(), hash26 = Array.from(new Uint8Array(await env.crypto.subtle.digest("SHA-256", bytes)), (v) => v.toString(16).padStart(2, "0")).join("");
     if (hash26 !== f.sha256 || bytes.byteLength !== f.bytes) throw Error("Painted path source commitment mismatch");
@@ -15919,7 +15926,7 @@ var STAND_PIECE_VARIANTS = 8;
 function createStandPieces(doc) {
   const cache4 = /* @__PURE__ */ new Map(), RES3 = 2;
   let bytes = 0;
-  function sprite5(name, variant, args = []) {
+  function sprite6(name, variant, args = []) {
     const key2 = name + "/" + variant + "/" + JSON.stringify(args);
     let s = cache4.get(key2);
     if (s) return s;
@@ -15938,7 +15945,7 @@ function createStandPieces(doc) {
     cache4.set(key2, s);
     return s;
   }
-  return Object.freeze({ sprite: sprite5, resources: () => ({ sprites: cache4.size, bytes }) });
+  return Object.freeze({ sprite: sprite6, resources: () => ({ sprites: cache4.size, bytes }) });
 }
 
 // src/client/forest_stands_lanes_v2.js
@@ -15984,8 +15991,8 @@ function createStandLanes(doc) {
     g.clearRect(0, 0, cw, ch);
     return [s, g];
   };
-  function* draw(c, bounds2, { lane: lane2, terrain, code, seed: seed2, world, sprite: sprite5, earth: earth2 = null }) {
-    const X0 = bounds2.x - PAD, Y0 = bounds2.y - PAD, W3 = bounds2.width + PAD * 2, Hh = bounds2.height + PAD * 2, tx0 = Math.floor(X0 / T) - 1, ty0 = Math.floor(Y0 / T) - 1, tx1 = Math.floor((X0 + W3) / T) + 1, ty1 = Math.floor((Y0 + Hh) / T) + 1;
+  function* draw(c, bounds2, { lane: lane2, terrain, code, seed: seed2, world, sprite: sprite6, earth: earth2 = null }) {
+    const X0 = bounds2.x - PAD, Y0 = bounds2.y - PAD, W4 = bounds2.width + PAD * 2, Hh = bounds2.height + PAD * 2, tx0 = Math.floor(X0 / T) - 1, ty0 = Math.floor(Y0 / T) - 1, tx1 = Math.floor((X0 + W4) / T) + 1, ty1 = Math.floor((Y0 + Hh) / T) + 1;
     const tiles = /* @__PURE__ */ new Map(), key2 = (x, y) => x + "," + y;
     for (let ty = ty0 - 1; ty <= ty1 + 1; ty++) for (let tx = tx0 - 1; tx <= tx1 + 1; tx++) {
       const k = lane2(tx, ty);
@@ -16007,7 +16014,7 @@ function createStandLanes(doc) {
       const [along2] = run(t, dx, dy), [across, i] = run(t, -dy, dx);
       return along2 >= across && i === Math.floor((across - 1) / 2) ? { shift: (across - 1) / 2 - i, across } : null;
     };
-    cw = Math.ceil(W3 * LS);
+    cw = Math.ceil(W4 * LS);
     ch = Math.ceil(Hh * LS);
     const out = doc.createElement("canvas");
     out.width = cw;
@@ -16104,7 +16111,7 @@ function createStandLanes(doc) {
         bg.save();
         bg.globalAlpha = 0.8;
         try {
-          earth2(bg, X0, Y0, W3, Hh);
+          earth2(bg, X0, Y0, W4, Hh);
         } catch {
         }
         bg.restore();
@@ -16132,7 +16139,7 @@ function createStandLanes(doc) {
     c.save();
     c.globalAlpha = 1;
     c.globalCompositeOperation = "source-over";
-    c.drawImage(out, X0, Y0, W3, Hh);
+    c.drawImage(out, X0, Y0, W4, Hh);
     c.lineCap = "round";
     c.lineJoin = "round";
     for (const { st, pts, lines, dress } of late) {
@@ -16145,7 +16152,7 @@ function createStandLanes(doc) {
           const n = H(q.n, k);
           if (n % (dress === "posts" ? 2 : 3)) continue;
           const along2 = (n >>> 4) % 13 - 6, x = q.x + dx * st.w * 0.5 + (dy ? along2 : 0), y = q.y + dy * st.w * 0.5 + (dx ? along2 : 0);
-          DRESS[dress]?.(c, x, y, n, sprite5, q.t.code);
+          DRESS[dress]?.(c, x, y, n, sprite6, q.t.code);
         }
       }
     }
@@ -16384,8 +16391,8 @@ var FX = {
   }
 };
 var DRESS = {
-  tuft(c, x, y, n, sprite5, code) {
-    const p = sprite5(code, "tuft", n >>> 7);
+  tuft(c, x, y, n, sprite6, code) {
+    const p = sprite6(code, "tuft", n >>> 7);
     if (p) {
       const k = Math.min(0.55, 18 / p.w);
       c.drawImage(p.image, x - p.ax * k, y + 3 - p.ay * k, p.w * k, p.h * k);
@@ -16529,7 +16536,7 @@ function createForestStandsArtV2(env, prior) {
     return { s, k: o.k ?? fit(s, 46, seed2) };
   }
   const item = (id, s, gx, gy, k, extra = null) => s ? { id, s, gx, gy, k, x0: gx - s.ax * k, y0: gy - s.ay * k, x1: gx + (s.w - s.ax) * k, y1: gy + (s.h - s.ay) * k, ...extra } : null;
-  function stamp5(c, it, alpha2 = 1) {
+  function stamp6(c, it, alpha2 = 1) {
     c.save();
     smoothSpriteContext(c);
     if (alpha2 !== 1) c.globalAlpha = alpha2;
@@ -16689,7 +16696,7 @@ function createForestStandsArtV2(env, prior) {
       minY = Math.min(minY, t.y);
       maxY = Math.max(maxY, t.y);
     }
-    const X0 = minX * T2 - 28, Y0 = minY * T2 - h - 20, W3 = (maxX - minX + 1) * T2 + 56, Hh = (maxY - minY + 1) * T2 + h + 40, cw = Math.ceil(W3 * PS), ch = Math.ceil(Hh * PS);
+    const X0 = minX * T2 - 28, Y0 = minY * T2 - h - 20, W4 = (maxX - minX + 1) * T2 + 56, Hh = (maxY - minY + 1) * T2 + h + 40, cw = Math.ceil(W4 * PS), ch = Math.ceil(Hh * PS);
     const mk = () => {
       const c = doc.createElement("canvas");
       c.width = cw;
@@ -16847,7 +16854,7 @@ function createForestStandsArtV2(env, prior) {
         raw(cg, () => cg.drawImage(e, 0, 0));
         e.width = 1;
       }
-      const xs = row2.map((t) => t.x), x0 = Math.max(X0, Math.min(...xs) * T2 - 26), x1 = Math.min(X0 + W3, (Math.max(...xs) + 1) * T2 + 26), y0 = Math.max(Y0, r * T2 - h - 14), y1 = Math.min(Y0 + Hh, (r + 1) * T2 + 16);
+      const xs = row2.map((t) => t.x), x0 = Math.max(X0, Math.min(...xs) * T2 - 26), x1 = Math.min(X0 + W4, (Math.max(...xs) + 1) * T2 + 26), y0 = Math.max(Y0, r * T2 - h - 14), y1 = Math.min(Y0 + Hh, (r + 1) * T2 + 16);
       const cr = doc.createElement("canvas");
       cr.width = Math.max(1, Math.round((x1 - x0) * PS));
       cr.height = Math.max(1, Math.round((y1 - y0) * PS));
@@ -17051,7 +17058,7 @@ function createForestStandsArtV2(env, prior) {
       }
       if (done.has(it.id)) return;
       done.add(it.id);
-      items.push(depthItem({ id: it.id + "#over", anchorX: it.gx, anchorY: it.gy, draw: (c) => stamp5(c, it) }));
+      items.push(depthItem({ id: it.id + "#over", anchorX: it.gx, anchorY: it.gy, draw: (c) => stamp6(c, it) }));
       stats.replays++;
     };
     for (const B3 of blocks2) for (const tr of B3.trees) {
@@ -17059,7 +17066,7 @@ function createForestStandsArtV2(env, prior) {
       const fade = actors2.some((a) => bubble(tr, a));
       if (fade) stats.faded++;
       stats.trees++;
-      items.push(depthItem({ id: tr.id, anchorX: tr.gx, anchorY: tr.gy, draw: (c) => stamp5(c, tr, fade ? FADE : 1) }));
+      items.push(depthItem({ id: tr.id, anchorX: tr.gx, anchorY: tr.gy, draw: (c) => stamp6(c, tr, fade ? FADE : 1) }));
       for (const f of frontOf(m, tr)) replay(f, tr, tr.id);
     }
     for (const a of actors2) {
@@ -17081,7 +17088,7 @@ function createForestStandsArtV2(env, prior) {
       let c = casters.get(tr);
       if (!c) {
         c = { key: tr.id, x: tr.gx, y: tr.gy, paint: (g) => {
-          stamp5(g, tr);
+          stamp6(g, tr);
           return true;
         } };
         casters.set(tr, c);
@@ -17391,30 +17398,30 @@ var FRONT6 = {
   dreads: [[8.4, -11.4, 8.6, -13.8, 6.8, -15.6, 4.6, -16.4, 2.2, -15.4, -0.4, -16.6, -3, -15.4, -5.6, -16.4, -8.2, -15.2, -11, -12.8, -11, -5, -8.8, -3.6, -7.4, -5.4, -6.8, -9.8, -2.2, -11, 3.6, -10.8, 6.4, -11.8], [-8.6, -9.4, -6.4, -9.4, -6, 2.2, -7.2, 3.6, -8.6, 2.4]]
 };
 var NO_EAR = /* @__PURE__ */ new Set(["long", "bob", "shaggy", "pigtails"]);
-function hairBack(c, st, H5, hat) {
+function hairBack(c, st, H6, hat) {
   const o = { bottom: true, split: 0.66, lw: 1.3 };
-  if (st === "mullet") G(c, [-6.6, -11.6, -11.4, -12.6, -12.6, -7, -12.2, -1.6, -13.8, 1.8, -13.2, 4.8, -11.6, 3.2, -11, 5.8, -9.4, 3, -8, 4.6, -7.4, 1, -6.6, -2.6], H5, o);
-  if (st === "long") G(c, [-6.4, -12, -11.8, -13, -12.8, -4, -12.6, 6.6, -10.2, 8.2, -7.8, 6.6, -6.4, 2], H5, o);
-  if (st === "mane") G(c, [-6.4, -12.4, -11.6, -15.6, -13.6, -11.6, -15.8, -9.2, -14, -6.4, -15.8, -2.6, -13.6, 0.2, -14.6, 4.6, -11.6, 3.4, -11, 8.4, -8.8, 4.6, -7, 7, -6.2, 1.6], H5, o);
+  if (st === "mullet") G(c, [-6.6, -11.6, -11.4, -12.6, -12.6, -7, -12.2, -1.6, -13.8, 1.8, -13.2, 4.8, -11.6, 3.2, -11, 5.8, -9.4, 3, -8, 4.6, -7.4, 1, -6.6, -2.6], H6, o);
+  if (st === "long") G(c, [-6.4, -12, -11.8, -13, -12.8, -4, -12.6, 6.6, -10.2, 8.2, -7.8, 6.6, -6.4, 2], H6, o);
+  if (st === "mane") G(c, [-6.4, -12.4, -11.6, -15.6, -13.6, -11.6, -15.8, -9.2, -14, -6.4, -15.8, -2.6, -13.6, 0.2, -14.6, 4.6, -11.6, 3.4, -11, 8.4, -8.8, 4.6, -7, 7, -6.2, 1.6], H6, o);
   if (st === "ponytail") {
-    G(c, [-10.2, -10.8, -13.8, -9.6, -15.4, -5, -14.8, 2.2, -12.8, 5.8, -11.6, 1.6, -12.2, -4.4, -10.6, -7.8], H5, o);
+    G(c, [-10.2, -10.8, -13.8, -9.6, -15.4, -5, -14.8, 2.2, -12.8, 5.8, -11.6, 1.6, -12.2, -4.4, -10.6, -7.8], H6, o);
     R(c, -12.2, -11.4, 2.6, 2.6, P2.tie, { flat: true, lw: 1 });
   }
   if (st === "pigtails") {
-    G(c, [-10.4, -9.4, -13.4, -8, -14.6, -3.6, -14.2, 2.6, -12.4, 5.8, -11.4, 2.4, -11.8, -3.4, -10.6, -6.6], H5, o);
+    G(c, [-10.4, -9.4, -13.4, -8, -14.6, -3.6, -14.2, 2.6, -12.4, 5.8, -11.4, 2.4, -11.8, -3.4, -10.6, -6.6], H6, o);
     R(c, -12.4, -10.2, 2.6, 2.4, P2.tie, { flat: true, lw: 1 });
   }
   if (st === "braid") {
-    for (let i = 0; i < 5; i++) G(c, oct(-12.6 - i % 2 * 0.6, -10 + i * 3, 3.4, 3.2), H5, { bottom: true, split: 0.6, lw: 1.1 });
+    for (let i = 0; i < 5; i++) G(c, oct(-12.6 - i % 2 * 0.6, -10 + i * 3, 3.4, 3.2), H6, { bottom: true, split: 0.6, lw: 1.1 });
     R(c, -13.4, 5.2, 2.6, 1.4, P2.tie, { flat: true, lw: 1 });
   }
   if (st === "dreads") for (let i = 0; i < 4; i++) {
     const x = -14 + i * 2.2, len = 13 + i % 2 * 2.8;
-    G(c, oct(x, -11.4, 2.3, len, 0.9), H5, { bottom: true, split: 0.7, lw: 1.1 });
+    G(c, oct(x, -11.4, 2.3, len, 0.9), H6, { bottom: true, split: 0.7, lw: 1.1 });
     R(c, x + 0.3, -11.4 + len - 1, 1.7, 1.4, P2.bead, { flat: true, lw: 0.8 });
   }
   if (st === "bun" && !hat) {
-    G(c, oct(-9.8, -21, 7, 6.2, 1.6), H5, { bottom: true, split: 0.6, lw: 1.3 });
+    G(c, oct(-9.8, -21, 7, 6.2, 1.6), H6, { bottom: true, split: 0.6, lw: 1.3 });
     R(c, -9, -15.6, 5.6, 1.6, P2.tie, { flat: true, lw: 1 });
   }
 }
@@ -17427,12 +17434,12 @@ function eyes(c, blink, y = -7.2) {
     px(c, 4.8, y, 1.6, 2.4, "#1b2631");
   }
 }
-function bareHead(c, st, S2, H5, blink, hat) {
+function bareHead(c, st, S2, H6, blink, hat) {
   G(c, HEAD2, S2, { bottom: true, split: 0.86, lw: 1.4 });
   if (st === "mohawk" || st === "undercut" || st === "mullet") {
     c.save();
     c.clip(poly3(HEAD2));
-    alpha(c, H5.b, 0.22, () => c.fillRect(-10, -14, 11, 9));
+    alpha(c, H6.b, 0.22, () => c.fillRect(-10, -14, 11, 9));
     c.restore();
   }
   if (st === "buzz") {
@@ -17442,13 +17449,13 @@ function bareHead(c, st, S2, H5, blink, hat) {
       c.rect(-30, -13.6, 60, 40);
       c.clip();
     }
-    G(c, [8.2, -11.6, 8.2, -13.4, 6.6, -14.8, -8.4, -14.8, -10.6, -12.8, -10.6, -5.2, -9.2, -4, -7.6, -5.6, -7, -10.4, -2.2, -11.2, 3.6, -11.2, 6.4, -11.8], { b: mix16(H5.b, S2.b, 0.35), d: mix16(H5.d, S2.d, 0.35) }, { bottom: true, split: 0.7, lw: 1.1 });
+    G(c, [8.2, -11.6, 8.2, -13.4, 6.6, -14.8, -8.4, -14.8, -10.6, -12.8, -10.6, -5.2, -9.2, -4, -7.6, -5.6, -7, -10.4, -2.2, -11.2, 3.6, -11.2, 6.4, -11.8], { b: mix16(H6.b, S2.b, 0.35), d: mix16(H6.d, S2.d, 0.35) }, { bottom: true, split: 0.7, lw: 1.1 });
     c.restore();
   }
   if (!NO_EAR.has(st)) R(c, -5.8, -7.8, 2.6, 3.6, S2, { lw: 1.1, nohi: true });
   if (st === "bald") px(c, -7.8, -12.6, 5.4, 1.1, "#ffffff59");
-  px(c, 0.8, -9.4, 2.6, 1, H5.d);
-  px(c, 4.4, -9.4, 2.4, 1, H5.d);
+  px(c, 0.8, -9.4, 2.6, 1, H6.d);
+  px(c, 4.4, -9.4, 2.4, 1, H6.d);
   eyes(c, blink);
   c.save();
   if (hat) {
@@ -17456,37 +17463,37 @@ function bareHead(c, st, S2, H5, blink, hat) {
     c.rect(-30, -13.6, 60, 40);
     c.clip();
   }
-  for (const shape3 of FRONT6[st] ?? FRONT6.short) G(c, shape3, H5, { bottom: true, split: 0.64, lw: 1.3 });
+  for (const shape3 of FRONT6[st] ?? FRONT6.short) G(c, shape3, H6, { bottom: true, split: 0.64, lw: 1.3 });
   if (st === "pigtails") R(c, -7.8, -9.8, 3.6, 2.2, P2.tie, { flat: true, lw: 1 });
-  if (!["bald", "mohawk", "buzz", "curly", "undercut"].includes(st)) px(c, -6.4, -14.4, 7, 0.9, H5.l);
+  if (!["bald", "mohawk", "buzz", "curly", "undercut"].includes(st)) px(c, -6.4, -14.4, 7, 0.9, H6.l);
   c.restore();
 }
-function facialHair(c, b, H5) {
+function facialHair(c, b, H6) {
   const MOUTH = "#3b2418", o = { bottom: true, split: 0.64, lw: 1.2 }, BEARD = [-3.6, -7.4, -2.2, -7.4, -1.4, -4.2, 1.2, -3.6, 8.2, -3.6, 8.4, 0.2, 6.8, 2.2, -0.8, 2.2, -3.4, 0.2];
   if (b === "stubble") {
-    alpha(c, H5.b, 0.32, () => {
+    alpha(c, H6.b, 0.32, () => {
       c.fillRect(-1.4, -3.8, 9.4, 4.4);
       c.fillRect(-3, -7, 1.8, 3.6);
     });
   }
-  if (b === "mustache") G(c, [1.4, -3.2, 2.4, -4.2, 7.4, -4.2, 8.4, -3.2, 7.2, -2.4, 4.8, -3.4, 2.4, -2.4], H5, { flat: true, lw: 1 });
-  if (b === "handlebar") G(c, [1, -3, 2.4, -4.2, 7.4, -4.2, 9.2, -3.6, 10, -5.6, 11, -4.4, 9.8, -2.2, 7.2, -2.6, 4.8, -3.4, 2.4, -2.6], H5, { flat: true, lw: 1 });
+  if (b === "mustache") G(c, [1.4, -3.2, 2.4, -4.2, 7.4, -4.2, 8.4, -3.2, 7.2, -2.4, 4.8, -3.4, 2.4, -2.4], H6, { flat: true, lw: 1 });
+  if (b === "handlebar") G(c, [1, -3, 2.4, -4.2, 7.4, -4.2, 9.2, -3.6, 10, -5.6, 11, -4.4, 9.8, -2.2, 7.2, -2.6, 4.8, -3.4, 2.4, -2.6], H6, { flat: true, lw: 1 });
   if (b === "goatee") {
-    G(c, [1.8, -4, 7.2, -4, 7.8, -3, 6.8, -2.2, 6.8, 0.4, 6, 2.4, 3.2, 2.4, 2.2, 0.4, 2.2, -2.2, 1.2, -3], H5, { bottom: true, split: 0.6, lw: 1.1 });
+    G(c, [1.8, -4, 7.2, -4, 7.8, -3, 6.8, -2.2, 6.8, 0.4, 6, 2.4, 3.2, 2.4, 2.2, 0.4, 2.2, -2.2, 1.2, -3], H6, { bottom: true, split: 0.6, lw: 1.1 });
     px(c, 2.8, -1.8, 3.6, 0.8, MOUTH);
   }
-  if (b === "chinstrap") G(c, [-3.4, -7.4, -2.2, -7.4, -1.4, -1.8, 1, -0.6, 7.6, -0.6, 8.2, 0.6, 7.2, 1.8, -0.6, 1.8, -3.2, 0.2], H5, { flat: true, lw: 1.1 });
-  if (b === "chops") G(c, [-3.6, -7.6, -1.8, -7.6, -0.4, -4.6, 2, -4.2, 7.6, -4.2, 8.4, -3.2, 6.8, -2.4, 2.4, -2.6, 1.2, -1.4, 0.2, 1, -2.2, 1.2, -3.4, -0.4], H5, o);
+  if (b === "chinstrap") G(c, [-3.4, -7.4, -2.2, -7.4, -1.4, -1.8, 1, -0.6, 7.6, -0.6, 8.2, 0.6, 7.2, 1.8, -0.6, 1.8, -3.2, 0.2], H6, { flat: true, lw: 1.1 });
+  if (b === "chops") G(c, [-3.6, -7.6, -1.8, -7.6, -0.4, -4.6, 2, -4.2, 7.6, -4.2, 8.4, -3.2, 6.8, -2.4, 2.4, -2.6, 1.2, -1.4, 0.2, 1, -2.2, 1.2, -3.4, -0.4], H6, o);
   if (b === "bushy") {
-    G(c, [-4, -7.8, -2.2, -7.8, -1.4, -4.4, 1.2, -3.8, 8.4, -3.8, 9.6, -1.2, 9.2, 3.2, 7.6, 6.4, 4.2, 7.8, 0.8, 6.8, -1.6, 4.6, -3.8, 1.4], H5, o);
+    G(c, [-4, -7.8, -2.2, -7.8, -1.4, -4.4, 1.2, -3.8, 8.4, -3.8, 9.6, -1.2, 9.2, 3.2, 7.6, 6.4, 4.2, 7.8, 0.8, 6.8, -1.6, 4.6, -3.8, 1.4], H6, o);
     px(c, 2.4, -2.6, 3.8, 0.9, MOUTH);
   }
   if (b === "short" || b === "long" || b === "braided") {
-    if (b === "long") G(c, [-1.4, 1.4, 7.8, 1.4, 6.6, 6.8, 3.6, 8.8, 0.6, 6.8], H5, { bottom: true, split: 0.6, lw: 1.2 });
-    G(c, BEARD, H5, o);
+    if (b === "long") G(c, [-1.4, 1.4, 7.8, 1.4, 6.6, 6.8, 3.6, 8.8, 0.6, 6.8], H6, { bottom: true, split: 0.6, lw: 1.2 });
+    G(c, BEARD, H6, o);
     px(c, 2.4, -2.6, 3.8, 0.9, MOUTH);
     if (b === "braided") {
-      for (let i = 0; i < 3; i++) G(c, oct(2.8 - i % 2 * 0.4, 1.6 + i * 2.3, 2.8, 2.4, 0.8), H5, { bottom: true, split: 0.6, lw: 1 });
+      for (let i = 0; i < 3; i++) G(c, oct(2.8 - i % 2 * 0.4, 1.6 + i * 2.3, 2.8, 2.4, 0.8), H6, { bottom: true, split: 0.6, lw: 1 });
       R(c, 3, 8.4, 2.4, 1.6, P2.bead, { flat: true, lw: 0.9 });
     }
   }
@@ -18515,7 +18522,7 @@ var OFFHAND_LOOKS = Object.freeze([
 var STAFF_REST = -0.6;
 var STAFF_TIP = -28;
 function staff(c, A, t) {
-  const pulse = 0.5 + 0.5 * Math.sin(t * 2.6), crystal3 = A.gem ? { b: A.c, d: A.d } : { b: "#b8c4cc", d: "#8d999b" };
+  const pulse = 0.5 + 0.5 * Math.sin(t * 2.6), crystal4 = A.gem ? { b: A.c, d: A.d } : { b: "#b8c4cc", d: "#8d999b" };
   R(c, -1.1, -24, 2.2, 32.8, P2.wood, { flat: true, lw: 1.2 });
   px(c, -1.1, -20.4, 2.2, 1.2, A.c);
   if (A.gem) {
@@ -18524,7 +18531,7 @@ function staff(c, A, t) {
   }
   R(c, -3.6, -27.6, 1.6, 4.6, accPal(A), { flat: true, lw: 1 });
   R(c, 2, -27.6, 1.6, 4.6, accPal(A), { flat: true, lw: 1 });
-  G(c, [0, -32.8, 2.8, -28, 0, -23.4, -2.8, -28], crystal3, { split: 0.5, lw: 1.3 });
+  G(c, [0, -32.8, 2.8, -28, 0, -23.4, -2.8, -28], crystal4, { split: 0.5, lw: 1.3 });
   px(c, -1, -30.4, 0.9, 1.6, "#ffffffb3");
 }
 function arcBand(cx, cy, r0, r1, a0, a1, n = 12) {
@@ -18813,10 +18820,10 @@ var TOMES = {
     lining: "#4a1a12",
     strap: IRON,
     front(c, { w, h, d }) {
-      const H5 = h + d;
+      const H6 = h + d;
       for (const [u, L] of [[2.8, 2.2], [5.6, 3.4], [8.6, 1.8]]) {
-        piece(c, [u - 1, H5 - 0.3, u + 1, H5 - 0.3, u + 0.9, H5 + 0.8, u + 0.55, H5 + L - 0.7, u, H5 + L, u - 0.55, H5 + L - 0.7, u - 0.9, H5 + 0.8], "#ff8a3d", 0.8, [u + 0.2, H5 - 0.3, u + 1, H5 - 0.3, u + 0.9, H5 + 0.8, u + 0.55, H5 + L - 0.7, u, H5 + L, u + 0.2, H5 + L - 0.4], "#e8631c");
-        px(c, u - 0.5, H5 + 0.3, 0.4, L * 0.45, "#ffe08a");
+        piece(c, [u - 1, H6 - 0.3, u + 1, H6 - 0.3, u + 0.9, H6 + 0.8, u + 0.55, H6 + L - 0.7, u, H6 + L, u - 0.55, H6 + L - 0.7, u - 0.9, H6 + 0.8], "#ff8a3d", 0.8, [u + 0.2, H6 - 0.3, u + 1, H6 - 0.3, u + 0.9, H6 + 0.8, u + 0.55, H6 + L - 0.7, u, H6 + L, u + 0.2, H6 + L - 0.4], "#e8631c");
+        px(c, u - 0.5, H6 + 0.3, 0.4, L * 0.45, "#ffe08a");
       }
     },
     face(c, { w, h, t, fx }) {
@@ -18918,18 +18925,18 @@ var TOMES = {
       piece(c, [0, h, 0, h - 2.6, 1.2, h - 1.6, 2.6, h - 0.4, 3.4, h], "#dff4ff", 0.7);
     },
     front(c, { w, h, d, open: open2, t, fx }) {
-      const W3 = w + d, H5 = h + d;
+      const W4 = w + d, H6 = h + d;
       c.save();
       c.globalAlpha *= 1 - open2;
-      piece(c, [-0.4, -0.5, W3 + 0.3, -0.5, W3 + 0.3, 1, W3 - 0.8, 1.7, W3 - 1.9, 1.1, W3 - 3.2, 2, W3 - 4.6, 1.2, W3 - 6, 2.1, W3 - 7.4, 1.1, 0.8, 1.9, -0.4, 1.2], "#eef8ff");
+      piece(c, [-0.4, -0.5, W4 + 0.3, -0.5, W4 + 0.3, 1, W4 - 0.8, 1.7, W4 - 1.9, 1.1, W4 - 3.2, 2, W4 - 4.6, 1.2, W4 - 6, 2.1, W4 - 7.4, 1.1, 0.8, 1.9, -0.4, 1.2], "#eef8ff");
       c.restore();
-      for (const [u, L] of [[1.4, 2.4], [3.3, 3.6], [5.2, 2], [7.3, 3]]) piece(c, [u - 0.8, H5 - 0.3, u + 0.8, H5 - 0.3, u, H5 + L], "#dff4ff", 0.75, [u, H5 - 0.3, u + 0.8, H5 - 0.3, u, H5 + L], "#a9dcf5");
+      for (const [u, L] of [[1.4, 2.4], [3.3, 3.6], [5.2, 2], [7.3, 3]]) piece(c, [u - 0.8, H6 - 0.3, u + 0.8, H6 - 0.3, u, H6 + L], "#dff4ff", 0.75, [u, H6 - 0.3, u + 0.8, H6 - 0.3, u, H6 + L], "#a9dcf5");
       if (fx) {
         const g = Math.max(0, Math.sin(t * 2.6));
         c.save();
         c.globalCompositeOperation = "lighter";
         c.fillStyle = `rgba(255,255,255,${g})`;
-        c.fillRect(3.2, H5 + 2.4, 0.3, 0.9);
+        c.fillRect(3.2, H6 + 2.4, 0.3, 0.9);
         c.restore();
       }
     }
@@ -18959,33 +18966,33 @@ var TOMES = {
       c.restore();
     },
     front(c, { w, h, d, open: open2, t, fx }) {
-      const W3 = w + d, H5 = h + d, ice = [-2, -0.6, 2.2, -2.4, W3 + 1.4, -1.6, W3 + 2.4, 3, W3 + 1.8, H5 + 1.2, 3.2, H5 + 2.4, -1.6, H5 + 0.8, -2.6, 4.2];
+      const W4 = w + d, H6 = h + d, ice = [-2, -0.6, 2.2, -2.4, W4 + 1.4, -1.6, W4 + 2.4, 3, W4 + 1.8, H6 + 1.2, 3.2, H6 + 2.4, -1.6, H6 + 0.8, -2.6, 4.2];
       c.save();
       c.globalAlpha *= Math.max(0, 1 - open2 * 1.4);
-      piece(c, [W3 - 0.6, -1.4, W3 + 2.6, -5.2, W3 + 2.4, -0.6], "#bfeaff", 0.9, [W3 + 1, -3.3, W3 + 2.6, -5.2, W3 + 2.4, -0.6], "#86cdee");
-      piece(c, [-1.6, H5 - 0.4, -4, H5 + 3.2, 0.4, H5 + 1.8], "#bfeaff", 0.9, [-1.6, H5 - 0.4, -4, H5 + 3.2, -1.2, H5 + 0.9], "#86cdee");
+      piece(c, [W4 - 0.6, -1.4, W4 + 2.6, -5.2, W4 + 2.4, -0.6], "#bfeaff", 0.9, [W4 + 1, -3.3, W4 + 2.6, -5.2, W4 + 2.4, -0.6], "#86cdee");
+      piece(c, [-1.6, H6 - 0.4, -4, H6 + 3.2, 0.4, H6 + 1.8], "#bfeaff", 0.9, [-1.6, H6 - 0.4, -4, H6 + 3.2, -1.2, H6 + 0.9], "#86cdee");
       trace(c, ice);
       c.fillStyle = "rgba(185,232,255,.32)";
       c.fill();
       c.save();
       trace(c, ice);
       c.clip();
-      trace(c, [2.2, -2.4, W3 + 1.4, -1.6, W3 + 2.4, 3, 3.6, 2]);
+      trace(c, [2.2, -2.4, W4 + 1.4, -1.6, W4 + 2.4, 3, 3.6, 2]);
       c.fillStyle = "rgba(255,255,255,.24)";
       c.fill();
-      trace(c, [-2.6, 4.2, 3.6, 2, 3.2, H5 + 2.4, -1.6, H5 + 0.8]);
+      trace(c, [-2.6, 4.2, 3.6, 2, 3.2, H6 + 2.4, -1.6, H6 + 0.8]);
       c.fillStyle = "rgba(110,180,230,.28)";
       c.fill();
       if (fx) {
-        const p = t * 0.35 % 1, x = -6 + p * (W3 + 16);
+        const p = t * 0.35 % 1, x = -6 + p * (W4 + 16);
         c.globalCompositeOperation = "lighter";
-        trace(c, [x, -3, x + 1.4, -3, x - 4.6, H5 + 3, x - 6, H5 + 3]);
+        trace(c, [x, -3, x + 1.4, -3, x - 4.6, H6 + 3, x - 6, H6 + 3]);
         c.fillStyle = "rgba(255,255,255,.35)";
         c.fill();
       }
       c.restore();
-      line(c, [2.2, -2.4, 3.6, 2, W3 + 2.4, 3], "rgba(255,255,255,.6)", 0.45);
-      line(c, [3.6, 2, 3.2, H5 + 2.4], "rgba(255,255,255,.45)", 0.45);
+      line(c, [2.2, -2.4, 3.6, 2, W4 + 2.4, 3], "rgba(255,255,255,.6)", 0.45);
+      line(c, [3.6, 2, 3.2, H6 + 2.4], "rgba(255,255,255,.45)", 0.45);
       line(c, [-2.6, 4.2, 3.6, 2], "rgba(255,255,255,.45)", 0.45);
       px(c, -0.9, 0.6, 0.6, 2.6, "#ffffffcc");
       px(c, 0.3, -0.6, 0.6, 1.4, "#ffffffcc");
@@ -19127,15 +19134,15 @@ var TOMES = {
       c.restore();
     },
     front(c, { w, h, d, open: open2 }) {
-      const W3 = w + d;
+      const W4 = w + d;
       c.save();
       c.globalAlpha *= 1 - open2;
       for (const v of [1.6, h - 3]) {
-        R(c, -0.8, v, W3 + 1.6, 1.6, COPPER, { split: 0.82, lw: 0.9 });
+        R(c, -0.8, v, W4 + 1.6, 1.6, COPPER, { split: 0.82, lw: 0.9 });
         c.strokeStyle = tint("#6f4220");
         c.lineWidth = 0.35;
         c.beginPath();
-        for (let x = -0.4; x < W3 + 0.6; x += 0.75) {
+        for (let x = -0.4; x < W4 + 0.6; x += 0.75) {
           c.moveTo(x, v + 0.15);
           c.lineTo(x + 0.45, v + 1.45);
         }
@@ -19145,7 +19152,7 @@ var TOMES = {
     },
     fx(c, { w, h, d, t }) {
       if (t * 1.4 % 1 > 0.5) return;
-      const W3 = w + d, seed2 = Math.floor(t * 16), x = W3 + 0.5, y0 = 3.3, y1 = h - 3.1;
+      const W4 = w + d, seed2 = Math.floor(t * 16), x = W4 + 0.5, y0 = 3.3, y1 = h - 3.1;
       c.save();
       c.globalCompositeOperation = "lighter";
       c.strokeStyle = "rgba(255,243,166,.95)";
@@ -19174,8 +19181,8 @@ var TOMES = {
     lining: "#3b4285",
     strap: { b: "#767fa3", d: "#5d6588" },
     back(c, { w, h, d, t, fx }) {
-      const W3 = w + d, H5 = h + d, dx = fx ? Math.sin(t * 0.9) * 0.4 : 0;
-      cloud(c, [[-1.4 + dx, H5 - 2.2, 2.3], [W3 + 1.2 - dx, H5 - 2.6, 2.5]], { b: "#4b5078", d: "#3a3e60" });
+      const W4 = w + d, H6 = h + d, dx = fx ? Math.sin(t * 0.9) * 0.4 : 0;
+      cloud(c, [[-1.4 + dx, H6 - 2.2, 2.3], [W4 + 1.2 - dx, H6 - 2.6, 2.5]], { b: "#4b5078", d: "#3a3e60" });
     },
     face(c, { w, h, t, fx }) {
       c.save();
@@ -19197,11 +19204,11 @@ var TOMES = {
       c.restore();
     },
     front(c, { w, h, d, t, fx }) {
-      const W3 = w + d, H5 = h + d, dx = fx ? Math.sin(t * 0.9 + 1) * 0.35 : 0;
-      cloud(c, [[-0.6 + dx, H5 - 0.6, 2], [2.2, H5 + 0.5, 2.4], [5.2 - dx, H5 + 0.8, 2.5], [8.2, H5 + 0.2, 2.2], [W3 + 1 - dx, H5 - 0.8, 1.8]], { b: "#8a90bd", d: "#686e9c" });
+      const W4 = w + d, H6 = h + d, dx = fx ? Math.sin(t * 0.9 + 1) * 0.35 : 0;
+      cloud(c, [[-0.6 + dx, H6 - 0.6, 2], [2.2, H6 + 0.5, 2.4], [5.2 - dx, H6 + 0.8, 2.5], [8.2, H6 + 0.2, 2.2], [W4 + 1 - dx, H6 - 0.8, 1.8]], { b: "#8a90bd", d: "#686e9c" });
     },
     fx(c, { w, h, d, t }) {
-      const H5 = h + d, ph = t * 0.8 % 1;
+      const H6 = h + d, ph = t * 0.8 % 1;
       if (ph > 0.18) return;
       const x = 2 + rand(Math.floor(t * 0.8)) * (w - 2), k = 1 - ph / 0.18;
       c.save();
@@ -19209,10 +19216,10 @@ var TOMES = {
       c.strokeStyle = `rgba(255,243,166,${k})`;
       c.lineWidth = 0.6;
       c.beginPath();
-      c.moveTo(x, H5 + 2.6);
-      c.lineTo(x - 0.8, H5 + 4);
-      c.lineTo(x + 0.4, H5 + 4.4);
-      c.lineTo(x - 0.4, H5 + 6.4);
+      c.moveTo(x, H6 + 2.6);
+      c.lineTo(x - 0.8, H6 + 4);
+      c.lineTo(x + 0.4, H6 + 4.4);
+      c.lineTo(x - 0.4, H6 + 6.4);
       c.stroke();
       c.restore();
     }
@@ -19595,8 +19602,8 @@ function tomeMotes(c, D2, t, element, tier2, y0) {
   c.restore();
 }
 function tomeFrame(kind) {
-  const D2 = TOMES[kind] ?? TOMES.tome, W3 = D2.w + D2.d, H5 = D2.h + D2.d, [x0, y0, x1, y1] = D2.box ?? [-0.8, -0.6, W3 + 0.8, H5 + 0.6];
-  return { x: (x0 + x1) / 2 - W3 / 2, y: (y0 + y1) / 2 - 3 - H5 / 2, span: Math.max(x1 - x0, y1 - y0) * 1.1 };
+  const D2 = TOMES[kind] ?? TOMES.tome, W4 = D2.w + D2.d, H6 = D2.h + D2.d, [x0, y0, x1, y1] = D2.box ?? [-0.8, -0.6, W4 + 0.8, H6 + 0.6];
+  return { x: (x0 + x1) / 2 - W4 / 2, y: (y0 + y1) / 2 - 3 - H6 / 2, span: Math.max(x1 - x0, y1 - y0) * 1.1 };
 }
 function sleeve3(c, w, S2) {
   if (w.body === "plate") R(c, 0, -2.4, 8.6, 4.8, P2.plate, { split: 0.7 });
@@ -19863,7 +19870,7 @@ function heroSpecForActor(actor) {
   return { cls: null, look: toLook(null), gear: { main: { tier: 0 }, off: actor?.subType ? { tier: 0 } : null }, offType: actor?.subType ?? null };
 }
 function drawBlockyHero(c, spec, pose = {}) {
-  const w = kit(spec), look = toLook(spec.look), S2 = skinPal(look.skin), H5 = hairPal(look.hairColor), st = look.hair, t = pose.t ?? 0;
+  const w = kit(spec), look = toLook(spec.look), S2 = skinPal(look.skin), H6 = hairPal(look.hairColor), st = look.hair, t = pose.t ?? 0;
   const covered = Boolean(w.helmet) && look.helmet, hatOn = covered && HATS.has(w.helmet), red = P2.red, bob = pose.bob ?? 0, sway = pose.sway ?? 0;
   const blink = pose.still ? false : pose.blink ?? (t + 1.9) % 3.9 < 0.12, front2 = w.main || pose.active ? pose.front ?? -0.6 : 1.25, guard = Boolean(pose.guard) && w.offFamily === "shield";
   FLASH = Boolean(pose.flash);
@@ -19880,7 +19887,7 @@ function drawBlockyHero(c, spec, pose = {}) {
   }
   if (w.body === "leather") G(c, [-7, -1, -16, 2.4, -15, 4.6, -7, 2.2], P2.teal, { lw: 1.3 });
   const hairHidden = hatOn && !HAIR_SHOWS.has(w.helmet);
-  if (!covered || hatOn) hairBack(c, st, H5, hairHidden);
+  if (!covered || hatOn) hairBack(c, st, H6, hairHidden);
   const offA = accOf(w.g.off);
   const farArm = () => {
     c.save();
@@ -19928,7 +19935,7 @@ function drawBlockyHero(c, spec, pose = {}) {
   c.translate(0, bob * 0.5);
   if (covered && !hatOn) {
     const A2 = accOf(w.g.helmet);
-    const fringe = () => G(c, [-1.2, -10.4, 7.4, -10.4, 7.4, -9.2, 5.6, -8.2, 3.8, -9.2, 1.8, -8.2, -1.2, -9.2], H5, { flat: true, lw: 1 });
+    const fringe = () => G(c, [-1.2, -10.4, 7.4, -10.4, 7.4, -9.2, 5.6, -8.2, 3.8, -9.2, 1.8, -8.2, -1.2, -9.2], H6, { flat: true, lw: 1 });
     const hoodFace = () => {
       R(c, -1.2, -10.4, 8.6, 9.6, S2, { lw: 1.2, flat: true });
       fringe();
@@ -19940,27 +19947,27 @@ function drawBlockyHero(c, spec, pose = {}) {
       c.beginPath();
       c.rect(-1.2, -10.4, 8.6, 9.6);
       c.clip();
-      facialHair(c, look.facialHair, H5);
+      facialHair(c, look.facialHair, H6);
       c.restore();
       fringe();
       eyes(c, blink, -7.4);
     };
     const coifFace = () => {
       R(c, -1.4, -10.6, 8.8, 10.2, S2, { lw: 1.2, flat: true });
-      px(c, 0.8, -9.4, 2.6, 1, H5.d);
-      px(c, 4.4, -9.4, 2.4, 1, H5.d);
+      px(c, 0.8, -9.4, 2.6, 1, H6.d);
+      px(c, 4.4, -9.4, 2.4, 1, H6.d);
       eyes(c, blink);
       c.save();
       c.beginPath();
       c.rect(-1.4, -10.6, 8.8, 10.2);
       c.clip();
-      facialHair(c, look.facialHair, H5);
+      facialHair(c, look.facialHair, H6);
       c.restore();
     };
     helmetPiece(c, w.helmet, A2, red, sway, HOOD_FACE.has(w.helmet) ? hoodFace : COIF_FACE.has(w.helmet) ? coifFace : OPEN_HOOD_FACE.has(w.helmet) ? openHoodFace : null);
   } else {
-    bareHead(c, st, S2, H5, blink, hairHidden);
-    facialHair(c, look.facialHair, H5);
+    bareHead(c, st, S2, H6, blink, hairHidden);
+    facialHair(c, look.facialHair, H6);
     if (hatOn) helmetPiece(c, w.helmet, accOf(w.g.helmet), red, sway, null);
   }
   c.restore();
@@ -20127,10 +20134,12 @@ function heroCard(spec) {
   }
   return { cls: spec.cls ?? null, look: { hair: l.hair, hairColor: l.hairColor, skin: l.skin, facialHair: l.facialHair, helmet: l.helmet, name: "" }, gear: gear2, offType: spec.offType ?? null };
 }
-var blank = (slot) => ({ slot, name: "", level: 1, hero: null });
+var blank = (slot) => ({ slot, name: "", level: 1, hero: null, world: null });
+var SEED = /^[A-Za-z0-9 .:#'-]{1,40}$/;
+var worldOf = (raw) => raw && typeof raw === "object" && typeof raw.seed === "string" && SEED.test(raw.seed) ? { seed: raw.seed } : null;
 function entry(raw) {
   if (!raw || typeof raw !== "object" || !Number.isInteger(raw.slot) || raw.slot < 1 || raw.slot > HERO_SLOT_LIMIT) return null;
-  return { slot: raw.slot, name: typeof raw.name === "string" && NAME.test(raw.name) ? raw.name : "", level: Number.isInteger(raw.level) && raw.level >= 1 && raw.level <= 999 ? raw.level : 1, hero: raw.hero == null ? null : heroCard(raw.hero) };
+  return { slot: raw.slot, name: typeof raw.name === "string" && NAME.test(raw.name) ? raw.name : "", level: Number.isInteger(raw.level) && raw.level >= 1 && raw.level <= 999 ? raw.level : 1, hero: raw.hero == null ? null : heroCard(raw.hero), world: worldOf(raw.world) };
 }
 function parse(storage, channel2) {
   let data = null;
@@ -20178,7 +20187,7 @@ function restoreHeroes(storage, channel2, slots) {
   return missing.length > 0 && write(storage, channel2, { ...r, heroes: [...r.heroes, ...missing.map(blank)].sort((a, b) => a.slot - b.slot) });
 }
 function createHeroRosterWriter({ storage, channel: channel2 = "", slot = 1 }) {
-  let last = null;
+  let last = null, world = null;
   const update = (next) => {
     const r = readHeroSlots(storage, channel2), heroes = r.heroes.some((h) => h.slot === slot) ? r.heroes : [...r.heroes, blank(slot)];
     write(storage, channel2, { ...r, heroes: heroes.map((h) => h.slot === slot ? { ...blank(slot), ...next } : h).sort((a, b) => a.slot - b.slot) });
@@ -20187,11 +20196,14 @@ function createHeroRosterWriter({ storage, channel: channel2 = "", slot = 1 }) {
     observe(model) {
       const player = model?.playersById?.[model.localPlayerId], actor = player && model.entitiesById?.[player.entityId];
       if (!actor?.heroLook || !storage) return;
-      const name = actor.heroLook.look?.name, next = { name: typeof name === "string" && NAME.test(name) ? name : "", level: player.progression?.level ?? 1, hero: heroCard(heroSpecForActor(actor)) };
+      const name = actor.heroLook.look?.name, next = { name: typeof name === "string" && NAME.test(name) ? name : "", level: player.progression?.level ?? 1, hero: heroCard(heroSpecForActor(actor)), world };
       const text2 = JSON.stringify(next);
       if (text2 === last) return;
       last = text2;
       update(next);
+    },
+    setWorld(next) {
+      world = worldOf(next);
     },
     // The open hero's save was reset: keep the seat, forget how they looked.
     clear() {
@@ -20485,7 +20497,7 @@ async function createWoodlandPilotEventAnchors({ asset, binding, cx, cy, seed: s
   if (!hasWorldCombat(binding) || !hasWilderness(binding) || isSeededBindingV1(binding) || !asset.wildernessExtension?.eventCapacities) return [];
   const candidates = asset.wildernessExtension.eventCapacities;
   const result = [];
-  for (const event of [...WOODLAND_EVENT_PILOT_V3_7, ...SPORE_EVENTS, HOLLOW_EVENT]) {
+  for (const event of [...WOODLAND_EVENT_PILOT_V3_7, ...hasWorldReshape(binding) ? [] : SPORE_EVENTS, HOLLOW_EVENT]) {
     if (Math.floor(event.x / 32) !== cx || Math.floor(event.y / 26) !== cy) continue;
     const slot = candidates.find((s) => s.eventSlotId === event.slotId);
     if (!slot || WOODLAND_EVENT_PILOT_V3_7.includes(event) && slot.biome !== "woodland" || slot.position.x !== event.x || slot.position.y !== event.y || !slot.cells?.length)
@@ -20529,6 +20541,7 @@ async function createWoodlandPilotEventAnchors({ asset, binding, cx, cy, seed: s
 
 // src/shared/generation/planned_event_anchors_v1.js
 var FIXED = new Set([...WOODLAND_EVENT_PILOT_V3_7, ...SPORE_EVENTS, HOLLOW_EVENT].map((e) => e.slotId));
+var FIXED_RESHAPED = new Set([...WOODLAND_EVENT_PILOT_V3_7, HOLLOW_EVENT].map((e) => e.slotId));
 var stable2 = (text2) => {
   let h = 2166136261;
   for (const c of text2) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0;
@@ -20541,14 +20554,18 @@ function open(tile, x, y, landmassId) {
   }
   return true;
 }
-async function createPlannedEventAnchorsV1({ asset, binding, cx, cy, seed: seed2, sha256, tile, regularAnchors = [], otherAnchors = [], built = BUILT_EVENT_KINDS }) {
+async function createPlannedEventAnchorsV1({ asset, binding, cx, cy, seed: seed2, sha256, tile, biome = "woodland", regularAnchors = [], otherAnchors = [], built = BUILT_EVENT_KINDS }) {
   if (!built.length || !hasWorldCombat(binding) || !hasWilderness(binding) || !asset.wildernessExtension?.eventCapacities) return [];
-  const result = [], fixed = isSeededBindingV1(binding) ? /* @__PURE__ */ new Set() : FIXED, safe = worldEventProtectionV1(asset), local6 = (x, y) => ({ x: (x - cx * 32 + 0.5) * 32, y: (y - cy * 26 + 0.5) * 32 });
+  const result = [], fixed = isSeededBindingV1(binding) ? /* @__PURE__ */ new Set() : hasWorldReshape(binding) ? FIXED_RESHAPED : FIXED, families3 = plannedEventFamiliesV1(biome), safe = worldEventProtectionV1(asset), local6 = (x, y) => ({ x: (x - cx * 32 + 0.5) * 32, y: (y - cy * 26 + 0.5) * 32 });
   for (const slot of asset.wildernessExtension.eventCapacities) {
     const { x, y } = slot.position;
     if (Math.floor(x / 32) !== cx || Math.floor(y / 26) !== cy || fixed.has(slot.eventSlotId)) continue;
     const kind = eventAtSlotV1(asset, slot.eventSlotId)?.event, ordinal = plannedEventOrdinalFor(slot.eventSlotId, slot.category, kind);
     if (!built.includes(kind) || ordinal === null || !safe(x, y) || !open(tile, x, y, slot.landmassId)) continue;
+    if (!NEST_POLICY.nests.every(([dx, dy]) => {
+      const t = tile(x + Math.round(dx / 32), y + Math.round(dy / 32));
+      return t.collision === "1" && t.landmassId === slot.landmassId;
+    })) continue;
     const center3 = local6(x, y), others = [...regularAnchors, ...otherAnchors, ...result].map((a) => a.position);
     const spots = [];
     for (let dy = -11; dy <= 11; dy++) for (let dx = -11; dx <= 11; dx++) {
@@ -20562,10 +20579,10 @@ async function createPlannedEventAnchorsV1({ asset, binding, cx, cy, seed: seed2
     const members = [];
     for (const s of spots) {
       if (members.some((m) => Math.hypot(m.position.x - s.position.x, m.position.y - s.position.y) < 40)) continue;
-      members.push({ family: SHRINE_POLICY.families[members.length], position: s.position });
-      if (members.length === SHRINE_POLICY.families.length) break;
+      members.push({ family: families3[members.length], position: s.position });
+      if (members.length === families3.length) break;
     }
-    if (members.length !== SHRINE_POLICY.families.length) continue;
+    if (members.length !== families3.length) continue;
     const identity2 = await worldIdentity(seed2, "anchor", ["planned-event-v1", slot.eventSlotId], sha256);
     result.push({ id: identity2.id, ordinal, position: center3, rank: SHRINE_POLICY.rank, combatVersion: WORLD_COMBAT_VERSION, members });
   }
@@ -21394,7 +21411,7 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     const edges = { north: { cells: collision[0], terrain: visual[0] }, south: { cells: collision[25], terrain: visual[25] }, west: { cells: collision.map((r) => r[0]).join(""), terrain: visual.map((r) => r[0]).join("") }, east: { cells: collision.map((r) => r[31]).join(""), terrain: visual.map((r) => r[31]).join("") } };
     const regularAnchors = packAnchors(cx, cy, identity2.digest);
     const eventAnchors = await createWoodlandPilotEventAnchors({ asset, binding, cx, cy, seed: seed2, sha256, tile, regularAnchors });
-    const plannedAnchors = await createPlannedEventAnchorsV1({ asset, binding, cx, cy, seed: seed2, sha256, tile, regularAnchors, otherAnchors: eventAnchors });
+    const plannedAnchors = await createPlannedEventAnchorsV1({ asset, binding, cx, cy, seed: seed2, sha256, tile, biome, regularAnchors, otherAnchors: eventAnchors });
     return freezeWire({ version: PLANNED_WORLD_VERSION, identity: identity2, chunkX, chunkY, region: { version: asset.version, regionX: String(Math.floor(cx / 2)), regionY: String(Math.floor(cy / 2)), biome, name: hasStarterVillage(binding) && cx >= sx && cx <= sx + 1 && cy >= sy && cy <= sy + 1 ? STARTER_VILLAGE_NAME + " \xB7 Woodland \xB7 Band 1" : biome === "ocean" ? "Open ocean" : biome[0].toUpperCase() + biome.slice(1) + " \xB7 Band " + c.band, minimumLevel: [1, 1, 6, 11, 21, 41][c.band] ?? 1, originWidthChunks: 0, originHeightChunks: 0 }, collision: { tileSize: 32, width: 32, height: 26, tiles: collision }, visual: { terrain: visual, biomes, blockers, ...caveArt.decorations.length ? { decorations: caveArt.decorations } : {}, ...stands ? { stands: standRows } : {}, route: { centerline, clearance, ...["planned-world-shoreline-v2", "planned-world-water-v3"].includes(asset.version) ? { mapFeatures: mapRows } : {} } }, edges, anchors: [...regularAnchors, ...eventAnchors, ...plannedAnchors], sites: reserved?.socket.entrance.chunkX === chunkX && reserved?.socket.entrance.chunkY === chunkY ? [reserved.socket] : [] });
   }
   let hollowHome = null;
@@ -21826,6 +21843,1031 @@ function createBuiltWorldStoreV1({ indexedDB, sha256 }) {
   });
 }
 
+// src/shared/generation/world_maker_v1/core.js
+var W = 150;
+var H3 = 160;
+var N = W * H3;
+function hash32(text2) {
+  let n = 2166136261;
+  for (let i = 0; i < text2.length; i++) {
+    n ^= text2.charCodeAt(i);
+    n = Math.imul(n, 16777619);
+  }
+  n = Math.imul(n ^ n >>> 16, 2246822507);
+  n = Math.imul(n ^ n >>> 13, 3266489909);
+  return (n ^ n >>> 16) >>> 0;
+}
+
+// src/shared/content/world_seed_v1.js
+var WORLD_SEED_MAX_LENGTH = 32;
+var NUMBER = /^-?\d{1,16}$/;
+function worldSeedV1(input) {
+  const text2 = String(input ?? "").trim().replace(/\s+/g, " ").toLowerCase().slice(0, WORLD_SEED_MAX_LENGTH).trim();
+  if (!text2) return null;
+  if (NUMBER.test(text2) && Number.isSafeInteger(Number(text2))) return { seed: String(Number(text2)), word: null };
+  return { seed: String(hash32(text2)), word: text2 };
+}
+var rollWorldSeedV1 = (randomUint32) => String(randomUint32() >>> 0);
+
+// src/client/world_build_v1.js
+var WORLD_BUILD_STAGES = Object.freeze([
+  { label: "Land, biomes and places", ends: "plan", share: 0.11 },
+  { label: "Coasts and harbors", ends: "ferry", share: 0.06 },
+  { label: "Rivers, roads and bridges", ends: "geography", share: 0.62 },
+  { label: "Wilds and events", ends: "events", share: 0.16 },
+  { label: "Saving your world", ends: "saved", share: 0.05 }
+]);
+var GUESS_MS = 4e4;
+var worldMakerWorkerUrlV1 = (environment) => {
+  const url = new URL("./world-maker-worker.js", environment.location.href), release = environment.document.documentElement.dataset.worldRelease;
+  if (release) url.searchParams.set("v", release);
+  return url;
+};
+function startWorldBuildV1({ environment, seed: seed2, save, workerUrl = worldMakerWorkerUrlV1(environment), now: now2 = () => environment.performance.now() }) {
+  const started = now2();
+  let stage2 = 0, stageStarted = started, total = GUESS_MS, failed = null, stored = null, worker = null;
+  const listeners = /* @__PURE__ */ new Set(), changed = () => {
+    for (const f of listeners) f();
+  };
+  const finish2 = (index) => {
+    while (stage2 <= index && stage2 < WORLD_BUILD_STAGES.length) {
+      if (stage2 === 0) total = Math.max(4e3, (now2() - started) / WORLD_BUILD_STAGES[0].share);
+      stage2++;
+    }
+    stageStarted = now2();
+    changed();
+  };
+  const result = new Promise((resolve, reject) => {
+    const fail = (message) => {
+      if (failed || stored) return;
+      failed = message || "The world maker stopped.";
+      worker?.terminate();
+      changed();
+      reject(Error(failed));
+    };
+    try {
+      worker = new environment.Worker(workerUrl, { type: "module" });
+    } catch (e) {
+      fail(e?.message);
+      return;
+    }
+    worker.addEventListener("error", (e) => {
+      e.preventDefault?.();
+      fail(e.message);
+    });
+    worker.addEventListener("message", async ({ data }) => {
+      if (data?.seed !== seed2 || failed) return;
+      if (data.type === "step") {
+        const index = WORLD_BUILD_STAGES.findIndex((s) => s.ends === data.step);
+        if (index >= 0) finish2(index);
+        return;
+      }
+      if (data.type === "error") {
+        fail(data.message);
+        return;
+      }
+      if (data.type !== "world") return;
+      worker.terminate();
+      finish2(WORLD_BUILD_STAGES.length - 2);
+      try {
+        const record2 = await save(data.text);
+        if (record2.hash !== data.hash) throw Error("The built world changed on its way to storage.");
+        stored = record2;
+        finish2(WORLD_BUILD_STAGES.length - 1);
+        resolve(record2);
+      } catch (e) {
+        fail(e?.message);
+      }
+    });
+    worker.postMessage({ type: "make", seed: seed2 });
+  });
+  result.catch(() => {
+  });
+  function read() {
+    if (stored) return { fraction: 1, stage: WORLD_BUILD_STAGES.length, failed: null };
+    let done = 0;
+    for (let i = 0; i < stage2; i++) done += WORLD_BUILD_STAGES[i].share;
+    const current = WORLD_BUILD_STAGES[stage2], part3 = current ? Math.min(0.9, (now2() - stageStarted) / (current.share * total)) : 0;
+    return { fraction: Math.min(0.99, done + (current?.share ?? 0) * part3), stage: stage2, failed };
+  }
+  return Object.freeze({ seed: seed2, result, read, onChange(f) {
+    listeners.add(f);
+    return () => listeners.delete(f);
+  }, cancel() {
+    if (!stored && !failed) {
+      failed = "Cancelled";
+      worker?.terminate();
+      changed();
+    }
+  } });
+}
+
+// src/client/class_kit_v1.js
+var local4 = (m) => m?.playersById?.[m.localPlayerId];
+function classKitDue(m) {
+  const p = local4(m), inv = m?.inventory;
+  return Boolean(p && inv && heroClassOf(p.d8) && inv.subweapons && !inv.classKit && m.entitiesById?.[p.entityId]?.alive && m.persistence?.phase === "encounter");
+}
+var classKitRoom = (m) => Object.keys(m.inventory.itemsById).length + CLASS_KIT_PIECES.length <= inventoryIntakeCapacity(local4(m).d8);
+var kitPieceFits = (inv, piece2) => piece2 === "weapon" ? inv.itemsById[inv.equipped.weapon]?.definitionId === "worn-sword" : piece2 === "overall" ? !inv.equipped.overall && !inv.equipped.chest && !inv.equipped.leggings : !inv.equipped[piece2];
+async function claimClassKit2({ readModel, adapter, wait, say = () => {
+} }) {
+  let m = readModel();
+  if (!classKitDue(m) || !classKitRoom(m)) return null;
+  const cls = heroClassOf(local4(m).d8).id;
+  say("Unpacking your starting gear\u2026");
+  const rev = m.inventory.revision;
+  await adapter.issue("classkit.claim", { inventoryRevision: rev });
+  if (!await wait((x) => Boolean(x.inventory?.classKit))) throw Error("Your starting gear didn\u2019t arrive. Try again.");
+  let worn = 0;
+  const ids4 = readModel().inventory.classKit.sourceEntityIds;
+  for (const [n, piece2] of CLASS_KIT_PIECES.entries()) {
+    m = readModel();
+    const inv = m.inventory, itemId = `item:${m.localPlayerId}:${ids4[n]}`, item = inv.itemsById[itemId];
+    if (!item || !kitPieceFits(inv, piece2)) continue;
+    say(`Putting on your ${itemDefinition(item).name}\u2026`);
+    const before = inv.revision;
+    await adapter.issue("equipment.equip", { itemId, slot: piece2, inventoryRevision: before });
+    if (await wait((x) => x.inventory.revision > before) && readModel().inventory.equipped[piece2] === itemId) worn++;
+  }
+  return { name: HERO_CLASSES[cls].name, worn };
+}
+
+// src/client/toast_v1.js
+var MAX_VISIBLE = 3;
+var DEFAULT_MS = 2600;
+var SVG = "http://www.w3.org/2000/svg";
+var ICONS = {
+  level: '<path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17l-6.1 3.4 1.5-6.8L2.2 9l6.9-.7z"/>',
+  mastery: '<path d="M12 2l2 6h6l-5 4 2 7-5-4-5 4 2-7-5-4h6z" opacity=".35"/><circle cx="12" cy="12" r="4"/>',
+  potion: '<path d="M9 2h6v2h-1v4.2a7 7 0 1 1-4 0V4H9z"/>',
+  loot: '<path d="M4 8h16l-1 12H5zM8 8V6a4 4 0 0 1 8 0v2"/>',
+  soul: '<path d="M12 2c3 4 6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 3-7 6-11z"/>',
+  event: '<path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm-1 5h2v6h-2zm0 8h2v2h-2z"/>'
+};
+var ACCENTS = { level: "#f5c451", mastery: "#e2b65c", potion: "#ff6a5c", loot: "#cfd8e3", soul: "#9fd6ff", event: "#c59cf0" };
+var lanes = /* @__PURE__ */ new WeakMap();
+function laneFor(doc) {
+  let lane2 = lanes.get(doc);
+  if (lane2) return lane2;
+  const root2 = doc.createElement("div");
+  root2.className = "toast-lane-v1";
+  root2.setAttribute("role", "status");
+  root2.setAttribute("aria-live", "polite");
+  root2.dataset.gameplayHud = "";
+  doc.body.append(root2);
+  const cards = /* @__PURE__ */ new Map();
+  function remove(card, how = "fade") {
+    if (!card.isConnected) return;
+    clearTimeout(card.timer);
+    cards.delete(card.dataset.key);
+    card.dataset.leaving = how;
+    setTimeout(() => card.remove(), 240);
+  }
+  function arm5(card, ms) {
+    clearTimeout(card.timer);
+    card.style.setProperty("--toast-ms", ms + "ms");
+    card.classList.remove("timing");
+    void card.offsetWidth;
+    card.classList.add("timing");
+    card.timer = setTimeout(() => remove(card), ms);
+  }
+  function swipe(card) {
+    let start = null, dx = 0, dy = 0;
+    card.addEventListener("pointerdown", (e) => {
+      start = { x: e.clientX, y: e.clientY };
+      dx = dy = 0;
+      card.style.transition = "none";
+      try {
+        card.setPointerCapture(e.pointerId);
+      } catch {
+      }
+    });
+    card.addEventListener("pointermove", (e) => {
+      if (!start) return;
+      dx = e.clientX - start.x;
+      dy = Math.min(0, e.clientY - start.y);
+      const sideways = Math.abs(dx) > Math.abs(dy);
+      card.style.transform = sideways ? `translateX(${dx}px)` : `translateY(${dy}px)`;
+      card.style.opacity = String(Math.max(0, 1 - (sideways ? Math.abs(dx) / 160 : -dy / 80)));
+    });
+    const end = () => {
+      if (!start) return;
+      start = null;
+      card.style.transition = "";
+      if (Math.abs(dx) > 48 || dy < -28) remove(card, Math.abs(dx) > Math.abs(dy) ? "side" : "up");
+      else {
+        card.style.transform = "";
+        card.style.opacity = "";
+      }
+    };
+    card.addEventListener("pointerup", end);
+    card.addEventListener("pointercancel", end);
+  }
+  function show({ kind = "loot", title, sub = "", accent = null, image = null, key: key2 = null, ms = DEFAULT_MS }) {
+    const id = key2 ?? kind + "/" + title, prior = cards.get(id);
+    if (prior) {
+      const n = Number(prior.dataset.count || 1) + 1;
+      prior.dataset.count = String(n);
+      prior.querySelector(".toast-count").textContent = "\xD7" + n;
+      if (sub) prior.querySelector(".toast-sub").textContent = sub;
+      prior.classList.remove("bump");
+      void prior.offsetWidth;
+      prior.classList.add("bump");
+      arm5(prior, ms);
+      return prior;
+    }
+    const card = doc.createElement("div");
+    card.className = "toast-v1";
+    card.dataset.kind = kind;
+    card.dataset.key = id;
+    card.style.setProperty("--toast-accent", accent ?? ACCENTS[kind] ?? ACCENTS.loot);
+    const badge = doc.createElement("div");
+    badge.className = "toast-badge";
+    if (image) {
+      const img = doc.createElement("img");
+      img.src = image;
+      img.alt = "";
+      badge.append(img);
+    } else {
+      const svg2 = doc.createElementNS(SVG, "svg");
+      svg2.setAttribute("viewBox", "0 0 24 24");
+      svg2.setAttribute("aria-hidden", "true");
+      svg2.innerHTML = ICONS[kind] ?? ICONS.loot;
+      badge.append(svg2);
+    }
+    const text2 = doc.createElement("div");
+    text2.className = "toast-text";
+    const t = doc.createElement("strong");
+    t.textContent = title;
+    const s = doc.createElement("small");
+    s.className = "toast-sub";
+    s.textContent = sub;
+    text2.append(t, s);
+    const count = doc.createElement("span");
+    count.className = "toast-count";
+    card.append(badge, text2, count);
+    root2.prepend(card);
+    cards.set(id, card);
+    swipe(card);
+    arm5(card, ms);
+    const visible3 = [...root2.querySelectorAll(".toast-v1:not([data-leaving])")];
+    for (const old2 of visible3.slice(MAX_VISIBLE)) remove(old2);
+    return card;
+  }
+  lane2 = { show, destroy() {
+    for (const c of cards.values()) clearTimeout(c.timer);
+    root2.remove();
+    lanes.delete(doc);
+  } };
+  lanes.set(doc, lane2);
+  return lane2;
+}
+function toastV1(doc, options) {
+  return laneFor(doc).show(options);
+}
+
+// src/client/hero_creator_v1.js
+var HERO_CREATOR_OPEN_EVENT = "hero-creator:open";
+var OFFHAND_NAMES = { shield: "Shield", dagger: "Dagger", tome: "Tome" };
+var CLASS_ICONS = {
+  knight: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5l15 6v11c0 10-6 17-15 21C15 39 9 32 9 22V11z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M24 14v20M16 22h16" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
+  rogue: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M33 6l5 5-17 17-5-5z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M15 24l9 9M12 36l6-6M9 39l3-3" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
+  mage: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 9h22a6 6 0 0 1 6 6v24H16a6 6 0 0 1-6-6z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M24 15l2.5 6 6 2.5-6 2.5-2.5 6-2.5-6-6-2.5 6-2.5z" fill="currentColor"/></svg>'
+};
+var classIconSvg = (id) => CLASS_ICONS[id] ?? "";
+var KIT_GEAR_SLOT = { weapon: "main", helmet: "helmet", overall: "body", gloves: "gloves", boots: "boots" };
+function kitGear(id) {
+  const k = CLASS_KITS[id], piece2 = (definitionId) => ({ tier: 0, kind: itemLook({ definitionId }) }), gear2 = { off: piece2("starter-" + HERO_CLASSES[id].offhand) };
+  for (const p of CLASS_KIT_PIECES) gear2[KIT_GEAR_SLOT[p]] = piece2(k[p]);
+  const legs3 = OVERALL_LEGS[gear2.body.kind];
+  gear2.legs = legs3 ? { tier: 0, kind: legs3 } : null;
+  return gear2;
+}
+var startingHeroSpecV1 = (hero) => ({ cls: hero.cls ?? null, look: hero.look, gear: hero.cls ? kitGear(hero.cls) : {}, offType: hero.cls ? HERO_CLASSES[hero.cls].offhand : null });
+var sameLook = (a, b) => Boolean(a && b) && Object.keys(DEFAULT_LOOK).every((k) => a[k] === b[k]);
+var cleanName = (text2) => [...String(text2).replace(/[^\p{L}\p{M}\p{N} '’.-]/gu, "").replace(/\s+/g, " ").trimStart()].slice(0, HERO_NAME_MAX).join("");
+var namedOk = (name) => name.length > 0 && validHeroName(name);
+function createHeroCreatorV1({ document: document2, environment, readModel, adapter, reportError = () => {
+}, onClose = () => {
+}, openHeroes = null, otherHeroes = () => false, beforeGame = null, startingHero = null }) {
+  const el = (tag, cls2 = "", text2 = "") => {
+    const e = document2.createElement(tag);
+    if (cls2) e.className = cls2;
+    if (text2) e.textContent = text2;
+    return e;
+  };
+  const button = (cls2, text2, onClick) => {
+    const b = el("button", cls2, text2);
+    b.type = "button";
+    b.addEventListener("click", onClick);
+    return b;
+  };
+  const root2 = el("section", "hero-creator-v1" + (beforeGame ? " is-before-game" : ""));
+  root2.hidden = true;
+  root2.setAttribute("role", "dialog");
+  root2.setAttribute("aria-modal", "true");
+  root2.setAttribute("aria-labelledby", "hero-creator-title");
+  const panel = el("div", "hc-panel"), head12 = el("header", "hc-head"), title = el("h2", "", "Create your hero"), intro = el("p", "hc-intro");
+  title.id = "hero-creator-title";
+  head12.append(title, intro);
+  if (beforeGame?.strip) head12.append(beforeGame.strip);
+  const body5 = el("div", "hc-body"), preview = el("div", "hc-preview"), stage2 = el("canvas", "hc-stage"), bar = el("div", "hc-bar");
+  stage2.setAttribute("role", "img");
+  stage2.setAttribute("aria-label", "Preview of your hero");
+  const options = el("div", "hc-options"), foot = el("footer", "hc-foot"), status2 = el("p", "hc-status"), cancel = button("hc-later", "Cancel", () => {
+    if (!busy) close();
+  }), confirm = button("hc-confirm", "", () => save());
+  const switchHero = button("hc-later", "Switch hero", () => {
+    if (!busy && openHeroes) {
+      root2.hidden = true;
+      opener = null;
+      openHeroes();
+    }
+  });
+  status2.setAttribute("role", "status");
+  foot.append(status2, switchHero, cancel, confirm);
+  let mode = "create", cls = null, deferClass = false, look = { ...DEFAULT_LOOK }, facing2 = 1, showGear = true, busy = false, thumbsKey = "", opener = null, kitBusy = false, kitRetryAt = 0, roomNoticed = false;
+  const toggle = (text2, get, set) => {
+    const b = button("hc-toggle", text2, () => {
+      set(!get());
+      paint();
+    });
+    return { b, sync() {
+      b.setAttribute("aria-pressed", String(get()));
+    } };
+  };
+  const gearToggle = toggle("Gear", () => showGear, (v) => {
+    showGear = v;
+  }), helmToggle = toggle("Helmet", () => look.helmet, (v) => {
+    look.helmet = v;
+  });
+  const randomButton = button("hc-toggle", "Random look", randomLook);
+  bar.append(button("hc-toggle", "Turn", () => {
+    facing2 = -facing2;
+  }), gearToggle.b, helmToggle.b, randomButton);
+  preview.append(stage2, bar);
+  const field2 = (label4, content, id) => {
+    const f = el("fieldset", "hc-field"), l = el("legend", "", label4), pick3 = el("span", "hc-pick");
+    if (id) pick3.id = id;
+    l.append(" ", pick3);
+    f.append(l, ...content);
+    options.append(f);
+    return { f, pick: pick3 };
+  };
+  const classCards = el("div", "hc-classes"), cardButtons = {};
+  for (const c of ["knight", "rogue", "mage"].map((id) => HERO_CLASSES[id])) {
+    const b = el("button", "hc-class"), canvas = el("canvas"), skill = CLASS_SKILLS[c.signature];
+    b.type = "button";
+    b.style.setProperty("--class", c.color);
+    b.append(canvas, el("strong", "", c.name), el("span", "", `${OFFHAND_NAMES[c.offhand]} \xB7 ${c.move.name} on Shift`), el("small", "", `Free skill: ${skill.name}`));
+    b.addEventListener("click", () => {
+      if (!busy) {
+        cls = c.id;
+        deferClass = false;
+        paint();
+      }
+    });
+    cardButtons[c.id] = { b, canvas };
+    classCards.append(b);
+  }
+  const laterClass = button("hc-toggle hc-class-later", "Decide later", () => {
+    if (!busy) {
+      cls = null;
+      deferClass = true;
+      paint();
+    }
+  }), laterRow = el("div", "hc-class-later-row");
+  laterRow.append(laterClass, el("p", "hc-sub", "Pick a class any time from the skill wheel or Stats."));
+  const classField = field2("Class", [classCards, laterRow]);
+  const nameInput = el("input", "hc-name");
+  nameInput.type = "text";
+  nameInput.maxLength = HERO_NAME_MAX * 2;
+  nameInput.placeholder = "Name your hero";
+  nameInput.autocomplete = "off";
+  nameInput.spellcheck = false;
+  nameInput.setAttribute("aria-label", "Hero name");
+  nameInput.addEventListener("input", () => {
+    const clean = cleanName(nameInput.value);
+    if (clean !== nameInput.value) nameInput.value = clean;
+    look.name = clean;
+    paint();
+  });
+  const nameField = field2("Name", [nameInput]);
+  const tiles = (list, key2, id) => {
+    const box2 = el("div", "hc-tiles"), map = {};
+    for (const [value2, name] of list) {
+      const b = el("button", "hc-tile"), canvas = el("canvas");
+      b.type = "button";
+      b.append(canvas, el("span", "", name));
+      b.addEventListener("click", () => {
+        look[key2] = value2;
+        paint();
+      });
+      map[value2] = { b, canvas };
+      box2.append(b);
+    }
+    return { box: box2, map };
+  };
+  const swatches = (list, key2) => {
+    const box2 = el("div", "hc-swatches"), map = {};
+    for (const [value2, name, hex3] of list) {
+      const b = el("button", "hc-swatch");
+      b.type = "button";
+      b.style.background = hex3;
+      b.title = name;
+      b.setAttribute("aria-label", name);
+      b.addEventListener("click", () => {
+        look[key2] = value2;
+        paint();
+      });
+      map[value2] = b;
+      box2.append(b);
+    }
+    return { box: box2, map };
+  };
+  const hairTiles = tiles(LOOK_OPTIONS.hairStyles, "hair"), natural = swatches(LOOK_OPTIONS.hairColors.filter((x) => !x[3]), "hairColor"), bold = swatches(LOOK_OPTIONS.hairColors.filter((x) => x[3]), "hairColor"), skins = swatches(LOOK_OPTIONS.skins, "skin"), beardTiles = tiles(LOOK_OPTIONS.facialHair, "facialHair");
+  const hairField = field2("Hair", [hairTiles.box]), hairColorField = field2("Hair color", [natural.box, el("p", "hc-sub", "Bold"), bold.box]), skinField = field2("Skin", [skins.box]), beardField = field2("Facial hair", [beardTiles.box]);
+  const lookFields = [nameField, hairField, hairColorField, skinField, beardField];
+  body5.append(preview, options);
+  panel.append(head12, body5, foot);
+  root2.append(panel);
+  document2.body.append(root2);
+  root2.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !busy && mode !== "create") {
+      e.preventDefault();
+      close();
+    }
+  });
+  const onRequest = (e) => open2(e?.detail?.mode ?? null);
+  document2.addEventListener(HERO_CREATOR_OPEN_EVENT, onRequest);
+  const local6 = (m) => m?.playersById?.[m.localPlayerId];
+  const heroClass = () => heroClassOf(local6(readModel())?.d8);
+  const wait = async (test, ms = 4e3) => {
+    const until = Date.now() + ms;
+    while (Date.now() < until) {
+      if (test(readModel())) return true;
+      await new Promise((r) => environment.setTimeout(r, 60));
+    }
+    return false;
+  };
+  const offhandOf = (item) => {
+    const d = itemDefinition(item);
+    return d?.slot === "subweapon" ? d.subType : null;
+  };
+  const currentGear = () => {
+    const m = readModel(), p = local6(m);
+    return m?.entitiesById?.[p?.entityId]?.heroLook?.gear ?? {};
+  };
+  const specFor = (id, gear2) => ({ cls: id, look, gear: gear2, offType: id ? HERO_CLASSES[id].offhand : null });
+  function previewGear() {
+    if (!showGear) return {};
+    const gear2 = currentGear();
+    if (mode === "look" || heroClass() || !cls) return gear2;
+    const inv = readModel()?.inventory, held = offhandOf(inv?.itemsById[inv?.equipped.subweapon]), kit2 = kitGear(cls), next = { ...gear2, off: held === HERO_CLASSES[cls].offhand && gear2.off ? gear2.off : kit2.off };
+    if (!inv?.classKit) {
+      for (const p of CLASS_KIT_PIECES) if (!inv || kitPieceFits(inv, p)) {
+        next[KIT_GEAR_SLOT[p]] = kit2[KIT_GEAR_SLOT[p]];
+        if (p === "overall") next.legs = kit2.legs;
+      }
+    }
+    return next;
+  }
+  function randomLook() {
+    const pick3 = (list) => list[Math.floor(Math.random() * list.length)][0];
+    look = { ...look, hair: pick3(LOOK_OPTIONS.hairStyles), hairColor: pick3(LOOK_OPTIONS.hairColors), skin: pick3(LOOK_OPTIONS.skins), facialHair: Math.random() < 0.55 ? "none" : pick3(LOOK_OPTIONS.facialHair) };
+    paint();
+  }
+  function draw(canvas, spec, frame, t) {
+    const r = canvas.getBoundingClientRect();
+    if (!r.width) return;
+    const dpr = Math.min(3, environment.devicePixelRatio || 1), W4 = Math.round(r.width * dpr), H6 = Math.round(r.height * dpr);
+    if (canvas.width !== W4 || canvas.height !== H6) {
+      canvas.width = W4;
+      canvas.height = H6;
+    }
+    const c = canvas.getContext("2d");
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    c.clearRect(0, 0, r.width, r.height);
+    c.save();
+    frame(c, r.width, r.height);
+    drawBlockyHero(c, spec, { t, still: t === null });
+    c.restore();
+  }
+  const headFrame = (x, y, s) => (c, w, h) => {
+    c.translate(w / 2 + x, h * y);
+    c.scale(w / s, w / s);
+  };
+  function paintThumbs() {
+    const key2 = JSON.stringify([{ ...look, name: "" }, cls, mode]);
+    if (key2 === thumbsKey) return;
+    thumbsKey = key2;
+    for (const [value2, { canvas }] of Object.entries(hairTiles.map)) draw(canvas, { cls: null, look: { ...look, hair: value2, helmet: false }, gear: {} }, headFrame(8, 0.9, 25.5), null);
+    for (const [value2, { canvas }] of Object.entries(beardTiles.map)) draw(canvas, { cls: null, look: { ...look, facialHair: value2, helmet: false }, gear: {} }, headFrame(2, 0.6, 22), null);
+    for (const [id, { canvas }] of Object.entries(cardButtons)) draw(canvas, specFor(id, kitGear(id)), (c, w, h) => {
+      const s = Math.min(w / 46, h / 58);
+      c.translate(w * 0.46, h - 6 - 20 * 0.8 * s);
+      c.scale(0.8 * s, 0.8 * s);
+    }, null);
+  }
+  function paintStage(t) {
+    draw(stage2, specFor(heroClass() ?? (mode === "look" ? null : cls), previewGear()), (c, w, h) => {
+      const s = Math.min(h / 56, w / 58);
+      c.translate(w * 0.5 - (facing2 > 0 ? 3 : -3) * s, h - 22 - 20 * 0.8 * s);
+      c.scale(0.8 * s * facing2, 0.8 * s);
+    }, t);
+  }
+  function confirmState() {
+    const named = namedOk(look.name.trim()), hasClass = Boolean(heroClass());
+    if (busy) return ["Working\u2026", false];
+    if (mode === "class") return cls ? [`Become a ${HERO_CLASSES[cls].name}`, true] : ["Pick a class", false];
+    if (!named) return ["Name your hero", false];
+    if (mode === "look") return ["Save look", true];
+    if (hasClass) return ["Begin", true];
+    if (cls) return [`Begin as a ${HERO_CLASSES[cls].name}`, true];
+    return deferClass ? ["Begin without a class", true] : ["Pick a class or decide later", false];
+  }
+  function paint() {
+    const hasClass = Boolean(heroClass());
+    classField.f.hidden = !(mode === "class" || mode === "create" && !hasClass);
+    laterRow.hidden = mode !== "create";
+    for (const f of lookFields) f.f.hidden = mode === "class";
+    helmToggle.b.hidden = randomButton.hidden = mode === "class";
+    title.textContent = mode === "create" ? "Create your hero" : mode === "class" ? "Choose your class" : "Your hero\u2019s look";
+    intro.textContent = mode === "create" ? "Name your hero and choose how they look. Pick a class now or later; once picked, it\u2019s permanent." : mode === "class" ? "Your class is permanent for this hero. Your name and look stay as they are." : "Change how your hero looks. Your gear still goes on top.";
+    for (const [id, { b }] of Object.entries(cardButtons)) {
+      b.setAttribute("aria-pressed", String(id === cls));
+      b.disabled = busy;
+    }
+    laterClass.setAttribute("aria-pressed", String(deferClass));
+    laterClass.disabled = busy;
+    for (const [v, { b }] of Object.entries(hairTiles.map)) b.setAttribute("aria-pressed", String(v === look.hair));
+    for (const [v, { b }] of Object.entries(beardTiles.map)) b.setAttribute("aria-pressed", String(v === look.facialHair));
+    for (const map of [natural.map, bold.map]) for (const [v, b] of Object.entries(map)) b.setAttribute("aria-pressed", String(v === look.hairColor));
+    for (const [v, b] of Object.entries(skins.map)) b.setAttribute("aria-pressed", String(v === look.skin));
+    hairColorField.pick.textContent = "\xB7 " + (LOOK_OPTIONS.hairColors.find((x) => x[0] === look.hairColor)?.[1] ?? "");
+    skinField.pick.textContent = "\xB7 " + (LOOK_OPTIONS.skins.find((x) => x[0] === look.skin)?.[1] ?? "");
+    gearToggle.sync();
+    helmToggle.sync();
+    cancel.hidden = mode === "create";
+    cancel.disabled = busy;
+    switchHero.hidden = !(mode === "create" && openHeroes && otherHeroes());
+    switchHero.disabled = busy;
+    const [label4, ready] = confirmState();
+    confirm.textContent = label4;
+    confirm.disabled = !ready;
+    if (!root2.hidden) paintThumbs();
+  }
+  async function chooseClass(classId) {
+    const c = HERO_CLASSES[classId];
+    let m = readModel(), inv = m.inventory, equipped = inv.itemsById[inv.equipped.subweapon];
+    if (equipped && offhandOf(equipped) !== c.offhand) {
+      status2.textContent = "Stowing your old offhand\u2026";
+      const rev = inv.revision;
+      await adapter.issue("equipment.unequip", { slot: "subweapon", inventoryRevision: rev });
+      await wait((x) => x.inventory.revision > rev);
+    }
+    m = readModel();
+    status2.textContent = `Becoming a ${c.name}\u2026`;
+    await adapter.issue("progression.change", { progressionRevision: local6(m).d8.revision, action: { kind: "class.choose", heroClass: classId } });
+    if (!await wait((x) => local6(x).d8?.heroClass === classId)) throw Error("The class choice didn\u2019t save. Try again.");
+    const owned2 = () => Object.values(readModel().inventory.itemsById).find((i) => offhandOf(i) === c.offhand);
+    m = readModel();
+    inv = m.inventory;
+    if (!owned2() && inv.subweapons && !inv.subweapons.claims[c.offhand]) {
+      status2.textContent = `Claiming your ${SUBWEAPONS[c.offhand].name}\u2026`;
+      const rev = inv.revision;
+      await adapter.issue("subweapon.claim", { subType: c.offhand, inventoryRevision: rev });
+      await wait((x) => x.inventory.revision > rev);
+    }
+    const item = owned2();
+    m = readModel();
+    inv = m.inventory;
+    if (item && inv.equipped.subweapon !== item.itemId) {
+      status2.textContent = `Equipping your ${OFFHAND_NAMES[c.offhand]}\u2026`;
+      const rev = inv.revision;
+      await adapter.issue("equipment.equip", { itemId: item.itemId, slot: "subweapon", inventoryRevision: rev });
+      await wait((x) => x.inventory.revision > rev);
+    }
+    try {
+      kitToast(await claimClassKit2({ readModel, adapter, wait, say: (text2) => {
+        status2.textContent = text2;
+      } }));
+    } catch {
+    }
+  }
+  function kitToast(r) {
+    if (r) toastV1(document2, { kind: "loot", title: `${r.name} starting gear`, sub: r.worn === CLASS_KIT_PIECES.length ? "Equipped and ready" : "Worn where your slots were free \xB7 the rest is in your bag", key: "classkit/ready", ms: 4200 });
+  }
+  function grantKit(m) {
+    const now2 = Date.now();
+    if (now2 < kitRetryAt) return;
+    if (!classKitRoom(m)) {
+      kitRetryAt = now2 + 5e3;
+      if (!roomNoticed) {
+        roomNoticed = true;
+        toastV1(document2, { kind: "loot", title: "Make room for your starting gear", sub: `Your bag needs ${CLASS_KIT_PIECES.length} free spaces.`, key: "classkit/room", ms: 5200 });
+      }
+      return;
+    }
+    kitBusy = true;
+    claimClassKit2({ readModel, adapter, wait }).then(kitToast, () => {
+      kitRetryAt = Date.now() + 15e3;
+    }).finally(() => {
+      kitBusy = false;
+    });
+  }
+  async function save() {
+    if (busy) return;
+    const next = { ...look, name: look.name.trim() };
+    if (mode !== "class" && !namedOk(next.name)) {
+      status2.textContent = "Give your hero a name: up to 16 letters, numbers, spaces, hyphens or apostrophes.";
+      return;
+    }
+    if (beforeGame) {
+      status2.textContent = "";
+      root2.hidden = true;
+      beforeGame.onDone({ look: next, cls, deferClass });
+      return;
+    }
+    busy = true;
+    paint();
+    try {
+      if (mode !== "look" && cls && !heroClass()) await chooseClass(cls);
+      if (mode !== "class") {
+        status2.textContent = "Saving your look\u2026";
+        await adapter.issue("progression.change", { progressionRevision: local6(readModel()).d8.revision, action: { kind: "look.set", look: next } });
+        if (!await wait((x) => sameLook(local6(x).d8?.look, next))) throw Error("Your look didn\u2019t save. Try again.");
+      }
+      status2.textContent = "";
+      busy = false;
+      close();
+    } catch (e) {
+      status2.textContent = e.message;
+      reportError(e.message);
+    } finally {
+      busy = false;
+      paint();
+    }
+  }
+  function open2(requested) {
+    const m = readModel(), p = local6(m);
+    if (!p?.d8 || busy) return false;
+    const hasClass = Boolean(heroClassOf(p.d8));
+    mode = !p.d8.look ? "create" : requested === "look" || hasClass ? "look" : "class";
+    look = { ...DEFAULT_LOOK, ...p.d8.look ?? {} };
+    nameInput.value = look.name;
+    deferClass = false;
+    if (mode !== "look") {
+      const inv = m.inventory, current = offhandOf(inv?.itemsById[inv?.equipped.subweapon]);
+      cls = hasClass ? null : Object.values(HERO_CLASSES).find((c) => c.offhand === current)?.id ?? null;
+    }
+    showGear = true;
+    facing2 = 1;
+    status2.textContent = "";
+    thumbsKey = "";
+    opener = document2.activeElement;
+    root2.hidden = false;
+    paint();
+    paintStage(environment.performance?.now?.() / 1e3 || 0);
+    if (startingHero && mode === "create") {
+      const hero = startingHero;
+      startingHero = null;
+      look = { ...look, ...hero.look };
+      nameInput.value = look.name;
+      cls = hero.cls ?? null;
+      deferClass = Boolean(hero.deferClass);
+      paint();
+      save();
+    }
+    return true;
+  }
+  function openBeforeGame(hero = null) {
+    mode = "create";
+    look = { ...DEFAULT_LOOK, ...hero?.look ?? {} };
+    nameInput.value = look.name;
+    cls = hero?.cls ?? null;
+    deferClass = Boolean(hero?.deferClass);
+    showGear = true;
+    facing2 = 1;
+    status2.textContent = "";
+    thumbsKey = "";
+    root2.hidden = false;
+    paint();
+    const frame = () => {
+      if (root2.hidden) return;
+      paintStage(environment.performance.now() / 1e3);
+      environment.requestAnimationFrame(frame);
+    };
+    frame();
+  }
+  function close() {
+    root2.hidden = true;
+    const back = opener;
+    opener = null;
+    if (back?.isConnected && back.closest("[role=dialog]:not([hidden])")) back.focus({ preventScroll: true });
+    else onClose();
+  }
+  function refresh(m, available) {
+    const p = local6(m);
+    if (root2.hidden) {
+      if (available && p?.d8 && !p.d8.look && m.persistence?.phase === "encounter" && m.entitiesById[p.entityId]?.alive) open2(null);
+      else if (available && !busy && !kitBusy && classKitDue(m)) grantKit(m);
+      return;
+    }
+    paintStage((environment.performance?.now?.() ?? Date.now()) / 1e3);
+  }
+  return Object.freeze({ open: open2, openBeforeGame, refresh, isOpen: () => !root2.hidden, destroy() {
+    document2.removeEventListener(HERO_CREATOR_OPEN_EVENT, onRequest);
+    root2.remove();
+  } });
+}
+
+// src/client/new_world_screen_v1.js
+var ICONS2 = {
+  classic: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M7 12l11-4 12 4 11-4v28l-11 4-12-4-11 4z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M18 8v28M30 12v28" stroke="currentColor" stroke-width="3"/></svg>',
+  seeded: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 41V24" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M24 26C24 18 18 13 9 13c0 8 6 13 15 13zM24 23c0-8 6-13 15-13 0 8-6 13-15 13z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M14 41h20" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
+  dice: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"/></svg>'
+};
+function dom(document2) {
+  const el = (tag, cls = "", text2 = "") => {
+    const e = document2.createElement(tag);
+    if (cls) e.className = cls;
+    if (text2) e.textContent = text2;
+    return e;
+  };
+  const button = (cls, text2, onClick) => {
+    const b = el("button", cls, text2);
+    b.type = "button";
+    b.addEventListener("click", onClick);
+    return b;
+  };
+  const icon = (name, cls) => {
+    const s = el("span", cls);
+    s.innerHTML = ICONS2[name];
+    return s;
+  };
+  const dialog = (labelId) => {
+    const root2 = el("section", "new-world-v1");
+    root2.setAttribute("role", "dialog");
+    root2.setAttribute("aria-modal", "true");
+    root2.setAttribute("aria-labelledby", labelId);
+    return root2;
+  };
+  return { el, button, icon, dialog };
+}
+async function newWorldFlowV1({ environment, save, startBuild = startWorldBuildV1 }) {
+  const randomUint32 = () => environment.crypto.getRandomValues(new Uint32Array(1))[0];
+  const choice = await chooseWorld(environment.document, { pick: "seeded", text: rollWorldSeedV1(randomUint32), roll: () => rollWorldSeedV1(randomUint32) });
+  if (choice.kind === "classic") return { kind: "classic", hero: null };
+  return buildWithHero(environment, choice.seed, save, startBuild);
+}
+function chooseWorld(document2, { pick: pick3, text: text2, roll: roll6 }) {
+  const { el, button, icon, dialog } = dom(document2);
+  return new Promise((resolve) => {
+    const root2 = dialog("new-world-title"), panel = el("div", "nw-panel"), head12 = el("header", "nw-head"), title = el("h2", "", "Choose your world");
+    title.id = "new-world-title";
+    head12.append(title, el("p", "nw-intro", "Each hero lives in one world. Play the classic map, or grow a new one from a seed."));
+    const body5 = el("div", "nw-body"), cards = el("div", "nw-cards"), legend = el("p", "nw-legend", "World");
+    const card = (kind, name, about, tag) => {
+      const b = button("nw-card is-" + kind, "", () => {
+        pick3 = kind;
+        paint();
+      });
+      b.dataset.world = kind;
+      const words = el("span", "nw-card-words");
+      words.append(el("strong", "", name), el("span", "", about), el("small", "", tag));
+      b.append(icon(kind, "nw-card-icon"), words);
+      cards.append(b);
+      return b;
+    };
+    const classicCard = card("classic", "Classic world", "The map every hero has played so far: Alderwood, the Woodland and the seven lands beyond.", "Same map for everyone \xB7 starts right away");
+    const seededCard = card("seeded", "New world", "A whole new map from a seed, with its own coasts, rivers, roads, towns, caves, forts, ruins and crypts.", "Builds while you make your hero");
+    const seedBox = el("div", "nw-seed"), label4 = el("label", "nw-legend", "Seed"), row2 = el("div", "nw-seed-row"), input = el("input", "nw-seed-input"), rollButton = button("nw-roll", "", () => {
+      input.value = roll6();
+      paint();
+    });
+    label4.htmlFor = input.id = "new-world-seed";
+    input.type = "text";
+    input.value = text2;
+    input.maxLength = WORLD_SEED_MAX_LENGTH;
+    input.placeholder = "Type a number or a word";
+    input.autocomplete = "off";
+    input.spellcheck = false;
+    input.setAttribute("autocapitalize", "off");
+    rollButton.append(icon("dice", "nw-roll-icon"), "Roll");
+    row2.append(input, rollButton);
+    const word = el("p", "nw-word");
+    word.setAttribute("aria-live", "polite");
+    seedBox.append(label4, row2, word, el("p", "nw-note", "Seeds are numbers; a word you type becomes one. The same seed always makes the same world, so friends can share one. Building takes about a minute, and you make your hero meanwhile."));
+    const ready = el("p", "nw-note nw-ready", "Nothing to build: the classic world is ready now.");
+    body5.append(legend, cards, seedBox, ready);
+    const foot = el("footer", "nw-foot"), next = button("nw-next", "", () => {
+      const seed2 = worldSeedV1(input.value);
+      if (pick3 === "seeded" && !seed2) return;
+      root2.remove();
+      resolve(pick3 === "classic" ? { kind: "classic" } : { kind: "seeded", seed: seed2, text: input.value });
+    });
+    foot.append(next);
+    panel.append(head12, body5, foot);
+    root2.append(panel);
+    input.addEventListener("input", paint);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        next.click();
+      }
+    });
+    function paint() {
+      const seeded = pick3 === "seeded", seed2 = worldSeedV1(input.value);
+      classicCard.setAttribute("aria-pressed", String(!seeded));
+      seededCard.setAttribute("aria-pressed", String(seeded));
+      seedBox.hidden = !seeded;
+      ready.hidden = seeded;
+      word.hidden = !(seeded && seed2?.word);
+      word.replaceChildren();
+      if (!word.hidden) {
+        const n = el("strong", "", seed2.seed);
+        word.append(`\u201C${seed2.word}\u201D becomes seed `, n);
+      }
+      const blocked3 = seeded && !seed2;
+      next.disabled = blocked3;
+      next.textContent = blocked3 ? "Type or roll a seed" : "Next: make your hero";
+    }
+    paint();
+    document2.body.append(root2);
+    (pick3 === "seeded" ? seededCard : classicCard).focus({ preventScroll: true });
+  });
+}
+async function buildWithHero(environment, seed2, save, startBuild) {
+  const document2 = environment.document;
+  let build = null, hero = null, heroDone = null, live = true;
+  const strip = buildStrip(document2, seed2), creator = createHeroCreatorV1({ document: document2, environment, readModel: () => null, adapter: null, beforeGame: { strip: strip.root, onDone: (h) => {
+    hero = h;
+    heroDone?.();
+  } } });
+  const waiting = waitingPanel(document2, environment, seed2);
+  const begin = () => {
+    const b = startBuild({ environment, seed: seed2.seed, save });
+    b.onChange(() => {
+      const state = b.read();
+      strip.paint(state);
+      waiting.paint(state);
+    });
+    return b;
+  };
+  build = begin();
+  const tick = () => {
+    if (!live) return;
+    const state = build.read();
+    strip.paint(state);
+    waiting.paint(state);
+    environment.requestAnimationFrame(tick);
+  };
+  tick();
+  const built = () => build.read().stage === WORLD_BUILD_STAGES.length;
+  try {
+    for (let showCreator = true; ; ) {
+      if (showCreator) {
+        const confirmed = new Promise((r) => {
+          heroDone = r;
+        });
+        creator.openBeforeGame(hero);
+        await confirmed;
+      }
+      if (built()) return { kind: "seeded", world: await build.result, hero };
+      const outcome = await waiting.show(hero, build);
+      if (outcome === "ready") return { kind: "seeded", world: await build.result, hero };
+      if (outcome === "classic") return { kind: "classic", hero };
+      if (outcome === "retry") {
+        build = begin();
+        showCreator = false;
+        continue;
+      }
+      showCreator = true;
+    }
+  } finally {
+    live = false;
+    build.cancel();
+    creator.destroy();
+    waiting.remove();
+  }
+}
+function buildStrip(document2, seed2) {
+  const { el, icon } = dom(document2);
+  const root2 = el("div", "nw-strip"), title = el("strong", "nw-strip-title"), detail = el("span", "nw-strip-detail"), bar = el("span", "nw-bar"), fill4 = el("span", "nw-bar-fill"), percent = el("span", "nw-strip-percent");
+  root2.setAttribute("role", "status");
+  bar.append(fill4);
+  root2.append(icon("seeded", "nw-strip-icon"), title, detail, bar, percent);
+  let last = "";
+  return { root: root2, paint(state) {
+    const key2 = JSON.stringify([Math.floor(state.fraction * 100), state.stage, state.failed]);
+    if (key2 === last) return;
+    last = key2;
+    const done = state.stage === WORLD_BUILD_STAGES.length, shown = Math.floor(state.fraction * 100);
+    root2.classList.toggle("is-failed", Boolean(state.failed));
+    root2.classList.toggle("is-done", done);
+    title.textContent = state.failed ? "This world couldn\u2019t be built" : done ? "Your world is ready" : "Building your world";
+    detail.textContent = state.failed ? "Seed " + seed2.seed + " \xB7 you can try again after making your hero" : "Seed " + seed2.seed + (done ? "" : " \xB7 " + WORLD_BUILD_STAGES[state.stage].label);
+    bar.hidden = percent.hidden = Boolean(state.failed);
+    fill4.style.width = shown + "%";
+    percent.textContent = shown + "%";
+  } };
+}
+function waitingPanel(document2, environment, seed2) {
+  const { el, button, dialog } = dom(document2);
+  const root2 = dialog("new-world-wait-title"), panel = el("div", "nw-panel nw-wait-panel"), head12 = el("header", "nw-head"), title = el("h2", "", "Your world is almost ready"), intro = el("p", "nw-intro");
+  title.id = "new-world-wait-title";
+  head12.append(title, intro);
+  root2.hidden = true;
+  const body5 = el("div", "nw-wait"), heroBox = el("div", "nw-wait-hero"), portrait = el("canvas", "nw-wait-portrait"), heroName = el("strong", "nw-wait-name"), heroClass = el("span", "nw-wait-class");
+  portrait.setAttribute("aria-hidden", "true");
+  heroBox.append(portrait, heroName, heroClass);
+  const side = el("div", "nw-wait-build"), top = el("div", "nw-wait-top"), seedLine = el("span", "nw-wait-seed"), bar = el("span", "nw-bar"), fill4 = el("span", "nw-bar-fill"), barRow = el("div", "nw-wait-bar"), percent = el("span", "nw-strip-percent");
+  seedLine.append("Seed ", el("strong", "", seed2.seed));
+  top.append(el("p", "nw-legend", "Building your world"), seedLine);
+  bar.append(fill4);
+  barRow.append(bar, percent);
+  const steps = el("ol", "nw-steps"), stepItems = WORLD_BUILD_STAGES.map((s) => {
+    const li = el("li", "nw-step");
+    li.append(el("span", "nw-step-mark"), el("span", "", s.label));
+    steps.append(li);
+    return li;
+  });
+  const note = el("p", "nw-note");
+  side.append(top, barRow, steps, note);
+  body5.append(heroBox, side);
+  const foot = el("footer", "nw-foot"), status2 = el("p", "nw-status");
+  status2.setAttribute("role", "status");
+  let settle = null;
+  const answer = (value2) => {
+    const s = settle;
+    settle = null;
+    root2.hidden = true;
+    s?.(value2);
+  };
+  const back = button("nw-quiet", "Back to hero", () => answer("back")), start = button("nw-next", "Starts when the world is ready", () => {
+  }), retry = button("nw-next", "Try again", () => answer("retry")), classic = button("nw-quiet", "Play the classic world", () => answer("classic"));
+  start.disabled = true;
+  foot.append(status2, back, classic, retry, start);
+  panel.append(head12, body5, foot);
+  root2.append(panel);
+  document2.body.append(root2);
+  let name = "";
+  return {
+    show(hero, build) {
+      name = hero.look.name;
+      heroName.textContent = name;
+      heroClass.textContent = (hero.cls ? HERO_CLASSES[hero.cls].name : "No class yet") + " \xB7 Level 1";
+      root2.hidden = false;
+      environment.requestAnimationFrame(() => {
+        const r = portrait.getBoundingClientRect();
+        if (!r.width) return;
+        const dpr = Math.min(3, environment.devicePixelRatio || 1);
+        portrait.width = Math.round(r.width * dpr);
+        portrait.height = Math.round(r.height * dpr);
+        const c = portrait.getContext("2d"), w = r.width, h = r.height, s = Math.min(h / 56, w / 58);
+        c.setTransform(dpr, 0, 0, dpr, 0, 0);
+        c.translate(w * 0.5 - 3 * s, h - 22 - 20 * 0.8 * s);
+        c.scale(0.8 * s, 0.8 * s);
+        drawBlockyHero(c, startingHeroSpecV1(hero), { t: 0, still: true });
+      });
+      back.focus({ preventScroll: true });
+      const asked = new Promise((r) => {
+        settle = r;
+      });
+      paint(build.read());
+      build.result.then(() => answer("ready"), () => paint(build.read()));
+      return asked;
+    },
+    paint,
+    remove() {
+      root2.remove();
+    }
+  };
+  function paint(state) {
+    if (root2.hidden) return;
+    const shown = Math.floor(state.fraction * 100);
+    fill4.style.width = shown + "%";
+    percent.textContent = shown + "%";
+    stepItems.forEach((li, i) => {
+      li.dataset.state = i < state.stage ? "done" : i === state.stage && !state.failed ? "now" : "later";
+    });
+    intro.textContent = state.failed ? `${name} is ready, but this seed\u2019s world couldn\u2019t be made.` : `${name} is ready. The adventure starts as soon as the world is built.`;
+    if (state.failed) {
+      title.textContent = "This world couldn\u2019t be built";
+      note.textContent = "The world maker stopped: " + state.failed + ". Try again, or play the classic world with " + name + ".";
+    } else {
+      title.textContent = "Your world is almost ready";
+      note.textContent = "Your world is saved with " + name + ", so it only builds once.";
+    }
+    retry.hidden = classic.hidden = !state.failed;
+    start.hidden = Boolean(state.failed);
+    barRow.hidden = Boolean(state.failed);
+    if (state.stage === WORLD_BUILD_STAGES.length) answer("ready");
+  }
+}
+
 // src/shared/content/forge_review.js
 var FORGE_REVIEW_BUILD = false;
 var ACTIVITY_SAVE_NAMESPACE = FORGE_REVIEW_BUILD ? "saq-world-forge-review-v1" : "saq-world-activity-campaigns-v1";
@@ -22125,7 +23167,7 @@ function openLine(c, a, b, hull2) {
 
 // src/shared/contracts/spore_pressure_v3.js
 var isSporeV3 = (r) => [SPORE_V3, SPORE_V4, SPORE_V5].includes(r?.rulesVersion);
-var local4 = (s, p) => projectToLocalFrameD9(p, s.d9World.runtime.frames);
+var local5 = (s, p) => projectToLocalFrameD9(p, s.d9World.runtime.frames);
 var openLine2 = (c, a, b) => {
   for (let i = 0; i <= 8; i++) if (collidesWithTiles(c, a.x + (b.x - a.x) * i / 8, a.y + (b.y - a.y) * i / 8, 12)) return false;
   return true;
@@ -22133,7 +23175,7 @@ var openLine2 = (c, a, b) => {
 function prepareSporePressureV3(s, r) {
   const c = s.spacesByInstanceId[s.overworldInstanceId].collision, chosen = [], seed2 = parseInt(r.groupId.slice(-6), 16) % 16;
   for (let n = 0; n < 12; n++) {
-    const pod = local4(s, r.pods[n % 3].position);
+    const pod = local5(s, r.pods[n % 3].position);
     let picked = null;
     for (const radius of SPORE_V3_POLICY.landingRadiiPixels) {
       for (let turn7 = 0; turn7 < 16; turn7++) {
@@ -22174,7 +23216,7 @@ function queueSporePressureV3(r) {
   r.pressure.nextPulseElapsed = r.elapsedTicks + (alive === 1 ? SPORE_V3_POLICY.lastPodPulseTicks : SPORE_V3_POLICY.pulseTicks);
   return changed;
 }
-var sporeLandingV3 = (s, r, n, fallback) => isSporeV3(r) ? local4(s, r.pressure.landings[n]) : fallback;
+var sporeLandingV3 = (s, r, n, fallback) => isSporeV3(r) ? local5(s, r.pressure.landings[n]) : fallback;
 function hatchSporeV3(s, r, n, g, d, a) {
   if (!isSporeV3(r)) return;
   const p = sporeLandingV3(s, r, n);
@@ -22306,12 +23348,12 @@ function podPositionV2(s, id, n, fallback) {
 function queuePodBurstsV2(r, n) {
   const pod = r.pods[n];
   while (pod.bursts < 3 && compareCombat(multiplyCombat(pod.hp, 100), multiplyCombat(pod.maxHp, SPORE_V2_POLICY.thresholdPercent[pod.bursts])) <= 0) {
-    const burst = pod.bursts++;
+    const burst2 = pod.bursts++;
     if (isSporeV5(r)) {
       queuePacedSporeV5(r, { pod: n });
       continue;
     }
-    for (const offset2 of burst === 0 ? [0] : burst === 1 ? [1] : [2, 3]) {
+    for (const offset2 of burst2 === 0 ? [0] : burst2 === 1 ? [1] : [2, 3]) {
       const stage2 = r.stages[n + offset2 * 3];
       if (stage2.phase === "pending") {
         stage2.phase = "queued";
@@ -22529,11 +23571,183 @@ function projectShrineV1(r, d, s, actor) {
   };
 }
 
+// src/shared/contracts/nests_v1.js
+var MOTHER = NEST_POLICY.motherMember;
+var nestHealthV1 = (level, party) => combatInteger(multiplyCombat(worldEnemyStats(level, "C").maxHp, NEST_POLICY.nestHealth * NEST_POLICY.partyHealthPercent[party - 1], 100));
+function initialNestsV1(s, id, anchor) {
+  const near = Object.values(s.playersById).filter((p) => {
+    const a = s.entitiesById[p.entityId];
+    return a.alive && a.residency.spaceInstanceId === s.overworldInstanceId && Math.hypot(a.position.x - anchor.x, a.position.y - anchor.y) <= NEST_POLICY.activeRadius;
+  }).length;
+  const partySize = Math.max(1, Math.min(4, near)), episode = s.d9World.episodes[id], level = copyWire(episode.snapshot?.effectiveLevel ?? episode.geography.minimumLevel ?? "1"), maxHp = nestHealthV1(level, partySize);
+  return { rulesVersion: NESTS_VERSION, nest: { level, partySize, hp: [maxHp, maxHp, maxHp].map(copyWire), maxHp, rotStart: 0, nextSpawn: NEST_POLICY.firstSpawnTicks, waiting: false, resets: 0, boon: null } };
+}
+var burst = (h) => h.hp.every((hp) => compareCombat(hp, 0) === 0);
+var nestPointsV1 = (a) => NEST_POLICY.nests.map(([x, y]) => ({ x: a.x + x, y: a.y + y }));
+var nestRotV1 = (r) => r.nest.waiting ? 0 : Math.min(1, (r.elapsedTicks - r.nest.rotStart) / NEST_POLICY.rotTicks);
+var nestTargetableV1 = (r, n) => r.status === "active" && !r.nest.waiting && r.stages[MOTHER].phase === "pending" && compareCombat(r.nest.hp[n], 0) > 0;
+var nestsReadyV1 = (r) => (burst(r.nest) || r.stages[MOTHER].phase === "defeated") && r.stages.every((t) => ["defeated", "cancelled"].includes(t.phase));
+function validateNestsV1(r) {
+  requireContract(r.kind === "nests" && r.rulesVersion === NESTS_VERSION && r.stages.length === NEST_MEMBERS, "Nest policy/membership");
+  closedRecord(r.nest, ["level", "partySize", "hp", "maxHp", "rotStart", "nextSpawn", "waiting", "resets", "boon"]);
+  const h = r.nest, mother = r.stages[MOTHER].phase;
+  safeInteger(h.partySize, 1, 4);
+  requireContract(compareCombat(h.maxHp, nestHealthV1(h.level, h.partySize)) === 0, "Nest health scaling");
+  requireContract(Array.isArray(h.hp) && h.hp.length === 3 && h.hp.every((hp) => compareCombat(hp, 0) >= 0 && compareCombat(hp, h.maxHp) <= 0), "Nest health");
+  safeInteger(h.rotStart, 0, r.elapsedTicks);
+  safeInteger(h.nextSpawn);
+  safeInteger(h.resets);
+  requireContract(typeof h.waiting === "boolean" && (h.boon === null || NEST_POLICY.boons.includes(h.boon)), "Nest state");
+  requireContract(r.stages.every((t) => ["pending", "hatched", "defeated", "cancelled"].includes(t.phase)), "Nest stage");
+  requireContract(!["hatched", "defeated"].includes(mother) || r.elapsedTicks - h.rotStart >= NEST_POLICY.rotTicks, "Brood Mother woke early");
+  requireContract(mother !== "cancelled" || burst(h), "Brood Mother withered early");
+  if (h.waiting) requireContract(mother === "pending" && r.stages.every((t) => t.phase !== "hatched") && h.hp.every((hp) => compareCombat(hp, h.maxHp) === 0), "Waiting nests");
+  requireContract(r.status === "completed" === (h.boon !== null), "Nest boon");
+  if (r.status === "completed") requireContract(nestsReadyV1(r), "Incomplete nest completion");
+}
+function openLine4(c, a, b, hull2) {
+  const n = Math.max(1, Math.ceil(Math.hypot(a.x - b.x, a.y - b.y) / 8));
+  for (let i = 0; i <= n; i++) if (collidesWithTiles(c, a.x + (b.x - a.x) * i / n, a.y + (b.y - a.y) * i / n, hull2)) return false;
+  return true;
+}
+function openPoint(s, r, g, from, points2, a) {
+  const c = s.spacesByInstanceId[g.spaceInstanceId].collision;
+  return points2.find((p) => !collidesWithTiles(c, p.x, p.y, a.hullRadius) && openLine4(c, from, p, a.hullRadius) && !Object.values(s.playersById).some((player) => {
+    const b = s.entitiesById[player.entityId];
+    return b.alive && b.residency.spaceInstanceId === g.spaceInstanceId && Math.hypot(b.position.x - p.x, b.position.y - p.y) < NEST_POLICY.playerClearance;
+  }) && !g.entityIds.some((id, i) => r.stages[i].phase === "hatched" && s.entitiesById[id].alive && Math.hypot(s.entitiesById[id].position.x - p.x, s.entitiesById[id].position.y - p.y) < a.hullRadius + (s.entitiesById[id].hullRadius ?? 10) + 4)) ?? null;
+}
+function place(g, a, p) {
+  a.position = { ...p };
+  a.movementIntent = { x: 0, y: 0 };
+  if (g.containment) g.containment.memberHomesById[a.entityId] = { ...p };
+}
+function retire(s, g, n) {
+  const a = s.entitiesById[g.entityIds[n]];
+  if (a) {
+    a.alive = false;
+    a.hp = "0";
+    a.movementIntent = { x: 0, y: 0 };
+  }
+}
+function advanceNestsV1(s, r, g, d, { activeActors, hardActors }) {
+  let changed = false;
+  const h = r.nest;
+  for (let n2 = 0; n2 < NEST_MEMBERS; n2++) if (r.stages[n2].phase === "hatched" && !s.entitiesById[g.entityIds[n2]].alive) {
+    r.stages[n2] = { phase: "defeated", at: r.elapsedTicks };
+    changed = true;
+  }
+  if (h.waiting) return changed;
+  if (burst(h) || r.stages[MOTHER].phase === "defeated") {
+    for (let n2 = 0; n2 < NEST_MEMBERS; n2++) if (r.stages[n2].phase === "pending") {
+      retire(s, g, n2);
+      r.stages[n2] = { phase: "cancelled", at: r.elapsedTicks };
+      changed = true;
+    }
+    return changed;
+  }
+  if (r.stages[MOTHER].phase !== "pending") return changed;
+  if (r.elapsedTicks - h.rotStart >= NEST_POLICY.rotTicks) {
+    const a2 = s.entitiesById[g.entityIds[MOTHER]], p2 = openPoint(s, r, g, d.anchor, NEST_POLICY.wake.map(([x, y]) => ({ x: d.anchor.x + x, y: d.anchor.y + y })), a2);
+    if (p2) {
+      place(g, a2, p2);
+      r.stages[MOTHER] = { phase: "hatched", at: r.elapsedTicks };
+      changed = true;
+    }
+    return changed;
+  }
+  if (r.elapsedTicks < h.nextSpawn || activeActors >= hardActors) return changed;
+  const n = r.stages.findIndex((t, i) => i !== MOTHER && t.phase === "pending"), living = r.stages.filter((t, i) => i !== MOTHER && t.phase === "hatched").length;
+  if (n < 0 || living >= NEST_POLICY.living) return changed;
+  const nests = nestPointsV1(d.anchor).filter((_, i) => compareCombat(h.hp[i], 0) > 0), nest = nests[(n + h.resets) % nests.length], a = s.entitiesById[g.entityIds[n]], p = openPoint(s, r, g, nest, NEST_POLICY.exits.map(([x, y]) => ({ x: nest.x + x, y: nest.y + y })), a);
+  if (p) {
+    place(g, a, p);
+    r.stages[n] = { phase: "hatched", at: r.elapsedTicks };
+    h.nextSpawn = r.elapsedTicks + NEST_POLICY.spawnSpacingTicks;
+    changed = true;
+  }
+  return changed;
+}
+function resetNestsV1(s, r, g, d) {
+  const h = r.nest;
+  if (r.status !== "active" || h.waiting || burst(h) || r.stages[MOTHER].phase === "defeated") return false;
+  for (let n = 0; n < NEST_MEMBERS; n++) {
+    if (r.stages[n].phase !== "hatched") continue;
+    const a = s.entitiesById[g.entityIds[n]];
+    if (!a.alive) {
+      r.stages[n] = { phase: "defeated", at: r.elapsedTicks };
+      continue;
+    }
+    place(g, a, d.members[n].position);
+    a.hp = copyWire(a.maxHp);
+    r.stages[n] = { phase: "pending", at: r.elapsedTicks };
+  }
+  h.hp = h.hp.map(() => copyWire(h.maxHp));
+  h.waiting = true;
+  h.resets++;
+  h.rotStart = r.elapsedTicks;
+  h.nextSpawn = r.elapsedTicks;
+  return true;
+}
+function restartNestsV1(r, p) {
+  const h = r.nest;
+  h.waiting = false;
+  h.rotStart = r.elapsedTicks;
+  h.nextSpawn = r.elapsedTicks + NEST_POLICY.firstSpawnTicks;
+  if (!r.eligiblePlayerIds.includes(p.playerId)) {
+    r.eligiblePlayerIds.push(p.playerId);
+    r.eligiblePlayerIds.sort();
+  }
+}
+function damageNestV1(s, id, n, requested) {
+  const r = s.d9World?.worldEvents?.records[id];
+  requireContract(r?.kind === "nests" && Number.isInteger(n) && n >= 0 && n < 3 && nestTargetableV1(r, n) && compareCombat(requested, 0) > 0, "Nest cannot take that damage");
+  const h = r.nest, actual = minCombat(h.hp[n], requested);
+  h.hp[n] = combatInteger(subtractCombat(h.hp[n], actual));
+  s.d9World.worldEvents.revision++;
+  return compareCombat(h.hp[n], 0) === 0;
+}
+function nestBoonV1(seedHex, groupId, episode) {
+  let h = 2166136261;
+  for (const ch of seedHex + "/nest-boon/" + groupId + "/" + episode) h = Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0;
+  return NEST_POLICY.boons[h % NEST_POLICY.boons.length];
+}
+function nestMothersV1(s) {
+  const out = /* @__PURE__ */ new Set();
+  for (const r of Object.values(s.d9World?.worldEvents?.records ?? {})) if (r.kind === "nests" && ["hatched", "defeated"].includes(r.stages[MOTHER]?.phase)) {
+    const id = s.groupsById[r.groupId]?.entityIds[MOTHER];
+    if (id) out.add(id);
+  }
+  return out;
+}
+function projectNestsV1(r, s, g) {
+  if (!r || r.nest.waiting) return { phase: "idle", rot: 0, warn: false, rotTicksLeft: NEST_POLICY.rotTicks, nests: [0, 1, 2].map(() => ({ ratio: 1, burst: false })), burst: 0, living: 0, remaining: r ? r.stages.filter((t, n) => n !== MOTHER && t.phase === "pending").length : 12, motherAwake: false, motherBeaten: false, motherRatio: 1, boon: null, resets: r?.nest.resets ?? 0, circle: { ...NEST_POLICY.circle } };
+  const h = r.nest, m = r.stages[MOTHER], won = burst(h) || m.phase === "defeated", phase = won ? "won" : m.phase === "hatched" ? "mother" : "fight", mother = g ? s.entitiesById[g.entityIds[MOTHER]] : null;
+  const rot = m.phase === "cancelled" ? Math.min(1, Math.max(0, (m.at - h.rotStart) / NEST_POLICY.rotTicks)) : m.phase === "pending" ? nestRotV1(r) : 1;
+  return {
+    phase,
+    rot,
+    warn: phase === "fight" && rot * 100 >= NEST_POLICY.warnPercent,
+    rotTicksLeft: phase === "fight" ? Math.max(0, NEST_POLICY.rotTicks - (r.elapsedTicks - h.rotStart)) : 0,
+    nests: h.hp.map((hp) => ({ ratio: integerRatio(hp, h.maxHp), burst: compareCombat(hp, 0) === 0 })),
+    burst: h.hp.filter((hp) => compareCombat(hp, 0) === 0).length,
+    living: r.stages.filter((t, n) => n !== MOTHER && t.phase === "hatched").length,
+    remaining: r.stages.filter((t, n) => n !== MOTHER && ["pending", "hatched"].includes(t.phase)).length,
+    motherAwake: m.phase === "hatched",
+    motherBeaten: m.phase === "defeated",
+    motherRatio: m.phase === "hatched" && mother ? integerRatio(mother.hp, mother.maxHp) : m.phase === "defeated" ? 0 : 1,
+    boon: h.boon,
+    resets: h.resets,
+    circle: { ...NEST_POLICY.circle }
+  };
+}
+
 // src/shared/contracts/world_events_v1.js
 var PLANNED_LEDGER_VERSION = "world-events-planned-v1";
-var WAVES = ["spore", "hollow", "cursed_shrine"];
-var CHEST0 = ["hollow", "cursed_shrine"];
-var membersOf = (kind) => kind === "spore" ? 12 : kind === "hollow" ? 13 : kind === "cursed_shrine" ? SHRINE_MEMBERS : 0;
+var WAVES = ["spore", "hollow", "cursed_shrine", "nests"];
+var CHEST0 = ["hollow", "cursed_shrine", "nests"];
+var running = (r) => r.status === "active" && !r.nest?.waiting;
+var membersOf = (kind) => kind === "spore" ? 12 : kind === "hollow" ? 13 : kind === "cursed_shrine" ? SHRINE_MEMBERS : kind === "nests" ? NEST_MEMBERS : 0;
 function validateBoons(b) {
   requireContract(b && typeof b === "object" && !Array.isArray(b) && Object.keys(b).length <= 8, "Boon ledger");
   for (const [id, row2] of Object.entries(b)) {
@@ -22554,8 +23768,8 @@ function installWorldEvents(s) {
   if (s.d9World?.plannedWorld) s.d9World.worldEvents ??= { version: SPORE_VERSION, revision: 0, records: {} };
   return s;
 }
-function validateWorldEvents(root) {
-  const w = root.worldEvents;
+function validateWorldEvents(root2) {
+  const w = root2.worldEvents;
   if (!w) return;
   closedRecord(w, ["version", "revision", "records"], w.version === PLANNED_LEDGER_VERSION ? ["boons"] : []);
   requireContract([SPORE_VERSION, HOLLOW_LEDGER_VERSION, PLANNED_LEDGER_VERSION].includes(w.version), "Unknown event policy");
@@ -22564,7 +23778,7 @@ function validateWorldEvents(root) {
   if (w.boons) validateBoons(w.boons);
   let active = 0;
   for (const [id, r] of Object.entries(w.records)) {
-    closedRecord(r, ["groupId", "kind", "status", "startedTick", "elapsedTicks", "eligiblePlayerIds", "claimedPlayerIds", "stages"], ["rulesVersion", "partySize", "podLevel", "pods", "pressure", "hollow", "shrine"]);
+    closedRecord(r, ["groupId", "kind", "status", "startedTick", "elapsedTicks", "eligiblePlayerIds", "claimedPlayerIds", "stages"], ["rulesVersion", "partySize", "podLevel", "pods", "pressure", "hollow", "shrine", "nest"]);
     if (r.kind === "hollow") {
       requireContract([HOLLOW_LEDGER_VERSION, PLANNED_LEDGER_VERSION].includes(w.version), "Hollow ledger successor required");
       validateHollowV1(r);
@@ -22573,11 +23787,15 @@ function validateWorldEvents(root) {
       requireContract(w.version === PLANNED_LEDGER_VERSION, "Planned ledger successor required");
       validateShrineV1(r);
     } else requireContract(!r.shrine, "Unexpected shrine extension");
+    if (r.kind === "nests") {
+      requireContract(w.version === PLANNED_LEDGER_VERSION, "Planned ledger successor required");
+      validateNestsV1(r);
+    } else requireContract(!r.nest, "Unexpected nest extension");
     validateSporePressureV3(r);
     if (isSporeV2(r)) validateSporePodsV2(r);
     else if (!CHEST0.includes(r.kind)) requireContract(!["rulesVersion", "partySize", "podLevel", "pods"].some((k) => Object.hasOwn(r, k)), "Unknown event extension");
-    requireContract(id === r.groupId && /^ordinary:[a-f0-9]{32}$/.test(id) && ["spore", "legacy", "hollow", "cursed_shrine"].includes(r.kind) && ["active", "completed"].includes(r.status), "Event identity/status");
-    active += Number(r.status === "active");
+    requireContract(id === r.groupId && /^ordinary:[a-f0-9]{32}$/.test(id) && ["spore", "legacy", "hollow", "cursed_shrine", "nests"].includes(r.kind) && ["active", "completed"].includes(r.status), "Event identity/status");
+    active += Number(running(r));
     safeInteger(r.startedTick);
     safeInteger(r.elapsedTicks);
     for (const list of [r.eligiblePlayerIds, r.claimedPlayerIds]) requireContract(Array.isArray(list) && list.length >= 0 && list.length <= 4 && new Set(list).size === list.length && list.every((id2) => /^ply:[a-f0-9]{32}$/.test(id2)), "Event participants");
@@ -22612,13 +23830,13 @@ function eventActorDormant(s, id) {
   }
   return c.hidden.has(id);
 }
-var activeEventCount = (s) => Object.values(s.d9World?.worldEvents?.records ?? {}).filter((r) => r.status === "active").length;
+var activeEventCount = (s) => Object.values(s.d9World?.worldEvents?.records ?? {}).filter(running).length;
 function definition(s, id) {
   return s.d9World?.runtime.groups.find((g) => g.groupId === id);
 }
 function canActivateWorldEvent(s, p, id, { legacy = false } = {}) {
   const a = s.entitiesById[p.entityId], g = s.groupsById[id], d = definition(s, id), primary = s.primary.actorsById[p.entityId];
-  return Boolean(eventKind(s, id) && eventKind(s, id) !== "planned" && !eventRecord(s, id) && g && !g.cleared && d && a.alive && a.residency.spaceInstanceId === s.overworldInstanceId && activeEventCount(s) < 4 && !primary.current && !primary.heldCommandId && (eventKind(s, id) === "spore" && !legacy ? sporeTriangleV2(s, id)?.pods.some((q) => Math.hypot(a.position.x - q.x, a.position.y - q.y) <= SPORE_POLICY.triggerRadius && lineClear(s, a.position, q)) : Math.hypot(a.position.x - d.anchor.x, a.position.y - d.anchor.y) <= SPORE_POLICY.triggerRadius && lineClear(s, a.position, d.anchor)));
+  return Boolean(eventKind(s, id) && eventKind(s, id) !== "planned" && (!eventRecord(s, id) || eventRecord(s, id).nest?.waiting === true) && g && !g.cleared && d && a.alive && a.residency.spaceInstanceId === s.overworldInstanceId && activeEventCount(s) < 4 && !primary.current && !primary.heldCommandId && (eventKind(s, id) === "spore" && !legacy ? sporeTriangleV2(s, id)?.pods.some((q) => Math.hypot(a.position.x - q.x, a.position.y - q.y) <= SPORE_POLICY.triggerRadius && lineClear(s, a.position, q)) : Math.hypot(a.position.x - d.anchor.x, a.position.y - d.anchor.y) <= SPORE_POLICY.triggerRadius && lineClear(s, a.position, d.anchor)));
 }
 function lineClear(s, a, b) {
   const c = s.spacesByInstanceId[s.overworldInstanceId].collision, n = Math.max(1, Math.ceil(Math.hypot(a.x - b.x, a.y - b.y) / 8));
@@ -22629,9 +23847,14 @@ function activateWorldEvent(s, p, id, { legacy = false, pressure = true, continu
   requireContract(canActivateWorldEvent(s, p, id, { legacy }), "Event unavailable, too far away, or four already active");
   installWorldEvents(s);
   const kind = eventKind(s, id), w = s.d9World.worldEvents;
+  if (w.records[id]?.nest?.waiting) {
+    restartNestsV1(w.records[id], p);
+    w.revision++;
+    return;
+  }
   if (kind === "hollow" && w.version !== PLANNED_LEDGER_VERSION) w.version = HOLLOW_LEDGER_VERSION;
-  if (kind === "cursed_shrine") w.version = PLANNED_LEDGER_VERSION;
-  s.d9World.worldEvents.records[id] = { groupId: id, kind, status: "active", startedTick: s.tick, elapsedTicks: 0, eligiblePlayerIds: [p.playerId], claimedPlayerIds: [], stages: WAVES.includes(kind) ? Array.from({ length: membersOf(kind) }, () => ({ phase: "pending", at: 0 })) : [], ...kind === "hollow" ? initialHollowV1() : {}, ...kind === "cursed_shrine" ? initialShrineV1() : {}, ...kind === "spore" && !legacy ? initialSporePodsV2(s, id) : {} };
+  if (kind === "cursed_shrine" || kind === "nests") w.version = PLANNED_LEDGER_VERSION;
+  s.d9World.worldEvents.records[id] = { groupId: id, kind, status: "active", startedTick: s.tick, elapsedTicks: 0, eligiblePlayerIds: [p.playerId], claimedPlayerIds: [], stages: WAVES.includes(kind) ? Array.from({ length: membersOf(kind) }, () => ({ phase: "pending", at: 0 })) : [], ...kind === "hollow" ? initialHollowV1() : {}, ...kind === "cursed_shrine" ? initialShrineV1() : {}, ...kind === "nests" ? initialNestsV1(s, id, definition(s, id).anchor) : {}, ...kind === "spore" && !legacy ? initialSporePodsV2(s, id) : {} };
   if (kind === "spore" && !legacy && pressure) {
     adoptSporePressureV3(s, s.d9World.worldEvents.records[id]);
     if (continuous) {
@@ -22681,6 +23904,7 @@ function advanceWorldEvents(s, { activeActors = Object.keys(s.playersById).lengt
     });
     if (!nearby.length) {
       if (r.kind === "cursed_shrine" && sealShrineV1(s, r, g)) changed = true;
+      if (r.kind === "nests" && resetNestsV1(s, r, g, d)) changed = true;
       continue;
     }
     for (const p of nearby) if (!r.eligiblePlayerIds.includes(p.playerId)) {
@@ -22696,6 +23920,12 @@ function advanceWorldEvents(s, { activeActors = Object.keys(s.playersById).lengt
     if (r.kind === "cursed_shrine") {
       const phases = r.stages.map((t) => t.phase);
       if (advanceShrineV1(s, r, g, d, { activeActors, hardActors, nearby })) changed = true;
+      activeActors += r.stages.filter((t, i) => t.phase === "hatched" && phases[i] !== "hatched").length;
+      continue;
+    }
+    if (r.kind === "nests") {
+      const phases = r.stages.map((t) => t.phase);
+      if (advanceNestsV1(s, r, g, d, { activeActors, hardActors })) changed = true;
       activeActors += r.stages.filter((t, i) => t.phase === "hatched" && phases[i] !== "hatched").length;
       continue;
     }
@@ -22756,7 +23986,7 @@ function advanceWorldEvents(s, { activeActors = Object.keys(s.playersById).lengt
 }
 function eventReadyToClear(s, id) {
   const r = eventRecord(s, id);
-  return !eventKind(s, id) || Boolean(r && (r.kind === "legacy" || (r.kind === "hollow" ? hollowReadyV1(r) : r.kind === "cursed_shrine" ? shrineReadyV1(r) : [0, 1, 2].every((n) => podUsed(s, id, n)) && r.stages.every((t) => ["cancelled", "defeated"].includes(t.phase)))));
+  return !eventKind(s, id) || Boolean(r && (r.kind === "legacy" || (r.kind === "hollow" ? hollowReadyV1(r) : r.kind === "cursed_shrine" ? shrineReadyV1(r) : r.kind === "nests" ? nestsReadyV1(r) : [0, 1, 2].every((n) => podUsed(s, id, n)) && r.stages.every((t) => ["cancelled", "defeated"].includes(t.phase)))));
 }
 function completeWorldEvents(s) {
   const w = s.d9World?.worldEvents;
@@ -22768,6 +23998,11 @@ function completeWorldEvents(s) {
       r.shrine.boon = shrineBoonV1(s.campaign.seed.seedHex, r.groupId, s.encounterEconomy.groups[r.groupId]?.episode ?? 0);
       w.boons ??= {};
       for (const id of r.eligiblePlayerIds) w.boons[id] = { boon: r.shrine.boon, untilTick: s.tick + SHRINE_POLICY.boonTicks, groupId: r.groupId };
+    }
+    if (r.kind === "nests") {
+      r.nest.boon = nestBoonV1(s.campaign.seed.seedHex, r.groupId, s.encounterEconomy.groups[r.groupId]?.episode ?? 0);
+      w.boons ??= {};
+      for (const id of r.eligiblePlayerIds) w.boons[id] = { boon: r.nest.boon, untilTick: s.tick + NEST_POLICY.boonTicks, groupId: r.groupId };
     }
   }
 }
@@ -22800,15 +24035,16 @@ function validateWorldEventsProgress(a, b) {
   const order2 = { pending: 0, queued: 1, airborne: 2, growing: 3, hatched: 4, cancelled: 5, defeated: 5 };
   for (const [id, r] of Object.entries(prior.records)) {
     const n = next.records[id];
-    if (!n && r.kind === "cursed_shrine" && r.status === "completed" && b.encounterEconomy?.groups[id]?.episode > a.encounterEconomy?.groups[id]?.episode) continue;
+    if (!n && ["cursed_shrine", "nests"].includes(r.kind) && r.status === "completed" && b.encounterEconomy?.groups[id]?.episode > a.encounterEconomy?.groups[id]?.episode) continue;
     if (r.kind === "cursed_shrine") requireContract(n && n.shrine && n.shrine.launchedWaves >= r.shrine.launchedWaves && (!r.shrine.sealed || n.shrine.sealed) && (r.shrine.boon === null || n.shrine.boon === r.shrine.boon), "Shrine history regressed");
+    if (r.kind === "nests") requireContract(n && n.nest && n.nest.resets >= r.nest.resets && (n.nest.resets > r.nest.resets || n.nest.hp.every((hp, i) => compareCombat(hp, r.nest.hp[i]) <= 0)) && (r.nest.boon === null || n.nest.boon === r.nest.boon), "Nest history regressed");
     if (r.kind === "hollow") requireContract(n && n.rulesVersion === r.rulesVersion && n.hollow.policyHash === r.hollow.policyHash && n.hollow.launchedWaves >= r.hollow.launchedWaves, "Hollow history regressed");
     validateSporePressureProgressV3(r, n, a.tick, b.tick);
     if (isSporeV2(r)) validateSporePodsProgressV2(r, n);
     else requireContract(!isSporeV2(n), "Legacy event cannot change policy during play");
     requireContract(n && n.groupId === id && n.kind === r.kind && n.startedTick === r.startedTick && n.elapsedTicks >= r.elapsedTicks && r.eligiblePlayerIds.every((id2) => n.eligiblePlayerIds.includes(id2)) && r.claimedPlayerIds.every((id2) => n.claimedPlayerIds.includes(id2)) && (r.status !== "completed" || n.status === "completed"), "Event history regressed");
     const generations = validateSporeGenerationProgressV4(r, n);
-    requireContract(r.stages.every((t, i) => adoptingSporeV5(r, n) && t.phase === "queued" && n.stages[i].phase === "pending" && n.stages[i].generation === t.generation || generations && n.stages[i].generation > t.generation || order2[n.stages[i].phase] >= order2[t.phase] && (!["cancelled", "defeated"].includes(t.phase) || n.stages[i].phase === t.phase)), "Event growth regressed");
+    requireContract(r.stages.every((t, i) => r.kind === "nests" && n.nest.resets > r.nest.resets && t.phase === "hatched" && n.stages[i].phase === "pending" || adoptingSporeV5(r, n) && t.phase === "queued" && n.stages[i].phase === "pending" && n.stages[i].generation === t.generation || generations && n.stages[i].generation > t.generation || order2[n.stages[i].phase] >= order2[t.phase] && (!["cancelled", "defeated"].includes(t.phase) || n.stages[i].phase === t.phase)), "Event growth regressed");
   }
 }
 function projectWorldEvents(s, actor) {
@@ -22817,8 +24053,8 @@ function projectWorldEvents(s, actor) {
     const kind = eventKind(s, d.groupId);
     if (!kind || kind === "planned" || Math.hypot(actor.position.x - d.anchor.x, actor.position.y - d.anchor.y) > 1100) return [];
     const r = eventRecord(s, d.groupId), ordinal = s.d9World.episodes[d.groupId].geography.anchorOrdinal, slot = [...SPORE_EVENTS, HOLLOW_EVENT].find((e) => e.ordinal === ordinal);
-    const geography = s.d9World.episodes[d.groupId].geography;
-    return [{ groupId: d.groupId, kind, label: kind === "cursed_shrine" ? "Cursed Shrine" : slot?.label ?? "Woodland encounter", ...kind === "hollow" ? { hollow: projectHollowV1(r, d, s) } : {}, ...kind === "cursed_shrine" ? { shrine: projectShrineV1(r, d, s, actor), biome: s.d9World.runtime.chunks.find((c) => c.chunkX === geography.chunkX && c.chunkY === geography.chunkY)?.region.biome ?? "woodland" } : {}, position: { ...kind === "spore" ? podPositionV2(s, d.groupId, 3, d.anchor) : d.anchor }, interactionPosition: kind === "spore" && !r ? sporeTriangleV2(s, d.groupId)?.pods.reduce((best, p) => !best || Math.hypot(actor.position.x - p.x, actor.position.y - p.y) < Math.hypot(actor.position.x - best.x, actor.position.y - best.y) ? p : best, null) ?? d.anchor : d.anchor, status: r?.status ?? "dormant", rewardClaimed: r?.claimedPlayerIds.includes(Object.values(s.playersById).find((p) => p.entityId === actor.entityId)?.playerId) ?? false, pressure: r && isSporeV3(r) ? { nextPulseTicks: Math.max(0, r.pressure.nextPulseElapsed - r.elapsedTicks), continuous: isSporeV4(r), remaining: r.stages.filter((t) => ["pending", "queued"].includes(t.phase)).length, living: r.stages.filter((t) => ["airborne", "growing", "hatched"].includes(t.phase)).length } : null, rulesVersion: r?.rulesVersion ?? (!r ? SPORE_V2_POLICY.version : null), canActivate: canActivateWorldEvent(s, Object.values(s.playersById).find((p) => p.entityId === actor.entityId), d.groupId), activeCount: activeEventCount(s), elapsedTicks: r?.elapsedTicks ?? 0, pods: kind === "spore" ? s.d9World.runtime.resources.filter((q) => q.groupId === d.groupId && q.ordinal < 3).map((q) => ({ position: { ...podPositionV2(s, d.groupId, q.ordinal, q.position) }, used: podUsed(s, d.groupId, q.ordinal), ordinal: q.ordinal, ...projectPodHealthV2(s, r, q.ordinal) })) : [], spores: kind === "spore" && r ? r.stages.flatMap((t, n) => ["airborne", "growing"].includes(t.phase) ? [{ phase: t.phase, at: t.at, pod: n % 3, position: { ...sporeLandingV3(s, r, n, d.members[n].position) } }] : []) : [], defeated: r?.stages.filter((t) => t.phase === "defeated").length ?? 0 }];
+    const geography = s.d9World.episodes[d.groupId].geography, biome = ["cursed_shrine", "nests"].includes(kind) ? s.d9World.runtime.chunks.find((c) => c.chunkX === geography.chunkX && c.chunkY === geography.chunkY)?.region.biome ?? "woodland" : null;
+    return [{ groupId: d.groupId, kind, label: kind === "cursed_shrine" ? "Cursed Shrine" : kind === "nests" ? NEST_LABELS[nestSkinOfV1(biome)] : slot?.label ?? "Woodland encounter", ...kind === "hollow" ? { hollow: projectHollowV1(r, d, s) } : {}, ...kind === "cursed_shrine" ? { shrine: projectShrineV1(r, d, s, actor), biome } : {}, ...kind === "nests" ? { nest: projectNestsV1(r, s, s.groupsById[d.groupId]), biome, skin: nestSkinOfV1(biome) } : {}, position: { ...kind === "spore" ? podPositionV2(s, d.groupId, 3, d.anchor) : d.anchor }, interactionPosition: kind === "spore" && !r ? sporeTriangleV2(s, d.groupId)?.pods.reduce((best, p) => !best || Math.hypot(actor.position.x - p.x, actor.position.y - p.y) < Math.hypot(actor.position.x - best.x, actor.position.y - best.y) ? p : best, null) ?? d.anchor : d.anchor, status: r?.nest?.waiting ? "dormant" : r?.status ?? "dormant", rewardClaimed: r?.claimedPlayerIds.includes(Object.values(s.playersById).find((p) => p.entityId === actor.entityId)?.playerId) ?? false, pressure: r && isSporeV3(r) ? { nextPulseTicks: Math.max(0, r.pressure.nextPulseElapsed - r.elapsedTicks), continuous: isSporeV4(r), remaining: r.stages.filter((t) => ["pending", "queued"].includes(t.phase)).length, living: r.stages.filter((t) => ["airborne", "growing", "hatched"].includes(t.phase)).length } : null, rulesVersion: r?.rulesVersion ?? (!r ? SPORE_V2_POLICY.version : null), canActivate: canActivateWorldEvent(s, Object.values(s.playersById).find((p) => p.entityId === actor.entityId), d.groupId), activeCount: activeEventCount(s), elapsedTicks: r?.elapsedTicks ?? 0, pods: kind === "spore" ? s.d9World.runtime.resources.filter((q) => q.groupId === d.groupId && q.ordinal < 3).map((q) => ({ position: { ...podPositionV2(s, d.groupId, q.ordinal, q.position) }, used: podUsed(s, d.groupId, q.ordinal), ordinal: q.ordinal, ...projectPodHealthV2(s, r, q.ordinal) })) : [], spores: kind === "spore" && r ? r.stages.flatMap((t, n) => ["airborne", "growing"].includes(t.phase) ? [{ phase: t.phase, at: t.at, pod: n % 3, position: { ...sporeLandingV3(s, r, n, d.members[n].position) } }] : []) : [], defeated: r?.stages.filter((t) => t.phase === "defeated").length ?? 0 }];
   });
 }
 
@@ -22983,6 +24219,13 @@ var isPodCombatTargetV4 = (a) => a?.podResource !== void 0;
 function podCombatTargetsV4(s) {
   const out = [];
   for (const r of Object.values(s.d9World?.worldEvents?.records ?? {})) {
+    if (r.kind === "nests") {
+      if (r.status !== "active" || r.nest.waiting) continue;
+      const d = s.d9World.runtime.groups.find((g) => g.groupId === r.groupId);
+      if (!d) continue;
+      NEST_POLICY.nests.forEach(([x, y], n) => out.push({ kind: "actor", entityId: prefix + r.groupId + "/" + n, team: "hostile", alive: nestTargetableV1(r, n), hp: r.nest.hp[n], maxHp: r.nest.maxHp, position: { x: d.anchor.x + x, y: d.anchor.y + y }, hullRadius: NEST_POLICY.nestRadius, combatRadius: NEST_POLICY.nestRadius, residency: { spaceInstanceId: s.overworldInstanceId }, podResource: { groupId: r.groupId, ordinal: n, nest: true } }));
+      continue;
+    }
     if (r.kind !== "spore" || !isSporePodV2(s, r.groupId, 0)) continue;
     for (let n = 0; n < 3; n++) {
       const p = r.pods[n], position4 = podPositionV2(s, r.groupId, n, null);
@@ -23133,9 +24376,9 @@ function overlayWoodlandFortParcelD10(chunk2, parcel2) {
 var CW2 = 32n;
 var CH2 = 26n;
 var T4 = 32;
-var W = BigInt(WOODLAND_CAVE_EXTERIOR.width);
-var H3 = BigInt(WOODLAND_CAVE_EXTERIOR.height);
-var inside2 = (x, y, p) => x >= BigInt(p.tileX) && x < BigInt(p.tileX) + W && y >= BigInt(p.tileY) && y < BigInt(p.tileY) + H3;
+var W2 = BigInt(WOODLAND_CAVE_EXTERIOR.width);
+var H4 = BigInt(WOODLAND_CAVE_EXTERIOR.height);
+var inside2 = (x, y, p) => x >= BigInt(p.tileX) && x < BigInt(p.tileX) + W2 && y >= BigInt(p.tileY) && y < BigInt(p.tileY) + H4;
 function overlayWoodlandCaveParcelD10(chunk2, parcel2) {
   if (!parcel2?.pages.some((p) => p.chunkX === chunk2.chunkX && p.chunkY === chunk2.chunkY)) return chunk2;
   const page = parcel2.pages.find((p) => p.chunkX === chunk2.chunkX && p.chunkY === chunk2.chunkY);
@@ -23151,7 +24394,7 @@ function overlayWoodlandCaveParcelD10(chunk2, parcel2) {
   }
   const intersects5 = (b) => {
     const bx = cx + BigInt(b.x), by = cy + BigInt(b.y);
-    return bx < x0 + W && bx + BigInt(b.width) > x0 && by < y0 + H3 && by + BigInt(b.height) > y0;
+    return bx < x0 + W2 && bx + BigInt(b.width) > x0 && by < y0 + H4 && by + BigInt(b.height) > y0;
   }, blockers = chunk2.visual.blockers.filter((b) => !intersects5(b));
   for (const b of WOODLAND_CAVE_EXTERIOR.blockers) {
     const gx = x0 + BigInt(b.x), gy = y0 + BigInt(b.y);
@@ -23200,8 +24443,8 @@ function overlayWoodlandCaveFamilyParcelsD12_1(chunk2, parcels = []) {
 
 // src/shared/generation/woodland_cave_region_placement_d12_2.js
 var WOODLAND_CAVE_FAMILY_PARCEL_D12_2 = "woodland-cave-family-parcel-d12-2-v1";
-var W2 = BigInt(WOODLAND_CAVE_EXTERIOR.width);
-var H4 = BigInt(WOODLAND_CAVE_EXTERIOR.height);
+var W3 = BigInt(WOODLAND_CAVE_EXTERIOR.width);
+var H5 = BigInt(WOODLAND_CAVE_EXTERIOR.height);
 var hash9 = (text2) => {
   let n = 2166136261;
   for (const c of text2) {
@@ -23226,11 +24469,11 @@ function overlayWoodlandCaveFamilyParcelsD12_2(chunk2, parcels = []) {
 
 // src/shared/contracts/world_root_contract_d9.js
 var D9_ROOT_VERSION = "world-root-d9-v1";
-function validateOriginHordeShape(root) {
-  if (root.originHordes === void 0) return;
-  const overlay = root.originHordes;
+function validateOriginHordeShape(root2) {
+  if (root2.originHordes === void 0) return;
+  const overlay = root2.originHordes;
   closedRecord(overlay, ["version", "groupsById"]);
-  requireContract(hasWorldCombat(root.plannedWorld) && overlay.version === "world-origin-horde-overlay-v1", "Unrecognized origin horde overlay");
+  requireContract(hasWorldCombat(root2.plannedWorld) && overlay.version === "world-origin-horde-overlay-v1", "Unrecognized origin horde overlay");
   requireContract(overlay.groupsById && typeof overlay.groupsById === "object" && !Array.isArray(overlay.groupsById) && Object.keys(overlay.groupsById).length <= 16, "Origin horde group bound");
   for (const [id, row2] of Object.entries(overlay.groupsById)) {
     closedRecord(row2, ["groupId", "episode", "appliedTick", "status", "protectedEpisode", "definition"]);
@@ -23257,66 +24500,66 @@ function validateOriginHordeShape(root) {
     }
   }
 }
-function validateD9Root(root) {
-  validateWorldEvents(root);
-  if (root.ordinaryRosterV2) {
-    closedRecord(root.ordinaryRosterV2, ["version", "activatedTick"]);
-    requireContract(hasWorldCombat(root.plannedWorld) && root.ordinaryRosterV2.version === "dungeon-ordinary-roster-v2", "Unrecognized V2 ordinary roster");
-    safeInteger(root.ordinaryRosterV2.activatedTick);
+function validateD9Root(root2) {
+  validateWorldEvents(root2);
+  if (root2.ordinaryRosterV2) {
+    closedRecord(root2.ordinaryRosterV2, ["version", "activatedTick"]);
+    requireContract(hasWorldCombat(root2.plannedWorld) && root2.ordinaryRosterV2.version === "dungeon-ordinary-roster-v2", "Unrecognized V2 ordinary roster");
+    safeInteger(root2.ordinaryRosterV2.activatedTick);
   }
-  if (root.ordinaryRoster) {
-    closedRecord(root.ordinaryRoster, ["version", "activatedTick"]);
-    requireContract(hasWorldCombat(root.plannedWorld) && root.ordinaryRoster.version === "dungeon-ordinary-roster-v1", "Unrecognized ordinary roster");
-    safeInteger(root.ordinaryRoster.activatedTick);
+  if (root2.ordinaryRoster) {
+    closedRecord(root2.ordinaryRoster, ["version", "activatedTick"]);
+    requireContract(hasWorldCombat(root2.plannedWorld) && root2.ordinaryRoster.version === "dungeon-ordinary-roster-v1", "Unrecognized ordinary roster");
+    safeInteger(root2.ordinaryRoster.activatedTick);
   }
-  validateOriginHordeShape(root);
-  closedRecord(root, ["version", "profile", "origin", "positions", "frame", "regionIndex", "discoveryIndex", "deadlineIndex", "migration", "runtime", "episodes", "content", "paging", "ownershipIndex", "groundIndex", "navigation", "runtimePolicy", "functionalSitesById", "siteReservationsById"], ["plannedWorld", "plannedStart", "settlementInterior", "originHordes", "ordinaryRoster", "ordinaryRosterV2", "worldEvents"]);
-  if (root.plannedWorld) {
-    validatePlannedBinding(root.plannedWorld);
-    validateWorldPosition(root.plannedStart);
-  } else requireContract(!root.plannedStart, "Unbound planned start");
-  requireContract(hasWorldCombat(root.plannedWorld) ? [COMBAT_RUNTIME_VERSION, LEGACY_COMBAT_RUNTIME_VERSION].includes(root.runtimePolicy) : root.runtimePolicy === (hasAlphaPopulation(root.plannedWorld) ? ALPHA_POPULATION_RETENTION.version : D9_RUNTIME_POLICY.version), "Unrecognized runtime admission policy");
-  requireContract(root.version === D9_ROOT_VERSION && canonicalStringify(root.profile) === canonicalStringify(D9_PROFILE), "Unknown pinned world profile");
-  requireContract(/^[a-f0-9]{64}$/.test(root.origin.manifestHash), "Missing origin commitment");
-  for (const p of Object.values(root.positions)) validateWorldPosition(p);
-  closedRecord(root.runtime, ["revision", "frames", "chunks", "groups", "resources"]);
-  const siteGroupCount = Object.values(root.functionalSitesById).reduce((n, site) => n + functionalSiteGroupsD12(site).length, 0);
-  requireContract(root.runtime.frames.length <= D9_RUNTIME_POLICY.frames + Number(hasFerries(root.plannedWorld)) && root.runtime.chunks.length <= D9_RUNTIME_POLICY.residentChunks && root.runtime.groups.length <= (usesHordeRetention({ d9World: root }) ? worldRetentionBudgets({ d9World: root }).groups : D9_RUNTIME_POLICY.proceduralGroups) + siteGroupCount, "D9 runtime admission bound");
-  validateSiteContentRootD9(root.content);
-  validateWorldPagingD9(root.paging);
-  validateNavigationD9(root.navigation);
-  if (root.navigation.knowledge) requireContract(root.navigation.knowledge.assetHash === root.plannedWorld?.assetHash, "Map knowledge asset mismatch");
-  requireContract(root.functionalSitesById && typeof root.functionalSitesById === "object" && !Array.isArray(root.functionalSitesById) && Object.keys(root.functionalSitesById).length <= 4096, "Functional site collection bound");
-  for (const [id, site] of Object.entries(root.functionalSitesById)) {
+  validateOriginHordeShape(root2);
+  closedRecord(root2, ["version", "profile", "origin", "positions", "frame", "regionIndex", "discoveryIndex", "deadlineIndex", "migration", "runtime", "episodes", "content", "paging", "ownershipIndex", "groundIndex", "navigation", "runtimePolicy", "functionalSitesById", "siteReservationsById"], ["plannedWorld", "plannedStart", "settlementInterior", "originHordes", "ordinaryRoster", "ordinaryRosterV2", "worldEvents"]);
+  if (root2.plannedWorld) {
+    validatePlannedBinding(root2.plannedWorld);
+    validateWorldPosition(root2.plannedStart);
+  } else requireContract(!root2.plannedStart, "Unbound planned start");
+  requireContract(hasWorldCombat(root2.plannedWorld) ? [COMBAT_RUNTIME_VERSION, LEGACY_COMBAT_RUNTIME_VERSION].includes(root2.runtimePolicy) : root2.runtimePolicy === (hasAlphaPopulation(root2.plannedWorld) ? ALPHA_POPULATION_RETENTION.version : D9_RUNTIME_POLICY.version), "Unrecognized runtime admission policy");
+  requireContract(root2.version === D9_ROOT_VERSION && canonicalStringify(root2.profile) === canonicalStringify(D9_PROFILE), "Unknown pinned world profile");
+  requireContract(/^[a-f0-9]{64}$/.test(root2.origin.manifestHash), "Missing origin commitment");
+  for (const p of Object.values(root2.positions)) validateWorldPosition(p);
+  closedRecord(root2.runtime, ["revision", "frames", "chunks", "groups", "resources"]);
+  const siteGroupCount = Object.values(root2.functionalSitesById).reduce((n, site) => n + functionalSiteGroupsD12(site).length, 0);
+  requireContract(root2.runtime.frames.length <= D9_RUNTIME_POLICY.frames + Number(hasFerries(root2.plannedWorld)) && root2.runtime.chunks.length <= D9_RUNTIME_POLICY.residentChunks && root2.runtime.groups.length <= (usesHordeRetention({ d9World: root2 }) ? worldRetentionBudgets({ d9World: root2 }).groups : D9_RUNTIME_POLICY.proceduralGroups) + siteGroupCount, "D9 runtime admission bound");
+  validateSiteContentRootD9(root2.content);
+  validateWorldPagingD9(root2.paging);
+  validateNavigationD9(root2.navigation);
+  if (root2.navigation.knowledge) requireContract(root2.navigation.knowledge.assetHash === root2.plannedWorld?.assetHash, "Map knowledge asset mismatch");
+  requireContract(root2.functionalSitesById && typeof root2.functionalSitesById === "object" && !Array.isArray(root2.functionalSitesById) && Object.keys(root2.functionalSitesById).length <= 4096, "Functional site collection bound");
+  for (const [id, site] of Object.entries(root2.functionalSitesById)) {
     requireContract(id === site.siteId, "Functional site key mismatch");
     validateFunctionalSiteD9(site);
   }
-  requireContract(root.siteReservationsById && typeof root.siteReservationsById === "object" && !Array.isArray(root.siteReservationsById) && Object.keys(root.siteReservationsById).length <= 4096, "Site reservation collection bound");
+  requireContract(root2.siteReservationsById && typeof root2.siteReservationsById === "object" && !Array.isArray(root2.siteReservationsById) && Object.keys(root2.siteReservationsById).length <= 4096, "Site reservation collection bound");
   const packages = /* @__PURE__ */ new Set();
-  for (const [id, r] of Object.entries(root.siteReservationsById)) {
+  for (const [id, r] of Object.entries(root2.siteReservationsById)) {
     closedRecord(r, ["version", "siteId", "packageId", "socket", "parcel"]);
     if (r.version === PLANNED_CRYPT_RESERVATION) {
       requireContract(id === r.siteId, "Crypt reservation key drift");
       validateSiteSocketD9(r.socket);
-      validatePlannedCryptReservation(root, r);
+      validatePlannedCryptReservation(root2, r);
       continue;
     }
     if (r.version === PLANNED_RUIN_RESERVATION) {
       requireContract(id === r.siteId, "Ruin reservation key drift");
       validateSiteSocketD9(r.socket);
-      validatePlannedRuinReservation(root, r);
+      validatePlannedRuinReservation(root2, r);
       continue;
     }
     if (r.version === PLANNED_FORT_RESERVATION) {
       requireContract(id === r.siteId, "Fort reservation key drift");
       validateSiteSocketD9(r.socket);
-      validatePlannedFortReservation(root, r);
+      validatePlannedFortReservation(root2, r);
       continue;
     }
     if (r.version === PLANNED_CAVE_RESERVATION) {
       requireContract(id === r.siteId && r.socket.siteId === id, "Planned Cave key mismatch");
       validateSiteSocketD9(r.socket);
-      validatePlannedCaveReservation(root, r);
+      validatePlannedCaveReservation(root2, r);
       continue;
     }
     const family = r.packageId === WOODLAND_CAVE_FAMILY_PACKAGE_ID, modernFamily = family && r.parcel?.version === WOODLAND_CAVE_FAMILY_PARCEL_D12_1, naturalFamily = family && r.parcel?.version === WOODLAND_CAVE_FAMILY_PARCEL_D12_2;
@@ -23327,24 +24570,24 @@ function validateD9Root(root) {
     if (r.packageId === WOODLAND_CAVE_PACKAGE_ID) requireContract(r.parcel.version === WOODLAND_CAVE_VERSION && r.parcel.pages.length === 1, "Cave reservation parcel");
     if (family) requireContract([WOODLAND_CAVE_FAMILY_PARCEL_D12, WOODLAND_CAVE_FAMILY_PARCEL_D12_1, WOODLAND_CAVE_FAMILY_PARCEL_D12_2].includes(r.parcel.version) && r.parcel.familyId === WOODLAND_CAVE_FAMILY_ID && r.parcel.spawnOrdinal >= 0 && r.parcel.spawnOrdinal < (naturalFamily ? 2 : modernFamily ? 16 : 4) && r.parcel.pages.length === 1 && (!(modernFamily || naturalFamily) || /^[a-f0-9]{64}$/.test(r.parcel.layoutSeed) && ["small", "standard", "large", "deep"].includes(r.parcel.tier)), "Cave family parcel");
   }
-  if (root.plannedWorld?.cavePrototype) {
-    const expected = plannedCaveIds(root.plannedWorld), actual = Object.values(root.siteReservationsById).filter((r) => r.version === PLANNED_CAVE_RESERVATION).map((r) => r.socket.provenance.reservationId);
+  if (root2.plannedWorld?.cavePrototype) {
+    const expected = plannedCaveIds(root2.plannedWorld), actual = Object.values(root2.siteReservationsById).filter((r) => r.version === PLANNED_CAVE_RESERVATION).map((r) => r.socket.provenance.reservationId);
     requireContract(actual.length === expected.length && new Set(actual).size === actual.length && expected.every((id) => actual.includes(id)), "Planned Cave composition mismatch");
   }
-  if (root.plannedWorld?.fortPrototype) {
-    const expected = plannedFortIdsV2(root.plannedWorld), actual = Object.values(root.siteReservationsById).filter((r) => r.version === PLANNED_FORT_RESERVATION).map((r) => r.socket.provenance.reservationId);
+  if (root2.plannedWorld?.fortPrototype) {
+    const expected = plannedFortIdsV2(root2.plannedWorld), actual = Object.values(root2.siteReservationsById).filter((r) => r.version === PLANNED_FORT_RESERVATION).map((r) => r.socket.provenance.reservationId);
     requireContract(actual.length === expected.length && new Set(actual).size === actual.length && expected.every((id) => actual.includes(id)), "Fort composition mismatch");
   }
-  if (root.plannedWorld?.ruinPrototype) {
-    const expected = plannedRuinIdsV2(root.plannedWorld), actual = Object.values(root.siteReservationsById).filter((r) => r.version === PLANNED_RUIN_RESERVATION).map((r) => r.socket.provenance.reservationId);
+  if (root2.plannedWorld?.ruinPrototype) {
+    const expected = plannedRuinIdsV2(root2.plannedWorld), actual = Object.values(root2.siteReservationsById).filter((r) => r.version === PLANNED_RUIN_RESERVATION).map((r) => r.socket.provenance.reservationId);
     requireContract(actual.length === expected.length && new Set(actual).size === actual.length && expected.every((id) => actual.includes(id)), "Ruin composition mismatch");
   }
-  if (root.plannedWorld?.cryptPrototype) {
-    const rows = Object.values(root.siteReservationsById).filter((r) => r.version === PLANNED_CRYPT_RESERVATION);
-    const expected = cryptIdsForBinding(root.plannedWorld), actual = rows.map((r) => r.socket.provenance.reservationId);
+  if (root2.plannedWorld?.cryptPrototype) {
+    const rows = Object.values(root2.siteReservationsById).filter((r) => r.version === PLANNED_CRYPT_RESERVATION);
+    const expected = cryptIdsForBinding(root2.plannedWorld), actual = rows.map((r) => r.socket.provenance.reservationId);
     requireContract(actual.length === expected.length && new Set(actual).size === actual.length && expected.every((id) => actual.includes(id)), "Crypt composition drift");
   }
-  return root;
+  return root2;
 }
 
 // src/shared/contracts/origin_egress_d9.js
@@ -24110,7 +25353,7 @@ function economicResources(s, m, playerId = null, spaceInstanceId = null) {
   const layout = encounterResourceLayout(s, m);
   return Object.values(layout).flat().filter((r) => eventResourceVisible(s, r) && (spaceInstanceId === null || r.spaceInstanceId === spaceInstanceId)).map((r) => {
     const group = s.groupsById[r.groupId], economy = s.encounterEconomy.groups[group.groupId], episode = economy.episode, sourceEntityId = episodeRewardId(group.groupId, episode, r.kind, r.ordinal), rewardClass = rewardClassForCompletionResourceD13D_C(s, r), claim = playerId ? eventPersonalClaim(s, r, playerId) ?? personalFinaleClaimD13D_G1(s, r.groupId, sourceEntityId, playerId) : null, record2 = economy.personalCompletionClaimsBySourceId?.[sourceEntityId], used = claim ? claim.claimed : record2 ? record2.eligiblePlayerIds.every((id) => record2.claimedByPlayerId[id]) : Boolean(economy.usedResources[sourceEntityId]);
-    return { ...r, ...eventKind(s, r.groupId) === "spore" && r.ordinal <= 3 ? { position: podPositionV2(s, r.groupId, r.ordinal, r.position) } : {}, ...eventKind(s, r.groupId) === "spore" && r.ordinal < 3 ? { eventPod: true } : {}, ...["spore", "hollow", "cursed_shrine"].includes(eventKind(s, r.groupId)) && r.kind === "chest" ? { eventChest: true, ...eventKind(s, r.groupId) === "cursed_shrine" ? { altarChest: true } : {} } : {}, episode, sourceEntityId, ...rewardClass ? { rewardClass } : {}, ...claim ? { personalClaim: claim } : {}, used };
+    return { ...r, ...eventKind(s, r.groupId) === "spore" && r.ordinal <= 3 ? { position: podPositionV2(s, r.groupId, r.ordinal, r.position) } : {}, ...eventKind(s, r.groupId) === "spore" && r.ordinal < 3 ? { eventPod: true } : {}, ...["spore", "hollow", "cursed_shrine", "nests"].includes(eventKind(s, r.groupId)) && r.kind === "chest" ? { eventChest: true, ...["cursed_shrine", "nests"].includes(eventKind(s, r.groupId)) ? { altarChest: true } : {} } : {}, episode, sourceEntityId, ...rewardClass ? { rewardClass } : {}, ...claim ? { personalClaim: claim } : {}, used };
   });
 }
 function resourceForCommand(s, m, payload, playerId = null) {
@@ -24441,24 +25684,24 @@ function installHostileProjectiles(state) {
   }
 }
 function cancelHostileProjectiles(state, entityId2) {
-  const root = state.hostileCombat;
-  if (!root) return;
-  for (const [id, shot] of Object.entries(root.projectiles)) if (shot.sourceId === entityId2 || shot.intendedTargetId === entityId2) delete root.projectiles[id];
-  for (const [id, action2] of Object.entries(root.actionsByEntityId)) if (id === entityId2 || action2.targetEntityId === entityId2) {
-    root.actionsByEntityId[id] = { ...idleHostileRangedAction(state.tick), actionSequence: action2.actionSequence, ...action2.nextShotTick !== void 0 ? { nextShotTick: action2.nextShotTick } : {} };
+  const root2 = state.hostileCombat;
+  if (!root2) return;
+  for (const [id, shot] of Object.entries(root2.projectiles)) if (shot.sourceId === entityId2 || shot.intendedTargetId === entityId2) delete root2.projectiles[id];
+  for (const [id, action2] of Object.entries(root2.actionsByEntityId)) if (id === entityId2 || action2.targetEntityId === entityId2) {
+    root2.actionsByEntityId[id] = { ...idleHostileRangedAction(state.tick), actionSequence: action2.actionSequence, ...action2.nextShotTick !== void 0 ? { nextShotTick: action2.nextShotTick } : {} };
   }
 }
 function validateHostileProjectiles(state) {
-  const root = state.hostileCombat;
-  if (!root) return;
+  const root2 = state.hostileCombat;
+  if (!root2) return;
   requireContract(hasWorldCombat(state), "Hostile projectiles outside World combat");
-  closedRecord(root, ["version", "actionsByEntityId", "projectiles"], ["catalogUpgrade", "catalogUpgradeV2"]);
-  requireContract(root.version === HOSTILE_PROJECTILES_VERSION, "Hostile projectile version");
-  closedRecord(root.actionsByEntityId, [], Object.keys(root.actionsByEntityId));
-  closedRecord(root.projectiles, [], Object.keys(root.projectiles));
-  requireContract(Object.keys(root.actionsByEntityId).length <= Object.keys(state.entitiesById).length, "Hostile ranged action bound");
+  closedRecord(root2, ["version", "actionsByEntityId", "projectiles"], ["catalogUpgrade", "catalogUpgradeV2"]);
+  requireContract(root2.version === HOSTILE_PROJECTILES_VERSION, "Hostile projectile version");
+  closedRecord(root2.actionsByEntityId, [], Object.keys(root2.actionsByEntityId));
+  closedRecord(root2.projectiles, [], Object.keys(root2.projectiles));
+  requireContract(Object.keys(root2.actionsByEntityId).length <= Object.keys(state.entitiesById).length, "Hostile ranged action bound");
   const parties = new Set(Object.values(state.playersById).map((p) => p.entityId));
-  for (const [id, a] of Object.entries(root.actionsByEntityId)) {
+  for (const [id, a] of Object.entries(root2.actionsByEntityId)) {
     const source3 = state.entitiesById[id], profile = ranged(source3);
     requireContract(source3?.team === "hostile" && profile, "Hostile ranged action owner");
     closedRecord(a, ["phase", "phaseStartedTick", "phaseEndsTick", "targetEntityId", "aim", "actionSequence"], ["nextShotTick"]);
@@ -24481,14 +25724,14 @@ function validateHostileProjectiles(state) {
       vector(a.aim, true);
     }
   }
-  requireContract(Object.keys(root.projectiles).length <= HOSTILE_PROJECTILE_LIMITS.global, "Hostile projectile global bound");
+  requireContract(Object.keys(root2.projectiles).length <= HOSTILE_PROJECTILE_LIMITS.global, "Hostile projectile global bound");
   const counts = /* @__PURE__ */ new Map(), groupByActor = new Map(Object.values(state.groupsById).flatMap((g) => g.entityIds.map((id) => [id, g])));
-  for (const [id, b] of Object.entries(root.projectiles)) {
+  for (const [id, b] of Object.entries(root2.projectiles)) {
     closedRecord(b, ["id", "sourceId", "sourceResidencyRevision", "spaceInstanceId", "intendedTargetId", "position", "direction", "remaining", "remainingTicks", "firedTick", "radius", "type", "attack", "sourceLevel", "actionSequence"]);
     validateId("attackActionId", id);
     requireContract(b.id === id, "Hostile projectile identity");
     const source3 = state.entitiesById[b.sourceId], profile = ranged(source3), g = groupByActor.get(b.sourceId);
-    requireContract(source3?.alive && source3.team === "hostile" && profile && root.actionsByEntityId[b.sourceId], "Hostile projectile source");
+    requireContract(source3?.alive && source3.team === "hostile" && profile && root2.actionsByEntityId[b.sourceId], "Hostile projectile source");
     requireContract(source3.residency.spaceInstanceId === b.spaceInstanceId && source3.residency.residencyRevision === b.sourceResidencyRevision, "Hostile projectile source residency");
     requireContract(parties.has(b.intendedTargetId), "Hostile projectile intended target");
     requireContract(state.entitiesById[b.intendedTargetId].residency.spaceInstanceId === b.spaceInstanceId, "Hostile projectile target residency");
@@ -25307,8 +26550,8 @@ function connectedRegionCut(bfs, slots, settlementNeighbor, random, minimumHomeC
     roadPairs.add([keyFor(parent), keyFor(bfs[index])].sort().join("/"));
   }
   const candidates = [];
-  for (const root of bfs.slice(1)) {
-    const component = /* @__PURE__ */ new Set(), pending = [keyFor(root)];
+  for (const root2 of bfs.slice(1)) {
+    const component = /* @__PURE__ */ new Set(), pending = [keyFor(root2)];
     while (pending.length) {
       const key2 = pending.pop();
       component.add(key2);
@@ -25952,23 +27195,23 @@ function wallContact(collision, start, delta3, radius) {
 }
 function createHostileProjectileSimulation(state, { damage, eligible: eligible2, identity: identity2, lineClear: lineClear2, canAct = () => true, canLaunch = eligible2, getSourceLevel = () => 1 }) {
   const profile = ordinaryRangedProfile;
-  const root = () => state.hostileCombat;
+  const root2 = () => state.hostileCombat;
   const connected = (a) => Object.values(state.playersById).some((p) => p.entityId === a?.entityId && p.connectionStatus === "connected");
   const resetAction = (action2) => ({ ...idle(state.tick), ...action2?.nextShotTick !== void 0 ? { nextShotTick: action2.nextShotTick } : {} });
   function cancelSource(id) {
-    const c = root();
+    const c = root2();
     if (!c) return;
     delete c.actionsByEntityId[id];
     for (const [key2, p] of Object.entries(c.projectiles)) if (p.sourceId === id) delete c.projectiles[key2];
   }
   function cancelTarget(id) {
-    const c = root();
+    const c = root2();
     if (!c) return;
     for (const [key2, a] of Object.entries(c.actionsByEntityId)) if (a.targetEntityId === id) c.actionsByEntityId[key2] = resetAction(a);
     for (const [key2, p] of Object.entries(c.projectiles)) if (p.intendedTargetId === id) delete c.projectiles[key2];
   }
   function beginTick(activeIds) {
-    const c = root();
+    const c = root2();
     if (!c) return;
     const active = new Set(activeIds);
     for (const [id, action2] of Object.entries(c.actionsByEntityId)) {
@@ -25992,7 +27235,7 @@ function createHostileProjectileSimulation(state, { damage, eligible: eligible2,
     }
   }
   function observeTarget(source3, target, intent) {
-    const config = profile(source3), c = root();
+    const config = profile(source3), c = root2();
     if (!config || !c) return intent;
     const action2 = c.actionsByEntityId[source3.entityId] ??= idle(state.tick);
     if (action2.phase !== "idle") return { x: 0, y: 0 };
@@ -26011,7 +27254,7 @@ function createHostileProjectileSimulation(state, { damage, eligible: eligible2,
     return { x: 0, y: 0 };
   }
   function advance() {
-    const c = root();
+    const c = root2();
     if (!c) return;
     for (const [id, action2] of Object.entries(c.actionsByEntityId).sort(([a], [b]) => a.localeCompare(b))) {
       if (action2.phase !== "windup" || state.tick < action2.phaseEndsTick) continue;
@@ -26082,7 +27325,7 @@ function createHostileProjectileSimulation(state, { damage, eligible: eligible2,
   function canMelee(source3, target) {
     const config = profile(source3);
     if (!config) return true;
-    if (!config.meleeFallback || !target || root()?.actionsByEntityId[source3.entityId]?.phase !== "idle") return false;
+    if (!config.meleeFallback || !target || root2()?.actionsByEntityId[source3.entityId]?.phase !== "idle") return false;
     return Math.hypot(target.position.x - source3.position.x, target.position.y - source3.position.y) <= config.minimumRange;
   }
   return Object.freeze({ beginTick, observeTarget, advance, cancelSource, cancelTarget, isRanged: (a) => Boolean(profile(a)), canMelee });
@@ -27362,9 +28605,9 @@ function createActivityScheduler(state, options = {}, { beforeSleep = () => true
     for (const key2 of separatedSince.keys()) if (!relevantPairs.has(key2)) separatedSince.delete(key2);
     const components = /* @__PURE__ */ new Map();
     sorted.forEach((p, i) => {
-      const root = find(i);
-      if (!components.has(root)) components.set(root, { spaceInstanceId: p.residency.spaceInstanceId, playerEntityIds: [] });
-      components.get(root).playerEntityIds.push(p.entityId);
+      const root2 = find(i);
+      if (!components.has(root2)) components.set(root2, { spaceInstanceId: p.residency.spaceInstanceId, playerEntityIds: [] });
+      components.get(root2).playerEntityIds.push(p.entityId);
     });
     clusters = [...components.values()];
     const activeIds = new Set(players.map((a) => a.entityId));
@@ -27662,9 +28905,9 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     return { r: extent(a, F.reach), spread: wide ? F.wideCone : F.cone };
   }
   function whirlingBlades2(a, stats, aim2, commandId) {
-    const W3 = T5.whirlingBlades, reach = aug(a, "whirling_blades", 0) ? scaled(W3.radius, T5.wide) : W3.radius, targets = cone(a, aim2, reach, Math.PI, W3.targets);
-    if (aug(a, "whirling_blades", 1)) for (const t of targets) pull(a, t, W3.pull);
-    for (const t of targets) for (let i = 0; i < W3.hits && t.alive; i++) damage(a, t, multiplyCombat(stats.attack, ...W3.attack), "offhand", commandId, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "skill" });
+    const W4 = T5.whirlingBlades, reach = aug(a, "whirling_blades", 0) ? scaled(W4.radius, T5.wide) : W4.radius, targets = cone(a, aim2, reach, Math.PI, W4.targets);
+    if (aug(a, "whirling_blades", 1)) for (const t of targets) pull(a, t, W4.pull);
+    for (const t of targets) for (let i = 0; i < W4.hits && t.alive; i++) damage(a, t, multiplyCombat(stats.attack, ...W4.attack), "offhand", commandId, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "skill" });
     return { r: extent(a, reach) };
   }
   const spell = (stats, attack) => {
@@ -28360,21 +29603,21 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
   const contactQueue = /* @__PURE__ */ new Map();
   const swiftTargets = (e) => activeElite(e.entityId) ? selectSwiftCommanderTargetsD12_4D(state, e) : [];
   const eliteRoot = () => {
-    const root = state.eliteCombat;
-    if (root) {
-      root.hasteByEntityId ??= {};
-      root.timedStatusesByEntityId ??= {};
-      root.guardByEntityId ??= {};
-      root.attackAuraByEntityId ??= {};
-      root.nullificationResistanceByEntityId ??= {};
-      root.pendingHazardsBySourceEliteId ??= {};
-      root.hazardsById ??= {};
-      root.webbedByEntityId ??= {};
-      root.slagBurnByEntityId ??= {};
+    const root2 = state.eliteCombat;
+    if (root2) {
+      root2.hasteByEntityId ??= {};
+      root2.timedStatusesByEntityId ??= {};
+      root2.guardByEntityId ??= {};
+      root2.attackAuraByEntityId ??= {};
+      root2.nullificationResistanceByEntityId ??= {};
+      root2.pendingHazardsBySourceEliteId ??= {};
+      root2.hazardsById ??= {};
+      root2.webbedByEntityId ??= {};
+      root2.slagBurnByEntityId ??= {};
     }
-    return root;
+    return root2;
   };
-  function refreshHasteSources(root, commanders) {
+  function refreshHasteSources(root2, commanders) {
     const sourcesByTarget = /* @__PURE__ */ new Map();
     for (const e of commanders) {
       for (const target of swiftTargets(e)) {
@@ -28385,16 +29628,16 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
     }
     for (const [entityId2, sources] of sourcesByTarget) {
       sources.sort();
-      const h = root.hasteByEntityId[entityId2] ??= { version: ELITE_HASTE_D12_4D_VERSION, entityId: entityId2, stacks: 0, sourceEliteIds: [], lastRefreshTick: state.tick, lingerExpiresTick: state.tick + SWIFT_COMMANDER_D12_4D.pulse.lingerTicks, nextDecayTick: null, lastStackTick: null, lastDecayTick: null };
+      const h = root2.hasteByEntityId[entityId2] ??= { version: ELITE_HASTE_D12_4D_VERSION, entityId: entityId2, stacks: 0, sourceEliteIds: [], lastRefreshTick: state.tick, lingerExpiresTick: state.tick + SWIFT_COMMANDER_D12_4D.pulse.lingerTicks, nextDecayTick: null, lastStackTick: null, lastDecayTick: null };
       h.sourceEliteIds = sources;
       h.lastRefreshTick = state.tick;
       h.lingerExpiresTick = state.tick + SWIFT_COMMANDER_D12_4D.pulse.lingerTicks;
       h.nextDecayTick = h.lingerExpiresTick;
     }
-    for (const [entityId2, h] of Object.entries(root.hasteByEntityId)) if (!sourcesByTarget.has(entityId2)) h.sourceEliteIds = [];
+    for (const [entityId2, h] of Object.entries(root2.hasteByEntityId)) if (!sourcesByTarget.has(entityId2)) h.sourceEliteIds = [];
     return sourcesByTarget;
   }
-  function advanceSwift(root, commanders, sourcesByTarget) {
+  function advanceSwift(root2, commanders, sourcesByTarget) {
     for (const e of commanders) {
       if (state.tick < e.nextPulseTick) continue;
       requireContract(state.tick === e.nextPulseTick, "Swift Commander pulse schedule skipped");
@@ -28404,7 +29647,7 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
       counters.hastePulses++;
       const recipients = [];
       for (const target of swiftTargets(e)) {
-        const h = root.hasteByEntityId[target.entityId];
+        const h = root2.hasteByEntityId[target.entityId];
         requireContract(h && sourcesByTarget.get(target.entityId)?.includes(e.eliteId), "Swift Commander source refresh missing");
         const previousStacks = h.stacks;
         h.stacks = Math.min(SWIFT_COMMANDER_D12_4D.pulse.maxStacks, h.stacks + 1);
@@ -28416,11 +29659,11 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
       counters.recipients += recipients.length;
     }
   }
-  function decayHaste(root, sourcesByTarget) {
-    for (const [entityId2, h] of Object.entries(root.hasteByEntityId)) {
+  function decayHaste(root2, sourcesByTarget) {
+    for (const [entityId2, h] of Object.entries(root2.hasteByEntityId)) {
       if (sourcesByTarget.has(entityId2)) continue;
       if (h.stacks === 0) {
-        delete root.hasteByEntityId[entityId2];
+        delete root2.hasteByEntityId[entityId2];
         continue;
       }
       if (state.tick < h.nextDecayTick) continue;
@@ -28431,14 +29674,14 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
       h.nextDecayTick = h.stacks ? state.tick + SWIFT_COMMANDER_D12_4D.pulse.decayTicks : null;
     }
   }
-  function cleanupGuard(root) {
-    for (const [entityId2, g] of Object.entries(root.guardByEntityId)) {
+  function cleanupGuard(root2) {
+    for (const [entityId2, g] of Object.entries(root2.guardByEntityId)) {
       const actor = state.entitiesById[entityId2];
-      if (!actor?.alive || actor.team !== "hostile" || actor.residency.spaceInstanceId !== g.spaceInstanceId) delete root.guardByEntityId[entityId2];
+      if (!actor?.alive || actor.team !== "hostile" || actor.residency.spaceInstanceId !== g.spaceInstanceId) delete root2.guardByEntityId[entityId2];
     }
   }
-  function refreshGuardSources(root, citadels) {
-    cleanupGuard(root);
+  function refreshGuardSources(root2, citadels) {
+    cleanupGuard(root2);
     const sourcesByTarget = /* @__PURE__ */ new Map();
     for (const e of citadels) {
       for (const target of selectIronCitadelTargetsD12_4G(state, e)) {
@@ -28449,7 +29692,7 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
     }
     for (const [entityId2, sources] of sourcesByTarget) {
       sources.sort();
-      const actor = state.entitiesById[entityId2], g = root.guardByEntityId[entityId2] ??= { version: ELITE_GUARD_D12_4G_VERSION, entityId: entityId2, spaceInstanceId: actor.residency.spaceInstanceId, stacks: 0, sourceEliteIds: [], lastRefreshTick: state.tick, lingerExpiresTick: state.tick + IRON_CITADEL_D12_4G.pulse.lingerTicks, nextDecayTick: state.tick + IRON_CITADEL_D12_4G.pulse.lingerTicks, lastStackTick: null, lastDecayTick: null, lastImpact: null };
+      const actor = state.entitiesById[entityId2], g = root2.guardByEntityId[entityId2] ??= { version: ELITE_GUARD_D12_4G_VERSION, entityId: entityId2, spaceInstanceId: actor.residency.spaceInstanceId, stacks: 0, sourceEliteIds: [], lastRefreshTick: state.tick, lingerExpiresTick: state.tick + IRON_CITADEL_D12_4G.pulse.lingerTicks, nextDecayTick: state.tick + IRON_CITADEL_D12_4G.pulse.lingerTicks, lastStackTick: null, lastDecayTick: null, lastImpact: null };
       g.sourceEliteIds = sources;
       g.spaceInstanceId = actor.residency.spaceInstanceId;
       g.lastRefreshTick = state.tick;
@@ -28457,10 +29700,10 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
       g.nextDecayTick = g.lingerExpiresTick;
       g.lastDecayTick = null;
     }
-    for (const [entityId2, g] of Object.entries(root.guardByEntityId)) if (!sourcesByTarget.has(entityId2)) g.sourceEliteIds = [];
+    for (const [entityId2, g] of Object.entries(root2.guardByEntityId)) if (!sourcesByTarget.has(entityId2)) g.sourceEliteIds = [];
     return sourcesByTarget;
   }
-  function advanceIronCitadel(root, citadels, sourcesByTarget) {
+  function advanceIronCitadel(root2, citadels, sourcesByTarget) {
     for (const e of citadels) {
       if (state.tick < e.nextPulseTick) continue;
       requireContract(state.tick === e.nextPulseTick, "Iron Citadel pulse schedule skipped");
@@ -28470,7 +29713,7 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
       counters.guardPulses++;
       const recipients = [];
       for (const target of selectIronCitadelTargetsD12_4G(state, e)) {
-        const g = root.guardByEntityId[target.entityId];
+        const g = root2.guardByEntityId[target.entityId];
         requireContract(g && sourcesByTarget.get(target.entityId)?.includes(e.eliteId), "Iron Citadel source refresh missing");
         const previousStacks = g.stacks;
         g.stacks = Math.min(IRON_CITADEL_D12_4G.pulse.maxStacks, g.stacks + 1);
@@ -28482,11 +29725,11 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
       counters.recipients += recipients.length;
     }
   }
-  function decayGuard(root, sourcesByTarget) {
-    for (const [entityId2, g] of Object.entries(root.guardByEntityId)) {
+  function decayGuard(root2, sourcesByTarget) {
+    for (const [entityId2, g] of Object.entries(root2.guardByEntityId)) {
       if (sourcesByTarget.has(entityId2)) continue;
       if (g.stacks === 0) {
-        delete root.guardByEntityId[entityId2];
+        delete root2.guardByEntityId[entityId2];
         continue;
       }
       if (state.tick < g.nextDecayTick) continue;
@@ -28495,24 +29738,24 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
       g.lastDecayTick = state.tick;
       counters.guardDecays++;
       if (g.stacks) g.nextDecayTick = state.tick + IRON_CITADEL_D12_4G.pulse.decayTicks;
-      else delete root.guardByEntityId[entityId2];
+      else delete root2.guardByEntityId[entityId2];
     }
   }
   function clearGuard(entityId2) {
-    const root = eliteRoot();
-    if (!root?.guardByEntityId[entityId2]) return false;
-    delete root.guardByEntityId[entityId2];
+    const root2 = eliteRoot();
+    if (!root2?.guardByEntityId[entityId2]) return false;
+    delete root2.guardByEntityId[entityId2];
     return true;
   }
   function clearGuardForGroup(groupId) {
-    const root = eliteRoot(), group = state.groupsById[groupId];
-    if (!root || !group) return 0;
+    const root2 = eliteRoot(), group = state.groupsById[groupId];
+    if (!root2 || !group) return 0;
     let count = 0;
     for (const entityId2 of group.entityIds) if (clearGuard(entityId2)) count++;
     return count;
   }
   function mitigateDirectDamage(source3, target, raw, { periodic = false, trigger = null, scripted = false } = {}) {
-    const root = eliteRoot(), g = root?.guardByEntityId?.[target?.entityId];
+    const root2 = eliteRoot(), g = root2?.guardByEntityId?.[target?.entityId];
     if (periodic || trigger === "periodic" || scripted || source3?.team !== "party" || target?.team !== "hostile" || !target.alive || !g?.stacks || compareCombat(raw, 0) <= 0) return { damage: raw, guard: null };
     const percent = g.stacks * IRON_CITADEL_D12_4G.pulse.perStackMitigationPercent, damage = combatInteger(maxCombat(1, combatInteger(multiplyCombat(raw, 100 - percent, 100), "round")), "round"), mitigated = combatInteger(subtractCombat(raw, damage), "round");
     g.lastImpact = { tick: state.tick, sourceEntityId: source3.entityId, damageBefore: copyWire(raw), damageAfter: copyWire(damage), mitigated: copyWire(mitigated), stacks: g.stacks };
@@ -28520,14 +29763,14 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
     counters.guardDamagePrevented = combatInteger(addCombat(counters.guardDamagePrevented, mitigated), "round");
     return { damage, guard: copyWire(g.lastImpact) };
   }
-  function cleanupAttackAura(root) {
-    for (const [entityId2, aura4] of Object.entries(root.attackAuraByEntityId)) {
+  function cleanupAttackAura(root2) {
+    for (const [entityId2, aura4] of Object.entries(root2.attackAuraByEntityId)) {
       const actor = state.entitiesById[entityId2], group = state.groupsById[aura4.groupId];
-      if (!actor?.alive || actor.team !== "hostile" || !group?.entityIds.includes(entityId2) || actor.residency.spaceInstanceId !== aura4.spaceInstanceId) delete root.attackAuraByEntityId[entityId2];
+      if (!actor?.alive || actor.team !== "hostile" || !group?.entityIds.includes(entityId2) || actor.residency.spaceInstanceId !== aura4.spaceInstanceId) delete root2.attackAuraByEntityId[entityId2];
     }
   }
-  function refreshAttackAuraSources(root, berserkers) {
-    cleanupAttackAura(root);
+  function refreshAttackAuraSources(root2, berserkers) {
+    cleanupAttackAura(root2);
     const sourcesByTarget = /* @__PURE__ */ new Map();
     for (const e of berserkers) {
       for (const target of selectBloodBerserkerTargetsD12_4H_A(state, e)) {
@@ -28538,7 +29781,7 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
     }
     for (const [entityId2, sources] of sourcesByTarget) {
       sources.sort();
-      const actor = state.entitiesById[entityId2], group = state.groupsById[berserkers.find((e) => sources.includes(e.eliteId)).groupId], aura4 = root.attackAuraByEntityId[entityId2] ??= { version: ELITE_ATTACK_AURA_D12_4H_A_VERSION, entityId: entityId2, groupId: group.groupId, spaceInstanceId: actor.residency.spaceInstanceId, stacks: 0, sourceEliteIds: [], lastRefreshTick: state.tick, lingerExpiresTick: state.tick + BLOOD_BERSERKER_D12_4H_A.pulse.lingerTicks, nextDecayTick: state.tick + BLOOD_BERSERKER_D12_4H_A.pulse.lingerTicks, lastStackTick: null, lastDecayTick: null };
+      const actor = state.entitiesById[entityId2], group = state.groupsById[berserkers.find((e) => sources.includes(e.eliteId)).groupId], aura4 = root2.attackAuraByEntityId[entityId2] ??= { version: ELITE_ATTACK_AURA_D12_4H_A_VERSION, entityId: entityId2, groupId: group.groupId, spaceInstanceId: actor.residency.spaceInstanceId, stacks: 0, sourceEliteIds: [], lastRefreshTick: state.tick, lingerExpiresTick: state.tick + BLOOD_BERSERKER_D12_4H_A.pulse.lingerTicks, nextDecayTick: state.tick + BLOOD_BERSERKER_D12_4H_A.pulse.lingerTicks, lastStackTick: null, lastDecayTick: null };
       aura4.sourceEliteIds = sources;
       aura4.groupId = group.groupId;
       aura4.spaceInstanceId = actor.residency.spaceInstanceId;
@@ -28547,10 +29790,10 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
       aura4.nextDecayTick = aura4.lingerExpiresTick;
       aura4.lastDecayTick = null;
     }
-    for (const [entityId2, aura4] of Object.entries(root.attackAuraByEntityId)) if (!sourcesByTarget.has(entityId2)) aura4.sourceEliteIds = [];
+    for (const [entityId2, aura4] of Object.entries(root2.attackAuraByEntityId)) if (!sourcesByTarget.has(entityId2)) aura4.sourceEliteIds = [];
     return sourcesByTarget;
   }
-  function advanceBloodBerserker(root, berserkers, sourcesByTarget) {
+  function advanceBloodBerserker(root2, berserkers, sourcesByTarget) {
     for (const e of berserkers) {
       if (state.tick < e.nextPulseTick) continue;
       requireContract(state.tick === e.nextPulseTick, "Berserker pulse schedule skipped");
@@ -28560,7 +29803,7 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
       counters.attackAuraPulses++;
       const recipients = [];
       for (const target of selectBloodBerserkerTargetsD12_4H_A(state, e)) {
-        const aura4 = root.attackAuraByEntityId[target.entityId];
+        const aura4 = root2.attackAuraByEntityId[target.entityId];
         requireContract(aura4 && sourcesByTarget.get(target.entityId)?.includes(e.eliteId), "Berserker source refresh missing");
         const previousStacks = aura4.stacks;
         aura4.stacks = Math.min(BLOOD_BERSERKER_D12_4H_A.pulse.maxStacks, aura4.stacks + 1);
@@ -28572,11 +29815,11 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
       counters.recipients += recipients.length;
     }
   }
-  function decayAttackAura(root, sourcesByTarget) {
-    for (const [entityId2, aura4] of Object.entries(root.attackAuraByEntityId)) {
+  function decayAttackAura(root2, sourcesByTarget) {
+    for (const [entityId2, aura4] of Object.entries(root2.attackAuraByEntityId)) {
       if (sourcesByTarget.has(entityId2)) continue;
       if (aura4.stacks === 0) {
-        delete root.attackAuraByEntityId[entityId2];
+        delete root2.attackAuraByEntityId[entityId2];
         continue;
       }
       if (state.tick < aura4.nextDecayTick) continue;
@@ -28585,30 +29828,30 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
       aura4.lastDecayTick = state.tick;
       counters.attackAuraDecays++;
       if (aura4.stacks) aura4.nextDecayTick = state.tick + BLOOD_BERSERKER_D12_4H_A.pulse.decayTicks;
-      else delete root.attackAuraByEntityId[entityId2];
+      else delete root2.attackAuraByEntityId[entityId2];
     }
   }
   function clearAttackAura(entityId2) {
-    const root = eliteRoot();
-    if (!root?.attackAuraByEntityId[entityId2]) return false;
-    delete root.attackAuraByEntityId[entityId2];
+    const root2 = eliteRoot();
+    if (!root2?.attackAuraByEntityId[entityId2]) return false;
+    delete root2.attackAuraByEntityId[entityId2];
     return true;
   }
   function clearWebbed(entityId2) {
-    const root = eliteRoot();
-    if (!root?.webbedByEntityId[entityId2]) return false;
-    delete root.webbedByEntityId[entityId2];
+    const root2 = eliteRoot();
+    if (!root2?.webbedByEntityId[entityId2]) return false;
+    delete root2.webbedByEntityId[entityId2];
     return true;
   }
   function clearSlagBurn(entityId2) {
-    const root = eliteRoot();
-    if (!root?.slagBurnByEntityId[entityId2]) return false;
-    delete root.slagBurnByEntityId[entityId2];
+    const root2 = eliteRoot();
+    if (!root2?.slagBurnByEntityId[entityId2]) return false;
+    delete root2.slagBurnByEntityId[entityId2];
     return true;
   }
   function clearAttackAuraForGroup(groupId) {
-    const root = eliteRoot(), group = state.groupsById[groupId];
-    if (!root || !group) return 0;
+    const root2 = eliteRoot(), group = state.groupsById[groupId];
+    if (!root2 || !group) return 0;
     let count = 0;
     for (const entityId2 of group.entityIds) if (clearAttackAura(entityId2)) count++;
     return count;
@@ -28620,66 +29863,66 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
     counters.attackAuraDirectHits++;
     return { damage, attackAura: { statusId: BLOOD_BERSERKER_D12_4H_A.pulse.statusId, stacks: aura4.stacks, multiplier: percent / 100, delivery } };
   }
-  function expireTimedStatuses(root) {
-    for (const [entityId2, statuses] of Object.entries(root.timedStatusesByEntityId)) {
+  function expireTimedStatuses(root2) {
+    for (const [entityId2, statuses] of Object.entries(root2.timedStatusesByEntityId)) {
       for (const [statusId, status2] of Object.entries(statuses)) if (statusId === GLACIAL_WARDEN_D12_4E.pulse.statusId && state.tick >= status2.expirationTick) {
         delete statuses[statusId];
         counters.snaresExpired++;
       }
-      if (!Object.keys(statuses).length) delete root.timedStatusesByEntityId[entityId2];
+      if (!Object.keys(statuses).length) delete root2.timedStatusesByEntityId[entityId2];
     }
   }
-  function advanceNullificationWindows(root) {
+  function advanceNullificationWindows(root2) {
     const statusId = NULLIFIER_D12_4I.pulse.statusId;
-    for (const [entityId2, resistance] of Object.entries(root.nullificationResistanceByEntityId)) {
+    for (const [entityId2, resistance] of Object.entries(root2.nullificationResistanceByEntityId)) {
       const actor = state.entitiesById[entityId2];
       if (!actor?.alive || state.tick >= resistance.expirationTick) {
-        delete root.nullificationResistanceByEntityId[entityId2];
+        delete root2.nullificationResistanceByEntityId[entityId2];
         if (actor?.alive) counters.nullificationResistanceExpired++;
       }
     }
-    for (const [entityId2, statuses] of Object.entries(root.timedStatusesByEntityId)) {
+    for (const [entityId2, statuses] of Object.entries(root2.timedStatusesByEntityId)) {
       const status2 = statuses[statusId];
       if (!status2) continue;
       const actor = state.entitiesById[entityId2];
       if (!actor?.alive) {
         delete statuses[statusId];
-        if (!Object.keys(statuses).length) delete root.timedStatusesByEntityId[entityId2];
+        if (!Object.keys(statuses).length) delete root2.timedStatusesByEntityId[entityId2];
         continue;
       }
       if (state.tick < status2.expirationTick) continue;
       requireContract(state.tick === status2.expirationTick, "Nullified expiration schedule skipped");
       delete statuses[statusId];
-      if (!Object.keys(statuses).length) delete root.timedStatusesByEntityId[entityId2];
-      root.nullificationResistanceByEntityId[entityId2] = { version: NULLIFICATION_RESISTANCE_D12_4I_VERSION, entityId: entityId2, statusId, sourceEliteId: status2.sourceEliteId, startedTick: state.tick, expirationTick: state.tick + NULLIFIER_D12_4I.pulse.resistanceTicks };
+      if (!Object.keys(statuses).length) delete root2.timedStatusesByEntityId[entityId2];
+      root2.nullificationResistanceByEntityId[entityId2] = { version: NULLIFICATION_RESISTANCE_D12_4I_VERSION, entityId: entityId2, statusId, sourceEliteId: status2.sourceEliteId, startedTick: state.tick, expirationTick: state.tick + NULLIFIER_D12_4I.pulse.resistanceTicks };
       counters.nullifiedExpired++;
     }
   }
   function clearNullification(entityId2) {
-    const root = eliteRoot();
-    if (!root) return false;
-    const statuses = root.timedStatusesByEntityId[entityId2], removed = Boolean(statuses?.[NULLIFIER_D12_4I.pulse.statusId] || root.nullificationResistanceByEntityId[entityId2]);
+    const root2 = eliteRoot();
+    if (!root2) return false;
+    const statuses = root2.timedStatusesByEntityId[entityId2], removed = Boolean(statuses?.[NULLIFIER_D12_4I.pulse.statusId] || root2.nullificationResistanceByEntityId[entityId2]);
     if (statuses) {
       delete statuses[NULLIFIER_D12_4I.pulse.statusId];
-      if (!Object.keys(statuses).length) delete root.timedStatusesByEntityId[entityId2];
+      if (!Object.keys(statuses).length) delete root2.timedStatusesByEntityId[entityId2];
     }
-    delete root.nullificationResistanceByEntityId[entityId2];
+    delete root2.nullificationResistanceByEntityId[entityId2];
     return removed;
   }
   function clearHostilePoison(entityId2) {
-    const root = eliteRoot(), statuses = root?.timedStatusesByEntityId?.[entityId2];
+    const root2 = eliteRoot(), statuses = root2?.timedStatusesByEntityId?.[entityId2];
     if (!statuses) return false;
     const removed = Boolean(statuses[TOXIC_DECAY_D12_4F.pulse.statusId]);
     delete statuses[TOXIC_DECAY_D12_4F.pulse.statusId];
-    if (!Object.keys(statuses).length) delete root.timedStatusesByEntityId[entityId2];
+    if (!Object.keys(statuses).length) delete root2.timedStatusesByEntityId[entityId2];
     return removed;
   }
   function beginTick() {
-    const root = eliteRoot();
-    if (!root) return;
-    maintainHostileHazards(root);
-    advanceNullificationWindows(root);
-    for (const [entityId2, statuses] of Object.entries(root.timedStatusesByEntityId).sort(([a], [b]) => a.localeCompare(b))) {
+    const root2 = eliteRoot();
+    if (!root2) return;
+    maintainHostileHazards(root2);
+    advanceNullificationWindows(root2);
+    for (const [entityId2, statuses] of Object.entries(root2.timedStatusesByEntityId).sort(([a], [b]) => a.localeCompare(b))) {
       const status2 = statuses[TOXIC_DECAY_D12_4F.pulse.statusId];
       if (!status2) continue;
       const target = state.entitiesById[entityId2];
@@ -28689,7 +29932,7 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
       }
       if (state.tick >= status2.nextTickAt && status2.nextTickAt <= status2.expirationTick) {
         requireContract(state.tick === status2.nextTickAt, "Toxic Decay tick schedule skipped");
-        const damage = combatInteger(multiplyCombat(status2.damagePerStack, status2.stacks), "round"), source3 = Object.values(root.elitesByEntityId).find((row2) => row2.eliteId === status2.sourceEliteId), result = applyPeriodicDamage({ sourceEntityId: source3.entityId, targetEntityId: entityId2, damage, stacks: status2.stacks, statusId: status2.statusId, sourceEliteId: status2.sourceEliteId });
+        const damage = combatInteger(multiplyCombat(status2.damagePerStack, status2.stacks), "round"), source3 = Object.values(root2.elitesByEntityId).find((row2) => row2.eliteId === status2.sourceEliteId), result = applyPeriodicDamage({ sourceEntityId: source3.entityId, targetEntityId: entityId2, damage, stacks: status2.stacks, statusId: status2.statusId, sourceEliteId: status2.sourceEliteId });
         counters.toxicTicks++;
         counters.toxicDamage = combatInteger(addCombat(counters.toxicDamage, result.damage), "round");
         status2.lastTick = { tick: state.tick, damage: copyWire(result.damage), stacks: status2.stacks, sourceEliteId: status2.sourceEliteId, targetAlive: result.targetAlive };
@@ -28710,20 +29953,20 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
     return true;
   }
   function resolveContactMelee() {
-    const root = eliteRoot();
-    if (!root) {
+    const root2 = eliteRoot();
+    if (!root2) {
       contactQueue.clear();
       return;
     }
     const rows = [...contactQueue.values()].sort((a, b) => a.sourceEntityId.localeCompare(b.sourceEntityId) || a.targetEntityId.localeCompare(b.targetEntityId));
     contactQueue.clear();
     for (const row2 of rows) {
-      const e = root.elitesByEntityId[row2.sourceEntityId], target = state.entitiesById[row2.targetEntityId];
+      const e = root2.elitesByEntityId[row2.sourceEntityId], target = state.entitiesById[row2.targetEntityId];
       if (e?.affixIds[0] !== TOXIC_DECAY_AFFIX_ID || !target?.alive || state.tick < e.nextPulseTick) continue;
-      const definition2 = TOXIC_DECAY_D12_4F, byStatus = root.timedStatusesByEntityId[target.entityId] ??= {}, prior = byStatus[definition2.pulse.statusId], previousStacks = prior?.stacks ?? 0, stacks = Math.min(definition2.pulse.maxStacks, previousStacks + 1), sourceEliteId = prior?.lastApplicationTick === state.tick ? [prior.sourceEliteId, e.eliteId].sort()[0] : e.eliteId, damagePerStack = combatInteger(maxCombat(1, combatInteger(multiplyCombat(target.maxHp, definition2.pulse.damageMaxHp.numerator, definition2.pulse.damageMaxHp.denominator), "round")), "round");
+      const definition2 = TOXIC_DECAY_D12_4F, byStatus = root2.timedStatusesByEntityId[target.entityId] ??= {}, prior = byStatus[definition2.pulse.statusId], previousStacks = prior?.stacks ?? 0, stacks = Math.min(definition2.pulse.maxStacks, previousStacks + 1), sourceEliteId = prior?.lastApplicationTick === state.tick ? [prior.sourceEliteId, e.eliteId].sort()[0] : e.eliteId, damagePerStack = combatInteger(maxCombat(1, combatInteger(multiplyCombat(target.maxHp, definition2.pulse.damageMaxHp.numerator, definition2.pulse.damageMaxHp.denominator), "round")), "round");
       const status2 = { version: TIMED_PLAYER_POISON_D12_4F_VERSION, entityId: target.entityId, statusId: definition2.pulse.statusId, sourceEliteId, applicationTick: prior?.applicationTick ?? state.tick, lastApplicationTick: state.tick, lastApplicationAdded: stacks > previousStacks, expirationTick: state.tick + definition2.pulse.durationTicks, nextTickAt: prior?.nextTickAt ?? state.tick + definition2.pulse.tickTicks, tickIntervalTicks: definition2.pulse.tickTicks, stacks, damagePerStack, lastTick: prior?.lastTick ?? null };
       byStatus[definition2.pulse.statusId] = status2;
-      root.timedStatusesByEntityId[target.entityId] = byStatus;
+      root2.timedStatusesByEntityId[target.entityId] = byStatus;
       e.pulseSequence++;
       e.nextPulseTick = state.tick + definition2.pulse.cadenceTicks;
       e.lastPulse = { tick: state.tick, sequence: e.pulseSequence, recipients: [{ entityId: target.entityId, statusId: status2.statusId, previousStacks, stacks, stackAdded: stacks > previousStacks, expiresTick: status2.expirationTick, nextTickAt: status2.nextTickAt }] };
@@ -28731,14 +29974,14 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
       if (stacks > previousStacks) counters.toxicStacksAdded++;
     }
   }
-  function applyGlacialSnare(root, e, target) {
-    const definition2 = GLACIAL_WARDEN_D12_4E, byStatus = root.timedStatusesByEntityId[target.entityId] ??= {}, prior = byStatus[definition2.pulse.statusId], sourceEliteId = prior?.applicationTick === state.tick ? [prior.sourceEliteId, e.eliteId].sort()[0] : e.eliteId;
+  function applyGlacialSnare(root2, e, target) {
+    const definition2 = GLACIAL_WARDEN_D12_4E, byStatus = root2.timedStatusesByEntityId[target.entityId] ??= {}, prior = byStatus[definition2.pulse.statusId], sourceEliteId = prior?.applicationTick === state.tick ? [prior.sourceEliteId, e.eliteId].sort()[0] : e.eliteId;
     byStatus[definition2.pulse.statusId] = { version: TIMED_ACTOR_STATUS_D12_4E_VERSION, entityId: target.entityId, statusId: definition2.pulse.statusId, sourceEliteId, applicationTick: state.tick, expirationTick: state.tick + definition2.pulse.durationTicks, magnitude: { movementMultiplier: definition2.pulse.movementMultiplier.numerator / definition2.pulse.movementMultiplier.denominator } };
-    root.timedStatusesByEntityId[target.entityId] = byStatus;
+    root2.timedStatusesByEntityId[target.entityId] = byStatus;
     counters.snaresApplied++;
     return byStatus[definition2.pulse.statusId];
   }
-  function advanceGlacial(root, ordered) {
+  function advanceGlacial(root2, ordered) {
     for (const e of ordered) {
       if (e.affixIds[0] !== GLACIAL_WARDEN_AFFIX_ID) continue;
       const source3 = state.entitiesById[e.entityId];
@@ -28749,14 +29992,14 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
       counters.scheduledPulses++;
       counters.glacialPulses++;
       const recipients = selectGlacialWardenTargetsD12_4E(state, e).map((target) => {
-        const status2 = applyGlacialSnare(root, e, target);
+        const status2 = applyGlacialSnare(root2, e, target);
         return { entityId: target.entityId, statusId: status2.statusId, expiresTick: status2.expirationTick, movementMultiplier: status2.magnitude.movementMultiplier };
       });
       e.lastPulse = { tick: state.tick, sequence: e.pulseSequence, recipients };
       counters.recipients += recipients.length;
     }
   }
-  function advanceNullifier(root, ordered) {
+  function advanceNullifier(root2, ordered) {
     const definition2 = NULLIFIER_D12_4I, statusId = definition2.pulse.statusId;
     for (const e of ordered) {
       if (e.affixIds[0] !== NULLIFIER_AFFIX_ID) continue;
@@ -28769,9 +30012,9 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
       counters.nullifierPulses++;
       const recipients = [];
       for (const target of selectNullifierTargetsD12_4I(state, e, { lineClear: lineClear2 })) {
-        if (root.timedStatusesByEntityId[target.entityId]?.[statusId] || root.nullificationResistanceByEntityId[target.entityId]) continue;
+        if (root2.timedStatusesByEntityId[target.entityId]?.[statusId] || root2.nullificationResistanceByEntityId[target.entityId]) continue;
         const status2 = { version: TIMED_NULLIFIED_D12_4I_VERSION, entityId: target.entityId, statusId, sourceEliteId: e.eliteId, applicationTick: state.tick, expirationTick: state.tick + definition2.pulse.durationTicks };
-        (root.timedStatusesByEntityId[target.entityId] ??= {})[statusId] = status2;
+        (root2.timedStatusesByEntityId[target.entityId] ??= {})[statusId] = status2;
         recipients.push({ entityId: target.entityId, statusId, expiresTick: status2.expirationTick, resistanceUntil: status2.expirationTick + definition2.pulse.resistanceTicks });
         counters.nullifiedApplied++;
       }
@@ -28790,20 +30033,20 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
   function hazardLineClear(hazard, target) {
     return lineClear2({ position: hazard.position, hullRadius: 0, residency: { spaceInstanceId: hazard.spaceInstanceId } }, target);
   }
-  function refreshWebbed(root) {
-    const active = Object.values(root.hazardsById).filter((row2) => row2.kind === WEB_WEAVER_D12_4J.pulse.hazardKind).sort((a, b) => a.hazardId.localeCompare(b.hazardId)), next = {};
+  function refreshWebbed(root2) {
+    const active = Object.values(root2.hazardsById).filter((row2) => row2.kind === WEB_WEAVER_D12_4J.pulse.hazardKind).sort((a, b) => a.hazardId.localeCompare(b.hazardId)), next = {};
     for (const player of Object.values(state.playersById).sort((a, b) => a.entityId.localeCompare(b.entityId))) {
       const actor = state.entitiesById[player.entityId];
       if (!actor?.alive) continue;
       const hazardIds = active.filter((hazard) => hazard.spaceInstanceId === actor.residency.spaceInstanceId && webHazardContainsActorD12_4J(hazard, actor) && hazardLineClear(hazard, actor)).map((hazard) => hazard.hazardId);
       if (!hazardIds.length) continue;
-      const prior = root.webbedByEntityId[actor.entityId];
+      const prior = root2.webbedByEntityId[actor.entityId];
       next[actor.entityId] = { version: WEBBED_STATUS_D12_4J_VERSION, entityId: actor.entityId, statusId: WEB_WEAVER_D12_4J.pulse.statusId, spaceInstanceId: actor.residency.spaceInstanceId, hazardIds, startedTick: prior?.startedTick ?? state.tick, lastEvaluatedTick: state.tick, movementMultiplier: WEB_WEAVER_D12_4J.pulse.movementMultiplier.numerator / WEB_WEAVER_D12_4J.pulse.movementMultiplier.denominator };
     }
-    root.webbedByEntityId = next;
+    root2.webbedByEntityId = next;
   }
-  function refreshSlagBurn(root) {
-    const active = Object.values(root.hazardsById).filter((row2) => row2.kind === SLAG_SHAPER_D12_4K.pulse.hazardKind).sort((a, b) => a.hazardId.localeCompare(b.hazardId)), next = {};
+  function refreshSlagBurn(root2) {
+    const active = Object.values(root2.hazardsById).filter((row2) => row2.kind === SLAG_SHAPER_D12_4K.pulse.hazardKind).sort((a, b) => a.hazardId.localeCompare(b.hazardId)), next = {};
     for (const hazard of active) hazard.affectedEntityIds = [];
     for (const player of Object.values(state.playersById).sort((a, b) => a.entityId.localeCompare(b.entityId))) {
       const actor = state.entitiesById[player.entityId];
@@ -28811,14 +30054,14 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
       const hazards = active.filter((hazard) => hazard.spaceInstanceId === actor.residency.spaceInstanceId && hostileEllipseHazardContainsActorD12_4K(hazard, actor) && hazardLineClear(hazard, actor));
       if (!hazards.length) continue;
       for (const hazard of hazards) hazard.affectedEntityIds.push(actor.entityId);
-      const prior = root.slagBurnByEntityId[actor.entityId];
+      const prior = root2.slagBurnByEntityId[actor.entityId];
       next[actor.entityId] = { version: SLAG_BURN_STATUS_D12_4K_VERSION, entityId: actor.entityId, statusId: SLAG_SHAPER_D12_4K.pulse.statusId, spaceInstanceId: actor.residency.spaceInstanceId, hazardIds: hazards.map((row2) => row2.hazardId), startedTick: prior?.startedTick ?? state.tick, lastEvaluatedTick: state.tick };
     }
-    root.slagBurnByEntityId = next;
+    root2.slagBurnByEntityId = next;
   }
-  function processSlagDamage(root) {
+  function processSlagDamage(root2) {
     const definition2 = SLAG_SHAPER_D12_4K.pulse;
-    for (const hazard of Object.values(root.hazardsById).filter((row2) => row2.kind === definition2.hazardKind).sort((a, b) => a.hazardId.localeCompare(b.hazardId))) {
+    for (const hazard of Object.values(root2.hazardsById).filter((row2) => row2.kind === definition2.hazardKind).sort((a, b) => a.hazardId.localeCompare(b.hazardId))) {
       if (state.tick < hazard.nextDamageTick) continue;
       requireContract(state.tick === hazard.nextDamageTick && state.tick < hazard.expirationTick, "Slag damage schedule skipped");
       counters.slagDamageOpportunities++;
@@ -28842,36 +30085,36 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
       hazard.nextDamageTick += definition2.damageIntervalTicks;
     }
   }
-  function maintainHostileHazards(root) {
-    for (const [hazardId, hazard] of Object.entries(root.hazardsById).sort(([a], [b]) => a.localeCompare(b))) {
+  function maintainHostileHazards(root2) {
+    for (const [hazardId, hazard] of Object.entries(root2.hazardsById).sort(([a], [b]) => a.localeCompare(b))) {
       if (state.tick < hazard.expirationTick) continue;
       requireContract(state.tick === hazard.expirationTick, "Hostile hazard expiration schedule skipped");
-      delete root.hazardsById[hazardId];
+      delete root2.hazardsById[hazardId];
       if (hazard.kind === WEB_WEAVER_D12_4J.pulse.hazardKind) counters.websExpired++;
       else counters.slagPoolsExpired++;
     }
-    for (const [sourceEliteId, pending] of Object.entries(root.pendingHazardsBySourceEliteId).sort(([a], [b]) => a.localeCompare(b))) {
+    for (const [sourceEliteId, pending] of Object.entries(root2.pendingHazardsBySourceEliteId).sort(([a], [b]) => a.localeCompare(b))) {
       const source3 = state.entitiesById[pending.sourceEntityId], web = pending.kind === WEB_WEAVER_D12_4J.pulse.hazardKind, definition2 = web ? WEB_WEAVER_D12_4J : SLAG_SHAPER_D12_4K;
       if (!source3?.alive || source3.residency.spaceInstanceId !== pending.spaceInstanceId) {
-        delete root.pendingHazardsBySourceEliteId[sourceEliteId];
+        delete root2.pendingHazardsBySourceEliteId[sourceEliteId];
         if (web) counters.webCastsCancelled++;
         else counters.slagCastsCancelled++;
         continue;
       }
       if (state.tick < pending.resolvesTick) continue;
       requireContract(state.tick === pending.resolvesTick, "Hostile hazard windup schedule skipped");
-      const active = Object.values(root.hazardsById).filter((row2) => row2.sourceEliteId === sourceEliteId && row2.kind === pending.kind).sort((a, b) => a.creationTick - b.creationTick || a.hazardId.localeCompare(b.hazardId));
-      if (active.length >= definition2.pulse.maxActivePerSource) delete root.hazardsById[active[0].hazardId];
-      root.hazardsById[pending.hazardId] = web ? { version: HOSTILE_FLOOR_HAZARD_D12_4J_VERSION, hazardId: pending.hazardId, ...webShape(), sourceEliteId, sourceEntityId: pending.sourceEntityId, spaceInstanceId: pending.spaceInstanceId, position: copyWire(pending.position), creationTick: state.tick, expirationTick: state.tick + definition2.pulse.durationTicks } : { version: HOSTILE_FLOOR_HAZARD_D12_4J_VERSION, hazardId: pending.hazardId, ...slagShape(), sourceEliteId, sourceEntityId: pending.sourceEntityId, spaceInstanceId: pending.spaceInstanceId, position: copyWire(pending.position), creationTick: state.tick, expirationTick: state.tick + definition2.pulse.durationTicks, nextDamageTick: state.tick + definition2.pulse.damageIntervalTicks, affectedEntityIds: [], lastDamageEvents: [] };
-      delete root.pendingHazardsBySourceEliteId[sourceEliteId];
+      const active = Object.values(root2.hazardsById).filter((row2) => row2.sourceEliteId === sourceEliteId && row2.kind === pending.kind).sort((a, b) => a.creationTick - b.creationTick || a.hazardId.localeCompare(b.hazardId));
+      if (active.length >= definition2.pulse.maxActivePerSource) delete root2.hazardsById[active[0].hazardId];
+      root2.hazardsById[pending.hazardId] = web ? { version: HOSTILE_FLOOR_HAZARD_D12_4J_VERSION, hazardId: pending.hazardId, ...webShape(), sourceEliteId, sourceEntityId: pending.sourceEntityId, spaceInstanceId: pending.spaceInstanceId, position: copyWire(pending.position), creationTick: state.tick, expirationTick: state.tick + definition2.pulse.durationTicks } : { version: HOSTILE_FLOOR_HAZARD_D12_4J_VERSION, hazardId: pending.hazardId, ...slagShape(), sourceEliteId, sourceEntityId: pending.sourceEntityId, spaceInstanceId: pending.spaceInstanceId, position: copyWire(pending.position), creationTick: state.tick, expirationTick: state.tick + definition2.pulse.durationTicks, nextDamageTick: state.tick + definition2.pulse.damageIntervalTicks, affectedEntityIds: [], lastDamageEvents: [] };
+      delete root2.pendingHazardsBySourceEliteId[sourceEliteId];
       if (web) counters.websFormed++;
       else counters.slagPoolsFormed++;
     }
-    refreshWebbed(root);
-    refreshSlagBurn(root);
-    processSlagDamage(root);
+    refreshWebbed(root2);
+    refreshSlagBurn(root2);
+    processSlagDamage(root2);
   }
-  function advanceWebWeaver(root, ordered) {
+  function advanceWebWeaver(root2, ordered) {
     const definition2 = WEB_WEAVER_D12_4J;
     for (const e of ordered) {
       if (e.affixIds[0] !== WEB_WEAVER_AFFIX_ID) continue;
@@ -28888,7 +30131,7 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
         const target = selectWebWeaverTargetD12_4J(state, e, { lineClear: lineClear2 });
         if (target) {
           const hazardId = hostileHazardIdD12_4J(e.eliteId, e.pulseSequence), shape3 = webShape(), pending = { version: PENDING_HOSTILE_HAZARD_D12_4J_VERSION, hazardId, ...shape3, sourceEliteId: e.eliteId, sourceEntityId: e.entityId, targetEntityId: target.entityId, spaceInstanceId: source3.residency.spaceInstanceId, position: copyWire(target.position), startedTick: state.tick, resolvesTick: state.tick + definition2.pulse.windupTicks };
-          root.pendingHazardsBySourceEliteId[e.eliteId] = pending;
+          root2.pendingHazardsBySourceEliteId[e.eliteId] = pending;
           recipients = [{ entityId: target.entityId, hazardId, resolvesTick: pending.resolvesTick, position: copyWire(target.position) }];
           counters.webCasts++;
         }
@@ -28897,7 +30140,7 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
       counters.recipients += recipients.length;
     }
   }
-  function advanceSlagShaper(root, ordered) {
+  function advanceSlagShaper(root2, ordered) {
     const definition2 = SLAG_SHAPER_D12_4K;
     for (const e of ordered) {
       if (e.affixIds[0] !== SLAG_SHAPER_AFFIX_ID) continue;
@@ -28912,7 +30155,7 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
       let recipients = [];
       if (engaged) {
         const hazardId = hostileHazardIdD12_4J(e.eliteId, e.pulseSequence), shape3 = slagShape(), pending = { version: PENDING_HOSTILE_HAZARD_D12_4J_VERSION, hazardId, ...shape3, sourceEliteId: e.eliteId, sourceEntityId: e.entityId, spaceInstanceId: source3.residency.spaceInstanceId, position: copyWire(source3.position), startedTick: state.tick, resolvesTick: state.tick + definition2.pulse.windupTicks };
-        root.pendingHazardsBySourceEliteId[e.eliteId] = pending;
+        root2.pendingHazardsBySourceEliteId[e.eliteId] = pending;
         recipients = [{ hazardId, resolvesTick: pending.resolvesTick, position: copyWire(source3.position) }];
         counters.slagCasts++;
       }
@@ -28920,16 +30163,16 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
     }
   }
   function advance() {
-    const root = eliteRoot();
-    if (!root) return;
-    expireTimedStatuses(root);
-    for (const e of Object.values(root.elitesByEntityId)) if (e.version === COMPOSITION_ELITE_V1 && e.affixIds[0] !== TOXIC_DECAY_AFFIX_ID && e.nextPulseTick < state.tick) {
+    const root2 = eliteRoot();
+    if (!root2) return;
+    expireTimedStatuses(root2);
+    for (const e of Object.values(root2.elitesByEntityId)) if (e.version === COMPOSITION_ELITE_V1 && e.affixIds[0] !== TOXIC_DECAY_AFFIX_ID && e.nextPulseTick < state.tick) {
       const cadence = eliteAffixDefinitionD12_4(e.affixIds[0]).pulse.cadenceTicks, missed = Math.ceil((state.tick - e.nextPulseTick) / cadence);
       e.pulseSequence += missed;
       e.nextPulseTick += missed * cadence;
       e.lastPulse = null;
     }
-    for (const e of Object.values(root.elitesByEntityId)) if (e.version === COMPOSITION_ELITE_V1 && e.affixIds[0] !== TOXIC_DECAY_AFFIX_ID && !activeElite(e.entityId)) {
+    for (const e of Object.values(root2.elitesByEntityId)) if (e.version === COMPOSITION_ELITE_V1 && e.affixIds[0] !== TOXIC_DECAY_AFFIX_ID && !activeElite(e.entityId)) {
       const cadence = eliteAffixDefinitionD12_4(e.affixIds[0]).pulse.cadenceTicks;
       if (state.tick >= e.nextPulseTick) {
         const skipped = Math.floor((state.tick - e.nextPulseTick) / cadence) + 1;
@@ -28938,7 +30181,7 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
       }
       e.lastPulse = null;
     }
-    const ordered = Object.values(root.elitesByEntityId).filter((e) => e.version !== COMPOSITION_ELITE_V1 || activeElite(e.entityId)).sort((a, b) => a.eliteId.localeCompare(b.eliteId)), commanders = ordered.filter((e) => e.affixIds[0] === SWIFT_COMMANDER_AFFIX_ID && state.entitiesById[e.entityId]?.alive), sourcesByTarget = refreshHasteSources(root, commanders), citadels = ordered.filter((e) => e.affixIds[0] === IRON_CITADEL_AFFIX_ID && state.entitiesById[e.entityId]?.alive).sort((a, b) => a.entityId.localeCompare(b.entityId)), guardSourcesByTarget = refreshGuardSources(root, citadels), berserkers = ordered.filter((e) => e.affixIds[0] === BLOOD_BERSERKER_AFFIX_ID && state.entitiesById[e.entityId]?.alive), attackSourcesByTarget = refreshAttackAuraSources(root, berserkers);
+    const ordered = Object.values(root2.elitesByEntityId).filter((e) => e.version !== COMPOSITION_ELITE_V1 || activeElite(e.entityId)).sort((a, b) => a.eliteId.localeCompare(b.eliteId)), commanders = ordered.filter((e) => e.affixIds[0] === SWIFT_COMMANDER_AFFIX_ID && state.entitiesById[e.entityId]?.alive), sourcesByTarget = refreshHasteSources(root2, commanders), citadels = ordered.filter((e) => e.affixIds[0] === IRON_CITADEL_AFFIX_ID && state.entitiesById[e.entityId]?.alive).sort((a, b) => a.entityId.localeCompare(b.entityId)), guardSourcesByTarget = refreshGuardSources(root2, citadels), berserkers = ordered.filter((e) => e.affixIds[0] === BLOOD_BERSERKER_AFFIX_ID && state.entitiesById[e.entityId]?.alive), attackSourcesByTarget = refreshAttackAuraSources(root2, berserkers);
     for (const e of ordered) {
       if (e.affixIds[0] !== VITALITY_WEAVER_AFFIX_ID) continue;
       const source3 = state.entitiesById[e.entityId];
@@ -28959,17 +30202,17 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
       counters.healingPulses++;
       counters.recipients += recipients.length;
     }
-    advanceSwift(root, commanders, sourcesByTarget);
-    decayHaste(root, sourcesByTarget);
-    advanceIronCitadel(root, citadels, guardSourcesByTarget);
-    decayGuard(root, guardSourcesByTarget);
-    advanceBloodBerserker(root, berserkers, attackSourcesByTarget);
-    decayAttackAura(root, attackSourcesByTarget);
-    advanceGlacial(root, ordered);
-    advanceNullifier(root, ordered);
-    advanceWebWeaver(root, ordered);
-    advanceSlagShaper(root, ordered);
-    maintainHostileHazards(root);
+    advanceSwift(root2, commanders, sourcesByTarget);
+    decayHaste(root2, sourcesByTarget);
+    advanceIronCitadel(root2, citadels, guardSourcesByTarget);
+    decayGuard(root2, guardSourcesByTarget);
+    advanceBloodBerserker(root2, berserkers, attackSourcesByTarget);
+    decayAttackAura(root2, attackSourcesByTarget);
+    advanceGlacial(root2, ordered);
+    advanceNullifier(root2, ordered);
+    advanceWebWeaver(root2, ordered);
+    advanceSlagShaper(root2, ordered);
+    maintainHostileHazards(root2);
   }
   function movementMultiplier(entityId2) {
     const actor = state.entitiesById[entityId2];
@@ -29136,18 +30379,18 @@ function createAegisMimicSimulation(state) {
     return Object.values(b.mimicEncounter?.mimicsByEntityId ?? {}).sort((x, y) => x.ordinal - y.ordinal);
   }
   function cleanupHaste(ids4) {
-    const root = state.eliteCombat;
-    if (!root) return;
-    const elites = new Set(ids4.map((id) => root.elitesByEntityId?.[id]?.eliteId));
-    for (const [id, h] of Object.entries(root.hasteByEntityId ?? {})) {
+    const root2 = state.eliteCombat;
+    if (!root2) return;
+    const elites = new Set(ids4.map((id) => root2.elitesByEntityId?.[id]?.eliteId));
+    for (const [id, h] of Object.entries(root2.hasteByEntityId ?? {})) {
       if (ids4.includes(id) || !state.entitiesById[id]?.alive) {
-        delete root.hasteByEntityId[id];
+        delete root2.hasteByEntityId[id];
         continue;
       }
       h.sourceEliteIds = h.sourceEliteIds.filter((id2) => !elites.has(id2));
     }
   }
-  function retire(b) {
+  function retire2(b) {
     const ids4 = [];
     for (const m of rows(b)) {
       const a = state.entitiesById[m.entityId];
@@ -29321,7 +30564,7 @@ function createAegisMimicSimulation(state) {
   return Object.freeze({
     synchronize,
     advance,
-    retire,
+    retire: retire2,
     towerTarget,
     mitigateIncoming,
     ownsMimic: (id) => Boolean(aegisMimicFor(state, id)),
@@ -30130,14 +31373,14 @@ var attackRadius = (ability) => ({
 })[ability] ?? BIOME_BOSS_REACH_V1[ability] ?? 75;
 function createRecoveredBossCombatV1(state, { applyDirectDamage, eligible: eligible2 = () => true, lineClear: lineClear2 = () => true } = {}) {
   const observed = /* @__PURE__ */ new Map(), stats = { casts: 0, hits: 0, summons: 0, phaseTwos: 0, interrupts: 0, poolHits: 0, coinsSpawned: 0, coinHits: 0, coinRicochets: 0 };
-  const root = () => state.bossCombat;
-  const records = () => Object.values(root()?.bossesByEntityId ?? {}).filter(recoveredBossRecord).sort((a, b) => a.bossId.localeCompare(b.bossId));
+  const root2 = () => state.bossCombat;
+  const records = () => Object.values(root2()?.bossesByEntityId ?? {}).filter(recoveredBossRecord).sort((a, b) => a.bossId.localeCompare(b.bossId));
   const record2 = (id) => {
-    const b = root()?.bossesByEntityId?.[id];
+    const b = root2()?.bossesByEntityId?.[id];
     return recoveredBossRecord(b) ? b : null;
   };
   const summon = (id) => {
-    const row2 = root()?.summonsByEntityId?.[id];
+    const row2 = root2()?.summonsByEntityId?.[id];
     return row2?.version === "recovered-boss-summon-v1" ? row2 : null;
   };
   const players = (a) => Object.values(state.playersById).filter((p) => p.connectionStatus === "connected").map((p) => state.entitiesById[p.entityId]).filter((t) => t?.alive && t.residency.spaceInstanceId === a.residency.spaceInstanceId && eligible2(a, t)).sort((x, y) => x.entityId.localeCompare(y.entityId));
@@ -30749,9 +31992,9 @@ function createBossCombatD12_5A(state, { applyDirectDamage, eligible: eligible2,
   const aegis = createAegisGoliathCombat(state, { applyDirectDamage, eligible: eligible2, lineClear: lineClear2 }), brimstone = createBrimstoneCombat(state, { applyDirectDamage, eligible: eligible2, lineClear: lineClear2 });
   const recovered = createRecoveredBossCombatV1(state, { applyDirectDamage, eligible: eligible2, lineClear: lineClear2 });
   const observedTargets = /* @__PURE__ */ new Map(), counters = { phaseTwoTriggers: 0, closeStrikes: 0, slamCasts: 0, slamHits: 0, rootSnareCasts: 0, rootSnareHits: 0, cocoonsActivated: 0, cocoonsHatched: 0, shieldBreaks: 0, websExpired: 0 };
-  const root = () => state.bossCombat;
-  const bossFor = (id) => root()?.bossesByEntityId?.[id] ?? null;
-  const summonFor = (id) => root()?.summonsByEntityId?.[id] ?? null;
+  const root2 = () => state.bossCombat;
+  const bossFor = (id) => root2()?.bossesByEntityId?.[id] ?? null;
+  const summonFor = (id) => root2()?.summonsByEntityId?.[id] ?? null;
   function isBoss(id) {
     return Boolean(bossFor(id));
   }
@@ -30771,13 +32014,13 @@ function createBossCombatD12_5A(state, { applyDirectDamage, eligible: eligible2,
     if (isBoss(source3.entityId)) observedTargets.set(source3.entityId, target?.entityId ?? null);
   }
   function clearStatus(entityId2) {
-    if (!root()) return false;
-    const removed = Boolean(root().statusesByEntityId[entityId2]);
-    delete root().statusesByEntityId[entityId2];
+    if (!root2()) return false;
+    const removed = Boolean(root2().statusesByEntityId[entityId2]);
+    delete root2().statusesByEntityId[entityId2];
     return removed;
   }
   function beginTick() {
-    const r = root();
+    const r = root2();
     if (!r) return;
     recovered.beginTick();
     for (const [id, hazard] of Object.entries(r.hazardsById)) if (state.tick >= hazard.expirationTick) {
@@ -30804,7 +32047,7 @@ function createBossCombatD12_5A(state, { applyDirectDamage, eligible: eligible2,
     actor.movementIntent = copyWire(zero2);
     actor.movedLastTick = false;
     for (const id of boss.summonEntityIds) {
-      const summon = root().summonsByEntityId[id], member = state.entitiesById[id];
+      const summon = root2().summonsByEntityId[id], member = state.entitiesById[id];
       summon.stage = "cocoon";
       summon.activatedTick = state.tick;
       summon.hatchTick = state.tick + ARACHNID_TREANT_D12_5A.barkShield.hatchTicks;
@@ -30819,7 +32062,7 @@ function createBossCombatD12_5A(state, { applyDirectDamage, eligible: eligible2,
   }
   function syncSummons(boss) {
     for (const id of boss.summonEntityIds) {
-      const summon = root().summonsByEntityId[id], actor = state.entitiesById[id];
+      const summon = root2().summonsByEntityId[id], actor = state.entitiesById[id];
       if (!actor.alive && summon.stage !== "dormant" && summon.stage !== "defeated") {
         summon.stage = "defeated";
         summon.defeatedTick = state.tick;
@@ -30840,8 +32083,8 @@ function createBossCombatD12_5A(state, { applyDirectDamage, eligible: eligible2,
     }
   }
   function applyRootStatus(boss, target) {
-    const prior = root().statusesByEntityId[target.entityId], expirationTick = state.tick + ARACHNID_TREANT_D12_5A.rootSnare.durationTicks;
-    root().statusesByEntityId[target.entityId] = { version: BOSS_STATUS_D12_5A_VERSION, entityId: target.entityId, statusId: ARACHNID_TREANT_D12_5A.rootSnare.statusId, sourceBossId: boss.bossId, applicationTick: prior?.applicationTick ?? state.tick, expirationTick: Math.max(prior?.expirationTick ?? 0, expirationTick), movementMultiplier: 0.4 };
+    const prior = root2().statusesByEntityId[target.entityId], expirationTick = state.tick + ARACHNID_TREANT_D12_5A.rootSnare.durationTicks;
+    root2().statusesByEntityId[target.entityId] = { version: BOSS_STATUS_D12_5A_VERSION, entityId: target.entityId, statusId: ARACHNID_TREANT_D12_5A.rootSnare.statusId, sourceBossId: boss.bossId, applicationTick: prior?.applicationTick ?? state.tick, expirationTick: Math.max(prior?.expirationTick ?? 0, expirationTick), movementMultiplier: 0.4 };
   }
   function resolveTelegraph(boss, actor) {
     requireContract(state.tick === boss.resolvesTick, "Boss telegraph schedule skipped");
@@ -30856,7 +32099,7 @@ function createBossCombatD12_5A(state, { applyDirectDamage, eligible: eligible2,
       counters.slamHits += hits;
     } else {
       const hazardId = `bossweb:${boss.bossId.slice(5, 29)}${boss.abilitySequence.toString(16).padStart(8, "0")}`;
-      root().hazardsById[hazardId] = { version: BOSS_HAZARD_D12_5A_VERSION, hazardId, kind: "treant_root_web", bossId: boss.bossId, sourceEntityId: actor.entityId, spaceInstanceId: actor.residency.spaceInstanceId, position: position4, createdTick: state.tick, expirationTick: state.tick + ARACHNID_TREANT_D12_5A.rootSnare.hazardDurationTicks, geometry: { radiusX: 75, radiusY: 33.75 }, movementMultiplier: 0.4 };
+      root2().hazardsById[hazardId] = { version: BOSS_HAZARD_D12_5A_VERSION, hazardId, kind: "treant_root_web", bossId: boss.bossId, sourceEntityId: actor.entityId, spaceInstanceId: actor.residency.spaceInstanceId, position: position4, createdTick: state.tick, expirationTick: state.tick + ARACHNID_TREANT_D12_5A.rootSnare.hazardDurationTicks, geometry: { radiusX: 75, radiusY: 33.75 }, movementMultiplier: 0.4 };
       for (const target of players) if (Math.hypot(target.position.x - position4.x, target.position.y - position4.y) <= ARACHNID_TREANT_D12_5A.rootSnare.impactRadius && pointLineClear(collision, position4, target.position, target.hullRadius * 0.25)) {
         applyDirectDamage(actor, target, combatInteger(multiplyCombat(actor.attackDamage, 13, 10), "round"), "treant_root_snare");
         if (target.alive) applyRootStatus(boss, target);
@@ -30879,7 +32122,7 @@ function createBossCombatD12_5A(state, { applyDirectDamage, eligible: eligible2,
     return distance9 < 64 && close < 0.8 ? "slam" : first < 0.5 ? "slam" : "root_snare";
   }
   function advance() {
-    const r = root();
+    const r = root2();
     if (!r) return;
     for (const boss of Object.values(r.bossesByEntityId).sort((a, b) => a.bossId.localeCompare(b.bossId))) {
       if (aegis.owns(boss.entityId) || brimstone.owns(boss.entityId) || recovered.owns(boss.entityId)) continue;
@@ -30930,7 +32173,7 @@ function createBossCombatD12_5A(state, { applyDirectDamage, eligible: eligible2,
     recovered.advance();
   }
   function reconcile() {
-    const r = root();
+    const r = root2();
     if (!r) return;
     for (const boss of Object.values(r.bossesByEntityId).sort((a, b) => a.bossId.localeCompare(b.bossId))) {
       if (aegis.owns(boss.entityId) || brimstone.owns(boss.entityId) || recovered.owns(boss.entityId)) continue;
@@ -30951,7 +32194,7 @@ function createBossCombatD12_5A(state, { applyDirectDamage, eligible: eligible2,
     recovered.reconcile();
   }
   function movementMultiplier(entityId2) {
-    const r = root(), actor = state.entitiesById[entityId2];
+    const r = root2(), actor = state.entitiesById[entityId2];
     if (!r || !actor?.alive) return 1;
     if (recovered.owns(entityId2)) return recovered.movementMultiplier(entityId2);
     if (brimstone.owns(entityId2)) return brimstone.movementMultiplier(entityId2);
@@ -30982,7 +32225,7 @@ function createBossCombatD12_5A(state, { applyDirectDamage, eligible: eligible2,
     if (!boss.shieldActive) return { damage, shielded: false };
     return { damage: combatInteger(multiplyCombat(damage, ARACHNID_TREANT_D12_5A.barkShield.damageMultiplier.numerator, ARACHNID_TREANT_D12_5A.barkShield.damageMultiplier.denominator), "round"), shielded: true };
   }
-  return Object.freeze({ towerTarget: aegis.towerTarget, beginTick, advance, reconcile, isBoss, frozen, observeTarget, clearStatus, movementMultiplier, mitigateIncoming, primaryReady: recovered.primaryReady, inspect: () => ({ ...counters, aegis: aegis.inspect(), brimstone: brimstone.inspect(), recovered: recovered.inspect(), bossCount: Object.keys(root()?.bossesByEntityId ?? {}).length, hazardCount: Object.keys(root()?.hazardsById ?? {}).length, statusCount: Object.keys(root()?.statusesByEntityId ?? {}).length }) });
+  return Object.freeze({ towerTarget: aegis.towerTarget, beginTick, advance, reconcile, isBoss, frozen, observeTarget, clearStatus, movementMultiplier, mitigateIncoming, primaryReady: recovered.primaryReady, inspect: () => ({ ...counters, aegis: aegis.inspect(), brimstone: brimstone.inspect(), recovered: recovered.inspect(), bossCount: Object.keys(root2()?.bossesByEntityId ?? {}).length, hazardCount: Object.keys(root2()?.hazardsById ?? {}).length, statusCount: Object.keys(root2()?.statusesByEntityId ?? {}).length }) });
 }
 
 // src/simulation/named_elites_v1.js
@@ -31201,6 +32444,17 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
       if (!canActivityApplyDamage(state, manifest, source3, target) || source3.team !== "party") return;
       const p = playerFor(source3.entityId), combat = state.subweaponCombat.actors[source3.entityId], roll6 = { rng: combat.rng }, packet = criticalDamagePacket(roll6, progression.resolvedStats(source3.entityId), requested ?? source3.attackDamage, mechanic, false), before = target.hp;
       if (compareCombat(packet.damage, 0) <= 0) return;
+      if (target.podResource.nest) {
+        const nest = state.d9World?.worldEvents?.records[target.podResource.groupId];
+        if (!nest || !nestTargetableV1(nest, target.podResource.ordinal)) return;
+        damageNestV1(state, target.podResource.groupId, target.podResource.ordinal, packet.damage);
+        combat.rng = roll6.rng;
+        const hp = state.d9World.worldEvents.records[target.podResource.groupId].nest.hp[target.podResource.ordinal];
+        target.hp = hp;
+        target.alive = compareCombat(hp, 0) > 0;
+        if (!target.alive) cancelSubweaponResidency(state, target.entityId);
+        return { critical: packet.critical, attemptedDamage: packet.damage, damage: combatInteger(subtractCombat(before, hp)), defeated: !target.alive, targetAlive: target.alive };
+      }
       const resource = economicResources(state, manifest).find((r) => r.groupId === target.podResource.groupId && r.ordinal === target.podResource.ordinal && !r.used);
       if (!resource) return;
       useEconomicResource(state, manifest, p, { groupId: resource.groupId, episode: resource.episode, ordinal: resource.ordinal }, progression.prepareResource, packet.damage);
@@ -31634,10 +32888,10 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
         const a = state.entitiesById[id], action2 = state.primary.actorsById[id].current;
         const cleave = wildernessCleaveTuning(state, action2.comboStep), forwardMinimum = cleave?.forwardDotMinimum ?? primaryProfile(state, id).forwardDotMinimum;
         const targetLimit = cleave?.maxTargets ?? (hasWorldCombat(state) ? [4, 6, 8][action2.comboStep - 1] : 1);
-        const targets = measure("targetQuery", () => selectForwardActors(a, query(a, 400).filter((t) => !isPodCombatTargetV4(t)), action2.aim, forwardMinimum, (source3, target) => canActivityTargetActor(state, manifest, source3, target) && clearHullGap(source3, target) <= (hasWorldCombat(state) ? a.attackReach : 20) && meleeLineClear(state.spacesByInstanceId[source3.residency.spaceInstanceId].collision, source3, target), targetLimit));
+        const targets = measure("targetQuery", () => selectForwardActors(a, query(a, 400).filter((t) => !isPodCombatTargetV4(t) || t.podResource.nest), action2.aim, forwardMinimum, (source3, target) => canActivityTargetActor(state, manifest, source3, target) && clearHullGap(source3, target) <= (hasWorldCombat(state) ? a.attackReach : 20) && meleeLineClear(state.spacesByInstanceId[source3.residency.spaceInstanceId].collision, source3, target), targetLimit));
         action2.hitResolved = true;
         if (targets.length) {
-          for (const targetId of targets) family.main(a, state.entitiesById[targetId]);
+          for (const targetId of targets) family.main(a, combatTargetV4(state, targetId));
         }
         {
           const r = economicResources(state, manifest).filter((r2) => (!targets.length || isSporePodV2(state, r2.groupId, r2.ordinal)) && r2.kind === "breakable" && !r2.used && r2.spaceInstanceId === a.residency.spaceInstanceId).find((r2) => {
@@ -32900,7 +34154,7 @@ function createActivityClientPort({ authority, localPlayerId, measure = (_n, fn)
           return [{ ...r, ...bossCompletion ? { bossCompletion } : {}, ...finaleCompletion ? { finaleCompletion } : {}, canUse: canUseResource(state, m, player, { groupId: r.groupId, episode: r.episode, ordinal: r.ordinal, inventoryRevision: player.inventory.revision }) }];
         }));
         const hostileHazards = projectHostileHazardsD12_4J(state, ctx.spaceInstanceId), bossHazards = projectBossHazardsD12_5A(state, ctx.spaceInstanceId);
-        const visible3 = engine.nearby(local6, 900).filter((a) => !eventActorDormant(state, a.entityId) && bossActorTargetableD12_5A(state, a.entityId));
+        const giants = nestMothersV1(state), visible3 = engine.nearby(local6, 900).filter((a) => !eventActorDormant(state, a.entityId) && bossActorTargetableD12_5A(state, a.entityId));
         for (const defeated of Object.values(state.entitiesById)) if (!defeated.alive && defeated.ai?.defeatedTick !== void 0 && state.tick - defeated.ai.defeatedTick <= 36 && defeated.residency.spaceInstanceId === ctx.spaceInstanceId && Math.hypot(defeated.position.x - local6.position.x, defeated.position.y - local6.position.y) <= 900 && !visible3.some((a) => a.entityId === defeated.entityId)) visible3.push(defeated);
         if (!visible3.some((a) => a.entityId === local6.entityId)) visible3.push(local6);
         for (const a of visible3) {
@@ -32909,7 +34163,7 @@ function createActivityClientPort({ authority, localPlayerId, measure = (_n, fn)
           entitiesById[a.entityId] = { position: { ...a.position }, hp: { m: integerRatio(a.hp, a.maxHp), e: 0 }, maxHp: { m: 1, e: 0 }, hpExact: integerWire(a.hp), maxHpExact: integerWire(a.maxHp), shieldRiposteTick: a.team === "party" ? engine.events().findLast((e) => e.kind === "combat.damageApplied" && e.source.entityId === a.entityId && e.payload.mechanic === "bash" && e.payload.trigger === "reactive")?.tick ?? -100 : -100, shieldBlockTick: a.team === "party" ? engine.events().findLast((e) => ["combat.damageApplied", "combat.defenseResolved"].includes(e.kind) && e.subject.entityId === a.entityId && e.payload.defenseKind === "block")?.tick ?? -100 : -100, heroLook: a.team === "party" ? heroLookView(Object.values(state.playersById).find((p2) => p2.entityId === a.entityId)) : null, equipmentAppearance: a.team === "party" ? (() => {
             const p2 = Object.values(state.playersById).find((p3) => p3.entityId === a.entityId);
             return Object.fromEntries(["weapon", "subweapon"].map((slot) => [slot, p2.inventory.itemsById[p2.inventory.equipped[slot]] ?? null]));
-          })() : null, guard: state.subweaponCombat.actors[a.entityId]?.guard ? { ...state.subweaponCombat.actors[a.entityId].guard, direction: { ...state.subweaponCombat.actors[a.entityId].guard.direction } } : null, subType: a.team === "party" ? playersById[Object.values(state.playersById).find((p2) => p2.entityId === a.entityId).playerId].stats.subType : null, alive: a.alive, deathAge: a.ai?.defeatedTick === void 0 ? null : state.tick - a.ai.defeatedTick, hullRadius: a.hullRadius, movedLastTick: a.movedLastTick, motion: a.ai?.motion ? { startedTick: a.ai.motion.startedTick, lastMovedTick: a.ai.motion.lastMovedTick } : null, meleePhase: a.ai?.melee ? { phase: a.ai.melee.phase, phaseStartedTick: a.ai.melee.phaseStartedTick, phaseEndsTick: a.ai.melee.phaseEndsTick, targetEntityId: a.ai.melee.targetEntityId, actionSequence: a.ai.melee.actionSequence } : null, meleeAction: a.team === "hostile" && (a.ai?.melee ? a.ai.melee.phase !== "idle" : a.attackTimer < Math.min(10, a.attackDelayTicks)), meleeGeometry: hasWorldCombat(state) && family ? { reach: a.attackReach, mode: a.attackReachMode, sourceRadius: a.combatRadius, targetRadius: attackTarget?.combatRadius ?? 9, targetPosition: attackTarget ? { ...attackTarget.position } : null } : null, encounterMode: group?.containment?.mode ?? null, team: a.team, levelLabel: a.team === "hostile" && state.d9World?.episodes[group?.groupId]?.snapshot ? "Lv. " + formatLarge(statValue(state.d9World.episodes[group.groupId].snapshot.effectiveLevel).toString()) : null, enemyFamily: family, presentationFacingX, visualKey: creature?.visualKey ?? null, visualSeed: deterministicCreatureVisualSeed(a.entityId), groundAnchorY: creature?.presentation.groundAnchor.y ?? creature?.body.groundAnchorY ?? a.hullRadius * 0.45, weaponVisual: a.team === "party" ? equippedWeaponVisual(Object.values(state.playersById).find((p2) => p2.entityId === a.entityId)) : null };
+          })() : null, guard: state.subweaponCombat.actors[a.entityId]?.guard ? { ...state.subweaponCombat.actors[a.entityId].guard, direction: { ...state.subweaponCombat.actors[a.entityId].guard.direction } } : null, subType: a.team === "party" ? playersById[Object.values(state.playersById).find((p2) => p2.entityId === a.entityId).playerId].stats.subType : null, alive: a.alive, deathAge: a.ai?.defeatedTick === void 0 ? null : state.tick - a.ai.defeatedTick, hullRadius: a.hullRadius, movedLastTick: a.movedLastTick, motion: a.ai?.motion ? { startedTick: a.ai.motion.startedTick, lastMovedTick: a.ai.motion.lastMovedTick } : null, meleePhase: a.ai?.melee ? { phase: a.ai.melee.phase, phaseStartedTick: a.ai.melee.phaseStartedTick, phaseEndsTick: a.ai.melee.phaseEndsTick, targetEntityId: a.ai.melee.targetEntityId, actionSequence: a.ai.melee.actionSequence } : null, meleeAction: a.team === "hostile" && (a.ai?.melee ? a.ai.melee.phase !== "idle" : a.attackTimer < Math.min(10, a.attackDelayTicks)), meleeGeometry: hasWorldCombat(state) && family ? { reach: a.attackReach, mode: a.attackReachMode, sourceRadius: a.combatRadius, targetRadius: attackTarget?.combatRadius ?? 9, targetPosition: attackTarget ? { ...attackTarget.position } : null } : null, encounterMode: group?.containment?.mode ?? null, team: a.team, levelLabel: a.team === "hostile" && state.d9World?.episodes[group?.groupId]?.snapshot ? "Lv. " + formatLarge(statValue(state.d9World.episodes[group.groupId].snapshot.effectiveLevel).toString()) : null, enemyFamily: family, ...giants.has(a.entityId) ? { presentationScale: 2 } : {}, presentationFacingX, visualKey: creature?.visualKey ?? null, visualSeed: deterministicCreatureVisualSeed(a.entityId), groundAnchorY: creature?.presentation.groundAnchor.y ?? creature?.body.groundAnchorY ?? a.hullRadius * 0.45, weaponVisual: a.team === "party" ? equippedWeaponVisual(Object.values(state.playersById).find((p2) => p2.entityId === a.entityId)) : null };
           const rangedAction = state.hostileCombat?.actionsByEntityId[a.entityId];
           if (ordinaryRangedProfile(a)) {
             const aim2 = rangedAction?.aim ?? null;
@@ -32939,7 +34193,7 @@ function createActivityClientPort({ authority, localPlayerId, measure = (_n, fn)
           eventKey = nextEventKey;
         }
         const events = eventView;
-        const place = inOverworld ? semanticPlaceAtWorldPosition(m, local6.position) : null, area2 = inOverworld ? areaAtWorldPosition(m, local6.position) : null, d = state.campaign.overworld.discovery, truthKey = state.d9World ? `${state.d9World.runtime.revision}/${ctx.spaceInstanceId}/${d.discoveredSiteIds.length}` : null;
+        const place2 = inOverworld ? semanticPlaceAtWorldPosition(m, local6.position) : null, area2 = inOverworld ? areaAtWorldPosition(m, local6.position) : null, d = state.campaign.overworld.discovery, truthKey = state.d9World ? `${state.d9World.runtime.revision}/${ctx.spaceInstanceId}/${d.discoveredSiteIds.length}` : null;
         if (state.d9World && (state !== siteTruthState || truthKey !== siteTruthKey || state.tick - siteTruthTick >= SITE_TRUTH_REFRESH_TICKS || state.tick < siteTruthTick)) {
           siteTruthView = presentationSiteTruth(state);
           siteTruthState = state;
@@ -32961,7 +34215,7 @@ function createActivityClientPort({ authority, localPlayerId, measure = (_n, fn)
         });
         if (state.d9World) {
           exits.push(...slowCached("trailNotes", () => trailNoteExits(state, local6)));
-          for (const e of projectWorldEvents(state, local6)) if (e.status === "dormant") exits.push({ exitId: "event:" + e.groupId, eventAction: { groupId: e.groupId }, x: (e.interactionPosition ?? e.position).x, y: (e.interactionPosition ?? e.position).y, radius: 96, available: e.canActivate, label: e.activeCount >= 4 ? "Four events active \u2014 finish one first" : (e.kind === "cursed_shrine" ? "Break the seal \xB7 " : e.kind === "hollow" ? "Investigate " : "Disturb ") + e.label });
+          for (const e of projectWorldEvents(state, local6)) if (e.status === "dormant") exits.push({ exitId: "event:" + e.groupId, eventAction: { groupId: e.groupId }, x: (e.interactionPosition ?? e.position).x, y: (e.interactionPosition ?? e.position).y, radius: 96, available: e.canActivate, label: e.activeCount >= 4 ? "Four events active \u2014 finish one first" : (e.kind === "cursed_shrine" ? "Break the seal \xB7 " : e.kind === "hollow" ? "Investigate " : e.kind === "nests" ? "Disturb the " : "Disturb ") + e.label });
           if (inFunctional) {
             if (isGeneratedInteriorFamily(functional)) {
               if (functionalFloor.index === 0) {
@@ -33041,7 +34295,7 @@ function createActivityClientPort({ authority, localPlayerId, measure = (_n, fn)
             ...inOverworld && tavernBinding ? { plannedTown: projectToLocalFrameD9({ chunkX: "1206", chunkY: "1244", localX: 0, localY: 0 }, state.d9World.runtime.frames) } : {},
             forgeStations: inOverworld ? state.campaign.forgeStations?.stations ?? [] : [],
             spaceId: space.spaceId,
-            label: tavernFloor2 ? "Tavern - " + tavernFloor2 : plannedRegion?.name ?? site?.properName ?? (functionalFloor ? `${site?.label} \xB7 Floor ${functionalFloor.index + 1}/${functional.floorCount}` : site?.label) ?? (area2?.minimumLevel ? area2.label + " \xB7 Minimum Lv. " + formatLarge(typeof area2.minimumLevel === "number" ? String(area2.minimumLevel) : area2.minimumLevel) : place?.label ?? area2?.label ?? "Unexplored territory"),
+            label: tavernFloor2 ? "Tavern - " + tavernFloor2 : plannedRegion?.name ?? site?.properName ?? (functionalFloor ? `${site?.label} \xB7 Floor ${functionalFloor.index + 1}/${functional.floorCount}` : site?.label) ?? (area2?.minimumLevel ? area2.label + " \xB7 Minimum Lv. " + formatLarge(typeof area2.minimumLevel === "number" ? String(area2.minimumLevel) : area2.minimumLevel) : place2?.label ?? area2?.label ?? "Unexplored territory"),
             collision: Object.freeze({ tileSize: c.tileSize, width: c.width, height: c.height, endless: Boolean(state.d9World && inOverworld) }),
             visual: page,
             exits: freezeProjection(exits),
@@ -33053,7 +34307,7 @@ function createActivityClientPort({ authority, localPlayerId, measure = (_n, fn)
             overworld: Object.freeze({ manifestId: m.manifestId, manifestHash: m.manifestHash, manifestVersion: 2, regionThreatTier: inOverworld ? populationRegionAt(m, local6.position)?.threatTier ?? null : null, populationGroups: m.population?.groups.length ?? 0, safeRegions: freezeProjection(inOverworld ? safeRegions.filter((r) => local6.position.x >= r.x && local6.position.x < r.x + r.width && local6.position.y >= r.y && local6.position.y < r.y + r.height) : []), egresses: freezeProjection(inOverworld && state.d9World ? state.d9World.origin.egress.openings.map((opening3) => {
               const p = opening3.cells[Math.floor(opening3.cells.length / 2)];
               return { side: opening3.side, x: (p.x + 0.5) * 32, y: (p.y + 0.5) * 32, label: "Frontier trail" };
-            }) : []), seedHex: m.generation.seedHex, generatorVersion: m.generation.generatorVersion, currentAreaId: inOverworld && area2 ? technicalChunkId(area2) : null, currentPlaceId: place?.placeId ?? null })
+            }) : []), seedHex: m.generation.seedHex, generatorVersion: m.generation.generatorVersion, currentAreaId: inOverworld && area2 ? technicalChunkId(area2) : null, currentPlaceId: place2?.placeId ?? null })
           }),
           persistence: freezeProjection({ phase: status2.phase === "ready" ? "encounter" : status2.phase, saving: Boolean(status2.saving), confirmedSaveRevision: status2.confirmedSaveRevision }),
           travel: null
@@ -33342,616 +34596,32 @@ async function createLocalWorldSession({
   } });
 }
 
-// src/client/class_kit_v1.js
-var local5 = (m) => m?.playersById?.[m.localPlayerId];
-function classKitDue(m) {
-  const p = local5(m), inv = m?.inventory;
-  return Boolean(p && inv && heroClassOf(p.d8) && inv.subweapons && !inv.classKit && m.entitiesById?.[p.entityId]?.alive && m.persistence?.phase === "encounter");
-}
-var classKitRoom = (m) => Object.keys(m.inventory.itemsById).length + CLASS_KIT_PIECES.length <= inventoryIntakeCapacity(local5(m).d8);
-var kitPieceFits = (inv, piece2) => piece2 === "weapon" ? inv.itemsById[inv.equipped.weapon]?.definitionId === "worn-sword" : piece2 === "overall" ? !inv.equipped.overall && !inv.equipped.chest && !inv.equipped.leggings : !inv.equipped[piece2];
-async function claimClassKit2({ readModel, adapter, wait, say = () => {
-} }) {
-  let m = readModel();
-  if (!classKitDue(m) || !classKitRoom(m)) return null;
-  const cls = heroClassOf(local5(m).d8).id;
-  say("Unpacking your starting gear\u2026");
-  const rev = m.inventory.revision;
-  await adapter.issue("classkit.claim", { inventoryRevision: rev });
-  if (!await wait((x) => Boolean(x.inventory?.classKit))) throw Error("Your starting gear didn\u2019t arrive. Try again.");
-  let worn = 0;
-  const ids4 = readModel().inventory.classKit.sourceEntityIds;
-  for (const [n, piece2] of CLASS_KIT_PIECES.entries()) {
-    m = readModel();
-    const inv = m.inventory, itemId = `item:${m.localPlayerId}:${ids4[n]}`, item = inv.itemsById[itemId];
-    if (!item || !kitPieceFits(inv, piece2)) continue;
-    say(`Putting on your ${itemDefinition(item).name}\u2026`);
-    const before = inv.revision;
-    await adapter.issue("equipment.equip", { itemId, slot: piece2, inventoryRevision: before });
-    if (await wait((x) => x.inventory.revision > before) && readModel().inventory.equipped[piece2] === itemId) worn++;
-  }
-  return { name: HERO_CLASSES[cls].name, worn };
-}
-
-// src/client/toast_v1.js
-var MAX_VISIBLE = 3;
-var DEFAULT_MS = 2600;
-var SVG = "http://www.w3.org/2000/svg";
-var ICONS = {
-  level: '<path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17l-6.1 3.4 1.5-6.8L2.2 9l6.9-.7z"/>',
-  mastery: '<path d="M12 2l2 6h6l-5 4 2 7-5-4-5 4 2-7-5-4h6z" opacity=".35"/><circle cx="12" cy="12" r="4"/>',
-  potion: '<path d="M9 2h6v2h-1v4.2a7 7 0 1 1-4 0V4H9z"/>',
-  loot: '<path d="M4 8h16l-1 12H5zM8 8V6a4 4 0 0 1 8 0v2"/>',
-  soul: '<path d="M12 2c3 4 6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 3-7 6-11z"/>',
-  event: '<path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm-1 5h2v6h-2zm0 8h2v2h-2z"/>'
-};
-var ACCENTS = { level: "#f5c451", mastery: "#e2b65c", potion: "#ff6a5c", loot: "#cfd8e3", soul: "#9fd6ff", event: "#c59cf0" };
-var lanes = /* @__PURE__ */ new WeakMap();
-function laneFor(doc) {
-  let lane2 = lanes.get(doc);
-  if (lane2) return lane2;
-  const root = doc.createElement("div");
-  root.className = "toast-lane-v1";
-  root.setAttribute("role", "status");
-  root.setAttribute("aria-live", "polite");
-  root.dataset.gameplayHud = "";
-  doc.body.append(root);
-  const cards = /* @__PURE__ */ new Map();
-  function remove(card, how = "fade") {
-    if (!card.isConnected) return;
-    clearTimeout(card.timer);
-    cards.delete(card.dataset.key);
-    card.dataset.leaving = how;
-    setTimeout(() => card.remove(), 240);
-  }
-  function arm5(card, ms) {
-    clearTimeout(card.timer);
-    card.style.setProperty("--toast-ms", ms + "ms");
-    card.classList.remove("timing");
-    void card.offsetWidth;
-    card.classList.add("timing");
-    card.timer = setTimeout(() => remove(card), ms);
-  }
-  function swipe(card) {
-    let start = null, dx = 0, dy = 0;
-    card.addEventListener("pointerdown", (e) => {
-      start = { x: e.clientX, y: e.clientY };
-      dx = dy = 0;
-      card.style.transition = "none";
-      try {
-        card.setPointerCapture(e.pointerId);
-      } catch {
-      }
-    });
-    card.addEventListener("pointermove", (e) => {
-      if (!start) return;
-      dx = e.clientX - start.x;
-      dy = Math.min(0, e.clientY - start.y);
-      const sideways = Math.abs(dx) > Math.abs(dy);
-      card.style.transform = sideways ? `translateX(${dx}px)` : `translateY(${dy}px)`;
-      card.style.opacity = String(Math.max(0, 1 - (sideways ? Math.abs(dx) / 160 : -dy / 80)));
-    });
-    const end = () => {
-      if (!start) return;
-      start = null;
-      card.style.transition = "";
-      if (Math.abs(dx) > 48 || dy < -28) remove(card, Math.abs(dx) > Math.abs(dy) ? "side" : "up");
-      else {
-        card.style.transform = "";
-        card.style.opacity = "";
-      }
-    };
-    card.addEventListener("pointerup", end);
-    card.addEventListener("pointercancel", end);
-  }
-  function show({ kind = "loot", title, sub = "", accent = null, image = null, key: key2 = null, ms = DEFAULT_MS }) {
-    const id = key2 ?? kind + "/" + title, prior = cards.get(id);
-    if (prior) {
-      const n = Number(prior.dataset.count || 1) + 1;
-      prior.dataset.count = String(n);
-      prior.querySelector(".toast-count").textContent = "\xD7" + n;
-      if (sub) prior.querySelector(".toast-sub").textContent = sub;
-      prior.classList.remove("bump");
-      void prior.offsetWidth;
-      prior.classList.add("bump");
-      arm5(prior, ms);
-      return prior;
-    }
-    const card = doc.createElement("div");
-    card.className = "toast-v1";
-    card.dataset.kind = kind;
-    card.dataset.key = id;
-    card.style.setProperty("--toast-accent", accent ?? ACCENTS[kind] ?? ACCENTS.loot);
-    const badge = doc.createElement("div");
-    badge.className = "toast-badge";
-    if (image) {
-      const img = doc.createElement("img");
-      img.src = image;
-      img.alt = "";
-      badge.append(img);
-    } else {
-      const svg2 = doc.createElementNS(SVG, "svg");
-      svg2.setAttribute("viewBox", "0 0 24 24");
-      svg2.setAttribute("aria-hidden", "true");
-      svg2.innerHTML = ICONS[kind] ?? ICONS.loot;
-      badge.append(svg2);
-    }
-    const text2 = doc.createElement("div");
-    text2.className = "toast-text";
-    const t = doc.createElement("strong");
-    t.textContent = title;
-    const s = doc.createElement("small");
-    s.className = "toast-sub";
-    s.textContent = sub;
-    text2.append(t, s);
-    const count = doc.createElement("span");
-    count.className = "toast-count";
-    card.append(badge, text2, count);
-    root.prepend(card);
-    cards.set(id, card);
-    swipe(card);
-    arm5(card, ms);
-    const visible3 = [...root.querySelectorAll(".toast-v1:not([data-leaving])")];
-    for (const old2 of visible3.slice(MAX_VISIBLE)) remove(old2);
-    return card;
-  }
-  lane2 = { show, destroy() {
-    for (const c of cards.values()) clearTimeout(c.timer);
-    root.remove();
-    lanes.delete(doc);
-  } };
-  lanes.set(doc, lane2);
-  return lane2;
-}
-function toastV1(doc, options) {
-  return laneFor(doc).show(options);
-}
-
-// src/client/hero_creator_v1.js
-var HERO_CREATOR_OPEN_EVENT = "hero-creator:open";
-var OFFHAND_NAMES = { shield: "Shield", dagger: "Dagger", tome: "Tome" };
-var CLASS_ICONS = {
-  knight: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5l15 6v11c0 10-6 17-15 21C15 39 9 32 9 22V11z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M24 14v20M16 22h16" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
-  rogue: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M33 6l5 5-17 17-5-5z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M15 24l9 9M12 36l6-6M9 39l3-3" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
-  mage: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 9h22a6 6 0 0 1 6 6v24H16a6 6 0 0 1-6-6z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M24 15l2.5 6 6 2.5-6 2.5-2.5 6-2.5-6-6-2.5 6-2.5z" fill="currentColor"/></svg>'
-};
-var classIconSvg = (id) => CLASS_ICONS[id] ?? "";
-var KIT_GEAR_SLOT = { weapon: "main", helmet: "helmet", overall: "body", gloves: "gloves", boots: "boots" };
-function kitGear(id) {
-  const k = CLASS_KITS[id], piece2 = (definitionId) => ({ tier: 0, kind: itemLook({ definitionId }) }), gear2 = { off: piece2("starter-" + HERO_CLASSES[id].offhand) };
-  for (const p of CLASS_KIT_PIECES) gear2[KIT_GEAR_SLOT[p]] = piece2(k[p]);
-  const legs3 = OVERALL_LEGS[gear2.body.kind];
-  gear2.legs = legs3 ? { tier: 0, kind: legs3 } : null;
-  return gear2;
-}
-var sameLook = (a, b) => Boolean(a && b) && Object.keys(DEFAULT_LOOK).every((k) => a[k] === b[k]);
-var cleanName = (text2) => [...String(text2).replace(/[^\p{L}\p{M}\p{N} '’.-]/gu, "").replace(/\s+/g, " ").trimStart()].slice(0, HERO_NAME_MAX).join("");
-var namedOk = (name) => name.length > 0 && validHeroName(name);
-function createHeroCreatorV1({ document: document2, environment, readModel, adapter, reportError = () => {
-}, onClose = () => {
-}, openHeroes = null, otherHeroes = () => false }) {
-  const el = (tag, cls2 = "", text2 = "") => {
-    const e = document2.createElement(tag);
-    if (cls2) e.className = cls2;
-    if (text2) e.textContent = text2;
-    return e;
-  };
-  const button = (cls2, text2, onClick) => {
-    const b = el("button", cls2, text2);
-    b.type = "button";
-    b.addEventListener("click", onClick);
-    return b;
-  };
-  const root = el("section", "hero-creator-v1");
-  root.hidden = true;
-  root.setAttribute("role", "dialog");
-  root.setAttribute("aria-modal", "true");
-  root.setAttribute("aria-labelledby", "hero-creator-title");
-  const panel = el("div", "hc-panel"), head12 = el("header", "hc-head"), title = el("h2", "", "Create your hero"), intro = el("p", "hc-intro");
-  title.id = "hero-creator-title";
-  head12.append(title, intro);
-  const body5 = el("div", "hc-body"), preview = el("div", "hc-preview"), stage2 = el("canvas", "hc-stage"), bar = el("div", "hc-bar");
-  stage2.setAttribute("role", "img");
-  stage2.setAttribute("aria-label", "Preview of your hero");
-  const options = el("div", "hc-options"), foot = el("footer", "hc-foot"), status2 = el("p", "hc-status"), cancel = button("hc-later", "Cancel", () => {
-    if (!busy) close();
-  }), confirm = button("hc-confirm", "", () => save());
-  const switchHero = button("hc-later", "Switch hero", () => {
-    if (!busy && openHeroes) {
-      root.hidden = true;
-      opener = null;
-      openHeroes();
-    }
-  });
-  status2.setAttribute("role", "status");
-  foot.append(status2, switchHero, cancel, confirm);
-  let mode = "create", cls = null, deferClass = false, look = { ...DEFAULT_LOOK }, facing2 = 1, showGear = true, busy = false, thumbsKey = "", opener = null, kitBusy = false, kitRetryAt = 0, roomNoticed = false;
-  const toggle = (text2, get, set) => {
-    const b = button("hc-toggle", text2, () => {
-      set(!get());
-      paint();
-    });
-    return { b, sync() {
-      b.setAttribute("aria-pressed", String(get()));
-    } };
-  };
-  const gearToggle = toggle("Gear", () => showGear, (v) => {
-    showGear = v;
-  }), helmToggle = toggle("Helmet", () => look.helmet, (v) => {
-    look.helmet = v;
-  });
-  const randomButton = button("hc-toggle", "Random look", randomLook);
-  bar.append(button("hc-toggle", "Turn", () => {
-    facing2 = -facing2;
-  }), gearToggle.b, helmToggle.b, randomButton);
-  preview.append(stage2, bar);
-  const field2 = (label4, content, id) => {
-    const f = el("fieldset", "hc-field"), l = el("legend", "", label4), pick3 = el("span", "hc-pick");
-    if (id) pick3.id = id;
-    l.append(" ", pick3);
-    f.append(l, ...content);
-    options.append(f);
-    return { f, pick: pick3 };
-  };
-  const classCards = el("div", "hc-classes"), cardButtons = {};
-  for (const c of ["knight", "rogue", "mage"].map((id) => HERO_CLASSES[id])) {
-    const b = el("button", "hc-class"), canvas = el("canvas"), skill = CLASS_SKILLS[c.signature];
-    b.type = "button";
-    b.style.setProperty("--class", c.color);
-    b.append(canvas, el("strong", "", c.name), el("span", "", `${OFFHAND_NAMES[c.offhand]} \xB7 ${c.move.name} on Shift`), el("small", "", `Free skill: ${skill.name}`));
-    b.addEventListener("click", () => {
-      if (!busy) {
-        cls = c.id;
-        deferClass = false;
-        paint();
-      }
-    });
-    cardButtons[c.id] = { b, canvas };
-    classCards.append(b);
-  }
-  const laterClass = button("hc-toggle hc-class-later", "Decide later", () => {
-    if (!busy) {
-      cls = null;
-      deferClass = true;
-      paint();
-    }
-  }), laterRow = el("div", "hc-class-later-row");
-  laterRow.append(laterClass, el("p", "hc-sub", "Pick a class any time from the skill wheel or Stats."));
-  const classField = field2("Class", [classCards, laterRow]);
-  const nameInput = el("input", "hc-name");
-  nameInput.type = "text";
-  nameInput.maxLength = HERO_NAME_MAX * 2;
-  nameInput.placeholder = "Name your hero";
-  nameInput.autocomplete = "off";
-  nameInput.spellcheck = false;
-  nameInput.setAttribute("aria-label", "Hero name");
-  nameInput.addEventListener("input", () => {
-    const clean = cleanName(nameInput.value);
-    if (clean !== nameInput.value) nameInput.value = clean;
-    look.name = clean;
-    paint();
-  });
-  const nameField = field2("Name", [nameInput]);
-  const tiles = (list, key2, id) => {
-    const box2 = el("div", "hc-tiles"), map = {};
-    for (const [value2, name] of list) {
-      const b = el("button", "hc-tile"), canvas = el("canvas");
-      b.type = "button";
-      b.append(canvas, el("span", "", name));
-      b.addEventListener("click", () => {
-        look[key2] = value2;
-        paint();
-      });
-      map[value2] = { b, canvas };
-      box2.append(b);
-    }
-    return { box: box2, map };
-  };
-  const swatches = (list, key2) => {
-    const box2 = el("div", "hc-swatches"), map = {};
-    for (const [value2, name, hex3] of list) {
-      const b = el("button", "hc-swatch");
-      b.type = "button";
-      b.style.background = hex3;
-      b.title = name;
-      b.setAttribute("aria-label", name);
-      b.addEventListener("click", () => {
-        look[key2] = value2;
-        paint();
-      });
-      map[value2] = b;
-      box2.append(b);
-    }
-    return { box: box2, map };
-  };
-  const hairTiles = tiles(LOOK_OPTIONS.hairStyles, "hair"), natural = swatches(LOOK_OPTIONS.hairColors.filter((x) => !x[3]), "hairColor"), bold = swatches(LOOK_OPTIONS.hairColors.filter((x) => x[3]), "hairColor"), skins = swatches(LOOK_OPTIONS.skins, "skin"), beardTiles = tiles(LOOK_OPTIONS.facialHair, "facialHair");
-  const hairField = field2("Hair", [hairTiles.box]), hairColorField = field2("Hair color", [natural.box, el("p", "hc-sub", "Bold"), bold.box]), skinField = field2("Skin", [skins.box]), beardField = field2("Facial hair", [beardTiles.box]);
-  const lookFields = [nameField, hairField, hairColorField, skinField, beardField];
-  body5.append(preview, options);
-  panel.append(head12, body5, foot);
-  root.append(panel);
-  document2.body.append(root);
-  root.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !busy && mode !== "create") {
-      e.preventDefault();
-      close();
-    }
-  });
-  const onRequest = (e) => open2(e?.detail?.mode ?? null);
-  document2.addEventListener(HERO_CREATOR_OPEN_EVENT, onRequest);
-  const local6 = (m) => m.playersById[m.localPlayerId];
-  const heroClass = () => heroClassOf(local6(readModel())?.d8);
-  const wait = async (test, ms = 4e3) => {
-    const until = Date.now() + ms;
-    while (Date.now() < until) {
-      if (test(readModel())) return true;
-      await new Promise((r) => environment.setTimeout(r, 60));
-    }
-    return false;
-  };
-  const offhandOf = (item) => {
-    const d = itemDefinition(item);
-    return d?.slot === "subweapon" ? d.subType : null;
-  };
-  const currentGear = () => {
-    const m = readModel(), p = local6(m);
-    return m.entitiesById?.[p?.entityId]?.heroLook?.gear ?? {};
-  };
-  const specFor = (id, gear2) => ({ cls: id, look, gear: gear2, offType: id ? HERO_CLASSES[id].offhand : null });
-  function previewGear() {
-    if (!showGear) return {};
-    const gear2 = currentGear();
-    if (mode === "look" || heroClass() || !cls) return gear2;
-    const inv = readModel().inventory, held = offhandOf(inv?.itemsById[inv?.equipped.subweapon]), kit2 = kitGear(cls), next = { ...gear2, off: held === HERO_CLASSES[cls].offhand && gear2.off ? gear2.off : kit2.off };
-    if (inv && !inv.classKit) {
-      for (const p of CLASS_KIT_PIECES) if (kitPieceFits(inv, p)) {
-        next[KIT_GEAR_SLOT[p]] = kit2[KIT_GEAR_SLOT[p]];
-        if (p === "overall") next.legs = kit2.legs;
-      }
-    }
-    return next;
-  }
-  function randomLook() {
-    const pick3 = (list) => list[Math.floor(Math.random() * list.length)][0];
-    look = { ...look, hair: pick3(LOOK_OPTIONS.hairStyles), hairColor: pick3(LOOK_OPTIONS.hairColors), skin: pick3(LOOK_OPTIONS.skins), facialHair: Math.random() < 0.55 ? "none" : pick3(LOOK_OPTIONS.facialHair) };
-    paint();
-  }
-  function draw(canvas, spec, frame, t) {
-    const r = canvas.getBoundingClientRect();
-    if (!r.width) return;
-    const dpr = Math.min(3, environment.devicePixelRatio || 1), W3 = Math.round(r.width * dpr), H5 = Math.round(r.height * dpr);
-    if (canvas.width !== W3 || canvas.height !== H5) {
-      canvas.width = W3;
-      canvas.height = H5;
-    }
-    const c = canvas.getContext("2d");
-    c.setTransform(dpr, 0, 0, dpr, 0, 0);
-    c.clearRect(0, 0, r.width, r.height);
-    c.save();
-    frame(c, r.width, r.height);
-    drawBlockyHero(c, spec, { t, still: t === null });
-    c.restore();
-  }
-  const headFrame = (x, y, s) => (c, w, h) => {
-    c.translate(w / 2 + x, h * y);
-    c.scale(w / s, w / s);
-  };
-  function paintThumbs() {
-    const key2 = JSON.stringify([{ ...look, name: "" }, cls, mode]);
-    if (key2 === thumbsKey) return;
-    thumbsKey = key2;
-    for (const [value2, { canvas }] of Object.entries(hairTiles.map)) draw(canvas, { cls: null, look: { ...look, hair: value2, helmet: false }, gear: {} }, headFrame(8, 0.9, 25.5), null);
-    for (const [value2, { canvas }] of Object.entries(beardTiles.map)) draw(canvas, { cls: null, look: { ...look, facialHair: value2, helmet: false }, gear: {} }, headFrame(2, 0.6, 22), null);
-    for (const [id, { canvas }] of Object.entries(cardButtons)) draw(canvas, specFor(id, kitGear(id)), (c, w, h) => {
-      const s = Math.min(w / 46, h / 58);
-      c.translate(w * 0.46, h - 6 - 20 * 0.8 * s);
-      c.scale(0.8 * s, 0.8 * s);
-    }, null);
-  }
-  function paintStage(t) {
-    draw(stage2, specFor(heroClass() ?? (mode === "look" ? null : cls), previewGear()), (c, w, h) => {
-      const s = Math.min(h / 56, w / 58);
-      c.translate(w * 0.5 - (facing2 > 0 ? 3 : -3) * s, h - 22 - 20 * 0.8 * s);
-      c.scale(0.8 * s * facing2, 0.8 * s);
-    }, t);
-  }
-  function confirmState() {
-    const named = namedOk(look.name.trim()), hasClass = Boolean(heroClass());
-    if (busy) return ["Working\u2026", false];
-    if (mode === "class") return cls ? [`Become a ${HERO_CLASSES[cls].name}`, true] : ["Pick a class", false];
-    if (!named) return ["Name your hero", false];
-    if (mode === "look") return ["Save look", true];
-    if (hasClass) return ["Begin", true];
-    if (cls) return [`Begin as a ${HERO_CLASSES[cls].name}`, true];
-    return deferClass ? ["Begin without a class", true] : ["Pick a class or decide later", false];
-  }
-  function paint() {
-    const hasClass = Boolean(heroClass());
-    classField.f.hidden = !(mode === "class" || mode === "create" && !hasClass);
-    laterRow.hidden = mode !== "create";
-    for (const f of lookFields) f.f.hidden = mode === "class";
-    helmToggle.b.hidden = randomButton.hidden = mode === "class";
-    title.textContent = mode === "create" ? "Create your hero" : mode === "class" ? "Choose your class" : "Your hero\u2019s look";
-    intro.textContent = mode === "create" ? "Name your hero and choose how they look. Pick a class now or later; once picked, it\u2019s permanent." : mode === "class" ? "Your class is permanent for this hero. Your name and look stay as they are." : "Change how your hero looks. Your gear still goes on top.";
-    for (const [id, { b }] of Object.entries(cardButtons)) {
-      b.setAttribute("aria-pressed", String(id === cls));
-      b.disabled = busy;
-    }
-    laterClass.setAttribute("aria-pressed", String(deferClass));
-    laterClass.disabled = busy;
-    for (const [v, { b }] of Object.entries(hairTiles.map)) b.setAttribute("aria-pressed", String(v === look.hair));
-    for (const [v, { b }] of Object.entries(beardTiles.map)) b.setAttribute("aria-pressed", String(v === look.facialHair));
-    for (const map of [natural.map, bold.map]) for (const [v, b] of Object.entries(map)) b.setAttribute("aria-pressed", String(v === look.hairColor));
-    for (const [v, b] of Object.entries(skins.map)) b.setAttribute("aria-pressed", String(v === look.skin));
-    hairColorField.pick.textContent = "\xB7 " + (LOOK_OPTIONS.hairColors.find((x) => x[0] === look.hairColor)?.[1] ?? "");
-    skinField.pick.textContent = "\xB7 " + (LOOK_OPTIONS.skins.find((x) => x[0] === look.skin)?.[1] ?? "");
-    gearToggle.sync();
-    helmToggle.sync();
-    cancel.hidden = mode === "create";
-    cancel.disabled = busy;
-    switchHero.hidden = !(mode === "create" && openHeroes && otherHeroes());
-    switchHero.disabled = busy;
-    const [label4, ready] = confirmState();
-    confirm.textContent = label4;
-    confirm.disabled = !ready;
-    if (!root.hidden) paintThumbs();
-  }
-  async function chooseClass(classId) {
-    const c = HERO_CLASSES[classId];
-    let m = readModel(), inv = m.inventory, equipped = inv.itemsById[inv.equipped.subweapon];
-    if (equipped && offhandOf(equipped) !== c.offhand) {
-      status2.textContent = "Stowing your old offhand\u2026";
-      const rev = inv.revision;
-      await adapter.issue("equipment.unequip", { slot: "subweapon", inventoryRevision: rev });
-      await wait((x) => x.inventory.revision > rev);
-    }
-    m = readModel();
-    status2.textContent = `Becoming a ${c.name}\u2026`;
-    await adapter.issue("progression.change", { progressionRevision: local6(m).d8.revision, action: { kind: "class.choose", heroClass: classId } });
-    if (!await wait((x) => local6(x).d8?.heroClass === classId)) throw Error("The class choice didn\u2019t save. Try again.");
-    const owned2 = () => Object.values(readModel().inventory.itemsById).find((i) => offhandOf(i) === c.offhand);
-    m = readModel();
-    inv = m.inventory;
-    if (!owned2() && inv.subweapons && !inv.subweapons.claims[c.offhand]) {
-      status2.textContent = `Claiming your ${SUBWEAPONS[c.offhand].name}\u2026`;
-      const rev = inv.revision;
-      await adapter.issue("subweapon.claim", { subType: c.offhand, inventoryRevision: rev });
-      await wait((x) => x.inventory.revision > rev);
-    }
-    const item = owned2();
-    m = readModel();
-    inv = m.inventory;
-    if (item && inv.equipped.subweapon !== item.itemId) {
-      status2.textContent = `Equipping your ${OFFHAND_NAMES[c.offhand]}\u2026`;
-      const rev = inv.revision;
-      await adapter.issue("equipment.equip", { itemId: item.itemId, slot: "subweapon", inventoryRevision: rev });
-      await wait((x) => x.inventory.revision > rev);
-    }
-    try {
-      kitToast(await claimClassKit2({ readModel, adapter, wait, say: (text2) => {
-        status2.textContent = text2;
-      } }));
-    } catch {
-    }
-  }
-  function kitToast(r) {
-    if (r) toastV1(document2, { kind: "loot", title: `${r.name} starting gear`, sub: r.worn === CLASS_KIT_PIECES.length ? "Equipped and ready" : "Worn where your slots were free \xB7 the rest is in your bag", key: "classkit/ready", ms: 4200 });
-  }
-  function grantKit(m) {
-    const now2 = Date.now();
-    if (now2 < kitRetryAt) return;
-    if (!classKitRoom(m)) {
-      kitRetryAt = now2 + 5e3;
-      if (!roomNoticed) {
-        roomNoticed = true;
-        toastV1(document2, { kind: "loot", title: "Make room for your starting gear", sub: `Your bag needs ${CLASS_KIT_PIECES.length} free spaces.`, key: "classkit/room", ms: 5200 });
-      }
-      return;
-    }
-    kitBusy = true;
-    claimClassKit2({ readModel, adapter, wait }).then(kitToast, () => {
-      kitRetryAt = Date.now() + 15e3;
-    }).finally(() => {
-      kitBusy = false;
-    });
-  }
-  async function save() {
-    if (busy) return;
-    const next = { ...look, name: look.name.trim() };
-    if (mode !== "class" && !namedOk(next.name)) {
-      status2.textContent = "Give your hero a name: up to 16 letters, numbers, spaces, hyphens or apostrophes.";
-      return;
-    }
-    busy = true;
-    paint();
-    try {
-      if (mode !== "look" && cls && !heroClass()) await chooseClass(cls);
-      if (mode !== "class") {
-        status2.textContent = "Saving your look\u2026";
-        await adapter.issue("progression.change", { progressionRevision: local6(readModel()).d8.revision, action: { kind: "look.set", look: next } });
-        if (!await wait((x) => sameLook(local6(x).d8?.look, next))) throw Error("Your look didn\u2019t save. Try again.");
-      }
-      status2.textContent = "";
-      busy = false;
-      close();
-    } catch (e) {
-      status2.textContent = e.message;
-      reportError(e.message);
-    } finally {
-      busy = false;
-      paint();
-    }
-  }
-  function open2(requested) {
-    const m = readModel(), p = local6(m);
-    if (!p?.d8 || busy) return false;
-    const hasClass = Boolean(heroClassOf(p.d8));
-    mode = !p.d8.look ? "create" : requested === "look" || hasClass ? "look" : "class";
-    look = { ...DEFAULT_LOOK, ...p.d8.look ?? {} };
-    nameInput.value = look.name;
-    deferClass = false;
-    if (mode !== "look") {
-      const inv = m.inventory, current = offhandOf(inv?.itemsById[inv?.equipped.subweapon]);
-      cls = hasClass ? null : Object.values(HERO_CLASSES).find((c) => c.offhand === current)?.id ?? null;
-    }
-    showGear = true;
-    facing2 = 1;
-    status2.textContent = "";
-    thumbsKey = "";
-    opener = document2.activeElement;
-    root.hidden = false;
-    paint();
-    paintStage(environment.performance?.now?.() / 1e3 || 0);
-    return true;
-  }
-  function close() {
-    root.hidden = true;
-    const back = opener;
-    opener = null;
-    if (back?.isConnected && back.closest("[role=dialog]:not([hidden])")) back.focus({ preventScroll: true });
-    else onClose();
-  }
-  function refresh(m, available) {
-    const p = local6(m);
-    if (root.hidden) {
-      if (available && p?.d8 && !p.d8.look && m.persistence?.phase === "encounter" && m.entitiesById[p.entityId]?.alive) open2(null);
-      else if (available && !busy && !kitBusy && classKitDue(m)) grantKit(m);
-      return;
-    }
-    paintStage((environment.performance?.now?.() ?? Date.now()) / 1e3);
-  }
-  return Object.freeze({ open: open2, refresh, isOpen: () => !root.hidden, destroy() {
-    document2.removeEventListener(HERO_CREATOR_OPEN_EVENT, onRequest);
-    root.remove();
-  } });
-}
-
 // src/client/world_event_hud_v4.js
 function createWorldEventHudV4(document2, onActivate = () => {
 }) {
   const stack = document2.createElement("div");
   stack.id = "world-event-stack-v4";
-  const root = document2.createElement("aside");
-  root.id = "world-event-hud-v4";
-  root.hidden = true;
-  root.setAttribute("data-gameplay-hud", "");
-  root.setAttribute("aria-label", "Local event");
+  const root2 = document2.createElement("aside");
+  root2.id = "world-event-hud-v4";
+  root2.hidden = true;
+  root2.setAttribute("data-gameplay-hud", "");
+  root2.setAttribute("aria-label", "Local event");
   const tag = document2.createElement("small"), head12 = document2.createElement("div"), title = document2.createElement("strong"), timer = document2.createElement("time"), row2 = document2.createElement("div"), pips = document2.createElement("span"), bar = document2.createElement("span"), fill4 = document2.createElement("i"), barText = document2.createElement("b"), line13 = document2.createElement("p"), action2 = document2.createElement("button");
   head12.append(title, timer);
   bar.append(fill4, barText);
   row2.append(pips, bar);
   action2.type = "button";
   action2.onclick = () => {
-    if (current && !root.hidden && !action2.hidden && !action2.disabled) onActivate(current);
+    if (current && !root2.hidden && !action2.hidden && !action2.disabled) onActivate(current);
   };
-  root.append(tag, head12, row2, line13, action2);
+  root2.append(tag, head12, row2, line13, action2);
   const badge = document2.createElement("div"), dial = document2.createElement("span"), badgeText = document2.createElement("span"), badgeName = document2.createElement("strong"), badgeTime = document2.createElement("time");
   badge.id = "world-event-boon-v4";
   badge.hidden = true;
   badge.setAttribute("data-gameplay-hud", "");
   badgeText.append(badgeName, badgeTime);
   badge.append(dial, badgeText);
-  stack.append(root, badge);
+  stack.append(root2, badge);
   const style = document2.createElement("style");
   style.textContent = `#world-event-stack-v4{position:absolute;z-index:7;top:76px;left:12px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;pointer-events:none}#world-event-hud-v4{--accent:#c27dff;position:relative;width:min(300px,56vw);padding:9px 13px 10px 16px;border-radius:7px;background:#11171ce0;box-shadow:inset 0 0 0 1px #ffffff14;color:#f3ead2;font:12px/1.35 system-ui;box-sizing:border-box}#world-event-hud-v4::before{content:'';position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:0 2px 2px 0;background:var(--accent)}#world-event-stack-v4 [hidden]{display:none!important}#world-event-hud-v4 small{display:block;color:var(--accent);font-size:10px;font-weight:700;letter-spacing:.15em}#world-event-hud-v4>div:first-of-type{display:flex;align-items:baseline;gap:8px}#world-event-hud-v4 strong{flex:1;font:700 20px/1.2 Georgia,serif;margin:1px 0 4px}#world-event-hud-v4 time{font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;color:var(--accent)}#world-event-hud-v4 time:empty{display:none}#world-event-hud-v4>div:nth-of-type(2){display:flex;align-items:center;gap:10px;margin:3px 0 2px}#world-event-hud-v4>div:nth-of-type(2)[data-empty]{display:none}#world-event-hud-v4 em{display:inline-block;width:9px;height:9px;margin:0 5px 0 2px;transform:rotate(45deg);border:1.5px solid #ffffff5c;background:#ffffff14}#world-event-hud-v4 em[data-on]{border-color:#f2dcff;background:var(--accent)}#world-event-hud-v4 span:last-child{position:relative;flex:1;height:13px;border-radius:7px;background:#ffffff1a;overflow:hidden}#world-event-hud-v4 i{position:absolute;inset:0 auto 0 0;border-radius:7px;background:var(--accent);min-width:13px}#world-event-hud-v4 b{position:relative;padding-left:8px;font-size:10px;line-height:13px;color:#fff;text-shadow:0 1px 1px #0008}#world-event-hud-v4 p{margin:5px 0 0;color:#c9c2ae;font-size:12px}#world-event-hud-v4 p:empty{display:none}#world-event-hud-v4 button{pointer-events:auto;touch-action:manipulation;margin-top:8px;padding:6px 10px;font:600 12px system-ui;border:1px solid #e8c37a99;border-radius:5px;background:#1b232b;color:#f3ead2}#world-event-hud-v4 button:disabled{opacity:.6}
 #world-event-boon-v4{--boon:#ffcf5a;--left:1;display:flex;align-items:center;gap:8px;padding:4px 11px 4px 4px;border-radius:22px;background:#11171ce0;box-shadow:inset 0 0 0 1px #ffffff14;color:#f3ead2;font:12px/1.2 system-ui}#world-event-boon-v4>span:first-child{width:30px;height:30px;border-radius:50%;background:radial-gradient(circle,#11171c 0 52%,transparent 54%),conic-gradient(var(--boon) calc(var(--left)*360deg),#ffffff1f 0);position:relative}#world-event-boon-v4>span:first-child::after{content:'';position:absolute;inset:10px;border-radius:50%;background:var(--boon);box-shadow:0 0 8px var(--boon)}#world-event-boon-v4 strong{display:block;font:700 13px/1.2 Georgia,serif}#world-event-boon-v4 time{display:block;font-weight:700;font-size:11px;color:var(--boon);font-variant-numeric:tabular-nums}
@@ -33959,7 +34629,7 @@ function createWorldEventHudV4(document2, onActivate = () => {
   document2.head.append(style);
   (document2.getElementById("world-view")?.parentElement ?? document2.body).append(stack);
   let previous = "", previousBadge = "", current = null, placedAt = 0;
-  function place() {
+  function place2() {
     const now2 = performance.now();
     if (now2 - placedAt < 500) return;
     placedAt = now2;
@@ -33977,19 +34647,19 @@ function createWorldEventHudV4(document2, onActivate = () => {
   const BOON_COLOR = { wrath: "#ff6a55", insight: "#6fb0ff", fortune: "#ffcf5a" };
   function refresh(trackerRow, visible3 = true) {
     if (!visible3 || !trackerRow) {
-      root.hidden = true;
+      root2.hidden = true;
       current = null;
       previous = "";
       return false;
     }
     const key2 = JSON.stringify(trackerRow);
-    if (key2 === previous && !root.hidden) return true;
+    if (key2 === previous && !root2.hidden) return true;
     previous = key2;
-    root.hidden = false;
+    root2.hidden = false;
     current = trackerRow.groupId;
-    place();
-    root.style.setProperty("--accent", trackerRow.accent ?? "#c27dff");
-    root.dataset.kind = trackerRow.kind ?? "";
+    place2();
+    root2.style.setProperty("--accent", trackerRow.accent ?? "#c27dff");
+    root2.dataset.kind = trackerRow.kind ?? "";
     tag.textContent = trackerRow.tag ?? "";
     title.textContent = trackerRow.title ?? "";
     timer.textContent = trackerRow.timer ?? "";
@@ -34022,7 +34692,7 @@ function createWorldEventHudV4(document2, onActivate = () => {
     if (key2 === previousBadge && !badge.hidden) return;
     previousBadge = key2;
     badge.hidden = false;
-    place();
+    place2();
     badge.style.setProperty("--boon", BOON_COLOR[b.boon] ?? "#ffcf5a");
     badge.style.setProperty("--left", String(Math.max(0, Math.min(1, b.fraction))));
     badgeName.textContent = b.name + (b.fx ? " \xB7 " + b.fx : "");
@@ -35208,10 +35878,10 @@ function paintStoneExitV3(c, x, y, k, biome, seed2 = 3) {
   treads(c, x - 32, x + 32, y + 18, y - 62, 6, k, true);
   c.save();
   c.globalCompositeOperation = "lighter";
-  const beam3 = c.createLinearGradient(0, y - 62, 0, y + 24);
-  beam3.addColorStop(0, "rgba(255,240,190,.45)");
-  beam3.addColorStop(1, "rgba(255,240,190,0)");
-  c.fillStyle = beam3;
+  const beam4 = c.createLinearGradient(0, y - 62, 0, y + 24);
+  beam4.addColorStop(0, "rgba(255,240,190,.45)");
+  beam4.addColorStop(1, "rgba(255,240,190,0)");
+  c.fillStyle = beam4;
   c.fill(poly4([[x - 28, y - 62], [x + 28, y - 62], [x + 40, y + 24], [x - 40, y + 24]]));
   c.restore();
   pier(c, x - 58, y - 80, x - 32, y + 20, k, b, seed2 + 1);
@@ -35326,10 +35996,10 @@ function paintCaveExitV3(c, x, y, k, biome, seed2 = 7) {
   c.restore();
   c.save();
   c.globalCompositeOperation = "lighter";
-  const beam3 = c.createLinearGradient(0, y - 40, 0, y + 40);
-  beam3.addColorStop(0, "rgba(255,240,190,.4)");
-  beam3.addColorStop(1, "rgba(255,240,190,0)");
-  c.fillStyle = beam3;
+  const beam4 = c.createLinearGradient(0, y - 40, 0, y + 40);
+  beam4.addColorStop(0, "rgba(255,240,190,.4)");
+  beam4.addColorStop(1, "rgba(255,240,190,0)");
+  c.fillStyle = beam4;
   c.fill(poly4([[x - 30, y - 20], [x + 30, y - 20], [x + 52, y + 40], [x - 52, y + 40]]));
   c.restore();
   for (const [sx, sy, w, h, sd] of [[-50, -46, 36, 40, 1], [-54, -8, 38, 40, 2], [-30, -80, 40, 30, 3], [8, -90, 46, 30, 4], [44, -62, 36, 38, 5], [52, -14, 40, 42, 6], [-58, 22, 30, 24, 7], [58, 24, 32, 24, 8]]) {
@@ -35697,22 +36367,22 @@ function chain(c, x0, y0, x1, y1, col = "#8d8a96", r = 2.4) {
   }
 }
 function chest(c, x, y, w, h, open2, wood2 = "#7a4a2a", band2 = "#3e3a45", trim2 = "#e2b54e") {
-  const W3 = ramp3(wood2), lidH = h * 0.5, body5 = poly4([[x - w / 2, y], [x + w / 2, y], [x + w / 2, y - h], [x - w / 2, y - h]]);
+  const W4 = ramp3(wood2), lidH = h * 0.5, body5 = poly4([[x - w / 2, y], [x + w / 2, y], [x + w / 2, y - h], [x - w / 2, y - h]]);
   shadow2(c, x + 2, y + 1, w * 0.62, w * 0.16, 0.35);
   if (open2) {
     const lid = poly4([[x - w / 2, y - h], [x + w / 2, y - h], [x + w / 2 - 2, y - h - lidH * 1.7], [x - w / 2 + 2, y - h - lidH * 1.7]]);
-    prop2(c, [[lid, W3.d]], 1.6);
+    prop2(c, [[lid, W4.d]], 1.6);
     light(c, x, y - h - 2, w * 0.9, h * 0.9, "rgba(255,214,110,A)", 0.85);
     prop2(c, [[ell3(x, y - h, w / 2 - 1.5, h * 0.2), "#ffd36a"]], 1.2);
     c.fillStyle = "#fff3c4";
     c.fill(ell3(x - w * 0.12, y - h - 0.6, w * 0.18, h * 0.07));
   }
-  prop2(c, [[body5, W3.m]], 1.8);
+  prop2(c, [[body5, W4.m]], 1.8);
   c.save();
   c.clip(body5);
-  c.fillStyle = W3.l;
+  c.fillStyle = W4.l;
   c.fillRect(x - w / 2, y - h, w, h * 0.22);
-  c.fillStyle = W3.d;
+  c.fillStyle = W4.d;
   c.fillRect(x - w / 2, y - h * 0.32, w, h * 0.32);
   c.fillStyle = band2;
   for (const bx of [-0.32, 0.32]) c.fillRect(x + bx * w - 1.6, y - h, 3.2, h);
@@ -35722,10 +36392,10 @@ function chest(c, x, y, w, h, open2, wood2 = "#7a4a2a", band2 = "#3e3a45", trim2
     lid.moveTo(x - w / 2, y - h);
     lid.quadraticCurveTo(x, y - h - lidH * 1.4, x + w / 2, y - h);
     lid.closePath();
-    prop2(c, [[lid, W3.l]], 1.8);
+    prop2(c, [[lid, W4.l]], 1.8);
     c.save();
     c.clip(lid);
-    c.fillStyle = W3.h;
+    c.fillStyle = W4.h;
     c.fill(ell3(x - w * 0.15, y - h - lidH * 0.55, w * 0.3, lidH * 0.3));
     c.fillStyle = band2;
     for (const bx of [-0.32, 0.32]) c.fillRect(x + bx * w - 1.6, y - h - lidH, 3.2, lidH);
@@ -36009,12 +36679,820 @@ function shrineUprightsV1(e, time) {
   return out;
 }
 
+// src/client/nest_art_v1.js
+var SKIN = Object.freeze({
+  woodland: { tag: "SPORE NEST", glow: "206,240,96", hot: "#f4ffc8", rot: { m: "#6e5878", rim: "#3a2b42", lip: "#957ea0", fleck: "#dcc6e2", dark: "#5a4763" }, shell: "#9a78a6", root: "#6e4b33", accent: "#cf9a58", splash: "#a8c63e" },
+  desert: { tag: "SCARAB NEST", glow: "255,176,56", hot: "#fff1c8", rot: { m: "#a06d3b", rim: "#5f3a1a", lip: "#c99b63", fleck: "#e9cc9c", dark: "#7f5428" }, shell: "#cf9455", root: "#8a5a30", accent: "#2f8273", splash: "#e29b2c" },
+  frostland: { tag: "FROST NEST", glow: "120,226,255", hot: "#ecffff", rot: { m: "#a6c6dd", rim: "#5f84a6", lip: "#e6f3fb", fleck: "#ffffff", dark: "#86a9c6" }, shell: "#d2e9f7", root: "#8db6d6", accent: "#5f86a8", splash: "#c4e8f6" },
+  wetland: { tag: "BOG NEST", glow: "186,238,84", hot: "#f4ffd0", rot: { m: "#4f4630", rim: "#2a2416", lip: "#7a7046", fleck: "#b9d36a", dark: "#3d3624" }, shell: "#94c860", root: "#4b3a2a", accent: "#5d8a45", splash: "#8fbf3f" }
+});
+var nestSkinV1 = (b) => SKIN[b] ?? SKIN.woodland;
+var NEST_LAYOUT_V1 = Object.freeze({ mother: { x: NEST_POLICY.motherAt[0], y: NEST_POLICY.motherAt[1] }, nests: Object.freeze(NEST_POLICY.nests.map(([x, y]) => Object.freeze({ x, y }))), edge: NEST_POLICY.circle });
+var lightA = (c, x, y, rx, ry, rgb6, a) => glow3(c, x, y, rx, ry, `rgba(${rgb6},A)`, a);
+function egg(x, y, w, h, k = 0.8, tilt = 0) {
+  const p = new Path2D(), n = 36, cs = Math.cos(tilt), sn = Math.sin(tilt);
+  for (let i = 0; i < n; i++) {
+    const a = i / n * TAU38, s = Math.sin(a), rx = w / 2 * (s < 0 ? 1 - (1 - k) * -s : 1), lx = Math.cos(a) * rx, ly = -h / 2 + s * h / 2;
+    const px3 = x + lx * cs - ly * sn, py = y + lx * sn + ly * cs;
+    i ? p.lineTo(px3, py) : p.moveTo(px3, py);
+  }
+  p.closePath();
+  return p;
+}
+function bulb(c, x, y, w, h, P6, k = 0.8, tilt = 0, o = 2.2) {
+  const p = egg(x, y, w, h, k, tilt);
+  prop2(c, [[p, P6.d]], o);
+  c.save();
+  c.clip(p);
+  c.fillStyle = P6.m;
+  c.fill(egg(x - w * 0.1, y - h * 0.04, w * 0.88, h * 0.95, k, tilt));
+  c.fillStyle = P6.l;
+  c.fill(egg(x - w * 0.22, y - h * 0.2, w * 0.42, h * 0.6, k * 0.95, tilt));
+  c.fillStyle = P6.h;
+  c.globalAlpha = 0.85;
+  c.fill(ell3(x - w * 0.2 + Math.sin(tilt) * h * 0.6, y - h * 0.74, w * 0.08, h * 0.09, -0.4 + tilt));
+  c.restore();
+  return p;
+}
+function root(c, x0, y0, x1, y1, bend, w, P6, o = 1.6) {
+  const dx = x1 - x0, dy = y1 - y0, L = Math.hypot(dx, dy) || 1, nx = -dy / L, ny = dx / L, cx = (x0 + x1) / 2 + nx * bend, cy = (y0 + y1) / 2 + ny * bend, p = new Path2D();
+  p.moveTo(x0 + nx * w, y0 + ny * w);
+  p.quadraticCurveTo(cx + nx * w * 0.7, cy + ny * w * 0.7, x1, y1);
+  p.quadraticCurveTo(cx - nx * w * 0.7, cy - ny * w * 0.7, x0 - nx * w, y0 - ny * w);
+  p.closePath();
+  prop2(c, [[p, P6.m]], o);
+  c.save();
+  c.clip(p);
+  c.fillStyle = P6.l;
+  c.fill(shift2(p, -w * 0.45, -w * 0.6));
+  c.restore();
+  return p;
+}
+function shard2(x, y, len, ang, w, bend = 0) {
+  const tx = x + Math.cos(ang) * len, ty = y + Math.sin(ang) * len, nx = -Math.sin(ang), ny = Math.cos(ang), mx = (x + tx) / 2 + nx * len * bend, my = (y + ty) / 2 + ny * len * bend;
+  return poly4([[x + nx * w, y + ny * w], [mx + nx * w * 0.9, my + ny * w * 0.9], [tx, ty], [mx - nx * w * 0.9, my - ny * w * 0.9], [x - nx * w, y - ny * w]]);
+}
+function crystal2(c, x, y, len, ang, w, P6, o = 1.8) {
+  const tx = x + Math.cos(ang) * len, ty = y + Math.sin(ang) * len, nx = -Math.sin(ang), ny = Math.cos(ang), sx = x + Math.cos(ang) * len * 0.78, sy = y + Math.sin(ang) * len * 0.78;
+  const A = poly4([[x + nx * w, y + ny * w], [sx + nx * w, sy + ny * w], [tx, ty], [x, y]]), B3 = poly4([[x, y], [tx, ty], [sx - nx * w, sy - ny * w], [x - nx * w, y - ny * w]]), lit = nx < 0 || nx === 0 && ny < 0;
+  prop2(c, [[A, lit ? P6.h : P6.m], [B3, lit ? P6.m : P6.l]], o, [poly4([[x, y], [tx, ty]], false)]);
+  c.save();
+  c.globalAlpha = 0.7;
+  c.strokeStyle = "#ffffff";
+  c.lineWidth = 0.9;
+  c.beginPath();
+  c.moveTo(x + nx * w * 0.6 + Math.cos(ang) * len * 0.2, y + ny * w * 0.6 + Math.sin(ang) * len * 0.2);
+  c.lineTo(sx + nx * w * 0.5, sy + ny * w * 0.5);
+  c.stroke();
+  c.restore();
+}
+function blob3(x, y, rx, ry, seed2, n = 30, jag2 = 0.14) {
+  const R3 = rng3(seed2), pts = [];
+  for (let i = 0; i < n; i++) {
+    const a = i / n * TAU38, k = 1 + (R3() - 0.5) * jag2 * 2;
+    pts.push([x + Math.cos(a) * rx * k, y + Math.sin(a) * ry * k]);
+  }
+  return rounded2(pts, 0.4);
+}
+function splat(x, y, r, seed2) {
+  const R3 = rng3(seed2), pts = [], n = 18;
+  for (let i = 0; i < n; i++) {
+    const a = i / n * TAU38, k = i % 2 ? 0.55 + R3() * 0.25 : 0.9 + R3() * 0.45;
+    pts.push([x + Math.cos(a) * r * k, y + Math.sin(a) * r * k * 0.5]);
+  }
+  return rounded2(pts, 0.3);
+}
+function crack2(c, x, y, len, ang, seed2, rgb6, w = 1.6) {
+  const R3 = rng3(seed2), pts = [[x, y]];
+  let px3 = x, py = y, a = ang;
+  for (let i = 0; i < 4; i++) {
+    a += (R3() - 0.5) * 1.1;
+    px3 += Math.cos(a) * len / 4;
+    py += Math.sin(a) * len / 4;
+    pts.push([px3, py]);
+  }
+  const p = poly4(pts, false);
+  c.save();
+  c.lineCap = "round";
+  c.lineJoin = "round";
+  c.strokeStyle = "rgba(16,12,18,.9)";
+  c.lineWidth = w + 1.4;
+  c.stroke(p);
+  c.strokeStyle = `rgb(${rgb6})`;
+  c.lineWidth = w * 0.6;
+  c.stroke(p);
+  c.restore();
+}
+function motes2(c, x, y, rx, ry, n, rgb6, seed2, size = 1.4, t = 0, kind = "spark") {
+  const R3 = rng3(seed2);
+  c.save();
+  c.globalCompositeOperation = "lighter";
+  for (let i = 0; i < n; i++) {
+    const a = R3() * TAU38, d = Math.sqrt(R3()), k = (R3() + t * 0.16) % 1, px3 = x + Math.cos(a) * rx * d + Math.sin(t * 1.3 + i) * 3, py = y + Math.sin(a) * ry * d - k * ry * 2.2, s = size * (0.6 + R3()), fade = Math.sin(k * Math.PI);
+    if (kind === "flake") {
+      c.strokeStyle = `rgba(${rgb6},${0.9 * fade})`;
+      c.lineWidth = 0.8;
+      for (let j = 0; j < 3; j++) {
+        const q = j * Math.PI / 3 + t;
+        c.beginPath();
+        c.moveTo(px3 - Math.cos(q) * s * 1.6, py - Math.sin(q) * s * 1.6);
+        c.lineTo(px3 + Math.cos(q) * s * 1.6, py + Math.sin(q) * s * 1.6);
+        c.stroke();
+      }
+      continue;
+    }
+    if (kind === "bubble") {
+      c.strokeStyle = `rgba(${rgb6},${0.8 * fade})`;
+      c.lineWidth = 0.8;
+      c.beginPath();
+      c.arc(px3, py, s * 1.4, 0, TAU38);
+      c.stroke();
+      c.fillStyle = `rgba(255,255,255,${0.6 * fade})`;
+      c.beginPath();
+      c.arc(px3 - s * 0.5, py - s * 0.5, s * 0.4, 0, TAU38);
+      c.fill();
+      continue;
+    }
+    c.fillStyle = `rgba(${rgb6},${0.32 * fade})`;
+    c.beginPath();
+    c.arc(px3, py, s * 2.2, 0, TAU38);
+    c.fill();
+    c.fillStyle = `rgba(${rgb6},${0.95 * fade})`;
+    c.beginPath();
+    c.arc(px3, py, s * 0.8, 0, TAU38);
+    c.fill();
+  }
+  c.restore();
+}
+function beam2(c, x, y, h, w, rgb6, a) {
+  c.save();
+  c.globalCompositeOperation = "lighter";
+  for (const [k, al] of [[1, a * 0.4], [0.55, a * 0.65], [0.22, a]]) {
+    const g = c.createLinearGradient(0, y, 0, y - h);
+    g.addColorStop(0, `rgba(${rgb6},${al})`);
+    g.addColorStop(0.6, `rgba(${rgb6},${al * 0.35})`);
+    g.addColorStop(1, `rgba(${rgb6},0)`);
+    c.fillStyle = g;
+    c.beginPath();
+    c.moveTo(x - w * k, y);
+    c.lineTo(x - w * k * 0.45, y - h);
+    c.lineTo(x + w * k * 0.45, y - h);
+    c.lineTo(x + w * k, y);
+    c.closePath();
+    c.fill();
+  }
+  c.restore();
+}
+function sporePod(c, st, S2, big = false) {
+  const P6 = ramp3(S2.shell, "#24122e", "#fff0f6"), Rt = ramp3(S2.root, "#1d0f06", "#ffe2b0"), A = ramp3(S2.accent), dark = "#2a1d30";
+  shadow2(c, 3, 1, big ? 40 : 31, big ? 10 : 8, 0.32);
+  root(c, -6, -7, -38, 3, 9, 3.6, Rt);
+  root(c, 9, -6, 37, 4, -9, 3.3, Rt);
+  root(c, -2, -8, -20, -2, 6, 2.4, Rt);
+  if (st === "burst") {
+    for (const [a, len, w] of [[-2.75, 18, 6], [-2.25, 23, 7], [-1.62, 21, 7], [-1.05, 24, 7], [-0.45, 17, 6]]) {
+      const p = shard2(0, -3, len, a, w, 0.12);
+      prop2(c, [[p, P6.m]], 1.8);
+      c.save();
+      c.clip(p);
+      c.fillStyle = P6.d2;
+      c.fill(shard2(0, -3, len * 0.9, a, w * 0.55, 0.12));
+      c.restore();
+    }
+    prop2(c, [[ell3(0, -3, 11, 5), dark]], 1.6);
+    c.fillStyle = `rgb(${S2.glow})`;
+    c.globalAlpha = 0.55;
+    c.fill(ell3(0, -2.5, 7, 2.4));
+    c.globalAlpha = 1;
+    for (const [x, y, w, h] of [[-20, 1, 15, 7], [19, 2, 13, 6]]) bulb(c, x, y, w, h, ramp3(S2.shell, "#3a2a3a", "#d8c8d8"), 0.9, 0, 1.6);
+  } else {
+    bulb(c, -20, 1, 15, 18, P6, 0.74, -0.38, 1.8);
+    bulb(c, 19, 2, 13, 15, P6, 0.74, 0.42, 1.8);
+    const W4 = 33, H6 = 41, body5 = bulb(c, 0, -1, W4, H6, P6, 0.7);
+    c.save();
+    c.clip(body5);
+    c.strokeStyle = P6.d2;
+    c.globalAlpha = 0.5;
+    c.lineWidth = 1.1;
+    for (const k of [-0.36, -0.13, 0.1, 0.32]) {
+      c.beginPath();
+      c.moveTo(k * W4 * 0.32, -H6);
+      c.quadraticCurveTo(k * W4 * 1.05, -H6 * 0.5, k * W4 * 0.78, 0);
+      c.stroke();
+    }
+    c.globalAlpha = 1;
+    for (const [x, y, r] of [[-7, -24, 2.6], [6, -30, 2], [9, -14, 2.8], [-4, -10, 2], [-11, -15, 1.6], [2, -19, 1.4]]) {
+      c.fillStyle = dark;
+      c.fill(ell3(x, y, r + 0.9, r * 0.8 + 0.9));
+      c.fillStyle = `rgb(${S2.glow})`;
+      c.fill(ell3(x, y, r, r * 0.8));
+      c.fillStyle = S2.hot;
+      c.fill(ell3(x - r * 0.3, y - r * 0.3, r * 0.35, r * 0.3));
+    }
+    if (st === "cracked") {
+      crack2(c, 2, -H6 + 3, 26, 1.7, 5, S2.glow, 1.8);
+      crack2(c, -3, -H6 * 0.6, 16, 2.4, 9, S2.glow, 1.4);
+      crack2(c, 6, -12, 12, 0.6, 13, S2.glow, 1.2);
+    }
+    c.restore();
+    prop2(c, [[ell3(1, -H6 + 1.5, 7, 3), dark]], 1.3);
+    c.fillStyle = `rgb(${S2.glow})`;
+    c.fill(ell3(1, -H6 + 2, 4.6, 1.6));
+    for (let i = 0; i < 5; i++) {
+      const a = -Math.PI / 2 + (i - 2) * 0.5;
+      prop2(c, [[shard2(1 + Math.cos(a) * 5, -H6 + 2 + Math.sin(a) * 2, 5, a, 1.8), P6.m]], 1);
+    }
+  }
+  root(c, -3, 1, -24, 6, -4, 2.6, Rt);
+  root(c, 5, 1, 27, 6, 4, 2.4, Rt);
+  const sh = (x, y, w) => {
+    const p = new Path2D();
+    p.moveTo(x - w / 2, y);
+    p.quadraticCurveTo(x, y - w * 0.6, x + w / 2, y);
+    p.quadraticCurveTo(x, y + w * 0.2, x - w / 2, y);
+    p.closePath();
+    prop2(c, [[p, A.m]], 1.2);
+    c.save();
+    c.clip(p);
+    c.fillStyle = A.l;
+    c.fill(shift2(p, -1, -1.6));
+    c.strokeStyle = A.d;
+    c.lineWidth = 0.8;
+    for (let i = 1; i < 3; i++) {
+      c.beginPath();
+      c.ellipse(x, y, w / 2 * i / 3, w * 0.3 * i / 3, 0, Math.PI, TAU38);
+      c.stroke();
+    }
+    c.restore();
+  };
+  sh(-26, -6, 9);
+  sh(-21, -3, 6);
+  sh(28, -4, 8);
+}
+function scarabMound(c, st, S2, big = false) {
+  const P6 = ramp3(S2.shell, "#3a1d0c", "#fff1c8"), C3 = ramp3(S2.accent, "#06201c", "#d8fff0"), hole = "#2a160a", H6 = st === "burst" ? 30 : 58;
+  shadow2(c, 4, 1, big ? 42 : 34, big ? 11 : 9, 0.32);
+  const pts = [[-33, 0], [-30, -H6 * 0.15], [-26, -H6 * 0.34], [-21, -H6 * 0.53], [-15, -H6 * 0.72], [-9, -H6 * 0.9], [-4, -H6], [1, -H6 * 0.95], [5, -H6 * 0.8], [8, -H6 * 0.66], [13, -H6 * 0.6], [17, -H6 * 0.69], [21, -H6 * 0.64], [24, -H6 * 0.47], [28, -H6 * 0.26], [31, -H6 * 0.1], [33, 0]];
+  if (st === "burst") {
+    pts.splice(5, 4, [-10, -H6 * 0.95], [-6, -H6 * 0.8], [-2, -H6 * 1.02], [3, -H6 * 0.86], [6, -H6 * 0.75]);
+  }
+  const out = rounded2(pts, 0.22);
+  prop2(c, [[out, P6.m]], 2.5);
+  c.save();
+  c.clip(out);
+  c.fillStyle = P6.l;
+  c.fill(poly4([[-34, 2], [-34, -H6 - 4], [-2, -H6 - 4], [3, -H6 * 0.55], [-2, 2]]));
+  c.fillStyle = P6.d;
+  c.fill(poly4([[3, 2], [3, -H6 * 0.5], [1, -H6 - 4], [40, -H6 - 4], [40, 2]]));
+  c.fillStyle = P6.m;
+  c.fill(poly4([[13, -H6 * 0.6], [17, -H6 * 0.7], [18, -H6 * 0.25], [11, -H6 * 0.16]]));
+  const R3 = rng3(17);
+  for (const ty of [0.24, 0.48, 0.72]) {
+    const y = -H6 * ty;
+    c.strokeStyle = P6.d2;
+    c.globalAlpha = 0.55;
+    c.lineWidth = 1.3;
+    c.beginPath();
+    for (let x = -32; x <= 32; x += 4) {
+      const yy = y + Math.sin(x * 0.4 + ty * 9) * 1.6;
+      x === -32 ? c.moveTo(x, yy) : c.lineTo(x, yy);
+    }
+    c.stroke();
+    c.strokeStyle = P6.h;
+    c.globalAlpha = 0.35;
+    c.translate(0, 1.6);
+    c.stroke();
+    c.translate(0, -1.6);
+    c.globalAlpha = 1;
+  }
+  for (let i = 0; i < 46; i++) {
+    const x = (R3() - 0.5) * 60, y = -R3() * H6;
+    c.fillStyle = R3() < 0.5 ? "rgba(60,30,10,.22)" : "rgba(255,240,200,.28)";
+    c.beginPath();
+    c.arc(x, y, 0.8, 0, TAU38);
+    c.fill();
+  }
+  if (st === "cracked") {
+    crack2(c, -6, -H6 * 0.9, 30, 1.5, 3, S2.glow, 1.8);
+    crack2(c, 10, -H6 * 0.6, 20, 2.1, 7, S2.glow, 1.4);
+  }
+  c.restore();
+  if (st === "burst") {
+    prop2(c, [[ell3(0, -H6 * 0.9, 9, 3.2), hole]], 1.3);
+    c.fillStyle = `rgba(${S2.glow},.7)`;
+    c.fill(ell3(0, -H6 * 0.88, 5.5, 1.6));
+  }
+  const holes = st === "burst" ? [[-14, -12, 5, 3.4]] : [[-15, -15, 5.4, 3.5], [16, -H6 * 0.46, 3.6, 2.5], [-8, -H6 * 0.66, 3.4, 2.4]];
+  for (const [x, y, w, h] of holes) {
+    prop2(c, [[ell3(x, y, w, h), hole]], 1.2);
+    c.fillStyle = `rgba(${S2.glow},.85)`;
+    c.fill(ell3(x + 0.5, y + h * 0.25, w * 0.55, h * 0.42));
+    c.strokeStyle = P6.h;
+    c.lineWidth = 1;
+    c.beginPath();
+    c.ellipse(x, y + 0.6, w * 1.05, h * 1.1, 0, 0.2, Math.PI - 0.2);
+    c.stroke();
+  }
+  prop2(c, [[ell3(4, -5, 10.5, 6.5), hole]], 1.6);
+  if (st !== "burst") for (const [x, y, r] of [[0, -5, 3.4], [6, -6, 3.8], [10, -3.5, 3], [3, -2, 3]]) {
+    prop2(c, [[ell3(x, y, r, r * 0.82), "#ffcb63"]], 1);
+    c.fillStyle = "#fff3c8";
+    c.fill(ell3(x - r * 0.3, y - r * 0.35, r * 0.35, r * 0.28));
+  }
+  for (const [x, y, w, h, a] of st === "burst" ? [[-20, -18, 5.5, 7, -0.45]] : [[-21, -H6 * 0.42, 5.5, 7.5, -0.45], [24, -7, 3.6, 4.6, 0.5]]) {
+    const p = ell3(x, y, w, h, a);
+    prop2(c, [[p, C3.m]], 1.4, [poly4([[x - Math.sin(a) * h, y - Math.cos(a) * h], [x + Math.sin(a) * h, y + Math.cos(a) * h]], false)]);
+    c.save();
+    c.clip(p);
+    c.fillStyle = C3.l;
+    c.fill(ell3(x - w * 0.4, y - h * 0.3, w * 0.4, h * 0.55, a));
+    c.fillStyle = C3.h;
+    c.fill(ell3(x - w * 0.45, y - h * 0.5, w * 0.15, h * 0.18, a));
+    c.restore();
+  }
+  for (const [x, y] of [[-30, 2], [27, 3], [-22, 4]]) prop2(c, [[ell3(x, y, 3.4, 2.2), P6.l]], 1.1);
+}
+function iceClutch(c, st, S2, big = false) {
+  const I = ramp3("#9cc4e4", "#1d3550", "#ffffff"), E = ramp3(S2.shell, "#355a7c", "#ffffff");
+  shadow2(c, 3, 1, big ? 40 : 32, big ? 10 : 8, 0.24);
+  for (const [x, a, len, w] of [[-12, -2.35, 26, 5], [-4, -1.95, 32, 5.5], [9, -1.18, 28, 5], [15, -0.82, 22, 4.5], [-18, -2.75, 18, 4]]) crystal2(c, x, 0, len, a, w, I);
+  const eggs = [[-13, 0, 16, 22, -0.32], [14, 1, 15, 20, 0.3], [0, -1, 22, 31, 0]];
+  for (const [x, y, w, h, t] of eggs) {
+    if (st === "burst") {
+      const keep2 = poly4([[x - w, y + 2], [x - w, y - h * 0.42], [x - w * 0.45, y - h * 0.55], [x - w * 0.1, y - h * 0.38], [x + w * 0.2, y - h * 0.6], [x + w * 0.55, y - h * 0.4], [x + w, y - h * 0.5], [x + w, y + 2]]);
+      c.save();
+      c.clip(keep2);
+      bulb(c, x, y, w, h, E, 0.78, t, 2);
+      c.restore();
+      c.save();
+      c.beginPath();
+      c.ellipse(x, y - h * 0.46, w * 0.42, h * 0.08, t, 0, TAU38);
+      c.fillStyle = "#24405a";
+      c.fill();
+      c.fillStyle = `rgba(${S2.glow},.6)`;
+      c.beginPath();
+      c.ellipse(x, y - h * 0.44, w * 0.28, h * 0.05, t, 0, TAU38);
+      c.fill();
+      c.restore();
+      continue;
+    }
+    const p = bulb(c, x, y, w, h, E, 0.78, t, 2);
+    c.save();
+    c.clip(p);
+    c.globalAlpha = 0.42;
+    c.fillStyle = E.d2;
+    const cy = y - h * 0.45;
+    c.beginPath();
+    c.arc(x + w * 0.06, cy, w * 0.24, 0.4, TAU38 - 0.6);
+    c.arc(x + w * 0.02, cy + h * 0.04, w * 0.1, TAU38 - 0.6, 0.4, true);
+    c.closePath();
+    c.fill();
+    c.globalAlpha = 1;
+    c.fillStyle = `rgba(${S2.glow},.5)`;
+    c.fill(ell3(x + w * 0.05, cy, w * 0.16, h * 0.12));
+    c.strokeStyle = "rgba(255,255,255,.85)";
+    c.lineWidth = 1.1;
+    c.beginPath();
+    c.ellipse(x - w * 0.05, y - h * 0.55, w * 0.32, h * 0.36, t, 3.6, 4.5);
+    c.stroke();
+    if (st === "cracked") {
+      crack2(c, x - w * 0.15, y - h * 0.98, h * 0.62, 1.25, x + 20, S2.glow, 1.5);
+    }
+    c.restore();
+  }
+  for (const [x, a, len, w] of [[-20, -2.95, 12, 3.5], [20, -0.25, 13, 3.6], [4, -0.55, 9, 3]]) crystal2(c, x, 3, len, a, w, I, 1.4);
+  for (const [x, w] of [[-22, 9], [21, 8], [-4, 6]]) {
+    const p = new Path2D();
+    p.moveTo(x - w, 4);
+    p.quadraticCurveTo(x - w * 0.4, -1, x, 1);
+    p.quadraticCurveTo(x + w * 0.5, -2, x + w, 4);
+    p.closePath();
+    prop2(c, [[p, "#f2f8fc"]], 1);
+  }
+}
+function bogBloat(c, st, S2, big = false) {
+  const M4 = ramp3(S2.root, "#140c06", "#e8d2a0"), G3 = ramp3(S2.shell, "#16300c", "#f6ffd8"), Rd = ramp3("#6f9a45", "#13240a", "#f0ffc0");
+  shadow2(c, 3, 1, big ? 42 : 33, big ? 10 : 8, 0.3);
+  const reed = (x, h, lean, head12) => {
+    const p = shard2(x, 0, h, -Math.PI / 2 + lean, 1.6, 0.05);
+    prop2(c, [[p, Rd.m]], 1.2);
+    if (head12) {
+      const hx = x + Math.cos(-Math.PI / 2 + lean) * h * 0.82, hy = Math.sin(-Math.PI / 2 + lean) * h * 0.82;
+      prop2(c, [[ell3(hx, hy, 2.4, 5.5, lean), "#7a4a24"]], 1);
+      c.fillStyle = "#a8703c";
+      c.fill(ell3(hx - 0.8, hy - 1.5, 0.9, 2.4, lean));
+    }
+  };
+  reed(-24, 34, -0.25, true);
+  reed(-19, 26, -0.08, false);
+  reed(-28, 22, -0.4, false);
+  reed(22, 30, 0.22, true);
+  reed(27, 20, 0.38, false);
+  const mound2 = rounded2([[-30, 1], [-27, -7], [-16, -12], [0, -14], [16, -12], [27, -7], [31, 1]], 0.35);
+  prop2(c, [[mound2, M4.m]], 2.2);
+  c.save();
+  c.clip(mound2);
+  c.fillStyle = M4.l;
+  c.fill(ell3(-8, -12, 20, 5));
+  c.fillStyle = M4.d;
+  c.fill(ell3(14, 0, 20, 6));
+  c.restore();
+  clumps(c, [[-18, -9, 4], [15, -10, 3.6], [-2, -12, 3]], S2.accent, 31, 1.2);
+  if (st === "burst") {
+    for (const [a, len, w] of [[-2.6, 17, 6], [-1.9, 14, 6], [-1.25, 16, 6], [-0.5, 15, 6]]) {
+      const p = shard2(0, -12, len, a, w, 0.2);
+      prop2(c, [[p, G3.d]], 1.6);
+      c.save();
+      c.clip(p);
+      c.fillStyle = G3.m;
+      c.fill(shift2(p, -1.4, -1.4));
+      c.restore();
+    }
+    prop2(c, [[ell3(0, -12, 9, 3.4), "#1d2a12"]], 1.4);
+    c.fillStyle = `rgba(${S2.glow},.65)`;
+    c.fill(ell3(0, -11.6, 6, 1.8));
+  } else {
+    for (const [x, y, w, h] of [[-19, -9, 13, 13], [18, -8, 11, 11]]) bulb(c, x, y, w, h, G3, 0.88, 0, 1.6);
+    const W4 = 34, H6 = 36, p = bulb(c, 0, -10, W4, H6, G3, 0.86);
+    c.save();
+    c.clip(p);
+    c.globalAlpha = 0.45;
+    c.fillStyle = G3.d2;
+    const cy = -10 - H6 * 0.48;
+    c.beginPath();
+    c.arc(1, cy, W4 * 0.22, 0.5, TAU38 - 0.7);
+    c.arc(-1, cy + 3, W4 * 0.09, TAU38 - 0.7, 0.5, true);
+    c.closePath();
+    c.fill();
+    c.globalAlpha = 1;
+    c.fillStyle = `rgba(${S2.glow},.55)`;
+    c.fill(ell3(1, cy, W4 * 0.15, H6 * 0.12));
+    c.strokeStyle = G3.d2;
+    c.globalAlpha = 0.55;
+    c.lineWidth = 1;
+    for (const [x0, y0, x1, y1] of [[-12, -14, -4, -34], [-4, -34, -8, -42], [-4, -34, 3, -40], [10, -16, 8, -30], [8, -30, 13, -38]]) {
+      c.beginPath();
+      c.moveTo(x0, y0);
+      c.lineTo(x1, y1);
+      c.stroke();
+    }
+    c.globalAlpha = 1;
+    c.strokeStyle = "rgba(255,255,255,.85)";
+    c.lineWidth = 1.6;
+    c.beginPath();
+    c.ellipse(-4, -28, W4 * 0.3, H6 * 0.32, 0, 3.5, 4.4);
+    c.stroke();
+    if (st === "cracked") {
+      crack2(c, -2, -42, 20, 1.3, 4, S2.glow, 1.6);
+      crack2(c, 8, -22, 14, 0.7, 8, S2.glow, 1.3);
+    }
+    c.restore();
+    for (const [x, len] of [[-6, 6], [3, 9], [10, 5]]) {
+      const d = new Path2D();
+      d.moveTo(x - 1.4, -11);
+      d.quadraticCurveTo(x - 1.2, -11 + len, x, -11 + len + 2);
+      d.quadraticCurveTo(x + 1.2, -11 + len, x + 1.4, -11);
+      d.closePath();
+      prop2(c, [[d, G3.l]], 0.9);
+    }
+  }
+  reed(-8, 10, -0.5, false);
+  reed(12, 9, 0.5, false);
+}
+var PAINT = { woodland: sporePod, desert: scarabMound, frostland: iceClutch, wetland: bogBloat };
+function motherSac(c, biome, st) {
+  const S2 = nestSkinV1(biome), paint = PAINT[biome] ?? sporePod;
+  if (st === "gone") {
+    c.filter = "saturate(.25) brightness(.62)";
+  }
+  const open2 = st === "wake" || st === "gone";
+  for (const [x, y, s] of [[-36, -4, 0.78], [38, -2, 0.72]]) {
+    c.save();
+    c.translate(x, y);
+    c.scale(s, s);
+    paint(c, open2 ? "burst" : "idle", S2);
+    c.restore();
+  }
+  c.save();
+  c.scale(1.72, 1.72);
+  paint(c, open2 ? "burst" : st === "stir" ? "cracked" : "idle", S2, true);
+  c.restore();
+  c.filter = "none";
+}
+var SCALE24 = 1.5;
+var LIMIT2 = 48;
+var sprites2 = /* @__PURE__ */ new Map();
+var painted2 = 0;
+function sprite3(key2, box2, paint) {
+  let s = sprites2.get(key2);
+  if (s) {
+    sprites2.delete(key2);
+    sprites2.set(key2, s);
+    return s;
+  }
+  const [l, t, r, b] = box2, w = Math.ceil((r - l) * SCALE24), h = Math.ceil((b - t) * SCALE24), canvas = typeof OffscreenCanvas === "function" ? new OffscreenCanvas(w, h) : globalThis.document?.createElement("canvas");
+  if (!canvas) return null;
+  canvas.width = w;
+  canvas.height = h;
+  const c = canvas.getContext("2d");
+  c.scale(SCALE24, SCALE24);
+  c.translate(-l, -t);
+  c.lineJoin = "round";
+  paint(c);
+  painted2++;
+  s = { canvas, box: box2 };
+  sprites2.set(key2, s);
+  while (sprites2.size > LIMIT2) sprites2.delete(sprites2.keys().next().value);
+  return s;
+}
+function stamp2(ctx, s, x, y) {
+  if (!s) return;
+  const [l, t, r, b] = s.box;
+  ctx.drawImage(s.canvas, x + l, y + t, r - l, b - t);
+}
+var BOX2 = Object.freeze({ nest: [-46, -74, 46, 14], mother: [-84, -128, 84, 24], ground: [-200, -120, 200, 130] });
+function rotGround(c, biome, rot, seed2 = 7) {
+  const S2 = nestSkinV1(biome), R3 = S2.rot, E = NEST_LAYOUT_V1.edge, k = 0.34 + 0.66 * Math.max(0, Math.min(1, rot)), rx = E.rx * k, ry = E.ry * k, oy = E.oy;
+  const outer = blob3(0, oy, rx, ry, seed2), inner = blob3(0, oy, rx - 5, ry - 3.4, seed2);
+  c.fillStyle = R3.rim;
+  c.fill(shift2(outer, 0, 2.2));
+  c.fillStyle = R3.lip;
+  c.fill(outer);
+  c.fillStyle = R3.m;
+  c.fill(shift2(inner, 0, 1.4));
+  c.save();
+  c.clip(shift2(inner, 0, 1.4));
+  const Q = rng3(seed2 * 13 + 1);
+  for (let i = 0; i < Math.round(14 * k); i++) {
+    const x = (Q() - 0.5) * rx * 1.8, y = oy + (Q() - 0.5) * ry * 1.8;
+    c.fillStyle = R3.dark;
+    c.fill(blob3(x, y, 8 + Q() * 14, 4 + Q() * 6, i + 40, 12, 0.3));
+  }
+  if (biome === "woodland") {
+    c.strokeStyle = R3.fleck;
+    c.globalAlpha = 0.55;
+    c.lineWidth = 0.9;
+    c.lineCap = "round";
+    for (let i = 0; i < Math.round(60 * k); i++) {
+      let x = (Q() - 0.5) * rx * 1.9, y = oy + (Q() - 0.5) * ry * 1.9, a = Q() * TAU38;
+      c.beginPath();
+      c.moveTo(x, y);
+      for (let j = 0; j < 4; j++) {
+        a += (Q() - 0.5) * 1.4;
+        x += Math.cos(a) * 5;
+        y += Math.sin(a) * 2.6;
+        c.lineTo(x, y);
+      }
+      c.stroke();
+    }
+    c.globalAlpha = 1;
+    for (let i = 0; i < Math.round(40 * k); i++) {
+      c.fillStyle = Q() < 0.5 ? R3.fleck : R3.lip;
+      c.beginPath();
+      c.arc((Q() - 0.5) * rx * 1.8, oy + (Q() - 0.5) * ry * 1.8, 0.9, 0, TAU38);
+      c.fill();
+    }
+  } else if (biome === "desert") {
+    for (let i = 0; i < Math.round(12 * k); i++) {
+      const x = (Q() - 0.5) * rx * 1.6, y = oy + (Q() - 0.5) * ry * 1.6, w = 3 + Q() * 3;
+      c.fillStyle = R3.rim;
+      c.fill(ell3(x, y, w, w * 0.55));
+      c.strokeStyle = R3.lip;
+      c.lineWidth = 1.1;
+      c.beginPath();
+      c.ellipse(x, y + 0.8, w * 1.15, w * 0.7, 0, 0.25, Math.PI - 0.25);
+      c.stroke();
+    }
+    c.fillStyle = R3.rim;
+    for (let t = 0; t < 4; t++) {
+      let x = (Q() - 0.5) * rx * 1.4, y = oy + (Q() - 0.5) * ry * 1.4, a = Q() * TAU38;
+      for (let j = 0; j < 10; j++) {
+        a += (Q() - 0.5) * 0.6;
+        x += Math.cos(a) * 5;
+        y += Math.sin(a) * 2.6;
+        const nx = -Math.sin(a) * 2.2, ny = Math.cos(a) * 1.2;
+        c.fillRect(x + nx - 0.7, y + ny - 0.5, 1.4, 1);
+        c.fillRect(x - nx - 0.7, y - ny - 0.5, 1.4, 1);
+      }
+    }
+    for (let i = 0; i < Math.round(30 * k); i++) {
+      c.fillStyle = Q() < 0.5 ? R3.fleck : R3.dark;
+      c.beginPath();
+      c.arc((Q() - 0.5) * rx * 1.8, oy + (Q() - 0.5) * ry * 1.8, 1, 0, TAU38);
+      c.fill();
+    }
+  } else if (biome === "frostland") {
+    c.lineCap = "round";
+    c.lineJoin = "round";
+    for (let i = 0; i < Math.round(16 * k); i++) {
+      let x = (Q() - 0.5) * rx * 1.8, y = oy + (Q() - 0.5) * ry * 1.8, a = Q() * TAU38;
+      const pts = [[x, y]];
+      for (let j = 0; j < 4; j++) {
+        a += (Q() - 0.5) * 1.2;
+        x += Math.cos(a) * (7 + Q() * 7);
+        y += Math.sin(a) * (4 + Q() * 3);
+        pts.push([x, y]);
+      }
+      const p = poly4(pts, false);
+      c.strokeStyle = R3.rim;
+      c.lineWidth = 1.3;
+      c.stroke(p);
+      c.strokeStyle = R3.lip;
+      c.lineWidth = 0.7;
+      c.save();
+      c.translate(0, -1);
+      c.stroke(p);
+      c.restore();
+    }
+    for (let i = 0; i < Math.round(18 * k); i++) {
+      const x = (Q() - 0.5) * rx * 1.7, y = oy + (Q() - 0.5) * ry * 1.7, s = 3 + Q() * 5;
+      c.fillStyle = R3.lip;
+      c.globalAlpha = 0.55;
+      c.fill(poly4([[x - s, y], [x, y - s * 0.4], [x + s, y], [x, y + s * 0.35]]));
+      c.globalAlpha = 1;
+    }
+  } else {
+    for (let i = 0; i < Math.round(22 * k); i++) {
+      const x = (Q() - 0.5) * rx * 1.7, y = oy + (Q() - 0.5) * ry * 1.7, r = 1.4 + Q() * 3;
+      c.strokeStyle = R3.lip;
+      c.lineWidth = 1;
+      c.beginPath();
+      c.ellipse(x, y, r, r * 0.6, 0, 0, TAU38);
+      c.stroke();
+      c.fillStyle = "rgba(255,255,255,.55)";
+      c.beginPath();
+      c.arc(x - r * 0.4, y - r * 0.25, r * 0.25, 0, TAU38);
+      c.fill();
+    }
+    for (let i = 0; i < Math.round(36 * k); i++) {
+      c.fillStyle = Q() < 0.6 ? R3.fleck : R3.rim;
+      c.fill(ell3((Q() - 0.5) * rx * 1.8, oy + (Q() - 0.5) * ry * 1.8, 1.6 + Q() * 2, 0.8 + Q()));
+    }
+  }
+  c.restore();
+}
+function drawVeins(ctx, x, y, biome, nests, time, rot) {
+  const S2 = nestSkinV1(biome), L = NEST_LAYOUT_V1, R3 = rng3(5), pulse = 0.55 + 0.45 * Math.sin(time * 3);
+  const paths = [];
+  for (const [i, n] of L.nests.entries()) {
+    if (nests[i]?.burst) continue;
+    const p = new Path2D(), mx = x + L.mother.x, my = y + L.mother.y + 4, nx = x + n.x, ny = y + n.y, cx = (mx + nx) / 2 + (R3() - 0.5) * 40, cy = (my + ny) / 2 + (R3() - 0.5) * 22;
+    p.moveTo(mx, my);
+    p.quadraticCurveTo(cx, cy, nx, ny);
+    paths.push(p);
+  }
+  const reach = 0.34 + 0.66 * rot;
+  for (let i = 0; i < 6; i++) {
+    const a = i / 6 * TAU38 + 0.4, p = new Path2D(), ex = x + Math.cos(a) * L.edge.rx * reach * 0.9, ey = y + L.edge.oy + Math.sin(a) * L.edge.ry * reach * 0.9;
+    p.moveTo(x + L.mother.x, y + L.mother.y + 4);
+    p.quadraticCurveTo((x + ex) / 2 + Math.sin(a) * 14, (y + ey) / 2 - Math.cos(a) * 8, ex, ey);
+    paths.push(p);
+  }
+  ctx.save();
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  const col = biome === "frostland" ? S2.rot.rim : biome === "desert" ? S2.rot.rim : S2.rot.rim;
+  for (const p of paths) {
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 5;
+    ctx.stroke(p);
+    ctx.strokeStyle = ramp3(S2.root).m;
+    ctx.lineWidth = biome === "frostland" ? 1.6 : 3;
+    ctx.stroke(p);
+  }
+  ctx.globalCompositeOperation = "lighter";
+  ctx.strokeStyle = `rgba(${S2.glow},${0.55 * pulse})`;
+  ctx.lineWidth = 1.2;
+  for (const p of paths) ctx.stroke(p);
+  ctx.restore();
+}
+var nestState = (n) => n?.burst ? "burst" : (n?.hp ?? 1) < 0.5 ? "cracked" : "idle";
+var motherStateV1 = (e) => e.phase === "mother" ? "wake" : e.phase === "won" ? "gone" : e.phase === "lost" ? "wake" : (e.rot ?? 0) >= 0.72 ? "stir" : "sleep";
+function drawNestGroundV1(ctx, e, time) {
+  const { x, y } = e.position, b = e.biome, S2 = nestSkinV1(b), L = NEST_LAYOUT_V1, rot = e.phase === "won" ? Math.max(0.34, (e.rot ?? 0) * 0.6) : e.phase === "mother" || e.phase === "lost" ? 1 : e.rot ?? 0, q = Math.round(rot * 40) / 40;
+  stamp2(ctx, sprite3("nest/ground/" + b + "/" + q, BOX2.ground, (c) => rotGround(c, b, q, e.seed ?? 7)), x, y);
+  for (const [i, n] of L.nests.entries()) if (e.nests?.[i]?.burst) {
+    ctx.fillStyle = ramp3(S2.splash).d;
+    ctx.fill(shift2(splat(x + n.x, y + n.y + 1, 26, i + 3), 0, 1.5));
+    ctx.fillStyle = S2.splash;
+    ctx.fill(splat(x + n.x, y + n.y, 26, i + 3));
+    ctx.fillStyle = ramp3(S2.splash).l;
+    ctx.fill(splat(x + n.x - 3, y + n.y - 1.5, 13, i + 9));
+  }
+  if (e.phase !== "won") drawVeins(ctx, x, y, b, e.nests ?? [], time, rot);
+  if (e.phase === "fight") {
+    const E = L.edge, near = rot > 0.8, warn = near ? 0.5 + 0.5 * Math.sin(time * 9) : 1;
+    ctx.save();
+    ctx.setLineDash([10, 7]);
+    ctx.lineDashOffset = -time * 12;
+    ctx.lineWidth = 2.6;
+    ctx.strokeStyle = "rgba(14,12,10,.6)";
+    ctx.beginPath();
+    ctx.ellipse(x, y + E.oy, E.rx, E.ry, 0, 0, TAU38);
+    ctx.stroke();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.strokeStyle = near ? `rgba(255,110,96,${0.9 * warn})` : `rgba(${S2.glow},.8)`;
+    ctx.lineWidth = 1.4;
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+function nestUprightsV1(e, time) {
+  const { x, y } = e.position, b = e.biome, S2 = nestSkinV1(b), L = NEST_LAYOUT_V1, paint = PAINT[b] ?? sporePod, out = [], id = e.groupId ?? "nest", pulse = 0.75 + 0.25 * Math.sin(time * 3.2), ms = motherStateV1(e);
+  L.nests.forEach((n, i) => {
+    const st = nestState(e.nests?.[i]);
+    out.push({ id: id + "/nest/" + i, anchorX: x + n.x, anchorY: y + n.y, draw(ctx) {
+      stamp2(ctx, sprite3("nest/" + b + "/" + st, BOX2.nest, (c) => paint(c, st, S2)), x + n.x, y + n.y);
+      if (st !== "burst") {
+        const top = b === "desert" ? -30 : b === "frostland" ? -16 : b === "wetland" ? -26 : -22;
+        lightA(ctx, x + n.x, y + n.y + top, 26, 22, S2.glow, (st === "cracked" ? 0.5 : 0.32) * pulse);
+        motes2(ctx, x + n.x, y + n.y - 10, 18, 8, st === "cracked" ? 6 : 3, S2.glow, i + 11, 1.1, time, b === "frostland" ? "flake" : b === "wetland" ? "bubble" : "spark");
+      }
+    } });
+  });
+  out.push({ id: id + "/mother", anchorX: x + L.mother.x, anchorY: y + L.mother.y, draw(ctx) {
+    const mx = x + L.mother.x, my = y + L.mother.y;
+    stamp2(ctx, sprite3("nest/mother/" + b + "/" + ms, BOX2.mother, (c) => motherSac(c, b, ms)), mx, my);
+    if (ms === "gone") return;
+    const stir = ms === "stir", wake = ms === "wake", top = b === "desert" ? -58 : b === "frostland" ? -34 : b === "wetland" ? -44 : -44;
+    lightA(ctx, mx, my + top, 46, 38, S2.glow, (wake ? 0.75 : stir ? 0.6 : 0.4) * pulse);
+    beam2(ctx, mx, my + top * 0.6, wake ? 220 : 300, wake ? 18 : 13, S2.glow, (stir || wake ? 0.42 : 0.3) * pulse);
+  } });
+  const rot = e.phase === "mother" || e.phase === "lost" ? 1 : e.phase === "won" ? 0.3 : e.rot ?? 0, reach = 0.34 + 0.66 * rot, Q = rng3(61);
+  for (let i = 0; i < 9; i++) {
+    const a = Q() * TAU38, d = 0.45 + Q() * 0.45, px3 = x + Math.cos(a) * L.edge.rx * reach * d, py = y + L.edge.oy + Math.sin(a) * L.edge.ry * reach * d, s = 0.8 + Q() * 0.5;
+    if (e.phase === "won" && i % 2) continue;
+    out.push({ id: id + "/prop/" + i, anchorX: px3, anchorY: py, draw(ctx) {
+      ctx.save();
+      ctx.translate(px3, py);
+      ctx.scale(s, s);
+      propPiece(ctx, b, i, S2, time);
+      ctx.restore();
+    } });
+  }
+  if (e.phase === "won" && e.chest) {
+    const big = !!e.motherBeaten, cx = x, cy = y + 14;
+    out.push({ id: id + "/chest", anchorX: cx, anchorY: cy, draw(ctx) {
+      if (!e.rewardClaimed) lightA(ctx, cx, cy - 14, big ? 30 : 24, big ? 22 : 18, "255,214,110", 0.7);
+      chest(ctx, cx, cy, big ? 38 : 30, big ? 19 : 16, !!e.rewardClaimed, "#6b4a2e", "#2c2a33", "#e2b54e");
+    } });
+  }
+  if (e.phase !== "won") [-30, 4, 40].forEach((oy, i) => out.push({ id: id + "/motes/" + i, anchorX: x, anchorY: y + oy, draw(ctx) {
+    motes2(ctx, x, y + oy - 20, L.edge.rx * reach * 0.8, 12, 5, S2.glow, 70 + i, 1.2, time, b === "frostland" ? "flake" : b === "wetland" ? "bubble" : "spark");
+  } }));
+  return out;
+}
+function propPiece(c, b, i, S2, time) {
+  if (b === "woodland") {
+    const P6 = ramp3("#e6d6c4"), cap = ramp3(i % 3 ? "#8f6aa0" : "#c8e86a");
+    prop2(c, [[poly4([[-1.4, 0], [1.4, 0], [1, -7], [-1, -7]]), P6.l]], 1);
+    const p = new Path2D();
+    p.moveTo(-5, -6);
+    p.quadraticCurveTo(0, -13, 5, -6);
+    p.closePath();
+    prop2(c, [[p, cap.m]], 1.1);
+    c.fillStyle = cap.h;
+    c.fill(ell3(-1.5, -9, 1.4, 1));
+    if (i % 3 === 0) lightA(c, 0, -8, 9, 7, S2.glow, 0.3);
+  } else if (b === "desert") {
+    const P6 = ramp3("#efe2c4");
+    prop2(c, [[poly4([[-6, 0], [-4, -3], [4, -2], [6, 1], [0, 2]]), P6.m]], 1.1);
+    if (i % 2) prop2(c, [[shard2(-2, -1, 9, -2.2, 1.5), P6.l]], 1);
+  } else if (b === "frostland") {
+    const I = ramp3("#a8cfec", "#1d3550", "#ffffff");
+    crystal2(c, 0, 0, 9 + i % 3 * 3, -1.7 + (i % 3 - 1) * 0.35, 2.4, I, 1.1);
+  } else {
+    const G3 = ramp3(S2.shell, "#16300c", "#f6ffd8");
+    prop2(c, [[ell3(0, -2, 4, 3), G3.m]], 1);
+    c.fillStyle = "rgba(255,255,255,.7)";
+    c.fill(ell3(-1.4, -3, 1, 0.7));
+    const Rd = ramp3("#6f9a45");
+    prop2(c, [[shard2(4, 0, 12, -1.4, 1.2), Rd.m]], 1);
+  }
+}
+function nestLightsV1(e, time) {
+  const { x, y } = e.position, S2 = nestSkinV1(e.biome), L = NEST_LAYOUT_V1, col = "rgb(" + S2.glow + ")", hex3 = "#" + S2.glow.split(",").map((v) => (+v).toString(16).padStart(2, "0")).join(""), out = [];
+  L.nests.forEach((n, i) => {
+    const st = nestState(e.nests?.[i]);
+    if (st !== "burst") out.push({ x: x + n.x, y: y + n.y - 18, r: st === "cracked" ? 60 : 46, color: hex3, alpha: st === "cracked" ? 0.6 : 0.42 });
+  });
+  const ms = motherStateV1(e);
+  if (ms !== "gone") out.push({ x: x + L.mother.x, y: y + L.mother.y - 40, r: ms === "sleep" ? 84 : 110, color: hex3, alpha: ms === "sleep" ? 0.5 : 0.7 });
+  void col;
+  return out;
+}
+
 // src/client/planned_event_presentation_v1.js
-var PLANNED = /* @__PURE__ */ new Set(["cursed_shrine"]);
+var PLANNED = /* @__PURE__ */ new Set(["cursed_shrine", "nests"]);
+var nestView = (e) => ({ position: e.position, biome: e.skin, groupId: e.groupId, rot: e.nest.rot, phase: e.nest.phase, nests: e.nest.nests.map((n) => ({ hp: n.ratio, burst: n.burst })), seed: 7, chest: e.status === "completed", motherBeaten: e.nest.motherBeaten, rewardClaimed: e.rewardClaimed });
 var inView = (e, v, m) => e.position.x > v.x - m && e.position.y > v.y - m && e.position.x < v.x + v.width + m && e.position.y < v.y + v.height + m;
 function drawPlannedEventGroundV1(ctx, model, viewport, time) {
   const t = time / 1e3;
   for (const e of model.worldEvents ?? []) {
+    if (e.kind === "nests" && inView(e, viewport, 240)) {
+      drawNestGroundV1(ctx, nestView(e), t);
+      continue;
+    }
     if (e.kind !== "cursed_shrine" || !inView(e, viewport, 240)) continue;
     drawShrineGroundV1(ctx, e, t);
     for (const m of e.shrine?.emergences ?? []) riftSwirlV1(ctx, m.position.x, m.position.y, 18, 5, t, 1 - m.ageTicks / 50, false);
@@ -36023,10 +37501,19 @@ function drawPlannedEventGroundV1(ctx, model, viewport, time) {
 function plannedEventDepthItemsV1(model, viewport, time) {
   const t = time / 1e3, out = [];
   for (const e of model.worldEvents ?? []) {
+    if (e.kind === "nests" && inView(e, viewport, 360)) {
+      for (const p of nestUprightsV1(nestView(e), t)) out.push(depthItem({ id: p.id, anchorX: p.anchorX, anchorY: p.anchorY, draw: p.draw }));
+      continue;
+    }
     if (e.kind !== "cursed_shrine" || !inView(e, viewport, 360)) continue;
     for (const p of shrineUprightsV1(e, t)) out.push(depthItem({ id: p.id, anchorX: e.position.x, anchorY: p.anchorY, draw: p.draw }));
     for (const m of e.shrine?.emergences ?? []) out.push(depthItem({ id: e.groupId + "/emerge/" + m.entityId, anchorX: m.position.x, anchorY: m.position.y, draw: (ctx) => riftMotesV1(ctx, m.position.x, m.position.y, 18, 5, t, 1 - m.ageTicks / 50) }));
   }
+  return out;
+}
+function plannedEventLightsV1(model, viewport, time) {
+  const t = time / 1e3, out = [];
+  for (const e of model.worldEvents ?? []) if (e.kind === "nests" && inView(e, viewport, 360)) out.push(...nestLightsV1(nestView(e), t));
   return out;
 }
 var BOON_NAMES = { wrath: ["Boon of Wrath", "+30% damage"], insight: ["Boon of Insight", "+50% XP"], fortune: ["Boon of Fortune", "Better drops"] };
@@ -36035,6 +37522,7 @@ function plannedEventTrackerV1(model) {
   if (!hero?.alive || !model.space?.overworld) return null;
   const e = (model.worldEvents ?? []).filter((e2) => PLANNED.has(e2.kind) && Math.hypot(hero.position.x - e2.position.x, hero.position.y - e2.position.y) < (e2.status === "dormant" ? 220 : e2.status === "completed" ? 340 : 768)).sort((a, b) => (a.status === "active" ? 0 : 1) - (b.status === "active" ? 0 : 1) || Math.hypot(hero.position.x - a.position.x, hero.position.y - a.position.y) - Math.hypot(hero.position.x - b.position.x, hero.position.y - b.position.y))[0];
   if (!e) return null;
+  if (e.kind === "nests") return nestTracker(e);
   const h = e.shrine, base = { groupId: e.groupId, kind: e.kind, accent: "#c27dff", tag: "CURSED SHRINE", title: "Cursed Shrine", pips: 3, done: 0 };
   if (e.status === "dormant") return { ...base, line: "Break the seal and hold the ring through three waves.", action: { label: e.canActivate ? "E / tap \xB7 Break the seal" : e.activeCount >= 4 ? "Finish another event first" : "Walk up to the altar", enabled: Boolean(e.canActivate) } };
   if (e.status === "completed") {
@@ -36059,6 +37547,38 @@ function boonBadgeV1(model) {
   if (!b) return null;
   const [name, fx] = BOON_NAMES[b.boon] ?? [b.boon, ""];
   return { boon: b.boon, name, fx, clock: clockV4(b.remainingTicks), fraction: b.remainingTicks / b.totalTicks };
+}
+var plural = (n, word) => n + " " + word + (n === 1 ? "" : "s");
+function nestTracker(e) {
+  const h = e.nest, skin = nestSkinV1(e.skin), base = { groupId: e.groupId, kind: e.kind, accent: "rgb(" + skin.glow + ")", tag: skin.tag, title: e.label, pips: 3, done: h.burst };
+  if (e.status === "dormant") return {
+    ...base,
+    done: 0,
+    line: h.resets ? "The nests healed. Burst all three before the rot reaches the ring." : "Burst all three nests before the rot reaches the ring.",
+    action: { label: e.canActivate ? "E / tap \xB7 Disturb the nest" : e.activeCount >= 4 ? "Finish another event first" : "Walk up to the nest", enabled: Boolean(e.canActivate) }
+  };
+  if (e.status === "completed") {
+    const [name, fx] = BOON_NAMES[h.boon] ?? ["Nest cleared", ""];
+    return {
+      ...base,
+      accent: "#e8c37a",
+      tag: h.motherBeaten ? "BROOD MOTHER BEATEN" : "NESTS BURST",
+      title: name,
+      done: h.burst,
+      line: (fx ? fx + " for 3 minutes. " : "") + (e.rewardClaimed ? "Chest claimed. The spot changes in about 10 minutes." : "Open the chest by the mother.")
+    };
+  }
+  if (h.phase === "won") return { ...base, title: h.motherBeaten ? "Brood Mother beaten" : "Every nest burst", line: h.living ? "Beat the last " + plural(h.living, "creature") + "." : "Beat the last creatures." };
+  if (h.phase === "mother") return { ...base, accent: "#ff6a7a", title: "The Brood Mother wakes", bar: h.motherRatio, barText: "Brood Mother", line: "Beat her for the big chest. Leave and the nests heal." };
+  return {
+    ...base,
+    accent: h.warn ? "#ff6a7a" : base.accent,
+    title: h.burst ? plural(h.burst, "nest") + " burst" : "Burst the nests",
+    bar: h.rot,
+    barText: "Rot",
+    timer: clockV4(h.rotTicksLeft),
+    line: h.warn ? "The rot is almost at the ring!" : "Hit the nests until they burst. Leave and they heal."
+  };
 }
 
 // src/client/class_tree_icons_v1.js
@@ -36457,32 +37977,32 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
 // src/client/level_up_celebration_v4.js
 var LEVEL_UP_CELEBRATION_V4 = Object.freeze({ durationMs: 3200, sparks: 22 });
 function createLevelUpCelebrationV4(doc) {
-  let root = null, timer = null;
+  let root2 = null, timer = null;
   function clear2() {
     clearTimeout(timer);
-    root?.remove();
-    root = null;
+    root2?.remove();
+    root2 = null;
   }
   function play(level, detail = "") {
     clear2();
-    root = doc.createElement("div");
-    root.className = "level-up-v4";
-    root.setAttribute("role", "status");
-    root.setAttribute("aria-live", "assertive");
+    root2 = doc.createElement("div");
+    root2.className = "level-up-v4";
+    root2.setAttribute("role", "status");
+    root2.setAttribute("aria-live", "assertive");
     const flash = doc.createElement("div");
     flash.className = "level-up-v4-flash";
     const stage2 = doc.createElement("div");
     stage2.className = "level-up-v4-stage";
     const rays = doc.createElement("div");
     rays.className = "level-up-v4-rays";
-    const burst = doc.createElement("div");
-    burst.className = "level-up-v4-burst";
+    const burst2 = doc.createElement("div");
+    burst2.className = "level-up-v4-burst";
     for (let i = 0; i < LEVEL_UP_CELEBRATION_V4.sparks; i++) {
       const s = doc.createElement("i"), a = i / LEVEL_UP_CELEBRATION_V4.sparks * Math.PI * 2 + i % 3 * 0.17, d = 90 + i % 5 * 26;
       s.style.setProperty("--dx", Math.cos(a) * d + "px");
       s.style.setProperty("--dy", Math.sin(a) * d * 0.8 + "px");
       s.style.animationDelay = i % 4 * 40 + "ms";
-      burst.append(s);
+      burst2.append(s);
     }
     const emblem2 = doc.createElement("div");
     emblem2.className = "level-up-v4-emblem";
@@ -36493,9 +38013,9 @@ function createLevelUpCelebrationV4(doc) {
     const sub = doc.createElement("span");
     sub.textContent = detail;
     emblem2.append(kicker, number2);
-    stage2.append(rays, burst, emblem2, sub);
-    root.append(flash, stage2);
-    doc.body.append(root);
+    stage2.append(rays, burst2, emblem2, sub);
+    root2.append(flash, stage2);
+    doc.body.append(root2);
     timer = setTimeout(clear2, LEVEL_UP_CELEBRATION_V4.durationMs);
   }
   return Object.freeze({ play, destroy: clear2 });
@@ -36534,10 +38054,10 @@ function drawInteractionCueV2(ctx, x, y) {
 // src/client/hero_slots_view_v1.js
 var CLASS_NAMES = { knight: "Knight", rogue: "Rogue", mage: "Mage" };
 function createHeroSlotsView({ document: document2, environment, heroSlots }) {
-  const root = document2.createElement("section");
-  root.id = "world-heroes-view";
-  root.className = "hero-slots";
-  root.hidden = true;
+  const root2 = document2.createElement("section");
+  root2.id = "world-heroes-view";
+  root2.className = "hero-slots";
+  root2.hidden = true;
   let shown = false, confirming = null, busy = null, error = "";
   function el(tag, cls, text2) {
     const e = document2.createElement(tag);
@@ -36586,6 +38106,7 @@ function createHeroSlotsView({ document: document2, environment, heroSlots }) {
       canvas.setAttribute("aria-hidden", "true");
       const name = h.name || (h.slot === active ? "Your hero" : "Unnamed hero");
       info2.append(el("strong", "hero-slot-name", name), el("small", "hero-slot-class", `${h.hero?.cls ? CLASS_NAMES[h.hero.cls] : "No class yet"} \xB7 Level ${h.level}`));
+      if (h.name || h.hero) info2.append(el("small", "hero-slot-world" + (h.world ? " is-seeded" : ""), h.world ? `World seed ${h.world.seed}` : "Classic world"));
       if (h.slot === active) actions.append(el("span", "hero-slot-badge", "Playing"));
       else if (confirming === h.slot) actions.append(button("Delete", () => act("delete", () => heroSlots.remove(h.slot)), "is-danger"), button("Keep", () => {
         confirming = null;
@@ -36602,22 +38123,22 @@ function createHeroSlotsView({ document: document2, environment, heroSlots }) {
     }
     if (heroes.length < HERO_SLOT_LIMIT) {
       const card = el("article", "hero-slot is-new"), info2 = el("div", "hero-slot-info"), actions = el("div", "hero-slot-actions");
-      info2.append(el("strong", "hero-slot-name", "New hero"), el("small", "hero-slot-class", `Starts in the hero creator \xB7 ${HERO_SLOT_LIMIT - heroes.length} open`));
+      info2.append(el("strong", "hero-slot-name", "New hero"), el("small", "hero-slot-class", `Choose a world, then make your hero \xB7 ${HERO_SLOT_LIMIT - heroes.length} open`));
       actions.append(button("Create", () => act("new", () => heroSlots.create())));
       card.append(el("span", "hero-slot-plus", "+"), info2, actions);
       grid.append(card);
     }
     const status2 = busy === "delete" ? "Deleting\u2026" : busy ? "Saving your hero\u2026" : error;
-    root.replaceChildren(el("p", "hero-slots-intro", "Each hero has their own world, bag and gear. Switching saves this hero first."), grid, ...status2 ? [el("p", "hero-slots-status", status2)] : []);
+    root2.replaceChildren(el("p", "hero-slots-intro", "Each hero has their own world, bag and gear. Switching saves this hero first."), grid, ...status2 ? [el("p", "hero-slots-status", status2)] : []);
     environment.requestAnimationFrame(() => {
       for (const [canvas, hero] of portraits) paint(canvas, hero);
     });
   }
   return Object.freeze({
-    root,
+    root: root2,
     // The list is read when the tab opens; it only changes through this tab.
     refresh(visible3) {
-      root.hidden = !visible3;
+      root2.hidden = !visible3;
       if (visible3 && !shown) render();
       if (!visible3) {
         confirming = null;
@@ -36626,7 +38147,7 @@ function createHeroSlotsView({ document: document2, environment, heroSlots }) {
       shown = visible3;
     },
     destroy() {
-      root.remove();
+      root2.remove();
     }
   });
 }
@@ -36869,16 +38390,16 @@ var TIER_NAMES = { 1: "Tier 1", 2: "Tier 2", 3: "Tier 3", 4: "Keystones \xB7 cho
 var TIER_TAGS = { 1: "Tier 1", 2: "Tier 2", 3: "Tier 3", 4: "Keystone", 5: "Endless" };
 var skillGateV2 = (n) => n.tree === "utility" ? 0 : [0, 0, 3, 7, 12, 15][n.tier] ?? 0;
 function skillTreeLayoutV2(tree) {
-  const nodes = CONSTELLATIONS[tree].nodes.filter((n) => n.active), ys = [...new Set(nodes.map((n) => n.y))].sort((a, b) => b - a), reach = Math.max(1, ...nodes.map((n) => Math.abs(n.x - 50))), k = 39 / reach, place = {};
+  const nodes = CONSTELLATIONS[tree].nodes.filter((n) => n.active), ys = [...new Set(nodes.map((n) => n.y))].sort((a, b) => b - a), reach = Math.max(1, ...nodes.map((n) => Math.abs(n.x - 50))), k = 39 / reach, place2 = {};
   for (const n of nodes) {
     const row2 = ys.indexOf(n.y);
-    place[n.id] = { row: row2, x: 50 + (n.x - 50) * k, y: ys.length > 1 ? row2 / (ys.length - 1) * 100 : 50 };
+    place2[n.id] = { row: row2, x: 50 + (n.x - 50) * k, y: ys.length > 1 ? row2 / (ys.length - 1) * 100 : 50 };
   }
   for (const n of nodes) {
-    const p = place[n.id];
-    p.label = Math.min(30, 2 * (p.x - 1), 2 * (99 - p.x), ...nodes.filter((o) => o !== n && place[o.id].row === p.row).map((o) => Math.abs(place[o.id].x - p.x)));
+    const p = place2[n.id];
+    p.label = Math.min(30, 2 * (p.x - 1), 2 * (99 - p.x), ...nodes.filter((o) => o !== n && place2[o.id].row === p.row).map((o) => Math.abs(place2[o.id].x - p.x)));
   }
-  return { nodes, rows: ys.length, place };
+  return { nodes, rows: ys.length, place: place2 };
 }
 function skillStateV2(d, n) {
   const rank = nodeRank(d, n.id), owned2 = integerBigInt(rank) > 0n, maxed = n.maxRank !== "infinite" && integerBigInt(rank) >= BigInt(n.maxRank), offer = purchaseAvailability(d, n.id);
@@ -36913,7 +38434,7 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
     void e.offsetWidth;
     e.classList.add(cls);
   };
-  const root = el("div", "", only ? "skills-v2 only" : "skills-v2"), top = el("div", "", "skills-top"), tabs = el("nav", "", "skills-tabs"), tabButtons = {};
+  const root2 = el("div", "", only ? "skills-v2 only" : "skills-v2"), top = el("div", "", "skills-top"), tabs = el("nav", "", "skills-tabs"), tabButtons = {};
   tabs.setAttribute("aria-label", "Constellations");
   for (const name of only ? [only] : TREES) {
     const b = button("", "", () => choose(name)), badge = el("b");
@@ -36932,7 +38453,7 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
   sheet.setAttribute("aria-label", "Skill details");
   sheet.append(grab, sheetBody);
   body5.append(scroll, sheet);
-  root.append(top, body5);
+  root2.append(top, body5);
   let tree = null, view2 = "tree", selected = null, open2 = false, confirmReset = false, d = null, ready = false, built = null, shown = null, lastRanks = {}, lastXp = null, drag = null;
   function disc4(n, withRank = true) {
     const art = PROGRESSION_ICONS[n.iconKey], wrap = el("span", "", "skill-disc"), rank = withRank && n.maxRank !== 1 ? el("small") : null;
@@ -37039,7 +38560,7 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
   grab.addEventListener("pointerup", release);
   grab.addEventListener("pointercancel", release);
   function paintHead(points2) {
-    root.style.setProperty("--tree", CONSTELLATIONS[tree].color);
+    root2.style.setProperty("--tree", CONSTELLATIONS[tree].color);
     for (const [name, { b, badge }] of Object.entries(tabButtons)) {
       const unspent = points2[name].unspent;
       b.setAttribute("aria-pressed", String(name === tree));
@@ -37129,7 +38650,7 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
   function paintSheet() {
     const n = selected ? ACTIVE_NODES[selected] : null;
     sheet.classList.toggle("open", Boolean(open2 && n));
-    root.classList.toggle("sheet-open", Boolean(open2 && n));
+    root2.classList.toggle("sheet-open", Boolean(open2 && n));
     if (!n) {
       sheetBody.replaceChildren(el("p", "Tap a skill to see what it does and learn it.", "sheet-empty"));
       return;
@@ -37191,7 +38712,7 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
     const height = open2 && selected ? sheet.offsetHeight : 0;
     scroll.style.setProperty("--sheet", `${Number.isFinite(height) ? height : 0}px`);
   }
-  return Object.freeze({ root, render(next, isReady) {
+  return Object.freeze({ root: root2, render(next, isReady) {
     d = next;
     ready = isReady;
     paint();
@@ -37237,10 +38758,10 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
     void e.offsetWidth;
     e.classList.add(cls);
   };
-  const root = el("div", "cs-view"), head12 = el("div", "cs-head"), points2 = el("div", "cs-points"), tabs = el("nav", "cs-tabs"), body5 = el("div", "cs-body"), utilityWrap = el("div", "cs-utility");
+  const root2 = el("div", "cs-view"), head12 = el("div", "cs-head"), points2 = el("div", "cs-points"), tabs = el("nav", "cs-tabs"), body5 = el("div", "cs-body"), utilityWrap = el("div", "cs-utility");
   tabs.setAttribute("aria-label", "Skill trees");
   head12.append(points2, tabs);
-  root.append(head12, body5);
+  root2.append(head12, body5);
   utilityWrap.append(utility.root);
   let d = null, ready = false, classId = null, tree = null, selected = null, confirmReset = false, grids = {}, tabButtons = {}, lastRanks = {};
   function icon(id, color28) {
@@ -37331,7 +38852,7 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
       badge.textContent = spent ? String(spent) : "";
       badge.hidden = !spent;
     }
-    root.style.setProperty("--tree", trees.find((t) => t.id === tree)?.color ?? "#b7a077");
+    root2.style.setProperty("--tree", trees.find((t) => t.id === tree)?.color ?? "#b7a077");
   }
   function paintGrid(g) {
     const t = g.tree, spent = classTreeSpent(d, t.id);
@@ -37450,7 +38971,7 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
     paintGrid(g);
     if (body5.firstChild !== g.wrap) body5.replaceChildren(g.wrap);
   }
-  return Object.freeze({ root, render(next, isReady) {
+  return Object.freeze({ root: root2, render(next, isReady) {
     d = next;
     ready = isReady;
     paint();
@@ -37478,7 +38999,7 @@ function createProgressionPresentation({ document: document2, readModel, issue }
   gain.hidden = true;
   gain.setAttribute("role", "status");
   document2.body.append(gain);
-  let attribute = "str", draft = { str: 0, dex: 0, int: 0 }, confirm = null, stamp5 = "", previous = null, message = "", messageUntil = 0, model = null, viewKey = "";
+  let attribute = "str", draft = { str: 0, dex: 0, int: 0 }, confirm = null, stamp6 = "", previous = null, message = "", messageUntil = 0, model = null, viewKey = "";
   const el = (tag, text2 = "", cls = "") => {
     const e = document2.createElement(tag);
     e.textContent = text2;
@@ -37516,8 +39037,8 @@ function createProgressionPresentation({ document: document2, readModel, issue }
     const local6 = m.playersById[m.localPlayerId], d = local6.d8;
     if (!d) return;
     const identity2 = m.context.campaignId + "/" + m.localPlayerId, now2 = performance.now();
-    if (stamp5 !== identity2) {
-      stamp5 = identity2;
+    if (stamp6 !== identity2) {
+      stamp6 = identity2;
       previous = null;
       draft = { str: 0, dex: 0, int: 0 };
       confirm = null;
@@ -37657,7 +39178,7 @@ function bloom(ctx, x, y, r, color28, alpha2) {
   ctx.fill();
   ctx.restore();
 }
-function blob3(ctx, x, y, r, color28, alpha2) {
+function blob4(ctx, x, y, r, color28, alpha2) {
   if (r <= 0 || alpha2 <= 0) return;
   ctx.save();
   ctx.globalCompositeOperation = "lighter";
@@ -37801,7 +39322,7 @@ function drawParryWard(ctx, x, y, facing2, ready, time, spentAge = -1) {
   const flare = spentAge >= 0 && spentAge < 300 ? 1 - spentAge / 300 : 0;
   if (!ready && !flare) return;
   const t = time / 1e3, wx = x + facing2 * 15, wy = y - 12, a = ready ? 1 : flare;
-  blob3(ctx, wx, wy, 12, ROGUE_VIOLET, 0.22 * a + 0.3 * flare);
+  blob4(ctx, wx, wy, 12, ROGUE_VIOLET, 0.22 * a + 0.3 * flare);
   ctx.save();
   ctx.translate(wx, wy);
   ctx.scale(facing2, 1);
@@ -38852,13 +40373,13 @@ var WEAPONS2 = {
   },
   // A long wooden staff, a collar and two prongs in the rarity color holding the crystal, which glows from Rare up.
   staff(c, A) {
-    const crystal3 = A.gem ? { b: A.c, d: A.d, l: "#ffffff" } : { b: "#b8c4cc", d: "#8d999b", l: "#e3e9ec" };
+    const crystal4 = A.gem ? { b: A.c, d: A.d, l: "#ffffff" } : { b: "#b8c4cc", d: "#8d999b", l: "#e3e9ec" };
     if (A.gem) glow4(c, 36, 0, 9.4, A.c, 0.42);
     B2(c, 0, -1.7, 29, 3.4, WOOD2, { dark: 1.3 });
     B2(c, 19.6, -2.1, 1.8, 4.2, acc(A), { dark: 1.6, lw: SM });
     for (const s of [-1, 1]) S(c, [28.4, s * 1.4, 30.4, s * 1.4, 33.4, s * 4.8, 38.4, s * 5.6, 38.4, s * 7.4, 32, s * 6.8], acc(A), { dark: s < 0 ? 0.9 : 1.6, lw: SM });
     B2(c, 27.2, -2.6, 2.6, 5.2, acc(A), { dark: 2, lw: SM });
-    S(c, [30.2, 0, 32.6, -4.2, 38.2, -4.2, 40.6, 0, 38.2, 4.2, 32.6, 4.2], crystal3, { dark: 2.6 });
+    S(c, [30.2, 0, 32.6, -4.2, 38.2, -4.2, 40.6, 0, 38.2, 4.2, 32.6, 4.2], crystal4, { dark: 2.6 });
     px2(c, 33.4, -2.6, 3, 0.9, "#ffffffb3");
   }
 };
@@ -39829,15 +41350,15 @@ var RING_KINDS = Object.freeze({ "Signet Ring": "signet", "Loop Ring": "loop", "
 var PIXELS = 144;
 var urls = /* @__PURE__ */ new Map();
 function fittedOffhand(document2, item) {
-  const W3 = PIXELS * 2, src = document2.createElement("canvas");
-  src.width = src.height = W3;
+  const W4 = PIXELS * 2, src = document2.createElement("canvas");
+  src.width = src.height = W4;
   const s = src.getContext("2d");
   if (!s) return null;
-  s.translate(W3 * 0.08, W3 * 0.08);
-  drawItemIcon(s, item, W3 * 0.84);
-  const d = s.getImageData(0, 0, W3, W3).data;
-  let x0 = W3, y0 = W3, x1 = -1, y1 = -1;
-  for (let y = 0; y < W3; y++) for (let x = 0; x < W3; x++) if (d[(y * W3 + x) * 4 + 3] > 160) {
+  s.translate(W4 * 0.08, W4 * 0.08);
+  drawItemIcon(s, item, W4 * 0.84);
+  const d = s.getImageData(0, 0, W4, W4).data;
+  let x0 = W4, y0 = W4, x1 = -1, y1 = -1;
+  for (let y = 0; y < W4; y++) for (let x = 0; x < W4; x++) if (d[(y * W4 + x) * 4 + 3] > 160) {
     if (x < x0) x0 = x;
     if (x > x1) x1 = x;
     if (y < y0) y0 = y;
@@ -39850,7 +41371,7 @@ function fittedOffhand(document2, item) {
     o.drawImage(src, 0, 0, PIXELS, PIXELS);
     return out;
   }
-  const bw = x1 - x0 + 1, bh = y1 - y0 + 1, k = Math.min(PIXELS * 0.88 / Math.max(bw, bh), PIXELS / W3 * 1.7);
+  const bw = x1 - x0 + 1, bh = y1 - y0 + 1, k = Math.min(PIXELS * 0.88 / Math.max(bw, bh), PIXELS / W4 * 1.7);
   o.drawImage(src, x0 + bw / 2 - PIXELS / k / 2, y0 + bh / 2 - PIXELS / k / 2, PIXELS / k, PIXELS / k, 0, 0, PIXELS, PIXELS);
   return out;
 }
@@ -39915,7 +41436,7 @@ var label2 = (k) => ({ ring1: "Ring 1", ring2: "Ring 2", subweapon: "Offhand" })
 var speedUrl = "data:image/svg+xml;charset=utf-8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2.5" stroke-linejoin="round"><path d="M6 5h5v6l8 4c2 1 2 4-1 4H6V5zm3 2h2M9 9h2" /></svg>');
 var soulUrl = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(MONSTER_SOUL_ART);
 function createForgePresentation({ document: document2, issue, invalidate }) {
-  const root = document2.getElementById("world-forge-view"), materials2 = document2.getElementById("world-materials-view");
+  const root2 = document2.getElementById("world-forge-view"), materials2 = document2.getElementById("world-materials-view");
   let selected = "weapon";
   const icon = (url) => {
     const img = document2.createElement("img");
@@ -39950,15 +41471,15 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
     }
     if (section !== "forge") return;
     const focus = document2.activeElement?.dataset.forgeAction;
-    root.replaceChildren();
+    root2.replaceChildren();
     const latest = Object.values(e.lastAttunementsBySlot).sort((a, b) => b.authorityOrder - a.authorityOrder)[0];
     if (latest) {
       const notice = el("p", `Attuned ${label2(latest.command.payload.slot)} to Lv. ${e.slotLevels[latest.command.payload.slot]}!`, "stat-gain");
       notice.setAttribute("role", "status");
-      root.append(notice);
+      root2.append(notice);
     }
-    if (review) root.append(el("p", "FUNDED FORGE REVIEW \u2014 starting funds are for testing only.", "forge-review-label"));
-    if (!m.forgeAccess) root.append(el("p", "Approach the Forge to attune.", "forge-access"));
+    if (review) root2.append(el("p", "FUNDED FORGE REVIEW \u2014 starting funds are for testing only.", "forge-review-label"));
+    if (!m.forgeAccess) root2.append(el("p", "Approach the Forge to attune.", "forge-access"));
     const layout = el("div", "", "forge-layout"), list = el("div", "", "forge-slots"), details = el("div", "", "forge-details");
     for (const slot of listedEquipmentSlots(inv)) {
       const item2 = inv.itemsById[inv.equipped[slot]], d2 = itemDefinition(item2), b = el("button", "", "forge-slot-card");
@@ -40025,8 +41546,8 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
       details.append(b);
     }
     layout.append(list, details);
-    root.append(layout);
-    if (focus) root.querySelector(`[data-forge-action="${focus}"]`)?.focus({ preventScroll: true });
+    root2.append(layout);
+    if (focus) root2.querySelector(`[data-forge-action="${focus}"]`)?.focus({ preventScroll: true });
   }
   return { render };
 }
@@ -41056,11 +42577,11 @@ function createInteractionHudV2({ document: doc, readModel, activate, isBlocked 
 // src/client/world_event_hud_v3.js
 function createWorldEventHudV3(document2, onActivate = () => {
 }) {
-  const root = document2.createElement("aside");
-  root.id = "world-event-hud-v3";
-  root.hidden = true;
-  root.setAttribute("data-gameplay-hud", "");
-  root.setAttribute("aria-label", "Local event objectives");
+  const root2 = document2.createElement("aside");
+  root2.id = "world-event-hud-v3";
+  root2.hidden = true;
+  root2.setAttribute("data-gameplay-hud", "");
+  root2.setAttribute("aria-label", "Local event objectives");
   const tag = document2.createElement("small"), title = document2.createElement("strong"), objective = document2.createElement("p"), bars = document2.createElement("div"), detail = document2.createElement("span");
   const pods = Array.from({ length: 3 }, (_, n) => {
     const row2 = document2.createElement("div"), label4 = document2.createElement("span"), bar = document2.createElement("progress");
@@ -41075,24 +42596,24 @@ function createWorldEventHudV3(document2, onActivate = () => {
   const action2 = document2.createElement("button");
   action2.type = "button";
   action2.onclick = () => {
-    if (currentGroup && !root.hidden && !action2.hidden && !action2.disabled) onActivate(currentGroup);
+    if (currentGroup && !root2.hidden && !action2.hidden && !action2.disabled) onActivate(currentGroup);
   };
-  root.append(tag, title, objective, bars, detail, action2);
+  root2.append(tag, title, objective, bars, detail, action2);
   const style = document2.createElement("style");
   style.textContent = `#world-event-hud-v3{position:absolute;z-index:7;top:76px;left:12px;width:min(258px,52vw);padding:10px 13px;border:1px solid #8863a6;border-left:3px solid #b282d7;border-radius:3px 8px 8px 3px;background:linear-gradient(120deg,#152330f2,#17212ae8);color:#eef4f4;font:12px/1.4 system-ui;pointer-events:none;box-sizing:border-box}#world-event-hud-v3 button{pointer-events:auto;touch-action:manipulation;margin-top:8px;padding:7px 10px;font:600 12px system-ui;border:1px solid #ab87cc;border-radius:4px;background:#32404f;color:#f0e7fa}#world-event-hud-v3 button:disabled{opacity:.6}#world-event-hud-v3[hidden]{display:none!important}#world-event-hud-v3 small{display:block;color:#ceabea;letter-spacing:.14em;font-size:9px;font-weight:800}#world-event-hud-v3 strong{display:block;font-size:16px;margin:2px 0 5px}#world-event-hud-v3 p{margin:4px 0 7px}#world-event-hud-v3>span{display:block;margin-top:7px;font-size:11px;color:#bbcfd4}#world-event-hud-v3>div>div{display:flex;align-items:center;gap:8px;margin:3px 0}#world-event-hud-v3 progress{width:100%;height:7px;accent-color:#afdf9d}#world-event-hud-v3 div span{min-width:47px;font-size:10px}#world-event-hud-v3[data-state=completed]{border-color:#7fbd95}#world-event-hud-v3[data-state=dormant]>div{display:none}@media(max-width:600px){#world-event-hud-v3{top:68px;left:8px;width:min(210px,51vw);padding:7px 9px;font-size:11px}#world-event-hud-v3 strong{font-size:14px}}@media(max-height:450px){#world-event-hud-v3{top:62px;padding:5px 9px}#world-event-hud-v3>div{display:none}}`;
   document2.head.append(style);
-  (document2.getElementById("world-view")?.parentElement ?? document2.body).append(root);
-  root.dataset.expanded = "false";
-  root.addEventListener?.("click", (e) => {
+  (document2.getElementById("world-view")?.parentElement ?? document2.body).append(root2);
+  root2.dataset.expanded = "false";
+  root2.addEventListener?.("click", (e) => {
     if (e.target === action2) return;
-    root.dataset.expanded = String(root.dataset.expanded !== "true");
+    root2.dataset.expanded = String(root2.dataset.expanded !== "true");
   });
   let previous = "", selected = null, enteredTick = 0, currentGroup = null;
   function refresh(model, visible3 = true) {
     const hero = model.entitiesById[model.playersById[model.localPlayerId].entityId];
     const event = (model.worldEvents ?? []).filter((e) => ["spore", "hollow"].includes(e.kind) && Math.hypot(hero.position.x - e.position.x, hero.position.y - e.position.y) < (e.status === "dormant" ? 220 : e.status === "completed" ? 340 : 768)).sort((a, b) => (a.status === "active" ? 0 : 1) - (b.status === "active" ? 0 : 1) || Math.hypot(hero.position.x - a.position.x, hero.position.y - a.position.y) - Math.hypot(hero.position.x - b.position.x, hero.position.y - b.position.y))[0];
-    root.hidden = !(visible3 && hero.alive && model.space.overworld && event);
-    if (root.hidden) {
+    root2.hidden = !(visible3 && hero.alive && model.space.overworld && event);
+    if (root2.hidden) {
       currentGroup = null;
       selected = null;
       previous = "";
@@ -41102,13 +42623,13 @@ function createWorldEventHudV3(document2, onActivate = () => {
       selected = event.groupId + "/" + event.status;
       enteredTick = model.tick;
     }
-    root.dataset.kind = event.kind;
+    root2.dataset.kind = event.kind;
     if (event.kind === "hollow") {
       const h = event.hollow, key2 = JSON.stringify([selected, h, event.rewardClaimed, event.canActivate, model.tick - enteredTick < 150]);
       if (key2 === previous) return true;
       previous = key2;
       currentGroup = event.groupId;
-      root.dataset.state = event.status;
+      root2.dataset.state = event.status;
       bars.hidden = true;
       action2.hidden = event.status !== "dormant";
       action2.disabled = !event.canActivate;
@@ -41127,7 +42648,7 @@ function createWorldEventHudV3(document2, onActivate = () => {
     action2.hidden = event.status !== "dormant";
     action2.disabled = !event.canActivate;
     action2.textContent = event.canActivate ? "E / tap \xB7 Disturb pod" : "Approach a pod";
-    root.dataset.state = event.status;
+    root2.dataset.state = event.status;
     tag.textContent = event.status === "dormant" ? "LOCAL EVENT" : event.status === "completed" ? "EVENT COMPLETE" : model.tick - enteredTick < 150 ? "EVENT STARTED" : "LOCAL EVENT \xB7 ACTIVE";
     title.textContent = "Spore Outbreak";
     objective.textContent = event.status === "dormant" ? "E / tap near a pod to disturb it." : event.status === "completed" ? event.rewardClaimed ? "Reward claimed." : "Claim your reward chest." : `Destroy the spore pods \xB7 ${destroyed}/3`;
@@ -41140,7 +42661,7 @@ function createWorldEventHudV3(document2, onActivate = () => {
     return true;
   }
   return Object.freeze({ refresh, destroy() {
-    root.remove();
+    root2.remove();
     style.remove();
   } });
 }
@@ -41870,14 +43391,14 @@ function enemyHealthBarRectV3(actor, tick = 0) {
   if (actor.bossSummon?.stage === "cocoon") return null;
   if (!actor.enemyFamily) return { x: -18, y: -26, w: 36, h: 4 };
   const profile = creaturePresentationForRenderV3(actor.enemyFamily) || creaturePresentationForRenderV3("sprout");
-  const bodyWidth = profile.visualBounds.width, rule = ELITE_HEALTH_BAR_SPECS_V3[actor.elite?.affixId];
+  const bodyWidth = profile.visualBounds.width, rule = ELITE_HEALTH_BAR_SPECS_V3[actor.elite?.affixId], barY = profile.labels.healthBarY * creatureDrawScaleD11(actor);
   if (rule) {
     const base = rule.scale ? bodyWidth * rule.scale : bodyWidth + rule.offset;
     const w2 = Math.max(rule.min, Math.min(rule.max, base));
-    return { x: -w2 / 2, y: profile.labels.healthBarY - 3, w: w2, h: 6 };
+    return { x: -w2 / 2, y: barY - 3, w: w2, h: 6 };
   }
   const w = Math.max(18, Math.min(34, bodyWidth * 0.68));
-  return { x: -w / 2, y: profile.labels.healthBarY, w, h: profile.visualScale < 0.72 ? 3 : 4 };
+  return { x: -w / 2, y: barY, w, h: profile.visualScale < 0.72 ? 3 : 4 };
 }
 var ELITE_ACCENTS_V4 = Object.freeze({ vitality_weaver: "#63dc87", swift_commander: "#22c8f0", glacial_warden: "#8fdcff", toxic_decay: "#9be35a", iron_citadel: "#b9c3cd", blood_berserker: "#ff4a4a", nullifier: "#c084fc", web_weaver: "#e8e4d8", slag_shaper: "#f97316" });
 function drawEnemyHealthEchoV3(c, actor, reading, tick) {
@@ -41896,7 +43417,7 @@ function drawBossHealthEchoV3(c, canvas, actor, reading, time) {
   drawHealthBarV4(c, { x: slot.x, y: slot.y, w: slot.w, h: slot.h, ratio: reading.actual, trail: reading.trail, impact: reading.impact, flash: reading.flash, fill: actor.boss?.shieldActive ? SHIELD_HEALTH_FILL_V4 : ENEMY_HEALTH_FILL_V4, edge: slot.accent ?? "#e9d7a8", ticks: 10, marker: 0.5, pad: 2 });
 }
 function createPlayerHealthHudV3(doc) {
-  const track = doc.querySelector(".hp-track"), root = doc.getElementById("world-app"), vitals = doc.getElementById("world-hud-vitals");
+  const track = doc.querySelector(".hp-track"), root2 = doc.getElementById("world-app"), vitals = doc.getElementById("world-hud-vitals");
   const trails = createHealthTrailsV3(), echo = track ? doc.createElement("span") : null;
   if (echo) {
     echo.className = "saq-hp-echo-v3";
@@ -41912,26 +43433,26 @@ function createPlayerHealthHudV3(doc) {
         echo.style.opacity = String(0.62 + data.impact * 0.38);
       }
       const low = data.actual > 0 && data.actual <= 0.35;
-      if (root) {
-        root.classList.toggle("saq-low-health-v3", low);
-        root.style.setProperty("--saq-injury-opacity", String(low ? Math.min(0.88, Math.max(0.2, (0.35 - data.actual) / 0.35 * 0.88)) : "0"));
+      if (root2) {
+        root2.classList.toggle("saq-low-health-v3", low);
+        root2.style.setProperty("--saq-injury-opacity", String(low ? Math.min(0.88, Math.max(0.2, (0.35 - data.actual) / 0.35 * 0.88)) : "0"));
       }
       vitals?.classList.toggle("saq-critical-health-v3", data.actual > 0 && data.actual <= 0.2);
       return data;
     },
     reset() {
       trails.clear();
-      if (root) {
-        root.classList.remove("saq-low-health-v3");
-        root.style.removeProperty("--saq-injury-opacity");
+      if (root2) {
+        root2.classList.remove("saq-low-health-v3");
+        root2.style.removeProperty("--saq-injury-opacity");
       }
       vitals?.classList.remove("saq-critical-health-v3");
     },
     destroy() {
       echo?.remove();
-      if (root) {
-        root.classList.remove("saq-low-health-v3");
-        root.style.removeProperty("--saq-injury-opacity");
+      if (root2) {
+        root2.classList.remove("saq-low-health-v3");
+        root2.style.removeProperty("--saq-injury-opacity");
       }
       vitals?.classList.remove("saq-critical-health-v3");
     }
@@ -41960,7 +43481,7 @@ function createVitalsHudV4(doc) {
   hpTrack?.prepend(hp);
   progression?.prepend(xp);
   let lastHp = null, lastXp = null, wrapTimer = null, shards = 0;
-  const painted3 = /* @__PURE__ */ new WeakMap();
+  const painted4 = /* @__PURE__ */ new WeakMap();
   function breakOff(at4, damage) {
     if (!hpTrack) return;
     const count = Math.min(6, 2 + Math.round(damage * 30));
@@ -41981,8 +43502,8 @@ function createVitalsHudV4(doc) {
     }
   }
   const paint = (el, text2) => {
-    if (painted3.get(el) !== text2) {
-      painted3.set(el, text2);
+    if (painted4.get(el) !== text2) {
+      painted4.set(el, text2);
       el.style.transform = text2;
     }
   };
@@ -42051,13 +43572,13 @@ function createVitalsHudV4(doc) {
 
 // src/client/wilderness_event_clue_hud_v3_8.js
 function createWoodlandClueHudV3_8(document2) {
-  const root = document2.createElement("aside");
-  root.id = "woodland-clue-v3-8";
-  root.hidden = true;
-  root.setAttribute("aria-label", "Nearby wilderness clue");
-  root.setAttribute("data-gameplay-hud", "");
+  const root2 = document2.createElement("aside");
+  root2.id = "woodland-clue-v3-8";
+  root2.hidden = true;
+  root2.setAttribute("aria-label", "Nearby wilderness clue");
+  root2.setAttribute("data-gameplay-hud", "");
   const heading = document2.createElement("strong"), message = document2.createElement("span");
-  root.append(heading, message);
+  root2.append(heading, message);
   const style = document2.createElement("style");
   style.textContent = [
     "#woodland-clue-v3-8{position:fixed;z-index:7;top:calc(114px + var(--world-safe-top,0px));left:calc(10px + var(--world-safe-left,0px));max-width:242px;box-sizing:border-box;padding:8px 12px 9px;pointer-events:none;border:1px solid rgba(158,141,93,.57);border-left:3px solid #9f9761;border-radius:3px 8px 8px 3px;background:linear-gradient(125deg,rgba(19,27,23,.94),rgba(13,21,23,.86));box-shadow:0 5px 19px rgba(0,0,0,.34);color:#e1d7b8;font:12px/1.4 Georgia,serif;text-shadow:0 1px 1px #0009}",
@@ -42068,12 +43589,12 @@ function createWoodlandClueHudV3_8(document2) {
     "@media(prefers-reduced-motion:reduce){#woodland-clue-v3-8{transition:none}}"
   ].join("\n");
   document2.head.append(style);
-  (document2.getElementById("world-app") ?? document2.body).append(root);
+  (document2.getElementById("world-app") ?? document2.body).append(root2);
   let previous = "";
   function refresh(model, visible3 = true) {
     const clue = model?.woodlandPilotClues?.[0];
     const show = Boolean(visible3 && clue && model?.space?.overworld);
-    root.hidden = !show;
+    root2.hidden = !show;
     if (!show) {
       previous = "";
       return;
@@ -42085,7 +43606,7 @@ function createWoodlandClueHudV3_8(document2) {
     message.textContent = clue.text + (clue.direction === "nearby" ? "" : " \xB7 " + clue.direction);
   }
   return Object.freeze({ refresh, destroy() {
-    root.remove();
+    root2.remove();
     style.remove();
   } });
 }
@@ -42307,7 +43828,7 @@ function noise(x, y) {
   const xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fy = y - yi, u = fx * fx * (3 - 2 * fx), v = fy * fy * (3 - 2 * fy), x0 = xi & 63, x1 = xi + 1 & 63, y0 = (yi & 63) << 6, y1 = (yi + 1 & 63) << 6, a = NOISE[y0 + x0], b = NOISE[y0 + x1], c = NOISE[y1 + x0], d = NOISE[y1 + x1];
   return a + (b - a) * u + (c - a + (a - b - c + d) * u) * v;
 }
-var PAINT = [];
+var PAINT2 = [];
 var PR = new Uint8Array(128);
 var PG = new Uint8Array(128);
 var PB = new Uint8Array(128);
@@ -42322,7 +43843,7 @@ for (let c = 0; c < 128; c++) {
 }
 for (const [k, v] of Object.entries(CHART_COLORS)) {
   const c = k.charCodeAt(0);
-  PAINT[c] = [PR[c], PG[c], PB[c]] = [parseInt(v.slice(1, 3), 16), parseInt(v.slice(3, 5), 16), parseInt(v.slice(5, 7), 16)];
+  PAINT2[c] = [PR[c], PG[c], PB[c]] = [parseInt(v.slice(1, 3), 16), parseInt(v.slice(3, 5), 16), parseInt(v.slice(5, 7), 16)];
 }
 for (const [k, depth] of [["w", 0.09], ["t", 0.1], ["m", 0.06], ["r", 0.06], ["a", 0.04], ["d", 0.04], ["s", 0.03], ["l", 0.08], ["o", 0.05]]) MOTTLE[k.charCodeAt(0)] = depth;
 function boxBlur(a, t, sum2, w, h, r) {
@@ -42350,9 +43871,9 @@ function boxBlur(a, t, sum2, w, h, r) {
     }
   }
 }
-function paintChartTerrain(data, raster, W3, H5) {
+function paintChartTerrain(data, raster, W4, H6) {
   const rw = raster.width, rh = raster.height, view2 = raster.view, n = rw * rh, codes = new Uint8Array(n), R3 = new Float32Array(n), G3 = new Float32Array(n), B3 = new Float32Array(n), M4 = new Float32Array(n), S2 = new Float32Array(n), K3 = new Float32Array(n), t = new Float32Array(n), sum2 = new Float32Array(rw);
-  const tps = view2.width / rw, tpx = view2.width / W3, tpy = view2.height / H5, clump = 1 / Math.max(4, tpx * 4);
+  const tps = view2.width / rw, tpx = view2.width / W4, tpy = view2.height / H6, clump = 1 / Math.max(4, tpx * 4);
   for (let y = 0; y < rh; y++) {
     const row2 = raster.rows[y], ty = view2.y + (y + 0.5) * view2.height / rh;
     for (let x = 0; x < rw; x++) {
@@ -42374,11 +43895,11 @@ function paintChartTerrain(data, raster, W3, H5) {
   for (const a of [R3, G3, B3, M4]) boxBlur(a, t, sum2, rw, rh, landR);
   boxBlur(S2, t, sum2, rw, rh, seaR);
   boxBlur(S2, t, sum2, rw, rh, seaR);
-  const wt = Math.min(12, Math.max(4, tpx * 2.5)), amp = wt / tps, f = 1 / (wt * 3.2), sx = rw / W3, sy = rh / H5, maxX = rw - 1.001, maxY = rh - 1.001, sea0 = PAINT[79];
-  for (let iy = 0; iy < H5; iy++) {
+  const wt = Math.min(12, Math.max(4, tpx * 2.5)), amp = wt / tps, f = 1 / (wt * 3.2), sx = rw / W4, sy = rh / H6, maxX = rw - 1.001, maxY = rh - 1.001, sea0 = PAINT2[79];
+  for (let iy = 0; iy < H6; iy++) {
     const ty = view2.y + (iy + 0.5) * tpy, ry = Math.min(rh - 1, (iy + 0.5) * sy | 0) * rw, py = (iy + 0.5) * sy - 0.5;
-    for (let ix = 0; ix < W3; ix++) {
-      const tx = view2.x + (ix + 0.5) * tpx, o = (iy * W3 + ix) * 4, n0 = ry + Math.min(rw - 1, (ix + 0.5) * sx | 0), c0 = codes[n0];
+    for (let ix = 0; ix < W4; ix++) {
+      const tx = view2.x + (ix + 0.5) * tpx, o = (iy * W4 + ix) * 4, n0 = ry + Math.min(rw - 1, (ix + 0.5) * sx | 0), c0 = codes[n0];
       let r, g, b;
       if (c0 === 76 || c0 === 87) {
         const k = K3[n0];
@@ -42423,11 +43944,11 @@ function paintChartTerrain(data, raster, W3, H5) {
   }
 }
 function paintChartRaster(canvas, raster, meta, filters, cssWidth, cssHeight) {
-  const c = canvas.getContext("2d"), q = Math.min(1, Math.sqrt(9e4 / (cssWidth * cssHeight))), W3 = Math.max(1, Math.round(cssWidth * q)), H5 = Math.max(1, Math.round(cssHeight * q)), raw = canvas.ownerDocument.createElement("canvas");
-  raw.width = W3;
-  raw.height = H5;
-  const rc = raw.getContext("2d"), pixels = rc.createImageData(W3, H5);
-  paintChartTerrain(pixels.data, raster, W3, H5);
+  const c = canvas.getContext("2d"), q = Math.min(1, Math.sqrt(9e4 / (cssWidth * cssHeight))), W4 = Math.max(1, Math.round(cssWidth * q)), H6 = Math.max(1, Math.round(cssHeight * q)), raw = canvas.ownerDocument.createElement("canvas");
+  raw.width = W4;
+  raw.height = H6;
+  const rc = raw.getContext("2d"), pixels = rc.createImageData(W4, H6);
+  paintChartTerrain(pixels.data, raster, W4, H6);
   rc.putImageData(pixels, 0, 0);
   c.imageSmoothingEnabled = true;
   c.drawImage(raw, 0, 0, canvas.width, canvas.height);
@@ -44013,7 +45534,7 @@ function createDiagnosticOverlays({ document: document2, environment, releaseInp
     w.maxX = Math.max(0, environment.innerWidth - w.el.offsetWidth);
     w.maxY = Math.max(0, environment.innerHeight - w.el.offsetHeight);
   }
-  function place(w) {
+  function place2(w) {
     w.x = Math.max(0, Math.min(w.maxX, w.x));
     w.y = Math.max(0, Math.min(w.maxY, w.y));
     w.el.style.left = w.x + "px";
@@ -44058,7 +45579,7 @@ function createDiagnosticOverlays({ document: document2, environment, releaseInp
         sync();
         nextPaint = 0;
         bounds2(w);
-        place(w);
+        place2(w);
         save();
       });
     } else el.textContent = "DPS: 0.0";
@@ -44071,7 +45592,7 @@ function createDiagnosticOverlays({ document: document2, environment, releaseInp
     el.hidden = !w.enabled;
     if (w.enabled) {
       bounds2(w);
-      place(w);
+      place2(w);
     }
     listen(toggle, "change", () => {
       releaseInput();
@@ -44081,7 +45602,7 @@ function createDiagnosticOverlays({ document: document2, environment, releaseInp
       nextPaint = 0;
       if (w.enabled) {
         bounds2(w);
-        place(w);
+        place2(w);
       }
       save();
     });
@@ -44100,7 +45621,7 @@ function createDiagnosticOverlays({ document: document2, environment, releaseInp
       e.stopPropagation();
       w.x = dragging.left + e.clientX - dragging.x;
       w.y = dragging.top + e.clientY - dragging.y;
-      place(w);
+      place2(w);
     });
     const stop2 = (e) => {
       if (dragging?.w !== w || dragging.id !== e.pointerId) return;
@@ -44125,7 +45646,7 @@ function createDiagnosticOverlays({ document: document2, environment, releaseInp
         bounds2(w);
         w.x += e.code === "ArrowRight" ? 10 : e.code === "ArrowLeft" ? -10 : 0;
         w.y += e.code === "ArrowDown" ? 10 : e.code === "ArrowUp" ? -10 : 0;
-        place(w);
+        place2(w);
         save();
       } else if (e.code === "Space") e.preventDefault();
     });
@@ -44134,7 +45655,7 @@ function createDiagnosticOverlays({ document: document2, environment, releaseInp
   listen(environment, "resize", () => {
     for (const w of Object.values(widgets)) if (w.enabled) {
       bounds2(w);
-      place(w);
+      place2(w);
     }
     save();
   });
@@ -44330,15 +45851,15 @@ function groundItemPresentation(drop, time, establish = 1, collapse = 0) {
   return { artKey, origin, scale, visibleCenter: { x: origin.x + center3.x * scale, y: origin.y + center3.y * scale }, contact: { x: origin.x + pivot2.x * scale, y: drop.position.y }, phase, alpha: establish * (1 - collapse), growth: establish, rarity: itemDefinition(drop)?.rarityTier ?? 0 };
 }
 function createGroundItemPresentation() {
-  let identity2 = null, records = /* @__PURE__ */ new Map(), sprites3 = /* @__PURE__ */ new Map(), counts = { rich: 0, motes: 0, labels: 0 };
+  let identity2 = null, records = /* @__PURE__ */ new Map(), sprites4 = /* @__PURE__ */ new Map(), counts = { rich: 0, motes: 0, labels: 0 };
   function lightSprites(ctx, tier2) {
-    if (sprites3.has(tier2)) return sprites3.get(tier2);
-    const doc = ctx.canvas.ownerDocument, color28 = RARITY_COLORS[tier2], beam3 = doc.createElement("canvas"), contact = doc.createElement("canvas");
-    beam3.width = 64;
-    beam3.height = 128;
+    if (sprites4.has(tier2)) return sprites4.get(tier2);
+    const doc = ctx.canvas.ownerDocument, color28 = RARITY_COLORS[tier2], beam4 = doc.createElement("canvas"), contact = doc.createElement("canvas");
+    beam4.width = 64;
+    beam4.height = 128;
     contact.width = 64;
     contact.height = 24;
-    const b = beam3.getContext("2d"), g = contact.getContext("2d"), width = [0, 4, 5.5, 7, 9, 11][tier2];
+    const b = beam4.getContext("2d"), g = contact.getContext("2d"), width = [0, 4, 5.5, 7, 9, 11][tier2];
     const outer = b.createLinearGradient(0, 7, 0, 121);
     outer.addColorStop(0, color28 + "00");
     outer.addColorStop(0.28, color28 + "20");
@@ -44391,8 +45912,8 @@ function createGroundItemPresentation() {
     g.fillStyle = bloom2;
     g.fillRect(0, -20, 64, 64);
     g.restore();
-    const result = { beam: beam3, contact };
-    sprites3.set(tier2, result);
+    const result = { beam: beam4, contact };
+    sprites4.set(tier2, result);
     return result;
   }
   function update(model, time) {
@@ -44436,11 +45957,11 @@ function createGroundItemPresentation() {
       ctx.globalAlpha = t.alpha;
       if (rich) {
         counts.rich++;
-        const x = t.visibleCenter.x, y = t.visibleCenter.y + 7, height = [0, 49, 60, 71, 83, 94][t.rarity] * t.growth, pulse = 0.9 + 0.1 * Math.sin(time / 900 + t.phase), stamp5 = lightSprites(ctx, t.rarity);
+        const x = t.visibleCenter.x, y = t.visibleCenter.y + 7, height = [0, 49, 60, 71, 83, 94][t.rarity] * t.growth, pulse = 0.9 + 0.1 * Math.sin(time / 900 + t.phase), stamp6 = lightSprites(ctx, t.rarity);
         ctx.save();
         ctx.globalAlpha = t.alpha * pulse;
-        ctx.drawImage(stamp5.beam, x - 32, y - height, 64, height + 10);
-        ctx.drawImage(stamp5.contact, t.contact.x - 32, t.contact.y - 10, 64, 24);
+        ctx.drawImage(stamp6.beam, x - 32, y - height, 64, height + 10);
+        ctx.drawImage(stamp6.contact, t.contact.x - 32, t.contact.y - 10, 64, 24);
         ctx.translate(x, y);
         ctx.lineCap = "round";
         if (t.rarity >= 2) {
@@ -44532,7 +46053,7 @@ var MAX_LOOT_LIGHTS = 12;
 function createDynamicWorldLightsV1(doc) {
   const stamps = /* @__PURE__ */ new Map();
   let drawn = 0, cores = 0;
-  function stamp5(color28, core5 = false) {
+  function stamp6(color28, core5 = false) {
     const key2 = color28 + (core5 ? "/core" : ""), cached = stamps.get(key2);
     if (cached) return cached;
     const c = doc.createElement("canvas");
@@ -44564,7 +46085,7 @@ function createDynamicWorldLightsV1(doc) {
     const pool = (x, y, radius, color28, alpha2) => {
       if (x + radius < view2.x || y + radius < view2.y || x - radius > view2.x + view2.width || y - radius > view2.y + view2.height) return;
       lc.globalAlpha = Math.min(1, alpha2);
-      lc.drawImage(stamp5(color28), x - radius, y - radius, radius * 2, radius * 2);
+      lc.drawImage(stamp6(color28), x - radius, y - radius, radius * 2, radius * 2);
       drawn++;
     };
     lc.save();
@@ -44600,7 +46121,7 @@ function createDynamicWorldLightsV1(doc) {
     const bounce = (x, y, r, color28, alpha2) => {
       if (!visible3(x, y, r)) return;
       ctx.globalAlpha = alpha2 * strength;
-      ctx.drawImage(stamp5(color28), x - r, y - r, r * 2, r * 2);
+      ctx.drawImage(stamp6(color28), x - r, y - r, r * 2, r * 2);
     };
     for (const portal of model.space.exits ?? []) if (portal.extractionPortal?.visible) bounce(portal.x, portal.y, 110, PORTAL_OUTER, 0.2);
     let loot = 0;
@@ -44615,7 +46136,7 @@ function createDynamicWorldLightsV1(doc) {
     for (const core5 of portalCores(model, view2, frame)) {
       const paint = (c) => {
         c.globalAlpha = 0.32 * strength * pulse;
-        c.drawImage(stamp5(PORTAL_OUTER, true), core5.x, core5.y, core5.w, core5.h);
+        c.drawImage(stamp6(PORTAL_OUTER, true), core5.x, core5.y, core5.w, core5.h);
       };
       if (through) through(ctx, core5.id, (c) => {
         c.save();
@@ -44637,7 +46158,7 @@ var MAX_LIGHTS = 48;
 function createSkillLightsV1(doc) {
   const stamps = /* @__PURE__ */ new Map();
   let drawn = 0;
-  function stamp5(color28) {
+  function stamp6(color28) {
     const cached = stamps.get(color28);
     if (cached) return cached;
     const c = doc.createElement("canvas");
@@ -44661,7 +46182,7 @@ function createSkillLightsV1(doc) {
       if (!(l.alpha > 0.01) || !(l.r > 0)) continue;
       if (view2 && (l.x + l.r < view2.x || l.y + l.r < view2.y || l.x - l.r > view2.x + view2.width || l.y - l.r > view2.y + view2.height)) continue;
       ctx.globalAlpha = Math.min(1, l.alpha * strength);
-      ctx.drawImage(stamp5(l.color), l.x - l.r, l.y - l.r * 0.8, l.r * 2, l.r * 1.6);
+      ctx.drawImage(stamp6(l.color), l.x - l.r, l.y - l.r * 0.8, l.r * 2, l.r * 1.6);
       drawn++;
     }
     ctx.restore();
@@ -45349,11 +46870,11 @@ function arachnidTreantAnatomyV4(tick, moving = false) {
     const phase = tick * 0.105 + index * Math.PI * 0.66 + (side < 0 ? Math.PI : 0);
     const stride = moving ? Math.sin(phase) * 2.4 : 0, lift = moving ? Math.max(0, Math.cos(phase)) * 2 : 0;
     const [r, k, a, f] = LEGS[index];
-    const root = point5(side * r[0], r[1]);
+    const root2 = point5(side * r[0], r[1]);
     const knee = point5(side * (k[0] + Math.sin(phase) * (moving ? 1.2 : 0.35)), k[1] + stride * 0.3);
     const ankle = point5(side * a[0], a[1] + stride - lift);
     const foot = point5(side * f[0], f[1] + stride - lift);
-    legs3.push({ index, side, root, knee, ankle, foot });
+    legs3.push({ index, side, root: root2, knee, ankle, foot });
   }
   return { legs: legs3, eyes: EYES };
 }
@@ -45839,9 +47360,9 @@ function drawTreantCocoonD12_5A(c, actor, tick) {
   c.restore();
   return true;
 }
-function traceSlamCrack(c, crack2, reveal) {
-  let remaining = crack2.length * Math.max(0, Math.min(1, reveal));
-  const points2 = crack2.points;
+function traceSlamCrack(c, crack3, reveal) {
+  let remaining = crack3.length * Math.max(0, Math.min(1, reveal));
+  const points2 = crack3.points;
   c.beginPath();
   c.moveTo(points2[0][0], points2[0][1]);
   for (let i = 1; i < points2.length && remaining > 0; i++) {
@@ -45874,18 +47395,18 @@ function slamTelegraph(c, row2, tick, progress8) {
   }
   c.lineCap = "round";
   c.lineJoin = "round";
-  for (const crack2 of SLAM_CRACKS) {
-    const reveal = Math.max(0, (spread - crack2.delay) / (1 - crack2.delay));
+  for (const crack3 of SLAM_CRACKS) {
+    const reveal = Math.max(0, (spread - crack3.delay) / (1 - crack3.delay));
     if (reveal <= 0) continue;
     c.globalAlpha = 0.5 + progress8 * 0.35;
     c.strokeStyle = "#60301f";
     c.lineWidth = 3;
-    traceSlamCrack(c, crack2, reveal);
+    traceSlamCrack(c, crack3, reveal);
     if (progress8 > 0.62) {
       c.globalAlpha = (progress8 - 0.62) / 0.38 * (0.45 + flash * 0.35);
       c.strokeStyle = flash > 0 ? "#ffd37c" : "#e98738";
       c.lineWidth = 1.25 + flash;
-      traceSlamCrack(c, crack2, reveal);
+      traceSlamCrack(c, crack3, reveal);
     }
   }
   if (flash > 0) {
@@ -46651,7 +48172,7 @@ var ART4 = {
     }
   }
 };
-var SCALE24 = 1.4;
+var SCALE25 = 1.4;
 var FEET = 16;
 var RES2 = 6;
 var BOUNDS2 = { "barrow_king/body": [-25, -72, 50, 75], "barrow_king/weapon": [8, -44, 15, 45], "sun_pharaoh/body": [-20, -72, 40, 75], "sun_pharaoh/weapon": [14, -57, 10, 57], "sun_pharaoh/sun": [-15, -15, 30, 30] };
@@ -46680,7 +48201,7 @@ function surface2(w, h) {
   }
   return null;
 }
-function sprite3(key2, white) {
+function sprite4(key2, white) {
   const id = key2 + (white ? "/flash" : "");
   if (cache2.has(id)) return cache2.get(id);
   let out = null;
@@ -46706,13 +48227,13 @@ function sprite3(key2, white) {
   cache2.set(id, out);
   return out;
 }
-function stamp2(c, key2, flash) {
-  const s = sprite3(key2, false);
+function stamp3(c, key2, flash) {
+  const s = sprite4(key2, false);
   if (!s) return;
   c.imageSmoothingEnabled = true;
   c.drawImage(s.canvas, s.x, s.y, s.w, s.h);
   if (flash) {
-    const f = sprite3(key2, true);
+    const f = sprite4(key2, true);
     if (f) {
       c.save();
       c.globalAlpha *= 0.85;
@@ -46768,14 +48289,14 @@ var around = (pivot2, pose, x, y) => {
 function drawKing(c, q, t, phase2, flash) {
   const pose = swordPose(q, t), [px3, py] = PIVOT.barrow_king, flame2 = q.ability === "crown_flame" ? q.charge : 0;
   aura3(c, 0, -34, 42 + (phase2 ? 6 : 0) + Math.sin(t * 0.07) * 2, `rgba(120,230,170,${0.22 + (phase2 ? 0.1 : 0) + flame2 * 0.3 + pose.glow * 0.15})`);
-  stamp2(c, "barrow_king/body", flash);
+  stamp3(c, "barrow_king/body", flash);
   if (phase2) for (const x of [-3, 3]) aura3(c, x, -54.5, 4.2 + Math.sin(t * 0.2 + x) * 0.6, "rgba(160,255,130,.75)");
   c.save();
   c.translate(px3, py + pose.lift);
   c.rotate(pose.rot);
   c.translate(-px3, -py);
   if (pose.glow > 0) aura3(c, 15, -20, 16, `rgba(150,255,140,${0.45 * pose.glow})`);
-  stamp2(c, "barrow_king/weapon", flash);
+  stamp3(c, "barrow_king/weapon", flash);
   c.restore();
   if (flame2 > 0) {
     aura3(c, 0, -76, 6 + flame2 * 10, `rgba(150,255,130,${0.35 + flame2 * 0.5})`);
@@ -46788,17 +48309,17 @@ function drawKing(c, q, t, phase2, flash) {
 function drawPharaoh(c, q, t, phase2, flash) {
   const pose = staffPose(q, t), [px3, py] = PIVOT.sun_pharaoh;
   aura3(c, 0, -40, 40 + (phase2 ? 6 : 0) + Math.sin(t * 0.06) * 2, `rgba(255,205,90,${0.3 + (phase2 ? 0.08 : 0) + pose.glow * 0.15})`);
-  stamp2(c, "sun_pharaoh/body", flash);
+  stamp3(c, "sun_pharaoh/body", flash);
   c.save();
   c.translate(px3, py + pose.lift);
   c.rotate(pose.rot);
   c.translate(-px3, -py);
-  stamp2(c, "sun_pharaoh/weapon", flash);
+  stamp3(c, "sun_pharaoh/weapon", flash);
   c.translate(SUN[0], SUN[1]);
   aura3(c, 0, 0, 14 * pose.sun + pose.glow * 10, `rgba(255,230,120,${0.7 + pose.glow * 0.25})`);
   c.rotate(t * (phase2 ? 0.02 : 0.01));
   c.scale(pose.sun, pose.sun);
-  stamp2(c, "sun_pharaoh/sun", flash);
+  stamp3(c, "sun_pharaoh/sun", flash);
   c.restore();
 }
 function drawPlain(c, id, flash) {
@@ -46817,7 +48338,7 @@ function drawPlain(c, id, flash) {
 function drawRelease(c, a, q, facing2) {
   const x = a.position.x, y = a.position.y + FEET;
   if (q.last === "crown_flame" && q.since < 10 && q.target) {
-    const k = q.since / 10, from = { x, y: y - 76 * SCALE24 }, to = q.target, h = { x: from.x + (to.x - from.x) * ease3(k * 1.6), y: from.y + (to.y - from.y) * ease3(k * 1.6) };
+    const k = q.since / 10, from = { x, y: y - 76 * SCALE25 }, to = q.target, h = { x: from.x + (to.x - from.x) * ease3(k * 1.6), y: from.y + (to.y - from.y) * ease3(k * 1.6) };
     standV1(c, y + (to.y - y) * ease3(k * 1.6), () => {
       c.globalAlpha = 1 - k;
       c.strokeStyle = "rgba(150,255,130,.8)";
@@ -46831,9 +48352,9 @@ function drawRelease(c, a, q, facing2) {
     });
   }
   if (q.last === "solar_beam" && q.since < 18 && q.target) {
-    const k = q.since / 18, pose = staffPose(q, 0), [sx, sy] = around(PIVOT.sun_pharaoh, pose, SUN[0], SUN[1]), from = { x: x + sx * SCALE24 * facing2, y: y + sy * SCALE24 };
+    const k = q.since / 18, pose = staffPose(q, 0), [sx, sy] = around(PIVOT.sun_pharaoh, pose, SUN[0], SUN[1]), from = { x: x + sx * SCALE25 * facing2, y: y + sy * SCALE25 };
     const angle3 = Math.atan2(q.target.y - a.position.y, q.target.x - a.position.x), length = BIOME_BOSS_REACH_V1.solar_beam, w = BIOME_BOSS_REACH_V1.solarBeamHalfWidth * (1 - k * 0.6);
-    const beam3 = () => {
+    const beam4 = () => {
       c.save();
       c.translate(from.x, from.y);
       c.rotate(angle3);
@@ -46860,7 +48381,7 @@ function drawRelease(c, a, q, facing2) {
         c.beginPath();
         c.rect(from.x - length - reach, y0, (length + reach) * 2, y1 - y0);
         c.clip();
-        beam3();
+        beam4();
       });
     }
   }
@@ -46887,11 +48408,11 @@ function biomeBossReleaseLightsV1(model, t) {
     const q = cast(a.boss, t), x = a.position.x, y = a.position.y + FEET;
     if (!q.target) continue;
     if (q.last === "crown_flame" && q.since < 10) {
-      const k = q.since / 10, e = ease3(k * 1.6), top = y - 76 * SCALE24;
+      const k = q.since / 10, e = ease3(k * 1.6), top = y - 76 * SCALE25;
       out.push({ x: x + (q.target.x - x) * e, y: top + (q.target.y - top) * e, r: 44, color: "#a8ff8c", alpha: 0.6 * (1 - k) });
     }
     if (q.last === "solar_beam" && q.since < 18) {
-      const k = q.since / 18, facing2 = views.get(a.boss.bossId ?? "boss")?.facing ?? 1, [sx, sy] = around(PIVOT.sun_pharaoh, staffPose(q, 0), SUN[0], SUN[1]), from = { x: x + sx * SCALE24 * facing2, y: y + sy * SCALE24 };
+      const k = q.since / 18, facing2 = views.get(a.boss.bossId ?? "boss")?.facing ?? 1, [sx, sy] = around(PIVOT.sun_pharaoh, staffPose(q, 0), SUN[0], SUN[1]), from = { x: x + sx * SCALE25 * facing2, y: y + sy * SCALE25 };
       const angle3 = Math.atan2(q.target.y - a.position.y, q.target.x - a.position.x), length = BIOME_BOSS_REACH_V1.solar_beam;
       for (let i = 0; i <= 5; i++) out.push({ x: from.x + Math.cos(angle3) * length * i / 5, y: from.y + Math.sin(angle3) * length * i / 5, r: 52, color: "#ffd36a", alpha: 0.7 * (1 - ease3(k)) });
     }
@@ -46907,10 +48428,10 @@ function drawBiomeBossV1(c, a, t, flash = false) {
   c.globalAlpha *= a.alive ? 1 : 0.3;
   c.fillStyle = "rgba(9,16,22,.42)";
   c.beginPath();
-  c.ellipse(0, 0, SHADOW4[id] * SCALE24, SHADOW4[id] * SCALE24 * 0.32, 0, 0, TAU43);
+  c.ellipse(0, 0, SHADOW4[id] * SCALE25, SHADOW4[id] * SCALE25 * 0.32, 0, 0, TAU43);
   c.fill();
   const stride = id === "barrow_king" ? 1.4 : 0.6, bob = -Math.abs(Math.sin(t * 0.11)) * stride * v.move, breath = Math.sin(t * 0.05) * 0.012 * (1 - v.move);
-  c.scale(SCALE24 * v.facing, SCALE24);
+  c.scale(SCALE25 * v.facing, SCALE25);
   c.translate(0, bob);
   c.rotate(Math.sin(t * 0.11) * 0.025 * v.move);
   c.scale(1 - breath * 0.5, 1 + breath);
@@ -47327,7 +48848,7 @@ function corrosivePseudopodGeometryV7(side, pose, tick) {
   const g = pose.goo, flow = g?.flow ?? 0, phase = g?.phase ?? 0;
   const bodyX = pose.bodyX ?? 0, bodyY = pose.bodyY ?? 0;
   const anchor = corrosiveGoopPointV5(pose, side * 29, -28);
-  const root = point6(anchor.x + bodyX, anchor.y + bodyY);
+  const root2 = point6(anchor.x + bodyX, anchor.y + bodyY);
   const drag = g?.tendrilDrag ?? 0, sway = Math.sin(tick * 0.045 + side * 1.4) * 1.4;
   const rest = point6(
     side * (59 + sway + Math.sin(phase + side) * 2 * flow) - drag * 0.45,
@@ -47339,8 +48860,8 @@ function corrosivePseudopodGeometryV7(side, pose, tick) {
   let c2 = point6(side * 47 - drag * 0.45, 7 + bodyY + sway);
   if (targeted) {
     const quick = pose.ability === "strike";
-    const reach = unit4(tip.x - root.x, tip.y - root.y);
-    const bend1 = quick ? point6(mix19(root.x, tip.x, 0.34) + side * 7, mix19(root.y, tip.y, 0.34) + 7) : point6(root.x + side * 24, root.y - 32 - (pose.slamWeight ?? 0) * 7);
+    const reach = unit4(tip.x - root2.x, tip.y - root2.y);
+    const bend1 = quick ? point6(mix19(root2.x, tip.x, 0.34) + side * 7, mix19(root2.y, tip.y, 0.34) + 7) : point6(root2.x + side * 24, root2.y - 32 - (pose.slamWeight ?? 0) * 7);
     const carry = 23 + (pose.slamWeight ?? 0) * 6;
     const bend2 = quick ? point6(tip.x - reach.x * 19, tip.y - reach.y * 19 + 4) : point6(tip.x - reach.x * carry, tip.y - reach.y * carry);
     c1 = lerp5(c1, bend1, amount);
@@ -47354,13 +48875,13 @@ function corrosivePseudopodGeometryV7(side, pose, tick) {
     c1.y -= amount * 12;
     c2.y -= amount * 19;
   }
-  const start = unit4(c1.x - root.x, c1.y - root.y), end = unit4(tip.x - c2.x, tip.y - c2.y);
+  const start = unit4(c1.x - root2.x, c1.y - root2.y), end = unit4(tip.x - c2.x, tip.y - c2.y);
   const rootNormal = point6(-start.y, start.x), tipNormal = point6(-end.y, end.x);
   const rootHalfWidth = 11.5 + amount * 1.3;
   const tipRadius = 7.1 + (targeted ? amount * 2.1 : 0) + (pose.ability === "slam" && targeted ? (pose.slamWeight ?? 0) * 2.5 : 0);
   const capCenter = shifted(tip, end, -tipRadius);
   return {
-    root,
+    root: root2,
     c1,
     c2,
     tip,
@@ -47376,8 +48897,8 @@ function corrosivePseudopodGeometryV7(side, pose, tick) {
   };
 }
 function outline3(c, g, close) {
-  const { root, c1, c2, tip, rootNormal: n, tipNormal: e, capCenter, rootHalfWidth: w, tipRadius: r } = g;
-  const a = shifted(root, n, w), b = shifted(capCenter, e, r), d = shifted(capCenter, e, -r), z = shifted(root, n, -w);
+  const { root: root2, c1, c2, tip, rootNormal: n, tipNormal: e, capCenter, rootHalfWidth: w, tipRadius: r } = g;
+  const a = shifted(root2, n, w), b = shifted(capCenter, e, r), d = shifted(capCenter, e, -r), z = shifted(root2, n, -w);
   c.beginPath();
   c.moveTo(a.x, a.y);
   c.bezierCurveTo(c1.x + n.x * w, c1.y + n.y * w, c2.x + e.x * r * 1.15, c2.y + e.y * r * 1.15, b.x, b.y);
@@ -47388,7 +48909,7 @@ function outline3(c, g, close) {
 }
 function drawCorrosivePseudopodV7(c, side, pose, tick, flash = false) {
   const g = corrosivePseudopodGeometryV7(side, pose, tick);
-  const { root, c1, c2, rootNormal: n, tipNormal: e, capCenter, rootHalfWidth: w, tipRadius: r } = g;
+  const { root: root2, c1, c2, rootNormal: n, tipNormal: e, capCenter, rootHalfWidth: w, tipRadius: r } = g;
   c.save();
   c.lineCap = "round";
   c.lineJoin = "round";
@@ -47399,12 +48920,12 @@ function drawCorrosivePseudopodV7(c, side, pose, tick, flash = false) {
     c.save();
     outline3(c, g, true);
     c.clip();
-    const a = shifted(root, n, w * 0.47), b = shifted(capCenter, e, r * 0.45);
+    const a = shifted(root2, n, w * 0.47), b = shifted(capCenter, e, r * 0.45);
     c.beginPath();
     c.moveTo(a.x, a.y);
     c.bezierCurveTo(c1.x + n.x * w * 0.58, c1.y + n.y * w * 0.58, c2.x + e.x * r * 0.57, c2.y + e.y * r * 0.57, b.x, b.y);
     c.quadraticCurveTo(capCenter.x, capCenter.y, capCenter.x - e.x * r * 0.11, capCenter.y - e.y * r * 0.11);
-    c.bezierCurveTo(c2.x - e.x * r * 0.18, c2.y - e.y * r * 0.18, c1.x - n.x * w * 0.14, c1.y - n.y * w * 0.14, root.x - n.x * w * 0.22, root.y - n.y * w * 0.22);
+    c.bezierCurveTo(c2.x - e.x * r * 0.18, c2.y - e.y * r * 0.18, c1.x - n.x * w * 0.14, c1.y - n.y * w * 0.14, root2.x - n.x * w * 0.22, root2.y - n.y * w * 0.22);
     c.closePath();
     c.fillStyle = LIGHT3;
     c.fill();
@@ -47715,20 +49236,20 @@ function drawCorrosiveMinionGround(c, rows, tick) {
     c.restore();
   }
 }
-function strand(c, root, tip, amount) {
+function strand(c, root2, tip, amount) {
   if (amount <= 0) return;
-  const d = unit5(tip.x - root.x, tip.y - root.y), n = point7(-d.y, d.x), w = 3.8 * amount, thin = 0.8 * amount, m = point7(mix20(root.x, tip.x, 0.55), mix20(root.y, tip.y, 0.55) + 5 * amount);
+  const d = unit5(tip.x - root2.x, tip.y - root2.y), n = point7(-d.y, d.x), w = 3.8 * amount, thin = 0.8 * amount, m = point7(mix20(root2.x, tip.x, 0.55), mix20(root2.y, tip.y, 0.55) + 5 * amount);
   c.beginPath();
-  c.moveTo(root.x + n.x * w, root.y + n.y * w);
+  c.moveTo(root2.x + n.x * w, root2.y + n.y * w);
   c.quadraticCurveTo(m.x + n.x * w * 0.4, m.y + n.y * w * 0.4, tip.x + n.x * thin, tip.y + n.y * thin);
   c.lineTo(tip.x - n.x * thin, tip.y - n.y * thin);
-  c.quadraticCurveTo(m.x - n.x * w * 0.4, m.y - n.y * w * 0.4, root.x - n.x * w, root.y - n.y * w);
+  c.quadraticCurveTo(m.x - n.x * w * 0.4, m.y - n.y * w * 0.4, root2.x - n.x * w, root2.y - n.y * w);
   c.closePath();
   fillSludge(c, CORROSIVE_SLUDGE_PALETTE_V7.base, true);
   c.strokeStyle = CORROSIVE_SLUDGE_PALETTE_V7.light;
   c.lineWidth = 0.8 * amount;
   c.beginPath();
-  c.moveTo(root.x - n.x * w * 0.4, root.y - n.y * w * 0.4);
+  c.moveTo(root2.x - n.x * w * 0.4, root2.y - n.y * w * 0.4);
   c.quadraticCurveTo(m.x, m.y, tip.x, tip.y);
   c.stroke();
 }
@@ -47770,8 +49291,8 @@ function minionBody(c, row2, tick, model, bodyPoseForActor) {
     const event = (model.bossHazards?.corrosiveSheds ?? []).find((s) => s.spawnedMinionIds.includes(row2.id));
     if (event && pose.age < 8) {
       const boss = model.entitiesById?.[row2.sourceEntityId] ?? Object.values(model.entitiesById ?? {}).find((a) => a.boss?.bossId === row2.bossId), local6 = tearOffset(event), body5 = boss && bodyPoseForActor ? bodyPoseForActor(boss, tick) : { bodyX: 0, bodyY: 0 };
-      const anchor = corrosiveGoopPointV5(body5, local6.x, local6.y - 33), root = boss ? point7(boss.position.x + anchor.x + body5.bodyX, boss.position.y + anchor.y + body5.bodyY) : point7(event.originPosition.x, event.originPosition.y - 33);
-      strand(c, root, point7(row2.position.x, row2.position.y - pose.height), 1 - ease5((pose.age - 3) / 5));
+      const anchor = corrosiveGoopPointV5(body5, local6.x, local6.y - 33), root2 = boss ? point7(boss.position.x + anchor.x + body5.bodyX, boss.position.y + anchor.y + body5.bodyY) : point7(event.originPosition.x, event.originPosition.y - 33);
+      strand(c, root2, point7(row2.position.x, row2.position.y - pose.height), 1 - ease5((pose.age - 3) / 5));
     }
     chunk(c, row2, pose);
     return;
@@ -48191,14 +49712,14 @@ function spore(c, row2, tick) {
 function stormPod(c, row2, p, index, tick) {
   const q = clamp34((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick)), growth = ease6((q - 0.12) / 0.88);
   if (growth <= 0) return;
-  const o = row2.originPosition, seed2 = index * 2.2, root = point8(o.x, o.y - 31), tip = point8(p.x, p.y - 7);
+  const o = row2.originPosition, seed2 = index * 2.2, root2 = point8(o.x, o.y - 31), tip = point8(p.x, p.y - 7);
   c.save();
   c.globalAlpha = 0.35 + growth * 0.55;
   c.strokeStyle = DARK5;
   c.lineWidth = 1.2;
   c.beginPath();
-  c.moveTo(root.x, root.y);
-  c.quadraticCurveTo(mix21(root.x, tip.x, 0.7), Math.min(root.y, tip.y) - 8 - growth * 7, tip.x, tip.y);
+  c.moveTo(root2.x, root2.y);
+  c.quadraticCurveTo(mix21(root2.x, tip.x, 0.7), Math.min(root2.y, tip.y) - 8 - growth * 7, tip.x, tip.y);
   c.stroke();
   ellipse4(c, p.x, p.y - 7, 1 + growth * 5.5, 1.3 + growth * 5.2, BASE, true, 1.1);
   ellipse4(c, p.x - 1.3, p.y - 8.5, 0.6 + growth * 1.7, 0.5 + growth * 1.3, LIGHT5, false);
@@ -48685,7 +50206,7 @@ function eyeLance(c, row2, tick, source3) {
     c.stroke();
     ellipse5(c, eye6.x, eye6.y, 1.8 + kick, 1.8 + kick, PALE4);
   }
-  const beam3 = (width, color28) => {
+  const beam4 = (width, color28) => {
     c.strokeStyle = color28;
     c.lineWidth = width;
     c.lineCap = "round";
@@ -48694,9 +50215,9 @@ function eyeLance(c, row2, tick, source3) {
     c.lineTo(to.x, to.y);
     c.stroke();
   };
-  beam3(15 + 9 * kick, "#53287988");
-  beam3(8 + 5 * kick, "#d051da");
-  beam3(3 + 3 * kick, "#fff0fc");
+  beam4(15 + 9 * kick, "#53287988");
+  beam4(8 + 5 * kick, "#d051da");
+  beam4(3 + 3 * kick, "#fff0fc");
   for (const side of [-1, 1]) {
     c.strokeStyle = "#d0a3ff";
     c.lineWidth = 1;
@@ -53089,16 +54610,16 @@ function wing3(c, side, pose, flash) {
   c.restore();
 }
 function armGeometry(side, pose) {
-  const root = point26(side * 25, 4), idle2 = point26(side * (32 - 11 * pose.armFold), 24 + pose.armLift), hand32 = { ...idle2 };
+  const root2 = point26(side * 25, 4), idle2 = point26(side * (32 - 11 * pose.armFold), 24 + pose.armLift), hand32 = { ...idle2 };
   if (side === pose.strikeSide && pose.strike > 0) {
-    const vx = pose.aim.x - pose.actorX - pose.bodyX, vy = pose.aim.y - pose.actorY - 17 - pose.bodyY, u = rotate4(vx, vy, -pose.rotation), d = unit11(u.x - root.x, u.y - root.y);
+    const vx = pose.aim.x - pose.actorX - pose.bodyX, vy = pose.aim.y - pose.actorY - 17 - pose.bodyY, u = rotate4(vx, vy, -pose.rotation), d = unit11(u.x - root2.x, u.y - root2.y);
     hand32.x = mix27(hand32.x, u.x - d.x * 10, pose.strike);
     hand32.y = mix27(hand32.y, u.y - d.y * 10, pose.strike);
   }
-  const dx = hand32.x - root.x, dy = hand32.y - root.y, length = Math.hypot(dx, dy) || 1, bend = Math.max(4, Math.min(11, 19 - length * 0.18));
-  const elbow22 = point26(root.x + dx * 0.45 + side * bend, root.y + dy * 0.45 - 3);
+  const dx = hand32.x - root2.x, dy = hand32.y - root2.y, length = Math.hypot(dx, dy) || 1, bend = Math.max(4, Math.min(11, 19 - length * 0.18));
+  const elbow22 = point26(root2.x + dx * 0.45 + side * bend, root2.y + dy * 0.45 - 3);
   const direction3 = pose.strike > 0 && side === pose.strikeSide ? unit11(hand32.x - elbow22.x, hand32.y - elbow22.y) : unit11(side * 0.12, 1);
-  return { root, elbow: elbow22, hand: hand32, angle: Math.atan2(direction3.y, direction3.x) - Math.PI / 2 };
+  return { root: root2, elbow: elbow22, hand: hand32, angle: Math.atan2(direction3.y, direction3.x) - Math.PI / 2 };
 }
 function ingotLimb(c, a, b, width, flash) {
   const d = unit11(b.x - a.x, b.y - a.y), n = point26(-d.y, d.x), p = [[a.x + n.x * width, a.y + n.y * width], [b.x + n.x * width * 0.85, b.y + n.y * width * 0.85], [b.x - n.x * width * 0.85, b.y - n.y * width * 0.85], [a.x - n.x * width, a.y - n.y * width]];
@@ -53326,7 +54847,7 @@ function drawGildedGround(c, model2, tick) {
   for (const row2 of h.gildedTaxations ?? []) teleport(c, row2, tick);
   c.restore();
 }
-function stamp3(c, row2, tick, pending) {
+function stamp4(c, row2, tick, pending) {
   const p = row2.position ?? row2.targetPosition, age = pending ? 0 : tick - row2.resolvedTick, q = pending ? progress7(row2, tick) : 1;
   if (!pending && (age < 0 || age >= 34)) return;
   const build = ease14((q - 0.08) / 0.5), drop = ease14((q - 0.8) / 0.2), height = pending ? 58 * build * (1 - drop) : 0, fade = pending ? build : 1 - ease14((age - 7) / 27), ry = 12 * (pending ? 1 : 1 - 0.35 * Math.sin(Math.PI * clamp44(age / 10)));
@@ -53611,14 +55132,14 @@ function gildedDepthItems(model2, tick, viewport = null) {
   for (const row2 of h.gildedTelegraphs ?? []) {
     if (tick < row2.startedTick || tick > row2.resolvesTick) continue;
     const id = row2.id ?? row2.bossId + "/" + row2.sequence;
-    if (row2.ability === "vault_crush") add(id + "/stamp", row2.position ?? row2.targetPosition, 110, 1, (c) => stamp3(c, row2, tick, true));
+    if (row2.ability === "vault_crush") add(id + "/stamp", row2.position ?? row2.targetPosition, 110, 1, (c) => stamp4(c, row2, tick, true));
     else if (row2.ability === "gold_fall") for (const [index, p] of targetRows(row2).entries()) add(id + "/fall/" + index, p, 105, 1, (c) => fallingGold(c, row2, index, tick, true));
   }
   for (const row2 of h.gildedImpacts ?? []) {
     const age = tick - row2.resolvedTick;
     if (age < 0 || age >= 40) continue;
     const id = row2.id ?? row2.bossId + "/" + row2.sequence;
-    if (row2.ability === "vault_crush") add(id + "/stamp", row2.targetPosition, 110, 1, (c) => stamp3(c, row2, tick, false));
+    if (row2.ability === "vault_crush") add(id + "/stamp", row2.targetPosition, 110, 1, (c) => stamp4(c, row2, tick, false));
     else if (row2.ability === "gold_fall") for (const [index, p] of targetRows(row2).entries()) add(id + "/fall/" + index, p, 80, 1, (c) => fallingGold(c, row2, index, tick, false));
     else if (row2.ability === "strike") add(id + "/strike", row2.targetPosition, 35, 1, (c) => strikeSpark(c, row2, tick));
   }
@@ -53945,7 +55466,7 @@ function gear(c, x, y, r, teeth, tick, sign2 = 1) {
   circle7(c, 0, 0, 3, "#c9f6ff");
   c.restore();
 }
-function blob4(c, tick, color28) {
+function blob5(c, tick, color28) {
   const p = [];
   for (let i = 0; i < 32; i++) {
     const a = i * TAU59 / 32, r = 34 + 4 * Math.sin(a * 5 + tick * 0.035) + 2 * Math.sin(a * 9 - tick * 0.024);
@@ -54087,8 +55608,8 @@ function drawVoid(c, a, t) {
   }
 }
 function drawCorrosive(c, a, t) {
-  blob4(c, t, "#548d62b9");
-  blob4(c, t * 0.78, "#72c4899b");
+  blob5(c, t, "#548d62b9");
+  blob5(c, t * 0.78, "#72c4899b");
   for (let i = 0; i < 12; i++) {
     const q = i * TAU59 / 12 + t * 4e-3, rad = 18 + i % 3 * 5;
     circle7(c, Math.cos(q) * rad, Math.sin(q) * rad * 0.68, 3 + i % 3, "#d4f7a4a8");
@@ -54785,7 +56306,7 @@ function brimstoneSlams(model, tick) {
   return rows;
 }
 function slamGround4(c, s, tick) {
-  const age = tick - s.resolvedTick, p = clamp45(age / 42), burst = clamp45(age / 10), fade = 1 - ease16((age - 15) / 27), pos = s.targetPosition;
+  const age = tick - s.resolvedTick, p = clamp45(age / 42), burst2 = clamp45(age / 10), fade = 1 - ease16((age - 15) / 27), pos = s.targetPosition;
   c.save();
   c.translate(pos.x, pos.y);
   circlePath(c, { x: 0, y: 0 }, 64);
@@ -54795,13 +56316,13 @@ function slamGround4(c, s, tick) {
     const a = i * TAU60 / 16, r = 54 + (i % 2 ? 2 : 7);
     return [Math.cos(a) * r, Math.sin(a) * r];
   }), "#30242b9a", null);
-  disc3(c, 0, 0, 55 * (1 - burst * 0.45), "#ff923b" + (age < 4 ? "7a" : "28"));
+  disc3(c, 0, 0, 55 * (1 - burst2 * 0.45), "#ff923b" + (age < 4 ? "7a" : "28"));
   spokes(c, 17, 62, 1);
   c.globalAlpha = fade * (1 - clamp45(age / 21));
   c.strokeStyle = GOLD11;
-  c.lineWidth = 4 * (1 - burst) + 1;
+  c.lineWidth = 4 * (1 - burst2) + 1;
   c.beginPath();
-  c.arc(0, 0, 12 + 52 * Math.sin(burst * Math.PI * 0.5), 0, TAU60);
+  c.arc(0, 0, 12 + 52 * Math.sin(burst2 * Math.PI * 0.5), 0, TAU60);
   c.stroke();
   c.restore();
 }
@@ -56733,9 +58254,9 @@ function createGroundGlowClipsV1() {
   return { clip: clip2, clear: () => clips.clear(), resources: () => ({ clipPages: clips.size, clipBuilds: builds, sampledCells: cells }) };
 }
 function createNightActorReadabilityV1(document2, { enabled = () => true } = {}) {
-  const stamp5 = document2.createElement("canvas");
-  stamp5.width = stamp5.height = 64;
-  const c = stamp5.getContext("2d"), g = c.createRadialGradient(32, 32, 0, 32, 32, 32);
+  const stamp6 = document2.createElement("canvas");
+  stamp6.width = stamp6.height = 64;
+  const c = stamp6.getContext("2d"), g = c.createRadialGradient(32, 32, 0, 32, 32, 32);
   g.addColorStop(0, "#d6e5ee88");
   g.addColorStop(0.5, "#a4b7cf28");
   g.addColorStop(1, "#a4b7cf00");
@@ -56755,7 +58276,7 @@ function createNightActorReadabilityV1(document2, { enabled = () => true } = {})
       if (player ? players >= 4 : a.team !== "hostile" || enemies >= 8) continue;
       const r = player ? 34 : Math.max(20, Math.min(44, (a.hullRadius ?? 10) * 1.6));
       ctx.globalAlpha = strength * (player ? 0.18 : 0.08);
-      ctx.drawImage(stamp5, a.position.x - r, a.position.y - r - 10, r * 2, r * 2);
+      ctx.drawImage(stamp6, a.position.x - r, a.position.y - r - 10, r * 2, r * 2);
       if (player) players++;
       else enemies++;
     }
@@ -56770,15 +58291,15 @@ var LOOT_LABEL_COLORS = Object.freeze(["#f5f5ef", "#b4e2ff", "#e0caff", "#ffd0ab
 function createNightGroundItemsV1({ enabled = () => true } = {}) {
   const legacy = createGroundItemPresentation(), records = /* @__PURE__ */ new Map(), stamps = /* @__PURE__ */ new Map(), labelStamps = /* @__PURE__ */ new Map(), clips = createGroundGlowClipsV1();
   let identity2 = null, visible3 = [], beamRecords = [], currentTime = 0, currentModel = null, currentArt = null, view2 = null, counts = { rich: 0, motes: 0, labels: 0, lights: 0 }, lastLabelBoxes = [];
-  function sprites3(ctx, tier2) {
+  function sprites4(ctx, tier2) {
     if (stamps.has(tier2)) return stamps.get(tier2);
-    const doc = ctx.canvas.ownerDocument, color28 = RARITY_COLORS[tier2], beam3 = doc.createElement("canvas"), contact = doc.createElement("canvas"), glow9 = doc.createElement("canvas");
-    beam3.width = 64;
-    beam3.height = 128;
+    const doc = ctx.canvas.ownerDocument, color28 = RARITY_COLORS[tier2], beam4 = doc.createElement("canvas"), contact = doc.createElement("canvas"), glow9 = doc.createElement("canvas");
+    beam4.width = 64;
+    beam4.height = 128;
     contact.width = 64;
     contact.height = 24;
     glow9.width = glow9.height = 96;
-    const b = beam3.getContext("2d"), c = contact.getContext("2d"), g = glow9.getContext("2d"), width = [1.4, 3.4, 4.4, 5.6, 7, 8.5][tier2];
+    const b = beam4.getContext("2d"), c = contact.getContext("2d"), g = glow9.getContext("2d"), width = [1.4, 3.4, 4.4, 5.6, 7, 8.5][tier2];
     const outer = b.createLinearGradient(32 - width * 3, 0, 32 + width * 3, 0);
     outer.addColorStop(0, color28 + "00");
     outer.addColorStop(0.3, color28 + "18");
@@ -56829,7 +58350,7 @@ function createNightGroundItemsV1({ enabled = () => true } = {}) {
     spill.addColorStop(1, color28 + "00");
     g.fillStyle = spill;
     g.fillRect(0, 0, 96, 96);
-    const result = { beam: beam3, contact, glow: glow9 };
+    const result = { beam: beam4, contact, glow: glow9 };
     stamps.set(tier2, result);
     return result;
   }
@@ -56865,7 +58386,7 @@ function createNightGroundItemsV1({ enabled = () => true } = {}) {
   }
   const pose = (r) => groundItemPresentation(r.drop, currentTime, Math.min(1, (currentTime - r.born) / 150), r.removed === null ? 0 : (currentTime - r.removed) / 120);
   function column(ctx, t, budget) {
-    const s = sprites3(ctx, t.rarity), x = t.visibleCenter.x, y = t.visibleCenter.y + 7, h = [34, 58, 70, 84, 98, 112][t.rarity] * t.growth, pulse = 0.94 + 0.06 * Math.sin(currentTime / 850 + t.phase), color28 = RARITY_COLORS[t.rarity];
+    const s = sprites4(ctx, t.rarity), x = t.visibleCenter.x, y = t.visibleCenter.y + 7, h = [34, 58, 70, 84, 98, 112][t.rarity] * t.growth, pulse = 0.94 + 0.06 * Math.sin(currentTime / 850 + t.phase), color28 = RARITY_COLORS[t.rarity];
     ctx.save();
     ctx.globalCompositeOperation = "source-over";
     ctx.globalAlpha = t.alpha * pulse;
@@ -56924,7 +58445,7 @@ function createNightGroundItemsV1({ enabled = () => true } = {}) {
     ctx.restore();
   }
   function columnGround(ctx, t) {
-    const s = sprites3(ctx, t.rarity), pulse = 0.94 + 0.06 * Math.sin(currentTime / 850 + t.phase);
+    const s = sprites4(ctx, t.rarity), pulse = 0.94 + 0.06 * Math.sin(currentTime / 850 + t.phase);
     ctx.save();
     ctx.globalAlpha = t.alpha * pulse;
     ctx.drawImage(s.contact, t.contact.x - 24, t.contact.y - 7, 48, 14);
@@ -56941,17 +58462,17 @@ function createNightGroundItemsV1({ enabled = () => true } = {}) {
   }
   let plan = /* @__PURE__ */ new Map();
   function budgets() {
-    let motes2 = 0, animated = 0;
+    let motes3 = 0, animated = 0;
     const out = /* @__PURE__ */ new Map();
     for (const r of beamRecords) {
-      const t = pose(r), a = t.rarity > 0 && animated < 6, n = Math.max(0, Math.min(t.rarity, 5, 24 - motes2));
+      const t = pose(r), a = t.rarity > 0 && animated < 6, n = Math.max(0, Math.min(t.rarity, 5, 24 - motes3));
       if (a) animated++;
-      motes2 += n;
+      motes3 += n;
       out.set(r, { animated: a, motes: n });
     }
     counts.rich = beamRecords.length;
     counts.animatedBeams = animated;
-    counts.motes = motes2;
+    counts.motes = motes3;
     return out;
   }
   function depthItems2() {
@@ -56988,7 +58509,7 @@ function createNightGroundItemsV1({ enabled = () => true } = {}) {
     let lights = 0;
     const strength = 0.15 + 0.36 * nightReadabilityStrength(frame);
     for (const { r, t, radius, id } of lit()) {
-      const s = sprites3(ctx, t.rarity), paint = (c) => {
+      const s = sprites4(ctx, t.rarity), paint = (c) => {
         c.save();
         if (clips.clip(c, currentModel.space, r.drop.itemId ?? r.drop.sourceEntityId, t.contact.x, t.contact.y, radius)) {
           c.globalCompositeOperation = "lighter";
@@ -57051,7 +58572,7 @@ function createNightGroundItemsV1({ enabled = () => true } = {}) {
     const boxes2 = [];
     for (const r of visible3) {
       if (!r.drop.canPickUp || r.removed !== null || boxes2.length >= 4) continue;
-      const t = pose(r), stamp5 = labelSprite(ctx, itemDefinition(r.drop)?.name ?? "Gear", t.rarity), width = stamp5.width;
+      const t = pose(r), stamp6 = labelSprite(ctx, itemDefinition(r.drop)?.name ?? "Gear", t.rarity), width = stamp6.width;
       const x = Math.max(view2.x + 6 + width / 2, Math.min(view2.x + view2.width - 6 - width / 2, t.contact.x));
       let selected = null;
       for (const dy of [10, 31, -35, 52, -56]) {
@@ -57068,7 +58589,7 @@ function createNightGroundItemsV1({ enabled = () => true } = {}) {
       ctx.globalAlpha = t.alpha;
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
-      ctx.drawImage(stamp5.image, selected.x, selected.y, selected.w, selected.h);
+      ctx.drawImage(stamp6.image, selected.x, selected.y, selected.w, selected.h);
     }
     ctx.restore();
     counts.labels = boxes2.length;
@@ -57117,9 +58638,9 @@ var GONE_MS = 260;
 var TICK_MS = 1e3 / 60;
 function createPotionDropsV1() {
   const records = /* @__PURE__ */ new Map();
-  let identity2 = null, sprite5 = null, pool = null, drawn = 0;
-  function sprites3(doc) {
-    if (sprite5) return;
+  let identity2 = null, sprite6 = null, pool = null, drawn = 0;
+  function sprites4(doc) {
+    if (sprite6) return;
     const s = 3, flask = doc.createElement("canvas");
     flask.width = 20 * s;
     flask.height = 26 * s;
@@ -57185,7 +58706,7 @@ function createPotionDropsV1() {
     g.fillStyle = r;
     g.fillRect(0, -20, 64, 64);
     g.restore();
-    sprite5 = flask;
+    sprite6 = flask;
     pool = glow9;
   }
   function update(model, time) {
@@ -57209,7 +58730,7 @@ function createPotionDropsV1() {
       if (time - r.gone >= GONE_MS) records.delete(id);
     }
   }
-  function place(r, time) {
+  function place2(r, time) {
     const age = time - r.born, settle = Math.min(1, age / SETTLE_MS), seed2 = r.drop.id.length * 37 + r.drop.id.charCodeAt(r.drop.id.length - 1), phase = seed2 % 628 / 100;
     const hop = settle < 1 ? Math.sin(settle * Math.PI) * 15 * (1 - settle * 0.35) : Math.max(0, Math.sin((age - SETTLE_MS) / 90) * 2.2 * Math.exp(-(age - SETTLE_MS) / 140)), bob = settle < 1 ? 0 : Math.sin(time / 420 + phase) * 1.1;
     const gone = r.gone === null ? 0 : Math.min(1, (time - r.gone) / GONE_MS);
@@ -57221,10 +58742,10 @@ function createPotionDropsV1() {
     update(model, time);
     drawn = 0;
     if (!records.size) return;
-    sprites3(ctx.canvas.ownerDocument);
+    sprites4(ctx.canvas.ownerDocument);
     full = model.potions && model.potions.count >= model.potions.capacity;
     for (const r of records.values()) {
-      const p = place(r, time);
+      const p = place2(r, time);
       if (!shown(p, viewport)) continue;
       drawn++;
       ctx.save();
@@ -57240,10 +58761,10 @@ function createPotionDropsV1() {
     }
   }
   function depthItems2(time, viewport) {
-    if (!records.size || !sprite5) return [];
+    if (!records.size || !sprite6) return [];
     const items = [];
     for (const r of records.values()) {
-      const p = place(r, time);
+      const p = place2(r, time);
       if (!shown(p, viewport)) continue;
       items.push(depthItem({ id: "potion/" + r.drop.id, anchorX: p.x, anchorY: p.y + 1, draw: (ctx) => {
         ctx.save();
@@ -57251,7 +58772,7 @@ function createPotionDropsV1() {
         ctx.translate(p.x, p.y - p.lift);
         ctx.rotate(p.tilt);
         ctx.scale(p.scale, p.scale);
-        ctx.drawImage(sprite5, -10, -25, 20, 26);
+        ctx.drawImage(sprite6, -10, -25, 20, 26);
         const glint = (time / 1e3 + p.phase) % 3.2;
         if (p.settled && r.gone === null && glint < 0.35) {
           const k = Math.sin(glint / 0.35 * Math.PI);
@@ -57270,7 +58791,7 @@ function createPotionDropsV1() {
   function lights(time, viewport) {
     const out = [];
     for (const r of records.values()) {
-      const p = place(r, time);
+      const p = place2(r, time);
       if (shown(p, viewport)) out.push({ x: p.x, y: p.y - 6, r: 26, color: "#ff6a5a", alpha: 0.6 * p.alpha });
     }
     return out;
@@ -57279,7 +58800,7 @@ function createPotionDropsV1() {
     if (!nightReadabilityStrength(frame) || !records.size || !pool) return [];
     const out = [];
     for (const r of records.values()) {
-      const p = place(r, time);
+      const p = place2(r, time);
       if (shown(p, viewport)) out.push({ id: "potion-glow/" + r.drop.id, ground: true, x: p.x - 18, y: p.y - 7, w: 36, h: 14 });
     }
     return out;
@@ -57290,7 +58811,7 @@ function createPotionDropsV1() {
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
     for (const r of records.values()) {
-      const p = place(r, time);
+      const p = place2(r, time);
       if (!shown(p, viewport)) continue;
       const paint = (c) => {
         c.globalAlpha = p.alpha * k * 0.55 * (0.8 + 0.2 * Math.sin(time / 520 + p.phase));
@@ -57715,10 +59236,10 @@ function drawCastSigil(ctx, x, y, element, age, facing2 = 1) {
 }
 function fireball(ctx, x, y, r, t, dir, speed) {
   const back = dir + Math.PI;
-  blob3(ctx, x, y, r * 4, "#ff6a1f", 0.5);
+  blob4(ctx, x, y, r * 4, "#ff6a1f", 0.5);
   for (let i = 10; i >= 1; i--) {
     const k = i / 10, d = k * r * (2 + 7 * speed), j = (rnd(i + Math.floor(t * 50)) - 0.5) * r * 0.9 * k;
-    blob3(ctx, x + Math.cos(back) * d - Math.sin(back) * j, y + Math.sin(back) * d + Math.cos(back) * j, r * (1.5 - k * 0.8), k < 0.3 ? "#ffd27a" : k < 0.65 ? "#ff8a3d" : "#c2410c", (1 - k) * 0.95);
+    blob4(ctx, x + Math.cos(back) * d - Math.sin(back) * j, y + Math.sin(back) * d + Math.cos(back) * j, r * (1.5 - k * 0.8), k < 0.3 ? "#ffd27a" : k < 0.65 ? "#ff8a3d" : "#c2410c", (1 - k) * 0.95);
   }
   ctx.save();
   ctx.globalCompositeOperation = "lighter";
@@ -57733,7 +59254,7 @@ function fireball(ctx, x, y, r, t, dir, speed) {
     ctx.fill();
   }
   ctx.restore();
-  blob3(ctx, x, y, r * 1.6, "#ffd27a", 1);
+  blob4(ctx, x, y, r * 1.6, "#ffd27a", 1);
   ctx.save();
   ctx.globalCompositeOperation = "lighter";
   ctx.shadowBlur = 10;
@@ -57745,7 +59266,7 @@ function fireball(ctx, x, y, r, t, dir, speed) {
   ctx.restore();
 }
 function iceLance(ctx, x, y, dir, len) {
-  blob3(ctx, x, y, len * 0.75, "#8fd8ff", 0.5);
+  blob4(ctx, x, y, len * 0.75, "#8fd8ff", 0.5);
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(dir);
@@ -57810,8 +59331,8 @@ function drawCastBolt(ctx, element, p, origin, time) {
   if (element === "lightning") {
     const o = origin ?? { x: p.x + bx * 30, y: p.y + by * 30 }, seed2 = Math.floor(time / 40);
     lightning(ctx, o.x, o.y, p.x, p.y, seed2, 5, 1.8);
-    blob3(ctx, p.x, p.y, 11, C3.deep, 0.5);
-    blob3(ctx, p.x, p.y, 6, C3.main, 0.9);
+    blob4(ctx, p.x, p.y, 11, C3.deep, 0.5);
+    blob4(ctx, p.x, p.y, 6, C3.main, 0.9);
     for (let i = 0; i < 3; i++) {
       const s = seed2 + i * 11, a = rnd(s) * TAU39;
       glowStroke(ctx, C3.main, 5, 0.8, () => jag(ctx, p.x, p.y, p.x + Math.cos(a) * 8, p.y + Math.sin(a) * 8, s, 1.6));
@@ -57828,7 +59349,7 @@ function drawCastBolt(ctx, element, p, origin, time) {
     const ph = (t * 6 + i / 6) % 1, d = 8 + ph * 22, j = (rnd(i + 3) - 0.5) * 8;
     if (element === "frost") {
       snowStar(ctx, p.x + bx * d - by * j, p.y + by * d + bx * j + 4 * ph, 1.3 * (1 - ph) + 0.3, 1 - ph);
-      blob3(ctx, p.x + bx * d * 0.7, p.y + by * d * 0.7, 5 * (1 - ph) + 2, "#e6f8ff", 0.4 * (1 - ph));
+      blob4(ctx, p.x + bx * d * 0.7, p.y + by * d * 0.7, 5 * (1 - ph) + 2, "#e6f8ff", 0.4 * (1 - ph));
     } else mote(ctx, p.x + bx * d - by * j, p.y + by * d + bx * j + 10 * ph * ph, 0.9 * (1 - ph) + 0.2, C3.spark, 1 - ph);
   }
   if (element === "frost") iceLance(ctx, p.x, p.y, dir, 19);
@@ -57849,7 +59370,7 @@ function starburst(ctx, x, y, R3, color28, alpha2, seed2) {
   ctx.fill();
   ctx.restore();
 }
-function crystal2(ctx, x, y, ht, wd, lean, alpha2) {
+function crystal3(ctx, x, y, ht, wd, lean, alpha2) {
   if (ht <= 0.5 || alpha2 <= 0) return;
   ctx.save();
   ctx.globalAlpha *= alpha2;
@@ -57881,7 +59402,7 @@ function crystal2(ctx, x, y, ht, wd, lean, alpha2) {
   ctx.stroke();
   ctx.restore();
 }
-function shard2(ctx, x, y, r, rot, alpha2) {
+function shard3(ctx, x, y, r, rot, alpha2) {
   if (alpha2 <= 0) return;
   ctx.save();
   ctx.globalAlpha *= Math.min(1, alpha2);
@@ -57923,7 +59444,7 @@ function drawCastImpact(ctx, element, x, y, age, crit = false) {
       const q = h / 0.5, e = easeOut(h / 0.3), R3 = (10 + 24 * e) * HIT * big, body5 = h < 0.16 ? 1 : 1 - smooth20((h - 0.16) / 0.26), sd = Math.floor(age / 70);
       for (let i = 0; i < 9; i++) {
         const a = i * TAU39 / 9 + 0.4, d = (4 + 20 * e) * HIT;
-        blob3(ctx, I.x + Math.cos(a) * d, I.y + Math.sin(a) * d * 0.75 - 10 * HIT * q, (8 + 10 * e) * HIT, q < 0.4 ? "#ff8a3d" : "#c2410c", (1 - q) * 0.9);
+        blob4(ctx, I.x + Math.cos(a) * d, I.y + Math.sin(a) * d * 0.75 - 10 * HIT * q, (8 + 10 * e) * HIT, q < 0.4 ? "#ff8a3d" : "#c2410c", (1 - q) * 0.9);
       }
       starburst(ctx, I.x, I.y - 6 * HIT * q, R3, "#c2410c", body5, sd);
       starburst(ctx, I.x, I.y - 6 * HIT * q, R3 * 0.78, "#ff7a1f", body5, sd + 7);
@@ -57959,12 +59480,12 @@ function drawCastImpact(ctx, element, x, y, age, crit = false) {
     ctx.ellipse(x, G3, 36 * HIT, 6 * HIT, 0, 0, TAU39);
     ctx.fill();
     ctx.restore();
-    for (const [dx, ht, lean] of FROST_BACK) crystal2(ctx, x + dx * HIT, G3, ht * grow, 5.2 * HIT, lean, fade);
+    for (const [dx, ht, lean] of FROST_BACK) crystal3(ctx, x + dx * HIT, G3, ht * grow, 5.2 * HIT, lean, fade);
     bloom(ctx, I.x, I.y, (10 + 22 * easeOut(h / 0.3)) * HIT, C3.main, 1 - h / 0.5 * 1.6);
-    for (const [dx, ht, lean] of FROST_FRONT) crystal2(ctx, x + dx * HIT, G3 + 1, ht * grow, 4.4 * HIT, lean, fade);
+    for (const [dx, ht, lean] of FROST_FRONT) crystal3(ctx, x + dx * HIT, G3 + 1, ht * grow, 4.4 * HIT, lean, fade);
     if (h < 0.45) for (let i = 0; i < 10; i++) {
       const a = Math.PI + (rnd(i + 40) - 0.5) * 2.6, v = (40 + 50 * rnd(i + 45)) * HIT;
-      shard2(ctx, I.x + Math.cos(a) * v * h * 0.7, I.y + Math.sin(a) * v * h * 0.7 + 70 * HIT * h * h, 1.5, age / 110 + i, 1 - h / 0.45);
+      shard3(ctx, I.x + Math.cos(a) * v * h * 0.7, I.y + Math.sin(a) * v * h * 0.7 + 70 * HIT * h * h, 1.5, age / 110 + i, 1 - h / 0.45);
     }
     glowStroke(ctx, C3.main, 8, 1.4 * (1 - h / 0.48), () => {
       ctx.beginPath();
@@ -57972,7 +59493,7 @@ function drawCastImpact(ctx, element, x, y, age, crit = false) {
     }, false);
     for (let i = 0; i < 5; i++) {
       const a = i * Math.PI / 2.5, d = (10 + 22 * easeOut(h / 0.3)) * HIT;
-      blob3(ctx, x + Math.cos(a) * d, G3 - 2 + Math.sin(a) * 2, (8 + 6 * h) * HIT, "#e6f8ff", 0.35 * (1 - h / 0.48));
+      blob4(ctx, x + Math.cos(a) * d, G3 - 2 + Math.sin(a) * 2, (8 + 6 * h) * HIT, "#e6f8ff", 0.35 * (1 - h / 0.48));
     }
   } else {
     const q = h / 0.42, seed2 = Math.floor(age / 20);
@@ -58215,9 +59736,9 @@ function drawGuardWard(ctx, x, y, angle3, type, open2, runes, blockAge, time, mo
     }
     return r;
   };
-  const N = 28, outer = [], inner = [];
-  for (let i = 0; i <= N; i++) {
-    const a = angle3 - span / 2 + span * i / N, r = radius(a);
+  const N2 = 28, outer = [], inner = [];
+  for (let i = 0; i <= N2; i++) {
+    const a = angle3 - span / 2 + span * i / N2, r = radius(a);
     outer.push(ringPoint(cx, cy, r + w.band / 2, a));
     inner.push(ringPoint(cx, cy, r - w.band / 2, a));
   }
@@ -58377,7 +59898,7 @@ function earthBreaker(ctx, b, age) {
   if (age < 220) {
     const k = 1 - age / 220;
     if (uprightPassV1()) {
-      blob3(ctx, x, y - 4, 34 * k + 8, K3.main, 0.9 * k);
+      blob4(ctx, x, y - 4, 34 * k + 8, K3.main, 0.9 * k);
       if (age < 70) bloom(ctx, x, y - 6, 14, K3.core, 1 - age / 70);
     }
     if (groundPassV1()) neon(ctx, K3, 2.4 * k + 0.4, () => circle8(ctx, x, y, 10 + 10 * (1 - k)));
@@ -58390,9 +59911,9 @@ function earthBreaker(ctx, b, age) {
       });
     }
   }
-  const crack2 = easeOut(age / 260);
+  const crack3 = easeOut(age / 260);
   if (groundPassV1()) for (let i = 0; i < 9; i++) {
-    const a = i * TAU39 / 9 + rnd(i + 3) * 0.4, len = R3 * (0.5 + 0.42 * rnd(i + 11)) * crack2, x0 = x + Math.cos(a) * 9, y0 = y + Math.sin(a) * 9, x1 = x + Math.cos(a) * len, y1 = y + Math.sin(a) * len, side = rnd(i + 17) < 0.5 ? -1 : 1, mx = lerp2(x0, x1, 0.55), my = lerp2(y0, y1, 0.55), bl = len * 0.3;
+    const a = i * TAU39 / 9 + rnd(i + 3) * 0.4, len = R3 * (0.5 + 0.42 * rnd(i + 11)) * crack3, x0 = x + Math.cos(a) * 9, y0 = y + Math.sin(a) * 9, x1 = x + Math.cos(a) * len, y1 = y + Math.sin(a) * len, side = rnd(i + 17) < 0.5 ? -1 : 1, mx = lerp2(x0, x1, 0.55), my = lerp2(y0, y1, 0.55), bl = len * 0.3;
     for (const draw of [() => jag(ctx, x0, y0, x1, y1, i * 13, 2.2), () => jag(ctx, mx, my, mx + Math.cos(a + side * 0.6) * bl, my + Math.sin(a + side * 0.6) * bl, i * 29, 1.4)]) {
       withAlpha(ctx, 0.9 * fade, () => {
         ctx.strokeStyle = "#1d0f07";
@@ -58469,7 +59990,7 @@ function rallyingCry(ctx, b, age) {
   }
   const c = clamp27(age / 700), cy = y - 30 - 14 * easeOut(c), s = 0.6 + 0.5 * easeOut(age / 160), ca = age < 120 ? 1 : 1 - smooth20((age - 380) / 320);
   if (uprightPassV1() && ca > 0) {
-    blob3(ctx, x, cy, 22 * s, K3.main, 0.55 * ca);
+    blob4(ctx, x, cy, 22 * s, K3.main, 0.55 * ca);
     const badge = () => {
       ctx.beginPath();
       ctx.moveTo(x - 9 * s, cy - 9 * s);
@@ -58511,7 +60032,7 @@ function rallyingCry(ctx, b, age) {
 function counterStance(ctx, b, age) {
   if (!uprightPassV1()) return;
   const { x, y } = b, K3 = C.reprisal, f = b.dx < 0 ? -1 : 1, k = age / 480, s = easeOut(age / 160);
-  blob3(ctx, x + f * 15, y - 14, 26 * (1 - k) + 4, K3.main, 0.7 * (1 - k));
+  blob4(ctx, x + f * 15, y - 14, 26 * (1 - k) + 4, K3.main, 0.7 * (1 - k));
   neon(ctx, K3, 2.2 * (1 - k) + 0.4, () => circle8(ctx, x, y - 6, 34 - 18 * s));
   sealShape(ctx, x + f * 15, y - 14, s * (1.45 - 0.3 * k), K3, (1 - k) * 1.3);
   for (let i = 0; i < 8; i++) {
@@ -58555,7 +60076,7 @@ function drawCounterWard(ctx, x, y, facing2, ready, time, spentAge = -1) {
   const t = time / 1e3, cx = x + facing2 * 15, cy = y - 14;
   if (ready && uprightPassV1()) {
     const breathe = 1.2 + 0.07 * Math.sin(t * 7);
-    blob3(ctx, cx, cy, 18, K3.main, 0.35);
+    blob4(ctx, cx, cy, 18, K3.main, 0.35);
     sealShape(ctx, cx, cy, breathe, K3, 1);
     for (let i = 0; i < 2; i++) {
       const a = t * 4 + i * Math.PI;
@@ -58568,7 +60089,7 @@ function drawCounterWard(ctx, x, y, facing2, ready, time, spentAge = -1) {
   }, 0.8);
   if (flare >= 0 && uprightPassV1()) {
     const k = flare;
-    blob3(ctx, cx, cy, 18 + 22 * k, K3.main, 0.9 * (1 - k));
+    blob4(ctx, cx, cy, 18 + 22 * k, K3.main, 0.9 * (1 - k));
     sealShape(ctx, cx, cy, 1.2 + 0.7 * k, K3, 1 - k);
     for (let i = 0; i < 10; i++) {
       const a = i * TAU39 / 10 + 0.2, d = 8 + 30 * easeOut(k);
@@ -58605,7 +60126,7 @@ function lunge(ctx, b, age) {
   });
   if (age > 90 && age < 400) {
     const h = (age - 90) / 310;
-    blob3(ctx, tx, ty, 12 + 14 * h, K3.main, 0.8 * (1 - h));
+    blob4(ctx, tx, ty, 12 + 14 * h, K3.main, 0.8 * (1 - h));
     star4(ctx, tx, ty, 7 + 15 * easeOut(h), K3.spark, 1 - h);
     neon(ctx, K3, 1.8 * (1 - h), () => circle8(ctx, tx, ty, 4 + 16 * easeOut(h)));
   }
@@ -58660,7 +60181,7 @@ function toxicFan(ctx, b, age) {
         ctx.beginPath();
         ctx.arc(b.x + Math.cos(a) * R3, b.y - 8 + Math.sin(a) * R3 - 4 * h, 5 + 9 * h, 0, TAU39);
         ctx.fill();
-        blob3(ctx, b.x + Math.cos(a) * R3, b.y - 10 + Math.sin(a) * R3 - 6 * h, 4 + 7 * h, K3.main, 0.6 * (1 - h));
+        blob4(ctx, b.x + Math.cos(a) * R3, b.y - 10 + Math.sin(a) * R3 - 6 * h, 4 + 7 * h, K3.main, 0.6 * (1 - h));
       });
     }
   }
@@ -58708,7 +60229,7 @@ function whirlingBlades(ctx, b, age) {
       standV1(ctx, b.y + Math.sin(a) * d, () => mote(ctx, b.x + Math.cos(a) * d, cy + Math.sin(a) * d, 1.4 * (1 - q), K3.spark, (1 - q) * fade));
     }
   }
-  if (uprightPassV1() && k < 0.25) blob3(ctx, b.x, cy, 26 * (1 - k * 4), K3.main, 0.6 * (1 - k * 4));
+  if (uprightPassV1() && k < 0.25) blob4(ctx, b.x, cy, 26 * (1 - k * 4), K3.main, 0.6 * (1 - k * 4));
 }
 function firebloom(ctx, b, age) {
   bloomAt(ctx, b.x + (Number.isFinite(b.ox) ? b.ox : b.dx * 90), b.y + (Number.isFinite(b.oy) ? b.oy : b.dy * 90), b.reach ?? 50, age);
@@ -58757,7 +60278,7 @@ function bloomAt(ctx, cx, cy, R3, age) {
     standV1(ctx, cy, () => {
       starburst(ctx, cx, cy - 6, R3 * 0.55 * easeOut(q * 2), "#e8551a", 1 - q, sd);
       starburst(ctx, cx, cy - 6, R3 * 0.34 * easeOut(q * 2), "#ffc94d", 1 - q, sd + 7);
-      blob3(ctx, cx, cy - 6, R3 * 0.45, "#ffe2a0", 0.8 * (1 - q * 1.6));
+      blob4(ctx, cx, cy - 6, R3 * 0.45, "#ffe2a0", 0.8 * (1 - q * 1.6));
     });
   }
   if (age > 180) for (let i = 0; i < 14; i++) {
@@ -58834,17 +60355,17 @@ function flashfreeze(ctx, b, age) {
     const a = i * TAU39 / 14 + rnd(i + 2) * 0.3, d = R3 * (0.45 + 0.48 * rnd(i + 8)), born = d / R3 * 230, h = (age - born) / 1e3;
     if (h < 0) continue;
     const grow = h < 0.12 ? 1 + 2.7 * (h / 0.12 - 1) ** 3 + 1.7 * (h / 0.12 - 1) ** 2 : 1, f2 = 1 - smooth20((age - born - 300) / 200);
-    standV1(ctx, y + Math.sin(a) * d, () => crystal2(ctx, x + Math.cos(a) * d, y + Math.sin(a) * d, (11 + 9 * rnd(i + 4)) * grow, 3.8, Math.cos(a) * 0.35, f2));
+    standV1(ctx, y + Math.sin(a) * d, () => crystal3(ctx, x + Math.cos(a) * d, y + Math.sin(a) * d, (11 + 9 * rnd(i + 4)) * grow, 3.8, Math.cos(a) * 0.35, f2));
     if (age - born > 300 && age - born < 560) {
       const q = (age - born - 300) / 260;
       standV1(ctx, y + Math.sin(a) * d + 1, () => {
-        for (let s = 0; s < 3; s++) shard2(ctx, x + Math.cos(a) * d + (s - 1) * 4, y + Math.sin(a) * d - 10 + 22 * q * q, 1.5, q * 6 + s, 1 - q);
+        for (let s = 0; s < 3; s++) shard3(ctx, x + Math.cos(a) * d + (s - 1) * 4, y + Math.sin(a) * d - 10 + 22 * q * q, 1.5, q * 6 + s, 1 - q);
       });
     }
   }
   if (uprightPassV1() && age < 320) {
     const k = age / 320, s = 7 + 12 * easeOut(k);
-    blob3(ctx, x, y - 14, 20 * (1 - k) + 8, F.main, 0.8 * (1 - k));
+    blob4(ctx, x, y - 14, 20 * (1 - k) + 8, F.main, 0.8 * (1 - k));
     neon(ctx, K3, 1.5 * (1 - k) + 0.3, () => {
       ctx.beginPath();
       for (let i = 0; i < 6; i++) {
@@ -58859,7 +60380,7 @@ function ballLightningCast(ctx, b, age) {
   if (!uprightPassV1()) return;
   const F = CAST_COLORS.lightning, K3 = { deep: "#5b3fd6", main: F.main, spark: F.spark }, f = b.dx < 0 ? -1 : 1, hx = b.x + f * 12, hy = b.y - 16, k = age / 360, seal = easeOut(age / 90) * (1 - smooth20((age - 220) / 140));
   if (seal > 0) {
-    blob3(ctx, hx, hy, 18 * seal, F.main, 0.6 * seal);
+    blob4(ctx, hx, hy, 18 * seal, F.main, 0.6 * seal);
     neon(ctx, K3, 1.4, () => {
       ctx.beginPath();
       ctx.ellipse(hx, hy, 6 * seal, 12 * seal, 0, 0, TAU39);
@@ -58889,7 +60410,7 @@ function drawQuakeImpact(ctx, x, y, age, crit = false) {
   ctx.fill();
   if (h < 0.4) {
     const q = h / 0.4;
-    blob3(ctx, x, y - 6, (14 + 10 * q) * big, K3.main, 0.85 * (1 - q));
+    blob4(ctx, x, y - 6, (14 + 10 * q) * big, K3.main, 0.85 * (1 - q));
     neon(ctx, K3, 1.6 * (1 - q), () => {
       ctx.beginPath();
       for (let i = 0; i < 5; i++) {
@@ -58924,8 +60445,8 @@ function drawLightningOrb(ctx, o, time) {
   ctx.beginPath();
   ctx.ellipse(o.x, o.y + 2, 9, 3, 0, 0, TAU39);
   ctx.fill();
-  blob3(ctx, x, y, r * 3.2, "#7a5cff", 0.55);
-  blob3(ctx, x, y, r * 2, F.main, 0.8);
+  blob4(ctx, x, y, r * 3.2, "#7a5cff", 0.55);
+  blob4(ctx, x, y, r * 2, F.main, 0.8);
   bloom(ctx, x, y, r * 1.3, F.core, 1);
   for (let i = 0; i < 4; i++) {
     const seed2 = Math.floor(time / 45) + i * 17, a = t * 3 + i * TAU39 / 4 + (rnd(seed2) - 0.5), l = r * 2 + 8 * rnd(seed2 + 3);
@@ -60704,15 +62225,15 @@ function createLighting(canvas, { presentation = null } = {}) {
       fieldKey = site.contentHash;
     }
     const key2 = site.contentHash + "/" + light2.id;
-    let stamp5 = torchStamps.get(key2);
-    if (stamp5) return stamp5;
+    let stamp6 = torchStamps.get(key2);
+    if (stamp6) return stamp6;
     const at4 = performance.now(), field2 = floorLightField(source3, light2), radius = 240;
     fieldBuilds++;
     maxFieldNodes = Math.max(maxFieldNodes, field2.evaluated);
     maxFieldSamples = Math.max(maxFieldSamples, field2.reached);
-    stamp5 = canvas.ownerDocument.createElement("canvas");
-    stamp5.width = stamp5.height = 256;
-    const g = stamp5.getContext("2d");
+    stamp6 = canvas.ownerDocument.createElement("canvas");
+    stamp6.width = stamp6.height = 256;
+    const g = stamp6.getContext("2d");
     g.scale(256 / (radius * 2), 256 / (radius * 2));
     g.translate(radius - light2.x, radius - light2.y);
     const coarse = canvas.ownerDocument.createElement("canvas");
@@ -60744,10 +62265,10 @@ function createLighting(canvas, { presentation = null } = {}) {
     g.clip(path9);
     g.drawImage(stamps.get("torch"), light2.x - core5, light2.y - core5, core5 * 2, core5 * 2);
     g.restore();
-    torchStamps.set(key2, stamp5);
+    torchStamps.set(key2, stamp6);
     while (torchStamps.size > LIGHT_LIMITS.descriptors) torchStamps.delete(torchStamps.keys().next().value);
     worstStaticBuildMs = Math.max(worstStaticBuildMs, performance.now() - at4);
-    return stamp5;
+    return stamp6;
   }
   function lightsFor(space) {
     let page = pages.get(space.visual);
@@ -61055,18 +62576,18 @@ function rewardTokenArtV4(doc) {
 
 // src/client/wallet_display.js
 function createWalletDisplay() {
-  let value2 = "0", authority = "0", from = "0", target = "0", started = 0, running = false, initialized = false;
+  let value2 = "0", authority = "0", from = "0", target = "0", started = 0, running2 = false, initialized = false;
   function snap(a) {
     value2 = authority = from = target = a;
-    running = false;
+    running2 = false;
     initialized = true;
   }
   function read(time) {
-    if (!running) return value2;
+    if (!running2) return value2;
     const t = Math.max(0, Math.min(1, (time - started) / 420));
     if (t === 1) {
       value2 = target;
-      running = false;
+      running2 = false;
       return value2;
     }
     const scale = Math.max((from.split(".")[1] ?? "").length, (target.split(".")[1] ?? "").length);
@@ -61093,7 +62614,7 @@ function createWalletDisplay() {
     from = value2;
     target = authority;
     started = time;
-    running = value2 !== target;
+    running2 = value2 !== target;
   } });
 }
 
@@ -62350,7 +63871,7 @@ function floorTouch(c, k, x, y, t, nearWall) {
   const u = unit12(x, y, 30), px3 = x * t, py = y * t;
   if (u > (nearWall ? 0.55 : 0.18)) return;
   const v = hash21(x, y, 31);
-  const blob5 = (color28, a, rx, ry) => {
+  const blob6 = (color28, a, rx, ry) => {
     for (let i = 3; i >= 1; i--) {
       c.fillStyle = rgba2(color28, a / 3 * 1.5);
       c.beginPath();
@@ -62359,7 +63880,7 @@ function floorTouch(c, k, x, y, t, nearWall) {
     }
   };
   if (k.touch === "moss" || k.touch === "vines") {
-    blob5("#5f7d43", 0.5, 8 + v % 6, 4 + v % 3);
+    blob6("#5f7d43", 0.5, 8 + v % 6, 4 + v % 3);
     if (v % 3 === 0) {
       c.strokeStyle = "#4f7a3a";
       c.lineWidth = 1.3;
@@ -62370,7 +63891,7 @@ function floorTouch(c, k, x, y, t, nearWall) {
         c.stroke();
       }
     }
-  } else if (k.touch === "sand") blob5("#e3c48a", 0.6, 10 + v % 8, 4 + v % 3);
+  } else if (k.touch === "sand") blob6("#e3c48a", 0.6, 10 + v % 8, 4 + v % 3);
   else if (k.touch === "puddle" && k.floor !== "planks") {
     c.fillStyle = "#24404c";
     c.beginPath();
@@ -62381,7 +63902,7 @@ function floorTouch(c, k, x, y, t, nearWall) {
     c.stroke();
     c.fillStyle = "rgba(160,210,230,.35)";
     c.fillRect(px3 + t / 2 - 4, py + t / 2 - 2, 5, 1.2);
-  } else if (k.touch === "frost") blob5("#dcebf5", 0.28, 6 + v % 5, 3 + v % 2);
+  } else if (k.touch === "frost") blob6("#dcebf5", 0.28, 6 + v % 5, 3 + v % 2);
   else if (k.touch === "gravel") for (let i = 0; i < 4; i++) {
     c.fillStyle = mix28(k.a, "#000000", 0.25);
     c.fillRect(px3 + hash21(x, y, 40 + i) % t, py + hash21(x, y, 50 + i) % t, 2, 1.6);
@@ -62583,15 +64104,15 @@ function flatDecoration(c, k, d, t) {
   }
 }
 function drawSitePremiumSurfaceV1(c, space) {
-  const rows = space.visual.terrain, t = space.collision.tileSize, W3 = space.collision.width, H5 = space.collision.height, k = kitFor(space.site ?? space.functionalSite);
+  const rows = space.visual.terrain, t = space.collision.tileSize, W4 = space.collision.width, H6 = space.collision.height, k = kitFor(space.site ?? space.functionalSite);
   c.fillStyle = k.void;
-  c.fillRect(0, 0, W3 * t, H5 * t);
+  c.fillRect(0, 0, W4 * t, H6 * t);
   if (k.floor === "earth") {
     c.fillStyle = k.earth[0];
-    for (let y = 0; y < H5; y++) for (let x = 0; x < W3; x++) if (rows[y]?.[x] === "1") c.fillRect(x * t - 1, y * t - 1, t + 2, t + 2);
+    for (let y = 0; y < H6; y++) for (let x = 0; x < W4; x++) if (rows[y]?.[x] === "1") c.fillRect(x * t - 1, y * t - 1, t + 2, t + 2);
   }
-  for (let y = 0; y < H5; y++) for (let x = 0; x < W3; x++) if (rows[y]?.[x] === "1") floorTile(c, k, x, y, t);
-  for (let y = 0; y < H5; y++) for (let x = 0; x < W3; x++) {
+  for (let y = 0; y < H6; y++) for (let x = 0; x < W4; x++) if (rows[y]?.[x] === "1") floorTile(c, k, x, y, t);
+  for (let y = 0; y < H6; y++) for (let x = 0; x < W4; x++) {
     if (rows[y]?.[x] !== "1") continue;
     const px3 = x * t, py = y * t, wallN = rows[y - 1]?.[x] === "0", wallW = rows[y]?.[x - 1] === "0", wallE = rows[y]?.[x + 1] === "0";
     if (wallN) {
@@ -62618,14 +64139,14 @@ function drawSitePremiumSurfaceV1(c, space) {
     floorTouch(c, k, x, y, t, wallN || wallW || wallE);
   }
   for (const d of space.visual.decorations ?? []) flatDecoration(c, k, d, t);
-  for (let y = 0; y < H5; y++) for (let x = 0; x < W3; x++) {
+  for (let y = 0; y < H6; y++) for (let x = 0; x < W4; x++) {
     if (rows[y]?.[x] !== "0") continue;
     const touches = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => rows[y + dy]?.[x + dx] === "1");
     if (!touches) continue;
     if (rows[y + 1]?.[x] === "1") wallFace(c, k, x, y, t, rows);
     else wallCap(c, k, x, y, t, rows);
   }
-  if (k.walls === "rock") for (let y = 0; y < H5; y++) for (let x = 0; x < W3; x++) {
+  if (k.walls === "rock") for (let y = 0; y < H6; y++) for (let x = 0; x < W4; x++) {
     if (rows[y]?.[x] !== "0" || ![[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => rows[y + dy]?.[x + dx] === "1")) continue;
     boulders(c, k, x, y, t, rows);
   }
@@ -63501,36 +65022,36 @@ function siteBiomeAtV1(space, x, y) {
 var siteContextAtV1 = (ctx, space, x, y) => siteTintedContextV1(ctx, siteBiomeAtV1(space, x, y));
 
 // src/client/site_art_v3.js
-var BOX2 = Object.freeze({ cave: [-268, -218, 336, 116], crypt: [-226, -220, 230, 28], ruin: [-226, -220, 230, 28], exit: [-104, -134, 104, 44], stairs: [-72, -82, 72, 52] });
+var BOX3 = Object.freeze({ cave: [-268, -218, 336, 116], crypt: [-226, -220, 230, 28], ruin: [-226, -220, 230, 28], exit: [-104, -134, 104, 44], stairs: [-72, -82, 72, 52] });
 var ANCHOR = Object.freeze({ cave: -24, crypt: -84, ruin: -84 });
 var ENTRANCE = { cave: paintCaveEntranceV3, crypt: paintCryptEntranceV3, ruin: paintRuinEntranceV3 };
-var SCALE25 = 1.5;
-var LIMIT2 = 12;
-var sprites2 = /* @__PURE__ */ new Map();
-var painted2 = 0;
-function sprite4(key2, box2, paint) {
-  let s = sprites2.get(key2);
+var SCALE26 = 1.5;
+var LIMIT3 = 12;
+var sprites3 = /* @__PURE__ */ new Map();
+var painted3 = 0;
+function sprite5(key2, box2, paint) {
+  let s = sprites3.get(key2);
   if (s) {
-    sprites2.delete(key2);
-    sprites2.set(key2, s);
+    sprites3.delete(key2);
+    sprites3.set(key2, s);
     return s;
   }
-  const [l, t, r, b] = box2, w = Math.ceil((r - l) * SCALE25), h = Math.ceil((b - t) * SCALE25), canvas = typeof OffscreenCanvas === "function" ? new OffscreenCanvas(w, h) : globalThis.document?.createElement("canvas");
+  const [l, t, r, b] = box2, w = Math.ceil((r - l) * SCALE26), h = Math.ceil((b - t) * SCALE26), canvas = typeof OffscreenCanvas === "function" ? new OffscreenCanvas(w, h) : globalThis.document?.createElement("canvas");
   if (!canvas) return null;
   canvas.width = w;
   canvas.height = h;
   const c = canvas.getContext("2d");
-  c.scale(SCALE25, SCALE25);
+  c.scale(SCALE26, SCALE26);
   c.translate(-l, -t);
   c.lineJoin = "round";
   paint(c);
-  painted2++;
+  painted3++;
   s = { canvas, box: box2 };
-  sprites2.set(key2, s);
-  while (sprites2.size > LIMIT2) sprites2.delete(sprites2.keys().next().value);
+  sprites3.set(key2, s);
+  while (sprites3.size > LIMIT3) sprites3.delete(sprites3.keys().next().value);
   return s;
 }
-function stamp4(ctx, s, x, y, facing2 = 0) {
+function stamp5(ctx, s, x, y, facing2 = 0) {
   if (!s) return;
   const [l, t, r, b] = s.box;
   ctx.save();
@@ -63586,14 +65107,14 @@ function siteArtV3OwnsDecoration(space, d) {
 }
 var plantsOf = (art) => art?.drawNatureProp ? (c, kit2, kind, x, y, s, n) => art.drawNatureProp(c, kit2, kind, x, y, s, n) : null;
 var entranceKey = (e, art) => e.family + "/" + e.biome + "/" + e.seed + (e.family === "cave" && plantsOf(art) ? "/planted" : "");
-var entranceSprite = (e, art) => sprite4(entranceKey(e, art), BOX2[e.family], (c) => ENTRANCE[e.family](c, 0, 0, e.biome, e.seed, plantsOf(art)));
+var entranceSprite = (e, art) => sprite5(entranceKey(e, art), BOX3[e.family], (c) => ENTRANCE[e.family](c, 0, 0, e.biome, e.seed, plantsOf(art)));
 function drawSiteEntranceV3(ctx, e, art = null) {
-  stamp4(ctx, entranceSprite(e, art), e.x, e.y);
+  stamp5(ctx, entranceSprite(e, art), e.x, e.y);
 }
 var queued = /* @__PURE__ */ new Set();
 function prewarmSiteEntranceV3(e, art = null) {
   const key2 = entranceKey(e, art);
-  if (sprites2.has(key2) || queued.has(key2)) return;
+  if (sprites3.has(key2) || queued.has(key2)) return;
   queued.add(key2);
   const run = () => {
     queued.delete(key2);
@@ -63606,11 +65127,11 @@ var STAIRS = { crypt: paintStoneStairsV3, ruin: paintStoneStairsV3, cave: paintC
 var EXIT = { crypt: paintStoneExitV3, ruin: paintStoneExitV3, cave: paintCaveExitV3, fort: paintFortDoorV3 };
 function drawSiteInteriorExitV3(ctx, space, exit) {
   const site = space.site ?? space.functionalSite, k = sitePremiumKitV1(site);
-  stamp4(ctx, sprite4("exit/" + k.family + "/" + k.biome, BOX2.exit, (c) => EXIT[k.family](c, 0, 0, k, k.biome)), exit.x, exit.y);
+  stamp5(ctx, sprite5("exit/" + k.family + "/" + k.biome, BOX3.exit, (c) => EXIT[k.family](c, 0, 0, k, k.biome)), exit.x, exit.y);
 }
 function drawSiteInteriorStairsV3(ctx, space, x, y, dir, facing2 = 0) {
   const site = space.site ?? space.functionalSite, k = sitePremiumKitV1(site);
-  stamp4(ctx, sprite4("stairs/" + k.family + "/" + k.biome + "/" + dir, BOX2.stairs, (c) => STAIRS[k.family](c, 0, 0, k, k.biome, dir)), x, y, Number.isInteger(facing2) ? facing2 : 0);
+  stamp5(ctx, sprite5("stairs/" + k.family + "/" + k.biome + "/" + dir, BOX3.stairs, (c) => STAIRS[k.family](c, 0, 0, k, k.biome, dir)), x, y, Number.isInteger(facing2) ? facing2 : 0);
 }
 
 // src/client/site_environment_presentation.js
@@ -63985,7 +65506,7 @@ function createSiteEnvironment(canvas, { authoredArt = null } = {}) {
       if (sw > 0 && sh > 0) ctx.drawImage(ruinSurface, sx, sy, sw, sh, sx, sy, sw, sh);
       return { paintedTerrainTiles: space.collision.width * space.collision.height, paintedBlockers: space.visual.blockers?.length ?? 0, totalTerrainTiles: space.collision.width * space.collision.height };
     }
-    let painted3 = 0;
+    let painted4 = 0;
     for (let py = Math.max(0, Math.floor(view2.y / extent)); py <= Math.min(Math.ceil(space.collision.height / size) - 1, Math.floor((view2.y + view2.height) / extent)); py++) for (let px3 = Math.max(0, Math.floor(view2.x / extent)); px3 <= Math.min(Math.ceil(space.collision.width / size) - 1, Math.floor((view2.x + view2.width) / extent)); px3++) {
       const key2 = px3 + "," + py;
       let page = pages.get(key2);
@@ -64002,7 +65523,7 @@ function createSiteEnvironment(canvas, { authoredArt = null } = {}) {
       pages.set(key2, page);
       while (pages.size > 24) pages.delete(pages.keys().next().value);
       ctx.drawImage(page, px3 * extent, py * extent);
-      painted3 += size * size;
+      painted4 += size * size;
     }
     if (site.siteKind === "procedural-fort") {
       for (const stair of space.exits?.filter((e) => ["up", "down"].includes(e.siteAction?.direction)) ?? []) if (!authoredArt?.fort?.interiorStair?.(ctx, space, stair)) drawSiteInteriorStairsV3(ctx, space, stair.x, stair.y, stair.siteAction.direction, stair.stairFacing);
@@ -64021,7 +65542,7 @@ function createSiteEnvironment(canvas, { authoredArt = null } = {}) {
       ctx.fillText("Exit", door.x, door.y + 32);
       ctx.textAlign = "left";
     }
-    return { paintedTerrainTiles: painted3, paintedBlockers: v.blockers?.length ?? 0, totalTerrainTiles: space.collision.width * space.collision.height };
+    return { paintedTerrainTiles: painted4, paintedBlockers: v.blockers?.length ?? 0, totalTerrainTiles: space.collision.width * space.collision.height };
   }, depthItems(space, view2) {
     const site = space.site ?? space.functionalSite;
     if (!["woodland-fort", "procedural-fort", "woodland-cave", "woodland-ruin", "procedural-ruin", "procedural-crypt"].includes(site?.siteKind)) return [];
@@ -64843,7 +66364,7 @@ function outside2(c, loops, dy, x, y, t) {
 function drawTracedWater(c, x, y, t, biome, seed2, offset2, at4, waterTile) {
   const mixed = biome === "w" || biome === "a" || !WATER2[biome], loops = mixed ? tracedShore(at4, x, y, t, offset2, seed2, 4, 80) : tracedShore(at4, x, y, t, offset2, seed2), open2 = !loops.length;
   if (open2 && !waterTile) return false;
-  const W3 = WATER2[biome] ?? WATER2.w, px3 = x * t, py = y * t, n = terrainHash(x + offset2.x / t, y + offset2.y / t, seed2 + 1723), k = WALL;
+  const W4 = WATER2[biome] ?? WATER2.w, px3 = x * t, py = y * t, n = terrainHash(x + offset2.x / t, y + offset2.y / t, seed2 + 1723), k = WALL;
   c.save();
   c.beginPath();
   c.rect(px3, py, t, t);
@@ -64859,28 +66380,28 @@ function drawTracedWater(c, x, y, t, biome, seed2, offset2, at4, waterTile) {
     c.beginPath();
     c.rect(px3, py, t, t);
   }
-  if (W3.glow && !open2) {
+  if (W4.glow && !open2) {
     trace3(c, loops);
-    c.strokeStyle = W3.glow;
+    c.strokeStyle = W4.glow;
     for (const lw of [40, 26, 14]) {
       c.lineWidth = lw;
       c.stroke();
     }
   }
-  if (W3.rim && !open2) {
+  if (W4.rim && !open2) {
     trace3(c, loops);
-    c.strokeStyle = tone4(W3.rim, -0.1);
+    c.strokeStyle = tone4(W4.rim, -0.1);
     c.lineWidth = 30;
     c.stroke();
-    c.strokeStyle = W3.rim;
+    c.strokeStyle = W4.rim;
     c.lineWidth = 27;
     c.stroke();
     trace3(c, loops, -1, -2);
-    c.strokeStyle = tone4(W3.rim, 0.12);
+    c.strokeStyle = tone4(W4.rim, 0.12);
     c.lineWidth = 22;
     c.stroke();
     trace3(c, loops);
-    c.strokeStyle = tone4(W3.rim, -0.14);
+    c.strokeStyle = tone4(W4.rim, -0.14);
     c.lineWidth = 13;
     c.stroke();
   }
@@ -64892,7 +66413,7 @@ function drawTracedWater(c, x, y, t, biome, seed2, offset2, at4, waterTile) {
   }
   c.save();
   c.clip();
-  if (W3.kind === "lava") {
+  if (W4.kind === "lava") {
     c.fillStyle = "#ffc246";
     c.fillRect(px3, py, t, t);
     if (!open2) {
@@ -64930,14 +66451,14 @@ function drawTracedWater(c, x, y, t, biome, seed2, offset2, at4, waterTile) {
       c.arc(px3 + 6 + (n >>> 4) % 20, py + 6 + (n >>> 10) % 20, 1.6 + (n >>> 16) % 2, 0, Math.PI * 2);
       c.stroke();
     }
-  } else if (W3.kind === "ice") {
-    c.fillStyle = W3.deep;
+  } else if (W4.kind === "ice") {
+    c.fillStyle = W4.deep;
     c.fillRect(px3, py, t, t);
     if (!open2) {
-      c.strokeStyle = mix30(W3.shallow, W3.deep, 0.5);
+      c.strokeStyle = mix30(W4.shallow, W4.deep, 0.5);
       c.lineWidth = 40;
       c.stroke();
-      c.strokeStyle = W3.shallow;
+      c.strokeStyle = W4.shallow;
       c.lineWidth = 18;
       c.stroke();
     }
@@ -64977,22 +66498,22 @@ function drawTracedWater(c, x, y, t, biome, seed2, offset2, at4, waterTile) {
       c.stroke();
     }
   } else {
-    c.fillStyle = mix30(W3.deep, "#06141c", 0.2);
+    c.fillStyle = mix30(W4.deep, "#06141c", 0.2);
     c.fillRect(px3, py, t, t);
     if (!open2) {
-      c.strokeStyle = W3.deep;
+      c.strokeStyle = W4.deep;
       c.lineWidth = 48;
       c.stroke();
-      c.strokeStyle = mix30(W3.shallow, W3.deep, 0.5);
+      c.strokeStyle = mix30(W4.shallow, W4.deep, 0.5);
       c.lineWidth = 32;
       c.stroke();
-      c.strokeStyle = W3.shallow;
+      c.strokeStyle = W4.shallow;
       c.lineWidth = 15;
       c.stroke();
     }
     if (waterTile && n % 2 === 0) {
       c.globalAlpha = 0.25;
-      c.fillStyle = mix30(W3.shallow, "#ffffff", 0.25);
+      c.fillStyle = mix30(W4.shallow, "#ffffff", 0.25);
       c.beginPath();
       c.ellipse(px3 + 16 + (n >>> 4) % 5 - 2, py + 8 + (n >>> 8) % 16, 6 + (n >>> 12) % 6, 1.6, 0, 0, Math.PI * 2);
       c.fill();
@@ -65001,29 +66522,29 @@ function drawTracedWater(c, x, y, t, biome, seed2, offset2, at4, waterTile) {
   }
   if (!open2) {
     trace3(c, loops, 0, k);
-    c.strokeStyle = W3.kind === "lava" ? "rgba(40,10,0,.45)" : "rgba(0,18,28,.3)";
+    c.strokeStyle = W4.kind === "lava" ? "rgba(40,10,0,.45)" : "rgba(0,18,28,.3)";
     c.lineWidth = 10;
     c.stroke();
     outside2(c, loops, k, x, y, t);
-    c.fillStyle = W3.bank;
+    c.fillStyle = W4.bank;
     c.fill("evenodd");
     trace3(c, loops, 0, k * 0.62);
-    c.strokeStyle = tone4(W3.bank, -0.25);
+    c.strokeStyle = tone4(W4.bank, -0.25);
     c.lineWidth = 1;
     c.stroke();
     outside2(c, loops, k * 0.34, x, y, t);
-    c.fillStyle = W3.lip;
+    c.fillStyle = W4.lip;
     c.fill("evenodd");
     trace3(c, loops, 0, k + 1.2);
-    c.strokeStyle = W3.foam;
+    c.strokeStyle = W4.foam;
     c.globalAlpha = 0.85;
     c.lineWidth = 1.7;
     c.stroke();
     c.globalAlpha = 1;
   }
-  if (waterTile && W3.kind !== "ice" && n % 3 !== 0) {
+  if (waterTile && W4.kind !== "ice" && n % 3 !== 0) {
     const rx = px3 + 10 + (n >>> 7) % 12, ry = py + 9 + (n >>> 11) % 14, l = 3 + (n >>> 15) % 6;
-    c.strokeStyle = W3.foam;
+    c.strokeStyle = W4.foam;
     c.globalAlpha = 0.6;
     c.lineWidth = 1.2;
     c.beginPath();
@@ -65032,7 +66553,7 @@ function drawTracedWater(c, x, y, t, biome, seed2, offset2, at4, waterTile) {
     c.stroke();
     c.globalAlpha = 1;
   }
-  if (waterTile && W3.kind !== "lava" && n % 4 === 3) {
+  if (waterTile && W4.kind !== "lava" && n % 4 === 3) {
     const sx = px3 + 8 + (n >>> 5) % 14, sy = py + 8 + (n >>> 10) % 14;
     c.fillStyle = "#ffffff";
     c.beginPath();
@@ -65320,17 +66841,17 @@ function pileRipple(c, x, y, w) {
   c.stroke();
 }
 function bridgeH(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
-  const B3 = BRIDGE[style], P6 = ramp4(B3.deck, "#1d120a", "#ffe7b8"), Pb = ramp4(B3.beam ?? B3.curb, "#120a04", "#ffd9a0"), Pp = ramp4(B3.post ?? B3.curb ?? B3.wall, "#140c06", "#ffe0a8"), R3 = rng5(seed2), H5 = wid * T6, L = len * T6;
+  const B3 = BRIDGE[style], P6 = ramp4(B3.deck, "#1d120a", "#ffe7b8"), Pb = ramp4(B3.beam ?? B3.curb, "#120a04", "#ffd9a0"), Pp = ramp4(B3.post ?? B3.curb ?? B3.wall, "#140c06", "#ffe0a8"), R3 = rng5(seed2), H6 = wid * T6, L = len * T6;
   const tiles = parts ?? [...Array(len).keys()].map((i) => [i === 0 ? "a" : i === len - 1 ? "b" : "m", x + i * T6]);
   const span = [Math.min(...tiles.map((t) => t[1])), Math.max(...tiles.map((t) => t[1])) + T6];
   c.save();
   c.lineJoin = "round";
   c.lineCap = "round";
   c.fillStyle = "rgba(6,14,22,.26)";
-  for (const [k, tx] of tiles) c.fillRect(tx + 3, y + 5, T6, H5);
+  for (const [k, tx] of tiles) c.fillRect(tx + 3, y + 5, T6, H6);
   const faceH = B3.stone || B3.basalt ? 13 : 6;
   for (const [k, tx] of tiles) {
-    const fy = y + H5;
+    const fy = y + H6;
     if (B3.stone || B3.basalt) {
       const Pw = ramp4(B3.wall, "#14181e", "#fff0d0");
       prop3(c, [[rect4(tx, fy, T6, faceH), Pw.m]], 1.2);
@@ -65380,15 +66901,15 @@ function bridgeH(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
     }
   }
   const top = new Path2D();
-  for (const [k, tx] of tiles) top.rect(tx, y, T6, H5);
+  for (const [k, tx] of tiles) top.rect(tx, y, T6, H6);
   prop3(c, [[top, P6.m]], 1.3);
   c.save();
   c.clip(top);
   for (const [k, tx] of tiles) {
-    if (B3.stone) flags(c, tx, y, T6, H5, P6, R3);
+    if (B3.stone) flags(c, tx, y, T6, H6, P6, R3);
     else if (B3.basalt) {
       const Ph = ramp4(B3.deck, "#0a0808", "#ffd2a0");
-      for (let j = 0; j < Math.ceil(H5 / 9) + 1; j++) for (let i = 0; i < 5; i++) {
+      for (let j = 0; j < Math.ceil(H6 / 9) + 1; j++) for (let i = 0; i < 5; i++) {
         const cx = tx + i * 7.2 + j % 2 * 3.6, cy = y + j * 8.2, q = poly11([...Array(6)].map((_, a) => [cx + Math.cos(a * TAU70 / 6) * 4.3, cy + Math.sin(a * TAU70 / 6) * 3.9]));
         c.fillStyle = tone5(Ph.m, (R3() - 0.5) * 0.16);
         c.fill(q);
@@ -65400,9 +66921,9 @@ function bridgeH(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
         c.fillStyle = tone5(Ph.m, (R3() - 0.5) * 0.1);
         c.fill(shift3(q, 0.4, 0.5));
       }
-    } else planks(c, tx, y, T6, H5, true, P6, R3, B3.rope_ ? 5.3 : 6.4, B3.rope_ ? "#2a3a40" : null);
+    } else planks(c, tx, y, T6, H6, true, P6, R3, B3.rope_ ? 5.3 : 6.4, B3.rope_ ? "#2a3a40" : null);
     if (B3.moss) for (let i = 0; i < 3; i++) {
-      const mx = tx + R3() * T6, my = y + R3() * H5;
+      const mx = tx + R3() * T6, my = y + R3() * H6;
       c.fillStyle = "rgba(110,150,70,.55)";
       c.beginPath();
       c.ellipse(mx, my, 3 + R3() * 3, 1.6 + R3(), 0, 0, TAU70);
@@ -65412,7 +66933,7 @@ function bridgeH(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
   c.restore();
   if (B3.stone || B3.basalt) {
     const Pw = ramp4(B3.wall, "#14181e", "#fff0d0");
-    for (const [ey, face3] of [[y, true], [y + H5 - 6, true]]) {
+    for (const [ey, face3] of [[y, true], [y + H6 - 6, true]]) {
       for (const [k, tx] of tiles) {
         const wy = ey - 5;
         prop3(c, [[rect4(tx, wy, T6, 11), Pw.m]], 1.2);
@@ -65462,14 +66983,14 @@ function bridgeH(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
       }
     }
   } else {
-    for (const ey of [y, y + H5 - 4]) {
+    for (const ey of [y, y + H6 - 4]) {
       const q = new Path2D();
       for (const [k, tx] of tiles) q.rect(tx, ey, T6, 4);
       prop3(c, [[q, Pb.m]], 1.1);
       c.fillStyle = Pb.l;
       for (const [k, tx] of tiles) c.fillRect(tx, ey, T6, 1.2);
     }
-    for (const ey of [y + 2, y + H5 - 2]) {
+    for (const ey of [y + 2, y + H6 - 2]) {
       const xs = [];
       for (const [k, tx] of tiles) {
         xs.push(tx);
@@ -65535,42 +67056,42 @@ function bridgeH(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
       }
     }
     if (B3.snow) {
-      for (const [k, tx] of tiles) for (const ey of [y + 5.5, y + H5 - 6]) drift2(c, [[tx + T6 * 0.3, ey, T6 * 0.32, 1.7], [tx + T6 * 0.72, ey + 0.4, T6 * 0.3, 1.5]], 0.7);
+      for (const [k, tx] of tiles) for (const ey of [y + 5.5, y + H6 - 6]) drift2(c, [[tx + T6 * 0.3, ey, T6 * 0.32, 1.7], [tx + T6 * 0.72, ey + 0.4, T6 * 0.3, 1.5]], 0.7);
     }
   }
   c.restore();
 }
 function bridgeV(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
-  const B3 = BRIDGE[style], P6 = ramp4(B3.deck, "#1d120a", "#ffe7b8"), Pb = ramp4(B3.beam ?? B3.curb, "#120a04", "#ffd9a0"), Pp = ramp4(B3.post ?? B3.curb ?? B3.wall, "#140c06", "#ffe0a8"), R3 = rng5(seed2), W3 = wid * T6;
+  const B3 = BRIDGE[style], P6 = ramp4(B3.deck, "#1d120a", "#ffe7b8"), Pb = ramp4(B3.beam ?? B3.curb, "#120a04", "#ffd9a0"), Pp = ramp4(B3.post ?? B3.curb ?? B3.wall, "#140c06", "#ffe0a8"), R3 = rng5(seed2), W4 = wid * T6;
   const tiles = parts ?? [...Array(len).keys()].map((i) => [i === 0 ? "a" : i === len - 1 ? "b" : "m", y + i * T6]);
   c.save();
   c.lineJoin = "round";
   c.lineCap = "round";
   c.fillStyle = "rgba(6,14,22,.26)";
-  for (const [k, ty] of tiles) c.fillRect(x + 4, ty + 4, W3, T6);
+  for (const [k, ty] of tiles) c.fillRect(x + 4, ty + 4, W4, T6);
   if (!B3.stone) {
-    for (const [k, ty] of tiles) if (k === "m") for (const ex of [x - 3, x + W3 - 1]) {
+    for (const [k, ty] of tiles) if (k === "m") for (const ex of [x - 3, x + W4 - 1]) {
       prop3(c, [[rect4(ex, ty + T6 / 2 - 2, 4, 4), Pb.d]], 1);
     }
   }
   const top = new Path2D();
-  for (const [k, ty] of tiles) top.rect(x, ty, W3, T6);
+  for (const [k, ty] of tiles) top.rect(x, ty, W4, T6);
   prop3(c, [[top, P6.m]], 1.3);
   c.save();
   c.clip(top);
   for (const [k, ty] of tiles) {
-    if (B3.stone) flags(c, x, ty, W3, T6, P6, R3);
-    else planks(c, x, ty, W3, T6, false, P6, R3);
+    if (B3.stone) flags(c, x, ty, W4, T6, P6, R3);
+    else planks(c, x, ty, W4, T6, false, P6, R3);
   }
   c.restore();
   for (const [k, ty] of tiles) if (k === "b") {
     const fy = ty + T6, st = ramp4(B3.stone ? B3.wall : B3.foot, "#10161e", "#fff4dc");
-    prop3(c, [[rect4(x, fy, W3, B3.stone ? 9 : 6), st.m]], 1.2);
-    masonry(c, x, fy, W3, B3.stone ? 9 : 6, st, R3);
+    prop3(c, [[rect4(x, fy, W4, B3.stone ? 9 : 6), st.m]], 1.2);
+    masonry(c, x, fy, W4, B3.stone ? 9 : 6, st, R3);
   }
   if (B3.stone) {
     const Pw = ramp4(B3.wall, "#14181e", "#fff0d0");
-    for (const ex of [x, x + W3 - 6]) for (const [k, ty] of tiles) {
+    for (const ex of [x, x + W4 - 6]) for (const [k, ty] of tiles) {
       const q = rect4(ex, ty - 6, 6, T6 + (k === "b" ? 6 : 0));
       prop3(c, [[q, Pw.l]], 1.1);
       c.fillStyle = Pw.h;
@@ -65589,14 +67110,14 @@ function bridgeV(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
       }
     }
   } else {
-    for (const ex of [x, x + W3 - 4]) {
+    for (const ex of [x, x + W4 - 4]) {
       const q = new Path2D();
       for (const [k, ty] of tiles) q.rect(ex, ty, 4, T6);
       prop3(c, [[q, Pb.m]], 1.1);
       c.fillStyle = Pb.l;
       for (const [k, ty] of tiles) c.fillRect(ex, ty, 1.2, T6);
     }
-    for (const ex of [x + 2, x + W3 - 2]) {
+    for (const ex of [x + 2, x + W4 - 2]) {
       for (const [k, ty] of tiles) {
         const q = rect4(ex - 1.1, ty - 10, 2.2, T6);
         prop3(c, [[q, Pp.l]], 0.9);
@@ -65747,7 +67268,7 @@ var shadow5 = (ctx, x, y, rx, ry) => {
   ctx.ellipse(x, y, rx, ry, 0, 0, TAU71);
   ctx.fill();
 };
-var beam2 = (ctx, x, y, w, h) => {
+var beam3 = (ctx, x, y, w, h) => {
   ctx.fillStyle = WOOD_DARK3;
   ctx.fillRect(x, y, w, h);
   ctx.fillStyle = WOOD_LIGHT3;
@@ -65785,7 +67306,7 @@ function drawFortBlockerD10(ctx, space, b, t) {
       const west = /west/.test(b.detail ?? ""), inside4 = west ? x + w - 9 : x + 4, outer = west ? x + 4 : x + w - 8;
       ctx.fillStyle = west ? "#758177" : "#4c5851";
       poly12(ctx, west ? [[x + w - 15, y + 8], [x + w - 4, y + 5], [x + w - 4, y + h - 13], [x + w - 15, y + h - 8]] : [[x + 4, y + 5], [x + 15, y + 8], [x + 15, y + h - 8], [x + 4, y + h - 13]], ctx.fillStyle, "#344038", 1);
-      beam2(ctx, inside4, y + 8, 6, h - 22);
+      beam3(ctx, inside4, y + 8, 6, h - 22);
       ctx.strokeStyle = "#b6bea8";
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -65793,7 +67314,7 @@ function drawFortBlockerD10(ctx, space, b, t) {
       ctx.lineTo(outer, y + h - 14);
       ctx.stroke();
     } else {
-      beam2(ctx, x + 8, y + 7, w - 16, 7);
+      beam3(ctx, x + 8, y + 7, w - 16, 7);
       ctx.fillStyle = "#9da691";
       ctx.fillRect(x + 7, y + 4, w - 14, 3);
     }
@@ -65825,7 +67346,7 @@ function drawFortDecorationShadowD10(ctx, d, t) {
   if (dims) shadow5(ctx, x, dims[2], dims[0], dims[1]);
 }
 function standard(ctx, x, y, color28, flip = 1) {
-  beam2(ctx, x - 3, y - 27, 6, 55);
+  beam3(ctx, x - 3, y - 27, 6, 55);
   poly12(ctx, [[x + flip * 3, y - 22], [x + flip * 26, y - 16], [x + flip * 21, y + 12], [x + flip * 3, y + 5]], color28, "#d1a64f", 1.5);
 }
 function keep(ctx, d, t) {
@@ -65845,14 +67366,14 @@ function keep(ctx, d, t) {
     ctx.lineTo(r - 14 - (yy - ridgeY) * 2.25, yy);
     ctx.stroke();
   }
-  beam2(ctx, cx - 7, ridgeY - 2, 14, 111);
-  beam2(ctx, l + 21, eaveY + 13, r - l - 42, 8);
+  beam3(ctx, cx - 7, ridgeY - 2, 14, 111);
+  beam3(ctx, l + 21, eaveY + 13, r - l - 42, 8);
   const gy = front2 - 92;
   poly12(ctx, [[cx - 58, gy + 34], [cx, gy - 22], [cx + 58, gy + 34], [cx + 50, front2 - 4], [cx - 50, front2 - 4]], "#566259", OUT3, 3);
   poly12(ctx, [[cx - 66, gy + 35], [cx, gy - 35], [cx + 66, gy + 35], [cx + 53, gy + 47], [cx, gy - 17], [cx - 53, gy + 47]], "#2b3835", OUT3, 3);
-  beam2(ctx, cx - 47, gy + 38, 8, front2 - gy - 43);
-  beam2(ctx, cx + 39, gy + 38, 8, front2 - gy - 43);
-  beam2(ctx, cx - 43, gy + 44, 86, 7);
+  beam3(ctx, cx - 47, gy + 38, 8, front2 - gy - 43);
+  beam3(ctx, cx + 39, gy + 38, 8, front2 - gy - 43);
+  beam3(ctx, cx - 43, gy + 44, 86, 7);
   standard(ctx, l + 93, front2 - 62, RED3, 1);
   standard(ctx, r - 93, front2 - 62, BLUE2, -1);
   masonry2(ctx, r - 88, back + 12, 30, 61, 857);
@@ -65865,14 +67386,14 @@ function gatehouse(ctx, d, t) {
     const cx = x + side * 104, l = cx - 62;
     masonry2(ctx, l, y - 35, 124, 75, 901 + side);
     poly12(ctx, [[l - 7, y - 35], [cx, y - 67], [l + 131, y - 35], [l + 118, y - 15], [cx, y - 45], [l + 7, y - 15]], side < 0 ? "#354641" : "#273733", OUT3, 3);
-    beam2(ctx, l + 12, y - 10, 8, 46);
-    beam2(ctx, l + 104, y - 10, 8, 46);
+    beam3(ctx, l + 12, y - 10, 8, 46);
+    beam3(ctx, l + 104, y - 10, 8, 46);
     standard(ctx, cx - side * 43, y - 3, side < 0 ? RED3 : BLUE2, -side);
   }
-  beam2(ctx, x - 59, y - 38, 118, 15);
+  beam3(ctx, x - 59, y - 38, 118, 15);
   ctx.fillStyle = "#b2753d";
   ctx.fillRect(x - 51, y - 34, 102, 4);
-  for (const px3 of [-48, -22, 22, 48]) beam2(ctx, x + px3 - 3, y - 30, 6, 53);
+  for (const px3 of [-48, -22, 22, 48]) beam3(ctx, x + px3 - 3, y - 30, 6, 53);
 }
 function watchtower(ctx, d, t) {
   const x = d.x * t, y = d.y * t, east = d.variant % 2 === 1, south = d.variant >= 2;
@@ -65889,8 +67410,8 @@ function watchtower(ctx, d, t) {
     ctx.lineWidth = 2;
     ctx.strokeRect(x + dx - 7, y - 34, 14, 16);
   }
-  beam2(ctx, x - 70, y - 6, 140, 9);
-  for (const dx of [-65, 57]) beam2(ctx, x + dx, y - 8, 8, 60);
+  beam3(ctx, x - 70, y - 6, 140, 9);
+  for (const dx of [-65, 57]) beam3(ctx, x + dx, y - 8, 8, 60);
   poly12(ctx, [[x - 79, y - 30], [x, y - 70], [x + 79, y - 30], [x + 64, y - 8], [x, y - 44], [x - 64, y - 8]], east ? "#293936" : "#344540", OUT3, 3);
   poly12(ctx, [[x - 70, y - 29], [x, y - 62], [x, y - 45], [x - 60, y - 16]], "#52645a", OUT3, 1.5);
   poly12(ctx, [[x, y - 62], [x + 70, y - 29], [x + 60, y - 16], [x, y - 45]], "#263431", OUT3, 1.5);
@@ -65902,9 +67423,9 @@ function watchtower(ctx, d, t) {
 function tent(ctx, d, t) {
   const x = d.x * t, y = d.y * t, w = d.kind === "fort-lean-to" ? 78 : 94, h = d.kind === "fort-lean-to" ? 45 : 58;
   if (d.kind === "fort-lean-to") {
-    beam2(ctx, x - w / 2, y + 12, w, 6);
-    beam2(ctx, x - w / 2, y - h + 10, 5, h);
-    beam2(ctx, x + w / 2 - 5, y - h + 10, 5, h);
+    beam3(ctx, x - w / 2, y + 12, w, 6);
+    beam3(ctx, x - w / 2, y - h + 10, 5, h);
+    beam3(ctx, x + w / 2 - 5, y - h + 10, 5, h);
     poly12(ctx, [[x - w / 2 - 5, y - h + 12], [x + w / 2 + 5, y - h + 12], [x + w / 2 - 4, y + 8], [x - w / 2 + 7, y + 1]], "#526346", OUT3, 2);
     poly12(ctx, [[x - w / 2, y - h + 14], [x, y - h + 14], [x - 4, y + 1], [x - w / 2 + 8, y]], "#74815a", OUT3, 1);
   } else {
@@ -65918,7 +67439,7 @@ function tent(ctx, d, t) {
     poly12(ctx, [[x - 36, front2], [x, ridge + 8], [x + 36, front2]], "#74603f", OUT3, 2);
     poly12(ctx, [[x, ridge + 10], [x - 15, front2], [x, front2]], "#201914", OUT3, 1.5);
     poly12(ctx, [[x, ridge + 10], [x + 15, front2], [x, front2]], "#9d8457", OUT3, 1.5);
-    beam2(ctx, x - 3, ridge - 5, 6, 67);
+    beam3(ctx, x - 3, ridge - 5, 6, 67);
     ctx.strokeStyle = "#d5bd83";
     ctx.lineWidth = 1.5;
     for (const side of [-1, 1]) {
@@ -65955,7 +67476,7 @@ function prop4(ctx, d, t) {
     ctx.fillRect(x - 32, y - 12, 50, 19);
     ctx.fillStyle = WOOD_LIGHT3;
     ctx.fillRect(x - 29, y - 9, 44, 5);
-    beam2(ctx, x + 21, y - 2, 35, 5);
+    beam3(ctx, x + 21, y - 2, 35, 5);
     for (const dx of [-25, 13]) {
       ctx.fillStyle = "#2b2821";
       ctx.beginPath();
@@ -65975,9 +67496,9 @@ function prop4(ctx, d, t) {
     ctx.beginPath();
     ctx.ellipse(x, y - 4, 22, 8, 0, 0, TAU71);
     ctx.fill();
-    beam2(ctx, x - 28, y - 35, 6, 36);
-    beam2(ctx, x + 22, y - 35, 6, 36);
-    beam2(ctx, x - 31, y - 40, 62, 7);
+    beam3(ctx, x - 28, y - 35, 6, 36);
+    beam3(ctx, x + 22, y - 35, 6, 36);
+    beam3(ctx, x - 31, y - 40, 62, 7);
     ctx.fillStyle = WOOD_LIGHT3;
     ctx.beginPath();
     ctx.arc(x, y - 20, 7, 0, TAU71);
@@ -66034,10 +67555,10 @@ function prop4(ctx, d, t) {
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(lean);
-    beam2(ctx, -3, -2, 6, 31);
-    beam2(ctx, -25, 23, 50, 7);
-    beam2(ctx, -22, 8, 6, 25);
-    beam2(ctx, 16, 8, 6, 25);
+    beam3(ctx, -3, -2, 6, 31);
+    beam3(ctx, -25, 23, 50, 7);
+    beam3(ctx, -22, 8, 6, 25);
+    beam3(ctx, 16, 8, 6, 25);
     ctx.strokeStyle = WOOD_DARK3;
     ctx.lineWidth = 5;
     ctx.beginPath();
@@ -66158,7 +67679,7 @@ function prop4(ctx, d, t) {
     ctx.fillRect(x - 30, y - 9, 60, 9);
     ctx.fillStyle = WOOD_LIGHT3;
     ctx.fillRect(x - 27, y - 7, 54, 3);
-    for (const dx of [-27, 22]) beam2(ctx, x + dx, y + 3, 6, 17);
+    for (const dx of [-27, 22]) beam3(ctx, x + dx, y + 3, 6, 17);
     return;
   }
   if (k === "fort-shrub") {
@@ -68625,7 +70146,8 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
       ...treasuryBossEffectLights(model, model.tick),
       ...brimstoneEffectLights(brimstoneView, model.tick),
       ...biomeBossReleaseLightsV1(visualModel, model.tick),
-      ...woodlandPilotEventLights(model, viewport, time)
+      ...woodlandPilotEventLights(model, viewport, time),
+      ...plannedEventLightsV1(model, viewport, time)
     ];
     skillLights.wash(ctx, glowing, viewport);
     drawDepthItems(ctx, depthItems2, unified ? (ordered) => glowMasks.plan(ctx, ordered, [...model.space.visual ? lighting.glows(model.space, lightView) : [], ...dynamicLights.portalCores(model, lightView, frame), ...groundItems.floorGlows(), ...potionDrops.floorGlows(time, viewport, frame)], (item, g) => {
@@ -69335,16 +70857,16 @@ function createSiteNavigatorD12_4C({ document: doc, port, enabled = false, relea
 
 // src/client/space_preparation_gate.js
 function createSpacePreparationGate(initialSpace) {
-  let space = initialSpace, phase = "ready", painted3 = false;
+  let space = initialSpace, phase = "ready", painted4 = false;
   function observe(next, pending = false) {
     if (pending) {
       space = next;
       phase = "waiting";
-      painted3 = false;
+      painted4 = false;
     } else if (next !== space || phase === "waiting") {
       space = next;
       phase = "loading";
-      painted3 = false;
+      painted4 = false;
     }
     return phase === "ready";
   }
@@ -69354,8 +70876,8 @@ function createSpacePreparationGate(initialSpace) {
     frame() {
       if (phase === "waiting") return "show-loading";
       if (phase === "loading") {
-        if (!painted3) {
-          painted3 = true;
+        if (!painted4) {
+          painted4 = true;
           return "show-loading";
         }
         return "prepare";
@@ -69374,7 +70896,7 @@ function createSpacePreparationGate(initialSpace) {
 
 // src/client/playable_client.js
 var progressionText = (v) => formatLarge(integerWire(v));
-function mountPlayableClient({ port, environment, nextCommandToken, capabilities, performanceProbe = null, environmentArt = null, readRuntimeDiagnostics = () => null, readSaveStatus = () => null, evidenceMode = false, evidenceIntervalMs = 0, developerMode = false, actorCollisionProbe = null, heroSlots = null }) {
+function mountPlayableClient({ port, environment, nextCommandToken, capabilities, performanceProbe = null, environmentArt = null, readRuntimeDiagnostics = () => null, readSaveStatus = () => null, evidenceMode = false, evidenceIntervalMs = 0, developerMode = false, actorCollisionProbe = null, heroSlots = null, startingHero = null }) {
   const doc = environment.document, canvas = doc.getElementById("world-view"), status2 = doc.getElementById("world-status");
   const levelUpCelebration = createLevelUpCelebrationV4(doc);
   if (new URL(environment.location.href).searchParams.get("previewLevelUp") === "1") environment.setTimeout(() => {
@@ -69514,7 +71036,7 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
   }, onClose: restoreGameplayFocus, openHeroes: heroSlots ? () => inventory.openHeroes() : null, otherHeroes: () => {
     const l = heroSlots?.list();
     return Boolean(l?.heroes.some((h) => h.slot !== l.active));
-  } });
+  }, startingHero });
   skillBar = createSkillWheelV1({ document: doc, environment, readModel, adapter, isBlocked: gameplayInputBlocked, openClassPicker: () => {
     subweaponHud?.clear();
     input.clear();
@@ -69666,8 +71188,8 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
     primary?.refresh(model);
     const participant = model.playersById[model.localPlayerId], progress8 = participant.progression;
     const levelNotice = doc.getElementById("world-level-up");
-    const painted3 = performanceProbe ? performanceProbe.measure("rendererTotal", () => renderer.render(model, time, input, authorityDeadline)) : renderer.render(model, time, input, authorityDeadline);
-    const displayProgress = painted3.xpDisplay ?? progress8;
+    const painted4 = performanceProbe ? performanceProbe.measure("rendererTotal", () => renderer.render(model, time, input, authorityDeadline)) : renderer.render(model, time, input, authorityDeadline);
+    const displayProgress = painted4.xpDisplay ?? progress8;
     if (displayProgress) {
       const identity2 = `${model.context.campaignId}/${model.localPlayerId}`;
       if (observedProgression?.identity === identity2 && progressionBigInt(displayProgress.level) > progressionBigInt(observedProgression.level)) {
@@ -69713,7 +71235,7 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
       if (hpBar) hpBar.value = 100 * hpRatio;
       vitalsHud.update(hpData);
       vitalsHud.barrier(model.subweapon);
-      setText(doc.getElementById("world-gold"), formatAmount(painted3.walletDisplay ?? model.inventory?.gold ?? "0"));
+      setText(doc.getElementById("world-gold"), formatAmount(painted4.walletDisplay ?? model.inventory?.gold ?? "0"));
       const health = doc.getElementById("world-health");
       if (health) setText(health, `HP ${formatLarge(hero.hpExact ?? String(Math.round(hero.hp.m * 10 ** hero.hp.e)))} / ${formatLarge(hero.maxHpExact ?? String(Math.round(hero.maxHp.m * 10 ** hero.maxHp.e)))}`);
       setText(doc.getElementById("world-metrics"), (model.primary ? `HP ${formatLarge(hero.hpExact ?? String(Math.round(hero.hp.m * 10 ** hero.hp.e)))} / ${formatLarge(hero.maxHpExact ?? String(Math.round(hero.maxHp.m * 10 ** hero.maxHp.e)))} \xB7 ` : "") + (model.space.visual ? `${model.space.settlementSafe ? "Safe settlement" : model.space.label} \xB7 ${model.space.visitedCount}/${model.space.visitedTotal} semantic places/sites discovered${model.space.site ? model.space.site.conqueredTick !== null ? " \xB7 Conquered" : " \xB7 Active site" : model.space.functionalSite ? model.space.functionalSite.conqueredTick !== null ? " \xB7 Conquered" : " \xB7 Active site" : model.space.overworld ? " \xB7 One continuous overworld" : " \xB7 Arrival saved"}` : `Tick ${model.tick} \xB7 Space revision ${model.context.spaceRevision} \xB7 Save ${model.persistence.confirmedSaveRevision}`));
@@ -69722,14 +71244,14 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
     else updateDom();
     const writeEvidence = () => Object.assign(canvas.dataset, {
       space: model.space.label,
-      x: String(painted3.actorX),
-      y: String(painted3.actorY),
+      x: String(painted4.actorX),
+      y: String(painted4.actorY),
       tick: String(model.tick),
       revision: String(model.context.spaceRevision),
       save: String(model.persistence.confirmedSaveRevision),
-      cameraX: String(painted3.camera.x),
-      cameraY: String(painted3.camera.y),
-      cameraZoom: String(painted3.camera.zoom),
+      cameraX: String(painted4.camera.x),
+      cameraY: String(painted4.camera.y),
+      cameraZoom: String(painted4.camera.zoom),
       phase: model.persistence.phase,
       primary: JSON.stringify(model.primary?.actorsById[model.playersById[model.localPlayerId].entityId] ?? null),
       progression: JSON.stringify(progress8 ?? null),
@@ -69741,7 +71263,7 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
       manifest: model.space.overworld?.manifestId ?? "legacy",
       placeId: model.space.overworld?.currentPlaceId ?? model.space.spaceId,
       seed: model.space.overworld?.seedHex ?? "legacy",
-      prompt: painted3.prompt ? JSON.stringify({ x: painted3.prompt.x, y: painted3.prompt.y, width: painted3.prompt.width, height: painted3.prompt.height }) : "null"
+      prompt: painted4.prompt ? JSON.stringify({ x: painted4.prompt.x, y: painted4.prompt.y, width: painted4.prompt.width, height: painted4.prompt.height }) : "null"
     });
     if (evidenceMode && time >= nextEvidenceAt) {
       nextEvidenceAt = time + evidenceIntervalMs;
@@ -70074,7 +71596,7 @@ function createDiagnosticDownloadD9({ environment, document: document2, runtimeI
   const filename = (kind) => `SAQ-World-${kind}-${runtimeId}-${(/* @__PURE__ */ new Date()).toISOString().replace(/[:.]/g, "-")}-${++sequence}.json`;
   const json = () => JSON.stringify(readPayload(), null, 2);
   function download(kind) {
-    const blob5 = new environment.Blob([json()], { type: "application/json" }), url = environment.URL.createObjectURL(blob5), link = document2.createElement("a");
+    const blob6 = new environment.Blob([json()], { type: "application/json" }), url = environment.URL.createObjectURL(blob6), link = document2.createElement("a");
     link.href = url;
     link.download = filename(kind);
     link.hidden = true;
@@ -70326,9 +71848,9 @@ function validateOwnedGearPageD9(row2) {
   }
   return row2;
 }
-async function readGroundChunkD9(root, address2, { readPage, sha256 }) {
-  if (!root) return null;
-  const tx = createPageTransaction({ root, readPage, sha256 }), ref = await tx.get(await gearChunkKeyD9(address2, sha256));
+async function readGroundChunkD9(root2, address2, { readPage, sha256 }) {
+  if (!root2) return null;
+  const tx = createPageTransaction({ root: root2, readPage, sha256 }), ref = await tx.get(await gearChunkKeyD9(address2, sha256));
   if (!ref) return null;
   const doc = await readPage(ref.pageId);
   requireContract(await pageDigest(doc, sha256) === ref.pageId && doc.kind === "ground-chunk" && same9(doc.payload.address, address2), "Ground chunk commitment/address mismatch");
@@ -70373,9 +71895,9 @@ function createWorldPageBufferD9({ readPage, sha256, limit = D9_RUNTIME_POLICY.d
   function stage2(pages) {
     prepareStage(pages)();
   }
-  async function readChunk(root, address2) {
-    if (!root) return null;
-    const tx = createPageTransaction({ root, readPage: read, sha256 }), ref = await tx.get(await chunkDeltaKeyD9(address2, sha256));
+  async function readChunk(root2, address2) {
+    if (!root2) return null;
+    const tx = createPageTransaction({ root: root2, readPage: read, sha256 }), ref = await tx.get(await chunkDeltaKeyD9(address2, sha256));
     if (!ref) return null;
     requireContract(ref.version === "world-page-ref-d9-v1", "Chunk index reference version");
     const doc = await read(ref.pageId);
@@ -70383,10 +71905,10 @@ function createWorldPageBufferD9({ readPage, sha256, limit = D9_RUNTIME_POLICY.d
     requireContract(doc.payload.chunkX === address2.chunkX && doc.payload.chunkY === address2.chunkY, "Chunk delta address mismatch");
     return copyWire(doc.payload);
   }
-  async function prepareChunk(root, delta3) {
-    const doc = worldDocument("chunk-delta", delta3), pageId = await pageDigest(doc, sha256), tx = createPageTransaction({ root, readPage: read, sha256 });
+  async function prepareChunk(root2, delta3) {
+    const doc = worldDocument("chunk-delta", delta3), pageId = await pageDigest(doc, sha256), tx = createPageTransaction({ root: root2, readPage: read, sha256 });
     await tx.set(await chunkDeltaKeyD9(delta3, sha256), { version: "world-page-ref-d9-v1", pageId });
-    return { expectedRoot: root, root: tx.root(), pages: [{ id: pageId, value: doc }, ...tx.pages()] };
+    return { expectedRoot: root2, root: tx.root(), pages: [{ id: pageId, value: doc }, ...tx.pages()] };
   }
   return {
     readPage: read,
@@ -70746,7 +72268,7 @@ function revealNavigationD9(state) {
   observations.set(state, nextKeys);
   return changed;
 }
-function acknowledgeNavigationD9(state, { expectedRoot, root, rows }) {
+function acknowledgeNavigationD9(state, { expectedRoot, root: root2, rows }) {
   const w = state.d9World;
   requireContract(w.discoveryIndex === expectedRoot, "Navigation root changed during preparation");
   const acknowledged = new Map(rows.map((r) => [navigationIdentityD9(r), r]));
@@ -70756,7 +72278,7 @@ function acknowledgeNavigationD9(state, { expectedRoot, root, rows }) {
     const tiles = [...r.tiles].map((v, i) => a.tiles[i] === v ? "?" : v).join(""), markers = r.markers.filter((m) => !a.markers.some((x) => x.id === m.id));
     return (w.plannedWorld ? /[^?]/.test(tiles) : tiles.includes("w") || tiles.includes("r") || tiles.includes("m") || tiles.includes("o") || tiles.includes("p")) || markers.length ? [{ ...r, tiles, markers }] : [];
   });
-  w.discoveryIndex = root;
+  w.discoveryIndex = root2;
   w.navigation.revision++;
 }
 
@@ -70957,7 +72479,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
   };
   const LIVE_HANDOFF_CHUNKS = 2, LIVE_EVICT_CHUNKS = 2, parcelKeys = fortParcel?.pages.map((p) => chunkAddressKey(p.chunkX, p.chunkY)) ?? [];
   const prepared = /* @__PURE__ */ new Map(), evaluatedCaveRegions = new Set(caveParcels.filter((p) => p.version === WOODLAND_CAVE_FAMILY_PARCEL_D12_2).map((p) => p.regionKey));
-  let reservationsDirty = false, busy = false, closed = false, error = null, generated = 0, discarded = 0, retries = 0, running = null, destinationTarget = null, lastEncounterKey = null, encounterPendingKey = null, encounterPendingSinceTick = null, encounterOffers = 0, encounterCompletions = 0, encounterRetries = 0, encounterLastLatencyTicks = 0, encounterMaxLatencyTicks = 0, urgentEncounterStreak = 0, lastDeadlineTick = -60, lastGroundKey = null, lastCollectTick = -600, lastNavigationTick = -30, navigationPreparing = null, navigationOffers = 0, navigationCompletions = 0, navigationCoalesced = 0, navigationRetries = 0, navigationRowsPrepared = 0, lastNavigationError = null, wantedAdmissions = 0, lastWantedAdmissionTick = null, lastWantedAdmissionAt = null, wantedMissingSinceTick = null, progressState = "idle", progressDetail = null;
+  let reservationsDirty = false, busy = false, closed = false, error = null, generated = 0, discarded = 0, retries = 0, running2 = null, destinationTarget = null, lastEncounterKey = null, encounterPendingKey = null, encounterPendingSinceTick = null, encounterOffers = 0, encounterCompletions = 0, encounterRetries = 0, encounterLastLatencyTicks = 0, encounterMaxLatencyTicks = 0, urgentEncounterStreak = 0, lastDeadlineTick = -60, lastGroundKey = null, lastCollectTick = -600, lastNavigationTick = -30, navigationPreparing = null, navigationOffers = 0, navigationCompletions = 0, navigationCoalesced = 0, navigationRetries = 0, navigationRowsPrepared = 0, lastNavigationError = null, wantedAdmissions = 0, lastWantedAdmissionTick = null, lastWantedAdmissionAt = null, wantedMissingSinceTick = null, progressState = "idle", progressDetail = null;
   let workerCalls = 0, lastRunWorked = true;
   const retryReasons = {};
   const retry = (reason) => {
@@ -71338,11 +72860,11 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
     }
   }
   function pump() {
-    if (running) return running;
-    running = run().finally(() => {
-      running = null;
+    if (running2) return running2;
+    running2 = run().finally(() => {
+      running2 = null;
     });
-    return running;
+    return running2;
   }
   async function syncNavigation() {
     const request = borrow((s) => ({ root: s.d9World.discoveryIndex, navigation: copyWire(s.d9World.navigation), stagedPages: pageBuffer.capture() })), key2 = String(request.root) + "/" + request.navigation.revision + "/" + request.navigation.pending.length;
@@ -71389,7 +72911,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
     });
   }
   async function syncPages() {
-    if (running) await running;
+    if (running2) await running2;
     requireContract(!closed && !error && authority.getStatus().phase === "ready", "World residency cannot prepare a save");
     busy = true;
     try {
@@ -71455,7 +72977,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
   function finishDestinationPosition() {
     destinationTarget = null;
   }
-  return Object.freeze({ pump, prime, needsSave, quiet: () => !lastRunWorked && !running && !destinationTarget, prepareTravelPosition: prepareDestinationPosition, finishTravelPosition: finishDestinationPosition, prepareWorldPosition, prepareReviewPosition: prepareDestinationPosition, finishReviewPosition: finishDestinationPosition, syncPages, warmGround, acknowledgeSave() {
+  return Object.freeze({ pump, prime, needsSave, quiet: () => !lastRunWorked && !running2 && !destinationTarget, prepareTravelPosition: prepareDestinationPosition, finishTravelPosition: finishDestinationPosition, prepareWorldPosition, prepareReviewPosition: prepareDestinationPosition, finishReviewPosition: finishDestinationPosition, syncPages, warmGround, acknowledgeSave() {
     reservationsDirty = false;
   }, resume() {
     if (error && staleWorkerGeometry(error)) error = null;
@@ -71465,7 +72987,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
   }, mapWindow: (request) => {
     const snapshot = borrow((s) => ({ root: s.d9World.discoveryIndex, stagedPages: pageBuffer.capture() }));
     return worker.mapWindow({ ...request, ...snapshot });
-  }, settled: () => running ?? Promise.resolve(), failure: () => error, inspect: () => {
+  }, settled: () => running2 ?? Promise.resolve(), failure: () => error, inspect: () => {
     const v = observedView(), wantedMissing = [...v.wanted.keys()].filter((k) => !v.resident.has(k)), page = pageBuffer.resources(), at4 = now2();
     return { busy, closed, error: error?.message ?? null, errorCode: error?.code ?? null, errorStack: error?.stack ?? null, generated, discarded, retries, retryReasons: { ...retryReasons }, pinnedCount: v.pinned.size, evictableCount: [...v.resident.keys()].filter((k) => !v.wanted.has(k) && !v.pinned.has(k)).length, prepared: prepared.size, preparedKeys: [...prepared.keys()], wantedKeys: [...v.wanted.keys()], wantedMissing, wantedReady: wantedMissing.length === 0, wantedMissingSinceTick, wantedAdmissions, lastWantedAdmissionTick, timeSinceWantedAdmissionMs: lastWantedAdmissionAt === null ? null : Math.max(0, at4 - lastWantedAdmissionAt), progressState, progressDetail, reviewPreparing: v.reviewPreparing, interactionReady: !v.approach || hasWorldCombat(v.plannedWorld), navigationPreparation: { pendingRows: v.navigation, inFlight: Boolean(navigationPreparing), offers: navigationOffers, completions: navigationCompletions, coalesced: navigationCoalesced, retries: navigationRetries, rowsPrepared: navigationRowsPrepared, lastError: lastNavigationError }, encounterPreparation: { approachPending: v.approach, blocksInitialReadiness: v.approach && !hasWorldCombat(v.plannedWorld), pending: Boolean(v.approach && v.encounterKey !== lastEncounterKey), offers: encounterOffers, completions: encounterCompletions, retries: encounterRetries, lastLatencyTicks: encounterLastLatencyTicks, maxLatencyTicks: encounterMaxLatencyTicks, pendingSinceTick: encounterPendingSinceTick }, needsSave: reservationsDirty || page.dirtyPages > D9_RUNTIME_POLICY.flushPages, regionalReservations: { evaluated: evaluatedCaveRegions.size, dirty: reservationsDirty }, pagePressure: { dirtyPages: page.dirtyPages, flushPages: D9_RUNTIME_POLICY.flushPages, capacity: page.capacity, oldestDirtyPageAgeMs: page.oldestDirtyPageAgeMs }, resident: v.resident.size, residentKeys: [...v.resident.keys()] };
   }, close() {
@@ -71539,22 +73061,22 @@ function activationState(state, site, playerId, kind) {
 async function prepareSiteBindingD9({ state, site, playerId, kind, catalog, readPage, sha256 }) {
   validateSiteSocketD9(site);
   validateSiteCatalogD9(catalog);
-  const root = state.d9World.content;
-  validateSiteContentRootD9(root);
+  const root2 = state.d9World.content;
+  validateSiteContentRootD9(root2);
   const reservation = Object.keys(state.d9World.siteReservationsById ?? {}).length ? state.d9World.siteReservationsById[site.siteId] : null;
   if (Object.keys(state.d9World.siteReservationsById ?? {}).length) requireContract(reservation, "Socket has no campaign reservation");
   const admitted2 = state.d9World.runtime.chunks.flatMap((c) => c.sites ?? []).find((s) => s.siteId === site.siteId);
   requireContract(admitted2 && canonicalStringify(admitted2) === canonicalStringify(site), "Unknown authoritative site socket");
-  const activation = activationState(state, site, playerId, kind), expected = canonicalStringify(root), index = createPageTransaction({ root: root.index, readPage, sha256 });
+  const activation = activationState(state, site, playerId, kind), expected = canonicalStringify(root2), index = createPageTransaction({ root: root2.index, readPage, sha256 });
   const bindingKey = await keyFor2("binding", site.siteId, sha256), previous = await index.get(bindingKey);
   if (previous) {
     validateSiteBindingD9(previous);
     requireContract(!reservation || previous.packageId === reservation.packageId, "Reserved binding/package mismatch");
-    return freezeWire({ expected, activation, site, playerId, kind, binding: previous, nextRoot: root, pages: [], replay: true });
+    return freezeWire({ expected, activation, site, playerId, kind, binding: previous, nextRoot: root2, pages: [], replay: true });
   }
   const candidates = [];
   for (const [priority, p] of catalog.packages.entries()) {
-    const representationKey = await keyFor2("representation", p.packageId, sha256), r = await index.get(representationKey), historical = root.historical.filter((b) => b.packageId === p.packageId).length;
+    const representationKey = await keyFor2("representation", p.packageId, sha256), r = await index.get(representationKey), historical = root2.historical.filter((b) => b.packageId === p.packageId).length;
     if (r) {
       requireContract(r.version === "content-representation-d9-v1" && r.packageId === p.packageId, "Invalid representation record");
       requireContract(progressionBigInt(r.count) > 0n, "Invalid representation count");
@@ -71570,7 +73092,7 @@ async function prepareSiteBindingD9({ state, site, playerId, kind, catalog, read
   const count = progressionWire(chosen.count + 1n);
   await index.set(bindingKey, binding);
   await index.set(chosen.representationKey, { version: "content-representation-d9-v1", packageId: chosen.p.packageId, count, lastSiteId: site.siteId });
-  return freezeWire({ expected, activation, site, playerId, kind, binding, nextRoot: { ...root, catalogVersion: catalog.catalogVersion, index: index.root() }, pages: index.pages(), replay: false });
+  return freezeWire({ expected, activation, site, playerId, kind, binding, nextRoot: { ...root2, catalogVersion: catalog.catalogVersion, index: index.root() }, pages: index.pages(), replay: false });
 }
 function commitSiteBindingD9(state, plan) {
   requireContract(canonicalStringify(state.d9World.content) === plan.expected, "Stale site binding plan");
@@ -71583,13 +73105,13 @@ async function prepareFortReservationBindingD10(state, parcel2, { readPage, sha2
   const site = parcel2.socket;
   validateSiteSocketD9(site);
   requireContract(parcel2.siteId === site.siteId && packageEligibleD9(site, WOODLAND_FORT_D11_PACKAGE, false), "Fort reservation eligibility");
-  const root = state.d9World.content, index = createPageTransaction({ root: root.index, readPage, sha256 }), expected = canonicalStringify(root), bindingKey = await keyFor2("binding", site.siteId, sha256), representationKey = await keyFor2("representation", WOODLAND_FORT_D11_PACKAGE.packageId, sha256);
+  const root2 = state.d9World.content, index = createPageTransaction({ root: root2.index, readPage, sha256 }), expected = canonicalStringify(root2), bindingKey = await keyFor2("binding", site.siteId, sha256), representationKey = await keyFor2("representation", WOODLAND_FORT_D11_PACKAGE.packageId, sha256);
   requireContract(!await index.get(bindingKey) && !await index.get(representationKey), "Fort already bound or represented");
   const binding = { version: SITE_BINDING_D9, siteId: site.siteId, status: "bound", packageId: WOODLAND_FORT_D11_PACKAGE.packageId, packageVersion: WOODLAND_FORT_D11_PACKAGE.packageVersion, contentHash: WOODLAND_FORT_D11_PACKAGE.contentHash, catalogVersion: D9_SITE_CONTENT_CATALOG.catalogVersion, policyVersion: "seed-reserved-fort-d10-v1", boundTick: state.tick, causedByPlayerId: null };
   validateSiteBindingD9(binding);
   await index.set(bindingKey, binding);
   await index.set(representationKey, { version: "content-representation-d9-v1", packageId: WOODLAND_FORT_D11_PACKAGE.packageId, count: "1", lastSiteId: site.siteId });
-  return freezeWire({ expected, binding, nextRoot: { ...root, catalogVersion: D9_SITE_CONTENT_CATALOG.catalogVersion, index: index.root() }, pages: index.pages() });
+  return freezeWire({ expected, binding, nextRoot: { ...root2, catalogVersion: D9_SITE_CONTENT_CATALOG.catalogVersion, index: index.root() }, pages: index.pages() });
 }
 function commitFortReservationBindingD10(state, plan) {
   requireContract(canonicalStringify(state.d9World.content) === plan.expected, "Fort reservation changed before admission");
@@ -71601,13 +73123,13 @@ async function prepareReservedBindingD10(state, parcel2, pkg, policy, { readPage
   validateSiteSocketD9(site);
   requireContract(parcel2.siteId === site.siteId && packageEligibleD9(site, pkg, false), "Reserved site eligibility");
   requireContract(state.d9World.siteReservationsById?.[site.siteId]?.packageId === pkg.packageId, "Reserved site/package mismatch");
-  const root = state.d9World.content, index = createPageTransaction({ root: root.index, readPage, sha256 }), expected = canonicalStringify(root), bindingKey = await keyFor2("binding", site.siteId, sha256), representationKey = await keyFor2("representation", pkg.packageId, sha256);
+  const root2 = state.d9World.content, index = createPageTransaction({ root: root2.index, readPage, sha256 }), expected = canonicalStringify(root2), bindingKey = await keyFor2("binding", site.siteId, sha256), representationKey = await keyFor2("representation", pkg.packageId, sha256);
   requireContract(!await index.get(bindingKey) && !await index.get(representationKey), "Reserved site already bound or represented");
   const binding = { version: SITE_BINDING_D9, siteId: site.siteId, status: "bound", packageId: pkg.packageId, packageVersion: pkg.packageVersion, contentHash: pkg.contentHash, catalogVersion: D9_SITE_CONTENT_CATALOG.catalogVersion, policyVersion: policy, boundTick: state.tick, causedByPlayerId: null };
   validateSiteBindingD9(binding);
   await index.set(bindingKey, binding);
   await index.set(representationKey, { version: "content-representation-d9-v1", packageId: pkg.packageId, count: "1", lastSiteId: site.siteId });
-  return freezeWire({ expected, binding, nextRoot: { ...root, catalogVersion: D9_SITE_CONTENT_CATALOG.catalogVersion, index: index.root() }, pages: index.pages() });
+  return freezeWire({ expected, binding, nextRoot: { ...root2, catalogVersion: D9_SITE_CONTENT_CATALOG.catalogVersion, index: index.root() }, pages: index.pages() });
 }
 var prepareCaveReservationBindingD10 = (state, parcel2, options) => prepareReservedBindingD10(state, parcel2, WOODLAND_CAVE_D11_PACKAGE, "seed-reserved-site-d10-v1", options);
 function commitCaveReservationBindingD10(state, plan) {
@@ -71977,7 +73499,7 @@ async function createLocalEndlessSessionD9(options) {
   }
   function latchFatal(failure, source3) {
     if (fatalInvariant) return fatalInvariant;
-    const reason = failure.reason ?? failure.message ?? String(failure), publication = authority.readConfirmed(), root = publication?.root ?? null;
+    const reason = failure.reason ?? failure.message ?? String(failure), publication = authority.readConfirmed(), root2 = publication?.root ?? null;
     let liveGeometry2 = null, liveTick = null, liveProbeError = null;
     try {
       authority.withAuthority((a) => a.withAuthorityState((s) => {
@@ -72009,7 +73531,7 @@ async function createLocalEndlessSessionD9(options) {
       stack: failure.stack ?? null,
       streaming: streaming ? { residentKeys: streaming.residentKeys, wantedKeys: streaming.wantedKeys, wantedMissing: streaming.wantedMissing, preparedKeys: streaming.preparedKeys, wantedReady: streaming.wantedReady, error: streaming.error, errorCode: streaming.errorCode, errorStack: streaming.errorStack, progressState: streaming.progressState, progressDetail: streaming.progressDetail } : null,
       dirtyPages: pages.resources(),
-      confirmedRoot: root ? { id: publication.id, revision: root.revision, tick: root.tick, previous: root.previous, campaignId: root.campaignId } : null,
+      confirmedRoot: root2 ? { id: publication.id, revision: root2.revision, tick: root2.tick, previous: root2.previous, campaignId: root2.campaignId } : null,
       failedCuts,
       retriedCuts,
       lastSuccessfulCommitTick: lastSavedTick
@@ -72516,14 +74038,14 @@ async function createLocalEndlessSessionD9(options) {
 function measureWorldViewport(environment) {
   const valid = (value2) => typeof value2 === "number" && Number.isFinite(value2) && value2 > 0;
   const fallback = (primary, secondary) => valid(primary) ? primary : valid(secondary) ? secondary : 1;
-  const viewport = environment.visualViewport, root = environment.document.documentElement;
+  const viewport = environment.visualViewport, root2 = environment.document.documentElement;
   const visual = valid(viewport?.width) && valid(viewport?.height);
   const offset2 = (value2) => Number.isFinite(value2) ? Math.max(0, value2) : 0;
   return Object.freeze({
     left: visual ? offset2(viewport.offsetLeft) : 0,
     top: visual ? offset2(viewport.offsetTop) : 0,
-    width: Math.max(1, Math.round(visual ? viewport.width : fallback(root.clientWidth, environment.innerWidth))),
-    height: Math.max(1, Math.round(visual ? viewport.height : fallback(root.clientHeight, environment.innerHeight)))
+    width: Math.max(1, Math.round(visual ? viewport.width : fallback(root2.clientWidth, environment.innerWidth))),
+    height: Math.max(1, Math.round(visual ? viewport.height : fallback(root2.clientHeight, environment.innerHeight)))
   });
 }
 function coordinateWorldViewport({ environment, shell, onResize = () => {
@@ -72825,11 +74347,17 @@ async function startWorldClient(environment) {
     });
     return null;
   }
-  let plannedReview = null, builtWorlds = null, builtWorld = null;
+  let plannedReview = null, builtWorlds = null, builtWorld = null, startingHero = null;
   if (plannedOpening) {
     if (activity) try {
       builtWorlds = createBuiltWorldStoreV1({ indexedDB: saveIndexedDb, sha256 });
-      builtWorld = await builtWorlds.forStart({ resume: launch.resume, requested: location.searchParams.get("builtWorld") });
+      let requested = location.searchParams.get("builtWorld");
+      if (!launch.resume && !requested && !FORGE_REVIEW_BUILD && proofCase === "A" && plannedOpening.assetId === "alpha") {
+        const made = await newWorldFlowV1({ environment, save: (text2) => builtWorlds.put(text2) });
+        startingHero = made.hero;
+        requested = made.world?.hash ?? null;
+      }
+      builtWorld = await builtWorlds.forStart({ resume: launch.resume, requested });
       if (builtWorld) plannedReview = await plannedOpening.open({ hash: builtWorld.hash, commitments: builtWorld.commitments, read: builtWorlds.read });
     } catch (error) {
       showStartupRecovery(environment, classifyLocalLaunchError(error), {
@@ -72850,6 +74378,7 @@ async function startWorldClient(environment) {
       return null;
     }
     plannedReview ??= await plannedOpening.open(null);
+    roster.setWorld(builtWorld ? { seed: builtWorld.seed } : null);
     if (woodlandReview && plannedReview?.asset.assetId === "alpha") plannedReview.targets.push(...WOODLAND_REVIEW_TARGETS_V1, ...PAINTED_REVIEW_TARGETS);
     if (plannedReview?.binding.woodlandForestVersion) plannedReview.targets.push({ id: "forest:entry", label: "Woodland forest V1 \xB7 walkable forest entry (inspection)", tile: { x: 3222, y: 6990 } });
   }
@@ -73162,6 +74691,7 @@ async function startWorldClient(environment) {
     port: clientPort,
     environment,
     heroSlots,
+    startingHero,
     actorCollisionProbe: activity ? createActorPresentationCollisionProbeV1(session.authority) : null,
     nextCommandToken: nextToken,
     performanceProbe,

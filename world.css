@@ -1476,3 +1476,70 @@ body #world-inventory #world-equipment,body #world-inventory #world-items{displa
 #world-inventory .gx-unique{margin:8px 0 6px;padding:10px 12px;border-radius:10px;background:rgba(232,195,122,.08);border:1px solid rgba(232,195,122,.3)}
 #world-inventory .gx-uniqueeffect{margin:0;color:#f1e6c8;font:500 13px/1.45 system-ui,sans-serif}
 #world-inventory .gx-flavor{margin:6px 0 0;color:#ff6b5b;font:italic 500 12.5px/1.4 system-ui,sans-serif}
+/* New-world screen (src/client/new_world_screen_v1.js): a new campaign picks the classic map or a
+   new seeded world, over the loading screen; the hero creator joins it there while the world builds. */
+.new-world-v1{position:fixed;inset:0;z-index:2600;display:grid;place-items:center;padding:calc(10px + var(--world-safe-top,0px)) calc(10px + var(--world-safe-right,0px)) calc(10px + var(--world-safe-bottom,0px)) calc(10px + var(--world-safe-left,0px));background:#060a0ed9;color:var(--rpg-ivory,#eee7d9);font:13px var(--rpg-ui)}
+.new-world-v1[hidden],.new-world-v1 [hidden]{display:none}
+.hero-creator-v1.is-before-game{z-index:2600}
+.nw-panel{width:min(880px,100%);max-height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto;box-sizing:border-box;border:1px solid var(--rpg-brass,#b7a077);border-radius:14px;background:linear-gradient(#1c2731,#121a22);box-shadow:0 20px 60px #000c;overflow:hidden}
+.nw-wait-panel{width:min(720px,100%)}
+.nw-head{padding:16px 18px 4px;text-align:center}
+.nw-head h2{margin:0;font:700 24px var(--rpg-title,Georgia,serif);color:#f4e7c4}
+.nw-intro{margin:6px auto 0;max-width:52ch;font:13px/1.45 var(--rpg-ui);color:#aeb7ba}
+.nw-body{min-height:0;overflow:auto;display:grid;gap:10px;padding:10px 18px 16px;overscroll-behavior:contain}
+.nw-legend{margin:6px 0 0;font:700 11px var(--rpg-ui);letter-spacing:.12em;text-transform:uppercase;color:var(--rpg-brass,#b7a077)}
+.nw-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.new-world-v1 button{font:600 14px var(--rpg-ui);color:var(--rpg-ivory,#eee7d9);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.new-world-v1 button:focus-visible,.nw-seed-input:focus-visible{outline:2px solid #e9c46a;outline-offset:2px}
+.nw-card{display:grid;grid-template-columns:52px minmax(0,1fr);gap:12px;align-items:start;padding:14px 16px;border-radius:12px;border:1px solid #2e3a45;background:#131b23;text-align:left}
+.nw-card[aria-pressed=true]{border-color:#e9c46a;background:#2a2518;box-shadow:0 0 0 1px #e9c46a}
+.nw-card-icon{display:block;width:52px;height:52px}.nw-card-icon svg{width:100%;height:100%}
+.nw-card.is-classic .nw-card-icon{color:#9dbca5}.nw-card.is-seeded .nw-card-icon{color:#e9c46a}
+.nw-card-words{display:grid;gap:5px}
+.nw-card-words strong{font:700 19px var(--rpg-title,Georgia,serif);color:#f4e7c4}
+.nw-card-words span{font:400 13px/1.45 var(--rpg-ui);color:#c9d0d3}
+.nw-card-words small{font:600 12px var(--rpg-ui)}
+.nw-card.is-classic small{color:#9dbca5}.nw-card.is-seeded small{color:#e9c46a}
+.nw-seed{display:grid;gap:8px}
+.nw-seed-row{display:flex;gap:8px}
+.nw-seed-input{flex:1;min-width:0;box-sizing:border-box;min-height:46px;padding:0 14px;border-radius:12px;border:1px solid #33404b;background:#0f161d;color:var(--rpg-ivory,#eee7d9);font:600 17px var(--rpg-ui);letter-spacing:.02em}
+.nw-roll{display:flex;align-items:center;gap:8px;min-height:46px;padding:0 16px;border-radius:12px;border:1px solid #e9c46a;background:#3a3222;color:#fff3cf}
+.nw-roll-icon{display:block;width:20px;height:20px}.nw-roll-icon svg{width:100%;height:100%}
+.nw-word{margin:0;font:13px var(--rpg-ui);color:#c9d0d3}.nw-word strong{color:#f4e7c4}
+.nw-note{margin:0;font:12px/1.45 var(--rpg-ui);color:#aeb7ba}
+.nw-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 10px;padding:10px 16px 14px;border-top:1px solid #26313b;background:#121a22}
+.new-world-v1 .nw-next{flex:1;max-width:340px;min-height:46px;padding:0 18px;border-radius:12px;border:1px solid #ffe39a;background:linear-gradient(#f4cf6a,#c98d1d);color:#1f1404;font-weight:700}
+.new-world-v1 .nw-next:disabled{border-color:#33404b;background:#1b242d;color:#76838b;cursor:default}
+.nw-quiet{min-height:46px;padding:0 18px;border-radius:12px;border:1px solid #3a4651;background:#161f27;color:#c3ccd0}
+.nw-status{flex:1 1 100%;margin:0;min-height:0;text-align:center}
+.nw-bar{flex:1;min-width:80px;height:6px;border-radius:999px;background:#0c1219;overflow:hidden}
+.nw-bar-fill{display:block;width:0;height:100%;border-radius:999px;background:linear-gradient(90deg,#c98d1d,#f4cf6a);transition:width .4s}
+.nw-strip{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;max-width:640px;margin:8px auto 0;padding:8px 12px;border-radius:10px;border:1px solid #2e3a45;background:#131b23;text-align:left}
+.nw-strip-icon{display:block;width:22px;height:22px;color:#e9c46a}.nw-strip-icon svg{width:100%;height:100%}
+.nw-strip-title{font:600 13px var(--rpg-ui);color:#eee7d9;white-space:nowrap}
+.nw-strip-detail{font:12px var(--rpg-ui);color:#aeb7ba}
+.nw-strip-percent{min-width:34px;font:700 12px var(--rpg-ui);color:#f4e7c4;text-align:right}
+.nw-strip.is-failed{border-color:#6b3a3e}.nw-strip.is-failed .nw-strip-icon{color:#c98b8f}
+.nw-wait{display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr);gap:20px;align-items:start;padding:12px 20px 18px;min-height:0;overflow:auto}
+.nw-wait-hero{display:grid;justify-items:center;gap:4px}
+.nw-wait-portrait{width:100%;max-width:200px;height:210px;border-radius:12px;background:radial-gradient(ellipse at 50% 88%,#2f4a35 0 26%,#1d2e24 58%,#141c24 100%)}
+.nw-wait-name{font:700 17px var(--rpg-title,Georgia,serif);color:#f4e7c4}
+.nw-wait-class{font:12px var(--rpg-ui);color:#aeb7ba}
+.nw-wait-build{display:grid;gap:12px;min-width:0}
+.nw-wait-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px}.nw-wait-top .nw-legend{margin:0}
+.nw-wait-seed{font:12px var(--rpg-ui);color:#aeb7ba}.nw-wait-seed strong{color:#eee7d9}
+.nw-wait-bar{display:flex;align-items:center;gap:10px}.nw-wait-bar .nw-bar{height:8px}
+.nw-steps{margin:0;padding:0;list-style:none;display:grid;gap:2px}
+.nw-step{display:flex;align-items:center;gap:10px;padding:7px 10px;border:1px solid transparent;border-radius:10px;font:13px var(--rpg-ui);color:#c9d0d3}
+.nw-step-mark{flex:none;width:16px;height:16px;box-sizing:border-box;border-radius:50%;border:1.5px solid #33404b}
+.nw-step[data-state=done] .nw-step-mark{display:grid;place-items:center;border-color:#9dbca5;background:#2a3b2e}
+.nw-step[data-state=done] .nw-step-mark::after{content:'';width:7px;height:3.5px;border:solid #9dbca5;border-width:0 0 2px 2px;transform:translateY(-1px) rotate(-45deg)}
+.nw-step[data-state=now]{border-color:#4a3f28;background:#2a2518;color:#fff3cf;font-weight:600}
+.nw-step[data-state=now] .nw-step-mark{border-color:#4a3f28;border-top-color:#e9c46a;animation:nw-spin 1s linear infinite}
+.nw-step[data-state=later]{color:#76838b}
+@keyframes nw-spin{to{transform:rotate(360deg)}}
+@media(max-width:560px){.nw-wait{grid-template-columns:minmax(0,1fr)}.nw-wait-portrait{height:150px}.nw-strip .nw-bar{flex-basis:100%;order:5}.nw-head h2{font-size:22px}}
+@media(prefers-reduced-motion:reduce){.nw-step[data-state=now] .nw-step-mark{animation:none}.nw-bar-fill{transition:none}}
+.hero-slot-world{display:flex;align-items:center;gap:5px;font:12px var(--rpg-ui);color:#c9d0d3}
+.hero-slot-world::before{content:'';flex:none;width:15px;height:15px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath d='M7 12l11-4 12 4 11-4v28l-11 4-12-4-11 4z' fill='%239dbca5' fill-opacity='.25' stroke='%239dbca5' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='M18 8v28M30 12v28' stroke='%239dbca5' stroke-width='4'/%3E%3C/svg%3E") center/contain no-repeat}
+.hero-slot-world.is-seeded::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath d='M24 43V24' stroke='%23e9c46a' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M24 26C24 18 18 13 9 13c0 8 6 13 15 13zM24 23c0-8 6-13 15-13 0 8-6 13-15 13z' fill='%23e9c46a' fill-opacity='.25' stroke='%23e9c46a' stroke-width='4' stroke-linejoin='round'/%3E%3C/svg%3E")}

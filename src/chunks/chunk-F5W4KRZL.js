@@ -225,7 +225,7 @@ var RESHAPE_TIERS = Object.freeze({ "repeatable-slot:ruin:wetland:standard:067":
 var RESHAPE_VERSION = "world-reshape-v2";
 var RESHAPE_HASH = "ac15d856c2dbbe38203480172b32aae7d19ccdd61cef10eee16aade24a0900d2";
 var RESHAPE_HYDROLOGY_HASH = "e12fd26221c55e0357b674d4beaf28cc522ef5f9dde420b073373f0ef7be1b65";
-var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-events1";
+var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-events2";
 var hasWorldReshape = (b) => b?.reshapeVersion === RESHAPE_VERSION && b?.reshapeHash === RESHAPE_HASH;
 var reshapedSite = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_SITES, id) ? RESHAPE_SITES[id] : null;
 var reshapedTier = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_TIERS, id) ? RESHAPE_TIERS[id] : null;
@@ -3044,6 +3044,176 @@ function worldEventProtectionV1(asset) {
   return cached;
 }
 
+// src/shared/content/world_event_plan_v1.js
+var WORLD_EVENT_PLAN_VERSION = "world-event-plan-v1";
+var WORLD_EVENT_KINDS = Object.freeze(["cursed_shrine", "nests", "road_ambush", "raided_camp", "buried_cache", "trophy_hunt", "wayside_shrine", "den"]);
+var WORLD_EVENT_SHARES = freezeWire({
+  pathside: { road_ambush: 55, wayside_shrine: 45 },
+  backcountry: { cursed_shrine: 20, nests: 25, raided_camp: 15, buried_cache: 20, den: 20 },
+  deep_wild: { trophy_hunt: 40, cursed_shrine: 30, den: 30 }
+});
+var SLOT = /^density-v2-event-capacity-[0-9]{3}$/;
+function validateWorldEventPlanV1(plan, clearings) {
+  requireContract(plan?.version === WORLD_EVENT_PLAN_VERSION && Object.keys(plan).sort().join() === "events,version" && Array.isArray(plan.events), "EVENT_PLAN:SHAPE");
+  const rows3 = new Map(plan.events.map((r) => [r?.eventSlotId, r]));
+  requireContract(rows3.size === plan.events.length && rows3.size === clearings.length && clearings.every((c) => rows3.has(c.eventSlotId)), "EVENT_PLAN:SLOTS");
+  const linked = /* @__PURE__ */ new Set();
+  for (const r of plan.events) {
+    const camp = r.event === "raided_camp";
+    requireContract(SLOT.test(r.eventSlotId) && WORLD_EVENT_KINDS.includes(r.event) && Object.keys(r).sort().join() === (camp ? "cacheSlotId,event,eventSlotId" : "event,eventSlotId"), "EVENT_PLAN:ROW");
+    if (camp) requireContract(rows3.get(r.cacheSlotId)?.event === "buried_cache" && !linked.has(r.cacheSlotId) && linked.add(r.cacheSlotId), "EVENT_PLAN:CACHE");
+  }
+  return freezeWire(plan);
+}
+var CLASSIC_SLOTS = {
+  cursed_shrine: [54, 56, 57, 58, 60, 67, 74, 77, 82, 84, 87, 111, 127, 129, 133, 135, 136, 141, 143, 147, 150, 152, 158, 159, 160, 165, 170, 174],
+  nests: [27, 51, 55, 66, 68, 73, 79, 83, 85, 89, 90, 91, 97, 104, 107, 112, 113, 116, 119, 121, 123, 128, 130, 138, 153],
+  road_ambush: [4, 5, 7, 9, 10, 11, 12, 13, 14, 17, 18, 22, 23, 24, 26, 28, 29, 31, 33, 34, 38, 40, 42, 46, 50, 52],
+  raided_camp: [30, 71, 88, 92, 93, 102, 103, 105, 106, 108, 118, 137, 139, 140],
+  buried_cache: [53, 59, 65, 69, 72, 75, 76, 78, 81, 94, 96, 101, 109, 110, 115, 124, 131, 132, 134],
+  trophy_hunt: [144, 145, 148, 154, 156, 157, 161, 163, 166, 167, 168, 169, 173, 175],
+  wayside_shrine: [1, 2, 3, 6, 8, 15, 16, 19, 20, 21, 25, 32, 35, 36, 37, 39, 41, 43, 44, 45, 47, 48, 49],
+  den: [61, 62, 63, 64, 70, 80, 86, 95, 98, 99, 100, 114, 117, 120, 122, 125, 126, 142, 146, 149, 151, 155, 162, 164, 171, 172, 176]
+};
+var CLASSIC_CACHES = { 30: 132, 71: 96, 88: 115, 92: 65, 93: 81, 102: 109, 103: 134, 105: 69, 106: 131, 108: 59, 118: 78, 137: 101, 139: 75, 140: 124 };
+var slotId = (n) => "density-v2-event-capacity-" + String(n).padStart(3, "0");
+var CLASSIC_EVENT_PLAN = freezeWire({ version: WORLD_EVENT_PLAN_VERSION, events: Object.entries(CLASSIC_SLOTS).flatMap(([event, list]) => list.map((n) => ({ n, event }))).sort((a, b) => a.n - b.n).map(({ n, event }) => CLASSIC_CACHES[n] ? { eventSlotId: slotId(n), event, cacheSlotId: slotId(CLASSIC_CACHES[n]) } : { eventSlotId: slotId(n), event }) });
+var plans = /* @__PURE__ */ new WeakMap();
+var atSlot = /* @__PURE__ */ new WeakMap();
+function eventPlanV1(asset) {
+  if (!asset || typeof asset !== "object") return Object.freeze([]);
+  let p = plans.get(asset);
+  if (p) return p;
+  const clearings = asset.wildernessExtension?.eventCapacities ?? [];
+  if (asset.eventPlan == null) {
+    const have = new Set(clearings.map((c) => c.eventSlotId));
+    p = Object.freeze(CLASSIC_EVENT_PLAN.events.filter((r) => have.has(r.eventSlotId)));
+  } else p = validateWorldEventPlanV1(asset.eventPlan, clearings).events;
+  plans.set(asset, p);
+  return p;
+}
+function eventAtSlotV1(asset, eventSlotId) {
+  const p = eventPlanV1(asset);
+  let m = atSlot.get(p);
+  if (!m) atSlot.set(p, m = new Map(p.map((r) => [r.eventSlotId, r])));
+  return m.get(eventSlotId) ?? null;
+}
+
+// src/shared/content/planned_events_v1.js
+var BUILT_EVENT_KINDS = Object.freeze(["cursed_shrine", "nests"]);
+var CATEGORIES = Object.freeze(["pathside", "backcountry", "deep_wild"]);
+var BASE = 1e5;
+var plannedEventOrdinal = (n) => Number.isSafeInteger(n) && n > BASE && n < BASE + CATEGORIES.length * 1e4 && n % 1e3 > 0 && Math.floor(n % 1e4 / 1e3) < WORLD_EVENT_KINDS.length;
+function plannedEventOrdinalFor(slot, category, kind2) {
+  const n = Number(/^density-v2-event-capacity-([0-9]{3})$/.exec(slot)?.[1]), c = CATEGORIES.indexOf(category), k = WORLD_EVENT_KINDS.indexOf(kind2);
+  return n > 0 && c >= 0 && k >= 0 ? BASE + c * 1e4 + k * 1e3 + n : null;
+}
+var plannedEventGroupV1 = (s, groupId) => Boolean(s.d9World?.plannedWorld) && plannedEventOrdinal(s.d9World.episodes?.[groupId]?.geography?.anchorOrdinal);
+var plannedEventCategory = (n) => CATEGORIES[Math.floor((n - BASE) / 1e4)];
+var plannedEventFirstKind = (n) => WORLD_EVENT_KINDS[Math.floor(n % 1e4 / 1e3)];
+function unit2(text) {
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619);
+  h = Math.imul(h ^ h >>> 16, 2246822507);
+  h = Math.imul(h ^ h >>> 13, 3266489909);
+  return ((h ^ h >>> 16) >>> 0) / 4294967296;
+}
+var cache = /* @__PURE__ */ new Map();
+function plannedEventKindV1(seedHex, ordinal, episode, built = BUILT_EVENT_KINDS) {
+  if (!plannedEventOrdinal(ordinal) || !Number.isSafeInteger(episode) || episode < 0) return null;
+  const key5 = seedHex + "/" + ordinal + "/" + episode + "/" + built.join(",");
+  if (cache.has(key5)) return cache.get(key5);
+  let kind2 = plannedEventFirstKind(ordinal);
+  if (!built.includes(kind2)) kind2 = null;
+  const shares = WORLD_EVENT_SHARES[plannedEventCategory(ordinal)];
+  for (let e = 1; e <= episode && kind2; e++) {
+    const options = Object.keys(shares).filter((k) => built.includes(k));
+    if (!options.length) break;
+    const pool = options.length > 1 ? options.filter((k) => k !== kind2) : options, total = pool.reduce((n, k) => n + shares[k], 0);
+    let roll = unit2(seedHex + "/planned-event/" + ordinal % 1e3 + "/" + e) * total;
+    kind2 = pool.find((k) => (roll -= shares[k]) < 0) ?? pool.at(-1);
+  }
+  if (cache.size > 4096) cache.clear();
+  cache.set(key5, kind2);
+  return kind2;
+}
+var SHRINE_VERSION = "cursed-shrine-v1";
+var SHRINE_POLICY = freezeWire({
+  version: SHRINE_VERSION,
+  // Three waves out of rifts by the pillars; the last member of wave 3 is the elite (rank S).
+  waves: [4, 5, 4],
+  elite: 12,
+  rank: "C",
+  firstWaveTicks: 60,
+  intermissionTicks: 150,
+  tellTicks: 45,
+  spawnSpacingTicks: 20,
+  families: ["sprout", "slime", "sprout", "slime", "slime", "sprout", "golem", "sprout", "slime", "sprout", "slime", "golem", "golem"],
+  // Stay inside the ring (px around the shrine's ground center). Outside longer than graceTicks reseals it: no reward.
+  circle: { rx: 176, ry: 100, oy: 6 },
+  graceTicks: 360,
+  triggerRadius: 96,
+  activeRadius: 768,
+  playerClearance: 48,
+  rifts: [[-92, 14], [92, 14], [0, 62], [-60, 52], [60, 52], [-120, 40], [120, 40]],
+  homes: [[-70, 40], [70, 40], [0, 80], [-110, 20], [110, 20], [-40, 70], [40, 70]],
+  // A random boon for every hero who fought here, for 3 minutes.
+  boonTicks: 10800,
+  boons: ["wrath", "insight", "fortune"],
+  reward: "one completion chest per eligible participant, plus a random boon",
+  reset: "renews like an ordinary pack, then may hold another event",
+  simulationHz: 60
+});
+var SHRINE_MEMBERS = SHRINE_POLICY.families.length;
+var BOON_EFFECTS = freezeWire({ wrath: { damagePercent: 30 }, insight: { xpPercent: 50 }, fortune: { qualityHundredths: 250 } });
+var mix = (a, b, c = a) => [a, b, c, b, b, a, c, a, b, a, b, c];
+var PLANNED_EVENT_FAMILIES = freezeWire({
+  woodland: ["sprout", "slime", "sprout", "slime", "slime", "sprout", "golem", "sprout", "slime", "sprout", "slime", "golem", "sprout"],
+  grassland: [...mix("tusk_boar", "field_scarecrow", "thorn_wyrm"), "tusk_boar"],
+  wetland: [...mix("toxic_fly", "marsh_ghost"), "toxic_fly"],
+  upland: [...mix("wyrmling", "gilded_scuttler"), "wyrmling"],
+  desert: [...mix("sand_scarab", "dune_scorpion"), "sand_scarab"],
+  frostland: [...mix("wyrmling", "gilded_scuttler"), "wyrmling"],
+  tropical: [...mix("thorn_wyrm", "thorn_wyrm"), "thorn_wyrm"],
+  volcanic: [...mix("hell_bat", "lava_serpent"), "lava_serpent"]
+});
+var plannedEventFamiliesV1 = (biome) => PLANNED_EVENT_FAMILIES[biome] ?? PLANNED_EVENT_FAMILIES.woodland;
+var NESTS_VERSION = "nests-v1";
+var NEST_POLICY = freezeWire({
+  version: NESTS_VERSION,
+  // Three nests around the sleeping Brood Mother (px from the clearing's ground center).
+  nests: [[-98, 10], [92, -4], [-6, 64]],
+  motherAt: [0, -6],
+  motherMember: 12,
+  // The rot creeps from the mother to the ring in rotTicks; the ring turns red from warnPercent.
+  circle: { rx: 176, ry: 100, oy: 6 },
+  rotTicks: 3600,
+  warnPercent: 80,
+  // A nest holds nestHealth times a rank C creature's health, more with more heroes.
+  nestHealth: 6,
+  partyHealthPercent: [100, 160, 220, 280],
+  nestRadius: 20,
+  // Defenders crawl out of the unburst nests, one every spawnSpacingTicks while fewer than living are out.
+  firstSpawnTicks: 45,
+  spawnSpacingTicks: 110,
+  living: 4,
+  exits: [[0, 26], [-28, 14], [28, 14], [0, -30], [-36, -10], [36, -10]],
+  wake: [[0, 96], [-44, 92], [44, 92], [52, 36], [-56, 40], [0, 36]],
+  triggerRadius: 96,
+  activeRadius: 768,
+  playerClearance: 48,
+  // A random boon for every hero who fought here, for 3 minutes.
+  boonTicks: 10800,
+  boons: ["wrath", "insight", "fortune"],
+  reward: "one completion chest per eligible participant plus a random boon; the woken Brood Mother adds her own drops",
+  reset: "nobody left nearby: the nests heal, the rot pulls back and living creatures go back into hiding",
+  simulationHz: 60
+});
+var NEST_MEMBERS = 13;
+var NEST_SKINS = freezeWire({ woodland: "woodland", grassland: "woodland", desert: "desert", volcanic: "desert", frostland: "frostland", upland: "frostland", wetland: "wetland", tropical: "wetland" });
+var NEST_LABELS = freezeWire({ woodland: "Spore Nest", desert: "Scarab Nest", frostland: "Frost Nest", wetland: "Bog Nest" });
+var nestSkinOfV1 = (biome) => NEST_SKINS[biome] ?? "woodland";
+
 // src/shared/content/wilderness_ecology_v3.js
 var existingCreature = (family2) => ORDINARY_ENEMIES.some((row) => row.family === family2);
 var WILDERNESS_ECOLOGY_BIOMES = Object.freeze(["woodland", "grassland", "wetland", "upland", "desert", "frostland", "tropical", "volcanic"]);
@@ -3566,126 +3736,6 @@ function validateRewardProgression(v) {
   if (v.modifiers) validateRewardModifiers(v.modifiers);
   return v;
 }
-
-// src/shared/content/world_event_plan_v1.js
-var WORLD_EVENT_PLAN_VERSION = "world-event-plan-v1";
-var WORLD_EVENT_KINDS = Object.freeze(["cursed_shrine", "nests", "road_ambush", "raided_camp", "buried_cache", "trophy_hunt", "wayside_shrine", "den"]);
-var WORLD_EVENT_SHARES = freezeWire({
-  pathside: { road_ambush: 55, wayside_shrine: 45 },
-  backcountry: { cursed_shrine: 20, nests: 25, raided_camp: 15, buried_cache: 20, den: 20 },
-  deep_wild: { trophy_hunt: 40, cursed_shrine: 30, den: 30 }
-});
-var SLOT = /^density-v2-event-capacity-[0-9]{3}$/;
-function validateWorldEventPlanV1(plan, clearings) {
-  requireContract(plan?.version === WORLD_EVENT_PLAN_VERSION && Object.keys(plan).sort().join() === "events,version" && Array.isArray(plan.events), "EVENT_PLAN:SHAPE");
-  const rows3 = new Map(plan.events.map((r) => [r?.eventSlotId, r]));
-  requireContract(rows3.size === plan.events.length && rows3.size === clearings.length && clearings.every((c) => rows3.has(c.eventSlotId)), "EVENT_PLAN:SLOTS");
-  const linked = /* @__PURE__ */ new Set();
-  for (const r of plan.events) {
-    const camp = r.event === "raided_camp";
-    requireContract(SLOT.test(r.eventSlotId) && WORLD_EVENT_KINDS.includes(r.event) && Object.keys(r).sort().join() === (camp ? "cacheSlotId,event,eventSlotId" : "event,eventSlotId"), "EVENT_PLAN:ROW");
-    if (camp) requireContract(rows3.get(r.cacheSlotId)?.event === "buried_cache" && !linked.has(r.cacheSlotId) && linked.add(r.cacheSlotId), "EVENT_PLAN:CACHE");
-  }
-  return freezeWire(plan);
-}
-var CLASSIC_SLOTS = {
-  cursed_shrine: [54, 56, 57, 58, 60, 67, 74, 77, 82, 84, 87, 111, 127, 129, 133, 135, 136, 141, 143, 147, 150, 152, 158, 159, 160, 165, 170, 174],
-  nests: [27, 51, 55, 66, 68, 73, 79, 83, 85, 89, 90, 91, 97, 104, 107, 112, 113, 116, 119, 121, 123, 128, 130, 138, 153],
-  road_ambush: [4, 5, 7, 9, 10, 11, 12, 13, 14, 17, 18, 22, 23, 24, 26, 28, 29, 31, 33, 34, 38, 40, 42, 46, 50, 52],
-  raided_camp: [30, 71, 88, 92, 93, 102, 103, 105, 106, 108, 118, 137, 139, 140],
-  buried_cache: [53, 59, 65, 69, 72, 75, 76, 78, 81, 94, 96, 101, 109, 110, 115, 124, 131, 132, 134],
-  trophy_hunt: [144, 145, 148, 154, 156, 157, 161, 163, 166, 167, 168, 169, 173, 175],
-  wayside_shrine: [1, 2, 3, 6, 8, 15, 16, 19, 20, 21, 25, 32, 35, 36, 37, 39, 41, 43, 44, 45, 47, 48, 49],
-  den: [61, 62, 63, 64, 70, 80, 86, 95, 98, 99, 100, 114, 117, 120, 122, 125, 126, 142, 146, 149, 151, 155, 162, 164, 171, 172, 176]
-};
-var CLASSIC_CACHES = { 30: 132, 71: 96, 88: 115, 92: 65, 93: 81, 102: 109, 103: 134, 105: 69, 106: 131, 108: 59, 118: 78, 137: 101, 139: 75, 140: 124 };
-var slotId = (n) => "density-v2-event-capacity-" + String(n).padStart(3, "0");
-var CLASSIC_EVENT_PLAN = freezeWire({ version: WORLD_EVENT_PLAN_VERSION, events: Object.entries(CLASSIC_SLOTS).flatMap(([event, list]) => list.map((n) => ({ n, event }))).sort((a, b) => a.n - b.n).map(({ n, event }) => CLASSIC_CACHES[n] ? { eventSlotId: slotId(n), event, cacheSlotId: slotId(CLASSIC_CACHES[n]) } : { eventSlotId: slotId(n), event }) });
-var plans = /* @__PURE__ */ new WeakMap();
-var atSlot = /* @__PURE__ */ new WeakMap();
-function eventPlanV1(asset) {
-  if (!asset || typeof asset !== "object") return Object.freeze([]);
-  let p = plans.get(asset);
-  if (p) return p;
-  const clearings = asset.wildernessExtension?.eventCapacities ?? [];
-  if (asset.eventPlan == null) {
-    const have = new Set(clearings.map((c) => c.eventSlotId));
-    p = Object.freeze(CLASSIC_EVENT_PLAN.events.filter((r) => have.has(r.eventSlotId)));
-  } else p = validateWorldEventPlanV1(asset.eventPlan, clearings).events;
-  plans.set(asset, p);
-  return p;
-}
-function eventAtSlotV1(asset, eventSlotId) {
-  const p = eventPlanV1(asset);
-  let m = atSlot.get(p);
-  if (!m) atSlot.set(p, m = new Map(p.map((r) => [r.eventSlotId, r])));
-  return m.get(eventSlotId) ?? null;
-}
-
-// src/shared/content/planned_events_v1.js
-var BUILT_EVENT_KINDS = Object.freeze(["cursed_shrine"]);
-var CATEGORIES = Object.freeze(["pathside", "backcountry", "deep_wild"]);
-var BASE = 1e5;
-var plannedEventOrdinal = (n) => Number.isSafeInteger(n) && n > BASE && n < BASE + CATEGORIES.length * 1e4 && n % 1e3 > 0 && Math.floor(n % 1e4 / 1e3) < WORLD_EVENT_KINDS.length;
-function plannedEventOrdinalFor(slot, category, kind2) {
-  const n = Number(/^density-v2-event-capacity-([0-9]{3})$/.exec(slot)?.[1]), c = CATEGORIES.indexOf(category), k = WORLD_EVENT_KINDS.indexOf(kind2);
-  return n > 0 && c >= 0 && k >= 0 ? BASE + c * 1e4 + k * 1e3 + n : null;
-}
-var plannedEventCategory = (n) => CATEGORIES[Math.floor((n - BASE) / 1e4)];
-var plannedEventFirstKind = (n) => WORLD_EVENT_KINDS[Math.floor(n % 1e4 / 1e3)];
-function unit2(text) {
-  let h = 2166136261;
-  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619);
-  h = Math.imul(h ^ h >>> 16, 2246822507);
-  h = Math.imul(h ^ h >>> 13, 3266489909);
-  return ((h ^ h >>> 16) >>> 0) / 4294967296;
-}
-var cache = /* @__PURE__ */ new Map();
-function plannedEventKindV1(seedHex, ordinal, episode, built = BUILT_EVENT_KINDS) {
-  if (!plannedEventOrdinal(ordinal) || !Number.isSafeInteger(episode) || episode < 0) return null;
-  const key5 = seedHex + "/" + ordinal + "/" + episode + "/" + built.join(",");
-  if (cache.has(key5)) return cache.get(key5);
-  let kind2 = plannedEventFirstKind(ordinal);
-  if (!built.includes(kind2)) kind2 = null;
-  const shares = WORLD_EVENT_SHARES[plannedEventCategory(ordinal)];
-  for (let e = 1; e <= episode && kind2; e++) {
-    const options = Object.keys(shares).filter((k) => built.includes(k)), pool = options.length > 1 ? options.filter((k) => k !== kind2) : options, total = pool.reduce((n, k) => n + shares[k], 0);
-    let roll = unit2(seedHex + "/planned-event/" + ordinal % 1e3 + "/" + e) * total;
-    kind2 = pool.find((k) => (roll -= shares[k]) < 0) ?? pool.at(-1);
-  }
-  if (cache.size > 4096) cache.clear();
-  cache.set(key5, kind2);
-  return kind2;
-}
-var SHRINE_VERSION = "cursed-shrine-v1";
-var SHRINE_POLICY = freezeWire({
-  version: SHRINE_VERSION,
-  // Three waves out of rifts by the pillars; the last member of wave 3 is the elite (rank S).
-  waves: [4, 5, 4],
-  elite: 12,
-  rank: "C",
-  firstWaveTicks: 60,
-  intermissionTicks: 150,
-  tellTicks: 45,
-  spawnSpacingTicks: 20,
-  families: ["sprout", "slime", "sprout", "slime", "slime", "sprout", "golem", "sprout", "slime", "sprout", "slime", "golem", "golem"],
-  // Stay inside the ring (px around the shrine's ground center). Outside longer than graceTicks reseals it: no reward.
-  circle: { rx: 176, ry: 100, oy: 6 },
-  graceTicks: 360,
-  triggerRadius: 96,
-  activeRadius: 768,
-  playerClearance: 48,
-  rifts: [[-92, 14], [92, 14], [0, 62], [-60, 52], [60, 52], [-120, 40], [120, 40]],
-  homes: [[-70, 40], [70, 40], [0, 80], [-110, 20], [110, 20], [-40, 70], [40, 70]],
-  // A random boon for every hero who fought here, for 3 minutes.
-  boonTicks: 10800,
-  boons: ["wrath", "insight", "fortune"],
-  reward: "one completion chest per eligible participant, plus a random boon",
-  reset: "renews like an ordinary pack, then may hold another event",
-  simulationHz: 60
-});
-var SHRINE_MEMBERS = SHRINE_POLICY.families.length;
-var BOON_EFFECTS = freezeWire({ wrath: { damagePercent: 30 }, insight: { xpPercent: 50 }, fortune: { qualityHundredths: 250 } });
 
 // src/shared/contracts/event_boons_v1.js
 var boonOfV1 = (s, playerId) => {
@@ -5744,6 +5794,7 @@ var poolFor = (biome, family2, tier) => {
   return { key: "woodland", ranged: ["thorn_wyrm"], melee: [] };
 };
 function contextFor(s, g) {
+  if (plannedEventGroupV1(s, g.groupId) && !recordFor(s, g.groupId)) return null;
   if (sporeOrdinal(s.d9World?.episodes[g.groupId]?.geography?.anchorOrdinal) || hollowOrdinal(s.d9World?.episodes[g.groupId]?.geography?.anchorOrdinal)) return null;
   const m = origin(s), site = Object.values(s.d9World.functionalSitesById).find((site2) => site2.floors?.some((f2) => f2.groupId === g.groupId)), floor = site?.floors.find((f2) => f2.groupId === g.groupId);
   if (floor) {
@@ -5871,7 +5922,7 @@ function adoptOrdinaryRosters(s, { groupIds = null, safe = true, freshEpisodes =
 }
 function validateOrdinaryRosterState(s) {
   const root = s.d9World?.ordinaryRoster, newIds = new Set(DUNGEON_MOBS_V1_PROFILES.map((p) => p.contentDefinitionId));
-  for (const g of Object.values(s.groupsById)) for (const id of g.entityIds) if (newIds.has(s.entitiesById[id].contentDefinitionId) && !isSiteEndLeaderV1(s, g.groupId, id)) requireContract(root && recordFor(s, g.groupId)?.substitutionsById[id]?.toProfileId === s.entitiesById[id].contentDefinitionId, "New ordinary actor lacks roster provenance");
+  for (const g of Object.values(s.groupsById)) for (const id of g.entityIds) if (newIds.has(s.entitiesById[id].contentDefinitionId) && !isSiteEndLeaderV1(s, g.groupId, id) && !plannedEventGroupV1(s, g.groupId)) requireContract(root && recordFor(s, g.groupId)?.substitutionsById[id]?.toProfileId === s.entitiesById[id].contentDefinitionId, "New ordinary actor lacks roster provenance");
   if (!root) return;
   closedRecord(root, ["version", "activatedTick"]);
   requireContract(hasWorldCombat(s) && root.version === ORDINARY_ROSTER_V1, "Unrecognized ordinary roster binding");
@@ -5961,6 +6012,7 @@ var voids = ["void_crawler", "void_spectre", "void_wraith", "rift_drifter"];
 var clockwork = ["clockwork_scarab", "star_weaver", "coin_elemental", "temporal_watcher", "clockwork_drone"];
 var cyber = ["neon_spider", "wireframe_orb", "cyber_wraith"];
 function contextFor2(s, g) {
+  if (plannedEventGroupV1(s, g.groupId) && !recordFor2(s, g.groupId)) return null;
   if (sporeOrdinal(s.d9World?.episodes[g.groupId]?.geography?.anchorOrdinal) || hollowOrdinal(s.d9World?.episodes[g.groupId]?.geography?.anchorOrdinal)) return null;
   const site = Object.values(s.d9World.functionalSitesById).find((site2) => site2.floors?.some((f2) => f2.groupId === g.groupId)), floor = site?.floors.find((f2) => f2.groupId === g.groupId);
   if (site && isWildernessStarterSiteV3(site)) return null;
@@ -6099,7 +6151,7 @@ function adoptOrdinaryRostersV2(s, { groupIds = null, safe = true, freshEpisodes
 }
 function validateOrdinaryRosterV2State(s) {
   const root = s.d9World?.ordinaryRosterV2, newIds = new Set([...DUNGEON_MOBS_V2_PROFILES, ...BIOME_CREATURES_V1_PROFILES].map((p) => p.contentDefinitionId));
-  for (const g of Object.values(s.groupsById)) for (const id of g.entityIds) if (newIds.has(s.entitiesById[id].contentDefinitionId) && !aegisMimicFor(s, id) && !isSiteEndLeaderV1(s, g.groupId, id)) requireContract(root && recordFor2(s, g.groupId)?.substitutionsById[id]?.toProfileId === s.entitiesById[id].contentDefinitionId, "New V2 ordinary actor lacks roster provenance");
+  for (const g of Object.values(s.groupsById)) for (const id of g.entityIds) if (newIds.has(s.entitiesById[id].contentDefinitionId) && !aegisMimicFor(s, id) && !isSiteEndLeaderV1(s, g.groupId, id) && !plannedEventGroupV1(s, g.groupId)) requireContract(root && recordFor2(s, g.groupId)?.substitutionsById[id]?.toProfileId === s.entitiesById[id].contentDefinitionId, "New V2 ordinary actor lacks roster provenance");
   if (!root) return;
   closedRecord(root, ["version", "activatedTick"]);
   requireContract(completeCatalog(s), "V2 ordinary roster requires the complete appended catalog");
@@ -8479,7 +8531,7 @@ var woodlandForestRole = (id) => typeof id === "string" && id.startsWith(WOODLAN
 var FOREST_STANDS_VERSION = "forest-stands-v2";
 var hasForestStands = (b) => b?.forestStandsVersion === FOREST_STANDS_VERSION;
 var FOREST_STANDS_PREFIX = FOREST_STANDS_VERSION + ":";
-var mix = (n) => {
+var mix2 = (n) => {
   n = Math.imul(n ^ n >>> 16, 2246822507);
   n = Math.imul(n ^ n >>> 13, 3266489909);
   return (n ^ n >>> 16) >>> 0;
@@ -8487,15 +8539,15 @@ var mix = (n) => {
 var standsHashText = (t) => {
   let n = 2166136261;
   for (let i = 0; i < t.length; i++) n = Math.imul(n ^ t.charCodeAt(i), 16777619);
-  return mix(n);
+  return mix2(n);
 };
-var lat = (k, x, y) => mix(Math.imul(x, 668265261) ^ Math.imul(y, 374761393) ^ k) / 4294967296;
+var lat = (k, x, y) => mix2(Math.imul(x, 668265261) ^ Math.imul(y, 374761393) ^ k) / 4294967296;
 var sm = (t) => t * t * (3 - 2 * t);
 function vnoise(k, x, y) {
   const gx = Math.floor(x), gy = Math.floor(y), u = sm(x - gx), v = sm(y - gy), a = lat(k, gx, gy), b = lat(k, gx + 1, gy), c = lat(k, gx, gy + 1), d = lat(k, gx + 1, gy + 1);
   return a + (b - a) * u + (c + (d - c) * u - (a + (b - a) * u)) * v;
 }
-var standsTileHash = (k, x, y) => mix(Math.imul(x, 2654435761) ^ Math.imul(y, 2246822519) ^ k);
+var standsTileHash = (k, x, y) => mix2(Math.imul(x, 2654435761) ^ Math.imul(y, 2246822519) ^ k);
 var clamp = (v) => v < 0 ? 0 : v > 1 ? 1 : v;
 var FOREST_STAND_PROFILES = Object.freeze({
   w: { glade: 0.36, forest: 0.5, core: 0.8, treeOpen: 0.34, treeForest: 0.92, lone: 0.05, massCore: 0.9, massForest: 0.06, cover: "fern", coverAt: 0.66, water: 0, height: 0 },
@@ -24541,6 +24593,20 @@ export {
   eventOrdinal,
   sporeOrdinal,
   worldEventProtectionV1,
+  eventAtSlotV1,
+  BUILT_EVENT_KINDS,
+  plannedEventOrdinal,
+  plannedEventOrdinalFor,
+  plannedEventKindV1,
+  SHRINE_VERSION,
+  SHRINE_POLICY,
+  SHRINE_MEMBERS,
+  plannedEventFamiliesV1,
+  NESTS_VERSION,
+  NEST_POLICY,
+  NEST_MEMBERS,
+  NEST_LABELS,
+  nestSkinOfV1,
   WILDERNESS_VERSION,
   WILDERNESS_HASH,
   hasWilderness,
@@ -24581,14 +24647,6 @@ export {
   rewardProgressionD9,
   prototypeRewardProgression,
   rewardProgression,
-  eventAtSlotV1,
-  BUILT_EVENT_KINDS,
-  plannedEventOrdinal,
-  plannedEventOrdinalFor,
-  plannedEventKindV1,
-  SHRINE_VERSION,
-  SHRINE_POLICY,
-  SHRINE_MEMBERS,
   boonOfV1,
   wrathDamageV1,
   insightXpV1,

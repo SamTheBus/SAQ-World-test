@@ -246,7 +246,7 @@ var RESHAPE_TIERS = Object.freeze({ "repeatable-slot:ruin:wetland:standard:067":
 var RESHAPE_VERSION = "world-reshape-v2";
 var RESHAPE_HASH = "ac15d856c2dbbe38203480172b32aae7d19ccdd61cef10eee16aade24a0900d2";
 var RESHAPE_HYDROLOGY_HASH = "e12fd26221c55e0357b674d4beaf28cc522ef5f9dde420b073373f0ef7be1b65";
-var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-events1";
+var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-events2";
 var hasWorldReshape = (b) => b?.reshapeVersion === RESHAPE_VERSION && b?.reshapeHash === RESHAPE_HASH;
 var reshapedSite = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_SITES, id) ? RESHAPE_SITES[id] : null;
 var reshapedTier = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_TIERS, id) ? RESHAPE_TIERS[id] : null;
@@ -4649,7 +4649,7 @@ async function createWoodlandPilotEventAnchors({ asset, binding, cx, cy, seed, s
   if (!hasWorldCombat(binding) || !hasWilderness(binding) || isSeededBindingV1(binding) || !asset.wildernessExtension?.eventCapacities) return [];
   const candidates = asset.wildernessExtension.eventCapacities;
   const result = [];
-  for (const event of [...WOODLAND_EVENT_PILOT_V3_7, ...SPORE_EVENTS, HOLLOW_EVENT]) {
+  for (const event of [...WOODLAND_EVENT_PILOT_V3_7, ...hasWorldReshape(binding) ? [] : SPORE_EVENTS, HOLLOW_EVENT]) {
     if (Math.floor(event.x / 32) !== cx || Math.floor(event.y / 26) !== cy) continue;
     const slot = candidates.find((s) => s.eventSlotId === event.slotId);
     if (!slot || WOODLAND_EVENT_PILOT_V3_7.includes(event) && slot.biome !== "woodland" || slot.position.x !== event.x || slot.position.y !== event.y || !slot.cells?.length)
@@ -4747,7 +4747,7 @@ function eventAtSlotV1(asset, eventSlotId) {
 }
 
 // src/shared/content/planned_events_v1.js
-var BUILT_EVENT_KINDS = Object.freeze(["cursed_shrine"]);
+var BUILT_EVENT_KINDS = Object.freeze(["cursed_shrine", "nests"]);
 var CATEGORIES = Object.freeze(["pathside", "backcountry", "deep_wild"]);
 var BASE = 1e5;
 var plannedEventOrdinal = (n) => Number.isSafeInteger(n) && n > BASE && n < BASE + CATEGORIES.length * 1e4 && n % 1e3 > 0 && Math.floor(n % 1e4 / 1e3) < WORLD_EVENT_KINDS.length;
@@ -4755,6 +4755,7 @@ function plannedEventOrdinalFor(slot, category, kind2) {
   const n = Number(/^density-v2-event-capacity-([0-9]{3})$/.exec(slot)?.[1]), c = CATEGORIES.indexOf(category), k = WORLD_EVENT_KINDS.indexOf(kind2);
   return n > 0 && c >= 0 && k >= 0 ? BASE + c * 1e4 + k * 1e3 + n : null;
 }
+var plannedEventGroupV1 = (s, groupId) => Boolean(s.d9World?.plannedWorld) && plannedEventOrdinal(s.d9World.episodes?.[groupId]?.geography?.anchorOrdinal);
 var plannedEventCategory = (n) => CATEGORIES[Math.floor((n - BASE) / 1e4)];
 var plannedEventFirstKind = (n) => WORLD_EVENT_KINDS[Math.floor(n % 1e4 / 1e3)];
 function unit(text) {
@@ -4773,7 +4774,9 @@ function plannedEventKindV1(seedHex, ordinal, episode, built = BUILT_EVENT_KINDS
   if (!built.includes(kind2)) kind2 = null;
   const shares = WORLD_EVENT_SHARES[plannedEventCategory(ordinal)];
   for (let e = 1; e <= episode && kind2; e++) {
-    const options = Object.keys(shares).filter((k) => built.includes(k)), pool = options.length > 1 ? options.filter((k) => k !== kind2) : options, total = pool.reduce((n, k) => n + shares[k], 0);
+    const options = Object.keys(shares).filter((k) => built.includes(k));
+    if (!options.length) break;
+    const pool = options.length > 1 ? options.filter((k) => k !== kind2) : options, total = pool.reduce((n, k) => n + shares[k], 0);
     let roll = unit(seedHex + "/planned-event/" + ordinal % 1e3 + "/" + e) * total;
     kind2 = pool.find((k) => (roll -= shares[k]) < 0) ?? pool.at(-1);
   }
@@ -4810,9 +4813,56 @@ var SHRINE_POLICY = freezeWire({
 });
 var SHRINE_MEMBERS = SHRINE_POLICY.families.length;
 var BOON_EFFECTS = freezeWire({ wrath: { damagePercent: 30 }, insight: { xpPercent: 50 }, fortune: { qualityHundredths: 250 } });
+var mix2 = (a, b, c = a) => [a, b, c, b, b, a, c, a, b, a, b, c];
+var PLANNED_EVENT_FAMILIES = freezeWire({
+  woodland: ["sprout", "slime", "sprout", "slime", "slime", "sprout", "golem", "sprout", "slime", "sprout", "slime", "golem", "sprout"],
+  grassland: [...mix2("tusk_boar", "field_scarecrow", "thorn_wyrm"), "tusk_boar"],
+  wetland: [...mix2("toxic_fly", "marsh_ghost"), "toxic_fly"],
+  upland: [...mix2("wyrmling", "gilded_scuttler"), "wyrmling"],
+  desert: [...mix2("sand_scarab", "dune_scorpion"), "sand_scarab"],
+  frostland: [...mix2("wyrmling", "gilded_scuttler"), "wyrmling"],
+  tropical: [...mix2("thorn_wyrm", "thorn_wyrm"), "thorn_wyrm"],
+  volcanic: [...mix2("hell_bat", "lava_serpent"), "lava_serpent"]
+});
+var plannedEventFamiliesV1 = (biome) => PLANNED_EVENT_FAMILIES[biome] ?? PLANNED_EVENT_FAMILIES.woodland;
+var NESTS_VERSION = "nests-v1";
+var NEST_POLICY = freezeWire({
+  version: NESTS_VERSION,
+  // Three nests around the sleeping Brood Mother (px from the clearing's ground center).
+  nests: [[-98, 10], [92, -4], [-6, 64]],
+  motherAt: [0, -6],
+  motherMember: 12,
+  // The rot creeps from the mother to the ring in rotTicks; the ring turns red from warnPercent.
+  circle: { rx: 176, ry: 100, oy: 6 },
+  rotTicks: 3600,
+  warnPercent: 80,
+  // A nest holds nestHealth times a rank C creature's health, more with more heroes.
+  nestHealth: 6,
+  partyHealthPercent: [100, 160, 220, 280],
+  nestRadius: 20,
+  // Defenders crawl out of the unburst nests, one every spawnSpacingTicks while fewer than living are out.
+  firstSpawnTicks: 45,
+  spawnSpacingTicks: 110,
+  living: 4,
+  exits: [[0, 26], [-28, 14], [28, 14], [0, -30], [-36, -10], [36, -10]],
+  wake: [[0, 96], [-44, 92], [44, 92], [52, 36], [-56, 40], [0, 36]],
+  triggerRadius: 96,
+  activeRadius: 768,
+  playerClearance: 48,
+  // A random boon for every hero who fought here, for 3 minutes.
+  boonTicks: 10800,
+  boons: ["wrath", "insight", "fortune"],
+  reward: "one completion chest per eligible participant plus a random boon; the woken Brood Mother adds her own drops",
+  reset: "nobody left nearby: the nests heal, the rot pulls back and living creatures go back into hiding",
+  simulationHz: 60
+});
+var NEST_MEMBERS = 13;
+var NEST_SKINS = freezeWire({ woodland: "woodland", grassland: "woodland", desert: "desert", volcanic: "desert", frostland: "frostland", upland: "frostland", wetland: "wetland", tropical: "wetland" });
+var NEST_LABELS = freezeWire({ woodland: "Spore Nest", desert: "Scarab Nest", frostland: "Frost Nest", wetland: "Bog Nest" });
 
 // src/shared/generation/planned_event_anchors_v1.js
 var FIXED = new Set([...WOODLAND_EVENT_PILOT_V3_7, ...SPORE_EVENTS, HOLLOW_EVENT].map((e) => e.slotId));
+var FIXED_RESHAPED = new Set([...WOODLAND_EVENT_PILOT_V3_7, HOLLOW_EVENT].map((e) => e.slotId));
 var stable2 = (text) => {
   let h = 2166136261;
   for (const c of text) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0;
@@ -4825,14 +4875,18 @@ function open(tile, x, y, landmassId) {
   }
   return true;
 }
-async function createPlannedEventAnchorsV1({ asset, binding, cx, cy, seed, sha256, tile, regularAnchors = [], otherAnchors = [], built = BUILT_EVENT_KINDS }) {
+async function createPlannedEventAnchorsV1({ asset, binding, cx, cy, seed, sha256, tile, biome = "woodland", regularAnchors = [], otherAnchors = [], built = BUILT_EVENT_KINDS }) {
   if (!built.length || !hasWorldCombat(binding) || !hasWilderness(binding) || !asset.wildernessExtension?.eventCapacities) return [];
-  const result = [], fixed = isSeededBindingV1(binding) ? /* @__PURE__ */ new Set() : FIXED, safe = worldEventProtectionV1(asset), local = (x, y) => ({ x: (x - cx * 32 + 0.5) * 32, y: (y - cy * 26 + 0.5) * 32 });
+  const result = [], fixed = isSeededBindingV1(binding) ? /* @__PURE__ */ new Set() : hasWorldReshape(binding) ? FIXED_RESHAPED : FIXED, families = plannedEventFamiliesV1(biome), safe = worldEventProtectionV1(asset), local = (x, y) => ({ x: (x - cx * 32 + 0.5) * 32, y: (y - cy * 26 + 0.5) * 32 });
   for (const slot of asset.wildernessExtension.eventCapacities) {
     const { x, y } = slot.position;
     if (Math.floor(x / 32) !== cx || Math.floor(y / 26) !== cy || fixed.has(slot.eventSlotId)) continue;
     const kind2 = eventAtSlotV1(asset, slot.eventSlotId)?.event, ordinal = plannedEventOrdinalFor(slot.eventSlotId, slot.category, kind2);
     if (!built.includes(kind2) || ordinal === null || !safe(x, y) || !open(tile, x, y, slot.landmassId)) continue;
+    if (!NEST_POLICY.nests.every(([dx, dy]) => {
+      const t = tile(x + Math.round(dx / 32), y + Math.round(dy / 32));
+      return t.collision === "1" && t.landmassId === slot.landmassId;
+    })) continue;
     const center2 = local(x, y), others = [...regularAnchors, ...otherAnchors, ...result].map((a) => a.position);
     const spots = [];
     for (let dy = -11; dy <= 11; dy++) for (let dx = -11; dx <= 11; dx++) {
@@ -4846,10 +4900,10 @@ async function createPlannedEventAnchorsV1({ asset, binding, cx, cy, seed, sha25
     const members = [];
     for (const s of spots) {
       if (members.some((m) => Math.hypot(m.position.x - s.position.x, m.position.y - s.position.y) < 40)) continue;
-      members.push({ family: SHRINE_POLICY.families[members.length], position: s.position });
-      if (members.length === SHRINE_POLICY.families.length) break;
+      members.push({ family: families[members.length], position: s.position });
+      if (members.length === families.length) break;
     }
-    if (members.length !== SHRINE_POLICY.families.length) continue;
+    if (members.length !== families.length) continue;
     const identity = await worldIdentity(seed, "anchor", ["planned-event-v1", slot.eventSlotId], sha256);
     result.push({ id: identity.id, ordinal, position: center2, rank: SHRINE_POLICY.rank, combatVersion: WORLD_COMBAT_VERSION, members });
   }
@@ -8585,7 +8639,7 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     const edges = { north: { cells: collision2[0], terrain: visual2[0] }, south: { cells: collision2[25], terrain: visual2[25] }, west: { cells: collision2.map((r) => r[0]).join(""), terrain: visual2.map((r) => r[0]).join("") }, east: { cells: collision2.map((r) => r[31]).join(""), terrain: visual2.map((r) => r[31]).join("") } };
     const regularAnchors = packAnchors(cx, cy, identity.digest);
     const eventAnchors = await createWoodlandPilotEventAnchors({ asset, binding, cx, cy, seed, sha256, tile, regularAnchors });
-    const plannedAnchors = await createPlannedEventAnchorsV1({ asset, binding, cx, cy, seed, sha256, tile, regularAnchors, otherAnchors: eventAnchors });
+    const plannedAnchors = await createPlannedEventAnchorsV1({ asset, binding, cx, cy, seed, sha256, tile, biome, regularAnchors, otherAnchors: eventAnchors });
     return freezeWire({ version: PLANNED_WORLD_VERSION, identity, chunkX, chunkY, region: { version: asset.version, regionX: String(Math.floor(cx / 2)), regionY: String(Math.floor(cy / 2)), biome, name: hasStarterVillage(binding) && cx >= sx && cx <= sx + 1 && cy >= sy && cy <= sy + 1 ? STARTER_VILLAGE_NAME + " \xB7 Woodland \xB7 Band 1" : biome === "ocean" ? "Open ocean" : biome[0].toUpperCase() + biome.slice(1) + " \xB7 Band " + c.band, minimumLevel: [1, 1, 6, 11, 21, 41][c.band] ?? 1, originWidthChunks: 0, originHeightChunks: 0 }, collision: { tileSize: 32, width: 32, height: 26, tiles: collision2 }, visual: { terrain: visual2, biomes, blockers: blockers2, ...caveArt.decorations.length ? { decorations: caveArt.decorations } : {}, ...stands ? { stands: standRows } : {}, route: { centerline, clearance, ...["planned-world-shoreline-v2", "planned-world-water-v3"].includes(asset.version) ? { mapFeatures: mapRows } : {} } }, edges, anchors: [...regularAnchors, ...eventAnchors, ...plannedAnchors], sites: reserved?.socket.entrance.chunkX === chunkX && reserved?.socket.entrance.chunkY === chunkY ? [reserved.socket] : [] });
   }
   let hollowHome = null;
@@ -11757,11 +11811,37 @@ function validateShrineV1(r) {
 }
 var shrineReadyV1 = (r) => (r.shrine.sealed || r.shrine.launchedWaves === 3) && r.stages.every((t) => ["defeated", "cancelled"].includes(t.phase));
 
+// src/shared/contracts/nests_v1.js
+var MOTHER = NEST_POLICY.motherMember;
+var nestHealthV1 = (level, party2) => combatInteger(multiplyCombat(worldEnemyStats(level, "C").maxHp, NEST_POLICY.nestHealth * NEST_POLICY.partyHealthPercent[party2 - 1], 100));
+var burst = (h) => h.hp.every((hp) => compareCombat(hp, 0) === 0);
+var nestTargetableV1 = (r, n) => r.status === "active" && !r.nest.waiting && r.stages[MOTHER].phase === "pending" && compareCombat(r.nest.hp[n], 0) > 0;
+var nestsReadyV1 = (r) => (burst(r.nest) || r.stages[MOTHER].phase === "defeated") && r.stages.every((t) => ["defeated", "cancelled"].includes(t.phase));
+function validateNestsV1(r) {
+  requireContract(r.kind === "nests" && r.rulesVersion === NESTS_VERSION && r.stages.length === NEST_MEMBERS, "Nest policy/membership");
+  closedRecord(r.nest, ["level", "partySize", "hp", "maxHp", "rotStart", "nextSpawn", "waiting", "resets", "boon"]);
+  const h = r.nest, mother = r.stages[MOTHER].phase;
+  safeInteger(h.partySize, 1, 4);
+  requireContract(compareCombat(h.maxHp, nestHealthV1(h.level, h.partySize)) === 0, "Nest health scaling");
+  requireContract(Array.isArray(h.hp) && h.hp.length === 3 && h.hp.every((hp) => compareCombat(hp, 0) >= 0 && compareCombat(hp, h.maxHp) <= 0), "Nest health");
+  safeInteger(h.rotStart, 0, r.elapsedTicks);
+  safeInteger(h.nextSpawn);
+  safeInteger(h.resets);
+  requireContract(typeof h.waiting === "boolean" && (h.boon === null || NEST_POLICY.boons.includes(h.boon)), "Nest state");
+  requireContract(r.stages.every((t) => ["pending", "hatched", "defeated", "cancelled"].includes(t.phase)), "Nest stage");
+  requireContract(!["hatched", "defeated"].includes(mother) || r.elapsedTicks - h.rotStart >= NEST_POLICY.rotTicks, "Brood Mother woke early");
+  requireContract(mother !== "cancelled" || burst(h), "Brood Mother withered early");
+  if (h.waiting) requireContract(mother === "pending" && r.stages.every((t) => t.phase !== "hatched") && h.hp.every((hp) => compareCombat(hp, h.maxHp) === 0), "Waiting nests");
+  requireContract(r.status === "completed" === (h.boon !== null), "Nest boon");
+  if (r.status === "completed") requireContract(nestsReadyV1(r), "Incomplete nest completion");
+}
+
 // src/shared/contracts/world_events_v1.js
 var PLANNED_LEDGER_VERSION = "world-events-planned-v1";
-var WAVES = ["spore", "hollow", "cursed_shrine"];
-var CHEST0 = ["hollow", "cursed_shrine"];
-var membersOf = (kind2) => kind2 === "spore" ? 12 : kind2 === "hollow" ? 13 : kind2 === "cursed_shrine" ? SHRINE_MEMBERS : 0;
+var WAVES = ["spore", "hollow", "cursed_shrine", "nests"];
+var CHEST0 = ["hollow", "cursed_shrine", "nests"];
+var running = (r) => r.status === "active" && !r.nest?.waiting;
+var membersOf = (kind2) => kind2 === "spore" ? 12 : kind2 === "hollow" ? 13 : kind2 === "cursed_shrine" ? SHRINE_MEMBERS : kind2 === "nests" ? NEST_MEMBERS : 0;
 function validateBoons(b) {
   requireContract(b && typeof b === "object" && !Array.isArray(b) && Object.keys(b).length <= 8, "Boon ledger");
   for (const [id, row] of Object.entries(b)) {
@@ -11788,7 +11868,7 @@ function validateWorldEvents(root) {
   if (w.boons) validateBoons(w.boons);
   let active2 = 0;
   for (const [id, r] of Object.entries(w.records)) {
-    closedRecord(r, ["groupId", "kind", "status", "startedTick", "elapsedTicks", "eligiblePlayerIds", "claimedPlayerIds", "stages"], ["rulesVersion", "partySize", "podLevel", "pods", "pressure", "hollow", "shrine"]);
+    closedRecord(r, ["groupId", "kind", "status", "startedTick", "elapsedTicks", "eligiblePlayerIds", "claimedPlayerIds", "stages"], ["rulesVersion", "partySize", "podLevel", "pods", "pressure", "hollow", "shrine", "nest"]);
     if (r.kind === "hollow") {
       requireContract([HOLLOW_LEDGER_VERSION, PLANNED_LEDGER_VERSION].includes(w.version), "Hollow ledger successor required");
       validateHollowV1(r);
@@ -11797,11 +11877,15 @@ function validateWorldEvents(root) {
       requireContract(w.version === PLANNED_LEDGER_VERSION, "Planned ledger successor required");
       validateShrineV1(r);
     } else requireContract(!r.shrine, "Unexpected shrine extension");
+    if (r.kind === "nests") {
+      requireContract(w.version === PLANNED_LEDGER_VERSION, "Planned ledger successor required");
+      validateNestsV1(r);
+    } else requireContract(!r.nest, "Unexpected nest extension");
     validateSporePressureV3(r);
     if (isSporeV2(r)) validateSporePodsV2(r);
     else if (!CHEST0.includes(r.kind)) requireContract(!["rulesVersion", "partySize", "podLevel", "pods"].some((k) => Object.hasOwn(r, k)), "Unknown event extension");
-    requireContract(id === r.groupId && /^ordinary:[a-f0-9]{32}$/.test(id) && ["spore", "legacy", "hollow", "cursed_shrine"].includes(r.kind) && ["active", "completed"].includes(r.status), "Event identity/status");
-    active2 += Number(r.status === "active");
+    requireContract(id === r.groupId && /^ordinary:[a-f0-9]{32}$/.test(id) && ["spore", "legacy", "hollow", "cursed_shrine", "nests"].includes(r.kind) && ["active", "completed"].includes(r.status), "Event identity/status");
+    active2 += Number(running(r));
     safeInteger(r.startedTick);
     safeInteger(r.elapsedTicks);
     for (const list of [r.eligiblePlayerIds, r.claimedPlayerIds]) requireContract(Array.isArray(list) && list.length >= 0 && list.length <= 4 && new Set(list).size === list.length && list.every((id2) => /^ply:[a-f0-9]{32}$/.test(id2)), "Event participants");
@@ -11830,7 +11914,7 @@ function eventPersonalClaim(s, r, playerId) {
 }
 function eventReadyToClear(s, id) {
   const r = eventRecord(s, id);
-  return !eventKind(s, id) || Boolean(r && (r.kind === "legacy" || (r.kind === "hollow" ? hollowReadyV1(r) : r.kind === "cursed_shrine" ? shrineReadyV1(r) : [0, 1, 2].every((n) => podUsed(s, id, n)) && r.stages.every((t) => ["cancelled", "defeated"].includes(t.phase)))));
+  return !eventKind(s, id) || Boolean(r && (r.kind === "legacy" || (r.kind === "hollow" ? hollowReadyV1(r) : r.kind === "cursed_shrine" ? shrineReadyV1(r) : r.kind === "nests" ? nestsReadyV1(r) : [0, 1, 2].every((n) => podUsed(s, id, n)) && r.stages.every((t) => ["cancelled", "defeated"].includes(t.phase)))));
 }
 function validateWorldEventsState(s) {
   const w = s.d9World?.worldEvents;
@@ -11861,15 +11945,16 @@ function validateWorldEventsProgress(a, b) {
   const order2 = { pending: 0, queued: 1, airborne: 2, growing: 3, hatched: 4, cancelled: 5, defeated: 5 };
   for (const [id, r] of Object.entries(prior.records)) {
     const n = next.records[id];
-    if (!n && r.kind === "cursed_shrine" && r.status === "completed" && b.encounterEconomy?.groups[id]?.episode > a.encounterEconomy?.groups[id]?.episode) continue;
+    if (!n && ["cursed_shrine", "nests"].includes(r.kind) && r.status === "completed" && b.encounterEconomy?.groups[id]?.episode > a.encounterEconomy?.groups[id]?.episode) continue;
     if (r.kind === "cursed_shrine") requireContract(n && n.shrine && n.shrine.launchedWaves >= r.shrine.launchedWaves && (!r.shrine.sealed || n.shrine.sealed) && (r.shrine.boon === null || n.shrine.boon === r.shrine.boon), "Shrine history regressed");
+    if (r.kind === "nests") requireContract(n && n.nest && n.nest.resets >= r.nest.resets && (n.nest.resets > r.nest.resets || n.nest.hp.every((hp, i) => compareCombat(hp, r.nest.hp[i]) <= 0)) && (r.nest.boon === null || n.nest.boon === r.nest.boon), "Nest history regressed");
     if (r.kind === "hollow") requireContract(n && n.rulesVersion === r.rulesVersion && n.hollow.policyHash === r.hollow.policyHash && n.hollow.launchedWaves >= r.hollow.launchedWaves, "Hollow history regressed");
     validateSporePressureProgressV3(r, n, a.tick, b.tick);
     if (isSporeV2(r)) validateSporePodsProgressV2(r, n);
     else requireContract(!isSporeV2(n), "Legacy event cannot change policy during play");
     requireContract(n && n.groupId === id && n.kind === r.kind && n.startedTick === r.startedTick && n.elapsedTicks >= r.elapsedTicks && r.eligiblePlayerIds.every((id2) => n.eligiblePlayerIds.includes(id2)) && r.claimedPlayerIds.every((id2) => n.claimedPlayerIds.includes(id2)) && (r.status !== "completed" || n.status === "completed"), "Event history regressed");
     const generations = validateSporeGenerationProgressV4(r, n);
-    requireContract(r.stages.every((t, i) => adoptingSporeV5(r, n) && t.phase === "queued" && n.stages[i].phase === "pending" && n.stages[i].generation === t.generation || generations && n.stages[i].generation > t.generation || order2[n.stages[i].phase] >= order2[t.phase] && (!["cancelled", "defeated"].includes(t.phase) || n.stages[i].phase === t.phase)), "Event growth regressed");
+    requireContract(r.stages.every((t, i) => r.kind === "nests" && n.nest.resets > r.nest.resets && t.phase === "hatched" && n.stages[i].phase === "pending" || adoptingSporeV5(r, n) && t.phase === "queued" && n.stages[i].phase === "pending" && n.stages[i].generation === t.generation || generations && n.stages[i].generation > t.generation || order2[n.stages[i].phase] >= order2[t.phase] && (!["cancelled", "defeated"].includes(t.phase) || n.stages[i].phase === t.phase)), "Event growth regressed");
   }
 }
 
@@ -12892,6 +12977,7 @@ var poolFor = (biome, family2, tier2) => {
   return { key: "woodland", ranged: ["thorn_wyrm"], melee: [] };
 };
 function contextFor(s, g) {
+  if (plannedEventGroupV1(s, g.groupId) && !recordFor(s, g.groupId)) return null;
   if (sporeOrdinal(s.d9World?.episodes[g.groupId]?.geography?.anchorOrdinal) || hollowOrdinal(s.d9World?.episodes[g.groupId]?.geography?.anchorOrdinal)) return null;
   const m = origin(s), site = Object.values(s.d9World.functionalSitesById).find((site2) => site2.floors?.some((f2) => f2.groupId === g.groupId)), floor = site?.floors.find((f2) => f2.groupId === g.groupId);
   if (floor) {
@@ -13023,7 +13109,7 @@ function restoreOrdinaryRosterProfiles(s, groupId) {
 }
 function validateOrdinaryRosterState(s) {
   const root = s.d9World?.ordinaryRoster, newIds = new Set(DUNGEON_MOBS_V1_PROFILES.map((p) => p.contentDefinitionId));
-  for (const g of Object.values(s.groupsById)) for (const id of g.entityIds) if (newIds.has(s.entitiesById[id].contentDefinitionId) && !isSiteEndLeaderV1(s, g.groupId, id)) requireContract(root && recordFor(s, g.groupId)?.substitutionsById[id]?.toProfileId === s.entitiesById[id].contentDefinitionId, "New ordinary actor lacks roster provenance");
+  for (const g of Object.values(s.groupsById)) for (const id of g.entityIds) if (newIds.has(s.entitiesById[id].contentDefinitionId) && !isSiteEndLeaderV1(s, g.groupId, id) && !plannedEventGroupV1(s, g.groupId)) requireContract(root && recordFor(s, g.groupId)?.substitutionsById[id]?.toProfileId === s.entitiesById[id].contentDefinitionId, "New ordinary actor lacks roster provenance");
   if (!root) return;
   closedRecord(root, ["version", "activatedTick"]);
   requireContract(hasWorldCombat(s) && root.version === ORDINARY_ROSTER_V1, "Unrecognized ordinary roster binding");
@@ -13081,6 +13167,7 @@ var voids = ["void_crawler", "void_spectre", "void_wraith", "rift_drifter"];
 var clockwork = ["clockwork_scarab", "star_weaver", "coin_elemental", "temporal_watcher", "clockwork_drone"];
 var cyber = ["neon_spider", "wireframe_orb", "cyber_wraith"];
 function contextFor2(s, g) {
+  if (plannedEventGroupV1(s, g.groupId) && !recordFor2(s, g.groupId)) return null;
   if (sporeOrdinal(s.d9World?.episodes[g.groupId]?.geography?.anchorOrdinal) || hollowOrdinal(s.d9World?.episodes[g.groupId]?.geography?.anchorOrdinal)) return null;
   const site = Object.values(s.d9World.functionalSitesById).find((site2) => site2.floors?.some((f2) => f2.groupId === g.groupId)), floor = site?.floors.find((f2) => f2.groupId === g.groupId);
   if (site && isWildernessStarterSiteV3(site)) return null;
@@ -13223,7 +13310,7 @@ function restoreOrdinaryRosterV2Profiles(s, groupId) {
 }
 function validateOrdinaryRosterV2State(s) {
   const root = s.d9World?.ordinaryRosterV2, newIds = new Set([...DUNGEON_MOBS_V2_PROFILES, ...BIOME_CREATURES_V1_PROFILES].map((p) => p.contentDefinitionId));
-  for (const g of Object.values(s.groupsById)) for (const id of g.entityIds) if (newIds.has(s.entitiesById[id].contentDefinitionId) && !aegisMimicFor(s, id) && !isSiteEndLeaderV1(s, g.groupId, id)) requireContract(root && recordFor2(s, g.groupId)?.substitutionsById[id]?.toProfileId === s.entitiesById[id].contentDefinitionId, "New V2 ordinary actor lacks roster provenance");
+  for (const g of Object.values(s.groupsById)) for (const id of g.entityIds) if (newIds.has(s.entitiesById[id].contentDefinitionId) && !aegisMimicFor(s, id) && !isSiteEndLeaderV1(s, g.groupId, id) && !plannedEventGroupV1(s, g.groupId)) requireContract(root && recordFor2(s, g.groupId)?.substitutionsById[id]?.toProfileId === s.entitiesById[id].contentDefinitionId, "New V2 ordinary actor lacks roster provenance");
   if (!root) return;
   closedRecord(root, ["version", "activatedTick"]);
   requireContract(completeCatalog(s), "V2 ordinary roster requires the complete appended catalog");
@@ -18557,7 +18644,7 @@ function economicResources(s, m, playerId = null, spaceInstanceId = null) {
   const layout = encounterResourceLayout(s, m);
   return Object.values(layout).flat().filter((r) => eventResourceVisible(s, r) && (spaceInstanceId === null || r.spaceInstanceId === spaceInstanceId)).map((r) => {
     const group = s.groupsById[r.groupId], economy = s.encounterEconomy.groups[group.groupId], episode = economy.episode, sourceEntityId = episodeRewardId(group.groupId, episode, r.kind, r.ordinal), rewardClass = rewardClassForCompletionResourceD13D_C(s, r), claim = playerId ? eventPersonalClaim(s, r, playerId) ?? personalFinaleClaimD13D_G1(s, r.groupId, sourceEntityId, playerId) : null, record2 = economy.personalCompletionClaimsBySourceId?.[sourceEntityId], used = claim ? claim.claimed : record2 ? record2.eligiblePlayerIds.every((id) => record2.claimedByPlayerId[id]) : Boolean(economy.usedResources[sourceEntityId]);
-    return { ...r, ...eventKind(s, r.groupId) === "spore" && r.ordinal <= 3 ? { position: podPositionV2(s, r.groupId, r.ordinal, r.position) } : {}, ...eventKind(s, r.groupId) === "spore" && r.ordinal < 3 ? { eventPod: true } : {}, ...["spore", "hollow", "cursed_shrine"].includes(eventKind(s, r.groupId)) && r.kind === "chest" ? { eventChest: true, ...eventKind(s, r.groupId) === "cursed_shrine" ? { altarChest: true } : {} } : {}, episode, sourceEntityId, ...rewardClass ? { rewardClass } : {}, ...claim ? { personalClaim: claim } : {}, used };
+    return { ...r, ...eventKind(s, r.groupId) === "spore" && r.ordinal <= 3 ? { position: podPositionV2(s, r.groupId, r.ordinal, r.position) } : {}, ...eventKind(s, r.groupId) === "spore" && r.ordinal < 3 ? { eventPod: true } : {}, ...["spore", "hollow", "cursed_shrine", "nests"].includes(eventKind(s, r.groupId)) && r.kind === "chest" ? { eventChest: true, ...["cursed_shrine", "nests"].includes(eventKind(s, r.groupId)) ? { altarChest: true } : {} } : {}, episode, sourceEntityId, ...rewardClass ? { rewardClass } : {}, ...claim ? { personalClaim: claim } : {}, used };
   });
 }
 function validateEncounterEconomy(s, m) {
@@ -20155,6 +20242,13 @@ var prefix = "event-pod/";
 function podCombatTargetsV4(s) {
   const out = [];
   for (const r of Object.values(s.d9World?.worldEvents?.records ?? {})) {
+    if (r.kind === "nests") {
+      if (r.status !== "active" || r.nest.waiting) continue;
+      const d = s.d9World.runtime.groups.find((g) => g.groupId === r.groupId);
+      if (!d) continue;
+      NEST_POLICY.nests.forEach(([x, y], n) => out.push({ kind: "actor", entityId: prefix + r.groupId + "/" + n, team: "hostile", alive: nestTargetableV1(r, n), hp: r.nest.hp[n], maxHp: r.nest.maxHp, position: { x: d.anchor.x + x, y: d.anchor.y + y }, hullRadius: NEST_POLICY.nestRadius, combatRadius: NEST_POLICY.nestRadius, residency: { spaceInstanceId: s.overworldInstanceId }, podResource: { groupId: r.groupId, ordinal: n, nest: true } }));
+      continue;
+    }
     if (r.kind !== "spore" || !isSporePodV2(s, r.groupId, 0)) continue;
     for (let n = 0; n < 3; n++) {
       const p = r.pods[n], position2 = podPositionV2(s, r.groupId, n, null);
@@ -20261,7 +20355,7 @@ function woodlandRegionNameD12_2(rootIndex, endingIndex) {
 }
 
 // src/shared/generation/endless_world_d9.js
-var mix2 = (text) => {
+var mix3 = (text) => {
   let h = 2166136261;
   for (let i = 0; i < text.length; i++) {
     h ^= text.charCodeAt(i);
@@ -20279,7 +20373,7 @@ var BIOME_CODES2 = { woodland: "w", "rocky-uplands": "r", marsh: "m" };
 function biomeAtD9(seed, tileX, tileY) {
   const x = BigInt(tileX), y = BigInt(tileY), gx = floorDiv(x, BIOME_FIELD_SPAN), gy = floorDiv(y, BIOME_FIELD_SPAN), ix = Number(x - gx * BIOME_FIELD_SPAN), iy = Number(y - gy * BIOME_FIELD_SPAN), s = Number(BIOME_FIELD_SPAN);
   const score = (biome) => {
-    const sample = (dx, dy) => mix2(D9_PROFILE.version + "/" + seed + "/biome-field/" + biome + "/" + (gx + BigInt(dx)) + "/" + (gy + BigInt(dy))) % 65536, a = sample(0, 0) * (s - ix) + sample(1, 0) * ix, b = sample(0, 1) * (s - ix) + sample(1, 1) * ix;
+    const sample = (dx, dy) => mix3(D9_PROFILE.version + "/" + seed + "/biome-field/" + biome + "/" + (gx + BigInt(dx)) + "/" + (gy + BigInt(dy))) % 65536, a = sample(0, 0) * (s - ix) + sample(1, 0) * ix, b = sample(0, 1) * (s - ix) + sample(1, 1) * ix;
     return a * (s - iy) + b * iy;
   };
   return D9_PROFILE.biomes.map((b) => [b, score(b)]).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0][0];
@@ -20287,10 +20381,10 @@ function biomeAtD9(seed, tileX, tileY) {
 function regionDescriptorD9(seed, x, y, { originWidthChunks = 4, originHeightChunks = 4 } = {}) {
   x = signedAddress(x);
   y = signedAddress(y);
-  const key9 = D9_PROFILE.version + "/" + seed + "/region/" + x + "/" + y, roll = mix2(key9 + "/floor") % 100, rx = BigInt(x), ry = BigInt(y), distance5 = max(abs2(rx), abs2(ry)), octave = distance5 > 0n ? distance5.toString(2).length - 1 : 0;
+  const key9 = D9_PROFILE.version + "/" + seed + "/region/" + x + "/" + y, roll = mix3(key9 + "/floor") % 100, rx = BigInt(x), ry = BigInt(y), distance5 = max(abs2(rx), abs2(ry)), octave = distance5 > 0n ? distance5.toString(2).length - 1 : 0;
   const biome = biomeAtD9(seed, rx * BigInt(D9_PROFILE.regionChunks * 32) + BigInt(D9_PROFILE.regionChunks * 16), ry * BigInt(D9_PROFILE.regionChunks * 26) + BigInt(D9_PROFILE.regionChunks * 13)), low = roll < D9_PROFILE.lowFloorPercent, anomaly = !low && roll < D9_PROFILE.lowFloorPercent + D9_PROFILE.anomalyPercent;
-  const shift = low ? 0 : Math.max(0, Math.floor(octave / 4) - 1), maxBand = anomaly ? 4 : Math.min(4, 1 + Math.floor(octave / 2)), band = low ? 0 : anomaly ? 3 + mix2(key9 + "/anomaly") % 2 : mix2(key9 + "/band") % (maxBand + 1), [min, maxValue] = D9_PROFILE.floorBands[band], factor = 1n << BigInt(shift), base = BigInt(min + mix2(key9 + "/within") % (maxValue - min + 1));
-  const floor = progressionWire(base * factor), names2 = { "rocky-uplands": ["Stone", "Amber", "Slate", "High"], marsh: ["Rain", "Mist", "Reed", "Fen"] }, ends = { "rocky-uplands": ["fold", "ridge", "heights", "crag"], marsh: ["mere", "fen", "marsh", "water"] }, name = biome === "woodland" ? woodlandRegionNameD12_2(mix2(key9 + "/name") % 4, mix2(key9 + "/end") % 4) : names2[biome][mix2(key9 + "/name") % 4] + ends[biome][mix2(key9 + "/end") % 4];
+  const shift = low ? 0 : Math.max(0, Math.floor(octave / 4) - 1), maxBand = anomaly ? 4 : Math.min(4, 1 + Math.floor(octave / 2)), band = low ? 0 : anomaly ? 3 + mix3(key9 + "/anomaly") % 2 : mix3(key9 + "/band") % (maxBand + 1), [min, maxValue] = D9_PROFILE.floorBands[band], factor = 1n << BigInt(shift), base = BigInt(min + mix3(key9 + "/within") % (maxValue - min + 1));
+  const floor = progressionWire(base * factor), names2 = { "rocky-uplands": ["Stone", "Amber", "Slate", "High"], marsh: ["Rain", "Mist", "Reed", "Fen"] }, ends = { "rocky-uplands": ["fold", "ridge", "heights", "crag"], marsh: ["mere", "fen", "marsh", "water"] }, name = biome === "woodland" ? woodlandRegionNameD12_2(mix3(key9 + "/name") % 4, mix3(key9 + "/end") % 4) : names2[biome][mix3(key9 + "/name") % 4] + ends[biome][mix3(key9 + "/end") % 4];
   return freezeWire({ version: D9_PROFILE.version, regionX: x, regionY: y, biome, name, minimumLevel: floor, originWidthChunks, originHeightChunks });
 }
 function chunkRegionD9(seed, x, y, origin2) {
@@ -20304,10 +20398,10 @@ function sharedEdgeD9(seed, x, y, side) {
   const vertical = side === "east" || side === "west";
   if (side === "east") x++;
   if (side === "south") y++;
-  const key9 = D9_PROFILE.version + "/" + seed + "/edge/" + (vertical ? "v" : "h") + "/" + x + "/" + y, count = vertical ? 26 : 32, center2 = 4 + mix2(key9) % (count - 8), cells3 = Array.from({ length: count }, (_, i) => Math.abs(i - center2) <= 2 ? "1" : "2"), terrain2 = cells3.map((v, i) => Math.abs(i - center2) <= 1 ? "p" : "g");
+  const key9 = D9_PROFILE.version + "/" + seed + "/edge/" + (vertical ? "v" : "h") + "/" + x + "/" + y, count = vertical ? 26 : 32, center2 = 4 + mix3(key9) % (count - 8), cells3 = Array.from({ length: count }, (_, i) => Math.abs(i - center2) <= 2 ? "1" : "2"), terrain2 = cells3.map((v, i) => Math.abs(i - center2) <= 1 ? "p" : "g");
   for (const i of [0, count - 1]) {
     const vx = x + (vertical ? 0n : i === 0 ? 0n : 1n), vy = y + (vertical ? i === 0 ? 0n : 1n : 0n);
-    cells3[i] = mix2(D9_PROFILE.version + "/" + seed + "/corner/" + vx + "/" + vy) % 9 === 0 ? "2" : "1";
+    cells3[i] = mix3(D9_PROFILE.version + "/" + seed + "/corner/" + vx + "/" + vy) % 9 === 0 ? "2" : "1";
     terrain2[i] = "g";
   }
   return freezeWire({ version: "world-edge-d9-v1", key: key9, axis: vertical ? "vertical" : "horizontal", center: center2, cells: cells3.join(""), terrain: terrain2.join("") });
@@ -20323,7 +20417,7 @@ async function generateChunkD9({ seed, chunkX, chunkY, origin: origin2 }, sha256
   for (let y = 0; y < 26; y++) {
     const row = [], art = [], biomeRow = [];
     for (let x = 0; x < 32; x++) {
-      const tx = X + BigInt(x), ty = Y + BigInt(y), biome = biomeAtD9(seed, tx, ty), field2 = mix2(seed + "/landform/" + floorDiv(tx, 5n) + "/" + floorDiv(ty, 5n)), detail = mix2(seed + "/detail/" + tx + "/" + ty), density = biome === "woodland" ? 19 : biome === "marsh" ? 12 : 8, blocked2 = field2 % 100 < density && detail % 5 !== 0;
+      const tx = X + BigInt(x), ty = Y + BigInt(y), biome = biomeAtD9(seed, tx, ty), field2 = mix3(seed + "/landform/" + floorDiv(tx, 5n) + "/" + floorDiv(ty, 5n)), detail = mix3(seed + "/detail/" + tx + "/" + ty), density = biome === "woodland" ? 19 : biome === "marsh" ? 12 : 8, blocked2 = field2 % 100 < density && detail % 5 !== 0;
       row.push(blocked2 ? "2" : "1");
       art.push("g");
       biomeRow.push(BIOME_CODES2[biome]);
@@ -20381,11 +20475,11 @@ async function generateChunkD9({ seed, chunkX, chunkY, origin: origin2 }, sha256
       carve(x, y, kind2);
     }
   }, elbow = (from, to, kind2, axis) => {
-    const n = mix2(identity.digest + "/route/" + from.x + "/" + from.y + "/" + to.x + "/" + to.y), bend = axis === "v" ? { x: from.x, y: Math.max(4, Math.min(21, Math.round((from.y + to.y) / 2) + (n % 5 - 2))) } : { x: Math.max(4, Math.min(27, Math.round((from.x + to.x) / 2) + (n % 5 - 2))), y: from.y };
+    const n = mix3(identity.digest + "/route/" + from.x + "/" + from.y + "/" + to.x + "/" + to.y), bend = axis === "v" ? { x: from.x, y: Math.max(4, Math.min(21, Math.round((from.y + to.y) / 2) + (n % 5 - 2))) } : { x: Math.max(4, Math.min(27, Math.round((from.x + to.x) / 2) + (n % 5 - 2))), y: from.y };
     line(from.x, from.y, bend.x, bend.y, kind2);
     line(bend.x, bend.y, to.x, to.y, kind2);
   };
-  const mainVertical = mix2(D9_PROFILE.version + "/" + seed + "/route-axis/" + region.regionX + "/" + region.regionY) % 2 === 0, junction = { x: 8 + mix2(identity.digest + "/route/jx") % 16, y: 7 + mix2(identity.digest + "/route/jy") % 12 }, ends = { north: { x: edges.north.center, y: 0 }, south: { x: edges.south.center, y: 25 }, west: { x: 0, y: edges.west.center }, east: { x: 31, y: edges.east.center } };
+  const mainVertical = mix3(D9_PROFILE.version + "/" + seed + "/route-axis/" + region.regionX + "/" + region.regionY) % 2 === 0, junction = { x: 8 + mix3(identity.digest + "/route/jx") % 16, y: 7 + mix3(identity.digest + "/route/jy") % 12 }, ends = { north: { x: edges.north.center, y: 0 }, south: { x: edges.south.center, y: 25 }, west: { x: 0, y: edges.west.center }, east: { x: 31, y: edges.east.center } };
   if (mainVertical) {
     elbow(ends.north, junction, "r", "v");
     elbow(ends.south, junction, "r", "v");
@@ -20434,16 +20528,16 @@ async function generateChunkD9({ seed, chunkX, chunkY, origin: origin2 }, sha256
   }
   const anchors2 = [];
   for (let i = 0; i < 2; i++) {
-    const h = mix2(identity.digest + "/anchor/" + i), x = 4 + h % 24, y = 4 + (h >>> 8) % 18;
+    const h = mix3(identity.digest + "/anchor/" + i), x = 4 + h % 24, y = 4 + (h >>> 8) % 18;
     if (tiles3[y][x] === "1" && tiles3[y][x + 1] === "1") {
       const id = await worldIdentity(seed, "anchor", [chunkX, chunkY, i], sha256);
       anchors2.push({ id: id.id, ordinal: i, position: { x: (x + 0.5) * 32, y: (y + 0.5) * 32 }, rank: ["C", "B", "A", "S"][(h >>> 16) % 4], members: [{ family: ["sprout", "golem", "slime"][h % 3] }, { family: ["sprout", "golem", "slime"][(h + 1) % 3] }] });
     }
   }
   const sites4 = [];
-  if (mix2(identity.digest + "/site-socket") % D9_PROFILE.siteSocketChanceDenominator === 0) {
+  if (mix3(identity.digest + "/site-socket") % D9_PROFILE.siteSocketChanceDenominator === 0) {
     const id = await worldIdentity(seed, "site", [chunkX, chunkY, 0], sha256);
-    const candidates = [...roadCells].map((v) => v.split(",").map(Number)).filter(([x2, y2]) => x2 >= 3 && x2 <= 28 && y2 >= 3 && y2 <= 22), [x, y] = candidates[mix2(id.digest + "/entrance") % candidates.length];
+    const candidates = [...roadCells].map((v) => v.split(",").map(Number)).filter(([x2, y2]) => x2 >= 3 && x2 <= 28 && y2 >= 3 && y2 <= 22), [x, y] = candidates[mix3(id.digest + "/entrance") % candidates.length];
     const site = { version: SITE_SOCKET_D9, siteId: id.id, siteSeed: id.digest, entrance: { chunkX, chunkY, localX: (x + 0.5) * 32, localY: (y + 0.5) * 32 }, siteClass: "dungeon", capabilities: ["interior"], region: { regionX: region.regionX, regionY: region.regionY, biome: region.biome }, minimumLevel: region.minimumLevel, provenance: { geographyVersion: D9_PROFILE.version, chunkId: identity.id, ordinal: 0 } };
     site.minimumLevel = copyWire(site.minimumLevel);
     validateSiteSocketD9(site);
