@@ -18743,7 +18743,7 @@ async function createWoodlandPilotEventAnchors({ asset, binding, cx, cy, seed: s
   for (const event of [...WOODLAND_EVENT_PILOT_V3_7, ...SPORE_EVENTS, HOLLOW_EVENT]) {
     if (Math.floor(event.x / 32) !== cx || Math.floor(event.y / 26) !== cy) continue;
     const slot = candidates.find((s) => s.eventSlotId === event.slotId);
-    if (!slot || slot.biome !== "woodland" || slot.position.x !== event.x || slot.position.y !== event.y || !slot.cells?.length)
+    if (!slot || WOODLAND_EVENT_PILOT_V3_7.includes(event) && slot.biome !== "woodland" || slot.position.x !== event.x || slot.position.y !== event.y || !slot.cells?.length)
       throw new Error("Woodland pilot is not backed by the frozen Wilderness V2 clearing");
     const cellIds = new Set(slot.cells.map((c) => c.x + "," + c.y));
     const safeCandidates = [];
