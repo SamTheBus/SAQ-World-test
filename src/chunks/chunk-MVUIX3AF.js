@@ -14,11 +14,11 @@ function walkWire(value, mode) {
     if (typeof current === "string") {
       requireContract(current.length <= 4096 && !/[\u0000]/u.test(current), "Invalid wire string");
       for (let i = 0; i < current.length; i++) {
-        const unit2 = current.charCodeAt(i);
-        if (unit2 >= 55296 && unit2 <= 56319) {
+        const unit3 = current.charCodeAt(i);
+        if (unit3 >= 55296 && unit3 <= 56319) {
           const next = current.charCodeAt(++i);
           requireContract(next >= 56320 && next <= 57343, "Unpaired wire surrogate");
-        } else requireContract(unit2 < 56320 || unit2 > 57343, "Unpaired wire surrogate");
+        } else requireContract(unit3 < 56320 || unit3 > 57343, "Unpaired wire surrogate");
       }
       return current;
     }
@@ -225,7 +225,7 @@ var RESHAPE_TIERS = Object.freeze({ "repeatable-slot:ruin:wetland:standard:067":
 var RESHAPE_VERSION = "world-reshape-v2";
 var RESHAPE_HASH = "ac15d856c2dbbe38203480172b32aae7d19ccdd61cef10eee16aade24a0900d2";
 var RESHAPE_HYDROLOGY_HASH = "e12fd26221c55e0357b674d4beaf28cc522ef5f9dde420b073373f0ef7be1b65";
-var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-ends2";
+var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-events1";
 var hasWorldReshape = (b) => b?.reshapeVersion === RESHAPE_VERSION && b?.reshapeHash === RESHAPE_HASH;
 var reshapedSite = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_SITES, id) ? RESHAPE_SITES[id] : null;
 var reshapedTier = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_TIERS, id) ? RESHAPE_TIERS[id] : null;
@@ -282,15 +282,30 @@ var active = CLASSIC_WORLD_ROLES;
 var ferry = FERRY_NETWORK;
 var bossAt = null;
 var starterAt = null;
-function useWorldRolesV1(roles, network = null) {
+var settlements = null;
+var builtSites = null;
+var revision = 0;
+var BUILT_SITE_FAMILIES = Object.freeze(["site-family:cave", "site-family:fort", "site-family:ruin", "site-family:crypt"]);
+var builtSite = (s) => freezeWire({ added: true, anchor: s.anchor, approach: s.approach, band: s.band, biome: s.id.split(":")[2], familyId: s.familyId, footprint: s.footprint, id: s.id, landmassId: s.landmassId, old: false, tier: s.tier });
+function useWorldRolesV1(roles, network = null, places = null, sites4 = null) {
   const r = roles == null ? CLASSIC_WORLD_ROLES : validateWorldRolesV1(roles), n = network == null ? FERRY_NETWORK : validateWorldFerryV1(network);
+  requireContract(places == null || Array.isArray(places) && places.every((s) => typeof s?.id === "string" && Number.isSafeInteger(s.tileOrigin?.x) && Number.isSafeInteger(s.tileOrigin?.y) && Number.isSafeInteger(s.band)), "WORLD_ROLES:SETTLEMENTS");
+  const built = sites4 == null ? null : sites4.filter((s) => BUILT_SITE_FAMILIES.includes(s?.familyId));
+  requireContract(built == null || built.every((s) => siteId(s.id) && Number.isSafeInteger(s.band) && s.footprint?.length && s.approach?.length) && new Set(built.map((s) => s.id)).size === built.length, "WORLD_ROLES:SITES");
   active = r;
   ferry = n;
   bossAt = starterAt = null;
+  revision++;
+  settlements = places == null ? null : new Map(places.map((s) => [s.id, freezeWire({ tileOrigin: { x: s.tileOrigin.x, y: s.tileOrigin.y }, band: s.band })]));
+  builtSites = built == null ? null : new Map(built.map((s) => [s.id, builtSite(s)]));
   return active;
 }
 var worldRolesV1 = () => active;
 var ferryNetworkV1 = () => ferry;
+var settlementV1 = (id) => settlements?.get(id) ?? null;
+var worldSitesV1 = () => builtSites && [...builtSites.values()];
+var worldSiteV1 = (id) => builtSites?.get(id) ?? null;
+var worldRevisionV1 = () => revision;
 var bossSiteV1 = (id) => active.bosses[id] ?? null;
 var bossAtSiteV1 = (reservationId) => (bossAt ??= new Map(Object.entries(active.bosses).map(([id, site]) => [site, id]))).get(reservationId) ?? null;
 var starterRoleAtSiteV1 = (reservationId) => (starterAt ??= new Map(Object.entries(active.starterSites).map(([role, site]) => [site, role]))).get(reservationId) ?? null;
@@ -3088,6 +3103,18 @@ function wildernessFairLevelGap(heroLevel, enemyLevel) {
   return { outgoing: old.outgoing, incoming: combatAmount(1) };
 }
 
+// src/shared/content/seeded_world_v1.js
+var isSeededBindingV1 = (b) => b?.worldMaker !== void 0;
+function presentSeededWorldV1(a) {
+  return {
+    ...a,
+    assetId: "alpha",
+    wildernessExtension: a.wildernessExtension && { ...a.wildernessExtension, version: WILDERNESS_VERSION, hash: WILDERNESS_HASH },
+    firstJourney: a.firstJourney && { ...a.firstJourney, version: ACCESS_VERSION, hash: ACCESS_HASH },
+    worldReshape: a.worldReshape && { ...a.worldReshape, version: RESHAPE_VERSION, hash: RESHAPE_HASH }
+  };
+}
+
 // src/shared/content/alpha_site_population_v1.js
 var ALPHA_POPULATION_VERSION = "planned-alpha-site-population-v1";
 var ALPHA_POPULATION_HASH = "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e";
@@ -3096,8 +3123,13 @@ var ALPHA_POPULATION_ROUTE_HASH = "baf9ea6ed5e392b4879e4d8e53fcd4f194c49f0e5819d
 var ALPHA_POPULATION_BASE_HASH = "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a";
 var ALPHA_POPULATION_SELECTIONS = freezeWire([{ "anchor": { "key": "35,116", "x": 35, "y": 116 }, "approach": [{ "x": 71, "y": 232 }], "band": 2, "familyId": "site-family:cave", "footprint": [{ "x": 70, "y": 232 }], "id": "repeatable-slot:cave:woodland:small:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "small", "biome": "woodland", "old": true, "added": false }, { "anchor": { "key": "77,95", "x": 77, "y": 95 }, "approach": [{ "x": 155, "y": 190 }], "band": 3, "familyId": "site-family:cave", "footprint": [{ "x": 154, "y": 190 }], "id": "repeatable-slot:cave:desert:standard:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "standard", "biome": "desert", "old": true, "added": false }, { "anchor": { "key": "32,110", "x": 32, "y": 110 }, "approach": [{ "x": 65, "y": 220 }], "band": 2, "familyId": "site-family:cave", "footprint": [{ "x": 64, "y": 220 }], "id": "repeatable-slot:cave:upland:large:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "large", "biome": "upland", "old": true, "added": false }, { "anchor": { "key": "58,36", "x": 58, "y": 36 }, "approach": [{ "x": 117, "y": 72 }], "band": 3, "familyId": "site-family:cave", "footprint": [{ "x": 116, "y": 72 }], "id": "repeatable-slot:cave:tropical:deep:01", "landmassId": "landmass:major-island:d14l1a:01:296d6010", "tier": "deep", "biome": "tropical", "old": true, "added": false }, { "anchor": { "key": "88,45", "x": 88, "y": 45 }, "approach": [{ "x": 177, "y": 89 }, { "x": 178, "y": 89 }], "band": 3, "familyId": "site-family:fort", "footprint": [{ "x": 175, "y": 89 }, { "x": 176, "y": 89 }, { "x": 175, "y": 90 }, { "x": 176, "y": 90 }], "id": "repeatable-slot:fort:grassland:small:01", "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "tier": "small", "biome": "grassland", "old": true, "added": false }, { "anchor": { "key": "21,128", "x": 21, "y": 128 }, "approach": [{ "x": 43, "y": 255 }, { "x": 44, "y": 255 }], "band": 1, "familyId": "site-family:fort", "footprint": [{ "x": 41, "y": 254 }, { "x": 42, "y": 254 }, { "x": 41, "y": 255 }, { "x": 42, "y": 255 }, { "x": 41, "y": 256 }, { "x": 42, "y": 256 }], "id": "repeatable-slot:fort:woodland:standard:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "standard", "biome": "woodland", "old": true, "added": false }, { "anchor": { "key": "125,110", "x": 125, "y": 110 }, "approach": [{ "x": 249, "y": 223 }, { "x": 249, "y": 224 }, { "x": 249, "y": 225 }], "band": 5, "familyId": "site-family:fort", "footprint": [{ "x": 248, "y": 220 }, { "x": 249, "y": 220 }, { "x": 250, "y": 220 }, { "x": 248, "y": 221 }, { "x": 249, "y": 221 }, { "x": 250, "y": 221 }, { "x": 248, "y": 222 }, { "x": 249, "y": 222 }, { "x": 250, "y": 222 }], "id": "repeatable-slot:fort:tropical:large:01", "landmassId": "landmass:medium-island:d14l1a:03:c2624ecc", "tier": "large", "biome": "tropical", "old": true, "added": false }, { "anchor": { "key": "39,132", "x": 39, "y": 132 }, "approach": [{ "x": 79, "y": 263 }], "band": 1, "familyId": "site-family:ruin", "footprint": [{ "x": 78, "y": 263 }, { "x": 78, "y": 264 }], "id": "repeatable-slot:ruin:woodland:small:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "small", "biome": "woodland", "old": true, "added": false }, { "anchor": { "key": "38,100", "x": 38, "y": 100 }, "approach": [{ "x": 77, "y": 199 }, { "x": 78, "y": 199 }], "band": 3, "familyId": "site-family:ruin", "footprint": [{ "x": 75, "y": 199 }, { "x": 76, "y": 199 }, { "x": 75, "y": 200 }, { "x": 76, "y": 200 }], "id": "repeatable-slot:ruin:upland:standard:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "standard", "biome": "upland", "old": true, "added": false }, { "anchor": { "key": "125,36", "x": 125, "y": 36 }, "approach": [{ "x": 251, "y": 71 }, { "x": 252, "y": 71 }], "band": 4, "familyId": "site-family:ruin", "footprint": [{ "x": 249, "y": 70 }, { "x": 250, "y": 70 }, { "x": 249, "y": 71 }, { "x": 250, "y": 71 }, { "x": 249, "y": 72 }, { "x": 250, "y": 72 }], "id": "repeatable-slot:ruin:volcanic:large:01", "landmassId": "landmass:medium-island:d14l1a:02:799115ea", "tier": "large", "biome": "volcanic", "old": true, "added": false }, { "anchor": { "key": "59,138", "x": 59, "y": 138 }, "approach": [{ "x": 119, "y": 276 }], "band": 2, "familyId": "site-family:crypt", "footprint": [{ "x": 118, "y": 276 }], "id": "repeatable-slot:crypt:grassland:small:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "small", "biome": "grassland", "old": true, "added": false }, { "anchor": { "key": "74,111", "x": 74, "y": 111 }, "approach": [{ "x": 149, "y": 222 }], "band": 3, "familyId": "site-family:crypt", "footprint": [{ "x": 148, "y": 222 }], "id": "repeatable-slot:crypt:upland:standard:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "standard", "biome": "upland", "old": true, "added": false }, { "anchor": { "key": "69,78", "x": 69, "y": 78 }, "approach": [{ "x": 138, "y": 157 }], "band": 3, "familyId": "site-family:crypt", "footprint": [{ "x": 138, "y": 156 }], "id": "repeatable-slot:crypt:frostland:deep:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "deep", "biome": "frostland", "old": true, "added": false }, { "anchor": { "key": "72,87", "x": 72, "y": 87 }, "approach": [{ "x": 145, "y": 174 }], "band": 3, "familyId": "site-family:cave", "footprint": [{ "x": 144, "y": 174 }], "id": "repeatable-slot:cave:desert:small:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "small", "biome": "desert", "old": false, "added": false }, { "anchor": { "key": "113,72", "x": 113, "y": 72 }, "approach": [{ "x": 227, "y": 144 }], "band": 4, "familyId": "site-family:cave", "footprint": [{ "x": 226, "y": 144 }], "id": "repeatable-slot:cave:frostland:large:01", "landmassId": "landmass:major-island:d14l1a:03:578d626c", "tier": "large", "biome": "frostland", "old": false, "added": false }, { "anchor": { "key": "112,120", "x": 112, "y": 120 }, "approach": [{ "x": 225, "y": 240 }], "band": 5, "familyId": "site-family:cave", "footprint": [{ "x": 224, "y": 240 }], "id": "repeatable-slot:cave:grassland:small:01", "landmassId": "landmass:medium-island:d14l1a:03:c2624ecc", "tier": "small", "biome": "grassland", "old": false, "added": false }, { "anchor": { "key": "63,12", "x": 63, "y": 12 }, "approach": [{ "x": 127, "y": 24 }], "band": 4, "familyId": "site-family:cave", "footprint": [{ "x": 126, "y": 24 }], "id": "repeatable-slot:cave:upland:standard:01", "landmassId": "landmass:medium-island:d14l1a:04:961b5a82", "tier": "standard", "biome": "upland", "old": false, "added": false }, { "anchor": { "key": "79,56", "x": 79, "y": 56 }, "approach": [{ "x": 159, "y": 112 }], "band": 4, "familyId": "site-family:cave", "footprint": [{ "x": 158, "y": 112 }], "id": "repeatable-slot:cave:volcanic:deep:01", "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "tier": "deep", "biome": "volcanic", "old": false, "added": false }, { "anchor": { "key": "35,55", "x": 35, "y": 55 }, "approach": [{ "x": 71, "y": 110 }], "band": 4, "familyId": "site-family:cave", "footprint": [{ "x": 70, "y": 110 }], "id": "repeatable-slot:cave:wetland:small:01", "landmassId": "landmass:major-island:d14l1a:01:296d6010", "tier": "small", "biome": "wetland", "old": false, "added": false }, { "anchor": { "key": "47,50", "x": 47, "y": 50 }, "approach": [{ "x": 95, "y": 100 }], "band": 4, "familyId": "site-family:cave", "footprint": [{ "x": 94, "y": 100 }], "id": "repeatable-slot:cave:wetland:standard:01", "landmassId": "landmass:major-island:d14l1a:01:296d6010", "tier": "standard", "biome": "wetland", "old": false, "added": false }, { "anchor": { "key": "19,122", "x": 19, "y": 122 }, "approach": [{ "x": 39, "y": 244 }], "band": 1, "familyId": "site-family:cave", "footprint": [{ "x": 38, "y": 244 }], "id": "repeatable-slot:cave:woodland:standard:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "standard", "biome": "woodland", "old": false, "added": false }, { "anchor": { "key": "112,33", "x": 112, "y": 33 }, "approach": [{ "x": 225, "y": 66 }], "band": 4, "familyId": "site-family:crypt", "footprint": [{ "x": 224, "y": 66 }], "id": "repeatable-slot:crypt:desert:small:01", "landmassId": "landmass:medium-island:d14l1a:02:799115ea", "tier": "small", "biome": "desert", "old": false, "added": false }, { "id": "repeatable-slot:crypt:frostland:large:01", "familyId": "site-family:crypt", "tier": "large", "landmassId": "landmass:major-island:d14l1a:03:578d626c", "band": 4, "anchor": { "key": "118,73", "x": 118, "y": 73 }, "footprint": [{ "x": 236, "y": 146 }], "approach": [{ "x": 237, "y": 146 }], "biome": "frostland", "old": false, "added": true }, { "anchor": { "key": "32,70", "x": 32, "y": 70 }, "approach": [{ "x": 65, "y": 140 }], "band": 4, "familyId": "site-family:crypt", "footprint": [{ "x": 64, "y": 140 }], "id": "repeatable-slot:crypt:wetland:standard:01", "landmassId": "landmass:medium-island:d14l1a:01:83c7b775", "tier": "standard", "biome": "wetland", "old": false, "added": false }, { "anchor": { "key": "39,122", "x": 39, "y": 122 }, "approach": [{ "x": 79, "y": 244 }], "band": 2, "familyId": "site-family:crypt", "footprint": [{ "x": 78, "y": 244 }], "id": "repeatable-slot:crypt:woodland:small:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "small", "biome": "woodland", "old": false, "added": false }, { "anchor": { "key": "68,91", "x": 68, "y": 91 }, "approach": [{ "x": 137, "y": 181 }, { "x": 138, "y": 181 }], "band": 3, "familyId": "site-family:fort", "footprint": [{ "x": 135, "y": 180 }, { "x": 136, "y": 180 }, { "x": 135, "y": 181 }, { "x": 136, "y": 181 }, { "x": 135, "y": 182 }, { "x": 136, "y": 182 }], "id": "repeatable-slot:fort:desert:standard:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "standard", "biome": "desert", "old": false, "added": false }, { "id": "repeatable-slot:fort:upland:deep:01", "familyId": "site-family:fort", "tier": "deep", "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "band": 4, "anchor": { "key": "95,34", "x": 95, "y": 34 }, "footprint": [{ "x": 190, "y": 68 }, { "x": 191, "y": 68 }, { "x": 192, "y": 68 }, { "x": 193, "y": 68 }, { "x": 190, "y": 69 }, { "x": 191, "y": 69 }, { "x": 192, "y": 69 }, { "x": 193, "y": 69 }, { "x": 190, "y": 70 }, { "x": 191, "y": 70 }, { "x": 192, "y": 70 }, { "x": 193, "y": 70 }], "approach": [{ "x": 194, "y": 69 }, { "x": 195, "y": 69 }, { "x": 196, "y": 69 }, { "x": 197, "y": 69 }], "biome": "upland", "old": false, "added": true }, { "anchor": { "key": "75,20", "x": 75, "y": 20 }, "approach": [{ "x": 149, "y": 41 }, { "x": 149, "y": 42 }], "band": 4, "familyId": "site-family:fort", "footprint": [{ "x": 149, "y": 38 }, { "x": 150, "y": 38 }, { "x": 149, "y": 39 }, { "x": 150, "y": 39 }, { "x": 149, "y": 40 }, { "x": 150, "y": 40 }], "id": "repeatable-slot:fort:upland:standard:01", "landmassId": "landmass:medium-island:d14l1a:04:961b5a82", "tier": "standard", "biome": "upland", "old": false, "added": false }, { "anchor": { "key": "44,76", "x": 44, "y": 76 }, "approach": [{ "x": 89, "y": 151 }, { "x": 90, "y": 151 }], "band": 4, "familyId": "site-family:fort", "footprint": [{ "x": 87, "y": 151 }, { "x": 88, "y": 151 }, { "x": 87, "y": 152 }, { "x": 88, "y": 152 }], "id": "repeatable-slot:fort:wetland:small:01", "landmassId": "landmass:medium-island:d14l1a:01:83c7b775", "tier": "small", "biome": "wetland", "old": false, "added": false }, { "anchor": { "key": "57,88", "x": 57, "y": 88 }, "approach": [{ "x": 115, "y": 175 }, { "x": 116, "y": 175 }], "band": 3, "familyId": "site-family:ruin", "footprint": [{ "x": 113, "y": 175 }, { "x": 114, "y": 175 }, { "x": 113, "y": 176 }, { "x": 114, "y": 176 }], "id": "repeatable-slot:ruin:desert:standard:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "standard", "biome": "desert", "old": false, "added": false }, { "id": "repeatable-slot:ruin:frostland:deep:01", "familyId": "site-family:ruin", "tier": "deep", "landmassId": "landmass:major-island:d14l1a:03:578d626c", "band": 4, "anchor": { "key": "112,77", "x": 112, "y": 77 }, "footprint": [{ "x": 224, "y": 154 }, { "x": 225, "y": 154 }, { "x": 226, "y": 154 }, { "x": 224, "y": 155 }, { "x": 225, "y": 155 }, { "x": 226, "y": 155 }, { "x": 224, "y": 156 }, { "x": 225, "y": 156 }, { "x": 226, "y": 156 }], "approach": [{ "x": 227, "y": 155 }, { "x": 228, "y": 155 }, { "x": 229, "y": 155 }], "biome": "frostland", "old": false, "added": true }, { "anchor": { "key": "28,73", "x": 28, "y": 73 }, "approach": [{ "x": 57, "y": 145 }, { "x": 58, "y": 145 }], "band": 4, "familyId": "site-family:ruin", "footprint": [{ "x": 55, "y": 145 }, { "x": 56, "y": 145 }, { "x": 55, "y": 146 }, { "x": 56, "y": 146 }], "id": "repeatable-slot:ruin:frostland:standard:01", "landmassId": "landmass:medium-island:d14l1a:01:83c7b775", "tier": "standard", "biome": "frostland", "old": false, "added": false }, { "anchor": { "key": "73,144", "x": 73, "y": 144 }, "approach": [{ "x": 147, "y": 287 }], "band": 2, "familyId": "site-family:ruin", "footprint": [{ "x": 146, "y": 287 }, { "x": 146, "y": 288 }], "id": "repeatable-slot:ruin:grassland:small:01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "tier": "small", "biome": "grassland", "old": false, "added": false }, { "anchor": { "key": "44,31", "x": 44, "y": 31 }, "approach": [{ "x": 88, "y": 63 }], "band": 3, "familyId": "site-family:ruin", "footprint": [{ "x": 88, "y": 61 }, { "x": 88, "y": 62 }], "id": "repeatable-slot:ruin:tropical:small:01", "landmassId": "landmass:major-island:d14l1a:01:296d6010", "tier": "small", "biome": "tropical", "old": false, "added": false }, { "anchor": { "key": "102,89", "x": 102, "y": 89 }, "approach": [{ "x": 205, "y": 177 }], "band": 3, "familyId": "site-family:ruin", "footprint": [{ "x": 204, "y": 177 }, { "x": 204, "y": 178 }], "id": "repeatable-slot:ruin:wetland:small:01", "landmassId": "landmass:major-island:d14l1a:03:578d626c", "tier": "small", "biome": "wetland", "old": false, "added": false }]);
 var hasAlphaPopulation = (b) => b?.sitePopulation === ALPHA_POPULATION_VERSION && b.sitePopulationHash === ALPHA_POPULATION_HASH;
-var populationIds = (b, family2) => hasAlphaPopulation(b) ? [...ALPHA_POPULATION_SELECTIONS, ...hasWilderness(b) ? WILDERNESS_SITE_SELECTIONS : [], ...hasFirstJourney(b) ? [FIRST_CAVE_SELECTION] : []].filter((s) => s.familyId === "site-family:" + family2).map((s) => s.id) : null;
-var newPopulationSelection = (id) => ALPHA_POPULATION_SELECTIONS.find((s) => s.id === id && !s.old) ?? wildernessSelection(id) ?? (id === FIRST_CAVE_SELECTION.id ? FIRST_CAVE_SELECTION : null);
+var seededSites = () => {
+  const s = worldSitesV1();
+  requireContract(s, "Seeded world sites not loaded");
+  return s;
+};
+var populationIds = (b, family2) => hasAlphaPopulation(b) ? (isSeededBindingV1(b) ? seededSites() : [...ALPHA_POPULATION_SELECTIONS, ...hasWilderness(b) ? WILDERNESS_SITE_SELECTIONS : [], ...hasFirstJourney(b) ? [FIRST_CAVE_SELECTION] : []]).filter((s) => s.familyId === "site-family:" + family2).map((s) => s.id) : null;
+var newPopulationSelection = (id) => worldSitesV1() ? worldSiteV1(id) : ALPHA_POPULATION_SELECTIONS.find((s) => s.id === id && !s.old) ?? wildernessSelection(id) ?? (id === FIRST_CAVE_SELECTION.id ? FIRST_CAVE_SELECTION : null);
 
 // src/shared/contracts/large_number.js
 function magnitudeSuffix(bucket) {
@@ -3491,7 +3523,8 @@ function rewardProgressionD9(depth, sourceId) {
   return freezeWire(validateRewardProgressionD9({ version: D9_REWARD_PROGRESSION, policy: D9_PROFILE.progressionPolicy, sourceDepth: progressionWire(progressionBigInt(depth)), quality: 1, sourceId, tomeEligibility: "base-single-d7-v1" }));
 }
 function validateRewardProgressionD9(v) {
-  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "siteReward", "gearClass", "armor", "wardrobe", "unique"]);
+  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "siteReward", "gearClass", "armor", "wardrobe", "unique", "boon"]);
+  requireContract(v.boon === void 0 || v.boon === "fortune" && v.rarityPolicyHash !== void 0, "Boon reward policy");
   requireContract(v.armor === void 0 || v.armor === "overall" && v.gearClass === void 0 && v.combatHash === WORLD_COMBAT_HASH, "One-piece armor policy");
   requireContract(v.wardrobe === void 0 || v.wardrobe === WARDROBE_V1 && v.gearClass !== void 0, "Wardrobe policy");
   requireContract(v.unique === void 0 || Object.hasOwn(UNIQUE_ITEMS, v.unique) && v.wardrobe === WARDROBE_V1 && (UNIQUE_ITEMS[v.unique].cls === null || UNIQUE_ITEMS[v.unique].cls === v.gearClass), "Unique policy");
@@ -3529,6 +3562,136 @@ function validateRewardProgression(v) {
   if (v.modifiers) validateRewardModifiers(v.modifiers);
   return v;
 }
+
+// src/shared/content/world_event_plan_v1.js
+var WORLD_EVENT_PLAN_VERSION = "world-event-plan-v1";
+var WORLD_EVENT_KINDS = Object.freeze(["cursed_shrine", "nests", "road_ambush", "raided_camp", "buried_cache", "trophy_hunt", "wayside_shrine", "den"]);
+var WORLD_EVENT_SHARES = freezeWire({
+  pathside: { road_ambush: 55, wayside_shrine: 45 },
+  backcountry: { cursed_shrine: 20, nests: 25, raided_camp: 15, buried_cache: 20, den: 20 },
+  deep_wild: { trophy_hunt: 40, cursed_shrine: 30, den: 30 }
+});
+var SLOT = /^density-v2-event-capacity-[0-9]{3}$/;
+function validateWorldEventPlanV1(plan, clearings) {
+  requireContract(plan?.version === WORLD_EVENT_PLAN_VERSION && Object.keys(plan).sort().join() === "events,version" && Array.isArray(plan.events), "EVENT_PLAN:SHAPE");
+  const rows3 = new Map(plan.events.map((r) => [r?.eventSlotId, r]));
+  requireContract(rows3.size === plan.events.length && rows3.size === clearings.length && clearings.every((c) => rows3.has(c.eventSlotId)), "EVENT_PLAN:SLOTS");
+  const linked = /* @__PURE__ */ new Set();
+  for (const r of plan.events) {
+    const camp = r.event === "raided_camp";
+    requireContract(SLOT.test(r.eventSlotId) && WORLD_EVENT_KINDS.includes(r.event) && Object.keys(r).sort().join() === (camp ? "cacheSlotId,event,eventSlotId" : "event,eventSlotId"), "EVENT_PLAN:ROW");
+    if (camp) requireContract(rows3.get(r.cacheSlotId)?.event === "buried_cache" && !linked.has(r.cacheSlotId) && linked.add(r.cacheSlotId), "EVENT_PLAN:CACHE");
+  }
+  return freezeWire(plan);
+}
+var CLASSIC_SLOTS = {
+  cursed_shrine: [54, 56, 57, 58, 60, 67, 74, 77, 82, 84, 87, 111, 127, 129, 133, 135, 136, 141, 143, 147, 150, 152, 158, 159, 160, 165, 170, 174],
+  nests: [27, 51, 55, 66, 68, 73, 79, 83, 85, 89, 90, 91, 97, 104, 107, 112, 113, 116, 119, 121, 123, 128, 130, 138, 153],
+  road_ambush: [4, 5, 7, 9, 10, 11, 12, 13, 14, 17, 18, 22, 23, 24, 26, 28, 29, 31, 33, 34, 38, 40, 42, 46, 50, 52],
+  raided_camp: [30, 71, 88, 92, 93, 102, 103, 105, 106, 108, 118, 137, 139, 140],
+  buried_cache: [53, 59, 65, 69, 72, 75, 76, 78, 81, 94, 96, 101, 109, 110, 115, 124, 131, 132, 134],
+  trophy_hunt: [144, 145, 148, 154, 156, 157, 161, 163, 166, 167, 168, 169, 173, 175],
+  wayside_shrine: [1, 2, 3, 6, 8, 15, 16, 19, 20, 21, 25, 32, 35, 36, 37, 39, 41, 43, 44, 45, 47, 48, 49],
+  den: [61, 62, 63, 64, 70, 80, 86, 95, 98, 99, 100, 114, 117, 120, 122, 125, 126, 142, 146, 149, 151, 155, 162, 164, 171, 172, 176]
+};
+var CLASSIC_CACHES = { 30: 132, 71: 96, 88: 115, 92: 65, 93: 81, 102: 109, 103: 134, 105: 69, 106: 131, 108: 59, 118: 78, 137: 101, 139: 75, 140: 124 };
+var slotId = (n) => "density-v2-event-capacity-" + String(n).padStart(3, "0");
+var CLASSIC_EVENT_PLAN = freezeWire({ version: WORLD_EVENT_PLAN_VERSION, events: Object.entries(CLASSIC_SLOTS).flatMap(([event, list]) => list.map((n) => ({ n, event }))).sort((a, b) => a.n - b.n).map(({ n, event }) => CLASSIC_CACHES[n] ? { eventSlotId: slotId(n), event, cacheSlotId: slotId(CLASSIC_CACHES[n]) } : { eventSlotId: slotId(n), event }) });
+var plans = /* @__PURE__ */ new WeakMap();
+var atSlot = /* @__PURE__ */ new WeakMap();
+function eventPlanV1(asset) {
+  if (!asset || typeof asset !== "object") return Object.freeze([]);
+  let p = plans.get(asset);
+  if (p) return p;
+  const clearings = asset.wildernessExtension?.eventCapacities ?? [];
+  if (asset.eventPlan == null) {
+    const have = new Set(clearings.map((c) => c.eventSlotId));
+    p = Object.freeze(CLASSIC_EVENT_PLAN.events.filter((r) => have.has(r.eventSlotId)));
+  } else p = validateWorldEventPlanV1(asset.eventPlan, clearings).events;
+  plans.set(asset, p);
+  return p;
+}
+function eventAtSlotV1(asset, eventSlotId) {
+  const p = eventPlanV1(asset);
+  let m = atSlot.get(p);
+  if (!m) atSlot.set(p, m = new Map(p.map((r) => [r.eventSlotId, r])));
+  return m.get(eventSlotId) ?? null;
+}
+
+// src/shared/content/planned_events_v1.js
+var BUILT_EVENT_KINDS = Object.freeze(["cursed_shrine"]);
+var CATEGORIES = Object.freeze(["pathside", "backcountry", "deep_wild"]);
+var BASE = 1e5;
+var plannedEventOrdinal = (n) => Number.isSafeInteger(n) && n > BASE && n < BASE + CATEGORIES.length * 1e4 && n % 1e3 > 0 && Math.floor(n % 1e4 / 1e3) < WORLD_EVENT_KINDS.length;
+function plannedEventOrdinalFor(slot, category, kind2) {
+  const n = Number(/^density-v2-event-capacity-([0-9]{3})$/.exec(slot)?.[1]), c = CATEGORIES.indexOf(category), k = WORLD_EVENT_KINDS.indexOf(kind2);
+  return n > 0 && c >= 0 && k >= 0 ? BASE + c * 1e4 + k * 1e3 + n : null;
+}
+var plannedEventCategory = (n) => CATEGORIES[Math.floor((n - BASE) / 1e4)];
+var plannedEventFirstKind = (n) => WORLD_EVENT_KINDS[Math.floor(n % 1e4 / 1e3)];
+function unit2(text) {
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619);
+  h = Math.imul(h ^ h >>> 16, 2246822507);
+  h = Math.imul(h ^ h >>> 13, 3266489909);
+  return ((h ^ h >>> 16) >>> 0) / 4294967296;
+}
+var cache = /* @__PURE__ */ new Map();
+function plannedEventKindV1(seedHex, ordinal, episode, built = BUILT_EVENT_KINDS) {
+  if (!plannedEventOrdinal(ordinal) || !Number.isSafeInteger(episode) || episode < 0) return null;
+  const key5 = seedHex + "/" + ordinal + "/" + episode + "/" + built.join(",");
+  if (cache.has(key5)) return cache.get(key5);
+  let kind2 = plannedEventFirstKind(ordinal);
+  if (!built.includes(kind2)) kind2 = null;
+  const shares = WORLD_EVENT_SHARES[plannedEventCategory(ordinal)];
+  for (let e = 1; e <= episode && kind2; e++) {
+    const options = Object.keys(shares).filter((k) => built.includes(k)), pool = options.length > 1 ? options.filter((k) => k !== kind2) : options, total = pool.reduce((n, k) => n + shares[k], 0);
+    let roll = unit2(seedHex + "/planned-event/" + ordinal % 1e3 + "/" + e) * total;
+    kind2 = pool.find((k) => (roll -= shares[k]) < 0) ?? pool.at(-1);
+  }
+  if (cache.size > 4096) cache.clear();
+  cache.set(key5, kind2);
+  return kind2;
+}
+var SHRINE_VERSION = "cursed-shrine-v1";
+var SHRINE_POLICY = freezeWire({
+  version: SHRINE_VERSION,
+  // Three waves out of rifts by the pillars; the last member of wave 3 is the elite (rank S).
+  waves: [4, 5, 4],
+  elite: 12,
+  rank: "C",
+  firstWaveTicks: 60,
+  intermissionTicks: 150,
+  tellTicks: 45,
+  spawnSpacingTicks: 20,
+  families: ["sprout", "slime", "sprout", "slime", "slime", "sprout", "golem", "sprout", "slime", "sprout", "slime", "golem", "golem"],
+  // Stay inside the ring (px around the shrine's ground center). Outside longer than graceTicks reseals it: no reward.
+  circle: { rx: 176, ry: 100, oy: 6 },
+  graceTicks: 360,
+  triggerRadius: 96,
+  activeRadius: 768,
+  playerClearance: 48,
+  rifts: [[-92, 14], [92, 14], [0, 62], [-60, 52], [60, 52], [-120, 40], [120, 40]],
+  homes: [[-70, 40], [70, 40], [0, 80], [-110, 20], [110, 20], [-40, 70], [40, 70]],
+  // A random boon for every hero who fought here, for 3 minutes.
+  boonTicks: 10800,
+  boons: ["wrath", "insight", "fortune"],
+  reward: "one completion chest per eligible participant, plus a random boon",
+  reset: "renews like an ordinary pack, then may hold another event",
+  simulationHz: 60
+});
+var SHRINE_MEMBERS = SHRINE_POLICY.families.length;
+var BOON_EFFECTS = freezeWire({ wrath: { damagePercent: 30 }, insight: { xpPercent: 50 }, fortune: { qualityHundredths: 250 } });
+
+// src/shared/contracts/event_boons_v1.js
+var boonOfV1 = (s, playerId) => {
+  const b = playerId && s.d9World?.worldEvents?.boons?.[playerId];
+  return b && b.untilTick > s.tick ? b : null;
+};
+var wrathDamageV1 = (s, playerId, raw) => boonOfV1(s, playerId)?.boon === "wrath" ? combatInteger(multiplyCombat(raw, 100 + BOON_EFFECTS.wrath.damagePercent, 100)) : raw;
+var insightXpV1 = (s, playerId, xp) => boonOfV1(s, playerId)?.boon === "insight" ? multiplyCombat(xp, 100 + BOON_EFFECTS.insight.xpPercent, 100) : xp;
+var captureBoonRewardV1 = (s, player, progression) => progression.rarityPolicyHash !== void 0 && boonOfV1(s, player.playerId)?.boon === "fortune" ? { ...progression, boon: "fortune" } : progression;
+var boonRewardQualityV1 = (progression) => progression.boon === "fortune" ? BOON_EFFECTS.fortune.qualityHundredths : 0;
 
 // src/shared/content/gear_numbers_d9.js
 function exactDecimal(v) {
@@ -3935,7 +4098,7 @@ function numericContext(precision = 48) {
     if (n === den) return q(exponent);
     return add(q(exponent), div(lnReduced(q(n, den)), ln2()));
   }
-  function exp(a) {
+  function exp2(a) {
     if (a.hi > 150000n * S) numericExtension("D9 exponential output admission");
     let x = a, k = 0;
     while (x.hi > S / 8n) {
@@ -3960,7 +4123,7 @@ function numericContext(precision = 48) {
   const dungeonScale = (powerValue) => {
     const p = progressionBigInt(powerValue), band = (p + 3n) / 4n * 4n;
     const effective = band <= 100n ? q(band) : add(q(100), mul2(q(3, 2), frac(q(band - 100n), 7, 10)));
-    const E = mul2(exp(mul2(effective, lnReduced(q(253, 250)))), add(q(1), mul2(q(3, 200), effective)));
+    const E = mul2(exp2(mul2(effective, lnReduced(q(253, 250)))), add(q(1), mul2(q(3, 200), effective)));
     return { effective, E };
   };
   function endpoint(a, mode = "round", places = 0) {
@@ -3972,7 +4135,7 @@ function numericContext(precision = 48) {
     }
     return integerWire(lo);
   }
-  return { q, add, sub, mul: mul2, div, power: power2, root, frac, log2Integer, exp, dungeonScale, endpoint, scale: S };
+  return { q, add, sub, mul: mul2, div, power: power2, root, frac, log2Integer, exp: exp2, dungeonScale, endpoint, scale: S };
 }
 function certifyNumeric(evaluate) {
   for (const p of [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]) {
@@ -4042,7 +4205,7 @@ function generateAtPrecision(c, seed, input, { tier = null, family: family2 = nu
     noun = uq.noun;
   }
   const rng2 = rewardStream(seed), random = () => rng2.random(), pick4 = (a) => a[Math.floor(random() * a.length)], power2 = progression.combatHash ? depth : progressionWire(progressionBigInt(depth) / 4n + 1n);
-  const rarityRandom = progression.combatHash ? random() : null, rarityTier = tier ?? (progression.combatHash ? hasWorldRarityV2(progression) ? siteRewardRarityV1(progression.siteReward, worldGearRarityV2(depth, progression.rarityHeroLevel, progression.rarityRole, rarityRandom, (progression.modifiers?.qualityHundredths ?? 0) + siteRewardQualityV1(progression.siteReward))) : worldGearRarity(depth, progression.combatQuality, rarityRandom, progression.modifiers?.qualityHundredths ?? 0) : rollRarityD9(depth, progression.quality, random));
+  const rarityRandom = progression.combatHash ? random() : null, rarityTier = tier ?? (progression.combatHash ? hasWorldRarityV2(progression) ? siteRewardRarityV1(progression.siteReward, worldGearRarityV2(depth, progression.rarityHeroLevel, progression.rarityRole, rarityRandom, (progression.modifiers?.qualityHundredths ?? 0) + siteRewardQualityV1(progression.siteReward) + boonRewardQualityV1(progression))) : worldGearRarity(depth, progression.combatQuality, rarityRandom, progression.modifiers?.qualityHundredths ?? 0) : rollRarityD9(depth, progression.quality, random));
   safeInteger(rarityTier, 0, 5);
   const cls = progression.gearClass ?? null, classOffhand = cls ? CLASS_GEAR[cls].offhand : null, wardrobe = Boolean(cls) && progression.wardrobe === WARDROBE_V1, classFamilies = wardrobe ? CLASS_GEAR_FAMILIES_V2 : CLASS_GEAR_FAMILIES, families = cls ? classFamilies : progression.armor === "overall" ? ONE_PIECE_GEAR_FAMILIES : GEAR_FAMILIES;
   const type = family2 ?? pick4(families), sub = type === "subweapon" ? subType ?? (cls ? classOffhand : pick4(["shield", "dagger", "tome"])) : null, own2 = type === "cape" ? CAPE_NOUNS : cls && type !== "ring" ? classGearNouns(cls, type) : GEAR_NOUNS[sub ?? type], shared = wardrobe && type === "helmet" ? SHARED_HELMET_NOUNS : [], nouns = [...own2 ?? [], ...shared], n = noun ?? (shared.length && random() < 0.2 ? pick4(shared) : pick4(own2));
@@ -5043,13 +5206,13 @@ function adjust(def, key5, old, value) {
   const [group, field2] = paths[key5];
   def[group][field2] = sum(sum(def[group][field2] ?? 0, old, -1), value);
 }
-var cache = /* @__PURE__ */ new Map();
+var cache2 = /* @__PURE__ */ new Map();
 function workshopResult(item) {
   const g = item.generated, steps = item.workshop?.steps ?? [];
   if (!steps.length) return { definition: g?.definition, tier: g?.rarityTier ?? 0, affixes: g?.affixes ?? [], enchants: 0, lockedLine: null, set: null };
   requireContract(g && item.workshop.version === WORKSHOP_VERSION && steps.length <= MAX_WORKSHOP_STEPS, "Invalid workshop overlay");
   const key5 = canonicalStringify([g, steps]);
-  if (cache.has(key5)) return cache.get(key5);
+  if (cache2.has(key5)) return cache2.get(key5);
   let definition = copyWire(g.definition), tier = g.rarityTier, affixes = copyWire(g.affixes), enchants = 0, lockedLine = null, set2 = null, unenchanted = null;
   for (let ordinal = 0; ordinal < steps.length; ordinal++) {
     const step = steps[ordinal], random = (label) => gearHash4(WORKSHOP_VERSION + "/" + g.seed + "/" + ordinal + "/" + step.kind + "/" + label) / 4294967296;
@@ -5098,8 +5261,8 @@ function workshopResult(item) {
   definition.name = (set2 ? set2 + " " : "") + definition.name;
   definition.rarityTier = tier;
   const result = freezeWire({ definition, tier, affixes, enchants, lockedLine, set: set2 });
-  if (cache.size >= 256) cache.delete(cache.keys().next().value);
-  cache.set(key5, result);
+  if (cache2.size >= 256) cache2.delete(cache2.keys().next().value);
+  cache2.set(key5, result);
   return result;
 }
 var unmodifiedItem = (item) => {
@@ -5477,7 +5640,7 @@ function wildernessSurfaceEcologyV3_5(biome) {
   return habitat(biome, "surface", WILDERNESS_ECOLOGY_RUNTIME_V3_5_PREFIX + ":surface:" + biome, biome);
 }
 function wildernessSiteEcologyV3_5(site, floorIndex = 0) {
-  const id = site?.socket?.provenance?.reservationId, row = approved.get(id);
+  const id = site?.socket?.provenance?.reservationId, row = worldSitesV1() ? worldSiteV1(id) : approved.get(id);
   if (!row || !Array.isArray(site?.floors) || !Number.isSafeInteger(floorIndex) || floorIndex < 0 || floorIndex >= site.floors.length || isWildernessStarterSiteV3(site)) return null;
   const family2 = site.familyId?.split(":").at(-1) ?? site.siteKind?.replace("procedural-", "");
   const biome = site.socket?.region?.biome;
@@ -6169,6 +6332,60 @@ function rebaseWorldRuntimeD9(state, newFrames) {
   state.spacesByInstanceId[state.overworldInstanceId].collision.frames = copyWire(newFrames);
   runtime.revision++;
   captureWorldPositionsD9(state);
+}
+
+// src/shared/content/settlement_life_alpha_v1.js
+var LIFE_VILLAGE_ID = "settlement-slot:village-outpost:02";
+var LIFE_VILLAGE_ORIGIN = freezeWire({ x: 4480, y: 7592 });
+var LIFE_NPCS = freezeWire([
+  { id: "civilian:alpha:town:mara", name: "Mara", role: "general", roleLabel: "General merchant", settlementId: "settlement-slot:town:05", buildingId: "town-open:roof:004", band: 3, tile: { x: 5912, y: 5750 }, space: "exterior", color: "#567867" },
+  { id: "civilian:alpha:town:bren", name: "Bren", role: "smith", roleLabel: "Smith", settlementId: "settlement-slot:town:05", buildingId: "town-open:roof:006", band: 3, tile: { x: 5870, y: 5778 }, space: "exterior", color: "#82604b" },
+  { id: "civilian:alpha:town:ada", name: "Ada", role: "innkeeper", roleLabel: "Innkeeper", settlementId: "settlement-slot:town:05", buildingId: "town-open:roof:008", band: 3, tile: { x: 9, y: 6 }, space: "tavern-ground", color: "#876657" },
+  { id: "civilian:alpha:village:ila", name: "Ila", role: "general", roleLabel: "General merchant", settlementId: LIFE_VILLAGE_ID, buildingId: "village:roof:002", band: 2, tile: { x: 4497, y: 7610 }, space: "exterior", color: "#58766d" },
+  { id: "civilian:alpha:village:oren", name: "Oren", role: "smith", roleLabel: "Smith", settlementId: LIFE_VILLAGE_ID, buildingId: "village:roof:003", band: 2, tile: { x: 4532, y: 7607 }, space: "exterior", color: "#8d6c49" },
+  { id: "civilian:alpha:village:nell", name: "Nell", role: "innkeeper", roleLabel: "Innkeeper \xB7 tavern veranda", settlementId: LIFE_VILLAGE_ID, buildingId: "village:roof:002", band: 2, tile: { x: 4499, y: 7610 }, space: "exterior", color: "#81657a" }
+]);
+
+// src/shared/content/world_towns_v1.js
+var TAVERN_TOWN_ID = "settlement-slot:town:05";
+var TAVERN_TOWN_ORIGIN = freezeWire({ x: 5824, y: 5720 });
+var CORNERS = { [STARTER_VILLAGE_ID]: STARTER_VILLAGE_ORIGIN, [LIFE_VILLAGE_ID]: LIFE_VILLAGE_ORIGIN, [TAVERN_TOWN_ID]: TAVERN_TOWN_ORIGIN };
+var townOriginV1 = (id) => settlementV1(id)?.tileOrigin ?? CORNERS[id];
+function townTileV1(id, t) {
+  const c = CORNERS[id], o = townOriginV1(id);
+  return o.x === c.x && o.y === c.y ? t : { x: t.x - c.x + o.x, y: t.y - c.y + o.y };
+}
+function perWorldV1(make) {
+  let at = -1, value;
+  return () => {
+    if (at !== worldRevisionV1()) {
+      value = make();
+      at = worldRevisionV1();
+    }
+    return value;
+  };
+}
+var moved2 = (list, place) => {
+  const out = list.map(place);
+  return out.every((v, i) => v === list[i]) ? list : freezeWire(out);
+};
+var townTilesV1 = (id, list) => moved2(list, (t) => townTileV1(id, t));
+var starterArrivalTilesV1 = perWorldV1(() => townTilesV1(STARTER_VILLAGE_ID, STARTER_ARRIVAL_TILES));
+function townNpcV1(n) {
+  if (!CORNERS[n.settlementId]) return n;
+  const band = settlementV1(n.settlementId)?.band ?? n.band, tile = n.space === "exterior" ? townTileV1(n.settlementId, n.tile) : n.tile;
+  return band === n.band && tile === n.tile ? n : { ...n, band, tile };
+}
+var lists = /* @__PURE__ */ new Map();
+var listsAt = -1;
+function townNpcsV1(list) {
+  if (listsAt !== worldRevisionV1()) {
+    lists.clear();
+    listsAt = worldRevisionV1();
+  }
+  let v = lists.get(list);
+  if (!v) lists.set(list, v = moved2(list, townNpcV1));
+  return v;
 }
 
 // src/shared/content/open_town_template_v1.js
@@ -7631,6 +7848,138 @@ var OPEN_TOWN_TEMPLATE_V1 = freezeWire({
   ]
 });
 
+// src/shared/generation/portable_math_v1.js
+var view = new DataView(new ArrayBuffer(8));
+function split(x) {
+  view.setFloat64(0, x);
+  let hi = view.getUint32(0), k = 0;
+  if (hi < 1048576) {
+    x *= 18014398509481984;
+    view.setFloat64(0, x);
+    hi = view.getUint32(0);
+    k = -54;
+  }
+  k += (hi >>> 20) - 1023;
+  view.setUint32(0, hi & 1048575 | 1072693248);
+  let m = view.getFloat64(0);
+  if (m > Math.SQRT2) {
+    m /= 2;
+    k++;
+  }
+  return [m, k];
+}
+function two(k) {
+  view.setUint32(0, k + 1023 << 20 >>> 0);
+  view.setUint32(4, 0);
+  return view.getFloat64(0);
+}
+var LN2_HI = 0.6931471803691238;
+var LN2_LO = 19082149292705877e-26;
+function logm(m) {
+  const f2 = m - 1, s = f2 / (2 + f2), z = s * s, w = z * z, t1 = w * (0.3999999999940942 + w * (0.22222198432149784 + w * 0.15313837699209373)), t2 = z * (0.6666666666666735 + w * (0.2857142874366239 + w * (0.1818357216161805 + w * 0.14798198605116586))), hf = 0.5 * f2 * f2;
+  return [f2, hf, s * (hf + t1 + t2)];
+}
+function log(x) {
+  if (!(x > 0)) return x === 0 ? -Infinity : NaN;
+  if (x === Infinity) return x;
+  const [m, k] = split(x), [f2, hf, r] = logm(m);
+  return k * LN2_HI - (hf - (r + k * LN2_LO) - f2);
+}
+function log2(x) {
+  if (!(x > 0)) return x === 0 ? -Infinity : NaN;
+  if (x === Infinity) return x;
+  const [m, k] = split(x), [f2, hf, r] = logm(m);
+  return k + (f2 - hf + r) / Math.LN2;
+}
+function exp(x) {
+  if (x !== x) return x;
+  if (x > 709.78) return Infinity;
+  if (x < -745.13) return 0;
+  const k = Math.floor(x * 1.4426950408889634 + 0.5), hi = x - k * LN2_HI, lo = k * LN2_LO, r = hi - lo, t = r * r, c = r - t * (0.16666666666666602 + t * (-0.0027777777777015593 + t * (6613756321437934e-20 + t * (-16533902205465252e-22 + t * 41381367970572385e-24)))), y = 1 - (lo - r * c / (2 - c) - hi);
+  return k > 1023 ? y * two(1023) * two(k - 1023) : k < -1022 ? y * two(-1022) * two(k + 1022) : y * two(k);
+}
+function pow3(x, y) {
+  if (y === 0) return 1;
+  if (x === 1) return 1;
+  if (y === 1) return x;
+  if (x !== x || y !== y) return NaN;
+  if (Number.isInteger(y) && Math.abs(y) <= 64) {
+    let n = Math.abs(y), b = x, v = 1;
+    while (n) {
+      if (n & 1) v *= b;
+      n >>= 1;
+      if (n) b *= b;
+    }
+    return y < 0 ? 1 / v : v;
+  }
+  if (x === 0) return y > 0 ? 0 : Infinity;
+  if (x < 0) {
+    if (!Number.isInteger(y)) return NaN;
+    const v = exp(y * log(-x));
+    return y % 2 ? -v : v;
+  }
+  return exp(y * log(x));
+}
+var ks = (x) => {
+  const z = x * x;
+  return x + z * x * (-0.16666666666666632 + z * (0.00833333333332249 + z * (-1984126982985795e-19 + z * (27557313707070068e-22 + z * (-25050760253406863e-24 + z * 158969099521155e-24)))));
+};
+var kc = (x) => {
+  const z = x * x;
+  return 1 - (0.5 * z - z * z * (0.0416666666666666 + z * (-0.001388888888887411 + z * (2480158728947673e-20 + z * (-27557314351390663e-23 + z * (2087572321298175e-24 + z * -11359647557788195e-27))))));
+};
+function quarter(x) {
+  const n = Math.round(x * 0.6366197723675814);
+  return [x - n * 1.5707963267341256 - n * 6077100506506192e-26, (n % 4 + 4) % 4];
+}
+function sin(x) {
+  if (!Number.isFinite(x)) return NaN;
+  const [r, q] = quarter(x);
+  return q === 0 ? ks(r) : q === 1 ? kc(r) : q === 2 ? -ks(r) : -kc(r);
+}
+function cos(x) {
+  if (!Number.isFinite(x)) return NaN;
+  const [r, q] = quarter(x);
+  return q === 0 ? kc(r) : q === 1 ? -ks(r) : q === 2 ? -kc(r) : ks(r);
+}
+var ATAN_HI = [0.4636476090008061, 0.7853981633974483, 0.982793723247329, 1.5707963267948966];
+var ATAN_LO = [22698777452961687e-33, 3061616997868383e-32, 13903311031230998e-33, 6123233995736766e-32];
+function atan(x) {
+  if (x !== x) return x;
+  const sign = x < 0 ? -1 : 1;
+  let a = Math.abs(x), id;
+  if (a >= 7378697629483821e4) return sign * ATAN_HI[3];
+  if (a < 0.4375) {
+    if (a < 1862645149230957e-24) return x;
+    id = -1;
+  } else if (a < 1.1875) {
+    if (a < 0.6875) {
+      id = 0;
+      a = (2 * a - 1) / (2 + a);
+    } else {
+      id = 1;
+      a = (a - 1) / (a + 1);
+    }
+  } else if (a < 2.4375) {
+    id = 2;
+    a = (a - 1.5) / (1 + 1.5 * a);
+  } else {
+    id = 3;
+    a = -1 / a;
+  }
+  const z = a * a, w = z * z, s1 = z * (0.3333333333333293 + w * (0.14285714272503466 + w * (0.09090887133436507 + w * (0.06661073137387531 + w * (0.049768779946159324 + w * 0.016285820115365782))))), s2 = w * (-0.19999999999876483 + w * (-0.11111110405462356 + w * (-0.0769187620504483 + w * (-0.058335701337905735 + w * -0.036531572744216916))));
+  return id < 0 ? sign * (a - a * (s1 + s2)) : sign * (ATAN_HI[id] - (a * (s1 + s2) - ATAN_LO[id] - a));
+}
+function atan2(y, x) {
+  if (x !== x || y !== y) return NaN;
+  const down = y < 0 || Object.is(y, -0);
+  if (x === 0) return y > 0 ? Math.PI / 2 : y < 0 ? -Math.PI / 2 : Object.is(x, -0) ? down ? -Math.PI : Math.PI : y;
+  const t = atan(y / x);
+  return x > 0 ? t : down ? t - Math.PI : t + Math.PI;
+}
+var hypot = (x, y) => Math.sqrt(x * x + y * y);
+var PM = Object.freeze({ hypot, sin, cos, atan2, exp, log, log2, pow: pow3 });
+
 // src/shared/generation/settlement_geometry_v1.js
 var TILE3 = D9_PROFILE.tileSize;
 var tilePoint = (p) => ({ x: (p[0] + 0.5) * TILE3, y: (p[1] + 0.5) * TILE3 });
@@ -7641,7 +7990,7 @@ function propsFor(t) {
   const props = [];
   for (const b of t.buildings.filter((b2) => b2.kind !== "home")) {
     const x = b.x - 1, y = b.y + b.h - 1;
-    if (x < 1 || y < 1 || x >= t.core[0] - 1 || y >= t.core[1] - 1 || t.buildings.some((q) => x >= q.x && x < q.x + q.w && y >= q.y && y < q.y + q.h) || t.buildings.some((q) => q.path.some((p) => Math.hypot(p[0] - x, p[1] - y) < 2) || Math.hypot(q.porch.x + 1 - x, q.porch.y + 1 - y) < 3)) continue;
+    if (x < 1 || y < 1 || x >= t.core[0] - 1 || y >= t.core[1] - 1 || t.buildings.some((q) => x >= q.x && x < q.x + q.w && y >= q.y && y < q.y + q.h) || t.buildings.some((q) => q.path.some((p) => PM.hypot(p[0] - x, p[1] - y) < 2) || PM.hypot(q.porch.x + 1 - x, q.porch.y + 1 - y) < 3)) continue;
     props.push({ id: b.id + ":barrel", x, y });
   }
   propCache.set(t, props);
@@ -7656,10 +8005,11 @@ var PLANNED_TOWN_VERSION = "planned-town-tavern-candidate-v1";
 var PLANNED_TOWN_START_VERSION = "planned-town-start-art-candidate-v2";
 var TOWN_START_TILES = freezeWire([{ x: 5871, y: 5760 }, { x: 5872, y: 5760 }, { x: 5871, y: 5761 }, { x: 5872, y: 5761 }]);
 var PLANNED_TOWN_ID = "settlement-slot:town:05";
+var townStartTilesV1 = perWorldV1(() => townTilesV1(PLANNED_TOWN_ID, TOWN_START_TILES));
 var PLANNED_TOWN_ASSET_HASH = "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a";
 function plannedTown(asset) {
-  const s = asset.settlements.find((s2) => s2.id === PLANNED_TOWN_ID);
-  requireContract(asset.assetId === "alpha" && s?.presetId === "town-open" && s.tileOrigin.x === 5824 && s.tileOrigin.y === 5720 && s.dimensions[0] === 96 && s.dimensions[1] === 78, "Unsupported town reservation");
+  const s = asset.settlements.find((s2) => s2.id === PLANNED_TOWN_ID), o = townOriginV1(PLANNED_TOWN_ID);
+  requireContract(asset.assetId === "alpha" && s?.presetId === "town-open" && s.tileOrigin.x === o.x && s.tileOrigin.y === o.y && s.dimensions[0] === 96 && s.dimensions[1] === 78, "Unsupported town reservation");
   return s;
 }
 var materials = /* @__PURE__ */ new Map();
@@ -7670,7 +8020,7 @@ for (const [points, width] of OPEN_TOWN_TEMPLATE_V1.streets) for (let i = 1; i <
   const [ax, ay] = points[i - 1], [bx, by] = points[i], dx = bx - ax, dy = by - ay, d = dx * dx + dy * dy;
   for (let y = Math.floor(Math.min(ay, by) - width); y <= Math.ceil(Math.max(ay, by) + width); y++) for (let x = Math.floor(Math.min(ax, bx) - width); x <= Math.ceil(Math.max(ax, bx) + width); x++) {
     const f2 = d ? Math.max(0, Math.min(1, ((x + 0.5 - ax) * dx + (y + 0.5 - ay) * dy) / d)) : 0;
-    if (Math.hypot(x + 0.5 - ax - f2 * dx, y + 0.5 - ay - f2 * dy) <= width / 2) put(x, y, "r");
+    if (PM.hypot(x + 0.5 - ax - f2 * dx, y + 0.5 - ay - f2 * dy) <= width / 2) put(x, y, "r");
   }
 }
 for (const b of OPEN_TOWN_TEMPLATE_V1.buildings) {
@@ -7678,21 +8028,23 @@ for (const b of OPEN_TOWN_TEMPLATE_V1.buildings) {
   const p = b.porch;
   for (let y = p.y; y < p.y + p.h; y++) for (let x = p.x; x < p.x + p.w; x++) put(x, y, "p");
 }
-function townConnector(x, y) {
-  return x >= 5805 && x <= 5826 && y >= 5732 && y <= 5734 || x >= 5824 && x <= 5826 && y >= 5733 && y <= 5765;
+function townConnector(x, y, o = townOriginV1(PLANNED_TOWN_ID)) {
+  const lx = x - o.x, ly = y - o.y;
+  return lx >= -19 && lx <= 2 && ly >= 12 && ly <= 14 || lx >= 0 && lx <= 2 && ly >= 13 && ly <= 45;
 }
 var TOWN_TAVERN = OPEN_TOWN_TEMPLATE_V1.buildings.find((b) => b.label === "Tavern + lodging");
 var TOWN_FRONTAGE = freezeWire({ x: 5824 + frontage(TOWN_TAVERN).x / 32 - 0.5, y: 5720 + frontage(TOWN_TAVERN).y / 32 - 0.5 });
+var townFrontageV1 = perWorldV1(() => townTileV1(PLANNED_TOWN_ID, TOWN_FRONTAGE));
 function createPlannedTownTiles(asset, terrain2) {
   const s = plannedTown(asset), ox = s.tileOrigin.x, oy = s.tileOrigin.y;
   for (let y = 0; y < 78; y++) for (let x = 0; x < 96; x++) requireContract(terrain2.base(ox + x, oy + y).walkable, "Town cannot replace authoritative water");
   return (x, y, base) => {
     if (x >= ox && x < ox + 96 && y >= oy && y < oy + 78) {
       const lx = x - ox, ly = y - oy;
-      const material = townConnector(x, y) ? "r" : materials.get(lx + "," + ly) ?? "g";
+      const material = townConnector(x, y, s.tileOrigin) ? "r" : materials.get(lx + "," + ly) ?? "g";
       return { ...base, collision: blocked(OPEN_TOWN_TEMPLATE_V1, lx, ly) ? "2" : "1", material, route: material === "r" ? 2 : 0, town: true };
     }
-    if (townConnector(x, y)) {
+    if (townConnector(x, y, s.tileOrigin)) {
       requireContract(terrain2.base(x, y).walkable, "Town approach cannot replace water");
       return { ...base, collision: "1", material: "r", route: 2, town: true };
     }
@@ -7700,19 +8052,19 @@ function createPlannedTownTiles(asset, terrain2) {
   };
 }
 function townChunkBlockers(cx, cy) {
-  const x = cx * 32, y = cy * 26, ox = 5824, oy = 5720;
+  const x = cx * 32, y = cy * 26, { x: ox, y: oy } = townOriginV1(PLANNED_TOWN_ID);
   if (x + 32 <= ox || x >= ox + 96 || y + 26 <= oy || y >= oy + 78) return [];
   return [{ id: PLANNED_TOWN_ID + ":clearing:" + cx + "," + cy, kind: "civilian-clearing", x: 0, y: 0, width: 32, height: 26, detail: "" }, ...OPEN_TOWN_TEMPLATE_V1.buildings.filter((b) => b.x + ox < x + 32 && b.x + b.w + ox > x && b.y + oy < y + 26 && b.y + b.h + oy > y).map((b) => ({ id: PLANNED_TOWN_ID + ":" + b.id, kind: "civilian-building", x: Math.max(x, b.x + ox) - x, y: Math.max(y, b.y + oy) - y, width: Math.min(x + 32, b.x + b.w + ox) - Math.max(x, b.x + ox), height: Math.min(y + 26, b.y + b.h + oy) - Math.max(y, b.y + oy), detail: b.label }))];
 }
 var TOWN_PROPS = propsFor(OPEN_TOWN_TEMPLATE_V1);
 
 // src/shared/contracts/planned_start_v1.js
-var plannedStartTiles = (b) => hasStarterVillage(b) ? STARTER_ARRIVAL_TILES : b?.townPrototype === PLANNED_TOWN_START_VERSION ? TOWN_START_TILES : null;
+var plannedStartTiles = (b) => hasStarterVillage(b) ? starterArrivalTilesV1() : b?.townPrototype === PLANNED_TOWN_START_VERSION ? townStartTilesV1() : null;
 var plannedStartSettlementId = (b, fallback) => hasStarterVillage(b) ? STARTER_VILLAGE_ID : b?.townPrototype === PLANNED_TOWN_START_VERSION ? PLANNED_TOWN_ID : fallback;
 var plannedStartLabel = (b, fallback) => hasStarterVillage(b) ? STARTER_VILLAGE_NAME : b?.townPrototype === PLANNED_TOWN_START_VERSION ? "town street" : fallback;
 function isStarterVillageSafe(state, position) {
   if (!hasStarterVillage(state) || !position) return false;
-  const q = localFramePositionD9(position, state.d9World.runtime.frames), x = (Number(q.chunkX) - 1024) * 32 + q.localX / 32, y = (Number(q.chunkY) - 1024) * 26 + q.localY / 32, o = STARTER_VILLAGE_ORIGIN;
+  const q = localFramePositionD9(position, state.d9World.runtime.frames), x = (Number(q.chunkX) - 1024) * 32 + q.localX / 32, y = (Number(q.chunkY) - 1024) * 26 + q.localY / 32, o = townOriginV1(STARTER_VILLAGE_ID);
   return x >= o.x && x < o.x + 64 && y >= o.y && y < o.y + 52;
 }
 
@@ -7920,12 +8272,12 @@ function applyWorldReshape(asset, binding, data) {
   requireContract(data.events.length === ext.eventCapacities.length, "World reshape event budget");
   const siteBiomes = {};
   for (const s of asset.sites) if (!s.id.startsWith("repeatable-slot:signature:")) siteBiomes[s.id] = site(s.id).biome;
-  const moved2 = {};
+  const moved3 = {};
   for (const s of [...asset.sites, ...ext.sites.map((r2) => r2.site)]) if (/^repeatable-slot:(cave|fort|ruin|crypt):/.test(s.id)) {
     const r2 = site(s.id);
-    if (r2.biome !== s.id.split(":")[2] || r2.band !== s.band) moved2[s.id] = [r2.biome, r2.band];
+    if (r2.biome !== s.id.split(":")[2] || r2.band !== s.band) moved3[s.id] = [r2.biome, r2.band];
   }
-  requireContract(canonicalStringify(moved2) === canonicalStringify(RESHAPE_SITES), "World reshape site table drift");
+  requireContract(canonicalStringify(moved3) === canonicalStringify(RESHAPE_SITES), "World reshape site table drift");
   const W5 = asset.domain.width * 64, H5 = asset.domain.height * 52, chunk = (c) => Number.isSafeInteger(c?.x) && Number.isSafeInteger(c?.y) && c.x >= 0 && c.y >= 0 && c.x < asset.domain.width * 2 && c.y < asset.domain.height * 2, land = new Set(asset.landmasses.map((l) => l.id));
   const signature = asset.sites.filter((s) => s.id.startsWith("repeatable-slot:signature:"));
   requireContract(signature.length === 16 && Object.keys(data.signatureSites).length === 16, "World reshape signature budget");
@@ -8036,7 +8388,7 @@ function createSoftBiomeSampler(p, macro) {
       const n = macro(i, j);
       if (n && n[1] === c[1]) {
         const d2 = (u - i) * (u - i) + (v - j) * (v - j);
-        weight[n[2]] += Math.exp(-d2 * 2.2);
+        weight[n[2]] += PM.exp(-d2 * 2.2);
       }
     }
     let best = c[2];
@@ -8067,19 +8419,19 @@ function validateHydrologyPlanV1(plan) {
 }
 function createHydrologyGeometryV1(plan, parent) {
   validateHydrologyPlanV1(plan);
-  const encoded = new Map(plan.pages.map((p) => [p.key, p.runs])), cache3 = /* @__PURE__ */ new Map();
+  const encoded = new Map(plan.pages.map((p) => [p.key, p.runs])), cache4 = /* @__PURE__ */ new Map();
   let decodes = 0, lastCx = NaN, lastCy = NaN, lastPage = null;
   function page(cx, cy) {
     if (cx === lastCx && cy === lastCy) return lastPage;
     const key5 = cx + "," + cy, runs = encoded.get(key5);
     let data = null;
     if (runs) {
-      data = cache3.get(key5);
+      data = cache4.get(key5);
       if (!data) {
         data = new Uint8Array(832);
         for (const [start, length, kind3] of runs) data.fill(kind3, start, start + length);
-        if (cache3.size >= 256) cache3.delete(cache3.keys().next().value);
-        cache3.set(key5, data);
+        if (cache4.size >= 256) cache4.delete(cache4.keys().next().value);
+        cache4.set(key5, data);
         decodes++;
       }
     }
@@ -8109,7 +8461,7 @@ function createHydrologyGeometryV1(plan, parent) {
     for (let y = 0; y < 52; y++) for (let x = 0; x < 64; x++) mask[y * 64 + x] = kind2(mx * 64 + x, my * 52 + y) ? 1 : 0;
     return mask;
   }
-  return Object.freeze({ ...parent, version: HYDROLOGY_VERSION, inland, maskForCell, hydrologyBasins: plan.basins, hydrologyNetwork: plan.network, hydrologyStats: () => ({ encodedPages: encoded.size, decodedPages: cache3.size, decodedPageLimit: 256, decodedBytes: cache3.size * 832, decodes }) });
+  return Object.freeze({ ...parent, version: HYDROLOGY_VERSION, inland, maskForCell, hydrologyBasins: plan.basins, hydrologyNetwork: plan.network, hydrologyStats: () => ({ encodedPages: encoded.size, decodedPages: cache4.size, decodedPageLimit: 256, decodedBytes: cache4.size * 832, decodes }) });
 }
 
 // src/shared/content/woodland_forest_pilot_v1.js
@@ -8118,18 +8470,6 @@ var WOODLAND_FOREST_POLICY = freezeWire({ version: WOODLAND_FOREST_VERSION, scop
 var WOODLAND_FOREST_HASH = "dd44ce53f044bf57b3ece91ea2867a5f157c0990225c6d19e6521ed8cd949190";
 var hasWoodlandForest = (b) => b?.woodlandForestVersion === WOODLAND_FOREST_VERSION && b?.woodlandForestHash === WOODLAND_FOREST_HASH && b?.assetId === "alpha";
 var woodlandForestRole = (id) => typeof id === "string" && id.startsWith(WOODLAND_FOREST_VERSION + "/") ? id.split("/")[1] : null;
-
-// src/shared/content/settlement_life_alpha_v1.js
-var LIFE_VILLAGE_ID = "settlement-slot:village-outpost:02";
-var LIFE_VILLAGE_ORIGIN = freezeWire({ x: 4480, y: 7592 });
-var LIFE_NPCS = freezeWire([
-  { id: "civilian:alpha:town:mara", name: "Mara", role: "general", roleLabel: "General merchant", settlementId: "settlement-slot:town:05", buildingId: "town-open:roof:004", band: 3, tile: { x: 5912, y: 5750 }, space: "exterior", color: "#567867" },
-  { id: "civilian:alpha:town:bren", name: "Bren", role: "smith", roleLabel: "Smith", settlementId: "settlement-slot:town:05", buildingId: "town-open:roof:006", band: 3, tile: { x: 5870, y: 5778 }, space: "exterior", color: "#82604b" },
-  { id: "civilian:alpha:town:ada", name: "Ada", role: "innkeeper", roleLabel: "Innkeeper", settlementId: "settlement-slot:town:05", buildingId: "town-open:roof:008", band: 3, tile: { x: 9, y: 6 }, space: "tavern-ground", color: "#876657" },
-  { id: "civilian:alpha:village:ila", name: "Ila", role: "general", roleLabel: "General merchant", settlementId: LIFE_VILLAGE_ID, buildingId: "village:roof:002", band: 2, tile: { x: 4497, y: 7610 }, space: "exterior", color: "#58766d" },
-  { id: "civilian:alpha:village:oren", name: "Oren", role: "smith", roleLabel: "Smith", settlementId: LIFE_VILLAGE_ID, buildingId: "village:roof:003", band: 2, tile: { x: 4532, y: 7607 }, space: "exterior", color: "#8d6c49" },
-  { id: "civilian:alpha:village:nell", name: "Nell", role: "innkeeper", roleLabel: "Innkeeper \xB7 tavern veranda", settlementId: LIFE_VILLAGE_ID, buildingId: "village:roof:002", band: 2, tile: { x: 4499, y: 7610 }, space: "exterior", color: "#81657a" }
-]);
 
 // src/shared/content/settlement_services_v2.js
 var SERVICES_V2 = "settlement-services-candidate-v2";
@@ -8140,8 +8480,8 @@ var WORKSHOP_POLICY = freezeWire({ version: SERVICES_V2, serviceAssignments: SER
 var hasServicesV2 = (b) => b?.settlementServicesVersion === SERVICES_V2 && b?.settlementServicesHash === SERVICES_V2_HASH;
 var ORDINARY_SERVICE_NPCS = freezeWire([...LIFE_NPCS, ...STARTER_NPCS]);
 var serviceNpcsFor = (b) => {
-  const ordinary2 = hasStarterVillage(b) ? ORDINARY_SERVICE_NPCS : LIFE_NPCS;
-  return hasServicesV2(b) ? [...ordinary2, SPECIALIST_NPC].map((n) => ({ ...n, services: SERVICE_ASSIGNMENTS[n.id] ?? [] })) : ordinary2;
+  const ordinary2 = townNpcsV1(hasStarterVillage(b) ? ORDINARY_SERVICE_NPCS : LIFE_NPCS);
+  return hasServicesV2(b) ? [...ordinary2, townNpcV1(SPECIALIST_NPC)].map((n) => ({ ...n, services: SERVICE_ASSIGNMENTS[n.id] ?? [] })) : ordinary2;
 };
 
 // src/shared/content/multiroom_policy_v1.js
@@ -8368,12 +8708,12 @@ function plannedCaveIds(binding) {
   return binding?.cavePrototype === PLANNED_CAVE_POPULATION_VERSION ? ALPHA_PLANNED_CAVES.map((r) => r.reservationId) : binding?.cavePrototype === PLANNED_CAVE_VERSION ? [PLANNED_CAVE_ID] : [];
 }
 function plannedCaveSelection(binding, id) {
-  const s = plannedCaveSelectionAsPlanned(binding, id), r = s && hasWorldReshape(binding) ? reshapedSite(id) : null;
+  const s = plannedCaveSelectionAsPlanned(binding, id), r = s && hasWorldReshape(binding) && !isSeededBindingV1(binding) ? reshapedSite(id) : null;
   return r ? { ...s, biome: r[0], band: r[1] } : s;
 }
 function plannedCaveSelectionAsPlanned(binding, id) {
   if (hasAlphaPopulation(binding)) {
-    const s = ALPHA_POPULATION_SELECTIONS.find((s2) => s2.id === id && s2.familyId === "site-family:cave");
+    const s = isSeededBindingV1(binding) ? worldSiteV1(id)?.familyId === "site-family:cave" ? worldSiteV1(id) : null : ALPHA_POPULATION_SELECTIONS.find((s2) => s2.id === id && s2.familyId === "site-family:cave");
     return s ? { reservationId: s.id, tier: s.tier, band: s.band, biome: s.biome, footprintChunk: s.footprint[0], approachChunk: s.approach[0] } : null;
   }
   return plannedCaveIds(binding).includes(id) ? ALPHA_PLANNED_CAVES.find((r) => r.reservationId === id) : null;
@@ -8382,7 +8722,7 @@ function plannedCaveSelectionAsPlanned(binding, id) {
 // src/shared/generation/local_water_geometry_v3.js
 var LOCAL_WATER_VERSION = "local-water-geometry-v3";
 function createLocalWaterGeometry(p, macro, shoreline, riverSegments) {
-  const protectedChunks = shoreline.protectedChunks, cache3 = /* @__PURE__ */ new Map(), coastCache = /* @__PURE__ */ new Map();
+  const protectedChunks = shoreline.protectedChunks, cache4 = /* @__PURE__ */ new Map(), coastCache = /* @__PURE__ */ new Map();
   const seed = parseInt(p.seedDigest.slice(0, 8), 16) >>> 0;
   const hash15 = (x, y, d) => {
     let n = seed ^ Math.imul(x + d, 73856093) ^ Math.imul(y - d, 19349663);
@@ -8431,7 +8771,7 @@ function createLocalWaterGeometry(p, macro, shoreline, riverSegments) {
     let distance5 = Infinity;
     for (let i = 0; i < near.length; i += 2) {
       const a = near[i], b = near[i + 1];
-      distance5 = Math.min(distance5, Math.hypot(Math.max(a - x, 0, x - a - 32), Math.max(b - y, 0, y - b - 26)));
+      distance5 = Math.min(distance5, PM.hypot(Math.max(a - x, 0, x - a - 32), Math.max(b - y, 0, y - b - 26)));
     }
     const t = Math.min(1, distance5 / 9);
     return t * t * (3 - 2 * t);
@@ -8448,19 +8788,19 @@ function createLocalWaterGeometry(p, macro, shoreline, riverSegments) {
     }
     if (!neighbors.length) return old;
     let distance5 = Infinity;
-    for (const [a, b] of neighbors) distance5 = Math.min(distance5, Math.hypot(Math.max(a * 64 - px, 0, px - (a + 1) * 64), Math.max(b * 52 - py, 0, py - (b + 1) * 52)));
+    for (const [a, b] of neighbors) distance5 = Math.min(distance5, PM.hypot(Math.max(a * 64 - px, 0, px - (a + 1) * 64), Math.max(b * 52 - py, 0, py - (b + 1) * 52)));
     if (distance5 > 32) return old;
     const inset = (2 + 8 * noise(px, py, 43, style.domain) + 5 * noise(px, py, 91, style.domain + 17)) * t;
     let margin = distance5 - inset;
     for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) if (!macro(mx + sx, my) && !macro(mx, my + sy)) {
       const r = 12 + 13 * noise(px, py, 69, style.domain + 37), lx = sx < 0 ? px - mx * 64 : (mx + 1) * 64 - px, ly = sy < 0 ? py - my * 52 : (my + 1) * 52 - py;
       if (lx < r && ly < r) {
-        const cut = style.expression === "angular-headlands" ? (lx + ly - r) * 0.707 : r - Math.hypot(lx - r, ly - r);
+        const cut = style.expression === "angular-headlands" ? (lx + ly - r) * 0.707 : r - PM.hypot(lx - r, ly - r);
         margin = Math.min(margin, cut * t + Math.min(lx, ly) * (1 - t) - inset * 0.25);
       }
     }
     if (p.landmasses[c[1]].classId === "minor-island") {
-      const b = p.landmasses[c[1]].bounds, w = (b.maxXExclusive - b.minX) * 64, h = (b.maxYExclusive - b.minY) * 52, cx = (b.minX + b.maxXExclusive) * 32, cy = (b.minY + b.maxYExclusive) * 26, angle = (hash15(2, 3, style.domain) / 4294967295 - 0.5) * 1.2, phase = hash15(5, 7, style.domain) / 4294967295 * Math.PI * 2, dx = px - cx, dy = py - cy, rx = w * (0.35 + 0.07 * noise(cx, cy, 73, style.domain + 61)), ry = h * (0.31 + 0.08 * noise(cx, cy, 83, style.domain + 71)), u = (dx * Math.cos(angle) + dy * Math.sin(angle)) / rx, v = (-dx * Math.sin(angle) + dy * Math.cos(angle)) / ry, theta = Math.atan2(v, u), shape = (1 - Math.hypot(u, v) + 0.16 * Math.sin(3 * theta + phase) + 0.08 * Math.sin(2 * theta - phase) + 0.05 * (noise(px, py, 29, style.domain + 89) - 0.5)) * Math.min(rx, ry);
+      const b = p.landmasses[c[1]].bounds, w = (b.maxXExclusive - b.minX) * 64, h = (b.maxYExclusive - b.minY) * 52, cx = (b.minX + b.maxXExclusive) * 32, cy = (b.minY + b.maxYExclusive) * 26, angle = (hash15(2, 3, style.domain) / 4294967295 - 0.5) * 1.2, phase = hash15(5, 7, style.domain) / 4294967295 * Math.PI * 2, dx = px - cx, dy = py - cy, rx = w * (0.35 + 0.07 * noise(cx, cy, 73, style.domain + 61)), ry = h * (0.31 + 0.08 * noise(cx, cy, 83, style.domain + 71)), u = (dx * PM.cos(angle) + dy * PM.sin(angle)) / rx, v = (-dx * PM.sin(angle) + dy * PM.cos(angle)) / ry, theta = PM.atan2(v, u), shape = (1 - PM.hypot(u, v) + 0.16 * PM.sin(3 * theta + phase) + 0.08 * PM.sin(2 * theta - phase) + 0.05 * (noise(px, py, 29, style.domain + 89) - 0.5)) * Math.min(rx, ry);
       margin = shape * t + distance5 * (1 - t);
     }
     return { water: margin < 0, shore: margin >= 0 && margin < (old?.width ?? 4), classId: old?.classId ?? "exposed-rocky-shore", margin, width: old?.width ?? 4, protected: false };
@@ -8516,11 +8856,11 @@ function createLocalWaterGeometry(p, macro, shoreline, riverSegments) {
   }
   const distance4 = (x, y, a, b) => {
     const dx = b.x - a.x, dy = b.y - a.y, u = Math.max(0, Math.min(1, ((x - a.x) * dx + (y - a.y) * dy) / (dx * dx + dy * dy || 1)));
-    return Math.hypot(x - a.x - u * dx, y - a.y - u * dy);
+    return PM.hypot(x - a.x - u * dx, y - a.y - u * dy);
   };
   function maskForCell(mx, my) {
     const key5 = mx + "," + my;
-    if (cache3.has(key5)) return cache3.get(key5);
+    if (cache4.has(key5)) return cache4.get(key5);
     const c = macro(mx, my);
     if (!c || !c[4] && !c[5]) return null;
     const mask = new Uint8Array(64 * 52), old = new Uint8Array(64 * 52), segments = riverSegments.get(key5) ?? [];
@@ -8532,19 +8872,19 @@ function createLocalWaterGeometry(p, macro, shoreline, riverSegments) {
         for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) if (!macro(mx + dx, my + dy)?.[4]) margin = Math.min(margin, dx < 0 ? lx + 0.5 : dx > 0 ? 63.5 - lx : dy < 0 ? ly + 0.5 : 51.5 - ly);
         for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) if (!macro(mx + sx, my)?.[4] && !macro(mx, my + sy)?.[4]) {
           const r = 13 + 8 * noise(x, y, 67, 419), a = sx < 0 ? lx + 0.5 : 63.5 - lx, b = sy < 0 ? ly + 0.5 : 51.5 - ly;
-          if (a < r && b < r) margin = Math.min(margin, (r - Math.hypot(a - r, b - r)) * t + Math.min(a, b) * (1 - t));
+          if (a < r && b < r) margin = Math.min(margin, (r - PM.hypot(a - r, b - r)) * t + Math.min(a, b) * (1 - t));
         }
-        const basin = lakeByCell.get(key5), cx = (basin.minX + basin.maxX) / 2, cy = (basin.minY + basin.maxY) / 2, rx = (basin.maxX - basin.minX) * 0.47, ry = (basin.maxY - basin.minY) * 0.46, u = (x - cx) / rx, v = (y - cy) / ry, theta = Math.atan2(v, u), phase = hash15(7, 9, basin.domain) / 4294967295 * Math.PI * 2, shape = (1 - Math.hypot(u, v) + 0.1 * Math.sin(3 * theta + phase) + 0.06 * Math.sin(2 * theta - phase) + 0.05 * (noise(x, y, 47, basin.domain) - 0.5)) * Math.min(rx, ry);
+        const basin = lakeByCell.get(key5), cx = (basin.minX + basin.maxX) / 2, cy = (basin.minY + basin.maxY) / 2, rx = (basin.maxX - basin.minX) * 0.47, ry = (basin.maxY - basin.minY) * 0.46, u = (x - cx) / rx, v = (y - cy) / ry, theta = PM.atan2(v, u), phase = hash15(7, 9, basin.domain) / 4294967295 * Math.PI * 2, shape = (1 - PM.hypot(u, v) + 0.1 * PM.sin(3 * theta + phase) + 0.06 * PM.sin(2 * theta - phase) + 0.05 * (noise(x, y, 47, basin.domain) - 0.5)) * Math.min(rx, ry);
         margin = Math.min(margin, shape * t + margin * (1 - t));
         mask[ly * 64 + lx] = margin >= inset ? 1 : 0;
       }
     } else {
       for (let ly = 0; ly < 52; ly++) for (let lx = 0; lx < 64; lx++) if (segments.some(([a, b, w]) => distance4(mx * 64 + lx + 0.5, my * 52 + ly + 0.5, a, b) <= w)) old[ly * 64 + lx] = 1;
       for (const [a, b, w] of segments) {
-        const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy), steps = Math.ceil(len * 2);
+        const dx = b.x - a.x, dy = b.y - a.y, len = PM.hypot(dx, dy), steps = Math.ceil(len * 2);
         for (let i = 0; i <= steps; i++) {
-          const u = i / steps, xx = a.x + dx * u, yy = a.y + dy * u, t = protection(xx, yy), bend = Math.sin(Math.PI * u) * (noise(xx, yy, 37, 503) - 0.5) * 11 * t * (guard(xx, yy) ? 0 : 1), x = xx - dy / len * bend, y = yy + dx / len * bend, r = w + 0.3 * Math.sin(Math.PI * u) * noise(xx, yy, 29, 523);
-          for (let ly = Math.max(0, Math.floor(y - r - my * 52)); ly < Math.min(52, Math.ceil(y + r - my * 52)); ly++) for (let lx = Math.max(0, Math.floor(x - r - mx * 64)); lx < Math.min(64, Math.ceil(x + r - mx * 64)); lx++) if (Math.hypot(mx * 64 + lx + 0.5 - x, my * 52 + ly + 0.5 - y) <= r) mask[ly * 64 + lx] = 1;
+          const u = i / steps, xx = a.x + dx * u, yy = a.y + dy * u, t = protection(xx, yy), bend = PM.sin(Math.PI * u) * (noise(xx, yy, 37, 503) - 0.5) * 11 * t * (guard(xx, yy) ? 0 : 1), x = xx - dy / len * bend, y = yy + dx / len * bend, r = w + 0.3 * PM.sin(Math.PI * u) * noise(xx, yy, 29, 523);
+          for (let ly = Math.max(0, Math.floor(y - r - my * 52)); ly < Math.min(52, Math.ceil(y + r - my * 52)); ly++) for (let lx = Math.max(0, Math.floor(x - r - mx * 64)); lx < Math.min(64, Math.ceil(x + r - mx * 64)); lx++) if (PM.hypot(mx * 64 + lx + 0.5 - x, my * 52 + ly + 0.5 - y) <= r) mask[ly * 64 + lx] = 1;
         }
       }
     }
@@ -8583,7 +8923,7 @@ function createLocalWaterGeometry(p, macro, shoreline, riverSegments) {
       }
       for (let n = 0; n < 3328; n++) if (mask[n] && !seen[n]) mask[n] = 0;
     }
-    cache3.set(key5, mask);
+    cache4.set(key5, mask);
     return mask;
   }
   function inland(x, y) {
@@ -8627,7 +8967,7 @@ function createLocalShoreline(p, macro) {
   for (const s of p.futureIslands) add([s.entrance, s.approach, s.landing, s.breathing]);
   add(p.extraProtected);
   add(p.originZone.runtimeChunks.map((c) => ({ x: c.chunkX, y: c.chunkY })));
-  const seed = Number.parseInt(p.seedDigest.slice(0, 8), 16) >>> 0, cache3 = /* @__PURE__ */ new Map();
+  const seed = Number.parseInt(p.seedDigest.slice(0, 8), 16) >>> 0, cache4 = /* @__PURE__ */ new Map();
   const hash15 = (x, y, domain) => {
     let n = seed ^ Math.imul(x + domain, 73856093) ^ Math.imul(y - domain, 19349663);
     n ^= n >>> 16;
@@ -8644,25 +8984,25 @@ function createLocalShoreline(p, macro) {
     const mx = Math.floor(x / 64), my = Math.floor(y / 52), c = macro(mx, my);
     if (!c) return null;
     const ck = mx + "," + my;
-    let ocean = cache3.get(ck);
+    let ocean = cache4.get(ck);
     if (!ocean) {
       ocean = [];
       for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (!macro(mx + dx, my + dy)) ocean.push([mx + dx, my + dy]);
-      cache3.set(ck, ocean);
+      cache4.set(ck, ocean);
     }
     if (!ocean.length) return null;
     const px = x + 0.5, py = y + 0.5;
     let distance4 = Infinity;
     for (const [ox, oy] of ocean) {
       const dx = Math.max(ox * 64 - px, 0, px - (ox + 1) * 64), dy = Math.max(oy * 52 - py, 0, py - (oy + 1) * 52);
-      distance4 = Math.min(distance4, Math.hypot(dx, dy));
+      distance4 = Math.min(distance4, PM.hypot(dx, dy));
     }
     if (distance4 > 30) return null;
     let protection = Infinity;
     const cx = Math.floor(x / 32), cy = Math.floor(y / 26);
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (protectedChunks.has(cx + dx + "," + (cy + dy))) {
       const a = (cx + dx) * 32, b = (cy + dy) * 26;
-      protection = Math.min(protection, Math.hypot(Math.max(a - px, 0, px - a - 32), Math.max(b - py, 0, py - b - 26)));
+      protection = Math.min(protection, PM.hypot(Math.max(a - px, 0, px - a - 32), Math.max(b - py, 0, py - b - 26)));
     }
     const t = Math.min(1, protection / 8), taper = t * t * (3 - 2 * t);
     const inset = (2 + 10 * noise(px, py, 56, 31) + 3 * noise(px, py, 112, 97)) * taper;
@@ -8670,7 +9010,7 @@ function createLocalShoreline(p, macro) {
     for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) if (!macro(mx + sx, my) && !macro(mx, my + sy)) {
       const r = 18 + 5 * noise(px, py, 80, 151), lx = sx < 0 ? px - mx * 64 : (mx + 1) * 64 - px, ly = sy < 0 ? py - my * 52 : (my + 1) * 52 - py;
       if (lx < r && ly < r) {
-        const cut = (r - Math.hypot(lx - r, ly - r)) * taper + Math.min(lx, ly) * (1 - taper);
+        const cut = (r - PM.hypot(lx - r, ly - r)) * taper + Math.min(lx, ly) * (1 - taper);
         margin = Math.min(margin, cut - inset * 0.3);
       }
     }
@@ -8714,7 +9054,9 @@ var tileAddress = (x, y) => ({ chunkX: String(PLANNED_ADDRESS_OFFSET.chunkX + Ma
 function validatePlannedBinding(b) {
   requirePlan([PLANNED_WORLD_VERSION, PLANNED_SHORELINE_VERSION, PLANNED_WATER_VERSION].includes(b?.version) && /^(alpha|bravo|charlie|fort-deep-fixture|ruin-deep-fixture|crypt-large-fixture|scan-0(0[1-9]|1[0-6]))$/.test(b.assetId), "Unknown planned world binding");
   for (const k of ["assetHash", "planHash", "routeHash", "planningHash", "physicalHash"]) requirePlan(/^[a-f0-9]{64}$/.test(b[k]), "Invalid planned world commitment");
-  const { reshapeVersion, reshapeHash, roadsideVersion, roadsideHash, accessVersion, accessHash, hydrologyVersion, hydrologyHash, woodlandForestVersion, woodlandForestHash, startVersion, startHash, townPrototype, cavePrototype, fortPrototype, ruinPrototype, cryptPrototype, sitePopulation, sitePopulationHash, wildernessVersion, wildernessHash, interiorGeneration, interiorGenerationHash, ferryVersion, ferryHash, settlementLifeVersion, settlementLifeHash, settlementServicesVersion, settlementServicesHash, combatVersion, combatHash, bossHostingVersion, bossHostingHash, ...base } = b;
+  const { reshapeVersion, reshapeHash, roadsideVersion, roadsideHash, accessVersion, accessHash, hydrologyVersion, hydrologyHash, woodlandForestVersion, woodlandForestHash, startVersion, startHash, townPrototype, cavePrototype, fortPrototype, ruinPrototype, cryptPrototype, sitePopulation, sitePopulationHash, wildernessVersion, wildernessHash, interiorGeneration, interiorGenerationHash, ferryVersion, ferryHash, settlementLifeVersion, settlementLifeHash, settlementServicesVersion, settlementServicesHash, combatVersion, combatHash, bossHostingVersion, bossHostingHash, worldMaker, ...base } = b;
+  const seeded2 = worldMaker !== void 0;
+  if (seeded2) requirePlan(/^world-maker-v1\.\d+$/.test(worldMaker) && b.assetId === "alpha", "Invalid seeded world commitment");
   requirePlan(Object.keys(base).sort().join(",") === "assetHash,assetId,physicalHash,planHash,planningHash,routeHash,version", "Unknown planned binding field");
   if (reshapeVersion !== void 0 || reshapeHash !== void 0) requirePlan(reshapeVersion === RESHAPE_VERSION && reshapeHash === RESHAPE_HASH && accessHash === ACCESS_HASH && b.assetId === "alpha", "Invalid world reshape commitment");
   if (roadsideVersion !== void 0 || roadsideHash !== void 0) requirePlan(roadsideVersion === ROADSIDE_VERSION && roadsideHash === ROADSIDE_HASH && accessHash === ACCESS_HASH && combatHash === WORLD_COMBAT_HASH, "Invalid roadside encounter commitment");
@@ -8729,8 +9071,8 @@ function validatePlannedBinding(b) {
   if (settlementLifeVersion !== void 0 || settlementLifeHash !== void 0) requirePlan(settlementLifeVersion === SETTLEMENT_LIFE_VERSION && settlementLifeHash === SETTLEMENT_LIFE_HASH && ferryVersion === FERRY_VERSION && b.assetId === "alpha", "Invalid settlement life commitment");
   if (ferryVersion !== void 0 || ferryHash !== void 0) requirePlan(ferryVersion === FERRY_VERSION && ferryHash === FERRY_HASH && interiorGeneration === MULTIROOM_VERSION && b.assetId === "alpha", "Invalid ferry network commitment");
   if (interiorGeneration !== void 0 || interiorGenerationHash !== void 0) requirePlan(interiorGeneration === MULTIROOM_VERSION && interiorGenerationHash === MULTIROOM_HASH && sitePopulation === ALPHA_POPULATION_VERSION && sitePopulationHash === ALPHA_POPULATION_HASH, "Invalid multiroom generation commitment");
-  if (sitePopulation !== void 0 || sitePopulationHash !== void 0) requirePlan(sitePopulation === ALPHA_POPULATION_VERSION && sitePopulationHash === ALPHA_POPULATION_HASH && b.assetId === "alpha" && b.assetHash === ALPHA_POPULATION_BASE_HASH && cryptPrototype === PLANNED_CRYPT_V2, "Invalid Alpha population commitment");
-  if (townPrototype !== void 0) requirePlan([PLANNED_TOWN_VERSION, PLANNED_TOWN_START_VERSION].includes(townPrototype) && b.assetId === "alpha" && b.assetHash === PLANNED_TOWN_ASSET_HASH, "Invalid town prototype commitment");
+  if (sitePopulation !== void 0 || sitePopulationHash !== void 0) requirePlan(sitePopulation === ALPHA_POPULATION_VERSION && sitePopulationHash === ALPHA_POPULATION_HASH && b.assetId === "alpha" && (seeded2 || b.assetHash === ALPHA_POPULATION_BASE_HASH) && cryptPrototype === PLANNED_CRYPT_V2, "Invalid Alpha population commitment");
+  if (townPrototype !== void 0) requirePlan([PLANNED_TOWN_VERSION, PLANNED_TOWN_START_VERSION].includes(townPrototype) && b.assetId === "alpha" && (seeded2 || b.assetHash === PLANNED_TOWN_ASSET_HASH), "Invalid town prototype commitment");
   if (cavePrototype !== void 0) requirePlan([PLANNED_CAVE_VERSION, PLANNED_CAVE_POPULATION_VERSION].includes(cavePrototype) && townPrototype === PLANNED_TOWN_START_VERSION && b.assetId === "alpha", "Invalid Cave prototype commitment");
   if (fortPrototype !== void 0) requirePlan([PLANNED_FORT_VERSION, PLANNED_FORT_V2].includes(fortPrototype) && cavePrototype === PLANNED_CAVE_POPULATION_VERSION && b.assetId === "alpha" || fortPrototype === PLANNED_FORT_V2 && b.assetId === "fort-deep-fixture" && townPrototype === void 0 && cavePrototype === void 0, "Invalid Fort prototype commitment");
   if (ruinPrototype !== void 0) requirePlan([PLANNED_RUIN_VERSION, PLANNED_RUIN_V2].includes(ruinPrototype) && b.assetId === "alpha" && fortPrototype === PLANNED_FORT_V2 && cavePrototype === PLANNED_CAVE_POPULATION_VERSION || ruinPrototype === PLANNED_RUIN_V2 && b.assetId === "ruin-deep-fixture" && !townPrototype && !fortPrototype && !cavePrototype, "Invalid Ruin prototype commitment");
@@ -8808,7 +9150,7 @@ function createPlannedTerrain(p) {
   const parentWater = p.version === PLANNED_WATER_VERSION ? createLocalWaterGeometry(p, macro, shoreline, riverSegments) : null, waterGeometry = p.hydrologyPlan ? createHydrologyGeometryV1(p.hydrologyPlan, parentWater) : parentWater;
   const segmentDistance = (x, y, a, b) => {
     const dx = b.x - a.x, dy = b.y - a.y, u = Math.max(0, Math.min(1, ((x - a.x) * dx + (y - a.y) * dy) / (dx * dx + dy * dy || 1)));
-    return Math.hypot(x - a.x - u * dx, y - a.y - u * dy);
+    return PM.hypot(x - a.x - u * dx, y - a.y - u * dy);
   };
   function base(x, y, sparseCoast = false) {
     const mx = Math.floor(x / 64), my = Math.floor(y / 52), c = macro(mx, my);
@@ -8875,7 +9217,7 @@ function validateCampaignTavern(s) {
   }
   closedRecord(r, ["version", "siteId", "binding", "floorLogicalIds"]);
   const b = r.binding;
-  requireContract(r.version === PLANNED_TOWN_VERSION && r.siteId === "loc:" + token(s.campaign.campaignId, "entrance") && b.campaignId === s.campaign.campaignId && b.settlementId === PLANNED_TOWN_ID && b.buildingId === TOWN_TAVERN.id && b.exteriorSpaceId === s.overworldInstanceId && same4(b.frontage, TOWN_FRONTAGE), "Tavern exterior identity drift");
+  requireContract(r.version === PLANNED_TOWN_VERSION && r.siteId === "loc:" + token(s.campaign.campaignId, "entrance") && b.campaignId === s.campaign.campaignId && b.settlementId === PLANNED_TOWN_ID && b.buildingId === TOWN_TAVERN.id && b.exteriorSpaceId === s.overworldInstanceId && same4(b.frontage, townFrontageV1()), "Tavern exterior identity drift");
   const expected = createTavernBinding({ campaignId: b.campaignId, settlementId: b.settlementId, buildingId: b.buildingId, exteriorSpaceId: b.exteriorSpaceId, frontage: b.frontage, exteriorDimensions: [14, 12] });
   requireContract(b.identity === expected.identity && b.version === expected.version && b.recipeVersion === expected.recipeVersion && Object.keys(b).sort().join(",") === Object.keys(expected).sort().join(","), "Tavern recipe/binding drift");
   closedRecord(b.floorSpaces, ["ground", "upper"]);
@@ -9579,10 +9921,10 @@ var hash2 = (s) => {
   for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0;
   return h;
 };
-var cache2 = /* @__PURE__ */ new Map();
+var cache3 = /* @__PURE__ */ new Map();
 function populateCombatRooms(base, seed, family2, tier, index) {
   const key5 = [seed, family2, tier, index].join("/");
-  if (cache2.has(key5)) return cache2.get(key5);
+  if (cache3.has(key5)) return cache3.get(key5);
   const rooms = base.graph.rooms.filter((r) => r.role !== "arrival"), ranked = rooms.map((r) => ({ r, n: hash2(WORLD_COMBAT_VERSION + key5 + r.roomId) })).sort((a, b) => a.n - b.n), chosen = ranked.slice(0, Math.min(WORLD_COMBAT_POLICY.floorPacks[tier], rooms.length)), members = [], packs = [];
   const families = family2 === "cave" ? ["slime", "rust_nibbler", "gargoyle"] : family2 === "fort" ? ["animated_armor", "gargoyle", "golem"] : ["cursed_blade", "gargoyle", "rust_nibbler"];
   for (const [i, { r, n }] of chosen.entries()) {
@@ -9605,8 +9947,8 @@ function populateCombatRooms(base, seed, family2, tier, index) {
     for (const [j, p] of used.entries()) members.push({ memberKey: family2 + ":horde:" + index + ":" + i + ":" + j, family: families[(n + j) % families.length], roomId: r.roomId, position: p, ...family2 === "fort" ? { eliteAffixId: i === 0 && j === 0 && index > 0 ? ["swift_commander", "slag_shaper", "iron_citadel"][Math.min(2, index - 1)] : null } : {} });
   }
   const result = freezeWire({ ...base, encounter: { rank: "C", combatVersion: WORLD_COMBAT_VERSION, packs, members } });
-  if (cache2.size >= 128) cache2.delete(cache2.keys().next().value);
-  cache2.set(key5, result);
+  if (cache3.size >= 128) cache3.delete(cache3.keys().next().value);
+  cache3.set(key5, result);
   return result;
 }
 
@@ -9955,13 +10297,18 @@ function exactMatcher(expected) {
 var compile = (list) => new Map(list.map((r) => [r.socket.provenance.reservationId, { socket: exactMatcher(r.socket), reservation: exactMatcher(r) }]));
 var commitments = compile([...ALPHA_POPULATION_RESERVATIONS, ...WILDERNESS_RESERVATIONS, ...ACCESS_RESERVATIONS]);
 var reshaped = compile(RESHAPE_RESERVATIONS);
+var seeded = null;
+function useSeededReservationsV1(list) {
+  seeded = list == null ? null : { revision: worldRevisionV1(), matchers: compile(list) };
+}
+var seededMatchers = () => seeded?.revision === worldRevisionV1() ? seeded.matchers : null;
 function validatePopulationSocket(s) {
-  const e = commitments.get(s.provenance.reservationId), f2 = reshaped.get(s.provenance.reservationId);
-  requireContract(e && newPopulationSelection(s.provenance.reservationId) && s.provenance.populationHash === ALPHA_POPULATION_HASH && (e.socket(s, /* @__PURE__ */ new WeakSet()) || f2.socket(s, /* @__PURE__ */ new WeakSet())), "Population socket commitment/geometry drift");
+  const own2 = seededMatchers(), e = (own2 ?? commitments).get(s.provenance.reservationId), f2 = own2 ? null : reshaped.get(s.provenance.reservationId);
+  requireContract(e && newPopulationSelection(s.provenance.reservationId) && s.provenance.populationHash === ALPHA_POPULATION_HASH && (e.socket(s, /* @__PURE__ */ new WeakSet()) || f2?.socket(s, /* @__PURE__ */ new WeakSet())), "Population socket commitment/geometry drift");
   return s;
 }
 function validatePopulationReservation(root, r) {
-  const e = (hasWorldReshape(root.plannedWorld) ? reshaped : commitments).get(r.socket.provenance.reservationId);
+  const e = (seededMatchers() ?? (hasWorldReshape(root.plannedWorld) ? reshaped : commitments)).get(r.socket.provenance.reservationId);
   requireContract((r.socket.provenance.reservationId !== FIRST_CAVE_ID || hasFirstJourney(root.plannedWorld)) && root.plannedWorld?.assetId === "alpha" && hasAlphaPopulation(root.plannedWorld) && (!wildernessSelection(r.socket.provenance.reservationId) || root.plannedWorld?.wildernessVersion === "wilderness-distribution-v2-native") && e && newPopulationSelection(r.socket.provenance.reservationId) && e.reservation(r, /* @__PURE__ */ new WeakSet()), "Population reservation commitment drift");
   return r;
 }
@@ -11452,12 +11799,12 @@ function fortFloorRecipeV2(seed, tier, index) {
     blockers2.push({ kind: kind2, x, y, width, height });
     decorations3.push({ kind: visual2, x: x + width / 2, y: y + height / 2, width, height, variant: n % 2 });
   }, point13 = (x, y) => ({ x: x * 32 + 16, y: y * 32 + 16 }), mid = Math.floor(w / 2), south = h - 8;
-  const split = Math.floor(w / 3), doorY = 10 + n % 3;
-  for (const x of [split, w - split - 1]) doorWall(x, 1, 1, h - 10, doorY, true);
-  for (const x of [split + 3, w - split - 4]) prop("fort-interior-storage", x, 3, 2, 2, "fort-storage");
+  const split2 = Math.floor(w / 3), doorY = 10 + n % 3;
+  for (const x of [split2, w - split2 - 1]) doorWall(x, 1, 1, h - 10, doorY, true);
+  for (const x of [split2 + 3, w - split2 - 4]) prop("fort-interior-storage", x, 3, 2, 2, "fort-storage");
   if (p.role === "ground") {
     const y = 7 + n % 2;
-    for (let x = split + 1; x < w - split - 1; x++) if (Math.abs(x - mid) > 1) cells3[y][x] = "0";
+    for (let x = split2 + 1; x < w - split2 - 1; x++) if (Math.abs(x - mid) > 1) cells3[y][x] = "0";
     decorations3.push({ kind: "fort-rug", x: mid - 3, y: 11, width: 6, height: 3, variant: 0 });
   } else if (p.role.startsWith("upper")) {
     prop("fort-interior-table", 2, 4, 4, 2, "fort-table");
@@ -11466,13 +11813,13 @@ function fortFloorRecipeV2(seed, tier, index) {
   } else {
     for (const y of [6, Math.floor(h / 2)]) for (const x of [3, w - 5]) prop("fort-interior-storage", x, y, 2, 2, "fort-storage");
     if (p.role === "deep-underground") for (const y of [7, 14]) {
-      for (let x = split + 1; x < w - split - 1; x++) if (Math.abs(x - (mid + (y === 7 ? -3 : 3))) > 1) cells3[y][x] = "0";
+      for (let x = split2 + 1; x < w - split2 - 1; x++) if (Math.abs(x - (mid + (y === 7 ? -3 : 3))) > 1) cells3[y][x] = "0";
     }
   }
   const rooms = [
-    { roomId: "fort-room:" + index + ":west", role: "side-chamber", x: 1, y: 1, width: split - 1, height: h - 10 },
-    { roomId: "fort-room:" + index + ":hall", role: p.role === "ground" ? "courtyard-hall" : "encounter", x: split + 1, y: 1, width: w - 2 * split - 2, height: h - 10 },
-    { roomId: "fort-room:" + index + ":east", role: "side-chamber", x: w - split, y: 1, width: split - 1, height: h - 10 }
+    { roomId: "fort-room:" + index + ":west", role: "side-chamber", x: 1, y: 1, width: split2 - 1, height: h - 10 },
+    { roomId: "fort-room:" + index + ":hall", role: p.role === "ground" ? "courtyard-hall" : "encounter", x: split2 + 1, y: 1, width: w - 2 * split2 - 2, height: h - 10 },
+    { roomId: "fort-room:" + index + ":east", role: "side-chamber", x: w - split2, y: 1, width: split2 - 1, height: h - 10 }
   ];
   const candidates = [point13(mid, 5), point13(4, doorY + 1), point13(w - 5, doorY + 1)];
   const families = p.role.includes("underground") ? ["golem", "rust_nibbler", "gargoyle"] : ["animated_armor", "gargoyle", "animated_armor"];
@@ -17405,17 +17752,17 @@ function discoverOverworldActors(state) {
   if (!manifest) return null;
   const discovery = copyWire(state.campaign.overworld.discovery);
   if (manifest.manifestVersion === 2) {
-    const regions = new Set(discovery.discoveredRegionIds), settlements = new Set(discovery.discoveredSettlementIds), sites4 = new Set(discovery.discoveredSiteIds);
+    const regions = new Set(discovery.discoveredRegionIds), settlements2 = new Set(discovery.discoveredSettlementIds), sites4 = new Set(discovery.discoveredSiteIds);
     for (const player of Object.values(state.playersById)) {
       const actor = state.space.entitiesById[player.entityId], chunk = actor && areaAtWorldPosition(manifest, actor.position);
       if (!chunk) continue;
       const chunkId = technicalChunkId(chunk);
       for (const region of manifest.regions.filter((value) => value.chunkIds.includes(chunkId))) regions.add(region.discoveryId);
-      for (const settlement of manifest.settlements.filter((value) => value.chunkIds.includes(chunkId))) settlements.add(settlement.discoveryId);
+      for (const settlement of manifest.settlements.filter((value) => value.chunkIds.includes(chunkId))) settlements2.add(settlement.discoveryId);
       for (const site of manifest.sites) if (Math.hypot(actor.position.x - site.position.x, actor.position.y - site.position.y) <= manifest.tileSize * 2) sites4.add(site.locationId);
     }
     discovery.discoveredRegionIds = [...regions].sort();
-    discovery.discoveredSettlementIds = [...settlements].sort();
+    discovery.discoveredSettlementIds = [...settlements2].sort();
     discovery.discoveredSiteIds = [...sites4].sort();
     const roads2 = new Set(discovery.traversedCorridorSegmentIds);
     discoverRoadSegments(state, manifest, roads2);
@@ -19004,11 +19351,11 @@ function prepareTravelState(source4, travel) {
   Object.assign(next.space, next.activeSpaceRef, { contentDefinitionId: destination.contentDefinitionId, collision: copyWire(destination.collision) });
   next.multiplayer.encounterParticipants = null;
   for (const [index, playerId] of next.session.playerIds.entries()) {
-    const moved2 = next.space.entitiesById[next.playersById[playerId].entityId];
-    moved2.position = regional ? copyWire(arrival.partyPositions[index]) : { x: destination.anchor.x, y: destination.anchor.y + index * 24 };
-    requireContract(!collidesWithTiles(destination.collision, moved2.position.x, moved2.position.y, moved2.hullRadius), "Destination anchor blocked");
-    moved2.movementIntent = { x: 0, y: 0 };
-    moved2.movedLastTick = false;
+    const moved3 = next.space.entitiesById[next.playersById[playerId].entityId];
+    moved3.position = regional ? copyWire(arrival.partyPositions[index]) : { x: destination.anchor.x, y: destination.anchor.y + index * 24 };
+    requireContract(!collidesWithTiles(destination.collision, moved3.position.x, moved3.position.y, moved3.hullRadius), "Destination anchor blocked");
+    moved3.movementIntent = { x: 0, y: 0 };
+    moved3.movedLastTick = false;
   }
   if (regional) next.campaign.geography = discoverCrossing(source4.campaign.geography, destination.spaceId, exit.roadSegmentId);
   validateWorldState(next);
@@ -19538,16 +19885,16 @@ async function pageDigest(value, sha256) {
   return entry.promise;
 }
 function createPageTransaction({ root = null, readPage, sha256 }) {
-  const dirty = /* @__PURE__ */ new Map(), cache3 = /* @__PURE__ */ new Map();
+  const dirty = /* @__PURE__ */ new Map(), cache4 = /* @__PURE__ */ new Map();
   let current = root;
   const load = async (id) => {
     if (!id) return null;
     if (dirty.has(id)) return dirty.get(id);
-    if (cache3.has(id)) return cache3.get(id);
+    if (cache4.has(id)) return cache4.get(id);
     const value = await readPage(id);
     requireContract(value && await pageDigest(value, sha256) === id, "Page commitment mismatch");
-    if (cache3.size >= 64) cache3.delete(cache3.keys().next().value);
-    cache3.set(id, value);
+    if (cache4.size >= 64) cache4.delete(cache4.keys().next().value);
+    cache4.set(id, value);
     return value;
   };
   const put2 = async (value) => {
@@ -20210,11 +20557,11 @@ function groundCoverageReadyD9(state, p) {
   if (!state.d9World) return true;
   const actor = state.entitiesById[p.entityId], spaceId = actor.residency.spaceInstanceId;
   if (!state.d9World.groundIndex && spaceId === state.overworldInstanceId) return true;
-  const cache3 = caches.get(state)?.get(p.playerId);
-  if (!cache3 || cache3.spaceInstanceId !== spaceId) return false;
-  if (cache3.fullSpaceBounds) return actor.position.x >= 0 && actor.position.y >= 0 && actor.position.x < cache3.fullSpaceBounds.width && actor.position.y < cache3.fullSpaceBounds.height;
-  const canonical = spaceId === state.overworldInstanceId ? localFramePositionD9(actor.position, state.d9World.runtime.frames) : legacyWorldPosition(actor.position), relative = relativeWorldPosition(canonical, cache3.center, 4);
-  return Boolean(relative && Math.hypot(relative.x - cache3.center.localX, relative.y - cache3.center.localY) <= cache3.radius - D9_PROFILE.placementSafetyRadius - D9_PROFILE.prepareRadius);
+  const cache4 = caches.get(state)?.get(p.playerId);
+  if (!cache4 || cache4.spaceInstanceId !== spaceId) return false;
+  if (cache4.fullSpaceBounds) return actor.position.x >= 0 && actor.position.y >= 0 && actor.position.x < cache4.fullSpaceBounds.width && actor.position.y < cache4.fullSpaceBounds.height;
+  const canonical = spaceId === state.overworldInstanceId ? localFramePositionD9(actor.position, state.d9World.runtime.frames) : legacyWorldPosition(actor.position), relative = relativeWorldPosition(canonical, cache4.center, 4);
+  return Boolean(relative && Math.hypot(relative.x - cache4.center.localX, relative.y - cache4.center.localY) <= cache4.radius - D9_PROFILE.placementSafetyRadius - D9_PROFILE.prepareRadius);
 }
 function participantGroundCoverageReadyD9(state) {
   return !state.d9World || Object.values(state.playersById).every((p) => groundCoverageReadyD9(state, p));
@@ -20224,11 +20571,11 @@ function participantGroundCoverageRefreshDueD9(state) {
   return Object.values(state.playersById).some((p) => {
     const actor = state.entitiesById[p.entityId];
     if (actor.residency.spaceInstanceId !== state.overworldInstanceId) return false;
-    const cache3 = caches.get(state)?.get(p.playerId);
-    if (!cache3 || cache3.spaceInstanceId !== state.overworldInstanceId) return true;
-    if (cache3.fullSpaceBounds) return false;
-    const canonical = localFramePositionD9(actor.position, state.d9World.runtime.frames), relative = relativeWorldPosition(canonical, cache3.center, 4);
-    return !relative || Math.hypot(relative.x - cache3.center.localX, relative.y - cache3.center.localY) >= 128;
+    const cache4 = caches.get(state)?.get(p.playerId);
+    if (!cache4 || cache4.spaceInstanceId !== state.overworldInstanceId) return true;
+    if (cache4.fullSpaceBounds) return false;
+    const canonical = localFramePositionD9(actor.position, state.d9World.runtime.frames), relative = relativeWorldPosition(canonical, cache4.center, 4);
+    return !relative || Math.hypot(relative.x - cache4.center.localX, relative.y - cache4.center.localY) >= 128;
   });
 }
 function groundCoverageStatusD9(state) {
@@ -20258,16 +20605,16 @@ function installGroundOccupancyD9(state, coverage) {
 function groundSpacingPredicateD9(state, p, spaceId, point13, hot) {
   if (!state.d9World) return (q) => hot.every((o) => Math.hypot(q.x - o.x, q.y - o.y) >= 27);
   if (Object.values(state.d9World.functionalSitesById ?? {}).some((site) => site.siteKind === "woodland-fort" && site.spaceInstanceId === spaceId)) return (q) => hot.every((o) => Math.hypot(q.x - o.x, q.y - o.y) >= 27);
-  const cache3 = caches.get(state)?.get(p.playerId), canonical = spaceId === state.overworldInstanceId ? localFramePositionD9(point13, state.d9World.runtime.frames) : legacyWorldPosition(point13), relative = cache3?.spaceInstanceId === spaceId ? relativeWorldPosition(canonical, cache3.center, 4) : null;
-  const wholeFloor = cache3?.spaceInstanceId === spaceId && cache3.fullSpaceBounds && point13.x >= 0 && point13.y >= 0 && point13.x < cache3.fullSpaceBounds.width && point13.y < cache3.fullSpaceBounds.height;
-  if (state.d9World.groundIndex && (!relative || !wholeFloor && Math.hypot(relative.x - cache3.center.localX, relative.y - cache3.center.localY) > cache3.radius - 367)) return () => false;
+  const cache4 = caches.get(state)?.get(p.playerId), canonical = spaceId === state.overworldInstanceId ? localFramePositionD9(point13, state.d9World.runtime.frames) : legacyWorldPosition(point13), relative = cache4?.spaceInstanceId === spaceId ? relativeWorldPosition(canonical, cache4.center, 4) : null;
+  const wholeFloor = cache4?.spaceInstanceId === spaceId && cache4.fullSpaceBounds && point13.x >= 0 && point13.y >= 0 && point13.x < cache4.fullSpaceBounds.width && point13.y < cache4.fullSpaceBounds.height;
+  if (state.d9World.groundIndex && (!relative || !wholeFloor && Math.hypot(relative.x - cache4.center.localX, relative.y - cache4.center.localY) > cache4.radius - 367)) return () => false;
   const bins = /* @__PURE__ */ new Map(), add = (o) => {
     const k = Math.floor(o.x / 28) + "," + Math.floor(o.y / 28);
     let b = bins.get(k);
     if (!b) bins.set(k, b = []);
     b.push(o);
   };
-  if (cache3?.spaceInstanceId === spaceId) for (const batch of cache3.points) for (const c of batch) {
+  if (cache4?.spaceInstanceId === spaceId) for (const batch of cache4.points) for (const c of batch) {
     const q = spaceId === state.overworldInstanceId ? projectToLocalFrameD9(c, state.d9World.runtime.frames) : relativeWorldPosition(c, { chunkX: "0", chunkY: "0" }, 64);
     if (q) add(q);
   }
@@ -20875,8 +21222,9 @@ function runtimeHollowVisualV4(page) {
 
 // src/shared/contracts/world_event_gear_provenance_v2.js
 function acceptedEventGearGeographyV2(groupId, g) {
-  if (!/^ordinary:[a-f0-9]{32}$/.test(groupId) || g.combatHash !== WORLD_COMBAT_HASH || !eventOrdinal(g.anchorOrdinal)) return false;
-  requireContract(Array.isArray(g.entityIds) && g.entityIds.length === (sporeOrdinal(g.anchorOrdinal) ? 12 : 6), "Event gear roster provenance");
+  const waves = hollowOrdinal(g.anchorOrdinal) || plannedEventOrdinal(g.anchorOrdinal);
+  if (!/^ordinary:[a-f0-9]{32}$/.test(groupId) || g.combatHash !== WORLD_COMBAT_HASH || !eventOrdinal(g.anchorOrdinal) && !waves) return false;
+  requireContract(Array.isArray(g.entityIds) && g.entityIds.length === (waves ? 13 : sporeOrdinal(g.anchorOrdinal) ? 12 : 6), "Event gear roster provenance");
   requireContract(g.rank === (g.anchorOrdinal === 39 ? "B" : "C"), "Event gear rank provenance");
   return true;
 }
@@ -20929,7 +21277,7 @@ function validateWorldPagingD9(paging) {
     for (const n of Object.values(p.salvageCredits)) safeInteger(n, 1);
   }
   closedRecord(paging.indexedRevisions, [], Object.keys(paging.players));
-  for (const revision of Object.values(paging.indexedRevisions)) safeInteger(revision);
+  for (const revision2 of Object.values(paging.indexedRevisions)) safeInteger(revision2);
   closedRecord(paging.remoteGearByPlayer, Object.keys(paging.players));
   for (const [pid, rows3] of Object.entries(paging.remoteGearByPlayer)) for (const [id, r] of Object.entries(rows3)) {
     closedRecord(r, ["item", "disposition", "recordHash"], ["origin"]);
@@ -21120,7 +21468,7 @@ function autoSalvageEligibleRewards(state) {
 function prepareEpisodeReward(state, p, source4, position, spaceInstanceId) {
   const inv = p.inventory, id = source4.sourceEntityId;
   if (inv.rewardsByEntityId[id]) return null;
-  const worldProgression = captureSiteRewardV1(state, source4, captureWorldRarityV2(state, p, source4, source4.progression ?? prototypeRewardProgression(source4.rank, id))), heroClass = heroClassOf(p.d8)?.id, world = worldProgression.combatHash === WORLD_COMBAT_HASH, baseProgression = heroClass && world ? { ...worldProgression, gearClass: heroClass, wardrobe: WARDROBE_V1 } : world ? { ...worldProgression, armor: "overall" } : worldProgression, modifiers = p.d8 ? progressionRewardWitness(p.d8) : null, progression = modifiers ? { ...baseProgression, quality: 1 + modifiers.qualityHundredths / 100, tomeEligibility: "personal-tome-d8-v1", modifiers } : baseProgression;
+  const worldProgression = captureBoonRewardV1(state, p, captureSiteRewardV1(state, source4, captureWorldRarityV2(state, p, source4, source4.progression ?? prototypeRewardProgression(source4.rank, id)))), heroClass = heroClassOf(p.d8)?.id, world = worldProgression.combatHash === WORLD_COMBAT_HASH, baseProgression = heroClass && world ? { ...worldProgression, gearClass: heroClass, wardrobe: WARDROBE_V1 } : world ? { ...worldProgression, armor: "overall" } : worldProgression, modifiers = p.d8 ? progressionRewardWitness(p.d8) : null, progression = modifiers ? { ...baseProgression, quality: 1 + modifiers.qualityHundredths / 100, tomeEligibility: "personal-tome-d8-v1", modifiers } : baseProgression;
   const ordinal = source4.kind === "enemy" ? safeInteger(inv.renewal.defeats + 1, 1) : 0, reward = rollContentReward(state, p, { ...source4, ordinal, modifiers }), dropPosition = reward.definitionId ? freeGearPosition(state, p, spaceInstanceId, position) : { ...position };
   const unique2 = inv.d7 && reward.definitionId && heroClass && world ? uniqueRewardV1(state, source4, heroClass, gearSeed(state, p, id)) : null, dropped = unique2 ? { ...progression, unique: unique2 } : progression;
   const generated = inv.d7 && reward.definitionId ? generateGear3(gearSeed(state, p, id), dropped) : null;
@@ -21768,12 +22116,12 @@ var times2 = (a, b) => {
   b = asCombatAmount(b);
   return multiplyCombat(a, b.n, b.d);
 };
-function guardChanceExact(raw, cap, unit2 = 1e3) {
+function guardChanceExact(raw, cap, unit3 = 1e3) {
   raw = asCombatAmount(raw);
   const half = combatAmount(cap, 2);
-  if (compareCombat(raw, half) <= 0) return multiplyCombat(raw, 1, unit2);
+  if (compareCombat(raw, half) <= 0) return multiplyCombat(raw, 1, unit3);
   const delta = subtractCombat(raw, half), den = addCombat(delta, half);
-  return addCombat(multiplyCombat(half, 1, unit2), multiplyCombat(times2(half, delta), den.d, BigInt(den.n) * BigInt(unit2)));
+  return addCombat(multiplyCombat(half, 1, unit3), multiplyCombat(times2(half, delta), den.d, BigInt(den.n) * BigInt(unit3)));
 }
 function resolveD9PlayerStats(player) {
   const inv = player.inventory, level = d9LevelStats(player.progression.level), bonus = equipmentBonuses(player), base = { version: "resolved-player-stats-integer-v2", maxHp: addCombat(level.maxHp, bonus.maxHp), attack: addCombat(level.attack, bonus.attack), defense: addCombat(level.defense, bonus.defense), moveSpeed: 3, pickupRadius: BASE_PICKUP_RADIUS };
@@ -22031,10 +22379,10 @@ function freezeResolved(value) {
   }
   return value;
 }
-function guardChance(raw, cap, unit2 = 1e3) {
+function guardChance(raw, cap, unit3 = 1e3) {
   const half = cap / 2;
-  if (raw <= half) return combatAmount(raw, unit2);
-  return addCombat(combatAmount(half, unit2), combatAmount(BigInt(cap - half) * BigInt(raw - half), BigInt(unit2) * BigInt(raw - half + cap - half)));
+  if (raw <= half) return combatAmount(raw, unit3);
+  return addCombat(combatAmount(half, unit3), combatAmount(BigInt(cap - half) * BigInt(raw - half), BigInt(unit3) * BigInt(raw - half + cap - half)));
 }
 function mitigateFractionalPlayerDamage(raw, defense) {
   raw = asCombatAmount(raw);
@@ -22299,18 +22647,18 @@ function stepActorMovement(actor, collision2, intent = actor.movementIntent, spe
   requireContract(Number.isFinite(speedMultiplier) && speedMultiplier >= 0 && speedMultiplier <= 1.45, "Invalid movement speed multiplier");
   let x = actor.position.x;
   let y = actor.position.y;
-  let moved2 = false;
+  let moved3 = false;
   const vx = intent.x * actor.moveSpeed * speedMultiplier;
   const vy = intent.y * actor.moveSpeed * speedMultiplier;
   if (vx !== 0 && !collidesWithTiles(collision2, x + vx, y, actor.hullRadius)) {
     x += vx;
-    moved2 = true;
+    moved3 = true;
   }
   if (vy !== 0 && !collidesWithTiles(collision2, x, y + vy, actor.hullRadius)) {
     y += vy;
-    moved2 = true;
+    moved3 = true;
   }
-  return { position: { x, y }, moved: moved2 };
+  return { position: { x, y }, moved: moved3 };
 }
 function selectSimpleEnemyTarget(enemy, entitiesById) {
   requireContract(enemy.kind === "actor" && enemy.ai?.kind === "simpleMelee", "Expected simple melee enemy");
@@ -23771,11 +24119,10 @@ export {
   useWorldRolesV1,
   worldRolesV1,
   ferryNetworkV1,
+  settlementV1,
   STARTER_VERSION,
   STARTER_VILLAGE_ID,
   STARTER_VILLAGE_NAME,
-  STARTER_VILLAGE_ORIGIN,
-  STARTER_ARRIVAL_TILES,
   STARTER_HASH,
   hasStarterVillage,
   ROADSIDE_VERSION,
@@ -23800,6 +24147,13 @@ export {
   FIRST_CAVE_ID,
   FIRST_CAVE_SELECTION,
   hasFirstJourney,
+  RESHAPE_VERSION,
+  RESHAPE_HASH,
+  RESHAPE_HYDROLOGY_HASH,
+  RESHAPE_DATABASE,
+  hasWorldReshape,
+  isSeededBindingV1,
+  presentSeededWorldV1,
   ALPHA_POPULATION_VERSION,
   ALPHA_POPULATION_HASH,
   ALPHA_POPULATION_PLAN_HASH,
@@ -23820,6 +24174,17 @@ export {
   rewardProgressionD9,
   prototypeRewardProgression,
   rewardProgression,
+  eventAtSlotV1,
+  BUILT_EVENT_KINDS,
+  plannedEventOrdinal,
+  plannedEventOrdinalFor,
+  plannedEventKindV1,
+  SHRINE_VERSION,
+  SHRINE_POLICY,
+  SHRINE_MEMBERS,
+  boonOfV1,
+  wrathDamageV1,
+  insightXpV1,
   BASE_TOME_ELEMENTS,
   tomeProfile,
   TOME_ELEMENTS,
@@ -23847,11 +24212,6 @@ export {
   hashReward,
   episodeRewardId,
   rewardProfileD9,
-  RESHAPE_VERSION,
-  RESHAPE_HASH,
-  RESHAPE_HYDROLOGY_HASH,
-  RESHAPE_DATABASE,
-  hasWorldReshape,
   worldOrdinaryMeleeProfile,
   HOSTILE_MOTION_D11_2_VERSION,
   hostileMeleeMotionD11_2,
@@ -23895,6 +24255,10 @@ export {
   frameCaptureInputs,
   captureWorldPositionsD9,
   rebaseWorldRuntimeD9,
+  LIFE_VILLAGE_ID,
+  LIFE_VILLAGE_ORIGIN,
+  townOriginV1,
+  starterArrivalTilesV1,
   OPEN_TOWN_TEMPLATE_V1,
   frontage,
   propsFor,
@@ -23936,8 +24300,6 @@ export {
   BOSS_HOSTING_VERSION,
   BOSS_HOSTING_HASH,
   hasBossHostingV1,
-  LIFE_VILLAGE_ID,
-  LIFE_VILLAGE_ORIGIN,
   SERVICES_V2,
   SERVICES_V2_HASH,
   serviceNpcsFor,
@@ -24031,6 +24393,7 @@ export {
   CRYPT_POPULATION_VERSION,
   CRYPT_POPULATION_CATALOG,
   CRYPT_POPULATION_TIERS,
+  useSeededReservationsV1,
   resolveEncounterLevelV2,
   ARACHNID_TREANT_PROFILE,
   ARACHNID_TREANT_D12_5A,
