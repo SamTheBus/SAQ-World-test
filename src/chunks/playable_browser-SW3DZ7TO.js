@@ -770,7 +770,7 @@ import {
   worldOrdinaryMeleeProfile,
   worldPointForArea,
   worldRolesV1
-} from "./chunk-X3PYWKK7.js";
+} from "./chunk-RDGHWSZV.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";

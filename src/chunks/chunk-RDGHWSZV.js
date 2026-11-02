@@ -245,7 +245,7 @@ var hasHydrologyV1 = (b) => b?.assetId === "alpha" && b.hydrologyVersion === HYD
 // src/shared/content/ferry_plan_v1.js
 var FERRY_VERSION = "planned-ferry-v1";
 var FERRY_HASH = "4ea2589d968c6a5eb1519da8914086d6517e1201a6ea24160b8abd006a633db4";
-var FERRY_NETWORK = freezeWire({ "version": "planned-ferry-v1", "parentRuntime": "db4f2670ae0f3170", "parentAssetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "parentPopulationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "landings": [{ "id": "ferry:alpha:00", "name": "Mainland Harbour", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "classId": "primary-mainland", "biomeId": "biome:grassland", "band": 3, "tile": { "x": 5242, "y": 6138 }, "water": { "x": 5248, "y": 6138 }, "facing": { "x": 1, "y": 0 }, "arrivals": [{ "x": 5242, "y": 6138 }, { "x": 5242, "y": 6136 }, { "x": 5244, "y": 6138 }, { "x": 5242, "y": 6140 }], "approach": [{ "x": 5242, "y": 6138 }, { "x": 5167, "y": 6138 }], "routeJoin": { "x": 5167, "y": 6138 }, "approachTiles": 76, "sourceSlotId": "settlement-slot:village-outpost:06:marine:01", "sourceSettlementId": "settlement-slot:village-outpost:06", "capacityNote": "Accepted ocean-facing settlement marine approach", "search": { "candidates": 1722, "attempts": 1, "nodes": 7199 } }, { "id": "ferry:alpha:01", "name": "Great Island 1 Landing", "landmassId": "landmass:major-island:d14l1a:01:296d6010", "classId": "major-island", "biomeId": "biome:wetland", "band": 4, "tile": { "x": 1938, "y": 1722 }, "water": { "x": 1938, "y": 1715 }, "facing": { "x": 0, "y": -1 }, "arrivals": [{ "x": 1938, "y": 1722 }, { "x": 1938, "y": 1720 }, { "x": 1940, "y": 1722 }, { "x": 1938, "y": 1724 }], "approach": [{ "x": 1938, "y": 1722 }, { "x": 1938, "y": 1729 }], "routeJoin": { "x": 1938, "y": 1729 }, "approachTiles": 8, "sourceSlotId": "settlement-slot:capital-great-hold:02:marine:01", "sourceSettlementId": "settlement-slot:capital-great-hold:02", "capacityNote": "Accepted ocean-facing settlement marine approach", "search": { "candidates": 747, "attempts": 1, "nodes": 102 } }, { "id": "ferry:alpha:02", "name": "Great Island 2 Landing", "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "classId": "major-island", "biomeId": "biome:volcanic", "band": 4, "tile": { "x": 5102, "y": 2758 }, "water": { "x": 5110, "y": 2758 }, "facing": { "x": 1, "y": 0 }, "arrivals": [{ "x": 5102, "y": 2758 }, { "x": 5102, "y": 2756 }, { "x": 5104, "y": 2758 }, { "x": 5102, "y": 2760 }], "approach": [{ "x": 5102, "y": 2758 }, { "x": 5071, "y": 2758 }], "routeJoin": { "x": 5071, "y": 2758 }, "approachTiles": 32, "sourceSlotId": null, "sourceSettlementId": null, "capacityNote": "Dedicated coastal site landing; no faction, future island or other protected chunk consumed", "search": { "candidates": 500, "attempts": 1, "nodes": 1438 } }, { "id": "ferry:alpha:03", "name": "Great Island 3 Landing", "landmassId": "landmass:major-island:d14l1a:03:578d626c", "classId": "major-island", "biomeId": "biome:woodland", "band": 4, "tile": { "x": 7238, "y": 3534 }, "water": { "x": 7231, "y": 3534 }, "facing": { "x": -1, "y": 0 }, "arrivals": [{ "x": 7238, "y": 3534 }, { "x": 7238, "y": 3532 }, { "x": 7240, "y": 3534 }, { "x": 7238, "y": 3536 }], "approach": [{ "x": 7238, "y": 3534 }, { "x": 7262, "y": 3534 }, { "x": 7262, "y": 3563 }, { "x": 7279, "y": 3563 }], "routeJoin": { "x": 7279, "y": 3563 }, "approachTiles": 71, "sourceSlotId": "settlement-slot:city:04:marine:01", "sourceSettlementId": "settlement-slot:city:04", "capacityNote": "Accepted ocean-facing settlement marine approach", "search": { "candidates": 698, "attempts": 1, "nodes": 5922 } }, { "id": "ferry:alpha:04", "name": "Island 1 Landing", "landmassId": "landmass:medium-island:d14l1a:01:83c7b775", "classId": "medium-island", "biomeId": "biome:wetland", "band": 4, "tile": { "x": 2434, "y": 3654 }, "water": { "x": 2434, "y": 3649 }, "facing": { "x": 0, "y": -1 }, "arrivals": [{ "x": 2434, "y": 3654 }, { "x": 2434, "y": 3652 }, { "x": 2436, "y": 3654 }, { "x": 2434, "y": 3656 }], "approach": [{ "x": 2434, "y": 3654 }, { "x": 2434, "y": 3653 }], "routeJoin": { "x": 2434, "y": 3653 }, "approachTiles": 2, "sourceSlotId": null, "sourceSettlementId": null, "capacityNote": "Dedicated coastal site landing; no faction, future island or other protected chunk consumed", "search": { "candidates": 679, "attempts": 1, "nodes": 2 } }, { "id": "ferry:alpha:05", "name": "Island 2 Landing", "landmassId": "landmass:medium-island:d14l1a:02:799115ea", "classId": "medium-island", "biomeId": "biome:desert", "band": 4, "tile": { "x": 7982, "y": 1746 }, "water": { "x": 7989, "y": 1746 }, "facing": { "x": 1, "y": 0 }, "arrivals": [{ "x": 7982, "y": 1746 }, { "x": 7982, "y": 1744 }, { "x": 7984, "y": 1746 }, { "x": 7982, "y": 1748 }], "approach": [{ "x": 7982, "y": 1746 }, { "x": 7975, "y": 1746 }], "routeJoin": { "x": 7975, "y": 1746 }, "approachTiles": 8, "sourceSlotId": null, "sourceSettlementId": null, "capacityNote": "Dedicated coastal site landing; no faction, future island or other protected chunk consumed", "search": { "candidates": 218, "attempts": 1, "nodes": 109 } }, { "id": "ferry:alpha:06", "name": "Island 3 Landing", "landmassId": "landmass:medium-island:d14l1a:03:c2624ecc", "classId": "medium-island", "biomeId": "biome:tropical", "band": 5, "tile": { "x": 7986, "y": 5710 }, "water": { "x": 7995, "y": 5710 }, "facing": { "x": 1, "y": 0 }, "arrivals": [{ "x": 7986, "y": 5710 }, { "x": 7986, "y": 5708 }, { "x": 7988, "y": 5710 }, { "x": 7986, "y": 5712 }], "approach": [{ "x": 7986, "y": 5710 }, { "x": 7986, "y": 5718 }, { "x": 7934, "y": 5718 }, { "x": 7934, "y": 5811 }], "routeJoin": { "x": 7934, "y": 5811 }, "approachTiles": 154, "sourceSlotId": null, "sourceSettlementId": null, "capacityNote": "Dedicated coastal site landing; no faction, future island or other protected chunk consumed", "search": { "candidates": 19, "attempts": 1, "nodes": 17771 } }, { "id": "ferry:alpha:07", "name": "Island 4 Landing", "landmassId": "landmass:medium-island:d14l1a:04:961b5a82", "classId": "medium-island", "biomeId": "biome:woodland", "band": 4, "tile": { "x": 4474, "y": 274 }, "water": { "x": 4480, "y": 274 }, "facing": { "x": 1, "y": 0 }, "arrivals": [{ "x": 4474, "y": 274 }, { "x": 4474, "y": 272 }, { "x": 4476, "y": 274 }, { "x": 4474, "y": 276 }], "approach": [{ "x": 4474, "y": 274 }, { "x": 4474, "y": 273 }, { "x": 4463, "y": 273 }], "routeJoin": { "x": 4463, "y": 273 }, "approachTiles": 13, "sourceSlotId": "settlement-slot:village-outpost:05:marine:01", "sourceSettlementId": "settlement-slot:village-outpost:05", "capacityNote": "Accepted ocean-facing settlement marine approach", "search": { "candidates": 779, "attempts": 1, "nodes": 232 } }], "connections": [{ "id": "ferry-route:ferry:alpha:01", "from": "ferry:alpha:00", "to": "ferry:alpha:01", "bidirectional": true }, { "id": "ferry-route:ferry:alpha:02", "from": "ferry:alpha:00", "to": "ferry:alpha:02", "bidirectional": true }, { "id": "ferry-route:ferry:alpha:03", "from": "ferry:alpha:00", "to": "ferry:alpha:03", "bidirectional": true }, { "id": "ferry-route:ferry:alpha:04", "from": "ferry:alpha:00", "to": "ferry:alpha:04", "bidirectional": true }, { "id": "ferry-route:ferry:alpha:05", "from": "ferry:alpha:00", "to": "ferry:alpha:05", "bidirectional": true }, { "id": "ferry-route:ferry:alpha:06", "from": "ferry:alpha:00", "to": "ferry:alpha:06", "bidirectional": true }, { "id": "ferry-route:ferry:alpha:07", "from": "ferry:alpha:00", "to": "ferry:alpha:07", "bidirectional": true }], "coverage": [{ "reservationId": "repeatable-slot:cave:woodland:small:01", "siteId": "site:d14106e89211e6856de651f731d9c01d", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:cave:desert:standard:01", "siteId": "site:7eee18f257e1dd8e286abc31ffc936d1", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:cave:upland:large:01", "siteId": "site:4e17e793c0cd89c98a40d4e56b2793ac", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:cave:tropical:deep:01", "siteId": "site:d9c7701d9b9395e73e2f93278fdbf268", "landmassId": "landmass:major-island:d14l1a:01:296d6010" }, { "reservationId": "repeatable-slot:cave:desert:small:01", "siteId": "site:187f55bf314156b61be3dba5aed40d01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:cave:frostland:large:01", "siteId": "site:51e63e304f4ee8c65d9f27d2ea4ea6e3", "landmassId": "landmass:major-island:d14l1a:03:578d626c" }, { "reservationId": "repeatable-slot:cave:grassland:small:01", "siteId": "site:b18cb1ff3b9b9dc5fe0f1ec018363ee8", "landmassId": "landmass:medium-island:d14l1a:03:c2624ecc" }, { "reservationId": "repeatable-slot:cave:upland:standard:01", "siteId": "site:7121db385eb3eafd1d0de2f63b962b79", "landmassId": "landmass:medium-island:d14l1a:04:961b5a82" }, { "reservationId": "repeatable-slot:cave:volcanic:deep:01", "siteId": "site:d3c8467a6debcc243695dc42118afa16", "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c" }, { "reservationId": "repeatable-slot:cave:wetland:small:01", "siteId": "site:7f2ef8e9733c98c8e4bbf16c74e83c11", "landmassId": "landmass:major-island:d14l1a:01:296d6010" }, { "reservationId": "repeatable-slot:cave:wetland:standard:01", "siteId": "site:0a0d547d361f87391d8452e6f8396309", "landmassId": "landmass:major-island:d14l1a:01:296d6010" }, { "reservationId": "repeatable-slot:cave:woodland:standard:01", "siteId": "site:70f485b1862ac199814be0b2530e986a", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:fort:grassland:small:01", "siteId": "site:ffe8b1fc8cecccfdb3fb9d44dd6a9aea", "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c" }, { "reservationId": "repeatable-slot:fort:woodland:standard:01", "siteId": "site:11bfa3b7b65142fb1b16282ce202a296", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:fort:tropical:large:01", "siteId": "site:dba6c6435b9bca6d810e5bb462e98f80", "landmassId": "landmass:medium-island:d14l1a:03:c2624ecc" }, { "reservationId": "repeatable-slot:fort:desert:standard:01", "siteId": "site:f4f18e33059ebae951c5efda7927adcd", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:fort:upland:deep:01", "siteId": "site:008569b825d37f670bef85494852022f", "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c" }, { "reservationId": "repeatable-slot:fort:upland:standard:01", "siteId": "site:02a269ea8794bf78db4404a2a38a323d", "landmassId": "landmass:medium-island:d14l1a:04:961b5a82" }, { "reservationId": "repeatable-slot:fort:wetland:small:01", "siteId": "site:0904c59ac05bc284028fc18b3029f7f3", "landmassId": "landmass:medium-island:d14l1a:01:83c7b775" }, { "reservationId": "repeatable-slot:ruin:woodland:small:01", "siteId": "site:4f56d59338391bf09150f20f6fc0a87b", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:ruin:upland:standard:01", "siteId": "site:e0f695606062eb7a85ce00dd45b05b8a", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:ruin:volcanic:large:01", "siteId": "site:4771323d4642197a072f5637cb1e7376", "landmassId": "landmass:medium-island:d14l1a:02:799115ea" }, { "reservationId": "repeatable-slot:ruin:desert:standard:01", "siteId": "site:697285318a41d7cf65e88e0182d8c8cd", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:ruin:frostland:deep:01", "siteId": "site:0b4deace0faad9ece59d8e720f79da22", "landmassId": "landmass:major-island:d14l1a:03:578d626c" }, { "reservationId": "repeatable-slot:ruin:frostland:standard:01", "siteId": "site:d08fd18faf311f7ffa05cfa8bde9aa11", "landmassId": "landmass:medium-island:d14l1a:01:83c7b775" }, { "reservationId": "repeatable-slot:ruin:grassland:small:01", "siteId": "site:df07be841312306cd9aa2d6b4280f159", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:ruin:tropical:small:01", "siteId": "site:1cefe829831df323286a2462e554e4f3", "landmassId": "landmass:major-island:d14l1a:01:296d6010" }, { "reservationId": "repeatable-slot:ruin:wetland:small:01", "siteId": "site:3efb34e4196ff2a0ef998fc7a70d3e06", "landmassId": "landmass:major-island:d14l1a:03:578d626c" }, { "reservationId": "repeatable-slot:crypt:grassland:small:01", "siteId": "site:800b36cde9b897db64bfa945cd595725", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:crypt:upland:standard:01", "siteId": "site:9de05c09fb01ec39abd41f273ac80306", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:crypt:frostland:deep:01", "siteId": "site:6ec0a8b8de3eb59c3633478d2879932f", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:crypt:desert:small:01", "siteId": "site:4cfe6569f91776f28741686d64ac7125", "landmassId": "landmass:medium-island:d14l1a:02:799115ea" }, { "reservationId": "repeatable-slot:crypt:frostland:large:01", "siteId": "site:de6f521d5903c22f45195c330e85e6c3", "landmassId": "landmass:major-island:d14l1a:03:578d626c" }, { "reservationId": "repeatable-slot:crypt:wetland:standard:01", "siteId": "site:dd829cb154fad69e6c4bd1caac3a79fb", "landmassId": "landmass:medium-island:d14l1a:01:83c7b775" }, { "reservationId": "repeatable-slot:crypt:woodland:small:01", "siteId": "site:7fe72ebc439393ca1acd958facfe038f", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }] });
+var FERRY_NETWORK = freezeWire({ "version": "planned-ferry-v1", "parentRuntime": "db4f2670ae0f3170", "parentAssetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "parentPopulationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "landings": [{ "id": "ferry:alpha:00", "name": "Mainland Harbor", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "classId": "primary-mainland", "biomeId": "biome:grassland", "band": 3, "tile": { "x": 5242, "y": 6138 }, "water": { "x": 5248, "y": 6138 }, "facing": { "x": 1, "y": 0 }, "arrivals": [{ "x": 5242, "y": 6138 }, { "x": 5242, "y": 6136 }, { "x": 5244, "y": 6138 }, { "x": 5242, "y": 6140 }], "approach": [{ "x": 5242, "y": 6138 }, { "x": 5167, "y": 6138 }], "routeJoin": { "x": 5167, "y": 6138 }, "approachTiles": 76, "sourceSlotId": "settlement-slot:village-outpost:06:marine:01", "sourceSettlementId": "settlement-slot:village-outpost:06", "capacityNote": "Accepted ocean-facing settlement marine approach", "search": { "candidates": 1722, "attempts": 1, "nodes": 7199 } }, { "id": "ferry:alpha:01", "name": "Great Island 1 Landing", "landmassId": "landmass:major-island:d14l1a:01:296d6010", "classId": "major-island", "biomeId": "biome:wetland", "band": 4, "tile": { "x": 1938, "y": 1722 }, "water": { "x": 1938, "y": 1715 }, "facing": { "x": 0, "y": -1 }, "arrivals": [{ "x": 1938, "y": 1722 }, { "x": 1938, "y": 1720 }, { "x": 1940, "y": 1722 }, { "x": 1938, "y": 1724 }], "approach": [{ "x": 1938, "y": 1722 }, { "x": 1938, "y": 1729 }], "routeJoin": { "x": 1938, "y": 1729 }, "approachTiles": 8, "sourceSlotId": "settlement-slot:capital-great-hold:02:marine:01", "sourceSettlementId": "settlement-slot:capital-great-hold:02", "capacityNote": "Accepted ocean-facing settlement marine approach", "search": { "candidates": 747, "attempts": 1, "nodes": 102 } }, { "id": "ferry:alpha:02", "name": "Great Island 2 Landing", "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "classId": "major-island", "biomeId": "biome:volcanic", "band": 4, "tile": { "x": 5102, "y": 2758 }, "water": { "x": 5110, "y": 2758 }, "facing": { "x": 1, "y": 0 }, "arrivals": [{ "x": 5102, "y": 2758 }, { "x": 5102, "y": 2756 }, { "x": 5104, "y": 2758 }, { "x": 5102, "y": 2760 }], "approach": [{ "x": 5102, "y": 2758 }, { "x": 5071, "y": 2758 }], "routeJoin": { "x": 5071, "y": 2758 }, "approachTiles": 32, "sourceSlotId": null, "sourceSettlementId": null, "capacityNote": "Dedicated coastal site landing; no faction, future island or other protected chunk consumed", "search": { "candidates": 500, "attempts": 1, "nodes": 1438 } }, { "id": "ferry:alpha:03", "name": "Great Island 3 Landing", "landmassId": "landmass:major-island:d14l1a:03:578d626c", "classId": "major-island", "biomeId": "biome:woodland", "band": 4, "tile": { "x": 7238, "y": 3534 }, "water": { "x": 7231, "y": 3534 }, "facing": { "x": -1, "y": 0 }, "arrivals": [{ "x": 7238, "y": 3534 }, { "x": 7238, "y": 3532 }, { "x": 7240, "y": 3534 }, { "x": 7238, "y": 3536 }], "approach": [{ "x": 7238, "y": 3534 }, { "x": 7262, "y": 3534 }, { "x": 7262, "y": 3563 }, { "x": 7279, "y": 3563 }], "routeJoin": { "x": 7279, "y": 3563 }, "approachTiles": 71, "sourceSlotId": "settlement-slot:city:04:marine:01", "sourceSettlementId": "settlement-slot:city:04", "capacityNote": "Accepted ocean-facing settlement marine approach", "search": { "candidates": 698, "attempts": 1, "nodes": 5922 } }, { "id": "ferry:alpha:04", "name": "Island 1 Landing", "landmassId": "landmass:medium-island:d14l1a:01:83c7b775", "classId": "medium-island", "biomeId": "biome:wetland", "band": 4, "tile": { "x": 2434, "y": 3654 }, "water": { "x": 2434, "y": 3649 }, "facing": { "x": 0, "y": -1 }, "arrivals": [{ "x": 2434, "y": 3654 }, { "x": 2434, "y": 3652 }, { "x": 2436, "y": 3654 }, { "x": 2434, "y": 3656 }], "approach": [{ "x": 2434, "y": 3654 }, { "x": 2434, "y": 3653 }], "routeJoin": { "x": 2434, "y": 3653 }, "approachTiles": 2, "sourceSlotId": null, "sourceSettlementId": null, "capacityNote": "Dedicated coastal site landing; no faction, future island or other protected chunk consumed", "search": { "candidates": 679, "attempts": 1, "nodes": 2 } }, { "id": "ferry:alpha:05", "name": "Island 2 Landing", "landmassId": "landmass:medium-island:d14l1a:02:799115ea", "classId": "medium-island", "biomeId": "biome:desert", "band": 4, "tile": { "x": 7982, "y": 1746 }, "water": { "x": 7989, "y": 1746 }, "facing": { "x": 1, "y": 0 }, "arrivals": [{ "x": 7982, "y": 1746 }, { "x": 7982, "y": 1744 }, { "x": 7984, "y": 1746 }, { "x": 7982, "y": 1748 }], "approach": [{ "x": 7982, "y": 1746 }, { "x": 7975, "y": 1746 }], "routeJoin": { "x": 7975, "y": 1746 }, "approachTiles": 8, "sourceSlotId": null, "sourceSettlementId": null, "capacityNote": "Dedicated coastal site landing; no faction, future island or other protected chunk consumed", "search": { "candidates": 218, "attempts": 1, "nodes": 109 } }, { "id": "ferry:alpha:06", "name": "Island 3 Landing", "landmassId": "landmass:medium-island:d14l1a:03:c2624ecc", "classId": "medium-island", "biomeId": "biome:tropical", "band": 5, "tile": { "x": 7986, "y": 5710 }, "water": { "x": 7995, "y": 5710 }, "facing": { "x": 1, "y": 0 }, "arrivals": [{ "x": 7986, "y": 5710 }, { "x": 7986, "y": 5708 }, { "x": 7988, "y": 5710 }, { "x": 7986, "y": 5712 }], "approach": [{ "x": 7986, "y": 5710 }, { "x": 7986, "y": 5718 }, { "x": 7934, "y": 5718 }, { "x": 7934, "y": 5811 }], "routeJoin": { "x": 7934, "y": 5811 }, "approachTiles": 154, "sourceSlotId": null, "sourceSettlementId": null, "capacityNote": "Dedicated coastal site landing; no faction, future island or other protected chunk consumed", "search": { "candidates": 19, "attempts": 1, "nodes": 17771 } }, { "id": "ferry:alpha:07", "name": "Island 4 Landing", "landmassId": "landmass:medium-island:d14l1a:04:961b5a82", "classId": "medium-island", "biomeId": "biome:woodland", "band": 4, "tile": { "x": 4474, "y": 274 }, "water": { "x": 4480, "y": 274 }, "facing": { "x": 1, "y": 0 }, "arrivals": [{ "x": 4474, "y": 274 }, { "x": 4474, "y": 272 }, { "x": 4476, "y": 274 }, { "x": 4474, "y": 276 }], "approach": [{ "x": 4474, "y": 274 }, { "x": 4474, "y": 273 }, { "x": 4463, "y": 273 }], "routeJoin": { "x": 4463, "y": 273 }, "approachTiles": 13, "sourceSlotId": "settlement-slot:village-outpost:05:marine:01", "sourceSettlementId": "settlement-slot:village-outpost:05", "capacityNote": "Accepted ocean-facing settlement marine approach", "search": { "candidates": 779, "attempts": 1, "nodes": 232 } }], "connections": [{ "id": "ferry-route:ferry:alpha:01", "from": "ferry:alpha:00", "to": "ferry:alpha:01", "bidirectional": true }, { "id": "ferry-route:ferry:alpha:02", "from": "ferry:alpha:00", "to": "ferry:alpha:02", "bidirectional": true }, { "id": "ferry-route:ferry:alpha:03", "from": "ferry:alpha:00", "to": "ferry:alpha:03", "bidirectional": true }, { "id": "ferry-route:ferry:alpha:04", "from": "ferry:alpha:00", "to": "ferry:alpha:04", "bidirectional": true }, { "id": "ferry-route:ferry:alpha:05", "from": "ferry:alpha:00", "to": "ferry:alpha:05", "bidirectional": true }, { "id": "ferry-route:ferry:alpha:06", "from": "ferry:alpha:00", "to": "ferry:alpha:06", "bidirectional": true }, { "id": "ferry-route:ferry:alpha:07", "from": "ferry:alpha:00", "to": "ferry:alpha:07", "bidirectional": true }], "coverage": [{ "reservationId": "repeatable-slot:cave:woodland:small:01", "siteId": "site:d14106e89211e6856de651f731d9c01d", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:cave:desert:standard:01", "siteId": "site:7eee18f257e1dd8e286abc31ffc936d1", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:cave:upland:large:01", "siteId": "site:4e17e793c0cd89c98a40d4e56b2793ac", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:cave:tropical:deep:01", "siteId": "site:d9c7701d9b9395e73e2f93278fdbf268", "landmassId": "landmass:major-island:d14l1a:01:296d6010" }, { "reservationId": "repeatable-slot:cave:desert:small:01", "siteId": "site:187f55bf314156b61be3dba5aed40d01", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:cave:frostland:large:01", "siteId": "site:51e63e304f4ee8c65d9f27d2ea4ea6e3", "landmassId": "landmass:major-island:d14l1a:03:578d626c" }, { "reservationId": "repeatable-slot:cave:grassland:small:01", "siteId": "site:b18cb1ff3b9b9dc5fe0f1ec018363ee8", "landmassId": "landmass:medium-island:d14l1a:03:c2624ecc" }, { "reservationId": "repeatable-slot:cave:upland:standard:01", "siteId": "site:7121db385eb3eafd1d0de2f63b962b79", "landmassId": "landmass:medium-island:d14l1a:04:961b5a82" }, { "reservationId": "repeatable-slot:cave:volcanic:deep:01", "siteId": "site:d3c8467a6debcc243695dc42118afa16", "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c" }, { "reservationId": "repeatable-slot:cave:wetland:small:01", "siteId": "site:7f2ef8e9733c98c8e4bbf16c74e83c11", "landmassId": "landmass:major-island:d14l1a:01:296d6010" }, { "reservationId": "repeatable-slot:cave:wetland:standard:01", "siteId": "site:0a0d547d361f87391d8452e6f8396309", "landmassId": "landmass:major-island:d14l1a:01:296d6010" }, { "reservationId": "repeatable-slot:cave:woodland:standard:01", "siteId": "site:70f485b1862ac199814be0b2530e986a", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:fort:grassland:small:01", "siteId": "site:ffe8b1fc8cecccfdb3fb9d44dd6a9aea", "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c" }, { "reservationId": "repeatable-slot:fort:woodland:standard:01", "siteId": "site:11bfa3b7b65142fb1b16282ce202a296", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:fort:tropical:large:01", "siteId": "site:dba6c6435b9bca6d810e5bb462e98f80", "landmassId": "landmass:medium-island:d14l1a:03:c2624ecc" }, { "reservationId": "repeatable-slot:fort:desert:standard:01", "siteId": "site:f4f18e33059ebae951c5efda7927adcd", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:fort:upland:deep:01", "siteId": "site:008569b825d37f670bef85494852022f", "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c" }, { "reservationId": "repeatable-slot:fort:upland:standard:01", "siteId": "site:02a269ea8794bf78db4404a2a38a323d", "landmassId": "landmass:medium-island:d14l1a:04:961b5a82" }, { "reservationId": "repeatable-slot:fort:wetland:small:01", "siteId": "site:0904c59ac05bc284028fc18b3029f7f3", "landmassId": "landmass:medium-island:d14l1a:01:83c7b775" }, { "reservationId": "repeatable-slot:ruin:woodland:small:01", "siteId": "site:4f56d59338391bf09150f20f6fc0a87b", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:ruin:upland:standard:01", "siteId": "site:e0f695606062eb7a85ce00dd45b05b8a", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:ruin:volcanic:large:01", "siteId": "site:4771323d4642197a072f5637cb1e7376", "landmassId": "landmass:medium-island:d14l1a:02:799115ea" }, { "reservationId": "repeatable-slot:ruin:desert:standard:01", "siteId": "site:697285318a41d7cf65e88e0182d8c8cd", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:ruin:frostland:deep:01", "siteId": "site:0b4deace0faad9ece59d8e720f79da22", "landmassId": "landmass:major-island:d14l1a:03:578d626c" }, { "reservationId": "repeatable-slot:ruin:frostland:standard:01", "siteId": "site:d08fd18faf311f7ffa05cfa8bde9aa11", "landmassId": "landmass:medium-island:d14l1a:01:83c7b775" }, { "reservationId": "repeatable-slot:ruin:grassland:small:01", "siteId": "site:df07be841312306cd9aa2d6b4280f159", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:ruin:tropical:small:01", "siteId": "site:1cefe829831df323286a2462e554e4f3", "landmassId": "landmass:major-island:d14l1a:01:296d6010" }, { "reservationId": "repeatable-slot:ruin:wetland:small:01", "siteId": "site:3efb34e4196ff2a0ef998fc7a70d3e06", "landmassId": "landmass:major-island:d14l1a:03:578d626c" }, { "reservationId": "repeatable-slot:crypt:grassland:small:01", "siteId": "site:800b36cde9b897db64bfa945cd595725", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:crypt:upland:standard:01", "siteId": "site:9de05c09fb01ec39abd41f273ac80306", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:crypt:frostland:deep:01", "siteId": "site:6ec0a8b8de3eb59c3633478d2879932f", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }, { "reservationId": "repeatable-slot:crypt:desert:small:01", "siteId": "site:4cfe6569f91776f28741686d64ac7125", "landmassId": "landmass:medium-island:d14l1a:02:799115ea" }, { "reservationId": "repeatable-slot:crypt:frostland:large:01", "siteId": "site:de6f521d5903c22f45195c330e85e6c3", "landmassId": "landmass:major-island:d14l1a:03:578d626c" }, { "reservationId": "repeatable-slot:crypt:wetland:standard:01", "siteId": "site:dd829cb154fad69e6c4bd1caac3a79fb", "landmassId": "landmass:medium-island:d14l1a:01:83c7b775" }, { "reservationId": "repeatable-slot:crypt:woodland:small:01", "siteId": "site:7fe72ebc439393ca1acd958facfe038f", "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca" }] });
 var hasFerries = (b) => b?.ferryVersion === FERRY_VERSION && b?.ferryHash === FERRY_HASH;
 
 // src/shared/content/world_roles_v1.js
@@ -2818,6 +2818,118 @@ function passiveEliteTraitsV1(source4, level) {
   return out;
 }
 var compositionEliteLabelV1 = (elite, primary) => [primary, ...elite.affixIds.slice(1).map((id) => PASSIVE_ELITE_TRAITS_V1[id]?.label ?? id)].join(" \xB7 ");
+
+// src/shared/content/elite_affixes_d12_4.js
+var ELITE_AFFIX_CATALOG_D12_4_VERSION = "elite-affix-catalog-d12.4-v1";
+var VITALITY_WEAVER_AFFIX_ID = "vitality_weaver";
+var SWIFT_COMMANDER_AFFIX_ID = "swift_commander";
+var GLACIAL_WARDEN_AFFIX_ID = "glacial_warden";
+var TOXIC_DECAY_AFFIX_ID = "toxic_decay";
+var IRON_CITADEL_AFFIX_ID = "iron_citadel";
+var BLOOD_BERSERKER_AFFIX_ID = "blood_berserker";
+var NULLIFIER_AFFIX_ID = "nullifier";
+var WEB_WEAVER_AFFIX_ID = "web_weaver";
+var SLAG_SHAPER_AFFIX_ID = "slag_shaper";
+var VITALITY_WEAVER_D12_4 = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: VITALITY_WEAVER_AFFIX_ID,
+  tier: "elite",
+  label: "VITALITY WEAVER",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 90, radius: 120, maximumTargets: 3, ordinaryHeal: { numerator: 6, denominator: 100 }, reservedBossHeal: { numerator: 15, denominator: 1e3 } },
+  presentation: { scale: 1.25, accent: "#39d27d", accentDark: "#123e31", accentLight: "#c5f28c" }
+});
+var SWIFT_COMMANDER_D12_4D = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: SWIFT_COMMANDER_AFFIX_ID,
+  tier: "elite",
+  label: "SWIFT COMMANDER",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 90, radius: 140, maxStacks: 3, perStackSpeedPercent: 15, lingerTicks: 300, decayTicks: 150 },
+  presentation: { scale: 1.25, accent: "#00d2ff", accentDark: "#123a50", accentLight: "#b9f4ff", commandGold: "#f0c95a" }
+});
+var GLACIAL_WARDEN_D12_4E = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: GLACIAL_WARDEN_AFFIX_ID,
+  tier: "elite",
+  label: "GLACIAL WARDEN",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 120, radius: 110, statusId: "glacial_warden_snare", durationTicks: 60, movementMultiplier: { numerator: 2, denominator: 5 } },
+  presentation: { scale: 1.25, accent: "#38bdf8", accentDark: "#153756", accentLight: "#d9f7ff", iceBlue: "#79d7ff" }
+});
+var TOXIC_DECAY_D12_4F = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: TOXIC_DECAY_AFFIX_ID,
+  tier: "elite",
+  label: "TOXIC DECAY",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 120, statusId: "toxic_decay_poison", durationTicks: 240, tickTicks: 60, maxStacks: 3, damageMaxHp: { numerator: 12, denominator: 1e3 } },
+  presentation: { scale: 1.25, accent: "#69e09b", accentDark: "#241735", accentLight: "#c7ff9a", sludge: "#70408f" }
+});
+var IRON_CITADEL_D12_4G = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: IRON_CITADEL_AFFIX_ID,
+  tier: "elite",
+  label: "IRON CITADEL",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 90, radius: 100, maxStacks: 3, perStackMitigationPercent: 15, lingerTicks: 300, decayTicks: 150 },
+  presentation: { scale: 1.25, accent: "#7196b5", accentDark: "#182a38", accentLight: "#d2e2eb", steel: "#45657d" }
+});
+var BLOOD_BERSERKER_D12_4H_A = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: BLOOD_BERSERKER_AFFIX_ID,
+  tier: "elite",
+  label: "BERSERKER",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 90, radius: 110, maxStacks: 3, perStackAttackPercent: 15, lingerTicks: 300, decayTicks: 150, statusId: "blood_berserker_attack" },
+  presentation: { scale: 1.25, accent: "#c83f4f", accentDark: "#35131c", accentLight: "#ffb067", bloodGold: "#e2b85a" }
+});
+var NULLIFIER_D12_4I = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: NULLIFIER_AFFIX_ID,
+  tier: "elite",
+  label: "NULLIFIER",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 300, chargeTicks: 60, radius: 90, statusId: "nullified", durationTicks: 120, resistanceTicks: 90 },
+  presentation: { scale: 1.25, accent: "#9b5de5", accentDark: "#251339", accentLight: "#e4c7ff", fracture: "#c98cff" }
+});
+var WEB_WEAVER_D12_4J = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: WEB_WEAVER_AFFIX_ID,
+  tier: "elite",
+  label: "WEB WEAVER",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 210, radius: 220, windupTicks: 45, hazardKind: "web_weaver_web", durationTicks: 240, statusId: "webbed", geometry: { kind: "ellipse", radiusX: 75, radiusY: 33.75 }, movementMultiplier: { numerator: 2, denominator: 5 }, maxActivePerSource: 2 },
+  presentation: { scale: 1.25, accent: "#a9f3ff", accentDark: "#241b4b", accentLight: "#f1fdff", thread: "#c7e9ef" }
+});
+var SLAG_SHAPER_D12_4K = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: SLAG_SHAPER_AFFIX_ID,
+  tier: "elite",
+  label: "SLAG SHAPER",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 180, windupTicks: 30, hazardKind: "slag_shaper_pool", durationTicks: 300, statusId: "slag_burn", geometry: { kind: "ellipse", radiusX: 12, radiusY: 6 }, damageMaxHp: { numerator: 15, denominator: 1e3 }, damageIntervalTicks: 45, nonlethal: false, maxActivePerSource: 2 },
+  presentation: { scale: 1.25, accent: "#f97316", accentDark: "#25130f", accentLight: "#fff0a8", crust: "#211a19" }
+});
+var ELITE_AFFIX_CATALOG_D12_4 = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  definitionsById: { [VITALITY_WEAVER_AFFIX_ID]: VITALITY_WEAVER_D12_4, [SWIFT_COMMANDER_AFFIX_ID]: SWIFT_COMMANDER_D12_4D, [GLACIAL_WARDEN_AFFIX_ID]: GLACIAL_WARDEN_D12_4E, [TOXIC_DECAY_AFFIX_ID]: TOXIC_DECAY_D12_4F, [IRON_CITADEL_AFFIX_ID]: IRON_CITADEL_D12_4G, [BLOOD_BERSERKER_AFFIX_ID]: BLOOD_BERSERKER_D12_4H_A, [NULLIFIER_AFFIX_ID]: NULLIFIER_D12_4I, [WEB_WEAVER_AFFIX_ID]: WEB_WEAVER_D12_4J, [SLAG_SHAPER_AFFIX_ID]: SLAG_SHAPER_D12_4K }
+});
+function eliteAffixDefinitionD12_4(affixId) {
+  return ELITE_AFFIX_CATALOG_D12_4.definitionsById[affixId] ?? null;
+}
+function applyEliteActorStatsD12_4(profile2, elite) {
+  if (!elite) return profile2;
+  requireContract(elite.tier === "elite" && (elite.affixIds.length === 1 || elite.version === COMPOSITION_ELITE_V1 && elite.affixIds.length <= 3 && elite.affixIds.slice(1).every((id) => PASSIVE_ELITE_TRAITS_V1[id]) && new Set(elite.affixIds).size === elite.affixIds.length), "Unsupported D12.4 elite loadout");
+  const definition = eliteAffixDefinitionD12_4(elite.affixIds[0]);
+  requireContract(definition, "Unsupported D12.4 elite loadout");
+  const d = definition.statMultipliers, extra = elite.affixIds.slice(1).map((id) => PASSIVE_ELITE_TRAITS_V1[id]);
+  return {
+    ...profile2,
+    maxHp: combatInteger(extra.reduce((hp, t) => multiplyCombat(hp, t.hp, 100), multiplyCombat(profile2.maxHp, d.maxHp.numerator, d.maxHp.denominator)), "round"),
+    attackDamage: combatInteger(extra.reduce((damage, t) => multiplyCombat(damage, t.damage, 100), multiplyCombat(profile2.attackDamage, d.attackDamage.numerator, d.attackDamage.denominator)), "round")
+  };
+}
 
 // src/shared/content/hidden_hollow_v1.js
 var HOLLOW_VERSION = "hidden-hollow-v1";
@@ -5552,7 +5664,7 @@ function ordinaryRosterProfile(s, groupId, entityId, fallback) {
 }
 function applySubstitutions(s, g, row) {
   for (const [id, sub] of Object.entries(row.substitutionsById)) {
-    const a = s.entitiesById[id], enemy = ordinaryEnemyForProfile(sub.toProfileId), profile2 = worldOrdinaryMeleeProfile(s, resolveOrdinaryProfile(enemy, rankFor(sub.toProfileId))), level = g.threatSnapshot?.levelsByEntityId[id], stats = level === void 0 ? profile2 : worldEnemyStats(level, rankFor(sub.toProfileId), enemy.budget);
+    const a = s.entitiesById[id], enemy = ordinaryEnemyForProfile(sub.toProfileId), profile2 = worldOrdinaryMeleeProfile(s, resolveOrdinaryProfile(enemy, rankFor(sub.toProfileId))), level = g.threatSnapshot?.levelsByEntityId[id], stats = applyEliteActorStatsD12_4(level === void 0 ? profile2 : worldEnemyStats(level, rankFor(sub.toProfileId), enemy.budget), s.eliteCombat?.elitesByEntityId?.[id] ?? null);
     a.contentDefinitionId = sub.toProfileId;
     for (const key5 of ["hullRadius", "combatRadius", "moveSpeed", "attackReach", "attackReachMode", "attackDelayTicks"]) a[key5] = profile2[key5];
     a.hp = combatInteger(stats.maxHp);
@@ -5783,7 +5895,7 @@ function ordinaryRosterV2Profile(s, groupId, entityId, fallback) {
 }
 function apply(s, g, row) {
   for (const [id, sub] of Object.entries(row.substitutionsById)) {
-    const a = s.entitiesById[id], enemy = ordinaryEnemyForProfile(sub.toProfileId), profile2 = worldOrdinaryMeleeProfile(s, resolveOrdinaryProfile(enemy, rankFor2(sub.toProfileId))), level = g.threatSnapshot?.levelsByEntityId[id], stats = level === void 0 ? profile2 : worldEnemyStats(level, rankFor2(sub.toProfileId), enemy.budget);
+    const a = s.entitiesById[id], enemy = ordinaryEnemyForProfile(sub.toProfileId), profile2 = worldOrdinaryMeleeProfile(s, resolveOrdinaryProfile(enemy, rankFor2(sub.toProfileId))), level = g.threatSnapshot?.levelsByEntityId[id], stats = applyEliteActorStatsD12_4(level === void 0 ? profile2 : worldEnemyStats(level, rankFor2(sub.toProfileId), enemy.budget), s.eliteCombat?.elitesByEntityId?.[id] ?? null);
     a.contentDefinitionId = sub.toProfileId;
     for (const key5 of ["hullRadius", "combatRadius", "moveSpeed", "attackReach", "attackReachMode", "attackDelayTicks"]) a[key5] = profile2[key5];
     a.hp = combatInteger(stats.maxHp);
@@ -8774,118 +8886,6 @@ function validateCampaignTavern(s) {
     const space = s.spacesByInstanceId[b.floorSpaces[f2]];
     requireContract(space && space.spaceId === r.floorLogicalIds[f2] && same4(space.collision, campaignTavernCollision(f2, hasSettlementLife(s.d9World.plannedWorld))), "Tavern floor geometry drift");
   }
-}
-
-// src/shared/content/elite_affixes_d12_4.js
-var ELITE_AFFIX_CATALOG_D12_4_VERSION = "elite-affix-catalog-d12.4-v1";
-var VITALITY_WEAVER_AFFIX_ID = "vitality_weaver";
-var SWIFT_COMMANDER_AFFIX_ID = "swift_commander";
-var GLACIAL_WARDEN_AFFIX_ID = "glacial_warden";
-var TOXIC_DECAY_AFFIX_ID = "toxic_decay";
-var IRON_CITADEL_AFFIX_ID = "iron_citadel";
-var BLOOD_BERSERKER_AFFIX_ID = "blood_berserker";
-var NULLIFIER_AFFIX_ID = "nullifier";
-var WEB_WEAVER_AFFIX_ID = "web_weaver";
-var SLAG_SHAPER_AFFIX_ID = "slag_shaper";
-var VITALITY_WEAVER_D12_4 = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: VITALITY_WEAVER_AFFIX_ID,
-  tier: "elite",
-  label: "VITALITY WEAVER",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 90, radius: 120, maximumTargets: 3, ordinaryHeal: { numerator: 6, denominator: 100 }, reservedBossHeal: { numerator: 15, denominator: 1e3 } },
-  presentation: { scale: 1.25, accent: "#39d27d", accentDark: "#123e31", accentLight: "#c5f28c" }
-});
-var SWIFT_COMMANDER_D12_4D = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: SWIFT_COMMANDER_AFFIX_ID,
-  tier: "elite",
-  label: "SWIFT COMMANDER",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 90, radius: 140, maxStacks: 3, perStackSpeedPercent: 15, lingerTicks: 300, decayTicks: 150 },
-  presentation: { scale: 1.25, accent: "#00d2ff", accentDark: "#123a50", accentLight: "#b9f4ff", commandGold: "#f0c95a" }
-});
-var GLACIAL_WARDEN_D12_4E = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: GLACIAL_WARDEN_AFFIX_ID,
-  tier: "elite",
-  label: "GLACIAL WARDEN",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 120, radius: 110, statusId: "glacial_warden_snare", durationTicks: 60, movementMultiplier: { numerator: 2, denominator: 5 } },
-  presentation: { scale: 1.25, accent: "#38bdf8", accentDark: "#153756", accentLight: "#d9f7ff", iceBlue: "#79d7ff" }
-});
-var TOXIC_DECAY_D12_4F = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: TOXIC_DECAY_AFFIX_ID,
-  tier: "elite",
-  label: "TOXIC DECAY",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 120, statusId: "toxic_decay_poison", durationTicks: 240, tickTicks: 60, maxStacks: 3, damageMaxHp: { numerator: 12, denominator: 1e3 } },
-  presentation: { scale: 1.25, accent: "#69e09b", accentDark: "#241735", accentLight: "#c7ff9a", sludge: "#70408f" }
-});
-var IRON_CITADEL_D12_4G = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: IRON_CITADEL_AFFIX_ID,
-  tier: "elite",
-  label: "IRON CITADEL",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 90, radius: 100, maxStacks: 3, perStackMitigationPercent: 15, lingerTicks: 300, decayTicks: 150 },
-  presentation: { scale: 1.25, accent: "#7196b5", accentDark: "#182a38", accentLight: "#d2e2eb", steel: "#45657d" }
-});
-var BLOOD_BERSERKER_D12_4H_A = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: BLOOD_BERSERKER_AFFIX_ID,
-  tier: "elite",
-  label: "BERSERKER",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 90, radius: 110, maxStacks: 3, perStackAttackPercent: 15, lingerTicks: 300, decayTicks: 150, statusId: "blood_berserker_attack" },
-  presentation: { scale: 1.25, accent: "#c83f4f", accentDark: "#35131c", accentLight: "#ffb067", bloodGold: "#e2b85a" }
-});
-var NULLIFIER_D12_4I = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: NULLIFIER_AFFIX_ID,
-  tier: "elite",
-  label: "NULLIFIER",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 300, chargeTicks: 60, radius: 90, statusId: "nullified", durationTicks: 120, resistanceTicks: 90 },
-  presentation: { scale: 1.25, accent: "#9b5de5", accentDark: "#251339", accentLight: "#e4c7ff", fracture: "#c98cff" }
-});
-var WEB_WEAVER_D12_4J = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: WEB_WEAVER_AFFIX_ID,
-  tier: "elite",
-  label: "WEB WEAVER",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 210, radius: 220, windupTicks: 45, hazardKind: "web_weaver_web", durationTicks: 240, statusId: "webbed", geometry: { kind: "ellipse", radiusX: 75, radiusY: 33.75 }, movementMultiplier: { numerator: 2, denominator: 5 }, maxActivePerSource: 2 },
-  presentation: { scale: 1.25, accent: "#a9f3ff", accentDark: "#241b4b", accentLight: "#f1fdff", thread: "#c7e9ef" }
-});
-var SLAG_SHAPER_D12_4K = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: SLAG_SHAPER_AFFIX_ID,
-  tier: "elite",
-  label: "SLAG SHAPER",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 180, windupTicks: 30, hazardKind: "slag_shaper_pool", durationTicks: 300, statusId: "slag_burn", geometry: { kind: "ellipse", radiusX: 12, radiusY: 6 }, damageMaxHp: { numerator: 15, denominator: 1e3 }, damageIntervalTicks: 45, nonlethal: false, maxActivePerSource: 2 },
-  presentation: { scale: 1.25, accent: "#f97316", accentDark: "#25130f", accentLight: "#fff0a8", crust: "#211a19" }
-});
-var ELITE_AFFIX_CATALOG_D12_4 = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  definitionsById: { [VITALITY_WEAVER_AFFIX_ID]: VITALITY_WEAVER_D12_4, [SWIFT_COMMANDER_AFFIX_ID]: SWIFT_COMMANDER_D12_4D, [GLACIAL_WARDEN_AFFIX_ID]: GLACIAL_WARDEN_D12_4E, [TOXIC_DECAY_AFFIX_ID]: TOXIC_DECAY_D12_4F, [IRON_CITADEL_AFFIX_ID]: IRON_CITADEL_D12_4G, [BLOOD_BERSERKER_AFFIX_ID]: BLOOD_BERSERKER_D12_4H_A, [NULLIFIER_AFFIX_ID]: NULLIFIER_D12_4I, [WEB_WEAVER_AFFIX_ID]: WEB_WEAVER_D12_4J, [SLAG_SHAPER_AFFIX_ID]: SLAG_SHAPER_D12_4K }
-});
-function eliteAffixDefinitionD12_4(affixId) {
-  return ELITE_AFFIX_CATALOG_D12_4.definitionsById[affixId] ?? null;
-}
-function applyEliteActorStatsD12_4(profile2, elite) {
-  if (!elite) return profile2;
-  requireContract(elite.tier === "elite" && (elite.affixIds.length === 1 || elite.version === COMPOSITION_ELITE_V1 && elite.affixIds.length <= 3 && elite.affixIds.slice(1).every((id) => PASSIVE_ELITE_TRAITS_V1[id]) && new Set(elite.affixIds).size === elite.affixIds.length), "Unsupported D12.4 elite loadout");
-  const definition = eliteAffixDefinitionD12_4(elite.affixIds[0]);
-  requireContract(definition, "Unsupported D12.4 elite loadout");
-  const d = definition.statMultipliers, extra = elite.affixIds.slice(1).map((id) => PASSIVE_ELITE_TRAITS_V1[id]);
-  return {
-    ...profile2,
-    maxHp: combatInteger(extra.reduce((hp, t) => multiplyCombat(hp, t.hp, 100), multiplyCombat(profile2.maxHp, d.maxHp.numerator, d.maxHp.denominator)), "round"),
-    attackDamage: combatInteger(extra.reduce((damage, t) => multiplyCombat(damage, t.damage, 100), multiplyCombat(profile2.attackDamage, d.attackDamage.numerator, d.attackDamage.denominator)), "round")
-  };
 }
 
 // src/shared/contracts/named_elite_tricks_v1.js
@@ -23740,6 +23740,25 @@ export {
   createMajorNameRegistry,
   D9_PROFILE,
   COMPOSITION_ELITE_V1,
+  VITALITY_WEAVER_AFFIX_ID,
+  SWIFT_COMMANDER_AFFIX_ID,
+  GLACIAL_WARDEN_AFFIX_ID,
+  TOXIC_DECAY_AFFIX_ID,
+  IRON_CITADEL_AFFIX_ID,
+  BLOOD_BERSERKER_AFFIX_ID,
+  NULLIFIER_AFFIX_ID,
+  WEB_WEAVER_AFFIX_ID,
+  SLAG_SHAPER_AFFIX_ID,
+  VITALITY_WEAVER_D12_4,
+  SWIFT_COMMANDER_D12_4D,
+  GLACIAL_WARDEN_D12_4E,
+  TOXIC_DECAY_D12_4F,
+  IRON_CITADEL_D12_4G,
+  BLOOD_BERSERKER_D12_4H_A,
+  NULLIFIER_D12_4I,
+  WEB_WEAVER_D12_4J,
+  SLAG_SHAPER_D12_4K,
+  eliteAffixDefinitionD12_4,
   HOLLOW_VERSION,
   HOLLOW_LEDGER_VERSION,
   HOLLOW_POLICY,
@@ -23987,25 +24006,6 @@ export {
   campaignTavernBinding,
   campaignTavernExits,
   validateCampaignTavern,
-  VITALITY_WEAVER_AFFIX_ID,
-  SWIFT_COMMANDER_AFFIX_ID,
-  GLACIAL_WARDEN_AFFIX_ID,
-  TOXIC_DECAY_AFFIX_ID,
-  IRON_CITADEL_AFFIX_ID,
-  BLOOD_BERSERKER_AFFIX_ID,
-  NULLIFIER_AFFIX_ID,
-  WEB_WEAVER_AFFIX_ID,
-  SLAG_SHAPER_AFFIX_ID,
-  VITALITY_WEAVER_D12_4,
-  SWIFT_COMMANDER_D12_4D,
-  GLACIAL_WARDEN_D12_4E,
-  TOXIC_DECAY_D12_4F,
-  IRON_CITADEL_D12_4G,
-  BLOOD_BERSERKER_D12_4H_A,
-  NULLIFIER_D12_4I,
-  WEB_WEAVER_D12_4J,
-  SLAG_SHAPER_D12_4K,
-  eliteAffixDefinitionD12_4,
   ELITE_HASTE_D12_4D_VERSION,
   TIMED_ACTOR_STATUS_D12_4E_VERSION,
   TIMED_PLAYER_POISON_D12_4F_VERSION,
