@@ -991,6 +991,7 @@ var starterRoleAtSiteV1 = (reservationId) => (starterAt ??= new Map(Object.entri
 
 // src/shared/content/seeded_world_v1.js
 var isSeededBindingV1 = (b) => b?.worldMaker !== void 0;
+var seededCommitmentsV1 = (asset) => ({ planHash: asset.upstream.planHash, routeHash: asset.routeHash, planningHash: asset.upstream.planningPolicyHash, physicalHash: asset.upstream.physicalPlanHash, worldMaker: asset.upstream.maker });
 function presentSeededWorldV1(a) {
   return {
     ...a,
@@ -8739,6 +8740,104 @@ function createPlannedWorldAssetStore({ readText, sha256, readWorld = null }) {
     const { generator } = await load(request.plannedWorld);
     return generator.generate(request);
   } });
+}
+
+// src/storage/built_world_store_v1.js
+var BUILT_WORLD_DATABASE = "saq-world-built-worlds-v1";
+var WORLDS = "worlds";
+var CAMPAIGNS = "campaigns";
+var VERSION = 1;
+var HASH = /^[0-9a-f]{64}$/;
+var pipe = async (bytes, stream) => new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer());
+var pack = async (bytes) => typeof CompressionStream === "function" ? { encoding: "gzip", bytes: await pipe(bytes, new CompressionStream("gzip")) } : { encoding: "utf8", bytes };
+var info = (r) => r && Object.freeze({ hash: r.hash, seed: r.seed, commitments: Object.freeze({ ...r.commitments }), size: r.size });
+function createBuiltWorldStoreV1({ indexedDB, sha256 }) {
+  if (!indexedDB || typeof indexedDB.open !== "function") throw new Error("Built world storage needs IndexedDB");
+  const open2 = () => new Promise((resolve, reject) => {
+    let r;
+    try {
+      r = indexedDB.open(BUILT_WORLD_DATABASE, VERSION);
+    } catch (error) {
+      reject(error);
+      return;
+    }
+    r.onupgradeneeded = () => {
+      const db = r.result;
+      for (const name of [WORLDS, CAMPAIGNS]) if (!db.objectStoreNames.contains(name)) db.createObjectStore(name);
+    };
+    r.onsuccess = () => resolve(r.result);
+    r.onerror = () => reject(r.error ?? new Error("Built world database unavailable"));
+    r.onblocked = () => reject(new Error("Built world database blocked"));
+  });
+  const run = async (names2, mode, work) => {
+    const db = await open2();
+    return new Promise((resolve, reject) => {
+      let result, failure = null;
+      const tx = db.transaction(names2, mode);
+      tx.oncomplete = () => {
+        db.close();
+        resolve(result);
+      };
+      tx.onabort = () => {
+        db.close();
+        reject(failure ?? tx.error ?? new Error("Built world storage failed"));
+      };
+      work(tx, (value) => {
+        result = value;
+      }, (error) => {
+        failure = error;
+        tx.abort();
+      });
+    });
+  };
+  const get = (name, key9) => run([name], "readonly", (tx, done) => {
+    const q = tx.objectStore(name).get(key9);
+    q.onsuccess = () => done(q.result ?? null);
+  });
+  const describe = async (hash19) => HASH.test(hash19) ? info(await get(WORLDS, hash19)) : null, campaignWorld = async (campaignId) => (await get(CAMPAIGNS, campaignId))?.hash ?? null;
+  return Object.freeze({
+    // Keeps a world file the world maker built. Returns what a page needs to name it.
+    async put(text) {
+      if (typeof text !== "string") throw new TypeError("A built world is JSON text");
+      const bytes = new TextEncoder().encode(text), hash19 = bytesToHex(await sha256(bytes)), asset = JSON.parse(text);
+      const record2 = { hash: hash19, seed: String(asset.upstream?.seed ?? asset.seed), commitments: seededCommitmentsV1(asset), size: bytes.length, ...await pack(bytes) };
+      await run([WORLDS], "readwrite", (tx) => {
+        tx.objectStore(WORLDS).put(record2, hash19);
+      });
+      return info(record2);
+    },
+    // The world's seed, commitments and size, or null when it isn't stored.
+    info: describe,
+    // The world file as text, or null when it isn't stored. The asset store checks its hash.
+    async read(hash19) {
+      const r = HASH.test(hash19) ? await get(WORLDS, hash19) : null;
+      if (!r) return null;
+      try {
+        return new TextDecoder("utf-8", { fatal: true }).decode(r.encoding === "gzip" ? await pipe(r.bytes, new DecompressionStream("gzip")) : r.bytes);
+      } catch {
+        throw new Error("Seeded world damaged in storage");
+      }
+    },
+    // A seeded campaign names its world before the launcher points at it.
+    bindCampaign: (campaignId, hash19) => run([WORLDS, CAMPAIGNS], "readwrite", (tx, done, fail) => {
+      const q = tx.objectStore(WORLDS).get(hash19);
+      q.onsuccess = () => {
+        if (!q.result) fail(new Error("Seeded world missing"));
+        else tx.objectStore(CAMPAIGNS).put({ hash: hash19 }, campaignId);
+      };
+    }),
+    // The hash of the world a campaign plays on, or null for a campaign on today's map.
+    campaignWorld,
+    // The world a start plays on: the one a resumed campaign was made on, or for a new campaign the
+    // stored world it asks for. null is today's map; a named world that isn't stored is an error.
+    async forStart({ resume = null, requested = null } = {}) {
+      const hash19 = resume ? await campaignWorld(resume.campaignId) : requested || null;
+      if (!hash19) return null;
+      const found = await describe(hash19);
+      if (!found) throw new Error("Seeded world missing");
+      return found;
+    }
+  });
 }
 
 // src/shared/content/forge_review.js
@@ -25428,12 +25527,12 @@ function createWorldPagePublication({ openDatabase, sha256 }) {
 
 // src/storage/local_indexeddb_campaign_store.js
 var WORLD_CAMPAIGN_DATABASE_NAME = "saq-world-campaigns-v1";
-var CAMPAIGNS = "campaigns";
+var CAMPAIGNS2 = "campaigns";
 var TRANSACTIONS = "transactions";
 var IDENTITY_RESERVATIONS = "identityReservations";
 var LAUNCHERS = "launchers";
 var DATABASE_VERSION = 5;
-var REQUIRED_STORES = [CAMPAIGNS, TRANSACTIONS, IDENTITY_RESERVATIONS, LAUNCHERS, WORLD_PAGE_STORE, WORLD_ROOT_STORE, WORLD_REF_STORE];
+var REQUIRED_STORES = [CAMPAIGNS2, TRANSACTIONS, IDENTITY_RESERVATIONS, LAUNCHERS, WORLD_PAGE_STORE, WORLD_ROOT_STORE, WORLD_REF_STORE];
 function createLocalIndexedDbCampaignStore({
   indexedDB,
   sha256,
@@ -25483,7 +25582,7 @@ function createStore({ indexedDB, sha256, expectedContentFingerprint, expectedGe
           }
           for (const name of [WORLD_PAGE_STORE, WORLD_ROOT_STORE]) if (!database.objectStoreNames.contains(name)) database.createObjectStore(name);
           if (!database.objectStoreNames.contains(LAUNCHERS)) database.createObjectStore(LAUNCHERS);
-          if (!database.objectStoreNames.contains(CAMPAIGNS)) database.createObjectStore(CAMPAIGNS);
+          if (!database.objectStoreNames.contains(CAMPAIGNS2)) database.createObjectStore(CAMPAIGNS2);
           if (!database.objectStoreNames.contains(TRANSACTIONS)) database.createObjectStore(TRANSACTIONS);
           const createdReservations = !database.objectStoreNames.contains(IDENTITY_RESERVATIONS);
           const identityReservations = createdReservations ? database.createObjectStore(IDENTITY_RESERVATIONS) : request.transaction.objectStore(IDENTITY_RESERVATIONS);
@@ -25636,7 +25735,7 @@ function createStore({ indexedDB, sha256, expectedContentFingerprint, expectedGe
         transaction = database.transaction(REQUIRED_STORES, "readwrite", { durability: "strict" });
         transaction.oncomplete = () => result ? finish(result) : unknown();
         transaction.onabort = () => finish(Object.freeze({ status: "aborted", reason: "storage-abort" }), domainError);
-        const campaigns = transaction.objectStore(CAMPAIGNS);
+        const campaigns = transaction.objectStore(CAMPAIGNS2);
         const transactions2 = transaction.objectStore(TRANSACTIONS);
         const identityReservations = transaction.objectStore(IDENTITY_RESERVATIONS);
         const currentRequest = campaigns.get(prepared.proposal.campaignId);
@@ -25709,7 +25808,7 @@ function createStore({ indexedDB, sha256, expectedContentFingerprint, expectedGe
   }
   async function loadCampaign(campaignId) {
     validateId("campaignId", campaignId);
-    return readRecord(CAMPAIGNS, campaignId, (value) => {
+    return readRecord(CAMPAIGNS2, campaignId, (value) => {
       if (value === void 0) return null;
       const envelope = parseCampaignEnvelope2(value);
       requireContract(envelope.campaignId === campaignId, "Stored campaign identity mismatch");
@@ -25732,7 +25831,7 @@ function createStore({ indexedDB, sha256, expectedContentFingerprint, expectedGe
     requireContract(["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O"].includes(key9), "Invalid launcher case");
     const database = await openDatabase();
     return new Promise((resolve, reject) => {
-      const tx = database.transaction([CAMPAIGNS, LAUNCHERS], "readwrite", { durability: "strict" });
+      const tx = database.transaction([CAMPAIGNS2, LAUNCHERS], "readwrite", { durability: "strict" });
       let failure = null;
       tx.oncomplete = () => {
         database.close();
@@ -25746,7 +25845,7 @@ function createStore({ indexedDB, sha256, expectedContentFingerprint, expectedGe
         tx.objectStore(LAUNCHERS).delete(key9);
         return;
       }
-      const request = tx.objectStore(CAMPAIGNS).get(reference.campaignId);
+      const request = tx.objectStore(CAMPAIGNS2).get(reference.campaignId);
       request.onsuccess = () => {
         try {
           const state = parseCampaignEnvelope2(request.result).cut.snapshot.state;
@@ -26091,8 +26190,8 @@ function createSiteTruthReuseV1(resolve) {
 var sharedSiteTruthReuseV1 = createSiteTruthReuseV1();
 
 // src/storage/world_navigation_pages_d9.js
-var VERSION = "world-map-knowledge-d9-v1";
-var mapKey = (playerId, spaceInstanceId, level, x, y, sha256) => pageDigest([VERSION, playerId, spaceInstanceId, level, x, y], sha256);
+var VERSION2 = "world-map-knowledge-d9-v1";
+var mapKey = (playerId, spaceInstanceId, level, x, y, sha256) => pageDigest([VERSION2, playerId, spaceInstanceId, level, x, y], sha256);
 var MAP_MAX_LEVEL_D9 = D9_RUNTIME_POLICY.mapOverviewLevels;
 async function readValue(index, key9, io) {
   const ref = await index.get(key9);
@@ -26112,7 +26211,7 @@ async function prepareNavigationPagesD9({ root, navigation, stagedPages = [] }, 
   }
   for (const row of rows3) {
     const key9 = await mapKey(row.playerId, row.spaceInstanceId, 0, row.chunkX, row.chunkY, sha256), old = await readValue(index, key9, io), tiles3 = [...row.tiles].map((v, i) => v === "?" ? old?.tiles[i] ?? "?" : v).join(""), markers = [...new Map([...old?.markers ?? [], ...row.markers].map((m) => [m.id, m])).values()];
-    await put3(key9, { version: VERSION, ...copyWire(row), tiles: tiles3, markers, level: 0 });
+    await put3(key9, { version: VERSION2, ...copyWire(row), tiles: tiles3, markers, level: 0 });
     for (let level = 1; level <= MAP_MAX_LEVEL_D9; level++) {
       const size = 1n << BigInt(level), x = floorDiv(BigInt(row.chunkX), size), y = floorDiv(BigInt(row.chunkY), size), k = await mapKey(row.playerId, row.spaceInstanceId, level, String(x), String(y), sha256), prior = await readValue(index, k, io), cells3 = [...prior?.tiles ?? "?".repeat(64)];
       for (let py = 0; py < 26; py++) for (let px = 0; px < 32; px++) {
@@ -26122,7 +26221,7 @@ async function prepareNavigationPagesD9({ root, navigation, stagedPages = [] }, 
         cells3[sy * 8 + sx] = color;
       }
       const summary = ["planned-world-shoreline-v2", "planned-world-water-v3"].includes(row.region?.version) ? mergeObservedSummaryV2(prior, row, old?.tiles, Number(size), Number(BigInt(row.chunkX) - x * size), Number(BigInt(row.chunkY) - y * size)) : null;
-      await put3(k, { ...summary ?? {}, version: VERSION, playerId: row.playerId, spaceInstanceId: row.spaceInstanceId, chunkX: String(x), chunkY: String(y), level, tiles: summary?.tiles ?? cells3.join(""), markers: [], region: null });
+      await put3(k, { ...summary ?? {}, version: VERSION2, playerId: row.playerId, spaceInstanceId: row.spaceInstanceId, chunkX: String(x), chunkY: String(y), level, tiles: summary?.tiles ?? cells3.join(""), markers: [], region: null });
     }
   }
   return { expectedRoot: root, root: index.root(), rows: copyWire(rows3), pages: [...documents.values(), ...index.pages()] };
@@ -26136,7 +26235,7 @@ async function readNavigationWindowD9({ root, playerId, spaceInstanceId, level, 
     const cx = String(BigInt(x) + BigInt(dx)), cy = String(BigInt(y) + BigInt(dy)), page = await readValue(index, await mapKey(playerId, spaceInstanceId, level, cx, cy, sha256), io);
     if (page) pages.push(copyWire(page));
   }
-  return { version: VERSION, root, level, pages };
+  return { version: VERSION2, root, level, pages };
 }
 
 // src/shared/generation/site_discovery_d9.js
@@ -27286,7 +27385,7 @@ function applyGroundResidenceD9(state, plan) {
 var same40 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var record = (x) => x !== null && typeof x === "object" && !Array.isArray(x);
 var transferRoots = ["d9World", "entitiesById", "groupsById", "encounterEconomy", "spacesByInstanceId", "playersById", "hostileCombat", "eliteCombat"];
-var pack = (value, exists) => exists ? { exists: true, value: copyWire(value) } : { exists: false };
+var pack2 = (value, exists) => exists ? { exists: true, value: copyWire(value) } : { exists: false };
 function worldTransferPatchD9(before, after, { releasedGroupIds = [], placements = [], coldGroups = [] } = {}) {
   const changes = [];
   function visit(a, b, path, aExists = true, bExists = true) {
@@ -27295,7 +27394,7 @@ function worldTransferPatchD9(before, after, { releasedGroupIds = [], placements
     if (aExists && bExists && same40(a, b)) return;
     if (aExists && bExists && record(a) && record(b)) {
       for (const key9 of /* @__PURE__ */ new Set([...Object.keys(a), ...Object.keys(b)])) visit(a[key9], b[key9], [...path, key9], Object.hasOwn(a, key9), Object.hasOwn(b, key9));
-    } else changes.push({ path, before: pack(a, aExists), after: pack(b, bExists) });
+    } else changes.push({ path, before: pack2(a, aExists), after: pack2(b, bExists) });
   }
   for (const root of transferRoots) visit(before[root], after[root], [root], Object.hasOwn(before, root), Object.hasOwn(after, root));
   requireContract(changes.length <= 256, "World transfer needs a smaller prepared batch");
@@ -27933,7 +28032,8 @@ function startActivitySaveWorker(environment) {
     observe: timing,
     now: () => environment.performance.now()
   }) });
-  const plannedAssets = createPlannedWorldAssetStore({ sha256, readText: async (file) => {
+  const builtWorlds = createBuiltWorldStoreV1({ indexedDB: saveIndexedDb, sha256 });
+  const plannedAssets = createPlannedWorldAssetStore({ sha256, readWorld: builtWorlds.read, readText: async (file) => {
     const response = await environment.fetch(new URL(file, environment.location.href));
     if (!response.ok) throw new Error("Missing planned world asset");
     return response.text();

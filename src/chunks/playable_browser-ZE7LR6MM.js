@@ -667,6 +667,7 @@ import {
   safeInteger,
   saleQuote,
   salvageQuote,
+  seededCommitmentsV1,
   selectForwardActors,
   selectSimpleEnemyTarget,
   semanticPlaceAtWorldPosition,
@@ -781,6 +782,7 @@ import {
   verifyPersistedEnvelope,
   wholeAmount,
   wildernessFairLevelGap,
+  withSeededWorldV1,
   woodlandForestRole,
   workshopMaterialPrices,
   workshopQuote,
@@ -793,7 +795,7 @@ import {
   worldPointForArea,
   worldRolesV1,
   wrathDamageV1
-} from "./chunk-LNIGIJ54.js";
+} from "./chunk-E3VS4EPK.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -14104,8 +14106,9 @@ async function createWoodlandEnvironmentV1(environment, review, prior, initial =
     files[f.path] = bytes;
     downloads += bytes.byteLength;
   }
-  const journey = JSON.parse(new TextDecoder().decode(files["journey.json"]));
-  if (review.asset.assetId !== journey.assetId || review.binding.assetHash !== journey.assetHash || review.binding.wildernessHash !== journey.wildernessHash) throw Error("Woodland journey requires matching accepted Alpha inputs");
+  const accepted = JSON.parse(new TextDecoder().decode(files["journey.json"])), seeded = isSeededBindingV1(review.binding);
+  if (!seeded && (review.asset.assetId !== accepted.assetId || review.binding.assetHash !== accepted.assetHash || review.binding.wildernessHash !== accepted.wildernessHash)) throw Error("Woodland journey requires matching accepted Alpha inputs");
+  const journey = seeded ? { ...accepted, clearings: [], scope: { ...accepted.scope, right: accepted.scope.left, bottom: accepted.scope.top } } : accepted;
   const protection = createWoodlandEventProtectionV1([...journey.clearings, ...review.asset.wildernessExtension?.eventCapacities ?? []]), stamps = [];
   for (const name of ["grass-source.webp", "earth-source.webp"]) {
     const bitmap = await environment.createImageBitmap(new Blob([files[name]], { type: "image/webp" })), c = environment.document.createElement("canvas");
@@ -14441,17 +14444,17 @@ async function createWoodlandForestArtV1(env, review, prior) {
     c.restore();
     c.globalAlpha = 1;
   }
-  function tree(c, s, x, y, size, n, info, focus) {
-    if (!active(s, x + size * 0.5, y + size * 0.78)) return prior.tree(c, s, x, y, size, n, info);
-    const small = info?.forestRole === "sapling", species = n % 10 < 4 ? 0 : n % 10 < 8 ? 1 : n % 10 === 8 ? 2 : 3, p = small ? sapling : crowns[species], height = size * (small ? 1.05 : 1.7), width = height * p.width / p.height, cx = x + size * 0.5, ground = y + size * 0.94, occludes = (Array.isArray(focus) ? focus : focus ? [focus] : []).some((f) => Math.abs(f.x - cx) < width * 0.42 && f.y > ground - height * 0.84 && f.y < ground - 10);
+  function tree(c, s, x, y, size, n, info2, focus) {
+    if (!active(s, x + size * 0.5, y + size * 0.78)) return prior.tree(c, s, x, y, size, n, info2);
+    const small = info2?.forestRole === "sapling", species = n % 10 < 4 ? 0 : n % 10 < 8 ? 1 : n % 10 === 8 ? 2 : 3, p = small ? sapling : crowns[species], height = size * (small ? 1.05 : 1.7), width = height * p.width / p.height, cx = x + size * 0.5, ground = y + size * 0.94, occludes = (Array.isArray(focus) ? focus : focus ? [focus] : []).some((f) => Math.abs(f.x - cx) < width * 0.42 && f.y > ground - height * 0.84 && f.y < ground - 10);
     stamp5(c, p, cx, ground, width, Boolean(n & 1), occludes ? 0.38 : 1);
     draws[small ? "sapling" : "tree"]++;
     return true;
   }
-  function base(c, s, x, y, size, n, biome, info) {
-    if (!active(s, x + size / 2, y + size / 2)) return prior.base(c, s, x, y, size, n, biome, info);
-    if (info?.hasCanopy) return true;
-    const role = info?.forestRole, cx = x + size * 0.5, ground = y + size * 0.84;
+  function base(c, s, x, y, size, n, biome, info2) {
+    if (!active(s, x + size / 2, y + size / 2)) return prior.base(c, s, x, y, size, n, biome, info2);
+    if (info2?.hasCanopy) return true;
+    const role = info2?.forestRole, cx = x + size * 0.5, ground = y + size * 0.84;
     if (role === "log" || role === "stump") {
       stamp5(c, smallProps[role === "log" ? 0 : 1], cx, ground, size * (role === "log" ? 1.08 : 0.87), Boolean(n & 1));
       draws[role]++;
@@ -14462,8 +14465,8 @@ async function createWoodlandForestArtV1(env, review, prior) {
     draws.shrub++;
     return true;
   }
-  function rock2(c, s, x, y, size, n, info) {
-    if (!active(s, x + size / 2, y + size / 2)) return prior.rock(c, s, x, y, size, n, info);
+  function rock2(c, s, x, y, size, n, info2) {
+    if (!active(s, x + size / 2, y + size / 2)) return prior.rock(c, s, x, y, size, n, info2);
     stamp5(c, rocks[(n >>> 4) % 3], x + size * 0.5, y + size * 0.95, size * (1 + n % 3 * 0.04), Boolean(n & 1));
     draws.rock++;
     return true;
@@ -14834,11 +14837,11 @@ async function createBiomeNatureArtV1(env, review, prior) {
     c.globalAlpha = 1;
   }
   const fit = (p, max, n) => Math.min(1, max / p.w) * (0.9 + (n >>> 7) % 3 * 0.05);
-  function tree(c, s, x, y, size, n, info, focus) {
+  function tree(c, s, x, y, size, n, info2, focus) {
     const cx = x + size * 0.5, code = owned2(s, cx, y + size * 0.78);
-    if (!code) return prior.tree(c, s, x, y, size, n, info, focus);
-    const t = s.collision.tileSize, o = environmentWorldOffset(s), tx = info?.tileX ?? Math.floor(cx / t), ty = info?.tileY ?? Math.floor((y + size * 0.78) / t), gx = (tx + 0.5) * t + ((n >>> 3) % 9 - 4), gy = (ty + 0.86) * t;
-    if (code === "w" && info?.forestRole === "sapling") {
+    if (!code) return prior.tree(c, s, x, y, size, n, info2, focus);
+    const t = s.collision.tileSize, o = environmentWorldOffset(s), tx = info2?.tileX ?? Math.floor(cx / t), ty = info2?.tileY ?? Math.floor((y + size * 0.78) / t), gx = (tx + 0.5) * t + ((n >>> 3) % 9 - 4), gy = (ty + 0.86) * t;
+    if (code === "w" && info2?.forestRole === "sapling") {
       const p2 = sprite5(code, "sapling", n >>> 15);
       stamp5(c, p2, gx, gy, 0.72 + (n >>> 5) % 3 * 0.04);
       draws.tree++;
@@ -14856,19 +14859,19 @@ async function createBiomeNatureArtV1(env, review, prior) {
     draws.tree++;
     return true;
   }
-  function base(c, s, x, y, size, n, biome, info) {
+  function base(c, s, x, y, size, n, biome, info2) {
     const code = owned2(s, x + size / 2, y + size / 2);
-    if (!code || !PICK[code].base) return prior.base(c, s, x, y, size, n, biome, info);
-    if (info?.hasCanopy) return true;
-    const role = info?.forestRole, kind = code === "w" && (role === "log" || role === "stump") ? role : pick(PICK[code].base, n >>> 9), p = sprite5(code, kind, n >>> 15);
+    if (!code || !PICK[code].base) return prior.base(c, s, x, y, size, n, biome, info2);
+    if (info2?.hasCanopy) return true;
+    const role = info2?.forestRole, kind = code === "w" && (role === "log" || role === "stump") ? role : pick(PICK[code].base, n >>> 9), p = sprite5(code, kind, n >>> 15);
     stamp5(c, p, x + size * 0.5, y + size * 0.84, fit(p, 44, n));
     draws.base++;
     return true;
   }
-  function rock2(c, s, x, y, size, n, info) {
+  function rock2(c, s, x, y, size, n, info2) {
     const code = owned2(s, x + size / 2, y + size / 2);
-    if (!code) return prior.rock(c, s, x, y, size, n, info);
-    if (info?.canopy) {
+    if (!code) return prior.rock(c, s, x, y, size, n, info2);
+    if (info2?.canopy) {
       const g = PICK[code].ground[0], p2 = sprite5(code, g[0], n >>> 15);
       stamp5(c, p2, x + size * 0.5 - 8, y + size * 0.95, g[1]);
       draws.ground++;
@@ -15292,7 +15295,7 @@ async function createPaintedRoutesV1(env, review, prior, { worldCoverage = false
   const root = new URL("../../assets/painted-paths-v1/", import.meta.url), r = await env.fetch(new URL("kit-manifest.json", root));
   if (!r.ok) throw Error("Missing painted path kit");
   const kit2 = await r.json();
-  if (JSON.stringify(kit2.targets) !== JSON.stringify(PAINTED_REVIEW_TARGETS) || kit2.version !== PAINTED_ROUTE_VERSION || review.asset.assetId !== kit2.assetId || review.binding.assetHash !== kit2.assetHash) throw Error("Painted path pilot input commitment mismatch");
+  if (JSON.stringify(kit2.targets) !== JSON.stringify(PAINTED_REVIEW_TARGETS) || kit2.version !== PAINTED_ROUTE_VERSION || !isSeededBindingV1(review.binding) && (review.asset.assetId !== kit2.assetId || review.binding.assetHash !== kit2.assetHash)) throw Error("Painted path pilot input commitment mismatch");
   const begin = env.performance.now(), profiles2 = [], downloads = kit2.files.reduce((n, f) => n + f.bytes, 0);
   let material;
   for (const [file, f] of kit2.files.entries()) {
@@ -21571,7 +21574,7 @@ async function plannedReviewTargetsV1(environment, assetId, { get, binding }, { 
       break;
     }
   }
-  if (environment.document.body.dataset.artPilot === "true" && assetId === "alpha") {
+  if (environment.document.body.dataset.artPilot === "true" && assetId === "alpha" && !isSeededBindingV1(binding)) {
     const journey = JSON.parse(await get("assets/hybrid-art-pilot-v1/journey.json"));
     if (journey.geometryBinding.assetHash !== binding.assetHash) throw Error("Art journey geometry mismatch");
     targets.unshift(...journey.stops, journey.supplement);
@@ -21590,15 +21593,15 @@ async function plannedReviewTargetsV1(environment, assetId, { get, binding }, { 
   if (binding.hydrologyHash) targets.unshift(...HYDROLOGY_REVIEW_TARGETS);
   if (asset.assetId === "alpha") targets.unshift({ id: "hidden-hollow:45", label: "Hidden Hollow \xB7 waves and guardian \xB7 inspection approach", tile: { x: HOLLOW_EVENT.x + 2, y: HOLLOW_EVENT.y + 3 } }, ...SPORE_EVENTS.map((e) => ({ id: "spore:" + e.ordinal, label: "Spore Outbreak " + (e.ordinal - 39) + " \xB7 triangular pods \xB7 inspection approach", tile: { x: e.x + 2, y: e.y + 3 } })));
   targets.unshift(...naturalClusterReviewTargets(asset, generator));
-  if (binding.accessHash) {
+  if (binding.accessHash && caveReservations.some((r) => r.socket.provenance.reservationId === FIRST_CAVE_ID)) {
     const r = caveReservations.find((r2) => r2.socket.provenance.reservationId === FIRST_CAVE_ID), e = r.socket.entrance;
     targets.unshift({ id: "first-journey:mouth", label: "Band 1 first cave \xB7 Alderwood outskirts (inspection)", tile: { x: (Number(e.chunkX) - 1024) * 32 + e.localX / 32 - 0.5, y: (Number(e.chunkY) - 1024) * 26 + e.localY / 32 - 0.5 } });
   }
   return targets;
 }
 var SITE_PLACEMENT_CACHE_KEY = "saq-world-site-placements-v1";
-async function openPlannedReviewV1(environment, assetId, sha256) {
-  const inputs = await plannedReviewInputsV1(environment, assetId, sha256), { binding, store } = inputs, asset = await store.prepare(binding), targets = [];
+async function openPlannedReviewV1(environment, assetId, sha256, { inputs: given = null, world = null } = {}) {
+  const base = given ?? await plannedReviewInputsV1(environment, assetId, sha256), inputs = world ? { ...base, binding: withSeededWorldV1(base.binding, world.hash, world.commitments), store: createPlannedWorldAssetStore({ readText: base.get, sha256, readWorld: world.read }) } : base, { binding, store } = inputs, asset = await store.prepare(binding), targets = [];
   let full = null, fullPromise = null, targetsPromise = null;
   const sites = () => fullPromise ??= store.load(binding).then((r) => full = r);
   const release = environment.document.documentElement?.dataset?.worldRelease ?? "", cacheable = /-compact-[0-9a-f]{12}$/.test(release), identity2 = plannedWorldAssetCacheKey(binding) + "|" + release;
@@ -21620,8 +21623,8 @@ async function openPlannedReviewV1(environment, assetId, sha256) {
     }
     return Object.freeze({ asset, binding, coverage: BIOME_PRESENTATION_COVERAGE, ...placed });
   })();
-  const ensureTargets = () => targetsPromise ??= sites().then((r) => plannedReviewTargetsV1(environment, assetId, inputs, r)).then((base) => {
-    targets.unshift(...base);
+  const ensureTargets = () => targetsPromise ??= sites().then((r) => plannedReviewTargetsV1(environment, assetId, inputs, r)).then((base2) => {
+    targets.unshift(...base2);
     return targets;
   });
   return Object.freeze({ asset, binding, targets, coverage: BIOME_PRESENTATION_COVERAGE, sites, forArt, ensureTargets, get caveReservation() {
@@ -21635,6 +21638,10 @@ async function openPlannedReviewV1(environment, assetId, sha256) {
   }, get cryptReservations() {
     return full?.cryptReservations;
   } });
+}
+async function beginPlannedReviewV1(environment, assetId, sha256) {
+  const inputs = await plannedReviewInputsV1(environment, assetId, sha256);
+  return Object.freeze({ assetId, binding: inputs.binding, open: (world) => openPlannedReviewV1(environment, assetId, sha256, { inputs, world }) });
 }
 function mountPlannedReviewControlsV1({ environment, controls, review, session }) {
   const travel = async (id) => {
@@ -21719,6 +21726,104 @@ function mountPlannedReviewControlsV1({ environment, controls, review, session }
   section.append(links);
   controls.append(section);
   Object.defineProperty(environment, "__SAQ_PLANNED_REVIEW__", { configurable: true, value: Object.freeze({ mapReservations: () => mapCheck.checked ? [...review.asset.settlements.filter((s) => !review.binding.townPrototype || s.id !== "settlement-slot:town:05" && (!review.binding.settlementLifeVersion || s.id !== "settlement-slot:village-outpost:02")).map((s) => ({ id: s.id, tile: { x: s.anchor.x * 64 + 32, y: s.anchor.y * 52 + 26 } })), ...review.asset.sites.filter((s) => (!review.binding.fortPrototype || !review.fortReservations.some((r) => r.socket.provenance.reservationId === s.id)) && (!review.binding.cavePrototype || !review.caveReservations.some((r) => r.socket.provenance.reservationId === s.id)) && (!review.binding.ruinPrototype || !review.ruinReservations.some((r) => r.socket.provenance.reservationId === s.id)) && (!review.binding.cryptPrototype || !review.cryptReservations.some((r) => r.socket.provenance.reservationId === s.id))).map((s) => ({ id: s.id, tile: { x: s.anchor.x * 64 + 32, y: s.anchor.y * 52 + 26 } }))] : [], binding: review.binding, targets: review.targets, travel: (id) => travel(id), save: () => session.save(), read: (options) => session.clientPort.getReadModel(options), resources: () => session.resources(), coverage: review.coverage }) });
+}
+
+// src/storage/built_world_store_v1.js
+var BUILT_WORLD_DATABASE = "saq-world-built-worlds-v1";
+var WORLDS = "worlds";
+var CAMPAIGNS = "campaigns";
+var VERSION = 1;
+var HASH = /^[0-9a-f]{64}$/;
+var pipe = async (bytes, stream) => new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer());
+var pack = async (bytes) => typeof CompressionStream === "function" ? { encoding: "gzip", bytes: await pipe(bytes, new CompressionStream("gzip")) } : { encoding: "utf8", bytes };
+var info = (r) => r && Object.freeze({ hash: r.hash, seed: r.seed, commitments: Object.freeze({ ...r.commitments }), size: r.size });
+function createBuiltWorldStoreV1({ indexedDB, sha256 }) {
+  if (!indexedDB || typeof indexedDB.open !== "function") throw new Error("Built world storage needs IndexedDB");
+  const open2 = () => new Promise((resolve, reject) => {
+    let r;
+    try {
+      r = indexedDB.open(BUILT_WORLD_DATABASE, VERSION);
+    } catch (error) {
+      reject(error);
+      return;
+    }
+    r.onupgradeneeded = () => {
+      const db = r.result;
+      for (const name of [WORLDS, CAMPAIGNS]) if (!db.objectStoreNames.contains(name)) db.createObjectStore(name);
+    };
+    r.onsuccess = () => resolve(r.result);
+    r.onerror = () => reject(r.error ?? new Error("Built world database unavailable"));
+    r.onblocked = () => reject(new Error("Built world database blocked"));
+  });
+  const run = async (names, mode, work) => {
+    const db = await open2();
+    return new Promise((resolve, reject) => {
+      let result, failure = null;
+      const tx = db.transaction(names, mode);
+      tx.oncomplete = () => {
+        db.close();
+        resolve(result);
+      };
+      tx.onabort = () => {
+        db.close();
+        reject(failure ?? tx.error ?? new Error("Built world storage failed"));
+      };
+      work(tx, (value2) => {
+        result = value2;
+      }, (error) => {
+        failure = error;
+        tx.abort();
+      });
+    });
+  };
+  const get = (name, key2) => run([name], "readonly", (tx, done) => {
+    const q = tx.objectStore(name).get(key2);
+    q.onsuccess = () => done(q.result ?? null);
+  });
+  const describe = async (hash26) => HASH.test(hash26) ? info(await get(WORLDS, hash26)) : null, campaignWorld = async (campaignId) => (await get(CAMPAIGNS, campaignId))?.hash ?? null;
+  return Object.freeze({
+    // Keeps a world file the world maker built. Returns what a page needs to name it.
+    async put(text2) {
+      if (typeof text2 !== "string") throw new TypeError("A built world is JSON text");
+      const bytes = new TextEncoder().encode(text2), hash26 = bytesToHex(await sha256(bytes)), asset = JSON.parse(text2);
+      const record2 = { hash: hash26, seed: String(asset.upstream?.seed ?? asset.seed), commitments: seededCommitmentsV1(asset), size: bytes.length, ...await pack(bytes) };
+      await run([WORLDS], "readwrite", (tx) => {
+        tx.objectStore(WORLDS).put(record2, hash26);
+      });
+      return info(record2);
+    },
+    // The world's seed, commitments and size, or null when it isn't stored.
+    info: describe,
+    // The world file as text, or null when it isn't stored. The asset store checks its hash.
+    async read(hash26) {
+      const r = HASH.test(hash26) ? await get(WORLDS, hash26) : null;
+      if (!r) return null;
+      try {
+        return new TextDecoder("utf-8", { fatal: true }).decode(r.encoding === "gzip" ? await pipe(r.bytes, new DecompressionStream("gzip")) : r.bytes);
+      } catch {
+        throw new Error("Seeded world damaged in storage");
+      }
+    },
+    // A seeded campaign names its world before the launcher points at it.
+    bindCampaign: (campaignId, hash26) => run([WORLDS, CAMPAIGNS], "readwrite", (tx, done, fail) => {
+      const q = tx.objectStore(WORLDS).get(hash26);
+      q.onsuccess = () => {
+        if (!q.result) fail(new Error("Seeded world missing"));
+        else tx.objectStore(CAMPAIGNS).put({ hash: hash26 }, campaignId);
+      };
+    }),
+    // The hash of the world a campaign plays on, or null for a campaign on today's map.
+    campaignWorld,
+    // The world a start plays on: the one a resumed campaign was made on, or for a new campaign the
+    // stored world it asks for. null is today's map; a named world that isn't stored is an error.
+    async forStart({ resume = null, requested = null } = {}) {
+      const hash26 = resume ? await campaignWorld(resume.campaignId) : requested || null;
+      if (!hash26) return null;
+      const found = await describe(hash26);
+      if (!found) throw new Error("Seeded world missing");
+      return found;
+    }
+  });
 }
 
 // src/shared/content/forge_review.js
@@ -32992,7 +33097,7 @@ function createActivityCampaignAuthority({ initialState, store, nextToken, sha25
     metadataForCut: (cut) => ({ generation: cut.generation })
   });
 }
-async function createLocalActivitySession({ sha256, nextToken, entropy, seedInput, resume, storeFactory, proofCase = "A", measure, durabilityTask = null }) {
+async function createLocalActivitySession({ sha256, nextToken, entropy, seedInput, resume, storeFactory, proofCase = "A", measure, durabilityTask = null, onCampaignReady = null }) {
   let initialState, localPlayerId, generationDiagnostics = null, store;
   if (resume) {
     store = storeFactory(null, null, activityCampaignCodec);
@@ -33009,6 +33114,7 @@ async function createLocalActivitySession({ sha256, nextToken, entropy, seedInpu
     ({ initialState, localPlayerId, generationDiagnostics } = fixture);
     if (FORGE_REVIEW_BUILD) initialState = fundForgeReview(copyWire(upgradeActivityState(initialState)));
   }
+  if (!resume) await onCampaignReady?.(initialState.campaign.campaignId);
   store = storeFactory(initialState.content.fingerprint, activityGeneration(initialState), activityCampaignCodec);
   const authority = createActivityCampaignAuthority({ initialState, store, nextToken, sha256, measure, resumeReference: Boolean(resume), durabilityTask });
   const checkpoint = () => authority.commitCut({ transactionId: createId("transactionId", nextToken()), checkpointId: createId("checkpointId", nextToken()) });
@@ -36475,11 +36581,11 @@ function createHeroSlotsView({ document: document2, environment, heroSlots }) {
   function render() {
     const { active, heroes } = heroSlots.list(), grid = el("div", "hero-slots-grid"), portraits = [];
     for (const h of heroes) {
-      const card = el("article", "hero-slot" + (h.slot === active ? " is-active" : "")), canvas = el("canvas", "hero-slot-portrait"), info = el("div", "hero-slot-info"), actions = el("div", "hero-slot-actions");
+      const card = el("article", "hero-slot" + (h.slot === active ? " is-active" : "")), canvas = el("canvas", "hero-slot-portrait"), info2 = el("div", "hero-slot-info"), actions = el("div", "hero-slot-actions");
       card.dataset.slot = String(h.slot);
       canvas.setAttribute("aria-hidden", "true");
       const name = h.name || (h.slot === active ? "Your hero" : "Unnamed hero");
-      info.append(el("strong", "hero-slot-name", name), el("small", "hero-slot-class", `${h.hero?.cls ? CLASS_NAMES[h.hero.cls] : "No class yet"} \xB7 Level ${h.level}`));
+      info2.append(el("strong", "hero-slot-name", name), el("small", "hero-slot-class", `${h.hero?.cls ? CLASS_NAMES[h.hero.cls] : "No class yet"} \xB7 Level ${h.level}`));
       if (h.slot === active) actions.append(el("span", "hero-slot-badge", "Playing"));
       else if (confirming === h.slot) actions.append(button("Delete", () => act("delete", () => heroSlots.remove(h.slot)), "is-danger"), button("Keep", () => {
         confirming = null;
@@ -36489,16 +36595,16 @@ function createHeroSlotsView({ document: document2, environment, heroSlots }) {
         confirming = h.slot;
         render();
       }, "is-quiet"));
-      card.append(canvas, info, actions);
+      card.append(canvas, info2, actions);
       if (confirming === h.slot) card.append(el("p", "hero-slot-confirm", `Delete ${name} for good? Their world, bag and gear go with them.`));
       grid.append(card);
       portraits.push([canvas, h.hero]);
     }
     if (heroes.length < HERO_SLOT_LIMIT) {
-      const card = el("article", "hero-slot is-new"), info = el("div", "hero-slot-info"), actions = el("div", "hero-slot-actions");
-      info.append(el("strong", "hero-slot-name", "New hero"), el("small", "hero-slot-class", `Starts in the hero creator \xB7 ${HERO_SLOT_LIMIT - heroes.length} open`));
+      const card = el("article", "hero-slot is-new"), info2 = el("div", "hero-slot-info"), actions = el("div", "hero-slot-actions");
+      info2.append(el("strong", "hero-slot-name", "New hero"), el("small", "hero-slot-class", `Starts in the hero creator \xB7 ${HERO_SLOT_LIMIT - heroes.length} open`));
       actions.append(button("Create", () => act("new", () => heroSlots.create())));
-      card.append(el("span", "hero-slot-plus", "+"), info, actions);
+      card.append(el("span", "hero-slot-plus", "+"), info2, actions);
       grid.append(card);
     }
     const status2 = busy === "delete" ? "Deleting\u2026" : busy ? "Saving your hero\u2026" : error;
@@ -39833,9 +39939,9 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
       for (const [name, url] of Object.entries(SALVAGE_MATERIAL_ART)) {
         const quantity = e.materials[name] ?? 0;
         if (!quantity && name !== "Monster Soul") continue;
-        const row2 = el("article", "", "material-card"), img = icon(url), info = el("div", "", "item-info");
-        info.append(el("strong", name), el("small", "Forge material", "item-sub"));
-        row2.append(img, info, el("strong", String(quantity)));
+        const row2 = el("article", "", "material-card"), img = icon(url), info2 = el("div", "", "item-info");
+        info2.append(el("strong", name), el("small", "Forge material", "item-sub"));
+        row2.append(img, info2, el("strong", String(quantity)));
         materials2.append(row2);
       }
       materials2.append(el("p", "Materials are held separately from carried gear.", "tt-muted"));
@@ -39868,9 +39974,9 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
         img.height = 36;
         b.append(img);
       }
-      const info = el("span", "", "item-info");
-      info.append(el("strong", label2(slot)), el("small", d2?.name ?? "[EMPTY SLOT]", "item-sub"));
-      b.append(info, el("span", `${e.slotLevels[slot]}/100`, "forge-rank"));
+      const info2 = el("span", "", "item-info");
+      info2.append(el("strong", label2(slot)), el("small", d2?.name ?? "[EMPTY SLOT]", "item-sub"));
+      b.append(info2, el("span", `${e.slotLevels[slot]}/100`, "forge-rank"));
       b.onclick = () => {
         selected = slot;
         invalidate();
@@ -40505,7 +40611,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     close2.className = "gx-close";
     close2.dataset.action = "dismiss";
     close2.setAttribute("aria-label", "Close item");
-    const head12 = element("div", "", "gx-head"), frame = element("div", "", "gx-itemicon"), info = element("div", "", "gx-iteminfo"), title = element("h4", displayName(d), "gx-itemname");
+    const head12 = element("div", "", "gx-head"), frame = element("div", "", "gx-itemicon"), info2 = element("div", "", "gx-iteminfo"), title = element("h4", displayName(d), "gx-itemname");
     title.id = "world-item-title";
     title.tabIndex = -1;
     frame.append(itemIcon(item));
@@ -40514,8 +40620,8 @@ function createInventoryPresentation({ document: document2, environment, readMod
       title.classList.add("is-unique");
       title.append(element("span", "Unique", "gx-uniquetag"));
     }
-    info.append(title, element("span", [RARITY_NAMES[d.rarityTier ?? 0], `${d.rarityTier ?? 0}\u2605`, (SLOT_NAMES[equippedSlot ?? (d.slot === "ring" ? "ring1" : d.slot)] ?? label3(d.slot)).replace(/ \d$/, ""), gen?.itemPower != null ? "Lv " + statText(gen.itemPower) : null].filter(Boolean).join(" \xB7 "), "gx-itemsub"));
-    head12.append(frame, info, close2);
+    info2.append(title, element("span", [RARITY_NAMES[d.rarityTier ?? 0], `${d.rarityTier ?? 0}\u2605`, (SLOT_NAMES[equippedSlot ?? (d.slot === "ring" ? "ring1" : d.slot)] ?? label3(d.slot)).replace(/ \d$/, ""), gen?.itemPower != null ? "Lv " + statText(gen.itemPower) : null].filter(Boolean).join(" \xB7 "), "gx-itemsub"));
+    head12.append(frame, info2, close2);
     scroll.append(head12);
     if (target && d.slot === "ring") {
       const tabs = element("div", "", "gx-ringtabs");
@@ -54205,37 +54311,33 @@ function drawRecoveredBossHudV1(c, canvas, model) {
 }
 
 // src/client/wilderness_event_pilot_presentation_v3_7.js
-function drawLandmark(ctx, event, x, y, time, near, completed) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.fillStyle = "rgba(8,12,9,.45)";
-  ctx.beginPath();
-  ctx.ellipse(0, 12, 70, 22, 0, 0, Math.PI * 2);
-  ctx.fill();
-  if (event.kind === "abandoned_camp") {
-    ctx.strokeStyle = "#594733";
-    ctx.lineWidth = 6;
+function landmarkParts(event, time, completed) {
+  const ground = [(ctx) => {
+    ctx.fillStyle = "rgba(8,12,9,.45)";
     ctx.beginPath();
-    ctx.moveTo(-42, -3);
-    ctx.lineTo(-29, 16);
-    ctx.moveTo(-40, 16);
-    ctx.lineTo(-22, -2);
-    ctx.stroke();
-    ctx.fillStyle = "#5b4029";
-    ctx.fillRect(-36, -23, 31, 17);
-    ctx.strokeStyle = "#a08754";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(-36, -23, 31, 17);
-    ctx.fillStyle = "#2c2820";
-    ctx.beginPath();
-    ctx.ellipse(18, 7, 21, 11, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 12, 70, 22, 0, 0, Math.PI * 2);
     ctx.fill();
-    for (let n = 0; n < 7; n++) {
-      const a = n * Math.PI * 2 / 7;
-      ctx.fillStyle = n % 2 ? "#756956" : "#443e32";
-      ctx.fillRect(16 + Math.cos(a) * 15, 4 + Math.sin(a) * 8, 8, 5);
-    }
-    if (!completed) {
+  }], stand = [];
+  if (event.kind === "abandoned_camp") {
+    ground.push((ctx) => {
+      ctx.fillStyle = "#2c2820";
+      ctx.beginPath();
+      ctx.ellipse(18, 7, 21, 11, 0, 0, Math.PI * 2);
+      ctx.fill();
+      for (let n = 0; n < 7; n++) {
+        const a = n * Math.PI * 2 / 7;
+        ctx.fillStyle = n % 2 ? "#756956" : "#443e32";
+        ctx.fillRect(16 + Math.cos(a) * 15, 4 + Math.sin(a) * 8, 8, 5);
+      }
+    });
+    stand.push({ gx: -20, gy: -6, draw: (ctx) => {
+      ctx.fillStyle = "#5b4029";
+      ctx.fillRect(-36, -23, 31, 17);
+      ctx.strokeStyle = "#a08754";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(-36, -23, 31, 17);
+    } });
+    if (!completed) stand.push({ gx: 20, gy: 7, draw: (ctx) => {
       ctx.fillStyle = "#e7a047";
       ctx.beginPath();
       ctx.moveTo(11, 6);
@@ -54248,78 +54350,98 @@ function drawLandmark(ctx, event, x, y, time, near, completed) {
       ctx.lineTo(21, -8);
       ctx.lineTo(24, 5);
       ctx.fill();
-    }
+    } });
+    stand.push({ gx: -32, gy: 16, draw: (ctx) => {
+      ctx.strokeStyle = "#594733";
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(-42, -3);
+      ctx.lineTo(-29, 16);
+      ctx.moveTo(-40, 16);
+      ctx.lineTo(-22, -2);
+      ctx.stroke();
+    } });
   } else if (event.kind === "roaming_pack") {
+    ground.push((ctx) => {
+      ctx.fillStyle = "#72513b";
+      ctx.beginPath();
+      ctx.ellipse(0, 5, 17, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+    });
     for (let i = 0; i < 9; i++) {
       const a = i * Math.PI * 2 / 9, xx = Math.cos(a) * 42, yy = Math.sin(a) * 21;
-      ctx.strokeStyle = i % 2 ? "#425132" : "#6b683c";
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      ctx.moveTo(xx, yy + 8);
-      ctx.lineTo(xx - 8, yy - 11);
-      ctx.lineTo(xx + 2, yy - 6);
-      ctx.stroke();
+      stand.push({ gx: xx, gy: yy + 8, draw: (ctx) => {
+        ctx.strokeStyle = i % 2 ? "#425132" : "#6b683c";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(xx, yy + 8);
+        ctx.lineTo(xx - 8, yy - 11);
+        ctx.lineTo(xx + 2, yy - 6);
+        ctx.stroke();
+      } });
     }
-    ctx.fillStyle = "#72513b";
-    ctx.beginPath();
-    ctx.ellipse(0, 5, 17, 8, 0, 0, Math.PI * 2);
-    ctx.fill();
-    for (let i = 0; i < 5; i++) {
-      const x2 = -18 + i * 9;
-      ctx.fillStyle = i % 2 ? "#90825a" : "#b8a16f";
-      ctx.beginPath();
-      ctx.arc(x2, -3 + Math.sin(time / 590 + i) * 2, 3, 0, Math.PI * 2);
-      ctx.fill();
-    }
+    stand.push({ gx: 0, gy: 5, draw: (ctx) => {
+      for (let i = 0; i < 5; i++) {
+        const x = -18 + i * 9;
+        ctx.fillStyle = i % 2 ? "#90825a" : "#b8a16f";
+        ctx.beginPath();
+        ctx.arc(x, -3 + Math.sin(time / 590 + i) * 2, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    } });
   } else {
-    ctx.fillStyle = "#5b5c4c";
-    ctx.beginPath();
-    ctx.moveTo(-29, 8);
-    ctx.lineTo(-22, -15);
-    ctx.lineTo(14, -23);
-    ctx.lineTo(34, 6);
-    ctx.closePath();
-    ctx.fill();
-    ctx.strokeStyle = "#adb296";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(-20, 0);
-    ctx.lineTo(-7, -14);
-    ctx.lineTo(16, -10);
-    ctx.stroke();
-    ctx.fillStyle = "#5c4426";
-    ctx.fillRect(-17, -21, 34, 8);
-    ctx.fillStyle = completed ? "#5e624d" : "#dbbb74";
-    ctx.beginPath();
-    ctx.arc(0, -16, 4 + Math.sin(time / 470) * 0.5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "#735237";
-    ctx.fillRect(26, -33, 5, 43);
-    ctx.fillStyle = "#a18d69";
-    ctx.beginPath();
-    ctx.moveTo(31, -31);
-    ctx.lineTo(49, -28);
-    ctx.lineTo(31, -14);
-    ctx.fill();
+    stand.push({ gx: 0, gy: 8, draw: (ctx) => {
+      ctx.fillStyle = "#5b5c4c";
+      ctx.beginPath();
+      ctx.moveTo(-29, 8);
+      ctx.lineTo(-22, -15);
+      ctx.lineTo(14, -23);
+      ctx.lineTo(34, 6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = "#adb296";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-20, 0);
+      ctx.lineTo(-7, -14);
+      ctx.lineTo(16, -10);
+      ctx.stroke();
+      ctx.fillStyle = "#5c4426";
+      ctx.fillRect(-17, -21, 34, 8);
+      ctx.fillStyle = completed ? "#5e624d" : "#dbbb74";
+      ctx.beginPath();
+      ctx.arc(0, -16, 4 + Math.sin(time / 470) * 0.5, 0, Math.PI * 2);
+      ctx.fill();
+    } });
+    stand.push({ gx: 28, gy: 10, draw: (ctx) => {
+      ctx.fillStyle = "#735237";
+      ctx.fillRect(26, -33, 5, 43);
+      ctx.fillStyle = "#a18d69";
+      ctx.beginPath();
+      ctx.moveTo(31, -31);
+      ctx.lineTo(49, -28);
+      ctx.lineTo(31, -14);
+      ctx.fill();
+    } });
   }
-  if (near) {
-    const label4 = completed ? event.label + " \xB7 Cleared" : event.label;
-    ctx.font = "bold 13px Georgia, serif";
-    ctx.textAlign = "center";
-    const w = ctx.measureText(label4).width + 22;
-    ctx.fillStyle = "rgba(11,18,20,.84)";
-    ctx.strokeStyle = completed ? "#7b8266" : "#c9a86c";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.roundRect(-w / 2, -70, w, 26, 6);
-    ctx.fill();
-    ctx.stroke();
-    ctx.fillStyle = completed ? "#b1b7a0" : "#f1d4a0";
-    ctx.fillText(label4, 0, -52);
-  }
-  ctx.restore();
+  return { ground, stand };
 }
-function woodlandPilotEventDepthItems(model, viewport, time) {
+function drawLandmarkLabel(ctx, event, completed) {
+  const label4 = completed ? event.label + " \xB7 Cleared" : event.label;
+  ctx.font = "bold 13px Georgia, serif";
+  ctx.textAlign = "center";
+  const w = ctx.measureText(label4).width + 22;
+  ctx.fillStyle = "rgba(11,18,20,.84)";
+  ctx.strokeStyle = completed ? "#7b8266" : "#c9a86c";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.roundRect(-w / 2, -70, w, 26, 6);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = completed ? "#b1b7a0" : "#f1d4a0";
+  ctx.fillText(label4, 0, -52);
+}
+function visibleLandmarks(model, viewport) {
   if (!model.space?.overworld || !model.navigation?.position || !model.navigation?.frames) return [];
   const { frames, position: position4 } = model.navigation;
   const hero = projectToLocalFrameD9(position4, frames);
@@ -54330,16 +54452,49 @@ function woodlandPilotEventDepthItems(model, viewport, time) {
     if (!status2.has(event.slotId)) continue;
     const center3 = projectToLocalFrameD9(woodlandPilotWorldPosition(event), frames);
     if (!center3 || center3.x < viewport.x - 125 || center3.y < viewport.y - 125 || center3.x > viewport.x + viewport.width + 125 || center3.y > viewport.y + viewport.height + 125) continue;
-    const near = Math.hypot(center3.x - hero.x, center3.y - hero.y) < 280;
-    const completed = status2.get(event.slotId) === "completed";
-    result.push(depthItem({
-      id: "woodland-event/" + event.slotId,
-      anchorX: center3.x,
-      anchorY: center3.y + 22,
-      draw: (ctx) => drawLandmark(ctx, event, center3.x, center3.y, time, near, completed)
-    }));
+    result.push({ event, center: center3, near: Math.hypot(center3.x - hero.x, center3.y - hero.y) < 280, completed: status2.get(event.slotId) === "completed" });
   }
   return result;
+}
+function drawWoodlandPilotEventGround(ctx, model, viewport, time) {
+  for (const { event, center: center3, completed } of visibleLandmarks(model, viewport)) {
+    ctx.save();
+    ctx.translate(center3.x, center3.y);
+    for (const paint of landmarkParts(event, time, completed).ground) paint(ctx);
+    ctx.restore();
+  }
+}
+function woodlandPilotEventDepthItems(model, viewport, time) {
+  const result = [];
+  for (const { event, center: center3, completed } of visibleLandmarks(model, viewport)) landmarkParts(event, time, completed).stand.forEach((part3, k) => result.push(depthItem({
+    id: "woodland-event/" + event.slotId + "/" + k,
+    anchorX: center3.x + part3.gx,
+    anchorY: center3.y + part3.gy,
+    draw: (ctx) => {
+      ctx.save();
+      ctx.translate(center3.x, center3.y);
+      part3.draw(ctx);
+      ctx.restore();
+    }
+  })));
+  return result;
+}
+function drawWoodlandPilotEventLabels(ctx, model, viewport) {
+  for (const { event, center: center3, near, completed } of visibleLandmarks(model, viewport)) if (near) {
+    ctx.save();
+    ctx.translate(center3.x, center3.y);
+    drawLandmarkLabel(ctx, event, completed);
+    ctx.restore();
+  }
+}
+function woodlandPilotEventLights(model, viewport, time) {
+  const out = [];
+  for (const { event, center: center3, completed } of visibleLandmarks(model, viewport)) {
+    if (completed) continue;
+    if (event.kind === "abandoned_camp") out.push({ x: center3.x + 20, y: center3.y - 2, r: 70, color: "#e7a047", alpha: 0.6 + 0.06 * Math.sin(time / 380) });
+    else if (event.kind === "treasure_cache") out.push({ x: center3.x, y: center3.y - 16, r: 30, color: "#dbbb74", alpha: 0.3 });
+  }
+  return out;
 }
 
 // src/client/brimstone_attack_effects_v2.js
@@ -59843,7 +59998,8 @@ function debrisFragmentPoseV1(id, n, age) {
   let seed2 = 2166136261;
   for (let i = 0; i < id.length; i++) seed2 = Math.imul(seed2 ^ id.charCodeAt(i), 16777619) >>> 0;
   const fly = n < 9, seconds = Math.min(age, 700) / 1e3, angle3 = n * 2.399963 + seed2 % 4093 / 653, speed = 26 + (seed2 + n * 19) % 57, travel = fly ? seconds : 0.5;
-  return { fly, x: Math.cos(angle3) * speed * travel, y: Math.sin(angle3) * speed * travel * 0.48 - (fly ? 90 * seconds - 145 * seconds * seconds : 0), rotation: seed2 % 17 * 0.37 + n * 0.71 + (fly ? seconds * (n % 2 ? 5 : -4) : 0), size: 7 + (seed2 + n * 7) % 7, alpha: Math.max(0, 1 - age / (fly ? 700 : 4500)), variant: (seed2 + n) % 4, metal: n % 4 === 0 };
+  const gy = Math.sin(angle3) * speed * travel * 0.48;
+  return { fly, x: Math.cos(angle3) * speed * travel, y: gy - (fly ? 90 * seconds - 145 * seconds * seconds : 0), gy, rotation: seed2 % 17 * 0.37 + n * 0.71 + (fly ? seconds * (n % 2 ? 5 : -4) : 0), size: 7 + (seed2 + n * 7) % 7, alpha: Math.max(0, 1 - age / (fly ? 700 : 4500)), variant: (seed2 + n) % 4, metal: n % 4 === 0 };
 }
 function createResourceDebrisV1({ art = null, presentation = null, remnants = null } = {}) {
   const legacy = presentation ?? createResourcePresentation(), seen = /* @__PURE__ */ new Map();
@@ -59874,33 +60030,36 @@ function createResourceDebrisV1({ art = null, presentation = null, remnants = nu
     for (const id of seen.keys()) if (!live.has(id)) seen.delete(id);
     const items = legacy.depthItems({ ...model, resources: (model.resources ?? []).filter((r) => r.kind === "chest" || !r.used) }, time, viewport);
     counts.breaks = effects2.length;
-    for (const { r, age, x, y } of effects2) items.push(depthItem({ id: "debris/" + r.sourceEntityId, anchorX: x, anchorY: y + 14, draw: (ctx) => {
-      remnants?.remnant(ctx, r.art, x, y, age);
+    for (const { r, age, x, y } of effects2) {
+      items.push(depthItem({ id: "debris/" + r.sourceEntityId, anchorX: x, anchorY: y + 14, draw: (ctx) => remnants?.remnant(ctx, r.art, x, y, age) }));
       for (let n = 0; n < 15; n++) {
         const p = debrisFragmentPoseV1(r.sourceEntityId, n, age);
-        if (p.alpha <= 0 || (p.fly ? counts.flying >= 72 : counts.settled >= 48)) continue;
-        if (p.fly) counts.flying++;
-        else counts.settled++;
-        const material = r.art === "barrel" ? p.metal ? "metal" : "wood" : r.art === "urn" ? "urn" : "clay";
-        if (art?.fragment(ctx, material, p.variant, x + p.x, y + p.y, p.size, p.rotation, p.alpha)) continue;
-        counts.fallbackFragments++;
-        ctx.save();
-        ctx.globalAlpha = p.alpha;
-        ctx.fillStyle = { wood: "#986344", metal: "#6e7c88", urn: "#708399", clay: "#d36a3e" }[material];
-        ctx.strokeStyle = "#182029";
-        ctx.lineWidth = 0.8;
-        ctx.translate(x + p.x, y + p.y);
-        ctx.rotate(p.rotation);
-        ctx.beginPath();
-        ctx.moveTo(-3, 2);
-        ctx.lineTo(0, -3);
-        ctx.lineTo(4, 1);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
+        if (p.alpha <= 0) continue;
+        items.push(depthItem({ id: "debris/" + r.sourceEntityId + "/" + n, anchorX: x + p.x, anchorY: y + p.gy, draw: (ctx) => {
+          if (p.fly ? counts.flying >= 72 : counts.settled >= 48) return;
+          if (p.fly) counts.flying++;
+          else counts.settled++;
+          const material = r.art === "barrel" ? p.metal ? "metal" : "wood" : r.art === "urn" ? "urn" : "clay";
+          if (art?.fragment(ctx, material, p.variant, x + p.x, y + p.y, p.size, p.rotation, p.alpha)) return;
+          counts.fallbackFragments++;
+          ctx.save();
+          ctx.globalAlpha = p.alpha;
+          ctx.fillStyle = { wood: "#986344", metal: "#6e7c88", urn: "#708399", clay: "#d36a3e" }[material];
+          ctx.strokeStyle = "#182029";
+          ctx.lineWidth = 0.8;
+          ctx.translate(x + p.x, y + p.y);
+          ctx.rotate(p.rotation);
+          ctx.beginPath();
+          ctx.moveTo(-3, 2);
+          ctx.lineTo(0, -3);
+          ctx.lineTo(4, 1);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+        } }));
       }
-    } }));
+    }
     return items;
   }
   return { depthItems: depthItems2, clear() {
@@ -67329,6 +67488,23 @@ function* prepareEnvironmentDrawing(ctx, space, viewport = null, layout = create
   return Object.freeze({ flowers, obstacleVisualIds, woodlandDetailIds, paintedTerrainTiles, paintedBlockers, paintedDecorations, totalTerrainTiles: c.width * c.height });
 }
 function drawEnvironmentMarkers(ctx, space) {
+  if (space.settlementSafe) {
+    const marker = space.overworld?.safeRegions[0]?.marker ?? { x: 528, y: 368, label: "ALDERWATCH" };
+    ctx.strokeStyle = "#d4bc7a";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(marker.x, marker.y, 22, 0, TAU72);
+    ctx.stroke();
+    ctx.font = "11px Georgia";
+    ctx.fillStyle = "#eadca5";
+    ctx.textAlign = "center";
+    ctx.fillText(marker.label, marker.x, marker.y + 38);
+    ctx.textAlign = "left";
+  }
+}
+function drawEnvironmentLabels(ctx, space) {
+  ctx.save();
+  ctx.lineWidth = 1;
   for (const exit of space.exits ?? []) if (exit.siteAction && exit.proceduralRuin) {
     const label4 = exit.label.replace(/^Enter /, ""), y = exit.y - 244;
     ctx.font = "600 11px Georgia";
@@ -67353,51 +67529,41 @@ function drawEnvironmentMarkers(ctx, space) {
     ctx.fillText(label4, exit.x, labelY + (ruin ? 11 : 12));
     ctx.textAlign = "left";
   }
-  if (space.settlementSafe) {
-    const marker = space.overworld?.safeRegions[0]?.marker ?? { x: 528, y: 368, label: "ALDERWATCH" };
-    ctx.strokeStyle = "#d4bc7a";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(marker.x, marker.y, 22, 0, TAU72);
-    ctx.stroke();
-    ctx.font = "11px Georgia";
-    ctx.fillStyle = "#eadca5";
-    ctx.textAlign = "center";
-    ctx.fillText(marker.label, marker.x, marker.y + 38);
-    ctx.textAlign = "left";
-  }
   const clue = space.overworld?.siteClue?.trailhead;
   if (clue) {
-    ctx.save();
-    ctx.translate(clue.x, clue.y);
-    ctx.fillStyle = "#273a30";
-    ctx.strokeStyle = "#17251e";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(-10, 9);
-    ctx.lineTo(-7, -13);
-    ctx.quadraticCurveTo(0, -18, 8, -12);
-    ctx.lineTo(11, 9);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-    ctx.fillStyle = "#70a85c";
-    ctx.beginPath();
-    ctx.ellipse(-1, -5, 6, 3, -0.5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = "#b9cc85";
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(-5, 1);
-    ctx.lineTo(5, -9);
-    ctx.stroke();
     ctx.font = "bold 11px Georgia";
     ctx.textAlign = "center";
     ctx.fillStyle = "#e4d8a3";
-    ctx.fillText(`${clue.trailLabel ?? "Woodland trail"} \xB7 ${clue.direction}`, 0, 25);
+    ctx.fillText(`${clue.trailLabel ?? "Woodland trail"} \xB7 ${clue.direction}`, clue.x, clue.y + 25);
     ctx.textAlign = "left";
-    ctx.restore();
   }
+  ctx.restore();
+}
+function drawTrailClueStone(ctx, clue) {
+  ctx.save();
+  ctx.translate(clue.x, clue.y);
+  ctx.fillStyle = "#273a30";
+  ctx.strokeStyle = "#17251e";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(-10, 9);
+  ctx.lineTo(-7, -13);
+  ctx.quadraticCurveTo(0, -18, 8, -12);
+  ctx.lineTo(11, 9);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = "#70a85c";
+  ctx.beginPath();
+  ctx.ellipse(-1, -5, 6, 3, -0.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = "#b9cc85";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(-5, 1);
+  ctx.lineTo(5, -9);
+  ctx.stroke();
+  ctx.restore();
 }
 function drawCollisionCoverageDebug(ctx, space, view2) {
   const t = space.collision.tileSize, v = space.visual, ox = v.originTile?.x ?? 0, oy = v.originTile?.y ?? 0;
@@ -67596,6 +67762,8 @@ function prepareEnvironmentDepthItems(space, view2, layout, art, time, pilot = n
     items.push(depthItem({ id: "exit/" + exit.exitId + "/ruin-rear", anchorX: exit.x, anchorY: exit.y - 180, draw: (ctx) => drawRuinExteriorRearD11_3(ctx, exit, seed2) }));
     items.push(depthItem({ id: "exit/" + exit.exitId + "/ruin-arch", anchorX: exit.x, anchorY: exit.y + 22, draw: (ctx) => drawRuinExteriorArchD11_3(ctx, exit, seed2) }));
   }
+  const clue = space.overworld?.siteClue?.trailhead;
+  if (clue && inside4(clue.x, clue.y)) items.push(depthItem({ id: "environment/trail-clue", anchorX: clue.x, anchorY: clue.y + 9, draw: (ctx) => drawTrailClueStone(ctx, clue) }));
   for (const exit of space.exits ?? []) if (exit.siteAction && exit.siteKind === "woodland-fort-keep" && inside4(exit.x, exit.y, 96)) items.push(depthItem({ id: "exit/" + exit.exitId, anchorX: exit.x, anchorY: exit.y + (exit.proceduralFort ? -70 : 22), draw: (c) => {
     const ctx = siteContextAtV1(c, space, exit.x, exit.y);
     if (!pilot?.fort?.door?.(ctx, space, exit)) drawFortKeepDoorD10(ctx, exit);
@@ -68249,7 +68417,10 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
       drawEnvironmentMarkers(ctx, model.space);
       setDepthFocusPointsV1([...visualActor?.alive ? [{ x: visualActor.position.x, y: visualActor.position.y - 12 }] : [], ...enemyDepthFocusPointsV1(visualModel, viewport)]);
       depthItems2.push(...environmentCache.depthItems(model.space, viewport, time));
-      if (seamless && !model.space.site) depthItems2.push(...woodlandPilotEventDepthItems(model, viewport, time));
+      if (seamless && !model.space.site) {
+        drawWoodlandPilotEventGround(ctx, model, viewport, time);
+        depthItems2.push(...woodlandPilotEventDepthItems(model, viewport, time));
+      }
     } else if (model.space.visual && (model.space.site || model.space.functionalSite)) depthItems2.push(...siteEnvironment.depthItems(model.space, viewport, time));
     animatedFlowers = seamless && !model.space.site ? environmentCache.drawFlowers(ctx, { x: cam.x, y: cam.y, width: canvas.width / cam.zoom, height: canvas.height / cam.zoom }, time) : 0;
     ambientMarks = drawEnvironmentAmbient(ctx, model.space, { x: cam.x, y: cam.y, width: canvas.width / cam.zoom, height: canvas.height / cam.zoom }, time);
@@ -68453,7 +68624,8 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
       ...archivedBossEffectLights(model, model.tick),
       ...treasuryBossEffectLights(model, model.tick),
       ...brimstoneEffectLights(brimstoneView, model.tick),
-      ...biomeBossReleaseLightsV1(visualModel, model.tick)
+      ...biomeBossReleaseLightsV1(visualModel, model.tick),
+      ...woodlandPilotEventLights(model, viewport, time)
     ];
     skillLights.wash(ctx, glowing, viewport);
     drawDepthItems(ctx, depthItems2, unified ? (ordered) => glowMasks.plan(ctx, ordered, [...model.space.visual ? lighting.glows(model.space, lightView) : [], ...dynamicLights.portalCores(model, lightView, frame), ...groundItems.floorGlows(), ...potionDrops.floorGlows(time, viewport, frame)], (item, g) => {
@@ -68507,6 +68679,10 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
       ctx.fillStyle = "#dce2ba";
       ctx.font = "12px system-ui";
       ctx.fillText("Slime clearing", area2.x - 40, area2.y - area2.radius - 10);
+    }
+    if (seamless && !model.space.site) {
+      drawEnvironmentLabels(ctx, model.space);
+      drawWoodlandPilotEventLabels(ctx, model, viewport);
     }
     combatVfx.draw(ctx, visualModel, time, viewport);
     if (performanceProbe) performanceProbe.measure("combatFeedback", () => feedback.draw(ctx, time, equipmentArt, viewport));
@@ -69714,6 +69890,8 @@ function createLocalLaunchPolicy({ launcherStore, url, launcherKey = WORLD_LOCAL
 }
 function classifyLocalLaunchError(error) {
   const message = error instanceof Error ? error.message : String(error);
+  if (/Seeded world missing/.test(message)) return Object.freeze({ code: "world-missing", title: "This campaign's world is missing", detail: "This campaign was made on a world built from a seed, and that world isn't stored in this browser anymore, so the campaign can't open. Try the browser or app where you made it, or start a new campaign." });
+  if (/Seeded world|No seeded world source/.test(message)) return Object.freeze({ code: "world-damaged", title: "This campaign's world is damaged", detail: "The stored world for this campaign doesn't match the world it was made on, so the campaign can't open safely. Try the browser or app where you made it, or start a new campaign." });
   if (/Saved activity campaign missing/.test(message)) return Object.freeze({ code: "campaign-not-found", title: "Saved campaign is not in this app", detail: "The resume reference exists, but its campaign is absent from this app\u2019s database. Chrome and an installed Home Screen app can use separate storage. Try the app or browser where you created the campaign. Retry does not erase data or create a different world." });
   if (/supplied together|Malformed World launcher/.test(message)) return Object.freeze({ code: "malformed-launch", title: "Launch reference is malformed", detail: "The campaign/controller launch reference is incomplete or invalid." });
   if (/Campaign not found/.test(message)) return Object.freeze({ code: "campaign-not-found", title: "Campaign not found", detail: "This launch reference is not present in this browser storage context." });
@@ -72580,25 +72758,22 @@ async function startWorldClient(environment) {
   const nextToken = () => Array.from(environment.crypto.getRandomValues(new Uint8Array(16)), (v) => v.toString(16).padStart(2, "0")).join("");
   const location = new URL(environment.location.href);
   const woodlandReview = environment.document.body.dataset.woodlandEnvironment === "v1" && (location.searchParams.get("plan") ?? "alpha") === "alpha";
-  const plannedReview = environment.document.body.dataset.plannedWorldReview === "true" ? await openPlannedReviewV1(environment, location.searchParams.get("plan") ?? "alpha", sha256) : null;
-  if (woodlandReview && plannedReview?.asset.assetId === "alpha") plannedReview.targets.push(...WOODLAND_REVIEW_TARGETS_V1, ...PAINTED_REVIEW_TARGETS);
-  if (plannedReview?.binding.woodlandForestVersion) plannedReview.targets.push({ id: "forest:entry", label: "Woodland forest V1 \xB7 walkable forest entry (inspection)", tile: { x: 3222, y: 6990 } });
-  startupLoading?.stage(2, "Finding your saved campaign\u2026");
+  const plannedOpening = environment.document.body.dataset.plannedWorldReview === "true" ? await beginPlannedReviewV1(environment, location.searchParams.get("plan") ?? "alpha", sha256) : null;
   const artV2 = environment.document.body.dataset.artV2 === "true";
   const townReview = environment.document.body.dataset.townReview === "true";
   const caveReview = environment.document.body.dataset.caveReview === "true", cavePopulation = environment.document.body.dataset.cavePopulation === "true";
   const fortReview = environment.document.body.dataset.fortReview === "true";
-  const plannedNamespace = woodlandReview ? "saq-world-woodland-environment-v1-" : plannedBossHostingNamespaceV1(plannedReview?.binding) ?? (environment.document.body.dataset.wildernessV3 === "true" ? "saq-world-wilderness-v3-" : environment.document.body.dataset.wildernessV2 === "true" ? "saq-world-wilderness-v2-" : environment.document.body.dataset.worldCombat === "v1" ? "saq-world-combat-v2-" : environment.document.body.dataset.settlementServices === "v2" ? "saq-world-settlement-services-v2-" : environment.document.body.dataset.settlementLife === "true" ? "saq-world-settlement-life-v1-" : environment.document.body.dataset.ferryReview === "true" ? "saq-world-ferry-v1-" : environment.document.body.dataset.multiroom === "true" ? "saq-world-multiroom-v1-" : environment.document.body.dataset.sitePopulation === "true" ? "saq-world-alpha-site-population-v1-" : environment.document.body.dataset.cryptReview === "true" ? environment.document.body.dataset.cryptVersion === "v2" ? "saq-world-planned-crypts-v2-" : "saq-world-planned-small-crypt-v1-" : environment.document.body.dataset.ruinReview === "true" ? environment.document.body.dataset.ruinVersion === "v2" ? "saq-world-planned-ruins-v2-" : "saq-world-planned-ruins-v1-" : fortReview ? environment.document.body.dataset.fortVersion === "v2" ? "saq-world-planned-forts-v2-" : "saq-world-planned-forts-v1-" : cavePopulation ? "saq-world-planned-caves-v2-" : caveReview ? "saq-world-planned-cave-v1-" : townReview ? "saq-world-town-start-art-v2-" : artV2 ? "saq-world-art-v2-" : environment.document.body.dataset.artPilot === "true" ? "saq-world-art-pilot-v1-" : environment.document.body.dataset.waterReview === "true" ? "saq-world-water-v3-" : environment.document.body.dataset.shorelineReview === "true" ? "saq-world-shoreline-v2-" : "saq-world-planned-foundation-v1-");
-  const databaseName = hasWorldReshape(plannedReview?.binding) ? RESHAPE_DATABASE : hasRoadsideEncounters(plannedReview?.binding) ? ROADSIDE_DATABASE : hasFirstJourney(plannedReview?.binding) ? ACCESS_DATABASE : hasHydrologyV1(plannedReview?.binding) ? HYDROLOGY_DATABASE : buildBalanceDatabaseV2(environment.document.body.dataset.worldBuildBalance === "v2", plannedReview?.asset.assetId, plannedReview ? plannedNamespace + plannedReview.asset.assetId : ACTIVITY_DATABASE_NAME);
+  const plannedNamespace = woodlandReview ? "saq-world-woodland-environment-v1-" : plannedBossHostingNamespaceV1(plannedOpening?.binding) ?? (environment.document.body.dataset.wildernessV3 === "true" ? "saq-world-wilderness-v3-" : environment.document.body.dataset.wildernessV2 === "true" ? "saq-world-wilderness-v2-" : environment.document.body.dataset.worldCombat === "v1" ? "saq-world-combat-v2-" : environment.document.body.dataset.settlementServices === "v2" ? "saq-world-settlement-services-v2-" : environment.document.body.dataset.settlementLife === "true" ? "saq-world-settlement-life-v1-" : environment.document.body.dataset.ferryReview === "true" ? "saq-world-ferry-v1-" : environment.document.body.dataset.multiroom === "true" ? "saq-world-multiroom-v1-" : environment.document.body.dataset.sitePopulation === "true" ? "saq-world-alpha-site-population-v1-" : environment.document.body.dataset.cryptReview === "true" ? environment.document.body.dataset.cryptVersion === "v2" ? "saq-world-planned-crypts-v2-" : "saq-world-planned-small-crypt-v1-" : environment.document.body.dataset.ruinReview === "true" ? environment.document.body.dataset.ruinVersion === "v2" ? "saq-world-planned-ruins-v2-" : "saq-world-planned-ruins-v1-" : fortReview ? environment.document.body.dataset.fortVersion === "v2" ? "saq-world-planned-forts-v2-" : "saq-world-planned-forts-v1-" : cavePopulation ? "saq-world-planned-caves-v2-" : caveReview ? "saq-world-planned-cave-v1-" : townReview ? "saq-world-town-start-art-v2-" : artV2 ? "saq-world-art-v2-" : environment.document.body.dataset.artPilot === "true" ? "saq-world-art-pilot-v1-" : environment.document.body.dataset.waterReview === "true" ? "saq-world-water-v3-" : environment.document.body.dataset.shorelineReview === "true" ? "saq-world-shoreline-v2-" : "saq-world-planned-foundation-v1-");
+  const databaseName = hasWorldReshape(plannedOpening?.binding) ? RESHAPE_DATABASE : hasRoadsideEncounters(plannedOpening?.binding) ? ROADSIDE_DATABASE : hasFirstJourney(plannedOpening?.binding) ? ACCESS_DATABASE : hasHydrologyV1(plannedOpening?.binding) ? HYDROLOGY_DATABASE : buildBalanceDatabaseV2(environment.document.body.dataset.worldBuildBalance === "v2", plannedOpening?.assetId, plannedOpening ? plannedNamespace + plannedOpening.assetId : ACTIVITY_DATABASE_NAME);
   const requestedScenario = environment.document.body.dataset.worldScenario;
   const scenario = requestedScenario === "fixture" ? "fixture" : requestedScenario === "seamless" || location.searchParams.get("world") === "reference" ? "seamless" : "procedural";
-  const profileRequested = location.searchParams.get("profile") === "1", evidenceRequested = location.searchParams.get("evidence") === "1", siteNavigatorRequested = Boolean(plannedReview) || profileRequested && evidenceRequested && location.searchParams.get("devTools") === "1", reviewPerformance = environment.document.documentElement.dataset.performanceReview === "true";
-  const performanceProbe = createBrowserPerformanceProbe({ now: () => environment.performance.now(), enabled: Boolean(plannedReview) || profileRequested || reviewPerformance, initiallyRecording: profileRequested || reviewPerformance });
+  const profileRequested = location.searchParams.get("profile") === "1", evidenceRequested = location.searchParams.get("evidence") === "1", siteNavigatorRequested = Boolean(plannedOpening) || profileRequested && evidenceRequested && location.searchParams.get("devTools") === "1", reviewPerformance = environment.document.documentElement.dataset.performanceReview === "true";
+  const performanceProbe = createBrowserPerformanceProbe({ now: () => environment.performance.now(), enabled: Boolean(plannedOpening) || profileRequested || reviewPerformance, initiallyRecording: profileRequested || reviewPerformance });
   let batteryPresentation = Boolean(performanceProbe) && location.searchParams.get("battery") === "1", lastPresentedFrame = null;
   environment.document.documentElement.dataset.batteryPresentation = batteryPresentation ? "30" : "full";
   const activity = scenario === "procedural" && location.searchParams.get("runtime") !== "legacy";
   const proofCase = location.searchParams.get("activityCase") ?? "A";
-  const launcherKey = hasWorldReshape(plannedReview?.binding) ? RESHAPE_DATABASE : hasRoadsideEncounters(plannedReview?.binding) ? ROADSIDE_DATABASE : hasFirstJourney(plannedReview?.binding) ? ACCESS_DATABASE : hasHydrologyV1(plannedReview?.binding) ? HYDROLOGY_DATABASE : buildBalanceDatabaseV2(environment.document.body.dataset.worldBuildBalance === "v2", plannedReview?.asset.assetId, plannedReview ? plannedNamespace + plannedReview.asset.assetId : activity ? `${FORGE_REVIEW_BUILD ? "saq-world-forge-review" : "saq-world-activity-launcher-v1"}-${proofCase}` : scenario === "procedural" ? WORLD_PROCEDURAL_LAUNCHER_KEY : WORLD_SEAMLESS_LAUNCHER_KEY);
+  const launcherKey = hasWorldReshape(plannedOpening?.binding) ? RESHAPE_DATABASE : hasRoadsideEncounters(plannedOpening?.binding) ? ROADSIDE_DATABASE : hasFirstJourney(plannedOpening?.binding) ? ACCESS_DATABASE : hasHydrologyV1(plannedOpening?.binding) ? HYDROLOGY_DATABASE : buildBalanceDatabaseV2(environment.document.body.dataset.worldBuildBalance === "v2", plannedOpening?.assetId, plannedOpening ? plannedNamespace + plannedOpening.assetId : activity ? `${FORGE_REVIEW_BUILD ? "saq-world-forge-review" : "saq-world-activity-launcher-v1"}-${proofCase}` : scenario === "procedural" ? WORLD_PROCEDURAL_LAUNCHER_KEY : WORLD_SEAMLESS_LAUNCHER_KEY);
   const policy = createLocalLaunchPolicy({ launcherStore: launcherCapability(environment, heroPrefix), url: location, launcherKey });
   const launcherDatabase = activity ? createLocalIndexedDbCampaignStore({ indexedDB: saveIndexedDb, sha256, databaseName }) : null;
   const forgetCamp = () => roster.clear();
@@ -72650,6 +72825,35 @@ async function startWorldClient(environment) {
     });
     return null;
   }
+  let plannedReview = null, builtWorlds = null, builtWorld = null;
+  if (plannedOpening) {
+    if (activity) try {
+      builtWorlds = createBuiltWorldStoreV1({ indexedDB: saveIndexedDb, sha256 });
+      builtWorld = await builtWorlds.forStart({ resume: launch.resume, requested: location.searchParams.get("builtWorld") });
+      if (builtWorld) plannedReview = await plannedOpening.open({ hash: builtWorld.hash, commitments: builtWorld.commitments, read: builtWorlds.read });
+    } catch (error) {
+      showStartupRecovery(environment, classifyLocalLaunchError(error), {
+        retry: () => environment.location.reload(),
+        forget: async () => {
+          await forget();
+          environment.history.replaceState(null, "", policy.cleanUrl().href);
+        },
+        startNew: async () => {
+          await forget();
+          const url = policy.cleanUrl();
+          url.searchParams.delete("builtWorld");
+          environment.history.replaceState(null, "", url.href);
+          environment.location.reload();
+        },
+        reset
+      });
+      return null;
+    }
+    plannedReview ??= await plannedOpening.open(null);
+    if (woodlandReview && plannedReview?.asset.assetId === "alpha") plannedReview.targets.push(...WOODLAND_REVIEW_TARGETS_V1, ...PAINTED_REVIEW_TARGETS);
+    if (plannedReview?.binding.woodlandForestVersion) plannedReview.targets.push({ id: "forest:entry", label: "Woodland forest V1 \xB7 walkable forest entry (inspection)", tile: { x: 3222, y: 6990 } });
+  }
+  startupLoading?.stage(2, "Finding your saved campaign\u2026");
   startupLoading?.stage(3, "Opening your world\u2026");
   let session, saveBridge = null, worldBridge = null, authorityDelivery = null;
   try {
@@ -72710,9 +72914,10 @@ async function startWorldClient(environment) {
       onStartupProgress: (message) => startupLoading?.note(message),
       plannedWorld: plannedReview?.binding,
       plannedTargets: plannedReview?.targets,
-      seedInput: plannedReview?.asset.seed ?? location.searchParams.get("seed"),
+      seedInput: isSeededBindingV1(plannedReview?.binding) ? "hex:" + plannedReview.asset.campaignSeedHex : plannedReview?.asset.seed ?? location.searchParams.get("seed"),
       now: () => environment.performance.now(),
       reviewCapabilities: { siteNavigator: siteNavigatorRequested },
+      onCampaignReady: builtWorld ? (campaignId) => builtWorlds.bindCampaign(campaignId, builtWorld.hash) : null,
       entropy: async (size) => Array.from(environment.crypto.getRandomValues(new Uint8Array(size))),
       storeFactory: (expectedContentFingerprint, expectedGenerationBinding, codec) => createLocalIndexedDbCampaignStore({ indexedDB: saveIndexedDb, sha256, expectedContentFingerprint, expectedGenerationBinding, codec, ...activity ? { databaseName } : {} })
     });
