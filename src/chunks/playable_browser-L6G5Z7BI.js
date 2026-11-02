@@ -90,7 +90,6 @@ import {
   ELITE_HASTE_D12_4D_VERSION,
   ENCOUNTER_PROGRESSION_VERSION,
   FERRY_HASH,
-  FERRY_NETWORK,
   FERRY_VERSION,
   FIRST_CAVE_ID,
   FIRST_CAVE_SELECTION,
@@ -416,6 +415,7 @@ import {
   equipmentRequiredLevel,
   equippedWeaponVisual,
   eventOrdinal,
+  ferryNetworkV1,
   findRuntimeSiteSocketD9,
   finiteNodeRank,
   firstInvalidActorGeometryD9,
@@ -689,6 +689,7 @@ import {
   unfrozenEpisodeD9,
   uniqueOf,
   updateHighestHeroLevel,
+  useWorldRolesV1,
   usesBuildBalanceV2,
   usesMultiroom,
   usesWildernessFairnessV3_2,
@@ -767,8 +768,9 @@ import {
   worldEventProtectionV1,
   worldLevelGapMultiplier,
   worldOrdinaryMeleeProfile,
-  worldPointForArea
-} from "./chunk-VOHHVSOZ.js";
+  worldPointForArea,
+  worldRolesV1
+} from "./chunk-X3PYWKK7.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -18582,7 +18584,7 @@ function createRoadsidePackSampler(asset, binding, tile) {
   const eventTiles = /* @__PURE__ */ new Set();
   for (const e of asset.wildernessExtension?.eventCapacities ?? []) for (const c of e.cells) for (let y = -2; y <= 2; y++) for (let x = -2; x <= 2; x++) eventTiles.add(c.x + x + "," + (c.y + y));
   const safe = (x, y) => {
-    if (eventTiles.has(x + "," + y) || Math.hypot(x - asset.spawnTile.x, y - asset.spawnTile.y) <= 32 || STARTER_ARRIVAL_TILES.some((p) => Math.hypot(x - p.x, y - p.y) <= 32) || FERRY_NETWORK.landings.some((l) => Math.hypot(x - l.tile.x, y - l.tile.y) <= 32)) return false;
+    if (eventTiles.has(x + "," + y) || Math.hypot(x - asset.spawnTile.x, y - asset.spawnTile.y) <= 32 || STARTER_ARRIVAL_TILES.some((p) => Math.hypot(x - p.x, y - p.y) <= 32) || ferryNetworkV1().landings.some((l) => Math.hypot(x - l.tile.x, y - l.tile.y) <= 32)) return false;
     const cx = Math.floor(x / 32), cy = Math.floor(y / 26), r = ROADSIDE_POLICY.wildernessSafetyCollarTiles;
     for (let yy = cy - 1; yy <= cy + 1; yy++) for (let xx = cx - 1; xx <= cx + 1; xx++) if (protectedChunks.has(xx + "," + yy) && x >= xx * 32 - r && x < (xx + 1) * 32 + r && y >= yy * 26 - r && y < (yy + 1) * 26 + r) return false;
     return true;
@@ -18670,7 +18672,7 @@ function createWorldPackSampler(asset, binding, tile) {
   for (const list of [asset.settlements, asset.sites, asset.futureIslands, asset.factions, asset.populationOverlay]) scan(list);
   for (const c of asset.extraProtected ?? []) protect(c);
   for (const c of asset.originZone?.runtimeChunks ?? []) protect({ x: c.chunkX, y: c.chunkY });
-  const safe = (x, y) => !protectedChunks.has(Math.floor(x / 32) + "," + Math.floor(y / 26)) && Math.hypot(x - asset.spawnTile.x, y - asset.spawnTile.y) > 24 && FERRY_NETWORK.landings.every((l) => Math.hypot(x - l.tile.x, y - l.tile.y) > 32);
+  const safe = (x, y) => !protectedChunks.has(Math.floor(x / 32) + "," + Math.floor(y / 26)) && Math.hypot(x - asset.spawnTile.x, y - asset.spawnTile.y) > 24 && ferryNetworkV1().landings.every((l) => Math.hypot(x - l.tile.x, y - l.tile.y) > 32);
   return (cx, cy, digest2) => {
     if (!hasWorldCombat(binding) || protectedChunks.has(cx + "," + cy)) return [];
     const h = hash7(WORLD_COMBAT_VERSION + "/" + asset.campaignSeedHex + "/" + cx + "/" + cy);
@@ -18839,7 +18841,7 @@ function villageChunkBlockers(cx, cy, binding) {
 // src/shared/generation/ferry_overlay_v1.js
 function createFerryOverlay(binding) {
   const tiles = /* @__PURE__ */ new Set();
-  if (hasFerries(binding)) for (const l of FERRY_NETWORK.landings) {
+  if (hasFerries(binding)) for (const l of ferryNetworkV1().landings) {
     for (const p of l.arrivals) for (let y = p.y - 1; y <= p.y + 1; y++) for (let x = p.x - 1; x <= p.x + 1; x++) tiles.add(x + "," + y);
     for (let i = 1; i < l.approach.length; i++) {
       const a = l.approach[i - 1], b = l.approach[i], n = Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
@@ -19221,7 +19223,7 @@ async function completePopulationReservation(r, asset, binding, sha256) {
     n.socket.provenance.placementVersion = n.parcel.version = CRYPT_POPULATION_VERSION;
   }
   n.socket.provenance.populationHash = ALPHA_POPULATION_HASH;
-  n.parcel.label = s.id === "repeatable-slot:cave:woodland:small:109" ? "Alderwood Outskirts Cave" : label(n.parcel.tier ?? s.tier, plannedSiteBiome(asset, s.id), family);
+  n.parcel.label = s.id === worldRolesV1().firstCave ? "Alderwood Outskirts Cave" : label(n.parcel.tier ?? s.tier, plannedSiteBiome(asset, s.id), family);
   const version = n.socket.provenance.placementVersion, extra = family === "ruin" || family === "crypt" ? "/" + PLANNED_RUIN_EXTERIOR_VERSION2 + (family === "ruin" && s.tier === "standard" ? "/" + STANDARD_RUIN_KIT_VERSION : "") : "";
   const c = await worldIdentity(PLANNED_WORLD_VERSION + "/" + NATURAL_CLUSTER_VERSION + "/" + asset.campaignSeedHex + "/" + binding.assetHash + (binding.townPrototype ? "/" + binding.townPrototype : "") + "/" + version + extra, "chunk", [n.socket.entrance.chunkX, n.socket.entrance.chunkY], sha256);
   n.socket.provenance.chunkId = c.id;
@@ -19618,6 +19620,7 @@ function createPlannedWorldAssetStore({ readText, sha256 }) {
       requirePlan(bytesToHex(await sha256(new TextEncoder().encode(text2))) === binding.assetHash, "Planned asset commitment mismatch");
       let asset = JSON.parse(text2);
       validateRuntimePlan(asset);
+      useWorldRolesV1(asset.contentRoles, asset.ferry);
       requirePlan(asset.upstream.planHash === binding.planHash && asset.upstream.physicalPlanHash === binding.physicalHash && asset.upstream.planningPolicyHash === binding.planningHash && asset.routeHash === binding.routeHash, "Planned asset upstream mismatch");
       if (hasAlphaPopulation(binding)) {
         const deltaText = await readText("assets/alpha-site-population-v1.json");
@@ -19764,7 +19767,7 @@ async function plannedReviewTargetsV1(environment, assetId, { get, binding }, { 
     const tier2 = r.parcel.tier, prefix2 = newPopulationSelection(r.socket.provenance.reservationId) ? r.socket.provenance.reservationId : tier2 === "small" ? "crypt" : "crypt:" + tier2, Tier = tier2[0].toUpperCase() + tier2.slice(1), label4 = r.parcel.label.startsWith(Tier + " ") ? r.parcel.label : Tier + " " + r.parcel.label;
     targets.unshift({ id: prefix2 + ":approach", label: label4 + " / Band " + r.socket.provenance.band + " / existing approach", tile: road }, { id: prefix2 + ":entrance", label: label4 + " / PLAYABLE entrance", tile: { x: (Number(s.chunkX) - 1024) * 32 + s.localX / 32 - 0.5, y: (Number(s.chunkY) - 1024) * 26 + s.localY / 32 - 0.5 } });
   }
-  if (binding.ferryVersion) for (const l of FERRY_NETWORK.landings) targets.push({ id: l.id, label: "FERRY " + l.name + " / " + l.biomeId + " / Band " + l.band, tile: l.tile });
+  if (binding.ferryVersion) for (const l of ferryNetworkV1().landings) targets.push({ id: l.id, label: "FERRY " + l.name + " / " + l.biomeId + " / Band " + l.band, tile: l.tile });
   if (binding.hydrologyHash) targets.unshift(...HYDROLOGY_REVIEW_TARGETS);
   if (asset.assetId === "alpha") targets.unshift({ id: "hidden-hollow:45", label: "Hidden Hollow \xB7 waves and guardian \xB7 inspection approach", tile: { x: HOLLOW_EVENT.x + 2, y: HOLLOW_EVENT.y + 3 } }, ...SPORE_EVENTS.map((e) => ({ id: "spore:" + e.ordinal, label: "Spore Outbreak " + (e.ordinal - 39) + " \xB7 triangular pods \xB7 inspection approach", tile: { x: e.x + 2, y: e.y + 3 } })));
   targets.unshift(...naturalClusterReviewTargets(asset, generator));
@@ -20746,7 +20749,7 @@ function observeMapKnowledge(state) {
   const k = state.d9World?.navigation?.knowledge;
   if (!k) return false;
   let changed = false;
-  const sites = Object.values(state.d9World.siteReservationsById), landings = hasFerries(state.d9World.plannedWorld) ? FERRY_NETWORK.landings : [];
+  const sites = Object.values(state.d9World.siteReservationsById), landings = hasFerries(state.d9World.plannedWorld) ? ferryNetworkV1().landings : [];
   for (const p of Object.values(state.playersById)) {
     const a = state.entitiesById[p.entityId];
     if (!a?.alive || a.residency.spaceInstanceId !== state.overworldInstanceId) continue;
@@ -20771,7 +20774,7 @@ function observeMapKnowledge(state) {
   return changed;
 }
 function trailNoteTarget(state) {
-  return Object.values(state.d9World?.siteReservationsById ?? {}).filter((r) => r.socket.provenance?.reservationId === (hasFirstJourney(state.d9World?.plannedWorld) ? FIRST_CAVE_ID : "repeatable-slot:cave:woodland:small:01")).sort((a, b) => a.siteId.localeCompare(b.siteId))[0] ?? null;
+  return Object.values(state.d9World?.siteReservationsById ?? {}).filter((r) => r.socket.provenance?.reservationId === (hasFirstJourney(state.d9World?.plannedWorld) ? worldRolesV1().firstCave : "repeatable-slot:cave:woodland:small:01")).sort((a, b) => a.siteId.localeCompare(b.siteId))[0] ?? null;
 }
 function canReadTrailNote(state, player, payload) {
   const k = state.d9World?.navigation?.knowledge, a = state.entitiesById[player?.entityId];
@@ -20803,8 +20806,8 @@ var TRAIL_NOTE_TEXT = "A traveler marked a small cave in the Woodland. The entra
 
 // src/shared/contracts/ferry_travel_v1.js
 var address = (p) => ({ chunkX: String(1024 + Math.floor(p.x / 32)), chunkY: String(1024 + Math.floor(p.y / 26)), localX: (p.x % 32 + 0.5) * 32, localY: (p.y % 26 + 0.5) * 32 });
-var ferryLanding = (id) => FERRY_NETWORK.landings.find((l) => l.id === id);
-var ferryConnections = (id) => FERRY_NETWORK.connections.flatMap((e) => e.from === id ? [ferryLanding(e.to)] : e.to === id ? [ferryLanding(e.from)] : []);
+var ferryLanding = (id) => ferryNetworkV1().landings.find((l) => l.id === id);
+var ferryConnections = (id) => ferryNetworkV1().connections.flatMap((e) => e.from === id ? [ferryLanding(e.to)] : e.to === id ? [ferryLanding(e.from)] : []);
 function ferrySourceEligible(s, actor, payload) {
   if (!hasFerries(s.d9World?.plannedWorld) || !actor?.alive || actor.residency.spaceInstanceId !== s.overworldInstanceId || s.primary.actorsById[actor.entityId].current) return false;
   const from = ferryLanding(payload.fromLandingId), to = ferryLanding(payload.toLandingId);
@@ -20825,7 +20828,7 @@ function ferryTravelTarget(s, actor, payload) {
 }
 function ferryExits(s, actor) {
   if (!hasFerries(s.d9World?.plannedWorld) || actor.residency.spaceInstanceId !== s.overworldInstanceId) return [];
-  return FERRY_NETWORK.landings.flatMap((l) => {
+  return ferryNetworkV1().landings.flatMap((l) => {
     const p = projectToLocalFrameD9(address(l.tile), s.d9World.runtime.frames), boat = projectToLocalFrameD9(address(l.water), s.d9World.runtime.frames);
     if (!p || Math.hypot(actor.position.x - p.x, actor.position.y - p.y) > 1e3) return [];
     return [{ exitId: l.id, ferryLandingId: l.id, siteKind: "ferry-landing", x: p.x, y: p.y, boat: boat ? { x: boat.x, y: boat.y } : null, facing: l.facing, radius: 80, available: actor.alive && !s.primary.actorsById[actor.entityId].current, label: "Ferry \xB7 " + l.name, destinations: ferryConnections(l.id).map((d) => ({ id: d.id, name: d.name, biome: d.biomeId.replace("biome:", ""), band: d.band })) }];
@@ -67298,7 +67301,7 @@ function revealNavigationD9(state) {
           const t = STARTER_ARRIVAL_TILES[0];
           if (String(1024 + Math.floor(t.x / 32)) === chunkX && String(1024 + Math.floor(t.y / 26)) === chunkY) nearby = nearby.concat([{ id: STARTER_VILLAGE_ID, label: STARTER_VILLAGE_NAME + " \xB7 Village \xB7 Band 1", kind: "settlement", x: (t.x % 32 + 0.5) * 32, y: (t.y % 26 + 0.5) * 32 }]);
         }
-        if (hasFerries(w.plannedWorld)) nearby = nearby.concat(FERRY_NETWORK.landings.filter((l) => String(1024 + Math.floor(l.tile.x / 32)) === chunkX && String(1024 + Math.floor(l.tile.y / 26)) === chunkY).map((l) => ({ id: l.id, label: l.name + " \xB7 Ferry", kind: "ferry", x: (l.tile.x % 32 + 0.5) * 32, y: (l.tile.y % 26 + 0.5) * 32 })));
+        if (hasFerries(w.plannedWorld)) nearby = nearby.concat(ferryNetworkV1().landings.filter((l) => String(1024 + Math.floor(l.tile.x / 32)) === chunkX && String(1024 + Math.floor(l.tile.y / 26)) === chunkY).map((l) => ({ id: l.id, label: l.name + " \xB7 Ferry", kind: "ferry", x: (l.tile.x % 32 + 0.5) * 32, y: (l.tile.y % 26 + 0.5) * 32 })));
         markCache2.set(chunkKey, nearby);
       }
       for (const mark of nearby) if (Math.floor(mark.x / 32) === lx && Math.floor(mark.y / 32) === ly && !row2.markers.some((m) => m.id === mark.id)) row2.markers.push({ ...mark });
