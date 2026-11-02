@@ -1,6 +1,6 @@
 {
-  "runtimeId": "9bbf101cf9acaefd",
-  "runtimeSha256": "9bbf101cf9acaefd343789e7cd1a169f466371f3b545d90fd96ea7fcf3bf28ff",
+  "runtimeId": "2104759c1d14859d",
+  "runtimeSha256": "2104759c1d14859dde14b26b5c78e0a7eeff978a957ea71a7009f29d8a7b7181",
   "files": [
     {
       "path": ".nojekyll",
@@ -519,8 +519,8 @@
     },
     {
       "path": "index.html",
-      "bytes": 13650,
-      "sha256": "81fbe5d479003f5405400ca523676c0de99bb73c2365c40a3f0c060a94c5f70b"
+      "bytes": 13674,
+      "sha256": "21bfbb1645e58aa16c399a337258c5fb5f1b6910911993725fadb550aa8b5ec1"
     },
     {
       "path": "manifest.webmanifest",
@@ -533,19 +533,19 @@
       "sha256": "8f0eab706a5708aa0d985d253e1be2f35220cbd2b4bd2f3aeb8e357ad535583f"
     },
     {
-      "path": "src/chunks/chunk-CO4HKTAI.js",
-      "bytes": 2473615,
-      "sha256": "16731c9215d5bcaa141d4a46a3dbd174b3abb6a734b57126ab25863ac8b7ee8c"
+      "path": "src/chunks/chunk-LNIGIJ54.js",
+      "bytes": 2474080,
+      "sha256": "40e7c32407af497fc9954098b2482f69bfd4d13dead64afc3a6d0f321f57b33c"
     },
     {
-      "path": "src/chunks/playable_browser-3TB6BL3V.js",
-      "bytes": 4807430,
-      "sha256": "7c03a389e2448997345d985dd45b05bacabd11ee0688f549555130c44f583fed"
+      "path": "src/chunks/playable_browser-RK6MXCKO.js",
+      "bytes": 4879315,
+      "sha256": "631b93153ed8839a3bd4244f81d5f991716589a967a88f1b9ab7ea6e18456e5f"
     },
     {
-      "path": "src/chunks/world_browser-S7W7BLGI.js",
+      "path": "src/chunks/world_browser-XFIT2ISO.js",
       "bytes": 1416,
-      "sha256": "bae9f4d3f03356745525c4e96a7135fae8c0cfc13eabf4c4c8e2898198b6e1e9"
+      "sha256": "4d665a5a5182d454c87be50fee98ff5762615b8be78340e15e019293c9bad835"
     },
     {
       "path": "src/client/startup_camp_v1.js",
@@ -560,7 +560,7 @@
     {
       "path": "src/entrypoints/browser_boot.js",
       "bytes": 2158,
-      "sha256": "999d87510e97e8b4b6294898d2c057448f1330886c1adf6b314722e3d1b21621"
+      "sha256": "9106ccc2fdb0fbf36ada4a2b537651c68307e488993fab9c93a190b5706bc998"
     },
     {
       "path": "world.css",

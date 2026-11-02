@@ -8511,6 +8511,15 @@ var RMAX = 9;
 var GAP = 2;
 var ROCK_MASSES = Object.freeze(["outcrop", "mesa", "lava-rock"]);
 var standsCell = (zone, cover, trail) => String.fromCharCode(97 + zone + (cover ? 4 : 0) + (trail ? 8 : 0));
+var readStandsCell = (ch) => {
+  const n = typeof ch === "string" ? ch.charCodeAt(0) - 97 : -1;
+  return n >= 0 && n < 16 ? { zone: n & 3, cover: Boolean(n & 4), trail: Boolean(n & 8) } : null;
+};
+var standsPiece = (id) => {
+  if (typeof id !== "string" || !id.startsWith(FOREST_STANDS_PREFIX)) return null;
+  const [, piece, detail, key5] = id.split(":");
+  return { piece, detail, key: key5 };
+};
 function createStandField(seed) {
   const k = (t) => standsHashText(seed + "/" + FOREST_STANDS_VERSION + "/" + t), K = { a: k("a"), b: k("b"), wx: k("wx"), wy: k("wy"), trail: k("trail"), conifer: k("conifer"), cover: k("cover"), rock: k("rock"), grove: k("grove"), slot: k("slot"), hedge: k("hedge"), mass: k("mass"), shape: k("shape"), bush: k("bush"), log: k("log") };
   function raw(x, y, s = 1) {
@@ -24694,7 +24703,11 @@ export {
   hasBossHostingV1,
   FOREST_STANDS_VERSION,
   hasForestStands,
+  standsTileHash,
+  ROCK_MASSES,
   standsCell,
+  readStandsCell,
+  standsPiece,
   createForestStandsV2,
   SERVICES_V2,
   SERVICES_V2_HASH,
