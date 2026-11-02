@@ -94,6 +94,7 @@ import {
   FERRY_VERSION,
   FIRST_CAVE_ID,
   FIRST_CAVE_SELECTION,
+  FOREST_STANDS_VERSION,
   FORGE_INTERACTION_RADIUS,
   FORT_CATALOG_V2,
   FORT_FAMILY_PACKAGE_ID,
@@ -380,6 +381,7 @@ import {
   createCommandGatewayContracts,
   createContentCatalog,
   createEvent,
+  createForestStandsV2,
   createId,
   createLocalIndexedDbCampaignStore,
   createMajorNameRegistry,
@@ -460,6 +462,7 @@ import {
   hasBossHostingV1,
   hasFerries,
   hasFirstJourney,
+  hasForestStands,
   hasHydrologyV1,
   hasRoadsideEncounters,
   hasSettlementLife,
@@ -683,6 +686,7 @@ import {
   spentPoints,
   sporeOrdinal,
   sporeReinforcementV4,
+  standsCell,
   starterArrivalTilesV1,
   stepActorMovement,
   subtractAmount,
@@ -785,7 +789,7 @@ import {
   worldPointForArea,
   worldRolesV1,
   wrathDamageV1
-} from "./chunk-MVUIX3AF.js";
+} from "./chunk-CO4HKTAI.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -2881,9 +2885,12 @@ var SPORE_V3_POLICY = freezeWire({ version: SPORE_V3, parent: "spore-outbreak-v2
 function compareDepthItems(a, b) {
   return Number(a.anchorY) - Number(b.anchorY) || Number(a.anchorX ?? 0) - Number(b.anchorX ?? 0) || String(a.id).localeCompare(String(b.id));
 }
-function drawDepthItems(ctx, items) {
-  const ordered = [...items].sort(compareDepthItems);
-  for (const item of ordered) item.draw(ctx);
+function drawDepthItems(ctx, items, cover2 = null) {
+  const ordered = [...items].sort(compareDepthItems), after = cover2?.(ordered);
+  for (let i = 0; i < ordered.length; i++) {
+    ordered[i].draw(ctx);
+    after?.(ordered[i], i);
+  }
   return ordered;
 }
 function depthItem({ id, anchorX = 0, anchorY, draw }) {
@@ -18833,7 +18840,7 @@ function openThreeByThree(tile, x, y, landmassId) {
   return true;
 }
 async function createWoodlandPilotEventAnchors({ asset, binding, cx, cy, seed: seed2, sha256, tile, regularAnchors = [] }) {
-  if (!hasWorldCombat(binding) || !hasWilderness(binding) || !asset.wildernessExtension?.eventCapacities) return [];
+  if (!hasWorldCombat(binding) || !hasWilderness(binding) || isSeededBindingV1(binding) || !asset.wildernessExtension?.eventCapacities) return [];
   const candidates = asset.wildernessExtension.eventCapacities;
   const result = [];
   for (const event of [...WOODLAND_EVENT_PILOT_V3_7, ...SPORE_EVENTS, HOLLOW_EVENT]) {
@@ -18894,10 +18901,10 @@ function open(tile, x, y, landmassId) {
 }
 async function createPlannedEventAnchorsV1({ asset, binding, cx, cy, seed: seed2, sha256, tile, regularAnchors = [], otherAnchors = [], built = BUILT_EVENT_KINDS }) {
   if (!built.length || !hasWorldCombat(binding) || !hasWilderness(binding) || !asset.wildernessExtension?.eventCapacities) return [];
-  const result = [], safe = worldEventProtectionV1(asset), local6 = (x, y) => ({ x: (x - cx * 32 + 0.5) * 32, y: (y - cy * 26 + 0.5) * 32 });
+  const result = [], fixed = isSeededBindingV1(binding) ? /* @__PURE__ */ new Set() : FIXED, safe = worldEventProtectionV1(asset), local6 = (x, y) => ({ x: (x - cx * 32 + 0.5) * 32, y: (y - cy * 26 + 0.5) * 32 });
   for (const slot of asset.wildernessExtension.eventCapacities) {
     const { x, y } = slot.position;
-    if (Math.floor(x / 32) !== cx || Math.floor(y / 26) !== cy || FIXED.has(slot.eventSlotId)) continue;
+    if (Math.floor(x / 32) !== cx || Math.floor(y / 26) !== cy || fixed.has(slot.eventSlotId)) continue;
     const kind = eventAtSlotV1(asset, slot.eventSlotId)?.event, ordinal = plannedEventOrdinalFor(slot.eventSlotId, slot.category, kind);
     if (!built.includes(kind) || ordinal === null || !safe(x, y) || !open(tile, x, y, slot.landmassId)) continue;
     const center3 = local6(x, y), others = [...regularAnchors, ...otherAnchors, ...result].map((a) => a.position);
@@ -19625,11 +19632,18 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     return { ...b, collision: blocked3 ? "2" : "1", material: route >= 2 ? "r" : route === 1 ? "p" : b.kind === "shore" ? (b.shoreClassId ? b.shoreClassId.includes("beach") : b.slope < 350 && mixPlan(asset.seedDigest + "/coast/" + Math.floor(x / 8) + "/" + Math.floor(y / 8)) % 5 < 2) ? "C" : "K" : "g", route };
   }
   const pilotRuins = ruins.filter((r) => isRuinGrovePilot(asset, r.reservation)), groveByRuin = new Map(pilotRuins.map((r) => [r, createRuinGrovePlan(r, asset.campaignSeedHex, acceptedPilotTile)]));
-  const forest = hasWoodlandForest(binding) ? createWoodlandForestSampler(asset.seedDigest) : null, forestEvents = /* @__PURE__ */ new Set();
+  const forest = hasWoodlandForest(binding) && !hasForestStands(binding) ? createWoodlandForestSampler(asset.seedDigest) : null, forestEvents = /* @__PURE__ */ new Set();
   if (forest) {
     for (const e of wilderness?.eventCapacities ?? []) for (const c of e.cells) if (forest.applies(c.x, c.y, "w")) for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) forestEvents.add(c.x + dx + "," + (c.y + dy));
   }
   const nature = createNaturalClusterSampler(asset.seedDigest), protection = createNaturalProtection(asset, { ruinFootprints: [...ruins, ...crypts].flatMap((r) => r.reservation.footprint) }), nativeCache = /* @__PURE__ */ new Map();
+  const standsClear = (x, y, b) => {
+    const key2 = x + "," + y;
+    if (routeAt(x, y) > 0 || b.bank || b.kind === "shore" || protection.at(x, y) || branchTrails.has(key2) || eventClearings.has(key2) || Math.abs(x - asset.spawnTile.x) <= 3 && Math.abs(y - asset.spawnTile.y) <= 3) return true;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (routeAt(x + dx, y + dy) || bridgeDecks.has(x + dx + "," + (y + dy)) || protection.at(x + dx, y + dy)) return true;
+    return false;
+  };
+  const stands = hasForestStands(binding) ? createForestStandsV2({ seedDigest: asset.seedDigest, asset, terrain, routeAt, clearAt: standsClear, protectedChunk: (cx, cy) => protection.at(cx * 32, cy * 26), events: (wilderness?.eventCapacities ?? []).map((e) => e.position) }) : null;
   function originalTile(x, y) {
     if (pilotRuins.some((r) => r.inside(x, y))) return acceptedPilotTile(x, y);
     const key2 = x + "," + y;
@@ -19644,7 +19658,8 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
         clear2 = true;
         break;
       }
-      let obstacle = clear2 ? null : forest?.applies(x, y, b.biome) ? forest.sample(x, y, b.biome) : nature.sample(x, y, b.biome);
+      const stand = stands?.tileAt(x, y);
+      let obstacle = stands ? stand?.block ? { kind: stand.kind, clusterId: stand.clusterId } : null : clear2 ? null : forest?.applies(x, y, b.biome) ? forest.sample(x, y, b.biome) : nature.sample(x, y, b.biome);
       if (obstacle) for (let dy = -1; dy <= 1 && obstacle; dy++) for (let dx = -1; dx <= 1; dx++) {
         const xx = x + dx, yy = y + dy, q = terrain.base(xx, yy), r = ruinByChunk.get(Math.floor(xx / 32) + "," + Math.floor(yy / 26));
         if (!q.walkable || q.bank || q.kind === "shore" || r && (r.ownsStructure(xx, yy) || r.trail.has(xx + "," + yy) || r.circulation.has(xx + "," + yy))) {
@@ -19671,6 +19686,12 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     if (result.route > 0 && result.material === "r") return result;
     return { ...result, collision: "1", material: track === "footpath" ? "p" : result.material, route: track === "footpath" ? 1 : result.route, wildernessTrack: track ?? null, wildernessClearing: clearing };
   };
+  const standsRow = (c, x, y) => {
+    const s = stands.tileAt(x, y);
+    if (!s || c.kind === "bridge" || c.material === "H" || c.material === "V") return ".";
+    const plain2 = c.town || c.caveExterior || c.fortExterior || c.ruinExterior || c.wildernessTrack || c.wildernessClearing || c.route > 0 || c.collision !== "1";
+    return standsCell(s.zone, !plain2 && s.cover, !plain2 && s.trail);
+  };
   const accessChunks = /* @__PURE__ */ new Set();
   if (asset.firstJourney) {
     const add = (cx, cy, r) => {
@@ -19687,12 +19708,13 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     requirePlan(Number.isSafeInteger(cx) && Number.isSafeInteger(cy), "Planned address range");
     const reservations = [...await caveReservations, ...await fortReservations, ...await ruinReservations, ...await cryptReservations], ruin = ruinByChunk.get(cx + "," + cy), fort = fortByChunk.get(cx + "," + cy), cave = caveByChunk.get(cx + "," + cy), reserved = ruin ? reservations.find((r) => r.socket.provenance.reservationId === ruin.reservation.id) : fort ? reservations.find((r) => r.socket.provenance.reservationId === fort.reservation.id) : cave ? reservations.find((r) => r.socket.provenance.reservationId === cave.reservation.id) : null;
     const starterChunk = hasStarterVillage(binding) && cx >= sx - 1 && cx <= sx + 1 && cy >= sy && cy <= sy + 1;
-    const identityInput = PLANNED_WORLD_VERSION + (binding.reshapeHash ? "/" + binding.reshapeHash : "") + (binding.roadsideHash ? "/" + binding.roadsideHash : "") + (starterChunk ? "/" + binding.startHash : "") + (binding.hydrologyHash ? "/" + binding.hydrologyHash : "") + (binding.accessHash && accessChunks.has(cx + "," + cy) ? "/" + binding.accessHash : "") + "/" + NATURAL_CLUSTER_VERSION + (forest?.intersectsChunk(cx, cy) ? "/" + WOODLAND_FOREST_HASH : "") + "/" + seed2 + "/" + binding.assetHash + (binding.ferryHash ? "/" + binding.ferryHash : "") + (binding.settlementLifeHash ? "/" + binding.settlementLifeHash : "") + (binding.settlementServicesHash ? "/" + binding.settlementServicesHash : "") + (binding.townPrototype ? "/" + binding.townPrototype : "") + (binding.wildernessHash ? "/" + binding.wildernessHash : "") + (ruin ? "/" + ([PLANNED_CRYPT_VERSION, PLANNED_CRYPT_V2, CRYPT_POPULATION_VERSION].includes(ruin.realizationVersion) ? ruin.realizationVersion : ruin.realizationVersion === PLANNED_RUIN_V2 ? PLANNED_RUIN_V2 : PLANNED_RUIN_VERSION) + "/" + PLANNED_RUIN_EXTERIOR_VERSION2 + (ruin.reservation.familyId === "site-family:ruin" && ruin.reservation.tier === "standard" ? "/" + STANDARD_RUIN_KIT_VERSION : "") + (isRuinGrovePilot(asset, ruin.reservation) ? "/" + RUIN_GROVE_VERSION : "") : fort ? "/" + fort.realizationVersion : cave ? "/" + PLANNED_CAVE_VERSION : ""), identity2 = await worldIdentity(identityInput, "chunk", [chunkX, chunkY], sha256), sceneryIdentity = binding.roadsideHash ? await worldIdentity(identityInput.replace("/" + binding.roadsideHash, ""), "chunk", [chunkX, chunkY], sha256) : identity2, collision = [], visual = [], biomes = [], centerline = [], clearance = [], mapRows = [], blockers = [];
+    const identityInput = PLANNED_WORLD_VERSION + (binding.reshapeHash ? "/" + binding.reshapeHash : "") + (binding.roadsideHash ? "/" + binding.roadsideHash : "") + (starterChunk ? "/" + binding.startHash : "") + (binding.hydrologyHash ? "/" + binding.hydrologyHash : "") + (binding.accessHash && accessChunks.has(cx + "," + cy) ? "/" + binding.accessHash : "") + "/" + NATURAL_CLUSTER_VERSION + (forest?.intersectsChunk(cx, cy) ? "/" + WOODLAND_FOREST_HASH : "") + (stands ? "/" + FOREST_STANDS_VERSION : "") + "/" + seed2 + "/" + binding.assetHash + (binding.ferryHash ? "/" + binding.ferryHash : "") + (binding.settlementLifeHash ? "/" + binding.settlementLifeHash : "") + (binding.settlementServicesHash ? "/" + binding.settlementServicesHash : "") + (binding.townPrototype ? "/" + binding.townPrototype : "") + (binding.wildernessHash ? "/" + binding.wildernessHash : "") + (ruin ? "/" + ([PLANNED_CRYPT_VERSION, PLANNED_CRYPT_V2, CRYPT_POPULATION_VERSION].includes(ruin.realizationVersion) ? ruin.realizationVersion : ruin.realizationVersion === PLANNED_RUIN_V2 ? PLANNED_RUIN_V2 : PLANNED_RUIN_VERSION) + "/" + PLANNED_RUIN_EXTERIOR_VERSION2 + (ruin.reservation.familyId === "site-family:ruin" && ruin.reservation.tier === "standard" ? "/" + STANDARD_RUIN_KIT_VERSION : "") + (isRuinGrovePilot(asset, ruin.reservation) ? "/" + RUIN_GROVE_VERSION : "") : fort ? "/" + fort.realizationVersion : cave ? "/" + PLANNED_CAVE_VERSION : ""), identity2 = await worldIdentity(identityInput, "chunk", [chunkX, chunkY], sha256), sceneryIdentity = binding.roadsideHash ? await worldIdentity(identityInput.replace("/" + binding.roadsideHash, ""), "chunk", [chunkX, chunkY], sha256) : identity2, collision = [], visual = [], biomes = [], centerline = [], clearance = [], mapRows = [], standRows = [], blockers = [];
     for (let y = 0; y < 26; y++) {
-      let cr = "", vr = "", br = "", rr = "", sr = "", mr = "";
+      let cr = "", vr = "", br = "", rr = "", sr = "", mr = "", fr = "";
       for (let x = 0; x < 32; x++) {
         const tx = cx * 32 + x, ty = cy * 26 + y, c2 = tile(tx, ty);
         cr += c2.collision;
+        if (stands) fr += standsRow(c2, tx, ty);
         vr += c2.material;
         br += c2.biome;
         rr += c2.route ? "1" : "0";
@@ -19708,6 +19730,7 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
       centerline.push(rr);
       clearance.push(sr);
       mapRows.push(mr);
+      if (stands) standRows.push(fr);
     }
     const townBlockers = [...townTiles ? townChunkBlockers(cx, cy) : [], ...villageTiles ? villageChunkBlockers(cx, cy, binding) : []];
     const used = /* @__PURE__ */ new Set(), matches = (x, y, a) => {
@@ -19730,12 +19753,12 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     const regularAnchors = packAnchors(cx, cy, identity2.digest);
     const eventAnchors = await createWoodlandPilotEventAnchors({ asset, binding, cx, cy, seed: seed2, sha256, tile, regularAnchors });
     const plannedAnchors = await createPlannedEventAnchorsV1({ asset, binding, cx, cy, seed: seed2, sha256, tile, regularAnchors, otherAnchors: eventAnchors });
-    return freezeWire({ version: PLANNED_WORLD_VERSION, identity: identity2, chunkX, chunkY, region: { version: asset.version, regionX: String(Math.floor(cx / 2)), regionY: String(Math.floor(cy / 2)), biome, name: hasStarterVillage(binding) && cx >= sx && cx <= sx + 1 && cy >= sy && cy <= sy + 1 ? STARTER_VILLAGE_NAME + " \xB7 Woodland \xB7 Band 1" : biome === "ocean" ? "Open ocean" : biome[0].toUpperCase() + biome.slice(1) + " \xB7 Band " + c.band, minimumLevel: [1, 1, 6, 11, 21, 41][c.band] ?? 1, originWidthChunks: 0, originHeightChunks: 0 }, collision: { tileSize: 32, width: 32, height: 26, tiles: collision }, visual: { terrain: visual, biomes, blockers, ...caveArt.decorations.length ? { decorations: caveArt.decorations } : {}, route: { centerline, clearance, ...["planned-world-shoreline-v2", "planned-world-water-v3"].includes(asset.version) ? { mapFeatures: mapRows } : {} } }, edges, anchors: [...regularAnchors, ...eventAnchors, ...plannedAnchors], sites: reserved?.socket.entrance.chunkX === chunkX && reserved?.socket.entrance.chunkY === chunkY ? [reserved.socket] : [] });
+    return freezeWire({ version: PLANNED_WORLD_VERSION, identity: identity2, chunkX, chunkY, region: { version: asset.version, regionX: String(Math.floor(cx / 2)), regionY: String(Math.floor(cy / 2)), biome, name: hasStarterVillage(binding) && cx >= sx && cx <= sx + 1 && cy >= sy && cy <= sy + 1 ? STARTER_VILLAGE_NAME + " \xB7 Woodland \xB7 Band 1" : biome === "ocean" ? "Open ocean" : biome[0].toUpperCase() + biome.slice(1) + " \xB7 Band " + c.band, minimumLevel: [1, 1, 6, 11, 21, 41][c.band] ?? 1, originWidthChunks: 0, originHeightChunks: 0 }, collision: { tileSize: 32, width: 32, height: 26, tiles: collision }, visual: { terrain: visual, biomes, blockers, ...caveArt.decorations.length ? { decorations: caveArt.decorations } : {}, ...stands ? { stands: standRows } : {}, route: { centerline, clearance, ...["planned-world-shoreline-v2", "planned-world-water-v3"].includes(asset.version) ? { mapFeatures: mapRows } : {} } }, edges, anchors: [...regularAnchors, ...eventAnchors, ...plannedAnchors], sites: reserved?.socket.entrance.chunkX === chunkX && reserved?.socket.entrance.chunkY === chunkY ? [reserved.socket] : [] });
   }
   let hollowHome = null;
   async function generate(args) {
     const cx = Number(BigInt(args.chunkX)) - PLANNED_ADDRESS_OFFSET.chunkX, cy = Number(BigInt(args.chunkY)) - PLANNED_ADDRESS_OFFSET.chunkY, hx = Math.floor(HOLLOW_EVENT.x / 32), hy = Math.floor(HOLLOW_EVENT.y / 26);
-    if (!binding.wildernessHash || Math.abs(cx - hx) > 1 || Math.abs(cy - hy) > 1) return generateBase(args);
+    if (!binding.wildernessHash || isSeededBindingV1(binding) || Math.abs(cx - hx) > 1 || Math.abs(cy - hy) > 1) return generateBase(args);
     hollowHome ??= generateBase({ seed: args.seed, chunkX: String(PLANNED_ADDRESS_OFFSET.chunkX + hx), chunkY: String(PLANNED_ADDRESS_OFFSET.chunkY + hy) });
     const home = await hollowHome, base = cx === hx && cy === hy ? home : await generateBase(args), result = hollowObstaclePage(base, home, (x, y) => tile(cx * 32 + x, cy * 26 + y));
     if (result === base) return base;
@@ -19746,7 +19769,7 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
 }
 
 // src/storage/planned_world_assets_v1.js
-var plannedWorldAssetCacheKey = (binding) => binding.assetId + "/" + binding.assetHash + "/" + (binding.townPrototype ?? "terrain-only") + "/" + (binding.cavePrototype ?? "no-cave") + "/" + (binding.fortPrototype ?? "no-fort") + "/" + (binding.ruinPrototype ?? "no-ruin") + "/" + (binding.cryptPrototype ?? "no-crypt") + "/" + (binding.sitePopulationHash ?? "base-roster") + "/" + (binding.interiorGenerationHash ?? "legacy-interiors") + "/" + (binding.ferryHash ?? "no-ferry") + "/" + (binding.settlementLifeHash ?? "no-services") + "/" + (binding.settlementServicesHash ?? "no-specialists") + "/" + (binding.combatHash ?? "legacy-combat") + "/" + (binding.wildernessHash ?? "no-wilderness") + "/" + (binding.bossHostingHash ?? "legacy-boss-hosting") + (binding.startHash ? "/" + binding.startHash : "") + (binding.woodlandForestHash ? "/" + binding.woodlandForestHash : "") + (binding.hydrologyHash ? "/" + binding.hydrologyHash : "") + (binding.accessHash ? "/" + binding.accessHash : "") + (binding.roadsideHash ? "/" + binding.roadsideHash : "") + (binding.reshapeHash ? "/" + binding.reshapeHash : "");
+var plannedWorldAssetCacheKey = (binding) => binding.assetId + "/" + binding.assetHash + "/" + (binding.townPrototype ?? "terrain-only") + "/" + (binding.cavePrototype ?? "no-cave") + "/" + (binding.fortPrototype ?? "no-fort") + "/" + (binding.ruinPrototype ?? "no-ruin") + "/" + (binding.cryptPrototype ?? "no-crypt") + "/" + (binding.sitePopulationHash ?? "base-roster") + "/" + (binding.interiorGenerationHash ?? "legacy-interiors") + "/" + (binding.ferryHash ?? "no-ferry") + "/" + (binding.settlementLifeHash ?? "no-services") + "/" + (binding.settlementServicesHash ?? "no-specialists") + "/" + (binding.combatHash ?? "legacy-combat") + "/" + (binding.wildernessHash ?? "no-wilderness") + "/" + (binding.bossHostingHash ?? "legacy-boss-hosting") + (binding.startHash ? "/" + binding.startHash : "") + (binding.woodlandForestHash ? "/" + binding.woodlandForestHash : "") + (binding.forestStandsVersion ? "/" + binding.forestStandsVersion : "") + (binding.hydrologyHash ? "/" + binding.hydrologyHash : "") + (binding.accessHash ? "/" + binding.accessHash : "") + (binding.roadsideHash ? "/" + binding.roadsideHash : "") + (binding.reshapeHash ? "/" + binding.reshapeHash : "");
 function createPlannedWorldAssetStore({ readText, sha256, readWorld = null }) {
   const cache4 = /* @__PURE__ */ new Map(), prepared = /* @__PURE__ */ new Map();
   const derive = async (asset, binding) => {
@@ -19847,7 +19870,7 @@ async function plannedReviewInputsV1(environment, assetId, sha256) {
   }, registry = JSON.parse(await get((environment.document.body.dataset.waterReview === "true" ? "assets/planned-world-water-v3" : shore2 ? "assets/planned-world-shore-v2" : "assets/planned-world-v1") + "/registry.json"));
   if (!registry[assetId]) throw new Error("Unknown planned review seed");
   const rawBinding = environment.document.body.dataset.townReview === "true" ? { ...registry[assetId].binding, townPrototype: "planned-town-start-art-candidate-v2", ...environment.document.body.dataset.sitePopulation === "true" ? { sitePopulation: ALPHA_POPULATION_VERSION, sitePopulationHash: ALPHA_POPULATION_HASH, ...environment.document.body.dataset.multiroom === "true" ? { interiorGeneration: MULTIROOM_VERSION, interiorGenerationHash: MULTIROOM_HASH, ...environment.document.body.dataset.ferryReview === "true" ? { ferryVersion: FERRY_VERSION, ferryHash: FERRY_HASH, ...environment.document.body.dataset.settlementLife === "true" ? { settlementLifeVersion: SETTLEMENT_LIFE_VERSION, settlementLifeHash: SETTLEMENT_LIFE_HASH, ...environment.document.body.dataset.settlementServices === "v2" ? { settlementServicesVersion: SERVICES_V2, settlementServicesHash: SERVICES_V2_HASH, ...environment.document.body.dataset.worldCombat === "v1" ? { combatVersion: WORLD_COMBAT_VERSION, combatHash: WORLD_COMBAT_HASH } : {} } : {} } : {} } : {} } : {} } : {}, ...environment.document.body.dataset.caveReview === "true" ? { cavePrototype: environment.document.body.dataset.cavePopulation === "true" ? PLANNED_CAVE_POPULATION_VERSION : "planned-cave-integration-candidate-v1", ...environment.document.body.dataset.fortReview === "true" ? { fortPrototype: environment.document.body.dataset.fortVersion === "v2" ? PLANNED_FORT_V2 : PLANNED_FORT_VERSION, ...environment.document.body.dataset.ruinReview === "true" ? { ruinPrototype: environment.document.body.dataset.ruinVersion === "v2" ? PLANNED_RUIN_V2 : PLANNED_RUIN_VERSION, ...environment.document.body.dataset.cryptReview === "true" ? { cryptPrototype: environment.document.body.dataset.cryptVersion === "v2" ? PLANNED_CRYPT_V2 : PLANNED_CRYPT_VERSION } : {} } : {} } : {} } : {} } : registry[assetId].binding, hosted = withBossHostingReviewBindingV1(rawBinding), hostedBinding = environment.document.body.dataset.starterVillage === "true" && assetId === "alpha" ? { ...hosted, startVersion: STARTER_VERSION, startHash: STARTER_HASH } : hosted, wildernessBinding = environment.document.body.dataset.wildernessV2 === "true" ? { ...hostedBinding, wildernessVersion: WILDERNESS_VERSION, wildernessHash: WILDERNESS_HASH } : hostedBinding, forestBinding = environment.document.body.dataset.woodlandForest === "v1" && assetId === "alpha" ? { ...wildernessBinding, woodlandForestVersion: WOODLAND_FOREST_VERSION, woodlandForestHash: WOODLAND_FOREST_HASH } : wildernessBinding, binding = environment.document.body.dataset.hydrologyReview === "v1" && assetId === "alpha" ? { ...forestBinding, hydrologyVersion: HYDROLOGY_VERSION, hydrologyHash: HYDROLOGY_HASH, ...environment.document.body.dataset.firstJourney === "v1" ? { accessVersion: ACCESS_VERSION, accessHash: ACCESS_HASH, ...environment.document.body.dataset.roadsideReview === "v1" ? { roadsideVersion: ROADSIDE_VERSION, roadsideHash: ROADSIDE_HASH } : {}, ...environment.document.body.dataset.worldReshape === "v1" ? { reshapeVersion: RESHAPE_VERSION, reshapeHash: RESHAPE_HASH } : {} } : {} } : forestBinding;
-  return { get, binding, store: createPlannedWorldAssetStore({ readText: get, sha256 }) };
+  return { get, binding: environment.document.body.dataset.forestStands === "v2" && assetId === "alpha" ? { ...binding, forestStandsVersion: FOREST_STANDS_VERSION } : binding, store: createPlannedWorldAssetStore({ readText: get, sha256 }) };
 }
 async function plannedReviewTargetsV1(environment, assetId, { get, binding }, { asset, generator, caveReservation, caveReservations, fortReservations, ruinReservations, cryptReservations }) {
   const terrain = createPlannedTerrain(asset), targets = [];
@@ -30636,14 +30659,17 @@ function heroLookView(player) {
 function projectWorldTerrainD9(state, compiled, { x, y, width = 88, height = 88 }) {
   requireContract(Number.isInteger(x) && Number.isInteger(y) && width <= 88 && height <= 88 && width > 0 && height > 0, "Terrain projection bound");
   const grid = Array.from({ length: height }, () => Array(width).fill("v")), biomes = Array.from({ length: height }, () => Array(width).fill("o")), blockers = [], decorations = [];
+  const stands = Array.from({ length: height }, () => Array(width).fill("."));
+  let hasStands = false;
   const plannedRuinIds2 = new Set(Object.values(state.d9World.siteReservationsById ?? {}).filter((r) => ["procedural-ruin-family", "procedural-crypt-family"].includes(r.packageId)).map((r) => r.siteId)), ruinWalls = /* @__PURE__ */ new Set();
   const plannedRuinArt = (id) => plannedRuinIds2.has(/^ruin(?:-art)?:(site:[a-f0-9]{32}):/.exec(id ?? "")?.[1]);
-  function paint(terrain, offsetX, offsetY, features, biome, details = []) {
+  function paint(terrain, offsetX, offsetY, features, biome, details = [], standRows = null) {
     const right = offsetX + (terrain[0]?.length ?? 0), bottom = offsetY + terrain.length;
     if (right <= x || bottom <= y || offsetX >= x + width || offsetY >= y + height) return;
     for (let gy = Math.max(y, offsetY); gy < Math.min(y + height, bottom); gy++) for (let gx = Math.max(x, offsetX); gx < Math.min(x + width, right); gx++) {
       grid[gy - y][gx - x] = terrain[gy - offsetY][gx - offsetX];
       biomes[gy - y][gx - x] = Array.isArray(biome) ? biome[gy - offsetY]?.[gx - offsetX] ?? "o" : biome;
+      if (standRows) stands[gy - y][gx - x] = standRows[gy - offsetY]?.[gx - offsetX] ?? ".";
     }
     for (const b of features) {
       const px3 = b.x + offsetX, py = b.y + offsetY;
@@ -30671,10 +30697,11 @@ function projectWorldTerrainD9(state, compiled, { x, y, width = 88, height = 88 
     const position4 = projectToLocalFrameD9({ chunkX: chunk2.chunkX, chunkY: chunk2.chunkY, localX: 0, localY: 0 }, state.d9World.runtime.frames);
     if (!position4) continue;
     const visual = runtimeHollowVisualV4(chunk2);
-    paint(visual.terrain, position4.x / D9_PROFILE.tileSize, position4.y / D9_PROFILE.tileSize, visual.blockers, visual.biomes ?? { woodland: "w", "rocky-uplands": "r", marsh: "m" }[chunk2.region.biome], visual.decorations ?? []);
+    paint(visual.terrain, position4.x / D9_PROFILE.tileSize, position4.y / D9_PROFILE.tileSize, visual.blockers, visual.biomes ?? { woodland: "w", "rocky-uplands": "r", marsh: "m" }[chunk2.region.biome], visual.decorations ?? [], visual.stands ?? null);
+    if (visual.stands) hasStands = true;
   }
   const point13 = localFramePositionD9({ x: x * D9_PROFILE.tileSize, y: y * D9_PROFILE.tileSize }, state.d9World.runtime.frames);
-  return { originTile: { x, y }, terrain: grid.map((r) => r.join("")), biomes: biomes.map((r) => r.join("")), blockers, decorations, worldAddress: point13 };
+  return { originTile: { x, y }, terrain: grid.map((r) => r.join("")), biomes: biomes.map((r) => r.join("")), blockers, decorations, ...hasStands ? { stands: stands.map((r) => r.join("")) } : {}, worldAddress: point13 };
 }
 
 // src/host/combat_presentation_projection.js
@@ -31227,7 +31254,7 @@ function createActivityClientPort({ authority, localPlayerId, measure = (_n, fn)
         const nearest = visible3.filter((a) => a.alive && a.team === "hostile").sort((a, b) => clearHullGap(local6, a) - clearHullGap(local6, b))[0], tomeTarget = !nearest ? "NO TARGET" : clearHullGap(local6, nearest) > 128 ? "OUT OF RANGE" : visible3.some((a) => a.alive && a.team === "hostile" && clearHullGap(local6, a) <= 128 && subweaponLineClear(c, local6, a)) ? "READY" : "LOS BLOCKED";
         const plannedPosition = state.d9World?.plannedWorld && inOverworld ? localFramePositionD9(local6.position, state.d9World.runtime.frames) : null, plannedRegion = plannedPosition ? state.d9World.runtime.chunks.find((c2) => c2.chunkX === plannedPosition.chunkX && c2.chunkY === plannedPosition.chunkY)?.region : null;
         for (const n of [...serviceNpcs].reverse()) exits.unshift({ exitId: n.id, serviceNpcId: n.id, x: n.position.x, y: n.position.y, radius: 72, available: n.available, label: "Talk to " + n.name + " \xB7 " + n.roleLabel });
-        const woodlandPilotEvents = state.d9World?.plannedWorld && inOverworld ? WOODLAND_EVENT_PILOT_V3_7.map((event) => {
+        const fixedEvents = state.d9World?.plannedWorld && !isSeededBindingV1(state.d9World.plannedWorld) && inOverworld, woodlandPilotEvents = fixedEvents ? WOODLAND_EVENT_PILOT_V3_7.map((event) => {
           const anchor = state.d9World.runtime.chunks.flatMap((chunk2) => chunk2.anchors).find((a) => a.ordinal === event.ordinal && isWoodlandPilotEventAnchor(a)), groupId = anchor ? "ordinary:" + anchor.id.split(":").at(-1) : null, group = groupId ? state.groupsById[groupId] : null;
           return { slotId: event.slotId, state: group?.cleared ? "completed" : eventRecord(state, groupId) ? "active" : "undiscovered" };
         }) : [];
@@ -31257,7 +31284,7 @@ function createActivityClientPort({ authority, localPlayerId, measure = (_n, fn)
           bossHazards,
           context: freezeProjection({ protocolVersion: 1, campaignId: state.campaign.campaignId, sessionId: state.session.sessionId, expectedSaveRevision: state.campaign.saveRevision, ...ctx, nextClientSequence: engine.nextClientSequence(localPlayerId) }),
           woodlandPilotEvents: freezeProjection(woodlandPilotEvents),
-          woodlandPilotClues: freezeProjection(state.d9World?.plannedWorld && inOverworld ? woodlandEventCluesV3_8(localFramePositionD9(local6.position, state.d9World.runtime.frames), woodlandPilotEvents) : []),
+          woodlandPilotClues: freezeProjection(fixedEvents ? woodlandEventCluesV3_8(localFramePositionD9(local6.position, state.d9World.runtime.frames), woodlandPilotEvents) : []),
           primary: freezeProjection({ actorsById: primaryActors, events }),
           encounter: null,
           recovery: Object.freeze({ canRespawn: !local6.alive, anchorLabel: plannedStartLabel(state.d9World?.plannedWorld, m.settlements.find((s) => s.settlementId === m.start.settlementId).label) }),
@@ -42784,7 +42811,7 @@ function createDynamicWorldLightsV1(doc) {
   const darknessOf = (frame) => {
     const [r, g, b] = frame.ambient;
     return Math.max(0, 1 - (r + g + b) / 765);
-  };
+  }, glowStrength = (frame) => frame?.enabled ? Math.min(1, (frame.profile === "interior" ? 0.4 : 0) + darknessOf(frame) * 1.4) : 0;
   function illuminate(lc, model, view2, frame, time, player) {
     drawn = 0;
     if (!frame?.enabled) return;
@@ -42813,10 +42840,14 @@ function createDynamicWorldLightsV1(doc) {
     if (player?.alive && !interior2) pool(player.position.x, player.position.y - 6, 124, PLAYER, 0.68);
     lc.restore();
   }
-  function glow9(ctx, model, view2, frame, time, player = null) {
+  const CORE = 30, coreRect = (portal) => ({ x: portal.x - CORE, y: portal.y - CORE * 0.7, w: CORE * 2, h: CORE * 1.4 });
+  function portalCores(model, view2, frame) {
+    if (glowStrength(frame) < 0.04) return [];
+    return (model.space.exits ?? []).filter((portal) => portal.extractionPortal?.visible && !(portal.x + CORE < view2.x || portal.y + CORE < view2.y || portal.x - CORE > view2.x + view2.width || portal.y - CORE > view2.y + view2.height)).map((portal) => ({ id: "portal-core/" + portal.exitId, ground: true, ...coreRect(portal) }));
+  }
+  function glow9(ctx, model, view2, frame, time, player = null, through = null) {
     cores = 0;
-    if (!frame?.enabled) return;
-    const strength = Math.min(1, (frame.profile === "interior" ? 0.4 : 0) + darknessOf(frame) * 1.4);
+    const strength = glowStrength(frame);
     if (strength < 0.04) return;
     const visible3 = (x, y, r) => !(x + r < view2.x || y + r < view2.y || x - r > view2.x + view2.width || y - r > view2.y + view2.height);
     ctx.save();
@@ -42836,17 +42867,22 @@ function createDynamicWorldLightsV1(doc) {
     if (player?.alive) bounce(player.position.x, player.position.y - 6, 96, PLAYER, 0.06);
     ctx.globalCompositeOperation = "lighter";
     const pulse = 0.85 + 0.15 * Math.sin(time * 4e-3);
-    for (const portal of model.space.exits ?? []) {
-      if (!portal.extractionPortal?.visible) continue;
-      const r = 30;
-      if (portal.x + r < view2.x || portal.y + r < view2.y || portal.x - r > view2.x + view2.width || portal.y - r > view2.y + view2.height) continue;
-      ctx.globalAlpha = 0.32 * strength * pulse;
-      ctx.drawImage(stamp5(PORTAL_OUTER, true), portal.x - r, portal.y - r * 0.7, r * 2, r * 1.4);
+    for (const core5 of portalCores(model, view2, frame)) {
+      const paint = (c) => {
+        c.globalAlpha = 0.32 * strength * pulse;
+        c.drawImage(stamp5(PORTAL_OUTER, true), core5.x, core5.y, core5.w, core5.h);
+      };
+      if (through) through(ctx, core5.id, (c) => {
+        c.save();
+        paint(c);
+        c.restore();
+      }, "lighter");
+      else paint(ctx);
       cores++;
     }
     ctx.restore();
   }
-  return Object.freeze({ illuminate, glow: glow9, resources: () => ({ dynamicWorldLights: { version: DYNAMIC_WORLD_LIGHTS_VERSION, drawn, cores } }) });
+  return Object.freeze({ illuminate, glow: glow9, portalCores, resources: () => ({ dynamicWorldLights: { version: DYNAMIC_WORLD_LIGHTS_VERSION, drawn, cores } }) });
 }
 
 // src/client/skill_lights_v1.js
@@ -44576,6 +44612,15 @@ function chip(c, contact, lift, angle3, size, color28, light2, fade) {
   poly4(c, [[-size, -size * 0.35], [-size * 0.2, -size], [size, -size * 0.3], [-size * 0.1, 0]], light2, null);
   c.restore();
 }
+function bossPolishEffectLights(model, tick) {
+  const out = [];
+  for (const row2 of impacts(model, tick).slice(0, 8)) {
+    if (row2.ability !== "shield_bash") continue;
+    const k = lightEnvelope(tick - row2.resolvedTick, 19);
+    if (k > 0.01) out.push({ x: row2.position.x + Math.cos(row2.angle) * 51, y: row2.position.y + Math.sin(row2.angle) * 51 - 14, r: 46, color: CYAN, alpha: 0.6 * k });
+  }
+  return out;
+}
 function bossPolishDepthItems(model, tick, viewport = null) {
   const items = [];
   const visible3 = (p) => !viewport || p.x >= viewport.x - 60 && p.x <= viewport.x + viewport.width + 60 && p.y >= viewport.y - 40 && p.y <= viewport.y + viewport.height + 100;
@@ -44675,6 +44720,40 @@ function drawAegisProjectileTrails(c, model, tick) {
     }
   }
   c.restore();
+}
+
+// src/client/fx_layers_v1.js
+var pass = null;
+var sink = null;
+var groundPassV1 = () => pass === null || pass === "ground";
+var uprightPassV1 = () => pass === null || pass === "upright";
+function inFxPassV1(p, draw) {
+  const old2 = pass;
+  pass = p;
+  try {
+    return draw();
+  } finally {
+    pass = old2;
+  }
+}
+function standV1(ctx, gy, draw) {
+  if (pass === null) {
+    ctx.save();
+    draw();
+    ctx.restore();
+  } else if (pass === "spread") sink.push({ y: gy, draw });
+}
+function spreadPiecesV1(paint) {
+  const oldPass = pass, oldSink = sink;
+  pass = "spread";
+  sink = [];
+  try {
+    paint();
+    return sink;
+  } finally {
+    pass = oldPass;
+    sink = oldSink;
+  }
 }
 
 // src/client/boss_presentation_biome_v1.js
@@ -44994,36 +45073,85 @@ function drawRelease(c, a, q, facing2) {
   const x = a.position.x, y = a.position.y + FEET;
   if (q.last === "crown_flame" && q.since < 10 && q.target) {
     const k = q.since / 10, from = { x, y: y - 76 * SCALE24 }, to = q.target, h = { x: from.x + (to.x - from.x) * ease3(k * 1.6), y: from.y + (to.y - from.y) * ease3(k * 1.6) };
-    c.save();
-    c.globalAlpha = 1 - k;
-    c.strokeStyle = "rgba(150,255,130,.8)";
-    c.lineWidth = 5;
-    c.lineCap = "round";
-    c.beginPath();
-    c.moveTo(from.x, from.y);
-    c.lineTo(h.x, h.y);
-    c.stroke();
-    aura3(c, h.x, h.y, 14, "rgba(190,255,160,.9)");
-    c.restore();
+    standV1(c, y + (to.y - y) * ease3(k * 1.6), () => {
+      c.globalAlpha = 1 - k;
+      c.strokeStyle = "rgba(150,255,130,.8)";
+      c.lineWidth = 5;
+      c.lineCap = "round";
+      c.beginPath();
+      c.moveTo(from.x, from.y);
+      c.lineTo(h.x, h.y);
+      c.stroke();
+      aura3(c, h.x, h.y, 14, "rgba(190,255,160,.9)");
+    });
   }
   if (q.last === "solar_beam" && q.since < 18 && q.target) {
     const k = q.since / 18, pose = staffPose(q, 0), [sx, sy] = around(PIVOT.sun_pharaoh, pose, SUN[0], SUN[1]), from = { x: x + sx * SCALE24 * facing2, y: y + sy * SCALE24 };
     const angle3 = Math.atan2(q.target.y - a.position.y, q.target.x - a.position.x), length = BIOME_BOSS_REACH_V1.solar_beam, w = BIOME_BOSS_REACH_V1.solarBeamHalfWidth * (1 - k * 0.6);
-    c.save();
-    c.translate(from.x, from.y);
-    c.rotate(angle3);
-    c.globalAlpha = 1 - ease3(k);
-    const g = c.createLinearGradient(0, -w, 0, w);
-    g.addColorStop(0, "rgba(255,190,60,0)");
-    g.addColorStop(0.35, "rgba(255,214,90,.85)");
-    g.addColorStop(0.5, "rgba(255,252,220,1)");
-    g.addColorStop(0.65, "rgba(255,214,90,.85)");
-    g.addColorStop(1, "rgba(255,190,60,0)");
-    c.fillStyle = g;
-    c.fillRect(0, -w, length, w * 2);
-    aura3(c, 0, 0, w * 1.4, "rgba(255,240,170,.9)");
-    c.restore();
+    const beam3 = () => {
+      c.save();
+      c.translate(from.x, from.y);
+      c.rotate(angle3);
+      c.globalAlpha = 1 - ease3(k);
+      const g = c.createLinearGradient(0, -w, 0, w);
+      g.addColorStop(0, "rgba(255,190,60,0)");
+      g.addColorStop(0.35, "rgba(255,214,90,.85)");
+      g.addColorStop(0.5, "rgba(255,252,220,1)");
+      g.addColorStop(0.65, "rgba(255,214,90,.85)");
+      g.addColorStop(1, "rgba(255,190,60,0)");
+      c.fillStyle = g;
+      c.fillRect(0, -w, length, w * 2);
+      aura3(c, 0, 0, w * 1.4, "rgba(255,240,170,.9)");
+      c.restore();
+    };
+    const lift = y - from.y, reach = w * 1.5, end = from.y + Math.sin(angle3) * length, top = Math.min(from.y, end) - reach, bottom = Math.max(from.y, end) + reach, edge = (v) => {
+      const m = c.getTransform();
+      return (Math.round(m.d * v + m.f) - m.f) / m.d;
+    };
+    for (let b = top; b < bottom; b += 24) {
+      const b1 = Math.min(bottom, b + 24);
+      standV1(c, (b + b1) / 2 + lift, () => {
+        const y0 = edge(b), y1 = edge(b1);
+        c.beginPath();
+        c.rect(from.x - length - reach, y0, (length + reach) * 2, y1 - y0);
+        c.clip();
+        beam3();
+      });
+    }
   }
+}
+function biomeBossReleaseDepthItemsV1(c, model, t) {
+  if (!canPaint()) return [];
+  const items = [];
+  for (const [id, a] of Object.entries(model.entitiesById ?? {})) {
+    if (!a.alive || !hasBiomeBossPainter(a.boss?.bossDefinitionId)) continue;
+    const facing2 = views.get(a.boss.bossId ?? "boss")?.facing ?? 1;
+    spreadPiecesV1(() => drawRelease(c, a, cast(a.boss, t), facing2)).forEach((p, k) => items.push(depthItem({ id: "boss-release/" + id + "/" + k, anchorX: a.position.x, anchorY: p.y + 0.5, draw: (g) => {
+      g.save();
+      p.draw();
+      g.restore();
+    } })));
+  }
+  return items;
+}
+function biomeBossReleaseLightsV1(model, t) {
+  if (!canPaint()) return [];
+  const out = [];
+  for (const a of Object.values(model.entitiesById ?? {})) {
+    if (!a.alive || !hasBiomeBossPainter(a.boss?.bossDefinitionId)) continue;
+    const q = cast(a.boss, t), x = a.position.x, y = a.position.y + FEET;
+    if (!q.target) continue;
+    if (q.last === "crown_flame" && q.since < 10) {
+      const k = q.since / 10, e = ease3(k * 1.6), top = y - 76 * SCALE24;
+      out.push({ x: x + (q.target.x - x) * e, y: top + (q.target.y - top) * e, r: 44, color: "#a8ff8c", alpha: 0.6 * (1 - k) });
+    }
+    if (q.last === "solar_beam" && q.since < 18) {
+      const k = q.since / 18, facing2 = views.get(a.boss.bossId ?? "boss")?.facing ?? 1, [sx, sy] = around(PIVOT.sun_pharaoh, staffPose(q, 0), SUN[0], SUN[1]), from = { x: x + sx * SCALE24 * facing2, y: y + sy * SCALE24 };
+      const angle3 = Math.atan2(q.target.y - a.position.y, q.target.x - a.position.x), length = BIOME_BOSS_REACH_V1.solar_beam;
+      for (let i = 0; i <= 5; i++) out.push({ x: from.x + Math.cos(angle3) * length * i / 5, y: from.y + Math.sin(angle3) * length * i / 5, r: 52, color: "#ffd36a", alpha: 0.7 * (1 - ease3(k)) });
+    }
+  }
+  return out;
 }
 function drawBiomeBossV1(c, a, t, flash = false) {
   const id = a.boss?.bossDefinitionId;
@@ -45045,7 +45173,7 @@ function drawBiomeBossV1(c, a, t, flash = false) {
   else if (id === "barrow_king") drawKing(c, q, t, phase2, flash);
   else drawPharaoh(c, q, t, phase2, flash);
   c.restore();
-  if (paint && a.alive) drawRelease(c, a, q, v.facing);
+  if (paint && a.alive && eliteLayerD12_4() !== "body") drawRelease(c, a, q, v.facing);
   return true;
 }
 function ring(c, x, y, r, color28, alpha2, width) {
@@ -49734,6 +49862,50 @@ function extendedBossDepthItems(model, tick, viewport) {
   if (!a) return [];
   return [...chronosDepthItems(a, tick, viewport), ...nexusDepthItems(a, tick, viewport), ...hooktailDepthItems(a, tick, viewport), ...cinderhartDepthItems(a, tick, viewport)];
 }
+var GLOW = { chronos: "#e2ac43", chronosPale: "#ffe8ad", nexus: "#f12c94", nexusHot: "#ff8bc9", hooktail: "#ff6031", cinderhart: "#f27632" };
+function extendedBossEffectLights(model, tick) {
+  const a = projected(model, tick);
+  if (!a) return [];
+  const h = a.bossHazards, out = [], at4 = (p, lift, r, color28, alpha2) => {
+    if (p && alpha2 > 0.01) out.push({ x: p.x, y: p.y - lift, r, color: color28, alpha: alpha2 });
+  };
+  const ramp4 = (row2) => Math.max(0, Math.min(1, (tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick))), pending = (row2) => tick >= row2.startedTick && tick <= row2.resolvesTick;
+  const body5 = (row2) => a.entitiesById?.[row2.sourceEntityId]?.position ?? row2.currentPosition ?? row2.position;
+  for (const row2 of h.chronosTelegraphs ?? []) if (row2.ability === "slam" && pending(row2)) at4(row2.position ?? row2.targetPosition, 10, 80, GLOW.chronos, 0.2 + 0.35 * ramp4(row2));
+  for (const row2 of h.chronosImpacts ?? []) at4(row2.targetPosition, 12, 90, GLOW.chronos, 0.7 * lightEnvelope(tick - row2.resolvedTick, 40));
+  for (const row2 of h.chronosRewinds ?? []) {
+    const active = row2.outcome === "channeling", age = row2.resolvedTick == null ? 0 : tick - row2.resolvedTick;
+    if (active || age >= 0 && age < 40) at4(body5(row2), 40, 70, GLOW.chronosPale, 0.45 * (active ? 1 : 1 - age / 40));
+  }
+  for (const row2 of h.nexusTelegraphs ?? []) if (row2.ability === "prism_collapse" && pending(row2)) at4(row2.position ?? row2.targetPosition, 20, 72, GLOW.nexus, 0.2 + 0.3 * ramp4(row2));
+  for (const row2 of h.nexusImpacts ?? []) {
+    const age = tick - row2.resolvedTick;
+    if (row2.ability === "prism_collapse") at4(row2.targetPosition, 20, 84, GLOW.nexus, 0.7 * lightEnvelope(age, 40));
+    else if (row2.ability === "strike") at4(row2.targetPosition, 10, 26, GLOW.nexusHot, 0.45 * lightEnvelope(age, 14));
+  }
+  for (const row2 of h.nexusBarriers ?? []) {
+    const active = row2.outcome === "active", age = tick - (row2.resolvedTick ?? tick);
+    if (active || age >= 0 && age < 30) at4(body5(row2), 40, 64, GLOW.nexus, 0.4 * (active ? 1 : 1 - age / 30));
+  }
+  for (const row2 of h.nexusProjectiles ?? []) if (tick >= row2.createdTick && tick <= row2.expiresTick) at4(row2.position, 6, 34, GLOW.nexusHot, 0.55);
+  for (const row2 of h.hooktailImpacts ?? []) {
+    if (row2.ability !== "scarlet_fire" || !row2.originPosition) continue;
+    const k = lightEnvelope(tick - row2.resolvedTick, 30), sign2 = row2.facing < 0 ? -1 : 1, range2 = row2.range ?? 110;
+    for (const t of [0.3, 0.65, 1]) at4({ x: row2.originPosition.x + sign2 * range2 * t, y: row2.originPosition.y }, 13, 40 + t * 14, GLOW.hooktail, 0.6 * k);
+  }
+  for (const row2 of h.cinderhartFires ?? []) {
+    const age = tick - row2.createdTick, left = row2.expiresTick - tick;
+    if (age < 0 || left <= 0) continue;
+    const heat = tick >= row2.ignitesTick ? Math.max(0.18, Math.min(1, left / 60)) : 0.25;
+    at4(row2.position, 10, (row2.radius ?? 30) + 22, GLOW.cinderhart, 0.65 * heat * Math.min(1, age / 12) * (0.9 + 0.1 * Math.sin(tick * 0.7 + row2.position.x)));
+  }
+  for (const actor of Object.values(a.entitiesById ?? {})) if (actor.boss?.bossDefinitionId === "cinderhart" && actor.boss.rush) {
+    const r = actor.boss.rush;
+    at4(actor.position, 16, 64, GLOW.cinderhart, 0.5);
+    if (r.originPosition) at4({ x: (r.originPosition.x + actor.position.x) / 2, y: (r.originPosition.y + actor.position.y) / 2 }, 10, 50, GLOW.cinderhart, 0.35);
+  }
+  return out;
+}
 function drawExtendedSummonActor(c, actor, tick, flash = false) {
   if (!isExtendedSummon(actor)) return false;
   const boss = Object.values(cacheModel?.entitiesById ?? {}).find((a) => a.boss?.bossId === actor.bossSummon.bossId);
@@ -49903,6 +50075,31 @@ function archivedBossDepthItems(model, tick, viewport = null) {
   const v = archivedBossArtModel(model, tick);
   if (!v) return [];
   return [...corrosiveDepthItems(v, tick, viewport), ...voidDepthItems(v, tick, viewport), ...extendedBossDepthItems(model, tick, viewport)];
+}
+var ACID2 = "#b5e976";
+var VIOLET2 = "#9d58d0";
+var VOID_PINK = "#ed459b";
+var VOID_PALE = "#efd3ff";
+function archivedBossEffectLights(model, tick) {
+  const v = archivedBossArtModel(model, tick);
+  if (!v) return [];
+  const h = v.bossHazards, out = [], at4 = (p, lift, r, color28, alpha2) => {
+    if (p && alpha2 > 0.01) out.push({ x: p.x, y: p.y - lift, r, color: color28, alpha: alpha2 });
+  };
+  for (const row2 of h.corrosiveImpacts ?? []) if (row2.ability === "slam") at4(row2.targetPosition, 8, 58, ACID2, 0.55 * lightEnvelope(tick - row2.resolvedTick, 40));
+  for (const row2 of h.corrosiveSpores ?? []) if ((row2.stage ?? "drifting") === "drifting") at4(row2.position, 7, 20, ACID2, 0.25);
+  for (const row2 of h.voidTelegraphs ?? []) if (row2.ability === "slam" && tick >= row2.startedTick && tick <= row2.resolvesTick) at4(row2.position ?? row2.targetPosition, 10, 72, VIOLET2, 0.2 + 0.35 * Math.min(1, Math.max(0, (tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick))));
+  for (const row2 of h.voidImpacts ?? []) {
+    const age = tick - row2.resolvedTick;
+    if (row2.ability === "eye_lance") {
+      const k = lightEnvelope(age, 20);
+      if (k <= 0.01) continue;
+      const g = voidEyeLanceGeometry(row2, v.entitiesById?.[row2.sourceEntityId], tick);
+      for (let i = 0; i <= 4; i++) at4({ x: g.from.x + (g.to.x - g.from.x) * i / 4, y: g.from.y + (g.to.y - g.from.y) * i / 4 }, 0, 44, VOID_PINK, 0.6 * k);
+    } else if (row2.ability === "slam") at4(row2.targetPosition, 12, 84, VIOLET2, 0.7 * lightEnvelope(age, 40));
+    else if (row2.ability === "strike") at4(row2.targetPosition, 10, 28, VOID_PALE, 0.45 * lightEnvelope(age, 14));
+  }
+  return [...out, ...extendedBossEffectLights(model, tick)];
 }
 function drawArchivedBossHud(c, canvas, model) {
   const v = archivedBossArtModel(model, model.tick);
@@ -50144,7 +50341,7 @@ var LIGHT8 = "#ffe094";
 var PALE9 = "#fff1c3";
 var BRASS2 = "#b07729";
 var RED2 = "#f05b4b";
-var VIOLET2 = "#b17be1";
+var VIOLET3 = "#b17be1";
 var MOLTEN = "#ee762b";
 var clamp43 = (x) => Math.max(0, Math.min(1, x));
 var ease13 = (x) => {
@@ -50485,12 +50682,12 @@ function drawMarcusTheOutlaw(c, actor2, tick, flash = false) {
   return true;
 }
 function warning2(c, p, r, q, color82 = GOLD8) {
-  ellipse11(c, p.x, p.y, r, r, color82 === VIOLET2 ? "#9f64d20b" : "#e3b5430b");
+  ellipse11(c, p.x, p.y, r, r, color82 === VIOLET3 ? "#9f64d20b" : "#e3b5430b");
   ring4(c, p.x, p.y, r, INK41, 2.5);
   ring4(c, p.x, p.y, r, color82, 1.05);
   c.beginPath();
   c.arc(p.x, p.y, r - 3, -Math.PI / 2, -Math.PI / 2 + TAU54 * q);
-  c.strokeStyle = color82 === VIOLET2 ? "#e4bdff" : PALE9;
+  c.strokeStyle = color82 === VIOLET3 ? "#e4bdff" : PALE9;
   c.lineWidth = 1.3;
   c.stroke();
 }
@@ -50502,7 +50699,7 @@ function reversalMarks(c, p, r, turn42, alpha2 = 1) {
   for (let i = 0; i < 4; i++) {
     c.save();
     c.rotate(i * TAU54 / 4);
-    line8(c, [[r - 7, -4], [r - 1, -4], [r - 1, 3]], VIOLET2, 1.05);
+    line8(c, [[r - 7, -4], [r - 1, -4], [r - 1, 3]], VIOLET3, 1.05);
     polygon22(c, [[r - 4, 1], [r - 1, 6], [r + 2, 1]], "#ddafff", false);
     c.restore();
   }
@@ -50520,14 +50717,14 @@ function drawMarcusGround(c, model2, tick) {
     const q = progress6(row2, tick), p = row2.position ?? row2.targetPosition;
     if (row2.ability === "lasso") warning2(c, p, 48, q);
     else if (row2.ability === "inversion") {
-      warning2(c, p, 120, q, VIOLET2);
+      warning2(c, p, 120, q, VIOLET3);
       reversalMarks(c, p, 104, -TAU54 * ease13(q) * 0.5, 0.35 + 0.65 * q);
       c.save();
       c.translate(p.x, p.y);
       c.globalAlpha *= 0.35 + 0.5 * q;
       for (const side of [0, Math.PI]) {
         const a = side - q * 2.2;
-        c.strokeStyle = VIOLET2;
+        c.strokeStyle = VIOLET3;
         c.lineWidth = 2.5;
         c.beginPath();
         c.arc(0, 0, 43, a, a + 1.7);
@@ -50572,7 +50769,7 @@ function drawMarcusGround(c, model2, tick) {
       c.save();
       c.globalAlpha *= 1 - ease13(age / 36);
       ellipse11(c, p.x, p.y, 120, 120, "#9d58d418");
-      ring4(c, p.x, p.y, 120, VIOLET2, 1.15);
+      ring4(c, p.x, p.y, 120, VIOLET3, 1.15);
       ring4(c, p.x, p.y, 12 + 108 * ease13(age / 14), "#e6baff", 1.3);
       reversalMarks(c, p, 104, -Math.PI - age * 0.035, 0.7);
       c.restore();
@@ -51898,6 +52095,37 @@ function treasuryBossDepthItems(model, tick, viewport) {
   if (!a) return [];
   return [...marcusDepthItems(a, tick, viewport), ...gildedDepthItems(a, tick, viewport)];
 }
+var GOLD10 = "#e9b747";
+var PALE_GOLD2 = "#ffe094";
+function treasuryBossEffectLights(model, tick) {
+  const a = project(model, tick);
+  if (!a) return [];
+  const h = a.bossHazards ?? {}, out = [], at4 = (p, lift, r, color28, alpha2) => {
+    if (p && alpha2 > 0.01) out.push({ x: p.x, y: p.y - lift, r, color: color28, alpha: alpha2 });
+  };
+  const body5 = (row2) => a.entitiesById?.[row2.sourceEntityId]?.position ?? row2.currentPosition ?? row2.sourcePosition ?? row2.originPosition ?? row2.position;
+  const ward = (row2, life) => {
+    const active = row2.outcome === "channeling", age = row2.resolvedTick == null ? 0 : tick - row2.resolvedTick;
+    return tick < row2.startedTick || !active && (age < 0 || age >= life) ? 0 : active ? 1 : 1 - age / life;
+  };
+  const siphon3 = (row2, life) => {
+    const last = row2.lastSiphon;
+    if (!last || !row2.targetPosition) return;
+    const k = lightEnvelope(tick - last.tick, life);
+    at4(row2.targetPosition, 12, 28, PALE_GOLD2, 0.4 * k);
+  };
+  for (const row2 of h.marcusMoltenShields ?? []) {
+    at4(body5(row2), 30, 72, GOLD10, 0.5 * ward(row2, 36));
+    siphon3(row2, 15);
+  }
+  for (const row2 of h.marcusImpacts ?? []) if (row2.ability === "strike") at4(row2.targetPosition, 10, 30, PALE_GOLD2, 0.45 * lightEnvelope(tick - row2.resolvedTick, 12));
+  for (const row2 of h.gildedTaxations ?? []) {
+    at4(body5(row2), 42, 72, GOLD10, 0.45 * ward(row2, 36));
+    siphon3(row2, 24);
+  }
+  for (const row2 of h.gildedImpacts ?? []) if (row2.ability === "strike") at4(row2.targetPosition, 8, 24, PALE_GOLD2, 0.4 * lightEnvelope(tick - row2.resolvedTick, 14));
+  return out;
+}
 function drawTreasuryBossHudV2(c, canvas, model) {
   const art = project(model, model.tick);
   if (!art) return false;
@@ -52460,6 +52688,7 @@ function woodlandPilotEventDepthItems(model, viewport, time) {
   const status2 = new Map((model.woodlandPilotEvents ?? []).map((event) => [event.slotId, event.state]));
   const result = [];
   for (const event of WOODLAND_EVENT_PILOT_V3_7) {
+    if (!status2.has(event.slotId)) continue;
     const center3 = projectToLocalFrameD9(woodlandPilotWorldPosition(event), frames);
     if (!center3 || center3.x < viewport.x - 125 || center3.y < viewport.y - 125 || center3.x > viewport.x + viewport.width + 125 || center3.y > viewport.y + viewport.height + 125) continue;
     const near = Math.hypot(center3.x - hero.x, center3.y - hero.y) < 280;
@@ -52526,7 +52755,7 @@ var COAL2 = "#292b37";
 var STONE4 = "#555561";
 var RUST3 = "#a04f35";
 var LAVA = "#f6662c";
-var GOLD10 = "#ffbd53";
+var GOLD11 = "#ffbd53";
 var WHITE = "#fff0b0";
 var clamp45 = (v) => Math.max(0, Math.min(1, v));
 var lerp7 = (a, b, p) => a + (b - a) * p;
@@ -52626,7 +52855,7 @@ function spokes(c, seed2, r, progress8) {
     const pts = [[Math.cos(angle3) * 7, Math.sin(angle3) * 7], [Math.cos(angle3 + j) * length * 0.45, Math.sin(angle3 + j) * length * 0.45], [Math.cos(angle3 - j) * length * progress8, Math.sin(angle3 - j) * length * progress8]];
     line11(c, pts, "#713c36", 5);
     line11(c, pts, LAVA, 2.4);
-    line11(c, pts, progress8 > 0.8 ? GOLD10 : "#ee8140", 0.8);
+    line11(c, pts, progress8 > 0.8 ? GOLD11 : "#ee8140", 0.8);
     if (i % 2 === 0) {
       const m = pts[1];
       line11(c, [m, [m[0] + Math.cos(angle3 + 0.8) * 11, m[1] + Math.sin(angle3 + 0.8) * 11]], LAVA, 1.3);
@@ -52662,14 +52891,14 @@ function moltenTarget(c, p, r, progress8, seed2) {
     const a = i * TAU57 / 8;
     c.save();
     c.rotate(a);
-    polygon24(c, [[r - 9, -2], [r - 1, -4], [r, 0], [r - 1, 4], [r - 9, 2], [r - 5, 0]], progress8 > i / 9 ? GOLD10 : RUST3, INK43, 1);
+    polygon24(c, [[r - 9, -2], [r - 1, -4], [r, 0], [r - 1, 4], [r - 9, 2], [r - 5, 0]], progress8 > i / 9 ? GOLD11 : RUST3, INK43, 1);
     c.restore();
   }
   for (let i = 0; i < 12; i++) {
     const a = i * TAU57 / 12 + 0.03;
     c.beginPath();
     c.arc(0, 0, r - 5, a, a + TAU57 / 12 - 0.13);
-    c.strokeStyle = i / 12 < progress8 ? GOLD10 : "#824e3f";
+    c.strokeStyle = i / 12 < progress8 ? GOLD11 : "#824e3f";
     c.lineWidth = 2.2;
     c.stroke();
   }
@@ -52692,7 +52921,7 @@ function ventMouthGround(c, p, q, tick) {
   c.fill();
   c.beginPath();
   c.ellipse(-2, -2, 4 + q * 3, 2.5 + q, 0, 0, TAU57);
-  c.fillStyle = GOLD10;
+  c.fillStyle = GOLD11;
   c.fill();
   for (let i = 0; i < 5; i++) {
     const a = i * TAU57 / 5, x = Math.cos(a) * 15, y = Math.sin(a) * 9;
@@ -52731,7 +52960,7 @@ function ventFissure(c, v, q, erupt, tick) {
       c.save();
       c.globalAlpha *= cooling;
       line11(c, path9, LAVA, 3.5 + cooling * 3);
-      line11(c, path9, GOLD10, 1 + cooling * 2.4);
+      line11(c, path9, GOLD11, 1 + cooling * 2.4);
       if (age < 18) {
         c.globalAlpha *= 1 - ease16(age / 18);
         line11(c, path9, WHITE, 1.2);
@@ -52740,7 +52969,7 @@ function ventFissure(c, v, q, erupt, tick) {
     } else line11(c, path9, "#fa7239", 1.4 + q * 2);
     for (let d = 19; d < opened - 4; d += 25) {
       const sign2 = Math.sin(d + seed2) > 0 ? 1 : -1, y = Math.sin(d * 0.19 + seed2) * 4;
-      line11(c, [[d, y], [d + 4, sign2 * 7], [d + 11, sign2 * 11]], erupt ? cooling > 0.5 ? GOLD10 : "#754935" : q > 0.8 ? GOLD10 : "#c47443", erupt ? 1.7 : 1);
+      line11(c, [[d, y], [d + 4, sign2 * 7], [d + 11, sign2 * 11]], erupt ? cooling > 0.5 ? GOLD11 : "#754935" : q > 0.8 ? GOLD11 : "#c47443", erupt ? 1.7 : 1);
     }
     if (!erupt) for (const side of [-1, 1]) for (let d = 0; d < a.length; d += 19) line11(c, [[d, side * 11.5], [Math.min(a.length, d + 10), side * 11.5]], q > 0.78 ? "#ffd36e" : "#9d6347", q > 0.78 ? 1.3 : 0.9);
     c.restore();
@@ -52775,7 +53004,7 @@ function slamGround4(c, s, tick) {
   disc3(c, 0, 0, 55 * (1 - burst * 0.45), "#ff923b" + (age < 4 ? "7a" : "28"));
   spokes(c, 17, 62, 1);
   c.globalAlpha = fade * (1 - clamp45(age / 21));
-  c.strokeStyle = GOLD10;
+  c.strokeStyle = GOLD11;
   c.lineWidth = 4 * (1 - burst) + 1;
   c.beginPath();
   c.arc(0, 0, 12 + 52 * Math.sin(burst * Math.PI * 0.5), 0, TAU57);
@@ -52804,7 +53033,7 @@ function drawBrimstoneAttackGround(c, model, tick) {
       for (let i = -1; i <= 1; i++) {
         c.save();
         c.rotate(i * 0.56);
-        polygon24(c, [[37, -1.8], [49, -3.6], [45, 0], [49, 3.6], [37, 1.8], [41, 0]], q > 0.55 ? GOLD10 : RUST3, null);
+        polygon24(c, [[37, -1.8], [49, -3.6], [45, 0], [49, 3.6], [37, 1.8], [41, 0]], q > 0.55 ? GOLD11 : RUST3, null);
         c.restore();
       }
       c.restore();
@@ -52849,7 +53078,7 @@ function lavaJet(c, p, height, width, age, seed2, opacity = 1) {
   c.quadraticCurveTo(width * 0.25, -height * 0.36, width * 0.23, -height * 0.2);
   c.lineTo(width * 0.25, -1);
   c.closePath();
-  c.fillStyle = GOLD10;
+  c.fillStyle = GOLD11;
   c.fill();
   polygon24(c, [[-width * 0.1, -1], [0, -height * 0.23], [width * 0.12, -1]], WHITE, null);
   c.restore();
@@ -52858,8 +53087,29 @@ function ember(c, p, seed2, age, life = 30) {
   const q = clamp45(age / life), a = seed2 * 2.39996, x = p.x + Math.cos(a) * (7 + q * 25), y = p.y - Math.sin(q * Math.PI) * (17 + seed2 % 4 * 6) - q * 8, r = 1.5 + seed2 % 3 * 0.25;
   c.save();
   c.globalAlpha *= Math.sin(q * Math.PI);
-  polygon24(c, [[x - r, y], [x, y - r * 2], [x + r, y], [x, y + r]], seed2 % 2 ? GOLD10 : LAVA, null);
+  polygon24(c, [[x - r, y], [x, y - r * 2], [x + r, y], [x, y + r]], seed2 % 2 ? GOLD11 : LAVA, null);
   c.restore();
+}
+function brimstoneEffectLights(model, tick) {
+  const out = [], at4 = (x, y, r, alpha2) => {
+    if (alpha2 > 0.01) out.push({ x, y, r, color: LAVA, alpha: alpha2 });
+  };
+  for (const v of model.bossHazards?.brimstoneVents ?? []) {
+    if (v.stage !== "erupting") {
+      const q = clamp45((tick - v.createdTick) / 270);
+      at4(v.position.x, v.position.y - 6, 24 + q * 16, 0.3 + q * 0.25);
+      continue;
+    }
+    const center3 = brimstoneEruptionEnvelope(v, tick, 0);
+    at4(v.position.x, v.position.y - 22, 76, 0.8 * center3.opacity * Math.min(1, center3.height + 0.3));
+    for (const a of armSpecs(v)) {
+      if (!(a.length > 0)) continue;
+      const d = a.length / 2, e = brimstoneEruptionEnvelope(v, tick, d);
+      if (e.localAge > 0) at4(v.position.x + a.x * d, v.position.y + a.y * d - 6, Math.max(30, d * 1.1), 0.5 * e.opacity);
+    }
+  }
+  for (const s of brimstoneSlams(model, tick)) at4(s.targetPosition.x, s.targetPosition.y - 20, 66, 0.8 * lightEnvelope(tick - s.resolvedTick, 22));
+  return out;
 }
 function brimstoneEffectDepthItems(model, tick, viewport = null) {
   const items = [], visible3 = (p) => !viewport || p.x >= viewport.x - 40 && p.x <= viewport.x + viewport.width + 40 && p.y >= viewport.y - 24 && p.y <= viewport.y + viewport.height + 95;
@@ -52941,7 +53191,7 @@ function brimstoneEffectDepthItems(model, tick, viewport = null) {
         c.strokeStyle = INK43;
         c.lineWidth = 1.26;
         c.stroke();
-        line11(c, [[-12, -4], [5, -3], [13, 0]], GOLD10, 2.2);
+        line11(c, [[-12, -4], [5, -3], [13, 0]], GOLD11, 2.2);
         c.restore();
       });
     }
@@ -54926,22 +55176,36 @@ function createNightGroundItemsV1({ enabled = () => true } = {}) {
       } });
     });
   }
-  function emission(ctx, _model = currentModel, _time = currentTime, _viewport = view2, { frame = null } = {}) {
+  function lit() {
+    const out = [];
+    for (const r of beamRecords) {
+      const t = pose(r);
+      if (!(t.rarity > 0 && out.length < 4 && r.removed === null)) continue;
+      const radius = 34 + t.rarity * 5;
+      out.push({ r, t, radius, id: "loot-glow/" + (r.drop.itemId ?? r.drop.sourceEntityId) });
+    }
+    return out;
+  }
+  function floorGlows() {
+    return enabled() ? lit().map(({ t, radius, id }) => ({ id, ground: true, x: t.contact.x - radius, y: t.contact.y - radius, w: radius * 2, h: radius * 2 })) : [];
+  }
+  function emission(ctx, _model = currentModel, _time = currentTime, _viewport = view2, { frame = null, through = null } = {}) {
     if (!enabled()) return;
     let lights = 0;
     const strength = 0.15 + 0.36 * nightReadabilityStrength(frame);
-    for (const r of beamRecords) {
-      const t = pose(r);
-      if (!(t.rarity > 0 && lights < 4 && r.removed === null)) continue;
-      const s = sprites3(ctx, t.rarity), radius = 34 + t.rarity * 5;
-      ctx.save();
-      if (clips.clip(ctx, currentModel.space, r.drop.itemId ?? r.drop.sourceEntityId, t.contact.x, t.contact.y, radius)) {
-        ctx.globalCompositeOperation = "lighter";
-        ctx.globalAlpha = t.alpha * strength;
-        ctx.drawImage(s.glow, t.contact.x - radius, t.contact.y - radius, radius * 2, radius * 2);
-        lights++;
-      }
-      ctx.restore();
+    for (const { r, t, radius, id } of lit()) {
+      const s = sprites3(ctx, t.rarity), paint = (c) => {
+        c.save();
+        if (clips.clip(c, currentModel.space, r.drop.itemId ?? r.drop.sourceEntityId, t.contact.x, t.contact.y, radius)) {
+          c.globalCompositeOperation = "lighter";
+          c.globalAlpha = t.alpha * strength;
+          c.drawImage(s.glow, t.contact.x - radius, t.contact.y - radius, radius * 2, radius * 2);
+          lights++;
+        }
+        c.restore();
+      };
+      if (through) through(ctx, id, paint, "lighter");
+      else paint(ctx);
     }
     counts.lights = lights;
   }
@@ -55043,7 +55307,7 @@ function createNightGroundItemsV1({ enabled = () => true } = {}) {
     }
     return counts;
   }
-  return { draw, depthItems: depthItems2, emission, labels: labels2, clear() {
+  return { draw, depthItems: depthItems2, floorGlows, emission, labels: labels2, clear() {
     records.clear();
     identity2 = null;
     currentModel = null;
@@ -55217,7 +55481,16 @@ function createPotionDropsV1() {
     }
     return out;
   }
-  function emission(ctx, model, time, viewport, { frame } = {}) {
+  function floorGlows(time, viewport, frame) {
+    if (!nightReadabilityStrength(frame) || !records.size || !pool) return [];
+    const out = [];
+    for (const r of records.values()) {
+      const p = place(r, time);
+      if (shown(p, viewport)) out.push({ id: "potion-glow/" + r.drop.id, ground: true, x: p.x - 18, y: p.y - 7, w: 36, h: 14 });
+    }
+    return out;
+  }
+  function emission(ctx, model, time, viewport, { frame, through = null } = {}) {
     const k = nightReadabilityStrength(frame);
     if (!k || !records.size || !pool) return;
     ctx.save();
@@ -55225,12 +55498,20 @@ function createPotionDropsV1() {
     for (const r of records.values()) {
       const p = place(r, time);
       if (!shown(p, viewport)) continue;
-      ctx.globalAlpha = p.alpha * k * 0.55 * (0.8 + 0.2 * Math.sin(time / 520 + p.phase));
-      ctx.drawImage(pool, p.x - 18, p.y - 7, 36, 14);
+      const paint = (c) => {
+        c.globalAlpha = p.alpha * k * 0.55 * (0.8 + 0.2 * Math.sin(time / 520 + p.phase));
+        c.drawImage(pool, p.x - 18, p.y - 7, 36, 14);
+      };
+      if (through) through(ctx, "potion-glow/" + r.drop.id, (c) => {
+        c.save();
+        paint(c);
+        c.restore();
+      }, "lighter");
+      else paint(ctx);
     }
     ctx.restore();
   }
-  return Object.freeze({ draw, depthItems: depthItems2, lights, emission, inspect: () => ({ version: POTION_DROP_ART_VERSION, records: records.size, drawn }) });
+  return Object.freeze({ draw, depthItems: depthItems2, floorGlows, lights, emission, inspect: () => ({ version: POTION_DROP_ART_VERSION, records: records.size, drawn }) });
 }
 
 // src/client/mastery_art.js
@@ -56215,40 +56496,6 @@ function drawGuardWard(ctx, x, y, angle3, type, open2, runes, blockAge, time, mo
   }
 }
 
-// src/client/fx_layers_v1.js
-var pass = null;
-var sink = null;
-var groundPassV1 = () => pass === null || pass === "ground";
-var uprightPassV1 = () => pass === null || pass === "upright";
-function inFxPassV1(p, draw) {
-  const old2 = pass;
-  pass = p;
-  try {
-    return draw();
-  } finally {
-    pass = old2;
-  }
-}
-function standV1(ctx, gy, draw) {
-  if (pass === null) {
-    ctx.save();
-    draw();
-    ctx.restore();
-  } else if (pass === "spread") sink.push({ y: gy, draw });
-}
-function spreadPiecesV1(paint) {
-  const oldPass = pass, oldSink = sink;
-  pass = "spread";
-  sink = [];
-  try {
-    paint();
-    return sink;
-  } finally {
-    pass = oldPass;
-    sink = oldSink;
-  }
-}
-
 // src/client/class_tree_skill_art_v1.js
 var TREE_SKILL_BURST_MS = Object.freeze({ earth_breaker: 780, rallying_cry: 900, counter_stance: 480, lunge: 440, toxic_fan: 560, whirling_blades: 620, firebloom: 820, flashfreeze: 800, ball_lightning: 360 });
 var C = Object.freeze({
@@ -56899,25 +57146,27 @@ function drawLightningOrb(ctx, o, time) {
 function drawCinderTrail(ctx, tr, time) {
   const F = CAST_COLORS.fire, K3 = { deep: "#8a2a0c", main: F.main, spark: F.spark }, fade = Math.min(1, (tr.ticks ?? 60) / 30), dx = tr.x2 - tr.x, dy = tr.y2 - tr.y, len = Math.hypot(dx, dy);
   if (fade <= 0) return;
-  ctx.save();
-  ctx.globalAlpha *= fade;
-  ctx.lineCap = "round";
-  ctx.strokeStyle = "rgba(60,30,14,.32)";
-  ctx.lineWidth = 9;
-  ctx.beginPath();
-  ctx.moveTo(tr.x, tr.y);
-  ctx.lineTo(tr.x2, tr.y2);
-  ctx.stroke();
-  ctx.restore();
-  neon(ctx, K3, 1.2, () => {
+  if (groundPassV1()) {
+    ctx.save();
+    ctx.globalAlpha *= fade;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "rgba(60,30,14,.32)";
+    ctx.lineWidth = 9;
     ctx.beginPath();
     ctx.moveTo(tr.x, tr.y);
     ctx.lineTo(tr.x2, tr.y2);
-  }, fade * 0.9);
+    ctx.stroke();
+    ctx.restore();
+    neon(ctx, K3, 1.2, () => {
+      ctx.beginPath();
+      ctx.moveTo(tr.x, tr.y);
+      ctx.lineTo(tr.x2, tr.y2);
+    }, fade * 0.9);
+  }
   const n = Math.max(2, Math.round(len / 9));
   for (let i = 0; i <= n; i++) {
     const k = i / n, px3 = tr.x + dx * k + (rnd(i + 11) - 0.5) * 5, py = tr.y + dy * k + (rnd(i + 23) - 0.5) * 4, h = (5 + 6 * rnd(i + 5)) * (0.7 + 0.3 * Math.sin(time / 55 + i * 2.1));
-    withAlpha(ctx, fade, () => {
+    standV1(ctx, py, () => withAlpha(ctx, fade, () => {
       ctx.fillStyle = i % 2 ? "#ff7a1f" : "#ffc94d";
       ctx.strokeStyle = "#8a2a0c";
       ctx.lineWidth = 0.6;
@@ -56928,11 +57177,11 @@ function drawCinderTrail(ctx, tr, time) {
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
-    });
+    }));
   }
   for (let i = 0; i < 6; i++) {
-    const cycle = time / 700 + rnd(i + 3), round = Math.floor(cycle), rise = cycle - round, k = rnd(i * 7 + round * 13);
-    mote(ctx, tr.x + dx * k, tr.y + dy * k - 4 - 16 * rise, 1, F.spark, fade * (1 - rise));
+    const cycle = time / 700 + rnd(i + 3), round = Math.floor(cycle), rise = cycle - round, k = rnd(i * 7 + round * 13), gy = tr.y + dy * k;
+    standV1(ctx, gy, () => mote(ctx, tr.x + dx * k, gy - 4 - 16 * rise, 1, F.spark, fade * (1 - rise)));
   }
 }
 var DRAW2 = Object.freeze({ earth_breaker: earthBreaker, rallying_cry: rallyingCry, counter_stance: counterStance, lunge, toxic_fan: toxicFan, whirling_blades: whirlingBlades, firebloom, flashfreeze, ball_lightning: ballLightningCast });
@@ -57708,8 +57957,16 @@ function createCombatVfx() {
     for (const [id, f] of Object.entries(m.combatPresentation?.families ?? {})) {
       const a = m.entitiesById[id];
       if (!a || !visible3(a.position)) continue;
-      put2("hero/" + id, a.position.x, foot(a), (ctx2) => inFxPassV1("upright", () => {
+      if (a.guard) for (const near of [false, true]) put2("ward/" + id + "/" + (near ? "near" : "far"), a.position.x, foot(a) - (near ? 0 : 1), (ctx2) => inFxPassV1("upright", () => {
+        const waist = a.position.y - 12;
+        ctx2.save();
+        ctx2.beginPath();
+        ctx2.rect(a.position.x - 60, near ? waist : waist - 60, 120, 60);
+        ctx2.clip();
         drawWard(ctx2, m, id, a, time, f.wall ?? 0);
+        ctx2.restore();
+      }));
+      put2("hero/" + id, a.position.x, foot(a), (ctx2) => inFxPassV1("upright", () => {
         if (f.dash.frames > 0 && f.blink) drawBlinkStreaks(ctx2, a.position.x, a.position.y, f.dash.x, f.dash.y, time);
         else if (f.dash.frames > 0) {
           drawDashStreaks(ctx2, a.position.x, a.position.y, f.dash.x, f.dash.y, time);
@@ -57722,7 +57979,7 @@ function createCombatVfx() {
         if (visible3(o)) put2("orb/" + id + "/" + k, o.x, o.y + 1, (ctx2) => drawLightningOrb(ctx2, o, time));
       });
       const tr = f.trail;
-      if (tr && (visible3(tr) || visible3({ x: tr.x2, y: tr.y2 }))) put2("trail/" + id, (tr.x + tr.x2) / 2, Math.max(tr.y, tr.y2), (ctx2) => drawCinderTrail(ctx2, tr, time));
+      if (tr && (visible3(tr) || visible3({ x: tr.x2, y: tr.y2 }))) spread("trail/" + id, (tr.x + tr.x2) / 2, () => drawCinderTrail(ctx, tr, time));
       const pool = f.pool;
       if (pool && visible3(pool)) spread("pool/" + id, pool.x, () => drawGhostPool(ctx, pool, time));
     }
@@ -57739,6 +57996,8 @@ function createCombatVfx() {
         if (!a || !visible3(a.position)) continue;
         if (a.subType === "shield") drawCounterWard(ctx, a.position.x, a.position.y, facings.get(id) ?? 1, f.parry > 0, time, parrySpent.has(id) ? time - parrySpent.get(id) : -1);
         if (f.pool && visible3(f.pool)) drawGhostPool(ctx, f.pool, time);
+        const tr = f.trail;
+        if (tr && (visible3(tr) || visible3({ x: tr.x2, y: tr.y2 }))) drawCinderTrail(ctx, tr, time);
       }
     });
     drawMasteryHazards(ctx, m, time);
@@ -58856,14 +59115,27 @@ function createLighting(canvas, { presentation = null } = {}) {
   function fixtures(space, view2, time, { split = false } = {}) {
     return visibleFixtures(space, view2, split).map((light2) => depthItem({ id: "light-fixture/" + light2.id, anchorX: light2.x, anchorY: light2.anchorY ?? light2.y + (light2.kind === "campfire" ? 12 : 18), draw: (ctx) => paintFixture(ctx, space, light2, time, split ? "base" : "combined") }));
   }
-  function emissive(ctx, space, view2, time) {
+  function emissive(ctx, space, view2, time, through = null) {
     fixtureCount = fixtureAnimations = 0;
     for (const light2 of visibleFixtures(space, view2, true)) {
       const animate = light2.dynamic && fixtureAnimations < LIGHT_LIMITS.dynamicVisible;
       if (animate) fixtureAnimations++;
       fixtureCount++;
-      paintFixture(ctx, space, light2, animate ? time : 0, "emissive", animate);
+      const paint = (c) => paintFixture(c, space, light2, animate ? time : 0, "emissive", animate);
+      if (through) through(ctx, "light-fixture/" + light2.id, paint);
+      else paint(ctx);
     }
+  }
+  function glowRect(light2) {
+    const f = light2.fixture;
+    if (f) {
+      const w = f.width ?? 8, h = f.height ?? 15;
+      return f.type === "hearth" ? { x: light2.x - 9, y: light2.y - 15, w: 19, h: 23 } : { x: light2.x - w / 2 - 2, y: light2.y - h / 2 - 3, w: w + 4, h: h + 5 };
+    }
+    return light2.kind === "campfire" ? { x: light2.x - 12, y: light2.y - 42, w: 24, h: 50 } : light2.kind === "torch" ? { x: light2.x - 8, y: light2.y - 28, w: 16, h: 30 } : { x: light2.x - 5, y: light2.y - 2, w: 10, h: 10 };
+  }
+  function glows(space, view2) {
+    return visibleFixtures(space, view2, true).filter((light2) => isLit(space, light2)).map((light2) => ({ id: "light-fixture/" + light2.id, ...glowRect(light2) }));
   }
   function ground(ctx, actor, { unified = false } = {}) {
     if (unified) return;
@@ -58876,7 +59148,7 @@ function createLighting(canvas, { presentation = null } = {}) {
   }
   return Object.freeze({ beginFrame: (value2) => {
     frame = value2;
-  }, draw, fixtures, emissive, ground, clear: clear2, resources: () => ({ lightingProfile: profile, lightFeatherStamps: torchStamps.size, lightFeatherBytes: torchStamps.size * 256 * 256 * 4, lightFieldBuilds: fieldBuilds, lightFieldStep: 16, lightMaxFieldNodes: maxFieldNodes, lightMaxFieldSamples: maxFieldSamples, lightWorstStaticBuildMs: worstStaticBuildMs, lightWorstPlayerLightMs: worstPlayerLightMs, playerLightsRendered: playerLights, ...clips.resources(), lightDescriptorPages: pages.size, lightDescriptors: [...pages.values()].reduce((n, p) => n + (p[previousLighting() ? "base" : "adapted"]?.length ?? 0), 0), lightDescriptorVariants: [...pages.values()].reduce((n, p) => n + (p.base?.length ?? 0) + (p.adapted?.length ?? 0), 0), lightStampBuilds: builds, lightDescriptorBuilds: descriptorBuilds, lightWorstDescriptorMs: worstDescriptorMs, lightStampBytes: stamps.size * 128 * 128 * 4, staticLightsRendered: statics, dynamicLightsConsidered: considered, dynamicLightsRendered: rendered, lightEmbers: embers2, lightFixturesRendered: fixtureCount, lightFixturesAnimated: fixtureAnimations, outdoorLightClipPages: outdoorPages.size, outdoorLightClips: [...outdoorPages.values()].reduce((n, p) => n + p.size, 0), outdoorLightClipBuilds: outdoorBuilds, outdoorLightMaxRays: outdoorMaxRays, outdoorLightMaxBlockers: outdoorMaxBlockers }) });
+  }, draw, fixtures, emissive, glows, ground, clear: clear2, resources: () => ({ lightingProfile: profile, lightFeatherStamps: torchStamps.size, lightFeatherBytes: torchStamps.size * 256 * 256 * 4, lightFieldBuilds: fieldBuilds, lightFieldStep: 16, lightMaxFieldNodes: maxFieldNodes, lightMaxFieldSamples: maxFieldSamples, lightWorstStaticBuildMs: worstStaticBuildMs, lightWorstPlayerLightMs: worstPlayerLightMs, playerLightsRendered: playerLights, ...clips.resources(), lightDescriptorPages: pages.size, lightDescriptors: [...pages.values()].reduce((n, p) => n + (p[previousLighting() ? "base" : "adapted"]?.length ?? 0), 0), lightDescriptorVariants: [...pages.values()].reduce((n, p) => n + (p.base?.length ?? 0) + (p.adapted?.length ?? 0), 0), lightStampBuilds: builds, lightDescriptorBuilds: descriptorBuilds, lightWorstDescriptorMs: worstDescriptorMs, lightStampBytes: stamps.size * 128 * 128 * 4, staticLightsRendered: statics, dynamicLightsConsidered: considered, dynamicLightsRendered: rendered, lightEmbers: embers2, lightFixturesRendered: fixtureCount, lightFixturesAnimated: fixtureAnimations, outdoorLightClipPages: outdoorPages.size, outdoorLightClips: [...outdoorPages.values()].reduce((n, p) => n + p.size, 0), outdoorLightClipBuilds: outdoorBuilds, outdoorLightMaxRays: outdoorMaxRays, outdoorLightMaxBlockers: outdoorMaxBlockers }) });
 }
 
 // src/client/reward_token_art_v4.js
@@ -65724,6 +65996,105 @@ function createEnvironmentCache2(canvas, { authoredArt = null, ...options } = {}
   return createEnvironmentCache(canvas, { ...options, presentationIdentity: () => authoredArt?.fort?.identity?.() ?? "", depthColliderVisuals: fortDepthColliderVisuals, prepareAhead: authoredArt?.prepareRouteAhead ? ((space, bounds2) => authoredArt.prepareRouteAhead(space, bounds2)) : null, fallbackReady: authoredArt?.routeFallbackReady ? ((space, bounds2) => authoredArt.routeFallbackReady(space, bounds2)) : null, prepareDrawing: (ctx, space, view2, layout, art) => prepareEnvironmentDrawing(ctx, space, view2, layout, art, authoredArt), prepareDepthItems: (space, view2, layout, art, time) => prepareEnvironmentDepthItems(space, view2, layout, art, time, authoredArt), prepareShadowCasters: (space, view2, layout) => prepareEnvironmentShadowCasters(space, view2, layout, authoredArt), drawFallback: (ctx, space, bounds2) => drawEnvironmentFallback(ctx, space, bounds2, authoredArt), drawRequiredObstacle: (ctx, space, b, tx, ty) => drawRequiredObstacleVisual(ctx, space, b, tx, ty, authoredArt) });
 }
 
+// src/client/emissive_occlusion_v1.js
+var REACH = { side: 72, up: 170, down: 12 };
+function createEmissiveOcclusionV1(doc) {
+  const pool = [];
+  let masks = /* @__PURE__ */ new Map(), used = 0, redrawn = 0;
+  function surface3(w, h) {
+    const c = pool[used] ??= doc.createElement("canvas");
+    used++;
+    if (c.width !== w || c.height !== h) {
+      c.width = w;
+      c.height = h;
+    }
+    const g = c.getContext("2d");
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.globalAlpha = 1;
+    g.globalCompositeOperation = "source-over";
+    g.clearRect(0, 0, w, h);
+    return [c, g];
+  }
+  function open2(m, r) {
+    const x0 = Math.floor(m.a * r.x + m.c * r.y + m.e), y0 = Math.floor(m.b * r.x + m.d * r.y + m.f), w = Math.max(1, Math.ceil(m.a * (r.x + r.w) + m.c * (r.y + r.h) + m.e) - x0), h = Math.max(1, Math.ceil(m.b * (r.x + r.w) + m.d * (r.y + r.h) + m.f) - y0);
+    const [canvas, g] = surface3(w, h);
+    g.setTransform(m.a, m.b, m.c, m.d, m.e - x0, m.f - y0);
+    return { canvas, g, x0, y0, w, h, m };
+  }
+  function plan(ctx, ordered, glows, redraw, covers = () => true) {
+    masks = /* @__PURE__ */ new Map();
+    used = 0;
+    redrawn = 0;
+    if (!glows.length || typeof ctx.getTransform !== "function" || !doc?.createElement) return null;
+    const at4 = new Map(ordered.map((item, i) => [item.id, i])), m = ctx.getTransform(), cover2 = /* @__PURE__ */ new Map();
+    const behind = (y) => {
+      let lo = 0, hi = ordered.length;
+      while (lo < hi) {
+        const mid = lo + hi >> 1;
+        if (ordered[mid].anchorY < y) lo = mid + 1;
+        else hi = mid;
+      }
+      return lo - 1;
+    };
+    for (const r of glows) {
+      const i = r.ground ? behind(r.y) : at4.get(r.id);
+      if (i === void 0) continue;
+      for (let j = i + 1; j < ordered.length; j++) {
+        const item = ordered[j];
+        if (item.anchorY - REACH.up > r.y + r.h) break;
+        if (item.anchorX + REACH.side < r.x || item.anchorX - REACH.side > r.x + r.w || item.anchorY + REACH.down < r.y || !covers(item)) continue;
+        let mask = masks.get(r.id);
+        if (!mask) {
+          mask = open2(m, r);
+          masks.set(r.id, mask);
+        }
+        if (!cover2.has(j)) cover2.set(j, []);
+        cover2.get(j).push(mask);
+      }
+    }
+    if (!cover2.size) return null;
+    return (item, i) => {
+      const list = cover2.get(i);
+      if (!list) return;
+      for (const mask of list) {
+        mask.g.save();
+        try {
+          redraw(item, mask.g);
+        } finally {
+          mask.g.restore();
+        }
+        redrawn++;
+      }
+    };
+  }
+  function paint(ctx, id, draw, composite = "source-over") {
+    const mask = masks.get(id);
+    if (!mask) {
+      draw(ctx);
+      return;
+    }
+    const [layer2, g] = surface3(mask.w, mask.h), m = mask.m;
+    g.setTransform(m.a, m.b, m.c, m.d, m.e - mask.x0, m.f - mask.y0);
+    draw(g);
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.globalAlpha = 1;
+    g.globalCompositeOperation = "destination-out";
+    g.drawImage(mask.canvas, 0, 0);
+    g.globalCompositeOperation = "source-over";
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = composite;
+    ctx.drawImage(layer2, mask.x0, mask.y0);
+    ctx.restore();
+  }
+  return Object.freeze({ plan, paint, clear: () => {
+    pool.length = 0;
+    masks = /* @__PURE__ */ new Map();
+    used = 0;
+  }, resources: () => ({ emissiveMasks: masks.size, emissiveMaskRedraws: redrawn, emissiveMaskCanvases: pool.length }) });
+}
+
 // src/client/aegis_mimic_presentation_v2.js
 var TAU70 = Math.PI * 2;
 var clamp49 = (v) => Math.max(0, Math.min(1, v));
@@ -65755,22 +66126,22 @@ function drawAttachedAegisMimic(c, actor, tick, flash = false) {
   c.restore();
   return true;
 }
-function drawAegisMimicTethers(c, model, tick) {
-  for (const a of Object.values(model.entitiesById ?? {})) {
-    const m = a.aegisMimic;
-    if (!a.alive || !m || !["orbiting", "recalling"].includes(m.stage)) continue;
-    const recall = m.stage === "recalling";
-    c.save();
-    c.strokeStyle = recall ? "#ffcf86" : "#63e8e888";
-    c.lineWidth = recall ? 1.6 : 1;
-    c.setLineDash(recall ? [3, 4] : [2, 5]);
-    c.lineDashOffset = -tick * (recall ? 0.9 : 0.2);
-    c.beginPath();
-    c.moveTo(m.bossPosition.x, m.bossPosition.y - 34);
-    c.lineTo(a.position.x, a.position.y - 24);
-    c.stroke();
-    c.restore();
-  }
+function drawTether(c, a, tick) {
+  const m = a.aegisMimic, recall = m.stage === "recalling";
+  c.save();
+  c.strokeStyle = recall ? "#ffcf86" : "#63e8e888";
+  c.lineWidth = recall ? 1.6 : 1;
+  c.setLineDash(recall ? [3, 4] : [2, 5]);
+  c.lineDashOffset = -tick * (recall ? 0.9 : 0.2);
+  c.beginPath();
+  c.moveTo(m.bossPosition.x, m.bossPosition.y - 34);
+  c.lineTo(a.position.x, a.position.y - 24);
+  c.stroke();
+  c.restore();
+}
+var tethered = (a) => a.alive && ["orbiting", "recalling"].includes(a.aegisMimic?.stage);
+function aegisMimicTetherDepthItems(model, tick) {
+  return Object.entries(model.entitiesById ?? {}).filter(([, a]) => tethered(a)).map(([id, a]) => depthItem({ id: "mimic-tether/" + id, anchorX: a.position.x, anchorY: a.position.y + (a.groundAnchorY ?? (a.hullRadius ?? 10) * 0.45) - 0.5, draw: (c) => drawTether(c, a, tick) }));
 }
 
 // src/client/boss_presentation_aegis_v1.js
@@ -66082,7 +66453,8 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
     if (event.kind === "build") performanceProbe.record("environment.rasterBuild", event.ms ?? 0);
     if (event.kind === "compose") performanceProbe.record("environment.rasterDraw", event.ms ?? 0);
   } }), lighting = createLighting(canvas, { presentation: environmentArt?.worldLightsV1 }), dayNight = createDayNightLightingV1({ review: environmentArt?.dayNightReview });
-  const dynamicLights = createDynamicWorldLightsV1(canvas.ownerDocument), skillLights = createSkillLightsV1(canvas.ownerDocument), silhouetteShadows = createSilhouetteShadowsV1(canvas.ownerDocument);
+  const dynamicLights = createDynamicWorldLightsV1(canvas.ownerDocument), skillLights = createSkillLightsV1(canvas.ownerDocument), silhouetteShadows = createSilhouetteShadowsV1(canvas.ownerDocument), glowMasks = createEmissiveOcclusionV1(canvas.ownerDocument);
+  const translucent = /^(vfx|[a-z]+-vfx|spark|impact|bolt|hostile-shot|aegis-shot|loot|potion|boss-polish|boss-release|cinderhart-fire|cinderhart-rush|goldfall|marcus-coin|mimic-tether)\//;
   let castingShadows = false;
   const camera = createCamera(), prompt = createPaintedPrompt(), actorMotion = createActorMotionPresentationV1({ collisionProbe: actorCollisionProbe });
   const seamDebug = new URLSearchParams(canvas.ownerDocument.defaultView?.location?.search ?? "").get("debugSeams") === "1";
@@ -66103,6 +66475,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
     lighting.clear();
     dayNight.clear();
     silhouetteShadows.clear();
+    glowMasks.clear();
     layout++;
   }
   function resize(width, height) {
@@ -66238,7 +66611,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
     depthItems2.push(...environmentArt?.reviewDepthItems?.(model, viewport) ?? []);
     depthItems2.push(...sporeDepthItems(model, viewport, environmentArt?.sporeArt), ...hollowDepthItems(model, viewport, environmentArt?.hollowArt), ...plannedEventDepthItemsV1(model, viewport, time));
     depthItems2.push(...resourceArt.depthItems({ ...model, resources: model.resources.filter((r) => !r.eventPod) }, time, viewport));
-    depthItems2.push(...portalArt.depthItems(model, viewport));
+    depthItems2.push(...portalArt.depthItems(model, viewport), ...aegisMimicTetherDepthItems(visualModel, model.tick), ...unified ? biomeBossReleaseDepthItemsV1(ctx, visualModel, model.tick) : []);
     if (model.space.visual) {
       if (!unified) {
         const paintLight = () => lighting.draw(ctx, model.space, lightView, time, visualActor);
@@ -66273,9 +66646,6 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
       ctx.beginPath();
       ctx.arc(area2.x, area2.y, area2.radius, 0, Math.PI * 2);
       ctx.stroke();
-      ctx.fillStyle = "#dce2ba";
-      ctx.font = "12px system-ui";
-      ctx.fillText("Slime clearing", area2.x - 40, area2.y - area2.radius - 10);
     }
     const { bossPolishView, brimstoneView } = observeBossEffects(model), drawGroundEffects = () => {
       drawWebWeaverHazardsD12_4J(ctx, model, model.tick);
@@ -66283,7 +66653,6 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
       drawBossPolishGround(ctx, bossPolishView, model.tick);
       drawBrimstoneGround(ctx, brimstoneView, model.tick);
       drawRecoveredBossGroundV1(ctx, model, model.tick);
-      drawAegisMimicTethers(ctx, model, model.tick);
       drawNamedEliteGroundV1(ctx, visualModel, model.tick);
       if (unified) for (const a of Object.values(visualModel.entitiesById)) {
         if (a.position.x < viewport.x - 96 || a.position.y < viewport.y - 96 || a.position.x > viewport.x + viewport.width + 96 || a.position.y > viewport.y + viewport.height + 96) continue;
@@ -66429,9 +66798,26 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
       else drawShadows();
     }
     depthItems2.push(...combatVfx.depthItems(visualModel, time, viewport, ctx), ...feedback.depthItems(time, viewport));
-    const glowing = [...combatVfx.lights(visualModel, time), ...feedback.lights(time), ...(model.hostileProjectiles ?? []).map(ordinaryHostileProjectileLight), ...(model.bossHazards?.aegisProjectiles ?? []).map((shot) => ({ x: shot.position.x, y: shot.position.y, r: 34, color: "#65e6ec", alpha: 0.45 }))];
+    const glowing = [
+      ...combatVfx.lights(visualModel, time),
+      ...feedback.lights(time),
+      ...(model.hostileProjectiles ?? []).map(ordinaryHostileProjectileLight),
+      ...(model.bossHazards?.aegisProjectiles ?? []).map((shot) => ({ x: shot.position.x, y: shot.position.y, r: 34, color: "#65e6ec", alpha: 0.45 })),
+      ...bossPolishEffectLights(bossPolishView, model.tick),
+      ...archivedBossEffectLights(model, model.tick),
+      ...treasuryBossEffectLights(model, model.tick),
+      ...brimstoneEffectLights(brimstoneView, model.tick),
+      ...biomeBossReleaseLightsV1(visualModel, model.tick)
+    ];
     skillLights.wash(ctx, glowing, viewport);
-    drawDepthItems(ctx, depthItems2);
+    drawDepthItems(ctx, depthItems2, unified ? (ordered) => glowMasks.plan(ctx, ordered, [...model.space.visual ? lighting.glows(model.space, lightView) : [], ...dynamicLights.portalCores(model, lightView, frame), ...groundItems.floorGlows(), ...potionDrops.floorGlows(time, viewport, frame)], (item, g) => {
+      castingShadows = true;
+      try {
+        item.draw(g);
+      } finally {
+        castingShadows = false;
+      }
+    }, (item) => !translucent.test(item.id)) : null);
     if (unified) {
       const paintLights = (lc) => {
         if (!model.space.visual) return;
@@ -66442,12 +66828,12 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
       if (performanceProbe) performanceProbe.measure("lighting", paintLight);
       else paintLight();
       if (model.space.visual) {
-        lighting.emissive(ctx, model.space, lightView, time);
-        dynamicLights.glow(ctx, model, lightView, frame, time, visualActor);
+        lighting.emissive(ctx, model.space, lightView, time, glowMasks.paint);
+        dynamicLights.glow(ctx, model, lightView, frame, time, visualActor, glowMasks.paint);
       }
       nightActors.draw(ctx, visualModel, lightView, frame);
-      groundItems.emission(ctx, model, time, viewport, { frame });
-      potionDrops.emission(ctx, model, time, viewport, { frame });
+      groundItems.emission(ctx, model, time, viewport, { frame, through: glowMasks.paint });
+      potionDrops.emission(ctx, model, time, viewport, { frame, through: glowMasks.paint });
       for (const [id, drawn] of Object.entries(visualModel.entitiesById)) {
         if (!drawn.alive) continue;
         if (seamless && (drawn.position.x < viewport.x - 80 || drawn.position.y < viewport.y - 80 || drawn.position.x > viewport.x + viewport.width + 80 || drawn.position.y > viewport.y + viewport.height + 80)) continue;
@@ -66469,6 +66855,12 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
         }
       }
       groundItems.labels(ctx);
+    }
+    if (model.encounter?.activation && !model.encounter.cleared && !model.encounter.active) {
+      const area2 = model.encounter.activation;
+      ctx.fillStyle = "#dce2ba";
+      ctx.font = "12px system-ui";
+      ctx.fillText("Slime clearing", area2.x - 40, area2.y - area2.radius - 10);
     }
     combatVfx.draw(ctx, visualModel, time, viewport);
     if (performanceProbe) performanceProbe.measure("combatFeedback", () => feedback.draw(ctx, time, equipmentArt, viewport));
@@ -66523,6 +66915,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
       ...dynamicLights.resources(),
       ...skillLights.resources(),
       ...silhouetteShadows.resources(),
+      ...glowMasks.resources(),
       groundItems: groundItems.inspect(),
       potionDrops: potionDrops.inspect(),
       resourceDebris: resourceArt.resources(),
