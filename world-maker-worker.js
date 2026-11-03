@@ -4425,6 +4425,131 @@ function hydrologyPlan(asset, rivers, bridgePlan, parent) {
   return { bridgePlan, drainage: rivers.drainage, version: "alpha-hydrology-plan-v2", policy: "terrain-drainage-lake-outlets-v3", parent, seed: asset.seed, widthTiles: W2, heightTiles: H2, macroOwnershipChanged: false, progressionChanged: false, network: rivers.network, headwaters: rivers.headwaters, basins: rivers.basins, pages: encoded, diagnostics: { chosenNetworkEdges: rivers.network.length, protectedWaterClips: rivers.blockedNew, discardedBankSlivers: rivers.discardedBankSlivers, waterTiles: rivers.water.size, basinCounts: rivers.basins.reduce((o, b) => (o[b.kind] = (o[b.kind] ?? 0) + 1, o), {}), lakeOutlets: rivers.basins.filter((b) => b.outlet).length }, failures };
 }
 
+// src/shared/generation/harbor_town_v1.js
+var HARBOR_TOWN_VERSION = "harbor-town-v1";
+var HARBOR_TOWN_ID = "settlement-slot:village-outpost:06";
+var HARBOR_TOWN_NAME = "Mainland Harbor";
+var HARBOR_DEPTH = 24;
+var HARBOR_JOIN = HARBOR_DEPTH + 2;
+var BEACH_MAX = 6;
+var REACH = 6;
+var CLASSIC_HARBOR = freezeWire({ version: HARBOR_TOWN_VERSION, pier: 12 });
+function house(n, kind, label, x, y, w, h, side, at, path = []) {
+  const doorPoint = side === "south" ? [at, y + h] : side === "north" ? [at, y] : side === "east" ? [x + w, at] : [x, at];
+  const porch = side === "south" ? { x: at - 1, y: y + h, w: 3, h: 3 } : side === "north" ? { x: at - 1, y: y - 3, w: 3, h: 3 } : side === "east" ? { x: x + w, y: at - 1, w: 3, h: 3 } : { x: x - 3, y: at - 1, w: 3, h: 3 };
+  return { id: "harbor:roof:" + n, kind, label, x, y, w, h, doorSide: side, doorPoint, porch, path, target: [x, y] };
+}
+var SOUTH = {
+  id: "harbor-south",
+  name: "Harbor",
+  core: [40, HARBOR_DEPTH],
+  landing: [20, HARBOR_DEPTH],
+  streets: [[[[20.5, 0], [20.5, HARBOR_DEPTH]], 3], [[[2, 9], [38, 9]], 2]],
+  places: [["Harbor quay", { x: 1, y: 20, w: 38, h: 4 }, "quay"], ["Harbor garden", { x: 13, y: 1, w: 5, h: 6 }, "garden"]],
+  buildings: [
+    house("001", "service", "Harbor master", 23, 11, 10, 8, "south", 27),
+    house("002", "support", "Fish market", 7, 11, 10, 8, "south", 12),
+    house("003", "home", "Home 1", 3, 1, 8, 6, "south", 6),
+    house("004", "home", "Home 2", 24, 1, 8, 6, "south", 27),
+    house("005", "home", "Home 3", 33, 2, 6, 5, "south", 35)
+  ],
+  dressing: [{ id: "nets", kind: "nets", x: 34, y: 15, w: 3 }, { id: "crates:1", kind: "crates", x: 3, y: 17, w: 2 }, { id: "crates:2", kind: "crates", x: 35, y: 18, w: 2 }]
+};
+var EAST = {
+  id: "harbor-east",
+  name: "Harbor",
+  core: [HARBOR_DEPTH, 40],
+  landing: [HARBOR_DEPTH, 20],
+  streets: [[[[0, 20.5], [HARBOR_DEPTH, 20.5]], 3], [[[1, 9], [20, 9]], 2], [[[1, 31], [20, 31]], 2]],
+  places: [["Harbor quay", { x: 20, y: 1, w: 4, h: 38 }, "quay"], ["Harbor garden", { x: 2, y: 33, w: 7, h: 6 }, "garden"]],
+  buildings: [
+    house("001", "service", "Harbor master", 8, 10, 10, 8, "south", 13),
+    house("002", "home", "Home 1", 1, 11, 6, 6, "south", 4),
+    house("003", "home", "Home 2", 2, 1, 8, 6, "south", 5),
+    house("004", "home", "Home 3", 11, 1, 7, 5, "south", 14),
+    house("005", "support", "Fish market", 8, 23, 10, 7, "north", 13),
+    house("006", "home", "Home 4", 1, 23, 6, 6, "north", 4),
+    house("007", "home", "Home 5", 11, 33, 7, 5, "north", 14)
+  ],
+  dressing: [{ id: "nets", kind: "nets", x: 18, y: 13, w: 2 }, { id: "crates:1", kind: "crates", x: 18, y: 25, w: 2 }, { id: "crates:2", kind: "crates", x: 18, y: 28, w: 1 }]
+};
+function mirror(t, id) {
+  const W2 = t.core[0], side = { east: "west", west: "east" };
+  return {
+    ...t,
+    id,
+    core: [...t.core],
+    landing: [W2 - 1 - t.landing[0], t.landing[1]],
+    streets: t.streets.map(([pts, w]) => [pts.map(([x, y]) => [W2 - x, y]), w]),
+    places: t.places.map(([n, p, k]) => [n, { ...p, x: W2 - p.x - p.w }, k]),
+    dressing: t.dressing.map((d) => ({ ...d, x: W2 - d.x - d.w })),
+    buildings: t.buildings.map((b) => ({ ...b, x: W2 - b.x - b.w, doorSide: side[b.doorSide] ?? b.doorSide, doorPoint: [side[b.doorSide] ? W2 - b.doorPoint[0] : W2 - 1 - b.doorPoint[0], b.doorPoint[1]], porch: { ...b.porch, x: W2 - b.porch.x - b.porch.w }, path: b.path.map(([x, y]) => [W2 - 1 - x, y]), target: [W2 - b.x - b.w, b.y] }))
+  };
+}
+var WEST = mirror(EAST, "harbor-west");
+var HARBOR_TEMPLATES = freezeWire({ south: SOUTH, east: EAST, west: WEST });
+var FACING = { "0,1": "south", "1,0": "east", "-1,0": "west" };
+var across = (f) => f.y ? { x: 1, y: 0 } : { x: 0, y: 1 };
+var box = (list) => {
+  const xs = list.map((p) => p.x), ys = list.map((p) => p.y), x = Math.min(...xs), y = Math.min(...ys);
+  return { x, y, w: Math.max(...xs) - x + 1, h: Math.max(...ys) - y + 1 };
+};
+var span = (L, f, u, k0, k1, j0, j1) => box([{ x: L.x + f.x * k0 + u.x * j0, y: L.y + f.y * k0 + u.y * j0 }, { x: L.x + f.x * k1 + u.x * j1, y: L.y + f.y * k1 + u.y * j1 }]);
+function harborLayoutV1(landing, length, id = "ferry:landing") {
+  const f = landing.facing, facing = FACING[f.x + "," + f.y];
+  if (!facing) return null;
+  const t = HARBOR_TEMPLATES[facing], L = landing.tile, u = across(f), origin = { x: L.x - t.landing[0], y: L.y - t.landing[1] }, body = { x: origin.x, y: origin.y, w: t.core[0], h: t.core[1] };
+  const at = (k, j) => ({ x: L.x + f.x * k + u.x * j, y: L.y + f.y * k + u.y * j });
+  const pierDressing = [{ id: "pier:crates", kind: "crates", ...at(2, -1) }, { id: "pier:barrel", kind: "barrels", ...at(3, 1) }, { id: "pier:bollard", kind: "bollard", ...at(length - 2, 1) }, { id: "pier:lamp", kind: "lamp", ...at(length - 1, -1) }];
+  const pier = span(L, f, u, 0, length - 1, -1, 1), boat = span(L, f, u, length - 6, length - 1, 2, 4);
+  return freezeWire({
+    version: HARBOR_TOWN_VERSION,
+    id: HARBOR_TOWN_ID,
+    name: HARBOR_TOWN_NAME,
+    landingId: landing.id ?? id,
+    facing,
+    f: { ...f },
+    u,
+    template: t,
+    origin,
+    body,
+    landing: { ...L },
+    pier: { ...pier, length, beach: length - REACH },
+    boat,
+    pierDressing,
+    dressing: t.dressing.map((d) => ({ ...d, x: origin.x + d.x, y: origin.y + d.y })),
+    bounds: box([{ x: Math.min(body.x, pier.x, boat.x), y: Math.min(body.y, pier.y, boat.y) }, { x: Math.max(body.x + body.w, pier.x + pier.w, boat.x + boat.w) - 1, y: Math.max(body.y + body.h, pier.y + pier.h, boat.y + boat.h) - 1 }])
+  });
+}
+function harborFitV1(base, x, y, fx, fy, free = () => true) {
+  const facing = FACING[fx + "," + fy];
+  if (!facing) return 0;
+  const t = HARBOR_TEMPLATES[facing], ox = x - t.landing[0], oy = y - t.landing[1], f = { x: fx, y: fy }, u = across(f);
+  const sea = (k, j) => {
+    const b = base(x + fx * k + u.x * j, y + fy * k + u.y * j);
+    return !b.walkable && b.kind === "ocean";
+  };
+  let beach = 1;
+  while (beach <= BEACH_MAX && base(x + fx * beach, y + fy * beach).walkable) beach++;
+  if (beach > BEACH_MAX) return 0;
+  const length = beach + REACH;
+  for (let k = 1; k < length + 2; k++) for (let j = -1; j <= 1; j++) {
+    if (k >= beach) {
+      if (!sea(k, j)) return 0;
+    } else {
+      const b = base(x + fx * k + u.x * j, y + fy * k + u.y * j);
+      if (!b.walkable && b.kind !== "ocean") return 0;
+    }
+  }
+  for (let k = length - 6; k < length; k++) for (let j = 2; j <= 4; j++) if (!sea(k, j)) return 0;
+  for (let k = HARBOR_DEPTH + 1; k <= HARBOR_JOIN; k++) {
+    const jx = x - fx * k, jy = y - fy * k;
+    if (!base(jx, jy).walkable || !free(jx, jy)) return 0;
+  }
+  for (let yy = oy; yy < oy + t.core[1]; yy++) for (let xx = ox; xx < ox + t.core[0]; xx++) if (!base(xx, yy).walkable || !free(xx, yy)) return 0;
+  return length;
+}
+
 // src/shared/generation/world_maker_v1/roads.js
 var TW = W * 64;
 var TH = H * 52;
@@ -4438,32 +4563,73 @@ function planFerry(asset, terrain, layout) {
   for (const s of asset.settlements) for (const c of s.core) hold(c);
   for (const f of asset.futureIslands) for (const c of [f.entrance, f.breathing]) hold(c);
   const free = (x, y) => !taken.has(Math.floor(x / 32) + "," + Math.floor(y / 26));
+  const own = /* @__PURE__ */ new Set();
+  {
+    const h = asset.settlements.find((s) => s.id === HARBOR_TOWN_ID);
+    for (const c of h?.core ?? []) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) own.add(c.x + dx + "," + (c.y + dy));
+  }
+  const others = /* @__PURE__ */ new Set();
+  for (const s of asset.sites) for (const c of [...s.footprint, ...s.approach]) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) others.add(c.x + dx + "," + (c.y + dy));
+  const harborFree = (x, y) => {
+    const k = Math.floor(x / 32) + "," + Math.floor(y / 26);
+    return !taken.has(k) || own.has(k) && !others.has(k);
+  };
   const named = {};
   for (const [n, l] of layout.landings.entries()) {
     const id = lm[l.landmass].id, cls = lm[l.landmass].classId, k = named[cls] = (named[cls] ?? 0) + 1, host = asset.settlements.find((s) => s.landmassId === id && marineChunks(s).length && (n > 0 || s.id === "settlement-slot:village-outpost:06"));
     const c = host ? marineChunks(host)[0] : { x: l.cell % W * 2, y: Math.floor(l.cell / W) * 2 }, cx0 = c.x * 32 + 16, cy0 = c.y * 26 + 13;
     let best = null, bd = Infinity;
-    for (const R of [90, 240, 600]) if (!best) for (let y2 = cy0 - R; y2 <= cy0 + R; y2 += R > 90 ? 4 : 2) for (let x2 = cx0 - R; x2 <= cx0 + R; x2 += R > 90 ? 4 : 2) {
-      if (x2 < 0 || y2 < 0 || x2 >= TW || y2 >= TH) continue;
-      const b = terrain.sampleBase(x2, y2);
-      if (!b.walkable || b.landmassId !== id) continue;
-      for (const [fx2, fy2] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-        let open = true;
-        for (let k2 = 1; k2 <= 8 && open; k2++) if (!terrain.waterGeometry.sampleCoast(x2 + fx2 * k2, y2 + fy2 * k2)?.water) open = false;
-        if (!open) continue;
-        let dry = free(x2, y2) && free(x2 - fx2 * 24, y2 - fy2 * 24);
-        for (let k2 = 1; k2 <= 24 && dry; k2++) if (!terrain.sampleBase(x2 - fx2 * k2, y2 - fy2 * k2).walkable) dry = false;
-        if (!dry) continue;
-        const d = PM.hypot(x2 - cx0, y2 - cy0);
-        if (d < bd) {
-          bd = d;
-          best = { x: x2, y: y2, fx: fx2, fy: fy2 };
+    const town = n === 0, shores = [], seen = /* @__PURE__ */ new Map(), tile = (x2, y2) => {
+      const k2 = y2 * TW + x2;
+      let v = seen.get(k2);
+      if (!v) {
+        v = terrain.base(x2, y2);
+        seen.set(k2, v);
+      }
+      return v;
+    };
+    for (const R of [90, 240, 600]) if (!best) {
+      for (let y2 = cy0 - R; y2 <= cy0 + R; y2 += R > 90 ? 4 : 2) for (let x2 = cx0 - R; x2 <= cx0 + R; x2 += R > 90 ? 4 : 2) {
+        if (x2 < 0 || y2 < 0 || x2 >= TW || y2 >= TH) continue;
+        const b = terrain.sampleBase(x2, y2);
+        if (!b.walkable || b.landmassId !== id) continue;
+        for (const [fx2, fy2] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+          if (town) {
+            if (!harborFree(x2, y2)) continue;
+            let k2 = 1;
+            while (k2 <= 6 && tile(x2 + fx2 * k2, y2 + fy2 * k2).walkable) k2++;
+            const b2 = tile(x2 + fx2 * k2, y2 + fy2 * k2);
+            if (k2 <= 6 && !b2.walkable && b2.kind === "ocean") shores.push({ x: x2, y: y2, fx: fx2, fy: fy2, d: PM.hypot(x2 - cx0, y2 - cy0) });
+            continue;
+          }
+          let open = true;
+          for (let k2 = 1; k2 <= 8 && open; k2++) if (!terrain.waterGeometry.sampleCoast(x2 + fx2 * k2, y2 + fy2 * k2)?.water) open = false;
+          if (!open) continue;
+          let dry = free(x2, y2) && free(x2 - fx2 * 24, y2 - fy2 * 24);
+          for (let k2 = 1; k2 <= 24 && dry; k2++) if (!terrain.sampleBase(x2 - fx2 * k2, y2 - fy2 * k2).walkable) dry = false;
+          if (!dry) continue;
+          const d = PM.hypot(x2 - cx0, y2 - cy0);
+          if (d < bd) {
+            bd = d;
+            best = { x: x2, y: y2, fx: fx2, fy: fy2 };
+          }
         }
       }
+      if (town) {
+        shores.sort((a, b) => a.d - b.d);
+        for (const s of shores) {
+          const pier = harborFitV1(tile, s.x, s.y, s.fx, s.fy, harborFree);
+          if (pier) {
+            best = { ...s, pier };
+            break;
+          }
+        }
+        shores.length = 0;
+      }
     }
-    if (!best) throw Error("No ferry landing on " + id);
-    const { x, y, fx, fy } = best, join = { x: x - fx * 24, y: y - fy * 24 };
-    landings.push({ id: "ferry:seeded:" + String(n).padStart(2, "0"), name: n === 0 ? "Mainland Harbor" : (cls === "major-island" ? "Great Island " : "Island ") + k + " Landing", landmassId: id, classId: lm[l.landmass].classId, facing: { x: fx, y: fy }, tile: { x, y }, water: { x: x + fx * 6, y: y + fy * 6 }, arrivals: [{ x, y }, { x: x - fx * 2, y: y - fy * 2 }, { x: x - fy * 2, y: y - fx * 2 }, { x: x + fy * 2, y: y + fx * 2 }], approach: [{ x, y }, join], routeJoin: { ...join }, sourceSettlementId: host?.id ?? null });
+    if (!best) throw Error(town ? "No shore for the harbor town" : "No ferry landing on " + id);
+    const { x, y, fx, fy } = best, reach = town ? HARBOR_JOIN : 24, join = { x: x - fx * reach, y: y - fy * reach };
+    landings.push({ id: "ferry:seeded:" + String(n).padStart(2, "0"), name: n === 0 ? "Mainland Harbor" : (cls === "major-island" ? "Great Island " : "Island ") + k + " Landing", landmassId: id, classId: lm[l.landmass].classId, facing: { x: fx, y: fy }, tile: { x, y }, water: { x: x + fx * 6, y: y + fy * 6 }, arrivals: [{ x, y }, { x: x - fx * 2, y: y - fy * 2 }, { x: x - fy * 2, y: y - fx * 2 }, { x: x + fy * 2, y: y + fx * 2 }], approach: [{ x, y }, join], routeJoin: { ...join }, sourceSettlementId: host?.id ?? null, ...town ? { harborTown: { version: HARBOR_TOWN_VERSION, pier: best.pier } } : {} });
   }
   return { version: "seeded-ferry-v1", landings, connections: landings.slice(1).map((l) => ({ bidirectional: true, from: landings[0].id, id: "ferry-route:" + l.id, to: l.id })) };
 }
@@ -4513,7 +4679,9 @@ function planRoads(asset, terrain, waterAt, ferry, stats = {}) {
     }
     return v;
   };
+  const hl = ferry.landings[0], hb = hl?.harborTown ? harborLayoutV1(hl, hl.harborTown.pier).body : null, inHarbor = (x, y) => Boolean(hb) && x >= hb.x - 1 && x <= hb.x + hb.w && y >= hb.y - 1 && y <= hb.y + hb.h;
   const tileCost = (x, y, lm) => {
+    if (inHarbor(x, y)) return Infinity;
     const g = ground(x, y);
     if (!g) return Infinity;
     const c = macro(Math.floor(x / 64), Math.floor(y / 52));
@@ -4847,7 +5015,7 @@ var CLASSIC_EVENT_PLAN = freezeWire({ version: WORLD_EVENT_PLAN_VERSION, events:
 
 // src/shared/generation/world_maker_v1/make.js
 var TW3 = W * 64;
-var WORLD_MAKER_VERSION = "world-maker-v1.4";
+var WORLD_MAKER_VERSION = "world-maker-v1.5";
 function makeWorld(seed, catalog, tries = 4, onStep = null) {
   const started = performance.now();
   let w, why = [];
@@ -4892,8 +5060,11 @@ function buildWorld(seed, catalog, onStep) {
   const ferry = planFerry(asset, terrain0, plan.layout);
   asset.ferry = ferry;
   t = lap("ferry", t);
+  const hl = ferry.landings[0], harbor = harborLayoutV1(hl, hl.harborTown.pier), hd = asset.routes.destinations.find((d) => d.id === HARBOR_TOWN_ID), hb = harbor.body;
+  if (hd.point.x >= hb.x - 1 && hd.point.x <= hb.x + hb.w && hd.point.y >= hb.y - 1 && hd.point.y <= hb.y + hb.h) hd.point = { x: hl.routeJoin.x, y: hl.routeJoin.y };
   const firstCave = asset.sites.find((s) => s.id === FIRST_CAVE);
-  let guards = [], G, passes = 0;
+  const hr = harbor.bounds;
+  let guards = [{ x1: hr.x - 3, y1: hr.y - 3, x2: hr.x + hr.w + 2, y2: hr.y + hr.h + 2 }], G, passes = 0;
   const pass = [];
   for (; ; ) {
     passes++;
@@ -4919,6 +5090,7 @@ function buildWorld(seed, catalog, onStep) {
   }
   t = lap("geography", t);
   const { rivers, waterAt, terrainR, roads, bridgePlan } = G;
+  if (harborFitV1(terrainR.base, hl.tile.x, hl.tile.y, hl.facing.x, hl.facing.y) !== hl.harborTown.pier) throw Error("The harbor town lost its ground");
   asset.routes = { ...asset.routes, bridges: bridgePlan.bridges, edges: roads.edges, failures: roads.failures, routePages: roads.routePages, riverCrossings: { ...asset.routes.riverCrossings, implemented: bridgePlan.bridges.length }, statistics: { searches: roads.stats.searches, nodes: roads.stats.nodes, passes, guards: guards.length, pass } };
   asset.routes.protectedChunkCount = terrainR.shoreline.protectedChunks.size;
   asset.wildernessExtension.eventCapacities = planEvents(asset, terrainR, roads, waterAt);

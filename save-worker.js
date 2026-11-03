@@ -5595,6 +5595,158 @@ function villageChunkBlockers(cx, cy, binding) {
   });
 }
 
+// src/shared/generation/harbor_town_v1.js
+var HARBOR_TOWN_VERSION = "harbor-town-v1";
+var HARBOR_TOWN_ID = "settlement-slot:village-outpost:06";
+var HARBOR_TOWN_NAME = "Mainland Harbor";
+var HARBOR_DEPTH = 24;
+var HARBOR_JOIN = HARBOR_DEPTH + 2;
+var REACH = 6;
+var CLASSIC_HARBOR = freezeWire({ version: HARBOR_TOWN_VERSION, pier: 12 });
+function house(n, kind2, label2, x, y, w, h, side, at, path = []) {
+  const doorPoint = side === "south" ? [at, y + h] : side === "north" ? [at, y] : side === "east" ? [x + w, at] : [x, at];
+  const porch = side === "south" ? { x: at - 1, y: y + h, w: 3, h: 3 } : side === "north" ? { x: at - 1, y: y - 3, w: 3, h: 3 } : side === "east" ? { x: x + w, y: at - 1, w: 3, h: 3 } : { x: x - 3, y: at - 1, w: 3, h: 3 };
+  return { id: "harbor:roof:" + n, kind: kind2, label: label2, x, y, w, h, doorSide: side, doorPoint, porch, path, target: [x, y] };
+}
+var SOUTH = {
+  id: "harbor-south",
+  name: "Harbor",
+  core: [40, HARBOR_DEPTH],
+  landing: [20, HARBOR_DEPTH],
+  streets: [[[[20.5, 0], [20.5, HARBOR_DEPTH]], 3], [[[2, 9], [38, 9]], 2]],
+  places: [["Harbor quay", { x: 1, y: 20, w: 38, h: 4 }, "quay"], ["Harbor garden", { x: 13, y: 1, w: 5, h: 6 }, "garden"]],
+  buildings: [
+    house("001", "service", "Harbor master", 23, 11, 10, 8, "south", 27),
+    house("002", "support", "Fish market", 7, 11, 10, 8, "south", 12),
+    house("003", "home", "Home 1", 3, 1, 8, 6, "south", 6),
+    house("004", "home", "Home 2", 24, 1, 8, 6, "south", 27),
+    house("005", "home", "Home 3", 33, 2, 6, 5, "south", 35)
+  ],
+  dressing: [{ id: "nets", kind: "nets", x: 34, y: 15, w: 3 }, { id: "crates:1", kind: "crates", x: 3, y: 17, w: 2 }, { id: "crates:2", kind: "crates", x: 35, y: 18, w: 2 }]
+};
+var EAST = {
+  id: "harbor-east",
+  name: "Harbor",
+  core: [HARBOR_DEPTH, 40],
+  landing: [HARBOR_DEPTH, 20],
+  streets: [[[[0, 20.5], [HARBOR_DEPTH, 20.5]], 3], [[[1, 9], [20, 9]], 2], [[[1, 31], [20, 31]], 2]],
+  places: [["Harbor quay", { x: 20, y: 1, w: 4, h: 38 }, "quay"], ["Harbor garden", { x: 2, y: 33, w: 7, h: 6 }, "garden"]],
+  buildings: [
+    house("001", "service", "Harbor master", 8, 10, 10, 8, "south", 13),
+    house("002", "home", "Home 1", 1, 11, 6, 6, "south", 4),
+    house("003", "home", "Home 2", 2, 1, 8, 6, "south", 5),
+    house("004", "home", "Home 3", 11, 1, 7, 5, "south", 14),
+    house("005", "support", "Fish market", 8, 23, 10, 7, "north", 13),
+    house("006", "home", "Home 4", 1, 23, 6, 6, "north", 4),
+    house("007", "home", "Home 5", 11, 33, 7, 5, "north", 14)
+  ],
+  dressing: [{ id: "nets", kind: "nets", x: 18, y: 13, w: 2 }, { id: "crates:1", kind: "crates", x: 18, y: 25, w: 2 }, { id: "crates:2", kind: "crates", x: 18, y: 28, w: 1 }]
+};
+function mirror(t, id) {
+  const W8 = t.core[0], side = { east: "west", west: "east" };
+  return {
+    ...t,
+    id,
+    core: [...t.core],
+    landing: [W8 - 1 - t.landing[0], t.landing[1]],
+    streets: t.streets.map(([pts, w]) => [pts.map(([x, y]) => [W8 - x, y]), w]),
+    places: t.places.map(([n, p, k]) => [n, { ...p, x: W8 - p.x - p.w }, k]),
+    dressing: t.dressing.map((d) => ({ ...d, x: W8 - d.x - d.w })),
+    buildings: t.buildings.map((b) => ({ ...b, x: W8 - b.x - b.w, doorSide: side[b.doorSide] ?? b.doorSide, doorPoint: [side[b.doorSide] ? W8 - b.doorPoint[0] : W8 - 1 - b.doorPoint[0], b.doorPoint[1]], porch: { ...b.porch, x: W8 - b.porch.x - b.porch.w }, path: b.path.map(([x, y]) => [W8 - 1 - x, y]), target: [W8 - b.x - b.w, b.y] }))
+  };
+}
+var WEST = mirror(EAST, "harbor-west");
+var HARBOR_TEMPLATES = freezeWire({ south: SOUTH, east: EAST, west: WEST });
+var FACING = { "0,1": "south", "1,0": "east", "-1,0": "west" };
+var across = (f2) => f2.y ? { x: 1, y: 0 } : { x: 0, y: 1 };
+var box2 = (list) => {
+  const xs = list.map((p) => p.x), ys = list.map((p) => p.y), x = Math.min(...xs), y = Math.min(...ys);
+  return { x, y, w: Math.max(...xs) - x + 1, h: Math.max(...ys) - y + 1 };
+};
+var span = (L2, f2, u, k0, k1, j0, j1) => box2([{ x: L2.x + f2.x * k0 + u.x * j0, y: L2.y + f2.y * k0 + u.y * j0 }, { x: L2.x + f2.x * k1 + u.x * j1, y: L2.y + f2.y * k1 + u.y * j1 }]);
+var inside = (r, x, y) => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h;
+function harborLayoutV1(landing, length, id = "ferry:landing") {
+  const f2 = landing.facing, facing = FACING[f2.x + "," + f2.y];
+  if (!facing) return null;
+  const t = HARBOR_TEMPLATES[facing], L2 = landing.tile, u = across(f2), origin2 = { x: L2.x - t.landing[0], y: L2.y - t.landing[1] }, body = { x: origin2.x, y: origin2.y, w: t.core[0], h: t.core[1] };
+  const at = (k, j) => ({ x: L2.x + f2.x * k + u.x * j, y: L2.y + f2.y * k + u.y * j });
+  const pierDressing = [{ id: "pier:crates", kind: "crates", ...at(2, -1) }, { id: "pier:barrel", kind: "barrels", ...at(3, 1) }, { id: "pier:bollard", kind: "bollard", ...at(length - 2, 1) }, { id: "pier:lamp", kind: "lamp", ...at(length - 1, -1) }];
+  const pier = span(L2, f2, u, 0, length - 1, -1, 1), boat = span(L2, f2, u, length - 6, length - 1, 2, 4);
+  return freezeWire({
+    version: HARBOR_TOWN_VERSION,
+    id: HARBOR_TOWN_ID,
+    name: HARBOR_TOWN_NAME,
+    landingId: landing.id ?? id,
+    facing,
+    f: { ...f2 },
+    u,
+    template: t,
+    origin: origin2,
+    body,
+    landing: { ...L2 },
+    pier: { ...pier, length, beach: length - REACH },
+    boat,
+    pierDressing,
+    dressing: t.dressing.map((d) => ({ ...d, x: origin2.x + d.x, y: origin2.y + d.y })),
+    bounds: box2([{ x: Math.min(body.x, pier.x, boat.x), y: Math.min(body.y, pier.y, boat.y) }, { x: Math.max(body.x + body.w, pier.x + pier.w, boat.x + boat.w) - 1, y: Math.max(body.y + body.h, pier.y + pier.h, boat.y + boat.h) - 1 }])
+  });
+}
+var active2 = null;
+var activeAt = -1;
+function harborTownV1() {
+  if (activeAt !== worldRevisionV1()) {
+    activeAt = worldRevisionV1();
+    const n = ferryNetworkV1(), l = n.landings.find((l2) => l2.name === HARBOR_TOWN_NAME), spec = n === FERRY_NETWORK ? CLASSIC_HARBOR : l?.harborTown;
+    active2 = l && spec?.version === HARBOR_TOWN_VERSION && Number.isSafeInteger(spec.pier) ? harborLayoutV1(l, spec.pier) : null;
+  }
+  return active2;
+}
+var materialCache = /* @__PURE__ */ new WeakMap();
+function materialsFor(t) {
+  let m = materialCache.get(t);
+  if (m) return m;
+  m = /* @__PURE__ */ new Map();
+  const [W8, H8] = t.core, put3 = (x, y, type) => {
+    if (x >= 0 && y >= 0 && x < W8 && y < H8 && m.get(x + "," + y) !== "r") m.set(x + "," + y, type);
+  };
+  for (const [points, width] of t.streets) for (let i = 1; i < points.length; i++) {
+    const [ax, ay] = points[i - 1], [bx, by] = points[i], dx = bx - ax, dy = by - ay, d = dx * dx + dy * dy;
+    for (let y = Math.floor(Math.min(ay, by) - width); y <= Math.ceil(Math.max(ay, by) + width); y++) for (let x = Math.floor(Math.min(ax, bx) - width); x <= Math.ceil(Math.max(ax, bx) + width); x++) {
+      const s = d ? Math.max(0, Math.min(1, ((x + 0.5 - ax) * dx + (y + 0.5 - ay) * dy) / d)) : 0;
+      if (PM.hypot(x + 0.5 - ax - s * dx, y + 0.5 - ay - s * dy) <= width / 2) put3(x, y, "r");
+    }
+  }
+  for (const b of t.buildings) {
+    for (const [x, y] of b.path) put3(x, y, "p");
+    const p = b.porch;
+    for (let y = p.y; y < p.y + p.h; y++) for (let x = p.x; x < p.x + p.w; x++) put3(x, y, "p");
+  }
+  materialCache.set(t, m);
+  return m;
+}
+var harborDressingTiles = (h) => [...h.dressing.flatMap((d) => Array.from({ length: d.w }, (_, i) => ({ x: d.x + i, y: d.y }))), ...h.pierDressing.map((d) => ({ x: d.x, y: d.y }))];
+function createHarborTownTiles(terrain2, h) {
+  const t = h.template, o = h.origin, materials3 = materialsFor(t), solid = new Set(harborDressingTiles(h).map((p) => p.x + "," + p.y)), deck = h.f.x ? "H" : "V";
+  for (let y = 0; y < t.core[1]; y++) for (let x = 0; x < t.core[0]; x++) requireContract(terrain2.base(o.x + x, o.y + y).walkable, "Harbor town cannot replace water");
+  return (x, y, b) => {
+    if (inside(h.body, x, y)) {
+      const lx = x - o.x, ly = y - o.y, material = materials3.get(lx + "," + ly) ?? "g", { naturalKind, naturalClusterId, ...rest } = b;
+      return { ...rest, collision: blocked(t, lx, ly) || solid.has(x + "," + y) ? "2" : "1", material, route: material === "r" || material === "p" ? 2 : 0, town: true };
+    }
+    if (inside(h.pier, x, y)) {
+      const { naturalKind, naturalClusterId, ...rest } = b;
+      return { ...rest, walkable: true, kind: "bridge", underlyingKind: b.kind, pier: true, collision: solid.has(x + "," + y) ? "2" : "1", material: deck, route: 1, town: true };
+    }
+    return b;
+  };
+}
+function harborChunkBlockers(h, cx, cy) {
+  const x = cx * 32, y = cy * 26, r = h.body;
+  if (x + 32 <= r.x || x >= r.x + r.w || y + 26 <= r.y || y >= r.y + r.h) return [];
+  const clip = (bx, by, bw, bh) => ({ x: Math.max(x, bx) - x, y: Math.max(y, by) - y, width: Math.min(x + 32, bx + bw) - Math.max(x, bx), height: Math.min(y + 26, by + bh) - Math.max(y, by) });
+  return [{ id: h.id + ":clearing:" + cx + "," + cy, kind: "civilian-clearing", ...clip(r.x, r.y, r.w, r.h), detail: "" }, ...h.template.buildings.filter((b) => b.x + h.origin.x < x + 32 && b.x + b.w + h.origin.x > x && b.y + h.origin.y < y + 26 && b.y + b.h + h.origin.y > y).map((b) => ({ id: h.id + ":" + b.id, kind: "civilian-building", ...clip(b.x + h.origin.x, b.y + h.origin.y, b.w, b.h), detail: b.label }))];
+}
+
 // src/shared/generation/ferry_overlay_v1.js
 function createFerryOverlay(binding) {
   const tiles3 = /* @__PURE__ */ new Set();
@@ -5781,10 +5933,10 @@ function createNaturalClusterSampler(seedDigest) {
       if (p.admission >= profile2.admission) continue;
       const dx = (x + 0.5 - p.x) / profile2.scale, dy = (y + 0.5 - p.y) / profile2.scale, u = dx * p.c + dy * p.s, v = -dx * p.s + dy * p.c;
       const theta = Math.atan2(v, u), edge = 1 + 0.16 * Math.sin(theta * 3 + p.phase) + 0.1 * Math.cos(theta * 2 - p.phase), body = 1 - Math.hypot(u / p.rx, v / p.ry) / edge;
-      const lobe = 1 - Math.hypot(u - p.lobeX, v - p.lobeY) / p.lobeR, inside4 = Math.max(body, lobe * 0.7);
-      if (inside4 <= 0 || p.cove && Math.hypot(u - p.rx * 0.8, v + p.ry * 0.32) < 1.3) continue;
-      if (inside4 > score || inside4 === score && p.id < best.id) {
-        score = inside4;
+      const lobe = 1 - Math.hypot(u - p.lobeX, v - p.lobeY) / p.lobeR, inside5 = Math.max(body, lobe * 0.7);
+      if (inside5 <= 0 || p.cove && Math.hypot(u - p.rx * 0.8, v + p.ry * 0.32) < 1.3) continue;
+      if (inside5 > score || inside5 === score && p.id < best.id) {
+        score = inside5;
         best = p;
       }
     }
@@ -5816,7 +5968,7 @@ function createNaturalProtection(asset, { ruinFootprints = [] } = {}) {
 function createPlannedCryptExterior(asset, id, terrain2 = createPlannedTerrain(asset)) {
   const r = asset.sites.find((s) => s.id === id), d = asset.routes.destinations.find((s) => s.id === id);
   requireContract(r?.familyId === "site-family:crypt" && r.tier === "small" && r.footprint.length === 1 && r.approach.length === 1 && d?.point, "Small Crypt needs its existing compact reservation");
-  const f2 = r.footprint[0], left = f2.x * 32 + 10, top = f2.y * 26 + 5, width = 12, height = 12, entrance = { x: left + 6, y: top + 8 }, allowed = (x, y) => [...r.footprint, ...r.approach].some((c) => Math.floor(x / 32) === c.x && Math.floor(y / 26) === c.y), inside4 = (x, y) => x >= left && x < left + width && y >= top && y < top + height, solids = /* @__PURE__ */ new Set(), trail = /* @__PURE__ */ new Set(), circulation = /* @__PURE__ */ new Set(), key9 = (x, y) => x + "," + y;
+  const f2 = r.footprint[0], left = f2.x * 32 + 10, top = f2.y * 26 + 5, width = 12, height = 12, entrance = { x: left + 6, y: top + 8 }, allowed = (x, y) => [...r.footprint, ...r.approach].some((c) => Math.floor(x / 32) === c.x && Math.floor(y / 26) === c.y), inside5 = (x, y) => x >= left && x < left + width && y >= top && y < top + height, solids = /* @__PURE__ */ new Set(), trail = /* @__PURE__ */ new Set(), circulation = /* @__PURE__ */ new Set(), key9 = (x, y) => x + "," + y;
   for (let y = 0; y < PLANNED_RUIN_ENTRY_MASK.length; y++) for (let x = 0; x < 9; x++) if (PLANNED_RUIN_ENTRY_MASK[y][x] === "0") solids.add(key9(entrance.x - 4 + x, entrance.y - 4 + y));
   const safe = (x, y) => {
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
@@ -5854,7 +6006,7 @@ function createPlannedCryptExterior(asset, id, terrain2 = createPlannedTerrain(a
   requireContract(terrain2.base(entrance.x, entrance.y).biome === BIOME_CODES[plannedSiteBiome(asset, r.id)], "Crypt entrance biome mismatch");
   const apply2 = (x, y, b) => solids.has(key9(x, y)) ? { ...b, collision: "2", material: "g", route: 0, ruinExterior: true } : trail.has(key9(x, y)) ? { ...b, collision: "1", material: "p", route: 1, ruinExterior: true } : circulation.has(key9(x, y)) ? { ...b, collision: "1", material: "g", route: 0, ruinExterior: true } : b;
   const presentation = (cx, cy, siteId2) => ({ blockers: [...solids].map((k) => k.split(",").map(Number)).filter(([x, y]) => Math.floor(x / 32) === cx && Math.floor(y / 26) === cy).map(([x, y]) => ({ id: "ruin:" + siteId2 + ":crypt-door-" + x + "-" + y, kind: "ruin-exterior-masonry", presentationPart: "entry-structure", detail: "crypt-entry", x: x - cx * 32, y: y - cy * 26, width: 1, height: 1 })), decorations: Math.floor(entrance.x / 32) === cx && Math.floor(entrance.y / 26) === cy ? [{ id: "ruin-art:" + siteId2 + ":entry", kind: "ruin-entry-facade", x: entrance.x + 0.5 - cx * 32, y: entrance.y + 0.5 - cy * 26, variant: 0 }] : [] });
-  return Object.freeze({ reservation: r, destination: d, left, top, width, height, entrance, road: d.point, allowed, inside: inside4, ownsStructure: (x, y) => solids.has(key9(x, y)), trail, circulation, connector, apply: apply2, presentation, terrain: terrain2, realizationVersion: PLANNED_CRYPT_VERSION });
+  return Object.freeze({ reservation: r, destination: d, left, top, width, height, entrance, road: d.point, allowed, inside: inside5, ownsStructure: (x, y) => solids.has(key9(x, y)), trail, circulation, connector, apply: apply2, presentation, terrain: terrain2, realizationVersion: PLANNED_CRYPT_VERSION });
 }
 async function derivePlannedCryptReservation(asset, binding, sha256, { reservationId, terrain: terrain2 } = {}) {
   const g = createPlannedCryptExterior(asset, reservationId, terrain2), r = g.reservation, biome = plannedSiteBiome(asset, r.id), identity = await worldIdentity(asset.campaignSeedHex, PLANNED_CRYPT_VERSION, [binding.assetHash, r.id, r.tier], sha256), siteId2 = "site:" + identity.digest.slice(0, 32), entrance = tileAddress(g.entrance.x, g.entrance.y), region = regionAddress(entrance.chunkX, entrance.chunkY), chunk = await worldIdentity(PLANNED_WORLD_VERSION + "/" + NATURAL_CLUSTER_VERSION + "/" + asset.campaignSeedHex + "/" + binding.assetHash + "/" + binding.townPrototype + "/" + PLANNED_CRYPT_VERSION + "/" + PLANNED_RUIN_EXTERIOR_VERSION2, "chunk", [entrance.chunkX, entrance.chunkY], sha256);
@@ -5867,7 +6019,7 @@ async function derivePlannedCryptReservation(asset, binding, sha256, { reservati
 function createPlannedCryptExteriorV2(asset, id, terrain2 = createPlannedTerrain(asset)) {
   const r = asset.sites.find((s) => s.id === id), d = asset.routes.destinations.find((s) => s.id === id);
   requireContract(r?.familyId === "site-family:crypt" && ["standard", "large", "deep"].includes(r.tier) && r.footprint.length === 1 && r.approach.length === 1 && d?.point, "Crypt V2 needs its existing compact reservation");
-  const f2 = r.footprint[0], left = f2.x * 32 + 10, top = f2.y * 26 + 5, width = 12, height = 12, entrance = { x: left + 6, y: top + 8 }, allowed = (x, y) => [...r.footprint, ...r.approach].some((c) => Math.floor(x / 32) === c.x && Math.floor(y / 26) === c.y), inside4 = (x, y) => x >= left && x < left + width && y >= top && y < top + height, solids = /* @__PURE__ */ new Set(), trail = /* @__PURE__ */ new Set(), circulation = /* @__PURE__ */ new Set(), key9 = (x, y) => x + "," + y;
+  const f2 = r.footprint[0], left = f2.x * 32 + 10, top = f2.y * 26 + 5, width = 12, height = 12, entrance = { x: left + 6, y: top + 8 }, allowed = (x, y) => [...r.footprint, ...r.approach].some((c) => Math.floor(x / 32) === c.x && Math.floor(y / 26) === c.y), inside5 = (x, y) => x >= left && x < left + width && y >= top && y < top + height, solids = /* @__PURE__ */ new Set(), trail = /* @__PURE__ */ new Set(), circulation = /* @__PURE__ */ new Set(), key9 = (x, y) => x + "," + y;
   for (let y = 0; y < PLANNED_RUIN_ENTRY_MASK.length; y++) for (let x = 0; x < 9; x++) if (PLANNED_RUIN_ENTRY_MASK[y][x] === "0") solids.add(key9(entrance.x - 4 + x, entrance.y - 4 + y));
   const safe = (x, y) => {
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
@@ -5905,7 +6057,7 @@ function createPlannedCryptExteriorV2(asset, id, terrain2 = createPlannedTerrain
   requireContract(terrain2.base(entrance.x, entrance.y).biome === BIOME_CODES[plannedSiteBiome(asset, r.id)], "Crypt entrance biome mismatch");
   const apply2 = (x, y, b) => solids.has(key9(x, y)) ? { ...b, collision: "2", material: "g", route: 0, ruinExterior: true } : trail.has(key9(x, y)) ? { ...b, collision: "1", material: "p", route: 1, ruinExterior: true } : circulation.has(key9(x, y)) ? { ...b, collision: "1", material: "g", route: 0, ruinExterior: true } : b;
   const presentation = (cx, cy, siteId2) => ({ blockers: [...solids].map((k) => k.split(",").map(Number)).filter(([x, y]) => Math.floor(x / 32) === cx && Math.floor(y / 26) === cy).map(([x, y]) => ({ id: "ruin:" + siteId2 + ":crypt-door-" + x + "-" + y, kind: "ruin-exterior-masonry", presentationPart: "entry-structure", detail: "crypt-entry", x: x - cx * 32, y: y - cy * 26, width: 1, height: 1 })), decorations: Math.floor(entrance.x / 32) === cx && Math.floor(entrance.y / 26) === cy ? [{ id: "ruin-art:" + siteId2 + ":entry", kind: "ruin-entry-facade", x: entrance.x + 0.5 - cx * 32, y: entrance.y + 0.5 - cy * 26, variant: 0 }] : [] });
-  return Object.freeze({ reservation: r, destination: d, left, top, width, height, entrance, road: d.point, allowed, inside: inside4, ownsStructure: (x, y) => solids.has(key9(x, y)), trail, circulation, connector, apply: apply2, presentation, terrain: terrain2, realizationVersion: PLANNED_CRYPT_V2 });
+  return Object.freeze({ reservation: r, destination: d, left, top, width, height, entrance, road: d.point, allowed, inside: inside5, ownsStructure: (x, y) => solids.has(key9(x, y)), trail, circulation, connector, apply: apply2, presentation, terrain: terrain2, realizationVersion: PLANNED_CRYPT_V2 });
 }
 async function derivePlannedCryptReservationV2(asset, binding, sha256, { reservationId, terrain: terrain2 } = {}) {
   const g = createPlannedCryptExteriorV2(asset, reservationId, terrain2), r = g.reservation, biome = plannedSiteBiome(asset, r.id), identity = await worldIdentity(asset.campaignSeedHex, PLANNED_CRYPT_V2, [binding.assetHash, r.id, r.tier], sha256), siteId2 = "site:" + identity.digest.slice(0, 32), entrance = tileAddress(g.entrance.x, g.entrance.y), region = regionAddress(entrance.chunkX, entrance.chunkY), chunk = await worldIdentity(PLANNED_WORLD_VERSION + "/" + NATURAL_CLUSTER_VERSION + "/" + asset.campaignSeedHex + "/" + binding.assetHash + (binding.townPrototype ? "/" + binding.townPrototype : "") + "/" + PLANNED_CRYPT_V2 + "/" + PLANNED_RUIN_EXTERIOR_VERSION2, "chunk", [entrance.chunkX, entrance.chunkY], sha256);
@@ -6034,7 +6186,7 @@ function createPlannedRuinExterior(asset, reservationId, terrain2 = createPlanne
   requireContract(r.footprint.length >= policy.minimumExteriorChunks && r.approach.length >= policy.minimumApproachChunks && (realization || r.footprint.length === (maxX - minX + 1) * (maxY - minY + 1)) && width <= (maxX - minX + 1) * 32 && height <= (maxY - minY + 1) * 26, "Ruin exterior capacity incompatible");
   const footprint = new Set(r.footprint.map((c) => c.x + "," + c.y));
   for (let y = top; y < top + height; y++) for (let x = left; x < left + width; x++) requireContract(footprint.has(Math.floor(x / 32) + "," + Math.floor(y / 26)), "Ruin architecture escapes actual footprint shape");
-  const allowedSet = new Set([...r.footprint, ...r.approach].map((c) => c.x + "," + c.y)), allowed = (x, y) => allowedSet.has(Math.floor(x / 32) + "," + Math.floor(y / 26)), inside4 = (x, y) => x >= left && x < left + width && y >= top && y < top + height, walk = Array.from({ length: height }, () => Array(width).fill("1")), ground = Array.from({ length: height }, () => Array(width).fill("g")), blockers2 = [], decorations3 = [], moduleClear = /* @__PURE__ */ new Set();
+  const allowedSet = new Set([...r.footprint, ...r.approach].map((c) => c.x + "," + c.y)), allowed = (x, y) => allowedSet.has(Math.floor(x / 32) + "," + Math.floor(y / 26)), inside5 = (x, y) => x >= left && x < left + width && y >= top && y < top + height, walk = Array.from({ length: height }, () => Array(width).fill("1")), ground = Array.from({ length: height }, () => Array(width).fill("g")), blockers2 = [], decorations3 = [], moduleClear = /* @__PURE__ */ new Set();
   const block2 = (kind2, detail, x, y, w, h) => {
     blockers2.push({ kind: kind2, detail, x, y, width: w, height: h });
     for (let yy = y; yy < y + h; yy++) for (let xx = x; xx < x + w; xx++) walk[yy][xx] = "2";
@@ -6122,7 +6274,7 @@ function createPlannedRuinExterior(asset, reservationId, terrain2 = createPlanne
       const xx = x + ox, yy = y + oy;
       if (!allowed(xx, yy)) return false;
       const base = terrain2.base(xx, yy);
-      if (!base.walkable || base.landmassId !== r.landmassId || inside4(xx, yy) && walk[yy - top][xx - left] !== "1") return false;
+      if (!base.walkable || base.landmassId !== r.landmassId || inside5(xx, yy) && walk[yy - top][xx - left] !== "1") return false;
     }
     return true;
   }, start = d.point, key9 = (x, y) => x + "," + y, queue = [start], parents = /* @__PURE__ */ new Map([[key9(start.x, start.y), null]]);
@@ -6154,7 +6306,7 @@ function createPlannedRuinExterior(asset, reservationId, terrain2 = createPlanne
   for (const key10 of trail) {
     const [x, y] = key10.split(",").map(Number), b = terrain2.base(x, y);
     requireContract(b.walkable && b.landmassId === r.landmassId, "Ruin approach intersects authoritative water");
-    if (inside4(x, y)) {
+    if (inside5(x, y)) {
       requireContract(walk[y - top][x - left] === "1", "Ruin approach intersects a building or wall");
       ground[y - top][x - left] = "p";
     }
@@ -6171,20 +6323,20 @@ function createPlannedRuinExterior(asset, reservationId, terrain2 = createPlanne
       }
       for (const [dx, dy] of [[0, 1], [-1, 0], [1, 0], [0, -1]]) {
         const x = p.x + dx, y = p.y + dy, k = key9(x, y);
-        if (!parents2.has(k) && inside4(x, y) && safe(x, y)) {
+        if (!parents2.has(k) && inside5(x, y) && safe(x, y)) {
           parents2.set(k, p);
           q.push({ x, y });
         }
       }
     }
     requireContract(end, "Ruin circulation cannot reach " + r.id + " courtyard " + key9(goal.x, goal.y));
-    for (let p = end; p; p = parents2.get(key9(p.x, p.y))) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (inside4(p.x + dx, p.y + dy)) circulation.add(key9(p.x + dx, p.y + dy));
+    for (let p = end; p; p = parents2.get(key9(p.x, p.y))) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (inside5(p.x + dx, p.y + dy)) circulation.add(key9(p.x + dx, p.y + dy));
   }
-  const ownsStructure = (x, y) => inside4(x, y) && walk[y - top][x - left] === "2";
+  const ownsStructure = (x, y) => inside5(x, y) && walk[y - top][x - left] === "2";
   const clearEntrance = (x, y) => x >= entrance.x - 4 && x <= entrance.x + 4 && y >= entrance.y - 4 && y <= entrance.y + 3 && !ownsStructure(x, y);
   const apply2 = (x, y, b) => ownsStructure(x, y) ? { ...b, collision: "2", material: "g", route: 0, ruinExterior: true } : trail.has(x + "," + y) ? { ...b, collision: "1", material: "p", route: 1, ruinExterior: true } : clearEntrance(x, y) || circulation.has(key9(x, y)) || moduleClear.has(key9(x, y)) ? { ...b, collision: "1", material: "g", route: 0, ruinExterior: true } : b;
   const presentation = (cx, cy, siteId2) => ({ blockers: blockers2.filter((b) => left + b.x < cx * 32 + 32 && left + b.x + b.width > cx * 32 && top + b.y < cy * 26 + 26 && top + b.y + b.height > cy * 26).map((b) => ({ ...b, id: "ruin:" + siteId2 + ":" + b.detail, x: left + b.x - cx * 32, y: top + b.y - cy * 26 })), decorations: decorations3.filter((q) => Math.floor((left + q.x) / 32) === cx && Math.floor((top + q.y) / 26) === cy).map((q, i) => ({ ...q, id: "ruin-art:" + siteId2 + ":" + q.kind + ":" + (q.standardRuinKit ? q.x + "," + q.y : i), x: left + q.x - cx * 32, y: top + q.y - cy * 26 })) });
-  return Object.freeze({ reservation: r, destination: d, policy, left, top, width, height, entrance, gate, road: d.point, side, connector, trail, circulation, allowed, inside: inside4, ownsStructure, apply: apply2, presentation, terrain: terrain2, realizationVersion: realization?.version ?? (r.tier === "standard" ? STANDARD_RUIN_KIT_VERSION : PLANNED_RUIN_EXTERIOR_VERSION2), variant: variation.toString(16).padStart(8, "0") });
+  return Object.freeze({ reservation: r, destination: d, policy, left, top, width, height, entrance, gate, road: d.point, side, connector, trail, circulation, allowed, inside: inside5, ownsStructure, apply: apply2, presentation, terrain: terrain2, realizationVersion: realization?.version ?? (r.tier === "standard" ? STANDARD_RUIN_KIT_VERSION : PLANNED_RUIN_EXTERIOR_VERSION2), variant: variation.toString(16).padStart(8, "0") });
 }
 async function derivePlannedRuinReservation(asset, binding, sha256, { reservationId, terrain: terrain2, realization = null } = {}) {
   const g = createPlannedRuinExterior(asset, reservationId, terrain2, realization), r = g.reservation, biome = plannedSiteBiome(asset, r.id), identity = await worldIdentity(asset.campaignSeedHex, PLANNED_RUIN_VERSION, [binding.assetHash, r.id, r.tier], sha256), siteId2 = "site:" + identity.digest.slice(0, 32), entrance = tileAddress(g.entrance.x, g.entrance.y), region = regionAddress(entrance.chunkX, entrance.chunkY);
@@ -6277,7 +6429,7 @@ function createPlannedFortExterior(asset, reservationId, terrain2 = createPlanne
   requireContract(r.footprint.length >= policy.minimumExteriorChunks && r.approach.length >= policy.minimumApproachChunks && (realization || r.footprint.length === (maxX - minX + 1) * (maxY - minY + 1)) && width <= (maxX - minX + 1) * 32 && height <= (maxY - minY + 1) * 26, "Fort exterior capacity incompatible");
   const footprint = new Set(r.footprint.map((c) => c.x + "," + c.y));
   for (let y = top; y < top + height; y++) for (let x = left; x < left + width; x++) requireContract(footprint.has(Math.floor(x / 32) + "," + Math.floor(y / 26)), "Fort architecture escapes actual footprint shape");
-  const allowedSet = new Set([...r.footprint, ...r.approach].map((c) => c.x + "," + c.y)), allowed = (x, y) => allowedSet.has(Math.floor(x / 32) + "," + Math.floor(y / 26)), inside4 = (x, y) => x >= left && x < left + width && y >= top && y < top + height, walk = Array.from({ length: height }, () => Array(width).fill("1")), ground = Array.from({ length: height }, () => Array(width).fill("g")), blockers2 = [], decorations3 = [];
+  const allowedSet = new Set([...r.footprint, ...r.approach].map((c) => c.x + "," + c.y)), allowed = (x, y) => allowedSet.has(Math.floor(x / 32) + "," + Math.floor(y / 26)), inside5 = (x, y) => x >= left && x < left + width && y >= top && y < top + height, walk = Array.from({ length: height }, () => Array(width).fill("1")), ground = Array.from({ length: height }, () => Array(width).fill("g")), blockers2 = [], decorations3 = [];
   const block2 = (kind2, detail, x, y, w, h) => {
     blockers2.push({ kind: kind2, detail, x, y, width: w, height: h });
     for (let yy = y; yy < y + h; yy++) for (let xx = x; xx < x + w; xx++) walk[yy][xx] = "2";
@@ -6310,7 +6462,7 @@ function createPlannedFortExterior(asset, reservationId, terrain2 = createPlanne
       const xx = x + ox, yy = y + oy;
       if (!allowed(xx, yy)) return false;
       const base = terrain2.base(xx, yy);
-      if (!base.walkable || base.landmassId !== r.landmassId || inside4(xx, yy) && walk[yy - top][xx - left] !== "1") return false;
+      if (!base.walkable || base.landmassId !== r.landmassId || inside5(xx, yy) && walk[yy - top][xx - left] !== "1") return false;
     }
     return true;
   }, start = d.point, key9 = (x, y) => x + "," + y, queue = [start], parents = /* @__PURE__ */ new Map([[key9(start.x, start.y), null]]);
@@ -6343,15 +6495,15 @@ function createPlannedFortExterior(asset, reservationId, terrain2 = createPlanne
   for (const key10 of trail) {
     const [x, y] = key10.split(",").map(Number), b = terrain2.base(x, y);
     requireContract(b.walkable && b.landmassId === r.landmassId, "Fort approach intersects authoritative water");
-    if (inside4(x, y)) {
+    if (inside5(x, y)) {
       requireContract(walk[y - top][x - left] === "1", "Fort approach intersects a building or wall");
       ground[y - top][x - left] = "p";
     }
   }
   decorations3.push({ kind: "fort-keep-facade", x: kx + kw / 2, y: ky + kh / 2, width: kw, height: kh }, { kind: "fort-banner", x: entrance.x - left - 3, y: entrance.y - top, variant: 0 }, { kind: "fort-banner", x: entrance.x - left + 3, y: entrance.y - top, variant: 1 }, { kind: "fort-training-target", x: 8, y: height - 10, variant: 0 }, { kind: "fort-crates", x: width - 9, y: height - 10, variant: 0 }, { kind: "fort-fire", x: 10, y: height - 14, variant: 0 });
-  const apply2 = (x, y, b) => inside4(x, y) ? { ...b, collision: walk[y - top][x - left], material: ground[y - top][x - left], route: ground[y - top][x - left] === "p" ? 1 : 0, fortExterior: true } : trail.has(x + "," + y) ? { ...b, collision: "1", material: "p", route: 1, fortExterior: true } : b;
+  const apply2 = (x, y, b) => inside5(x, y) ? { ...b, collision: walk[y - top][x - left], material: ground[y - top][x - left], route: ground[y - top][x - left] === "p" ? 1 : 0, fortExterior: true } : trail.has(x + "," + y) ? { ...b, collision: "1", material: "p", route: 1, fortExterior: true } : b;
   const presentation = (cx, cy, siteId2) => ({ blockers: blockers2.filter((b) => left + b.x < cx * 32 + 32 && left + b.x + b.width > cx * 32 && top + b.y < cy * 26 + 26 && top + b.y + b.height > cy * 26).map((b) => ({ ...b, id: "fort:" + siteId2 + ":" + b.detail, x: left + b.x - cx * 32, y: top + b.y - cy * 26 })), decorations: decorations3.filter((q) => Math.floor((left + q.x) / 32) === cx && Math.floor((top + q.y) / 26) === cy).map((q, i) => ({ ...q, id: "fort-art:" + siteId2 + ":" + q.kind + ":" + i, x: left + q.x - cx * 32, y: top + q.y - cy * 26 })) });
-  return Object.freeze({ reservation: r, destination: d, policy, left, top, width, height, entrance, gate, road: d.point, side, connector, trail, allowed, inside: inside4, apply: apply2, presentation, terrain: terrain2, realizationVersion: realization?.version ?? PLANNED_FORT_VERSION, variant: realization?.variant ?? "reviewed-v1" });
+  return Object.freeze({ reservation: r, destination: d, policy, left, top, width, height, entrance, gate, road: d.point, side, connector, trail, allowed, inside: inside5, apply: apply2, presentation, terrain: terrain2, realizationVersion: realization?.version ?? PLANNED_FORT_VERSION, variant: realization?.variant ?? "reviewed-v1" });
 }
 async function derivePlannedFortReservation(asset, binding, sha256, { reservationId, terrain: terrain2 } = {}) {
   const g = createPlannedFortExterior(asset, reservationId, terrain2), r = g.reservation, biome = plannedSiteBiome(asset, r.id), identity = await worldIdentity(asset.campaignSeedHex, PLANNED_FORT_VERSION, [binding.assetHash, r.id, r.tier], sha256), siteId2 = "site:" + identity.digest.slice(0, 32), entrance = tileAddress(g.entrance.x, g.entrance.y), region = regionAddress(entrance.chunkX, entrance.chunkY);
@@ -7979,12 +8131,12 @@ var zones = [
   [[16.5, 6.8], [21.7, 6.5], [22.1, 9.7], [17.2, 10.2]],
   [[22, 3.8], [25, 4.2], [27, 6], [26.5, 9.5], [24.7, 11], [21.2, 10.3], [20.4, 8], [21, 5.5]]
 ];
-var inside = (x, y, p) => {
+var inside2 = (x, y, p) => {
   let yes = false;
   for (let i = 0, j = p.length - 1; i < p.length; j = i++) if (p[i][1] > y !== p[j][1] > y && x < (p[j][0] - p[i][0]) * (y - p[i][1]) / (p[j][1] - p[i][1]) + p[i][0]) yes = !yes;
   return yes;
 };
-for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) if (zones.some((p) => inside(x + 0.5, y + 0.5, p))) tiles[y][x] = "1";
+for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) if (zones.some((p) => inside2(x + 0.5, y + 0.5, p))) tiles[y][x] = "1";
 tiles[9][8] = "0";
 tiles[6][16] = "0";
 var rows = tiles.map((r) => r.join(""));
@@ -8608,7 +8760,7 @@ function createPlannedCaveExterior(asset, reservationId = PLANNED_CAVE_ID, share
   const r = asset.sites.find((s) => s.id === reservationId), destination = asset.routes.destinations.find((d) => d.id === reservationId);
   requireContract(r?.familyId === "site-family:cave" && PLANNED_CAVE_TIERS.includes(r.tier) && r.footprint.length === 1 && r.approach.length === 1 && destination?.point, "Unsupported planned compact Cave reservation");
   const f2 = r.footprint[0], a = r.approach[0], left = f2.x * 32 + 8, top = f2.y * 26 + 3, entrance = { x: left + WOODLAND_CAVE_EXTERIOR.entranceTile.x, y: top + WOODLAND_CAVE_EXTERIOR.entranceTile.y }, road = destination.point;
-  const allowed = (x, y) => [f2, a].some((c) => Math.floor(x / 32) === c.x && Math.floor(y / 26) === c.y), inside4 = (x, y) => x >= left && x < left + WOODLAND_CAVE_EXTERIOR.width && y >= top && y < top + WOODLAND_CAVE_EXTERIOR.height, trail = /* @__PURE__ */ new Set(), put3 = (x, y) => {
+  const allowed = (x, y) => [f2, a].some((c) => Math.floor(x / 32) === c.x && Math.floor(y / 26) === c.y), inside5 = (x, y) => x >= left && x < left + WOODLAND_CAVE_EXTERIOR.width && y >= top && y < top + WOODLAND_CAVE_EXTERIOR.height, trail = /* @__PURE__ */ new Set(), put3 = (x, y) => {
     requireContract(allowed(x, y), "Cave connector escaped allocated entrance/approach");
     trail.add(x + "," + y);
   };
@@ -8621,13 +8773,13 @@ function createPlannedCaveExterior(asset, reservationId = PLANNED_CAVE_ID, share
     const [x, y] = k.split(",").map(Number);
     requireContract(terrain2.base(x, y).walkable && terrain2.base(x, y).landmassId === r.landmassId, "Cave approach cannot replace water");
   }
-  const apply2 = (x, y, base) => inside4(x, y) ? { ...base, collision: WOODLAND_CAVE_EXTERIOR.collision[y - top][x - left] === "1" ? "1" : "2", material: WOODLAND_CAVE_EXTERIOR.terrain[y - top][x - left], route: WOODLAND_CAVE_EXTERIOR.collision[y - top][x - left] === "1" && WOODLAND_CAVE_EXTERIOR.terrain[y - top][x - left] === "p" ? 1 : 0, caveExterior: true } : trail.has(x + "," + y) ? { ...base, collision: "1", material: "p", route: 1, caveExterior: true } : base;
+  const apply2 = (x, y, base) => inside5(x, y) ? { ...base, collision: WOODLAND_CAVE_EXTERIOR.collision[y - top][x - left] === "1" ? "1" : "2", material: WOODLAND_CAVE_EXTERIOR.terrain[y - top][x - left], route: WOODLAND_CAVE_EXTERIOR.collision[y - top][x - left] === "1" && WOODLAND_CAVE_EXTERIOR.terrain[y - top][x - left] === "p" ? 1 : 0, caveExterior: true } : trail.has(x + "," + y) ? { ...base, collision: "1", material: "p", route: 1, caveExterior: true } : base;
   const intersects = (cx, cy) => [f2, a].some((c) => c.x === cx && c.y === cy);
   const presentation = (cx, cy, siteId2) => {
     if (cx !== f2.x || cy !== f2.y) return { blockers: [], decorations: [] };
     return { blockers: WOODLAND_CAVE_EXTERIOR.blockers.map((b) => ({ ...copyWire(b), id: "cave:" + siteId2 + ":" + b.detail, x: left + b.x - cx * 32, y: top + b.y - cy * 26 })), decorations: WOODLAND_CAVE_EXTERIOR.decorations.map((d, i) => ({ ...copyWire(d), id: "cave-decoration:" + siteId2 + ":" + i, x: left + d.x - cx * 32, y: top + d.y - cy * 26 })) };
   };
-  return Object.freeze({ reservation: r, destination, footprint: f2, approach: a, left, top, entrance, road, trail, inside: inside4, allowed, apply: apply2, intersects, presentation, terrain: terrain2 });
+  return Object.freeze({ reservation: r, destination, footprint: f2, approach: a, left, top, entrance, road, trail, inside: inside5, allowed, apply: apply2, intersects, presentation, terrain: terrain2 });
 }
 async function derivePlannedCaveReservation(asset, binding, sha256, { reservationId = PLANNED_CAVE_ID, terrain: terrain2 = null } = {}) {
   const g = createPlannedCaveExterior(asset, reservationId, terrain2), r = g.reservation, identity = await worldIdentity(asset.campaignSeedHex, PLANNED_CAVE_VERSION, [binding.assetHash, r.id, r.tier], sha256), siteId2 = "site:" + identity.digest.slice(0, 32), entrance = tileAddress(g.entrance.x, g.entrance.y), region = regionAddress(entrance.chunkX, entrance.chunkY), biome = plannedSiteBiome(asset, r.id);
@@ -8696,6 +8848,7 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
   const cryptReservations = Promise.all(cryptIds.map((reservationId) => (reservationId.includes(":small:") ? derivePlannedCryptReservation : derivePlannedCryptReservationV2)(asset, binding, sha256, { reservationId, terrain: terrain2 }).then((r) => completePopulationReservation(r, asset, binding, sha256))));
   const starter = townOriginV1(STARTER_VILLAGE_ID), sx = starter.x / 32, sy = starter.y / 26;
   const townTiles = binding.townPrototype ? createPlannedTownTiles(asset, terrain2) : null, villageTiles = hasSettlementLife(binding) ? createPlannedVillageTiles(asset, terrain2, binding) : null;
+  const harbor = hasFerries(binding) ? harborTownV1() : null, harborTiles = harbor ? createHarborTownTiles(terrain2, harbor) : null;
   const bridgeDecks = createOutdoorBridgeDecks(asset.routes.bridges ?? [], terrain2);
   const mapFeatures = /* @__PURE__ */ new Map();
   if (["planned-world-shoreline-v2", "planned-world-water-v3"].includes(asset.version)) for (const e of asset.routes.edges) for (let i = 0; i < e.path.length; i++) {
@@ -8708,7 +8861,8 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
   const wilderness = asset.wildernessExtension ?? null, branchTrails = new Map((wilderness?.trailTiles ?? []).map((c) => [c.x + "," + c.y, c.kind])), eventClearings = new Set((wilderness?.eventCapacities ?? []).flatMap((e) => e.cells.map((c) => c.x + "," + c.y)));
   for (const c of wilderness?.trailTiles ?? []) if (c.kind === "footpath" && mapFeatures.get(c.y * terrain2.widthTiles + c.x) !== "R") mapFeatures.set(c.y * terrain2.widthTiles + c.x, "T");
   const ferry2 = createFerryOverlay(binding);
-  const routeAt = (x, y) => Math.max(ferry2.at(x, y) ? 1 : 0, Number(routePages.get(Math.floor(x / 32) + "," + Math.floor(y / 26))?.[y % 26]?.[x % 32] ?? 0));
+  const hb = harbor?.bounds, ferryAt = (x, y) => ferry2.at(x, y) && !(hb && x >= hb.x && x < hb.x + hb.w && y >= hb.y && y < hb.y + hb.h);
+  const routeAt = (x, y) => Math.max(ferryAt(x, y) ? 1 : 0, Number(routePages.get(Math.floor(x / 32) + "," + Math.floor(y / 26))?.[y % 26]?.[x % 32] ?? 0));
   function acceptedPilotTile(x, y) {
     const b = terrain2.base(x, y), deck = bridgeDecks.get(x + "," + y);
     if (deck) return { ...b, walkable: true, kind: "bridge", underlyingKind: deck.underlyingKind, bridgeId: deck.id, collision: "1", material: deck.material, route: routeAt(x, y) || 1 };
@@ -8763,7 +8917,7 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     return result;
   }
   const tile = (x, y) => {
-    const native = townTiles ? townTiles(x, y, originalTile(x, y)) : originalTile(x, y), b = villageTiles ? villageTiles(x, y, native) : native;
+    const native = townTiles ? townTiles(x, y, originalTile(x, y)) : originalTile(x, y), village = villageTiles ? villageTiles(x, y, native) : native, b = harborTiles ? harborTiles(x, y, village) : village;
     const cave = caveByChunk.get(Math.floor(x / 32) + "," + Math.floor(y / 26));
     const fort = fortByChunk.get(Math.floor(x / 32) + "," + Math.floor(y / 26));
     const ruin = ruinByChunk.get(Math.floor(x / 32) + "," + Math.floor(y / 26));
@@ -8820,13 +8974,13 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
       mapRows.push(mr);
       if (stands) standRows.push(fr);
     }
-    const townBlockers = [...townTiles ? townChunkBlockers(cx, cy) : [], ...villageTiles ? villageChunkBlockers(cx, cy, binding) : []];
+    const townBlockers = [...townTiles ? townChunkBlockers(cx, cy) : [], ...villageTiles ? villageChunkBlockers(cx, cy, binding) : [], ...harbor ? harborChunkBlockers(harbor, cx, cy) : []];
     const used = /* @__PURE__ */ new Set(), matches = (x, y, a) => {
       if (x >= 32 || y >= 26 || fort?.inside(cx * 32 + x, cy * 26 + y) || ruin?.ownsStructure(cx * 32 + x, cy * 26 + y) || collision2[y][x] !== "2" || visual2[y][x] !== "g" || used.has(y * 32 + x)) return false;
       const b = tile(cx * 32 + x, cy * 26 + y);
-      return b.naturalKind === a.naturalKind && b.naturalClusterId === a.naturalClusterId && b.biome === a.biome;
+      return !b.town && b.naturalKind === a.naturalKind && b.naturalClusterId === a.naturalClusterId && b.biome === a.biome;
     };
-    for (let y = 0; y < 26; y++) for (let x = 0; x < 32; x++) if (!townBlockers.length && !fort?.inside(cx * 32 + x, cy * 26 + y) && !ruin?.ownsStructure(cx * 32 + x, cy * 26 + y) && collision2[y][x] === "2" && visual2[y][x] === "g" && !used.has(y * 32 + x)) {
+    for (let y = 0; y < 26; y++) for (let x = 0; x < 32; x++) if (!(townBlockers.length && tile(cx * 32 + x, cy * 26 + y).town) && !fort?.inside(cx * 32 + x, cy * 26 + y) && !ruin?.ownsStructure(cx * 32 + x, cy * 26 + y) && collision2[y][x] === "2" && visual2[y][x] === "g" && !used.has(y * 32 + x)) {
       const a = tile(cx * 32 + x, cy * 26 + y);
       let w = 1, h = 1;
       while (matches(x + w, y, a)) w++;
@@ -12044,7 +12198,7 @@ function validateWorldEvents(root) {
   safeInteger(w.revision);
   requireContract(w.records && Object.keys(w.records).length <= (w.version === PLANNED_LEDGER_VERSION ? 256 : w.version === HOLLOW_LEDGER_VERSION ? 9 : 8), "Event ledger bound");
   if (w.boons) validateBoons(w.boons);
-  let active2 = 0;
+  let active3 = 0;
   for (const [id, r] of Object.entries(w.records)) {
     closedRecord(r, ["groupId", "kind", "status", "startedTick", "elapsedTicks", "eligiblePlayerIds", "claimedPlayerIds", "stages"], ["rulesVersion", "partySize", "podLevel", "pods", "pressure", "hollow", "shrine", "nest"]);
     if (r.kind === "hollow") {
@@ -12063,7 +12217,7 @@ function validateWorldEvents(root) {
     if (isSporeV2(r)) validateSporePodsV2(r);
     else if (!CHEST0.includes(r.kind)) requireContract(!["rulesVersion", "partySize", "podLevel", "pods"].some((k) => Object.hasOwn(r, k)), "Unknown event extension");
     requireContract(id === r.groupId && /^ordinary:[a-f0-9]{32}$/.test(id) && ["spore", "legacy", "hollow", "cursed_shrine", "nests"].includes(r.kind) && ["active", "completed"].includes(r.status), "Event identity/status");
-    active2 += Number(running(r));
+    active3 += Number(running(r));
     safeInteger(r.startedTick);
     safeInteger(r.elapsedTicks);
     for (const list of [r.eligiblePlayerIds, r.claimedPlayerIds]) requireContract(Array.isArray(list) && list.length >= 0 && list.length <= 4 && new Set(list).size === list.length && list.every((id2) => /^ply:[a-f0-9]{32}$/.test(id2)), "Event participants");
@@ -12076,7 +12230,7 @@ function validateWorldEvents(root) {
       safeInteger(stage.at, 0, r.elapsedTicks);
     }
   }
-  requireContract(active2 <= SPORE_POLICY.maxActive, "Four active event limit");
+  requireContract(active3 <= SPORE_POLICY.maxActive, "Four active event limit");
 }
 var source5 = (s, id, kind2, n) => episodeRewardId(id, s.encounterEconomy.groups[id].episode, kind2, n);
 var podUsed = (s, id, n) => Boolean(s.encounterEconomy.groups[id]?.usedResources[source5(s, id, "breakable", n)]);
@@ -15944,13 +16098,13 @@ function floorMotifs(grid, b, floorIndex) {
 }
 function assembleFloor2({ site, floorIndex, floorCount, roomCount, tier: tier2, b, floorSeed }) {
   const grid = Array.from({ length: H3 }, () => Array(W3).fill("0")), owners = /* @__PURE__ */ new Map(), rooms = [], modules = [], edges = [];
-  const mirror = pick4(b, 2, 3) === 1;
+  const mirror2 = pick4(b, 2, 3) === 1;
   for (let i = 0; i < roomCount; i++) {
-    const slot = slots[i], col = mirror ? 3 - slot[0] : slot[0], cx = 8 + 15 * col, cy = 8 + 15 * slot[1], role = roleFor2(i, roomCount, floorIndex, floorCount), module = WOODLAND_CAVE_MODULES_BY_ID_D12_1[moduleIdFor(role)], origin2 = { x: cx - 4, y: cy - 4 }, roomId = `floor-${floorIndex}-room-${i}`, bounds = { x: origin2.x, y: origin2.y, width: 9, height: 9 };
+    const slot = slots[i], col = mirror2 ? 3 - slot[0] : slot[0], cx = 8 + 15 * col, cy = 8 + 15 * slot[1], role = roleFor2(i, roomCount, floorIndex, floorCount), module = WOODLAND_CAVE_MODULES_BY_ID_D12_1[moduleIdFor(role)], origin2 = { x: cx - 4, y: cy - 4 }, roomId = `floor-${floorIndex}-room-${i}`, bounds = { x: origin2.x, y: origin2.y, width: 9, height: 9 };
     const openCells = stampRoom(grid, owners, module, origin2, "room:" + roomId);
     const room2 = { roomId, role, moduleId: module.moduleId, cx, cy, bounds, sockets: module.sockets.map((s) => ({ ...copyWire(s), x: origin2.x + s.x, y: origin2.y + s.y })), decorationAnchors: module.anchors.decorations.map((a) => ({ x: origin2.x + a.x, y: origin2.y + a.y })), encounterAnchors: module.anchors.encounters.map((a) => ({ x: origin2.x + a.x, y: origin2.y + a.y })), reservedZones: module.reservedZones.map((z) => ({ ...copyWire(z), x: origin2.x + z.x, y: origin2.y + z.y })), openCells };
     rooms.push(room2);
-    modules.push({ moduleInstanceId: `module:${roomId}`, moduleId: module.moduleId, role, rotation: 0, reflection: mirror ? "horizontal" : "none", bounds: copyWire(bounds), connects: [] });
+    modules.push({ moduleInstanceId: `module:${roomId}`, moduleId: module.moduleId, role, rotation: 0, reflection: mirror2 ? "horizontal" : "none", bounds: copyWire(bounds), connects: [] });
     if (i) {
       const prior = rooms[i - 1], edgeId = `edge:${floorIndex}:${i - 1}-${i}`;
       modules.push(...connectorBetween(grid, owners, prior, room2, edgeId, i));
@@ -15959,7 +16113,7 @@ function assembleFloor2({ site, floorIndex, floorCount, roomCount, tier: tier2, 
   }
   requireContract(connected3(rooms, edges), "Disconnected Cave module graph");
   const arrival = gridPoint(rooms[0].cx, rooms[0].cy), last = rooms.at(-1), progress = gridPoint(last.cx, last.cy), up = floorIndex > 0 ? { transitionId: `transition:${site.siteId}:${floorIndex}:up`, floorId: null, anchor: point9(arrival.x, arrival.y) } : null, down = floorIndex < floorCount - 1 ? { transitionId: `transition:${site.siteId}:${floorIndex}:down`, floorId: null, anchor: point9(progress.x, progress.y) } : null;
-  const reward = floorIndex === floorCount - 1 ? { rewardId: `reward:${site.siteId}:${floorIndex}:0`, ...WOODLAND_CAVE_FAMILY_D12_1.rewardPolicy, position: point9(progress.x + (mirror ? -2 : 2), progress.y) } : null;
+  const reward = floorIndex === floorCount - 1 ? { rewardId: `reward:${site.siteId}:${floorIndex}:0`, ...WOODLAND_CAVE_FAMILY_D12_1.rewardPolicy, position: point9(progress.x + (mirror2 ? -2 : 2), progress.y) } : null;
   const reserved = [arrival, progress, ...reward ? [{ x: reward.position.x / T3 - 0.5, y: reward.position.y / T3 - 0.5 }] : []], encounterRooms = rooms.filter((r) => rolesEncounter.has(r.role)), members = [], used = [];
   const memberCount = Math.min(WOODLAND_CAVE_FAMILY_D12_1.encounterPolicy.maximumMembersPerFloor, tier2.threat[0] + pick4(b, tier2.threat[1] - tier2.threat[0] + 1, 27));
   for (let i = 0; i < memberCount; i++) {
@@ -20730,8 +20884,8 @@ var CW = 32n;
 var CH = 26n;
 var T4 = 32;
 var key5 = (x, y) => x + "," + y;
-var inside2 = (x, y, p) => x >= BigInt(p.tileX) && x < BigInt(p.tileX) + 48n && y >= BigInt(p.tileY) && y < BigInt(p.tileY) + 36n;
-var fortParcelOwnsWorldPositionD10 = (parcel2, p) => Boolean(parcel2 && inside2(BigInt(p.chunkX) * CW + BigInt(Math.floor(p.localX / T4)), BigInt(p.chunkY) * CH + BigInt(Math.floor(p.localY / T4)), parcel2));
+var inside3 = (x, y, p) => x >= BigInt(p.tileX) && x < BigInt(p.tileX) + 48n && y >= BigInt(p.tileY) && y < BigInt(p.tileY) + 36n;
+var fortParcelOwnsWorldPositionD10 = (parcel2, p) => Boolean(parcel2 && inside3(BigInt(p.chunkX) * CW + BigInt(Math.floor(p.localX / T4)), BigInt(p.chunkY) * CH + BigInt(Math.floor(p.localY / T4)), parcel2));
 async function planWoodlandFortParcelD10({ seed, origin: origin2, ruinSocket, maxRouteTiles = 160 }, sha256) {
   requireContract(ruinSocket?.siteId && maxRouteTiles >= 1 && maxRouteTiles <= 512, "Fort reservation input");
   const cache4 = /* @__PURE__ */ new Map();
@@ -20768,7 +20922,7 @@ async function planWoodlandFortParcelD10({ seed, origin: origin2, ruinSocket, ma
       if (x1 - x0 !== 1n || y1 - y0 !== 1n) continue;
       const outside = await cell(x, y + 1n);
       if (outside?.page.visual.route.centerline[outside.y]?.[outside.x] !== "1") continue;
-      let woodland = 0, total = 0, valid = !inside2(startX, startY, p);
+      let woodland = 0, total = 0, valid = !inside3(startX, startY, p);
       for (let cy = y0; cy <= y1; cy++) for (let cx = x0; cx <= x1; cx++) {
         const part = await chunk(cx, cy);
         if (!part) {
@@ -20808,7 +20962,7 @@ function overlayWoodlandFortParcelD10(chunk, parcel2) {
   const x0 = BigInt(parcel2.tileX), y0 = BigInt(parcel2.tileY), cx = BigInt(chunk.chunkX) * CW, cy = BigInt(chunk.chunkY) * CH;
   const collision2 = chunk.collision.tiles.map((r) => [...r]), terrain2 = chunk.visual.terrain.map((r) => [...r]), biomes = chunk.visual.biomes.map((r) => [...r]);
   const centerline = chunk.visual.route.centerline.map((r) => [...r]), clearance = chunk.visual.route.clearance.map((r) => [...r]);
-  const own2 = (x, y) => inside2(cx + BigInt(x), cy + BigInt(y), parcel2);
+  const own2 = (x, y) => inside3(cx + BigInt(x), cy + BigInt(y), parcel2);
   for (let y = 0; y < 26; y++) for (let x = 0; x < 32; x++) if (own2(x, y)) {
     const fx = Number(cx + BigInt(x) - x0), fy = Number(cy + BigInt(y) - y0);
     collision2[y][x] = WOODLAND_FORT_TEMPLATE.collision.tiles[fy][fx];
@@ -20845,8 +20999,8 @@ var T5 = 32;
 var W5 = BigInt(WOODLAND_CAVE_EXTERIOR.width);
 var H5 = BigInt(WOODLAND_CAVE_EXTERIOR.height);
 var key6 = (x, y) => x + "," + y;
-var inside3 = (x, y, p) => x >= BigInt(p.tileX) && x < BigInt(p.tileX) + W5 && y >= BigInt(p.tileY) && y < BigInt(p.tileY) + H5;
-var caveParcelOwnsWorldPositionD10 = (parcel2, p) => Boolean(parcel2 && inside3(BigInt(p.chunkX) * CW2 + BigInt(Math.floor(p.localX / T5)), BigInt(p.chunkY) * CH2 + BigInt(Math.floor(p.localY / T5)), parcel2));
+var inside4 = (x, y, p) => x >= BigInt(p.tileX) && x < BigInt(p.tileX) + W5 && y >= BigInt(p.tileY) && y < BigInt(p.tileY) + H5;
+var caveParcelOwnsWorldPositionD10 = (parcel2, p) => Boolean(parcel2 && inside4(BigInt(p.chunkX) * CW2 + BigInt(Math.floor(p.localX / T5)), BigInt(p.chunkY) * CH2 + BigInt(Math.floor(p.localY / T5)), parcel2));
 async function planWoodlandCaveParcelD10({ seed, origin: origin2, ruinSocket, fortParcel, minRouteTiles = 48, maxRouteTiles = 192, excludedParcels = [], excludedPlacementRegions = [], minimumSeparationTiles = 0 }, sha256) {
   requireContract(ruinSocket?.siteId && fortParcel?.siteId && minRouteTiles >= 48 && minRouteTiles <= maxRouteTiles && maxRouteTiles <= 512 && minimumSeparationTiles >= 0, "Cave reservation input");
   const cache4 = /* @__PURE__ */ new Map();
@@ -20887,7 +21041,7 @@ async function planWoodlandCaveParcelD10({ seed, origin: origin2, ruinSocket, fo
           }
           for (const s of page.sites ?? []) {
             const sx = BigInt(s.entrance.chunkX) * CW2 + BigInt(Math.floor(s.entrance.localX / T5)), sy = BigInt(s.entrance.chunkY) * CH2 + BigInt(Math.floor(s.entrance.localY / T5));
-            if (s.siteId === ruinSocket.siteId || inside3(sx, sy, parcel2)) valid = false;
+            if (s.siteId === ruinSocket.siteId || inside4(sx, sy, parcel2)) valid = false;
           }
           for (let yy = top; yy < top + H5; yy++) for (let xx = left; xx < left + W5; xx++) {
             const p = normalizeWorldPosition({ chunkX: String(floorDiv(xx, CW2)), chunkY: String(floorDiv(yy, CH2)), localX: Number(xx - floorDiv(xx, CW2) * CW2) * T5 + 16, localY: Number(yy - floorDiv(yy, CH2) * CH2) * T5 + 16 });
@@ -20924,7 +21078,7 @@ function overlayWoodlandCaveParcelD10(chunk, parcel2) {
   if (!parcel2?.pages.some((p) => p.chunkX === chunk.chunkX && p.chunkY === chunk.chunkY)) return chunk;
   const page = parcel2.pages.find((p) => p.chunkX === chunk.chunkX && p.chunkY === chunk.chunkY);
   requireContract(parcel2.version === WOODLAND_CAVE_VERSION && page.baseDigest === chunk.identity.digest, "Cave parcel/base mismatch");
-  const x0 = BigInt(parcel2.tileX), y0 = BigInt(parcel2.tileY), cx = BigInt(chunk.chunkX) * CW2, cy = BigInt(chunk.chunkY) * CH2, own2 = (x, y) => inside3(cx + BigInt(x), cy + BigInt(y), parcel2), collision2 = chunk.collision.tiles.map((r) => [...r]), terrain2 = chunk.visual.terrain.map((r) => [...r]), biomes = chunk.visual.biomes.map((r) => [...r]), centerline = chunk.visual.route.centerline.map((r) => [...r]), clearance = chunk.visual.route.clearance.map((r) => [...r]);
+  const x0 = BigInt(parcel2.tileX), y0 = BigInt(parcel2.tileY), cx = BigInt(chunk.chunkX) * CW2, cy = BigInt(chunk.chunkY) * CH2, own2 = (x, y) => inside4(cx + BigInt(x), cy + BigInt(y), parcel2), collision2 = chunk.collision.tiles.map((r) => [...r]), terrain2 = chunk.visual.terrain.map((r) => [...r]), biomes = chunk.visual.biomes.map((r) => [...r]), centerline = chunk.visual.route.centerline.map((r) => [...r]), clearance = chunk.visual.route.clearance.map((r) => [...r]);
   for (let y = 0; y < 26; y++) for (let x = 0; x < 32; x++) if (own2(x, y)) {
     const fx = Number(cx + BigInt(x) - x0), fy = Number(cy + BigInt(y) - y0);
     collision2[y][x] = WOODLAND_CAVE_EXTERIOR.collision[fy][fx];
@@ -21231,7 +21385,7 @@ function originEgress(manifest, collision2, resources = []) {
   for (const side of ["north", "east", "south", "west"]) {
     const horizontal = side === "north" || side === "south", length = horizontal ? w : h, candidates = [];
     for (let a = 2; a < length - 2; a++) {
-      const cells3 = [], inside4 = [];
+      const cells3 = [], inside5 = [];
       let ok = true;
       for (let d = -1; d <= 1; d++) {
         const x = side === "west" ? 0 : side === "east" ? w - 1 : a + d, y = side === "north" ? 0 : side === "south" ? h - 1 : a + d, ix = x + (side === "west" ? 1 : side === "east" ? -1 : 0), iy = y + (side === "north" ? 1 : side === "south" ? -1 : 0);
@@ -21240,9 +21394,9 @@ function originEgress(manifest, collision2, resources = []) {
           break;
         }
         cells3.push({ x, y, from: collision2.tiles[y][x], to: "1" });
-        inside4.push({ x: ix, y: iy });
+        inside5.push({ x: ix, y: iy });
       }
-      if (ok) candidates.push({ side, cells: cells3, inside: inside4, score: Math.abs(a - length / 2) });
+      if (ok) candidates.push({ side, cells: cells3, inside: inside5, score: Math.abs(a - length / 2) });
     }
     candidates.sort((a, b) => a.score - b.score || a.cells[1].x - b.cells[1].x || a.cells[1].y - b.cells[1].y);
     if (candidates.length) {
