@@ -51609,6 +51609,7 @@ var PORTAL_OUTER = "#6cc6ff";
 var PORTAL_INNER = "#c4b5fd";
 var PLAYER = "#ffe9c4";
 var MAX_LOOT_LIGHTS = 12;
+var MAX_FOE_LIGHTS = 48;
 function createDynamicWorldLightsV1(doc) {
   const stamps = /* @__PURE__ */ new Map();
   let drawn = 0, cores = 0;
@@ -51663,6 +51664,16 @@ function createDynamicWorldLightsV1(doc) {
       loot++;
     }
     if (player?.alive && !interior2) pool(player.position.x, player.position.y - 6, 124, PLAYER, 0.68);
+    let foes = 0;
+    for (const id in model.entitiesById ?? {}) {
+      if (foes >= MAX_FOE_LIGHTS) break;
+      const a = model.entitiesById[id];
+      if (!a?.alive || a.team !== "hostile" || !a.position) continue;
+      const radius = Math.max(30, Math.min(64, (a.hullRadius ?? 10) * 3.2)), x = a.position.x, y = a.position.y - 4;
+      if (x + radius < view3.x || y + radius < view3.y || x - radius > view3.x + view3.width || y - radius > view3.y + view3.height) continue;
+      pool(x, y, radius, PLAYER, interior2 ? 0.3 : 0.4);
+      foes++;
+    }
     lc.restore();
   }
   const CORE = 30, coreRect = (portal) => ({ x: portal.x - CORE, y: portal.y - CORE * 0.7, w: CORE * 2, h: CORE * 1.4 });
