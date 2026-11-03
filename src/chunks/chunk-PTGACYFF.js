@@ -3370,6 +3370,75 @@ var seededSites = () => {
 var populationIds = (b, family2) => hasAlphaPopulation(b) ? (isSeededBindingV1(b) ? seededSites() : [...ALPHA_POPULATION_SELECTIONS, ...hasWilderness(b) ? WILDERNESS_SITE_SELECTIONS : [], ...hasFirstJourney(b) ? [FIRST_CAVE_SELECTION] : []]).filter((s) => s.familyId === "site-family:" + family2).map((s) => s.id) : null;
 var newPopulationSelection = (id) => worldSitesV1() ? worldSiteV1(id) : ALPHA_POPULATION_SELECTIONS.find((s) => s.id === id && !s.old) ?? wildernessSelection(id) ?? (id === FIRST_CAVE_SELECTION.id ? FIRST_CAVE_SELECTION : null);
 
+// src/shared/content/world_loot_v3.js
+var WORLD_LOOT_V3_VERSION = "world-loot-v3";
+var WORLD_LOOT_V3_HASH = "5945f4f6a6c02522b745889a88f4cd1034d8e4b89266517a2c31825741ef5cdf";
+var WORLD_LOOT_V3_POLICY = freezeWire({
+  version: WORLD_LOOT_V3_VERSION,
+  parentCombatHash: WORLD_COMBAT_HASH,
+  unlockLevels: [1, 1, 10, 20, 35, 50],
+  // gearPerMille: chance this source drops gear; uncommon: basis points of non-rare gear;
+  // rare: [level, basis points] anchors, linear between them, 0 before the first, flat after the last.
+  sources: {
+    ordinary: { gearPerMille: 15, uncommon: 2e3, rare: [[10, 100], [50, 200]], rich: false },
+    elite: { gearPerMille: 250, uncommon: 4500, rare: [[10, 300], [50, 600]], rich: false },
+    smallEnd: { gearPerMille: 500, uncommon: 4500, rare: [[10, 300], [50, 600]], rich: false },
+    mini: { gearPerMille: 1e3, uncommon: 6e3, rare: [[10, 800], [50, 1500]], rich: false },
+    boss: { gearPerMille: 1e3, uncommon: 8e3, rare: [[10, 1500], [20, 2e3], [30, 2800], [40, 3500]], rich: true },
+    smallChest: { gearPerMille: 150, uncommon: 2500, rare: [], rich: false },
+    standardChest: { gearPerMille: 400, uncommon: 5e3, rare: [[10, 300], [50, 800]], rich: false },
+    bossChest: { gearPerMille: 1e3, uncommon: 7e3, rare: [[10, 1e3], [20, 1500], [30, 2200], [40, 3e3]], rich: true }
+  },
+  // How Rare-or-better gear splits into Rare / Epic / Legendary / Mythic (basis points).
+  split: [
+    { minimumLevel: 1, plain: [1e4, 0, 0, 0], rich: [1e4, 0, 0, 0] },
+    { minimumLevel: 20, plain: [9e3, 1e3, 0, 0], rich: [8e3, 2e3, 0, 0] },
+    { minimumLevel: 35, plain: [8200, 1500, 300, 0], rich: [6800, 2500, 700, 0] },
+    { minimumLevel: 50, plain: [7700, 1700, 500, 100], rich: [6e3, 2800, 1e3, 200] }
+  ],
+  qualityFromLevel: 30,
+  gate: "min(frozen encounter level, personal hero level when the reward is captured). Pickup, reopen and portal use never reroll."
+});
+var SOURCES = WORLD_LOOT_V3_POLICY.sources;
+function lootSourceV3(role, siteReward = null) {
+  if (role === "ordinary" || role === "elite") return role;
+  if (role === "boss") return siteReward === "site-end-elite" ? "smallEnd" : siteReward === "mini-boss" ? "mini" : "boss";
+  requireContract(role === "completion", "Loot v3 role");
+  return siteReward === "lair-chest" ? "bossChest" : siteReward === "standard-chest" ? "standardChest" : "smallChest";
+}
+function lootGearPerMilleV3(role, siteReward = null, occurrenceHundredths = 100) {
+  return Math.min(1e3, Math.floor(SOURCES[lootSourceV3(role, siteReward)].gearPerMille * occurrenceHundredths / 100));
+}
+function rareShare(anchors2, level) {
+  if (!anchors2.length || level < BigInt(anchors2[0][0])) return 0n;
+  for (let i = 1; i < anchors2.length; i++) {
+    const [a, va] = anchors2[i - 1], [b, vb] = anchors2[i];
+    if (level < BigInt(b)) return BigInt(va) + (BigInt(vb) - BigInt(va)) * (level - BigInt(a)) / BigInt(b - a);
+  }
+  return BigInt(anchors2.at(-1)[1]);
+}
+function worldLootWeightsV3(encounter, hero, role, siteReward = null, qualityHundredths = 0) {
+  positiveProgression(encounter);
+  positiveProgression(hero);
+  const a = progressionBigInt(encounter), b = progressionBigInt(hero), level = a < b ? a : b, q = progressionBigInt(qualityHundredths);
+  requireContract(q >= 0n, "Loot v3 quality");
+  const src = SOURCES[lootSourceV3(role, siteReward)], rare = rareShare(src.rare, level), rest = 10000n - rare, u = rest * BigInt(src.uncommon) / 10000n;
+  const row = [...WORLD_LOOT_V3_POLICY.split].reverse().find((r) => level >= BigInt(r.minimumLevel))[src.rich ? "rich" : "plain"];
+  const top = row.slice(1).map((w2) => rare * BigInt(w2) / 10000n), w = [rest - u, u, rare - top.reduce((x, y) => x + y, 0n), ...top];
+  const boost = level >= BigInt(WORLD_LOOT_V3_POLICY.qualityFromLevel) ? q : 0n;
+  return w.map((n, i) => level < BigInt(WORLD_LOOT_V3_POLICY.unlockLevels[i]) ? 0n : n * (10000n + boost * BigInt(i * 10)));
+}
+function worldGearRarityV3(encounter, hero, role, siteReward, draw, qualityHundredths = 0) {
+  requireContract(Number.isFinite(draw) && draw >= 0 && draw < 1, "Loot v3 draw");
+  const weights = worldLootWeightsV3(encounter, hero, role, siteReward, qualityHundredths), total = weights.reduce((a, b) => a + b, 0n), roll = BigInt(Math.floor(draw * 4294967296)) * total;
+  let sum2 = 0n;
+  for (let i = 0; i < weights.length; i++) {
+    sum2 += weights[i];
+    if (roll < sum2 * 4294967296n) return i;
+  }
+  requireContract(false, "Loot v3 weights failed");
+}
+
 // src/shared/contracts/large_number.js
 function magnitudeSuffix(bucket) {
   if (bucket < 5) return ["", "K", "M", "B", "T"][bucket];
@@ -3506,7 +3575,7 @@ function validateWorldRarityProgressionV2(p) {
     requireContract(p.rarityHeroLevel === void 0 && p.rarityRole === void 0, "Rarity fields require policy commitment");
     return p;
   }
-  requireContract(p.rarityPolicyHash === WORLD_RARITY_HASH && p.combatHash === WORLD_COMBAT_HASH, "World rarity policy commitment");
+  requireContract([WORLD_RARITY_HASH, WORLD_LOOT_V3_HASH].includes(p.rarityPolicyHash) && p.combatHash === WORLD_COMBAT_HASH, "World rarity policy commitment");
   positiveProgression(p.rarityHeroLevel);
   requireContract(["ordinary", "elite", "boss", "completion"].includes(p.rarityRole) && p.combatQuality === (p.rarityRole === "boss" ? "elite" : p.rarityRole), "World rarity source role");
   return p;
@@ -3519,14 +3588,14 @@ function rewardRarityRoleV2(state, source5, spawnEntityId = null) {
 function captureWorldRarityV2(state, player, source5, progression) {
   if (progression.combatHash !== WORLD_COMBAT_HASH) return progression;
   requireContract(!hasWorldRarityV2(progression), "Reward rarity already captured");
-  return { ...progression, rarityPolicyHash: WORLD_RARITY_HASH, rarityHeroLevel: progressionWire(progressionBigInt(player.progression.level)), rarityRole: rewardRarityRoleV2(state, source5) };
+  return { ...progression, rarityPolicyHash: WORLD_LOOT_V3_HASH, rarityHeroLevel: progressionWire(progressionBigInt(player.progression.level)), rarityRole: rewardRarityRoleV2(state, source5) };
 }
 
 // src/shared/content/site_rewards_v1.js
 var SITE_REWARDS_VERSION = "site-rewards-v1";
 var SITE_REWARDS_POLICY = freezeWire({
   version: SITE_REWARDS_VERSION,
-  kinds: { "site-end-elite": { role: "boss", floor: 1, quality: 0 }, "mini-boss": { role: "boss", floor: 0, quality: 0 }, "lair-boss": { role: "boss", floor: 2, quality: 0 }, "lair-chest": { role: "completion", floor: 0, quality: 300 } }
+  kinds: { "site-end-elite": { role: "boss", floor: 1, quality: 0 }, "mini-boss": { role: "boss", floor: 0, quality: 0 }, "lair-boss": { role: "boss", floor: 2, quality: 0 }, "lair-chest": { role: "completion", floor: 0, quality: 300 }, "standard-chest": { role: "completion", floor: 0, quality: 0 } }
 });
 var kind = (k) => SITE_REWARDS_POLICY.kinds[k];
 var siteRewardRoleV1 = (k) => k ? kind(k).role : null;
@@ -4327,7 +4396,7 @@ function generateAtPrecision(c, seed, input, { tier = null, family: family2 = nu
     noun = uq.noun;
   }
   const rng2 = rewardStream(seed), random = () => rng2.random(), pick5 = (a) => a[Math.floor(random() * a.length)], power2 = progression.combatHash ? depth : progressionWire(progressionBigInt(depth) / 4n + 1n);
-  const rarityRandom = progression.combatHash ? random() : null, rarityTier = tier ?? (progression.combatHash ? hasWorldRarityV2(progression) ? siteRewardRarityV1(progression.siteReward, worldGearRarityV2(depth, progression.rarityHeroLevel, progression.rarityRole, rarityRandom, (progression.modifiers?.qualityHundredths ?? 0) + siteRewardQualityV1(progression.siteReward) + boonRewardQualityV1(progression) + quickClearRewardQualityV1(progression))) : worldGearRarity(depth, progression.combatQuality, rarityRandom, progression.modifiers?.qualityHundredths ?? 0) : rollRarityD9(depth, progression.quality, random));
+  const rarityRandom = progression.combatHash ? random() : null, rarityTier = tier ?? (progression.combatHash ? progression.rarityPolicyHash === WORLD_LOOT_V3_HASH ? worldGearRarityV3(depth, progression.rarityHeroLevel, progression.rarityRole, progression.siteReward ?? null, rarityRandom, (progression.modifiers?.qualityHundredths ?? 0) + boonRewardQualityV1(progression) + quickClearRewardQualityV1(progression)) : hasWorldRarityV2(progression) ? siteRewardRarityV1(progression.siteReward, worldGearRarityV2(depth, progression.rarityHeroLevel, progression.rarityRole, rarityRandom, (progression.modifiers?.qualityHundredths ?? 0) + siteRewardQualityV1(progression.siteReward) + boonRewardQualityV1(progression) + quickClearRewardQualityV1(progression))) : worldGearRarity(depth, progression.combatQuality, rarityRandom, progression.modifiers?.qualityHundredths ?? 0) : rollRarityD9(depth, progression.quality, random));
   safeInteger(rarityTier, 0, 5);
   const cls = progression.gearClass ?? null, classOffhand = cls ? CLASS_GEAR[cls].offhand : null, wardrobe = Boolean(cls) && progression.wardrobe === WARDROBE_V1, classFamilies = wardrobe ? CLASS_GEAR_FAMILIES_V2 : CLASS_GEAR_FAMILIES, families = cls ? classFamilies : progression.armor === "overall" ? ONE_PIECE_GEAR_FAMILIES : GEAR_FAMILIES;
   const type = family2 ?? pick5(families), sub = type === "subweapon" ? subType ?? (cls ? classOffhand : pick5(["shield", "dagger", "tome"])) : null, own2 = type === "cape" ? CAPE_NOUNS : cls && type !== "ring" ? classGearNouns(cls, type) : GEAR_NOUNS[sub ?? type], shared = wardrobe && type === "helmet" ? SHARED_HELMET_NOUNS : [], nouns = [...own2 ?? [], ...shared], n = noun ?? (shared.length && random() < 0.2 ? pick5(shared) : pick5(own2));
@@ -5718,7 +5787,7 @@ function rollContentReward(state, player, { sourceEntityId, rank, kind: kind2, o
   const gold = (n) => !modifiers || modifiers.goldHundredths === 100 ? n : multiplyAmount(rewardAmount(n), `${Math.floor(modifiers.goldHundredths / 100)}.${String(modifiers.goldHundredths % 100).padStart(2, "0")}`.replace(/0+$/, "").replace(/\.$/, ""));
   const profile2 = progression?.version === D9_REWARD_PROGRESSION ? rewardProfileD9(progression, rank) : rewardProfile(rank), key5 = `d5-eco-v1/${state.campaign.seed.seedHex}/${player.playerId}/${sourceEntityId}`, roll = hashReward(key5 + "/branch") % 100, pool = REWARD_POOLS[Math.min(2, ["C", "B", "A", "S"].indexOf(rank))];
   if (hasWorldCombat(state)) {
-    const l = BigInt(progression?.sourceDepth ?? 1), elite = progression?.combatQuality === "elite", value = String(kind2 === "chest" ? 20n + 4n * l : (1n + l / 4n) * BigInt(elite ? 3 : 1)), gear = kind2 === "chest" || elite || occurrence(hashReward(key5 + "/combat-gear"), 10, key5 + "/combat-gear");
+    const l = BigInt(progression?.sourceDepth ?? 1), elite = progression?.combatQuality === "elite", value = String(kind2 === "chest" ? 20n + 4n * l : (1n + l / 4n) * BigInt(elite ? 3 : 1)), gear = progression?.rarityPolicyHash === WORLD_LOOT_V3_HASH ? hashReward(key5 + "/combat-gear-v3") % 1e3 < lootGearPerMilleV3(progression.rarityRole, progression.siteReward ?? null, modifiers?.occurrenceHundredths ?? 100) : kind2 === "chest" || elite || occurrence(hashReward(key5 + "/combat-gear"), 10, key5 + "/combat-gear");
     return { gold: gold(value), souls: hashReward(key5 + "/combat-soul") % 100 < 35 ? 1 : 0, definitionId: gear ? pool[hashReward(key5 + "/combat-family") % pool.length] : null, healing: false };
   }
   if (kind2 === "enemy") {
@@ -10303,7 +10372,8 @@ function validateEliteCombatD12_4(state) {
     const affixId = e.affixIds[0], definition = eliteAffixDefinitionD12_4(affixId);
     requireContract(definition, "Unsupported elite affix loadout");
     const actor = state.entitiesById[entityId], group = state.groupsById[e.groupId], site = state.d9World?.functionalSitesById?.[e.siteId], floor = site?.floors?.find((row) => row.floorId === e.floorId), index = floor?.enemyIds?.indexOf(entityId) ?? -1;
-    requireContract(actor?.team === "hostile" && group?.entityIds.includes(entityId) && group.siteId === e.siteId && (e.version === COMPOSITION_ELITE_V1 && e.siteId === null ? e.floorId === null && e.roomId === "overworld-pack" && state.d9World.runtime.groups.some((d) => d.groupId === group.groupId && d.members.some((m) => m.entityId === entityId)) : floor?.groupId === e.groupId && index >= 0 && floor.encounter.members[index]?.roomId === e.roomId), "Elite ownership drift");
+    const originPack = e.version === COMPOSITION_ELITE_V1 && e.floorId === null && e.roomId === "overworld-pack" && state.d9World?.episodes[e.groupId]?.origin === true && !site?.floors?.some((row) => row.groupId === e.groupId);
+    requireContract(actor?.team === "hostile" && group?.entityIds.includes(entityId) && group.siteId === e.siteId && (originPack || (e.version === COMPOSITION_ELITE_V1 && e.siteId === null ? e.floorId === null && e.roomId === "overworld-pack" && state.d9World.runtime.groups.some((d) => d.groupId === group.groupId && d.members.some((m) => m.entityId === entityId)) : floor?.groupId === e.groupId && index >= 0 && floor.encounter.members[index]?.roomId === e.roomId)), "Elite ownership drift");
     closedRecord(e.identitySource, ["campaignSeed", "siteId", "floorId", "groupId", "roomId", "entityId", "affixId"]);
     requireContract(e.identitySource.campaignSeed === state.campaign.seed.seedHex && e.identitySource.siteId === e.siteId && e.identitySource.floorId === e.floorId && e.identitySource.groupId === e.groupId && e.identitySource.roomId === e.roomId && e.identitySource.entityId === e.entityId && e.identitySource.affixId === affixId, "Elite identity source drift");
     safeInteger(e.activatedTick, 0, state.tick);
@@ -10615,9 +10685,9 @@ function adoptEncounterCompositionV1(s, g, level, { rescale = false } = {}) {
     if (rescale) {
       const a = s.entitiesById[id], enemy = ordinaryEnemyForProfile(a.contentDefinitionId);
       if (!enemy) continue;
-      const rank = ["C", "B", "A", "S"][Math.max(0, ORDINARY_PROFILES.findIndex((p) => p.contentDefinitionId === a.contentDefinitionId)) % 4], stats = applyEliteActorStatsD12_4(worldEnemyStats(level, rank, enemy.budget), e), old = a.maxHp;
+      const rank = ["C", "B", "A", "S"][Math.max(0, ORDINARY_PROFILES.findIndex((p) => p.contentDefinitionId === a.contentDefinitionId)) % 4], stats = siteEndActorProfileV1(s, g, a, applyEliteActorStatsD12_4(worldEnemyStats(level, rank, enemy.budget), e)), old = a.maxHp, grown = addCombat(a.hp, stats.maxHp);
       a.maxHp = stats.maxHp;
-      a.hp = combatInteger(minCombat(a.maxHp, maxCombat(1, addCombat(a.hp, subtractCombat(a.maxHp, old)))));
+      a.hp = combatInteger(minCombat(a.maxHp, maxCombat(1, compareCombat(grown, old) > 0 ? subtractCombat(grown, old) : 0)));
       a.attackDamage = stats.attackDamage;
     }
   }
@@ -10744,7 +10814,7 @@ function validateSiteEndFloorV1(state, site, floor) {
   requireContract(elite?.affixIds?.[0] === end.affixId && elite.floorId === floor.floorId && (elite.namedEliteId ?? null) === (end.named ?? null), "SITE_END:ELITE_MISSING");
   return true;
 }
-function siteRewardKindV1(state, source5, spawnEntityId = null) {
+function siteRewardKindV1(state, source5, spawnEntityId = null, standardChest = false) {
   if (!["enemy", "chest"].includes(source5?.kind) || !siteEndsActiveV1(state)) return null;
   let site = null, floor = null;
   for (const s of Object.values(state.d9World.functionalSitesById ?? {})) {
@@ -10756,7 +10826,7 @@ function siteRewardKindV1(state, source5, spawnEntityId = null) {
   }
   if (!floor) return null;
   const lair = ["large", "deep"].includes(site.sizeTier);
-  if (source5.kind === "chest") return lair ? "lair-chest" : null;
+  if (source5.kind === "chest") return lair ? "lair-chest" : standardChest && site.sizeTier === "standard" ? "standard-chest" : null;
   const id = spawnEntityId ?? state.groupsById[source5.groupId]?.entityIds[source5.spawnOrdinal ?? source5.ordinal];
   if (state.bossCombat?.bossesByEntityId?.[id]) return lair ? "lair-boss" : null;
   const role = siteEndRoleV1(floor, id);
@@ -10764,7 +10834,7 @@ function siteRewardKindV1(state, source5, spawnEntityId = null) {
   return site.sizeTier === "small" && floor.encounter?.members?.[0]?.memberKey === "finale:elite-leader" && floor.enemyIds?.[0] === id && state.eliteCombat?.elitesByEntityId?.[id] ? "site-end-elite" : null;
 }
 function captureSiteRewardV1(state, source5, progression) {
-  const kind2 = progression.rarityPolicyHash === void 0 ? null : siteRewardKindV1(state, source5);
+  const kind2 = progression.rarityPolicyHash === void 0 ? null : siteRewardKindV1(state, source5, null, progression.rarityPolicyHash === WORLD_LOOT_V3_HASH);
   return kind2 ? { ...progression, rarityRole: siteRewardRoleV1(kind2), siteReward: kind2 } : progression;
 }
 
@@ -22236,7 +22306,7 @@ function validateCombatRewardSourceV1(state, source5, spawnEntityId, live, recip
     if (recipient) requireContract(progressionBigInt(p.rarityHeroLevel) <= progressionBigInt(recipient.progression.level), "Reward rarity hero snapshot exceeds recipient");
     if (p.gearClass && recipient) requireContract(heroClassOf(recipient.d8)?.id === p.gearClass, "Reward gear class mismatch");
     if (live) {
-      const site = siteRewardKindV1(state, source5, spawnEntityId);
+      const site = siteRewardKindV1(state, source5, spawnEntityId, p.rarityPolicyHash === WORLD_LOOT_V3_HASH);
       requireContract(p.rarityRole === (siteRewardRoleV1(site) ?? rewardRarityRoleV2(state, source5, spawnEntityId)) && (p.siteReward ?? null) === site, "Reward rarity role drift");
     }
   }
@@ -22325,7 +22395,7 @@ function prepareEpisodeReward(state, p, source5, position, spaceInstanceId) {
   const inv = p.inventory, id = source5.sourceEntityId;
   if (inv.rewardsByEntityId[id]) return null;
   const worldProgression = captureQuickClearRewardV1(state, source5, captureBoonRewardV1(state, p, captureSiteRewardV1(state, source5, captureWorldRarityV2(state, p, source5, source5.progression ?? prototypeRewardProgression(source5.rank, id))))), heroClass = heroClassOf(p.d8)?.id, world = worldProgression.combatHash === WORLD_COMBAT_HASH, baseProgression = heroClass && world ? { ...worldProgression, gearClass: heroClass, wardrobe: WARDROBE_V1 } : world ? { ...worldProgression, armor: "overall" } : worldProgression, modifiers = p.d8 ? progressionRewardWitness(p.d8) : null, progression = modifiers ? { ...baseProgression, quality: 1 + modifiers.qualityHundredths / 100, tomeEligibility: "personal-tome-d8-v1", modifiers } : baseProgression;
-  const ordinal = source5.kind === "enemy" ? safeInteger(inv.renewal.defeats + 1, 1) : 0, reward = rollContentReward(state, p, { ...source5, ordinal, modifiers }), dropPosition = reward.definitionId ? freeGearPosition(state, p, spaceInstanceId, position) : { ...position };
+  const ordinal = source5.kind === "enemy" ? safeInteger(inv.renewal.defeats + 1, 1) : 0, reward = rollContentReward(state, p, { ...source5, ...source5.progression ? { progression: worldProgression } : {}, ordinal, modifiers }), dropPosition = reward.definitionId ? freeGearPosition(state, p, spaceInstanceId, position) : { ...position };
   const unique2 = inv.d7 && reward.definitionId && heroClass && world ? uniqueRewardV1(state, source5, heroClass, gearSeed(state, p, id)) : null, dropped = unique2 ? { ...progression, unique: unique2 } : progression;
   const generated = inv.d7 && reward.definitionId ? generateGear3(gearSeed(state, p, id), dropped) : null;
   const record = { ...generated ? { generated } : {}, sourceEntityId: id, ordinal, defeatedTick: state.tick, spaceInstanceId, position: dropPosition, definitionId: reward.definitionId, claimed: false, pickup: null, autoSalvageEligibleTick: generated ? safeInteger(state.tick + AUTO_SALVAGE_ACTIVE_TICKS, 1) : null, autoSalvage: null, rewardVersion: CONTENT_REWARD_VERSION, episodeSource: { groupId: source5.groupId, episode: source5.episode, kind: source5.kind, ordinal: source5.spawnOrdinal, rank: source5.rank, progression: copyWire(dropped), ...source5.rewardClass ? { rewardClass: source5.rewardClass } : {} }, healing: reward.healing, spawnEntityId: source5.kind === "enemy" ? state.groupsById[source5.groupId].entityIds[source5.spawnOrdinal] : null };

@@ -7430,6 +7430,49 @@ function nestBiomeV1(s, groupId) {
   return g ? s.d9World.runtime.chunks?.find((c) => c.chunkX === g.chunkX && c.chunkY === g.chunkY)?.region.biome ?? "woodland" : "woodland";
 }
 
+// src/shared/content/named_elites_v1.js
+var NAMED_ELITES_V1 = Object.freeze({
+  old_bristleback: Object.freeze({ id: "old_bristleback", label: "OLD BRISTLEBACK", family: "tusk_boar", biome: "grassland", affixId: "swift_commander" }),
+  hollow_jack: Object.freeze({ id: "hollow_jack", label: "HOLLOW JACK", family: "field_scarecrow", biome: "grassland", affixId: "glacial_warden" }),
+  queen_kheptra: Object.freeze({ id: "queen_kheptra", label: "QUEEN KHEPTRA", family: "sand_scarab", biome: "desert", affixId: "web_weaver" }),
+  glasstail: Object.freeze({ id: "glasstail", label: "GLASSTAIL", family: "dune_scorpion", biome: "desert", affixId: "slag_shaper" })
+});
+var NAMED_ELITE_IDS_V1 = Object.freeze(Object.keys(NAMED_ELITES_V1));
+var NAMED_ELITE_HULL_V1 = 11;
+var NAMED_ELITE_TRICKS_V1 = Object.freeze({
+  old_bristleback: Object.freeze({ kind: "charge", firstDelayTicks: 90, minRange: 56, maxRange: 160, windupTicks: 42, chargeTicks: 26, speed: 7, contactRadius: 24, damageTenths: 16, knockback: 10, knockbackTicks: 12, recoverTicks: 45, cooldownTicks: 180 }),
+  queen_kheptra: Object.freeze({ kind: "shell", absorbNumerator: 4, absorbDenominator: 5, capNumerator: 1, capDenominator: 4, regrowTicks: 120, crackTicks: 36 })
+});
+var namedEliteForV1 = (biome, family2) => Object.values(NAMED_ELITES_V1).find((n) => n.biome === biome && n.family === family2) ?? null;
+
+// src/shared/content/site_end_profile_v1.js
+var SITE_MINI_BOSS_V1 = freezeWire({ hullRadius: 16, combatRadius: 17.28, maxHp: { numerator: 3, denominator: 1 }, attackDamage: { numerator: 3, denominator: 2 } });
+function miniBossProfileV1(profile2) {
+  const m = SITE_MINI_BOSS_V1;
+  return {
+    ...profile2,
+    hullRadius: m.hullRadius,
+    combatRadius: m.combatRadius,
+    maxHp: combatInteger(multiplyCombat(profile2.maxHp, m.maxHp.numerator, m.maxHp.denominator), "round"),
+    attackDamage: combatInteger(multiplyCombat(profile2.attackDamage, m.attackDamage.numerator, m.attackDamage.denominator), "round")
+  };
+}
+function namedEliteProfileV1(profile2) {
+  return { ...profile2, hullRadius: NAMED_ELITE_HULL_V1, combatRadius: Math.round(NAMED_ELITE_HULL_V1 * 108) / 100 };
+}
+var siteEndBodyV1 = (end, profile2) => end?.role === "mini-boss" ? miniBossProfileV1(profile2) : end?.role === "elite" && end.named ? namedEliteProfileV1(profile2) : profile2;
+var siteEndRoleV1 = (floor, entityId2) => floor?.encounter?.siteEnd && floor.enemyIds?.[0] === entityId2 ? floor.encounter.siteEnd.role : null;
+var siteEndProfileV1 = (floor, entityId2, profile2) => siteEndRoleV1(floor, entityId2) ? siteEndBodyV1(floor.encounter.siteEnd, profile2) : profile2;
+function isSiteEndLeaderV1(state, groupId, entityId2) {
+  for (const site of Object.values(state.d9World?.functionalSitesById ?? {})) for (const floor of site.floors ?? []) if (floor.groupId === groupId) return siteEndRoleV1(floor, entityId2) !== null;
+  return false;
+}
+function siteEndActorProfileV1(state, group, actor, profile2) {
+  if (!profile2 || !group?.siteId) return profile2;
+  for (const site of Object.values(state.d9World?.functionalSitesById ?? {})) for (const floor of site.floors ?? []) if (floor.groupId === group.groupId) return siteEndProfileV1(floor, actor.entityId, profile2);
+  return profile2;
+}
+
 // src/shared/contracts/encounter_composition_v1.js
 var generatedEliteId = (source6) => /^ent:[a-f0-9]{32}$/.test(source6.entityId) ? "elite:" + source6.entityId.slice(4) : "elite:" + Array.from({ length: 4 }, (_, i) => compositionHashV1(COMPOSITION_V1 + "/" + canonicalStringify(source6) + "/" + i).toString(16).padStart(8, "0")).join("");
 var floorFor = (s, g) => s.d9World?.functionalSitesById?.[g.siteId]?.floors?.find((f2) => f2.groupId === g.groupId);
@@ -7463,21 +7506,6 @@ function validateCompositionEliteV1(s, e) {
     requireContract(row && row.primary === e.affixIds[0], "Composition candidate roll changed");
   }
 }
-
-// src/shared/content/named_elites_v1.js
-var NAMED_ELITES_V1 = Object.freeze({
-  old_bristleback: Object.freeze({ id: "old_bristleback", label: "OLD BRISTLEBACK", family: "tusk_boar", biome: "grassland", affixId: "swift_commander" }),
-  hollow_jack: Object.freeze({ id: "hollow_jack", label: "HOLLOW JACK", family: "field_scarecrow", biome: "grassland", affixId: "glacial_warden" }),
-  queen_kheptra: Object.freeze({ id: "queen_kheptra", label: "QUEEN KHEPTRA", family: "sand_scarab", biome: "desert", affixId: "web_weaver" }),
-  glasstail: Object.freeze({ id: "glasstail", label: "GLASSTAIL", family: "dune_scorpion", biome: "desert", affixId: "slag_shaper" })
-});
-var NAMED_ELITE_IDS_V1 = Object.freeze(Object.keys(NAMED_ELITES_V1));
-var NAMED_ELITE_HULL_V1 = 11;
-var NAMED_ELITE_TRICKS_V1 = Object.freeze({
-  old_bristleback: Object.freeze({ kind: "charge", firstDelayTicks: 90, minRange: 56, maxRange: 160, windupTicks: 42, chargeTicks: 26, speed: 7, contactRadius: 24, damageTenths: 16, knockback: 10, knockbackTicks: 12, recoverTicks: 45, cooldownTicks: 180 }),
-  queen_kheptra: Object.freeze({ kind: "shell", absorbNumerator: 4, absorbDenominator: 5, capNumerator: 1, capDenominator: 4, regrowTicks: 120, crackTicks: 36 })
-});
-var namedEliteForV1 = (biome, family2) => Object.values(NAMED_ELITES_V1).find((n) => n.biome === biome && n.family === family2) ?? null;
 
 // src/shared/contracts/named_elite_tricks_v1.js
 var CHARGE_PHASES = ["ready", "windup", "charging", "recover"];
@@ -7748,7 +7776,8 @@ function validateEliteCombatD12_4(state) {
     const affixId = e.affixIds[0], definition = eliteAffixDefinitionD12_4(affixId);
     requireContract(definition, "Unsupported elite affix loadout");
     const actor = state.entitiesById[entityId2], group = state.groupsById[e.groupId], site = state.d9World?.functionalSitesById?.[e.siteId], floor = site?.floors?.find((row) => row.floorId === e.floorId), index = floor?.enemyIds?.indexOf(entityId2) ?? -1;
-    requireContract(actor?.team === "hostile" && group?.entityIds.includes(entityId2) && group.siteId === e.siteId && (e.version === COMPOSITION_ELITE_V1 && e.siteId === null ? e.floorId === null && e.roomId === "overworld-pack" && state.d9World.runtime.groups.some((d) => d.groupId === group.groupId && d.members.some((m) => m.entityId === entityId2)) : floor?.groupId === e.groupId && index >= 0 && floor.encounter.members[index]?.roomId === e.roomId), "Elite ownership drift");
+    const originPack = e.version === COMPOSITION_ELITE_V1 && e.floorId === null && e.roomId === "overworld-pack" && state.d9World?.episodes[e.groupId]?.origin === true && !site?.floors?.some((row) => row.groupId === e.groupId);
+    requireContract(actor?.team === "hostile" && group?.entityIds.includes(entityId2) && group.siteId === e.siteId && (originPack || (e.version === COMPOSITION_ELITE_V1 && e.siteId === null ? e.floorId === null && e.roomId === "overworld-pack" && state.d9World.runtime.groups.some((d) => d.groupId === group.groupId && d.members.some((m) => m.entityId === entityId2)) : floor?.groupId === e.groupId && index >= 0 && floor.encounter.members[index]?.roomId === e.roomId)), "Elite ownership drift");
     closedRecord(e.identitySource, ["campaignSeed", "siteId", "floorId", "groupId", "roomId", "entityId", "affixId"]);
     requireContract(e.identitySource.campaignSeed === state.campaign.seed.seedHex && e.identitySource.siteId === e.siteId && e.identitySource.floorId === e.floorId && e.identitySource.groupId === e.groupId && e.identitySource.roomId === e.roomId && e.identitySource.entityId === e.entityId && e.identitySource.affixId === affixId, "Elite identity source drift");
     safeInteger(e.activatedTick, 0, state.tick);
@@ -7965,34 +7994,6 @@ function validateEliteCombatD12_4(state) {
     requireContract(status.lastEvaluatedTick === state.tick && Array.isArray(status.hazardIds) && status.hazardIds.length >= 1 && status.hazardIds.every((id, index) => typeof id === "string" && (index === 0 || status.hazardIds[index - 1] < id)), "Invalid Slag Burn sources");
     for (const id of status.hazardIds) requireContract(root.hazardsById[id]?.kind === slag.hazardKind && root.hazardsById[id].affectedEntityIds.includes(entityId2), "Slag Burn actor outside authoritative hazard");
   }
-}
-
-// src/shared/content/site_end_profile_v1.js
-var SITE_MINI_BOSS_V1 = freezeWire({ hullRadius: 16, combatRadius: 17.28, maxHp: { numerator: 3, denominator: 1 }, attackDamage: { numerator: 3, denominator: 2 } });
-function miniBossProfileV1(profile2) {
-  const m = SITE_MINI_BOSS_V1;
-  return {
-    ...profile2,
-    hullRadius: m.hullRadius,
-    combatRadius: m.combatRadius,
-    maxHp: combatInteger(multiplyCombat(profile2.maxHp, m.maxHp.numerator, m.maxHp.denominator), "round"),
-    attackDamage: combatInteger(multiplyCombat(profile2.attackDamage, m.attackDamage.numerator, m.attackDamage.denominator), "round")
-  };
-}
-function namedEliteProfileV1(profile2) {
-  return { ...profile2, hullRadius: NAMED_ELITE_HULL_V1, combatRadius: Math.round(NAMED_ELITE_HULL_V1 * 108) / 100 };
-}
-var siteEndBodyV1 = (end, profile2) => end?.role === "mini-boss" ? miniBossProfileV1(profile2) : end?.role === "elite" && end.named ? namedEliteProfileV1(profile2) : profile2;
-var siteEndRoleV1 = (floor, entityId2) => floor?.encounter?.siteEnd && floor.enemyIds?.[0] === entityId2 ? floor.encounter.siteEnd.role : null;
-var siteEndProfileV1 = (floor, entityId2, profile2) => siteEndRoleV1(floor, entityId2) ? siteEndBodyV1(floor.encounter.siteEnd, profile2) : profile2;
-function isSiteEndLeaderV1(state, groupId, entityId2) {
-  for (const site of Object.values(state.d9World?.functionalSitesById ?? {})) for (const floor of site.floors ?? []) if (floor.groupId === groupId) return siteEndRoleV1(floor, entityId2) !== null;
-  return false;
-}
-function siteEndActorProfileV1(state, group, actor, profile2) {
-  if (!profile2 || !group?.siteId) return profile2;
-  for (const site of Object.values(state.d9World?.functionalSitesById ?? {})) for (const floor of site.floors ?? []) if (floor.groupId === group.groupId) return siteEndProfileV1(floor, actor.entityId, profile2);
-  return profile2;
 }
 
 // src/shared/contracts/encounter_progression.js
@@ -9949,6 +9950,75 @@ function validateSporePressureProgressV3(a, b, fromTick, toTick) {
   } else if (isSporeV3(b)) requireContract(a.rulesVersion === SPORE_V2 && a.status === "active" && b.pressure.adoptedTick >= fromTick && b.pressure.adoptedTick <= toTick, "Invalid spore pressure adoption");
 }
 
+// src/shared/content/world_loot_v3.js
+var WORLD_LOOT_V3_VERSION = "world-loot-v3";
+var WORLD_LOOT_V3_HASH = "5945f4f6a6c02522b745889a88f4cd1034d8e4b89266517a2c31825741ef5cdf";
+var WORLD_LOOT_V3_POLICY = freezeWire({
+  version: WORLD_LOOT_V3_VERSION,
+  parentCombatHash: WORLD_COMBAT_HASH,
+  unlockLevels: [1, 1, 10, 20, 35, 50],
+  // gearPerMille: chance this source drops gear; uncommon: basis points of non-rare gear;
+  // rare: [level, basis points] anchors, linear between them, 0 before the first, flat after the last.
+  sources: {
+    ordinary: { gearPerMille: 15, uncommon: 2e3, rare: [[10, 100], [50, 200]], rich: false },
+    elite: { gearPerMille: 250, uncommon: 4500, rare: [[10, 300], [50, 600]], rich: false },
+    smallEnd: { gearPerMille: 500, uncommon: 4500, rare: [[10, 300], [50, 600]], rich: false },
+    mini: { gearPerMille: 1e3, uncommon: 6e3, rare: [[10, 800], [50, 1500]], rich: false },
+    boss: { gearPerMille: 1e3, uncommon: 8e3, rare: [[10, 1500], [20, 2e3], [30, 2800], [40, 3500]], rich: true },
+    smallChest: { gearPerMille: 150, uncommon: 2500, rare: [], rich: false },
+    standardChest: { gearPerMille: 400, uncommon: 5e3, rare: [[10, 300], [50, 800]], rich: false },
+    bossChest: { gearPerMille: 1e3, uncommon: 7e3, rare: [[10, 1e3], [20, 1500], [30, 2200], [40, 3e3]], rich: true }
+  },
+  // How Rare-or-better gear splits into Rare / Epic / Legendary / Mythic (basis points).
+  split: [
+    { minimumLevel: 1, plain: [1e4, 0, 0, 0], rich: [1e4, 0, 0, 0] },
+    { minimumLevel: 20, plain: [9e3, 1e3, 0, 0], rich: [8e3, 2e3, 0, 0] },
+    { minimumLevel: 35, plain: [8200, 1500, 300, 0], rich: [6800, 2500, 700, 0] },
+    { minimumLevel: 50, plain: [7700, 1700, 500, 100], rich: [6e3, 2800, 1e3, 200] }
+  ],
+  qualityFromLevel: 30,
+  gate: "min(frozen encounter level, personal hero level when the reward is captured). Pickup, reopen and portal use never reroll."
+});
+var SOURCES = WORLD_LOOT_V3_POLICY.sources;
+function lootSourceV3(role, siteReward = null) {
+  if (role === "ordinary" || role === "elite") return role;
+  if (role === "boss") return siteReward === "site-end-elite" ? "smallEnd" : siteReward === "mini-boss" ? "mini" : "boss";
+  requireContract(role === "completion", "Loot v3 role");
+  return siteReward === "lair-chest" ? "bossChest" : siteReward === "standard-chest" ? "standardChest" : "smallChest";
+}
+function lootGearPerMilleV3(role, siteReward = null, occurrenceHundredths = 100) {
+  return Math.min(1e3, Math.floor(SOURCES[lootSourceV3(role, siteReward)].gearPerMille * occurrenceHundredths / 100));
+}
+function rareShare(anchors2, level) {
+  if (!anchors2.length || level < BigInt(anchors2[0][0])) return 0n;
+  for (let i = 1; i < anchors2.length; i++) {
+    const [a, va] = anchors2[i - 1], [b, vb] = anchors2[i];
+    if (level < BigInt(b)) return BigInt(va) + (BigInt(vb) - BigInt(va)) * (level - BigInt(a)) / BigInt(b - a);
+  }
+  return BigInt(anchors2.at(-1)[1]);
+}
+function worldLootWeightsV3(encounter, hero, role, siteReward = null, qualityHundredths = 0) {
+  positiveProgression(encounter);
+  positiveProgression(hero);
+  const a = progressionBigInt(encounter), b = progressionBigInt(hero), level = a < b ? a : b, q = progressionBigInt(qualityHundredths);
+  requireContract(q >= 0n, "Loot v3 quality");
+  const src = SOURCES[lootSourceV3(role, siteReward)], rare = rareShare(src.rare, level), rest = 10000n - rare, u = rest * BigInt(src.uncommon) / 10000n;
+  const row = [...WORLD_LOOT_V3_POLICY.split].reverse().find((r) => level >= BigInt(r.minimumLevel))[src.rich ? "rich" : "plain"];
+  const top = row.slice(1).map((w2) => rare * BigInt(w2) / 10000n), w = [rest - u, u, rare - top.reduce((x, y) => x + y, 0n), ...top];
+  const boost = level >= BigInt(WORLD_LOOT_V3_POLICY.qualityFromLevel) ? q : 0n;
+  return w.map((n, i) => level < BigInt(WORLD_LOOT_V3_POLICY.unlockLevels[i]) ? 0n : n * (10000n + boost * BigInt(i * 10)));
+}
+function worldGearRarityV3(encounter, hero, role, siteReward, draw, qualityHundredths = 0) {
+  requireContract(Number.isFinite(draw) && draw >= 0 && draw < 1, "Loot v3 draw");
+  const weights = worldLootWeightsV3(encounter, hero, role, siteReward, qualityHundredths), total = weights.reduce((a, b) => a + b, 0n), roll = BigInt(Math.floor(draw * 4294967296)) * total;
+  let sum2 = 0n;
+  for (let i = 0; i < weights.length; i++) {
+    sum2 += weights[i];
+    if (roll < sum2 * 4294967296n) return i;
+  }
+  requireContract(false, "Loot v3 weights failed");
+}
+
 // src/shared/contracts/economy_amount.js
 function amount(value) {
   requireContract(typeof value === "string" && value.length <= 512 && /^(0|[1-9][0-9]*)(\.[0-9]*[1-9])?$/.test(value), "Invalid economy amount");
@@ -10045,7 +10115,7 @@ function validateWorldRarityProgressionV2(p) {
     requireContract(p.rarityHeroLevel === void 0 && p.rarityRole === void 0, "Rarity fields require policy commitment");
     return p;
   }
-  requireContract(p.rarityPolicyHash === WORLD_RARITY_HASH && p.combatHash === WORLD_COMBAT_HASH, "World rarity policy commitment");
+  requireContract([WORLD_RARITY_HASH, WORLD_LOOT_V3_HASH].includes(p.rarityPolicyHash) && p.combatHash === WORLD_COMBAT_HASH, "World rarity policy commitment");
   positiveProgression(p.rarityHeroLevel);
   requireContract(["ordinary", "elite", "boss", "completion"].includes(p.rarityRole) && p.combatQuality === (p.rarityRole === "boss" ? "elite" : p.rarityRole), "World rarity source role");
   return p;
@@ -10060,7 +10130,7 @@ function rewardRarityRoleV2(state, source6, spawnEntityId = null) {
 var SITE_REWARDS_VERSION = "site-rewards-v1";
 var SITE_REWARDS_POLICY = freezeWire({
   version: SITE_REWARDS_VERSION,
-  kinds: { "site-end-elite": { role: "boss", floor: 1, quality: 0 }, "mini-boss": { role: "boss", floor: 0, quality: 0 }, "lair-boss": { role: "boss", floor: 2, quality: 0 }, "lair-chest": { role: "completion", floor: 0, quality: 300 } }
+  kinds: { "site-end-elite": { role: "boss", floor: 1, quality: 0 }, "mini-boss": { role: "boss", floor: 0, quality: 0 }, "lair-boss": { role: "boss", floor: 2, quality: 0 }, "lair-chest": { role: "completion", floor: 0, quality: 300 }, "standard-chest": { role: "completion", floor: 0, quality: 0 } }
 });
 var kind = (k) => SITE_REWARDS_POLICY.kinds[k];
 var siteRewardRoleV1 = (k) => k ? kind(k).role : null;
@@ -10763,7 +10833,7 @@ function generateAtPrecision(c, seed, input, { tier: tier2 = null, family: famil
     noun = uq.noun;
   }
   const rng2 = rewardStream(seed), random = () => rng2.random(), pick5 = (a) => a[Math.floor(random() * a.length)], power2 = progression.combatHash ? depth : progressionWire(progressionBigInt(depth) / 4n + 1n);
-  const rarityRandom = progression.combatHash ? random() : null, rarityTier = tier2 ?? (progression.combatHash ? hasWorldRarityV2(progression) ? siteRewardRarityV1(progression.siteReward, worldGearRarityV2(depth, progression.rarityHeroLevel, progression.rarityRole, rarityRandom, (progression.modifiers?.qualityHundredths ?? 0) + siteRewardQualityV1(progression.siteReward) + boonRewardQualityV1(progression) + quickClearRewardQualityV1(progression))) : worldGearRarity(depth, progression.combatQuality, rarityRandom, progression.modifiers?.qualityHundredths ?? 0) : rollRarityD9(depth, progression.quality, random));
+  const rarityRandom = progression.combatHash ? random() : null, rarityTier = tier2 ?? (progression.combatHash ? progression.rarityPolicyHash === WORLD_LOOT_V3_HASH ? worldGearRarityV3(depth, progression.rarityHeroLevel, progression.rarityRole, progression.siteReward ?? null, rarityRandom, (progression.modifiers?.qualityHundredths ?? 0) + boonRewardQualityV1(progression) + quickClearRewardQualityV1(progression)) : hasWorldRarityV2(progression) ? siteRewardRarityV1(progression.siteReward, worldGearRarityV2(depth, progression.rarityHeroLevel, progression.rarityRole, rarityRandom, (progression.modifiers?.qualityHundredths ?? 0) + siteRewardQualityV1(progression.siteReward) + boonRewardQualityV1(progression) + quickClearRewardQualityV1(progression))) : worldGearRarity(depth, progression.combatQuality, rarityRandom, progression.modifiers?.qualityHundredths ?? 0) : rollRarityD9(depth, progression.quality, random));
   safeInteger(rarityTier, 0, 5);
   const cls = progression.gearClass ?? null, classOffhand = cls ? CLASS_GEAR[cls].offhand : null, wardrobe = Boolean(cls) && progression.wardrobe === WARDROBE_V1, classFamilies = wardrobe ? CLASS_GEAR_FAMILIES_V2 : CLASS_GEAR_FAMILIES, families = cls ? classFamilies : progression.armor === "overall" ? ONE_PIECE_GEAR_FAMILIES : GEAR_FAMILIES;
   const type = family2 ?? pick5(families), sub = type === "subweapon" ? subType ?? (cls ? classOffhand : pick5(["shield", "dagger", "tome"])) : null, own2 = type === "cape" ? CAPE_NOUNS : cls && type !== "ring" ? classGearNouns(cls, type) : GEAR_NOUNS[sub ?? type], shared = wardrobe && type === "helmet" ? SHARED_HELMET_NOUNS : [], nouns = [...own2 ?? [], ...shared], n = noun ?? (shared.length && random() < 0.2 ? pick5(shared) : pick5(own2));
@@ -12126,7 +12196,7 @@ function rollContentReward(state, player, { sourceEntityId, rank, kind: kind2, o
   const gold = (n) => !modifiers || modifiers.goldHundredths === 100 ? n : multiplyAmount(rewardAmount(n), `${Math.floor(modifiers.goldHundredths / 100)}.${String(modifiers.goldHundredths % 100).padStart(2, "0")}`.replace(/0+$/, "").replace(/\.$/, ""));
   const profile2 = progression?.version === D9_REWARD_PROGRESSION ? rewardProfileD9(progression, rank) : rewardProfile(rank), key9 = `d5-eco-v1/${state.campaign.seed.seedHex}/${player.playerId}/${sourceEntityId}`, roll = hashReward(key9 + "/branch") % 100, pool = REWARD_POOLS[Math.min(2, ["C", "B", "A", "S"].indexOf(rank))];
   if (hasWorldCombat(state)) {
-    const l = BigInt(progression?.sourceDepth ?? 1), elite = progression?.combatQuality === "elite", value = String(kind2 === "chest" ? 20n + 4n * l : (1n + l / 4n) * BigInt(elite ? 3 : 1)), gear = kind2 === "chest" || elite || occurrence(hashReward(key9 + "/combat-gear"), 10, key9 + "/combat-gear");
+    const l = BigInt(progression?.sourceDepth ?? 1), elite = progression?.combatQuality === "elite", value = String(kind2 === "chest" ? 20n + 4n * l : (1n + l / 4n) * BigInt(elite ? 3 : 1)), gear = progression?.rarityPolicyHash === WORLD_LOOT_V3_HASH ? hashReward(key9 + "/combat-gear-v3") % 1e3 < lootGearPerMilleV3(progression.rarityRole, progression.siteReward ?? null, modifiers?.occurrenceHundredths ?? 100) : kind2 === "chest" || elite || occurrence(hashReward(key9 + "/combat-gear"), 10, key9 + "/combat-gear");
     return { gold: gold(value), souls: hashReward(key9 + "/combat-soul") % 100 < 35 ? 1 : 0, definitionId: gear ? pool[hashReward(key9 + "/combat-family") % pool.length] : null, healing: false };
   }
   if (kind2 === "enemy") {
@@ -12452,7 +12522,7 @@ function validateSiteEndFloorV1(state, site, floor) {
   requireContract(elite?.affixIds?.[0] === end.affixId && elite.floorId === floor.floorId && (elite.namedEliteId ?? null) === (end.named ?? null), "SITE_END:ELITE_MISSING");
   return true;
 }
-function siteRewardKindV1(state, source6, spawnEntityId = null) {
+function siteRewardKindV1(state, source6, spawnEntityId = null, standardChest = false) {
   if (!["enemy", "chest"].includes(source6?.kind) || !siteEndsActiveV1(state)) return null;
   let site = null, floor = null;
   for (const s of Object.values(state.d9World.functionalSitesById ?? {})) {
@@ -12464,7 +12534,7 @@ function siteRewardKindV1(state, source6, spawnEntityId = null) {
   }
   if (!floor) return null;
   const lair = ["large", "deep"].includes(site.sizeTier);
-  if (source6.kind === "chest") return lair ? "lair-chest" : null;
+  if (source6.kind === "chest") return lair ? "lair-chest" : standardChest && site.sizeTier === "standard" ? "standard-chest" : null;
   const id = spawnEntityId ?? state.groupsById[source6.groupId]?.entityIds[source6.spawnOrdinal ?? source6.ordinal];
   if (state.bossCombat?.bossesByEntityId?.[id]) return lair ? "lair-boss" : null;
   const role = siteEndRoleV1(floor, id);
@@ -18383,7 +18453,7 @@ function validateCombatRewardSourceV1(state, source6, spawnEntityId, live, recip
     if (recipient) requireContract(progressionBigInt(p.rarityHeroLevel) <= progressionBigInt(recipient.progression.level), "Reward rarity hero snapshot exceeds recipient");
     if (p.gearClass && recipient) requireContract(heroClassOf(recipient.d8)?.id === p.gearClass, "Reward gear class mismatch");
     if (live) {
-      const site = siteRewardKindV1(state, source6, spawnEntityId);
+      const site = siteRewardKindV1(state, source6, spawnEntityId, p.rarityPolicyHash === WORLD_LOOT_V3_HASH);
       requireContract(p.rarityRole === (siteRewardRoleV1(site) ?? rewardRarityRoleV2(state, source6, spawnEntityId)) && (p.siteReward ?? null) === site, "Reward rarity role drift");
     }
   }

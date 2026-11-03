@@ -825,7 +825,7 @@ import {
   worldRevisionV1,
   worldRolesV1,
   wrathDamageV1
-} from "./chunk-W5KPGQDK.js";
+} from "./chunk-PTGACYFF.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -30837,6 +30837,7 @@ function createEncounterRenewal(s, m, onRenew) {
       e.usedResources = {};
       delete e.personalCompletionClaimsBySourceId;
       g.cleared = false;
+      for (const id of g.entityIds) if (s.eliteCombat?.elitesByEntityId[id]?.groupId === g.groupId && s.eliteCombat.elitesByEntityId[id].version === COMPOSITION_ELITE_V1) delete s.eliteCombat.elitesByEntityId[id];
       if (originEpisode2) {
         s.d9World.episodes[g.groupId] = originEpisode2;
         e.contentDepth = 1;
@@ -32519,6 +32520,7 @@ function captureOwnedWorldStreamStateV1(state, kind) {
     encounterEconomy: structuredClone(state.encounterEconomy),
     spacesByInstanceId,
     subweaponCombat: structuredClone(state.subweaponCombat),
+    ...state.eliteCombat ? { eliteCombat: structuredClone(state.eliteCombat) } : {},
     ...state.hostileCombat ? { hostileCombat: structuredClone(state.hostileCombat) } : {}
   };
 }
