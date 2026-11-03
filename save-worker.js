@@ -18795,7 +18795,7 @@ function originHordeDefinition(s, origin2, collision2, g) {
       queue.push(p2);
     }
   }
-  requireContract(members.length >= 6, "Origin horde requires safe placement extension");
+  if (members.length < 6) return null;
   return { ...copyWire(g), members };
 }
 function hasHistory(s, id) {
@@ -18842,7 +18842,7 @@ function upgradeOriginHordes(s) {
     const g = s.groupsById[original.groupId], economy = s.encounterEconomy.groups[g.groupId], prior = s.d9World.originHordes?.groupsById[g.groupId];
     if (prior?.status === "expanded" || g.cleared || hasHistory(s, g.groupId)) continue;
     if (prior?.protectedEpisode && prior.episode === economy.episode) continue;
-    const definition = originHordeDefinition(s, origin2, collision2, original), expand = untouched(s, g) && birthSafe(s, definition);
+    const definition = originHordeDefinition(s, origin2, collision2, original), expand = Boolean(definition) && untouched(s, g) && birthSafe(s, definition);
     if (prior && prior.episode === economy.episode && !expand) continue;
     s.d9World.originHordes ??= { version: ORIGIN_HORDE_VERSION, groupsById: {} };
     if (!s.d9World.episodes[g.groupId]) {
