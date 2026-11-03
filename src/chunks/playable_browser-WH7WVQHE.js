@@ -33051,6 +33051,11 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
               if (returnIntent) {
                 intent = returnIntent;
                 returning = true;
+                const home = contained.containment.memberHomesById[a.entityId], camp = contained.containment.homeAnchor;
+                if (pursuesByPath(a) && home && !pursuitPaths.straightClear(collision, a, { position: home }, intent)) {
+                  const goal = Math.hypot(a.position.x - home.x, a.position.y - home.y) > Math.hypot(camp.x - home.x, camp.y - home.y) + 64 ? camp : home;
+                  intent = measure("pursuitPaths", () => pursuitPaths.intentFor(collision, a, { position: goal })) ?? intent;
+                }
               } else if (pursuesByPath(a)) {
                 const chase = measure("targetQuery", () => containment.targetFor(a, (source3, candidate) => canActivityTargetActor(state, manifest, source3, candidate) && canReach(collision, source3, candidate)));
                 target = chase && meleeLineClear(collision, a, chase) ? chase : null;
