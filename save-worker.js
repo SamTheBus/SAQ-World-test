@@ -246,7 +246,7 @@ var RESHAPE_TIERS = Object.freeze({ "repeatable-slot:ruin:wetland:standard:067":
 var RESHAPE_VERSION = "world-reshape-v2";
 var RESHAPE_HASH = "ac15d856c2dbbe38203480172b32aae7d19ccdd61cef10eee16aade24a0900d2";
 var RESHAPE_HYDROLOGY_HASH = "e12fd26221c55e0357b674d4beaf28cc522ef5f9dde420b073373f0ef7be1b65";
-var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-events3";
+var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-level50";
 var hasWorldReshape = (b) => b?.reshapeVersion === RESHAPE_VERSION && b?.reshapeHash === RESHAPE_HASH;
 var reshapedSite = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_SITES, id) ? RESHAPE_SITES[id] : null;
 var reshapedTier = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_TIERS, id) ? RESHAPE_TIERS[id] : null;
@@ -448,32 +448,6 @@ function presentCombat(a) {
 }
 var combatInteger = (a, mode = "round") => integerWire(roundCombat(a, mode).n);
 
-// src/shared/contracts/endless_formula.js
-var WORK = 2e6;
-function pow(base, exponent, budget) {
-  let result = 1n;
-  while (exponent) {
-    if (--budget.left < 0) numericExtension("formula work");
-    if (exponent & 1n) result *= base;
-    exponent >>= 1n;
-    if (exponent) base *= base;
-    if (result.toString().length > INTEGER_MAX_DIGITS * 2 + 32 || base.toString().length > INTEGER_MAX_DIGITS * 2 + 32) numericExtension("formula intermediate");
-  }
-  return result;
-}
-function integerRoot(value, degree2) {
-  requireContract(typeof value === "bigint" && value >= 0n && Number.isSafeInteger(degree2) && degree2 >= 1 && degree2 <= 100, "Invalid root");
-  if (value < 2n || degree2 === 1) return value;
-  const budget = { left: WORK };
-  let lo = 0n, hi = 1n << BigInt(Math.ceil(value.toString(2).length / degree2));
-  while (lo + 1n < hi) {
-    const mid = lo + hi >> 1n;
-    if (pow(mid, BigInt(degree2), budget) <= value) lo = mid;
-    else hi = mid;
-  }
-  return pow(hi, BigInt(degree2), budget) <= value ? hi : lo;
-}
-
 // src/shared/content/world_combat_v1.js
 var WORLD_COMBAT_VERSION = "world-combat-hordes-progression-v1";
 var WORLD_COMBAT_HASH = "a6bd45764908d58d1e1dff8e55e811a0d10876ee0b24ea4b15aa28ea6c94fc59";
@@ -591,7 +565,7 @@ function exp(x) {
   const k = Math.floor(x * 1.4426950408889634 + 0.5), hi = x - k * LN2_HI, lo = k * LN2_LO, r = hi - lo, t = r * r, c = r - t * (0.16666666666666602 + t * (-0.0027777777777015593 + t * (6613756321437934e-20 + t * (-16533902205465252e-22 + t * 41381367970572385e-24)))), y = 1 - (lo - r * c / (2 - c) - hi);
   return k > 1023 ? y * two(1023) * two(k - 1023) : k < -1022 ? y * two(-1022) * two(k + 1022) : y * two(k);
 }
-function pow2(x, y) {
+function pow(x, y) {
   if (y === 0) return 1;
   if (x === 1) return 1;
   if (y === 1) return x;
@@ -671,7 +645,7 @@ function atan2(y, x) {
   return x > 0 ? t : down ? t - Math.PI : t + Math.PI;
 }
 var hypot = (x, y) => Math.sqrt(x * x + y * y);
-var PM = Object.freeze({ hypot, sin, cos, atan2, exp, log, log2, pow: pow2 });
+var PM = Object.freeze({ hypot, sin, cos, atan2, exp, log, log2, pow });
 
 // src/shared/generation/world_reshape_v1.js
 function applyWorldReshape(asset, binding, data) {
@@ -7093,6 +7067,27 @@ function threatEndpointsD9(level, tier2, { hp = 1, damage = 1, xp = 1 } = {}) {
   });
 }
 
+// src/shared/content/hero_leveling_v2.js
+var HERO_LEVELING_V2_VERSION = "hero-leveling-v2";
+var HERO_LEVELING_V2_POLICY = freezeWire({
+  version: HERO_LEVELING_V2_VERSION,
+  levelCap: 50,
+  // XP from level L to L+1, for L = 1..49.
+  steps: [140, 180, 220, 390, 450, 500, 560, 620, 880, 960, 1e3, 1100, 1200, 1300, 1400, 1800, 1900, 2e3, 2100, 2200, 2300, 2400, 2500, 2600, 3200, 3400, 3500, 3600, 3700, 3800, 4e3, 4100, 4200, 4300, 4400, 5200, 5400, 5500, 5600, 5800, 5900, 6100, 6200, 6300, 6500, 6600, 6700, 6900, 8100],
+  paragonStep: 4400,
+  siteClearKills: { "site-end-elite": 5, "mini-boss": 15, "lair-boss": 40 }
+});
+var P = HERO_LEVELING_V2_POLICY;
+var TOTALS = [0n];
+for (const s of P.steps) TOTALS.push(TOTALS.at(-1) + BigInt(s));
+var HERO_LEVEL_CAP = P.levelCap;
+function heroLevelAtXpV2(totalXp) {
+  const xp = BigInt(totalXp);
+  let l = 1;
+  while (l < P.levelCap && xp >= TOTALS[l]) l++;
+  return l;
+}
+
 // src/shared/contracts/encounter_level_v2.js
 function resolveEncounterLevelV2(minimumLevel, participants) {
   positiveProgression(minimumLevel);
@@ -7102,7 +7097,7 @@ function resolveEncounterLevelV2(minimumLevel, participants) {
     positiveProgression(value);
     if (progressionBigInt(value) > level) level = progressionBigInt(value);
   }
-  return progressionWire(level);
+  return progressionWire(level > BigInt(HERO_LEVEL_CAP) ? BigInt(HERO_LEVEL_CAP) : level);
 }
 function resetEncounterSnapshotV2(prior, { tick, minimumLevel, participants }) {
   if (!prior) throw new TypeError("Reset lacks an existing progression snapshot");
@@ -7171,12 +7166,11 @@ function livingFusedMimics(state, boss) {
 }
 
 // src/shared/contracts/hero_progression_d9.js
-var D9_HERO_VERSION = "player-progression-d9-v1";
+var D9_HERO_VERSION = "player-progression-d9-v2";
 function d9LevelAtXp(totalXp) {
   const xp = progressionBigInt(totalXp);
   integerWire(xp);
-  const root = integerRoot(9n + 4n * (xp / 25n), 2), l = (root - 1n) / 2n;
-  return progressionWire(l < 1n ? 1n : l);
+  return progressionWire(BigInt(heroLevelAtXpV2(xp)));
 }
 function d9ProgressionAtXp(totalXp) {
   return freezeWire({ version: D9_HERO_VERSION, totalXp: progressionWire(progressionBigInt(totalXp)), level: d9LevelAtXp(totalXp) });
@@ -10838,7 +10832,7 @@ function generateAtPrecision(c, seed, input, { tier: tier2 = null, family: famil
   const cls = progression.gearClass ?? null, classOffhand = cls ? CLASS_GEAR[cls].offhand : null, wardrobe = Boolean(cls) && progression.wardrobe === WARDROBE_V1, classFamilies = wardrobe ? CLASS_GEAR_FAMILIES_V2 : CLASS_GEAR_FAMILIES, families = cls ? classFamilies : progression.armor === "overall" ? ONE_PIECE_GEAR_FAMILIES : GEAR_FAMILIES;
   const type = family2 ?? pick5(families), sub = type === "subweapon" ? subType ?? (cls ? classOffhand : pick5(["shield", "dagger", "tome"])) : null, own2 = type === "cape" ? CAPE_NOUNS : cls && type !== "ring" ? classGearNouns(cls, type) : GEAR_NOUNS[sub ?? type], shared = wardrobe && type === "helmet" ? SHARED_HELMET_NOUNS : [], nouns = [...own2 ?? [], ...shared], n = noun ?? (shared.length && random() < 0.2 ? pick5(shared) : pick5(own2));
   requireContract((family2 ? cls ? classFamilies : GEAR_FAMILIES : families).includes(type) && (!cls || type !== "subweapon" || sub === classOffhand) && nouns?.includes(n), "Unknown generated family/noun");
-  const E = c.dungeonScale(power2).E, R2 = c.q(100 + 7 * rarityTier, 100), P = c.q((100 + 15 * rarityTier) * (type === "overall" ? 18 : 10), 1e3), flatR = c.mul(R2, c.q(type === "overall" ? 18 : 10, 10));
+  const E = c.dungeonScale(power2).E, R2 = c.q(100 + 7 * rarityTier, 100), P2 = c.q((100 + 15 * rarityTier) * (type === "overall" ? 18 : 10), 1e3), flatR = c.mul(R2, c.q(type === "overall" ? 18 : 10, 10));
   const I = (v) => {
     if (v && typeof v === "object" && "lo" in v) return v;
     const q = exactDecimal(v);
@@ -10882,11 +10876,11 @@ function generateAtPrecision(c, seed, input, { tier: tier2 = null, family: famil
     let value;
     if (key9 === "atk" || key9 === "def") value = ceil(times3(f2(".04", ".08"), E, flatR));
     else if (key9 === "maxHp") value = ceil(times3(f2(".12", ".24"), E, flatR));
-    else if (key9 === "moveSpeed") value = ceil(times3(1 + Math.floor(random() * 2), power2, P));
-    else if (key9 === "critChance") value = round44(capped(times3(f2(".015", ".04"), c.root(I(power2), 2), P), I(".2")));
-    else if (key9 === "critDamage") value = round44(times3(f2(".03", ".06"), c.root(I(power2), 2), P));
-    else if (key9 === "block" || key9 === "parry") value = round44(capped(times3(f2(".005", ".015"), c.root(I(power2), 2), P), I(".15")));
-    else if (key9 === "bonusAreaRadius") value = round44(times3(f2(".04", ".10"), P));
+    else if (key9 === "moveSpeed") value = ceil(times3(1 + Math.floor(random() * 2), power2, P2));
+    else if (key9 === "critChance") value = round44(capped(times3(f2(".015", ".04"), c.root(I(power2), 2), P2), I(".2")));
+    else if (key9 === "critDamage") value = round44(times3(f2(".03", ".06"), c.root(I(power2), 2), P2));
+    else if (key9 === "block" || key9 === "parry") value = round44(capped(times3(f2(".005", ".015"), c.root(I(power2), 2), P2), I(".15")));
+    else if (key9 === "bonusAreaRadius") value = round44(times3(f2(".04", ".10"), P2));
     else if (key9 === "activeSpd") value = round44(times3(f2(".01", ".03"), c.frac(I(power2), 3, 10), I((100 + 8 * rarityTier) / 100)));
     else {
       value = ceil(times3(f2(".4", ".8"), c.add(I(3), c.frac(I(power2), 3, 4)), c.q(100 + 25 * rarityTier, 100)));
@@ -10913,7 +10907,7 @@ function affixRollRangeD9(g, key9) {
   positiveProgression(g.itemPower);
   const tier2 = safeInteger(g.rarityTier, 0, 5), p = g.itemPower, overall = g.definition.slot === "overall";
   return certifyNumeric((c) => {
-    const P = c.q((100 + 15 * tier2) * (overall ? 18 : 10), 1e3), R2 = c.q((100 + 7 * tier2) * (overall ? 18 : 10), 1e3), I = c.q, mul2 = c.mul;
+    const P2 = c.q((100 + 15 * tier2) * (overall ? 18 : 10), 1e3), R2 = c.q((100 + 7 * tier2) * (overall ? 18 : 10), 1e3), I = c.q, mul2 = c.mul;
     const cap = (a, b) => ({ lo: a.lo < b.lo ? a.lo : b.lo, hi: a.hi < b.hi ? a.hi : b.hi }), ceil = (x) => progressionWire(c.endpoint(x, "ceil")), round44 = (x) => decimalWire(c.endpoint(x, "round", 4), 4);
     let minimum, maximum;
     if (["atk", "def", "maxHp"].includes(key9)) {
@@ -10921,17 +10915,17 @@ function affixRollRangeD9(g, key9) {
       minimum = ceil(mul2(I(lo, 100), scale2));
       maximum = ceil(mul2(I(lo * 2, 100), scale2));
     } else if (key9 === "moveSpeed") {
-      minimum = ceil(mul2(I(p), P));
-      maximum = ceil(mul2(I(2), mul2(I(p), P)));
+      minimum = ceil(mul2(I(p), P2));
+      maximum = ceil(mul2(I(2), mul2(I(p), P2)));
     } else if (key9 === "bonusAreaRadius") {
-      minimum = round44(mul2(I(4, 100), P));
-      maximum = round44(mul2(I(10, 100), P));
+      minimum = round44(mul2(I(4, 100), P2));
+      maximum = round44(mul2(I(10, 100), P2));
     } else if (key9 === "activeSpd") {
       const scale2 = mul2(c.frac(I(p), 3, 10), I(100 + 8 * tier2, 100));
       minimum = round44(mul2(I(1, 100), scale2));
       maximum = round44(mul2(I(3, 100), scale2));
     } else if (["critChance", "critDamage", "block", "parry"].includes(key9)) {
-      const scale2 = mul2(c.root(I(p), 2), P), lo = key9 === "critChance" ? I(15, 1e3) : key9 === "critDamage" ? I(3, 100) : I(5, 1e3), hi = key9 === "critChance" ? I(4, 100) : key9 === "critDamage" ? I(6, 100) : I(15, 1e3), limit = key9 === "critChance" ? I(2, 10) : I(15, 100);
+      const scale2 = mul2(c.root(I(p), 2), P2), lo = key9 === "critChance" ? I(15, 1e3) : key9 === "critDamage" ? I(3, 100) : I(5, 1e3), hi = key9 === "critChance" ? I(4, 100) : key9 === "critDamage" ? I(6, 100) : I(15, 1e3), limit = key9 === "critChance" ? I(2, 10) : I(15, 100);
       minimum = round44(key9 === "critDamage" ? mul2(lo, scale2) : cap(mul2(lo, scale2), limit));
       maximum = round44(key9 === "critDamage" ? mul2(hi, scale2) : cap(mul2(hi, scale2), limit));
     } else {
@@ -11332,7 +11326,7 @@ function generateGear(seed, depth, { tier: tier2 = null, family: family2 = null,
   safeInteger(rarityTier, 0, 5);
   const type = family2 ?? pick5(GEAR_FAMILIES2), sub = type === "subweapon" ? subType ?? pick5(["shield", "dagger", "tome"]) : null, n = noun ?? pick5(GEAR_NOUNS2[sub ?? type]);
   requireContract(GEAR_FAMILIES2.includes(type) && GEAR_NOUNS2[sub ?? type]?.includes(n), "Unknown generated family/noun");
-  const band = Math.ceil(power2 / 4) * 4, effective = band <= 100 ? band : 100 + Math.pow(band - 100, 0.7) * 1.5, E = Math.pow(1.012, effective) * (1 + 0.015 * effective), R2 = 1 + 0.07 * rarityTier, P = (1 + 0.15 * rarityTier) * (type === "overall" ? 1.8 : 1), flatR = R2 * (type === "overall" ? 1.8 : 1), f2 = (a, b) => a + (b - a) * random(), int = (a, b) => a + Math.floor(random() * (b - a + 1));
+  const band = Math.ceil(power2 / 4) * 4, effective = band <= 100 ? band : 100 + Math.pow(band - 100, 0.7) * 1.5, E = Math.pow(1.012, effective) * (1 + 0.015 * effective), R2 = 1 + 0.07 * rarityTier, P2 = (1 + 0.15 * rarityTier) * (type === "overall" ? 1.8 : 1), flatR = R2 * (type === "overall" ? 1.8 : 1), f2 = (a, b) => a + (b - a) * random(), int = (a, b) => a + Math.floor(random() * (b - a + 1));
   const raw = { type, subType: sub, statsRolled: rarityTier, noun: n, baseAtk: 0, baseDef: 0, baseMaxHp: 0, baseStr: 0, baseDex: 0, baseInt: 0, baseMoveSpeed: 0, baseCritChance: 0, baseCritDamage: 0, baseBlock: 0, baseParry: 0 };
   if (type === "ring") {
     const roll = random();
@@ -11347,10 +11341,10 @@ function generateGear(seed, depth, { tier: tier2 = null, family: family2 = null,
     let value;
     if (key9 === "atk" || key9 === "def") value = Math.ceil(f2(0.04, 0.08) * E * flatR);
     else if (key9 === "maxHp") value = Math.ceil(f2(0.12, 0.24) * E * flatR);
-    else if (key9 === "moveSpeed") value = Math.ceil(int(1, 2) * power2 * P);
-    else if (key9 === "critChance") value = round4(Math.min(0.2, f2(0.015, 0.04) * Math.sqrt(power2) * P));
-    else if (key9 === "critDamage") value = round4(f2(0.03, 0.06) * Math.sqrt(power2) * P);
-    else if (key9 === "block" || key9 === "parry") value = round4(Math.min(0.15, f2(5e-3, 0.015) * Math.sqrt(power2) * P));
+    else if (key9 === "moveSpeed") value = Math.ceil(int(1, 2) * power2 * P2);
+    else if (key9 === "critChance") value = round4(Math.min(0.2, f2(0.015, 0.04) * Math.sqrt(power2) * P2));
+    else if (key9 === "critDamage") value = round4(f2(0.03, 0.06) * Math.sqrt(power2) * P2);
+    else if (key9 === "block" || key9 === "parry") value = round4(Math.min(0.15, f2(5e-3, 0.015) * Math.sqrt(power2) * P2));
     else if (key9 === "activeSpd") value = round4(f2(0.01, 0.03) * Math.pow(power2, 0.3) * (1 + 0.08 * rarityTier));
     else {
       value = Math.ceil(f2(0.4, 0.8) * (3 + Math.pow(power2, 0.75)) * (1 + 0.25 * rarityTier));
@@ -11649,7 +11643,7 @@ function generateGear2(seed, input, { tier: tier2 = null, family: family2 = null
   safeInteger(rarityTier, 0, 5);
   const type = family2 ?? pick5(GEAR_FAMILIES3), sub = type === "subweapon" ? subType ?? pick5(["shield", "dagger", "tome"]) : null, n = noun ?? pick5(GEAR_NOUNS3[sub ?? type]);
   requireContract(GEAR_FAMILIES3.includes(type) && GEAR_NOUNS3[sub ?? type]?.includes(n), "Unknown generated family/noun");
-  const band = Math.ceil(power2 / 4) * 4, effective = band <= 100 ? band : 100 + Math.pow(band - 100, 0.7) * 1.5, E = Math.pow(1.012, effective) * (1 + 0.015 * effective), R2 = 1 + 0.07 * rarityTier, P = (1 + 0.15 * rarityTier) * (type === "overall" ? 1.8 : 1), flatR = R2 * (type === "overall" ? 1.8 : 1), f2 = (a, b) => a + (b - a) * random(), int = (a, b) => a + Math.floor(random() * (b - a + 1));
+  const band = Math.ceil(power2 / 4) * 4, effective = band <= 100 ? band : 100 + Math.pow(band - 100, 0.7) * 1.5, E = Math.pow(1.012, effective) * (1 + 0.015 * effective), R2 = 1 + 0.07 * rarityTier, P2 = (1 + 0.15 * rarityTier) * (type === "overall" ? 1.8 : 1), flatR = R2 * (type === "overall" ? 1.8 : 1), f2 = (a, b) => a + (b - a) * random(), int = (a, b) => a + Math.floor(random() * (b - a + 1));
   const raw = { type, subType: sub, statsRolled: rarityTier, noun: n, baseAtk: 0, baseDef: 0, baseMaxHp: 0, baseStr: 0, baseDex: 0, baseInt: 0, baseMoveSpeed: 0, baseCritChance: 0, baseCritDamage: 0, baseBlock: 0, baseParry: 0 };
   if (type === "ring") {
     const roll = random();
@@ -11664,10 +11658,10 @@ function generateGear2(seed, input, { tier: tier2 = null, family: family2 = null
     let value;
     if (key9 === "atk" || key9 === "def") value = Math.ceil(f2(0.04, 0.08) * E * flatR);
     else if (key9 === "maxHp") value = Math.ceil(f2(0.12, 0.24) * E * flatR);
-    else if (key9 === "moveSpeed") value = Math.ceil(int(1, 2) * power2 * P);
-    else if (key9 === "critChance") value = round42(Math.min(0.2, f2(0.015, 0.04) * Math.sqrt(power2) * P));
-    else if (key9 === "critDamage") value = round42(f2(0.03, 0.06) * Math.sqrt(power2) * P);
-    else if (key9 === "block" || key9 === "parry") value = round42(Math.min(0.15, f2(5e-3, 0.015) * Math.sqrt(power2) * P));
+    else if (key9 === "moveSpeed") value = Math.ceil(int(1, 2) * power2 * P2);
+    else if (key9 === "critChance") value = round42(Math.min(0.2, f2(0.015, 0.04) * Math.sqrt(power2) * P2));
+    else if (key9 === "critDamage") value = round42(f2(0.03, 0.06) * Math.sqrt(power2) * P2);
+    else if (key9 === "block" || key9 === "parry") value = round42(Math.min(0.15, f2(5e-3, 0.015) * Math.sqrt(power2) * P2));
     else if (key9 === "activeSpd") value = round42(f2(0.01, 0.03) * Math.pow(power2, 0.3) * (1 + 0.08 * rarityTier));
     else {
       value = Math.ceil(f2(0.4, 0.8) * (3 + Math.pow(power2, 0.75)) * (1 + 0.25 * rarityTier));
@@ -11716,7 +11710,7 @@ var gearSeed = (state, p, source6) => `dungeon-gear-d7-v1/${state.campaign.seed.
 var round43 = (n) => Number(n.toFixed(4));
 function affixRollRange(g, key9) {
   if (g.version === "dungeon-gear-d9-v1") return affixRollRangeD9(g, key9);
-  const power2 = safeInteger(g.itemPower, 1), rarityTier = safeInteger(g.rarityTier, 0, 5), type = g.definition.slot, band = Math.ceil(power2 / 4) * 4, effective = band <= 100 ? band : 100 + Math.pow(band - 100, 0.7) * 1.5, E = Math.pow(1.012, effective) * (1 + 0.015 * effective), R2 = 1 + 0.07 * rarityTier, P = (1 + 0.15 * rarityTier) * (type === "overall" ? 1.8 : 1), flatR = R2 * (type === "overall" ? 1.8 : 1);
+  const power2 = safeInteger(g.itemPower, 1), rarityTier = safeInteger(g.rarityTier, 0, 5), type = g.definition.slot, band = Math.ceil(power2 / 4) * 4, effective = band <= 100 ? band : 100 + Math.pow(band - 100, 0.7) * 1.5, E = Math.pow(1.012, effective) * (1 + 0.015 * effective), R2 = 1 + 0.07 * rarityTier, P2 = (1 + 0.15 * rarityTier) * (type === "overall" ? 1.8 : 1), flatR = R2 * (type === "overall" ? 1.8 : 1);
   let minimum, maximum;
   if (key9 === "atk" || key9 === "def") {
     minimum = Math.ceil(0.04 * E * flatR);
@@ -11725,20 +11719,20 @@ function affixRollRange(g, key9) {
     minimum = Math.ceil(0.12 * E * flatR);
     maximum = Math.ceil(0.24 * E * flatR);
   } else if (key9 === "moveSpeed") {
-    minimum = Math.ceil(power2 * P);
-    maximum = Math.ceil(2 * power2 * P);
+    minimum = Math.ceil(power2 * P2);
+    maximum = Math.ceil(2 * power2 * P2);
   } else if (key9 === "critChance") {
-    minimum = round43(Math.min(0.2, 0.015 * Math.sqrt(power2) * P));
-    maximum = round43(Math.min(0.2, 0.04 * Math.sqrt(power2) * P));
+    minimum = round43(Math.min(0.2, 0.015 * Math.sqrt(power2) * P2));
+    maximum = round43(Math.min(0.2, 0.04 * Math.sqrt(power2) * P2));
   } else if (key9 === "critDamage") {
-    minimum = round43(0.03 * Math.sqrt(power2) * P);
-    maximum = round43(0.06 * Math.sqrt(power2) * P);
+    minimum = round43(0.03 * Math.sqrt(power2) * P2);
+    maximum = round43(0.06 * Math.sqrt(power2) * P2);
   } else if (key9 === "block" || key9 === "parry") {
-    minimum = round43(Math.min(0.15, 5e-3 * Math.sqrt(power2) * P));
-    maximum = round43(Math.min(0.15, 0.015 * Math.sqrt(power2) * P));
+    minimum = round43(Math.min(0.15, 5e-3 * Math.sqrt(power2) * P2));
+    maximum = round43(Math.min(0.15, 0.015 * Math.sqrt(power2) * P2));
   } else if (key9 === "bonusAreaRadius") {
-    minimum = round43(0.04 * P);
-    maximum = round43(0.1 * P);
+    minimum = round43(0.04 * P2);
+    maximum = round43(0.1 * P2);
   } else if (key9 === "activeSpd") {
     const scale2 = Math.pow(power2, 0.3) * (1 + 0.08 * rarityTier);
     minimum = round43(0.01 * scale2);
@@ -11766,7 +11760,7 @@ function generateGear3(seed, input, { tier: tier2 = null, family: family2 = null
   safeInteger(rarityTier, 0, 5);
   const type = family2 ?? pick5(GEAR_FAMILIES4), sub = type === "subweapon" ? subType ?? pick5(["shield", "dagger", "tome"]) : null, n = noun ?? pick5(GEAR_NOUNS4[sub ?? type]);
   requireContract(GEAR_FAMILIES4.includes(type) && GEAR_NOUNS4[sub ?? type]?.includes(n), "Unknown generated family/noun");
-  const band = Math.ceil(power2 / 4) * 4, effective = band <= 100 ? band : 100 + Math.pow(band - 100, 0.7) * 1.5, E = Math.pow(1.012, effective) * (1 + 0.015 * effective), R2 = 1 + 0.07 * rarityTier, P = (1 + 0.15 * rarityTier) * (type === "overall" ? 1.8 : 1), flatR = R2 * (type === "overall" ? 1.8 : 1), f2 = (a, b) => a + (b - a) * random(), int = (a, b) => a + Math.floor(random() * (b - a + 1));
+  const band = Math.ceil(power2 / 4) * 4, effective = band <= 100 ? band : 100 + Math.pow(band - 100, 0.7) * 1.5, E = Math.pow(1.012, effective) * (1 + 0.015 * effective), R2 = 1 + 0.07 * rarityTier, P2 = (1 + 0.15 * rarityTier) * (type === "overall" ? 1.8 : 1), flatR = R2 * (type === "overall" ? 1.8 : 1), f2 = (a, b) => a + (b - a) * random(), int = (a, b) => a + Math.floor(random() * (b - a + 1));
   const raw = { type, subType: sub, statsRolled: rarityTier, noun: n, baseAtk: 0, baseDef: 0, baseMaxHp: 0, baseStr: 0, baseDex: 0, baseInt: 0, baseMoveSpeed: 0, baseCritChance: 0, baseCritDamage: 0, baseBlock: 0, baseParry: 0 };
   if (type === "ring") {
     const roll = random();
@@ -11781,11 +11775,11 @@ function generateGear3(seed, input, { tier: tier2 = null, family: family2 = null
     let value;
     if (key9 === "atk" || key9 === "def") value = Math.ceil(f2(0.04, 0.08) * E * flatR);
     else if (key9 === "maxHp") value = Math.ceil(f2(0.12, 0.24) * E * flatR);
-    else if (key9 === "moveSpeed") value = Math.ceil(int(1, 2) * power2 * P);
-    else if (key9 === "critChance") value = round43(Math.min(0.2, f2(0.015, 0.04) * Math.sqrt(power2) * P));
-    else if (key9 === "critDamage") value = round43(f2(0.03, 0.06) * Math.sqrt(power2) * P);
-    else if (key9 === "block" || key9 === "parry") value = round43(Math.min(0.15, f2(5e-3, 0.015) * Math.sqrt(power2) * P));
-    else if (key9 === "bonusAreaRadius") value = round43(f2(0.04, 0.1) * P);
+    else if (key9 === "moveSpeed") value = Math.ceil(int(1, 2) * power2 * P2);
+    else if (key9 === "critChance") value = round43(Math.min(0.2, f2(0.015, 0.04) * Math.sqrt(power2) * P2));
+    else if (key9 === "critDamage") value = round43(f2(0.03, 0.06) * Math.sqrt(power2) * P2);
+    else if (key9 === "block" || key9 === "parry") value = round43(Math.min(0.15, f2(5e-3, 0.015) * Math.sqrt(power2) * P2));
+    else if (key9 === "bonusAreaRadius") value = round43(f2(0.04, 0.1) * P2);
     else if (key9 === "activeSpd") value = round43(f2(0.01, 0.03) * Math.pow(power2, 0.3) * (1 + 0.08 * rarityTier));
     else {
       value = Math.ceil(f2(0.4, 0.8) * (3 + Math.pow(power2, 0.75)) * (1 + 0.25 * rarityTier));
@@ -12019,12 +12013,12 @@ var FORGE_MATERIAL_COSTS = Object.freeze([
 // src/shared/content/forge.js
 var FORGE_MATERIALS = Object.freeze(["Monster Soul", "Rare Scrap", "Luminous Soul", "Magic Scrap", "Epic Scrap", "Astral Shards", "Legendary Scrap", "Mythic Scrap", "Eridium Shard", "Overlord's Sigil", "Astral Essence"]);
 var mul = multiplyAmount;
-var pow3 = powerAmount;
+var pow2 = powerAmount;
 function attunementCost(level, player = null) {
   if (combatPlayer(player)) return freezeWire(combatAttuneCost(level));
   safeInteger(level, 0, 99);
   const n = level + 1;
-  const gold = n <= 10 ? mul("2500", pow3("1.35", n)) : n <= 30 ? mul(mul("2500", pow3("1.35", 10)), pow3("3.55", n - 10)) : mul(mul("100000", pow3("2.25", 30)), pow3("3", n - 30));
+  const gold = n <= 10 ? mul("2500", pow2("1.35", n)) : n <= 30 ? mul(mul("2500", pow2("1.35", 10)), pow2("3.55", n - 10)) : mul(mul("100000", pow2("2.25", 30)), pow2("3", n - 30));
   return freezeWire({ gold, materials: FORGE_MATERIAL_COSTS[level] });
 }
 var totals = [{ gold: "0", materials: {} }];

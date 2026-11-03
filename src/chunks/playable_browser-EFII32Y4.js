@@ -705,10 +705,12 @@ import {
   settleMasteryXp,
   settlementV1,
   signedAddress,
+  siteClearXpV2,
   siteFinaleDiagnosticD13D_B,
   siteInstanceId,
   siteOccupantsD13C,
   siteResetTransitionsD13C,
+  siteRewardKindV1,
   siteRunEpisodeObservationRequiredD13B,
   siteSupportsResetD13C,
   siteTransitionTarget,
@@ -825,7 +827,7 @@ import {
   worldRevisionV1,
   worldRolesV1,
   wrathDamageV1
-} from "./chunk-PTGACYFF.js";
+} from "./chunk-PX75QQQA.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -32997,10 +32999,14 @@ function createActivityProgression(state, manifest, measure) {
     if (!group || target.team !== "hostile") return [];
     const reward = ordinaryKillXp(target, group, state);
     if (!reward) return [];
+    const siteKind = siteRewardKindV1(state, { kind: "enemy", groupId: group.groupId }, target.entityId), killXp = (player) => {
+      const base = ordinaryKillXp(target, group, state, player);
+      return siteKind ? String(BigInt(base) + BigInt(siteClearXpV2(siteKind, group.threatSnapshot.levelsByEntityId[target.entityId], player.progression.level))) : base;
+    };
     const xpOnly = BROOD_XP_ONLY_V1.includes(ordinaryEnemyForProfile(target.contentDefinitionId)?.family);
     const rows = eligibleNearbyParticipants(state, target.residency.spaceInstanceId, [target.position], radius).map((player) => {
       const inventoryPlan = xpOnly ? null : prepareEpisodeReward(state, player, episodeSource(state, group, "enemy", group.entityIds.indexOf(target.entityId)), target.position, target.residency.spaceInstanceId), rate = stats2.get(player.entityId).heroXpRate;
-      const next = awardPlayerXp(player.progression, combatInteger(insightXpV1(state, player.playerId, multiplyCombat(ordinaryKillXp(target, group, state, player), rate?.n ?? 1, rate?.d ?? 1)))), d8 = player.d8 ? updateHighestHeroLevel(player.d8, next.level) : null, leveled = progressionBigInt(next.level) > progressionBigInt(player.progression.level);
+      const next = awardPlayerXp(player.progression, combatInteger(insightXpV1(state, player.playerId, multiplyCombat(killXp(player), rate?.n ?? 1, rate?.d ?? 1)))), d8 = player.d8 ? updateHighestHeroLevel(player.d8, next.level) : null, leveled = progressionBigInt(next.level) > progressionBigInt(player.progression.level);
       const resolved = leveled ? resolvePlayerStats({ ...player, progression: next, ...d8 ? { d8 } : {} }) : null;
       return { player, inventoryPlan, xpOnly, next, d8, resolved, levels: progressionBigInt(next.level) - progressionBigInt(player.progression.level) };
     });
@@ -67911,6 +67917,7 @@ function createWalletDisplay() {
 function createXpDisplay() {
   let target = null, shown = null, phase = "idle", since = 0, deadline2 = 0, start = 0, previousTime = null;
   const ratio = (p) => p.capped ? 100 : 100 * integerRatio(integerWire(p.current), integerWire(p.required));
+  const rank = (p) => progressionBigInt(p.level) + progressionBigInt(p.paragon ?? 0);
   const current = (required, value2) => progressionWire((progressionBigInt(required) * BigInt(Math.round(value2 * 1e6)) + 50000000n) / 100000000n);
   function snap(p, time) {
     target = { ...p };
@@ -67931,7 +67938,7 @@ function createXpDisplay() {
       } else if (phase === "fill") {
         start = shown.value;
         since = time;
-        phase = pending ? "hold" : progressionBigInt(target.level) > progressionBigInt(shown.level) ? "threshold" : "fill";
+        phase = pending ? "hold" : rank(target) > rank(shown) ? "threshold" : "fill";
       }
     }
     if (phase !== "idle" && time >= deadline2 + 400) return snap(target, time);
@@ -67942,7 +67949,7 @@ function createXpDisplay() {
       start = 0;
     }
     if (phase === "hold" && (!pending || time >= deadline2)) {
-      phase = progressionBigInt(target.level) > progressionBigInt(shown.level) ? "threshold" : "fill";
+      phase = rank(target) > rank(shown) ? "threshold" : "fill";
       since = time;
       start = shown.value;
     }
@@ -76527,11 +76534,11 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
       if (progressHud) {
         progressHud.hidden = !progress8;
         if (progress8) {
-          setText(doc.getElementById("world-level"), `Lv ${progressionText(displayProgress.level)}`);
+          setText(doc.getElementById("world-level"), `Lv ${progressionText(displayProgress.level)}${Number(displayProgress.paragon ?? 0) > 0 ? ` \xB7 P${progressionText(displayProgress.paragon)}` : ""}`);
           setText(doc.getElementById("world-xp"), displayProgress.capped ? "MAX" : `${progressionText(displayProgress.current)}/${progressionText(displayProgress.required)} XP`);
           const bar = doc.getElementById("world-xp-bar"), value2 = displayProgress.value ?? (progress8.capped ? 100 : 100 * integerRatio(integerWire(progress8.current), integerWire(progress8.required)));
           if (bar.value !== value2) bar.value = value2;
-          bar.setAttribute("aria-label", progress8.capped ? "Maximum level" : `Level ${progressionText(progress8.level)}: ${progressionText(progress8.current)} of ${progressionText(progress8.required)} XP`);
+          bar.setAttribute("aria-label", progress8.capped ? "Maximum level" : `Level ${progressionText(progress8.level)}${Number(progress8.paragon ?? 0) > 0 ? `, Paragon ${progressionText(progress8.paragon)}` : ""}: ${progressionText(progress8.current)} of ${progressionText(progress8.required)} XP`);
           progressHud.title = `Max HP ${formatLarge(participant.stats.maxHp)} \xB7 Attack ${formatLarge(participant.stats.attack)} \xB7 Defense ${formatLarge(participant.stats.defense)}`;
         }
       }
