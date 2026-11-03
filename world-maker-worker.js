@@ -4550,11 +4550,892 @@ function harborFitV1(base, x, y, fx, fy, free = () => true) {
   return length;
 }
 
-// src/shared/generation/world_maker_v1/roads.js
+// src/shared/generation/world_maker_v1/curved_roads.js
 var TW = W * 64;
 var TH = H * 52;
-var tkey = (x, y) => x + "," + y;
-var ROAD = { main: { value: 3, width: 5 }, secondary: { value: 2, width: 3 }, trail: { value: 1, width: 1 } };
+var CW = W * 2;
+var SHAPE = { main: { value: 3, width: 5, radius: 38, meander: [3.4, 72, 0.6, 18], rank: 2, slope: 1 }, secondary: { value: 2, width: 3, radius: 24, meander: [2.8, 52, 0.7, 14], rank: 1, slope: 1 }, trail: { value: 1, width: 1, radius: 9, meander: [1.6, 26, 0.7, 8], rank: 0, slope: 0.5 } };
+var hyp = (x, y) => Math.sqrt(x * x + y * y);
+var DISC = [1, 0.7, 0.45, 0.45];
+var DIRS2 = [[1, 0], [0, 1], [-1, 0], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1], [2, 1], [1, 2], [-2, 1], [-1, 2], [2, -1], [1, -2], [-2, -1], [-1, -2]];
+var MOVES = new Map([4, 2].map((L) => [L, DIRS2.map(([mx, my]) => {
+  const dx = mx * L, dy = my * L, len = hyp(dx, dy), n = Math.max(1, Math.ceil(len)), off = [];
+  for (let i = 1; i <= n; i++) off.push(Math.round(dx * i / n), Math.round(dy * i / n));
+  const diag = [];
+  for (let k = 0; k < off.length; k += 2) {
+    const px = k ? off[k - 2] : 0, py = k ? off[k - 1] : 0;
+    if (off[k] !== px && off[k + 1] !== py) diag.push(off[k], py, px, off[k + 1]);
+  }
+  return { mx, my, dx, dy, len, n, off, diag };
+})]));
+var PASSES = [[4, 2, 4e5], [4, 6, 7e5], [2, 6, 9e5], [2, null, 15e5]];
+var HW = 2.6;
+var RIVER = 26;
+function planCurvedRoads(asset, terrain, waterAt, ferry, stats = {}) {
+  stats.searches = 0;
+  stats.nodes = 0;
+  stats.widened = 0;
+  const macro = terrain.macro, lmIndex = new Map(asset.landmasses.map((l, k) => [l.id, k])), soft = valueNoise(asset.seedDigest, "roads-v2/soft"), wave = valueNoise(asset.seedDigest, "roads-v2/meander");
+  const land = new Int16Array(W * H).fill(-1), box2 = [];
+  for (let my = 0; my < H; my++) for (let mx = 0; mx < W; mx++) {
+    const c = macro(mx, my);
+    if (!c) continue;
+    land[my * W + mx] = c[1];
+    const b = box2[c[1]] ??= [mx, my, mx, my];
+    if (mx < b[0]) b[0] = mx;
+    if (my < b[1]) b[1] = my;
+    if (mx > b[2]) b[2] = mx;
+    if (my > b[3]) b[3] = my;
+  }
+  const landAt = (x, y) => x < 0 || y < 0 || x >= TW || y >= TH ? -1 : land[(y / 52 | 0) * W + (x >> 6)];
+  const owner = new Int16Array(CW * H * 2), ownerKey = /* @__PURE__ */ new Map(), own = (id) => {
+    let k = ownerKey.get(id);
+    if (k === void 0) {
+      k = ownerKey.size + 1;
+      ownerKey.set(id, k);
+    }
+    return k;
+  };
+  for (const s of asset.settlements) for (const c of s.core) owner[c.y * CW + c.x] = own(s.id);
+  for (const s of asset.sites) for (const c of s.footprint) owner[c.y * CW + c.x] = own(s.id);
+  for (const f of asset.futureIslands) for (const c of [f.entrance, f.breathing]) owner[c.y * CW + c.x] = own(f.id);
+  const ownerAt = (x, y) => owner[(y / 26 | 0) * CW + (x >> 5)], allowOf = (ids) => ids.map((id) => ownerKey.get(id) ?? 0);
+  const hl = ferry.landings[0], hb = hl?.harborTown ? harborLayoutV1(hl, hl.harborTown.pier).body : null;
+  const inHarbor = (x, y) => Boolean(hb) && x >= hb.x - 1 && x <= hb.x + hb.w && y >= hb.y - 1 && y <= hb.y + hb.h, inBody = (x, y) => Boolean(hb) && x >= hb.x && x < hb.x + hb.w && y >= hb.y && y < hb.y + hb.h;
+  const pageLand = new Int16Array(CW * H * 2);
+  for (let p = 0; p < pageLand.length; p++) pageLand[p] = land[((p / CW | 0) >> 1) * W + (p % CW >> 1)];
+  const NP = CW * H * 2, GP = new Array(NP).fill(null), CP = new Array(NP).fill(null), RP = new Array(NP).fill(null), page = (x, y) => (y / 26 | 0) * CW + (x >> 5), off = (x, y) => y % 26 * 32 + (x & 31);
+  const seaNear = new Array(W * H);
+  for (let my = 0; my < H; my++) for (let mx = 0; mx < W; mx++) {
+    if (land[my * W + mx] < 0) continue;
+    const l = [];
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+      const nx = mx + dx, ny = my + dy;
+      if (nx < 0 || ny < 0 || nx >= W || ny >= H || land[ny * W + nx] < 0) l.push(nx * 64, ny * 52);
+    }
+    if (l.length) seaNear[my * W + mx] = l;
+  }
+  const nearSea = (m, x, y) => {
+    const l = seaNear[m];
+    if (!l) return false;
+    const px = x + 0.5, py = y + 0.5;
+    for (let i = 0; i < l.length; i += 2) {
+      const dx = Math.max(l[i] - px, 0, px - l[i] - 64), dy = Math.max(l[i + 1] - py, 0, py - l[i + 1] - 52);
+      if (dx * dx + dy * dy <= 1089) return true;
+    }
+    return false;
+  };
+  const wg = terrain.waterGeometry, classify = wg ? (x, y) => {
+    if (inHarbor(x, y)) return 0;
+    const m = (y / 52 | 0) * W + (x >> 6), coast = nearSea(m, x, y) ? wg.sampleCoast(x, y)?.water : false, w = waterAt(x, y);
+    if (w === 1 && !coast) return 2;
+    return w || coast || land[m] < 0 ? 0 : 1;
+  } : (x, y) => {
+    if (inHarbor(x, y)) return 0;
+    const b = terrain.sampleBase(x, y), w = waterAt(x, y);
+    return w === 1 && !terrain.waterGeometry?.sampleCoast(x, y)?.water ? 2 : b.walkable && !w ? 1 : 0;
+  };
+  function ground(x, y) {
+    if (x < 0 || y < 0 || x >= TW || y >= TH) return 0;
+    const g = GP[page(x, y)] ??= new Uint8Array(832).fill(255), o = off(x, y);
+    let v = g[o];
+    if (v === 255) {
+      v = classify(x, y);
+      g[o] = v;
+    }
+    return v;
+  }
+  function cost(x, y) {
+    const c = CP[page(x, y)] ??= new Float32Array(832).fill(-1), o = off(x, y);
+    let v = c[o];
+    if (v < 0) {
+      const g = ground(x, y);
+      v = g === 1 ? 1 + 0.45 * soft(x, y, 34) : g === 2 ? RIVER : Infinity;
+      c[o] = v;
+    }
+    return v;
+  }
+  const valueAt = (x, y) => {
+    if (x < 0 || y < 0 || x >= TW || y >= TH) return 0;
+    const r = RP[page(x, y)];
+    return r ? r[off(x, y)] : 0;
+  };
+  const stamp = (x, y, v) => {
+    if (x < 0 || y < 0 || x >= TW || y >= TH || inBody(x, y)) return;
+    const r = RP[page(x, y)] ??= new Uint8Array(832), o = off(x, y);
+    if (r[o] < v) r[o] = v;
+  };
+  const elev = new Float64Array(W * H).fill(NaN);
+  for (let my = 0; my < H; my++) for (let mx = 0; mx < W; mx++) {
+    const c = macro(mx, my);
+    if (c) elev[my * W + mx] = c[10];
+  }
+  function height(x, y) {
+    const fx = (x - 32) / 64, fy = (y - 26) / 52, mx = Math.floor(fx), my = Math.floor(fy), u = fx - mx, v = fy - my;
+    let s = 0, wt = 0;
+    for (let k = 0; k < 4; k++) {
+      const cx2 = mx + (k & 1), cy2 = my + (k >> 1);
+      if (cx2 < 0 || cy2 < 0 || cx2 >= W || cy2 >= H) continue;
+      const h = elev[cy2 * W + cx2];
+      if (h !== h) continue;
+      const w = (k & 1 ? u : 1 - u) * (k >> 1 ? v : 1 - v);
+      s += h * w;
+      wt += w;
+    }
+    return wt ? s / wt : 0;
+  }
+  const tileOk = (x, y, lm, allow, river) => {
+    const g = ground(x, y);
+    if (!g || g === 2 && !river || landAt(x, y) !== lm) return false;
+    const o = ownerAt(x, y);
+    return !o || allow.includes(o);
+  };
+  const mark = new Uint16Array(W * H);
+  let gen = 0;
+  function corridor(a, b, lm, pad) {
+    const start = (a.y / 52 | 0) * W + (a.x >> 6), goal = (b.y / 52 | 0) * W + (b.x >> 6), gx = b.x / 64, gy = b.y / 52, dist = /* @__PURE__ */ new Map([[start, 0]]), from = /* @__PURE__ */ new Map(), heap = new Heap();
+    heap.push(0, start);
+    const hc = (x, y) => hyp(x - gx, y - gy) * 0.9;
+    while (heap.size) {
+      const k = heap.peekKey(), i = heap.pop();
+      if (i === goal) break;
+      const x = i % W, y = i / W | 0, d = dist.get(i);
+      if (k > d + hc(x, y) + 1e-9) continue;
+      for (const [dx, dy] of DIRS2.slice(0, 8)) {
+        const nx = x + dx, ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= W || ny >= H || land[ny * W + nx] !== lm) continue;
+        const c = macro(nx, ny), j = ny * W + nx, v = d + (dx && dy ? Math.SQRT2 : 1) * (1 + c[8] / 350);
+        if (v < (dist.get(j) ?? Infinity)) {
+          dist.set(j, v);
+          from.set(j, i);
+          heap.push(v + hc(nx, ny), j);
+        }
+      }
+    }
+    if (!dist.has(goal)) return null;
+    if (++gen === 65536) {
+      mark.fill(0);
+      gen = 1;
+    }
+    let x0 = W, y0 = H, x1 = -1, y1 = -1;
+    for (let i = goal; ; i = from.get(i)) {
+      const x = i % W, y = i / W | 0;
+      for (let dy = -pad; dy <= pad; dy++) for (let dx = -pad; dx <= pad; dx++) {
+        const mx = x + dx, my = y + dy;
+        if (mx < 0 || my < 0 || mx >= W || my >= H) continue;
+        mark[my * W + mx] = gen;
+        if (mx < x0) x0 = mx;
+        if (my < y0) y0 = my;
+        if (mx > x1) x1 = mx;
+        if (my > y1) y1 = my;
+      }
+      if (i === start) break;
+    }
+    return { gen, x0: x0 * 64, y0: y0 * 52, x1: x1 * 64 + 63, y1: y1 * 52 + 51 };
+  }
+  const passable = (x, y, lm) => landAt(x, y) === lm && ground(x, y) !== 0;
+  const onGoal = (goal, x, y) => goal.min > 0 && valueAt(x, y) >= goal.min && ground(x, y) === 1 && goal.near(x, y);
+  function search(a, goal, lm, allow, kind, L, cor, limit) {
+    const b = cor ?? (() => {
+      const c = box2[lm];
+      return { x0: c[0] * 64, y0: c[1] * 52, x1: c[2] * 64 + 63, y1: c[3] * 52 + 51 };
+    })();
+    const x0 = Math.floor(b.x0 / L) * L, y0 = Math.floor(b.y0 / L) * L, nx = Math.floor((Math.min(TW - 1, b.x1) - x0) / L) + 1, ny = Math.floor((Math.min(TH - 1, b.y1) - y0) / L) + 1, n = nx * ny;
+    const clampN = (v, o, m) => Math.max(0, Math.min(m - 1, Math.round((v - o) / L))), sx = clampN(a.x, x0, nx), sy = clampN(a.y, y0, ny), start = sy * nx + sx;
+    const dist = new Float64Array(n).fill(Infinity), from = new Int32Array(n).fill(-1), state = new Uint8Array(n), hs = new Float32Array(n).fill(NaN), hit = new Int32Array(n), heap = new Heap();
+    const moves = MOVES.get(L), slope = SHAPE[kind].slope, pt = goal.pt, minV = goal.min ?? 0, near = goal.near, hw = HW, h = (x, y) => pt ? hyp(x - pt.x, y - pt.y) * hw : 0;
+    const heightOf = (i, x, y) => {
+      let v = hs[i];
+      if (v !== v) {
+        v = height(x, y);
+        hs[i] = v;
+      }
+      return v;
+    };
+    dist[start] = 0;
+    heap.push(0, start);
+    let end = -1, nodes = 0;
+    while (heap.size) {
+      const i = heap.pop();
+      if (state[i] === 2) continue;
+      state[i] = 2;
+      if (++nodes > limit) break;
+      const lx = i % nx, ly = i / nx | 0, x = x0 + lx * L, y = y0 + ly * L;
+      if (i !== start && (hit[i] || pt && Math.abs(x - pt.x) <= L && Math.abs(y - pt.y) <= L && lineCost({ x, y }, pt, lm, allow, false) < Infinity || onGoal(goal, x, y))) {
+        end = i;
+        break;
+      }
+      const d = dist[i], e0 = heightOf(i, x, y);
+      for (const m of moves) {
+        const X = x + m.dx, Y = y + m.dy, kx = lx + m.mx, ky = ly + m.my;
+        if (kx < 0 || ky < 0 || kx >= nx || ky >= ny) continue;
+        if (cor && mark[(Y / 52 | 0) * W + (X >> 6)] !== cor.gen) continue;
+        const j = ky * nx + kx;
+        if (state[j] === 2) continue;
+        let sum = 0, ok = true, goalTile = 0;
+        const o = m.off;
+        for (let k = 0; k < o.length; k += 2) {
+          const tx = x + o[k], ty = y + o[k + 1], p = (ty / 26 | 0) * CW + (tx >> 5);
+          if (pageLand[p] !== lm) {
+            ok = false;
+            break;
+          }
+          const w = owner[p];
+          if (w && !allow.includes(w)) {
+            ok = false;
+            break;
+          }
+          const of = ty % 26 * 32 + (tx & 31), cp = CP[p];
+          let c = cp ? cp[of] : -1;
+          if (c < 0) c = cost(tx, ty);
+          if (c === Infinity) {
+            ok = false;
+            break;
+          }
+          const r = RP[p], v2 = r ? r[of] : 0;
+          sum += c * DISC[v2];
+          if (minV && v2 >= minV && c < RIVER && !goalTile && near(tx, ty)) goalTile = ty * TW + tx + 1;
+        }
+        const dg = m.diag;
+        for (let k = 0; k < dg.length && ok; k += 4) if (!passable(x + dg[k], y + dg[k + 1], lm) && !passable(x + dg[k + 2], y + dg[k + 3], lm)) ok = false;
+        if (!ok) continue;
+        const dh = Math.abs(heightOf(j, X, Y) - e0) / m.len / 2.2, v = d + sum * m.len / m.n + m.len * slope * Math.min(6, dh * dh);
+        if (v < dist[j]) {
+          dist[j] = v;
+          from[j] = i;
+          hit[j] = goalTile;
+          heap.push(v + h(X, Y), j);
+        }
+      }
+    }
+    stats.nodes += nodes;
+    stats.searches++;
+    if (end < 0) return null;
+    const path = [];
+    for (let i = end; i >= 0; i = from[i]) path.push({ x: x0 + i % nx * L, y: y0 + (i / nx | 0) * L });
+    path.reverse();
+    const last = path[path.length - 1];
+    if (hit[end]) {
+      const g = hit[end] - 1;
+      path.pop();
+      path.push({ x: g % TW, y: g / TW | 0 });
+    } else if (pt && !onGoal(goal, last.x, last.y) && (last.x !== pt.x || last.y !== pt.y)) path.push({ x: pt.x, y: pt.y });
+    return path;
+  }
+  function route(a, goal, lm, allow, kind) {
+    for (const [L, pad, limit] of PASSES) {
+      const cor = pad === null ? null : corridor(a, goal.pt ?? a, lm, pad);
+      if (pad !== null && !cor) continue;
+      const p = search(a, goal, lm, allow, kind, L, cor, limit);
+      if (p) return p;
+      stats.widened++;
+    }
+    return null;
+  }
+  function lineCost(p, q, lm, allow, river) {
+    const L = hyp(q.x - p.x, q.y - p.y), n = Math.max(1, Math.ceil(L));
+    let sum = 0, lx = NaN, ly = NaN;
+    for (let i = 0; i <= n; i++) {
+      const x = Math.round(p.x + (q.x - p.x) * i / n), y = Math.round(p.y + (q.y - p.y) * i / n);
+      if (!tileOk(x, y, lm, allow, river)) return Infinity;
+      if (lx === lx && x !== lx && y !== ly && !tileOk(x, ly, lm, allow, river) && !tileOk(lx, y, lm, allow, river)) return Infinity;
+      lx = x;
+      ly = y;
+      sum += cost(x, y);
+    }
+    return sum * L / (n + 1);
+  }
+  function taut(P, lm, allow, reach) {
+    const n = P.length, cum = new Float64Array(n);
+    for (let k = 1; k < n; k++) cum[k] = cum[k - 1] + lineCost(P[k - 1], P[k], lm, allow, true);
+    const out = [P[0]];
+    let i = 0;
+    const fits = (j) => {
+      const c = lineCost(P[i], P[j], lm, allow, false);
+      return c < Infinity && c <= (cum[j] - cum[i]) * 1.04 + 1;
+    };
+    while (i < n - 1) {
+      let cap = Math.min(n - 1, i + reach);
+      for (let k = i + 1; k < cap; k++) if (P[k].lock) {
+        cap = k;
+        break;
+      }
+      let hi = cap, lo = i + 1;
+      if (hi > lo && !fits(hi)) {
+        while (hi - lo > 1) {
+          const mid = lo + hi >> 1;
+          if (fits(mid)) lo = mid;
+          else hi = mid;
+        }
+        hi = lo;
+      }
+      out.push(P[hi]);
+      i = hi;
+    }
+    return out;
+  }
+  function riverAxis(cx2, cy2) {
+    let n = 0, sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0;
+    for (let dy = -6; dy <= 6; dy++) for (let dx = -6; dx <= 6; dx++) if (ground(cx2 + dx, cy2 + dy) === 2) {
+      n++;
+      sx += dx;
+      sy += dy;
+      sxx += dx * dx;
+      syy += dy * dy;
+      sxy += dx * dy;
+    }
+    if (n < 3) return null;
+    const mx = sx / n, my = sy / n, a = sxx / n - mx * mx, b = sxy / n - mx * my, c = syy / n - my * my, l = (a + c) / 2 + Math.sqrt((a - c) * (a - c) / 4 + b * b);
+    let vx = l - c, vy = b;
+    if (hyp(vx, vy) < 1e-9) {
+      vx = b;
+      vy = l - a;
+    }
+    const vl = hyp(vx, vy);
+    return vl < 1e-9 ? null : { x: vx / vl, y: vy / vl };
+  }
+  function straightBridge(c, hint, lm, width) {
+    const c0x = Math.round(c.x), c0y = Math.round(c.y), hx = Math.abs(hint.x), hy = Math.abs(hint.y), ax = Math.max(hx, hy) < 1.5 * Math.min(hx, hy) ? riverAxis(c0x, c0y) : null, across2 = ax ? Math.abs(ax.y) >= Math.abs(ax.x) : hx >= hy;
+    for (const horiz of [across2, !across2]) for (const sh of [0, 1, -1, 2, -2, 3, -3]) {
+      const cx2 = c0x + (horiz ? 0 : sh), cy2 = c0y + (horiz ? sh : 0), d = horiz ? { x: Math.sign(hint.x) || 1, y: 0 } : { x: 0, y: Math.sign(hint.y) || 1 }, r = (width - 1) / 2;
+      let b0 = 0, b1 = 0;
+      while (ground(cx2 - d.x * (b0 + 1), cy2 - d.y * (b0 + 1)) === 2 && b0 < 30) b0++;
+      while (ground(cx2 + d.x * (b1 + 1), cy2 + d.y * (b1 + 1)) === 2 && b1 < 30) b1++;
+      const s = { x: cx2 - d.x * (b0 + 1), y: cy2 - d.y * (b0 + 1) }, e = { x: cx2 + d.x * (b1 + 1), y: cy2 + d.y * (b1 + 1) };
+      if (ground(cx2, cy2) !== 2 || !tileOk(s.x, s.y, lm, [], false) || !tileOk(e.x, e.y, lm, [], false) || b0 + b1 + 4 > 40) continue;
+      let deck = true;
+      for (let k = -b0 - 2; k <= b1 + 2 && deck; k++) for (let j = -r; j <= r; j++) if (!ground(cx2 + d.x * k - d.y * j, cy2 + d.y * k + d.x * j)) {
+        deck = false;
+        break;
+      }
+      if (!deck) continue;
+      for (const A of [4, 2, 0]) {
+        let dry = true;
+        for (let k = 1; k <= A && dry; k++) if (ground(s.x - d.x * k, s.y - d.y * k) !== 1 || ground(e.x + d.x * k, e.y + d.y * k) !== 1) dry = false;
+        if (dry) return { d, start: s, end: e, a0: { x: s.x - d.x * A, y: s.y - d.y * A }, a1: { x: e.x + d.x * A, y: e.y + d.y * A } };
+      }
+    }
+    return null;
+  }
+  function bridgeRun(V) {
+    for (let k = 0; k < V.length - 1; k++) {
+      if (V[k].lock && V[k + 1].lock) continue;
+      const p = V[k], q = V[k + 1], n = Math.max(1, Math.ceil(hyp(q.x - p.x, q.y - p.y)));
+      let t0 = -1;
+      for (let i = 0; i <= n; i++) {
+        const t = i / n, r = ground(Math.round(p.x + (q.x - p.x) * t), Math.round(p.y + (q.y - p.y) * t)) === 2;
+        if (r && t0 < 0) t0 = t;
+        if (!r && t0 >= 0) return { k, t0, t1: t };
+      }
+      if (t0 >= 0) return { k, t0, t1: 1 };
+    }
+    return null;
+  }
+  function bridges(V, lm, width) {
+    const out = [];
+    for (let guard = 0; guard < 24; guard++) {
+      const run = bridgeRun(V);
+      if (!run) break;
+      const { k, t0, t1 } = run, p = V[k], q = V[k + 1], tm = (t0 + t1) / 2, c = { x: p.x + (q.x - p.x) * tm, y: p.y + (q.y - p.y) * tm }, b = straightBridge(c, { x: q.x - p.x, y: q.y - p.y }, lm, width);
+      const same = (u, v) => u.x === v.x && u.y === v.y;
+      if (!b || out.some((o) => same(o.start, b.start) && same(o.end, b.end) || same(o.start, b.end) && same(o.end, b.start))) {
+        p.lock = q.lock = true;
+        continue;
+      }
+      const far = (v) => hyp(v.x - c.x, v.y - c.y);
+      let i0 = k, i1 = k + 1;
+      while (i0 > 0 && !V[i0].lock && far(V[i0]) < far(b.a0) + 2) i0--;
+      while (i1 < V.length - 1 && !V[i1].lock && far(V[i1]) < far(b.a1) + 2) i1++;
+      V.splice(i0 + 1, i1 - i0 - 1, { ...b.a0, lock: true }, { ...b.start, lock: true }, { ...b.end, lock: true }, { ...b.a1, lock: true });
+      out.push(b);
+    }
+    return out;
+  }
+  function fillet(V, R) {
+    const out = [V[0]];
+    for (let k = 1; k < V.length - 1; k++) {
+      const p = V[k - 1], q = V[k], r = V[k + 1];
+      if (q.lock || R <= 0) {
+        out.push(q);
+        continue;
+      }
+      const ux0 = p.x - q.x, uy0 = p.y - q.y, vx0 = r.x - q.x, vy0 = r.y - q.y, lu = hyp(ux0, uy0), lv = hyp(vx0, vy0);
+      if (lu < 1e-6 || lv < 1e-6) continue;
+      const ux = ux0 / lu, uy = uy0 / lu, vx = vx0 / lv, vy = vy0 / lv, cos2 = Math.max(-1, Math.min(1, ux * vx + uy * vy));
+      if (cos2 < -0.99955 || cos2 > 0.9999) {
+        out.push(q);
+        continue;
+      }
+      const tanH = Math.sqrt((1 - cos2) / (1 + cos2)), sinH = Math.sqrt((1 - cos2) / 2), tmax = Math.min(lu * (p.lock ? 0.95 : 0.48), lv * (r.lock ? 0.95 : 0.48)), tl = Math.min(R / tanH, tmax), rr = tl * tanH;
+      const p1 = { x: q.x + ux * tl, y: q.y + uy * tl }, p2 = { x: q.x + vx * tl, y: q.y + vy * tl }, bx = ux + vx, by = uy + vy, bl = hyp(bx, by), dc = rr / sinH, cc = { x: q.x + bx / bl * dc, y: q.y + by / bl * dc };
+      const a1 = PM.atan2(p1.y - cc.y, p1.x - cc.x), a2 = PM.atan2(p2.y - cc.y, p2.x - cc.x);
+      let da = a2 - a1;
+      while (da > Math.PI) da -= 2 * Math.PI;
+      while (da < -Math.PI) da += 2 * Math.PI;
+      const n = Math.max(2, Math.ceil(Math.abs(da) * rr / 1.2));
+      for (let i = 0; i <= n; i++) {
+        const ang = a1 + da * i / n;
+        out.push({ x: cc.x + PM.cos(ang) * rr, y: cc.y + PM.sin(ang) * rr });
+      }
+    }
+    out.push(V[V.length - 1]);
+    return out;
+  }
+  function resample(P) {
+    const out = [{ ...P[0], s: 0 }];
+    let s = 0, carry = 0;
+    for (let k = 0; k < P.length - 1; k++) {
+      const p = P[k], q = P[k + 1], L = hyp(q.x - p.x, q.y - p.y);
+      if (L < 1e-9) continue;
+      let t = 1 - carry;
+      while (t <= L) {
+        s += 1;
+        out.push({ x: p.x + (q.x - p.x) * t / L, y: p.y + (q.y - p.y) * t / L, s, lock: !!(p.lock && q.lock) });
+        t += 1;
+      }
+      carry = L - (t - 1);
+    }
+    const z = P[P.length - 1];
+    out.push({ ...z, s: s + carry });
+    return out;
+  }
+  function straight(P) {
+    const out = [];
+    let s = 0;
+    for (let k = 0; k < P.length - 1; k++) {
+      const p = P[k], q = P[k + 1], L = hyp(q.x - p.x, q.y - p.y), n = Math.max(1, Math.ceil(L));
+      for (let i = 0; i < n; i++) out.push({ x: p.x + (q.x - p.x) * i / n, y: p.y + (q.y - p.y) * i / n, s: s + L * i / n, lock: i ? !!(p.lock && q.lock) : !!p.lock });
+      s += L;
+    }
+    out.push({ ...P[P.length - 1], s });
+    return out;
+  }
+  function meander(P, kind, salt2, lm, allow) {
+    const [A1, L1, A2, L2] = SHAPE[kind].meander, total = P[P.length - 1].s, half = SHAPE[kind].width / 2, R = Math.ceil(half), locks = P.filter((p) => p.lock).map((p) => p.s);
+    const near = (s) => {
+      let d = Math.min(s, total - s);
+      for (const l of locks) d = Math.min(d, Math.abs(s - l));
+      return d;
+    };
+    const nrm = P.map((p, i) => {
+      const q = P[Math.min(P.length - 1, i + 2)], o = P[Math.max(0, i - 2)], tx = q.x - o.x, ty = q.y - o.y, tl = hyp(tx, ty) || 1;
+      return [-ty / tl, tx / tl];
+    });
+    const ok = (x, y) => {
+      for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) {
+        if (dx * dx + dy * dy > (half + 0.5) * (half + 0.5)) continue;
+        if (!tileOk(Math.round(x + dx), Math.round(y + dy), lm, allow, false)) return false;
+      }
+      return true;
+    };
+    let shift = P.map((p, i) => {
+      if (p.lock) return 0;
+      const f = Math.min(1, near(p.s) / (L1 * 0.45)), fade = f * f * (3 - 2 * f);
+      let m = ((wave(p.s, salt2, L1) - 0.5) * 2 * A1 + (wave(p.s + 977, salt2 + 31, L2) - 0.5) * 2 * A2) * fade;
+      for (const sc of [1, 0.6, 0.3, 0]) {
+        if (sc === 0 || ok(p.x + nrm[i][0] * m * sc, p.y + nrm[i][1] * m * sc)) {
+          m *= sc;
+          break;
+        }
+      }
+      return m;
+    });
+    for (let pass = 0; pass < 2; pass++) shift = shift.map((m, i) => {
+      if (P[i].lock) return 0;
+      let s = 0, n = 0;
+      for (let j = Math.max(0, i - 6); j <= Math.min(P.length - 1, i + 6); j++) {
+        s += Math.min(Math.abs(m), Math.abs(shift[j])) * Math.sign(shift[j] || m);
+        n++;
+      }
+      return s / n;
+    });
+    return P.map((p, i) => ({ ...p, x: p.x + nrm[i][0] * shift[i], y: p.y + nrm[i][1] * shift[i] }));
+  }
+  const fillScore = (x, y) => ground(x, y) !== 1 ? 0 : ownerAt(x, y) ? 1 : 2;
+  function chain(P) {
+    const t = [];
+    let lx = NaN, ly = NaN;
+    for (let i = 0; i < P.length; i++) {
+      const p = P[i], q = P[i + 1], n = q ? Math.max(1, Math.ceil(hyp(q.x - p.x, q.y - p.y) - 1e-9)) : 1;
+      for (let s = 0; s < n; s++) {
+        const fx = q ? p.x + (q.x - p.x) * s / n : p.x, fy = q ? p.y + (q.y - p.y) * s / n : p.y, x = Math.round(fx), y = Math.round(fy);
+        if (x === lx && y === ly) continue;
+        if (lx === lx && x !== lx && y !== ly) {
+          const a = fillScore(x, ly), b = fillScore(lx, y), ax = x - fx, ay = ly - fy, bx = lx - fx, by = y - fy;
+          t.push(a > b || a === b && ax * ax + ay * ay <= bx * bx + by * by ? { x, y: ly, fill: true } : { x: lx, y, fill: true });
+        }
+        t.push({ x, y });
+        lx = x;
+        ly = y;
+      }
+    }
+    return t;
+  }
+  const onDeck = (b, x, y) => b.d.y === 0 ? y === b.start.y && x >= Math.min(b.start.x, b.end.x) && x <= Math.max(b.start.x, b.end.x) : x === b.start.x && y >= Math.min(b.start.y, b.end.y) && y <= Math.max(b.start.y, b.end.y);
+  function valid(P, decks, lm, allow) {
+    const t = chain(P);
+    for (let i = 3; i < t.length - 3; i++) {
+      const { x, y } = t[i];
+      if (tileOk(x, y, lm, allow, false)) continue;
+      if (ground(x, y) === 2 && landAt(x, y) === lm && decks.some((b) => onDeck(b, x, y))) continue;
+      return false;
+    }
+    return true;
+  }
+  function shape(path, kind, lm, allow, salt2, L) {
+    const P0 = path.map((p) => ({ x: p.x, y: p.y })), decks = bridges(P0, lm, kind === "main" ? 5 : 3), V0 = taut(P0, lm, allow, Math.round(140 / L)), R = SHAPE[kind].radius;
+    for (const [r, drift] of [[R, true], [R, false], [R / 2, false]]) {
+      let P2 = resample(fillet(V0, r));
+      if (drift) P2 = meander(P2, kind, salt2, lm, allow);
+      if (valid(P2, decks, lm, allow)) return { P: P2, decks };
+    }
+    const P = straight(V0);
+    if (!valid(P, decks, lm, allow)) stats.unshaped = (stats.unshaped ?? 0) + 1;
+    return { P, decks };
+  }
+  const built = /* @__PURE__ */ new Map(), cellKey = (x, y) => Math.floor(y / 8) * 1200 + Math.floor(x / 8);
+  const addBuilt = (P, kind) => {
+    for (const p of P) {
+      const k = cellKey(p.x, p.y);
+      let l = built.get(k);
+      if (!l) built.set(k, l = []);
+      l.push({ x: p.x, y: p.y, kind });
+    }
+  };
+  function nearestBuilt(x, y, kind, rings = 1) {
+    const bx = Math.floor(x / 8), by = Math.floor(y / 8), rank = SHAPE[kind].rank;
+    let best = null, bd = Infinity;
+    for (let r = 0; r <= rings; r++) {
+      for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+        if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+        for (const q of built.get((by + dy) * 1200 + bx + dx) ?? []) {
+          if (SHAPE[q.kind].rank < rank) continue;
+          const d = hyp(q.x - x, q.y - y);
+          if (d < bd) {
+            bd = d;
+            best = q;
+          }
+        }
+      }
+      if (best && bd <= r * 8) break;
+    }
+    return best ? { q: best, d: bd } : null;
+  }
+  function merge(P, kind) {
+    const w = SHAPE[kind].width, joined = P.map((p) => {
+      if (p.lock) return null;
+      const n = nearestBuilt(p.x, p.y, kind);
+      return n && n.d < (w + SHAPE[n.q.kind].width) / 2 * 0.6 + 1 && ground(Math.round(n.q.x), Math.round(n.q.y)) === 1 ? n.q : null;
+    });
+    const pieces = [];
+    let cur = null;
+    for (let i = 0; i < P.length; i++) {
+      if (joined[i]) {
+        if (cur) {
+          cur.push({ x: joined[i].x, y: joined[i].y, joint: joined[i] });
+          pieces.push(cur);
+          cur = null;
+        }
+        continue;
+      }
+      if (!cur) {
+        cur = [];
+        if (i > 0 && joined[i - 1]) cur.push({ x: joined[i - 1].x, y: joined[i - 1].y, joint: joined[i - 1] });
+      }
+      cur.push(P[i]);
+    }
+    if (cur) pieces.push(cur);
+    return pieces.filter((p) => p.length >= 4);
+  }
+  function enter(P, lm, allow) {
+    for (const end of [0, 1]) {
+      const n = P.length;
+      if (n < 14) break;
+      const Q = end ? P[n - 1] : P[0];
+      if (!Q.joint) continue;
+      const ai = end ? n - 9 : 8, A = P[ai], Z = P[end ? ai - 3 : ai + 3], tl = hyp(A.x - Z.x, A.y - Z.y) || 1, L = hyp(Q.x - A.x, Q.y - A.y), C = { x: A.x + (A.x - Z.x) / tl * L * 0.5, y: A.y + (A.y - Z.y) / tl * L * 0.5 }, k = Math.max(2, Math.round(L * 1.2)), line = [];
+      for (let i = 1; i <= k; i++) {
+        const u = i / k, w0 = (1 - u) * (1 - u), w1 = 2 * (1 - u) * u, w2 = u * u;
+        line.push({ x: w0 * A.x + w1 * C.x + w2 * Q.x, y: w0 * A.y + w1 * C.y + w2 * Q.y });
+      }
+      line[line.length - 1] = Q;
+      const qx = Math.round(Q.x), qy = Math.round(Q.y);
+      if (chain([A, ...line]).some((t) => (t.x !== qx || t.y !== qy) && !tileOk(t.x, t.y, lm, allow, false))) continue;
+      if (end) P.splice(ai + 1, n - ai - 1, ...line);
+      else P.splice(0, ai, ...line.reverse());
+    }
+    return P;
+  }
+  const raster = (P, kind) => {
+    const { value, width } = SHAPE[kind], r = Math.max(0.75, width / 2 + 0.15), R = Math.ceil(r);
+    for (let i = 0; i < P.length; i++) {
+      const p = P[i], q = P[i + 1], n = q ? Math.max(1, Math.ceil(hyp(q.x - p.x, q.y - p.y) * 2)) : 1;
+      for (let s = 0; s < n; s++) {
+        const x = q ? p.x + (q.x - p.x) * s / n : p.x, y = q ? p.y + (q.y - p.y) * s / n : p.y, cx2 = Math.round(x), cy2 = Math.round(y);
+        for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) if (hyp(cx2 + dx - x, cy2 + dy - y) <= r) stamp(cx2 + dx, cy2 + dy, value);
+      }
+    }
+    for (const t of chain(P)) stamp(t.x, t.y, value);
+  };
+  function tilePath(P) {
+    const t = chain(P).filter((c) => !c.fill);
+    const out = [t[0]];
+    for (let i = 1; i < t.length - 1; i++) {
+      const z = t[i - 1], a = t[i], b = t[i + 1], sx = a.x - z.x, sy = a.y - z.y;
+      if (sx === b.x - a.x && sy === b.y - a.y && Math.abs(sx) <= 1 && Math.abs(sy) <= 1) continue;
+      out.push(a);
+    }
+    if (t.length > 1) out.push(t[t.length - 1]);
+    return out;
+  }
+  function simplify(P) {
+    const keep = new Uint8Array(P.length);
+    keep[0] = keep[P.length - 1] = 1;
+    const stack = [[0, P.length - 1]];
+    while (stack.length) {
+      const [i, j] = stack.pop();
+      const a = P[i], b = P[j], dx = b.x - a.x, dy = b.y - a.y, l = hyp(dx, dy) || 1;
+      let far = -1, fd = 0.15;
+      for (let k = i + 1; k < j; k++) {
+        const d = Math.abs((P[k].x - a.x) * dy - (P[k].y - a.y) * dx) / l;
+        if (d > fd) {
+          fd = d;
+          far = k;
+        }
+      }
+      if (far >= 0) {
+        keep[far] = 1;
+        stack.push([i, far], [far, j]);
+      }
+    }
+    const out = [];
+    for (let i = 0; i < P.length; i++) if (keep[i]) out.push(Math.round(P[i].x * 10) / 10, Math.round(P[i].y * 10) / 10);
+    return out;
+  }
+  const edges = [], failures = [], dest = new Map(asset.routes.destinations.map((d) => [d.id, d]));
+  function addRoute(from, to, kind, lmId, P, decks) {
+    const lm = lmIndex.get(lmId), pieces = merge(P, kind);
+    let added = 0;
+    for (const piece of pieces) {
+      const C = enter(piece, lm, []), path = tilePath(C);
+      if (path.length < 2) continue;
+      let len = 0;
+      for (let i = 1; i < C.length; i++) len += hyp(C[i].x - C[i - 1].x, C[i].y - C[i - 1].y);
+      raster(C, kind);
+      addBuilt(C, kind);
+      added++;
+      edges.push({ bridgeIds: [], centerline: simplify(C), from, id: "route:seeded:" + String(edges.length).padStart(3, "0"), idealWalkSeconds: len * 32 / 180, kind, landmassId: lmId, lengthPixels: Math.round(len * 32), nodes: path.length, path, to });
+    }
+    return added;
+  }
+  const salt = (id) => {
+    let n = 0;
+    for (let i = 0; i < id.length; i++) n = (n * 31 + id.charCodeAt(i)) % 9973;
+    return n;
+  };
+  const byLand = /* @__PURE__ */ new Map();
+  for (const s of asset.settlements) {
+    if (!byLand.has(s.landmassId)) byLand.set(s.landmassId, []);
+    byLand.get(s.landmassId).push({ id: s.id, point: dest.get(s.id).point, kind: /capital|city/.test(s.id) ? "main" : "secondary" });
+  }
+  for (const l of ferry.landings) {
+    if (!byLand.has(l.landmassId)) byLand.set(l.landmassId, []);
+    byLand.get(l.landmassId).push({ id: l.id, point: l.routeJoin, kind: "secondary" });
+  }
+  for (const [lmId, nodes] of byLand) {
+    const lm = lmIndex.get(lmId), start = nodes.find((n) => /capital/.test(n.id)) ?? nodes.find((n) => !n.id.startsWith("ferry:")) ?? nodes[0], linked = [start], rest = nodes.filter((n) => n !== start);
+    rest.sort((a, b) => (a.kind === "main" ? 0 : 1) - (b.kind === "main" ? 0 : 1));
+    while (rest.length) {
+      let pick = null, pd = Infinity, to = null;
+      for (const n of rest) for (const m of linked) {
+        const d = hyp(n.point.x - m.point.x, n.point.y - m.point.y) * (n.kind === "main" && m.kind === "main" ? 0.5 : 1);
+        if (d < pd) {
+          pd = d;
+          pick = n;
+          to = m;
+        }
+      }
+      rest.splice(rest.indexOf(pick), 1);
+      const kind = pick.kind === "main" && to.kind === "main" ? "main" : "secondary", allow = allowOf([pick.id, to.id]);
+      const path = route(pick.point, { pt: to.point, min: kind !== "main" ? 2 : 0, near: (x, y) => hyp(x - pick.point.x, y - pick.point.y) > 40 }, lm, allow, kind);
+      if (!path) {
+        failures.push({ code: "NO_ROAD", from: pick.id, to: to.id, start: ground(pick.point.x, pick.point.y), goal: ground(to.point.x, to.point.y), lm });
+        continue;
+      }
+      path.unshift({ ...pick.point });
+      const { P, decks } = shape(path, kind, lm, allow, salt(pick.id + ">" + to.id), 4);
+      addRoute(pick.id, to.id, kind, lmId, P, decks);
+      linked.push(pick);
+    }
+  }
+  connectors();
+  const roadLands = new Set(edges.filter((e) => e.kind !== "trail").map((e) => e.landmassId));
+  for (const d of asset.routes.destinations) {
+    if (d.kind !== "trail") continue;
+    const lm = lmIndex.get(d.landmassId), landing = ferry.landings.find((l) => l.landmassId === d.landmassId);
+    let near = false;
+    for (let dy = -3; dy <= 3 && !near; dy++) for (let dx = -3; dx <= 3; dx++) if (valueAt(d.point.x + dx, d.point.y + dy) > 0) {
+      near = true;
+      break;
+    }
+    if (near) continue;
+    const hasRoad = roadLands.has(d.landmassId);
+    if (!hasRoad && !landing) {
+      if (asset.landmasses[lm].classId !== "minor-island") failures.push({ code: "NO_NETWORK", to: d.id });
+      continue;
+    }
+    let target = landing?.routeJoin ?? null;
+    if (hasRoad) {
+      const nb = nearestBuilt(d.point.x, d.point.y, "trail", 400);
+      if (nb && landAt(Math.round(nb.q.x), Math.round(nb.q.y)) === lm) target = { x: Math.round(nb.q.x), y: Math.round(nb.q.y) };
+    }
+    const allow = allowOf([d.id]), path = route(d.point, { pt: target, min: hasRoad ? 1 : 0, near: (x, y) => hyp(x - d.point.x, y - d.point.y) > 6 }, lm, allow, "trail");
+    if (!path) {
+      failures.push({ code: "NO_TRAIL", to: d.id });
+      continue;
+    }
+    path.unshift({ ...d.point });
+    const { P, decks } = shape(path, "trail", lm, allow, salt(d.id), 4);
+    if (!addRoute(d.id, hasRoad ? "network" : landing.id, "trail", d.landmassId, P, decks)) failures.push({ code: "NO_TRAIL", to: d.id });
+  }
+  const routePages = [];
+  for (let p = 0; p < RP.length; p++) if (RP[p]) routePages.push([p % CW + "," + Math.floor(p / CW), RP[p]]);
+  routePages.sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
+  return { edges, failures, routePages: routePages.map(([key2, p]) => ({ key: key2, rows: Array.from({ length: 26 }, (_, y) => Array.from(p.subarray(y * 32, y * 32 + 32)).join("")) })), valueAt, stats };
+  function connectors() {
+    const towns = asset.settlements.map((s) => ({ id: s.id, lm: s.landmassId, p: dest.get(s.id)?.point, core: s.core })).filter((t) => t.p), pairs = [];
+    for (let i = 0; i < towns.length; i++) for (let j = i + 1; j < towns.length; j++) {
+      const A = towns[i], B2 = towns[j];
+      if (A.lm !== B2.lm) continue;
+      const line = hyp(A.p.x - B2.p.x, A.p.y - B2.p.y);
+      if (line >= 300 && line <= 2600) pairs.push({ A, B: B2, line });
+    }
+    pairs.sort((p, q) => p.line - q.line || (p.A.id < q.A.id ? -1 : 1));
+    let added = 0, tries = 0, g = graph(towns);
+    const report = [];
+    for (const pr of pairs) {
+      if (added >= 10 || tries >= 24) break;
+      const road = g.trip(pr.A.id, pr.B.id);
+      if (road <= pr.line * 1.5) continue;
+      tries++;
+      const kind = /capital|city/.test(pr.A.id) && /capital|city/.test(pr.B.id) ? "main" : "secondary", lm = lmIndex.get(pr.A.lm), allow = allowOf([pr.A.id, pr.B.id]), B2 = pr.B.p, A = pr.A.p;
+      const path = route(A, { pt: B2, min: 2, near: (x, y) => hyp(x - B2.x, y - B2.y) < 70 && hyp(x - A.x, y - A.y) > 70 }, lm, allow, kind);
+      if (!path) continue;
+      path.unshift({ ...A });
+      const { P, decks } = shape(path, kind, lm, allow, salt("link>" + pr.A.id + ">" + pr.B.id), 4);
+      if (!addRoute(pr.A.id, pr.B.id, kind, pr.A.lm, P, decks)) continue;
+      added++;
+      g = graph(towns);
+      report.push({ from: pr.A.id, to: pr.B.id, line: Math.round(pr.line), before: Math.round(road), after: Math.round(g.trip(pr.A.id, pr.B.id)) });
+    }
+    stats.connectors = report;
+  }
+  function graph(towns) {
+    const id = /* @__PURE__ */ new Map(), xs = [], ys = [], adj = [], node = (x, y) => {
+      const k = Math.round(y / 2) * 1e4 + Math.round(x / 2);
+      let i = id.get(k);
+      if (i === void 0) {
+        i = xs.length;
+        id.set(k, i);
+        xs.push(Math.round(x / 2) * 2);
+        ys.push(Math.round(y / 2) * 2);
+        adj.push([]);
+      }
+      return i;
+    };
+    const link = (p, q, d) => {
+      if (p === q) return;
+      adj[p].push(q, d);
+      adj[q].push(p, d);
+    };
+    for (const e of edges) {
+      if (e.kind === "trail") continue;
+      const c = e.centerline;
+      let prev = -1;
+      for (let i = 0; i < c.length; i += 2) {
+        const a = c[i], b = c[i + 1];
+        if (prev >= 0) {
+          const n = Math.max(1, Math.ceil(hyp(a - xs[prev], b - ys[prev]) / 2));
+          for (let k = 1; k <= n; k++) {
+            const q = node(xs[prev] + (a - xs[prev]) * k / n, ys[prev] + (b - ys[prev]) * k / n);
+            link(prev, q, hyp(xs[q] - xs[prev], ys[q] - ys[prev]));
+            prev = q;
+          }
+        } else prev = node(a, b);
+      }
+    }
+    const grid = /* @__PURE__ */ new Map();
+    for (let i = 0; i < xs.length; i++) {
+      const k = cellKey(xs[i], ys[i]);
+      let l = grid.get(k);
+      if (!l) grid.set(k, l = []);
+      l.push(i);
+    }
+    const around = (x0, y0, x1, y1, f) => {
+      for (let by = Math.floor(y0 / 8); by <= Math.floor(y1 / 8); by++) for (let bx = Math.floor(x0 / 8); bx <= Math.floor(x1 / 8); bx++) for (const j of grid.get(by * 1200 + bx) ?? []) f(j);
+    };
+    const real = xs.length;
+    for (let i = 0; i < real; i++) around(xs[i] - 3, ys[i] - 3, xs[i] + 3, ys[i] + 3, (j) => {
+      if (j > i) {
+        const d = hyp(xs[j] - xs[i], ys[j] - ys[i]);
+        if (d <= 2.9) link(i, j, d);
+      }
+    });
+    const hub = /* @__PURE__ */ new Map(), addHub = (key2, x, y) => {
+      const h = xs.length;
+      xs.push(x);
+      ys.push(y);
+      adj.push([]);
+      hub.set(key2, h);
+      return h;
+    };
+    for (const t of towns) {
+      const h = addHub(t.id, t.p.x, t.p.y);
+      for (const c of t.core) {
+        const x0 = c.x * 32 - 6, y0 = c.y * 26 - 6, x1 = c.x * 32 + 38, y1 = c.y * 26 + 32;
+        around(x0, y0, x1, y1, (j) => {
+          if (j < real && xs[j] >= x0 && xs[j] <= x1 && ys[j] >= y0 && ys[j] <= y1) link(h, j, 0);
+        });
+      }
+      around(t.p.x - 12, t.p.y - 12, t.p.x + 12, t.p.y + 12, (j) => {
+        if (j < real && hyp(xs[j] - t.p.x, ys[j] - t.p.y) <= 12) link(h, j, 0);
+      });
+    }
+    for (const l of ferry.landings) {
+      const P = l.routeJoin, h = addHub(l.id, P.x, P.y);
+      around(P.x - 16, P.y - 16, P.x + 16, P.y + 16, (j) => {
+        if (j < real && hyp(xs[j] - P.x, ys[j] - P.y) <= 16) link(h, j, 0);
+      });
+    }
+    const dist = new Float64Array(xs.length);
+    return { trip(a, b) {
+      const s = hub.get(a), t = hub.get(b);
+      if (s === void 0 || t === void 0) return Infinity;
+      dist.fill(Infinity);
+      dist[s] = 0;
+      const heap = new Heap();
+      heap.push(0, s);
+      while (heap.size) {
+        const k = heap.peekKey(), i = heap.pop();
+        if (i === t) return k;
+        if (k > dist[i]) continue;
+        const l = adj[i];
+        for (let n = 0; n < l.length; n += 2) {
+          const j = l[n], v = k + l[n + 1];
+          if (v < dist[j]) {
+            dist[j] = v;
+            heap.push(v, j);
+          }
+        }
+      }
+      return Infinity;
+    } };
+  }
+}
+
+// src/shared/generation/world_maker_v1/roads.js
+var TW2 = W * 64;
+var TH2 = H * 52;
 function planFerry(asset, terrain, layout) {
   const lm = asset.landmasses, landings = [], taken = /* @__PURE__ */ new Set(), hold = (c) => {
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) taken.add(c.x + dx + "," + (c.y + dy));
@@ -4580,7 +5461,7 @@ function planFerry(asset, terrain, layout) {
     const c = host ? marineChunks(host)[0] : { x: l.cell % W * 2, y: Math.floor(l.cell / W) * 2 }, cx0 = c.x * 32 + 16, cy0 = c.y * 26 + 13;
     let best = null, bd = Infinity;
     const town = n === 0, shores = [], seen = /* @__PURE__ */ new Map(), tile = (x2, y2) => {
-      const k2 = y2 * TW + x2;
+      const k2 = y2 * TW2 + x2;
       let v = seen.get(k2);
       if (!v) {
         v = terrain.base(x2, y2);
@@ -4590,7 +5471,7 @@ function planFerry(asset, terrain, layout) {
     };
     for (const R of [90, 240, 600]) if (!best) {
       for (let y2 = cy0 - R; y2 <= cy0 + R; y2 += R > 90 ? 4 : 2) for (let x2 = cx0 - R; x2 <= cx0 + R; x2 += R > 90 ? 4 : 2) {
-        if (x2 < 0 || y2 < 0 || x2 >= TW || y2 >= TH) continue;
+        if (x2 < 0 || y2 < 0 || x2 >= TW2 || y2 >= TH2) continue;
         const b = terrain.sampleBase(x2, y2);
         if (!b.walkable || b.landmassId !== id) continue;
         for (const [fx2, fy2] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
@@ -4644,218 +5525,14 @@ function planDestinations(asset) {
     ...asset.futureIslands.map((f) => ({ id: f.id, kind: "trail", landmassId: f.landmassId, point: centre(f.approach), reservationId: f.id, socket: f.approach }))
   ];
 }
-function planRoads(asset, terrain, waterAt, ferry, stats = {}) {
-  const lmIndex = new Map(asset.landmasses.map((l, k) => [l.id, k])), macro = terrain.macro;
-  const pages = /* @__PURE__ */ new Map(), valueAt = (x, y) => pages.get(tkey(Math.floor(x / 32), Math.floor(y / 26)))?.[y % 26 * 32 + x % 32] ?? 0;
-  const stamp = (x, y, v) => {
-    if (x < 0 || y < 0 || x >= TW || y >= TH) return;
-    const k = tkey(Math.floor(x / 32), Math.floor(y / 26));
-    let p = pages.get(k);
-    if (!p) {
-      p = new Uint8Array(832);
-      pages.set(k, p);
-    }
-    const o = y % 26 * 32 + x % 32;
-    if (p[o] < v) p[o] = v;
-  };
-  const owner = /* @__PURE__ */ new Map();
-  const reserve = (c, id) => owner.set(tkey(c.x, c.y), id);
-  for (const s of asset.settlements) for (const c of s.core) reserve(c, s.id);
-  for (const s of asset.sites) for (const c of s.footprint) reserve(c, s.id);
-  for (const f of asset.futureIslands) for (const c of [f.entrance, f.breathing]) reserve(c, f.id);
-  const cache = /* @__PURE__ */ new Map(), ground = (x, y) => {
-    const k = Math.floor(x / 32) + Math.floor(y / 26) * W * 2;
-    let p = cache.get(k);
-    if (!p) {
-      p = new Uint8Array(832).fill(255);
-      cache.set(k, p);
-    }
-    const o = y % 26 * 32 + x % 32;
-    let v = p[o];
-    if (v === 255) {
-      const b = terrain.sampleBase(x, y), w = waterAt(x, y);
-      v = w === 1 && !terrain.waterGeometry.sampleCoast(x, y)?.water ? 2 : b.walkable && !w ? 1 : 0;
-      p[o] = v;
-    }
-    return v;
-  };
-  const hl = ferry.landings[0], hb = hl?.harborTown ? harborLayoutV1(hl, hl.harborTown.pier).body : null, inHarbor = (x, y) => Boolean(hb) && x >= hb.x - 1 && x <= hb.x + hb.w && y >= hb.y - 1 && y <= hb.y + hb.h;
-  const tileCost = (x, y, lm) => {
-    if (inHarbor(x, y)) return Infinity;
-    const g = ground(x, y);
-    if (!g) return Infinity;
-    const c = macro(Math.floor(x / 64), Math.floor(y / 52));
-    if (!c || c[1] !== lm) return Infinity;
-    return g === 2 ? 14 : 1 + c[8] / 350;
-  };
-  function corridor(a, b, lm, pad) {
-    const start = Math.floor(a.y / 52) * W + Math.floor(a.x / 64), goal = Math.floor(b.y / 52) * W + Math.floor(b.x / 64), dist = /* @__PURE__ */ new Map([[start, 0]]), from = /* @__PURE__ */ new Map(), heap = new Heap();
-    heap.push(0, start);
-    const hc = (x, y) => PM.hypot(x - b.x / 64, y - b.y / 52) * 0.9;
-    while (heap.size) {
-      const k = heap.peekKey(), i = heap.pop();
-      if (i === goal) break;
-      const x = i % W, y = i / W | 0, d = dist.get(i);
-      if (k > d + hc(x, y) + 1e-9) continue;
-      for (const [dx, dy] of N8) {
-        const nx = x + dx, ny = y + dy;
-        if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
-        const c = macro(nx, ny);
-        if (!c || c[1] !== lm) continue;
-        const j = ny * W + nx, v = d + PM.hypot(dx, dy) * (1 + c[8] / 350);
-        if (v < (dist.get(j) ?? Infinity)) {
-          dist.set(j, v);
-          from.set(j, i);
-          heap.push(v + hc(nx, ny), j);
-        }
-      }
-    }
-    const cells = /* @__PURE__ */ new Set();
-    if (!dist.has(goal)) return null;
-    for (let i = goal; ; i = from.get(i)) {
-      const x = i % W, y = i / W | 0;
-      for (let dy = -pad; dy <= pad; dy++) for (let dx = -pad; dx <= pad; dx++) cells.add((y + dy) * W + x + dx);
-      if (i === start) break;
-    }
-    return cells;
-  }
-  function search(a, b, lm, ids, isGoal, cells, limit) {
-    const snap = (v) => v - (v & 1), s = { x: snap(a.x), y: snap(a.y) }, LW = TW / 2, id = (x, y) => (y >> 1) * LW + (x >> 1), startId = id(s.x, s.y), startOwner = owner.get(tkey(Math.floor(s.x / 32), Math.floor(s.y / 26))), dist = /* @__PURE__ */ new Map([[startId, 0]]), from = /* @__PURE__ */ new Map(), heap = new Heap(), closed = /* @__PURE__ */ new Set();
-    heap.push(0, startId);
-    let end = -1, nodes = 0;
-    const h = (x, y) => b ? (Math.abs(x - b.x) + Math.abs(y - b.y)) * 1.8 : 0;
-    while (heap.size) {
-      const k = heap.peekKey(), i = heap.pop(), x = i % LW * 2, y = Math.floor(i / LW) * 2, d = dist.get(i);
-      if (closed.has(i)) continue;
-      closed.add(i);
-      if (++nodes > limit) break;
-      if (isGoal(x, y)) {
-        end = i;
-        break;
-      }
-      for (const [dx, dy] of [[2, 0], [-2, 0], [0, 2], [0, -2]]) {
-        const nx = x + dx, ny = y + dy;
-        if (nx < 0 || ny < 0 || nx >= TW || ny >= TH) continue;
-        if (cells && !cells.has(Math.floor(ny / 52) * W + Math.floor(nx / 64))) continue;
-        const o = owner.get(tkey(Math.floor(nx / 32), Math.floor(ny / 26)));
-        if (o && !ids.includes(o) && o !== startOwner) continue;
-        const mid = tileCost(x + dx / 2, y + dy / 2, lm), c = tileCost(nx, ny, lm);
-        if (!Number.isFinite(c) || !Number.isFinite(mid)) continue;
-        const road = valueAt(nx, ny) >= 2 ? 0.35 : valueAt(nx, ny) ? 0.6 : 1, v = d + (mid + c) * road, j = id(nx, ny);
-        if (!closed.has(j) && v < (dist.get(j) ?? Infinity)) {
-          dist.set(j, v);
-          from.set(j, i);
-          heap.push(v + h(nx, ny), j);
-        }
-      }
-    }
-    stats.nodes = (stats.nodes ?? 0) + nodes;
-    stats.searches = (stats.searches ?? 0) + 1;
-    if (end < 0) return null;
-    const path = [];
-    for (let i = end; i !== void 0; i = from.get(i)) path.push({ x: i % LW * 2, y: Math.floor(i / LW) * 2 });
-    return path.reverse();
-  }
-  function route(a, b, lm, ids, isGoal) {
-    for (const pad of [2, 6, null]) {
-      const cells = pad === null ? null : corridor(a, b ?? a, lm, pad);
-      if (pad !== null && !cells) continue;
-      const p = search(a, b, lm, ids, isGoal, cells, pad === null ? 15e5 : 5e5);
-      if (p) return p;
-      stats.widened = (stats.widened ?? 0) + 1;
-    }
-    return null;
-  }
-  const edges = [], failures = [], dest = new Map(asset.routes.destinations.map((d) => [d.id, d]));
-  const draw = (path, kind) => {
-    const { value, width } = ROAD[kind], r = (width - 1) / 2;
-    for (let i = 0; i < path.length; i++) {
-      const p = path[i], q = path[i + 1] ?? p;
-      for (const t of [p, { x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 }]) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) stamp(t.x + dx, t.y + dy, value);
-    }
-  };
-  const addEdge = (from, to, kind, path, lmId) => {
-    const len = path.length * 64;
-    edges.push({ bridgeIds: [], from, id: "route:seeded:" + String(edges.length).padStart(3, "0"), idealWalkSeconds: len / 180, kind, landmassId: lmId, lengthPixels: len, nodes: path.length, path, to });
-    draw(path, kind);
-  };
-  const near = (p, r, test) => {
-    for (let dy = -r; dy <= r; dy += 1) for (let dx = -r; dx <= r; dx += 1) if (test(p.x + dx, p.y + dy)) return true;
-    return false;
-  };
-  const byLand = /* @__PURE__ */ new Map();
-  for (const s of asset.settlements) {
-    if (!byLand.has(s.landmassId)) byLand.set(s.landmassId, []);
-    byLand.get(s.landmassId).push({ id: s.id, point: dest.get(s.id).point, kind: /capital|city/.test(s.id) ? "main" : "secondary" });
-  }
-  for (const l of ferry.landings) {
-    if (!byLand.has(l.landmassId)) byLand.set(l.landmassId, []);
-    byLand.get(l.landmassId).push({ id: l.id, point: l.routeJoin, kind: "secondary" });
-  }
-  for (const [lmId, nodes] of byLand) {
-    const lm = lmIndex.get(lmId), start = nodes.find((n) => /capital/.test(n.id)) ?? nodes.find((n) => !n.id.startsWith("ferry:")) ?? nodes[0], linked = [start], rest = nodes.filter((n) => n !== start);
-    rest.sort((a, b) => (a.kind === "main" ? 0 : 1) - (b.kind === "main" ? 0 : 1));
-    while (rest.length) {
-      let pick = null, pd = Infinity, to = null;
-      for (const n of rest) for (const m of linked) {
-        const d = PM.hypot(n.point.x - m.point.x, n.point.y - m.point.y) * (n.kind === "main" && m.kind === "main" ? 0.5 : 1);
-        if (d < pd) {
-          pd = d;
-          pick = n;
-          to = m;
-        }
-      }
-      rest.splice(rest.indexOf(pick), 1);
-      const kind = pick.kind === "main" && to.kind === "main" ? "main" : "secondary";
-      const path = route(pick.point, to.point, lm, [pick.id, to.id], (x, y) => Math.abs(x - to.point.x) <= 2 && Math.abs(y - to.point.y) <= 2 || kind !== "main" && valueAt(x, y) >= 2 && PM.hypot(x - pick.point.x, y - pick.point.y) > 40);
-      if (!path) {
-        const snap = (v) => v - (v & 1);
-        failures.push({ code: "NO_ROAD", from: pick.id, to: to.id, start: ground(snap(pick.point.x), snap(pick.point.y)), goal: ground(snap(to.point.x), snap(to.point.y)), startOwner: owner.get(tkey(Math.floor(pick.point.x / 32), Math.floor(pick.point.y / 26))) ?? null, goalOwner: owner.get(tkey(Math.floor(to.point.x / 32), Math.floor(to.point.y / 26))) ?? null, lmStart: macro(Math.floor(pick.point.x / 64), Math.floor(pick.point.y / 52))?.[1], lm });
-        continue;
-      }
-      addEdge(pick.id, to.id, kind, path, lmId);
-      linked.push(pick);
-    }
-  }
-  for (const d of asset.routes.destinations) {
-    if (d.kind !== "trail") continue;
-    const lm = lmIndex.get(d.landmassId), landing = ferry.landings.find((l) => l.landmassId === d.landmassId);
-    if (near(d.point, 3, (x, y) => valueAt(x, y) > 0)) continue;
-    const hasRoad = edges.some((e) => e.landmassId === d.landmassId && e.kind !== "trail");
-    if (!hasRoad && !landing) {
-      if (asset.landmasses[lm].classId !== "minor-island") failures.push({ code: "NO_NETWORK", to: d.id });
-      continue;
-    }
-    const goal = hasRoad ? (x, y) => valueAt(x, y) > 0 : (x, y) => Math.abs(x - landing.routeJoin.x) <= 2 && Math.abs(y - landing.routeJoin.y) <= 2;
-    let target = landing?.routeJoin ?? null;
-    if (hasRoad) {
-      let bd = Infinity;
-      for (const e of edges) if (e.landmassId === d.landmassId) for (const p of e.path) {
-        const dd = PM.hypot(p.x - d.point.x, p.y - d.point.y);
-        if (dd < bd) {
-          bd = dd;
-          target = p;
-        }
-      }
-    }
-    const path = route(d.point, target, lm, [d.id], goal);
-    if (!path) {
-      failures.push({ code: "NO_TRAIL", to: d.id });
-      continue;
-    }
-    addEdge(d.id, hasRoad ? "network" : landing.id, "trail", path, d.landmassId);
-  }
-  const routePages = [...pages].sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0).map(([key2, p]) => ({ key: key2, rows: Array.from({ length: 26 }, (_, y) => Array.from(p.subarray(y * 32, y * 32 + 32)).join("")) }));
-  return { edges, failures, routePages, valueAt, stats };
-}
 
 // src/shared/generation/world_maker_v1/wild.js
-var TW2 = W * 64;
-var TH2 = H * 52;
+var TW3 = W * 64;
+var TH3 = H * 52;
 var DIAMOND = [[0, -3, 0], [-2, -2, 2], [-3, -1, 3], [-4, 0, 4], [-3, 1, 3], [-2, 2, 2], [0, 3, 0]];
 var EVENT_MIX = { pathside: 52, backcountry: 88, deep_wild: 36 };
 function planEvents(asset, terrain, roads, waterAt) {
-  const G = 8, GW = TW2 / G, GH = TH2 / G, far = new Uint16Array(GW * GH).fill(65535), q = [];
+  const G = 8, GW = TW3 / G, GH = TH3 / G, far = new Uint16Array(GW * GH).fill(65535), q = [];
   for (const p of asset.routes.routePages) {
     const [cx2, cy2] = p.key.split(",").map(Number);
     p.rows.forEach((r, y) => {
@@ -4897,7 +5574,7 @@ function planEvents(asset, terrain, roads, waterAt) {
     return true;
   };
   const cand = { pathside: [], backcountry: [], deep_wild: [] };
-  for (let y = 16; y < TH2 - 16; y += 16) for (let x = 16; x < TW2 - 16; x += 16) {
+  for (let y = 16; y < TH3 - 16; y += 16) for (let x = 16; x < TW3 - 16; x += 16) {
     if (!terrain.macro(Math.floor(x / 64), Math.floor(y / 52))) continue;
     const b = terrain.sampleBase(x, y);
     if (!b.walkable) continue;
@@ -5014,8 +5691,8 @@ var slotId = (n) => "density-v2-event-capacity-" + String(n).padStart(3, "0");
 var CLASSIC_EVENT_PLAN = freezeWire({ version: WORLD_EVENT_PLAN_VERSION, events: Object.entries(CLASSIC_SLOTS).flatMap(([event, list]) => list.map((n) => ({ n, event }))).sort((a, b) => a.n - b.n).map(({ n, event }) => CLASSIC_CACHES[n] ? { eventSlotId: slotId(n), event, cacheSlotId: slotId(CLASSIC_CACHES[n]) } : { eventSlotId: slotId(n), event }) });
 
 // src/shared/generation/world_maker_v1/make.js
-var TW3 = W * 64;
-var WORLD_MAKER_VERSION = "world-maker-v1.5";
+var TW4 = W * 64;
+var WORLD_MAKER_VERSION = "world-maker-v1.6";
 function makeWorld(seed, catalog, tries = 4, onStep = null) {
   const started = performance.now();
   let w, why = [];
@@ -5069,13 +5746,13 @@ function buildWorld(seed, catalog, onStep) {
   for (; ; ) {
     passes++;
     let q = performance.now();
-    const rivers2 = planRivers(asset, terrain0, { guards, landings: ferry.landings, firstCave }), waterAt2 = (x, y) => rivers2.water.get(y * TW3 + x) ?? 0;
+    const rivers2 = planRivers(asset, terrain0, { guards, landings: ferry.landings, firstCave }), waterAt2 = (x, y) => rivers2.water.get(y * TW4 + x) ?? 0;
     const tr = performance.now() - q;
     q = performance.now();
     const terrainR2 = createPlannedTerrain(presentSeededWorldV1({ ...asset, hydrologyPlan: dryPlan(rivers2) }));
     const tt = performance.now() - q;
     q = performance.now();
-    const roads2 = planRoads(asset, terrainR2, waterAt2, ferry);
+    const roads2 = planCurvedRoads(asset, terrainR2, waterAt2, ferry);
     (ms.passes ??= []).push({ rivers: Math.round(tr), terrain: Math.round(tt), roads: Math.round(performance.now() - q) });
     pass.push({ searches: roads2.stats.searches, nodes: roads2.stats.nodes, widened: roads2.stats.widened ?? 0 });
     const kind = (x, y) => terrainR2.waterGeometry.sampleCoast(x, y)?.water ? 3 : waterAt2(x, y);
