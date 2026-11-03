@@ -421,6 +421,7 @@ import {
   eligibleFunctionalSocketD10,
   eligibleNearbyParticipants,
   eliteAffixDefinitionD12_4,
+  eliteTypeV2For,
   emptyMasteryTransient,
   emptyWorldPagingD9,
   encounterActorProfile,
@@ -817,7 +818,7 @@ import {
   worldPointForArea,
   worldRolesV1,
   wrathDamageV1
-} from "./chunk-XA4M2S7H.js";
+} from "./chunk-AS5NSWLC.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -14433,9 +14434,9 @@ var ELITE_LOOKS_V2 = Object.freeze({
 });
 function eliteLookV2Of(actor) {
   const e = actor?.elite;
-  if (!e || e.namedEliteId) return null;
+  if (!e) return null;
   if (e.lookV2) return e.lookV2;
-  return ELITE_TYPES_V2[e.affixId]?.look ?? null;
+  return eliteTypeV2For({ ...e, affixIds: [e.affixId] }, actor.enemyFamily)?.look ?? null;
 }
 var typeOf = (actor) => ELITE_TYPES_V2[actor.elite?.affixV2 ?? actor.elite?.affixId] ?? null;
 var moveOf = (actor) => {
@@ -31515,7 +31516,7 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
       e.nextPulseTick += GLACIAL_WARDEN_D12_4E.pulse.cadenceTicks;
       counters.scheduledPulses++;
       counters.glacialPulses++;
-      const recipients = (e.namedEliteId ? selectGlacialWardenTargetsD12_4E(state, e) : []).map((target) => {
+      const recipients = (eliteTypeV2For(e, ordinaryEnemyForProfile(source3.contentDefinitionId)?.family) ? [] : selectGlacialWardenTargetsD12_4E(state, e)).map((target) => {
         const status2 = applyGlacialSnare(root2, e, target);
         return { entityId: target.entityId, statusId: status2.statusId, expiresTick: status2.expirationTick, movementMultiplier: status2.magnitude.movementMultiplier };
       });
@@ -33888,7 +33889,7 @@ var distance8 = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 var zero4 = (v) => v || 0;
 function createEliteMovesV2(state, { applyDirectDamage, chill = () => null, eligible: eligible2 = () => true, lineClear: lineClear2, active = () => true } = {}) {
   const stats = { moves: 0, hits: 0, knockbacks: 0, chills: 0 };
-  const typeOf2 = (e) => e && !e.namedEliteId ? ELITE_TYPES_V2[e.affixIds?.[0]] ?? null : null;
+  const typeOf2 = (e) => e ? eliteTypeV2For(e, ordinaryEnemyForProfile(state.entitiesById[e.entityId]?.contentDefinitionId)?.family) : null;
   const elites = () => Object.values(state.eliteCombat?.elitesByEntityId ?? {}).filter(typeOf2).sort((a, b) => a.entityId.localeCompare(b.entityId));
   const record2 = (id) => {
     const e = state.eliteCombat?.elitesByEntityId?.[id];

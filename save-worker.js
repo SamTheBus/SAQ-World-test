@@ -7389,6 +7389,7 @@ var ELITE_TYPES_V2 = Object.freeze({
     move: Object.freeze({ kind: "cone", name: "Frost Breath", firstDelayTicks: 60, minRange: 0, maxRange: 88, windupTicks: 54, strikeTicks: 30, length: 96, halfAngle: 0.4, damageTenths: 10, recoverTicks: 30, cooldownTicks: 210 })
   })
 });
+var eliteTypeV2For = (e, family2) => !e || e.namedEliteId || BROOD_CREATURE_FAMILIES_V1.includes(family2) ? null : ELITE_TYPES_V2[e.affixIds?.[0]] ?? null;
 var eliteMovePhaseCapV2 = (m, phase) => phase === "windup" ? m.windupTicks : phase === "strike" ? m.strikeTicks : phase === "recover" ? m.recoverTicks : Math.max(m.cooldownTicks, m.firstDelayTicks);
 
 // src/shared/contracts/elite_moves_v2.js
@@ -7398,7 +7399,7 @@ var point2 = (p) => {
   return p;
 };
 function validateEliteMoveV2(state, e) {
-  const k = e.move, t = e.namedEliteId ? null : ELITE_TYPES_V2[e.affixIds?.[0]], m = t?.move;
+  const k = e.move, t = eliteTypeV2For(e, ordinaryEnemyForProfile(state.entitiesById[e.entityId]?.contentDefinitionId)?.family), m = t?.move;
   requireContract(m && k?.kind === m.kind, "Invalid elite move");
   closedRecord(k, ["kind", "phase", "phaseEndsTick", "sequence", "origin", "direction", "target", "hitEntityIds", "knockbacksByEntityId"]);
   requireContract(ELITE_MOVE_PHASES_V2.includes(k.phase), "Invalid elite move phase");
