@@ -246,7 +246,7 @@ var RESHAPE_TIERS = Object.freeze({ "repeatable-slot:ruin:wetland:standard:067":
 var RESHAPE_VERSION = "world-reshape-v2";
 var RESHAPE_HASH = "ac15d856c2dbbe38203480172b32aae7d19ccdd61cef10eee16aade24a0900d2";
 var RESHAPE_HYDROLOGY_HASH = "e12fd26221c55e0357b674d4beaf28cc522ef5f9dde420b073373f0ef7be1b65";
-var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-events2";
+var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-events3";
 var hasWorldReshape = (b) => b?.reshapeVersion === RESHAPE_VERSION && b?.reshapeHash === RESHAPE_HASH;
 var reshapedSite = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_SITES, id) ? RESHAPE_SITES[id] : null;
 var reshapedTier = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_TIERS, id) ? RESHAPE_TIERS[id] : null;
@@ -4824,14 +4824,25 @@ var PLANNED_EVENT_FAMILIES = freezeWire({
   tropical: [...mix2("thorn_wyrm", "thorn_wyrm"), "thorn_wyrm"],
   volcanic: [...mix2("hell_bat", "lava_serpent"), "lava_serpent"]
 });
-var plannedEventFamiliesV1 = (biome) => PLANNED_EVENT_FAMILIES[biome] ?? PLANNED_EVENT_FAMILIES.woodland;
-var NESTS_VERSION = "nests-v1";
+var BROOD_ROSTER = freezeWire(["brood_mother", "broodling", "broodling", "broodling", ...Array(24).fill("hatchling")]);
+var plannedEventFamiliesV1 = (biome) => [...PLANNED_EVENT_FAMILIES[biome] ?? PLANNED_EVENT_FAMILIES.woodland, ...BROOD_ROSTER];
+var PLANNED_EVENT_CREW = 13;
+var PLANNED_EVENT_MEMBERS = PLANNED_EVENT_CREW + BROOD_ROSTER.length;
+var plannedEventMemberRankV1 = (n, rank) => n === 12 || n === 13 ? "S" : rank;
+var NESTS_VERSION = "nests-v2";
 var NEST_POLICY = freezeWire({
   version: NESTS_VERSION,
-  // Three nests around the sleeping Brood Mother (px from the clearing's ground center).
+  // Three nests (her eggs) around the sleeping Brood Mother (px from the clearing's ground center).
   nests: [[-98, 10], [92, -4], [-6, 64]],
   motherAt: [0, -6],
-  motherMember: 12,
+  // Members 0-11 defend the eggs; 12 sits this event out; 13 is the Brood Mother. Egg e's clutch is
+  // broodling 14+e (an elite with the biome's trick) and hatchlings 17+8e to 24+8e.
+  defenders: 12,
+  motherMember: 13,
+  broodlings: [14, 15, 16],
+  firstHatchling: 17,
+  hatchlingsPerEgg: 8,
+  motherScale: 1.7,
   // The rot creeps from the mother to the ring in rotTicks; the ring turns red from warnPercent.
   circle: { rx: 176, ry: 100, oy: 6 },
   rotTicks: 3600,
@@ -4846,19 +4857,31 @@ var NEST_POLICY = freezeWire({
   living: 4,
   exits: [[0, 26], [-28, 14], [28, 14], [0, -30], [-36, -10], [36, -10]],
   wake: [[0, 96], [-44, 92], [44, 92], [52, 36], [-56, 40], [0, 36]],
+  // Eggs still whole when she wakes hatch onto her back; one clutch pours off each time her health
+  // falls past the next mark. Burst all three and she wakes alone and angry. Each clutch member lands
+  // on open ground around her and spends leapTicks in the air on the way down.
+  releaseAt: [75, 50, 25],
+  landingRadii: [40, 60, 80, 100, 120, 140],
+  landingAngles: 16,
+  leapTicks: 20,
+  rage: { damagePercent: 115, speedPercent: 110 },
+  quickClearQualityHundredths: 100,
+  // The elite trick a broodling carries, by nest skin.
+  broodAffixes: { woodland: "web_weaver", desert: "iron_citadel", frostland: "glacial_warden", wetland: "toxic_decay" },
   triggerRadius: 96,
   activeRadius: 768,
   playerClearance: 48,
   // A random boon for every hero who fought here, for 3 minutes.
   boonTicks: 10800,
   boons: ["wrath", "insight", "fortune"],
-  reward: "one completion chest per eligible participant plus a random boon; the woken Brood Mother adds her own drops",
-  reset: "nobody left nearby: the nests heal, the rot pulls back and living creatures go back into hiding",
+  reward: "one completion chest per eligible participant plus a random boon once the Brood Mother is beaten; she adds her own drops, her brood drops none",
+  reset: "nobody left nearby: the eggs heal, the rot pulls back and living creatures (her too) go back into hiding",
   simulationHz: 60
 });
-var NEST_MEMBERS = 13;
+var NEST_MEMBERS = PLANNED_EVENT_MEMBERS;
 var NEST_SKINS = freezeWire({ woodland: "woodland", grassland: "woodland", desert: "desert", volcanic: "desert", frostland: "frostland", upland: "frostland", wetland: "wetland", tropical: "wetland" });
 var NEST_LABELS = freezeWire({ woodland: "Spore Nest", desert: "Scarab Nest", frostland: "Frost Nest", wetland: "Bog Nest" });
+var nestSkinOfV1 = (biome) => NEST_SKINS[biome] ?? "woodland";
 
 // src/shared/generation/planned_event_anchors_v1.js
 var FIXED = new Set([...WOODLAND_EVENT_PILOT_V3_7, ...SPORE_EVENTS, HOLLOW_EVENT].map((e) => e.slotId));
@@ -4901,9 +4924,10 @@ async function createPlannedEventAnchorsV1({ asset, binding, cx, cy, seed, sha25
     for (const s of spots) {
       if (members.some((m) => Math.hypot(m.position.x - s.position.x, m.position.y - s.position.y) < 40)) continue;
       members.push({ family: families[members.length], position: s.position });
-      if (members.length === families.length) break;
+      if (members.length === PLANNED_EVENT_CREW) break;
     }
-    if (members.length !== families.length) continue;
+    if (members.length !== PLANNED_EVENT_CREW) continue;
+    for (let n = PLANNED_EVENT_CREW; n < families.length; n++) members.push({ family: families[n], position: { ...members[(n - PLANNED_EVENT_CREW) % 12].position } });
     const identity = await worldIdentity(seed, "anchor", ["planned-event-v1", slot.eventSlotId], sha256);
     result.push({ id: identity.id, ordinal, position: center2, rank: SHRINE_POLICY.rank, combatVersion: WORLD_COMBAT_VERSION, members });
   }
@@ -6581,6 +6605,46 @@ var BIOME_CREATURES_V1_MELEE_MOTION = freezeWire({
   tomb_mummy: { windupTicks: 18, impactTicks: 3, recoveryTicks: 13 }
 });
 
+// src/shared/content/brood_creatures_v1.js
+var BROOD_CREATURES_V1_VERSION = "world-brood-creatures-v1";
+var BROOD_CREATURE_FAMILIES_V1 = Object.freeze(["brood_mother", "broodling", "hatchling"]);
+var BROOD_XP_ONLY_V1 = Object.freeze(["broodling", "hatchling"]);
+var source4 = "SAQ World Brood Mother v2 (code-drawn); World ordinary melee adaptation";
+var specs4 = [
+  ["brood_mother", "Brood Mother", 72, 9, 1.3, 64, 20, 22, 30, 22],
+  ["broodling", "Broodling", 42, 7, 1.7, 52, 10, 10.8, 20, 14],
+  ["hatchling", "Hatchling", 12, 3, 2, 40, 6, 7, 14, 10]
+];
+var BROOD_CREATURES_V1_ENEMIES = freezeWire(specs4.map(([family2, name, hp, damage, moveSpeed, delayTicks, hullRadius, combatRadius, reach, stopDistance], index) => {
+  const enemyDefinitionId = "def:d410" + (index + 39).toString(16).padStart(28, "0");
+  return {
+    enemyDefinitionId,
+    contentDefinitionId: enemyDefinitionId,
+    kind: "ordinaryEnemyDefinition",
+    family: family2,
+    name,
+    body: { width: 24, height: 24, hullRadius, combatRadius },
+    visual: "brood-creatures-v1-" + family2.replaceAll("_", "-"),
+    behavior: "standard-melee",
+    moveSpeed,
+    attack: { reach, delayTicks, awareness: 260, stopDistance },
+    budget: { hp, damage },
+    sourceVersion: BROOD_CREATURES_V1_VERSION,
+    source: source4
+  };
+}));
+var meta4 = (threatCategory) => ({ eligibility: { biomes: [], sites: [] }, threatCategory, rewardCategory: "ordinary-gear" });
+var BROOD_CREATURES_V1_METADATA = freezeWire({
+  brood_mother: meta4("ordinary-heavy"),
+  broodling: meta4("ordinary-skirmisher"),
+  hatchling: meta4("ordinary-light")
+});
+var BROOD_CREATURES_V1_MELEE_MOTION = freezeWire({
+  brood_mother: { windupTicks: 16, impactTicks: 3, recoveryTicks: 12 },
+  broodling: { windupTicks: 9, impactTicks: 2, recoveryTicks: 8 },
+  hatchling: { windupTicks: 6, impactTicks: 2, recoveryTicks: 6 }
+});
+
 // src/shared/content/ordinary_enemies.js
 var ORDINARY_CATALOG_VERSION = "d11-world-creatures-v1";
 var DUNGEON_ORDINARY_ACQUIRE_RANGE = 260;
@@ -6687,7 +6751,7 @@ var LEGACY_ORDINARY_ENEMIES = freezeWire([
   }
 ].map((d) => ({ ...d, contentDefinitionId: d.enemyDefinitionId })));
 var DUNGEON_MOBS_V1_CATALOG_ENEMIES = Object.freeze([...LEGACY_ORDINARY_ENEMIES, ...DUNGEON_MOBS_V1_ENEMIES]);
-var ORDINARY_ENEMIES = Object.freeze([...DUNGEON_MOBS_V1_CATALOG_ENEMIES, ...DUNGEON_MOBS_V2_ENEMIES, ...BIOME_CREATURES_V1_ENEMIES]);
+var ORDINARY_ENEMIES = Object.freeze([...DUNGEON_MOBS_V1_CATALOG_ENEMIES, ...DUNGEON_MOBS_V2_ENEMIES, ...BIOME_CREATURES_V1_ENEMIES, ...BROOD_CREATURES_V1_ENEMIES]);
 function resolveOrdinaryProfile(enemy, tier2, progressionPower = BASELINE_PROGRESSION_POWER) {
   requireContract(ORDINARY_ENEMIES.includes(enemy), "Unknown ordinary definition");
   const i = ORDINARY_ENEMIES.indexOf(enemy), rank = THREAT_TIERS.indexOf(tier2), power2 = resolveThreatPower(progressionPower, tier2);
@@ -6712,7 +6776,10 @@ var LEGACY_ORDINARY_PROFILES = Object.freeze(ORDINARY_PROFILES.slice(0, LEGACY_O
 var DUNGEON_MOBS_V1_CATALOG_PROFILES = Object.freeze(ORDINARY_PROFILES.slice(0, DUNGEON_MOBS_V1_CATALOG_ENEMIES.length * THREAT_TIERS.length));
 var DUNGEON_MOBS_V1_PROFILES = Object.freeze(DUNGEON_MOBS_V1_CATALOG_PROFILES.slice(LEGACY_ORDINARY_PROFILES.length));
 var DUNGEON_MOBS_V2_PROFILES = Object.freeze(ORDINARY_PROFILES.slice(DUNGEON_MOBS_V1_CATALOG_PROFILES.length, (DUNGEON_MOBS_V1_CATALOG_ENEMIES.length + DUNGEON_MOBS_V2_ENEMIES.length) * THREAT_TIERS.length));
-var BIOME_CREATURES_V1_PROFILES = Object.freeze(ORDINARY_PROFILES.slice((DUNGEON_MOBS_V1_CATALOG_ENEMIES.length + DUNGEON_MOBS_V2_ENEMIES.length) * THREAT_TIERS.length));
+var BIOME_CREATURES_V1_START = (DUNGEON_MOBS_V1_CATALOG_ENEMIES.length + DUNGEON_MOBS_V2_ENEMIES.length) * THREAT_TIERS.length;
+var BROOD_CREATURES_V1_START = BIOME_CREATURES_V1_START + BIOME_CREATURES_V1_ENEMIES.length * THREAT_TIERS.length;
+var BIOME_CREATURES_V1_PROFILES = Object.freeze(ORDINARY_PROFILES.slice(BIOME_CREATURES_V1_START, BROOD_CREATURES_V1_START));
+var BROOD_CREATURES_V1_PROFILES = Object.freeze(ORDINARY_PROFILES.slice(BROOD_CREATURES_V1_START));
 var enemyByProfile = new Map(ORDINARY_PROFILES.map((p) => [p.contentDefinitionId, ORDINARY_ENEMIES.find((d) => p.profileKey.startsWith(`ordinary-${d.family.replaceAll("_", "-")}-`))]));
 function ordinaryEnemyForProfile(id) {
   return enemyByProfile.get(id) ?? null;
@@ -6904,10 +6971,10 @@ function prepareEpisodeSnapshotD9(episode, { tick, minimumLevel, participants, a
   const level = resolveEncounterLevelV2(minimumLevel, eligible3);
   return freezeWire({ version: "episode-progression-d9-v1", snapshotId: episode.anchorId + "/episode/" + String(episode.episode), activatedTick: tick, trigger, minimumLevel: progressionWire(progressionBigInt(minimumLevel)), effectiveLevel: progressionWire(level), sourceDepth: progressionWire(level), mappingVersion: D9_PROFILE.progressionPolicy, rank, participants: eligible3.map((p) => ({ playerId: p.playerId, heroLevel: progressionWire(progressionBigInt(p.heroLevel)) })) });
 }
-function chooseEpisodePlacementD9({ candidates, participants, spaceInstanceId, isLegal, combat = false, hollow = false }) {
+function chooseEpisodePlacementD9({ candidates, participants, spaceInstanceId, isLegal, combat = false, hollow = false, planned = false }) {
   requireContract(candidates.length <= D9_PROFILE.placementCandidates, "Placement work bound");
   for (const pair of candidates) {
-    requireContract(combat ? pair.length >= 6 && pair.length <= (hollow ? 13 : 12) : pair.length === 2, "D9 encounter member capacity");
+    requireContract(combat ? pair.length >= 6 && pair.length <= (planned ? PLANNED_EVENT_MEMBERS : hollow ? 13 : 12) : pair.length === 2, "D9 encounter member capacity");
     if (pair.every((p) => isLegal(p) && participants.every((a) => a.spaceInstanceId !== spaceInstanceId || pointDistance(p, a.position) >= D9_PROFILE.placementSafetyRadius))) return freezeWire(pair);
   }
   return null;
@@ -7034,8 +7101,8 @@ function compositionBandV1(level) {
   const n = progressionBigInt(level);
   return [...COMPOSITION_POLICY_V1.bands].reverse().find((b) => n >= BigInt(b.from));
 }
-function passiveEliteTraitsV1(source5, level) {
-  const n = progressionBigInt(level), key9 = COMPOSITION_V1 + "/" + source5.campaignSeed + "/" + source5.entityId + "/" + String(level), out = [];
+function passiveEliteTraitsV1(source6, level) {
+  const n = progressionBigInt(level), key9 = COMPOSITION_V1 + "/" + source6.campaignSeed + "/" + source6.entityId + "/" + String(level), out = [];
   if (n >= 15n && compositionHashV1(key9 + "/second") % 100 < (n >= 45n ? 100 : n >= 30n ? 75 : 35)) out.push(compositionHashV1(key9 + "/trait") % 2 ? "brutal" : "hardened");
   if (n >= 30n && out.length && compositionHashV1(key9 + "/third") % 100 < (n >= 45n ? 60 : 25)) out.push(out[0] === "brutal" ? "hardened" : "brutal");
   return out;
@@ -7153,14 +7220,72 @@ function applyEliteActorStatsD12_4(profile2, elite) {
   };
 }
 
+// src/shared/contracts/nests_v1.js
+var MOTHER = NEST_POLICY.motherMember;
+var clutchMembersV1 = (e) => [NEST_POLICY.broodlings[e], ...Array.from({ length: NEST_POLICY.hatchlingsPerEgg }, (_, k) => NEST_POLICY.firstHatchling + e * NEST_POLICY.hatchlingsPerEgg + k)];
+var CLUTCH_OF = new Map([0, 1, 2].flatMap((e) => clutchMembersV1(e).map((n) => [n, e])));
+var nestHealthV1 = (level, party2) => combatInteger(multiplyCombat(worldEnemyStats(level, "C").maxHp, NEST_POLICY.nestHealth * NEST_POLICY.partyHealthPercent[party2 - 1], 100));
+var burst = (h) => h.hp.every((hp) => compareCombat(hp, 0) === 0);
+var awake = (r) => ["hatched", "defeated"].includes(r.stages[MOTHER].phase);
+var nestTargetableV1 = (r, n) => r.status === "active" && !r.nest.waiting && r.stages[MOTHER].phase === "pending" && compareCombat(r.nest.hp[n], 0) > 0;
+var nestsReadyV1 = (r) => r.stages[MOTHER].phase === "defeated" && r.stages.every((t) => ["defeated", "cancelled"].includes(t.phase));
+function validateNestsV1(r) {
+  requireContract(r.kind === "nests" && r.rulesVersion === NESTS_VERSION && r.stages.length === NEST_MEMBERS, "Nest policy/membership");
+  closedRecord(r.nest, ["level", "partySize", "hp", "maxHp", "rotStart", "nextSpawn", "waiting", "resets", "boon", "clutches", "rage"]);
+  const h = r.nest, mother = r.stages[MOTHER].phase, up = awake(r);
+  safeInteger(h.partySize, 1, 4);
+  requireContract(compareCombat(h.maxHp, nestHealthV1(h.level, h.partySize)) === 0, "Nest health scaling");
+  requireContract(Array.isArray(h.hp) && h.hp.length === 3 && h.hp.every((hp) => compareCombat(hp, 0) >= 0 && compareCombat(hp, h.maxHp) <= 0), "Nest health");
+  safeInteger(h.rotStart, 0, r.elapsedTicks);
+  safeInteger(h.nextSpawn);
+  safeInteger(h.resets);
+  requireContract(typeof h.waiting === "boolean" && (h.boon === null || NEST_POLICY.boons.includes(h.boon)), "Nest state");
+  requireContract(r.stages.every((t) => ["pending", "hatched", "defeated", "cancelled"].includes(t.phase)), "Nest stage");
+  requireContract(["pending", "cancelled"].includes(r.stages[12].phase), "Nests leave member 12 out");
+  requireContract(!up || burst(h) || r.elapsedTicks - h.rotStart >= NEST_POLICY.rotTicks, "Brood Mother woke early");
+  requireContract(mother !== "cancelled", "Brood Mother withered");
+  requireContract(Array.isArray(h.clutches) && h.clutches.length === 3 && h.clutches.every((c) => (up ? ["none", "riding", "out"] : ["egg"]).includes(c)), "Nest clutches");
+  h.clutches.forEach((c, e) => {
+    const phases = clutchMembersV1(e).map((n) => r.stages[n].phase), hidden = mother === "defeated" ? ["pending", "cancelled", "defeated"] : ["pending", "defeated"];
+    if (c === "riding") requireContract(compareCombat(h.hp[e], 0) > 0 && phases.every((p) => hidden.includes(p)), "Riding clutch");
+    else if (c === "out") requireContract(compareCombat(h.hp[e], 0) > 0 && phases.every((p) => p === "hatched" || p === "defeated"), "Clutch out");
+    else requireContract(phases.every((p) => hidden.includes(p)), "Clutch in its egg");
+  });
+  requireContract(h.clutches.filter((c) => c === "out").length <= NEST_POLICY.releaseAt.length, "Clutch release marks");
+  requireContract(h.rage === null || up && burst(h), "Brood Mother rage");
+  if (h.rage) {
+    closedRecord(h.rage, ["attackDamage", "moveSpeed"]);
+    combatInteger(h.rage.attackDamage);
+    requireContract(Number.isFinite(h.rage.moveSpeed) && h.rage.moveSpeed > 0, "Brood Mother calm speed");
+  }
+  if (h.waiting) requireContract(mother === "pending" && r.stages.every((t) => t.phase !== "hatched") && h.hp.every((hp) => compareCombat(hp, h.maxHp) === 0) && h.rage === null, "Waiting nests");
+  requireContract(r.status === "completed" === (h.boon !== null), "Nest boon");
+  if (r.status === "completed") requireContract(nestsReadyV1(r), "Incomplete nest completion");
+}
+var LANDING = NEST_POLICY.landingRadii.flatMap((radius, i) => Array.from({ length: NEST_POLICY.landingAngles }, (_, k) => {
+  const a = (k + i % 2 / 2) / NEST_POLICY.landingAngles * Math.PI * 2;
+  return [Math.round(Math.cos(a) * radius), Math.round(Math.sin(a) * radius * 0.7)];
+}));
+function nestBiomeV1(s, groupId) {
+  const g = s.d9World?.episodes?.[groupId]?.geography;
+  return g ? s.d9World.runtime.chunks?.find((c) => c.chunkX === g.chunkX && c.chunkY === g.chunkY)?.region.biome ?? "woodland" : "woodland";
+}
+
 // src/shared/contracts/encounter_composition_v1.js
-var generatedEliteId = (source5) => /^ent:[a-f0-9]{32}$/.test(source5.entityId) ? "elite:" + source5.entityId.slice(4) : "elite:" + Array.from({ length: 4 }, (_, i) => compositionHashV1(COMPOSITION_V1 + "/" + canonicalStringify(source5) + "/" + i).toString(16).padStart(8, "0")).join("");
+var generatedEliteId = (source6) => /^ent:[a-f0-9]{32}$/.test(source6.entityId) ? "elite:" + source6.entityId.slice(4) : "elite:" + Array.from({ length: 4 }, (_, i) => compositionHashV1(COMPOSITION_V1 + "/" + canonicalStringify(source6) + "/" + i).toString(16).padStart(8, "0")).join("");
 var floorFor = (s, g) => s.d9World?.functionalSitesById?.[g.siteId]?.floors?.find((f2) => f2.groupId === g.groupId);
+var familyOf = (s, id) => ordinaryEnemyForProfile(s.entitiesById[id]?.contentDefinitionId)?.family;
+function broodElitesV1(s, g, { includeDefeated = false } = {}) {
+  const ids = g.entityIds.filter((id) => familyOf(s, id) === "broodling" && (includeDefeated || s.entitiesById[id].alive));
+  if (!ids.length) return [];
+  const primary = NEST_POLICY.broodAffixes[nestSkinOfV1(nestBiomeV1(s, g.groupId))];
+  return ids.map((id) => ({ id, n: g.entityIds.indexOf(id), primary }));
+}
 function compositionCandidatesV1(s, g, level, { includeDefeated = false } = {}) {
   const f2 = floorFor(s, g), chance = compositionBandV1(level).chancePercent, key9 = COMPOSITION_V1 + "/" + s.campaign.seed.seedHex + "/" + g.groupId + "/" + String(s.encounterEconomy.groups[g.groupId].episode) + "/" + String(level);
   const candidates = g.entityIds.flatMap((id, n) => {
     const a = s.entitiesById[id], spec = f2?.encounter.members[n];
-    if (!a || !includeDefeated && !a.alive || a.boss || s.content?.definitionsById[a.contentDefinitionId]?.isBoss || s.bossCombat?.bossesByEntityId?.[id] || String(spec?.memberKey).startsWith("finale:") || !ordinaryEnemyForProfile(a.contentDefinitionId)) return [];
+    if (!a || !includeDefeated && !a.alive || a.boss || s.content?.definitionsById[a.contentDefinitionId]?.isBoss || s.bossCombat?.bossesByEntityId?.[id] || String(spec?.memberKey).startsWith("finale:") || !ordinaryEnemyForProfile(a.contentDefinitionId) || BROOD_CREATURE_FAMILIES_V1.includes(familyOf(s, id))) return [];
     return [{ id, n, roll: compositionHashV1(key9 + "/" + id), primary: COMPOSITION_POLICY_V1.primaryAffixes[compositionHashV1(key9 + "/" + id + "/primary") % COMPOSITION_POLICY_V1.primaryAffixes.length] }];
   }).sort((a, b) => a.roll - b.roll || a.id.localeCompare(b.id));
   const rolled = candidates.filter((c) => c.roll % 100 < chance);
@@ -7175,7 +7300,7 @@ function validateCompositionEliteV1(s, e) {
   requireContract(canonicalStringify(e.affixIds.slice(1)) === canonicalStringify(passiveEliteTraitsV1(e.identitySource, level)), "Composition passive roll changed");
   if (!e.composition.inherited) {
     requireContract(e.eliteId === generatedEliteId(e.identitySource), "Generated elite identity changed");
-    const row = compositionCandidatesV1(s, g, level, { includeDefeated: true }).find((c) => c.id === e.entityId);
+    const row = [...broodElitesV1(s, g, { includeDefeated: true }), ...compositionCandidatesV1(s, g, level, { includeDefeated: true })].find((c) => c.id === e.entityId);
     requireContract(row && row.primary === e.affixIds[0], "Composition candidate roll changed");
   }
 }
@@ -7251,44 +7376,44 @@ function hostileHazardIdD12_4J(eliteId, sequence) {
 async function createElite({ campaignSeed, siteId: siteId2, floorId, groupId, roomId, entityId: entityId2, activatedTick, affixId }, { sha256 }) {
   const definition = eliteAffixDefinitionD12_4(affixId);
   requireContract(definition, "Unknown elite affix");
-  const source5 = { campaignSeed, siteId: siteId2, floorId, groupId, roomId, entityId: entityId2, affixId };
-  const eliteId = "elite:" + bytesToHex((await hashBytes(frameUtf8([ELITE_RECORD_D12_4_VERSION, ...Object.values(source5)]), sha256)).slice(0, 16));
-  return freezeWire({ version: ELITE_RECORD_D12_4_VERSION, eliteId, entityId: entityId2, groupId, siteId: siteId2, floorId, roomId, tier: "elite", affixIds: [affixId], identitySource: source5, activatedTick, nextPulseTick: affixId === TOXIC_DECAY_AFFIX_ID ? activatedTick : activatedTick + definition.pulse.cadenceTicks, pulseSequence: 0, lastPulse: null });
+  const source6 = { campaignSeed, siteId: siteId2, floorId, groupId, roomId, entityId: entityId2, affixId };
+  const eliteId = "elite:" + bytesToHex((await hashBytes(frameUtf8([ELITE_RECORD_D12_4_VERSION, ...Object.values(source6)]), sha256)).slice(0, 16));
+  return freezeWire({ version: ELITE_RECORD_D12_4_VERSION, eliteId, entityId: entityId2, groupId, siteId: siteId2, floorId, roomId, tier: "elite", affixIds: [affixId], identitySource: source6, activatedTick, nextPulseTick: affixId === TOXIC_DECAY_AFFIX_ID ? activatedTick : activatedTick + definition.pulse.cadenceTicks, pulseSequence: 0, lastPulse: null });
 }
-function createVitalityWeaverEliteD12_4(source5, capabilities) {
-  return createElite({ ...source5, affixId: VITALITY_WEAVER_AFFIX_ID }, capabilities);
+function createVitalityWeaverEliteD12_4(source6, capabilities) {
+  return createElite({ ...source6, affixId: VITALITY_WEAVER_AFFIX_ID }, capabilities);
 }
-function createSwiftCommanderEliteD12_4D(source5, capabilities) {
-  return createElite({ ...source5, affixId: SWIFT_COMMANDER_AFFIX_ID }, capabilities);
+function createSwiftCommanderEliteD12_4D(source6, capabilities) {
+  return createElite({ ...source6, affixId: SWIFT_COMMANDER_AFFIX_ID }, capabilities);
 }
-function createGlacialWardenEliteD12_4E(source5, capabilities) {
-  return createElite({ ...source5, affixId: GLACIAL_WARDEN_AFFIX_ID }, capabilities);
+function createGlacialWardenEliteD12_4E(source6, capabilities) {
+  return createElite({ ...source6, affixId: GLACIAL_WARDEN_AFFIX_ID }, capabilities);
 }
-function createToxicDecayEliteD12_4F(source5, capabilities) {
-  return createElite({ ...source5, affixId: TOXIC_DECAY_AFFIX_ID }, capabilities);
+function createToxicDecayEliteD12_4F(source6, capabilities) {
+  return createElite({ ...source6, affixId: TOXIC_DECAY_AFFIX_ID }, capabilities);
 }
-function createIronCitadelEliteD12_4G(source5, capabilities) {
-  return createElite({ ...source5, affixId: IRON_CITADEL_AFFIX_ID }, capabilities);
+function createIronCitadelEliteD12_4G(source6, capabilities) {
+  return createElite({ ...source6, affixId: IRON_CITADEL_AFFIX_ID }, capabilities);
 }
-function createBloodBerserkerEliteD12_4H_A(source5, capabilities) {
-  return createElite({ ...source5, affixId: BLOOD_BERSERKER_AFFIX_ID }, capabilities);
+function createBloodBerserkerEliteD12_4H_A(source6, capabilities) {
+  return createElite({ ...source6, affixId: BLOOD_BERSERKER_AFFIX_ID }, capabilities);
 }
-function createNullifierEliteD12_4I(source5, capabilities) {
-  return createElite({ ...source5, affixId: NULLIFIER_AFFIX_ID }, capabilities);
+function createNullifierEliteD12_4I(source6, capabilities) {
+  return createElite({ ...source6, affixId: NULLIFIER_AFFIX_ID }, capabilities);
 }
-function createWebWeaverEliteD12_4J(source5, capabilities) {
-  return createElite({ ...source5, affixId: WEB_WEAVER_AFFIX_ID }, capabilities);
+function createWebWeaverEliteD12_4J(source6, capabilities) {
+  return createElite({ ...source6, affixId: WEB_WEAVER_AFFIX_ID }, capabilities);
 }
-function createSlagShaperEliteD12_4K(source5, capabilities) {
-  return createElite({ ...source5, affixId: SLAG_SHAPER_AFFIX_ID }, capabilities);
+function createSlagShaperEliteD12_4K(source6, capabilities) {
+  return createElite({ ...source6, affixId: SLAG_SHAPER_AFFIX_ID }, capabilities);
 }
-function createEliteForAffixD13D_B(source5, affixId, capabilities) {
-  return createElite({ ...source5, affixId }, capabilities);
+function createEliteForAffixD13D_B(source6, affixId, capabilities) {
+  return createElite({ ...source6, affixId }, capabilities);
 }
-async function createNamedEliteV1(source5, namedEliteId, capabilities) {
+async function createNamedEliteV1(source6, namedEliteId, capabilities) {
   const named = NAMED_ELITES_V1[namedEliteId];
   requireContract(named, "Unknown named elite");
-  return freezeWire({ ...await createEliteForAffixD13D_B(source5, named.affixId, capabilities), namedEliteId });
+  return freezeWire({ ...await createEliteForAffixD13D_B(source6, named.affixId, capabilities), namedEliteId });
 }
 function eliteActorProfileD12_4(state, actor, profile2) {
   return applyEliteActorStatsD12_4(profile2, state.eliteCombat?.elitesByEntityId?.[actor.entityId] ?? null);
@@ -7414,8 +7539,8 @@ function validateEliteCombatD12_4(state) {
     safeInteger(h.stacks, 0, SWIFT_COMMANDER_D12_4D.pulse.maxStacks);
     requireContract(Array.isArray(h.sourceEliteIds) && h.sourceEliteIds.length <= Object.keys(root.elitesByEntityId).length && h.sourceEliteIds.every((id, index) => typeof id === "string" && (index === 0 || h.sourceEliteIds[index - 1] < id)), "Invalid haste sources");
     for (const eliteId of h.sourceEliteIds) {
-      const e = Object.values(root.elitesByEntityId).find((row) => row.eliteId === eliteId), source5 = state.entitiesById[e?.entityId];
-      requireContract(e?.affixIds[0] === SWIFT_COMMANDER_AFFIX_ID && source5?.alive && actor.alive && source5.residency.spaceInstanceId === actor.residency.spaceInstanceId && Math.hypot(source5.position.x - actor.position.x, source5.position.y - actor.position.y) <= SWIFT_COMMANDER_D12_4D.pulse.radius, "Invalid active haste source");
+      const e = Object.values(root.elitesByEntityId).find((row) => row.eliteId === eliteId), source6 = state.entitiesById[e?.entityId];
+      requireContract(e?.affixIds[0] === SWIFT_COMMANDER_AFFIX_ID && source6?.alive && actor.alive && source6.residency.spaceInstanceId === actor.residency.spaceInstanceId && Math.hypot(source6.position.x - actor.position.x, source6.position.y - actor.position.y) <= SWIFT_COMMANDER_D12_4D.pulse.radius, "Invalid active haste source");
     }
     safeInteger(h.lastRefreshTick, 0, state.tick);
     safeInteger(h.lingerExpiresTick, h.lastRefreshTick, state.tick + SWIFT_COMMANDER_D12_4D.pulse.lingerTicks);
@@ -7434,8 +7559,8 @@ function validateEliteCombatD12_4(state) {
     safeInteger(g.stacks, 0, IRON_CITADEL_D12_4G.pulse.maxStacks);
     requireContract(Array.isArray(g.sourceEliteIds) && g.sourceEliteIds.length <= Object.keys(root.elitesByEntityId).length && g.sourceEliteIds.every((id, index) => typeof id === "string" && (index === 0 || g.sourceEliteIds[index - 1] < id)), "Invalid Guard sources");
     for (const eliteId of g.sourceEliteIds) {
-      const e = Object.values(root.elitesByEntityId).find((row) => row.eliteId === eliteId), source5 = state.entitiesById[e?.entityId];
-      requireContract(e?.affixIds[0] === IRON_CITADEL_AFFIX_ID && source5?.alive && source5.residency.spaceInstanceId === actor.residency.spaceInstanceId && Math.hypot(source5.position.x - actor.position.x, source5.position.y - actor.position.y) <= IRON_CITADEL_D12_4G.pulse.radius, "Invalid active Guard source");
+      const e = Object.values(root.elitesByEntityId).find((row) => row.eliteId === eliteId), source6 = state.entitiesById[e?.entityId];
+      requireContract(e?.affixIds[0] === IRON_CITADEL_AFFIX_ID && source6?.alive && source6.residency.spaceInstanceId === actor.residency.spaceInstanceId && Math.hypot(source6.position.x - actor.position.x, source6.position.y - actor.position.y) <= IRON_CITADEL_D12_4G.pulse.radius, "Invalid active Guard source");
     }
     safeInteger(g.lastRefreshTick, 0, state.tick);
     safeInteger(g.lingerExpiresTick, g.lastRefreshTick, state.tick + IRON_CITADEL_D12_4G.pulse.lingerTicks);
@@ -7460,8 +7585,8 @@ function validateEliteCombatD12_4(state) {
     safeInteger(aura.stacks, 0, BLOOD_BERSERKER_D12_4H_A.pulse.maxStacks);
     requireContract(Array.isArray(aura.sourceEliteIds) && aura.sourceEliteIds.length <= Object.keys(root.elitesByEntityId).length && aura.sourceEliteIds.every((id, index) => typeof id === "string" && (index === 0 || aura.sourceEliteIds[index - 1] < id)), "Invalid attack-aura sources");
     for (const eliteId of aura.sourceEliteIds) {
-      const e = Object.values(root.elitesByEntityId).find((row) => row.eliteId === eliteId), source5 = state.entitiesById[e?.entityId];
-      requireContract(e?.affixIds[0] === BLOOD_BERSERKER_AFFIX_ID && e.groupId === aura.groupId && source5?.alive && source5.residency.spaceInstanceId === actor.residency.spaceInstanceId && Math.hypot(source5.position.x - actor.position.x, source5.position.y - actor.position.y) <= BLOOD_BERSERKER_D12_4H_A.pulse.radius, "Invalid active attack-aura source");
+      const e = Object.values(root.elitesByEntityId).find((row) => row.eliteId === eliteId), source6 = state.entitiesById[e?.entityId];
+      requireContract(e?.affixIds[0] === BLOOD_BERSERKER_AFFIX_ID && e.groupId === aura.groupId && source6?.alive && source6.residency.spaceInstanceId === actor.residency.spaceInstanceId && Math.hypot(source6.position.x - actor.position.x, source6.position.y - actor.position.y) <= BLOOD_BERSERKER_D12_4H_A.pulse.radius, "Invalid active attack-aura source");
     }
     safeInteger(aura.lastRefreshTick, 0, state.tick);
     safeInteger(aura.lingerExpiresTick, aura.lastRefreshTick, state.tick + BLOOD_BERSERKER_D12_4H_A.pulse.lingerTicks);
@@ -7478,8 +7603,8 @@ function validateEliteCombatD12_4(state) {
       if (statusId === GLACIAL_WARDEN_D12_4E.pulse.statusId) {
         closedRecord(status, ["version", "entityId", "statusId", "sourceEliteId", "applicationTick", "expirationTick", "magnitude"]);
         requireContract(status.version === TIMED_ACTOR_STATUS_D12_4E_VERSION && status.entityId === entityId2 && status.statusId === statusId, "Invalid timed actor status identity");
-        const source5 = Object.values(root.elitesByEntityId).find((row) => row.eliteId === status.sourceEliteId);
-        requireContract(source5?.affixIds[0] === GLACIAL_WARDEN_AFFIX_ID, "Invalid timed actor status source");
+        const source6 = Object.values(root.elitesByEntityId).find((row) => row.eliteId === status.sourceEliteId);
+        requireContract(source6?.affixIds[0] === GLACIAL_WARDEN_AFFIX_ID, "Invalid timed actor status source");
         safeInteger(status.applicationTick, 0, state.tick);
         safeInteger(status.expirationTick, status.applicationTick + 1, state.tick + GLACIAL_WARDEN_D12_4E.pulse.durationTicks);
         requireContract(status.expirationTick === status.applicationTick + GLACIAL_WARDEN_D12_4E.pulse.durationTicks, "Timed actor status duration drift");
@@ -7489,8 +7614,8 @@ function validateEliteCombatD12_4(state) {
       } else if (statusId === NULLIFIER_D12_4I.pulse.statusId) {
         closedRecord(status, ["version", "entityId", "statusId", "sourceEliteId", "applicationTick", "expirationTick"]);
         requireContract(status.version === TIMED_NULLIFIED_D12_4I_VERSION && status.entityId === entityId2 && status.statusId === statusId && actor.alive, "Invalid Nullified status identity");
-        const source5 = Object.values(root.elitesByEntityId).find((row) => row.eliteId === status.sourceEliteId);
-        requireContract(source5?.affixIds[0] === NULLIFIER_AFFIX_ID, "Invalid Nullified source");
+        const source6 = Object.values(root.elitesByEntityId).find((row) => row.eliteId === status.sourceEliteId);
+        requireContract(source6?.affixIds[0] === NULLIFIER_AFFIX_ID, "Invalid Nullified source");
         safeInteger(status.applicationTick, 0, state.tick);
         safeInteger(status.expirationTick, state.tick + 1, state.tick + NULLIFIER_D12_4I.pulse.durationTicks);
         requireContract(status.expirationTick === status.applicationTick + NULLIFIER_D12_4I.pulse.durationTicks && state.tick < status.expirationTick, "Nullified duration drift");
@@ -7498,8 +7623,8 @@ function validateEliteCombatD12_4(state) {
         requireContract(statusId === TOXIC_DECAY_D12_4F.pulse.statusId, "Invalid timed actor status identity");
         closedRecord(status, ["version", "entityId", "statusId", "sourceEliteId", "applicationTick", "lastApplicationTick", "lastApplicationAdded", "expirationTick", "nextTickAt", "tickIntervalTicks", "stacks", "damagePerStack", "lastTick"]);
         requireContract(status.version === TIMED_PLAYER_POISON_D12_4F_VERSION && status.entityId === entityId2 && status.statusId === statusId && actor.alive && typeof status.lastApplicationAdded === "boolean", "Invalid Toxic Decay status identity");
-        const source5 = Object.values(root.elitesByEntityId).find((row) => row.eliteId === status.sourceEliteId);
-        requireContract(source5?.affixIds[0] === TOXIC_DECAY_AFFIX_ID, "Invalid Toxic Decay source");
+        const source6 = Object.values(root.elitesByEntityId).find((row) => row.eliteId === status.sourceEliteId);
+        requireContract(source6?.affixIds[0] === TOXIC_DECAY_AFFIX_ID, "Invalid Toxic Decay source");
         safeInteger(status.applicationTick, 0, state.tick);
         safeInteger(status.lastApplicationTick, status.applicationTick, state.tick);
         safeInteger(status.expirationTick, state.tick + 1, state.tick + TOXIC_DECAY_D12_4F.pulse.durationTicks);
@@ -7520,8 +7645,8 @@ function validateEliteCombatD12_4(state) {
   }
   for (const [entityId2, resistance] of Object.entries(root.nullificationResistanceByEntityId ?? {})) {
     closedRecord(resistance, ["version", "entityId", "statusId", "sourceEliteId", "startedTick", "expirationTick"]);
-    const actor = state.entitiesById[entityId2], source5 = Object.values(root.elitesByEntityId).find((row) => row.eliteId === resistance.sourceEliteId);
-    requireContract(resistance.version === NULLIFICATION_RESISTANCE_D12_4I_VERSION && resistance.entityId === entityId2 && resistance.statusId === NULLIFIER_D12_4I.pulse.statusId && actor?.team === "party" && actor.alive && source5?.affixIds[0] === NULLIFIER_AFFIX_ID, "Invalid Nullifier resistance identity");
+    const actor = state.entitiesById[entityId2], source6 = Object.values(root.elitesByEntityId).find((row) => row.eliteId === resistance.sourceEliteId);
+    requireContract(resistance.version === NULLIFICATION_RESISTANCE_D12_4I_VERSION && resistance.entityId === entityId2 && resistance.statusId === NULLIFIER_D12_4I.pulse.statusId && actor?.team === "party" && actor.alive && source6?.affixIds[0] === NULLIFIER_AFFIX_ID, "Invalid Nullifier resistance identity");
     safeInteger(resistance.startedTick, 0, state.tick);
     safeInteger(resistance.expirationTick, state.tick + 1, state.tick + NULLIFIER_D12_4I.pulse.resistanceTicks);
     requireContract(resistance.expirationTick === resistance.startedTick + NULLIFIER_D12_4I.pulse.resistanceTicks && state.tick < resistance.expirationTick && !root.timedStatusesByEntityId?.[entityId2]?.[NULLIFIER_D12_4I.pulse.statusId], "Nullifier resistance schedule drift");
@@ -7539,7 +7664,7 @@ function validateEliteCombatD12_4(state) {
     requireContract(row.kind === slag.hazardKind && row.geometry.kind === slag.geometry.kind && row.geometry.radiusX === slag.geometry.radiusX && row.geometry.radiusY === slag.geometry.radiusY && row.effect.statusId === slag.statusId && row.effect.damageFraction.numerator === slag.damageMaxHp.numerator && row.effect.damageFraction.denominator === slag.damageMaxHp.denominator && row.effect.damageIntervalTicks === slag.damageIntervalTicks && row.effect.nonlethal === false, "Slag hazard definition drift");
   };
   for (const [sourceEliteId, pending] of Object.entries(root.pendingHazardsBySourceEliteId ?? {})) {
-    const sourceElite = sourceByEliteId.get(sourceEliteId), source5 = state.entitiesById[pending.sourceEntityId], base = pending.version === PENDING_HOSTILE_HAZARD_D12_4J_VERSION && sourceElite?.entityId === pending.sourceEntityId && pending.sourceEliteId === sourceEliteId && pending.hazardId === hostileHazardIdD12_4J(sourceEliteId, sourceElite.pulseSequence) && source5?.alive && source5.residency.spaceInstanceId === pending.spaceInstanceId && state.spacesByInstanceId[pending.spaceInstanceId] && Number.isFinite(pending.position?.x) && Number.isFinite(pending.position?.y);
+    const sourceElite = sourceByEliteId.get(sourceEliteId), source6 = state.entitiesById[pending.sourceEntityId], base = pending.version === PENDING_HOSTILE_HAZARD_D12_4J_VERSION && sourceElite?.entityId === pending.sourceEntityId && pending.sourceEliteId === sourceEliteId && pending.hazardId === hostileHazardIdD12_4J(sourceEliteId, sourceElite.pulseSequence) && source6?.alive && source6.residency.spaceInstanceId === pending.spaceInstanceId && state.spacesByInstanceId[pending.spaceInstanceId] && Number.isFinite(pending.position?.x) && Number.isFinite(pending.position?.y);
     requireContract(base, "Invalid pending hostile hazard");
     safeInteger(pending.startedTick, 0, state.tick);
     if (pending.kind === web.hazardKind) {
@@ -7696,7 +7821,7 @@ var LEGACY_HOSTILE_MELEE_MOTION_D11_2 = freezeWire({
   animated_armor: { windupTicks: 14, impactTicks: 3, recoveryTicks: 12 },
   cursed_blade: { windupTicks: 9, impactTicks: 3, recoveryTicks: 8 }
 });
-var HOSTILE_MELEE_MOTION_D11_2 = freezeWire({ ...LEGACY_HOSTILE_MELEE_MOTION_D11_2, ...DUNGEON_MOBS_V1_MELEE_MOTION, ...DUNGEON_MOBS_V2_MELEE_MOTION, ...BIOME_CREATURES_V1_MELEE_MOTION });
+var HOSTILE_MELEE_MOTION_D11_2 = freezeWire({ ...LEGACY_HOSTILE_MELEE_MOTION_D11_2, ...DUNGEON_MOBS_V1_MELEE_MOTION, ...DUNGEON_MOBS_V2_MELEE_MOTION, ...BIOME_CREATURES_V1_MELEE_MOTION, ...BROOD_CREATURES_V1_MELEE_MOTION });
 var hostileMeleeMotionD11_2 = (family2) => HOSTILE_MELEE_MOTION_D11_2[family2] ?? null;
 
 // src/shared/content/site_definition_runtime_d10.js
@@ -9695,10 +9820,10 @@ function validateWorldRarityProgressionV2(p) {
   requireContract(["ordinary", "elite", "boss", "completion"].includes(p.rarityRole) && p.combatQuality === (p.rarityRole === "boss" ? "elite" : p.rarityRole), "World rarity source role");
   return p;
 }
-function rewardRarityRoleV2(state, source5, spawnEntityId = null) {
-  if (source5.kind === "chest") return "completion";
-  const id = spawnEntityId ?? state.groupsById[source5.groupId]?.entityIds[source5.spawnOrdinal ?? source5.ordinal];
-  return source5.kind === "enemy" && state.bossCombat?.bossesByEntityId[id] ? "boss" : source5.kind === "enemy" && state.eliteCombat?.elitesByEntityId[id] ? "elite" : "ordinary";
+function rewardRarityRoleV2(state, source6, spawnEntityId = null) {
+  if (source6.kind === "chest") return "completion";
+  const id = spawnEntityId ?? state.groupsById[source6.groupId]?.entityIds[source6.spawnOrdinal ?? source6.ordinal];
+  return source6.kind === "enemy" && state.bossCombat?.bossesByEntityId[id] ? "boss" : source6.kind === "enemy" && state.eliteCombat?.elitesByEntityId[id] ? "elite" : "ordinary";
 }
 
 // src/shared/content/site_rewards_v1.js
@@ -9933,8 +10058,9 @@ function rewardProgressionD9(depth, sourceId) {
   return freezeWire(validateRewardProgressionD9({ version: D9_REWARD_PROGRESSION, policy: D9_PROFILE.progressionPolicy, sourceDepth: progressionWire(progressionBigInt(depth)), quality: 1, sourceId, tomeEligibility: "base-single-d7-v1" }));
 }
 function validateRewardProgressionD9(v) {
-  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "siteReward", "gearClass", "armor", "wardrobe", "unique", "boon"]);
+  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "siteReward", "gearClass", "armor", "wardrobe", "unique", "boon", "quickClear"]);
   requireContract(v.boon === void 0 || v.boon === "fortune" && v.rarityPolicyHash !== void 0, "Boon reward policy");
+  requireContract(v.quickClear === void 0 || v.quickClear === true && v.rarityPolicyHash !== void 0 && v.combatQuality === "completion", "Quick clear reward policy");
   requireContract(v.armor === void 0 || v.armor === "overall" && v.gearClass === void 0 && v.combatHash === WORLD_COMBAT_HASH, "One-piece armor policy");
   requireContract(v.wardrobe === void 0 || v.wardrobe === WARDROBE_V1 && v.gearClass !== void 0, "Wardrobe policy");
   requireContract(v.unique === void 0 || Object.hasOwn(UNIQUE_ITEMS, v.unique) && v.wardrobe === WARDROBE_V1 && (UNIQUE_ITEMS[v.unique].cls === null || UNIQUE_ITEMS[v.unique].cls === v.gearClass), "Unique policy");
@@ -9975,6 +10101,7 @@ function validateRewardProgression(v) {
 
 // src/shared/contracts/event_boons_v1.js
 var boonRewardQualityV1 = (progression) => progression.boon === "fortune" ? BOON_EFFECTS.fortune.qualityHundredths : 0;
+var quickClearRewardQualityV1 = (progression) => progression.quickClear ? NEST_POLICY.quickClearQualityHundredths : 0;
 
 // src/shared/content/gear_numbers_d9.js
 function exactDecimal(v) {
@@ -10406,7 +10533,7 @@ function generateAtPrecision(c, seed, input, { tier: tier2 = null, family: famil
     noun = uq.noun;
   }
   const rng2 = rewardStream(seed), random = () => rng2.random(), pick5 = (a) => a[Math.floor(random() * a.length)], power2 = progression.combatHash ? depth : progressionWire(progressionBigInt(depth) / 4n + 1n);
-  const rarityRandom = progression.combatHash ? random() : null, rarityTier = tier2 ?? (progression.combatHash ? hasWorldRarityV2(progression) ? siteRewardRarityV1(progression.siteReward, worldGearRarityV2(depth, progression.rarityHeroLevel, progression.rarityRole, rarityRandom, (progression.modifiers?.qualityHundredths ?? 0) + siteRewardQualityV1(progression.siteReward) + boonRewardQualityV1(progression))) : worldGearRarity(depth, progression.combatQuality, rarityRandom, progression.modifiers?.qualityHundredths ?? 0) : rollRarityD9(depth, progression.quality, random));
+  const rarityRandom = progression.combatHash ? random() : null, rarityTier = tier2 ?? (progression.combatHash ? hasWorldRarityV2(progression) ? siteRewardRarityV1(progression.siteReward, worldGearRarityV2(depth, progression.rarityHeroLevel, progression.rarityRole, rarityRandom, (progression.modifiers?.qualityHundredths ?? 0) + siteRewardQualityV1(progression.siteReward) + boonRewardQualityV1(progression) + quickClearRewardQualityV1(progression))) : worldGearRarity(depth, progression.combatQuality, rarityRandom, progression.modifiers?.qualityHundredths ?? 0) : rollRarityD9(depth, progression.quality, random));
   safeInteger(rarityTier, 0, 5);
   const cls = progression.gearClass ?? null, classOffhand = cls ? CLASS_GEAR[cls].offhand : null, wardrobe = Boolean(cls) && progression.wardrobe === WARDROBE_V1, classFamilies = wardrobe ? CLASS_GEAR_FAMILIES_V2 : CLASS_GEAR_FAMILIES, families = cls ? classFamilies : progression.armor === "overall" ? ONE_PIECE_GEAR_FAMILIES : GEAR_FAMILIES;
   const type = family2 ?? pick5(families), sub = type === "subweapon" ? subType ?? (cls ? classOffhand : pick5(["shield", "dagger", "tome"])) : null, own2 = type === "cape" ? CAPE_NOUNS : cls && type !== "ring" ? classGearNouns(cls, type) : GEAR_NOUNS[sub ?? type], shared = wardrobe && type === "helmet" ? SHARED_HELMET_NOUNS : [], nouns = [...own2 ?? [], ...shared], n = noun ?? (shared.length && random() < 0.2 ? pick5(shared) : pick5(own2));
@@ -11285,7 +11412,7 @@ function rewardStream4(key9) {
     return r.value / 4294967296;
   }, state: () => copyWire(state) };
 }
-var gearSeed = (state, p, source5) => `dungeon-gear-d7-v1/${state.campaign.seed.seedHex}/${p.playerId}/${source5}`;
+var gearSeed = (state, p, source6) => `dungeon-gear-d7-v1/${state.campaign.seed.seedHex}/${p.playerId}/${source6}`;
 var round43 = (n) => Number(n.toFixed(4));
 function affixRollRange(g, key9) {
   if (g.version === "dungeon-gear-d9-v1") return affixRollRangeD9(g, key9);
@@ -11811,31 +11938,6 @@ function validateShrineV1(r) {
 }
 var shrineReadyV1 = (r) => (r.shrine.sealed || r.shrine.launchedWaves === 3) && r.stages.every((t) => ["defeated", "cancelled"].includes(t.phase));
 
-// src/shared/contracts/nests_v1.js
-var MOTHER = NEST_POLICY.motherMember;
-var nestHealthV1 = (level, party2) => combatInteger(multiplyCombat(worldEnemyStats(level, "C").maxHp, NEST_POLICY.nestHealth * NEST_POLICY.partyHealthPercent[party2 - 1], 100));
-var burst = (h) => h.hp.every((hp) => compareCombat(hp, 0) === 0);
-var nestTargetableV1 = (r, n) => r.status === "active" && !r.nest.waiting && r.stages[MOTHER].phase === "pending" && compareCombat(r.nest.hp[n], 0) > 0;
-var nestsReadyV1 = (r) => (burst(r.nest) || r.stages[MOTHER].phase === "defeated") && r.stages.every((t) => ["defeated", "cancelled"].includes(t.phase));
-function validateNestsV1(r) {
-  requireContract(r.kind === "nests" && r.rulesVersion === NESTS_VERSION && r.stages.length === NEST_MEMBERS, "Nest policy/membership");
-  closedRecord(r.nest, ["level", "partySize", "hp", "maxHp", "rotStart", "nextSpawn", "waiting", "resets", "boon"]);
-  const h = r.nest, mother = r.stages[MOTHER].phase;
-  safeInteger(h.partySize, 1, 4);
-  requireContract(compareCombat(h.maxHp, nestHealthV1(h.level, h.partySize)) === 0, "Nest health scaling");
-  requireContract(Array.isArray(h.hp) && h.hp.length === 3 && h.hp.every((hp) => compareCombat(hp, 0) >= 0 && compareCombat(hp, h.maxHp) <= 0), "Nest health");
-  safeInteger(h.rotStart, 0, r.elapsedTicks);
-  safeInteger(h.nextSpawn);
-  safeInteger(h.resets);
-  requireContract(typeof h.waiting === "boolean" && (h.boon === null || NEST_POLICY.boons.includes(h.boon)), "Nest state");
-  requireContract(r.stages.every((t) => ["pending", "hatched", "defeated", "cancelled"].includes(t.phase)), "Nest stage");
-  requireContract(!["hatched", "defeated"].includes(mother) || r.elapsedTicks - h.rotStart >= NEST_POLICY.rotTicks, "Brood Mother woke early");
-  requireContract(mother !== "cancelled" || burst(h), "Brood Mother withered early");
-  if (h.waiting) requireContract(mother === "pending" && r.stages.every((t) => t.phase !== "hatched") && h.hp.every((hp) => compareCombat(hp, h.maxHp) === 0), "Waiting nests");
-  requireContract(r.status === "completed" === (h.boon !== null), "Nest boon");
-  if (r.status === "completed") requireContract(nestsReadyV1(r), "Incomplete nest completion");
-}
-
 // src/shared/contracts/world_events_v1.js
 var PLANNED_LEDGER_VERSION = "world-events-planned-v1";
 var WAVES = ["spore", "hollow", "cursed_shrine", "nests"];
@@ -11900,8 +12002,8 @@ function validateWorldEvents(root) {
   }
   requireContract(active2 <= SPORE_POLICY.maxActive, "Four active event limit");
 }
-var source4 = (s, id, kind2, n) => episodeRewardId(id, s.encounterEconomy.groups[id].episode, kind2, n);
-var podUsed = (s, id, n) => Boolean(s.encounterEconomy.groups[id]?.usedResources[source4(s, id, "breakable", n)]);
+var source5 = (s, id, kind2, n) => episodeRewardId(id, s.encounterEconomy.groups[id].episode, kind2, n);
+var podUsed = (s, id, n) => Boolean(s.encounterEconomy.groups[id]?.usedResources[source5(s, id, "breakable", n)]);
 function eventResourceVisible(s, r) {
   const kind2 = eventKind(s, r.groupId);
   const event = eventRecord(s, r.groupId);
@@ -11925,7 +12027,7 @@ function validateWorldEventsState(s) {
     if (isSporeV3(r)) requireContract(r.pressure.adoptedTick <= s.tick, "Spore pressure adoption chronology");
     const g = s.groupsById[r.groupId];
     if (!g) continue;
-    requireContract(eventKind(s, r.groupId) === r.kind && g.spaceInstanceId === s.overworldInstanceId && g.entityIds.length === (membersOf(r.kind) || 6), "Event group binding");
+    requireContract(eventKind(s, r.groupId) === r.kind && g.spaceInstanceId === s.overworldInstanceId && g.entityIds.length === (r.kind === "cursed_shrine" ? PLANNED_EVENT_MEMBERS : membersOf(r.kind) || 6), "Event group binding");
     requireContract(r.status === "completed" ? g.cleared : !g.cleared, "Event completion agreement");
     if (isSporeV2(r)) r.pods.forEach((p, n) => {
       requireContract(p.lastHitTick === null || p.lastHitTick <= s.tick, "Spore hit chronology");
@@ -12120,11 +12222,11 @@ function validateSiteEndFloorV1(state, site, floor) {
   requireContract(elite?.affixIds?.[0] === end.affixId && elite.floorId === floor.floorId && (elite.namedEliteId ?? null) === (end.named ?? null), "SITE_END:ELITE_MISSING");
   return true;
 }
-function siteRewardKindV1(state, source5, spawnEntityId = null) {
-  if (!["enemy", "chest"].includes(source5?.kind) || !siteEndsActiveV1(state)) return null;
+function siteRewardKindV1(state, source6, spawnEntityId = null) {
+  if (!["enemy", "chest"].includes(source6?.kind) || !siteEndsActiveV1(state)) return null;
   let site = null, floor = null;
   for (const s of Object.values(state.d9World.functionalSitesById ?? {})) {
-    floor = s.floors?.find((f2) => f2.groupId === source5.groupId) ?? null;
+    floor = s.floors?.find((f2) => f2.groupId === source6.groupId) ?? null;
     if (floor) {
       site = s;
       break;
@@ -12132,8 +12234,8 @@ function siteRewardKindV1(state, source5, spawnEntityId = null) {
   }
   if (!floor) return null;
   const lair = ["large", "deep"].includes(site.sizeTier);
-  if (source5.kind === "chest") return lair ? "lair-chest" : null;
-  const id = spawnEntityId ?? state.groupsById[source5.groupId]?.entityIds[source5.spawnOrdinal ?? source5.ordinal];
+  if (source6.kind === "chest") return lair ? "lair-chest" : null;
+  const id = spawnEntityId ?? state.groupsById[source6.groupId]?.entityIds[source6.spawnOrdinal ?? source6.ordinal];
   if (state.bossCombat?.bossesByEntityId?.[id]) return lair ? "lair-boss" : null;
   const role = siteEndRoleV1(floor, id);
   if (role) return role === "elite" ? "site-end-elite" : "mini-boss";
@@ -12713,8 +12815,8 @@ function validateWorkshopProgress(before, after, pid) {
   for (const [id, r] of Object.entries(b.records)) for (const stamp of r.receipts.slice(a.records[id]?.receipts.length ?? 0)) {
     requireContract(stamp.authorityOrder > before.lastAppliedAuthorityOrder && stamp.revision > before.playersById[pid].inventory.revision, "Modification lacks later command");
     const old = before.playersById[pid].inventory.itemsById[id];
-    const source5 = r.baseItem.sourceEntityId;
-    requireContract(old || a.records[id] || before.playersById[pid].inventory.renewal.groundBySourceId[source5] || after.playersById[pid].inventory.services.purchasesBySourceId[source5] || after.playersById[pid].inventory.rewardsByEntityId[source5]?.claimed, "Modification lost ownership");
+    const source6 = r.baseItem.sourceEntityId;
+    requireContract(old || a.records[id] || before.playersById[pid].inventory.renewal.groundBySourceId[source6] || after.playersById[pid].inventory.services.purchasesBySourceId[source6] || after.playersById[pid].inventory.rewardsByEntityId[source6]?.claimed, "Modification lost ownership");
   }
   for (const [k, n] of Object.entries(a.materialPurchases)) requireContract((b.materialPurchases[k] ?? 0) >= n, "Material purchase history removed");
   for (const [k, n] of Object.entries(b.materialPurchases)) {
@@ -12770,7 +12872,7 @@ function runtimeCollisionPageD92(page) {
 function acceptedEventGearGeographyV2(groupId, g) {
   const waves = hollowOrdinal(g.anchorOrdinal) || plannedEventOrdinal(g.anchorOrdinal);
   if (!/^ordinary:[a-f0-9]{32}$/.test(groupId) || g.combatHash !== WORLD_COMBAT_HASH || !eventOrdinal(g.anchorOrdinal) && !waves) return false;
-  requireContract(Array.isArray(g.entityIds) && g.entityIds.length === (waves ? 13 : sporeOrdinal(g.anchorOrdinal) ? 12 : 6), "Event gear roster provenance");
+  requireContract(Array.isArray(g.entityIds) && g.entityIds.length === (plannedEventOrdinal(g.anchorOrdinal) ? PLANNED_EVENT_MEMBERS : waves ? 13 : sporeOrdinal(g.anchorOrdinal) ? 12 : 6), "Event gear roster provenance");
   requireContract(g.rank === (g.anchorOrdinal === 39 ? "B" : "C"), "Event gear rank provenance");
   return true;
 }
@@ -14279,7 +14381,7 @@ async function buildRuinFamilyV1(state, socket, binding, { sha256, runEpisode = 
     }
     if (hosting && restored) requireContract(bosses.some((record2) => record2.boss?.entityId === p.actors[0]?.entityId), "Required restored site boss was not installed");
     if (recipe.encounter.siteEnd && p.actors.length) {
-      const a = p.actors[0], leader = recipe.encounter.members[0], end = recipe.encounter.siteEnd, source5 = { campaignSeed: state.campaign.seed.seedHex, siteId: socket.siteId, floorId: floorIds[i], groupId: p.group.groupId, roomId: leader.roomId, entityId: a.entityId, activatedTick: state.tick }, elite = await (end.named ? createNamedEliteV1(source5, end.named, { sha256 }) : createEliteForAffixD13D_B(source5, leader.eliteAffixId, { sha256 })), stats = applyEliteActorStatsD12_4({ maxHp: a.maxHp, attackDamage: a.attackDamage }, elite), m = siteEndBodyV1(end, { ...stats, hullRadius: a.hullRadius, combatRadius: a.combatRadius });
+      const a = p.actors[0], leader = recipe.encounter.members[0], end = recipe.encounter.siteEnd, source6 = { campaignSeed: state.campaign.seed.seedHex, siteId: socket.siteId, floorId: floorIds[i], groupId: p.group.groupId, roomId: leader.roomId, entityId: a.entityId, activatedTick: state.tick }, elite = await (end.named ? createNamedEliteV1(source6, end.named, { sha256 }) : createEliteForAffixD13D_B(source6, leader.eliteAffixId, { sha256 })), stats = applyEliteActorStatsD12_4({ maxHp: a.maxHp, attackDamage: a.attackDamage }, elite), m = siteEndBodyV1(end, { ...stats, hullRadius: a.hullRadius, combatRadius: a.combatRadius });
       Object.assign(a, { hp: combatInteger(m.maxHp), maxHp: combatInteger(m.maxHp), attackDamage: combatInteger(m.attackDamage), hullRadius: m.hullRadius, combatRadius: m.combatRadius });
       elites.push(elite);
     }
@@ -15425,7 +15527,7 @@ async function buildFortFamilyV1(state, socket, binding, { sha256, runEpisode = 
     }
     if (hosting && restored) requireContract(restoredInstalled, "Required restored Fort boss was not installed");
     if (!aegis && !brimstone && !restoredInstalled && leader.eliteAffixId) {
-      const a = p.actors[0], source5 = { campaignSeed: state.campaign.seed.seedHex, siteId: socket.siteId, floorId: floorIds[i], groupId: p.group.groupId, roomId: leader.roomId, entityId: a.entityId, activatedTick: state.tick }, named = recipe.encounter.siteEnd?.named, elite = await (named ? createNamedEliteV1(source5, named, { sha256 }) : createEliteForAffixD13D_B(source5, leader.eliteAffixId, { sha256 })), stats = applyEliteActorStatsD12_4({ maxHp: a.maxHp, attackDamage: a.attackDamage }, elite);
+      const a = p.actors[0], source6 = { campaignSeed: state.campaign.seed.seedHex, siteId: socket.siteId, floorId: floorIds[i], groupId: p.group.groupId, roomId: leader.roomId, entityId: a.entityId, activatedTick: state.tick }, named = recipe.encounter.siteEnd?.named, elite = await (named ? createNamedEliteV1(source6, named, { sha256 }) : createEliteForAffixD13D_B(source6, leader.eliteAffixId, { sha256 })), stats = applyEliteActorStatsD12_4({ maxHp: a.maxHp, attackDamage: a.attackDamage }, elite);
       a.hp = combatInteger(stats.maxHp);
       a.maxHp = combatInteger(stats.maxHp);
       a.attackDamage = combatInteger(stats.attackDamage);
@@ -16723,7 +16825,7 @@ async function buildWoodlandCaveFamilyD12_2(state, site, binding, { sha256, runE
     for (let n = 0; n < encounterMembers.length; n++) {
       const spec = encounterMembers[n], boss = spec.role === "arachnid-treant", enemy = boss ? null : ORDINARY_ENEMIES.find((e) => e.family === spec.family);
       requireContract(boss || enemy, "Unknown D12 cave enemy");
-      const profile2 = boss ? ARACHNID_TREANT_PROFILE : resolveOrdinaryProfile(enemy, floor.encounter.rank), entityId2 = "ent:" + await token6(`floor-${floor.index}-enemy-${n}`), resolved = worldOrdinaryMeleeProfile(state, state.content.definitionsById[profile2.contentDefinitionId]), baseStats = boss ? hasWorldCombat(state) ? worldBossStats(episode.snapshot.effectiveLevel) : { maxHp: profile2.maxHp, attackDamage: profile2.attackDamage } : (hasWorldCombat(state) ? worldEnemyStats : threatEndpointsD9)(episode.snapshot.effectiveLevel, floor.encounter.rank, enemy.budget), source5 = { campaignSeed: state.campaign.seed.seedHex, siteId: site.siteId, floorId: floor.floorId, groupId, roomId: spec.roomId, entityId: entityId2, activatedTick: state.tick }, elite = boss ? null : spec.memberKey === LARGE_CAVE_FINALE_ELITE_KEY_D13D_F ? await createEliteForAffixD13D_B(source5, largeFinale.contentBinding.eliteAffixId, { sha256 }) : spec.memberKey === SMALL_CAVE_FINALE_LEADER_KEY_D13D_B ? await createEliteForAffixD13D_B(source5, smallFinale.contentBinding.eliteAffixId, { sha256 }) : slagRoster && n === 0 ? await createSlagShaperEliteD12_4K(source5, { sha256 }) : webRoster && n === 0 ? await createWebWeaverEliteD12_4J(source5, { sha256 }) : nullifierRoster && n === 0 ? await createNullifierEliteD12_4I(source5, { sha256 }) : berserkerRoster && n === 0 ? await createBloodBerserkerEliteD12_4H_A(source5, { sha256 }) : citadelRoster && n === 0 ? await createIronCitadelEliteD12_4G(source5, { sha256 }) : toxicRoster && n === 0 ? await createToxicDecayEliteD12_4F(source5, { sha256 }) : glacialRoster && n === 0 ? await createGlacialWardenEliteD12_4E(source5, { sha256 }) : swiftRoster && n === 0 ? await createSwiftCommanderEliteD12_4D(source5, { sha256 }) : swiftRoster && n === 1 ? await createVitalityWeaverEliteD12_4(source5, { sha256 }) : reviewRoster && !bossRoster && n === 0 ? await createVitalityWeaverEliteD12_4(source5, { sha256 }) : null, stats = applyEliteActorStatsD12_4(baseStats, elite);
+      const profile2 = boss ? ARACHNID_TREANT_PROFILE : resolveOrdinaryProfile(enemy, floor.encounter.rank), entityId2 = "ent:" + await token6(`floor-${floor.index}-enemy-${n}`), resolved = worldOrdinaryMeleeProfile(state, state.content.definitionsById[profile2.contentDefinitionId]), baseStats = boss ? hasWorldCombat(state) ? worldBossStats(episode.snapshot.effectiveLevel) : { maxHp: profile2.maxHp, attackDamage: profile2.attackDamage } : (hasWorldCombat(state) ? worldEnemyStats : threatEndpointsD9)(episode.snapshot.effectiveLevel, floor.encounter.rank, enemy.budget), source6 = { campaignSeed: state.campaign.seed.seedHex, siteId: site.siteId, floorId: floor.floorId, groupId, roomId: spec.roomId, entityId: entityId2, activatedTick: state.tick }, elite = boss ? null : spec.memberKey === LARGE_CAVE_FINALE_ELITE_KEY_D13D_F ? await createEliteForAffixD13D_B(source6, largeFinale.contentBinding.eliteAffixId, { sha256 }) : spec.memberKey === SMALL_CAVE_FINALE_LEADER_KEY_D13D_B ? await createEliteForAffixD13D_B(source6, smallFinale.contentBinding.eliteAffixId, { sha256 }) : slagRoster && n === 0 ? await createSlagShaperEliteD12_4K(source6, { sha256 }) : webRoster && n === 0 ? await createWebWeaverEliteD12_4J(source6, { sha256 }) : nullifierRoster && n === 0 ? await createNullifierEliteD12_4I(source6, { sha256 }) : berserkerRoster && n === 0 ? await createBloodBerserkerEliteD12_4H_A(source6, { sha256 }) : citadelRoster && n === 0 ? await createIronCitadelEliteD12_4G(source6, { sha256 }) : toxicRoster && n === 0 ? await createToxicDecayEliteD12_4F(source6, { sha256 }) : glacialRoster && n === 0 ? await createGlacialWardenEliteD12_4E(source6, { sha256 }) : swiftRoster && n === 0 ? await createSwiftCommanderEliteD12_4D(source6, { sha256 }) : swiftRoster && n === 1 ? await createVitalityWeaverEliteD12_4(source6, { sha256 }) : reviewRoster && !bossRoster && n === 0 ? await createVitalityWeaverEliteD12_4(source6, { sha256 }) : null, stats = applyEliteActorStatsD12_4(baseStats, elite);
       requireContract(resolved, "Missing D12 cave actor profile");
       if (elite) elites.push(elite);
       entityIds.push(entityId2);
@@ -16868,10 +16970,10 @@ function rewardClassForEconomicResourceD13D_C(state, resource) {
   if (resource.kind !== "chest" || resource.completion !== true || resource.ordinal !== 0) return null;
   return contextForGroup(state, resource.groupId)?.rewardClass ?? null;
 }
-function validateSiteFinaleCompletionRewardSourceD13D_C(state, source5) {
-  const context = contextForGroup(state, source5.groupId), economy = state.encounterEconomy.groups[source5.groupId];
-  requireContract([SITE_FINALE_ELITE_PACK_COMPLETION_REWARD_CLASS, BOSS_COMPLETION_REWARD_CLASS, SITE_FINALE_PROVISIONAL_COMPLETION_REWARD_CLASS].includes(source5.rewardClass) && source5.rewardClass === context?.rewardClass && source5.kind === "chest" && source5.ordinal === 0 && economy?.episode === source5.episode, "Invalid Cave finale completion reward source");
-  return source5;
+function validateSiteFinaleCompletionRewardSourceD13D_C(state, source6) {
+  const context = contextForGroup(state, source6.groupId), economy = state.encounterEconomy.groups[source6.groupId];
+  requireContract([SITE_FINALE_ELITE_PACK_COMPLETION_REWARD_CLASS, BOSS_COMPLETION_REWARD_CLASS, SITE_FINALE_PROVISIONAL_COMPLETION_REWARD_CLASS].includes(source6.rewardClass) && source6.rewardClass === context?.rewardClass && source6.kind === "chest" && source6.ordinal === 0 && economy?.episode === source6.episode, "Invalid Cave finale completion reward source");
+  return source6;
 }
 
 // src/shared/contracts/site_run_episode_d13b.js
@@ -17025,17 +17127,17 @@ function appendReceipt(record2, receipt) {
     record2.historyArchive.archivedCommitment = archived.commitment;
   }
 }
-function rewardArchiveProof(receipt, sourceEntityId, source5, reward) {
-  const base = { version: SITE_RUN_REWARD_ARCHIVE_D13C1, siteId: receipt.siteId, episode: receipt.episode, episodeSeed: receipt.episodeSeed, startedTick: receipt.startedTick, clearedTick: receipt.clearedTick, resetTick: receipt.resetTick, groupCount: receipt.groupCount, enemyCount: receipt.enemyCount, receiptIdentityCommitment: receipt.identityCommitment, sourceEntityId, groupId: source5.groupId, sourceEpisode: source5.episode, kind: source5.kind, ordinal: source5.ordinal, rank: source5.rank, spawnEntityId: reward.spawnEntityId, participantIds: [] };
+function rewardArchiveProof(receipt, sourceEntityId, source6, reward) {
+  const base = { version: SITE_RUN_REWARD_ARCHIVE_D13C1, siteId: receipt.siteId, episode: receipt.episode, episodeSeed: receipt.episodeSeed, startedTick: receipt.startedTick, clearedTick: receipt.clearedTick, resetTick: receipt.resetTick, groupCount: receipt.groupCount, enemyCount: receipt.enemyCount, receiptIdentityCommitment: receipt.identityCommitment, sourceEntityId, groupId: source6.groupId, sourceEpisode: source6.episode, kind: source6.kind, ordinal: source6.ordinal, rank: source6.rank, spawnEntityId: reward.spawnEntityId, participantIds: [] };
   return { ...base, sourceCommitment: commitment("SAQ-WORLD-SITE-RUN-REWARD-SOURCE-D13C1", base) };
 }
-function dispositionOrigin(state, player, sourceEntityId, source5, proof2) {
-  const inv = player.inventory, itemId2 = `item:${player.playerId}:${sourceEntityId}`, base = { groupId: source5.groupId, episode: source5.episode, sourceEntityId, ...source5.progression ? { progression: copyWire(source5.progression) } : {} };
+function dispositionOrigin(state, player, sourceEntityId, source6, proof2) {
+  const inv = player.inventory, itemId2 = `item:${player.playerId}:${sourceEntityId}`, base = { groupId: source6.groupId, episode: source6.episode, sourceEntityId, ...source6.progression ? { progression: copyWire(source6.progression) } : {} };
   const carried = inv.itemsById[itemId2] && inv.renewal.originsByItemId[itemId2], dropped = inv.renewal.groundBySourceId[sourceEntityId]?.origin, salvaged = inv.d7?.salvaged?.[itemId2]?.origin, automatic = inv.d7?.autoSalvaged?.[itemId2]?.origin, remote = state.d9World?.paging.remoteGearByPlayer?.[player.playerId]?.[itemId2];
   const rows3 = [carried, dropped, salvaged, automatic, inv.services?.salesByItemId[itemId2]?.origin, remote?.origin].filter(Boolean);
   requireContract(rows3.length === 1 || rows3.length === 0 && remote, "Claimed retired gear has no unique ownership disposition");
   const origin2 = rows3[0] ?? (remote.origin = base);
-  requireContract(origin2.groupId === source5.groupId && origin2.episode === source5.episode && origin2.sourceEntityId === sourceEntityId, "Retired gear ownership provenance drift");
+  requireContract(origin2.groupId === source6.groupId && origin2.episode === source6.episode && origin2.sourceEntityId === sourceEntityId, "Retired gear ownership provenance drift");
   origin2.archive = copyWire(proof2);
   return origin2;
 }
@@ -17045,17 +17147,17 @@ function retireEpisodeRewardRowsD13C2(state, receipt, { archivedOnly = false } =
     const inv = player.inventory;
     let changed = false;
     for (const [sourceEntityId, reward] of Object.entries(inv?.rewardsByEntityId ?? {})) {
-      const source5 = reward.episodeSource;
-      if (!source5 || (archivedOnly ? !source5.archive : !groupIds.has(source5.groupId))) continue;
-      let proof2 = source5.archive;
+      const source6 = reward.episodeSource;
+      if (!source6 || (archivedOnly ? !source6.archive : !groupIds.has(source6.groupId))) continue;
+      let proof2 = source6.archive;
       if (!proof2) {
-        const used = state.encounterEconomy?.groups?.[source5.groupId]?.usedResources?.[sourceEntityId];
-        proof2 = rewardArchiveProof(receipt, sourceEntityId, source5, reward);
+        const used = state.encounterEconomy?.groups?.[source6.groupId]?.usedResources?.[sourceEntityId];
+        proof2 = rewardArchiveProof(receipt, sourceEntityId, source6, reward);
         proof2.participantIds = used ? [...used.playerIds] : [];
         const { sourceCommitment: ignored, ...base } = proof2;
         proof2.sourceCommitment = commitment("SAQ-WORLD-SITE-RUN-REWARD-SOURCE-D13C1", base);
       }
-      if (reward.definitionId && reward.claimed) dispositionOrigin(state, player, sourceEntityId, source5, proof2);
+      if (reward.definitionId && reward.claimed) dispositionOrigin(state, player, sourceEntityId, source6, proof2);
       inv.renewal.retiredGold = addAmount(inv.renewal.retiredGold, rewardAmount(inv.goldAwardsByEntityId[sourceEntityId].amount));
       inv.renewal.retiredSouls = safeInteger(inv.renewal.retiredSouls + (inv.economy.soulAwardsByEntityId[sourceEntityId] ?? 0));
       delete inv.rewardsByEntityId[sourceEntityId];
@@ -17069,12 +17171,12 @@ function retireEpisodeRewardRowsD13C2(state, receipt, { archivedOnly = false } =
     }
   }
 }
-function validateSiteRunRewardArchiveD13C1(state, sourceEntityId, source5) {
-  const proof2 = source5?.archive;
+function validateSiteRunRewardArchiveD13C1(state, sourceEntityId, source6) {
+  const proof2 = source6?.archive;
   if (!proof2) return false;
   closedRecord(proof2, ["version", "siteId", "episode", "episodeSeed", "startedTick", "clearedTick", "resetTick", "groupCount", "enemyCount", "receiptIdentityCommitment", "sourceEntityId", "groupId", "sourceEpisode", "kind", "ordinal", "rank", "spawnEntityId", "participantIds", "sourceCommitment"]);
-  requireContract(proof2.version === SITE_RUN_REWARD_ARCHIVE_D13C1 && proof2.sourceEntityId === sourceEntityId && proof2.groupId === source5.groupId && proof2.sourceEpisode === source5.episode && (source5.sourceEntityId === void 0 || source5.sourceEntityId === sourceEntityId), "Archived reward source identity drift");
-  if (source5.kind !== void 0) requireContract(proof2.kind === source5.kind && proof2.ordinal === source5.ordinal && proof2.rank === source5.rank, "Archived reward source detail drift");
+  requireContract(proof2.version === SITE_RUN_REWARD_ARCHIVE_D13C1 && proof2.sourceEntityId === sourceEntityId && proof2.groupId === source6.groupId && proof2.sourceEpisode === source6.episode && (source6.sourceEntityId === void 0 || source6.sourceEntityId === sourceEntityId), "Archived reward source identity drift");
+  if (source6.kind !== void 0) requireContract(proof2.kind === source6.kind && proof2.ordinal === source6.ordinal && proof2.rank === source6.rank, "Archived reward source detail drift");
   const record2 = state.campaign.siteRunEpisodesById?.[proof2.siteId];
   requireContract(record2 && record2.episode > proof2.episode && proof2.episodeSeed === deriveSiteRunEpisodeSeedD13B(worldSeedHex(state), proof2.siteId, proof2.episode), "Archived reward episode is not retired");
   safeInteger(proof2.startedTick, 0, proof2.clearedTick);
@@ -17102,7 +17204,7 @@ function removeTemporaryCombat(state, entityIds) {
   if (elite) {
     for (const [id, row] of Object.entries(elite.pendingHazardsBySourceEliteId ?? {})) if (eliteIds.has(id) || eliteIds.has(row.sourceEliteId)) delete elite.pendingHazardsBySourceEliteId[id];
     for (const [id, row] of Object.entries(elite.hazardsById ?? {})) if (eliteIds.has(row.sourceEliteId)) delete elite.hazardsById[id];
-    for (const key9 of ["hasteByEntityId", "guardByEntityId", "attackAuraByEntityId"]) for (const [id, row] of Object.entries(elite[key9] ?? {})) if (actors.has(id) || row.sourceEliteIds?.some((source5) => eliteIds.has(source5))) delete elite[key9][id];
+    for (const key9 of ["hasteByEntityId", "guardByEntityId", "attackAuraByEntityId"]) for (const [id, row] of Object.entries(elite[key9] ?? {})) if (actors.has(id) || row.sourceEliteIds?.some((source6) => eliteIds.has(source6))) delete elite[key9][id];
     for (const [id, statuses] of Object.entries(elite.timedStatusesByEntityId ?? {})) {
       for (const [statusId, row] of Object.entries(statuses)) if (actors.has(id) || eliteIds.has(row.sourceEliteId)) delete statuses[statusId];
       if (!Object.keys(statuses).length) delete elite.timedStatusesByEntityId[id];
@@ -17817,7 +17919,7 @@ function validateWorldPagingD9(paging) {
   for (const [id, g] of Object.entries(paging.originsByGroup)) {
     closedRecord(g, ["groupId", "episode", "rank", "chunkX", "chunkY", "anchorOrdinal", "entityIds"], ["combatHash"]);
     const site = functionalSiteDefinitionForGroupD10(id), generated = /^site:site:[a-f0-9]{32}:cave-floor-[0-3]$/.test(id), fortFloor = fortGroupFloorIndexV1(id), ruin = cryptGroupInfoV2(id) ?? ruinGroupInfoV2(id), count = ruin ? ruin.count : fortFloor !== null ? 3 : site?.template.encounter.members.length ?? (generated ? null : 2);
-    requireContract(g.groupId === id && ["C", "B", "A", "S"].includes(g.rank) && (g.combatHash === WORLD_COMBAT_HASH ? g.entityIds.length >= 1 && g.entityIds.length <= 40 : count === null ? g.entityIds.length >= 1 && g.entityIds.length <= 5 : g.entityIds.length === count), "Cold origin identity");
+    requireContract(g.groupId === id && ["C", "B", "A", "S"].includes(g.rank) && (g.combatHash === WORLD_COMBAT_HASH ? g.entityIds.length >= 1 && g.entityIds.length <= 48 : count === null ? g.entityIds.length >= 1 && g.entityIds.length <= 5 : g.entityIds.length === count), "Cold origin identity");
     safeInteger(g.episode);
     if (!acceptedEventGearGeographyV2(id, g)) safeInteger(g.anchorOrdinal, 0, generated || fortFloor !== null || ruin ? 3 : 1);
     if (g.combatHash !== void 0) requireContract(g.combatHash === WORLD_COMBAT_HASH, "Unknown roster provenance policy");
@@ -17972,8 +18074,8 @@ function attachChunkRuntimeD9(state, chunk, delta) {
       const resource = copyWire(initial.resource);
       resource.position = local(resource.position);
       runtime.resources.push(resource);
-      for (const source5 of initial.actors) {
-        const actor = copyWire(source5);
+      for (const source6 of initial.actors) {
+        const actor = copyWire(source6);
         actor.position = local(actor.position);
         state.entitiesById[actor.entityId] = actor;
       }
@@ -17993,17 +18095,17 @@ function rewardClassForEconomicResourceD12_5D(state, resource) {
   if (state.proofCase !== "O" || resource.kind !== "chest" || resource.completion !== true || resource.ordinal !== 0) return null;
   return arachnidTreantForGroup(state, resource.groupId) ? BOSS_COMPLETION_REWARD_CLASS : null;
 }
-function validateBossCompletionRewardSourceD12_5D(state, source5) {
-  requireContract(source5.rewardClass === BOSS_COMPLETION_REWARD_CLASS && state.proofCase === "O" && source5.kind === "chest" && source5.ordinal === 0 && Boolean(arachnidTreantForGroup(state, source5.groupId)), "Invalid boss completion reward source");
-  return source5;
+function validateBossCompletionRewardSourceD12_5D(state, source6) {
+  requireContract(source6.rewardClass === BOSS_COMPLETION_REWARD_CLASS && state.proofCase === "O" && source6.kind === "chest" && source6.ordinal === 0 && Boolean(arachnidTreantForGroup(state, source6.groupId)), "Invalid boss completion reward source");
+  return source6;
 }
 function rewardClassForCompletionResourceD13D_C(state, resource) {
   return rewardClassForEconomicResourceD13D_C(state, resource) ?? rewardClassForEconomicResourceD12_5D(state, resource);
 }
-function validateCompletionRewardSourceD13D_C(state, source5) {
-  if (source5.rewardClass !== BOSS_COMPLETION_REWARD_CLASS) return validateSiteFinaleCompletionRewardSourceD13D_C(state, source5);
-  const production = rewardClassForEconomicResourceD13D_C(state, { ...source5, completion: true });
-  return production === BOSS_COMPLETION_REWARD_CLASS ? validateSiteFinaleCompletionRewardSourceD13D_C(state, source5) : validateBossCompletionRewardSourceD12_5D(state, source5);
+function validateCompletionRewardSourceD13D_C(state, source6) {
+  if (source6.rewardClass !== BOSS_COMPLETION_REWARD_CLASS) return validateSiteFinaleCompletionRewardSourceD13D_C(state, source6);
+  const production = rewardClassForEconomicResourceD13D_C(state, { ...source6, completion: true });
+  return production === BOSS_COMPLETION_REWARD_CLASS ? validateSiteFinaleCompletionRewardSourceD13D_C(state, source6) : validateBossCompletionRewardSourceD12_5D(state, source6);
 }
 
 // src/shared/contracts/renewable_inventory.js
@@ -18042,21 +18144,21 @@ function installAutoSalvageDeadlines(state) {
 function groundGear(p) {
   return [...Object.values(p.inventory.rewardsByEntityId).filter((r) => r.definitionId && !r.claimed && r.retiredTick === void 0), ...Object.entries(p.inventory.renewal?.groundBySourceId ?? {}).map(([id, g]) => ({ sourceEntityId: id, definitionId: g.item.definitionId, ...g.item.generated ? { generated: g.item.generated } : {}, ...g.item.workshop ? { workshop: g.item.workshop } : {}, position: g.position, spaceInstanceId: g.spaceInstanceId, dropped: true }))];
 }
-function validateCombatRewardSourceV1(state, source5, spawnEntityId, live, recipient = null) {
+function validateCombatRewardSourceV1(state, source6, spawnEntityId, live, recipient = null) {
   if (!hasWorldCombat(state)) return;
-  const p = source5.progression;
+  const p = source6.progression;
   requireContract(p?.combatHash === WORLD_COMBAT_HASH, "Reward combat policy mismatch");
   if (hasWorldRarityV2(p)) {
     validateWorldRarityProgressionV2(p);
     if (recipient) requireContract(progressionBigInt(p.rarityHeroLevel) <= progressionBigInt(recipient.progression.level), "Reward rarity hero snapshot exceeds recipient");
     if (p.gearClass && recipient) requireContract(heroClassOf(recipient.d8)?.id === p.gearClass, "Reward gear class mismatch");
     if (live) {
-      const site = siteRewardKindV1(state, source5, spawnEntityId);
-      requireContract(p.rarityRole === (siteRewardRoleV1(site) ?? rewardRarityRoleV2(state, source5, spawnEntityId)) && (p.siteReward ?? null) === site, "Reward rarity role drift");
+      const site = siteRewardKindV1(state, source6, spawnEntityId);
+      requireContract(p.rarityRole === (siteRewardRoleV1(site) ?? rewardRarityRoleV2(state, source6, spawnEntityId)) && (p.siteReward ?? null) === site, "Reward rarity role drift");
     }
   }
   if (live) {
-    const snapshot = state.d9World.episodes[source5.groupId]?.snapshot, quality = source5.kind === "chest" ? "completion" : source5.kind === "enemy" && (state.eliteCombat?.elitesByEntityId[spawnEntityId] || state.bossCombat?.bossesByEntityId[spawnEntityId]) ? "elite" : "ordinary";
+    const snapshot = state.d9World.episodes[source6.groupId]?.snapshot, quality = source6.kind === "chest" ? "completion" : source6.kind === "enemy" && (state.eliteCombat?.elitesByEntityId[spawnEntityId] || state.bossCombat?.bossesByEntityId[spawnEntityId]) ? "elite" : "ordinary";
     requireContract(snapshot && same19(p.sourceDepth, snapshot.sourceDepth) && p.episodeSnapshotId === snapshot.snapshotId && p.combatQuality === quality, "Reward locked level/quality mismatch");
   }
 }
@@ -18295,8 +18397,8 @@ function validateRenewableInventoryProgress(before, after, pid) {
     const value = { ...reward, claimed: false, pickup: null, autoSalvage: null };
     delete value.retiredTick;
     if (value.episodeSource) {
-      const { archive: ignored, ...source5 } = value.episodeSource;
-      value.episodeSource = source5;
+      const { archive: ignored, ...source6 } = value.episodeSource;
+      value.episodeSource = source6;
     }
     return value;
   };
@@ -18472,8 +18574,8 @@ function hasHistory(s, id) {
   return Object.values(s.playersById).some((p) => {
     const inv = p.inventory, rows3 = [...Object.values(inv.rewardsByEntityId ?? {}), ...Object.values(inv.renewal?.originsByItemId ?? {}), ...Object.values(inv.d7?.salvaged ?? {}), ...Object.values(inv.d7?.autoSalvaged ?? {})];
     return rows3.some((r) => {
-      const source5 = r.episodeSource ?? r.origin ?? r.reward?.episodeSource ?? r;
-      return source5.groupId === id && (source5.episode === void 0 || source5.episode === economy.episode);
+      const source6 = r.episodeSource ?? r.origin ?? r.reward?.episodeSource ?? r;
+      return source6.groupId === id && (source6.episode === void 0 || source6.episode === economy.episode);
     });
   });
 }
@@ -20281,11 +20383,11 @@ function validateMasteryCombat(s) {
   closedRecord(all, Object.values(s.playersById).map((p) => p.entityId));
   for (const [owner, b] of Object.entries(all)) {
     closedRecord(b, ["poisons", "statuses", "hazards", "razors"]);
-    const source5 = s.entitiesById[owner];
+    const source6 = s.entitiesById[owner];
     for (const name of Object.keys(b)) {
       closedRecord(b[name], [], Object.keys(b[name]));
       for (const [id, e] of Object.entries(b[name])) {
-        requireContract(e.id === id && e.sourceId === owner && source5.alive && e.spaceInstanceId === source5.residency.spaceInstanceId, "Mastery effect ownership/space");
+        requireContract(e.id === id && e.sourceId === owner && source6.alive && e.spaceInstanceId === source6.residency.spaceInstanceId, "Mastery effect ownership/space");
         if (name === "poisons") {
           closedRecord(e, ["id", "sourceId", "targetId", "spaceInstanceId", "attack", "rank", "toxicRank", "stacks", "nextTick", "expiresTick", "sourceItem"]);
           validateInteger(e.attack);
@@ -22463,20 +22565,20 @@ function compileOverworldManifest(definition, resolveAreaDefinition) {
   const blockers2 = [];
   const chunks2 = new Map(definition.chunks.map((chunk) => [technicalChunkId(chunk), chunk]));
   for (const chunk of definition.chunks) {
-    const source5 = resolveAreaDefinition(chunk.collisionDefinitionId), visualSource = resolveAreaDefinition(chunk.terrainDefinitionId);
+    const source6 = resolveAreaDefinition(chunk.collisionDefinitionId), visualSource = resolveAreaDefinition(chunk.terrainDefinitionId);
     const ox = chunk.origin.x / tile, oy = chunk.origin.y / tile;
-    closedRecord(source5, ["collision", "visual"]);
+    closedRecord(source6, ["collision", "visual"]);
     closedRecord(visualSource, ["collision", "visual"]);
-    const sourceCollision = source5.collision;
+    const sourceCollision = source6.collision;
     requireContract(sourceCollision.tileSize === tile && sourceCollision.width * tile === chunk.dimensions.width && sourceCollision.height * tile === chunk.dimensions.height, "Resolved area dimensions mismatch");
-    validateVisual(source5.visual, sourceCollision.width, sourceCollision.height);
+    validateVisual(source6.visual, sourceCollision.width, sourceCollision.height);
     validateVisual(visualSource.visual, sourceCollision.width, sourceCollision.height);
     for (let y = 0; y < sourceCollision.height; y++) for (let x = 0; x < sourceCollision.width; x++) {
       collision2[oy + y][ox + x] = sourceCollision.tiles[y][x];
       terrain2[oy + y][ox + x] = visualSource.visual.terrain[y][x];
     }
     for (const blocker of visualSource.visual.blockers) {
-      const boundary = blocker.x === 0 || blocker.y === 0 || blocker.x + blocker.width === source5.collision.width || blocker.y + blocker.height === source5.collision.height;
+      const boundary = blocker.x === 0 || blocker.y === 0 || blocker.x + blocker.width === source6.collision.width || blocker.y + blocker.height === source6.collision.height;
       if (!boundary) blockers2.push({ ...copyWire(blocker), x: ox + blocker.x, y: oy + blocker.y });
     }
   }
@@ -23126,12 +23228,12 @@ function proofDefeated(state) {
   const p = state.campaign?.encounterProof;
   return Boolean(p && !p.cleared && p.requiredHostileIds.length === 1 && p.requiredHostileIds.every((id) => !state.space.entitiesById[id].alive));
 }
-function prepareProofStart(source5, hostileId) {
-  requireContract(canActivateProof(source5), "Authored activation unavailable");
+function prepareProofStart(source6, hostileId) {
+  requireContract(canActivateProof(source6), "Authored activation unavailable");
   validateId("entityId", hostileId);
-  const clearing = proofClearingForState(source5);
-  requireContract(!source5.space.entitiesById[hostileId], "Hostile identity already in use");
-  const next = compactSafeHistory(source5), p = next.content.definitionsById[SLIME_CLEARING.hostileProfileId];
+  const clearing = proofClearingForState(source6);
+  requireContract(!source6.space.entitiesById[hostileId], "Hostile identity already in use");
+  const next = compactSafeHistory(source6), p = next.content.definitionsById[SLIME_CLEARING.hostileProfileId];
   next.campaign.encounterProof.requiredHostileIds = [hostileId];
   next.space.entitiesById[hostileId] = {
     entityId: hostileId,
@@ -23163,9 +23265,9 @@ function prepareProofStart(source5, hostileId) {
   }
   return next;
 }
-function prepareProofClear(source5) {
-  requireContract(proofDefeated(source5) && Object.values(source5.primary.actorsById).every((a) => a.current === null && a.heldCommandId === null && a.queuedCommandId === null), "Victory requires defeated roster and settled primary actions");
-  const next = copyWire(source5);
+function prepareProofClear(source6) {
+  requireContract(proofDefeated(source6) && Object.values(source6.primary.actorsById).every((a) => a.current === null && a.heldCommandId === null && a.queuedCommandId === null), "Victory requires defeated roster and settled primary actions");
+  const next = copyWire(source6);
   for (const id of next.campaign.encounterProof.requiredHostileIds) delete next.space.entitiesById[id];
   next.campaign.encounterProof = { ...initialEncounterProof(), cleared: true };
   next.space.encounterId = null;
@@ -23176,32 +23278,32 @@ function prepareProofClear(source5) {
   }
   return compactSafeHistory(next);
 }
-function validatePrimaryProgress(before, source5) {
-  requireContract(before.primary && source5.primary && source5.tick >= before.tick, "Invalid primary progress context");
-  validateCampaignDiscoveryProgress(before, source5);
+function validatePrimaryProgress(before, source6) {
+  requireContract(before.primary && source6.primary && source6.tick >= before.tick, "Invalid primary progress context");
+  validateCampaignDiscoveryProgress(before, source6);
   for (const key9 of ["session", "content", "activeSpaceRef", "rngStatesByName"])
-    requireContract(same26(before[key9], source5[key9]), `Primary progress changed ${key9}`);
-  requireContract(same26(before.multiplayer.encounterParticipants, source5.multiplayer.encounterParticipants), "Primary progress changed frozen roster");
-  requireContract(same26(Object.keys(before.playersById).sort(), Object.keys(source5.playersById).sort()), "Primary player membership changed");
-  for (const [id, player] of Object.entries(before.playersById)) requireContract(same26({ ...player, connectionStatus: source5.playersById[id].connectionStatus }, source5.playersById[id]), "Primary ownership changed");
+    requireContract(same26(before[key9], source6[key9]), `Primary progress changed ${key9}`);
+  requireContract(same26(before.multiplayer.encounterParticipants, source6.multiplayer.encounterParticipants), "Primary progress changed frozen roster");
+  requireContract(same26(Object.keys(before.playersById).sort(), Object.keys(source6.playersById).sort()), "Primary player membership changed");
+  for (const [id, player] of Object.entries(before.playersById)) requireContract(same26({ ...player, connectionStatus: source6.playersById[id].connectionStatus }, source6.playersById[id]), "Primary ownership changed");
   for (const key9 of ["encounterId", "encounterAttemptId", "collision", "contentDefinitionId"])
-    requireContract(same26(before.space[key9], source5.space[key9]), "Primary space changed");
-  requireContract(same26(Object.keys(before.space.entitiesById).sort(), Object.keys(source5.space.entitiesById).sort()), "Primary actor inventory changed");
+    requireContract(same26(before.space[key9], source6.space[key9]), "Primary space changed");
+  requireContract(same26(Object.keys(before.space.entitiesById).sort(), Object.keys(source6.space.entitiesById).sort()), "Primary actor inventory changed");
   for (const [id, actor] of Object.entries(before.space.entitiesById)) {
-    const current = source5.space.entitiesById[id], normalized = copyWire(current);
+    const current = source6.space.entitiesById[id], normalized = copyWire(current);
     for (const key9 of ["hp", "alive", "position", "movementIntent", "attackTimer", "nextAttackActionSequence", "movedLastTick", "ai"]) normalized[key9] = copyWire(actor[key9]);
     requireContract(same26(actor, normalized) && boundedCombatInteger(current.hp) <= boundedCombatInteger(actor.hp) && current.nextAttackActionSequence >= actor.nextAttackActionSequence, "Primary actor rules/resources changed");
     if (actor.ai) requireContract(same26({ ...current.ai, updatesApplied: actor.ai.updatesApplied }, actor.ai) && current.ai.updatesApplied >= actor.ai.updatesApplied, "Primary AI rules changed");
-    const old = before.history.combatBaseline.actorsById[id], now = source5.history.combatBaseline.actorsById[id];
+    const old = before.history.combatBaseline.actorsById[id], now = source6.history.combatBaseline.actorsById[id];
     requireContract(now.lastSourceSequence >= old.lastSourceSequence && boundedCombatInteger(now.hp) <= boundedCombatInteger(old.hp), "Primary retirement actor anchor regressed");
   }
-  requireContract(source5.eventEmission.lastEventSequence >= before.eventEmission.lastEventSequence && source5.lastAppliedAuthorityOrder >= before.lastAppliedAuthorityOrder && source5.history.commandFloor.authorityOrder >= before.history.commandFloor.authorityOrder, "Primary authority cursor regressed");
-  for (const key9 of ["sessionGeneration", "sessionIdHighWatermark"]) requireContract(same26(before.history[key9], source5.history[key9]), "Primary session fence changed");
+  requireContract(source6.eventEmission.lastEventSequence >= before.eventEmission.lastEventSequence && source6.lastAppliedAuthorityOrder >= before.lastAppliedAuthorityOrder && source6.history.commandFloor.authorityOrder >= before.history.commandFloor.authorityOrder, "Primary authority cursor regressed");
+  for (const key9 of ["sessionGeneration", "sessionIdHighWatermark"]) requireContract(same26(before.history[key9], source6.history[key9]), "Primary session fence changed");
   for (const key9 of ["eventSequence", "tick", "attackActionIdHighWatermark", "eventIdHighWatermark"])
-    requireContract(before.history.combatBaseline[key9] === null || source5.history.combatBaseline[key9] >= before.history.combatBaseline[key9], "Primary retirement cursor regressed");
-  for (const key9 of ["actionIdHighWatermark", "eventIdHighWatermark"]) requireContract(before.primary[key9] === null || source5.primary[key9] >= before.primary[key9], "Primary identity fence regressed");
-  for (const [id, a] of Object.entries(before.primary.actorsById)) requireContract(source5.primary.actorsById[id].profileId === a.profileId && source5.primary.actorsById[id].nextSourceSequence >= a.nextSourceSequence && source5.primary.actorsById[id].retiredSourceSequence >= a.retiredSourceSequence, "Primary source cursor regressed");
-  for (const id of before.session.playerIds) requireContract(appliedClientSequence(source5, id) >= appliedClientSequence(before, id), "Primary client cursor regressed");
+    requireContract(before.history.combatBaseline[key9] === null || source6.history.combatBaseline[key9] >= before.history.combatBaseline[key9], "Primary retirement cursor regressed");
+  for (const key9 of ["actionIdHighWatermark", "eventIdHighWatermark"]) requireContract(before.primary[key9] === null || source6.primary[key9] >= before.primary[key9], "Primary identity fence regressed");
+  for (const [id, a] of Object.entries(before.primary.actorsById)) requireContract(source6.primary.actorsById[id].profileId === a.profileId && source6.primary.actorsById[id].nextSourceSequence >= a.nextSourceSequence && source6.primary.actorsById[id].retiredSourceSequence >= a.retiredSourceSequence, "Primary source cursor regressed");
+  for (const id of before.session.playerIds) requireContract(appliedClientSequence(source6, id) >= appliedClientSequence(before, id), "Primary client cursor regressed");
 }
 
 // src/shared/contracts/geography.js
@@ -23721,9 +23823,9 @@ function validateWorldState(value) {
   let previousActionId = baseline?.attackActionIdHighWatermark ?? null;
   let previousEventId = baseline?.eventIdHighWatermark ?? null;
   for (const { receipt, action } of combatReceipts.slice().sort((a, b) => a.receipt.eventSequenceStart - b.receipt.eventSequenceStart)) {
-    const source5 = value.space?.entitiesById[receipt.sourceEntityId];
+    const source6 = value.space?.entitiesById[receipt.sourceEntityId];
     const target = value.space?.entitiesById[receipt.targetEntityId];
-    requireContract(source5?.kind === "actor" && target?.kind === "actor", "Combat receipt references missing actor");
+    requireContract(source6?.kind === "actor" && target?.kind === "actor", "Combat receipt references missing actor");
     if (baseline) {
       requireContract(receipt.eventSequenceStart > baseline.eventSequence, "Combat receipt precedes compacted event fence");
       requireContract(previousActionId === null || action.attackActionId > previousActionId, "Combat action identity fence violation");
@@ -23742,9 +23844,9 @@ function validateWorldState(value) {
       const command = applied && JSON.parse(applied.commandCanonical);
       const player = value.playersById[action.causation.playerId];
       const primary = action.primary;
-      const linkage = primary ? value.primary && command?.kind === "combat.primaryIntent" && command.payload.pressed && applied.tick <= primary.startedTick && applied.result?.entityId === source5.entityId && receipt.tick === primary.startedTick + primaryProfile(value, source5.entityId).steps[primary.comboStep - 1].startup : command?.kind === "combat.basicAttack" && applied.tick === receipt.tick && command.payload.targetEntityId === target.entityId && applied.result?.attackActionId === action.attackActionId;
+      const linkage = primary ? value.primary && command?.kind === "combat.primaryIntent" && command.payload.pressed && applied.tick <= primary.startedTick && applied.result?.entityId === source6.entityId && receipt.tick === primary.startedTick + primaryProfile(value, source6.entityId).steps[primary.comboStep - 1].startup : command?.kind === "combat.basicAttack" && applied.tick === receipt.tick && command.payload.targetEntityId === target.entityId && applied.result?.attackActionId === action.attackActionId;
       requireContract(
-        value.multiplayer && linkage && command.sessionId === action.causation.sessionId && command.playerId === action.causation.playerId && command.spaceInstanceId === action.spaceInstanceId && command.spaceRevision === action.spaceRevision && player?.entityId === source5.entityId && player.characterId === action.causation.characterId && source5.ownerCharacterId === player.characterId && applied.result?.status === "applied",
+        value.multiplayer && linkage && command.sessionId === action.causation.sessionId && command.playerId === action.causation.playerId && command.spaceInstanceId === action.spaceInstanceId && command.spaceRevision === action.spaceRevision && player?.entityId === source6.entityId && player.characterId === action.causation.characterId && source6.ownerCharacterId === player.characterId && applied.result?.status === "applied",
         "Combat command attribution/receipt mismatch"
       );
     }
@@ -23768,7 +23870,7 @@ function validateWorldState(value) {
     );
     else requireContract(priorHp <= boundedCombatInteger(target.maxHp), "Combat receipt exceeds target maximum health");
     requireContract(
-      damage === Math.min(priorHp, boundedCombatInteger(source5.attackDamage)),
+      damage === Math.min(priorHp, boundedCombatInteger(source6.attackDamage)),
       "Frozen combat outcome does not match direct damage rule"
     );
     priorOutcomeByTarget[receipt.targetEntityId] = receipt.outcome;
@@ -23855,11 +23957,11 @@ function validateHostileProjectiles(state) {
   requireContract(Object.keys(root.actionsByEntityId).length <= Object.keys(state.entitiesById).length, "Hostile ranged action bound");
   const parties = new Set(Object.values(state.playersById).map((p) => p.entityId));
   for (const [id, a] of Object.entries(root.actionsByEntityId)) {
-    const source5 = state.entitiesById[id], profile2 = ranged3(source5);
-    requireContract(source5?.team === "hostile" && profile2, "Hostile ranged action owner");
+    const source6 = state.entitiesById[id], profile2 = ranged3(source6);
+    requireContract(source6?.team === "hostile" && profile2, "Hostile ranged action owner");
     closedRecord(a, ["phase", "phaseStartedTick", "phaseEndsTick", "targetEntityId", "aim", "actionSequence"], ["nextShotTick"]);
     requireContract(["idle", "windup", "recovery"].includes(a.phase), "Hostile ranged phase");
-    if (profile2.meleeFallback && a.phase !== "idle") requireContract(!source5.ai?.melee || source5.ai.melee.phase === "idle", "Overlapping hybrid ranged and melee attacks");
+    if (profile2.meleeFallback && a.phase !== "idle") requireContract(!source6.ai?.melee || source6.ai.melee.phase === "idle", "Overlapping hybrid ranged and melee attacks");
     if (a.nextShotTick !== void 0) {
       requireContract(Boolean(profile2.cooldownTicks), "Unexpected ranged cooldown");
       safeInteger(a.nextShotTick, 0, state.tick + profile2.cooldownTicks);
@@ -23870,7 +23972,7 @@ function validateHostileProjectiles(state) {
     safeInteger(a.phaseEndsTick, a.phaseStartedTick, state.tick + 300);
     safeInteger(a.actionSequence);
     requireContract(a.phaseEndsTick - a.phaseStartedTick === (a.phase === "windup" ? profile2.windupTicks : a.phase === "recovery" ? profile2.recoveryTicks : 0), "Hostile ranged phase timing");
-    requireContract(a.phase === "windup" ? a.actionSequence === source5.nextAttackActionSequence : a.phase === "idle" ? a.actionSequence <= source5.nextAttackActionSequence : a.actionSequence < source5.nextAttackActionSequence, "Hostile ranged action chronology");
+    requireContract(a.phase === "windup" ? a.actionSequence === source6.nextAttackActionSequence : a.phase === "idle" ? a.actionSequence <= source6.nextAttackActionSequence : a.actionSequence < source6.nextAttackActionSequence, "Hostile ranged action chronology");
     requireContract(a.phase === "idle" === (a.targetEntityId === null && a.aim === null), "Hostile ranged idle action");
     if (a.phase !== "idle") {
       requireContract(parties.has(a.targetEntityId) && a.aim !== null, "Hostile ranged action target");
@@ -23883,15 +23985,15 @@ function validateHostileProjectiles(state) {
     closedRecord(b, ["id", "sourceId", "sourceResidencyRevision", "spaceInstanceId", "intendedTargetId", "position", "direction", "remaining", "remainingTicks", "firedTick", "radius", "type", "attack", "sourceLevel", "actionSequence"]);
     validateId("attackActionId", id);
     requireContract(b.id === id, "Hostile projectile identity");
-    const source5 = state.entitiesById[b.sourceId], profile2 = ranged3(source5), g = groupByActor.get(b.sourceId);
-    requireContract(source5?.alive && source5.team === "hostile" && profile2 && root.actionsByEntityId[b.sourceId], "Hostile projectile source");
-    requireContract(source5.residency.spaceInstanceId === b.spaceInstanceId && source5.residency.residencyRevision === b.sourceResidencyRevision, "Hostile projectile source residency");
+    const source6 = state.entitiesById[b.sourceId], profile2 = ranged3(source6), g = groupByActor.get(b.sourceId);
+    requireContract(source6?.alive && source6.team === "hostile" && profile2 && root.actionsByEntityId[b.sourceId], "Hostile projectile source");
+    requireContract(source6.residency.spaceInstanceId === b.spaceInstanceId && source6.residency.residencyRevision === b.sourceResidencyRevision, "Hostile projectile source residency");
     requireContract(parties.has(b.intendedTargetId), "Hostile projectile intended target");
     requireContract(state.entitiesById[b.intendedTargetId].residency.spaceInstanceId === b.spaceInstanceId, "Hostile projectile target residency");
     requireContract(profile2.projectileType === b.type && HOSTILE_PROJECTILE_STYLES.includes(b.type) && b.radius === profile2.radius, "Hostile projectile style/radius");
     safeInteger(b.sourceResidencyRevision, 1);
     safeInteger(b.actionSequence, 1);
-    requireContract(b.actionSequence < source5.nextAttackActionSequence, "Hostile projectile source action chronology");
+    requireContract(b.actionSequence < source6.nextAttackActionSequence, "Hostile projectile source action chronology");
     safeInteger(b.firedTick, 0, state.tick);
     safeInteger(b.remainingTicks, 1, profile2.lifeTicks);
     requireContract(b.remainingTicks <= profile2.lifeTicks - (state.tick - b.firedTick), "Hostile projectile lifetime chronology");
@@ -23903,7 +24005,7 @@ function validateHostileProjectiles(state) {
     requireContract(integerBigInt(b.attack) > 0n, "Hostile projectile attack");
     positiveProgression(b.sourceLevel);
     requireContract(same27(g?.threatSnapshot?.levelsByEntityId[b.sourceId], b.sourceLevel), "Hostile projectile locked level");
-    requireContract(same27(source5.attackDamage, b.attack), "Hostile projectile captured attack");
+    requireContract(same27(source6.attackDamage, b.attack), "Hostile projectile captured attack");
     counts.set(b.sourceId, (counts.get(b.sourceId) ?? 0) + 1);
     requireContract(counts.get(b.sourceId) <= HOSTILE_PROJECTILE_LIMITS.perSource, "Hostile projectile source bound");
   }
@@ -24393,7 +24495,7 @@ function validateActivityState(s) {
       safeInteger(c.outsideTicks, 0, c.disengageTicks);
       safeInteger(c.modeStartedTick, 0, s.tick);
     }
-    requireContract(g.entityIds.length >= 1 && g.entityIds.length <= (hasWorldCombat(s) ? 40 : 10) && typeof g.cleared === "boolean", "Group capacity");
+    requireContract(g.entityIds.length >= 1 && g.entityIds.length <= (hasWorldCombat(s) ? 48 : 10) && typeof g.cleared === "boolean", "Group capacity");
     for (const id2 of g.entityIds) {
       const a = s.entitiesById[id2];
       requireContract(a?.team === "hostile" && a.residency.spaceInstanceId === g.spaceInstanceId && !grouped.has(id2), "Group actor ownership mismatch");
@@ -24976,73 +25078,73 @@ function validateSafeFixture(state) {
   );
   return fixture;
 }
-function validateSafeProgress(before, source5) {
-  validateWorldState(source5);
-  validateSafeFixture(source5);
-  requireContract(before.space.encounterId === null && source5.tick >= before.tick, "Invalid safe progress phase/tick");
-  requireContract(samePlayerMembership(before.playersById, source5.playersById), "Safe player membership changed");
-  validateCampaignDiscoveryProgress(before, source5);
+function validateSafeProgress(before, source6) {
+  validateWorldState(source6);
+  validateSafeFixture(source6);
+  requireContract(before.space.encounterId === null && source6.tick >= before.tick, "Invalid safe progress phase/tick");
+  requireContract(samePlayerMembership(before.playersById, source6.playersById), "Safe player membership changed");
+  validateCampaignDiscoveryProgress(before, source6);
   for (const key9 of ["session", "content", "activeSpaceRef", "rngStatesByName", "combat", "eventEmission"])
-    requireContract(same32(before[key9], source5[key9]), `Safe progress changed ${key9}`);
-  requireContract(same32(before.multiplayer.encounterParticipants, source5.multiplayer.encounterParticipants), "Safe progress changed participants");
-  requireContract(Boolean(before.primary) === Boolean(source5.primary), "Safe primary extension changed");
+    requireContract(same32(before[key9], source6[key9]), `Safe progress changed ${key9}`);
+  requireContract(same32(before.multiplayer.encounterParticipants, source6.multiplayer.encounterParticipants), "Safe progress changed participants");
+  requireContract(Boolean(before.primary) === Boolean(source6.primary), "Safe primary extension changed");
   if (before.primary) {
-    const normalized = copyWire(source5.primary);
+    const normalized = copyWire(source6.primary);
     for (const id of Object.keys(normalized.actorsById)) normalized.actorsById[id].facing = copyWire(before.primary.actorsById[id].facing);
     requireContract(same32(normalized, before.primary), "Safe progress changed primary rules/history");
   }
-  requireContract(source5.lastAppliedAuthorityOrder >= before.lastAppliedAuthorityOrder, "Safe command order went backward");
-  requireContract(source5.history.commandFloor.authorityOrder >= before.history.commandFloor.authorityOrder, "Safe command floor went backward");
+  requireContract(source6.lastAppliedAuthorityOrder >= before.lastAppliedAuthorityOrder, "Safe command order went backward");
+  requireContract(source6.history.commandFloor.authorityOrder >= before.history.commandFloor.authorityOrder, "Safe command floor went backward");
   for (const [sessionId, summary] of Object.entries(before.history.sessionsById)) {
-    const retained = source5.history.sessionsById[sessionId];
+    const retained = source6.history.sessionsById[sessionId];
     if (retained) requireContract(sessionId === before.session.sessionId ? retained.firstAuthorityOrder === summary.firstAuthorityOrder : same32(retained, summary), "Safe progress changed established session summary");
   }
   for (const key9 of ["combatBaseline", "sessionIdHighWatermark", "sessionGeneration"])
-    requireContract(same32(before.history[key9], source5.history[key9]), "Safe progress changed history anchors");
-  requireContract(same32(Object.keys(before.space.entitiesById).sort(), Object.keys(source5.space.entitiesById).sort()), "Safe actor inventory changed");
+    requireContract(same32(before.history[key9], source6.history[key9]), "Safe progress changed history anchors");
+  requireContract(same32(Object.keys(before.space.entitiesById).sort(), Object.keys(source6.space.entitiesById).sort()), "Safe actor inventory changed");
   for (const playerId of before.session.playerIds) requireContract(
-    appliedClientSequence(source5, playerId) >= appliedClientSequence(before, playerId),
+    appliedClientSequence(source6, playerId) >= appliedClientSequence(before, playerId),
     "Safe client sequence went backward"
   );
   for (const [id, actor] of Object.entries(before.space.entitiesById)) {
-    const normalized = copyWire(source5.space.entitiesById[id]);
+    const normalized = copyWire(source6.space.entitiesById[id]);
     for (const key9 of ["position", "movementIntent", "attackTimer", "movedLastTick"]) normalized[key9] = copyWire(actor[key9]);
     requireContract(same32(normalized, actor), "Safe progress changed actor rules or health");
-    const current = source5.space.entitiesById[id];
-    requireContract(!collidesWithTiles(source5.space.collision, current.position.x, current.position.y, current.hullRadius), "Safe actor in blocked tile");
+    const current = source6.space.entitiesById[id];
+    requireContract(!collidesWithTiles(source6.space.collision, current.position.x, current.position.y, current.hullRadius), "Safe actor in blocked tile");
   }
-  for (const receipt of Object.values(source5.appliedCommandsById)) if (receipt.authorityOrder > before.lastAppliedAuthorityOrder)
+  for (const receipt of Object.values(source6.appliedCommandsById)) if (receipt.authorityOrder > before.lastAppliedAuthorityOrder)
     requireContract(["movement.setIntent", "space.travel"].includes(JSON.parse(receipt.commandCanonical).kind), "Non-movement safe command");
 }
-function prepareTravelState(source5, travel) {
-  validateWorldState(source5);
+function prepareTravelState(source6, travel) {
+  validateWorldState(source6);
   closedRecord(travel, ["commandId", "destinationInstanceId"]);
   validateId("commandId", travel.commandId);
   validateId("spaceInstanceId", travel.destinationInstanceId);
-  const fixture = validateSafeFixture(source5);
-  const receipt = source5.appliedCommandsById[travel.commandId];
-  requireContract(receipt?.authorityOrder === source5.lastAppliedAuthorityOrder && receipt.tick === source5.tick, "Travel needs latest applied intent at current tick");
+  const fixture = validateSafeFixture(source6);
+  const receipt = source6.appliedCommandsById[travel.commandId];
+  requireContract(receipt?.authorityOrder === source6.lastAppliedAuthorityOrder && receipt.tick === source6.tick, "Travel needs latest applied intent at current tick");
   const command = JSON.parse(receipt.commandCanonical);
   requireContract(
-    command.kind === "space.travel" && command.sessionId === source5.session.sessionId && command.spaceInstanceId === source5.space.spaceInstanceId && command.spaceRevision === source5.space.spaceRevision,
+    command.kind === "space.travel" && command.sessionId === source6.session.sessionId && command.spaceInstanceId === source6.space.spaceInstanceId && command.spaceRevision === source6.space.spaceRevision,
     "Stale travel request context"
   );
-  const player = source5.playersById[command.playerId], actor = source5.space.entitiesById[player.entityId];
+  const player = source6.playersById[command.playerId], actor = source6.space.entitiesById[player.entityId];
   const exit = (fixture.exits ?? [fixture.exit]).find((e) => e.exitId === command.payload.exitId);
   requireContract(player.connectionStatus === "connected" && actor.alive && exit && Math.hypot(actor.position.x - exit.x, actor.position.y - exit.y) <= exit.radius, "Exit unavailable or out of reach");
-  requireContract(travel.destinationInstanceId > source5.space.spaceInstanceId, "Travel must advance permanent instance identity fence");
-  const regional = Boolean(source5.campaign.geography);
+  requireContract(travel.destinationInstanceId > source6.space.spaceInstanceId, "Travel must advance permanent instance identity fence");
+  const regional = Boolean(source6.campaign.geography);
   const destination = regional ? oldwardSpace(exit.destinationSpaceId) : ACTIVE_SPACE_FIXTURES[exit.destinationIndex];
   const arrival = regional ? destination.exits.find((e) => e.exitId === exit.reciprocalExitId) : null;
   if (regional) requireContract(
     arrival?.destinationSpaceId === fixture.spaceId && arrival.reciprocalExitId === exit.exitId,
     "Destination reciprocal socket mismatch"
   );
-  const next = compactSafeHistory(source5);
+  const next = compactSafeHistory(source6);
   next.activeSpaceRef = {
     spaceId: destination.spaceId,
     spaceInstanceId: travel.destinationInstanceId,
-    spaceRevision: safeInteger(source5.space.spaceRevision + 1)
+    spaceRevision: safeInteger(source6.space.spaceRevision + 1)
   };
   Object.assign(next.space, next.activeSpaceRef, { contentDefinitionId: destination.contentDefinitionId, collision: copyWire(destination.collision) });
   next.multiplayer.encounterParticipants = null;
@@ -25053,7 +25155,7 @@ function prepareTravelState(source5, travel) {
     moved3.movementIntent = { x: 0, y: 0 };
     moved3.movedLastTick = false;
   }
-  if (regional) next.campaign.geography = discoverCrossing(source5.campaign.geography, destination.spaceId, exit.roadSegmentId);
+  if (regional) next.campaign.geography = discoverCrossing(source6.campaign.geography, destination.spaceId, exit.roadSegmentId);
   validateWorldState(next);
   return next;
 }
@@ -25078,17 +25180,17 @@ function validateCampaignEnvelope(envelope) {
   if (authored2) {
     closedRecord(envelope.proof, ["sourceSnapshot"], envelope.kind === "encounterStart" ? ["hostileId"] : []);
     validateSnapshot(envelope.proof.sourceSnapshot);
-    const source5 = envelope.proof.sourceSnapshot.state;
-    requireContract(source5.campaign.saveRevision + 1 === envelope.saveRevision && source5.campaign.checkpointId !== envelope.checkpointId, "Proof source checkpoint mismatch");
+    const source6 = envelope.proof.sourceSnapshot.state;
+    requireContract(source6.campaign.saveRevision + 1 === envelope.saveRevision && source6.campaign.checkpointId !== envelope.checkpointId, "Proof source checkpoint mismatch");
     let expected;
     if (envelope.kind === "encounterStart") {
-      expected = prepareProofStart(source5, envelope.proof.hostileId);
+      expected = prepareProofStart(source6, envelope.proof.hostileId);
       expected.space.encounterId = envelope.encounter.encounterId;
       expected.space.encounterAttemptId = envelope.encounter.encounterAttemptId;
       expected.multiplayer.encounterParticipants = eligibleEncounterParticipants(expected);
     } else {
       requireContract(envelope.encounter.outcome === "victory", "Proof outcome must be authority victory");
-      expected = prepareProofClear(source5);
+      expected = prepareProofClear(source6);
     }
     expected.campaign.saveRevision = envelope.saveRevision;
     expected.campaign.checkpointId = envelope.checkpointId;
@@ -25982,8 +26084,8 @@ function createPlannedCartography(asset, binding, loaded) {
   const terrain2 = loaded.generator.terrain;
   const sites4 = [];
   for (const family2 of ["cave", "fort", "ruin", "crypt"]) for (const r of loaded[family2 + "Reservations"] ?? []) {
-    const a = r.socket.entrance, reservationId = r.socket.provenance.reservationId, source5 = asset.sites.find((s) => s.id === reservationId);
-    sites4.push({ id: r.siteId, reservationId, kind: "site", family: family2, tier: r.socket.provenance.sizeTier ?? r.parcel.tier ?? "standard", label: r.parcel.label ?? r.socket.label ?? family2, x: (Number(BigInt(a.chunkX) - 1024n) * 1024 + a.localX) / 32, y: (Number(BigInt(a.chunkY) - 1024n) * 832 + a.localY) / 32, band: source5?.band ?? 1, biome: source5?.biomeId?.replace("biome:", "") ?? r.socket.region?.biome ?? "unknown" });
+    const a = r.socket.entrance, reservationId = r.socket.provenance.reservationId, source6 = asset.sites.find((s) => s.id === reservationId);
+    sites4.push({ id: r.siteId, reservationId, kind: "site", family: family2, tier: r.socket.provenance.sizeTier ?? r.parcel.tier ?? "standard", label: r.parcel.label ?? r.socket.label ?? family2, x: (Number(BigInt(a.chunkX) - 1024n) * 1024 + a.localX) / 32, y: (Number(BigInt(a.chunkY) - 1024n) * 832 + a.localY) / 32, band: source6?.band ?? 1, biome: source6?.biomeId?.replace("biome:", "") ?? r.socket.region?.biome ?? "unknown" });
   }
   const routes = asset.routes.edges.map((e) => ({ id: e.id, kind: e.kind, bounds: { x: Math.min(...e.path.map((p) => p.x)), y: Math.min(...e.path.map((p) => p.y)), right: Math.max(...e.path.map((p) => p.x)), bottom: Math.max(...e.path.map((p) => p.y)) }, paths: chartPolyline(e.path) }));
   const rows3 = /* @__PURE__ */ new Map();
@@ -26029,12 +26131,12 @@ function createPlannedCartography(asset, binding, loaded) {
 }
 
 // src/host/planned_campaign_binding_v1.js
-async function preparePlannedCampaignBindingV1(source5, binding, { plannedAssets }) {
+async function preparePlannedCampaignBindingV1(source6, binding, { plannedAssets }) {
   validatePlannedBinding(binding);
-  requireContract(source5.tick === 0 && !source5.d9World.plannedWorld && source5.d9World.runtime.chunks.length === 0 && !Object.keys(source5.d9World.siteReservationsById).length, "Planned genesis requires a fresh campaign");
+  requireContract(source6.tick === 0 && !source6.d9World.plannedWorld && source6.d9World.runtime.chunks.length === 0 && !Object.keys(source6.d9World.siteReservationsById).length, "Planned genesis requires a fresh campaign");
   const { asset, generator, caveReservations, fortReservations, ruinReservations, cryptReservations } = await plannedAssets.load(binding);
-  requireContract(asset.campaignSeedHex === source5.campaign.seed.seedHex, "Planned genesis seed mismatch");
-  const startTiles = plannedStartTiles(binding), s = copyWire(source5), spawn = tileAddress(...startTiles ? [startTiles[0].x, startTiles[0].y] : [asset.spawnTile.x, asset.spawnTile.y]), frames = copyWire(planLocalFramesD9(s.session.playerIds.map((playerId) => ({ playerId, position: spawn })), { keepOrigin: true }));
+  requireContract(asset.campaignSeedHex === source6.campaign.seed.seedHex, "Planned genesis seed mismatch");
+  const startTiles = plannedStartTiles(binding), s = copyWire(source6), spawn = tileAddress(...startTiles ? [startTiles[0].x, startTiles[0].y] : [asset.spawnTile.x, asset.spawnTile.y]), frames = copyWire(planLocalFramesD9(s.session.playerIds.map((playerId) => ({ playerId, position: spawn })), { keepOrigin: true }));
   frames[0].originBounds = { width: s.d9World.origin.width / 1024, height: s.d9World.origin.height / 832 };
   rebaseWorldRuntimeD9(s, frames);
   const q = projectToLocalFrameD9(spawn, frames);
@@ -26596,7 +26698,7 @@ function inventoryRows(state, p) {
   const rows3 = [];
   for (const item of Object.values(inv.itemsById)) if (item.sourceEntityId !== null) rows3.push(base(item, inv.renewal.originsByItemId[item.itemId], "CARRIED"));
   for (const r of Object.values(inv.rewardsByEntityId)) if (r.definitionId && !r.claimed && r.retiredTick === void 0) {
-    const item = { itemId: `item:${p.playerId}:${r.sourceEntityId}`, definitionId: r.definitionId, ownerPlayerId: p.playerId, sourceEntityId: r.sourceEntityId, ...r.generated ? { generated: copyWire(r.generated) } : {} }, source5 = r.episodeSource, origin2 = source5 ? { groupId: source5.groupId, episode: source5.episode, sourceEntityId: r.sourceEntityId, ...source5.progression ? { progression: copyWire(source5.progression) } : {} } : Object.values(state.groupsById).filter((g) => g.entityIds.includes(r.sourceEntityId)).map((g) => ({ groupId: g.groupId, episode: 0, sourceEntityId: r.sourceEntityId }))[0];
+    const item = { itemId: `item:${p.playerId}:${r.sourceEntityId}`, definitionId: r.definitionId, ownerPlayerId: p.playerId, sourceEntityId: r.sourceEntityId, ...r.generated ? { generated: copyWire(r.generated) } : {} }, source6 = r.episodeSource, origin2 = source6 ? { groupId: source6.groupId, episode: source6.episode, sourceEntityId: r.sourceEntityId, ...source6.progression ? { progression: copyWire(source6.progression) } : {} } : Object.values(state.groupsById).filter((g) => g.entityIds.includes(r.sourceEntityId)).map((g) => ({ groupId: g.groupId, episode: 0, sourceEntityId: r.sourceEntityId }))[0];
     rows3.push({ ...base(item, origin2, "UNCLAIMED"), location: point13(r.position, r.spaceInstanceId) });
   }
   for (const d of Object.values(inv.renewal.groundBySourceId)) rows3.push({ ...base(d.item, d.origin, "DROPPED"), location: point13(d.position, d.spaceInstanceId), drop: { droppedTick: d.droppedTick, receipt: copyWire(d.receipt) } });
@@ -26625,7 +26727,7 @@ function validateOwnedGearPageD9(row) {
     if (g.combatHash !== void 0) requireContract(g.combatHash === WORLD_COMBAT_HASH, "Unknown roster provenance policy");
     if (fortFloor !== null) requireContract(g.anchorOrdinal === fortFloor, "Fort gear floor provenance drift");
     if (ruin) requireContract(g.anchorOrdinal === ruin.floor, "Ruin gear floor provenance drift");
-    requireContract(["C", "B", "A", "S"].includes(g.rank) && Array.isArray(g.entityIds) && (g.combatHash === WORLD_COMBAT_HASH ? g.entityIds.length >= 1 && g.entityIds.length <= 40 : count === null ? g.entityIds.length >= 1 && g.entityIds.length <= 5 : g.entityIds.length === count) && new Set(g.entityIds).size === g.entityIds.length && g.entityIds.every((id) => typeof id === "string" && id.startsWith("ent:")), "Owned gear geography provenance");
+    requireContract(["C", "B", "A", "S"].includes(g.rank) && Array.isArray(g.entityIds) && (g.combatHash === WORLD_COMBAT_HASH ? g.entityIds.length >= 1 && g.entityIds.length <= 48 : count === null ? g.entityIds.length >= 1 && g.entityIds.length <= 5 : g.entityIds.length === count) && new Set(g.entityIds).size === g.entityIds.length && g.entityIds.every((id) => typeof id === "string" && id.startsWith("ent:")), "Owned gear geography provenance");
   }
   if (row.location) {
     closedRecord(row.location, ["spaceInstanceId", "position"]);
@@ -27305,7 +27407,7 @@ async function validateWorldAdvanceD9(a, b, options) {
   if (options) await reconcileWorldComparisonPagesD9(a, b, options);
   alignWorldReceiptComparisonD9(a, result.d9World.runtime.frames);
   alignWorldReceiptComparisonD9(b, result.d9World.runtime.frames);
-  for (const id of a.session.playerIds) for (const [source5, row] of Object.entries(a.playersById[id].d8.causalXp)) if (!retiredEntities.has(source5)) for (const [kind2, sequence] of Object.entries(row)) requireContract((b.playersById[id].d8.causalXp[source5]?.[kind2] ?? 0) >= sequence, "Mastery causal receipt regressed across paging");
+  for (const id of a.session.playerIds) for (const [source6, row] of Object.entries(a.playersById[id].d8.causalXp)) if (!retiredEntities.has(source6)) for (const [kind2, sequence] of Object.entries(row)) requireContract((b.playersById[id].d8.causalXp[source6]?.[kind2] ?? 0) >= sequence, "Mastery causal receipt regressed across paging");
   validateEncounterEconomyProgress(a, b);
   validateOriginHordeProgress(a, b);
   validateOrdinaryRosterProgress(a, b);
@@ -27612,9 +27714,9 @@ async function prepareWorldResidencyD9(request, { sha256, readPage }) {
   for (const id of release) {
     const chunk = state.d9World.runtime.chunks.find((c) => c.identity.id === id);
     requireContract(chunk, "Released terrain not resident");
-    for (const p of Object.values(state.playersById)) for (const [source5, d] of Object.entries(p.inventory.renewal.groundBySourceId)) if (d.spaceInstanceId === state.overworldInstanceId) {
+    for (const p of Object.values(state.playersById)) for (const [source6, d] of Object.entries(p.inventory.renewal.groundBySourceId)) if (d.spaceInstanceId === state.overworldInstanceId) {
       const pos = localFramePositionD9(d.position, state.d9World.runtime.frames);
-      if (pos.chunkX === chunk.chunkX && pos.chunkY === chunk.chunkY) (remove[p.playerId] ??= []).push(source5);
+      if (pos.chunkX === chunk.chunkX && pos.chunkY === chunk.chunkY) (remove[p.playerId] ??= []).push(source6);
     }
   }
   if (Object.keys(remove).length) {
@@ -27665,10 +27767,10 @@ async function prepareProceduralEncounterD9(state, chunk, anchor, { sha256, epis
     return q && !parcelOwns(p) && !collidesWithTiles(c, q.x, q.y, 10) && !chunk.anchors.some((other) => other !== anchor && Math.hypot(p.localX - other.position.x, p.localY - other.position.y) < 72);
   };
   const pair = anchor.combatVersion === WORLD_COMBAT_VERSION ? anchor.members.map((m) => world(m.position)) : chooseEpisodePlacementD9({ candidates, participants, spaceInstanceId, isLegal });
-  if (!pair || anchor.combatVersion && (pair.some((p) => !isLegal(p)) || !chooseEpisodePlacementD9({ candidates: [pair], participants: sporeOrdinal(anchor.ordinal) || hollowOrdinal(anchor.ordinal) || plannedEventOrdinal(anchor.ordinal) ? [] : participants, spaceInstanceId, isLegal, combat: true, hollow: hollowOrdinal(anchor.ordinal) || plannedEventOrdinal(anchor.ordinal) }))) return null;
+  if (!pair || anchor.combatVersion && (pair.some((p) => !isLegal(p)) || !chooseEpisodePlacementD9({ candidates: [pair], participants: sporeOrdinal(anchor.ordinal) || hollowOrdinal(anchor.ordinal) || plannedEventOrdinal(anchor.ordinal) ? [] : participants, spaceInstanceId, isLegal, combat: true, hollow: hollowOrdinal(anchor.ordinal) || plannedEventOrdinal(anchor.ordinal), planned: plannedEventOrdinal(anchor.ordinal) }))) return null;
   const entityIds = [], actors = [], members = [];
   for (let n = 0; n < pair.length; n++) {
-    const identity = await worldIdentity(state.campaign.seed.seedHex, "spawn", [chunk.chunkX, chunk.chunkY, anchor.ordinal, n], sha256), entityId2 = "ent:" + identity.digest.slice(0, 32), enemy = ORDINARY_ENEMIES.find((e) => e.family === anchor.members[n].family), profile2 = worldOrdinaryMeleeProfile(state, resolveOrdinaryProfile(enemy, (hollowOrdinal(anchor.ordinal) || plannedEventOrdinal(anchor.ordinal)) && n === 12 ? "S" : anchor.rank)), position2 = local(pair[n]);
+    const identity = await worldIdentity(state.campaign.seed.seedHex, "spawn", [chunk.chunkX, chunk.chunkY, anchor.ordinal, n], sha256), entityId2 = "ent:" + identity.digest.slice(0, 32), enemy = ORDINARY_ENEMIES.find((e) => e.family === anchor.members[n].family), profile2 = worldOrdinaryMeleeProfile(state, resolveOrdinaryProfile(enemy, hollowOrdinal(anchor.ordinal) || plannedEventOrdinal(anchor.ordinal) ? plannedEventMemberRankV1(n, anchor.rank) : anchor.rank)), position2 = local(pair[n]);
     entityIds.push(entityId2);
     requireContract(renewal ? state.groupsById[groupId].entityIds[n] === entityId2 : !state.entitiesById[entityId2], "Procedural entity identity collision");
     members.push({ entityId: entityId2, enemyDefinitionId: enemy.enemyDefinitionId, profileId: profile2.contentDefinitionId, position: copyWire(position2) });
