@@ -26317,7 +26317,17 @@ function createPlannedCartography(asset, binding, loaded) {
     const a = r.socket.entrance, reservationId = r.socket.provenance.reservationId, source6 = asset.sites.find((s) => s.id === reservationId);
     sites4.push({ id: r.siteId, reservationId, kind: "site", family: family2, tier: r.socket.provenance.sizeTier ?? r.parcel.tier ?? "standard", label: r.parcel.label ?? r.socket.label ?? family2, x: (Number(BigInt(a.chunkX) - 1024n) * 1024 + a.localX) / 32, y: (Number(BigInt(a.chunkY) - 1024n) * 832 + a.localY) / 32, band: source6?.band ?? 1, biome: source6?.biomeId?.replace("biome:", "") ?? r.socket.region?.biome ?? "unknown" });
   }
-  const routes = asset.routes.edges.map((e) => ({ id: e.id, kind: e.kind, bounds: { x: Math.min(...e.path.map((p) => p.x)), y: Math.min(...e.path.map((p) => p.y)), right: Math.max(...e.path.map((p) => p.x)), bottom: Math.max(...e.path.map((p) => p.y)) }, paths: chartPolyline(e.path) }));
+  const routeLine = (e) => {
+    const c = e.centerline;
+    if (!Array.isArray(c) || c.length < 4) return e.path;
+    const out = [];
+    for (let i = 0; i + 1 < c.length; i += 2) out.push({ x: c[i], y: c[i + 1] });
+    return out;
+  };
+  const routes = asset.routes.edges.map((e) => {
+    const line = routeLine(e);
+    return { id: e.id, kind: e.kind, bounds: { x: Math.min(...line.map((p) => p.x)), y: Math.min(...line.map((p) => p.y)), right: Math.max(...line.map((p) => p.x)), bottom: Math.max(...line.map((p) => p.y)) }, paths: chartPolyline(line) };
+  });
   const rows3 = /* @__PURE__ */ new Map();
   for (const p of asset.wildernessExtension?.trailTiles ?? []) if (p.kind === "footpath") {
     const y = p.y;
