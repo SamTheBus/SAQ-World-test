@@ -8120,8 +8120,15 @@ function propsFor(t) {
   propCache.set(t, props);
   return props;
 }
+var fountainCache = /* @__PURE__ */ new WeakMap();
+function fountainsFor(t) {
+  if (fountainCache.has(t)) return fountainCache.get(t);
+  const list = t.places.filter((p) => p[2] === "public").map(([, p]) => ({ x: Math.floor(p.x + (p.w - 1) / 2), y: Math.floor(p.y + (p.h - 1) / 2) }));
+  fountainCache.set(t, list);
+  return list;
+}
 function blocked(t, x, y) {
-  return t.buildings.some((b) => x >= b.x && x < b.x + b.w && y >= b.y && y < b.y + b.h) || propsFor(t).some((p) => p.x === x && p.y === y);
+  return t.buildings.some((b) => x >= b.x && x < b.x + b.w && y >= b.y && y < b.y + b.h) || propsFor(t).some((p) => p.x === x && p.y === y) || fountainsFor(t).some((f2) => x >= f2.x - 1 && x <= f2.x + 1 && y >= f2.y && y <= f2.y + 1);
 }
 
 // src/shared/generation/planned_town_v1.js
@@ -24972,6 +24979,7 @@ export {
   worldRolesV1,
   ferryNetworkV1,
   settlementV1,
+  worldRevisionV1,
   STARTER_VERSION,
   STARTER_VILLAGE_ID,
   STARTER_VILLAGE_NAME,
@@ -25123,7 +25131,9 @@ export {
   OPEN_TOWN_TEMPLATE_V1,
   frontage,
   propsFor,
+  fountainsFor,
   blocked,
+  PLANNED_TOWN_ID,
   createPlannedTownTiles,
   townChunkBlockers,
   TOWN_PROPS,
