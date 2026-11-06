@@ -827,7 +827,7 @@ import {
   worldRevisionV1,
   worldRolesV1,
   wrathDamageV1
-} from "./chunk-3357WXVH.js";
+} from "./chunk-HTFGC2RN.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -4701,8 +4701,6 @@ function post(c, x, y, len = 30) {
   c.beginPath();
   c.ellipse(x + 5, y + len, 11, 3.5, 0, 0, TAU3);
   c.stroke();
-  c.fillStyle = "rgba(20,40,60,.35)";
-  c.fillRect(x + 1, y + len + 2, 8, 14);
   prop(c, [[rect2(x, y, 10, len), "#4a3826"]], 1.6);
   c.fillStyle = "#6b5238";
   c.fillRect(x + 1.5, y, 2, len);
@@ -64318,7 +64316,7 @@ function createNightGroundItemsV1({ enabled = () => true } = {}) {
     return result;
   }
   function labels2(ctx) {
-    if (!enabled()) return;
+    if (!enabled() || !visible3.some((r) => r.drop.canPickUp && r.removed === null)) return;
     ctx.save();
     ctx.font = "bold 11px Georgia";
     ctx.textAlign = "center";
@@ -68765,7 +68763,7 @@ function rewardTokenArtV4(doc) {
     draw(g);
     return c;
   };
-  const star2 = (g, r, inner) => {
+  const star = (g, r, inner) => {
     g.beginPath();
     for (let i = 0; i < 10; i++) {
       const a = -Math.PI / 2 + i * Math.PI / 5, d = i % 2 ? inner : r;
@@ -68801,12 +68799,12 @@ function rewardTokenArtV4(doc) {
     g.fill();
     g.stroke();
     g.fillStyle = "#c27e19";
-    star2(g, 3, 1.3);
+    star(g, 3, 1.3);
     g.fill();
     g.fillStyle = "#fff0b0";
     g.save();
     g.translate(-0.35, -0.4);
-    star2(g, 2.5, 1.05);
+    star(g, 2.5, 1.05);
     g.fill();
     g.restore();
     g.strokeStyle = "#ffffffd0";
@@ -72245,7 +72243,6 @@ var FACE3 = "#6a4c32";
 var LIP2 = "#86673f";
 var FLOW = { color: "#d6f2fb", alpha: 0.55, width: 1.5, len: [24, 38], chance: 3 };
 var CREST = { alpha: 0.5, width: 1.4, len: [9, 13], chance: 5 };
-var SPARKLE = 10;
 var LILIES = 6;
 var REEDS = 8;
 function hash24(x, y, s) {
@@ -72305,19 +72302,6 @@ function flowAxis(at5, waterAt2, x, y, key2) {
     axes.set(key2, r);
   }
   return r;
-}
-function star(c, x, y, s) {
-  c.beginPath();
-  c.moveTo(x, y - s);
-  c.lineTo(x + s * 0.28, y - s * 0.28);
-  c.lineTo(x + s, y);
-  c.lineTo(x + s * 0.28, y + s * 0.28);
-  c.lineTo(x, y + s);
-  c.lineTo(x - s * 0.28, y + s * 0.28);
-  c.lineTo(x - s, y);
-  c.lineTo(x - s * 0.28, y - s * 0.28);
-  c.closePath();
-  c.fill();
 }
 function lily(c, x, y, r, a, flower) {
   c.beginPath();
@@ -72498,21 +72482,6 @@ function drawRiverMix(c, loops, open2, x, y, t, offset2, seed2, at5, waterAt2, b
         if (!((v.h >>> 16 + s) % 2)) continue;
         const X2 = X + s * v.ny * (r + 5) + v.nx * 3, Y2 = Y - s * v.nx * (r + 5) + v.ny * 3;
         if (inside4(loops, X2, Y2)) lily(c, X2, Y2, r * f, (v.h >>> 18 + s) % 628 / 100, false);
-      }
-    }
-  }
-  {
-    const h = hash24(Math.round(x + offset2.x / t), Math.round(y + offset2.y / t), seed2 + 6007);
-    if (h % SPARKLE === 0) {
-      const X = px3 + 6 + (h >>> 4) % 20, Y = py + 6 + (h >>> 10) % 20;
-      if (ok(X, Y)) {
-        c.fillStyle = "#ffffff";
-        c.globalAlpha = 0.9;
-        star(c, X, Y, 1.8 + (h >>> 16) % 3 * 0.5);
-        c.beginPath();
-        c.arc(X + 4, Y + 3, 0.8, 0, Math.PI * 2);
-        c.fill();
-        c.globalAlpha = 1;
       }
     }
   }
@@ -72771,15 +72740,6 @@ function drawTracedWater(c, x, y, t, biome, seed2, offset2, at5, waterTile) {
       c.fillStyle = "#f3f8fb";
       c.fill();
     }
-    if (waterTile && n % 5 === 0) {
-      c.strokeStyle = "rgba(255,255,255,.75)";
-      c.lineWidth = 2;
-      c.beginPath();
-      const gx = px3 + 10 + (n >>> 6) % 12, gy = py + 12 + (n >>> 11) % 10;
-      c.moveTo(gx - 6, gy + 4);
-      c.lineTo(gx + 4, gy - 4);
-      c.stroke();
-    }
   } else {
     c.fillStyle = mix32(W4.deep, "#06141c", 0.2);
     c.fillRect(px3 - 0.5, py - 0.5, t + 1, t + 1);
@@ -72793,14 +72753,6 @@ function drawTracedWater(c, x, y, t, biome, seed2, offset2, at5, waterTile) {
       c.strokeStyle = W4.shallow;
       c.lineWidth = 15;
       c.stroke();
-    }
-    if (waterTile && n % 2 === 0) {
-      c.globalAlpha = 0.25;
-      c.fillStyle = mix32(W4.shallow, "#ffffff", 0.25);
-      c.beginPath();
-      c.ellipse(px3 + 16 + (n >>> 4) % 5 - 2, py + 8 + (n >>> 8) % 16, 6 + (n >>> 12) % 6, 1.6, 0, 0, Math.PI * 2);
-      c.fill();
-      c.globalAlpha = 1;
     }
   }
   if (!open2) {
@@ -72835,16 +72787,6 @@ function drawTracedWater(c, x, y, t, biome, seed2, offset2, at5, waterTile) {
     c.quadraticCurveTo(rx, ry - 2.2, rx + l, ry);
     c.stroke();
     c.globalAlpha = 1;
-  }
-  if (waterTile && W4.kind !== "lava" && n % 4 === 3) {
-    const sx = px3 + 8 + (n >>> 5) % 14, sy = py + 8 + (n >>> 10) % 14;
-    c.fillStyle = "#ffffff";
-    c.beginPath();
-    c.ellipse(sx, sy, 3.4, 1.1, -0.15, 0, Math.PI * 2);
-    c.fill();
-    c.beginPath();
-    c.ellipse(sx + 6, sy + 2, 1.6, 0.7, -0.15, 0, Math.PI * 2);
-    c.fill();
   }
   c.restore();
   c.restore();
@@ -74231,7 +74173,7 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
       pathStats.environmentPathAheadCancelled++;
     }
   }
-  let lastView = null, travelX = 0, travelY = 0;
+  let lastView = null, travelX = 0, travelY = 0, exitsKey = null;
   let layoutJob = null, activeJob = null, planKey = null, planVisual = null, key2 = null, scaleKey = null, queue = [], routeQueue = [], routeBurst = 0, pending = null, generation = 0, visualGeneration = 0, rasterGeneration = 0, currentVisual = null, currentSpace = null, frameSequence = 0, visibleIds = /* @__PURE__ */ new Set(), pathScreenIds = /* @__PURE__ */ new Set(), preloadIds = /* @__PURE__ */ new Set(), recentIds = /* @__PURE__ */ new Set(), recentSeen = /* @__PURE__ */ new Map(), protectedIds = /* @__PURE__ */ new Set(), lastFlowers = [], requiredTasks = [], builds = 0, created = 0, worstBuildMs = 0, descriptorReuses = 0, retentionHits = 0, peakNeeded = 0, peakPrefetched = 0, capacity = BASE_LIMIT, evictions = 0, misses = 0, fallbackBuilds = 0, fallbackHits = 0, peakFallbackPages = 0, visibleRasterPages = 0, fallbackPages = 0, activeColliderVisuals = 0, missingColliderVisuals = 0, underCoveredColliderVisuals = 0, lastColliderRepair = null, lastColliderAudit = null, lastRasterLifecycle = null, staleRasterDiscards = 0, atomicRasterReplacements = 0, rasterCompletenessRepairs = 0, clearCount = 0, lastClearReason = "none", lastMissReason = "none", clearReasons = /* @__PURE__ */ Object.create(null);
   const emit = (kind, values = {}) => {
     if (diagnostics) diagnostics({ kind, at: performance.now(), ...values });
@@ -74328,6 +74270,7 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
     if (v.stands) for (let row2 = y / t - 3; row2 < (y + SIZE) / t + 3; row2++) text2 += (v.stands[row2 - oy] ?? "").slice(Math.max(0, x / t - 3 - ox), Math.max(0, (x + SIZE) / t + 3 - ox)) + "|";
     for (const b of v.blockers) if ((b.x + b.width) * t >= x - 64 && (b.y + b.height) * t >= y - 64 && b.x * t < x + SIZE + 64 && b.y * t < y + SIZE + 64) text2 += JSON.stringify(b);
     for (const d of v.decorations ?? []) if (d.x * t >= x - 640 && d.y * t >= y - 360 && d.x * t < x + SIZE + 640 && d.y * t < y + SIZE + 360) text2 += JSON.stringify(d);
+    for (const e of space.exits ?? []) if (e.x >= x - 640 && e.y >= y - 360 && e.x < x + SIZE + 640 && e.y < y + SIZE + 360) text2 += "|e" + e.x + "/" + e.y + "/" + e.label;
     return text2;
   }
   function layoutFor(space) {
@@ -74564,7 +74507,16 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
   }
   function draw(ctx, space, view3, renderScale = 1) {
     const composeTransform = typeof ctx.getTransform === "function" ? ctx.getTransform() : null;
-    const nextKey = environmentIdentity(space) + "/" + space.exits.map((e) => e.x + "/" + e.y + "/" + e.label).join("|") + "/" + (presentationIdentity?.() ?? "");
+    const nextKey = environmentIdentity(space) + "/" + (presentationIdentity?.() ?? "");
+    const nextExits = space.exits.map((e) => e.x + "/" + e.y + "/" + e.label).join("|");
+    if (exitsKey !== nextExits) {
+      if (exitsKey !== null) {
+        layouts3.clear();
+        planKey = null;
+        for (const entry2 of pages.values()) entry2.visual = null;
+      }
+      exitsKey = nextExits;
+    }
     if (key2 !== nextKey || scaleKey !== renderScale) {
       const reason = key2 === null ? "initial" : key2 !== nextKey ? "visual-identity-change" : "render-scale-change";
       clear2(reason);

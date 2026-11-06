@@ -4286,6 +4286,18 @@ function validateBytes(bytes, size) {
   }
   return bytes;
 }
+var textEncoder = typeof TextEncoder === "function" ? new TextEncoder() : null;
+async function hashUtf8(text, sha256) {
+  requireContract(typeof sha256 === "function", "Explicit SHA-256 provider required");
+  if (!textEncoder || typeof text !== "string" || typeof text.isWellFormed !== "function") return hashBytes(utf8(text), sha256);
+  requireContract(!text.includes("\0"), "Invalid UTF-8 input");
+  requireContract(text.isWellFormed(), "Unpaired surrogate");
+  const bytes = textEncoder.encode(text);
+  requireContract(bytes.length <= 16777216, `Expected ${bytes.length} bytes`);
+  const result = await sha256(bytes);
+  validateBytes(result, 32);
+  return [...result];
+}
 function bytesToHex(bytes) {
   validateBytes(bytes, bytes.length);
   return bytes.map((byte) => byte.toString(16).padStart(2, "0")).join("");
@@ -25787,7 +25799,7 @@ var DIGEST_ENTRY_CHARS = 128 * 1024;
 async function pageDigest(value, sha256) {
   const text = canonicalStringify(value);
   requireContract(typeof sha256 === "function", "Explicit SHA-256 provider required");
-  if (text.length > DIGEST_ENTRY_CHARS) return bytesToHex(await hashBytes(utf8(text), sha256));
+  if (text.length > DIGEST_ENTRY_CHARS) return bytesToHex(await hashUtf8(text, sha256));
   let memo = digestMemos.get(sha256);
   if (!memo) {
     memo = { entries: /* @__PURE__ */ new Map(), characters: 0 };
@@ -25799,7 +25811,7 @@ async function pageDigest(value, sha256) {
     memo.entries.set(text, cached);
     return cached.promise;
   }
-  const entry = { promise: (async () => bytesToHex(await hashBytes(utf8(text), sha256)))(), characters: text.length };
+  const entry = { promise: (async () => bytesToHex(await hashUtf8(text, sha256)))(), characters: text.length };
   memo.entries.set(text, entry);
   memo.characters += text.length;
   while (memo.entries.size > DIGEST_ENTRIES || memo.characters > DIGEST_TOTAL_CHARS) {
@@ -27818,7 +27830,7 @@ async function validateWorldAdvanceD9(a, b, options) {
 // src/storage/world_save_task_d9.js
 function createWorldSaveTaskD9({ store, sha256, generatePlannedChunk = null }) {
   let confirmed = null, pending = null, busy = false;
-  const same42 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+  const same41 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
   async function open2(campaignId) {
     requireContract(!busy && !pending, "World cut is pending");
     busy = true;
@@ -27860,7 +27872,7 @@ function createWorldSaveTaskD9({ store, sha256, generatePlannedChunk = null }) {
         const envelope = parseActivityEnvelope(legacyCheckpoint), legacy = envelope.cut.snapshot.state;
         await verifyActivityEnvelope(envelope, { sha256, expectedContentFingerprint: legacy.content.fingerprint, expectedGenerationBinding: activityGeneration(legacy) });
         const migration = await prepareD9OriginMigration(legacy, { sha256 });
-        requireContract(same42(migration.state, state), "First D9 cut must be the exact historical migration");
+        requireContract(same41(migration.state, state), "First D9 cut must be the exact historical migration");
       } else {
         if (confirmed?.publication.id !== head.id) confirmed = { publication: head, state: await openWorldSnapshotD9(head, { sha256, readPage: store.worldPages.readPage, generatePlannedChunk }) };
         const staged = new Map((request.stagedPages ?? []).map((p) => [p.id, p.value]));
@@ -27954,21 +27966,42 @@ function applyGroundResidenceD9(state, plan) {
 }
 
 // src/shared/contracts/world_patch_d9.js
-var same40 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var record = (x) => x !== null && typeof x === "object" && !Array.isArray(x);
 var transferRoots = ["d9World", "entitiesById", "groupsById", "encounterEconomy", "spacesByInstanceId", "playersById", "hostileCombat", "eliteCombat"];
 var pack2 = (value, exists) => exists ? { exists: true, value: copyWire(value) } : { exists: false };
+function sameWireD9(a, b) {
+  if (a === b) return true;
+  if (a === null || b === null || typeof a !== "object" || typeof b !== "object") return false;
+  const list = Array.isArray(a);
+  if (list !== Array.isArray(b)) return false;
+  if (list) {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) if (!sameWireD9(a[i], b[i])) return false;
+    return true;
+  }
+  const keys2 = Object.keys(a);
+  if (keys2.length !== Object.keys(b).length) return false;
+  for (const key9 of keys2) if (!Object.hasOwn(b, key9) || !sameWireD9(a[key9], b[key9])) return false;
+  return true;
+}
 function worldTransferPatchD9(before, after, { releasedGroupIds = [], placements = [], coldGroups = [] } = {}) {
   const changes = [];
   function visit(a, b, path, aExists = true, bExists = true) {
     if (!aExists && !bExists) return;
     if (path.length === 2 && path[0] === "d9World" && path[1] === "positions") return;
-    if (aExists && bExists && same40(a, b)) return;
+    if (aExists && bExists && sameWireD9(a, b)) return;
     if (aExists && bExists && record(a) && record(b)) {
       for (const key9 of /* @__PURE__ */ new Set([...Object.keys(a), ...Object.keys(b)])) visit(a[key9], b[key9], [...path, key9], Object.hasOwn(a, key9), Object.hasOwn(b, key9));
     } else changes.push({ path, before: pack2(a, aExists), after: pack2(b, bExists) });
   }
-  for (const root of transferRoots) visit(before[root], after[root], [root], Object.hasOwn(before, root), Object.hasOwn(after, root));
+  for (const root of transferRoots) {
+    const aExists = Object.hasOwn(before, root), bExists = Object.hasOwn(after, root);
+    if (aExists && bExists) {
+      validateWire(before[root]);
+      validateWire(after[root]);
+    }
+    visit(before[root], after[root], [root], aExists, bExists);
+  }
   requireContract(changes.length <= 256, "World transfer needs a smaller prepared batch");
   return { version: "world-transfer-patch-d9-v1", campaignId: before.campaign.campaignId, runtimeRevision: before.d9World.runtime.revision, frames: copyWire(before.d9World.runtime.frames), revisions: Object.fromEntries(Object.values(before.playersById).map((p) => [p.playerId, p.inventory.revision])), releasedGroupIds: [...releasedGroupIds], placements: copyWire(placements), coldGroups: [...coldGroups], changes };
 }
@@ -28295,7 +28328,7 @@ async function prepareWorldEncountersD9(before, { sha256 }) {
 }
 
 // src/storage/world_cold_deadlines_d9.js
-var same41 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same40 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 async function settleColdDeadlinesD9(state, buffer, { sha256, limit = 8 }) {
   const deadlines = createPageTransaction({ root: state.d9World.deadlineIndex, readPage: buffer.readPage, sha256 }), due = await dueWorldDeadlines(deadlines, state.tick, limit), chunks2 = /* @__PURE__ */ new Map(), additionalRows = {}, changedGroups = /* @__PURE__ */ new Set();
   async function chunk(row) {
@@ -28314,7 +28347,7 @@ async function settleColdDeadlinesD9(state, buffer, { sha256, limit = 8 }) {
       const r = e.players[row.ownerPlayerId]?.rewards[row.sourceId], p = state.playersById[row.ownerPlayerId];
       if (!r || !p || !r.generated || r.claimed || r.autoSalvageEligibleTick === null || r.autoSalvageEligibleTick > state.tick) continue;
       const itemId2 = `item:${p.playerId}:${r.sourceEntityId}`, owned = await readOwnedGearD9(state.d9World.ownershipIndex, p.playerId, itemId2, { sha256, readPage: buffer.readPage });
-      requireContract(owned?.disposition === "UNCLAIMED" && same41(owned.item.generated, r.generated) && owned.origin.groupId === groupId && owned.origin.episode === e.economy.episode, "Cold salvage lacks current unclaimed ownership");
+      requireContract(owned?.disposition === "UNCLAIMED" && same40(owned.item.generated, r.generated) && owned.origin.groupId === groupId && owned.origin.episode === e.economy.episode, "Cold salvage lacks current unclaimed ownership");
       requireContract(!p.inventory.itemsById[itemId2] && !p.inventory.renewal.groundBySourceId[r.sourceEntityId], "Cold salvage item is locally owned");
       const working = copyWire(p), terminal = autoSalvageReward(state, working, r, owned.origin);
       p.inventory.revision = working.inventory.revision;

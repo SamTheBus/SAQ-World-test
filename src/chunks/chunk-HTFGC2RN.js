@@ -1655,6 +1655,18 @@ function validateBytes(bytes, size) {
   }
   return bytes;
 }
+var textEncoder = typeof TextEncoder === "function" ? new TextEncoder() : null;
+async function hashUtf8(text, sha256) {
+  requireContract(typeof sha256 === "function", "Explicit SHA-256 provider required");
+  if (!textEncoder || typeof text !== "string" || typeof text.isWellFormed !== "function") return hashBytes(utf8(text), sha256);
+  requireContract(!text.includes("\0"), "Invalid UTF-8 input");
+  requireContract(text.isWellFormed(), "Unpaired surrogate");
+  const bytes = textEncoder.encode(text);
+  requireContract(bytes.length <= 16777216, `Expected ${bytes.length} bytes`);
+  const result = await sha256(bytes);
+  validateBytes(result, 32);
+  return [...result];
+}
 function bytesToHex(bytes) {
   validateBytes(bytes, bytes.length);
   return bytes.map((byte) => byte.toString(16).padStart(2, "0")).join("");
@@ -20817,7 +20829,7 @@ var DIGEST_ENTRY_CHARS = 128 * 1024;
 async function pageDigest(value, sha256) {
   const text = canonicalStringify(value);
   requireContract(typeof sha256 === "function", "Explicit SHA-256 provider required");
-  if (text.length > DIGEST_ENTRY_CHARS) return bytesToHex(await hashBytes(utf8(text), sha256));
+  if (text.length > DIGEST_ENTRY_CHARS) return bytesToHex(await hashUtf8(text, sha256));
   let memo = digestMemos.get(sha256);
   if (!memo) {
     memo = { entries: /* @__PURE__ */ new Map(), characters: 0 };
@@ -20829,7 +20841,7 @@ async function pageDigest(value, sha256) {
     memo.entries.set(text, cached);
     return cached.promise;
   }
-  const entry = { promise: (async () => bytesToHex(await hashBytes(utf8(text), sha256)))(), characters: text.length };
+  const entry = { promise: (async () => bytesToHex(await hashUtf8(text, sha256)))(), characters: text.length };
   memo.entries.set(text, entry);
   memo.characters += text.length;
   while (memo.entries.size > DIGEST_ENTRIES || memo.characters > DIGEST_TOTAL_CHARS) {
