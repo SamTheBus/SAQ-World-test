@@ -9252,7 +9252,7 @@ function pickTree(S, code, x, y, z, e, edge, h) {
 // src/shared/content/settlement_services_v2.js
 var SERVICES_V2 = "settlement-services-candidate-v2";
 var SERVICES_V2_HASH = "23d063a4274a386f580788ecf149edafa58a646018606c70f22932f13e6280a2";
-var SERVICE_ASSIGNMENTS = freezeWire({ "civilian:alpha:town:bren": ["attune", "reforge", "awaken", "shatter", "materials"], "civilian:alpha:town:selene": ["enchant", "purge", "resonance", "shatter", "materials"] });
+var SERVICE_ASSIGNMENTS = freezeWire({ "civilian:alpha:alderwood:smith": ["attune", "shatter"], "civilian:alpha:village:oren": ["attune", "shatter"], "civilian:alpha:town:bren": ["attune", "reforge", "awaken", "shatter", "materials"], "civilian:alpha:town:selene": ["enchant", "purge", "resonance", "shatter", "materials"] });
 var SPECIALIST_NPC = freezeWire({ id: "civilian:alpha:town:selene", name: "Selene", role: "enchanter", roleLabel: "Enchanter", settlementId: "settlement-slot:town:05", buildingId: "town-open:roof:007", band: 3, tile: { x: 5910, y: 5754 }, space: "exterior", color: "#806b9e" });
 var WORKSHOP_POLICY = freezeWire({ version: SERVICES_V2, serviceAssignments: SERVICE_ASSIGNMENTS, parent: "4af4d3519fb954a5161c799771d79e69ced9955044fb690fc78e6333a3fec8c4", stock: "unchanged personal band-derived ordinary gear; no wall-clock refresh", materials: { "Eridium Shard": "300", "Overlord's Sigil": "250", "Astral Essence": "500" }, reforge: "Dungeon execution formula: floor(150 * 1.045^((itemPower-1)*5) * 2^stars), 1 Sigil; one mutable affix", awaken: "2500*(stars+1) gold, stars+1 Eridium, 5*(stars+1) target-tier scrap; same family and base identity; scaled existing affixes and one additional eligible line", enchant: "2+ stars, slot level 50+, 1 Astral Essence, one random active stat +25%, stars-1 capacity", purge: "1000*itemPower*max(stars,1) gold; remove enchants only", resonance: "Dungeon gold curve, 25+25*stars Monster Souls; World-supported stat sets, two/three-piece bonuses", shatter: "World ordinary salvage; protected/Unique/Sigil destruction forbidden. Dungeon Spectral Codex has no World authority", priceDomain: { maximumItemPower: 1e3 }, limits: { modifiedItems: 64, operationsPerItem: 32, materialPurchasesPerKind: 1e6 }, setMultipliers: "Dungeon constants.js: cumulative two/three-piece thresholds; eleven active-combat sets; inactive idle lines excluded" });
 var hasServicesV2 = (b) => b?.settlementServicesVersion === SERVICES_V2 && b?.settlementServicesHash === SERVICES_V2_HASH;
@@ -16944,6 +16944,68 @@ function validatePotionProgress(x, y) {
   return b.capacityUpgrades - a.capacityUpgrades + b.potencyUpgrades - a.potencyUpgrades;
 }
 
+// src/shared/contracts/world_time_v1.js
+var WORLD_TIME_VERSION = "campaign-world-time-v1";
+var WORLD_TIME_POLICY = freezeWire({
+  version: WORLD_TIME_VERSION,
+  authorityTicksPerSecond: 60,
+  cycleTicks: 216e3,
+  realMinutesPerCycle: 60,
+  minutesPerDay: 1440,
+  ticksPerGameMinute: 150,
+  startingMinuteOfDay: 480,
+  dayIndexOrigin: 0,
+  dayBoundaryMinute: 0,
+  phases: [
+    { id: "dawn", startMinute: 300, endMinute: 420 },
+    { id: "day", startMinute: 420, endMinute: 1140 },
+    { id: "dusk", startMinute: 1140, endMinute: 1260 },
+    { id: "night", startMinute: 1260, endMinute: 300 }
+  ],
+  clockSource: "persisted-authority-tick-only",
+  offlineAdvance: false,
+  loadingAdvance: false,
+  focusSuspensionAdvance: false,
+  restOrTravelTimeAdvance: false,
+  preview: "presentation-only-no-authority-or-persistence-mutation"
+});
+var WORLD_TIME_POLICY_HASH = "779ab0b4efd1a93c4b4c75cdadf24e398573e883eb0b51a1542db3128d7e8306";
+function projection(minuteOfDay, { authorityTick, dayIndex, preview }) {
+  const period = minuteOfDay >= 300 && minuteOfDay < 420 ? "dawn" : minuteOfDay >= 420 && minuteOfDay < 1140 ? "day" : minuteOfDay >= 1140 && minuteOfDay < 1260 ? "dusk" : "night";
+  const start = { dawn: 300, day: 420, dusk: 1140, night: 1260 }[period], duration = { dawn: 120, day: 720, dusk: 120, night: 480 }[period];
+  const periodMinutes = period === "night" && minuteOfDay < 300 ? minuteOfDay + 1440 - start : minuteOfDay - start;
+  const wholeMinute = Math.floor(minuteOfDay), hour = Math.floor(wholeMinute / 60), minute = wholeMinute % 60;
+  return Object.freeze({
+    version: WORLD_TIME_VERSION,
+    policyHash: WORLD_TIME_POLICY_HASH,
+    authorityTick,
+    dayIndex,
+    dayNumber: dayIndex === null ? null : dayIndex + 1,
+    minuteOfDay,
+    hour,
+    minute,
+    amPm: hour < 12 ? "AM" : "PM",
+    timeLabel: String(hour).padStart(2, "0") + ":" + String(minute).padStart(2, "0"),
+    period,
+    periodProgress: periodMinutes / duration,
+    phase: minuteOfDay / 1440,
+    dayFraction: minuteOfDay / 1440,
+    cycleTicks: WORLD_TIME_POLICY.cycleTicks,
+    preview
+  });
+}
+function worldTimeAtTick(tick) {
+  safeInteger(tick, 0);
+  const remainder = tick % WORLD_TIME_POLICY.cycleTicks, elapsedCycles = (tick - remainder) / WORLD_TIME_POLICY.cycleTicks;
+  const shifted = remainder + WORLD_TIME_POLICY.startingMinuteOfDay * WORLD_TIME_POLICY.ticksPerGameMinute;
+  const dayCarry = shifted >= WORLD_TIME_POLICY.cycleTicks ? 1 : 0, tickWithinDay = shifted % WORLD_TIME_POLICY.cycleTicks;
+  return projection(tickWithinDay / WORLD_TIME_POLICY.ticksPerGameMinute, { authorityTick: tick, dayIndex: elapsedCycles + dayCarry, preview: false });
+}
+function worldTimeAtMinute(minute) {
+  requireContract(typeof minute === "number" && Number.isFinite(minute) && minute >= 0 && minute < WORLD_TIME_POLICY.minutesPerDay, "Preview minute must be finite and within [0,1440)");
+  return projection(minute, { authorityTick: null, dayIndex: null, preview: true });
+}
+
 // src/shared/contracts/settlement_services_v1.js
 var same15 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var ordinary = new Set(REWARD_POOLS.flat());
@@ -16977,6 +17039,56 @@ function serviceStock(s, p, npc, gearClass = heroClassOf(p.d8)?.id ?? null, lega
     return stockCache.get(key5);
   });
 }
+var DAILY = "daily:";
+var RESTOCK_SHIFT = (WORLD_TIME_POLICY.startingMinuteOfDay - 360) * WORLD_TIME_POLICY.ticksPerGameMinute;
+var MAX_DAILY_PURCHASES = 512;
+var SHOP_TIERS = freezeWire({ village: { count: 6, top: 1 }, town: { count: 8, top: 2 }, city: { count: 10, top: 3 } });
+var SHOP_FAMILIES = freezeWire({ general: ["boots", "ring", "gloves", "cape"], smith: ["weapon", "overall", "helmet", "subweapon"] });
+var SHOP_FAMILIES_CLASSLESS = freezeWire({ general: ["boots", "ring"], smith: ["weapon", "overall"] });
+var restockDay = (tick) => Math.floor((tick + RESTOCK_SHIFT) / WORLD_TIME_POLICY.cycleTicks);
+var restockTicksLeft = (tick) => WORLD_TIME_POLICY.cycleTicks - (tick + RESTOCK_SHIFT) % WORLD_TIME_POLICY.cycleTicks;
+var shopTier = (npc) => /capital|city/.test(npc.settlementId ?? "") ? "city" : /town/.test(npc.settlementId ?? "") ? "town" : "village";
+var townLevel = (npc) => [1, 1, 6, 11, 21, 41][npc.band] ?? 1;
+var sellBase = (item) => {
+  const power2 = progressionBigInt(item.generated?.itemPower ?? 1), bounded2 = Number(power2 > BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) ? BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) : power2);
+  return (2 + Math.floor(bounded2 / 2)) * 2 ** (item.generated?.rarityTier ?? 0);
+};
+var dailyBuyPrice = (item) => String(4 * sellBase(item));
+var purchaseCap = (s) => hasWorldCombat(s) ? MAX_DAILY_PURCHASES : SETTLEMENT_LIFE_POLICY.maximumPurchaseRecords;
+function dailyOffer(s, p, npc, day, slot, level, cls) {
+  const sourceEntityId = "ent:" + token4("daily-stock-v1/" + WORLD_COMBAT_HASH + "/" + (cls ?? "-") + "/" + s.campaign.seed.seedHex + "/" + p.playerId + "/" + npc.id + "/" + day + "/" + slot), key5 = sourceEntityId + "/" + level;
+  if (!stockCache.has(key5)) {
+    const tier = SHOP_TIERS[shopTier(npc)], floor = level >= 40 ? 2 : level >= 20 ? 1 : 0, top = Math.max(tier.top, floor), weights = [60, 30, 14, 6].slice(0, top - floor + 1), roll = gearHash4(sourceEntityId + "/rarity") % weights.reduce((a, b) => a + b, 0);
+    let rarity = floor;
+    for (let i = 0, acc = 0; i < weights.length; i++) {
+      acc += weights[i];
+      if (roll < acc) {
+        rarity = floor + i;
+        break;
+      }
+    }
+    const families = cls ? SHOP_FAMILIES[npc.role] : SHOP_FAMILIES_CLASSLESS[npc.role], family2 = families[(slot + day) % families.length];
+    const progression = { ...rewardProgressionD9(level, sourceEntityId), combatHash: WORLD_COMBAT_HASH, combatQuality: "ordinary", ...cls ? { gearClass: cls, wardrobe: WARDROBE_V1, affixes: AFFIXES_V2 } : { armor: "overall" } }, generated = generateGear3(gearSeed(s, p, sourceEntityId), progression, { tier: rarity, family: family2 });
+    const item = { itemId: `item:${p.playerId}:${sourceEntityId}`, definitionId: generated.definition.definitionId, ownerPlayerId: p.playerId, sourceEntityId, generated: copyWire(generated) };
+    if (stockCache.size >= 256) stockCache.delete(stockCache.keys().next().value);
+    stockCache.set(key5, freezeWire({ offer: { id: DAILY + day + ":" + slot + ":" + level, family: family2, price: dailyBuyPrice(item) }, sourceEntityId, item }));
+  }
+  return stockCache.get(key5);
+}
+function dailyStock(s, p, npc, day = restockDay(s.tick)) {
+  if (!SHOP_FAMILIES[npc.role]) return [];
+  const level = Math.max(townLevel(npc), Number(p.progression?.level ?? 1)), cls = heroClassOf(p.d8)?.id ?? null;
+  return Array.from({ length: SHOP_TIERS[shopTier(npc)].count }, (_, slot) => dailyOffer(s, p, npc, day, slot, level, cls));
+}
+function currentStock(s, p, npc) {
+  return hasWorldCombat(s) ? dailyStock(s, p, npc) : serviceStock(s, p, npc);
+}
+function validateDailyItem(s, p, r, item) {
+  const [, day, slot, level] = r.offerId.split(":").map(Number), n = serviceNpcsFor(s.d9World?.plannedWorld).find((n2) => n2.id === r.npcId), base = unmodifiedItem(item);
+  requireContract(n && hasWorldCombat(s) && Number.isSafeInteger(day) && Number.isSafeInteger(slot) && Number.isSafeInteger(level) && restockDay(r.tick) === day && slot >= 0 && slot < SHOP_TIERS[shopTier(n)].count && level >= townLevel(n) && level <= 50, "Daily stock purchase identity");
+  const q = dailyOffer(s, p, n, day, slot, level, base.generated?.progression?.gearClass ?? null);
+  requireContract(q.offer.id === r.offerId && same15(q.item, base) && same15(r.item, base), "Purchased gear changed");
+}
 function servicePurchase(p, sourceId) {
   return p.inventory.services?.purchasesBySourceId[sourceId] ?? null;
 }
@@ -16985,11 +17097,16 @@ function validateServiceOrigin(p, o, id) {
   requireContract(o.servicePurchase === id && servicePurchase(p, id), "Unknown purchased gear provenance");
 }
 function validateServiceItem(s, p, item) {
-  const r = servicePurchase(p, item.sourceEntityId), n = serviceNpcsFor(s.d9World?.plannedWorld).find((n2) => n2.id === r?.npcId), stock = n && [...serviceStock(s, p, n), ...heroClassOf(p.d8) ? serviceStock(s, p, n, null) : [], ...hasWorldCombat(s) ? serviceStock(s, p, n, null, true) : []].find((q) => q.offer.id === r.offerId && same15(q.item, unmodifiedItem(item)));
+  const r = servicePurchase(p, item.sourceEntityId);
+  if (r?.offerId.startsWith(DAILY)) {
+    validateDailyItem(s, p, r, item);
+    return item;
+  }
+  const n = serviceNpcsFor(s.d9World?.plannedWorld).find((n2) => n2.id === r?.npcId), stock = n && [...serviceStock(s, p, n), ...heroClassOf(p.d8) ? serviceStock(s, p, n, null) : [], ...hasWorldCombat(s) ? serviceStock(s, p, n, null, true) : []].find((q) => q.offer.id === r.offerId && same15(q.item, unmodifiedItem(item)));
   requireContract(stock && same15(r.item, unmodifiedItem(item)), "Purchased gear changed");
   return item;
 }
-var worldDrop = (item, o) => Boolean(item.generated && typeof item.generated.progression?.combatHash === "string" && o.groupId && !o.servicePurchase);
+var worldDrop = (item, o) => Boolean(item.generated && typeof item.generated.progression?.combatHash === "string" && (o.groupId || o.servicePurchase));
 var KEPT_SALE_RECEIPTS = 128;
 var MAX_HOT_SALE_RECEIPTS = 2048;
 var settledSale = (s, p, r) => {
@@ -17009,7 +17126,7 @@ function saleQuote(p, item) {
   if (!item || item.ownerPlayerId !== p.playerId || !o || item.sourceEntityId === null || !(ordinary.has(item.definitionId) || worldDrop(item, o)) || item.locked || item.protected || item.unique || d?.unique || d?.classification === "unique-landmark" || Object.values(p.inventory.equipped).includes(item.itemId) || Object.values(p.inventory.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item.sourceEntityId) || isClassKitSource(p, item.sourceEntityId) || (item.generated?.rarityTier ?? 0) > SETTLEMENT_LIFE_POLICY.sale.maximumRarity) return null;
   if (!o.servicePurchase && !o.groupId) return null;
   const power2 = progressionBigInt(item.generated?.itemPower ?? 1), bounded2 = Number(power2 > BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) ? BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) : power2);
-  if (!ordinary.has(item.definitionId)) return String((2 + Math.floor(bounded2 / 2)) * 2 ** (item.generated?.rarityTier ?? 0));
+  if (!ordinary.has(item.definitionId)) return String(sellBase(item));
   return String(SETTLEMENT_LIFE_POLICY.sale.baseGold + bounded2 * SETTLEMENT_LIFE_POLICY.sale.perItemPower + (item.generated?.rarityTier ?? 0) * SETTLEMENT_LIFE_POLICY.sale.perRarityTier);
 }
 var supplyCount = potionCount;
@@ -17035,11 +17152,11 @@ function serviceActionProblem(s, p, kind2, payload) {
       if (!upgrade.price) return "Already fully upgraded";
       return compareAmount(inv.gold, upgrade.price) < 0 ? "Insufficient gold" : null;
     }
-    const stock = serviceStock(s, p, npc).find((q) => q.offer.id === payload.offerId);
+    const stock = currentStock(s, p, npc).find((q) => q.offer.id === payload.offerId);
     if (!stock) return "Offer unavailable";
     if (l.purchasesBySourceId[stock.sourceEntityId]) return "This personal stock has already been purchased";
     if (Object.keys(inv.itemsById).length >= inventoryIntakeCapacity(p.d8)) return "Equipment inventory is full";
-    if (Object.keys(l.purchasesBySourceId).length >= SETTLEMENT_LIFE_POLICY.maximumPurchaseRecords) return "Personal stock ledger is full";
+    if (Object.keys(l.purchasesBySourceId).length >= purchaseCap(s)) return "Personal stock ledger is full";
     return compareAmount(inv.gold, stock.offer.price) < 0 ? "Insufficient gold" : null;
   }
   if (kind2 === "service.sell") {
@@ -17066,7 +17183,7 @@ function applyServiceAction(s, p, c, order) {
   if (c.kind === "service.buy") {
     if (potionUpgrade(p, c.payload.offerId)) price = applyPotionUpgrade(p, c.payload.offerId);
     else {
-      const n = serviceNpcsFor(s.d9World?.plannedWorld).find((n2) => n2.id === c.payload.npcId), q = serviceStock(s, p, n).find((q2) => q2.offer.id === c.payload.offerId);
+      const n = serviceNpcsFor(s.d9World?.plannedWorld).find((n2) => n2.id === c.payload.npcId), q = currentStock(s, p, n).find((q2) => q2.offer.id === c.payload.offerId);
       price = q.offer.price;
       i.itemsById[q.item.itemId] = copyWire(q.item);
       i.renewal.originsByItemId[q.item.itemId] = { servicePurchase: q.sourceEntityId, sourceEntityId: q.sourceEntityId };
@@ -17098,6 +17215,10 @@ function serviceGoldAdjustment(p, gold) {
   let income = l.retiredSaleGold, spent = addAmount(addAmount(multiplyAmount(String(l.supplyPurchases), SETTLEMENT_LIFE_POLICY.supply.price), multiplyAmount(String(l.restCount), SETTLEMENT_LIFE_POLICY.rest.price)), potionUpgradeSpent(p));
   for (const r of Object.values(l.salesByItemId)) income = addAmount(income, r.gold);
   for (const r of Object.values(l.purchasesBySourceId)) {
+    if (r.offerId.startsWith(DAILY)) {
+      spent = addAmount(spent, dailyBuyPrice(r.item));
+      continue;
+    }
     const n = ORDINARY_SERVICE_NPCS.find((n2) => n2.id === r.npcId), offer = SETTLEMENT_LIFE_POLICY.stockByRole[n?.role]?.find((q) => q.id === r.offerId);
     requireContract(offer, "Unknown purchased stock");
     spent = addAmount(spent, merchantPrice(n, offer));
@@ -17120,7 +17241,7 @@ function validateSettlementServices(s, p, validateCommand2) {
   safeInteger(l.suppliesUsed, 0, l.supplyPurchases + (l.potions?.grants ?? 0));
   validatePotionBelt(s, p, SETTLEMENT_LIFE_POLICY.supply.maximum);
   safeInteger(l.restCount, 0, SETTLEMENT_LIFE_POLICY.maximumRests);
-  requireContract(Object.keys(l.purchasesBySourceId).length <= SETTLEMENT_LIFE_POLICY.maximumPurchaseRecords && Object.keys(l.salesByItemId).length <= (s.d9World?.paging ? MAX_HOT_SALE_RECEIPTS : SETTLEMENT_LIFE_POLICY.sale.retainedReceiptBound), "Service receipt bound");
+  requireContract(Object.keys(l.purchasesBySourceId).length <= purchaseCap(s) && Object.keys(l.salesByItemId).length <= (s.d9World?.paging ? MAX_HOT_SALE_RECEIPTS : SETTLEMENT_LIFE_POLICY.sale.retainedReceiptBound), "Service receipt bound");
   function receipt(r, kind2) {
     validateCommand2(r.command);
     const c = r.command;
@@ -17214,7 +17335,7 @@ function projectedServiceNpcs(s, p) {
     if (n.space === "exterior" && !s.d9World.runtime.chunks.some((c) => c.chunkX === String(1024 + Math.floor(n.tile.x / 32)) && c.chunkY === String(1024 + Math.floor(n.tile.y / 26)))) return [];
     const q = serviceNpcPosition(s, n);
     if (!q || q.spaceInstanceId !== a.residency.spaceInstanceId || Math.abs(q.position.x - a.position.x) > 1800 || Math.abs(q.position.y - a.position.y) > 1800) return [];
-    return [{ ...n, position: q.position, available: Boolean(accessibleServiceNpc(s, p, n.id)), stock: serviceStock(s, p, n).map((q2) => ({ id: q2.offer.id, label: q2.item.generated.definition.name, price: q2.offer.price, item: copyWire(q2.item), purchased: Boolean(servicePurchase(p, q2.sourceEntityId)) })) }];
+    return [{ ...n, position: q.position, available: Boolean(accessibleServiceNpc(s, p, n.id)), tier: shopTier(n), restockTicks: hasWorldCombat(s) ? restockTicksLeft(s.tick) : null, stock: currentStock(s, p, n).map((q2) => ({ id: q2.offer.id, label: q2.item.generated.definition.name, price: q2.offer.price, item: copyWire(q2.item), purchased: Boolean(servicePurchase(p, q2.sourceEntityId)) })) }];
   });
 }
 
@@ -25770,6 +25891,8 @@ export {
   collectGroundPotions,
   potionDropCount,
   potionUpgrade,
+  worldTimeAtTick,
+  worldTimeAtMinute,
   saleQuote,
   supplyCount,
   serviceActionProblem,

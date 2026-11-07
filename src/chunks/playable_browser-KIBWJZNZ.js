@@ -828,8 +828,10 @@ import {
   worldPointForArea,
   worldRevisionV1,
   worldRolesV1,
+  worldTimeAtMinute,
+  worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-XXSLQ6KT.js";
+} from "./chunk-IMIW5JQY.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -41037,68 +41039,6 @@ var activityCampaignTransactions = createCampaignStoreTransactions({
 });
 var activityCampaignCodec = Object.freeze({ ...activityCampaignTransactions, parseCampaignEnvelope: parseActivityEnvelope, serializeCampaignEnvelope: serializeActivityEnvelope, validateTransactionProposal: validateActivityProposal });
 
-// src/shared/contracts/world_time_v1.js
-var WORLD_TIME_VERSION = "campaign-world-time-v1";
-var WORLD_TIME_POLICY = freezeWire({
-  version: WORLD_TIME_VERSION,
-  authorityTicksPerSecond: 60,
-  cycleTicks: 216e3,
-  realMinutesPerCycle: 60,
-  minutesPerDay: 1440,
-  ticksPerGameMinute: 150,
-  startingMinuteOfDay: 480,
-  dayIndexOrigin: 0,
-  dayBoundaryMinute: 0,
-  phases: [
-    { id: "dawn", startMinute: 300, endMinute: 420 },
-    { id: "day", startMinute: 420, endMinute: 1140 },
-    { id: "dusk", startMinute: 1140, endMinute: 1260 },
-    { id: "night", startMinute: 1260, endMinute: 300 }
-  ],
-  clockSource: "persisted-authority-tick-only",
-  offlineAdvance: false,
-  loadingAdvance: false,
-  focusSuspensionAdvance: false,
-  restOrTravelTimeAdvance: false,
-  preview: "presentation-only-no-authority-or-persistence-mutation"
-});
-var WORLD_TIME_POLICY_HASH = "779ab0b4efd1a93c4b4c75cdadf24e398573e883eb0b51a1542db3128d7e8306";
-function projection(minuteOfDay, { authorityTick, dayIndex, preview }) {
-  const period = minuteOfDay >= 300 && minuteOfDay < 420 ? "dawn" : minuteOfDay >= 420 && minuteOfDay < 1140 ? "day" : minuteOfDay >= 1140 && minuteOfDay < 1260 ? "dusk" : "night";
-  const start = { dawn: 300, day: 420, dusk: 1140, night: 1260 }[period], duration = { dawn: 120, day: 720, dusk: 120, night: 480 }[period];
-  const periodMinutes = period === "night" && minuteOfDay < 300 ? minuteOfDay + 1440 - start : minuteOfDay - start;
-  const wholeMinute = Math.floor(minuteOfDay), hour = Math.floor(wholeMinute / 60), minute = wholeMinute % 60;
-  return Object.freeze({
-    version: WORLD_TIME_VERSION,
-    policyHash: WORLD_TIME_POLICY_HASH,
-    authorityTick,
-    dayIndex,
-    dayNumber: dayIndex === null ? null : dayIndex + 1,
-    minuteOfDay,
-    hour,
-    minute,
-    amPm: hour < 12 ? "AM" : "PM",
-    timeLabel: String(hour).padStart(2, "0") + ":" + String(minute).padStart(2, "0"),
-    period,
-    periodProgress: periodMinutes / duration,
-    phase: minuteOfDay / 1440,
-    dayFraction: minuteOfDay / 1440,
-    cycleTicks: WORLD_TIME_POLICY.cycleTicks,
-    preview
-  });
-}
-function worldTimeAtTick(tick) {
-  safeInteger(tick, 0);
-  const remainder = tick % WORLD_TIME_POLICY.cycleTicks, elapsedCycles = (tick - remainder) / WORLD_TIME_POLICY.cycleTicks;
-  const shifted2 = remainder + WORLD_TIME_POLICY.startingMinuteOfDay * WORLD_TIME_POLICY.ticksPerGameMinute;
-  const dayCarry = shifted2 >= WORLD_TIME_POLICY.cycleTicks ? 1 : 0, tickWithinDay = shifted2 % WORLD_TIME_POLICY.cycleTicks;
-  return projection(tickWithinDay / WORLD_TIME_POLICY.ticksPerGameMinute, { authorityTick: tick, dayIndex: elapsedCycles + dayCarry, preview: false });
-}
-function worldTimeAtMinute(minute) {
-  requireContract(typeof minute === "number" && Number.isFinite(minute) && minute >= 0 && minute < WORLD_TIME_POLICY.minutesPerDay, "Preview minute must be finite and within [0,1440)");
-  return projection(minute, { authorityTick: null, dayIndex: null, preview: true });
-}
-
 // src/shared/contracts/stat_presentation.js
 var fraction = (v) => {
   if (v?.n !== void 0) return [BigInt(v.n), BigInt(v.d)];
@@ -50427,6 +50367,8 @@ function createSettlementServicesMenu2(options) {
  #settlement-services .tn-shell{position:relative;height:100%;display:flex;flex-direction:column;min-height:0}
  #settlement-services .tn-head{display:flex;align-items:center;gap:10px;padding:12px 12px 10px;flex:none}
  #settlement-services .tn-npc{width:46px;height:46px;border-radius:14px;flex:none;display:grid;place-items:center;background:var(--tn-card2);border:1px solid #33404d}#settlement-services .tn-npc svg{width:28px;height:28px}
+ #settlement-services .tn-tier{display:inline-flex;align-items:center;height:18px;padding:0 7px;margin-left:6px;border-radius:9px;background:var(--tn-card2);border:1px solid #33404d;color:var(--tn-label);font:700 10px/1 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;vertical-align:2px}
+ #settlement-services .tn-restock{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:9px 12px;border-radius:14px;background:var(--tn-card);border:1px solid var(--tn-line)}#settlement-services .tn-restock svg{width:20px;height:20px;flex:none}#settlement-services .tn-restock b{display:block;font:700 13px/1.2 system-ui,sans-serif;color:var(--tn-text)}#settlement-services .tn-restock small{font:12px/1.3 system-ui,sans-serif;color:var(--tn-muted)}#settlement-services .tn-restock .tn-when{margin-left:auto;font:700 14px/1 system-ui,sans-serif;color:var(--tn-gold);font-variant-numeric:tabular-nums;white-space:nowrap}
  #settlement-services .tn-who{flex:1;min-width:0}#settlement-services .tn-who h3{margin:0;font:400 19px/1.15 Georgia,'Times New Roman',serif;color:var(--tn-text)}#settlement-services .tn-who small{color:var(--tn-muted);font-size:12px}
  #settlement-services .tn-x{width:44px;height:44px;border-radius:12px;border:1px solid var(--tn-line);background:var(--tn-card);display:grid;place-items:center;flex:none;padding:0}
  #settlement-services .tn-wallet{display:flex;gap:8px;padding:0 12px 10px;flex:none;flex-wrap:wrap}
@@ -50589,6 +50531,7 @@ function createSettlementServicesMenu2(options) {
   const UP = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
   const CHECK = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2a1c05" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>';
   const LOCK = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#cfd5d6" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+  const RESTOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="#d9b25f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>';
   const CLOSE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#aeb5b6" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>';
   const FLASK = (full, size = "") => `<svg class="tn-flask" ${size} viewBox="0 0 20 26" aria-hidden="true"><path d="M7.4 7.6H12.6V11.6A6.6 6.6 0 1 1 7.4 11.6Z" fill="${full ? "#e8404a" : "#2a3542"}" stroke="#0c1219" stroke-width="1.4"/><rect x="7" y="4" width="6" height="3.6" rx="1" fill="#8a6a44"/>${full ? '<path d="M9 13.5a3 3 0 0 0-1.6 2.6" stroke="#ffb3a6" stroke-width="1.2" fill="none" stroke-linecap="round"/>' : ""}</svg>`;
   const FACES = {
@@ -50774,7 +50717,9 @@ function createSettlementServicesMenu2(options) {
     panel.dataset.serviceKind = kind;
     panel.replaceChildren();
     const shell = el("div", void 0, "tn-shell"), head13 = el("div", void 0, "tn-head"), face3 = markup(el("div", void 0, "tn-npc"), FACES[kind]), who = el("div", void 0, "tn-who");
-    who.append(el("h3", npc?.name ?? "Potions"), el("small", npc?.roleLabel ?? "Your potion belt"));
+    const title = el("h3", npc?.name ?? "Potions");
+    if (npc?.tier && npc.stock?.length) title.append(el("span", { village: "Village", town: "Town", city: "City" }[npc.tier], "tn-tier"));
+    who.append(title, el("small", npc?.roleLabel ?? "Your potion belt"));
     const exit = button("", close, "close", "tn-x");
     exit.innerHTML = CLOSE;
     exit.setAttribute("aria-label", "Close");
@@ -50816,7 +50761,7 @@ function createSettlementServicesMenu2(options) {
       }
     }
     shell.append(wallet);
-    const modes = kind === "forge" ? [["attune", "Upgrade"], ["reforge", "Reforge"], ["awaken", "Awaken"], ["shatter", "Salvage"], ...npc.stock?.length ? [["gear", "Buy"]] : []] : kind === "altar" ? [["enchant", "Enchant"], ["purge", "Purge"], ["resonance", "Resonance"]] : kind === "shop" ? [["gear", "Buy"], ["sell", "Sell"], ["supplies", "Potions"]] : [["supplies", "Potions"]];
+    const modes = kind === "forge" ? [...[["attune", "Upgrade"], ["reforge", "Reforge"], ["awaken", "Awaken"], ["shatter", "Salvage"]].filter(([id]) => npc.services.includes(id)), ...npc.stock?.length ? [["gear", "Buy"]] : []] : kind === "altar" ? [["enchant", "Enchant"], ["purge", "Purge"], ["resonance", "Resonance"]] : kind === "shop" ? [["gear", "Buy"], ["sell", "Sell"], ["supplies", "Potions"]] : [["supplies", "Potions"]];
     if (!modes.some(([id]) => id === mode)) mode = modes[0][0];
     if (modes.length > 1) {
       const tabs = el("nav", void 0, "tn-tabs");
@@ -50842,6 +50787,14 @@ function createSettlementServicesMenu2(options) {
     if (mode === "gear") {
       const offers = npc.stock ?? [], kinds2 = new Set(offers.map((q2) => bagFilterOf(itemDefinition(q2.item))));
       if (!kinds2.has(filter)) filter = "all";
+      if (npc.restockTicks != null && offers.length) {
+        const r = el("div", void 0, "tn-restock"), txt = el("div"), top = Math.max(...offers.map((q2) => q2.item.generated?.rarityTier ?? 0)), mins = Math.max(1, Math.ceil(npc.restockTicks / 3600));
+        r.innerHTML = RESTOCK;
+        txt.append(el("b", "Restocks at dawn"), el("small", offers.length + " items \xB7 " + (npc.tier === "village" ? "up to Uncommon" : npc.tier === "town" ? "up to Rare" : "up to Epic")));
+        r.append(txt, el("span", mins >= 60 ? "1 h" : mins + " min", "tn-when"));
+        r.title = "Shops restock at 06:00 each in-game day";
+        body5.append(r);
+      }
       if (kinds2.size > 1) body5.append(chips(FILTERS.filter(([id]) => id === "all" || kinds2.has(id)), filter, (id) => {
         filter = id;
         redraw();
@@ -50856,7 +50809,7 @@ function createSettlementServicesMenu2(options) {
         }, id: "item:" + q2.id }));
       }
       if (offers.length) {
-        body5.append(grid, el("p", "Tap an item to see it and compare. What you buy stays sold.", "tn-hint"));
+        body5.append(grid, el("p", "Tap an item to see it and compare. What you buy stays sold until dawn.", "tn-hint"));
       } else body5.append(el("p", "Nothing for sale here.", "tn-empty"));
       const q = offers.find((q2) => q2.id === sheet);
       if (q) {
@@ -50914,7 +50867,7 @@ function createSettlementServicesMenu2(options) {
       body5.append(card);
       if (npc?.role === "general") {
         const B3 = POTION_BELT_POLICY;
-        for (const [offerId, title, max, text2, icon] of [[B3.offers.capacity, "Bigger belt", B3.maxCapacityUpgrades, () => ["Carry ", belt.capacity, belt.capacity + 1, " potions"], FLASK(true)], [B3.offers.potency, "Stronger brew", B3.maxPotencyUpgrades, () => ["Heal ", belt.healPercent + "%", belt.healPercent + B3.potencyStep + "%", " of max HP"], '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ef6f7d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"/><path d="M12 8.5v5M9.5 11h5"/></svg>']]) {
+        for (const [offerId, title2, max, text2, icon] of [[B3.offers.capacity, "Bigger belt", B3.maxCapacityUpgrades, () => ["Carry ", belt.capacity, belt.capacity + 1, " potions"], FLASK(true)], [B3.offers.potency, "Stronger brew", B3.maxPotencyUpgrades, () => ["Heal ", belt.healPercent + "%", belt.healPercent + B3.potencyStep + "%", " of max HP"], '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ef6f7d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"/><path d="M12 8.5v5M9.5 11h5"/></svg>']]) {
           const u = potionUpgrade(p, offerId), row2 = el("div", void 0, "tn-card tn-upg"), info2 = el("div");
           info2.style.flex = "1";
           const [a, b, c, d] = text2(), line15 = el("p");
@@ -50925,12 +50878,12 @@ function createSettlementServicesMenu2(options) {
           } else line15.append("Fully upgraded");
           const pips = el("div", void 0, "tn-pips");
           for (let n = 0; n < max; n++) pips.append(el("i", void 0, n < u.done ? "on" : ""));
-          info2.append(el("h4", title), line15, pips);
+          info2.append(el("h4", title2), line15, pips);
           const buy = button("", () => issue("service.buy", { npcId, offerId }), "buy:" + offerId, "tn-btn is-gold is-small");
           if (u.price) buy.append(coin4(), formatAmount(u.price));
           else buy.append("Done");
           buy.disabled = busy || !u.price || compareAmount(inv.gold, u.price) < 0;
-          buy.setAttribute("aria-label", u.price ? title + ", " + u.price + " gold" : title + ", fully upgraded");
+          buy.setAttribute("aria-label", u.price ? title2 + ", " + u.price + " gold" : title2 + ", fully upgraded");
           row2.append(markup(el("div", void 0, "tn-ic"), icon), info2, buy);
           body5.append(row2);
         }
@@ -51107,7 +51060,7 @@ function createSettlementServicesMenu2(options) {
     supplyButton.dataset.cooling = String(cooling);
     supplyButton.style.setProperty("--potion-cooldown", String(cooling ? belt.cooldownTicks / belt.cooldownTotal : 0));
     supplyButton.setAttribute("aria-label", "Drink health potion, " + belt.count + " of " + belt.capacity + ", heals " + belt.healPercent + " percent");
-    const next = m.localPlayerId + "/" + m.inventory.revision + "/" + m.playersById[m.localPlayerId].progression.level + "/" + npcId + "/" + mode + "/" + selected + "/" + line14 + "/" + materialQuantity + "/" + busy + "/" + notice + "/" + confirm + "/" + sheet + "/" + filter + "/" + [...picks].join(",") + "/" + (m.serviceNpcs?.find((n) => n.id === npcId)?.available ?? false);
+    const next = m.localPlayerId + "/" + m.inventory.revision + "/" + m.playersById[m.localPlayerId].progression.level + "/" + npcId + "/" + mode + "/" + selected + "/" + line14 + "/" + materialQuantity + "/" + busy + "/" + notice + "/" + confirm + "/" + sheet + "/" + filter + "/" + [...picks].join(",") + "/" + (m.serviceNpcs?.find((n) => n.id === npcId)?.available ?? false) + "/" + (m.serviceNpcs?.find((n) => n.id === npcId)?.stock?.map((q) => q.id + (q.purchased ? "!" : "")).join() ?? "") + "/" + Math.ceil((m.serviceNpcs?.find((n) => n.id === npcId)?.restockTicks ?? 0) / 3600);
     if (panel.open && key2 !== next) {
       const focus = doc.activeElement?.dataset.serviceAction;
       key2 = next;

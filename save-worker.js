@@ -1975,7 +1975,7 @@ function townNpcsV1(list) {
 // src/shared/content/settlement_services_v2.js
 var SERVICES_V2 = "settlement-services-candidate-v2";
 var SERVICES_V2_HASH = "23d063a4274a386f580788ecf149edafa58a646018606c70f22932f13e6280a2";
-var SERVICE_ASSIGNMENTS = freezeWire({ "civilian:alpha:town:bren": ["attune", "reforge", "awaken", "shatter", "materials"], "civilian:alpha:town:selene": ["enchant", "purge", "resonance", "shatter", "materials"] });
+var SERVICE_ASSIGNMENTS = freezeWire({ "civilian:alpha:alderwood:smith": ["attune", "shatter"], "civilian:alpha:village:oren": ["attune", "shatter"], "civilian:alpha:town:bren": ["attune", "reforge", "awaken", "shatter", "materials"], "civilian:alpha:town:selene": ["enchant", "purge", "resonance", "shatter", "materials"] });
 var SPECIALIST_NPC = freezeWire({ id: "civilian:alpha:town:selene", name: "Selene", role: "enchanter", roleLabel: "Enchanter", settlementId: "settlement-slot:town:05", buildingId: "town-open:roof:007", band: 3, tile: { x: 5910, y: 5754 }, space: "exterior", color: "#806b9e" });
 var WORKSHOP_POLICY = freezeWire({ version: SERVICES_V2, serviceAssignments: SERVICE_ASSIGNMENTS, parent: "4af4d3519fb954a5161c799771d79e69ced9955044fb690fc78e6333a3fec8c4", stock: "unchanged personal band-derived ordinary gear; no wall-clock refresh", materials: { "Eridium Shard": "300", "Overlord's Sigil": "250", "Astral Essence": "500" }, reforge: "Dungeon execution formula: floor(150 * 1.045^((itemPower-1)*5) * 2^stars), 1 Sigil; one mutable affix", awaken: "2500*(stars+1) gold, stars+1 Eridium, 5*(stars+1) target-tier scrap; same family and base identity; scaled existing affixes and one additional eligible line", enchant: "2+ stars, slot level 50+, 1 Astral Essence, one random active stat +25%, stars-1 capacity", purge: "1000*itemPower*max(stars,1) gold; remove enchants only", resonance: "Dungeon gold curve, 25+25*stars Monster Souls; World-supported stat sets, two/three-piece bonuses", shatter: "World ordinary salvage; protected/Unique/Sigil destruction forbidden. Dungeon Spectral Codex has no World authority", priceDomain: { maximumItemPower: 1e3 }, limits: { modifiedItems: 64, operationsPerItem: 32, materialPurchasesPerKind: 1e6 }, setMultipliers: "Dungeon constants.js: cumulative two/three-piece thresholds; eleven active-combat sets; inactive idle lines excluded" });
 var hasServicesV2 = (b) => b?.settlementServicesVersion === SERVICES_V2 && b?.settlementServicesHash === SERVICES_V2_HASH;
@@ -12818,6 +12818,32 @@ function validatePotionProgress(x, y) {
   return b.capacityUpgrades - a.capacityUpgrades + b.potencyUpgrades - a.potencyUpgrades;
 }
 
+// src/shared/contracts/world_time_v1.js
+var WORLD_TIME_VERSION = "campaign-world-time-v1";
+var WORLD_TIME_POLICY = freezeWire({
+  version: WORLD_TIME_VERSION,
+  authorityTicksPerSecond: 60,
+  cycleTicks: 216e3,
+  realMinutesPerCycle: 60,
+  minutesPerDay: 1440,
+  ticksPerGameMinute: 150,
+  startingMinuteOfDay: 480,
+  dayIndexOrigin: 0,
+  dayBoundaryMinute: 0,
+  phases: [
+    { id: "dawn", startMinute: 300, endMinute: 420 },
+    { id: "day", startMinute: 420, endMinute: 1140 },
+    { id: "dusk", startMinute: 1140, endMinute: 1260 },
+    { id: "night", startMinute: 1260, endMinute: 300 }
+  ],
+  clockSource: "persisted-authority-tick-only",
+  offlineAdvance: false,
+  loadingAdvance: false,
+  focusSuspensionAdvance: false,
+  restOrTravelTimeAdvance: false,
+  preview: "presentation-only-no-authority-or-persistence-mutation"
+});
+
 // src/shared/contracts/settlement_services_v1.js
 var same = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var ordinary = new Set(REWARD_POOLS.flat());
@@ -12845,6 +12871,47 @@ function serviceStock(s, p, npc, gearClass = heroClassOf(p.d8)?.id ?? null, lega
     return stockCache.get(key9);
   });
 }
+var DAILY = "daily:";
+var RESTOCK_SHIFT = (WORLD_TIME_POLICY.startingMinuteOfDay - 360) * WORLD_TIME_POLICY.ticksPerGameMinute;
+var MAX_DAILY_PURCHASES = 512;
+var SHOP_TIERS = freezeWire({ village: { count: 6, top: 1 }, town: { count: 8, top: 2 }, city: { count: 10, top: 3 } });
+var SHOP_FAMILIES = freezeWire({ general: ["boots", "ring", "gloves", "cape"], smith: ["weapon", "overall", "helmet", "subweapon"] });
+var SHOP_FAMILIES_CLASSLESS = freezeWire({ general: ["boots", "ring"], smith: ["weapon", "overall"] });
+var restockDay = (tick) => Math.floor((tick + RESTOCK_SHIFT) / WORLD_TIME_POLICY.cycleTicks);
+var shopTier = (npc) => /capital|city/.test(npc.settlementId ?? "") ? "city" : /town/.test(npc.settlementId ?? "") ? "town" : "village";
+var townLevel = (npc) => [1, 1, 6, 11, 21, 41][npc.band] ?? 1;
+var sellBase = (item) => {
+  const power2 = progressionBigInt(item.generated?.itemPower ?? 1), bounded2 = Number(power2 > BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) ? BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) : power2);
+  return (2 + Math.floor(bounded2 / 2)) * 2 ** (item.generated?.rarityTier ?? 0);
+};
+var dailyBuyPrice = (item) => String(4 * sellBase(item));
+var purchaseCap = (s) => hasWorldCombat(s) ? MAX_DAILY_PURCHASES : SETTLEMENT_LIFE_POLICY.maximumPurchaseRecords;
+function dailyOffer(s, p, npc, day, slot, level, cls) {
+  const sourceEntityId = "ent:" + token("daily-stock-v1/" + WORLD_COMBAT_HASH + "/" + (cls ?? "-") + "/" + s.campaign.seed.seedHex + "/" + p.playerId + "/" + npc.id + "/" + day + "/" + slot), key9 = sourceEntityId + "/" + level;
+  if (!stockCache.has(key9)) {
+    const tier2 = SHOP_TIERS[shopTier(npc)], floor = level >= 40 ? 2 : level >= 20 ? 1 : 0, top = Math.max(tier2.top, floor), weights = [60, 30, 14, 6].slice(0, top - floor + 1), roll = gearHash4(sourceEntityId + "/rarity") % weights.reduce((a, b) => a + b, 0);
+    let rarity = floor;
+    for (let i = 0, acc = 0; i < weights.length; i++) {
+      acc += weights[i];
+      if (roll < acc) {
+        rarity = floor + i;
+        break;
+      }
+    }
+    const families = cls ? SHOP_FAMILIES[npc.role] : SHOP_FAMILIES_CLASSLESS[npc.role], family2 = families[(slot + day) % families.length];
+    const progression = { ...rewardProgressionD9(level, sourceEntityId), combatHash: WORLD_COMBAT_HASH, combatQuality: "ordinary", ...cls ? { gearClass: cls, wardrobe: WARDROBE_V1, affixes: AFFIXES_V2 } : { armor: "overall" } }, generated = generateGear3(gearSeed(s, p, sourceEntityId), progression, { tier: rarity, family: family2 });
+    const item = { itemId: `item:${p.playerId}:${sourceEntityId}`, definitionId: generated.definition.definitionId, ownerPlayerId: p.playerId, sourceEntityId, generated: copyWire(generated) };
+    if (stockCache.size >= 256) stockCache.delete(stockCache.keys().next().value);
+    stockCache.set(key9, freezeWire({ offer: { id: DAILY + day + ":" + slot + ":" + level, family: family2, price: dailyBuyPrice(item) }, sourceEntityId, item }));
+  }
+  return stockCache.get(key9);
+}
+function validateDailyItem(s, p, r, item) {
+  const [, day, slot, level] = r.offerId.split(":").map(Number), n = serviceNpcsFor(s.d9World?.plannedWorld).find((n2) => n2.id === r.npcId), base = unmodifiedItem(item);
+  requireContract(n && hasWorldCombat(s) && Number.isSafeInteger(day) && Number.isSafeInteger(slot) && Number.isSafeInteger(level) && restockDay(r.tick) === day && slot >= 0 && slot < SHOP_TIERS[shopTier(n)].count && level >= townLevel(n) && level <= 50, "Daily stock purchase identity");
+  const q = dailyOffer(s, p, n, day, slot, level, base.generated?.progression?.gearClass ?? null);
+  requireContract(q.offer.id === r.offerId && same(q.item, base) && same(r.item, base), "Purchased gear changed");
+}
 function servicePurchase(p, sourceId) {
   return p.inventory.services?.purchasesBySourceId[sourceId] ?? null;
 }
@@ -12853,18 +12920,23 @@ function validateServiceOrigin(p, o, id) {
   requireContract(o.servicePurchase === id && servicePurchase(p, id), "Unknown purchased gear provenance");
 }
 function validateServiceItem(s, p, item) {
-  const r = servicePurchase(p, item.sourceEntityId), n = serviceNpcsFor(s.d9World?.plannedWorld).find((n2) => n2.id === r?.npcId), stock = n && [...serviceStock(s, p, n), ...heroClassOf(p.d8) ? serviceStock(s, p, n, null) : [], ...hasWorldCombat(s) ? serviceStock(s, p, n, null, true) : []].find((q) => q.offer.id === r.offerId && same(q.item, unmodifiedItem(item)));
+  const r = servicePurchase(p, item.sourceEntityId);
+  if (r?.offerId.startsWith(DAILY)) {
+    validateDailyItem(s, p, r, item);
+    return item;
+  }
+  const n = serviceNpcsFor(s.d9World?.plannedWorld).find((n2) => n2.id === r?.npcId), stock = n && [...serviceStock(s, p, n), ...heroClassOf(p.d8) ? serviceStock(s, p, n, null) : [], ...hasWorldCombat(s) ? serviceStock(s, p, n, null, true) : []].find((q) => q.offer.id === r.offerId && same(q.item, unmodifiedItem(item)));
   requireContract(stock && same(r.item, unmodifiedItem(item)), "Purchased gear changed");
   return item;
 }
-var worldDrop = (item, o) => Boolean(item.generated && typeof item.generated.progression?.combatHash === "string" && o.groupId && !o.servicePurchase);
+var worldDrop = (item, o) => Boolean(item.generated && typeof item.generated.progression?.combatHash === "string" && (o.groupId || o.servicePurchase));
 var MAX_HOT_SALE_RECEIPTS = 2048;
 function saleQuote(p, item) {
   const d = itemDefinition(item), o = p.inventory.renewal?.originsByItemId[item?.itemId];
   if (!item || item.ownerPlayerId !== p.playerId || !o || item.sourceEntityId === null || !(ordinary.has(item.definitionId) || worldDrop(item, o)) || item.locked || item.protected || item.unique || d?.unique || d?.classification === "unique-landmark" || Object.values(p.inventory.equipped).includes(item.itemId) || Object.values(p.inventory.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item.sourceEntityId) || isClassKitSource(p, item.sourceEntityId) || (item.generated?.rarityTier ?? 0) > SETTLEMENT_LIFE_POLICY.sale.maximumRarity) return null;
   if (!o.servicePurchase && !o.groupId) return null;
   const power2 = progressionBigInt(item.generated?.itemPower ?? 1), bounded2 = Number(power2 > BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) ? BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) : power2);
-  if (!ordinary.has(item.definitionId)) return String((2 + Math.floor(bounded2 / 2)) * 2 ** (item.generated?.rarityTier ?? 0));
+  if (!ordinary.has(item.definitionId)) return String(sellBase(item));
   return String(SETTLEMENT_LIFE_POLICY.sale.baseGold + bounded2 * SETTLEMENT_LIFE_POLICY.sale.perItemPower + (item.generated?.rarityTier ?? 0) * SETTLEMENT_LIFE_POLICY.sale.perRarityTier);
 }
 function serviceGoldAdjustment(p, gold) {
@@ -12873,6 +12945,10 @@ function serviceGoldAdjustment(p, gold) {
   let income = l.retiredSaleGold, spent = addAmount(addAmount(multiplyAmount(String(l.supplyPurchases), SETTLEMENT_LIFE_POLICY.supply.price), multiplyAmount(String(l.restCount), SETTLEMENT_LIFE_POLICY.rest.price)), potionUpgradeSpent(p));
   for (const r of Object.values(l.salesByItemId)) income = addAmount(income, r.gold);
   for (const r of Object.values(l.purchasesBySourceId)) {
+    if (r.offerId.startsWith(DAILY)) {
+      spent = addAmount(spent, dailyBuyPrice(r.item));
+      continue;
+    }
     const n = ORDINARY_SERVICE_NPCS.find((n2) => n2.id === r.npcId), offer = SETTLEMENT_LIFE_POLICY.stockByRole[n?.role]?.find((q) => q.id === r.offerId);
     requireContract(offer, "Unknown purchased stock");
     spent = addAmount(spent, merchantPrice(n, offer));
@@ -12895,7 +12971,7 @@ function validateSettlementServices(s, p, validateCommand2) {
   safeInteger(l.suppliesUsed, 0, l.supplyPurchases + (l.potions?.grants ?? 0));
   validatePotionBelt(s, p, SETTLEMENT_LIFE_POLICY.supply.maximum);
   safeInteger(l.restCount, 0, SETTLEMENT_LIFE_POLICY.maximumRests);
-  requireContract(Object.keys(l.purchasesBySourceId).length <= SETTLEMENT_LIFE_POLICY.maximumPurchaseRecords && Object.keys(l.salesByItemId).length <= (s.d9World?.paging ? MAX_HOT_SALE_RECEIPTS : SETTLEMENT_LIFE_POLICY.sale.retainedReceiptBound), "Service receipt bound");
+  requireContract(Object.keys(l.purchasesBySourceId).length <= purchaseCap(s) && Object.keys(l.salesByItemId).length <= (s.d9World?.paging ? MAX_HOT_SALE_RECEIPTS : SETTLEMENT_LIFE_POLICY.sale.retainedReceiptBound), "Service receipt bound");
   function receipt(r, kind2) {
     validateCommand2(r.command);
     const c = r.command;
