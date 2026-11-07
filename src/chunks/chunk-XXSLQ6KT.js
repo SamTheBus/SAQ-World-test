@@ -16989,11 +16989,27 @@ function validateServiceItem(s, p, item) {
   requireContract(stock && same15(r.item, unmodifiedItem(item)), "Purchased gear changed");
   return item;
 }
+var worldDrop = (item, o) => Boolean(item.generated && typeof item.generated.progression?.combatHash === "string" && o.groupId && !o.servicePurchase);
+var KEPT_SALE_RECEIPTS = 128;
+var MAX_HOT_SALE_RECEIPTS = 2048;
+var settledSale = (s, p, r) => {
+  const indexed = s.d9World?.paging?.indexedRevisions?.[p.playerId];
+  return indexed !== void 0 && r.revision <= indexed && !p.inventory.services.purchasesBySourceId[r.item.sourceEntityId] && !p.inventory.rewardsByEntityId[r.item.sourceEntityId] && !p.inventory.itemsById[r.item.itemId];
+};
+function retireSettledSales(s, p) {
+  const l = p.inventory.services;
+  if (!l || !s.d9World?.paging) return;
+  for (const [id, r] of Object.entries(l.salesByItemId).filter(([, r2]) => settledSale(s, p, r2)).sort((a, b) => b[1].authorityOrder - a[1].authorityOrder).slice(KEPT_SALE_RECEIPTS)) {
+    l.retiredSaleGold = addAmount(l.retiredSaleGold, r.gold);
+    delete l.salesByItemId[id];
+  }
+}
 function saleQuote(p, item) {
   const d = itemDefinition(item), o = p.inventory.renewal?.originsByItemId[item?.itemId];
-  if (!item || item.ownerPlayerId !== p.playerId || !o || item.sourceEntityId === null || !ordinary.has(item.definitionId) || item.locked || item.protected || item.unique || d?.unique || d?.classification === "unique-landmark" || Object.values(p.inventory.equipped).includes(item.itemId) || Object.values(p.inventory.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item.sourceEntityId) || isClassKitSource(p, item.sourceEntityId) || (item.generated?.rarityTier ?? 0) > SETTLEMENT_LIFE_POLICY.sale.maximumRarity) return null;
+  if (!item || item.ownerPlayerId !== p.playerId || !o || item.sourceEntityId === null || !(ordinary.has(item.definitionId) || worldDrop(item, o)) || item.locked || item.protected || item.unique || d?.unique || d?.classification === "unique-landmark" || Object.values(p.inventory.equipped).includes(item.itemId) || Object.values(p.inventory.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item.sourceEntityId) || isClassKitSource(p, item.sourceEntityId) || (item.generated?.rarityTier ?? 0) > SETTLEMENT_LIFE_POLICY.sale.maximumRarity) return null;
   if (!o.servicePurchase && !o.groupId) return null;
   const power2 = progressionBigInt(item.generated?.itemPower ?? 1), bounded2 = Number(power2 > BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) ? BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) : power2);
+  if (!ordinary.has(item.definitionId)) return String((2 + Math.floor(bounded2 / 2)) * 2 ** (item.generated?.rarityTier ?? 0));
   return String(SETTLEMENT_LIFE_POLICY.sale.baseGold + bounded2 * SETTLEMENT_LIFE_POLICY.sale.perItemPower + (item.generated?.rarityTier ?? 0) * SETTLEMENT_LIFE_POLICY.sale.perRarityTier);
 }
 var supplyCount = potionCount;
@@ -17028,7 +17044,7 @@ function serviceActionProblem(s, p, kind2, payload) {
   }
   if (kind2 === "service.sell") {
     if (npc.role !== "general" && npc.role !== "smith") return "This civilian does not buy equipment";
-    if (Object.keys(l.salesByItemId).length >= SETTLEMENT_LIFE_POLICY.sale.retainedReceiptBound) return "Sale receipt capacity reached; retained ownership proofs cannot be discarded";
+    if (Object.keys(l.salesByItemId).length >= (s.d9World?.paging ? MAX_HOT_SALE_RECEIPTS : SETTLEMENT_LIFE_POLICY.sale.retainedReceiptBound)) return "Sale receipt capacity reached; retained ownership proofs cannot be discarded";
     return saleQuote(p, inv.itemsById[payload.itemId]) === null ? "Only unequipped ordinary carried loot can be sold" : null;
   }
   if (kind2 === "service.rest") {
@@ -17063,6 +17079,7 @@ function applyServiceAction(s, p, c, order) {
     i.gold = addAmount(i.gold, gold);
     delete i.itemsById[item.itemId];
     delete i.renewal.originsByItemId[item.itemId];
+    retireSettledSales(s, p);
   } else if (c.kind === "service.rest") {
     i.gold = subtractAmount(i.gold, SETTLEMENT_LIFE_POLICY.rest.price);
     l.restCount++;
@@ -17103,7 +17120,7 @@ function validateSettlementServices(s, p, validateCommand2) {
   safeInteger(l.suppliesUsed, 0, l.supplyPurchases + (l.potions?.grants ?? 0));
   validatePotionBelt(s, p, SETTLEMENT_LIFE_POLICY.supply.maximum);
   safeInteger(l.restCount, 0, SETTLEMENT_LIFE_POLICY.maximumRests);
-  requireContract(Object.keys(l.purchasesBySourceId).length <= SETTLEMENT_LIFE_POLICY.maximumPurchaseRecords && Object.keys(l.salesByItemId).length <= SETTLEMENT_LIFE_POLICY.sale.retainedReceiptBound, "Service receipt bound");
+  requireContract(Object.keys(l.purchasesBySourceId).length <= SETTLEMENT_LIFE_POLICY.maximumPurchaseRecords && Object.keys(l.salesByItemId).length <= (s.d9World?.paging ? MAX_HOT_SALE_RECEIPTS : SETTLEMENT_LIFE_POLICY.sale.retainedReceiptBound), "Service receipt bound");
   function receipt(r, kind2) {
     validateCommand2(r.command);
     const c = r.command;
@@ -17162,7 +17179,8 @@ function validateServiceProgress(before, after, pid) {
   for (const [id, r] of Object.entries(x.salesByItemId)) {
     const n = y.salesByItemId[id];
     if (!n) {
-      requireContract(!b.rewardsByEntityId[r.item.sourceEntityId] && !x.purchasesBySourceId[r.item.sourceEntityId] && Object.values(after.campaign.siteRunEpisodesById ?? {}).some((e) => e.lastReset?.retiredGroupIds.includes(r.origin.groupId) && e.lastReset.toEpisode === e.episode), "Sale retired without authoritative reward archival");
+      const indexed = after.d9World?.paging?.indexedRevisions?.[pid], settled = indexed !== void 0 && r.revision <= indexed && !b.itemsById[id];
+      requireContract(!b.rewardsByEntityId[r.item.sourceEntityId] && !x.purchasesBySourceId[r.item.sourceEntityId] && (settled || Object.values(after.campaign.siteRunEpisodesById ?? {}).some((e) => e.lastReset?.retiredGroupIds.includes(r.origin.groupId) && e.lastReset.toEpisode === e.episode)), "Sale retired without authoritative reward archival");
       retired = addAmount(retired, r.gold);
       continue;
     }
@@ -22410,7 +22428,7 @@ function validateWorldPagingD9(paging) {
   closedRecord(paging.remoteGearByPlayer, Object.keys(paging.players));
   for (const [pid, rows3] of Object.entries(paging.remoteGearByPlayer)) for (const [id, r] of Object.entries(rows3)) {
     closedRecord(r, ["item", "disposition", "recordHash"], ["origin"]);
-    requireContract(r.item.itemId === id && r.item.ownerPlayerId === pid && ["DROPPED", "SALVAGED", "AUTO_SALVAGED"].includes(r.disposition) && /^[a-f0-9]{64}$/.test(r.recordHash), "Remote gear proof identity");
+    requireContract(r.item.itemId === id && r.item.ownerPlayerId === pid && ["DROPPED", "SALVAGED", "AUTO_SALVAGED", "SOLD"].includes(r.disposition) && /^[a-f0-9]{64}$/.test(r.recordHash), "Remote gear proof identity");
     if (r.origin) {
       if (r.origin.servicePurchase) {
         closedRecord(r.origin, ["servicePurchase", "sourceEntityId"]);
