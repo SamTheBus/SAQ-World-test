@@ -23463,7 +23463,7 @@ function validateEvent(event) {
     validateId("entityId", event.payload.sourceEntityId);
     validateId("entityId", event.payload.targetEntityId);
   } else {
-    closedRecord(event.payload, ["attackActionId", "sourceEntityId", "sourceCharacterId", "targetEntityId", "damage", "resultingHp", "targetAlive"], ["combatVersion", "critical", "mechanic", "defenseKind", "sourceItem", "trigger", "barrierAbsorption", "chainFrom", "meleeContact", "projectileContact"]);
+    closedRecord(event.payload, ["attackActionId", "sourceEntityId", "sourceCharacterId", "targetEntityId", "damage", "resultingHp", "targetAlive"], ["combatVersion", "critical", "mechanic", "defenseKind", "sourceItem", "trigger", "barrierAbsorption", "chainFrom", "meleeContact", "projectileContact", "skillMark"]);
     validateId("attackActionId", event.payload.attackActionId);
     validateId("entityId", event.payload.sourceEntityId);
     if (event.payload.sourceCharacterId !== null) validateId("characterId", event.payload.sourceCharacterId);
@@ -23496,6 +23496,7 @@ function validateEvent(event) {
         closedRecord(chain.position, ["x", "y"]);
         requireContract(event.payload.mechanic === "lightning" && Number.isFinite(chain.position.x) && Number.isFinite(chain.position.y), "Invalid Lightning chain");
       }
+      if (event.payload.skillMark !== void 0) requireContract(["fan", "bloodburst"].includes(event.payload.skillMark), "Invalid skill mark");
       const b = event.payload.barrierAbsorption;
       if (b != null) {
         closedRecord(b, ["absorbed", "remaining", "capacity"]);

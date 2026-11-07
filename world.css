@@ -1057,6 +1057,8 @@ body #world-xp{color:#bfe6f0}
 .skill-wheel-v1 .skill-slot-time{position:absolute;z-index:3;font:800 15px var(--rpg-ui);color:#fff;text-shadow:0 1px 2px #000,0 0 5px #000}
 .skill-wheel-v1 .skill-slot-key{position:absolute;z-index:3;right:8px;bottom:5px;font:700 9px var(--rpg-ui);color:#d9cfb9;opacity:.85}
 @media(pointer:coarse){.skill-wheel-v1 .skill-slot-key{display:none}}
+.skill-wheel-v1 .skill-slot-charges{position:absolute;z-index:3;left:50%;top:3px;transform:translateX(-50%);min-width:15px;height:15px;padding:0 3px;border-radius:8px;box-sizing:border-box;background:#1a1426;box-shadow:inset 0 0 0 1.5px var(--class,#b48cff);font:800 10px/15px var(--rpg-ui);color:#e3d2ff;text-align:center}
+.skill-wheel-v1 .skill-slot-charges[data-full=true]{background:var(--class,#b48cff);color:#1a1426}
 .skill-wheel-v1 .skill-slot[data-state=ready]{box-shadow:inset 0 0 0 2px var(--class),inset 0 -6px 10px #0006,0 3px 0 #070b10,0 0 16px color-mix(in srgb,var(--class) 55%,transparent)}
 .skill-wheel-v1 .skill-slot[data-state=blocked] .skill-slot-icon{opacity:.45;filter:grayscale(.6)}
 .skill-wheel-v1 .skill-slot[data-state=locked]{background:#10171db8;border-color:#0b101599;box-shadow:inset 0 0 0 1px #3a465166;cursor:default;opacity:.7;transform:var(--at) scale(.82)}

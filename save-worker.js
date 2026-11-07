@@ -20608,8 +20608,8 @@ function validateClassSkillState(s, combat, actor) {
   }
   const whole = (v) => typeof v === "string" && /^[1-9][0-9]{0,29}$/.test(v), reach = (v) => Number.isFinite(v) && v > 0 && v <= 400;
   if (k.aegis !== void 0) {
-    closedRecord(k.aegis, ["hp", "full", "ticks"]);
-    requireContract(whole(k.aegis.hp) && whole(k.aegis.full) && BigInt(k.aegis.hp) <= BigInt(k.aegis.full) && actor.alive, "Invalid Aegis Pulse");
+    closedRecord(k.aegis, ["hp", "full", "ticks"], ["over", "echo"]);
+    requireContract(whole(k.aegis.hp) && whole(k.aegis.full) && BigInt(k.aegis.hp) <= BigInt(k.aegis.full) && actor.alive && [void 0, true].includes(k.aegis.over) && [void 0, true].includes(k.aegis.echo), "Invalid Aegis Pulse");
     safeInteger(k.aegis.ticks, 1, AEGIS_TICKS);
   }
   if (k.leap !== void 0) {
