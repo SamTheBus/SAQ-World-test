@@ -10048,6 +10048,77 @@ function worldGearRarityV3(encounter, hero, role, siteReward, draw, qualityHundr
   requireContract(false, "Loot v3 weights failed");
 }
 
+// src/shared/content/world_loot_v4.js
+var WORLD_LOOT_V4_VERSION = "world-loot-v4";
+var WORLD_LOOT_V4_HASH = "4322b61b219906b7d6792c64bdef13dcbb1c2e09cb5ddb21a38047f108de4c92";
+var WORLD_LOOT_V4_POLICY = freezeWire({
+  version: WORLD_LOOT_V4_VERSION,
+  parentCombatHash: WORLD_COMBAT_HASH,
+  unlockLevels: [1, 1, 10, 20, 35, 50],
+  sources: {
+    ordinary: { gearPerMille: 40, common: [[1, 8e3], [10, 5e3], [20, 0]], rare: [[9, 0], [10, 200], [20, 1e3], [30, 4500], [40, 1e4]], rich: false },
+    elite: { gearPerMille: 500, common: [[1, 5500], [10, 3e3], [20, 0]], rare: [[9, 0], [10, 400], [20, 1500], [30, 5e3], [40, 1e4]], rich: false },
+    smallEnd: { gearPerMille: 700, common: [[1, 5500], [10, 3e3], [20, 0]], rare: [[9, 0], [10, 400], [20, 1500], [30, 5e3], [40, 1e4]], rich: false },
+    mini: { gearPerMille: 1e3, common: [[1, 4e3], [10, 2e3], [20, 0]], rare: [[9, 0], [10, 800], [20, 2e3], [30, 5500], [40, 1e4]], rich: false },
+    boss: { gearPerMille: 1e3, common: [[1, 2e3], [10, 0]], rare: [[9, 0], [10, 1500], [20, 4e3], [30, 1e4]], rich: true },
+    smallChest: { gearPerMille: 350, common: [[1, 7500], [10, 5e3], [20, 0]], rare: [[20, 0], [30, 3e3], [40, 1e4]], rich: false },
+    standardChest: { gearPerMille: 650, common: [[1, 5e3], [10, 3e3], [20, 0]], rare: [[9, 0], [10, 300], [20, 1200], [30, 5e3], [40, 1e4]], rich: false },
+    bossChest: { gearPerMille: 1e3, common: [[1, 3e3], [10, 0]], rare: [[9, 0], [10, 1e3], [20, 3500], [30, 1e4]], rich: true }
+  },
+  split: [
+    { minimumLevel: 1, plain: [1e4, 0, 0, 0], rich: [1e4, 0, 0, 0] },
+    { minimumLevel: 20, plain: [9e3, 1e3, 0, 0], rich: [8e3, 2e3, 0, 0] },
+    { minimumLevel: 35, plain: [8200, 1500, 300, 0], rich: [6800, 2500, 700, 0] },
+    { minimumLevel: 50, plain: [7700, 1700, 500, 100], rich: [6e3, 2800, 1e3, 200] }
+  ],
+  qualityFromLevel: 30,
+  gate: "min(frozen encounter level, personal hero level when the reward is captured). Pickup, reopen and portal use never reroll."
+});
+var SOURCES2 = WORLD_LOOT_V4_POLICY.sources;
+function lootGearPerMilleV4(role, siteReward = null, occurrenceHundredths = 100) {
+  return Math.min(1e3, Math.floor(SOURCES2[lootSourceV3(role, siteReward)].gearPerMille * occurrenceHundredths / 100));
+}
+function curve(anchors2, level) {
+  if (level <= BigInt(anchors2[0][0])) return BigInt(anchors2[0][1]);
+  for (let i = 1; i < anchors2.length; i++) {
+    const [a, va] = anchors2[i - 1], [b, vb] = anchors2[i];
+    if (level < BigInt(b)) return BigInt(va) + (BigInt(vb) - BigInt(va)) * (level - BigInt(a)) / BigInt(b - a);
+  }
+  return BigInt(anchors2.at(-1)[1]);
+}
+function worldLootWeightsV4(encounter, hero, role, siteReward = null, qualityHundredths = 0) {
+  positiveProgression(encounter);
+  positiveProgression(hero);
+  const a = progressionBigInt(encounter), b = progressionBigInt(hero), level = a < b ? a : b, q = progressionBigInt(qualityHundredths);
+  requireContract(q >= 0n, "Loot v4 quality");
+  const src = SOURCES2[lootSourceV3(role, siteReward)], common = curve(src.common, level), rare = curve(src.rare, level), uncommon = 10000n - common - rare;
+  requireContract(uncommon >= 0n, "Loot v4 shares");
+  const row = [...WORLD_LOOT_V4_POLICY.split].reverse().find((r) => level >= BigInt(r.minimumLevel))[src.rich ? "rich" : "plain"];
+  const top = row.slice(1).map((w2) => rare * BigInt(w2) / 10000n), w = [common, uncommon, rare - top.reduce((x, y) => x + y, 0n), ...top];
+  const boost = level >= BigInt(WORLD_LOOT_V4_POLICY.qualityFromLevel) ? q : 0n;
+  return w.map((n, i) => level < BigInt(WORLD_LOOT_V4_POLICY.unlockLevels[i]) ? 0n : n * (10000n + boost * BigInt(i * 10)));
+}
+function worldGearRarityV4(encounter, hero, role, siteReward, draw, qualityHundredths = 0) {
+  requireContract(Number.isFinite(draw) && draw >= 0 && draw < 1, "Loot v4 draw");
+  const weights = worldLootWeightsV4(encounter, hero, role, siteReward, qualityHundredths), total = weights.reduce((a, b) => a + b, 0n), roll = BigInt(Math.floor(draw * 4294967296)) * total;
+  let sum2 = 0n;
+  requireContract(total > 0n, "Loot v4 weights empty");
+  for (let i = 0; i < weights.length; i++) {
+    sum2 += weights[i];
+    if (roll < sum2 * 4294967296n) return i;
+  }
+  requireContract(false, "Loot v4 weights failed");
+}
+var isSourceLootV4 = (hash19) => hash19 === WORLD_LOOT_V3_HASH || hash19 === WORLD_LOOT_V4_HASH;
+function lootGearPerMilleFor(hash19, role, siteReward = null, occurrenceHundredths = 100) {
+  requireContract(isSourceLootV4(hash19), "Loot table");
+  return (hash19 === WORLD_LOOT_V4_HASH ? lootGearPerMilleV4 : lootGearPerMilleV3)(role, siteReward, occurrenceHundredths);
+}
+function worldGearRarityFor(hash19, encounter, hero, role, siteReward, draw, qualityHundredths = 0) {
+  requireContract(isSourceLootV4(hash19), "Loot table");
+  return (hash19 === WORLD_LOOT_V4_HASH ? worldGearRarityV4 : worldGearRarityV3)(encounter, hero, role, siteReward, draw, qualityHundredths);
+}
+
 // src/shared/contracts/economy_amount.js
 function amount(value) {
   requireContract(typeof value === "string" && value.length <= 512 && /^(0|[1-9][0-9]*)(\.[0-9]*[1-9])?$/.test(value), "Invalid economy amount");
@@ -10144,7 +10215,7 @@ function validateWorldRarityProgressionV2(p) {
     requireContract(p.rarityHeroLevel === void 0 && p.rarityRole === void 0, "Rarity fields require policy commitment");
     return p;
   }
-  requireContract([WORLD_RARITY_HASH, WORLD_LOOT_V3_HASH].includes(p.rarityPolicyHash) && p.combatHash === WORLD_COMBAT_HASH, "World rarity policy commitment");
+  requireContract([WORLD_RARITY_HASH, WORLD_LOOT_V3_HASH, WORLD_LOOT_V4_HASH].includes(p.rarityPolicyHash) && p.combatHash === WORLD_COMBAT_HASH, "World rarity policy commitment");
   positiveProgression(p.rarityHeroLevel);
   requireContract(["ordinary", "elite", "boss", "completion"].includes(p.rarityRole) && p.combatQuality === (p.rarityRole === "boss" ? "elite" : p.rarityRole), "World rarity source role");
   return p;
@@ -10862,7 +10933,7 @@ function generateAtPrecision(c, seed, input, { tier: tier2 = null, family: famil
     noun = uq.noun;
   }
   const rng2 = rewardStream(seed), random = () => rng2.random(), pick5 = (a) => a[Math.floor(random() * a.length)], power2 = progression.combatHash ? depth : progressionWire(progressionBigInt(depth) / 4n + 1n);
-  const rarityRandom = progression.combatHash ? random() : null, rarityTier = tier2 ?? (progression.combatHash ? progression.rarityPolicyHash === WORLD_LOOT_V3_HASH ? worldGearRarityV3(depth, progression.rarityHeroLevel, progression.rarityRole, progression.siteReward ?? null, rarityRandom, (progression.modifiers?.qualityHundredths ?? 0) + boonRewardQualityV1(progression) + quickClearRewardQualityV1(progression)) : hasWorldRarityV2(progression) ? siteRewardRarityV1(progression.siteReward, worldGearRarityV2(depth, progression.rarityHeroLevel, progression.rarityRole, rarityRandom, (progression.modifiers?.qualityHundredths ?? 0) + siteRewardQualityV1(progression.siteReward) + boonRewardQualityV1(progression) + quickClearRewardQualityV1(progression))) : worldGearRarity(depth, progression.combatQuality, rarityRandom, progression.modifiers?.qualityHundredths ?? 0) : rollRarityD9(depth, progression.quality, random));
+  const rarityRandom = progression.combatHash ? random() : null, rarityTier = tier2 ?? (progression.combatHash ? isSourceLootV4(progression.rarityPolicyHash) ? worldGearRarityFor(progression.rarityPolicyHash, depth, progression.rarityHeroLevel, progression.rarityRole, progression.siteReward ?? null, rarityRandom, (progression.modifiers?.qualityHundredths ?? 0) + boonRewardQualityV1(progression) + quickClearRewardQualityV1(progression)) : hasWorldRarityV2(progression) ? siteRewardRarityV1(progression.siteReward, worldGearRarityV2(depth, progression.rarityHeroLevel, progression.rarityRole, rarityRandom, (progression.modifiers?.qualityHundredths ?? 0) + siteRewardQualityV1(progression.siteReward) + boonRewardQualityV1(progression) + quickClearRewardQualityV1(progression))) : worldGearRarity(depth, progression.combatQuality, rarityRandom, progression.modifiers?.qualityHundredths ?? 0) : rollRarityD9(depth, progression.quality, random));
   safeInteger(rarityTier, 0, 5);
   const cls = progression.gearClass ?? null, classOffhand = cls ? CLASS_GEAR[cls].offhand : null, wardrobe = Boolean(cls) && progression.wardrobe === WARDROBE_V1, classFamilies = wardrobe ? CLASS_GEAR_FAMILIES_V2 : CLASS_GEAR_FAMILIES, families = cls ? classFamilies : progression.armor === "overall" ? ONE_PIECE_GEAR_FAMILIES : GEAR_FAMILIES;
   const type = family2 ?? pick5(families), sub = type === "subweapon" ? subType ?? (cls ? classOffhand : pick5(["shield", "dagger", "tome"])) : null, own2 = type === "cape" ? CAPE_NOUNS : cls && type !== "ring" ? classGearNouns(cls, type) : GEAR_NOUNS[sub ?? type], shared = wardrobe && type === "helmet" ? SHARED_HELMET_NOUNS : [], nouns = [...own2 ?? [], ...shared], n = noun ?? (shared.length && random() < 0.2 ? pick5(shared) : pick5(own2));
@@ -12225,7 +12296,7 @@ function rollContentReward(state, player, { sourceEntityId, rank, kind: kind2, o
   const gold = (n) => !modifiers || modifiers.goldHundredths === 100 ? n : multiplyAmount(rewardAmount(n), `${Math.floor(modifiers.goldHundredths / 100)}.${String(modifiers.goldHundredths % 100).padStart(2, "0")}`.replace(/0+$/, "").replace(/\.$/, ""));
   const profile2 = progression?.version === D9_REWARD_PROGRESSION ? rewardProfileD9(progression, rank) : rewardProfile(rank), key9 = `d5-eco-v1/${state.campaign.seed.seedHex}/${player.playerId}/${sourceEntityId}`, roll = hashReward(key9 + "/branch") % 100, pool = REWARD_POOLS[Math.min(2, ["C", "B", "A", "S"].indexOf(rank))];
   if (hasWorldCombat(state)) {
-    const l = BigInt(progression?.sourceDepth ?? 1), elite = progression?.combatQuality === "elite", value = String(kind2 === "chest" ? 20n + 4n * l : (1n + l / 4n) * BigInt(elite ? 3 : 1)), gear = progression?.rarityPolicyHash === WORLD_LOOT_V3_HASH ? hashReward(key9 + "/combat-gear-v3") % 1e3 < lootGearPerMilleV3(progression.rarityRole, progression.siteReward ?? null, modifiers?.occurrenceHundredths ?? 100) : kind2 === "chest" || elite || occurrence(hashReward(key9 + "/combat-gear"), 10, key9 + "/combat-gear");
+    const l = BigInt(progression?.sourceDepth ?? 1), elite = progression?.combatQuality === "elite", value = String(kind2 === "chest" ? 20n + 4n * l : (1n + l / 4n) * BigInt(elite ? 3 : 1)), gear = isSourceLootV4(progression?.rarityPolicyHash) ? hashReward(key9 + "/combat-gear-v3") % 1e3 < lootGearPerMilleFor(progression.rarityPolicyHash, progression.rarityRole, progression.siteReward ?? null, modifiers?.occurrenceHundredths ?? 100) : kind2 === "chest" || elite || occurrence(hashReward(key9 + "/combat-gear"), 10, key9 + "/combat-gear");
     return { gold: gold(value), souls: hashReward(key9 + "/combat-soul") % 100 < 35 ? 1 : 0, definitionId: gear ? pool[hashReward(key9 + "/combat-family") % pool.length] : null, healing: false };
   }
   if (kind2 === "enemy") {
@@ -18482,7 +18553,7 @@ function validateCombatRewardSourceV1(state, source6, spawnEntityId, live, recip
     if (recipient) requireContract(progressionBigInt(p.rarityHeroLevel) <= progressionBigInt(recipient.progression.level), "Reward rarity hero snapshot exceeds recipient");
     if (p.gearClass && recipient) requireContract(heroClassOf(recipient.d8)?.id === p.gearClass, "Reward gear class mismatch");
     if (live) {
-      const site = siteRewardKindV1(state, source6, spawnEntityId, p.rarityPolicyHash === WORLD_LOOT_V3_HASH);
+      const site = siteRewardKindV1(state, source6, spawnEntityId, isSourceLootV4(p.rarityPolicyHash));
       requireContract(p.rarityRole === (siteRewardRoleV1(site) ?? rewardRarityRoleV2(state, source6, spawnEntityId)) && (p.siteReward ?? null) === site, "Reward rarity role drift");
     }
   }
