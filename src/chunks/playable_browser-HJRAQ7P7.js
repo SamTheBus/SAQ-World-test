@@ -532,7 +532,6 @@ import {
   isCryptFamily,
   isFortFamily,
   isGeneratedInteriorFamily,
-  isNewAffix,
   isRuinFamily,
   isSeededBindingV1,
   isSporeV4,
@@ -830,7 +829,7 @@ import {
   worldRevisionV1,
   worldRolesV1,
   wrathDamageV1
-} from "./chunk-IE67Y5HJ.js";
+} from "./chunk-L2ANMFJB.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -47121,6 +47120,7 @@ var sign = (v) => {
 };
 var sum = (a, b) => statDifference(a, statScale(b, -1));
 var affixLine = (k, skill) => ({ atk: "attack", def: "defense", maxHp: "maxHp", str: "str", dex: "dex", int: "int" })[k] ?? "fx:" + (k === "activeSpd" ? "activeSpeed" : k) + (skill ? ":" + skill : "");
+var affixLineKey = affixLine;
 var skillName = (id) => CLASS_TREE_SKILLS[id]?.name ?? id;
 function lineLabel(key2) {
   const [k, skill] = (key2.startsWith("fx:") ? key2.slice(3) : key2).split(":");
@@ -50275,10 +50275,6 @@ function observeCanvasDisplaySize({ environment, canvas, onSize }) {
   } });
 }
 
-// src/client/dungeon_service_style_v2.js
-var DUNGEON_SERVICE_CSS = '#settlement-services .close-btn{\n  background: linear-gradient(180deg, #7f1d1d 0%, #450a0a 100%);\n  border: 1.5px solid #ef4444;\n  color: #ffffff;\n  border-radius: 4px;\n  padding: 4px 6px;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  cursor: pointer;\n  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);\n  transition: all 0.15s ease;\n}\n#settlement-services .close-btn:active{\n  background: linear-gradient(180deg, #991b1b 0%, #7f1d1d 100%);\n  border-color: #f87171;\n  color: #ffffff;\n  box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);\n}\n#settlement-services /* --- BLACKSMITH FORGE MODAL STYLES --- */\n.modal-card.forge-card{\n  max-width: 860px;\n  width: 94vw;\n  max-height: 90vh;\n  padding: 12px 14px;\n}\n#settlement-services /* --- OBSIDIAN CELESTIAL ALTAR STYLES --- */\n.modal-card.enchant-card{\n  max-width: 820px;\n  width: 94vw;\n  max-height: 90vh;\n  padding: 12px 14px;\n  background:\n    radial-gradient(\n      circle at top,\n      rgba(168, 85, 247, 0.2) 0%,\n      rgba(10, 8, 20, 0.98) 75%\n    ),\n    #06040e;\n  border: 2.5px solid var(--accent-arcane-purple);\n  outline: 1px solid var(--border-aged-bronze);\n  outline-offset: -4px;\n  box-shadow:\n    0 25px 70px rgba(0, 0, 0, 0.98),\n    0 0 35px rgba(168, 85, 247, 0.32),\n    inset 0 0 20px rgba(168, 85, 247, 0.08);\n  border-radius: 10px;\n}\n#settlement-services .enchant-layout{\n  display: grid;\n  grid-template-columns: 280px 1fr;\n  gap: 10px;\n  height: calc(82vh - 70px);\n  max-height: calc(82vh - 70px);\n  overflow: hidden;\n}\n#settlement-services .enchant-pane{\n  background: linear-gradient(180deg, #110d1c 0%, #080510 100%);\n  border: 1.5px solid #5a4325;\n  border-radius: 6px;\n  padding: 10px;\n  overflow-y: auto;\n  min-height: 0;\n  touch-action: pan-y;\n  box-shadow:\n    inset 0 4px 18px rgba(0, 0, 0, 0.95),\n    0 2px 6px rgba(0, 0, 0, 0.5);\n}\n#settlement-services .enchant-pane::-webkit-scrollbar{\n  width: 5px;\n}\n#settlement-services .enchant-pane::-webkit-scrollbar-track{\n  background: rgba(0, 0, 0, 0.25);\n  border-radius: 3px;\n}\n#settlement-services .enchant-pane::-webkit-scrollbar-thumb{\n  background: #00d2ff;\n  border-radius: 3px;\n}\n#settlement-services .enchant-pane::-webkit-scrollbar-thumb:hover{\n  background: #38bdf8;\n}\n@media (max-width: 768px){#settlement-services .enchant-layout{\n    grid-template-columns: 1fr;\n    max-height: calc(84vh - 70px);\n    overflow-y: auto;\n  }#settlement-services .enchant-left-pane,#settlement-services .enchant-right-pane{\n    max-height: 250px;\n  }}\n#settlement-services .forge-mode-bar{\n  display: flex;\n  gap: 6px;\n  margin-bottom: 10px;\n  overflow-x: auto;\n  padding: 4px;\n  background: rgba(10, 8, 18, 0.85);\n  border: 1px solid var(--border-aged-bronze);\n  border-radius: 6px;\n  touch-action: pan-x;\n  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.8);\n}\n#settlement-services .forge-mode-btn{\n  flex: 1;\n  background: linear-gradient(180deg, #1c1528 0%, #0f0c18 100%);\n  color: #94a3b8;\n  border: 1.5px solid var(--border-cold-iron);\n  border-radius: 4px;\n  padding: 6px 4px;\n  font-size: 9px;\n  font-weight: 800;\n  letter-spacing: 0.8px;\n  cursor: pointer;\n  white-space: nowrap;\n  text-align: center;\n  transition: all 0.15s ease;\n}\n#settlement-services .forge-mode-btn.active{\n  background: linear-gradient(180deg, #b45309 0%, #78350f 100%) !important;\n  color: #ffffff !important;\n  border-color: #ffd700 !important;\n  box-shadow: 0 0 12px rgba(241, 196, 15, 0.35) !important;\n  text-shadow: 0 1px 2px #000000;\n}\n#settlement-services .forge-layout{\n  display: grid;\n  grid-template-columns: 280px 1fr;\n  gap: 10px;\n  height: calc(82vh - 70px);\n  max-height: calc(82vh - 70px);\n  overflow: hidden;\n}\n#settlement-services .forge-pane{\n  background: linear-gradient(180deg, #110d1c 0%, #080510 100%);\n  border: 1.5px solid #5a4325;\n  border-radius: 6px;\n  padding: 10px;\n  overflow-y: auto;\n  min-height: 0;\n  touch-action: pan-y;\n  box-shadow:\n    inset 0 4px 18px rgba(0, 0, 0, 0.95),\n    0 2px 6px rgba(0, 0, 0, 0.5);\n}\n#settlement-services .forge-left-pane{\n  max-height: 100%;\n  min-height: 0;\n}\n#settlement-services .forge-right-pane{\n  max-height: 100%;\n  min-height: 0;\n}\n#settlement-services .forge-pane::-webkit-scrollbar{\n  width: 5px;\n}\n#settlement-services .forge-pane::-webkit-scrollbar-track{\n  background: rgba(0, 0, 0, 0.25);\n  border-radius: 3px;\n}\n#settlement-services .forge-pane::-webkit-scrollbar-thumb{\n  background: #a855f7;\n  border-radius: 3px;\n}\n#settlement-services .forge-pane::-webkit-scrollbar-thumb:hover{\n  background: #c084fc;\n}\n#settlement-services .forge-progress-bg{\n  width: 100%;\n  height: 10px;\n  background: #06040a;\n  border: 1.5px solid var(--border-aged-bronze);\n  border-radius: 5px;\n  overflow: hidden;\n  margin-bottom: 10px;\n  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.9);\n}\n#settlement-services .forge-progress-fill{\n  height: 100%;\n  background: linear-gradient(90deg, #ea580c 0%, #f59e0b 100%);\n  box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);\n  transition: width 0.2s ease-out;\n}\n#settlement-services .forge-anvil-button{\n  background: linear-gradient(180deg, #241c33 0%, #0d0914 100%);\n  color: #ffffff;\n  border: 2px solid var(--border-gold-filigree);\n  border-radius: 6px;\n  padding: 12px;\n  font-size: 11px;\n  font-weight: 900;\n  letter-spacing: 1.2px;\n  text-transform: uppercase;\n  cursor: pointer;\n  box-shadow:\n    0 4px 14px rgba(0, 0, 0, 0.8),\n    inset 0 1px 0 rgba(255, 255, 255, 0.2);\n  transition:\n    transform 0.1s ease,\n    filter 0.15s ease,\n    box-shadow 0.15s ease;\n  text-shadow: 0 1px 3px #000000;\n}\n#settlement-services .forge-anvil-button:active:not(:disabled){\n  transform: scale(0.97);\n  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.9);\n}\n#settlement-services .forge-anvil-button:disabled{\n  opacity: 0.35;\n  cursor: not-allowed;\n  border-color: var(--border-cold-iron) !important;\n  background: #120e1a !important;\n  color: #64748b !important;\n  box-shadow: none !important;\n}\n@media (max-width: 768px){#settlement-services .forge-layout{\n    grid-template-columns: 1fr;\n    max-height: calc(84vh - 70px);\n    overflow-y: auto;\n  }#settlement-services .forge-left-pane,#settlement-services .forge-right-pane{\n    max-height: 250px;\n  }}\n@media (orientation: portrait), (max-width: 600px){#settlement-services .shop-modal-card,#settlement-services .forge-modal-card,#settlement-services .enchant-card{\n    width: 96% !important;\n    margin: 0 auto !important;\n    height: calc(\n      100dvh - max(8px, env(safe-area-inset-top, 12px)) -\n        max(8px, env(safe-area-inset-bottom, 12px)) - 10px\n    ) !important;\n    max-height: none !important;\n  }#settlement-services /* Retain full content scrolling inside full-height panels */\n  .shop-content-panel{\n    max-height: none !important;\n    flex: 1 !important;\n    overflow-y: auto !important;\n  }#settlement-services .forge-layout,#settlement-services .enchant-layout{\n    grid-template-columns: 1fr !important; /* Stack columns on mobile */\n    height: auto !important;\n    max-height: none !important;\n    flex: 1 !important;\n  }#settlement-services .forge-left-pane,#settlement-services .forge-right-pane,#settlement-services .enchant-left-pane,#settlement-services .enchant-right-pane{\n    max-height: none !important;\n    flex: 1 !important;\n  }#settlement-services .shop-tab-bar,#settlement-services .forge-mode-bar{\n    display: flex !important;\n    overflow-x: auto !important;\n    white-space: nowrap !important;\n    flex-wrap: nowrap !important;\n    flex-shrink: 0 !important;\n    touch-action: pan-x !important;\n    -webkit-overflow-scrolling: touch !important;\n    padding-bottom: 4px !important;\n  }#settlement-services .shop-tab-bar::-webkit-scrollbar,#settlement-services .forge-mode-bar::-webkit-scrollbar{\n    height: 3px !important;\n    display: block !important;\n  }#settlement-services .shop-tab-bar::-webkit-scrollbar-thumb,#settlement-services .forge-mode-bar::-webkit-scrollbar-thumb{\n    background: var(--border-aged-bronze) !important;\n    border-radius: 2px !important;\n  }#settlement-services .shop-tab-btn,#settlement-services .forge-mode-btn{\n    flex-shrink: 0 !important;\n  }}\n#settlement-services /* --- GOTHIC MERCHANT TRADE LEDGER STYLES --- */\n.shop-modal-card{\n  max-width: 680px !important;\n  width: 94vw !important;\n  background:\n    radial-gradient(\n      circle at top,\n      rgba(212, 175, 55, 0.18) 0%,\n      rgba(14, 10, 24, 0.98) 75%\n    ),\n    #080610 !important;\n  border: 2.5px solid var(--border-gold-filigree) !important;\n  outline: 1px solid var(--border-aged-bronze) !important;\n  outline-offset: -4px !important;\n  box-shadow:\n    0 25px 70px rgba(0, 0, 0, 0.98),\n    0 0 35px rgba(212, 175, 55, 0.28),\n    inset 0 0 20px rgba(212, 175, 55, 0.05) !important;\n  border-radius: 10px !important;\n  padding: 14px 16px !important;\n}\n#settlement-services .shop-header-banner{\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  background: linear-gradient(180deg, #281e3a 0%, #120c1d 100%);\n  border: 1.5px solid #8c6d3b;\n  border-bottom: 2px solid #d4af37;\n  border-radius: 6px;\n  padding: 8px 12px;\n  margin-bottom: 10px;\n  box-shadow:\n    0 4px 12px rgba(0, 0, 0, 0.8),\n    inset 0 1px 0 rgba(255, 255, 255, 0.15);\n}\n#settlement-services .shop-merchant-title{\n  display: flex;\n  align-items: center;\n  gap: 10px;\n}\n#settlement-services .shop-merchant-badge{\n  width: 36px;\n  height: 36px;\n  border-radius: 8px;\n  background: rgba(241, 196, 15, 0.15);\n  border: 1.5px solid #f1c40f;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  box-shadow: 0 0 10px rgba(241, 196, 15, 0.3);\n  flex-shrink: 0;\n}\n#settlement-services .shop-title-group{\n  display: flex;\n  flex-direction: column;\n  text-align: left;\n}\n#settlement-services .shop-main-title{\n  font-size: 13px;\n  font-weight: 900;\n  color: #ffd700;\n  letter-spacing: 1.5px;\n  text-transform: uppercase;\n  line-height: 1.1;\n}\n#settlement-services .shop-sub-title{\n  font-size: 8.5px;\n  color: #94a3b8;\n  font-family: monospace;\n  letter-spacing: 0.5px;\n}\n#settlement-services .shop-wallet-bar{\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  margin-left: auto;\n  margin-right: 12px;\n}\n#settlement-services .shop-wallet-badge{\n  display: flex;\n  align-items: center;\n  gap: 5px;\n  padding: 4px 8px;\n  border-radius: 6px;\n  font-family: monospace;\n  font-size: 10px;\n  font-weight: 800;\n}\n#settlement-services .shop-wallet-badge.gold-badge{\n  background: rgba(241, 196, 15, 0.12);\n  border: 1px solid rgba(241, 196, 15, 0.5);\n  color: #ffd700;\n}\n#settlement-services .shop-wallet-badge.souls-badge{\n  background: rgba(160, 174, 192, 0.12);\n  border: 1px solid rgba(160, 174, 192, 0.5);\n  color: #e2e8f0;\n}\n#settlement-services .shop-tab-bar{\n  display: flex;\n  gap: 6px;\n  margin-bottom: 10px;\n}\n#settlement-services .shop-tab-btn{\n  flex: 1;\n  background: linear-gradient(180deg, #1c1528 0%, #0f0c18 100%);\n  color: #94a3b8;\n  border: 1.5px solid var(--border-cold-iron);\n  border-radius: 6px;\n  padding: 7px 6px;\n  font-size: 9.5px;\n  font-weight: 800;\n  letter-spacing: 0.5px;\n  cursor: pointer;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  gap: 6px;\n  transition: all 0.15s ease;\n  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);\n}\n#settlement-services .shop-tab-btn.active{\n  background: linear-gradient(180deg, #b45309 0%, #78350f 100%) !important;\n  color: #ffffff !important;\n  border-color: #ffd700 !important;\n  border-top-color: #fef08a !important;\n  box-shadow:\n    0 0 14px rgba(241, 196, 15, 0.4),\n    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;\n  text-shadow: 0 1px 2px #000000;\n}\n@media (hover: hover) and (pointer: fine){#settlement-services .shop-tab-btn:active{\n    transform: scale(0.97);\n  }}\n#settlement-services .shop-content-panel{\n  max-height: 58vh;\n  overflow-y: auto;\n  padding-right: 4px;\n}\n#settlement-services .shop-restock-bar{\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  background: linear-gradient(180deg, #181226 0%, #0b0814 100%);\n  border: 1px solid var(--border-aged-bronze);\n  padding: 6px 10px;\n  border-radius: 6px;\n  margin-bottom: 8px;\n  font-family: monospace;\n  font-size: 9px;\n  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.7);\n}\n#settlement-services .shop-refresh-btn{\n  background: linear-gradient(180deg, #241c30 0%, #120e1a 100%);\n  color: var(--text-gold-amber);\n  border: 1px solid var(--border-aged-bronze);\n  padding: 4px 8px;\n  border-radius: 4px;\n  font-size: 8.5px;\n  font-weight: 800;\n  font-family: monospace;\n  cursor: pointer;\n  display: flex;\n  align-items: center;\n  gap: 4px;\n  transition:\n    transform 0.1s ease,\n    border-color 0.15s ease;\n}\n#settlement-services .shop-refresh-btn:active{\n  transform: scale(0.96);\n}\n#settlement-services .shop-showcase-list{\n  display: flex;\n  flex-direction: column;\n  gap: 6px;\n}\n#settlement-services .shop-showcase-card{\n  background: linear-gradient(180deg, #1c142b 0%, #0d0918 100%);\n  border: 1.5px solid #3a304a;\n  border-radius: 8px;\n  padding: 8px 12px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  cursor: pointer;\n  transition: all 0.15s ease;\n  box-shadow:\n    0 4px 14px rgba(0, 0, 0, 0.7),\n    inset 0 1px 0 rgba(255, 255, 255, 0.08),\n    inset 0 0 10px rgba(0, 0, 0, 0.6);\n}\n#settlement-services .shop-showcase-card:hover,#settlement-services .shop-showcase-card:active{\n  background: linear-gradient(180deg, #28193d 0%, #120c22 100%);\n  border-color: #8c6d3b;\n  transform: translateY(-1px);\n  box-shadow:\n    0 6px 18px rgba(0, 0, 0, 0.85),\n    inset 0 1px 0 rgba(255, 255, 255, 0.15);\n}\n#settlement-services .shop-showcase-card.card-sold-out{\n  opacity: 0.45;\n  filter: grayscale(0.6);\n  cursor: default;\n}\n#settlement-services .shop-card-left{\n  display: flex;\n  align-items: center;\n  gap: 10px;\n  flex: 1;\n  min-width: 0;\n}\n#settlement-services .shop-card-icon-container{\n  width: 42px;\n  height: 42px;\n  border-radius: 6px;\n  background: radial-gradient(circle at center, #181226 0%, #080510 100%);\n  border: 1.5px solid #8c6d3b;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  flex-shrink: 0;\n  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.9);\n}\n#settlement-services .shop-card-details{\n  display: flex;\n  flex-direction: column;\n  text-align: left;\n  min-width: 0;\n  gap: 2px;\n}\n#settlement-services .shop-card-title-row{\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  min-width: 0;\n}\n#settlement-services .shop-card-name{\n  font-size: 11.5px;\n  font-weight: 800;\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n#settlement-services .shop-card-tier-badge{\n  font-size: 8px;\n  font-weight: 900;\n  font-family: monospace;\n  padding: 1px 4px;\n  border-radius: 3px;\n  border: 1px solid;\n  flex-shrink: 0;\n}\n#settlement-services .shop-card-type-row{\n  font-size: 8.5px;\n  color: #94a3b8;\n  font-family: monospace;\n}\n#settlement-services .shop-card-stats-row{\n  font-size: 9px;\n  color: #e2e8f0;\n  font-family: monospace;\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n#settlement-services .shop-card-deltas{\n  font-size: 8.5px;\n  font-family: monospace;\n  font-weight: bold;\n  margin-top: 1px;\n}\n#settlement-services .shop-card-right{\n  margin-left: 10px;\n  flex-shrink: 0;\n}\n#settlement-services .shop-buy-btn{\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  padding: 7px 14px;\n  border-radius: 6px;\n  font-size: 9.5px;\n  font-weight: 900;\n  font-family: monospace;\n  cursor: pointer;\n  border: 1.5px solid;\n  transition:\n    transform 0.1s ease,\n    box-shadow 0.15s ease,\n    filter 0.15s ease;\n  text-shadow: 0 1px 2px #000000;\n}\n#settlement-services .shop-buy-btn:active:not(:disabled){\n  transform: translateY(2px);\n}\n#settlement-services .shop-buy-btn.affordable{\n  background: linear-gradient(180deg, #059669 0%, #047857 60%, #024e37 100%);\n  color: #ffffff;\n  border-color: #34d399;\n  border-top-color: #a7f3d0;\n  border-bottom: 2.5px solid #012b25;\n  box-shadow:\n    0 4px 10px rgba(0, 0, 0, 0.8),\n    0 0 12px rgba(52, 211, 153, 0.3),\n    inset 0 1px 0 rgba(255, 255, 255, 0.3);\n}\n#settlement-services .shop-buy-btn.affordable:hover{\n  filter: brightness(1.15);\n  box-shadow: 0 0 16px rgba(52, 211, 153, 0.45);\n}\n#settlement-services .shop-buy-btn.unaffordable{\n  background: linear-gradient(180deg, #7f1d1d 0%, #450a0a 100%);\n  color: #f87171;\n  border-color: #ef4444;\n  border-bottom: 2.5px solid #280505;\n  cursor: not-allowed;\n  opacity: 0.8;\n}\n#settlement-services .shop-buy-btn.sold-out{\n  background: #181226;\n  color: #64748b;\n  border-color: #3a3247;\n  cursor: not-allowed;\n  opacity: 0.5;\n}\n#settlement-services /* --- MOONLIT STEEL & SAPPHIRE FORGE STYLES --- */\n.forge-modal-card{\n  max-width: 820px !important;\n  width: 94vw !important;\n  max-height: 90vh !important;\n  background:\n    radial-gradient(\n      circle at top,\n      rgba(212, 175, 55, 0.14) 0%,\n      rgba(14, 10, 24, 0.98) 75%\n    ),\n    #080610 !important;\n  border: 2.5px solid var(--border-gold-filigree) !important;\n  outline: 1px solid var(--border-aged-bronze) !important;\n  outline-offset: -4px !important;\n  box-shadow:\n    0 25px 70px rgba(0, 0, 0, 0.98),\n    0 0 35px rgba(212, 175, 55, 0.2),\n    inset 0 0 25px rgba(212, 175, 55, 0.05) !important;\n  border-radius: 10px !important;\n  padding: 14px 16px !important;\n}\n#settlement-services .forge-header-banner{\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  background: linear-gradient(180deg, #281e3a 0%, #120c1d 100%);\n  border: 1.5px solid #8c6d3b;\n  border-bottom: 2px solid #d4af37;\n  border-radius: 6px;\n  padding: 8px 12px;\n  margin-bottom: 10px;\n  box-shadow:\n    0 4px 12px rgba(0, 0, 0, 0.8),\n    inset 0 1px 0 rgba(255, 255, 255, 0.15);\n}\n#settlement-services .forge-title-group{\n  display: flex;\n  align-items: center;\n  gap: 10px;\n}\n#settlement-services .forge-badge-icon{\n  width: 36px;\n  height: 36px;\n  border-radius: 8px;\n  background: rgba(56, 189, 248, 0.12);\n  border: 1.5px solid #38bdf8;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);\n  flex-shrink: 0;\n}\n#settlement-services .forge-text-group{\n  display: flex;\n  flex-direction: column;\n  text-align: left;\n}\n#settlement-services .forge-main-title{\n  font-size: 13px;\n  font-weight: 900;\n  color: #38bdf8;\n  letter-spacing: 1.5px;\n  text-transform: uppercase;\n  line-height: 1.1;\n  text-shadow: 0 1px 3px #000;\n}\n#settlement-services .forge-sub-title{\n  font-size: 8.5px;\n  color: #94a3b8;\n  font-family: monospace;\n  letter-spacing: 0.5px;\n}\n#settlement-services .forge-smith-quote{\n  display: flex;\n  align-items: center;\n  gap: 10px;\n  background: rgba(10, 8, 18, 0.75);\n  border: 1px solid var(--border-aged-bronze);\n  border-radius: 8px;\n  padding: 8px 10px;\n  margin-bottom: 10px;\n  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.6);\n}\n#settlement-services .smith-avatar{\n  width: 32px;\n  height: 32px;\n  border-radius: 50%;\n  background: rgba(56, 189, 248, 0.15);\n  border: 1px solid #38bdf8;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  flex-shrink: 0;\n}\n#settlement-services .smith-quote-text{\n  display: flex;\n  flex-direction: column;\n  text-align: left;\n  min-width: 0;\n}\n#settlement-services .smith-name{\n  font-size: 8px;\n  font-weight: 900;\n  color: #38bdf8;\n  letter-spacing: 1px;\n  font-family: monospace;\n}\n#settlement-services .smith-line{\n  font-size: 9.5px;\n  color: #cbd5e1;\n  font-style: italic;\n  line-height: 1.25;\n}\n#settlement-services .forge-slot-card{\n  padding: 6px 10px;\n  margin-bottom: 6px;\n  border-radius: 6px;\n  cursor: pointer;\n  display: flex;\n  align-items: center;\n  transition: all 0.15s ease;\n}\n#settlement-services .forge-slot-card:hover{\n  transform: translateY(-1px);\n}\n#settlement-services .shop-modal-card,#settlement-services .forge-modal-card,#settlement-services .enchant-card{\n  min-width: 0;\n  min-height: 0;\n  max-width: calc(\n    var(--app-viewport-width) - var(--app-safe-left) - var(--app-safe-right)\n  ) !important;\n  max-height: calc(\n    var(--app-viewport-height) - var(--app-safe-top) - var(--app-safe-bottom)\n  ) !important;\n}\n#settlement-services .shop-header-banner,#settlement-services .forge-header-banner{\n  flex-shrink: 0;\n  min-width: 0;\n}\n#settlement-services .shop-title-group,#settlement-services .forge-title-group{\n  min-width: 0;\n  overflow-wrap: anywhere;\n}\n#settlement-services .close-btn{\n  width: 36px;\n  min-width: 36px;\n  height: 36px;\n  min-height: 36px;\n  padding: 6px;\n  flex-shrink: 0;\n  touch-action: manipulation;\n}\n#settlement-services .shop-content-panel,#settlement-services .forge-layout,#settlement-services .enchant-layout{\n  min-width: 0;\n  min-height: 0;\n  overscroll-behavior: contain;\n}\n#settlement-services .shop-content-panel,#settlement-services .forge-pane,#settlement-services .enchant-pane{\n  touch-action: pan-y;\n}\n#settlement-services html[data-viewport-layout="wide-landscape"] .shop-modal-card,#settlement-services html[data-viewport-layout="wide-landscape"] .forge-modal-card,#settlement-services html[data-viewport-layout="wide-landscape"] .enchant-card{\n  width: min(96%, 980px) !important;\n  height: calc(\n    var(--app-viewport-height) - var(--app-safe-top) - var(--app-safe-bottom)\n  ) !important;\n  padding: 8px 10px !important;\n  margin: 0 !important;\n}\n#settlement-services html[data-viewport-layout="wide-landscape"] .shop-header-banner,#settlement-services html[data-viewport-layout="wide-landscape"] .forge-header-banner{\n  min-height: 38px;\n  padding: 4px 8px;\n  margin-bottom: 5px;\n}\n#settlement-services html[data-viewport-layout="wide-landscape"] .shop-content-panel{\n  max-height: none !important;\n  flex: 1;\n  overflow-y: auto;\n}\n#settlement-services html[data-viewport-layout="wide-landscape"] .shop-tab-bar,#settlement-services html[data-viewport-layout="wide-landscape"] .forge-mode-bar{\n  min-height: 32px;\n  margin-bottom: 5px;\n  overflow-x: auto;\n  flex-wrap: nowrap;\n  touch-action: pan-x;\n}\n#settlement-services html[data-viewport-layout="narrow-portrait"] .shop-modal-card,#settlement-services html[data-viewport-layout="narrow-portrait"] .forge-modal-card,#settlement-services html[data-viewport-layout="narrow-portrait"] .enchant-card{\n  width: 100% !important;\n  height: 100% !important;\n  max-height: 100% !important;\n  margin: 0 !important;\n  padding: 8px !important;\n  border-radius: 7px !important;\n}\n#settlement-services html[data-viewport-layout="narrow-portrait"] .shop-header-banner,#settlement-services html[data-viewport-layout="narrow-portrait"] .forge-header-banner{\n  min-height: 40px;\n  padding: 4px 7px;\n  margin-bottom: 5px;\n  font-size: 10px;\n  letter-spacing: 0.7px;\n}\n#settlement-services html[data-viewport-layout="narrow-portrait"] .shop-merchant-badge,#settlement-services html[data-viewport-layout="narrow-portrait"] .forge-badge-icon{\n  width: 30px;\n  height: 30px;\n}\n#settlement-services html[data-viewport-layout="narrow-portrait"] .shop-content-panel{\n  max-height: none !important;\n  flex: 1 !important;\n  overflow-y: auto !important;\n}\n#settlement-services html[data-viewport-layout="narrow-portrait"] .shop-tab-bar,#settlement-services html[data-viewport-layout="narrow-portrait"] .forge-mode-bar{\n  overflow-x: auto !important;\n  flex-wrap: nowrap !important;\n  flex-shrink: 0 !important;\n  touch-action: pan-x !important;\n}\n@media (max-width: 680px), (max-height: 430px){#settlement-services html[data-viewport-layout] .forge-layout,#settlement-services html[data-viewport-layout] .enchant-layout{\n    grid-template-columns: 1fr !important;\n    flex: 1 !important;\n    height: auto !important;\n    overflow-y: auto !important;\n  }#settlement-services html[data-viewport-layout] .forge-pane,#settlement-services html[data-viewport-layout] .enchant-pane{\n    flex: none !important;\n    max-height: none !important;\n    overflow: visible;\n  }}';
-var DUNGEON_SERVICE_ICONS = { "shop": '<svg\n                  width="22"\n                  height="22"\n                  viewBox="0 0 24 24"\n                  fill="none"\n                  stroke="#f1c40f"\n                  stroke-width="2"\n                  stroke-linecap="round"\n                  stroke-linejoin="round"\n                >\n                  <path d="M12 2L3 7v10l9 5 9-5V7l-9-5z" />\n                  <path d="M12 22V12" />\n                  <path d="M12 12L3 7" />\n                  <path d="M12 12l9-7" />\n                  <circle cx="12" cy="7" r="2" fill="#f1c40f" />\n                </svg>', "forge": '<svg\n                  width="22"\n                  height="22"\n                  viewBox="0 0 24 24"\n                  fill="none"\n                  stroke="#38bdf8"\n                  stroke-width="2"\n                  stroke-linecap="round"\n                  stroke-linejoin="round"\n                >\n                  <path\n                    d="M14.5 17.5L3 6V3h3l11.5 11.5 M13 19l6-6 M16 16l4 4 M19 21l2-2"\n                  />\n                </svg>', "enchanter": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><path d="M12 2L3 7v10l9 5 9-5V7zM12 2v20M3 7l18 10M21 7L3 17"/></svg>', "close": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>' };
-
 // src/client/settlement_services_menu_legacy_v1.js
 function createSettlementServicesMenu({ document: doc, adapter, readModel, clearInput, restoreFocus, reportError }) {
   const panel = doc.createElement("dialog");
@@ -50418,35 +50414,95 @@ function createSettlementServicesMenu({ document: doc, adapter, readModel, clear
 }
 
 // src/client/settlement_services_menu_v1.js
-var labels = { attack: "Attack", defense: "Defense", maxHp: "Max HP", activeSpeed: "Attack speed", atk: "Attack", def: "Defense", activeSpd: "Attack speed" };
 function createSettlementServicesMenu2(options) {
   const { document: doc, adapter, readModel, clearInput, restoreFocus, reportError } = options;
   if (!doc.body.dataset.settlementServices) return createSettlementServicesMenu(options);
   const style = doc.createElement("style");
-  style.textContent = DUNGEON_SERVICE_CSS + `
- #settlement-services{padding:0;width:min(900px,calc(100vw - 20px));max-width:calc(100vw - 20px);height:min(820px,92dvh);max-height:92dvh;background:#080610;color:#e2e8f0;border:2px solid #a78a4d;border-radius:10px;font:15px system-ui;box-shadow:0 20px 90px #000;overflow:hidden;box-sizing:border-box}
- #settlement-services::backdrop{background:#0009}#settlement-services *{box-sizing:border-box}#settlement-services .service-shell{height:100%;display:flex;flex-direction:column;padding:12px;min-height:0}
- #settlement-services .forge-header-banner,#settlement-services .shop-header-banner{flex-shrink:0;min-height:60px;gap:12px;padding:10px;margin:0 0 8px}
- #settlement-services .forge-main-title,#settlement-services .shop-main-title{font-size:14px}#settlement-services .shop-sub-title,#settlement-services .forge-sub-title{font-size:10px}
- #settlement-services .close-btn{position:static!important;width:44px;height:44px;min-width:44px;display:grid;place-items:center;color:#f5e7b5;background:#421f31;border:1px solid #b58155;border-radius:6px;cursor:pointer}
- #settlement-services .service-wallet{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:10px 4px;color:#f1c40f;font-weight:bold}
- #settlement-services .forge-mode-bar,#settlement-services .shop-tab-bar{flex-shrink:0;display:flex;overflow-x:auto;gap:5px;padding:4px 0 10px;margin:0;touch-action:pan-x}
- #settlement-services .forge-mode-btn,#settlement-services .shop-tab-btn{flex:1;min-height:44px;white-space:nowrap;font-size:12px;padding:10px;cursor:pointer;background:#161021;color:#d6c6a5;border:1px solid #68502c;border-radius:5px}
- #settlement-services button[aria-pressed=true]{border-color:#e0be69;background:#49324b;color:#fff}#settlement-services button:focus-visible{outline:2px solid #38bdf8;outline-offset:2px}
- #settlement-services .service-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;touch-action:pan-y}
- #settlement-services .forge-layout,#settlement-services .enchant-layout{display:grid;grid-template-columns:270px minmax(0,1fr);height:100%;max-height:none;overflow:hidden;gap:12px}
- #settlement-services .forge-pane,#settlement-services .enchant-pane{padding:14px;min-width:0;overflow:auto;touch-action:pan-y;background:linear-gradient(#181124,#090610);border:1px solid #5a4325;border-radius:6px}
- #settlement-services .service-card{display:flex;align-items:center;gap:12px;width:100%;min-height:74px;padding:10px;margin-bottom:9px;background:linear-gradient(130deg,#24192e,#0d0914);color:#efeadb;border:1px solid #776444;border-radius:6px;text-align:left;cursor:pointer}
- #settlement-services .service-card img{width:42px;height:42px;object-fit:contain;flex-shrink:0}#settlement-services .service-card span{display:flex;flex-direction:column;gap:4px;min-width:0;overflow-wrap:anywhere}
- #settlement-services small{color:#aeb7c7;font-size:12px}#settlement-services .service-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;padding:8px}
- #settlement-services .service-grid article{padding:14px;border:1px solid #836b36;border-radius:6px;background:#17101f}#settlement-services .service-grid .service-card{border:0;background:none;padding:0}
- #settlement-services .forge-anvil-button{width:100%;padding:14px;min-height:46px;font-size:14px;margin:10px 0;background:linear-gradient(135deg,#854516,#402248);color:#fff0c5;border:1px solid #caa65b;border-radius:6px;cursor:pointer}
- #settlement-services button:disabled{opacity:.48;cursor:not-allowed}#settlement-services .service-status{padding:8px;color:#d7c0ef;flex-shrink:0;min-height:30px;font-size:13px}
- #settlement-services[data-service-kind=shop] .forge-main-title{color:#f1c40f}#settlement-services[data-service-kind=shop] .forge-badge-icon{border-color:#caa65b;background:#42351c}
- #settlement-services[data-service-kind=altar]{border-color:#a855f7;background:radial-gradient(circle at top,#341c4a,#090510 75%)}#settlement-services[data-service-kind=altar] .forge-main-title{color:#d8b4fe}#settlement-services[data-service-kind=altar] .forge-badge-icon{border-color:#a855f7;background:#311747}#settlement-services[data-service-kind=altar] .forge-header-banner{border-bottom-color:#a855f7}
- #settlement-services .service-price{color:#f3cf65}#settlement-services .service-preview{padding:12px;border:1px solid #555080;border-radius:6px;background:#080712;margin:12px 0}#settlement-services .service-preview p{margin:7px 0;display:flex;gap:8px;justify-content:space-between}#settlement-services details{padding:10px 0;line-height:1.6}#settlement-services summary{cursor:pointer;color:#c6adf1}
- #settlement-services .service-error{color:#fca5a5}#settlement-services progress{width:100%}
- @media(max-width:650px){#settlement-services{height:94dvh;max-height:94dvh}#settlement-services .forge-layout,#settlement-services .enchant-layout{display:block;overflow:auto;height:auto}#settlement-services .forge-left-pane,#settlement-services .enchant-left-pane{max-height:180px!important;min-height:0!important;height:auto!important;overflow-y:auto!important;margin-bottom:10px}#settlement-services .forge-right-pane,#settlement-services .enchant-right-pane{max-height:none!important;height:auto!important}#settlement-services .shop-main-title,#settlement-services .forge-main-title{font-size:11px}#settlement-services .service-shell{padding:8px}#settlement-services .service-grid{grid-template-columns:1fr}#settlement-services .service-wallet{font-size:13px}}
+  style.textContent = `
+ #settlement-services{--tn-panel:#10161d;--tn-card:#151d26;--tn-card2:#1b2530;--tn-line:#26313d;--tn-line2:#222c37;--tn-text:#eee7d9;--tn-muted:#aeb5b6;--tn-dim:#7f8a93;--tn-label:#b7a077;--tn-gold:#f0c862;--tn-up:#5fd08a;--tn-down:#ff8a70;--tn-accent:#d9b25f;padding:0;margin:auto;width:min(560px,calc(100vw - 16px));max-width:calc(100vw - 16px);height:min(860px,calc(100dvh - 16px));max-height:calc(100dvh - 16px);background:var(--tn-panel);color:var(--tn-text);border:1px solid #2f3a46;border-radius:22px;font:14px/1.35 system-ui,-apple-system,'Segoe UI',sans-serif;box-shadow:0 20px 90px #000c;overflow:hidden;box-sizing:border-box}
+ #settlement-services[data-service-kind=inn]{height:fit-content;margin:auto auto calc(8px + env(safe-area-inset-bottom,0px))}#settlement-services[data-service-kind=inn] .tn-shell{height:auto}#settlement-services[data-service-kind=inn] .tn-body{flex:none}#settlement-services[data-service-kind=inn] .tn-btn{flex:none;height:52px}
+ #settlement-services::backdrop{background:#0008}#settlement-services *{box-sizing:border-box}
+ #settlement-services button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}#settlement-services button:disabled{cursor:default}
+ #settlement-services button:focus-visible{outline:2px solid #38bdf8;outline-offset:2px}
+ #settlement-services .tn-shell{position:relative;height:100%;display:flex;flex-direction:column;min-height:0}
+ #settlement-services .tn-head{display:flex;align-items:center;gap:10px;padding:12px 12px 10px;flex:none}
+ #settlement-services .tn-npc{width:46px;height:46px;border-radius:14px;flex:none;display:grid;place-items:center;background:var(--tn-card2);border:1px solid #33404d}#settlement-services .tn-npc svg{width:28px;height:28px}
+ #settlement-services .tn-who{flex:1;min-width:0}#settlement-services .tn-who h3{margin:0;font:400 19px/1.15 Georgia,'Times New Roman',serif;color:var(--tn-text)}#settlement-services .tn-who small{color:var(--tn-muted);font-size:12px}
+ #settlement-services .tn-x{width:44px;height:44px;border-radius:12px;border:1px solid var(--tn-line);background:var(--tn-card);display:grid;place-items:center;flex:none;padding:0}
+ #settlement-services .tn-wallet{display:flex;gap:8px;padding:0 12px 10px;flex:none;flex-wrap:wrap}
+ #settlement-services .tn-chipv{display:flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:15px;background:var(--tn-card);border:1px solid var(--tn-line);font:700 13px/1 system-ui,sans-serif;font-variant-numeric:tabular-nums}
+ #settlement-services .tn-coin{display:inline-block;width:14px;height:14px;flex:none;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffe9a0,#e0a92e 60%,#a06d12);box-shadow:0 0 0 1px #6b4a0c}
+ #settlement-services .tn-mat{display:inline-block;width:14px;height:14px;flex:none;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:radial-gradient(circle at 40% 40%,#e6d4ff,var(--m,#9a6bff) 60%,#2b1a55)}
+ #settlement-services .tn-tabs{display:flex;gap:4px;margin:0 12px 10px;padding:4px;background:var(--tn-card);border:1px solid var(--tn-line);border-radius:14px;flex:none;overflow-x:auto;scrollbar-width:none}
+ #settlement-services .tn-tab{flex:1 1 0;min-width:0;height:38px;border:0;border-radius:10px;background:none;color:var(--tn-muted);font:700 13px/1 system-ui,sans-serif;padding:0 4px;white-space:nowrap}
+ #settlement-services .tn-tab[aria-pressed=true]{background:#26313d;color:var(--tn-text);box-shadow:inset 0 -2px 0 var(--tn-accent)}
+ #settlement-services .tn-notice{margin:0 12px 8px;padding:8px 10px;border-radius:10px;background:#151d26;border:1px solid var(--tn-line);font-size:13px;color:var(--tn-muted);flex:none}#settlement-services .tn-notice.is-error{color:#ffb0a0;border-color:#7a3b3b}
+ #settlement-services .tn-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;touch-action:pan-y;padding:0 12px 12px;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin;scrollbar-color:#3a4654 transparent}
+ #settlement-services .tn-filters{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:none}
+ #settlement-services .tn-chip{flex:none;height:34px;padding:0 12px;border-radius:17px;border:1px solid #2c3846;background:var(--tn-card);color:var(--tn-muted);font:600 12px/1 system-ui,sans-serif}
+ #settlement-services .tn-chip[aria-pressed=true]{background:#2a3542;color:var(--tn-text);border-color:#4a5868}
+ #settlement-services .tn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:12px 6px}
+ #settlement-services .tn-cell{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;padding:0;border:0;background:none}
+ #settlement-services .tn-tile{position:relative;width:74px;height:74px;flex:none;border-radius:14px;border:2px solid var(--r,#3a4654);background:color-mix(in srgb,var(--r,#fff) 12%,#151d26);display:grid;place-items:center}
+ #settlement-services .tn-tile img{width:54px;height:54px;object-fit:contain}
+ #settlement-services .tn-st,#settlement-services .tn-lv{position:absolute;left:4px;font:700 10px/1 system-ui,sans-serif;color:#eee7d9;background:#0c1219d9;border-radius:6px;padding:2px 4px;pointer-events:none}
+ #settlement-services .tn-st{top:4px}#settlement-services .tn-lv{bottom:4px;color:#cfd5d6}
+ #settlement-services .tn-badge{position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;border:2px solid #0c1219;display:grid;place-items:center}
+ #settlement-services .tn-badge.is-up{background:#2f7d4a}#settlement-services .tn-badge.is-lock{background:#3a4654}#settlement-services .tn-badge.is-pick{background:var(--tn-gold)}
+ #settlement-services .tn-cell.is-picked .tn-tile{box-shadow:0 0 0 3px var(--tn-gold)}
+ #settlement-services .tn-cell.is-sold .tn-tile{opacity:.35}#settlement-services .tn-cell.is-viewed .tn-tile{box-shadow:0 0 0 3px #f0c86277}
+ #settlement-services .tn-nm{font:600 11px/1.2 system-ui,sans-serif;text-align:center;color:color-mix(in srgb,var(--r,#eee7d9) 70%,#fff);max-width:86px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ #settlement-services .tn-pr{display:flex;align-items:center;gap:4px;font:700 12px/1 system-ui,sans-serif;color:var(--tn-gold);font-variant-numeric:tabular-nums}#settlement-services .tn-pr.is-short{color:#d98a7a}#settlement-services .tn-pr.is-sold{color:var(--tn-dim)}
+ #settlement-services .tn-hint{margin:0;font-size:12px;color:var(--tn-dim);text-align:center}#settlement-services .tn-hint.is-left{text-align:left}
+ #settlement-services .tn-empty{margin:24px 0;text-align:center;color:var(--tn-dim);font-size:13px}
+ #settlement-services .tn-card{background:var(--tn-card);border:1px solid var(--tn-line);border-radius:16px;padding:12px}
+ #settlement-services .tn-sect{margin:0 0 6px;font:700 10px/1 system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--tn-label)}
+ #settlement-services .tn-btn{min-height:48px;border-radius:14px;border:1px solid #3a4654;background:var(--tn-card2);color:var(--tn-text);font:800 15px/1 system-ui,sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 16px}
+ #settlement-services .tn-btn.is-gold{flex:1;background:linear-gradient(#f3d27a,#d9a83c);color:#2a1c05;border-color:#f6dc8c}#settlement-services .tn-btn.is-gold .tn-coin{box-shadow:0 0 0 1px #2a1c05}
+ #settlement-services .tn-btn.is-small{min-height:42px;flex:none;padding:0 12px}
+ #settlement-services .tn-btn:disabled{opacity:.45}
+ #settlement-services .tn-foot{display:flex;align-items:center;gap:10px;padding:10px 12px 12px;border-top:1px solid var(--tn-line);flex:none}
+ #settlement-services .tn-sum{flex:1;min-width:0}#settlement-services .tn-sum b{display:block;font:800 16px/1.2 system-ui,sans-serif}#settlement-services .tn-sum small{color:var(--tn-muted);font-size:12px}
+ #settlement-services .tn-sheet{position:absolute;left:0;right:0;bottom:0;max-height:86%;display:flex;flex-direction:column;background:var(--tn-card);border-top:3px solid var(--r,#b7a077);border-radius:20px 20px 0 0;box-shadow:0 -20px 60px #000c;z-index:2}
+ #settlement-services .tn-sheetscroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:14px 14px 8px;display:flex;flex-direction:column;gap:10px}
+ #settlement-services .tn-ihead{display:flex;gap:10px;align-items:center}#settlement-services .tn-ihead .tn-tile{width:58px;height:58px}#settlement-services .tn-ihead .tn-tile img{width:42px;height:42px}
+ #settlement-services .tn-iname{margin:0;font:700 16px/1.2 system-ui,sans-serif;color:color-mix(in srgb,var(--r,#eee7d9) 70%,#fff)}#settlement-services .tn-isub{font-size:12px;color:var(--tn-muted)}
+ #settlement-services .tn-cmp{font-size:12px;color:var(--tn-muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+ #settlement-services .tn-sec{border-top:1px solid var(--tn-line2);padding-top:8px}
+ #settlement-services .tn-bases{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px}
+ #settlement-services .tn-base{background:#111820;border:1px solid var(--tn-line2);border-radius:12px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:3px}
+ #settlement-services .tn-base b{font:800 16px/1 system-ui,sans-serif}#settlement-services .tn-base small{font-size:11px;color:var(--tn-muted)}
+ #settlement-services .tn-mk{font:800 11px/1 system-ui,sans-serif;display:flex;gap:3px;align-items:center;flex:none}#settlement-services .tn-mk.is-up,#settlement-services .tn-mk.is-new{color:var(--tn-up)}#settlement-services .tn-mk.is-down{color:var(--tn-down)}#settlement-services .tn-mk.is-same{color:var(--tn-dim)}
+ #settlement-services .tn-ln{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;font:600 13px/1.25 system-ui,sans-serif;color:#cfd5d6}
+ #settlement-services .tn-ln>span:first-child{display:flex;align-items:center;gap:8px;min-width:0}
+ #settlement-services .tn-roll{height:4px;border-radius:2px;background:#26313d;margin-left:24px;overflow:hidden}#settlement-services .tn-roll i{display:block;height:100%;background:#8a99a8}#settlement-services .tn-roll.is-max i{background:var(--tn-gold)}
+ #settlement-services .tn-note{margin:0;padding:10px 12px;font-size:13px;line-height:1.4;color:var(--tn-text);background:var(--tn-card);border:1px solid var(--tn-line);border-left:3px solid var(--tn-accent);border-radius:12px}#settlement-services .tn-note.is-warn{border-left-color:#ff8a70}#settlement-services .tn-note.is-warn{color:#ffb0a0}
+ #settlement-services .tn-belt{display:flex;justify-content:center;gap:10px;padding:12px 0 6px}#settlement-services .tn-flask{width:40px;height:52px}
+ #settlement-services .tn-upg{display:flex;gap:12px;align-items:center}
+ #settlement-services .tn-upg .tn-ic{width:48px;height:48px;border-radius:14px;background:var(--tn-card2);display:grid;place-items:center;flex:none}
+ #settlement-services .tn-upg h4{margin:0;font:700 15px/1.2 system-ui,sans-serif}#settlement-services .tn-upg p{margin:2px 0 0;font-size:12px;color:var(--tn-muted)}
+ #settlement-services .tn-pips{display:flex;gap:4px;margin-top:6px}#settlement-services .tn-pips i{width:16px;height:5px;border-radius:3px;background:#2c3846}#settlement-services .tn-pips i.on{background:var(--tn-accent)}
+ #settlement-services .tn-arrow{color:var(--tn-up);font-weight:800}
+ #settlement-services .tn-strip{display:flex;gap:8px;overflow-x:auto;padding:5px 3px;flex:none;scrollbar-width:none}
+ #settlement-services .tn-strip .tn-cell{flex:none;width:58px;min-width:58px}#settlement-services .tn-strip .tn-cell .tn-tile{width:58px;height:58px}#settlement-services .tn-strip .tn-tile img{width:42px;height:42px}
+ #settlement-services .tn-strip .tn-cell[aria-pressed=true] .tn-tile{box-shadow:0 0 0 3px var(--tn-gold)}
+ #settlement-services .tn-radio{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:9px 10px;border-radius:12px;border:1px solid var(--tn-line);background:#111820;margin-bottom:6px;font:600 13px/1.2 system-ui,sans-serif;color:#cfd5d6;text-align:left}
+ #settlement-services .tn-radio .tn-dot{width:18px;height:18px;border-radius:50%;border:2px solid #4a5868;flex:none}
+ #settlement-services .tn-radio[aria-pressed=true]{border-color:var(--tn-accent);background:#d9b25f14}#settlement-services .tn-radio[aria-pressed=true] .tn-dot{border:5px solid var(--tn-accent)}
+ #settlement-services .tn-radio>span:last-child{display:flex;align-items:center;gap:8px}
+ #settlement-services .tn-costs{display:flex;gap:6px;flex-wrap:wrap}
+ #settlement-services .tn-cost{display:flex;align-items:center;gap:6px;height:32px;padding:0 10px;border-radius:10px;background:#111820;border:1px solid var(--tn-line2);font:700 13px/1 system-ui,sans-serif;font-variant-numeric:tabular-nums}
+ #settlement-services .tn-cost small{color:var(--tn-dim);font-weight:600}#settlement-services .tn-cost.is-short{border-color:#7a3b3b;color:#ffb0a0}
+ #settlement-services .tn-links{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}#settlement-services .tn-link{display:inline-flex;align-items:center;gap:5px;min-height:34px;padding:0 12px 0 8px;border:1px solid color-mix(in srgb,var(--tn-gold) 45%,transparent);border-radius:999px;background:color-mix(in srgb,var(--tn-gold) 10%,transparent);font:700 12px/1 system-ui,sans-serif;color:var(--tn-gold)}#settlement-services .tn-link:disabled{opacity:.45}#settlement-services .tn-link img,#settlement-services .tn-link svg{width:16px;height:16px}
+ #settlement-services .tn-slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+ #settlement-services .tn-slot{background:#111820;border:1px solid var(--tn-line2);border-radius:12px;padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
+ #settlement-services .tn-slot .tn-tile{width:52px;height:52px}#settlement-services .tn-slot .tn-tile img{width:38px;height:38px}
+ #settlement-services .tn-slot small{font-size:10px;color:var(--tn-muted)}#settlement-services .tn-slot b{font:800 11px/1 system-ui,sans-serif;color:var(--tn-accent)}
+ #settlement-services .tn-slot[aria-pressed=true]{border-color:var(--tn-accent);background:#d9b25f14}
+ #settlement-services .tn-slot .tn-none{width:52px;height:52px;border-radius:12px;border:2px dashed #33404d}
+ #settlement-services .tn-bar{height:8px;border-radius:4px;background:#26313d;overflow:hidden}#settlement-services .tn-bar i{display:block;height:100%;background:linear-gradient(90deg,#c9963a,#f0c862)}
+ #settlement-services .tn-hp{height:12px;border-radius:6px;background:#3a1c22;overflow:hidden}#settlement-services .tn-hp i{display:block;height:100%;background:linear-gradient(#ff6b6b,#d33a46)}
+ #settlement-services .tn-setnow{display:grid;gap:4px}#settlement-services .tn-setname{font:700 18px/1.2 Georgia,'Times New Roman',serif;color:var(--tn-text)}#settlement-services .tn-setgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:8px}#settlement-services .tn-set{display:grid;gap:6px;align-content:start;padding:10px;background:var(--tn-card);border:1px solid var(--tn-line);border-radius:14px}#settlement-services .tn-set.is-now{border-color:var(--tn-gold);box-shadow:inset 0 0 0 1px var(--tn-gold)}#settlement-services .tn-seth{display:flex;align-items:center;gap:7px;min-width:0}#settlement-services .tn-seth b{flex:1;min-width:0;font-size:13px;color:var(--tn-text)}#settlement-services .tn-seti{display:grid;place-items:center;width:22px;height:22px;flex:none;border-radius:7px;background:var(--tn-card2);color:var(--tn-accent)}#settlement-services .tn-seti svg{width:14px;height:14px}#settlement-services .tn-setn{flex:none;padding:2px 6px;border-radius:999px;background:color-mix(in srgb,var(--tn-up) 18%,transparent);color:var(--tn-up);font:700 10px/1.2 system-ui,sans-serif}#settlement-services .tn-pc{display:flex;gap:7px;align-items:flex-start;font-size:12px;line-height:1.3;color:var(--tn-muted)}#settlement-services .tn-pc i{flex:none;min-width:30px;padding:1px 0;text-align:center;font:800 10px/14px system-ui,sans-serif;font-style:normal;border-radius:6px;background:var(--tn-card2);color:var(--tn-label)}#settlement-services .tn-pc.is-on{color:var(--tn-up)}#settlement-services .tn-pc.is-on i{background:color-mix(in srgb,var(--tn-up) 20%,transparent);color:var(--tn-up)}#settlement-services .tn-sets{display:grid;gap:7px}#settlement-services .tn-sets div{display:grid;gap:1px;font-size:12px;line-height:1.35;color:var(--tn-muted)}#settlement-services .tn-sets b{color:var(--tn-text);font-weight:700}
  `;
   doc.head.append(style);
   const panel = doc.createElement("dialog");
@@ -50459,7 +50515,8 @@ function createSettlementServicesMenu2(options) {
     if (cls) e.className = cls;
     return e;
   };
-  let lastPotionCount = null, npcId = null, mode = "gear", selected = null, line14 = 0, materialQuantity = 1, key2 = null, busy = false, notice = "", confirm = null;
+  let lastPotionCount = null, npcId = null, mode = "gear", selected = null, line14 = 0, materialQuantity = 1, key2 = null, busy = false, notice = "", confirm = null, bad = false, sheet = null, filter = "all";
+  const picks = /* @__PURE__ */ new Set();
   const close = () => {
     if (busy) return;
     panel.close();
@@ -50510,14 +50567,16 @@ function createSettlementServicesMenu2(options) {
     if (busy) return;
     clearInput();
     busy = true;
-    notice = "Saving transaction\u2026";
+    bad = false;
+    notice = "Saving\u2026";
     key2 = null;
     refresh(readModel());
     try {
       const result = await adapter.issue(kind, { ...payload, inventoryRevision: readModel().inventory.revision });
-      if (!["admitted", "alreadyApplied"].includes(result?.status)) throw Error("Transaction not accepted");
-      notice = "Transaction saved.";
+      if (!["admitted", "alreadyApplied"].includes(result?.status)) throw Error("That did not go through. Try again.");
+      notice = { "service.buy": "Bought.", "service.rest": "Rested. Health is full.", "service.material": "Bought.", "forge.attune": "Slot upgraded.", "service.modify": "Done." }[kind] ?? "Done.";
     } catch (e) {
+      bad = true;
       notice = e.message;
       reportError(e.message);
     } finally {
@@ -50527,218 +50586,506 @@ function createSettlementServicesMenu2(options) {
       refresh(readModel());
     }
   }
-  function card(item, id, description, fn) {
-    const d = itemDefinition(item), b = button("", fn, id, "service-card");
-    b.append(image(item, d?.slot));
-    const text2 = el("span");
-    text2.append(el("strong", d?.name ?? "Empty slot"), el("small", description));
-    b.append(text2);
+  const UP = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+  const CHECK = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2a1c05" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>';
+  const LOCK = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#cfd5d6" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+  const CLOSE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#aeb5b6" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+  const FLASK = (full, size = "") => `<svg class="tn-flask" ${size} viewBox="0 0 20 26" aria-hidden="true"><path d="M7.4 7.6H12.6V11.6A6.6 6.6 0 1 1 7.4 11.6Z" fill="${full ? "#e8404a" : "#2a3542"}" stroke="#0c1219" stroke-width="1.4"/><rect x="7" y="4" width="6" height="3.6" rx="1" fill="#8a6a44"/>${full ? '<path d="M9 13.5a3 3 0 0 0-1.6 2.6" stroke="#ffb3a6" stroke-width="1.2" fill="none" stroke-linecap="round"/>' : ""}</svg>`;
+  const FACES = {
+    shop: '<svg viewBox="0 0 24 24" fill="none" stroke="#f0c862" stroke-width="1.8" stroke-linejoin="round"><path d="M4 9h16l-1.5 11h-13z"/><path d="M8 9V7a4 4 0 0 1 8 0v2"/></svg>',
+    forge: '<svg viewBox="0 0 24 24" fill="none" stroke="#ff9a5a" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M3 10h13l3-3h2v4l-3 2H6z"/><path d="M8 13v3M14 13v3M6 19h10"/></svg>',
+    altar: '<svg viewBox="0 0 24 24" fill="none" stroke="#c9a6ff" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l2.2 5.3L20 9l-4.4 3.8L17 18.5 12 15.6 7 18.5l1.4-5.7L4 9l5.8-.7z"/></svg>',
+    inn: '<svg viewBox="0 0 24 24" fill="none" stroke="#9fd0ff" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M3 18V9M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="1.6"/></svg>',
+    supplies: FLASK(true)
+  };
+  const MATS = { "Monster Soul": "#9a6bff", "Eridium Shard": "#ff6fb5", "Overlord's Sigil": "#ff6b5a", "Astral Essence": "#6fc3ff" };
+  const FILTERS = [["all", "All"], ["weapon", "Weapons"], ["offhand", "Offhand"], ["armor", "Armor"], ["ring", "Rings"]];
+  const markup = (e, html) => {
+    e.innerHTML = html;
+    return e;
+  }, coin4 = () => el("i", void 0, "tn-coin"), tierOf = (d) => d?.rarityTier ?? 0;
+  const mat = (k) => {
+    const i = el("i", void 0, "tn-mat");
+    i.style.setProperty("--m", MATS[k] ?? "#9a6bff");
+    return i;
+  };
+  const price = (n, cls) => {
+    const s = el("span", void 0, "tn-pr" + (cls ? " " + cls : ""));
+    s.append(coin4(), formatAmount(n));
+    return s;
+  };
+  const redraw = () => {
+    key2 = null;
+    refresh(readModel());
+  };
+  const slotName = (slot) => (SLOT_NAMES[slot] ?? slot).replace(/ \d$/, "");
+  const wornFor = (inv, d) => inv.itemsById[inv.equipped[d.slot === "ring" ? "ring1" : d.slot]];
+  const sectionsOf = (item) => itemSections(itemDefinition(item), item.generated);
+  function tile(item, badge) {
+    const d = itemDefinition(item), t = el("div", void 0, "tn-tile");
+    t.style.setProperty("--r", RARITY_COLORS[tierOf(d)]);
+    t.append(image(item, d?.slot));
+    if (tierOf(d)) t.append(el("span", tierOf(d) + "\u2605", "tn-st"));
+    const lv = item?.generated?.itemPower;
+    if (lv != null) t.append(el("span", "Lv " + statText(lv), "tn-lv"));
+    if (badge) t.append(markup(el("span", void 0, "tn-badge is-" + badge), badge === "up" ? UP : badge === "pick" ? CHECK : LOCK));
+    return t;
+  }
+  function cell(item, { badge, cost, costClass, label: label4, cls, fn, id, named = true } = {}) {
+    const d = itemDefinition(item), b = el("button", void 0, "tn-cell" + (cls ? " " + cls : ""));
+    b.type = "button";
+    if (id) b.dataset.serviceAction = id;
+    b.disabled = busy;
+    b.onclick = fn;
+    b.style.setProperty("--r", RARITY_COLORS[tierOf(d)]);
+    b.append(tile(item, badge));
+    if (named) b.append(el("span", displayName(d), "tn-nm"));
+    if (label4) b.append(el("span", label4, "tn-pr is-sold"));
+    else if (cost !== void 0) b.append(price(cost, costClass));
+    b.setAttribute("aria-label", displayName(d) + (label4 ? ", " + label4 : cost !== void 0 ? ", " + formatAmount(cost) + " gold" : ""));
     return b;
   }
-  function tooltip(item) {
-    const d = itemDefinition(item), box5 = el("details");
-    box5.append(el("summary", "Item details & comparison"));
-    const stats2 = el("div", void 0, "service-preview");
-    for (const [group, values] of Object.entries({ bonuses: d.bonuses, attributes: d.attributes, effects: d.effects })) {
-      for (const [k, v] of Object.entries(values ?? {})) if (Number(v) !== 0) stats2.append(el("p", (labels[k] ?? k) + " \xB7 " + v));
-    }
-    const m = readModel(), equipped = m.inventory.itemsById[m.inventory.equipped[d.slot === "ring" ? "ring1" : d.slot]], other = itemDefinition(equipped);
-    if (other) {
-      stats2.append(el("strong", "Equipped: " + other.name));
-      for (const [k, v] of Object.entries(d.bonuses)) stats2.append(el("p", (labels[k] ?? k) + ": " + (other.bonuses[k] ?? 0) + " \u2192 " + v));
-    }
-    box5.append(stats2);
-    return box5;
+  function isUpgradeOver(item, inv) {
+    const w = wornFor(inv, itemDefinition(item));
+    if (!w) return true;
+    const marks2 = compareSections(sectionsOf(item), [sectionsOf(w)]).base.filter((l) => l.flat).map((l) => l.mark);
+    return marks2.some((m) => m === "up" || m === "new") && !marks2.includes("down");
   }
-  function cost(parent, gold, materials2, inv) {
-    const box5 = el("div", void 0, "service-preview");
-    box5.append(el("strong", "REQUIREMENTS"), el("p", formatAmount(gold) + " Gold \xB7 owned " + formatAmount(inv.gold), compareAmount(inv.gold, gold) >= 0 ? "service-price" : "service-error"));
-    for (const [k, n] of Object.entries(materials2)) box5.append(el("p", n + " \xD7 " + k + " \xB7 owned " + (inv.economy.materials[k] ?? 0), (inv.economy.materials[k] ?? 0) >= n ? "" : "service-error"));
+  function markEl(l) {
+    if (!l.mark) return null;
+    return el("span", l.mark === "up" ? "\u25B2 " + lineValue(l.key, l.diff) : l.mark === "down" ? "\u25BC " + lineValue(l.key, l.diff) : l.mark, "tn-mk is-" + l.mark);
+  }
+  function lineRow(l) {
+    const row2 = el("div", void 0, "tn-ln"), text2 = markup(el("span"), statIcon(l.key));
+    text2.append("+" + lineValue(l.key, l.value) + " " + lineLabel(l.key));
+    row2.append(text2);
+    const m = markEl(l);
+    if (m) row2.append(m);
+    return row2;
+  }
+  function itemHead(item, sub) {
+    const d = itemDefinition(item), h = el("div", void 0, "tn-ihead"), info2 = el("div");
+    info2.style.minWidth = "0";
+    info2.append(el("h4", displayName(d), "tn-iname"), el("div", sub ?? [RARITY_NAMES[tierOf(d)], tierOf(d) + "\u2605", slotName(d.slot === "ring" ? "ring1" : d.slot), item.generated?.itemPower != null ? "Lv " + statText(item.generated.itemPower) : null].filter(Boolean).join(" \xB7 "), "tn-isub"));
+    h.style.setProperty("--r", RARITY_COLORS[tierOf(d)]);
+    h.append(tile(item), info2);
+    return h;
+  }
+  function itemSheet(item, inv, foot, notes = []) {
+    const d = itemDefinition(item), w = wornFor(inv, d), sec = sectionsOf(item), cmp = w ? compareSections(sec, [sectionsOf(w)]) : { base: sec.base.map((l) => ({ ...l, mark: "new" })), affixes: sec.affixes.map((l) => ({ ...l, mark: "new" })) };
+    const s = el("div", void 0, "tn-sheet");
+    s.style.setProperty("--r", RARITY_COLORS[tierOf(d)]);
+    s.setAttribute("role", "dialog");
+    s.setAttribute("aria-label", displayName(d));
+    const sc = el("div", void 0, "tn-sheetscroll");
+    sc.append(itemHead(item));
+    if (w) {
+      const c = el("div", void 0, "tn-cmp"), n = el("b", displayName(itemDefinition(w)));
+      n.style.color = RARITY_COLORS[tierOf(itemDefinition(w))];
+      c.append("Arrows compare with your worn ", n);
+      sc.append(c);
+    } else sc.append(el("div", "Your " + slotName(d.slot === "ring" ? "ring1" : d.slot) + " slot is empty", "tn-cmp"));
+    for (const n of notes) sc.append(el("p", n, "tn-note is-warn"));
+    const flat2 = cmp.base.filter((l) => l.flat), traits = cmp.base.filter((l) => !l.flat);
+    if (flat2.length || traits.length) {
+      const box5 = el("div", void 0, "tn-sec");
+      box5.append(el("p", "Base stats", "tn-sect"));
+      if (flat2.length) {
+        const g = el("div", void 0, "tn-bases");
+        for (const l of flat2) {
+          const t = markup(el("div", void 0, "tn-base"), statIcon(l.key, 16));
+          t.append(el("b", lineValue(l.key, l.value)), el("small", lineLabel(l.key)));
+          const m = markEl(l);
+          if (m) t.append(m);
+          g.append(t);
+        }
+        box5.append(g);
+      }
+      for (const l of traits) box5.append(lineRow(l));
+      sc.append(box5);
+    }
+    if (cmp.affixes.length) {
+      const box5 = el("div", void 0, "tn-sec");
+      box5.append(el("p", "Affixes \xB7 " + cmp.affixes.length, "tn-sect"));
+      for (const l of cmp.affixes) {
+        box5.append(lineRow(l));
+        if (l.roll && !l.roll.fixed) {
+          const bar = el("div", void 0, "tn-roll" + (l.roll.max ? " is-max" : "")), f2 = el("i");
+          f2.style.width = (l.roll.quality * 100).toFixed(1) + "%";
+          bar.append(f2);
+          box5.append(bar);
+        }
+      }
+      sc.append(box5);
+    }
+    if (!flat2.length && !traits.length && !cmp.affixes.length) sc.append(el("p", "No stat bonus", "tn-note"));
+    const f = el("div", void 0, "tn-foot");
+    f.append(...foot);
+    s.append(sc, f);
+    return s;
+  }
+  function costs(parent, gold, materials2, inv, npc, p) {
+    if (gold === "0" && !Object.keys(materials2 ?? {}).length) return true;
+    const box5 = el("div");
+    box5.append(el("p", "Cost", "tn-sect"));
+    const row2 = el("div", void 0, "tn-costs"), haveGold = compareAmount(inv.gold, gold) >= 0;
+    let afford = haveGold;
+    const g = el("span", void 0, "tn-cost" + (haveGold ? "" : " is-short"));
+    g.append(coin4(), formatAmount(inv.gold), el("small", "/ " + formatAmount(gold)));
+    g.title = "You have " + formatAmount(inv.gold) + " of " + formatAmount(gold) + " gold";
+    if (gold !== "0") row2.append(g);
+    const buy = [];
+    for (const [k, n] of Object.entries(materials2 ?? {})) {
+      const have = inv.economy.materials[k] ?? 0, c = el("span", void 0, "tn-cost" + (have >= n ? "" : " is-short"));
+      c.title = k;
+      c.append(mat(k), String(have), el("small", "/ " + n + " " + k));
+      c.title = "You have " + have + " of " + n + " " + k;
+      row2.append(c);
+      if (have < n) {
+        afford = false;
+        const each = workshopMaterialPrices(p)[k];
+        if (each && npc?.services?.includes("materials")) buy.push([k, n - have, String(Number(each) * (n - have))]);
+      }
+    }
+    box5.append(row2);
+    const links = el("div", void 0, "tn-links");
+    for (const [k, n, cost] of buy) {
+      const b = button("", () => issue("service.material", { npcId, material: k, quantity: n }), "material:" + k, "tn-link");
+      b.append(mat(k), "Buy " + n + " " + k + " \xB7 ", coin4(), cost);
+      b.disabled = busy || compareAmount(inv.gold, cost) < 0;
+      links.append(b);
+    }
+    if (buy.length) box5.append(links);
     parent.append(box5);
-    return compareAmount(inv.gold, gold) >= 0 && Object.entries(materials2).every(([k, n]) => (inv.economy.materials[k] ?? 0) >= n);
+    return afford;
+  }
+  function chips(list, current, pick3) {
+    const row2 = el("div", void 0, "tn-filters");
+    for (const [id, label4] of list) {
+      const b = button(label4, () => pick3(id), "chip:" + id, "tn-chip");
+      b.setAttribute("aria-pressed", String(current === id));
+      row2.append(b);
+    }
+    return row2;
   }
   function draw(m) {
-    const inv = m.inventory, p = { playerId: m.localPlayerId, inventory: inv, progression: m.playersById[m.localPlayerId].progression }, npc = m.serviceNpcs?.find((n) => n.id === npcId), isSmith = npc?.services?.includes("attune"), isAltar = npc?.role === "enchanter";
-    panel.dataset.serviceKind = isAltar ? "altar" : isSmith ? "forge" : "shop";
+    const inv = m.inventory, p = { playerId: m.localPlayerId, inventory: inv, progression: m.playersById[m.localPlayerId].progression }, npc = m.serviceNpcs?.find((n) => n.id === npcId);
+    const kind = !npc ? "supplies" : npc.role === "enchanter" ? "altar" : npc.services?.includes("attune") ? "forge" : npc.role === "innkeeper" ? "inn" : "shop";
+    panel.dataset.serviceKind = kind;
     panel.replaceChildren();
-    const shell = el("div", void 0, "service-shell"), header = el("header", void 0, isAltar ? "forge-header-banner" : isSmith ? "forge-header-banner" : "shop-header-banner"), title = el("div", void 0, "forge-title-group"), badge = el("div", void 0, "forge-badge-icon");
-    badge.innerHTML = DUNGEON_SERVICE_ICONS[isAltar ? "enchanter" : isSmith ? "forge" : "shop"];
-    const group = el("div", void 0, "forge-text-group");
-    group.append(el("strong", !npc ? "CARRIED PROVISIONS" : isAltar ? "CELESTIAL ENCHANTMENT ALTAR" : isSmith ? "BLACKSMITH FORGE & SMELTERY" : npc?.role === "innkeeper" ? "TAVERN & LODGING" : "MERCHANT BAZAAR", "forge-main-title"), el("small", (npc?.name ?? "Carried supplies") + " \xB7 " + (npc?.roleLabel ?? "Provisions"), "forge-sub-title"));
-    title.append(badge, group);
-    const exit = button("", close, "close", "close-btn");
-    exit.innerHTML = DUNGEON_SERVICE_ICONS.close;
-    exit.setAttribute("aria-label", "Close services");
-    header.append(title, exit);
-    shell.append(header);
-    const wallet = el("div", void 0, "service-wallet");
-    wallet.append(image({ definitionId: "gold" }), el("span", formatAmount(inv.gold) + " Gold"), el("small", (inv.economy.materials["Monster Soul"] ?? 0) + " Monster Souls \xB7 local Band " + (npc?.band ?? "\u2014")));
-    wallet.firstChild.width = 22;
-    wallet.firstChild.height = 22;
-    shell.append(wallet);
-    const tabs = el("nav", void 0, "forge-mode-bar"), modes = isAltar ? [["enchant", "Enchantment"], ["purge", "Purge"], ["resonance", "Resonance"], ["shatter", "Shatter"], ["materials", "Materials"]] : isSmith ? [["attune", "Attunement"], ["reforge", "Reforge"], ["awaken", "Awaken"], ["gear", "Trade"], ["materials", "Materials"]] : npc?.role === "innkeeper" ? [["rest", "Rest"]] : [["gear", "Equipment"], ["supplies", "Potions"], ["sell", "Sell"]];
-    if (!npcId) modes.splice(0, modes.length, ["supplies", "Supplies"]);
-    for (const [id, label4] of modes) {
-      const b = button(label4, () => change(id), "tab:" + id, "forge-mode-btn");
-      b.setAttribute("aria-pressed", String(mode === id));
-      tabs.append(b);
-    }
-    shell.append(tabs);
-    const status2 = el("div", notice, "service-status");
-    status2.setAttribute("role", "status");
-    shell.append(status2);
-    const body5 = el("div", void 0, "service-body");
-    shell.append(body5);
+    const shell = el("div", void 0, "tn-shell"), head13 = el("div", void 0, "tn-head"), face3 = markup(el("div", void 0, "tn-npc"), FACES[kind]), who = el("div", void 0, "tn-who");
+    who.append(el("h3", npc?.name ?? "Potions"), el("small", npc?.roleLabel ?? "Your potion belt"));
+    const exit = button("", close, "close", "tn-x");
+    exit.innerHTML = CLOSE;
+    exit.setAttribute("aria-label", "Close");
+    head13.append(face3, who, exit);
+    shell.append(head13);
     panel.append(shell);
     if (npcId && (!npc || !npc.available)) {
-      body5.append(el("p", "Approach this civilian on clear ground."));
+      const b = el("div", void 0, "tn-body");
+      b.append(el("p", "Walk up to " + (npc?.name ?? "them") + " to trade.", "tn-empty"));
+      shell.append(b);
       return;
     }
+    if (kind === "inn") {
+      const hero = m.entitiesById?.[m.playersById[m.localPlayerId].entityId], hp = Number(statText(hero?.hp ?? 0).replace(/[^\d.]/g, "")) || 0, max = Number(statText(hero?.maxHp ?? 0).replace(/[^\d.]/g, "")) || 0, box5 = el("div", void 0, "tn-body");
+      const top = el("div", void 0, "tn-ln");
+      top.append(el("span", "Health"), el("span", Math.round(hp) + " / " + Math.round(max) + (hp < max ? " \u2192 " + Math.round(max) : "")));
+      const bar = el("div", void 0, "tn-hp"), fill5 = el("i");
+      fill5.style.width = (max ? Math.min(100, hp / max * 100) : 0).toFixed(1) + "%";
+      bar.append(fill5);
+      box5.append(top, bar);
+      if (notice) box5.append(el("p", notice, "tn-note" + (bad ? " is-warn" : "")));
+      const rest = button("", () => issue("service.rest", { npcId }), "rest", "tn-btn is-gold");
+      rest.append("Rest by the fire \xB7 ", coin4(), formatAmount(SETTLEMENT_LIFE_POLICY.rest.price));
+      rest.disabled = busy || hp >= max || compareAmount(inv.gold, SETTLEMENT_LIFE_POLICY.rest.price) < 0;
+      box5.append(rest);
+      if (hp >= max) box5.append(el("p", "You are already at full health.", "tn-hint"));
+      shell.append(box5);
+      return;
+    }
+    const wallet = el("div", void 0, "tn-wallet"), g = el("span", void 0, "tn-chipv");
+    g.append(coin4(), formatAmount(inv.gold));
+    wallet.append(g);
+    if (kind === "forge" || kind === "altar") {
+      for (const [k, n] of Object.entries(inv.economy.materials ?? {})) if (n > 0) {
+        const c = el("span", void 0, "tn-chipv");
+        c.title = k;
+        c.append(mat(k), String(n));
+        wallet.append(c);
+      }
+    }
+    shell.append(wallet);
+    const modes = kind === "forge" ? [["attune", "Upgrade"], ["reforge", "Reforge"], ["awaken", "Awaken"], ["shatter", "Salvage"], ...npc.stock?.length ? [["gear", "Buy"]] : []] : kind === "altar" ? [["enchant", "Enchant"], ["purge", "Purge"], ["resonance", "Resonance"]] : kind === "shop" ? [["gear", "Buy"], ["sell", "Sell"], ["supplies", "Potions"]] : [["supplies", "Potions"]];
+    if (!modes.some(([id]) => id === mode)) mode = modes[0][0];
+    if (modes.length > 1) {
+      const tabs = el("nav", void 0, "tn-tabs");
+      tabs.setAttribute("aria-label", "Services");
+      for (const [id, label4] of modes) {
+        const b = button(label4, () => {
+          sheet = null;
+          change(id);
+        }, "tab:" + id, "tn-tab");
+        b.setAttribute("aria-pressed", String(mode === id));
+        tabs.append(b);
+      }
+      shell.append(tabs);
+    }
+    if (notice) {
+      const n = el("div", notice, "tn-notice" + (bad ? " is-error" : ""));
+      n.setAttribute("role", "status");
+      shell.append(n);
+    }
+    const body5 = el("div", void 0, "tn-body");
+    shell.append(body5);
+    const foot = el("div", void 0, "tn-foot");
     if (mode === "gear") {
-      body5.append(el("p", "Personal regional stock \xB7 purchased offers stay sold. No timer rerolls."));
-      const grid = el("div", void 0, "service-grid");
-      for (const q of npc.stock) {
-        const a = el("article");
-        a.append(card(q.item, "item:" + q.id, "Ordinary equipment \xB7 " + q.price + " Gold", () => {
-          a.querySelector("details").open = !a.querySelector("details").open;
-        }), tooltip(q.item));
-        const required = equipmentRequiredLevel(p, q.item);
-        if (required !== null) a.append(el("p", "Requires hero level " + required + (equipmentLevelAllowed(p, q.item) ? " \xB7 ready to equip" : " \xB7 cannot equip yet")));
-        const b = button(q.purchased ? "Purchased" : "Buy \xB7 " + q.price + " Gold", () => issue("service.buy", { npcId, offerId: q.id }), "buy:" + q.id);
-        b.disabled = busy || q.purchased || compareAmount(inv.gold, q.price) < 0;
-        a.append(b);
-        grid.append(a);
+      const offers = npc.stock ?? [], kinds2 = new Set(offers.map((q2) => bagFilterOf(itemDefinition(q2.item))));
+      if (!kinds2.has(filter)) filter = "all";
+      if (kinds2.size > 1) body5.append(chips(FILTERS.filter(([id]) => id === "all" || kinds2.has(id)), filter, (id) => {
+        filter = id;
+        redraw();
+      }));
+      const grid = el("div", void 0, "tn-grid");
+      for (const q2 of offers) {
+        if (filter !== "all" && bagFilterOf(itemDefinition(q2.item)) !== filter) continue;
+        const allowed = equipmentLevelAllowed(p, q2.item);
+        grid.append(cell(q2.item, { badge: !allowed ? "lock" : !q2.purchased && isUpgradeOver(q2.item, inv) ? "up" : null, cost: q2.price, costClass: compareAmount(inv.gold, q2.price) < 0 ? "is-short" : null, label: q2.purchased ? "Sold" : null, cls: (q2.purchased ? "is-sold" : "") + (sheet === q2.id ? " is-viewed" : ""), fn: () => {
+          sheet = q2.id;
+          redraw();
+        }, id: "item:" + q2.id }));
+      }
+      if (offers.length) {
+        body5.append(grid, el("p", "Tap an item to see it and compare. What you buy stays sold.", "tn-hint"));
+      } else body5.append(el("p", "Nothing for sale here.", "tn-empty"));
+      const q = offers.find((q2) => q2.id === sheet);
+      if (q) {
+        const required = equipmentRequiredLevel(p, q.item), notes = required !== null && !equipmentLevelAllowed(p, q.item) ? ["You can wear this at hero level " + required + "."] : [];
+        const shut = button("Close", () => {
+          sheet = null;
+          redraw();
+        }, "close-item", "tn-btn"), buy = button("", () => issue("service.buy", { npcId, offerId: q.id }), "buy:" + q.id, "tn-btn is-gold");
+        if (q.purchased) buy.append("Sold");
+        else if (compareAmount(inv.gold, q.price) < 0) buy.append("Need ", coin4(), formatAmount(q.price));
+        else buy.append("Buy \xB7 ", coin4(), formatAmount(q.price));
+        buy.disabled = busy || q.purchased || compareAmount(inv.gold, q.price) < 0;
+        shell.append(itemSheet(q.item, inv, [shut, buy], notes));
+      }
+    } else if (mode === "sell") {
+      const sellable = Object.values(inv.itemsById).map((i) => ({ i, q: saleQuote(p, i) })).filter((x) => x.q !== null);
+      for (const id of [...picks]) if (!sellable.some((x) => x.i.itemId === id)) picks.delete(id);
+      const pickTier = (t) => {
+        picks.clear();
+        for (const x of sellable) if (tierOf(itemDefinition(x.i)) === t) picks.add(x.i.itemId);
+        confirm = null;
+        redraw();
+      };
+      if (sellable.length) {
+        body5.append(chips([["common", "Pick all Commons"], ["uncommon", "Pick all Uncommons"], ["clear", "Clear"]], null, (id) => id === "clear" ? (picks.clear(), confirm = null, redraw()) : pickTier(id === "common" ? 0 : 1)));
+        const grid = el("div", void 0, "tn-grid");
+        for (const { i, q } of sellable) {
+          const on = picks.has(i.itemId);
+          grid.append(cell(i, { badge: on ? "pick" : null, cost: q, cls: on ? "is-picked" : "", fn: () => {
+            if (on) picks.delete(i.itemId);
+            else picks.add(i.itemId);
+            confirm = null;
+            redraw();
+          }, id: "pick:" + i.itemId }));
+        }
+        body5.append(grid, el("p", "Worn and Unique gear never shows up here.", "tn-hint"));
+      } else body5.append(el("p", "Nothing here this merchant will buy. Worn and Unique gear never shows up here.", "tn-empty"));
+      const chosen = sellable.filter((x) => picks.has(x.i.itemId)), total = chosen.reduce((a, x) => addAmount(a, x.q), "0"), sum2 = el("div", void 0, "tn-sum");
+      sum2.append(el("b", chosen.length === 1 ? "1 item" : chosen.length + " items"), el("small", chosen.length ? "Tap Sell to trade them for gold" : "Tap items to pick them"));
+      const sell = button("", () => {
+        if (confirm === "sell") sellMany(chosen.map((x) => x.i.itemId));
+        else {
+          confirm = "sell";
+          redraw();
+        }
+      }, "sell", "tn-btn is-gold");
+      if (confirm === "sell") sell.append("Tap again to sell");
+      else sell.append("Sell \xB7 +", coin4(), formatAmount(total));
+      sell.disabled = busy || !chosen.length;
+      foot.append(sum2, sell);
+      shell.append(foot);
+    } else if (mode === "supplies") {
+      const belt = m.potions, card = el("div", void 0, "tn-card");
+      card.append(el("p", "Potion belt \xB7 " + belt.count + " / " + belt.capacity, "tn-sect"), markup(el("div", void 0, "tn-belt"), Array.from({ length: belt.capacity }, (_, n) => FLASK(n < belt.count)).join("")), el("p", "Each potion heals " + belt.healPercent + "% of max HP \xB7 refills free in town \xB7 enemies drop more", "tn-hint"));
+      body5.append(card);
+      if (npc?.role === "general") {
+        const B3 = POTION_BELT_POLICY;
+        for (const [offerId, title, max, text2, icon] of [[B3.offers.capacity, "Bigger belt", B3.maxCapacityUpgrades, () => ["Carry ", belt.capacity, belt.capacity + 1, " potions"], FLASK(true)], [B3.offers.potency, "Stronger brew", B3.maxPotencyUpgrades, () => ["Heal ", belt.healPercent + "%", belt.healPercent + B3.potencyStep + "%", " of max HP"], '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ef6f7d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"/><path d="M12 8.5v5M9.5 11h5"/></svg>']]) {
+          const u = potionUpgrade(p, offerId), row2 = el("div", void 0, "tn-card tn-upg"), info2 = el("div");
+          info2.style.flex = "1";
+          const [a, b, c, d] = text2(), line15 = el("p");
+          if (u.price) {
+            line15.append(a, String(b), " ");
+            const arrow2 = el("span", "\u2192 " + c, "tn-arrow");
+            line15.append(arrow2, d);
+          } else line15.append("Fully upgraded");
+          const pips = el("div", void 0, "tn-pips");
+          for (let n = 0; n < max; n++) pips.append(el("i", void 0, n < u.done ? "on" : ""));
+          info2.append(el("h4", title), line15, pips);
+          const buy = button("", () => issue("service.buy", { npcId, offerId }), "buy:" + offerId, "tn-btn is-gold is-small");
+          if (u.price) buy.append(coin4(), formatAmount(u.price));
+          else buy.append("Done");
+          buy.disabled = busy || !u.price || compareAmount(inv.gold, u.price) < 0;
+          buy.setAttribute("aria-label", u.price ? title + ", " + u.price + " gold" : title + ", fully upgraded");
+          row2.append(markup(el("div", void 0, "tn-ic"), icon), info2, buy);
+          body5.append(row2);
+        }
+      } else body5.append(el("p", npc ? "A general merchant can make your belt bigger and your potions stronger." : "Visit a general merchant to make your belt bigger and your potions stronger.", "tn-hint"));
+    } else if (mode === "attune") {
+      const slots = listedEquipmentSlots(inv);
+      if (!slots.includes(selected)) selected = slots.includes("weapon") ? "weapon" : slots[0];
+      const grid = el("div", void 0, "tn-slots");
+      for (const slot of slots) {
+        const i2 = inv.itemsById[inv.equipped[slot]], b = button("", () => change(mode, slot), "slot:" + slot, "tn-slot");
+        b.setAttribute("aria-pressed", String(slot === selected));
+        b.append(i2 ? tile(i2) : el("div", void 0, "tn-none"), el("small", slotName(slot)), el("b", "+" + inv.economy.slotLevels[slot]));
+        b.setAttribute("aria-label", slotName(slot) + " slot, +" + inv.economy.slotLevels[slot]);
+        grid.append(b);
       }
       body5.append(grid);
-      if (isSmith) body5.append(button("Sell carried equipment", () => change("sell"), "tab:sell"));
-    } else if (mode === "sell") {
-      body5.append(el("p", "Equipped, starter, Unique/protected gear and provisions remain protected."));
-      for (const i of Object.values(inv.itemsById)) {
-        const q = saleQuote(p, i);
-        if (q === null) continue;
-        body5.append(card(i, "select-sale:" + i.itemId, "Receive " + q + " Gold", () => {
-        }), tooltip(i), button(confirm === i.itemId ? "Confirm sale \xB7 " + q + " Gold" : "Sell \xB7 " + q + " Gold", () => {
-          if (confirm === i.itemId) issue("service.sell", { npcId, itemId: i.itemId });
-          else {
-            confirm = i.itemId;
-            key2 = null;
-            refresh(readModel());
-          }
-        }, "sell:" + i.itemId));
-      }
-    } else if (mode === "supplies") {
-      const belt = m.potions;
-      body5.append(el("h3", "Health potions \xB7 " + belt.count + " / " + belt.capacity), el("p", "Each potion heals " + belt.healPercent + "% of max HP. Enemies drop potions (elites often, bosses always) and your belt refills for free in town."));
-      if (npc?.role === "general") for (const offerId of Object.values(POTION_BELT_POLICY.offers)) {
-        const u = potionUpgrade(p, offerId), b = button(u.price ? u.label + " \xB7 " + u.price + " Gold" : u.label + " \xB7 fully upgraded", () => issue("service.buy", { npcId, offerId }), "buy:" + offerId);
-        b.disabled = busy || !u.price || compareAmount(inv.gold, u.price) < 0;
-        body5.append(b);
-      }
-      else body5.append(el("p", "Visit a general merchant to carry more potions or make them stronger."));
-    } else if (mode === "rest") {
-      body5.append(el("h3", "A safe rest"), el("p", SETTLEMENT_LIFE_POLICY.rest.effect), el("p", "Cost: 5 Gold \xB7 no time skipping, revival, reset or status cure."));
-      body5.append(button("Rest \xB7 recover all missing HP \xB7 5 Gold", () => issue("service.rest", { npcId }), "rest"));
-    } else if (mode === "materials") {
-      const selector = el("select");
-      selector.setAttribute("aria-label", "Material quantity");
-      for (const n of [1, 10, 100, 1e3]) {
-        const o = el("option", String(n));
-        o.value = n;
-        o.selected = n === materialQuantity;
-        selector.append(o);
-      }
-      selector.onchange = () => {
-        materialQuantity = Number(selector.value);
-        key2 = null;
-        refresh(readModel());
-      };
-      body5.append(el("label", "Purchase quantity "), selector);
-      body5.append(el("p", "Workshop supplies \xB7 individual purchases \xB7 each is saved to your wallet."));
-      for (const [material, price] of Object.entries(workshopMaterialPrices(p))) {
-        const b = button(material + " \xD7 " + materialQuantity + " \xB7 " + String(Number(price) * materialQuantity) + " Gold \xB7 owned " + (inv.economy.materials[material] ?? 0), () => issue("service.material", { npcId, material, quantity: materialQuantity }), "material:" + material);
-        b.disabled = busy || compareAmount(inv.gold, String(Number(price) * materialQuantity)) < 0;
-        body5.append(b);
-      }
-    } else {
-      const layout = el("div", void 0, isAltar ? "enchant-layout" : "forge-layout"), list = el("div", void 0, isAltar ? "enchant-pane enchant-left-pane" : "forge-pane forge-left-pane"), detail = el("div", void 0, isAltar ? "enchant-pane enchant-right-pane" : "forge-pane forge-right-pane");
-      layout.append(list, detail);
-      body5.append(layout);
-      if (mode === "attune") {
-        if (!listedEquipmentSlots(inv).includes(selected)) selected = "weapon";
-        for (const slot of listedEquipmentSlots(inv)) {
-          const i2 = inv.itemsById[inv.equipped[slot]], b2 = i2 ? card(i2, "slot:" + slot, slot + " \xB7 Lv. " + inv.economy.slotLevels[slot], () => change(mode, slot)) : button(slot + " \xB7 empty \xB7 Lv. " + inv.economy.slotLevels[slot], () => change(mode, slot), "slot:" + slot, "service-card");
-          b2.setAttribute("aria-pressed", String(slot === selected));
-          list.append(b2);
+      const lv = inv.economy.slotLevels[selected], i = inv.itemsById[inv.equipped[selected]], d = itemDefinition(i), card = el("div", void 0, "tn-card"), bar = el("div", void 0, "tn-bar"), fill5 = el("i");
+      fill5.style.width = lv + "%";
+      bar.append(fill5);
+      card.append(el("p", slotName(selected) + " slot \xB7 +" + lv + (lv < 100 ? " \u2192 +" + (lv + 1) : " \xB7 max"), "tn-sect"), bar);
+      if (d && lv < 100) {
+        const before = effectiveEquipmentBonuses(d, selected, lv, combatPlayer(p)), after = effectiveEquipmentBonuses(d, selected, lv + 1, combatPlayer(p));
+        for (const k of Object.keys(before)) {
+          if (String(before[k]) === String(after[k]) && !Number(before[k])) continue;
+          const row2 = el("div", void 0, "tn-ln"), left = markup(el("span"), statIcon(k));
+          left.append(lineLabel(k));
+          const right = el("span");
+          right.append(el("b", statText(before[k])), " ", el("span", "\u2192 " + statText(after[k]), "tn-arrow"));
+          row2.append(left, right);
+          card.append(row2);
         }
-        const lv = inv.economy.slotLevels[selected], i = inv.itemsById[inv.equipped[selected]], d = itemDefinition(i);
-        detail.append(el("h3", selected.toUpperCase() + " SLOT ATTUNEMENT"), el("p", "Lv. " + lv + " / 100 \xB7 remains with this slot when gear is replaced."));
-        const bar = el("progress");
-        bar.max = 100;
-        bar.value = lv;
-        detail.append(bar);
-        if (lv === 100) {
-          detail.append(el("p", "Maximum Attunement"));
-          return;
-        }
-        const q = attunementCost(lv, p), afford = cost(detail, q.gold, q.materials, inv);
-        if (d) {
-          const before = effectiveEquipmentBonuses(d, selected, lv, combatPlayer(p)), after = effectiveEquipmentBonuses(d, selected, lv + 1, combatPlayer(p)), preview = el("div", void 0, "service-preview");
-          preview.append(el("strong", "ATTUNEMENT PREVIEW"));
-          for (const k of Object.keys(before)) preview.append(el("p", (labels[k] ?? k) + ": " + before[k] + " \u2192 " + after[k]));
-          detail.append(preview);
-        }
-        const b = button("Attune \xB7 " + lv + " \u2192 " + (lv + 1), () => issue("forge.attune", { slot: selected, expectedLevel: lv }), "attune");
+      }
+      card.append(el("p", "Stays with the slot when you change gear \xB7 max +100", "tn-hint is-left"));
+      body5.append(card);
+      if (lv < 100) {
+        const q = attunementCost(lv, p), afford = costs(body5, q.gold, q.materials, inv, npc, p);
+        if (!m.forgeAccess) body5.append(el("p", "Stand by the forge to upgrade.", "tn-note is-warn"));
+        const b = button("", () => issue("forge.attune", { slot: selected, expectedLevel: lv }), "attune", "tn-btn is-gold");
+        b.append("Upgrade \xB7 ", coin4(), formatAmount(q.gold));
         b.disabled = busy || !m.forgeAccess || !afford;
-        detail.append(b);
-      } else {
-        const items = Object.values(inv.itemsById).filter((i2) => i2.generated && !i2.unique && !i2.protected);
-        if (!items.some((i2) => i2.itemId === selected)) selected = items[0]?.itemId;
-        for (const i2 of items) {
-          const r2 = workshopResult(i2), b2 = card(i2, "select:" + i2.itemId, r2.tier + "\u2605 \xB7 " + r2.enchants + " enchantments" + (r2.set ? " \xB7 " + r2.set : ""), () => change(mode, i2.itemId));
-          b2.setAttribute("aria-pressed", String(i2.itemId === selected));
-          list.append(b2);
-        }
-        const i = items.find((i2) => i2.itemId === selected);
-        detail.append(el("h3", { reforge: "Modifier Reforging", awaken: "Star Awakening", enchant: "Celestial Enchantment", purge: "Arcane Purge", resonance: "Set Resonance Matrix", shatter: "Shatter & Salvage" }[mode]));
-        if (!i) {
-          detail.append(el("p", "Select carried generated equipment. Buy ordinary gear or recover dungeon loot."));
-          return;
-        }
-        detail.append(el("strong", itemDefinition(i).name), tooltip(i));
-        const r = workshopResult(i);
-        if (mode === "reforge") {
-          detail.append(el("p", "Select one affix. Executing locks the other lines."));
-          r.affixes.forEach((a, index) => {
-            const b2 = button(isNewAffix(a.key) ? affixText(a) : (labels[a.key] ?? a.key) + " \xB7 " + a.value, () => {
-              line14 = index;
-              key2 = null;
-              refresh(readModel());
-            }, "line:" + index, "service-card");
-            b2.disabled = busy || r.lockedLine !== null && r.lockedLine !== index;
-            b2.setAttribute("aria-pressed", String(line14 === index));
-            detail.append(b2);
-          });
-        }
-        const q = workshopQuote(p, i, mode, line14);
-        if (typeof q.preview === "string") detail.append(el("p", q.preview));
-        if (mode === "resonance") {
-          detail.append(el("p", "Current set: " + (r.set ?? "None") + " \xB7 two matching pieces activate the listed bonus; three add the second threshold bonus."));
-          for (const [name, effects2] of Object.entries(RESONANCE_SETS)) detail.append(el("small", name + ": " + Object.entries(effects2).map(([threshold, values]) => threshold + " \u2014 " + Object.entries(values).map(([k, v]) => k + " +" + Math.round(v * 100) + "%").join(", ")).join("; ")), el("br"));
-        }
-        if (mode === "shatter") detail.append(el("p", "Ordinary gear is permanently salvaged for " + Object.entries(q.preview).map(([k, v]) => v + " " + k).join(", ") + ". World protects Unique gear; a Spectral Codex is not bound in this campaign."));
-        const afford = cost(detail, q.gold, q.materials, inv);
-        if (q.problem) detail.append(el("p", q.problem, "service-error"));
-        const b = button(confirm === i.itemId ? "Confirm " + mode : mode === "shatter" ? "Shatter ordinary gear" : { awaken: "Awaken Star", reforge: "Execute Reforge", enchant: "Infuse Celestial Enchantment", purge: "Purge Enchantments", resonance: "Re-Resonate Set" }[mode], () => {
-          if (confirm === i.itemId) issue("service.modify", { npcId, itemId: i.itemId, operation: mode, line: line14 });
-          else {
-            confirm = i.itemId;
-            key2 = null;
-            refresh(readModel());
-          }
-        }, "execute:" + mode);
-        b.disabled = busy || !afford || Boolean(q.problem);
-        detail.append(b);
+        foot.append(b);
+        shell.append(foot);
+      } else body5.append(el("p", "This slot is fully upgraded.", "tn-hint"));
+    } else {
+      const worn = new Set(Object.values(inv.equipped)), items = Object.values(inv.itemsById).filter((i2) => i2.generated && !i2.unique && !i2.protected && !(mode === "shatter" && worn.has(i2.itemId)));
+      if (!items.some((i2) => i2.itemId === selected)) selected = items[0]?.itemId;
+      if (!items.length) {
+        body5.append(el("p", "Bring gear with stars (drops or shop gear) to work on it here.", "tn-empty"));
+        return;
       }
+      const strip = el("div", void 0, "tn-strip");
+      for (const i2 of items) {
+        const r2 = workshopResult(i2), b2 = cell(i2, { named: false, fn: () => change(mode, i2.itemId), id: "select:" + i2.itemId });
+        b2.setAttribute("aria-pressed", String(i2.itemId === selected));
+        b2.setAttribute("aria-label", displayName(itemDefinition(i2)) + ", " + r2.tier + " stars");
+        strip.append(b2);
+      }
+      body5.append(strip);
+      const on = strip.querySelector('[aria-pressed="true"]');
+      if (on) requestAnimationFrame(() => {
+        strip.scrollLeft += on.getBoundingClientRect().left - strip.getBoundingClientRect().left - (strip.clientWidth - on.offsetWidth) / 2;
+      });
+      const i = items.find((i2) => i2.itemId === selected), r = workshopResult(i), card = el("div", void 0, "tn-card");
+      card.style.borderTop = "3px solid " + (RARITY_COLORS[r.tier] ?? "#3a4654");
+      card.append(itemHead(i, [RARITY_NAMES[r.tier], r.tier + "\u2605", r.enchants ? r.enchants + " enchant" + (r.enchants > 1 ? "s" : "") : null, r.set ? r.set + " set" : null].filter(Boolean).join(" \xB7 ")));
+      body5.append(card);
+      const q = workshopQuote(p, i, mode, line14);
+      if (mode === "reforge") {
+        const box5 = el("div");
+        box5.append(el("p", "Pick a line to reroll", "tn-sect"));
+        r.affixes.forEach((a, index) => {
+          const b2 = button("", () => {
+            line14 = index;
+            confirm = null;
+            redraw();
+          }, "line:" + index, "tn-radio"), txt = markup(el("span"), statIcon(affixLineKey(a.key, a.skill)));
+          txt.append(affixText(a));
+          b2.append(el("span", void 0, "tn-dot"), txt);
+          b2.disabled = busy || r.lockedLine !== null && r.lockedLine !== index;
+          b2.setAttribute("aria-pressed", String(line14 === index));
+          box5.append(b2);
+        });
+        if (!r.affixes.length) box5.append(el("p", "This item has no lines to reroll.", "tn-hint is-left"));
+        else box5.append(el("p", r.lockedLine === null ? "It becomes a random new line this item can roll. After the first reforge, only this line can be rerolled." : "Only this line can be rerolled now.", "tn-hint is-left"));
+        body5.append(box5);
+      } else if (mode === "resonance") {
+        const worn2 = {};
+        for (const id of Object.values(inv.equipped)) {
+          const w = inv.itemsById[id], ws = w?.workshop && workshopResult(w).set;
+          if (ws) worn2[ws] = (worn2[ws] ?? 0) + 1;
+        }
+        const fx = (values) => Object.entries(values).map(([k, v]) => lineLabel("fx:" + k) + " +" + Math.round(v * 100) + "%").join(", "), total = (e) => {
+          const t = { ...e.two };
+          for (const [k, v] of Object.entries(e.three)) t[k] = (t[k] ?? 0) + v;
+          return t;
+        };
+        const now2 = el("div", void 0, "tn-card tn-setnow");
+        now2.append(el("p", "Set on this item", "tn-sect"), el("b", r.set ?? "No set yet", "tn-setname"), el("p", r.set ? "You wear " + (worn2[r.set] ?? 0) + " " + r.set + " piece" + ((worn2[r.set] ?? 0) === 1 ? "" : "s") + ". Changing rolls a different set at random." : "Give it a set at random. Wear 2 of a set for its first bonus, 3 for the full bonus.", "tn-hint is-left"));
+        body5.append(now2);
+        body5.append(el("p", "Sets", "tn-sect"));
+        const grid = el("div", void 0, "tn-setgrid");
+        for (const [name, e] of Object.entries(RESONANCE_SETS)) {
+          const n = worn2[name] ?? 0, c = el("div", void 0, "tn-set" + (name === r.set ? " is-now" : ""));
+          const h = el("div", void 0, "tn-seth");
+          h.append(markup(el("span", void 0, "tn-seti"), statIcon("fx:" + Object.keys(e.two)[0])), el("b", name));
+          if (n) h.append(el("small", n + " worn", "tn-setn"));
+          c.append(h);
+          for (const [pc2, vals] of [[2, e.two], [3, total(e)]]) {
+            const row2 = el("div", void 0, "tn-pc" + (n >= pc2 ? " is-on" : ""));
+            row2.append(el("i", pc2 + " pc"), el("span", fx(vals)));
+            c.append(row2);
+          }
+          grid.append(c);
+        }
+        body5.append(grid);
+      } else if (mode === "shatter" && q.preview && typeof q.preview === "object") body5.append(el("p", "Salvage breaks this item for " + Object.entries(q.preview).map(([k, v]) => v + " " + k).join(", ") + ". It is gone for good.", "tn-note"));
+      else if (typeof q.preview === "string") body5.append(el("p", q.preview, "tn-note"));
+      if (q.problem) body5.append(el("p", q.problem, "tn-note is-warn"));
+      const afford = q.gold !== void 0 ? costs(body5, q.gold, q.materials, inv, npc, p) : false, risky = mode === "shatter" || mode === "purge", verb = { reforge: "Reforge this line", awaken: "Awaken \xB7 +1 star", enchant: "Enchant", purge: "Purge enchantments", resonance: "Change set", shatter: "Salvage" }[mode];
+      const b = button(risky && confirm === i.itemId ? "Tap again to " + verb.toLowerCase() : verb, () => {
+        if (!risky || confirm === i.itemId) issue("service.modify", { npcId, itemId: i.itemId, operation: mode, line: line14 });
+        else {
+          confirm = i.itemId;
+          redraw();
+        }
+      }, "execute:" + mode, "tn-btn is-gold");
+      b.disabled = busy || !afford || Boolean(q.problem);
+      foot.append(b);
+      shell.append(foot);
+    }
+  }
+  async function sellMany(ids4) {
+    if (busy || !ids4.length) return;
+    clearInput();
+    busy = true;
+    bad = false;
+    notice = "Selling\u2026";
+    redraw();
+    let sold = 0;
+    try {
+      for (const itemId of ids4) {
+        const result = await adapter.issue("service.sell", { npcId, itemId, inventoryRevision: readModel().inventory.revision });
+        if (!["admitted", "alreadyApplied"].includes(result?.status)) throw Error("Could not sell that item. Try again.");
+        sold++;
+        picks.delete(itemId);
+      }
+      notice = sold === 1 ? "Sold 1 item." : "Sold " + sold + " items.";
+    } catch (e) {
+      bad = true;
+      notice = (sold ? "Sold " + sold + ". " : "") + e.message;
+      reportError(e.message);
+    } finally {
+      busy = false;
+      confirm = null;
+      redraw();
     }
   }
   function refresh(m) {
@@ -50760,7 +51107,7 @@ function createSettlementServicesMenu2(options) {
     supplyButton.dataset.cooling = String(cooling);
     supplyButton.style.setProperty("--potion-cooldown", String(cooling ? belt.cooldownTicks / belt.cooldownTotal : 0));
     supplyButton.setAttribute("aria-label", "Drink health potion, " + belt.count + " of " + belt.capacity + ", heals " + belt.healPercent + " percent");
-    const next = m.localPlayerId + "/" + m.inventory.revision + "/" + m.playersById[m.localPlayerId].progression.level + "/" + npcId + "/" + mode + "/" + selected + "/" + line14 + "/" + materialQuantity + "/" + busy + "/" + notice + "/" + confirm + "/" + (m.serviceNpcs?.find((n) => n.id === npcId)?.available ?? false);
+    const next = m.localPlayerId + "/" + m.inventory.revision + "/" + m.playersById[m.localPlayerId].progression.level + "/" + npcId + "/" + mode + "/" + selected + "/" + line14 + "/" + materialQuantity + "/" + busy + "/" + notice + "/" + confirm + "/" + sheet + "/" + filter + "/" + [...picks].join(",") + "/" + (m.serviceNpcs?.find((n) => n.id === npcId)?.available ?? false);
     if (panel.open && key2 !== next) {
       const focus = doc.activeElement?.dataset.serviceAction;
       key2 = next;
@@ -50775,7 +51122,11 @@ function createSettlementServicesMenu2(options) {
     mode = npc?.services?.includes("attune") ? "attune" : npc?.role === "enchanter" ? "enchant" : npc?.role === "innkeeper" ? "rest" : npc ? "gear" : "supplies";
     selected = null;
     notice = "";
+    bad = false;
     confirm = null;
+    sheet = null;
+    filter = "all";
+    picks.clear();
     key2 = null;
     panel.showModal();
     refresh(readModel());
@@ -51043,7 +51394,7 @@ function groupChartMarkers(markers, view3, width, height, radius = 22) {
   return groups;
 }
 function layoutChartLabels(groups, ctx, width, height, span2, selectedId = null) {
-  const occupied = groups.map((g) => ({ x: g.x - 12, y: g.y - 12, w: 24, h: 24 })), labels2 = [], overlap = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+  const occupied = groups.map((g) => ({ x: g.x - 12, y: g.y - 12, w: 24, h: 24 })), labels = [], overlap = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
   for (const g of [...groups].sort((a, b) => Number(b.members.some((m) => m.id === selectedId)) - Number(a.members.some((m) => m.id === selectedId)))) {
     if (g.members.length !== 1) continue;
     const m = g.members[0];
@@ -51052,12 +51403,12 @@ function layoutChartLabels(groups, ctx, width, height, span2, selectedId = null)
     const text2 = m.state === "rumored" ? "Rumored " + m.family : m.state === "unvisited" && m.kind === "settlement" ? "Unvisited " + m.label : m.label, w = Math.min(220, ctx.measureText(text2).width + 8), h = 18;
     for (const p of [{ x: g.x + 15, y: g.y - 9, w, h }, { x: g.x - w - 15, y: g.y - 9, w, h }, { x: g.x - w / 2, y: g.y + 15, w, h }]) {
       if (p.x < 3 || p.y < 3 || p.x + p.w > width - 3 || p.y + p.h > height - 3 || occupied.some((q) => overlap(p, q))) continue;
-      labels2.push({ ...p, text: text2 });
+      labels.push({ ...p, text: text2 });
       occupied.push(p);
       break;
     }
   }
-  return labels2;
+  return labels;
 }
 function drawChartIcon(c, m, x, y, size = 9) {
   const s = size, big = m.kind === "settlement" && (m.class === "capital-great-hold" || m.class === "city");
@@ -57137,8 +57488,8 @@ function drawCorrosiveBossHud(c, canvas, model) {
   c.fillRect(x + 12, y + 24, (w - 24) * ratio, 8);
   c.fillStyle = MINT;
   c.font = "11px sans-serif";
-  const labels2 = { slam: "Caustic slam \u2014 leave the marked pool", spore_storm: "Spore storm \u2014 three fragile homing spores" };
-  c.fillText(labels2[b.pendingAction?.ability] ?? (b.phase === 2 ? "Toxic pressure \xB7 acid trails and spores" : "Alchemical sludge \xB7 avoid the acid trail"), canvas.width / 2, y + 47);
+  const labels = { slam: "Caustic slam \u2014 leave the marked pool", spore_storm: "Spore storm \u2014 three fragile homing spores" };
+  c.fillText(labels[b.pendingAction?.ability] ?? (b.phase === 2 ? "Toxic pressure \xB7 acid trails and spores" : "Alchemical sludge \xB7 avoid the acid trail"), canvas.width / 2, y + 47);
   c.restore();
   return true;
 }
@@ -57658,8 +58009,8 @@ function drawVoidBossHud(c, canvas, model) {
   c.fillRect(x + 12, y + 24, (w - 24) * ratio, 8);
   c.fillStyle = PALE4;
   c.font = "11px sans-serif";
-  const labels2 = { eye_lance: "Eye Lance \xB7 eyes gather, pulse, then fire", slam: "Void slam \xB7 leave the marked circle", singularity: "Gravity pull \xB7 keep moving out of the magenta ring" };
-  c.fillText(labels2[b.pendingAction?.ability] ?? "The Eye of the Void", canvas.width / 2, y + 47);
+  const labels = { eye_lance: "Eye Lance \xB7 eyes gather, pulse, then fire", slam: "Void slam \xB7 leave the marked circle", singularity: "Gravity pull \xB7 keep moving out of the magenta ring" };
+  c.fillText(labels[b.pendingAction?.ability] ?? "The Eye of the Void", canvas.width / 2, y + 47);
   c.restore();
   return true;
 }
@@ -64096,8 +64447,8 @@ function drawBrimstoneBossHud(c, canvas, model) {
   c.fillRect(x + 12, y + 24, (w - 24) * ratio, 8);
   c.font = "11px sans-serif";
   c.fillStyle = HOT3;
-  const labels2 = { strike: "Gauntlet strike", slam: "Molten slam \u2014 move out of the ring", magma_vents: "Magma vents \u2014 watch the cross-shaped fissures" };
-  c.fillText(labels2[b.pendingAction?.ability] ?? "Brimstone furnace", canvas.width / 2, y + 47);
+  const labels = { strike: "Gauntlet strike", slam: "Molten slam \u2014 move out of the ring", magma_vents: "Magma vents \u2014 watch the cross-shaped fissures" };
+  c.fillText(labels[b.pendingAction?.ability] ?? "Brimstone furnace", canvas.width / 2, y + 47);
   c.restore();
   return true;
 }
@@ -65654,7 +66005,7 @@ function createNightGroundItemsV1({ enabled = () => true } = {}) {
     while (labelStamps.size > 16) labelStamps.delete(labelStamps.keys().next().value);
     return result;
   }
-  function labels2(ctx) {
+  function labels(ctx) {
     if (!enabled() || !visible3.some((r) => r.drop.canPickUp && r.removed === null)) return;
     ctx.save();
     ctx.font = "bold 11px Georgia";
@@ -65709,11 +66060,11 @@ function createNightGroundItemsV1({ enabled = () => true } = {}) {
     for (const r of beamRecords) columnGround(ctx, pose(r));
     if (!deferEmission) {
       emission(ctx, model, time, viewport, { frame: frame2 });
-      labels2(ctx);
+      labels(ctx);
     }
     return counts;
   }
-  return { draw, depthItems: depthItems2, floorGlows, emission, labels: labels2, clear() {
+  return { draw, depthItems: depthItems2, floorGlows, emission, labels, clear() {
     records.clear();
     identity2 = null;
     currentModel = null;
