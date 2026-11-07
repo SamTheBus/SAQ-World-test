@@ -827,7 +827,7 @@ import {
   worldRevisionV1,
   worldRolesV1,
   wrathDamageV1
-} from "./chunk-4LRF2TTJ.js";
+} from "./chunk-DN7GVX74.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -28444,6 +28444,27 @@ var PULSE_TICKS = 60;
 var BREATH_REST_TICKS = 3600;
 var MEND_TICKS = 180;
 var REFILL_MAX = 150;
+var AEGIS_TICKS = 360;
+var OVERCHARGE_TICKS = 180;
+var LEAP_TICKS = 20;
+var TITAN_TICKS = 180;
+var SPITE_TICKS = 300;
+var MEMORY_TICKS = 360;
+var MEMORY_MAX = 600;
+var HELD_MAX = 24;
+var CUT_GAP_TICKS = 5;
+var MAX_CUTS = 9;
+var FLOWER_TICKS = 300;
+var ECHO_TICKS = 30;
+var STEPPED_TICKS = 120;
+var METEOR_FALL_TICKS = 60;
+var METEOR_FALL_MAX = 80;
+var METEOR_GROUND_TICKS = 240;
+var METEOR_GROUND_MAX = 420;
+var MAX_METEORS = 3;
+var CRACK_TICKS = 180;
+var CRACK_MAX = 240;
+var QUICK_TICKS = 180;
 var LONGER_COOLDOWN = Object.freeze([13, 10]);
 var SPELL_ELEMENTS = Object.freeze(["fire", "frost", "lightning"]);
 var POOL_TICKS = 180;
@@ -28454,8 +28475,8 @@ var HIDE_TICKS = 300;
 var MAX_SUN = 3;
 var MAX_HIDE = 5;
 var SUNFALL_CASTS = 3;
-var TIMED = ["surge", "enGarde", "rush", "wail", "shell", "riposte", "keen", "evade", "rest", "mend"];
-var LIVE = ["rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var TIMED = ["surge", "enGarde", "rush", "wail", "shell", "riposte", "keen", "evade", "rest", "mend", "titan", "spite", "stepped", "quick"];
+var LIVE = ["aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
 function skillCooldown(combat, skillId) {
   return combat?.skills?.cooldowns?.[skillId] ?? 0;
 }
@@ -28508,7 +28529,7 @@ function advanceClassSkillTimers(tick, combat) {
     if (k[key2] <= 1) delete k[key2];
     else k[key2]--;
   }
-  for (const key2 of ["bulwark", "charge", "hide", "weave", "ice"]) if (k[key2]) {
+  for (const key2 of ["bulwark", "charge", "hide", "weave", "ice", "aegis"]) if (k[key2]) {
     if (k[key2].ticks <= 1) delete k[key2];
     else k[key2].ticks--;
   }
@@ -28551,7 +28572,7 @@ function cancelClassSkillAction(combat) {
     delete combat.skills.pool;
     delete combat.skills.ram;
     delete combat.skills.thrown;
-    for (const key2 of ["banner", "smoke", "wall", "field"]) delete combat.skills[key2];
+    for (const key2 of ["banner", "smoke", "wall", "field", "leap", "cuts", "flower", "echo", "meteors", "crack"]) delete combat.skills[key2];
     prune(combat);
   }
 }
@@ -28650,6 +28671,63 @@ function validateClassSkillState(s, combat, actor) {
     requireContract(typeof k.ice.hp === "string" && /^[1-9][0-9]{0,29}$/.test(k.ice.hp) && actor.alive, "Invalid Ice Barrier");
     safeInteger(k.ice.ticks, 1, ICE_TICKS);
   }
+  const whole = (v) => typeof v === "string" && /^[1-9][0-9]{0,29}$/.test(v), reach = (v) => Number.isFinite(v) && v > 0 && v <= 400;
+  if (k.aegis !== void 0) {
+    closedRecord(k.aegis, ["hp", "full", "ticks"]);
+    requireContract(whole(k.aegis.hp) && whole(k.aegis.full) && BigInt(k.aegis.hp) <= BigInt(k.aegis.full) && actor.alive, "Invalid Aegis Pulse");
+    safeInteger(k.aegis.ticks, 1, AEGIS_TICKS);
+  }
+  if (k.leap !== void 0) {
+    closedRecord(k.leap, ["x", "y", "sx", "sy", "ticks"]);
+    requireContract(pos(k.leap) && Number.isFinite(k.leap.sx) && Number.isFinite(k.leap.sy) && actor.alive, "Invalid Skyfall Leap");
+    safeInteger(k.leap.ticks, 1, LEAP_TICKS);
+  }
+  for (const [key2, max] of [["titan", TITAN_TICKS], ["spite", SPITE_TICKS], ["stepped", STEPPED_TICKS], ["quick", QUICK_TICKS]]) if (k[key2] !== void 0) safeInteger(k[key2], 1, max);
+  if (k.held !== void 0) {
+    requireContract(Array.isArray(k.held) && k.held.length >= 1 && k.held.length <= HELD_MAX, "Invalid Retribution");
+    for (const h of k.held) {
+      closedRecord(h, ["amount", "ticks"]);
+      requireContract(whole(h.amount), "Invalid blocked hit");
+      safeInteger(h.ticks, 1, MEMORY_MAX);
+    }
+  }
+  if (k.cuts !== void 0) {
+    closedRecord(k.cuts, ["target", "left", "next"], ["extra"]);
+    requireContract(typeof k.cuts.target === "string" && k.cuts.target.length <= 200 && actor.alive, "Invalid Thousand Cuts");
+    safeInteger(k.cuts.left, 1, MAX_CUTS);
+    safeInteger(k.cuts.next, Math.max(0, s.tick - 1), s.tick + CUT_GAP_TICKS);
+    if (k.cuts.extra !== void 0) safeInteger(k.cuts.extra, 1, 3);
+  }
+  if (k.flower !== void 0) {
+    closedRecord(k.flower, ["x", "y", "r", "ticks", "next"]);
+    requireContract(pos(k.flower) && reach(k.flower.r) && actor.alive, "Invalid Noxious Bloom");
+    safeInteger(k.flower.ticks, 1, FLOWER_TICKS);
+    safeInteger(k.flower.next, 1, PULSE_TICKS);
+  }
+  if (k.echo !== void 0) {
+    closedRecord(k.echo, ["x", "y", "ticks"]);
+    requireContract(pos(k.echo) && actor.alive, "Invalid Afterimage");
+    safeInteger(k.echo.ticks, 1, ECHO_TICKS);
+  }
+  if (k.stepSpare !== void 0) requireContract(k.stepSpare === true && k.stepRefill === void 0, "Invalid Double Step");
+  if (k.stepRefill !== void 0) safeInteger(k.stepRefill, 1, Math.ceil(CLASS_SKILLS.shadowstep.cooldownTicks * LONGER_COOLDOWN[0] / LONGER_COOLDOWN[1]));
+  if (k.meteors !== void 0) {
+    requireContract(Array.isArray(k.meteors) && k.meteors.length >= 1 && k.meteors.length <= MAX_METEORS && actor.alive, "Invalid Meteor");
+    for (const m of k.meteors) {
+      closedRecord(m, ["x", "y", "fall", "ticks", "next", "r"]);
+      requireContract(pos(m) && reach(m.r), "Invalid meteor");
+      safeInteger(m.fall, 0, METEOR_FALL_MAX);
+      safeInteger(m.ticks, 1, METEOR_GROUND_MAX);
+      safeInteger(m.next, 1, PULSE_TICKS);
+    }
+  }
+  if (k.crack !== void 0) {
+    closedRecord(k.crack, ["x", "y", "r", "rank", "ticks", "next"]);
+    requireContract(pos(k.crack) && reach(k.crack.r) && actor.alive, "Invalid cracked ground");
+    safeInteger(k.crack.rank, 1, 6);
+    safeInteger(k.crack.ticks, 1, CRACK_MAX);
+    safeInteger(k.crack.next, 1, PULSE_TICKS);
+  }
   if (k.orbs !== void 0) {
     requireContract(Array.isArray(k.orbs) && k.orbs.length >= 1 && k.orbs.length <= MAX_ORBS && actor.alive, "Invalid orbs");
     for (const o of k.orbs) {
@@ -28663,7 +28741,8 @@ function validateClassSkillState(s, combat, actor) {
   for (const [id, left] of Object.entries(k.cooldowns)) safeInteger(left, 1, Math.ceil(Math.min(MAX_SKILL_COOLDOWN_TICKS, CLASS_SKILLS[id].cooldownTicks) * LONGER_COOLDOWN[0] / LONGER_COOLDOWN[1]));
   const unit13 = (v) => Number.isFinite(v.x) && Number.isFinite(v.y) && Math.abs(Math.hypot(v.x, v.y) - 1) < 1e-9;
   if (k.last) {
-    closedRecord(k.last, ["skillId", "tick", "x", "y"], ["r", "ox", "oy", "ox2", "oy2", "spread"]);
+    closedRecord(k.last, ["skillId", "tick", "x", "y"], ["r", "ox", "oy", "ox2", "oy2", "spread", "n"]);
+    if (k.last.n !== void 0) safeInteger(k.last.n, 0, 12);
     if (k.last.r !== void 0) requireContract(Number.isFinite(k.last.r) && k.last.r >= 0 && k.last.r <= 400, "Invalid skill reach");
     if (k.last.spread !== void 0) requireContract(Number.isFinite(k.last.spread) && k.last.spread >= 0 && k.last.spread <= 3.2, "Invalid skill spread");
     for (const key2 of ["ox", "oy", "ox2", "oy2"]) if (k.last[key2] !== void 0) requireContract(Number.isFinite(k.last[key2]) && Math.abs(k.last[key2]) <= 400, "Invalid skill landing");
@@ -29696,7 +29775,7 @@ function combatTargetV4(s, id) {
 var combatTargetsV4 = (s) => [...Object.values(s.entitiesById), ...podCombatTargetsV4(s)];
 
 // src/shared/contracts/mastery_combat.js
-var TREE_STATUSES = Object.freeze({ mark: [5, 300], deathmark: [5, 360], kindle: [5, 240], struck: [3, 600] });
+var TREE_STATUSES = Object.freeze({ mark: [5, 300], deathmark: [5, 360], kindle: [5, 240], struck: [3, 600], hinder: [6, 60] });
 var emptyMasteryCombat = () => ({ poisons: {}, statuses: {}, hazards: {}, razors: {} });
 function installMasteryCombat(s) {
   s.subweaponCombat.mastery ??= Object.fromEntries(Object.values(s.playersById).map((p) => [p.entityId, emptyMasteryCombat()]));
@@ -30286,7 +30365,16 @@ var shieldPacket = (stats2) => {
   const f = stats2.familyProperties, defense = addCombat(f?.reflect ?? combatAmount(1), f?.bashDefense ?? combatAmount(0)), base = addCombat(multiplyCombat(stats2.defense, defense.n, defense.d), multiplyCombat(stats2.attack, f?.bashAttack?.n ?? 0, f?.bashAttack?.d ?? 1)), scale = f?.bashMultiplier ?? combatAmount(1);
   return multiplyCombat(base, scale.n, scale.d);
 };
-function incomingSubweaponHit({ combat, stats: stats2, raw, boss = false, actor = null, source: source3 = null, suppressed = false, knight = false, wall = 0 }) {
+function aegisTakes(combat, out) {
+  const g = combat.skills?.aegis;
+  if (!g || compareCombat(out.damage, 0) === 0) return out;
+  const taken = combatInteger(minCombat(g.hp, out.damage)), left = combatInteger(subtractCombat(g.hp, taken)), broke = compareCombat(left, 0) === 0;
+  if (broke) clearSkillState(combat, "aegis");
+  else g.hp = left;
+  const damage = combatInteger(subtractCombat(out.damage, taken));
+  return { ...out, damage, aegis: broke ? "broke" : "hit", ...out.defense === null && compareCombat(damage, 0) === 0 ? { defense: "barrier" } : {} };
+}
+function incomingSubweaponHit({ combat, stats: stats2, raw, boss = false, actor = null, source: source3 = null, suppressed = false, knight = false, wall = 0, steady = 0 }) {
   if (suppressed) return { damage: combatInteger(mitigateFractionalPlayerDamage(raw, stats2.defense)), absorbed: "0", defense: null, counter: null, suppressed: true };
   if (combat.skills?.counter) {
     spendCounterWindow(combat);
@@ -30299,7 +30387,7 @@ function incomingSubweaponHit({ combat, stats: stats2, raw, boss = false, actor 
     else ice.hp = left;
     raw = subtractCombat(raw, taken);
     if (compareCombat(raw, 0) === 0) return { damage: "0", absorbed: "0", defense: "barrier", counter: null, ice: broke ? "broke" : "hit" };
-    if (broke) return { ...incomingSubweaponHit({ combat, stats: stats2, raw, boss, actor, source: source3, suppressed, knight, wall }), ice: "broke" };
+    if (broke) return { ...incomingSubweaponHit({ combat, stats: stats2, raw, boss, actor, source: source3, suppressed, knight, wall, steady }), ice: "broke" };
   }
   const absorbed = combatInteger(minCombat(combat.barrier, raw));
   combat.barrier = combatInteger(subtractCombat(combat.barrier, absorbed));
@@ -30311,15 +30399,15 @@ function incomingSubweaponHit({ combat, stats: stats2, raw, boss = false, actor 
   const parryReady = family === "dagger" && Boolean(combat.skills?.parry);
   if (parryReady) spendParryWindow(combat);
   const guarded = activeGuard || parryReady || compareCombat(chance, 0) > 0 && combatRoll(combat, multiplyCombat(chance, (boss ? 65 : 100) * (combat.fatigue ? 50 : 100), 1e4));
-  if (!guarded) return { damage: combatInteger(net), absorbed, defense: null, counter: null };
-  if (activeGuard) spendGuard(combat.guard, net);
+  if (!guarded) return aegisTakes(combat, { damage: combatInteger(net), absorbed, defense: null, counter: null });
+  if (activeGuard) spendGuard(combat.guard, net, steady);
   combat.fatigue = 30;
   if (family === "shield" && knight) reduceSkillCooldown(combat, "shield_bash", BLOCK_BASH_REFUND_TICKS);
   else if (family === "shield") combat.pressure = Math.min(3, combat.pressure + 1);
   const mitigation = multiplyCombat(family === "shield" ? stats2.familyProperties?.blockMitigation ?? combatAmount(7, 10) : stats2.familyProperties?.parryMitigation ?? combatAmount(3, 5), boss ? 65 : 100, 100);
   const damage = combatInteger(multiplyCombat(net, subtractCombat(1, mitigation).n, subtractCombat(1, mitigation).d));
   const masteryCounterEligible = !boss || combat.counterCooldown === 0;
-  return { damage, absorbed, prevented: subtractCombat(net, damage), masteryCounterEligible, defense: family === "shield" ? "block" : "parry", counter: null };
+  return aegisTakes(combat, { damage, absorbed, prevented: subtractCombat(net, damage), masteryCounterEligible, defense: family === "shield" ? "block" : "parry", counter: null });
 }
 
 // src/shared/contracts/tome_cast.js
@@ -30560,10 +30648,14 @@ function validateSubweaponCombat(s) {
   }
   requireContract(Object.keys(c.controls ?? {}).length <= 512, "Frost control bound");
   for (const [id, e] of Object.entries(c.controls ?? {})) {
-    closedRecord(e, ["id", "sourceId", "targetId", "spaceInstanceId", "phase", "stacks", "appliedTick", "expiresTick"], ["boost"]);
+    closedRecord(e, ["id", "sourceId", "targetId", "spaceInstanceId", "phase", "stacks", "appliedTick", "expiresTick"], ["boost", "since"]);
     if (e.boost !== void 0) {
       safeInteger(e.boost, 1, 5);
       requireContract(e.phase === "chill", "Only a chill carries a boost");
+    }
+    if (e.since !== void 0) {
+      requireContract(e.phase === "chill", "Only a chill counts how long it held");
+      safeInteger(e.since, 0, e.appliedTick);
     }
     const a = s.entitiesById[e.sourceId], t = combatTargetV4(s, e.targetId);
     requireContract(id === e.id && id === e.sourceId + "/" + e.targetId && c.actors[e.sourceId] && a.alive && t?.alive && t.team === "hostile" && a.residency.spaceInstanceId === e.spaceInstanceId && t.residency.spaceInstanceId === e.spaceInstanceId, "Frost owner/space");
@@ -30572,7 +30664,7 @@ function validateSubweaponCombat(s) {
     safeInteger(e.appliedTick, 0, s.tick);
     safeInteger(e.expiresTick, s.tick + 1, e.appliedTick + 360);
     const def = s.content.definitionsById[t.contentDefinitionId] ?? {};
-    requireContract((e.phase === "chill" ? e.expiresTick - e.appliedTick >= 240 && e.expiresTick - e.appliedTick <= 360 : e.phase === "boss-slow" ? e.expiresTick - e.appliedTick === 90 : e.expiresTick - e.appliedTick >= (def.isElite ? 30 : 60) && e.expiresTick - e.appliedTick <= (def.isElite ? 68 : 135)) && e.phase === "boss-slow" === (e.phase !== "chill" && def.isBoss === true), "Frost duration/classification");
+    requireContract((e.phase === "chill" ? e.expiresTick - e.appliedTick >= 240 && e.expiresTick - e.appliedTick <= 360 : e.phase === "boss-slow" ? e.expiresTick - e.appliedTick === 90 : e.expiresTick - e.appliedTick >= 12 && e.expiresTick - e.appliedTick <= (def.isElite ? 68 : 135)) && e.phase === "boss-slow" === (e.phase !== "chill" && def.isBoss === true), "Frost duration/classification");
   }
 }
 function cancelSubweaponResidency(s, id) {
@@ -32972,13 +33064,14 @@ function createMasteryAwards(state) {
 }
 
 // src/simulation/tome_element_rules.js
+var chillSince = (s, source3, old2) => classRank(Object.values(s.playersById ?? {}).find((p) => p.entityId === source3.entityId)?.d8, "winters_grasp") ? { since: old2 && old2.phase === "chill" && old2.expiresTick > s.tick && old2.since !== void 0 ? old2.since : s.tick } : {};
 function applyFrostControl(s, source3, target, stats2, chillTicks = 240, boost = 0, longer = 0) {
   if (!target.alive) return null;
   const controls = s.subweaponCombat.controls ?? (s.subweaponCombat.controls = {}), id = source3.entityId + "/" + target.entityId, old2 = controls[id];
   if (Object.values(controls).some((e) => e.targetId === target.entityId && e.expiresTick > s.tick && e.phase !== "chill")) return null;
   const stacks = (old2 && old2.expiresTick > s.tick ? old2.stacks : 0) + 1, def = s.content.definitionsById[target.contentDefinitionId] ?? {}, boss = def.isBoss === true, elite = def.isElite === true;
   const phase = stacks === 4 ? boss ? "boss-slow" : "freeze" : "chill", duration = phase === "chill" ? chillTicks : boss ? 90 : Math.round((elite ? 30 : 60) * (100 + longer) / 100);
-  const effect = { id, sourceId: source3.entityId, targetId: target.entityId, spaceInstanceId: source3.residency.spaceInstanceId, phase, stacks: phase === "chill" ? stacks : 0, appliedTick: s.tick, expiresTick: s.tick + duration, ...boost && phase === "chill" ? { boost } : {} };
+  const effect = { id, sourceId: source3.entityId, targetId: target.entityId, spaceInstanceId: source3.residency.spaceInstanceId, phase, stacks: phase === "chill" ? stacks : 0, appliedTick: s.tick, expiresTick: s.tick + duration, ...boost && phase === "chill" ? { boost } : {}, ...phase === "chill" ? chillSince(s, source3, old2) : {} };
   controls[id] = effect;
   if (phase === "boss-slow") {
     const c = s.subweaponCombat.actors[source3.entityId];
@@ -32987,7 +33080,7 @@ function applyFrostControl(s, source3, target, stats2, chillTicks = 240, boost =
   }
   return effect;
 }
-var STATUS_RATE = { stun: () => 0, slow: (r) => 1 - 0.2 * r, daze: (r) => 1 - 0.06 * r };
+var STATUS_RATE = { stun: () => 0, slow: (r) => 1 - 0.2 * r, daze: (r) => 1 - 0.06 * r, hinder: (r) => 1 - 0.05 * r };
 function statusRates(s, visit) {
   const owners = new Map(Object.values(s.playersById ?? {}).map((p) => [p.entityId, p]));
   for (const [owner, b] of Object.entries(s.subweaponCombat.mastery ?? {})) {
@@ -34605,6 +34698,28 @@ var CLASS_SKILL_TUNING_V1 = Object.freeze({
   // Duel: how near counts. Volatile and Shatter: how far their bursts reach.
   duel: 110,
   burst: 56,
+  // Row five. Aegis Pulse: how far around it shoves and how far (elites half; bosses hold), its Barrier in % of
+  // max HP and Overcharge's. Skyfall Leap: reach, aim cone, the landing's radius, its hit (Attack + Shield),
+  // stuns and Quake Field's slow (5% a rank). Retribution: radius and the Attack it adds to the hits it gives
+  // back. Thousand Cuts: reach, aim cone, cuts, each cut, Fan of Steel's reach and count, Flourish's most.
+  // Noxious Bloom: radius and the burst. Shadowstep: how far it finds an enemy and its crit (Assassinate's).
+  // Meteor: reach, aim cone, how far ahead with nobody there, impact radius and hit, how often the ground
+  // burns and each burn, Meteor Shower's smaller meteors and how far apart, Impact Crater's extra ticks.
+  // Glacial Burst: radius, most hit, Ice Lances' reach and count. Thunderfall: radius, bolts, each bolt, the
+  // stun, how high the bolts start. Cracked ground: how often it slows and for how long. Pyromaniac: how
+  // near and how many count. Afterimage: its burst's radius.
+  aegisPulse: { radius: 80, shove: 40, worth: 20, overcharge: [7, 5] },
+  skyfallLeap: { reach: 130, cone: 0.6, radius: 64, attack: [3, 1], stun: 60, eliteStun: 30, quake: 4 },
+  retribution: { radius: 90, attack: [1, 1] },
+  thousandCuts: { reach: 60, cone: 0.9, cuts: 6, attack: [3, 5], fan: 50, fanTargets: 2, flourish: 3 },
+  noxiousBloom: { radius: 80, attack: [1, 1] },
+  shadowstep: { reach: 160, crit: [2, 1], assassinate: [3, 1] },
+  meteor: { reach: 160, cone: 0.9, distance: 110, radius: 64, attack: [3, 1], pulse: 30, ground: [1, 4], small: [3, 5], spacing: 40, crater: 180 },
+  glacialBurst: { radius: 90, targets: 12, lance: 170, lances: 8 },
+  thunderfall: { radius: 130, bolts: 5, attack: [2, 1], stun: 60, sky: 150 },
+  crack: { pulse: 30, hold: 45 },
+  pyromaniac: { reach: 110, most: 5 },
+  afterimage: { radius: 44 },
   // Row-two passives that hit: Crosscut cuts along a Dash, Cinder Step's trail burns (per rank).
   crosscut: { attack: [15, 100] },
   cinderStep: { attack: [10, 100] },
@@ -34794,7 +34909,9 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     const E = T9.earthBreaker, impact = rank(a, "impact_training"), base = addCombat(multiplyCombat(stats2.attack, ...E.attack), shieldPacket(stats2)), raw = impact ? pct2(base, 6 * impact) : base, stunAll = aug(a, "earth_breaker", 0);
     const reach = E.radius * (100 + 6 * rank(a, "seismic_reach")) / 100, targets = cone(a, aim2, reach, Math.PI, E.targets);
     if (aug(a, "earth_breaker", 1)) for (const t of targets) pull(a, t, E.pull);
-    const hit = crowd(a, raw, targets.length);
+    const combat = c.actors[a.entityId], titan = combat.skills?.titan && rank(a, "titan") ? 15 * rank(a, "titan") : 0;
+    clearSkillState(combat, "titan");
+    const hit = titan ? pct2(crowd(a, raw, targets.length), titan) : crowd(a, raw, targets.length);
     for (const t of targets) {
       const was = slowed(t);
       damage(a, t, hit, "quake", commandId, { sourceItem: damageSourceItem(owner(a), "bash"), trigger: "skill" });
@@ -34803,6 +34920,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       if (stunAll && ordinary(t)) stun(a, t, stunTicks(a, E.stun));
       else effects2.status(a, t, "slow", E.slow, E.slowTicks);
     }
+    crackGround(a, a.position, reach);
     return { r: extent(a, reach) };
   }
   function rallyingCry2(a, stats2, aim2) {
@@ -34869,6 +34987,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       }
       if (canStun(a)) stun(a, t, stunTicks(a, definition2(t).isElite || definition2(t).isMiniboss ? R4.eliteStun : R4.stun));
     }
+    crackGround(a, a.position, R4.slam);
   }
   function shieldThrow2(a, stats2, aim2) {
     const S2 = T9.shieldThrow, first = cone(a, aim2, S2.reach, S2.cone, 1)[0], end = first ? null : pathEnd(a, { x: aim2.x, y: aim2.y, remaining: S2.reach });
@@ -34952,6 +35071,85 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     const k = classSkillsRecord(combat);
     k.still = Math.min(STILL_TICKS, (k.still ?? 0) + 1);
   }
+  function crackGround(a, p, r, quake = 0) {
+    const g = rank(a, "groundbreaker");
+    if (!g && !quake) return;
+    classSkillsRecord(c.actors[a.entityId]).crack = { x: p.x, y: p.y, r: Math.max(1, Math.min(400, Math.round(r))), rank: Math.max(g, quake), ticks: quake ? CRACK_MAX : CRACK_TICKS, next: 1 };
+  }
+  function stepCrack(a, combat) {
+    const k = combat.skills?.crack;
+    if (!k) return;
+    if (!a.alive) {
+      clearSkillState(combat, "crack");
+      return;
+    }
+    if (--k.next <= 0) {
+      k.next = T9.crack.pulse;
+      if (canStun(a)) {
+        for (const t of around2(a, k, k.r)) if (!isPodCombatTargetV4(t)) effects2.status(a, t, "hinder", k.rank, T9.crack.hold);
+      }
+    }
+    if (--k.ticks <= 0) clearSkillState(combat, "crack");
+  }
+  function shove(a) {
+    const P8 = T9.aegisPulse;
+    for (const t of around2(a, a.position, P8.radius * effects2.area(a))) if (!isPodCombatTargetV4(t) && !definition2(t).isBoss) knockback(a, t, definition2(t).isElite || definition2(t).isMiniboss ? P8.shove / 2 : P8.shove);
+  }
+  function aegisPulse2(a, stats2) {
+    const P8 = T9.aegisPulse, over = aug(a, "aegis_pulse", 1), worth = combatInteger(multiplyCombat(stats2.maxHp, P8.worth, 100)), hp = over ? combatInteger(multiplyCombat(worth, ...P8.overcharge)) : worth;
+    shove(a);
+    if (compareCombat(hp, 0) > 0) classSkillsRecord(c.actors[a.entityId]).aegis = { hp, full: hp, ticks: over ? OVERCHARGE_TICKS : AEGIS_TICKS };
+    return { r: extent(a, P8.radius) };
+  }
+  function skyfallLeap2(a, stats2, aim2) {
+    const L = T9.skyfallLeap, t = cone(a, aim2, L.reach, L.cone, 1)[0], toward3 = t ? unit3({ x: t.position.x - a.position.x, y: t.position.y - a.position.y }) : aim2, far = t ? Math.max(0, Math.min(L.reach, distance11(a, t) - (a.hullRadius ?? 0) - (t.hullRadius ?? 0) - 2)) : L.reach, end = pathEnd(a, { x: toward3.x, y: toward3.y, remaining: far }), combat = c.actors[a.entityId];
+    classSkillsRecord(combat).leap = { x: end.x, y: end.y, sx: a.position.x, sy: a.position.y, ticks: LEAP_TICKS };
+    lowerShield(combat.guard);
+    return { ...landingOffset(a, end), r: extent(a, aug(a, "skyfall_leap", 0) ? scaled(L.radius, T9.wide) : L.radius) };
+  }
+  function stepLeap(a, combat) {
+    const l = combat.skills?.leap;
+    if (!l) return;
+    if (!a.alive) {
+      clearSkillState(combat, "leap");
+      return;
+    }
+    lowerShield(combat.guard);
+    const k = 1 - (l.ticks - 1) / LEAP_TICKS, x = l.sx + (l.x - l.sx) * k, y = l.sy + (l.y - l.sy) * k;
+    if (!collidesWithTiles(space(a), x, y, a.hullRadius)) {
+      a.position = { x, y };
+      a.movedLastTick = true;
+    }
+    if (--l.ticks > 0) return;
+    clearSkillState(combat, "leap");
+    const L = T9.skyfallLeap, stats2 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "bash"), radius = (aug(a, "skyfall_leap", 0) ? scaled(L.radius, T9.wide) : L.radius) * effects2.area(a), near2 = around2(a, a.position, radius), hit = crowd(a, breakerHit(a, stats2, L.attack), near2.length);
+    for (const t of near2) {
+      const was = slowed(t);
+      damage(a, t, hit, "quake", null, { sourceItem, trigger: "skill" });
+      tremor(a, t, was);
+      if (!t.alive || isPodCombatTargetV4(t)) continue;
+      if (definition2(t).isBoss) {
+        daze(a, t, L.stun);
+        continue;
+      }
+      if (canStun(a)) stun(a, t, stunTicks(a, definition2(t).isElite || definition2(t).isMiniboss ? L.eliteStun : L.stun));
+    }
+    crackGround(a, a.position, radius, aug(a, "skyfall_leap", 1) ? L.quake : 0);
+    if (rank(a, "titan")) classSkillsRecord(combat).titan = TITAN_TICKS;
+  }
+  function retribution2(a, stats2, aim2, commandId) {
+    const R4 = T9.retribution, k = classSkillsRecord(c.actors[a.entityId]), held = k.held ?? [], raw = held.reduce((sum2, h) => addCombat(sum2, h.amount), multiplyCombat(stats2.attack, ...R4.attack)), reach = Math.min(400, (aug(a, "retribution", 0) ? scaled(R4.radius, T9.wide) : R4.radius) * effects2.area(a)), sourceItem = damageSourceItem(owner(a), "bash");
+    delete k.held;
+    for (const t of around2(a, a.position, reach)) damage(a, t, aug(a, "retribution", 1) && c.effects[a.entityId + "/" + t.entityId + "/bleed"] ? multiplyCombat(raw, 2, 1) : raw, "riposte", commandId, { sourceItem, trigger: "skill" });
+    return { r: reach, n: Math.min(12, held.length) };
+  }
+  function stepHeld(a, combat) {
+    const held = combat.skills?.held;
+    if (!held) return;
+    const left = held.filter((h) => --h.ticks > 0);
+    if (left.length && a.alive) combat.skills.held = left;
+    else clearSkillState(combat, "held");
+  }
   let refund = 0;
   function lunge2(a, stats2, aim2, commandId) {
     const L = T9.lunge, reach = aug(a, "lunge", 0) ? scaled(L.reach, T9.wider) : L.reach, t = cone(a, aim2, reach, L.cone, 1)[0], combat = c.actors[a.entityId], toward3 = t ? { x: t.position.x - a.position.x, y: t.position.y - a.position.y } : aim2, l = Math.hypot(toward3.x, toward3.y);
@@ -34969,11 +35167,11 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     }
     return true;
   }
-  function poison(a, t, stats2) {
+  function poison(a, t, stats2, longer = 0) {
     const b = c.mastery?.[a.entityId];
     if (!b || !t.alive || isPodCombatTargetV4(t)) return;
     const old2 = b.poisons[t.entityId], virulence = rank(a, "virulence"), attack = virulence ? combatInteger(pct2(stats2.attack, 6 * virulence)) : stats2.attack;
-    b.poisons[t.entityId] = { id: t.entityId, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, attack: copyWire(old2?.attack ?? attack), rank: old2?.rank ?? 1, toxicRank: old2?.toxicRank ?? "0", stacks: Math.min(5, (old2?.stacks ?? 0) + 1), nextTick: old2?.nextTick ?? s.tick + 60, expiresTick: s.tick + 60 * (10 + rank(a, "lingering_venom")), sourceItem: damageSourceItem(owner(a), "poison") };
+    b.poisons[t.entityId] = { id: t.entityId, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, attack: copyWire(old2?.attack ?? attack), rank: old2?.rank ?? 1, toxicRank: old2?.toxicRank ?? "0", stacks: Math.min(5, (old2?.stacks ?? 0) + 1), nextTick: old2?.nextTick ?? s.tick + 60, expiresTick: s.tick + Math.min(900, 60 * (10 + rank(a, "lingering_venom")) + longer), sourceItem: damageSourceItem(owner(a), "poison") };
   }
   function toxicFan2(a, stats2, aim2, commandId) {
     const F = T9.toxicFan, wide = aug(a, "toxic_fan", 0), slow = aug(a, "toxic_fan", 1);
@@ -35043,6 +35241,111 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     }
     if (--m.ticks <= 0) clearSkillState(combat, "smoke");
   }
+  function thousandCuts2(a, stats2, aim2, commandId) {
+    const C3 = T9.thousandCuts, t = cone(a, aim2, C3.reach, C3.cone, 1)[0];
+    if (!t || isPodCombatTargetV4(t)) return false;
+    classSkillsRecord(c.actors[a.entityId]).cuts = { target: t.entityId, left: C3.cuts, next: s.tick };
+    slash(a, stats2, commandId);
+    return landingOffset(a, t.position);
+  }
+  function slash(a, stats2, commandId = null) {
+    const C3 = T9.thousandCuts, combat = c.actors[a.entityId], cuts = combat.skills?.cuts, t = cuts ? s.entitiesById[cuts.target] : null;
+    if (!t?.alive || t.residency.spaceInstanceId !== a.residency.spaceInstanceId || distance11(a, t) > C3.reach + 40 + (t.hullRadius ?? 0)) {
+      clearSkillState(combat, "cuts");
+      return;
+    }
+    const sourceItem = damageSourceItem(owner(a), "offhand"), each = multiplyCombat(stats2.attack, ...C3.attack), hit = damage(a, t, each, "offhand", commandId, { sourceItem, trigger: "skill" });
+    if (aug(a, "thousand_cuts", 1)) for (const n of effects2.nearby(a, t, C3.fan).filter((n2) => n2 !== t && n2.alive).sort((x, y) => distance11(t, x) - distance11(t, y) || x.entityId.localeCompare(y.entityId)).slice(0, C3.fanTargets)) damage(a, n, each, "offhand", commandId, { sourceItem, trigger: "skill" });
+    if (hit?.critical) {
+      const flourish = rank(a, "flourish");
+      if (flourish && a.alive) heal(a, stats2, 5 * flourish, 1e3);
+      if (aug(a, "thousand_cuts", 0) && (cuts.extra ?? 0) < C3.flourish) {
+        cuts.extra = (cuts.extra ?? 0) + 1;
+        cuts.left++;
+      }
+    }
+    if (--cuts.left <= 0) clearSkillState(combat, "cuts");
+    else cuts.next = s.tick + CUT_GAP_TICKS;
+  }
+  function stepCuts(a, combat, suppressed) {
+    const cuts = combat.skills?.cuts;
+    if (!cuts || s.tick < cuts.next) return;
+    const stats2 = getStats(a.entityId);
+    if (!a.alive || suppressed || stats2.subType !== "dagger") {
+      clearSkillState(combat, "cuts");
+      return;
+    }
+    slash(a, stats2);
+  }
+  function noxiousBloom2(a, stats2, aim2, commandId) {
+    const N2 = T9.noxiousBloom, r = Math.max(1, Math.min(400, Math.round((aug(a, "noxious_bloom", 1) ? scaled(N2.radius, T9.wide) : N2.radius) * effects2.area(a)))), longer = aug(a, "noxious_bloom", 0) ? 120 : 0, sourceItem = damageSourceItem(owner(a), "offhand");
+    for (const t of around2(a, a.position, r)) {
+      damage(a, t, multiplyCombat(stats2.attack, ...N2.attack), "offhand", commandId, { sourceItem, trigger: "skill" });
+      poison(a, t, stats2, longer);
+      poison(a, t, stats2, longer);
+    }
+    classSkillsRecord(c.actors[a.entityId]).flower = { x: a.position.x, y: a.position.y, r, ticks: FLOWER_TICKS, next: PULSE_TICKS };
+    return { r };
+  }
+  const inFlower = (a, t) => {
+    const f = c.actors[a.entityId]?.skills?.flower;
+    return Boolean(f && Math.hypot(t.position.x - f.x, t.position.y - f.y) <= f.r + (t.hullRadius ?? 0));
+  };
+  function stepFlower(a, combat) {
+    const f = combat.skills?.flower;
+    if (!f) return;
+    if (!a.alive) {
+      clearSkillState(combat, "flower");
+      return;
+    }
+    if (--f.next <= 0) {
+      f.next = PULSE_TICKS;
+      const stats2 = getStats(a.entityId), longer = aug(a, "noxious_bloom", 0) ? 120 : 0;
+      for (const t of around2(a, f, f.r)) poison(a, t, stats2, longer);
+    }
+    if (--f.ticks <= 0) clearSkillState(combat, "flower");
+  }
+  function echoBurst(a, e) {
+    const r = rank(a, "afterimage");
+    if (!r || !a.alive) return;
+    const stats2 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "offhand");
+    for (const t of around2(a, e, T9.afterimage.radius)) damage(a, t, multiplyCombat(stats2.attack, 20 * r, 100), "offhand", null, { sourceItem, trigger: "proc" });
+  }
+  function stepEcho(a, combat) {
+    const e = combat.skills?.echo;
+    if (!e || --e.ticks > 0) return;
+    clearSkillState(combat, "echo");
+    echoBurst(a, e);
+  }
+  function shadowstep2(a, stats2, aim2) {
+    const S2 = T9.shadowstep, t = effects2.nearby(a, a, S2.reach).filter((t2) => t2.alive && !isPodCombatTargetV4(t2) && distance11(a, t2) <= S2.reach + (t2.hullRadius ?? 0)).sort((x, y) => distance11(a, x) - distance11(a, y) || x.entityId.localeCompare(y.entityId))[0];
+    if (!t) return false;
+    const d = unit3({ x: t.position.x - a.position.x, y: t.position.y - a.position.y }), gap = (t.hullRadius ?? 0) + (a.hullRadius ?? 0) + 6, from = { ...a.position }, col2 = space(a);
+    const spot = [[d.x, d.y], [-d.y, d.x], [d.y, -d.x], [-d.x, -d.y]].map(([x, y]) => ({ x: t.position.x + x * gap, y: t.position.y + y * gap })).find((p) => !collidesWithTiles(col2, p.x, p.y, a.hullRadius));
+    if (!spot) return false;
+    a.position = spot;
+    a.movedLastTick = true;
+    classSkillsRecord(c.actors[a.entityId]).stepped = STEPPED_TICKS;
+    return landingOffset(a, from, "2");
+  }
+  function stepCharges(a, combat) {
+    const k = combat.skills;
+    if (!rank(a, "shadowstep") || !aug(a, "shadowstep", 1)) {
+      if (k?.stepSpare || k?.stepRefill) {
+        delete k.stepSpare;
+        k.stepRefill = 1;
+        clearSkillState(combat, "stepRefill");
+      }
+      return;
+    }
+    if (!a.alive || k?.cooldowns?.shadowstep || k?.stepSpare) return;
+    const r = classSkillsRecord(combat), left = (r.stepRefill ?? CLASS_SKILLS.shadowstep.cooldownTicks) - 1;
+    if (left > 0) r.stepRefill = left;
+    else {
+      delete r.stepRefill;
+      r.stepSpare = true;
+    }
+  }
   const spell = (stats2, attack) => {
     const p = stats2.familyProperties?.tomePower ?? combatAmount(18, 10);
     return multiplyCombat(multiplyCombat(stats2.attack, ...attack), p.n, p.d);
@@ -35069,7 +35372,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       damage(a, t, raw, "frost", commandId, { sourceItem: damageSourceItem(owner(a), "frost"), trigger: "skill" });
       if (!t.alive || isPodCombatTargetV4(t)) continue;
       const def = definition2(t), phase = def.isBoss === true ? "boss-slow" : def.isElite === true || def.isMiniboss ? "chill" : "freeze", id = a.entityId + "/" + t.entityId;
-      c.controls[id] = { id, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, phase, stacks: phase === "chill" ? 3 : 0, appliedTick: s.tick, expiresTick: s.tick + (phase === "chill" ? chill : phase === "boss-slow" ? 90 : Math.round((deep ? 90 : 60) * (100 + 10 * rank(a, "deep_freeze")) / 100)) };
+      c.controls[id] = { id, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, phase, stacks: phase === "chill" ? 3 : 0, appliedTick: s.tick, expiresTick: s.tick + (phase === "chill" ? chill : phase === "boss-slow" ? 90 : Math.round((deep ? 90 : 60) * (100 + 10 * rank(a, "deep_freeze")) / 100)), ...phase === "chill" ? chillSince(s, a, c.controls[id]) : {} };
     }
     return { r: extent(a, reach) };
   }
@@ -35221,7 +35524,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     c.controls ??= {};
     const def = definition2(t), phase = def.isBoss === true ? "boss-slow" : !freeze2 || def.isElite === true || def.isMiniboss ? "chill" : "freeze", id = a.entityId + "/" + t.entityId, old2 = c.controls[id];
     if (old2 && old2.expiresTick > s.tick && (old2.phase === "freeze" || old2.phase === phase)) return;
-    c.controls[id] = { id, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, phase, stacks: phase === "chill" ? 1 : 0, appliedTick: s.tick, expiresTick: s.tick + (phase === "chill" ? 240 : phase === "boss-slow" ? 90 : 60) };
+    c.controls[id] = { id, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, phase, stacks: phase === "chill" ? 1 : 0, appliedTick: s.tick, expiresTick: s.tick + (phase === "chill" ? 240 : phase === "boss-slow" ? 90 : 60), ...phase === "chill" ? chillSince(s, a, old2) : {} };
   }
   function staticField2(a) {
     classSkillsRecord(c.actors[a.entityId]).field = { x: a.position.x, y: a.position.y, ticks: aug(a, "static_field", 0) ? FIELD_MAX : FIELD_TICKS, next: PULSE_TICKS };
@@ -35260,8 +35563,95 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     }
     if (--f.ticks <= 0) clearSkillState(combat, "field");
   }
-  const handlers = { shield_bash: bash, flurry, cast: cast2, earth_breaker: earthBreaker2, rallying_cry: rallyingCry2, counter_stance: counterStance2, shield_charge: shieldCharge2, shield_throw: shieldThrow2, war_banner: warBanner2, lunge: lunge2, toxic_fan: toxicFan2, whirling_blades: whirlingBlades2, riposte: riposte2, rupture: rupture2, smoke_veil: smokeVeil2, firebloom: firebloom2, flashfreeze: flashfreeze2, ball_lightning: ballLightning, flame_wall: flameWall2, ice_barrier: iceBarrier2, static_field: staticField2 };
-  const ELEMENT = { firebloom: "fire", flame_wall: "fire", flashfreeze: "frost", ice_barrier: "frost", ball_lightning: "lightning", static_field: "lightning" };
+  function meteor(a, stats2, aim2) {
+    const M4 = T9.meteor, first = cone(a, aim2, M4.reach, M4.cone, 1)[0], at5 = first ? { ...first.position } : landing(a, aim2, M4.distance).position, shower = aug(a, "meteor", 1), ground = METEOR_GROUND_TICKS + (aug(a, "meteor", 0) ? M4.crater : 0), col2 = space(a), heading = Math.atan2(aim2.y, aim2.x);
+    const spots = shower ? [0, 1, 2].map((i) => ({ x: at5.x + Math.cos(heading + i * Math.PI * 2 / 3) * M4.spacing, y: at5.y + Math.sin(heading + i * Math.PI * 2 / 3) * M4.spacing })).map((p) => collidesWithTiles(col2, p.x, p.y, 4) ? { ...at5 } : p) : [at5], r = shower ? scaled(M4.radius, M4.small) : M4.radius;
+    classSkillsRecord(c.actors[a.entityId]).meteors = spots.map((p, i) => ({ x: p.x, y: p.y, fall: METEOR_FALL_TICKS + i * 10, ticks: ground, next: M4.pulse, r }));
+    return { n: spots.length };
+  }
+  function stepMeteors(a, combat) {
+    const list = combat.skills?.meteors;
+    if (!list) return;
+    if (!a.alive) {
+      clearSkillState(combat, "meteors");
+      return;
+    }
+    const M4 = T9.meteor, stats2 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "fire"), A = effects2.area(a);
+    for (const m of list) {
+      if (m.fall > 0) {
+        if (--m.fall > 0) continue;
+        const raw = spell(stats2, M4.attack);
+        for (const t of around2(a, m, m.r * A)) {
+          damage(a, t, m.r < M4.radius ? multiplyCombat(raw, ...M4.small) : raw, "fire", null, { sourceItem, trigger: "skill" });
+          burn(a, t, sourceItem);
+        }
+        continue;
+      }
+      if (--m.next <= 0) {
+        m.next = M4.pulse;
+        const molten = rank(a, "molten_ground"), raw = spell(stats2, M4.ground);
+        for (const t of around2(a, m, m.r * A)) damage(a, t, molten ? pct2(raw, 8 * molten) : raw, "fire", null, { sourceItem, trigger: "skill" });
+      }
+      m.ticks--;
+    }
+    const left = list.filter((m) => m.fall > 0 || m.ticks > 0);
+    if (left.length) combat.skills.meteors = left;
+    else clearSkillState(combat, "meteors");
+  }
+  function grasp(a) {
+    const r = rank(a, "winters_grasp");
+    if (!r || !a.alive) return;
+    for (const e of Object.values(c.controls ?? {})) {
+      if (e.sourceId !== a.entityId || e.phase !== "chill" || e.since === void 0 || e.expiresTick <= s.tick || s.tick - e.since < 180) continue;
+      const t = s.entitiesById[e.targetId];
+      if (!t?.alive || definition2(t).isBoss) continue;
+      c.controls[e.id] = { id: e.id, sourceId: e.sourceId, targetId: e.targetId, spaceInstanceId: e.spaceInstanceId, phase: "freeze", stacks: 0, appliedTick: s.tick, expiresTick: s.tick + 12 * r };
+    }
+  }
+  function glacialBurst2(a, stats2, aim2, commandId) {
+    const G3 = T9.glacialBurst, combat = c.actors[a.entityId], ice = combat.skills?.ice, old2 = combat.barrier ?? 0, spent = addCombat(ice ? ice.hp : 0, old2);
+    if (compareCombat(spent, 0) <= 0) return false;
+    const ticks = ice?.ticks ?? ICE_TICKS;
+    clearSkillState(combat, "ice");
+    if (compareCombat(old2, 0) > 0) combat.barrier = combatInteger(subtractCombat(old2, old2));
+    const raw = multiplyCombat(spent, 2, 1), sourceItem = damageSourceItem(owner(a), "frost"), hit = cone(a, aim2, G3.radius, Math.PI, G3.targets), lances = aug(a, "glacial_burst", 1);
+    for (const t of hit) {
+      damage(a, t, raw, "frost", commandId, { sourceItem, trigger: "skill" });
+      if (canStun(a)) frost(a, t, false);
+    }
+    if (lances) for (let i = 0; i < G3.lances; i++) {
+      const angle3 = i * Math.PI * 2 / G3.lances, end = pathEnd(a, { x: Math.cos(angle3), y: Math.sin(angle3), remaining: G3.lance });
+      for (const t of alongPath(a, a.position, end)) {
+        if (hit.includes(t) || !t.alive) continue;
+        hit.push(t);
+        damage(a, t, spent, "frost", commandId, { sourceItem, trigger: "skill" });
+        if (canStun(a)) frost(a, t, false);
+      }
+    }
+    const back = (aug(a, "glacial_burst", 0) ? 30 : 0) + 5 * rank(a, "echoing_burst");
+    if (back) {
+      const hp = combatInteger(multiplyCombat(spent, back, 100));
+      if (compareCombat(hp, 0) > 0) classSkillsRecord(combat).ice = { hp, ticks };
+    }
+    return { r: extent(a, G3.radius), ...lances ? { n: G3.lances } : {} };
+  }
+  function thunderfall2(a, stats2, aim2, commandId) {
+    const F = T9.thunderfall, bolts = F.bolts + (aug(a, "thunderfall", 0) ? 2 : 0) + rank(a, "storm_call"), reach = Math.min(400, F.radius * effects2.area(a)), raw = spell(stats2, F.attack), sourceItem = damageSourceItem(owner(a), "lightning"), clap = aug(a, "thunderfall", 1);
+    const targets = around2(a, a.position, reach).sort((x, y) => distance11(a, x) - distance11(a, y) || x.entityId.localeCompare(y.entityId)).slice(0, bolts);
+    for (const t of targets) {
+      damage(a, t, raw, "lightning", commandId, { sourceItem, trigger: "skill", chainFrom: { entityId: a.entityId, position: { x: t.position.x, y: t.position.y - F.sky } } });
+      if (clap && t.alive && ordinary(t) && canStun(a)) effects2.status(a, t, "stun", 1, F.stun);
+    }
+    return { r: reach, n: Math.min(12, targets.length) };
+  }
+  let zapped = null;
+  function quicken(a, combat) {
+    const r = rank(a, "quickening"), k = combat.skills;
+    if (!r || !k?.quick || s.tick % 25 >= r) return;
+    for (const id of Object.keys(k.cooldowns)) reduceSkillCooldown(combat, id, 1);
+  }
+  const handlers = { shield_bash: bash, flurry, cast: cast2, earth_breaker: earthBreaker2, rallying_cry: rallyingCry2, counter_stance: counterStance2, shield_charge: shieldCharge2, shield_throw: shieldThrow2, war_banner: warBanner2, lunge: lunge2, toxic_fan: toxicFan2, whirling_blades: whirlingBlades2, riposte: riposte2, rupture: rupture2, smoke_veil: smokeVeil2, firebloom: firebloom2, flashfreeze: flashfreeze2, ball_lightning: ballLightning, flame_wall: flameWall2, ice_barrier: iceBarrier2, static_field: staticField2, aegis_pulse: aegisPulse2, skyfall_leap: skyfallLeap2, retribution: retribution2, thousand_cuts: thousandCuts2, noxious_bloom: noxiousBloom2, shadowstep: shadowstep2, meteor, glacial_burst: glacialBurst2, thunderfall: thunderfall2 };
+  const ELEMENT = { firebloom: "fire", flame_wall: "fire", meteor: "fire", flashfreeze: "frost", ice_barrier: "frost", glacial_burst: "frost", ball_lightning: "lightning", static_field: "lightning", thunderfall: "lightning" };
   let weaving = 0;
   function use(a, skillId, aimInput, commandId = null) {
     const stats2 = getStats(a.entityId), aim2 = unit3(aimInput), element = ELEMENT[skillId], weave = rank(a, "spell_weaving"), last = c.actors[a.entityId]?.skills?.weave;
@@ -35280,6 +35670,16 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (refund) {
       reduceSkillCooldown(c.actors[a.entityId], skillId, refund);
       refund = 0;
+    }
+    if (skillId === "shadowstep" && aug(a, "shadowstep", 1)) {
+      if (record3.stepSpare) {
+        delete record3.stepSpare;
+        record3.stepRefill = record3.cooldowns.shadowstep;
+        delete record3.cooldowns.shadowstep;
+      } else if (record3.stepRefill) {
+        record3.cooldowns.shadowstep = Math.min(record3.cooldowns.shadowstep, record3.stepRefill);
+        delete record3.stepRefill;
+      }
     }
     if (weave && element) record3.weave = { element, ticks: WEAVE_TICKS };
     if (rank(a, "momentum")) record3.surge = SURGE_TICKS;
@@ -35336,6 +35736,16 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     stepOrbs(a, combat);
     stepTrail(a, combat);
     stepPool(a, combat);
+    stepLeap(a, combat);
+    stepCrack(a, combat);
+    stepHeld(a, combat);
+    stepCuts(a, combat, suppressed);
+    stepFlower(a, combat);
+    stepEcho(a, combat);
+    stepCharges(a, combat);
+    stepMeteors(a, combat);
+    grasp(a);
+    quicken(a, combat);
     wail(a, combat);
     const string = combat.skills?.flurry;
     if (!string || s.tick < string.nextTick) return;
@@ -35395,9 +35805,14 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (opening3 && target.maxHp !== void 0 && compareCombat(target.hp, target.maxHp) >= 0) n += 10 * opening3;
     return n ? combatAmount(n, 100) : null;
   }
-  let enGardeHit = null;
+  let enGardeHit = null, stepHit = null;
   function forceCrit(source3, target, trigger) {
     const k = record2(source3);
+    if (trigger !== "periodic" && k?.stepped) {
+      clearSkillState(c.actors[source3.entityId], "stepped");
+      stepHit = target.entityId;
+      return true;
+    }
     if (trigger === "periodic" || !k?.enGarde || !rank(source3, "en_garde")) return false;
     delete k.enGarde;
     enGardeHit = target.entityId;
@@ -35465,8 +35880,35 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       if (was && was.expiresTick > s.tick && was.rank !== element) out = pct2(out, 5 * overload);
       effects2.status(source3, target, "struck", element, 600);
     }
+    const spite = rank(source3, "spite");
+    if (spite && record2(source3)?.spite) out = pct2(out, 5 * spite);
+    const exe = rank(source3, "executioner");
+    if (exe && target.maxHp !== void 0 && compareCombat(multiplyCombat(target.hp, 100, 1), multiplyCombat(target.maxHp, 25, 1)) < 0) out = pct2(out, 6 * exe);
+    const fester = rank(source3, "fester");
+    if (fester && mechanic === "poison" && inFlower(source3, target)) out = pct2(out, 5 * fester);
+    const pyro = rank(source3, "pyromaniac");
+    if (pyro) {
+      const P8 = T9.pyromaniac;
+      let n = 0;
+      for (const e of Object.values(c.effects)) {
+        if (n >= P8.most) break;
+        if (e.sourceId !== source3.entityId || e.kind !== "burn") continue;
+        const t = s.entitiesById[e.targetId];
+        if (t?.alive && Math.hypot(t.position.x - source3.position.x, t.position.y - source3.position.y) <= P8.reach) n++;
+      }
+      if (n) out = pct2(out, pyro * n);
+    }
+    if (stepHit === target.entityId) {
+      stepHit = null;
+      out = multiplyCombat(out, ...aug(source3, "shadowstep", 0) ? T9.shadowstep.assassinate : T9.shadowstep.crit);
+      const sharp = rank(source3, "assassinate");
+      if (sharp) out = pct2(out, 10 * sharp);
+    }
+    if (mechanic === "lightning") zapped = { id: target.entityId, tick: s.tick };
     const combat = c.actors[source3.entityId];
     if (!combat || trigger === "periodic") return whole(out);
+    const dance = rank(source3, "blade_dance");
+    if (dance && critical) reduceSkillCooldown(combat, "thousand_cuts", 6 * dance);
     if (critical && target.alive && wears(source3, "glasstail-cloak")) bleed(source3, target, getStats(source3.entityId));
     const blood = rank(source3, "blood_for_blood");
     if (blood && source3.alive && marks2.ticking(target, "bleed")) heal(source3, getStats(source3.entityId), 5 * blood, 1e3);
@@ -35519,6 +35961,17 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     const ward = rank(target, "frost_ward");
     if (ward && defense.ice === "broke" && canStun(target)) {
       for (const t of around2(target, target.position, T9.flashfreeze.radius)) if (!isPodCombatTargetV4(t)) for (let n = 0; n < ward && t.alive; n++) applyFrostControl(s, target, t, stats2, 240 + 24 * rank(target, "cold_snap"));
+    }
+    const aegis = combat?.skills?.aegis, bastion = rank(target, "bastion_ward");
+    if (aegis && bastion && defense.defense === "block") aegis.hp = combatInteger(minCombat(aegis.full, addCombat(aegis.hp, multiplyCombat(aegis.full, 2 * bastion, 100))));
+    if (defense.aegis === "broke" && aug(target, "aegis_pulse", 0)) shove(target);
+    if (defense.counter === "stance" && rank(target, "spite") && combat) classSkillsRecord(combat).spite = SPITE_TICKS;
+    if (defense.defense === "block" && rank(target, "retribution") && combat) {
+      const amount = combatInteger(addCombat(defense.prevented ?? 0, defense.damage ?? 0));
+      if (compareCombat(amount, 0) > 0) {
+        const k = classSkillsRecord(combat);
+        k.held = [...k.held ?? [], { amount, ticks: MEMORY_TICKS }].slice(-HELD_MAX);
+      }
     }
     const grudge = rank(target, "grudge");
     if (grudge && source3.alive && canStun(target) && !isPodCombatTargetV4(source3)) effects2.status(target, source3, "grudge", grudge, 240);
@@ -35574,6 +36027,11 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       for (const t of alongPath(a, from, to)) damage(a, t, multiplyCombat(stats2.attack, T9.crosscut.attack[0] * cross, T9.crosscut.attack[1]), "offhand", null, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "proc" });
     }
     if (rank(a, "cinder_step") || wears(a, "pharaoh-khopesh")) classSkillsRecord(combat).trail = { x: from.x, y: from.y, x2: to.x, y2: to.y, ticks: TRAIL_TICKS, next: 1 };
+    if (rank(a, "afterimage")) {
+      const k = classSkillsRecord(combat);
+      if (k.echo) echoBurst(a, k.echo);
+      k.echo = { x: from.x, y: from.y, ticks: ECHO_TICKS };
+    }
   }
   function landed(a, target) {
     const combat = c.actors[a.entityId];
@@ -35610,6 +36068,9 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
         }
       }
     }
+    const letting = rank(a, "bloodletting");
+    if (letting && a.alive && (c.effects[a.entityId + "/" + target.entityId + "/bleed"] || c.mastery?.[a.entityId]?.poisons?.[target.entityId])) heal(a, getStats(a.entityId), letting, 100);
+    if (rank(a, "quickening") && combat && zapped?.id === target.entityId && zapped.tick === s.tick) classSkillsRecord(combat).quick = QUICK_TICKS;
     const harvest = rank(a, "red_harvest"), bled = c.effects[a.entityId + "/" + target.entityId + "/bleed"];
     if (harvest && bled) for (const n of around2(a, target.position, T9.jump).filter((n2) => n2 !== target && !isPodCombatTargetV4(n2)).sort((x, y) => distance11(target, x) - distance11(target, y) || x.entityId.localeCompare(y.entityId)).slice(0, harvest)) periodic(a, n, "bleed", bled.attack, { sourceItem: bled.sourceItem });
   }
@@ -38931,7 +39392,7 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
       const stats2 = progression.resolvedStats(target.entityId), suppressed = subweaponSuppressedD12_4I(state, target.entityId);
       defenseStats = stats2;
       const defenseSource = attribution?.projectileDirection ? { ...source3, position: { x: target.position.x - attribution.projectileDirection.x * 32, y: target.position.y - attribution.projectileDirection.y * 32 } } : source3;
-      defense = incomingSubweaponHit({ combat: state.subweaponCombat.actors[target.entityId], stats: stats2, raw, actor: target, source: defenseSource, knight: playerFor(target.entityId)?.d8?.heroClass === "knight", wall: classRank(playerFor(target.entityId)?.d8, "iron_wall"), boss: bossCombat.isBoss(source3.entityId) || Boolean(state.content.definitionsById[source3.contentDefinitionId]?.isBoss), suppressed });
+      defense = incomingSubweaponHit({ combat: state.subweaponCombat.actors[target.entityId], stats: stats2, raw, actor: target, source: defenseSource, knight: playerFor(target.entityId)?.d8?.heroClass === "knight", wall: classRank(playerFor(target.entityId)?.d8, "iron_wall"), steady: classRank(playerFor(target.entityId)?.d8, "unyielding"), boss: bossCombat.isBoss(source3.entityId) || Boolean(state.content.definitionsById[source3.contentDefinitionId]?.isBoss), suppressed });
       raw = defense.damage;
       if (compareCombat(defense.absorbed, 0) > 0) barrierAbsorption = { absorbed: copyWire(defense.absorbed), remaining: copyWire(state.subweaponCombat.actors[target.entityId].barrier), capacity: copyWire(stats2.maxBarrier) };
     }
@@ -40111,7 +40572,7 @@ function projectCombatPresentation(state, visibleIds) {
   return { masteryHazards: mastery.flatMap((b) => Object.values(b.hazards)).filter((e) => ids4.has(e.sourceId)).map((e) => ({ position: { ...e.position }, radius: e.radius, expiresTick: e.expiresTick })), masteryRazors: mastery.flatMap((b) => Object.values(b.razors)).filter((e) => ids4.has(e.sourceId)).map((e) => ({ position: { ...e.position }, direction: { ...e.direction } })), statuses: [...Object.values(state.subweaponCombat.effects), ...mastery.flatMap((b) => [...Object.values(b.poisons).map((e) => ({ ...e, id: e.sourceId + "/" + e.id, kind: "poison" })), ...Object.values(b.statuses).filter((e) => e.kind !== "grudge" && e.kind !== "weaken").map((e) => ({ ...e, id: e.sourceId + "/" + e.id, stacks: e.rank, nextTick: e.expiresTick, appliedTick: e.expiresTick - (e.kind === "expose" ? 300 : e.kind === "slow" ? 240 : 90) }))]), ...Object.values(state.subweaponCombat.controls ?? {}).map((e) => ({ ...e, kind: e.phase, nextTick: e.expiresTick }))].filter((e) => ids4.has(e.targetId) && e.expiresTick > state.tick).map((e) => ({ lane: (lanes2.set(e.targetId, (lanes2.get(e.targetId) ?? -1) + 1), lanes2.get(e.targetId)), id: e.id, sourceId: e.sourceId, targetId: e.targetId, kind: e.kind, stacks: e.stacks, expiresTick: e.expiresTick, nextTick: e.nextTick, durationFrames: ["bleed", "poison"].includes(e.kind) ? 600 : e.kind === "burn" ? 240 : e.expiresTick - e.appliedTick })), families: Object.fromEntries(Object.entries(state.subweaponCombat.actors).filter(([id]) => ids4.has(id)).map(([id, c]) => [id, { mastery: (() => {
     const p = Object.values(state.playersById).find((p2) => p2.entityId === id), d = p?.d8, t = d?.transient;
     return t ? { pulseBlocks: t.pulseBlocks, syphon: finiteNodeRank(d, "tome_arcane_syphon") > 0, earthBreaker: finiteNodeRank(d, "shield_earth_breaker_bash") > 0, singularity: finiteNodeRank(d, "tome_keystone_singularity") > 0, anchor: t.lastAnchor, fortitudeStacks: t.fortitudeStacks, retaliatoryReady: t.retaliatoryReady, colossus: t.colossusTicks > 0, shadowStep: t.shadowStepTicks > 0, syphonStacks: t.syphonStacks, weavingStacks: t.weavingStacks } : null;
-  })(), element: Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.itemsById[Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.equipped.subweapon]?.generated?.definition.spellType ?? "fire", guard: c.guard ? { ...c.guard, integrity: presentCombat(c.guard.integrity), direction: { ...c.guard.direction } } : null, pressure: c.pressure, dash: { ...c.dash }, blink: itemDefinition(((p) => p?.inventory.itemsById[p.inventory.equipped.subweapon])(Object.values(state.playersById).find((p) => p.entityId === id)))?.subType === "tome", delivery: { ...c.delivery }, skill: c.skills?.last ? { ...c.skills.last } : null, parry: c.skills?.parry ?? c.skills?.counter ?? 0, orbs: c.skills?.orbs?.map((o) => ({ x: o.x, y: o.y, dx: o.dx, dy: o.dy, ticks: o.ticks })) ?? null, trail: c.skills?.trail ? { x: c.skills.trail.x, y: c.skills.trail.y, x2: c.skills.trail.x2, y2: c.skills.trail.y2, ticks: c.skills.trail.ticks } : null, pool: c.skills?.pool ? { x: c.skills.pool.x, y: c.skills.pool.y, ticks: c.skills.pool.ticks } : null, thrown: c.skills?.thrown ? { x: c.skills.thrown.x, y: c.skills.thrown.y } : null, banner: c.skills?.banner ? { x: c.skills.banner.x, y: c.skills.banner.y, ticks: c.skills.banner.ticks } : null, smoke: c.skills?.smoke ? { x: c.skills.smoke.x, y: c.skills.smoke.y, ticks: c.skills.smoke.ticks } : null, flameWall: c.skills?.wall ? { x: c.skills.wall.x, y: c.skills.wall.y, dx: c.skills.wall.dx, dy: c.skills.wall.dy, ticks: c.skills.wall.ticks, ring: Boolean(c.skills.wall.ring) } : null, field: c.skills?.field ? { x: c.skills.field.x, y: c.skills.field.y, ticks: c.skills.field.ticks } : null, ice: c.skills?.ice ? { ticks: c.skills.ice.ticks } : null, riposte: c.skills?.riposte ?? 0, keen: Boolean(c.skills?.keen), sun: c.skills?.sun ?? 0, wail: c.skills?.wail ?? 0, shell: c.skills?.shell ?? 0, wall: classRank(Object.values(state.playersById).find((p) => p.entityId === id)?.d8, "iron_wall") }])) };
+  })(), element: Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.itemsById[Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.equipped.subweapon]?.generated?.definition.spellType ?? "fire", guard: c.guard ? { ...c.guard, integrity: presentCombat(c.guard.integrity), direction: { ...c.guard.direction } } : null, pressure: c.pressure, dash: { ...c.dash }, blink: itemDefinition(((p) => p?.inventory.itemsById[p.inventory.equipped.subweapon])(Object.values(state.playersById).find((p) => p.entityId === id)))?.subType === "tome", delivery: { ...c.delivery }, skill: c.skills?.last ? { ...c.skills.last } : null, parry: c.skills?.parry ?? c.skills?.counter ?? 0, orbs: c.skills?.orbs?.map((o) => ({ x: o.x, y: o.y, dx: o.dx, dy: o.dy, ticks: o.ticks })) ?? null, trail: c.skills?.trail ? { x: c.skills.trail.x, y: c.skills.trail.y, x2: c.skills.trail.x2, y2: c.skills.trail.y2, ticks: c.skills.trail.ticks } : null, pool: c.skills?.pool ? { x: c.skills.pool.x, y: c.skills.pool.y, ticks: c.skills.pool.ticks } : null, thrown: c.skills?.thrown ? { x: c.skills.thrown.x, y: c.skills.thrown.y } : null, banner: c.skills?.banner ? { x: c.skills.banner.x, y: c.skills.banner.y, ticks: c.skills.banner.ticks } : null, smoke: c.skills?.smoke ? { x: c.skills.smoke.x, y: c.skills.smoke.y, ticks: c.skills.smoke.ticks } : null, flameWall: c.skills?.wall ? { x: c.skills.wall.x, y: c.skills.wall.y, dx: c.skills.wall.dx, dy: c.skills.wall.dy, ticks: c.skills.wall.ticks, ring: Boolean(c.skills.wall.ring) } : null, field: c.skills?.field ? { x: c.skills.field.x, y: c.skills.field.y, ticks: c.skills.field.ticks } : null, ice: c.skills?.ice ? { ticks: c.skills.ice.ticks } : null, aegis: c.skills?.aegis ? { ticks: c.skills.aegis.ticks } : null, crack: c.skills?.crack ? { x: c.skills.crack.x, y: c.skills.crack.y, r: c.skills.crack.r, ticks: c.skills.crack.ticks } : null, flower: c.skills?.flower ? { x: c.skills.flower.x, y: c.skills.flower.y, r: c.skills.flower.r, ticks: c.skills.flower.ticks } : null, echo: c.skills?.echo ? { x: c.skills.echo.x, y: c.skills.echo.y, ticks: c.skills.echo.ticks } : null, meteors: c.skills?.meteors ? c.skills.meteors.map((m) => ({ x: m.x, y: m.y, fall: m.fall, ticks: m.ticks, r: m.r })) : null, stepped: Boolean(c.skills?.stepped), riposte: c.skills?.riposte ?? 0, keen: Boolean(c.skills?.keen), sun: c.skills?.sun ?? 0, wail: c.skills?.wail ?? 0, shell: c.skills?.shell ?? 0, wall: classRank(Object.values(state.playersById).find((p) => p.entityId === id)?.d8, "iron_wall") }])) };
 }
 
 // src/shared/content/creatures_d11.js
@@ -44032,7 +44493,16 @@ var SKILL_ICONS_V1 = Object.freeze({
   smoke_veil: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="sk-sv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ece8f4"/><stop offset=".6" stop-color="#b9b2c8"/><stop offset="1" stop-color="#6f6684"/></linearGradient></defs><path d="M7 40l9-9M41 40l-9-9" fill="none" stroke="#0b1015" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 40l9-9M41 40l-9-9" fill="none" stroke="#b48cff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 34a8 8 0 0 1 2-15 10 10 0 0 1 19-4 8 8 0 0 1 8 11 6 6 0 0 1-3 8z" fill="url(#sk-sv)" stroke="#0b1015" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/><path d="M16 20a6 6 0 0 1 8-3" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".9"/><path d="M15 30c4 2 12 2 17-1" fill="none" stroke="#5b2fa8" stroke-width="2" stroke-linecap="round" opacity=".6"/></svg>`,
   flame_wall: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="sk-fw" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#fff1c4"/><stop offset=".35" stop-color="#ffc94d"/><stop offset=".75" stop-color="#ff7a1f"/><stop offset="1" stop-color="#b8361d"/></linearGradient></defs><path d="M3 42h42" fill="none" stroke="#0b1015" stroke-width="6.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 42h42" fill="none" stroke="#5a2a12" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 40c0-8 5-11 4-19 4 3 6 7 6 11 1-6 4-10 3-17 5 4 7 10 7 16 1-7 5-11 4-20 6 5 8 12 7 19 2-4 5-6 5-10 4 5 5 11 4 20z" fill="url(#sk-fw)" stroke="#0b1015" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/><path d="M12 39c0-3 1-5 2-7M24 39c0-4 1-7 2-9M36 39c0-3 1-5 2-7" fill="none" stroke="#fff1c4" stroke-width="2" stroke-linecap="round"/></svg>`,
   ice_barrier: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="sk-ib" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#bfe9ff"/><stop offset="1" stop-color="#3c7fb0"/></linearGradient></defs><path d="M24 3l16 9v18l-16 15-16-15V12z" fill="url(#sk-ib)" stroke="#0b1015" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/><path d="M24 3v42M8 12l16 10 16-10M24 22v0" fill="none" stroke="#2f6f9e" stroke-width="1.8" stroke-linejoin="round" opacity=".55"/><path d="M24 15v14M18 19l12 6M30 19l-12 6" fill="none" stroke="#0b1015" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 15v14M18 19l12 6M30 19l-12 6" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 13l6-4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>`,
-  static_field: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><radialGradient id="sk-sf" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#fff3a6"/><stop offset=".55" stop-color="#b9a6ff"/><stop offset="1" stop-color="#5b3fd6"/></radialGradient></defs><ellipse cx="24" cy="31" rx="21" ry="12" fill="url(#sk-sf)" stroke="#0b1015" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/><ellipse cx="24" cy="31" rx="14" ry="7.5" fill="none" stroke="#fff3a6" stroke-width="1.6" opacity=".8"/><path d="M15 6l-3 9 5 1-4 9" fill="none" stroke="#0b1015" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 6l-3 9 5 1-4 9" fill="none" stroke="#ffe45c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M33 4l-3 10 5 1-3 10" fill="none" stroke="#0b1015" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M33 4l-3 10 5 1-3 10" fill="none" stroke="#ffe45c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 12l-2 6 4 1-2 7" fill="none" stroke="#0b1015" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 12l-2 6 4 1-2 7" fill="none" stroke="#fff3a6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+  static_field: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><radialGradient id="sk-sf" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#fff3a6"/><stop offset=".55" stop-color="#b9a6ff"/><stop offset="1" stop-color="#5b3fd6"/></radialGradient></defs><ellipse cx="24" cy="31" rx="21" ry="12" fill="url(#sk-sf)" stroke="#0b1015" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/><ellipse cx="24" cy="31" rx="14" ry="7.5" fill="none" stroke="#fff3a6" stroke-width="1.6" opacity=".8"/><path d="M15 6l-3 9 5 1-4 9" fill="none" stroke="#0b1015" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 6l-3 9 5 1-4 9" fill="none" stroke="#ffe45c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M33 4l-3 10 5 1-3 10" fill="none" stroke="#0b1015" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M33 4l-3 10 5 1-3 10" fill="none" stroke="#ffe45c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 12l-2 6 4 1-2 7" fill="none" stroke="#0b1015" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 12l-2 6 4 1-2 7" fill="none" stroke="#fff3a6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  aegis_pulse: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="sk-ap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2fbff"/><stop offset=".5" stop-color="#73bedc"/><stop offset="1" stop-color="#1f5680"/></linearGradient></defs><path d="M8 15a18 18 0 0 0 0 18M40 15a18 18 0 0 1 0 18M3.5 10a25 25 0 0 0 0 28M44.5 10a25 25 0 0 1 0 28" fill="none" stroke="#0b1015" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 15a18 18 0 0 0 0 18M40 15a18 18 0 0 1 0 18M3.5 10a25 25 0 0 0 0 28M44.5 10a25 25 0 0 1 0 28" fill="none" stroke="#bfe6f7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 7l12 4.5v10c0 9-5.5 14-12 18-6.5-4-12-9-12-18v-10z" fill="url(#sk-ap)" stroke="#0b1015" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/><path d="M24 15l5 2.9v5.8l-5 2.9-5-2.9v-5.8z" fill="#ffd36b" stroke="#0b1015" stroke-width="2" stroke-linejoin="round"/><path d="M16.5 13.5l4.5-1.6" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none" opacity=".85"/></svg>`,
+  skyfall_leap: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="sk-sl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff1dc"/><stop offset=".5" stop-color="#ff9d5c"/><stop offset="1" stop-color="#a8431c"/></linearGradient></defs><path d="M4 41h40" fill="none" stroke="#0b1015" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 41h40" fill="none" stroke="#ff9d5c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 38l-3 6M24 38l4 5M15 37l-7-4M33 37l7-4" fill="none" stroke="#0b1015" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 38l-3 6M24 38l4 5M15 37l-7-4M33 37l7-4" fill="none" stroke="#ffd09a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 3h12v14h7L24 35 11 17h7z" fill="url(#sk-sl)" stroke="#0b1015" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="8" cy="27" r="2.6" fill="#5a3d29" stroke="#0b1015" stroke-width="1.6"/><circle cx="40" cy="26" r="2.2" fill="#5a3d29" stroke="#0b1015" stroke-width="1.6"/><path d="M21 6v10" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none" opacity=".85"/></svg>`,
+  retribution: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><radialGradient id="sk-rt" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#fff0f2"/><stop offset=".45" stop-color="#ff8fa0"/><stop offset="1" stop-color="#9c2f45"/></radialGradient></defs><path d="M24 2L28 11.6L36.9 6.2L34.5 16.4L44.9 17.2L37 24L44.9 30.8L34.5 31.6L36.9 41.8L28 36.4L24 46L20 36.4L11.1 41.8L13.5 31.6L3.1 30.8L11 24L3.1 17.2L13.5 16.4L11.1 6.2L20 11.6Z" fill="#ffd0d8" stroke="#0b1015" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/><path d="M24 12l9.5 3.5v8c0 6.5-4.2 10.5-9.5 13.5-5.3-3-9.5-7-9.5-13.5v-8z" fill="url(#sk-rt)" stroke="#0b1015" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/><path d="M24 17v13M19 22h10" fill="none" stroke="#0b1015" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 17v13M19 22h10" fill="none" stroke="#fff0f2" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 16l3-1.1" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none" opacity=".85"/></svg>`,
+  thousand_cuts: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="sk-tc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fffbe6"/><stop offset=".5" stop-color="#f5cf6a"/><stop offset="1" stop-color="#9a6b12"/></linearGradient></defs><path d="M6 15L42 29M6 31L42 17M15 6L31 42M33 6L17 42" fill="none" stroke="#0b1015" stroke-width="5.6" stroke-linecap="round"/><path d="M6 15L42 29M6 31L42 17M15 6L31 42M33 6L17 42" fill="none" stroke="url(#sk-tc)" stroke-width="3" stroke-linecap="round"/><path d="M6 15L42 29M6 31L42 17M15 6L31 42M33 6L17 42" fill="none" stroke="#fffbe6" stroke-width="1" stroke-linecap="round" opacity=".8"/><path d="M24 16.5L25.8 22.2L31.5 24L25.8 25.8L24 31.5L22.2 25.8L16.5 24L22.2 22.2Z" fill="#fff3c4" stroke="#0b1015" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></svg>`,
+  noxious_bloom: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="sk-nb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3b6f2"/><stop offset=".55" stop-color="#9a4fb8"/><stop offset="1" stop-color="#4a1d5e"/></linearGradient></defs><path d="M24 25c-4-3-6-8-5-13 1-2 3-3 5-3s4 1 5 3c1 5-1 10-5 13z" fill="url(#sk-nb)" stroke="#0b1015" stroke-width="2.4" stroke-linejoin="round" transform="rotate(0 24 25)"/><path d="M24 25c-4-3-6-8-5-13 1-2 3-3 5-3s4 1 5 3c1 5-1 10-5 13z" fill="url(#sk-nb)" stroke="#0b1015" stroke-width="2.4" stroke-linejoin="round" transform="rotate(60 24 25)"/><path d="M24 25c-4-3-6-8-5-13 1-2 3-3 5-3s4 1 5 3c1 5-1 10-5 13z" fill="url(#sk-nb)" stroke="#0b1015" stroke-width="2.4" stroke-linejoin="round" transform="rotate(120 24 25)"/><path d="M24 25c-4-3-6-8-5-13 1-2 3-3 5-3s4 1 5 3c1 5-1 10-5 13z" fill="url(#sk-nb)" stroke="#0b1015" stroke-width="2.4" stroke-linejoin="round" transform="rotate(180 24 25)"/><path d="M24 25c-4-3-6-8-5-13 1-2 3-3 5-3s4 1 5 3c1 5-1 10-5 13z" fill="url(#sk-nb)" stroke="#0b1015" stroke-width="2.4" stroke-linejoin="round" transform="rotate(240 24 25)"/><path d="M24 25c-4-3-6-8-5-13 1-2 3-3 5-3s4 1 5 3c1 5-1 10-5 13z" fill="url(#sk-nb)" stroke="#0b1015" stroke-width="2.4" stroke-linejoin="round" transform="rotate(300 24 25)"/><circle cx="24" cy="25" r="5.2" fill="#9be36a" stroke="#0b1015" stroke-width="2.4"/><circle cx="22.6" cy="23.6" r="1.8" fill="#f4ffe6"/><circle cx="9" cy="8" r="2.2" fill="#9be36a" stroke="#0b1015" stroke-width="1.6"/><circle cx="39" cy="6" r="1.8" fill="#9be36a" stroke="#0b1015" stroke-width="1.6"/><circle cx="41" cy="16" r="1.4" fill="#d9ffb0" stroke="#0b1015" stroke-width="1.4"/></svg>`,
+  shadowstep: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="sk-ss" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ece8f4"/><stop offset=".6" stop-color="#b9b2c8"/><stop offset="1" stop-color="#6f6684"/></linearGradient></defs><path d="M5 41a6 6 0 0 1 1-11 8 8 0 0 1 14-2 6 6 0 0 1 4 9 5 5 0 0 1-3 4z" fill="url(#sk-ss)" stroke="#0b1015" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/><path d="M14 24C14 9 32 5 37 15" fill="none" stroke="#0b1015" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.1 5.2"/><path d="M14 24C14 9 32 5 37 15" fill="none" stroke="#b48cff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.1 5.2"/><path d="M33 13l4 2 1-5" fill="none" stroke="#0b1015" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M33 13l4 2 1-5" fill="none" stroke="#b48cff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><g transform="rotate(40 34 30)"><path d="M34 16l3.4 6v14h-6.8V22z" fill="#e9eef5" stroke="#0b1015" stroke-width="2.4" stroke-linejoin="round"/><path d="M28.5 36h11" stroke="#0b1015" stroke-width="4.4" stroke-linecap="round"/><path d="M28.5 36h11" stroke="#9a7a3a" stroke-width="2" stroke-linecap="round"/><path d="M34 37v7" stroke="#0b1015" stroke-width="4.6" stroke-linecap="round"/><path d="M34 37v7" stroke="#5b2fa8" stroke-width="2.2" stroke-linecap="round"/></g></svg>`,
+  meteor: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><radialGradient id="sk-me" cx=".6" cy=".4" r=".7"><stop offset="0" stop-color="#fff3d6"/><stop offset=".4" stop-color="#ffb03a"/><stop offset="1" stop-color="#c2410c"/></radialGradient></defs><path d="M45 3L22 26" stroke="#0b1015" stroke-width="13" stroke-linecap="round"/><path d="M45 3L22 26" stroke="#ff8a3d" stroke-width="8.6" stroke-linecap="round"/><path d="M44 4L24 24" stroke="#ffd27a" stroke-width="3.6" stroke-linecap="round"/><path d="M38 18l-8 8M30 4l-6 6" stroke="#0b1015" stroke-width="4.4" stroke-linecap="round"/><path d="M38 18l-8 8M30 4l-6 6" stroke="#ffd27a" stroke-width="2" stroke-linecap="round"/><path d="M17 21l7 2 4 7-2 7-7 4-8-2-4-7 2-7z" fill="url(#sk-me)" stroke="#0b1015" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/><path d="M13 28l3 2M18 34l3-1" stroke="#7a2a0c" stroke-width="1.8" stroke-linecap="round"/><path d="M12 25l3-2" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none" opacity=".85"/></svg>`,
+  glacial_burst: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="sk-gb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#bfe9ff"/><stop offset="1" stop-color="#3c7fb0"/></linearGradient></defs><path d="M34.8 31.9L44.3 32.4L37.2 26L33.2 27.8ZM26 37.2L32.4 44.3L31.9 34.8L27.8 33.2ZM16.1 34.8L15.6 44.3L22 37.2L20.2 33.2ZM10.8 26L3.7 32.4L13.2 31.9L14.8 27.8ZM13.2 16.1L3.7 15.6L10.8 22L14.8 20.2ZM22 10.8L15.6 3.7L16.1 13.2L20.2 14.8ZM31.9 13.2L32.4 3.7L26 10.8L27.8 14.8ZM37.2 22L44.3 15.6L34.8 16.1L33.2 20.2Z" fill="url(#sk-gb)" stroke="#0b1015" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/><path d="M24 12l7 4v8l-7 4-7-4v-8z" fill="url(#sk-gb)" stroke="#0b1015" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/><path d="M24 16v8M20.5 18l7 4M27.5 18l-7 4" fill="none" stroke="#0b1015" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 16v8M20.5 18l7 4M27.5 18l-7 4" fill="none" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.5 15.5l3-1.6" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none" opacity=".85"/></svg>`,
+  thunderfall: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="sk-tf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3a6"/><stop offset=".55" stop-color="#ffe45c"/><stop offset="1" stop-color="#c99a12"/></linearGradient></defs><path d="M5 44h38" fill="none" stroke="#0b1015" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 44h38" fill="none" stroke="#b9a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M0 0l-4 8h4l-3 8 8-11h-4l3-5z" fill="url(#sk-tf)" stroke="#0b1015" stroke-width="2.2" stroke-linejoin="round" transform="translate(14 22)"/><path d="M0 0l-4 8h4l-3 8 8-11h-4l3-5z" fill="url(#sk-tf)" stroke="#0b1015" stroke-width="2.2" stroke-linejoin="round" transform="translate(26 24)"/><path d="M0 0l-4 8h4l-3 8 8-11h-4l3-5z" fill="url(#sk-tf)" stroke="#0b1015" stroke-width="2.2" stroke-linejoin="round" transform="translate(37 21)"/><path d="M9 21a6 6 0 0 1 1-11 9 9 0 0 1 16-3 8 8 0 0 1 13 3 6 6 0 0 1 0 11z" fill="#8b7fb0" stroke="#0b1015" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/><path d="M12 12a6 6 0 0 1 7-3" stroke="#d6cdf0" stroke-width="2" stroke-linecap="round" fill="none"/></svg>`
 });
 var MOVE_ICON_FOR = { shield: "guard", dagger: "dash", tome: "blink" };
 
@@ -45919,9 +46389,10 @@ function drawWorldHero(ctx, actor, facing2, presentationTime, primary = null, ti
     primary = { ...primary, facing: actor.guard.direction };
     guardY = actor.guard.direction.y;
   }
-  const pose = primaryPose(primary, tick), moving = actor.movedLastTick, riposteAge = tick - actor.shieldRiposteTick, blockAge = tick - actor.shieldBlockTick, cast2 = ["cast", "firebloom", "flashfreeze", "chain_lightning", "flame_wall", "ice_barrier", "static_field"].includes(skill?.skillId) ? castPose(tick - skill.tick) : ["shield_bash", "earth_breaker", "shield_charge", "shield_throw"].includes(skill?.skillId) && actor.subType === "shield" ? bashPose(tick - skill.tick) : ["flurry", "lunge", "toxic_fan", "whirling_blades", "riposte", "rupture", "smoke_veil"].includes(skill?.skillId) && actor.subType === "dagger" ? flurryPose(tick - skill.tick, daggerTypeOf(actor.heroLook?.gear?.off?.kind)) : null;
+  const pose = primaryPose(primary, tick), moving = actor.movedLastTick, riposteAge = tick - actor.shieldRiposteTick, blockAge = tick - actor.shieldBlockTick, cast2 = ["cast", "firebloom", "flashfreeze", "chain_lightning", "flame_wall", "ice_barrier", "static_field", "meteor", "glacial_burst", "thunderfall"].includes(skill?.skillId) ? castPose(tick - skill.tick) : ["shield_bash", "earth_breaker", "shield_charge", "shield_throw", "aegis_pulse", "skyfall_leap", "retribution"].includes(skill?.skillId) && actor.subType === "shield" ? bashPose(tick - skill.tick) : ["flurry", "lunge", "toxic_fan", "whirling_blades", "riposte", "rupture", "smoke_veil", "thousand_cuts", "noxious_bloom", "shadowstep"].includes(skill?.skillId) && actor.subType === "dagger" ? flurryPose(tick - skill.tick, daggerTypeOf(actor.heroLook?.gear?.off?.kind)) : null;
+  const leapAge = skill?.skillId === "skyfall_leap" ? tick - skill.tick : -1, lift = leapAge >= 0 && leapAge < 20 ? Math.sin(Math.PI * leapAge / 20) * 26 : 0;
   ctx.save();
-  ctx.translate(actor.position.x, actor.position.y - 8);
+  ctx.translate(actor.position.x, actor.position.y - 8 - lift);
   ctx.scale(0.8 * facing2, 0.8);
   if (primary) ctx.rotate(pose.body);
   drawBlockyHero(ctx, heroSpecForActor(actor), {
@@ -65740,7 +66211,7 @@ function drawGuardWard(ctx, x, y, angle3, type, open2, runes, blockAge, time, mo
 }
 
 // src/client/class_tree_skill_art_v1.js
-var TREE_SKILL_BURST_MS = Object.freeze({ earth_breaker: 780, rallying_cry: 900, counter_stance: 480, lunge: 440, toxic_fan: 560, whirling_blades: 620, firebloom: 820, flashfreeze: 800, ball_lightning: 360, shield_charge: 900, shield_throw: 380, war_banner: 820, riposte: 480, rupture: 600, smoke_veil: 500, flame_wall: 520, ice_barrier: 600, static_field: 560 });
+var TREE_SKILL_BURST_MS = Object.freeze({ earth_breaker: 780, rallying_cry: 900, counter_stance: 480, lunge: 440, toxic_fan: 560, whirling_blades: 620, firebloom: 820, flashfreeze: 800, ball_lightning: 360, shield_charge: 900, shield_throw: 380, war_banner: 820, riposte: 480, rupture: 600, smoke_veil: 500, flame_wall: 520, ice_barrier: 600, static_field: 560, aegis_pulse: 700, skyfall_leap: 1e3, retribution: 760, thousand_cuts: 900, noxious_bloom: 700, shadowstep: 620, afterimage_burst: 460, meteor: 520, meteor_impact: 600, glacial_burst: 800, thunderfall: 620 });
 var C = Object.freeze({
   breaker: { core: "#fff1dc", main: "#ff9d5c", deep: "#a8431c", spark: "#ffd09a" },
   rally: { core: "#fffbe8", main: "#ffd36b", deep: "#b7791f", spark: "#fff1b0" },
@@ -66935,7 +67406,534 @@ function drawStaticField(ctx, f, time) {
     standV1(ctx, y, () => mote(ctx, x, y - 2, 1.3, F.spark, 0.8 * fade));
   }
 }
-var DRAW2 = Object.freeze({ earth_breaker: earthBreaker, rallying_cry: rallyingCry, counter_stance: counterStance, lunge, toxic_fan: toxicFan, whirling_blades: whirlingBlades, firebloom, flashfreeze, ball_lightning: ballLightningCast, shield_charge: shieldCharge, shield_throw: shieldThrow, war_banner: warBanner, riposte, rupture, smoke_veil: smokeVeil, flame_wall: flameWall, ice_barrier: iceBarrier, static_field: staticField });
+function drawCrackedGround(ctx, c, time) {
+  if (!groundPassV1()) return;
+  const K3 = C.breaker, fade = Math.min(1, (c.ticks ?? 60) / 30), R4 = c.r ?? 60, seed2 = Math.abs(Math.round(c.x * 7 + c.y * 13)) % 997;
+  if (fade <= 0) return;
+  for (let i = 0; i < 10; i++) {
+    const a = i * TAU45 / 10 + rnd2(seed2 + i) * 0.5, len = R4 * (0.55 + 0.4 * rnd2(seed2 + i + 11)), x0 = c.x + Math.cos(a) * R4 * 0.12, y0 = c.y + Math.sin(a) * R4 * 0.12, x1 = c.x + Math.cos(a) * len, y1 = c.y + Math.sin(a) * len, draw = () => jag(ctx, x0, y0, x1, y1, seed2 + i * 13, 2.2);
+    withAlpha(ctx, 0.75 * fade, () => {
+      ctx.strokeStyle = "#2a1a0e";
+      ctx.lineWidth = 3.2;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      draw();
+      ctx.stroke();
+    });
+    glowStroke(ctx, K3.main, 4, 0.9 * fade * (0.75 + 0.25 * Math.sin(time / 300 + i)), draw, false);
+  }
+  neon(ctx, K3, 1, () => circle8(ctx, c.x, c.y, R4), 0.35 * fade);
+}
+var AEGIS = Object.freeze({ core: "#f2fbff", main: "#73bedc", deep: "#1f5680", spark: "#d6f1ff" });
+function aegisPulse(ctx, b, age) {
+  const K3 = AEGIS, R4 = b.reach ?? 90, x = b.x, y = b.y, go = easeOut(age / 300), fade = 1 - smooth20((age - 380) / 320);
+  if (groundPassV1()) {
+    area(ctx, x, y, R4 * go, K3.main, fade);
+    neon(ctx, K3, 3.2 * (1 - go) + 0.6, () => circle8(ctx, x, y, R4 * go), fade);
+    if (age > 160) runeRing(ctx, x, y, R4, K3, fade * smooth20((age - 160) / 120), age / 1200, 12);
+    for (let i = 0; i < 10; i++) {
+      const a = i * TAU45 / 10 + 0.15, d0 = R4 * (0.3 + 0.62 * go), d1 = d0 + 9;
+      neon(ctx, K3, 1.3, () => {
+        ctx.beginPath();
+        ctx.moveTo(x + Math.cos(a - 0.1) * d0, y + Math.sin(a - 0.1) * d0);
+        ctx.lineTo(x + Math.cos(a) * d1, y + Math.sin(a) * d1);
+        ctx.lineTo(x + Math.cos(a + 0.1) * d0, y + Math.sin(a + 0.1) * d0);
+      }, fade * 0.9);
+    }
+  }
+  if (uprightPassV1() && age < 380) {
+    const k = age / 380;
+    blob4(ctx, x, y - 14, 28 * (1 - k) + 10, K3.main, 0.75 * (1 - k));
+    if (age < 90) bloom(ctx, x, y - 14, 16, K3.core, 1 - age / 90);
+    neon(ctx, K3, 2.2 * (1 - k) + 0.4, () => {
+      ctx.beginPath();
+      ctx.ellipse(x, y - 15, 22 + 14 * (1 - easeOut(k)), 26 + 14 * (1 - easeOut(k)), 0, 0, TAU45);
+    }, 1 - k);
+  }
+}
+function drawAegisShell(ctx, x, y, ticks, time, near2) {
+  const K3 = AEGIS, t = time / 1e3, fade = ticks < 60 ? 0.55 + 0.45 * Math.abs(Math.sin(t * 14)) : 1, cy = y - 15, rx = 22, ry = 26, s = 7;
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(x - 40, near2 ? cy : cy - 40, 80, 40);
+  ctx.clip();
+  ctx.globalAlpha *= fade;
+  const shell = () => {
+    ctx.beginPath();
+    ctx.ellipse(x, cy, rx, ry, 0, 0, TAU45);
+  };
+  shell();
+  ctx.fillStyle = near2 ? "rgba(150,215,245,.2)" : "rgba(120,190,230,.13)";
+  ctx.fill();
+  ctx.save();
+  shell();
+  ctx.clip();
+  ctx.strokeStyle = "rgba(214,241,255,.5)";
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  for (let row2 = -4; row2 <= 4; row2++) for (let col2 = -3; col2 <= 3; col2++) {
+    const hx = x + col2 * s * 1.73 + (row2 % 2 ? s * 0.87 : 0) + Math.sin(t * 0.8) * 2, hy = cy + row2 * s * 1.5;
+    for (let k = 0; k <= 6; k++) {
+      const a = k * TAU45 / 6 + Math.PI / 6, px3 = hx + Math.cos(a) * s * 0.92, py = hy + Math.sin(a) * s * 0.92;
+      k ? ctx.lineTo(px3, py) : ctx.moveTo(px3, py);
+    }
+  }
+  ctx.stroke();
+  ctx.restore();
+  neon(ctx, K3, 1.5, shell, 0.95);
+  const g = t * 0.5 % 1, ga = -Math.PI / 2 + g * TAU45;
+  star4(ctx, x + Math.cos(ga) * rx * 0.85, cy + Math.sin(ga) * ry * 0.85, 3.5, K3.spark, 0.9);
+  ctx.restore();
+}
+var LEAP_MS = 1e3 / 60 * 20;
+function skyfallLeap(ctx, b, age) {
+  const K3 = C.breaker, lx = b.x + (b.ox ?? b.dx * 100), ly = b.y + (b.oy ?? b.dy * 100), R4 = b.reach ?? 70;
+  if (groundPassV1() && age < 360) {
+    const k = age / 360;
+    neon(ctx, K3, 2 * (1 - k) + 0.3, () => circle8(ctx, b.x, b.y, 8 + 20 * easeOut(k)), 1 - k);
+  }
+  for (let i = 0; i < 6; i++) {
+    const a2 = i * TAU45 / 6 + 0.4, d = 8 + 14 * easeOut(age / 420), q = clamp28(age / 420);
+    if (q >= 1) continue;
+    standV1(ctx, b.y + Math.sin(a2) * d * 0.6, () => {
+      ctx.fillStyle = `rgba(112,88,64,${0.4 * (1 - q)})`;
+      ctx.beginPath();
+      ctx.arc(b.x + Math.cos(a2) * d, b.y + Math.sin(a2) * d * 0.6 - 3 - 6 * q, 3 + 5 * q, 0, TAU45);
+      ctx.fill();
+    });
+  }
+  if (age < LEAP_MS) {
+    const k = age / LEAP_MS;
+    if (groundPassV1()) {
+      neon(ctx, K3, 1.6, () => circle8(ctx, lx, ly, R4 * (1.4 - 0.4 * easeOut(k))), 0.4 + 0.6 * k);
+      for (let i = 0; i < 4; i++) {
+        const a2 = i * TAU45 / 4 + k * 1.5;
+        neon(ctx, K3, 1.4, () => {
+          ctx.beginPath();
+          ctx.moveTo(lx + Math.cos(a2) * R4 * 0.5, ly + Math.sin(a2) * R4 * 0.5);
+          ctx.lineTo(lx + Math.cos(a2) * R4 * 0.8, ly + Math.sin(a2) * R4 * 0.8);
+        }, 0.4 + 0.6 * k);
+      }
+    }
+    const n = 10;
+    for (let i = 0; i < n; i++) {
+      const k0 = k * i / n, k1 = k * (i + 1) / n, px0 = lerp2(b.x, lx, k0), py0 = lerp2(b.y, ly, k0) - 26 * Math.sin(Math.PI * k0) - 14, px1 = lerp2(b.x, lx, k1), py1 = lerp2(b.y, ly, k1) - 26 * Math.sin(Math.PI * k1) - 14;
+      standV1(ctx, lerp2(b.y, ly, k1), () => glowStroke(ctx, K3.main, 8, 3 * (i + 1) / n, () => {
+        ctx.beginPath();
+        ctx.moveTo(px0, py0);
+        ctx.lineTo(px1, py1);
+      }, false));
+    }
+    return;
+  }
+  const a = age - LEAP_MS;
+  if (uprightPassV1() && a < 160) {
+    const k = a / 160;
+    glowStroke(ctx, K3.spark, 14, 6 * (1 - k) + 1, () => {
+      ctx.beginPath();
+      ctx.moveTo(lx, ly - 90 * (1 - k * 0.3));
+      ctx.lineTo(lx, ly - 4);
+    }, true);
+    blob4(ctx, lx, ly - 10, 36 * (1 - k) + 10, K3.main, 0.85 * (1 - k));
+    if (a < 70) bloom(ctx, lx, ly - 8, 20, K3.core, 1 - a / 70);
+  }
+  earthBreaker(ctx, { x: lx, y: ly, reach: R4 }, a * 780 / (1e3 - LEAP_MS));
+}
+function retribution(ctx, b, age) {
+  const K3 = C.reprisal, R4 = b.reach ?? 94, x = b.x, y = b.y, go = easeOut(age / 280), fade = 1 - smooth20((age - 420) / 340), n = Math.min(15, 3 + (b.n ?? 0));
+  if (uprightPassV1() && age < 300) {
+    const k = age / 300;
+    sealShape(ctx, x + (b.dx < 0 ? -1 : 1) * 12, y - 15, 1.1 + 0.6 * k, K3, 1 - k);
+    blob4(ctx, x, y - 12, 30 * (1 - k) + 10, K3.main, 0.85 * (1 - k));
+    if (age < 80) bloom(ctx, x, y - 14, 18, K3.core, 1 - age / 80);
+  }
+  if (groundPassV1()) {
+    area(ctx, x, y, R4 * go, K3.deep, fade * 1.2);
+    area(ctx, x, y, R4 * go, K3.main, fade * 0.6);
+    neon(ctx, K3, 3.6 * (1 - go) + 0.6, () => circle8(ctx, x, y, R4 * go), fade);
+    if (age > 200) runeRing(ctx, x, y, R4, K3, fade * smooth20((age - 200) / 120), -age / 900, 12);
+  }
+  for (let i = 0; i < n; i++) {
+    const a = i * TAU45 / n + rnd2(i + 5) * 0.35, d = R4 * (0.35 + 0.55 * rnd2(i + 9)), born = d / R4 * 240, q = clamp28((age - born) / 200);
+    if (q <= 0) continue;
+    const px3 = x + Math.cos(a) * d, py = y + Math.sin(a) * d, h = (14 + 8 * rnd2(i + 13)) * easeOut(q) * fade, w = 3.2;
+    standV1(ctx, py, () => withAlpha(ctx, fade, () => {
+      ctx.fillStyle = K3.main;
+      ctx.strokeStyle = K3.deep;
+      ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      ctx.moveTo(px3 - w, py);
+      ctx.lineTo(px3 + (rnd2(i) - 0.5) * 3, py - h);
+      ctx.lineTo(px3 + w, py);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = K3.spark;
+      ctx.beginPath();
+      ctx.moveTo(px3 - w * 0.35, py);
+      ctx.lineTo(px3 + (rnd2(i) - 0.5) * 3, py - h * 0.8);
+      ctx.lineTo(px3 + w * 0.2, py);
+      ctx.closePath();
+      ctx.fill();
+    }));
+  }
+}
+var CUT_MS = 1e3 / 60 * 5;
+function thousandCuts(ctx, b, age) {
+  if (!uprightPassV1()) return;
+  const K3 = C.duelist, tx = b.x + (b.ox ?? b.dx * 30), ty = b.y + (b.oy ?? b.dy * 30) - 12;
+  for (let i = 0; i < 9; i++) {
+    const a2 = age - i * CUT_MS;
+    if (a2 < 0 || a2 > 240) continue;
+    const k = a2 / 240, ang = rnd2(i * 7 + 3) * Math.PI - Math.PI / 2, len = 28 + 8 * rnd2(i + 7), sw = easeOut(a2 / 70), c = Math.cos(ang), s = Math.sin(ang), x0 = tx - c * len / 2, y0 = ty - s * len / 2, x1 = x0 + c * len * sw, y1 = y0 + s * len * sw;
+    neon(ctx, K3, 2.4 * (1 - k) + 0.4, () => {
+      ctx.beginPath();
+      ctx.moveTo(x0, y0);
+      ctx.lineTo(x1, y1);
+    }, 1 - k);
+    if (a2 < 90) {
+      ctx.save();
+      ctx.translate(x1, y1);
+      ctx.rotate(ang);
+      ctx.globalAlpha *= 1 - a2 / 90;
+      bladeShape(ctx, 11, 1.8);
+      ctx.restore();
+    }
+    if (a2 > 40 && a2 < 160) star4(ctx, tx + (rnd2(i + 11) - 0.5) * 10, ty + (rnd2(i + 13) - 0.5) * 10, 5 + 4 * (a2 - 40) / 120, K3.spark, 1 - (a2 - 40) / 120);
+  }
+  if (age < 120) blob4(ctx, b.x, b.y - 12, 14, K3.main, 0.6 * (1 - age / 120));
+}
+function petals(ctx, x, y, r, count, alpha2, spin) {
+  if (alpha2 <= 0 || r <= 1) return;
+  withAlpha(ctx, alpha2, () => {
+    for (let i = 0; i < count; i++) {
+      const a = spin + i * TAU45 / count, c = Math.cos(a), s = Math.sin(a), w = r * 0.32, tip = { x: x + c * r, y: y + s * r }, mid = { x: x + c * r * 0.5, y: y + s * r * 0.5 };
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.quadraticCurveTo(mid.x - s * w, mid.y + c * w, tip.x, tip.y);
+      ctx.quadraticCurveTo(mid.x + s * w, mid.y - c * w, x, y);
+      ctx.closePath();
+      ctx.fillStyle = "#7c3a96";
+      ctx.fill();
+      ctx.lineWidth = 1.1;
+      ctx.strokeStyle = "#2b0f38";
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x + c * r * 0.2, y + s * r * 0.2);
+      ctx.quadraticCurveTo(mid.x - s * w * 0.45, mid.y + c * w * 0.45, x + c * r * 0.85, y + s * r * 0.85);
+      ctx.quadraticCurveTo(mid.x + s * w * 0.45, mid.y - c * w * 0.45, x + c * r * 0.2, y + s * r * 0.2);
+      ctx.fillStyle = "#b46ad0";
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(x + c * r * 0.15, y + s * r * 0.15);
+      ctx.lineTo(x + c * r * 0.8, y + s * r * 0.8);
+      ctx.strokeStyle = "#b8f07a";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+    circle8(ctx, x, y, r * 0.18);
+    ctx.fillStyle = "#9be36a";
+    ctx.fill();
+    ctx.strokeStyle = "#2c5a14";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    circle8(ctx, x - r * 0.05, y - r * 0.05, r * 0.08);
+    ctx.fillStyle = "#e8ffc8";
+    ctx.fill();
+  });
+}
+function noxiousBloom(ctx, b, age) {
+  const K3 = C.venom, R4 = b.reach ?? 80, x = b.x, y = b.y, go = easeOut(age / 320), fade = 1 - smooth20((age - 380) / 320);
+  if (groundPassV1()) {
+    area(ctx, x, y, R4 * go, K3.main, fade);
+    neon(ctx, K3, 3 * (1 - go) + 0.5, () => circle8(ctx, x, y, R4 * go), fade);
+    petals(ctx, x, y, R4 * 0.42 * easeOut(age / 260), 8, 1, 0.2);
+  }
+  for (let i = 0; i < 12; i++) {
+    const a = i * TAU45 / 12 + rnd2(i + 2) * 0.4, d = R4 * go * (0.3 + 0.6 * rnd2(i + 6)), px3 = x + Math.cos(a) * d, py = y + Math.sin(a) * d, q = clamp28(age / 600);
+    standV1(ctx, py, () => mote(ctx, px3, py - 4 - 26 * q * (0.6 + 0.4 * rnd2(i + 8)), 1.6, i % 3 ? K3.main : "#d58cf0", fade));
+  }
+  if (uprightPassV1() && age < 240) {
+    const k = age / 240;
+    blob4(ctx, x, y - 6, 24 * (1 - k) + 8, K3.main, 0.75 * (1 - k));
+  }
+}
+function drawNoxiousFlower(ctx, f, time) {
+  const K3 = C.venom, t = time / 1e3, fade = Math.min(1, (f.ticks ?? 60) / 45), R4 = f.r ?? 80;
+  if (fade <= 0) return;
+  if (groundPassV1()) {
+    runeRing(ctx, f.x, f.y, R4, K3, 0.6 * fade, t * 0.25, 14);
+    petals(ctx, f.x, f.y, R4 * 0.42 * (0.92 + 0.08 * fade), 8, fade, 0.2 + Math.sin(t * 0.7) * 0.04);
+  }
+  for (let i = 0; i < 6; i++) {
+    const a = i * TAU45 / 6 + 0.5 + rnd2(i + 3) * 0.4, d = R4 * (0.55 + 0.3 * rnd2(i + 5)), px3 = f.x + Math.cos(a) * d, py = f.y + Math.sin(a) * d, h = (7 + 5 * rnd2(i + 7)) * fade, sway = Math.sin(t * 2 + i) * 1.2;
+    standV1(ctx, py, () => withAlpha(ctx, fade, () => {
+      ctx.strokeStyle = "#3f7d22";
+      ctx.lineWidth = 1.6;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(px3, py);
+      ctx.quadraticCurveTo(px3 + sway, py - h * 0.5, px3 + sway, py - h);
+      ctx.stroke();
+      circle8(ctx, px3 + sway, py - h - 2.4, 2.8);
+      ctx.fillStyle = "#9a4fb8";
+      ctx.fill();
+      ctx.strokeStyle = "#2b0f38";
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+      mote(ctx, px3 + sway - 0.8, py - h - 3.2, 0.9, "#e3b6f2", 0.9);
+    }));
+  }
+  for (let i = 0; i < 8; i++) {
+    const cycle = t / 1.6 + rnd2(i + 3), r = cycle - Math.floor(cycle), a = rnd2(i * 5 + Math.floor(cycle) * 11) * TAU45, d = R4 * 0.8 * rnd2(i * 3 + Math.floor(cycle) * 7), px3 = f.x + Math.cos(a) * d, py = f.y + Math.sin(a) * d;
+    standV1(ctx, py, () => mote(ctx, px3 + Math.sin(t * 3 + i) * 2, py - 4 - 24 * r, 1.4, i % 2 ? K3.main : "#d58cf0", fade * (1 - r)));
+  }
+}
+function shadowstep(ctx, b, age) {
+  const K3 = C.skirmish, fx = b.x + (b.ox2 ?? -b.dx * 60), fy = b.y + (b.oy2 ?? -b.dy * 60), fade = 1 - smooth20((age - 260) / 360);
+  for (let i = 0; i < 5; i++) {
+    const a = i * TAU45 / 5 + 0.4, d = 5 + 10 * easeOut(age / 400), px3 = fx + Math.cos(a) * d, py = fy + Math.sin(a) * d * 0.6, r = (5 + 3 * rnd2(i + 3)) * (1 - 0.4 * age / 620);
+    standV1(ctx, py, () => smokePuff(ctx, px3, py - 8 - 6 * age / 620, r, fade * 0.85));
+  }
+  if (groundPassV1() && age < 300) {
+    const k = age / 300;
+    neon(ctx, K3, 1.4 * (1 - k) + 0.2, () => {
+      ctx.beginPath();
+      ctx.moveTo(fx, fy);
+      ctx.lineTo(b.x, b.y);
+    }, (1 - k) * 0.8);
+    neon(ctx, K3, 2 * (1 - k) + 0.4, () => circle8(ctx, b.x, b.y, 8 + 22 * easeOut(k)), 1 - k);
+  }
+  if (uprightPassV1() && age < 280) {
+    const k = age / 280;
+    blob4(ctx, b.x, b.y - 14, 20 * (1 - k) + 6, K3.main, 0.8 * (1 - k));
+    star4(ctx, b.x, b.y - 16, 10 + 8 * k, K3.spark, 1 - k);
+  }
+}
+function drawAfterimageEcho(ctx, e, time) {
+  const K3 = C.skirmish, t = time / 1e3, k = 1 - (e.ticks ?? 30) / 30, x = e.x, y = e.y, flick = 0.55 + 0.25 * Math.sin(t * 40);
+  if (groundPassV1()) neon(ctx, K3, 1.4, () => circle8(ctx, x, y, 20 - 12 * k), 0.5 + 0.5 * k);
+  if (!uprightPassV1()) return;
+  withAlpha(ctx, flick * (1 - 0.3 * k), () => {
+    ctx.fillStyle = "rgba(180,140,255,.55)";
+    ctx.strokeStyle = K3.deep;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(x, y - 21, 5.5, 5.5, 0, 0, TAU45);
+    ctx.fill();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x - 6, y - 15);
+    ctx.lineTo(x + 6, y - 15);
+    ctx.lineTo(x + 5, y - 4);
+    ctx.lineTo(x + 3, y);
+    ctx.lineTo(x - 3, y);
+    ctx.lineTo(x - 5, y - 4);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  });
+  star4(ctx, x, y - 14, 3 + 4 * k, K3.spark, 0.5 + 0.5 * k);
+}
+function afterimageBurst(ctx, b, age) {
+  const K3 = C.skirmish, R4 = b.reach ?? 44, k = easeOut(age / 300), fade = 1 - smooth20((age - 160) / 220);
+  if (groundPassV1()) neon(ctx, K3, 2.6 * fade + 0.3, () => circle8(ctx, b.x, b.y, R4 * k), fade);
+  if (uprightPassV1() && age < 240) {
+    const q = age / 240;
+    blob4(ctx, b.x, b.y - 12, 22 * (1 - q) + 8, K3.main, 0.8 * (1 - q));
+    star4(ctx, b.x, b.y - 14, 8 + 10 * q, K3.spark, 1 - q);
+  }
+}
+function meteorCall(ctx, b, age) {
+  if (!uprightPassV1()) return;
+  const F = FIRE4(), f = b.dx < 0 ? -1 : 1, hx = b.x + f * 8, hy = b.y - 26, k = age / 520, fade = 1 - smooth20((age - 300) / 220);
+  neon(ctx, F, 1.6, () => circle8(ctx, hx, hy, 6 + 6 * easeOut(age / 200)), fade);
+  for (let i = 0; i < 6; i++) {
+    const a = i * TAU45 / 6 + age / 300;
+    mote(ctx, hx + Math.cos(a) * 9, hy + Math.sin(a) * 4, 1.2, F.spark, fade);
+  }
+  const up = easeOut(age / 360);
+  glowStroke(ctx, F.main, 10, 2.4 * fade, () => {
+    ctx.beginPath();
+    ctx.moveTo(hx, hy - 6);
+    ctx.lineTo(hx + f * 10 * up, hy - 6 - 90 * up);
+  }, false);
+  mote(ctx, hx + f * 10 * up, hy - 6 - 90 * up, 2.6, F.core, fade);
+  if (k < 0.3) blob4(ctx, hx, hy, 14, F.main, 0.8 * (1 - k / 0.3));
+}
+function drawMeteor(ctx, m, time) {
+  const F = FIRE4(), t = time / 1e3, R4 = m.r ?? 64;
+  if (m.fall > 0) {
+    const k = 1 - m.fall / 60, h = Math.max(0, m.fall) * 4.4, mx = m.x - h * 0.45, my = m.y - h - 10;
+    if (groundPassV1()) {
+      neon(ctx, F, 1.4, () => circle8(ctx, m.x, m.y, R4), 0.35 + 0.5 * k);
+      neon(ctx, F, 1.8, () => circle8(ctx, m.x, m.y, R4 * (1 - 0.85 * k)), 0.4 + 0.6 * k);
+      withAlpha(ctx, 0.25 + 0.35 * k, () => {
+        ctx.fillStyle = "rgba(40,20,10,.35)";
+        ctx.beginPath();
+        ctx.ellipse(m.x, m.y, 4 + 8 * k, 2 + 4 * k, 0, 0, TAU45);
+        ctx.fill();
+      });
+    }
+    standV1(ctx, m.y + 0.5, () => {
+      const s = R4 / 64, r = 7 * s + 2;
+      glowStroke(ctx, F.main, 14, 6 * s, () => {
+        ctx.beginPath();
+        ctx.moveTo(mx, my);
+        ctx.lineTo(mx - 40 * s * 0.45 * 2.2, my - 40 * s * 2.2);
+      }, false);
+      glowStroke(ctx, F.spark, 0, 2.4 * s, () => {
+        ctx.beginPath();
+        ctx.moveTo(mx, my);
+        ctx.lineTo(mx - 18 * s * 0.45 * 2.2, my - 18 * s * 2.2);
+      }, false);
+      blob4(ctx, mx, my, r * 2.2, F.main, 0.55);
+      ctx.fillStyle = "#4a2a1a";
+      ctx.strokeStyle = "#1d0f07";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let i = 0; i < 7; i++) {
+        const a = i * TAU45 / 7, q = r * (0.82 + 0.18 * rnd2(i + 3));
+        i ? ctx.lineTo(mx + Math.cos(a) * q, my + Math.sin(a) * q) : ctx.moveTo(mx + Math.cos(a) * q, my + Math.sin(a) * q);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#ffb03a";
+      ctx.beginPath();
+      ctx.arc(mx + r * 0.25, my + r * 0.25, r * 0.45, 0, TAU45);
+      ctx.fill();
+      ctx.fillStyle = "#fff0c0";
+      ctx.beginPath();
+      ctx.arc(mx + r * 0.32, my + r * 0.32, r * 0.2, 0, TAU45);
+      ctx.fill();
+    });
+    return;
+  }
+  const fade = Math.min(1, (m.ticks ?? 60) / 30);
+  if (fade <= 0) return;
+  if (groundPassV1()) {
+    withAlpha(ctx, fade, () => {
+      ctx.fillStyle = "rgba(58,30,16,.32)";
+      circle8(ctx, m.x, m.y, R4 * 0.92);
+      ctx.fill();
+    });
+    neon(ctx, F, 1.5, () => circle8(ctx, m.x, m.y, R4 * 0.92), 0.8 * fade);
+    for (let i = 0; i < 6; i++) {
+      const a = i * TAU45 / 6 + rnd2(i + (m.x | 0)) * 0.5, draw = () => jag(ctx, m.x + Math.cos(a) * 6, m.y + Math.sin(a) * 6, m.x + Math.cos(a) * R4 * 0.8, m.y + Math.sin(a) * R4 * 0.8, i * 13 + (m.y | 0), 1.8);
+      withAlpha(ctx, 0.8 * fade, () => {
+        ctx.strokeStyle = "#1d0f07";
+        ctx.lineWidth = 3;
+        ctx.lineCap = "round";
+        draw();
+        ctx.stroke();
+      });
+      glowStroke(ctx, F.main, 6, 1.3 * fade * (0.8 + 0.2 * Math.sin(t * 5 + i)), draw, false);
+    }
+  }
+  const n = Math.max(4, Math.round(R4 / 9));
+  for (let i = 0; i < n; i++) {
+    const a = rnd2(i + (m.x | 0)) * TAU45, d = R4 * 0.75 * Math.sqrt(rnd2(i + 7 + (m.y | 0))), px3 = m.x + Math.cos(a) * d, py = m.y + Math.sin(a) * d, h = (10 + 7 * rnd2(i + 5)) * (0.75 + 0.25 * Math.sin(time / 70 + i * 1.9)), fw = 4.2;
+    standV1(ctx, py, () => withAlpha(ctx, fade, () => {
+      ctx.fillStyle = i % 2 ? "#ff7a1f" : "#ffb03a";
+      ctx.strokeStyle = "#8a2a0c";
+      ctx.lineWidth = 0.7;
+      ctx.beginPath();
+      ctx.moveTo(px3 - fw, py);
+      ctx.quadraticCurveTo(px3 - fw * 0.6, py - h * 0.55, px3 + Math.sin(time / 120 + i) * 1.6, py - h);
+      ctx.quadraticCurveTo(px3 + fw * 0.6, py - h * 0.55, px3 + fw, py);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#ffe08a";
+      ctx.beginPath();
+      ctx.moveTo(px3 - fw * 0.45, py);
+      ctx.quadraticCurveTo(px3, py - h * 0.55, px3 + fw * 0.45, py);
+      ctx.closePath();
+      ctx.fill();
+    }));
+  }
+  for (let i = 0; i < 5; i++) {
+    const cycle = time / 900 + rnd2(i + 3), r = cycle - Math.floor(cycle), a = rnd2(i * 7 + Math.floor(cycle) * 13) * TAU45, d = R4 * 0.7 * rnd2(i * 3 + Math.floor(cycle) * 5), px3 = m.x + Math.cos(a) * d, py = m.y + Math.sin(a) * d;
+    standV1(ctx, py, () => mote(ctx, px3, py - 6 - 22 * r, 1.1, F.spark, fade * (1 - r)));
+  }
+}
+function meteorImpact(ctx, b, age) {
+  const F = FIRE4(), R4 = b.reach ?? 64, x = b.x, y = b.y, go = easeOut(age / 260), fade = 1 - smooth20((age - 300) / 300);
+  if (groundPassV1()) {
+    area(ctx, x, y, R4 * go, F.main, fade * 1.4);
+    neon(ctx, F, 4 * (1 - go) + 0.6, () => circle8(ctx, x, y, R4 * go), fade);
+  }
+  if (uprightPassV1() && age < 300) {
+    const k = age / 300;
+    blob4(ctx, x, y - 10, R4 * 0.7 * (1 - k) + 10, F.main, 0.9 * (1 - k));
+    if (age < 90) bloom(ctx, x, y - 10, R4 * 0.4, F.core, 1 - age / 90);
+  }
+  for (let i = 0; i < 10; i++) {
+    const a = rnd2(i + 20) * TAU45, d = R4 * (0.2 + 0.6 * rnd2(i + 30)), h = clamp28(age / 420);
+    if (h >= 1) continue;
+    const px3 = x + Math.cos(a) * d * (0.4 + 0.6 * h), py = y + Math.sin(a) * d * (0.4 + 0.6 * h), lift = 34 * (1 + rnd2(i + 40)) * 4 * h * (1 - h), s = 1.3 + 1.2 * rnd2(i + 50);
+    standV1(ctx, py, () => withAlpha(ctx, 1 - h * h, () => {
+      ctx.fillStyle = i % 3 ? "#5a3d29" : "#ffb03a";
+      ctx.strokeStyle = "#1b0f07";
+      ctx.lineWidth = 0.7;
+      ctx.beginPath();
+      ctx.arc(px3, py - lift, s, 0, TAU45);
+      ctx.fill();
+      ctx.stroke();
+    }));
+  }
+}
+function glacialBurst(ctx, b, age) {
+  const Fz = CAST_COLORS.frost, K3 = { deep: "#1f5680", main: Fz.main, spark: "#e6f8ff" }, R4 = b.reach ?? 100, x = b.x, y = b.y, go = easeOut(age / 260), fade = 1 - smooth20((age - 480) / 320);
+  if (groundPassV1()) {
+    area(ctx, x, y, R4 * go, Fz.main, fade);
+    neon(ctx, K3, 3.4 * (1 - go) + 0.6, () => circle8(ctx, x, y, R4 * go), fade);
+    if (age > 220) runeRing(ctx, x, y, R4, K3, fade * smooth20((age - 220) / 140), age / 1400, 16);
+  }
+  if (uprightPassV1() && age < 300) {
+    const k = age / 300;
+    blob4(ctx, x, y - 14, 30 * (1 - k) + 10, Fz.main, 0.8 * (1 - k));
+    if (age < 90) bloom(ctx, x, y - 14, 18, Fz.core, 1 - age / 90);
+    for (let i = 0; i < 10; i++) {
+      const a = i * TAU45 / 10 + 0.3, d = 12 + R4 * 0.6 * easeOut(k);
+      shard3(ctx, x + Math.cos(a) * d, y - 14 + Math.sin(a) * d * 0.75, 3, a + Math.PI / 2, 1 - k);
+    }
+  }
+  for (let i = 0; i < 12; i++) {
+    const a = i * TAU45 / 12 + rnd2(i + 4) * 0.3, d = R4 * (0.78 + 0.18 * rnd2(i + 8)), born = d / R4 * 260, q = clamp28((age - born) / 420);
+    if (q <= 0 || q >= 1) continue;
+    const px3 = x + Math.cos(a) * d, py = y + Math.sin(a) * d, ht = (12 + 8 * rnd2(i + 12)) * (q < 0.6 ? easeOut(q / 0.6) : 1), al = q < 0.6 ? 1 : 1 - (q - 0.6) / 0.4;
+    standV1(ctx, py, () => crystal4(ctx, px3, py, ht, 4, (rnd2(i + 16) - 0.5) * 0.5, al));
+  }
+  const n = b.n ?? 0;
+  for (let i = 0; i < n; i++) {
+    const a = i * TAU45 / n, k = easeOut(age / 360), d = 20 + 150 * k, px3 = x + Math.cos(a) * d, py = y + Math.sin(a) * d;
+    if (age > 420) continue;
+    standV1(ctx, py, () => {
+      glowStroke(ctx, Fz.main, 8, 2 * (1 - k) + 0.6, () => {
+        ctx.beginPath();
+        ctx.moveTo(px3 - Math.cos(a) * 16, py - 10 - Math.sin(a) * 16);
+        ctx.lineTo(px3, py - 10);
+      }, false);
+      shard3(ctx, px3, py - 10, 3.4, a + Math.PI / 2, 1 - k * 0.5);
+    });
+  }
+}
+function thunderfall(ctx, b, age) {
+  const F = CAST_COLORS.lightning, K3 = { deep: F.deep, main: F.main, spark: F.spark }, R4 = b.reach ?? 130, x = b.x, y = b.y, k = easeOut(age / 300), fade = 1 - smooth20((age - 320) / 300);
+  if (groundPassV1()) {
+    neon(ctx, { deep: F.deep, main: "#b9a6ff", spark: F.spark }, 2.2 * fade + 0.4, () => circle8(ctx, x, y, R4 * k), 0.8 * fade);
+    if (age > 180) runeRing(ctx, x, y, R4, { deep: F.deep, main: "#b9a6ff", spark: F.spark }, fade * smooth20((age - 180) / 120), -age / 1600, 16);
+  }
+  if (uprightPassV1() && age < 360) {
+    const q = age / 360, f = b.dx < 0 ? -1 : 1;
+    lightning(ctx, x + f * 6, y - 24, x + f * 10, y - 150, Math.floor(age / 45), 5, 1.6, 1 - q);
+    blob4(ctx, x + f * 6, y - 22, 18 * (1 - q) + 6, F.main, 0.8 * (1 - q));
+    star4(ctx, x + f * 6, y - 26, 8 + 8 * q, F.spark, 1 - q);
+  }
+}
+var DRAW2 = Object.freeze({ earth_breaker: earthBreaker, rallying_cry: rallyingCry, counter_stance: counterStance, lunge, toxic_fan: toxicFan, whirling_blades: whirlingBlades, firebloom, flashfreeze, ball_lightning: ballLightningCast, shield_charge: shieldCharge, shield_throw: shieldThrow, war_banner: warBanner, riposte, rupture, smoke_veil: smokeVeil, flame_wall: flameWall, ice_barrier: iceBarrier, static_field: staticField, aegis_pulse: aegisPulse, skyfall_leap: skyfallLeap, retribution, thousand_cuts: thousandCuts, noxious_bloom: noxiousBloom, shadowstep, afterimage_burst: afterimageBurst, meteor: meteorCall, meteor_impact: meteorImpact, glacial_burst: glacialBurst, thunderfall });
 function drawTreeSkillBurst(ctx, skillId, b, age) {
   const draw = DRAW2[skillId], life = TREE_SKILL_BURST_MS[skillId];
   if (!draw) return false;
@@ -67477,7 +68475,7 @@ function drawPersistentStatus(ctx, e, target, tick, time, lane2 = 0, part3 = "al
 }
 var SKILL_ELEMENT_COLORS = { fire: "#ffc27a", lightning: "#d6c8ff", frost: "#cfe9ff" };
 var LIGHT10 = Object.freeze({ fire: "#ff8a3d", frost: "#8fd8ff", lightning: "#ffe45c", knight: "#73bedc", breaker: "#ff9d5c", rally: "#ffd36b", reprisal: "#ff8fa0", duelist: "#f5cf6a", venom: "#9be36a", skirmish: "#b48cff", parry: "#e4ceff", blink: "#8fd0ff" });
-var SKILL_LIGHT = Object.freeze({ shield_bash: [LIGHT10.knight, 56, 320, 0.55], flurry: [LIGHT10.skirmish, 46, 400, 0.4], earth_breaker: [LIGHT10.breaker, null, 780, 0.45], rallying_cry: [LIGHT10.rally, null, 900, 0.45], counter_stance: [LIGHT10.reprisal, 50, 480, 0.45], lunge: [LIGHT10.duelist, 44, 440, 0.35], toxic_fan: [LIGHT10.venom, null, 560, 0.3], whirling_blades: [LIGHT10.skirmish, null, 620, 0.35], firebloom: [LIGHT10.fire, null, 820, 0.75], flashfreeze: [LIGHT10.frost, null, 800, 0.55], ball_lightning: [LIGHT10.lightning, 44, 360, 0.5], shield_charge: [LIGHT10.breaker, 60, 900, 0.45], shield_throw: [LIGHT10.reprisal, 40, 380, 0.4], war_banner: [LIGHT10.rally, null, 820, 0.45], riposte: [LIGHT10.duelist, 44, 480, 0.4], rupture: ["#ff4d6d", null, 600, 0.4], smoke_veil: [LIGHT10.skirmish, null, 500, 0.25], flame_wall: [LIGHT10.fire, 70, 520, 0.7], ice_barrier: [LIGHT10.frost, 50, 600, 0.55], static_field: [LIGHT10.lightning, null, 560, 0.5] });
+var SKILL_LIGHT = Object.freeze({ shield_bash: [LIGHT10.knight, 56, 320, 0.55], flurry: [LIGHT10.skirmish, 46, 400, 0.4], earth_breaker: [LIGHT10.breaker, null, 780, 0.45], rallying_cry: [LIGHT10.rally, null, 900, 0.45], counter_stance: [LIGHT10.reprisal, 50, 480, 0.45], lunge: [LIGHT10.duelist, 44, 440, 0.35], toxic_fan: [LIGHT10.venom, null, 560, 0.3], whirling_blades: [LIGHT10.skirmish, null, 620, 0.35], firebloom: [LIGHT10.fire, null, 820, 0.75], flashfreeze: [LIGHT10.frost, null, 800, 0.55], ball_lightning: [LIGHT10.lightning, 44, 360, 0.5], shield_charge: [LIGHT10.breaker, 60, 900, 0.45], shield_throw: [LIGHT10.reprisal, 40, 380, 0.4], war_banner: [LIGHT10.rally, null, 820, 0.45], riposte: [LIGHT10.duelist, 44, 480, 0.4], rupture: ["#ff4d6d", null, 600, 0.4], smoke_veil: [LIGHT10.skirmish, null, 500, 0.25], flame_wall: [LIGHT10.fire, 70, 520, 0.7], ice_barrier: [LIGHT10.frost, 50, 600, 0.55], static_field: [LIGHT10.lightning, null, 560, 0.5], aegis_pulse: [LIGHT10.knight, null, 700, 0.5], skyfall_leap: [LIGHT10.breaker, 70, 1e3, 0.5], retribution: [LIGHT10.reprisal, null, 760, 0.5], thousand_cuts: [LIGHT10.duelist, 40, 900, 0.4], noxious_bloom: [LIGHT10.venom, null, 700, 0.35], shadowstep: [LIGHT10.skirmish, 44, 620, 0.45], afterimage_burst: [LIGHT10.skirmish, 50, 460, 0.45], meteor: [LIGHT10.fire, 40, 520, 0.5], meteor_impact: [LIGHT10.fire, null, 600, 0.8], glacial_burst: [LIGHT10.frost, null, 800, 0.6], thunderfall: [LIGHT10.lightning, 60, 620, 0.55] });
 function burstLight(b) {
   if (b.kind.startsWith("uq:")) return uniqueBurstLight(b);
   if (b.kind === "blink" || b.kind === "blinkEnd") return { color: LIGHT10.blink, r: 40, life: 300, alpha: 0.45 };
@@ -67581,10 +68579,14 @@ function createCombatVfx() {
         if (f.dash.frames > old2.dash) add(f.blink ? "blink" : "dash", a, time, f.dash.x, f.dash.y, { id, facing: poses[id]?.facing ?? 1 });
         if ((f.wail ?? 0) > (old2.wail ?? 0)) add("uq:wail", a, time);
         if ((f.shell ?? 0) > (old2.shell ?? 0)) add("uq:shell", a, time);
+        (f.meteors ?? []).forEach((mt, k) => {
+          if (mt.fall === 0 && (old2.meteors?.[k] ?? 0) > 0) add("skill:meteor_impact", { position: { x: mt.x, y: mt.y } }, time, 1, 0, { reach: mt.r });
+        });
+        if (old2.echo && (!f.echo || f.echo.x !== old2.echo.x || f.echo.y !== old2.echo.y)) add("skill:afterimage_burst", { position: old2.echo }, time, 1, 0, { reach: 44 });
         if (old2.dash > 0 && f.dash.frames === 0) add(f.blink ? "blinkEnd" : "dashEnd", a, time, old2.dx, old2.dy);
         if (f.skill && f.skill.tick !== old2.skill) {
           const facing2 = poses[id]?.facing ?? 1, cast2 = f.skill.skillId === "cast", own = !cast2 && f.skill.skillId !== "shield_bash";
-          add("skill:" + f.skill.skillId, cast2 ? { position: castCirclePosition(a, facing2) } : a, time, f.skill.x, f.skill.y, { facing: facing2, ground: a.position.y, reach: f.skill.r, ox: own ? f.skill.ox : void 0, oy: own ? f.skill.oy : void 0, ox2: f.skill.ox2, oy2: f.skill.oy2, spread: f.skill.spread, subType: a.subType, element: cast2 ? castElement(m, id, f.element) : null, shield: f.skill.skillId === "shield_bash" ? shieldTypeOf(a.heroLook?.gear?.off?.kind) : null, dagger: f.skill.skillId === "flurry" ? daggerTypeOf(a.heroLook?.gear?.off?.kind) : null });
+          add("skill:" + f.skill.skillId, cast2 ? { position: castCirclePosition(a, facing2) } : a, time, f.skill.x, f.skill.y, { facing: facing2, ground: a.position.y, reach: f.skill.r, ox: own ? f.skill.ox : void 0, oy: own ? f.skill.oy : void 0, ox2: f.skill.ox2, oy2: f.skill.oy2, spread: f.skill.spread, n: f.skill.n, subType: a.subType, element: cast2 ? castElement(m, id, f.element) : null, shield: f.skill.skillId === "shield_bash" ? shieldTypeOf(a.heroLook?.gear?.off?.kind) : null, dagger: f.skill.skillId === "flurry" ? daggerTypeOf(a.heroLook?.gear?.off?.kind) : null });
           bursts[bursts.length - 1].color = SKILL_ELEMENT_COLORS[f.element] ?? SKILL_ELEMENT_COLORS.fire;
           const gear2 = a.heroLook?.gear, landing = f.skill.ox !== void 0 ? { tx: a.position.x + f.skill.ox, ty: a.position.y + f.skill.oy } : null;
           if (f.skill.skillId === "shield_bash" && gear2?.main?.kind === "gravecleaver") add("uq:ring", a, time);
@@ -67594,7 +68596,7 @@ function createCombatVfx() {
       }
       if (old2 && old2.parry > 1 && !f.parry) parrySpent.set(id, time);
       facings.set(id, poses[id]?.facing ?? 1);
-      families3.set(id, { mastery: f.mastery, pressure: f.pressure, delivery: f.delivery.tick, dash: f.dash.frames, dx: f.dash.x, dy: f.dash.y, skill: f.skill?.tick, parry: f.parry ?? 0, wail: f.wail ?? 0, shell: f.shell ?? 0 });
+      families3.set(id, { mastery: f.mastery, pressure: f.pressure, delivery: f.delivery.tick, dash: f.dash.frames, dx: f.dash.x, dy: f.dash.y, skill: f.skill?.tick, parry: f.parry ?? 0, wail: f.wail ?? 0, shell: f.shell ?? 0, meteors: f.meteors?.map((mt) => mt.fall) ?? null, echo: f.echo ? { x: f.echo.x, y: f.echo.y } : null });
     }
     seen3 = true;
   }
@@ -67697,6 +68699,12 @@ function createCombatVfx() {
       if (f.flameWall && visible3(f.flameWall)) spread("wall/" + id, f.flameWall.x, () => drawFlameWall(ctx, f.flameWall, time));
       if (f.field && visible3(f.field)) spread("field/" + id, f.field.x, () => drawStaticField(ctx, f.field, time));
       if (f.ice) for (const near2 of [false, true]) put2("ice/" + id + "/" + (near2 ? "near" : "far"), a.position.x, foot(a) - (near2 ? 0 : 1), (ctx2) => drawIceShell(ctx2, a.position.x, a.position.y, f.ice.ticks, time, near2));
+      if (f.aegis) for (const near2 of [false, true]) put2("aegis/" + id + "/" + (near2 ? "near" : "far"), a.position.x, foot(a) - (near2 ? 0 : 1), (ctx2) => drawAegisShell(ctx2, a.position.x, a.position.y, f.aegis.ticks, time, near2));
+      if (f.flower && visible3(f.flower)) spread("flower/" + id, f.flower.x, () => drawNoxiousFlower(ctx, f.flower, time));
+      if (f.echo && visible3(f.echo)) put2("echo/" + id, f.echo.x, f.echo.y, (ctx2) => inFxPassV1("upright", () => drawAfterimageEcho(ctx2, f.echo, time)));
+      (f.meteors ?? []).forEach((mt, k) => {
+        if (visible3(mt)) spread("meteor/" + id + "/" + k, mt.x, () => drawMeteor(ctx, mt, time));
+      });
       const tr = f.trail;
       if (tr && (visible3(tr) || visible3({ x: tr.x2, y: tr.y2 }))) spread("trail/" + id, (tr.x + tr.x2) / 2, () => drawCinderTrail(ctx, tr, time));
       const pool = f.pool;
@@ -67720,6 +68728,10 @@ function createCombatVfx() {
         if (f.smoke && visible3(f.smoke)) drawSmokeVeil(ctx, f.smoke, time);
         if (f.flameWall && visible3(f.flameWall)) drawFlameWall(ctx, f.flameWall, time);
         if (f.field && visible3(f.field)) drawStaticField(ctx, f.field, time);
+        if (f.crack && visible3(f.crack)) drawCrackedGround(ctx, f.crack, time);
+        if (f.flower && visible3(f.flower)) drawNoxiousFlower(ctx, f.flower, time);
+        if (f.echo && visible3(f.echo)) drawAfterimageEcho(ctx, f.echo, time);
+        for (const mt of f.meteors ?? []) if (visible3(mt)) drawMeteor(ctx, mt, time);
         const tr = f.trail;
         if (tr && (visible3(tr) || visible3({ x: tr.x2, y: tr.y2 }))) drawCinderTrail(ctx, tr, time);
       }
@@ -67756,6 +68768,14 @@ function createCombatVfx() {
       }
       if (f.field) at5(f.field.x, f.field.y, 96, LIGHT10.lightning, 0.3 * Math.min(1, (f.field.ticks ?? 60) / 30));
       if (f.ice) at5(a.position.x, a.position.y, 44, LIGHT10.frost, 0.4);
+      if (f.aegis) at5(a.position.x, a.position.y, 50, LIGHT10.knight, 0.4);
+      if (f.flower) at5(f.flower.x, f.flower.y, f.flower.r, LIGHT10.venom, 0.25 * Math.min(1, (f.flower.ticks ?? 60) / 45));
+      if (f.echo) at5(f.echo.x, f.echo.y, 30, LIGHT10.skirmish, 0.35);
+      if (f.stepped) at5(a.position.x, a.position.y, 36, LIGHT10.skirmish, 0.35);
+      for (const mt of f.meteors ?? []) {
+        if (mt.fall > 0) at5(mt.x - mt.fall * 4.4 * 0.45, mt.y - mt.fall * 4.4 - 10, 60, LIGHT10.fire, 0.7);
+        else at5(mt.x, mt.y, mt.r * 1.2, LIGHT10.fire, 0.5 * Math.min(1, (mt.ticks ?? 60) / 30));
+      }
       const tr = f.trail;
       if (tr) {
         const fade = Math.min(1, (tr.ticks ?? 60) / 30), n = Math.max(1, Math.round(Math.hypot(tr.x2 - tr.x, tr.y2 - tr.y) / 36));
