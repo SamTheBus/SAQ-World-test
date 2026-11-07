@@ -1545,3 +1545,92 @@ body #world-inventory #world-equipment,body #world-inventory #world-items{displa
 .hero-slot-world{display:flex;align-items:center;gap:5px;font:12px var(--rpg-ui);color:#c9d0d3}
 .hero-slot-world::before{content:'';flex:none;width:15px;height:15px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath d='M7 12l11-4 12 4 11-4v28l-11 4-12-4-11 4z' fill='%239dbca5' fill-opacity='.25' stroke='%239dbca5' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='M18 8v28M30 12v28' stroke='%239dbca5' stroke-width='4'/%3E%3C/svg%3E") center/contain no-repeat}
 .hero-slot-world.is-seeded::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath d='M24 43V24' stroke='%23e9c46a' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M24 26C24 18 18 13 9 13c0 8 6 13 15 13zM24 23c0-8 6-13 15-13 0 8-6 13-15 13z' fill='%23e9c46a' fill-opacity='.25' stroke='%23e9c46a' stroke-width='4' stroke-linejoin='round'/%3E%3C/svg%3E")}
+
+/* Premium menu v1 (inventory_presentation.js, .rpg-menu). One slim top bar: menu button, page name, gold and
+   bag count, close. Landscape: the pages on a thin icon rail down the left; the menu button opens it to show
+   names, the hero and badges. Portrait: the pages on an icon bar along the bottom. Big landscape screens keep
+   the names showing. Gear page on landscape: the doll stays still beside a stats column that scrolls.
+   Mockup: mockups/rpg-menu-mockup.webp (2026-11-07). */
+body #world-inventory.rpg-menu[hidden]{display:none}
+body #world-inventory.rpg-menu{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto auto;grid-template-areas:"top" "info" "body" "status" "nav";gap:0;padding:0;overflow:hidden;border-radius:16px}
+body #world-inventory.rpg-menu>.bag-heading{grid-area:top;position:static;display:flex;align-items:center;gap:8px;min-height:46px;height:46px;padding:0 8px 0 8px;margin:0;border:0;border-bottom:1px solid #26313d;background:none;box-sizing:border-box}
+body #world-inventory.rpg-menu>.bag-heading>div{flex:1;min-width:0}
+body #world-inventory.rpg-menu>.bag-heading>div>small{display:none}
+body #world-inventory.rpg-menu #world-bag-title{margin:0;font:700 18px/1 Georgia,'Times New Roman',serif;letter-spacing:.02em;color:#eee7d9;text-transform:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body #world-inventory.rpg-menu #world-bag-summary{position:static;display:flex;align-items:center;gap:6px;flex:none;margin:0;padding:0;font:700 13px/1 system-ui,sans-serif;color:#eee7d9}
+body #world-inventory.rpg-menu #world-bag-summary>svg{width:16px;height:16px;margin:0 -2px 0 0;order:1;position:relative;left:22px;pointer-events:none}
+body #world-inventory.rpg-menu #world-bag-summary>strong{order:1;display:inline-flex;align-items:center;height:30px;padding:0 11px 0 27px;border-radius:15px;background:#151d26;border:1px solid #33404d;color:#f0c862;font:700 13px/1 system-ui,sans-serif;font-variant-numeric:tabular-nums;white-space:nowrap}
+body #world-inventory.rpg-menu #world-bag-summary>span{order:0;display:inline-flex;align-items:center;height:30px;margin:0;padding:0 11px;border-radius:15px;background:#151d26;border:1px solid #33404d;color:#aeb5b6;font:600 12px/1 system-ui,sans-serif;font-variant-numeric:tabular-nums;white-space:nowrap}
+body #world-inventory.rpg-menu #world-bag-close,body #world-inventory.rpg-menu button.rm-railbtn{flex:none;width:36px;min-width:36px;height:36px;min-height:36px;padding:0;border-radius:18px;border:1px solid #33404d;background:#1b2530;box-shadow:none;display:grid;place-items:center;color:#eee7d9}
+body #world-inventory.rpg-menu button.rm-railbtn{border-radius:11px;background:#151d26}
+body #world-inventory.rpg-menu button.rm-railbtn .rm-icon{width:20px;height:20px}
+body #world-inventory.rpg-menu #world-forge-gear{min-height:36px;height:36px}
+body #world-inventory.rpg-menu>#world-bag-stats{grid-area:info;margin:0;padding:6px 12px 0}
+body #world-inventory.rpg-menu>.bag-body{grid-area:body;min-height:0;min-width:0;padding:8px}
+body #world-inventory.rpg-menu>#world-inventory-status{grid-area:status;margin:0;padding:0 12px 6px}
+body #world-inventory.rpg-menu>#world-inventory-status:empty{display:none}
+/* The pages: an icon bar along the bottom (portrait). */
+body #world-inventory.rpg-menu>.bag-section-tabs{grid-area:nav;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:0;height:60px;padding:0;margin:0;border:0;border-top:1px solid #26313d;border-radius:0;background:#0d1319;box-shadow:none;overflow:visible}
+body #world-inventory.rpg-menu .rm-who{display:none}
+body #world-inventory.rpg-menu button.rm-page{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:0;min-height:0;height:auto;padding:0;margin:0;border:0;border-radius:0;background:none;box-shadow:none;color:#7d878c;font:600 10px/1 system-ui,sans-serif;letter-spacing:0;text-transform:none;text-shadow:none;white-space:nowrap}
+body #world-inventory.rpg-menu button.rm-page[aria-pressed=true]{color:#f0c862;background:none;box-shadow:inset 0 3px 0 #f0c862}
+body #world-inventory.rpg-menu button.rm-page:hover{color:#eee7d9}
+body #world-inventory.rpg-menu button.rm-page[aria-pressed=true]:hover{color:#f0c862}
+body #world-inventory.rpg-menu .rm-page .rm-icon{width:21px;height:21px;flex:none}
+body #world-inventory.rpg-menu .rm-label{color:inherit;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+body #world-inventory.rpg-menu .rm-badge{position:absolute;top:8px;left:calc(50% + 8px);width:9px;height:9px;padding:0;border-radius:5px;background:#5fd38a;box-shadow:0 0 0 2px #0d1319;font-size:0;color:transparent;overflow:hidden}
+body #world-inventory.rpg-menu .rm-badge.is-points{background:#f0c862}
+body #world-inventory.rpg-menu .rm-badge:empty{display:none}
+body #world-inventory.rpg-menu button.rm-railbtn{display:none}
+body #world-inventory.rpg-menu[data-section=forge]>.bag-section-tabs{display:none}
+/* Landscape: a thin rail down the left; the menu button opens it over the page with names and badges. */
+@media(orientation:landscape){
+ body #world-inventory.rpg-menu{grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;grid-template-areas:"top top" "nav info" "nav body" "nav status"}
+ body #world-inventory.rpg-menu:not([data-section=forge]) button.rm-railbtn{display:grid}
+ body #world-inventory.rpg-menu>.bag-section-tabs{display:flex;flex-direction:column;gap:4px;width:60px;height:auto;padding:6px;border-top:0;border-right:1px solid #26313d;overflow-x:hidden;overflow-y:auto;scrollbar-width:none;box-sizing:border-box;transition:width .16s ease,margin .16s ease,box-shadow .16s ease}
+ body #world-inventory.rpg-menu button.rm-page{flex:none;flex-direction:row;justify-content:flex-start;gap:11px;width:100%;height:44px;padding:0 0 0 13px;border-radius:12px;font-size:13px}
+ body #world-inventory.rpg-menu button.rm-page[aria-pressed=true]{background:#1b2530;box-shadow:inset 3px 0 0 #f0c862}
+ body #world-inventory.rpg-menu .rm-label{display:none}
+ body #world-inventory.rpg-menu .rm-badge{top:7px;left:auto;right:7px}
+ body #world-inventory.rpg-menu.rail-open>.bag-section-tabs{position:relative;z-index:6;width:200px;margin-right:-140px;box-shadow:10px 0 26px #000a;background:#0d1319}
+ body #world-inventory.rpg-menu.rail-open .rm-label{display:block}
+ body #world-inventory.rpg-menu.rail-open .rm-badge{position:static;width:auto;height:auto;margin:0 8px 0 auto;padding:4px 7px;border-radius:8px;background:#1d3a2a;box-shadow:none;color:#5fd38a;font:800 10px/1 system-ui,sans-serif;letter-spacing:.04em}
+ body #world-inventory.rpg-menu.rail-open .rm-badge.is-points{background:#3a2f17;color:#f0c862}
+ body #world-inventory.rpg-menu.rail-open .rm-who{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;column-gap:9px;align-items:center;flex:none;padding:4px 4px 10px;margin-bottom:2px;border-bottom:1px solid #26313d}
+ body #world-inventory.rpg-menu .rm-level{grid-row:1/3;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font:800 14px/1 Georgia,serif;color:#1a1308;background:radial-gradient(circle at 35% 30%,#ffe3a0,#d9a441 60%,#8c6420)}
+ body #world-inventory.rpg-menu .rm-name{font:700 14px/1.2 Georgia,serif;color:#eee7d9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ body #world-inventory.rpg-menu .rm-class{font:12px/1.2 system-ui,sans-serif;color:#7d878c;white-space:nowrap}
+ /* Gear: the doll beside a stats column that scrolls on its own. */
+ body #world-inventory.rpg-menu[data-section=equipment] #world-bag-browse{overflow:hidden;padding:0}
+ body #world-inventory.rpg-menu[data-section=equipment] #world-bag-browse>section:first-child{max-width:980px;height:100%}
+ body #world-inventory.rpg-menu #world-equipment{display:grid;grid-template-columns:minmax(290px,380px) minmax(0,1fr);gap:10px;height:100%;align-items:start}
+ body #world-inventory.rpg-menu #world-equipment>.gx-doll{max-height:100%;box-sizing:border-box}
+ body #world-inventory.rpg-menu .gx-side{display:flex;flex-direction:column;gap:10px;height:100%;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#3a4654 transparent;padding-right:2px}
+ body #world-inventory.rpg-menu .gx-side>.gx-scrollhint{display:none}
+}
+/* Short landscape phones: the doll's slots lose their names and shrink so all five fit with the hero. */
+@media(orientation:landscape) and (max-height:560px){
+ body #world-inventory.rpg-menu>.bag-section-tabs{gap:3px;padding:5px}
+ body #world-inventory.rpg-menu button.rm-page{height:40px}
+ body #world-inventory.rpg-menu.rail-open .rm-who{padding:2px 4px 7px}
+ body #world-inventory.rpg-menu .rm-level{width:30px;height:30px;font-size:13px}
+ body #world-inventory.rpg-menu .gx-doll{grid-template-columns:54px minmax(0,1fr) 54px;padding:8px}
+ body #world-inventory.rpg-menu .gx-doll .gx-col{gap:5px}
+ body #world-inventory.rpg-menu .gx-doll .gx-slotlabel{display:none}
+ body #world-inventory.rpg-menu .gx-doll button.gx-slot{width:50px;height:50px;border-radius:11px}
+ body #world-inventory.rpg-menu .gx-doll .gx-slot img{width:36px;height:36px}
+ body #world-inventory.rpg-menu .gx-side .gx-keystat{padding:7px 4px}
+ body #world-inventory.rpg-menu .gx-side .gx-attr{padding:8px 6px}
+ body #world-inventory.rpg-menu .gx-side .gx-statrow{padding:8px 0;font-size:13px}
+}
+/* Big landscape screens keep the page names showing. */
+@media(orientation:landscape) and (min-height:600px) and (min-width:1000px){
+ body #world-inventory.rpg-menu>.bag-section-tabs{width:200px;margin:0;box-shadow:none}
+ body #world-inventory.rpg-menu .rm-label{display:block}
+ body #world-inventory.rpg-menu .rm-who{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;column-gap:9px;align-items:center;flex:none;padding:4px 4px 10px;margin-bottom:2px;border-bottom:1px solid #26313d}
+ body #world-inventory.rpg-menu .rm-badge{position:static;width:auto;height:auto;margin:0 8px 0 auto;padding:4px 7px;border-radius:8px;background:#1d3a2a;box-shadow:none;color:#5fd38a;font:800 10px/1 system-ui,sans-serif;letter-spacing:.04em}
+ body #world-inventory.rpg-menu .rm-badge.is-points{background:#3a2f17;color:#f0c862}
+ body #world-inventory.rpg-menu:not([data-section=forge]) button.rm-railbtn{display:none}
+}
+/* The level and HP panel opens Stats and Skills. */
+body #world-hud-vitals.bag-crest{pointer-events:auto;cursor:pointer}

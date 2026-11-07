@@ -49146,6 +49146,19 @@ function contextActionLabelForModel(model, action2 = contextActionForModel(model
   if (!resource) return null;
   return resource.eventPod ? "Destroy spore pod" : resource.kind === "chest" ? model.space?.site?.siteKind === "woodland-cave" ? "Open Chest" : "Open chest" : resource.art === "barrel" ? "Break barrel" : resource.art === "urn" ? "Break urn" : "Break pot";
 }
+var MENU_PAGES = [["equipment", "Gear"], ["bag", "Bag"], ["materials", "Materials"], ["stats", "Stats"], ["progression", "Skills"], ["heroes", "Heroes"]];
+var MENU_TITLES = { equipment: "Gear", bag: "Bag", materials: "Materials" };
+var SEEN_KEY = "saq-world-seen-items-v1:";
+var menuIcon = (d) => `<svg class="rm-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+var MENU_ICONS = Object.freeze({
+  menu: menuIcon('<path d="M4 7h16M4 12h16M4 17h16"/>'),
+  equipment: menuIcon('<path d="M6 11a6 6 0 0112 0v3l-2 1v4H8v-4l-2-1z"/><path d="M9 12h6"/>'),
+  bag: menuIcon('<path d="M5 9h14l-1 11H6z"/><path d="M9 9V7a3 3 0 016 0v2"/>'),
+  materials: menuIcon('<path d="M12 3l7 5-3 11H8L5 8z"/><path d="M5 8h14M12 3l-4 16M12 3l4 16"/>'),
+  stats: menuIcon('<path d="M5 20V11M10 20V5M15 20v-7M20 20V8"/>'),
+  progression: menuIcon('<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.5 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/>'),
+  heroes: menuIcon('<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 19c0-3.3 2.7-6 6-6s6 2.7 6 6M15 14.2c3 .2 5 2.3 5 4.8"/>')
+});
 function createInventoryPresentation({ document: document2, environment, readModel, adapter, clearInput, restoreGameplayFocus = () => {
 }, heroSlots = null }) {
   const panel = document2.getElementById("world-inventory"), openButton = document2.getElementById("world-bag"), pickup = document2.getElementById("world-pickup");
@@ -49159,7 +49172,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     e.style.setProperty("--rarity", RARITY_COLORS[d.rarityTier ?? 0]);
     e.classList.add("rarity-item");
   };
-  let open2 = false, key2 = null, error = "", observed = null, toastUntil = 0, selected = null, gridKey = null, inspect = false, selectionOrigin = null, section = "equipment", ringSlot = "ring1", bagFilter = "all", moreOpen = false, revealMore = false, heroStatsOpen = true;
+  let open2 = false, key2 = null, error = "", observed = null, toastUntil = 0, selected = null, gridKey = null, inspect = false, selectionOrigin = null, section = "bag", lastItems = "bag", menuKey = null, upCount = 0, seen3 = null, ringSlot = "ring1", bagFilter = "all", moreOpen = false, revealMore = false, heroStatsOpen = true;
   const HERO_STATS_KEY = "saq-world-hero-stats-v1";
   try {
     heroStatsOpen = environment.localStorage?.getItem(HERO_STATS_KEY) !== "off";
@@ -49196,7 +49209,26 @@ function createInventoryPresentation({ document: document2, environment, readMod
     panel.querySelector(".bag-section-tabs").append(heroesButton);
     document2.querySelector(".bag-body").append(heroesView.root);
   }
-  for (const [name, text2] of [["equipment", "GEAR"], ["bag", "BAG"], ["materials", "MATERIALS"]]) document2.getElementById(`world-${name}-tab`).textContent = text2;
+  const nav = panel.querySelector(".bag-section-tabs"), heading = panel.querySelector(".bag-heading");
+  panel.classList.add("rpg-menu");
+  const railButton = button("", () => panel.classList.toggle("rail-open"));
+  railButton.id = "world-menu-rail";
+  railButton.className = "rm-railbtn";
+  railButton.setAttribute("aria-label", "Show page names");
+  railButton.innerHTML = MENU_ICONS.menu;
+  heading.prepend(railButton);
+  heading.insertBefore(document2.getElementById("world-bag-summary"), closeButton);
+  const who = element("div", "", "rm-who");
+  nav.prepend(who);
+  for (const [id, name] of MENU_PAGES) {
+    const b = document2.getElementById(`world-${id}-tab`);
+    if (!b) continue;
+    b.classList.add("rm-page");
+    b.innerHTML = MENU_ICONS[id];
+    b.append(element("span", name, "rm-label"), element("span", "", "rm-badge"));
+    b.setAttribute("aria-label", name);
+    b.addEventListener("click", () => panel.classList.remove("rail-open"));
+  }
   const forge = createForgePresentation({ document: document2, issue, invalidate: () => {
     key2 = null;
     refresh(readModel());
@@ -49277,7 +49309,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
   function toggle() {
     if (open2) return close();
     forgeSession = false;
-    if (section === "forge") section = "equipment";
+    if (!["equipment", "bag", "materials"].includes(section)) section = lastItems;
     const m = readModel();
     if (!m.inventory || !alive(m)) return;
     clearInput();
@@ -49286,6 +49318,62 @@ function createInventoryPresentation({ document: document2, environment, readMod
     inspect = false;
     refresh(readModel());
     closeButton.focus();
+  }
+  function openCharacter() {
+    if (open2) return close();
+    const m = readModel();
+    if (!m.inventory || !alive(m)) return;
+    const d8 = m.playersById[m.localPlayerId]?.d8;
+    forgeSession = false;
+    section = d8?.heroClass && classTreePoints(d8).unspent > 0n ? "progression" : "stats";
+    clearInput();
+    open2 = true;
+    error = "";
+    inspect = false;
+    key2 = null;
+    refresh(readModel());
+    closeButton.focus();
+  }
+  function paintMenu(m, local6, inv) {
+    if (["equipment", "bag", "materials"].includes(section)) lastItems = section;
+    const identity2 = `${m.context.campaignId}/${m.localPlayerId}`, owned2 = Object.keys(inv.itemsById), worn = new Set(Object.values(inv.equipped));
+    if (seen3?.identity !== identity2) {
+      let ids4 = null;
+      try {
+        ids4 = JSON.parse(environment.localStorage?.getItem(SEEN_KEY + identity2) ?? "null");
+      } catch {
+      }
+      seen3 = { identity: identity2, ids: new Set(Array.isArray(ids4) ? ids4 : owned2) };
+      if (!Array.isArray(ids4)) try {
+        environment.localStorage?.setItem(SEEN_KEY + identity2, JSON.stringify(owned2));
+      } catch {
+      }
+    }
+    if (section === "bag" && owned2.some((id) => !seen3.ids.has(id))) {
+      seen3.ids = new Set(owned2);
+      try {
+        environment.localStorage?.setItem(SEEN_KEY + identity2, JSON.stringify(owned2));
+      } catch {
+      }
+    }
+    let ap = 0, pts = 0;
+    try {
+      ap = Number(pointBalances(local6.d8).attributeUnspent) || 0;
+      if (local6.d8?.heroClass) pts = Number(classTreePoints(local6.d8).unspent);
+    } catch {
+    }
+    const fresh = owned2.filter((id) => !worn.has(id) && !seen3.ids.has(id)).length, look = m.entitiesById[local6.entityId]?.heroLook, name = look?.look?.name || "Your hero", cls = HERO_CLASSES[local6.d8?.heroClass]?.name ?? "No class yet", level = local6.progression.level;
+    const next = [fresh, upCount, ap, pts, level, name, cls].join("/");
+    if (menuKey === next) return;
+    menuKey = next;
+    for (const [id, text2, kind] of [["equipment", upCount ? "UP" : "", "is-up"], ["bag", fresh ? fresh + " NEW" : "", "is-new"], ["stats", ap > 0 ? ap + " AP" : "", "is-points"], ["progression", pts > 0 ? pts + " PTS" : "", "is-points"]]) {
+      const b = document2.getElementById(`world-${id}-tab`), badge = b?.querySelector(".rm-badge");
+      if (!badge) continue;
+      badge.textContent = text2;
+      badge.className = "rm-badge " + kind;
+      b.setAttribute("aria-label", b.querySelector(".rm-label").textContent + (text2 ? ", " + text2.toLowerCase() : ""));
+    }
+    who.replaceChildren(element("span", String(level), "rm-level"), element("strong", name, "rm-name"), element("small", cls, "rm-class"));
   }
   const HELMET_EYE = {
     shown: '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>',
@@ -49377,6 +49465,8 @@ function createInventoryPresentation({ document: document2, environment, readMod
     statsButton.setAttribute("aria-pressed", String(section === "stats"));
     heroesView?.refresh(open2 && section === "heroes");
     heroesButton?.setAttribute("aria-pressed", String(section === "heroes"));
+    if (open2) paintMenu(m, local6, inv);
+    else panel.classList.remove("rail-open");
     panel.hidden = !open2;
     gearSwitch.hidden = !open2 || !forgeSession;
     gearSwitch.textContent = section === "forge" ? "Carried gear" : "Attunement";
@@ -49385,7 +49475,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
       panel.dataset.section = section;
       panel.classList.remove("is-inspecting");
       comparison.hidden = true;
-      document2.getElementById("world-bag-title").textContent = section === "stats" ? "CHARACTER STATS" : section === "heroes" ? "HEROES" : "SKILLS";
+      document2.getElementById("world-bag-title").textContent = section === "stats" ? "Stats" : section === "heroes" ? "Heroes" : "Skills";
       for (const id of ["equipment", "bag", "materials"]) document2.getElementById(`world-${id}-tab`).setAttribute("aria-pressed", "false");
       status2.textContent = error || (section === "stats" ? "Review your stats. Attribute changes require confirmation." : "");
       return;
@@ -49398,9 +49488,9 @@ function createInventoryPresentation({ document: document2, environment, readMod
       list.replaceChildren();
       const equippedIds = new Set(Object.values(inv.equipped));
       const scan = scanBag(inv, local6, owner);
+      upCount = scan.upItems.size;
       buildGear(m, inv, local6, scan);
       buildBag(inv, scan);
-      document2.getElementById("world-bag-tab").textContent = "BAG";
       document2.getElementById("world-carried-count").textContent = `${Object.keys(inv.itemsById).length - [...equippedIds].filter(Boolean).length} items`;
       const goldArt = document2.querySelector("#world-wallet svg")?.cloneNode(true) ?? icon("gold");
       document2.getElementById("world-bag-summary").replaceChildren(goldArt, element("strong", `${formatAmount(inv.gold)} gold`), element("span", `${Object.keys(inv.itemsById).length} / ${local6.d8 ? inventoryIntakeCapacity(local6.d8) : 64} owned`));
@@ -49409,7 +49499,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     if (key2 === nextKey) return;
     key2 = nextKey;
     document2.getElementById("world-bag-stats").textContent = `Attack ${statText(local6.stats.attack)}  \xB7  Defense ${statText(local6.stats.defense)}  \xB7  Max HP ${statText(local6.stats.maxHp)}`;
-    document2.getElementById("world-bag-title").textContent = section === "forge" ? "BLACKSMITH FORGE" : "INVENTORY";
+    document2.getElementById("world-bag-title").textContent = section === "forge" ? "Blacksmith forge" : MENU_TITLES[section] ?? "Bag";
     forge.render(m, section);
     status2.textContent = error || (section === "forge" ? "Attunement is permanent. Each press applies one level." : !canEquip ? "Finish your swing before changing equipment." : "");
     for (const action3 of panel.querySelectorAll("[data-equipment-action]")) action3.disabled = !canEquip || Boolean(action3.dataset.equipItemId && !equipmentLevelAllowed(owner, inv.itemsById[action3.dataset.equipItemId]));
@@ -49576,7 +49666,9 @@ function createInventoryPresentation({ document: document2, environment, readMod
       }
       parts.push(card);
     }
-    slots.replaceChildren(...parts);
+    const side = element("div", "", "gx-side");
+    side.append(...parts.slice(1));
+    slots.replaceChildren(doll, side);
   }
   function buildBag(inv, scan) {
     const equipped = new Set(Object.values(inv.equipped)), items = Object.values(inv.itemsById).filter((i) => !equipped.has(i.itemId) && itemDefinition(i)), counts = { all: items.length };
@@ -50001,18 +50093,18 @@ function createInventoryPresentation({ document: document2, environment, readMod
       }
     }
   };
-  const crest = document2.getElementById("world-level"), crestKey = (e) => {
+  const crest = document2.getElementById("world-hud-vitals") ?? document2.getElementById("world-level"), crestKey = (e) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      toggle();
+      openCharacter();
     }
   };
   if (crest) {
     crest.classList.add("bag-crest");
     crest.setAttribute("role", "button");
     crest.tabIndex = 0;
-    crest.setAttribute("aria-label", "Open bag");
-    crest.addEventListener("click", toggle);
+    crest.setAttribute("aria-label", "Open stats and skills");
+    crest.addEventListener("click", openCharacter);
     crest.addEventListener("keydown", crestKey);
   }
   openButton.addEventListener("click", toggle);
@@ -50030,7 +50122,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     environment.removeEventListener("resize", resized);
     browse?.removeEventListener("scroll", followAnchor);
     openButton.removeEventListener("click", toggle);
-    crest?.removeEventListener("click", toggle);
+    crest?.removeEventListener("click", openCharacter);
     crest?.removeEventListener("keydown", crestKey);
     closeButton.removeEventListener("click", close);
     environment.removeEventListener("keydown", keyboard);
