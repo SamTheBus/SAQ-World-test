@@ -1,6 +1,6 @@
 {
-  "runtimeId": "12e56c39b809a64c",
-  "runtimeSha256": "12e56c39b809a64c7b966912f439d6ed05b86fbf0784a74d323bd718077e5e2a",
+  "runtimeId": "a8e1efd3d1afc80e",
+  "runtimeSha256": "a8e1efd3d1afc80ee6a6807974debf44374b084a630a0d0f92a8866bede907f0",
   "files": [
     {
       "path": ".nojekyll",
@@ -51,6 +51,16 @@
       "path": "assets/desert-nature-v1/understory.webp",
       "bytes": 67748,
       "sha256": "7ce53abcacdb9782c16cd5fcb1ac4a887c60a2abb99c4cdd941c5b1b819ec65c"
+    },
+    {
+      "path": "assets/fonts-v1/baloo2-800-latin.woff2",
+      "bytes": 18632,
+      "sha256": "3e36c57e37bda5b5f28cf10636d6d3aed4de5250df923f1b203b64ad857c79a7"
+    },
+    {
+      "path": "assets/fonts-v1/OFL.txt",
+      "bytes": 4384,
+      "sha256": "ad09b05dc8bc678c9daf7c4c5f7ef1f55e5726127f4330b2e98e40b9dffcb860"
     },
     {
       "path": "assets/fort-art-pilot-v1/floor-v1.webp",
@@ -520,7 +530,7 @@
     {
       "path": "index.html",
       "bytes": 13674,
-      "sha256": "d895a6a0bc1c6dd24ca1b1ca70b90b69edf9f261fa07efd32aba142e0295b397"
+      "sha256": "c82dee93a2286cd1dd80ac9b01fb89942e15e1adf67d3879467af200f35ff104"
     },
     {
       "path": "manifest.webmanifest",
@@ -538,9 +548,9 @@
       "sha256": "2768b79814920dcaf6c612963783aa50e17ac880c490af8b4937b4295ae25b43"
     },
     {
-      "path": "src/chunks/playable_browser-Q5TJQMN5.js",
-      "bytes": 5247023,
-      "sha256": "140f45ec2524a602db0ed0726a8aa7420da8305b353314fb8c7fe93d0ee8150e"
+      "path": "src/chunks/playable_browser-4JT4EEVR.js",
+      "bytes": 5254554,
+      "sha256": "6e3b709e3c6ffedd66828dd706a3db95922264b2a04f043a48627b535c66a03f"
     },
     {
       "path": "src/chunks/world_browser-VCFF7QPK.js",
@@ -560,7 +570,7 @@
     {
       "path": "src/entrypoints/browser_boot.js",
       "bytes": 2158,
-      "sha256": "71e8e338e2e929bc600fc7715efeb7d365bac680feed61136f64b834399c51b4"
+      "sha256": "c67ac27ce4b3679a0853c16d2bde88d0f439508b4bde5e2e5ae2805818874e6f"
     },
     {
       "path": "world-maker-worker.js",
