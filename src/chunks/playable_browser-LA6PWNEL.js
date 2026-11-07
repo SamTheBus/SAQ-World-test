@@ -466,6 +466,7 @@ import {
   functionalSiteTransitionTargetD9,
   functionalSitesD10,
   fundForgeReview,
+  gearAffixTotalsV2,
   gearHash,
   generateOrdinaryPopulation,
   grantPotions,
@@ -495,6 +496,7 @@ import {
   hashReward,
   heroClassOf,
   heroLookOf,
+  heroRank,
   historicalSiteContentD9,
   hollowOrdinal,
   hostileHazardIdD12_4J,
@@ -530,6 +532,7 @@ import {
   isCryptFamily,
   isFortFamily,
   isGeneratedInteriorFamily,
+  isNewAffix,
   isRuinFamily,
   isSeededBindingV1,
   isSporeV4,
@@ -827,7 +830,7 @@ import {
   worldRevisionV1,
   worldRolesV1,
   wrathDamageV1
-} from "./chunk-5KY5SK46.js";
+} from "./chunk-IE67Y5HJ.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -33180,7 +33183,7 @@ function createMasteryAwards(state) {
 }
 
 // src/simulation/tome_element_rules.js
-var chillSince = (s, source3, old2) => classRank(Object.values(s.playersById ?? {}).find((p) => p.entityId === source3.entityId)?.d8, "winters_grasp") ? { since: old2 && old2.phase === "chill" && old2.expiresTick > s.tick && old2.since !== void 0 ? old2.since : s.tick } : {};
+var chillSince = (s, source3, old2) => heroRank(Object.values(s.playersById ?? {}).find((p) => p.entityId === source3.entityId), "winters_grasp") ? { since: old2 && old2.phase === "chill" && old2.expiresTick > s.tick && old2.since !== void 0 ? old2.since : s.tick } : {};
 function applyFrostControl(s, source3, target, stats2, chillTicks = 240, boost = 0, longer = 0) {
   if (!target.alive) return null;
   const controls = s.subweaponCombat.controls ?? (s.subweaponCombat.controls = {}), id = source3.entityId + "/" + target.entityId, old2 = controls[id];
@@ -33201,7 +33204,7 @@ function statusRates(s, visit) {
   const owners = new Map(Object.values(s.playersById ?? {}).map((p) => [p.entityId, p]));
   for (const [owner, b] of Object.entries(s.subweaponCombat.mastery ?? {})) {
     for (const e of Object.values(b.statuses)) if (e.expiresTick > s.tick && STATUS_RATE[e.kind]) visit(e.targetId, STATUS_RATE[e.kind](e.rank));
-    const paralytic = classRank(owners.get(owner)?.d8, "paralytic");
+    const paralytic = heroRank(owners.get(owner), "paralytic");
     if (paralytic) {
       for (const e of Object.values(b.poisons)) if (e.expiresTick > s.tick) visit(e.targetId, 1 - 0.04 * paralytic);
     }
@@ -34565,7 +34568,7 @@ function createMasteryEffects(s, { damage, eligible: eligible2, identity: identi
   function status2(a, t, kind, level, duration) {
     if (!t.alive || isPodCombatTargetV4(t) && kind !== "expose") return;
     const id = t.entityId + "/" + kind;
-    buckets[a.entityId].statuses[id] = { id, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, kind, rank: level, expiresTick: s.tick + duration };
+    buckets[a.entityId].statuses[id] = { id, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, kind, rank: TREE_STATUSES[kind] ? Math.min(TREE_STATUSES[kind][0], level) : level, expiresTick: s.tick + duration };
   }
   function offhand2(a, t, stats2) {
     if (!p(a)?.d8 || !t.alive) return;
@@ -34934,7 +34937,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (!collidesWithTiles(space(t), x, y, t.hullRadius)) t.position = { x, y };
   }
   const canStun = (a) => Boolean(s.subweaponCombat.mastery?.[a.entityId]);
-  const rank = (a, id) => classRank(owner(a)?.d8, id), aug = (a, id, index) => hasAugment(owner(a)?.d8, id, index), pct2 = (value2, percent) => multiplyCombat(value2, 100 + percent, 100);
+  const rank = (a, id) => heroRank(owner(a), id), aug = (a, id, index) => hasAugment(owner(a)?.d8, id, index), pct2 = (value2, percent) => multiplyCombat(value2, 100 + percent, 100);
   const wears = (a, id) => wearsUnique(owner(a), id), burn = (a, t, sourceItem) => {
     if (t.alive && !isPodCombatTargetV4(t)) periodic(a, t, "burn", getStats(a.entityId).attack, { sourceItem });
   };
@@ -34954,6 +34957,20 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     const r = rank(a, "unstoppable");
     if (r) for (const id of BREAKER) reduceSkillCooldown(c.actors[a.entityId], id, 12 * r);
   }
+  let current = null, waving = false;
+  const as = (id, fn, ...args) => {
+    const was = current;
+    current = id;
+    try {
+      return fn(...args);
+    } finally {
+      current = was;
+    }
+  };
+  const healFlat = (a, n) => {
+    const stats2 = getStats(a.entityId);
+    if (stats2) a.hp = combatInteger(minCombat(stats2.maxHp, addCombat(a.hp, n)));
+  };
   const heal = (a, stats2, n, d) => {
     a.hp = combatInteger(minCombat(stats2.maxHp, addCombat(a.hp, multiplyCombat(stats2.maxHp, n, rank(a, "blood_price") ? d * 2 : d))));
   };
@@ -35203,7 +35220,15 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (aug(a, "shield_charge", 2) && a.alive) classSkillsRecord(combat).jugg = JUGG_TICKS;
     if (aug(a, "shield_charge", 3) && a.alive) shieldSlam(a, stats2, { x: r.dx, y: r.dy }, quake);
   }
-  function shieldSlam(a, stats2, aim2, quake) {
+  function shieldSlam(...args) {
+    waving = true;
+    try {
+      return slamBody(...args);
+    } finally {
+      waving = false;
+    }
+  }
+  function slamBody(a, stats2, aim2, quake) {
     const S2 = T9.slam, hit = multiplyCombat(breakerHit(a, stats2, T9.earthBreaker.attack), ...S2.attack), sourceItem = damageSourceItem(owner(a), "bash");
     for (const t of around2(a, a.position, S2.radius * effects2.area(a))) {
       damage(a, t, hit, "quake", null, { sourceItem, trigger: "skill" });
@@ -35324,7 +35349,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
   function crackGround(a, p, r, quake = 0) {
     const g = rank(a, "groundbreaker");
     if (!g && !quake) return;
-    classSkillsRecord(c.actors[a.entityId]).crack = { x: p.x, y: p.y, r: Math.max(1, Math.min(400, Math.round(r))), rank: Math.max(g, quake), ticks: quake ? CRACK_MAX : CRACK_TICKS, next: 1 };
+    classSkillsRecord(c.actors[a.entityId]).crack = { x: p.x, y: p.y, r: Math.max(1, Math.min(400, Math.round(r))), rank: Math.min(6, Math.max(g, quake)), ticks: quake ? CRACK_MAX : CRACK_TICKS, next: 1 };
   }
   function stepCrack(a, combat) {
     const k = combat.skills?.crack;
@@ -36143,14 +36168,18 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     weaving = weave && element && last && last.element !== element ? weave : 0;
     let done;
     try {
+      current = skillId;
       done = handlers[skillId]?.(a, stats2, aim2, commandId);
     } finally {
       weaving = 0;
+      current = null;
     }
     if (!done) return false;
     const record3 = classSkillsRecord(c.actors[a.entityId]), base = skillId === "shield_bash" ? Math.ceil(scaled(CLASS_SKILLS[skillId].cooldownTicks, T9.styles[offhandStyle(owner(a))]?.cooldown)) : CLASS_SKILLS[skillId].cooldownTicks;
     const longer = rank(a, "restless") ? [6, 5] : skillId === "cast" && rank(a, "overload") ? [13, 10] : [1, 1];
     record3.cooldowns[skillId] = Math.ceil((BREAKER.includes(skillId) && rank(a, "reckless") ? Math.ceil(base * 3 / 4) : base) * longer[0] / longer[1]);
+    const cdr = gearAffixTotalsV2(owner(a)).cdr;
+    if (cdr) record3.cooldowns[skillId] = Math.max(1, Math.ceil(record3.cooldowns[skillId] * (1e4 - cdr) / 1e4));
     record3.last = { skillId, tick: s.tick, ...aim2, ...typeof done === "object" ? done : {} };
     if (refund) {
       reduceSkillCooldown(c.actors[a.entityId], skillId, refund);
@@ -36228,24 +36257,24 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     mend(a, combat);
     bearer(a, combat);
     restless(a, combat);
-    stepRam(a, combat);
-    stepThrow(a, combat);
-    stepBanner(a, combat);
+    as("shield_charge", stepRam, a, combat);
+    as("shield_throw", stepThrow, a, combat);
+    as("war_banner", stepBanner, a, combat);
     stepStill(a, combat);
-    stepSmoke(a, combat);
-    stepWall(a, combat);
-    stepField(a, combat);
-    stepOrbs(a, combat);
+    as("smoke_veil", stepSmoke, a, combat);
+    as("flame_wall", stepWall, a, combat);
+    as("static_field", stepField, a, combat);
+    as("ball_lightning", stepOrbs, a, combat);
     stepTrail(a, combat);
     stepPool(a, combat);
-    stepLeap(a, combat);
-    stepCrack(a, combat);
-    stepHeld(a, combat);
-    stepCuts(a, combat, suppressed);
-    stepFlower(a, combat);
-    stepEcho(a, combat);
+    as("skyfall_leap", stepLeap, a, combat);
+    as("skyfall_leap", stepCrack, a, combat);
+    as("retribution", stepHeld, a, combat);
+    as("thousand_cuts", stepCuts, a, combat, suppressed);
+    as("noxious_bloom", stepFlower, a, combat);
+    as("aegis_pulse", stepEcho, a, combat);
     stepCharges(a, combat);
-    stepMeteors(a, combat);
+    as("meteor", stepMeteors, a, combat);
     grasp(a);
     quicken(a, combat);
     stepStorm(a, combat);
@@ -36253,15 +36282,15 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     stepBlooms(a, combat);
     stepPhoenix(a, combat);
     guardBanner(a, combat);
-    stepAftershock(a, combat);
-    stepFault(a, combat);
+    as("earth_breaker", stepAftershock, a, combat);
+    as("earth_breaker", stepFault, a, combat);
     stepAgain(a, combat);
-    stepSpin(a, combat);
+    as("whirling_blades", stepSpin, a, combat);
     stepTwin(a, combat);
-    stepSeeds(a, combat);
-    stepThaw(a, combat);
-    stepRime(a, combat);
-    stepThunder(a, combat);
+    as("firebloom", stepSeeds, a, combat);
+    as("flashfreeze", stepThaw, a, combat);
+    as("glacial_burst", stepRime, a, combat);
+    as("thunderfall", stepThunder, a, combat);
     wail(a, combat);
     const string = combat.skills?.flurry;
     if (!string || s.tick < string.nextTick) return;
@@ -36270,7 +36299,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       cancelClassSkillAction(combat);
       return;
     }
-    cut(a, stats2, { x: string.x, y: string.y }, null, FLURRY_CUTS - string.cutsLeft);
+    as("flurry", cut, a, stats2, { x: string.x, y: string.y }, null, FLURRY_CUTS - string.cutsLeft);
     if (--string.cutsLeft <= 0) delete combat.skills.flurry;
     else string.nextTick += FLURRY_GAP_TICKS;
   }
@@ -36351,7 +36380,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     ["kindle", 5, (k, t, mechanic) => FIRE5.includes(mechanic) && k.on(t, "kindle")],
     ["exploit", 3, (k, t) => k.on(t, "expose")]
   ];
-  const FIRE5 = ["fire", "burn"], ELEMENT_OF = { fire: 1, burn: 1, frost: 2, lightning: 3 };
+  const FIRE5 = ["fire", "burn"], ELEMENT_OF = { fire: 1, burn: 1, frost: 2, lightning: 3 }, SIGNATURES = /* @__PURE__ */ new Set(["shield_bash", "flurry", "cast"]), SHOCKWAVES = /* @__PURE__ */ new Set(["earth_breaker", "skyfall_leap"]);
   function outgoing(source3, target, raw, mechanic, trigger, critical = false) {
     let out = raw;
     const whole = (v) => v === raw ? v : outgoingCombat(v);
@@ -36427,6 +36456,19 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       if (sharp) out = pct2(out, 10 * sharp);
       const own = c.actors[source3.entityId];
       if (own && aug(source3, "shadowstep", 3) && !own.skills?.twinned && source3.alive) classSkillsRecord(own).twin = { target: target.entityId, ticks: 1 };
+    }
+    const gear2 = gearAffixTotalsV2(owner(source3));
+    if (gear2.any) {
+      let extra = 0;
+      if (mechanic === "main") extra += gear2.mainDmg;
+      if (SIGNATURES.has(current) || !current && trigger === "proc" && mechanic !== "main") extra += gear2.offDmg;
+      extra += FIRE5.includes(mechanic) ? gear2.fireDmg : mechanic === "frost" ? gear2.frostDmg : mechanic === "lightning" ? gear2.lightningDmg : mechanic === "bleed" ? gear2.bleedDmg : mechanic === "poison" ? gear2.poisonDmg : 0;
+      if (waving || SHOCKWAVES.has(current)) extra += gear2.shockDmg;
+      if (trigger === "reactive" || current === "retribution") extra += gear2.counterDmg;
+      if (current && gear2.skills[current]) extra += gear2.skills[current];
+      if (!ordinary(target)) extra += gear2.eliteDmg;
+      if (extra) out = multiplyCombat(out, 1e4 + extra, 1e4);
+      if (gear2.lifeHit && trigger !== "periodic" && source3.alive) healFlat(source3, gear2.lifeHit);
     }
     if (mechanic === "lightning") zapped = { id: target.entityId, tick: s.tick };
     const combat = c.actors[source3.entityId];
@@ -36621,6 +36663,8 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (volatile && c.effects[a.entityId + "/" + target.entityId + "/burn"]) burst(a, target, "fire", 8 * volatile);
     if (shatter && frozen?.phase === "freeze" && frozen.expiresTick > s.tick) burst(a, target, "frost", 10 * shatter);
     if (a.alive && wears(a, "jacks-band")) heal(a, getStats(a.entityId), U.heal, 100);
+    const kill = gearAffixTotalsV2(owner(a)).lifeKill;
+    if (a.alive && kill) heal(a, getStats(a.entityId), kill, 1e4);
     const combat = c.actors[a.entityId], avalanche = rank(a, "avalanche"), stunned = avalanche ? c.mastery?.[a.entityId]?.statuses?.[target.entityId + "/stun"] : null;
     if (avalanche && combat && stunned && stunned.expiresTick > s.tick) reduceSkillCooldown(combat, "shield_charge", 60 * avalanche);
     const opportunist = rank(a, "opportunist");
@@ -36684,7 +36728,7 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
   const effects2 = createMasteryEffects(s, { damage, eligible: eligible2, identity: identity2, getStats: stats2, awards: mastery, bleed: (a, t, captured) => periodic(a, t, "bleed", captured.attack, captured) });
   function periodic(source3, target, kind, attack, captured) {
     if (!target.alive) return;
-    const id = `${source3.entityId}/${target.entityId}/${kind}`, old2 = c.effects[id], longer = classRank(players.get(source3.entityId)?.d8, kind === "bleed" ? "serrated_edge" : "searing"), lingering = kind === "bleed" ? classRank(players.get(source3.entityId)?.d8, "lingering_venom") : 0, eye6 = kind === "burn" && wearsUnique(players.get(source3.entityId), "eye-of-the-sun"), life = Math.min(kind === "bleed" ? 1350 : 540, Math.round((kind === "bleed" ? 600 : 240) * (100 + 10 * longer) * (eye6 ? 150 : 100) * (100 + 10 * lingering) / 1e6) + (captured.extra ?? 0));
+    const id = `${source3.entityId}/${target.entityId}/${kind}`, old2 = c.effects[id], longer = heroRank(players.get(source3.entityId), kind === "bleed" ? "serrated_edge" : "searing"), lingering = kind === "bleed" ? heroRank(players.get(source3.entityId), "lingering_venom") : 0, eye6 = kind === "burn" && wearsUnique(players.get(source3.entityId), "eye-of-the-sun"), life = Math.min(kind === "bleed" ? 1350 : 540, Math.round((kind === "bleed" ? 600 : 240) * (100 + 10 * longer) * (eye6 ? 150 : 100) * (100 + 10 * lingering) / 1e6) + (captured.extra ?? 0));
     c.effects[id] = {
       id,
       sourceId: source3.entityId,
@@ -36711,7 +36755,7 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
   }
   function elementImpact(source3, target, b, element = b.delivery ?? "fire") {
     skills.landed(source3, target);
-    const tree = (id) => classRank(players.get(source3.entityId)?.d8, id), boost = 0, burnBoost = (100 + 6 * tree("kindling")) * (100 + 8 * tree("firebrand")), burnAttack = burnBoost === 1e4 ? b.attack : copyWire(combatInteger(multiplyCombat(b.attack, burnBoost, 1e4)));
+    const tree = (id) => heroRank(players.get(source3.entityId), id), boost = 0, burnBoost = (100 + 6 * tree("kindling")) * (100 + 8 * tree("firebrand")), burnAttack = burnBoost === 1e4 ? b.attack : copyWire(combatInteger(multiplyCombat(b.attack, burnBoost, 1e4)));
     const coefficient = b.tomeRecipe ? capturedTomePower(b.tomeRecipe) : b.firePower ?? combatAmount(18, 10), base = multiplyCombat(b.attack, coefficient.n, coefficient.d), raw = boost ? multiplyCombat(base, 100 + boost, 100) : base, overload = b.tomeRecipe?.overload ?? 0, A = b.tomeRecipe?.areaScale ?? 1, origin = { position: { ...target.position }, hullRadius: target.hullRadius };
     const neighbors = overload && element !== "lightning" ? effects2.nearby(source3, origin, 80 * A * (1 + 0.2 * overload)).filter((t) => t.entityId !== target.entityId) : [];
     const hops = [];
@@ -39975,7 +40019,7 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
       const stats2 = progression.resolvedStats(target.entityId), suppressed = subweaponSuppressedD12_4I(state, target.entityId);
       defenseStats = stats2;
       const defenseSource = attribution?.projectileDirection ? { ...source3, position: { x: target.position.x - attribution.projectileDirection.x * 32, y: target.position.y - attribution.projectileDirection.y * 32 } } : source3;
-      defense = incomingSubweaponHit({ combat: state.subweaponCombat.actors[target.entityId], stats: stats2, raw, actor: target, source: defenseSource, knight: playerFor(target.entityId)?.d8?.heroClass === "knight", wall: classRank(playerFor(target.entityId)?.d8, "bulwark_colossus") ? 10 : classRank(playerFor(target.entityId)?.d8, "iron_wall"), steady: classRank(playerFor(target.entityId)?.d8, "unyielding"), boss: bossCombat.isBoss(source3.entityId) || Boolean(state.content.definitionsById[source3.contentDefinitionId]?.isBoss), suppressed });
+      defense = incomingSubweaponHit({ combat: state.subweaponCombat.actors[target.entityId], stats: stats2, raw, actor: target, source: defenseSource, knight: playerFor(target.entityId)?.d8?.heroClass === "knight", wall: classRank(playerFor(target.entityId)?.d8, "bulwark_colossus") ? 10 : heroRank(playerFor(target.entityId), "iron_wall"), steady: heroRank(playerFor(target.entityId), "unyielding"), boss: bossCombat.isBoss(source3.entityId) || Boolean(state.content.definitionsById[source3.contentDefinitionId]?.isBoss), suppressed });
       raw = defense.damage;
       if (compareCombat(defense.absorbed, 0) > 0) barrierAbsorption = { absorbed: copyWire(defense.absorbed), remaining: copyWire(state.subweaponCombat.actors[target.entityId].barrier), capacity: copyWire(stats2.maxBarrier) };
     }
@@ -40155,7 +40199,7 @@ function createActivitySimulation(initialState, { measure = (_name, fn) => fn(),
       } else if (command.kind === "combat.guardIntent") {
         guardIntent(state.subweaponCombat.actors[actor.entityId].guard, command.payload.pressed, state.primary.actorsById[actor.entityId]);
       } else if (command.kind === "combat.shadowDash") {
-        if (beginShadowDash(actor, state.subweaponCombat.actors[actor.entityId], resolvePlayerStats(player), command.payload.aim, false, 100 - 5 * classRank(player.d8, "quick_dash"))) family.classHooks.dashed(actor);
+        if (beginShadowDash(actor, state.subweaponCombat.actors[actor.entityId], resolvePlayerStats(player), command.payload.aim, false, 100 - 5 * heroRank(player, "quick_dash"))) family.classHooks.dashed(actor);
       } else if (command.kind === "combat.skill") {
         family.skill(actor, command.payload.skillId, command.payload.aim, command.commandId);
       } else if (command.kind === "gear.salvage") {
@@ -47033,8 +47077,42 @@ var BAG_FILTERS = Object.freeze([["all", "All"], ["weapon", "Weapons"], ["offhan
 var bagFilterOf = (d) => d.slot === "weapon" ? "weapon" : d.slot === "subweapon" ? "offhand" : d.slot === "ring" ? "ring" : "armor";
 var slotFilterOf = (slot) => slot === "weapon" ? "weapon" : slot === "subweapon" ? "offhand" : slot.startsWith("ring") ? "ring" : "armor";
 var displayName = (d) => String(d?.name ?? "").replace(/\s*\(Lv\.\s*\d+\)$/, "");
-var LABELS = { attack: "Attack", defense: "Defense", maxHp: "Max HP", str: "STR", dex: "DEX", int: "INT", moveSpeed: "Movement speed", critChance: "Crit chance", critDamage: "Crit damage", block: "Block", parry: "Parry", activeSpeed: "Active Speed", bonusAreaRadius: "Area Radius", atkPct: "Attack", maxHpPct: "Max HP", defPct: "Defense", moveSpeedPct: "Movement speed", strPct: "STR", dexPct: "DEX", intPct: "INT" };
-var PCT = /* @__PURE__ */ new Set(["activeSpeed", "critChance", "critDamage", "block", "parry", "bonusAreaRadius", "atkPct", "maxHpPct", "defPct", "moveSpeedPct", "strPct", "dexPct", "intPct"]);
+var LABELS = {
+  attack: "Attack",
+  defense: "Defense",
+  maxHp: "Max HP",
+  str: "STR",
+  dex: "DEX",
+  int: "INT",
+  moveSpeed: "Movement speed",
+  critChance: "Crit chance",
+  critDamage: "Crit damage",
+  block: "Block",
+  parry: "Parry",
+  activeSpeed: "Active Speed",
+  bonusAreaRadius: "Area Radius",
+  atkPct: "Attack",
+  maxHpPct: "Max HP",
+  defPct: "Defense",
+  moveSpeedPct: "Movement speed",
+  strPct: "STR",
+  dexPct: "DEX",
+  intPct: "INT",
+  mainDmg: "Main hand damage",
+  offDmg: "Offhand damage",
+  fireDmg: "Fire damage",
+  frostDmg: "Frost damage",
+  lightningDmg: "Lightning damage",
+  bleedDmg: "Bleed damage",
+  poisonDmg: "Poison damage",
+  shockDmg: "Shockwave damage",
+  counterDmg: "Counter damage",
+  cdr: "Cooldown reduction",
+  eliteDmg: "Damage to elites",
+  lifeHit: "Life on hit",
+  lifeKill: "Life per kill"
+};
+var PCT = /* @__PURE__ */ new Set(["activeSpeed", "critChance", "critDamage", "block", "parry", "bonusAreaRadius", "atkPct", "maxHpPct", "defPct", "moveSpeedPct", "strPct", "dexPct", "intPct", "mainDmg", "offDmg", "fireDmg", "frostDmg", "lightningDmg", "bleedDmg", "poisonDmg", "shockDmg", "counterDmg", "skillDmg", "cdr", "eliteDmg", "lifeKill"]);
 var FLAT = ["attack", "defense", "maxHp", "str", "dex", "int"];
 var zero5 = (v) => statValue(v) === 0;
 var sign = (v) => {
@@ -47042,12 +47120,20 @@ var sign = (v) => {
   return n > 0 ? 1 : n < 0 ? -1 : 0;
 };
 var sum = (a, b) => statDifference(a, statScale(b, -1));
-var affixLine = (k) => ({ atk: "attack", def: "defense", maxHp: "maxHp", str: "str", dex: "dex", int: "int" })[k] ?? "fx:" + (k === "activeSpd" ? "activeSpeed" : k);
-var lineLabel = (key2) => LABELS[key2.startsWith("fx:") ? key2.slice(3) : key2] ?? key2;
+var affixLine = (k, skill) => ({ atk: "attack", def: "defense", maxHp: "maxHp", str: "str", dex: "dex", int: "int" })[k] ?? "fx:" + (k === "activeSpd" ? "activeSpeed" : k) + (skill ? ":" + skill : "");
+var skillName = (id) => CLASS_TREE_SKILLS[id]?.name ?? id;
+function lineLabel(key2) {
+  const [k, skill] = (key2.startsWith("fx:") ? key2.slice(3) : key2).split(":");
+  return k === "skillDmg" ? skillName(skill) + " damage" : k === "passiveRank" ? skillName(skill) : LABELS[k] ?? key2;
+}
 function lineValue(key2, v) {
-  const k = key2.startsWith("fx:") ? key2.slice(3) : key2, pct2 = key2.startsWith("fx:") && PCT.has(k);
+  const k = (key2.startsWith("fx:") ? key2.slice(3) : key2).split(":")[0], pct2 = key2.startsWith("fx:") && PCT.has(k);
   return statText(pct2 ? statScale(v, 100) : v, true) + (pct2 || key2 === "fx:moveSpeed" ? "%" : "");
 }
+var affixText = (a) => {
+  const key2 = affixLine(a.key, a.skill);
+  return "+" + lineValue(key2, a.value) + " " + lineLabel(key2);
+};
 function itemLines(d) {
   const lines2 = /* @__PURE__ */ new Map(), add = (key2, v) => {
     if (!zero5(v) || key2 === "attack" && d.slot === "weapon") lines2.set(key2, v);
@@ -47063,7 +47149,7 @@ function rollOf(generated, a) {
 }
 function itemSections(d, generated) {
   const affixes = (generated?.affixes ?? []).map((a) => {
-    const key2 = affixLine(a.key);
+    const key2 = affixLine(a.key, a.skill);
     return { key: key2, value: a.value, flat: FLAT.includes(key2), roll: rollOf(generated, a) };
   }), rolled = /* @__PURE__ */ new Map();
   for (const a of affixes) rolled.set(a.key, rolled.has(a.key) ? sum(rolled.get(a.key), a.value) : a.value);
@@ -47109,11 +47195,27 @@ var ICON_PATHS = {
   moveSpeed: ["#7fd3c9", '<path d="M12.8 19.6A2 2 0 1 0 14 16H2M17.5 8a2.5 2.5 0 1 1 2 4H2M9.8 4.4A2 2 0 1 1 11 8H2"/>'],
   bonusAreaRadius: ["#67c7bb", '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>'],
   block: ["#9cb4cc", '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M9 12l2 2 4-4"/>'],
-  parry: ["#c5ccd4", '<path d="M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M19 21l2-2M14.5 6.5 18 3h3v3l-3.5 3.5M5 14l4 4M7 17l-3 3M3 19l2 2"/>']
+  parry: ["#c5ccd4", '<path d="M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M19 21l2-2M14.5 6.5 18 3h3v3l-3.5 3.5M5 14l4 4M7 17l-3 3M3 19l2 2"/>'],
+  // Affixes v2 (mockup icons).
+  mainDmg: ["#ff8f7a", '<path d="M14.5 17.5 3 6V3h3l11.5 11.5"/><path d="M13 19l6-6M16 16l4 4M19 21l2-2"/><path d="M19 2v5M16.5 4.5h5"/>'],
+  offDmg: ["#f0a3c4", '<path d="M9.5 17.5 21 6V3h-3L6.5 14.5"/><path d="M11 19l-6-6M8 16l-4 4M5 21l-2-2"/><path d="M5 2v5M2.5 4.5h5"/>'],
+  fireDmg: ["#ff7a45", '<path d="M12 22c4 0 7-3 7-7 0-4-3-6-4-10-2 2-3 4-3 6-1-1-2-2-2-4-2 2-5 5-5 8 0 4 3 7 7 7z"/>'],
+  frostDmg: ["#8fd3ff", '<path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M9 3.5l3 2 3-2M9 20.5l3-2 3 2"/>'],
+  lightningDmg: ["#c9a6ff", '<path d="M13 2 5 13h6l-1 9 8-12h-6z"/>'],
+  bleedDmg: ["#e05a5a", '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>'],
+  poisonDmg: ["#9be15d", '<path d="M9 3h6M10 3v6L5 18a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/><path d="M7.5 15h9"/>'],
+  counterDmg: ["#9cb4cc", '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>'],
+  shockDmg: ["#e8a25a", '<path d="M2 19h20"/><path d="M4 15c2.5-3.5 5.5-3.5 8 0s5.5 3.5 8 0"/><path d="M7 10.5c1.7-2.2 3.3-2.2 5 0s3.3 2.2 5 0"/>'],
+  skillDmg: ["#ffd36e", '<path d="M12 7v10M7 12h10"/><circle cx="12" cy="12" r="9"/>'],
+  passiveRank: ["#ffd36e", '<path d="M7 18l5-5 5 5"/><path d="M7 11l5-5 5 5"/>'],
+  cdr: ["#7fc7ff", '<path d="M12 9v4l3 2"/><path d="M9 2h6"/><circle cx="12" cy="13" r="8"/>'],
+  eliteDmg: ["#f0c45a", '<path d="M3 19h18"/><path d="M4 19 3 8l5 4 4-7 4 7 5-4-1 11"/>'],
+  lifeHit: ["#ff7d8f", '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"/><path d="M12 8.5v5M9.5 11h5"/>'],
+  lifeKill: ["#ff9aa6", '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"/><path d="M9 11l2 2 4-4"/>']
 };
 var ICON_ALIAS = { atkPct: "attack", defPct: "defense", maxHpPct: "maxHp", strPct: "str", dexPct: "dex", intPct: "int", moveSpeedPct: "moveSpeed", activeSpd: "activeSpeed" };
 function statIcon(key2, size = 16) {
-  const k = key2.startsWith("fx:") ? key2.slice(3) : key2, icon = ICON_PATHS[ICON_ALIAS[k] ?? k];
+  const k = (key2.startsWith("fx:") ? key2.slice(3) : key2).split(":")[0], icon = ICON_PATHS[ICON_ALIAS[k] ?? k];
   if (!icon) return "";
   return `<svg class="gx-ic" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${icon[0]}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icon[1]}</svg>`;
 }
@@ -50607,7 +50709,7 @@ function createSettlementServicesMenu2(options) {
         if (mode === "reforge") {
           detail.append(el("p", "Select one affix. Executing locks the other lines."));
           r.affixes.forEach((a, index) => {
-            const b2 = button((labels[a.key] ?? a.key) + " \xB7 " + a.value, () => {
+            const b2 = button(isNewAffix(a.key) ? affixText(a) : (labels[a.key] ?? a.key) + " \xB7 " + a.value, () => {
               line14 = index;
               key2 = null;
               refresh(readModel());

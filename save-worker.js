@@ -10286,6 +10286,44 @@ function classGearFlavor(cls, family2, noun) {
   return {};
 }
 
+// src/shared/content/gear_affixes_v2.js
+var AFFIXES_V2 = "affixes-v2";
+var NEW_AFFIX_POOLS = freezeWire({
+  weapon: ["mainDmg", "classDmg", "skillDmg", "eliteDmg", "lifeHit"],
+  shield: ["offDmg", "classDmg", "skillDmg", "passiveRank", "cdr"],
+  dagger: ["offDmg", "classDmg", "skillDmg", "passiveRank", "cdr"],
+  tome: ["offDmg", "classDmg", "skillDmg", "passiveRank", "cdr"],
+  helmet: ["classDmg", "passiveRank", "cdr"],
+  gloves: ["mainDmg", "offDmg", "cdr", "lifeHit"],
+  overall: ["lifeKill"],
+  boots: ["maxHp", "def", "lifeKill"],
+  cape: ["lifeKill"],
+  ring: ["mainDmg", "offDmg", "cdr", "eliteDmg", "lifeHit"]
+});
+var CLASS_DAMAGE = freezeWire({ knight: ["shockDmg", "counterDmg"], rogue: ["bleedDmg", "poisonDmg"], mage: ["fireDmg", "frostDmg", "lightningDmg"] });
+var TOME_DAMAGE = freezeWire({ fire: "fireDmg", frost: "frostDmg", lightning: "lightningDmg" });
+var NEW_AFFIX_KEYS = Object.freeze(["mainDmg", "offDmg", "fireDmg", "frostDmg", "lightningDmg", "bleedDmg", "poisonDmg", "shockDmg", "counterDmg", "skillDmg", "passiveRank", "cdr", "eliteDmg", "lifeHit", "lifeKill"]);
+var isNewAffix = (key9) => NEW_AFFIX_KEYS.includes(key9);
+var NEW_AFFIX_RANGES = freezeWire({ mainDmg: [40, 100], offDmg: [40, 100], fireDmg: [50, 130], frostDmg: [50, 130], lightningDmg: [50, 130], bleedDmg: [50, 130], poisonDmg: [50, 130], shockDmg: [50, 130], counterDmg: [50, 130], skillDmg: [80, 150], cdr: [30, 60], eliteDmg: [50, 120], lifeKill: [10, 30] });
+var byClass = (cls, f2) => Object.values(CLASS_TREE_SKILLS).filter((x) => x.classId === cls && f2(x)).map((x) => x.id).sort();
+var ACTIVES = {};
+var PASSIVES = {};
+var classActives = (cls) => ACTIVES[cls] ??= Object.freeze(byClass(cls, (x) => x.kind === "active"));
+var classRankPassives = (cls) => PASSIVES[cls] ??= Object.freeze(byClass(cls, (x) => x.kind === "passive" && x.maxRank === 5));
+function affixPoolV2(oldPool, slotKey, rarityTier) {
+  return [...oldPool, ...(NEW_AFFIX_POOLS[slotKey] ?? []).filter((k) => !oldPool.includes(k) && (k !== "passiveRank" || rarityTier >= 2))];
+}
+function resolveNewAffix(key9, cls, spellType, random) {
+  if (key9 !== "classDmg") return key9;
+  if (spellType && TOME_DAMAGE[spellType]) return TOME_DAMAGE[spellType];
+  const list = CLASS_DAMAGE[cls];
+  return list[Math.floor(random() * list.length)];
+}
+function affixSkill(key9, cls, random) {
+  const list = key9 === "skillDmg" ? classActives(cls) : key9 === "passiveRank" ? classRankPassives(cls) : null;
+  return list ? list[Math.floor(random() * list.length)] : null;
+}
+
 // src/shared/content/uniques_v1.js
 var unique = (id, name, family2, subType, noun, cls, from, biome, effect, flavor) => ({ id, name, family: family2, subType, noun, cls, look: id, from, biome, effect, flavor });
 var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
@@ -10458,7 +10496,8 @@ function rewardProgressionD9(depth, sourceId) {
   return freezeWire(validateRewardProgressionD9({ version: D9_REWARD_PROGRESSION, policy: D9_PROFILE.progressionPolicy, sourceDepth: progressionWire(progressionBigInt(depth)), quality: 1, sourceId, tomeEligibility: "base-single-d7-v1" }));
 }
 function validateRewardProgressionD9(v) {
-  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "siteReward", "gearClass", "armor", "wardrobe", "unique", "boon", "quickClear"]);
+  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "siteReward", "gearClass", "armor", "wardrobe", "unique", "boon", "quickClear", "affixes"]);
+  requireContract(v.affixes === void 0 || v.affixes === AFFIXES_V2 && v.gearClass !== void 0, "Affix pool policy");
   requireContract(v.boon === void 0 || v.boon === "fortune" && v.rarityPolicyHash !== void 0, "Boon reward policy");
   requireContract(v.quickClear === void 0 || v.quickClear === true && v.rarityPolicyHash !== void 0 && v.combatQuality === "completion", "Quick clear reward policy");
   requireContract(v.armor === void 0 || v.armor === "overall" && v.gearClass === void 0 && v.combatHash === WORLD_COMBAT_HASH, "One-piece armor policy");
@@ -10976,10 +11015,22 @@ function generateAtPrecision(c, seed, input, { tier: tier2 = null, family: famil
     }
   }
   if (cls) applyClassFlavor(raw, classGearFlavor(cls, type, n));
-  const affixes = [], pool = [...AFFIX_POOLS[sub ?? type]], bonus = {};
+  const v2 = Boolean(cls) && progression.affixes === AFFIXES_V2, affixes = [], pool = v2 ? affixPoolV2(AFFIX_POOLS[sub ?? type], sub ?? type, rarityTier) : [...AFFIX_POOLS[sub ?? type]], bonus = {};
   for (let i = 0; i < rarityTier && pool.length; i++) {
-    const key9 = pool.splice(Math.floor(random() * pool.length), 1)[0];
-    let value;
+    let key9 = pool.splice(Math.floor(random() * pool.length), 1)[0], value, skill = null;
+    if (v2 && (key9 === "classDmg" || isNewAffix(key9))) {
+      key9 = resolveNewAffix(key9, cls, raw.spellType ?? null, random);
+      skill = affixSkill(key9, cls, random);
+      const star = c.q(100 + 5 * rarityTier, 100);
+      if (key9 === "passiveRank") value = progressionWire(1n);
+      else if (key9 === "lifeHit") value = ceil(times3(f2(".2", ".4"), c.add(I(3), times3(power2, ".5")), star));
+      else {
+        const [lo, hi] = NEW_AFFIX_RANGES[key9];
+        value = round44(times3(f2(String(lo / 1e3), String(hi / 1e3)), star));
+      }
+      affixes.push(skill ? { key: key9, value, skill } : { key: key9, value });
+      continue;
+    }
     if (key9 === "atk" || key9 === "def") value = ceil(times3(f2(".04", ".08"), E, flatR));
     else if (key9 === "maxHp") value = ceil(times3(f2(".12", ".24"), E, flatR));
     else if (key9 === "moveSpeed") value = ceil(times3(1 + Math.floor(random() * 2), power2, P2));
@@ -11016,7 +11067,19 @@ function affixRollRangeD9(g, key9) {
     const P2 = c.q((100 + 15 * tier2) * (overall ? 18 : 10), 1e3), R2 = c.q((100 + 7 * tier2) * (overall ? 18 : 10), 1e3), I = c.q, mul2 = c.mul;
     const cap = (a, b) => ({ lo: a.lo < b.lo ? a.lo : b.lo, hi: a.hi < b.hi ? a.hi : b.hi }), ceil = (x) => progressionWire(c.endpoint(x, "ceil")), round44 = (x) => decimalWire(c.endpoint(x, "round", 4), 4);
     let minimum, maximum;
-    if (["atk", "def", "maxHp"].includes(key9)) {
+    const star = c.q(100 + 5 * tier2, 100);
+    if (NEW_AFFIX_RANGES[key9]) {
+      const [lo, hi] = NEW_AFFIX_RANGES[key9];
+      minimum = round44(mul2(I(lo, 1e3), star));
+      maximum = round44(mul2(I(hi, 1e3), star));
+    } else if (key9 === "lifeHit") {
+      const base = mul2(c.add(I(3), mul2(I(p), I(1, 2))), star);
+      minimum = ceil(mul2(I(2, 10), base));
+      maximum = ceil(mul2(I(4, 10), base));
+    } else if (key9 === "passiveRank") {
+      minimum = progressionWire(1n);
+      maximum = progressionWire(1n);
+    } else if (["atk", "def", "maxHp"].includes(key9)) {
       const scale2 = mul2(c.dungeonScale(p).E, R2), lo = key9 === "maxHp" ? 12 : 4;
       minimum = ceil(mul2(I(lo, 100), scale2));
       maximum = ceil(mul2(I(lo * 2, 100), scale2));
@@ -11931,6 +11994,7 @@ var scale = (a, n, d, ceil = false) => {
   return decimalResult(ceil ? roundCombat(q, "ceil") : q, typeof a === "number");
 };
 function adjust(def, key9, old, value) {
+  if (!paths[key9]) return;
   const [group, field2] = paths[key9];
   def[group][field2] = sum(sum(def[group][field2] ?? 0, old, -1), value);
 }
@@ -11949,7 +12013,7 @@ function workshopResult(item) {
       const next = generateGear3(g.seed, g.progression ?? g.contentDepth, { tier: tier2 + 1, family: g.definition.slot, subType: g.definition.subType ?? null, noun: g.definition.noun });
       definition = copyWire(next.definition);
       for (const a of next.affixes) adjust(definition, a.key, a.value, 0);
-      affixes = affixes.map((a) => ({ key: a.key, value: scale(a.value, 100 + 15 * (tier2 + 1), 100 + 15 * tier2, integer.has(a.key)) }));
+      affixes = affixes.map((a) => a.key === "passiveRank" ? a : { ...a, value: scale(a.value, 100 + 15 * (tier2 + 1), 100 + 15 * tier2, integer.has(a.key) || a.key === "lifeHit") });
       for (const a of affixes) adjust(definition, a.key, 0, a.value);
       const additions3 = next.affixes.filter((a) => !affixes.some((old) => old.key === a.key));
       if (additions3.length) {
@@ -11961,15 +12025,22 @@ function workshopResult(item) {
     } else if (step.kind === "reforge") {
       requireContract(!enchants && Number.isInteger(step.line) && step.line >= 0 && step.line < affixes.length && (lockedLine === null || lockedLine === step.line), "Invalid locked reforge line");
       lockedLine = step.line;
-      const old = affixes[step.line], pool = AFFIX_POOLS4[g.definition.subType ?? g.definition.slot].filter((k) => !affixes.some((a, i) => i !== step.line && a.key === k)), name = pool[Math.floor(random("key") * pool.length)], range = affixRollRange({ ...g, rarityTier: tier2, definition }, name);
+      const v2 = g.progression?.affixes === AFFIXES_V2 && g.progression.gearClass, slot = g.definition.subType ?? g.definition.slot, classKey = (k) => Object.values(CLASS_DAMAGE).flat().includes(k) ? "classDmg" : k;
+      const old = affixes[step.line], pool = (v2 ? affixPoolV2(AFFIX_POOLS[slot], slot, tier2) : AFFIX_POOLS4[slot]).filter((k) => !affixes.some((a, i) => i !== step.line && classKey(a.key) === k)), picked = pool[Math.floor(random("key") * pool.length)];
+      let name = picked, skill = null;
+      if (v2 && (picked === "classDmg" || isNewAffix(picked))) {
+        name = resolveNewAffix(picked, g.progression.gearClass, definition.spellType ?? null, () => random("class"));
+        skill = affixSkill(name, g.progression.gearClass, () => random("skill"));
+      }
+      const range = affixRollRange({ ...g, rarityTier: tier2, definition }, name), whole = integer.has(name) || name === "lifeHit" || name === "passiveRank";
       let value;
-      if (integer.has(name) && (typeof range.minimum === "string" || typeof range.maximum === "string" || range.minimum?.chunks)) {
+      if (whole && (typeof range.minimum === "string" || typeof range.maximum === "string" || range.minimum?.chunks)) {
         const lo = progressionBigInt(range.minimum), hi = progressionBigInt(range.maximum);
         value = progressionWire(lo + (hi - lo) * BigInt(Math.floor(random("value") * 1e6)) / 1000000n);
-      } else value = integer.has(name) ? Math.floor(range.minimum + random("value") * (range.maximum - range.minimum + 1)) : Number((Number(range.minimum) + random("value") * (Number(range.maximum) - Number(range.minimum))).toFixed(4));
+      } else value = whole ? Math.floor(range.minimum + random("value") * (range.maximum - range.minimum + 1)) : Number((Number(range.minimum) + random("value") * (Number(range.maximum) - Number(range.minimum))).toFixed(4));
       adjust(definition, old.key, old.value, 0);
       adjust(definition, name, 0, value);
-      affixes[step.line] = { key: name, value };
+      affixes[step.line] = skill ? { key: name, value, skill } : { key: name, value };
     } else if (step.kind === "enchant") {
       requireContract(tier2 >= 2 && enchants < tier2 - 1, "Enchant capacity exceeded");
       unenchanted ??= copyWire(definition);
@@ -12767,7 +12838,7 @@ function serviceStock(s, p, npc, gearClass = heroClassOf(p.d8)?.id ?? null, lega
   return offers.map((base) => {
     const offer = { ...base, price: merchantPrice(npc, base) }, sourceEntityId = "ent:" + token(SETTLEMENT_LIFE_POLICY.stockVersion + (hasWorldCombat(s) ? "/" + WORLD_COMBAT_HASH : "") + (cls ? "/" + cls : "") + "/" + s.campaign.seed.seedHex + "/" + p.playerId + "/" + npc.id + "/" + offer.id), key9 = sourceEntityId + (legacyChest ? "/legacy-chest" : "");
     if (!stockCache.has(key9)) {
-      const progression = hasWorldCombat(s) ? { ...rewardProgressionD9([0, 1, 6, 11, 21, 41][npc.band], sourceEntityId), combatHash: WORLD_COMBAT_HASH, combatQuality: "ordinary", ...cls ? { gearClass: cls } : {} } : rewardProgression(SETTLEMENT_LIFE_POLICY.bandSourceDepth[npc.band], sourceEntityId), generated = generateGear3(gearSeed(s, p, sourceEntityId), progression, { tier: SETTLEMENT_LIFE_POLICY.gearRarity, family: (cls || hasWorldCombat(s) && !legacyChest) && offer.family === "chest" ? "overall" : offer.family });
+      const progression = hasWorldCombat(s) ? { ...rewardProgressionD9([0, 1, 6, 11, 21, 41][npc.band], sourceEntityId), combatHash: WORLD_COMBAT_HASH, combatQuality: "ordinary", ...cls ? { gearClass: cls, affixes: AFFIXES_V2 } : {} } : rewardProgression(SETTLEMENT_LIFE_POLICY.bandSourceDepth[npc.band], sourceEntityId), generated = generateGear3(gearSeed(s, p, sourceEntityId), progression, { tier: SETTLEMENT_LIFE_POLICY.gearRarity, family: (cls || hasWorldCombat(s) && !legacyChest) && offer.family === "chest" ? "overall" : offer.family });
       if (stockCache.size >= 128) stockCache.delete(stockCache.keys().next().value);
       stockCache.set(key9, freezeWire({ offer, sourceEntityId, item: { itemId: `item:${p.playerId}:${sourceEntityId}`, definitionId: offer.definitionId, ownerPlayerId: p.playerId, sourceEntityId, generated: copyWire(generated) } }));
     }

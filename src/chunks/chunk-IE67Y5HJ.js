@@ -3757,6 +3757,45 @@ function classGearFlavor(cls, family2, noun) {
   return {};
 }
 
+// src/shared/content/gear_affixes_v2.js
+var AFFIXES_V2 = "affixes-v2";
+var NEW_AFFIX_POOLS = freezeWire({
+  weapon: ["mainDmg", "classDmg", "skillDmg", "eliteDmg", "lifeHit"],
+  shield: ["offDmg", "classDmg", "skillDmg", "passiveRank", "cdr"],
+  dagger: ["offDmg", "classDmg", "skillDmg", "passiveRank", "cdr"],
+  tome: ["offDmg", "classDmg", "skillDmg", "passiveRank", "cdr"],
+  helmet: ["classDmg", "passiveRank", "cdr"],
+  gloves: ["mainDmg", "offDmg", "cdr", "lifeHit"],
+  overall: ["lifeKill"],
+  boots: ["maxHp", "def", "lifeKill"],
+  cape: ["lifeKill"],
+  ring: ["mainDmg", "offDmg", "cdr", "eliteDmg", "lifeHit"]
+});
+var CLASS_DAMAGE = freezeWire({ knight: ["shockDmg", "counterDmg"], rogue: ["bleedDmg", "poisonDmg"], mage: ["fireDmg", "frostDmg", "lightningDmg"] });
+var TOME_DAMAGE = freezeWire({ fire: "fireDmg", frost: "frostDmg", lightning: "lightningDmg" });
+var NEW_AFFIX_KEYS = Object.freeze(["mainDmg", "offDmg", "fireDmg", "frostDmg", "lightningDmg", "bleedDmg", "poisonDmg", "shockDmg", "counterDmg", "skillDmg", "passiveRank", "cdr", "eliteDmg", "lifeHit", "lifeKill"]);
+var isNewAffix = (key5) => NEW_AFFIX_KEYS.includes(key5);
+var NEW_AFFIX_RANGES = freezeWire({ mainDmg: [40, 100], offDmg: [40, 100], fireDmg: [50, 130], frostDmg: [50, 130], lightningDmg: [50, 130], bleedDmg: [50, 130], poisonDmg: [50, 130], shockDmg: [50, 130], counterDmg: [50, 130], skillDmg: [80, 150], cdr: [30, 60], eliteDmg: [50, 120], lifeKill: [10, 30] });
+var CDR_CAP = 0.3;
+var byClass = (cls, f2) => Object.values(CLASS_TREE_SKILLS).filter((x) => x.classId === cls && f2(x)).map((x) => x.id).sort();
+var ACTIVES = {};
+var PASSIVES = {};
+var classActives = (cls) => ACTIVES[cls] ??= Object.freeze(byClass(cls, (x) => x.kind === "active"));
+var classRankPassives = (cls) => PASSIVES[cls] ??= Object.freeze(byClass(cls, (x) => x.kind === "passive" && x.maxRank === 5));
+function affixPoolV2(oldPool, slotKey, rarityTier) {
+  return [...oldPool, ...(NEW_AFFIX_POOLS[slotKey] ?? []).filter((k) => !oldPool.includes(k) && (k !== "passiveRank" || rarityTier >= 2))];
+}
+function resolveNewAffix(key5, cls, spellType, random) {
+  if (key5 !== "classDmg") return key5;
+  if (spellType && TOME_DAMAGE[spellType]) return TOME_DAMAGE[spellType];
+  const list = CLASS_DAMAGE[cls];
+  return list[Math.floor(random() * list.length)];
+}
+function affixSkill(key5, cls, random) {
+  const list = key5 === "skillDmg" ? classActives(cls) : key5 === "passiveRank" ? classRankPassives(cls) : null;
+  return list ? list[Math.floor(random() * list.length)] : null;
+}
+
 // src/shared/content/uniques_v1.js
 var unique = (id, name, family2, subType, noun, cls, from, biome, effect, flavor) => ({ id, name, family: family2, subType, noun, cls, look: id, from, biome, effect, flavor });
 var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
@@ -3937,7 +3976,8 @@ function rewardProgressionD9(depth, sourceId) {
   return freezeWire(validateRewardProgressionD9({ version: D9_REWARD_PROGRESSION, policy: D9_PROFILE.progressionPolicy, sourceDepth: progressionWire(progressionBigInt(depth)), quality: 1, sourceId, tomeEligibility: "base-single-d7-v1" }));
 }
 function validateRewardProgressionD9(v) {
-  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "siteReward", "gearClass", "armor", "wardrobe", "unique", "boon", "quickClear"]);
+  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "siteReward", "gearClass", "armor", "wardrobe", "unique", "boon", "quickClear", "affixes"]);
+  requireContract(v.affixes === void 0 || v.affixes === AFFIXES_V2 && v.gearClass !== void 0, "Affix pool policy");
   requireContract(v.boon === void 0 || v.boon === "fortune" && v.rarityPolicyHash !== void 0, "Boon reward policy");
   requireContract(v.quickClear === void 0 || v.quickClear === true && v.rarityPolicyHash !== void 0 && v.combatQuality === "completion", "Quick clear reward policy");
   requireContract(v.armor === void 0 || v.armor === "overall" && v.gearClass === void 0 && v.combatHash === WORLD_COMBAT_HASH, "One-piece armor policy");
@@ -4545,10 +4585,22 @@ function generateAtPrecision(c, seed, input, { tier = null, family: family2 = nu
     }
   }
   if (cls) applyClassFlavor(raw, classGearFlavor(cls, type, n));
-  const affixes = [], pool = [...AFFIX_POOLS[sub ?? type]], bonus = {};
+  const v2 = Boolean(cls) && progression.affixes === AFFIXES_V2, affixes = [], pool = v2 ? affixPoolV2(AFFIX_POOLS[sub ?? type], sub ?? type, rarityTier) : [...AFFIX_POOLS[sub ?? type]], bonus = {};
   for (let i = 0; i < rarityTier && pool.length; i++) {
-    const key5 = pool.splice(Math.floor(random() * pool.length), 1)[0];
-    let value;
+    let key5 = pool.splice(Math.floor(random() * pool.length), 1)[0], value, skill = null;
+    if (v2 && (key5 === "classDmg" || isNewAffix(key5))) {
+      key5 = resolveNewAffix(key5, cls, raw.spellType ?? null, random);
+      skill = affixSkill(key5, cls, random);
+      const star = c.q(100 + 5 * rarityTier, 100);
+      if (key5 === "passiveRank") value = progressionWire(1n);
+      else if (key5 === "lifeHit") value = ceil(times3(f2(".2", ".4"), c.add(I(3), times3(power2, ".5")), star));
+      else {
+        const [lo, hi] = NEW_AFFIX_RANGES[key5];
+        value = round44(times3(f2(String(lo / 1e3), String(hi / 1e3)), star));
+      }
+      affixes.push(skill ? { key: key5, value, skill } : { key: key5, value });
+      continue;
+    }
     if (key5 === "atk" || key5 === "def") value = ceil(times3(f2(".04", ".08"), E, flatR));
     else if (key5 === "maxHp") value = ceil(times3(f2(".12", ".24"), E, flatR));
     else if (key5 === "moveSpeed") value = ceil(times3(1 + Math.floor(random() * 2), power2, P2));
@@ -4585,7 +4637,19 @@ function affixRollRangeD9(g, key5) {
     const P2 = c.q((100 + 15 * tier) * (overall ? 18 : 10), 1e3), R = c.q((100 + 7 * tier) * (overall ? 18 : 10), 1e3), I = c.q, mul2 = c.mul;
     const cap = (a, b) => ({ lo: a.lo < b.lo ? a.lo : b.lo, hi: a.hi < b.hi ? a.hi : b.hi }), ceil = (x) => progressionWire(c.endpoint(x, "ceil")), round44 = (x) => decimalWire(c.endpoint(x, "round", 4), 4);
     let minimum, maximum;
-    if (["atk", "def", "maxHp"].includes(key5)) {
+    const star = c.q(100 + 5 * tier, 100);
+    if (NEW_AFFIX_RANGES[key5]) {
+      const [lo, hi] = NEW_AFFIX_RANGES[key5];
+      minimum = round44(mul2(I(lo, 1e3), star));
+      maximum = round44(mul2(I(hi, 1e3), star));
+    } else if (key5 === "lifeHit") {
+      const base = mul2(c.add(I(3), mul2(I(p), I(1, 2))), star);
+      minimum = ceil(mul2(I(2, 10), base));
+      maximum = ceil(mul2(I(4, 10), base));
+    } else if (key5 === "passiveRank") {
+      minimum = progressionWire(1n);
+      maximum = progressionWire(1n);
+    } else if (["atk", "def", "maxHp"].includes(key5)) {
       const scale2 = mul2(c.dungeonScale(p).E, R), lo = key5 === "maxHp" ? 12 : 4;
       minimum = ceil(mul2(I(lo, 100), scale2));
       maximum = ceil(mul2(I(lo * 2, 100), scale2));
@@ -5500,6 +5564,7 @@ var scale = (a, n, d, ceil = false) => {
   return decimalResult(ceil ? roundCombat(q, "ceil") : q, typeof a === "number");
 };
 function adjust(def, key5, old, value) {
+  if (!paths[key5]) return;
   const [group, field2] = paths[key5];
   def[group][field2] = sum(sum(def[group][field2] ?? 0, old, -1), value);
 }
@@ -5518,7 +5583,7 @@ function workshopResult(item) {
       const next = generateGear3(g.seed, g.progression ?? g.contentDepth, { tier: tier + 1, family: g.definition.slot, subType: g.definition.subType ?? null, noun: g.definition.noun });
       definition = copyWire(next.definition);
       for (const a of next.affixes) adjust(definition, a.key, a.value, 0);
-      affixes = affixes.map((a) => ({ key: a.key, value: scale(a.value, 100 + 15 * (tier + 1), 100 + 15 * tier, integer.has(a.key)) }));
+      affixes = affixes.map((a) => a.key === "passiveRank" ? a : { ...a, value: scale(a.value, 100 + 15 * (tier + 1), 100 + 15 * tier, integer.has(a.key) || a.key === "lifeHit") });
       for (const a of affixes) adjust(definition, a.key, 0, a.value);
       const additions = next.affixes.filter((a) => !affixes.some((old) => old.key === a.key));
       if (additions.length) {
@@ -5530,15 +5595,22 @@ function workshopResult(item) {
     } else if (step.kind === "reforge") {
       requireContract(!enchants && Number.isInteger(step.line) && step.line >= 0 && step.line < affixes.length && (lockedLine === null || lockedLine === step.line), "Invalid locked reforge line");
       lockedLine = step.line;
-      const old = affixes[step.line], pool = AFFIX_POOLS4[g.definition.subType ?? g.definition.slot].filter((k) => !affixes.some((a, i) => i !== step.line && a.key === k)), name = pool[Math.floor(random("key") * pool.length)], range = affixRollRange({ ...g, rarityTier: tier, definition }, name);
+      const v2 = g.progression?.affixes === AFFIXES_V2 && g.progression.gearClass, slot = g.definition.subType ?? g.definition.slot, classKey = (k) => Object.values(CLASS_DAMAGE).flat().includes(k) ? "classDmg" : k;
+      const old = affixes[step.line], pool = (v2 ? affixPoolV2(AFFIX_POOLS[slot], slot, tier) : AFFIX_POOLS4[slot]).filter((k) => !affixes.some((a, i) => i !== step.line && classKey(a.key) === k)), picked = pool[Math.floor(random("key") * pool.length)];
+      let name = picked, skill = null;
+      if (v2 && (picked === "classDmg" || isNewAffix(picked))) {
+        name = resolveNewAffix(picked, g.progression.gearClass, definition.spellType ?? null, () => random("class"));
+        skill = affixSkill(name, g.progression.gearClass, () => random("skill"));
+      }
+      const range = affixRollRange({ ...g, rarityTier: tier, definition }, name), whole = integer.has(name) || name === "lifeHit" || name === "passiveRank";
       let value;
-      if (integer.has(name) && (typeof range.minimum === "string" || typeof range.maximum === "string" || range.minimum?.chunks)) {
+      if (whole && (typeof range.minimum === "string" || typeof range.maximum === "string" || range.minimum?.chunks)) {
         const lo = progressionBigInt(range.minimum), hi = progressionBigInt(range.maximum);
         value = progressionWire(lo + (hi - lo) * BigInt(Math.floor(random("value") * 1e6)) / 1000000n);
-      } else value = integer.has(name) ? Math.floor(range.minimum + random("value") * (range.maximum - range.minimum + 1)) : Number((Number(range.minimum) + random("value") * (Number(range.maximum) - Number(range.minimum))).toFixed(4));
+      } else value = whole ? Math.floor(range.minimum + random("value") * (range.maximum - range.minimum + 1)) : Number((Number(range.minimum) + random("value") * (Number(range.maximum) - Number(range.minimum))).toFixed(4));
       adjust(definition, old.key, old.value, 0);
       adjust(definition, name, 0, value);
-      affixes[step.line] = { key: name, value };
+      affixes[step.line] = skill ? { key: name, value, skill } : { key: name, value };
     } else if (step.kind === "enchant") {
       requireContract(tier >= 2 && enchants < tier - 1, "Enchant capacity exceeded");
       unenchanted ??= copyWire(definition);
@@ -8725,19 +8797,19 @@ function validateHydrologyPlanV1(plan) {
 }
 function createHydrologyGeometryV1(plan, parent) {
   validateHydrologyPlanV1(plan);
-  const encoded = new Map(plan.pages.map((p) => [p.key, p.runs])), cache4 = /* @__PURE__ */ new Map();
+  const encoded = new Map(plan.pages.map((p) => [p.key, p.runs])), cache5 = /* @__PURE__ */ new Map();
   let decodes = 0, lastCx = NaN, lastCy = NaN, lastPage = null;
   function page(cx, cy) {
     if (cx === lastCx && cy === lastCy) return lastPage;
     const key5 = cx + "," + cy, runs = encoded.get(key5);
     let data = null;
     if (runs) {
-      data = cache4.get(key5);
+      data = cache5.get(key5);
       if (!data) {
         data = new Uint8Array(832);
         for (const [start, length, kind3] of runs) data.fill(kind3, start, start + length);
-        if (cache4.size >= 256) cache4.delete(cache4.keys().next().value);
-        cache4.set(key5, data);
+        if (cache5.size >= 256) cache5.delete(cache5.keys().next().value);
+        cache5.set(key5, data);
         decodes++;
       }
     }
@@ -8767,7 +8839,7 @@ function createHydrologyGeometryV1(plan, parent) {
     for (let y = 0; y < 52; y++) for (let x = 0; x < 64; x++) mask[y * 64 + x] = kind2(mx * 64 + x, my * 52 + y) ? 1 : 0;
     return mask;
   }
-  return Object.freeze({ ...parent, version: HYDROLOGY_VERSION, inland, maskForCell, hydrologyBasins: plan.basins, hydrologyNetwork: plan.network, hydrologyStats: () => ({ encodedPages: encoded.size, decodedPages: cache4.size, decodedPageLimit: 256, decodedBytes: cache4.size * 832, decodes }) });
+  return Object.freeze({ ...parent, version: HYDROLOGY_VERSION, inland, maskForCell, hydrologyBasins: plan.basins, hydrologyNetwork: plan.network, hydrologyStats: () => ({ encodedPages: encoded.size, decodedPages: cache5.size, decodedPageLimit: 256, decodedBytes: cache5.size * 832, decodes }) });
 }
 
 // src/shared/content/woodland_forest_pilot_v1.js
@@ -9428,7 +9500,7 @@ function plannedCaveSelectionAsPlanned(binding, id) {
 // src/shared/generation/local_water_geometry_v3.js
 var LOCAL_WATER_VERSION = "local-water-geometry-v3";
 function createLocalWaterGeometry(p, macro, shoreline, riverSegments) {
-  const protectedChunks = shoreline.protectedChunks, cache4 = /* @__PURE__ */ new Map(), coastCache = /* @__PURE__ */ new Map();
+  const protectedChunks = shoreline.protectedChunks, cache5 = /* @__PURE__ */ new Map(), coastCache = /* @__PURE__ */ new Map();
   const seed = parseInt(p.seedDigest.slice(0, 8), 16) >>> 0;
   const hash15 = (x, y, d) => {
     let n = seed ^ Math.imul(x + d, 73856093) ^ Math.imul(y - d, 19349663);
@@ -9566,7 +9638,7 @@ function createLocalWaterGeometry(p, macro, shoreline, riverSegments) {
   };
   function maskForCell(mx, my) {
     const key5 = mx + "," + my;
-    if (cache4.has(key5)) return cache4.get(key5);
+    if (cache5.has(key5)) return cache5.get(key5);
     const c = macro(mx, my);
     if (!c || !c[4] && !c[5]) return null;
     const mask = new Uint8Array(64 * 52), old = new Uint8Array(64 * 52), segments = riverSegments.get(key5) ?? [];
@@ -9629,7 +9701,7 @@ function createLocalWaterGeometry(p, macro, shoreline, riverSegments) {
       }
       for (let n = 0; n < 3328; n++) if (mask[n] && !seen[n]) mask[n] = 0;
     }
-    cache4.set(key5, mask);
+    cache5.set(key5, mask);
     return mask;
   }
   function inland(x, y) {
@@ -9673,7 +9745,7 @@ function createLocalShoreline(p, macro) {
   for (const s of p.futureIslands) add([s.entrance, s.approach, s.landing, s.breathing]);
   add(p.extraProtected);
   add(p.originZone.runtimeChunks.map((c) => ({ x: c.chunkX, y: c.chunkY })));
-  const seed = Number.parseInt(p.seedDigest.slice(0, 8), 16) >>> 0, cache4 = /* @__PURE__ */ new Map();
+  const seed = Number.parseInt(p.seedDigest.slice(0, 8), 16) >>> 0, cache5 = /* @__PURE__ */ new Map();
   const hash15 = (x, y, domain) => {
     let n = seed ^ Math.imul(x + domain, 73856093) ^ Math.imul(y - domain, 19349663);
     n ^= n >>> 16;
@@ -9690,11 +9762,11 @@ function createLocalShoreline(p, macro) {
     const mx = Math.floor(x / 64), my = Math.floor(y / 52), c = macro(mx, my);
     if (!c) return null;
     const ck = mx + "," + my;
-    let ocean = cache4.get(ck);
+    let ocean = cache5.get(ck);
     if (!ocean) {
       ocean = [];
       for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (!macro(mx + dx, my + dy)) ocean.push([mx + dx, my + dy]);
-      cache4.set(ck, ocean);
+      cache5.set(ck, ocean);
     }
     if (!ocean.length) return null;
     const px = x + 0.5, py = y + 0.5;
@@ -16898,7 +16970,7 @@ function serviceStock(s, p, npc, gearClass = heroClassOf(p.d8)?.id ?? null, lega
   return offers.map((base) => {
     const offer = { ...base, price: merchantPrice(npc, base) }, sourceEntityId = "ent:" + token4(SETTLEMENT_LIFE_POLICY.stockVersion + (hasWorldCombat(s) ? "/" + WORLD_COMBAT_HASH : "") + (cls ? "/" + cls : "") + "/" + s.campaign.seed.seedHex + "/" + p.playerId + "/" + npc.id + "/" + offer.id), key5 = sourceEntityId + (legacyChest ? "/legacy-chest" : "");
     if (!stockCache.has(key5)) {
-      const progression = hasWorldCombat(s) ? { ...rewardProgressionD9([0, 1, 6, 11, 21, 41][npc.band], sourceEntityId), combatHash: WORLD_COMBAT_HASH, combatQuality: "ordinary", ...cls ? { gearClass: cls } : {} } : rewardProgression(SETTLEMENT_LIFE_POLICY.bandSourceDepth[npc.band], sourceEntityId), generated = generateGear3(gearSeed(s, p, sourceEntityId), progression, { tier: SETTLEMENT_LIFE_POLICY.gearRarity, family: (cls || hasWorldCombat(s) && !legacyChest) && offer.family === "chest" ? "overall" : offer.family });
+      const progression = hasWorldCombat(s) ? { ...rewardProgressionD9([0, 1, 6, 11, 21, 41][npc.band], sourceEntityId), combatHash: WORLD_COMBAT_HASH, combatQuality: "ordinary", ...cls ? { gearClass: cls, affixes: AFFIXES_V2 } : {} } : rewardProgression(SETTLEMENT_LIFE_POLICY.bandSourceDepth[npc.band], sourceEntityId), generated = generateGear3(gearSeed(s, p, sourceEntityId), progression, { tier: SETTLEMENT_LIFE_POLICY.gearRarity, family: (cls || hasWorldCombat(s) && !legacyChest) && offer.family === "chest" ? "overall" : offer.family });
       if (stockCache.size >= 128) stockCache.delete(stockCache.keys().next().value);
       stockCache.set(key5, freezeWire({ offer, sourceEntityId, item: { itemId: `item:${p.playerId}:${sourceEntityId}`, definitionId: offer.definitionId, ownerPlayerId: p.playerId, sourceEntityId, generated: copyWire(generated) } }));
     }
@@ -20942,16 +21014,16 @@ async function pageDigest(value, sha256) {
   return entry.promise;
 }
 function createPageTransaction({ root = null, readPage, sha256 }) {
-  const dirty = /* @__PURE__ */ new Map(), cache4 = /* @__PURE__ */ new Map();
+  const dirty = /* @__PURE__ */ new Map(), cache5 = /* @__PURE__ */ new Map();
   let current = root;
   const load = async (id) => {
     if (!id) return null;
     if (dirty.has(id)) return dirty.get(id);
-    if (cache4.has(id)) return cache4.get(id);
+    if (cache5.has(id)) return cache5.get(id);
     const value = await readPage(id);
     requireContract(value && await pageDigest(value, sha256) === id, "Page commitment mismatch");
-    if (cache4.size >= 64) cache4.delete(cache4.keys().next().value);
-    cache4.set(id, value);
+    if (cache5.size >= 64) cache5.delete(cache5.keys().next().value);
+    cache5.set(id, value);
     return value;
   };
   const put2 = async (value) => {
@@ -21614,11 +21686,11 @@ function groundCoverageReadyD9(state, p) {
   if (!state.d9World) return true;
   const actor = state.entitiesById[p.entityId], spaceId = actor.residency.spaceInstanceId;
   if (!state.d9World.groundIndex && spaceId === state.overworldInstanceId) return true;
-  const cache4 = caches.get(state)?.get(p.playerId);
-  if (!cache4 || cache4.spaceInstanceId !== spaceId) return false;
-  if (cache4.fullSpaceBounds) return actor.position.x >= 0 && actor.position.y >= 0 && actor.position.x < cache4.fullSpaceBounds.width && actor.position.y < cache4.fullSpaceBounds.height;
-  const canonical = spaceId === state.overworldInstanceId ? localFramePositionD9(actor.position, state.d9World.runtime.frames) : legacyWorldPosition(actor.position), relative = relativeWorldPosition(canonical, cache4.center, 4);
-  return Boolean(relative && Math.hypot(relative.x - cache4.center.localX, relative.y - cache4.center.localY) <= cache4.radius - D9_PROFILE.placementSafetyRadius - D9_PROFILE.prepareRadius);
+  const cache5 = caches.get(state)?.get(p.playerId);
+  if (!cache5 || cache5.spaceInstanceId !== spaceId) return false;
+  if (cache5.fullSpaceBounds) return actor.position.x >= 0 && actor.position.y >= 0 && actor.position.x < cache5.fullSpaceBounds.width && actor.position.y < cache5.fullSpaceBounds.height;
+  const canonical = spaceId === state.overworldInstanceId ? localFramePositionD9(actor.position, state.d9World.runtime.frames) : legacyWorldPosition(actor.position), relative = relativeWorldPosition(canonical, cache5.center, 4);
+  return Boolean(relative && Math.hypot(relative.x - cache5.center.localX, relative.y - cache5.center.localY) <= cache5.radius - D9_PROFILE.placementSafetyRadius - D9_PROFILE.prepareRadius);
 }
 function participantGroundCoverageReadyD9(state) {
   return !state.d9World || Object.values(state.playersById).every((p) => groundCoverageReadyD9(state, p));
@@ -21628,11 +21700,11 @@ function participantGroundCoverageRefreshDueD9(state) {
   return Object.values(state.playersById).some((p) => {
     const actor = state.entitiesById[p.entityId];
     if (actor.residency.spaceInstanceId !== state.overworldInstanceId) return false;
-    const cache4 = caches.get(state)?.get(p.playerId);
-    if (!cache4 || cache4.spaceInstanceId !== state.overworldInstanceId) return true;
-    if (cache4.fullSpaceBounds) return false;
-    const canonical = localFramePositionD9(actor.position, state.d9World.runtime.frames), relative = relativeWorldPosition(canonical, cache4.center, 4);
-    return !relative || Math.hypot(relative.x - cache4.center.localX, relative.y - cache4.center.localY) >= 128;
+    const cache5 = caches.get(state)?.get(p.playerId);
+    if (!cache5 || cache5.spaceInstanceId !== state.overworldInstanceId) return true;
+    if (cache5.fullSpaceBounds) return false;
+    const canonical = localFramePositionD9(actor.position, state.d9World.runtime.frames), relative = relativeWorldPosition(canonical, cache5.center, 4);
+    return !relative || Math.hypot(relative.x - cache5.center.localX, relative.y - cache5.center.localY) >= 128;
   });
 }
 function groundCoverageStatusD9(state) {
@@ -21662,16 +21734,16 @@ function installGroundOccupancyD9(state, coverage) {
 function groundSpacingPredicateD9(state, p, spaceId, point14, hot) {
   if (!state.d9World) return (q) => hot.every((o) => Math.hypot(q.x - o.x, q.y - o.y) >= 27);
   if (Object.values(state.d9World.functionalSitesById ?? {}).some((site) => site.siteKind === "woodland-fort" && site.spaceInstanceId === spaceId)) return (q) => hot.every((o) => Math.hypot(q.x - o.x, q.y - o.y) >= 27);
-  const cache4 = caches.get(state)?.get(p.playerId), canonical = spaceId === state.overworldInstanceId ? localFramePositionD9(point14, state.d9World.runtime.frames) : legacyWorldPosition(point14), relative = cache4?.spaceInstanceId === spaceId ? relativeWorldPosition(canonical, cache4.center, 4) : null;
-  const wholeFloor = cache4?.spaceInstanceId === spaceId && cache4.fullSpaceBounds && point14.x >= 0 && point14.y >= 0 && point14.x < cache4.fullSpaceBounds.width && point14.y < cache4.fullSpaceBounds.height;
-  if (state.d9World.groundIndex && (!relative || !wholeFloor && Math.hypot(relative.x - cache4.center.localX, relative.y - cache4.center.localY) > cache4.radius - 367)) return () => false;
+  const cache5 = caches.get(state)?.get(p.playerId), canonical = spaceId === state.overworldInstanceId ? localFramePositionD9(point14, state.d9World.runtime.frames) : legacyWorldPosition(point14), relative = cache5?.spaceInstanceId === spaceId ? relativeWorldPosition(canonical, cache5.center, 4) : null;
+  const wholeFloor = cache5?.spaceInstanceId === spaceId && cache5.fullSpaceBounds && point14.x >= 0 && point14.y >= 0 && point14.x < cache5.fullSpaceBounds.width && point14.y < cache5.fullSpaceBounds.height;
+  if (state.d9World.groundIndex && (!relative || !wholeFloor && Math.hypot(relative.x - cache5.center.localX, relative.y - cache5.center.localY) > cache5.radius - 367)) return () => false;
   const bins = /* @__PURE__ */ new Map(), add = (o) => {
     const k = Math.floor(o.x / 28) + "," + Math.floor(o.y / 28);
     let b = bins.get(k);
     if (!b) bins.set(k, b = []);
     b.push(o);
   };
-  if (cache4?.spaceInstanceId === spaceId) for (const batch of cache4.points) for (const c of batch) {
+  if (cache5?.spaceInstanceId === spaceId) for (const batch of cache5.points) for (const c of batch) {
     const q = spaceId === state.overworldInstanceId ? projectToLocalFrameD9(c, state.d9World.runtime.frames) : relativeWorldPosition(c, { chunkX: "0", chunkY: "0" }, 64);
     if (q) add(q);
   }
@@ -22525,7 +22597,7 @@ function autoSalvageEligibleRewards(state) {
 function prepareEpisodeReward(state, p, source5, position, spaceInstanceId) {
   const inv = p.inventory, id = source5.sourceEntityId;
   if (inv.rewardsByEntityId[id]) return null;
-  const worldProgression = captureQuickClearRewardV1(state, source5, captureBoonRewardV1(state, p, captureSiteRewardV1(state, source5, captureWorldRarityV2(state, p, source5, source5.progression ?? prototypeRewardProgression(source5.rank, id))))), heroClass = heroClassOf(p.d8)?.id, world = worldProgression.combatHash === WORLD_COMBAT_HASH, baseProgression = heroClass && world ? { ...worldProgression, gearClass: heroClass, wardrobe: WARDROBE_V1 } : world ? { ...worldProgression, armor: "overall" } : worldProgression, modifiers = p.d8 ? progressionRewardWitness(p.d8) : null, progression = modifiers ? { ...baseProgression, quality: 1 + modifiers.qualityHundredths / 100, tomeEligibility: "personal-tome-d8-v1", modifiers } : baseProgression;
+  const worldProgression = captureQuickClearRewardV1(state, source5, captureBoonRewardV1(state, p, captureSiteRewardV1(state, source5, captureWorldRarityV2(state, p, source5, source5.progression ?? prototypeRewardProgression(source5.rank, id))))), heroClass = heroClassOf(p.d8)?.id, world = worldProgression.combatHash === WORLD_COMBAT_HASH, baseProgression = heroClass && world ? { ...worldProgression, gearClass: heroClass, wardrobe: WARDROBE_V1, affixes: AFFIXES_V2 } : world ? { ...worldProgression, armor: "overall" } : worldProgression, modifiers = p.d8 ? progressionRewardWitness(p.d8) : null, progression = modifiers ? { ...baseProgression, quality: 1 + modifiers.qualityHundredths / 100, tomeEligibility: "personal-tome-d8-v1", modifiers } : baseProgression;
   const ordinal = source5.kind === "enemy" ? safeInteger(inv.renewal.defeats + 1, 1) : 0, reward = rollContentReward(state, p, { ...source5, ...source5.progression ? { progression: worldProgression } : {}, ordinal, modifiers }), dropPosition = reward.definitionId ? freeGearPosition(state, p, spaceInstanceId, position) : { ...position };
   const unique2 = inv.d7 && reward.definitionId && heroClass && world ? uniqueRewardV1(state, source5, heroClass, gearSeed(state, p, id)) : null, dropped = unique2 ? { ...progression, unique: unique2 } : progression;
   const generated = inv.d7 && reward.definitionId ? generateGear3(gearSeed(state, p, id), dropped) : null;
@@ -23801,12 +23873,44 @@ function validateAttackTiming(t, base) {
   requireContract(canonicalStringify({ ...t, startup: base.startup, active: base.active, recovery: base.recovery }) === canonicalStringify(base), "Haste changed attack behavior");
 }
 
+// src/shared/contracts/gear_affix_totals_v2.js
+var EMPTY2 = Object.freeze({ any: false, mainDmg: 0, offDmg: 0, fireDmg: 0, frostDmg: 0, lightningDmg: 0, bleedDmg: 0, poisonDmg: 0, shockDmg: 0, counterDmg: 0, eliteDmg: 0, cdr: 0, lifeKill: 0, lifeHit: 0, skills: Object.freeze({}), ranks: Object.freeze({}) });
+var cache4 = /* @__PURE__ */ new WeakMap();
+var bp = (v) => Math.round(Number(v) * 1e4);
+function gearAffixTotalsV2(player) {
+  const inv = player?.inventory;
+  if (!inv?.equipped || !inv.itemsById) return EMPTY2;
+  const key5 = inv.revision + "|" + Object.entries(inv.equipped).map(([slot, id]) => slot + "=" + id).join(","), hit = cache4.get(inv);
+  if (hit?.key === key5) return hit.totals;
+  const t = { ...EMPTY2, skills: {}, ranks: {} };
+  for (const id of Object.values(inv.equipped)) {
+    const item = id && inv.itemsById[id];
+    if (!item?.generated) continue;
+    for (const a of workshopResult(item).affixes ?? []) {
+      if (!isNewAffix(a.key)) continue;
+      t.any = true;
+      if (a.key === "skillDmg") t.skills[a.skill] = (t.skills[a.skill] ?? 0) + bp(a.value);
+      else if (a.key === "passiveRank") t.ranks[a.skill] = (t.ranks[a.skill] ?? 0) + Number(a.value);
+      else if (a.key === "lifeHit") t.lifeHit += Number(a.value);
+      else t[a.key] += bp(a.value);
+    }
+  }
+  t.cdr = Math.min(t.cdr, bp(CDR_CAP));
+  const totals2 = Object.freeze(t);
+  cache4.set(inv, { key: key5, totals: totals2 });
+  return totals2;
+}
+function heroRank(player, id) {
+  const r = classRank(player?.d8, id);
+  return r ? r + (gearAffixTotalsV2(player).ranks[id] ?? 0) : 0;
+}
+
 // src/simulation/primary_rules.js
 var actors = (state) => state.entitiesById ?? state.space.entitiesById;
 var sourceSpace = (state, id) => state.entitiesById ? state.spacesByInstanceId[state.entitiesById[id].residency.spaceInstanceId] : state.space;
 var primaryAllowed = (state) => Boolean(state.entitiesById) || state.space.encounterId !== null;
 function swingHaste(state, player, entityId, haste) {
-  const r = classRank(player.d8, "slipstream");
+  const r = heroRank(player, "slipstream");
   return r && state.subweaponCombat?.actors[entityId]?.skills?.rush ? addCombat(haste, combatAmount(5 * r, 100)) : haste;
 }
 function eventFor(next, action, finished) {
@@ -25251,6 +25355,7 @@ export {
   compareAmount,
   wholeAmount,
   formatAmount,
+  isNewAffix,
   UNIQUE_ITEMS,
   uniqueOf,
   rewardProgressionD9,
@@ -25831,6 +25936,8 @@ export {
   resolvePlayerStats,
   mitigateFractionalPlayerDamage,
   mitigatePlayerDamage,
+  gearAffixTotalsV2,
+  heroRank,
   applyPrimaryIntent,
   readyPrimarySources,
   beginPrimary,
