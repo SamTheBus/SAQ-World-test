@@ -22315,12 +22315,44 @@ function townCrossingsV1(streets, line19, closed = false) {
   for (const [pts, w] of streets) for (let i = 1; i < pts.length; i++) for (let k = 1; k < L.length; k++) {
     const h = segX(pts[i - 1], pts[i], L[k - 1], L[k]);
     if (!h) continue;
-    const s = acc2[k - 1] + h.j * (acc2[k] - acc2[k - 1]);
-    if (!out.some((o) => hyp2(o.x - h.x, o.y - h.y) < Math.max(w, o.w) + 1.5)) out.push({ ...h, w, s });
+    const s = acc2[k - 1] + h.j * (acc2[k] - acc2[k - 1]), o = out.find((o2) => hyp2(o2.x - h.x, o2.y - h.y) < Math.max(w, o2.w) + 1.5);
+    if (o) o.parts.push({ s, w, ang: h.ang });
+    else out.push({ ...h, w, s, parts: [{ s, w, ang: h.ang }] });
   }
   return { list: out, len: acc2.at(-1), acc: acc2, L };
 }
 var allStreets = (t) => t.connector ? [...t.streets, [t.connector.pts, t.connector.w]] : t.streets;
+var GATE_ART = { village: { WH: 36, TW: 34, k: 0.9 }, town: { WH: 40, TW: 36, k: 1 }, city: { WH: 50, TW: 40, k: 1.15 }, capital: { WH: 58, TW: 44, k: 1.3 } };
+function townGateSpanV1(size, f, h, at5, len = 0) {
+  const cfg = GATE_ART[size === "hamlet" ? "village" : size] ?? GATE_ART.town, gk = Math.min(1.5, (f.gateScale ?? 1) * cfg.k), T28 = 32, s = h.s;
+  const [ax, ay] = at5(s - 0.8), [bx, by] = at5(s + 0.8), wa = PM.atan2(by - ay, bx - ax);
+  let lo = 0, hi = 0;
+  for (const p of h.parts ?? [h]) {
+    let off = p.s - s;
+    if (len) {
+      off = (off % len + len) % len;
+      if (off > len / 2) off -= len;
+    }
+    const we = p.w / Math.max(0.4, Math.abs(PM.sin(p.ang - wa)));
+    lo = Math.min(lo, off - we / 2);
+    hi = Math.max(hi, off + we / 2);
+  }
+  const pad2 = 1.8 * Math.max(1, gk * 0.85);
+  if (Math.abs(by - ay) < Math.abs(bx - ax)) {
+    const half = Math.max(-lo, hi) + pad2;
+    return { pre: half, post: half, vertical: false };
+  }
+  const foot = cfg.WH + cfg.TW / 2 + 6, h2 = (cfg.WH + 60) * gk * 1.3, north = Math.max(pad2, (foot + 12) / T28), south = Math.max(pad2, (h2 + 26 - foot) / T28);
+  return ay < by ? { pre: -lo + north, post: hi + south, vertical: true } : { pre: -lo + south, post: hi + north, vertical: true };
+}
+function townGateGapV1(g, d, len) {
+  let x = d - g.s;
+  if (len) {
+    x = (x % len + len) % len;
+    if (x > len / 2) x -= len;
+  }
+  return x > -g.pre && x < g.post;
+}
 function wallMarks(t, f, open2) {
   const X = townCrossingsV1(allStreets(t), f.pts, !open2), { L, acc: acc2, len } = X, mod = (s) => (s % len + len) % len, dist3 = (a, b) => {
     const d = Math.abs(mod(a) - mod(b));
@@ -22333,8 +22365,11 @@ function wallMarks(t, f, open2) {
     const q = (s - acc2[k - 1]) / (acc2[k] - acc2[k - 1] || 1);
     return [L[k - 1][0] + (L[k][0] - L[k - 1][0]) * q, L[k - 1][1] + (L[k][1] - L[k - 1][1]) * q];
   };
-  const gates = X.list.map((h) => ({ s: h.s, half: h.w / 2 + 1.8, w: h.w, x: h.x, y: h.y, ang: h.ang })), towers = [];
-  for (const g of gates) for (const s of [g.s - g.half, g.s + g.half]) {
+  const gates = X.list.map((h) => {
+    const sp = townGateSpanV1(t.size, f, h, at5, open2 ? 0 : len);
+    return { s: h.s, ...sp, half: Math.max(sp.pre, sp.post), w: h.w, x: h.x, y: h.y, ang: h.ang };
+  }), towers = [];
+  for (const g of gates) for (const s of [g.s - g.pre, g.s + g.post]) {
     if (open2 && (s < 0 || s > len)) continue;
     const [x, y] = at5(s);
     towers.push({ x, y, gate: true });
@@ -22779,8 +22814,13 @@ function townRasterV1(t) {
   });
   for (const [g, closed] of [[geo.wall, true], [geo.castle, false]]) {
     if (!g) continue;
+    const gap = (q, x, y) => {
+      if (!q.vertical) return false;
+      const dy = y + 0.5 - q.y, [ax, ay] = g.at(q.s - 1), [bx, by] = g.at(q.s + 1), span2 = dy < 0 === ay < by ? q.pre : q.post;
+      return Math.abs(dy) <= span2 - 1 && Math.abs(x + 0.5 - q.x) <= 2.5;
+    };
     stroke4(g.pts, 1.1, (x, y) => {
-      if (!g.gates.some((q) => hyp2(x + 0.5 - q.x, y + 0.5 - q.y) <= q.half + 0.4 && onStreet(x, y, 0.5))) col2[idx(x, y)] = 1;
+      if (!g.gates.some((q) => gap(q, x, y) || hyp2(x + 0.5 - q.x, y + 0.5 - q.y) <= q.half + 0.4 && onStreet(x, y, 0.5))) col2[idx(x, y)] = 1;
     }, closed);
     for (const tw of g.towers) for (let y = Math.floor(tw.y - 2); y <= Math.ceil(tw.y + 2); y++) for (let x = Math.floor(tw.x - 2); x <= Math.ceil(tw.x + 2); x++) if (ok(x, y) && hyp2(x + 0.5 - tw.x, y + 0.5 - tw.y) <= 1.2) col2[idx(x, y)] = 1;
   }
@@ -72191,8 +72231,9 @@ function crossings(streets, line19, closed = false) {
   for (const [pts, w] of streets) for (let i = 1; i < pts.length; i++) for (let k = 1; k < L.length; k++) {
     const h = segX2(pts[i - 1], pts[i], L[k - 1], L[k]);
     if (!h) continue;
-    const s = acc2[k - 1] + h.j * (acc2[k] - acc2[k - 1]);
-    if (!out.some((o) => Math.hypot(o.x - h.x, o.y - h.y) < Math.max(w, o.w) + 1.5)) out.push({ ...h, w, s });
+    const s = acc2[k - 1] + h.j * (acc2[k] - acc2[k - 1]), o = out.find((o2) => Math.hypot(o2.x - h.x, o2.y - h.y) < Math.max(w, o2.w) + 1.5);
+    if (o) o.parts?.push({ s, w, ang: h.ang });
+    else out.push({ ...h, w, s, parts: [{ s, w, ang: h.ang }] });
   }
   return { list: out, len: acc2.at(-1), acc: acc2, L };
 }
@@ -72593,8 +72634,11 @@ function wallItems2(f, biome, streets, t, size = "town", slot = "") {
     return [L[k - 1][0] + (L[k][0] - L[k - 1][0]) * q, L[k - 1][1] + (L[k][1] - L[k - 1][1]) * q];
   };
   const cen = [f.pts.reduce((a, p) => a + p[0], 0) / f.pts.length * T21, f.pts.reduce((a, p) => a + p[1], 0) / f.pts.length * T21];
-  const gates = X.list.map((h) => ({ s: h.s, half: h.w / 2 + 1.8 * Math.max(1, gk * 0.85), h })), marks2 = [];
-  for (const g of gates) marks2.push({ s: mod(g.s - g.half), gate: g, side: -1 }, { s: mod(g.s + g.half), gate: g, side: 1 });
+  const gates = X.list.map((h) => {
+    const sp = townGateSpanV1(size, f, h, at5, open2 ? 0 : len);
+    return { s: h.s, ...sp, half: Math.max(sp.pre, sp.post), h };
+  }), marks2 = [], inGap = (s) => gates.some((g) => townGateGapV1(g, s, open2 ? 0 : len));
+  for (const g of gates) marks2.push({ s: mod(g.s - g.pre), gate: g, side: -1 }, { s: mod(g.s + g.post), gate: g, side: 1 });
   const n = Math.max(6, Math.round(len / 12));
   for (let k = 0; k < n; k++) {
     const s = k * len / n;
@@ -72610,7 +72654,7 @@ function wallItems2(f, biome, streets, t, size = "town", slot = "") {
     let sb = b.s;
     if (sb <= a.s) sb += len;
     const mid = (a.s + sb) / 2;
-    if (gates.some((g) => dist3(mid, g.s) < g.half)) continue;
+    if (inGap(mid)) continue;
     const pts = [];
     for (let s = a.s; s < sb; s += 0.6) pts.push(at5(s));
     pts.push(at5(sb));
@@ -72620,7 +72664,7 @@ function wallItems2(f, biome, streets, t, size = "town", slot = "") {
   for (const g of gates) {
     const [p0x, p0y] = at5(g.s - 0.8), [p1x, p1y] = at5(g.s + 0.8), horiz = Math.abs(p1y - p0y) < Math.abs(p1x - p0x), rw = g.h.w * T21;
     if (horiz) {
-      const [ax, ay] = at5(g.s - g.half), [bx, by] = at5(g.s + g.half), half = Math.abs(bx - ax) * T21 / 2;
+      const [ax, ay] = at5(g.s - g.pre), [bx, by] = at5(g.s + g.post), half = Math.abs(bx - ax) * T21 / 2;
       const hh = Math.max(half, (rw + 10) / 2 + 26), gb = (ay + by) / 2 * T21 + cfg.WH + cfg.TW / 2 + 8;
       {
         const gx = (ax + bx) / 2 * T21, gy = (ay + by) / 2 * T21, rich = size !== "town" && size !== "village", fy = Math.max(ay, by) * T21 + cfg.WH + cfg.TW / 2 - 4, H7 = Math.max((cfg.WH + 86) * gk, 142), aw = Math.max(24, Math.min(rw + 10, 2 * hh - 30)), ah = Math.min(92 * gk, H7 - 58), bb = { x0: gx - hh, x1: gx + hh, y0: gb - H7 - cfg.TW, y1: gb };
@@ -74257,7 +74301,7 @@ function wallParts(t) {
     };
     for (let s = 0; s < w.len - 1e-6; s += 2) {
       const e = Math.min(w.len, s + 2), mid = (s + e) / 2;
-      if (w.gates.some((q) => dist3(mid, q.s) < q.half)) continue;
+      if (w.gates.some((q) => townGateGapV1(q, mid, open2 ? 0 : w.len))) continue;
       const pts = [];
       for (let q = s; q < e; q += 0.5) pts.push(w.at(q));
       pts.push(w.at(e - 1e-6));

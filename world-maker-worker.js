@@ -5527,7 +5527,7 @@ function planDestinations(asset) {
 }
 
 // src/shared/generation/town_layout_v1.js
-var TOWN_LAYOUT_VERSION = "town-layout-v1";
+var TOWN_LAYOUT_VERSION = "town-layout-v1.1";
 var SPOT_NAMES = Object.freeze({ "capital-great-hold:01": "Highcrown", "capital-great-hold:02": "Stormhold", "city:01": "Ashford", "city:02": "Silverkeep", "city:03": "Marrowgate", "city:04": "Brightwater", "town:01": "Larkcross", "town:02": "Thornbury", "town:03": "Fenwick", "town:04": "Copperwell", "town:06": "Hollowmere", "town:07": "Ravensford", "town:08": "Ironwall", "village-outpost:03": "Willowford", "village-outpost:04": "Gull's Rest", "village-outpost:05": "Driftwood" });
 var ALWAYS_WALLED = /* @__PURE__ */ new Set(["town:08"]);
 var sq = (v) => v * v;
@@ -5560,15 +5560,20 @@ var chaikin = (pts, n = 2) => {
 function buildTownLayoutV1(slot, size, biome, seed, dims) {
   const need = size === "hamlet" ? ["stalls", "inn"] : size === "village" ? ["stalls", "forge", "inn"] : ["stalls", "forge", "inn", "tower", "chapel"];
   let t;
+  const layout = (s) => {
+    const a = build(slot, size, biome, s, dims);
+    const wall = a.features.find((f) => f.type === "wall");
+    return wall ? build(slot, size, biome, s, dims, wall.pts) : a;
+  };
   for (let k = 0; k < 8; k++) {
-    t = build(slot, size, biome, k ? seed + "#" + k : seed, dims);
+    t = layout(k ? seed + "#" + k : seed);
     const have = new Set(t.features.map((f) => f.type));
     if (need.every((n) => have.has(n))) break;
   }
   const key2 = slot.replace("settlement-slot:", "");
   return { ...t, seed: String(seed), name: SPOT_NAMES[key2] ?? key2 };
 }
-function build(slot, size, biome, seed, dims) {
+function build(slot, size, biome, seed, dims, ring = null) {
   const [W2, H2] = dims, key2 = slot.replace("settlement-slot:", ""), r = townRng("town2/" + seed + "/" + slot), ri = (a, b) => a + Math.floor(r() * (b - a + 1)), pick = (a) => a[Math.floor(r() * a.length)];
   let arch = size === "hamlet" ? "hamlet" : size === "village" ? pick(["green", "street", "fork"]) : size === "town" ? pick(["square", "crossroads"]) : size === "capital" ? "capital" : "city";
   const mods = [];
@@ -5583,6 +5588,23 @@ function build(slot, size, biome, seed, dims) {
     if (x >= 0 && y >= 0 && x < W2 && y < H2) G[y * W2 + x] = v;
   };
   const streets = [], places = [], buildings = [], features = [], lanes = [];
+  const KEEP = 2.4, ringD = (x, y) => {
+    let b = 1e9;
+    for (let i = 0; i < ring.length; i++) {
+      const a = ring[i], q = ring[(i + 1) % ring.length], dx = q[0] - a[0], dy = q[1] - a[1], dd = dx * dx + dy * dy, f = dd ? Math.max(0, Math.min(1, ((x - a[0]) * dx + (y - a[1]) * dy) / dd)) : 0;
+      b = Math.min(b, hyp2(x - a[0] - f * dx, y - a[1] - f * dy));
+    }
+    return b;
+  };
+  const inRing = (px, py) => {
+    let c = false;
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const [xi, yi] = ring[i], [xj, yj] = ring[j];
+      if (yi > py !== yj > py && px < (xj - xi) * (py - yi) / (yj - yi) + xi) c = !c;
+    }
+    return c;
+  };
+  if (ring) for (let y = 0; y < H2; y++) for (let x = 0; x < W2; x++) G[y * W2 + x] = ringD(x + 0.5, y + 0.5) <= KEEP ? 7 : inRing(x + 0.5, y + 0.5) ? 0 : 8;
   const barriers = [];
   const street = (pts, w, main = false) => {
     pts = chaikin(pts);
@@ -5666,16 +5688,16 @@ function build(slot, size, biome, seed, dims) {
   if (arch === "green") {
     const rx = 9, ry = 6;
     center = { kind: "green", x: cx2, y: cy2, rx, ry };
-    const ring = [];
+    const ring2 = [];
     for (let k = 0; k <= 16; k++) {
       const a = k / 16 * PI * 2;
-      ring.push([cx2 + PM.cos(a) * (rx + 2), cy2 + PM.sin(a) * (ry + 2)]);
+      ring2.push([cx2 + PM.cos(a) * (rx + 2), cy2 + PM.sin(a) * (ry + 2)]);
     }
     for (let y = cy2 - ry; y <= cy2 + ry; y++) for (let x = cx2 - rx; x <= cx2 + rx; x++) if (sq((x + 0.5 - cx2) / rx) + sq((y + 0.5 - cy2) / ry) <= 1) set(x, y, 3);
     street([[ex, H2], [ex + ri(-4, 4), cy2 + ry + 8], [cx2, cy2 + ry + 2]], 3, true);
-    streets.push([ring, 3]);
-    lanes.push({ pts: ring, w: 3 });
-    for (let i = 1; i < ring.length; i++) street([ring[i - 1], ring[i]], 3);
+    streets.push([ring2, 3]);
+    lanes.push({ pts: ring2, w: 3 });
+    for (let i = 1; i < ring2.length; i++) street([ring2[i - 1], ring2[i]], 3);
     streets.splice(streets.length - 16, 16);
     street([[cx2 - rx - 2, cy2], [cx2 - rx - 12, cy2 + ri(-4, 4)], [2, cy2 + ri(-8, 8)]], 3);
     street([[cx2 + rx + 2, cy2], [cx2 + rx + 12, cy2 + ri(-4, 4)], [W2 - 2, cy2 + ri(-8, 8)]], 3);
@@ -5710,6 +5732,7 @@ function build(slot, size, biome, seed, dims) {
       set(kx, y, 5);
       set(kx + KW - 1, y, 5);
     }
+    for (let y = ky - 4; y < ky + KH + 2; y++) for (let x = kx - 2; x < kx + KW + 2; x++) if (at(x, y) === 0) set(x, y, 7);
     zone = { cx: cx2, cy: Math.round((2 + H2 - 6) / 2), rx: W2 * 0.46, ry: (H2 - 8) / 2 };
     center = { kind: "square", x: cx2 - 15, y: cy2 + 14, w: 30, h: 18 };
     const ave = [[cx2, H2 + 1], [cx2, ky + KH - 5]];
@@ -5721,12 +5744,12 @@ function build(slot, size, biome, seed, dims) {
     const sy = cy2 + 23;
     street([[2, sy + ri(-3, 3)], [cx2 - 30, sy + ri(-2, 2)], [cx2 - 15, sy], [cx2 + 15, sy], [cx2 + 30, sy + ri(-2, 2)], [W2 - 2, sy + ri(-3, 3)]], 4);
     street([[cx2 - 64, my + ri(-1, 1)], [cx2 - 30, my], [cx2 - 8, my], [cx2 + 8, my], [cx2 + 30, my], [cx2 + 64, my + ri(-1, 1)]], 3);
-    const ring = [], rx = W2 * 0.33, ryy = H2 * 0.29, rcy = cy2 + 16;
+    const ring2 = [], rx = W2 * 0.33, ryy = H2 * 0.29, rcy = cy2 + 16;
     for (let k = 0; k <= 24; k++) {
       const a = k / 24 * PI * 2;
-      ring.push([cx2 + PM.cos(a) * rx + ri(-2, 2), rcy + PM.sin(a) * ryy + ri(-2, 2)]);
+      ring2.push([cx2 + PM.cos(a) * rx + ri(-2, 2), rcy + PM.sin(a) * ryy + ri(-2, 2)]);
     }
-    for (let i = 1; i < ring.length; i++) street([ring[i - 1], ring[i]], 3);
+    for (let i = 1; i < ring2.length; i++) street([ring2[i - 1], ring2[i]], 3);
     for (let k = 0; k < 18; k++) {
       const L = lanes[1 + Math.floor(r() * (lanes.length - 1))], p = L.pts[Math.floor(L.pts.length * (0.2 + r() * 0.6))], a = Math.round(r() * 4) * PI / 2 + ri(-1, 1) * 0.2, len = ri(16, 30), bend = [p[0] + PM.cos(a) * len * 0.5 + ri(-2, 2), p[1] + PM.sin(a) * len * 0.5 + ri(-2, 2)], end = [p[0] + PM.cos(a) * len, p[1] + PM.sin(a) * len];
       if (inZ(end[0], end[1], zone, 0.9) && !(end[1] < ky + KH + 2 && Math.abs(end[0] - cx2) < KW / 2 + 3)) street([p, bend, end], 2);
@@ -5754,13 +5777,13 @@ function build(slot, size, biome, seed, dims) {
   }
   if (arch === "city") {
     zone = { cx: cx2, cy: cy2, rx: W2 * 0.32 + 2, ry: H2 * 0.3 + 2 };
-    const ring = [];
+    const ring2 = [];
     const rx = W2 * 0.32, ryy = H2 * 0.3;
     for (let k = 0; k <= 20; k++) {
       const a = k / 20 * PI * 2;
-      ring.push([cx2 + PM.cos(a) * rx + ri(-2, 2), cy2 + PM.sin(a) * ryy + ri(-2, 2)]);
+      ring2.push([cx2 + PM.cos(a) * rx + ri(-2, 2), cy2 + PM.sin(a) * ryy + ri(-2, 2)]);
     }
-    for (let i = 1; i < ring.length; i++) street([ring[i - 1], ring[i]], 3);
+    for (let i = 1; i < ring2.length; i++) street([ring2[i - 1], ring2[i]], 3);
   }
   if (zone) {
     const Z = zone, sp = arch === "capital" ? 14 : 13, top = castle ? castle.y + castle.h + 18 : Z.cy - Z.ry + 5, hs = [];
@@ -6094,7 +6117,8 @@ function build(slot, size, biome, seed, dims) {
       x1 = Math.max(x1, castle.x + castle.w);
     }
     const m = 3, wx = (x0 + x1) / 2, wy = (y0 + y1) / 2, rx = Math.min((x1 - x0) / 2 + m, wx - 1.5, W2 - 1.5 - wx), ry = Math.min((y1 - y0) / 2 + m + 1, wy - 1.5, H2 - 1.5 - wy), pts = [];
-    for (let k = 0; k < 80; k++) {
+    if (ring) pts.push(...ring);
+    else for (let k = 0; k < 80; k++) {
       const a = k / 80 * PI * 2, ca = PM.cos(a), sa = PM.sin(a);
       pts.push([wx + Math.sign(ca) * Math.sqrt(Math.abs(ca)) * rx, wy + Math.sign(sa) * Math.sqrt(Math.abs(sa)) * ry]);
     }
@@ -6119,6 +6143,68 @@ function build(slot, size, biome, seed, dims) {
       if (!pr || dW(e) > 3) continue;
       const dx = e[0] - pr[0], dy = e[1] - pr[1], L = hyp2(dx, dy) || 1, k = Math.min(9, ...[dx > 0 ? (W2 - 1 - e[0]) / (dx / L) : dx < 0 ? (e[0] - 1) / (-dx / L) : 9, dy > 0 ? (H2 - 1 - e[1]) / (dy / L) : dy < 0 ? (e[1] - 1) / (-dy / L) : 9]);
       if (k > 0) sp.push([e[0] + dx / L * k, e[1] + dy / L * k]);
+    }
+    if (ring) {
+      const inW = (x, y) => {
+        let c = false;
+        for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+          const [xi, yi] = pts[i], [xj, yj] = pts[j];
+          if (yi > y !== yj > y && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c;
+        }
+        return c;
+      };
+      const wcx = pts.reduce((a, p) => a + p[0], 0) / pts.length, wcy = pts.reduce((a, p) => a + p[1], 0) / pts.length, wrx = Math.max(...pts.map((p) => Math.abs(p[0] - wcx))), wry = Math.max(...pts.map((p) => Math.abs(p[1] - wcy)));
+      const sideAt = (x, y) => {
+        const u = (x - wcx) / wrx, v = (y - wcy) / wry;
+        return Math.abs(u) >= Math.abs(v) ? u < 0 ? "w" : "e" : v < 0 ? "n" : "s";
+      };
+      const runs = streets.map(([sp]) => {
+        const R = [sp[0]];
+        for (let i = 1; i < sp.length; i++) {
+          const a = sp[i - 1], b = sp[i], n = Math.max(1, Math.ceil(hyp2(b[0] - a[0], b[1] - a[1]) / 0.5));
+          for (let k = 1; k <= n; k++) R.push([a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n]);
+        }
+        return R.map((p) => ({ p, in: inW(p[0], p[1]) }));
+      });
+      const best = {};
+      runs.forEach((R, si) => {
+        for (let i = 1; i < R.length; i++) if (R[i].in !== R[i - 1].in) {
+          const [x, y] = R[i].p, side = sideAt(x, y), mid = side === "n" || side === "s" ? Math.abs(x - wcx) : Math.abs(y - wcy);
+          const score = (streets[si][0] === lanes[0]?.pts ? 1e4 : 0) + streets[si][1] * 100 - mid;
+          if (!best[side] || score > best[side].score) best[side] = { si, i, score };
+        }
+      });
+      const kept = new Set(Object.values(best).map((b) => b.si + ":" + b.i)), extra = [];
+      runs.forEach((R, si) => {
+        const cuts = [];
+        for (let i = 1; i < R.length; i++) if (R[i].in !== R[i - 1].in) cuts.push(i);
+        if (!cuts.length) return;
+        const bounds = [0, ...cuts, R.length], pieces = [];
+        for (let k = 0; k < bounds.length - 1; k++) {
+          let a = bounds[k], b = bounds[k + 1];
+          const inside2 = R[a].in, openA = k === 0 || kept.has(si + ":" + bounds[k]), openB = k === bounds.length - 2 || kept.has(si + ":" + bounds[k + 1]);
+          if (!inside2) {
+            if (k > 0 && !openA || k < bounds.length - 2 && !openB) continue;
+            pieces.push(R.slice(Math.max(0, a - 1), Math.min(R.length, b + 1)).map((q) => q.p));
+            continue;
+          }
+          if (!openA) while (a < b && dW(R[a].p) < 3.6) a++;
+          if (!openB) while (b > a && dW(R[b - 1].p) < 3.6) b--;
+          if (b - a >= 4) pieces.push(R.slice(a, b).map((q) => q.p));
+        }
+        const merged = [];
+        for (const pc of pieces) {
+          const last = merged.at(-1);
+          if (last && hyp2(last.at(-1)[0] - pc[0][0], last.at(-1)[1] - pc[0][1]) < 0.8) last.push(...pc.slice(1));
+          else merged.push(pc);
+        }
+        const sp = streets[si][0], simp = (pc) => pc.filter((p, i) => i === 0 || i === pc.length - 1 || i % 2 === 0);
+        sp.length = 0;
+        if (merged.length) sp.push(...simp(merged[0]));
+        for (const pc of merged.slice(1)) extra.push([simp(pc), streets[si][1]]);
+      });
+      for (let i = streets.length - 1; i >= 0; i--) if (streets[i][0].length < 2) streets.splice(i, 1);
+      streets.push(...extra);
     }
     features.push({ type: "wall", pts });
   }
@@ -6171,10 +6257,34 @@ function build(slot, size, biome, seed, dims) {
     const inWall = (R) => wl && [[R.x - 1, R.y - 1], [R.x + R.w + 1, R.y - 1], [R.x - 1, R.y + R.h + 1], [R.x + R.w + 1, R.y + R.h + 1], [R.x + R.w / 2, R.y + R.h / 2]].some(([px, py]) => inPoly(px, py, wl.pts));
     for (let t = 0; t < 2e3 && n < want; t++) {
       const w = ri(wl ? 6 : 7, 12), h = ri(wl ? 4 : 5, 8), x = ri(1, W2 - w - 1), y = ri(1, H2 - h - 1), R = { x, y, w, h };
-      if (Math.min(x, y, W2 - x - w, H2 - y - h) > 14 || !free(R, 0) || nearB(R) || nearY(R) || nearSt(R) || inWall(R)) continue;
+      if (Math.min(x, y, W2 - x - w, H2 - y - h) > 14 || !free(R, 0, ring ? [0, 8] : [0]) || nearB(R) || nearY(R) || nearSt(R) || inWall(R)) continue;
       fill(R, 2);
       features.push({ type: "field", ...R, kind: FK[(o + n) % 5] });
       n++;
+    }
+  }
+  for (let i = 0; i < W2 * H2; i++) if (G[i] === 7 || G[i] === 8) G[i] = 0;
+  if (ring || castle) {
+    if (ring) {
+      for (let i = 0; i < W2 * H2; i++) if (G[i] === 1) G[i] = 0;
+    }
+    for (const [pts, w] of streets) for (let i = 1; i < pts.length; i++) {
+      const [ax, ay] = pts[i - 1], [bx, by] = pts[i], dx = bx - ax, dy = by - ay, d = dx * dx + dy * dy;
+      for (let y = Math.floor(Math.min(ay, by) - w); y <= Math.ceil(Math.max(ay, by) + w); y++) for (let x = Math.floor(Math.min(ax, bx) - w); x <= Math.ceil(Math.max(ax, bx) + w); x++) {
+        const f = d ? Math.max(0, Math.min(1, ((x + 0.5 - ax) * dx + (y + 0.5 - ay) * dy) / d)) : 0;
+        if (hyp2(x + 0.5 - ax - f * dx, y + 0.5 - ay - f * dy) <= w / 2 && at(x, y) === 0) set(x, y, 1);
+      }
+    }
+    const wl = features.find((f) => f.type === "wall");
+    if (wl) for (let y = 0; y < H2; y++) for (let x = 0; x < W2; x++) {
+      if (at(x, y) !== 0) continue;
+      const p = wl.pts;
+      let b = 1e9;
+      for (let i = 0; i < p.length; i++) {
+        const a = p[i], q = p[(i + 1) % p.length], dx = q[0] - a[0], dy = q[1] - a[1], dd = dx * dx + dy * dy, f = dd ? Math.max(0, Math.min(1, ((x + 0.5 - a[0]) * dx + (y + 0.5 - a[1]) * dy) / dd)) : 0;
+        b = Math.min(b, hyp2(x + 0.5 - a[0] - f * dx, y + 0.5 - a[1] - f * dy));
+      }
+      if (b <= 1.1) set(x, y, 5);
     }
   }
   return { arch: [arch, ...mods].join("+"), mods, size, biome, core: [W2, H2], streets, buildings, places, features, entry: [ex, H2], grid: G };
@@ -6221,7 +6331,7 @@ function connect(L, origin, dest) {
   for (const [, R, k] of L.places) if (k === "garden") mark(R);
   const cost = (i) => {
     const v = G[i];
-    return v === 1 || v === 3 ? 0 : v === 0 ? 1 : v === 5 ? 2 : v === 2 && soft[i] ? 6 : -1;
+    return v === 1 || v === 3 ? 0 : v === 0 ? 1 : v === 2 && soft[i] ? 6 : -1;
   };
   const D = new Float64Array(W2 * H2).fill(Infinity), next = new Int32Array(W2 * H2).fill(-1), open = new Heap();
   for (let i = 0; i < W2 * H2; i++) if (cost(i) === 0) {
@@ -6499,7 +6609,7 @@ var CLASSIC_EVENT_PLAN = freezeWire({ version: WORLD_EVENT_PLAN_VERSION, events:
 
 // src/shared/generation/world_maker_v1/make.js
 var TW4 = W * 64;
-var WORLD_MAKER_VERSION = "world-maker-v1.7";
+var WORLD_MAKER_VERSION = "world-maker-v1.8";
 function makeWorld(seed, catalog, tries = 4, onStep = null) {
   const started = performance.now();
   let w, why = [];

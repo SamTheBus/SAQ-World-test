@@ -1,6 +1,6 @@
 {
-  "runtimeId": "5576ee2b62de8a87",
-  "runtimeSha256": "5576ee2b62de8a8756cadf590f18e67cf45e649273c0bd423a49167543792fad",
+  "runtimeId": "2f5237a828dd64a6",
+  "runtimeSha256": "2f5237a828dd64a68edf0060b02f7eb323d62b86769367bf15d1c7a4fab01bfb",
   "files": [
     {
       "path": ".nojekyll",
@@ -530,7 +530,7 @@
     {
       "path": "index.html",
       "bytes": 13674,
-      "sha256": "2e034be751bbd4ff812dc82709894b8238088b6588a62b740db3c6cfc1083f4b"
+      "sha256": "e32b8fc082c4795c673699f58f9618d558c09da0e491bf24dcbca5bb22d96368"
     },
     {
       "path": "manifest.webmanifest",
@@ -539,8 +539,8 @@
     },
     {
       "path": "save-worker.js",
-      "bytes": 2870998,
-      "sha256": "c899079fca9217973557d1df33d547c7652f2cc688caf91ed51a5f7307a3b5c2"
+      "bytes": 2872730,
+      "sha256": "60d710ae7dd3c17ffef09f63cf4c44638cefd3562100a29e9f88a7a57835a805"
     },
     {
       "path": "src/chunks/chunk-IMIW5JQY.js",
@@ -548,9 +548,9 @@
       "sha256": "784a303f00fc0bcc965df059ea603b4193df56c10b894aa33886fe8bf058b941"
     },
     {
-      "path": "src/chunks/playable_browser-CKGZ36CU.js",
-      "bytes": 5794428,
-      "sha256": "a2e290afdd614281a639ecd7646027c7fd8b0071cbee5878513958b9c5e0a0ff"
+      "path": "src/chunks/playable_browser-E4EYX56K.js",
+      "bytes": 5796554,
+      "sha256": "5766fd8c4f8e100ab55b73e0c5c7d384984513a0c5e5c87337e0b839cbd3c6fa"
     },
     {
       "path": "src/chunks/world_browser-3S6OWYSP.js",
@@ -570,12 +570,12 @@
     {
       "path": "src/entrypoints/browser_boot.js",
       "bytes": 2158,
-      "sha256": "782b40cd7cdcca6a32e6e4bca1d70615ad3914ce5bcce881cc76637374712f94"
+      "sha256": "0085ff12df19690281051676844c87e1b16fd8bd4184332b18d3f231683c7c99"
     },
     {
       "path": "world-maker-worker.js",
-      "bytes": 360806,
-      "sha256": "4252ef6c036e52ead07c4ae6bea27d1b69c13f4317adbc975d823599236f4ce3"
+      "bytes": 366706,
+      "sha256": "8609ab904f29e390297293cf1e868c19ca18198be82fc6351ca9a2f43c4f95d6"
     },
     {
       "path": "world.css",
