@@ -6010,6 +6010,77 @@ function townStreetPlanV1(t) {
   }
   return out;
 }
+var townFountainArtV1 = (t) => {
+  if (!townNewArtV1(t)) return [];
+  const zone = t.features.some((f2) => f2.type === "zone");
+  return t.features.filter((f2) => f2.type === "plaza").map((f2) => ({ x: (f2.x + f2.w / 2) * 32, y: (f2.y + f2.h / 2) * 32 + 20, size: zone ? t.size === "capital" ? "capital" : "city" : t.size === "village" || t.size === "hamlet" ? "village" : "town" }));
+};
+var blockCache = /* @__PURE__ */ new WeakMap();
+function townArtBlockersV1(t) {
+  let out = blockCache.get(t);
+  if (out) return out;
+  out = [];
+  blockCache.set(t, out);
+  if (!townNewArtV1(t)) return out;
+  const T8 = 32;
+  const tile = (x, y) => out.push({ x: Math.floor(x / T8), y: Math.floor(y / T8), w: 1, h: 1 });
+  const box3 = (x0, y0, x1, y1) => {
+    const a = Math.floor(x0 / T8), b = Math.floor(y0 / T8);
+    out.push({ x: a, y: b, w: Math.floor((x1 - 1) / T8) - a + 1, h: Math.floor((y1 - 1) / T8) - b + 1 });
+  };
+  const oval = (cx, cy, rx, ry) => {
+    for (let y = Math.floor((cy - ry) / T8); y <= Math.floor((cy + ry) / T8); y++) for (let x = Math.floor((cx - rx) / T8); x <= Math.floor((cx + rx) / T8); x++) {
+      const dx = ((x + 0.5) * T8 - cx) / rx, dy = ((y + 0.5) * T8 - cy) / ry;
+      if (dx * dx + dy * dy <= 1) out.push({ x, y, w: 1, h: 1 });
+    }
+    tile(cx, cy);
+  };
+  const zone = t.features.some((f2) => f2.type === "zone"), plazas = t.features.filter((f2) => f2.type === "plaza");
+  for (const f2 of townFountainArtV1(t)) {
+    const [rx, ry, dy] = { village: [42, 20, 0], town: [60, 28, 0], city: [92, 44, 10], capital: [124, 58, 16] }[f2.size];
+    oval(f2.x, f2.y + dy, rx, ry);
+  }
+  for (const p of plazas) {
+    const fx = (p.x + p.w / 2) * T8, fy = (p.y + p.h / 2) * T8 + 20;
+    if (zone) {
+      const cap = t.size === "capital", d = cap ? 230 : 200;
+      for (const s of [-1, 1]) {
+        box3(fx + s * d - 20, fy - 52, fx + s * d + 20, fy + 8);
+        const bx = fx + s * (cap ? 160 : 140);
+        box3(bx - 18, fy - 8, bx + 18, fy + 10);
+      }
+      for (const st of t.features.filter((f2) => f2.type === "stalls")) for (const s of st.stalls) out.push({ x: s.x, y: p.y + p.h - 3, w: 3, h: 2 });
+    } else {
+      const d = t.size === "village" || t.size === "hamlet" ? 80 : 104;
+      for (const s of [-1, 1]) box3(fx + s * d - 18, fy - 6, fx + s * d + 18, fy + 12);
+    }
+  }
+  for (const st of t.features.filter((f2) => f2.type === "stalls")) for (const s of st.stalls) out.push({ x: s.x, y: s.y, w: 3, h: 2 });
+  for (const g of t.features.filter((f2) => f2.type === "green")) {
+    oval(g.x * T8, g.y * T8 + 10, 30, 12);
+    oval(g.x * T8 + g.rx * T8 * 0.55, g.y * T8 - g.ry * T8 * 0.15, 26, 10);
+  }
+  for (const f2 of t.features) {
+    if (f2.type === "forge" && f2.pad) {
+      const E = f2.pad, x = E.x * T8, y = E.y * T8;
+      out.push({ x: E.x, y: E.y, w: E.w, h: Math.min(4, E.h) });
+      tile(x + 134, y + 208);
+      box3(x + 168, y + 162, x + 208, y + 178);
+      tile(x + 30, y + 180);
+      tile(x + 38, y + 238);
+      box3(x + 166, y + 226, x + 202, y + 240);
+    }
+    if (f2.type === "inn" && f2.garden) {
+      const E = f2.garden, b = t.buildings.find((q) => q.id === f2.building), north = b?.doorSide === "north", x = E.x * T8, y = E.y * T8, w = E.w * T8, h = E.h * T8, py0 = y + (north ? h * 0.52 : h * 0.2);
+      for (const ty of [py0 + 30, north ? y + 70 : y + h - 50]) box3(x + w / 2 - 30, ty - 6, x + w / 2 + 22, ty + 22);
+      const gy = north ? y + h - 26 : y + 40;
+      box3(x + w - 64, gy - 10, x + w - 34, gy);
+      out.push({ x: E.x, y: Math.floor((y + 12) / T8), w: 1, h: Math.floor((y + h - 13) / T8) - Math.floor((y + 12) / T8) + 1 });
+      out.push({ x: E.x, y: north ? E.y + E.h - 1 : E.y, w: E.w, h: 1 });
+    }
+  }
+  return out;
+}
 var KIND = { row: "home", tower: "civic", chapel: "civic" };
 var templates = /* @__PURE__ */ new WeakMap();
 function townTemplateV1(t) {
@@ -6033,6 +6104,10 @@ function townPropsV1(t) {
   if (p) return p;
   const tp = townTemplateV1(t), [W9, H9] = t.core;
   p = [];
+  if (townNewArtV1(t)) {
+    propCache2.set(t, p);
+    return p;
+  }
   for (const b of tp.buildings.filter((b2) => b2.kind === "service")) {
     const x = b.x - 1, y = b.y + b.h - 1;
     if (x < 1 || y < 1 || x >= W9 - 1 || y >= H9 - 1 || tp.buildings.some((q) => x >= q.x && x < q.x + q.w && y >= q.y && y < q.y + q.h) || tp.buildings.some((q) => hyp2(q.porch.x + 1 - x, q.porch.y + 1 - y) < 3)) continue;
@@ -6137,6 +6212,10 @@ function townRasterV1(t) {
     });
   }
   for (const p of townPropsV1(t)) if (ok(p.x, p.y)) col[idx(p.x, p.y)] = 1;
+  for (const r of townArtBlockersV1(t)) rectDo(r, (x, y) => {
+    const i = idx(x, y);
+    if (!water[i] && !deck[i]) col[i] = 1;
+  });
   for (const f2 of townFountainsV1(t)) rectDo({ x: f2.x - 1, y: f2.y, w: 3, h: 2 }, (x, y) => {
     col[idx(x, y)] = 1;
   });
