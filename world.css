@@ -1722,3 +1722,5 @@ body #world-hud-vitals.bag-crest{pointer-events:auto;cursor:pointer}
 }
 #world-inventory .sx-xp[hidden],#world-inventory button.sx-pickclass[hidden]{display:none}
 #world-inventory .sx-key small{white-space:nowrap}#world-inventory .sx-key>div{min-width:0}
+/* The bag count only matters on the bag pages (Gear, Bag, Materials); other pages keep just the gold. */
+body #world-inventory.rpg-menu:not([data-section=equipment]):not([data-section=bag]):not([data-section=materials]) #world-bag-summary>span{display:none}
