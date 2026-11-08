@@ -1634,3 +1634,91 @@ body #world-inventory.rpg-menu[data-section=forge]>.bag-section-tabs{display:non
 }
 /* The level and HP panel opens Stats and Skills. */
 body #world-hud-vitals.bag-crest{pointer-events:auto;cursor:pointer}
+
+/* Stats page v4 (character_stats_v3.js, progression_presentation.js; mockups/stats-page-mockup.webp, 2026-11-07).
+   Hero card beside the attributes card and the stat list; drafted points show their gains in green. */
+#world-inventory .sx-view{flex:1;min-width:0;min-height:0;display:grid;grid-template-columns:240px minmax(0,1fr);gap:10px;align-items:start;overflow:hidden;color:#eee7d9;font-family:system-ui,sans-serif}
+#world-inventory .sx-view[hidden]{display:none}
+#world-inventory .sx-card{background:#151d26;border:1px solid #26313d;border-radius:14px;box-sizing:border-box}
+#world-inventory .sx-hero{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 10px 10px;max-height:100%;overflow-y:auto;scrollbar-width:none}
+#world-inventory button.sx-look{position:absolute;top:8px;right:8px;width:32px;height:32px;min-height:32px;padding:0;display:grid;place-items:center;border-radius:10px;border:1px solid #33404d;background:#1b2530;color:#aeb5b6;box-shadow:none}
+#world-inventory .sx-portrait{width:118px;height:116px;image-rendering:pixelated;margin-top:-2px}
+#world-inventory .sx-who{display:flex;flex-direction:column;align-items:center;gap:2px}
+#world-inventory .sx-name{font:700 17px/1.2 Georgia,'Times New Roman',serif;color:#eee7d9}
+#world-inventory .sx-sub{font-size:12px;color:#7d878c}
+#world-inventory button.sx-pickclass{margin-top:6px;min-height:34px;padding:0 14px;border-radius:17px;border:1px solid #b7a077;background:#2a2418;color:#f6e3b0;font:700 12px system-ui,sans-serif;box-shadow:none}
+#world-inventory .sx-xp{width:100%;margin-top:8px}
+#world-inventory .sx-xptrack{height:7px;border-radius:4px;background:#0b1015;border:1px solid #26313d;overflow:hidden}
+#world-inventory .sx-xptrack i{display:block;height:100%;background:linear-gradient(90deg,#b8862e,#f0c862);border-radius:4px}
+#world-inventory .sx-xptext{display:flex;justify-content:space-between;margin-top:4px;font-size:11px;color:#7d878c;font-variant-numeric:tabular-nums}
+#world-inventory .sx-keys{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+#world-inventory .sx-key{display:flex;align-items:center;gap:7px;min-width:0;padding:6px 8px;border-radius:10px;background:#1b2530}
+#world-inventory .sx-key b{display:block;font:700 15px/1.1 system-ui,sans-serif;color:#eee7d9;font-variant-numeric:tabular-nums;white-space:nowrap}
+#world-inventory .sx-key small{display:block;font:600 10px/1.2 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#7d878c}
+#world-inventory .sx-ic{flex:none;display:inline-flex}
+#world-inventory .sx-gain{margin-left:auto;color:#5fd38a;font:800 11px/1 system-ui,sans-serif;white-space:nowrap;font-variant-numeric:tabular-nums}
+#world-inventory .sx-main{display:flex;flex-direction:column;gap:10px;min-width:0;max-height:100%;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#3a4654 transparent}
+#world-inventory .sx-title{margin:0;flex:1;font:700 11px/1 system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#b7a077}
+#world-inventory .sx-attrs{display:flex;flex-direction:column;gap:7px;padding:10px 12px}
+#world-inventory .sx-attrhead{display:flex;align-items:center;gap:8px;min-height:26px}
+#world-inventory .sx-pts{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 11px;border-radius:13px;background:#2a2418;border:1px solid #b7a077;color:#f6e3b0;font:700 12px/1 system-ui,sans-serif}
+#world-inventory .sx-pts b{font-size:15px;color:#fff3cf}
+#world-inventory .sx-pts[hidden],#world-inventory button.sx-reset[hidden],#world-inventory .sx-attrfoot[hidden],#world-inventory .sx-step button[hidden]{display:none}
+#world-inventory button.sx-reset{min-height:26px;height:26px;padding:0 4px;border:0;background:none;box-shadow:none;color:#7d878c;font:600 11px/1 system-ui,sans-serif;text-decoration:underline;text-underline-offset:3px}
+#world-inventory button.sx-reset.is-armed{color:#f0a0a6}
+#world-inventory .sx-attrrows{display:flex;flex-direction:column;gap:6px}
+#world-inventory .sx-arow{display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:52px;padding:6px 8px;border-radius:12px;background:#1b2530;border:1px solid transparent;transition:border-color .15s,background .15s}
+#world-inventory .sx-arow.is-drafted{border-color:color-mix(in srgb,var(--c) 55%,transparent);background:color-mix(in srgb,var(--c) 9%,#1b2530)}
+#world-inventory .sx-aic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 16%,#0f151c)}
+#world-inventory .sx-atext{min-width:0}
+#world-inventory .sx-aline{display:flex;align-items:baseline;gap:7px}
+#world-inventory .sx-aline b{font:700 14px/1 system-ui,sans-serif;letter-spacing:.04em;color:#eee7d9}
+#world-inventory .sx-aval{display:inline-block;font:700 20px/1 Georgia,'Times New Roman',serif;color:#eee7d9;font-variant-numeric:tabular-nums}
+#world-inventory .sx-aval.is-pop{animation:sx-pop .22s ease-out}
+@keyframes sx-pop{0%{transform:scale(1)}40%{transform:scale(1.28);color:var(--c)}100%{transform:scale(1)}}
+#world-inventory .sx-adraft{font:800 13px/1 system-ui,sans-serif;color:var(--c)}
+#world-inventory .sx-adesc{margin-top:3px;font-size:11.5px;color:#aeb5b6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#world-inventory .sx-step{display:flex;align-items:center;gap:6px}
+#world-inventory .sx-step button{width:40px;height:40px;min-height:40px;padding:0;border-radius:20px;display:grid;place-items:center;font:800 20px/1 system-ui,sans-serif;border:1px solid #33404d;background:#121a22;color:#aeb5b6;box-shadow:none;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+#world-inventory .sx-step button.sx-plus{background:color-mix(in srgb,var(--c) 22%,#121a22);border-color:color-mix(in srgb,var(--c) 70%,transparent);color:#fff;box-shadow:0 0 12px color-mix(in srgb,var(--c) 30%,transparent)}
+#world-inventory .sx-step button:active:not(:disabled){transform:scale(.92)}
+#world-inventory .sx-step button:disabled{opacity:.32;box-shadow:none}
+#world-inventory .sx-attrfoot{display:flex;align-items:center;gap:8px}
+#world-inventory .sx-spacer{flex:1}
+#world-inventory button.sx-undo,#world-inventory button.sx-confirm{min-height:38px;height:38px;padding:0 16px;border-radius:19px;border:1px solid #33404d;background:#121a22;color:#aeb5b6;font:700 13px/1 system-ui,sans-serif;box-shadow:none}
+#world-inventory button.sx-confirm{background:linear-gradient(#e2b65a,#b8862e);border-color:#f3d48a;color:#1a1308;box-shadow:0 0 14px #f0c86244}
+#world-inventory button.sx-confirm:disabled{opacity:.5}
+#world-inventory .sx-groups{display:grid;grid-template-columns:1fr 1fr;column-gap:16px;padding:10px 12px}
+#world-inventory .sx-groups .sx-title{grid-column:1/-1;margin:8px 0 4px}
+#world-inventory .sx-groups .sx-title:first-child{margin-top:0}
+#world-inventory .sx-row{display:flex;align-items:center;gap:7px;min-height:30px;border-bottom:1px solid #1e2832;min-width:0}
+#world-inventory .sx-label{flex:1;min-width:0;color:#aeb5b6;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#world-inventory .sx-row .sx-gain{margin-left:0}
+#world-inventory .sx-value{color:#eee7d9;font:700 13px/1 system-ui,sans-serif;font-variant-numeric:tabular-nums;white-space:nowrap}
+/* Short landscape phones: a smaller hero so the card fits without scrolling. */
+@media(orientation:landscape) and (max-height:560px){
+ #world-inventory .sx-view{grid-template-columns:224px minmax(0,1fr)}
+ #world-inventory .sx-hero{padding:6px 8px 8px}
+ #world-inventory .sx-portrait{width:86px;height:84px}
+ #world-inventory .sx-name{font-size:15px}
+ #world-inventory .sx-xp{margin-top:5px}
+ #world-inventory .sx-keys{gap:5px;margin-top:6px}
+ #world-inventory .sx-key{padding:4px 7px}
+ #world-inventory .sx-key b{font-size:14px}
+ #world-inventory .sx-arow{min-height:48px;padding:5px 8px}
+ #world-inventory .sx-step button{width:38px;height:38px;min-height:38px}
+}
+/* Portrait and narrow: the hero card becomes a strip on top, then attributes, key stats and the list, all scrolling. */
+@media(orientation:portrait),(max-width:640px){
+ #world-inventory .sx-view{display:flex;flex-direction:column;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+ #world-inventory .sx-hero{display:grid;grid-template-columns:84px minmax(0,1fr) auto;grid-template-areas:"pic who look" "pic xp xp" "keys keys keys";column-gap:10px;row-gap:2px;align-items:center;width:100%;overflow:visible;max-height:none;flex:none}
+ #world-inventory .sx-portrait{grid-area:pic;width:84px;height:82px;margin:0}
+ #world-inventory .sx-who{grid-area:who;align-items:flex-start}
+ #world-inventory button.sx-look{grid-area:look;position:static}
+ #world-inventory button.sx-pickclass{grid-column:2/-1}
+ #world-inventory .sx-xp{grid-area:xp;margin-top:4px}
+ #world-inventory .sx-keys{grid-area:keys}
+ #world-inventory .sx-main{max-height:none;overflow:visible;flex:none}
+}
+#world-inventory .sx-xp[hidden],#world-inventory button.sx-pickclass[hidden]{display:none}
+#world-inventory .sx-key small{white-space:nowrap}#world-inventory .sx-key>div{min-width:0}
