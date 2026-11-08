@@ -6010,6 +6010,24 @@ function townStreetPlanV1(t) {
   }
   return out;
 }
+var artCache = /* @__PURE__ */ new WeakMap();
+function townArtBuildingsV1(t) {
+  let A = artCache.get(t);
+  if (A) return A;
+  A = { houses: [], inn: null, tower: null, chapel: null, hall: null, manors: [], rows: [] };
+  artCache.set(t, A);
+  if (!townNewArtV1(t)) return A;
+  const byId2 = new Map(t.buildings.map((b) => [b.id, b])), innId = t.features.find((f2) => f2.type === "inn")?.building, towerId = t.features.find((f2) => f2.type === "tower")?.building;
+  const manors = new Set(t.features.filter((f2) => f2.type === "manor" && f2.building).map((f2) => f2.building));
+  A.inn = byId2.get(innId) ?? null;
+  A.tower = byId2.get(towerId) ?? null;
+  A.chapel = byId2.get(t.features.find((f2) => f2.type === "chapel")?.building) ?? null;
+  A.hall = byId2.get(t.features.find((f2) => f2.type === "hall")?.building) ?? null;
+  A.manors = [...manors].map((id) => byId2.get(id)).filter(Boolean);
+  A.rows = t.buildings.filter((b) => b.kind === "row");
+  for (const b of t.buildings) if ((b.kind === "home" || b.kind === "service") && b.id !== innId && !manors.has(b.id) && !/^(Barracks|Stables|Manor)/.test(b.label ?? "")) A.houses.push(b);
+  return A;
+}
 var townFountainArtV1 = (t) => {
   if (!townNewArtV1(t)) return [];
   const zone = t.features.some((f2) => f2.type === "zone");
@@ -6036,6 +6054,21 @@ function townArtBlockersV1(t) {
     tile(cx, cy);
   };
   const zone = t.features.some((f2) => f2.type === "zone"), plazas = t.features.filter((f2) => f2.type === "plaza");
+  const ring = (R2, gate) => {
+    const gx = (R2.x + R2.w / 2) * T8;
+    for (let x = R2.x; x < R2.x + R2.w; x++) {
+      out.push({ x, y: R2.y, w: 1, h: 1 });
+      if (Math.abs((x + 0.5) * T8 - gx) >= gate) out.push({ x, y: R2.y + R2.h - 1, w: 1, h: 1 });
+    }
+    out.push({ x: R2.x, y: R2.y, w: 1, h: R2.h }, { x: R2.x + R2.w - 1, y: R2.y, w: 1, h: R2.h });
+  };
+  for (const [, R2, k] of t.places) if (k === "garden") {
+    ring(R2, 20);
+    const x = R2.x * T8, y = R2.y * T8, w = R2.w * T8, h = R2.h * T8;
+    tile(x + w / 2 + 34, y + h + 12);
+    tile(x + w / 2 - 40, y + h + 14);
+    if (w >= 192) box3(x + w - 48, y + 34, x + w - 8, y + 46);
+  }
   for (const f2 of townFountainArtV1(t)) {
     const [rx, ry, dy] = { village: [42, 20, 0], town: [60, 28, 0], city: [92, 44, 10], capital: [124, 58, 16] }[f2.size];
     oval(f2.x, f2.y + dy, rx, ry);
@@ -6069,6 +6102,29 @@ function townArtBlockersV1(t) {
       tile(x + 30, y + 180);
       tile(x + 38, y + 238);
       box3(x + 166, y + 226, x + 202, y + 240);
+    }
+    if (f2.type === "chapel" && f2.yard) {
+      const E = f2.yard, gc = Math.floor(E.x + E.w / 2);
+      for (let y = E.y; y < E.y + E.h; y++) for (let x = E.x; x < E.x + E.w; x++) if (x !== gc || y === E.y) out.push({ x, y, w: 1, h: 1 });
+    }
+    if (f2.type === "manor" && f2.building) {
+      const b = t.buildings.find((q) => q.id === f2.building);
+      if (b) {
+        const X = b.x * T8, W9 = b.w * T8, G2 = (b.y + b.h) * T8, cx = X + W9 / 2, fy = G2 + 2.4 * T8;
+        box3(X + 6, fy - 10, cx - 34, fy);
+        box3(cx + 34, fy - 10, X + W9 - 6, fy);
+        for (const sx of [cx - 120, cx + 120]) tile(sx, G2 + 30);
+      }
+    }
+    if (f2.type === "field") ring(f2, 26);
+    if (f2.type === "yard") out.push({ x: f2.x, y: f2.y, w: f2.w, h: f2.h });
+    if (f2.type === "monument") {
+      const x = f2.x * T8, y = f2.y * T8, R2 = (f2.r - 0.7) * T8, E = 0.8;
+      oval(x, y + 24, 62, 26);
+      for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+        tile(x + sx * 92, y + sy * R2 * E * 0.86 + (sy < 0 ? 6 : 12) - 4);
+        tile(x + sx * R2 * 0.72 * 0.707, y + sy * R2 * 0.72 * 0.707 * E + 8);
+      }
     }
     if (f2.type === "inn" && f2.garden) {
       const E = f2.garden, b = t.buildings.find((q) => q.id === f2.building), north = b?.doorSide === "north", x = E.x * T8, y = E.y * T8, w = E.w * T8, h = E.h * T8, py0 = y + (north ? h * 0.52 : h * 0.2);
@@ -6160,7 +6216,8 @@ function townRasterV1(t) {
   for (const f2 of t.features) if (f2.type === "plaza") rectDo(f2, (x, y) => {
     mat[idx(x, y)] = 3;
   });
-  for (const b of tp.buildings) if (b.porch) rectDo(b.porch, (x, y) => {
+  const A = townArtBuildingsV1(t), ownPath = new Set([A.chapel, A.hall, ...A.manors].filter(Boolean).map((b) => b.id));
+  for (const b of tp.buildings) if (b.porch && !ownPath.has(b.id)) rectDo(b.porch, (x, y) => {
     if (mat[idx(x, y)] === 1) mat[idx(x, y)] = 3;
   });
   const onStreet = (x, y, pad) => streets.some(([pts, sw]) => segDist(pts, x + 0.5, y + 0.5) <= sw / 2 + pad);
