@@ -4571,7 +4571,7 @@ var MOVES = new Map([4, 2].map((L) => [L, DIRS2.map(([mx, my]) => {
 var PASSES = [[4, 2, 4e5], [4, 6, 7e5], [2, 6, 9e5], [2, null, 15e5]];
 var HW = 2.6;
 var RIVER = 26;
-function planCurvedRoads(asset, terrain, waterAt, ferry, stats = {}) {
+function planCurvedRoads(asset, terrain, waterAt, ferry, stats = {}, opts = {}) {
   stats.searches = 0;
   stats.nodes = 0;
   stats.widened = 0;
@@ -4601,9 +4601,15 @@ function planCurvedRoads(asset, terrain, waterAt, ferry, stats = {}) {
   for (const f of asset.futureIslands) for (const c of [f.entrance, f.breathing]) owner[c.y * CW + c.x] = own(f.id);
   const ownerAt = (x, y) => owner[(y / 26 | 0) * CW + (x >> 5)], allowOf = (ids) => ids.map((id) => ownerKey.get(id) ?? 0);
   const hl = ferry.landings[0], hb = hl?.harborTown ? harborLayoutV1(hl, hl.harborTown.pier).body : null;
-  const inHarbor = (x, y) => Boolean(hb) && x >= hb.x - 1 && x <= hb.x + hb.w && y >= hb.y - 1 && y <= hb.y + hb.h, inBody = (x, y) => Boolean(hb) && x >= hb.x && x < hb.x + hb.w && y >= hb.y && y < hb.y + hb.h;
+  const inHarbor = (x, y) => Boolean(hb) && x >= hb.x - 1 && x <= hb.x + hb.w && y >= hb.y - 1 && y <= hb.y + hb.h, inBody0 = (x, y) => Boolean(hb) && x >= hb.x && x < hb.x + hb.w && y >= hb.y && y < hb.y + hb.h;
+  const towns = opts.towns ?? /* @__PURE__ */ new Map(), rects = [...towns.values()].map((t) => t.rect);
+  const inTown = (x, y, m) => {
+    for (const r of rects) if (x >= r.x - m && x < r.x + r.w + m && y >= r.y - m && y < r.y + r.h + m) return true;
+    return false;
+  }, inBody = (x, y) => inBody0(x, y) || inTown(x, y, 0);
   const pageLand = new Int16Array(CW * H * 2);
   for (let p = 0; p < pageLand.length; p++) pageLand[p] = land[((p / CW | 0) >> 1) * W + (p % CW >> 1)];
+  const dest = new Map(asset.routes.destinations.map((d) => [d.id, d]));
   const NP = CW * H * 2, GP = new Array(NP).fill(null), CP = new Array(NP).fill(null), RP = new Array(NP).fill(null), page = (x, y) => (y / 26 | 0) * CW + (x >> 5), off = (x, y) => y % 26 * 32 + (x & 31);
   const seaNear = new Array(W * H);
   for (let my = 0; my < H; my++) for (let mx = 0; mx < W; mx++) {
@@ -4625,7 +4631,7 @@ function planCurvedRoads(asset, terrain, waterAt, ferry, stats = {}) {
     }
     return false;
   };
-  const wg = terrain.waterGeometry, classify = wg ? (x, y) => {
+  const wg = terrain.waterGeometry, classify0 = wg ? (x, y) => {
     if (inHarbor(x, y)) return 0;
     const m = (y / 52 | 0) * W + (x >> 6), coast = nearSea(m, x, y) ? wg.sampleCoast(x, y)?.water : false, w = waterAt(x, y);
     if (w === 1 && !coast) return 2;
@@ -4635,6 +4641,7 @@ function planCurvedRoads(asset, terrain, waterAt, ferry, stats = {}) {
     const b = terrain.sampleBase(x, y), w = waterAt(x, y);
     return w === 1 && !terrain.waterGeometry?.sampleCoast(x, y)?.water ? 2 : b.walkable && !w ? 1 : 0;
   };
+  const classify = rects.length ? (x, y) => inTown(x, y, 1) ? 0 : classify0(x, y) : classify0;
   function ground(x, y) {
     if (x < 0 || y < 0 || x >= TW || y >= TH) return 0;
     const g = GP[page(x, y)] ??= new Uint8Array(832).fill(255), o = off(x, y);
@@ -4690,6 +4697,51 @@ function planCurvedRoads(asset, terrain, waterAt, ferry, stats = {}) {
     const o = ownerAt(x, y);
     return !o || allow.includes(o);
   };
+  const portsOf = /* @__PURE__ */ new Map();
+  for (const [id, t] of towns) {
+    const s = asset.settlements.find((s2) => s2.id === id), lm = lmIndex.get(s?.landmassId), k = ownerKey.get(id) ?? 0, r = t.rect;
+    if (!s) continue;
+    const usable = (x, y) => ground(x, y) === 1 && landAt(x, y) === lm && (!ownerAt(x, y) || ownerAt(x, y) === k);
+    let list = t.ports.filter((p) => {
+      if (!usable(p.x, p.y)) return false;
+      for (let i = 1; i <= 6; i++) {
+        const x = Math.round(p.x + 0.5 - p.ux * i - 0.5), y = Math.round(p.y + 0.5 - p.uy * i - 0.5);
+        if (x >= r.x && y >= r.y && x < r.x + r.w && y < r.y + r.h) break;
+        if (classify0(x, y) !== 1) return false;
+      }
+      return true;
+    }).map((p) => ({ x: p.x, y: p.y }));
+    if (!list.length) {
+      const q = dest.get(id)?.point ?? { x: r.x + r.w / 2, y: r.y + r.h };
+      let best = null, bd = Infinity;
+      const m = 4;
+      for (let y = r.y - m; y < r.y + r.h + m; y++) for (let x = r.x - m; x < r.x + r.w + m; x++) {
+        if (x > r.x - m && x < r.x + r.w + m - 1 && y > r.y - m && y < r.y + r.h + m - 1) continue;
+        if (!usable(x, y)) continue;
+        const d = hyp(x - q.x, y - q.y);
+        if (d < bd) {
+          bd = d;
+          best = { x, y };
+        }
+      }
+      if (best) list = [best];
+    }
+    portsOf.set(id, list);
+  }
+  const portFor = (id, q) => {
+    const l = portsOf.get(id);
+    if (!l?.length) return null;
+    let best = l[0], bd = Infinity;
+    for (const p of l) {
+      const d = hyp(p.x - q.x, p.y - q.y);
+      if (d < bd) {
+        bd = d;
+        best = p;
+      }
+    }
+    return best;
+  };
+  stats.ports = [...portsOf.values()].reduce((n, l) => n + l.length, 0);
   const mark = new Uint16Array(W * H);
   let gen = 0;
   function corridor(a, b, lm, pad) {
@@ -5212,7 +5264,7 @@ function planCurvedRoads(asset, terrain, waterAt, ferry, stats = {}) {
     for (let i = 0; i < P.length; i++) if (keep[i]) out.push(Math.round(P[i].x * 10) / 10, Math.round(P[i].y * 10) / 10);
     return out;
   }
-  const edges = [], failures = [], dest = new Map(asset.routes.destinations.map((d) => [d.id, d]));
+  const edges = [], failures = [];
   function addRoute(from, to, kind, lmId, P, decks) {
     const lm = lmIndex.get(lmId), pieces = merge(P, kind);
     let added = 0;
@@ -5257,12 +5309,13 @@ function planCurvedRoads(asset, terrain, waterAt, ferry, stats = {}) {
       }
       rest.splice(rest.indexOf(pick), 1);
       const kind = pick.kind === "main" && to.kind === "main" ? "main" : "secondary", allow = allowOf([pick.id, to.id]);
-      const path = route(pick.point, { pt: to.point, min: kind !== "main" ? 2 : 0, near: (x, y) => hyp(x - pick.point.x, y - pick.point.y) > 40 }, lm, allow, kind);
+      const a = portFor(pick.id, to.point) ?? pick.point, b = portFor(to.id, a) ?? to.point;
+      const path = route(a, { pt: b, min: kind !== "main" ? 2 : 0, near: (x, y) => hyp(x - a.x, y - a.y) > 40 }, lm, allow, kind);
       if (!path) {
-        failures.push({ code: "NO_ROAD", from: pick.id, to: to.id, start: ground(pick.point.x, pick.point.y), goal: ground(to.point.x, to.point.y), lm });
+        failures.push({ code: "NO_ROAD", from: pick.id, to: to.id, start: ground(a.x, a.y), goal: ground(b.x, b.y), lm });
         continue;
       }
-      path.unshift({ ...pick.point });
+      path.unshift({ ...a });
       const { P, decks } = shape(path, kind, lm, allow, salt(pick.id + ">" + to.id), 4);
       addRoute(pick.id, to.id, kind, lmId, P, decks);
       linked.push(pick);
@@ -5303,34 +5356,34 @@ function planCurvedRoads(asset, terrain, waterAt, ferry, stats = {}) {
   routePages.sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
   return { edges, failures, routePages: routePages.map(([key2, p]) => ({ key: key2, rows: Array.from({ length: 26 }, (_, y) => Array.from(p.subarray(y * 32, y * 32 + 32)).join("")) })), valueAt, stats };
   function connectors() {
-    const towns = asset.settlements.map((s) => ({ id: s.id, lm: s.landmassId, p: dest.get(s.id)?.point, core: s.core })).filter((t) => t.p), pairs = [];
-    for (let i = 0; i < towns.length; i++) for (let j = i + 1; j < towns.length; j++) {
-      const A = towns[i], B2 = towns[j];
+    const towns2 = asset.settlements.map((s) => ({ id: s.id, lm: s.landmassId, p: dest.get(s.id)?.point, core: s.core })).filter((t) => t.p), pairs = [];
+    for (let i = 0; i < towns2.length; i++) for (let j = i + 1; j < towns2.length; j++) {
+      const A = towns2[i], B2 = towns2[j];
       if (A.lm !== B2.lm) continue;
       const line = hyp(A.p.x - B2.p.x, A.p.y - B2.p.y);
       if (line >= 300 && line <= 2600) pairs.push({ A, B: B2, line });
     }
     pairs.sort((p, q) => p.line - q.line || (p.A.id < q.A.id ? -1 : 1));
-    let added = 0, tries = 0, g = graph(towns);
+    let added = 0, tries = 0, g = graph(towns2);
     const report = [];
     for (const pr of pairs) {
       if (added >= 10 || tries >= 24) break;
       const road = g.trip(pr.A.id, pr.B.id);
       if (road <= pr.line * 1.5) continue;
       tries++;
-      const kind = /capital|city/.test(pr.A.id) && /capital|city/.test(pr.B.id) ? "main" : "secondary", lm = lmIndex.get(pr.A.lm), allow = allowOf([pr.A.id, pr.B.id]), B2 = pr.B.p, A = pr.A.p;
+      const kind = /capital|city/.test(pr.A.id) && /capital|city/.test(pr.B.id) ? "main" : "secondary", lm = lmIndex.get(pr.A.lm), allow = allowOf([pr.A.id, pr.B.id]), A = portFor(pr.A.id, pr.B.p) ?? pr.A.p, B2 = portFor(pr.B.id, A) ?? pr.B.p;
       const path = route(A, { pt: B2, min: 2, near: (x, y) => hyp(x - B2.x, y - B2.y) < 70 && hyp(x - A.x, y - A.y) > 70 }, lm, allow, kind);
       if (!path) continue;
       path.unshift({ ...A });
       const { P, decks } = shape(path, kind, lm, allow, salt("link>" + pr.A.id + ">" + pr.B.id), 4);
       if (!addRoute(pr.A.id, pr.B.id, kind, pr.A.lm, P, decks)) continue;
       added++;
-      g = graph(towns);
+      g = graph(towns2);
       report.push({ from: pr.A.id, to: pr.B.id, line: Math.round(pr.line), before: Math.round(road), after: Math.round(g.trip(pr.A.id, pr.B.id)) });
     }
     stats.connectors = report;
   }
-  function graph(towns) {
+  function graph(towns2) {
     const id = /* @__PURE__ */ new Map(), xs = [], ys = [], adj = [], node = (x, y) => {
       const k = Math.round(y / 2) * 1e4 + Math.round(x / 2);
       let i = id.get(k);
@@ -5389,7 +5442,7 @@ function planCurvedRoads(asset, terrain, waterAt, ferry, stats = {}) {
       hub.set(key2, h);
       return h;
     };
-    for (const t of towns) {
+    for (const t of towns2) {
       const h = addHub(t.id, t.p.x, t.p.y);
       for (const c of t.core) {
         const x0 = c.x * 32 - 6, y0 = c.y * 26 - 6, x1 = c.x * 32 + 38, y1 = c.y * 26 + 32;
@@ -5399,6 +5452,9 @@ function planCurvedRoads(asset, terrain, waterAt, ferry, stats = {}) {
       }
       around(t.p.x - 12, t.p.y - 12, t.p.x + 12, t.p.y + 12, (j) => {
         if (j < real && hyp(xs[j] - t.p.x, ys[j] - t.p.y) <= 12) link(h, j, 0);
+      });
+      for (const p of portsOf.get(t.id) ?? []) around(p.x - 6, p.y - 6, p.x + 6, p.y + 6, (j) => {
+        if (j < real && hyp(xs[j] - p.x, ys[j] - p.y) <= 6) link(h, j, 0);
       });
     }
     for (const l of ferry.landings) {
@@ -6322,7 +6378,7 @@ var segDist = (pts, x, y, closed = false) => {
   }
   return best;
 };
-function connect(L, origin, dest) {
+function connect(L, origin, dest, sw = 3) {
   const [W2, H2] = L.core, G = L.grid, lx = dest.x - origin.x + 0.5, ly = dest.y - origin.y + 0.5, cl = (v, a, b) => Math.max(a, Math.min(b, v));
   const soft = new Uint8Array(W2 * H2), mark = (R) => {
     for (let y = R.y; y < R.y + R.h; y++) for (let x = R.x; x < R.x + R.w; x++) if (x >= 0 && y >= 0 && x < W2 && y < H2) soft[y * W2 + x] = 1;
@@ -6396,31 +6452,84 @@ function connect(L, origin, dest) {
   if (hyp3(edge[0] - kept[0][0], edge[1] - kept[0][1]) > 0.01) pts.push([r3(kept[0][0]), r3(kept[0][1])]);
   for (const p of kept.slice(1)) pts.push([r3(p[0]), r3(p[1])]);
   if (pts.length < 2) pts.push([r3(kept[0][0]), r3(kept[0][1])]);
-  return { pts, w: 3 };
+  return { pts, w: sw };
 }
-function planGeneratedTownsV1(asset) {
+function streetEnds(streets, W2, H2) {
+  const out = [];
+  for (const [pts, w] of streets) {
+    if (pts.length < 2) continue;
+    for (const end of [0, 1]) {
+      const e = end ? pts[pts.length - 1] : pts[0];
+      let k = end ? pts.length - 2 : 1;
+      while (k >= 0 && k < pts.length && hyp3(pts[k][0] - e[0], pts[k][1] - e[1]) < 0.01) k += end ? -1 : 1;
+      if (k < 0 || k >= pts.length) continue;
+      const p = pts[k], l = hyp3(e[0] - p[0], e[1] - p[1]), ux = (e[0] - p[0]) / l, uy = (e[1] - p[1]) / l;
+      const tx = ux > 1e-6 ? (W2 - e[0]) / ux : ux < -1e-6 ? -e[0] / ux : Infinity, ty = uy > 1e-6 ? (H2 - e[1]) / uy : uy < -1e-6 ? -e[1] / uy : Infinity, edge = Math.max(0, Math.min(tx, ty));
+      if (edge <= 3.5) out.push({ e, ux, uy, w, edge });
+    }
+  }
+  return out;
+}
+var PORT = 4;
+function townPortsV1(L, origin) {
+  const [W2, H2] = L.core, out = [];
+  for (const { e, ux, uy, w, edge } of streetEnds(L.streets, W2, H2)) {
+    const x = origin.x + Math.floor(e[0] + ux * (edge + PORT)), y = origin.y + Math.floor(e[1] + uy * (edge + PORT));
+    if (!out.some((p) => p.x === x && p.y === y)) out.push({ x, y, ux: r3(ux), uy: r3(uy), w });
+  }
+  return out;
+}
+function planTownSpotsV1(asset) {
+  const spots = /* @__PURE__ */ new Map();
+  for (const [id, size] of Object.entries(GENERATED_TOWN_SIZES)) {
+    const s = asset.settlements.find((s2) => s2.id === id);
+    if (!s) continue;
+    const L = buildTownLayoutV1(id, size, s.biomeId.replace("biome:", ""), asset.seedDigest, s.dimensions);
+    spots.set(id, { L, rect: { x: s.tileOrigin.x, y: s.tileOrigin.y, w: L.core[0], h: L.core[1] }, ports: townPortsV1(L, s.tileOrigin) });
+  }
+  return spots;
+}
+function planGeneratedTownsV1(asset, spots = null) {
   const towns = [];
   for (const [id, size] of Object.entries(GENERATED_TOWN_SIZES)) {
     const s = asset.settlements.find((s2) => s2.id === id);
     if (!s) continue;
-    const biome = s.biomeId.replace("biome:", ""), L = buildTownLayoutV1(id, size, biome, asset.seedDigest, s.dimensions), dest = asset.routes.destinations.find((d) => d.id === id)?.point ?? null;
-    const connector = dest ? connect(L, s.tileOrigin, dest) : null;
+    const biome = s.biomeId.replace("biome:", ""), L = spots?.get(id)?.L ?? buildTownLayoutV1(id, size, biome, asset.seedDigest, s.dimensions), o = s.tileOrigin, [W2, H2] = L.core, ports = spots?.get(id)?.ports ?? townPortsV1(L, o);
+    const ends = [], by = (p) => p.x >= o.x - 8 && p.y >= o.y - 8 && p.x < o.x + W2 + 8 && p.y < o.y + H2 + 8;
+    for (const e of asset.routes.edges ?? []) for (const [p, mine] of [[e.path?.[0], e.from === id], [e.path?.at(-1), e.to === id]]) if (mine && p && by(p) && !ends.some((q) => hyp3(q.x - p.x, q.y - p.y) < 6)) ends.push({ x: p.x, y: p.y });
+    if (!ends.length) {
+      const dest = asset.routes.destinations.find((d) => d.id === id)?.point;
+      if (dest) ends.push(dest);
+    }
+    const connectors = [];
+    for (const p of ends) {
+      let sw = 3, bd = 6;
+      for (const q of ports) {
+        const d = hyp3(q.x - p.x, q.y - p.y);
+        if (d < bd) {
+          bd = d;
+          sw = Math.max(3, q.w);
+        }
+      }
+      const c = connect(L, o, p, sw);
+      if (c) connectors.push(c);
+    }
     let { features, places } = L;
-    if (connector) {
+    if (connectors.length) {
       const near = (R) => {
-        for (let y = R.y - 1; y <= R.y + R.h; y++) for (let x = R.x - 1; x <= R.x + R.w; x++) if (segDist(connector.pts, x + 0.5, y + 0.5) <= connector.w / 2 + 0.5) return true;
+        for (let y = R.y - 1; y <= R.y + R.h; y++) for (let x = R.x - 1; x <= R.x + R.w; x++) if (connectors.some((c) => segDist(c.pts, x + 0.5, y + 0.5) <= c.w / 2 + 0.5)) return true;
         return false;
       };
       features = features.filter((f) => f.type !== "field" || !near(f));
       places = places.filter(([, R, k]) => k !== "garden" || !near(R));
     }
     const feat = (f) => {
-      const o = { ...f };
-      if (o.pts) o.pts = rp(o.pts);
-      if (o.trees) o.trees = rp(o.trees);
-      if (o.list) o.list = o.list.map((b) => ({ ...b, x: r3(b.x) }));
-      for (const k of ["rx", "ry", "cx", "cy", "x", "y", "r"]) if (typeof o[k] === "number") o[k] = r3(o[k]);
-      return o;
+      const o2 = { ...f };
+      if (o2.pts) o2.pts = rp(o2.pts);
+      if (o2.trees) o2.trees = rp(o2.trees);
+      if (o2.list) o2.list = o2.list.map((b) => ({ ...b, x: r3(b.x) }));
+      for (const k of ["rx", "ry", "cx", "cy", "x", "y", "r"]) if (typeof o2[k] === "number") o2[k] = r3(o2[k]);
+      return o2;
     };
     towns.push({
       id,
@@ -6436,7 +6545,7 @@ function planGeneratedTownsV1(asset) {
       buildings: L.buildings,
       places,
       features: features.map(feat),
-      connector
+      connectors
     });
   }
   return { version: GENERATED_TOWNS_VERSION, layout: TOWN_LAYOUT_VERSION, towns };
@@ -6609,7 +6718,7 @@ var CLASSIC_EVENT_PLAN = freezeWire({ version: WORLD_EVENT_PLAN_VERSION, events:
 
 // src/shared/generation/world_maker_v1/make.js
 var TW4 = W * 64;
-var WORLD_MAKER_VERSION = "world-maker-v1.8";
+var WORLD_MAKER_VERSION = "world-maker-v1.9";
 function makeWorld(seed, catalog, tries = 4, onStep = null) {
   const started = performance.now();
   let w, why = [];
@@ -6657,6 +6766,9 @@ function buildWorld(seed, catalog, onStep) {
   const hl = ferry.landings[0], harbor = harborLayoutV1(hl, hl.harborTown.pier), hd = asset.routes.destinations.find((d) => d.id === HARBOR_TOWN_ID), hb = harbor.body;
   if (hd.point.x >= hb.x - 1 && hd.point.x <= hb.x + hb.w && hd.point.y >= hb.y - 1 && hd.point.y <= hb.y + hb.h) hd.point = { x: hl.routeJoin.x, y: hl.routeJoin.y };
   const firstCave = asset.sites.find((s) => s.id === FIRST_CAVE);
+  let tq = performance.now();
+  const spots = planTownSpotsV1(asset);
+  ms.townLayouts = Math.round(performance.now() - tq);
   const hr = harbor.bounds;
   let guards = [{ x1: hr.x - 3, y1: hr.y - 3, x2: hr.x + hr.w + 2, y2: hr.y + hr.h + 2 }], G, passes = 0;
   const pass = [];
@@ -6669,7 +6781,7 @@ function buildWorld(seed, catalog, onStep) {
     const terrainR2 = createPlannedTerrain(presentSeededWorldV1({ ...asset, hydrologyPlan: dryPlan(rivers2) }));
     const tt = performance.now() - q;
     q = performance.now();
-    const roads2 = planCurvedRoads(asset, terrainR2, waterAt2, ferry);
+    const roads2 = planCurvedRoads(asset, terrainR2, waterAt2, ferry, {}, { towns: spots });
     (ms.passes ??= []).push({ rivers: Math.round(tr), terrain: Math.round(tt), roads: Math.round(performance.now() - q) });
     pass.push({ searches: roads2.stats.searches, nodes: roads2.stats.nodes, widened: roads2.stats.widened ?? 0 });
     const kind = (x, y) => terrainR2.waterGeometry.sampleCoast(x, y)?.water ? 3 : waterAt2(x, y);
@@ -6699,7 +6811,7 @@ function buildWorld(seed, catalog, onStep) {
   for (const l of ferry.landings) Object.assign(l, asset.worldReshape.ferryLandings[l.id]);
   asset.contentRoles = makeRoles(asset);
   t = performance.now();
-  asset.generatedTowns = planGeneratedTownsV1(asset);
+  asset.generatedTowns = planGeneratedTownsV1(asset, spots);
   t = lap("towns", t);
   asset.eventPlan = planWorldEventsV1({ seed: asset.seedDigest, clearings: asset.wildernessExtension.eventCapacities });
   asset.routeHash = sha256Hex(JSON.stringify(asset.routes.edges.map((e) => e.path)));

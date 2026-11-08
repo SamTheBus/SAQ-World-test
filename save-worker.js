@@ -5773,6 +5773,23 @@ var segDist = (pts, x, y, closed = false) => {
   }
   return best;
 };
+var townConnectorsV1 = (t) => t.connectors ?? (t.connector ? [t.connector] : []);
+function streetEnds(streets, W9, H9) {
+  const out = [];
+  for (const [pts, w] of streets) {
+    if (pts.length < 2) continue;
+    for (const end of [0, 1]) {
+      const e = end ? pts[pts.length - 1] : pts[0];
+      let k = end ? pts.length - 2 : 1;
+      while (k >= 0 && k < pts.length && hyp2(pts[k][0] - e[0], pts[k][1] - e[1]) < 0.01) k += end ? -1 : 1;
+      if (k < 0 || k >= pts.length) continue;
+      const p = pts[k], l = hyp2(e[0] - p[0], e[1] - p[1]), ux = (e[0] - p[0]) / l, uy = (e[1] - p[1]) / l;
+      const tx = ux > 1e-6 ? (W9 - e[0]) / ux : ux < -1e-6 ? -e[0] / ux : Infinity, ty = uy > 1e-6 ? (H9 - e[1]) / uy : uy < -1e-6 ? -e[1] / uy : Infinity, edge = Math.max(0, Math.min(tx, ty));
+      if (edge <= 3.5) out.push({ e, ux, uy, w, edge });
+    }
+  }
+  return out;
+}
 var lists2 = /* @__PURE__ */ new WeakMap();
 var loaded = [];
 var byId = /* @__PURE__ */ new Map();
@@ -5810,7 +5827,7 @@ function townCrossingsV1(streets, line, closed = false) {
   }
   return { list: out, len: acc.at(-1), acc, L: L2 };
 }
-var allStreets = (t) => t.connector ? [...t.streets, [t.connector.pts, t.connector.w]] : t.streets;
+var allStreets = (t) => [...t.streets, ...townConnectorsV1(t).map((c) => [c.pts, c.w])];
 var GATE_ART = { village: { WH: 36, TW: 34, k: 0.9 }, town: { WH: 40, TW: 36, k: 1 }, city: { WH: 50, TW: 40, k: 1.15 }, capital: { WH: 58, TW: 44, k: 1.3 } };
 function townGateSpanV1(size, f2, h, at, len = 0) {
   const cfg = GATE_ART[size === "hamlet" ? "village" : size] ?? GATE_ART.town, gk = Math.min(1.5, (f2.gateScale ?? 1) * cfg.k), T8 = 32, s = h.s;
@@ -5883,21 +5900,11 @@ function townLanesV1(t) {
   let L2 = laneCache.get(t);
   if (L2) return L2;
   L2 = [];
-  const [W9, H9] = t.core, cn = t.connector?.pts ?? [];
-  for (const [pts, w] of t.streets) {
-    if (pts.length < 2) continue;
-    for (const end of [0, 1]) {
-      const e = end ? pts[pts.length - 1] : pts[0];
-      let k = end ? pts.length - 2 : 1;
-      while (k >= 0 && k < pts.length && hyp2(pts[k][0] - e[0], pts[k][1] - e[1]) < 0.01) k += end ? -1 : 1;
-      if (k < 0 || k >= pts.length) continue;
-      const p = pts[k], l = hyp2(e[0] - p[0], e[1] - p[1]), ux = (e[0] - p[0]) / l, uy = (e[1] - p[1]) / l;
-      const tx = ux > 1e-6 ? (W9 - e[0]) / ux : ux < -1e-6 ? -e[0] / ux : Infinity, ty = uy > 1e-6 ? (H9 - e[1]) / uy : uy < -1e-6 ? -e[1] / uy : Infinity, edge = Math.max(0, Math.min(tx, ty));
-      if (!(edge <= 3.5)) continue;
-      if (cn.length && segDist(cn, e[0], e[1]) < w / 2 + 2) continue;
-      const run = edge + LANE;
-      L2.push({ pts: [[r3(e[0]), r3(e[1])], [r3(e[0] + ux * run), r3(e[1] + uy * run)]], w, edge: r3(edge), run: r3(run) });
-    }
+  const [W9, H9] = t.core, cns = townConnectorsV1(t);
+  for (const { e, ux, uy, w, edge } of streetEnds(t.streets, W9, H9)) {
+    if (cns.some((c) => segDist(c.pts, e[0], e[1]) < w / 2 + 2)) continue;
+    const run = edge + LANE;
+    L2.push({ pts: [[r3(e[0]), r3(e[1])], [r3(e[0] + ux * run), r3(e[1] + uy * run)]], w, edge: r3(edge), run: r3(run) });
   }
   laneCache.set(t, L2);
   return L2;
@@ -6265,10 +6272,10 @@ var rasters = /* @__PURE__ */ new WeakMap();
 function townRasterV1(t) {
   let R2 = rasters.get(t);
   if (R2) return R2;
-  const [W9, H9] = t.core, cn = t.connector;
+  const [W9, H9] = t.core;
   let x0 = 0, y0 = 0, x1 = W9, y1 = H9;
   const lanes = townLanesV1(t);
-  for (const [pts, pw] of [...cn ? [[cn.pts, cn.w]] : [], ...lanes.map((l) => [l.pts, l.w])]) for (const [x, y] of pts) {
+  for (const [pts, pw] of [...townConnectorsV1(t).map((c) => [c.pts, c.w]), ...lanes.map((l) => [l.pts, l.w])]) for (const [x, y] of pts) {
     x0 = Math.min(x0, Math.floor(x - pw));
     y0 = Math.min(y0, Math.floor(y - pw));
     x1 = Math.max(x1, Math.ceil(x + pw));
