@@ -6041,7 +6041,7 @@ var artCache = /* @__PURE__ */ new WeakMap();
 function townArtBuildingsV1(t) {
   let A = artCache.get(t);
   if (A) return A;
-  A = { houses: [], inn: null, tower: null, chapel: null, hall: null, manors: [], rows: [] };
+  A = { houses: [], inn: null, tower: null, chapel: null, hall: null, manors: [], rows: [], barracks: null, stables: null };
   artCache.set(t, A);
   if (!townNewArtV1(t)) return A;
   const byId2 = new Map(t.buildings.map((b) => [b.id, b])), innId = t.features.find((f2) => f2.type === "inn")?.building, towerId = t.features.find((f2) => f2.type === "tower")?.building;
@@ -6053,7 +6053,32 @@ function townArtBuildingsV1(t) {
   A.manors = [...manors].map((id) => byId2.get(id)).filter(Boolean);
   A.rows = t.buildings.filter((b) => b.kind === "row");
   for (const b of t.buildings) if ((b.kind === "home" || b.kind === "service") && b.id !== innId && !manors.has(b.id) && !/^(Barracks|Stables|Manor)/.test(b.label ?? "")) A.houses.push(b);
+  A.barracks = t.buildings.find((b) => b.label === "Barracks") ?? null;
+  A.stables = t.buildings.find((b) => b.label === "Stables") ?? null;
   return A;
+}
+var bannerCache = /* @__PURE__ */ new WeakMap();
+function townBannersV1(t) {
+  let L2 = bannerCache.get(t);
+  if (L2) return L2;
+  L2 = [];
+  bannerCache.set(t, L2);
+  if (!townNewArtV1(t)) return L2;
+  const T8 = 32;
+  const f2 = t.features.find((q) => q.type === "banners");
+  if (!f2) return L2;
+  const pz = t.features.find((q) => q.type === "plaza"), inPz = (b) => pz && b.x > pz.x && b.x < pz.x + pz.w && b.y > pz.y && b.y < pz.y + pz.h;
+  for (const b of f2.list) if (!inPz(b)) L2.push({ x: b.x * T8, y: b.y * T8, flip: !!b.flip });
+  if (pz) {
+    const fy = (pz.y + pz.h / 2) * T8 + 20;
+    for (const [bx, flip] of [[pz.x * T8 + 34, false], [(pz.x + pz.w) * T8 - 34, true]]) for (const dy of [-44, 64]) L2.push({ x: bx, y: fy + dy, flip });
+  }
+  return L2;
+}
+function townCastleYewsV1(f2) {
+  const T8 = 32, k = f2.keep, cx = (f2.x + f2.w / 2) * T8, G2 = (k.y + k.h) * T8, yb = (f2.y + f2.h - 1) * T8, out = [];
+  for (let y = G2 + 2.8 * T8; y < yb - 6.2 * T8; y += 2.2 * T8) for (const sd of [-1, 1]) out.push({ x: cx + sd * (2.6 * T8 + 16), y });
+  return out;
 }
 var townFountainArtV1 = (t) => {
   if (!townNewArtV1(t)) return [];
@@ -6153,6 +6178,26 @@ function townArtBlockersV1(t) {
         tile(x + sx * R2 * 0.72 * 0.707, y + sy * R2 * 0.72 * 0.707 * E + 8);
       }
     }
+    if (f2.type === "castle") {
+      const k = f2.keep, X = k.x * T8, W9 = k.w * T8, G2 = (k.y + k.h) * T8, cx = X + W9 / 2, pw = W9 * 0.3;
+      for (const sx of [X + 4, X + W9 - 4]) oval(sx, G2 + 20, 40, 16);
+      for (const sd of [-1, 1]) tile(cx + sd * (pw / 2 + 54), G2 + 34);
+      for (const y of townCastleYewsV1(f2)) tile(y.x, y.y - 4);
+    }
+    if (f2.type === "castleTrees") for (const [tx, ty] of f2.trees) tile(tx * T8, ty * T8 - 2);
+    if (f2.type === "manor" && f2.garden && !f2.building) {
+      const g = f2.garden, x = g.x * T8, y = g.y * T8, w = g.w * T8, h = g.h * T8, cx = x + w / 2, cy = y + h / 2, R0 = Math.min(w, h) * 0.2, gap = 13;
+      oval(cx, cy, R0 + 4, R0 * 0.7 + 3);
+      for (const [px, py] of [[x + 18, y + 18], [x + w - 18, y + 18], [x + 18, y + h - 18], [x + w - 18, y + h - 18]]) tile(px, py);
+      if (w >= 280) for (const sd of [-1, 1]) box3(cx + sd * (R0 + 22) - 14, cy + R0 - 8, cx + sd * (R0 + 22) + 14, cy + R0 + 10);
+      for (const [sx, sy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+        const bx0 = sx < 0 ? x + 16 : cx + gap, by0 = sy < 0 ? y + 16 : cy + gap, bw = w / 2 - 16 - gap, bh = h / 2 - 16 - gap;
+        for (let ty = Math.floor(by0 / T8); ty <= Math.floor((by0 + bh) / T8); ty++) for (let tx = Math.floor(bx0 / T8); tx <= Math.floor((bx0 + bw) / T8); tx++) {
+          const mx = (tx + 0.5) * T8, my = (ty + 0.5) * T8;
+          if (mx > bx0 && mx < bx0 + bw && my > by0 && my < by0 + bh) out.push({ x: tx, y: ty, w: 1, h: 1 });
+        }
+      }
+    }
     if (f2.type === "inn" && f2.garden) {
       const E = f2.garden, b = t.buildings.find((q) => q.id === f2.building), north = b?.doorSide === "north", x = E.x * T8, y = E.y * T8, w = E.w * T8, h = E.h * T8, py0 = y + (north ? h * 0.52 : h * 0.2);
       for (const ty of [py0 + 30, north ? y + 70 : y + h - 50]) box3(x + w / 2 - 30, ty - 6, x + w / 2 + 22, ty + 22);
@@ -6162,6 +6207,22 @@ function townArtBlockersV1(t) {
       out.push({ x: E.x, y: north ? E.y + E.h - 1 : E.y, w: E.w, h: 1 });
     }
   }
+  const A = townArtBuildingsV1(t);
+  if (A.barracks) {
+    const b = A.barracks, X = b.x * T8, W9 = b.w * T8, G2 = (b.y + b.h) * T8, x0 = X + 12, x1 = X + W9 - 12;
+    tile(x0 + 40, G2 + 26);
+    tile(x0 + 100, G2 + 30);
+    tile(x1 - 40, G2 + 26);
+    tile(x1 - 92, G2 + 18);
+  }
+  if (A.stables) {
+    const b = A.stables, X = b.x * T8, W9 = b.w * T8, G2 = (b.y + b.h) * T8, x0 = X + 12, x1 = X + W9 - 12, cx = (x0 + x1) / 2;
+    tile(x0 + 56, G2 + 20);
+    box3(cx - 80, G2 + 12, cx - 44, G2 + 30);
+    tile(cx + 70, G2 + 18);
+    box3(x1 - 114, G2 + 12, x1 - 46, G2 + 44);
+  }
+  for (const b of townBannersV1(t)) tile(b.x, b.y - 2);
   return out;
 }
 var KIND = { row: "home", tower: "civic", chapel: "civic" };
@@ -6243,7 +6304,8 @@ function townRasterV1(t) {
   for (const f2 of t.features) if (f2.type === "plaza") rectDo(f2, (x, y) => {
     mat[idx(x, y)] = 3;
   });
-  const A = townArtBuildingsV1(t), ownPath = new Set([A.chapel, A.hall, ...A.manors].filter(Boolean).map((b) => b.id));
+  const A = townArtBuildingsV1(t), ownPath = new Set([A.chapel, A.hall, ...A.manors, A.barracks, A.stables].filter(Boolean).map((b) => b.id));
+  if (townNewArtV1(t)) ownPath.add("b:900");
   for (const b of tp.buildings) if (b.porch && !ownPath.has(b.id)) rectDo(b.porch, (x, y) => {
     if (mat[idx(x, y)] === 1) mat[idx(x, y)] = 3;
   });
