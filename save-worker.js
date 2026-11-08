@@ -5741,6 +5741,7 @@ var hyp = PM.hypot;
 var W = 150;
 var H = 160;
 var N = W * H;
+var CODE = { woodland: "w", grassland: "a", wetland: "m", upland: "r", desert: "d", frostland: "s", tropical: "t", volcanic: "l" };
 
 // src/shared/generation/generated_towns_v1.js
 var GENERATED_TOWNS_VERSION = "generated-towns-v1";
@@ -6394,19 +6395,22 @@ var townBoundsV1 = (t) => {
 };
 var MAT = ["", "g", "r", "p"];
 function createGeneratedTownTiles(terrain2, towns) {
-  const list = towns.map((t) => ({ t, b: townBoundsV1(t), R: townRasterV1(t) }));
-  return (x, y, b) => {
-    for (const { t, b: B2, R: R2 } of list) {
-      if (x < B2.x || y < B2.y || x >= B2.x + B2.w || y >= B2.y + B2.h) continue;
-      const i = (y - B2.y) * R2.w + (x - B2.x), m = R2.mat[i];
-      if (!m) continue;
+  const list = towns.map((t) => ({ t, b: townBoundsV1(t), R: townRasterV1(t), code: CODE[t.biome] ?? null }));
+  return (x, y, b0) => {
+    for (const { t, b: B2, R: R2, code } of list) {
+      const o = t.origin, [W9, H9] = t.core, inB = x >= B2.x && y >= B2.y && x < B2.x + B2.w && y < B2.y + B2.h, i = inB ? (y - B2.y) * R2.w + (x - B2.x) : -1, m = inB ? R2.mat[i] : 0;
+      const mine = m || x >= o.x && y >= o.y && x < o.x + W9 && y < o.y + H9, b = mine && code && b0.biome && b0.biome !== code && b0.walkable ? { ...b0, biome: code } : b0;
+      if (!m) {
+        if (b !== b0) return b;
+        continue;
+      }
       if (!b.walkable) return b;
       const { naturalKind, naturalClusterId, ...rest } = b, material = MAT[m];
       if (R2.water[i]) return { ...rest, walkable: false, kind: "river", collision: "2", material: "W", route: 0, town: true };
       if (R2.deck[i]) return { ...rest, walkable: true, kind: "bridge", underlyingKind: "river", bridgeId: t.id + ":bridge:" + R2.deckId[i], collision: "1", material: R2.deck[i] === 1 ? "H" : "V", route: 2, town: true, townBridge: true };
       return { ...rest, collision: R2.col[i] ? "2" : "1", material, route: m === 2 || m === 3 ? 2 : 0, town: true };
     }
-    return b;
+    return b0;
   };
 }
 function generatedTownChunkBlockers(towns, cx, cy) {
