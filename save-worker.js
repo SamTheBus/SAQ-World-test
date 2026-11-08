@@ -5847,6 +5847,169 @@ function townGeometryV1(t) {
   geoCache.set(t, g);
   return g;
 }
+var TOWN_NEW_ART = Object.freeze(/* @__PURE__ */ new Set(["grassland", "woodland"]));
+var townNewArtV1 = (t) => TOWN_NEW_ART.has(t?.biome);
+var LANE = 8;
+var LANE_END = 0.3;
+var laneCache = /* @__PURE__ */ new WeakMap();
+function townLanesV1(t) {
+  let L2 = laneCache.get(t);
+  if (L2) return L2;
+  L2 = [];
+  const [W9, H9] = t.core, cn = t.connector?.pts ?? [];
+  for (const [pts, w] of t.streets) {
+    if (pts.length < 2) continue;
+    for (const end of [0, 1]) {
+      const e = end ? pts[pts.length - 1] : pts[0];
+      let k = end ? pts.length - 2 : 1;
+      while (k >= 0 && k < pts.length && hyp2(pts[k][0] - e[0], pts[k][1] - e[1]) < 0.01) k += end ? -1 : 1;
+      if (k < 0 || k >= pts.length) continue;
+      const p = pts[k], l = hyp2(e[0] - p[0], e[1] - p[1]), ux = (e[0] - p[0]) / l, uy = (e[1] - p[1]) / l;
+      const tx = ux > 1e-6 ? (W9 - e[0]) / ux : ux < -1e-6 ? -e[0] / ux : Infinity, ty = uy > 1e-6 ? (H9 - e[1]) / uy : uy < -1e-6 ? -e[1] / uy : Infinity, edge = Math.max(0, Math.min(tx, ty));
+      if (!(edge <= 3.5)) continue;
+      if (cn.length && segDist(cn, e[0], e[1]) < w / 2 + 2) continue;
+      const run = edge + LANE;
+      L2.push({ pts: [[r3(e[0]), r3(e[1])], [r3(e[0] + ux * run), r3(e[1] + uy * run)]], w, edge: r3(edge), run: r3(run) });
+    }
+  }
+  laneCache.set(t, L2);
+  return L2;
+}
+var laneWidthV1 = (lane, d) => {
+  if (d <= lane.edge) return 1;
+  const u = Math.min(1, (d - lane.edge) / (lane.run - lane.edge || 1)), s = u * u * (3 - 2 * u);
+  return 1 - (1 - LANE_END) * s;
+};
+var gridCache = /* @__PURE__ */ new WeakMap();
+function townGridV1(t) {
+  let G2 = gridCache.get(t);
+  if (G2) return G2;
+  const [W9, H9] = t.core;
+  G2 = new Uint8Array(W9 * H9);
+  const set2 = (x, y, v) => {
+    if (x >= 0 && y >= 0 && x < W9 && y < H9) G2[y * W9 + x] = v;
+  }, rectDo = (r, v) => {
+    for (let y = r.y; y < r.y + r.h; y++) for (let x = r.x; x < r.x + r.w; x++) set2(x, y, v);
+  };
+  const stroke = (pts, half, v, closed = false) => {
+    const n = pts.length;
+    for (let i = closed ? 0 : 1; i < n; i++) {
+      const a = pts[i ? i - 1 : n - 1], b = pts[i];
+      for (let y = Math.max(0, Math.floor(Math.min(a[1], b[1]) - half - 1)); y <= Math.min(H9 - 1, Math.ceil(Math.max(a[1], b[1]) + half + 1)); y++) for (let x = Math.max(0, Math.floor(Math.min(a[0], b[0]) - half - 1)); x <= Math.min(W9 - 1, Math.ceil(Math.max(a[0], b[0]) + half + 1)); x++) if (segDist([a, b], x + 0.5, y + 0.5) <= half) G2[y * W9 + x] = v;
+    }
+  };
+  const geo = townGeometryV1(t);
+  if (geo.river) stroke(geo.river.pts, geo.river.w / 2 + 0.4, 4);
+  for (const [g, closed] of [[geo.wall, true], [geo.castle, false]]) if (g) stroke(g.pts, 1.1, 5, closed);
+  for (const [pts, w] of allStreets(t)) stroke(pts, w / 2, 1);
+  for (const f2 of t.features) {
+    if (f2.type === "plaza") rectDo(f2, 3);
+    else if (f2.type === "green") {
+      for (let y = Math.floor(f2.y - f2.ry); y <= Math.ceil(f2.y + f2.ry); y++) for (let x = Math.floor(f2.x - f2.rx); x <= Math.ceil(f2.x + f2.rx); x++) if (((x + 0.5 - f2.x) / f2.rx) ** 2 + ((y + 0.5 - f2.y) / f2.ry) ** 2 <= 1) set2(x, y, 3);
+    } else if (f2.type === "field" || f2.type === "yard") rectDo(f2, 2);
+    else if (f2.type === "forge" && f2.pad) rectDo(f2.pad, 2);
+    else if (f2.type === "inn" && f2.garden) rectDo(f2.garden, 2);
+    else if (f2.type === "chapel" && f2.yard) rectDo(f2.yard, 2);
+    else if (f2.type === "manor" && f2.garden) rectDo(f2.garden, 2);
+    else if (f2.type === "stalls") for (const s of f2.stalls) rectDo({ x: s.x, y: s.y, w: 2, h: 1 }, 2);
+  }
+  for (const [, R2] of t.places) rectDo(R2, 2);
+  for (const b of t.buildings) {
+    rectDo(b, 2);
+    if (b.porch) rectDo(b.porch, 2);
+  }
+  const keep = t.features.find((f2) => f2.type === "castle")?.keep;
+  if (keep) rectDo(keep, 2);
+  gridCache.set(t, G2);
+  return G2;
+}
+var fhash = (...v) => {
+  let h = 2166136261;
+  for (const n of v) h = Math.imul(h ^ (Math.round(n * 7) | 0), 16777619);
+  return h >>> 0;
+};
+var frng = (seed) => {
+  let a = seed >>> 0 || 1;
+  return () => {
+    a = a + 1831565813 >>> 0;
+    let t = a;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+};
+var planCache = /* @__PURE__ */ new WeakMap();
+function townStreetPlanV1(t) {
+  let out = planCache.get(t);
+  if (out) return out;
+  out = [];
+  planCache.set(t, out);
+  if (!townNewArtV1(t)) return out;
+  const [W9, H9] = t.core, grid = townGridV1(t), occ = Uint8Array.from(grid), r = frng(fhash(W9, H9, 301)), village = t.size === "village" || t.size === "hamlet";
+  const fit = (x, y, w, h) => {
+    for (let yy = y; yy < y + h; yy++) for (let xx = x; xx < x + w; xx++) {
+      if (xx < 0 || yy < 0 || xx >= W9 || yy >= H9 || occ[yy * W9 + xx]) return false;
+    }
+    return true;
+  };
+  const take = (x, y, w, h) => {
+    for (let yy = y - 1; yy <= y + h; yy++) for (let xx = x - 1; xx <= x + w; xx++) if (xx >= 0 && yy >= 0 && xx < W9 && yy < H9) occ[yy * W9 + xx] = 9;
+  };
+  const far = (x, y, d) => out.every((o) => hyp2(o.x - x, o.y - y) >= d);
+  const put3 = (kind2, x, y, w, h, d = 3) => {
+    if (!fit(x, y, w, h) || !far(x + w / 2, y + h, d)) return false;
+    take(x, y, w, h);
+    out.push({ kind: kind2, x: x + w / 2, y: y + h, tile: { x, y, w, h } });
+    return true;
+  };
+  const cf = t.features.find((f2) => f2.type === "plaza" || f2.type === "green"), CB = cf ? cf.type === "green" ? { x: cf.x - cf.rx, y: cf.y - cf.ry, w: cf.rx * 2, h: cf.ry * 2 } : { x: cf.x, y: cf.y, w: cf.w, h: cf.h } : null, inC = (x, y) => CB && x >= CB.x - 1 && x <= CB.x + CB.w && y >= CB.y - 1 && y <= CB.y + CB.h;
+  for (const [pts, w] of t.streets) {
+    if (w < 3) continue;
+    let acc = 3.5, side = 1;
+    for (let i = 1; i < pts.length; i++) {
+      const [ax, ay] = pts[i - 1], [bx, by] = pts[i], L2 = hyp2(bx - ax, by - ay);
+      if (L2 < 1e-6) continue;
+      const nx = -(by - ay) / L2, ny = (bx - ax) / L2;
+      for (let d = 0; d < L2; d += 0.5) {
+        acc += 0.5;
+        if (acc < (village ? 13 : 7)) continue;
+        const q = d / L2, cx = ax + (bx - ax) * q, cy = ay + (by - ay) * q, o = w / 2 + 0.9, lx = Math.floor(cx + nx * o * side), ly = Math.floor(cy + ny * o * side);
+        const wallAbove = [1, 2].some((k) => ly - k >= 0 && lx >= 0 && lx < W9 && grid[(ly - k) * W9 + lx] === 2);
+        if (!inC(lx, ly) && !wallAbove && put3(village ? "lampV" : "lampT", lx, ly, 1, 1, 4)) {
+          acc = 0;
+          side = -side;
+        }
+      }
+    }
+  }
+  const [ex, ey] = t.entry;
+  for (const [kind2, dx] of [["signpost", 2], ["milestone", -3]]) {
+    for (let dy = -2; dy >= -6; dy--) if (put3(kind2, ex + dx, ey + dy, 1, 1, 2)) break;
+  }
+  if (cf) {
+    const g = cf.type === "green", bx0 = g ? cf.x - cf.rx : cf.x, by0 = g ? cf.y - cf.ry : cf.y, bw = g ? cf.rx * 2 : cf.w, bh = g ? cf.ry * 2 : cf.h, cx = bx0 + bw / 2, cy = by0 + bh / 2;
+    const ring = [];
+    for (let y = Math.floor(by0 - 5); y <= by0 + bh + 5; y++) for (let x = Math.floor(bx0 - 5); x <= bx0 + bw + 5; x++) {
+      const inside5 = x >= bx0 && x < bx0 + bw && y >= by0 && y < by0 + bh, behind = y < by0 && y > by0 - 4 && x >= bx0 - 1 && x <= bx0 + bw;
+      if (!inside5 && !behind) ring.push([x, y, hyp2((x - cx) / bw, (y - cy) / bh)]);
+    }
+    ring.sort((a, b) => a[2] - b[2] || a[1] - b[1] || a[0] - b[0]);
+    const want = [["notice", 2, 1], ["bench", 2, 1], ["bench", 2, 1], ["tub", 1, 1], ["tub", 1, 1]];
+    if (!village) want.splice(1, 0, ["trough", 3, 1]);
+    for (const [k, w, h] of want) {
+      for (const [x, y] of ring) if (put3(k, x, y, w, h, k === "bench" ? 6 : 4)) break;
+    }
+  }
+  for (const [pts, w] of t.streets) {
+    for (let i = 2; i < pts.length - 1; i += 3) {
+      if (r() < 0.55) continue;
+      const [x, y] = pts[i], [px, py] = pts[i - 1], L2 = hyp2(x - px, y - py) || 1, s = r() < 0.5 ? 1 : -1, o = w / 2 + 1.2, tx = Math.floor(x - (y - py) / L2 * o * s), ty = Math.floor(y + (x - px) / L2 * o * s);
+      const k = ["tub", "barrels", "cart", "bench", "tub"][Math.floor(r() * 5)];
+      if (!inC(tx, ty)) put3(k, tx, ty, k === "cart" ? 2 : 1, 1, 6);
+    }
+  }
+  return out;
+}
 var KIND = { row: "home", tower: "civic", chapel: "civic" };
 var templates = /* @__PURE__ */ new WeakMap();
 function townTemplateV1(t) {
@@ -5858,7 +6021,8 @@ function townTemplateV1(t) {
     const k = castle.keep;
     buildings.push({ id: "b:900", kind: "civic", label: "Castle", x: k.x, y: k.y, w: k.w, h: k.h, doorSide: "south", doorPoint: [k.x + Math.floor(k.w / 2), k.y + k.h], porch: { x: k.x + Math.floor(k.w / 2) - 1, y: k.y + k.h, w: 3, h: 2 }, path: [], target: [k.x, k.y] });
   }
-  const places = [...plaza ? [["Square", { x: plaza.x, y: plaza.y, w: plaza.w, h: plaza.h }, "public"]] : [], ...t.places.map(([n, R2, k], i) => [n + " " + (i + 1), R2, k]), ...t.features.filter((f2) => f2.type === "manor" && f2.garden && !f2.building).map((f2, i) => ["Castle garden " + (i + 1), f2.garden, "garden"])];
+  const bare = townNewArtV1(t) && t.features.some((f2) => f2.type === "zone");
+  const places = [...plaza ? [["Square", { x: plaza.x, y: plaza.y, w: plaza.w, h: plaza.h }, "public", ...bare ? [{ bare: true }] : []]] : [], ...t.places.map(([n, R2, k], i) => [n + " " + (i + 1), R2, k]), ...t.features.filter((f2) => f2.type === "manor" && f2.garden && !f2.building).map((f2, i) => ["Castle garden " + (i + 1), f2.garden, "garden"])];
   m = { id: "generated:" + t.seed + ":" + t.id.replace("settlement-slot:", ""), core: [...t.core], streets: allStreets(t).map(([p, w]) => [p, w]), buildings, places };
   templates.set(t, m);
   return m;
@@ -5884,13 +6048,14 @@ function townRasterV1(t) {
   if (R2) return R2;
   const [W9, H9] = t.core, cn = t.connector;
   let x0 = 0, y0 = 0, x1 = W9, y1 = H9;
-  if (cn) for (const [x, y] of cn.pts) {
-    x0 = Math.min(x0, Math.floor(x - cn.w));
-    y0 = Math.min(y0, Math.floor(y - cn.w));
-    x1 = Math.max(x1, Math.ceil(x + cn.w));
-    y1 = Math.max(y1, Math.ceil(y + cn.w));
+  const lanes = townLanesV1(t);
+  for (const [pts, pw] of [...cn ? [[cn.pts, cn.w]] : [], ...lanes.map((l) => [l.pts, l.w])]) for (const [x, y] of pts) {
+    x0 = Math.min(x0, Math.floor(x - pw));
+    y0 = Math.min(y0, Math.floor(y - pw));
+    x1 = Math.max(x1, Math.ceil(x + pw));
+    y1 = Math.max(y1, Math.ceil(y + pw));
   }
-  const w = x1 - x0, h = y1 - y0, mat = new Uint8Array(w * h), col = new Uint8Array(w * h), deck = new Uint8Array(w * h), idx = (x, y) => (y - y0) * w + (x - x0), inCore = (x, y) => x >= 0 && y >= 0 && x < W9 && y < H9, ok = (x, y) => x >= x0 && y >= y0 && x < x1 && y < y1;
+  const w = x1 - x0, h = y1 - y0, mat = new Uint8Array(w * h), col = new Uint8Array(w * h), deck = new Uint8Array(w * h), deckId = new Uint8Array(w * h), water = new Uint8Array(w * h), idx = (x, y) => (y - y0) * w + (x - x0), inCore = (x, y) => x >= 0 && y >= 0 && x < W9 && y < H9, ok = (x, y) => x >= x0 && y >= y0 && x < x1 && y < y1;
   for (let y = 0; y < H9; y++) for (let x = 0; x < W9; x++) mat[idx(x, y)] = 1;
   const stroke = (pts, half, fn, closed = false) => {
     const n = pts.length;
@@ -5910,6 +6075,13 @@ function townRasterV1(t) {
   for (const [pts, sw] of streets) stroke(pts, sw / 2, (x, y) => {
     mat[idx(x, y)] = 2;
   });
+  for (const l of lanes) {
+    const [a, b] = l.pts, dx = b[0] - a[0], dy = b[1] - a[1], q = dx * dx + dy * dy || 1;
+    stroke(l.pts, l.w / 2, (x, y) => {
+      const f2 = Math.max(0, Math.min(1, ((x + 0.5 - a[0]) * dx + (y + 0.5 - a[1]) * dy) / q)), half = l.w * laneWidthV1(l, f2 * l.run) / 2;
+      if (half >= 0.5 && hyp2(x + 0.5 - a[0] - f2 * dx, y + 0.5 - a[1] - f2 * dy) <= half && (mat[idx(x, y)] === 0 || mat[idx(x, y)] === 1)) mat[idx(x, y)] = 2;
+    });
+  }
   for (const f2 of t.features) if (f2.type === "plaza") rectDo(f2, (x, y) => {
     mat[idx(x, y)] = 3;
   });
@@ -5918,14 +6090,28 @@ function townRasterV1(t) {
   });
   const onStreet = (x, y, pad) => streets.some(([pts, sw]) => segDist(pts, x + 0.5, y + 0.5) <= sw / 2 + pad);
   if (geo.river) stroke(geo.river.pts, geo.river.w / 2 + 0.4, (x, y) => {
-    if (geo.river.bridges.length && onStreet(x, y, 0.3) && geo.river.bridges.some((b) => hyp2(x + 0.5 - b.x, y + 0.5 - b.y) <= geo.river.w / 2 + b.w)) {
-      deck[idx(x, y)] = 1;
-      mat[idx(x, y)] = 3;
-      col[idx(x, y)] = 0;
+    const i = idx(x, y);
+    let near = -1, nd = 1e9;
+    if (onStreet(x, y, 0.3)) geo.river.bridges.forEach((b, k) => {
+      const d = hyp2(x + 0.5 - b.x, y + 0.5 - b.y);
+      if (d <= geo.river.w / 2 + b.w && d < nd) {
+        nd = d;
+        near = k;
+      }
+    });
+    if (near >= 0) {
+      const b = geo.river.bridges[near];
+      deck[i] = Math.abs(PM.cos(b.ang)) >= Math.abs(PM.sin(b.ang)) ? 1 : 2;
+      deckId[i] = near + 1;
+      mat[i] = 3;
+      col[i] = 0;
+      water[i] = 0;
     } else {
-      col[idx(x, y)] = 1;
-      deck[idx(x, y)] = 0;
-      if (mat[idx(x, y)] !== 1) mat[idx(x, y)] = 1;
+      col[i] = 1;
+      deck[i] = 0;
+      deckId[i] = 0;
+      water[i] = 1;
+      mat[i] = 1;
     }
   });
   for (const [g, closed] of [[geo.wall, true], [geo.castle, false]]) {
@@ -5938,8 +6124,12 @@ function townRasterV1(t) {
   for (const b of tp.buildings) rectDo(b, (x, y) => {
     col[idx(x, y)] = 1;
   });
+  const newArt = townNewArtV1(t);
+  if (newArt) for (const p of townStreetPlanV1(t)) rectDo(p.tile, (x, y) => {
+    if (!water[idx(x, y)] && !deck[idx(x, y)]) col[idx(x, y)] = 1;
+  });
   for (const f2 of t.features) {
-    if (f2.type === "lamps") {
+    if (f2.type === "lamps" && !newArt) {
       for (const l of f2.lamps) if (ok(l.x, l.y)) col[idx(l.x, l.y)] = 1;
     }
     if (f2.type === "stalls") for (const s of f2.stalls) rectDo({ x: s.x, y: s.y, w: 2, h: 1 }, (x, y) => {
@@ -5954,8 +6144,10 @@ function townRasterV1(t) {
     mat[idx(x, y)] = 0;
     col[idx(x, y)] = 0;
     deck[idx(x, y)] = 0;
+    deckId[idx(x, y)] = 0;
+    water[idx(x, y)] = 0;
   }
-  R2 = { x0, y0, w, h, mat, col, deck };
+  R2 = { x0, y0, w, h, mat, col, deck, deckId, water };
   rasters.set(t, R2);
   return R2;
 }
@@ -5973,7 +6165,9 @@ function createGeneratedTownTiles(terrain2, towns) {
       if (!m) continue;
       if (!b.walkable) return b;
       const { naturalKind, naturalClusterId, ...rest } = b, material = MAT[m];
-      return { ...rest, collision: R2.col[i] ? "2" : "1", material, route: m === 2 || m === 3 ? 2 : 0, town: true, ...R2.deck[i] ? { townBridge: true } : {} };
+      if (R2.water[i]) return { ...rest, walkable: false, kind: "river", collision: "2", material: "W", route: 0, town: true };
+      if (R2.deck[i]) return { ...rest, walkable: true, kind: "bridge", underlyingKind: "river", bridgeId: t.id + ":bridge:" + R2.deckId[i], collision: "1", material: R2.deck[i] === 1 ? "H" : "V", route: 2, town: true, townBridge: true };
+      return { ...rest, collision: R2.col[i] ? "2" : "1", material, route: m === 2 || m === 3 ? 2 : 0, town: true };
     }
     return b;
   };

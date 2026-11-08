@@ -6331,6 +6331,7 @@ function planGeneratedTownsV1(asset) {
   }
   return { version: GENERATED_TOWNS_VERSION, layout: TOWN_LAYOUT_VERSION, towns };
 }
+var TOWN_NEW_ART = Object.freeze(/* @__PURE__ */ new Set(["grassland", "woodland"]));
 
 // src/shared/generation/world_maker_v1/wild.js
 var TW3 = W * 64;
