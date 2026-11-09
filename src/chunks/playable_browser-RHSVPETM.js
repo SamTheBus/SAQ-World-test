@@ -70844,7 +70844,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     for (const s of meta.settlements) {
       const big = s.class === "capital-great-hold" || s.class === "city";
       if (k.visited[s.id] === void 0) {
-        if (big) out.push({ id: s.id, kind: "settlement", icon: "unknown", label: s.class === "city" ? "Undiscovered city" : "Undiscovered capital", x: s.x, y: s.y, band: s.band, town: null, row: s, travel: false, big, unknown: true });
+        out.push({ id: s.id, kind: "settlement", icon: "unknown", label: "Undiscovered " + (CLASS_WORD[s.class] ?? "town").toLowerCase(), x: s.x, y: s.y, band: s.band, town: null, row: s, travel: false, big, unknown: true });
         continue;
       }
       const t = towns2.get(s.id);
@@ -71269,12 +71269,12 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
       const sets = meta?.settlements ?? [], small_ = sets.filter((s) => s.class !== "city" && s.class !== "capital-great-hold"), big = sets.filter((s) => s.class === "city" || s.class === "capital-great-hold"), k = knowledge();
       row2("town", "Towns and villages", small_.filter((s) => k?.visited[s.id] !== void 0).length + " / " + small_.length);
       row2("city", "Cities and capitals", big.filter((s) => k?.visited[s.id] !== void 0).length + " / " + big.length);
-      row2("unknown", "City not found yet", big.filter((s) => k?.visited[s.id] === void 0).length + " left");
+      row2("unknown", "Town not found yet", sets.filter((s) => k?.visited[s.id] === void 0).length + " left");
       for (const f of ["cave", "fort", "ruin", "crypt"]) row2(f, cap2(f) + "s", count((m2) => m2.kind === "site" && !m2.rumored && m2.site.family === f) + " found");
       row2("event", "Event clearings", count((m2) => m2.kind === "event") + " found");
       row2("ferry", "Ferry landings", count((m2) => m2.kind === "ferry") + " found");
       row2("quest", "Tracked place", tracked && placeById(tracked) ? "1" : "none");
-      sheet.append(grid, el("p", "m2-note", "Cities and capitals show as ? until you reach them; other places appear once you find them. Every town and dungeon you find is a fast travel point. A green tick marks a cleared dungeon."));
+      sheet.append(grid, el("p", "m2-note", "Every town, city and capital shows as ? until you reach it; dungeons appear once you find them. Every town and dungeon you find is a fast travel point. A green tick marks a cleared dungeon."));
       const notes = knowledge()?.journal ?? [];
       if (notes.length) sheet.append(el("p", "m2-note", "Journal: " + TRAIL_NOTE_TEXT));
       sheet.append(x);
