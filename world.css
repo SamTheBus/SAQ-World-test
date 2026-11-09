@@ -1739,3 +1739,9 @@ body #world-inventory.rpg-menu:not([data-section=equipment]):not([data-section=b
  body #carried-rations{left:calc(var(--hud-lc) + 64px)!important;bottom:calc(var(--hud-bc) + 2px)!important;top:auto!important}
  body .skill-wheel-v1,body #primary-attack,body .shield-guard{translate:min(18px,calc(var(--world-safe-right) * .3)) min(6px,calc(var(--world-safe-bottom) * .3))}
 }
+/* Uniques v2 (Nov 8): a unique's lines this copy doesn't have yet, dimmed, with the rarity that unlocks each. */
+#world-inventory .gx-locked{display:flex;flex-direction:column;gap:5px}
+#world-inventory .gx-line.is-locked{padding:5px 9px;border:1px dashed #33404d;border-radius:9px;color:#6b757a;font-weight:500}
+#world-inventory .gx-line.is-locked .gx-linetext{display:inline-flex;align-items:center;gap:7px}
+#world-inventory .gx-line.is-locked svg{opacity:.65}
+#world-inventory .gx-unlock{flex:none;font:700 10px/1 system-ui,sans-serif;letter-spacing:.07em;text-transform:uppercase;opacity:.85}

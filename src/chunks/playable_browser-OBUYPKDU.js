@@ -257,6 +257,8 @@ import {
   TOXIC_DECAY_D12_4F,
   TransactionPayloadConflictError,
   UNIQUE_ITEMS,
+  UNIQUE_LINE_UNLOCKS,
+  UNIQUE_TIERS,
   VITALITY_WEAVER_AFFIX_ID,
   VITALITY_WEAVER_D12_4,
   WEBBED_STATUS_D12_4J_VERSION,
@@ -773,7 +775,9 @@ import {
   townTemplateV1,
   triggerScaledMasteryXp,
   unfrozenEpisodeD9,
+  uniqueEffectText,
   uniqueOf,
+  uniqueStarValue,
   updateHighestHeroLevel,
   useGeneratedTownsV1,
   useSeededReservationsV1,
@@ -865,7 +869,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-TTLPTMMV.js";
+} from "./chunk-VDDNCPDP.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -37305,14 +37309,17 @@ var CRACK_MAX = 240;
 var QUICK_TICKS = 180;
 var LONGER_COOLDOWN = Object.freeze([13, 10]);
 var SPELL_ELEMENTS = Object.freeze(["fire", "frost", "lightning"]);
-var POOL_TICKS = 180;
 var POOL_PULSE_TICKS = 30;
 var WAIL_TICKS = 1800;
 var SHELL_TICKS = 600;
 var HIDE_TICKS = 300;
-var MAX_SUN = 3;
 var MAX_HIDE = 5;
-var SUNFALL_CASTS = 3;
+var POOL_MAX_TICKS = 240;
+var TRAIL_MAX_TICKS = 180;
+var WAIL_MAX_TICKS = 2400;
+var SHELL_MAX_TICKS = 840;
+var SUN_MAX = 4;
+var SUNFALL_MAX_CASTS = 5;
 var TIMED = ["surge", "enGarde", "rush", "wail", "shell", "riposte", "keen", "evade", "rest", "mend", "titan", "spite", "stepped", "quick", "wave", "phoenix", "hymn", "firm", "jugg", "cloak", "twinned", "regrow"];
 var LIVE = ["aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
 function skillCooldown(combat, skillId) {
@@ -37438,19 +37445,19 @@ function validateClassSkillState(s, combat, actor) {
   if (k.trail !== void 0) {
     closedRecord(k.trail, ["x", "y", "x2", "y2", "ticks", "next"]);
     requireContract(["x", "y", "x2", "y2"].every((key2) => Number.isFinite(k.trail[key2])) && actor.alive, "Invalid trail");
-    safeInteger(k.trail.ticks, 1, TRAIL_TICKS);
+    safeInteger(k.trail.ticks, 1, TRAIL_MAX_TICKS);
     safeInteger(k.trail.next, 1, TRAIL_PULSE_TICKS);
   }
   if (k.pool !== void 0) {
     closedRecord(k.pool, ["x", "y", "ticks", "next"]);
     requireContract(Number.isFinite(k.pool.x) && Number.isFinite(k.pool.y) && actor.alive, "Invalid pool");
-    safeInteger(k.pool.ticks, 1, POOL_TICKS);
+    safeInteger(k.pool.ticks, 1, POOL_MAX_TICKS);
     safeInteger(k.pool.next, 1, POOL_PULSE_TICKS);
   }
-  if (k.wail !== void 0) safeInteger(k.wail, 1, WAIL_TICKS);
-  if (k.shell !== void 0) safeInteger(k.shell, 1, SHELL_TICKS);
-  if (k.sun !== void 0) safeInteger(k.sun, 1, MAX_SUN);
-  if (k.casts !== void 0) safeInteger(k.casts, 1, SUNFALL_CASTS - 1);
+  if (k.wail !== void 0) safeInteger(k.wail, 1, WAIL_MAX_TICKS);
+  if (k.shell !== void 0) safeInteger(k.shell, 1, SHELL_MAX_TICKS);
+  if (k.sun !== void 0) safeInteger(k.sun, 1, SUN_MAX);
+  if (k.casts !== void 0) safeInteger(k.casts, 1, SUNFALL_MAX_CASTS - 1);
   for (const [key2, stacks, ticks] of [["bulwark", 3, BULWARK_TICKS], ["charge", 5, CHARGE_TICKS], ["hide", MAX_HIDE, HIDE_TICKS]]) if (k[key2] !== void 0) {
     closedRecord(k[key2], ["stacks", "ticks"]);
     safeInteger(k[key2].stacks, 1, stacks);
@@ -43556,6 +43563,20 @@ function wearsUnique(player, id) {
   }
   return false;
 }
+function wornUniqueTier(player, id) {
+  const inv = player?.inventory;
+  if (!inv?.equipped) return null;
+  let best = null;
+  for (const itemId of Object.values(inv.equipped)) {
+    const item = itemId ? inv.itemsById[itemId] : null, d = item && itemDefinition(item);
+    if (d?.unique === id && (best === null || (d.rarityTier ?? 0) > best)) best = d.rarityTier ?? 0;
+  }
+  return best;
+}
+function wornUniqueValue(player, id) {
+  const tier2 = wornUniqueTier(player, id);
+  return tier2 === null ? null : uniqueStarValue(id, tier2);
+}
 function knockbackImmuneV1(state, entity) {
   return Boolean(state.subweaponCombat?.actors?.[entity.entityId]?.skills?.firm) || wearsUnique(Object.values(state.playersById).find((p) => p.entityId === entity.entityId), "bristleback-mantle");
 }
@@ -43747,8 +43768,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
   }
   const canStun = (a) => Boolean(s.subweaponCombat.mastery?.[a.entityId]);
   const rank = (a, id) => heroRank(owner(a), id), aug = (a, id, index) => hasAugment(owner(a)?.d8, id, index), pct2 = (value2, percent) => multiplyCombat(value2, 100 + percent, 100);
-  const wears = (a, id) => wearsUnique(owner(a), id), burn = (a, t, sourceItem) => {
-    if (t.alive && !isPodCombatTargetV4(t)) periodic(a, t, "burn", getStats(a.entityId).attack, { sourceItem });
+  const wears = (a, id) => wearsUnique(owner(a), id), worn = (a, id) => wornUniqueValue(owner(a), id), burn = (a, t, sourceItem, strength = 100) => {
+    if (!t.alive || isPodCombatTargetV4(t)) return;
+    const attack = getStats(a.entityId).attack;
+    periodic(a, t, "burn", strength === 100 ? attack : combatInteger(multiplyCombat(attack, strength, 100)), { sourceItem });
   };
   const around3 = (a, p, radius) => effects2.nearby(a, { position: p }, radius + 40).filter((t) => t.alive && Math.hypot(t.position.x - p.x, t.position.y - p.y) <= radius + (t.hullRadius ?? 0));
   const ordinary = (t) => {
@@ -43827,7 +43850,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       if (canStun(a)) stun(a, t, stunTicks(a, scaled(elite ? T25.bash.eliteStun : T25.bash.stun, style.stun)));
     }
     const sourceItem = damageSourceItem(owner(a), "bash"), combat = c.actors[a.entityId], sun = combat?.skills?.sun;
-    if (wears(a, "gravecleaver")) for (const t of around3(a, a.position, U.ring)) burn(a, t, sourceItem);
+    {
+      const cleave = worn(a, "gravecleaver");
+      if (cleave) for (const t of around3(a, a.position, U.ring)) burn(a, t, sourceItem, cleave);
+    }
     if (sun && wears(a, "sunshield")) {
       delete combat.skills.sun;
       const end = pathEnd(a, { x: aim2.x, y: aim2.y, remaining: U.beam.reach });
@@ -43890,9 +43916,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       settleTomeSustain(player, a, c.actors[a.entityId], stats3);
       refreshStats?.(player);
     }
-    if (wears(a, "undying-sun-staff")) {
+    const sunfallEvery = worn(a, "undying-sun-staff");
+    if (sunfallEvery) {
       const k = classSkillsRecord(c.actors[a.entityId]), n = (k.casts ?? 0) + 1;
-      if (n < SUNFALL_CASTS) {
+      if (n < sunfallEvery) {
         k.casts = n;
         return true;
       }
@@ -44645,9 +44672,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (--trail2.ticks <= 0) clearTrail(combat);
   }
   function sunTrail(a, combat) {
-    if (!wears(a, "pharaoh-khopesh")) return;
+    const ticks = worn(a, "pharaoh-khopesh");
+    if (!ticks) return;
     const to = pathEnd(a, combat.dash);
-    classSkillsRecord(combat).trail = { x: a.position.x, y: a.position.y, x2: to.x, y2: to.y, ticks: TRAIL_TICKS, next: 1 };
+    classSkillsRecord(combat).trail = { x: a.position.x, y: a.position.y, x2: to.x, y2: to.y, ticks, next: 1 };
   }
   function stepPool(a, combat) {
     const pool2 = combat.skills?.pool;
@@ -44667,7 +44695,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (!a.alive || combat.skills?.wail || !wears(a, "barrowshroud")) return;
     const stats3 = getStats(a.entityId);
     if (compareCombat(multiplyCombat(a.hp, 100, 1), multiplyCombat(stats3.maxHp, U.wail.below, 1)) >= 0) return;
-    classSkillsRecord(combat).wail = WAIL_TICKS;
+    classSkillsRecord(combat).wail = worn(a, "barrowshroud") ?? WAIL_TICKS;
     if (canStun(a)) {
       for (const t of around3(a, a.position, U.wail.radius)) if (!isPodCombatTargetV4(t)) effects2.status(a, t, "slow", U.wail.slow, U.wail.ticks);
     }
@@ -45151,7 +45179,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     const shellCombat = c.actors[target.entityId];
     if (shellCombat && !shellCombat.skills?.shell && wears(target, "kheptra-signet")) {
       out = multiplyCombat(out, 50, 100);
-      classSkillsRecord(shellCombat).shell = SHELL_TICKS;
+      classSkillsRecord(shellCombat).shell = worn(target, "kheptra-signet") ?? SHELL_TICKS;
     }
     return out;
   }
@@ -45206,9 +45234,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       const r = rank(source3, id);
       if (r && applies(marks2, target, mechanic)) out = pct2(out, percent * r);
     }
-    if (marks2.ticking(target, "burn") && wears(source3, "eye-of-the-sun")) out = pct2(out, U.eyeBurn);
-    const hide = record2(source3)?.hide;
-    if (hide && wears(source3, "bristleback-mantle")) out = pct2(out, U.hide * hide.stacks);
+    const eye6 = marks2.ticking(target, "burn") ? worn(source3, "eye-of-the-sun") : null;
+    if (eye6) out = pct2(out, eye6[1]);
+    const hide = record2(source3)?.hide, hidePct = hide ? worn(source3, "bristleback-mantle") : null;
+    if (hidePct) out = pct2(out, hidePct * hide.stacks);
     if (enGardeHit === target.entityId) {
       enGardeHit = null;
       out = pct2(out, 8 * rank(source3, "en_garde"));
@@ -45284,7 +45313,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (!combat || trigger === "periodic") return whole(out);
     const dance = rank(source3, "blade_dance");
     if (dance && critical) reduceSkillCooldown(combat, "thousand_cuts", 6 * dance);
-    if (critical && target.alive && wears(source3, "glasstail-cloak")) bleed(source3, target, getStats(source3.entityId));
+    {
+      const shard4 = critical && target.alive ? worn(source3, "glasstail-cloak") : null;
+      if (shard4) bleed(source3, target, getStats(source3.entityId), shard4 - 100);
+    }
     const blood = rank(source3, "blood_for_blood");
     if (blood && source3.alive && marks2.ticking(target, "bleed")) heal(source3, getStats(source3.entityId), 5 * blood, 1e3);
     const run2 = rank(source3, "hit_and_run");
@@ -45390,9 +45422,12 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     }
     const grudge = rank(target, "grudge");
     if (grudge && source3.alive && canStun(target) && !isPodCombatTargetV4(source3)) effects2.status(target, source3, "grudge", grudge, 240);
-    if (combat && defense.defense === "block" && wears(target, "sunshield")) {
-      const k = classSkillsRecord(combat);
-      k.sun = Math.min(MAX_SUN, (k.sun ?? 0) + 1);
+    {
+      const sunMax = combat && defense.defense === "block" ? worn(target, "sunshield") : null;
+      if (sunMax) {
+        const k = classSkillsRecord(combat);
+        k.sun = Math.min(sunMax, (k.sun ?? 0) + 1);
+      }
     }
     if (combat && wears(target, "bristleback-mantle")) {
       const k = classSkillsRecord(combat);
@@ -45441,7 +45476,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       const stats3 = getStats(a.entityId);
       for (const t of alongPath(a, from, to)) damage(a, t, multiplyCombat(stats3.attack, T25.crosscut.attack[0] * cross2, T25.crosscut.attack[1]), "offhand", null, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "proc" });
     }
-    if (rank(a, "cinder_step") || wears(a, "pharaoh-khopesh")) classSkillsRecord(combat).trail = { x: from.x, y: from.y, x2: to.x, y2: to.y, ticks: TRAIL_TICKS, next: 1 };
+    {
+      const sunTicks = worn(a, "pharaoh-khopesh") ?? 0, ticks = Math.max(rank(a, "cinder_step") ? TRAIL_TICKS : 0, sunTicks);
+      if (ticks) classSkillsRecord(combat).trail = { x: from.x, y: from.y, x2: to.x, y2: to.y, ticks, next: 1 };
+    }
     if (rank(a, "afterimage")) {
       const k = classSkillsRecord(combat);
       if (k.echo) echoBurst(a, k.echo);
@@ -45454,9 +45492,9 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     }
   }
   function landed(a, target) {
-    const combat = c.actors[a.entityId];
-    if (!combat || !a.alive || !target || !wears(a, "crownflame-scepter")) return;
-    classSkillsRecord(combat).pool = { x: target.position.x, y: target.position.y, ticks: POOL_TICKS, next: 1 };
+    const combat = c.actors[a.entityId], ticks = combat && a.alive && target ? worn(a, "crownflame-scepter") : null;
+    if (!ticks) return;
+    classSkillsRecord(combat).pool = { x: target.position.x, y: target.position.y, ticks, next: 1 };
   }
   function burst(a, target, element, percent) {
     const stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), element);
@@ -45464,14 +45502,20 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
   }
   function defeated(a, target) {
     if (!players.get(a.entityId)) return;
-    if (wears(a, "wightfang") && Object.values(c.effects).some((e) => e.targetId === target.entityId && e.kind === "bleed")) {
-      const sourceItem = damageSourceItem(owner(a), "offhand");
-      for (const t of around3(a, target.position, U.burst)) if (t !== target) burn(a, t, sourceItem);
+    {
+      const burst2 = worn(a, "wightfang");
+      if (burst2 && Object.values(c.effects).some((e) => e.targetId === target.entityId && e.kind === "bleed")) {
+        const sourceItem = damageSourceItem(owner(a), "offhand");
+        for (const t of around3(a, target.position, U.burst)) if (t !== target) burn(a, t, sourceItem, burst2);
+      }
     }
     const volatile = rank(a, "volatile"), shatter = rank(a, "shatter"), frozen = c.controls?.[a.entityId + "/" + target.entityId];
     if (volatile && c.effects[a.entityId + "/" + target.entityId + "/burn"]) burst(a, target, "fire", 8 * volatile);
     if (shatter && frozen?.phase === "freeze" && frozen.expiresTick > s.tick) burst(a, target, "frost", 10 * shatter);
-    if (a.alive && wears(a, "jacks-band")) heal(a, getStats(a.entityId), U.heal, 100);
+    {
+      const harvest2 = a.alive ? worn(a, "jacks-band") : null;
+      if (harvest2) heal(a, getStats(a.entityId), harvest2, 1e3);
+    }
     const kill = gearAffixTotalsV2(owner(a)).lifeKill;
     if (a.alive && kill) heal(a, getStats(a.entityId), kill, 1e4);
     const combat = c.actors[a.entityId], avalanche = rank(a, "avalanche"), stunned = avalanche ? c.mastery?.[a.entityId]?.statuses?.[target.entityId + "/stun"] : null;
@@ -45537,7 +45581,7 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
   const effects2 = createMasteryEffects(s, { damage, eligible: eligible2, identity: identity2, getStats: stats3, awards: mastery, bleed: (a, t, captured) => periodic(a, t, "bleed", captured.attack, captured) });
   function periodic(source3, target, kind, attack, captured) {
     if (!target.alive) return;
-    const id = `${source3.entityId}/${target.entityId}/${kind}`, old2 = c.effects[id], longer = heroRank(players.get(source3.entityId), kind === "bleed" ? "serrated_edge" : "searing"), lingering = kind === "bleed" ? heroRank(players.get(source3.entityId), "lingering_venom") : 0, eye6 = kind === "burn" && wearsUnique(players.get(source3.entityId), "eye-of-the-sun"), life = Math.min(kind === "bleed" ? 1350 : 540, Math.round((kind === "bleed" ? 600 : 240) * (100 + 10 * longer) * (eye6 ? 150 : 100) * (100 + 10 * lingering) / 1e6) + (captured.extra ?? 0));
+    const id = `${source3.entityId}/${target.entityId}/${kind}`, old2 = c.effects[id], longer = heroRank(players.get(source3.entityId), kind === "bleed" ? "serrated_edge" : "searing"), lingering = kind === "bleed" ? heroRank(players.get(source3.entityId), "lingering_venom") : 0, eye6 = kind === "burn" ? wornUniqueValue(players.get(source3.entityId), "eye-of-the-sun")?.[0] ?? 0 : 0, life = Math.min(kind === "bleed" ? 1350 : 540, Math.round((kind === "bleed" ? 600 : 240) * (100 + 10 * longer) * (100 + eye6) * (100 + 10 * lingering) / 1e6) + (captured.extra ?? 0));
     c.effects[id] = {
       id,
       sourceId: source3.entityId,
@@ -58754,7 +58798,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     }
     if (unique) {
       const box5 = element("div", "", "gx-unique");
-      box5.append(element("p", unique.effect, "gx-uniqueeffect"), element("p", "\u201C" + unique.flavor + "\u201D", "gx-flavor"));
+      box5.append(element("p", uniqueEffectText(unique, d.rarityTier), "gx-uniqueeffect"), element("p", "\u201C" + unique.flavor + "\u201D", "gx-flavor"));
       scroll.append(box5);
     }
     if (d.subType === "tome" && TOME_LINE[d.spellType]) scroll.append(element("p", TOME_LINE[d.spellType], "gx-itemnote"));
@@ -58786,6 +58830,22 @@ function createInventoryPresentation({ document: document2, environment, readMod
         sec.append(wrap2);
       }
       scroll.append(sec);
+    }
+    if (unique) {
+      const have = d.rarityTier ?? 0, locked = (UNIQUE_TIERS[unique.id]?.lines ?? []).map((k, i) => [k, UNIQUE_LINE_UNLOCKS[i]]).filter(([, t]) => t > have);
+      if (locked.length) {
+        const sec = element("section", "", "gx-section gx-locked");
+        sec.append(element("h5", "Unlocks at higher rarity", "gx-sectiontitle"));
+        for (const [k, t] of locked) {
+          const [key3, skill] = k.split(":"), line21 = affixLineKey(key3, skill), row2 = element("div", "", "gx-line is-locked"), text2 = markup(element("span", "", "gx-linetext"), LOCK_BADGE);
+          text2.append(lineLabel(line21));
+          const tag = element("small", RARITY_NAMES[t], "gx-unlock");
+          tag.style.color = RARITY_COLORS[t];
+          row2.append(text2, tag);
+          sec.append(row2);
+        }
+        scroll.append(sec);
+      }
     }
     if (!cmp.base.length && !cmp.affixes.length) scroll.append(element("p", "No stat bonus", "gx-itemnote"));
     for (const w of worn) {

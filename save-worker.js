@@ -8513,8 +8513,14 @@ function miniBossProfileV1(profile2) {
     attackDamage: combatInteger(multiplyCombat(profile2.attackDamage, m.attackDamage.numerator, m.attackDamage.denominator), "round")
   };
 }
+var NAMED_ELITE_HEALTH_V1 = freezeWire({ numerator: 3, denominator: 1 });
 function namedEliteProfileV1(profile2) {
-  return { ...profile2, hullRadius: NAMED_ELITE_HULL_V1, combatRadius: Math.round(NAMED_ELITE_HULL_V1 * 108) / 100 };
+  return {
+    ...profile2,
+    hullRadius: NAMED_ELITE_HULL_V1,
+    combatRadius: Math.round(NAMED_ELITE_HULL_V1 * 108) / 100,
+    maxHp: combatInteger(multiplyCombat(profile2.maxHp, NAMED_ELITE_HEALTH_V1.numerator, NAMED_ELITE_HEALTH_V1.denominator), "round")
+  };
 }
 var siteEndBodyV1 = (end, profile2) => end?.role === "mini-boss" ? miniBossProfileV1(profile2) : end?.role === "elite" && end.named ? namedEliteProfileV1(profile2) : profile2;
 var siteEndRoleV1 = (floor, entityId2) => floor?.encounter?.siteEnd && floor.enemyIds?.[0] === entityId2 ? floor.encounter.siteEnd.role : null;
@@ -11390,7 +11396,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "knight",
     "barrow_king",
     "grassland",
-    "Shield Bash also cleaves a ring of ghostfire around you. Enemies caught in it burn.",
+    "Shield Bash also cleaves a ring of ghostfire around you. Enemies caught in it burn ({0} of a normal burn).",
     "Kneel. The barrow is patient."
   ),
   unique(
@@ -11402,7 +11408,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "rogue",
     "barrow_king",
     "grassland",
-    "Enemies that die while bleeding burst into ghostfire, setting the enemies near them burning.",
+    "Enemies that die while bleeding burst into ghostfire, setting the enemies near them burning ({0} of a normal burn).",
     "It remembers every throat it opened."
   ),
   unique(
@@ -11414,7 +11420,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "mage",
     "barrow_king",
     "grassland",
-    "Cast leaves a pool of ghostfire where it lands. Enemies standing in it burn.",
+    "Cast leaves a pool of ghostfire where it lands for {0}. Enemies standing in it burn.",
     "The crown burns colder than gold."
   ),
   unique(
@@ -11426,7 +11432,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     null,
     "barrow_king",
     "grassland",
-    "When a hit drops you below 30% Health, a wail slows enemies near you for 3 s. Once every 30 s.",
+    "When a hit drops you below 30% Health, a wail slows enemies near you for 3 s. Once every {0}.",
     "Worn by a king who would not stay buried."
   ),
   // Sun Pharaoh: sunlight and burning.
@@ -11439,7 +11445,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "knight",
     "sun_pharaoh",
     "desert",
-    "Each block with Guard stores sunlight, up to 3. Shield Bash releases it as a beam that burns everything in a line.",
+    "Each block with Guard stores sunlight, up to {0}. Shield Bash releases it as a beam that burns everything in a line.",
     "Look upon it. Then look away."
   ),
   unique(
@@ -11451,7 +11457,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "rogue",
     "sun_pharaoh",
     "desert",
-    "Dash and Lunge leave a trail of sunfire behind you for 2 s. Enemies who cross it burn.",
+    "Dash and Lunge leave a trail of sunfire behind you for {0}. Enemies who cross it burn.",
     "Every step, a sunrise."
   ),
   unique(
@@ -11463,7 +11469,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "mage",
     "sun_pharaoh",
     "desert",
-    "Every third Cast calls Sunfall: three suns strike around the target.",
+    "Every {0} Cast calls Sunfall: three suns strike around the target.",
     "Noon, three times over."
   ),
   unique(
@@ -11475,7 +11481,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     null,
     "sun_pharaoh",
     "desert",
-    "Your burns last 50% longer. Burning enemies take 10% more damage from you.",
+    "Your burns last {0} longer. Burning enemies take {1} more damage from you.",
     "It never blinks."
   ),
   // Named elites, at the end of small sites.
@@ -11488,7 +11494,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     null,
     "old_bristleback",
     "grassland",
-    "You can\u2019t be knocked back. Each hit you take gives +5% Attack for 5 s, up to 5 times.",
+    "You can\u2019t be knocked back. Each hit you take gives +{0} Attack for 5 s, up to 5 times.",
     "Hunters stopped counting the arrows."
   ),
   unique(
@@ -11500,7 +11506,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     null,
     "hollow_jack",
     "grassland",
-    "Killing an enemy heals you for 3% of your Max Health.",
+    "Killing an enemy heals you for {0} of your Max Health.",
     "Nothing grows where Jack stands, except Jack."
   ),
   unique(
@@ -11512,7 +11518,7 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     null,
     "queen_kheptra",
     "desert",
-    "Every 10 s, the next hit you take is halved.",
+    "Every {0}, the next hit you take is halved.",
     "She has buried three pharaohs."
   ),
   unique(
@@ -11524,13 +11530,30 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     null,
     "glasstail",
     "desert",
-    "Your critical hits leave a glass shard in the enemy, and it bleeds.",
+    "Your critical hits leave a glass shard in the enemy, and it bleeds ({0} of a normal bleed).",
     "Sand the lightning struck never forgets."
   )
 ].map((u) => [u.id, u])));
 var UNIQUE_IDS = Object.freeze(Object.keys(UNIQUE_ITEMS));
+var UNIQUE_MIN_RARITY = 2;
+var UNIQUE_TIERS = freezeWire({
+  "gravecleaver": { lines: ["mainDmg", "shockDmg", "counterDmg", "critDamage", "eliteDmg"], stars: [60, 80, 100, 125], unit: "pct" },
+  "wightfang": { lines: ["offDmg", "bleedDmg", "parry", "critChance", "cdr"], stars: [60, 80, 100, 125], unit: "pct" },
+  "crownflame-scepter": { lines: ["mainDmg", "fireDmg", "bonusAreaRadius", "critChance", "eliteDmg"], stars: [120, 150, 180, 240], unit: "ticks" },
+  "barrowshroud": { lines: ["maxHp", "def", "lifeKill", "atk", "cdr"], stars: [2400, 2100, 1800, 1500], unit: "ticks" },
+  "sunshield": { lines: ["block", "offDmg", "cdr", "passiveRank", "counterDmg"], stars: [2, 3, 3, 4], unit: "count" },
+  "pharaoh-khopesh": { lines: ["mainDmg", "skillDmg:lunge", "critDamage", "activeSpd", "eliteDmg"], stars: [60, 90, 120, 180], unit: "ticks" },
+  "undying-sun-staff": { lines: ["mainDmg", "fireDmg", "critChance", "activeSpd", "eliteDmg"], stars: [5, 4, 3, 2], unit: "nth" },
+  "eye-of-the-sun": { lines: ["atk", "critChance", "eliteDmg", "lifeHit", "maxHp"], stars: [[30, 6], [40, 8], [50, 10], [65, 12]], unit: "eye" },
+  "bristleback-mantle": { lines: ["maxHp", "def", "str", "lifeKill", "moveSpeed"], stars: [3, 4, 5, 6], unit: "pct" },
+  "jacks-band": { lines: ["lifeHit", "atk", "maxHp", "eliteDmg", "critChance"], stars: [20, 25, 30, 40], unit: "permille" },
+  "kheptra-signet": { lines: ["def", "maxHp", "cdr", "atk", "moveSpeed"], stars: [840, 720, 600, 480], unit: "ticks" },
+  "glasstail-cloak": { lines: ["critChance", "dex", "critDamage", "lifeKill", "moveSpeed"], stars: [60, 80, 100, 125], unit: "pct" }
+});
+var UNIQUE_LINE_UNLOCKS = Object.freeze([2, 2, 3, 4, 5]);
+var NTH = Object.freeze({ 2: "second", 3: "third", 4: "fourth", 5: "fifth" });
 var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh"]);
-var UNIQUE_DROP_CHANCE = Object.freeze({ boss: 0.15, named: 0.25, world: 2e-3 });
+var UNIQUE_DROP_CHANCE = Object.freeze({ boss: 0.25, named: 0.1, world: 2e-3 });
 
 // src/shared/content/reward_modifiers.js
 function validateRewardModifiers(v) {
@@ -12025,7 +12048,8 @@ function generateAtPrecision(c, seed, input, { tier: tier2 = null, family: famil
     noun = uq.noun;
   }
   const rng3 = rewardStream(seed), random = () => rng3.random(), pick6 = (a) => a[Math.floor(random() * a.length)], power2 = progression.combatHash ? depth : progressionWire(progressionBigInt(depth) / 4n + 1n);
-  const rarityRandom = progression.combatHash ? random() : null, rarityTier = tier2 ?? (progression.combatHash ? isSourceLootV4(progression.rarityPolicyHash) ? worldGearRarityFor(progression.rarityPolicyHash, depth, progression.rarityHeroLevel, progression.rarityRole, progression.siteReward ?? null, rarityRandom, (progression.modifiers?.qualityHundredths ?? 0) + boonRewardQualityV1(progression) + quickClearRewardQualityV1(progression)) : hasWorldRarityV2(progression) ? siteRewardRarityV1(progression.siteReward, worldGearRarityV2(depth, progression.rarityHeroLevel, progression.rarityRole, rarityRandom, (progression.modifiers?.qualityHundredths ?? 0) + siteRewardQualityV1(progression.siteReward) + boonRewardQualityV1(progression) + quickClearRewardQualityV1(progression))) : worldGearRarity(depth, progression.combatQuality, rarityRandom, progression.modifiers?.qualityHundredths ?? 0) : rollRarityD9(depth, progression.quality, random));
+  const rarityRandom = progression.combatHash ? random() : null, rolledTier = tier2 ?? (progression.combatHash ? isSourceLootV4(progression.rarityPolicyHash) ? worldGearRarityFor(progression.rarityPolicyHash, depth, progression.rarityHeroLevel, progression.rarityRole, progression.siteReward ?? null, rarityRandom, (progression.modifiers?.qualityHundredths ?? 0) + boonRewardQualityV1(progression) + quickClearRewardQualityV1(progression)) : hasWorldRarityV2(progression) ? siteRewardRarityV1(progression.siteReward, worldGearRarityV2(depth, progression.rarityHeroLevel, progression.rarityRole, rarityRandom, (progression.modifiers?.qualityHundredths ?? 0) + siteRewardQualityV1(progression.siteReward) + boonRewardQualityV1(progression) + quickClearRewardQualityV1(progression))) : worldGearRarity(depth, progression.combatQuality, rarityRandom, progression.modifiers?.qualityHundredths ?? 0) : rollRarityD9(depth, progression.quality, random));
+  const rarityTier = uq && rolledTier < UNIQUE_MIN_RARITY ? UNIQUE_MIN_RARITY : rolledTier;
   safeInteger(rarityTier, 0, 5);
   const cls = progression.gearClass ?? null, classOffhand = cls ? CLASS_GEAR[cls].offhand : null, wardrobe = Boolean(cls) && progression.wardrobe === WARDROBE_V1, classFamilies = wardrobe ? CLASS_GEAR_FAMILIES_V2 : CLASS_GEAR_FAMILIES, families = cls ? classFamilies : progression.armor === "overall" ? ONE_PIECE_GEAR_FAMILIES : GEAR_FAMILIES;
   const type = family2 ?? pick6(families), sub = type === "subweapon" ? subType ?? (cls ? classOffhand : pick6(["shield", "dagger", "tome"])) : null, own2 = type === "cape" ? CAPE_NOUNS : cls && type !== "ring" ? classGearNouns(cls, type) : GEAR_NOUNS[sub ?? type], shared = wardrobe && type === "helmet" ? SHARED_HELMET_NOUNS : [], nouns = [...own2 ?? [], ...shared], n = noun ?? (shared.length && random() < 0.2 ? pick6(shared) : pick6(own2));
@@ -12069,11 +12093,13 @@ function generateAtPrecision(c, seed, input, { tier: tier2 = null, family: famil
   }
   if (cls) applyClassFlavor(raw, classGearFlavor(cls, type, n));
   const v2 = Boolean(cls) && progression.affixes === AFFIXES_V2, affixes = [], pool = v2 ? affixPoolV2(AFFIX_POOLS[sub ?? type], sub ?? type, rarityTier) : [...AFFIX_POOLS[sub ?? type]], bonus = {};
-  for (let i = 0; i < rarityTier && pool.length; i++) {
-    let key9 = pool.splice(Math.floor(random() * pool.length), 1)[0], value, skill = null;
-    if (v2 && (key9 === "classDmg" || isNewAffix(key9))) {
+  const uqLines = uq ? [...UNIQUE_TIERS[progression.unique]?.lines ?? []] : null;
+  for (let i = 0; i < rarityTier && (uqLines ? uqLines.length : pool.length); i++) {
+    let key9 = uqLines ? uqLines.shift() : pool.splice(Math.floor(random() * pool.length), 1)[0], value, skill = null;
+    if (uqLines && key9.includes(":")) [key9, skill] = key9.split(":");
+    if ((v2 || uqLines) && (key9 === "classDmg" || isNewAffix(key9))) {
       key9 = resolveNewAffix(key9, cls, raw.spellType ?? null, random);
-      skill = affixSkill(key9, cls, random);
+      skill = skill ?? affixSkill(key9, cls, random);
       const star = c.q(100 + 5 * rarityTier, 100);
       if (key9 === "passiveRank") value = progressionWire(1n);
       else if (key9 === "lifeHit") value = ceil(times3(f3(".2", ".4"), c.add(I(3), times3(power2, ".5")), star));
@@ -21823,7 +21849,6 @@ var ORB_TICKS = 240;
 var ORB_ZAP_TICKS = 30;
 var MAX_ORBS = 2;
 var RUSH_TICKS = 180;
-var TRAIL_TICKS = 120;
 var TRAIL_PULSE_TICKS = 30;
 var RAM_TICKS = 32;
 var THROW_TICKS = 150;
@@ -21885,14 +21910,15 @@ var CRACK_MAX = 240;
 var QUICK_TICKS = 180;
 var LONGER_COOLDOWN = Object.freeze([13, 10]);
 var SPELL_ELEMENTS = Object.freeze(["fire", "frost", "lightning"]);
-var POOL_TICKS = 180;
 var POOL_PULSE_TICKS = 30;
-var WAIL_TICKS = 1800;
-var SHELL_TICKS = 600;
 var HIDE_TICKS = 300;
-var MAX_SUN = 3;
 var MAX_HIDE = 5;
-var SUNFALL_CASTS = 3;
+var POOL_MAX_TICKS = 240;
+var TRAIL_MAX_TICKS = 180;
+var WAIL_MAX_TICKS = 2400;
+var SHELL_MAX_TICKS = 840;
+var SUN_MAX = 4;
+var SUNFALL_MAX_CASTS = 5;
 var LIVE = ["aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
 function validateClassSkillState(s, combat, actor) {
   const k = combat.skills;
@@ -21906,19 +21932,19 @@ function validateClassSkillState(s, combat, actor) {
   if (k.trail !== void 0) {
     closedRecord(k.trail, ["x", "y", "x2", "y2", "ticks", "next"]);
     requireContract(["x", "y", "x2", "y2"].every((key9) => Number.isFinite(k.trail[key9])) && actor.alive, "Invalid trail");
-    safeInteger(k.trail.ticks, 1, TRAIL_TICKS);
+    safeInteger(k.trail.ticks, 1, TRAIL_MAX_TICKS);
     safeInteger(k.trail.next, 1, TRAIL_PULSE_TICKS);
   }
   if (k.pool !== void 0) {
     closedRecord(k.pool, ["x", "y", "ticks", "next"]);
     requireContract(Number.isFinite(k.pool.x) && Number.isFinite(k.pool.y) && actor.alive, "Invalid pool");
-    safeInteger(k.pool.ticks, 1, POOL_TICKS);
+    safeInteger(k.pool.ticks, 1, POOL_MAX_TICKS);
     safeInteger(k.pool.next, 1, POOL_PULSE_TICKS);
   }
-  if (k.wail !== void 0) safeInteger(k.wail, 1, WAIL_TICKS);
-  if (k.shell !== void 0) safeInteger(k.shell, 1, SHELL_TICKS);
-  if (k.sun !== void 0) safeInteger(k.sun, 1, MAX_SUN);
-  if (k.casts !== void 0) safeInteger(k.casts, 1, SUNFALL_CASTS - 1);
+  if (k.wail !== void 0) safeInteger(k.wail, 1, WAIL_MAX_TICKS);
+  if (k.shell !== void 0) safeInteger(k.shell, 1, SHELL_MAX_TICKS);
+  if (k.sun !== void 0) safeInteger(k.sun, 1, SUN_MAX);
+  if (k.casts !== void 0) safeInteger(k.casts, 1, SUNFALL_MAX_CASTS - 1);
   for (const [key9, stacks, ticks] of [["bulwark", 3, BULWARK_TICKS], ["charge", 5, CHARGE_TICKS], ["hide", MAX_HIDE, HIDE_TICKS]]) if (k[key9] !== void 0) {
     closedRecord(k[key9], ["stacks", "ticks"]);
     safeInteger(k[key9].stacks, 1, stacks);
