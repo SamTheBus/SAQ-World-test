@@ -1089,6 +1089,24 @@ function fractionalModifier12(n, d, p, q) {
   return combatAmount(root, scale2);
 }
 
+// src/shared/content/combat_balance_v3.js
+var ENEMY_CURVE_V3 = freezeWire({
+  maxHp: [100, 114, 141, 167, 194, 226, 272, 336, 400, 459, 506, 562, 615, 669, 725, 782, 847, 914, 981, 1048, 1126, 1203, 1289, 1366, 1451, 1539, 1630, 1726, 1819, 1918, 2026, 2150, 2262, 2377, 2487, 2586, 2683, 2794, 2880, 2985, 3091, 3184, 3314, 3427, 3522, 3632, 3752, 3803, 3869, 3915],
+  attackDamage: [4, 5, 7, 11, 15, 20, 26, 32, 39, 46, 50, 56, 61, 65, 70, 75, 80, 85, 91, 96, 102, 107, 113, 119, 125, 132, 138, 144, 151, 158, 165, 172, 179, 185, 191, 197, 203, 209, 213, 218, 223, 229, 234, 239, 245, 251, 258, 260, 263, 267]
+});
+var COMBAT_BALANCE_V3 = freezeWire({
+  version: "combat-balance-v3",
+  // Each point of the main stat (STR with a shield, DEX with a dagger, INT with a tome): +0.25% Attack, +0.1% crit.
+  mainAttackBasisPoints: 25,
+  mainCritBasisPoints: 10,
+  // Damage taken = raw x K/(K+Defense), K = 12 x hero level + 20, never below 25% of raw.
+  armor: { perLevel: 12, base: 20, minTakenPercent: 25 },
+  // Elites (every elite type alike), then named elites and mini-bosses on top of an elite; bosses on a C rank.
+  elite: { maxHp: { numerator: 4, denominator: 1 }, attackDamage: { numerator: 5, denominator: 2 } },
+  miniBoss: { maxHp: { numerator: 6, denominator: 1 }, attackDamage: { numerator: 3, denominator: 2 } },
+  boss: { maxHp: 45, attackDamage: 4 }
+});
+
 // src/shared/content/world_combat_v1.js
 var WORLD_COMBAT_VERSION = "world-combat-hordes-progression-v1";
 var WORLD_COMBAT_HASH = "a6bd45764908d58d1e1dff8e55e811a0d10876ee0b24ea4b15aa28ea6c94fc59";
@@ -1101,8 +1119,8 @@ var combatPlayer = (p) => p?.inventory?.services?.combatHash === WORLD_COMBAT_HA
 function worldEnemyStats(level, tier, budget = { hp: 45, damage: 6 }, elite = false) {
   const l = progressionBigInt(level), n = l - 1n, r = BigInt({ C: 100, B: 140, A: 200, S: 300 }[tier]);
   requireContract(r && l >= 1n, "World combat level/rank");
-  const ceil = (n2, d) => (n2 + d - 1n) / d;
-  return { maxHp: String(ceil((240n + 48n * n + n * n) * BigInt(budget.hp) * r, 8n * 45n * 100n)), attackDamage: String(ceil((3n + 2n * n) * BigInt(budget.damage) * r, 6n * 100n)), xp: String(ceil((4n + 2n * l) * r * BigInt(elite ? 3 : 1), 100n)) };
+  const ceil = (n2, d) => (n2 + d - 1n) / d, at2 = Number(l > 50n ? 50n : l) - 1;
+  return { maxHp: String(ceil(BigInt(ENEMY_CURVE_V3.maxHp[at2]) * BigInt(budget.hp) * r, 45n * 100n)), attackDamage: String(ceil(BigInt(ENEMY_CURVE_V3.attackDamage[at2]) * BigInt(budget.damage) * r, 6n * 100n)), xp: String(ceil((4n + 2n * l) * r * BigInt(elite ? 3 : 1), 100n)) };
 }
 function combatAttuneCost(level) {
   requireContract(Number.isInteger(level) && level >= 0 && level < 100, "Combat attunement level");
@@ -1119,7 +1137,7 @@ function combatAttuneSpent(level) {
 }
 function worldBossStats(level) {
   const s = worldEnemyStats(level, "C");
-  return { maxHp: String(BigInt(s.maxHp) * 12n), attackDamage: String(BigInt(s.attackDamage) * 2n), xp: String(BigInt(s.xp) * 15n) };
+  return { maxHp: String(BigInt(s.maxHp) * BigInt(COMBAT_BALANCE_V3.boss.maxHp)), attackDamage: String(BigInt(s.attackDamage) * BigInt(COMBAT_BALANCE_V3.boss.attackDamage)), xp: String(BigInt(s.xp) * 15n) };
 }
 function worldHeroKillXp(level, heroLevel, tier = "C", elite = false, boss = false) {
   const enemy = progressionBigInt(level), hero = progressionBigInt(heroLevel), rewardLevel = enemy < hero + 2n ? enemy : hero + 2n;
@@ -1163,7 +1181,6 @@ var BUILD_BALANCE_VERSION = "world-build-balance-v2";
 var BUILD_BALANCE_HASH = "e666f81238740d6d20121429d4780b073f7f0adf00e2392e81eb7b69de33c2b2";
 var BUILD_BALANCE_POLICY = freezeWire({ version: BUILD_BALANCE_VERSION, parentCombatHash: WORLD_COMBAT_HASH, attributePointsPerHeroLevel: 3, utilityPointsPerHeroLevel: 1, attributes: { commonAttackPerPoint: 1, strHp: 6, shieldBaseHp: 20, dexCritChanceBasisPoints: 25, intSpellPowerBasisPoints: 25, intFlatTomeBarrier: 0.5, barrierBase: "Level and equipment HP, excluding STR HP; mastery capacity applies afterward", familyAttackBasisPoints: 10 }, heroXpMultiplier: 2, masteryXpMultiplier: 4, attributeRespecGold: "0", economy: "Retain ordinary gold, gear, material awards and shop/Forge/Enchanter prices; accelerate skill/hero progression independently. No free gold or gear.", comparison: "Match hero level, gear power/rarity/attunement and legal skill-point budgets. Shield safety, Dagger crit/bleed and Tome ranged/AoE are distinct.", saveBoundary: "Fresh versioned World campaign namespace; previous database remains untouched. No migration.", simulation: "Existing 60 Hz authority, collision, action cadence and catch-up limits unchanged" });
 var usesBuildBalanceV2 = (player) => combatPlayer(player);
-var buildSpellScaleV2 = (intAboveBase) => addCombat(1, multiplyCombat(combatAmount(integerBigInt(intAboveBase)), BUILD_BALANCE_POLICY.attributes.intSpellPowerBasisPoints, 1e4));
 var balancedHeroKillXpV2 = (...args) => String(integerBigInt(worldHeroKillXp(...args)) * BigInt(BUILD_BALANCE_POLICY.heroXpMultiplier));
 var balancedMasteryAwardV2 = (player, amount2) => {
   const n = typeof amount2 === "bigint" ? amount2 : typeof amount2 === "number" ? BigInt(safeInteger(amount2)) : integerBigInt(amount2);
@@ -3040,7 +3057,7 @@ function applyEliteActorStatsD12_4(profile2, elite) {
   requireContract(elite.tier === "elite" && (elite.affixIds.length === 1 || elite.version === COMPOSITION_ELITE_V1 && elite.affixIds.length <= 3 && elite.affixIds.slice(1).every((id) => PASSIVE_ELITE_TRAITS_V1[id]) && new Set(elite.affixIds).size === elite.affixIds.length), "Unsupported D12.4 elite loadout");
   const definition = eliteAffixDefinitionD12_4(elite.affixIds[0]);
   requireContract(definition, "Unsupported D12.4 elite loadout");
-  const d = definition.statMultipliers, extra = elite.affixIds.slice(1).map((id) => PASSIVE_ELITE_TRAITS_V1[id]);
+  const d = COMBAT_BALANCE_V3.elite, extra = elite.affixIds.slice(1).map((id) => PASSIVE_ELITE_TRAITS_V1[id]);
   return {
     ...profile2,
     maxHp: combatInteger(extra.reduce((hp, t) => multiplyCombat(hp, t.hp, 100), multiplyCombat(profile2.maxHp, d.maxHp.numerator, d.maxHp.denominator)), "round"),
@@ -4611,13 +4628,18 @@ function generateAtPrecision(c, seed, input, { tier = null, family: family2 = nu
       raw.baseMaxHp = v((10n + 4n * l) * factor);
     }
     if (type === "cape") {
-      raw.baseDef = v((2n + l) / 2n);
+      raw.baseDef = progression.affixes === AFFIXES_V2 ? v(1n + l) : v((2n + l) / 2n);
       raw.baseMaxHp = v((10n + 4n * l) / 2n);
     }
     if (type === "ring") {
-      raw.baseAtk = v(1n + l / 3n);
-      raw.baseDef = v(1n + l / 4n);
-      raw.baseMaxHp = v(5n + l);
+      const g3 = progression.affixes === AFFIXES_V2;
+      raw.baseAtk = g3 ? v(1n + l) : v(1n + l / 3n);
+      raw.baseDef = g3 ? v(1n + l) : v(1n + l / 4n);
+      raw.baseMaxHp = g3 ? v(5n + 2n * l) : v(5n + l);
+    }
+    if (type === "subweapon" && progression.affixes === AFFIXES_V2) {
+      if (sub === "shield") raw.baseDef = v(2n + l);
+      else if (sub === "dagger" || sub === "tome") raw.baseAtk = v(2n + l);
     }
   }
   if (cls) applyClassFlavor(raw, classGearFlavor(cls, type, n));
@@ -4644,8 +4666,8 @@ function generateAtPrecision(c, seed, input, { tier = null, family: family2 = nu
       value = round44(times3(f3(String(lo / 1e3), String(hi / 1e3)), c.q(100 + 5 * rarityTier, 100)));
     } else if (key5 === "atk" || key5 === "def") value = ceil(times3(f3(".04", ".08"), E, flatR));
     else if (key5 === "maxHp") value = ceil(times3(f3(".12", ".24"), E, flatR));
-    else if (key5 === "moveSpeed") value = ceil(times3(1 + Math.floor(random() * 2), power2, P2));
-    else if (key5 === "critChance") value = round44(capped(times3(f3(".015", ".04"), c.root(I(power2), 2), P2), I(".2")));
+    else if (key5 === "moveSpeed") value = progression.affixes === AFFIXES_V2 ? ceil(times3(f3("10", "23"), P2)) : ceil(times3(1 + Math.floor(random() * 2), power2, P2));
+    else if (key5 === "critChance") value = progression.affixes === AFFIXES_V2 ? round44(capped(times3(f3(".01", ".02"), c.root(I(power2), 2), P2), I(".1"))) : round44(capped(times3(f3(".015", ".04"), c.root(I(power2), 2), P2), I(".2")));
     else if (key5 === "critDamage") value = round44(times3(f3(".03", ".06"), c.root(I(power2), 2), P2));
     else if (key5 === "block" || key5 === "parry") value = round44(capped(times3(f3(".005", ".015"), c.root(I(power2), 2), P2), I(".15")));
     else if (key5 === "bonusAreaRadius") value = round44(times3(f3(".04", ".10"), P2));
@@ -4698,6 +4720,9 @@ function affixRollRangeD9(g, key5) {
       const scale2 = mul2(c.dungeonScale(p).E, R), lo = key5 === "maxHp" ? 12 : 4;
       minimum = ceil(mul2(I(lo, 100), scale2));
       maximum = ceil(mul2(I(lo * 2, 100), scale2));
+    } else if (key5 === "moveSpeed" && g.progression?.affixes === AFFIXES_V2) {
+      minimum = ceil(mul2(I(10), P2));
+      maximum = ceil(mul2(I(23), P2));
     } else if (key5 === "moveSpeed") {
       minimum = ceil(mul2(I(p), P2));
       maximum = ceil(mul2(I(2), mul2(I(p), P2)));
@@ -4709,7 +4734,7 @@ function affixRollRangeD9(g, key5) {
       minimum = round44(mul2(I(1, 100), scale2));
       maximum = round44(mul2(I(3, 100), scale2));
     } else if (["critChance", "critDamage", "block", "parry"].includes(key5)) {
-      const scale2 = mul2(c.root(I(p), 2), P2), lo = key5 === "critChance" ? I(15, 1e3) : key5 === "critDamage" ? I(3, 100) : I(5, 1e3), hi = key5 === "critChance" ? I(4, 100) : key5 === "critDamage" ? I(6, 100) : I(15, 1e3), limit = key5 === "critChance" ? I(2, 10) : I(15, 100);
+      const scale2 = mul2(c.root(I(p), 2), P2), v3 = g.progression?.affixes === AFFIXES_V2, lo = key5 === "critChance" ? v3 ? I(1, 100) : I(15, 1e3) : key5 === "critDamage" ? I(3, 100) : I(5, 1e3), hi = key5 === "critChance" ? v3 ? I(2, 100) : I(4, 100) : key5 === "critDamage" ? I(6, 100) : I(15, 1e3), limit = key5 === "critChance" ? v3 ? I(1, 10) : I(2, 10) : I(15, 100);
       minimum = round44(key5 === "critDamage" ? mul2(lo, scale2) : cap(mul2(lo, scale2), limit));
       maximum = round44(key5 === "critDamage" ? mul2(hi, scale2) : cap(mul2(hi, scale2), limit));
     } else {
@@ -6110,7 +6135,7 @@ var NAMED_ELITE_TRICKS_V1 = Object.freeze({
 var namedEliteForV1 = (biome, family2) => Object.values(NAMED_ELITES_V1).find((n) => n.biome === biome && n.family === family2) ?? null;
 
 // src/shared/content/site_end_profile_v1.js
-var SITE_MINI_BOSS_V1 = freezeWire({ hullRadius: 16, combatRadius: 17.28, maxHp: { numerator: 3, denominator: 1 }, attackDamage: { numerator: 3, denominator: 2 } });
+var SITE_MINI_BOSS_V1 = freezeWire({ hullRadius: 16, combatRadius: 17.28, maxHp: { numerator: 6, denominator: 1 }, attackDamage: { numerator: 3, denominator: 2 } });
 function miniBossProfileV1(profile2) {
   const m = SITE_MINI_BOSS_V1;
   return {
@@ -24717,18 +24742,19 @@ function resolveD9PlayerStats(player) {
   for (const k of ["str", "dex", "int"]) attributes[k] = combatInteger(roundCombat(times2(attributes[k], addCombat(1, effect(k + "Pct"))), "floor"));
   const str = subtractCombat(maxCombat(attributes.str, 5), 5), dex = subtractCombat(maxCombat(attributes.dex, 5), 5), intel = subtractCombat(maxCombat(attributes.int, 5), 5), f3 = definition?.family ?? {};
   const gear = (k) => multiplyCombat(exactDecimal(definition?.bonuses[k] ?? 0), scale2, 100);
-  const balanced = usesBuildBalanceV2(player), flatAttack = balanced ? addCombat(addCombat(base.attack, gear("attack")), addCombat(addCombat(str, dex), intel)) : addCombat(addCombat(addCombat(base.attack, gear("attack")), multiplyCombat(str, 5, 2)), dex);
-  const attack = times2(flatAttack, addCombat(quantize(addCombat(1, effect("atkPct"))), multiplyCombat(family2 === "dagger" ? dex : family2 === "tome" ? intel : str, 1, 1e3)));
+  const balanced = usesBuildBalanceV2(player), flatAttack = balanced ? addCombat(base.attack, gear("attack")) : addCombat(addCombat(addCombat(base.attack, gear("attack")), multiplyCombat(str, 5, 2)), dex);
+  const main = family2 === "dagger" ? dex : family2 === "tome" ? intel : str, attack = times2(flatAttack, addCombat(quantize(addCombat(1, effect("atkPct"))), balanced ? multiplyCombat(main, COMBAT_BALANCE_V3.mainAttackBasisPoints, 1e4) : multiplyCombat(main, 1, 1e3)));
   const maxHp = roundCombat(times2(addCombat(addCombat(addCombat(base.maxHp, gear("maxHp")), balanced && family2 === "shield" ? BUILD_BALANCE_POLICY.attributes.shieldBaseHp : 0), multiplyCombat(str, balanced ? BUILD_BALANCE_POLICY.attributes.strHp : 10)), addCombat(quantize(addCombat(1, effect("maxHpPct"))), multiplyCombat(str, balanced ? 0 : 1, 1e3))));
   const defense = pct2(addCombat(addCombat(base.defense, gear("defense")), multiplyCombat(intel, 1, 5)), "defPct"), tome = tomeProfile(definition?.spellType ?? "fire", definition?.rarityTier ?? 0), den = addCombat(intel, 150);
   const barrier = balanced ? combatAmount(0) : addCombat(tome.barrier, multiplyCombat(intel, 15n * BigInt(den.d), 100n * BigInt(den.n)));
-  const chance = addCombat(addCombat(combatAmount(5, 100), effect("critChance")), balanced ? multiplyCombat(dex, BUILD_BALANCE_POLICY.attributes.dexCritChanceBasisPoints, 1e4) : 0), overflow = compareCombat(chance, 1) > 0 ? subtractCombat(chance, 1) : combatAmount(0);
+  const chance = addCombat(addCombat(combatAmount(5, 100), effect("critChance")), balanced ? multiplyCombat(main, COMBAT_BALANCE_V3.mainCritBasisPoints, 1e4) : 0), overflow = compareCombat(chance, 1) > 0 ? subtractCombat(chance, 1) : combatAmount(0);
   const rawBlock = addCombat(roundCombat(multiplyCombat(addCombat(effect("block"), exactDecimal(definition?.family ? 0 : 0.15)), 1e6)), multiplyCombat(str, 1e3)), rawParry = addCombat(roundCombat(multiplyCombat(addCombat(effect("parry"), exactDecimal(definition?.family ? 0 : 0.12)), 1e6)), multiplyCombat(dex, 1e3));
   const blockCap = Math.round((0.4 + (f3.blockCapBonus ?? 0.02)) * 1e6), parryCap = Math.round(((f3.subArchetype === "main_gauche" ? 0.45 : 0.35) + (f3.parryCapBonus ?? 0.02)) * 1e6);
   const boots = inv.equipped.boots ? (inv.economy.slotLevels.boots ?? 0) * 2 : 0;
   const speed = multiplyCombat(minCombat(combatAmount(5, 2), times2(addCombat(1, multiplyCombat(addCombat(boots, effect("moveSpeed")), 1, 100)), addCombat(1, effect("moveSpeedPct")))), 3);
   const result = {
     ...base,
+    ...balanced ? { armorLevel: String(player.progression.level) } : {},
     attack,
     maxHp,
     defense,
@@ -24745,7 +24771,6 @@ function resolveD9PlayerStats(player) {
     maxBarrier: family2 === "tome" ? roundCombat(times2(maxHp, barrier)) : combatAmount(0)
   };
   const resolved = resolveMasteryContribution(player, result, { rawBlock, rawParry, blockCap, parryCap, barrierFraction: barrier, rawArea: quantize(effect("bonusAreaRadius")), guardChance: guardChanceExact });
-  if (balanced && family2 === "tome") resolved.familyProperties.tomePower = times2(resolved.familyProperties.tomePower, buildSpellScaleV2(combatInteger(intel)));
   const hpScale = classTreeMaxHpScale(player.d8);
   if (hpScale) resolved.maxHp = multiplyCombat(resolved.maxHp, ...hpScale);
   return { ...resolved, ...Object.fromEntries(["attack", "defense", "maxHp", "maxBarrier"].map((k) => [k, combatInteger(resolved[k])])) };
@@ -24970,6 +24995,15 @@ function mitigateFractionalPlayerDamage(raw, defense) {
   if (compareCombat(raw, 0) === 0) return raw;
   const ratio = combatAmount(20n * BigInt(defense.d), 20n * BigInt(defense.d) + BigInt(defense.n));
   const bounded2 = compareCombat(ratio, combatAmount(15, 100)) < 0 ? combatAmount(15, 100) : ratio;
+  const result = multiplyCombat(raw, bounded2.n, bounded2.d);
+  return compareCombat(result, 1) < 0 ? combatAmount(1) : result;
+}
+function mitigateWorldPlayerDamage(raw, defense, level) {
+  raw = asCombatAmount(raw);
+  defense = asCombatAmount(defense);
+  if (compareCombat(raw, 0) === 0) return raw;
+  const A = COMBAT_BALANCE_V3.armor, k = BigInt(A.base) + BigInt(A.perLevel) * BigInt(safeInteger(Number(level), 1, 1e5));
+  const ratio = combatAmount(k * BigInt(defense.d), k * BigInt(defense.d) + BigInt(defense.n)), floor = combatAmount(A.minTakenPercent, 100), bounded2 = compareCombat(ratio, floor) < 0 ? floor : ratio;
   const result = multiplyCombat(raw, bounded2.n, bounded2.d);
   return compareCombat(result, 1) < 0 ? combatAmount(1) : result;
 }
@@ -27091,7 +27125,6 @@ export {
   useSeededReservationsV1,
   BUILD_BALANCE_HASH,
   usesBuildBalanceV2,
-  buildSpellScaleV2,
   balancedMasteryAwardV2,
   buildBalanceDatabaseV2,
   siteClearXpV2,
@@ -27426,6 +27459,7 @@ export {
   validatePlayerInventory3 as validatePlayerInventory2,
   resolvePlayerStats,
   mitigateFractionalPlayerDamage,
+  mitigateWorldPlayerDamage,
   mitigatePlayerDamage,
   gearAffixTotalsV2,
   heroRank,

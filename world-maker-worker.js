@@ -675,6 +675,24 @@ var INTEGER_MAX_DIGITS = 65536;
 // src/shared/contracts/combat_amount.js
 var DIGITS = INTEGER_MAX_DIGITS * 2 + 32;
 
+// src/shared/content/combat_balance_v3.js
+var ENEMY_CURVE_V3 = freezeWire({
+  maxHp: [100, 114, 141, 167, 194, 226, 272, 336, 400, 459, 506, 562, 615, 669, 725, 782, 847, 914, 981, 1048, 1126, 1203, 1289, 1366, 1451, 1539, 1630, 1726, 1819, 1918, 2026, 2150, 2262, 2377, 2487, 2586, 2683, 2794, 2880, 2985, 3091, 3184, 3314, 3427, 3522, 3632, 3752, 3803, 3869, 3915],
+  attackDamage: [4, 5, 7, 11, 15, 20, 26, 32, 39, 46, 50, 56, 61, 65, 70, 75, 80, 85, 91, 96, 102, 107, 113, 119, 125, 132, 138, 144, 151, 158, 165, 172, 179, 185, 191, 197, 203, 209, 213, 218, 223, 229, 234, 239, 245, 251, 258, 260, 263, 267]
+});
+var COMBAT_BALANCE_V3 = freezeWire({
+  version: "combat-balance-v3",
+  // Each point of the main stat (STR with a shield, DEX with a dagger, INT with a tome): +0.25% Attack, +0.1% crit.
+  mainAttackBasisPoints: 25,
+  mainCritBasisPoints: 10,
+  // Damage taken = raw x K/(K+Defense), K = 12 x hero level + 20, never below 25% of raw.
+  armor: { perLevel: 12, base: 20, minTakenPercent: 25 },
+  // Elites (every elite type alike), then named elites and mini-bosses on top of an elite; bosses on a C rank.
+  elite: { maxHp: { numerator: 4, denominator: 1 }, attackDamage: { numerator: 5, denominator: 2 } },
+  miniBoss: { maxHp: { numerator: 6, denominator: 1 }, attackDamage: { numerator: 3, denominator: 2 } },
+  boss: { maxHp: 45, attackDamage: 4 }
+});
+
 // src/shared/content/world_combat_v1.js
 var WORLD_COMBAT_VERSION = "world-combat-hordes-progression-v1";
 var WORLD_COMBAT_POLICY = freezeWire({ version: WORLD_COMBAT_VERSION, parentRuntime: "3da5e7e40452aa32", reviewRevision: 3, parentCombatRuntime: "f474d024b06426c4", bandLevels: [1, 6, 11, 21, 41], primary: { reachClearHullGapPixels: 32, forwardDotMinimum: 0.1, cleaveTargetsByCombo: [4, 6, 8], cadence: "existing 22/24/40 tick combo, movement multipliers unchanged" }, forge: { firstAttuneGold: 30, firstAttuneSouls: 2, flatAttackPerWeaponAttune: 2, flatArmorHpPerAttune: 8, enchantSlotLevel: 3, pricing: "World progression successor; Dungeon mechanics and UI retained" }, ordinaryPack: [6, 12], floorPacks: { small: 3, standard: 3, large: 4, deep: 4 }, floorPackSize: [6, 8], maximumFloorMembers: 40, activeActors: 192, retainedSiteActors: 4096, retainedSiteGroups: 128, worldActors: 192, renewalVacancyTicks: 18e3, gearChancePercent: 10, soulChancePercent: 35, equipmentLevel: "encounter level equals item power; regional minimum and participant escalation preserved", ordinaryStats: "HP=(30+6*(L-1)+(L-1)^2/8)*familyHP/45*rank; damage=(3+2*(L-1))*familyDamage/6*rank", xp: "per recipient: reward level min(locked encounter level,hero level+2); base1+integerSqrt(reward level); rankC100/B140/A200/S300hundredths, elitex3 or bossx15atC, ceil rank reward; multiply4/(4+max(abs(enemy level-hero level)-2,0)^2),floor and allow0; mastery applies afterward", levelGap: { graceLevels: 2, outgoing: "4/(4+max(enemy level-hero level-2,0)^2)", incoming: "min(4,(4+max(enemy level-hero level-2,0)^2)/4)", policy: "Deterministic per-recipient frozen enemy level and current hero level; every delivered damage packet once, after attack/crit and before wards, barrier or defense; no random misses" }, engagement: { threat: "actor-relative threat with frozen encounter level retained", initialAcquireLineOfSight: true, attackLineOfSight: true, interiorPursuitMemoryTicks: 600, disengageTicks: 120, returnHealing: false }, equipmentRequirement: "World combat generated itemPower <= hero level; higher-level finds remain owned, sellable and salvageable", rarity: { unit: "basis points", status: "provisional World tuning; natural drops unlock Legendary at21 and Mythic at41; existing Awaken path retained", below21: { ordinary: [7e3, 2400, 500, 100, 0, 0], completion: [0, 6500, 3e3, 500, 0, 0] }, from21: { ordinary: [7e3, 2400, 500, 95, 5, 0], completion: [0, 6500, 3e3, 450, 50, 0] }, from41: { ordinary: [7e3, 2400, 500, 90, 9, 1], completion: [0, 6500, 3e3, 400, 90, 10] } }, economy: "enemy gold 1+level/4; chest 20+4*level and guaranteed gear; elite gold x3 and guaranteed gear", safety: "all settlement/site/faction/future-island protected chunks plus one-chunk collar; ferry and spawn safety; prepare at 768px, no placement within 384px of any actor", respawn: "existing 18000 active tick vacant cleared encounter renewal, unresolved ownership gates retained", simulation: "60Hz unchanged; spatial activation, separation, LOS and interior navigation retained" });

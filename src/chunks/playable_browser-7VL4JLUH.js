@@ -346,7 +346,6 @@ import {
   buildCryptFamilyV2,
   buildFortFamilyV1,
   buildRuinFamilyV1,
-  buildSpellScaleV2,
   buildWoodlandCaveFamilyD12_2,
   buildWoodlandFortD11,
   bytesToHex,
@@ -573,6 +572,7 @@ import {
   minCombat,
   mitigateFractionalPlayerDamage,
   mitigatePlayerDamage,
+  mitigateWorldPlayerDamage,
   mixPlan,
   multiplyCombat,
   nearbyForge,
@@ -872,7 +872,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-KGVUCM2H.js";
+} from "./chunk-7MC2XACM.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -39208,6 +39208,7 @@ function validateD8Receipt(state, player, validateCommand2) {
 }
 
 // src/simulation/subweapon_rules.js
+var mitigated = (raw, stats3) => stats3.armorLevel ? mitigateWorldPlayerDamage(raw, stats3.defense, stats3.armorLevel) : mitigateFractionalPlayerDamage(raw, stats3.defense);
 function combatRoll(combat, chance) {
   const draw = nextUint32(combat.rng);
   combat.rng = copyWire(draw.state);
@@ -39321,7 +39322,7 @@ function aegisTakes(combat, out) {
   return { ...out, damage, aegis: broke ? "broke" : "hit", ...out.defense === null && compareCombat(damage, 0) === 0 ? { defense: "barrier" } : {} };
 }
 function incomingSubweaponHit({ combat, stats: stats3, raw, boss = false, actor = null, source: source3 = null, suppressed = false, knight = false, wall = 0, steady = 0 }) {
-  if (suppressed) return { damage: combatInteger(mitigateFractionalPlayerDamage(raw, stats3.defense)), absorbed: "0", defense: null, counter: null, suppressed: true };
+  if (suppressed) return { damage: combatInteger(mitigated(raw, stats3)), absorbed: "0", defense: null, counter: null, suppressed: true };
   if (combat.skills?.counter) {
     spendCounterWindow(combat);
     return { damage: "0", absorbed: "0", prevented: raw, masteryCounterEligible: false, defense: "block", counter: "stance" };
@@ -39339,7 +39340,7 @@ function incomingSubweaponHit({ combat, stats: stats3, raw, boss = false, actor 
   combat.barrier = combatInteger(subtractCombat(combat.barrier, absorbed));
   raw = subtractCombat(raw, absorbed);
   if (compareCombat(raw, 0) === 0) return { damage: "0", absorbed, defense: "barrier", counter: null };
-  const net = mitigateFractionalPlayerDamage(raw, stats3.defense), family = stats3.subType;
+  const net = mitigated(raw, stats3), family = stats3.subType;
   const chance = family === "shield" ? stats3.blockChance : family === "dagger" ? stats3.parryChance : combatAmount(0);
   const activeGuard = family === "shield" && guardsSource(combat.guard, actor, source3, wall);
   const parryReady = family === "dagger" && Boolean(combat.skills?.parry);
@@ -39380,9 +39381,7 @@ function validateTomeRecipe(r) {
 }
 function capturedTomePower(r) {
   const base = resolveMasterySpellPower({ ...r, basePower: tomeProfile(r.spellType, r.stars).power });
-  if (r.version !== "tome-cast-world-build-v2") return base;
-  const scale = buildSpellScaleV2(r.attributeInt);
-  return multiplyCombat(base, scale.n, scale.d);
+  return base;
 }
 function synchronizeTomeRotation(player) {
   if (!player.d8) return;
@@ -43614,7 +43613,7 @@ function settleTomeSustain(player, actor, combat, stats3) {
 
 // src/simulation/class_skills_v1.js
 var CLASS_SKILL_TUNING_V1 = Object.freeze({
-  bash: { reach: 48, cone: 0.85, targets: 5, attack: [3, 2], knockback: 22, eliteKnockback: 10, stun: 48, eliteStun: 24 },
+  bash: { reach: 48, cone: 0.85, targets: 5, attack: [4, 1], knockback: 22, eliteKnockback: 10, stun: 48, eliteStun: 24 },
   flurry: { reach: 44, cone: 0.95, targets: 3, attack: [9, 4] },
   cast: { cone: 1.05, attack: [3, 1] },
   earthBreaker: { radius: 70, targets: 8, attack: [2, 1], slow: 2, slowTicks: 180, stun: 60, pull: 30 },
@@ -45946,10 +45945,10 @@ function createEliteCombatD12_4(state, { lineClear: lineClear2, applyPeriodicDam
   function mitigateDirectDamage(source3, target, raw, { periodic = false, trigger = null, scripted = false } = {}) {
     const root2 = eliteRoot(), g = root2?.guardByEntityId?.[target?.entityId];
     if (periodic || trigger === "periodic" || scripted || source3?.team !== "party" || target?.team !== "hostile" || !target.alive || !g?.stacks || compareCombat(raw, 0) <= 0) return { damage: raw, guard: null };
-    const percent = g.stacks * IRON_CITADEL_D12_4G.pulse.perStackMitigationPercent, damage = combatInteger(maxCombat(1, combatInteger(multiplyCombat(raw, 100 - percent, 100), "round")), "round"), mitigated = combatInteger(subtractCombat(raw, damage), "round");
-    g.lastImpact = { tick: state.tick, sourceEntityId: source3.entityId, damageBefore: copyWire(raw), damageAfter: copyWire(damage), mitigated: copyWire(mitigated), stacks: g.stacks };
+    const percent = g.stacks * IRON_CITADEL_D12_4G.pulse.perStackMitigationPercent, damage = combatInteger(maxCombat(1, combatInteger(multiplyCombat(raw, 100 - percent, 100), "round")), "round"), mitigated2 = combatInteger(subtractCombat(raw, damage), "round");
+    g.lastImpact = { tick: state.tick, sourceEntityId: source3.entityId, damageBefore: copyWire(raw), damageAfter: copyWire(damage), mitigated: copyWire(mitigated2), stacks: g.stacks };
     counters.guardMitigations++;
-    counters.guardDamagePrevented = combatInteger(addCombat(counters.guardDamagePrevented, mitigated), "round");
+    counters.guardDamagePrevented = combatInteger(addCombat(counters.guardDamagePrevented, mitigated2), "round");
     return { damage, guard: copyWire(g.lastImpact) };
   }
   function cleanupAttackAura(root2) {
