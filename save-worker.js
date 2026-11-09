@@ -453,6 +453,7 @@ var ENEMY_CURVE_V3 = freezeWire({
   maxHp: [100, 114, 141, 167, 194, 226, 272, 336, 400, 459, 506, 562, 615, 669, 725, 782, 847, 914, 981, 1048, 1126, 1203, 1289, 1366, 1451, 1539, 1630, 1726, 1819, 1918, 2026, 2150, 2262, 2377, 2487, 2586, 2683, 2794, 2880, 2985, 3091, 3184, 3314, 3427, 3522, 3632, 3752, 3803, 3869, 3915],
   attackDamage: [4, 5, 7, 11, 15, 20, 26, 32, 39, 46, 50, 56, 61, 65, 70, 75, 80, 85, 91, 96, 102, 107, 113, 119, 125, 132, 138, 144, 151, 158, 165, 172, 179, 185, 191, 197, 203, 209, 213, 218, 223, 229, 234, 239, 245, 251, 258, 260, 263, 267]
 });
+var EARLY_LEVELS_EASE_V1 = freezeWire({ maxHpPercent: [55, 65, 75, 85, 95], attackDamagePercent: [50, 60, 70, 80, 90] });
 var COMBAT_BALANCE_V3 = freezeWire({
   version: "combat-balance-v3",
   // Each point of the main stat (STR with a shield, DEX with a dagger, INT with a tome): +0.25% Attack, +0.1% crit.
@@ -593,12 +594,13 @@ var hasWorldCombat = (x) => {
   return b?.combatVersion === WORLD_COMBAT_VERSION && b.combatHash === WORLD_COMBAT_HASH;
 };
 var combatPlayer = (p) => p?.inventory?.services?.combatHash === WORLD_COMBAT_HASH;
-function worldEnemyStats(level, tier2, budget = { hp: 45, damage: 6 }, elite = false) {
+function worldEnemyStats(level, tier2, budget = { hp: 45, damage: 6 }, elite = false, eased = true) {
   const l = progressionBigInt(level), n = l - 1n, r = BigInt({ C: 100, B: 140, A: 200, S: 300 }[tier2]);
   requireContract(r && l >= 1n, "World combat level/rank");
-  const ceil = (n2, d) => (n2 + d - 1n) / d, at2 = Number(l > 50n ? 50n : l) - 1;
-  return { maxHp: String(ceil(BigInt(ENEMY_CURVE_V3.maxHp[at2]) * BigInt(budget.hp) * r, 45n * 100n)), attackDamage: String(ceil(BigInt(ENEMY_CURVE_V3.attackDamage[at2]) * BigInt(budget.damage) * r, 6n * 100n)), xp: String(ceil((4n + 2n * l) * r * BigInt(elite ? 3 : 1), 100n)) };
+  const ceil = (n2, d) => (n2 + d - 1n) / d, at2 = Number(l > 50n ? 50n : l) - 1, ease = (k) => BigInt(eased ? EARLY_LEVELS_EASE_V1[k][at2] ?? 100 : 100);
+  return { maxHp: String(ceil(BigInt(ENEMY_CURVE_V3.maxHp[at2]) * BigInt(budget.hp) * r * ease("maxHpPercent"), 45n * 100n * 100n)), attackDamage: String(ceil(BigInt(ENEMY_CURVE_V3.attackDamage[at2]) * BigInt(budget.damage) * r * ease("attackDamagePercent"), 6n * 100n * 100n)), xp: String(ceil((4n + 2n * l) * r * BigInt(elite ? 3 : 1), 100n)) };
 }
+var worldObjectHealth = (level) => worldEnemyStats(level, "C", void 0, false, false).maxHp;
 function combatAttuneCost(level) {
   requireContract(Number.isInteger(level) && level >= 0 && level < 100, "Combat attunement level");
   return { gold: attunementGoldV1(level), materials: {
@@ -2568,6 +2570,25 @@ function townArtBlockersV1(t) {
   }
   return out;
 }
+var backRows = /* @__PURE__ */ new WeakMap();
+function townBackRowsV1(t) {
+  let m = backRows.get(t);
+  if (m) return m;
+  m = /* @__PURE__ */ new Map();
+  backRows.set(t, m);
+  if (!townNewArtV1(t)) return m;
+  const A = townArtBuildingsV1(t);
+  if (A.inn && t.size !== "hamlet") m.set(A.inn.id, t.size === "village" ? 2 : 1);
+  if (A.stables) m.set(A.stables.id, 2);
+  if (A.barracks) m.set(A.barracks.id, 1);
+  if (A.chapel && t.size === "capital") m.set(A.chapel.id, 1);
+  if (A.hall && t.biome === "desert") m.set(A.hall.id, 1);
+  return m;
+}
+var townSolidRectV1 = (t, b) => {
+  const k = townBackRowsV1(t).get(b.id) ?? 0;
+  return k ? { x: b.x, y: b.y + k, w: b.w, h: b.h - k } : b;
+};
 var KIND = { row: "home", tower: "civic", chapel: "civic" };
 var templates = /* @__PURE__ */ new WeakMap();
 function townTemplateV1(t) {
@@ -2691,7 +2712,7 @@ function townRasterV1(t) {
     }, closed);
     for (const tw of g.towers) for (let y = Math.floor(tw.y - 2); y <= Math.ceil(tw.y + 2); y++) for (let x = Math.floor(tw.x - 2); x <= Math.ceil(tw.x + 2); x++) if (ok(x, y) && hyp2(x + 0.5 - tw.x, y + 0.5 - tw.y) <= 1.2) col[idx(x, y)] = 1;
   }
-  for (const b of tp.buildings) rectDo(b, (x, y) => {
+  for (const b of tp.buildings) rectDo(townSolidRectV1(t, b), (x, y) => {
     col[idx(x, y)] = 1;
   });
   const newArt = townNewArtV1(t);
@@ -2894,7 +2915,10 @@ function generatedTownChunkBlockers(towns, cx, cy) {
     if (x + 32 <= o.x || x >= o.x + W9 || y + 26 <= o.y || y >= o.y + H9) continue;
     const clip = (bx, by, bw, bh) => ({ x: Math.max(x, bx) - x, y: Math.max(y, by) - y, width: Math.min(x + 32, bx + bw) - Math.max(x, bx), height: Math.min(y + 26, by + bh) - Math.max(y, by) });
     out.push({ id: t.id + ":clearing:" + cx + "," + cy, kind: "civilian-clearing", ...clip(o.x, o.y, W9, H9), detail: "" });
-    for (const b of townTemplateV1(t).buildings) if (b.x + o.x < x + 32 && b.x + b.w + o.x > x && b.y + o.y < y + 26 && b.y + b.h + o.y > y) out.push({ id: t.id + ":" + b.id, kind: "civilian-building", ...clip(b.x + o.x, b.y + o.y, b.w, b.h), detail: b.label });
+    for (const b0 of townTemplateV1(t).buildings) {
+      const b = townSolidRectV1(t, b0);
+      if (b.x + o.x < x + 32 && b.x + b.w + o.x > x && b.y + o.y < y + 26 && b.y + b.h + o.y > y) out.push({ id: t.id + ":" + b0.id, kind: "civilian-building", ...clip(b.x + o.x, b.y + o.y, b.w, b.h), detail: b0.label });
+    }
   }
   return out;
 }
@@ -8882,7 +8906,7 @@ function applyEliteActorStatsD12_4(profile2, elite) {
 var MOTHER = NEST_POLICY.motherMember;
 var clutchMembersV1 = (e) => [NEST_POLICY.broodlings[e], ...Array.from({ length: NEST_POLICY.hatchlingsPerEgg }, (_, k) => NEST_POLICY.firstHatchling + e * NEST_POLICY.hatchlingsPerEgg + k)];
 var CLUTCH_OF = new Map([0, 1, 2].flatMap((e) => clutchMembersV1(e).map((n) => [n, e])));
-var nestHealthV1 = (level, party2) => combatInteger(multiplyCombat(worldEnemyStats(level, "C").maxHp, NEST_POLICY.nestHealth * NEST_POLICY.partyHealthPercent[party2 - 1], 100));
+var nestHealthV1 = (level, party2) => combatInteger(multiplyCombat(worldObjectHealth(level), NEST_POLICY.nestHealth * NEST_POLICY.partyHealthPercent[party2 - 1], 100));
 var burst = (h) => h.hp.every((hp) => compareCombat(hp, 0) === 0);
 var awake = (r) => ["hatched", "defeated"].includes(r.stages[MOTHER].phase);
 var nestTargetableV1 = (r, n) => r.status === "active" && !r.nest.waiting && r.stages[MOTHER].phase === "pending" && compareCombat(r.nest.hp[n], 0) > 0;
@@ -11355,7 +11379,7 @@ function validateSporePodsV2(r) {
   requireContract(isSporeV2(r), "Unknown spore-pod policy");
   safeInteger(r.partySize, 1, 4);
   requireContract(r.podLevel !== void 0 && Array.isArray(r.pods) && r.pods.length === 3, "Spore pod inventory");
-  const expectedMax = combatInteger(multiplyCombat(worldEnemyStats(r.podLevel, "C").maxHp, 10 * SPORE_V2_POLICY.partyHealthPercent[r.partySize - 1], 100));
+  const expectedMax = combatInteger(multiplyCombat(worldObjectHealth(r.podLevel), 10 * SPORE_V2_POLICY.partyHealthPercent[r.partySize - 1], 100));
   for (const p of r.pods) {
     closedRecord(p, ["position", "hp", "maxHp", "lastHitTick", "bursts"], ["lastDamage"]);
     if (p.lastDamage !== void 0) {
