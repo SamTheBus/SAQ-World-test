@@ -9002,6 +9002,83 @@ function fountainDesert(c, fx, fy, size, jet3) {
     if (size !== "village") for (const s of [-1, 1]) jet3(c, fx + s * rx * 0.7, fy - ry * 0.1, fx + s * rx * 0.4, fy + 2, 6);
   }
 }
+var MUD = "#c98f55";
+var MUDTOP = "#e2b57c";
+var gardenSideD = (b) => b.doorSide === "north" ? "north" : "south";
+function gardenWallSidesDesert(c, b, d = 3) {
+  if (d < 2) return;
+  const y0 = gardenSideD(b) === "south" ? (b.y + b.h) * T8 : (b.y - d) * T8, y1 = y0 + d * T8 - 6, top = y0 + 2, H6 = 16;
+  for (const fx of [b.x * T8 + 2, (b.x + b.w) * T8 - 2]) {
+    const sx = fx - 5, w = 10, p = rr(sx, top - H6, w, y1 - top + 2, 4);
+    prop(c, [[p, MUDTOP]], 1.4);
+    clip(c, p, () => {
+      c.fillStyle = tone(MUD, -0.02);
+      c.fillRect(fx < b.x * T8 + T8 ? sx + w - 3 : sx, top - H6, 3, y1 - top + 2);
+      c.fillStyle = tone(MUDTOP, 0.18);
+      c.fillRect(sx + 3, top - H6 + 3, 1.6, y1 - top - 6);
+      const r = hash3(fx, y0);
+      for (let k = 0; k < (y1 - top) / 26; k++) {
+        c.fillStyle = tone(MUDTOP, -0.12);
+        c.fillRect(sx + 2 + (r >>> k & 3), top - H6 + 10 + k * 26, 4, 1.2);
+      }
+    });
+  }
+}
+function mudPier(c, x, fy, h = 24) {
+  shadow5(c, x + 3, fy + 1, 9, 3);
+  const p = rr(x - 6, fy - h, 12, h + 1, [3, 3, 1, 1]);
+  prop(c, [[p, MUD]], 1.3);
+  clip(c, p, () => {
+    c.fillStyle = tone(MUD, -0.16);
+    c.fillRect(x + 2, fy - h, 4, h + 1);
+    c.fillStyle = "rgba(0,0,0,.1)";
+    c.fillRect(x - 6, fy - 4, 12, 5);
+  });
+  prop(c, [[rr(x - 7.5, fy - h - 5, 15, 7, 3.5), MUDTOP]], 1.1);
+  c.fillStyle = tone(MUDTOP, 0.2);
+  c.fillRect(x - 5, fy - h - 4, 7, 1.4);
+}
+function gardenWallFrontDesert(c, b, d = 3) {
+  if (d < 2) return;
+  const gate = b.doorSide === "south" || b.doorSide === "north", fy = gardenSideD(b) === "south" ? (b.y + b.h + d) * T8 - 6 : (b.y - d) * T8 + 4, x0 = b.x * T8 + 2, x1 = (b.x + b.w) * T8 - 2, gx = gate ? b.doorPoint[0] * T8 + 16 : -1e4, H6 = 17;
+  for (const [a, bq] of gate ? [[x0, gx - 18], [gx + 18, x1]] : [[x0, x1]]) {
+    if (bq - a < 8) continue;
+    const f = rect2(a - 5, fy - H6, bq - a + 10, H6 + 1);
+    prop(c, [[f, MUD]], 1.4);
+    clip(c, f, () => {
+      c.fillStyle = "rgba(0,0,0,.12)";
+      c.fillRect(a - 5, fy - 5, bq - a + 10, 6);
+      const r = hash3(a, fy);
+      for (let k = 0; k < (bq - a) / 30; k++) {
+        const sx = a + 8 + (r >>> k % 24 & 15) + k * 30;
+        if (sx < bq - 10) {
+          c.fillStyle = tone(MUD, 0.1);
+          c.fillRect(sx, fy - H6 + 7, 9, 4);
+          c.fillStyle = tone(MUD, -0.14);
+          c.fillRect(sx + 3, fy - 8 + (r >>> k & 3), 6, 1.2);
+        }
+      }
+    });
+    prop(c, [[rr(a - 6, fy - H6 - 5, bq - a + 12, 8, 4), MUDTOP]], 1.2);
+    c.fillStyle = tone(MUDTOP, 0.2);
+    c.fillRect(a, fy - H6 - 4, bq - a, 1.5);
+  }
+  if (gate) {
+    const g = poly([[gx - 14, fy - 3], [gx - 14, fy - 21], [gx - 40, fy - 26], [gx - 40, fy - 8]]);
+    prop(c, [[g, "#3f8f8f"]], 1.1);
+    clip(c, g, () => {
+      for (let k = 1; k < 4; k++) {
+        const t = k / 4;
+        line(c, [[gx - 14 - 26 * t, fy - 3 - 5 * t], [gx - 14 - 26 * t, fy - 21 - 5 * t]], tone("#3f8f8f", -0.28), 1.2);
+      }
+      c.fillStyle = tone("#3f8f8f", 0.2);
+      c.fillRect(gx - 38, fy - 24, 24, 1.4);
+    });
+    for (const yy of [fy - 8, fy - 17]) line(c, [[gx - 14, yy], [gx - 24, yy - 2]], "#2f2a26", 1.6);
+  }
+  for (const px5 of [x0, x1]) mudPier(c, px5, fy, 22);
+  if (gate) for (const gp of [gx - 18, gx + 18]) mudPier(c, gp, fy, 26);
+}
 
 // src/client/town_art_v1/fx.js
 var TAU12 = Math.PI * 2;
@@ -81088,7 +81165,8 @@ function tuftsAt(c, x, y) {
   }
 }
 var gardenSide = (b) => b.doorSide === "north" ? "north" : "south";
-function picketFence(c, b, d = 3) {
+function picketFence(c, b, d = 3, biome) {
+  if (biome === "desert") return gardenWallSidesDesert(c, b, d);
   if (d < 2) return;
   const y0 = gardenSide(b) === "south" ? (b.y + b.h) * T38 : (b.y - d) * T38, y1 = y0 + d * T38 - 6;
   for (const fx of [b.x * T38 + 2, (b.x + b.w) * T38 - 2]) {
@@ -81103,7 +81181,8 @@ function picketFence(c, b, d = 3) {
     for (const fy of [y1, top + 2]) prop(c, [[rect2(fx - 3.5, fy - 17, 7, 18), "#e6dfcc"]], 1);
   }
 }
-function picketFront(c, b, d = 3) {
+function picketFront(c, b, d = 3, biome) {
+  if (biome === "desert") return gardenWallFrontDesert(c, b, d);
   if (d < 2) return;
   const gate = b.doorSide === "south" || b.doorSide === "north";
   const fy = gardenSide(b) === "south" ? (b.y + b.h + d) * T38 - 6 : (b.y - d) * T38 + 4, x0 = b.x * T38 + 2, x1 = (b.x + b.w) * T38 - 2, gx = gate ? b.doorPoint[0] * T38 + 16 : -1e4;
@@ -82144,13 +82223,13 @@ function generatedTownDepthItems(m, v, env = null) {
         out.push(depthItem({ id: key2 + "pickets:" + b.id, anchorX: x, anchorY: side, draw: (c) => {
           c.save();
           c.translate(o.x, o.y);
-          picketFence(c, b, d);
+          picketFence(c, b, d, t.biome);
           c.restore();
         } }));
         out.push(depthItem({ id: key2 + "picket-front:" + b.id, anchorX: x, anchorY: front2, draw: (c) => {
           c.save();
           c.translate(o.x, o.y);
-          picketFront(c, b, d);
+          picketFront(c, b, d, t.biome);
           c.restore();
         } }));
       }
