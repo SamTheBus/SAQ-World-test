@@ -906,7 +906,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-VH4EE2O6.js";
+} from "./chunk-76RU2NPU.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -71160,6 +71160,45 @@ function createVitalsHudV4(doc) {
   const xp = progression ? bar("vbar-xp", [xpFill, part3("vbar-gloss")]) : null;
   hpTrack?.prepend(hp);
   progression?.prepend(xp);
+  const vitals = doc.getElementById("world-hud-vitals"), levelText = doc.getElementById("world-level"), NS = "http://www.w3.org/2000/svg";
+  let med = null, ring6 = null, medNum = null, medPar = null, lastLevel = null, lastRing = null, ringTimer = null;
+  if (vitals && levelText) {
+    med = doc.createElement("div");
+    med.className = "vmed";
+    med.setAttribute("aria-hidden", "true");
+    const svg2 = doc.createElementNS(NS, "svg");
+    svg2.setAttribute("viewBox", "0 0 60 60");
+    svg2.innerHTML = '<defs><linearGradient id="vmed-brass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3dc98"/><stop offset=".55" stop-color="#c9a45e"/><stop offset="1" stop-color="#7d5c2a"/></linearGradient></defs><circle cx="30" cy="30" r="29.6" fill="#120c07"/><circle cx="30" cy="30" r="28" fill="url(#vmed-brass)"/><circle cx="30" cy="30" r="24.8" fill="none" stroke="#3a2a14" stroke-width="3.6"/><circle class="vmed-ring" cx="30" cy="30" r="24.8" fill="none" stroke="#ffe08a" stroke-width="3.6" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 30 30)"/><circle cx="30" cy="30" r="21.4" fill="#1a140e" stroke="#120c07" stroke-width="1.5"/><path d="M14 22a18 18 0 0 1 32 0" fill="none" stroke="#fff" stroke-opacity=".07" stroke-width="3"/>';
+    ring6 = svg2.querySelector(".vmed-ring");
+    const lv = doc.createElement("b");
+    lv.textContent = "Lv";
+    medNum = doc.createElement("strong");
+    medPar = doc.createElement("small");
+    medPar.hidden = true;
+    med.append(svg2, lv, medNum, medPar);
+    vitals.append(med);
+  }
+  const setRing = (v, instant) => {
+    if (!ring6) return;
+    const r = Math.max(0, Math.min(1, v)), key2 = r.toFixed(3) + (instant ? "i" : "");
+    if (key2 === lastRing) return;
+    lastRing = key2;
+    med.classList.toggle("instant", Boolean(instant));
+    ring6.setAttribute("stroke-dasharray", `${(r * 100).toFixed(2)} 100`);
+    ring6.style.opacity = r < 4e-3 ? "0" : "1";
+    if (instant) void med.offsetWidth;
+  };
+  function medallion() {
+    if (!med) return;
+    const text2 = levelText.textContent;
+    if (text2 === lastLevel) return;
+    lastLevel = text2;
+    const m = /Lv\s*([^\s·]+)(?:\s*·\s*P\s*(\S+))?/.exec(text2);
+    medNum.textContent = m ? m[1] : text2.replace(/^Lv\s*/, "");
+    medNum.classList.toggle("long", medNum.textContent.length > 2);
+    medPar.hidden = !(m && m[2]);
+    medPar.textContent = m && m[2] ? "P" + m[2] : "";
+  }
   let lastHp = null, lastXp = null, wrapTimer = null, shards = 0;
   const painted4 = /* @__PURE__ */ new WeakMap();
   function breakOff(at7, damage) {
@@ -71215,11 +71254,17 @@ function createVitalsHudV4(doc) {
     }
     if (xp && xpBar && !progression.hidden) {
       const r = Math.max(0, Math.min(1, Number(xpBar.value) / Number(xpBar.max || 100)));
-      if (lastXp === null) scale(xpFill, r);
-      else if (r < lastXp - 0.02) {
+      medallion();
+      if (lastXp === null) {
+        scale(xpFill, r);
+        setRing(r, true);
+      } else if (r < lastXp - 0.02) {
         view3.clearTimeout(wrapTimer);
+        view3.clearTimeout(ringTimer);
         scale(xpFill, 1);
         retrigger(xp, "gain");
+        setRing(1);
+        if (med) retrigger(med, "gain");
         wrapTimer = view3.setTimeout(() => {
           xpFill.classList.add("instant");
           scale(xpFill, 0);
@@ -71227,9 +71272,15 @@ function createVitalsHudV4(doc) {
           xpFill.classList.remove("instant");
           scale(xpFill, lastXp);
         }, 560);
+        ringTimer = view3.setTimeout(() => {
+          setRing(0, true);
+          setRing(lastXp);
+        }, 560);
       } else if (r > lastXp + 5e-4) {
         scale(xpFill, r);
         retrigger(xp, "gain");
+        setRing(r);
+        if (med) retrigger(med, "gain");
       }
       lastXp = r;
     }
@@ -71244,6 +71295,8 @@ function createVitalsHudV4(doc) {
   }
   return Object.freeze({ update, barrier, destroy() {
     view3.clearTimeout(wrapTimer);
+    view3.clearTimeout(ringTimer);
+    med?.remove();
     hp?.remove();
     xp?.remove();
     barrierBar?.remove();
