@@ -26,7 +26,7 @@
   ];
   const TIPS = [
     'Hold Attack to keep swinging.',
-    'Hold the spin button to rearrange your skill wheel.',
+    'Rearrange your skill wheel on the Skills page: tap two spots to swap them.',
     'Every class has a move: Knights Guard, Rogues Dash and Mages Blink.',
     'Each block a Knight makes takes a second off Shield Bash.',
     'Armor you equip shows on your hero. Higher stars brighten the trim.',

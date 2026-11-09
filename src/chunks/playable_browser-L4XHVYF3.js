@@ -856,6 +856,7 @@ import {
   verifyBoundOverworldGeometry,
   verifyContentFingerprint,
   verifyPersistedEnvelope,
+  wheelEntriesFor,
   wholeAmount,
   wildernessFairLevelGap,
   withSeededWorldV1,
@@ -874,7 +875,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-FOH7V32J.js";
+} from "./chunk-W2JWA7IR.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -44321,8 +44322,8 @@ function validateClassSkillState(s, combat, actor) {
   if (k.enGarde !== void 0) safeInteger(k.enGarde, 1, EN_GARDE_TICKS);
   if (k.rush !== void 0) safeInteger(k.rush, 1, RUSH_TICKS);
   if (k.trail !== void 0) {
-    closedRecord(k.trail, ["x", "y", "x2", "y2", "ticks", "next"]);
-    requireContract(["x", "y", "x2", "y2"].every((key2) => Number.isFinite(k.trail[key2])) && actor.alive, "Invalid trail");
+    closedRecord(k.trail, ["x", "y", "x2", "y2", "ticks", "next"], ["fire", "frost", "spark"]);
+    requireContract(["x", "y", "x2", "y2"].every((key2) => Number.isFinite(k.trail[key2])) && ["fire", "frost", "spark"].every((key2) => k.trail[key2] === void 0 || k.trail[key2] === true) && actor.alive, "Invalid trail");
     safeInteger(k.trail.ticks, 1, TRAIL_MAX_TICKS);
     safeInteger(k.trail.next, 1, TRAIL_PULSE_TICKS);
   }
@@ -46466,7 +46467,7 @@ function validateSubweaponCombat(s) {
   for (const [id, e] of Object.entries(c.controls ?? {})) {
     closedRecord(e, ["id", "sourceId", "targetId", "spaceInstanceId", "phase", "stacks", "appliedTick", "expiresTick"], ["boost", "since"]);
     if (e.boost !== void 0) {
-      safeInteger(e.boost, 1, 5);
+      safeInteger(e.boost, 1, 10);
       requireContract(e.phase === "chill", "Only a chill carries a boost");
     }
     if (e.since !== void 0) {
@@ -50603,6 +50604,9 @@ var CLASS_SKILL_TUNING_V1 = Object.freeze({
   // Row-two passives that hit: Crosscut cuts along a Dash, Cinder Step's trail burns (per rank).
   crosscut: { attack: [15, 100] },
   cinderStep: { attack: [10, 100] },
+  // Frost Step's chill (boost per rank: 5% slow each), Static Step's spark (per rank, how far, how many).
+  frostStep: { boost: 2 },
+  staticStep: { attack: [10, 100], radius: 56, targets: 2 },
   // What an augment widens: Long Lunge, Wide Arc, Wildfire and Wide Freeze.
   wider: [3, 2],
   wide: [7, 5],
@@ -51550,6 +51554,15 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       const r = rank(a, "cinder_step"), stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "fire");
       if (r) for (const t of alongPath(a, { x: trail2.x, y: trail2.y }, { x: trail2.x2, y: trail2.y2 })) damage(a, t, multiplyCombat(stats3.attack, T37.cinderStep.attack[0] * r, T37.cinderStep.attack[1]), "fire", null, { sourceItem, trigger: "proc" });
       if (wears(a, "pharaoh-khopesh")) for (const t of alongPath(a, { x: trail2.x, y: trail2.y }, { x: trail2.x2, y: trail2.y2 })) burn(a, t, sourceItem);
+      const fr = rank(a, "frost_step");
+      if (fr && canStun(a)) {
+        for (const t of alongPath(a, { x: trail2.x, y: trail2.y }, { x: trail2.x2, y: trail2.y2 })) if (!isPodCombatTargetV4(t) && !Object.values(c.controls ?? {}).some((e) => e.sourceId === a.entityId && e.targetId === t.entityId && e.expiresTick > s.tick)) applyFrostControl(s, a, t, stats3, 240 + 24 * rank(a, "cold_snap"), T37.frostStep.boost * fr);
+      }
+      const sp = rank(a, "static_step");
+      if (sp) {
+        const S4 = T37.staticStep, at5 = { x: trail2.x, y: trail2.y }, from = { entityId: a.entityId, position: at5 }, d = (t) => Math.hypot(t.position.x - at5.x, t.position.y - at5.y), zapItem = damageSourceItem(owner(a), "lightning");
+        for (const t of effects2.nearby(a, { position: at5 }, S4.radius * effects2.area(a)).sort((x, y) => d(x) - d(y) || x.entityId.localeCompare(y.entityId)).slice(0, S4.targets)) damage(a, t, multiplyCombat(stats3.attack, S4.attack[0] * sp, S4.attack[1]), "lightning", null, { sourceItem: zapItem, trigger: "proc", chainFrom: from });
+      }
     }
     if (--trail2.ticks <= 0) clearTrail(combat);
   }
@@ -51557,7 +51570,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     const ticks = worn(a, "pharaoh-khopesh");
     if (!ticks) return;
     const to = pathEnd(a, combat.dash);
-    classSkillsRecord(combat).trail = { x: a.position.x, y: a.position.y, x2: to.x, y2: to.y, ticks, next: 1 };
+    classSkillsRecord(combat).trail = { x: a.position.x, y: a.position.y, x2: to.x, y2: to.y, ticks, next: 1, fire: true };
   }
   function stepPool(a, combat) {
     const pool2 = combat.skills?.pool;
@@ -51627,7 +51640,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (--w.ticks <= 0) clearSkillState(combat, "wall");
   }
   function iceWorth(a, stats3) {
-    const I = T37.iceBarrier, base = aug(a, "ice_barrier", 0) ? I.thick : I.worth, worth = combatInteger(multiplyCombat(stats3.maxHp, base + 4 * rank(a, "glacial_skin"), 100));
+    const I = T37.iceBarrier, base = aug(a, "ice_barrier", 0) ? I.thick : I.worth, worth = combatInteger(multiplyCombat(stats3.maxHp, base, 100));
     return rank(a, "ice_fortress") ? combatInteger(multiplyCombat(worth, ...T37.fortress)) : worth;
   }
   function iceBarrier2(a, stats3) {
@@ -52359,8 +52372,8 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       for (const t of alongPath(a, from, to)) damage(a, t, multiplyCombat(stats3.attack, T37.crosscut.attack[0] * cross2, T37.crosscut.attack[1]), "offhand", null, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "proc" });
     }
     {
-      const sunTicks = worn(a, "pharaoh-khopesh") ?? 0, ticks = Math.max(rank(a, "cinder_step") ? TRAIL_TICKS : 0, sunTicks);
-      if (ticks) classSkillsRecord(combat).trail = { x: from.x, y: from.y, x2: to.x, y2: to.y, ticks, next: 1 };
+      const sunTicks = worn(a, "pharaoh-khopesh") ?? 0, fire2 = Boolean(sunTicks || rank(a, "cinder_step")), frost2 = rank(a, "frost_step") > 0, spark = rank(a, "static_step") > 0, ticks = Math.max(rank(a, "cinder_step") || frost2 || spark ? TRAIL_TICKS : 0, sunTicks);
+      if (ticks) classSkillsRecord(combat).trail = { x: from.x, y: from.y, x2: to.x, y2: to.y, ticks, next: 1, ...fire2 ? { fire: true } : {}, ...frost2 ? { frost: true } : {}, ...spark ? { spark: true } : {} };
     }
     if (rank(a, "afterimage")) {
       const k = classSkillsRecord(combat);
@@ -52495,7 +52508,7 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
     const neighbors = overload && element !== "lightning" ? effects2.nearby(source3, origin, 80 * A * (1 + 0.2 * overload)).filter((t) => t.entityId !== target.entityId) : [];
     const hops = [];
     if (element === "lightning") {
-      const reach = 120 * (overload ? A : 1) * (100 + 10 * tree("arc_reach")) / 100, fork = tree("forked_lightning"), seen4 = /* @__PURE__ */ new Set([target.entityId]);
+      const reach = 120 * (overload ? A : 1), fork = tree("forked_lightning"), seen4 = /* @__PURE__ */ new Set([target.entityId]);
       const closest = (from) => combatTargetsV4(s).filter((t) => !seen4.has(t.entityId) && eligible2(source3, t) && Math.hypot(t.position.x - from.position.x, t.position.y - from.position.y) <= reach && subweaponLineClear(s.spacesByInstanceId[source3.residency.spaceInstanceId].collision, from, t)).sort((a, b2) => Math.hypot(a.position.x - from.position.x, a.position.y - from.position.y) - Math.hypot(b2.position.x - from.position.x, b2.position.y - from.position.y) || a.entityId.localeCompare(b2.entityId))[0];
       let previous = target;
       for (let n = 0; n < 1 + overload + tree("storm_conductor") + skills.conductor(source3, target); n++) {
@@ -60760,7 +60773,7 @@ function nestTracker(e) {
 }
 
 // src/client/class_tree_icons_v1.js
-var CLASS_TREE_ICONS_V1 = Object.freeze({ "iron_will": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M12 15l-3-3a2 2 0 0 1 3-2.6A2 2 0 0 1 15 12z"/>', "rallying_cry": '<path d="M4 10v4l11 5V5zM15 9a3 3 0 0 1 0 6M19 7a7 7 0 0 1 0 10"/>', "bulwark_stance": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M9 13l3-3 3 3M9 17l3-3 3 3"/>', "iron_wall": '<rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 12h16M12 5v14"/>', "intimidate": '<circle cx="12" cy="10" r="6"/><path d="M9 9h.01M15 9h.01M9 13h6M10 16v4M14 16v4"/>', "heavy_plating": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/>', "hold_the_line": '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>', "war_banner": '<path d="M6 21V3M6 4l10 3-10 4"/><path d="M3 21h6"/>', "rooted": '<path d="M12 3v10M12 13l-6 7M12 13l6 7M12 13v8M8 8l4 2 4-2"/>', "second_breath": '<path d="M3 12h4l2-5 4 10 2-5h6"/>', "standard_bearer": '<path d="M6 21V3M6 4l10 3-10 4"/><path d="M12 14l3 3 5-5"/>', "last_stand": '<path d="M12 20l-7-7a4.5 4.5 0 0 1 7-5.6A4.5 4.5 0 0 1 19 13z"/><path d="M12 8l-1.5 3h3L12 14"/>', "unyielding": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M8 12h8"/>', "aegis_pulse": '<path d="M12 6l4 1.7v3.4c0 2.3-1.7 4-4 5-2.3-1-4-2.7-4-5V7.7z"/><path d="M4 7a10 10 0 0 0 0 10M20 7a10 10 0 0 1 0 10"/>', "bastion_ward": '<path d="M12 6l4 1.7v3.4c0 2.3-1.7 4-4 5-2.3-1-4-2.7-4-5V7.7z"/><circle cx="12" cy="11" r="9"/>', "bulwark_colossus": '<path d="M3 21V8l4 3V5l5 4 5-4v6l4-3v13z"/>', "heavy_hands": '<path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="8"/><path d="M4 4l3 3"/>', "earth_breaker": '<path d="M3 20h18M5 20l4-8 3 4 2-3 4 7M12 3v4"/>', "momentum": '<path d="M7 17l5-5 5 5M7 11l5-5 5 5"/>', "shatterpoint": '<path d="M12 2l2 7 7 3-7 3-2 7-2-7-7-3 7-3z"/>', "concussion": '<circle cx="12" cy="14" r="6"/><path d="M6 5l1.2 2M12 3v2.5M18 5l-1.2 2"/>', "impact_training": '<path d="M15 12l-8.5 8.5a2.1 2.1 0 1 1-3-3L12 9M14 4l6 6-3 3-6-6z"/>', "unstoppable": '<path d="M4 20l16-16M9 4h11v11"/>', "shield_charge": '<path d="M14 4l6 2.5v5c0 3.5-2.5 6-6 7.5-3.5-1.5-6-4-6-7.5v-5z"/><path d="M2 9h4M3 13h3M2 17h4"/>', "reckless": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M13 7l-3 5h4l-3 5"/>', "crowd_breaker": '<circle cx="7" cy="14" r="3"/><circle cx="17" cy="14" r="3"/><circle cx="12" cy="7" r="3"/><path d="M4 21h16"/>', "avalanche": '<path d="M3 20l6-10 4 6 3-4 5 8z"/><path d="M15 4l2 2M19 6l1 2"/>', "tremor": '<path d="M3 12h3l2-5 3 10 3-10 2 5h5"/><path d="M4 20h16"/>', "groundbreaker": '<path d="M3 19h18M7 19l2-4-2-3M14 19l-1-3 3-3M18 19l-1-2"/>', "skyfall_leap": '<path d="M12 3v10M8 9l4 4 4-4M4 20h16M6 20l2-3M18 20l-2-3"/>', "titan": '<path d="M8 21V11l-3-2V5h14v4l-3 2v10z"/><path d="M9 5V3M15 5V3M12 5V3"/>', "earthshaker": '<path d="M12 2l2.6 6.4L21 9l-5 4.6L17.5 21 12 17.3 6.5 21 8 13.6 3 9l6.4-.6z"/>', "retaliation": '<path d="M9 14L4 9l5-5M4 9h11a5 5 0 0 1 0 10h-3"/>', "counter_stance": '<path d="M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4"/>', "spiked_shield": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M12 3v3M19 6l-2 2M5 6l2 2"/>', "grudge": '<path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.5"/>', "unbroken": '<path d="M4 12h16M12 4v16"/><circle cx="12" cy="12" r="8"/>', "serrated_edge": '<path d="M3 14l3-3 3 3 3-3 3 3 3-3 3 3M3 19h18"/>', "vengeance": '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.4-.5-2-1-3-1-2.1-.2-4 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.2.4-2.3 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>', "shield_throw": '<circle cx="9" cy="12" r="5"/><path d="M15 8a6 6 0 0 1 0 8M19 6a9 9 0 0 1 0 12"/>', "blood_for_blood": '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/><path d="M10 14h4M12 12v4"/>', "blood_price": '<path d="M10 3s5 5.5 5 9.5a5 5 0 0 1-10 0C5 8.5 10 3 10 3z"/><circle cx="17" cy="16" r="4"/><path d="M17 14v4"/>', "marked_foe": '<circle cx="12" cy="12" r="9"/><path d="M22 12h-4M6 12H2M12 6V2M12 22v-4"/>', "red_harvest": '<path d="M7 3s3 3.5 3 6a3 3 0 0 1-6 0c0-2.5 3-6 3-6zM17 3s3 3.5 3 6a3 3 0 0 1-6 0c0-2.5 3-6 3-6zM12 12s3 3.5 3 6a3 3 0 0 1-6 0c0-2.5 3-6 3-6z"/>', "spite": '<path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-5 3-7 0 3 2 4 3 4-1-4 0-7 0-9z"/><path d="M10 15l4-3"/>', "retribution": '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/>', "executioner": '<path d="M6 21L18 9M14 5l5 5-3 3-5-5z"/><path d="M5 18l2 2"/>', "thorned_bulwark": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M12 3v-2M19 6l2-1M5 6L3 5M19 12h2M5 12H3"/>', "focus": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>', "lunge": '<path d="M14 4l6 6-8 8-3-3zM9 15l-5 5M2 8h5M3 12h3"/>', "en_garde": '<path d="M12 2v14M8 16h8M12 16v6M9 6l3-4 3 4"/>', "opening_strike": '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>', "footwork": '<path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/>', "fencers_grace": '<path d="M4 20L18 6M14 4l6 6"/><path d="M6 10l2-2M10 6l2-2"/><circle cx="18" cy="18" r="3"/>', "duel": '<path d="M5 19L17 7M7 7l12 12M4 16l4 4M16 20l4-4"/>', "riposte": '<path d="M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M9.5 14.5 6 18M4 16l4 4"/>', "steel_nerves": '<path d="M12 20l-7-7a4.5 4.5 0 0 1 7-5.6A4.5 4.5 0 0 1 19 13z"/><path d="M8 12h3l1-2 2 4 1-2h1"/>', "coup_de_grace": '<path d="M12 3a7 7 0 0 0-7 7c0 3 2 4 2 6v2h10v-2c0-2 2-3 2-6a7 7 0 0 0-7-7z"/><path d="M9 11h.01M15 11h.01M10 18v3M14 18v3"/>', "marked_for_death": '<circle cx="12" cy="12" r="9"/><path d="M12 7v10M7 12h10"/><circle cx="12" cy="12" r="3"/>', "glass_blade": '<path d="M14 3l7 7-11 11-7-7z"/><path d="M8 13l3 3M11 10l3 3"/>', "blade_dance": '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>', "thousand_cuts": '<path d="M4 4l16 16M20 4L4 20M12 2v20"/>', "flourish": '<path d="M12 21c-5-3-8-6-8-10a4 4 0 0 1 8-1 4 4 0 0 1 8 1c0 4-3 7-8 10z"/><path d="M12 7v6"/>', "master_duelist": '<path d="M3 18l2-10 5 5 2-8 2 8 5-5 2 10z"/><path d="M3 21h18"/>', "virulence": '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/><path d="M9.5 14h5M12 11.5v5"/>', "toxic_fan": '<path d="M12 21L5 7M12 21V4M12 21l7-14"/>', "serrated_cuts": '<path d="M3 14l3-3 3 3 3-3 3 3 3-3 3 3M3 19h18"/>', "vipers_coating": '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>', "paralytic": '<circle cx="12" cy="12" r="9"/><path d="M12 7v5h4M5 19l2-2"/>', "open_wounds": '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/><path d="M9 11l6 6"/>', "lingering_venom": '<path d="M6 3h12M6 21h12M7 3c0 6 10 6 10 9s-10 3-10 9M17 3c0 6-10 6-10 9"/>', "rupture": '<path d="M12 4s4.5 5 4.5 8.5a4.5 4.5 0 0 1-9 0C7.5 9 12 4 12 4zM3 20l3-3M21 20l-3-3M12 23v-3"/>', "hemorrhage": '<path d="M7 3s3 3.5 3 6a3 3 0 0 1-6 0c0-2.5 3-6 3-6zM17 3s3 3.5 3 6a3 3 0 0 1-6 0c0-2.5 3-6 3-6zM12 12s3 3.5 3 6a3 3 0 0 1-6 0c0-2.5 3-6 3-6z"/>', "septic": '<path d="M12 3a7 7 0 0 0-7 7c0 3 2 4 2 6v2h10v-2c0-2 2-3 2-6a7 7 0 0 0-7-7z"/><path d="M9 11h.01M15 11h.01M10 18v3M14 18v3"/>', "contagious": '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>', "toxic_blood": '<path d="M8 3s4 4.5 4 7.5a4 4 0 0 1-8 0C4 7.5 8 3 8 3z"/><path d="M16 11s4 4.5 4 7.5a4 4 0 0 1-8 0c0-3 4-7.5 4-7.5z"/>', "bloodletting": '<path d="M12 20l-7-7a4.5 4.5 0 0 1 7-5.6A4.5 4.5 0 0 1 19 13z"/>', "noxious_bloom": '<circle cx="12" cy="12" r="2.5"/><path d="M12 3a3 3 0 0 1 0 6 3 3 0 0 1 0-6zM12 15a3 3 0 0 1 0 6 3 3 0 0 1 0-6zM3 12a3 3 0 0 1 6 0 3 3 0 0 1-6 0zM15 12a3 3 0 0 1 6 0 3 3 0 0 1-6 0z"/>', "fester": '<circle cx="9" cy="10" r="4"/><circle cx="16" cy="15" r="3"/><circle cx="8" cy="18" r="2"/><path d="M14 5l2-2M18 9l2-1"/>', "virulent_bloom": '<path d="M3 18l2-10 5 5 2-8 2 8 5-5 2 10z"/><path d="M3 21h18"/>', "light_step": '<path d="M7 3v10l-3 5v2h15v-2l-3-3-5-1V3z"/><path d="M15 4h5M16 8h4"/>', "whirling_blades": '<path d="M12 12a2 2 0 1 1 2-2 4 4 0 1 1-4-4 6 6 0 1 1-6 6"/>', "quick_dash": '<path d="M3 8h11a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h8"/>', "crosscut": '<path d="M5 5l14 14M19 5L5 19M3 12h4M17 12h4"/>', "slipstream": '<path d="M3 10h12M3 14h8M15 7l5 5-5 5"/>', "hit_and_run": '<path d="M4 12h10M10 7l5 5-5 5"/><path d="M20 4v16"/>', "evasive": '<path d="M6 20V10a6 6 0 0 1 12 0v10l-3-2-3 2-3-2z"/><path d="M10 10h.01M14 10h.01"/>', "smoke_veil": '<path d="M7 18a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1.5A3.5 3.5 0 1 1 17 18z"/>', "shade": '<path d="M5 8h14M3 12h18M6 16h12M9 20h6"/>', "opportunist": '<circle cx="12" cy="12" r="5"/><path d="M12 3v4M12 17v4M3 12h4M17 12h4"/>', "exploit": '<path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.5"/>', "restless": '<path d="M3 8h11a3 3 0 1 0-3-3M3 16h8"/><path d="M15 13l3 3 3-3M18 16v-6"/>', "afterimage": '<path d="M6 20V10a6 6 0 0 1 12 0v10l-3-2-3 2-3-2z"/><path d="M3 18V12M21 18V12"/>', "shadowstep": '<path d="M12 3a9 9 0 1 0 0 18M8 12h12M16 8l4 4-4 4"/>', "assassinate": '<path d="M14.5 3.5l6 6-9 9-3-3zM8.5 15.5l-5 5M6 13l5 5"/>', "shadow_assassin": '<path d="M3 18l2-10 5 5 2-8 2 8 5-5 2 10z"/><path d="M3 21h18"/>', "kindling": '<path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-5 3-7 0 3 2 4 3 4-1-4 0-7 0-9z"/>', "firebloom": '<circle cx="12" cy="12" r="2.5"/><path d="M12 3a3 3 0 0 1 0 6 3 3 0 0 1 0-6zM12 15a3 3 0 0 1 0 6 3 3 0 0 1 0-6zM3 12a3 3 0 0 1 6 0 3 3 0 0 1-6 0zM15 12a3 3 0 0 1 6 0 3 3 0 0 1-6 0z"/>', "firebrand": '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5"/><path d="M12.5 6c.5 2 3 3 3 6a3 3 0 0 1-6 0c0-1.5 1-2.5 1.5-3.5 0 1.5 1 2 1.5 2-.5-2 0-3.5 0-4.5z"/>', "fan_the_flames": '<path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-5 3-7 0 3 2 4 3 4-1-4 0-7 0-9z"/><path d="M4 21h16"/>', "searing": '<path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-5 3-7 0 3 2 4 3 4-1-4 0-7 0-9z"/><path d="M3 22h18"/>', "cinder_step": '<path d="M8 20c-2 0-3-2-3-4s2-4 3-4 2 2 2 4-1 4-2 4zM16 12c-2 0-3-2-3-4s2-4 3-4 2 2 2 4-1 4-2 4z"/>', "volatile": '<circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l2.5 2.5M16.5 16.5 19 19M5 19l2.5-2.5M16.5 7.5 19 5"/>', "flame_wall": '<path d="M3 21h18M5 21c0-4 2-5 2-8 1 2 2 2 2 4 0-3 1-5 3-7 0 3 2 4 2 7 1-1 1-2 1-3 1 2 2 4 2 7"/>', "firewalker": '<path d="M8 20c-2 0-3-2-3-4s2-4 3-4 2 2 2 4-1 4-2 4zM16 12c-2 0-3-2-3-4s2-4 3-4 2 2 2 4-1 4-2 4z"/>', "spreading_flames": '<path d="M8 6c.7 2.8 3 4 3 7a3 3 0 0 1-6 0c0-1.6 1-2.6 1.6-3.6"/><path d="M16 9c.7 2.8 3 4 3 7a3 3 0 0 1-6 0c0-1.6 1-2.6 1.6-3.6"/><path d="M10 18h3"/>', "kindle": '<path d="M4 12h16M12 4v16"/><path d="M15 7c.5 2 2 3 2 5a2 2 0 0 1-4 0c0-1 .6-1.6 1-2.3"/>', "glass_furnace": '<path d="M4 21V8l8-5 8 5v13z"/><path d="M12 18c-2 0-3-1.4-3-3 0-2 2-3 3-5 1 2 3 3 3 5 0 1.6-1 3-3 3z"/>', "pyromaniac": '<circle cx="12" cy="12" r="3"/><path d="M12 2c.6 2 3 3 3 5M5 9c2 0 3.5 1.4 4 3M19 9c-2 0-3.5 1.4-4 3M8 20c1-1.6 2.4-2.4 4-2.4s3 .8 4 2.4"/>', "meteor": '<circle cx="15.5" cy="15.5" r="5"/><path d="M3 3l8 8M7 3l6 6M3 7l6 6"/>', "molten_ground": '<path d="M3 17c3-5 15-5 18 0M7 17c1.5-2 8.5-2 10 0M12 3v6M9 6l3 3 3-3"/>', "phoenix": '<path d="M12 21c-1-4-1-7 0-10 1 3 1 6 0 10zM12 11C9 7 5 7 2 8c3 1 5 3 6 7M12 11c3-4 7-4 10-3-3 1-5 3-6 7M12 11V4M10 6l2-2 2 2"/>', "cold_snap": '<path d="M12 2v20M4 6l16 12M20 6L4 18M9 3l3 3 3-3M9 21l3-3 3 3"/>', "flashfreeze": '<path d="M12 3v18M5 7.5l14 9M19 7.5l-14 9"/><circle cx="12" cy="12" r="10" stroke-dasharray="2 3"/>', "frostbinder": '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5"/><path d="M12.5 6v8M9.5 8l6 4M15.5 8l-6 4"/>', "brittle": '<circle cx="12" cy="12" r="9"/><path d="M12 3l-2 5 4 3-3 4 1 6"/>', "deep_freeze": '<path d="M12 3v18M4 7.5l16 9M20 7.5l-16 9"/><path d="M8 3h8M8 21h8"/>', "glacial_skin": '<path d="M12 20l-7-7a4.5 4.5 0 0 1 7-5.6A4.5 4.5 0 0 1 19 13z"/><path d="M12 9v6M9.5 10.5l5 3M14.5 10.5l-5 3"/>', "shatter": '<path d="M12 2v5M12 17v5M2 12h5M17 12h5M5 5l3.5 3.5M15.5 15.5 19 19M5 19l3.5-3.5M15.5 8.5 19 5"/>', "ice_barrier": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M12 8v8M9 10l6 4M15 10l-6 4"/>', "steady_mind": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M9 11h6M9 14h6"/>', "arcane_syphon": '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5"/><path d="M14 7v7M11 11l3 3 3-3"/>', "frost_ward": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M12 3l-1.5 6 3 2.5-2 4.5"/>', "ice_fortress": '<path d="M4 21V9h3V5h3v4h4V5h3v4h3v12z"/><path d="M10 21v-5h4v5"/>', "winters_grasp": '<path d="M7 21v-8l-2-3V6M11 12V4M15 12V5M19 13V7"/><path d="M5 14c2 6 12 6 14 0"/>', "glacial_burst": '<path d="M12 2v6M12 16v6M2 12h6M16 12h6M5 5l4 4M15 15l4 4M5 19l4-4M15 9l4-4"/><path d="M12 9l3 3-3 3-3-3z"/>', "echoing_burst": '<circle cx="12" cy="12" r="3"/><path d="M6 6a8.5 8.5 0 0 0 0 12M18 6a8.5 8.5 0 0 1 0 12"/>', "absolute_zero": '<circle cx="12" cy="12" r="9"/><path d="M12 6v12M7 9l10 6M17 9L7 15"/>', "static_charge": '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/><path d="M19 3v4M17 5h4"/>', "ball_lightning": '<circle cx="12" cy="12" r="5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/><path d="M11 9.5l2 2.5-2 2.5"/>', "storm_conductor": '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5"/><path d="M13 6l-3 5h4l-3 5"/>', "superconductor": '<path d="M13 2L6 12h5l-1 6M17 14a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"/>', "forked_lightning": '<path d="M12 22v-8M12 14L5 4M12 14l7-10M12 14V3"/>', "arc_reach": '<path d="M2 12h6M16 12h6M5 9l-3 3 3 3M19 9l3 3-3 3M12 8v8"/>', "spell_weaving": '<path d="M3 8c3 0 3 8 6 8s3-8 6-8 3 8 6 8M3 16c3 0 3-8 6-8"/>', "static_field": '<circle cx="12" cy="12" r="9" stroke-dasharray="3 3"/><path d="M13 6l-4 6h4l-2 6"/>', "live_wire": '<path d="M3 12h3l2-5 3 10 3-10 2 5h5"/>', "elemental_overload": '<circle cx="12" cy="7" r="3.5"/><circle cx="7" cy="16" r="3.5"/><circle cx="17" cy="16" r="3.5"/>', "magnetic": '<path d="M6 4v8a6 6 0 0 0 12 0V4M6 8h4M14 8h4M10 4v8a2 2 0 0 0 4 0V4"/>', "overload": '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/><circle cx="12" cy="12" r="10" stroke-dasharray="2 3"/>', "quickening": '<circle cx="12" cy="13" r="8"/><path d="M13 9l-2 4h3l-2 4M9 2h6"/>', "thunderfall": '<path d="M7 14a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1.5A3.5 3.5 0 1 1 17 14"/><path d="M12 12l-2 4h4l-2 5"/>', "storm_call": '<path d="M6 3L3 9h4l-2 5M13 3l-3 6h4l-2 5M20 3l-3 6h4l-2 5M3 21h18"/>', "living_storm": '<path d="M12 2l2.6 6.4L21 9l-5 4.6L17.5 21 12 17.3 6.5 21 8 13.6 3 9l6.4-.6z"/>' });
+var CLASS_TREE_ICONS_V1 = Object.freeze({ "iron_will": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M12 15l-3-3a2 2 0 0 1 3-2.6A2 2 0 0 1 15 12z"/>', "rallying_cry": '<path d="M4 10v4l11 5V5zM15 9a3 3 0 0 1 0 6M19 7a7 7 0 0 1 0 10"/>', "bulwark_stance": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M9 13l3-3 3 3M9 17l3-3 3 3"/>', "iron_wall": '<rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 12h16M12 5v14"/>', "intimidate": '<circle cx="12" cy="10" r="6"/><path d="M9 9h.01M15 9h.01M9 13h6M10 16v4M14 16v4"/>', "heavy_plating": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/>', "hold_the_line": '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>', "war_banner": '<path d="M6 21V3M6 4l10 3-10 4"/><path d="M3 21h6"/>', "rooted": '<path d="M12 3v10M12 13l-6 7M12 13l6 7M12 13v8M8 8l4 2 4-2"/>', "second_breath": '<path d="M3 12h4l2-5 4 10 2-5h6"/>', "standard_bearer": '<path d="M6 21V3M6 4l10 3-10 4"/><path d="M12 14l3 3 5-5"/>', "last_stand": '<path d="M12 20l-7-7a4.5 4.5 0 0 1 7-5.6A4.5 4.5 0 0 1 19 13z"/><path d="M12 8l-1.5 3h3L12 14"/>', "unyielding": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M8 12h8"/>', "aegis_pulse": '<path d="M12 6l4 1.7v3.4c0 2.3-1.7 4-4 5-2.3-1-4-2.7-4-5V7.7z"/><path d="M4 7a10 10 0 0 0 0 10M20 7a10 10 0 0 1 0 10"/>', "bastion_ward": '<path d="M12 6l4 1.7v3.4c0 2.3-1.7 4-4 5-2.3-1-4-2.7-4-5V7.7z"/><circle cx="12" cy="11" r="9"/>', "bulwark_colossus": '<path d="M3 21V8l4 3V5l5 4 5-4v6l4-3v13z"/>', "heavy_hands": '<path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="8"/><path d="M4 4l3 3"/>', "earth_breaker": '<path d="M3 20h18M5 20l4-8 3 4 2-3 4 7M12 3v4"/>', "momentum": '<path d="M7 17l5-5 5 5M7 11l5-5 5 5"/>', "shatterpoint": '<path d="M12 2l2 7 7 3-7 3-2 7-2-7-7-3 7-3z"/>', "concussion": '<circle cx="12" cy="14" r="6"/><path d="M6 5l1.2 2M12 3v2.5M18 5l-1.2 2"/>', "impact_training": '<path d="M15 12l-8.5 8.5a2.1 2.1 0 1 1-3-3L12 9M14 4l6 6-3 3-6-6z"/>', "unstoppable": '<path d="M4 20l16-16M9 4h11v11"/>', "shield_charge": '<path d="M14 4l6 2.5v5c0 3.5-2.5 6-6 7.5-3.5-1.5-6-4-6-7.5v-5z"/><path d="M2 9h4M3 13h3M2 17h4"/>', "reckless": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M13 7l-3 5h4l-3 5"/>', "crowd_breaker": '<circle cx="7" cy="14" r="3"/><circle cx="17" cy="14" r="3"/><circle cx="12" cy="7" r="3"/><path d="M4 21h16"/>', "avalanche": '<path d="M3 20l6-10 4 6 3-4 5 8z"/><path d="M15 4l2 2M19 6l1 2"/>', "tremor": '<path d="M3 12h3l2-5 3 10 3-10 2 5h5"/><path d="M4 20h16"/>', "groundbreaker": '<path d="M3 19h18M7 19l2-4-2-3M14 19l-1-3 3-3M18 19l-1-2"/>', "skyfall_leap": '<path d="M12 3v10M8 9l4 4 4-4M4 20h16M6 20l2-3M18 20l-2-3"/>', "titan": '<path d="M8 21V11l-3-2V5h14v4l-3 2v10z"/><path d="M9 5V3M15 5V3M12 5V3"/>', "earthshaker": '<path d="M12 2l2.6 6.4L21 9l-5 4.6L17.5 21 12 17.3 6.5 21 8 13.6 3 9l6.4-.6z"/>', "retaliation": '<path d="M9 14L4 9l5-5M4 9h11a5 5 0 0 1 0 10h-3"/>', "counter_stance": '<path d="M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4"/>', "spiked_shield": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M12 3v3M19 6l-2 2M5 6l2 2"/>', "grudge": '<path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.5"/>', "unbroken": '<path d="M4 12h16M12 4v16"/><circle cx="12" cy="12" r="8"/>', "serrated_edge": '<path d="M3 14l3-3 3 3 3-3 3 3 3-3 3 3M3 19h18"/>', "vengeance": '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.4-.5-2-1-3-1-2.1-.2-4 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.2.4-2.3 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>', "shield_throw": '<circle cx="9" cy="12" r="5"/><path d="M15 8a6 6 0 0 1 0 8M19 6a9 9 0 0 1 0 12"/>', "blood_for_blood": '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/><path d="M10 14h4M12 12v4"/>', "blood_price": '<path d="M10 3s5 5.5 5 9.5a5 5 0 0 1-10 0C5 8.5 10 3 10 3z"/><circle cx="17" cy="16" r="4"/><path d="M17 14v4"/>', "marked_foe": '<circle cx="12" cy="12" r="9"/><path d="M22 12h-4M6 12H2M12 6V2M12 22v-4"/>', "red_harvest": '<path d="M7 3s3 3.5 3 6a3 3 0 0 1-6 0c0-2.5 3-6 3-6zM17 3s3 3.5 3 6a3 3 0 0 1-6 0c0-2.5 3-6 3-6zM12 12s3 3.5 3 6a3 3 0 0 1-6 0c0-2.5 3-6 3-6z"/>', "spite": '<path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-5 3-7 0 3 2 4 3 4-1-4 0-7 0-9z"/><path d="M10 15l4-3"/>', "retribution": '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/>', "executioner": '<path d="M6 21L18 9M14 5l5 5-3 3-5-5z"/><path d="M5 18l2 2"/>', "thorned_bulwark": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M12 3v-2M19 6l2-1M5 6L3 5M19 12h2M5 12H3"/>', "focus": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>', "lunge": '<path d="M14 4l6 6-8 8-3-3zM9 15l-5 5M2 8h5M3 12h3"/>', "en_garde": '<path d="M12 2v14M8 16h8M12 16v6M9 6l3-4 3 4"/>', "opening_strike": '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>', "footwork": '<path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/>', "fencers_grace": '<path d="M4 20L18 6M14 4l6 6"/><path d="M6 10l2-2M10 6l2-2"/><circle cx="18" cy="18" r="3"/>', "duel": '<path d="M5 19L17 7M7 7l12 12M4 16l4 4M16 20l4-4"/>', "riposte": '<path d="M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M9.5 14.5 6 18M4 16l4 4"/>', "steel_nerves": '<path d="M12 20l-7-7a4.5 4.5 0 0 1 7-5.6A4.5 4.5 0 0 1 19 13z"/><path d="M8 12h3l1-2 2 4 1-2h1"/>', "coup_de_grace": '<path d="M12 3a7 7 0 0 0-7 7c0 3 2 4 2 6v2h10v-2c0-2 2-3 2-6a7 7 0 0 0-7-7z"/><path d="M9 11h.01M15 11h.01M10 18v3M14 18v3"/>', "marked_for_death": '<circle cx="12" cy="12" r="9"/><path d="M12 7v10M7 12h10"/><circle cx="12" cy="12" r="3"/>', "glass_blade": '<path d="M14 3l7 7-11 11-7-7z"/><path d="M8 13l3 3M11 10l3 3"/>', "blade_dance": '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>', "thousand_cuts": '<path d="M4 4l16 16M20 4L4 20M12 2v20"/>', "flourish": '<path d="M12 21c-5-3-8-6-8-10a4 4 0 0 1 8-1 4 4 0 0 1 8 1c0 4-3 7-8 10z"/><path d="M12 7v6"/>', "master_duelist": '<path d="M3 18l2-10 5 5 2-8 2 8 5-5 2 10z"/><path d="M3 21h18"/>', "virulence": '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/><path d="M9.5 14h5M12 11.5v5"/>', "toxic_fan": '<path d="M12 21L5 7M12 21V4M12 21l7-14"/>', "serrated_cuts": '<path d="M3 14l3-3 3 3 3-3 3 3 3-3 3 3M3 19h18"/>', "vipers_coating": '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>', "paralytic": '<circle cx="12" cy="12" r="9"/><path d="M12 7v5h4M5 19l2-2"/>', "open_wounds": '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/><path d="M9 11l6 6"/>', "lingering_venom": '<path d="M6 3h12M6 21h12M7 3c0 6 10 6 10 9s-10 3-10 9M17 3c0 6-10 6-10 9"/>', "rupture": '<path d="M12 4s4.5 5 4.5 8.5a4.5 4.5 0 0 1-9 0C7.5 9 12 4 12 4zM3 20l3-3M21 20l-3-3M12 23v-3"/>', "hemorrhage": '<path d="M7 3s3 3.5 3 6a3 3 0 0 1-6 0c0-2.5 3-6 3-6zM17 3s3 3.5 3 6a3 3 0 0 1-6 0c0-2.5 3-6 3-6zM12 12s3 3.5 3 6a3 3 0 0 1-6 0c0-2.5 3-6 3-6z"/>', "septic": '<path d="M12 3a7 7 0 0 0-7 7c0 3 2 4 2 6v2h10v-2c0-2 2-3 2-6a7 7 0 0 0-7-7z"/><path d="M9 11h.01M15 11h.01M10 18v3M14 18v3"/>', "contagious": '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>', "toxic_blood": '<path d="M8 3s4 4.5 4 7.5a4 4 0 0 1-8 0C4 7.5 8 3 8 3z"/><path d="M16 11s4 4.5 4 7.5a4 4 0 0 1-8 0c0-3 4-7.5 4-7.5z"/>', "bloodletting": '<path d="M12 20l-7-7a4.5 4.5 0 0 1 7-5.6A4.5 4.5 0 0 1 19 13z"/>', "noxious_bloom": '<circle cx="12" cy="12" r="2.5"/><path d="M12 3a3 3 0 0 1 0 6 3 3 0 0 1 0-6zM12 15a3 3 0 0 1 0 6 3 3 0 0 1 0-6zM3 12a3 3 0 0 1 6 0 3 3 0 0 1-6 0zM15 12a3 3 0 0 1 6 0 3 3 0 0 1-6 0z"/>', "fester": '<circle cx="9" cy="10" r="4"/><circle cx="16" cy="15" r="3"/><circle cx="8" cy="18" r="2"/><path d="M14 5l2-2M18 9l2-1"/>', "virulent_bloom": '<path d="M3 18l2-10 5 5 2-8 2 8 5-5 2 10z"/><path d="M3 21h18"/>', "light_step": '<path d="M7 3v10l-3 5v2h15v-2l-3-3-5-1V3z"/><path d="M15 4h5M16 8h4"/>', "whirling_blades": '<path d="M12 12a2 2 0 1 1 2-2 4 4 0 1 1-4-4 6 6 0 1 1-6 6"/>', "quick_dash": '<path d="M3 8h11a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h8"/>', "crosscut": '<path d="M5 5l14 14M19 5L5 19M3 12h4M17 12h4"/>', "slipstream": '<path d="M3 10h12M3 14h8M15 7l5 5-5 5"/>', "hit_and_run": '<path d="M4 12h10M10 7l5 5-5 5"/><path d="M20 4v16"/>', "evasive": '<path d="M6 20V10a6 6 0 0 1 12 0v10l-3-2-3 2-3-2z"/><path d="M10 10h.01M14 10h.01"/>', "smoke_veil": '<path d="M7 18a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1.5A3.5 3.5 0 1 1 17 18z"/>', "shade": '<path d="M5 8h14M3 12h18M6 16h12M9 20h6"/>', "opportunist": '<circle cx="12" cy="12" r="5"/><path d="M12 3v4M12 17v4M3 12h4M17 12h4"/>', "exploit": '<path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.5"/>', "restless": '<path d="M3 8h11a3 3 0 1 0-3-3M3 16h8"/><path d="M15 13l3 3 3-3M18 16v-6"/>', "afterimage": '<path d="M6 20V10a6 6 0 0 1 12 0v10l-3-2-3 2-3-2z"/><path d="M3 18V12M21 18V12"/>', "shadowstep": '<path d="M12 3a9 9 0 1 0 0 18M8 12h12M16 8l4 4-4 4"/>', "assassinate": '<path d="M14.5 3.5l6 6-9 9-3-3zM8.5 15.5l-5 5M6 13l5 5"/>', "shadow_assassin": '<path d="M3 18l2-10 5 5 2-8 2 8 5-5 2 10z"/><path d="M3 21h18"/>', "kindling": '<path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-5 3-7 0 3 2 4 3 4-1-4 0-7 0-9z"/>', "firebloom": '<circle cx="12" cy="12" r="2.5"/><path d="M12 3a3 3 0 0 1 0 6 3 3 0 0 1 0-6zM12 15a3 3 0 0 1 0 6 3 3 0 0 1 0-6zM3 12a3 3 0 0 1 6 0 3 3 0 0 1-6 0zM15 12a3 3 0 0 1 6 0 3 3 0 0 1-6 0z"/>', "firebrand": '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5"/><path d="M12.5 6c.5 2 3 3 3 6a3 3 0 0 1-6 0c0-1.5 1-2.5 1.5-3.5 0 1.5 1 2 1.5 2-.5-2 0-3.5 0-4.5z"/>', "fan_the_flames": '<path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-5 3-7 0 3 2 4 3 4-1-4 0-7 0-9z"/><path d="M4 21h16"/>', "searing": '<path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-5 3-7 0 3 2 4 3 4-1-4 0-7 0-9z"/><path d="M3 22h18"/>', "cinder_step": '<path d="M8 20c-2 0-3-2-3-4s2-4 3-4 2 2 2 4-1 4-2 4zM16 12c-2 0-3-2-3-4s2-4 3-4 2 2 2 4-1 4-2 4z"/>', "volatile": '<circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l2.5 2.5M16.5 16.5 19 19M5 19l2.5-2.5M16.5 7.5 19 5"/>', "flame_wall": '<path d="M3 21h18M5 21c0-4 2-5 2-8 1 2 2 2 2 4 0-3 1-5 3-7 0 3 2 4 2 7 1-1 1-2 1-3 1 2 2 4 2 7"/>', "firewalker": '<path d="M8 20c-2 0-3-2-3-4s2-4 3-4 2 2 2 4-1 4-2 4zM16 12c-2 0-3-2-3-4s2-4 3-4 2 2 2 4-1 4-2 4z"/>', "spreading_flames": '<path d="M8 6c.7 2.8 3 4 3 7a3 3 0 0 1-6 0c0-1.6 1-2.6 1.6-3.6"/><path d="M16 9c.7 2.8 3 4 3 7a3 3 0 0 1-6 0c0-1.6 1-2.6 1.6-3.6"/><path d="M10 18h3"/>', "kindle": '<path d="M4 12h16M12 4v16"/><path d="M15 7c.5 2 2 3 2 5a2 2 0 0 1-4 0c0-1 .6-1.6 1-2.3"/>', "glass_furnace": '<path d="M4 21V8l8-5 8 5v13z"/><path d="M12 18c-2 0-3-1.4-3-3 0-2 2-3 3-5 1 2 3 3 3 5 0 1.6-1 3-3 3z"/>', "pyromaniac": '<circle cx="12" cy="12" r="3"/><path d="M12 2c.6 2 3 3 3 5M5 9c2 0 3.5 1.4 4 3M19 9c-2 0-3.5 1.4-4 3M8 20c1-1.6 2.4-2.4 4-2.4s3 .8 4 2.4"/>', "meteor": '<circle cx="15.5" cy="15.5" r="5"/><path d="M3 3l8 8M7 3l6 6M3 7l6 6"/>', "molten_ground": '<path d="M3 17c3-5 15-5 18 0M7 17c1.5-2 8.5-2 10 0M12 3v6M9 6l3 3 3-3"/>', "phoenix": '<path d="M12 21c-1-4-1-7 0-10 1 3 1 6 0 10zM12 11C9 7 5 7 2 8c3 1 5 3 6 7M12 11c3-4 7-4 10-3-3 1-5 3-6 7M12 11V4M10 6l2-2 2 2"/>', "cold_snap": '<path d="M12 2v20M4 6l16 12M20 6L4 18M9 3l3 3 3-3M9 21l3-3 3 3"/>', "flashfreeze": '<path d="M12 3v18M5 7.5l14 9M19 7.5l-14 9"/><circle cx="12" cy="12" r="10" stroke-dasharray="2 3"/>', "frostbinder": '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5"/><path d="M12.5 6v8M9.5 8l6 4M15.5 8l-6 4"/>', "brittle": '<circle cx="12" cy="12" r="9"/><path d="M12 3l-2 5 4 3-3 4 1 6"/>', "deep_freeze": '<path d="M12 3v18M4 7.5l16 9M20 7.5l-16 9"/><path d="M8 3h8M8 21h8"/>', "frost_step": '<path d="M8 20c-2 0-3-2-3-4s2-4 3-4 2 2 2 4-1 4-2 4z"/><path d="M16 3v10M12 5.5l8 5M20 5.5l-8 5"/>', "shatter": '<path d="M12 2v5M12 17v5M2 12h5M17 12h5M5 5l3.5 3.5M15.5 15.5 19 19M5 19l3.5-3.5M15.5 8.5 19 5"/>', "ice_barrier": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M12 8v8M9 10l6 4M15 10l-6 4"/>', "steady_mind": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M9 11h6M9 14h6"/>', "arcane_syphon": '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5"/><path d="M14 7v7M11 11l3 3 3-3"/>', "frost_ward": '<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M12 3l-1.5 6 3 2.5-2 4.5"/>', "ice_fortress": '<path d="M4 21V9h3V5h3v4h4V5h3v4h3v12z"/><path d="M10 21v-5h4v5"/>', "winters_grasp": '<path d="M7 21v-8l-2-3V6M11 12V4M15 12V5M19 13V7"/><path d="M5 14c2 6 12 6 14 0"/>', "glacial_burst": '<path d="M12 2v6M12 16v6M2 12h6M16 12h6M5 5l4 4M15 15l4 4M5 19l4-4M15 9l4-4"/><path d="M12 9l3 3-3 3-3-3z"/>', "echoing_burst": '<circle cx="12" cy="12" r="3"/><path d="M6 6a8.5 8.5 0 0 0 0 12M18 6a8.5 8.5 0 0 1 0 12"/>', "absolute_zero": '<circle cx="12" cy="12" r="9"/><path d="M12 6v12M7 9l10 6M17 9L7 15"/>', "static_charge": '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/><path d="M19 3v4M17 5h4"/>', "ball_lightning": '<circle cx="12" cy="12" r="5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/><path d="M11 9.5l2 2.5-2 2.5"/>', "storm_conductor": '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5"/><path d="M13 6l-3 5h4l-3 5"/>', "superconductor": '<path d="M13 2L6 12h5l-1 6M17 14a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"/>', "forked_lightning": '<path d="M12 22v-8M12 14L5 4M12 14l7-10M12 14V3"/>', "static_step": '<path d="M8 20c-2 0-3-2-3-4s2-4 3-4 2 2 2 4-1 4-2 4z"/><path d="M18 2l-4 6h4l-3 6"/>', "spell_weaving": '<path d="M3 8c3 0 3 8 6 8s3-8 6-8 3 8 6 8M3 16c3 0 3-8 6-8"/>', "static_field": '<circle cx="12" cy="12" r="9" stroke-dasharray="3 3"/><path d="M13 6l-4 6h4l-2 6"/>', "live_wire": '<path d="M3 12h3l2-5 3 10 3-10 2 5h5"/>', "elemental_overload": '<circle cx="12" cy="7" r="3.5"/><circle cx="7" cy="16" r="3.5"/><circle cx="17" cy="16" r="3.5"/>', "magnetic": '<path d="M6 4v8a6 6 0 0 0 12 0V4M6 8h4M14 8h4M10 4v8a2 2 0 0 0 4 0V4"/>', "overload": '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/><circle cx="12" cy="12" r="10" stroke-dasharray="2 3"/>', "quickening": '<circle cx="12" cy="13" r="8"/><path d="M13 9l-2 4h3l-2 4M9 2h6"/>', "thunderfall": '<path d="M7 14a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1.5A3.5 3.5 0 1 1 17 14"/><path d="M12 12l-2 4h4l-2 5"/>', "storm_call": '<path d="M6 3L3 9h4l-2 5M13 3l-3 6h4l-2 5M20 3l-3 6h4l-2 5M3 21h18"/>', "living_storm": '<path d="M12 2l2.6 6.4L21 9l-5 4.6L17.5 21 12 17.3 6.5 21 8 13.6 3 9l6.4-.6z"/>' });
 
 // src/client/skill_icons_v1.js
 var outline = 'stroke="#0b1015" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"';
@@ -60818,7 +60831,7 @@ var PAGE_ANGLES = [[164, 195, 226, 257, 288]];
 var TURN = -153;
 var SPACING = 31;
 var MOVE_NAMES = { shield: "Guard", dagger: "Dash", tome: "Blink" };
-var TIP_KEY = "saq-skill-wheel-arrange-tip-v1";
+var TIP_KEY = "saq-skill-wheel-arrange-tip-v2";
 function wheelEntriesV1(player) {
   if (heroClassOf(player?.d8)) return skillLoadout(player.d8);
   return Array.from({ length: WHEEL_SLOTS }, (_, i) => i === 0 ? MOVE_SLOT : i === 1 ? "pick" : null);
@@ -60834,13 +60847,11 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
     if (cls) e.className = cls;
     return e;
   };
-  const wheel = el("div", "skill-wheel-v1"), ring6 = el("div", "skill-wheel-ring"), spin = el("button", "skill-wheel-spin"), done = el("button", "skill-wheel-done");
+  const wheel = el("div", "skill-wheel-v1"), ring6 = el("div", "skill-wheel-ring"), done = el("button", "skill-wheel-done");
   wheel.dataset.gameplayHud = "";
   wheel.setAttribute("aria-label", "Skills");
-  spin.type = done.type = "button";
-  spin.dataset.gameplayHud = done.dataset.gameplayHud = "";
-  spin.innerHTML = SKILL_ICONS_V1.spin + "<i></i><i></i>";
-  spin.setAttribute("aria-label", "Hold to arrange the skill wheel.");
+  done.type = "button";
+  done.dataset.gameplayHud = "";
   done.innerHTML = '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 25l8 8 16-18" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Done</span>';
   done.setAttribute("aria-label", "Finish arranging the skill wheel");
   done.hidden = true;
@@ -60850,7 +60861,7 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
   attackSkill.hidden = true;
   attackSkill.setAttribute("aria-hidden", "true");
   let attackPaint = "";
-  wheel.append(ring6, spin);
+  wheel.append(ring6);
   document2.getElementById("world-bag").parentElement.append(wheel, done, attackSkill);
   const slots = [];
   for (let i = 0; i < WHEEL_SLOTS; i++) {
@@ -60940,7 +60951,7 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
     stopArranging(true);
   });
   listen(done, "click", (e) => e.preventDefault());
-  let page = 0, turn7 = 0, target = 0, drag = null, frame3 = null, geometry = null, hold = null, held = false;
+  let page = 0, turn7 = 0, target = 0, drag = null, frame3 = null, geometry = null;
   const now3 = () => environment.performance?.now?.() ?? Date.now();
   function animate() {
     const step = () => {
@@ -60958,26 +60969,6 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
     wheel.dataset.page = String(next + 1);
     animate();
   }
-  listen(spin, "pointerdown", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    held = false;
-    environment.clearTimeout(hold);
-    hold = environment.setTimeout(() => {
-      held = true;
-      if (arranging) stopArranging(true);
-      else startArranging();
-    }, 450);
-  });
-  const spinUp = (e) => {
-    environment.clearTimeout(hold);
-    hold = null;
-    if (e.type === "pointerup" && !held) setPage(page ? 0 : 1);
-    held = false;
-  };
-  listen(spin, "pointerup", spinUp);
-  listen(spin, "pointercancel", spinUp);
-  listen(spin, "click", (e) => e.preventDefault());
   const angleAt = (e) => Math.atan2(e.clientY - geometry.cy - geometry.top, e.clientX - geometry.cx - geometry.left) * 180 / Math.PI;
   listen(ring6, "pointerdown", (e) => {
     if (!geometry || WHEEL_PAGES < 2) return;
@@ -61067,7 +61058,6 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
     wheel.style.setProperty("--slot", g.slot + "px");
     document2.body.style.setProperty("--wheel-slot", g.slot + "px");
     ring6.style.cssText = `left:${(g.cx - band3).toFixed(1)}px;top:${(g.cy - band3).toFixed(1)}px;width:${(band3 * 2).toFixed(1)}px;height:${(band3 * 2).toFixed(1)}px;--hole:${hole.toFixed(1)}px;clip-path:path(evenodd,"${circle9(band3, band3)} ${circle9(hole, band3)}")`;
-    spin.style.setProperty("--at", css(at5(270, g.hub + 20, 34)));
     done.style.cssText = `left:${(g.cx - g.hub).toFixed(1)}px;top:${(g.cy - g.hub).toFixed(1)}px;width:${(g.hub * 2).toFixed(1)}px;height:${(g.hub * 2).toFixed(1)}px`;
     attackSkill.style.left = done.style.left;
     attackSkill.style.top = done.style.top;
@@ -61092,7 +61082,7 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
     }
     if (seen4) return;
     remember();
-    toastV1(document2, { kind: "mastery", title: "Arrange your skill wheel", sub: "Hold the spin button above Attack, then tap two slots to swap them.", accent: heroClass.color, key: "skill-wheel-tip", ms: 7e3 });
+    toastV1(document2, { kind: "mastery", title: "Arrange your skill wheel", sub: "Open the menu, then Skills: tap two spots on the skill wheel there to swap them.", accent: heroClass.color, key: "skill-wheel-tip", ms: 7e3 });
   }
   let lastModel = null;
   const paintNow = () => {
@@ -61118,6 +61108,7 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
     }
     wheel.dataset.classId = heroClass?.id ?? "none";
     wheel.style.setProperty("--class", heroClass?.color ?? "#c9b58b");
+    document2.body.style.setProperty("--wheel-class", heroClass?.color ?? "#c9b58b");
     const index = list.indexOf(MOVE_SLOT);
     if (index !== moveIndex) {
       moveIndex = index;
@@ -61149,7 +61140,6 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
       }
       s.b.disabled = !arranging && state === "locked";
     });
-    spin.dataset.page = String(page + 1);
     tip(heroClass);
     const onAttack = heroClass ? p.d8?.attackSkill : null, attackLeft = onAttack ? c?.skills?.cooldowns?.[onAttack] ?? 0 : 0;
     attackSkill.hidden = !onAttack || arranging;
@@ -61168,7 +61158,6 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
   }
   return Object.freeze({ refresh, turn: setPage, arrange: startArranging, inspect: () => ({ page, turn: turn7, arranging, draft: draft ? [...draft] : null }), destroy() {
     listeners.forEach((f) => f());
-    environment.clearTimeout(hold);
     if (frame3) environment.cancelAnimationFrame?.(frame3);
     wheel.remove();
     done.remove();
@@ -62606,6 +62595,7 @@ var TOP = 10;
 var TILE7 = 54;
 var ROWS = 6;
 var center2 = (row2, col2) => ({ x: col2 * COL + COL / 2, y: row2 * ROW + TOP + TILE7 / 2 });
+var MOVE_NAMES2 = { shield: "Guard", dagger: "Dash", tome: "Blink" };
 var KIND_TAG = { active: "ACTIVE", passive: "PASSIVE", capstone: "PASSIVE" };
 var kindTag = (s) => s.tradeOff ? "TRADE-OFF" : KIND_TAG[s.kind];
 function skillStateV1(d, id) {
@@ -62629,12 +62619,13 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
     void e.offsetWidth;
     e.classList.add(cls);
   };
-  const root2 = el("div", "cs-view"), head13 = el("div", "cs-head"), points2 = el("div", "cs-points"), tabs = el("nav", "cs-tabs"), body5 = el("div", "cs-body"), utilityWrap = el("div", "cs-utility");
+  const root2 = el("div", "cs-view"), head13 = el("div", "cs-head"), points2 = el("div", "cs-points"), tabs = el("nav", "cs-tabs"), body5 = el("div", "cs-body"), utilityWrap = el("div", "cs-utility"), wheelBar = el("section", "cs-wheel");
   tabs.setAttribute("aria-label", "Skill trees");
-  head13.append(points2, tabs);
+  wheelBar.setAttribute("aria-label", "Skill wheel");
+  head13.append(points2, tabs, wheelBar);
   root2.append(head13, body5);
   utilityWrap.append(utility.root);
-  let d = null, ready = false, classId = null, tree = null, selected = null, confirmReset = false, grids = {}, tabButtons = {}, lastRanks = {};
+  let d = null, ready = false, classId = null, tree = null, selected = null, confirmReset = false, grids = {}, tabButtons = {}, lastRanks = {}, wheelPick = null;
   function icon(id, color28) {
     const svg2 = svgEl("svg");
     for (const [k, v] of Object.entries({ viewBox: "0 0 24 24", fill: "none", stroke: color28, "stroke-width": "1.9", "stroke-linecap": "round", "stroke-linejoin": "round", "aria-hidden": "true" })) svg2.setAttribute(k, v);
@@ -62692,6 +62683,61 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
     wrap2.append(tagline, grid, foot);
     return { tree: t, wrap: wrap2, tagline, grid, bubble, foot, tiles: tiles3, lines: lines2, gates };
   }
+  function paintWheel() {
+    const hc = heroClassOf(d);
+    wheelBar.hidden = !hc;
+    if (!hc) return;
+    const slots = skillLoadout(d), bench5 = wheelEntriesFor(d).filter((id) => !slots.includes(id));
+    wheelBar.style.setProperty("--class", hc.color);
+    const head14 = el("div", "cs-wheel-head");
+    head14.append(el("span", "", "SKILL WHEEL"), el("small", "", wheelPick !== null ? "Now tap where it goes" : bench5.length ? "Tap two to swap. Past the line: off the wheel" : "Tap two to swap them"));
+    const spot = (key2, id) => {
+      const move2 = id === MOVE_SLOT, name = move2 ? MOVE_NAMES2[hc.offhand] ?? "Class move" : id ? CLASS_SKILLS[id]?.name ?? id : "Empty", b = button("cs-wheel-spot", "", () => pickWheel(key2)), icon2 = el("span", "cs-wheel-icon");
+      icon2.innerHTML = move2 ? SKILL_ICONS_V1[MOVE_ICON_FOR[hc.offhand]] ?? "" : id ? SKILL_ICONS_V1[id] ?? "" : "";
+      b.append(icon2, el("span", "cs-wheel-name", name));
+      b.dataset.empty = String(!id);
+      b.dataset.picked = String(wheelPick === key2);
+      b.disabled = !ready;
+      b.setAttribute("aria-label", `${name}${key2[0] === "b" ? ", not on the wheel" : ""}. ${wheelPick === null ? "Tap to pick it up" : "Tap to swap"}`);
+      return b;
+    };
+    const row2 = el("div", "cs-wheel-row");
+    row2.append(...slots.map((id, i) => spot("w" + i, id)));
+    if (bench5.length) {
+      row2.append(el("i", "cs-wheel-gap"));
+      for (const id of bench5) {
+        const b = spot("b:" + id, id);
+        b.classList.add("bench");
+        row2.append(b);
+      }
+    }
+    wheelBar.replaceChildren(head14, row2);
+  }
+  function pickWheel(key2) {
+    if (wheelPick === null || wheelPick === key2) {
+      wheelPick = wheelPick === key2 ? null : key2;
+      paint2();
+      return;
+    }
+    const first = wheelPick, slot = (k) => k[0] === "w" ? Number(k.slice(1)) : -1, i = slot(first), j = slot(key2), next = [...skillLoadout(d)];
+    wheelPick = null;
+    if (i < 0 && j < 0) {
+      wheelPick = key2;
+      paint2();
+      return;
+    }
+    if (i >= 0 && j >= 0) [next[i], next[j]] = [next[j], next[i]];
+    else {
+      const at5 = i >= 0 ? i : j, id = (i >= 0 ? key2 : first).slice(2);
+      if (next[at5] === MOVE_SLOT) {
+        paint2();
+        return;
+      }
+      next[at5] = id;
+    }
+    send({ kind: "skills.arrange", slots: next });
+    paint2();
+  }
   function defaultTree(trees) {
     return trees.reduce((a, b) => classTreeSpent(d, b.id) > classTreeSpent(d, a.id) ? b : a, trees[0]).id;
   }
@@ -62724,6 +62770,7 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
       badge.hidden = !spent;
     }
     root2.style.setProperty("--tree", trees.find((t) => t.id === tree)?.color ?? "#b7a077");
+    paintWheel();
   }
   function paintGrid(g) {
     const t = g.tree, spent = classTreeSpent(d, t.id);
@@ -62768,7 +62815,7 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
     if (s.kind === "active" && CLASS_SKILL_AUGMENTS[id]) parts.push(augmentList(id, s, st));
     if (s.kind === "active" && st.learned) {
       const onAttack = d.attackSkill === id, onWheel = skillLoadout(d).includes(id);
-      parts.push(el("p", "cs-note", onAttack ? "It\u2019s on your Attack button." : onWheel ? "It\u2019s on your skill wheel." : "Your wheel is full. Hold the spin button above Attack to swap it in."));
+      parts.push(el("p", "cs-note", onAttack ? "It\u2019s on your Attack button." : onWheel ? "It\u2019s on your skill wheel." : "Your wheel is full. Swap it in from the skill wheel at the top."));
       const swap = button("cs-attack", onAttack ? "Back to basic attack" : "Put on Attack button", () => send(onAttack ? { kind: "skills.arrange", slots: skillLoadout({ ...d, attackSkill: void 0 }), attack: null } : { kind: "skills.arrange", slots: skillLoadout({ ...d, attackSkill: id }), attack: id }));
       swap.disabled = !ready;
       parts.push(swap);
@@ -62829,6 +62876,7 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
       tree = null;
       selected = null;
       lastRanks = {};
+      wheelPick = null;
       buildTabs(trees);
     }
     if (!tree) tree = defaultTree(trees);
@@ -62853,6 +62901,7 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
     confirmReset = false;
     grids = {};
     lastRanks = {};
+    wheelPick = null;
     utility.reset();
   }, inspect: () => ({ tree, selected }) });
 }
@@ -68976,6 +69025,7 @@ function createShieldGuardInput({ button, environment, readModel, adapter, isBlo
     button.setAttribute("aria-pressed", String(Boolean(g?.raised)));
     button.setAttribute("aria-label", `Raise Shield \u2014 hold Shift or touch. Guard Integrity ${Math.floor(g?.integrity ?? 0)} of 32`);
     button.style.setProperty("--guard-fill", `${100 * (g?.integrity ?? 0) / 32}%`);
+    button.style.setProperty("--cool", (1 - Math.min(32, g?.integrity ?? 0) / 32).toFixed(3));
     button.dataset.raised = String(Boolean(g?.raised));
     button.dataset.empty = String((g?.integrity ?? 0) < 8);
     const text2 = `${g?.raised ? "RAISED" : g?.mustRelease ? "RELEASE" : g?.requested ? "RAISING\u2026" : "GUARD"}
@@ -69036,6 +69086,13 @@ function createSubweaponHud({ document: document2, environment, readModel, adapt
   guardButton.type = "button";
   guardButton.className = "shield-guard";
   guardButton.dataset.gameplayHud = "";
+  {
+    const key2 = document2.createElement("small");
+    key2.className = "move-key";
+    key2.textContent = "\u21E7";
+    key2.setAttribute("aria-hidden", "true");
+    guardButton.append(key2);
+  }
   document2.getElementById("world-bag").parentElement.append(guardButton);
   const guard = createShieldGuardInput({ button: guardButton, environment, readModel, adapter, isBlocked, clearPrimary, reportError });
   const panel = document2.createElement("div"), dash = document2.createElement("button");
@@ -69134,7 +69191,11 @@ ${(c.dash.cooldown / 60).toFixed(1)}s`;
       time.className = "move-time";
       time.textContent = ready ? "" : (c.dash.cooldown / 60).toFixed(1);
       dash.innerHTML = SKILL_ICONS_V1[blink ? "blink" : "dash"];
-      dash.append(time, label4);
+      const key2 = document2.createElement("small");
+      key2.className = "move-key";
+      key2.textContent = "\u21E7";
+      key2.setAttribute("aria-hidden", "true");
+      dash.append(time, label4, key2);
       dash.dataset.label = value2;
       dash.dataset.move = blink ? "blink" : "dash";
       dash.setAttribute("aria-label", `${blink ? "Blink" : "Shadow Dash"} \u2014 Shift`);
@@ -86486,7 +86547,7 @@ function drawLightningOrb(ctx, o, time) {
   }
   ctx.restore();
 }
-function drawCinderTrail(ctx, tr, time) {
+function drawFireTrail(ctx, tr, time) {
   const F = CAST_COLORS.fire, K6 = { deep: "#8a2a0c", main: F.main, spark: F.spark }, fade = Math.min(1, (tr.ticks ?? 60) / 30), dx = tr.x2 - tr.x, dy = tr.y2 - tr.y, len = Math.hypot(dx, dy);
   if (fade <= 0) return;
   if (groundPassV1()) {
@@ -86526,6 +86587,69 @@ function drawCinderTrail(ctx, tr, time) {
     const cycle = time / 700 + rnd2(i + 3), round = Math.floor(cycle), rise = cycle - round, k = rnd2(i * 7 + round * 13), gy = tr.y + dy * k;
     standV1(ctx, gy, () => mote(ctx, tr.x + dx * k, gy - 4 - 16 * rise, 1, F.spark, fade * (1 - rise)));
   }
+}
+function drawFrostTrail(ctx, tr, time) {
+  const F = CAST_COLORS.frost, K6 = { deep: "#1f5680", main: F.main, spark: F.spark }, fade = Math.min(1, (tr.ticks ?? 60) / 30), dx = tr.x2 - tr.x, dy = tr.y2 - tr.y, len = Math.hypot(dx, dy);
+  if (fade <= 0) return;
+  if (groundPassV1()) {
+    ctx.save();
+    ctx.globalAlpha *= 0.38 * fade;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#dff4ff";
+    ctx.lineWidth = 12;
+    ctx.beginPath();
+    ctx.moveTo(tr.x, tr.y);
+    ctx.lineTo(tr.x2, tr.y2);
+    ctx.stroke();
+    ctx.restore();
+    neon(ctx, K6, 1, () => {
+      ctx.beginPath();
+      ctx.moveTo(tr.x, tr.y);
+      ctx.lineTo(tr.x2, tr.y2);
+    }, fade * 0.7);
+  }
+  const n = Math.max(2, Math.round(len / 12));
+  for (let i = 0; i <= n; i++) {
+    const k = i / n, px5 = tr.x + dx * k + (rnd2(i + 31) - 0.5) * 7, py = tr.y + dy * k + (rnd2(i + 37) - 0.5) * 5, h = 4 + 5 * rnd2(i + 41);
+    standV1(ctx, py, () => withAlpha(ctx, fade * 0.95, () => {
+      ctx.fillStyle = i % 2 ? "#e6f8ff" : "#a9dcff";
+      ctx.strokeStyle = K6.deep;
+      ctx.lineWidth = 0.6;
+      ctx.beginPath();
+      ctx.moveTo(px5 - 2.2, py);
+      ctx.lineTo(px5, py - h);
+      ctx.lineTo(px5 + 2.2, py);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }));
+  }
+  for (let i = 0; i < 4; i++) {
+    const cycle = time / 900 + rnd2(i + 9), round = Math.floor(cycle), rise = cycle - round, k = rnd2(i * 5 + round * 11), gy = tr.y + dy * k;
+    standV1(ctx, gy, () => mote(ctx, tr.x + dx * k, gy - 3 - 10 * rise, 1, F.spark, fade * (1 - rise)));
+  }
+}
+function drawStaticSpark(ctx, tr, time) {
+  const L = CAST_COLORS.lightning, K6 = { deep: L.deep, main: L.main, spark: L.spark }, fade = Math.min(1, (tr.ticks ?? 60) / 30), flick = 0.75 + 0.25 * Math.sin(time / 40), seed2 = Math.floor(time / 90);
+  if (fade <= 0) return;
+  if (groundPassV1()) withAlpha(ctx, 0.28 * fade, () => {
+    ctx.fillStyle = L.main;
+    circle8(ctx, tr.x, tr.y, 9);
+    ctx.fill();
+  });
+  standV1(ctx, tr.y, () => {
+    for (let i = 0; i < 3; i++) {
+      const a = rnd2(seed2 * 3 + i) * TAU76, r = 8 + 6 * rnd2(seed2 * 5 + i);
+      neon(ctx, K6, 1, () => jag(ctx, tr.x, tr.y - 6, tr.x + Math.cos(a) * r, tr.y - 6 + Math.sin(a) * r, seed2 + i, 1.6), fade * flick);
+    }
+    mote(ctx, tr.x, tr.y - 6, 2.2, L.core, fade);
+  });
+}
+function drawCinderTrail(ctx, tr, time) {
+  const any = tr.fire || tr.frost || tr.spark;
+  if (tr.fire || !any) drawFireTrail(ctx, tr, time);
+  if (tr.frost) drawFrostTrail(ctx, tr, time);
+  if (tr.spark) drawStaticSpark(ctx, tr, time);
 }
 var RAM_MS_PER_PX = 1e3 / 60 / 7;
 function shieldCharge(ctx, b, age) {
@@ -88783,8 +88907,9 @@ function createCombatVfx() {
       }
       const tr = f.trail;
       if (tr) {
-        const fade = Math.min(1, (tr.ticks ?? 60) / 30), n = Math.max(1, Math.round(Math.hypot(tr.x2 - tr.x, tr.y2 - tr.y) / 36));
-        for (let i = 0; i <= n; i++) at5(tr.x + (tr.x2 - tr.x) * i / n, tr.y + (tr.y2 - tr.y) * i / n, 30, LIGHT11.fire, 0.45 * fade * (0.85 + 0.15 * Math.sin(time / 90 + i * 1.7)));
+        const fade = Math.min(1, (tr.ticks ?? 60) / 30), n = Math.max(1, Math.round(Math.hypot(tr.x2 - tr.x, tr.y2 - tr.y) / 36)), glow9 = tr.fire || !(tr.frost || tr.spark) ? LIGHT11.fire : tr.frost ? LIGHT11.frost : null;
+        if (glow9) for (let i = 0; i <= n; i++) at5(tr.x + (tr.x2 - tr.x) * i / n, tr.y + (tr.y2 - tr.y) * i / n, 30, glow9, 0.45 * fade * (0.85 + 0.15 * Math.sin(time / 90 + i * 1.7)));
+        if (tr.spark) at5(tr.x, tr.y, 36, LIGHT11.lightning, 0.4 * fade);
       }
     }
     for (const e of m.combatPresentation?.statuses ?? []) {
