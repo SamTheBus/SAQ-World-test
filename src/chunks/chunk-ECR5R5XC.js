@@ -7733,6 +7733,25 @@ function townArtBlockersV1(t) {
   }
   return out;
 }
+var backRows = /* @__PURE__ */ new WeakMap();
+function townBackRowsV1(t) {
+  let m = backRows.get(t);
+  if (m) return m;
+  m = /* @__PURE__ */ new Map();
+  backRows.set(t, m);
+  if (!townNewArtV1(t)) return m;
+  const A = townArtBuildingsV1(t);
+  if (A.inn && t.size !== "hamlet") m.set(A.inn.id, t.size === "village" ? 2 : 1);
+  if (A.stables) m.set(A.stables.id, 2);
+  if (A.barracks) m.set(A.barracks.id, 1);
+  if (A.chapel && t.size === "capital") m.set(A.chapel.id, 1);
+  if (A.hall && t.biome === "desert") m.set(A.hall.id, 1);
+  return m;
+}
+var townSolidRectV1 = (t, b) => {
+  const k = townBackRowsV1(t).get(b.id) ?? 0;
+  return k ? { x: b.x, y: b.y + k, w: b.w, h: b.h - k } : b;
+};
 var KIND = { row: "home", tower: "civic", chapel: "civic" };
 var templates = /* @__PURE__ */ new WeakMap();
 function townTemplateV1(t) {
@@ -7856,7 +7875,7 @@ function townRasterV1(t) {
     }, closed);
     for (const tw of g.towers) for (let y = Math.floor(tw.y - 2); y <= Math.ceil(tw.y + 2); y++) for (let x = Math.floor(tw.x - 2); x <= Math.ceil(tw.x + 2); x++) if (ok(x, y) && hyp2(x + 0.5 - tw.x, y + 0.5 - tw.y) <= 1.2) col[idx(x, y)] = 1;
   }
-  for (const b of tp.buildings) rectDo(b, (x, y) => {
+  for (const b of tp.buildings) rectDo(townSolidRectV1(t, b), (x, y) => {
     col[idx(x, y)] = 1;
   });
   const newArt = townNewArtV1(t);
@@ -8090,7 +8109,10 @@ function generatedTownChunkBlockers(towns, cx, cy) {
     if (x + 32 <= o.x || x >= o.x + W6 || y + 26 <= o.y || y >= o.y + H6) continue;
     const clip = (bx, by, bw, bh) => ({ x: Math.max(x, bx) - x, y: Math.max(y, by) - y, width: Math.min(x + 32, bx + bw) - Math.max(x, bx), height: Math.min(y + 26, by + bh) - Math.max(y, by) });
     out.push({ id: t.id + ":clearing:" + cx + "," + cy, kind: "civilian-clearing", ...clip(o.x, o.y, W6, H6), detail: "" });
-    for (const b of townTemplateV1(t).buildings) if (b.x + o.x < x + 32 && b.x + b.w + o.x > x && b.y + o.y < y + 26 && b.y + b.h + o.y > y) out.push({ id: t.id + ":" + b.id, kind: "civilian-building", ...clip(b.x + o.x, b.y + o.y, b.w, b.h), detail: b.label });
+    for (const b0 of townTemplateV1(t).buildings) {
+      const b = townSolidRectV1(t, b0);
+      if (b.x + o.x < x + 32 && b.x + b.w + o.x > x && b.y + o.y < y + 26 && b.y + b.h + o.y > y) out.push({ id: t.id + ":" + b0.id, kind: "civilian-building", ...clip(b.x + o.x, b.y + o.y, b.w, b.h), detail: b0.label });
+    }
   }
   return out;
 }
