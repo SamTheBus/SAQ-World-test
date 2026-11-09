@@ -386,6 +386,7 @@ import {
   captureWorldPositionsD9,
   certifyNumeric,
   chunkAddressKey,
+  chunkScalesV1,
   claimClassKit,
   claimSubweapon,
   classAugments,
@@ -612,6 +613,7 @@ import {
   nodeRank,
   normalizeSeedInput,
   normalizeWorldPosition,
+  noteAreaBossV1,
   nounLookType,
   observeSiteRunEpisodesD13B,
   oldwardAreaDefinition,
@@ -622,6 +624,7 @@ import {
   originManifestForState,
   outgoingCombat,
   ownedItem,
+  packMemberLevelV1,
   packageEligibleD9,
   pageDigest,
   parseCampaignEnvelope,
@@ -820,6 +823,7 @@ import {
   useWorldRolesV1,
   usesBuildBalanceV2,
   usesMultiroom,
+  usesSpawnLevelsV1,
   usesWildernessFairnessV3_2,
   utf8,
   validHeroName,
@@ -907,7 +911,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-DIQCCIY5.js";
+} from "./chunk-SEWOVFMR.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -45269,6 +45273,16 @@ function createOutdoorBridgeDecks(records, terrain) {
 }
 
 // src/shared/generation/planned_world_chunks_v1.js
+var cellLevels = /* @__PURE__ */ new WeakMap();
+var cellLevelAt = (asset, x, y) => {
+  let m = cellLevels.get(asset);
+  if (!m) {
+    m = /* @__PURE__ */ new Map();
+    for (const row2 of asset.cellRows ?? []) for (const c of row2.cells) if (Number.isInteger(c[11])) m.set(c[0] + "," + row2.y, c[11]);
+    cellLevels.set(asset, m);
+  }
+  return m.get(x + "," + y) ?? null;
+};
 function createPlannedChunkGenerator(asset, binding, sha256) {
   validatePlannedBinding(binding);
   requirePlan(asset.assetId === binding.assetId && asset.routeHash === binding.routeHash && asset.upstream.planHash === binding.planHash, "Planned chunk input identity mismatch");
@@ -45456,7 +45470,7 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     const regularAnchors = packAnchors(cx, cy2, identity2.digest);
     const eventAnchors = await createWoodlandPilotEventAnchors({ asset, binding, cx, cy: cy2, seed: seed2, sha256, tile, regularAnchors });
     const plannedAnchors = await createPlannedEventAnchorsV1({ asset, binding, cx, cy: cy2, seed: seed2, sha256, tile, biome, regularAnchors, otherAnchors: eventAnchors });
-    return freezeWire({ version: PLANNED_WORLD_VERSION, identity: identity2, chunkX, chunkY, region: { version: asset.version, regionX: String(Math.floor(cx / 2)), regionY: String(Math.floor(cy2 / 2)), biome, name: hasStarterVillage(binding) && cx >= sx && cx <= sx + 1 && cy2 >= sy && cy2 <= sy + 1 ? STARTER_VILLAGE_NAME + " \xB7 " + starterBiomeName() + " \xB7 Band 1" : biome === "ocean" ? "Open ocean" : biome[0].toUpperCase() + biome.slice(1) + " \xB7 Band " + c.band, minimumLevel: [1, 1, 6, 11, 21, 41][c.band] ?? 1, originWidthChunks: 0, originHeightChunks: 0 }, collision: { tileSize: 32, width: 32, height: 26, tiles: collision }, visual: { terrain: visual, biomes: biomes2, blockers, ...caveArt.decorations.length ? { decorations: caveArt.decorations } : {}, ...stands ? { stands: standRows } : {}, route: { centerline, clearance, ...["planned-world-shoreline-v2", "planned-world-water-v3"].includes(asset.version) ? { mapFeatures: mapRows } : {} } }, edges, anchors: [...regularAnchors, ...eventAnchors, ...plannedAnchors], sites: reserved?.socket.entrance.chunkX === chunkX && reserved?.socket.entrance.chunkY === chunkY ? [reserved.socket] : [] });
+    return freezeWire({ version: PLANNED_WORLD_VERSION, identity: identity2, chunkX, chunkY, region: { version: asset.version, regionX: String(Math.floor(cx / 2)), regionY: String(Math.floor(cy2 / 2)), biome, name: hasStarterVillage(binding) && cx >= sx && cx <= sx + 1 && cy2 >= sy && cy2 <= sy + 1 ? STARTER_VILLAGE_NAME + " \xB7 " + starterBiomeName() + " \xB7 Band 1" : biome === "ocean" ? "Open ocean" : biome[0].toUpperCase() + biome.slice(1) + " \xB7 Band " + c.band, minimumLevel: cellLevelAt(asset, Math.floor(cx / 2), Math.floor(cy2 / 2)) ?? [1, 1, 6, 11, 21, 41][c.band] ?? 1, originWidthChunks: 0, originHeightChunks: 0 }, collision: { tileSize: 32, width: 32, height: 26, tiles: collision }, visual: { terrain: visual, biomes: biomes2, blockers, ...caveArt.decorations.length ? { decorations: caveArt.decorations } : {}, ...stands ? { stands: standRows } : {}, route: { centerline, clearance, ...["planned-world-shoreline-v2", "planned-world-water-v3"].includes(asset.version) ? { mapFeatures: mapRows } : {} } }, edges, anchors: [...regularAnchors, ...eventAnchors, ...plannedAnchors], sites: reserved?.socket.entrance.chunkX === chunkX && reserved?.socket.entrance.chunkY === chunkY ? [reserved.socket] : [] });
   }
   let hollowHome = null;
   async function generate(args) {
@@ -50265,6 +50279,7 @@ function createEncounterRenewal(s, m, onRenew) {
       if (e.clearedTick === null) {
         e.clearedTick = s.tick;
         ensurePersonalFinaleClaimsD13D_G1(s, g.groupId);
+        noteAreaBossV1(s, g.groupId);
       }
       const occupied = actors2.some((a) => near3(g, a, ORDINARY_ACTIVITY_RADII.leaveRadius));
       if (Object.values(s.d9World?.functionalSitesById ?? {}).some((site) => functionalSiteGroupsD12(site).includes(g.groupId))) continue;
@@ -52446,11 +52461,11 @@ function createActivityProgression(state, manifest, measure2) {
     const eligible2 = eligibleNearbyParticipants(state, group.spaceInstanceId, points2 ?? live.map((a) => a.position), radius);
     if (!eligible2.length) return;
     measure2("threatSnapshot", () => {
-      const episode = state.d9World?.episodes[group.groupId];
-      let level = state.d9World ? resolveEncounterLevelV2(episode?.geography.minimumLevel ?? 1, eligible2) : Math.max(...eligible2.map((p) => p.progression.level));
+      const spawnLevels = usesSpawnLevelsV1(state), episode = state.d9World?.episodes[group.groupId];
+      let level = state.d9World ? resolveEncounterLevelV2(episode?.geography.minimumLevel ?? 1, !spawnLevels || !episode || chunkScalesV1(state, episode.geography.chunkX, episode.geography.chunkY) ? eligible2 : []) : Math.max(...eligible2.map((p) => p.progression.level));
       if (episode?.snapshot) level = episode.snapshot.effectiveLevel;
       if (episode) admitContentNumericD9(level, episode.geography.rank);
-      const levelsByEntityId = Object.fromEntries(group.entityIds.map((id) => [id, copyWire(state.entitiesById[id].alive ? level : group.threatSnapshot?.levelsByEntityId[id] ?? 1)]));
+      const levelsByEntityId = Object.fromEntries(group.entityIds.map((id) => [id, copyWire(state.entitiesById[id].alive ? spawnLevels && !state.bossCombat?.bossesByEntityId?.[id] ? packMemberLevelV1(level, id) : level : group.threatSnapshot?.levelsByEntityId[id] ?? 1)]));
       const snapshot = { version: state.d9World ? D9_THREAT_VERSION : ENCOUNTER_PROGRESSION_VERSION, activatedTick: state.tick, levelsByEntityId };
       adoptEncounterCompositionV1(state, group, level);
       const profiles2 = live.map((actor) => [actor, encounterActorProfile(state, { ...group, threatSnapshot: snapshot }, actor)]);
@@ -59222,7 +59237,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
       progression.prepareCombat(target, scheduler.config.prepareRadius);
     }
     const levelGapForWorld = usesWildernessFairnessV3_2(state) ? wildernessFairLevelGap : worldLevelGapMultiplier;
-    const levelGap = hasWorldCombat(state) && source3.team !== target.team ? levelGapForWorld(progression.combatLevel(source3.team === "party" ? source3.entityId : target.entityId), source3.team === "hostile" && attribution?.sourceLevel !== void 0 ? attribution.sourceLevel : progression.combatLevel(source3.team === "hostile" ? source3.entityId : target.entityId)) : null;
+    const levelGap = hasWorldCombat(state) && !usesSpawnLevelsV1(state) && source3.team !== target.team ? levelGapForWorld(progression.combatLevel(source3.team === "party" ? source3.entityId : target.entityId), source3.team === "hostile" && attribution?.sourceLevel !== void 0 ? attribution.sourceLevel : progression.combatLevel(source3.team === "hostile" ? source3.entityId : target.entityId)) : null;
     let raw = requested ?? asCombatAmount(source3.attackDamage), critical = resolvedComponent ? attribution.inheritedCritical === true : false, defense = null, defenseStats = null, barrierAbsorption = null, pendingPlayerRng = null, pendingForcedTransient = null, eliteGuard = null, eliteAttack = null;
     const sourceSubweaponSuppressed = source3.team === "party" && subweaponSuppressedD12_4I(state, source3.entityId);
     if (!resolvedComponent && mechanic === "main") {

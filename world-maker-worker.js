@@ -4188,7 +4188,7 @@ function validateRuntimePlan(p) {
   let count = 0;
   for (const row of p.cellRows) for (const c of row.cells) {
     const key2 = c[0] + "," + row.y;
-    requirePlan(!seen.has(key2) && c.length === 11 && c[1] >= 0 && c[1] < p.landmasses.length && c[2] >= 1 && c[2] <= 8 && c[3] >= 1 && c[3] <= 5, "Invalid/overlapping planned cell");
+    requirePlan(!seen.has(key2) && (c.length === 11 || c.length === 12 && Number.isInteger(c[11]) && c[11] >= 1 && c[11] <= 50) && c[1] >= 0 && c[1] < p.landmasses.length && c[2] >= 1 && c[2] <= 8 && c[3] >= 1 && c[3] <= 5, "Invalid/overlapping planned cell");
     seen.add(key2);
     count++;
   }
@@ -4543,6 +4543,18 @@ function makeLand(seed) {
   return { owner, landmasses, land, elevation, slope, geology, depth };
 }
 
+// src/shared/content/spawn_levels_v1.js
+var SPAWN_LEVELS_V1 = freezeWire({
+  version: "spawn-levels-v1",
+  levelCap: 50,
+  // Each pack member's offset from the encounter level, picked by its id (out of 20).
+  packOffsets: [-1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2],
+  site: { offsets: [1, 2], highEvery: 10, highTiers: ["small", "standard"], highOffset: { early: 10, late: 15, lateFrom: 25 } },
+  lairTiers: ["large", "deep"]
+});
+var cap = (level) => Math.max(1, Math.min(SPAWN_LEVELS_V1.levelCap, level));
+var areaLevelForQuantileV1 = (q) => cap(1 + Math.floor(SPAWN_LEVELS_V1.levelCap * q));
+
 // src/shared/generation/world_maker_v1/layout.js
 var CHUNK_KEYS = /* @__PURE__ */ new Set(["core", "expansion", "sockets"]);
 function relocate(record, dx, dy, fromLandmass, toLandmass) {
@@ -4622,11 +4634,11 @@ function makeLayout(seed, land, templates) {
   const alder = choose("settlement-slot:village-outpost:01", mainland, (i) => -Math.abs(far(i) / maxFar - 0.62) * 3 + startDir(i) * 0.8 - slope[i] / 300 + (depth[i] >= 3 ? 0.4 : 0), 3);
   if (!alder) throw Error("No room for Alderwood");
   const A = alder.anchor;
-  const cap = choose("settlement-slot:capital-great-hold:01", mainland, (i) => {
+  const cap2 = choose("settlement-slot:capital-great-hold:01", mainland, (i) => {
     const d = PM.hypot(cx(i) - A.x, cy(i) - A.y);
     return -Math.abs(d - 7) - slope[i] / 400;
   });
-  if (!cap) throw Error("No room for the capital");
+  if (!cap2) throw Error("No room for the capital");
   const islands = [...majors, ...mediums], icells = islands.flatMap((k) => landmasses[k].cells), ix0 = icells.reduce((a, i) => a + cx(i), 0) / icells.length, iy0 = icells.reduce((a, i) => a + cy(i), 0) / icells.length;
   const hub = choose("settlement-slot:village-outpost:06", mainland, (i) => -PM.hypot(cx(i) - ix0, cy(i) - iy0) / 20 - Math.max(0, 8 - PM.hypot(cx(i) - A.x, cy(i) - A.y)) * 0.3);
   if (!hub) throw Error("No room for the ferry harbour");
@@ -4676,12 +4688,13 @@ function makeLayout(seed, land, templates) {
   let farthest = 0;
   for (const i of landCells) if (Number.isFinite(travel[i])) farthest = Math.max(farthest, travel[i]);
   for (const i of landCells) if (!Number.isFinite(travel[i])) travel[i] = farthest + (owner[i] >= 0 ? 4 : 0);
-  const band = new Uint8Array(W * H);
+  const band = new Uint8Array(W * H), level = new Uint8Array(W * H);
   [...landCells].sort((a, b) => travel[a] - travel[b] || a - b).forEach((i, k, all) => {
     const q = k / all.length;
     band[i] = q < 0.12 ? 1 : q < 0.32 ? 2 : q < 0.58 ? 3 : q < 0.85 ? 4 : 5;
+    level[i] = areaLevelForQuantileV1(q);
   });
-  return { placed, taken, fits, put: put2, choose, landings, travel, band, mainland, majors, mediums, ofClass, coastal, isLand, hubCell };
+  return { placed, taken, fits, put: put2, choose, landings, travel, band, level, mainland, majors, mediums, ofClass, coastal, isLand, hubCell };
 }
 
 // src/shared/generation/world_maker_v1/biomes.js
@@ -4692,7 +4705,7 @@ function makeBiomes(seed, land, layout) {
   const { owner, landmasses, elevation, slope, depth } = land, { band, travel } = layout, cells = land.land, total = cells.length, rnd = stream(seed, "biomes");
   const bandSize = [0, 0, 0, 0, 0, 0];
   for (const i of cells) bandSize[band[i]]++;
-  const cap = { total: Math.floor(total * SHARE.max), min: Math.ceil(total * SHARE.min) };
+  const cap2 = { total: Math.floor(total * SHARE.max), min: Math.ceil(total * SHARE.min) };
   const bandCap = (b, k) => Math.floor(bandSize[k] * (b === B.woodland && k === 1 ? SHARE.woodlandBand1 : SHARE.band));
   const phi = rnd() * Math.PI * 2, ux = PM.cos(phi), uy = PM.sin(phi);
   let lo = Infinity, hi = -Infinity;
@@ -4780,7 +4793,7 @@ function makeBiomes(seed, land, layout) {
     const x = A.x + dx, y = A.y + dy;
     if (inside(x, y) && owner[idx(x, y)] === owner[start]) locked[idx(x, y)] = 1;
   }
-  const room = (b, i) => allowed(b, i) && (!locked[i] || b === startB) && count[b] < cap.total && inBand[b][band[i]] < bandCap(b, band[i]);
+  const room = (b, i) => allowed(b, i) && (!locked[i] || b === startB) && count[b] < cap2.total && inBand[b][band[i]] < bandCap(b, band[i]);
   const claim = (b, i) => {
     if (biome[i] >= 0) {
       count[biome[i]]--;
@@ -4839,7 +4852,7 @@ function makeBiomes(seed, land, layout) {
     const k = owner[open[0]], mine = open.filter((i) => owner[i] === k);
     let pick2 = null, pv = Infinity;
     for (let b = 0; b < BIOMES.length; b++) {
-      const left = cap.total - count[b];
+      const left = cap2.total - count[b];
       if (left < mine.length * 0.5) continue;
       for (const i of mine) {
         if (!allowed(b, i) || seeds.some((s) => PM.hypot(cx(s.i) - cx(i), cy(s.i) - cy(i)) < 5)) continue;
@@ -4915,15 +4928,15 @@ function makeBiomes(seed, land, layout) {
     return moved2;
   };
   const fixLow = (b) => {
-    let c = border(b, (i) => room(b, i) && count[biome[i]] > cap.min + 40);
-    if (!c.length) c = border(b, (i) => room(b, i) && count[biome[i]] > cap.min);
+    let c = border(b, (i) => room(b, i) && count[biome[i]] > cap2.min + 40);
+    if (!c.length) c = border(b, (i) => room(b, i) && count[biome[i]] > cap2.min);
     c.sort((p, q) => pref[b](p) - pref[b](q));
     let n = 0;
-    for (const i of c.slice(0, 8)) if (room(b, i) && count[biome[i]] > cap.min) {
+    for (const i of c.slice(0, 8)) if (room(b, i) && count[biome[i]] > cap2.min) {
       claim(b, i);
       n++;
     }
-    return n > 0 || plant(b, (i) => count[biome[i]] > cap.min + 40, cap.min - count[b] + 8) > 0;
+    return n > 0 || plant(b, (i) => count[biome[i]] > cap2.min + 40, cap2.min - count[b] + 8) > 0;
   };
   const fixOver = (b, k) => {
     const c = [];
@@ -4933,7 +4946,7 @@ function makeBiomes(seed, land, layout) {
         const x = cx(i) + dx, y = cy(i) + dy;
         if (!inside(x, y)) continue;
         const j = idx(x, y), o = biome[j];
-        if (owner[j] === owner[i] && o >= 0 && o !== b && room(o, i) && count[b] > cap.min) {
+        if (owner[j] === owner[i] && o >= 0 && o !== b && room(o, i) && count[b] > cap2.min) {
           c.push([pref[o](i) - pref[b](i), i, o]);
           break;
         }
@@ -4941,25 +4954,25 @@ function makeBiomes(seed, land, layout) {
     }
     let n = 0;
     c.sort((p, q) => p[0] - q[0]);
-    for (const [, i, o] of c.slice(0, 8)) if (room(o, i) && count[b] > cap.min) {
+    for (const [, i, o] of c.slice(0, 8)) if (room(o, i) && count[b] > cap2.min) {
       claim(o, i);
       n++;
     }
     if (n) return true;
-    const excess = (k ? inBand[b][k] - bandCap(b, k) : count[b] - cap.total) + 4;
+    const excess = (k ? inBand[b][k] - bandCap(b, k) : count[b] - cap2.total) + 4;
     for (const o of BIOMES.map((_, o2) => o2).filter((o2) => o2 !== b).sort((p, q) => count[p] - count[q])) if (plant(o, (i) => biome[i] === b && (!k || band[i] === k), excess)) return true;
     return false;
   };
   for (let guard = 0; guard < 3e3; guard++) {
     const todo = [];
     for (let b = 0; b < BIOMES.length; b++) {
-      if (count[b] < cap.min) todo.push(() => fixLow(b));
-      if (count[b] > cap.total) todo.push(() => fixOver(b, 0));
+      if (count[b] < cap2.min) todo.push(() => fixLow(b));
+      if (count[b] > cap2.total) todo.push(() => fixOver(b, 0));
       for (let k = 1; k <= 5; k++) if (inBand[b][k] > bandCap(b, k)) todo.push(() => fixOver(b, k));
     }
     if (!todo.length || !todo.some((fix) => fix())) break;
   }
-  return { biome, seeds, count, inBand, bandSize, bandCap, cap, pref, T, M };
+  return { biome, seeds, count, inBand, bandSize, bandCap, cap: cap2, pref, T, M };
 }
 
 // src/shared/generation/world_maker_v1/roles.js
@@ -5186,7 +5199,7 @@ function makeWorldPlan(seed, catalog) {
 var FORMAT = { version: "planned-world-water-v3", shoreline: "local-shoreline-runtime-v2", water: "local-water-geometry-v3", routes: "planned-world-routes-water-v3", wilderness: "wilderness-distribution-v2-native", access: "alderwood-first-journey-v1", reshape: "world-reshape-v2", hydrology: "alpha-hydrology-plan-v2", hydrologyPolicy: "terrain-drainage-lake-outlets-v3" };
 var chunkRef = (c) => ({ chunkX: c.x, chunkY: c.y, key: c.x + "," + c.y });
 function baseAsset(plan, catalog) {
-  const { seed, land, layout, biomes, places } = plan, { owner, landmasses, elevation, slope, geology } = land, { band } = layout, { biome } = biomes;
+  const { seed, land, layout, biomes, places } = plan, { owner, landmasses, elevation, slope, geology } = land, { band, level } = layout, { biome } = biomes;
   const seedDigest = sha256Hex("seeded-world/" + seed), campaignSeedHex = sha256Hex("seeded-campaign/" + seed).slice(0, 32);
   const volcanic = land.land.filter((i) => BIOMES[biome[i]] === "volcanic").sort((a, b) => elevation[b] - elevation[a]);
   for (const i of volcanic.slice(0, Math.ceil(volcanic.length * 0.08))) geology[i] = 2;
@@ -5196,7 +5209,21 @@ function baseAsset(plan, catalog) {
     for (let x = 0; x < W; x++) {
       const i = idx(x, y);
       if (owner[i] < 0) continue;
-      cells.push([x, owner[i], biome[i] + 1, band[i], 0, 0, 0, 0, slope[i], geology[i], elevation[i]]);
+      cells.push([
+        x,
+        owner[i],
+        biome[i] + 1,
+        band[i],
+        0,
+        0,
+        0,
+        0,
+        slope[i],
+        geology[i],
+        elevation[i],
+        level[i]
+        /* spawn levels v1 */
+      ]);
     }
     if (cells.length) cellRows.push({ cells, y });
   }
@@ -6176,12 +6203,12 @@ function planCurvedRoads(asset, terrain, waterAt, ferry, stats = {}, opts = {}) 
       return c < Infinity && c <= (cum[j] - cum[i]) * 1.04 + 1;
     };
     while (i < n - 1) {
-      let cap = Math.min(n - 1, i + reach);
-      for (let k = i + 1; k < cap; k++) if (P[k].lock) {
-        cap = k;
+      let cap2 = Math.min(n - 1, i + reach);
+      for (let k = i + 1; k < cap2; k++) if (P[k].lock) {
+        cap2 = k;
         break;
       }
-      let hi = cap, lo = i + 1;
+      let hi = cap2, lo = i + 1;
       if (hi > lo && !fits(hi)) {
         while (hi - lo > 1) {
           const mid = lo + hi >> 1;
@@ -7017,7 +7044,7 @@ var CLASSIC_EVENT_PLAN = freezeWire({ version: WORLD_EVENT_PLAN_VERSION, events:
 
 // src/shared/generation/world_maker_v1/make.js
 var TW4 = W * 64;
-var WORLD_MAKER_VERSION = "world-maker-v1.10";
+var WORLD_MAKER_VERSION = "world-maker-v1.12";
 function makeWorld(seed, catalog, tries = 4, onStep = null) {
   const started = performance.now();
   let w, why = [];
