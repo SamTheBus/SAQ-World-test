@@ -2431,6 +2431,9 @@ function validateCommand(command) {
   } else if (command.kind === "ferry.travel") {
     closedRecord(command.payload, ["fromLandingId", "toLandingId"]);
     requireContract([command.payload.fromLandingId, command.payload.toLandingId].every((id) => /^ferry:(alpha|seeded):[0-9]{2}$/.test(id)) && command.payload.fromLandingId !== command.payload.toLandingId, "Invalid ferry connection");
+  } else if (command.kind === "map.travel") {
+    closedRecord(command.payload, ["destinationId"]);
+    requireContract(typeof command.payload.destinationId === "string" && /^(?:settlement-slot:[a-z-]+:[0-9]{2}|site:[a-f0-9]{32})$/.test(command.payload.destinationId), "Invalid fast travel destination");
   } else if (command.kind === "site.transition") {
     closedRecord(command.payload, ["siteId", "direction"], ["transitionId", "extractionId"]);
     requireContract(/^loc:[a-f0-9]{32}$/.test(command.payload.siteId) || /^site:[a-f0-9]{32}$/.test(command.payload.siteId), "Invalid site transition identity");
@@ -7970,6 +7973,28 @@ function generatedTownChunkBlockers(towns, cx, cy) {
     for (const b of townTemplateV1(t).buildings) if (b.x + o.x < x + 32 && b.x + b.w + o.x > x && b.y + o.y < y + 26 && b.y + b.h + o.y > y) out.push({ id: t.id + ":" + b.id, kind: "civilian-building", ...clip(b.x + o.x, b.y + o.y, b.w, b.h), detail: b.label });
   }
   return out;
+}
+function townOutlineV1(t) {
+  const o = t.origin, w = t.features.find((f3) => f3.type === "wall");
+  if (w) return w.pts.filter((_, i) => i % 4 === 0).map(([x, y]) => ({ x: r3(o.x + x), y: r3(o.y + y) }));
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  for (const b of t.buildings) {
+    x0 = Math.min(x0, b.x);
+    y0 = Math.min(y0, b.y);
+    x1 = Math.max(x1, b.x + b.w);
+    y1 = Math.max(y1, b.y + b.h);
+  }
+  if (x0 > x1) {
+    x0 = 0;
+    y0 = 0;
+    [x1, y1] = t.core;
+  }
+  const m = 2, cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, rx = (x1 - x0) / 2 + m, ry = (y1 - y0) / 2 + m, pts = [];
+  for (let k = 0; k < 20; k++) {
+    const a = k / 20 * Math.PI * 2, ca = PM.cos(a), sa = PM.sin(a);
+    pts.push({ x: r3(o.x + cx + Math.sign(ca) * Math.sqrt(Math.abs(ca)) * rx), y: r3(o.y + cy + Math.sign(sa) * Math.sqrt(Math.abs(sa)) * ry) });
+  }
+  return pts;
 }
 
 // src/shared/content/world_towns_v1.js
@@ -27167,6 +27192,7 @@ export {
   townStartV1,
   createGeneratedTownTiles,
   generatedTownChunkBlockers,
+  townOutlineV1,
   townOriginV1,
   townTileV1,
   generatedStarterV1,

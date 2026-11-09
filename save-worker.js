@@ -21954,6 +21954,9 @@ function validateCommand(command) {
   } else if (command.kind === "ferry.travel") {
     closedRecord(command.payload, ["fromLandingId", "toLandingId"]);
     requireContract([command.payload.fromLandingId, command.payload.toLandingId].every((id) => /^ferry:(alpha|seeded):[0-9]{2}$/.test(id)) && command.payload.fromLandingId !== command.payload.toLandingId, "Invalid ferry connection");
+  } else if (command.kind === "map.travel") {
+    closedRecord(command.payload, ["destinationId"]);
+    requireContract(typeof command.payload.destinationId === "string" && /^(?:settlement-slot:[a-z-]+:[0-9]{2}|site:[a-f0-9]{32})$/.test(command.payload.destinationId), "Invalid fast travel destination");
   } else if (command.kind === "site.transition") {
     closedRecord(command.payload, ["siteId", "direction"], ["transitionId", "extractionId"]);
     requireContract(/^loc:[a-f0-9]{32}$/.test(command.payload.siteId) || /^site:[a-f0-9]{32}$/.test(command.payload.siteId), "Invalid site transition identity");
@@ -22485,6 +22488,22 @@ function validateClassSkillState(s, combat, actor) {
 
 // src/shared/contracts/map_discovery_v1.js
 var MAP_KNOWLEDGE_VERSION = "campaign-shared-map-knowledge-v1";
+var MAP_KNOWLEDGE_ROWS = 512;
+var eventMapId = (x, y) => "event:" + Math.floor(x) + "," + Math.floor(y);
+var townBoxes = /* @__PURE__ */ new WeakMap();
+function townBox(t) {
+  let b = townBoxes.get(t);
+  if (!b) {
+    const pts = townOutlineV1(t);
+    b = pts?.length ? { x0: Math.min(...pts.map((p) => p.x)) - 3, y0: Math.min(...pts.map((p) => p.y)) - 3, x1: Math.max(...pts.map((p) => p.x)) + 3, y1: Math.max(...pts.map((p) => p.y)) + 3 } : { x0: t.origin.x - 3, y0: t.origin.y - 3, x1: t.origin.x + t.core[0] + 3, y1: t.origin.y + t.core[1] + 3 };
+    townBoxes.set(t, b);
+  }
+  return b;
+}
+var eventGroup = (state, id) => {
+  const n = state.d9World.episodes?.[id]?.geography?.anchorOrdinal;
+  return plannedEventOrdinal(n) || hollowOrdinal(n) || sporeOrdinal(n);
+};
 var TRAIL_NOTE_ID = "note:alderwood:woodland-trail-v1";
 var TRAIL_NOTE_TILE = Object.freeze({ x: 3684, y: 6946 });
 var mapTilePosition = (p) => ({ x: (Number(BigInt(p.chunkX) - 1024n) * 1024 + p.localX) / 32, y: (Number(BigInt(p.chunkY) - 1024n) * 832 + p.localY) / 32 });
@@ -22516,9 +22535,9 @@ function validateMapKnowledge(k) {
     safeInteger(s.band, 1, 5);
   }
   for (const rows3 of [k.visited, k.rumors]) {
-    requireContract(rows3 && typeof rows3 === "object" && !Array.isArray(rows3) && Object.keys(rows3).length <= 192, "Bounded map knowledge");
+    requireContract(rows3 && typeof rows3 === "object" && !Array.isArray(rows3) && Object.keys(rows3).length <= MAP_KNOWLEDGE_ROWS, "Bounded map knowledge");
     for (const [id, tick] of Object.entries(rows3)) {
-      requireContract(typeof id === "string" && id.length <= 180 && /^(?:site:|settlement-slot:|ferry:)/.test(id), "Map discovery identity");
+      requireContract(typeof id === "string" && id.length <= 180 && (/^(?:site:|settlement-slot:|ferry:)/.test(id) || /^event:[0-9]{1,6},[0-9]{1,6}$/.test(id)), "Map discovery identity");
       safeInteger(tick);
     }
   }
@@ -22547,10 +22566,29 @@ function observeMapKnowledge(state) {
         changed = true;
       }
     };
-    for (const s of k.settlements) visit(s.id, s.x, s.y, s.class === "capital-great-hold" ? 32 : s.class === "city" ? 24 : 20);
+    for (const s of k.settlements) {
+      const t = generatedTownV1(s.id);
+      if (t) {
+        const b = townBox(t);
+        if (k.visited[s.id] === void 0 && pos.x >= b.x0 && pos.x <= b.x1 && pos.y >= b.y0 && pos.y <= b.y1) {
+          k.visited[s.id] = state.tick;
+          changed = true;
+        }
+      } else visit(s.id, s.x, s.y, s.class === "capital-great-hold" ? 32 : s.class === "city" ? 24 : 20);
+    }
     for (const s of sites4) {
       const q = mapTilePosition(s.socket.entrance);
-      visit(s.siteId, q.x, q.y, 12);
+      visit(s.siteId, q.x, q.y, 14);
+    }
+    for (const g of state.d9World.runtime.groups ?? []) {
+      if (!g.anchor || !eventGroup(state, g.groupId)) continue;
+      let q;
+      try {
+        q = mapTilePosition(localFramePositionD9(g.anchor, state.d9World.runtime.frames));
+      } catch {
+        continue;
+      }
+      if (Object.keys(k.visited).length < MAP_KNOWLEDGE_ROWS) visit(eventMapId(q.x, q.y), q.x, q.y, 16);
     }
     for (const l of landings) visit(l.id, l.tile.x + 0.5, l.tile.y + 0.5, 8);
   }
@@ -26525,7 +26563,7 @@ function validateActivityCommand(command) {
   const { residencyRevision, ...legacy } = command;
   safeInteger(residencyRevision, 1);
   validateCommand(legacy);
-  requireContract(["worldEvent.activate", "discovery.readNote", "movement.setIntent", "combat.primaryIntent", "combat.guardIntent", "combat.shadowDash", "combat.skill", "subweapon.claim", "classkit.claim", "service.modify", "service.material", "service.breakdown", "service.buy", "service.sell", "service.rest", "supply.use", "ferry.travel", "site.transition", "player.respawn", "loot.pickup", "gear.salvage", "gear.drop", "resource.interact", "progression.change", "forge.attune", "equipment.equip", "equipment.unequip"].includes(command.kind), "Unsupported activity command");
+  requireContract(["worldEvent.activate", "discovery.readNote", "movement.setIntent", "combat.primaryIntent", "combat.guardIntent", "combat.shadowDash", "combat.skill", "subweapon.claim", "classkit.claim", "service.modify", "service.material", "service.breakdown", "service.buy", "service.sell", "service.rest", "supply.use", "ferry.travel", "map.travel", "site.transition", "player.respawn", "loot.pickup", "gear.salvage", "gear.drop", "resource.interact", "progression.change", "forge.attune", "equipment.equip", "equipment.unequip"].includes(command.kind), "Unsupported activity command");
   return command;
 }
 var same31 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
@@ -28279,6 +28317,29 @@ function chartPolyline(points) {
   for (let i = 0; i < out.length; i += 255) chunks2.push(out.slice(Math.max(0, i - Number(i > 0)), i + 255));
   return chunks2;
 }
+var SHOP = { "Merchant / market": "merchant", Forge: "forge", "Tavern + lodging": "inn", "Enchanter tower": "enchanter", Temple: "temple", Chapel: "temple", Cathedral: "temple", "Great hall": "hall" };
+var r1 = (v) => Math.round(v * 10) / 10;
+var flat = (pts) => pts.flatMap(([x, y]) => [r1(x), r1(y)]);
+function townPlan(t) {
+  const f3 = (type) => t.features.filter((v) => v.type === type);
+  return {
+    id: t.id,
+    name: String(t.name).slice(0, 80),
+    size: t.size,
+    biome: t.biome,
+    arch: t.arch,
+    walled: f3("wall").length > 0,
+    origin: { x: t.origin.x, y: t.origin.y },
+    core: [t.core[0], t.core[1]],
+    streets: [...t.streets.map(([pts, w, paved]) => [flat(pts), w, Boolean(paved)]), ...(t.connectors ?? []).map((c) => [flat(c.pts), c.w, true]), ...f3("avenue").map((a) => [flat(a.pts), a.w, true])],
+    buildings: t.buildings.map((b) => [b.x, b.y, b.w, b.h, SHOP[b.label] ?? ""]),
+    squares: [...f3("plaza").map((v) => [v.x, v.y, v.w, v.h])],
+    greens: [...f3("yard"), ...f3("field")].map((v) => [v.x, v.y, v.w, v.h, v.kind === "wheat" || v.kind === "barley" ? 1 : 0]),
+    walls: f3("wall").map((w) => flat(w.pts)),
+    rivers: f3("river").map((r) => flat(r.pts)),
+    castles: f3("castle").map((c) => [c.x, c.y, c.w, c.h])
+  };
+}
 function createPlannedCartography(asset, binding, loaded2) {
   const terrain2 = loaded2.generator.terrain;
   const sites4 = [];
@@ -28317,7 +28378,7 @@ function createPlannedCartography(asset, binding, loaded2) {
     }
   }
   const landings = hasFerries(binding) ? ferryNetworkV1().landings.map((l) => ({ id: l.id, kind: "ferry", label: l.name, x: l.tile.x + 0.5, y: l.tile.y + 0.5, band: asset.worldReshape?.ferryLandings[l.id]?.band ?? l.band, biome: (asset.worldReshape?.ferryLandings[l.id]?.biomeId ?? l.biomeId).replace("biome:", "") })) : [], landingById = Object.fromEntries(landings.map((l) => [l.id, l]));
-  const metadata = { version: CARTOGRAPHY_VERSION, assetHash: binding.assetHash, widthTiles: terrain2.widthTiles, heightTiles: terrain2.heightTiles, settlements: settlementMapCatalog(asset, binding), sites: sites4, routes, trailRuns, bridges: asset.routes.bridges ?? [], landings, ferries: hasFerries(binding) ? ferryNetworkV1().connections.map((e) => ({ from: e.from, to: e.to, a: landingById[e.from], b: landingById[e.to] })) : [], townOutlines: generatedTownsOfV1(asset.generatedTowns).map((t) => ({ id: t.id, walled: t.features.some((f3) => f3.type === "wall"), points: townOutlineV1(t) })) };
+  const metadata = { version: CARTOGRAPHY_VERSION, assetHash: binding.assetHash, widthTiles: terrain2.widthTiles, heightTiles: terrain2.heightTiles, settlements: settlementMapCatalog(asset, binding), sites: sites4, routes, trailRuns, bridges: asset.routes.bridges ?? [], landings, ferries: hasFerries(binding) ? ferryNetworkV1().connections.map((e) => ({ from: e.from, to: e.to, a: landingById[e.from], b: landingById[e.to] })) : [], townOutlines: generatedTownsOfV1(asset.generatedTowns).map((t) => ({ id: t.id, walled: t.features.some((f3) => f3.type === "wall"), points: townOutlineV1(t) })), towns: generatedTownsOfV1(asset.generatedTowns).map(townPlan), rivers: (asset.hydrologyPlan?.network ?? []).map((n) => ({ r: r1(n.radius ?? 1), pts: n.points.filter((p, i, l) => i % 3 === 0 || i === l.length - 1).flatMap((p) => [r1(p.x), r1(p.y)]) })), lakes: (asset.hydrologyPlan?.basins ?? []).filter((b) => b.center && b.radii).map((b) => ({ x: r1(b.center.x), y: r1(b.center.y), rx: r1(b.radii.x), ry: r1(b.radii.y) })) };
   return Object.freeze({ metadata, raster(request) {
     closedRecord(request, ["op", "binding", "view", "width", "height"], ["rowStart", "rowCount"]);
     const { view: view2, width, height } = request;

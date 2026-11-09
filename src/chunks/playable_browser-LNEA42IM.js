@@ -771,6 +771,7 @@ import {
   townLanesV1,
   townNewArtV1,
   townOriginV1,
+  townOutlineV1,
   townPropsV1,
   townRasterV1,
   townRowDoorV1,
@@ -875,7 +876,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-W2JWA7IR.js";
+} from "./chunk-NWWRNJIK.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -2604,8 +2605,8 @@ async function createFortArtPilotV1(environment, review, prior) {
   for (const file of manifest.files) {
     const response2 = await environment.fetch(new URL(file.path, root2));
     if (!response2.ok) throw Error("Missing fort art " + file.id);
-    const bytes = await response2.arrayBuffer(), hash35 = Array.from(new Uint8Array(await environment.crypto.subtle.digest("SHA-256", bytes)), (n) => n.toString(16).padStart(2, "0")).join("");
-    if (hash35 !== file.sha256 || bytes.byteLength !== file.bytes) throw Error("Fort art commitment mismatch " + file.id);
+    const bytes = await response2.arrayBuffer(), hash36 = Array.from(new Uint8Array(await environment.crypto.subtle.digest("SHA-256", bytes)), (n) => n.toString(16).padStart(2, "0")).join("");
+    if (hash36 !== file.sha256 || bytes.byteLength !== file.bytes) throw Error("Fort art commitment mismatch " + file.id);
     downloadBytes += bytes.byteLength;
     const bitmap = await environment.createImageBitmap(new Blob([bytes], { type: "image/webp" }));
     try {
@@ -3834,8 +3835,8 @@ function* paintPremiumBuilding(c, b, biome) {
       c.fillRect(x0, bot + 0.8, x1 - x0, 1.4);
     }
     const capCol = S4.roof === "snow" ? "#ffffff" : S4.roof === "reed" || S4.roof === "palm" ? tone(col2, -0.25) : tone(col2, 0.24);
-    const cap2 = rr(x0 - 1, ridge2 - 4, x1 - x0 + 2, 8, 4);
-    prop(c, [[cap2, capCol]], 2);
+    const cap3 = rr(x0 - 1, ridge2 - 4, x1 - x0 + 2, 8, 4);
+    prop(c, [[cap3, capCol]], 2);
     if (S4.roof === "tile" || S4.roof === "shingle" || S4.roof === "slate") {
       for (let q = x0 + 6; q < x1; q += 12) {
         line(c, [[q, ridge2 - 3.5], [q, ridge2 + 3.5]], tone(capCol, -0.35), 1);
@@ -6630,14 +6631,14 @@ function lychgate(c, x, y, st) {
 }
 function graveItems(E4, biome, label4) {
   if (biome === "desert") return graveItemsDesert(E4, label4);
-  const x = E4.x * T4, y = E4.y * T4, w = E4.w * T4, h = E4.h * T4, r = rng2(hash2(x, y, 47)), st = biome === "desert" ? "#d2b48a" : biome === "frostland" ? "#b8c2cb" : "#b3ad9f", gx = x + w / 2, items = [], cap2 = label4 === "Cathedral";
+  const x = E4.x * T4, y = E4.y * T4, w = E4.w * T4, h = E4.h * T4, r = rng2(hash2(x, y, 47)), st = biome === "desert" ? "#d2b48a" : biome === "frostland" ? "#b8c2cb" : "#b3ad9f", gx = x + w / 2, items = [], cap3 = label4 === "Cathedral";
   items.push({ y: y - 2, draw: (c) => wallRunF(c, x, y, w, st, rng2(hash2(x, y, 1))) });
   for (const sx of [x + 5, x + w - 5]) items.push({ y: y + h - 8, draw: (c) => wallRunS(c, sx, y, y + h, st) });
   items.push({ y: y + h, draw: (c) => {
     const rr22 = rng2(hash2(x, y, 2));
     wallRunF(c, x, y + h, w / 2 - 26, st, rr22);
     wallRunF(c, gx + 26, y + h, w / 2 - 26, st, rr22);
-    if (cap2) {
+    if (cap3) {
       railing(c, x, y + h, w / 2 - 26);
       railing(c, gx + 26, y + h, w / 2 - 26);
     }
@@ -8593,12 +8594,12 @@ function lanternPillar(c, x, y) {
     c.fillRect(x - 4, ly - 13, 2.4, 8);
   });
   line(c, [[x, ly - 16], [x, ly]], "#8a6420", 1.2);
-  const cap2 = new Path2D();
-  cap2.moveTo(x - 9, ly - 16);
-  cap2.quadraticCurveTo(x - 9, ly - 26, x, ly - 30);
-  cap2.quadraticCurveTo(x + 9, ly - 26, x + 9, ly - 16);
-  cap2.closePath();
-  prop(c, [[cap2, "#c99a3a"]], 1);
+  const cap3 = new Path2D();
+  cap3.moveTo(x - 9, ly - 16);
+  cap3.quadraticCurveTo(x - 9, ly - 26, x, ly - 30);
+  cap3.quadraticCurveTo(x + 9, ly - 26, x + 9, ly - 16);
+  cap3.closePath();
+  prop(c, [[cap3, "#c99a3a"]], 1);
   prop(c, [[ell(x, ly - 31, 1.8, 1.8), "#c99a3a"]], 0.6);
 }
 function signpostDesert(c, x, y) {
@@ -12185,8 +12186,8 @@ function houseItems(b, biome, door3) {
     });
     barge2(c, [[x0 + 6, Rtop], [x0, ridge2], [x0 - 3, eave + 8]], K6.timber);
     barge2(c, [[x1 - 6, Rtop], [x1, ridge2], [x1 + 3, eave + 8]], K6.timber);
-    const cap2 = rr2(x0 - 1, ridge2 - 4, x1 - x0 + 2, 8, 4), capCol = tone12(roofCol, 0.2);
-    prop2(c, [[cap2, capCol]], 1.8);
+    const cap3 = rr2(x0 - 1, ridge2 - 4, x1 - x0 + 2, 8, 4), capCol = tone12(roofCol, 0.2);
+    prop2(c, [[cap3, capCol]], 1.8);
     for (let q = x0 + 8; q < x1; q += 14) line3(c, [[q, ridge2 - 3.5], [q, ridge2 + 3.5]], tone12(capCol, -0.35), 1);
     c.fillStyle = tone12(capCol, 0.28);
     c.fillRect(x0 + 2, ridge2 - 3, x1 - x0 - 4, 1.4);
@@ -12469,12 +12470,12 @@ function brassLantern2(c, x, y, s = 1) {
     c.fillRect(x - 2.6 * s, y + 4, 1.6 * s, 7 * s);
   });
   line3(c, [[x, y + 2], [x, y + 14 * s]], "#7a5418", 1);
-  const cap2 = new Path2D();
-  cap2.moveTo(x - 6 * s, y + 2);
-  cap2.quadraticCurveTo(x - 6 * s, y - 3 * s, x, y - 6 * s);
-  cap2.quadraticCurveTo(x + 6 * s, y - 3 * s, x + 6 * s, y + 2);
-  cap2.closePath();
-  prop2(c, [[cap2, BRASS2]], 0.9);
+  const cap3 = new Path2D();
+  cap3.moveTo(x - 6 * s, y + 2);
+  cap3.quadraticCurveTo(x - 6 * s, y - 3 * s, x, y - 6 * s);
+  cap3.quadraticCurveTo(x + 6 * s, y - 3 * s, x + 6 * s, y + 2);
+  cap3.closePath();
+  prop2(c, [[cap3, BRASS2]], 0.9);
   prop2(c, [[poly2([[x - 3 * s, y + 14 * s], [x + 3 * s, y + 14 * s], [x, y + 18 * s]]), BRASS2]], 0.7);
 }
 function olla2(c, x, y, s, col2) {
@@ -12585,17 +12586,17 @@ function windTower2(c, tx, yb, yt, r) {
   c.fillStyle = tone13(WALL3, -0.22);
   c.fillRect(x, yt + 38, w, 2);
   c.fillRect(x, yb - 24, w, 2);
-  const cap2 = new Path2D();
-  cap2.moveTo(x - 4, yt + 4);
-  cap2.lineTo(x - 4, yt - 3);
-  cap2.lineTo(x + 6, yt - 3);
-  cap2.lineTo(x + 6, yt - 9);
-  cap2.lineTo(x + w - 6, yt - 9);
-  cap2.lineTo(x + w - 6, yt - 3);
-  cap2.lineTo(x + w + 4, yt - 3);
-  cap2.lineTo(x + w + 4, yt + 4);
-  cap2.closePath();
-  prop2(c, [[cap2, tone13(WALL3, 0.1)]], 1.4);
+  const cap3 = new Path2D();
+  cap3.moveTo(x - 4, yt + 4);
+  cap3.lineTo(x - 4, yt - 3);
+  cap3.lineTo(x + 6, yt - 3);
+  cap3.lineTo(x + 6, yt - 9);
+  cap3.lineTo(x + w - 6, yt - 9);
+  cap3.lineTo(x + w - 6, yt - 3);
+  cap3.lineTo(x + w + 4, yt - 3);
+  cap3.lineTo(x + w + 4, yt + 4);
+  cap3.closePath();
+  prop2(c, [[cap3, tone13(WALL3, 0.1)]], 1.4);
 }
 function chimneyPot(c, x, y) {
   prop2(c, [[poly2([[x - 7, y], [x + 7, y], [x + 5, y - 16], [x - 5, y - 16]]), "#c97a4a"]], 1.2);
@@ -16610,12 +16611,12 @@ function lanternD(c, x, y, s, glass5) {
     c.fillRect(x - 3 * s, y - 10 * s, 1.6 * s, 7 * s);
   });
   line(c, [[x, y - 12 * s], [x, y]], "#7a5418", 1);
-  const cap2 = new Path2D();
-  cap2.moveTo(x - 6 * s, y - 12 * s);
-  cap2.quadraticCurveTo(x - 6 * s, y - 18 * s, x, y - 21 * s);
-  cap2.quadraticCurveTo(x + 6 * s, y - 18 * s, x + 6 * s, y - 12 * s);
-  cap2.closePath();
-  prop(c, [[cap2, GOLD5]], 1);
+  const cap3 = new Path2D();
+  cap3.moveTo(x - 6 * s, y - 12 * s);
+  cap3.quadraticCurveTo(x - 6 * s, y - 18 * s, x, y - 21 * s);
+  cap3.quadraticCurveTo(x + 6 * s, y - 18 * s, x + 6 * s, y - 12 * s);
+  cap3.closePath();
+  prop(c, [[cap3, GOLD5]], 1);
   prop(c, [[ell(x, y - 22 * s, 1.4 * s, 1.4 * s), GOLD5]], 0.6);
 }
 function goodsD(c, kind, x0, x1, y, r) {
@@ -20972,8 +20973,8 @@ async function createHollowGroundCoverV1(env, { root: root2 = new URL("../../ass
       if (!ids.includes(row2.id) || row2.path !== row2.id + ".webp") throw Error("Unrecognized Hollow plant");
       const response2 = await env.fetch(new URL(row2.path, root2));
       if (!response2.ok) throw Error("Missing Hollow plant");
-      const b = await response2.arrayBuffer(), hash35 = Array.from(new Uint8Array(await env.crypto.subtle.digest("SHA-256", b)), (n) => n.toString(16).padStart(2, "0")).join("");
-      if (hash35 !== row2.sha256 || b.byteLength !== row2.bytes) throw Error("Hollow plant hash mismatch");
+      const b = await response2.arrayBuffer(), hash36 = Array.from(new Uint8Array(await env.crypto.subtle.digest("SHA-256", b)), (n) => n.toString(16).padStart(2, "0")).join("");
+      if (hash36 !== row2.sha256 || b.byteLength !== row2.bytes) throw Error("Hollow plant hash mismatch");
       downloadBytes += b.byteLength;
       const image = await env.createImageBitmap(new Blob([b], { type: "image/webp" }));
       try {
@@ -33483,8 +33484,8 @@ async function createWoodlandEnvironmentV1(environment, review, prior, initial =
   for (const f of manifest.files) {
     const r = await environment.fetch(new URL(f.path, base));
     if (!r.ok) throw Error("Missing Woodland asset " + f.path);
-    const bytes = await r.arrayBuffer(), hash35 = Array.from(new Uint8Array(await environment.crypto.subtle.digest("SHA-256", bytes)), (v) => v.toString(16).padStart(2, "0")).join("");
-    if (bytes.byteLength !== f.bytes || hash35 !== f.sha256) throw Error("Woodland asset commitment mismatch " + f.path);
+    const bytes = await r.arrayBuffer(), hash36 = Array.from(new Uint8Array(await environment.crypto.subtle.digest("SHA-256", bytes)), (v) => v.toString(16).padStart(2, "0")).join("");
+    if (bytes.byteLength !== f.bytes || hash36 !== f.sha256) throw Error("Woodland asset commitment mismatch " + f.path);
     files[f.path] = bytes;
     downloads += bytes.byteLength;
   }
@@ -33524,23 +33525,23 @@ async function createWoodlandEnvironmentV1(environment, review, prior, initial =
   delete files["earth-source.webp"];
   let mode = initial;
   const active2 = () => mode === "woodland";
-  const address2 = (space, x, y) => {
+  const address3 = (space, x, y) => {
     const o = environmentWorldOffset(space);
     return { x: (x + o.x - 1048576) / 32, y: (y + o.y - 851968) / 32, o };
   };
-  const code = (space, x, y) => {
+  const code2 = (space, x, y) => {
     const v = space.visual;
     return v?.biomes?.[Math.floor(y / 32) - (v.originTile?.y ?? 0)]?.[Math.floor(x / 32) - (v.originTile?.x ?? 0)];
   };
   function weight2(space, x, y) {
     if (!active2() || space.site || space.settlementInterior || !space.visual?.worldAddress) return 0;
-    const p = address2(space, x, y);
-    return woodlandEligibleV1(journey, code(space, x, y), p.x, p.y) ? woodlandScopeWeightV1(journey.scope, p.x, p.y) : 0;
+    const p = address3(space, x, y);
+    return woodlandEligibleV1(journey, code2(space, x, y), p.x, p.y) ? woodlandScopeWeightV1(journey.scope, p.x, p.y) : 0;
   }
   function groundWeight(space, x, y) {
     if (!worldCoverage) return weight2(space, x, y);
     if (!active2() || space.site || space.settlementInterior || !space.visual?.worldAddress) return 0;
-    return ["w", "a"].includes(code(space, x, y)) ? 1 : 0;
+    return ["w", "a"].includes(code2(space, x, y)) ? 1 : 0;
   }
   function material(c, index, x, y, w, h, wx, wy, period, alpha2) {
     if (alpha2 <= 0) return;
@@ -33623,7 +33624,7 @@ async function createWoodlandEnvironmentV1(environment, review, prior, initial =
     }
     const alpha2 = weight2(space, x * 32 + 16, y * 32 + 16);
     if (!alpha2) return void 0;
-    const p = address2(space, x * 32, y * 32), v = space.visual, ox = v.originTile?.x ?? 0, oy = v.originTile?.y ?? 0;
+    const p = address3(space, x * 32, y * 32), v = space.visual, ox = v.originTile?.x ?? 0, oy = v.originTile?.y ?? 0;
     if (protection.has(Math.floor(p.x), Math.floor(p.y))) return null;
     const type = v.terrain[y - oy]?.[x - ox];
     if (!["g", "f"].includes(type) || occupied.has(x + "," + y)) return null;
@@ -33681,8 +33682,8 @@ async function createWoodlandFoliageV2(environment, prior) {
   for (const f of manifest.files) {
     const r2 = await environment.fetch(new URL(f.path, root2));
     if (!r2.ok) throw Error("Missing Woodland foliage " + f.path);
-    const b = await r2.arrayBuffer(), hash35 = Array.from(new Uint8Array(await environment.crypto.subtle.digest("SHA-256", b)), (n) => n.toString(16).padStart(2, "0")).join("");
-    if (b.byteLength !== f.bytes || hash35 !== f.sha256) throw Error("Woodland foliage commitment mismatch");
+    const b = await r2.arrayBuffer(), hash36 = Array.from(new Uint8Array(await environment.crypto.subtle.digest("SHA-256", b)), (n) => n.toString(16).padStart(2, "0")).join("");
+    if (b.byteLength !== f.bytes || hash36 !== f.sha256) throw Error("Woodland foliage commitment mismatch");
     bytes += b.byteLength;
     const image = await environment.createImageBitmap(new Blob([b], { type: "image/webp" }));
     try {
@@ -33950,7 +33951,7 @@ var hash12 = (text2) => {
   return h >>> 0;
 };
 var unit2 = (h, n) => (h >>> n & 255) / 255;
-var naturalVisualKind = (code, blockerKind) => blockerKind === "rock" || ["r", "d", "s", "l"].includes(code) ? "rock" : code === "m" ? "tree" : "base";
+var naturalVisualKind = (code2, blockerKind) => blockerKind === "rock" || ["r", "d", "s", "l"].includes(code2) ? "rock" : code2 === "m" ? "tree" : "base";
 function createNaturalClusterSampler(seedDigest) {
   requireContract(typeof seedDigest === "string" && seedDigest.length > 0, "Natural cluster seed required");
   const cache5 = /* @__PURE__ */ new Map();
@@ -34037,12 +34038,12 @@ var naturalCanopyAt = (n, tx, ty, seed2 = 0) => {
   const score = terrainHash(tx, ty, seed2 + 419);
   return score % 100 < 76 && [[1, 0], [-1, 0], [0, 1], [0, -1]].every(([dx, dy]) => score < terrainHash(tx + dx, ty + dy, seed2 + 419));
 };
-var natureCanopyAt = (code, n, tx, ty, seed2 = 0) => {
-  if (code === "r" || code === "s") {
+var natureCanopyAt = (code2, n, tx, ty, seed2 = 0) => {
+  if (code2 === "r" || code2 === "s") {
     const score = terrainHash(tx, ty, seed2 + 433);
     return score % 100 < 80 && score < terrainHash(tx + 1, ty, seed2 + 433) && score < terrainHash(tx - 1, ty, seed2 + 433);
   }
-  return (code === "d" || code === "l") && naturalCanopyAt(n, tx, ty, seed2);
+  return (code2 === "d" || code2 === "l") && naturalCanopyAt(n, tx, ty, seed2);
 };
 var naturalBasePose = (n, tx, ty, t) => {
   const size = t + 6 + (n >>> 14) % 9;
@@ -34060,8 +34061,8 @@ function woodlandLandmarkForBlocker(space, b) {
   if (b.naturalClusterId || b.kind !== "thicket" && b.kind !== "trees" || b.width * b.height < 4) return null;
   const t = space.collision.tileSize, seed2 = environmentSeed(space), offset2 = environmentWorldOffset(space), v = space.visual, ox = v.originTile?.x ?? 0, oy = v.originTile?.y ?? 0, left = Math.floor(b.x), top = Math.floor(b.y), right = Math.ceil(b.x + b.width) - 1, bottom = Math.ceil(b.y + b.height) - 1, n = terrainHash(left + offset2.x / t, top + offset2.y / t, seed2 + 887);
   if (n % 29 !== 0) return null;
-  const candidates = [[left + Math.floor((right - left) / 2), bottom], [right, top + Math.floor((bottom - top) / 2)], [left + Math.floor((right - left) / 2), top], [left, top + Math.floor((bottom - top) / 2)]], chosen = candidates[(n >>> 6) % candidates.length], code = v.biomes?.[chosen[1] - oy]?.[chosen[0] - ox] ?? "w";
-  if (code !== "w") return null;
+  const candidates = [[left + Math.floor((right - left) / 2), bottom], [right, top + Math.floor((bottom - top) / 2)], [left + Math.floor((right - left) / 2), top], [left, top + Math.floor((bottom - top) / 2)]], chosen = candidates[(n >>> 6) % candidates.length], code2 = v.biomes?.[chosen[1] - oy]?.[chosen[0] - ox] ?? "w";
+  if (code2 !== "w") return null;
   const types = ["ruin", "shrine", "camp", "shelter", "cart", "signpost"], type = types[(n >>> 10) % types.length];
   return { id: `${blockerIdentity(b)}/landmark`, obstacleId: b.id ?? null, tileX: chosen[0], tileY: chosen[1], x: (chosen[0] + 0.5) * t, y: (chosen[1] + 0.72) * t, n, type };
 }
@@ -34101,13 +34102,13 @@ function* prepareEnvironmentLayout(space) {
     } else if (b.kind === "thicket" || b.kind === "trees" || b.kind === "rock") {
       const landmark = woodlandLandmarkForBlocker(space, b.source), left = Math.floor(b.x / t), top = Math.floor(b.y / t), right = Math.ceil((b.x + b.w) / t), bottom = Math.ceil((b.y + b.h) / t);
       for (let ty = top; ty < bottom; ty++) for (let tx = left; tx < right; tx++) {
-        const key2 = tx + "," + ty, forestRole = woodlandForestRole(b.naturalClusterId), n = forestRole ? woodlandForestVisualHash(b.naturalClusterId, tx + offset2.x / t, ty + offset2.y / t) : terrainHash(tx + offset2.x / t, ty + offset2.y / t, seed2 + 113), code = biome(tx, ty) ?? (b.kind === "rock" ? "r" : "w");
+        const key2 = tx + "," + ty, forestRole = woodlandForestRole(b.naturalClusterId), n = forestRole ? woodlandForestVisualHash(b.naturalClusterId, tx + offset2.x / t, ty + offset2.y / t) : terrainHash(tx + offset2.x / t, ty + offset2.y / t, seed2 + 113), code2 = biome(tx, ty) ?? (b.kind === "rock" ? "r" : "w");
         obstacleTiles.add(key2);
-        if (naturalVisualKind(code, b.kind) === "rock") {
-          const id = obstacleTileVisualId(b, tx, ty, "rock"), canopy2 = Boolean(b.naturalClusterId) && natureCanopyAt(code, n, tx + offset2.x / t, ty + offset2.y / t, seed2);
-          rocks.push({ id, obstacleId: b.id, ...b.naturalClusterId ? naturalRockPose(n, tx, ty, t) : { x: tx * t - 2, y: ty * t + 2, size: t + 4 }, n, forestRole, biome: code, organic: Boolean(b.naturalClusterId), canopy: canopy2, tileX: tx, tileY: ty });
+        if (naturalVisualKind(code2, b.kind) === "rock") {
+          const id = obstacleTileVisualId(b, tx, ty, "rock"), canopy2 = Boolean(b.naturalClusterId) && natureCanopyAt(code2, n, tx + offset2.x / t, ty + offset2.y / t, seed2);
+          rocks.push({ id, obstacleId: b.id, ...b.naturalClusterId ? naturalRockPose(n, tx, ty, t) : { x: tx * t - 2, y: ty * t + 2, size: t + 4 }, n, forestRole, biome: code2, organic: Boolean(b.naturalClusterId), canopy: canopy2, tileX: tx, tileY: ty });
           if (canopy2) trees.push({ id: `${b.id}/nature/${tx},${ty}`, baseId: id, obstacleId: b.id, x: tx * t - 11 + (n % 9 - 4), y: ty * t - 18 + ((n >>> 4) % 7 - 3), size: t + 18 + (n >>> 12) % 7, n, biome: "nature", tileX: tx, tileY: ty, scattered: false });
-        } else if (code === "m") {
+        } else if (code2 === "m") {
           const id = obstacleTileVisualId(b, tx, ty, "tree");
           trees.push({ id, obstacleId: b.id, ...b.naturalClusterId ? naturalMarshPose(n, tx, ty, t) : { x: tx * t - 8 + (n % 3 - 1), y: ty * t - 15 + ((n >>> 4) % 3 - 1), size: t + 16 }, n, biome: "marsh", tileX: tx, tileY: ty, scattered: false });
         } else {
@@ -34189,15 +34190,15 @@ async function createBiomeNatureArtV1(env, review, prior) {
       image.close();
     }
   }
-  for (const [code, name] of Object.entries(BIOME_NATURE_KITS)) {
+  for (const [code2, name] of Object.entries(BIOME_NATURE_KITS)) {
     const root2 = new URL(`../../assets/${name}-nature-v1/`, import.meta.url), response = await env.fetch(new URL("kit-manifest.json", root2));
     if (!response.ok) throw Error("Missing " + name + " nature kit");
     const manifest = await response.json();
     if (manifest.version !== name + "-nature-v1" || !(manifest.pxPerUnit > 0) || !manifest.files?.length || manifest.files.some((f) => !ROLES.has(f.role) || !f.slots?.length)) throw Error("Invalid " + name + " nature kit");
     const ppu = manifest.pxPerUnit, byKind = {};
     for (const f of manifest.files) for (const { kind, s, image } of await decode(f, root2)) (byKind[kind] ??= []).push(Object.freeze({ image, w: s.width / ppu, h: s.height / ppu, ax: s.anchor[0] / ppu, ay: s.anchor[1] / ppu }));
-    for (const kind of new Set([...PICK[code].tree, ...PICK[code].base ?? [], ...PICK[code].rock].filter((k) => typeof k === "string").concat(PICK[code].ground.map((g) => g[0])))) if (!byKind[kind]) throw Error("Nature kit " + name + " lacks " + kind);
-    kits[code] = byKind;
+    for (const kind of new Set([...PICK[code2].tree, ...PICK[code2].base ?? [], ...PICK[code2].rock].filter((k) => typeof k === "string").concat(PICK[code2].ground.map((g) => g[0])))) if (!byKind[kind]) throw Error("Nature kit " + name + " lacks " + kind);
+    kits[code2] = byKind;
   }
   const biomeAt = (space, x, y) => {
     const v = space.visual;
@@ -34205,11 +34206,11 @@ async function createBiomeNatureArtV1(env, review, prior) {
   };
   const owned2 = (space, x, y) => {
     if (space.site || space.settlementInterior || !space.visual?.worldAddress) return null;
-    const code = biomeAt(space, x, y);
-    return kits[code] ? code : null;
+    const code2 = biomeAt(space, x, y);
+    return kits[code2] ? code2 : null;
   };
-  const sprite6 = (code, kind, h) => {
-    const list = kits[code][kind];
+  const sprite6 = (code2, kind, h) => {
+    const list = kits[code2][kind];
     return list[h % list.length];
   };
   function stamp6(c, p, gx, gy, k, alpha2 = 1) {
@@ -34222,57 +34223,57 @@ async function createBiomeNatureArtV1(env, review, prior) {
   }
   const fit = (p, max, n) => Math.min(1, max / p.w) * (0.9 + (n >>> 7) % 3 * 0.05);
   function tree(c, s, x, y, size, n, info2, focus) {
-    const cx = x + size * 0.5, code = owned2(s, cx, y + size * 0.78);
-    if (!code) return prior.tree(c, s, x, y, size, n, info2, focus);
+    const cx = x + size * 0.5, code2 = owned2(s, cx, y + size * 0.78);
+    if (!code2) return prior.tree(c, s, x, y, size, n, info2, focus);
     const t = s.collision.tileSize, o = environmentWorldOffset(s), tx = info2?.tileX ?? Math.floor(cx / t), ty = info2?.tileY ?? Math.floor((y + size * 0.78) / t), gx = (tx + 0.5) * t + ((n >>> 3) % 9 - 4), gy = (ty + 0.86) * t;
-    if (code === "w" && info2?.forestRole === "sapling") {
-      const p2 = sprite6(code, "sapling", n >>> 15);
+    if (code2 === "w" && info2?.forestRole === "sapling") {
+      const p2 = sprite6(code2, "sapling", n >>> 15);
       stamp6(c, p2, gx, gy, 0.72 + (n >>> 5) % 3 * 0.04);
       draws.tree++;
       return true;
     }
-    if (code === "m" && !naturalCanopyAt(n, tx + o.x / t, ty + o.y / t, environmentSeed(s))) {
-      const p2 = sprite6(code, pick(PICK.m.base, n >>> 9), n >>> 15);
+    if (code2 === "m" && !naturalCanopyAt(n, tx + o.x / t, ty + o.y / t, environmentSeed(s))) {
+      const p2 = sprite6(code2, pick(PICK.m.base, n >>> 9), n >>> 15);
       stamp6(c, p2, gx, gy, fit(p2, 44, n));
       draws.base++;
       return true;
     }
-    const p = sprite6(code, pick(PICK[code].tree, n >>> 9), n >>> 15), k = 0.84 + (n >>> 5) % 5 * 0.04, w = p.w * k, h = p.h * k;
+    const p = sprite6(code2, pick(PICK[code2].tree, n >>> 9), n >>> 15), k = 0.84 + (n >>> 5) % 5 * 0.04, w = p.w * k, h = p.h * k;
     const occludes = (Array.isArray(focus) ? focus : focus ? [focus] : []).some((f) => Math.abs(f.x - gx) < w * 0.4 && f.y > gy - h * 0.84 && f.y < gy - 10);
     stamp6(c, p, gx, gy, k, occludes ? 0.38 : 1);
     draws.tree++;
     return true;
   }
   function base(c, s, x, y, size, n, biome, info2) {
-    const code = owned2(s, x + size / 2, y + size / 2);
-    if (!code || !PICK[code].base) return prior.base(c, s, x, y, size, n, biome, info2);
+    const code2 = owned2(s, x + size / 2, y + size / 2);
+    if (!code2 || !PICK[code2].base) return prior.base(c, s, x, y, size, n, biome, info2);
     if (info2?.hasCanopy) return true;
-    const role = info2?.forestRole, kind = code === "w" && (role === "log" || role === "stump") ? role : pick(PICK[code].base, n >>> 9), p = sprite6(code, kind, n >>> 15);
+    const role = info2?.forestRole, kind = code2 === "w" && (role === "log" || role === "stump") ? role : pick(PICK[code2].base, n >>> 9), p = sprite6(code2, kind, n >>> 15);
     stamp6(c, p, x + size * 0.5, y + size * 0.84, fit(p, 44, n));
     draws.base++;
     return true;
   }
   function rock2(c, s, x, y, size, n, info2) {
-    const code = owned2(s, x + size / 2, y + size / 2);
-    if (!code) return prior.rock(c, s, x, y, size, n, info2);
+    const code2 = owned2(s, x + size / 2, y + size / 2);
+    if (!code2) return prior.rock(c, s, x, y, size, n, info2);
     if (info2?.canopy) {
-      const g = PICK[code].ground[0], p2 = sprite6(code, g[0], n >>> 15);
+      const g = PICK[code2].ground[0], p2 = sprite6(code2, g[0], n >>> 15);
       stamp6(c, p2, x + size * 0.5 - 8, y + size * 0.95, g[1]);
       draws.ground++;
       return true;
     }
-    const p = sprite6(code, pick(PICK[code].rock, n >>> 9), n >>> 15);
+    const p = sprite6(code2, pick(PICK[code2].rock, n >>> 9), n >>> 15);
     stamp6(c, p, x + size * 0.5, y + size * 0.95, fit(p, 46, n));
     draws.rock++;
     return true;
   }
-  function biomeDetail(c, s, tx, ty, code, n, cluster, layout) {
+  function biomeDetail(c, s, tx, ty, code2, n, cluster, layout) {
     const t = s.collision.tileSize;
     if (!owned2(s, (tx + 0.5) * t, (ty + 0.5) * t)) return void 0;
     if ((n >>> 3) % 7 !== 0 && !(cluster % 5 === 0 && n % 3 === 0)) return 0;
     const x = tx * t + 6 + n % 20, y = ty * t + 12 + (n >>> 8) % 16;
     if (!layout.allowsSmall(x, y)) return 0;
-    const [kind, k] = pickGround(PICK[code].ground, n >>> 11), p = sprite6(code, kind, n >>> 17);
+    const [kind, k] = pickGround(PICK[code2].ground, n >>> 11), p = sprite6(code2, kind, n >>> 17);
     stamp6(c, p, x, y, k);
     draws.ground++;
     return 1;
@@ -34284,7 +34285,7 @@ async function createBiomeNatureArtV1(env, review, prior) {
     draws.ground++;
     return true;
   }
-  const codeOf = Object.fromEntries(Object.entries(BIOME_NATURE_KITS).map(([code, name]) => [name, code]));
+  const codeOf = Object.fromEntries(Object.entries(BIOME_NATURE_KITS).map(([code2, name]) => [name, code2]));
   function drawNatureProp(c, biome, kind, x, y, scale = 1, n = 0) {
     const list = kits[codeOf[biome]]?.[kind];
     if (!list?.length) return false;
@@ -34685,8 +34686,8 @@ async function createPaintedRoutesV1(env, review, prior, { worldCoverage = false
   for (const [file, f] of kit2.files.entries()) {
     const response = await env.fetch(new URL(f.path, root2));
     if (!response.ok) throw Error("Missing painted path source");
-    const bytes = await response.arrayBuffer(), hash35 = Array.from(new Uint8Array(await env.crypto.subtle.digest("SHA-256", bytes)), (v) => v.toString(16).padStart(2, "0")).join("");
-    if (hash35 !== f.sha256 || bytes.byteLength !== f.bytes) throw Error("Painted path source commitment mismatch");
+    const bytes = await response.arrayBuffer(), hash36 = Array.from(new Uint8Array(await env.crypto.subtle.digest("SHA-256", bytes)), (v) => v.toString(16).padStart(2, "0")).join("");
+    if (hash36 !== f.sha256 || bytes.byteLength !== f.bytes) throw Error("Painted path source commitment mismatch");
     const bitmap = await env.createImageBitmap(new Blob([bytes], { type: "image/webp" })), c = env.document.createElement("canvas");
     if (bitmap.width !== f.width || bitmap.height !== f.height) throw Error("Painted path source dimensions");
     c.width = f.width;
@@ -34715,9 +34716,9 @@ async function createPaintedRoutesV1(env, review, prior, { worldCoverage = false
     const v = space.visual, ox = v.originTile?.x ?? 0, oy = v.originTile?.y ?? 0;
     let signature = "", near3 = false;
     for (let y = Math.floor(py / 32) - 1; y <= Math.ceil((py + PAINTED_PAGE_SIZE) / 32); y++) for (let x = Math.floor(px5 / 32) - 1; x <= Math.ceil((px5 + PAINTED_PAGE_SIZE) / 32); x++) {
-      const code = at5(x, y);
-      signature += (code ?? "?") + (v.biomes?.[y - oy]?.[x - ox] ?? "?");
-      if ((code === "r" || code === "p") && kit2.biomes.includes(v.biomes?.[y - oy]?.[x - ox])) near3 = true;
+      const code2 = at5(x, y);
+      signature += (code2 ?? "?") + (v.biomes?.[y - oy]?.[x - ox] ?? "?");
+      if ((code2 === "r" || code2 === "p") && kit2.biomes.includes(v.biomes?.[y - oy]?.[x - ox])) near3 = true;
     }
     return near3 ? seed2 + "/" + (px5 + o.x) + "/" + (py + o.y) + "/" + signature : null;
   }
@@ -34803,8 +34804,8 @@ async function createPaintedRoutesV1(env, review, prior, { worldCoverage = false
         if (aligned) {
           if (!allowed[(y >>> 5) * 2 + (x >>> 5)]) continue;
         } else {
-          const tx = Math.floor(lx / 32), ty = Math.floor(ly / 32), code = at5(tx, ty), biome = v.biomes?.[ty - oy]?.[tx - ox];
-          if (blocked2.has(code) || !kit2.biomes.includes(biome)) continue;
+          const tx = Math.floor(lx / 32), ty = Math.floor(ly / 32), code2 = at5(tx, ty), biome = v.biomes?.[ty - oy]?.[tx - ox];
+          if (blocked2.has(code2) || !kit2.biomes.includes(biome)) continue;
         }
         const wx = lx + o.x, wy = ly + o.y, weight2 = paintedScopeWeight(scope, wx, wy);
         if (!weight2) continue;
@@ -35382,11 +35383,11 @@ function createStandLanes(doc = null) {
     stamps.set(key2, s);
     return s;
   }
-  function* draw(c, bounds2, { lane: lane2, terrain, code, seed: seed2, world, sprite: sprite6, skip = null, kinds: kinds2 = KINDS }) {
+  function* draw(c, bounds2, { lane: lane2, terrain, code: code2, seed: seed2, world, sprite: sprite6, skip = null, kinds: kinds2 = KINDS }) {
     const X0 = bounds2.x - PAD2, Y0 = bounds2.y - PAD2, W3 = bounds2.width + PAD2 * 2, Hh = bounds2.height + PAD2 * 2, tx0 = Math.floor(X0 / T31) - 1, ty0 = Math.floor(Y0 / T31) - 1, tx1 = Math.floor((X0 + W3) / T31) + 1, ty1 = Math.floor((Y0 + Hh) / T31) + 1;
     const tiles3 = /* @__PURE__ */ new Map(), key2 = (x, y) => x + "," + y;
     const make = (x, y, k) => {
-      const raw = code(x, y), lc = LANES[raw] ? raw : "w";
+      const raw = code2(x, y), lc = LANES[raw] ? raw : "w";
       return { tx: x, ty: y, k, code: lc, ghost: Boolean(skip?.(raw, k)), n: seed2(x, y) };
     };
     let own = 0;
@@ -35875,8 +35876,8 @@ var FX = {
   }
 };
 var DRESS = {
-  tuft(c, x, y, n, sprite6, code) {
-    const p = sprite6(code, "tuft", n >>> 7);
+  tuft(c, x, y, n, sprite6, code2) {
+    const p = sprite6(code2, "tuft", n >>> 7);
     if (p) {
       const k = Math.min(0.55, 18 / p.w);
       c.drawImage(p.image, x - p.ax * k, y + 3 - p.ay * k, p.w * k, p.h * k);
@@ -35961,7 +35962,7 @@ var pick2 = (list, h) => {
   }
   return list[0];
 };
-var idKind = (code) => code === "r" ? "rock" : code === "m" ? "tree" : "base";
+var idKind = (code2) => code2 === "r" ? "rock" : code2 === "m" ? "tree" : "base";
 var GROUND = {
   w: { floor: "#4c7d35", floor2: "#567f38", litter: ["#8a6a34", "#a87a3a", "#6f5a2c", "#b98a44"], moss: "#5f9e3a", under: "#3f7230" },
   a: { floor: "#5a8f3a", floor2: "#62953e", litter: ["#8a7a3a", "#a08a44", "#7a6a34"], moss: "#6aa43e", under: "#6f9a3a" },
@@ -35994,8 +35995,8 @@ function createForestStandsArtV2(env, prior) {
   const doc = env.document, pieces = createStandPieces(doc), lanes2 = createStandLanes(doc), kits = /* @__PURE__ */ new Map(), models = /* @__PURE__ */ new WeakMap(), plates = /* @__PURE__ */ new Map(), bands = /* @__PURE__ */ new WeakMap(), casters = /* @__PURE__ */ new WeakMap(), fronts = /* @__PURE__ */ new WeakMap();
   let plateBytes = 0;
   const stats3 = { platesBuilt: 0, trees: 0, faded: 0, replays: 0, lanePages: 0 };
-  function kit2(code, kind, h = 0) {
-    const key2 = code + "/" + kind + "/" + h % 6;
+  function kit2(code2, kind, h = 0) {
+    const key2 = code2 + "/" + kind + "/" + h % 6;
     if (kits.has(key2)) return kits.get(key2);
     let s = null;
     if (prior.drawNatureProp) {
@@ -36005,7 +36006,7 @@ function createForestStandsArtV2(env, prior) {
         s = { image, w, h: hh, ax: -x, ay: -y };
       } };
       try {
-        if (!prior.drawNatureProp(rc, KITS2[code], kind, 0, 0, 1, h % 6)) s = null;
+        if (!prior.drawNatureProp(rc, KITS2[code2], kind, 0, 0, 1, h % 6)) s = null;
       } catch {
         s = null;
       }
@@ -36014,9 +36015,9 @@ function createForestStandsArtV2(env, prior) {
     return s;
   }
   const fit = (p, max, n) => p ? Math.min(1, max / p.w) * (0.9 + (n >>> 7) % 3 * 0.05) : 1;
-  function art(code, o, seed2) {
+  function art(code2, o, seed2) {
     if (o.fn) return { s: pieces.sprite(o.fn, seed2 % STAND_PIECE_VARIANTS, o.fn === "fernbed" ? [o.pal, o.h] : o.fn === "tallgrass" ? [o.col, o.h, o.heads] : o.fn === "bramble" ? [o.pal, o.berry] : []), k: o.k ?? 1 };
-    const s = kit2(code, o.kit, seed2 >>> 3);
+    const s = kit2(code2, o.kit, seed2 >>> 3);
     return { s, k: o.k ?? fit(s, 46, seed2) };
   }
   const item = (id, s, gx, gy, k, extra = null) => s ? { id, s, gx, gy, k, x0: gx - s.ax * k, y0: gy - s.ay * k, x1: gx + (s.w - s.ax) * k, y1: gy + (s.h - s.ay) * k, ...extra } : null;
@@ -36068,59 +36069,59 @@ function createForestStandsArtV2(env, prior) {
     for (let ty = by * BLOCK; ty < (by + 1) * BLOCK; ty++) for (let tx = bx * BLOCK; tx < (bx + 1) * BLOCK; tx++) {
       const c = cellAt(m, tx, ty);
       if (!c) continue;
-      const code = codeAt(m, tx, ty), A = ART2[code];
+      const code2 = codeAt(m, tx, ty), A = ART2[code2];
       if (!A) continue;
       const seed2 = seedAt(m, tx, ty), n = H2(seed2, 3), p = m.blocked.get(tx + "," + ty), wid = tx + m.wox + "," + (ty + m.woy), add = (it) => {
         if (it) items.push(it);
       };
       if (p?.piece === "trunk") {
-        const palm3 = code === "d" && p.detail === "palm", s = palm3 ? kit2("t", "palm", n >>> 15) : kit2(code, p.detail, n >>> 15), it = item("stand-tree/" + wid, s, (tx + 0.5) * T32 + ((n >>> 3) % 9 - 4), (ty + 0.86) * T32, (0.84 + (n >>> 5) % 5 * 0.04) * (palm3 ? 0.85 : 1), { tree: true });
+        const palm3 = code2 === "d" && p.detail === "palm", s = palm3 ? kit2("t", "palm", n >>> 15) : kit2(code2, p.detail, n >>> 15), it = item("stand-tree/" + wid, s, (tx + 0.5) * T32 + ((n >>> 3) % 9 - 4), (ty + 0.86) * T32, (0.84 + (n >>> 5) % 5 * 0.04) * (palm3 ? 0.85 : 1), { tree: true });
         if (it) trees.push(it);
       } else if (p?.piece === "mass") {
         if (ROCK_MASSES.includes(p.detail)) {
-          if (PLATE[code]) {
+          if (PLATE[code2]) {
             masses.add(p.key);
             const below = m.blocked.get(tx + "," + (ty + 1));
             if (!(below?.piece === "mass" && below.key === p.key) && n % 4 === 0) {
-              const s = kit2(code, pick2(A.rock ?? ["rock", 1], n >>> 9), n >>> 15);
+              const s = kit2(code2, pick2(A.rock ?? ["rock", 1], n >>> 9), n >>> 15);
               add(item("stand/" + wid + "/foot", s, (tx + 0.5) * T32 + (n % 11 - 5), (ty + 1.2) * T32, s ? Math.min(1, 24 / s.w) : 1));
             }
           } else {
             const list = A.rock ?? ["rock", 1];
             for (let i = 0; i < (p.detail === "mesa" ? 1 : 2); i++) {
-              const q = H2(n, 30 + i), s = kit2(code, pick2(list, q >>> 9), q >>> 15);
+              const q = H2(n, 30 + i), s = kit2(code2, pick2(list, q >>> 9), q >>> 15);
               add(item("stand/" + wid + "/r" + i, s, (tx + 0.3 + i * 0.45) * T32 + (q % 7 - 3), (ty + 0.6 + i * 0.3) * T32, p.detail === "mesa" ? 1.35 : fit(s, 52, q)));
             }
           }
         } else if (p.detail === "bamboo") {
           for (let i = 0; i < 2; i++) {
             const q = H2(n, 10 + i);
-            add(item("stand/" + wid + "/b" + i, kit2(code, "bamboo", q >>> 9), (tx + 0.3 + i * 0.45) * T32 + (q % 7 - 3), (ty + 0.5 + i * 0.4) * T32, 0.82 + (q >>> 4) % 4 * 0.05));
+            add(item("stand/" + wid + "/b" + i, kit2(code2, "bamboo", q >>> 9), (tx + 0.3 + i * 0.45) * T32 + (q % 7 - 3), (ty + 0.5 + i * 0.4) * T32, 0.82 + (q >>> 4) % 4 * 0.05));
           }
         } else {
           for (let i = 0; i < 3; i++) {
-            const q = H2(n, 20 + i), o = pick2(A.mass ?? [{ kit: "bush" }, 1], q >>> 9), { s, k } = art(code, o, q);
+            const q = H2(n, 20 + i), o = pick2(A.mass ?? [{ kit: "bush" }, 1], q >>> 9), { s, k } = art(code2, o, q);
             add(item("stand/" + wid + "/m" + i, s, (tx + [0.25, 0.75, 0.5][i]) * T32 + (q % 9 - 4), (ty + [0.4, 0.5, 0.9][i]) * T32, k * (o.fn === "bramble" ? 0.95 : 1)));
           }
           if (A.massTree && n % 100 < 30) {
-            const it = item("stand-tree/" + wid, kit2(code, pick2(A.massTree, n >>> 11), n >>> 17), (tx + 0.5) * T32, (ty + 0.86) * T32, 0.8 + (n >>> 5) % 4 * 0.04, { tree: true });
+            const it = item("stand-tree/" + wid, kit2(code2, pick2(A.massTree, n >>> 11), n >>> 17), (tx + 0.5) * T32, (ty + 0.86) * T32, 0.8 + (n >>> 5) % 4 * 0.04, { tree: true });
             if (it) trees.push(it);
           }
         }
       } else if (p?.piece === "log") {
         const left = m.blocked.get(tx - 1 + "," + ty);
-        if (!(left?.piece === "log" && left.key === p.key)) add(item("stand/" + wid + "/log", kit2(code, A.log ?? "log", n >>> 15) ?? kit2("w", "log", n >>> 15), (tx + 1) * T32, (ty + 0.8) * T32, 0.95));
+        if (!(left?.piece === "log" && left.key === p.key)) add(item("stand/" + wid + "/log", kit2(code2, A.log ?? "log", n >>> 15) ?? kit2("w", "log", n >>> 15), (tx + 1) * T32, (ty + 0.8) * T32, 0.95));
       } else if (p?.piece === "bush" || p?.piece === "hedge") {
-        const hedge = p.piece === "hedge", s = kit2(code, pick2(hedge ? ["bush", 1] : A.bush, n >>> 9), n >>> 15);
+        const hedge = p.piece === "hedge", s = kit2(code2, pick2(hedge ? ["bush", 1] : A.bush, n >>> 9), n >>> 15);
         add(item("stand/" + wid + "/bush", s, (tx + 0.5) * T32 + (hedge ? 0 : n % 7 - 3), (ty + 0.84) * T32, fit(s, hedge ? 46 : 44, n)));
       } else if (p?.piece === "stone") {
-        const s = kit2(code, pick2(A.stone, n >>> 9), n >>> 15);
+        const s = kit2(code2, pick2(A.stone, n >>> 9), n >>> 15);
         add(item("stand/" + wid + "/stone", s, (tx + 0.5) * T32, (ty + 0.9) * T32, fit(s, 40, n)));
       } else if (p) {
       } else if (c.cover && A.cover) {
         const inner = [[1, 0], [-1, 0], [0, 1], [0, -1]].every(([dx, dy]) => cellAt(m, tx + dx, ty + dy)?.cover);
         if (inner || n % 10 < 8) for (let i = 0; i < (inner ? 2 : 1); i++) {
-          const q = H2(n, 40 + i), o = pick2(A.cover, q >>> 9), { s, k } = art(code, o, q);
+          const q = H2(n, 40 + i), o = pick2(A.cover, q >>> 9), { s, k } = art(code2, o, q);
           add(item("stand/" + wid + "/c" + i, s, (tx + 0.05 + q % 90 / 100) * T32, (ty + 0.25 + (q >>> 8) % 70 / 100) * T32, k * (0.8 + (q >>> 4) % 4 * 0.07)));
         }
       } else if (!c.trail && m.v.terrain[ty - m.oy]?.[tx - m.ox] === "g") {
@@ -36128,7 +36129,7 @@ function createForestStandsArtV2(env, prior) {
         if (q % 100 < (forest ? 8 : c.zone === 0 ? 9 : 5)) {
           const kind = pick2(forest ? A.flat : A.glade, q >>> 8);
           if (!TALL.has(kind)) {
-            const s = kit2(code, kind, q >>> 16), it = item("stand/" + wid + "/flat", s, (tx + 0.2 + (q >>> 20) % 7 / 10) * T32, (ty + 0.6 + (q >>> 24) % 4 / 10) * T32, fit(s, 30, q) * 0.8);
+            const s = kit2(code2, kind, q >>> 16), it = item("stand/" + wid + "/flat", s, (tx + 0.2 + (q >>> 20) % 7 / 10) * T32, (ty + 0.6 + (q >>> 24) % 4 / 10) * T32, fit(s, 30, q) * 0.8);
             if (it) flats.push(it);
           }
         }
@@ -36147,15 +36148,15 @@ function createForestStandsArtV2(env, prior) {
     let local6 = m.plates.get(key2);
     if (local6 !== void 0) return local6;
     local6 = null;
-    const tiles3 = m.masses.get(key2), code = tiles3 && codeAt(m, tiles3[0][0], tiles3[0][1]);
-    if (tiles3 && PLATE[code]) {
-      const world = tiles3.map(([x, y]) => [x + m.wox, y + m.woy]).sort((a, b) => a[1] - b[1] || a[0] - b[0]), id = m.seed + "|" + code + "|" + key2 + "|" + world.join(";");
+    const tiles3 = m.masses.get(key2), code2 = tiles3 && codeAt(m, tiles3[0][0], tiles3[0][1]);
+    if (tiles3 && PLATE[code2]) {
+      const world = tiles3.map(([x, y]) => [x + m.wox, y + m.woy]).sort((a, b) => a[1] - b[1] || a[0] - b[0]), id = m.seed + "|" + code2 + "|" + key2 + "|" + world.join(";");
       let p = plates.get(id);
       if (p) {
         plates.delete(id);
         plates.set(id, p);
       } else {
-        p = buildPlate(code, world, m.seed);
+        p = buildPlate(code2, world, m.seed);
         plates.set(id, p);
         plateBytes += p.bytes;
         stats3.platesBuilt++;
@@ -36171,8 +36172,8 @@ function createForestStandsArtV2(env, prior) {
     m.plates.set(key2, local6);
     return local6;
   }
-  function buildPlate(code, tiles3, seed2) {
-    const P10 = PLATE[code], h = P10.h, set = new Set(tiles3.map(([x, y]) => x + "," + y)), rock2 = (x, y) => set.has(x + "," + y), ts = tiles3.map(([x, y]) => ({ x, y, s: standsTileHash(seed2, x, y) }));
+  function buildPlate(code2, tiles3, seed2) {
+    const P10 = PLATE[code2], h = P10.h, set = new Set(tiles3.map(([x, y]) => x + "," + y)), rock2 = (x, y) => set.has(x + "," + y), ts = tiles3.map(([x, y]) => ({ x, y, s: standsTileHash(seed2, x, y) }));
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
     for (const t of ts) {
       minX = Math.min(minX, t.x);
@@ -36349,7 +36350,7 @@ function createForestStandsArtV2(env, prior) {
       for (const t of row2) {
         const n = H2(t.s, 53);
         if (n % 5 || !P10.dress) continue;
-        const s = kit2(code, pick2(P10.dress, n >>> 7), n >>> 13);
+        const s = kit2(code2, pick2(P10.dress, n >>> 7), n >>> 13);
         if (!s) continue;
         const k = Math.min(1, 30 / s.w);
         cc.drawImage(s.image, (t.x + 0.5) * T32 + (n % 9 - 4) - s.ax * k, (t.y + 0.7) * T32 - h - s.ay * k, s.w * k, s.h * k);
@@ -36364,11 +36365,11 @@ function createForestStandsArtV2(env, prior) {
   function floor(c, space, bounds2) {
     const m = modelFor(space);
     if (!m) return;
-    const x0 = Math.floor(bounds2.x / T32) - 2, y0 = Math.floor(bounds2.y / T32) - 2, x1 = Math.floor((bounds2.x + bounds2.width) / T32) + 2, y1 = Math.floor((bounds2.y + bounds2.height) / T32) + 2, groups = /* @__PURE__ */ new Map(), group = (code) => {
-      let g = groups.get(code);
+    const x0 = Math.floor(bounds2.x / T32) - 2, y0 = Math.floor(bounds2.y / T32) - 2, x1 = Math.floor((bounds2.x + bounds2.width) / T32) + 2, y1 = Math.floor((bounds2.y + bounds2.height) / T32) + 2, groups = /* @__PURE__ */ new Map(), group = (code2) => {
+      let g = groups.get(code2);
       if (!g) {
         g = { floor: new Path2D(), under: new Path2D(), inner: [], covers: 0, n: 0 };
-        groups.set(code, g);
+        groups.set(code2, g);
       }
       return g;
     };
@@ -36379,24 +36380,24 @@ function createForestStandsArtV2(env, prior) {
     for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) {
       const cell = cellAt(m, tx, ty);
       if (!cell) continue;
-      const code = codeAt(m, tx, ty), G3 = GROUND[code];
+      const code2 = codeAt(m, tx, ty), G3 = GROUND[code2];
       if (!G3) continue;
       const seed2 = seedAt(m, tx, ty), p = m.blocked.get(tx + "," + ty);
       if (cell.cover && G3.under) {
-        const n2 = H2(seed2, 7), g2 = group(code);
+        const n2 = H2(seed2, 7), g2 = group(code2);
         g2.under.addPath(blob(rng8(n2), (tx + 0.5) * T32 + (n2 % 7 - 3), (ty + 0.55) * T32, 19 + (n2 >>> 8) % 5, 0.3, 16));
         g2.covers++;
       }
       if (!G3.floor || m.v.terrain[ty - m.oy]?.[tx - m.ox] !== "g") continue;
       const thicket = p?.piece === "mass" && !ROCK_MASSES.includes(p.detail);
       if (cell.zone < 2 && !cell.cover && !thicket && !trunkNear(tx, ty)) continue;
-      const n = H2(seed2, 5), g = group(code);
+      const n = H2(seed2, 5), g = group(code2);
       g.floor.addPath(blob(rng8(n), (tx + 0.5) * T32 + (n % 9 - 4), (ty + 0.5) * T32 + ((n >>> 4) % 7 - 3), 20 + (n >>> 8) % 6, 0.3, 18));
       g.inner.push([tx, ty, seed2]);
       g.n++;
     }
-    for (const [code, g] of groups) {
-      const G3 = GROUND[code];
+    for (const [code2, g] of groups) {
+      const G3 = GROUND[code2];
       if (g.n) {
         c.save();
         c.fillStyle = G3.floor;
@@ -36473,8 +36474,8 @@ function createForestStandsArtV2(env, prior) {
   }
   function standsTile(c, space, b, tx, ty) {
     const m = modelFor(space);
-    const code = m ? codeAt(m, tx, ty) : null;
-    return obstacleTileVisualId(b, tx, ty, idKind(code ?? (b.kind === "rock" ? "r" : "w")));
+    const code2 = m ? codeAt(m, tx, ty) : null;
+    return obstacleTileVisualId(b, tx, ty, idKind(code2 ?? (b.kind === "rock" ? "r" : "w")));
   }
   function bandsOf(s) {
     let b = bands.get(s.image);
@@ -36600,7 +36601,7 @@ function createForestStandsArtV2(env, prior) {
     seed: (x, y) => seedAt(m, x, y),
     world: { x: m.wox * T32, y: m.woy * T32 },
     sprite: kit2,
-    skip: paints ? (code, kind) => kind !== "T" && PAINTED.has(code) : null
+    skip: paints ? (code2, kind) => kind !== "T" && PAINTED.has(code2) : null
   });
   function paintedRoads(m, bounds2, at5) {
     const x0 = Math.floor(bounds2.x / T32) - 2, y0 = Math.floor(bounds2.y / T32) - 2, x1 = Math.floor((bounds2.x + bounds2.width) / T32) + 2, y1 = Math.floor((bounds2.y + bounds2.height) / T32) + 2;
@@ -37065,8 +37066,8 @@ function cobbles(g, r, w, cols, near3) {
     }
   });
 }
-function drawRibbons(c, pieces, code, { box: box5, world, near: near3 = () => 0 }) {
-  const S4 = STYLE[code];
+function drawRibbons(c, pieces, code2, { box: box5, world, near: near3 = () => 0 }) {
+  const S4 = STYLE[code2];
   if (!S4 || !pieces.length) return;
   const V = VERGE[S4.verge], half = (r) => RIBBON_HALF[r.kind];
   c.save();
@@ -37401,18 +37402,18 @@ function createRouteProps({ index, segDist: segDist2, nearTown }) {
     let k = kept.get(m);
     if (!k) kept.set(m, k = /* @__PURE__ */ new Map());
     if (k.has(p)) return k.get(p);
-    let code = standsOn(m, space, p.x, p.y);
-    if (code && p.kind === "fence" && (!standsOn(m, space, p.a.x, p.a.y) || !standsOn(m, space, p.b.x, p.b.y))) code = null;
-    if (code && p.wide && (!standsOn(m, space, p.x - 24, p.y) || !standsOn(m, space, p.x + 24, p.y))) code = null;
-    k.set(p, code);
-    return code;
+    let code2 = standsOn(m, space, p.x, p.y);
+    if (code2 && p.kind === "fence" && (!standsOn(m, space, p.a.x, p.a.y) || !standsOn(m, space, p.b.x, p.b.y))) code2 = null;
+    if (code2 && p.wide && (!standsOn(m, space, p.x - 24, p.y) || !standsOn(m, space, p.x + 24, p.y))) code2 = null;
+    k.set(p, code2);
+    return code2;
   }
   function visible3(m, space, view3, pad2) {
     const x0 = view3.x + m.dx - pad2, y0 = view3.y + m.dy - pad2, x1 = x0 + view3.width + pad2 * 2, y1 = y0 + view3.height + pad2 * 2, out = [];
     for (const r of index.near(x0, y0, x1, y1).keys()) for (const p of plan(r)) {
       if (p.x < x0 || p.x > x1 || p.y < y0 || p.y > y1) continue;
-      const code = keep3(m, space, p);
-      if (code) out.push({ p, code, x: p.x - m.dx, y: p.y - m.dy });
+      const code2 = keep3(m, space, p);
+      if (code2) out.push({ p, code: code2, x: p.x - m.dx, y: p.y - m.dy });
     }
     return out;
   }
@@ -37426,14 +37427,14 @@ function createRouteProps({ index, segDist: segDist2, nearTown }) {
     planned: () => plans2.size
   });
 }
-function paint(c, p, code, x, y, m) {
+function paint(c, p, code2, x, y, m) {
   c.save();
   try {
-    if (p.kind === "sign") signpost(c, x, y, p.arms, code);
-    else if (p.kind === "cart") cart(c, x, y, p.dir, code);
-    else if (p.kind === "mark") marker(c, x, y, MARKER[code] ?? "milestone", code, Boolean(p.small));
-    else if (p.kind === "lamp") lantern6(c, x, y, code);
-    else if (p.kind === "fence") fence(c, { x: p.a.x - m.dx, y: p.a.y - m.dy }, { x: p.b.x - m.dx, y: p.b.y - m.dy }, code);
+    if (p.kind === "sign") signpost(c, x, y, p.arms, code2);
+    else if (p.kind === "cart") cart(c, x, y, p.dir, code2);
+    else if (p.kind === "mark") marker(c, x, y, MARKER[code2] ?? "milestone", code2, Boolean(p.small));
+    else if (p.kind === "lamp") lantern6(c, x, y, code2);
+    else if (p.kind === "fence") fence(c, { x: p.a.x - m.dx, y: p.a.y - m.dy }, { x: p.b.x - m.dx, y: p.b.y - m.dy }, code2);
   } finally {
     c.restore();
   }
@@ -37457,8 +37458,8 @@ function box2(c, x, y, w, h, col2, shade5 = true, r = 1.2) {
   c.lineWidth = 1.4;
   c.stroke(p);
 }
-function signpost(c, x, y, arms, code) {
-  const wood2 = code === "l" ? { base: "#4a4244", dark: "#2a2426", lite: "#6a6062" } : code === "s" ? { base: "#8a6a4a", dark: "#5e4630", lite: "#a8865e" } : WOOD20;
+function signpost(c, x, y, arms, code2) {
+  const wood2 = code2 === "l" ? { base: "#4a4244", dark: "#2a2426", lite: "#6a6062" } : code2 === "s" ? { base: "#8a6a4a", dark: "#5e4630", lite: "#a8865e" } : WOOD20;
   box2(c, x - 2.6, y - 34, 5.2, 36, wood2.base);
   const used = /* @__PURE__ */ new Set();
   arms.forEach((a, i) => {
@@ -37493,7 +37494,7 @@ function signpost(c, x, y, arms, code) {
     for (let k = 0; k < 3; k++) c.fillRect(dir > 0 ? 4 + k * 4 : -7 - k * 4, -0.6, 2.6, 1.2);
     c.restore();
   });
-  if (code === "s") {
+  if (code2 === "s") {
     c.fillStyle = "#fff";
     c.beginPath();
     c.ellipse(x, y - 35, 4.6, 2.2, 0, 0, TAU72);
@@ -37505,7 +37506,7 @@ function signpost(c, x, y, arms, code) {
   c.fillStyle = tone25(wood2.base, -0.25);
   c.fillRect(x - 3.6, y - 0.5, 7.2, 2.4);
 }
-function marker(c, x, y, kind, code, small) {
+function marker(c, x, y, kind, code2, small) {
   if (kind === "milestone") {
     const p = new Path2D();
     p.moveTo(x - 6, y + 1);
@@ -37632,11 +37633,11 @@ function marker(c, x, y, kind, code, small) {
     c.fill();
     return;
   }
-  if (kind === "lantern-post") lantern6(c, x, y, code);
+  if (kind === "lantern-post") lantern6(c, x, y, code2);
 }
-function lantern6(c, x, y, code) {
+function lantern6(c, x, y, code2) {
   const metal = "#3a3436";
-  box2(c, x - 1.8, y - 34, 3.6, 35, code === "m" ? "#5a3e26" : metal, false, 1);
+  box2(c, x - 1.8, y - 34, 3.6, 35, code2 === "m" ? "#5a3e26" : metal, false, 1);
   c.fillStyle = metal;
   c.fillRect(x - 1, y - 35, 9, 2);
   c.strokeStyle = OL34;
@@ -37667,8 +37668,8 @@ function lantern6(c, x, y, code) {
   c.fillStyle = "#8c887c";
   c.fillRect(x - 3.8, y - 1, 7.6, 3);
 }
-function fence(c, a, b, code) {
-  const wood2 = code === "s" ? { base: "#8a6a4a", dark: "#5e4630" } : code === "d" ? { base: "#b08a5a", dark: "#7a5a36" } : { base: "#9a6a3a", dark: "#6e4824" };
+function fence(c, a, b, code2) {
+  const wood2 = code2 === "s" ? { base: "#8a6a4a", dark: "#5e4630" } : code2 === "d" ? { base: "#b08a5a", dark: "#7a5a36" } : { base: "#9a6a3a", dark: "#6e4824" };
   c.lineCap = "round";
   for (const [h, lw] of [[13, 3.2], [6, 3.2]]) {
     c.strokeStyle = OL34;
@@ -37682,7 +37683,7 @@ function fence(c, a, b, code) {
     c.stroke();
   }
   for (const p of [a, b]) box2(c, p.x - 2.2, p.y - 18, 4.4, 19, wood2.base, true, 1);
-  if (code === "s") {
+  if (code2 === "s") {
     c.strokeStyle = "#ffffff";
     c.lineWidth = 2;
     c.beginPath();
@@ -37691,13 +37692,13 @@ function fence(c, a, b, code) {
     c.stroke();
   }
 }
-function cart(c, x, y, dir, code) {
+function cart(c, x, y, dir, code2) {
   c.translate(x, y);
   c.scale(dir, 1);
   box2(c, -20, -20, 36, 11, "#9a6a3a");
   c.fillStyle = "#6e4824";
   c.fillRect(-18, -15, 32, 1.2);
-  const load = code === "d" ? "#e4c48c" : code === "s" ? "#8a6a4a" : code === "t" ? "#5aaa44" : "#e2c35a";
+  const load = code2 === "d" ? "#e4c48c" : code2 === "s" ? "#8a6a4a" : code2 === "t" ? "#5aaa44" : "#e2c35a";
   c.beginPath();
   c.moveTo(-18, -20);
   c.quadraticCurveTo(-14, -31, -2, -30);
@@ -38281,18 +38282,18 @@ function createCurvedRoutesV1(env, review, prior) {
     if (!all.length) return;
     const codes = /* @__PURE__ */ new Set();
     for (let y = Math.floor(b.y / T34) - 2; y <= Math.floor((b.y + b.height) / T34) + 2; y++) for (let x = Math.floor(b.x / T34) - 2; x <= Math.floor((b.x + b.width) / T34) + 2; x++) {
-      const code = biomeOf3(m, x, y);
-      if (code) codes.add(code);
+      const code2 = biomeOf3(m, x, y);
+      if (code2) codes.add(code2);
     }
-    const paints = [...codes].some((code) => PAINTED.has(code)) && needsPaint(m, b), key2 = pageKey(m, b), layer2 = !paints ? void 0 : quick ? layers.get(key2) : yield* layerFor(m, b, view3);
-    for (const code of codes) {
-      if (layer2 !== void 0 && PAINTED.has(code)) continue;
-      const clip9 = tileClip(m, b, (x, y) => biomeOf3(m, x, y) === code && !CUT2.has(terrainOf(m, x, y)));
+    const paints = [...codes].some((code2) => PAINTED.has(code2)) && needsPaint(m, b), key2 = pageKey(m, b), layer2 = !paints ? void 0 : quick ? layers.get(key2) : yield* layerFor(m, b, view3);
+    for (const code2 of codes) {
+      if (layer2 !== void 0 && PAINTED.has(code2)) continue;
+      const clip9 = tileClip(m, b, (x, y) => biomeOf3(m, x, y) === code2 && !CUT2.has(terrainOf(m, x, y)));
       if (!clip9) continue;
       c.save();
       c.clip(clip9);
       try {
-        drawRibbons(c, all, STYLE[code] ? code : "w", { box: box5, world, near: near3 });
+        drawRibbons(c, all, STYLE[code2] ? code2 : "w", { box: box5, world, near: near3 });
       } finally {
         c.restore();
       }
@@ -41436,9 +41437,9 @@ var HYDROLOGY_REVIEW_TARGETS = [{ "id": "hydrology:basin:inline:landmass:major-i
 function naturalClusterReviewTargets(asset, generator) {
   const protect = createNaturalProtection(asset), counts = {}, found = {};
   for (const row2 of asset.cellRows) for (const c of row2.cells) {
-    const code = BIOME_CODES[asset.biomeIds[c[2] - 1].replace("biome:", "")];
-    if (found[code] || (counts[code] ?? 0) >= 96) continue;
-    counts[code] = (counts[code] ?? 0) + 1;
+    const code2 = BIOME_CODES[asset.biomeIds[c[2] - 1].replace("biome:", "")];
+    if (found[code2] || (counts[code2] ?? 0) >= 96) continue;
+    counts[code2] = (counts[code2] ?? 0) + 1;
     const x = c[0] * 64 + 32, y = row2.y * 52 + 26;
     if (protect.at(x, y)) continue;
     let tile = null, blocked3 = 0;
@@ -41447,7 +41448,7 @@ function naturalClusterReviewTargets(asset, generator) {
       if (b.naturalClusterId && b.collision === "2") blocked3++;
       if (!tile && Math.abs(dx) <= 3 && Math.abs(dy) <= 3 && b.collision === "1" && [[1, 0], [-1, 0], [0, 1], [0, -1]].every(([a, b2]) => generator.tile(x + dx + a, y + dy + b2).collision === "1")) tile = { x: x + dx, y: y + dy };
     }
-    if (tile && blocked3 >= 12) found[code] = { id: "natural:" + code, label: "Natural cluster review \xB7 " + code + " \xB7 inspection only", tile };
+    if (tile && blocked3 >= 12) found[code2] = { id: "natural:" + code2, label: "Natural cluster review \xB7 " + code2 + " \xB7 inspection only", tile };
   }
   return Object.keys(found).sort().map((k) => found[k]);
 }
@@ -42861,9 +42862,9 @@ async function plannedReviewTargetsV1(environment, assetId, { get, binding }, { 
 }
 var SITE_PLACEMENT_CACHE_KEY = "saq-world-site-placements-v1";
 async function openPlannedReviewV1(environment, assetId, sha256, { inputs: given = null, world = null } = {}) {
-  const base = given ?? await plannedReviewInputsV1(environment, assetId, sha256), inputs = world ? { ...base, binding: withSeededWorldV1(base.binding, world.hash, world.commitments), store: createPlannedWorldAssetStore({ readText: base.get, sha256, readWorld: world.read }) } : base, { binding, store } = inputs, asset = await store.prepare(binding), targets = [];
+  const base = given ?? await plannedReviewInputsV1(environment, assetId, sha256), inputs = world ? { ...base, binding: withSeededWorldV1(base.binding, world.hash, world.commitments), store: createPlannedWorldAssetStore({ readText: base.get, sha256, readWorld: world.read }) } : base, { binding, store: store2 } = inputs, asset = await store2.prepare(binding), targets = [];
   let full = null, fullPromise = null, targetsPromise = null;
-  const sites = () => fullPromise ??= store.load(binding).then((r) => full = r);
+  const sites = () => fullPromise ??= store2.load(binding).then((r) => full = r);
   const release = environment.document.documentElement?.dataset?.worldRelease ?? "", cacheable = /-compact-[0-9a-f]{12}$/.test(release), identity2 = plannedWorldAssetCacheKey(binding) + "|" + release;
   let artPromise = null;
   const forArt = () => artPromise ??= (async () => {
@@ -43040,23 +43041,23 @@ function createBuiltWorldStoreV1({ indexedDB, sha256 }) {
     const q = tx.objectStore(name).get(key2);
     q.onsuccess = () => done(q.result ?? null);
   });
-  const describe = async (hash35) => HASH.test(hash35) ? info(await get(WORLDS, hash35)) : null, campaignWorld = async (campaignId) => (await get(CAMPAIGNS, campaignId))?.hash ?? null;
+  const describe = async (hash36) => HASH.test(hash36) ? info(await get(WORLDS, hash36)) : null, campaignWorld = async (campaignId) => (await get(CAMPAIGNS, campaignId))?.hash ?? null;
   return Object.freeze({
     // Keeps a world file the world maker built. Returns what a page needs to name it.
     async put(text2) {
       if (typeof text2 !== "string") throw new TypeError("A built world is JSON text");
-      const bytes = new TextEncoder().encode(text2), hash35 = bytesToHex(await sha256(bytes)), asset = JSON.parse(text2);
-      const record2 = { hash: hash35, seed: String(asset.upstream?.seed ?? asset.seed), commitments: seededCommitmentsV1(asset), size: bytes.length, ...await pack(bytes) };
+      const bytes = new TextEncoder().encode(text2), hash36 = bytesToHex(await sha256(bytes)), asset = JSON.parse(text2);
+      const record2 = { hash: hash36, seed: String(asset.upstream?.seed ?? asset.seed), commitments: seededCommitmentsV1(asset), size: bytes.length, ...await pack(bytes) };
       await run2([WORLDS], "readwrite", (tx) => {
-        tx.objectStore(WORLDS).put(record2, hash35);
+        tx.objectStore(WORLDS).put(record2, hash36);
       });
       return info(record2);
     },
     // The world's seed, commitments and size, or null when it isn't stored.
     info: describe,
     // The world file as text, or null when it isn't stored. The asset store checks its hash.
-    async read(hash35) {
-      const r = HASH.test(hash35) ? await get(WORLDS, hash35) : null;
+    async read(hash36) {
+      const r = HASH.test(hash36) ? await get(WORLDS, hash36) : null;
       if (!r) return null;
       try {
         return new TextDecoder("utf-8", { fatal: true }).decode(r.encoding === "gzip" ? await pipe(r.bytes, new DecompressionStream("gzip")) : r.bytes);
@@ -43065,11 +43066,11 @@ function createBuiltWorldStoreV1({ indexedDB, sha256 }) {
       }
     },
     // A seeded campaign names its world before the launcher points at it.
-    bindCampaign: (campaignId, hash35) => run2([WORLDS, CAMPAIGNS], "readwrite", (tx, done, fail) => {
-      const q = tx.objectStore(WORLDS).get(hash35);
+    bindCampaign: (campaignId, hash36) => run2([WORLDS, CAMPAIGNS], "readwrite", (tx, done, fail) => {
+      const q = tx.objectStore(WORLDS).get(hash36);
       q.onsuccess = () => {
         if (!q.result) fail(new Error("Seeded world missing"));
-        else tx.objectStore(CAMPAIGNS).put({ hash: hash35 }, campaignId);
+        else tx.objectStore(CAMPAIGNS).put({ hash: hash36 }, campaignId);
       };
     }),
     // The hash of the world a campaign plays on, or null for a campaign on today's map.
@@ -43077,9 +43078,9 @@ function createBuiltWorldStoreV1({ indexedDB, sha256 }) {
     // The world a start plays on: the one a resumed campaign was made on, or for a new campaign the
     // stored world it asks for. null is today's map; a named world that isn't stored is an error.
     async forStart({ resume = null, requested = null } = {}) {
-      const hash35 = resume ? await campaignWorld(resume.campaignId) : requested || null;
-      if (!hash35) return null;
-      const found = await describe(hash35);
+      const hash36 = resume ? await campaignWorld(resume.campaignId) : requested || null;
+      if (!hash36) return null;
+      const found = await describe(hash36);
       if (!found) throw new Error("Seeded world missing");
       return found;
     }
@@ -45407,6 +45408,26 @@ function projectWorldEvents(s, actor) {
 
 // src/shared/contracts/map_discovery_v1.js
 var MAP_KNOWLEDGE_VERSION = "campaign-shared-map-knowledge-v1";
+var MAP_KNOWLEDGE_ROWS = 512;
+var eventMapId = (x, y) => "event:" + Math.floor(x) + "," + Math.floor(y);
+var eventMapTile = (id) => {
+  const m = /^event:([0-9]+),([0-9]+)$/.exec(id);
+  return m ? { x: Number(m[1]) + 0.5, y: Number(m[2]) + 0.5 } : null;
+};
+var townBoxes = /* @__PURE__ */ new WeakMap();
+function townBox(t) {
+  let b = townBoxes.get(t);
+  if (!b) {
+    const pts = townOutlineV1(t);
+    b = pts?.length ? { x0: Math.min(...pts.map((p) => p.x)) - 3, y0: Math.min(...pts.map((p) => p.y)) - 3, x1: Math.max(...pts.map((p) => p.x)) + 3, y1: Math.max(...pts.map((p) => p.y)) + 3 } : { x0: t.origin.x - 3, y0: t.origin.y - 3, x1: t.origin.x + t.core[0] + 3, y1: t.origin.y + t.core[1] + 3 };
+    townBoxes.set(t, b);
+  }
+  return b;
+}
+var eventGroup = (state, id) => {
+  const n = state.d9World.episodes?.[id]?.geography?.anchorOrdinal;
+  return plannedEventOrdinal(n) || hollowOrdinal(n) || sporeOrdinal(n);
+};
 var TRAIL_NOTE_ID = "note:alderwood:woodland-trail-v1";
 var TRAIL_NOTE_TILE = Object.freeze({ x: 3684, y: 6946 });
 var trailNoteTileV1 = () => {
@@ -45429,9 +45450,9 @@ function validateMapKnowledge(k) {
     safeInteger(s.band, 1, 5);
   }
   for (const rows of [k.visited, k.rumors]) {
-    requireContract(rows && typeof rows === "object" && !Array.isArray(rows) && Object.keys(rows).length <= 192, "Bounded map knowledge");
+    requireContract(rows && typeof rows === "object" && !Array.isArray(rows) && Object.keys(rows).length <= MAP_KNOWLEDGE_ROWS, "Bounded map knowledge");
     for (const [id, tick] of Object.entries(rows)) {
-      requireContract(typeof id === "string" && id.length <= 180 && /^(?:site:|settlement-slot:|ferry:)/.test(id), "Map discovery identity");
+      requireContract(typeof id === "string" && id.length <= 180 && (/^(?:site:|settlement-slot:|ferry:)/.test(id) || /^event:[0-9]{1,6},[0-9]{1,6}$/.test(id)), "Map discovery identity");
       safeInteger(tick);
     }
   }
@@ -45460,10 +45481,29 @@ function observeMapKnowledge(state) {
         changed = true;
       }
     };
-    for (const s of k.settlements) visit(s.id, s.x, s.y, s.class === "capital-great-hold" ? 32 : s.class === "city" ? 24 : 20);
+    for (const s of k.settlements) {
+      const t = generatedTownV1(s.id);
+      if (t) {
+        const b = townBox(t);
+        if (k.visited[s.id] === void 0 && pos.x >= b.x0 && pos.x <= b.x1 && pos.y >= b.y0 && pos.y <= b.y1) {
+          k.visited[s.id] = state.tick;
+          changed = true;
+        }
+      } else visit(s.id, s.x, s.y, s.class === "capital-great-hold" ? 32 : s.class === "city" ? 24 : 20);
+    }
     for (const s of sites) {
       const q = mapTilePosition(s.socket.entrance);
-      visit(s.siteId, q.x, q.y, 12);
+      visit(s.siteId, q.x, q.y, 14);
+    }
+    for (const g of state.d9World.runtime.groups ?? []) {
+      if (!g.anchor || !eventGroup(state, g.groupId)) continue;
+      let q;
+      try {
+        q = mapTilePosition(localFramePositionD9(g.anchor, state.d9World.runtime.frames));
+      } catch {
+        continue;
+      }
+      if (Object.keys(k.visited).length < MAP_KNOWLEDGE_ROWS) visit(eventMapId(q.x, q.y), q.x, q.y, 16);
     }
     for (const l of landings) visit(l.id, l.tile.x + 0.5, l.tile.y + 0.5, 8);
   }
@@ -45540,6 +45580,75 @@ function ferryPreparationChunks(id) {
   const p = ferryArrivalAddress(id), rows = [];
   for (let y = -1; y <= 1; y++) for (let x = -1; x <= 1; x++) rows.push({ chunkX: String(BigInt(p.chunkX) + BigInt(x)), chunkY: String(BigInt(p.chunkY) + BigInt(y)) });
   return rows;
+}
+
+// src/shared/contracts/fast_travel_v1.js
+var FAST_TRAVEL_CLEAR_PX = 256;
+var FAST_TRAVEL_ID = /^(?:settlement-slot:[a-z-]+:[0-9]{2}|site:[a-f0-9]{32})$/;
+var address2 = (p) => ({ chunkX: String(1024 + Math.floor(p.x / 32)), chunkY: String(1024 + Math.floor(p.y / 26)), localX: (p.x % 32 + 0.5) * 32, localY: (p.y % 26 + 0.5) * 32 });
+var tileOf = (a) => ({ x: Math.floor((Number(BigInt(a.chunkX) - 1024n) * 1024 + a.localX) / 32), y: Math.floor((Number(BigInt(a.chunkY) - 1024n) * 832 + a.localY) / 32) });
+function fastTravelOrigin(s, id) {
+  const k = s.d9World?.navigation?.knowledge;
+  if (!k || typeof id !== "string" || !FAST_TRAVEL_ID.test(id)) return null;
+  if (id.startsWith("settlement-slot:")) {
+    const row2 = k.settlements.find((r2) => r2.id === id);
+    if (!row2?.built) return null;
+    const t = generatedTownV1(id);
+    if (t) {
+      const a = townStartV1(t).arrival;
+      return { tiles: a.map((p) => ({ x: p.x, y: p.y })), near: 2 };
+    }
+    return { tiles: [{ x: Math.floor(row2.x), y: Math.floor(row2.y) }], near: 0 };
+  }
+  const r = s.d9World.siteReservationsById?.[id];
+  if (!r) return null;
+  const e = tileOf(r.socket.entrance);
+  return { tiles: [{ x: e.x, y: e.y + 2 }], near: 0 };
+}
+var fastTravelArrivalAddress = (s, id) => {
+  const o = fastTravelOrigin(s, id);
+  return o ? address2(o.tiles[0]) : null;
+};
+function fastTravelPreparationChunks(s, id) {
+  const p = fastTravelArrivalAddress(s, id), rows = [];
+  if (!p) return rows;
+  for (let y = -1; y <= 1; y++) for (let x = -1; x <= 1; x++) rows.push({ chunkX: String(BigInt(p.chunkX) + BigInt(x)), chunkY: String(BigInt(p.chunkY) + BigInt(y)) });
+  return rows;
+}
+function fastTravelThreat(s, actor) {
+  for (const a of Object.values(s.entitiesById)) {
+    if (!a?.alive || a.team !== "hostile" || a.residency?.spaceInstanceId !== s.overworldInstanceId) continue;
+    if (Math.hypot(a.position.x - actor.position.x, a.position.y - actor.position.y) > FAST_TRAVEL_CLEAR_PX) continue;
+    if (eventActorDormant(s, a.entityId)) continue;
+    return true;
+  }
+  return false;
+}
+function fastTravelEligible(s, actor, payload) {
+  if (!s.d9World?.plannedWorld || !actor?.alive || actor.residency.spaceInstanceId !== s.overworldInstanceId) return false;
+  const p = s.primary.actorsById[actor.entityId];
+  if (p?.current || p?.heldCommandId) return false;
+  const k = s.d9World.navigation?.knowledge;
+  if (!k || k.visited[payload.destinationId] === void 0 || !fastTravelOrigin(s, payload.destinationId)) return false;
+  return !fastTravelThreat(s, actor);
+}
+function fastTravelTarget(s, actor, payload) {
+  if (!fastTravelEligible(s, actor, payload)) return null;
+  const o = fastTravelOrigin(s, payload.destinationId), collision = s.spacesByInstanceId[s.overworldInstanceId].collision, players = [...s.session.playerIds].sort(), index = Math.max(0, players.findIndex((id) => s.playersById[id].entityId === actor.entityId));
+  const tiles3 = o.tiles.map((_, i) => o.tiles[(index + i) % o.tiles.length]), base = o.tiles[0];
+  for (let r = Math.max(1, o.near); r <= 10; r++) {
+    const ring6 = [];
+    for (let y = -r; y <= r; y++) for (let x = -r; x <= r; x++) if (Math.max(Math.abs(x), Math.abs(y)) === r) ring6.push({ x: base.x + x, y: base.y + y, o: -y * 4 + Math.abs(x) });
+    ring6.sort((a, b) => a.o - b.o);
+    tiles3.push(...ring6);
+  }
+  for (const t of tiles3) {
+    const world = address2(t), local6 = projectToLocalFrameD9(world, s.d9World.runtime.frames);
+    if (!local6 || collidesWithTiles(collision, local6.x, local6.y, actor.hullRadius)) continue;
+    if (Object.values(s.entitiesById).some((a) => a.entityId !== actor.entityId && a.alive && a.residency.spaceInstanceId === s.overworldInstanceId && Math.hypot(a.position.x - local6.x, a.position.y - local6.y) < a.hullRadius + actor.hullRadius + 4)) continue;
+    return { spaceInstanceId: s.overworldInstanceId, position: { x: local6.x, y: local6.y }, world };
+  }
+  return null;
 }
 
 // src/shared/content/world_combat_retention_v1.js
@@ -46579,7 +46688,7 @@ function birthSafe(s, definition2) {
   }));
 }
 function originEpisode(s, g, definition2) {
-  const site = siteFor(originFor(s), g.groupId), address2 = legacyWorldPosition(site?.returnAnchor ?? definition2.anchor), rank = tier(definition2.members[0].profileId), e = s.encounterEconomy.groups[g.groupId], record2 = { ...unfrozenEpisodeD9("origin:" + g.groupId, e.episode, { origin: true }), geography: { chunkX: address2.chunkX, chunkY: address2.chunkY, anchorOrdinal: 0, minimumLevel: 1, rank } };
+  const site = siteFor(originFor(s), g.groupId), address3 = legacyWorldPosition(site?.returnAnchor ?? definition2.anchor), rank = tier(definition2.members[0].profileId), e = s.encounterEconomy.groups[g.groupId], record2 = { ...unfrozenEpisodeD9("origin:" + g.groupId, e.episode, { origin: true }), geography: { chunkX: address3.chunkX, chunkY: address3.chunkY, anchorOrdinal: 0, minimumLevel: 1, rank } };
   if (g.threatSnapshot) {
     const level = copyWire(g.threatSnapshot.levelsByEntityId[g.entityIds.find((id) => s.entitiesById[id].alive) ?? g.entityIds[0]]);
     record2.snapshot = { version: "episode-progression-d9-v1", snapshotId: record2.anchorId + "/episode/" + String(record2.episode), activatedTick: g.threatSnapshot.activatedTick, trigger: "activation", minimumLevel: 1, effectiveLevel: level, sourceDepth: copyWire(level), mappingVersion: "effective-level-depth-d9-v1", rank, participants: [] };
@@ -46836,8 +46945,8 @@ function createEncounterRenewal(s, m, onRenew) {
       if (s.d9World) {
         const rank = ordinaryTier(s.entitiesById[g.entityIds[0]].contentDefinitionId) ?? "C", highest = Object.values(s.playersById).filter((p) => visitors.includes(s.entitiesById[p.entityId])).reduce((n, p) => progressionBigInt(p.progression.level) > n ? progressionBigInt(p.progression.level) : n, 1n);
         admitContentNumericD9(progressionWire(highest), rank);
-        const address2 = legacyWorldPosition(defs.get(g.groupId).members[0].position);
-        originEpisode2 = { ...unfrozenEpisodeD9("origin:" + g.groupId, safeInteger(e.episode + 1), { origin: true }), ...existing?.ordinaryRoster ? { ordinaryRoster: copyWire(existing.ordinaryRoster) } : {}, ...existing?.ordinaryRosterV2 ? { ordinaryRosterV2: copyWire(existing.ordinaryRosterV2) } : {}, geography: existing?.geography ?? { chunkX: address2.chunkX, chunkY: address2.chunkY, anchorOrdinal: 0, minimumLevel: 1, rank } };
+        const address3 = legacyWorldPosition(defs.get(g.groupId).members[0].position);
+        originEpisode2 = { ...unfrozenEpisodeD9("origin:" + g.groupId, safeInteger(e.episode + 1), { origin: true }), ...existing?.ordinaryRoster ? { ordinaryRoster: copyWire(existing.ordinaryRoster) } : {}, ...existing?.ordinaryRosterV2 ? { ordinaryRosterV2: copyWire(existing.ordinaryRosterV2) } : {}, geography: existing?.geography ?? { chunkX: address3.chunkX, chunkY: address3.chunkY, anchorOrdinal: 0, minimumLevel: 1, rank } };
       }
       retireEncounterRewards(s, g.groupId);
       e.episode = safeInteger(e.episode + 1, 1);
@@ -47380,7 +47489,7 @@ function validateActivityCommand(command) {
   const { residencyRevision, ...legacy } = command;
   safeInteger(residencyRevision, 1);
   validateCommand(legacy);
-  requireContract(["worldEvent.activate", "discovery.readNote", "movement.setIntent", "combat.primaryIntent", "combat.guardIntent", "combat.shadowDash", "combat.skill", "subweapon.claim", "classkit.claim", "service.modify", "service.material", "service.breakdown", "service.buy", "service.sell", "service.rest", "supply.use", "ferry.travel", "site.transition", "player.respawn", "loot.pickup", "gear.salvage", "gear.drop", "resource.interact", "progression.change", "forge.attune", "equipment.equip", "equipment.unequip"].includes(command.kind), "Unsupported activity command");
+  requireContract(["worldEvent.activate", "discovery.readNote", "movement.setIntent", "combat.primaryIntent", "combat.guardIntent", "combat.shadowDash", "combat.skill", "subweapon.claim", "classkit.claim", "service.modify", "service.material", "service.breakdown", "service.buy", "service.sell", "service.rest", "supply.use", "ferry.travel", "map.travel", "site.transition", "player.respawn", "loot.pickup", "gear.salvage", "gear.drop", "resource.interact", "progression.change", "forge.attune", "equipment.equip", "equipment.unequip"].includes(command.kind), "Unsupported activity command");
   return command;
 }
 function activityContextMatches(state, c) {
@@ -47420,6 +47529,7 @@ function validateActivityCommandForState(c, s) {
   if (c.kind.startsWith("service.") || c.kind === "supply.use") requireContract(serviceActionProblem(s, s.playersById[c.playerId], c.kind, c.payload) === null, serviceActionProblem(s, s.playersById[c.playerId], c.kind, c.payload) ?? "Service unavailable");
   if (c.kind === "discovery.readNote") requireContract(canReadTrailNote(s, s.playersById[c.playerId], c.payload), "Trail note unavailable");
   if (c.kind === "ferry.travel") requireContract(ferryTravelTarget(s, actor, c.payload), "Ferry unavailable: approach the landing and prepare a safe arrival");
+  if (c.kind === "map.travel") requireContract(fastTravelTarget(s, actor, c.payload), "Fast travel unavailable: step out of combat, outdoors, to a place you have found");
   if (c.kind === "site.transition") {
     const actor2 = s.entitiesById[s.playersById[c.playerId].entityId], target = /^site:/.test(c.payload.siteId) ? functionalSiteTransitionTargetD9(s, actor2, c.payload) : siteTransitionTarget(s, manifestForState(s), actor2, c.payload);
     requireContract(target, "Site entrance unavailable: approach it and finish the current swing");
@@ -49480,9 +49590,9 @@ function separationImpulse(a, b) {
     y = dy / d;
   } else {
     const first = a.entityId < b.entityId, key2 = first ? a.entityId + b.entityId : b.entityId + a.entityId;
-    let hash35 = 0;
-    for (let i = 0; i < key2.length; i++) hash35 = Math.imul(hash35, 31) + key2.charCodeAt(i) >>> 0;
-    const angle3 = hash35 % 8 * Math.PI / 4, sign3 = first ? 1 : -1;
+    let hash36 = 0;
+    for (let i = 0; i < key2.length; i++) hash36 = Math.imul(hash36, 31) + key2.charCodeAt(i) >>> 0;
+    const angle3 = hash36 % 8 * Math.PI / 4, sign3 = first ? 1 : -1;
     x = Math.cos(angle3) * sign3;
     y = Math.sin(angle3) * sign3;
   }
@@ -49658,11 +49768,11 @@ function createEncounterContainmentD11_2(state, { participantPolicy = () => null
       const collision = state.spacesByInstanceId[group.spaceInstanceId]?.collision;
       if (!collision) continue;
       for (const target of participantsByGroup.get(group.groupId) ?? []) {
-        const cap2 = wildernessGlobalPursuerCap(state, group, target, globalStartLocal);
-        if (cap2 === null) continue;
+        const cap3 = wildernessGlobalPursuerCap(state, group, target, globalStartLocal);
+        if (cap3 === null) continue;
         let row2 = byHero.get(target.entityId);
         if (!row2) {
-          row2 = { cap: cap2, candidates: [] };
+          row2 = { cap: cap3, candidates: [] };
           byHero.set(target.entityId, row2);
         }
         for (const id of group.entityIds) {
@@ -49679,8 +49789,8 @@ function createEncounterContainmentD11_2(state, { participantPolicy = () => null
     for (const [id, row2] of byHero) globalSlotsByPlayer.set(id, new Set(selectWildernessGlobalPursuers(row2.candidates, row2.cap)));
   }
   function globalPursuitAllowed(group, actor, target) {
-    const cap2 = wildernessGlobalPursuerCap(state, group, target, globalStartLocal);
-    if (cap2 === null || actor.boss || state.bossCombat?.bossesByEntityId?.[actor.entityId] || state.eliteCombat?.elitesByEntityId?.[actor.entityId]) return true;
+    const cap3 = wildernessGlobalPursuerCap(state, group, target, globalStartLocal);
+    if (cap3 === null || actor.boss || state.bossCombat?.bossesByEntityId?.[actor.entityId] || state.eliteCombat?.elitesByEntityId?.[actor.entityId]) return true;
     const close = actor.attackReach + actor.combatRadius + target.combatRadius + 4;
     if (distance4(actor.position, target.position) <= close || actor.ai?.melee?.phase && actor.ai.melee.phase !== "idle") return true;
     return globalSlotsByPlayer.get(target.entityId)?.has(actor.entityId) === true;
@@ -51857,7 +51967,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (n) growIce(a, combat, T37.zero.worth * n, T37.zero.cap);
   }
   function growIce(a, combat, percent, capPercent) {
-    const stats3 = getStats(a.entityId), ice = combat.skills?.ice, had = ice ? ice.hp : "0", cap2 = combatInteger(multiplyCombat(stats3.maxHp, capPercent, 100)), gain = combatInteger(multiplyCombat(stats3.maxHp, percent, 100)), hp = compareCombat(had, cap2) >= 0 ? had : combatInteger(minCombat(cap2, addCombat(had, gain)));
+    const stats3 = getStats(a.entityId), ice = combat.skills?.ice, had = ice ? ice.hp : "0", cap3 = combatInteger(multiplyCombat(stats3.maxHp, capPercent, 100)), gain = combatInteger(multiplyCombat(stats3.maxHp, percent, 100)), hp = compareCombat(had, cap3) >= 0 ? had : combatInteger(minCombat(cap3, addCombat(had, gain)));
     if (compareCombat(hp, 0) > 0) classSkillsRecord(combat).ice = { hp, ticks: ICE_TICKS };
   }
   function stepBlooms(a, combat) {
@@ -55910,7 +56020,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
   }
   function apply2(command, authorityOrder) {
     requireContract(authorityOrder === state.lastAppliedAuthorityOrder + 1 && command.clientSequence === state.appliedClientSequences[command.playerId] + 1, "Noncontiguous applied command");
-    const player = state.playersById[command.playerId], actor = state.entitiesById[player.entityId], inventory = player.inventory, respawning = command.kind === "player.respawn", suppressed = subweaponSuppressedD12_4I(state, actor.entityId), target = command.kind === "ferry.travel" ? ferryTravelTarget(state, actor, command.payload) : command.kind === "site.transition" ? siteTransitionTarget(state, manifest, actor, command.payload) : null, progressionPlan = prepareD8Command(player, command), valid = (command.kind !== "worldEvent.activate" || canActivateWorldEvent(state, player, command.payload.groupId)) && (command.kind !== "discovery.readNote" || canReadTrailNote(state, player, command.payload)) && (!progressionPlan || !progressionPlan.error && command.expectedSaveRevision === state.campaign.saveRevision) && activityContextMatches(state, command) && (respawning ? !actor.alive : actor.alive) && (!["site.transition", "ferry.travel"].includes(command.kind) || Boolean(target)) && (command.kind !== "loot.pickup" || inventory?.revision === command.payload.inventoryRevision && canPickUp(state, player, command.payload.sourceEntityId, resolvePlayerStats(player).pickupRadius)) && (command.kind !== "subweapon.claim" || canClaimSubweapon(state, player, command.payload)) && (command.kind !== "classkit.claim" || canClaimClassKit(state, player, command.payload)) && (command.kind !== "combat.guardIntent" || !command.payload.pressed || !suppressed && resolvePlayerStats(player).subType === "shield") && (command.kind !== "combat.shadowDash" || canShadowDash(actor, state.subweaponCombat.actors[actor.entityId], resolvePlayerStats(player), suppressed)) && (command.kind !== "combat.skill" || canUseClassSkill(player, actor, state.subweaponCombat.actors[actor.entityId], resolvePlayerStats(player), command.payload.skillId, suppressed)) && (command.kind !== "gear.salvage" || canSalvage(state, player, command.payload)) && (command.kind !== "gear.drop" || canDropGear(state, player, command.payload)) && (command.kind !== "resource.interact" || canUseResource(state, manifest, player, command.payload)) && (command.kind !== "forge.attune" || canAttune(state, player, command.payload, manifest)) && (!(command.kind.startsWith("service.") || command.kind === "supply.use") || serviceActionProblem(state, player, command.kind, command.payload) === null) && (!command.kind.startsWith("equipment.") || equipmentActionAvailable(state, player, command.kind, command.payload));
+    const player = state.playersById[command.playerId], actor = state.entitiesById[player.entityId], inventory = player.inventory, respawning = command.kind === "player.respawn", suppressed = subweaponSuppressedD12_4I(state, actor.entityId), target = command.kind === "ferry.travel" ? ferryTravelTarget(state, actor, command.payload) : command.kind === "map.travel" ? fastTravelTarget(state, actor, command.payload) : command.kind === "site.transition" ? siteTransitionTarget(state, manifest, actor, command.payload) : null, progressionPlan = prepareD8Command(player, command), valid = (command.kind !== "worldEvent.activate" || canActivateWorldEvent(state, player, command.payload.groupId)) && (command.kind !== "discovery.readNote" || canReadTrailNote(state, player, command.payload)) && (!progressionPlan || !progressionPlan.error && command.expectedSaveRevision === state.campaign.saveRevision) && activityContextMatches(state, command) && (respawning ? !actor.alive : actor.alive) && (!["site.transition", "ferry.travel", "map.travel"].includes(command.kind) || Boolean(target)) && (command.kind !== "loot.pickup" || inventory?.revision === command.payload.inventoryRevision && canPickUp(state, player, command.payload.sourceEntityId, resolvePlayerStats(player).pickupRadius)) && (command.kind !== "subweapon.claim" || canClaimSubweapon(state, player, command.payload)) && (command.kind !== "classkit.claim" || canClaimClassKit(state, player, command.payload)) && (command.kind !== "combat.guardIntent" || !command.payload.pressed || !suppressed && resolvePlayerStats(player).subType === "shield") && (command.kind !== "combat.shadowDash" || canShadowDash(actor, state.subweaponCombat.actors[actor.entityId], resolvePlayerStats(player), suppressed)) && (command.kind !== "combat.skill" || canUseClassSkill(player, actor, state.subweaponCombat.actors[actor.entityId], resolvePlayerStats(player), command.payload.skillId, suppressed)) && (command.kind !== "gear.salvage" || canSalvage(state, player, command.payload)) && (command.kind !== "gear.drop" || canDropGear(state, player, command.payload)) && (command.kind !== "resource.interact" || canUseResource(state, manifest, player, command.payload)) && (command.kind !== "forge.attune" || canAttune(state, player, command.payload, manifest)) && (!(command.kind.startsWith("service.") || command.kind === "supply.use") || serviceActionProblem(state, player, command.kind, command.payload) === null) && (!command.kind.startsWith("equipment.") || equipmentActionAvailable(state, player, command.kind, command.payload));
     if (valid) {
       if (respawning) measure2("playerRespawn", () => {
         state.encounterEconomy.outingsByPlayer[player.playerId].earnedOutside = false;
@@ -56371,7 +56481,7 @@ function createActivityAuthority({ initialState, measure: measure2, schedulerOpt
 // src/host/exact_cut_authority_core.js
 function createExactCutAuthority({
   initialCut,
-  store,
+  store: store2,
   nextToken,
   sha256,
   expectedGenerationBinding,
@@ -56438,7 +56548,7 @@ function createExactCutAuthority({
     return freezeWire(result);
   }
   async function latestEnvelope() {
-    const text2 = await store.loadLatestCheckpoint(campaignId);
+    const text2 = await store2.loadLatestCheckpoint(campaignId);
     requireContract(typeof text2 === "string", "Missing durable plural checkpoint");
     const envelope = await verifyPluralEnvelope(parsePluralEnvelope(text2), options);
     requireContract(envelope.campaignId === campaignId, "Store returned another campaign");
@@ -56532,7 +56642,7 @@ function createExactCutAuthority({
       });
       pending.prepared = await pluralCampaignTransactions.prepareTransaction(proposal, options);
       dispatched = true;
-      return await settle(await store.commitTransaction(proposal));
+      return await settle(await store2.commitTransaction(proposal));
     } catch (error) {
       if (!dispatched) {
         pending = null;
@@ -56563,7 +56673,7 @@ function createExactCutAuthority({
     phase2 = "pending";
     try {
       const prepared = pending.prepared, proposal = prepared.proposal;
-      const known2 = await store.lookupTransaction(campaignId, proposal.transactionId);
+      const known2 = await store2.lookupTransaction(campaignId, proposal.transactionId);
       if (known2 !== null) {
         if (known2.proposalCanonical !== prepared.proposalCanonical) {
           const original = await pluralCampaignTransactions.prepareTransaction(JSON.parse(known2.proposalCanonical), options);
@@ -56576,7 +56686,7 @@ function createExactCutAuthority({
         }
         return await settle(known2.result);
       }
-      const retried = await store.commitTransaction(proposal);
+      const retried = await store2.commitTransaction(proposal);
       return retried?.status === "committed" ? await settle(retried) : unknown();
     } catch (error) {
       if (definiteError(error)) return definite({ status: "aborted", reason: error.message });
@@ -57511,11 +57621,11 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
 
 // src/host/local_activity_session.js
 var ACTIVITY_DATABASE_NAME = ACTIVITY_SAVE_NAMESPACE;
-function createActivityCampaignAuthority({ initialState, store, nextToken, sha256, measure: measure2, resumeReference = false, schedulerOptions, durabilityTask = null }) {
+function createActivityCampaignAuthority({ initialState, store: store2, nextToken, sha256, measure: measure2, resumeReference = false, schedulerOptions, durabilityTask = null }) {
   const generation = activityGeneration(initialState);
   return createExactCutAuthority({
     initialCut: { generation, snapshot: { state: initialState } },
-    store,
+    store: store2,
     nextToken,
     sha256,
     expectedGenerationBinding: generation,
@@ -57536,10 +57646,10 @@ function createActivityCampaignAuthority({ initialState, store, nextToken, sha25
   });
 }
 async function createLocalActivitySession({ sha256, nextToken, entropy, seedInput, resume, storeFactory, proofCase = "A", measure: measure2, durabilityTask = null, onCampaignReady = null }) {
-  let initialState, localPlayerId, generationDiagnostics = null, store;
+  let initialState, localPlayerId, generationDiagnostics = null, store2;
   if (resume) {
-    store = storeFactory(null, null, activityCampaignCodec);
-    const text2 = await store.loadLatestCheckpoint(resume.campaignId);
+    store2 = storeFactory(null, null, activityCampaignCodec);
+    const text2 = await store2.loadLatestCheckpoint(resume.campaignId);
     requireContract(text2, "Saved activity campaign missing");
     const envelope = parseActivityEnvelope(text2);
     initialState = envelope.cut.snapshot.state;
@@ -57553,12 +57663,12 @@ async function createLocalActivitySession({ sha256, nextToken, entropy, seedInpu
     if (FORGE_REVIEW_BUILD) initialState = fundForgeReview(copyWire(upgradeActivityState(initialState)));
   }
   if (!resume) await onCampaignReady?.(initialState.campaign.campaignId);
-  store = storeFactory(initialState.content.fingerprint, activityGeneration(initialState), activityCampaignCodec);
-  const authority = createActivityCampaignAuthority({ initialState, store, nextToken, sha256, measure: measure2, resumeReference: Boolean(resume), durabilityTask });
+  store2 = storeFactory(initialState.content.fingerprint, activityGeneration(initialState), activityCampaignCodec);
+  const authority = createActivityCampaignAuthority({ initialState, store: store2, nextToken, sha256, measure: measure2, resumeReference: Boolean(resume), durabilityTask });
   const checkpoint = () => authority.commitCut({ transactionId: createId("transactionId", nextToken()), checkpointId: createId("checkpointId", nextToken()) });
   if (resume) await authority.loadCampaign();
   else requireContract((await checkpoint()).status === "committed", "Could not create durable campaign");
-  await store.writeLocalLauncher?.(proofCase, { campaignId: initialState.campaign.campaignId, playerId: localPlayerId });
+  await store2.writeLocalLauncher?.(proofCase, { campaignId: initialState.campaign.campaignId, playerId: localPlayerId });
   const clientPort = createActivityClientPort({ authority, localPlayerId, measure: measure2 });
   let pendingSave = null, saveAgain = false, lastSaveError = null, lastClearCount = authority.withAuthority((a) => a.clearedGroupCount());
   const lifecycleKey = () => authority.withAuthority((a) => a.withAuthorityState((s) => s.session.playerIds.map((id) => `${s.entitiesById[s.playersById[id].entityId].alive}/${s.playerRespawnsById?.[id]?.count ?? 0}/${s.playersById[id].inventory?.revision ?? 0}/${s.playersById[id].d8?.lastChange?.authorityOrder ?? 0}`).join("|") + "/" + (s.encounterEconomy?.revision ?? 0)));
@@ -57754,10 +57864,10 @@ async function createLocalWorldSession({
   }
   const localPlayerId = resume ? validateId("playerId", resume.playerId) : created.localPlayerId;
   if (resume) validateId("campaignId", resume.campaignId);
-  const store = storeFactory(initialState.content.fingerprint);
+  const store2 = storeFactory(initialState.content.fingerprint);
   const authority = createCampaignAuthority({
     initialState,
-    store,
+    store: store2,
     sha256,
     nextToken,
     allowSafeTravel: true,
@@ -59474,10 +59584,10 @@ function crack(c, x, y, len, ang, seed2, col2 = RUNE, w = 2.2) {
   c.stroke(p);
   c.restore();
 }
-function obelisk(c, x, y, h, w, P10, lit, seed2, glyph = 0) {
-  const t = w * 0.68, cap2 = w * 0.62, L = poly6([[x - w / 2, y], [x, y + 2], [x, y - h], [x - t / 2, y - h]]), Rr = poly6([[x, y + 2], [x + w / 2, y], [x + t / 2, y - h], [x, y - h]]), C1 = poly6([[x - t / 2, y - h], [x, y - h], [x, y - h - cap2]]), C22 = poly6([[x, y - h], [x + t / 2, y - h], [x, y - h - cap2]]);
+function obelisk(c, x, y, h, w, P10, lit, seed2, glyph2 = 0) {
+  const t = w * 0.68, cap3 = w * 0.62, L = poly6([[x - w / 2, y], [x, y + 2], [x, y - h], [x - t / 2, y - h]]), Rr = poly6([[x, y + 2], [x + w / 2, y], [x + t / 2, y - h], [x, y - h]]), C1 = poly6([[x - t / 2, y - h], [x, y - h], [x, y - h - cap3]]), C22 = poly6([[x, y - h], [x + t / 2, y - h], [x, y - h - cap3]]);
   shadow23(c, x + 3, y + 1, w * 0.85, w * 0.28, 0.32);
-  prop4(c, [[L, P10.l], [Rr, P10.d], [C1, P10.h], [C22, P10.m]], 2, [poly6([[x, y + 2], [x, y - h - cap2]], false)]);
+  prop4(c, [[L, P10.l], [Rr, P10.d], [C1, P10.h], [C22, P10.m]], 2, [poly6([[x, y + 2], [x, y - h - cap3]], false)]);
   c.strokeStyle = P10.d2;
   c.lineWidth = 1;
   c.beginPath();
@@ -59486,14 +59596,14 @@ function obelisk(c, x, y, h, w, P10, lit, seed2, glyph = 0) {
   c.lineTo(x + w * 0.47, y - h * 0.18);
   c.stroke();
   const gx = x - w * 0.2, gy = y - h * 0.58, s = w * 0.2, g = new Path2D();
-  if (glyph % 3 === 0) {
+  if (glyph2 % 3 === 0) {
     g.moveTo(gx, gy - s * 1.6);
     g.lineTo(gx, gy + s * 1.6);
     g.moveTo(gx - s, gy - s * 0.6);
     g.lineTo(gx + s, gy + s * 0.2);
     g.moveTo(gx - s, gy + s * 0.6);
     g.lineTo(gx + s, gy - s * 0.2);
-  } else if (glyph % 3 === 1) {
+  } else if (glyph2 % 3 === 1) {
     g.moveTo(gx - s, gy - s * 1.5);
     g.lineTo(gx + s * 0.6, gy);
     g.lineTo(gx - s, gy + s * 1.5);
@@ -59517,7 +59627,7 @@ function obelisk(c, x, y, h, w, P10, lit, seed2, glyph = 0) {
   c.lineWidth = lit ? 1.5 : 1.2;
   c.stroke(g);
   c.restore();
-  if (lit) light(c, x, y - h - cap2 * 0.4, w * 1.1, w * 1.1, "rgba(194,125,255,A)", 0.5);
+  if (lit) light(c, x, y - h - cap3 * 0.4, w * 1.1, w * 1.1, "rgba(194,125,255,A)", 0.5);
 }
 function curseFire(c, x, y, s = 1) {
   c.save();
@@ -60628,14 +60738,14 @@ function nestUprightsV1(e, time) {
 }
 function propPiece(c, b, i, S4, time) {
   if (b === "woodland") {
-    const P10 = ramp3("#e6d6c4"), cap2 = ramp3(i % 3 ? "#8f6aa0" : "#c8e86a");
+    const P10 = ramp3("#e6d6c4"), cap3 = ramp3(i % 3 ? "#8f6aa0" : "#c8e86a");
     prop4(c, [[poly6([[-1.4, 0], [1.4, 0], [1, -7], [-1, -7]]), P10.l]], 1);
     const p = new Path2D();
     p.moveTo(-5, -6);
     p.quadraticCurveTo(0, -13, 5, -6);
     p.closePath();
-    prop4(c, [[p, cap2.m]], 1.1);
-    c.fillStyle = cap2.h;
+    prop4(c, [[p, cap3.m]], 1.1);
+    c.fillStyle = cap3.h;
     c.fill(ell5(-1.5, -9, 1.4, 1));
     if (i % 3 === 0) lightA(c, 0, -8, 9, 7, S4.glow, 0.3);
   } else if (b === "desert") {
@@ -60778,8 +60888,8 @@ var CLASS_TREE_ICONS_V1 = Object.freeze({ "iron_will": '<path d="M12 3l7 3v6c0 4
 // src/client/skill_icons_v1.js
 var outline = 'stroke="#0b1015" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"';
 var treeIcon = (s) => {
-  const color28 = classTreeOf(s.classId, s.tree).color, glyph = CLASS_TREE_ICONS_V1[s.id];
-  return `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><radialGradient id="sk-${s.id}" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="${color28}"/><stop offset="1" stop-color="#16202a"/></radialGradient></defs><circle cx="24" cy="24" r="19" fill="url(#sk-${s.id})" ${outline}/><g transform="translate(9 9) scale(1.25)" fill="none" stroke-linecap="round" stroke-linejoin="round"><g stroke="#0b1015" stroke-width="4">${glyph}</g><g stroke="#ffffff" stroke-width="2">${glyph}</g></g></svg>`;
+  const color28 = classTreeOf(s.classId, s.tree).color, glyph2 = CLASS_TREE_ICONS_V1[s.id];
+  return `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><radialGradient id="sk-${s.id}" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="${color28}"/><stop offset="1" stop-color="#16202a"/></radialGradient></defs><circle cx="24" cy="24" r="19" fill="url(#sk-${s.id})" ${outline}/><g transform="translate(9 9) scale(1.25)" fill="none" stroke-linecap="round" stroke-linejoin="round"><g stroke="#0b1015" stroke-width="4">${glyph2}</g><g stroke="#ffffff" stroke-width="2">${glyph2}</g></g></svg>`;
 };
 var TREE_ACTIVE_ICONS = Object.fromEntries(Object.values(CLASS_TREE_SKILLS).filter((s) => s.kind === "active").map((s) => [s.id, treeIcon(s)]));
 var SKILL_ICONS_V1 = Object.freeze({
@@ -65299,11 +65409,11 @@ function createInventoryPresentation({ document: document2, environment, readMod
     } catch {
     }
     const fresh = owned2.filter((id) => !worn.has(id) && !seen4.ids.has(id)).length, look = m.entitiesById[local6.entityId]?.heroLook, name = look?.look?.name || "Your hero", cls = HERO_CLASSES[local6.d8?.heroClass]?.name ?? "No class yet", level = local6.progression.level;
-    const cap2 = local6.d8 ? inventoryIntakeCapacity(local6.d8) : 64, wallet = `${formatAmount(inv.gold)}/${owned2.length}/${cap2}`;
+    const cap3 = local6.d8 ? inventoryIntakeCapacity(local6.d8) : 64, wallet = `${formatAmount(inv.gold)}/${owned2.length}/${cap3}`;
     if (summaryKey !== wallet) {
       summaryKey = wallet;
       const goldArt = document2.querySelector("#world-wallet svg")?.cloneNode(true) ?? icon("gold");
-      document2.getElementById("world-bag-summary").replaceChildren(goldArt, element("strong", `${formatAmount(inv.gold)} gold`), element("span", `${owned2.length} / ${cap2} owned`));
+      document2.getElementById("world-bag-summary").replaceChildren(goldArt, element("strong", `${formatAmount(inv.gold)} gold`), element("span", `${owned2.length} / ${cap3} owned`));
     }
     const next = [fresh, upCount, ap, pts, level, name, cls].join("/");
     if (menuKey === next) return;
@@ -67406,183 +67516,6 @@ function chartView(center3, span2, width, height) {
 function projectChart(p, view3, width, height) {
   return { x: (p.x - view3.x) * width / view3.width, y: (p.y - view3.y) * height / view3.height };
 }
-function chartMarkers(meta, knowledge, states, filters) {
-  const visited = knowledge?.visited ?? {}, rumors = knowledge?.rumors ?? {}, out = [];
-  if (filters.settlements) for (const m of meta.settlements) out.push({ ...m, state: visited[m.id] !== void 0 ? "visited" : "unvisited" });
-  if (filters.ferries) for (const m of meta.landings) out.push({ ...m, state: visited[m.id] !== void 0 ? "visited" : "unvisited" });
-  if (filters.sites) for (const m of meta.sites) {
-    const seen4 = visited[m.id] !== void 0, rumored = rumors[m.id] !== void 0;
-    if (!seen4 && !rumored) continue;
-    const completed = seen4 && states?.[m.id]?.state === "completed";
-    if (completed && !filters.completed) continue;
-    out.push({ ...m, state: completed ? "completed" : seen4 ? "discovered" : "rumored" });
-  }
-  return out;
-}
-function groupChartMarkers(markers, view3, width, height, radius = 22) {
-  const groups = [], inside5 = [];
-  for (const m of markers) {
-    const p = projectChart(m, view3, width, height);
-    if (p.x >= 12 && p.y >= 12 && p.x <= width - 12 && p.y <= height - 12) inside5.push({ m, p });
-  }
-  for (const { m, p } of inside5.sort((a, b) => (a.m.kind === "settlement" ? -1 : 0) - (b.m.kind === "settlement" ? -1 : 0) || a.m.id.localeCompare(b.m.id))) {
-    const near3 = groups.find((g) => Math.hypot(g.x - p.x, g.y - p.y) < radius);
-    if (near3) {
-      near3.members.push(m);
-      continue;
-    }
-    groups.push({ ...p, members: [m] });
-  }
-  return groups;
-}
-function layoutChartLabels(groups, ctx, width, height, span2, selectedId = null) {
-  const occupied = groups.map((g) => ({ x: g.x - 12, y: g.y - 12, w: 24, h: 24 })), labels = [], overlap = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
-  for (const g of [...groups].sort((a, b) => Number(b.members.some((m) => m.id === selectedId)) - Number(a.members.some((m) => m.id === selectedId)))) {
-    if (g.members.length !== 1) continue;
-    const m = g.members[0];
-    if (span2 > 2600 && m.id !== selectedId) continue;
-    if (m.kind === "site" && span2 > 1200 && m.id !== selectedId) continue;
-    const text2 = m.state === "rumored" ? "Rumored " + m.family : m.state === "unvisited" && m.kind === "settlement" ? "Unvisited " + m.label : m.label, w = Math.min(220, ctx.measureText(text2).width + 8), h = 18;
-    for (const p of [{ x: g.x + 15, y: g.y - 9, w, h }, { x: g.x - w - 15, y: g.y - 9, w, h }, { x: g.x - w / 2, y: g.y + 15, w, h }]) {
-      if (p.x < 3 || p.y < 3 || p.x + p.w > width - 3 || p.y + p.h > height - 3 || occupied.some((q) => overlap(p, q))) continue;
-      labels.push({ ...p, text: text2 });
-      occupied.push(p);
-      break;
-    }
-  }
-  return labels;
-}
-function drawChartIcon(c, m, x, y, size = 9) {
-  const s = size, big = m.kind === "settlement" && (m.class === "capital-great-hold" || m.class === "city");
-  c.save();
-  c.translate(x, y);
-  c.strokeStyle = "#11181e";
-  c.lineWidth = Math.max(1.4, s * 0.24);
-  c.lineJoin = "round";
-  c.fillStyle = m.state === "completed" ? "#a6dcb4" : m.kind === "ferry" ? "#a3d8e8" : m.state === "rumored" ? "#cfaee6" : m.kind === "settlement" ? m.state === "unvisited" ? "#cbbd97" : big ? "#f3d47e" : "#f5e7bf" : { cave: "#d8c49b", fort: "#d3cbb8", ruin: "#cbc0a6", crypt: "#c5bcd4" }[m.family] ?? "#f1d2a0";
-  c.beginPath();
-  if (m.kind === "settlement" && big) {
-    const t = s * 0.42;
-    c.moveTo(-s, s * 0.8);
-    c.lineTo(-s, -s * 0.55);
-    c.lineTo(-s + t, -s * 0.55);
-    c.lineTo(-s + t, -s * 0.95);
-    c.lineTo(-t * 0.5, -s * 0.95);
-    c.lineTo(-t * 0.5, -s * 0.55);
-    c.lineTo(t * 0.5, -s * 0.55);
-    c.lineTo(t * 0.5, -s * 0.95);
-    c.lineTo(s - t, -s * 0.95);
-    c.lineTo(s - t, -s * 0.55);
-    c.lineTo(s, -s * 0.55);
-    c.lineTo(s, s * 0.8);
-    c.closePath();
-  } else if (m.kind === "settlement") {
-    c.moveTo(-s * 0.82, s * 0.78);
-    c.lineTo(-s * 0.82, -s * 0.1);
-    c.lineTo(0, -s * 0.9);
-    c.lineTo(s * 0.82, -s * 0.1);
-    c.lineTo(s * 0.82, s * 0.78);
-    c.closePath();
-  } else if (m.kind === "ferry") c.arc(0, 0, s * 0.9, 0, Math.PI * 2);
-  else if (m.state === "rumored") {
-    c.moveTo(0, -s);
-    c.lineTo(s * 0.85, 0);
-    c.lineTo(0, s);
-    c.lineTo(-s * 0.85, 0);
-    c.closePath();
-  } else if (m.family === "cave") {
-    c.moveTo(-s, s * 0.75);
-    c.quadraticCurveTo(-s * 0.55, -s * 0.95, 0, -s * 0.95);
-    c.quadraticCurveTo(s * 0.55, -s * 0.95, s, s * 0.75);
-    c.closePath();
-  } else if (m.family === "fort") {
-    const t = s * 0.36;
-    c.moveTo(-s * 0.8, s * 0.8);
-    c.lineTo(-s * 0.8, -s * 0.9);
-    c.lineTo(-s * 0.8 + t, -s * 0.9);
-    c.lineTo(-s * 0.8 + t, -s * 0.55);
-    c.lineTo(-t * 0.5, -s * 0.55);
-    c.lineTo(-t * 0.5, -s * 0.9);
-    c.lineTo(t * 0.5, -s * 0.9);
-    c.lineTo(t * 0.5, -s * 0.55);
-    c.lineTo(s * 0.8 - t, -s * 0.55);
-    c.lineTo(s * 0.8 - t, -s * 0.9);
-    c.lineTo(s * 0.8, -s * 0.9);
-    c.lineTo(s * 0.8, s * 0.8);
-    c.closePath();
-  } else if (m.family === "ruin") {
-    c.moveTo(-s * 0.9, s * 0.8);
-    c.lineTo(-s * 0.9, -s * 0.5);
-    c.lineTo(-s * 0.45, -s * 0.85);
-    c.lineTo(-s * 0.1, -s * 0.35);
-    c.lineTo(s * 0.3, -s * 0.7);
-    c.lineTo(s * 0.9, -s * 0.2);
-    c.lineTo(s * 0.9, s * 0.8);
-    c.closePath();
-  } else if (m.family === "crypt") {
-    c.moveTo(-s * 0.7, s * 0.85);
-    c.lineTo(-s * 0.7, -s * 0.2);
-    c.arc(0, -s * 0.2, s * 0.7, Math.PI, 0);
-    c.lineTo(s * 0.7, s * 0.85);
-    c.closePath();
-  } else c.rect(-s * 0.8, -s * 0.8, s * 1.6, s * 1.6);
-  c.fill();
-  c.stroke();
-  c.fillStyle = "#1b2329";
-  c.strokeStyle = "#1b2329";
-  c.lineWidth = Math.max(1, s * 0.16);
-  if (m.kind === "settlement" && !big && s >= 5) c.fillRect(-s * 0.2, s * 0.1, s * 0.4, s * 0.68);
-  if (m.kind === "site" && m.state !== "rumored") {
-    if (m.family === "cave") {
-      c.beginPath();
-      c.moveTo(-s * 0.42, s * 0.75);
-      c.quadraticCurveTo(0, -s * 0.55, s * 0.42, s * 0.75);
-      c.closePath();
-      c.fill();
-    } else if (m.family === "crypt" && s >= 5) {
-      c.beginPath();
-      c.moveTo(0, -s * 0.55);
-      c.lineTo(0, s * 0.45);
-      c.moveTo(-s * 0.32, -s * 0.15);
-      c.lineTo(s * 0.32, -s * 0.15);
-      c.stroke();
-    } else if (m.family === "fort" && s >= 5) c.fillRect(-s * 0.2, s * 0.15, s * 0.4, s * 0.65);
-  }
-  if (m.kind === "ferry" && s >= 5) {
-    c.beginPath();
-    c.moveTo(0, -s * 0.55);
-    c.lineTo(0, s * 0.5);
-    c.moveTo(-s * 0.45, s * 0.05);
-    c.quadraticCurveTo(0, s * 0.75, s * 0.45, s * 0.05);
-    c.stroke();
-  }
-  if (s >= 7 && (m.state === "rumored" || m.kind === "settlement" && m.state === "unvisited")) {
-    c.font = "bold " + Math.round(s * 1.1) + "px system-ui";
-    c.textAlign = "center";
-    c.textBaseline = "middle";
-    c.fillStyle = "#1b2329";
-    c.fillText("?", 0, m.kind === "settlement" ? s * 0.18 : s * 0.08);
-  }
-  if (m.state === "completed") {
-    const r = Math.max(3, s * 0.48);
-    c.translate(s * 0.8, -s * 0.8);
-    c.fillStyle = "#2f8a4c";
-    c.strokeStyle = "#0f2417";
-    c.lineWidth = 1.2;
-    c.beginPath();
-    c.arc(0, 0, r, 0, Math.PI * 2);
-    c.fill();
-    c.stroke();
-    c.strokeStyle = "#eafbe9";
-    c.lineWidth = Math.max(1, r * 0.32);
-    c.beginPath();
-    c.moveTo(-r * 0.5, 0);
-    c.lineTo(-r * 0.1, r * 0.42);
-    c.lineTo(r * 0.55, -r * 0.4);
-    c.stroke();
-  }
-  c.restore();
-}
 var NOISE = (() => {
   const g = new Float32Array(4096);
   let s = 2463534242;
@@ -67605,7 +67538,6 @@ var PB = new Uint8Array(128);
 var MOTTLE = new Float32Array(128).fill(0.05);
 var SHALLOW = [70, 140, 164];
 var SAND3 = [228, 212, 162];
-var FOOTPRINT = { "capital-great-hold": 30, city: 24, town: 18, "village-outpost": 13 };
 for (let c = 0; c < 128; c++) {
   PR[c] = 111;
   PG[c] = 143;
@@ -67713,140 +67645,1118 @@ function paintChartTerrain(data, raster, W3, H6) {
     }
   }
 }
-function paintChartRaster(canvas, raster, meta, filters, cssWidth, cssHeight) {
+
+// src/client/atlas_paint_v2.js
+var MAP_FONT = '"IM Fell English SC",Georgia,serif';
+var UI_FONT = '"Baloo 2",system-ui,sans-serif';
+var ICOL = { town: "#e9d6a0", city: "#f0c75a", cave: "#c9a47a", fort: "#b9b4a6", ruin: "#c2b28e", crypt: "#a99bc4", event: "#b98ad8", merchant: "#e4b54a", forge: "#d0743c", inn: "#c9894a", enchanter: "#6f8fe0", temple: "#e8e2c8", hall: "#c46a4a", quest: "#ffcf4a", ferry: "#8cc8e0", unknown: "#cfc4a8" };
+function hash17(x, y, s = 0) {
+  let h = x * 374761393 + y * 668265263 + s * 982451653 | 0;
+  h = Math.imul(h ^ h >>> 13, 1274126177);
+  return ((h ^ h >>> 16) >>> 0) / 4294967296;
+}
+function vnoise(x, y, s = 0) {
+  const xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fy = y - yi, u = fx * fx * (3 - 2 * fx), v = fy * fy * (3 - 2 * fy), a = hash17(xi, yi, s), b = hash17(xi + 1, yi, s), c = hash17(xi, yi + 1, s), d = hash17(xi + 1, yi + 1, s);
+  return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+}
+function fbm(x, y, s = 0) {
+  return vnoise(x, y, s) * 0.5 + vnoise(x * 2.1, y * 2.1, s + 7) * 0.3 + vnoise(x * 4.3, y * 4.3, s + 13) * 0.2;
+}
+function glyph(c, kind, r) {
+  c.save();
+  c.fillStyle = "#2a1d12";
+  c.strokeStyle = "#2a1d12";
+  c.lineWidth = 1.6;
+  c.lineJoin = "round";
+  c.lineCap = "round";
+  const k = r / 10;
+  c.scale(k, k);
+  c.beginPath();
+  switch (kind) {
+    case "city":
+      c.moveTo(-6.5, 5.5);
+      c.lineTo(-6.5, -4);
+      c.lineTo(-4, -4);
+      c.lineTo(-4, -6.5);
+      c.lineTo(-1.5, -6.5);
+      c.lineTo(-1.5, -4);
+      c.lineTo(1.5, -4);
+      c.lineTo(1.5, -6.5);
+      c.lineTo(4, -6.5);
+      c.lineTo(4, -4);
+      c.lineTo(6.5, -4);
+      c.lineTo(6.5, 5.5);
+      c.closePath();
+      c.fill();
+      c.fillStyle = "#f3e6c4";
+      c.beginPath();
+      c.arc(0, 2.2, 2, Math.PI, 0);
+      c.lineTo(2, 5.5);
+      c.lineTo(-2, 5.5);
+      c.fill();
+      break;
+    case "cave":
+      c.moveTo(-7, 5);
+      c.quadraticCurveTo(-5, -6, 0, -6);
+      c.quadraticCurveTo(5, -6, 7, 5);
+      c.closePath();
+      c.fill();
+      c.fillStyle = "#f3e6c4";
+      c.beginPath();
+      c.moveTo(-3, 5);
+      c.quadraticCurveTo(0, -2, 3, 5);
+      c.fill();
+      break;
+    case "fort":
+      c.moveTo(-6, 6);
+      c.lineTo(-6, -6);
+      c.lineTo(-3, -6);
+      c.lineTo(-3, -3.5);
+      c.lineTo(-1, -3.5);
+      c.lineTo(-1, -6);
+      c.lineTo(1, -6);
+      c.lineTo(1, -3.5);
+      c.lineTo(3, -3.5);
+      c.lineTo(3, -6);
+      c.lineTo(6, -6);
+      c.lineTo(6, 6);
+      c.closePath();
+      c.fill();
+      c.fillStyle = "#f3e6c4";
+      c.fillRect(-1.4, 1.5, 2.8, 4.5);
+      break;
+    case "ruin":
+      c.moveTo(-6.5, 6);
+      c.lineTo(-6.5, -3);
+      c.lineTo(-3.5, -6);
+      c.lineTo(-1, -1.5);
+      c.lineTo(2, -4.5);
+      c.lineTo(6.5, -1);
+      c.lineTo(6.5, 6);
+      c.closePath();
+      c.fill();
+      c.strokeStyle = "#f3e6c4";
+      c.lineWidth = 1.1;
+      c.beginPath();
+      c.moveTo(-3, 6);
+      c.lineTo(-3, 1);
+      c.moveTo(1.5, 6);
+      c.lineTo(1.5, 1.5);
+      c.stroke();
+      break;
+    case "crypt":
+      c.moveTo(-5, 6);
+      c.lineTo(-5, -1);
+      c.arc(0, -1, 5, Math.PI, 0);
+      c.lineTo(5, 6);
+      c.closePath();
+      c.fill();
+      c.strokeStyle = "#f3e6c4";
+      c.lineWidth = 1.4;
+      c.beginPath();
+      c.moveTo(0, -3.5);
+      c.lineTo(0, 3.5);
+      c.moveTo(-2.4, -1);
+      c.lineTo(2.4, -1);
+      c.stroke();
+      break;
+    case "event":
+      for (const a of [-1, 1]) {
+        c.save();
+        c.rotate(a * 0.72);
+        c.beginPath();
+        c.moveTo(-0.9, -7);
+        c.lineTo(0.9, -7);
+        c.lineTo(0.9, 3);
+        c.lineTo(-0.9, 3);
+        c.closePath();
+        c.fill();
+        c.fillRect(-3, 3, 6, 1.4);
+        c.fillRect(-0.7, 4.4, 1.4, 2.6);
+        c.restore();
+      }
+      break;
+    case "merchant":
+      c.moveTo(-5, -1);
+      c.quadraticCurveTo(-6.5, 6, 0, 6);
+      c.quadraticCurveTo(6.5, 6, 5, -1);
+      c.quadraticCurveTo(2.5, -3, 0, -3);
+      c.quadraticCurveTo(-2.5, -3, -5, -1);
+      c.fill();
+      c.fillRect(-2.2, -6, 4.4, 3);
+      c.strokeStyle = "#f3e6c4";
+      c.lineWidth = 1.2;
+      c.beginPath();
+      c.moveTo(1.6, -0.2);
+      c.quadraticCurveTo(-1.8, -0.4, -1.4, 1.4);
+      c.quadraticCurveTo(1.6, 2.4, 1.4, 3.6);
+      c.quadraticCurveTo(-1, 4.4, -1.8, 3.4);
+      c.moveTo(0, -1);
+      c.lineTo(0, 4.8);
+      c.stroke();
+      break;
+    case "forge":
+      c.moveTo(-7, -3.5);
+      c.lineTo(4, -3.5);
+      c.quadraticCurveTo(7, -3.5, 7, -1.5);
+      c.lineTo(3, -0.5);
+      c.lineTo(2, 2);
+      c.lineTo(4, 2);
+      c.lineTo(4, 5.5);
+      c.lineTo(-4, 5.5);
+      c.lineTo(-4, 2);
+      c.lineTo(-2, 2);
+      c.lineTo(-3, -0.5);
+      c.quadraticCurveTo(-7, -1, -7, -3.5);
+      c.fill();
+      break;
+    case "inn":
+      c.moveTo(-5, -5);
+      c.lineTo(3, -5);
+      c.lineTo(3, 5.5);
+      c.lineTo(-5, 5.5);
+      c.closePath();
+      c.fill();
+      c.lineWidth = 1.8;
+      c.beginPath();
+      c.moveTo(3, -2.5);
+      c.quadraticCurveTo(7, -2.5, 7, 0.5);
+      c.quadraticCurveTo(7, 3, 3, 3);
+      c.stroke();
+      c.fillStyle = "#f3e6c4";
+      c.fillRect(-3.6, -6.4, 5.2, 2.4);
+      break;
+    case "enchanter":
+      c.moveTo(0, -7);
+      c.lineTo(4.5, -1);
+      c.lineTo(0, 7);
+      c.lineTo(-4.5, -1);
+      c.closePath();
+      c.fill();
+      c.strokeStyle = "#e8eeff";
+      c.lineWidth = 1;
+      c.beginPath();
+      c.moveTo(-4.5, -1);
+      c.lineTo(4.5, -1);
+      c.moveTo(0, -7);
+      c.lineTo(0, 7);
+      c.stroke();
+      break;
+    case "temple":
+      c.moveTo(-6, 6);
+      c.lineTo(-6, 0);
+      c.lineTo(0, -4);
+      c.lineTo(6, 0);
+      c.lineTo(6, 6);
+      c.closePath();
+      c.fill();
+      c.fillRect(-1, -8, 2, 5);
+      c.fillRect(-2.5, -6.8, 5, 1.6);
+      break;
+    case "hall":
+      c.moveTo(-4, -6.5);
+      c.lineTo(5, -6.5);
+      c.lineTo(5, 3);
+      c.lineTo(0.5, 1);
+      c.lineTo(-4, 3);
+      c.closePath();
+      c.fill();
+      c.lineWidth = 1.6;
+      c.beginPath();
+      c.moveTo(-4, -7);
+      c.lineTo(-4, 7);
+      c.stroke();
+      break;
+    case "quest":
+      c.moveTo(0, -7);
+      c.lineTo(5.5, 0);
+      c.lineTo(0, 7);
+      c.lineTo(-5.5, 0);
+      c.closePath();
+      c.fill();
+      c.fillStyle = "#ffe9a8";
+      c.fillRect(-0.9, -4, 1.8, 4.6);
+      c.fillRect(-0.9, 2, 1.8, 1.8);
+      break;
+    case "ferry":
+      c.lineWidth = 1.6;
+      c.moveTo(0, -6);
+      c.lineTo(0, 5);
+      c.moveTo(-3, -3.5);
+      c.lineTo(3, -3.5);
+      c.moveTo(-5, 1);
+      c.quadraticCurveTo(0, 8, 5, 1);
+      c.stroke();
+      break;
+    case "unknown":
+      c.font = "bold 13px Georgia,serif";
+      c.textAlign = "center";
+      c.textBaseline = "middle";
+      c.fillText("?", 0, 1);
+      break;
+    default:
+      c.moveTo(-6, 5);
+      c.lineTo(-6, -1);
+      c.lineTo(0, -6.5);
+      c.lineTo(6, -1);
+      c.lineTo(6, 5);
+      c.closePath();
+      c.fill();
+      c.fillStyle = "#f3e6c4";
+      c.fillRect(-1.6, 0.6, 3.2, 4.4);
+  }
+  c.restore();
+}
+function medal(c, x, y, r, kind, opt = {}) {
+  c.save();
+  c.translate(x, y);
+  if (opt.shadow !== false) {
+    c.fillStyle = "rgba(20,12,6,.42)";
+    c.beginPath();
+    c.arc(0.6, 1.2, r + 1.2, 0, 7);
+    c.fill();
+  }
+  c.fillStyle = "#2a1d12";
+  c.beginPath();
+  c.arc(0, 0, r + 1.3, 0, 7);
+  c.fill();
+  c.fillStyle = opt.rim ?? "#c9a45e";
+  c.beginPath();
+  c.arc(0, 0, r + 0.4, 0, 7);
+  c.fill();
+  c.fillStyle = opt.col ?? ICOL[kind] ?? "#ddd";
+  c.beginPath();
+  c.arc(0, 0, r - 1, 0, 7);
+  c.fill();
+  c.fillStyle = "rgba(255,255,255,.22)";
+  c.beginPath();
+  c.arc(0, 0, r - 1, Math.PI * 1.05, Math.PI * 1.95);
+  c.closePath();
+  c.fill();
+  glyph(c, kind, r * 0.78);
+  if (opt.done) {
+    c.fillStyle = "#2f8a4c";
+    c.strokeStyle = "#0f2417";
+    c.lineWidth = 1;
+    c.beginPath();
+    c.arc(r * 0.72, -r * 0.72, Math.max(3, r * 0.42), 0, 7);
+    c.fill();
+    c.stroke();
+    c.strokeStyle = "#eafbe9";
+    c.lineWidth = 1.2;
+    c.beginPath();
+    c.moveTo(r * 0.52, -r * 0.72);
+    c.lineTo(r * 0.68, -r * 0.56);
+    c.lineTo(r * 0.92, -r * 0.9);
+    c.stroke();
+  }
+  c.restore();
+}
+function rimPip(c, x, y, ang, kind, r) {
+  c.save();
+  c.translate(x, y);
+  c.save();
+  c.rotate(ang);
+  c.fillStyle = "#1a120a";
+  c.beginPath();
+  c.moveTo(r + 5.5, 0);
+  c.lineTo(r - 1, -4.2);
+  c.lineTo(r - 1, 4.2);
+  c.closePath();
+  c.fill();
+  c.fillStyle = kind === "quest" ? "#ffcf4a" : "#e9d6a0";
+  c.beginPath();
+  c.moveTo(r + 4, 0);
+  c.lineTo(r, -2.8);
+  c.lineTo(r, 2.8);
+  c.closePath();
+  c.fill();
+  c.restore();
+  medal(c, 0, 0, r, kind, { shadow: false });
+  c.restore();
+}
+function inkLabel(c, text2, x, y, o = {}) {
+  c.save();
+  c.font = o.font ?? "15px " + MAP_FONT;
+  c.textAlign = o.align ?? "center";
+  c.textBaseline = "middle";
+  c.lineJoin = "round";
+  c.strokeStyle = o.halo ?? "rgba(240,228,200,.92)";
+  c.lineWidth = o.hw ?? 3.2;
+  c.strokeText(text2, x, y);
+  c.fillStyle = o.col ?? "#2a1d12";
+  c.fillText(text2, x, y);
+  c.restore();
+}
+function compassRose(c, x, y, r) {
+  c.save();
+  c.translate(x, y);
+  const ink2 = "#3b2a1a", fill5 = "#e9dcb8";
+  c.strokeStyle = ink2;
+  c.lineWidth = 1;
+  c.beginPath();
+  c.arc(0, 0, r * 0.62, 0, 7);
+  c.stroke();
+  c.beginPath();
+  c.arc(0, 0, r * 0.55, 0, 7);
+  c.stroke();
+  for (let i = 0; i < 8; i++) {
+    const L = i % 2 ? r * 0.6 : r;
+    c.save();
+    c.rotate(i * Math.PI / 4);
+    c.beginPath();
+    c.moveTo(0, -L);
+    c.lineTo(r * 0.13, 0);
+    c.lineTo(0, r * 0.1);
+    c.closePath();
+    c.fillStyle = i === 0 ? "#9a2f1f" : fill5;
+    c.fill();
+    c.stroke();
+    c.beginPath();
+    c.moveTo(0, -L);
+    c.lineTo(-r * 0.13, 0);
+    c.lineTo(0, r * 0.1);
+    c.closePath();
+    c.fillStyle = i === 0 ? "#c8452f" : ink2;
+    c.fill();
+    c.stroke();
+    c.restore();
+  }
+  c.font = "bold " + Math.round(r * 0.42) + "px " + MAP_FONT;
+  c.textAlign = "center";
+  c.textBaseline = "middle";
+  c.fillStyle = ink2;
+  c.fillText("N", 0, -r - r * 0.28);
+  c.restore();
+}
+function heroArrow(c, x, y, s, ang) {
+  c.save();
+  c.translate(x, y);
+  c.rotate(ang + Math.PI / 2);
+  c.scale(s / 7.5, s / 7.5);
+  c.strokeStyle = "#14100a";
+  c.lineWidth = 2.2;
+  c.lineJoin = "round";
+  c.fillStyle = "#fff3c9";
+  c.beginPath();
+  c.moveTo(0, -7.5);
+  c.lineTo(5.5, 6);
+  c.lineTo(0, 3);
+  c.lineTo(-5.5, 6);
+  c.closePath();
+  c.stroke();
+  c.fill();
+  c.fillStyle = "#e9b54a";
+  c.beginPath();
+  c.moveTo(0, -7.5);
+  c.lineTo(5.5, 6);
+  c.lineTo(0, 3);
+  c.closePath();
+  c.fill();
+  c.restore();
+}
+function boxBlur2(a, t, sum2, w, h, r) {
+  const inv = 1 / (2 * r + 1);
+  for (let y = 0; y < h; y++) {
+    const o = y * w;
+    let s = 0;
+    for (let x = -r; x <= r; x++) s += a[o + (x < 0 ? 0 : x >= w ? w - 1 : x)];
+    for (let x = 0; x < w; x++) {
+      t[o + x] = s * inv;
+      const add = x + r + 1, sub = x - r;
+      s += a[o + (add >= w ? w - 1 : add)] - a[o + (sub < 0 ? 0 : sub)];
+    }
+  }
+  sum2.fill(0);
+  for (let y = -r; y <= r; y++) {
+    const o = (y < 0 ? 0 : y >= h ? h - 1 : y) * w;
+    for (let x = 0; x < w; x++) sum2[x] += t[o + x];
+  }
+  for (let y = 0; y < h; y++) {
+    const o = y * w, add = (y + r + 1 >= h ? h - 1 : y + r + 1) * w, sub = (y - r < 0 ? 0 : y - r) * w;
+    for (let x = 0; x < w; x++) {
+      a[o + x] = sum2[x] * inv;
+      sum2[x] += t[add + x] - t[sub + x];
+    }
+  }
+}
+function chamfer(D2, W3, H6) {
+  for (let y = 0; y < H6; y++) for (let x = 0; x < W3; x++) {
+    const i = y * W3 + x;
+    let v = D2[i];
+    if (!v) continue;
+    if (x > 0) v = Math.min(v, D2[i - 1] + 1);
+    if (y > 0) {
+      v = Math.min(v, D2[i - W3] + 1);
+      if (x > 0) v = Math.min(v, D2[i - W3 - 1] + 1.414);
+      if (x < W3 - 1) v = Math.min(v, D2[i - W3 + 1] + 1.414);
+    }
+    D2[i] = v;
+  }
+  for (let y = H6 - 1; y >= 0; y--) for (let x = W3 - 1; x >= 0; x--) {
+    const i = y * W3 + x;
+    let v = D2[i];
+    if (!v) continue;
+    if (x < W3 - 1) v = Math.min(v, D2[i + 1] + 1);
+    if (y < H6 - 1) {
+      v = Math.min(v, D2[i + W3] + 1);
+      if (x < W3 - 1) v = Math.min(v, D2[i + W3 + 1] + 1.414);
+      if (x > 0) v = Math.min(v, D2[i + W3 - 1] + 1.414);
+    }
+    D2[i] = v;
+  }
+}
+var code = (raster, tx, ty) => {
+  const v = raster.view, x = Math.floor((tx - v.x) / v.width * raster.width), y = Math.floor((ty - v.y) / v.height * raster.height);
+  if (x < 0 || y < 0 || x >= raster.width || y >= raster.height) return 0;
+  return raster.rows[y].charCodeAt(x) & 127;
+};
+var isWet = (c) => c === 79 || c === 76 || c === 87 || c === 0;
+var isLand = (c) => c && c !== 79 && c !== 76 && c !== 87;
+function polyline(c, flatPts, P10, ox = 0, oy = 0) {
+  c.beginPath();
+  for (let i = 0; i < flatPts.length; i += 2) {
+    const q = P10(ox + flatPts[i], oy + flatPts[i + 1]);
+    i ? c.lineTo(q.x, q.y) : c.moveTo(q.x, q.y);
+  }
+}
+var inBox = (view3, b, m = 0) => !(b.right < view3.x - m || b.x > view3.x + view3.width + m || b.bottom < view3.y - m || b.y > view3.y + view3.height + m);
+var ATLAS = { w: [122, 146, 96], a: [171, 180, 112], m: [118, 146, 122], r: [164, 150, 122], d: [222, 196, 140], s: [226, 230, 226], t: [96, 140, 98], l: [124, 100, 92], o: [150, 165, 115], B: [214, 200, 160] };
+var AR = new Uint8Array(128).fill(160);
+var AG = new Uint8Array(128).fill(170);
+var AB = new Uint8Array(128).fill(118);
+for (const [k, v] of Object.entries(ATLAS)) {
+  const i = k.charCodeAt(0);
+  AR[i] = v[0];
+  AG[i] = v[1];
+  AB[i] = v[2];
+}
+var PAPER = [236, 224, 196];
+var SEA = [190, 206, 204];
+var LAKE = [176, 200, 202];
+function atlasTerrain(raster, PW, PH) {
+  const rw = raster.width, rh = raster.height, view3 = raster.view, n = rw * rh, codes = new Uint8Array(n), R6 = new Float32Array(n), G3 = new Float32Array(n), B5 = new Float32Array(n), M4 = new Float32Array(n), S4 = new Float32Array(n), t = new Float32Array(n), sum2 = new Float32Array(rw);
+  for (let y = 0; y < rh; y++) {
+    const row2 = raster.rows[y];
+    for (let x = 0; x < rw; x++) {
+      const c = row2.charCodeAt(x) & 127, i = y * rw + x;
+      codes[i] = c;
+      if (c === 79) S4[i] = 1;
+      else if (c !== 76 && c !== 87) {
+        R6[i] = AR[c];
+        G3[i] = AG[c];
+        B5[i] = AB[c];
+        M4[i] = 1;
+      }
+    }
+  }
+  const tps = view3.width / rw, tpp = view3.width / PW, landR = Math.max(1, Math.round(6 / tps)), seaR = Math.max(1, Math.round(5 / tps));
+  for (const a of [R6, G3, B5, M4]) boxBlur2(a, t, sum2, rw, rh, landR);
+  boxBlur2(S4, t, sum2, rw, rh, seaR);
+  const sx = rw / PW, sy = rh / PH, maxX = rw - 1.001, maxY = rh - 1.001, wt = Math.max(3, tpp * 3), amp = wt / tps, f = 1 / (wt * 3.2);
+  const dry = new Uint8Array(PW * PH), ocean = new Uint8Array(PW * PH), col2 = new Float32Array(PW * PH * 3), Wm = new Float32Array(n), inland3 = tpp < 3.5;
+  if (inland3) for (let i = 0; i < n; i++) Wm[i] = codes[i] === 76 || codes[i] === 87 ? 1 : 0;
+  for (let iy = 0; iy < PH; iy++) {
+    const ty = view3.y + (iy + 0.5) * view3.height / PH, py = (iy + 0.5) * sy - 0.5;
+    for (let ix = 0; ix < PW; ix++) {
+      const tx = view3.x + (ix + 0.5) * tpp, i = iy * PW + ix, c0 = codes[Math.min(rh - 1, (iy + 0.5) * sy | 0) * rw + Math.min(rw - 1, (ix + 0.5) * sx | 0)];
+      let fx = (ix + 0.5) * sx - 0.5 + (vnoise(tx * f, ty * f, 21) - 0.5) * 2 * amp, fy = py + (vnoise(tx * f + 19, ty * f + 7, 22) - 0.5) * 2 * amp;
+      fx = fx < 0 ? 0 : fx > maxX ? maxX : fx;
+      fy = fy < 0 ? 0 : fy > maxY ? maxY : fy;
+      const x0 = fx | 0, y0 = fy | 0, u = fx - x0, v = fy - y0, a = y0 * rw + x0, b = x0 < rw - 1 ? a + 1 : a, l = y0 < rh - 1 ? a + rw : a, q = l + b - a, w00 = (1 - u) * (1 - v), w10 = u * (1 - v), w01 = (1 - u) * v, w11 = u * v, sea = S4[a] * w00 + S4[b] * w10 + S4[l] * w01 + S4[q] * w11;
+      if (sea > 0.5) {
+        ocean[i] = 1;
+        continue;
+      }
+      if (inland3) {
+        const gx = (ix + 0.5) * sx - 0.5, gy = py, cx0 = gx < 0 ? 0 : gx > maxX ? maxX : gx, cy0 = gy < 0 ? 0 : gy > maxY ? maxY : gy, X = cx0 | 0, Y = cy0 | 0, U2 = cx0 - X, V = cy0 - Y, A = Y * rw + X, Bq = X < rw - 1 ? A + 1 : A, Lq = Y < rh - 1 ? A + rw : A, Q = Lq + Bq - A;
+        if (Wm[A] * (1 - U2) * (1 - V) + Wm[Bq] * U2 * (1 - V) + Wm[Lq] * (1 - U2) * V + Wm[Q] * U2 * V > 0.42) continue;
+      }
+      dry[i] = 1;
+      const m = M4[a] * w00 + M4[b] * w10 + M4[l] * w01 + M4[q] * w11, im = m > 1e-3 ? 1 / m : 0;
+      col2[i * 3] = (R6[a] * w00 + R6[b] * w10 + R6[l] * w01 + R6[q] * w11) * im || 170;
+      col2[i * 3 + 1] = (G3[a] * w00 + G3[b] * w10 + G3[l] * w01 + G3[q] * w11) * im || 180;
+      col2[i * 3 + 2] = (B5[a] * w00 + B5[b] * w10 + B5[l] * w01 + B5[q] * w11) * im || 112;
+    }
+  }
+  return { dry, ocean, col: col2 };
+}
+function paintAtlasRaster(canvas, raster, meta, cssWidth, cssHeight, options = {}) {
+  const c = canvas.getContext("2d"), ratio = canvas.width / cssWidth, q = Math.min(1, Math.sqrt(26e4 / (canvas.width * canvas.height))), PW = Math.max(8, Math.round(canvas.width * q)), PH = Math.max(8, Math.round(canvas.height * q)), view3 = raster.view, tpp = view3.width / PW, px5 = Math.max(1, ratio * q);
+  const { dry, ocean, col: col2 } = atlasTerrain(raster, PW, PH), toWet = new Float32Array(PW * PH), toDry = new Float32Array(PW * PH);
+  for (let i = 0; i < PW * PH; i++) {
+    toWet[i] = dry[i] ? 1e6 : 0;
+    toDry[i] = dry[i] ? 0 : 1e6;
+  }
+  chamfer(toWet, PW, PH);
+  chamfer(toDry, PW, PH);
+  const raw = canvas.ownerDocument.createElement("canvas");
+  raw.width = PW;
+  raw.height = PH;
+  const rc = raw.getContext("2d"), img = rc.createImageData(PW, PH), D2 = img.data, gx = view3.x / tpp, gy = view3.y / tpp;
+  for (let y = 0; y < PH; y++) for (let x = 0; x < PW; x++) {
+    const i = y * PW + x, o = i * 4, ax = gx + x, ay = gy + y, tx = view3.x + x * tpp, ty = view3.y + y * tpp, paper = 0.95 + 0.05 * vnoise(ax / (9 * px5), ay / (9 * px5), 11) + (hash17(ax | 0, ay | 0, 2) - 0.5) * 0.035;
+    let r, g, b;
+    if (dry[i]) {
+      const k = 0.87 + 0.13 * vnoise(tx / 140, ty / 140, 9), mix34 = 0.3;
+      r = (col2[i * 3] * (1 - mix34) + PAPER[0] * mix34) * k;
+      g = (col2[i * 3 + 1] * (1 - mix34) + PAPER[1] * mix34) * k;
+      b = (col2[i * 3 + 2] * (1 - mix34) + PAPER[2] * mix34) * k;
+      const e = toWet[i];
+      if (e < 1.6 * px5) {
+        r = 59;
+        g = 42;
+        b = 26;
+      } else if (e < 4.5 * px5) {
+        const s2 = 1 - (e - 1.6 * px5) / (2.9 * px5);
+        r *= 1 - 0.16 * s2;
+        g *= 1 - 0.16 * s2;
+        b *= 1 - 0.18 * s2;
+      }
+    } else if (ocean[i]) {
+      const d = toDry[i] / px5, s2 = Math.max(0, 1 - d / 60);
+      r = SEA[0] * (0.9 + 0.1 * s2);
+      g = SEA[1] * (0.9 + 0.1 * s2);
+      b = SEA[2] * (0.92 + 0.08 * s2);
+      for (const ring6 of [5, 10, 17]) {
+        const t = Math.abs(d - ring6);
+        if (t < 0.7 && d < 26) {
+          const a = (1 - t / 0.7) * (ring6 === 5 ? 0.55 : ring6 === 10 ? 0.38 : 0.24);
+          r = r * (1 - a) + 70 * a;
+          g = g * (1 - a) + 98 * a;
+          b = b * (1 - a) + 110 * a;
+        }
+      }
+      if (((ax | 0) + (ay | 0)) % Math.round(5 * px5) === 0 && d > 30 && vnoise(tx / 400, ty / 400, 4) > 0.62) {
+        r *= 0.93;
+        g *= 0.94;
+        b *= 0.95;
+      }
+    } else {
+      const d = toDry[i] / px5;
+      r = LAKE[0];
+      g = LAKE[1];
+      b = LAKE[2];
+      if (d < 1.2) {
+        r *= 0.9;
+        g *= 0.93;
+        b *= 0.95;
+      }
+    }
+    r *= paper;
+    g *= paper;
+    b *= paper;
+    D2[o] = r;
+    D2[o + 1] = g;
+    D2[o + 2] = b;
+    D2[o + 3] = 255;
+  }
+  rc.putImageData(img, 0, 0);
+  c.save();
+  c.setTransform(1, 0, 0, 1, 0, 0);
+  c.imageSmoothingEnabled = true;
+  c.drawImage(raw, 0, 0, canvas.width, canvas.height);
+  c.restore();
+  c.save();
+  c.setTransform(ratio, 0, 0, ratio, 0, 0);
+  const s = cssWidth / view3.width, P10 = (x, y) => ({ x: (x - view3.x) * s, y: (y - view3.y) * s });
+  if (view3.width / cssWidth >= 1.5) {
+    c.lineCap = "round";
+    c.lineJoin = "round";
+    c.strokeStyle = "rgba(60,90,110,.85)";
+    for (const r of meta.rivers ?? []) {
+      c.lineWidth = Math.max(0.8, s * r.r * 2);
+      polyline(c, r.pts, P10);
+      c.stroke();
+    }
+    if (view3.width / cssWidth >= 3.5) for (const l of meta.lakes ?? []) {
+      if (l.x < view3.x - 80 || l.y < view3.y - 80 || l.x > view3.x + view3.width + 80 || l.y > view3.y + view3.height + 80) continue;
+      const p = P10(l.x, l.y);
+      c.beginPath();
+      c.ellipse(p.x, p.y, Math.max(1.5, l.rx * s), Math.max(1.2, l.ry * s), 0, 0, 7);
+      c.fillStyle = "#b9cfd0";
+      c.fill();
+      c.strokeStyle = "#3b2a1a";
+      c.lineWidth = 0.9;
+      c.stroke();
+    }
+  }
+  const avoid = [];
+  for (const o of meta.townOutlines ?? []) {
+    const xs = o.points.map((p) => p.x), ys = o.points.map((p) => p.y);
+    avoid.push({ x0: Math.min(...xs) - 8, y0: Math.min(...ys) - 8, x1: Math.max(...xs) + 8, y1: Math.max(...ys) + 8 });
+  }
+  atlasStamps(c, raster, view3, s, avoid, meta);
+  for (const o of meta.townOutlines ?? []) {
+    if (options.visible && !options.visible(o.id)) continue;
+    const pts = o.points.map((p) => P10(p.x, p.y));
+    c.beginPath();
+    pts.forEach((q2, i) => i ? c.lineTo(q2.x, q2.y) : c.moveTo(q2.x, q2.y));
+    c.closePath();
+    c.fillStyle = "rgba(236,222,186,.92)";
+    c.fill();
+    c.lineJoin = "round";
+    c.strokeStyle = "#3a2c1c";
+    c.lineWidth = o.walled ? 1.8 : 1;
+    c.setLineDash(o.walled ? [] : [3, 2.5]);
+    c.stroke();
+    c.setLineDash([]);
+  }
+  if (s >= 1.2) for (const t of meta.towns ?? []) {
+    if (options.visible && !options.visible(t.id)) continue;
+    drawTownPlan(c, t, view3, s, "atlas");
+  }
+  atlasRoads(c, meta, view3, s, options.visible);
+  c.restore();
+}
+function atlasStamps(c, raster, view3, s, avoid, meta) {
+  const base = Math.max(18, 10 / s), step = 18 * 2 ** Math.ceil(Math.log2(base / 18)), k = Math.min(1.3, Math.max(0.8, s * 60)), cand = [], m = Math.max(1, step * 0.6);
+  for (let ty = Math.floor(view3.y / step) * step; ty < view3.y + view3.height + step; ty += step) for (let tx = Math.floor(view3.x / step) * step; tx < view3.x + view3.width + step; tx += step) {
+    const jx = tx + (hash17(tx, ty, 1) - 0.5) * step * 0.9, jy = ty + (hash17(tx, ty, 2) - 0.5) * step * 0.9, b = code(raster, jx, jy);
+    if (!isLand(b) || b === 66) continue;
+    if ([[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => isWet(code(raster, jx + dx * m, jy + dy * m)))) continue;
+    if (avoid.some((a) => jx > a.x0 && jx < a.x1 && jy > a.y0 && jy < a.y1)) continue;
+    const key2 = String.fromCharCode(b), dens = { w: 0.75, t: 0.8, r: 0.55, l: 0.5, s: 0.45, d: 0.45, m: 0.45, a: 0.28, o: 0.3 }[key2] ?? 0.3;
+    if (hash17(tx, ty, 3) > dens) continue;
+    cand.push([jy, jx, key2, tx, ty]);
+  }
+  cand.sort((a, b) => a[0] - b[0]);
+  const P10 = (x, y) => [(x - view3.x) * s, (y - view3.y) * s];
+  for (const [jy, jx, b, tx, ty] of cand) {
+    const [x, y] = P10(jx, jy), h = hash17(tx, ty, 4);
+    if (b === "w") {
+      stampTree(c, x, y, k, h > 0.5 ? "#6f8d55" : "#5f7f4a");
+      if (h > 0.4) stampTree(c, x + 3.4 * k, y + 1.4 * k, k * 0.85, "#6a8a52");
+    } else if (b === "t") {
+      stampTree(c, x, y, k * 1.1, "#4f7f52");
+      stampTree(c, x - 3 * k, y + 1.6 * k, k * 0.9, "#5a8a5a");
+    } else if (b === "s") h > 0.5 ? stampMount(c, x, y, k, true) : stampPine(c, x, y, k, "#6f8a7a");
+    else if (b === "r") stampMount(c, x, y, k * (0.85 + h * 0.4), false);
+    else if (b === "l") h > 0.55 ? stampVolc(c, x, y, k) : stampMount(c, x, y, k * 0.9, false);
+    else if (b === "d") stampDune(c, x, y, k);
+    else if (b === "m") stampMarsh(c, x, y, k);
+    else stampTuft(c, x, y, k);
+  }
+}
+function stampTree(c, x, y, k, col2) {
+  c.fillStyle = col2;
+  c.strokeStyle = "#3b2a1a";
+  c.lineWidth = 0.7;
+  c.beginPath();
+  c.moveTo(x, y - 4.2 * k);
+  c.quadraticCurveTo(x + 3.4 * k, y - 2.6 * k, x + 2.6 * k, y + 0.6 * k);
+  c.lineTo(x - 2.6 * k, y + 0.6 * k);
+  c.quadraticCurveTo(x - 3.4 * k, y - 2.6 * k, x, y - 4.2 * k);
+  c.fill();
+  c.stroke();
+  c.beginPath();
+  c.moveTo(x, y + 0.6 * k);
+  c.lineTo(x, y + 2 * k);
+  c.stroke();
+}
+function stampPine(c, x, y, k, col2) {
+  c.fillStyle = col2;
+  c.strokeStyle = "#3b2a1a";
+  c.lineWidth = 0.7;
+  c.beginPath();
+  c.moveTo(x, y - 5 * k);
+  c.lineTo(x + 2.6 * k, y + k);
+  c.lineTo(x - 2.6 * k, y + k);
+  c.closePath();
+  c.fill();
+  c.stroke();
+}
+function stampMount(c, x, y, k, snow) {
+  c.strokeStyle = "#3b2a1a";
+  c.lineWidth = 0.8;
+  c.fillStyle = "rgba(236,224,196,.85)";
+  c.beginPath();
+  c.moveTo(x - 5 * k, y + 2 * k);
+  c.lineTo(x - 0.6 * k, y - 4.4 * k);
+  c.lineTo(x + 1.4 * k, y - 1.6 * k);
+  c.lineTo(x + 2.6 * k, y - 3 * k);
+  c.lineTo(x + 5.4 * k, y + 2 * k);
+  c.closePath();
+  c.fill();
+  c.stroke();
+  c.beginPath();
+  c.moveTo(x - 0.6 * k, y - 4.4 * k);
+  c.lineTo(x + 0.2 * k, y + 2 * k);
+  c.lineWidth = 0.5;
+  c.stroke();
+  if (snow) {
+    c.fillStyle = "#fff";
+    c.beginPath();
+    c.moveTo(x - 0.6 * k, y - 4.4 * k);
+    c.lineTo(x - 2 * k, y - 2.4 * k);
+    c.lineTo(x + 0.6 * k, y - 2.6 * k);
+    c.closePath();
+    c.fill();
+  }
+  for (let i = 0; i < 3; i++) {
+    c.beginPath();
+    c.moveTo(x + (0.6 + i * 0.9) * k, y - (1.2 - i * 0.9) * k);
+    c.lineTo(x + (1.4 + i * 0.9) * k, y + 1.6 * k);
+    c.lineWidth = 0.45;
+    c.stroke();
+  }
+}
+function stampDune(c, x, y, k) {
+  c.strokeStyle = "rgba(110,80,40,.75)";
+  c.lineWidth = 0.8;
+  c.beginPath();
+  c.moveTo(x - 4 * k, y);
+  c.quadraticCurveTo(x, y - 3 * k, x + 4 * k, y);
+  c.stroke();
+  c.beginPath();
+  c.moveTo(x - k, y - 1.4 * k);
+  c.quadraticCurveTo(x + 1.6 * k, y - 0.4 * k, x + 3 * k, y + 0.4 * k);
+  c.lineWidth = 0.5;
+  c.stroke();
+}
+function stampTuft(c, x, y, k, col2 = "#3e5a3a") {
+  c.strokeStyle = col2;
+  c.lineWidth = 0.7;
+  c.beginPath();
+  for (const a of [-0.5, 0, 0.5]) {
+    c.moveTo(x, y);
+    c.lineTo(x + a * 3 * k, y - 2.6 * k);
+  }
+  c.stroke();
+}
+function stampMarsh(c, x, y, k) {
+  c.strokeStyle = "#365c55";
+  c.lineWidth = 0.6;
+  c.beginPath();
+  c.moveTo(x - 3 * k, y);
+  c.lineTo(x + 3 * k, y);
+  c.moveTo(x - 1.6 * k, y + 1.4 * k);
+  c.lineTo(x + 1.8 * k, y + 1.4 * k);
+  c.stroke();
+  stampTuft(c, x, y - 0.2 * k, k * 0.8, "#365c55");
+}
+function stampVolc(c, x, y, k) {
+  stampMount(c, x, y, k, false);
+  c.fillStyle = "#b23a1e";
+  c.beginPath();
+  c.arc(x - 0.6 * k, y - 4.6 * k, 0.9 * k, 0, 7);
+  c.fill();
+}
+function atlasRoads(c, meta, view3, s, visible3 = null) {
+  const P10 = (x, y) => ({ x: (x - view3.x) * s, y: (y - view3.y) * s }), line21 = (pts) => {
+    c.beginPath();
+    pts.forEach((p, i) => {
+      const q = P10(p.x, p.y);
+      i ? c.lineTo(q.x, q.y) : c.moveTo(q.x, q.y);
+    });
+    c.stroke();
+  };
+  c.lineCap = "round";
+  c.lineJoin = "round";
+  const close = view3.width <= 1800;
+  if (close && view3.width < 1e3) {
+    c.strokeStyle = "rgba(122,80,48,.7)";
+    c.lineWidth = 0.8;
+    c.setLineDash([1.4, 2.4]);
+    for (const r of meta.trailRuns ?? []) {
+      if (r[1] < view3.y || r[1] > view3.y + view3.height || r[2] < view3.x || r[0] > view3.x + view3.width) continue;
+      line21([{ x: r[0] + 0.5, y: r[1] + 0.5 }, { x: r[2] + 0.5, y: r[3] + 0.5 }]);
+    }
+  }
+  for (const r of meta.routes ?? []) {
+    if (r.bounds && !inBox(view3, r.bounds, 40)) continue;
+    const main = r.kind === "main", paved = main || r.kind === "secondary";
+    if (!paved && !close) continue;
+    c.setLineDash(paved ? [] : [1.5, 2.5]);
+    c.strokeStyle = main ? "#7a3b22" : paved ? "#8a5a3a" : "#8a5a3a";
+    c.lineWidth = main ? 1.7 : paved ? 1.1 : 0.9;
+    for (const p of r.paths) line21(p);
+  }
+  c.setLineDash([]);
+  for (const b of meta.bridges ?? []) {
+    c.strokeStyle = "#3b2a1a";
+    c.lineWidth = 2.6;
+    line21([b.start, b.end]);
+    c.strokeStyle = "#d8c08c";
+    c.lineWidth = 1.3;
+    line21([b.start, b.end]);
+  }
+  c.strokeStyle = "rgba(60,90,110,.8)";
+  c.lineWidth = 1;
+  c.setLineDash([4, 3]);
+  for (const f of meta.ferries ?? []) if (f.a && f.b && (!visible3 || visible3(f.from) && visible3(f.to))) line21([f.a, f.b]);
+  c.setLineDash([]);
+}
+var ROOF5 = ["#9a5b45", "#8c5240", "#a3664c", "#7f5a4a", "#94604f"];
+var SHOPROOF = { merchant: "#c98f3a", forge: "#6e6a66", inn: "#a5583c", enchanter: "#5b6fb0", temple: "#cfc6b0", hall: "#8e3b30" };
+function drawTownPlan(c, t, view3, s, style) {
+  const O = t.origin;
+  if (!inBox(view3, { x: O.x - 8, y: O.y - 8, right: O.x + t.core[0] + 8, bottom: O.y + t.core[1] + 8 })) return;
+  const P10 = (x, y) => ({ x: (O.x + x - view3.x) * s, y: (O.y + y - view3.y) * s }), atlas = style === "atlas";
+  c.save();
+  c.lineJoin = "round";
+  c.lineCap = "round";
+  if (!atlas) for (const [x, y, w, h, wheat] of t.greens) {
+    const p = P10(x, y);
+    c.fillStyle = wheat ? "#d8c47a" : "#8fb06a";
+    c.fillRect(p.x, p.y, w * s, h * s);
+    c.strokeStyle = "rgba(70,52,30,.5)";
+    c.lineWidth = 0.6;
+    c.strokeRect(p.x, p.y, w * s, h * s);
+  }
+  for (const r of t.rivers) {
+    c.strokeStyle = atlas ? "#9fbcc4" : "#4f9fc8";
+    c.lineWidth = Math.max(1.5, 3 * s);
+    polyline(c, r, P10, 0, 0);
+    c.stroke();
+  }
+  for (const [pts, w] of t.streets) {
+    c.strokeStyle = atlas ? "rgba(90,62,36,.85)" : "#5a4630";
+    c.lineWidth = (w + (atlas ? 0.8 : 1.1)) * s;
+    polyline(c, pts, P10);
+    c.stroke();
+  }
+  for (const [x, y, w, h] of t.squares) {
+    const p = P10(x, y);
+    c.fillStyle = atlas ? "rgba(90,62,36,.85)" : "#5a4630";
+    c.fillRect(p.x - 0.5 * s, p.y - 0.5 * s, (w + 1) * s, (h + 1) * s);
+  }
+  for (const [pts, w, paved] of t.streets) {
+    c.strokeStyle = atlas ? "#efe2bf" : paved ? "#d9ccad" : "#cfae78";
+    c.lineWidth = w * s;
+    polyline(c, pts, P10);
+    c.stroke();
+  }
+  for (const [x, y, w, h] of t.squares) {
+    const p = P10(x, y);
+    c.fillStyle = atlas ? "#f3e8c8" : "#e2d6b6";
+    c.fillRect(p.x, p.y, w * s, h * s);
+  }
+  for (const [x, y, w, h, shop] of t.buildings) {
+    const p = P10(x, y), bw = w * s, bh = h * s;
+    if (atlas) {
+      c.fillStyle = shop ? "#8a5a3a" : "#a88a66";
+      c.fillRect(p.x, p.y, bw, bh);
+      c.strokeStyle = "#3b2a1a";
+      c.lineWidth = 0.7;
+      c.strokeRect(p.x, p.y, bw, bh);
+      continue;
+    }
+    c.fillStyle = "rgba(30,20,10,.35)";
+    c.fillRect(p.x + 0.8, p.y + 1.2, bw, bh);
+    c.fillStyle = shop ? SHOPROOF[shop] : ROOF5[(x * 7 + y * 3) % ROOF5.length];
+    c.fillRect(p.x, p.y, bw, bh);
+    c.strokeStyle = "rgba(255,255,255,.22)";
+    c.lineWidth = Math.max(0.6, s * 0.5);
+    c.beginPath();
+    if (bw > bh) {
+      c.moveTo(p.x + 1, p.y + bh / 2);
+      c.lineTo(p.x + bw - 1, p.y + bh / 2);
+    } else {
+      c.moveTo(p.x + bw / 2, p.y + 1);
+      c.lineTo(p.x + bw / 2, p.y + bh - 1);
+    }
+    c.stroke();
+    c.strokeStyle = "#2a1d12";
+    c.lineWidth = 0.8;
+    c.strokeRect(p.x, p.y, bw, bh);
+  }
+  for (const w of t.walls) {
+    c.strokeStyle = "#3d3a36";
+    c.lineWidth = Math.max(2, 2.2 * s);
+    polyline(c, w, P10);
+    c.stroke();
+    c.strokeStyle = atlas ? "#8a7e70" : "#a9a39a";
+    c.lineWidth = Math.max(0.9, 1.1 * s);
+    polyline(c, w, P10);
+    c.stroke();
+  }
+  c.restore();
+}
+function townShops(t) {
+  const out = [];
+  for (const [x, y, w, h, shop] of t.buildings) if (shop) out.push({ kind: shop, x: t.origin.x + x + w / 2, y: t.origin.y + y + h / 2 });
+  return out;
+}
+function paintMiniRaster(canvas, raster, meta, cssWidth, cssHeight) {
   const c = canvas.getContext("2d"), q = Math.min(1, Math.sqrt(9e4 / (cssWidth * cssHeight))), W3 = Math.max(1, Math.round(cssWidth * q)), H6 = Math.max(1, Math.round(cssHeight * q)), raw = canvas.ownerDocument.createElement("canvas");
   raw.width = W3;
   raw.height = H6;
   const rc = raw.getContext("2d"), pixels3 = rc.createImageData(W3, H6);
   paintChartTerrain(pixels3.data, raster, W3, H6);
   rc.putImageData(pixels3, 0, 0);
+  c.save();
+  c.setTransform(1, 0, 0, 1, 0, 0);
   c.imageSmoothingEnabled = true;
   c.drawImage(raw, 0, 0, canvas.width, canvas.height);
-  const ratio = canvas.width / cssWidth, view3 = raster.view, point13 = (p) => projectChart(p, view3, canvas.width, canvas.height), k = ratio * Math.max(1, Math.min(2.2, cssWidth / view3.width)), inView2 = (b) => !(b.right < view3.x || b.x > view3.x + view3.width || b.bottom < view3.y || b.y > view3.y + view3.height);
-  const outlined = /* @__PURE__ */ new Set();
-  if (filters.settlements) for (const o of meta.townOutlines ?? []) {
-    outlined.add(o.id);
-    const pts = o.points.map(point13);
+  c.restore();
+  const ratio = canvas.width / cssWidth, view3 = raster.view, s = cssWidth / view3.width, P10 = (x, y) => ({ x: (x - view3.x) * s, y: (y - view3.y) * s });
+  c.save();
+  c.setTransform(ratio, 0, 0, ratio, 0, 0);
+  const boxes2 = (meta.towns ?? []).map((t) => ({ x0: t.origin.x - 4, y0: t.origin.y - 4, x1: t.origin.x + t.core[0] + 4, y1: t.origin.y + t.core[1] + 4 })), roads = [];
+  for (const r of meta.routes ?? []) if (!r.bounds || inBox(view3, r.bounds, 30)) roads.push(r);
+  const step = Math.max(4, 9 / s);
+  for (let ty = Math.floor(view3.y / step) * step; ty < view3.y + view3.height + step; ty += step) for (let tx = Math.floor(view3.x / step) * step; tx < view3.x + view3.width + step; tx += step) {
+    const jx = tx + (hash17(tx, ty, 1) - 0.5) * step, jy = ty + (hash17(tx, ty, 2) - 0.5) * step, b = String.fromCharCode(code(raster, jx, jy));
+    if (!"wtas".includes(b)) continue;
+    const dens = (b === "w" || b === "t" ? 0.55 : b === "s" ? 0.3 : 0.16) * (fbm(jx / 70, jy / 70, 6) > 0.5 ? 1.4 : 0.5);
+    if (hash17(tx, ty, 3) > dens) continue;
+    if (boxes2.some((a) => jx > a.x0 && jx < a.x1 && jy > a.y0 && jy < a.y1)) continue;
+    if (roads.some((r2) => r2.paths.some((p2) => p2.some((q2) => Math.abs(q2.x - jx) < 6 && Math.abs(q2.y - jy) < 6)))) continue;
+    const p = P10(jx, jy), r = Math.max(1.8, 3.4 * s);
+    c.fillStyle = "rgba(20,30,15,.35)";
     c.beginPath();
-    pts.forEach((q2, i) => i ? c.lineTo(q2.x, q2.y) : c.moveTo(q2.x, q2.y));
-    c.closePath();
-    c.fillStyle = "rgba(232,212,164,.9)";
+    c.arc(p.x + 0.7, p.y + 1, r, 0, 7);
     c.fill();
-    c.lineJoin = "round";
-    c.strokeStyle = "#3a2c1c";
-    c.lineWidth = (o.walled ? 2.2 : 1.1) * ratio;
-    c.setLineDash(o.walled ? [] : [3 * ratio, 2.5 * ratio]);
-    c.stroke();
-    c.setLineDash([]);
-  }
-  if (filters.settlements) for (const s of meta.settlements) {
-    if (!s.built || outlined.has(s.id)) continue;
-    const p = point13(s), rad = (FOOTPRINT[s.class] ?? 9) * canvas.width / view3.width;
-    if (p.x < -rad || p.y < -rad || p.x > canvas.width + rad || p.y > canvas.height + rad) continue;
-    const g = c.createRadialGradient(p.x, p.y, 0, p.x, p.y, rad);
-    if (!g) continue;
-    g.addColorStop(0, "rgba(236,216,168,.95)");
-    g.addColorStop(0.6, "rgba(220,196,146,.75)");
-    g.addColorStop(1, "rgba(216,192,142,0)");
-    c.fillStyle = g;
+    c.fillStyle = b === "s" ? "#5f7d6b" : b === "t" ? "#2f6a3e" : "#3f7238";
     c.beginPath();
-    c.arc(p.x, p.y, rad, 0, Math.PI * 2);
+    c.arc(p.x, p.y, r, 0, 7);
+    c.fill();
+    c.fillStyle = "rgba(255,255,255,.16)";
+    c.beginPath();
+    c.arc(p.x - r * 0.3, p.y - r * 0.3, r * 0.5, 0, 7);
     c.fill();
   }
-  const line21 = (points2, color28, width, dash = []) => {
-    c.strokeStyle = color28;
-    c.lineWidth = width * k;
-    c.setLineDash(dash.map((d) => d * k));
-    c.lineJoin = "round";
-    c.lineCap = "round";
+  c.lineCap = "round";
+  c.lineJoin = "round";
+  const line21 = (pts) => {
     c.beginPath();
-    let first = true;
-    for (const p of points2) {
-      const q2 = point13(p);
-      if (first) c.moveTo(q2.x, q2.y);
-      else c.lineTo(q2.x, q2.y);
-      first = false;
-    }
+    pts.forEach((p, i) => {
+      const q2 = P10(p.x, p.y);
+      i ? c.lineTo(q2.x, q2.y) : c.moveTo(q2.x, q2.y);
+    });
     c.stroke();
-  };
-  if (filters.routes) {
-    const shown = meta.routes.filter((r) => (!r.bounds || inView2(r.bounds)) && (r.kind === "footpath" || r.kind === "trail" ? view3.width <= 1800 : r.kind === "main" || view3.width <= 4500)), paved = shown.filter((r) => r.kind === "main" || r.kind === "secondary");
-    if (view3.width < 1e3) for (const r of meta.trailRuns) {
-      if (r[1] < view3.y || r[1] > view3.y + view3.height || r[2] < view3.x || r[0] > view3.x + view3.width) continue;
-      line21([{ x: r[0] + 0.5, y: r[1] + 0.5 }, { x: r[2] + 0.5, y: r[3] + 0.5 }], "rgba(236,224,186,.6)", 0.9);
-    }
-    for (const r of shown) if (r.kind !== "main" && r.kind !== "secondary") for (const p of r.paths) line21(p, "rgba(240,230,196,.8)", 1, [2.4, 2]);
-    c.globalAlpha = 0.6;
-    for (const r of paved) for (const p of r.paths) line21(p, "#2a2116", r.kind === "main" ? 3.6 : 2.7);
-    c.globalAlpha = 1;
-    for (const r of paved) for (const p of r.paths) line21(p, r.kind === "main" ? "#f4e5b6" : "#e3d4a8", r.kind === "main" ? 1.9 : 1.25);
-    for (const b of meta.bridges) {
-      line21([b.start, b.end], "#2a2116", 4.2);
-      line21([b.start, b.end], "#caa876", 2.6);
-    }
+  }, wd = (k) => k === "main" ? 4 : k === "secondary" ? 3 : 2;
+  for (const r of roads) {
+    c.strokeStyle = "#6e5536";
+    c.lineWidth = Math.max(1.6, (wd(r.kind) + 1) * s);
+    for (const p of r.paths) line21(p);
   }
-  if (filters.ferries) {
-    for (const f of meta.ferries) if (f.a && f.b) line21([f.a, f.b], "rgba(206,234,242,.85)", 1.2, [4, 4]);
+  for (const r of roads) {
+    c.strokeStyle = r.kind === "main" || r.kind === "secondary" ? "#d2b47e" : "#b99a68";
+    c.lineWidth = Math.max(0.9, wd(r.kind) * s);
+    for (const p of r.paths) line21(p);
   }
-  c.setLineDash([]);
+  for (const b of meta.bridges ?? []) {
+    if (b.start.x < view3.x - 20 || b.start.x > view3.x + view3.width + 20 || b.start.y < view3.y - 20 || b.start.y > view3.y + view3.height + 20) continue;
+    c.strokeStyle = "#3b2a1a";
+    c.lineWidth = Math.max(2.4, 5 * s);
+    line21([b.start, b.end]);
+    c.strokeStyle = "#c49a62";
+    c.lineWidth = Math.max(1.4, 3.6 * s);
+    line21([b.start, b.end]);
+  }
+  for (const t of meta.towns ?? []) drawTownPlan(c, t, view3, s, "paint");
+  c.restore();
 }
 
-// src/client/planned_map_v1.js
-var ICON = { plus: '<path d="M12 5v14M5 12h14"/>', minus: '<path d="M5 12h14"/>', locate: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4"/>', world: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>', layers: '<path d="M12 3 2.5 8 12 13l9.5-5L12 3zM2.5 12.5l9.5 5 9.5-5M2.5 16.5l9.5 5 9.5-5"/>', close: '<path d="M6 6l12 12M18 6 6 18"/>' };
-var MINI_TILES_PER_PX = 1.4;
+// src/client/atlas_map_v2.js
+var KNEEL_MS = 3e3;
+var CLEAR_PX = 256;
+var WALK_TILES_PER_S = 5.6;
 var MINI_PAD = 32;
-function createPlannedMapV1({ document: doc, environment: env, port, releaseInput }) {
-  const el = (tag, text2) => {
+var MINI_LEVELS = [0.4, 0.62, 1, 1.4, 2.2, 3.4];
+var TOWN_LEVEL = 1;
+var WILD_LEVEL = 3;
+var SIZE_WORD = { hamlet: "Hamlet", village: "Village", town: "Town", city: "City", capital: "Capital" };
+var CLASS_WORD = { "capital-great-hold": "Capital", city: "City", town: "Town", "village-outpost": "Village" };
+var SHOP_NAME = { merchant: "Merchant", forge: "Smith", inn: "Inn", enchanter: "Enchanter", temple: "Chapel", hall: "Great hall" };
+var EVENT_NAME = { cursed_shrine: "Cursed Shrine", nests: "Nests", hollow: "Hidden Hollow", spore: "Spore Outbreak" };
+var cap2 = (s) => s ? s[0].toUpperCase() + s.slice(1) : "";
+var fontsRequested = false;
+function loadMapFonts(env, done) {
+  if (fontsRequested || typeof env.FontFace !== "function") return;
+  fontsRequested = true;
+  try {
+    const faces = [new env.FontFace("IM Fell English SC", "url('assets/fonts-v1/imfell-sc-latin.woff2') format('woff2')", { display: "swap" }), new env.FontFace("IM Fell English", "url('assets/fonts-v1/imfell-italic-latin.woff2') format('woff2')", { style: "italic", display: "swap" })];
+    for (const f of faces) f.load().then((face3) => {
+      env.document?.fonts?.add(face3);
+      done();
+    }).catch(() => {
+    });
+  } catch {
+  }
+}
+var store = { get(k) {
+  try {
+    return globalThis.localStorage?.getItem(k) ?? null;
+  } catch {
+    return null;
+  }
+}, set(k, v) {
+  try {
+    v === null ? globalThis.localStorage?.removeItem(k) : globalThis.localStorage?.setItem(k, v);
+  } catch {
+  }
+} };
+function createAtlasMapV2({ document: doc, environment: env, port, releaseInput, issue = null }) {
+  const el = (tag, cls, text2) => {
     const e = doc.createElement(tag);
-    if (text2) e.textContent = text2;
+    if (cls) e.className = cls;
+    if (text2 !== void 0) e.textContent = text2;
     return e;
   }, style = el("style");
   style.textContent = `
-.chart-mini{position:fixed;right:calc(12px + var(--world-safe-right,0px));top:calc(12px + var(--world-safe-top,0px));z-index:6;padding:3px;border:1px solid #a78f60;border-radius:9px;background:linear-gradient(135deg,#202b35,#101820);box-shadow:0 4px 12px #0006,inset 0 0 0 2px #0d141b;color:#e8dcc0}.chart-mini canvas{display:block;border-radius:6px;cursor:pointer;-webkit-tap-highlight-color:transparent}.chart-mini::after{content:"";position:absolute;inset:3px;border-radius:6px;box-shadow:inset 0 0 0 1px #000a,inset 0 0 9px #08101580;pointer-events:none}.chart-mini::before{content:"N";position:absolute;left:50%;top:0;transform:translate(-50%,-55%);z-index:1;width:15px;height:13px;border:1px solid #a78f60;border-radius:7px;background:#141e27;color:#f2e2b6;font:700 8px/13px system-ui,sans-serif;text-align:center;pointer-events:none}
-.chart-atlas{position:fixed;inset:calc(8px + var(--world-safe-top,0px)) calc(8px + var(--world-safe-right,0px)) calc(8px + var(--world-safe-bottom,0px)) calc(8px + var(--world-safe-left,0px));max-width:1400px;margin:auto;z-index:45;overflow:hidden;background:#1d4c6c;color:#ece3cc;border:1px solid #a78f60;border-radius:10px;box-shadow:0 10px 45px #000c;font:14px system-ui,sans-serif;overscroll-behavior:contain}.chart-atlas[hidden],.chart-mini[hidden],.chart-atlas [hidden]{display:none!important}.chart-atlas>canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block;touch-action:none}.chart-atlas::after{content:"";position:absolute;inset:0;z-index:1;border-radius:inherit;box-shadow:inset 0 0 0 4px #101821,inset 0 0 0 5px #a78f6066,inset 0 0 44px #08111899;pointer-events:none}
-.chart-corner{position:absolute;left:12px;top:12px;z-index:2;display:flex;flex-direction:column;align-items:flex-start;gap:8px;max-width:calc(100% - 84px)}.chart-title{padding:7px 12px 8px;background:#101820e0;border:1px solid #a78f6080;border-radius:8px;pointer-events:none}.chart-title strong{display:block;font:17px/1.15 Georgia,serif;letter-spacing:.06em;color:#eedcb2}.chart-title span{display:block;margin-top:2px;font:11px/1.3 system-ui,sans-serif;color:#b5c1c3}.chart-atlas .chart-journal{min-height:36px;padding:6px 14px;border:1px solid #a78f60;border-radius:18px;background:#141e27e6;color:#f0e2bf;font:600 13px system-ui,sans-serif;box-shadow:0 3px 10px #0007}
-.chart-fab{position:absolute;right:10px;top:10px;z-index:2;display:flex;flex-direction:column;gap:8px}.chart-atlas .chart-fab button{width:44px;height:44px;min-height:44px;padding:0;display:grid;place-items:center;border:1px solid #a78f60;border-radius:50%;background:#141e27e6;color:#f0e2bf;box-shadow:0 3px 10px #0007}.chart-atlas .chart-fab .chart-close{width:44px;min-width:44px;height:44px;border-radius:50%;margin-bottom:6px;background:#35271dee;border-color:#c9a86b}.chart-atlas button[aria-pressed=true]{background:#5a4626;border-color:#e2c27e}.chart-fab svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
-.chart-layers{position:absolute;right:64px;top:10px;z-index:3;width:min(250px,calc(100% - 84px));max-height:calc(100% - 20px);box-sizing:border-box;overflow:auto;padding:10px 12px;background:#101820f2;border:1px solid #a78f6099;border-radius:10px;box-shadow:0 6px 24px #000a;font:13px system-ui,sans-serif}.chart-layers h4{margin:2px 0 4px;font:600 11px system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#c9b88f}.chart-layers h4+div{margin-bottom:8px}.chart-layers label{display:flex;gap:8px;align-items:center;min-height:30px}.chart-layers input{width:18px;height:18px;margin:0;accent-color:#c9a86b}.chart-key{display:grid;grid-template-columns:22px 1fr;gap:3px 8px;align-items:center;font-size:12px;color:#c9d1cf}.chart-key canvas{width:22px;height:22px}.chart-layers p{margin:8px 0 2px;font-size:12px;line-height:1.4;color:#aab6b6}
-.chart-atlas .chart-panel{position:absolute;left:10px;right:64px;bottom:10px;z-index:2;max-height:45%;box-sizing:border-box;overflow:auto;padding:12px 14px 10px;background:#101820f2;border:1px solid #a78f6099;border-radius:12px;box-shadow:0 6px 24px #000a}.chart-atlas .chart-panel h3{margin:0 34px 6px 0;font:18px/1.25 Georgia,serif;color:#eedcb2}.chart-atlas .chart-panel p{margin:4px 0;font:13px/1.45 system-ui,sans-serif;color:#c4cdcc}.chart-atlas .chart-panel button{display:block;width:100%;min-height:40px;margin:6px 0;padding:6px 10px;text-align:left;border:1px solid #6c6a5a;border-radius:8px;background:#1d2a35;color:#ece3cc;font:600 13px system-ui,sans-serif}.chart-atlas .chart-panel .chart-sheet-close{position:absolute;right:6px;top:6px;width:32px;height:32px;min-height:32px;margin:0;padding:0;text-align:center;border-radius:50%;font-size:18px;line-height:1}
-.chart-status{position:absolute;left:50%;bottom:14px;z-index:2;transform:translateX(-50%);padding:5px 12px;border-radius:14px;background:#101820e0;color:#cfd8d5;font:12px system-ui,sans-serif;white-space:nowrap;pointer-events:none}.chart-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:46;background:#203e43;color:#e9efd6;border:1px solid #a7c3a0;border-radius:8px;padding:12px;max-width:90vw;font:14px system-ui}.chart-toast[hidden]{display:none}
-@media(max-height:500px){.chart-atlas .chart-panel{left:auto;top:10px;width:min(290px,calc(100% - 200px));max-height:none}.chart-corner{flex-direction:row;align-items:center}.chart-title span{display:none}}
+.chart-mini.m2-mini{position:fixed;right:calc(10px + var(--world-safe-right,0px));top:calc(6px + var(--world-safe-top,0px));z-index:6;padding:0;border:0;border-radius:50%;background:none;box-shadow:none;color:#efe2c2}.chart-mini.m2-mini::before,.chart-mini.m2-mini::after{content:none}
+.m2-mini canvas{display:block;cursor:pointer;-webkit-tap-highlight-color:transparent}.m2-mini .m2-zoom{position:absolute;width:24px;height:24px;min-height:0;padding:0;display:grid;place-items:center;border:1.5px solid #1a120a;border-radius:50%;background:radial-gradient(circle at 40% 35%,#f0d68e,#b98d45 70%);color:#2a1d12;font:800 15px/1 ${UI_FONT};box-shadow:0 2px 4px #0008;cursor:pointer;-webkit-tap-highlight-color:transparent}.m2-mini .m2-zoom::after{content:"";position:absolute;inset:-7px;border-radius:50%}
+.m2-mini .m2-placeline{position:absolute;left:50%;top:calc(100% + 16px);transform:translateX(-50%);white-space:nowrap;font:17px ${MAP_FONT};color:#f6e7c0;text-shadow:0 0 3px #1a120a,0 0 3px #1a120a,0 1px 2px #1a120a;pointer-events:none;opacity:0;transition:opacity .5s}.m2-mini .m2-placeline.on{opacity:1}
+.m2-atlas{position:fixed;inset:calc(6px + var(--world-safe-top,0px)) calc(6px + var(--world-safe-right,0px)) calc(6px + var(--world-safe-bottom,0px)) calc(6px + var(--world-safe-left,0px));max-width:1400px;margin:auto;z-index:45;overflow:hidden;background:#bed0ce;color:#2a1d12;border-radius:6px;box-shadow:0 10px 45px #000c;font:14px ${UI_FONT};overscroll-behavior:contain}.m2-atlas[hidden],.m2-mini[hidden],.m2-atlas [hidden]{display:none!important}
+.m2-atlas>canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block;touch-action:none}
+.m2-title{position:absolute;left:20px;top:20px;z-index:2;padding:6px 16px 7px;background:#efe3c4;border:2px solid #2a1d12;border-radius:4px;box-shadow:inset 0 0 0 2px #efe3c4,inset 0 0 0 3px #8a6a40,0 3px 8px #0005;pointer-events:none;text-align:center}.m2-title strong{display:block;font:24px/1.1 ${MAP_FONT};color:#2a1d12}.m2-title span{display:block;font:italic 13px/1.3 "IM Fell English",Georgia,serif;color:#5a4128}
+.m2-tools{position:absolute;right:20px;top:20px;z-index:2;display:flex;flex-direction:column;gap:8px}.m2-atlas button{font-family:${UI_FONT}}.m2-tools button{width:42px;height:42px;min-height:0;padding:0;display:grid;place-items:center;border:2px solid #2a1d12;border-radius:50%;background:#efe3c4;color:#2a1d12;box-shadow:0 2px 6px #0006;cursor:pointer}.m2-tools .m2-close{background:#3a2716;color:#f3e6c4;margin-bottom:4px}.m2-tools button[aria-pressed=true]{background:#e8c46a}.m2-tools svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.m2-sheet{position:absolute;left:50%;bottom:20px;z-index:3;transform:translateX(-50%);width:min(560px,calc(100% - 40px));max-height:calc(100% - 40px);box-sizing:border-box;overflow:auto;padding:14px 16px 14px;background:linear-gradient(#f3e8cb,#eadbb4);border:2px solid #2a1d12;border-radius:8px;box-shadow:inset 0 0 0 3px #f3e8cb,inset 0 0 0 4px #8a6a40,0 6px 18px #0007;color:#2a1d12}
+.m2-head{display:flex;gap:12px;align-items:center;margin-right:36px}.m2-head canvas{flex:0 0 auto;width:48px;height:48px}.m2-head h3{margin:0;font:27px/1.05 ${MAP_FONT};color:#2a1d12}.m2-sub{margin-top:3px;font:600 14px/1.3 ${UI_FONT};color:#6a5236}
+.m2-x{position:absolute;right:10px;top:10px;width:32px;height:32px;min-height:0;padding:0;border:0;border-radius:50%;background:#3a2716;color:#f3e6c4;font:800 18px/32px ${UI_FONT};cursor:pointer}
+.m2-chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 2px}.m2-chip{display:inline-flex;align-items:center;gap:5px;padding:2px 10px 2px 3px;border:1.5px solid #b49a6c;border-radius:16px;background:#e6d6ad;font:600 14px/22px ${UI_FONT};color:#3a2716}.m2-chip canvas{width:22px;height:22px}
+.m2-status{display:flex;flex-wrap:wrap;gap:4px 14px;margin:9px 0 2px;font:600 14px/1.35 ${UI_FONT};color:#5a4128}.m2-status b{color:#2f7a3f}.m2-note{margin:8px 0 0;font:500 14px/1.4 ${UI_FONT};color:#5a4128}
+.m2-btns{display:flex;gap:10px;margin-top:12px}.m2-btns button{flex:1;min-height:44px;padding:6px 10px;border:2px solid #2a1d12;border-radius:8px;font:800 16px ${UI_FONT};cursor:pointer;box-shadow:0 3px 0 #2a1d12}.m2-gold{background:linear-gradient(#f6d67a,#d9a845);color:#2a1d12}.m2-plain{background:#e6d6ad;color:#2a1d12}.m2-btns button:disabled{background:#d9ccab;color:#8a7a5e;box-shadow:0 3px 0 #8a7a5e;border-color:#8a7a5e;cursor:default}
+.m2-key{display:grid;grid-template-columns:1fr 1fr;gap:4px 18px;margin-top:6px}.m2-key div{display:flex;align-items:center;gap:7px;font:600 14px/26px ${UI_FONT};color:#3a2716}.m2-key canvas{width:24px;height:24px;flex:0 0 auto}.m2-key span{margin-left:auto;font-weight:800}.m2-sheet h4{margin:0 40px 2px 0;font:22px ${MAP_FONT}}
+.m2-toast{position:fixed;left:50%;top:calc(var(--world-safe-top,0px) + 154px);transform:translateX(-50%);z-index:46;max-width:min(420px,90vw);padding:8px 14px;background:#efe3c4;border:2px solid #2a1d12;border-radius:8px;color:#2a1d12;font:600 14px/1.35 ${UI_FONT};box-shadow:0 4px 12px #0007;text-align:center;pointer-events:none}.m2-toast[hidden]{display:none}
+.m2-kneel{position:fixed;left:50%;top:max(calc(var(--world-safe-top,0px) + 156px),20vh);transform:translateX(-50%);z-index:40;display:flex;align-items:center;gap:10px;padding:7px 16px 9px 8px;background:#efe3c4;border:2px solid #2a1d12;border-radius:26px;box-shadow:0 4px 12px #0007;pointer-events:none}.m2-kneel[hidden]{display:none}.m2-kneel canvas{width:34px;height:34px}.m2-kneel strong{display:block;font:18px/1.1 ${MAP_FONT};color:#2a1d12}.m2-kneel i{display:block;height:6px;margin-top:5px;border:1px solid #2a1d12;border-radius:4px;background:#d9ccab;overflow:hidden}.m2-kneel i b{display:block;height:100%;width:0;background:linear-gradient(90deg,#d9a845,#f6d67a)}
+.m2-banner{position:fixed;left:50%;top:max(calc(var(--world-safe-top,0px) + 150px),17vh);z-index:39;transform:translateX(-50%);width:min(440px,100vw);pointer-events:none;opacity:0}.m2-banner[hidden]{display:none}.m2-banner canvas{display:block;width:100%;height:auto}.m2-banner.show{animation:m2banner 3.6s ease forwards}
+@keyframes m2banner{0%{opacity:0;transform:translate(-50%,6px)}12%{opacity:1;transform:translate(-50%,0)}80%{opacity:1}100%{opacity:0}}
+@media(max-height:500px) and (min-width:601px){.m2-banner{top:calc(4px + var(--world-safe-top,0px));width:min(380px,calc(100vw - 560px),100vw)}.m2-kneel,.m2-toast{top:calc(var(--world-safe-top,0px) + 84px)}.m2-sheet{left:auto;right:76px;transform:none;bottom:12px;width:min(420px,calc(100% - 100px))}.m2-title{transform:scale(.8);transform-origin:left top}}
+@media(max-width:600px){html body #world-bag,html body #local-world-controls:not([open]){top:calc(166px + var(--world-safe-top,0px))!important}.m2-mini .m2-placeline{top:calc(100% + 50px)}.m2-title{left:14px;top:14px;padding:4px 10px}.m2-title strong{font-size:19px}.m2-tools{right:14px;top:14px}.m2-sheet{bottom:12px;width:calc(100% - 24px);padding:12px}.m2-head h3{font-size:23px}.m2-key{grid-template-columns:1fr}}
 `;
   doc.head.append(style);
-  const mini = el("section"), small = el("canvas"), atlas = el("section"), large = el("canvas"), corner = el("div"), title = el("div"), fab = el("div"), layers = el("div"), filtersRow = el("div"), legend = el("div"), panel = el("aside"), status2 = el("div"), toast = el("div");
-  mini.className = "chart-mini";
+  const ICON = { plus: '<path d="M12 5v14M5 12h14"/>', minus: '<path d="M5 12h14"/>', locate: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4"/>', world: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>', key: '<path d="M5 6h14M5 12h14M5 18h9"/>', close: '<path d="M6 6l12 12M18 6 6 18"/>' };
+  const mini = el("section", "chart-mini m2-mini"), small = el("canvas"), zoomIn = el("button", "m2-zoom", "+"), zoomOut = el("button", "m2-zoom", "\u2212"), placeLine = el("div", "m2-placeline");
   mini.dataset.gameplayHud = "";
   small.setAttribute("aria-label", "Minimap \u2014 open world map");
   small.setAttribute("role", "button");
   small.tabIndex = 0;
-  mini.append(small);
-  atlas.className = "chart-atlas";
+  zoomIn.type = zoomOut.type = "button";
+  zoomIn.setAttribute("aria-label", "Zoom minimap in");
+  zoomOut.setAttribute("aria-label", "Zoom minimap out");
+  mini.append(small, zoomIn, zoomOut, placeLine);
+  const atlas = el("section", "m2-atlas"), large = el("canvas"), title = el("div", "m2-title"), titleSub = el("span"), tools2 = el("div", "m2-tools"), sheet = el("aside", "m2-sheet"), toast = el("div", "m2-toast"), kneelBox = el("div", "m2-kneel"), kneelMedal = el("canvas"), kneelText = el("strong"), kneelBar = el("b"), banner3 = el("div", "m2-banner"), bannerCanvas = el("canvas");
   atlas.hidden = true;
   atlas.setAttribute("role", "dialog");
   atlas.setAttribute("aria-modal", "true");
   atlas.setAttribute("aria-label", "World map");
-  large.setAttribute("aria-label", "World geography and discovered destinations");
-  corner.className = "chart-corner";
-  title.className = "chart-title";
-  title.append(el("strong", "World map"), el("span", "Drag to pan \xB7 pinch to zoom \xB7 tap a marker"));
-  corner.append(title);
-  fab.className = "chart-fab";
-  layers.className = "chart-layers";
-  layers.hidden = true;
-  filtersRow.className = "chart-filters";
-  legend.className = "chart-key";
-  panel.className = "chart-panel";
-  panel.setAttribute("aria-live", "polite");
-  panel.hidden = true;
-  status2.className = "chart-status";
-  status2.hidden = true;
-  atlas.append(large, corner, fab, layers, panel, status2);
-  toast.className = "chart-toast";
+  title.append(el("strong", void 0, "The Known World"), titleSub);
+  sheet.hidden = true;
+  sheet.setAttribute("aria-live", "polite");
   toast.hidden = true;
-  doc.body.append(mini, atlas, toast);
-  let open2 = false, closed = false, meta = null, model = null, center3 = null, span2 = 512, mode = "map", selected = null, hitGroups = [], lastPaint = -1, dirty = true, busy = false, wanted = null, metadataError = null, lastJournal = null, toastUntil = 0, requests = 0, rasterBuilds = 0, cacheHits = 0, paintMs = 0;
-  const filters = { settlements: true, sites: true, completed: true, routes: true, ferries: true }, cache5 = /* @__PURE__ */ new Map(), pointers = /* @__PURE__ */ new Map();
-  let gesture = null, atlasSize = null;
-  const phoneQuery = env.matchMedia?.("(max-width:600px)"), shortQuery = env.matchMedia?.("(max-height:500px)");
+  kneelBox.hidden = true;
+  banner3.hidden = true;
+  {
+    const bar = el("i");
+    bar.append(kneelBar);
+    const t = el("div");
+    t.append(kneelText, bar);
+    kneelBox.append(kneelMedal, t);
+  }
+  banner3.append(bannerCanvas);
+  atlas.append(large, title, tools2, sheet);
+  doc.body.append(mini, atlas, toast, kneelBox, banner3);
+  let open2 = false, closed = false, meta = null, model = null, center3 = null, span2 = 600, selected = null, sheetMode = null, hits2 = [], lastPaint = -1, dirty = true, busy = false, metadataError = null, requests = 0, rasterBuilds = 0, cacheHits = 0, paintMs = 0, atlasSize = null, gesture = null;
+  let tracked = store.get("saq-map-track"), miniOffset = Number(store.get("saq-minimap-zoom")) || 0, kneel = null, toastUntil = 0, seen4 = null, bannerQueue = [], bannerUntil = 0, insideTown = null, placeLineUntil = 0, lastBanner = { id: null }, placesKey = null, placesList = [], bezel = null;
+  const cache5 = /* @__PURE__ */ new Map(), miniCache = /* @__PURE__ */ new Map(), pointers = /* @__PURE__ */ new Map(), phoneQuery = env.matchMedia?.("(max-width:600px)"), shortQuery = env.matchMedia?.("(max-height:500px)");
+  loadMapFonts(env, () => {
+    dirty = true;
+    bezel = null;
+  });
   const sizeObserver = typeof env.ResizeObserver === "function" ? new env.ResizeObserver((entries) => {
     const r = entries.find((e) => e.target === large)?.contentRect;
     if (r && r.width > 1 && r.height > 1) {
@@ -67857,15 +68767,16 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
   sizeObserver?.observe(large);
   const invalidateSize = () => {
     atlasSize = null;
+    bezel = null;
     dirty = true;
   };
   env.addEventListener("resize", invalidateSize);
   env.addEventListener("orientationchange", invalidateSize);
-  const button = (text2, fn, parent, label4 = null, icon = null) => {
-    const b = el("button", text2);
+  const button = (parent, label4, icon, fn, cls) => {
+    const b = el("button", cls);
     b.type = "button";
-    if (label4) b.setAttribute("aria-label", label4);
-    if (icon) b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICON[icon] + "</svg>";
+    b.setAttribute("aria-label", label4);
+    b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICON[icon] + "</svg>";
     b.onclick = (e) => {
       e.preventDefault();
       fn();
@@ -67873,183 +68784,212 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
     parent.append(b);
     return b;
   };
-  function player() {
-    return model?.navigation?.position ? chartPosition(model.navigation.position) : null;
-  }
-  function show() {
-    if (!player()) return;
-    releaseInput();
-    open2 = true;
-    atlasSize = null;
-    mode = "map";
-    center3 = { ...player() };
-    span2 = 512;
-    selected = null;
-    dirty = true;
-    atlas.hidden = false;
-    mini.hidden = true;
-    doc.documentElement.dataset.worldMapOpen = "true";
-    renderPanel();
-    close.focus({ preventScroll: true });
-  }
-  function hide() {
-    open2 = false;
-    atlas.hidden = true;
-    layers.hidden = true;
-    mini.hidden = !player();
-    pointers.clear();
-    gesture = null;
-    dirty = true;
-    releaseInput();
-    doc.documentElement.dataset.worldMapOpen = "false";
-  }
-  function clamp52() {
-    if (!meta || !center3) return;
-    center3.x = Math.max(-span2 * 0.15, Math.min(meta.widthTiles + span2 * 0.15, center3.x));
-    center3.y = Math.max(-span2 * 0.15, Math.min(meta.heightTiles + span2 * 0.15, center3.y));
-    span2 = Math.max(160, Math.min(Math.max(meta.widthTiles, meta.heightTiles) * 1.6, span2));
-  }
-  function zoom(factor, point13 = null) {
-    if (!meta || !center3) return;
-    const rect6 = large.getBoundingClientRect(), old2 = span2;
-    span2 *= factor;
-    clamp52();
-    if (point13) {
-      center3.x += (point13.x / rect6.width - 0.5) * (old2 - span2);
-      center3.y += (point13.y / rect6.height - 0.5) * (old2 - span2) * rect6.height / rect6.width;
-    }
-    dirty = true;
-  }
-  const close = button("", hide, fab, "Close world map", "close");
-  close.className = "chart-close";
-  button("", () => zoom(1 / 1.7), fab, "Zoom in", "plus");
-  button("", () => zoom(1.7), fab, "Zoom out", "minus");
-  button("", () => {
-    center3 = { ...player() };
-    span2 = 512;
-    selected = null;
-    mode = "map";
-    dirty = true;
-    renderPanel();
-  }, fab, "Centre on me", "locate");
-  button("", () => {
-    if (!meta) return;
-    const r = large.getBoundingClientRect();
-    center3 = { x: meta.widthTiles / 2, y: meta.heightTiles / 2 };
-    span2 = Math.max(meta.widthTiles * 1.08, meta.heightTiles * r.width / r.height * 1.08);
-    dirty = true;
-  }, fab, "Whole world", "world");
-  const layersButton = button("", () => {
-    layers.hidden = !layers.hidden;
-    layersButton.setAttribute("aria-pressed", String(!layers.hidden));
-  }, fab, "Layers and map key", "layers");
-  const journalButton = button("Journal", () => {
-    mode = mode === "journal" ? "map" : "journal";
-    renderPanel();
-  }, corner);
-  journalButton.className = "chart-journal";
-  for (const [key3, label4] of Object.entries({ settlements: "Settlements", sites: "Known sites", completed: "Completed sites", routes: "Roads & trails", ferries: "Ferries" })) {
-    const row2 = el("label"), input = el("input");
-    input.type = "checkbox";
-    input.checked = true;
-    input.onchange = () => {
-      filters[key3] = input.checked;
-      dirty = true;
-    };
-    row2.append(input, el("span", label4));
-    filtersRow.append(row2);
-  }
-  for (const [m, text2] of [[{ kind: "settlement", class: "village-outpost", state: "visited" }, "Village or town"], [{ kind: "settlement", class: "city", state: "visited" }, "City or capital"], [{ kind: "settlement", class: "town", state: "unvisited" }, "Not visited yet"], [{ kind: "site", family: "cave", state: "discovered" }, "Cave"], [{ kind: "site", family: "fort", state: "discovered" }, "Fort"], [{ kind: "site", family: "ruin", state: "discovered" }, "Ruin"], [{ kind: "site", family: "crypt", state: "discovered" }, "Crypt"], [{ kind: "site", state: "rumored" }, "Rumored site"], [{ kind: "ferry", state: "visited" }, "Ferry landing"], [{ kind: "site", family: "cave", state: "completed" }, "Completed"]]) {
-    const icon = el("canvas");
-    icon.width = 44;
-    icon.height = 44;
-    const c = icon.getContext("2d");
-    c.scale(2, 2);
-    drawChartIcon(c, m, 11, 11, 7);
-    legend.append(icon, el("span", text2));
-  }
-  layers.append(el("h4", "Show"), filtersRow, el("h4", "Key"), legend, el("p", "Cream lines are roads, dashes are trails and blue dashes are ferry routes. Red dots on the minimap are nearby enemies."));
-  const sheetClose = () => {
-    const b = button("\xD7", () => {
-      selected = null;
-      mode = "map";
-      dirty = true;
-      renderPanel();
-    }, panel, "Close details");
-    b.className = "chart-sheet-close";
+  const medalCanvas = (kind, css, opt = {}) => {
+    const c = el("canvas"), r = Math.min(2, env.devicePixelRatio || 1);
+    c.width = c.height = Math.round(css * r);
+    const x = c.getContext("2d");
+    x.scale(r, r);
+    medal(x, css / 2, css / 2, css / 2 - 2.5, kind, { ...opt, shadow: false });
+    return c;
   };
-  function renderPanel() {
-    panel.replaceChildren();
-    journalButton.setAttribute("aria-pressed", String(mode === "journal"));
-    if (mode === "journal") {
-      panel.append(el("h3", "Shared journal"));
-      const notes = model?.navigation?.knowledge?.journal ?? [];
-      if (!notes.length) panel.append(el("p", "No notes yet. A trail note is posted beside the Alderwood arrival square. Read it with E or the touch prompt."));
-      for (const note of notes) {
-        panel.append(el("h3", "Woodland trail note"), el("p", TRAIL_NOTE_TEXT));
-        const site = meta?.sites.find((s) => s.id === note.siteId);
-        if (site) button("Show rumored cave", () => {
-          center3 = { x: site.x, y: site.y };
-          span2 = 512;
-          selected = site;
-          mode = "map";
-          dirty = true;
-          renderPanel();
-        }, panel);
-      }
-      panel.append(el("p", "Knowledge is shared by this campaign\u2019s players and saved. Reading the note consumes no inventory space."));
-      sheetClose();
-      panel.hidden = false;
-      return;
+  const player = () => model?.navigation?.position ? chartPosition(model.navigation.position) : null;
+  const knowledge = () => model?.navigation?.knowledge ?? null;
+  const townsById = () => {
+    if (!meta) return /* @__PURE__ */ new Map();
+    meta._towns ??= new Map((meta.towns ?? []).map((t) => [t.id, t]));
+    return meta._towns;
+  };
+  const outdoors = () => Boolean(model?.space && !model.space.site && !model.space.functionalSite && !model.space.settlementInterior);
+  function places() {
+    const k = knowledge();
+    if (!meta || !k) return [];
+    const key3 = k.revision + "/" + Object.keys(k.visited).length + "/" + Object.keys(k.rumors).length + "/" + JSON.stringify(model.navigation.navigableSitesById ? Object.keys(model.navigation.navigableSitesById).length : 0);
+    if (key3 === placesKey) return placesList;
+    placesKey = key3;
+    const out = [], towns2 = townsById(), states = model.navigation.navigableSitesById ?? {};
+    for (const s of meta.settlements) {
+      if (k.visited[s.id] === void 0) continue;
+      const t = towns2.get(s.id), big = s.class === "capital-great-hold" || s.class === "city";
+      out.push({ id: s.id, kind: "settlement", icon: big ? "city" : "town", label: t?.name ?? s.label, x: s.x, y: s.y, band: s.band, town: t ?? null, row: s, travel: Boolean(s.built), big });
     }
-    if (selected) {
-      const known2 = model?.navigation?.knowledge, visited = known2?.visited?.[selected.id] !== void 0, state = selected.state ?? (visited ? model.navigation.navigableSitesById?.[selected.id]?.state === "completed" ? "completed" : "discovered" : known2?.rumors?.[selected.id] !== void 0 ? "rumored" : "unvisited");
-      panel.append(el("h3", state === "rumored" ? "Rumored " + selected.family : selected.label), el("p", (selected.kind === "site" ? selected.tier + " " + selected.family : selected.kind === "settlement" ? selected.class.replaceAll("-", " ") : "Ferry landing") + " \xB7 Band " + selected.band), el("p", state === "unvisited" ? "Location known \u2014 not visited" : state === "completed" ? "Completed \u2014 reset rules are unchanged" : state === "rumored" ? "Location learned from a note \u2014 not yet discovered" : "Discovered by your party"));
-      if (selected.kind === "settlement") panel.append(el("p", selected.built ? "Populated review settlement." : "UNBUILT settlement reservation. Geography and location are established; buildings/services are not present."));
-      if (selected.biome) panel.append(el("p", selected.biome.replaceAll("-", " ")));
-      sheetClose();
-      panel.hidden = false;
-      return;
+    for (const s of meta.sites) {
+      const seen5 = k.visited[s.id] !== void 0, rumored = k.rumors[s.id] !== void 0;
+      if (!seen5 && !rumored) continue;
+      out.push({ id: s.id, kind: "site", icon: seen5 ? s.family : "unknown", label: seen5 ? s.label : "Rumored " + s.family, x: s.x, y: s.y, band: s.band, site: s, done: seen5 && states[s.id]?.state === "completed", travel: seen5, rumored: !seen5 });
     }
-    panel.hidden = true;
+    for (const l of meta.landings ?? []) if (k.visited[l.id] !== void 0) out.push({ id: l.id, kind: "ferry", icon: "ferry", label: l.label, x: l.x, y: l.y, band: l.band, landing: l });
+    for (const id of Object.keys(k.visited)) {
+      const p = eventMapTile(id);
+      if (p) out.push({ id, kind: "event", icon: "event", label: "Event clearing", x: p.x, y: p.y });
+    }
+    placesList = out;
+    return out;
   }
-  function metadata() {
-    port.cartographyWindow({ op: "metadata" }).then((value2) => {
-      if (closed) return;
-      meta = value2;
-      metadataError = null;
-      dirty = true;
-      renderPanel();
-    }).catch((error) => {
-      metadataError = error.message;
-      status2.textContent = "Map unavailable: " + error.message;
-      status2.hidden = false;
-    });
+  const placeById = (id) => places().find((p) => p.id === id) ?? null;
+  const eventName = (p) => {
+    const me = heroEntity();
+    if (!me) return p.label;
+    const ev = (model.worldEvents ?? []).find((e) => e.position && chartDistance(e) <= 20 && Math.hypot(chartOf(e).x - p.x, chartOf(e).y - p.y) <= 20);
+    return ev ? EVENT_NAME[ev.kind] ?? p.label : p.label;
+  };
+  function heroEntity() {
+    const id = model?.playersById?.[model.localPlayerId]?.entityId;
+    return id ? model.entitiesById?.[id] ?? null : null;
   }
-  metadata();
-  function requestRaster(view3, width, height, cssWidth, cssHeight, ratio) {
+  const chartOf = (e) => {
+    const me = heroEntity(), p = player();
+    return { x: p.x + (e.position.x - me.position.x) / 32, y: p.y + (e.position.y - me.position.y) / 32 };
+  };
+  const chartDistance = (e) => {
+    const me = heroEntity();
+    return Math.hypot(e.position.x - me.position.x, e.position.y - me.position.y) / 32;
+  };
+  function threatNear() {
+    if (!outdoors()) return false;
+    const me = heroEntity();
+    if (!me?.position) return false;
+    return Object.values(model.entitiesById ?? {}).some((a) => a?.alive && a.team === "hostile" && a.position && Math.hypot(a.position.x - me.position.x, a.position.y - me.position.y) <= CLEAR_PX);
+  }
+  function travelBlock() {
+    const me = heroEntity();
+    if (!issue) return "Fast travel is not available here.";
+    if (!me?.alive) return "You cannot travel while defeated.";
+    if (!outdoors()) return "Step outside first: no fast travel from dungeons or buildings.";
+    if (threatNear()) return "Enemies are too close. Get clear of the fight first.";
+    if (kneel) return "Already traveling.";
+    return null;
+  }
+  const miniDiameter = () => phoneQuery?.matches ? 108 : shortQuery?.matches ? 112 : 146;
+  const miniTpp = () => {
+    const p = player(), inTown = p && insideTownAt(p), base = inTown ? TOWN_LEVEL : WILD_LEVEL;
+    return MINI_LEVELS[Math.max(0, Math.min(MINI_LEVELS.length - 1, base + miniOffset))];
+  };
+  function insideTownAt(p) {
+    for (const o of meta?.townOutlines ?? []) {
+      o._box ??= { x0: Math.min(...o.points.map((q) => q.x)), y0: Math.min(...o.points.map((q) => q.y)), x1: Math.max(...o.points.map((q) => q.x)), y1: Math.max(...o.points.map((q) => q.y)) };
+      const b = o._box;
+      if (p.x >= b.x0 - 2 && p.x <= b.x1 + 2 && p.y >= b.y0 - 2 && p.y <= b.y1 + 2) return o.id;
+    }
+    return null;
+  }
+  function setMiniZoom(d) {
+    const p = player(), inTown = p && insideTownAt(p), base = inTown ? TOWN_LEVEL : WILD_LEVEL, next = Math.max(-base, Math.min(MINI_LEVELS.length - 1 - base, miniOffset + d));
+    if (next === miniOffset) return;
+    miniOffset = next;
+    store.set("saq-minimap-zoom", String(miniOffset));
+    dirty = true;
+  }
+  zoomIn.onclick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setMiniZoom(-1);
+  };
+  zoomOut.onclick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setMiniZoom(1);
+  };
+  mini.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    setMiniZoom(e.deltaY > 0 ? 1 : -1);
+  }, { passive: false });
+  function bezelImage(D2, ratio) {
+    const key3 = D2 + "/" + ratio;
+    if (bezel?.key === key3) return bezel.canvas;
+    const W3 = D2 + 28, H6 = D2 + 34, R6 = D2 / 2, cx = W3 / 2, cy2 = 20 + R6, c = el("canvas");
+    c.width = Math.round(W3 * ratio);
+    c.height = Math.round(H6 * ratio);
+    const x = c.getContext("2d");
+    x.scale(ratio, ratio);
+    x.fillStyle = "rgba(0,0,0,.42)";
+    x.beginPath();
+    x.arc(cx + 1, cy2 + 3, R6 + 11, 0, 7);
+    x.fill();
+    const g = x.createLinearGradient(0, cy2 - R6 - 10, 0, cy2 + R6 + 10);
+    g.addColorStop(0, "#4a3f30");
+    g.addColorStop(0.5, "#2a231b");
+    g.addColorStop(1, "#16120d");
+    x.fillStyle = g;
+    x.beginPath();
+    x.arc(cx, cy2, R6 + 10, 0, 7);
+    x.arc(cx, cy2, R6, 0, 7, true);
+    x.fill();
+    x.strokeStyle = "#d8b56a";
+    x.lineWidth = 1;
+    x.beginPath();
+    x.arc(cx, cy2, R6 + 9.2, 0, 7);
+    x.stroke();
+    for (let i = 0; i < 16; i++) {
+      const a = i * Math.PI / 8;
+      x.strokeStyle = i % 4 ? "rgba(216,181,106,.55)" : "#e9c77a";
+      x.lineWidth = i % 4 ? 1 : 1.8;
+      x.beginPath();
+      x.moveTo(cx + Math.cos(a) * (R6 + 3), cy2 + Math.sin(a) * (R6 + 3));
+      x.lineTo(cx + Math.cos(a) * (R6 + (i % 4 ? 6 : 8)), cy2 + Math.sin(a) * (R6 + (i % 4 ? 6 : 8)));
+      x.stroke();
+    }
+    x.strokeStyle = "#1a140e";
+    x.lineWidth = 2.2;
+    x.beginPath();
+    x.arc(cx, cy2, R6 + 1, 0, 7);
+    x.stroke();
+    x.strokeStyle = "#c9a45e";
+    x.lineWidth = 1.4;
+    x.beginPath();
+    x.arc(cx, cy2, R6 + 2.6, 0, 7);
+    x.stroke();
+    x.save();
+    x.translate(cx, cy2 - R6 - 6);
+    x.fillStyle = "#1a140e";
+    x.beginPath();
+    x.moveTo(-9, -7);
+    x.lineTo(9, -7);
+    x.lineTo(9, 3);
+    x.lineTo(0, 9);
+    x.lineTo(-9, 3);
+    x.closePath();
+    x.fill();
+    x.fillStyle = "#8f2a1c";
+    x.strokeStyle = "#e0bd72";
+    x.lineWidth = 1.2;
+    x.beginPath();
+    x.moveTo(-7.5, -5.5);
+    x.lineTo(7.5, -5.5);
+    x.lineTo(7.5, 2.2);
+    x.lineTo(0, 7.2);
+    x.lineTo(-7.5, 2.2);
+    x.closePath();
+    x.fill();
+    x.stroke();
+    x.font = "12px " + MAP_FONT;
+    x.fillStyle = "#f6e2b0";
+    x.textAlign = "center";
+    x.textBaseline = "middle";
+    x.fillText("N", 0, -0.6);
+    x.restore();
+    bezel = { key: key3, canvas: c };
+    return c;
+  }
+  function requestRaster(store_, view3, width, height, cssWidth, cssHeight, ratio, keep3) {
     const rounded4 = { x: Math.floor(view3.x), y: Math.floor(view3.y), width: Math.ceil(view3.width), height: Math.ceil(view3.height) }, key3 = JSON.stringify([rounded4, width, height, cssWidth, cssHeight, ratio]);
-    wanted = { key: key3, view: rounded4, width, height, cssWidth, cssHeight };
-    if (cache5.has(key3)) {
-      const v = cache5.get(key3);
-      cache5.delete(key3);
-      cache5.set(key3, v);
+    if (store_.has(key3)) {
+      const v = store_.get(key3);
+      store_.delete(key3);
+      store_.set(key3, v);
       cacheHits++;
       return v;
     }
     if (!busy) {
       busy = true;
       requests++;
-      const request = wanted;
-      port.cartographyWindow({ op: "raster", view: request.view, width, height }).then((raster) => {
+      port.cartographyWindow({ op: "raster", view: rounded4, width, height }).then((raster) => {
         if (closed) return;
         metadataError = null;
         const surface3 = doc.createElement("canvas");
         surface3.width = Math.round(cssWidth * ratio);
         surface3.height = Math.round(cssHeight * ratio);
-        const result = { key: request.key, raster, surface: surface3, cssWidth: request.cssWidth, cssHeight: request.cssHeight, filterKey: null };
-        cache5.set(request.key, result);
-        while (cache5.size > 6) cache5.delete(cache5.keys().next().value);
+        store_.set(key3, { key: key3, raster, surface: surface3, cssWidth, cssHeight, paintKey: null });
+        while (store_.size > keep3) store_.delete(store_.keys().next().value);
         dirty = true;
       }).catch((e) => {
         metadataError = e.message;
@@ -68059,176 +68999,646 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
     }
     return null;
   }
-  function canvasDimensions(canvas, isLarge) {
-    if (isLarge) {
-      if (!atlasSize) {
-        const r = canvas.getBoundingClientRect();
-        atlasSize = { width: Math.max(1, r.width), height: Math.max(1, r.height) };
-      }
-      return atlasSize;
-    }
-    return phoneQuery?.matches ? { width: 120, height: 86 } : shortQuery?.matches ? { width: 152, height: 79 } : { width: 184, height: 124 };
-  }
-  function plate6(c, x, y, w, h, r) {
-    c.beginPath();
-    if (c.roundRect) c.roundRect(x, y, w, h, r);
-    else c.rect(x, y, w, h);
-    c.fill();
-    c.stroke();
-  }
-  function draw() {
+  function drawMini() {
     const p = player();
     if (!p || !meta) return;
-    const canvas = open2 ? large : small, { width, height } = canvasDimensions(canvas, open2), ratio = Math.min(2, env.devicePixelRatio || 1);
-    if (width < 2 || height < 2) return;
-    if (canvas.width !== Math.round(width * ratio) || canvas.height !== Math.round(height * ratio)) {
-      canvas.width = Math.round(width * ratio);
-      canvas.height = Math.round(height * ratio);
-      if (!open2) {
-        small.style.width = width + "px";
-        small.style.height = height + "px";
-      }
-      dirty = true;
+    const D2 = miniDiameter(), W3 = D2 + 28, H6 = D2 + 34, R6 = D2 / 2, cx = W3 / 2, cy2 = 20 + R6, ratio = Math.min(2, env.devicePixelRatio || 1);
+    if (small.width !== Math.round(W3 * ratio) || small.height !== Math.round(H6 * ratio)) {
+      small.width = Math.round(W3 * ratio);
+      small.height = Math.round(H6 * ratio);
+      small.style.width = W3 + "px";
+      small.style.height = H6 + "px";
+      const at6 = (a) => [cx + Math.cos(a) * (R6 + 3) - 12, cy2 + Math.sin(a) * (R6 + 3) - 12];
+      const [ix, iy] = at6(Math.PI * 0.8), [ox, oy] = at6(Math.PI * 0.64);
+      zoomIn.style.left = ix + "px";
+      zoomIn.style.top = iy + "px";
+      zoomOut.style.left = ox + "px";
+      zoomOut.style.top = oy + "px";
     }
-    const c = canvas.getContext("2d");
+    const c = small.getContext("2d");
     c.setTransform(ratio, 0, 0, ratio, 0, 0);
-    c.fillStyle = CHART_COLORS.O;
+    c.clearRect(0, 0, W3, H6);
+    const tpp = miniTpp(), span_ = D2 * tpp, shown = chartView(p, span_, D2, D2), block2 = Math.max(8, 24 * tpp), req = { x: Math.floor(p.x / block2) * block2 + block2 / 2, y: Math.floor(p.y / block2) * block2 + block2 / 2 }, full = D2 + MINI_PAD * 2, backing = chartView(req, tpp * full, full, full), n = Math.min(240, Math.max(32, Math.round(full)));
+    let result = requestRaster(miniCache, backing, n, n, full, full, ratio, 4);
+    if (!result) result = [...miniCache.values()].reverse().find((v) => Math.abs(v.raster.view.width / backing.width - 1) < 0.05 && Math.abs(v.raster.view.x + v.raster.view.width / 2 - p.x) < v.raster.view.width * 0.4 && Math.abs(v.raster.view.y + v.raster.view.height / 2 - p.y) < v.raster.view.height * 0.4) ?? [...miniCache.values()].reverse().find((v) => {
+      const w = v.raster.view;
+      return p.x - shown.width / 2 >= w.x && p.x + shown.width / 2 <= w.x + w.width && p.y - shown.height / 2 >= w.y && p.y + shown.height / 2 <= w.y + w.height && w.width < shown.width * 8;
+    }) ?? null;
+    c.save();
+    c.beginPath();
+    c.arc(cx, cy2, R6 + 0.5, 0, 7);
+    c.clip();
+    c.fillStyle = "#3f7a52";
+    c.fillRect(cx - R6, cy2 - R6, D2, D2);
+    if (result) {
+      if (result.paintKey !== "m") {
+        const t = env.performance.now();
+        paintMiniRaster(result.surface, result.raster, meta, result.cssWidth, result.cssHeight);
+        paintMs = env.performance.now() - t;
+        result.paintKey = "m";
+        rasterBuilds++;
+      }
+      const q = projectChart(result.raster.view, shown, D2, D2);
+      c.imageSmoothingEnabled = true;
+      c.drawImage(result.surface, cx - R6 + q.x, cy2 - R6 + q.y, result.raster.view.width * D2 / shown.width, result.raster.view.height * D2 / shown.height);
+    }
+    const at5 = (x, y) => ({ x: cx + (x - p.x) / tpp, y: cy2 + (y - p.y) / tpp }), inside5 = (q, m) => Math.hypot(q.x - cx, q.y - cy2) < R6 - m;
+    if (tpp <= 1.05) for (const t of meta.towns ?? []) for (const s of townShops(t)) {
+      const q = at5(s.x, s.y);
+      if (inside5(q, 5)) medal(c, q.x, q.y, tpp < 0.5 ? 7 : 5.6, s.kind, { shadow: false });
+    }
+    const rim = [], list = places();
+    for (const m of list) {
+      if (m.kind === "site" && m.rumored) continue;
+      const q = at5(m.x, m.y), d = Math.hypot(m.x - p.x, m.y - p.y);
+      if (inside5(q, 7)) {
+        if (m.kind === "settlement" && tpp <= 1.05) continue;
+        medal(c, q.x, q.y, m.kind === "settlement" ? 7 : 5.6, m.icon, { done: m.done, shadow: false });
+      } else if (d < 1400 && m.id !== tracked) rim.push({ ...m, q, d });
+    }
+    const me = heroEntity();
+    if (outdoors() && me?.position) {
+      c.fillStyle = "#e8402f";
+      c.strokeStyle = "#2a0b08";
+      c.lineWidth = 1.1;
+      let k = 0;
+      for (const a of Object.values(model.entitiesById)) {
+        if (!a?.alive || a.team !== "hostile" || !a.position) continue;
+        const q = { x: cx + (a.position.x - me.position.x) / 32 / tpp, y: cy2 + (a.position.y - me.position.y) / 32 / tpp };
+        if (!inside5(q, 3)) continue;
+        c.beginPath();
+        c.arc(q.x, q.y, 2.4, 0, 7);
+        c.fill();
+        c.stroke();
+        if (++k >= 48) break;
+      }
+    }
+    const tp = tracked ? placeById(tracked) : null;
+    let trackAng = null;
+    if (tp) {
+      const q = at5(tp.x, tp.y);
+      if (inside5(q, 9)) medal(c, q.x, q.y, 7, "quest", { shadow: false });
+      else {
+        trackAng = Math.atan2(q.y - cy2, q.x - cx);
+        const d = Math.atan2(Math.sin(trackAng + Math.PI / 2), Math.cos(trackAng + Math.PI / 2));
+        if (Math.abs(d) < 0.34) trackAng = -Math.PI / 2 + (d < 0 ? -0.34 : 0.34);
+      }
+    }
+    const f = model.primary?.actorsById?.[model.playersById?.[model.localPlayerId]?.entityId]?.facing ?? { x: 0, y: -1 }, ang = Math.atan2(f.y, f.x);
+    c.save();
+    c.translate(cx, cy2);
+    c.rotate(ang + Math.PI / 2);
+    c.fillStyle = "rgba(255,246,216,.2)";
+    c.strokeStyle = "rgba(255,246,216,.5)";
+    c.lineWidth = 0.8;
+    c.beginPath();
+    c.moveTo(0, 0);
+    c.arc(0, 0, R6 * 0.6, -Math.PI / 2 - 0.42, -Math.PI / 2 + 0.42);
+    c.closePath();
+    c.fill();
+    c.stroke();
+    c.restore();
+    heroArrow(c, cx, cy2, 7.5, ang);
+    c.restore();
+    c.drawImage(bezelImage(D2, ratio), 0, 0, W3, H6);
+    const keep3 = [], dA = (u, v) => Math.abs(Math.atan2(Math.sin(u - v), Math.cos(u - v)));
+    rim.sort((a, b) => a.d - b.d);
+    const north = -Math.PI / 2, nudge = (a) => {
+      const d = Math.atan2(Math.sin(a - north), Math.cos(a - north));
+      return Math.abs(d) < 0.34 ? north + (d < 0 ? -0.34 : 0.34) : a;
+    };
+    for (const m of rim) {
+      const a = nudge(Math.atan2(m.q.y - cy2, m.q.x - cx));
+      if (trackAng !== null && dA(a, trackAng) < 0.5) continue;
+      if (keep3.some((k) => dA(k.a, a) < 0.5)) continue;
+      keep3.push({ ...m, a });
+      if (keep3.length >= 6) break;
+    }
+    for (const m of keep3) rimPip(c, cx + Math.cos(m.a) * (R6 - 1), cy2 + Math.sin(m.a) * (R6 - 1), m.a, m.icon, 5.2);
+    if (trackAng !== null) rimPip(c, cx + Math.cos(trackAng) * (R6 + 1), cy2 + Math.sin(trackAng) * (R6 + 1), trackAng, "quest", 6.6);
+  }
+  function show() {
+    if (!player()) return;
+    releaseInput();
+    open2 = true;
+    atlasSize = null;
+    center3 = { ...player() };
+    span2 = Math.max(420, Math.min(900, span2));
+    selected = null;
+    sheetMode = null;
+    dirty = true;
+    atlas.hidden = false;
+    mini.hidden = true;
+    doc.documentElement.dataset.worldMapOpen = "true";
+    renderSheet();
+    closeButton.focus({ preventScroll: true });
+  }
+  function hide() {
+    open2 = false;
+    atlas.hidden = true;
+    mini.hidden = !player();
+    pointers.clear();
+    gesture = null;
+    dirty = true;
+    releaseInput();
+    doc.documentElement.dataset.worldMapOpen = "false";
+  }
+  const maxSpan = () => meta ? Math.max(meta.widthTiles, meta.heightTiles) * 1.3 : 4096;
+  function clamp52() {
+    if (!meta || !center3) return;
+    span2 = Math.max(110, Math.min(maxSpan(), span2));
+    center3.x = Math.max(-span2 * 0.1, Math.min(meta.widthTiles + span2 * 0.1, center3.x));
+    center3.y = Math.max(-span2 * 0.1, Math.min(meta.heightTiles + span2 * 0.1, center3.y));
+  }
+  function zoom(factor, point13 = null) {
+    if (!meta || !center3) return;
+    const r = atlasDims(), old2 = span2;
+    span2 *= factor;
+    clamp52();
+    if (point13) {
+      center3.x += (point13.x / r.width - 0.5) * (old2 - span2);
+      center3.y += (point13.y / r.height - 0.5) * (old2 - span2) * r.height / r.width;
+    }
+    dirty = true;
+  }
+  const closeButton = button(tools2, "Close world map", "close", hide, "m2-close");
+  button(tools2, "Zoom in", "plus", () => zoom(1 / 1.6));
+  button(tools2, "Zoom out", "minus", () => zoom(1.6));
+  button(tools2, "Center on me", "locate", () => {
+    center3 = { ...player() };
+    span2 = 600;
+    dirty = true;
+  });
+  button(tools2, "Whole world", "world", () => {
+    if (!meta) return;
+    const r = atlasDims();
+    center3 = { x: meta.widthTiles / 2, y: meta.heightTiles / 2 };
+    span2 = Math.min(maxSpan(), Math.max(meta.widthTiles * 1.04, meta.heightTiles * r.width / r.height * 1.04));
+    dirty = true;
+  });
+  const keyButton = button(tools2, "Map key and found places", "key", () => {
+    sheetMode = sheetMode === "key" ? null : "key";
+    selected = null;
+    renderSheet();
+    dirty = true;
+  });
+  function atlasDims() {
+    if (!atlasSize) {
+      const r = large.getBoundingClientRect();
+      atlasSize = { width: Math.max(1, r.width), height: Math.max(1, r.height) };
+    }
+    return atlasSize;
+  }
+  const fmt = (n) => Math.round(n).toLocaleString("en-US"), walk = (t) => {
+    const s = t / WALK_TILES_PER_S;
+    return s < 60 ? "about " + Math.max(5, Math.round(s / 5) * 5) + " s" : "about " + Math.round(s / 60) + " min";
+  };
+  function subtitle(m) {
+    if (m.kind === "settlement") {
+      const t = m.town, w = t ? SIZE_WORD[t.size] ?? "Town" : CLASS_WORD[m.row.class] ?? "Town", biome = t ? cap2(t.biome) : "";
+      return [t?.walled ? "Walled " + w.toLowerCase() : w, biome, "Band " + m.band].filter(Boolean).join(" \xB7 ");
+    }
+    if (m.kind === "site") {
+      const s = m.site;
+      return [cap2(s.tier) + " " + s.family, cap2(String(s.biome).replaceAll("-", " ")), "Band " + s.band].join(" \xB7 ");
+    }
+    if (m.kind === "ferry") return "Ferry landing \xB7 Band " + m.band;
+    return "Events return here after each run";
+  }
+  function renderSheet() {
+    sheet.replaceChildren();
+    keyButton.setAttribute("aria-pressed", String(sheetMode === "key"));
+    const x = el("button", "m2-x", "\xD7");
+    x.type = "button";
+    x.setAttribute("aria-label", "Close");
+    x.onclick = (e) => {
+      e.preventDefault();
+      selected = null;
+      sheetMode = null;
+      renderSheet();
+      dirty = true;
+    };
+    if (sheetMode === "key") {
+      sheet.append(el("h4", void 0, "Map key"));
+      const grid = el("div", "m2-key"), list = places(), count = (f) => list.filter(f).length, row2 = (kind, text2, value2) => {
+        const d2 = el("div");
+        d2.append(medalCanvas(kind, 24), el("em", void 0, text2));
+        d2.lastChild.style.fontStyle = "normal";
+        d2.append(el("span", void 0, value2));
+        grid.append(d2);
+      };
+      const sets = meta?.settlements ?? [], small_ = sets.filter((s) => s.class !== "city" && s.class !== "capital-great-hold"), big = sets.filter((s) => s.class === "city" || s.class === "capital-great-hold"), k = knowledge();
+      row2("town", "Towns and villages", small_.filter((s) => k?.visited[s.id] !== void 0).length + " / " + small_.length);
+      row2("city", "Cities and capitals", big.filter((s) => k?.visited[s.id] !== void 0).length + " / " + big.length);
+      for (const f of ["cave", "fort", "ruin", "crypt"]) row2(f, cap2(f) + "s", count((m2) => m2.kind === "site" && !m2.rumored && m2.site.family === f) + " found");
+      row2("event", "Event clearings", count((m2) => m2.kind === "event") + " found");
+      row2("ferry", "Ferry landings", count((m2) => m2.kind === "ferry") + " found");
+      row2("quest", "Tracked place", tracked && placeById(tracked) ? "1" : "none");
+      sheet.append(grid, el("p", "m2-note", "Places appear once you find them. Every town and dungeon you find is a fast travel point. A green tick marks a cleared dungeon."));
+      const notes = knowledge()?.journal ?? [];
+      if (notes.length) sheet.append(el("p", "m2-note", "Journal: " + TRAIL_NOTE_TEXT));
+      sheet.append(x);
+      sheet.hidden = false;
+      return;
+    }
+    if (!selected) {
+      sheet.hidden = true;
+      return;
+    }
+    const m = placeById(selected.id) ?? selected;
+    if (sheetMode === "confirm") {
+      const head14 = el("div", "m2-head");
+      head14.append(medalCanvas(m.icon, 48), el("div"));
+      head14.lastChild.append(el("h3", void 0, "Travel to " + m.label + "?"), el("div", "m2-sub", "You kneel for 3 seconds. Moving or taking a hit cancels it."));
+      const b2 = el("div", "m2-btns"), go = el("button", "m2-gold", "Travel"), no = el("button", "m2-plain", "Cancel");
+      go.type = no.type = "button";
+      const block2 = travelBlock();
+      go.disabled = Boolean(block2);
+      go.onclick = (e) => {
+        e.preventDefault();
+        startKneel(m);
+      };
+      no.onclick = (e) => {
+        e.preventDefault();
+        sheetMode = null;
+        renderSheet();
+      };
+      b2.append(go, no);
+      sheet.append(head14);
+      if (block2) sheet.append(el("p", "m2-note", block2));
+      sheet.append(b2, x);
+      sheet.hidden = false;
+      return;
+    }
+    const head13 = el("div", "m2-head");
+    head13.append(medalCanvas(m.icon, 48, { done: m.done }), el("div"));
+    head13.lastChild.append(el("h3", void 0, m.kind === "event" ? eventName(m) : m.label), el("div", "m2-sub", subtitle(m)));
+    sheet.append(head13);
+    if (m.kind === "settlement" && m.town) {
+      const kinds2 = [...new Set(m.town.buildings.map((b2) => b2[4]).filter(Boolean))].sort((a, b2) => Object.keys(SHOP_NAME).indexOf(a) - Object.keys(SHOP_NAME).indexOf(b2)), chips = el("div", "m2-chips");
+      for (const k of kinds2) {
+        const chip2 = el("span", "m2-chip");
+        chip2.append(medalCanvas(k, 22), el("span", void 0, SHOP_NAME[k]));
+        chips.append(chip2);
+      }
+      if (kinds2.length) sheet.append(chips);
+    }
+    const status2 = el("div", "m2-status"), p = player(), d = p ? Math.hypot(m.x - p.x, m.y - p.y) : 0, mark = el("b", void 0, m.rumored ? "Rumored" : m.done ? "\u2713 Cleared" : "\u2713 Found");
+    status2.append(mark);
+    const here = Boolean(p) && (d < 6 || m.kind === "settlement" && insideTownAt(p) === m.id);
+    if (p) status2.append(el("span", void 0, here ? "You are here" : fmt(d) + " tiles \xB7 " + walk(d)));
+    sheet.append(status2);
+    const b = el("div", "m2-btns");
+    if (m.travel && !here) {
+      const go = el("button", "m2-gold", "Travel here");
+      go.type = "button";
+      go.onclick = (e) => {
+        e.preventDefault();
+        sheetMode = "confirm";
+        renderSheet();
+      };
+      b.append(go);
+    }
+    const tr = el("button", "m2-plain", tracked === m.id ? "Stop tracking" : "Track");
+    tr.type = "button";
+    tr.onclick = (e) => {
+      e.preventDefault();
+      tracked = tracked === m.id ? null : m.id;
+      store.set("saq-map-track", tracked);
+      renderSheet();
+      dirty = true;
+    };
+    b.append(tr);
+    sheet.append(b, x);
+    sheet.hidden = false;
+  }
+  function drawFrame2(c, w, h) {
+    c.save();
+    c.strokeStyle = "#2a1d12";
+    c.lineWidth = 3;
+    c.strokeRect(1.5, 1.5, w - 3, h - 3);
+    const band3 = 9;
+    c.fillStyle = "#efe2bf";
+    c.fillRect(3, 3, w - 6, band3);
+    c.fillRect(3, h - 3 - band3, w - 6, band3);
+    c.fillRect(3, 3, band3, h - 6);
+    c.fillRect(w - 3 - band3, 3, band3, h - 6);
+    c.fillStyle = "#2a1d12";
+    const seg = 16;
+    for (let x = 3 + band3; x < w - 3 - band3; x += seg * 2) {
+      c.fillRect(x, 5, Math.min(seg, w - 3 - band3 - x), band3 - 4);
+      c.fillRect(x, h - 3 - band3 + 2, Math.min(seg, w - 3 - band3 - x), band3 - 4);
+    }
+    for (let y = 3 + band3; y < h - 3 - band3; y += seg * 2) {
+      c.fillRect(5, y, band3 - 4, Math.min(seg, h - 3 - band3 - y));
+      c.fillRect(w - 3 - band3 + 2, y, band3 - 4, Math.min(seg, h - 3 - band3 - y));
+    }
+    c.lineWidth = 1.5;
+    c.strokeRect(3 + band3 + 0.75, 3 + band3 + 0.75, w - 6 - band3 * 2 - 1.5, h - 6 - band3 * 2 - 1.5);
+    c.restore();
+  }
+  function drawAtlas() {
+    const p = player();
+    if (!p || !meta) return;
+    const { width, height } = atlasDims(), ratio = Math.min(2, env.devicePixelRatio || 1);
+    if (width < 2 || height < 2) return;
+    if (large.width !== Math.round(width * ratio) || large.height !== Math.round(height * ratio)) {
+      large.width = Math.round(width * ratio);
+      large.height = Math.round(height * ratio);
+    }
+    const c = large.getContext("2d");
+    c.setTransform(ratio, 0, 0, ratio, 0, 0);
+    c.fillStyle = "#bed0ce";
     c.fillRect(0, 0, width, height);
-    if (open2 && !center3) center3 = { ...p };
-    const viewSpan = open2 ? span2 : width * MINI_TILES_PER_PX, shown = chartView(open2 ? center3 : p, viewSpan, width, height), pad2 = open2 ? 0 : MINI_PAD, requestCenter = open2 ? center3 : { x: Math.floor(p.x / 32) * 32 + 16, y: Math.floor(p.y / 32) * 32 + 16 }, backingView = chartView(requestCenter, viewSpan * (width + pad2 * 2) / width, width + pad2 * 2, height + pad2 * 2), rw = Math.min(512, Math.round(width + pad2 * 2)), rh = Math.min(240, Math.round(height + pad2 * 2));
-    let result = requestRaster(backingView, Math.max(32, rw), Math.max(32, rh), width + pad2 * 2, height + pad2 * 2, ratio);
-    const fresh = Boolean(result);
+    if (!center3) center3 = { ...p };
+    const shown = chartView(center3, span2, width, height), rw = Math.min(512, Math.round(width)), rh = Math.min(240, Math.round(height)), k = knowledge();
+    let result = requestRaster(cache5, shown, Math.max(32, rw), Math.max(32, rh), width, height, ratio, 6);
     if (!result) result = [...cache5.values()].reverse().find((v) => v.raster.view.width / shown.width < 3 && v.raster.view.width / shown.width > 0.4) ?? null;
     if (result) {
-      const filterKey = JSON.stringify([filters.routes, filters.ferries, filters.settlements]);
-      if (result.filterKey !== filterKey) {
-        const started = env.performance.now();
-        paintChartRaster(result.surface, result.raster, meta, filters, result.cssWidth, result.cssHeight);
-        paintMs = env.performance.now() - started;
-        result.filterKey = filterKey;
+      const visibleKey = Object.keys(k?.visited ?? {}).filter((id) => !id.startsWith("event:")).length;
+      if (result.paintKey !== "a" + visibleKey) {
+        const t = env.performance.now();
+        paintAtlasRaster(result.surface, result.raster, meta, result.cssWidth, result.cssHeight, { visible: (id) => k?.visited[id] !== void 0 });
+        paintMs = env.performance.now() - t;
+        result.paintKey = "a" + visibleKey;
         rasterBuilds++;
       }
       const q = projectChart(result.raster.view, shown, width, height);
       c.imageSmoothingEnabled = true;
       c.drawImage(result.surface, q.x, q.y, result.raster.view.width * width / shown.width, result.raster.view.height * height / shown.height);
     }
-    const k = model.navigation.knowledge, raw = chartMarkers(meta, k, model.navigation.navigableSitesById, filters), groups = groupChartMarkers(raw, shown, width, height, open2 ? 25 : 12), pos = projectChart(p, shown, width, height);
-    hitGroups = groups;
-    for (const g of groups) {
-      if (!open2 && Math.hypot(g.x - pos.x, g.y - pos.y) < 7) continue;
-      if (open2 && selected && g.members.some((m) => m.id === selected.id)) {
-        c.strokeStyle = "#ffd77a";
-        c.lineWidth = 2.5;
+    const P10 = (m) => projectChart(m, shown, width, height), list = places(), far = span2 > 2600;
+    hits2 = [];
+    const marks2 = [];
+    for (const m of list) {
+      if (far && m.kind !== "settlement") continue;
+      const q = P10(m);
+      if (q.x < -20 || q.y < -20 || q.x > width + 20 || q.y > height + 20) continue;
+      const r = m.kind === "settlement" ? m.big ? 11 : 9 : m.kind === "event" ? 7 : 7.5;
+      marks2.push({ m, q, r });
+    }
+    marks2.sort((a, b) => a.r - b.r);
+    for (const { m, q, r } of marks2) {
+      if (selected?.id === m.id || tracked === m.id) {
+        c.strokeStyle = tracked === m.id ? "#f2c243" : "#fff1c0";
+        c.lineWidth = 3;
         c.beginPath();
-        c.arc(g.x, g.y, 16, 0, Math.PI * 2);
+        c.arc(q.x, q.y, r + 6, 0, 7);
+        c.stroke();
+        c.strokeStyle = "#2a1d12";
+        c.lineWidth = 1;
+        c.beginPath();
+        c.arc(q.x, q.y, r + 7.6, 0, 7);
         c.stroke();
       }
-      if (g.members.length > 1) {
-        c.fillStyle = "#f1e6c8";
-        c.strokeStyle = "#11181e";
-        c.lineWidth = 1.6;
-        c.beginPath();
-        c.arc(g.x, g.y, open2 ? 12 : 6.5, 0, Math.PI * 2);
-        c.fill();
-        c.stroke();
-        c.fillStyle = "#1b2329";
-        c.font = "bold " + (open2 ? 11 : 8) + "px system-ui";
-        c.textAlign = "center";
-        c.textBaseline = "middle";
-        c.fillText(String(g.members.length), g.x, g.y + 0.5);
-        c.textAlign = "left";
-      } else drawChartIcon(c, g.members[0], g.x, g.y, open2 ? 9 : 5);
+      medal(c, q.x, q.y, r, m.icon, { done: m.done });
+      hits2.push({ m, x: q.x, y: q.y, r: Math.max(16, r + 6) });
     }
-    if (open2) {
-      c.font = "600 12px system-ui";
-      c.lineWidth = 1;
-      for (const l of layoutChartLabels(groups, c, width, height, span2, selected?.id)) {
-        c.fillStyle = "#101820d9";
-        c.strokeStyle = "#a78f6066";
-        plate6(c, l.x, l.y, l.w, l.h, 4);
-        c.fillStyle = "#f1e6c8";
-        c.textAlign = "left";
-        c.textBaseline = "middle";
-        c.fillText(l.text, l.x + 4, l.y + 9.5);
+    const hp = P10(p), taken = [{ x: hp.x - 12, y: hp.y - 14, w: 24, h: 28 }, ...marks2.map(({ q, r }) => ({ x: q.x - r, y: q.y - r, w: r * 2, h: r * 2 }))], overlap = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+    for (const { m, q, r } of [...marks2].sort((a, b) => Number(b.m.id === selected?.id) - Number(a.m.id === selected?.id) || b.r - a.r)) {
+      if (m.kind !== "settlement" && m.id !== selected?.id && m.id !== tracked) continue;
+      const size = m.big ? 19 : 16;
+      c.font = size + "px " + MAP_FONT;
+      const text3 = m.kind === "event" ? eventName(m) : m.label, w = c.measureText(text3).width;
+      for (const [lx, ly] of [[q.x, q.y + r + 12], [q.x + r + 6 + w / 2, q.y], [q.x - r - 6 - w / 2, q.y], [q.x, q.y - r - 11]]) {
+        const box5 = { x: lx - w / 2 - 2, y: ly - size * 0.55, w: w + 4, h: size * 1.1 };
+        if (box5.x < 14 || box5.x + box5.w > width - 14 || box5.y < 14 || box5.y + box5.h > height - 14 || taken.some((t) => overlap(t, box5))) continue;
+        taken.push(box5);
+        inkLabel(c, text3, lx, ly, { font: size + "px " + MAP_FONT });
+        break;
       }
     }
-    const entityId2 = model.playersById?.[model.localPlayerId]?.entityId, me = model.entitiesById?.[entityId2];
-    const outdoors = model.space && !model.space.site && !model.space.functionalSite && !model.space.settlementInterior;
-    if (!open2 && outdoors && me?.position) {
-      const s = width / viewSpan / 32;
-      c.fillStyle = "#ff4b3e";
-      c.strokeStyle = "#2a0b08";
-      c.lineWidth = 1.2;
-      let n = 0;
-      for (const a of Object.values(model.entitiesById)) {
-        if (!a?.alive || a.team !== "hostile" || !a.position) continue;
-        const x = pos.x + (a.position.x - me.position.x) * s, y = pos.y + (a.position.y - me.position.y) * s;
-        if (x < 3 || y < 3 || x > width - 3 || y > height - 3) continue;
+    const me = P10(p), f = model.primary?.actorsById?.[model.playersById?.[model.localPlayerId]?.entityId]?.facing ?? { x: 0, y: -1 };
+    heroArrow(c, me.x, me.y, 10, Math.atan2(f.y, f.x));
+    if (kneel) {
+      const d = placeById(kneel.id);
+      if (d) {
+        const q = P10(d);
+        c.save();
+        c.strokeStyle = "rgba(154,47,31,.85)";
+        c.lineWidth = 2;
+        c.setLineDash([6, 5]);
         c.beginPath();
-        c.arc(x, y, 2.3, 0, Math.PI * 2);
-        c.fill();
+        c.moveTo(me.x, me.y);
+        c.quadraticCurveTo((me.x + q.x) / 2, Math.min(me.y, q.y) - 40, q.x, q.y);
         c.stroke();
-        if (++n >= 48) break;
+        c.restore();
       }
     }
-    const f = model.primary?.actorsById?.[entityId2]?.facing ?? { x: 0, y: -1 }, r = open2 ? 1.3 : 1;
+    if (width > 760 || sheet.hidden) compassRose(c, width - 62, height - 70, 26);
+    const units = [16, 32, 64, 128, 256, 512, 1024, 2048].find((n) => n * width / span2 >= 70) ?? 4096, len = units * width / span2;
     c.save();
-    c.translate(pos.x, pos.y);
-    const glow9 = c.createRadialGradient?.(0, 0, 0, 0, 0, 11 * r);
-    if (glow9) {
-      glow9.addColorStop(0, "rgba(255,236,170,.55)");
-      glow9.addColorStop(1, "rgba(255,236,170,0)");
-      c.fillStyle = glow9;
+    c.strokeStyle = "#2a1d12";
+    c.fillStyle = "#2a1d12";
+    c.lineWidth = 1.5;
+    const sx = 26, sy = height - 28;
+    if (sheet.hidden) {
       c.beginPath();
-      c.arc(0, 0, 11 * r, 0, Math.PI * 2);
-      c.fill();
-    }
-    c.rotate(Math.atan2(f.y, f.x) + Math.PI / 2);
-    c.scale(r, r);
-    c.strokeStyle = "#14100a";
-    c.lineWidth = 2.2;
-    c.lineJoin = "round";
-    c.fillStyle = "#fff3c9";
-    c.beginPath();
-    c.moveTo(0, -7.5);
-    c.lineTo(5.5, 6);
-    c.lineTo(0, 3);
-    c.lineTo(-5.5, 6);
-    c.closePath();
-    c.stroke();
-    c.fill();
-    c.fillStyle = "#e9b54a";
-    c.beginPath();
-    c.moveTo(0, -7.5);
-    c.lineTo(5.5, 6);
-    c.lineTo(0, 3);
-    c.closePath();
-    c.fill();
-    c.restore();
-    if (open2) {
-      const units = [16, 32, 64, 128, 256, 512, 1024].find((n) => n * width / span2 >= 70) ?? 2048, len = units * width / span2;
-      c.fillStyle = "#101820d9";
-      c.strokeStyle = "#a78f6080";
-      c.lineWidth = 1;
-      plate6(c, 12, height - 48, Math.max(96, len + 24), 36, 6);
-      c.strokeStyle = "#efe3c4";
-      c.lineWidth = 2;
-      c.beginPath();
-      c.moveTo(24, height - 25);
-      c.lineTo(24, height - 21);
-      c.lineTo(24 + len, height - 21);
-      c.lineTo(24 + len, height - 25);
+      c.moveTo(sx, sy - 4);
+      c.lineTo(sx, sy);
+      c.lineTo(sx + len, sy);
+      c.lineTo(sx + len, sy - 4);
       c.stroke();
-      c.fillStyle = "#efe3c4";
-      c.font = "11px system-ui";
-      c.textAlign = "left";
-      c.textBaseline = "alphabetic";
-      c.fillText(units + " tiles", 24, height - 30);
-      const text2 = metadataError ? "Map detail error: " + metadataError : !result ? "Drawing the map\u2026" : !fresh && busy ? "Sharpening\u2026" : "";
-      status2.hidden = !text2;
-      if (status2.textContent !== text2) status2.textContent = text2;
+      inkLabel(c, fmt(units) + " tiles", sx + len / 2, sy - 11, { font: "13px " + MAP_FONT });
+    }
+    c.restore();
+    drawFrame2(c, width, height);
+    const found = meta.settlements.filter((s) => k?.visited[s.id] !== void 0).length, text2 = metadataError ? "Map detail error: " + metadataError : found + " of " + meta.settlements.length + " towns found";
+    if (titleSub.textContent !== text2) titleSub.textContent = text2;
+  }
+  const say = (text2, time = env.performance.now(), ms = 4200) => {
+    toast.textContent = text2;
+    toast.hidden = false;
+    toastUntil = time + ms;
+  };
+  function startKneel(m) {
+    const block2 = travelBlock();
+    if (block2) {
+      say(block2);
+      return;
+    }
+    const me = heroEntity();
+    kneel = { id: m.id, label: m.label, icon: m.icon, t0: env.performance.now(), x: me.position.x, y: me.position.y, hp: me.hp };
+    hide();
+    selected = null;
+    sheetMode = null;
+    renderSheet();
+    const r = Math.min(2, env.devicePixelRatio || 1);
+    kneelMedal.width = kneelMedal.height = Math.round(34 * r);
+    const x = kneelMedal.getContext("2d");
+    x.setTransform(r, 0, 0, r, 0, 0);
+    x.clearRect(0, 0, 34, 34);
+    medal(x, 17, 17, 14, m.icon, { shadow: false });
+    kneelText.textContent = "Traveling to " + m.label;
+    kneelBar.style.width = "0%";
+    kneelBox.hidden = false;
+  }
+  function stepKneel(time) {
+    if (!kneel) return;
+    const me = heroEntity(), why = !me?.alive ? "Travel stopped." : Math.hypot(me.position.x - kneel.x, me.position.y - kneel.y) > 6 ? "Travel canceled: you moved." : Number(me.hp) < Number(kneel.hp) ? "Travel canceled: you were hit." : !outdoors() ? "Travel canceled." : threatNear() ? "Travel canceled: enemies are too close." : null;
+    if (why) {
+      kneel = null;
+      kneelBox.hidden = true;
+      say(why, time);
+      return;
+    }
+    const t = Math.min(1, (time - kneel.t0) / KNEEL_MS);
+    kneelBar.style.width = Math.round(t * 100) + "%";
+    if (t < 1) return;
+    const id = kneel.id;
+    kneel = null;
+    kneelBox.hidden = true;
+    try {
+      Promise.resolve(issue("map.travel", { destinationId: id })).then((r) => {
+        if (r?.status === "busy") say("Busy saving. Try again in a moment.");
+      }).catch((e) => say(e.message));
+    } catch (e) {
+      say(e.message, time);
     }
   }
+  function bannerFor(m) {
+    if (m.kind === "settlement") {
+      const t = m.town;
+      return { kind: m.icon, top: "You have entered", name: m.label, sub: t ? ((t.walled ? "Walled " : "") + (SIZE_WORD[t.size] ?? "Town").toLowerCase() + " of the " + cap2(t.biome)).replace(/^./, (ch) => ch.toUpperCase()) : CLASS_WORD[m.row.class] ?? "Settlement", chip: m.travel ? "Fast travel unlocked" : null };
+    }
+    if (m.kind === "site") return { kind: m.icon, top: "Discovered", name: m.label, sub: cap2(m.site.tier) + " " + m.site.family + " \xB7 Band " + m.site.band, chip: "Fast travel unlocked" };
+    if (m.kind === "ferry") return { kind: "ferry", top: "Discovered", name: m.label, sub: "Ferry landing", chip: null };
+    return { kind: "event", top: "Discovered", name: eventName(m), sub: "Events return to this clearing", chip: null };
+  }
+  function paintBanner(o) {
+    const r = Math.min(2, env.devicePixelRatio || 1), W3 = 440, H6 = o.chip ? 168 : 140;
+    bannerCanvas.width = Math.round(W3 * r);
+    bannerCanvas.height = Math.round(H6 * r);
+    const x = bannerCanvas.getContext("2d");
+    x.setTransform(r, 0, 0, r, 0, 0);
+    x.clearRect(0, 0, W3, H6);
+    const cx = W3 / 2;
+    const ink2 = (t, y, font, fill5 = "#f6e7c0", w = 5) => {
+      x.save();
+      x.font = font;
+      x.textAlign = "center";
+      x.textBaseline = "middle";
+      x.lineJoin = "round";
+      x.strokeStyle = "#1a120a";
+      x.lineWidth = w;
+      x.strokeText(t, cx, y);
+      x.fillStyle = fill5;
+      x.fillText(t, cx, y);
+      x.restore();
+    };
+    medal(x, cx, 22, 15, o.kind);
+    ink2(o.top, 48, 'italic 15px "IM Fell English",Georgia,serif', "#f1e2bb", 4);
+    let size = 36;
+    x.font = size + "px " + MAP_FONT;
+    while (x.measureText(o.name).width > W3 - 60 && size > 20) {
+      size -= 2;
+      x.font = size + "px " + MAP_FONT;
+    }
+    ink2(o.name, 78, size + "px " + MAP_FONT);
+    const tw = x.measureText(o.name).width, half = Math.min(200, tw / 2 + 70), gap = tw / 2 + 12;
+    x.save();
+    for (const s of [-1, 1]) {
+      x.strokeStyle = "#1a120a";
+      x.lineWidth = 3.2;
+      x.beginPath();
+      x.moveTo(cx + s * gap, 78);
+      x.lineTo(cx + s * half, 78);
+      x.stroke();
+      x.strokeStyle = "#e6c47a";
+      x.lineWidth = 1.4;
+      x.beginPath();
+      x.moveTo(cx + s * gap, 78);
+      x.lineTo(cx + s * half, 78);
+      x.stroke();
+      x.fillStyle = "#e6c47a";
+      x.strokeStyle = "#1a120a";
+      x.lineWidth = 1.2;
+      const px5 = cx + s * half;
+      x.beginPath();
+      x.moveTo(px5 + s * 6, 78);
+      x.lineTo(px5, 74.8);
+      x.lineTo(px5 - s * 2, 78);
+      x.lineTo(px5, 81.2);
+      x.closePath();
+      x.fill();
+      x.stroke();
+    }
+    x.restore();
+    ink2(o.sub, 106, 'italic 16px "IM Fell English",Georgia,serif', "#f1e2bb", 4);
+    if (o.chip) {
+      x.save();
+      x.font = "700 13px " + UI_FONT;
+      const cw = x.measureText(o.chip).width + 36, y = 140;
+      x.beginPath();
+      x.roundRect?.(cx - cw / 2, y - 12, cw, 24, 12);
+      x.fillStyle = "#16110c";
+      x.fill();
+      x.strokeStyle = "#c9a45e";
+      x.lineWidth = 1.2;
+      x.stroke();
+      medal(x, cx - cw / 2 + 13, y, 7.5, o.kind, { shadow: false });
+      x.fillStyle = "#f1e2bb";
+      x.textBaseline = "middle";
+      x.textAlign = "left";
+      x.fillText(o.chip, cx - cw / 2 + 26, y + 0.5);
+      x.restore();
+    }
+  }
+  function stepBanners(time) {
+    const k = knowledge();
+    if (!k || !meta) return;
+    const ids4 = Object.keys(k.visited);
+    if (seen4 === null) {
+      seen4 = new Set(ids4);
+    } else if (ids4.length !== seen4.size) {
+      for (const id of ids4) if (!seen4.has(id)) {
+        seen4.add(id);
+        const m = placeById(id);
+        if (m) bannerQueue.push({ ...bannerFor(m), id });
+      }
+    }
+    if (time >= bannerUntil && bannerQueue.length && !open2) {
+      const o = bannerQueue.shift();
+      lastBanner = { id: o.id };
+      paintBanner(o);
+      banner3.hidden = false;
+      banner3.classList.remove("show");
+      void banner3.offsetWidth;
+      banner3.classList.add("show");
+      bannerUntil = time + 3700;
+    } else if (time >= bannerUntil && !bannerQueue.length && !banner3.hidden) {
+      banner3.hidden = true;
+      banner3.classList.remove("show");
+    }
+    const p = player(), town = p ? insideTownAt(p) : null;
+    if (town !== insideTown) {
+      if (town && seen4.has(town) && k.visited[town] !== void 0 && !bannerQueue.length && time >= bannerUntil && town !== lastBanner.id) {
+        const m = placeById(town);
+        if (m && time > 2e3) {
+          placeLine.textContent = m.label;
+          placeLine.classList.add("on");
+          placeLineUntil = time + 3200;
+        }
+      }
+      insideTown = town;
+    }
+    if (placeLineUntil && time > placeLineUntil) {
+      placeLine.classList.remove("on");
+      placeLineUntil = 0;
+    }
+  }
+  function metadata() {
+    port.cartographyWindow({ op: "metadata" }).then((value2) => {
+      if (closed) return;
+      meta = value2;
+      metadataError = null;
+      placesKey = null;
+      dirty = true;
+    }).catch((error) => {
+      metadataError = error.message;
+    });
+  }
+  metadata();
   const key2 = (e) => {
     if (e.code === "Escape" && open2) {
       e.preventDefault();
@@ -68265,7 +69675,7 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
     if (ps.length === 1) {
       center3.x -= (q.x - old2.x) * span2 / q.width;
       center3.y -= (q.y - old2.y) * span2 / q.width;
-      gesture.moved ||= Math.hypot(q.x - old2.x, q.y - old2.y) > 2;
+      gesture.moved ||= Math.hypot(q.x - old2.x, q.y - old2.y) > 3;
       clamp52();
       dirty = true;
     } else if (ps.length === 2) {
@@ -68276,34 +69686,25 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
     }
   };
   large.onpointerup = (e) => {
-    if (!gesture?.moved) {
-      const q = relative(e), hit = hitGroups.find((g) => Math.hypot(g.x - q.x, g.y - q.y) <= 17);
-      if (hit?.members.length > 1) {
-        mode = "map";
-        panel.replaceChildren(el("h3", "Nearby locations"));
-        for (const m of hit.members) button((m.state === "rumored" ? "Rumored " + m.family : m.label) + " \xB7 Band " + m.band, () => {
-          center3 = { x: m.x, y: m.y };
-          span2 = Math.max(160, span2 / 3);
-          selected = m;
-          mode = "map";
-          dirty = true;
-          renderPanel();
-        }, panel);
-        sheetClose();
-        panel.hidden = false;
-      } else if (hit) {
-        selected = hit.members[0];
-        mode = "map";
-        dirty = true;
-        renderPanel();
-      } else if (!panel.hidden) {
-        selected = null;
-        mode = "map";
-        dirty = true;
-        renderPanel();
+    if (gesture && !gesture.moved) {
+      const q = relative(e);
+      let best = null, bd = 1e9;
+      for (const h of hits2) {
+        const d = Math.hypot(h.x - q.x, h.y - q.y);
+        if (d <= h.r && d < bd) {
+          best = h;
+          bd = d;
+        }
       }
-      layers.hidden = true;
-      layersButton.setAttribute("aria-pressed", "false");
+      if (best) {
+        selected = best.m;
+        sheetMode = null;
+      } else {
+        selected = null;
+        if (sheetMode !== "key") sheetMode = null;
+      }
+      renderSheet();
+      dirty = true;
     }
     pointers.delete(e.pointerId);
     if (!pointers.size) gesture = null;
@@ -68314,43 +69715,67 @@ function createPlannedMapV1({ document: doc, environment: env, port, releaseInpu
   };
   large.addEventListener("wheel", (e) => {
     e.preventDefault();
-    zoom(e.deltaY > 0 ? 1.3 : 1 / 1.3, relative(e));
+    zoom(e.deltaY > 0 ? 1.25 : 1 / 1.25, relative(e));
   }, { passive: false });
-  renderPanel();
-  return { isOpen: () => open2, refresh(m, time = env.performance.now(), presentation = { gameplayHudVisible: true }) {
-    model = m;
-    const active2 = Boolean(player()) && (open2 || presentation.gameplayHudVisible);
-    if (!active2 && open2) hide();
-    atlas.hidden = !open2;
-    mini.hidden = !active2 || open2;
-    if (!active2) return;
-    const count = m.navigation.knowledge?.journal?.length ?? 0;
-    journalButton.textContent = "Journal" + (count ? " \xB7 " + count : "");
-    if (lastJournal !== null && count > lastJournal) {
-      toast.textContent = "Trail note added to the shared journal \xB7 cave location revealed on the map";
-      toast.hidden = false;
-      toastUntil = time + 6500;
-      if (open2) renderPanel();
+  const api = {
+    isOpen: () => open2,
+    refresh(m, time = env.performance.now(), presentation = { gameplayHudVisible: true }) {
+      model = m;
+      const active2 = Boolean(player()) && (open2 || presentation.gameplayHudVisible);
+      if (!active2 && open2) hide();
+      atlas.hidden = !open2;
+      mini.hidden = !active2 || open2;
+      stepKneel(time);
+      if (time > toastUntil) toast.hidden = true;
+      if (meta) stepBanners(time);
+      if (!active2) return;
+      if (dirty || time - lastPaint >= 50) {
+        open2 ? drawAtlas() : drawMini();
+        lastPaint = time;
+        dirty = false;
+      }
+    },
+    // Test and diagnostics hooks.
+    places: () => places().map((p) => ({ id: p.id, kind: p.kind, label: p.label, x: p.x, y: p.y })),
+    hero: () => player(),
+    show,
+    hide,
+    view: (x, y, s) => {
+      center3 = { x, y };
+      span2 = s;
+      clamp52();
+      dirty = true;
+    },
+    selectPlace(id) {
+      selected = placeById(id);
+      sheetMode = null;
+      renderSheet();
+      dirty = true;
+      return selected;
+    },
+    travelConfirm() {
+      sheetMode = "confirm";
+      renderSheet();
+    },
+    startTravel(id) {
+      const m = placeById(id);
+      if (m) startKneel(m);
+      return Boolean(m);
+    },
+    resources: () => ({ cartographyMode: "atlas-v2", mapLevel: span2, mapMaximumLevel: maxSpan(), mapRasterRequests: requests, mapRasterCacheEntries: cache5.size + miniCache.size, mapRasterBuilds: rasterBuilds, mapRasterCacheHits: cacheHits, mapRasterBusy: busy, mapPaintMs: Math.round(paintMs * 10) / 10, minimapTilesPerPixel: meta ? miniTpp() : null, kneeling: Boolean(kneel), bannerQueue: bannerQueue.length, mapError: metadataError }),
+    destroy() {
+      closed = true;
+      sizeObserver?.disconnect();
+      env.removeEventListener("resize", invalidateSize);
+      env.removeEventListener("orientationchange", invalidateSize);
+      env.removeEventListener("keydown", key2);
+      for (const e of [mini, atlas, style, toast, kneelBox, banner3]) e.remove();
+      cache5.clear();
+      miniCache.clear();
     }
-    lastJournal = count;
-    if (time > toastUntil) toast.hidden = true;
-    if (dirty || time - lastPaint >= 50) {
-      draw(time);
-      lastPaint = time;
-      dirty = false;
-    }
-  }, resources: () => ({ cartographyMode: "seed-plan-layered-v1", mapLevel: span2, mapMaximumLevel: meta ? Math.max(meta.widthTiles, meta.heightTiles) * 1.6 : 0, mapRasterRequests: requests, mapRasterCacheEntries: cache5.size, mapRasterBuilds: rasterBuilds, mapRasterCacheHits: cacheHits, mapRasterBusy: busy, mapPaintMs: Math.round(paintMs * 10) / 10 }), destroy() {
-    closed = true;
-    sizeObserver?.disconnect();
-    env.removeEventListener("resize", invalidateSize);
-    env.removeEventListener("orientationchange", invalidateSize);
-    env.removeEventListener("keydown", key2);
-    mini.remove();
-    atlas.remove();
-    style.remove();
-    toast.remove();
-    cache5.clear();
-  } };
+  };
+  mini.reviewMap = api;
+  return api;
 }
 
 // src/client/planned_cartography_v2.js
@@ -68469,13 +69894,13 @@ function drawCartographyD9(ctx, { pages: pages2, pending = [], viewport, width, 
       });
     } else {
       ctx.beginPath();
-      addJoinedKnowledge(ctx, page, x, y, cw, ch, cols, rows, (code) => code !== "?");
+      addJoinedKnowledge(ctx, page, x, y, cw, ch, cols, rows, (code2) => code2 !== "?");
       ctx.fillStyle = "#24302d";
       ctx.fill();
-      for (const code of Object.keys(TERRAIN)) {
+      for (const code2 of Object.keys(TERRAIN)) {
         ctx.beginPath();
-        addJoinedKnowledge(ctx, page, x, y, cw, ch, cols, rows, (value2) => value2 === code);
-        ctx.fillStyle = TERRAIN[code];
+        addJoinedKnowledge(ctx, page, x, y, cw, ch, cols, rows, (value2) => value2 === code2);
+        ctx.fillStyle = TERRAIN[code2];
         ctx.fill();
       }
     }
@@ -68604,9 +70029,9 @@ function createMapCanvasSizeCacheD9(canvas, environment) {
     environment.visualViewport?.removeEventListener("resize", invalidate);
   } };
 }
-function createWorldMapD9({ document: doc, environment, port, releaseInput }) {
+function createWorldMapD9({ document: doc, environment, port, releaseInput, issue = null }) {
   const planned = doc.body.dataset.shorelineReview === "true";
-  if (planned && port.cartographyWindow) return createPlannedMapV1({ document: doc, environment, port, releaseInput });
+  if (planned && port.cartographyWindow) return createAtlasMapV2({ document: doc, environment, port, releaseInput, issue });
   if (!port.mapWindow) return { refresh() {
   }, isOpen: () => false, destroy() {
   } };
@@ -70083,7 +71508,7 @@ function hull(points2) {
   return [...low.slice(0, -1), ...high.slice(0, -1)];
 }
 function shadowPolygonV1(caster2, frame3) {
-  const scale = clamp29(caster2.height / 96, 0.12, 1.2), length = Math.hypot(frame3.vector.x, frame3.vector.y) * scale, cap2 = length > 160 ? 160 / length : 1, vx = frame3.vector.x * scale * cap2, vy = frame3.vector.y * scale * cap2, points2 = [];
+  const scale = clamp29(caster2.height / 96, 0.12, 1.2), length = Math.hypot(frame3.vector.x, frame3.vector.y) * scale, cap3 = length > 160 ? 160 / length : 1, vx = frame3.vector.x * scale * cap3, vy = frame3.vector.y * scale * cap3, points2 = [];
   if (caster2.round) {
     for (let i = 0; i < 8; i++) {
       const a = i * Math.PI / 4, x = caster2.x + caster2.w * 0.5 + Math.cos(a) * caster2.w * 0.44, y = caster2.y + caster2.h * 0.73 + Math.sin(a) * caster2.h * 0.22;
@@ -70328,7 +71753,7 @@ function recordSpriteDrawsV1(paint2) {
   return { handled: handled && draws.length > 0, draws, procedural, base: Number.isFinite(base) ? base : 0, height: Number.isFinite(base) ? base - top : 0 };
 }
 function shadowProjectionV1(vector2, baseY, height, limits = SILHOUETTE_LIMITS) {
-  const length = Math.hypot(vector2.x, vector2.y) * height / limits.referenceHeight, cap2 = length > limits.maximumLength ? limits.maximumLength / length : 1, kx = vector2.x / limits.referenceHeight * cap2, ky = vector2.y / limits.referenceHeight * cap2;
+  const length = Math.hypot(vector2.x, vector2.y) * height / limits.referenceHeight, cap3 = length > limits.maximumLength ? limits.maximumLength / length : 1, kx = vector2.x / limits.referenceHeight * cap3, ky = vector2.y / limits.referenceHeight * cap3;
   return [1, 0, -kx, -ky, kx * baseY, baseY * (1 + ky)];
 }
 function createSilhouetteShadowsV1(doc, limits = SILHOUETTE_LIMITS) {
@@ -72756,7 +74181,7 @@ var unit5 = (x, y) => {
   return point7(x / d, y / d);
 };
 var distance9 = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
-var hash17 = (s) => {
+var hash18 = (s) => {
   let h = 2166136261;
   for (const ch of String(s)) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
   return h >>> 0;
@@ -72865,7 +74290,7 @@ function ageGradient(c, chain2, tick, rgb6, minimum, maximum, span2 = 90) {
 function drawCorrosiveTrails(c, rows, tick) {
   const live = rows.flatMap((block2) => (block2.segments ?? []).map((segment8) => ({ ...segment8, id: block2.id + "/" + segment8.sequence, sourceEntityId: block2.sourceEntityId, kind: block2.kind, radius: block2.radius }))).filter((r) => r.createdTick <= tick && r.expiresTick > tick && r.from && r.to && r.radius > 0);
   for (const chain2 of chains(live)) {
-    const slag2 = chain2[0].kind === "slag", points2 = sampleChain(chain2), seed2 = hash17(chain2[0].chainId ?? chain2[0].sourceEntityId) % 97;
+    const slag2 = chain2[0].kind === "slag", points2 = sampleChain(chain2), seed2 = hash18(chain2[0].chainId ?? chain2[0].sourceEntityId) % 97;
     if (points2.length < 2) continue;
     c.save();
     footprint(c, chain2);
@@ -72917,7 +74342,7 @@ function approvedMinion(c, row2, tick, { scaleX = 1, scaleY = 1, alpha: alpha2 =
   const family = row2.enemyFamily, profile = creaturePresentationForRenderV3(family), frame3 = profile?.painterFrame, painter2 = CREATURE_PAINTERS_D11[family];
   if (!profile || !painter2) return;
   const melee = typeof row2.meleePhase === "object" ? row2.meleePhase : null, span2 = Math.max(1, (melee?.phaseEndsTick ?? tick) - (melee?.phaseStartedTick ?? tick));
-  const attack = hostileMeleePose({ ...row2, alive: true, meleePhase: melee }, tick), seed2 = (row2.visualSeed ?? hash17(row2.id)) >>> 0;
+  const attack = hostileMeleePose({ ...row2, alive: true, meleePhase: melee }, tick), seed2 = (row2.visualSeed ?? hash18(row2.id)) >>> 0;
   const m = { x: frame3.x, y: frame3.y, w: frame3.width, h: frame3.height, flashTimer: flash ? 1 : 0, movedLastTick: !!row2.movedLastTick, meleePhase: melee, phaseProgress: melee ? clamp34((tick - melee.phaseStartedTick) / span2) : 0, meleeAction: !!attack, familyAttack: attack, deathProgress: 0, presentationTick: tick, motionBlend: row2.movedLastTick ? 1 : 0, stepPhase: tick * 0.66 + seed2 % 17 * 0.13, paletteKey: profile.paletteKey };
   c.save();
   c.translate(row2.position.x, row2.position.y);
@@ -73008,12 +74433,12 @@ function drawCorrosiveMinionGround(c, rows, tick) {
     else if (row2.stage === "coalescing") {
       const q = pose.landing, r = 15 - 5 * ease6(q);
       c.globalAlpha *= 1 - ease6((q - 0.55) / 0.45);
-      splatPath(c, r, hash17(row2.id));
+      splatPath(c, r, hash18(row2.id));
       fill2(c, slag2 ? "#b86b31" : "#419e55", true);
-      splatPath(c, r * 0.72, hash17(row2.id));
+      splatPath(c, r * 0.72, hash18(row2.id));
       fill2(c, slag2 ? "#eba245" : "#91d67b");
       for (let i = 0; i < 4; i++) {
-        const a = i * 1.7 + hash17(row2.id) % 5, d = 14 + q * 11;
+        const a = i * 1.7 + hash18(row2.id) % 5, d = 14 + q * 11;
         c.strokeStyle = slag2 ? "#d98d3c" : "#a6dc86";
         c.lineWidth = 0.9;
         c.beginPath();
@@ -73025,7 +74450,7 @@ function drawCorrosiveMinionGround(c, rows, tick) {
     else if (row2.stage === "dissolving") {
       const q = clamp34(pose.terminalAge / 24);
       c.globalAlpha *= 1 - q;
-      splatPath(c, 12 + q * 5, hash17(row2.id));
+      splatPath(c, 12 + q * 5, hash18(row2.id));
       fill2(c, slag2 ? "#7a4c30" : "#386e42");
     }
     c.restore();
@@ -73118,7 +74543,7 @@ function minionBody(c, row2, tick, model, bodyPoseForActor) {
       c.globalAlpha *= 1 - ease6(q);
       chunk(c, row2, { ...atHit, height });
       for (let i = 0; i < 3; i++) {
-        const a = i * 2.4 + hash17(row2.id) % 8, d = 4 + q * 14;
+        const a = i * 2.4 + hash18(row2.id) % 8, d = 4 + q * 14;
         ellipse3(c, row2.position.x + Math.cos(a) * d, row2.position.y - height + Math.sin(a) * d * 0.6, 1.8 * (1 - q) + 0.2, 1.4 * (1 - q) + 0.2, row2.enemyFamily === "slag_slime" ? "#d78a41" : LIGHT5);
       }
       c.restore();
@@ -73129,7 +74554,7 @@ function minionBody(c, row2, tick, model, bodyPoseForActor) {
     c.save();
     c.globalAlpha *= 1 - q;
     for (let i = 0; i < 3; i++) {
-      const a = i * 2.4 + hash17(row2.id) % 8, d = 5 + q * 11;
+      const a = i * 2.4 + hash18(row2.id) % 8, d = 5 + q * 11;
       ellipse3(c, row2.position.x + Math.cos(a) * d, row2.position.y + Math.sin(a) * d * 0.5 - q * 4, 1.2 * (1 - q) + 0.3, 0.9 * (1 - q) + 0.2, row2.enemyFamily === "slag_slime" ? "#d78a41" : LIGHT5);
     }
     c.restore();
@@ -73162,7 +74587,7 @@ var ease7 = (v) => {
 var mix23 = (a, b, p) => a + (b - a) * p;
 var point8 = (x, y) => ({ x, y });
 var lerp6 = (a, b, p) => point8(mix23(a.x, b.x, p), mix23(a.y, b.y, p));
-function hash18(value2) {
+function hash19(value2) {
   let n = 2166136261;
   for (const ch of String(value2)) n = Math.imul(n ^ ch.charCodeAt(0), 16777619);
   return n >>> 0;
@@ -73331,7 +74756,7 @@ function irregularPool(c, x, y, r, seed2) {
 function poolGround(c, row2, tick) {
   const age = tick - row2.createdTick, left = row2.expiresTick - tick;
   if (age < 0 || left <= 0) return;
-  const r = row2.radius ?? 12, seed2 = hash18(row2.id), spread = 0.25 + 0.75 * ease7(age / 13), fade = 0.28 + 0.72 * clamp35(left / 65);
+  const r = row2.radius ?? 12, seed2 = hash19(row2.id), spread = 0.25 + 0.75 * ease7(age / 13), fade = 0.28 + 0.72 * clamp35(left / 65);
   c.save();
   c.translate(row2.position.x, row2.position.y);
   ellipse4(c, 0, 0, r, r, "#478b3533", false);
@@ -73357,7 +74782,7 @@ function poolGround(c, row2, tick) {
 function warning(c, row2, tick) {
   const q = clamp35((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick));
   if (row2.ability !== "slam") return;
-  const p = row2.targetPosition ?? row2.position, r = row2.radius ?? 64, seed2 = hash18(row2.id ?? row2.bossId);
+  const p = row2.targetPosition ?? row2.position, r = row2.radius ?? 64, seed2 = hash19(row2.id ?? row2.bossId);
   c.save();
   c.translate(p.x, p.y);
   ellipse4(c, 0, 0, r, r, `rgba(113,182,75,${0.045 + q * 0.065})`, false);
@@ -73389,7 +74814,7 @@ function slamGround(c, row2, tick) {
   c.save();
   c.translate(p.x, p.y);
   c.globalAlpha = (1 - q) * 0.65;
-  irregularPool(c, 0, 0, 13 + ease7(age / 14) * 27, hash18(row2.bossId));
+  irregularPool(c, 0, 0, 13 + ease7(age / 14) * 27, hash19(row2.bossId));
   fill3(c, "#417f3e80", false);
   c.globalAlpha = (1 - q) * 0.7;
   c.strokeStyle = ACID;
@@ -73457,7 +74882,7 @@ function spore(c, row2, tick) {
     c.translate(p.x, p.y);
     c.globalAlpha = 1 - endAge / 24;
     for (let i = 0; i < 6; i++) {
-      const a = i * TAU84 / 6 + hash18(row2.id) % 9, dist3 = 3 + endAge * 0.7;
+      const a = i * TAU84 / 6 + hash19(row2.id) % 9, dist3 = 3 + endAge * 0.7;
       ellipse4(c, Math.cos(a) * dist3, Math.sin(a) * dist3 * 0.6 - 8 - endAge * 0.25, 1.4, 1.1, i % 2 ? LIGHT6 : ACID, false);
     }
     if (stage2 === "detonated") {
@@ -73472,7 +74897,7 @@ function spore(c, row2, tick) {
   }
   c.save();
   c.translate(p.x, p.y);
-  const pulse3 = Math.sin((tick + hash18(row2.id) % 37) * 0.14), r = 6.1 + pulse3 * 0.45;
+  const pulse3 = Math.sin((tick + hash19(row2.id) % 37) * 0.14), r = 6.1 + pulse3 * 0.45;
   ellipse4(c, 0, 2, 8, 3, "#101c1855", false);
   ellipse4(c, 0, -7, row2.radius ?? 12, row2.radius ?? 12, "#8dd66b2b", false);
   ellipse4(c, 0, -7, r, r, BASE5);
@@ -73528,7 +74953,7 @@ function corrosiveDepthItems(model, tick, viewport = null) {
   };
   for (const row2 of h.corrosiveImpacts ?? []) {
     const age = tick - row2.resolvedTick;
-    if (row2.ability === "slam" && age >= 0 && age < 40) add((row2.id ?? row2.bossId + "/" + row2.sequence) + "/slam", row2.targetPosition, (c) => splash(c, row2.targetPosition, age, hash18(row2.bossId), 1.4), 85);
+    if (row2.ability === "slam" && age >= 0 && age < 40) add((row2.id ?? row2.bossId + "/" + row2.sequence) + "/slam", row2.targetPosition, (c) => splash(c, row2.targetPosition, age, hash19(row2.bossId), 1.4), 85);
   }
   for (const row2 of h.corrosiveSpores ?? []) add(row2.id, row2.position, (c) => spore(c, row2, tick), 28);
   for (const row2 of h.corrosiveTelegraphs ?? []) if (row2.ability === "spore_storm") for (const [index, p] of (row2.sporeSpawnPositions ?? []).entries()) add((row2.id ?? row2.bossId) + "/pod/" + index, p, (c) => stormPod(c, row2, p, index, tick), 90);
@@ -73585,7 +75010,7 @@ function unit7(x, y) {
   const d = Math.hypot(x, y) || 1;
   return point9(x / d, y / d);
 }
-function hash19(value2) {
+function hash20(value2) {
   let n = 2166136261;
   for (const ch of String(value2)) n = Math.imul(n ^ ch.charCodeAt(0), 16777619);
   return n >>> 0;
@@ -73831,7 +75256,7 @@ function accretion(c, p, progress8, tick, collapse = 0) {
   c.restore();
 }
 function singularityGround(c, row2, tick) {
-  const p = row2.position ?? row2.originPosition, progress8 = castProgress(row2, tick), elapsed = tick - row2.startedTick, seed2 = hash19((row2.bossId ?? row2.sourceEntityId ?? ID2) + "/" + row2.sequence);
+  const p = row2.position ?? row2.originPosition, progress8 = castProgress(row2, tick), elapsed = tick - row2.startedTick, seed2 = hash20((row2.bossId ?? row2.sourceEntityId ?? ID2) + "/" + row2.sequence);
   c.save();
   boundary(c, p, row2.radius ?? 90, progress8, "singularity");
   for (let i = 0; i < 3; i++) {
@@ -73862,7 +75287,7 @@ function slamGround2(c, row2, tick) {
 function collapseGround(c, row2, tick) {
   const age = tick - row2.resolvedTick;
   if (age < 0 || age >= 40) return;
-  const p = row2.targetPosition ?? row2.originPosition, r = row2.radius ?? 90, seed2 = hash19((row2.bossId ?? row2.sourceEntityId ?? ID2) + "/" + row2.sequence);
+  const p = row2.targetPosition ?? row2.originPosition, r = row2.radius ?? 90, seed2 = hash20((row2.bossId ?? row2.sourceEntityId ?? ID2) + "/" + row2.sequence);
   c.save();
   if (age < 12) {
     c.globalAlpha = 1 - ease8(age / 12);
@@ -73945,7 +75370,7 @@ function slamForce(c, row2, tick, pending, source3) {
       c.save();
       c.globalAlpha = 1 - ease8(age / 24);
       for (let i = 0; i < 7; i++) {
-        const a = i * TAU85 / 7 + hash19(row2.bossId) % 7, d = age * (0.75 + i % 3 * 0.13), height = Math.max(0, age * 1.8 - age * age * 0.085);
+        const a = i * TAU85 / 7 + hash20(row2.bossId) % 7, d = age * (0.75 + i % 3 * 0.13), height = Math.max(0, age * 1.8 - age * age * 0.085);
         c.strokeStyle = i % 2 ? PINK : VIOLET;
         c.lineWidth = 1.1;
         c.beginPath();
@@ -74942,7 +76367,7 @@ var unit9 = (x, y) => {
   return point23(x / d, y / d);
 };
 var progress3 = (row2, tick) => clamp40((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick));
-function hash20(value2) {
+function hash21(value2) {
   let n = 2166136261;
   for (const ch of String(value2)) n = Math.imul(n ^ ch.charCodeAt(0), 16777619);
   return n >>> 0;
@@ -75021,7 +76446,7 @@ function nexusAttackPose(actor2, tick) {
   const recent = age >= 0 && age < 40 ? last : null, record2 = pending ?? recent, p = pending ? progress3(pending, tick) : 0;
   const origin = record2?.originPosition ?? actor2.position;
   const aim2 = record2?.targetPosition ?? point23(actor2.position.x + Math.cos(b.facingAngle ?? actor2.facingAngle ?? Math.PI / 2) * 60, actor2.position.y + Math.sin(b.facingAngle ?? actor2.facingAngle ?? Math.PI / 2) * 60);
-  const d = unit9(aim2.x - origin.x, aim2.y - origin.y), seed2 = Number.isFinite(actor2.visualSeed) ? actor2.visualSeed : hash20(actor2.id ?? actor2.entityId ?? ID4) % 997;
+  const d = unit9(aim2.x - origin.x, aim2.y - origin.y), seed2 = Number.isFinite(actor2.visualSeed) ? actor2.visualSeed : hash21(actor2.id ?? actor2.entityId ?? ID4) % 997;
   const pose = { ability: record2?.ability ?? null, p, age, direction: d, aim: aim2, bodyX: 0, bodyY: (decoy ? -21 : -40) + Math.sin((tick + seed2 * 0.13) / 11) * (decoy ? 1.7 : 3), rotation: 0.09 + Math.sin((tick + seed2 * 0.04) / 77) * 0.12, yaw: 0.72 * Math.sin((tick + seed2 * 0.31) / 42 + 0.6), scaleX: 1, scaleY: 1, charge: 0, release: 0, lock: 0, formTime: tick + seed2 % 180, decoy };
   if (decoy) {
     const shotAge = tick - (actor2.nexusDecoy.lastShotTick ?? -Infinity), ready = actor2.nexusDecoy.aggro ? 1 - ease11(((actor2.nexusDecoy.nextShotTick ?? tick + 60) - tick) / 16) : 0;
@@ -75175,7 +76600,7 @@ function deathFragments(c, actor2, tick) {
   c.globalAlpha *= 1 - ease11(age / 24);
   c.translate(actor2.position.x, actor2.position.y - 21);
   for (let i = 0; i < 7; i++) {
-    const a = i * 2.39996 + hash20(actor2.id ?? actor2.entityId) % 11, r = 5 + age * (0.45 + i % 3 * 0.17), x = Math.cos(a) * r, y = Math.sin(a) * r + age * age * 0.018;
+    const a = i * 2.39996 + hash21(actor2.id ?? actor2.entityId) % 11, r = 5 + age * (0.45 + i % 3 * 0.17), x = Math.cos(a) * r, y = Math.sin(a) * r + age * age * 0.018;
     c.save();
     c.translate(x, y);
     c.rotate(a + age * 0.045);
@@ -75202,7 +76627,7 @@ function drawNexusOverseer(c, actor2, tick, flash = false) {
   const vx = pose.aim.x - actor2.position.x - pose.bodyX, vy = pose.aim.y - actor2.position.y - pose.bodyY - 17, cos = Math.cos(pose.rotation), sin = Math.sin(pose.rotation);
   const localPose = { ...pose, aim: point23(cos * vx + sin * vy, -sin * vx + cos * vy) };
   prism(c, localPose, size, flash);
-  const phase2 = ((tick + hash20(actor2.id ?? actor2.entityId ?? ID4) % 173) % 173 + 173) % 173;
+  const phase2 = ((tick + hash21(actor2.id ?? actor2.entityId ?? ID4) % 173) % 173 + 173) % 173;
   if (phase2 < 8 && !flash) {
     c.save();
     c.globalAlpha *= Math.sin(phase2 / 8 * Math.PI) * 0.45;
@@ -75429,7 +76854,7 @@ function tether(c, row2, decoy, tick, model2) {
   c.strokeStyle = CYAN3;
   c.lineWidth = 1.1;
   c.stroke();
-  const travel = ((tick - row2.startedTick) * 0.023 + hash20(decoy.id ?? decoy.entityId) % 10 * 0.1) % 1, u = 1 - travel, x = u * u * to.x + 2 * u * travel * middle.x + travel * travel * from.x, y = u * u * to.y + 2 * u * travel * middle.y + travel * travel * from.y;
+  const travel = ((tick - row2.startedTick) * 0.023 + hash21(decoy.id ?? decoy.entityId) % 10 * 0.1) % 1, u = 1 - travel, x = u * u * to.x + 2 * u * travel * middle.x + travel * travel * from.x, y = u * u * to.y + 2 * u * travel * middle.y + travel * travel * from.y;
   ellipse7(c, x, y, 2, 1.5, PALE6);
   c.restore();
 }
@@ -75536,7 +76961,7 @@ var ease12 = (x) => {
 var mix26 = (a, b, u) => a + (b - a) * u;
 var point24 = (x, y) => ({ x, y });
 var progress4 = (row2, tick) => clamp41((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick));
-function hash21(s) {
+function hash22(s) {
   let h = 2166136261;
   for (const x of String(s)) h = Math.imul(h ^ x.charCodeAt(0), 16777619);
   return h >>> 0;
@@ -75591,7 +77016,7 @@ function rotate2(x, y, a) {
 }
 function ashfangAttackPose(actor2, tick) {
   const b = actor2.boss ?? {}, alive = actor2.alive !== false, pending = alive ? b.pendingAction : null, last = alive ? b.lastAction : null, age = last ? tick - last.resolvedTick : Infinity, recent = age >= 0 && age < 42 ? last : null, row2 = pending ?? recent, q = pending ? progress4(pending, tick) : 0;
-  const facing2 = (pending?.facing ?? recent?.facing ?? b.facing ?? -1) < 0 ? -1 : 1, seed2 = hash21(actor2.entityId ?? ID5) % 193, hover = Math.sin((tick + seed2) / 13) * 1.65;
+  const facing2 = (pending?.facing ?? recent?.facing ?? b.facing ?? -1) < 0 ? -1 : 1, seed2 = hash22(actor2.entityId ?? ID5) % 193, hover = Math.sin((tick + seed2) / 13) * 1.65;
   const p = { ability: row2?.ability ?? null, p: q, age, facing: facing2, orientation: -facing2, bodyX: 22, bodyY: -14 + hover, neckX: 0, neckY: 0, headAngle: 0.025 * Math.sin(tick / 23), jaw: 0.07 + 0.025 * Math.sin(tick / 17), heat: 0, pulse: 0, wing: 0.1 * Math.sin(tick / 12), coil: 0, compression: 0, tailDrive: 0, tailReturn: 0, target: row2?.targetPosition ?? actor2.position };
   if (pending?.ability === "scarlet_fire") {
     const u = ease12(q / 0.86);
@@ -76115,7 +77540,7 @@ function fireBurst(c, row2, tick, model2) {
 function impactDebris(c, row2, tick) {
   const age = tick - row2.resolvedTick;
   if (age < 0 || age >= 34) return;
-  const p = row2.targetPosition, seed2 = hash21(row2.id ?? row2.sequence), q = age / 34;
+  const p = row2.targetPosition, seed2 = hash22(row2.id ?? row2.sequence), q = age / 34;
   c.save();
   c.globalAlpha *= 1 - ease12((q - 0.55) / 0.45);
   for (let i = 0; i < 13; i++) {
@@ -76166,7 +77591,7 @@ var ease13 = (x) => {
   x = clamp42(x);
   return x * x * (3 - 2 * x);
 };
-function hash22(value2) {
+function hash23(value2) {
   let h = 2166136261;
   for (const ch of String(value2)) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
   return h >>> 0;
@@ -76473,7 +77898,7 @@ function drawCinderBunny(c, actor2, tick, flash = false) {
   const hopping = !dead && b.stage === "hopping", u = hopping ? clamp42((tick - b.hopStartedTick) / Math.max(1, b.landsTick - b.hopStartedTick)) : 0, arc3 = hopping ? Math.sin(Math.PI * u) * 24 : 0;
   const restAge = Math.max(0, tick - b.stageStartedTick), restLength = Math.max(1, (b.nextHopTick ?? tick + 18) - b.stageStartedTick), crouch = !hopping && !dead ? ease13((restAge / restLength - 0.55) / 0.45) : 0;
   const recentLand = !hopping && b.hopSequence > 0 && !dead ? Math.max(0, 1 - restAge / 8) : 0, stretch = hopping ? Math.sin(Math.PI * u) : 0, sign3 = (b.facing ?? 1) < 0 ? -1 : 1;
-  const seed2 = hash22(actor2.entityId) % 31;
+  const seed2 = hash23(actor2.entityId) % 31;
   c.save();
   c.translate(actor2.position.x, actor2.position.y);
   c.lineCap = "round";
@@ -76536,7 +77961,7 @@ function drawCinderBunny(c, actor2, tick, flash = false) {
 function fireGround(c, row2, tick) {
   const age = tick - row2.createdTick, left = row2.expiresTick - tick;
   if (age < 0 || left <= 0) return;
-  const r = row2.radius, ignite = clamp42((tick - row2.createdTick) / Math.max(1, row2.ignitesTick - row2.createdTick)), active2 = tick >= row2.ignitesTick, fade = 0.2 + 0.8 * clamp42(left / 60), seed2 = hash22(row2.id) % 31;
+  const r = row2.radius, ignite = clamp42((tick - row2.createdTick) / Math.max(1, row2.ignitesTick - row2.createdTick)), active2 = tick >= row2.ignitesTick, fade = 0.2 + 0.8 * clamp42(left / 60), seed2 = hash23(row2.id) % 31;
   c.save();
   c.translate(row2.position.x, row2.position.y);
   ellipse9(c, 0, 0, r, r, `rgba(22,19,24,${active2 ? 0.44 * fade : 0.22 * ignite})`);
@@ -76558,7 +77983,7 @@ function fireGround(c, row2, tick) {
 function fireTongues(c, row2, tick) {
   const age = tick - row2.createdTick, left = row2.expiresTick - tick;
   if (age < 0 || left <= 0) return;
-  const active2 = tick >= row2.ignitesTick, seed2 = hash22(row2.id) % 47, ignite = ease13(age / 12), fade = clamp42(left / 60), heat = active2 ? Math.max(0.18, fade) : 0.25;
+  const active2 = tick >= row2.ignitesTick, seed2 = hash23(row2.id) % 47, ignite = ease13(age / 12), fade = clamp42(left / 60), heat = active2 ? Math.max(0.18, fade) : 0.25;
   c.save();
   c.translate(row2.position.x, row2.position.y);
   if (!active2) {
@@ -77180,7 +78605,7 @@ var smooth23 = (v) => {
   return v * v * (3 - 2 * v);
 };
 var mix27 = (a, b, q) => a + (b - a) * q;
-var hash23 = (value2) => {
+var hash24 = (value2) => {
   let n = 2166136261;
   for (const ch of String(value2)) n = Math.imul(n ^ ch.charCodeAt(0), 16777619);
   return n >>> 0;
@@ -77215,7 +78640,7 @@ function bead(c, x, y, size, age, fill5 = GOLD15) {
 function drawMarcusMoltenPoolV5(c, row2, tick) {
   const age = tick - row2.createdTick, duration = row2.expiresTick - row2.createdTick;
   if (age < 0 || age >= duration || !(row2.radius > 0)) return;
-  const r = row2.radius, seed2 = hash23(row2.id), phase2 = seed2 % 628 / 100;
+  const r = row2.radius, seed2 = hash24(row2.id), phase2 = seed2 % 628 / 100;
   const cooling = smooth23((age / duration - 0.7) / 0.3), fade = 1 - 0.66 * cooling;
   const small = r < 24, settle = smooth23(age / 12);
   c.save();
@@ -77417,7 +78842,7 @@ var unit10 = (x, y) => {
 };
 var rotate3 = (x, y, a) => point25(Math.cos(a) * x - Math.sin(a) * y, Math.sin(a) * x + Math.cos(a) * y);
 var progress6 = (row2, tick) => clamp44((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick));
-function hash24(value2) {
+function hash25(value2) {
   let n = 2166136261;
   for (const ch of String(value2)) n = Math.imul(n ^ ch.charCodeAt(0), 16777619);
   return n >>> 0;
@@ -77499,7 +78924,7 @@ function coin2(c, x, y, r = 3.7, angle22 = 0, flat2 = 0.69, flash = false) {
 }
 function marcusAttackPose(actor2, tick) {
   const b = actor2.boss ?? {}, alive = actor2.alive !== false, pending = alive ? b.pendingAction : null, last = alive ? b.lastAction : null, age = last ? tick - last.resolvedTick : Infinity, recent = age >= 0 && age < 40 ? last : null, record2 = pending ?? recent, p = pending ? progress6(pending, tick) : 0;
-  const origin = record2?.originPosition ?? actor2.position, aim2 = record2?.targetPosition ?? point25(actor2.position.x + Math.cos(b.facingAngle ?? Math.PI / 2) * 60, actor2.position.y + Math.sin(b.facingAngle ?? Math.PI / 2) * 60), d = unit10(aim2.x - origin.x, aim2.y - origin.y), seed2 = Number.isFinite(actor2.visualSeed) ? actor2.visualSeed : hash24(actor2.entityId ?? ID7) % 997;
+  const origin = record2?.originPosition ?? actor2.position, aim2 = record2?.targetPosition ?? point25(actor2.position.x + Math.cos(b.facingAngle ?? Math.PI / 2) * 60, actor2.position.y + Math.sin(b.facingAngle ?? Math.PI / 2) * 60), d = unit10(aim2.x - origin.x, aim2.y - origin.y), seed2 = Number.isFinite(actor2.visualSeed) ? actor2.visualSeed : hash25(actor2.entityId ?? ID7) % 997;
   const hover = Math.sin((tick + seed2 * 0.17) / 9) * 3.4, walk = actor2.movedLastTick ? 1 : 0;
   const pose = { ability: record2?.ability ?? null, p, age, direction: d, aim: aim2, bodyX: 0, bodyY: -9 + hover, rotation: Math.sin((tick + seed2) / 41) * 0.018, scaleX: 1, scaleY: 1, gather: 0, charge: 0, release: 0, slack: 0, headDrop: 0, orbitRadius: 45, orbitTilt: Math.sin(tick / 58) * 0.17, orbitPhase: tick * 0.014, walk };
   pose.rotation += Math.sin(tick * 0.25) * 0.022 * walk;
@@ -78073,7 +79498,7 @@ function payoutGround(c, row2, tick) {
 }
 function payout(c, row2, tick) {
   if (!positive(row2.amount) || tick < row2.createdTick) return;
-  const count = payoutCount(row2), seed2 = hash24(row2.id), collected = row2.collectedTick != null && tick >= row2.collectedTick;
+  const count = payoutCount(row2), seed2 = hash25(row2.id), collected = row2.collectedTick != null && tick >= row2.collectedTick;
   c.save();
   if (collected) {
     const age = tick - row2.collectedTick;
@@ -78218,7 +79643,7 @@ var unit11 = (x, y) => {
 var rotate4 = (x, y, a) => point26(Math.cos(a) * x - Math.sin(a) * y, Math.sin(a) * x + Math.cos(a) * y);
 var progress7 = (row2, tick) => clamp45((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick));
 var color26 = (flash, value2) => flash ? "#fff" : value2;
-function hash25(value2) {
+function hash26(value2) {
   let n = 2166136261;
   for (const ch of String(value2)) n = Math.imul(n ^ ch.charCodeAt(0), 16777619);
   return n >>> 0;
@@ -78285,7 +79710,7 @@ function gildedAttackPose(actor2, tick) {
   const b = actor2.boss ?? {}, alive = actor2.alive !== false && b.bossDefinitionId === ID8, pending = alive ? b.pendingAction : null, last = alive ? b.lastAction : null;
   const age = last ? tick - last.resolvedTick : Infinity, recent = age >= 0 && age < 40 ? last : null, record2 = pending ?? recent, p = pending ? progress7(pending, tick) : 0;
   const aim2 = record2?.targetPosition ?? point26(actor2.position.x + Math.cos(b.facingAngle ?? Math.PI / 2) * 60, actor2.position.y + Math.sin(b.facingAngle ?? Math.PI / 2) * 60), origin = record2?.originPosition ?? actor2.position, d = unit11(aim2.x - origin.x, aim2.y - origin.y);
-  const seed2 = Number.isFinite(actor2.visualSeed) ? actor2.visualSeed : hash25(actor2.entityId ?? actor2.id ?? ID8) % 997, hover = Math.sin((tick + seed2 * 0.13) / 12) * 2;
+  const seed2 = Number.isFinite(actor2.visualSeed) ? actor2.visualSeed : hash26(actor2.entityId ?? actor2.id ?? ID8) % 997, hover = Math.sin((tick + seed2 * 0.13) / 12) * 2;
   const pose = { ability: record2?.ability ?? null, p, age, direction: d, aim: aim2, bodyX: 0, bodyY: -38 + hover, rotation: Math.sin(tick / 47) * 0.018, jaw: 0.2 + 0.045 * Math.sin((tick + seed2) / 17), wing: 0.08 + 0.025 * Math.sin(tick / 13), armLift: 0, armFold: 0, charge: 0, release: 0, slack: 0, strike: 0, strikeSide: d.x < 0 ? -1 : 1 };
   const tax = b.taxation, taxAge = tax?.resolvedTick == null ? Infinity : tick - tax.resolvedTick;
   const taxOwns = alive && tax && (tax.outcome === "channeling" || b.actionState === "dazed" || ["completed", "broken"].includes(tax.outcome) && taxAge >= 0 && taxAge < 36);
@@ -78813,7 +80238,7 @@ function payoutGround2(c, row2, tick) {
   c.restore();
 }
 function payoutPile(c, row2, tick) {
-  const count = payoutCount2(row2), seed2 = hash25(row2.id), age = tick - row2.landsTick, bounce = age >= 0 && age < 8 ? Math.sin(Math.PI * age / 8) * (1 - age / 8) * 2 : 0;
+  const count = payoutCount2(row2), seed2 = hash26(row2.id), age = tick - row2.landsTick, bounce = age >= 0 && age < 8 ? Math.sin(Math.PI * age / 8) * (1 - age / 8) * 2 : 0;
   c.save();
   c.translate(row2.position.x, row2.position.y - bounce);
   for (let i = 0; i < count; i++) {
@@ -78838,7 +80263,7 @@ function payoutPile(c, row2, tick) {
   c.restore();
 }
 function payoutFan(c, row2, tick) {
-  const age = tick - row2.createdTick, q = clamp45(age / Math.max(1, row2.landsTick - row2.createdTick)), from = payoutOrigin2(row2), to = row2.position, count = payoutCount2(row2), seed2 = hash25(row2.id);
+  const age = tick - row2.createdTick, q = clamp45(age / Math.max(1, row2.landsTick - row2.createdTick)), from = payoutOrigin2(row2), to = row2.position, count = payoutCount2(row2), seed2 = hash26(row2.id);
   const d = unit11(to.x - row2.originPosition.x, to.y - row2.originPosition.y), n = point26(-d.y, d.x), arc3 = Math.sin(Math.PI * q), travel = 1 - Math.pow(1 - q, 1.18);
   c.save();
   if (age < 6) {
@@ -78864,7 +80289,7 @@ function payoutFan(c, row2, tick) {
 function payoutPickup(c, row2, tick) {
   const age = tick - row2.collectedTick;
   if (age < 0 || age >= 30 || !row2.collectionPosition) return;
-  const count = payoutCount2(row2), seed2 = hash25(row2.id), to = point26(row2.collectionPosition.x, row2.collectionPosition.y - 14);
+  const count = payoutCount2(row2), seed2 = hash26(row2.id), to = point26(row2.collectionPosition.x, row2.collectionPosition.y - 14);
   c.save();
   for (let i = 0; i < count; i++) {
     const s = payoutSlot2(i, count, seed2), delay = i % 6 * 1.1, q = clamp45((age - delay) / (22 - delay)), u = 1 - q, from = point26(row2.position.x + s.x, row2.position.y + s.y), middle = point26(mix29(from.x, to.x, 0.48), Math.min(from.y, to.y) - 17 - i % 3 * 3);
@@ -79873,7 +81298,7 @@ var ease17 = (p) => {
   p = clamp46(p);
   return p * p * (3 - 2 * p);
 };
-var hash26 = (s) => {
+var hash27 = (s) => {
   let v = 2166136261;
   for (const x of String(s)) v = Math.imul(v ^ x.charCodeAt(0), 16777619);
   return v >>> 0;
@@ -80054,7 +81479,7 @@ function ventFissure(c, v, q, erupt, tick) {
     c.save();
     c.translate(v.position.x, v.position.y);
     c.rotate(Math.atan2(a.y, a.x));
-    const seed2 = hash26(v.id + a.key), path10 = [[0, 0]], opened = a.length * (erupt ? 1 : reveal);
+    const seed2 = hash27(v.id + a.key), path10 = [[0, 0]], opened = a.length * (erupt ? 1 : reveal);
     for (let d = 8; d < opened; d += 10) path10.push([d, Math.sin(d * 0.19 + seed2) * 4]);
     path10.push([opened, 0]);
     line17(c, path10, "#1b1c27a8", 18);
@@ -80126,7 +81551,7 @@ function drawBrimstoneAttackGround(c, model, tick) {
   const h = model.bossHazards ?? {};
   for (const t of h.brimstoneTelegraphs ?? []) {
     const q = clamp46((tick - t.startedTick) / Math.max(1, t.resolvesTick - t.startedTick));
-    if (t.ability === "slam") moltenTarget(c, t.position, 64, q, hash26(t.bossId));
+    if (t.ability === "slam") moltenTarget(c, t.position, 64, q, hash27(t.bossId));
     else if (t.ability === "strike") {
       c.save();
       c.translate(t.position.x, t.position.y);
@@ -80147,7 +81572,7 @@ function drawBrimstoneAttackGround(c, model, tick) {
         c.restore();
       }
       c.restore();
-    } else for (const p of t.ventTargets) moltenTarget(c, p, 18, q, hash26(t.bossId));
+    } else for (const p of t.ventTargets) moltenTarget(c, p, 18, q, hash27(t.bossId));
   }
   for (const v of h.brimstoneVents ?? []) ventFissure(c, v, clamp46((tick - v.createdTick) / 270), v.stage === "erupting", tick);
   for (const s of brimstoneSlams(model, tick)) slamGround4(c, s, tick);
@@ -80227,7 +81652,7 @@ function brimstoneEffectDepthItems(model, tick, viewport = null) {
     if (visible3(p)) items.push(Object.freeze({ id: "brimstone-vfx/" + id, anchorX: p.x, anchorY: p.y + 2, draw }));
   };
   for (const v of model.bossHazards?.brimstoneVents ?? []) {
-    const seed2 = hash26(v.id);
+    const seed2 = hash27(v.id);
     if (v.stage !== "erupting") {
       const q = clamp46((tick - v.createdTick) / 270);
       add(v.id + "/boil", v.position, (c) => {
@@ -80921,7 +82346,7 @@ var DARK9 = "#4a3424";
 var IRON8 = "#2f2f35";
 var STONE8 = "#b9b2a4";
 var GLASS8 = "#f7e3a4";
-var hash27 = (...v) => {
+var hash28 = (...v) => {
   let h = 2166136261;
   for (const n of v) h = Math.imul(h ^ (Math.round(n * 7) | 0), 16777619);
   return h >>> 0;
@@ -80936,7 +82361,7 @@ function rng10(seed2) {
     return ((t ^ t >>> 14) >>> 0) / 4294967296;
   };
 }
-var tn = (x, y, k = 1) => ((hash27(x, y) >>> 4) % 7 - 3) * 0.03 * k;
+var tn = (x, y, k = 1) => ((hash28(x, y) >>> 4) % 7 - 3) * 0.03 * k;
 var canvasOf2 = (w, h) => {
   const doc = globalThis.document;
   if (doc?.createElement) {
@@ -81273,7 +82698,7 @@ function bandPoly(P10, half) {
 function squareMouths(c, p, streets, paved = false, biome) {
   const x = p.x * T38, y = p.y * T38, w = p.w * T38, h = p.h * T38, S4 = biome === "desert" ? DESERT_PAVE : paved ? "#bdb39e" : "#bdb39a", span2 = 64, pad2 = paved ? 26 : 18;
   const stone3 = (xx, yy, backing) => {
-    const hh = hash27(xx, yy), tn2 = ((hh >>> (paved ? 6 : 5)) % 9 - 4) * 0.022;
+    const hh = hash28(xx, yy), tn2 = ((hh >>> (paved ? 6 : 5)) % 9 - 4) * 0.022;
     if (paved) {
       if (backing) {
         c.fillStyle = tone(S4, -0.38);
@@ -81401,7 +82826,7 @@ function squareMouths(c, p, streets, paved = false, biome) {
         const t = (a - ex) * ux + (b - ey) * uy, sd = Math.abs((a - ex) * nx + (b - ey) * ny) / half;
         if (t < pad2 - 2 || t > reach) return;
         const f = 1 - (t - pad2) / (reach - pad2), clump = woodlandFieldV1(a / 38, b / 38, 91);
-        if (clump * 0.95 + f * 0.85 - sd * 0.3 > 0.95 - hash27(a, b, 7) % 100 / 400) stone3(a, b, true);
+        if (clump * 0.95 + f * 0.85 - sd * 0.3 > 0.95 - hash28(a, b, 7) % 100 / 400) stone3(a, b, true);
       });
       c.restore();
     }
@@ -81470,7 +82895,7 @@ function cityPaving(c, all, plazas, b, biome) {
       for (let y = Math.floor(y0 / 9) * 9; y < y1; y += 9) {
         const j = Math.round(y / 9) & 1;
         for (let x = Math.floor(x0 / 10) * 10 - j * 5; x < x1; x += 10) {
-          const h = hash27(x, y), sw = 7.4 + h % 5 * 0.35, sh = 6.6 + (h >>> 3) % 4 * 0.3, tn2 = ((h >>> 6) % 9 - 4) * 0.02;
+          const h = hash28(x, y), sw = 7.4 + h % 5 * 0.35, sh = 6.6 + (h >>> 3) % 4 * 0.3, tn2 = ((h >>> 6) % 9 - 4) * 0.02;
           s.fillStyle = tone(PAVE, tn2);
           s.beginPath();
           s.roundRect(x - sw / 2, y - sh / 2, sw, sh, 2.2);
@@ -81502,7 +82927,7 @@ function cityPaving(c, all, plazas, b, biome) {
   const inB = (x, y) => x > b.x0 - 8 && x < b.x1 + 8 && y > b.y0 - 8 && y < b.y1 + 8;
   const joint3 = (ex, ey, nx, ny) => {
     line(c, [[ex - nx * 1.5, ey - ny * 1.5], [ex + nx * 2.5, ey + ny * 2.5]], "#7a7262", 1.2);
-    if (hash27(ex, ey, 3) % 100 < 12) {
+    if (hash28(ex, ey, 3) % 100 < 12) {
       c.strokeStyle = "#5d8a3a";
       c.lineWidth = 1.2;
       c.beginPath();
@@ -81545,7 +82970,7 @@ function cityPlazaTop(c, f, biome) {
   for (let xx = x + 4; xx < x + w - 4; xx += 24) for (const yy of [y + 4, y + h - 15]) {
     const ww = Math.min(22, x + w - 5 - xx - 1);
     if (ww < 6) continue;
-    c.fillStyle = tone(S4, 0.08 + ((hash27(xx, yy) >>> 4) % 5 - 2) * 0.03);
+    c.fillStyle = tone(S4, 0.08 + ((hash28(xx, yy) >>> 4) % 5 - 2) * 0.03);
     c.fillRect(xx + 1, yy, ww, 11);
     c.fillStyle = tone(S4, 0.24);
     c.fillRect(xx + 2, yy + 0.6, ww - 2, 1.2);
@@ -81553,7 +82978,7 @@ function cityPlazaTop(c, f, biome) {
   for (let yy = y + 16; yy < y + h - 16; yy += 24) for (const xx of [x + 4, x + w - 15]) {
     const hh = Math.min(22, y + h - 17 - yy - 1);
     if (hh < 6) continue;
-    c.fillStyle = tone(S4, 0.08 + ((hash27(xx, yy) >>> 4) % 5 - 2) * 0.03);
+    c.fillStyle = tone(S4, 0.08 + ((hash28(xx, yy) >>> 4) % 5 - 2) * 0.03);
     c.fillRect(xx, yy + 1, 11, hh);
     c.fillStyle = tone(S4, 0.24);
     c.fillRect(xx + 0.6, yy + 2, 10, 1.2);
@@ -81586,7 +83011,7 @@ function cityPlazaTop(c, f, biome) {
   c.restore();
 }
 function greenGround2(c, g, biome) {
-  const x = g.x * T38, y = g.y * T38, rx = g.rx * T38, ry = g.ry * T38, r = rng10(hash27(x, y, 19));
+  const x = g.x * T38, y = g.y * T38, rx = g.rx * T38, ry = g.ry * T38, r = rng10(hash28(x, y, 19));
   if (biome === "desert") return;
   const drift3 = (cx, cy2, n, col2, eye6) => {
     for (let i = 0; i < n; i++) {
@@ -81748,7 +83173,7 @@ function timberBridge(c, h, rw, biome) {
   c.save();
   c.clip(deck2);
   for (let x = -L / 2 - 2, k = 0; x < L / 2 + 2; x += 6.5, k++) {
-    const t = ((hash27(x, k) >>> 3) % 7 - 3) * 0.035;
+    const t = ((hash28(x, k) >>> 3) % 7 - 3) * 0.035;
     c.fillStyle = tone(WD, t);
     c.fillRect(x + 0.6, -dW, 5.4, dW * 2);
     c.fillStyle = tone(WD, 0.22 + t);
@@ -83398,10 +84823,10 @@ function backWall(c, W3, windows, t) {
   }
 }
 function wallCaps(c, W3, H6, door3) {
-  const cap2 = "#6a5640", top = "#8a7458";
-  prop2(c, [[rect3(0, 26, 24, H6 - 26), cap2]], 1.4);
-  prop2(c, [[rect3(W3 - 24, 26, 24, H6 - 26), cap2]], 1.4);
-  prop2(c, [[rect3(0, H6 - 26, W3, 26), cap2]], 1.4);
+  const cap3 = "#6a5640", top = "#8a7458";
+  prop2(c, [[rect3(0, 26, 24, H6 - 26), cap3]], 1.4);
+  prop2(c, [[rect3(W3 - 24, 26, 24, H6 - 26), cap3]], 1.4);
+  prop2(c, [[rect3(0, H6 - 26, W3, 26), cap3]], 1.4);
   for (const [x, y, w, h] of [[0, 26, 24, H6 - 26], [W3 - 24, 26, 24, H6 - 26], [0, H6 - 26, W3, 26]]) {
     px4(c, x + 3, y + 3, w - 6, h - 6, top);
     c.fillStyle = tone2(top, -0.12);
@@ -83754,14 +85179,14 @@ function stairsDown(c, p) {
 var RUNS = [[160, 32, 32, 64], [160, 160, 32, 96], [160, 320, 32, 38], [256, 32, 32, 64], [256, 160, 32, 96], [256, 320, 32, 38], [24, 192, 168, 32], [256, 192, 168, 32]];
 var FACES = [[24, 224, 136], [288, 224, 136], [160, 256, 32], [256, 256, 32], [160, 96, 32], [256, 96, 32]];
 function partitions(c) {
-  const cap2 = "#6a5640", top = "#8a7458";
+  const cap3 = "#6a5640", top = "#8a7458";
   for (const [x, y, w] of FACES) {
     prop2(c, [[rect3(x, y, w, 8), tone2(PLASTER3, -0.12)]], 1.2);
     px4(c, x, y + 5, w, 3, BEAM2);
   }
   c.fillStyle = OL38;
   for (const [x, y, w, h] of RUNS) c.fillRect(x - 1.4, y - 1.4, w + 2.8, h + 2.8);
-  c.fillStyle = cap2;
+  c.fillStyle = cap3;
   for (const [x, y, w, h] of RUNS) c.fillRect(x, y, w, h);
   c.fillStyle = top;
   for (const [x, y, w, h] of RUNS) c.fillRect(x + 3, y + 3, w - 6, h - 6);
@@ -90589,7 +92014,7 @@ var ROCK2 = "#4b5b55";
 var ROCK_LIGHT = "#78877b";
 var MOSS2 = "#4d7547";
 var EARTH = "#343830";
-var hash28 = (x, y, s = 0) => {
+var hash29 = (x, y, s = 0) => {
   let n = (Math.imul((x | 0) + s, 374761393) ^ Math.imul((y | 0) - s, 668265263)) >>> 0;
   n = Math.imul(n ^ n >>> 13, 1274126177) >>> 0;
   return n ^ n >>> 16;
@@ -90615,14 +92040,14 @@ var shadow26 = (ctx, x, y, rx, ry, a = 0.42) => {
 function roughShape(x, y, rx, ry, seed2, count = 8) {
   const p = [];
   for (let i = 0; i < count; i++) {
-    const a = i / count * TAU106, n = hash28(seed2, i, 17), r = 0.82 + n % 25 / 100;
+    const a = i / count * TAU106, n = hash29(seed2, i, 17), r = 0.82 + n % 25 / 100;
     p.push([x + Math.cos(a) * rx * r, y + Math.sin(a) * ry * (0.86 + (n >>> 8) % 22 / 100)]);
   }
   return p;
 }
 function rock(ctx, x, y, rx, ry, seed2, light2 = ROCK_LIGHT) {
   shadow26(ctx, x + 2, y + ry * 0.72, rx * 0.84, ry * 0.32, 0.34);
-  const n = hash28(seed2, 7);
+  const n = hash29(seed2, 7);
   poly11(ctx, roughShape(x, y, rx, ry, seed2), [ROCK_DARK, ROCK2, "#40504a"][n % 3], OUT2, 2);
   poly11(ctx, roughShape(x - rx * 0.12, y - ry * 0.24, rx * 0.62, ry * 0.36, seed2 + 31, 7), [light2, "#68786e", "#829080"][(n >>> 4) % 3], null);
   ctx.strokeStyle = "rgba(17,27,24,.55)";
@@ -90649,7 +92074,7 @@ function drawGeneratedCaveSurfaceD12_1(ctx, space) {
   ctx.fillStyle = EARTH;
   ctx.fillRect(0, 0, w, h);
   for (const motif of space.visual.motifs ?? []) {
-    const x = motif.x * t, y = motif.y * t, s = motif.scale ?? 1, r = motif.rotation ?? 0, n = hash28(Math.floor(motif.x * 31), Math.floor(motif.y * 29), motif.kind.length) >>> 0;
+    const x = motif.x * t, y = motif.y * t, s = motif.scale ?? 1, r = motif.rotation ?? 0, n = hash29(Math.floor(motif.x * 31), Math.floor(motif.y * 29), motif.kind.length) >>> 0;
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(r);
@@ -90690,7 +92115,7 @@ function drawGeneratedCaveSurfaceD12_1(ctx, space) {
   }
   for (let y = 1; y < rows.length - 1; y++) for (let x = 1; x < rows[y].length - 1; x++) {
     if (rows[y][x] !== "1") continue;
-    const n = hash28(x, y, 117) >>> 0;
+    const n = hash29(x, y, 117) >>> 0;
     if (n % 19) continue;
     ctx.fillStyle = n % 3 ? "#596158" : "#77766a";
     ctx.beginPath();
@@ -90705,7 +92130,7 @@ function drawGeneratedCaveSurfaceD12_1(ctx, space) {
   ctx.fillStyle = "#222e2a";
   ctx.fill(band3);
   for (const b of boundary2) {
-    const n = hash28(b.x, b.y, space.visual.motifs?.length ?? 0) >>> 0;
+    const n = hash29(b.x, b.y, space.visual.motifs?.length ?? 0) >>> 0;
     if (n % 100 > 62) continue;
     rock(ctx, (b.x + 0.5) * t + (n % 7 - 3), (b.y + 0.5) * t + ((n >>> 5) % 5 - 2), 20 + n % 10, 16 + (n >>> 8) % 10, n);
     if (n % 6 === 0) {
@@ -90774,7 +92199,7 @@ function drawCaveSurfaceD10(ctx, space) {
     ctx.stroke();
   }
   for (let i = 0; i < 58; i++) {
-    const n = hash28(i, 29, 11), x = 3 + n % 2400 / 100, y = 3 + (n >>> 10) % 1500 / 100;
+    const n = hash29(i, 29, 11), x = 3 + n % 2400 / 100, y = 3 + (n >>> 10) % 1500 / 100;
     if (!floorAt(rows, x, y)) continue;
     ctx.fillStyle = i % 4 ? "#596158" : "#77766a";
     ctx.beginPath();
@@ -90803,8 +92228,8 @@ function drawCaveSurfaceD10(ctx, space) {
   const faces = [[[[5.5, 4.4], [8.2, 2.8], [14.6, 2.7], [18.1, 4.6], [17.4, 5.5], [9.1, 4.7]], "#3d4b45"], [[[3.1, 7], [4.3, 5.5], [5.1, 6.4], [4.2, 12.3], [6.2, 14.2], [5, 15.1], [3.2, 12.6]], "#34413c"], [[[6.2, 13.4], [8.8, 14.6], [11.2, 13.8], [13, 14.8], [12.2, 15.8], [7.1, 15.8]], "#3b4842"], [[[20.3, 4.8], [22.1, 3.4], [25.3, 3.7], [27, 5.7], [26.7, 9.8], [25.6, 10.9], [25.4, 5.3]], "#3a4842"], [[[19.3, 10], [22, 10.3], [24.7, 11.2], [26.1, 10], [26.7, 11.1], [24.9, 12.1], [21.1, 11.4]], "#303d38"]];
   for (const [points2, color28] of faces) poly11(ctx, points2.map(([x, y]) => [x * t, y * t]), color28, null);
   for (const b of boundary2) {
-    const n = hash28(b.x, b.y, 3), near3 = Number(rows[b.y]?.[b.x - 1] === "1") + Number(rows[b.y]?.[b.x + 1] === "1") + Number(rows[b.y - 1]?.[b.x] === "1") + Number(rows[b.y + 1]?.[b.x] === "1");
-    if (hash28(b.x, b.y, 113) % 100 >= 54 && near3 < 3) continue;
+    const n = hash29(b.x, b.y, 3), near3 = Number(rows[b.y]?.[b.x - 1] === "1") + Number(rows[b.y]?.[b.x + 1] === "1") + Number(rows[b.y - 1]?.[b.x] === "1") + Number(rows[b.y + 1]?.[b.x] === "1");
+    if (hash29(b.x, b.y, 113) % 100 >= 54 && near3 < 3) continue;
     const cx = (b.x + 0.5) * t + (n % 9 - 4), cy2 = (b.y + 0.5) * t + ((n >>> 5) % 7 - 3), rx = 22 + n % 11, ry = 17 + (n >>> 8) % 12;
     rock(ctx, cx, cy2, rx, ry, n);
     if (n % 5 === 0) {
@@ -90815,7 +92240,7 @@ function drawCaveSurfaceD10(ctx, space) {
     }
   }
   for (const b of boundary2) {
-    const n = hash28(b.x, b.y, 91);
+    const n = hash29(b.x, b.y, 91);
     if (n % 3) continue;
     ctx.strokeStyle = "rgba(8,14,12,.72)";
     ctx.lineWidth = 3;
@@ -90833,12 +92258,12 @@ function drawCaveBlockerD10(ctx, space, b, t) {
   poly11(ctx, [[x - 3, y + h * 0.3], [x + w * 0.08, y + 4], [x + w * 0.28, y - 5], [x + w * 0.47, y + 3], [x + w * 0.68, y - 4], [x + w * 0.88, y + 5], [x + w + 3, y + h * 0.27], [x + w - 2, y + h + 4], [x + 2, y + h + 5]], ROCK_DARK, OUT2, 2.4);
   const count = Math.max(2, Math.ceil(w / 48));
   for (let i = 0; i < count; i++) {
-    const n = hash28(seed2, i, 4), cx = x + (i + 0.48) * w / count + (n % 13 - 6), cy2 = y + h * 0.55 + ((n >>> 5) % 11 - 5), rx = w / count * 0.68, ry = h * (0.44 + (n >>> 9) % 14 / 100);
+    const n = hash29(seed2, i, 4), cx = x + (i + 0.48) * w / count + (n % 13 - 6), cy2 = y + h * 0.55 + ((n >>> 5) % 11 - 5), rx = w / count * 0.68, ry = h * (0.44 + (n >>> 9) % 14 / 100);
     rock(ctx, cx, cy2, rx, ry, n);
   }
   ctx.fillStyle = MOSS2;
   for (let i = 0; i < Math.max(1, Math.ceil(w / 95)); i++) {
-    const n = hash28(seed2, i, 22);
+    const n = hash29(seed2, i, 22);
     ctx.beginPath();
     ctx.ellipse(x + 24 + i * 91 + n % 12, y + 9 + n % 8, 22 + n % 10, 7, (n % 5 - 2) * 0.08, 0, TAU106);
     ctx.fill();
@@ -90945,7 +92370,7 @@ function mushroomCluster(ctx, x, y, v) {
   ctx.ellipse(x, y + 5, 31, 8, (v - 1) * 0.08, 0, TAU106);
   ctx.fill();
   for (let i = 0; i < count; i++) {
-    const n = hash28(i, v, 51), dx = -26 + i * (52 / (count - 1)) + (n % 7 - 3), h = 10 + (n >>> 4) % 18, wide = 5 + (n >>> 8) % 8, lean = (n >>> 12) % 9 - 4, tilt = lean * 0.035;
+    const n = hash29(i, v, 51), dx = -26 + i * (52 / (count - 1)) + (n % 7 - 3), h = 10 + (n >>> 4) % 18, wide = 5 + (n >>> 8) % 8, lean = (n >>> 12) % 9 - 4, tilt = lean * 0.035;
     ctx.strokeStyle = OUT2;
     ctx.lineWidth = 3.2 + (n >>> 16) % 3 * 0.45;
     ctx.beginPath();
@@ -91327,12 +92752,12 @@ function drawCaveDecorationD10(ctx, d, t) {
 // src/client/site_premium_surface_v1.js
 var TAU107 = Math.PI * 2;
 var INK47 = "#121618";
-var hash29 = (x, y, s = 0) => {
+var hash30 = (x, y, s = 0) => {
   let n = (Math.imul((x | 0) + s * 977, 374761393) ^ Math.imul((y | 0) - s * 131, 668265263)) >>> 0;
   n = Math.imul(n ^ n >>> 13, 1274126177) >>> 0;
   return (n ^ n >>> 16) >>> 0;
 };
-var unit12 = (x, y, s) => hash29(x, y, s) / 4294967296;
+var unit12 = (x, y, s) => hash30(x, y, s) / 4294967296;
 var hexRgb2 = (h) => {
   const n = parseInt(h.slice(1), 16);
   return [n >> 16 & 255, n >> 8 & 255, n & 255];
@@ -91385,17 +92810,17 @@ function slab2(c, x, y, w, h, fill5, dark) {
   c.fillRect(x, y + h - 1.4, w, 1.4);
 }
 function floorTile(c, k, x, y, t) {
-  const px5 = x * t, py = y * t, n = hash29(x, y, 3);
+  const px5 = x * t, py = y * t, n = hash30(x, y, 3);
   if (k.floor === "earth") {
     for (let i = 0; i < 3; i++) {
-      const u = hash29(x, y, 10 + i);
+      const u = hash30(x, y, 10 + i);
       c.fillStyle = rgba3(i ? k.earth[1] : "#000000", i ? 0.35 : 0.12);
       c.beginPath();
       c.ellipse(px5 + u % t, py + (u >>> 8) % t, 4 + u % 7, 2 + (u >>> 4) % 3, 0, 0, TAU107);
       c.fill();
     }
     for (let i = 0; i < 2; i++) {
-      const u = hash29(x, y, 20 + i), s = 1.5 + u % 3;
+      const u = hash30(x, y, 20 + i), s = 1.5 + u % 3;
       c.fillStyle = mix30(k.a, "#000000", 0.2 + u % 5 / 20);
       c.beginPath();
       c.ellipse(px5 + u % t, py + (u >>> 7) % t, s, s * 0.7, 0, 0, TAU107);
@@ -91410,7 +92835,7 @@ function floorTile(c, k, x, y, t) {
   c.fillRect(px5, py, t, t);
   if (k.floor === "planks") {
     for (let r = 0; r < 3; r++) {
-      const yy = py + r * (t / 3), off = hash29(x, r + y * 3, 5) % 20;
+      const yy = py + r * (t / 3), off = hash30(x, r + y * 3, 5) % 20;
       const tone30 = mix30("#8e6038", "#7a5030", unit12(x, y * 3 + r, 6));
       c.fillStyle = tone30;
       c.fillRect(px5, yy + 1, t, t / 3 - 2);
@@ -91444,7 +92869,7 @@ function floorTile(c, k, x, y, t) {
 function floorTouch(c, k, x, y, t, nearWall) {
   const u = unit12(x, y, 30), px5 = x * t, py = y * t;
   if (u > (nearWall ? 0.55 : 0.18)) return;
-  const v = hash29(x, y, 31);
+  const v = hash30(x, y, 31);
   const blob6 = (color28, a, rx, ry) => {
     for (let i = 3; i >= 1; i--) {
       c.fillStyle = rgba3(color28, a / 3 * 1.5);
@@ -91479,7 +92904,7 @@ function floorTouch(c, k, x, y, t, nearWall) {
   } else if (k.touch === "frost") blob6("#dcebf5", 0.28, 6 + v % 5, 3 + v % 2);
   else if (k.touch === "gravel") for (let i = 0; i < 4; i++) {
     c.fillStyle = mix30(k.a, "#000000", 0.25);
-    c.fillRect(px5 + hash29(x, y, 40 + i) % t, py + hash29(x, y, 50 + i) % t, 2, 1.6);
+    c.fillRect(px5 + hash30(x, y, 40 + i) % t, py + hash30(x, y, 50 + i) % t, 2, 1.6);
   }
   else if (k.touch === "embers" && v % 2 === 0) {
     c.strokeStyle = "#ff7a2a";
@@ -91502,12 +92927,12 @@ function floorTouch(c, k, x, y, t, nearWall) {
   }
 }
 function wallFace(c, k, x, y, t, rows) {
-  const px5 = x * t, py = y * t, cap2 = 11, n = hash29(x, y, 60);
+  const px5 = x * t, py = y * t, cap3 = 11, n = hash30(x, y, 60);
   c.fillStyle = k.face;
-  c.fillRect(px5, py + cap2, t, t - cap2);
+  c.fillRect(px5, py + cap3, t, t - cap3);
   if (k.walls === "rock") {
     for (let i = 0; i < 4; i++) {
-      const u = hash29(x, y, 61 + i), bx = px5 + u % t - 6, by = py + cap2 + (u >>> 6) % (t - cap2 - 6);
+      const u = hash30(x, y, 61 + i), bx = px5 + u % t - 6, by = py + cap3 + (u >>> 6) % (t - cap3 - 6);
       c.fillStyle = mix30(k.face, i % 2 ? "#000000" : "#ffffff", 0.12);
       c.beginPath();
       c.moveTo(bx, by);
@@ -91522,29 +92947,29 @@ function wallFace(c, k, x, y, t, rows) {
     }
   } else {
     const ch = k.walls === "brick" ? 7 : 10, cw = k.walls === "brick" ? 14 : t;
-    for (let yy = py + cap2, r = 0; yy < py + t; yy += ch, r++) for (let xx = px5 - r % 2 * cw / 2; xx < px5 + t; xx += cw) {
+    for (let yy = py + cap3, r = 0; yy < py + t; yy += ch, r++) for (let xx = px5 - r % 2 * cw / 2; xx < px5 + t; xx += cw) {
       c.fillStyle = mix30(k.face, "#000000", unit12(Math.round(xx), r + y * 9, 62) * 0.22);
       c.fillRect(Math.max(px5, xx + 1), yy + 1, Math.min(cw - 2, px5 + t - Math.max(px5, xx + 1)), ch - 2);
       c.fillStyle = "rgba(255,255,255,.07)";
       c.fillRect(Math.max(px5, xx + 1), yy + 1, Math.min(cw - 2, px5 + t - Math.max(px5, xx + 1)), 1);
     }
   }
-  const g = c.createLinearGradient(0, py + cap2, 0, py + t);
+  const g = c.createLinearGradient(0, py + cap3, 0, py + t);
   g.addColorStop(0, "rgba(0,0,0,0)");
   g.addColorStop(1, "rgba(0,0,0,.38)");
   c.fillStyle = g;
-  c.fillRect(px5, py + cap2, t, t - cap2);
+  c.fillRect(px5, py + cap3, t, t - cap3);
   if (k.walls !== "rock" && x % 4 === 0) {
     c.fillStyle = k.cap;
-    c.fillRect(px5 + t / 2 - 5, py + cap2, 10, t - cap2);
+    c.fillRect(px5 + t / 2 - 5, py + cap3, 10, t - cap3);
     c.fillStyle = mix30(k.cap, "#000000", 0.25);
-    c.fillRect(px5 + t / 2 + 1, py + cap2, 4, t - cap2);
+    c.fillRect(px5 + t / 2 + 1, py + cap3, 4, t - cap3);
     c.strokeStyle = INK47;
     c.lineWidth = 1.2;
-    c.strokeRect(px5 + t / 2 - 5, py + cap2, 10, t - cap2);
+    c.strokeRect(px5 + t / 2 - 5, py + cap3, 10, t - cap3);
   } else if (k.family === "crypt" && n % 5 === 0) {
     c.fillStyle = "#14181a";
-    c.fillRect(px5 + 8, py + cap2 + 3, t - 16, t - cap2 - 7);
+    c.fillRect(px5 + 8, py + cap3 + 3, t - 16, t - cap3 - 7);
     c.fillStyle = "#e8e0cc";
     c.beginPath();
     c.arc(px5 + t / 2, py + t - 8, 3, 0, TAU107);
@@ -91552,21 +92977,21 @@ function wallFace(c, k, x, y, t, rows) {
   }
   if (k.biome === "desert" && k.family !== "cave") {
     c.fillStyle = "#2f5fa8";
-    c.fillRect(px5, py + cap2 + 2, t, 4);
+    c.fillRect(px5, py + cap3 + 2, t, 4);
     c.fillStyle = "#e9b93a";
-    for (let i = 0; i < 4; i++) c.fillRect(px5 + 3 + i * 8, py + cap2 + 3, 2, 2);
+    for (let i = 0; i < 4; i++) c.fillRect(px5 + 3 + i * 8, py + cap3 + 3, 2, 2);
   }
   if ((k.touch === "vines" || k.family === "ruin" && k.touch === "moss") && n % 3 === 0) {
     c.strokeStyle = "#3f6b35";
     c.lineWidth = 1.6;
     c.beginPath();
-    c.moveTo(px5 + 6 + n % 20, py + cap2);
-    c.quadraticCurveTo(px5 + 10 + n % 14, py + cap2 + 10, px5 + 4 + n % 22, py + t);
+    c.moveTo(px5 + 6 + n % 20, py + cap3);
+    c.quadraticCurveTo(px5 + 10 + n % 14, py + cap3 + 10, px5 + 4 + n % 22, py + t);
     c.stroke();
     c.fillStyle = "#5f8f43";
     for (let i = 0; i < 3; i++) {
       c.beginPath();
-      c.ellipse(px5 + 6 + n % 20 + i, py + cap2 + 5 + i * 6, 2.6, 1.6, 0, 0, TAU107);
+      c.ellipse(px5 + 6 + n % 20 + i, py + cap3 + 5 + i * 6, 2.6, 1.6, 0, 0, TAU107);
       c.fill();
     }
   }
@@ -91575,9 +93000,9 @@ function wallFace(c, k, x, y, t, rows) {
     for (let i = 0; i < 4; i++) {
       const ix = px5 + 3 + i * 8 + n % 3;
       c.beginPath();
-      c.moveTo(ix, py + cap2);
-      c.lineTo(ix + 3, py + cap2);
-      c.lineTo(ix + 1.5, py + cap2 + 5 + (n >>> i) % 5);
+      c.moveTo(ix, py + cap3);
+      c.lineTo(ix + 3, py + cap3);
+      c.lineTo(ix + 1.5, py + cap3 + 5 + (n >>> i) % 5);
       c.closePath();
       c.fill();
     }
@@ -91586,12 +93011,12 @@ function wallFace(c, k, x, y, t, rows) {
     c.strokeStyle = "#ff7a2a";
     c.lineWidth = 1.2;
     c.beginPath();
-    c.moveTo(px5 + 5, py + cap2 + 4);
+    c.moveTo(px5 + 5, py + cap3 + 4);
     c.lineTo(px5 + 12, py + t - 8);
     c.lineTo(px5 + 20, py + t - 4);
     c.stroke();
   }
-  wallCap(c, k, x, y, t, rows, cap2);
+  wallCap(c, k, x, y, t, rows, cap3);
   c.strokeStyle = INK47;
   c.lineWidth = 1.6;
   c.beginPath();
@@ -91647,7 +93072,7 @@ function wallCap(c, k, x, y, t, rows, h = t) {
 function flatDecoration(c, k, d, t) {
   const x = d.x * t, y = d.y * t, v = d.variant ?? 0;
   if (d.kind === "ruin-rubble-flat") for (let i = 0; i < 6; i++) {
-    const u = hash29(i, v, 90), s = 2 + u % 4;
+    const u = hash30(i, v, 90), s = 2 + u % 4;
     c.fillStyle = mix30(k.a, "#000000", 0.1 + u % 5 / 25);
     c.beginPath();
     c.ellipse(x + u % 40 - 20, y + (u >>> 6) % 20 - 10, s + 1, s * 0.7, 0, 0, TAU107);
@@ -91728,7 +93153,7 @@ function drawSitePremiumSurfaceV1(c, space) {
 }
 function boulders(c, k, x, y, t, rows) {
   for (let i = 0; i < 3; i++) {
-    const u = hash29(x, y, 80 + i);
+    const u = hash30(x, y, 80 + i);
     if (i === 2 && u % 2) continue;
     const r = 7 + u % 7, bx = x * t + 4 + (u >>> 3) % (t - 8), by = y * t + 6 + (u >>> 9) % (t - 12), pts = [];
     for (let a = 0; a < 7; a++) {
@@ -91762,7 +93187,7 @@ var STONE11 = "#667268";
 var STONE_LIGHT = "#98a08d";
 var MOSS3 = "#4d7545";
 var MOSS_LIGHT2 = "#78985c";
-var hash30 = (x, y, s = 0) => {
+var hash31 = (x, y, s = 0) => {
   let n = (Math.imul((x | 0) + s, 374761393) ^ Math.imul((y | 0) - s, 668265263)) >>> 0;
   n = Math.imul(n ^ n >>> 13, 1274126177) >>> 0;
   return n ^ n >>> 16;
@@ -91786,7 +93211,7 @@ var shadow27 = (ctx, x, y, rx, ry, a = 0.36) => {
   ctx.fill();
 };
 function stone2(ctx, x, y, w, h, seed2) {
-  const n = hash30(seed2, w | 0, h | 0), lean = n % 7 - 3;
+  const n = hash31(seed2, w | 0, h | 0), lean = n % 7 - 3;
   shadow27(ctx, x + w * 0.5, y + h * 0.91, w * 0.45, Math.max(4, h * 0.12), 0.3);
   poly12(ctx, [[x + 2, y + h * 0.22], [x + w * 0.16 + lean, y + 2], [x + w * 0.75, y], [x + w - 2, y + h * 0.2], [x + w - 4, y + h - 2], [x + 4, y + h]], STONE_DARK, INK48, 2);
   poly12(ctx, [[x + w * 0.16 + lean, y + 3], [x + w * 0.75, y + 1], [x + w * 0.91, y + h * 0.2], [x + w * 0.31, y + h * 0.28]], STONE_LIGHT, null);
@@ -91795,7 +93220,7 @@ function stone2(ctx, x, y, w, h, seed2) {
 function weeds(ctx, x, y, seed2, count = 6) {
   ctx.lineCap = "round";
   for (let i = 0; i < count; i++) {
-    const n = hash30(seed2, i, 29), dx = n % 41 - 20, h = 9 + (n >>> 5) % 15;
+    const n = hash31(seed2, i, 29), dx = n % 41 - 20, h = 9 + (n >>> 5) % 15;
     ctx.strokeStyle = i % 3 ? MOSS3 : MOSS_LIGHT2;
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -91805,9 +93230,9 @@ function weeds(ctx, x, y, seed2, count = 6) {
   }
 }
 function organicBlob(ctx, x, y, rx, ry, seed2, fill5, stroke5 = null, width = 1) {
-  const count = 8 + hash30(seed2, 17, 3) % 4, points2 = [];
+  const count = 8 + hash31(seed2, 17, 3) % 4, points2 = [];
   for (let i = 0; i < count; i++) {
-    const a = TAU108 * i / count, n = hash30(seed2, i, 43), radius = 0.7 + n % 29 / 100;
+    const a = TAU108 * i / count, n = hash31(seed2, i, 43), radius = 0.7 + n % 29 / 100;
     points2.push([x + Math.cos(a) * rx * radius, y + Math.sin(a) * ry * (0.72 + (n >>> 7) % 35 / 100)]);
   }
   ctx.beginPath();
@@ -91829,19 +93254,19 @@ function organicBlob(ctx, x, y, rx, ry, seed2, fill5, stroke5 = null, width = 1)
 function moss3(ctx, x, y, scale, seed2, spread = 1) {
   ctx.save();
   ctx.lineJoin = "round";
-  const count = 3 + hash30(seed2, 5, 71) % 3;
+  const count = 3 + hash31(seed2, 5, 71) % 3;
   for (let i = 0; i < count; i++) {
-    const n = hash30(seed2, i, 97), dx = (n % 101 - 50) / 50 * scale * 0.78 * spread, dy = ((n >>> 8) % 71 - 35) / 35 * scale * 0.24;
+    const n = hash31(seed2, i, 97), dx = (n % 101 - 50) / 50 * scale * 0.78 * spread, dy = ((n >>> 8) % 71 - 35) / 35 * scale * 0.24;
     organicBlob(ctx, x + dx, y + dy, scale * (0.42 + (n >>> 15) % 23 / 100), scale * (0.16 + (n >>> 20) % 12 / 100), seed2 + i * 31, "#31543a", i === 0 ? INK48 : null, 1.2);
   }
   for (let i = 0; i < count + 1; i++) {
-    const n = hash30(seed2, i, 137), dx = (n % 101 - 50) / 50 * scale * 0.75 * spread, dy = ((n >>> 9) % 61 - 30) / 30 * scale * 0.21;
+    const n = hash31(seed2, i, 137), dx = (n % 101 - 50) / 50 * scale * 0.75 * spread, dy = ((n >>> 9) % 61 - 30) / 30 * scale * 0.21;
     organicBlob(ctx, x + dx, y + dy, scale * (0.2 + (n >>> 16) % 14 / 100), scale * (0.08 + (n >>> 21) % 9 / 100), seed2 + i * 47 + 9, i % 3 ? MOSS3 : "#638552", null);
   }
   ctx.strokeStyle = "#294a33";
   ctx.lineCap = "round";
   for (let i = 0; i < 3; i++) {
-    const n = hash30(seed2, i, 211), sx = x + (n % 31 - 15) * scale / 35, sy = y + scale * 0.1, side = i % 2 ? -1 : 1;
+    const n = hash31(seed2, i, 211), sx = x + (n % 31 - 15) * scale / 35, sy = y + scale * 0.1, side = i % 2 ? -1 : 1;
     ctx.lineWidth = Math.max(1, scale * 0.045 - i * 0.18);
     ctx.beginPath();
     ctx.moveTo(sx, sy);
@@ -91849,7 +93274,7 @@ function moss3(ctx, x, y, scale, seed2, spread = 1) {
     ctx.stroke();
   }
   for (let i = 0; i < 8; i++) {
-    const n = hash30(seed2, i, 263), px5 = x + (n % 101 - 50) * scale / 62 * spread, py = y + ((n >>> 8) % 41 - 20) * scale / 75, s = 1 + (n >>> 14) % 3;
+    const n = hash31(seed2, i, 263), px5 = x + (n % 101 - 50) * scale / 62 * spread, py = y + ((n >>> 8) % 41 - 20) * scale / 75, s = 1 + (n >>> 14) % 3;
     poly12(ctx, [[px5, py - s], [px5 + s, py], [px5, py + s], [px5 - s, py]], i % 3 ? MOSS_LIGHT2 : "#b0aa68", null);
   }
   ctx.restore();
@@ -91883,7 +93308,7 @@ function vine(ctx, x, y, height, seed2) {
   ctx.save();
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
-  const side = hash30(seed2, 3, 311) % 2 ? -1 : 1, n1 = hash30(seed2, 5, 317), n2 = hash30(seed2, 7, 331), points2 = [{ x, y }, { x: x + side * (11 + n1 % 7), y: y - height * 0.27 }, { x: x - side * (8 + n2 % 8), y: y - height * 0.52 }, { x: x + side * (12 + (n1 >>> 7) % 8), y: y - height * 0.76 }, { x: x + side * ((n2 >>> 8) % 9 - 4), y: y - height }];
+  const side = hash31(seed2, 3, 311) % 2 ? -1 : 1, n1 = hash31(seed2, 5, 317), n2 = hash31(seed2, 7, 331), points2 = [{ x, y }, { x: x + side * (11 + n1 % 7), y: y - height * 0.27 }, { x: x - side * (8 + n2 % 8), y: y - height * 0.52 }, { x: x + side * (12 + (n1 >>> 7) % 8), y: y - height * 0.76 }, { x: x + side * ((n2 >>> 8) % 9 - 4), y: y - height }];
   bentPath(ctx, points2);
   ctx.strokeStyle = INK48;
   ctx.lineWidth = 9;
@@ -91907,7 +93332,7 @@ function vine(ctx, x, y, height, seed2) {
   }
   const leaves = [{ p: points2[1], side }, { p: points2[2], side: -side }, { p: points2[3], side }, { p: points2[4], side: -side }];
   for (let i = 0; i < leaves.length; i++) {
-    const row2 = leaves[i], n = hash30(seed2, i, 347), dx = row2.side * (6 + n % 4), dy = -2 - (n >>> 5) % 5;
+    const row2 = leaves[i], n = hash31(seed2, i, 347), dx = row2.side * (6 + n % 4), dy = -2 - (n >>> 5) % 5;
     leaf3(ctx, row2.p.x + dx, row2.p.y + dy, 9 + (n >>> 9) % 4, row2.side * (0.48 + (n >>> 13) % 18 / 100), i % 2 ? MOSS_LIGHT2 : MOSS3);
   }
   ctx.restore();
@@ -91916,7 +93341,7 @@ function rootCluster(ctx, x, y, height, seed2, bend = 0, scale = 1) {
   ctx.save();
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
-  const n1 = hash30(seed2, 1, 401), n2 = hash30(seed2, 2, 409), side = n1 % 2 ? -1 : 1, swing = Math.max(0.9, scale), points2 = [{ x, y }, { x: x + side * (14 + n1 % 7) * swing + bend * 0.12, y: y + height * 0.28 }, { x: x - side * (16 + n2 % 8) * swing + bend * 0.52, y: y + height * 0.61 }, { x: x + bend, y: y + height }], main = Math.max(9, 17 * scale);
+  const n1 = hash31(seed2, 1, 401), n2 = hash31(seed2, 2, 409), side = n1 % 2 ? -1 : 1, swing = Math.max(0.9, scale), points2 = [{ x, y }, { x: x + side * (14 + n1 % 7) * swing + bend * 0.12, y: y + height * 0.28 }, { x: x - side * (16 + n2 % 8) * swing + bend * 0.52, y: y + height * 0.61 }, { x: x + bend, y: y + height }], main = Math.max(9, 17 * scale);
   bentPath(ctx, points2.map((p) => ({ x: p.x + 3, y: p.y + 3 })));
   ctx.strokeStyle = "rgba(8,13,10,.52)";
   ctx.lineWidth = main + 6;
@@ -91970,7 +93395,7 @@ function roundedMass(ctx, points2, fill5) {
   ctx.fill();
 }
 function ruinExteriorRootGeometryD11_3_4(x, y, seed2, side) {
-  const n = hash30(seed2, side, 523), j = n % 7 - 3, main = side < 0 ? [{ x: x - 67, y: y + 27 }, { x: x - 89 + j, y: y + 43 }, { x: x - 124, y: y + 52 + j }, { x: x - 157, y: y + 61 + j }] : [{ x: x + 108, y: y + 33 }, { x: x + 124, y: y + 40 + j }, { x: x + 143 + j, y: y + 38 }, { x: x + 160, y: y + 40 + j }], fork = side < 0 ? [main[1], { x: x - 110, y: y + 70 + j }, { x: x - 134 - j, y: y + 86 }] : [main[1], { x: x + 142 + j, y: y + 51 }, { x: x + 160, y: y + 54 - j }];
+  const n = hash31(seed2, side, 523), j = n % 7 - 3, main = side < 0 ? [{ x: x - 67, y: y + 27 }, { x: x - 89 + j, y: y + 43 }, { x: x - 124, y: y + 52 + j }, { x: x - 157, y: y + 61 + j }] : [{ x: x + 108, y: y + 33 }, { x: x + 124, y: y + 40 + j }, { x: x + 143 + j, y: y + 38 }, { x: x + 160, y: y + 40 + j }], fork = side < 0 ? [main[1], { x: x - 110, y: y + 70 + j }, { x: x - 134 - j, y: y + 86 }] : [main[1], { x: x + 142 + j, y: y + 51 }, { x: x + 160, y: y + 54 - j }];
   return Object.freeze([{ points: main, widths: side < 0 ? [18, 16, 9, 2] : [11, 8, 4, 1.5] }, { points: fork, widths: side < 0 ? [9, 5, 1.5] : [5, 2.5, 1] }].map((shape3) => Object.freeze({ points: Object.freeze(shape3.points.map(Object.freeze)), widths: Object.freeze(shape3.widths) })));
 }
 function exteriorRootMass(ctx, x, y, seed2, side) {
@@ -91986,7 +93411,7 @@ function exteriorRootFoliage(ctx, x, y, seed2, side) {
   for (const [dx, dy, count, salt] of clusters) {
     shadow27(ctx, x + dx, y + dy + 5, 12 + count * 2, 5, 0.2);
     for (let i = 0; i < count; i++) {
-      const n = hash30(seed2 + salt * 37, i, 571), angle3 = -1.55 + (n % 91 - 45) / 100 + (side < 0 ? -i * 0.18 : i * 0.16), size = 10 + (n >>> 8) % 5, spread = (i - (count - 1) / 2) * 7;
+      const n = hash31(seed2 + salt * 37, i, 571), angle3 = -1.55 + (n % 91 - 45) / 100 + (side < 0 ? -i * 0.18 : i * 0.16), size = 10 + (n >>> 8) % 5, spread = (i - (count - 1) / 2) * 7;
       leaf3(ctx, x + dx + spread, y + dy + (n >>> 13) % 5 - 2, size, angle3, i % 3 === 0 ? MOSS_LIGHT2 : MOSS3);
     }
   }
@@ -92164,7 +93589,7 @@ function drawRuinSurfaceD11_3(ctx, space) {
   ctx.stroke();
   for (const [x, y, size, seed2, spread] of [[8.1, 9.9, 49, 1201, 1.55], [15.8, 8.3, 45, 1217, 1.5], [11.8, 4.2, 43, 1231, 1.65], [18.2, 4.8, 37, 1249, 1.35]]) moss3(ctx, x * t, y * t, size, seed2, spread);
   for (let i = 0; i < 42; i++) {
-    const n = hash30(i, 41, 19), x = 3 + n % 1800 / 100, y = 3 + (n >>> 10) % 1250 / 100;
+    const n = hash31(i, 41, 19), x = 3 + n % 1800 / 100, y = 3 + (n >>> 10) % 1250 / 100;
     if (rows[Math.floor(y)]?.[Math.floor(x)] !== "1") continue;
     organicBlob(ctx, x * t, y * t, 5 + n % 10, 2 + (n >>> 4) % 4, n, i % 3 ? "rgba(143,137,105,.28)" : "rgba(36,56,43,.32)", null);
   }
@@ -92177,7 +93602,7 @@ function drawRuinSurfaceD11_3(ctx, space) {
   }
   ctx.restore();
   for (let y = 0; y < rows.length; y++) for (let x = 0; x < rows[y].length; x++) if (rows[y][x] === "0" && [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => rows[y + dy]?.[x + dx] === "1")) {
-    const n = hash30(x, y, 77), px5 = x * t + 2 + n % 5, py = y * t + 3 + (n >>> 4) % 4, south = rows[y + 1]?.[x] === "1";
+    const n = hash31(x, y, 77), px5 = x * t + 2 + n % 5, py = y * t + 3 + (n >>> 4) % 4, south = rows[y + 1]?.[x] === "1";
     stone2(ctx, px5, py, t - 4, t - (south ? 1 : 7), n);
     if (n % 4 === 0) moss3(ctx, px5 + 14, py + 6, 11, n + 1301, 0.82);
   }
@@ -92524,7 +93949,7 @@ function siteEntrancesV1(space) {
   const ox = v.originTile?.x ?? 0, oy = v.originTile?.y ?? 0;
   found = [...groups.values()].map((g) => {
     const door3 = (space.exits ?? []).find((e) => e.siteAction?.siteId === "site:" + g.id && e.siteAction?.direction === "enter"), dx = door3?.x ?? (g.x0 + g.x1) / 2, dy = door3?.y ?? g.y1 + t;
-    const code = v.biomes?.[Math.floor(dy / t) - oy]?.[Math.floor(dx / t) - ox], biome = BIOME_NAMES[code] ?? "grassland", family = g.crypt ? "crypt" : g.prefix;
+    const code2 = v.biomes?.[Math.floor(dy / t) - oy]?.[Math.floor(dx / t) - ox], biome = BIOME_NAMES[code2] ?? "grassland", family = g.crypt ? "crypt" : g.prefix;
     const foot = (x) => {
       let y = null;
       for (const [a, b, f] of g.feet) if (x >= a && x <= b && (y === null || f > y)) y = f;
@@ -93738,7 +95163,7 @@ var FLOW3 = { color: "#d6f2fb", alpha: 0.55, width: 1.5, len: [24, 38], chance: 
 var CREST2 = { alpha: 0.5, width: 1.4, len: [9, 13], chance: 5 };
 var LILIES = 6;
 var REEDS = 8;
-function hash31(x, y, s) {
+function hash33(x, y, s) {
   let n = Math.imul(s, 374761393) ^ Math.imul(x, 668265263) ^ Math.imul(y, 2246822519);
   n = Math.imul(n ^ n >>> 13, 1274126177);
   return (n ^ n >>> 16) >>> 0;
@@ -93765,7 +95190,7 @@ function shore(loops, offset2, seed2, box5) {
     const p = L[i], q = L[(i + 1) % L.length], o = L[(i + L.length - 1) % L.length];
     if (p[0] < box5[0] || p[0] > box5[2] || p[1] < box5[1] || p[1] > box5[3]) continue;
     const dx = q[0] - o[0], dy = q[1] - o[1], d = Math.hypot(dx, dy) || 1;
-    out.push({ x: p[0], y: p[1], nx: dy / d, ny: -dx / d, h: hash31(Math.round((p[0] + offset2.x) * 2), Math.round((p[1] + offset2.y) * 2), seed2 + 4421) });
+    out.push({ x: p[0], y: p[1], nx: dy / d, ny: -dx / d, h: hash33(Math.round((p[0] + offset2.x) * 2), Math.round((p[1] + offset2.y) * 2), seed2 + 4421) });
   }
   return out;
 }
@@ -93901,7 +95326,7 @@ function drawRiverMix(c, loops, open2, x, y, t, offset2, seed2, at5, waterAt2, b
   for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) {
     const nx = x + i, ny = y + j;
     if (at5(nx, ny) !== "W") continue;
-    const gx = Math.round(nx + offset2.x / t), gy = Math.round(ny + offset2.y / t), h = hash31(gx, gy, seed2 + 5101);
+    const gx = Math.round(nx + offset2.x / t), gy = Math.round(ny + offset2.y / t), h = hash33(gx, gy, seed2 + 5101);
     if ((h >>> 3) % CREST2.chance === 0) {
       const ax2 = flowAxis(at5, waterAt2, nx, ny, seed2 + ":" + gx + "," + gy);
       if (ax2) {
@@ -94012,7 +95437,7 @@ var tone27 = (h, f) => mix32(h, f > 0 ? "#ffffff" : "#000000", Math.abs(f));
 var SEGS = { 1: [["L", "T"]], 2: [["T", "R"]], 4: [["B", "L"]], 8: [["R", "B"]], 3: [["L", "R"]], 12: [["R", "L"]], 5: [["B", "T"]], 10: [["T", "B"]], 14: [["T", "L"]], 13: [["R", "T"]], 11: [["L", "B"]], 7: [["B", "R"]], 6: [["T", "L"], ["B", "R"]], 9: [["R", "T"], ["L", "B"]] };
 var EDGE2 = { T: [0, -1], B: [0, 1], L: [-1, 0], R: [1, 0] };
 var inland = (v) => v === "W" || v === "L";
-function hash33(x, y, s) {
+function hash34(x, y, s) {
   let n = Math.imul(s, 374761393) ^ Math.imul(x, 668265263) ^ Math.imul(y, 2246822519);
   n = Math.imul(n ^ n >>> 13, 1274126177);
   return (n ^ n >>> 16) >>> 0;
@@ -94070,7 +95495,7 @@ function tracedShore(at5, x, y, t, offset2, seed2, reach = M3, pad2 = PAD4) {
     let L = [], k = start;
     while (!seen4.has(k)) {
       seen4.add(k);
-      const [X, Y] = k.split(",").map(Number), px5 = X * h2, py = Y * h2, h = hash33(Math.round((px5 + offset2.x) * 2), Math.round((py + offset2.y) * 2), seed2 + 1709), a = h % 6283 / 1e3, r = 3.2 * ((h >>> 13) % 1e3) / 1e3;
+      const [X, Y] = k.split(",").map(Number), px5 = X * h2, py = Y * h2, h = hash34(Math.round((px5 + offset2.x) * 2), Math.round((py + offset2.y) * 2), seed2 + 1709), a = h % 6283 / 1e3, r = 3.2 * ((h >>> 13) % 1e3) / 1e3;
       L.push([px5 + Math.cos(a) * r, py + Math.sin(a) * r * 0.8]);
       const q = next.get(k);
       if (!q) break;
@@ -94538,14 +95963,14 @@ function masonry2(c, x, y, w, h, P10, R6) {
   flags4(c, x, y, w, h, P10, R6, 1);
   c.restore();
 }
-function post2(c, x, y, h, P10, w = 3.6, cap2 = true, snow = false) {
+function post2(c, x, y, h, P10, w = 3.6, cap3 = true, snow = false) {
   const p = rect5(x - w / 2, y - h, w, h);
   prop5(c, [[p, P10.m]], 1.1);
   c.fillStyle = P10.l;
   c.fillRect(x - w / 2, y - h, 1.1, h);
   c.fillStyle = P10.d;
   c.fillRect(x + w / 2 - 1, y - h, 1, h);
-  if (cap2) {
+  if (cap3) {
     const q = rect5(x - w / 2 - 0.8, y - h - 1.6, w + 1.6, 2.2);
     prop5(c, [[q, P10.d]], 1);
   }
@@ -94850,7 +96275,7 @@ function bridgeV(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
 }
 var STYLE_H = { w: "timber", a: "timber", m: "boardwalk", r: "stone", d: "sandstone", s: "snow", t: "rope", l: "basalt" };
 var STYLE_V = { r: "stone", d: "sandstone", l: "stone", s: "snow" };
-function hash34(x, y, s) {
+function hash35(x, y, s) {
   let n = Math.imul(s, 374761393) ^ Math.imul(x, 668265263) ^ Math.imul(y, 2246822519);
   n = Math.imul(n ^ n >>> 13, 1274126177);
   return (n ^ n >>> 16) >>> 0;
@@ -94878,16 +96303,16 @@ function drawRiverBridges(c, at5, biomeAt, minX, maxX, minY, maxY, t, offset2, s
         stack.push([nx, ny]);
       }
     }
-    const code = biomeAt(x0 + x1 >> 1, y0 + y1 >> 1), s = hash34(x0 + Math.round(offset2.x / t), y0 + Math.round(offset2.y / t), seed2 + 1931);
-    if (v === "H") bridgeH(c, x0 * t, y0 * t, x1 - x0 + 1, y1 - y0 + 1, STYLE_H[code] ?? "timber", s);
-    else bridgeV(c, x0 * t, y0 * t, y1 - y0 + 1, x1 - x0 + 1, STYLE_V[code] ?? "timber", s);
+    const code2 = biomeAt(x0 + x1 >> 1, y0 + y1 >> 1), s = hash35(x0 + Math.round(offset2.x / t), y0 + Math.round(offset2.y / t), seed2 + 1931);
+    if (v === "H") bridgeH(c, x0 * t, y0 * t, x1 - x0 + 1, y1 - y0 + 1, STYLE_H[code2] ?? "timber", s);
+    else bridgeV(c, x0 * t, y0 * t, y1 - y0 + 1, x1 - x0 + 1, STYLE_V[code2] ?? "timber", s);
     drawn++;
   }
   return drawn;
 }
 
 // src/client/planned_world_materials_v1.js
-var plannedGroundPalette = (code) => ({ a: ["#768b43", "#8e9c54", "#637b39"], d: ["#b7a376", "#c6b186", "#a99569"], s: ["#b8c9ce", "#d0dce0", "#9cbbc3"], t: ["#266743", "#397a51", "#1d563e"], l: ["#47474b", "#58545a", "#383d43"] })[code] ?? null;
+var plannedGroundPalette = (code2) => ({ a: ["#768b43", "#8e9c54", "#637b39"], d: ["#b7a376", "#c6b186", "#a99569"], s: ["#b8c9ce", "#d0dce0", "#9cbbc3"], t: ["#266743", "#397a51", "#1d563e"], l: ["#47474b", "#58545a", "#383d43"] })[code2] ?? null;
 function drawPlannedSurfaceCell(c, type, biome, x, y, t, seed2, offset2, at5) {
   if (drawInlandWater(c, type, x, y, t, seed2, offset2, at5, biome)) return true;
   if (!["O", "W", "L", "C", "K", "H", "V"].includes(type)) return false;
@@ -95799,7 +97224,7 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
     for (const b of v.blockers) if (["thicket", "trees", "rock", "building", "fence", "hollow-trunk"].includes(b.kind) || b.kind.startsWith("fort-") || b.kind === "ruin-exterior-masonry" && b.plannedRuinExterior === true) for (let ty = b.y; ty < b.y + b.height; ty++) for (let tx = b.x; tx < b.x + b.width; tx++) {
       const x = tx * tile, y = ty * tile;
       if (x + tile <= bounds2.x || y + tile <= bounds2.y || x >= bounds2.x + bounds2.width || y >= bounds2.y + bounds2.height) continue;
-      const code = v.biomes?.[ty - tileOy]?.[tx - tileOx] ?? (b.kind === "rock" ? "r" : "w"), visualKind = b.kind === "building" || b.kind === "fence" || b.kind === "hollow-trunk" || b.kind.startsWith("fort-") || b.plannedRuinExterior === true ? "solid" : code === "r" ? "rock" : code === "m" ? "tree" : "base", id = obstacleTileVisualId(b, tx, ty, visualKind), ownerPageId = Math.floor(x / SIZE3) * SIZE3 + "/" + Math.floor(y / SIZE3) * SIZE3, coverageRatio = obstacleTileVisualCoverage(b, visualKind);
+      const code2 = v.biomes?.[ty - tileOy]?.[tx - tileOx] ?? (b.kind === "rock" ? "r" : "w"), visualKind = b.kind === "building" || b.kind === "fence" || b.kind === "hollow-trunk" || b.kind.startsWith("fort-") || b.plannedRuinExterior === true ? "solid" : code2 === "r" ? "rock" : code2 === "m" ? "tree" : "base", id = obstacleTileVisualId(b, tx, ty, visualKind), ownerPageId = Math.floor(x / SIZE3) * SIZE3 + "/" + Math.floor(y / SIZE3) * SIZE3, coverageRatio = obstacleTileVisualCoverage(b, visualKind);
       found.set(id, { b, tx, ty, visualKind, ownerPageId, coverageRatio });
     }
     return found;
@@ -96335,13 +97760,13 @@ function building(ctx, b, tile) {
 }
 function drawGrassGround(ctx, bounds2, seed2, offset2 = { x: 0, y: 0 }, biomeAt = () => null) {
   const palette = (b) => plannedGroundPalette(b) ?? (b === "r" ? ["#756f58", "#837b61", "#666550"] : b === "m" ? ["#315f50", "#3a705a", "#285449"] : ["#356f43", "#43814b", "#2f653c"]);
-  const minX = Math.floor(bounds2.x / 32) - 1, maxX = Math.floor((bounds2.x + bounds2.width) / 32) + 1, minY = Math.floor(bounds2.y / 32) - 1, maxY = Math.floor((bounds2.y + bounds2.height) / 32) + 1, code = (x, y) => biomeAt(x * 32 + 16, y * 32 + 16) ?? "w";
+  const minX = Math.floor(bounds2.x / 32) - 1, maxX = Math.floor((bounds2.x + bounds2.width) / 32) + 1, minY = Math.floor(bounds2.y / 32) - 1, maxY = Math.floor((bounds2.y + bounds2.height) / 32) + 1, code2 = (x, y) => biomeAt(x * 32 + 16, y * 32 + 16) ?? "w";
   ctx.fillStyle = palette("w")[0];
   ctx.fillRect(bounds2.x, bounds2.y, bounds2.width, bounds2.height);
   for (let y = minY; y <= maxY; y++) {
-    let start = minX, current = code(start, y);
+    let start = minX, current = code2(start, y);
     for (let x = minX + 1; x <= maxX + 1; x++) {
-      const next = x <= maxX ? code(x, y) : null;
+      const next = x <= maxX ? code2(x, y) : null;
       if (next === current) continue;
       if (current !== "w") {
         ctx.fillStyle = palette(current)[0];
@@ -96363,7 +97788,7 @@ function drawGrassGround(ctx, bounds2, seed2, offset2 = { x: 0, y: 0 }, biomeAt 
     }
   };
   for (let y = minY; y <= maxY; y++) for (let x = minX; x <= maxX; x++) {
-    const here = code(x, y), right = code(x + 1, y), down = code(x, y + 1);
+    const here = code2(x, y), right = code2(x + 1, y), down = code2(x, y + 1);
     if (here !== right) feather2((x + 1) * 32, y * 32 + 16, here, right, true);
     if (here !== down) feather2(x * 32 + 16, (y + 1) * 32, here, down, false);
   }
@@ -96839,7 +98264,7 @@ function drawCollisionCoverageDebug(ctx, space, view3) {
   for (const b of v.blockers ?? []) if (["thicket", "trees", "rock", "building", "fence", "cave-rock-wall", "ruin-exterior-masonry", "hollow-trunk"].includes(b.kind) || b.kind.startsWith("fort-")) for (let ty = b.y; ty < b.y + b.height; ty++) for (let tx = b.x; tx < b.x + b.width; tx++) {
     const x = tx * t, y = ty * t;
     if (x + t < view3.x || y + t < view3.y || x > view3.x + view3.width || y > view3.y + view3.height) continue;
-    const code = v.biomes?.[ty - oy]?.[tx - ox] ?? (b.kind === "rock" ? "r" : "w"), authored = b.kind === "hollow-trunk" || b.kind === "cave-rock-wall" || b.kind === "ruin-exterior-masonry" || b.kind.startsWith("fort-"), kind = b.kind === "building" || b.kind === "fence" || authored ? "solid" : naturalVisualKind(code, b.kind), coverage = kind === "solid" ? 1 : kind === "tree" ? 0.92 : kind === "rock" ? 0.86 : 0.88, margin = (1 - Math.sqrt(coverage)) * t / 2;
+    const code2 = v.biomes?.[ty - oy]?.[tx - ox] ?? (b.kind === "rock" ? "r" : "w"), authored = b.kind === "hollow-trunk" || b.kind === "cave-rock-wall" || b.kind === "ruin-exterior-masonry" || b.kind.startsWith("fort-"), kind = b.kind === "building" || b.kind === "fence" || authored ? "solid" : naturalVisualKind(code2, b.kind), coverage = kind === "solid" ? 1 : kind === "tree" ? 0.92 : kind === "rock" ? 0.86 : 0.88, margin = (1 - Math.sqrt(coverage)) * t / 2;
     ctx.fillStyle = "rgba(227,65,55,.18)";
     ctx.fillRect(x, y, t, t);
     ctx.strokeStyle = "rgba(255,91,73,.9)";
@@ -96869,7 +98294,7 @@ function drawRequiredObstacleVisual(ctx, space, b, tx, ty, pilot = null) {
     ctx.restore();
     return obstacleTileVisualId(b, tx, ty, "solid");
   }
-  const t = space.collision.tileSize, v = space.visual, ox = v.originTile?.x ?? 0, oy = v.originTile?.y ?? 0, seed2 = environmentSeed(space), offset2 = environmentWorldOffset(space), code = v.biomes?.[ty - oy]?.[tx - ox] ?? (b.kind === "rock" ? "r" : "w"), forestRole = woodlandForestRole(b.naturalClusterId), n = forestRole ? woodlandForestVisualHash(b.naturalClusterId, tx + offset2.x / t, ty + offset2.y / t) : terrainHash(tx + offset2.x / t, ty + offset2.y / t, seed2 + 113), visualKind = naturalVisualKind(code, b.kind), id = obstacleTileVisualId(b, tx, ty, visualKind);
+  const t = space.collision.tileSize, v = space.visual, ox = v.originTile?.x ?? 0, oy = v.originTile?.y ?? 0, seed2 = environmentSeed(space), offset2 = environmentWorldOffset(space), code2 = v.biomes?.[ty - oy]?.[tx - ox] ?? (b.kind === "rock" ? "r" : "w"), forestRole = woodlandForestRole(b.naturalClusterId), n = forestRole ? woodlandForestVisualHash(b.naturalClusterId, tx + offset2.x / t, ty + offset2.y / t) : terrainHash(tx + offset2.x / t, ty + offset2.y / t, seed2 + 113), visualKind = naturalVisualKind(code2, b.kind), id = obstacleTileVisualId(b, tx, ty, visualKind);
   if (b.kind === "building") {
     building(ctx, b, t);
     return obstacleTileVisualId(b, tx, ty, "solid");
@@ -96891,8 +98316,8 @@ function drawRequiredObstacleVisual(ctx, space, b, tx, ty, pilot = null) {
   }
   if (visualKind === "rock") {
     const p = b.naturalClusterId ? naturalRockPose(n, tx, ty, t) : { x: tx * t - 2, y: ty * t + 2, size: t + 4 };
-    if (!pilot?.rock(ctx, space, p.x, p.y, p.size, n, { forestRole })) drawRockCluster(ctx, p.x, p.y, p.size, n, code, Boolean(b.naturalClusterId));
-  } else if (code === "m") {
+    if (!pilot?.rock(ctx, space, p.x, p.y, p.size, n, { forestRole })) drawRockCluster(ctx, p.x, p.y, p.size, n, code2, Boolean(b.naturalClusterId));
+  } else if (code2 === "m") {
     const { x, y, size } = b.naturalClusterId ? naturalMarshPose(n, tx, ty, t) : { x: tx * t - 8 + (n % 3 - 1), y: ty * t - 15 + ((n >>> 4) % 3 - 1), size: t + 16 };
     ctx.fillStyle = "#183f34";
     ctx.beginPath();
@@ -98788,7 +100213,7 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
     input.clear();
     primary?.clear();
   } });
-  navigation = createWorldMapD9({ document: doc, environment, port: viewPort, releaseInput: () => {
+  navigation = createWorldMapD9({ document: doc, environment, port: viewPort, issue: (kind, payload) => adapter.issue(kind, payload), releaseInput: () => {
     subweaponHud?.clear();
     input.clear();
     primary?.clear();
@@ -99627,12 +101052,12 @@ function validateOwnedGearPageD9(row2) {
   }
   return row2;
 }
-async function readGroundChunkD9(root2, address2, { readPage, sha256 }) {
+async function readGroundChunkD9(root2, address3, { readPage, sha256 }) {
   if (!root2) return null;
-  const tx = createPageTransaction({ root: root2, readPage, sha256 }), ref = await tx.get(await gearChunkKeyD9(address2, sha256));
+  const tx = createPageTransaction({ root: root2, readPage, sha256 }), ref = await tx.get(await gearChunkKeyD9(address3, sha256));
   if (!ref) return null;
   const doc = await readPage(ref.pageId);
-  requireContract(await pageDigest(doc, sha256) === ref.pageId && doc.kind === "ground-chunk" && same9(doc.payload.address, address2), "Ground chunk commitment/address mismatch");
+  requireContract(await pageDigest(doc, sha256) === ref.pageId && doc.kind === "ground-chunk" && same9(doc.payload.address, address3), "Ground chunk commitment/address mismatch");
   requireContract(Object.keys(doc.payload.cells).length <= 56, "Ground chunk cell bound");
   return copyWire(doc.payload);
 }
@@ -99646,7 +101071,7 @@ async function readGroundCellPageD9(id, descriptor, { readPage, sha256 }) {
 }
 
 // src/storage/world_page_buffer_d9.js
-var chunkDeltaKeyD9 = (address2, sha256) => pageDigest({ version: "world-chunk-key-d9-v1", chunkX: signedAddress(address2.chunkX), chunkY: signedAddress(address2.chunkY) }, sha256);
+var chunkDeltaKeyD9 = (address3, sha256) => pageDigest({ version: "world-chunk-key-d9-v1", chunkX: signedAddress(address3.chunkX), chunkY: signedAddress(address3.chunkY) }, sha256);
 function createWorldPageBufferD9({ readPage, sha256, limit = D9_RUNTIME_POLICY.dirtyPages, now: now3 = () => Date.now() }) {
   const staged = /* @__PURE__ */ new Map(), stagedAt = /* @__PURE__ */ new Map(), ownedRows = /* @__PURE__ */ new WeakSet();
   let rowValidations = 0, checkpointReuses = 0;
@@ -99674,14 +101099,14 @@ function createWorldPageBufferD9({ readPage, sha256, limit = D9_RUNTIME_POLICY.d
   function stage2(pages2) {
     prepareStage(pages2)();
   }
-  async function readChunk(root2, address2) {
+  async function readChunk(root2, address3) {
     if (!root2) return null;
-    const tx = createPageTransaction({ root: root2, readPage: read, sha256 }), ref = await tx.get(await chunkDeltaKeyD9(address2, sha256));
+    const tx = createPageTransaction({ root: root2, readPage: read, sha256 }), ref = await tx.get(await chunkDeltaKeyD9(address3, sha256));
     if (!ref) return null;
     requireContract(ref.version === "world-page-ref-d9-v1", "Chunk index reference version");
     const doc = await read(ref.pageId);
     requireContract(doc && await pageDigest(doc, sha256) === ref.pageId && doc.kind === "chunk-delta", "Missing/corrupt chunk delta");
-    requireContract(doc.payload.chunkX === address2.chunkX && doc.payload.chunkY === address2.chunkY, "Chunk delta address mismatch");
+    requireContract(doc.payload.chunkX === address3.chunkX && doc.payload.chunkY === address3.chunkY, "Chunk delta address mismatch");
     return copyWire(doc.payload);
   }
   async function prepareChunk(root2, delta3) {
@@ -100317,9 +101742,9 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
         return p.playerId + "/" + a.residency.spaceInstanceId + "/" + Math.floor(a.position.x / 128) + "," + Math.floor(a.position.y / 128) + "/" + p.inventory.revision;
       }).join("|");
       const wanted = filter(participantWindowsD9(residencyPlayers)), preload = filter(participantWindowsD9(residencyPlayers, D9_PROFILE.preloadRadiusChunks));
-      if (destinationTarget) for (const address2 of destinationTarget.requiredChunks) {
-        if (historical(address2)) continue;
-        const key2 = chunkAddressKey(address2.chunkX, address2.chunkY), row2 = { chunkX: address2.chunkX, chunkY: address2.chunkY, distance: 0 };
+      if (destinationTarget) for (const address3 of destinationTarget.requiredChunks) {
+        if (historical(address3)) continue;
+        const key2 = chunkAddressKey(address3.chunkX, address3.chunkY), row2 = { chunkX: address3.chunkX, chunkY: address3.chunkY, distance: 0 };
         wanted.set(key2, row2);
         preload.set(key2, row2);
       }
@@ -100347,11 +101772,11 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
       return { plannedWorld: w.plannedWorld ?? null, navigation: w.navigation.pending.length, tick: s.tick, deadlines: w.deadlineIndex, ground, groundKey, seed: s.campaign.seed.seedHex, origin, players, resident, pinned, approach, encounterKey, wanted, preload, regionKeys, familyParcels, existingParcels, reviewPreparing: Boolean(destinationTarget) };
     });
   }
-  const priority = (address2, v) => {
-    let score = address2.distance;
+  const priority = (address3, v) => {
+    let score = address3.distance;
     for (const p of v.players) {
-      const dx = Number(BigInt(address2.chunkX) - BigInt(p.position.chunkX)) * D9_PROFILE.chunkWidth + D9_PROFILE.chunkWidth / 2 - p.position.localX, dy = Number(BigInt(address2.chunkY) - BigInt(p.position.chunkY)) * D9_PROFILE.chunkHeight + D9_PROFILE.chunkHeight / 2 - p.position.localY, length = Math.hypot(dx, dy), intent = Math.hypot(p.intent.x, p.intent.y);
-      if (length && intent) score = Math.min(score, address2.distance - 0.45 * Math.max(0, (dx * p.intent.x + dy * p.intent.y) / (length * intent)));
+      const dx = Number(BigInt(address3.chunkX) - BigInt(p.position.chunkX)) * D9_PROFILE.chunkWidth + D9_PROFILE.chunkWidth / 2 - p.position.localX, dy = Number(BigInt(address3.chunkY) - BigInt(p.position.chunkY)) * D9_PROFILE.chunkHeight + D9_PROFILE.chunkHeight / 2 - p.position.localY, length = Math.hypot(dx, dy), intent = Math.hypot(p.intent.x, p.intent.y);
+      if (length && intent) score = Math.min(score, address3.distance - 0.45 * Math.max(0, (dx * p.intent.x + dy * p.intent.y) / (length * intent)));
     }
     return score;
   };
@@ -100362,10 +101787,10 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
       discarded++;
     }
   }
-  async function generate(address2, v) {
-    const key2 = chunkAddressKey(address2.chunkX, address2.chunkY);
+  async function generate(address3, v) {
+    const key2 = chunkAddressKey(address3.chunkX, address3.chunkY);
     if (prepared.has(key2) || v.resident.has(key2)) return;
-    const generatedChunk = await worker.generate({ seed: v.seed, chunkX: address2.chunkX, chunkY: address2.chunkY, profile: D9_PROFILE.version, origin: v.origin, ...v.plannedWorld ? { plannedWorld: v.plannedWorld } : {} }), historical = overlayWoodlandCaveParcelD10(overlayWoodlandFortParcelD10(overlayWoodlandRuinExteriorD11_3_2(overlayFunctionalSiteBootstrapD9(generatedChunk, siteBootstrap), ruinSocket ?? siteBootstrap), fortParcel), caveParcel), legacy = overlayWoodlandCaveFamilyParcelsD12(historical, v.familyParcels.filter((parcel2) => ![WOODLAND_CAVE_FAMILY_PARCEL_D12_1, WOODLAND_CAVE_FAMILY_PARCEL_D12_2, PLANNED_CAVE_PARCEL].includes(parcel2.version))), modern = overlayWoodlandCaveFamilyParcelsD12_1(legacy, v.familyParcels.filter((parcel2) => parcel2.version === WOODLAND_CAVE_FAMILY_PARCEL_D12_1)), chunk2 = overlayWoodlandCaveFamilyParcelsD12_2(modern, v.familyParcels.filter((parcel2) => parcel2.version === WOODLAND_CAVE_FAMILY_PARCEL_D12_2));
+    const generatedChunk = await worker.generate({ seed: v.seed, chunkX: address3.chunkX, chunkY: address3.chunkY, profile: D9_PROFILE.version, origin: v.origin, ...v.plannedWorld ? { plannedWorld: v.plannedWorld } : {} }), historical = overlayWoodlandCaveParcelD10(overlayWoodlandFortParcelD10(overlayWoodlandRuinExteriorD11_3_2(overlayFunctionalSiteBootstrapD9(generatedChunk, siteBootstrap), ruinSocket ?? siteBootstrap), fortParcel), caveParcel), legacy = overlayWoodlandCaveFamilyParcelsD12(historical, v.familyParcels.filter((parcel2) => ![WOODLAND_CAVE_FAMILY_PARCEL_D12_1, WOODLAND_CAVE_FAMILY_PARCEL_D12_2, PLANNED_CAVE_PARCEL].includes(parcel2.version))), modern = overlayWoodlandCaveFamilyParcelsD12_1(legacy, v.familyParcels.filter((parcel2) => parcel2.version === WOODLAND_CAVE_FAMILY_PARCEL_D12_1)), chunk2 = overlayWoodlandCaveFamilyParcelsD12_2(modern, v.familyParcels.filter((parcel2) => parcel2.version === WOODLAND_CAVE_FAMILY_PARCEL_D12_2));
     generated++;
     const current = observedView();
     if (closed || !current.preload.has(key2) || current.resident.has(key2)) {
@@ -100764,8 +102189,8 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
     destinationTarget = { position: copyWire(position4), requiredChunks: copyWire(requiredChunks2), departingPlayerId };
     for (let attempt = 0; attempt < D9_RUNTIME_POLICY.preparedChunks; attempt++) {
       await pump();
-      const v = observedView(), historical = (address2) => BigInt(address2.chunkX) >= 0n && BigInt(address2.chunkY) >= 0n && BigInt(address2.chunkX) < BigInt(v.origin.originWidthChunks) && BigInt(address2.chunkY) < BigInt(v.origin.originHeightChunks);
-      if (destinationTarget.requiredChunks.every((address2) => historical(address2) || v.resident.has(chunkAddressKey(address2.chunkX, address2.chunkY)))) return true;
+      const v = observedView(), historical = (address3) => BigInt(address3.chunkX) >= 0n && BigInt(address3.chunkY) >= 0n && BigInt(address3.chunkX) < BigInt(v.origin.originWidthChunks) && BigInt(address3.chunkY) < BigInt(v.origin.originHeightChunks);
+      if (destinationTarget.requiredChunks.every((address3) => historical(address3) || v.resident.has(chunkAddressKey(address3.chunkX, address3.chunkY)))) return true;
     }
     destinationTarget = null;
     throw new Error("Destination residency could not become ready within the deterministic preparation budget");
@@ -100797,7 +102222,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
 async function prepareD9OriginMigration(state, { sha256 }) {
   validateActivityState(state);
   requireContract(!state.d9World, "World already migrated");
-  const m = manifestForState(state), collision = compileBoundOverworld(state).collision, hash35 = bytesToHex(await hashBytes(utf8(canonicalStringify(m)), sha256)), overlay = originEgress(m, collision, economicResources(state, m));
+  const m = manifestForState(state), collision = compileBoundOverworld(state).collision, hash36 = bytesToHex(await hashBytes(utf8(canonicalStringify(m)), sha256)), overlay = originEgress(m, collision, economicResources(state, m));
   const positions = {};
   for (const a of Object.values(state.entitiesById)) if (a.residency.spaceInstanceId === state.overworldInstanceId) positions[a.entityId] = legacyWorldPosition(a.position);
   const next = copyWire(state);
@@ -100812,7 +102237,7 @@ async function prepareD9OriginMigration(state, { sha256 }) {
     aliases[id] = { chunkX: String(ch.origin.x / D9_PROFILE.chunkWidth), chunkY: String(ch.origin.y / D9_PROFILE.chunkHeight) };
   }
   const frames = [{ id: 0, chunkX: "0", chunkY: "0", offsetX: 0, offsetY: 0, playerIds: [], originBounds: { width: m.dimensions.width / D9_PROFILE.chunkWidth, height: m.dimensions.height / D9_PROFILE.chunkHeight } }];
-  next.d9World = { version: D9_ROOT_VERSION, profile: copyWire(D9_PROFILE), origin: { manifestHash: hash35, width: m.dimensions.width, height: m.dimensions.height, chunkAliases: aliases, egress: copyWire(overlay), resources: copyWire(economicResources(state, m)) }, positions, frame: { chunkX: "0", chunkY: "0" }, regionIndex: null, discoveryIndex: null, deadlineIndex: null, migration: { version: "origin-migration-d9-v1", tick: state.tick, sourceSaveRevision: state.campaign.saveRevision }, runtime: { revision: 0, frames: copyWire(frames), chunks: [], groups: [], resources: [] }, episodes: {}, functionalSitesById: {}, siteReservationsById: {} };
+  next.d9World = { version: D9_ROOT_VERSION, profile: copyWire(D9_PROFILE), origin: { manifestHash: hash36, width: m.dimensions.width, height: m.dimensions.height, chunkAliases: aliases, egress: copyWire(overlay), resources: copyWire(economicResources(state, m)) }, positions, frame: { chunkX: "0", chunkY: "0" }, regionIndex: null, discoveryIndex: null, deadlineIndex: null, migration: { version: "origin-migration-d9-v1", tick: state.tick, sourceSaveRevision: state.campaign.saveRevision }, runtime: { revision: 0, frames: copyWire(frames), chunks: [], groups: [], resources: [] }, episodes: {}, functionalSitesById: {}, siteReservationsById: {} };
   next.spacesByInstanceId[next.overworldInstanceId].collision = { version: D9_COLLISION_VERSION, tileSize: 32, width: 20480, height: 3328, origin: copyWire(applyOriginEgress(collision, overlay)), frames: copyWire(frames), pages: [] };
   next.d9World.runtimePolicy = D9_RUNTIME_POLICY.version;
   next.d9World.navigation = emptyNavigationD9();
@@ -100831,7 +102256,7 @@ async function prepareD9OriginMigration(state, { sha256 }) {
     }
     next.d9World.navigation.pending.push(...rows.values());
   }
-  next.d9World.content = historicalSiteContentD9(m, hash35);
+  next.d9World.content = historicalSiteContentD9(m, hash36);
   next.d9World.paging = emptyWorldPagingD9(next.session.playerIds);
   next.d9World.ownershipIndex = null;
   next.d9World.groundIndex = null;
@@ -101276,8 +102701,8 @@ async function createLocalEndlessSessionD9(options) {
   const pages2 = createWorldPageBufferD9({ readPage: worker.readPage, sha256, now: now3 }), authority = createPagedWorldAuthorityD9({ initialState: opened.state, publication: opened.publication, task: worker, measure: measure2, developerCapabilities: { siteNavigator: siteNavigatorEnabled }, capturePages: pages2.capture, confirmedPages: pages2.acknowledge });
   const fortParcel = Object.values(opened.state.d9World.siteReservationsById ?? {}).find((r) => r.packageId === "woodland-fort")?.parcel ?? null, caveParcel = Object.values(opened.state.d9World.siteReservationsById ?? {}).find((r) => r.packageId === WOODLAND_CAVE_PACKAGE_ID)?.parcel ?? null, caveParcels = Object.values(opened.state.d9World.siteReservationsById ?? {}).filter((r) => r.packageId === WOODLAND_CAVE_FAMILY_PACKAGE_ID).map((r) => r.parcel).sort((a, b) => (a.regionKey ?? "").localeCompare(b.regionKey ?? "") || a.spawnOrdinal - b.spawnOrdinal);
   const stream = createWorldResidencyD9({ authority, worker, pageBuffer: pages2, siteBootstrap, ruinSocket: ruinReservation?.socket ?? null, fortParcel, caveParcel, caveParcels, measure: measure2, now: now3 }), clientPort = createActivityClientPort({ authority, localPlayerId, measure: measure2 });
-  const store = storeFactory(opened.state.content.fingerprint, activityGeneration(opened.state), activityCampaignCodec);
-  await store.writeLocalLauncher?.(proofCase, { campaignId: opened.state.campaign.campaignId, playerId: localPlayerId });
+  const store2 = storeFactory(opened.state.content.fingerprint, activityGeneration(opened.state), activityCampaignCodec);
+  await store2.writeLocalLauncher?.(proofCase, { campaignId: opened.state.campaign.campaignId, playerId: localPlayerId });
   const GATE_TIMEOUT_MS = 15e3, RETRY_MS = 1e3, STREAM_SERVICE_MS = 100, STREAM_IDLE_SERVICE_MS = 500;
   let lastStreamAnchor = null;
   const streamAnchor = () => authority.withAuthority((a) => a.withAuthorityState((s) => Object.values(s.playersById).map((p) => {
@@ -101350,7 +102775,7 @@ async function createLocalEndlessSessionD9(options) {
   lastCritical = criticalLifecycle();
   if (opened.state.d9World.groundIndex) await stream.warmGround();
   else {
-    const query = authority.withReadyAuthority((a) => a.withAuthorityState(captureGroundCoverageQueryV1)), result = await prepareGroundCoverageQueryV1(query, { sha256, readPage: store.worldPages?.readPage });
+    const query = authority.withReadyAuthority((a) => a.withAuthorityState(captureGroundCoverageQueryV1)), result = await prepareGroundCoverageQueryV1(query, { sha256, readPage: store2.worldPages?.readPage });
     if (result.coverage.length) requireContract(authority.withReadyAuthority((a) => a.withAuthorityState((s) => installGroundCoverageQueryV1(s, result))), "Initial ground proof changed before play");
   }
   authority.withReadyAuthority((a) => a.withAuthorityState((s) => measure2("explorationReveal", () => revealNavigationD9(s))));
@@ -101482,6 +102907,38 @@ async function createLocalEndlessSessionD9(options) {
           authority.withReadyAuthority((a) => a.withAuthorityState((s) => revealNavigationD9(s)));
           const durable = await save();
           requireContract(durable.status === "committed", durable.reason ?? "Ferry arrival save failed");
+          return receipt;
+        } catch (error) {
+          lastError = error.message;
+          throw error;
+        } finally {
+          stream.finishTravelPosition();
+          ferryPending = null;
+          void stream.pump();
+        }
+      })();
+      return ferryPending;
+    }
+    if (command.kind === "map.travel") {
+      const where = authority.withReadyAuthority((a) => a.withAuthorityState((s) => {
+        const actor = s.entitiesById[s.playersById[command.playerId].entityId];
+        return fastTravelEligible(s, actor, command.payload) ? { address: fastTravelArrivalAddress(s, command.payload.destinationId), chunks: fastTravelPreparationChunks(s, command.payload.destinationId) } : null;
+      }));
+      requireContract(where?.address, "Fast travel unavailable: step out of combat, outdoors, to a place you have found");
+      ferryPending = (async () => {
+        try {
+          if (groundPreparation) await groundPreparation.promise;
+          if (saving) await saving;
+          await stream.settled();
+          await stream.prepareTravelPosition(where.address, where.chunks, command.playerId);
+          const receipt = clientPort.send(command);
+          requireContract(["admitted", "alreadyApplied"].includes(receipt.status), "Fast travel was not admitted");
+          authority.drainCommands();
+          const applied = authority.withReadyAuthority((a) => a.withAuthorityState((s) => s.appliedCommandsById[command.commandId]));
+          requireContract(applied?.status === "applied", "Fast travel became stale: an enemy came close, or the arrival was blocked");
+          authority.withReadyAuthority((a) => a.withAuthorityState((s) => revealNavigationD9(s)));
+          const durable = await save();
+          requireContract(durable.status === "committed", durable.reason ?? "Fast travel arrival save failed");
           return receipt;
         } catch (error) {
           lastError = error.message;
@@ -101645,12 +103102,12 @@ async function createLocalEndlessSessionD9(options) {
   };
   let groundPreparation = null, groundPreparationError = null, groundPreparationOffers = 0, groundPreparationCompletions = 0;
   const groundPreparationHistory = [];
-  const groundPrefetch = createGroundCoveragePrefetchV1({ canRun: () => typeof store.worldPages?.readPage === "function" && !reviewTravelPending && !groundPreparation && !groundPreparationError && !fatalInvariant && !functionalCommands.busy() && !ferryPending && !respawnPending && !servicePending && authority.getStatus().phase === "ready", needsRefresh: () => authority.withAuthority((a) => a.withAuthorityState(participantGroundCoverageRefreshDueD9)), settleStream: async () => {
+  const groundPrefetch = createGroundCoveragePrefetchV1({ canRun: () => typeof store2.worldPages?.readPage === "function" && !reviewTravelPending && !groundPreparation && !groundPreparationError && !fatalInvariant && !functionalCommands.busy() && !ferryPending && !respawnPending && !servicePending && authority.getStatus().phase === "ready", needsRefresh: () => authority.withAuthority((a) => a.withAuthorityState(participantGroundCoverageRefreshDueD9)), settleStream: async () => {
   }, prepare: async () => {
     const query = authority.withAuthority((a) => a.withAuthorityState(captureGroundCoverageQueryV1)), stagedPages = pages2.capture();
     let result;
     try {
-      result = await prepareGroundCoverageQueryV1(query, { sha256, stagedPages, readPage: store.worldPages.readPage });
+      result = await prepareGroundCoverageQueryV1(query, { sha256, stagedPages, readPage: store2.worldPages.readPage });
     } catch (error) {
       if (authority.withAuthority((a) => a.withAuthorityState((s) => s.d9World.groundIndex)) !== query.root) return false;
       throw error;
