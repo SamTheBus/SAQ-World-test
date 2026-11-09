@@ -780,7 +780,33 @@ var LIFE_NPCS = freezeWire([
 
 // src/shared/generation/town_layout_v1.js
 var TOWN_LAYOUT_VERSION = "town-layout-v1.1";
-var SPOT_NAMES = Object.freeze({ "village-outpost:01": "Alderwood", "capital-great-hold:01": "Highcrown", "capital-great-hold:02": "Stormhold", "city:01": "Ashford", "city:02": "Silverkeep", "city:03": "Marrowgate", "city:04": "Brightwater", "town:01": "Larkcross", "town:02": "Thornbury", "town:03": "Fenwick", "town:04": "Copperwell", "town:06": "Hollowmere", "town:07": "Ravensford", "town:08": "Ironwall", "village-outpost:03": "Willowford", "village-outpost:04": "Gull's Rest", "village-outpost:05": "Driftwood" });
+var SPOT_NAMES = Object.freeze({
+  "village-outpost:01": "Alderwood",
+  "capital-great-hold:01": "Highcrown",
+  "capital-great-hold:02": "Stormhold",
+  "city:01": "Ashford",
+  "city:02": "Silverkeep",
+  "city:03": "Marrowgate",
+  "city:04": "Brightwater",
+  "town:01": "Larkcross",
+  "town:02": "Thornbury",
+  "town:03": "Fenwick",
+  "town:04": "Copperwell",
+  "town:06": "Hollowmere",
+  "town:07": "Ravensford",
+  "town:08": "Ironwall",
+  "village-outpost:03": "Willowford",
+  "village-outpost:04": "Gull's Rest",
+  "village-outpost:05": "Driftwood",
+  // The island settlements world-maker-v1.11 adds where an island has nothing else.
+  "village-outpost:07": "Saltmere",
+  "village-outpost:08": "Kelpwick",
+  "village-outpost:09": "Ternby",
+  "village-outpost:10": "Brinecombe",
+  "town:09": "Seabright",
+  "town:10": "Wavecrest",
+  "town:11": "Tidemoor"
+});
 var ALWAYS_WALLED = /* @__PURE__ */ new Set(["town:08"]);
 var sq = (v) => v * v;
 var hyp = PM.hypot;
@@ -1708,7 +1734,15 @@ var GENERATED_TOWN_SIZES = Object.freeze({
   "settlement-slot:town:08": "town",
   "settlement-slot:village-outpost:03": "village",
   "settlement-slot:village-outpost:04": "hamlet",
-  "settlement-slot:village-outpost:05": "hamlet"
+  "settlement-slot:village-outpost:05": "hamlet",
+  // world-maker-v1.11: the island villages and towns, only where an island has nothing else.
+  "settlement-slot:village-outpost:07": "village",
+  "settlement-slot:village-outpost:08": "village",
+  "settlement-slot:village-outpost:09": "village",
+  "settlement-slot:village-outpost:10": "village",
+  "settlement-slot:town:09": "town",
+  "settlement-slot:town:10": "town",
+  "settlement-slot:town:11": "town"
 });
 var hyp2 = PM.hypot;
 var r3 = (v) => Math.round(v * 1e3) / 1e3;
@@ -2093,6 +2127,19 @@ for (const role of Object.keys(CAST_KITS)) {
     KIT_OF[slot + "|" + role] = ks2[i % ks2.length];
   });
 }
+var ISLAND_SPOTS = [["village-outpost:07", "village"], ["village-outpost:08", "village"], ["village-outpost:09", "village"], ["village-outpost:10", "village"], ["town:09", "town"], ["town:10", "town"], ["town:11", "town"]];
+for (const role of Object.keys(CAST_KITS)) {
+  const ks2 = Object.keys(CAST_KITS[role]);
+  shuffled("island-kits|" + role, ISLAND_SPOTS.map((s) => s[0])).forEach((slot, i) => {
+    KIT_OF[slot + "|" + role] = ks2[i % ks2.length];
+  });
+}
+SPOTS.push(...ISLAND_SPOTS);
+var ISLAND_NAMES = [
+  ["Anselm", "Baldric", "Cedric", "Darrow", "Elric", "Fergus", "Grady", "Holt", "Ingram", "Jory", "Kester", "Leof", "Morgan", "Niall", "Oswin", "Piers", "Radley", "Stellan", "Tobias", "Ulf"],
+  ["Alys", "Bryony", "Cressida", "Delphine", "Eira", "Fern", "Gwen", "Hollis", "Isolde", "Jessamy", "Kerensa", "Lark", "Merry", "Nerys", "Orla", "Primrose", "Rhosyn", "Saffron", "Tilda", "Wynne"]
+];
+var ISLAND_SLOTS = new Set(ISLAND_SPOTS.map((s) => s[0]));
 var CAST = {};
 {
   const used = /* @__PURE__ */ new Set(["Ada", "Bren", "Mara", "Selene", "Ila", "Nell", "Oren"]);
@@ -2101,9 +2148,12 @@ var CAST = {};
     for (const role of size === "village" ? ["general", "smith", "innkeeper"] : ["general", "smith", "innkeeper", "enchanter"]) {
       const r = rng(slot + "|" + role), kit = KIT_OF[slot + "|" + role], K = CAST_KITS[role][kit];
       const beard = pick(r, K.beard), look = { hair: pick(r, K.hair), facialHair: beard, hairColor: K.old ? pick(r, OLD) : pick(r, COLORS), skin: pick(r, SKINS) };
+      const [bearded, smooth] = ISLAND_SLOTS.has(slot) ? ISLAND_NAMES : [BEARDED, SMOOTH];
+      let list = beard === "none" ? smooth : bearded;
+      if (list.every((n) => used.has(n))) list = [...bearded, ...smooth];
       let name;
       do {
-        name = pick(r, beard === "none" ? SMOOTH : BEARDED);
+        name = pick(r, list);
       } while (used.has(name));
       used.add(name);
       const cloth = K.robe ? pick(r, ROBES) : pick(r, CLOTH), skirt = pick(r, CLOTH);
@@ -4179,7 +4229,7 @@ function validateRuntimePlan(p) {
     for (const b of w.bridgeGuards) requirePlan(Object.keys(b).sort().join(",") === "x1,x2,y1,y2" && Object.values(b).every(Number.isSafeInteger) && b.x1 <= b.x2 && b.y1 <= b.y2 && b.x2 - b.x1 <= 20 && b.y2 - b.y1 <= 20, "Invalid immutable bridge guard");
   }
   requirePlan(p.scale.tilePixels === 32 && p.scale.chunkTilesX === 32 && p.scale.chunkTilesY === 26 && p.scale.macroTilesX === 64 && p.scale.macroTilesY === 52, "Planned spatial scale");
-  requirePlan(p.settlements.length === 20 && p.sites.length === (p.firstJourney ? 125 : p.wildernessExtension ? 124 : p.populationOverlay ? 51 : 48) && p.futureIslands.length === 6 && p.factions.length === 3 && p.stonewatch.candidateCount > 0, "Incomplete planned reservations");
+  requirePlan(p.settlements.length >= 20 && p.settlements.length <= 27 && p.sites.length === (p.firstJourney ? 125 : p.wildernessExtension ? 124 : p.populationOverlay ? 51 : 48) && p.futureIslands.length === 6 && p.factions.length === 3 && p.stonewatch.candidateCount > 0, "Incomplete planned reservations");
   if (p.worldReshape) requirePlan(p.worldReshape.version === RESHAPE_VERSION && p.worldReshape.hash === RESHAPE_HASH && p.firstJourney && p.assetId === "alpha", "Uncommitted world reshape");
   if (p.firstJourney) requirePlan(p.firstJourney.version === ACCESS_VERSION && p.firstJourney.hash === ACCESS_HASH && p.wildernessExtension && p.hydrologyPlan && p.assetId === "alpha" && p.sites.filter((s) => s.id === "repeatable-slot:cave:woodland:small:109").length === 1, "Uncommitted first journey");
   if (p.wildernessExtension) requirePlan(p.wildernessExtension.version === WILDERNESS_VERSION && p.wildernessExtension.hash === WILDERNESS_HASH && p.assetId === "alpha", "Uncommitted wilderness extension");
@@ -5005,6 +5055,8 @@ function makeRoles(asset) {
 
 // src/shared/generation/world_maker_v1/places.js
 var moveSite = (t, dx, dy, lm) => ({ ...t, anchor: { key: t.anchor.x + dx + "," + (t.anchor.y + dy), x: t.anchor.x + dx, y: t.anchor.y + dy }, footprint: t.footprint.map((c) => ({ x: c.x + 2 * dx, y: c.y + 2 * dy })), approach: t.approach.map((c) => ({ x: c.x + 2 * dx, y: c.y + 2 * dy })), landmassId: lm });
+var ISLAND_VILLAGES = ["settlement-slot:village-outpost:07", "settlement-slot:village-outpost:08", "settlement-slot:village-outpost:09", "settlement-slot:village-outpost:10"];
+var ISLAND_TOWNS = ["settlement-slot:town:09", "settlement-slot:town:10", "settlement-slot:town:11"];
 var SITE_MIX = { cave: { small: 33, standard: 4, large: 2, deep: 2 }, crypt: { small: 12, standard: 2, large: 1, deep: 1 }, fort: { small: 2, standard: 14, large: 1, deep: 1 }, ruin: { small: 4, standard: 27, large: 2, deep: 1 } };
 function makePlaces(seed, land, layout, biomes, catalog) {
   const { owner, landmasses, elevation, slope, depth } = land, { band, placed, taken, fits, put: put2, choose, mainland, majors, mediums, coastal, isLand } = layout, { biome } = biomes, rnd = stream(seed, "places");
@@ -5070,17 +5122,46 @@ function makePlaces(seed, land, layout, biomes, catalog) {
   settle("settlement-slot:city:03", mainland, (i) => -Math.abs(band[i] - 3) * 0.5 + away(i));
   settle("settlement-slot:village-outpost:02", mainland, (i) => -Math.abs(band[i] - 2) * 0.6 + away(i) - slope[i] / 800);
   settle("settlement-slot:village-outpost:03", mainland, (i) => -Math.abs(band[i] - 3) * 0.6 - elevation[i] / 2500 + away(i));
-  const byIsland = (k) => [...placed.values()].some((s) => s.landmassId === LM[k]);
-  const majorsBySize = [...majors].sort((a, b) => landmasses[b].cells.length - landmasses[a].cells.length);
-  for (const id of ["settlement-slot:capital-great-hold:02", "settlement-slot:city:04", "settlement-slot:village-outpost:04"]) {
-    const free = majorsBySize.filter((k) => !byIsland(k));
-    settle(id, free.length ? free : majorsBySize, (i) => away(i) - slope[i] / 800);
+  const onIsland = (k) => [...placed.values()].filter((s) => s.landmassId === LM[k]), byIsland = (k) => onIsland(k).length > 0;
+  const townish = (k) => onIsland(k).filter((s) => !s.id.includes(":village-outpost:")).length, size = (k) => landmasses[k].cells.length;
+  const fewestTowns = () => [...majors].sort((a, b) => townish(a) - townish(b) || size(b) - size(a));
+  for (const id of ["settlement-slot:capital-great-hold:02", "settlement-slot:city:04"]) {
+    const ks2 = fewestTowns(), few = ks2.filter((k) => townish(k) === townish(ks2[0]));
+    settle(id, few, (i) => away(i) - slope[i] / 800);
   }
-  {
-    const free = mediums.filter((k) => !byIsland(k));
-    settle("settlement-slot:village-outpost:05", free.length ? free : mediums, (i) => away(i));
+  for (const id of ["settlement-slot:village-outpost:04", "settlement-slot:village-outpost:05"]) {
+    const free = [...majors, ...mediums].filter((k) => !byIsland(k)), pool = free.some((k) => majors.includes(k)) ? free.filter((k) => majors.includes(k)) : free;
+    settle(id, pool.length ? pool : id.endsWith(":04") ? majors : mediums, (i) => away(i) - slope[i] / 800);
   }
-  const settlements2 = [...catalog.settlements.keys()].map((id) => {
+  const landingOf = new Map(layout.landings.slice(1).map((l) => [l.landmass, l.cell]));
+  const extras = [], rename = (t, id, role) => ({ ...JSON.parse(JSON.stringify(t).split(t.id).join(id)), role });
+  const settleExtra = (t, k) => {
+    const L = landingOf.get(k), score = (i) => away(i) - slope[i] / 800 - (L === void 0 ? 0 : PM.hypot(cx(i) - cx(L), cy(i) - cy(L)) / 24);
+    for (const spacing of [3, 2, 1]) {
+      let best = null, bv = -Infinity;
+      for (const i of landmasses[k].cells) {
+        const v = score(i) + rnd() * 0.01;
+        if (v <= bv) continue;
+        if (fits(t, cx(i), cy(i), k, spacing)) {
+          bv = v;
+          best = i;
+        }
+      }
+      if (best !== null) {
+        const r = relocate(t, cx(best) - t.anchor.x, cy(best) - t.anchor.y, t.landmassId, LM[k]);
+        for (const c of [...r.core, ...r.expansion, ...r.sockets]) taken[idx(Math.floor(c.x / 2), Math.floor(c.y / 2))] = 1;
+        placed.set(r.id, r);
+        extras.push(r.id);
+        return true;
+      }
+    }
+    return false;
+  };
+  const VILLAGE = catalog.settlements.get("settlement-slot:village-outpost:03"), TOWN = catalog.settlements.get("settlement-slot:town:01");
+  let nv = 0, nt = 0;
+  for (const k of [...mediums].sort((a, b) => size(b) - size(a))) if (!byIsland(k) && nv < ISLAND_VILLAGES.length && settleExtra(rename(VILLAGE, ISLAND_VILLAGES[nv], "island-village"), k)) nv++;
+  for (const k of [...majors].sort((a, b) => size(b) - size(a))) if (!townish(k) && nt < ISLAND_TOWNS.length && settleExtra(rename(TOWN, ISLAND_TOWNS[nt], "island-town"), k)) nt++;
+  const settlements2 = [...catalog.settlements.keys(), ...extras].map((id) => {
     const s = placed.get(id);
     if (!s) throw Error("Unplaced " + id);
     const i = idx(s.anchor.x, s.anchor.y);
@@ -7044,7 +7125,7 @@ var CLASSIC_EVENT_PLAN = freezeWire({ version: WORLD_EVENT_PLAN_VERSION, events:
 
 // src/shared/generation/world_maker_v1/make.js
 var TW4 = W * 64;
-var WORLD_MAKER_VERSION = "world-maker-v1.12";
+var WORLD_MAKER_VERSION = "world-maker-v1.13";
 function makeWorld(seed, catalog, tries = 4, onStep = null) {
   const started = performance.now();
   let w, why = [];

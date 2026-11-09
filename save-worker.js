@@ -2073,7 +2073,33 @@ var LIFE_NPCS = freezeWire([
 ]);
 
 // src/shared/generation/town_layout_v1.js
-var SPOT_NAMES = Object.freeze({ "village-outpost:01": "Alderwood", "capital-great-hold:01": "Highcrown", "capital-great-hold:02": "Stormhold", "city:01": "Ashford", "city:02": "Silverkeep", "city:03": "Marrowgate", "city:04": "Brightwater", "town:01": "Larkcross", "town:02": "Thornbury", "town:03": "Fenwick", "town:04": "Copperwell", "town:06": "Hollowmere", "town:07": "Ravensford", "town:08": "Ironwall", "village-outpost:03": "Willowford", "village-outpost:04": "Gull's Rest", "village-outpost:05": "Driftwood" });
+var SPOT_NAMES = Object.freeze({
+  "village-outpost:01": "Alderwood",
+  "capital-great-hold:01": "Highcrown",
+  "capital-great-hold:02": "Stormhold",
+  "city:01": "Ashford",
+  "city:02": "Silverkeep",
+  "city:03": "Marrowgate",
+  "city:04": "Brightwater",
+  "town:01": "Larkcross",
+  "town:02": "Thornbury",
+  "town:03": "Fenwick",
+  "town:04": "Copperwell",
+  "town:06": "Hollowmere",
+  "town:07": "Ravensford",
+  "town:08": "Ironwall",
+  "village-outpost:03": "Willowford",
+  "village-outpost:04": "Gull's Rest",
+  "village-outpost:05": "Driftwood",
+  // The island settlements world-maker-v1.11 adds where an island has nothing else.
+  "village-outpost:07": "Saltmere",
+  "village-outpost:08": "Kelpwick",
+  "village-outpost:09": "Ternby",
+  "village-outpost:10": "Brinecombe",
+  "town:09": "Seabright",
+  "town:10": "Wavecrest",
+  "town:11": "Tidemoor"
+});
 var hyp = PM.hypot;
 
 // src/shared/generation/world_maker_v1/core.js
@@ -2102,7 +2128,15 @@ var GENERATED_TOWN_SIZES = Object.freeze({
   "settlement-slot:town:08": "town",
   "settlement-slot:village-outpost:03": "village",
   "settlement-slot:village-outpost:04": "hamlet",
-  "settlement-slot:village-outpost:05": "hamlet"
+  "settlement-slot:village-outpost:05": "hamlet",
+  // world-maker-v1.11: the island villages and towns, only where an island has nothing else.
+  "settlement-slot:village-outpost:07": "village",
+  "settlement-slot:village-outpost:08": "village",
+  "settlement-slot:village-outpost:09": "village",
+  "settlement-slot:village-outpost:10": "village",
+  "settlement-slot:town:09": "town",
+  "settlement-slot:town:10": "town",
+  "settlement-slot:town:11": "town"
 });
 var hyp2 = PM.hypot;
 var r3 = (v) => Math.round(v * 1e3) / 1e3;
@@ -3190,6 +3224,19 @@ for (const role of Object.keys(CAST_KITS)) {
     KIT_OF[slot + "|" + role] = ks2[i % ks2.length];
   });
 }
+var ISLAND_SPOTS = [["village-outpost:07", "village"], ["village-outpost:08", "village"], ["village-outpost:09", "village"], ["village-outpost:10", "village"], ["town:09", "town"], ["town:10", "town"], ["town:11", "town"]];
+for (const role of Object.keys(CAST_KITS)) {
+  const ks2 = Object.keys(CAST_KITS[role]);
+  shuffled("island-kits|" + role, ISLAND_SPOTS.map((s) => s[0])).forEach((slot, i) => {
+    KIT_OF[slot + "|" + role] = ks2[i % ks2.length];
+  });
+}
+SPOTS.push(...ISLAND_SPOTS);
+var ISLAND_NAMES = [
+  ["Anselm", "Baldric", "Cedric", "Darrow", "Elric", "Fergus", "Grady", "Holt", "Ingram", "Jory", "Kester", "Leof", "Morgan", "Niall", "Oswin", "Piers", "Radley", "Stellan", "Tobias", "Ulf"],
+  ["Alys", "Bryony", "Cressida", "Delphine", "Eira", "Fern", "Gwen", "Hollis", "Isolde", "Jessamy", "Kerensa", "Lark", "Merry", "Nerys", "Orla", "Primrose", "Rhosyn", "Saffron", "Tilda", "Wynne"]
+];
+var ISLAND_SLOTS = new Set(ISLAND_SPOTS.map((s) => s[0]));
 var CAST = {};
 {
   const used = /* @__PURE__ */ new Set(["Ada", "Bren", "Mara", "Selene", "Ila", "Nell", "Oren"]);
@@ -3198,9 +3245,12 @@ var CAST = {};
     for (const role of size === "village" ? ["general", "smith", "innkeeper"] : ["general", "smith", "innkeeper", "enchanter"]) {
       const r = rng(slot + "|" + role), kit = KIT_OF[slot + "|" + role], K = CAST_KITS[role][kit];
       const beard = pick2(r, K.beard), look = { hair: pick2(r, K.hair), facialHair: beard, hairColor: K.old ? pick2(r, OLD) : pick2(r, COLORS), skin: pick2(r, SKINS) };
+      const [bearded, smooth2] = ISLAND_SLOTS.has(slot) ? ISLAND_NAMES : [BEARDED, SMOOTH];
+      let list2 = beard === "none" ? smooth2 : bearded;
+      if (list2.every((n) => used.has(n))) list2 = [...bearded, ...smooth2];
       let name;
       do {
-        name = pick2(r, beard === "none" ? SMOOTH : BEARDED);
+        name = pick2(r, list2);
       } while (used.has(name));
       used.add(name);
       const cloth = K.robe ? pick2(r, ROBES) : pick2(r, CLOTH), skirt = pick2(r, CLOTH);
@@ -5479,7 +5529,7 @@ function validateRuntimePlan(p) {
     for (const b of w.bridgeGuards) requirePlan(Object.keys(b).sort().join(",") === "x1,x2,y1,y2" && Object.values(b).every(Number.isSafeInteger) && b.x1 <= b.x2 && b.y1 <= b.y2 && b.x2 - b.x1 <= 20 && b.y2 - b.y1 <= 20, "Invalid immutable bridge guard");
   }
   requirePlan(p.scale.tilePixels === 32 && p.scale.chunkTilesX === 32 && p.scale.chunkTilesY === 26 && p.scale.macroTilesX === 64 && p.scale.macroTilesY === 52, "Planned spatial scale");
-  requirePlan(p.settlements.length === 20 && p.sites.length === (p.firstJourney ? 125 : p.wildernessExtension ? 124 : p.populationOverlay ? 51 : 48) && p.futureIslands.length === 6 && p.factions.length === 3 && p.stonewatch.candidateCount > 0, "Incomplete planned reservations");
+  requirePlan(p.settlements.length >= 20 && p.settlements.length <= 27 && p.sites.length === (p.firstJourney ? 125 : p.wildernessExtension ? 124 : p.populationOverlay ? 51 : 48) && p.futureIslands.length === 6 && p.factions.length === 3 && p.stonewatch.candidateCount > 0, "Incomplete planned reservations");
   if (p.worldReshape) requirePlan(p.worldReshape.version === RESHAPE_VERSION && p.worldReshape.hash === RESHAPE_HASH && p.firstJourney && p.assetId === "alpha", "Uncommitted world reshape");
   if (p.firstJourney) requirePlan(p.firstJourney.version === ACCESS_VERSION && p.firstJourney.hash === ACCESS_HASH && p.wildernessExtension && p.hydrologyPlan && p.assetId === "alpha" && p.sites.filter((s) => s.id === "repeatable-slot:cave:woodland:small:109").length === 1, "Uncommitted first journey");
   if (p.wildernessExtension) requirePlan(p.wildernessExtension.version === WILDERNESS_VERSION && p.wildernessExtension.hash === WILDERNESS_HASH && p.assetId === "alpha", "Uncommitted wilderness extension");
@@ -14101,7 +14151,7 @@ function validateMapKnowledge(k) {
   closedRecord(k, ["version", "assetHash", "revision", "settlements", "visited", "rumors", "journal"]);
   requireContract(k.version === MAP_KNOWLEDGE_VERSION && /^[a-f0-9]{64}$/.test(k.assetHash), "Map knowledge version/commitment");
   safeInteger(k.revision);
-  requireContract(Array.isArray(k.settlements) && k.settlements.length === 20, "Settlement map catalog");
+  requireContract(Array.isArray(k.settlements) && k.settlements.length >= 20 && k.settlements.length <= 27, "Settlement map catalog");
   const ids = /* @__PURE__ */ new Set();
   for (const s of k.settlements) {
     closedRecord(s, ["id", "kind", "class", "label", "x", "y", "band", "built"]);
