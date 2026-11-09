@@ -874,7 +874,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-VKG523D2.js";
+} from "./chunk-4PH4VTDN.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -58007,7 +58007,7 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
       materials2.append(el("p", "Souls", "mt-sec"), row2("Monster Soul", "Feeds slot upgrades and resonance", ["Elites", "Named", "Mini-bosses", "Bosses"], "mt-row mt-hero"), el("p", "Scraps", "mt-sec"));
       const steps2 = ["1\u201320", "21\u201340", "41\u201360", "61\u201380", "81\u2013100", "91\u2013100"];
       ["Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic"].forEach((t, i) => materials2.append(row2(t + " Scrap", (i < 5 ? "Awakens " + t + " gear \xB7 " : "") + "Upgrades " + steps2[i], ["Salvage " + t])));
-      materials2.append(el("p", "Rare materials", "mt-sec"), row2("Overlord's Sigil", "Rerolls a line when you reforge", ["Town Smith"]), row2("Eridium Shard", "Awakens gear \xB7 Upgrades 41\u201360", ["Town Smith"]), row2("Astral Essence", "Powers an enchant \xB7 Upgrades 61\u201380", ["Town Smith"]), row2("Starshard", "Upgrades 81\u2013100", ["World Tiers \xB7 coming later"]));
+      materials2.append(el("p", "Rare materials", "mt-sec"), row2("Overlord's Sigil", "Rerolls a line when you reforge", ["Elites", "Bosses", "Town Smith"]), row2("Eridium Shard", "Awakens gear \xB7 Upgrades 41\u201360", ["Elites", "Bosses", "Town Smith"]), row2("Astral Essence", "Powers an enchant \xB7 Upgrades 61\u201380", ["Elites", "Bosses", "Town Smith"]), row2("Starshard", "Upgrades 81\u2013100", ["World Tiers \xB7 coming later"]));
       materials2.append(el("p", "A Smith breaks one Scrap into three of the rarity below.", "mt-note"));
       if (review) materials2.append(el("p", "FUNDED FORGE REVIEW \u2014 separate test campaign", "forge-review-label"));
       return;
@@ -58481,8 +58481,15 @@ function createInventoryPresentation({ document: document2, environment, readMod
         toastV1(document2, { kind: "soul", title: "Monster Soul", sub: `+${gained} \xB7 ${inv.economy?.materials["Monster Soul"] ?? 0} carried`, key: "soul" });
         toastUntil = time + 1600;
       }
+      if (Object.keys(inv.rewardsByEntityId ?? {}).length > (observed.rewards ?? 0)) for (const k of ["Overlord's Sigil", "Eridium Shard", "Astral Essence"]) {
+        const n = (inv.economy?.materials[k] ?? 0) - (observed.drops?.[k] ?? 0);
+        if (n > 0) {
+          toastV1(document2, { kind: "loot", title: k, sub: `+${n} \xB7 ${inv.economy.materials[k]} carried`, image: SALVAGE_MATERIAL_ART[k], accent: k === "Eridium Shard" ? "#ff7ad9" : k === "Astral Essence" ? "#8fd0ff" : "#f0c862", key: "mat/" + k, ms: 3200 });
+          toastUntil = time + 1600;
+        }
+      }
     }
-    if (observed?.identity !== identity2 || observed.revision !== inv.revision) observed = { identity: identity2, revision: inv.revision, gold: inv.gold, souls: inv.economy?.materials["Monster Soul"] ?? 0, ids: new Set(Object.keys(inv.itemsById)) };
+    if (observed?.identity !== identity2 || observed.revision !== inv.revision) observed = { identity: identity2, revision: inv.revision, gold: inv.gold, souls: inv.economy?.materials["Monster Soul"] ?? 0, rewards: Object.keys(inv.rewardsByEntityId ?? {}).length, drops: Object.fromEntries(["Overlord's Sigil", "Eridium Shard", "Astral Essence"].map((k) => [k, inv.economy?.materials[k] ?? 0])), ids: new Set(Object.keys(inv.itemsById)) };
     document2.getElementById("world-loot-notice").hidden = open2 || !alive(m) || time >= toastUntil;
     progressionView.refresh(m, open2 && section === "progression", open2 && section === "stats");
     progressionButton.setAttribute("aria-pressed", String(section === "progression"));

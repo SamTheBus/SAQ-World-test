@@ -485,6 +485,9 @@ var ECONOMY_V1 = freezeWire({
   salePercentOfShop: 10,
   // Slot attunement gold: the first step costs firstGold, each next step growthPercent as much
   // (about 785k at step 50, hundreds of millions in the 80s, about 2.6 billion for step 100).
+  // Material drops v1: elites have elitePercent% to drop one; named elites, mini-bosses, bosses and boss chests always drop counts[source];
+  // each one is a Sigil, Eridium or Astral Essence by the mix weights.
+  materialDrops: { elitePercent: 20, counts: { "site-end-elite": 1, "mini-boss": 2, "lair-boss": 4, "lair-chest": 2 }, mix: [["Overlord's Sigil", 45], ["Eridium Shard", 35], ["Astral Essence", 20]] },
   attunement: {
     firstGold: 200,
     growthPercent: 118,
@@ -552,6 +555,23 @@ var ATTUNE_SOULS = ATTUNE_GOLD.map((gold, level) => {
   return Math.max(A.minimumSouls, Number((2n * gold * perHour + goldPerHour) / (2n * goldPerHour)));
 });
 var attunementSoulsV1 = (level) => ATTUNE_SOULS[level];
+var DROP_MATERIALS_V1 = Object.freeze(ECONOMY_V1.materialDrops.mix.map(([m]) => m));
+function rewardMaterialsV1(progression, kind2, draw) {
+  const D = ECONOMY_V1.materialDrops, source6 = rewardSourceV1(progression);
+  const n = kind2 === "chest" ? progression?.siteReward === "lair-chest" ? D.counts["lair-chest"] : 0 : kind2 !== "enemy" ? 0 : source6 === "elite" ? draw("chance") % 100 < D.elitePercent ? 1 : 0 : D.counts[source6] ?? 0;
+  const out = {};
+  for (let i = 0; i < n; i++) {
+    let r = draw("pick/" + i) % 100;
+    for (const [m, w] of D.mix) {
+      if (r < w) {
+        out[m] = (out[m] ?? 0) + 1;
+        break;
+      }
+      r -= w;
+    }
+  }
+  return out;
+}
 function attunementMaterialsV1(level) {
   const A = ECONOMY_V1.attunement, [lo, hi] = A.bandMaterialRamp, band = Math.floor(level / 20), out = {}, ramp = (k, len) => lo + Math.round((hi - lo) * k / (len - 1));
   for (const m of A.bands[band]) out[m] = ramp(level % 20, 20);
@@ -13660,7 +13680,14 @@ function rollContentReward(state, player, { sourceEntityId, rank, kind: kind2, o
   const profile2 = progression?.version === D9_REWARD_PROGRESSION ? rewardProfileD9(progression, rank) : rewardProfile(rank), key9 = `d5-eco-v1/${state.campaign.seed.seedHex}/${player.playerId}/${sourceEntityId}`, roll = hashReward(key9 + "/branch") % 100, pool = REWARD_POOLS[Math.min(2, ["C", "B", "A", "S"].indexOf(rank))];
   if (hasWorldCombat(state)) {
     const l = BigInt(progression?.sourceDepth ?? 1), elite = progression?.combatQuality === "elite", source6 = rewardSourceV1(progression), unit3 = BigInt(goldUnit(l > 50n ? 50 : Number(l))), value = String(kind2 === "chest" ? unit3 * BigInt(ECONOMY_V1.chestUnits) * (progression?.siteReward === "lair-chest" ? BigInt(ECONOMY_V1.bossChestGold) : 1n) : unit3 * BigInt(ECONOMY_V1.sourceGold[source6])), gear = isSourceLootV4(progression?.rarityPolicyHash) ? hashReward(key9 + "/combat-gear-v3") % 1e3 < lootGearPerMilleFor(progression.rarityPolicyHash, progression.rarityRole, progression.siteReward ?? null, modifiers?.occurrenceHundredths ?? 100) : kind2 === "chest" || elite || occurrence(hashReward(key9 + "/combat-gear"), 10, key9 + "/combat-gear");
-    return { gold: gold(value), souls: kind2 === "chest" ? hashReward(key9 + "/combat-soul") % 100 < 35 ? 1 : 0 : source6 === "ordinary" ? hashReward(key9 + "/combat-soul") % 100 < ECONOMY_V1.ordinarySoulPercent ? 1 : 0 : ECONOMY_V1.sourceSouls[source6], definitionId: gear ? pool[hashReward(key9 + "/combat-family") % pool.length] : null, healing: false };
+    return {
+      gold: gold(value),
+      souls: kind2 === "chest" ? hashReward(key9 + "/combat-soul") % 100 < 35 ? 1 : 0 : source6 === "ordinary" ? hashReward(key9 + "/combat-soul") % 100 < ECONOMY_V1.ordinarySoulPercent ? 1 : 0 : ECONOMY_V1.sourceSouls[source6],
+      definitionId: gear ? pool[hashReward(key9 + "/combat-family") % pool.length] : null,
+      healing: false,
+      ...((m) => Object.keys(m).length ? { materials: m } : {})(rewardMaterialsV1(progression, kind2, (k) => hashReward(key9 + "/materials-v1/" + k)))
+      /* material drops v1 */
+    };
   }
   if (kind2 === "enemy") {
     const gearRoll = hashReward(`${canonicalStringify(state.campaign.seed)}/${player.playerId}/${sourceEntityId}/player-inventory-d4r-v1`);
@@ -19103,6 +19130,10 @@ function retireEpisodeRewardRowsD13C2(state, receipt, { archivedOnly = false } =
       if (reward.definitionId && reward.claimed) dispositionOrigin(state, player, sourceEntityId, source6, proof2);
       inv.renewal.retiredGold = addAmount(inv.renewal.retiredGold, rewardAmount(inv.goldAwardsByEntityId[sourceEntityId].amount));
       inv.renewal.retiredSouls = safeInteger(inv.renewal.retiredSouls + (inv.economy.soulAwardsByEntityId[sourceEntityId] ?? 0));
+      if (reward.materials) {
+        const t = inv.renewal.retiredMaterials ??= {};
+        for (const [k, n] of Object.entries(reward.materials)) t[k] = safeInteger((t[k] ?? 0) + n);
+      }
       delete inv.rewardsByEntityId[sourceEntityId];
       delete inv.goldAwardsByEntityId[sourceEntityId];
       delete inv.economy.soulAwardsByEntityId[sourceEntityId];
@@ -19602,7 +19633,8 @@ function hydrateChunkDeltaD9(delta, chunk, frames) {
 function chunkPagedAccountingD9(delta) {
   const players = {};
   for (const e of delta.encounters) for (const [id, rows3] of Object.entries(e.players)) {
-    const p = players[id] ??= { gold: "0", souls: 0, salvageCredits: {} };
+    const p = players[id] ??= { gold: "0", souls: 0, salvageCredits: {}, materials: {} };
+    for (const r of Object.values(rows3.rewards)) for (const [k, n] of Object.entries(r.materials ?? {})) p.materials[k] = safeInteger((p.materials[k] ?? 0) + n);
     for (const g of Object.values(rows3.gold)) p.gold = addAmount(p.gold, rewardAmount(g.amount));
     for (const n of Object.values(rows3.souls)) p.souls = safeInteger(p.souls + n);
     for (const r of [...Object.values(rows3.salvaged), ...Object.values(rows3.autoSalvaged)]) for (const [k, n] of Object.entries(r.materials)) p.salvageCredits[k] = safeInteger((p.salvageCredits[k] ?? 0) + n);
@@ -19832,7 +19864,11 @@ function validateWorldPagingD9(paging) {
   closedRecord(paging, ["version", "players", "originsByGroup", "indexedRevisions", "remoteGearByPlayer", "coldObligations"]);
   requireContract(paging.version === "world-paging-d9-v1", "World paging version");
   for (const p of Object.values(paging.players)) {
-    closedRecord(p, ["gold", "souls", "salvageCredits"]);
+    closedRecord(p, ["gold", "souls", "salvageCredits"], ["materials"]);
+    if (p.materials) {
+      closedRecord(p.materials, [], DROP_MATERIALS_V1);
+      for (const n of Object.values(p.materials)) safeInteger(n, 1);
+    }
     amount(p.gold);
     safeInteger(p.souls);
     closedRecord(p.salvageCredits, [], SALVAGE_MATERIALS4);
@@ -19892,6 +19928,13 @@ function accounting(state, delta, direction2) {
       if (next) p.salvageCredits[k] = next;
       else delete p.salvageCredits[k];
     }
+    for (const [k, n] of Object.entries(totals2.materials ?? {})) {
+      const m = p.materials ??= {}, next = safeInteger((m[k] ?? 0) + direction2 * n);
+      requireContract(next >= 0, "Cold material accounting");
+      if (next) m[k] = next;
+      else delete m[k];
+    }
+    if (p.materials && !Object.keys(p.materials).length) delete p.materials;
   }
   return players;
 }
@@ -20052,6 +20095,11 @@ function validateCompletionRewardSourceD13D_C(state, source6) {
 }
 
 // src/shared/contracts/renewable_inventory.js
+function retireRewardMaterials(renewal, materials3) {
+  if (!materials3) return;
+  const t = renewal.retiredMaterials ??= {};
+  for (const [k, n] of Object.entries(materials3)) t[k] = safeInteger((t[k] ?? 0) + n);
+}
 var same20 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var itemId = (p, id) => `item:${p.playerId}:${id ?? "starter"}`;
 var AUTO_SALVAGE_ACTIVE_TICKS = 5 * 60 * 60;
@@ -20128,6 +20176,7 @@ function retireEncounterRewards(state, groupId) {
       if (r.episodeSource) {
         inv.renewal.retiredGold = addAmount(inv.renewal.retiredGold, rewardAmount(inv.goldAwardsByEntityId[id].amount));
         inv.renewal.retiredSouls = safeInteger(inv.renewal.retiredSouls + (inv.economy.soulAwardsByEntityId[id] ?? 0));
+        retireRewardMaterials(inv.renewal, r.materials);
       }
       delete inv.rewardsByEntityId[id];
       delete inv.goldAwardsByEntityId[id];
@@ -20141,7 +20190,12 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
   const inv = p.inventory, n = inv.renewal;
   closedRecord(inv, ["version", "economy", "revision", "gold", "goldAwardsByEntityId", "itemsById", "equipped", "rewardsByEntityId", "lastEquipmentChange", "topologyMigration", "renewal"], ["subweapons", "d7", "services", "classKit"]);
   validateSettlementServices(state, p, validateCommand2);
-  closedRecord(n, ["version", "baseGold", "baseSouls", "retiredGold", "retiredSouls", "defeats", "groundBySourceId", "originsByItemId", "lastDrop", "lastGroundPickup"]);
+  closedRecord(n, ["version", "baseGold", "baseSouls", "retiredGold", "retiredSouls", "defeats", "groundBySourceId", "originsByItemId", "lastDrop", "lastGroundPickup"], ["retiredMaterials"]);
+  if (n.retiredMaterials) {
+    closedRecord(n.retiredMaterials, [], DROP_MATERIALS_V1);
+    for (const v of Object.values(n.retiredMaterials)) safeInteger(v, 1);
+  }
+  ;
   requireContract(n.version === "renewable-inventory-d5-v1", "Unsupported renewable inventory");
   safeInteger(inv.revision);
   amount(n.baseGold);
@@ -20215,7 +20269,7 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
   }
   for (const r of Object.values(inv.rewardsByEntityId)) {
     if (!r.episodeSource) continue;
-    closedRecord(r, ["sourceEntityId", "ordinal", "defeatedTick", "spaceInstanceId", "position", "definitionId", "claimed", "pickup", "rewardVersion", "episodeSource", "healing", "spawnEntityId"], ["generated", "autoSalvageEligibleTick", "autoSalvage", "retiredTick"]);
+    closedRecord(r, ["sourceEntityId", "ordinal", "defeatedTick", "spaceInstanceId", "position", "definitionId", "claimed", "pickup", "rewardVersion", "episodeSource", "healing", "spawnEntityId"], ["generated", "autoSalvageEligibleTick", "autoSalvage", "retiredTick", "materials"]);
     if (r.generated) {
       validateGeneratedGear(r.generated, gearSeed(state, p, r.sourceEntityId), r.episodeSource.progression ?? prototypeRewardProgression(r.episodeSource.rank, r.sourceEntityId));
       if (r.autoSalvageEligibleTick !== void 0) requireContract(r.autoSalvageEligibleTick === r.defeatedTick + AUTO_SALVAGE_ACTIVE_TICKS, "Automatic salvage deadline drift");
@@ -20266,7 +20320,7 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
       }
       requireContract(id === episodeRewardId(s.groupId, s.episode, s.kind, s.ordinal) && r.rewardVersion === CONTENT_REWARD_VERSION, "Reward incarnation mismatch");
       const expected = rollContentReward(state, p, { sourceEntityId: id, rank: s.rank, kind: s.kind, ordinal: r.ordinal, modifiers: s.progression?.modifiers ?? null, progression: s.progression ?? null, rewardClass: s.rewardClass ?? null });
-      requireContract(r.definitionId === expected.definitionId && inv.goldAwardsByEntityId[id]?.amount === expected.gold && inv.economy.soulAwardsByEntityId[id] === expected.souls && r.healing === expected.healing, "Content reward drift");
+      requireContract(r.definitionId === expected.definitionId && inv.goldAwardsByEntityId[id]?.amount === expected.gold && inv.economy.soulAwardsByEntityId[id] === expected.souls && same20(r.materials ?? null, expected.materials ?? null) && r.healing === expected.healing, "Content reward drift");
       if (live) {
         const group = state.groupsById[s.groupId];
         requireContract(s.rank === (ordinaryTier(state.entitiesById[group.entityIds[0]].contentDefinitionId) ?? "C"), "Reward rank differs from content");
@@ -20346,6 +20400,7 @@ function validateRenewableInventoryProgress(before, after, pid) {
     return value;
   };
   let retiredGold = x.retiredGold, retiredSouls = x.retiredSouls;
+  const retiredMaterials = { ...x.retiredMaterials ?? {} };
   for (const [id, r] of Object.entries(a.rewardsByEntityId)) {
     const n = b.rewardsByEntityId[id], o = gearOrigin(before, before.playersById[pid], r);
     if (!n) {
@@ -20354,6 +20409,7 @@ function validateRenewableInventoryProgress(before, after, pid) {
       if (r.episodeSource) {
         retiredGold = addAmount(retiredGold, rewardAmount(a.goldAwardsByEntityId[id].amount));
         retiredSouls = safeInteger(retiredSouls + (a.economy.soulAwardsByEntityId[id] ?? 0));
+        for (const [k, v] of Object.entries(r.materials ?? {})) retiredMaterials[k] = (retiredMaterials[k] ?? 0) + v;
       }
       if (r.definitionId && r.claimed) {
         const owned = b.itemsById[itemId({ playerId: pid }, id)] || y.groundBySourceId[id]?.item || b.d7?.salvaged[itemId({ playerId: pid }, id)]?.item || b.d7?.autoSalvaged[itemId({ playerId: pid }, id)]?.item || b.services?.salesByItemId[itemId({ playerId: pid }, id)]?.item || a.services?.salesByItemId[itemId({ playerId: pid }, id)]?.item || after.d9World?.paging.remoteGearByPlayer[pid]?.[itemId({ playerId: pid }, id)]?.item;
@@ -20368,7 +20424,7 @@ function validateRenewableInventoryProgress(before, after, pid) {
       }
     }
   }
-  requireContract(same20(y.retiredGold, retiredGold) && y.retiredSouls === retiredSouls, "Retired reward aggregate drift");
+  requireContract(same20(y.retiredGold, retiredGold) && y.retiredSouls === retiredSouls && same20(y.retiredMaterials ?? {}, retiredMaterials), "Retired reward aggregate drift");
   requireContract(!a.d7 || b.d7, "D7 inventory version removed");
   if (b.d7) validateSalvageProgress(a, b, before, after);
   if (!same20(a.equipped, b.equipped)) requireContract(b.lastEquipmentChange?.authorityOrder > before.lastAppliedAuthorityOrder, "Equipment lacks new command");
@@ -20973,6 +21029,9 @@ function validateForgeEconomy(p, state, validateCommand2) {
   closedRecord(e.materials, [], FORGE_MATERIALS);
   closedRecord(e.lastAttunementsBySlot, [], equipmentSlots(inv));
   requireContract(Array.isArray(e.legacyRewardIds) && e.legacyRewardIds.length <= 63 && same23([...new Set(e.legacyRewardIds)].sort(), e.legacyRewardIds), "Invalid legacy reward set");
+  const drops = {}, addDrops = (m) => {
+    for (const [k, n] of Object.entries(m ?? {})) drops[k] = (drops[k] ?? 0) + n;
+  };
   let gold = e.origin === "forge-review-v1" ? "50000" : "0", souls = e.origin === "forge-review-v1" ? 200 : 0;
   const prior = new Set(e.legacyRewardIds);
   if (!inv.renewal) for (const id of prior) requireContract(inv.rewardsByEntityId[id], "Unknown legacy receipt");
@@ -20991,15 +21050,18 @@ function validateForgeEconomy(p, state, validateCommand2) {
   else {
     gold = addAmount(inv.renewal.baseGold, inv.renewal.retiredGold);
     souls = inv.renewal.baseSouls + inv.renewal.retiredSouls;
+    addDrops(inv.renewal.retiredMaterials);
     for (const [id, r] of Object.entries(inv.rewardsByEntityId)) if (r.episodeSource) {
       gold = addAmount(gold, rewardAmount(inv.goldAwardsByEntityId[id].amount));
       souls += e.soulAwardsByEntityId[id] ?? 0;
+      addDrops(r.materials);
     }
   }
   const cold = state.d9World?.paging.players[p.playerId];
   if (cold) {
     gold = addAmount(gold, cold.gold);
     souls = safeInteger(souls + cold.souls);
+    addDrops(cold.materials);
   }
   let spentGold = p.d8 ? multiplyAmount(p.d8.attributeResetCount, "2500") : "0", levels2 = 0;
   const spentMaterials = {}, orders = /* @__PURE__ */ new Set();
@@ -21032,7 +21094,7 @@ function validateForgeEconomy(p, state, validateCommand2) {
   spentGold = addAmount(spentGold, workshop.gold);
   requireContract(inv.gold === subtractAmount(serviceGoldAdjustment(p, gold), spentGold), "Economy gold accounting");
   for (const k of FORGE_MATERIALS) {
-    const balance = (k === "Monster Soul" ? souls : 0) + (inv.d7?.credits[k] ?? 0) + (workshop.materials[k] ?? 0) - (spentMaterials[k] ?? 0);
+    const balance = (k === "Monster Soul" ? souls : 0) + (drops[k] ?? 0) + (inv.d7?.credits[k] ?? 0) + (workshop.materials[k] ?? 0) - (spentMaterials[k] ?? 0);
     requireContract(balance >= 0 && (e.materials[k] ?? 0) === balance, "Economy material accounting");
     if (Object.hasOwn(e.materials, k)) safeInteger(e.materials[k], 1);
   }

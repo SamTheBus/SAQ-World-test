@@ -712,6 +712,9 @@ var ECONOMY_V1 = freezeWire({
   salePercentOfShop: 10,
   // Slot attunement gold: the first step costs firstGold, each next step growthPercent as much
   // (about 785k at step 50, hundreds of millions in the 80s, about 2.6 billion for step 100).
+  // Material drops v1: elites have elitePercent% to drop one; named elites, mini-bosses, bosses and boss chests always drop counts[source];
+  // each one is a Sigil, Eridium or Astral Essence by the mix weights.
+  materialDrops: { elitePercent: 20, counts: { "site-end-elite": 1, "mini-boss": 2, "lair-boss": 4, "lair-chest": 2 }, mix: [["Overlord's Sigil", 45], ["Eridium Shard", 35], ["Astral Essence", 20]] },
   attunement: {
     firstGold: 200,
     growthPercent: 118,
@@ -755,6 +758,7 @@ var ATTUNE_SOULS = ATTUNE_GOLD.map((gold, level) => {
   const A = ECONOMY_V1.attunement, step = level + 1, hero = Math.min(50, 1 + Math.floor(3 * step / 5)), perHour = BigInt(A.soulsPerHour + Math.floor(A.eliteSoulsPerHour * Math.min(hero, 30) / 30)), goldPerHour = BigInt(60 * ECONOMY_V1.minuteGoldUnits * goldUnit(hero));
   return Math.max(A.minimumSouls, Number((2n * gold * perHour + goldPerHour) / (2n * goldPerHour)));
 });
+var DROP_MATERIALS_V1 = Object.freeze(ECONOMY_V1.materialDrops.mix.map(([m]) => m));
 
 // src/shared/content/world_combat_v1.js
 var WORLD_COMBAT_VERSION = "world-combat-hordes-progression-v1";
