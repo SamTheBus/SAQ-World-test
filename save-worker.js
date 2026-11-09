@@ -246,7 +246,7 @@ var RESHAPE_TIERS = Object.freeze({ "repeatable-slot:ruin:wetland:standard:067":
 var RESHAPE_VERSION = "world-reshape-v2";
 var RESHAPE_HASH = "ac15d856c2dbbe38203480172b32aae7d19ccdd61cef10eee16aade24a0900d2";
 var RESHAPE_HYDROLOGY_HASH = "e12fd26221c55e0357b674d4beaf28cc522ef5f9dde420b073373f0ef7be1b65";
-var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-level50";
+var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-econ1";
 var hasWorldReshape = (b) => b?.reshapeVersion === RESHAPE_VERSION && b?.reshapeHash === RESHAPE_HASH;
 var reshapedSite = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_SITES, id) ? RESHAPE_SITES[id] : null;
 var reshapedTier = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_TIERS, id) ? RESHAPE_TIERS[id] : null;
@@ -11136,6 +11136,55 @@ function validateSporePressureProgressV3(a, b, fromTick, toTick) {
   } else if (isSporeV3(b)) requireContract(a.rulesVersion === SPORE_V2 && a.status === "active" && b.pressure.adoptedTick >= fromTick && b.pressure.adoptedTick <= toTick, "Invalid spore pressure adoption");
 }
 
+// src/shared/content/economy_v1.js
+var ECONOMY_V1 = freezeWire({
+  version: "economy-v1",
+  minuteGoldUnits: 13,
+  // Gold for a kill, in ordinary kills; bosses outside a lair pay like a lair boss.
+  sourceGold: { ordinary: 1, elite: 3, "site-end-elite": 8, "mini-boss": 15, "lair-boss": 40 },
+  // Monster Souls for a kill: ordinary enemies only now and then.
+  sourceSouls: { ordinary: 0, elite: 1, "site-end-elite": 2, "mini-boss": 4, "lair-boss": 8 },
+  ordinarySoulPercent: 5,
+  // A lair's boss chest pays three site chests.
+  bossChestGold: 3,
+  // Shops: minutes of play per rarity (Common..Mythic); Rare from level 10, Epic from 20, as drops.
+  shopMinutes: [2, 4, 10, 30, 60, 120],
+  shopRareLevel: 10,
+  shopEpicLevel: 20,
+  // Workshop: minutes of play for a Rare; other rarities scale by rarityPercent. Each earlier
+  // reforge or resonance on the same item makes the next one cost repeatPercent as much.
+  workshopMinutes: { reforge: 5, resonance: 5, enchant: 10, purge: 2 },
+  awakenMinutes: [30, 38, 45, 53, 60],
+  rarityPercent: [50, 75, 100, 150, 200, 300],
+  repeatPercent: 150,
+  // Bought materials cost their base price per goldUnit of the hero's level.
+  materialBase: { "Eridium Shard": 30, "Overlord's Sigil": 20, "Astral Essence": 60 },
+  // A town potion refill costs half a minute of play per potion.
+  potionRefillPercentOfMinute: 50
+});
+var goldUnit = (level) => 1 + Math.floor(Math.max(1, Math.floor(Number(level) || 1)) / 4);
+function rewardSourceV1(progression) {
+  const site = progression?.siteReward;
+  if (site && Object.hasOwn(ECONOMY_V1.sourceGold, site)) return site;
+  if (progression?.rarityRole === "boss") return "lair-boss";
+  return progression?.combatQuality === "elite" ? "elite" : "ordinary";
+}
+function minutesGold(minutes, level, percent = 100) {
+  const g = BigInt(ECONOMY_V1.minuteGoldUnits * goldUnit(level)), m = BigInt(Math.round(minutes * 100));
+  const v = (g * m * BigInt(percent) + 9999n) / 10000n;
+  return String(v < 1n ? 1n : v);
+}
+var shopPriceV1 = (itemLevel, tier2) => minutesGold(ECONOMY_V1.shopMinutes[Math.max(0, Math.min(5, tier2))], itemLevel);
+var shopTopRarityV1 = (level) => level >= ECONOMY_V1.shopEpicLevel ? 3 : level >= ECONOMY_V1.shopRareLevel ? 2 : 1;
+function workshopGoldV1(op, itemLevel, tier2, repeats = 0) {
+  const t = Math.max(0, Math.min(5, tier2)), rarity = ECONOMY_V1.rarityPercent[t];
+  const minutes = op === "awaken" ? ECONOMY_V1.awakenMinutes[Math.min(4, t)] : ECONOMY_V1.workshopMinutes[op];
+  let gold = BigInt(minutesGold(minutes, itemLevel, op === "awaken" ? 100 : rarity));
+  for (let i = 0; i < repeats; i++) gold = (gold * BigInt(ECONOMY_V1.repeatPercent) + 99n) / 100n;
+  return String(gold);
+}
+var materialPriceV1 = (material, heroLevel) => ECONOMY_V1.materialBase[material] === void 0 ? null : String(ECONOMY_V1.materialBase[material] * goldUnit(heroLevel));
+
 // src/shared/content/world_loot_v3.js
 var WORLD_LOOT_V3_VERSION = "world-loot-v3";
 var WORLD_LOOT_V3_HASH = "5945f4f6a6c02522b745889a88f4cd1034d8e4b89266517a2c31825741ef5cdf";
@@ -13561,8 +13610,8 @@ function rollContentReward(state, player, { sourceEntityId, rank, kind: kind2, o
   const gold = (n) => !modifiers || modifiers.goldHundredths === 100 ? n : multiplyAmount(rewardAmount(n), `${Math.floor(modifiers.goldHundredths / 100)}.${String(modifiers.goldHundredths % 100).padStart(2, "0")}`.replace(/0+$/, "").replace(/\.$/, ""));
   const profile2 = progression?.version === D9_REWARD_PROGRESSION ? rewardProfileD9(progression, rank) : rewardProfile(rank), key9 = `d5-eco-v1/${state.campaign.seed.seedHex}/${player.playerId}/${sourceEntityId}`, roll = hashReward(key9 + "/branch") % 100, pool = REWARD_POOLS[Math.min(2, ["C", "B", "A", "S"].indexOf(rank))];
   if (hasWorldCombat(state)) {
-    const l = BigInt(progression?.sourceDepth ?? 1), elite = progression?.combatQuality === "elite", value = String(kind2 === "chest" ? 20n + 4n * l : (1n + l / 4n) * BigInt(elite ? 3 : 1)), gear = isSourceLootV4(progression?.rarityPolicyHash) ? hashReward(key9 + "/combat-gear-v3") % 1e3 < lootGearPerMilleFor(progression.rarityPolicyHash, progression.rarityRole, progression.siteReward ?? null, modifiers?.occurrenceHundredths ?? 100) : kind2 === "chest" || elite || occurrence(hashReward(key9 + "/combat-gear"), 10, key9 + "/combat-gear");
-    return { gold: gold(value), souls: hashReward(key9 + "/combat-soul") % 100 < 35 ? 1 : 0, definitionId: gear ? pool[hashReward(key9 + "/combat-family") % pool.length] : null, healing: false };
+    const l = BigInt(progression?.sourceDepth ?? 1), elite = progression?.combatQuality === "elite", source6 = rewardSourceV1(progression), value = String(kind2 === "chest" ? (20n + 4n * l) * (progression?.siteReward === "lair-chest" ? BigInt(ECONOMY_V1.bossChestGold) : 1n) : (1n + l / 4n) * BigInt(ECONOMY_V1.sourceGold[source6])), gear = isSourceLootV4(progression?.rarityPolicyHash) ? hashReward(key9 + "/combat-gear-v3") % 1e3 < lootGearPerMilleFor(progression.rarityPolicyHash, progression.rarityRole, progression.siteReward ?? null, modifiers?.occurrenceHundredths ?? 100) : kind2 === "chest" || elite || occurrence(hashReward(key9 + "/combat-gear"), 10, key9 + "/combat-gear");
+    return { gold: gold(value), souls: kind2 === "chest" ? hashReward(key9 + "/combat-soul") % 100 < 35 ? 1 : 0 : source6 === "ordinary" ? hashReward(key9 + "/combat-soul") % 100 < ECONOMY_V1.ordinarySoulPercent ? 1 : 0 : ECONOMY_V1.sourceSouls[source6], definitionId: gear ? pool[hashReward(key9 + "/combat-family") % pool.length] : null, healing: false };
   }
   if (kind2 === "enemy") {
     const gearRoll = hashReward(`${canonicalStringify(state.campaign.seed)}/${player.playerId}/${sourceEntityId}/player-inventory-d4r-v1`);
@@ -14051,12 +14100,13 @@ function potionUpgradeSpent(p) {
   let spent = "0";
   for (let i = 0; i < b.capacityUpgrades; i++) spent = addAmount(spent, B.capacityPrices[i]);
   for (let i = 0; i < b.potencyUpgrades; i++) spent = addAmount(spent, B.potencyPrices[i]);
-  return spent;
+  return b.refillGold ? addAmount(spent, b.refillGold) : spent;
 }
 function validatePotionBelt(state, p, legacyMaximum) {
   const r = p.inventory.services?.potions;
   if (r) {
-    closedRecord(r, ["grants", "capacityUpgrades", "potencyUpgrades", "lastUseTick"], ["ground"]);
+    closedRecord(r, ["grants", "capacityUpgrades", "potencyUpgrades", "lastUseTick"], ["ground", "refillGold"]);
+    if (r.refillGold !== void 0) amount(r.refillGold);
     if (r.ground !== void 0) validateGroundPotions(state, r.ground);
     safeInteger(r.grants, 0, B.maximumGrants);
     safeInteger(r.capacityUpgrades, 0, B.maxCapacityUpgrades);
@@ -14085,7 +14135,7 @@ function validateGroundPotions(state, ground) {
 }
 function validatePotionProgress(x, y) {
   const a = x?.potions ?? EMPTY, b = y?.potions ?? EMPTY;
-  requireContract(b.grants >= a.grants && b.capacityUpgrades >= a.capacityUpgrades && b.potencyUpgrades >= a.potencyUpgrades && (a.lastUseTick === null || b.lastUseTick !== null && b.lastUseTick >= a.lastUseTick), "Potion belt regressed");
+  requireContract(compareAmount(b.refillGold ?? "0", a.refillGold ?? "0") >= 0 && b.grants >= a.grants && b.capacityUpgrades >= a.capacityUpgrades && b.potencyUpgrades >= a.potencyUpgrades && (a.lastUseTick === null || b.lastUseTick !== null && b.lastUseTick >= a.lastUseTick), "Potion belt regressed");
   return b.capacityUpgrades - a.capacityUpgrades + b.potencyUpgrades - a.potencyUpgrades;
 }
 
@@ -14155,12 +14205,12 @@ var sellBase = (item) => {
   const power2 = progressionBigInt(item.generated?.itemPower ?? 1), bounded2 = Number(power2 > BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) ? BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) : power2);
   return (2 + Math.floor(bounded2 / 2)) * 2 ** (item.generated?.rarityTier ?? 0);
 };
-var dailyBuyPrice = (item) => String(4 * sellBase(item));
+var dailyBuyPrice = (item) => shopPriceV1(Number(progressionBigInt(item.generated?.itemPower ?? 1)), item.generated?.rarityTier ?? 0);
 var purchaseCap = (s) => hasWorldCombat(s) ? MAX_DAILY_PURCHASES : SETTLEMENT_LIFE_POLICY.maximumPurchaseRecords;
 function dailyOffer(s, p, npc, day, slot, level, cls) {
   const sourceEntityId = "ent:" + token2("daily-stock-v1/" + WORLD_COMBAT_HASH + "/" + (cls ?? "-") + "/" + s.campaign.seed.seedHex + "/" + p.playerId + "/" + npc.id + "/" + day + "/" + slot), key9 = sourceEntityId + "/" + level;
   if (!stockCache.has(key9)) {
-    const tier2 = SHOP_TIERS[shopTier(npc)], floor = level >= 40 ? 2 : level >= 20 ? 1 : 0, top = Math.max(tier2.top, floor), weights = [60, 30, 14, 6].slice(0, top - floor + 1), roll = gearHash4(sourceEntityId + "/rarity") % weights.reduce((a, b) => a + b, 0);
+    const tier2 = SHOP_TIERS[shopTier(npc)], floor = level >= 40 ? 2 : level >= 20 ? 1 : 0, top = Math.max(Math.min(tier2.top, shopTopRarityV1(level)), floor), weights = [60, 30, 14, 6].slice(0, top - floor + 1), roll = gearHash4(sourceEntityId + "/rarity") % weights.reduce((a, b) => a + b, 0);
     let rarity = floor;
     for (let i = 0, acc = 0; i < weights.length; i++) {
       acc += weights[i];
@@ -14489,11 +14539,11 @@ function validateSalvageProgress(a, b, before, after = null) {
 
 // src/shared/contracts/settlement_workshop_v2.js
 var combatMaterialPrices = Object.freeze({ "Eridium Shard": "30", "Overlord's Sigil": "20", "Astral Essence": "60", "Rare Scrap": "8", "Magic Scrap": "16", "Epic Scrap": "32", "Legendary Scrap": "64", "Mythic Scrap": "128", "Luminous Soul": "20", "Astral Shards": "40" });
-var workshopMaterialPrices = (p) => combatPlayer(p) ? combatMaterialPrices : WORKSHOP_MATERIAL_PRICES;
+var workshopMaterialPrices = (p) => combatPlayer(p) ? { ...combatMaterialPrices, ...Object.fromEntries(Object.keys(ECONOMY_V1.materialBase).map((k) => [k, materialPriceV1(k, p.progression?.level ?? 1)])) } : WORKSHOP_MATERIAL_PRICES;
 var same4 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var WORKSHOP_MATERIAL_PRICES = Object.freeze({ ...WORKSHOP_POLICY.materials, "Rare Scrap": "40", "Magic Scrap": "80", "Epic Scrap": "160", "Legendary Scrap": "320", "Mythic Scrap": "640", "Luminous Soul": "100", "Astral Shards": "200" });
 function installWorkshop(s, p) {
-  if (hasServicesV2(s.d9World?.plannedWorld)) p.inventory.services.workshop = { version: WORKSHOP_VERSION, records: {}, materialPurchases: {}, materialReceipts: {} };
+  if (hasServicesV2(s.d9World?.plannedWorld)) p.inventory.services.workshop = { version: WORKSHOP_VERSION, records: {}, materialPurchases: {}, materialReceipts: {}, materialGold: {} };
 }
 function power(item) {
   const n = progressionBigInt(item.generated.itemPower);
@@ -14506,21 +14556,21 @@ function exponentialCost(base, item, tierBase) {
 }
 function workshopQuote(p, item, op, line = 0) {
   if (!item?.generated) return { problem: "Select ordinary generated equipment" };
-  const r = workshopResult(item), materials3 = {};
+  const r = workshopResult(item), materials3 = {}, world = combatPlayer(p), repeats = (kind2) => (item.workshop?.steps ?? []).filter((x) => x.kind === kind2).length;
   let gold = "0", problem = null;
   if (item.locked || item.protected || item.unique || item.generated.definition.unique || item.sourceEntityId === null || Object.values(p.inventory.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item.sourceEntityId) || isClassKitSource(p, item.sourceEntityId)) problem = "Protected equipment cannot be modified or shattered";
   if (op === "awaken") {
     if (r.tier >= 5) problem = "Maximum five-star rarity";
     if (r.enchants) problem = "Purge enchantments before awakening";
     const n = r.tier + 1;
-    gold = String(combatPlayer(p) ? 150 * n * (1 + Math.floor(power(item) / 10)) : 2500 * n);
+    gold = world ? workshopGoldV1("awaken", power(item), r.tier) : String(2500 * n);
     materials3["Eridium Shard"] = n;
     materials3[["Monster Soul", "Rare Scrap", "Magic Scrap", "Epic Scrap", "Legendary Scrap", "Mythic Scrap"][n]] = 5 * n;
   } else if (op === "reforge") {
     if (!r.affixes.length) problem = "This item has no affix lines. Awaken it first.";
     if (r.enchants) problem = "Purge enchantments before reforging";
     if (!Number.isInteger(line) || line < 0 || line >= r.affixes.length || r.lockedLine !== null && r.lockedLine !== line) problem = "Select the unlocked reforge line";
-    gold = combatPlayer(p) ? String(30 + 5 * power(item) + 25 * r.tier) : exponentialCost(150, item, [2, 1]);
+    gold = world ? workshopGoldV1("reforge", power(item), r.tier, repeats("reforge")) : exponentialCost(150, item, [2, 1]);
     materials3["Overlord's Sigil"] = 1;
   } else if (op === "enchant") {
     const slot = item.generated.definition.slot === "ring" ? "ring1" : item.generated.definition.slot, attunement = Math.max(p.inventory.economy.slotLevels[slot] ?? 0, slot === "ring1" ? p.inventory.economy.slotLevels.ring2 ?? 0 : 0);
@@ -14528,11 +14578,12 @@ function workshopQuote(p, item, op, line = 0) {
     else if (attunement < (combatPlayer(p) ? 3 : 50)) problem = "Slot Attunement Level " + (combatPlayer(p) ? 3 : 50) + " required";
     else if (r.enchants >= r.tier - 1) problem = "Maximum enchantments reached; purge to replace them";
     materials3["Astral Essence"] = 1;
+    if (world) gold = workshopGoldV1("enchant", power(item), r.tier);
   } else if (op === "purge") {
     if (!r.enchants) problem = "No enchantments to purge";
-    gold = String((combatPlayer(p) ? 5 : 1e3) * power(item) * Math.max(1, r.tier));
+    gold = world ? workshopGoldV1("purge", power(item), r.tier) : String(1e3 * power(item) * Math.max(1, r.tier));
   } else if (op === "resonance") {
-    gold = combatPlayer(p) ? String(40 + 8 * power(item) + 30 * r.tier) : exponentialCost(100, item, [3, 2]);
+    gold = world ? workshopGoldV1("resonance", power(item), r.tier, repeats("resonance")) : exponentialCost(100, item, [3, 2]);
     materials3["Monster Soul"] = combatPlayer(p) ? 3 + 3 * r.tier : 25 + 25 * r.tier;
   } else if (op === "shatter") {
     if (Object.values(p.inventory.equipped).includes(item.itemId)) problem = "Unequip before shattering";
@@ -14545,7 +14596,7 @@ function workshopAccounting(p) {
   const materials3 = {}, w = p.inventory.services?.workshop;
   if (!w) return { gold, materials: materials3 };
   for (const [k, n] of Object.entries(w.materialPurchases)) {
-    gold = addAmount(gold, multiplyAmount(workshopMaterialPrices(p)[k], String(n)));
+    gold = addAmount(gold, w.materialGold ? w.materialGold[k] : multiplyAmount(workshopMaterialPrices(p)[k], String(n)));
     materials3[k] = n;
   }
   for (const r of Object.values(w.records)) {
@@ -14581,7 +14632,11 @@ function validateWorkshop(s, p, validateCommand2) {
     return;
   }
   requireContract(w, "Missing workshop");
-  closedRecord(w, ["version", "records", "materialPurchases", "materialReceipts"]);
+  closedRecord(w, ["version", "records", "materialPurchases", "materialReceipts"], ["materialGold"]);
+  if (w.materialGold) {
+    closedRecord(w.materialGold, Object.keys(w.materialPurchases));
+    for (const v of Object.values(w.materialGold)) amount(v);
+  }
   requireContract(w.version === WORKSHOP_VERSION && Object.keys(w.records).length <= MAX_WORKSHOP_ITEMS, "Workshop version/bound");
   const orders = /* @__PURE__ */ new Set();
   function stamp(r, kind2) {

@@ -629,6 +629,7 @@ import {
   potionCount,
   potionDropCount,
   potionHealPercent,
+  potionRefillPriceV1,
   potionUpgrade,
   prepareEpisodeReward,
   prepareProgressionChange,
@@ -681,6 +682,7 @@ import {
   recoveredBossForId,
   recoveredBossRecord,
   recycleSporeV4,
+  refillPotionsV1,
   regionAddress,
   relativeWorldPosition,
   requireContract,
@@ -872,7 +874,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-7MC2XACM.js";
+} from "./chunk-ZWJCXV7G.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -49127,7 +49129,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
       state.tick = safeInteger(state.tick + 1, 1);
       if (state.d9World && state.tick % POTION_BELT_POLICY.refillIntervalTicks === 0) for (const p of Object.values(state.playersById)) {
         const a = state.entitiesById[p.entityId];
-        if (a?.alive && a.residency.spaceInstanceId === state.overworldInstanceId && (isStarterVillageSafe(state, a.position) || isWorldPointSafe(manifest, a.position))) grantPotions(p, POTION_BELT_POLICY.maxCapacityUpgrades + POTION_BELT_POLICY.baseCharges);
+        if (a?.alive && a.residency.spaceInstanceId === state.overworldInstanceId && (isStarterVillageSafe(state, a.position) || isWorldPointSafe(manifest, a.position))) (hasWorldCombat(state) ? refillPotionsV1 : grantPotions)(p, POTION_BELT_POLICY.maxCapacityUpgrades + POTION_BELT_POLICY.baseCharges);
       }
       if (state.d9World) for (const p of Object.values(state.playersById)) collectGroundPotions(state, p);
       expireWildernessCrowdGrace(state);
@@ -50563,7 +50565,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
           worldTime: worldTimeAtTick(state.tick),
           localPlayerId,
           inventory,
-          potions: Object.freeze({ count: potionCount(player), capacity: potionCapacity(player), healPercent: potionHealPercent(player), cooldownTicks: potionCooldownTicks(state, player), cooldownTotal: POTION_BELT_POLICY.cooldownTicks, enabled: Boolean(player.inventory?.services), drops: freezeProjection(potionDrops) }),
+          potions: Object.freeze({ count: potionCount(player), capacity: potionCapacity(player), healPercent: potionHealPercent(player), cooldownTicks: potionCooldownTicks(state, player), cooldownTotal: POTION_BELT_POLICY.cooldownTicks, enabled: Boolean(player.inventory?.services), refillPrice: hasWorldCombat(state) ? potionRefillPriceV1(player.progression?.level ?? 1) : null, drops: freezeProjection(potionDrops) }),
           forgeAccess: forgeAccess(state, player, m),
           loot: freezeProjection(loot),
           resources: freezeProjection(resources),
@@ -59996,7 +59998,7 @@ function createSettlementServicesMenu2(options) {
       shell.append(foot);
     } else if (mode === "supplies") {
       const belt = m.potions, card = el("div", void 0, "tn-card");
-      card.append(el("p", "Potion belt \xB7 " + belt.count + " / " + belt.capacity, "tn-sect"), markup(el("div", void 0, "tn-belt"), Array.from({ length: belt.capacity }, (_, n) => FLASK(n < belt.count)).join("")), el("p", "Each potion heals " + belt.healPercent + "% of max HP \xB7 refills free in town \xB7 enemies drop more", "tn-hint"));
+      card.append(el("p", "Potion belt \xB7 " + belt.count + " / " + belt.capacity, "tn-sect"), markup(el("div", void 0, "tn-belt"), Array.from({ length: belt.capacity }, (_, n) => FLASK(n < belt.count)).join("")), el("p", "Each potion heals " + belt.healPercent + "% of max HP \xB7 " + (belt.refillPrice ? "refills in town for " + belt.refillPrice + " gold each" : "refills free in town") + " \xB7 enemies drop more", "tn-hint"));
       body5.append(card);
       if (npc?.role === "general") {
         const B5 = POTION_BELT_POLICY;
