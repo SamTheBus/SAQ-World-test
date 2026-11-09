@@ -3776,6 +3776,8 @@ var TOME_DAMAGE = freezeWire({ fire: "fireDmg", frost: "frostDmg", lightning: "l
 var NEW_AFFIX_KEYS = Object.freeze(["mainDmg", "offDmg", "fireDmg", "frostDmg", "lightningDmg", "bleedDmg", "poisonDmg", "shockDmg", "counterDmg", "skillDmg", "passiveRank", "cdr", "eliteDmg", "lifeHit", "lifeKill"]);
 var isNewAffix = (key5) => NEW_AFFIX_KEYS.includes(key5);
 var NEW_AFFIX_RANGES = freezeWire({ mainDmg: [40, 100], offDmg: [40, 100], fireDmg: [50, 130], frostDmg: [50, 130], lightningDmg: [50, 130], bleedDmg: [50, 130], poisonDmg: [50, 130], shockDmg: [50, 130], counterDmg: [50, 130], skillDmg: [80, 150], cdr: [30, 60], eliteDmg: [50, 120], lifeKill: [10, 30] });
+var PERCENT_STAT_OF = freezeWire({ atk: "atkPct", def: "defPct", maxHp: "maxHpPct" });
+var PERCENT_STAT_RANGES = freezeWire({ atkPct: [30, 60], maxHpPct: [40, 80], defPct: [40, 80] });
 var CDR_CAP = 0.3;
 var byClass = (cls, f3) => Object.values(CLASS_TREE_SKILLS).filter((x) => x.classId === cls && f3(x)).map((x) => x.id).sort();
 var ACTIVES = {};
@@ -3783,7 +3785,7 @@ var PASSIVES = {};
 var classActives = (cls) => ACTIVES[cls] ??= Object.freeze(byClass(cls, (x) => x.kind === "active"));
 var classRankPassives = (cls) => PASSIVES[cls] ??= Object.freeze(byClass(cls, (x) => x.kind === "passive" && x.maxRank === 5));
 function affixPoolV2(oldPool, slotKey, rarityTier) {
-  return [...oldPool, ...(NEW_AFFIX_POOLS[slotKey] ?? []).filter((k) => !oldPool.includes(k) && (k !== "passiveRank" || rarityTier >= 2))];
+  return [...new Set([...oldPool, ...(NEW_AFFIX_POOLS[slotKey] ?? []).filter((k) => !oldPool.includes(k) && (k !== "passiveRank" || rarityTier >= 2))].map((k) => PERCENT_STAT_OF[k] ?? k))];
 }
 function resolveNewAffix(key5, cls, spellType, random) {
   if (key5 !== "classDmg") return key5;
@@ -3953,14 +3955,14 @@ var UNIQUE_TIERS = freezeWire({
   "gravecleaver": { lines: ["mainDmg", "shockDmg", "counterDmg", "critDamage", "eliteDmg"], stars: [60, 80, 100, 125], unit: "pct" },
   "wightfang": { lines: ["offDmg", "bleedDmg", "parry", "critChance", "cdr"], stars: [60, 80, 100, 125], unit: "pct" },
   "crownflame-scepter": { lines: ["mainDmg", "fireDmg", "bonusAreaRadius", "critChance", "eliteDmg"], stars: [120, 150, 180, 240], unit: "ticks" },
-  "barrowshroud": { lines: ["maxHp", "def", "lifeKill", "atk", "cdr"], stars: [2400, 2100, 1800, 1500], unit: "ticks" },
+  "barrowshroud": { lines: ["maxHpPct", "defPct", "lifeKill", "atkPct", "cdr"], stars: [2400, 2100, 1800, 1500], unit: "ticks" },
   "sunshield": { lines: ["block", "offDmg", "cdr", "passiveRank", "counterDmg"], stars: [2, 3, 3, 4], unit: "count" },
   "pharaoh-khopesh": { lines: ["mainDmg", "skillDmg:lunge", "critDamage", "activeSpd", "eliteDmg"], stars: [60, 90, 120, 180], unit: "ticks" },
   "undying-sun-staff": { lines: ["mainDmg", "fireDmg", "critChance", "activeSpd", "eliteDmg"], stars: [5, 4, 3, 2], unit: "nth" },
-  "eye-of-the-sun": { lines: ["atk", "critChance", "eliteDmg", "lifeHit", "maxHp"], stars: [[30, 6], [40, 8], [50, 10], [65, 12]], unit: "eye" },
-  "bristleback-mantle": { lines: ["maxHp", "def", "str", "lifeKill", "moveSpeed"], stars: [3, 4, 5, 6], unit: "pct" },
-  "jacks-band": { lines: ["lifeHit", "atk", "maxHp", "eliteDmg", "critChance"], stars: [20, 25, 30, 40], unit: "permille" },
-  "kheptra-signet": { lines: ["def", "maxHp", "cdr", "atk", "moveSpeed"], stars: [840, 720, 600, 480], unit: "ticks" },
+  "eye-of-the-sun": { lines: ["atkPct", "critChance", "eliteDmg", "lifeHit", "maxHpPct"], stars: [[30, 6], [40, 8], [50, 10], [65, 12]], unit: "eye" },
+  "bristleback-mantle": { lines: ["maxHpPct", "defPct", "str", "lifeKill", "moveSpeed"], stars: [3, 4, 5, 6], unit: "pct" },
+  "jacks-band": { lines: ["lifeHit", "atkPct", "maxHpPct", "eliteDmg", "critChance"], stars: [20, 25, 30, 40], unit: "permille" },
+  "kheptra-signet": { lines: ["defPct", "maxHpPct", "cdr", "atkPct", "moveSpeed"], stars: [840, 720, 600, 480], unit: "ticks" },
   "glasstail-cloak": { lines: ["critChance", "dex", "critDamage", "lifeKill", "moveSpeed"], stars: [60, 80, 100, 125], unit: "pct" }
 });
 var UNIQUE_LINE_UNLOCKS = Object.freeze([2, 2, 3, 4, 5]);
@@ -4637,7 +4639,10 @@ function generateAtPrecision(c, seed, input, { tier = null, family: family2 = nu
       affixes.push(skill ? { key: key5, value, skill } : { key: key5, value });
       continue;
     }
-    if (key5 === "atk" || key5 === "def") value = ceil(times3(f3(".04", ".08"), E, flatR));
+    if (PERCENT_STAT_RANGES[key5]) {
+      const [lo, hi] = PERCENT_STAT_RANGES[key5];
+      value = round44(times3(f3(String(lo / 1e3), String(hi / 1e3)), c.q(100 + 5 * rarityTier, 100)));
+    } else if (key5 === "atk" || key5 === "def") value = ceil(times3(f3(".04", ".08"), E, flatR));
     else if (key5 === "maxHp") value = ceil(times3(f3(".12", ".24"), E, flatR));
     else if (key5 === "moveSpeed") value = ceil(times3(1 + Math.floor(random() * 2), power2, P2));
     else if (key5 === "critChance") value = round44(capped(times3(f3(".015", ".04"), c.root(I(power2), 2), P2), I(".2")));
@@ -4655,7 +4660,7 @@ function generateAtPrecision(c, seed, input, { tier = null, family: family2 = nu
   }
   const adj = { atk: "Fierce", maxHp: "Grizzled", def: "Hardened", moveSpeed: "Fleet", critChance: "Precise", critDamage: "Savage", block: "Stalwart", parry: "Nimble", str: "Heavy", dex: "Swift", int: "Erudite", activeSpd: "Hasty" };
   const dominant = Object.keys(adj).reduce((a, k) => compareCombat(exactDecimal(bonus[k] ?? 0), exactDecimal(bonus[a] ?? 0)) > 0 ? k : a, "");
-  const definition = { numericVersion: "generated-numeric-d9-v1", definitionId: `d7-${type}-${sub ?? "ordinary"}`, name: uq ? `${uq.name} (Lv. ${power2})` : `${dominant ? adj[dominant] : "Standard"} ${n} (Lv. ${power2})`, slot: type, subType: sub, spellType: raw.spellType ?? null, noun: n, rarityTier, itemPower: power2, bonuses: { attack: sumGear(raw.baseAtk, bonus.atk ?? 0), maxHp: sumGear(raw.baseMaxHp, bonus.maxHp ?? 0), defense: sumGear(raw.baseDef, bonus.def ?? 0) }, attributes: { str: sumGear(raw.baseStr, bonus.str ?? 0), dex: sumGear(raw.baseDex, bonus.dex ?? 0), int: sumGear(raw.baseInt, bonus.int ?? 0) }, effects: { moveSpeed: sumGear(raw.baseMoveSpeed, bonus.moveSpeed ?? 0), critChance: sumGear(raw.baseCritChance, bonus.critChance ?? 0), critDamage: sumGear(raw.baseCritDamage, bonus.critDamage ?? 0), block: sumGear(raw.baseBlock, bonus.block ?? 0), parry: sumGear(raw.baseParry, bonus.parry ?? 0), activeSpeed: bonus.activeSpd ?? 0, bonusAreaRadius: bonus.bonusAreaRadius ?? 0, ...Object.fromEntries(["atkPct", "maxHpPct", "defPct", "moveSpeedPct", "strPct", "dexPct", "intPct"].map((k) => [k, raw[k] ?? 0])) }, family: { ...Object.fromEntries(["subArchetype", "blockCapBonus", "reflectDamage", "bashAtkBonus", "parryCapBonus", "parryMitigation", "riposteDamage", "bleedChance", "offhandChance", "offhandDmg"].map((k) => [k, raw[k] ?? null])), fireChanceNumerator: 50 + 3 * rarityTier, fireChanceDenominator: 150, firePowerNumerator: 18 + 2 * rarityTier }, weaponVisual: type === "weapon" ? "iron" : null, ...cls && !sharedGear(type, n) ? { gearClass: cls } : {}, ...uq ? { unique: uq.id } : {} };
+  const definition = { numericVersion: "generated-numeric-d9-v1", definitionId: `d7-${type}-${sub ?? "ordinary"}`, name: uq ? `${uq.name} (Lv. ${power2})` : `${dominant ? adj[dominant] : "Standard"} ${n} (Lv. ${power2})`, slot: type, subType: sub, spellType: raw.spellType ?? null, noun: n, rarityTier, itemPower: power2, bonuses: { attack: sumGear(raw.baseAtk, bonus.atk ?? 0), maxHp: sumGear(raw.baseMaxHp, bonus.maxHp ?? 0), defense: sumGear(raw.baseDef, bonus.def ?? 0) }, attributes: { str: sumGear(raw.baseStr, bonus.str ?? 0), dex: sumGear(raw.baseDex, bonus.dex ?? 0), int: sumGear(raw.baseInt, bonus.int ?? 0) }, effects: { moveSpeed: sumGear(raw.baseMoveSpeed, bonus.moveSpeed ?? 0), critChance: sumGear(raw.baseCritChance, bonus.critChance ?? 0), critDamage: sumGear(raw.baseCritDamage, bonus.critDamage ?? 0), block: sumGear(raw.baseBlock, bonus.block ?? 0), parry: sumGear(raw.baseParry, bonus.parry ?? 0), activeSpeed: bonus.activeSpd ?? 0, bonusAreaRadius: bonus.bonusAreaRadius ?? 0, ...Object.fromEntries(["atkPct", "maxHpPct", "defPct", "moveSpeedPct", "strPct", "dexPct", "intPct"].map((k) => [k, bonus[k] ? sumGear(raw[k] ?? 0, bonus[k]) : raw[k] ?? 0])) }, family: { ...Object.fromEntries(["subArchetype", "blockCapBonus", "reflectDamage", "bashAtkBonus", "parryCapBonus", "parryMitigation", "riposteDamage", "bleedChance", "offhandChance", "offhandDmg"].map((k) => [k, raw[k] ?? null])), fireChanceNumerator: 50 + 3 * rarityTier, fireChanceDenominator: 150, firePowerNumerator: 18 + 2 * rarityTier }, weaponVisual: type === "weapon" ? "iron" : null, ...cls && !sharedGear(type, n) ? { gearClass: cls } : {}, ...uq ? { unique: uq.id } : {} };
   if (sub === "tome" && raw.spellType !== "fire") {
     delete definition.family.fireChanceNumerator;
     delete definition.family.fireChanceDenominator;
@@ -4674,7 +4679,11 @@ function affixRollRangeD9(g, key5) {
     const cap = (a, b) => ({ lo: a.lo < b.lo ? a.lo : b.lo, hi: a.hi < b.hi ? a.hi : b.hi }), ceil = (x) => progressionWire(c.endpoint(x, "ceil")), round44 = (x) => decimalWire(c.endpoint(x, "round", 4), 4);
     let minimum, maximum;
     const star = c.q(100 + 5 * tier, 100);
-    if (NEW_AFFIX_RANGES[key5]) {
+    if (PERCENT_STAT_RANGES[key5]) {
+      const [lo, hi] = PERCENT_STAT_RANGES[key5];
+      minimum = round44(mul2(I(lo, 1e3), star));
+      maximum = round44(mul2(I(hi, 1e3), star));
+    } else if (NEW_AFFIX_RANGES[key5]) {
       const [lo, hi] = NEW_AFFIX_RANGES[key5];
       minimum = round44(mul2(I(lo, 1e3), star));
       maximum = round44(mul2(I(hi, 1e3), star));
@@ -5587,7 +5596,7 @@ var WORKSHOP_VERSION = "settlement-workshop-v2";
 var MAX_WORKSHOP_ITEMS = 64;
 var MAX_WORKSHOP_STEPS = 32;
 var RESONANCE_SETS = freezeWire({ Vanguard: { two: { atkPct: 0.05 }, three: { atkPct: 0.15 } }, Colossus: { two: { maxHpPct: 0.08 }, three: { maxHpPct: 0.22 } }, Bastion: { two: { defPct: 0.05 }, three: { defPct: 0.18 } }, Windrunner: { two: { moveSpeedPct: 0.05 }, three: { moveSpeedPct: 0.15 } }, Wraith: { two: { critChance: 0.03 }, three: { critChance: 0.08, critDamage: 0.15 } }, Reaver: { two: { critDamage: 0.15 }, three: { critDamage: 0.35, critChance: 0.02 } }, Dreadnought: { two: { block: 0.03 }, three: { block: 0.08, defPct: 0.06 } }, Duellist: { two: { parry: 0.02 }, three: { parry: 0.06, activeSpeed: 0.1 } }, Scholar: { two: { intPct: 0.05 }, three: { intPct: 0.15, activeSpeed: 0.1 } }, Berserker: { two: { strPct: 0.05 }, three: { strPct: 0.15 } }, Scout: { two: { dexPct: 0.05 }, three: { dexPct: 0.15, moveSpeedPct: 0.08 } } });
-var paths = { atk: ["bonuses", "attack"], def: ["bonuses", "defense"], maxHp: ["bonuses", "maxHp"], str: ["attributes", "str"], dex: ["attributes", "dex"], int: ["attributes", "int"], activeSpd: ["effects", "activeSpeed"], moveSpeed: ["effects", "moveSpeed"], critChance: ["effects", "critChance"], critDamage: ["effects", "critDamage"], block: ["effects", "block"], parry: ["effects", "parry"], bonusAreaRadius: ["effects", "bonusAreaRadius"] };
+var paths = { atk: ["bonuses", "attack"], def: ["bonuses", "defense"], maxHp: ["bonuses", "maxHp"], str: ["attributes", "str"], dex: ["attributes", "dex"], int: ["attributes", "int"], activeSpd: ["effects", "activeSpeed"], moveSpeed: ["effects", "moveSpeed"], critChance: ["effects", "critChance"], critDamage: ["effects", "critDamage"], block: ["effects", "block"], parry: ["effects", "parry"], bonusAreaRadius: ["effects", "bonusAreaRadius"], atkPct: ["effects", "atkPct"], maxHpPct: ["effects", "maxHpPct"], defPct: ["effects", "defPct"] };
 var integer = /* @__PURE__ */ new Set(["atk", "def", "maxHp", "str", "dex", "int", "moveSpeed"]);
 var decimalResult = (q, numeric = false) => {
   if (q.d === "1") return progressionWire(BigInt(q.n));
