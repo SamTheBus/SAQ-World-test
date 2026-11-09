@@ -70603,12 +70603,21 @@ function townShops(t) {
   for (const [x, y, w, h, shop] of t.buildings) if (shop) out.push({ kind: shop, x: t.origin.x + x + w / 2, y: t.origin.y + y + h / 2 });
   return out;
 }
+function liftMini(d) {
+  for (let i = 0; i < d.length; i += 4) {
+    const r = d[i] * 1.05 + 10, g = d[i + 1] * 1.05 + 10, b = d[i + 2] * 1.05 + 10, l = r * 0.3 + g * 0.59 + b * 0.11;
+    d[i] = l + (r - l) * 1.32;
+    d[i + 1] = l + (g - l) * 1.32;
+    d[i + 2] = l + (b - l) * 1.32;
+  }
+}
 function paintMiniRaster(canvas, raster, meta, cssWidth, cssHeight) {
   const c = canvas.getContext("2d"), q = Math.min(1, Math.sqrt(9e4 / (cssWidth * cssHeight))), W3 = Math.max(1, Math.round(cssWidth * q)), H6 = Math.max(1, Math.round(cssHeight * q)), raw = canvas.ownerDocument.createElement("canvas");
   raw.width = W3;
   raw.height = H6;
   const rc = raw.getContext("2d"), pixels3 = rc.createImageData(W3, H6);
   paintChartTerrain(pixels3.data, raster, W3, H6);
+  liftMini(pixels3.data);
   rc.putImageData(pixels3, 0, 0);
   c.save();
   c.setTransform(1, 0, 0, 1, 0, 0);
@@ -70629,11 +70638,11 @@ function paintMiniRaster(canvas, raster, meta, cssWidth, cssHeight) {
     if (boxes2.some((a) => jx > a.x0 && jx < a.x1 && jy > a.y0 && jy < a.y1)) continue;
     if (roads.some((r2) => r2.paths.some((p2) => p2.some((q2) => Math.abs(q2.x - jx) < 6 && Math.abs(q2.y - jy) < 6)))) continue;
     const p = P11(jx, jy), r = Math.max(1.8, 3.4 * s);
-    c.fillStyle = "rgba(20,30,15,.35)";
+    c.fillStyle = "rgba(20,40,15,.26)";
     c.beginPath();
     c.arc(p.x + 0.7, p.y + 1, r, 0, 7);
     c.fill();
-    c.fillStyle = b === "s" ? "#5f7d6b" : b === "t" ? "#2f6a3e" : "#3f7238";
+    c.fillStyle = b === "s" ? "#76a083" : b === "t" ? "#3a8a4a" : "#4b8f3e";
     c.beginPath();
     c.arc(p.x, p.y, r, 0, 7);
     c.fill();
@@ -70833,8 +70842,12 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     placesKey = key3;
     const out = [], towns2 = townsById(), states = model.navigation.navigableSitesById ?? {};
     for (const s of meta.settlements) {
-      if (k.visited[s.id] === void 0) continue;
-      const t = towns2.get(s.id), big = s.class === "capital-great-hold" || s.class === "city";
+      const big = s.class === "capital-great-hold" || s.class === "city";
+      if (k.visited[s.id] === void 0) {
+        if (big) out.push({ id: s.id, kind: "settlement", icon: "unknown", label: s.class === "city" ? "Undiscovered city" : "Undiscovered capital", x: s.x, y: s.y, band: s.band, town: null, row: s, travel: false, big, unknown: true });
+        continue;
+      }
+      const t = towns2.get(s.id);
       out.push({ id: s.id, kind: "settlement", icon: big ? "city" : "town", label: t?.name ?? s.label, x: s.x, y: s.y, band: s.band, town: t ?? null, row: s, travel: Boolean(s.built), big });
     }
     for (const s of meta.sites) {
@@ -70929,6 +70942,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     x.fillStyle = "rgba(0,0,0,.42)";
     x.beginPath();
     x.arc(cx + 1, cy2 + 3, R7 + 11, 0, 7);
+    x.arc(cx, cy2, R7, 0, 7, true);
     x.fill();
     const g = x.createLinearGradient(0, cy2 - R7 - 10, 0, cy2 + R7 + 10);
     g.addColorStop(0, "#4a3f30");
@@ -71053,7 +71067,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     c.beginPath();
     c.arc(cx, cy2, R7 + 0.5, 0, 7);
     c.clip();
-    c.fillStyle = "#3f7a52";
+    c.fillStyle = "#5c9f4c";
     c.fillRect(cx - R7, cy2 - R7, D2, D2);
     if (result) {
       if (result.paintKey !== "m") {
@@ -71074,7 +71088,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     }
     const rim = [], list = places();
     for (const m of list) {
-      if (m.kind === "site" && m.rumored) continue;
+      if (m.kind === "site" && m.rumored || m.unknown) continue;
       const q = at6(m.x, m.y), d = Math.hypot(m.x - p.x, m.y - p.y);
       if (inside5(q, 7)) {
         if (m.kind === "settlement" && tpp <= 1.05) continue;
@@ -71255,11 +71269,12 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
       const sets = meta?.settlements ?? [], small_ = sets.filter((s) => s.class !== "city" && s.class !== "capital-great-hold"), big = sets.filter((s) => s.class === "city" || s.class === "capital-great-hold"), k = knowledge();
       row2("town", "Towns and villages", small_.filter((s) => k?.visited[s.id] !== void 0).length + " / " + small_.length);
       row2("city", "Cities and capitals", big.filter((s) => k?.visited[s.id] !== void 0).length + " / " + big.length);
+      row2("unknown", "City not found yet", big.filter((s) => k?.visited[s.id] === void 0).length + " left");
       for (const f of ["cave", "fort", "ruin", "crypt"]) row2(f, cap2(f) + "s", count((m2) => m2.kind === "site" && !m2.rumored && m2.site.family === f) + " found");
       row2("event", "Event clearings", count((m2) => m2.kind === "event") + " found");
       row2("ferry", "Ferry landings", count((m2) => m2.kind === "ferry") + " found");
       row2("quest", "Tracked place", tracked && placeById(tracked) ? "1" : "none");
-      sheet.append(grid, el("p", "m2-note", "Places appear once you find them. Every town and dungeon you find is a fast travel point. A green tick marks a cleared dungeon."));
+      sheet.append(grid, el("p", "m2-note", "Cities and capitals show as ? until you reach them; other places appear once you find them. Every town and dungeon you find is a fast travel point. A green tick marks a cleared dungeon."));
       const notes = knowledge()?.journal ?? [];
       if (notes.length) sheet.append(el("p", "m2-note", "Journal: " + TRAIL_NOTE_TEXT));
       sheet.append(x);
@@ -71308,11 +71323,13 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
       }
       if (kinds2.length) sheet.append(chips);
     }
-    const status2 = el("div", "m2-status"), p = player(), d = p ? Math.hypot(m.x - p.x, m.y - p.y) : 0, mark = el("b", void 0, m.rumored ? "Rumored" : m.done ? "\u2713 Cleared" : "\u2713 Found");
+    const status2 = el("div", "m2-status"), p = player(), d = p ? Math.hypot(m.x - p.x, m.y - p.y) : 0, mark = el("b", void 0, m.unknown ? "Not found yet" : m.rumored ? "Rumored" : m.done ? "\u2713 Cleared" : "\u2713 Found");
+    if (m.unknown) mark.style.color = "#8a6232";
     status2.append(mark);
     const here = Boolean(p) && (d < 6 || m.kind === "settlement" && insideTownAt(p) === m.id);
     if (p) status2.append(el("span", void 0, here ? "You are here" : fmt(d) + " tiles \xB7 " + walk(d)));
     sheet.append(status2);
+    if (m.unknown) sheet.append(el("p", "m2-note", "Reach it to learn its name and unlock fast travel."));
     const b = el("div", "m2-btns");
     if (m.travel && !here) {
       const go = el("button", "m2-gold", "Travel here");
@@ -71416,12 +71433,12 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
         c.arc(q.x, q.y, r + 7.6, 0, 7);
         c.stroke();
       }
-      medal(c, q.x, q.y, r, m.icon, { done: m.done });
+      medal(c, q.x, q.y, r, m.icon, m.unknown ? { col: "#d9ccaa", rim: "#8f7a52" } : { done: m.done });
       hits2.push({ m, x: q.x, y: q.y, r: Math.max(16, r + 6) });
     }
     const hp = P11(p), taken = [{ x: hp.x - 12, y: hp.y - 14, w: 24, h: 28 }, ...marks2.map(({ q, r }) => ({ x: q.x - r, y: q.y - r, w: r * 2, h: r * 2 }))], overlap = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
     for (const { m, q, r } of [...marks2].sort((a, b) => Number(b.m.id === selected?.id) - Number(a.m.id === selected?.id) || b.r - a.r)) {
-      if (m.kind !== "settlement" && m.id !== selected?.id && m.id !== tracked) continue;
+      if ((m.kind !== "settlement" || m.unknown) && m.id !== selected?.id && m.id !== tracked) continue;
       const size = m.big ? 19 : 16;
       c.font = size + "px " + MAP_FONT;
       const text3 = m.kind === "event" ? eventName(m) : m.label, w = c.measureText(text3).width;
