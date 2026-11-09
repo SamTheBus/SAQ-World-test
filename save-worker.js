@@ -485,7 +485,19 @@ var ECONOMY_V1 = freezeWire({
   salePercentOfShop: 10,
   // Slot attunement gold: the first step costs firstGold, each next step growthPercent as much
   // (about 785k at step 50, hundreds of millions in the 80s, about 2.6 billion for step 100).
-  attunement: { firstGold: 200, growthPercent: 118 },
+  attunement: {
+    firstGold: 200,
+    growthPercent: 118,
+    // Scraps v2: five bands of 20 steps; each step also takes the band's materials, about 2 at the start of a band up to 10 at its end.
+    bands: [["Common Scrap"], ["Uncommon Scrap"], ["Rare Scrap", "Eridium Shard"], ["Epic Scrap", "Astral Essence"], ["Legendary Scrap", "Starshard"]],
+    bandMaterialRamp: [2, 10],
+    mythicFromStep: 91,
+    // Souls are set so earning them takes about as long as the gold: step n is expected around hero level 1+3n/5 (50 from step 82),
+    // where play earns about soulsPerHour+eliteSoulsPerHour*min(level,30)/30 Souls (measured Nov 8) and 60*minuteGoldUnits gold units an hour.
+    soulsPerHour: 42,
+    eliteSoulsPerHour: 80,
+    minimumSouls: 2
+  },
   // Shops: minutes of play per rarity (Common..Mythic); Rare from level 10, Epic from 20, as drops.
   shopMinutes: [2, 4, 10, 30, 60, 120],
   shopRareLevel: 10,
@@ -535,6 +547,17 @@ function workshopGoldV1(op, itemLevel, tier2, repeats = 0) {
 var materialPriceV1 = (material, heroLevel) => ECONOMY_V1.materialBase[material] === void 0 ? null : String(ECONOMY_V1.materialBase[material] * goldUnit(heroLevel));
 var salePriceV1 = (itemLevel, tier2) => minutesGold(ECONOMY_V1.shopMinutes[Math.max(0, Math.min(5, tier2))] * ECONOMY_V1.salePercentOfShop / 100, itemLevel);
 var attunementGoldV1 = (level) => String(ATTUNE_GOLD[level]);
+var ATTUNE_SOULS = ATTUNE_GOLD.map((gold, level) => {
+  const A = ECONOMY_V1.attunement, step = level + 1, hero = Math.min(50, 1 + Math.floor(3 * step / 5)), perHour = BigInt(A.soulsPerHour + Math.floor(A.eliteSoulsPerHour * Math.min(hero, 30) / 30)), goldPerHour = BigInt(60 * ECONOMY_V1.minuteGoldUnits * goldUnit(hero));
+  return Math.max(A.minimumSouls, Number((2n * gold * perHour + goldPerHour) / (2n * goldPerHour)));
+});
+var attunementSoulsV1 = (level) => ATTUNE_SOULS[level];
+function attunementMaterialsV1(level) {
+  const A = ECONOMY_V1.attunement, [lo, hi] = A.bandMaterialRamp, band = Math.floor(level / 20), out = {}, ramp = (k, len) => lo + Math.round((hi - lo) * k / (len - 1));
+  for (const m of A.bands[band]) out[m] = ramp(level % 20, 20);
+  if (level + 1 >= A.mythicFromStep) out["Mythic Scrap"] = ramp(level + 1 - A.mythicFromStep, 101 - A.mythicFromStep);
+  return out;
+}
 
 // src/shared/content/world_combat_v1.js
 var WORLD_COMBAT_VERSION = "world-combat-hordes-progression-v1";
@@ -553,16 +576,21 @@ function worldEnemyStats(level, tier2, budget = { hp: 45, damage: 6 }, elite = f
 }
 function combatAttuneCost(level) {
   requireContract(Number.isInteger(level) && level >= 0 && level < 100, "Combat attunement level");
-  return { gold: attunementGoldV1(level), materials: { "Monster Soul": 2 + 2 * level } };
+  return { gold: attunementGoldV1(level), materials: {
+    "Monster Soul": attunementSoulsV1(level),
+    ...attunementMaterialsV1(level)
+    /* Scraps v2 bands */
+  } };
 }
+var attuneSpent = [{ gold: "0", materials: {} }];
 function combatAttuneSpent(level) {
-  let gold = 0n, souls = 0;
-  for (let i = 0; i < level; i++) {
-    const c = combatAttuneCost(i);
-    gold += BigInt(c.gold);
-    souls += c.materials["Monster Soul"];
+  while (attuneSpent.length <= level) {
+    const prev = attuneSpent.at(-1), c = combatAttuneCost(attuneSpent.length - 1), materials3 = { ...prev.materials };
+    for (const [k, v] of Object.entries(c.materials)) materials3[k] = (materials3[k] ?? 0) + v;
+    attuneSpent.push({ gold: String(BigInt(prev.gold) + BigInt(c.gold)), materials: materials3 });
   }
-  return { gold: String(gold), materials: level ? { "Monster Soul": souls } : {} };
+  const s = attuneSpent[level];
+  return { gold: s.gold, materials: { ...s.materials } };
 }
 function worldBossStats(level) {
   const s = worldEnemyStats(level, "C");
@@ -12165,7 +12193,7 @@ function validateGenerationIdentity(identity) {
 var GEAR_VERSION = "dungeon-gear-d9-v1";
 var RARITY_NAMES = Object.freeze(["Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic"]);
 var RARITY_COLORS = Object.freeze(["#ffffff", "#2ecc71", "#3498db", "#9b59b6", "#e67e22", "#e74c3c"]);
-var SALVAGE_MATERIALS = Object.freeze(["Monster Soul", "Rare Scrap", "Magic Scrap", "Epic Scrap", "Legendary Scrap", "Mythic Scrap"]);
+var SALVAGE_MATERIALS = Object.freeze(["Common Scrap", "Uncommon Scrap", "Rare Scrap", "Epic Scrap", "Legendary Scrap", "Mythic Scrap"]);
 var GEAR_FAMILIES = Object.freeze(["weapon", "subweapon", "helmet", "chest", "leggings", "overall", "boots", "ring"]);
 var ONE_PIECE_GEAR_FAMILIES = Object.freeze(GEAR_FAMILIES.filter((f3) => f3 !== "chest" && f3 !== "leggings"));
 var GEAR_NOUNS = Object.freeze({ weapon: ["Greatsword", "Longsword", "Halberd", "Warhammer", "Battleaxe", "Broadsword", "Flanged Mace", "Claymore"], shield: ["Kite Shield", "Tower Shield", "Buckler", "Aegis", "Heater Shield"], dagger: ["Kris", "Stiletto", "Baselard", "Dirk", "Main-Gauche"], tome: ["Grimoire", "Spellbook", "Codex", "Lexicon", "Chronicle"], helmet: ["Greathelm", "Armet", "Visor"], chest: ["Hauberk", "Cuirass", "Brigandine", "Plate Mail", "Chain Mail", "Doublet"], leggings: ["Greaves", "Legplates", "Chausses", "Cuisses"], boots: ["Sabatons", "Sollerets", "Steel Boots", "Treads"], overall: ["Exosuit", "Inquisitor Robes", "Full Plate Armor", "Trenchcoat"], ring: ["Signet Ring", "Loop Ring", "Band Ring", "Seal Ring"] });
@@ -12725,7 +12753,7 @@ function rollEquipmentRarity(options) {
 var GEAR_VERSION2 = "dungeon-gear-d7-v1";
 var RARITY_NAMES2 = Object.freeze(["Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic"]);
 var RARITY_COLORS2 = Object.freeze(["#ffffff", "#2ecc71", "#3498db", "#9b59b6", "#e67e22", "#e74c3c"]);
-var SALVAGE_MATERIALS2 = Object.freeze(["Monster Soul", "Rare Scrap", "Magic Scrap", "Epic Scrap", "Legendary Scrap", "Mythic Scrap"]);
+var SALVAGE_MATERIALS2 = Object.freeze(["Common Scrap", "Uncommon Scrap", "Rare Scrap", "Epic Scrap", "Legendary Scrap", "Mythic Scrap"]);
 var GEAR_FAMILIES2 = Object.freeze(["weapon", "subweapon", "helmet", "chest", "leggings", "overall", "boots", "ring"]);
 var GEAR_NOUNS2 = Object.freeze({ weapon: ["Greatsword", "Longsword", "Halberd", "Warhammer", "Battleaxe", "Broadsword", "Flanged Mace", "Claymore"], shield: ["Kite Shield", "Tower Shield", "Buckler", "Aegis", "Heater Shield"], dagger: ["Kris", "Stiletto", "Baselard", "Dirk", "Main-Gauche"], tome: ["Grimoire", "Spellbook", "Codex", "Lexicon", "Chronicle"], helmet: ["Greathelm", "Armet", "Visor"], chest: ["Hauberk", "Cuirass", "Brigandine", "Plate Mail", "Chain Mail", "Doublet"], leggings: ["Greaves", "Legplates", "Chausses", "Cuisses"], boots: ["Sabatons", "Sollerets", "Steel Boots", "Treads"], overall: ["Exosuit", "Inquisitor Robes", "Full Plate Armor", "Trenchcoat"], ring: ["Signet Ring", "Loop Ring", "Band Ring", "Seal Ring"] });
 var AFFIX_POOLS2 = Object.freeze({ weapon: ["critChance", "critDamage", "activeSpd"], chest: ["maxHp", "def", "str", "dex", "int"], overall: ["maxHp", "def", "str", "dex", "int"], helmet: ["critChance", "activeSpd"], leggings: ["maxHp", "def", "str", "dex", "int"], boots: ["moveSpeed", "activeSpd"], ring: ["atk", "maxHp", "def", "str", "dex", "int", "critChance", "moveSpeed"], shield: ["block", "moveSpeed"], dagger: ["parry", "critChance", "moveSpeed"], tome: ["critDamage", "activeSpd", "critChance"] });
@@ -13041,7 +13069,7 @@ function dungeonItemBases2(item, stageScale) {
 var GEAR_VERSION3 = "dungeon-gear-d7-v2";
 var RARITY_NAMES3 = Object.freeze(["Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic"]);
 var RARITY_COLORS3 = Object.freeze(["#ffffff", "#2ecc71", "#3498db", "#9b59b6", "#e67e22", "#e74c3c"]);
-var SALVAGE_MATERIALS3 = Object.freeze(["Monster Soul", "Rare Scrap", "Magic Scrap", "Epic Scrap", "Legendary Scrap", "Mythic Scrap"]);
+var SALVAGE_MATERIALS3 = Object.freeze(["Common Scrap", "Uncommon Scrap", "Rare Scrap", "Epic Scrap", "Legendary Scrap", "Mythic Scrap"]);
 var GEAR_FAMILIES3 = Object.freeze(["weapon", "subweapon", "helmet", "chest", "leggings", "overall", "boots", "ring"]);
 var GEAR_NOUNS3 = Object.freeze({ weapon: ["Greatsword", "Longsword", "Halberd", "Warhammer", "Battleaxe", "Broadsword", "Flanged Mace", "Claymore"], shield: ["Kite Shield", "Tower Shield", "Buckler", "Aegis", "Heater Shield"], dagger: ["Kris", "Stiletto", "Baselard", "Dirk", "Main-Gauche"], tome: ["Grimoire", "Spellbook", "Codex", "Lexicon", "Chronicle"], helmet: ["Greathelm", "Armet", "Visor"], chest: ["Hauberk", "Cuirass", "Brigandine", "Plate Mail", "Chain Mail", "Doublet"], leggings: ["Greaves", "Legplates", "Chausses", "Cuisses"], boots: ["Sabatons", "Sollerets", "Steel Boots", "Treads"], overall: ["Exosuit", "Inquisitor Robes", "Full Plate Armor", "Trenchcoat"], ring: ["Signet Ring", "Loop Ring", "Band Ring", "Seal Ring"] });
 var AFFIX_POOLS3 = Object.freeze({ weapon: ["critChance", "critDamage", "activeSpd"], chest: ["maxHp", "def", "str", "dex", "int"], overall: ["maxHp", "def", "str", "dex", "int"], helmet: ["critChance", "activeSpd"], leggings: ["maxHp", "def", "str", "dex", "int"], boots: ["moveSpeed", "activeSpd"], ring: ["atk", "maxHp", "def", "str", "dex", "int", "critChance", "moveSpeed"], shield: ["block", "moveSpeed"], dagger: ["parry", "critChance", "moveSpeed"], tome: ["critDamage", "activeSpd", "critChance"] });
@@ -13119,7 +13147,7 @@ function generateGear2(seed, input, { tier: tier2 = null, family: family2 = null
 var GEAR_VERSION4 = "dungeon-gear-d8-v1";
 var RARITY_NAMES4 = Object.freeze(["Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic"]);
 var RARITY_COLORS4 = Object.freeze(["#ffffff", "#2ecc71", "#3498db", "#9b59b6", "#e67e22", "#e74c3c"]);
-var SALVAGE_MATERIALS4 = Object.freeze(["Monster Soul", "Rare Scrap", "Magic Scrap", "Epic Scrap", "Legendary Scrap", "Mythic Scrap"]);
+var SALVAGE_MATERIALS4 = Object.freeze(["Common Scrap", "Uncommon Scrap", "Rare Scrap", "Epic Scrap", "Legendary Scrap", "Mythic Scrap"]);
 var GEAR_FAMILIES4 = Object.freeze(["weapon", "subweapon", "helmet", "chest", "leggings", "overall", "boots", "ring"]);
 var GEAR_NOUNS4 = Object.freeze({ weapon: ["Greatsword", "Longsword", "Halberd", "Warhammer", "Battleaxe", "Broadsword", "Flanged Mace", "Claymore"], shield: ["Kite Shield", "Tower Shield", "Buckler", "Aegis", "Heater Shield"], dagger: ["Kris", "Stiletto", "Baselard", "Dirk", "Main-Gauche"], tome: ["Grimoire", "Spellbook", "Codex", "Lexicon", "Chronicle"], helmet: ["Greathelm", "Armet", "Visor"], chest: ["Hauberk", "Cuirass", "Brigandine", "Plate Mail", "Chain Mail", "Doublet"], leggings: ["Greaves", "Legplates", "Chausses", "Cuisses"], boots: ["Sabatons", "Sollerets", "Steel Boots", "Treads"], overall: ["Exosuit", "Inquisitor Robes", "Full Plate Armor", "Trenchcoat"], ring: ["Signet Ring", "Loop Ring", "Band Ring", "Seal Ring"] });
 var AFFIX_POOLS4 = Object.freeze({ weapon: ["critChance", "critDamage", "activeSpd"], chest: ["maxHp", "def", "str", "dex", "int"], overall: ["maxHp", "def", "str", "dex", "int"], helmet: ["critChance", "activeSpd", "bonusAreaRadius"], leggings: ["maxHp", "def", "str", "dex", "int"], boots: ["moveSpeed", "activeSpd"], ring: ["atk", "maxHp", "def", "str", "dex", "int", "critChance", "moveSpeed", "bonusAreaRadius"], shield: ["block", "moveSpeed", "bonusAreaRadius"], dagger: ["parry", "critChance", "moveSpeed", "bonusAreaRadius"], tome: ["critDamage", "activeSpd", "critChance", "bonusAreaRadius"], gloves: ["atk", "critChance", "activeSpd", "str", "dex", "int"] });
@@ -13359,41 +13387,41 @@ var FORGE_MATERIAL_COSTS = Object.freeze([
   Object.freeze({ "Monster Soul": 89 }),
   Object.freeze({ "Monster Soul": 111 }),
   Object.freeze({ "Monster Soul": 139 }),
-  Object.freeze({ "Monster Soul": 1200, "Rare Scrap": 18 }),
-  Object.freeze({ "Monster Soul": 1440, "Rare Scrap": 23 }),
-  Object.freeze({ "Monster Soul": 1727, "Rare Scrap": 29 }),
-  Object.freeze({ "Monster Soul": 2073, "Rare Scrap": 36 }),
-  Object.freeze({ "Monster Soul": 2488, "Rare Scrap": 45 }),
-  Object.freeze({ "Monster Soul": 2985, "Rare Scrap": 57 }),
-  Object.freeze({ "Monster Soul": 3583, "Rare Scrap": 71 }),
-  Object.freeze({ "Monster Soul": 4299, "Rare Scrap": 89 }),
-  Object.freeze({ "Monster Soul": 5159, "Rare Scrap": 111 }),
-  Object.freeze({ "Monster Soul": 6191, "Rare Scrap": 139 }),
-  Object.freeze({ "Monster Soul": 7430, "Rare Scrap": 174 }),
-  Object.freeze({ "Monster Soul": 8916, "Rare Scrap": 218 }),
-  Object.freeze({ "Monster Soul": 10699, "Rare Scrap": 272 }),
-  Object.freeze({ "Monster Soul": 12839, "Rare Scrap": 341 }),
-  Object.freeze({ "Monster Soul": 15407, "Rare Scrap": 426 }),
-  Object.freeze({ "Luminous Soul": 5, "Magic Scrap": 30 }),
-  Object.freeze({ "Luminous Soul": 6, "Magic Scrap": 37 }),
-  Object.freeze({ "Luminous Soul": 8, "Magic Scrap": 45 }),
-  Object.freeze({ "Luminous Soul": 9, "Magic Scrap": 55 }),
-  Object.freeze({ "Luminous Soul": 11, "Magic Scrap": 67 }),
-  Object.freeze({ "Luminous Soul": 13, "Magic Scrap": 82 }),
-  Object.freeze({ "Luminous Soul": 15, "Magic Scrap": 100 }),
-  Object.freeze({ "Luminous Soul": 18, "Magic Scrap": 122 }),
-  Object.freeze({ "Luminous Soul": 22, "Magic Scrap": 149 }),
-  Object.freeze({ "Luminous Soul": 26, "Magic Scrap": 182 }),
-  Object.freeze({ "Luminous Soul": 30, "Magic Scrap": 222 }),
-  Object.freeze({ "Luminous Soul": 36, "Magic Scrap": 271 }),
-  Object.freeze({ "Luminous Soul": 42, "Magic Scrap": 331 }),
-  Object.freeze({ "Luminous Soul": 50, "Magic Scrap": 404 }),
-  Object.freeze({ "Luminous Soul": 59, "Magic Scrap": 493 }),
-  Object.freeze({ "Luminous Soul": 70, "Magic Scrap": 602 }),
-  Object.freeze({ "Luminous Soul": 83, "Magic Scrap": 734 }),
-  Object.freeze({ "Luminous Soul": 98, "Magic Scrap": 896 }),
-  Object.freeze({ "Luminous Soul": 116, "Magic Scrap": 1093 }),
-  Object.freeze({ "Luminous Soul": 136, "Magic Scrap": 1333 }),
+  Object.freeze({ "Monster Soul": 1200, "Uncommon Scrap": 18 }),
+  Object.freeze({ "Monster Soul": 1440, "Uncommon Scrap": 23 }),
+  Object.freeze({ "Monster Soul": 1727, "Uncommon Scrap": 29 }),
+  Object.freeze({ "Monster Soul": 2073, "Uncommon Scrap": 36 }),
+  Object.freeze({ "Monster Soul": 2488, "Uncommon Scrap": 45 }),
+  Object.freeze({ "Monster Soul": 2985, "Uncommon Scrap": 57 }),
+  Object.freeze({ "Monster Soul": 3583, "Uncommon Scrap": 71 }),
+  Object.freeze({ "Monster Soul": 4299, "Uncommon Scrap": 89 }),
+  Object.freeze({ "Monster Soul": 5159, "Uncommon Scrap": 111 }),
+  Object.freeze({ "Monster Soul": 6191, "Uncommon Scrap": 139 }),
+  Object.freeze({ "Monster Soul": 7430, "Uncommon Scrap": 174 }),
+  Object.freeze({ "Monster Soul": 8916, "Uncommon Scrap": 218 }),
+  Object.freeze({ "Monster Soul": 10699, "Uncommon Scrap": 272 }),
+  Object.freeze({ "Monster Soul": 12839, "Uncommon Scrap": 341 }),
+  Object.freeze({ "Monster Soul": 15407, "Uncommon Scrap": 426 }),
+  Object.freeze({ "Luminous Soul": 5, "Rare Scrap": 30 }),
+  Object.freeze({ "Luminous Soul": 6, "Rare Scrap": 37 }),
+  Object.freeze({ "Luminous Soul": 8, "Rare Scrap": 45 }),
+  Object.freeze({ "Luminous Soul": 9, "Rare Scrap": 55 }),
+  Object.freeze({ "Luminous Soul": 11, "Rare Scrap": 67 }),
+  Object.freeze({ "Luminous Soul": 13, "Rare Scrap": 82 }),
+  Object.freeze({ "Luminous Soul": 15, "Rare Scrap": 100 }),
+  Object.freeze({ "Luminous Soul": 18, "Rare Scrap": 122 }),
+  Object.freeze({ "Luminous Soul": 22, "Rare Scrap": 149 }),
+  Object.freeze({ "Luminous Soul": 26, "Rare Scrap": 182 }),
+  Object.freeze({ "Luminous Soul": 30, "Rare Scrap": 222 }),
+  Object.freeze({ "Luminous Soul": 36, "Rare Scrap": 271 }),
+  Object.freeze({ "Luminous Soul": 42, "Rare Scrap": 331 }),
+  Object.freeze({ "Luminous Soul": 50, "Rare Scrap": 404 }),
+  Object.freeze({ "Luminous Soul": 59, "Rare Scrap": 493 }),
+  Object.freeze({ "Luminous Soul": 70, "Rare Scrap": 602 }),
+  Object.freeze({ "Luminous Soul": 83, "Rare Scrap": 734 }),
+  Object.freeze({ "Luminous Soul": 98, "Rare Scrap": 896 }),
+  Object.freeze({ "Luminous Soul": 116, "Rare Scrap": 1093 }),
+  Object.freeze({ "Luminous Soul": 136, "Rare Scrap": 1333 }),
   Object.freeze({ "Epic Scrap": 57, "Astral Shards": 1 }),
   Object.freeze({ "Epic Scrap": 67, "Astral Shards": 1 }),
   Object.freeze({ "Epic Scrap": 78, "Astral Shards": 1 }),
@@ -13452,7 +13480,7 @@ var FORGE_MATERIAL_COSTS = Object.freeze([
 ]);
 
 // src/shared/content/forge.js
-var FORGE_MATERIALS = Object.freeze(["Monster Soul", "Rare Scrap", "Luminous Soul", "Magic Scrap", "Epic Scrap", "Astral Shards", "Legendary Scrap", "Mythic Scrap", "Eridium Shard", "Overlord's Sigil", "Astral Essence"]);
+var FORGE_MATERIALS = Object.freeze(["Monster Soul", "Common Scrap", "Uncommon Scrap", "Luminous Soul", "Rare Scrap", "Epic Scrap", "Astral Shards", "Legendary Scrap", "Mythic Scrap", "Eridium Shard", "Overlord's Sigil", "Astral Essence", "Starshard"]);
 var mul = multiplyAmount;
 var pow2 = powerAmount;
 function attunementCost(level, player = null) {
@@ -13585,8 +13613,8 @@ var SITE_FINALE_PROVISIONAL_COMPLETION_REWARD_CLASS = "site-finale-provisional-c
 var CONTENT_DEPTH = Object.freeze(Object.fromEntries(["C", "B", "A", "S"].map((rank) => [rank, prototypeRewardProgression(rank, "compatibility").sourceDepth])));
 var MATERIAL_DEPTH_BANDS = Object.freeze([
   { minimumDepth: 1, material: "Monster Soul" },
-  { minimumDepth: 11, material: "Rare Scrap" },
-  { minimumDepth: 21, material: "Magic Scrap" },
+  { minimumDepth: 11, material: "Uncommon Scrap" },
+  { minimumDepth: 21, material: "Rare Scrap" },
   { minimumDepth: 31, material: "Epic Scrap" },
   { minimumDepth: 41, material: "Legendary Scrap" },
   { minimumDepth: 51, material: "Mythic Scrap" }
@@ -14559,12 +14587,13 @@ function validateSalvageProgress(a, b, before, after = null) {
 }
 
 // src/shared/contracts/settlement_workshop_v2.js
-var combatMaterialPrices = Object.freeze({ "Eridium Shard": "30", "Overlord's Sigil": "20", "Astral Essence": "60", "Rare Scrap": "8", "Magic Scrap": "16", "Epic Scrap": "32", "Legendary Scrap": "64", "Mythic Scrap": "128", "Luminous Soul": "20", "Astral Shards": "40" });
+var combatMaterialPrices = Object.freeze({ "Eridium Shard": "30", "Overlord's Sigil": "20", "Astral Essence": "60" });
 var workshopMaterialPrices = (p) => combatPlayer(p) ? { ...combatMaterialPrices, ...Object.fromEntries(Object.keys(ECONOMY_V1.materialBase).map((k) => [k, materialPriceV1(k, p.progression?.level ?? 1)])) } : WORKSHOP_MATERIAL_PRICES;
 var same4 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
-var WORKSHOP_MATERIAL_PRICES = Object.freeze({ ...WORKSHOP_POLICY.materials, "Rare Scrap": "40", "Magic Scrap": "80", "Epic Scrap": "160", "Legendary Scrap": "320", "Mythic Scrap": "640", "Luminous Soul": "100", "Astral Shards": "200" });
+var SCRAP_BREAK_YIELD = 3;
+var WORKSHOP_MATERIAL_PRICES = Object.freeze({ ...WORKSHOP_POLICY.materials, "Uncommon Scrap": "40", "Rare Scrap": "80", "Epic Scrap": "160", "Legendary Scrap": "320", "Mythic Scrap": "640", "Luminous Soul": "100", "Astral Shards": "200" });
 function installWorkshop(s, p) {
-  if (hasServicesV2(s.d9World?.plannedWorld)) p.inventory.services.workshop = { version: WORKSHOP_VERSION, records: {}, materialPurchases: {}, materialReceipts: {}, materialGold: {} };
+  if (hasServicesV2(s.d9World?.plannedWorld)) p.inventory.services.workshop = { version: WORKSHOP_VERSION, records: {}, materialPurchases: {}, materialReceipts: {}, materialGold: {}, scrapBreaks: {}, scrapReceipts: {} };
 }
 function power(item) {
   const n = progressionBigInt(item.generated.itemPower);
@@ -14586,7 +14615,7 @@ function workshopQuote(p, item, op, line = 0) {
     const n = r.tier + 1;
     gold = world ? workshopGoldV1("awaken", power(item), r.tier) : String(2500 * n);
     materials3["Eridium Shard"] = n;
-    materials3[["Monster Soul", "Rare Scrap", "Magic Scrap", "Epic Scrap", "Legendary Scrap", "Mythic Scrap"][n]] = 5 * n;
+    materials3[world ? SALVAGE_MATERIALS4[r.tier] : ["Monster Soul", "Uncommon Scrap", "Rare Scrap", "Epic Scrap", "Legendary Scrap", "Mythic Scrap"][n]] = 5 * n;
   } else if (op === "reforge") {
     if (!r.affixes.length) problem = "This item has no affix lines. Awaken it first.";
     if (r.enchants) problem = "Purge enchantments before reforging";
@@ -14619,6 +14648,11 @@ function workshopAccounting(p) {
   for (const [k, n] of Object.entries(w.materialPurchases)) {
     gold = addAmount(gold, w.materialGold ? w.materialGold[k] : multiplyAmount(workshopMaterialPrices(p)[k], String(n)));
     materials3[k] = n;
+  }
+  for (const [k, n] of Object.entries(w.scrapBreaks ?? {})) {
+    const lower = SALVAGE_MATERIALS4[SALVAGE_MATERIALS4.indexOf(k) - 1];
+    materials3[k] = (materials3[k] ?? 0) - n;
+    materials3[lower] = (materials3[lower] ?? 0) + SCRAP_BREAK_YIELD * n;
   }
   for (const r of Object.values(w.records)) {
     let item = copyWire(r.baseItem);
@@ -14653,7 +14687,8 @@ function validateWorkshop(s, p, validateCommand2) {
     return;
   }
   requireContract(w, "Missing workshop");
-  closedRecord(w, ["version", "records", "materialPurchases", "materialReceipts"], ["materialGold"]);
+  closedRecord(w, ["version", "records", "materialPurchases", "materialReceipts"], ["materialGold", "scrapBreaks", "scrapReceipts"]);
+  requireContract(!w.scrapBreaks === !w.scrapReceipts, "Scrap break-down ledger");
   if (w.materialGold) {
     closedRecord(w.materialGold, Object.keys(w.materialPurchases));
     for (const v of Object.values(w.materialGold)) amount(v);
@@ -14681,6 +14716,16 @@ function validateWorkshop(s, p, validateCommand2) {
     const r = w.materialReceipts[k];
     stamp(r, "service.material");
     requireContract(r.command.payload.material === k, "Material receipt identity");
+  }
+  if (w.scrapBreaks) {
+    closedRecord(w.scrapBreaks, [], SALVAGE_MATERIALS4.slice(1));
+    closedRecord(w.scrapReceipts, Object.keys(w.scrapBreaks));
+    for (const [k, n] of Object.entries(w.scrapBreaks)) {
+      safeInteger(n, 1, 1e6);
+      const r = w.scrapReceipts[k];
+      stamp(r, "service.breakdown");
+      requireContract(r.command.payload.material === k, "Break-down receipt identity");
+    }
   }
   for (const [id, r] of Object.entries(w.records)) {
     closedRecord(r, ["baseItem", "receipts"]);
@@ -21821,7 +21866,7 @@ function validateCommand(command) {
     validatePrimaryAim(command.payload.aim);
   } else if (command.kind === "player.respawn") {
     closedRecord(command.payload, []);
-  } else if (command.kind === "service.modify" || command.kind === "service.material") {
+  } else if (command.kind === "service.modify" || command.kind === "service.material" || command.kind === "service.breakdown") {
     closedRecord(command.payload, ["npcId", "inventoryRevision", ...command.kind === "service.modify" ? ["itemId", "operation", "line"] : ["material", "quantity"]]);
     safeInteger(command.payload.inventoryRevision);
     requireContract(/^civilian:[a-z0-9:-]{1,100}$/.test(command.payload.npcId), "Invalid specialist");
@@ -26412,7 +26457,7 @@ function validateActivityCommand(command) {
   const { residencyRevision, ...legacy } = command;
   safeInteger(residencyRevision, 1);
   validateCommand(legacy);
-  requireContract(["worldEvent.activate", "discovery.readNote", "movement.setIntent", "combat.primaryIntent", "combat.guardIntent", "combat.shadowDash", "combat.skill", "subweapon.claim", "classkit.claim", "service.modify", "service.material", "service.buy", "service.sell", "service.rest", "supply.use", "ferry.travel", "site.transition", "player.respawn", "loot.pickup", "gear.salvage", "gear.drop", "resource.interact", "progression.change", "forge.attune", "equipment.equip", "equipment.unequip"].includes(command.kind), "Unsupported activity command");
+  requireContract(["worldEvent.activate", "discovery.readNote", "movement.setIntent", "combat.primaryIntent", "combat.guardIntent", "combat.shadowDash", "combat.skill", "subweapon.claim", "classkit.claim", "service.modify", "service.material", "service.breakdown", "service.buy", "service.sell", "service.rest", "supply.use", "ferry.travel", "site.transition", "player.respawn", "loot.pickup", "gear.salvage", "gear.drop", "resource.interact", "progression.change", "forge.attune", "equipment.equip", "equipment.unequip"].includes(command.kind), "Unsupported activity command");
   return command;
 }
 var same31 = (a, b) => canonicalStringify(a) === canonicalStringify(b);

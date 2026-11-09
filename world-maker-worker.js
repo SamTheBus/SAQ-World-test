@@ -712,7 +712,19 @@ var ECONOMY_V1 = freezeWire({
   salePercentOfShop: 10,
   // Slot attunement gold: the first step costs firstGold, each next step growthPercent as much
   // (about 785k at step 50, hundreds of millions in the 80s, about 2.6 billion for step 100).
-  attunement: { firstGold: 200, growthPercent: 118 },
+  attunement: {
+    firstGold: 200,
+    growthPercent: 118,
+    // Scraps v2: five bands of 20 steps; each step also takes the band's materials, about 2 at the start of a band up to 10 at its end.
+    bands: [["Common Scrap"], ["Uncommon Scrap"], ["Rare Scrap", "Eridium Shard"], ["Epic Scrap", "Astral Essence"], ["Legendary Scrap", "Starshard"]],
+    bandMaterialRamp: [2, 10],
+    mythicFromStep: 91,
+    // Souls are set so earning them takes about as long as the gold: step n is expected around hero level 1+3n/5 (50 from step 82),
+    // where play earns about soulsPerHour+eliteSoulsPerHour*min(level,30)/30 Souls (measured Nov 8) and 60*minuteGoldUnits gold units an hour.
+    soulsPerHour: 42,
+    eliteSoulsPerHour: 80,
+    minimumSouls: 2
+  },
   // Shops: minutes of play per rarity (Common..Mythic); Rare from level 10, Epic from 20, as drops.
   shopMinutes: [2, 4, 10, 30, 60, 120],
   shopRareLevel: 10,
@@ -735,6 +747,14 @@ var growTable = (first, percent, length) => {
 };
 var GOLD_UNITS = growTable(ECONOMY_V1.firstKillGold, ECONOMY_V1.killGrowthPercent, 50).map(Number);
 var ATTUNE_GOLD = growTable(ECONOMY_V1.attunement.firstGold, ECONOMY_V1.attunement.growthPercent, 100);
+var goldUnit = (level) => {
+  const n = Math.floor(Number(level));
+  return GOLD_UNITS[Math.min(50, Math.max(1, Number.isFinite(n) ? n : n > 0 ? 50 : 1)) - 1];
+};
+var ATTUNE_SOULS = ATTUNE_GOLD.map((gold, level) => {
+  const A = ECONOMY_V1.attunement, step = level + 1, hero = Math.min(50, 1 + Math.floor(3 * step / 5)), perHour = BigInt(A.soulsPerHour + Math.floor(A.eliteSoulsPerHour * Math.min(hero, 30) / 30)), goldPerHour = BigInt(60 * ECONOMY_V1.minuteGoldUnits * goldUnit(hero));
+  return Math.max(A.minimumSouls, Number((2n * gold * perHour + goldPerHour) / (2n * goldPerHour)));
+});
 
 // src/shared/content/world_combat_v1.js
 var WORLD_COMBAT_VERSION = "world-combat-hordes-progression-v1";
