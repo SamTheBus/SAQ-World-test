@@ -9660,9 +9660,14 @@ function townArtBlockersV1(t) {
   if (!townNewArtV1(t)) return out;
   const T4 = 32;
   const tile = (x, y) => out.push({ x: Math.floor(x / T4), y: Math.floor(y / T4), w: 1, h: 1 });
+  const span = (p0, p1) => {
+    let a = Math.ceil(p0 / T4 - 0.5), b = Math.floor(p1 / T4 - 0.5);
+    if (b < a) a = b = Math.floor((p0 + p1) / 2 / T4);
+    return [a, b - a + 1];
+  };
   const box2 = (x0, y0, x1, y1) => {
-    const a = Math.floor(x0 / T4), b = Math.floor(y0 / T4);
-    out.push({ x: a, y: b, w: Math.floor((x1 - 1) / T4) - a + 1, h: Math.floor((y1 - 1) / T4) - b + 1 });
+    const [a, w] = span(x0, x1), [b, h] = span(y0, y1);
+    out.push({ x: a, y: b, w, h });
   };
   const oval = (cx, cy, rx, ry) => {
     for (let y = Math.floor((cy - ry) / T4); y <= Math.floor((cy + ry) / T4); y++) for (let x = Math.floor((cx - rx) / T4); x <= Math.floor((cx + rx) / T4); x++) {
@@ -9696,7 +9701,7 @@ function townArtBlockersV1(t) {
     if (zone) {
       const cap = t.size === "capital", d = cap ? 230 : 200;
       for (const s of [-1, 1]) {
-        box2(fx + s * d - 20, fy - 52, fx + s * d + 20, fy + 8);
+        box2(fx + s * d - 22, fy - 56, fx + s * d + 22, fy - 32);
         const bx = fx + s * (cap ? 160 : 140);
         box2(bx - 18, fy - 8, bx + 18, fy + 10);
       }
@@ -9796,7 +9801,6 @@ function townArtBlockersV1(t) {
     tile(cx + 70, G2 + 18);
     box2(x1 - 114, G2 + 12, x1 - 46, G2 + 44);
   }
-  for (const b of townBannersV1(t)) tile(b.x, b.y - 2);
   return out;
 }
 var KIND = { row: "home", tower: "civic", chapel: "civic" };
@@ -9925,9 +9929,11 @@ function townRasterV1(t) {
     col[idx(x, y)] = 1;
   });
   const newArt = townNewArtV1(t);
-  if (newArt) for (const p of townStreetPlanV1(t)) rectDo(p.tile, (x, y) => {
-    if (!water[idx(x, y)] && !deck[idx(x, y)]) col[idx(x, y)] = 1;
-  });
+  if (newArt) {
+    for (const p of townStreetPlanV1(t)) if (!TOWN_SOFT_PROPS_V1.has(p.kind)) rectDo(p.tile, (x, y) => {
+      if (!water[idx(x, y)] && !deck[idx(x, y)]) col[idx(x, y)] = 1;
+    });
+  }
   for (const f3 of t.features) {
     if (f3.type === "lamps" && !newArt) {
       for (const l of f3.lamps) if (ok(l.x, l.y)) col[idx(l.x, l.y)] = 1;
@@ -9954,6 +9960,66 @@ function townRasterV1(t) {
   R = { x0, y0, w, h, mat, col, deck, deckId, water };
   rasters.set(t, R);
   return R;
+}
+var TOWN_SOFT_PROPS_V1 = /* @__PURE__ */ new Set(["lampV", "lampT", "signpost", "milestone", "tub"]);
+var reachCache = /* @__PURE__ */ new WeakMap();
+function townReachV1(t) {
+  let s = reachCache.get(t);
+  if (s) return s;
+  const { w, h, col, mat } = townRasterV1(t), q = [];
+  s = new Uint8Array(w * h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const i = y * w + x;
+    if (!col[i] && mat[i] && (x === 0 || y === 0 || x === w - 1 || y === h - 1 || mat[i] === 2)) {
+      s[i] = 1;
+      q.push(i);
+    }
+  }
+  while (q.length) {
+    const i = q.pop(), x = i % w, y = (i - x) / w;
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const nx = x + dx, ny = y + dy;
+      if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+      const j = ny * w + nx;
+      if (!s[j] && !col[j]) {
+        s[j] = 1;
+        q.push(j);
+      }
+    }
+  }
+  reachCache.set(t, s);
+  return s;
+}
+var rowDoorCache = /* @__PURE__ */ new WeakMap();
+function townRowDoorV1(t, b) {
+  let m = rowDoorCache.get(t);
+  if (!m) {
+    m = /* @__PURE__ */ new Map();
+    rowDoorCache.set(t, m);
+    const R = townRasterV1(t), s = townReachV1(t), open = (x, y) => {
+      const X = x - R.x0, Y = y - R.y0;
+      return X >= 0 && Y >= 0 && X < R.w && Y < R.h && s[Y * R.w + X] === 1;
+    };
+    for (const r of townArtBuildingsV1(t).rows) {
+      const pref = fhash(r.x, r.y, r.w, r.h) % 2 === 0 ? "right" : "left";
+      m.set(r.id, [pref, pref === "right" ? "left" : "right"].find((e) => open(e === "right" ? r.x + r.w - 1 : r.x, r.y + r.h)) ?? null);
+    }
+  }
+  return m.has(b.id) ? m.get(b.id) : null;
+}
+function townHouseDoorV1(t, b) {
+  const X = b.x * 32, W6 = b.w * 32, side = b.doorSide;
+  let own2;
+  if (side === "north") {
+    const r = frng(fhash(b.x, b.y, 201));
+    for (let k = t.biome === "woodland" ? 4 : 5; k > 0; k--) r();
+    own2 = r() < 0.5 ? X + 40 : X + W6 - 40;
+  } else own2 = side === "south" ? b.doorPoint[0] * 32 + 16 : side === "west" ? X + 34 : X + W6 - 34;
+  const R = townRasterV1(t), s = townReachV1(t), open = (px) => {
+    const x = Math.floor(px / 32) - R.x0, y = b.y + b.h - R.y0;
+    return x >= 0 && y >= 0 && x < R.w && y < R.h && s[y * R.w + x] === 1;
+  };
+  return [own2, 2 * X + W6 - own2].find(open) ?? own2;
 }
 var townBoundsV1 = (t) => {
   const R = townRasterV1(t);
@@ -26809,6 +26875,8 @@ export {
   townTemplateV1,
   townPropsV1,
   townRasterV1,
+  townRowDoorV1,
+  townHouseDoorV1,
   createGeneratedTownTiles,
   generatedTownChunkBlockers,
   ENCHANTER_TOWER_V1,
