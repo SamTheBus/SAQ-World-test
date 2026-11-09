@@ -246,7 +246,7 @@ var RESHAPE_TIERS = Object.freeze({ "repeatable-slot:ruin:wetland:standard:067":
 var RESHAPE_VERSION = "world-reshape-v2";
 var RESHAPE_HASH = "ac15d856c2dbbe38203480172b32aae7d19ccdd61cef10eee16aade24a0900d2";
 var RESHAPE_HYDROLOGY_HASH = "e12fd26221c55e0357b674d4beaf28cc522ef5f9dde420b073373f0ef7be1b65";
-var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-econ1";
+var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-econ2";
 var hasWorldReshape = (b) => b?.reshapeVersion === RESHAPE_VERSION && b?.reshapeHash === RESHAPE_HASH;
 var reshapedSite = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_SITES, id) ? RESHAPE_SITES[id] : null;
 var reshapedTier = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_TIERS, id) ? RESHAPE_TIERS[id] : null;
@@ -466,6 +466,76 @@ var COMBAT_BALANCE_V3 = freezeWire({
   boss: { maxHp: 45, attackDamage: 4 }
 });
 
+// src/shared/content/economy_v1.js
+var ECONOMY_V1 = freezeWire({
+  version: "economy-v1",
+  minuteGoldUnits: 13,
+  firstKillGold: 10,
+  killGrowthPercent: 115,
+  // A site chest pays this many ordinary kills.
+  chestUnits: 20,
+  // Gold for a kill, in ordinary kills; bosses outside a lair pay like a lair boss.
+  sourceGold: { ordinary: 1, elite: 3, "site-end-elite": 8, "mini-boss": 15, "lair-boss": 40 },
+  // Monster Souls for a kill: ordinary enemies only now and then.
+  sourceSouls: { ordinary: 0, elite: 1, "site-end-elite": 2, "mini-boss": 4, "lair-boss": 8 },
+  ordinarySoulPercent: 5,
+  // A lair's boss chest pays three site chests.
+  bossChestGold: 3,
+  // Drops sell for this share of the shop price.
+  salePercentOfShop: 10,
+  // Slot attunement gold: the first step costs firstGold, each next step growthPercent as much
+  // (about 785k at step 50, hundreds of millions in the 80s, about 2.6 billion for step 100).
+  attunement: { firstGold: 200, growthPercent: 118 },
+  // Shops: minutes of play per rarity (Common..Mythic); Rare from level 10, Epic from 20, as drops.
+  shopMinutes: [2, 4, 10, 30, 60, 120],
+  shopRareLevel: 10,
+  shopEpicLevel: 20,
+  // Workshop: minutes of play for a Rare; other rarities scale by rarityPercent. Each earlier
+  // reforge or resonance on the same item makes the next one cost repeatPercent as much.
+  workshopMinutes: { reforge: 5, resonance: 5, enchant: 10, purge: 2 },
+  awakenMinutes: [30, 38, 45, 53, 60],
+  rarityPercent: [50, 75, 100, 150, 200, 300],
+  repeatPercent: 150,
+  // Bought materials cost their base price per goldUnit of the hero's level.
+  materialBase: { "Eridium Shard": 30, "Overlord's Sigil": 20, "Astral Essence": 60 },
+  // A town potion refill costs half a minute of play per potion.
+  potionRefillPercentOfMinute: 50
+});
+var growTable = (first, percent, length) => {
+  const t = [BigInt(first)];
+  while (t.length < length) t.push((t.at(-1) * BigInt(percent) + 50n) / 100n);
+  return t;
+};
+var GOLD_UNITS = growTable(ECONOMY_V1.firstKillGold, ECONOMY_V1.killGrowthPercent, 50).map(Number);
+var ATTUNE_GOLD = growTable(ECONOMY_V1.attunement.firstGold, ECONOMY_V1.attunement.growthPercent, 100);
+var goldUnit = (level) => {
+  const n = Math.floor(Number(level));
+  return GOLD_UNITS[Math.min(50, Math.max(1, Number.isFinite(n) ? n : n > 0 ? 50 : 1)) - 1];
+};
+function rewardSourceV1(progression) {
+  const site = progression?.siteReward;
+  if (site && Object.hasOwn(ECONOMY_V1.sourceGold, site)) return site;
+  if (progression?.rarityRole === "boss") return "lair-boss";
+  return progression?.combatQuality === "elite" ? "elite" : "ordinary";
+}
+function minutesGold(minutes, level, percent = 100) {
+  const g = BigInt(ECONOMY_V1.minuteGoldUnits * goldUnit(level)), m = BigInt(Math.round(minutes * 100));
+  const v = (g * m * BigInt(percent) + 9999n) / 10000n;
+  return String(v < 1n ? 1n : v);
+}
+var shopPriceV1 = (itemLevel, tier2) => minutesGold(ECONOMY_V1.shopMinutes[Math.max(0, Math.min(5, tier2))], itemLevel);
+var shopTopRarityV1 = (level) => level >= ECONOMY_V1.shopEpicLevel ? 3 : level >= ECONOMY_V1.shopRareLevel ? 2 : 1;
+function workshopGoldV1(op, itemLevel, tier2, repeats = 0) {
+  const t = Math.max(0, Math.min(5, tier2)), rarity = ECONOMY_V1.rarityPercent[t];
+  const minutes = op === "awaken" ? ECONOMY_V1.awakenMinutes[Math.min(4, t)] : ECONOMY_V1.workshopMinutes[op];
+  let gold = BigInt(minutesGold(minutes, itemLevel, op === "awaken" ? 100 : rarity));
+  for (let i = 0; i < repeats; i++) gold = (gold * BigInt(ECONOMY_V1.repeatPercent) + 99n) / 100n;
+  return String(gold);
+}
+var materialPriceV1 = (material, heroLevel) => ECONOMY_V1.materialBase[material] === void 0 ? null : String(ECONOMY_V1.materialBase[material] * goldUnit(heroLevel));
+var salePriceV1 = (itemLevel, tier2) => minutesGold(ECONOMY_V1.shopMinutes[Math.max(0, Math.min(5, tier2))] * ECONOMY_V1.salePercentOfShop / 100, itemLevel);
+var attunementGoldV1 = (level) => String(ATTUNE_GOLD[level]);
+
 // src/shared/content/world_combat_v1.js
 var WORLD_COMBAT_VERSION = "world-combat-hordes-progression-v1";
 var WORLD_COMBAT_HASH = "a6bd45764908d58d1e1dff8e55e811a0d10876ee0b24ea4b15aa28ea6c94fc59";
@@ -483,7 +553,7 @@ function worldEnemyStats(level, tier2, budget = { hp: 45, damage: 6 }, elite = f
 }
 function combatAttuneCost(level) {
   requireContract(Number.isInteger(level) && level >= 0 && level < 100, "Combat attunement level");
-  return { gold: String(30 + 20 * level + 10 * level * level), materials: { "Monster Soul": 2 + 2 * level } };
+  return { gold: attunementGoldV1(level), materials: { "Monster Soul": 2 + 2 * level } };
 }
 function combatAttuneSpent(level) {
   let gold = 0n, souls = 0;
@@ -11136,55 +11206,6 @@ function validateSporePressureProgressV3(a, b, fromTick, toTick) {
   } else if (isSporeV3(b)) requireContract(a.rulesVersion === SPORE_V2 && a.status === "active" && b.pressure.adoptedTick >= fromTick && b.pressure.adoptedTick <= toTick, "Invalid spore pressure adoption");
 }
 
-// src/shared/content/economy_v1.js
-var ECONOMY_V1 = freezeWire({
-  version: "economy-v1",
-  minuteGoldUnits: 13,
-  // Gold for a kill, in ordinary kills; bosses outside a lair pay like a lair boss.
-  sourceGold: { ordinary: 1, elite: 3, "site-end-elite": 8, "mini-boss": 15, "lair-boss": 40 },
-  // Monster Souls for a kill: ordinary enemies only now and then.
-  sourceSouls: { ordinary: 0, elite: 1, "site-end-elite": 2, "mini-boss": 4, "lair-boss": 8 },
-  ordinarySoulPercent: 5,
-  // A lair's boss chest pays three site chests.
-  bossChestGold: 3,
-  // Shops: minutes of play per rarity (Common..Mythic); Rare from level 10, Epic from 20, as drops.
-  shopMinutes: [2, 4, 10, 30, 60, 120],
-  shopRareLevel: 10,
-  shopEpicLevel: 20,
-  // Workshop: minutes of play for a Rare; other rarities scale by rarityPercent. Each earlier
-  // reforge or resonance on the same item makes the next one cost repeatPercent as much.
-  workshopMinutes: { reforge: 5, resonance: 5, enchant: 10, purge: 2 },
-  awakenMinutes: [30, 38, 45, 53, 60],
-  rarityPercent: [50, 75, 100, 150, 200, 300],
-  repeatPercent: 150,
-  // Bought materials cost their base price per goldUnit of the hero's level.
-  materialBase: { "Eridium Shard": 30, "Overlord's Sigil": 20, "Astral Essence": 60 },
-  // A town potion refill costs half a minute of play per potion.
-  potionRefillPercentOfMinute: 50
-});
-var goldUnit = (level) => 1 + Math.floor(Math.max(1, Math.floor(Number(level) || 1)) / 4);
-function rewardSourceV1(progression) {
-  const site = progression?.siteReward;
-  if (site && Object.hasOwn(ECONOMY_V1.sourceGold, site)) return site;
-  if (progression?.rarityRole === "boss") return "lair-boss";
-  return progression?.combatQuality === "elite" ? "elite" : "ordinary";
-}
-function minutesGold(minutes, level, percent = 100) {
-  const g = BigInt(ECONOMY_V1.minuteGoldUnits * goldUnit(level)), m = BigInt(Math.round(minutes * 100));
-  const v = (g * m * BigInt(percent) + 9999n) / 10000n;
-  return String(v < 1n ? 1n : v);
-}
-var shopPriceV1 = (itemLevel, tier2) => minutesGold(ECONOMY_V1.shopMinutes[Math.max(0, Math.min(5, tier2))], itemLevel);
-var shopTopRarityV1 = (level) => level >= ECONOMY_V1.shopEpicLevel ? 3 : level >= ECONOMY_V1.shopRareLevel ? 2 : 1;
-function workshopGoldV1(op, itemLevel, tier2, repeats = 0) {
-  const t = Math.max(0, Math.min(5, tier2)), rarity = ECONOMY_V1.rarityPercent[t];
-  const minutes = op === "awaken" ? ECONOMY_V1.awakenMinutes[Math.min(4, t)] : ECONOMY_V1.workshopMinutes[op];
-  let gold = BigInt(minutesGold(minutes, itemLevel, op === "awaken" ? 100 : rarity));
-  for (let i = 0; i < repeats; i++) gold = (gold * BigInt(ECONOMY_V1.repeatPercent) + 99n) / 100n;
-  return String(gold);
-}
-var materialPriceV1 = (material, heroLevel) => ECONOMY_V1.materialBase[material] === void 0 ? null : String(ECONOMY_V1.materialBase[material] * goldUnit(heroLevel));
-
 // src/shared/content/world_loot_v3.js
 var WORLD_LOOT_V3_VERSION = "world-loot-v3";
 var WORLD_LOOT_V3_HASH = "5945f4f6a6c02522b745889a88f4cd1034d8e4b89266517a2c31825741ef5cdf";
@@ -13548,7 +13569,7 @@ function equipmentBonuses(p) {
     requireContract(d, "Unknown equipped item");
     const level = p.inventory.economy?.slotLevels[slot] ?? 0, bonus = d.numericVersion ? null : effectiveEquipmentBonuses(d, slot, level, combatPlayer(p));
     for (const key9 of Object.keys(result)) {
-      const extra = slot === "weapon" && key9 === "attack" ? level * (combatPlayer(p) ? 2 : 15) : ["chest", "leggings", "overall"].includes(slot) ? key9 === "maxHp" ? level * (combatPlayer(p) ? 8 : 50) : key9 === "defense" ? level * (combatPlayer(p) ? 2 : 10) : 0 : ["ring1", "ring2"].includes(slot) ? key9 === "attack" ? level * (combatPlayer(p) ? 2 : 10) : key9 === "maxHp" ? level * (combatPlayer(p) ? 6 : 30) : 0 : 0;
+      const extra = combatPlayer(p) ? 0 : slot === "weapon" && key9 === "attack" ? level * (combatPlayer(p) ? 2 : 15) : ["chest", "leggings", "overall"].includes(slot) ? key9 === "maxHp" ? level * (combatPlayer(p) ? 8 : 50) : key9 === "defense" ? level * (combatPlayer(p) ? 2 : 10) : 0 : ["ring1", "ring2"].includes(slot) ? key9 === "attack" ? level * (combatPlayer(p) ? 2 : 10) : key9 === "maxHp" ? level * (combatPlayer(p) ? 6 : 30) : 0 : 0;
       const value = d.rarityTier !== void 0 ? addCombat(d.numericVersion ? multiplyCombat(asCombatAmount(d.bonuses[key9]), 100 + level, 100) : combatAmount(d.bonuses[key9] * (100 + level), 100), extra) : bonus[key9];
       result[key9] = value?.n !== void 0 || result[key9]?.n !== void 0 ? addCombat(result[key9], value) : result[key9] + value;
     }
@@ -13610,7 +13631,7 @@ function rollContentReward(state, player, { sourceEntityId, rank, kind: kind2, o
   const gold = (n) => !modifiers || modifiers.goldHundredths === 100 ? n : multiplyAmount(rewardAmount(n), `${Math.floor(modifiers.goldHundredths / 100)}.${String(modifiers.goldHundredths % 100).padStart(2, "0")}`.replace(/0+$/, "").replace(/\.$/, ""));
   const profile2 = progression?.version === D9_REWARD_PROGRESSION ? rewardProfileD9(progression, rank) : rewardProfile(rank), key9 = `d5-eco-v1/${state.campaign.seed.seedHex}/${player.playerId}/${sourceEntityId}`, roll = hashReward(key9 + "/branch") % 100, pool = REWARD_POOLS[Math.min(2, ["C", "B", "A", "S"].indexOf(rank))];
   if (hasWorldCombat(state)) {
-    const l = BigInt(progression?.sourceDepth ?? 1), elite = progression?.combatQuality === "elite", source6 = rewardSourceV1(progression), value = String(kind2 === "chest" ? (20n + 4n * l) * (progression?.siteReward === "lair-chest" ? BigInt(ECONOMY_V1.bossChestGold) : 1n) : (1n + l / 4n) * BigInt(ECONOMY_V1.sourceGold[source6])), gear = isSourceLootV4(progression?.rarityPolicyHash) ? hashReward(key9 + "/combat-gear-v3") % 1e3 < lootGearPerMilleFor(progression.rarityPolicyHash, progression.rarityRole, progression.siteReward ?? null, modifiers?.occurrenceHundredths ?? 100) : kind2 === "chest" || elite || occurrence(hashReward(key9 + "/combat-gear"), 10, key9 + "/combat-gear");
+    const l = BigInt(progression?.sourceDepth ?? 1), elite = progression?.combatQuality === "elite", source6 = rewardSourceV1(progression), unit3 = BigInt(goldUnit(l > 50n ? 50 : Number(l))), value = String(kind2 === "chest" ? unit3 * BigInt(ECONOMY_V1.chestUnits) * (progression?.siteReward === "lair-chest" ? BigInt(ECONOMY_V1.bossChestGold) : 1n) : unit3 * BigInt(ECONOMY_V1.sourceGold[source6])), gear = isSourceLootV4(progression?.rarityPolicyHash) ? hashReward(key9 + "/combat-gear-v3") % 1e3 < lootGearPerMilleFor(progression.rarityPolicyHash, progression.rarityRole, progression.siteReward ?? null, modifiers?.occurrenceHundredths ?? 100) : kind2 === "chest" || elite || occurrence(hashReward(key9 + "/combat-gear"), 10, key9 + "/combat-gear");
     return { gold: gold(value), souls: kind2 === "chest" ? hashReward(key9 + "/combat-soul") % 100 < 35 ? 1 : 0 : source6 === "ordinary" ? hashReward(key9 + "/combat-soul") % 100 < ECONOMY_V1.ordinarySoulPercent ? 1 : 0 : ECONOMY_V1.sourceSouls[source6], definitionId: gear ? pool[hashReward(key9 + "/combat-family") % pool.length] : null, healing: false };
   }
   if (kind2 === "enemy") {
@@ -14257,7 +14278,7 @@ function saleQuote(p, item) {
   if (!item || item.ownerPlayerId !== p.playerId || !o || item.sourceEntityId === null || !(ordinary.has(item.definitionId) || worldDrop(item, o)) || item.locked || item.protected || item.unique || d?.unique || d?.classification === "unique-landmark" || Object.values(p.inventory.equipped).includes(item.itemId) || Object.values(p.inventory.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item.sourceEntityId) || isClassKitSource(p, item.sourceEntityId) || (item.generated?.rarityTier ?? 0) > SETTLEMENT_LIFE_POLICY.sale.maximumRarity) return null;
   if (!o.servicePurchase && !o.groupId) return null;
   const power2 = progressionBigInt(item.generated?.itemPower ?? 1), bounded2 = Number(power2 > BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) ? BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) : power2);
-  if (!ordinary.has(item.definitionId)) return String(sellBase(item));
+  if (!ordinary.has(item.definitionId)) return String(combatPlayer(p) ? salePriceV1(Number(power2), item.generated?.rarityTier ?? 0) : sellBase(item));
   return String(SETTLEMENT_LIFE_POLICY.sale.baseGold + bounded2 * SETTLEMENT_LIFE_POLICY.sale.perItemPower + (item.generated?.rarityTier ?? 0) * SETTLEMENT_LIFE_POLICY.sale.perRarityTier);
 }
 function serviceGoldAdjustment(p, gold) {
@@ -23455,7 +23476,7 @@ function resolveD9PlayerStats(player) {
   const chance = addCombat(addCombat(combatAmount(5, 100), effect("critChance")), balanced ? multiplyCombat(main, COMBAT_BALANCE_V3.mainCritBasisPoints, 1e4) : 0), overflow = compareCombat(chance, 1) > 0 ? subtractCombat(chance, 1) : combatAmount(0);
   const rawBlock = addCombat(roundCombat(multiplyCombat(addCombat(effect("block"), exactDecimal(definition?.family ? 0 : 0.15)), 1e6)), multiplyCombat(str, 1e3)), rawParry = addCombat(roundCombat(multiplyCombat(addCombat(effect("parry"), exactDecimal(definition?.family ? 0 : 0.12)), 1e6)), multiplyCombat(dex, 1e3));
   const blockCap = Math.round((0.4 + (f3.blockCapBonus ?? 0.02)) * 1e6), parryCap = Math.round(((f3.subArchetype === "main_gauche" ? 0.45 : 0.35) + (f3.parryCapBonus ?? 0.02)) * 1e6);
-  const boots = inv.equipped.boots ? (inv.economy.slotLevels.boots ?? 0) * 2 : 0;
+  const boots = inv.equipped.boots && !combatPlayer(player) ? (inv.economy.slotLevels.boots ?? 0) * 2 : 0;
   const speed = multiplyCombat(minCombat(combatAmount(5, 2), times2(addCombat(1, multiplyCombat(addCombat(boots, effect("moveSpeed")), 1, 100)), addCombat(1, effect("moveSpeedPct")))), 3);
   const result = {
     ...base,
@@ -23634,7 +23655,7 @@ function resolvePlayerStats(player, { legacyMigration = false } = {}) {
   if (!player.inventory) return base;
   const bonus = player.inventory.version === "player-inventory-d4-v1" ? equipmentBonuses3(player) : equipmentBonuses2(player);
   const plus = (a, b) => b?.n !== void 0 ? addCombat(a, b) : a + b;
-  const resolved = { ...base, maxHp: plus(base.maxHp, bonus.maxHp), attack: plus(base.attack, bonus.attack), defense: plus(base.defense, bonus.defense), moveSpeed: base.moveSpeed * Math.min(2.5, 1 + (player.inventory.equipped.boots ? (player.inventory.economy?.slotLevels.boots ?? 0) * 2 : 0) / 100) };
+  const resolved = { ...base, maxHp: plus(base.maxHp, bonus.maxHp), attack: plus(base.attack, bonus.attack), defense: plus(base.defense, bonus.defense), moveSpeed: base.moveSpeed * Math.min(2.5, 1 + (player.inventory.equipped.boots && !combatPlayer(player) ? (player.inventory.economy?.slotLevels.boots ?? 0) * 2 : 0) / 100) };
   const result = player.inventory.subweapons ? resolveSubweaponContribution(player, resolved) : resolved;
   if (legacyMigration || !player.inventory.subweapons) return freezeWire(result);
   return (player.d8 ? freezeResolved : freezeWire)({ ...result, version: "resolved-player-stats-integer-v2", ...Object.fromEntries(["attack", "defense", "maxHp", "maxBarrier"].map((k) => [k, combatInteger(result[k])])) });
@@ -23674,7 +23695,7 @@ function resolveSubweaponContribution(player, base) {
     critChance: q(Math.min(1, 0.05 + (effects.critChance ?? 0))),
     critMultiplier: addCombat(combatAmount(15e3 + dex, 1e4), q((effects.critDamage ?? 0) + Math.max(0, 0.05 + (effects.critChance ?? 0) - 1) * 2)),
     activeHaste: q(effects.activeSpeed ?? 0),
-    moveSpeed: 3 * Math.min(2.5, (1 + ((inv.equipped.boots ? (inv.economy.slotLevels.boots ?? 0) * 2 : 0) + (effects.moveSpeed ?? 0)) / 100) * (1 + (effects.moveSpeedPct ?? 0))),
+    moveSpeed: 3 * Math.min(2.5, (1 + ((inv.equipped.boots && !combatPlayer(player) ? (inv.economy.slotLevels.boots ?? 0) * 2 : 0) + (effects.moveSpeed ?? 0)) / 100) * (1 + (effects.moveSpeedPct ?? 0))),
     familyProperties: { reflect: q(f3.reflectDamage ?? 1), bashAttack: q(f3.bashAtkBonus ?? 0), riposte: q(f3.riposteDamage ?? 0.8), parryMitigation: q(f3.parryMitigation ?? 0.6), bleed: q(f3.bleedChance ?? 0.15), offhand: q(f3.offhandChance ?? 0.5), offhandDamage: q(f3.offhandDmg ?? 0.45), fireChance: combatAmount(f3.fireChanceNumerator ?? 1, f3.fireChanceDenominator ?? 3), firePower: combatAmount(f3.firePowerNumerator ?? 18, 10), tomeChance: tome.chance, tomePower: tome.power },
     blockChance: family2 === "shield" ? guardChance(Math.round(((effects.block ?? 0) + (definition?.family ? 0 : 0.15)) * 1e6) + str * 1e3, Math.round((0.4 + (f3.blockCapBonus ?? 0.02)) * 1e6), 1e6) : combatAmount(0),
     parryChance: family2 === "dagger" ? guardChance(Math.round(((effects.parry ?? 0) + (definition?.family ? 0 : 0.12)) * 1e6) + dex * 1e3, Math.round(((f3.subArchetype === "main_gauche" ? 0.45 : 0.35) + (f3.parryCapBonus ?? 0.02)) * 1e6), 1e6) : combatAmount(0),

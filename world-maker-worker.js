@@ -693,6 +693,49 @@ var COMBAT_BALANCE_V3 = freezeWire({
   boss: { maxHp: 45, attackDamage: 4 }
 });
 
+// src/shared/content/economy_v1.js
+var ECONOMY_V1 = freezeWire({
+  version: "economy-v1",
+  minuteGoldUnits: 13,
+  firstKillGold: 10,
+  killGrowthPercent: 115,
+  // A site chest pays this many ordinary kills.
+  chestUnits: 20,
+  // Gold for a kill, in ordinary kills; bosses outside a lair pay like a lair boss.
+  sourceGold: { ordinary: 1, elite: 3, "site-end-elite": 8, "mini-boss": 15, "lair-boss": 40 },
+  // Monster Souls for a kill: ordinary enemies only now and then.
+  sourceSouls: { ordinary: 0, elite: 1, "site-end-elite": 2, "mini-boss": 4, "lair-boss": 8 },
+  ordinarySoulPercent: 5,
+  // A lair's boss chest pays three site chests.
+  bossChestGold: 3,
+  // Drops sell for this share of the shop price.
+  salePercentOfShop: 10,
+  // Slot attunement gold: the first step costs firstGold, each next step growthPercent as much
+  // (about 785k at step 50, hundreds of millions in the 80s, about 2.6 billion for step 100).
+  attunement: { firstGold: 200, growthPercent: 118 },
+  // Shops: minutes of play per rarity (Common..Mythic); Rare from level 10, Epic from 20, as drops.
+  shopMinutes: [2, 4, 10, 30, 60, 120],
+  shopRareLevel: 10,
+  shopEpicLevel: 20,
+  // Workshop: minutes of play for a Rare; other rarities scale by rarityPercent. Each earlier
+  // reforge or resonance on the same item makes the next one cost repeatPercent as much.
+  workshopMinutes: { reforge: 5, resonance: 5, enchant: 10, purge: 2 },
+  awakenMinutes: [30, 38, 45, 53, 60],
+  rarityPercent: [50, 75, 100, 150, 200, 300],
+  repeatPercent: 150,
+  // Bought materials cost their base price per goldUnit of the hero's level.
+  materialBase: { "Eridium Shard": 30, "Overlord's Sigil": 20, "Astral Essence": 60 },
+  // A town potion refill costs half a minute of play per potion.
+  potionRefillPercentOfMinute: 50
+});
+var growTable = (first, percent, length) => {
+  const t = [BigInt(first)];
+  while (t.length < length) t.push((t.at(-1) * BigInt(percent) + 50n) / 100n);
+  return t;
+};
+var GOLD_UNITS = growTable(ECONOMY_V1.firstKillGold, ECONOMY_V1.killGrowthPercent, 50).map(Number);
+var ATTUNE_GOLD = growTable(ECONOMY_V1.attunement.firstGold, ECONOMY_V1.attunement.growthPercent, 100);
+
 // src/shared/content/world_combat_v1.js
 var WORLD_COMBAT_VERSION = "world-combat-hordes-progression-v1";
 var WORLD_COMBAT_POLICY = freezeWire({ version: WORLD_COMBAT_VERSION, parentRuntime: "3da5e7e40452aa32", reviewRevision: 3, parentCombatRuntime: "f474d024b06426c4", bandLevels: [1, 6, 11, 21, 41], primary: { reachClearHullGapPixels: 32, forwardDotMinimum: 0.1, cleaveTargetsByCombo: [4, 6, 8], cadence: "existing 22/24/40 tick combo, movement multipliers unchanged" }, forge: { firstAttuneGold: 30, firstAttuneSouls: 2, flatAttackPerWeaponAttune: 2, flatArmorHpPerAttune: 8, enchantSlotLevel: 3, pricing: "World progression successor; Dungeon mechanics and UI retained" }, ordinaryPack: [6, 12], floorPacks: { small: 3, standard: 3, large: 4, deep: 4 }, floorPackSize: [6, 8], maximumFloorMembers: 40, activeActors: 192, retainedSiteActors: 4096, retainedSiteGroups: 128, worldActors: 192, renewalVacancyTicks: 18e3, gearChancePercent: 10, soulChancePercent: 35, equipmentLevel: "encounter level equals item power; regional minimum and participant escalation preserved", ordinaryStats: "HP=(30+6*(L-1)+(L-1)^2/8)*familyHP/45*rank; damage=(3+2*(L-1))*familyDamage/6*rank", xp: "per recipient: reward level min(locked encounter level,hero level+2); base1+integerSqrt(reward level); rankC100/B140/A200/S300hundredths, elitex3 or bossx15atC, ceil rank reward; multiply4/(4+max(abs(enemy level-hero level)-2,0)^2),floor and allow0; mastery applies afterward", levelGap: { graceLevels: 2, outgoing: "4/(4+max(enemy level-hero level-2,0)^2)", incoming: "min(4,(4+max(enemy level-hero level-2,0)^2)/4)", policy: "Deterministic per-recipient frozen enemy level and current hero level; every delivered damage packet once, after attack/crit and before wards, barrier or defense; no random misses" }, engagement: { threat: "actor-relative threat with frozen encounter level retained", initialAcquireLineOfSight: true, attackLineOfSight: true, interiorPursuitMemoryTicks: 600, disengageTicks: 120, returnHealing: false }, equipmentRequirement: "World combat generated itemPower <= hero level; higher-level finds remain owned, sellable and salvageable", rarity: { unit: "basis points", status: "provisional World tuning; natural drops unlock Legendary at21 and Mythic at41; existing Awaken path retained", below21: { ordinary: [7e3, 2400, 500, 100, 0, 0], completion: [0, 6500, 3e3, 500, 0, 0] }, from21: { ordinary: [7e3, 2400, 500, 95, 5, 0], completion: [0, 6500, 3e3, 450, 50, 0] }, from41: { ordinary: [7e3, 2400, 500, 90, 9, 1], completion: [0, 6500, 3e3, 400, 90, 10] } }, economy: "enemy gold 1+level/4; chest 20+4*level and guaranteed gear; elite gold x3 and guaranteed gear", safety: "all settlement/site/faction/future-island protected chunks plus one-chunk collar; ferry and spawn safety; prepare at 768px, no placement within 384px of any actor", respawn: "existing 18000 active tick vacant cleared encounter renewal, unresolved ownership gates retained", simulation: "60Hz unchanged; spatial activation, separation, LOS and interior navigation retained" });
