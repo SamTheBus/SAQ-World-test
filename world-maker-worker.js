@@ -691,35 +691,9 @@ var LIFE_NPCS = freezeWire([
   { id: "civilian:alpha:village:nell", name: "Nell", role: "innkeeper", roleLabel: "Innkeeper \xB7 tavern veranda", settlementId: LIFE_VILLAGE_ID, buildingId: "village:roof:002", band: 2, tile: { x: 4499, y: 7610 }, space: "exterior", color: "#81657a" }
 ]);
 
-// src/shared/content/world_towns_v1.js
-var TAVERN_TOWN_ID = "settlement-slot:town:05";
-var TAVERN_TOWN_ORIGIN = freezeWire({ x: 5824, y: 5720 });
-var CORNERS = { [STARTER_VILLAGE_ID]: STARTER_VILLAGE_ORIGIN, [LIFE_VILLAGE_ID]: LIFE_VILLAGE_ORIGIN, [TAVERN_TOWN_ID]: TAVERN_TOWN_ORIGIN };
-var townOriginV1 = (id) => settlementV1(id)?.tileOrigin ?? CORNERS[id];
-function townTileV1(id, t) {
-  const c = CORNERS[id], o = townOriginV1(id);
-  return o.x === c.x && o.y === c.y ? t : { x: t.x - c.x + o.x, y: t.y - c.y + o.y };
-}
-function perWorldV1(make) {
-  let at = -1, value;
-  return () => {
-    if (at !== worldRevisionV1()) {
-      value = make();
-      at = worldRevisionV1();
-    }
-    return value;
-  };
-}
-var moved = (list, place) => {
-  const out = list.map(place);
-  return out.every((v, i) => v === list[i]) ? list : freezeWire(out);
-};
-var townTilesV1 = (id, list) => moved(list, (t) => townTileV1(id, t));
-var starterArrivalTilesV1 = perWorldV1(() => townTilesV1(STARTER_VILLAGE_ID, STARTER_ARRIVAL_TILES));
-
 // src/shared/generation/town_layout_v1.js
 var TOWN_LAYOUT_VERSION = "town-layout-v1.1";
-var SPOT_NAMES = Object.freeze({ "capital-great-hold:01": "Highcrown", "capital-great-hold:02": "Stormhold", "city:01": "Ashford", "city:02": "Silverkeep", "city:03": "Marrowgate", "city:04": "Brightwater", "town:01": "Larkcross", "town:02": "Thornbury", "town:03": "Fenwick", "town:04": "Copperwell", "town:06": "Hollowmere", "town:07": "Ravensford", "town:08": "Ironwall", "village-outpost:03": "Willowford", "village-outpost:04": "Gull's Rest", "village-outpost:05": "Driftwood" });
+var SPOT_NAMES = Object.freeze({ "village-outpost:01": "Alderwood", "capital-great-hold:01": "Highcrown", "capital-great-hold:02": "Stormhold", "city:01": "Ashford", "city:02": "Silverkeep", "city:03": "Marrowgate", "city:04": "Brightwater", "town:01": "Larkcross", "town:02": "Thornbury", "town:03": "Fenwick", "town:04": "Copperwell", "town:06": "Hollowmere", "town:07": "Ravensford", "town:08": "Ironwall", "village-outpost:03": "Willowford", "village-outpost:04": "Gull's Rest", "village-outpost:05": "Driftwood" });
 var ALWAYS_WALLED = /* @__PURE__ */ new Set(["town:08"]);
 var sq = (v) => v * v;
 var hyp = PM.hypot;
@@ -1629,7 +1603,9 @@ function sha256Hex(text) {
 
 // src/shared/generation/generated_towns_v1.js
 var GENERATED_TOWNS_VERSION = "generated-towns-v1";
+var STARTER_TOWN_ID_V1 = "settlement-slot:village-outpost:01";
 var GENERATED_TOWN_SIZES = Object.freeze({
+  [STARTER_TOWN_ID_V1]: "village",
   "settlement-slot:capital-great-hold:01": "capital",
   "settlement-slot:capital-great-hold:02": "capital",
   "settlement-slot:city:01": "city",
@@ -1834,6 +1810,32 @@ function planGeneratedTownsV1(asset, spots = null) {
 var TOWN_NEW_ART = Object.freeze(/* @__PURE__ */ new Set(["grassland", "woodland"]));
 var TOWN_SHOP_ROLES = Object.freeze({ hamlet: ["general", "innkeeper"], village: ["general", "smith", "innkeeper"], town: ["general", "smith", "innkeeper", "enchanter"], city: ["general", "smith", "innkeeper", "enchanter"], capital: ["general", "smith", "innkeeper", "enchanter"] });
 
+// src/shared/content/world_towns_v1.js
+var TAVERN_TOWN_ID = "settlement-slot:town:05";
+var TAVERN_TOWN_ORIGIN = freezeWire({ x: 5824, y: 5720 });
+var CORNERS = { [STARTER_VILLAGE_ID]: STARTER_VILLAGE_ORIGIN, [LIFE_VILLAGE_ID]: LIFE_VILLAGE_ORIGIN, [TAVERN_TOWN_ID]: TAVERN_TOWN_ORIGIN };
+var townOriginV1 = (id) => settlementV1(id)?.tileOrigin ?? CORNERS[id];
+function townTileV1(id, t) {
+  const c = CORNERS[id], o = townOriginV1(id);
+  return o.x === c.x && o.y === c.y ? t : { x: t.x - c.x + o.x, y: t.y - c.y + o.y };
+}
+function perWorldV1(make) {
+  let at = -1, value;
+  return () => {
+    if (at !== worldRevisionV1()) {
+      value = make();
+      at = worldRevisionV1();
+    }
+    return value;
+  };
+}
+var moved = (list, place) => {
+  const out = list.map(place);
+  return out.every((v, i) => v === list[i]) ? list : freezeWire(out);
+};
+var townTilesV1 = (id, list) => moved(list, (t) => townTileV1(id, t));
+var builtArrival = perWorldV1(() => townTilesV1(STARTER_VILLAGE_ID, STARTER_ARRIVAL_TILES));
+
 // src/shared/content/tavern_interior_v1.js
 var freeze = (o) => {
   for (const v of Object.values(o)) if (v && typeof v === "object") freeze(v);
@@ -2023,6 +2025,22 @@ var CAST = {};
     CAST["settlement-slot:" + slot] = out;
   }
 }
+var BUILT_CASTS = {
+  "civilian:alpha:alderwood:merchant": { kit: "shopkeeper", look: { hair: "short", facialHair: "mustache", hairColor: "dark-brown", skin: "tan" }, cloth: "#3f7a52", skirt: "#2f5f8a" },
+  "civilian:alpha:alderwood:smith": { kit: "blacksmith", look: { hair: "bald", facialHair: "bushy", hairColor: "soft-black", skin: "tan" }, cloth: "#3f7a52", skirt: "#4a4f5a" },
+  "civilian:alpha:alderwood:innkeeper": { kit: "innkeeper", look: { hair: "short", facialHair: "handlebar", hairColor: "gray", skin: "light" }, cloth: "#b8463a", skirt: "#7a3f3a" },
+  "civilian:alpha:town:mara": { kit: "trader", look: { hair: "ponytail", facialHair: "none", hairColor: "black", skin: "brown" }, cloth: "#b8463a", skirt: "#3a5a3a" },
+  "civilian:alpha:town:bren": { kit: "armorer", look: { hair: "short", facialHair: "mustache", hairColor: "brown", skin: "light" }, cloth: "#3f7a52", skirt: "#4a4f5a" },
+  "civilian:alpha:town:ada": { kit: "barmaid", look: { hair: "braid", facialHair: "none", hairColor: "auburn", skin: "tan" }, cloth: "#3f6f52", skirt: "#7a3f3a" },
+  "civilian:alpha:town:selene": { kit: "mystic", look: { hair: "long", facialHair: "none", hairColor: "silver", skin: "light" }, cloth: "#7d3c98", skirt: "#5a3a8a" },
+  "civilian:alpha:village:ila": { kit: "shopkeeper", look: { hair: "bob", facialHair: "none", hairColor: "copper", skin: "fair" }, cloth: "#2f7a74", skirt: "#8a5a2a" },
+  "civilian:alpha:village:oren": { kit: "young", look: { hair: "short", facialHair: "stubble", hairColor: "dark-blonde", skin: "olive" }, cloth: "#3f7a52", skirt: "#4a4f5a" },
+  "civilian:alpha:village:nell": { kit: "host", look: { hair: "curly", facialHair: "none", hairColor: "light-brown", skin: "peach" }, cloth: "#7a2e3a", skirt: "#6a3a6e" }
+};
+CAST["settlement-slot:village-outpost:01"] = freezeWire(Object.fromEntries([["general", "merchant", "Alderwood Merchant"], ["smith", "smith", "Alderwood Smith"], ["innkeeper", "innkeeper", "Alderwood Innkeeper"]].map(([role, k, name]) => {
+  const c = BUILT_CASTS["civilian:alpha:alderwood:" + k];
+  return [role, { name, kit: c.kit, look: c.look, cloth: c.cloth, skirt: c.skirt }];
+})));
 
 // src/shared/content/settlement_services_v2.js
 var SERVICES_V2 = "settlement-services-candidate-v2";
@@ -4582,6 +4600,7 @@ function makeLayout(seed, land, templates) {
 // src/shared/generation/world_maker_v1/biomes.js
 var SHARE = { min: 0.1, max: 0.15, target: 0.125, band: 0.4, woodlandBand1: 0.5 };
 var B = Object.fromEntries(BIOMES.map((b, k) => [b, k]));
+var startBiomeV1 = (seed) => stream(seed, "start-biome")() < 0.5 ? "woodland" : "grassland";
 function makeBiomes(seed, land, layout) {
   const { owner, landmasses, elevation, slope, depth } = land, { band, travel } = layout, cells = land.land, total = cells.length, rnd = stream(seed, "biomes");
   const bandSize = [0, 0, 0, 0, 0, 0];
@@ -4621,8 +4640,9 @@ function makeBiomes(seed, land, layout) {
   ];
   const allowed = (b, i) => (b !== B.volcanic || band[i] >= 4) && (band[i] > 1 || b <= B.upland);
   const A = layout.placed.get("settlement-slot:village-outpost:01").anchor, start = idx(A.x, A.y), seeds = [];
+  const startB = startBiomeV1(seed) === "grassland" ? B.grassland : B.woodland, other = startB === B.woodland ? B.grassland : B.woodland;
   const addSeed = (b, i, why) => seeds.push({ b, i, why });
-  addSeed(B.woodland, start, "Alderwood");
+  addSeed(startB, start, "Alderwood");
   const nearStart = (b, lo2, hi2) => {
     let best = -1, bv = Infinity;
     for (const i of cells) {
@@ -4637,7 +4657,8 @@ function makeBiomes(seed, land, layout) {
     }
     if (best >= 0) addSeed(b, best, "near the start");
   };
-  nearStart(B.grassland, 7, 13);
+  if (startB === B.woodland) nearStart(B.grassland, 7, 13);
+  else nearStart(B.woodland, 5, 9);
   nearStart([B.upland, B.wetland].sort((a, b) => pref[a](start) - pref[b](start))[0], 8, 15);
   for (let round = 0; round < 3; round++) for (const b of BIOMES.map((_, k) => k)) {
     if (seeds.filter((s) => s.b === b).length > round) continue;
@@ -4672,7 +4693,7 @@ function makeBiomes(seed, land, layout) {
     const x = A.x + dx, y = A.y + dy;
     if (inside(x, y) && owner[idx(x, y)] === owner[start]) locked[idx(x, y)] = 1;
   }
-  const room = (b, i) => allowed(b, i) && (!locked[i] || b === B.woodland) && count[b] < cap.total && inBand[b][band[i]] < bandCap(b, band[i]);
+  const room = (b, i) => allowed(b, i) && (!locked[i] || b === startB) && count[b] < cap.total && inBand[b][band[i]] < bandCap(b, band[i]);
   const claim = (b, i) => {
     if (biome[i] >= 0) {
       count[biome[i]]--;
@@ -4757,14 +4778,14 @@ function makeBiomes(seed, land, layout) {
         if (owner[j] < 0 || biome[j] >= 0) continue;
         if (pass === 0 && owner[j] !== owner[i]) continue;
         if (pass === 0 && !room(biome[i], j)) continue;
-        if (!allowed(biome[i], j) || locked[j] && biome[i] !== B.woodland) continue;
+        if (!allowed(biome[i], j) || locked[j] && biome[i] !== startB) continue;
         claim(biome[i], j);
         q.push(j);
       }
     }
   }
-  for (const i of cells) if (biome[i] < 0) claim(locked[i] ? B.woodland : B.grassland, i);
-  for (const i of cells) if (locked[i] && biome[i] !== B.woodland) claim(B.woodland, i);
+  for (const i of cells) if (biome[i] < 0) claim(locked[i] ? startB : B.grassland, i);
+  for (const i of cells) if (locked[i] && biome[i] !== startB) claim(startB, i);
   const border = (b, filter) => {
     const out = [];
     for (const i of cells) {
@@ -6909,7 +6930,7 @@ var CLASSIC_EVENT_PLAN = freezeWire({ version: WORLD_EVENT_PLAN_VERSION, events:
 
 // src/shared/generation/world_maker_v1/make.js
 var TW4 = W * 64;
-var WORLD_MAKER_VERSION = "world-maker-v1.9";
+var WORLD_MAKER_VERSION = "world-maker-v1.10";
 function makeWorld(seed, catalog, tries = 4, onStep = null) {
   const started = performance.now();
   let w, why = [];

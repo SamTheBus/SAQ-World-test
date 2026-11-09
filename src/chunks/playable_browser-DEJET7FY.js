@@ -473,6 +473,7 @@ import {
   gearAffixTotalsV2,
   gearHash,
   generateOrdinaryPopulation,
+  generatedStarterV1,
   generatedTownChunkBlockers,
   generatedTownV1,
   generatedTownsOfV1,
@@ -771,8 +772,10 @@ import {
   townPropsV1,
   townRasterV1,
   townRowDoorV1,
+  townStartV1,
   townStreetPlanV1,
   townTemplateV1,
+  townTileV1,
   triggerScaledMasteryXp,
   unfrozenEpisodeD9,
   uniqueEffectText,
@@ -869,7 +872,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-VDDNCPDP.js";
+} from "./chunk-BN634554.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -34953,7 +34956,7 @@ var villageConnector = (x, y, origin = LIFE_VILLAGE_ORIGIN) => {
   const lx = x - origin.x, ly = y - origin.y;
   return lx >= -16 && lx <= 2 && ly >= 12 && ly <= 14 || lx >= 0 && lx <= 2 && ly >= 13 && ly <= 33;
 };
-var villagePlacements = (binding) => [{ id: LIFE_VILLAGE_ID, name: "Crossroads village", origin: townOriginV1(LIFE_VILLAGE_ID), band: settlementV1(LIFE_VILLAGE_ID)?.band ?? 2 }, ...hasStarterVillage(binding) ? [{ id: STARTER_VILLAGE_ID, name: STARTER_VILLAGE_NAME, origin: townOriginV1(STARTER_VILLAGE_ID), band: settlementV1(STARTER_VILLAGE_ID)?.band ?? 1 }] : []];
+var villagePlacements = (binding) => [{ id: LIFE_VILLAGE_ID, name: "Crossroads village", origin: townOriginV1(LIFE_VILLAGE_ID), band: settlementV1(LIFE_VILLAGE_ID)?.band ?? 2 }, ...hasStarterVillage(binding) && !generatedStarterV1() ? [{ id: STARTER_VILLAGE_ID, name: STARTER_VILLAGE_NAME, origin: townOriginV1(STARTER_VILLAGE_ID), band: settlementV1(STARTER_VILLAGE_ID)?.band ?? 1 }] : []];
 var exteriorNpcAt = (x, y, binding) => serviceNpcsFor(binding).some((n) => n.space === "exterior" && n.tile.x === x && n.tile.y === y);
 function createPlannedVillageTiles(asset, terrain, binding) {
   const placements2 = villagePlacements(binding);
@@ -35607,6 +35610,10 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     ruinByChunk.set(key2, crypt);
   }
   const cryptReservations = Promise.all(cryptIds.map((reservationId) => (reservationId.includes(":small:") ? derivePlannedCryptReservation : derivePlannedCryptReservationV2)(asset, binding, sha256, { reservationId, terrain }).then((r) => completePopulationReservation(r, asset, binding, sha256))));
+  const starterBiomeName = () => {
+    const g = generatedStarterV1()?.biome ?? "woodland";
+    return g[0].toUpperCase() + g.slice(1);
+  };
   const starter = townOriginV1(STARTER_VILLAGE_ID), sx = starter.x / 32, sy = starter.y / 26;
   const townTiles = binding.townPrototype ? createPlannedTownTiles(asset, terrain) : null, villageTiles = hasSettlementLife(binding) ? createPlannedVillageTiles(asset, terrain, binding) : null;
   const harbor = hasFerries(binding) ? harborTownV1() : null, harborTiles = harbor ? createHarborTownTiles(terrain, harbor) : null;
@@ -35757,7 +35764,7 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     const regularAnchors = packAnchors(cx, cy, identity2.digest);
     const eventAnchors = await createWoodlandPilotEventAnchors({ asset, binding, cx, cy, seed: seed2, sha256, tile, regularAnchors });
     const plannedAnchors = await createPlannedEventAnchorsV1({ asset, binding, cx, cy, seed: seed2, sha256, tile, biome, regularAnchors, otherAnchors: eventAnchors });
-    return freezeWire({ version: PLANNED_WORLD_VERSION, identity: identity2, chunkX, chunkY, region: { version: asset.version, regionX: String(Math.floor(cx / 2)), regionY: String(Math.floor(cy / 2)), biome, name: hasStarterVillage(binding) && cx >= sx && cx <= sx + 1 && cy >= sy && cy <= sy + 1 ? STARTER_VILLAGE_NAME + " \xB7 Woodland \xB7 Band 1" : biome === "ocean" ? "Open ocean" : biome[0].toUpperCase() + biome.slice(1) + " \xB7 Band " + c.band, minimumLevel: [1, 1, 6, 11, 21, 41][c.band] ?? 1, originWidthChunks: 0, originHeightChunks: 0 }, collision: { tileSize: 32, width: 32, height: 26, tiles: collision }, visual: { terrain: visual, biomes: biomes2, blockers, ...caveArt.decorations.length ? { decorations: caveArt.decorations } : {}, ...stands ? { stands: standRows } : {}, route: { centerline, clearance, ...["planned-world-shoreline-v2", "planned-world-water-v3"].includes(asset.version) ? { mapFeatures: mapRows } : {} } }, edges, anchors: [...regularAnchors, ...eventAnchors, ...plannedAnchors], sites: reserved?.socket.entrance.chunkX === chunkX && reserved?.socket.entrance.chunkY === chunkY ? [reserved.socket] : [] });
+    return freezeWire({ version: PLANNED_WORLD_VERSION, identity: identity2, chunkX, chunkY, region: { version: asset.version, regionX: String(Math.floor(cx / 2)), regionY: String(Math.floor(cy / 2)), biome, name: hasStarterVillage(binding) && cx >= sx && cx <= sx + 1 && cy >= sy && cy <= sy + 1 ? STARTER_VILLAGE_NAME + " \xB7 " + starterBiomeName() + " \xB7 Band 1" : biome === "ocean" ? "Open ocean" : biome[0].toUpperCase() + biome.slice(1) + " \xB7 Band " + c.band, minimumLevel: [1, 1, 6, 11, 21, 41][c.band] ?? 1, originWidthChunks: 0, originHeightChunks: 0 }, collision: { tileSize: 32, width: 32, height: 26, tiles: collision }, visual: { terrain: visual, biomes: biomes2, blockers, ...caveArt.decorations.length ? { decorations: caveArt.decorations } : {}, ...stands ? { stands: standRows } : {}, route: { centerline, clearance, ...["planned-world-shoreline-v2", "planned-world-water-v3"].includes(asset.version) ? { mapFeatures: mapRows } : {} } }, edges, anchors: [...regularAnchors, ...eventAnchors, ...plannedAnchors], sites: reserved?.socket.entrance.chunkX === chunkX && reserved?.socket.entrance.chunkY === chunkY ? [reserved.socket] : [] });
   }
   let hollowHome = null;
   async function generate(args) {
@@ -38530,6 +38537,10 @@ function projectWorldEvents(s, actor) {
 var MAP_KNOWLEDGE_VERSION = "campaign-shared-map-knowledge-v1";
 var TRAIL_NOTE_ID = "note:alderwood:woodland-trail-v1";
 var TRAIL_NOTE_TILE = Object.freeze({ x: 3684, y: 6946 });
+var trailNoteTileV1 = () => {
+  const t = generatedStarterV1();
+  return t ? townStartV1(t).note : townTileV1(STARTER_VILLAGE_ID, TRAIL_NOTE_TILE);
+};
 var tileMapAddress = (p) => ({ chunkX: String(1024 + Math.floor(p.x / 32)), chunkY: String(1024 + Math.floor(p.y / 26)), localX: (p.x % 32 + 0.5) * 32, localY: (p.y % 26 + 0.5) * 32 });
 var mapTilePosition = (p) => ({ x: (Number(BigInt(p.chunkX) - 1024n) * 1024 + p.localX) / 32, y: (Number(BigInt(p.chunkY) - 1024n) * 832 + p.localY) / 32 });
 function validateMapKnowledge(k) {
@@ -38595,9 +38606,10 @@ function trailNoteTarget(state) {
 }
 function canReadTrailNote(state, player, payload) {
   const k = state.d9World?.navigation?.knowledge, a = state.entitiesById[player?.entityId];
-  if (!k || !hasStarterVillage(state.d9World.plannedWorld) || payload.noteId !== TRAIL_NOTE_ID || k.journal.some((n) => n.id === TRAIL_NOTE_ID) || !trailNoteTarget(state) || !a?.alive || a.residency.spaceInstanceId !== state.overworldInstanceId || state.primary.actorsById[a.entityId]?.current) return false;
+  if (!k || !hasStarterVillage(state.d9World.plannedWorld) || payload.noteId !== TRAIL_NOTE_ID || k.journal.some((n2) => n2.id === TRAIL_NOTE_ID) || !trailNoteTarget(state) || !a?.alive || a.residency.spaceInstanceId !== state.overworldInstanceId || state.primary.actorsById[a.entityId]?.current) return false;
   const p = mapTilePosition(localFramePositionD9(a.position, state.d9World.runtime.frames));
-  return Math.hypot(p.x - TRAIL_NOTE_TILE.x - 0.5, p.y - TRAIL_NOTE_TILE.y - 0.5) * 32 <= 80;
+  const n = trailNoteTileV1();
+  return Math.hypot(p.x - n.x - 0.5, p.y - n.y - 0.5) * 32 <= 80;
 }
 function readTrailNote(state, player, payload) {
   requireContract(canReadTrailNote(state, player, payload), "Trail note is unavailable");
@@ -38610,7 +38622,7 @@ function readTrailNote(state, player, payload) {
 function trailNoteExits(state, actor) {
   const k = state.d9World?.navigation?.knowledge;
   if (!k || !hasStarterVillage(state.d9World.plannedWorld) || k.journal.some((n) => n.id === TRAIL_NOTE_ID) || !trailNoteTarget(state) || actor.residency.spaceInstanceId !== state.overworldInstanceId) return [];
-  const p = projectToLocalFrameD9(tileMapAddress(TRAIL_NOTE_TILE), state.d9World.runtime.frames);
+  const p = projectToLocalFrameD9(tileMapAddress(trailNoteTileV1()), state.d9World.runtime.frames);
   if (!p || Math.hypot(p.x - actor.position.x, p.y - actor.position.y) > 800) return [];
   const player = Object.values(state.playersById).find((v) => v.entityId === actor.entityId);
   return [{ exitId: TRAIL_NOTE_ID, noteId: TRAIL_NOTE_ID, siteKind: "discovery-note", x: p.x, y: p.y, radius: 80, available: canReadTrailNote(state, player, { noteId: TRAIL_NOTE_ID }), label: "Read trail note" }];

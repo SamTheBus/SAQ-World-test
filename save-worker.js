@@ -1930,50 +1930,8 @@ var LIFE_NPCS = freezeWire([
   { id: "civilian:alpha:village:nell", name: "Nell", role: "innkeeper", roleLabel: "Innkeeper \xB7 tavern veranda", settlementId: LIFE_VILLAGE_ID, buildingId: "village:roof:002", band: 2, tile: { x: 4499, y: 7610 }, space: "exterior", color: "#81657a" }
 ]);
 
-// src/shared/content/world_towns_v1.js
-var TAVERN_TOWN_ID = "settlement-slot:town:05";
-var TAVERN_TOWN_ORIGIN = freezeWire({ x: 5824, y: 5720 });
-var CORNERS = { [STARTER_VILLAGE_ID]: STARTER_VILLAGE_ORIGIN, [LIFE_VILLAGE_ID]: LIFE_VILLAGE_ORIGIN, [TAVERN_TOWN_ID]: TAVERN_TOWN_ORIGIN };
-var townOriginV1 = (id) => settlementV1(id)?.tileOrigin ?? CORNERS[id];
-function townTileV1(id, t) {
-  const c = CORNERS[id], o = townOriginV1(id);
-  return o.x === c.x && o.y === c.y ? t : { x: t.x - c.x + o.x, y: t.y - c.y + o.y };
-}
-function perWorldV1(make) {
-  let at2 = -1, value;
-  return () => {
-    if (at2 !== worldRevisionV1()) {
-      value = make();
-      at2 = worldRevisionV1();
-    }
-    return value;
-  };
-}
-var moved2 = (list2, place) => {
-  const out = list2.map(place);
-  return out.every((v, i) => v === list2[i]) ? list2 : freezeWire(out);
-};
-var townTilesV1 = (id, list2) => moved2(list2, (t) => townTileV1(id, t));
-var starterArrivalTilesV1 = perWorldV1(() => townTilesV1(STARTER_VILLAGE_ID, STARTER_ARRIVAL_TILES));
-function townNpcV1(n) {
-  if (!CORNERS[n.settlementId]) return n;
-  const band = settlementV1(n.settlementId)?.band ?? n.band, tile = n.space === "exterior" ? townTileV1(n.settlementId, n.tile) : n.tile;
-  return band === n.band && tile === n.tile ? n : { ...n, band, tile };
-}
-var lists = /* @__PURE__ */ new Map();
-var listsAt = -1;
-function townNpcsV1(list2) {
-  if (listsAt !== worldRevisionV1()) {
-    lists.clear();
-    listsAt = worldRevisionV1();
-  }
-  let v = lists.get(list2);
-  if (!v) lists.set(list2, v = moved2(list2, townNpcV1));
-  return v;
-}
-
 // src/shared/generation/town_layout_v1.js
-var SPOT_NAMES = Object.freeze({ "capital-great-hold:01": "Highcrown", "capital-great-hold:02": "Stormhold", "city:01": "Ashford", "city:02": "Silverkeep", "city:03": "Marrowgate", "city:04": "Brightwater", "town:01": "Larkcross", "town:02": "Thornbury", "town:03": "Fenwick", "town:04": "Copperwell", "town:06": "Hollowmere", "town:07": "Ravensford", "town:08": "Ironwall", "village-outpost:03": "Willowford", "village-outpost:04": "Gull's Rest", "village-outpost:05": "Driftwood" });
+var SPOT_NAMES = Object.freeze({ "village-outpost:01": "Alderwood", "capital-great-hold:01": "Highcrown", "capital-great-hold:02": "Stormhold", "city:01": "Ashford", "city:02": "Silverkeep", "city:03": "Marrowgate", "city:04": "Brightwater", "town:01": "Larkcross", "town:02": "Thornbury", "town:03": "Fenwick", "town:04": "Copperwell", "town:06": "Hollowmere", "town:07": "Ravensford", "town:08": "Ironwall", "village-outpost:03": "Willowford", "village-outpost:04": "Gull's Rest", "village-outpost:05": "Driftwood" });
 var hyp = PM.hypot;
 
 // src/shared/generation/world_maker_v1/core.js
@@ -1984,7 +1942,9 @@ var CODE = { woodland: "w", grassland: "a", wetland: "m", upland: "r", desert: "
 
 // src/shared/generation/generated_towns_v1.js
 var GENERATED_TOWNS_VERSION = "generated-towns-v1";
+var STARTER_TOWN_ID_V1 = "settlement-slot:village-outpost:01";
 var GENERATED_TOWN_SIZES = Object.freeze({
+  [STARTER_TOWN_ID_V1]: "village",
   "settlement-slot:capital-great-hold:01": "capital",
   "settlement-slot:capital-great-hold:02": "capital",
   "settlement-slot:city:01": "city",
@@ -2030,15 +1990,15 @@ function streetEnds(streets, W9, H9) {
   }
   return out;
 }
-var lists2 = /* @__PURE__ */ new WeakMap();
+var lists = /* @__PURE__ */ new WeakMap();
 var loaded = [];
 var byId = /* @__PURE__ */ new Map();
 function generatedTownsOfV1(record2) {
   if (record2?.version !== GENERATED_TOWNS_VERSION || !Array.isArray(record2.towns)) return [];
-  let l = lists2.get(record2);
+  let l = lists.get(record2);
   if (!l) {
     l = record2.towns.filter((t) => GENERATED_TOWN_SIZES[t.id] && Number.isSafeInteger(t.origin?.x) && Number.isSafeInteger(t.origin?.y) && typeof t.seed === "string");
-    lists2.set(record2, l);
+    lists.set(record2, l);
   }
   return l;
 }
@@ -2048,6 +2008,7 @@ function useGeneratedTownsV1(record2) {
   return loaded;
 }
 var generatedTownsV1 = () => loaded;
+var generatedTownV1 = (id) => byId.get(id) ?? null;
 function segX(a, b, c, d) {
   const r = [b[0] - a[0], b[1] - a[1]], s = [d[0] - c[0], d[1] - c[1]], den = r[0] * s[1] - r[1] * s[0];
   if (Math.abs(den) < 1e-9) return null;
@@ -2626,6 +2587,59 @@ function townRasterV1(t) {
   return R2;
 }
 var TOWN_SOFT_PROPS_V1 = /* @__PURE__ */ new Set(["lampV", "lampT", "signpost", "milestone", "tub"]);
+var reachCache = /* @__PURE__ */ new WeakMap();
+function townReachV1(t) {
+  let s = reachCache.get(t);
+  if (s) return s;
+  const { w, h, col, mat } = townRasterV1(t), q = [];
+  s = new Uint8Array(w * h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const i = y * w + x;
+    if (!col[i] && mat[i] && (x === 0 || y === 0 || x === w - 1 || y === h - 1 || mat[i] === 2)) {
+      s[i] = 1;
+      q.push(i);
+    }
+  }
+  while (q.length) {
+    const i = q.pop(), x = i % w, y = (i - x) / w;
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const nx = x + dx, ny = y + dy;
+      if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+      const j = ny * w + nx;
+      if (!s[j] && !col[j]) {
+        s[j] = 1;
+        q.push(j);
+      }
+    }
+  }
+  reachCache.set(t, s);
+  return s;
+}
+var startCache = /* @__PURE__ */ new WeakMap();
+function townStartV1(t) {
+  let s = startCache.get(t);
+  if (s) return s;
+  const R2 = townRasterV1(t), reach = townReachV1(t), o = t.origin, [W9, H9] = t.core;
+  const open2 = (x, y) => {
+    const X = x - R2.x0, Y = y - R2.y0;
+    return x >= 0 && y >= 0 && x < W9 && y < H9 && X >= 0 && Y >= 0 && X < R2.w && Y < R2.h && reach[Y * R2.w + X] === 1;
+  };
+  const board = townStreetPlanV1(t).find((p) => p.kind === "notice"), cf = t.features.find((f3) => f3.type === "green" || f3.type === "plaza");
+  const aim = board ? [board.tile.x + 1, board.tile.y + 2] : cf?.type === "green" ? [cf.x, cf.y + cf.ry + 1] : cf ? [cf.x + cf.w / 2, cf.y + cf.h / 2] : t.entry;
+  let best = null, bd = 1e9;
+  for (let y = 0; y < H9 - 1; y++) for (let x = 0; x < W9 - 1; x++) {
+    if (!(open2(x, y) && open2(x + 1, y) && open2(x, y + 1) && open2(x + 1, y + 1))) continue;
+    const d = hyp2(x + 1 - aim[0], y + 1 - aim[1]);
+    if (d < bd) {
+      bd = d;
+      best = [x, y];
+    }
+  }
+  const [ax, ay] = best ?? [Math.floor(aim[0]), Math.floor(aim[1])];
+  s = Object.freeze({ arrival: Object.freeze([[0, 0], [1, 0], [0, 1], [1, 1]].map(([dx, dy]) => Object.freeze({ x: o.x + ax + dx, y: o.y + ay + dy }))), note: Object.freeze(board ? { x: o.x + board.tile.x, y: o.y + board.tile.y } : { x: o.x + ax + 2, y: o.y + ay }) });
+  startCache.set(t, s);
+  return s;
+}
 var townBoundsV1 = (t) => {
   const R2 = townRasterV1(t);
   return { x: t.origin.x + R2.x0, y: t.origin.y + R2.y0, w: R2.w, h: R2.h };
@@ -2764,6 +2778,53 @@ function townOutlineV1(t) {
     pts.push({ x: r3(o.x + cx + Math.sign(ca) * Math.sqrt(Math.abs(ca)) * rx), y: r3(o.y + cy + Math.sign(sa) * Math.sqrt(Math.abs(sa)) * ry) });
   }
   return pts;
+}
+
+// src/shared/content/world_towns_v1.js
+var TAVERN_TOWN_ID = "settlement-slot:town:05";
+var TAVERN_TOWN_ORIGIN = freezeWire({ x: 5824, y: 5720 });
+var CORNERS = { [STARTER_VILLAGE_ID]: STARTER_VILLAGE_ORIGIN, [LIFE_VILLAGE_ID]: LIFE_VILLAGE_ORIGIN, [TAVERN_TOWN_ID]: TAVERN_TOWN_ORIGIN };
+var townOriginV1 = (id) => settlementV1(id)?.tileOrigin ?? CORNERS[id];
+function townTileV1(id, t) {
+  const c = CORNERS[id], o = townOriginV1(id);
+  return o.x === c.x && o.y === c.y ? t : { x: t.x - c.x + o.x, y: t.y - c.y + o.y };
+}
+function perWorldV1(make) {
+  let at2 = -1, value;
+  return () => {
+    if (at2 !== worldRevisionV1()) {
+      value = make();
+      at2 = worldRevisionV1();
+    }
+    return value;
+  };
+}
+var moved2 = (list2, place) => {
+  const out = list2.map(place);
+  return out.every((v, i) => v === list2[i]) ? list2 : freezeWire(out);
+};
+var townTilesV1 = (id, list2) => moved2(list2, (t) => townTileV1(id, t));
+var generatedStarterV1 = () => generatedTownV1(STARTER_VILLAGE_ID);
+var builtArrival = perWorldV1(() => townTilesV1(STARTER_VILLAGE_ID, STARTER_ARRIVAL_TILES));
+var starterArrivalTilesV1 = () => {
+  const t = generatedStarterV1();
+  return t ? townStartV1(t).arrival : builtArrival();
+};
+function townNpcV1(n) {
+  if (!CORNERS[n.settlementId]) return n;
+  const band = settlementV1(n.settlementId)?.band ?? n.band, tile = n.space === "exterior" ? townTileV1(n.settlementId, n.tile) : n.tile;
+  return band === n.band && tile === n.tile ? n : { ...n, band, tile };
+}
+var lists2 = /* @__PURE__ */ new Map();
+var listsAt = -1;
+function townNpcsV1(list2) {
+  if (listsAt !== worldRevisionV1()) {
+    lists2.clear();
+    listsAt = worldRevisionV1();
+  }
+  let v = lists2.get(list2);
+  if (!v) lists2.set(list2, v = moved2(list2, townNpcV1));
+  return v;
 }
 
 // src/shared/content/tavern_interior_v1.js
@@ -2983,6 +3044,22 @@ var CAST = {};
     CAST["settlement-slot:" + slot] = out;
   }
 }
+var BUILT_CASTS = {
+  "civilian:alpha:alderwood:merchant": { kit: "shopkeeper", look: { hair: "short", facialHair: "mustache", hairColor: "dark-brown", skin: "tan" }, cloth: "#3f7a52", skirt: "#2f5f8a" },
+  "civilian:alpha:alderwood:smith": { kit: "blacksmith", look: { hair: "bald", facialHair: "bushy", hairColor: "soft-black", skin: "tan" }, cloth: "#3f7a52", skirt: "#4a4f5a" },
+  "civilian:alpha:alderwood:innkeeper": { kit: "innkeeper", look: { hair: "short", facialHair: "handlebar", hairColor: "gray", skin: "light" }, cloth: "#b8463a", skirt: "#7a3f3a" },
+  "civilian:alpha:town:mara": { kit: "trader", look: { hair: "ponytail", facialHair: "none", hairColor: "black", skin: "brown" }, cloth: "#b8463a", skirt: "#3a5a3a" },
+  "civilian:alpha:town:bren": { kit: "armorer", look: { hair: "short", facialHair: "mustache", hairColor: "brown", skin: "light" }, cloth: "#3f7a52", skirt: "#4a4f5a" },
+  "civilian:alpha:town:ada": { kit: "barmaid", look: { hair: "braid", facialHair: "none", hairColor: "auburn", skin: "tan" }, cloth: "#3f6f52", skirt: "#7a3f3a" },
+  "civilian:alpha:town:selene": { kit: "mystic", look: { hair: "long", facialHair: "none", hairColor: "silver", skin: "light" }, cloth: "#7d3c98", skirt: "#5a3a8a" },
+  "civilian:alpha:village:ila": { kit: "shopkeeper", look: { hair: "bob", facialHair: "none", hairColor: "copper", skin: "fair" }, cloth: "#2f7a74", skirt: "#8a5a2a" },
+  "civilian:alpha:village:oren": { kit: "young", look: { hair: "short", facialHair: "stubble", hairColor: "dark-blonde", skin: "olive" }, cloth: "#3f7a52", skirt: "#4a4f5a" },
+  "civilian:alpha:village:nell": { kit: "host", look: { hair: "curly", facialHair: "none", hairColor: "light-brown", skin: "peach" }, cloth: "#7a2e3a", skirt: "#6a3a6e" }
+};
+CAST["settlement-slot:village-outpost:01"] = freezeWire(Object.fromEntries([["general", "merchant", "Alderwood Merchant"], ["smith", "smith", "Alderwood Smith"], ["innkeeper", "innkeeper", "Alderwood Innkeeper"]].map(([role, k, name]) => {
+  const c = BUILT_CASTS["civilian:alpha:alderwood:" + k];
+  return [role, { name, kit: c.kit, look: c.look, cloth: c.cloth, skirt: c.skirt }];
+})));
 var generatedShopServicesV1 = (role, size) => role === "smith" ? size === "village" || size === "hamlet" ? ["attune", "shatter"] : ["attune", "reforge", "awaken", "shatter", "materials"] : role === "enchanter" ? ["enchant", "purge", "resonance", "shatter", "materials"] : [];
 var at = null;
 var list = [];
@@ -3021,7 +3098,7 @@ var ORDINARY_SERVICE_NPCS = freezeWire([...LIFE_NPCS, ...STARTER_NPCS]);
 var lists3 = /* @__PURE__ */ new Map();
 var listsFor = null;
 var serviceNpcsFor = (b) => {
-  const ordinary2 = townNpcsV1(hasStarterVillage(b) ? ORDINARY_SERVICE_NPCS : LIFE_NPCS), seeded2 = generatedTownNpcsV1(), v2 = hasServicesV2(b);
+  const ordinary2 = townNpcsV1(hasStarterVillage(b) && !generatedStarterV1() ? ORDINARY_SERVICE_NPCS : LIFE_NPCS), seeded2 = generatedTownNpcsV1(), v2 = hasServicesV2(b);
   if (listsFor !== ordinary2 || lists3.get("seeded") !== seeded2) {
     lists3.clear();
     listsFor = ordinary2;
@@ -6599,7 +6676,7 @@ var villageConnector = (x, y, origin2 = LIFE_VILLAGE_ORIGIN) => {
   const lx = x - origin2.x, ly = y - origin2.y;
   return lx >= -16 && lx <= 2 && ly >= 12 && ly <= 14 || lx >= 0 && lx <= 2 && ly >= 13 && ly <= 33;
 };
-var villagePlacements = (binding) => [{ id: LIFE_VILLAGE_ID, name: "Crossroads village", origin: townOriginV1(LIFE_VILLAGE_ID), band: settlementV1(LIFE_VILLAGE_ID)?.band ?? 2 }, ...hasStarterVillage(binding) ? [{ id: STARTER_VILLAGE_ID, name: STARTER_VILLAGE_NAME, origin: townOriginV1(STARTER_VILLAGE_ID), band: settlementV1(STARTER_VILLAGE_ID)?.band ?? 1 }] : []];
+var villagePlacements = (binding) => [{ id: LIFE_VILLAGE_ID, name: "Crossroads village", origin: townOriginV1(LIFE_VILLAGE_ID), band: settlementV1(LIFE_VILLAGE_ID)?.band ?? 2 }, ...hasStarterVillage(binding) && !generatedStarterV1() ? [{ id: STARTER_VILLAGE_ID, name: STARTER_VILLAGE_NAME, origin: townOriginV1(STARTER_VILLAGE_ID), band: settlementV1(STARTER_VILLAGE_ID)?.band ?? 1 }] : []];
 var exteriorNpcAt = (x, y, binding) => serviceNpcsFor(binding).some((n) => n.space === "exterior" && n.tile.x === x && n.tile.y === y);
 function createPlannedVillageTiles(asset, terrain2, binding) {
   const placements = villagePlacements(binding);
@@ -9909,6 +9986,10 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     ruinByChunk.set(key9, crypt);
   }
   const cryptReservations = Promise.all(cryptIds.map((reservationId) => (reservationId.includes(":small:") ? derivePlannedCryptReservation : derivePlannedCryptReservationV2)(asset, binding, sha256, { reservationId, terrain: terrain2 }).then((r) => completePopulationReservation(r, asset, binding, sha256))));
+  const starterBiomeName = () => {
+    const g = generatedStarterV1()?.biome ?? "woodland";
+    return g[0].toUpperCase() + g.slice(1);
+  };
   const starter = townOriginV1(STARTER_VILLAGE_ID), sx = starter.x / 32, sy = starter.y / 26;
   const townTiles = binding.townPrototype ? createPlannedTownTiles(asset, terrain2) : null, villageTiles = hasSettlementLife(binding) ? createPlannedVillageTiles(asset, terrain2, binding) : null;
   const harbor = hasFerries(binding) ? harborTownV1() : null, harborTiles = harbor ? createHarborTownTiles(terrain2, harbor) : null;
@@ -10059,7 +10140,7 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     const regularAnchors = packAnchors(cx, cy, identity.digest);
     const eventAnchors = await createWoodlandPilotEventAnchors({ asset, binding, cx, cy, seed, sha256, tile, regularAnchors });
     const plannedAnchors = await createPlannedEventAnchorsV1({ asset, binding, cx, cy, seed, sha256, tile, biome, regularAnchors, otherAnchors: eventAnchors });
-    return freezeWire({ version: PLANNED_WORLD_VERSION, identity, chunkX, chunkY, region: { version: asset.version, regionX: String(Math.floor(cx / 2)), regionY: String(Math.floor(cy / 2)), biome, name: hasStarterVillage(binding) && cx >= sx && cx <= sx + 1 && cy >= sy && cy <= sy + 1 ? STARTER_VILLAGE_NAME + " \xB7 Woodland \xB7 Band 1" : biome === "ocean" ? "Open ocean" : biome[0].toUpperCase() + biome.slice(1) + " \xB7 Band " + c.band, minimumLevel: [1, 1, 6, 11, 21, 41][c.band] ?? 1, originWidthChunks: 0, originHeightChunks: 0 }, collision: { tileSize: 32, width: 32, height: 26, tiles: collision2 }, visual: { terrain: visual2, biomes, blockers: blockers2, ...caveArt.decorations.length ? { decorations: caveArt.decorations } : {}, ...stands ? { stands: standRows } : {}, route: { centerline, clearance, ...["planned-world-shoreline-v2", "planned-world-water-v3"].includes(asset.version) ? { mapFeatures: mapRows } : {} } }, edges, anchors: [...regularAnchors, ...eventAnchors, ...plannedAnchors], sites: reserved?.socket.entrance.chunkX === chunkX && reserved?.socket.entrance.chunkY === chunkY ? [reserved.socket] : [] });
+    return freezeWire({ version: PLANNED_WORLD_VERSION, identity, chunkX, chunkY, region: { version: asset.version, regionX: String(Math.floor(cx / 2)), regionY: String(Math.floor(cy / 2)), biome, name: hasStarterVillage(binding) && cx >= sx && cx <= sx + 1 && cy >= sy && cy <= sy + 1 ? STARTER_VILLAGE_NAME + " \xB7 " + starterBiomeName() + " \xB7 Band 1" : biome === "ocean" ? "Open ocean" : biome[0].toUpperCase() + biome.slice(1) + " \xB7 Band " + c.band, minimumLevel: [1, 1, 6, 11, 21, 41][c.band] ?? 1, originWidthChunks: 0, originHeightChunks: 0 }, collision: { tileSize: 32, width: 32, height: 26, tiles: collision2 }, visual: { terrain: visual2, biomes, blockers: blockers2, ...caveArt.decorations.length ? { decorations: caveArt.decorations } : {}, ...stands ? { stands: standRows } : {}, route: { centerline, clearance, ...["planned-world-shoreline-v2", "planned-world-water-v3"].includes(asset.version) ? { mapFeatures: mapRows } : {} } }, edges, anchors: [...regularAnchors, ...eventAnchors, ...plannedAnchors], sites: reserved?.socket.entrance.chunkX === chunkX && reserved?.socket.entrance.chunkY === chunkY ? [reserved.socket] : [] });
   }
   let hollowHome = null;
   async function generate(args) {
