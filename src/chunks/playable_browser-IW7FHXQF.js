@@ -876,7 +876,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-NWWRNJIK.js";
+} from "./chunk-RTX3XR3O.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -56057,7 +56057,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
       } else if (command.kind === "combat.guardIntent") {
         guardIntent(state.subweaponCombat.actors[actor.entityId].guard, command.payload.pressed, state.primary.actorsById[actor.entityId]);
       } else if (command.kind === "combat.shadowDash") {
-        if (beginShadowDash(actor, state.subweaponCombat.actors[actor.entityId], resolvePlayerStats(player), command.payload.aim, false, 100 - 5 * heroRank(player, "quick_dash"))) family.classHooks.dashed(actor);
+        if (beginShadowDash(actor, state.subweaponCombat.actors[actor.entityId], resolvePlayerStats(player), command.payload.aim, false, 100 - 5 * heroRank(player, "quick_dash") - 2 * (heroRank(player, "cinder_step") + heroRank(player, "frost_step") + heroRank(player, "static_step")))) family.classHooks.dashed(actor);
       } else if (command.kind === "combat.skill") {
         family.skill(actor, command.payload.skillId, command.payload.aim, command.commandId);
       } else if (command.kind === "gear.salvage") {

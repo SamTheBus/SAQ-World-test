@@ -1,6 +1,6 @@
 {
-  "runtimeId": "aedd1356d217924e",
-  "runtimeSha256": "aedd1356d217924e029027d6672a52cfc751d8728ee19dd5eb42a122985b034e",
+  "runtimeId": "b6941a3790be3cd2",
+  "runtimeSha256": "b6941a3790be3cd27de282690dca5cb256baa7f1ac03d73c4195bb5d1c6fedb4",
   "files": [
     {
       "path": ".nojekyll",
@@ -9,8 +9,8 @@
     },
     {
       "path": "assets/alderwood-access-v1/alpha.json",
-      "bytes": 49036,
-      "sha256": "edac8ab7f19ffe07ea81c6c5253b755cd3876a53f8c8526aac81d621c589e226"
+      "bytes": 45906,
+      "sha256": "48fd65d60a26a6403b36111e0d3622e366c26f6a07709e9d34ff013a013fcdeb"
     },
     {
       "path": "assets/alpha-site-population-v1.json",
@@ -19,8 +19,8 @@
     },
     {
       "path": "assets/breakable-props-v1/kit-manifest.json",
-      "bytes": 1418,
-      "sha256": "ae35d3e35ac414509df8833bb3eb07824d8b543cf9a36aabf3d42e06c1fb06d8"
+      "bytes": 1392,
+      "sha256": "4ff954a64875c15c7ba1bfdf6fb24860815b4c55ef8e529184757783c3336093"
     },
     {
       "path": "assets/breakable-props-v1/props-source-v1.webp",
@@ -34,8 +34,8 @@
     },
     {
       "path": "assets/desert-nature-v1/kit-manifest.json",
-      "bytes": 7891,
-      "sha256": "e3403f1928b99425b94ab0e0420996edff289403f45435923685b433a33f492a"
+      "bytes": 7515,
+      "sha256": "6b1cb5b5289897263de26eda4beafe337908977911d2d5b40ba7ff0cc4afad9d"
     },
     {
       "path": "assets/desert-nature-v1/rocks.webp",
@@ -74,8 +74,8 @@
     },
     {
       "path": "assets/fonts-v1/OFL.txt",
-      "bytes": 4477,
-      "sha256": "7350acb49e7246c66cbbbb8ca2287f5a7c8bc912cbc26a820de1fab0baab59de"
+      "bytes": 4384,
+      "sha256": "ad09b05dc8bc678c9daf7c4c5f7ef1f55e5726127f4330b2e98e40b9dffcb860"
     },
     {
       "path": "assets/fort-art-pilot-v1/floor-v1.webp",
@@ -109,8 +109,8 @@
     },
     {
       "path": "assets/frostland-nature-v1/kit-manifest.json",
-      "bytes": 7371,
-      "sha256": "f46cf2cfa92c94e7e09921e1fbc092861fc8e2b0b5d5e8d77132cc592094c434"
+      "bytes": 7021,
+      "sha256": "af91f2944519ed894c64c56e91c782e1502a7069be13abace59e1065e32463e0"
     },
     {
       "path": "assets/frostland-nature-v1/rocks.webp",
@@ -134,8 +134,8 @@
     },
     {
       "path": "assets/grassland-nature-v1/kit-manifest.json",
-      "bytes": 7873,
-      "sha256": "69f6a7b4dc525c2aaa5f628ada77c3c766f502fabd418efaa599b2dc16dd4af0"
+      "bytes": 7497,
+      "sha256": "8a8f72703b02c81dd2c34852adfb84ff2fd7f8bd38618e8e9809d5634f47b0e5"
     },
     {
       "path": "assets/grassland-nature-v1/rocks.webp",
@@ -204,13 +204,13 @@
     },
     {
       "path": "assets/hybrid-art-pilot-v1/journey.json",
-      "bytes": 19629,
-      "sha256": "466b8f5e9c6d574c88ef4244788d3fbf9905c00678645a170ee33451b357143a"
+      "bytes": 18448,
+      "sha256": "452601819b2d7eb533f4732004a078ecc8fb5cbb86d18b5f17d3565f34115989"
     },
     {
       "path": "assets/hybrid-art-pilot-v1/kit-manifest.json",
-      "bytes": 3484,
-      "sha256": "2dbaffe8397be7412933272fe7ea92223f0d3a40f478aa8b18a95cad57ee89b0"
+      "bytes": 3339,
+      "sha256": "b0fed05ca0443571c1d839e37c29c5d5bc90ec3bd0d0536b54e717ed7579638a"
     },
     {
       "path": "assets/hybrid-art-pilot-v1/woodland-atlas-source.webp",
@@ -234,8 +234,8 @@
     },
     {
       "path": "assets/hydrology-v1/alpha.json",
-      "bytes": 754670,
-      "sha256": "dc1e50ea1a1381514949979ef7a1c7db4033b69d3ca7e1f9da11329923d6f68a"
+      "bytes": 754669,
+      "sha256": "4fb70faf18fe2ae53ec79c71e4c1c7d70f6f3769649b084dd8f66fce53cd8cc6"
     },
     {
       "path": "assets/night-loot-v1/debris-source-v1.webp",
@@ -274,8 +274,8 @@
     },
     {
       "path": "assets/roadside-encounters-v1/policy.json",
-      "bytes": 1229,
-      "sha256": "1c458444e4a44b3b08a08f165cb61531bb604684638e7e1aa294d440a9e27f19"
+      "bytes": 1207,
+      "sha256": "b45cc8e610b432ef59a91b345c9a0083b1ee8e4557cbf777dbfb6620f8f063c3"
     },
     {
       "path": "assets/ruin-storybook-v1/entrance-source.webp",
@@ -289,8 +289,8 @@
     },
     {
       "path": "assets/ruin-storybook-v1/kit-manifest.json",
-      "bytes": 9079,
-      "sha256": "067a0eac5f63671ef33383c810fe4dcbfe3415d32674a3f144369888e99ab1a8"
+      "bytes": 8546,
+      "sha256": "8a62758bd7d5f10ddbcec66d4b6004949d798f682681677fa9d6e6d0696ce03d"
     },
     {
       "path": "assets/ruin-storybook-v1/materials-source.webp",
@@ -304,8 +304,8 @@
     },
     {
       "path": "assets/ruin-storybook-v1/provenance.json",
-      "bytes": 9771,
-      "sha256": "f772d0815af882a3b752235dacc7e86ca3a38d69c1a5543410ef2e5d1e4fcaa1"
+      "bytes": 9754,
+      "sha256": "5031b97670823a1842b6f5297db245eded4cec3ebe05dc047423c2d1efe890bb"
     },
     {
       "path": "assets/ruin-storybook-v1/vertical-thin-source.webp",
@@ -334,8 +334,8 @@
     },
     {
       "path": "assets/tropical-nature-v1/kit-manifest.json",
-      "bytes": 6860,
-      "sha256": "1529f2cba4be8cd3edac55f8b9db01ebeae663871cedee460acb378d964a6090"
+      "bytes": 6534,
+      "sha256": "c4e37eebef363db9d8ac846667dfc0fba909b1e38f7b913a034b48dd519af9e7"
     },
     {
       "path": "assets/tropical-nature-v1/rocks.webp",
@@ -359,8 +359,8 @@
     },
     {
       "path": "assets/upland-nature-v1/kit-manifest.json",
-      "bytes": 7368,
-      "sha256": "d0eff97904eb131f88d2d1f64be649e21fc25d55f634254db8d2613069fc42f6"
+      "bytes": 7018,
+      "sha256": "db61dd127edd107929163140005e6f20c5ed8dac156d5058a3a6c01588009779"
     },
     {
       "path": "assets/upland-nature-v1/rocks.webp",
@@ -384,8 +384,8 @@
     },
     {
       "path": "assets/volcanic-nature-v1/kit-manifest.json",
-      "bytes": 6602,
-      "sha256": "238ec3d704c1fca583667b93ef485f8d15b0ca626d394ea58ee035d005fe8941"
+      "bytes": 6291,
+      "sha256": "16b82d1ce69aa7fae604610427936f1ee13fd3e68b95011732a5a62409e7c759"
     },
     {
       "path": "assets/volcanic-nature-v1/rocks.webp",
@@ -409,8 +409,8 @@
     },
     {
       "path": "assets/wetland-nature-v1/kit-manifest.json",
-      "bytes": 7892,
-      "sha256": "c663bbcdce5081a0fbdd864b23a47d0f286e8c197e26a4e6d08c184acbae703c"
+      "bytes": 7516,
+      "sha256": "e25bf7a9db990a8ec0725aefff1b255673f58e04dd532e75d148d3b2757229fe"
     },
     {
       "path": "assets/wetland-nature-v1/rocks.webp",
@@ -429,8 +429,8 @@
     },
     {
       "path": "assets/wilderness-v2/alpha.json",
-      "bytes": 1472486,
-      "sha256": "16fd11e07d0ed26701039f0747a761a10cee49b7eb71a25c18e105eb8a559573"
+      "bytes": 1472485,
+      "sha256": "ed2f7fcafeac4305b6658242d232d8d79dade9ecb6b43ea74125fc1318cc282f"
     },
     {
       "path": "assets/woodland-environment-v1/earth-source.webp",
@@ -444,8 +444,8 @@
     },
     {
       "path": "assets/woodland-environment-v1/journey.json",
-      "bytes": 7177,
-      "sha256": "058a621525e5390161c30c7c83934aebc347bec0d1220a558a7e24f13c454400"
+      "bytes": 6786,
+      "sha256": "c2c36e935451174640f25e0218ac75575a61b726027cabdf6808922cdc00a381"
     },
     {
       "path": "assets/woodland-environment-v1/kit-manifest.json",
@@ -499,8 +499,8 @@
     },
     {
       "path": "assets/woodland-nature-v1/kit-manifest.json",
-      "bytes": 10284,
-      "sha256": "b625fea1e77646d26511a51991bb22a46f8f97d7c82e39c1607de018fe8f108e"
+      "bytes": 9791,
+      "sha256": "c217e6e2d3790e5c170196ebfe3bcd2c89f66f78fafcbc1010cef78a6af8126d"
     },
     {
       "path": "assets/woodland-nature-v1/rocks.webp",
@@ -529,8 +529,8 @@
     },
     {
       "path": "assets/world-maker-v1/catalog.json",
-      "bytes": 66206,
-      "sha256": "84c1f238f82b7c936f14ee2906fd89246630f382a23d878c957fae7d994dcb02"
+      "bytes": 66205,
+      "sha256": "541a3982167b6b5ef43d3d690f72655626991e3195160acf149fa749402e99f2"
     },
     {
       "path": "assets/world-reshape-v2/alpha.json",
@@ -539,38 +539,38 @@
     },
     {
       "path": "assets/world-reshape-v2/hydrology.json",
-      "bytes": 697116,
-      "sha256": "18fa029868dc21aef004c669c83df89a29f280d1108fbfd11f13b0827337609a"
+      "bytes": 697115,
+      "sha256": "e12fd26221c55e0357b674d4beaf28cc522ef5f9dde420b073373f0ef7be1b65"
     },
     {
       "path": "index.html",
       "bytes": 13674,
-      "sha256": "d90c8bba7927df1e29b2903bb62a4de295f186c82d578a1eb2f7d6923573d831"
+      "sha256": "b834b75a7a54600befb7ecab0f0efe606e5e171f2b288ffde1bf096859e810fa"
     },
     {
       "path": "manifest.webmanifest",
-      "bytes": 205,
-      "sha256": "35c90a151d862ce45c97d114b740be108ce16dc562611475715f7edc7b0962c4"
+      "bytes": 195,
+      "sha256": "9256b4a8863f6c1ce6d6846b9db558386298902e06e20a2bde38891d0adb9646"
     },
     {
       "path": "save-worker.js",
-      "bytes": 2922461,
-      "sha256": "9b79b4b766a20997a0041aeb2b81601a0afaef648361ab0b4b34090c3f9b7dd9"
+      "bytes": 2922572,
+      "sha256": "329f8afaa253891c59b8cf44f87c91a6405fe8798efa2cfd600ed3433978c33b"
     },
     {
-      "path": "src/chunks/chunk-NWWRNJIK.js",
-      "bytes": 2627385,
-      "sha256": "a308c85e2d7a2fe2fa0f13ae46e239d069e84e0b9ccd1ce224a914a43998e896"
+      "path": "src/chunks/chunk-RTX3XR3O.js",
+      "bytes": 2627496,
+      "sha256": "e0575a95261485afbf13ffbedc04c3b910726d3382f383bc168f57fb080df4d1"
     },
     {
-      "path": "src/chunks/playable_browser-LNEA42IM.js",
-      "bytes": 6235415,
-      "sha256": "90443320126e66a8475c9a1beb26ddaaee6078d467755a2d419dfe43aefb9eb2"
+      "path": "src/chunks/playable_browser-IW7FHXQF.js",
+      "bytes": 6235522,
+      "sha256": "37b15015a4b90161b1846698ccc24a4353dee7eb7e79db78a034e426029872bb"
     },
     {
-      "path": "src/chunks/world_browser-XCQHR5F4.js",
+      "path": "src/chunks/world_browser-EMAUMGJG.js",
       "bytes": 1416,
-      "sha256": "583ab466538c46807a91bff86fe05f87c59113cf53bab9f9f8c570d3cd1630bd"
+      "sha256": "38558938c73d8c24857434c7ed2ad38ff72c02f0f998fdb9645e4021c96df6d9"
     },
     {
       "path": "src/client/startup_camp_v1.js",
@@ -579,13 +579,13 @@
     },
     {
       "path": "src/client/startup_loading_v1.js",
-      "bytes": 6222,
-      "sha256": "7e1714a01c486f2d11a4cc3e30bab250cad9fb42d3c781973368ea042ff6a100"
+      "bytes": 6103,
+      "sha256": "982f510df097c11494d43ec02ca836590c95731c9f4a9d53ad6ba0d6551b89e4"
     },
     {
       "path": "src/entrypoints/browser_boot.js",
       "bytes": 2158,
-      "sha256": "4229531353d1e2502a123a47f005d6b368a560bacf8497ad75093f86d8f27428"
+      "sha256": "725e1f5782984098d0354a0221c5f378013ab3c8f27af45c27121005488667e1"
     },
     {
       "path": "world-maker-worker.js",
