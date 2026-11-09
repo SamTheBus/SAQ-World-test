@@ -874,7 +874,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-EM4ARVN7.js";
+} from "./chunk-FOH7V32J.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -54134,7 +54134,7 @@ function createArchivedBossFightRuntime(state, { pool: pool2, damage, hit, clear
     }
   }
   function collapseRing(b, a, c) {
-    if (b.bossDefinitionId !== "hooktail" || !b.archive) return false;
+    if (b.bossDefinitionId !== "ashfang" || !b.archive) return false;
     const idx = b.archive.collapsedRings.length, ring6 = originalArenaRing(c, b.homePosition, idx);
     if (!ring6) return false;
     b.archive.collapsedRings.push({ ...ring6, createdTick: state.tick });
@@ -54142,12 +54142,12 @@ function createArchivedBossFightRuntime(state, { pool: pool2, damage, hit, clear
     return true;
   }
   function tickCollapsedRings(b, a, all) {
-    if (b.bossDefinitionId !== "hooktail" || !b.archive || !b.archive.collapsedRings.length || state.tick % 40 !== 0) return;
+    if (b.bossDefinitionId !== "ashfang" || !b.archive || !b.archive.collapsedRings.length || state.tick % 40 !== 0) return;
     for (const t of targetsIn(b, all)) {
       if (!b.archive.collapsedRings.some((r) => onOriginalRing(r, t.position))) continue;
       if (compareCombat(t.hp, "1") <= 0) continue;
       const requested = combatInteger(minCombat(rounded2(t.maxHp, 8, 100), subtractCombat(t.hp, "1")), "round");
-      damagePacket(a, t, requested, "hooktail_void", { sourceActionSequence: b.abilitySequence, nonLethal: true });
+      damagePacket(a, t, requested, "ashfang_void", { sourceActionSequence: b.abilitySequence, nonLethal: true });
     }
   }
   function resolveOriginal(b, a, targets, ability, pos, c) {
@@ -54170,11 +54170,11 @@ function createArchivedBossFightRuntime(state, { pool: pool2, damage, hit, clear
         effect(b, t, "control_glitch", conf.glitch.durationTicks, 1);
         hits2.push(t.entityId);
       }
-    } else if (ability === "scarlet_fire" && kind === "hooktail") {
-      for (const t of locked) if (originalFireCone(a.position, pos, t.position, conf.fire.range, conf.fire.halfAngle, t.hullRadius ?? 9) && sweptPathClear(c, a.position, t.position, 3) && damagePacket(a, t, rounded2(a.attackDamage, 155, 100), "hooktail_scarlet_fire", { sourceActionSequence: b.abilitySequence })) hits2.push(t.entityId);
-    } else if (ability === "hooked_tail" && kind === "hooktail") {
-      for (const t of locked) if (within(t.position, pos, 64 + (t.hullRadius ?? 9)) && damagePacket(a, t, rounded2(a.attackDamage, 18, 10), "hooktail_slam", { sourceActionSequence: b.abilitySequence })) hits2.push(t.entityId);
-    } else if (ability === "arena_collapse" && kind === "hooktail") {
+    } else if (ability === "scarlet_fire" && kind === "ashfang") {
+      for (const t of locked) if (originalFireCone(a.position, pos, t.position, conf.fire.range, conf.fire.halfAngle, t.hullRadius ?? 9) && sweptPathClear(c, a.position, t.position, 3) && damagePacket(a, t, rounded2(a.attackDamage, 155, 100), "ashfang_scarlet_fire", { sourceActionSequence: b.abilitySequence })) hits2.push(t.entityId);
+    } else if (ability === "hooked_tail" && kind === "ashfang") {
+      for (const t of locked) if (within(t.position, pos, 64 + (t.hullRadius ?? 9)) && damagePacket(a, t, rounded2(a.attackDamage, 18, 10), "ashfang_slam", { sourceActionSequence: b.abilitySequence })) hits2.push(t.entityId);
+    } else if (ability === "arena_collapse" && kind === "ashfang") {
       collapseRing(b, a, c);
     } else if (ability === "singularity" && kind === "void_overseer") {
       for (const t of locked) if (within(t.position, a.position, conf.singularity.radius + (t.hullRadius ?? 9)) && damagePacket(a, t, rounded2(a.attackDamage, 195, 100), "void_singularity", { sourceActionSequence: b.abilitySequence })) hits2.push(t.entityId);
@@ -54269,7 +54269,7 @@ function createArchivedBossFightRuntime(state, { pool: pool2, damage, hit, clear
       tickSpores(b, a, all, c);
       tickPoison(b, a, all);
     }
-    if (b.bossDefinitionId === "hooktail") tickCollapsedRings(b, a, all);
+    if (b.bossDefinitionId === "ashfang") tickCollapsedRings(b, a, all);
     if (b.bossDefinitionId === "cinderhart") tickCinderFires(b, a, all);
     if (b.bossDefinitionId === "nexus_overseer") advanceNexusDecoys(b, a, all, c);
     if (["corrosive_abomination", "void_overseer"].includes(b.bossDefinitionId)) tickContact(b, a, all);
@@ -54491,7 +54491,7 @@ function createRecoveredBossCombatV1(state, { applyDirectDamage, eligible: eligi
     if (id === "nexus_overseer") return b.archive ? originalNexusAbilityChoice(b.selectionSeed, b.abilitySequence, dist2(a.position, target.position)) : r < 0.35 ? "control_glitch" : r < 0.74 ? "prism_collapse" : "prism_slam";
     if (id === "gilded_vault_keeper") return b.phase === 2 && r < 0.32 ? "taxation" : r < 0.64 ? "vault_crush" : "gold_fall";
     if (id === "marcus") return b.phase === 2 && r < 0.23 ? "molten_shield" : r < 0.48 ? "coin_barrage" : r < 0.71 ? "gold_rush" : r < 0.86 ? "inversion" : "gilded_lasso";
-    if (id === "hooktail") {
+    if (id === "ashfang") {
       if (b.archive) {
         const pool3 = b.phase === 2 ? ["hooked_tail", "scarlet_fire", "arena_collapse"] : ["hooked_tail", "scarlet_fire"];
         const chosen = pool3[Math.floor(roll5(b.selectionSeed, b.abilitySequence, 568840981) * pool3.length)];
@@ -54768,7 +54768,7 @@ function createRecoveredBossCombatV1(state, { applyDirectDamage, eligible: eligi
       }
       if (state.tick < p.nextDamageTick) continue;
       p.nextDamageTick = Math.min(p.expiresTick, state.tick + 45);
-      if (p.kind === "time" || p.kind === "gold_spill" || b.archive && b.bossDefinitionId === "corrosive_abomination" && ["acid", "slag"].includes(p.kind) || b.archive && b.bossDefinitionId === "hooktail" && p.kind === "collapse" || b.archive && b.bossDefinitionId === "cinderhart" && p.kind === "fire") continue;
+      if (p.kind === "time" || p.kind === "gold_spill" || b.archive && b.bossDefinitionId === "corrosive_abomination" && ["acid", "slag"].includes(p.kind) || b.archive && b.bossDefinitionId === "ashfang" && p.kind === "collapse" || b.archive && b.bossDefinitionId === "cinderhart" && p.kind === "fire") continue;
       const effectiveRadius = p.kind === "prism" ? p.radius * (1 - 0.64 * Math.min(1, (state.tick - p.createdTick) / (p.expiresTick - p.createdTick))) : p.radius;
       for (const t of targets) {
         const d = dist2(t.position, p.position);
@@ -63000,7 +63000,7 @@ function createProgressionPresentation({ document: document2, readModel, issue }
 }
 
 // src/client/salvage_material_art.js
-var SALVAGE_MATERIAL_ART = { "Monster Soul": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g_ms_999%22%20x1%3D%220%25%22%20y1%3D%22100%25%22%20x2%3D%220%25%22%20y2%3D%220%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%232d3436%22%20%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23636e72%22%20%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M16%203%20C16%203%2C%206%2015%2C%206%2022%20C6%2027%2C%2010.5%2030%2C%2016%2030%20C21.5%2030%2C%2026%2027%2C%2026%2022%20C26%2015%2C%2016%203%2C%2016%203%20Z%22%20fill%3D%22url(%23g_ms_999)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M11%2019%20L14%2017%22%20stroke%3D%22%23e74c3c%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M21%2019%20L18%2017%22%20stroke%3D%22%23e74c3c%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%2F%3E%0A%20%20%20%20%20%20%3C%2Fsvg%3E", "Common Scrap": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22p%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23f4f5f6%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%23b4bac2%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23585e66%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M5%209%20L13%205%20L17%208%20L25%206%20L28%2014%20L25%2019%20L27%2026%20L17%2028%20L14%2025%20L6%2026%20L4%2018%20Z%22%20fill%3D%22url(%23p)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2211%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2223%22%20cy%3D%2210%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2222%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2222.5%22%20cy%3D%2223%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Cpath%20d%3D%22M10%207.5%20L15%209.5%22%20stroke%3D%22rgba(255%2C255%2C255%2C.55)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Uncommon Scrap": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22p%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23a8f0bf%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%2334b866%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23145c31%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M5%209%20L13%205%20L17%208%20L25%206%20L28%2014%20L25%2019%20L27%2026%20L17%2028%20L14%2025%20L6%2026%20L4%2018%20Z%22%20fill%3D%22url(%23p)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2211%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2223%22%20cy%3D%2210%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2222%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2222.5%22%20cy%3D%2223%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Cpath%20d%3D%22M10%207.5%20L15%209.5%22%20stroke%3D%22rgba(255%2C255%2C255%2C.55)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Rare Scrap": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22p%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23b3dcff%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%233a8fd6%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23173f73%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M5%209%20L13%205%20L17%208%20L25%206%20L28%2014%20L25%2019%20L27%2026%20L17%2028%20L14%2025%20L6%2026%20L4%2018%20Z%22%20fill%3D%22url(%23p)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2211%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2223%22%20cy%3D%2210%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2222%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2222.5%22%20cy%3D%2223%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Cpath%20d%3D%22M10%207.5%20L15%209.5%22%20stroke%3D%22rgba(255%2C255%2C255%2C.55)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M8%2016%20L24%2015%22%20stroke%3D%22rgba(0%2C0%2C0%2C.35)%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Epic Scrap": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22p%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23e2bdfa%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%239757c2%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%234a1f63%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M5%209%20L13%205%20L17%208%20L25%206%20L28%2014%20L25%2019%20L27%2026%20L17%2028%20L14%2025%20L6%2026%20L4%2018%20Z%22%20fill%3D%22url(%23p)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2211%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2223%22%20cy%3D%2210%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2222%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2222.5%22%20cy%3D%2223%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Cpath%20d%3D%22M10%207.5%20L15%209.5%22%20stroke%3D%22rgba(255%2C255%2C255%2C.55)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M8%2016%20L24%2015%22%20stroke%3D%22rgba(0%2C0%2C0%2C.35)%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M6.5%2019%20L25.5%2018%22%20stroke%3D%22%23f0c862%22%20stroke-width%3D%221.4%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Legendary Scrap": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22p%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ffd8a0%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%23e07b22%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237d3a08%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M5%209%20L13%205%20L17%208%20L25%206%20L28%2014%20L25%2019%20L27%2026%20L17%2028%20L14%2025%20L6%2026%20L4%2018%20Z%22%20fill%3D%22url(%23p)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2211%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2223%22%20cy%3D%2210%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2222%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2222.5%22%20cy%3D%2223%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Cpath%20d%3D%22M10%207.5%20L15%209.5%22%20stroke%3D%22rgba(255%2C255%2C255%2C.55)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M8%2016%20L24%2015%22%20stroke%3D%22rgba(0%2C0%2C0%2C.35)%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M6.5%2019%20L25.5%2018%22%20stroke%3D%22%23f0c862%22%20stroke-width%3D%221.4%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M27%201.0999999999999996%20L27%208.9%20M23.1%205%20L30.9%205%22%20stroke%3D%22%23fff6cf%22%20stroke-width%3D%221.4%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Mythic Scrap": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22p%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ffb4a8%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%23de4636%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237a1810%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M5%209%20L13%205%20L17%208%20L25%206%20L28%2014%20L25%2019%20L27%2026%20L17%2028%20L14%2025%20L6%2026%20L4%2018%20Z%22%20fill%3D%22url(%23p)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2211%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2223%22%20cy%3D%2210%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2222%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2222.5%22%20cy%3D%2223%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Cpath%20d%3D%22M10%207.5%20L15%209.5%22%20stroke%3D%22rgba(255%2C255%2C255%2C.55)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M8%2016%20L24%2015%22%20stroke%3D%22rgba(0%2C0%2C0%2C.35)%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M6.5%2019%20L25.5%2018%22%20stroke%3D%22%23f0c862%22%20stroke-width%3D%221.4%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M27%201.0999999999999996%20L27%208.9%20M23.1%205%20L30.9%205%22%20stroke%3D%22%23fff6cf%22%20stroke-width%3D%221.4%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M4.5%203.8499999999999996%20L4.5%2010.15%20M1.3499999999999996%207%20L7.65%207%22%20stroke%3D%22%23fff6cf%22%20stroke-width%3D%221.4%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Overlord's Sigil": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22tealA%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%237ff0d6%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23138a73%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M16%203%20L19%205.5%20L23%204.5%20L24%208.5%20L28%2010%20L26.5%2014%20L29%2017%20L26%2020%20L27%2024%20L23%2024.5%20L21%2028%20L17%2026.5%20L13.5%2029%20L11%2025.5%20L7%2025.5%20L7%2021.5%20L3.5%2019%20L6%2015.5%20L4%2011.5%20L8%2010%20L8.5%206%20L12.5%206%20Z%22%20fill%3D%22url(%23tealA)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216.5%22%20r%3D%227%22%20fill%3D%22none%22%20stroke%3D%22%230b4f43%22%20stroke-width%3D%221.6%22%2F%3E%3Cpath%20d%3D%22M12%2019%20L12.5%2014%20L14.5%2016%20L16%2012.5%20L17.5%2016%20L19.5%2014%20L20%2019%20Z%22%20fill%3D%22%23f0c862%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.2%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M9%209.5%20L12%208%22%20stroke%3D%22rgba(255%2C255%2C255%2C.55)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Eridium Shard": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22eriGlow%22%20cx%3D%22.5%22%20cy%3D%22.5%22%20r%3D%22.5%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23e9b6ff%22%20stop-opacity%3D%22.9%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23b05cf0%22%20stop-opacity%3D%220%22%2F%3E%3C%2FradialGradient%3E%3ClinearGradient%20id%3D%22eri%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23f0c4ff%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%23b05cf0%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%235a1d8c%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2214%22%20fill%3D%22url(%23eriGlow)%22%2F%3E%3Cpath%20d%3D%22M16%203%20L22%2016%20L16%2029%20L10%2016%20Z%22%20fill%3D%22url(%23eri)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M10%2016%20L22%2016%20M16%203%20L16%2029%22%20stroke%3D%22%233d1260%22%20stroke-width%3D%221.2%22%2F%3E%3Cpath%20d%3D%22M14%208%20L12.5%2014%22%20stroke%3D%22rgba(255%2C255%2C255%2C.85)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M5%209%20L5%2013%20M3%2011%20L7%2011%20M26%2020%20L26%2024%20M24%2022%20L28%2022%22%20stroke%3D%22%23f3d2ff%22%20stroke-width%3D%221.3%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Astral Essence": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22ast%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%239fe8ff%22%2F%3E%3Cstop%20offset%3D%22.55%22%20stop-color%3D%22%236d6af0%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%233b1e9c%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M20%203%20C12%204%206%2010%206%2017%20C6%2024%2012%2029%2019%2029%20C22%2029%2025%2028%2027%2026%20C19%2026%2013%2021%2013%2015%20C13%209%2016%205%2020%203%20Z%22%20fill%3D%22url(%23ast)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M22%209%20L23%2012%20L26%2013%20L23%2014%20L22%2017%20L21%2014%20L18%2013%20L21%2012%20Z%22%20fill%3D%22%23fff%22%20stroke%3D%22%23000%22%20stroke-width%3D%221%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2226%22%20cy%3D%2220%22%20r%3D%221%22%20fill%3D%22%23dff%22%2F%3E%3Cpath%20d%3D%22M10%2012%20L8.5%2017%22%20stroke%3D%22rgba(255%2C255%2C255%2C.7)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Starshard": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22starA%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23fff6c8%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23e3a21a%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M16%202%20L19.5%2012.5%20L30%2016%20L19.5%2019.5%20L16%2030%20L12.5%2019.5%20L2%2016%20L12.5%2012.5%20Z%22%20fill%3D%22url(%23starA)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M16%206%20L16%2026%20M6%2016%20L26%2016%22%20stroke%3D%22rgba(255%2C255%2C255%2C.55)%22%20stroke-width%3D%221.1%22%2F%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%222.4%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E" };
+var SALVAGE_MATERIAL_ART = { "Monster Soul": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g_ms_999%22%20x1%3D%220%25%22%20y1%3D%22100%25%22%20x2%3D%220%25%22%20y2%3D%220%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%232d3436%22%20%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23636e72%22%20%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M16%203%20C16%203%2C%206%2015%2C%206%2022%20C6%2027%2C%2010.5%2030%2C%2016%2030%20C21.5%2030%2C%2026%2027%2C%2026%2022%20C26%2015%2C%2016%203%2C%2016%203%20Z%22%20fill%3D%22url(%23g_ms_999)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M11%2019%20L14%2017%22%20stroke%3D%22%23e74c3c%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M21%2019%20L18%2017%22%20stroke%3D%22%23e74c3c%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%2F%3E%0A%20%20%20%20%20%20%3C%2Fsvg%3E", "Common Scrap": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22p%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23f4f5f6%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%23b4bac2%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23585e66%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M5%209%20L13%205%20L17%208%20L25%206%20L28%2014%20L25%2019%20L27%2026%20L17%2028%20L14%2025%20L6%2026%20L4%2018%20Z%22%20fill%3D%22url(%23p)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2211%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2223%22%20cy%3D%2210%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2222%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2222.5%22%20cy%3D%2223%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Cpath%20d%3D%22M10%207.5%20L15%209.5%22%20stroke%3D%22rgba(255%2C255%2C255%2C.55)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Uncommon Scrap": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22p%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23a8f0bf%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%2334b866%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23145c31%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M5%209%20L13%205%20L17%208%20L25%206%20L28%2014%20L25%2019%20L27%2026%20L17%2028%20L14%2025%20L6%2026%20L4%2018%20Z%22%20fill%3D%22url(%23p)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2211%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2223%22%20cy%3D%2210%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2222%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2222.5%22%20cy%3D%2223%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Cpath%20d%3D%22M10%207.5%20L15%209.5%22%20stroke%3D%22rgba(255%2C255%2C255%2C.55)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Rare Scrap": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22p%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23b3dcff%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%233a8fd6%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23173f73%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M5%209%20L13%205%20L17%208%20L25%206%20L28%2014%20L25%2019%20L27%2026%20L17%2028%20L14%2025%20L6%2026%20L4%2018%20Z%22%20fill%3D%22url(%23p)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2211%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2223%22%20cy%3D%2210%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2222%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2222.5%22%20cy%3D%2223%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Cpath%20d%3D%22M10%207.5%20L15%209.5%22%20stroke%3D%22rgba(255%2C255%2C255%2C.55)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M8%2016%20L24%2015%22%20stroke%3D%22rgba(0%2C0%2C0%2C.35)%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Epic Scrap": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22p%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23e2bdfa%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%239757c2%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%234a1f63%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M5%209%20L13%205%20L17%208%20L25%206%20L28%2014%20L25%2019%20L27%2026%20L17%2028%20L14%2025%20L6%2026%20L4%2018%20Z%22%20fill%3D%22url(%23p)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2211%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2223%22%20cy%3D%2210%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2222%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2222.5%22%20cy%3D%2223%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Cpath%20d%3D%22M10%207.5%20L15%209.5%22%20stroke%3D%22rgba(255%2C255%2C255%2C.55)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M8%2016%20L24%2015%22%20stroke%3D%22rgba(0%2C0%2C0%2C.35)%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M6.5%2019%20L25.5%2018%22%20stroke%3D%22%23f0c862%22%20stroke-width%3D%221.4%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Legendary Scrap": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22p%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ffd8a0%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%23e07b22%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237d3a08%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M5%209%20L13%205%20L17%208%20L25%206%20L28%2014%20L25%2019%20L27%2026%20L17%2028%20L14%2025%20L6%2026%20L4%2018%20Z%22%20fill%3D%22url(%23p)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2211%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2223%22%20cy%3D%2210%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2222%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2222.5%22%20cy%3D%2223%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Cpath%20d%3D%22M10%207.5%20L15%209.5%22%20stroke%3D%22rgba(255%2C255%2C255%2C.55)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M8%2016%20L24%2015%22%20stroke%3D%22rgba(0%2C0%2C0%2C.35)%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M6.5%2019%20L25.5%2018%22%20stroke%3D%22%23f0c862%22%20stroke-width%3D%221.4%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M27%201.0999999999999996%20L27%208.9%20M23.1%205%20L30.9%205%22%20stroke%3D%22%23fff6cf%22%20stroke-width%3D%221.4%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Mythic Scrap": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22p%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ffb4a8%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%23de4636%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237a1810%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M5%209%20L13%205%20L17%208%20L25%206%20L28%2014%20L25%2019%20L27%2026%20L17%2028%20L14%2025%20L6%2026%20L4%2018%20Z%22%20fill%3D%22url(%23p)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2211%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2223%22%20cy%3D%2210%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2222%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Ccircle%20cx%3D%2222.5%22%20cy%3D%2223%22%20r%3D%221.4%22%20fill%3D%22%23000%22%20opacity%3D%22.55%22%2F%3E%3Cpath%20d%3D%22M10%207.5%20L15%209.5%22%20stroke%3D%22rgba(255%2C255%2C255%2C.55)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M8%2016%20L24%2015%22%20stroke%3D%22rgba(0%2C0%2C0%2C.35)%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M6.5%2019%20L25.5%2018%22%20stroke%3D%22%23f0c862%22%20stroke-width%3D%221.4%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M27%201.0999999999999996%20L27%208.9%20M23.1%205%20L30.9%205%22%20stroke%3D%22%23fff6cf%22%20stroke-width%3D%221.4%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M4.5%203.8499999999999996%20L4.5%2010.15%20M1.3499999999999996%207%20L7.65%207%22%20stroke%3D%22%23fff6cf%22%20stroke-width%3D%221.4%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Overlord's Sigil": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22tealA%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%237ff0d6%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23138a73%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M16%203%20L19%205.5%20L23%204.5%20L24%208.5%20L28%2010%20L26.5%2014%20L29%2017%20L26%2020%20L27%2024%20L23%2024.5%20L21%2028%20L17%2026.5%20L13.5%2029%20L11%2025.5%20L7%2025.5%20L7%2021.5%20L3.5%2019%20L6%2015.5%20L4%2011.5%20L8%2010%20L8.5%206%20L12.5%206%20Z%22%20fill%3D%22url(%23tealA)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216.5%22%20r%3D%227%22%20fill%3D%22none%22%20stroke%3D%22%230b4f43%22%20stroke-width%3D%221.6%22%2F%3E%3Cpath%20d%3D%22M12%2019%20L12.5%2014%20L14.5%2016%20L16%2012.5%20L17.5%2016%20L19.5%2014%20L20%2019%20Z%22%20fill%3D%22%23f0c862%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.2%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M9%209.5%20L12%208%22%20stroke%3D%22rgba(255%2C255%2C255%2C.55)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Wakestone": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22eriGlow%22%20cx%3D%22.5%22%20cy%3D%22.5%22%20r%3D%22.5%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23e9b6ff%22%20stop-opacity%3D%22.9%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23b05cf0%22%20stop-opacity%3D%220%22%2F%3E%3C%2FradialGradient%3E%3ClinearGradient%20id%3D%22eri%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23f0c4ff%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%23b05cf0%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%235a1d8c%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2214%22%20fill%3D%22url(%23eriGlow)%22%2F%3E%3Cpath%20d%3D%22M16%203%20L22%2016%20L16%2029%20L10%2016%20Z%22%20fill%3D%22url(%23eri)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M10%2016%20L22%2016%20M16%203%20L16%2029%22%20stroke%3D%22%233d1260%22%20stroke-width%3D%221.2%22%2F%3E%3Cpath%20d%3D%22M14%208%20L12.5%2014%22%20stroke%3D%22rgba(255%2C255%2C255%2C.85)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M5%209%20L5%2013%20M3%2011%20L7%2011%20M26%2020%20L26%2024%20M24%2022%20L28%2022%22%20stroke%3D%22%23f3d2ff%22%20stroke-width%3D%221.3%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Astral Essence": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22ast%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%239fe8ff%22%2F%3E%3Cstop%20offset%3D%22.55%22%20stop-color%3D%22%236d6af0%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%233b1e9c%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M20%203%20C12%204%206%2010%206%2017%20C6%2024%2012%2029%2019%2029%20C22%2029%2025%2028%2027%2026%20C19%2026%2013%2021%2013%2015%20C13%209%2016%205%2020%203%20Z%22%20fill%3D%22url(%23ast)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M22%209%20L23%2012%20L26%2013%20L23%2014%20L22%2017%20L21%2014%20L18%2013%20L21%2012%20Z%22%20fill%3D%22%23fff%22%20stroke%3D%22%23000%22%20stroke-width%3D%221%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2226%22%20cy%3D%2220%22%20r%3D%221%22%20fill%3D%22%23dff%22%2F%3E%3Cpath%20d%3D%22M10%2012%20L8.5%2017%22%20stroke%3D%22rgba(255%2C255%2C255%2C.7)%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E", "Starshard": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22starA%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23fff6c8%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23e3a21a%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M16%202%20L19.5%2012.5%20L30%2016%20L19.5%2019.5%20L16%2030%20L12.5%2019.5%20L2%2016%20L12.5%2012.5%20Z%22%20fill%3D%22url(%23starA)%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M16%206%20L16%2026%20M6%2016%20L26%2016%22%20stroke%3D%22rgba(255%2C255%2C255%2C.55)%22%20stroke-width%3D%221.1%22%2F%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%222.4%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E" };
 
 // src/client/item_icon_art_v1.js
 var { P: P6, M: M2, ACC: ACC2 } = HERO_COLORS;
@@ -64799,7 +64799,7 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
       materials2.append(el("p", "Souls", "mt-sec"), row2("Monster Soul", "Feeds slot upgrades and resonance", ["Elites", "Named", "Mini-bosses", "Bosses"], "mt-row mt-hero"), el("p", "Scraps", "mt-sec"));
       const steps2 = ["1\u201320", "21\u201340", "41\u201360", "61\u201380", "81\u2013100", "91\u2013100"];
       ["Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic"].forEach((t, i) => materials2.append(row2(t + " Scrap", (i < 5 ? "Awakens " + t + " gear \xB7 " : "") + "Upgrades " + steps2[i], ["Salvage " + t])));
-      materials2.append(el("p", "Rare materials", "mt-sec"), row2("Overlord's Sigil", "Rerolls a line when you reforge", ["Elites", "Bosses", "Town Smith"]), row2("Eridium Shard", "Awakens gear \xB7 Upgrades 41\u201360", ["Elites", "Bosses", "Town Smith"]), row2("Astral Essence", "Powers an enchant \xB7 Upgrades 61\u201380", ["Elites", "Bosses", "Town Smith"]), row2("Starshard", "Upgrades 81\u2013100", ["World Tiers \xB7 coming later"]));
+      materials2.append(el("p", "Rare materials", "mt-sec"), row2("Overlord's Sigil", "Rerolls a line when you reforge", ["Elites", "Bosses", "Town Smith"]), row2("Wakestone", "Awakens gear \xB7 Upgrades 41\u201360", ["Elites", "Bosses", "Town Smith"]), row2("Astral Essence", "Powers an enchant \xB7 Upgrades 61\u201380", ["Elites", "Bosses", "Town Smith"]), row2("Starshard", "Upgrades 81\u2013100", ["World Tiers \xB7 coming later"]));
       materials2.append(el("p", "A Smith breaks one Scrap into three of the rarity below.", "mt-note"));
       if (review) materials2.append(el("p", "FUNDED FORGE REVIEW \u2014 separate test campaign", "forge-review-label"));
       return;
@@ -65273,15 +65273,15 @@ function createInventoryPresentation({ document: document2, environment, readMod
         toastV1(document2, { kind: "soul", title: "Monster Soul", sub: `+${gained} \xB7 ${inv.economy?.materials["Monster Soul"] ?? 0} carried`, key: "soul" });
         toastUntil = time + 1600;
       }
-      if (Object.keys(inv.rewardsByEntityId ?? {}).length > (observed.rewards ?? 0)) for (const k of ["Overlord's Sigil", "Eridium Shard", "Astral Essence"]) {
+      if (Object.keys(inv.rewardsByEntityId ?? {}).length > (observed.rewards ?? 0)) for (const k of ["Overlord's Sigil", "Wakestone", "Astral Essence"]) {
         const n = (inv.economy?.materials[k] ?? 0) - (observed.drops?.[k] ?? 0);
         if (n > 0) {
-          toastV1(document2, { kind: "loot", title: k, sub: `+${n} \xB7 ${inv.economy.materials[k]} carried`, image: SALVAGE_MATERIAL_ART[k], accent: k === "Eridium Shard" ? "#ff7ad9" : k === "Astral Essence" ? "#8fd0ff" : "#f0c862", key: "mat/" + k, ms: 3200 });
+          toastV1(document2, { kind: "loot", title: k, sub: `+${n} \xB7 ${inv.economy.materials[k]} carried`, image: SALVAGE_MATERIAL_ART[k], accent: k === "Wakestone" ? "#ff7ad9" : k === "Astral Essence" ? "#8fd0ff" : "#f0c862", key: "mat/" + k, ms: 3200 });
           toastUntil = time + 1600;
         }
       }
     }
-    if (observed?.identity !== identity2 || observed.revision !== inv.revision) observed = { identity: identity2, revision: inv.revision, gold: inv.gold, souls: inv.economy?.materials["Monster Soul"] ?? 0, rewards: Object.keys(inv.rewardsByEntityId ?? {}).length, drops: Object.fromEntries(["Overlord's Sigil", "Eridium Shard", "Astral Essence"].map((k) => [k, inv.economy?.materials[k] ?? 0])), ids: new Set(Object.keys(inv.itemsById)) };
+    if (observed?.identity !== identity2 || observed.revision !== inv.revision) observed = { identity: identity2, revision: inv.revision, gold: inv.gold, souls: inv.economy?.materials["Monster Soul"] ?? 0, rewards: Object.keys(inv.rewardsByEntityId ?? {}).length, drops: Object.fromEntries(["Overlord's Sigil", "Wakestone", "Astral Essence"].map((k) => [k, inv.economy?.materials[k] ?? 0])), ids: new Set(Object.keys(inv.itemsById)) };
     document2.getElementById("world-loot-notice").hidden = open2 || !alive(m) || time >= toastUntil;
     progressionView.refresh(m, open2 && section === "progression", open2 && section === "stats");
     progressionButton.setAttribute("aria-pressed", String(section === "progression"));
@@ -66479,7 +66479,7 @@ function createSettlementServicesMenu2(options) {
     inn: '<svg viewBox="0 0 24 24" fill="none" stroke="#9fd0ff" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M3 18V9M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="1.6"/></svg>',
     supplies: FLASK(true)
   };
-  const MATS = { "Monster Soul": "#9a6bff", "Eridium Shard": "#ff6fb5", "Overlord's Sigil": "#ff6b5a", "Astral Essence": "#6fc3ff" };
+  const MATS = { "Monster Soul": "#9a6bff", "Wakestone": "#ff6fb5", "Overlord's Sigil": "#ff6b5a", "Astral Essence": "#6fc3ff" };
   const FILTERS = [["all", "All"], ["weapon", "Weapons"], ["offhand", "Offhand"], ["armor", "Armor"], ["ring", "Rings"]];
   const markup = (e, html) => {
     e.innerHTML = html;
@@ -75379,8 +75379,8 @@ function nexusDepthItems(model2, tick, viewport = null) {
   return items;
 }
 
-// src/client/boss_presentation_hooktail_v1.js
-var ID5 = "hooktail";
+// src/client/boss_presentation_ashfang_v1.js
+var ID5 = "ashfang";
 var TAU90 = Math.PI * 2;
 var INK39 = "#100e17";
 var BLACK = "#19151e";
@@ -75451,7 +75451,7 @@ function glow6(c, x, y, r, color82) {
 function rotate2(x, y, a) {
   return point24(x * Math.cos(a) - y * Math.sin(a), x * Math.sin(a) + y * Math.cos(a));
 }
-function hooktailAttackPose(actor2, tick) {
+function ashfangAttackPose(actor2, tick) {
   const b = actor2.boss ?? {}, alive = actor2.alive !== false, pending = alive ? b.pendingAction : null, last = alive ? b.lastAction : null, age = last ? tick - last.resolvedTick : Infinity, recent = age >= 0 && age < 42 ? last : null, row2 = pending ?? recent, q = pending ? progress4(pending, tick) : 0;
   const facing2 = (pending?.facing ?? recent?.facing ?? b.facing ?? -1) < 0 ? -1 : 1, seed2 = hash21(actor2.entityId ?? ID5) % 193, hover = Math.sin((tick + seed2) / 13) * 1.65;
   const p = { ability: row2?.ability ?? null, p: q, age, facing: facing2, orientation: -facing2, bodyX: 22, bodyY: -14 + hover, neckX: 0, neckY: 0, headAngle: 0.025 * Math.sin(tick / 23), jaw: 0.07 + 0.025 * Math.sin(tick / 17), heat: 0, pulse: 0, wing: 0.1 * Math.sin(tick / 12), coil: 0, compression: 0, tailDrive: 0, tailReturn: 0, target: row2?.targetPosition ?? actor2.position };
@@ -75725,9 +75725,9 @@ function torso(c, p, flash) {
   for (const [x, y, r] of [[2, -39, 9], [15, -35, 7], [25, -27, 6]]) polygon21(c, [[x - 4, y + 4], [x, y - r], [x + 4, y + 2]], flash ? "#fff" : BLACK, true, 1.1);
   c.restore();
 }
-function drawHooktail(c, actor2, tick, flash = false) {
+function drawAshfang(c, actor2, tick, flash = false) {
   if (actor2.boss?.bossDefinitionId !== ID5) return false;
-  const p = hooktailAttackPose(actor2, tick), death = actor2.alive === false ? ease12((actor2.deathAge ?? 0) / 42) : 0;
+  const p = ashfangAttackPose(actor2, tick), death = actor2.alive === false ? ease12((actor2.deathAge ?? 0) / 42) : 0;
   c.save();
   c.translate(actor2.position.x, actor2.position.y);
   c.lineCap = "round";
@@ -75910,17 +75910,17 @@ function slamGround3(c, row2, tick) {
   if (age < 22) circle5(c, p.x, p.y, r * (0.12 + 0.88 * u), "#c67e5a", 1.3 * (1 - ease12(age / 22)) + 0.1);
   c.restore();
 }
-function drawHooktailGround(c, model2, tick) {
+function drawAshfangGround(c, model2, tick) {
   const h = model2.bossHazards ?? {};
   c.save();
-  for (const row2 of h.hooktailCollapsedRings ?? []) collapsedRing(c, row2, tick);
-  for (const row2 of h.hooktailTelegraphs ?? []) {
+  for (const row2 of h.ashfangCollapsedRings ?? []) collapsedRing(c, row2, tick);
+  for (const row2 of h.ashfangTelegraphs ?? []) {
     if (tick < row2.startedTick || tick > row2.resolvesTick) continue;
     if (row2.ability === "slam") slamWarning(c, row2, tick);
     else if (row2.ability === "scarlet_fire") fireWarning(c, row2, tick);
     else if (row2.ability === "calamity_slam") ringWarning(c, row2, tick);
   }
-  for (const row2 of h.hooktailImpacts ?? []) if (row2.ability === "slam") slamGround3(c, row2, tick);
+  for (const row2 of h.ashfangImpacts ?? []) if (row2.ability === "slam") slamGround3(c, row2, tick);
   for (const actor2 of Object.values(model2.entitiesById ?? {})) {
     if (actor2.boss?.bossDefinitionId !== ID5) continue;
     const age = tick - (actor2.boss.phaseStartedTick ?? -1e3);
@@ -75936,7 +75936,7 @@ function drawHooktailGround(c, model2, tick) {
 function fireBurst(c, row2, tick, model2) {
   const age = tick - row2.resolvedTick;
   if (age < 0 || age >= 30) return;
-  const actor2 = model2.entitiesById?.[row2.sourceEntityId], caster2 = actor2 ? { ...actor2, alive: true, position: row2.originPosition, boss: { ...actor2.boss, pendingAction: null, lastAction: row2 } } : { position: row2.originPosition, boss: { lastAction: row2, facing: row2.facing } }, pose = hooktailAttackPose(caster2, row2.resolvedTick), from = mouth2(caster2, pose), sign3 = row2.facing < 0 ? -1 : 1, range2 = row2.range ?? 110, half = row2.halfAngle ?? 0.8, outer = point24(row2.originPosition.x + sign3 * range2, row2.originPosition.y - 13), width = range2 * Math.sin(half), fade = 1 - ease12((age - 6) / 24), burn = 1 - ease12(age / 15);
+  const actor2 = model2.entitiesById?.[row2.sourceEntityId], caster2 = actor2 ? { ...actor2, alive: true, position: row2.originPosition, boss: { ...actor2.boss, pendingAction: null, lastAction: row2 } } : { position: row2.originPosition, boss: { lastAction: row2, facing: row2.facing } }, pose = ashfangAttackPose(caster2, row2.resolvedTick), from = mouth2(caster2, pose), sign3 = row2.facing < 0 ? -1 : 1, range2 = row2.range ?? 110, half = row2.halfAngle ?? 0.8, outer = point24(row2.originPosition.x + sign3 * range2, row2.originPosition.y - 13), width = range2 * Math.sin(half), fade = 1 - ease12((age - 6) / 24), burn = 1 - ease12(age / 15);
   c.save();
   c.translate(from.x, from.y);
   c.scale(sign3, 1);
@@ -75990,12 +75990,12 @@ function impactDebris(c, row2, tick) {
   }
   c.restore();
 }
-function hooktailDepthItems(model2, tick, viewport = null) {
+function ashfangDepthItems(model2, tick, viewport = null) {
   const h = model2.bossHazards ?? {}, items = [], visible3 = (p, r) => !viewport || p.x + r >= (viewport.x ?? viewport.left ?? -Infinity) && p.x - r <= (viewport.right ?? (viewport.x ?? 0) + (viewport.width ?? Infinity)) && p.y + r >= (viewport.y ?? viewport.top ?? -Infinity) && p.y - r <= (viewport.bottom ?? (viewport.y ?? 0) + (viewport.height ?? Infinity));
   const add = (id, p, r, draw) => {
-    if (visible3(p, r)) items.push(Object.freeze({ id: "hooktail-vfx/" + id, anchorX: p.x, anchorY: p.y + 1, draw }));
+    if (visible3(p, r)) items.push(Object.freeze({ id: "ashfang-vfx/" + id, anchorX: p.x, anchorY: p.y + 1, draw }));
   };
-  for (const row2 of h.hooktailImpacts ?? []) {
+  for (const row2 of h.ashfangImpacts ?? []) {
     const age = tick - row2.resolvedTick;
     if (age < 0 || age >= 42) continue;
     const id = row2.id ?? row2.bossId + "/" + row2.sequence;
@@ -76554,14 +76554,14 @@ function cinderhartDepthItems(model2, tick, viewport = null) {
 }
 
 // src/client/boss_archive_world_extended_v1.js
-var kinds = ["chronos_arbitrator", "nexus_overseer", "hooktail", "cinderhart"];
+var kinds = ["chronos_arbitrator", "nexus_overseer", "ashfang", "cinderhart"];
 var hasExtendedBossPainter = (id) => kinds.includes(id);
 var point10 = (p) => ({ x: p.x, y: p.y });
 var ids3 = (a) => a?.bossSummon?.kind;
 var isExtendedSummon = (a) => ["bunny", "hologram"].includes(ids3(a));
 var renamed = (kind, ability) => {
   if (kind === "chronos_arbitrator") return { chronos_slam: "slam", time_field: "dilation_field", chronos_rewind: "rewind" }[ability] ?? ability;
-  if (kind === "hooktail") return { hooked_tail: "slam", arena_collapse: "calamity_slam" }[ability] ?? ability;
+  if (kind === "ashfang") return { hooked_tail: "slam", arena_collapse: "calamity_slam" }[ability] ?? ability;
   if (kind === "cinderhart") return { fire_charge: "cinder_rush" }[ability] ?? ability;
   if (kind === "nexus_overseer") return { prism_slam: "strike" }[ability] ?? ability;
   return ability;
@@ -76681,7 +76681,7 @@ function drawExtendedBossActor(c, actor, tick, flash = false) {
   const a = originalActor(actor, tick), kind = actor.boss?.bossDefinitionId;
   if (kind === "chronos_arbitrator") return drawChronosArbitrator(c, a, tick, flash);
   if (kind === "nexus_overseer") return drawNexusOverseer(c, a, tick, flash);
-  if (kind === "hooktail") return drawHooktail(c, a, tick, flash);
+  if (kind === "ashfang") return drawAshfang(c, a, tick, flash);
   if (kind === "cinderhart") return drawCinderhart(c, a, tick, flash);
   return false;
 }
@@ -76761,9 +76761,9 @@ function projected(model, tick) {
     nexusBarriers: barriers,
     nexusProjectiles: h.recoveredNexusShots ?? [],
     nexusGlitches: glitches,
-    hooktailTelegraphs: casts.filter((q) => q.bossDefinitionId === "hooktail"),
-    hooktailImpacts: impacts2.filter((q) => q.bossDefinitionId === "hooktail"),
-    hooktailCollapsedRings: (h.recoveredCollapsedRings ?? []).map((r) => ({ id: r.bossId + ":collapse:" + r.index, bossId: r.bossId, createdTick: r.createdTick, ring: { index: r.index, minColumn: r.minColumn, maxColumn: r.maxColumn, minRow: r.minRow, maxRow: r.maxRow, tileSize: r.tileSize, tiles: r.tiles } })),
+    ashfangTelegraphs: casts.filter((q) => q.bossDefinitionId === "ashfang"),
+    ashfangImpacts: impacts2.filter((q) => q.bossDefinitionId === "ashfang"),
+    ashfangCollapsedRings: (h.recoveredCollapsedRings ?? []).map((r) => ({ id: r.bossId + ":collapse:" + r.index, bossId: r.bossId, createdTick: r.createdTick, ring: { index: r.index, minColumn: r.minColumn, maxColumn: r.maxColumn, minRow: r.minRow, maxRow: r.maxRow, tileSize: r.tileSize, tiles: r.tiles } })),
     cinderhartFires: fires,
     cinderhartLandings: [],
     cinderhartTelegraphs: casts.filter((q) => q.bossDefinitionId === "cinderhart"),
@@ -76777,15 +76777,15 @@ function drawExtendedBossGround(c, model, tick) {
   if (!a) return;
   drawChronosGround(c, a, tick);
   drawNexusGround(c, a, tick);
-  drawHooktailGround(c, a, tick);
+  drawAshfangGround(c, a, tick);
   drawCinderhartGround(c, a, tick);
 }
 function extendedBossDepthItems(model, tick, viewport) {
   const a = projected(model, tick);
   if (!a) return [];
-  return [...chronosDepthItems(a, tick, viewport), ...nexusDepthItems(a, tick, viewport), ...hooktailDepthItems(a, tick, viewport), ...cinderhartDepthItems(a, tick, viewport)];
+  return [...chronosDepthItems(a, tick, viewport), ...nexusDepthItems(a, tick, viewport), ...ashfangDepthItems(a, tick, viewport), ...cinderhartDepthItems(a, tick, viewport)];
 }
-var GLOW3 = { chronos: "#e2ac43", chronosPale: "#ffe8ad", nexus: "#f12c94", nexusHot: "#ff8bc9", hooktail: "#ff6031", cinderhart: "#f27632" };
+var GLOW3 = { chronos: "#e2ac43", chronosPale: "#ffe8ad", nexus: "#f12c94", nexusHot: "#ff8bc9", ashfang: "#ff6031", cinderhart: "#f27632" };
 function extendedBossEffectLights(model, tick) {
   const a = projected(model, tick);
   if (!a) return [];
@@ -76811,10 +76811,10 @@ function extendedBossEffectLights(model, tick) {
     if (active2 || age >= 0 && age < 30) at5(body5(row2), 40, 64, GLOW3.nexus, 0.4 * (active2 ? 1 : 1 - age / 30));
   }
   for (const row2 of h.nexusProjectiles ?? []) if (tick >= row2.createdTick && tick <= row2.expiresTick) at5(row2.position, 6, 34, GLOW3.nexusHot, 0.55);
-  for (const row2 of h.hooktailImpacts ?? []) {
+  for (const row2 of h.ashfangImpacts ?? []) {
     if (row2.ability !== "scarlet_fire" || !row2.originPosition) continue;
     const k = lightEnvelope(tick - row2.resolvedTick, 30), sign3 = row2.facing < 0 ? -1 : 1, range2 = row2.range ?? 110;
-    for (const t of [0.3, 0.65, 1]) at5({ x: row2.originPosition.x + sign3 * range2 * t, y: row2.originPosition.y }, 13, 40 + t * 14, GLOW3.hooktail, 0.6 * k);
+    for (const t of [0.3, 0.65, 1]) at5({ x: row2.originPosition.x + sign3 * range2 * t, y: row2.originPosition.y }, 13, 40 + t * 14, GLOW3.ashfang, 0.6 * k);
   }
   for (const row2 of h.cinderhartFires ?? []) {
     const age = tick - row2.createdTick, left = row2.expiresTick - tick;
@@ -79164,7 +79164,7 @@ function drawCinderhart2(c, a, t) {
     circle7(c, x, y, 1.5 + i % 3, i % 2 ? "#f0a53d" : "#ed5133");
   }
 }
-function drawHooktail2(c, a, t) {
+function drawAshfang2(c, a, t) {
   const q = Math.sin(t * 0.045), w = Math.sin(t * 0.07) * 12;
   poly9(c, [[-28, -4], [-57, -41 - w], [-47, -5], [-39, 2], [-20, 5]], "#752e39", "#260f1a", 2);
   poly9(c, [[12, -7], [59, -42 + w], [38, 12], [24, 11]], "#a13b3d", "#381a29", 2);
@@ -79301,7 +79301,7 @@ function drawRecoveredBossV1(c, a, t, flash = false) {
   c.translate(0, Math.sin(t * 0.04) * 2);
   const id = spec.id;
   if (id === "cinderhart") drawCinderhart2(c, a, t);
-  if (id === "hooktail") drawHooktail2(c, a, t);
+  if (id === "ashfang") drawAshfang2(c, a, t);
   if (id === "marcus") drawMarcus(c, a, t);
   if (id === "gilded_vault_keeper") drawGilded(c, a, t);
   if (id === "nexus_overseer") drawNexus(c, a, t);
@@ -79371,7 +79371,7 @@ function drawRecoveredBossGroundV1(c, model, t) {
   drawTreasuryBossGroundV2(c, model, t);
   drawBiomeBossGroundV1(c, model, t);
   for (const p of h.recoveredPools ?? []) {
-    if (hasBiomeBossPainter(p.bossDefinitionId) || hasTreasuryBossPainter(p.bossDefinitionId) || hasArchivedBossPainter(p.bossDefinitionId) && !(p.bossDefinitionId === "hooktail" && p.kind === "collapse")) continue;
+    if (hasBiomeBossPainter(p.bossDefinitionId) || hasTreasuryBossPainter(p.bossDefinitionId) || hasArchivedBossPainter(p.bossDefinitionId) && !(p.bossDefinitionId === "ashfang" && p.kind === "collapse")) continue;
     const life = Math.min(1, (p.expiresTick - t) / 40, (t - p.createdTick) / 15);
     if (life <= 0) continue;
     const col2 = color27(p.kind);
@@ -79400,7 +79400,7 @@ function drawRecoveredBossGroundV1(c, model, t) {
   }
   for (const q of h.recoveredTelegraphs ?? []) {
     const spec = recoveredBossForId(q.bossDefinitionId);
-    if (!spec || q.ability === "eye_lance" || hasBiomeBossPainter(q.bossDefinitionId) || hasTreasuryBossPainter(q.bossDefinitionId) || hasArchivedBossPainter(q.bossDefinitionId) && !(q.bossDefinitionId === "hooktail" && q.ability === "arena_collapse") && !(q.bossDefinitionId === "nexus_overseer" && q.ability === "prism_slam")) continue;
+    if (!spec || q.ability === "eye_lance" || hasBiomeBossPainter(q.bossDefinitionId) || hasTreasuryBossPainter(q.bossDefinitionId) || hasArchivedBossPainter(q.bossDefinitionId) && !(q.bossDefinitionId === "ashfang" && q.ability === "arena_collapse") && !(q.bossDefinitionId === "nexus_overseer" && q.ability === "prism_slam")) continue;
     const span2 = Math.max(1, q.resolvesTick - q.startedTick), progress8 = ease16((t - q.startedTick) / span2);
     c.save();
     c.translate(q.position.x, q.position.y);

@@ -225,7 +225,7 @@ var RESHAPE_TIERS = Object.freeze({ "repeatable-slot:ruin:wetland:standard:067":
 var RESHAPE_VERSION = "world-reshape-v2";
 var RESHAPE_HASH = "ac15d856c2dbbe38203480172b32aae7d19ccdd61cef10eee16aade24a0900d2";
 var RESHAPE_HYDROLOGY_HASH = "e12fd26221c55e0357b674d4beaf28cc522ef5f9dde420b073373f0ef7be1b65";
-var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-scraps2";
+var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-wakestone";
 var hasWorldReshape = (b) => b?.reshapeVersion === RESHAPE_VERSION && b?.reshapeHash === RESHAPE_HASH;
 var reshapedSite = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_SITES, id) ? RESHAPE_SITES[id] : null;
 var reshapedTier = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_TIERS, id) ? RESHAPE_TIERS[id] : null;
@@ -273,12 +273,12 @@ var hasFerries = (b) => b?.ferryVersion === FERRY_VERSION && b?.ferryHash === FE
 
 // src/shared/content/world_roles_v1.js
 var WORLD_ROLES_VERSION = "world-roles-v1";
-var WORLD_BOSS_ROLES = Object.freeze(["corrosive_abomination", "void_overseer", "chronos_arbitrator", "nexus_overseer", "gilded_vault_keeper", "marcus", "hooktail", "cinderhart", "barrow_king", "sun_pharaoh", "aegis_goliath", "brimstone_colossus"]);
+var WORLD_BOSS_ROLES = Object.freeze(["corrosive_abomination", "void_overseer", "chronos_arbitrator", "nexus_overseer", "gilded_vault_keeper", "marcus", "ashfang", "cinderhart", "barrow_king", "sun_pharaoh", "aegis_goliath", "brimstone_colossus"]);
 var WORLD_STARTER_ROLES = Object.freeze(["starter-cave", "starter-elite-fort", "advanced-ruin"]);
 var WORLD_FACTION_ROLES = Object.freeze(["martial", "stealth", "magic"]);
 var CLASSIC_WORLD_ROLES = freezeWire({
   version: WORLD_ROLES_VERSION,
-  bosses: { corrosive_abomination: "repeatable-slot:ruin:wetland:standard:033", void_overseer: "repeatable-slot:ruin:frostland:deep:01", chronos_arbitrator: "repeatable-slot:ruin:upland:standard:049", nexus_overseer: "repeatable-slot:ruin:tropical:standard:037", gilded_vault_keeper: "repeatable-slot:crypt:upland:standard:01", marcus: "repeatable-slot:fort:grassland:standard:040", hooktail: "repeatable-slot:ruin:desert:standard:056", cinderhart: "repeatable-slot:ruin:woodland:standard:054", barrow_king: "repeatable-slot:ruin:wetland:standard:067", sun_pharaoh: "repeatable-slot:crypt:frostland:deep:01", aegis_goliath: "repeatable-slot:fort:upland:deep:01", brimstone_colossus: "repeatable-slot:ruin:volcanic:large:01" },
+  bosses: { corrosive_abomination: "repeatable-slot:ruin:wetland:standard:033", void_overseer: "repeatable-slot:ruin:frostland:deep:01", chronos_arbitrator: "repeatable-slot:ruin:upland:standard:049", nexus_overseer: "repeatable-slot:ruin:tropical:standard:037", gilded_vault_keeper: "repeatable-slot:crypt:upland:standard:01", marcus: "repeatable-slot:fort:grassland:standard:040", ashfang: "repeatable-slot:ruin:desert:standard:056", cinderhart: "repeatable-slot:ruin:woodland:standard:054", barrow_king: "repeatable-slot:ruin:wetland:standard:067", sun_pharaoh: "repeatable-slot:crypt:frostland:deep:01", aegis_goliath: "repeatable-slot:fort:upland:deep:01", brimstone_colossus: "repeatable-slot:ruin:volcanic:large:01" },
   starterSites: { "starter-cave": "repeatable-slot:cave:woodland:small:089", "starter-elite-fort": "repeatable-slot:fort:woodland:standard:01", "advanced-ruin": "repeatable-slot:ruin:woodland:standard:054" },
   firstCave: "repeatable-slot:cave:woodland:small:109",
   eliteSites: null,
@@ -402,8 +402,8 @@ var RECOVERED_BOSSES = Object.freeze({
     adds: 0,
     attacks: Object.freeze({ coin_barrage: 65, gold_rush: 55, gilded_lasso: 55, inversion: 80, molten_shield: 240 })
   }),
-  hooktail: Object.freeze({
-    id: "hooktail",
+  ashfang: Object.freeze({
+    id: "ashfang",
     label: "ASHFANG",
     site: "repeatable-slot:ruin:desert:standard:056",
     family: "ruin",
@@ -806,7 +806,7 @@ function proveBossArenaV1(recipe, kind2, position, { supportPositions = [], live
   }
   if (kind2 === "cinderhart") requireContract(Math.min(...Object.values(arms)) >= 220, "BOSS_HOST:CHARGE_LANES_TOO_SHORT");
   if (kind2 === "void_overseer") requireContract(Math.max(arms.east + 34, arms.west + 34) >= 260 && Math.max(arms.north + 34, arms.south + 34) >= 260, "BOSS_HOST:BEAM_AXES_TOO_SHORT");
-  if (kind2 === "hooktail") {
+  if (kind2 === "ashfang") {
     for (let y = -7; y <= 7; y++) for (let x = -7; x <= 7; x++) if (Math.abs(x) === 7 || Math.abs(y) === 7) requireContract(!collidesWithTiles(recipe.collision, position.x + x * TILE, position.y + y * TILE, 9), "BOSS_HOST:COLLAPSE_RING_LEAVES_CHAMBER");
   }
   return { version: BOSS_HOSTING_VERSION, policyHash: BOSS_HOSTING_HASH, kind: kind2, roomId: room2.roomId, boundsTiles: copyWire(b), stagingPositions: pads, playerHullRadius: 9, bossHullRadius: 34, playerSafeTileCenters: cells3.length, connectedSafeCentersAfterCentral64pxSlam: connected4.size, liveSupportCount, supportHullUpperBound: 20, routes, chargeClearancePx: arms, claims: ["four-distinct-static-staging", "room-contained-player-circulation-with-live-support-bodies", "targeted64px-telegraph-egress", "central64px-slam-connected-safe-space"], limits: ["not-all-possible-hazard-combinations", "not-party-balance-or-network-proof", "native-persistent-hazard-fights-required"] };
@@ -1126,14 +1126,15 @@ var ECONOMY_V1 = freezeWire({
   salePercentOfShop: 10,
   // Slot attunement gold: the first step costs firstGold, each next step growthPercent as much
   // (about 785k at step 50, hundreds of millions in the 80s, about 2.6 billion for step 100).
-  // Material drops v1: elites have elitePercent% to drop one; named elites, mini-bosses, bosses and boss chests always drop counts[source];
-  // each one is a Sigil, Eridium or Astral Essence by the mix weights.
-  materialDrops: { elitePercent: 20, counts: { "site-end-elite": 1, "mini-boss": 2, "lair-boss": 4, "lair-chest": 2 }, mix: [["Overlord's Sigil", 45], ["Eridium Shard", 35], ["Astral Essence", 20]] },
+  // Material drops v2: Sigil, Wakestone and Astral Essence each roll on their own, rolls[source] times, at elite or
+  // chances percent. Named elites, mini-bosses, lair bosses and boss chests never give nothing: if every roll misses,
+  // one material is picked by the chances weights (they sum to 100).
+  materialDrops: { materials: ["Overlord's Sigil", "Wakestone", "Astral Essence"], rolls: { elite: 1, "site-end-elite": 1, "mini-boss": 2, "lair-boss": 4, "lair-chest": 2 }, elite: [9, 7, 4], chances: [45, 35, 20] },
   attunement: {
     firstGold: 200,
     growthPercent: 118,
     // Scraps v2: five bands of 20 steps; each step also takes the band's materials, about 2 at the start of a band up to 10 at its end.
-    bands: [["Common Scrap"], ["Uncommon Scrap"], ["Rare Scrap", "Eridium Shard"], ["Epic Scrap", "Astral Essence"], ["Legendary Scrap", "Starshard"]],
+    bands: [["Common Scrap"], ["Uncommon Scrap"], ["Rare Scrap", "Wakestone"], ["Epic Scrap", "Astral Essence"], ["Legendary Scrap", "Starshard"]],
     bandMaterialRamp: [2, 10],
     mythicFromStep: 91,
     // Souls are set so earning them takes about as long as the gold: step n is expected around hero level 1+3n/5 (50 from step 82),
@@ -1153,7 +1154,7 @@ var ECONOMY_V1 = freezeWire({
   rarityPercent: [50, 75, 100, 150, 200, 300],
   repeatPercent: 150,
   // Bought materials cost their base price per goldUnit of the hero's level.
-  materialBase: { "Eridium Shard": 30, "Overlord's Sigil": 20, "Astral Essence": 60 },
+  materialBase: { "Wakestone": 30, "Overlord's Sigil": 20, "Astral Essence": 60 },
   // A town potion refill costs half a minute of play per potion.
   potionRefillPercentOfMinute: 50
 });
@@ -1196,19 +1197,23 @@ var ATTUNE_SOULS = ATTUNE_GOLD.map((gold, level) => {
   return Math.max(A.minimumSouls, Number((2n * gold * perHour + goldPerHour) / (2n * goldPerHour)));
 });
 var attunementSoulsV1 = (level) => ATTUNE_SOULS[level];
-var DROP_MATERIALS_V1 = Object.freeze(ECONOMY_V1.materialDrops.mix.map(([m]) => m));
+var DROP_MATERIALS_V1 = Object.freeze([...ECONOMY_V1.materialDrops.materials]);
 function rewardMaterialsV1(progression, kind2, draw) {
   const D = ECONOMY_V1.materialDrops, source5 = rewardSourceV1(progression);
-  const n = kind2 === "chest" ? progression?.siteReward === "lair-chest" ? D.counts["lair-chest"] : 0 : kind2 !== "enemy" ? 0 : source5 === "elite" ? draw("chance") % 100 < D.elitePercent ? 1 : 0 : D.counts[source5] ?? 0;
-  const out = {};
-  for (let i = 0; i < n; i++) {
-    let r = draw("pick/" + i) % 100;
-    for (const [m, w] of D.mix) {
-      if (r < w) {
-        out[m] = (out[m] ?? 0) + 1;
+  const key5 = kind2 === "chest" ? progression?.siteReward === "lair-chest" ? "lair-chest" : null : kind2 === "enemy" && source5 !== "ordinary" ? source5 : null;
+  if (!key5 || !D.rolls[key5]) return {};
+  const odds = key5 === "elite" ? D.elite : D.chances, out = {};
+  for (let i = 0; i < D.rolls[key5]; i++) D.materials.forEach((m, j) => {
+    if (draw(m + "/" + i) % 100 < odds[j]) out[m] = (out[m] ?? 0) + 1;
+  });
+  if (key5 !== "elite" && !Object.keys(out).length) {
+    let r = draw("floor") % 100;
+    for (const [j, m] of D.materials.entries()) {
+      if (r < D.chances[j]) {
+        out[m] = 1;
         break;
       }
-      r -= w;
+      r -= D.chances[j];
     }
   }
   return out;
@@ -5955,7 +5960,7 @@ var FORGE_MATERIAL_COSTS = Object.freeze([
 ]);
 
 // src/shared/content/forge.js
-var FORGE_MATERIALS = Object.freeze(["Monster Soul", "Common Scrap", "Uncommon Scrap", "Luminous Soul", "Rare Scrap", "Epic Scrap", "Astral Shards", "Legendary Scrap", "Mythic Scrap", "Eridium Shard", "Overlord's Sigil", "Astral Essence", "Starshard"]);
+var FORGE_MATERIALS = Object.freeze(["Monster Soul", "Common Scrap", "Uncommon Scrap", "Luminous Soul", "Rare Scrap", "Epic Scrap", "Astral Shards", "Legendary Scrap", "Mythic Scrap", "Wakestone", "Overlord's Sigil", "Astral Essence", "Starshard"]);
 var mul = multiplyAmount;
 var pow2 = powerAmount;
 function attunementCost(level, player = null) {
@@ -10569,7 +10574,7 @@ var SERVICES_V2 = "settlement-services-candidate-v2";
 var SERVICES_V2_HASH = "23d063a4274a386f580788ecf149edafa58a646018606c70f22932f13e6280a2";
 var SERVICE_ASSIGNMENTS = freezeWire({ "civilian:alpha:alderwood:smith": ["attune", "shatter"], "civilian:alpha:village:oren": ["attune", "shatter"], "civilian:alpha:town:bren": ["attune", "reforge", "awaken", "shatter", "materials"], "civilian:alpha:town:selene": ["enchant", "purge", "resonance", "shatter", "materials"] });
 var SPECIALIST_NPC = freezeWire({ id: "civilian:alpha:town:selene", name: "Selene", role: "enchanter", roleLabel: "Enchanter", settlementId: "settlement-slot:town:05", buildingId: "town-open:roof:007", band: 3, tile: { x: 5910, y: 5754 }, space: "exterior", color: "#806b9e" });
-var WORKSHOP_POLICY = freezeWire({ version: SERVICES_V2, serviceAssignments: SERVICE_ASSIGNMENTS, parent: "4af4d3519fb954a5161c799771d79e69ced9955044fb690fc78e6333a3fec8c4", stock: "unchanged personal band-derived ordinary gear; no wall-clock refresh", materials: { "Eridium Shard": "300", "Overlord's Sigil": "250", "Astral Essence": "500" }, reforge: "Dungeon execution formula: floor(150 * 1.045^((itemPower-1)*5) * 2^stars), 1 Sigil; one mutable affix", awaken: "2500*(stars+1) gold, stars+1 Eridium, 5*(stars+1) target-tier scrap; same family and base identity; scaled existing affixes and one additional eligible line", enchant: "2+ stars, slot level 50+, 1 Astral Essence, one random active stat +25%, stars-1 capacity", purge: "1000*itemPower*max(stars,1) gold; remove enchants only", resonance: "Dungeon gold curve, 25+25*stars Monster Souls; World-supported stat sets, two/three-piece bonuses", shatter: "World ordinary salvage; protected/Unique/Sigil destruction forbidden. Dungeon Spectral Codex has no World authority", priceDomain: { maximumItemPower: 1e3 }, limits: { modifiedItems: 64, operationsPerItem: 32, materialPurchasesPerKind: 1e6 }, setMultipliers: "Dungeon constants.js: cumulative two/three-piece thresholds; eleven active-combat sets; inactive idle lines excluded" });
+var WORKSHOP_POLICY = freezeWire({ version: SERVICES_V2, serviceAssignments: SERVICE_ASSIGNMENTS, parent: "4af4d3519fb954a5161c799771d79e69ced9955044fb690fc78e6333a3fec8c4", stock: "unchanged personal band-derived ordinary gear; no wall-clock refresh", materials: { "Wakestone": "300", "Overlord's Sigil": "250", "Astral Essence": "500" }, reforge: "Dungeon execution formula: floor(150 * 1.045^((itemPower-1)*5) * 2^stars), 1 Sigil; one mutable affix", awaken: "2500*(stars+1) gold, stars+1 Wakestone, 5*(stars+1) target-tier scrap; same family and base identity; scaled existing affixes and one additional eligible line", enchant: "2+ stars, slot level 50+, 1 Astral Essence, one random active stat +25%, stars-1 capacity", purge: "1000*itemPower*max(stars,1) gold; remove enchants only", resonance: "Dungeon gold curve, 25+25*stars Monster Souls; World-supported stat sets, two/three-piece bonuses", shatter: "World ordinary salvage; protected/Unique/Sigil destruction forbidden. Dungeon Spectral Codex has no World authority", priceDomain: { maximumItemPower: 1e3 }, limits: { modifiedItems: 64, operationsPerItem: 32, materialPurchasesPerKind: 1e6 }, setMultipliers: "Dungeon constants.js: cumulative two/three-piece thresholds; eleven active-combat sets; inactive idle lines excluded" });
 var hasServicesV2 = (b) => b?.settlementServicesVersion === SERVICES_V2 && b?.settlementServicesHash === SERVICES_V2_HASH;
 var ORDINARY_SERVICE_NPCS = freezeWire([...LIFE_NPCS, ...STARTER_NPCS]);
 var lists3 = /* @__PURE__ */ new Map();
@@ -12977,7 +12982,7 @@ var ARCHIVED_FIGHT_PROFILES = Object.freeze({
     glitch: Object.freeze({ radius: 180, durationTicks: 180 }),
     decoy: Object.freeze({ max: 2, hullRadius: 12, range: 220, speed: 1.35, projectileSpeed: 4.2, projectileRadius: 6, projectileLifeTicks: 180 })
   }),
-  hooktail: Object.freeze({
+  ashfang: Object.freeze({
     originalContentSha: "2b4afc45bdc731d1b7079dbc44611aabefd87c05cd2be06dc2450ebb46373a91",
     attack: Object.freeze({ scarlet_fire: 60, hooked_tail: 75, arena_collapse: 85 }),
     fire: Object.freeze({ range: 110, halfAngle: 0.8, damageMultiplier: 1.55 }),
@@ -13174,7 +13179,7 @@ function validateRecoveredBossV1(state, id, b) {
       safeInteger(event.damageSequence, 1, 16);
       requireContract(Array.isArray(event.spawnedMinionIds) && event.spawnedMinionIds.length === 1 && event.chunkCount === 1 && b.summonEntityIds.includes(event.spawnedMinionIds[0]), "Invalid real shed minion binding");
     }
-    requireContract(Array.isArray(archive.collapsedRings) && archive.collapsedRings.length <= 7 && (!archive.collapsedRings.length || b.bossDefinitionId === "hooktail"), "Archived collapse ledger invalid");
+    requireContract(Array.isArray(archive.collapsedRings) && archive.collapsedRings.length <= 7 && (!archive.collapsedRings.length || b.bossDefinitionId === "ashfang"), "Archived collapse ledger invalid");
     for (const r of archive.collapsedRings) {
       closedRecord(r, ["index", "createdTick", "minColumn", "maxColumn", "minRow", "maxRow", "tileSize", "tiles"]);
       safeInteger(r.index, 0, 7);
@@ -18020,7 +18025,7 @@ function validateClassKitProgress(a, b) {
 }
 
 // src/shared/contracts/settlement_workshop_v2.js
-var combatMaterialPrices = Object.freeze({ "Eridium Shard": "30", "Overlord's Sigil": "20", "Astral Essence": "60" });
+var combatMaterialPrices = Object.freeze({ "Wakestone": "30", "Overlord's Sigil": "20", "Astral Essence": "60" });
 var workshopMaterialPrices = (p) => combatPlayer(p) ? { ...combatMaterialPrices, ...Object.fromEntries(Object.keys(ECONOMY_V1.materialBase).map((k) => [k, materialPriceV1(k, p.progression?.level ?? 1)])) } : WORKSHOP_MATERIAL_PRICES;
 var same15 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var SCRAP_BREAK_YIELD = 3;
@@ -18044,7 +18049,7 @@ function workshopQuote(p, item, op, line = 0) {
     if (r.enchants) problem = "Purge enchantments before awakening";
     const n = r.tier + 1;
     gold = world ? workshopGoldV1("awaken", power(item), r.tier) : String(2500 * n);
-    materials2["Eridium Shard"] = n;
+    materials2["Wakestone"] = n;
     materials2[world ? SALVAGE_MATERIALS4[r.tier] : ["Monster Soul", "Uncommon Scrap", "Rare Scrap", "Epic Scrap", "Legendary Scrap", "Mythic Scrap"][n]] = 5 * n;
   } else if (op === "reforge") {
     if (!r.affixes.length) problem = "This item has no affix lines. Awaken it first.";

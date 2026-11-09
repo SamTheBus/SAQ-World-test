@@ -464,12 +464,12 @@ var FERRY_NETWORK = freezeWire({ "version": "planned-ferry-v1", "parentRuntime":
 
 // src/shared/content/world_roles_v1.js
 var WORLD_ROLES_VERSION = "world-roles-v1";
-var WORLD_BOSS_ROLES = Object.freeze(["corrosive_abomination", "void_overseer", "chronos_arbitrator", "nexus_overseer", "gilded_vault_keeper", "marcus", "hooktail", "cinderhart", "barrow_king", "sun_pharaoh", "aegis_goliath", "brimstone_colossus"]);
+var WORLD_BOSS_ROLES = Object.freeze(["corrosive_abomination", "void_overseer", "chronos_arbitrator", "nexus_overseer", "gilded_vault_keeper", "marcus", "ashfang", "cinderhart", "barrow_king", "sun_pharaoh", "aegis_goliath", "brimstone_colossus"]);
 var WORLD_STARTER_ROLES = Object.freeze(["starter-cave", "starter-elite-fort", "advanced-ruin"]);
 var WORLD_FACTION_ROLES = Object.freeze(["martial", "stealth", "magic"]);
 var CLASSIC_WORLD_ROLES = freezeWire({
   version: WORLD_ROLES_VERSION,
-  bosses: { corrosive_abomination: "repeatable-slot:ruin:wetland:standard:033", void_overseer: "repeatable-slot:ruin:frostland:deep:01", chronos_arbitrator: "repeatable-slot:ruin:upland:standard:049", nexus_overseer: "repeatable-slot:ruin:tropical:standard:037", gilded_vault_keeper: "repeatable-slot:crypt:upland:standard:01", marcus: "repeatable-slot:fort:grassland:standard:040", hooktail: "repeatable-slot:ruin:desert:standard:056", cinderhart: "repeatable-slot:ruin:woodland:standard:054", barrow_king: "repeatable-slot:ruin:wetland:standard:067", sun_pharaoh: "repeatable-slot:crypt:frostland:deep:01", aegis_goliath: "repeatable-slot:fort:upland:deep:01", brimstone_colossus: "repeatable-slot:ruin:volcanic:large:01" },
+  bosses: { corrosive_abomination: "repeatable-slot:ruin:wetland:standard:033", void_overseer: "repeatable-slot:ruin:frostland:deep:01", chronos_arbitrator: "repeatable-slot:ruin:upland:standard:049", nexus_overseer: "repeatable-slot:ruin:tropical:standard:037", gilded_vault_keeper: "repeatable-slot:crypt:upland:standard:01", marcus: "repeatable-slot:fort:grassland:standard:040", ashfang: "repeatable-slot:ruin:desert:standard:056", cinderhart: "repeatable-slot:ruin:woodland:standard:054", barrow_king: "repeatable-slot:ruin:wetland:standard:067", sun_pharaoh: "repeatable-slot:crypt:frostland:deep:01", aegis_goliath: "repeatable-slot:fort:upland:deep:01", brimstone_colossus: "repeatable-slot:ruin:volcanic:large:01" },
   starterSites: { "starter-cave": "repeatable-slot:cave:woodland:small:089", "starter-elite-fort": "repeatable-slot:fort:woodland:standard:01", "advanced-ruin": "repeatable-slot:ruin:woodland:standard:054" },
   firstCave: "repeatable-slot:cave:woodland:small:109",
   eliteSites: null,
@@ -549,8 +549,8 @@ var RECOVERED_BOSSES = Object.freeze({
     adds: 0,
     attacks: Object.freeze({ coin_barrage: 65, gold_rush: 55, gilded_lasso: 55, inversion: 80, molten_shield: 240 })
   }),
-  hooktail: Object.freeze({
-    id: "hooktail",
+  ashfang: Object.freeze({
+    id: "ashfang",
     label: "ASHFANG",
     site: "repeatable-slot:ruin:desert:standard:056",
     family: "ruin",
@@ -712,14 +712,15 @@ var ECONOMY_V1 = freezeWire({
   salePercentOfShop: 10,
   // Slot attunement gold: the first step costs firstGold, each next step growthPercent as much
   // (about 785k at step 50, hundreds of millions in the 80s, about 2.6 billion for step 100).
-  // Material drops v1: elites have elitePercent% to drop one; named elites, mini-bosses, bosses and boss chests always drop counts[source];
-  // each one is a Sigil, Eridium or Astral Essence by the mix weights.
-  materialDrops: { elitePercent: 20, counts: { "site-end-elite": 1, "mini-boss": 2, "lair-boss": 4, "lair-chest": 2 }, mix: [["Overlord's Sigil", 45], ["Eridium Shard", 35], ["Astral Essence", 20]] },
+  // Material drops v2: Sigil, Wakestone and Astral Essence each roll on their own, rolls[source] times, at elite or
+  // chances percent. Named elites, mini-bosses, lair bosses and boss chests never give nothing: if every roll misses,
+  // one material is picked by the chances weights (they sum to 100).
+  materialDrops: { materials: ["Overlord's Sigil", "Wakestone", "Astral Essence"], rolls: { elite: 1, "site-end-elite": 1, "mini-boss": 2, "lair-boss": 4, "lair-chest": 2 }, elite: [9, 7, 4], chances: [45, 35, 20] },
   attunement: {
     firstGold: 200,
     growthPercent: 118,
     // Scraps v2: five bands of 20 steps; each step also takes the band's materials, about 2 at the start of a band up to 10 at its end.
-    bands: [["Common Scrap"], ["Uncommon Scrap"], ["Rare Scrap", "Eridium Shard"], ["Epic Scrap", "Astral Essence"], ["Legendary Scrap", "Starshard"]],
+    bands: [["Common Scrap"], ["Uncommon Scrap"], ["Rare Scrap", "Wakestone"], ["Epic Scrap", "Astral Essence"], ["Legendary Scrap", "Starshard"]],
     bandMaterialRamp: [2, 10],
     mythicFromStep: 91,
     // Souls are set so earning them takes about as long as the gold: step n is expected around hero level 1+3n/5 (50 from step 82),
@@ -739,7 +740,7 @@ var ECONOMY_V1 = freezeWire({
   rarityPercent: [50, 75, 100, 150, 200, 300],
   repeatPercent: 150,
   // Bought materials cost their base price per goldUnit of the hero's level.
-  materialBase: { "Eridium Shard": 30, "Overlord's Sigil": 20, "Astral Essence": 60 },
+  materialBase: { "Wakestone": 30, "Overlord's Sigil": 20, "Astral Essence": 60 },
   // A town potion refill costs half a minute of play per potion.
   potionRefillPercentOfMinute: 50
 });
@@ -758,7 +759,7 @@ var ATTUNE_SOULS = ATTUNE_GOLD.map((gold, level) => {
   const A = ECONOMY_V1.attunement, step = level + 1, hero = Math.min(50, 1 + Math.floor(3 * step / 5)), perHour = BigInt(A.soulsPerHour + Math.floor(A.eliteSoulsPerHour * Math.min(hero, 30) / 30)), goldPerHour = BigInt(60 * ECONOMY_V1.minuteGoldUnits * goldUnit(hero));
   return Math.max(A.minimumSouls, Number((2n * gold * perHour + goldPerHour) / (2n * goldPerHour)));
 });
-var DROP_MATERIALS_V1 = Object.freeze(ECONOMY_V1.materialDrops.mix.map(([m]) => m));
+var DROP_MATERIALS_V1 = Object.freeze([...ECONOMY_V1.materialDrops.materials]);
 
 // src/shared/content/world_combat_v1.js
 var WORLD_COMBAT_VERSION = "world-combat-hordes-progression-v1";
@@ -2131,7 +2132,7 @@ CAST["settlement-slot:village-outpost:01"] = freezeWire(Object.fromEntries([["ge
 var SERVICES_V2 = "settlement-services-candidate-v2";
 var SERVICE_ASSIGNMENTS = freezeWire({ "civilian:alpha:alderwood:smith": ["attune", "shatter"], "civilian:alpha:village:oren": ["attune", "shatter"], "civilian:alpha:town:bren": ["attune", "reforge", "awaken", "shatter", "materials"], "civilian:alpha:town:selene": ["enchant", "purge", "resonance", "shatter", "materials"] });
 var SPECIALIST_NPC = freezeWire({ id: "civilian:alpha:town:selene", name: "Selene", role: "enchanter", roleLabel: "Enchanter", settlementId: "settlement-slot:town:05", buildingId: "town-open:roof:007", band: 3, tile: { x: 5910, y: 5754 }, space: "exterior", color: "#806b9e" });
-var WORKSHOP_POLICY = freezeWire({ version: SERVICES_V2, serviceAssignments: SERVICE_ASSIGNMENTS, parent: "4af4d3519fb954a5161c799771d79e69ced9955044fb690fc78e6333a3fec8c4", stock: "unchanged personal band-derived ordinary gear; no wall-clock refresh", materials: { "Eridium Shard": "300", "Overlord's Sigil": "250", "Astral Essence": "500" }, reforge: "Dungeon execution formula: floor(150 * 1.045^((itemPower-1)*5) * 2^stars), 1 Sigil; one mutable affix", awaken: "2500*(stars+1) gold, stars+1 Eridium, 5*(stars+1) target-tier scrap; same family and base identity; scaled existing affixes and one additional eligible line", enchant: "2+ stars, slot level 50+, 1 Astral Essence, one random active stat +25%, stars-1 capacity", purge: "1000*itemPower*max(stars,1) gold; remove enchants only", resonance: "Dungeon gold curve, 25+25*stars Monster Souls; World-supported stat sets, two/three-piece bonuses", shatter: "World ordinary salvage; protected/Unique/Sigil destruction forbidden. Dungeon Spectral Codex has no World authority", priceDomain: { maximumItemPower: 1e3 }, limits: { modifiedItems: 64, operationsPerItem: 32, materialPurchasesPerKind: 1e6 }, setMultipliers: "Dungeon constants.js: cumulative two/three-piece thresholds; eleven active-combat sets; inactive idle lines excluded" });
+var WORKSHOP_POLICY = freezeWire({ version: SERVICES_V2, serviceAssignments: SERVICE_ASSIGNMENTS, parent: "4af4d3519fb954a5161c799771d79e69ced9955044fb690fc78e6333a3fec8c4", stock: "unchanged personal band-derived ordinary gear; no wall-clock refresh", materials: { "Wakestone": "300", "Overlord's Sigil": "250", "Astral Essence": "500" }, reforge: "Dungeon execution formula: floor(150 * 1.045^((itemPower-1)*5) * 2^stars), 1 Sigil; one mutable affix", awaken: "2500*(stars+1) gold, stars+1 Wakestone, 5*(stars+1) target-tier scrap; same family and base identity; scaled existing affixes and one additional eligible line", enchant: "2+ stars, slot level 50+, 1 Astral Essence, one random active stat +25%, stars-1 capacity", purge: "1000*itemPower*max(stars,1) gold; remove enchants only", resonance: "Dungeon gold curve, 25+25*stars Monster Souls; World-supported stat sets, two/three-piece bonuses", shatter: "World ordinary salvage; protected/Unique/Sigil destruction forbidden. Dungeon Spectral Codex has no World authority", priceDomain: { maximumItemPower: 1e3 }, limits: { modifiedItems: 64, operationsPerItem: 32, materialPurchasesPerKind: 1e6 }, setMultipliers: "Dungeon constants.js: cumulative two/three-piece thresholds; eleven active-combat sets; inactive idle lines excluded" });
 var ORDINARY_SERVICE_NPCS = freezeWire([...LIFE_NPCS, ...STARTER_NPCS]);
 
 // src/shared/content/settlement_life_v1.js
@@ -4962,7 +4963,7 @@ function makeBiomes(seed, land, layout) {
 
 // src/shared/generation/world_maker_v1/roles.js
 var FIRST_CAVE = "repeatable-slot:cave:woodland:small:109";
-var BOSS_HOMES = { corrosive_abomination: ["ruin", "standard", "wetland"], void_overseer: ["ruin", "deep", "frostland"], chronos_arbitrator: ["ruin", "standard", "upland"], nexus_overseer: ["ruin", "standard", "tropical"], gilded_vault_keeper: ["crypt", "standard", "upland"], marcus: ["fort", "standard", "grassland"], hooktail: ["ruin", "standard", "desert"], cinderhart: ["ruin", "standard", "woodland"], barrow_king: ["ruin", "large", "grassland"], sun_pharaoh: ["crypt", "deep", "desert"], aegis_goliath: ["fort", "deep", "upland"], brimstone_colossus: ["ruin", "large", "volcanic"] };
+var BOSS_HOMES = { corrosive_abomination: ["ruin", "standard", "wetland"], void_overseer: ["ruin", "deep", "frostland"], chronos_arbitrator: ["ruin", "standard", "upland"], nexus_overseer: ["ruin", "standard", "tropical"], gilded_vault_keeper: ["crypt", "standard", "upland"], marcus: ["fort", "standard", "grassland"], ashfang: ["ruin", "standard", "desert"], cinderhart: ["ruin", "standard", "woodland"], barrow_king: ["ruin", "large", "grassland"], sun_pharaoh: ["crypt", "deep", "desert"], aegis_goliath: ["fort", "deep", "upland"], brimstone_colossus: ["ruin", "large", "volcanic"] };
 var STARTER_HOMES = { "starter-cave": ["cave", "small", "woodland"], "starter-elite-fort": ["fort", "standard", "woodland"] };
 var REQUIRED_SITES = [...Object.values(BOSS_HOMES), ...Object.values(STARTER_HOMES)];
 function makeRoles(asset) {
