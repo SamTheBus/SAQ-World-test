@@ -101980,6 +101980,10 @@ async function startWorldClient(environment) {
   try {
     if (activity) {
       const workerUrl = applyBossHostingWorkerBindingV1(new URL(environment.document.documentElement.dataset.worldSaveWorker ?? "./save-worker.js", location), plannedReview?.binding);
+      {
+        const release = environment.document.documentElement.dataset.worldRelease;
+        if (release) workerUrl.searchParams.set("v", release);
+      }
       if (heroSlot > 1) workerUrl.searchParams.set("hero", String(heroSlot));
       if (plannedReview) {
         workerUrl.searchParams.set("plannedReview", "1");
