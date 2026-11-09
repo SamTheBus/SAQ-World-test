@@ -21630,7 +21630,7 @@ function validateCommand(command) {
     closedRecord(command.payload, ["inventoryRevision", ...command.kind === "supply.use" ? [] : ["npcId"], ...command.kind === "service.buy" ? ["offerId"] : command.kind === "service.sell" ? ["itemId"] : []]);
     safeInteger(command.payload.inventoryRevision);
     if (command.kind !== "supply.use") requireContract(typeof command.payload.npcId === "string" && /^civilian:[a-z0-9:-]{1,100}$/.test(command.payload.npcId), "Invalid civilian identity");
-    if (command.kind === "service.buy") requireContract(typeof command.payload.offerId === "string" && /^[a-z-]{1,50}$/.test(command.payload.offerId), "Invalid offer");
+    if (command.kind === "service.buy") requireContract(typeof command.payload.offerId === "string" && /^(?:[a-z-]{1,50}|daily:\d{1,9}:\d{1,3}:\d{1,3})$/.test(command.payload.offerId), "Invalid offer");
     if (command.kind === "service.sell") requireContract(typeof command.payload.itemId === "string" && /^item:ply:[0-9a-f]{32}:(?:ent:[0-9a-f]{32}|starter)$/.test(command.payload.itemId), "Invalid sale item");
   } else if (command.kind === "ferry.travel") {
     closedRecord(command.payload, ["fromLandingId", "toLandingId"]);

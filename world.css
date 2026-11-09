@@ -1724,3 +1724,18 @@ body #world-hud-vitals.bag-crest{pointer-events:auto;cursor:pointer}
 #world-inventory .sx-key small{white-space:nowrap}#world-inventory .sx-key>div{min-width:0}
 /* The bag count only matters on the bag pages (Gear, Bag, Materials); other pages keep just the gold. */
 body #world-inventory.rpg-menu:not([data-section=equipment]):not([data-section=bag]):not([data-section=materials]) #world-bag-summary>span{display:none}
+/* Corner HUD for phones held sideways (mockups/hud-corners-mockup.webp, 2026-11-08). The camera cutout only sits
+   mid-height on one side, so the corner pieces come in close to the screen edge (at most 22px) instead of sitting
+   inside the full side margin; the action cluster, which reaches mid-height, only takes a small share of it. */
+@media(max-height:500px) and (min-width:601px){
+ body{--hud-lc:clamp(12px,var(--world-safe-left),22px);--hud-rc:clamp(12px,var(--world-safe-right),22px);--hud-bc:max(10px,calc(var(--world-safe-bottom) - 11px))}
+ body #world-hud-vitals{top:8px!important;left:var(--hud-lc)!important;width:236px!important;height:64px!important;padding:7px 10px 8px 50px!important}
+ body #world-level{top:10px!important;left:8px!important;width:34px!important;height:34px!important}
+ body #world-hud-vitals #world-xp{position:absolute!important;left:52px!important;right:auto!important;top:auto!important;bottom:5px!important;font-size:10px!important;line-height:12px!important}
+ body #world-hud-vitals #world-wallet{position:absolute!important;right:10px!important;left:auto!important;top:auto!important;bottom:4px!important}
+ body .chart-mini{top:8px!important;right:var(--hud-rc)!important}
+ body #local-world-controls:not([open]){top:8px!important;right:calc(var(--hud-rc) + 172px)!important}
+ body #world-bag{left:var(--hud-lc)!important;bottom:var(--hud-bc)!important;top:auto!important}
+ body #carried-rations{left:calc(var(--hud-lc) + 64px)!important;bottom:calc(var(--hud-bc) + 2px)!important;top:auto!important}
+ body .skill-wheel-v1,body #primary-attack,body .shield-guard{translate:min(18px,calc(var(--world-safe-right) * .3)) min(6px,calc(var(--world-safe-bottom) * .3))}
+}

@@ -863,7 +863,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-PNTJNGYF.js";
+} from "./chunk-DK5QRTMH.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -50943,6 +50943,15 @@ function createSettlementServicesMenu2(options) {
   };
   const supplyButton = button("", drink, "drink-potion");
   supplyButton.addEventListener("mousedown", (e) => e.preventDefault());
+  supplyButton.addEventListener("pointerdown", (e) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    drink();
+  });
+  supplyButton.onclick = (e) => {
+    if (e.detail === 0) drink();
+  };
   supplyButton.id = "carried-rations";
   supplyButton.classList.add("potion-button");
   supplyButton.innerHTML = '<span class="potion-socket" aria-hidden="true"><svg viewBox="0 0 20 26"><defs><clipPath id="potion-flask-glass"><path d="M7.4 7.6H12.6V11.6A6.6 6.6 0 1 1 7.4 11.6Z"/></clipPath><linearGradient id="potion-flask-red" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8a78"/><stop offset=".4" stop-color="#ee3b45"/><stop offset="1" stop-color="#a3122c"/></linearGradient></defs><path d="M7.4 7.6H12.6V11.6A6.6 6.6 0 1 1 7.4 11.6Z" fill="#f6d9d3" fill-opacity=".16"/><g clip-path="url(#potion-flask-glass)"><g class="potion-liquid"><rect x="2" y="12.6" width="16" height="13" fill="url(#potion-flask-red)"/><rect x="2" y="12.6" width="16" height="1.1" fill="#ffb3a6"/></g><rect x="2" y="7" width="16" height="5" fill="#fff" fill-opacity=".12"/></g><path d="M7.4 7.6H12.6V11.6A6.6 6.6 0 1 1 7.4 11.6Z" fill="none" stroke="#1b0f13" stroke-width="1.6" stroke-linejoin="round"/><rect x="6.1" y="6.3" width="7.8" height="2.4" fill="#1b0f13"/><rect x="6.9" y="6.9" width="6.2" height="1.2" fill="#e9d7c8"/><rect x="7.4" y="2.5" width="5.2" height="4.2" fill="#1b0f13"/><rect x="8.1" y="3.2" width="3.8" height="3" fill="#a8743f"/><rect x="8.1" y="3.2" width="1.3" height="3" fill="#d39a5b"/><rect x="5.4" y="15.6" width="1.5" height="3.2" fill="#fff" fill-opacity=".82"/><rect x="6.6" y="14" width="1.3" height="1.2" fill="#fff" fill-opacity=".82"/></svg><b></b></span><span class="potion-copy" aria-hidden="true"><small>Potion</small><strong><span></span><span></span></strong></span>';
