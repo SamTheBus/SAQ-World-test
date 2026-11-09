@@ -212,20 +212,20 @@ function two(k) {
 var LN2_HI = 0.6931471803691238;
 var LN2_LO = 19082149292705877e-26;
 function logm(m) {
-  const f = m - 1, s = f / (2 + f), z = s * s, w = z * z, t1 = w * (0.3999999999940942 + w * (0.22222198432149784 + w * 0.15313837699209373)), t2 = z * (0.6666666666666735 + w * (0.2857142874366239 + w * (0.1818357216161805 + w * 0.14798198605116586))), hf = 0.5 * f * f;
-  return [f, hf, s * (hf + t1 + t2)];
+  const f3 = m - 1, s = f3 / (2 + f3), z = s * s, w = z * z, t1 = w * (0.3999999999940942 + w * (0.22222198432149784 + w * 0.15313837699209373)), t2 = z * (0.6666666666666735 + w * (0.2857142874366239 + w * (0.1818357216161805 + w * 0.14798198605116586))), hf = 0.5 * f3 * f3;
+  return [f3, hf, s * (hf + t1 + t2)];
 }
 function log(x) {
   if (!(x > 0)) return x === 0 ? -Infinity : NaN;
   if (x === Infinity) return x;
-  const [m, k] = split(x), [f, hf, r] = logm(m);
-  return k * LN2_HI - (hf - (r + k * LN2_LO) - f);
+  const [m, k] = split(x), [f3, hf, r] = logm(m);
+  return k * LN2_HI - (hf - (r + k * LN2_LO) - f3);
 }
 function log2(x) {
   if (!(x > 0)) return x === 0 ? -Infinity : NaN;
   if (x === Infinity) return x;
-  const [m, k] = split(x), [f, hf, r] = logm(m);
-  return k + (f - hf + r) / Math.LN2;
+  const [m, k] = split(x), [f3, hf, r] = logm(m);
+  return k + (f3 - hf + r) / Math.LN2;
 }
 function exp(x) {
   if (x !== x) return x;
@@ -753,12 +753,12 @@ function buildTownLayoutV1(slot, size, biome, seed, dims) {
   let t;
   const layout = (s) => {
     const a = build(slot, size, biome, s, dims);
-    const wall = a.features.find((f) => f.type === "wall");
+    const wall = a.features.find((f3) => f3.type === "wall");
     return wall ? build(slot, size, biome, s, dims, wall.pts) : a;
   };
   for (let k = 0; k < 8; k++) {
     t = layout(k ? seed + "#" + k : seed);
-    const have = new Set(t.features.map((f) => f.type));
+    const have = new Set(t.features.map((f3) => f3.type));
     if (need.every((n) => have.has(n))) break;
   }
   const key2 = slot.replace("settlement-slot:", "");
@@ -782,8 +782,8 @@ function build(slot, size, biome, seed, dims, ring = null) {
   const KEEP = 2.4, ringD = (x, y) => {
     let b = 1e9;
     for (let i = 0; i < ring.length; i++) {
-      const a = ring[i], q = ring[(i + 1) % ring.length], dx = q[0] - a[0], dy = q[1] - a[1], dd = dx * dx + dy * dy, f = dd ? Math.max(0, Math.min(1, ((x - a[0]) * dx + (y - a[1]) * dy) / dd)) : 0;
-      b = Math.min(b, hyp(x - a[0] - f * dx, y - a[1] - f * dy));
+      const a = ring[i], q = ring[(i + 1) % ring.length], dx = q[0] - a[0], dy = q[1] - a[1], dd = dx * dx + dy * dy, f3 = dd ? Math.max(0, Math.min(1, ((x - a[0]) * dx + (y - a[1]) * dy) / dd)) : 0;
+      b = Math.min(b, hyp(x - a[0] - f3 * dx, y - a[1] - f3 * dy));
     }
     return b;
   };
@@ -803,7 +803,7 @@ function build(slot, size, biome, seed, dims, ring = null) {
       const near = (p) => {
         let best = 1e9, dir = 0;
         for (let i = 1; i < R.pts.length; i++) {
-          const [ax, ay] = R.pts[i - 1], [bx, by] = R.pts[i], dx = bx - ax, dy = by - ay, q = dx * dx + dy * dy, f = q ? Math.max(0, Math.min(1, ((p[0] - ax) * dx + (p[1] - ay) * dy) / q)) : 0, d = hyp(p[0] - ax - f * dx, p[1] - ay - f * dy);
+          const [ax, ay] = R.pts[i - 1], [bx, by] = R.pts[i], dx = bx - ax, dy = by - ay, q = dx * dx + dy * dy, f3 = q ? Math.max(0, Math.min(1, ((p[0] - ax) * dx + (p[1] - ay) * dy) / q)) : 0, d = hyp(p[0] - ax - f3 * dx, p[1] - ay - f3 * dy);
           if (d < best) {
             best = d;
             dir = PM.atan2(dy, dx);
@@ -829,8 +829,8 @@ function build(slot, size, biome, seed, dims, ring = null) {
     for (let i = 1; i < pts.length; i++) {
       const [ax, ay] = pts[i - 1], [bx, by] = pts[i], dx = bx - ax, dy = by - ay, d = dx * dx + dy * dy;
       for (let y = Math.floor(Math.min(ay, by) - w); y <= Math.ceil(Math.max(ay, by) + w); y++) for (let x = Math.floor(Math.min(ax, bx) - w); x <= Math.ceil(Math.max(ax, bx) + w); x++) {
-        const f = d ? Math.max(0, Math.min(1, ((x + 0.5 - ax) * dx + (y + 0.5 - ay) * dy) / d)) : 0;
-        if (hyp(x + 0.5 - ax - f * dx, y + 0.5 - ay - f * dy) <= w / 2 && at(x, y) === 0) set(x, y, 1);
+        const f3 = d ? Math.max(0, Math.min(1, ((x + 0.5 - ax) * dx + (y + 0.5 - ay) * dy) / d)) : 0;
+        if (hyp(x + 0.5 - ax - f3 * dx, y + 0.5 - ay - f3 * dy) <= w / 2 && at(x, y) === 0) set(x, y, 1);
       }
     }
   };
@@ -853,8 +853,8 @@ function build(slot, size, biome, seed, dims, ring = null) {
     for (let i = 1; i < pts.length; i++) {
       const [ax, ay] = pts[i - 1], [bx, by] = pts[i], dx = bx - ax, dy = by - ay, dd = dx * dx + dy * dy;
       for (let y = Math.floor(Math.min(ay, by) - d - 1); y <= Math.ceil(Math.max(ay, by) + d + 1); y++) for (let x = Math.floor(Math.min(ax, bx) - d - 1); x <= Math.ceil(Math.max(ax, bx) + d + 1); x++) {
-        const f = dd ? Math.max(0, Math.min(1, ((x + 0.5 - ax) * dx + (y + 0.5 - ay) * dy) / dd)) : 0;
-        if (hyp(x + 0.5 - ax - f * dx, y + 0.5 - ay - f * dy) <= d) set(x, y, v);
+        const f3 = dd ? Math.max(0, Math.min(1, ((x + 0.5 - ax) * dx + (y + 0.5 - ay) * dy) / dd)) : 0;
+        if (hyp(x + 0.5 - ax - f3 * dx, y + 0.5 - ay - f3 * dy) <= d) set(x, y, v);
       }
     }
   };
@@ -1317,15 +1317,15 @@ function build(slot, size, biome, seed, dims, ring = null) {
       const a = pts[i], b = pts[(i + 1) % pts.length];
       const dx = b[0] - a[0], dy = b[1] - a[1], dd = dx * dx + dy * dy;
       for (let y = Math.floor(Math.min(a[1], b[1]) - 2); y <= Math.ceil(Math.max(a[1], b[1]) + 2); y++) for (let x = Math.floor(Math.min(a[0], b[0]) - 2); x <= Math.ceil(Math.max(a[0], b[0]) + 2); x++) {
-        const f = dd ? Math.max(0, Math.min(1, ((x + 0.5 - a[0]) * dx + (y + 0.5 - a[1]) * dy) / dd)) : 0;
-        if (hyp(x + 0.5 - a[0] - f * dx, y + 0.5 - a[1] - f * dy) <= 1.1 && at(x, y) === 0) set(x, y, 5);
+        const f3 = dd ? Math.max(0, Math.min(1, ((x + 0.5 - a[0]) * dx + (y + 0.5 - a[1]) * dy) / dd)) : 0;
+        if (hyp(x + 0.5 - a[0] - f3 * dx, y + 0.5 - a[1] - f3 * dy) <= 1.1 && at(x, y) === 0) set(x, y, 5);
       }
     }
     const dW = (p) => {
       let b = 1e9;
       for (let i = 0; i < pts.length; i++) {
-        const a = pts[i], q = pts[(i + 1) % pts.length], dx = q[0] - a[0], dy = q[1] - a[1], dd = dx * dx + dy * dy, f = dd ? Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / dd)) : 0;
-        b = Math.min(b, hyp(p[0] - a[0] - f * dx, p[1] - a[1] - f * dy));
+        const a = pts[i], q = pts[(i + 1) % pts.length], dx = q[0] - a[0], dy = q[1] - a[1], dd = dx * dx + dy * dy, f3 = dd ? Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / dd)) : 0;
+        b = Math.min(b, hyp(p[0] - a[0] - f3 * dx, p[1] - a[1] - f3 * dy));
       }
       return b;
     };
@@ -1425,7 +1425,7 @@ function build(slot, size, biome, seed, dims, ring = null) {
   if (biome !== "desert" && (size === "village" || size === "town")) {
     const FK = ["wheat", "plough", "hay", "cabbage", "barley"], want = size === "village" ? 5 : 4, o = Math.floor(r() * 5);
     let n = 0;
-    const wl = features.find((f) => f.type === "wall"), inPoly = (px, py, P) => {
+    const wl = features.find((f3) => f3.type === "wall"), inPoly = (px, py, P) => {
       let c = false;
       for (let i = 0, j = P.length - 1; i < P.length; j = i++) {
         const [xi, yi] = P[i], [xj, yj] = P[j];
@@ -1434,7 +1434,7 @@ function build(slot, size, biome, seed, dims, ring = null) {
       return c;
     };
     const nearB = (R) => buildings.some((b) => R.x < b.x + b.w + 2 && R.x + R.w > b.x - 2 && R.y < b.y + b.h + 2 && R.y + R.h > b.y - 2);
-    const yards = features.flatMap((f) => [f.pad, f.garden, f.circle, f.yard].filter(Boolean)), nearY = (R) => yards.some((b) => R.x < b.x + b.w + 1 && R.x + R.w > b.x - 1 && R.y < b.y + b.h + 1 && R.y + R.h > b.y - 1);
+    const yards = features.flatMap((f3) => [f3.pad, f3.garden, f3.circle, f3.yard].filter(Boolean)), nearY = (R) => yards.some((b) => R.x < b.x + b.w + 1 && R.x + R.w > b.x - 1 && R.y < b.y + b.h + 1 && R.y + R.h > b.y - 1);
     const nearSt = (R) => streets.some(([sp]) => {
       for (let i = 1; i < sp.length; i++) {
         const a = sp[i - 1], b = sp[i];
@@ -1462,18 +1462,18 @@ function build(slot, size, biome, seed, dims, ring = null) {
     for (const [pts, w] of streets) for (let i = 1; i < pts.length; i++) {
       const [ax, ay] = pts[i - 1], [bx, by] = pts[i], dx = bx - ax, dy = by - ay, d = dx * dx + dy * dy;
       for (let y = Math.floor(Math.min(ay, by) - w); y <= Math.ceil(Math.max(ay, by) + w); y++) for (let x = Math.floor(Math.min(ax, bx) - w); x <= Math.ceil(Math.max(ax, bx) + w); x++) {
-        const f = d ? Math.max(0, Math.min(1, ((x + 0.5 - ax) * dx + (y + 0.5 - ay) * dy) / d)) : 0;
-        if (hyp(x + 0.5 - ax - f * dx, y + 0.5 - ay - f * dy) <= w / 2 && at(x, y) === 0) set(x, y, 1);
+        const f3 = d ? Math.max(0, Math.min(1, ((x + 0.5 - ax) * dx + (y + 0.5 - ay) * dy) / d)) : 0;
+        if (hyp(x + 0.5 - ax - f3 * dx, y + 0.5 - ay - f3 * dy) <= w / 2 && at(x, y) === 0) set(x, y, 1);
       }
     }
-    const wl = features.find((f) => f.type === "wall");
+    const wl = features.find((f3) => f3.type === "wall");
     if (wl) for (let y = 0; y < H2; y++) for (let x = 0; x < W2; x++) {
       if (at(x, y) !== 0) continue;
       const p = wl.pts;
       let b = 1e9;
       for (let i = 0; i < p.length; i++) {
-        const a = p[i], q = p[(i + 1) % p.length], dx = q[0] - a[0], dy = q[1] - a[1], dd = dx * dx + dy * dy, f = dd ? Math.max(0, Math.min(1, ((x + 0.5 - a[0]) * dx + (y + 0.5 - a[1]) * dy) / dd)) : 0;
-        b = Math.min(b, hyp(x + 0.5 - a[0] - f * dx, y + 0.5 - a[1] - f * dy));
+        const a = p[i], q = p[(i + 1) % p.length], dx = q[0] - a[0], dy = q[1] - a[1], dd = dx * dx + dy * dy, f3 = dd ? Math.max(0, Math.min(1, ((x + 0.5 - a[0]) * dx + (y + 0.5 - a[1]) * dy) / dd)) : 0;
+        b = Math.min(b, hyp(x + 0.5 - a[0] - f3 * dx, y + 0.5 - a[1] - f3 * dy));
       }
       if (b <= 1.1) set(x, y, 5);
     }
@@ -1603,12 +1603,12 @@ function sha256Hex(text) {
       const a2 = w[i - 15], b2 = w[i - 2];
       w[i] = (r(a2, 7) ^ r(a2, 18) ^ a2 >>> 3) + w[i - 16] + (r(b2, 17) ^ r(b2, 19) ^ b2 >>> 10) + w[i - 7] | 0;
     }
-    let [a, b, c, d, e, f, g, k] = h;
+    let [a, b, c, d, e, f3, g, k] = h;
     for (let i = 0; i < 64; i++) {
-      const t1 = k + (r(e, 6) ^ r(e, 11) ^ r(e, 25)) + (e & f ^ ~e & g) + K[i] + w[i] | 0, t2 = (r(a, 2) ^ r(a, 13) ^ r(a, 22)) + (a & b ^ a & c ^ b & c) | 0;
+      const t1 = k + (r(e, 6) ^ r(e, 11) ^ r(e, 25)) + (e & f3 ^ ~e & g) + K[i] + w[i] | 0, t2 = (r(a, 2) ^ r(a, 13) ^ r(a, 22)) + (a & b ^ a & c ^ b & c) | 0;
       k = g;
-      g = f;
-      f = e;
+      g = f3;
+      f3 = e;
       e = d + t1 | 0;
       d = c;
       c = b;
@@ -1620,7 +1620,7 @@ function sha256Hex(text) {
     h[2] = h[2] + c | 0;
     h[3] = h[3] + d | 0;
     h[4] = h[4] + e | 0;
-    h[5] = h[5] + f | 0;
+    h[5] = h[5] + f3 | 0;
     h[6] = h[6] + g | 0;
     h[7] = h[7] + k | 0;
   }
@@ -1654,7 +1654,7 @@ var segDist = (pts, x, y, closed = false) => {
   let best = 1e9;
   const n = pts.length;
   for (let i = closed ? 0 : 1; i < n; i++) {
-    const a = pts[i ? i - 1 : n - 1], b = pts[i], dx = b[0] - a[0], dy = b[1] - a[1], q = dx * dx + dy * dy, f = q ? Math.max(0, Math.min(1, ((x - a[0]) * dx + (y - a[1]) * dy) / q)) : 0, d = hyp2(x - a[0] - f * dx, y - a[1] - f * dy);
+    const a = pts[i ? i - 1 : n - 1], b = pts[i], dx = b[0] - a[0], dy = b[1] - a[1], q = dx * dx + dy * dy, f3 = q ? Math.max(0, Math.min(1, ((x - a[0]) * dx + (y - a[1]) * dy) / q)) : 0, d = hyp2(x - a[0] - f3 * dx, y - a[1] - f3 * dy);
     if (d < best) best = d;
   }
   return best;
@@ -1664,7 +1664,7 @@ function connect(L, origin, dest, sw = 3) {
   const soft = new Uint8Array(W2 * H2), mark = (R) => {
     for (let y = R.y; y < R.y + R.h; y++) for (let x = R.x; x < R.x + R.w; x++) if (x >= 0 && y >= 0 && x < W2 && y < H2) soft[y * W2 + x] = 1;
   };
-  for (const f of L.features) if (f.type === "field") mark(f);
+  for (const f3 of L.features) if (f3.type === "field") mark(f3);
   for (const [, R, k] of L.places) if (k === "garden") mark(R);
   const cost = (i) => {
     const v = G[i];
@@ -1801,11 +1801,11 @@ function planGeneratedTownsV1(asset, spots = null) {
         for (let y = R.y - 1; y <= R.y + R.h; y++) for (let x = R.x - 1; x <= R.x + R.w; x++) if (connectors.some((c) => segDist(c.pts, x + 0.5, y + 0.5) <= c.w / 2 + 0.5)) return true;
         return false;
       };
-      features = features.filter((f) => f.type !== "field" || !near(f));
+      features = features.filter((f3) => f3.type !== "field" || !near(f3));
       places = places.filter(([, R, k]) => k !== "garden" || !near(R));
     }
-    const feat = (f) => {
-      const o2 = { ...f };
+    const feat = (f3) => {
+      const o2 = { ...f3 };
       if (o2.pts) o2.pts = rp(o2.pts);
       if (o2.trees) o2.trees = rp(o2.trees);
       if (o2.list) o2.list = o2.list.map((b) => ({ ...b, x: r3(b.x) }));
@@ -1833,6 +1833,110 @@ function planGeneratedTownsV1(asset, spots = null) {
 }
 var TOWN_NEW_ART = Object.freeze(/* @__PURE__ */ new Set(["grassland", "woodland"]));
 var TOWN_SHOP_ROLES = Object.freeze({ hamlet: ["general", "innkeeper"], village: ["general", "smith", "innkeeper"], town: ["general", "smith", "innkeeper", "enchanter"], city: ["general", "smith", "innkeeper", "enchanter"], capital: ["general", "smith", "innkeeper", "enchanter"] });
+
+// src/shared/content/tavern_interior_v1.js
+var freeze = (o) => {
+  for (const v of Object.values(o)) if (v && typeof v === "object") freeze(v);
+  return Object.freeze(o);
+};
+var f = (id, type, x, y, w = 1, h = 1) => ({ id, type, x, y, w, h });
+var TAVERN_INTERIOR_V1 = freeze({
+  version: "tavern-fitted-v1",
+  width: 14,
+  height: 12,
+  tileSize: 32,
+  usable: [12, 10],
+  floors: [
+    {
+      id: "ground",
+      walls: [],
+      furniture: [
+        f("hearth", "hearth", 1, 1, 1, 2),
+        f("table-west", "table", 3, 2, 2, 2),
+        f("table-east", "table", 6, 2, 2, 2),
+        f("bench-west", "bench", 3, 1, 2, 1),
+        f("bench-east", "bench", 6, 1, 2, 1),
+        f("seat-west", "chair", 3, 4),
+        f("seat-east", "chair", 7, 4),
+        f("counter", "counter", 9, 1, 1, 4),
+        f("oven", "oven", 11, 1, 2, 1),
+        f("kitchen", "worktop", 12, 3, 1, 2),
+        f("pantry", "cupboard", 11, 5, 2, 1),
+        f("table-small", "table", 3, 6, 2, 1),
+        f("seat-small", "chair", 3, 7),
+        f("rack", "rack", 1, 10, 2, 1)
+      ],
+      stairs: { x: 10, y: 8, w: 2, h: 2 },
+      arrival: { x: 112, y: 288 },
+      exitAnchor: { x: 48, y: 272 },
+      stairAnchor: { x: 352, y: 272 },
+      stairArrival: { x: 272, y: 272 },
+      destinations: [{ id: "common-room", x: 208, y: 208 }, { id: "counter-front", x: 272, y: 112 }, { id: "kitchen", x: 352, y: 112 }]
+    },
+    {
+      id: "upper",
+      walls: [...Array.from({ length: 10 }, (_, i) => i + 1).filter((y) => ![3, 4, 8, 9].includes(y)).flatMap((y) => [{ x: 5, y }, { x: 8, y }]), ...Array.from({ length: 5 }, (_, i) => ({ x: i + 1, y: 6 })), ...Array.from({ length: 5 }, (_, i) => ({ x: i + 8, y: 6 }))],
+      furniture: [
+        f("bed-nw", "bed", 1, 1, 2, 1),
+        f("wardrobe-nw", "cupboard", 1, 4),
+        f("desk-nw", "desk", 3, 1),
+        f("bed-ne", "bed", 10, 1, 2, 1),
+        f("wardrobe-ne", "cupboard", 12, 4),
+        f("desk-ne", "desk", 9, 1),
+        f("bed-sw", "bed", 1, 9, 2, 1),
+        f("wardrobe-sw", "cupboard", 4, 10),
+        f("desk-sw", "desk", 1, 7),
+        f("bed-se", "bed", 10, 9, 2, 1),
+        f("wardrobe-se", "cupboard", 12, 7),
+        f("desk-se", "desk", 9, 10)
+      ],
+      stairs: { x: 6, y: 9, w: 2, h: 2 },
+      arrival: { x: 224, y: 240 },
+      stairAnchor: { x: 224, y: 304 },
+      destinations: [{ id: "guest-room-1", x: 112, y: 112 }, { id: "guest-room-2", x: 336, y: 112 }, { id: "guest-room-3", x: 112, y: 256 }, { id: "guest-room-4", x: 336, y: 256 }]
+    }
+  ]
+});
+
+// src/shared/content/town_interiors_v1.js
+var freeze2 = (o) => {
+  for (const v of Object.values(o)) if (v && typeof v === "object") freeze2(v);
+  return Object.freeze(o);
+};
+var f2 = (id, type, x, y, w = 1, h = 1) => ({ id, type, x, y, w, h });
+var ENCHANTER_TOWER_V1 = freeze2({
+  version: "enchanter-tower-v1",
+  width: 12,
+  height: 10,
+  tileSize: 32,
+  round: { cx: 192, cy: 166, rx: 180, ry: 134, margin: 8 },
+  windows: [118, 266],
+  floors: [{
+    id: "ground",
+    walls: [],
+    door: { x0: 160, x1: 224 },
+    furniture: [
+      f2("shelf-west", "shelf", 2, 2, 2, 1),
+      f2("shelf-east", "shelf", 8, 2, 2, 1),
+      f2("altar", "altar", 5, 4, 2, 1),
+      f2("candles-west", "candles", 3, 4),
+      f2("candles-east", "candles", 8, 4),
+      f2("desk", "desk", 1, 5, 2, 1),
+      f2("chair", "chair", 1, 6),
+      f2("ball", "ball", 1, 7),
+      f2("geode", "geode", 10, 5),
+      f2("staffs", "staffs", 10, 6, 1, 2)
+    ],
+    stairs: null,
+    arrival: { x: 192, y: 232 },
+    exitAnchor: { x: 192, y: 276 },
+    destinations: [{ id: "rune-circle", x: 192, y: 200 }]
+  }]
+});
+var TOWN_INTERIOR_RECIPES = freeze2({
+  inn: { room: TAVERN_INTERIOR_V1, floors: ["ground", "upper"], keeper: { role: "innkeeper", floor: "ground", tile: { x: 10, y: 3 }, facing: -1, reach: 52, talk: 96, across: [{ x: 9, y: 1, w: 2, h: 4 }] }, labels: { enter: "Inn \xB7 Enter [E]", exit: "Inn \xB7 Exit [E]", up: "Guest rooms \xB7 Upstairs [E]", down: "Common room \xB7 Downstairs [E]" } },
+  hall: { room: ENCHANTER_TOWER_V1, floors: ["ground"], keeper: { role: "enchanter", floor: "ground", tile: { x: 5, y: 3 }, facing: -1, reach: 52, dx: 16 }, labels: { enter: "Enchanter \xB7 Enter [E]", exit: "Enchanter \xB7 Exit [E]" } }
+});
 
 // src/shared/content/town_casts_v1.js
 var SPOTS = [
@@ -1902,7 +2006,7 @@ for (const role of Object.keys(CAST_KITS)) {
 }
 var CAST = {};
 {
-  const used = /* @__PURE__ */ new Set();
+  const used = /* @__PURE__ */ new Set(["Ada", "Bren", "Mara", "Selene", "Ila", "Nell", "Oren"]);
   for (const [slot, size] of SPOTS) {
     const out = {};
     for (const role of size === "village" ? ["general", "smith", "innkeeper"] : ["general", "smith", "innkeeper", "enchanter"]) {
@@ -3620,8 +3724,8 @@ var put = (x, y, type) => {
 for (const [points, width] of OPEN_TOWN_TEMPLATE_V1.streets) for (let i = 1; i < points.length; i++) {
   const [ax, ay] = points[i - 1], [bx, by] = points[i], dx = bx - ax, dy = by - ay, d = dx * dx + dy * dy;
   for (let y = Math.floor(Math.min(ay, by) - width); y <= Math.ceil(Math.max(ay, by) + width); y++) for (let x = Math.floor(Math.min(ax, bx) - width); x <= Math.ceil(Math.max(ax, bx) + width); x++) {
-    const f = d ? Math.max(0, Math.min(1, ((x + 0.5 - ax) * dx + (y + 0.5 - ay) * dy) / d)) : 0;
-    if (PM.hypot(x + 0.5 - ax - f * dx, y + 0.5 - ay - f * dy) <= width / 2) put(x, y, "r");
+    const f3 = d ? Math.max(0, Math.min(1, ((x + 0.5 - ax) * dx + (y + 0.5 - ay) * dy) / d)) : 0;
+    if (PM.hypot(x + 0.5 - ax - f3 * dx, y + 0.5 - ay - f3 * dy) <= width / 2) put(x, y, "r");
   }
 }
 for (const b of OPEN_TOWN_TEMPLATE_V1.buildings) {
@@ -3748,8 +3852,8 @@ function createLocalWaterGeometry(p, macro, shoreline, riverSegments) {
       data = { flags, classCodes, widths, margins };
       rawCache.set(key2, data);
     }
-    const n = (y - my * 52) * 64 + x - mx * 64, f = data.flags[n];
-    return f & 8 ? { water: !!(f & 1), shore: !!(f & 2), protected: !!(f & 4), classId: classes[data.classCodes[n]], width: data.widths[n], margin: data.margins[n] } : null;
+    const n = (y - my * 52) * 64 + x - mx * 64, f3 = data.flags[n];
+    return f3 & 8 ? { water: !!(f3 & 1), shore: !!(f3 & 2), protected: !!(f3 & 4), classId: classes[data.classCodes[n]], width: data.widths[n], margin: data.margins[n] } : null;
   }
   const dryRaw = (x, y) => !!macro(Math.floor(x / 64), Math.floor(y / 52)) && !cachedRaw(x, y)?.water;
   const drySample = (x, y) => !!macro(Math.floor(x / 64), Math.floor(y / 52)) && !rawCoast(x, y)?.water;
@@ -4769,12 +4873,12 @@ function makeRoles(asset) {
   const eliteSites = {};
   for (const b of BIOMES) {
     const ids = realized.filter((s) => {
-      const [f, t, sb] = kind(s);
-      return sb === b && t === "small" && ["fort", "ruin", "crypt"].includes(f);
+      const [f3, t, sb] = kind(s);
+      return sb === b && t === "small" && ["fort", "ruin", "crypt"].includes(f3);
     }).map((s) => s.id).sort();
     if (ids.length) eliteSites[b] = ids;
   }
-  const factionHalls = Object.fromEntries(asset.factions.map((f) => [f.id.split(":")[1], f.hallSettlementId]));
+  const factionHalls = Object.fromEntries(asset.factions.map((f3) => [f3.id.split(":")[1], f3.hallSettlementId]));
   return { version: WORLD_ROLES_VERSION, bosses, starterSites, firstCave: FIRST_CAVE, eliteSites, factionHalls };
 }
 
@@ -4876,7 +4980,7 @@ function makePlaces(seed, land, layout, biomes, catalog) {
     return true;
   };
   let serial = 200;
-  const nextId = (f, b, t) => "repeatable-slot:" + f + ":" + b + ":" + t + ":" + ++serial;
+  const nextId = (f3, b, t) => "repeatable-slot:" + f3 + ":" + b + ":" + t + ":" + ++serial;
   function placeSite(id, t, b, score) {
     let best = null, bv = -Infinity;
     for (const i of land.land) {
@@ -4914,7 +5018,7 @@ function makePlaces(seed, land, layout, biomes, catalog) {
     if (!s) throw Error("No home for " + t.id);
   }
   const slots = [];
-  for (const [f, tiers] of Object.entries(SITE_MIX)) for (const [t, n] of Object.entries(tiers)) for (let k = 0; k < n; k++) slots.push({ f, t });
+  for (const [f3, tiers] of Object.entries(SITE_MIX)) for (const [t, n] of Object.entries(tiers)) for (let k = 0; k < n; k++) slots.push({ f: f3, t });
   slots[slots.findIndex((s) => s.f === "cave" && s.t === "small")] = null;
   const lairs = slots.filter((s) => s && (s.t === "large" || s.t === "deep")), rest = slots.filter((s) => s && s.t !== "large" && s.t !== "deep");
   for (let i = rest.length - 1; i > 0; i--) {
@@ -4923,9 +5027,9 @@ function makePlaces(seed, land, layout, biomes, catalog) {
   }
   const area = BIOMES.map((_, b) => land.land.filter((i) => biome[i] === b).length), order = BIOMES.map((_, b) => b).sort((a, b) => area[b] - area[a] || a - b);
   const share = BIOMES.map(() => []), isLair = (s) => s.t === "large" || s.t === "deep";
-  for (const [f, t, b] of REQUIRED_SITES) {
-    const pool = isLair({ t }) ? lairs : rest, k = pool.findIndex((s) => s.f === f && s.t === t);
-    if (k < 0) throw Error("No " + t + " " + f + " left for " + b);
+  for (const [f3, t, b] of REQUIRED_SITES) {
+    const pool = isLair({ t }) ? lairs : rest, k = pool.findIndex((s) => s.f === f3 && s.t === t);
+    if (k < 0) throw Error("No " + t + " " + f3 + " left for " + b);
     share[B2[b]].push(pool.splice(k, 1)[0]);
   }
   const lairless = order.filter((b) => !share[b].some(isLair));
@@ -4934,21 +5038,21 @@ function makePlaces(seed, land, layout, biomes, catalog) {
   const quota = (b) => 13 + (order.indexOf(b) < 5 ? 1 : 0) - (b === B2.woodland ? 1 : 0);
   for (const b of order) while (share[b].length < quota(b) && next < rest.length) share[b].push(rest[next++]);
   while (next < rest.length) share[order[next % 8]].push(rest[next++]);
-  for (const b of order) for (const { f, t } of share[b].sort((p, q) => ["deep", "large", "standard", "small"].indexOf(p.t) - ["deep", "large", "standard", "small"].indexOf(q.t))) {
+  for (const b of order) for (const { f: f3, t } of share[b].sort((p, q) => ["deep", "large", "standard", "small"].indexOf(p.t) - ["deep", "large", "standard", "small"].indexOf(q.t))) {
     const lair = t === "large" || t === "deep", deep = deepest(b);
-    const s = placeSite(nextId(f, BIOMES[b], t), catalog.site(f, t), b, (i) => spread(i) + (lair ? (band[i] >= deep - 1 ? 6 : 0) + Math.min(inner[i], 4) : t === "small" ? -Math.abs(band[i] - 2.5) * 0.3 : 0) + unit(seed + f + t + i) * 0.8);
-    if (!s) throw Error("No room for a " + t + " " + f + " in " + BIOMES[b]);
+    const s = placeSite(nextId(f3, BIOMES[b], t), catalog.site(f3, t), b, (i) => spread(i) + (lair ? (band[i] >= deep - 1 ? 6 : 0) + Math.min(inner[i], 4) : t === "small" ? -Math.abs(band[i] - 2.5) * 0.3 : 0) + unit(seed + f3 + t + i) * 0.8);
+    if (!s) throw Error("No room for a " + t + " " + f3 + " in " + BIOMES[b]);
   }
   const islets = landmasses.map((l, k) => ({ k, l })).filter(({ l }) => l.classId === "minor-island").map(({ k, l }) => ({ k, i: [...l.cells].sort((a, b) => band[b] - band[a] || a - b)[0] })).filter(({ i }) => !used.has(key2(2 * cx(i), 2 * cy(i)))).sort((a, b) => band[b.i] - band[a.i] || unit(seed + a.i) - unit(seed + b.i));
   if (islets.length < 6) throw Error("Too few islets for the future islands");
-  const futureIslands = catalog.futureIslands.map((f, n) => {
-    const { k, i } = islets[n], dx = cx(i) - f.anchor.x, dy = cy(i) - f.anchor.y, mv = (c) => ({ x: c.x + 2 * dx, y: c.y + 2 * dy });
-    return { anchor: { x: cx(i), y: cy(i) }, approach: mv(f.approach), band: band[i], breathing: mv(f.breathing), entrance: mv(f.entrance), id: f.id, landing: mv(f.landing), landmassId: LM[k] };
+  const futureIslands = catalog.futureIslands.map((f3, n) => {
+    const { k, i } = islets[n], dx = cx(i) - f3.anchor.x, dy = cy(i) - f3.anchor.y, mv = (c) => ({ x: c.x + 2 * dx, y: c.y + 2 * dy });
+    return { anchor: { x: cx(i), y: cy(i) }, approach: mv(f3.approach), band: band[i], breathing: mv(f3.breathing), entrance: mv(f3.entrance), id: f3.id, landing: mv(f3.landing), landmassId: LM[k] };
   });
   const HALLS = { "faction-hq-candidate:martial": "settlement-slot:city:02", "faction-hq-candidate:stealth": "settlement-slot:city:03", "faction-hq-candidate:magic": "settlement-slot:city:01" };
-  const factions = catalog.factions.map((f) => {
-    const s = settlements2.find((s2) => s2.id === HALLS[f.id]), mx = s.anchor.x * 2 + 0.5, my = s.anchor.y * 2 + 0.5, c = [...s.core].sort((a, b) => PM.hypot(a.x - mx, a.y - my) - PM.hypot(b.x - mx, b.y - my) || a.y - b.y || a.x - b.x)[0];
-    return { activity: [], anchor: { x: s.anchor.x, y: s.anchor.y }, approach: [], arrival: [{ x: c.x, y: c.y }], campus: [], contentBinding: null, dimensions: [32, 26], id: f.id, landmassId: s.landmassId, tileOrigin: { x: c.x * 32, y: c.y * 26 }, hallSettlementId: s.id };
+  const factions = catalog.factions.map((f3) => {
+    const s = settlements2.find((s2) => s2.id === HALLS[f3.id]), mx = s.anchor.x * 2 + 0.5, my = s.anchor.y * 2 + 0.5, c = [...s.core].sort((a, b) => PM.hypot(a.x - mx, a.y - my) - PM.hypot(b.x - mx, b.y - my) || a.y - b.y || a.x - b.x)[0];
+    return { activity: [], anchor: { x: s.anchor.x, y: s.anchor.y }, approach: [], arrival: [{ x: c.x, y: c.y }], campus: [], contentBinding: null, dimensions: [32, 26], id: f3.id, landmassId: s.landmassId, tileOrigin: { x: c.x * 32, y: c.y * 26 }, hallSettlementId: s.id };
   });
   return { settlements: settlements2, sites, futureIslands, factions, deepest, inner };
 }
@@ -4999,7 +5103,7 @@ function baseAsset(plan, catalog) {
     return { bounds: { maxXExclusive: maxX, maxYExclusive: maxY, minX, minY }, cellCount: l.cells.length, classId: l.classId, id: l.id };
   });
   const A = places.settlements.find((s) => s.id === "settlement-slot:village-outpost:01"), core = A.core, spawnTile = { x: Math.round(core.reduce((a, c) => a + c.x, 0) / core.length * 32 + 16), y: Math.round(core.reduce((a, c) => a + c.y, 0) / core.length * 26 + 13) };
-  const extraProtected = [...places.settlements.flatMap((s) => marineChunks(s).map((c) => ({ classId: "settlement-marine-approach", x: c.x, y: c.y }))), ...places.factions.flatMap((f) => f.arrival.map((c) => ({ classId: "faction-campus-arrival-approach-activity", x: c.x, y: c.y })))];
+  const extraProtected = [...places.settlements.flatMap((s) => marineChunks(s).map((c) => ({ classId: "settlement-marine-approach", x: c.x, y: c.y }))), ...places.factions.flatMap((f3) => f3.arrival.map((c) => ({ classId: "faction-campus-arrival-approach-activity", x: c.x, y: c.y })))];
   const seen = /* @__PURE__ */ new Set(), extra = extraProtected.filter((e) => {
     const k = e.classId + e.x + "," + e.y;
     if (seen.has(k)) return false;
@@ -5250,7 +5354,7 @@ function planDrainageV3(p, { protectedTile, extraTile, routeAt }) {
     const curve = (n, r) => {
       const P1 = n.point, P2 = r.point, c = main(n), P0 = c ? c.point : { x: 2 * P1.x - P2.x, y: 2 * P1.y - P2.y }, P3 = r.receiver ? nodes.get(r.receiver).point : r.outlet ? r.outlet[Math.min(r.outlet.length - 1, 6)] : { x: 2 * P2.x - P1.x, y: 2 * P2.y - P1.y }, len = PM.hypot(P2.x - P1.x, P2.y - P1.y), steps = Math.max(2, Math.ceil(len / 3)), phase = hash2("meander/" + n.key) % 628 / 100, amp = Math.min(4, len * 0.05), points = [];
       for (let i = 0; i <= steps; i++) {
-        const t = i / steps, t2 = t * t, t3 = t2 * t, f = (a, b, c2, d) => 0.5 * (2 * b + (-a + c2) * t + (2 * a - 5 * b + 4 * c2 - d) * t2 + (-a + 3 * b - 3 * c2 + d) * t3), x = f(P0.x, P1.x, P2.x, P3.x), y = f(P0.y, P1.y, P2.y, P3.y), bend = PM.sin(Math.PI * t) * PM.sin(2 * Math.PI * t + phase) * amp;
+        const t = i / steps, t2 = t * t, t3 = t2 * t, f3 = (a, b, c2, d) => 0.5 * (2 * b + (-a + c2) * t + (2 * a - 5 * b + 4 * c2 - d) * t2 + (-a + 3 * b - 3 * c2 + d) * t3), x = f3(P0.x, P1.x, P2.x, P3.x), y = f3(P0.y, P1.y, P2.y, P3.y), bend = PM.sin(Math.PI * t) * PM.sin(2 * Math.PI * t + phase) * amp;
         points.push({ x: x - (P2.y - P1.y) / len * bend, y: y + (P2.x - P1.x) / len * bend });
       }
       points[0] = { ...P1 };
@@ -5546,26 +5650,26 @@ function mirror(t, id) {
 var WEST = mirror(EAST, "harbor-west");
 var HARBOR_TEMPLATES = freezeWire({ south: SOUTH, east: EAST, west: WEST });
 var FACING = { "0,1": "south", "1,0": "east", "-1,0": "west" };
-var across = (f) => f.y ? { x: 1, y: 0 } : { x: 0, y: 1 };
+var across = (f3) => f3.y ? { x: 1, y: 0 } : { x: 0, y: 1 };
 var box = (list) => {
   const xs = list.map((p) => p.x), ys = list.map((p) => p.y), x = Math.min(...xs), y = Math.min(...ys);
   return { x, y, w: Math.max(...xs) - x + 1, h: Math.max(...ys) - y + 1 };
 };
-var span = (L, f, u, k0, k1, j0, j1) => box([{ x: L.x + f.x * k0 + u.x * j0, y: L.y + f.y * k0 + u.y * j0 }, { x: L.x + f.x * k1 + u.x * j1, y: L.y + f.y * k1 + u.y * j1 }]);
+var span = (L, f3, u, k0, k1, j0, j1) => box([{ x: L.x + f3.x * k0 + u.x * j0, y: L.y + f3.y * k0 + u.y * j0 }, { x: L.x + f3.x * k1 + u.x * j1, y: L.y + f3.y * k1 + u.y * j1 }]);
 function harborLayoutV1(landing, length, id = "ferry:landing") {
-  const f = landing.facing, facing = FACING[f.x + "," + f.y];
+  const f3 = landing.facing, facing = FACING[f3.x + "," + f3.y];
   if (!facing) return null;
-  const t = HARBOR_TEMPLATES[facing], L = landing.tile, u = across(f), origin = { x: L.x - t.landing[0], y: L.y - t.landing[1] }, body = { x: origin.x, y: origin.y, w: t.core[0], h: t.core[1] };
-  const at = (k, j) => ({ x: L.x + f.x * k + u.x * j, y: L.y + f.y * k + u.y * j });
+  const t = HARBOR_TEMPLATES[facing], L = landing.tile, u = across(f3), origin = { x: L.x - t.landing[0], y: L.y - t.landing[1] }, body = { x: origin.x, y: origin.y, w: t.core[0], h: t.core[1] };
+  const at = (k, j) => ({ x: L.x + f3.x * k + u.x * j, y: L.y + f3.y * k + u.y * j });
   const pierDressing = [{ id: "pier:crates", kind: "crates", ...at(2, -1) }, { id: "pier:barrel", kind: "barrels", ...at(3, 1) }, { id: "pier:bollard", kind: "bollard", ...at(length - 2, 1) }, { id: "pier:lamp", kind: "lamp", ...at(length - 1, -1) }];
-  const pier = span(L, f, u, 0, length - 1, -1, 1), boat = span(L, f, u, length - 6, length - 1, 2, 4);
+  const pier = span(L, f3, u, 0, length - 1, -1, 1), boat = span(L, f3, u, length - 6, length - 1, 2, 4);
   return freezeWire({
     version: HARBOR_TOWN_VERSION,
     id: HARBOR_TOWN_ID,
     name: HARBOR_TOWN_NAME,
     landingId: landing.id ?? id,
     facing,
-    f: { ...f },
+    f: { ...f3 },
     u,
     template: t,
     origin,
@@ -5581,7 +5685,7 @@ function harborLayoutV1(landing, length, id = "ferry:landing") {
 function harborFitV1(base, x, y, fx, fy, free = () => true) {
   const facing = FACING[fx + "," + fy];
   if (!facing) return 0;
-  const t = HARBOR_TEMPLATES[facing], ox = x - t.landing[0], oy = y - t.landing[1], f = { x: fx, y: fy }, u = across(f);
+  const t = HARBOR_TEMPLATES[facing], ox = x - t.landing[0], oy = y - t.landing[1], f3 = { x: fx, y: fy }, u = across(f3);
   const sea = (k, j) => {
     const b = base(x + fx * k + u.x * j, y + fy * k + u.y * j);
     return !b.walkable && b.kind === "ocean";
@@ -5655,7 +5759,7 @@ function planCurvedRoads(asset, terrain, waterAt, ferry, stats = {}, opts = {}) 
   };
   for (const s of asset.settlements) for (const c of s.core) owner[c.y * CW + c.x] = own(s.id);
   for (const s of asset.sites) for (const c of s.footprint) owner[c.y * CW + c.x] = own(s.id);
-  for (const f of asset.futureIslands) for (const c of [f.entrance, f.breathing]) owner[c.y * CW + c.x] = own(f.id);
+  for (const f3 of asset.futureIslands) for (const c of [f3.entrance, f3.breathing]) owner[c.y * CW + c.x] = own(f3.id);
   const ownerAt = (x, y) => owner[(y / 26 | 0) * CW + (x >> 5)], allowOf = (ids) => ids.map((id) => ownerKey.get(id) ?? 0);
   const hl = ferry.landings[0], hb = hl?.harborTown ? harborLayoutV1(hl, hl.harborTown.pier).body : null;
   const inHarbor = (x, y) => Boolean(hb) && x >= hb.x - 1 && x <= hb.x + hb.w && y >= hb.y - 1 && y <= hb.y + hb.h, inBody0 = (x, y) => Boolean(hb) && x >= hb.x && x < hb.x + hb.w && y >= hb.y && y < hb.y + hb.h;
@@ -6139,7 +6243,7 @@ function planCurvedRoads(asset, terrain, waterAt, ferry, stats = {}, opts = {}) 
     };
     let shift = P.map((p, i) => {
       if (p.lock) return 0;
-      const f = Math.min(1, near(p.s) / (L1 * 0.45)), fade = f * f * (3 - 2 * f);
+      const f3 = Math.min(1, near(p.s) / (L1 * 0.45)), fade = f3 * f3 * (3 - 2 * f3);
       let m = ((wave(p.s, salt2, L1) - 0.5) * 2 * A1 + (wave(p.s + 977, salt2 + 31, L2) - 0.5) * 2 * A2) * fade;
       for (const sc of [1, 0.6, 0.3, 0]) {
         if (sc === 0 || ok(p.x + nrm[i][0] * m * sc, p.y + nrm[i][1] * m * sc)) {
@@ -6481,8 +6585,8 @@ function planCurvedRoads(asset, terrain, waterAt, ferry, stats = {}, opts = {}) 
       if (!l) grid.set(k, l = []);
       l.push(i);
     }
-    const around = (x0, y0, x1, y1, f) => {
-      for (let by = Math.floor(y0 / 8); by <= Math.floor(y1 / 8); by++) for (let bx = Math.floor(x0 / 8); bx <= Math.floor(x1 / 8); bx++) for (const j of grid.get(by * 1200 + bx) ?? []) f(j);
+    const around = (x0, y0, x1, y1, f3) => {
+      for (let by = Math.floor(y0 / 8); by <= Math.floor(y1 / 8); by++) for (let bx = Math.floor(x0 / 8); bx <= Math.floor(x1 / 8); bx++) for (const j of grid.get(by * 1200 + bx) ?? []) f3(j);
     };
     const real = xs.length;
     for (let i = 0; i < real; i++) around(xs[i] - 3, ys[i] - 3, xs[i] + 3, ys[i] + 3, (j) => {
@@ -6555,7 +6659,7 @@ function planFerry(asset, terrain, layout) {
   };
   for (const s of asset.sites) for (const c of [...s.footprint, ...s.approach]) hold(c);
   for (const s of asset.settlements) for (const c of s.core) hold(c);
-  for (const f of asset.futureIslands) for (const c of [f.entrance, f.breathing]) hold(c);
+  for (const f3 of asset.futureIslands) for (const c of [f3.entrance, f3.breathing]) hold(c);
   const free = (x, y) => !taken.has(Math.floor(x / 32) + "," + Math.floor(y / 26));
   const own = /* @__PURE__ */ new Set();
   {
@@ -6635,7 +6739,7 @@ function planDestinations(asset) {
       return { id: s.id, kind: main.test(s.id) ? "main" : "secondary", landmassId: s.landmassId, point: centre(socket), reservationId: s.id, socket };
     }),
     ...asset.sites.map((s) => ({ id: s.id, kind: "trail", landmassId: s.landmassId, point: centre(s.approach[0]), reservationId: s.id, socket: s.approach[0] })),
-    ...asset.futureIslands.map((f) => ({ id: f.id, kind: "trail", landmassId: f.landmassId, point: centre(f.approach), reservationId: f.id, socket: f.approach }))
+    ...asset.futureIslands.map((f3) => ({ id: f3.id, kind: "trail", landmassId: f3.landmassId, point: centre(f3.approach), reservationId: f3.id, socket: f3.approach }))
   ];
 }
 
@@ -6675,7 +6779,7 @@ function planEvents(asset, terrain, roads, waterAt) {
   };
   for (const s of asset.settlements) for (const c of [...s.core, ...s.expansion, ...s.sockets]) res(c);
   for (const s of asset.sites) for (const c of [...s.footprint, ...s.approach]) res(c);
-  for (const f of asset.futureIslands) for (const c of [f.entrance, f.approach, f.landing, f.breathing]) res(c, 0);
+  for (const f3 of asset.futureIslands) for (const c of [f3.entrance, f3.approach, f3.landing, f3.breathing]) res(c, 0);
   for (const e of asset.extraProtected) res(e, 0);
   for (const c of asset.originZone.runtimeChunks) res({ x: c.chunkX, y: c.chunkY }, 0);
   for (const l of asset.ferry.landings) for (const t of [...l.arrivals, ...l.approach]) res({ x: Math.floor(t.x / 32), y: Math.floor(t.y / 26) }, 1);
@@ -6817,7 +6921,7 @@ function makeWorld(seed, catalog, tries = 4, onStep = null) {
       why.push(variant + ": " + e.message);
       continue;
     }
-    const bad = [...w.asset.hydrologyPlan.failures.map((f) => f.code), ...w.asset.routes.failures.map((f) => f.code)];
+    const bad = [...w.asset.hydrologyPlan.failures.map((f3) => f3.code), ...w.asset.routes.failures.map((f3) => f3.code)];
     w.asset.upstream = { ...w.asset.upstream, seed, variant: attempt, retries: why };
     if (!bad.length) break;
     why.push(variant + ": " + bad.join(" "));
@@ -6874,10 +6978,10 @@ function buildWorld(seed, catalog, onStep) {
     const kind = (x, y) => terrainR2.waterGeometry.sampleCoast(x, y)?.water ? 3 : waterAt2(x, y);
     const bridgePlan2 = planHydrologyBridgesV2({ ...asset, routes: { ...asset.routes, edges: roads2.edges, bridges: [] } }, kind);
     G = { rivers: rivers2, waterAt: waterAt2, terrainR: terrainR2, roads: roads2, bridgePlan: bridgePlan2 };
-    const bad = bridgePlan2.failures.filter((f) => f.start && f.end || f.a && f.z);
+    const bad = bridgePlan2.failures.filter((f3) => f3.start && f3.end || f3.a && f3.z);
     if (!bad.length || passes === 5) break;
-    for (const f of bad) {
-      const a = f.start ?? f.a, z = f.end ?? f.z;
+    for (const f3 of bad) {
+      const a = f3.start ?? f3.a, z = f3.end ?? f3.z;
       guards.push({ x1: Math.min(a.x, z.x) - 12, y1: Math.min(a.y, z.y) - 12, x2: Math.max(a.x, z.x) + 12, y2: Math.max(a.y, z.y) + 12 });
     }
   }
@@ -6890,8 +6994,8 @@ function buildWorld(seed, catalog, onStep) {
   t = lap("events", t);
   const caveTrail = roads.edges.find((e) => e.from === FIRST_CAVE);
   asset.firstJourney.trail.path = caveTrail ? [...caveTrail.path].reverse() : [asset.routes.destinations.find((d) => d.id === FIRST_CAVE).point];
-  const soft = rivers.failures.filter((f) => f.code === "BASIN_TARGET_UNMET");
-  rivers.failures = rivers.failures.filter((f) => f.code !== "BASIN_TARGET_UNMET");
+  const soft = rivers.failures.filter((f3) => f3.code === "BASIN_TARGET_UNMET");
+  rivers.failures = rivers.failures.filter((f3) => f3.code !== "BASIN_TARGET_UNMET");
   asset.hydrologyPlan = hydrologyPlan(asset, rivers, bridgePlan, parent);
   asset.hydrologyPlan.notes = { basinTargetsUnmet: soft };
   asset.worldReshape = reshapeLayer(asset, ferry);
@@ -6913,9 +7017,9 @@ function catalogFrom(c) {
   const shape = new Map(Object.entries(c.shapes));
   return {
     settlements: new Map(c.settlements.map((s) => [s.id, s])),
-    site: (f, t) => {
-      const s = shape.get(f + "/" + t);
-      if (!s) throw Error("No shape for " + f + "/" + t);
+    site: (f3, t) => {
+      const s = shape.get(f3 + "/" + t);
+      if (!s) throw Error("No shape for " + f3 + "/" + t);
       return s;
     },
     signatures: c.signatures.map((s) => ({ ...s, biome: s.id.split(":")[2] })),
