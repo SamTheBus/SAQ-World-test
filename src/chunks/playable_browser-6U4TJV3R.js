@@ -82540,8 +82540,8 @@ function createInventoryPresentation({ document: document2, environment, readMod
       scroll.append(tabs);
     } else {
       const note = element("div", "", "gx-compareline");
-      if (equippedSlot) note.append(`Worn in your ${SLOT_NAMES[equippedSlot].replace(/ \d$/, "")} slot`);
-      else if (worn.length) {
+      if (equippedSlot) {
+      } else if (worn.length) {
         note.append("Arrows compare with your worn ");
         for (const w of worn) {
           const name = element("b", displayName(itemDefinition(w)));
