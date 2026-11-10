@@ -13584,6 +13584,7 @@ function adoptEncounterCompositionV1(s, g, level, { rescale = false } = {}) {
   let count2 = g.entityIds.filter((id) => root2.elitesByEntityId[id] && familyOf2(s, id) !== "broodling").length;
   const chosen = new Map([...broodElitesV1(s, g), ...huntChampionElitesV1(s, g), ...compositionCandidatesV1(s, g, level).filter((c) => !root2.elitesByEntityId[c.id]).slice(0, Math.max(0, budget - count2))].filter((c) => !root2.elitesByEntityId[c.id]).map((c) => [c.id, c]));
   for (const [n, id] of g.entityIds.entries()) {
+    if (aegisMimicFor(s, id)) continue;
     const prior = root2.elitesByEntityId[id], c = chosen.get(id), spec = f3?.encounter.members[n];
     if (prior?.version === COMPOSITION_ELITE_V1 || String(spec?.memberKey).startsWith("finale:") || !prior && !c) continue;
     const primary = prior?.affixIds[0] ?? c.primary, source7 = prior?.identitySource ?? { campaignSeed: s.campaign.seed.seedHex, siteId: g.siteId, floorId: f3?.floorId ?? null, groupId: g.groupId, roomId: spec?.roomId ?? "overworld-pack", entityId: id, affixId: primary }, traits = passiveEliteTraitsV1(source7, level);
