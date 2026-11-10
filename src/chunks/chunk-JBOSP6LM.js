@@ -2322,6 +2322,9 @@ function validateCommand(command) {
   } else if (command.kind === "discovery.readNote") {
     closedRecord(command.payload, ["noteId"]);
     requireContract(command.payload.noteId === "note:alderwood:woodland-trail-v1", "Unknown discovery note");
+  } else if (command.kind === "quest.act") {
+    closedRecord(command.payload, ["action", "questId"]);
+    requireContract(["take", "abandon", "turnIn", "search", "deliver"].includes(command.payload.action) && typeof command.payload.questId === "string" && command.payload.questId.length <= 96 && /^q[bf]:[a-z0-9:-]+$/.test(command.payload.questId), "Invalid quest command");
   } else if (command.kind === "loot.pickup") {
     closedRecord(command.payload, ["sourceEntityId", "inventoryRevision"]);
     validateId("entityId", command.payload.sourceEntityId);
@@ -19257,7 +19260,7 @@ function applyServiceAction(s, p, c, order) {
 function serviceGoldAdjustment(p, gold) {
   const l = p.inventory.services;
   if (!l) return gold;
-  let income = l.retiredSaleGold, spent = addAmount(addAmount(multiplyAmount(String(l.supplyPurchases), SETTLEMENT_LIFE_POLICY.supply.price), multiplyAmount(String(l.restCount), SETTLEMENT_LIFE_POLICY.rest.price)), potionUpgradeSpent(p));
+  let income = addAmount(l.retiredSaleGold, l.questGold ?? "0"), spent = addAmount(addAmount(multiplyAmount(String(l.supplyPurchases), SETTLEMENT_LIFE_POLICY.supply.price), multiplyAmount(String(l.restCount), SETTLEMENT_LIFE_POLICY.rest.price)), potionUpgradeSpent(p));
   for (const r of Object.values(l.salesByItemId)) income = addAmount(income, r.gold);
   for (const r of Object.values(l.purchasesBySourceId)) {
     if (r.offerId.startsWith(DAILY)) {
@@ -19277,7 +19280,8 @@ function validateSettlementServices(s, p, validateCommand2) {
     return;
   }
   requireContract(l, "Missing service state");
-  closedRecord(l, ["version", "purchasesBySourceId", "salesByItemId", "retiredSaleGold", "supplyPurchases", "suppliesUsed", "restCount", "lastTransaction"], ["workshop", "combatHash", "potions"]);
+  closedRecord(l, ["version", "purchasesBySourceId", "salesByItemId", "retiredSaleGold", "supplyPurchases", "suppliesUsed", "restCount", "lastTransaction"], ["workshop", "combatHash", "potions", "questGold"]);
+  if (Object.hasOwn(l, "questGold")) amount(l.questGold);
   requireContract((l.combatHash ?? null) === (hasWorldCombat(s) ? WORLD_COMBAT_HASH : null), "Service combat policy drift");
   validateWorkshop(s, p, validateCommand2);
   requireContract(l.version === SETTLEMENT_LIFE_VERSION, "Unknown service version");
@@ -19339,6 +19343,7 @@ function validateServiceProgress(before, after, pid) {
   requireContract(Boolean(x) === Boolean(y), "Service state changed after genesis");
   if (!x) return;
   requireContract(y.supplyPurchases >= x.supplyPurchases && y.suppliesUsed >= x.suppliesUsed && y.restCount >= x.restCount, "Service counters regressed");
+  requireContract(compareAmount(y.questGold ?? "0", x.questGold ?? "0") >= 0, "Quest gold regressed");
   const upgrades = validatePotionProgress(x, y);
   for (const [id, r] of Object.entries(x.purchasesBySourceId)) requireContract(same16(r, y.purchasesBySourceId[id]), "Purchase history rewritten");
   let retired = x.retiredSaleGold;
@@ -27436,6 +27441,7 @@ export {
   oldwardAreaDefinition,
   oldwardSpace,
   integerRoot,
+  minutesGold,
   potionRefillPriceV1,
   WORLD_COMBAT_VERSION,
   WORLD_COMBAT_HASH,
@@ -27523,6 +27529,7 @@ export {
   worldRolesV1,
   ferryNetworkV1,
   settlementV1,
+  worldSiteV1,
   worldRevisionV1,
   STARTER_VERSION,
   STARTER_VILLAGE_ID,
@@ -27609,6 +27616,7 @@ export {
   newPopulationSelection,
   formatLarge,
   integerRatio,
+  amount,
   addAmount,
   subtractAmount,
   compareAmount,
@@ -27790,9 +27798,11 @@ export {
   createForestStandsV2,
   ENCHANTER_TOWER_V1,
   shopkeeperCastV1,
+  generatedTownNpcsV1,
   SERVICES_V2,
   SERVICES_V2_HASH,
   serviceNpcsFor,
+  serviceNpcByIdV1,
   MULTIROOM_VERSION,
   MULTIROOM_HASH,
   usesMultiroom,
@@ -27911,6 +27921,7 @@ export {
   projectHostileHazardsD12_4J,
   subweaponSuppressedD12_4I,
   adoptEncounterCompositionV1,
+  siteEndSpecV1,
   siteRewardKindV1,
   CRYPT_POPULATION_VERSION,
   CRYPT_POPULATION_CATALOG,
@@ -28073,8 +28084,12 @@ export {
   collectGroundPotions,
   potionDropCount,
   potionUpgrade,
+  WORLD_TIME_POLICY,
   worldTimeAtTick,
   worldTimeAtMinute,
+  accessibleServiceNpc,
+  restockDay,
+  restockTicksLeft,
   saleQuote,
   supplyCount,
   serviceActionProblem,
