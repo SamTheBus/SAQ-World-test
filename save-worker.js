@@ -2269,7 +2269,7 @@ function townGeometryV1(t) {
   geoCache.set(t, g);
   return g;
 }
-var TOWN_NEW_ART = Object.freeze(/* @__PURE__ */ new Set(["grassland", "woodland", "desert"]));
+var TOWN_NEW_ART = Object.freeze(/* @__PURE__ */ new Set(["grassland", "woodland", "desert", "frostland"]));
 var townNewArtV1 = (t) => TOWN_NEW_ART.has(t?.biome);
 var LANE = 8;
 var LANE_END = 0.3;
@@ -2704,7 +2704,7 @@ function townRasterV1(t) {
   });
   const A = townArtBuildingsV1(t), ownPath = new Set([A.chapel, A.hall, ...A.manors, A.barracks, A.stables].filter(Boolean).map((b) => b.id));
   if (townNewArtV1(t)) ownPath.add("b:900");
-  if (t.biome === "desert") for (const b of tp.buildings) ownPath.add(b.id);
+  if (t.biome === "desert" || t.biome === "frostland") for (const b of tp.buildings) ownPath.add(b.id);
   for (const b of tp.buildings) if (b.porch && !ownPath.has(b.id)) rectDo(b.porch, (x, y) => {
     if (mat[idx(x, y)] === 1) mat[idx(x, y)] = 3;
   });
