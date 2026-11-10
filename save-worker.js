@@ -9121,7 +9121,7 @@ async function completePopulationReservation(r, asset, binding, sha256) {
     n.socket.provenance.placementVersion = n.parcel.version = CRYPT_POPULATION_VERSION;
   }
   n.socket.provenance.populationHash = ALPHA_POPULATION_HASH;
-  n.parcel.label = s.id === worldRolesV1().firstCave ? "Alderwood Outskirts Cave" : siteNameV1(asset, s.id) ?? label(n.parcel.tier ?? s.tier, plannedSiteBiome(asset, s.id), family2);
+  n.parcel.label = s.id === worldRolesV1().firstCave ? "Alderwood Outskirts Cave" : (isSeededBindingV1(binding) ? siteNameV1(asset, s.id) : null) ?? label(n.parcel.tier ?? s.tier, plannedSiteBiome(asset, s.id), family2);
   const version = n.socket.provenance.placementVersion, extra = family2 === "ruin" || family2 === "crypt" ? "/" + PLANNED_RUIN_EXTERIOR_VERSION2 + (family2 === "ruin" && s.tier === "standard" ? "/" + STANDARD_RUIN_KIT_VERSION : "") : "";
   const c = await worldIdentity(PLANNED_WORLD_VERSION + "/" + NATURAL_CLUSTER_VERSION + "/" + asset.campaignSeedHex + "/" + binding.assetHash + (binding.townPrototype ? "/" + binding.townPrototype : "") + "/" + version + extra, "chunk", [n.socket.entrance.chunkX, n.socket.entrance.chunkY], sha256);
   n.socket.provenance.chunkId = c.id;
