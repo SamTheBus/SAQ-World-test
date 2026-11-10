@@ -11947,8 +11947,15 @@ function validateProvisions(p, s, validateCommand2) {
   requireContract(s.format === D6_ACTIVITY_FORMAT && b.version === "base-provisions-d6-1", "Invalid provision version");
   closedRecord(b.claims, [], SUBWEAPON_TYPES);
   for (const [type, r] of Object.entries(b.claims)) {
-    closedRecord(r, ["sourceEntityId", "command", "authorityOrder", "tick", "revision"]);
+    const carried = r.arrival !== void 0;
+    closedRecord(r, ["sourceEntityId", ...carried ? ["arrival"] : ["command", "authorityOrder", "tick", "revision"]]);
     requireContract(/^ent:[0-9a-f]{32}$/.test(r.sourceEntityId) && BigInt("0x" + r.sourceEntityId.slice(4)) <= BigInt(s.identitySequence), "Invalid provision identity fence");
+    if (carried) {
+      requireContract(r.arrival === i.renewal?.arrival?.heroId, "Provision arrival mismatch");
+      const item2 = i.itemsById[`item:${p.playerId}:${r.sourceEntityId}`] ?? i.renewal.groundBySourceId[r.sourceEntityId]?.item;
+      requireContract(item2?.definitionId === SUBWEAPONS[type].definitionId, "Claimed subweapon lost or replaced");
+      continue;
+    }
     validateCommand2(r.command);
     const c = r.command;
     requireContract(c.kind === "subweapon.claim" && c.payload.subType === type && c.playerId === p.playerId && c.sessionId === s.session.sessionId && c.campaignId === s.campaign.campaignId && provisionLevelAllowed(p, type), "Invalid provision receipt");
@@ -14924,7 +14931,8 @@ var classKitPiece = (p, sourceEntityId) => {
 };
 function validateClassKit(p, s, validateCommand2) {
   const i = p.inventory, k = i.classKit;
-  closedRecord(k, ["version", "heroClass", "sourceEntityIds", "command", "authorityOrder", "tick", "revision"]);
+  closedRecord(k, ["version", "heroClass", "sourceEntityIds", ...k.arrival !== void 0 ? ["arrival"] : ["command", "authorityOrder", "tick", "revision"]]);
+  requireContract(k.arrival === void 0 || k.arrival === i.renewal?.arrival?.heroId, "Class kit arrival mismatch");
   requireContract(s.format === D6_ACTIVITY_FORMAT && k.version === CLASS_KIT_VERSION && i.subweapons, "Invalid class kit version");
   requireContract(heroClassOf(p.d8)?.id === k.heroClass && Boolean(CLASS_KITS[k.heroClass]), "Class kit for another class");
   requireContract(Array.isArray(k.sourceEntityIds) && k.sourceEntityIds.length === CLASS_KIT_PIECES.length && new Set(k.sourceEntityIds).size === CLASS_KIT_PIECES.length, "Invalid class kit pieces");
@@ -14933,6 +14941,7 @@ function validateClassKit(p, s, validateCommand2) {
     const item = i.itemsById[`item:${p.playerId}:${id}`] ?? i.renewal.groundBySourceId[id]?.item;
     requireContract(item?.definitionId === CLASS_KITS[k.heroClass][CLASS_KIT_PIECES[n]], "Class kit piece lost or replaced");
   }
+  if (k.arrival !== void 0) return;
   validateCommand2(k.command);
   const c = k.command;
   requireContract(c.kind === "classkit.claim" && c.playerId === p.playerId && c.sessionId === s.session.sessionId && c.campaignId === s.campaign.campaignId, "Invalid class kit receipt");
@@ -15696,6 +15705,21 @@ function groundOccupancyWindowD9(state, p, radius) {
   return { center: spaceId === state.overworldInstanceId ? localFramePositionD9(actor.position, state.d9World.runtime.frames) : legacyWorldPosition(actor.position) };
 }
 
+// src/shared/contracts/hero_arrival_v1.js
+var HERO_ARRIVAL_VERSION = "hero-arrival-v1";
+var HERO_ID = /^hero:[0-9a-z-]{1,64}$/;
+var validHeroId = (id) => typeof id === "string" && HERO_ID.test(id);
+var same5 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+function validateCarriedGear(g, witness) {
+  if (!witness || !Object.keys(witness).length) {
+    validateGeneratedGear(g, g.seed, g.progression ?? g.contentDepth);
+    return g;
+  }
+  closedRecord(witness, [], ["tier", "family", "subType", "noun"]);
+  requireContract(same5(generateGear3(g.seed, g.progression, witness), g), "Carried gear differs from its own seed");
+  return g;
+}
+
 // src/shared/contracts/hollow_mouth_clearance_v3.js
 function runtimeCollisionPageD9(page) {
   const tiles3 = [...page.collision.tiles], blockers2 = page.visual?.blockers ?? [], decorations3 = page.visual?.decorations ?? [];
@@ -15920,11 +15944,11 @@ var WILDERNESS_ECOLOGY_V3_5_COVERAGE = Object.freeze([...approved.values()].redu
 
 // src/shared/contracts/ordinary_roster_v1.js
 var ORDINARY_ROSTER_V1 = "dungeon-ordinary-roster-v1";
-var same5 = (a, b) => a === b || a !== void 0 && b !== void 0 && canonicalStringify(a) === canonicalStringify(b);
+var same6 = (a, b) => a === b || a !== void 0 && b !== void 0 && canonicalStringify(a) === canonicalStringify(b);
 var rankFor = (id) => ["C", "B", "A", "S"][ORDINARY_ENEMIES.findIndex((e) => ordinaryEnemyForProfile(id) === e) >= 0 ? (parseInt(id.slice(8), 16) - 1) % 4 : 0];
 var origin = (s) => s.content?.definitionsById?.[s.campaign.overworld?.manifestDefinitionId];
 var recordFor = (s, id) => s.d9World?.episodes[id]?.ordinaryRoster;
-var newProfilesReady = (s) => Boolean(s.d9World?.ordinaryRoster) || DUNGEON_MOBS_V1_PROFILES.every((p) => same5(s.content?.definitionsById?.[p.contentDefinitionId], p));
+var newProfilesReady = (s) => Boolean(s.d9World?.ordinaryRoster) || DUNGEON_MOBS_V1_PROFILES.every((p) => same6(s.content?.definitionsById?.[p.contentDefinitionId], p));
 var poolFor = (biome, family2, tier2) => {
   if (family2 === "crypt" && tier2 === "deep") return { key: "crypt:deep", ranged: ["void_orb"], melee: ["marsh_ghost", "corroded_golem"] };
   if (family2 === "crypt" || family2 === "ruin") return { key: family2 + ":haunted", ranged: ["toxic_fly"], melee: ["marsh_ghost", "corroded_golem"] };
@@ -16082,7 +16106,7 @@ function validateOrdinaryRosterState(s) {
     safeInteger(row.adoptedEpisode, 0, s.encounterEconomy.groups[id].episode);
     safeInteger(row.adoptedTick, root.activatedTick, s.tick);
     const context = contextFor(s, g);
-    requireContract(context && context.pool.key === row.poolKey && same5(selection(s, g, context), row.substitutionsById), "Roster deterministic selection drift");
+    requireContract(context && context.pool.key === row.poolKey && same6(selection(s, g, context), row.substitutionsById), "Roster deterministic selection drift");
     for (const [entityId2, sub] of Object.entries(row.substitutionsById)) {
       closedRecord(sub, ["fromProfileId", "toProfileId"]);
       requireContract(s.entitiesById[entityId2]?.contentDefinitionId === sub.toProfileId && g.entityIds.includes(entityId2), "Roster actor profile drift");
@@ -16091,20 +16115,20 @@ function validateOrdinaryRosterState(s) {
 }
 function ordinaryRosterAdoptionForGroup(a, b, id) {
   try {
-    if (a.tick !== b.tick || !hasWorldCombat(a) || !newProfilesReady(a) || recordFor(a, id) || !a.groupsById[id] || !same5(a.playersById, b.playersById) || !same5(a.groupsById[id], b.groupsById[id]) || !same5(a.encounterEconomy.groups[id], b.encounterEconomy.groups[id])) return false;
+    if (a.tick !== b.tick || !hasWorldCombat(a) || !newProfilesReady(a) || recordFor(a, id) || !a.groupsById[id] || !same6(a.playersById, b.playersById) || !same6(a.groupsById[id], b.groupsById[id]) || !same6(a.encounterEconomy.groups[id], b.encounterEconomy.groups[id])) return false;
     const draft = copyWire(a);
     adoptOrdinaryRosters(draft, { groupIds: [id] });
-    return same5(recordFor(draft, id), recordFor(b, id)) && Boolean(recordFor(b, id)) && a.groupsById[id].entityIds.every((key9) => same5(draft.entitiesById[key9], b.entitiesById[key9]));
+    return same6(recordFor(draft, id), recordFor(b, id)) && Boolean(recordFor(b, id)) && a.groupsById[id].entityIds.every((key9) => same6(draft.entitiesById[key9], b.entitiesById[key9]));
   } catch {
     return false;
   }
 }
 function validateOrdinaryRosterProgress(a, b) {
   const before = a.d9World?.ordinaryRoster, after = b.d9World?.ordinaryRoster;
-  requireContract(same5(before, after) || !before && after?.version === ORDINARY_ROSTER_V1 && after.activatedTick === b.tick && a.tick === b.tick && newProfilesReady(a), "Ordinary roster binding changed");
+  requireContract(same6(before, after) || !before && after?.version === ORDINARY_ROSTER_V1 && after.activatedTick === b.tick && a.tick === b.tick && newProfilesReady(a), "Ordinary roster binding changed");
   for (const [id, episode] of Object.entries(a.d9World.episodes)) {
     const prior = episode.ordinaryRoster, next = recordFor(b, id);
-    if (same5(prior, next)) continue;
+    if (same6(prior, next)) continue;
     if (prior && !b.groupsById[id] && !b.d9World.episodes[id]) continue;
     const oldEconomy = a.encounterEconomy.groups[id], newEconomy = b.encounterEconomy.groups[id], renewal = !prior && next && oldEconomy && newEconomy && newEconomy.episode === oldEconomy.episode + 1 && next.adoptedEpisode === newEconomy.episode && next.adoptedTick === newEconomy.startedTick && newEconomy.startedTick >= a.tick;
     requireContract(!prior && (ordinaryRosterAdoptionForGroup(a, b, id) || renewal), "Ordinary roster episode history changed");
@@ -16113,13 +16137,13 @@ function validateOrdinaryRosterProgress(a, b) {
 
 // src/shared/contracts/ordinary_roster_v2.js
 var ORDINARY_ROSTER_V2 = "dungeon-ordinary-roster-v2";
-var same6 = (a, b) => a === b || a !== void 0 && b !== void 0 && canonicalStringify(a) === canonicalStringify(b);
+var same7 = (a, b) => a === b || a !== void 0 && b !== void 0 && canonicalStringify(a) === canonicalStringify(b);
 var rankFor2 = (id) => ["C", "B", "A", "S"][(parseInt(id.slice(8), 16) - 1) % 4];
 var recordFor2 = (s, id) => s.d9World?.episodes[id]?.ordinaryRosterV2;
-var completeCatalog = (s) => [...DUNGEON_MOBS_V2_ENEMIES, ...DUNGEON_MOBS_V2_PROFILES].every((p) => same6(s.content?.definitionsById?.[p.contentDefinitionId], p));
+var completeCatalog = (s) => [...DUNGEON_MOBS_V2_ENEMIES, ...DUNGEON_MOBS_V2_PROFILES].every((p) => same7(s.content?.definitionsById?.[p.contentDefinitionId], p));
 var ready = (s) => completeCatalog(s) || Boolean(s.streamCapture && s.d9World?.ordinaryRosterV2?.version === ORDINARY_ROSTER_V2);
 var natives = new Set(BIOME_CREATURE_FAMILIES_V1);
-var nativeCatalog = (s) => [...BIOME_CREATURES_V1_ENEMIES, ...BIOME_CREATURES_V1_PROFILES].every((p) => same6(s.content?.definitionsById?.[p.contentDefinitionId], p));
+var nativeCatalog = (s) => [...BIOME_CREATURES_V1_ENEMIES, ...BIOME_CREATURES_V1_PROFILES].every((p) => same7(s.content?.definitionsById?.[p.contentDefinitionId], p));
 var mountain = ["gilded_scuttler", "mimic_shield"];
 var voids = ["void_crawler", "void_spectre", "void_wraith", "rift_drifter"];
 var clockwork = ["clockwork_scarab", "star_weaver", "coin_elemental", "temporal_watcher", "clockwork_drone"];
@@ -16284,7 +16308,7 @@ function validateOrdinaryRosterV2State(s) {
     safeInteger(row.adoptedEpisode, 0, s.encounterEconomy.groups[id].episode);
     safeInteger(row.adoptedTick, root.activatedTick, s.tick);
     const context = contextFor2(s, g);
-    requireContract(context && context.key === row.poolKey && same6(selection2(s, g, context), row.substitutionsById), "V2 roster deterministic selection drift");
+    requireContract(context && context.key === row.poolKey && same7(selection2(s, g, context), row.substitutionsById), "V2 roster deterministic selection drift");
     for (const [entityId2, sub] of Object.entries(row.substitutionsById)) {
       closedRecord(sub, ["fromProfileId", "toProfileId"]);
       requireContract(s.entitiesById[entityId2]?.contentDefinitionId === sub.toProfileId && g.entityIds.includes(entityId2), "V2 roster actor profile drift");
@@ -16293,20 +16317,20 @@ function validateOrdinaryRosterV2State(s) {
 }
 function ordinaryRosterV2AdoptionForGroup(a, b, id) {
   try {
-    if (a.tick !== b.tick || !hasWorldCombat(a) || !ready(a) || recordFor2(a, id) || !a.groupsById[id] || !same6(a.playersById, b.playersById) || !same6(a.groupsById[id], b.groupsById[id]) || !same6(a.encounterEconomy.groups[id], b.encounterEconomy.groups[id])) return false;
+    if (a.tick !== b.tick || !hasWorldCombat(a) || !ready(a) || recordFor2(a, id) || !a.groupsById[id] || !same7(a.playersById, b.playersById) || !same7(a.groupsById[id], b.groupsById[id]) || !same7(a.encounterEconomy.groups[id], b.encounterEconomy.groups[id])) return false;
     const draft = copyWire(a);
     adoptOrdinaryRostersV2(draft, { groupIds: [id] });
-    return Boolean(recordFor2(b, id)) && same6(recordFor2(draft, id), recordFor2(b, id)) && a.groupsById[id].entityIds.every((key9) => same6(draft.entitiesById[key9], b.entitiesById[key9]));
+    return Boolean(recordFor2(b, id)) && same7(recordFor2(draft, id), recordFor2(b, id)) && a.groupsById[id].entityIds.every((key9) => same7(draft.entitiesById[key9], b.entitiesById[key9]));
   } catch {
     return false;
   }
 }
 function validateOrdinaryRosterV2Progress(a, b) {
   const before = a.d9World?.ordinaryRosterV2, after = b.d9World?.ordinaryRosterV2;
-  requireContract(same6(before, after) || !before && after?.version === ORDINARY_ROSTER_V2 && after.activatedTick === b.tick && a.tick === b.tick && ready(a), "V2 ordinary roster binding changed");
+  requireContract(same7(before, after) || !before && after?.version === ORDINARY_ROSTER_V2 && after.activatedTick === b.tick && a.tick === b.tick && ready(a), "V2 ordinary roster binding changed");
   for (const [id, episode] of Object.entries(a.d9World.episodes)) {
     const prior = episode.ordinaryRosterV2, next = recordFor2(b, id);
-    if (same6(prior, next)) continue;
+    if (same7(prior, next)) continue;
     if (prior && !b.groupsById[id] && !b.d9World.episodes[id]) continue;
     const oldEconomy = a.encounterEconomy.groups[id], newEconomy = b.encounterEconomy.groups[id], renewal = !prior && next && oldEconomy && newEconomy && newEconomy.episode === oldEconomy.episode + 1 && next.adoptedEpisode === newEconomy.episode && next.adoptedTick === newEconomy.startedTick && newEconomy.startedTick >= a.tick;
     requireContract(!prior && (ordinaryRosterV2AdoptionForGroup(a, b, id) || renewal), "V2 ordinary roster episode history changed");
@@ -17274,7 +17298,7 @@ var CRYPT_DEFINITION_V2 = Object.freeze({ package: CRYPT_PACKAGE_V2, family: { l
 var CRYPT_DEFINITION_V3 = Object.freeze({ ...CRYPT_DEFINITION_V2, family: { label: "Crypt" }, package: CRYPT_POPULATION_PACKAGE });
 
 // src/shared/contracts/planned_crypt_v2.js
-var same7 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same8 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var digest = (v) => typeof v === "string" && /^[a-f0-9]{64}$/.test(v);
 function validatePlannedCryptSocketV2(s) {
   const p = s.provenance, fixture = p.reservationId === LARGE_CRYPT_FIXTURE_ID;
@@ -17283,7 +17307,7 @@ function validatePlannedCryptSocketV2(s) {
   requireContract(CRYPT_TIER_POLICY_V2[p.sizeTier] && (fixture ? p.sizeTier === "large" && s.region.biome === "upland" : [ALPHA_STANDARD_CRYPT_ID, ALPHA_DEEP_CRYPT_ID].includes(p.reservationId) && plannedSiteRole(p.reservationId, "crypt", p.sizeTier, s.region.biome, p.band)), "Crypt V2 role drift");
   requireContract((fixture ? p.band === 3 : siteFits(p.reservationId, s.region.biome, p.band, 3)) && s.minimumLevel === [0, 1, 6, 11, 21, 41][p.band], "Crypt V2 progression drift");
   const expected = p.sizeTier === "deep" ? { core: { x: 138, y: 156 }, approach: { x: 138, y: 157 } } : { core: { x: 148, y: 222 }, approach: { x: 149, y: 222 } };
-  requireContract(same7(p.footprintChunks, [expected.core]) && same7(p.approachChunks, [expected.approach]), "Crypt V2 compact capacity drift");
+  requireContract(same8(p.footprintChunks, [expected.core]) && same8(p.approachChunks, [expected.approach]), "Crypt V2 compact capacity drift");
   requireContract(s.entrance.chunkX === String(1024 + expected.core.x) && s.entrance.chunkY === String(1024 + expected.core.y) && s.entrance.localX === 528 && s.entrance.localY === 432, "Crypt V2 doorway drift");
   return s;
 }
@@ -17293,12 +17317,12 @@ function validatePlannedCryptReservationV2(root, r) {
   validatePlannedCryptSocketV2(s);
   closedRecord(q, ["version", "siteId", "socket", "familyId", "packageId", "tier", "label", "tileX", "tileY", "width", "height", "layoutSeed", "pages", "roadAnchor"]);
   const f3 = p.footprintChunks[0];
-  requireContract(q.version === PLANNED_CRYPT_V2 && q.siteId === r.siteId && same7(q.socket, s) && q.familyId === "site-family:crypt" && q.packageId === r.packageId && q.tier === p.sizeTier && q.label === s.region.biome[0].toUpperCase() + s.region.biome.slice(1) + " Crypt" && q.width === 12 && q.height === 12 && q.tileX === String((1024 + f3.x) * 32 + 10) && q.tileY === String((1024 + f3.y) * 26 + 5) && q.layoutSeed === s.siteSeed && same7(q.pages, [{ chunkX: String(1024 + f3.x), chunkY: String(1024 + f3.y) }]) && p.assetHash === root.plannedWorld.assetHash && p.planHash === root.plannedWorld.planHash, "Crypt V2 parcel drift");
+  requireContract(q.version === PLANNED_CRYPT_V2 && q.siteId === r.siteId && same8(q.socket, s) && q.familyId === "site-family:crypt" && q.packageId === r.packageId && q.tier === p.sizeTier && q.label === s.region.biome[0].toUpperCase() + s.region.biome.slice(1) + " Crypt" && q.width === 12 && q.height === 12 && q.tileX === String((1024 + f3.x) * 32 + 10) && q.tileY === String((1024 + f3.y) * 26 + 5) && q.layoutSeed === s.siteSeed && same8(q.pages, [{ chunkX: String(1024 + f3.x), chunkY: String(1024 + f3.y) }]) && p.assetHash === root.plannedWorld.assetHash && p.planHash === root.plannedWorld.planHash, "Crypt V2 parcel drift");
   return r;
 }
 
 // src/shared/contracts/planned_ruin_v2.js
-var same8 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same9 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var digest2 = (v) => typeof v === "string" && /^[a-f0-9]{64}$/.test(v);
 function validatePlannedRuinSocketV2(s) {
   const p = s.provenance, t = RUIN_TIER_POLICY_V2[p.sizeTier], fixture = p.reservationId === DEEP_RUIN_FIXTURE_ID;
@@ -17324,7 +17348,7 @@ function validatePlannedRuinReservationV2(root, r) {
   requireContract(root.plannedWorld?.ruinPrototype === PLANNED_RUIN_V2 && plannedRuinIdsV2(root.plannedWorld).includes(p.reservationId) && r.version === PLANNED_RUIN_RESERVATION && r.packageId === RUIN_FAMILY_PACKAGE_ID && r.siteId === s.siteId, "Unselected Ruin V2 reservation");
   validatePlannedRuinSocketV2(s);
   closedRecord(q, ["version", "siteId", "socket", "familyId", "packageId", "tier", "label", "tileX", "tileY", "width", "height", "layoutSeed", "pages", "roadAnchor"]);
-  requireContract(q.version === PLANNED_RUIN_V2 && q.siteId === r.siteId && same8(q.socket, s) && q.packageId === r.packageId && q.familyId === "site-family:ruin" && q.tier === p.sizeTier && [[56, 70], [84, 44]].some((v) => same8(v, [q.width, q.height])) && q.layoutSeed === s.siteSeed && p.assetHash === root.plannedWorld.assetHash && p.planHash === root.plannedWorld.planHash, "Ruin V2 parcel drift");
+  requireContract(q.version === PLANNED_RUIN_V2 && q.siteId === r.siteId && same9(q.socket, s) && q.packageId === r.packageId && q.familyId === "site-family:ruin" && q.tier === p.sizeTier && [[56, 70], [84, 44]].some((v) => same9(v, [q.width, q.height])) && q.layoutSeed === s.siteSeed && p.assetHash === root.plannedWorld.assetHash && p.planHash === root.plannedWorld.planHash, "Ruin V2 parcel drift");
   const left = Number(q.tileX) - 1024 * 32, top = Number(q.tileY) - 1024 * 26;
   safeInteger(left, 0);
   safeInteger(top, 0);
@@ -17336,7 +17360,7 @@ function validatePlannedRuinReservationV2(root, r) {
 }
 
 // src/shared/contracts/planned_ruin_v1.js
-var same9 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same10 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var digest3 = (v) => typeof v === "string" && /^[a-f0-9]{64}$/.test(v);
 function validatePlannedRuinSocket(socket) {
   if (socket.provenance.populationHash !== void 0 || socket.provenance.assetHash === ALPHA_POPULATION_BASE_HASH && newPopulationSelection(socket.provenance.reservationId)) return validatePopulationSocket(socket);
@@ -17367,9 +17391,9 @@ function validatePlannedRuinReservation(root, r) {
   validatePlannedRuinSocket(r.socket);
   const p = r.socket.provenance, q = r.parcel;
   closedRecord(q, ["version", "siteId", "socket", "familyId", "packageId", "tier", "label", "tileX", "tileY", "width", "height", "layoutSeed", "pages", "roadAnchor"]);
-  requireContract(q.version === PLANNED_RUIN_VERSION && q.siteId === r.siteId && same9(q.socket, r.socket) && q.packageId === r.packageId && q.familyId === "site-family:ruin" && q.tier === p.sizeTier && same9([q.width, q.height], RUIN_TIER_POLICY[q.tier].exteriorTiles) && q.layoutSeed === r.socket.siteSeed && p.assetHash === root.plannedWorld.assetHash && p.planHash === root.plannedWorld.planHash, "Ruin parcel commitments drift");
+  requireContract(q.version === PLANNED_RUIN_VERSION && q.siteId === r.siteId && same10(q.socket, r.socket) && q.packageId === r.packageId && q.familyId === "site-family:ruin" && q.tier === p.sizeTier && same10([q.width, q.height], RUIN_TIER_POLICY[q.tier].exteriorTiles) && q.layoutSeed === r.socket.siteSeed && p.assetHash === root.plannedWorld.assetHash && p.planHash === root.plannedWorld.planHash, "Ruin parcel commitments drift");
   const small = p.sizeTier === "small", fx = small ? 78 : 75, fy = small ? 263 : 199, expected = small ? [{ x: 78, y: 263 }, { x: 78, y: 264 }] : [{ x: 75, y: 199 }, { x: 76, y: 199 }, { x: 75, y: 200 }, { x: 76, y: 200 }], approach = small ? [{ x: 79, y: 263 }] : [{ x: 77, y: 199 }, { x: 78, y: 199 }];
-  requireContract(same9(p.footprintChunks, expected) && same9(p.approachChunks, approach) && siteFits(p.reservationId, r.socket.region.biome, p.band, small ? 1 : 3), "Selected Alpha Ruin footprint/progression drift");
+  requireContract(same10(p.footprintChunks, expected) && same10(p.approachChunks, approach) && siteFits(p.reservationId, r.socket.region.biome, p.band, small ? 1 : 3), "Selected Alpha Ruin footprint/progression drift");
   const left = fx * 32 + Math.floor(((small ? 32 : 64) - q.width) / 2), top = fy * 26, doorX = left + Math.floor(q.width / 2), doorY = top + Math.floor(q.height / 2);
   requireContract(q.tileX === String(1024 * 32 + left) && q.tileY === String(1024 * 26 + top) && q.label === r.socket.region.biome[0].toUpperCase() + r.socket.region.biome.slice(1) + " Ruin" && r.socket.entrance.chunkX === String(1024 + Math.floor(doorX / 32)) && r.socket.entrance.chunkY === String(1024 + Math.floor(doorY / 26)) && r.socket.entrance.localX === doorX % 32 * 32 + 16 && r.socket.entrance.localY === doorY % 26 * 32 + 16, "Ruin exterior/door drift");
   requireContract(q.pages.length === p.footprintChunks.length && q.pages.every((c, i) => c.chunkX === String(1024 + p.footprintChunks[i].x) && c.chunkY === String(1024 + p.footprintChunks[i].y)), "Ruin page inventory drift");
@@ -17380,13 +17404,13 @@ function validateRuinFamily(site, { familyDefinition = null } = {}) {
   requireContract(site.version === (familyDefinition?.functionalVersion ?? FUNCTIONAL_RUIN_FAMILY) && site.packageId === (familyDefinition?.package.packageId ?? RUIN_FAMILY_PACKAGE_ID) && (familyDefinition ? site.packageVersion === familyDefinition.version : [PLANNED_RUIN_VERSION, PLANNED_RUIN_V2].includes(site.packageVersion)) && site.packageVersion === site.socket.provenance.placementVersion && site.contentHash === (familyDefinition?.package ?? ruinPackageForVersion(site.packageVersion)).contentHash && site.siteKind === (familyDefinition?.siteKind ?? "procedural-ruin") && site.familyId === (familyDefinition?.familyId ?? "site-family:ruin") && site.siteId === site.socket.siteId && site.siteSeed === site.socket.siteSeed && site.layoutSeed === site.siteSeed && digest3(site.layoutHash) && digest3(site.instanceHash), "Ruin identity drift");
   (familyDefinition?.validateSocket ?? validatePlannedRuinSocket)(site.socket);
   const multi = site.floors[0]?.version === MULTIROOM_VERSION, policy = multi ? multiroomPolicy(site.sizeTier) : (familyDefinition?.policy ?? ruinTierPolicyForVersion(site.packageVersion))[site.sizeTier], links2 = multi ? multiroomLinks(site.sizeTier) : (familyDefinition?.links ?? (site.packageVersion === PLANNED_RUIN_V2 ? ruinFloorLinksV2 : ruinFloorLinks))(site.sizeTier);
-  requireContract(site.floorCount === policy.floors.length && site.floorCount === site.floors.length && site.spaceInstanceId === site.floors[0].spaceInstanceId && same9(site.floorIds, site.floors.map((f3) => f3.floorId)), "Ruin floor inventory drift");
+  requireContract(site.floorCount === policy.floors.length && site.floorCount === site.floors.length && site.spaceInstanceId === site.floors[0].spaceInstanceId && same10(site.floorIds, site.floors.map((f3) => f3.floorId)), "Ruin floor inventory drift");
   const ids = /* @__PURE__ */ new Set();
   for (const [i, f3] of site.floors.entries()) {
     closedRecord(f3, ["version", "role", "collision", "visual", "entrance", "stairAnchors", "graph", "encounter", "reward", "floorId", "index", "floorSeed", "logicalSpaceId", "spaceInstanceId", "groupId", "enemyIds", "rewardId", "transitions"]);
     const recipe = multi ? multiroomRecipe(site.siteSeed, site.familyId.split(":")[1], site.sizeTier, i, Boolean(f3.encounter.combatVersion)) : (familyDefinition?.recipe ?? (site.packageVersion === PLANNED_RUIN_V2 ? ruinFloorRecipeV2 : ruinFloorRecipe))(site.siteSeed, site.sizeTier, i);
     if (multi) validateMultiroomRecipe(f3, site.siteSeed, site.familyId.split(":")[1], site.sizeTier, i, f3.encounter.siteEnd ? { floorCount: site.floorCount, reservationId: site.socket.provenance.reservationId, biome: site.socket.region?.biome, siteEnd: true } : f3.encounter.bossHosting ? { floorCount: site.floorCount, reservationId: site.socket.provenance.reservationId } : null);
-    else for (const key9 of Object.keys(recipe)) requireContract(same9(f3[key9], recipe[key9]), "Ruin immutable floor " + key9 + " drift");
+    else for (const key9 of Object.keys(recipe)) requireContract(same10(f3[key9], recipe[key9]), "Ruin immutable floor " + key9 + " drift");
     requireContract(f3.index === i && /^floor:[a-f0-9]{32}$/.test(f3.floorId) && /^spi:[a-f0-9]{32}$/.test(f3.spaceInstanceId) && /^spc:[a-f0-9]{32}$/.test(f3.logicalSpaceId) && f3.enemyIds.length === recipe.encounter.members.length, "Ruin floor identity drift");
     for (const id of [f3.floorId, f3.spaceInstanceId, f3.logicalSpaceId, f3.groupId, ...f3.enemyIds, f3.rewardId]) {
       requireContract(typeof id === "string" && !ids.has(id), "Ruin duplicate identity");
@@ -17399,12 +17423,12 @@ function validateRuinFamily(site, { familyDefinition = null } = {}) {
       if (t) {
         const dest = site.floors[destIndex], reverse = direction2 === "up" ? "down" : "up";
         closedRecord(t, ["transitionId", "floorId", "spaceInstanceId", "anchor", "targetAnchor", "label"]);
-        requireContract(t.floorId === dest.floorId && t.spaceInstanceId === dest.spaceInstanceId && same9(t.anchor, f3.stairAnchors[direction2]) && same9(t.targetAnchor, dest.stairAnchors[reverse]) && /^transition:[a-f0-9]{32}$/.test(t.transitionId), "Ruin stair target drift");
+        requireContract(t.floorId === dest.floorId && t.spaceInstanceId === dest.spaceInstanceId && same10(t.anchor, f3.stairAnchors[direction2]) && same10(t.targetAnchor, dest.stairAnchors[reverse]) && /^transition:[a-f0-9]{32}$/.test(t.transitionId), "Ruin stair target drift");
       }
     }
   }
-  requireContract(same9(site.encounterProvenance, { version: site.packageVersion, floorMemberKeys: Object.fromEntries(site.floors.map((f3) => [f3.floorId, f3.encounter.members.map((m) => m.memberKey)])) }) && site.interior.groupId === site.floors[0].groupId && same9(site.interior.collision, site.floors[0].collision), "Ruin compatibility/provenance drift");
-  requireContract(Array.isArray(site.discoveredByPlayerIds) && site.discoveredByPlayerIds.length <= 4 && new Set(site.discoveredByPlayerIds).size === site.discoveredByPlayerIds.length && same9(site.discoveredByPlayerIds, [...site.discoveredByPlayerIds].sort()) && site.discoveredByPlayerIds.every((id) => /^ply:[a-f0-9]{32}$/.test(id)), "Ruin discovery inventory drift");
+  requireContract(same10(site.encounterProvenance, { version: site.packageVersion, floorMemberKeys: Object.fromEntries(site.floors.map((f3) => [f3.floorId, f3.encounter.members.map((m) => m.memberKey)])) }) && site.interior.groupId === site.floors[0].groupId && same10(site.interior.collision, site.floors[0].collision), "Ruin compatibility/provenance drift");
+  requireContract(Array.isArray(site.discoveredByPlayerIds) && site.discoveredByPlayerIds.length <= 4 && new Set(site.discoveredByPlayerIds).size === site.discoveredByPlayerIds.length && same10(site.discoveredByPlayerIds, [...site.discoveredByPlayerIds].sort()) && site.discoveredByPlayerIds.every((id) => /^ply:[a-f0-9]{32}$/.test(id)), "Ruin discovery inventory drift");
   if (site.conqueredTick !== null) safeInteger(site.conqueredTick);
   return site;
 }
@@ -17424,16 +17448,16 @@ function validateRuinRuntimeV1(state, site) {
       requireContract(!boss, "Unexpected Ruin boss binding");
       requireContract(a?.contentDefinitionId === profile2.contentDefinitionId && a.residency.spaceInstanceId === floor.spaceInstanceId && a.hullRadius === siteEndProfileV1(floor, id, profile2).hullRadius, "Ruin actor binding drift");
       requireContract(elite?.version === COMPOSITION_ELITE_V1 || Boolean(elite) === Boolean(m.eliteAffixId), "Ruin elite roster drift");
-      if (elite) requireContract(elite.siteId === site.siteId && elite.floorId === floor.floorId && elite.groupId === floor.groupId && elite.roomId === m.roomId && (elite.version === COMPOSITION_ELITE_V1 ? elite.composition.inherited ? Boolean(m.eliteAffixId) && elite.affixIds[0] === m.eliteAffixId : !m.eliteAffixId : same9(elite.affixIds, [m.eliteAffixId])), "Ruin elite binding drift");
+      if (elite) requireContract(elite.siteId === site.siteId && elite.floorId === floor.floorId && elite.groupId === floor.groupId && elite.roomId === m.roomId && (elite.version === COMPOSITION_ELITE_V1 ? elite.composition.inherited ? Boolean(m.eliteAffixId) && elite.affixIds[0] === m.eliteAffixId : !m.eliteAffixId : same10(elite.affixIds, [m.eliteAffixId])), "Ruin elite binding drift");
     }
     const resource = state.d9World.runtime.resources.find((r) => r.groupId === floor.groupId);
-    requireContract(resource?.kind === "chest" && resource.completion === true && resource.ordinal === 0 && same9(resource.position, floor.reward.position), "Ruin reward binding drift");
+    requireContract(resource?.kind === "chest" && resource.completion === true && resource.ordinal === 0 && same10(resource.position, floor.reward.position), "Ruin reward binding drift");
   }
   return site;
 }
 
 // src/shared/contracts/planned_crypt_v1.js
-var same10 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same11 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var digest4 = (v) => typeof v === "string" && /^[a-f0-9]{64}$/.test(v);
 function validatePlannedCryptSocket(s) {
   if (s.provenance.populationHash !== void 0 || s.provenance.assetHash === ALPHA_POPULATION_BASE_HASH && newPopulationSelection(s.provenance.reservationId)) return validatePopulationSocket(s);
@@ -17441,7 +17465,7 @@ function validatePlannedCryptSocket(s) {
   const p = s.provenance;
   closedRecord(p, ["geographyVersion", "chunkId", "placementVersion", "identityDomain", "reservationId", "assetHash", "planHash", "sizeTier", "band", "footprintChunks", "approachChunks"]);
   requireContract(s.version === PLANNED_CRYPT_SOCKET && p.geographyVersion === "planned-world-water-v3" && p.placementVersion === PLANNED_CRYPT_VERSION && p.identityDomain === "planned-reservation-crypt" && p.reservationId === ALPHA_SMALL_CRYPT_ID && p.sizeTier === "small" && siteFits(p.reservationId, s.region.biome, p.band, 2) && s.minimumLevel === [0, 1, 6, 11, 21, 41][p.band] && digest4(p.assetHash) && digest4(p.planHash) && /^chunk:[a-f0-9]{32}$/.test(p.chunkId), "Crypt commitment/role drift");
-  requireContract(same10(p.footprintChunks, [{ x: 118, y: 276 }]) && same10(p.approachChunks, [{ x: 119, y: 276 }]), "Crypt compact capacity drift");
+  requireContract(same11(p.footprintChunks, [{ x: 118, y: 276 }]) && same11(p.approachChunks, [{ x: 119, y: 276 }]), "Crypt compact capacity drift");
   requireContract(s.entrance.chunkX === "1142" && s.entrance.chunkY === "1300" && s.entrance.localX === 528 && s.entrance.localY === 432, "Crypt door alignment drift");
   return s;
 }
@@ -17452,7 +17476,7 @@ function validatePlannedCryptReservation(root, r) {
   requireContract([PLANNED_CRYPT_VERSION, PLANNED_CRYPT_V2].includes(root.plannedWorld?.cryptPrototype) && root.plannedWorld.assetId === "alpha" && r.version === PLANNED_CRYPT_RESERVATION && r.packageId === CRYPT_PACKAGE_ID && r.siteId === r.socket.siteId, "Unselected Crypt");
   validatePlannedCryptSocket(r.socket);
   closedRecord(q, ["version", "siteId", "socket", "familyId", "packageId", "tier", "label", "tileX", "tileY", "width", "height", "layoutSeed", "pages", "roadAnchor"]);
-  requireContract(q.version === PLANNED_CRYPT_VERSION && q.siteId === r.siteId && same10(q.socket, r.socket) && q.familyId === "site-family:crypt" && q.packageId === CRYPT_PACKAGE_ID && q.tier === "small" && q.label === r.socket.region.biome[0].toUpperCase() + r.socket.region.biome.slice(1) + " Crypt" && q.width === 12 && q.height === 12 && q.tileX === String(1024 * 32 + 118 * 32 + 10) && q.tileY === String(1024 * 26 + 276 * 26 + 5) && q.layoutSeed === r.socket.siteSeed && same10(q.pages, [{ chunkX: "1142", chunkY: "1300" }]) && r.socket.provenance.assetHash === root.plannedWorld.assetHash && r.socket.provenance.planHash === root.plannedWorld.planHash, "Crypt parcel drift");
+  requireContract(q.version === PLANNED_CRYPT_VERSION && q.siteId === r.siteId && same11(q.socket, r.socket) && q.familyId === "site-family:crypt" && q.packageId === CRYPT_PACKAGE_ID && q.tier === "small" && q.label === r.socket.region.biome[0].toUpperCase() + r.socket.region.biome.slice(1) + " Crypt" && q.width === 12 && q.height === 12 && q.tileX === String(1024 * 32 + 118 * 32 + 10) && q.tileY === String(1024 * 26 + 276 * 26 + 5) && q.layoutSeed === r.socket.siteSeed && same11(q.pages, [{ chunkX: "1142", chunkY: "1300" }]) && r.socket.provenance.assetHash === root.plannedWorld.assetHash && r.socket.provenance.planHash === root.plannedWorld.planHash, "Crypt parcel drift");
   return r;
 }
 var validateCryptFamily = (site) => validateRuinFamily(site, { familyDefinition: { ...site.packageVersion === CRYPT_POPULATION_VERSION ? CRYPT_CONFIGURATION_V3 : site.packageVersion === PLANNED_CRYPT_V2 ? CRYPT_CONFIGURATION_V2 : CRYPT_FAMILY_CONFIGURATION, validateSocket: validatePlannedCryptSocket } });
@@ -17710,13 +17734,13 @@ function fortFloorRecipeV2(seed, tier2, index) {
 }
 
 // src/shared/contracts/planned_fort_v2.js
-var same11 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same12 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 function validateFortReservationV2(root, r) {
   const p = r.socket.provenance, q = r.parcel, fixture = root.plannedWorld.assetId === "fort-deep-fixture";
   requireContract(root.plannedWorld.fortPrototype === PLANNED_FORT_V2 && plannedFortIdsV2(root.plannedWorld).includes(p.reservationId) && q.version === PLANNED_FORT_V2, "Unselected Fort V2 reservation");
   const expected = Array.from({ length: 3 }, (_, y) => Array.from({ length: 3 }, (_2, x) => ({ x: 248 + x, y: 220 + y }))).flat();
-  requireContract(p.reservationId === (fixture ? DEEP_FORT_FIXTURE_ID : "repeatable-slot:fort:tropical:large:01") && p.sizeTier === (fixture ? "deep" : "large") && (fixture ? p.band === 5 : siteFits(p.reservationId, r.socket.region.biome, p.band, 5)) && same11(p.footprintChunks, expected) && same11(p.approachChunks, [{ x: 249, y: 223 }, { x: 249, y: 224 }, { x: 249, y: 225 }]), "Fort V2 selected capacity drift");
-  requireContract(r.siteId === r.socket.siteId && r.packageId === "procedural-fort-family" && q.siteId === r.siteId && q.packageId === r.packageId && q.familyId === "site-family:fort" && same11(q.socket, r.socket) && q.tier === p.sizeTier && q.layoutSeed === r.socket.siteSeed && q.label === (fixture ? "Deep Fort fixture" : r.socket.region.biome[0].toUpperCase() + r.socket.region.biome.slice(1) + " Fort"), "Fort V2 parcel identity drift");
+  requireContract(p.reservationId === (fixture ? DEEP_FORT_FIXTURE_ID : "repeatable-slot:fort:tropical:large:01") && p.sizeTier === (fixture ? "deep" : "large") && (fixture ? p.band === 5 : siteFits(p.reservationId, r.socket.region.biome, p.band, 5)) && same12(p.footprintChunks, expected) && same12(p.approachChunks, [{ x: 249, y: 223 }, { x: 249, y: 224 }, { x: 249, y: 225 }]), "Fort V2 selected capacity drift");
+  requireContract(r.siteId === r.socket.siteId && r.packageId === "procedural-fort-family" && q.siteId === r.siteId && q.packageId === r.packageId && q.familyId === "site-family:fort" && same12(q.socket, r.socket) && q.tier === p.sizeTier && q.layoutSeed === r.socket.siteSeed && q.label === (fixture ? "Deep Fort fixture" : r.socket.region.biome[0].toUpperCase() + r.socket.region.biome.slice(1) + " Fort"), "Fort V2 parcel identity drift");
   requireContract(p.assetHash === root.plannedWorld.assetHash && p.planHash === root.plannedWorld.planHash && q.tileX === String(1024 * 32 + 7944) && q.tileY === String(1024 * 26 + 5720) && q.width === 80 && q.height === 70 && q.roadAnchor.tileX === String(1024 * 32 + 7983) && q.roadAnchor.tileY === String(1024 * 26 + 5789), "Fort V2 geometry commitment drift");
   requireContract(r.socket.entrance.chunkX === String(1024 + 249) && r.socket.entrance.chunkY === String(1024 + 221) && r.socket.entrance.localX === 528 && r.socket.entrance.localY === (5753 % 26 + 0.5) * 32, "Fort V2 entrance drift");
   requireContract(q.pages.length === expected.length && q.pages.every((c, i) => c.chunkX === String(1024 + expected[i].x) && c.chunkY === String(1024 + expected[i].y)), "Fort V2 page inventory drift");
@@ -17724,7 +17748,7 @@ function validateFortReservationV2(root, r) {
 }
 
 // src/shared/contracts/planned_fort_v1.js
-var same12 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same13 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var digest5 = (v) => typeof v === "string" && /^[a-f0-9]{64}$/.test(v);
 function validatePlannedFortSocket(socket) {
   if (socket.provenance.populationHash !== void 0 || socket.provenance.assetHash === ALPHA_POPULATION_BASE_HASH && newPopulationSelection(socket.provenance.reservationId)) return validatePopulationSocket(socket);
@@ -17757,9 +17781,9 @@ function validatePlannedFortReservation(root, r) {
   validatePlannedFortSocket(r.socket);
   const p = r.socket.provenance, q = r.parcel;
   closedRecord(q, ["version", "siteId", "socket", "familyId", "packageId", "tier", "label", "tileX", "tileY", "width", "height", "layoutSeed", "pages", "roadAnchor"]);
-  requireContract(q.version === PLANNED_FORT_VERSION && q.siteId === r.siteId && same12(q.socket, r.socket) && q.packageId === r.packageId && q.familyId === "site-family:fort" && q.tier === p.sizeTier && same12([q.width, q.height], FORT_TIER_POLICY[q.tier].exteriorTiles) && q.layoutSeed === r.socket.siteSeed && p.assetHash === root.plannedWorld.assetHash && p.planHash === root.plannedWorld.planHash, "Fort parcel commitments drift");
+  requireContract(q.version === PLANNED_FORT_VERSION && q.siteId === r.siteId && same13(q.socket, r.socket) && q.packageId === r.packageId && q.familyId === "site-family:fort" && q.tier === p.sizeTier && same13([q.width, q.height], FORT_TIER_POLICY[q.tier].exteriorTiles) && q.layoutSeed === r.socket.siteSeed && p.assetHash === root.plannedWorld.assetHash && p.planHash === root.plannedWorld.planHash, "Fort parcel commitments drift");
   const small = p.sizeTier === "small", fx = small ? 175 : 41, fy = small ? 89 : 254, expected = Array.from({ length: small ? 2 : 3 }, (_, y) => [{ x: fx, y: fy + y }, { x: fx + 1, y: fy + y }]).flat();
-  requireContract(same12(p.footprintChunks, expected) && same12(p.approachChunks, [{ x: fx + 2, y: small ? fy : fy + 1 }, { x: fx + 3, y: small ? fy : fy + 1 }]) && siteFits(p.reservationId, r.socket.region.biome, p.band, small ? 3 : 1), "Selected Alpha Fort footprint/progression drift");
+  requireContract(same13(p.footprintChunks, expected) && same13(p.approachChunks, [{ x: fx + 2, y: small ? fy : fy + 1 }, { x: fx + 3, y: small ? fy : fy + 1 }]) && siteFits(p.reservationId, r.socket.region.biome, p.band, small ? 3 : 1), "Selected Alpha Fort footprint/progression drift");
   const left = fx * 32 + Math.floor((64 - q.width) / 2), top = fy * 26, doorX = left + Math.floor(q.width / 2), doorY = top + 5 + FORT_TIER_POLICY[q.tier].floors[0].tiles[1] + 2;
   requireContract(q.tileX === String(1024 * 32 + left) && q.tileY === String(1024 * 26 + top) && q.label === r.socket.region.biome[0].toUpperCase() + r.socket.region.biome.slice(1) + " Fort" && r.socket.entrance.chunkX === String(1024 + Math.floor(doorX / 32)) && r.socket.entrance.chunkY === String(1024 + Math.floor(doorY / 26)) && r.socket.entrance.localX === doorX % 32 * 32 + 16 && r.socket.entrance.localY === doorY % 26 * 32 + 16 && q.roadAnchor.tileX === String(1024 * 32 + left + q.width - 1) && q.roadAnchor.tileY === String(1024 * 26 + (small ? 2327 : 6643)), "Fort exterior/door/approach drift");
   requireContract(q.pages.length === p.footprintChunks.length && q.pages.every((c, i) => c.chunkX === String(1024 + p.footprintChunks[i].x) && c.chunkY === String(1024 + p.footprintChunks[i].y)), "Fort page inventory drift");
@@ -17770,13 +17794,13 @@ function validateFortFamily(site) {
   requireContract(site.version === FUNCTIONAL_FORT_FAMILY && site.packageId === FORT_FAMILY_PACKAGE_ID && [PLANNED_FORT_VERSION, PLANNED_FORT_V2].includes(site.packageVersion) && site.packageVersion === site.socket.provenance.placementVersion && site.contentHash === fortPackageForVersion(site.packageVersion).contentHash && site.siteKind === "procedural-fort" && site.familyId === "site-family:fort" && site.siteId === site.socket.siteId && site.siteSeed === site.socket.siteSeed && site.layoutSeed === site.siteSeed && digest5(site.layoutHash) && digest5(site.instanceHash), "Fort identity drift");
   validatePlannedFortSocket(site.socket);
   const multi = site.floors[0]?.version === MULTIROOM_VERSION, policy = multi ? multiroomPolicy(site.sizeTier) : FORT_TIER_POLICY[site.sizeTier], links2 = multi ? multiroomLinks(site.sizeTier) : fortFloorLinks(site.sizeTier);
-  requireContract(site.floorCount === policy.floors.length && site.floorCount === site.floors.length && site.spaceInstanceId === site.floors[0].spaceInstanceId && same12(site.floorIds, site.floors.map((f3) => f3.floorId)), "Fort floor inventory drift");
+  requireContract(site.floorCount === policy.floors.length && site.floorCount === site.floors.length && site.spaceInstanceId === site.floors[0].spaceInstanceId && same13(site.floorIds, site.floors.map((f3) => f3.floorId)), "Fort floor inventory drift");
   const ids = /* @__PURE__ */ new Set();
   for (const [i, f3] of site.floors.entries()) {
     closedRecord(f3, ["version", "role", "collision", "visual", "entrance", "stairAnchors", "graph", "encounter", "reward", "floorId", "index", "floorSeed", "logicalSpaceId", "spaceInstanceId", "groupId", "enemyIds", "rewardId", "transitions"]);
     const recipe = multi ? multiroomRecipe(site.siteSeed, "fort", site.sizeTier, i, Boolean(f3.encounter.combatVersion)) : (site.packageVersion === PLANNED_FORT_V2 ? fortFloorRecipeV2 : fortFloorRecipe)(site.siteSeed, site.sizeTier, i);
     if (multi) validateMultiroomRecipe(f3, site.siteSeed, site.familyId.split(":")[1], site.sizeTier, i, f3.encounter.siteEnd ? { floorCount: site.floorCount, reservationId: site.socket.provenance.reservationId, biome: site.socket.region?.biome, siteEnd: true } : f3.encounter.bossHosting ? { floorCount: site.floorCount, reservationId: site.socket.provenance.reservationId } : null);
-    else for (const key9 of Object.keys(recipe)) requireContract(same12(f3[key9], recipe[key9]), "Fort immutable floor " + key9 + " drift");
+    else for (const key9 of Object.keys(recipe)) requireContract(same13(f3[key9], recipe[key9]), "Fort immutable floor " + key9 + " drift");
     requireContract(f3.index === i && /^floor:[a-f0-9]{32}$/.test(f3.floorId) && /^spi:[a-f0-9]{32}$/.test(f3.spaceInstanceId) && /^spc:[a-f0-9]{32}$/.test(f3.logicalSpaceId) && f3.enemyIds.length === recipe.encounter.members.length, "Fort floor identity drift");
     for (const id of [f3.floorId, f3.spaceInstanceId, f3.logicalSpaceId, f3.groupId, ...f3.enemyIds, f3.rewardId]) {
       requireContract(typeof id === "string" && !ids.has(id), "Fort duplicate identity");
@@ -17789,12 +17813,12 @@ function validateFortFamily(site) {
       if (t) {
         const dest = site.floors[destIndex], reverse = direction2 === "up" ? "down" : "up";
         closedRecord(t, ["transitionId", "floorId", "spaceInstanceId", "anchor", "targetAnchor", "label"]);
-        requireContract(t.floorId === dest.floorId && t.spaceInstanceId === dest.spaceInstanceId && same12(t.anchor, f3.stairAnchors[direction2]) && same12(t.targetAnchor, dest.stairAnchors[reverse]) && /^transition:[a-f0-9]{32}$/.test(t.transitionId), "Fort stair target drift");
+        requireContract(t.floorId === dest.floorId && t.spaceInstanceId === dest.spaceInstanceId && same13(t.anchor, f3.stairAnchors[direction2]) && same13(t.targetAnchor, dest.stairAnchors[reverse]) && /^transition:[a-f0-9]{32}$/.test(t.transitionId), "Fort stair target drift");
       }
     }
   }
-  requireContract(same12(site.encounterProvenance, { version: site.packageVersion, floorMemberKeys: Object.fromEntries(site.floors.map((f3) => [f3.floorId, f3.encounter.members.map((m) => m.memberKey)])) }) && site.interior.groupId === site.floors[0].groupId && same12(site.interior.collision, site.floors[0].collision), "Fort compatibility/provenance drift");
-  requireContract(Array.isArray(site.discoveredByPlayerIds) && site.discoveredByPlayerIds.length <= 4 && new Set(site.discoveredByPlayerIds).size === site.discoveredByPlayerIds.length && same12(site.discoveredByPlayerIds, [...site.discoveredByPlayerIds].sort()) && site.discoveredByPlayerIds.every((id) => /^ply:[a-f0-9]{32}$/.test(id)), "Fort discovery inventory drift");
+  requireContract(same13(site.encounterProvenance, { version: site.packageVersion, floorMemberKeys: Object.fromEntries(site.floors.map((f3) => [f3.floorId, f3.encounter.members.map((m) => m.memberKey)])) }) && site.interior.groupId === site.floors[0].groupId && same13(site.interior.collision, site.floors[0].collision), "Fort compatibility/provenance drift");
+  requireContract(Array.isArray(site.discoveredByPlayerIds) && site.discoveredByPlayerIds.length <= 4 && new Set(site.discoveredByPlayerIds).size === site.discoveredByPlayerIds.length && same13(site.discoveredByPlayerIds, [...site.discoveredByPlayerIds].sort()) && site.discoveredByPlayerIds.every((id) => /^ply:[a-f0-9]{32}$/.test(id)), "Fort discovery inventory drift");
   if (site.conqueredTick !== null) safeInteger(site.conqueredTick);
   return site;
 }
@@ -17823,16 +17847,16 @@ function validateFortRuntimeV1(state, site) {
       }
       requireContract(a?.contentDefinitionId === profile2.contentDefinitionId && a.residency.spaceInstanceId === floor.spaceInstanceId && a.hullRadius === siteEndProfileV1(floor, id, profile2).hullRadius, "Fort actor binding drift");
       requireContract(elite?.version === COMPOSITION_ELITE_V1 || Boolean(elite) === Boolean(m.eliteAffixId), "Fort elite roster drift");
-      if (elite) requireContract(elite.siteId === site.siteId && elite.floorId === floor.floorId && elite.groupId === floor.groupId && elite.roomId === m.roomId && (elite.version === COMPOSITION_ELITE_V1 ? elite.composition.inherited ? Boolean(m.eliteAffixId) && elite.affixIds[0] === m.eliteAffixId : !m.eliteAffixId : same12(elite.affixIds, [m.eliteAffixId])), "Fort elite binding drift");
+      if (elite) requireContract(elite.siteId === site.siteId && elite.floorId === floor.floorId && elite.groupId === floor.groupId && elite.roomId === m.roomId && (elite.version === COMPOSITION_ELITE_V1 ? elite.composition.inherited ? Boolean(m.eliteAffixId) && elite.affixIds[0] === m.eliteAffixId : !m.eliteAffixId : same13(elite.affixIds, [m.eliteAffixId])), "Fort elite binding drift");
     }
     const resource = state.d9World.runtime.resources.find((r) => r.groupId === floor.groupId);
-    requireContract(resource?.kind === "chest" && resource.completion === true && resource.ordinal === 0 && same12(resource.position, floor.reward.position), "Fort reward binding drift");
+    requireContract(resource?.kind === "chest" && resource.completion === true && resource.ordinal === 0 && same13(resource.position, floor.reward.position), "Fort reward binding drift");
   }
   return site;
 }
 
 // src/shared/contracts/planned_cave_v1.js
-var same13 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same14 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var digest6 = (v) => typeof v === "string" && /^[a-f0-9]{64}$/.test(v);
 function validatePlannedCaveSocket(site) {
   if (site.provenance.populationHash !== void 0 || site.provenance.assetHash === ALPHA_POPULATION_BASE_HASH && newPopulationSelection(site.provenance.reservationId)) return validatePopulationSocket(site);
@@ -17857,11 +17881,11 @@ function validatePlannedCaveReservation(root, r) {
   validatePlannedCaveSocket(r.socket);
   const p = r.socket.provenance, q = r.parcel, expected = plannedCaveSelection(root.plannedWorld, p.reservationId);
   requireContract(expected, "Unselected planned Cave");
-  requireContract(p.reservationId === expected.reservationId && p.assetHash === root.plannedWorld.assetHash && p.planHash === root.plannedWorld.planHash && same13(p.footprintChunk, expected.footprintChunk) && same13(p.approachChunk, expected.approachChunk) && p.sizeTier === expected.tier && p.band === expected.band && r.socket.region.biome === expected.biome, "Selected Alpha Cave reservation drift");
+  requireContract(p.reservationId === expected.reservationId && p.assetHash === root.plannedWorld.assetHash && p.planHash === root.plannedWorld.planHash && same14(p.footprintChunk, expected.footprintChunk) && same14(p.approachChunk, expected.approachChunk) && p.sizeTier === expected.tier && p.band === expected.band && r.socket.region.biome === expected.biome, "Selected Alpha Cave reservation drift");
   closedRecord(q, ["version", "siteId", "socket", "familyId", "packageId", "spawnOrdinal", "regionKey", "regionName", "geographicQualifier", "label", "tileX", "tileY", "width", "height", "orientation", "pages", "roadAnchor", "tier", "siteSeed", "layoutSeed", "placementProvenance"]);
-  requireContract(q.version === PLANNED_CAVE_PARCEL && q.siteId === r.siteId && r.packageId === "woodland-cave-family" && q.packageId === r.packageId && q.familyId === "family:woodland-cave-d12" && q.spawnOrdinal === 0 && same13(q.socket, r.socket) && q.tier === p.sizeTier && digest6(q.siteSeed) && digest6(q.layoutSeed) && q.width === 12 && q.height === 9 && q.orientation === "south-facing" && q.tileX === String((1024 + p.footprintChunk.x) * 32 + 8) && q.tileY === String((1024 + p.footprintChunk.y) * 26 + 3), "Planned Cave parcel drift");
+  requireContract(q.version === PLANNED_CAVE_PARCEL && q.siteId === r.siteId && r.packageId === "woodland-cave-family" && q.packageId === r.packageId && q.familyId === "family:woodland-cave-d12" && q.spawnOrdinal === 0 && same14(q.socket, r.socket) && q.tier === p.sizeTier && digest6(q.siteSeed) && digest6(q.layoutSeed) && q.width === 12 && q.height === 9 && q.orientation === "south-facing" && q.tileX === String((1024 + p.footprintChunk.x) * 32 + 8) && q.tileY === String((1024 + p.footprintChunk.y) * 26 + 3), "Planned Cave parcel drift");
   requireContract(q.pages.length === 1 && q.pages[0].chunkX === r.socket.entrance.chunkX && q.pages[0].chunkY === r.socket.entrance.chunkY && digest6(q.pages[0].baseDigest) && q.pages[0].baseDigest.slice(0, 32) === p.chunkId.slice(6), "Planned Cave chunk commitment drift");
-  requireContract(same13(q.placementProvenance, { version: PLANNED_CAVE_VERSION, kind: "existing-planned-reservation", reservationId: p.reservationId, assetHash: p.assetHash, planHash: p.planHash }) && same13(q.roadAnchor, { tileX: String((1024 + p.footprintChunk.x) * 32 + 13), tileY: String((1024 + p.footprintChunk.y) * 26 + 11) }) && q.regionName === expected.biome[0].toUpperCase() + expected.biome.slice(1) && q.label === q.regionName + " Cave" && q.geographicQualifier === "" && q.regionKey === r.socket.region.regionX + "," + r.socket.region.regionY, "Planned Cave approach/provenance drift");
+  requireContract(same14(q.placementProvenance, { version: PLANNED_CAVE_VERSION, kind: "existing-planned-reservation", reservationId: p.reservationId, assetHash: p.assetHash, planHash: p.planHash }) && same14(q.roadAnchor, { tileX: String((1024 + p.footprintChunk.x) * 32 + 13), tileY: String((1024 + p.footprintChunk.y) * 26 + 11) }) && q.regionName === expected.biome[0].toUpperCase() + expected.biome.slice(1) && q.label === q.regionName + " Cave" && q.geographicQualifier === "" && q.regionKey === r.socket.region.regionX + "," + r.socket.region.regionY, "Planned Cave approach/provenance drift");
   return r;
 }
 
@@ -19094,7 +19118,7 @@ var STANDARD_CAVE_FINALE_BOSS_KEY_D13D_D = "finale:arachnid-treant";
 var STANDARD_CAVE_FINALE_COCOON_KEYS_D13D_D = freezeWire(["finale:arachnid-cocoon-0", "finale:arachnid-cocoon-1", "finale:arachnid-cocoon-2"]);
 var WOODLAND_CAVE_FINALE_PROFILE_D13D_A = "finale-policy:woodland-cave-family-d13d-a";
 var WOODLAND_CAVE_FINALE_POLICY_D13D_A = freezeWire({ small: "elite-pack-or-miniboss", standard: "boss", large: "boss-with-elites", deep: "enhanced-boss-with-elite-pack" });
-var same14 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same15 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var point11 = (p) => p && typeof p.x === "number" && Number.isFinite(p.x) && typeof p.y === "number" && Number.isFinite(p.y);
 var proceduralCaveShape = (site) => site?.familyId === WOODLAND_CAVE_FAMILY_ID && Array.isArray(site.floors) && site.floors.length > 0;
 var generatedWoodlandCave = (site) => site?.packageId === WOODLAND_CAVE_FAMILY_PACKAGE_ID && proceduralCaveShape(site);
@@ -19281,16 +19305,16 @@ function deriveWoodlandCaveFinaleReservationD13D_G(site) {
 function finaleEncounterMaterializedD13D_F(state, site, record2 = state.campaign.siteFinaleReservationsById?.[site.siteId]) {
   if (![SITE_FINALE_RESERVATION_D13D_F, SITE_FINALE_RESERVATION_D13D_G].includes(record2?.version)) return false;
   const floor = site.floors[record2.finalFloorIndex], members = record2.encounterBinding.members, group = state.groupsById[floor.groupId];
-  if (members.length !== 5 || (floor.encounter.combatVersion ? floor.enemyIds.length < 5 : floor.enemyIds.length !== 5) || !same14(floor.encounter.combatVersion ? floor.encounter.members.filter((m) => members.some((n) => n.memberKey === m.memberKey)) : floor.encounter.members, members) || !group || group.siteId !== site.siteId || group.spaceInstanceId !== floor.spaceInstanceId || !same14(group.entityIds, floor.enemyIds) || !same14(site.encounterProvenance.floorMemberKeys[floor.floorId], floor.encounter.members.map((row) => row.memberKey))) return false;
+  if (members.length !== 5 || (floor.encounter.combatVersion ? floor.enemyIds.length < 5 : floor.enemyIds.length !== 5) || !same15(floor.encounter.combatVersion ? floor.encounter.members.filter((m) => members.some((n) => n.memberKey === m.memberKey)) : floor.encounter.members, members) || !group || group.siteId !== site.siteId || group.spaceInstanceId !== floor.spaceInstanceId || !same15(group.entityIds, floor.enemyIds) || !same15(site.encounterProvenance.floorMemberKeys[floor.floorId], floor.encounter.members.map((row) => row.memberKey))) return false;
   for (let i = 0; i < 5; i++) {
     const member = members[i], id = floor.enemyIds[i], actor = state.entitiesById[id], profile2 = i === 0 ? ARACHNID_TREANT_PROFILE : resolveOrdinaryProfile(ORDINARY_ENEMIES.find((row) => row.family === member.family), floor.encounter.rank);
-    if (!actor || actor.contentDefinitionId !== profile2.contentDefinitionId || actor.residency.spaceInstanceId !== floor.spaceInstanceId || !same14(group.containment.memberHomesById[id], member.position)) return false;
+    if (!actor || actor.contentDefinitionId !== profile2.contentDefinitionId || actor.residency.spaceInstanceId !== floor.spaceInstanceId || !same15(group.containment.memberHomesById[id], member.position)) return false;
   }
   const [bossId, ...rest] = floor.enemyIds, summonIds = rest.slice(0, 3), eliteId = rest[3], boss = state.bossCombat?.bossesByEntityId?.[bossId], elite = state.eliteCombat?.elitesByEntityId?.[eliteId];
-  return Boolean(boss && boss.bossDefinitionId === ARACHNID_TREANT_BOSS_ID && boss.siteId === site.siteId && boss.floorId === floor.floorId && boss.groupId === group.groupId && boss.roomId === record2.finaleChamberId && same14(boss.homePosition, members[0].position) && same14(boss.summonEntityIds, summonIds) && summonIds.every((id, i) => {
+  return Boolean(boss && boss.bossDefinitionId === ARACHNID_TREANT_BOSS_ID && boss.siteId === site.siteId && boss.floorId === floor.floorId && boss.groupId === group.groupId && boss.roomId === record2.finaleChamberId && same15(boss.homePosition, members[0].position) && same15(boss.summonEntityIds, summonIds) && summonIds.every((id, i) => {
     const row = state.bossCombat.summonsByEntityId[id];
-    return row?.bossId === boss.bossId && row.groupId === group.groupId && row.ordinal === i && same14(row.homePosition, members[i + 1].position);
-  }) && elite && elite.entityId === eliteId && elite.groupId === group.groupId && elite.siteId === site.siteId && elite.floorId === floor.floorId && elite.roomId === record2.finaleChamberId && same14(elite.affixIds, [record2.contentBinding.eliteAffixId]) && same14(elite.identitySource, { campaignSeed: state.campaign.seed.seedHex, siteId: site.siteId, floorId: floor.floorId, groupId: group.groupId, roomId: record2.finaleChamberId, entityId: eliteId, affixId: record2.contentBinding.eliteAffixId }) && floor.enemyIds.slice(0, 4).every((id) => !state.eliteCombat?.elitesByEntityId?.[id]) && !state.bossCombat.summonsByEntityId[eliteId] && !state.bossCombat.bossesByEntityId[eliteId]);
+    return row?.bossId === boss.bossId && row.groupId === group.groupId && row.ordinal === i && same15(row.homePosition, members[i + 1].position);
+  }) && elite && elite.entityId === eliteId && elite.groupId === group.groupId && elite.siteId === site.siteId && elite.floorId === floor.floorId && elite.roomId === record2.finaleChamberId && same15(elite.affixIds, [record2.contentBinding.eliteAffixId]) && same15(elite.identitySource, { campaignSeed: state.campaign.seed.seedHex, siteId: site.siteId, floorId: floor.floorId, groupId: group.groupId, roomId: record2.finaleChamberId, entityId: eliteId, affixId: record2.contentBinding.eliteAffixId }) && floor.enemyIds.slice(0, 4).every((id) => !state.eliteCombat?.elitesByEntityId?.[id]) && !state.bossCombat.summonsByEntityId[eliteId] && !state.bossCombat.bossesByEntityId[eliteId]);
 }
 function installLargeDeploymentD13D_F(state, site, record2, { completionMigrated = false } = {}) {
   const episode = state.campaign.siteRunEpisodesById?.[site.siteId];
@@ -19330,7 +19354,7 @@ function validateBase(record2, site) {
 function validateWoodlandCaveFinaleReservationD13D_A(record2, site) {
   validateBase(record2, site);
   const expected = deriveWoodlandCaveFinaleReservationD13D_G(site);
-  requireContract(same14(record2, expected), "Procedural Cave finale reservation drift");
+  requireContract(same15(record2, expected), "Procedural Cave finale reservation drift");
   if (record2.version === SITE_FINALE_RESERVATION_D13D_B) {
     const c = record2.contentBinding, e = record2.encounterBinding, r = record2.rewardBinding;
     closedRecord(c, ["version", "variantId", "eliteAffixId", "eliteFamily", "escortFamily"]);
@@ -19347,7 +19371,7 @@ function validateWoodlandCaveFinaleReservationD13D_A(record2, site) {
     requireContract(record2.sizeTier === "standard" && record2.requiredFinaleClass === "boss" && c.version === STANDARD_CAVE_FINALE_CONTENT_D13D_D && c.variantId === "boss" && c.bossDefinitionId === ARACHNID_TREANT_BOSS_ID && c.summonCount === 3 && e.version === STANDARD_CAVE_FINALE_ENCOUNTER_D13D_D && e.variantId === "boss" && e.members.length === 4 && r.version === STANDARD_CAVE_FINALE_REWARD_D13D_E && r.profileId === STANDARD_CAVE_FINALE_REWARD_PROFILE_D13D_E && r.rewardClass === BOSS_COMPLETION_REWARD_CLASS, "Invalid Standard Cave Arachnid Treant binding");
     closedRecord(e.members[0], ["memberKey", "role", "family", "roomId", "position"]);
     for (const member of e.members.slice(1)) closedRecord(member, ["memberKey", "role", "family", "summonOrdinal", "roomId", "position"]);
-    requireContract(e.members[0].memberKey === STANDARD_CAVE_FINALE_BOSS_KEY_D13D_D && e.members[0].role === "arachnid-treant" && e.members[0].family === null && same14(e.members.slice(1).map((row) => row.memberKey), STANDARD_CAVE_FINALE_COCOON_KEYS_D13D_D) && e.members.slice(1).every((row, index) => row.role === "treant-cocoon" && row.summonOrdinal === index), "Invalid Standard Cave Arachnid Treant roster");
+    requireContract(e.members[0].memberKey === STANDARD_CAVE_FINALE_BOSS_KEY_D13D_D && e.members[0].role === "arachnid-treant" && e.members[0].family === null && same15(e.members.slice(1).map((row) => row.memberKey), STANDARD_CAVE_FINALE_COCOON_KEYS_D13D_D) && e.members.slice(1).every((row, index) => row.role === "treant-cocoon" && row.summonOrdinal === index), "Invalid Standard Cave Arachnid Treant roster");
   } else if (record2.version === SITE_FINALE_RESERVATION_D13D_G) {
     const r = record2.rewardBinding;
     requireContract(record2.sizeTier === "large" && record2.requiredFinaleClass === "boss-with-elites", "Invalid Large Cave finale policy");
@@ -19367,7 +19391,7 @@ function finaleEncounterMaterializedD13D_B(state, site, record2 = state.campaign
   if (rows3.some((row) => row.index < 0)) return false;
   for (const row of rows3) {
     const actor = state.entitiesById[row.entityId], enemy = ORDINARY_ENEMIES.find((candidate) => candidate.family === row.binding.family), profile2 = enemy && resolveOrdinaryProfile(enemy, floor.encounter.rank);
-    if (!same14(row.member, { memberKey: row.binding.memberKey, role: row.binding.role, family: row.binding.family, position: row.binding.position, roomId: row.binding.roomId }) || !actor || actor.contentDefinitionId !== profile2?.contentDefinitionId) return false;
+    if (!same15(row.member, { memberKey: row.binding.memberKey, role: row.binding.role, family: row.binding.family, position: row.binding.position, roomId: row.binding.roomId }) || !actor || actor.contentDefinitionId !== profile2?.contentDefinitionId) return false;
   }
   const leader = rows3.find((row) => row.binding.role === "elite-leader"), escort = rows3.find((row) => row.binding.role === "ordinary-escort"), elite = state.eliteCombat?.elitesByEntityId?.[leader.entityId];
   return Boolean(elite && elite.affixIds.length === 1 && elite.affixIds[0] === record2.contentBinding.eliteAffixId && !state.eliteCombat?.elitesByEntityId?.[escort.entityId]);
@@ -19381,12 +19405,12 @@ function finaleEncounterMaterializedD13D_D(state, site, record2 = state.campaign
   if (rows3.some((row) => row.index < 0) || !floor.encounter.combatVersion && rows3.length !== floor.encounter.members.length) return false;
   for (const row of rows3) {
     const actor = state.entitiesById[row.entityId], profile2 = row.binding.role === "arachnid-treant" ? ARACHNID_TREANT_PROFILE : resolveOrdinaryProfile(ORDINARY_ENEMIES.find((candidate) => candidate.family === row.binding.family), floor.encounter.rank);
-    if (!same14(row.member, row.binding) || !actor || actor.contentDefinitionId !== profile2?.contentDefinitionId || actor.residency.spaceInstanceId !== floor.spaceInstanceId) return false;
+    if (!same15(row.member, row.binding) || !actor || actor.contentDefinitionId !== profile2?.contentDefinitionId || actor.residency.spaceInstanceId !== floor.spaceInstanceId) return false;
   }
   const bossRow = rows3[0], summonRows = rows3.slice(1), boss = state.bossCombat?.bossesByEntityId?.[bossRow.entityId];
-  return Boolean(boss && boss.bossDefinitionId === ARACHNID_TREANT_BOSS_ID && boss.siteId === site.siteId && boss.floorId === floor.floorId && boss.roomId === record2.finaleChamberId && same14(boss.homePosition, bossRow.binding.position) && same14(boss.summonEntityIds, summonRows.map((row) => row.entityId)) && summonRows.every((row, index) => {
+  return Boolean(boss && boss.bossDefinitionId === ARACHNID_TREANT_BOSS_ID && boss.siteId === site.siteId && boss.floorId === floor.floorId && boss.roomId === record2.finaleChamberId && same15(boss.homePosition, bossRow.binding.position) && same15(boss.summonEntityIds, summonRows.map((row) => row.entityId)) && summonRows.every((row, index) => {
     const summon = state.bossCombat.summonsByEntityId[row.entityId];
-    return summon?.bossId === boss.bossId && summon.ordinal === index && same14(summon.homePosition, row.binding.position);
+    return summon?.bossId === boss.bossId && summon.ordinal === index && same15(summon.homePosition, row.binding.position);
   }));
 }
 function installDeployment(state, site, record2, { completionMigrated = false } = {}) {
@@ -19421,8 +19445,8 @@ function installSiteFinaleReservationsD13D_A(state) {
   const records2 = state.campaign.siteFinaleReservationsById ??= {};
   for (const site of sites4) {
     const expected = deriveWoodlandCaveFinaleReservationD13D_G(site), prior = records2[site.siteId], completionMigrated = Boolean(prior && prior.rewardBinding === null);
-    if (prior && !same14(prior, expected)) {
-      const smallUpgrade = expected.version === SITE_FINALE_RESERVATION_D13D_B && (same14(prior, deriveWoodlandCaveFinaleReservationD13D_A(site)) || same14(prior, legacySmallReservationD13D_B(site))), standardUpgrade = expected.version === SITE_FINALE_RESERVATION_D13D_E && (same14(prior, deriveWoodlandCaveFinaleReservationD13D_A(site)) || same14(prior, deriveWoodlandCaveFinaleReservationD13D_D(site))), largeUpgrade = expected.version === SITE_FINALE_RESERVATION_D13D_G && (same14(prior, deriveWoodlandCaveFinaleReservationD13D_F(site)) || same14(prior, deriveWoodlandCaveFinaleReservationD13D_E(site)));
+    if (prior && !same15(prior, expected)) {
+      const smallUpgrade = expected.version === SITE_FINALE_RESERVATION_D13D_B && (same15(prior, deriveWoodlandCaveFinaleReservationD13D_A(site)) || same15(prior, legacySmallReservationD13D_B(site))), standardUpgrade = expected.version === SITE_FINALE_RESERVATION_D13D_E && (same15(prior, deriveWoodlandCaveFinaleReservationD13D_A(site)) || same15(prior, deriveWoodlandCaveFinaleReservationD13D_D(site))), largeUpgrade = expected.version === SITE_FINALE_RESERVATION_D13D_G && (same15(prior, deriveWoodlandCaveFinaleReservationD13D_F(site)) || same15(prior, deriveWoodlandCaveFinaleReservationD13D_E(site)));
       requireContract(smallUpgrade || standardUpgrade || largeUpgrade, "Immutable procedural Cave finale reservation changed");
     }
     records2[site.siteId] = copyWire(expected);
@@ -19461,7 +19485,7 @@ function validateSiteFinaleReservationsD13D_A(state) {
     requireContract(state.campaign.siteFinaleDeploymentsById === void 0 || Object.keys(state.campaign.siteFinaleDeploymentsById).length === 0, "Finale deployment exists without an activated procedural Cave");
     return true;
   }
-  requireContract(records2 && same14(Object.keys(records2).sort(), sites4.map((site) => site.siteId)), "Procedural Cave finale reservation inventory drift");
+  requireContract(records2 && same15(Object.keys(records2).sort(), sites4.map((site) => site.siteId)), "Procedural Cave finale reservation inventory drift");
   const bound = [];
   for (const site of sites4) {
     const record2 = validateWoodlandCaveFinaleReservationD13D_A(records2[site.siteId], site);
@@ -19476,29 +19500,29 @@ function validateSiteFinaleReservationsD13D_A(state) {
       validateLargeDeploymentD13D_F(state, site, record2);
     }
   }
-  requireContract(same14(Object.keys(state.campaign.siteFinaleDeploymentsById ?? {}).sort(), bound.sort()), "Cave finale deployment inventory drift");
+  requireContract(same15(Object.keys(state.campaign.siteFinaleDeploymentsById ?? {}).sort(), bound.sort()), "Cave finale deployment inventory drift");
   return true;
 }
 var allowedUpgrade = (before, after, siteId2) => {
   const site = after.d9World.functionalSitesById[siteId2], older = before.campaign.siteFinaleReservationsById?.[siteId2], newer = after.campaign.siteFinaleReservationsById?.[siteId2];
   if (!site || !older || !newer) return false;
   const expected = deriveWoodlandCaveFinaleReservationD13D_G(site);
-  return Boolean((same14(older, deriveWoodlandCaveFinaleReservationD13D_A(site)) || same14(older, legacySmallReservationD13D_B(site)) || same14(older, deriveWoodlandCaveFinaleReservationD13D_D(site)) || same14(older, deriveWoodlandCaveFinaleReservationD13D_F(site))) && same14(newer, expected));
+  return Boolean((same15(older, deriveWoodlandCaveFinaleReservationD13D_A(site)) || same15(older, legacySmallReservationD13D_B(site)) || same15(older, deriveWoodlandCaveFinaleReservationD13D_D(site)) || same15(older, deriveWoodlandCaveFinaleReservationD13D_F(site))) && same15(newer, expected));
 };
 var allowedDeploymentUpgrade = (before, after, siteId2) => {
   const old = before.campaign.siteFinaleDeploymentsById?.[siteId2], next = after.campaign.siteFinaleDeploymentsById?.[siteId2], episode = after.campaign.siteRunEpisodesById?.[siteId2];
   if (!old || !next || old.firstCompletionEpisode !== void 0 || !episode) return false;
-  return same14(next, { ...old, firstCompletionEpisode: episode.episode + 1 });
+  return same15(next, { ...old, firstCompletionEpisode: episode.episode + 1 });
 };
 function validateSiteFinaleReservationProgressD13D_A(before, after) {
   const older = before.campaign.siteFinaleReservationsById ?? {}, newer = after.campaign.siteFinaleReservationsById ?? {};
-  for (const [siteId2, record2] of Object.entries(older)) requireContract(Boolean(newer[siteId2]) && (same14(newer[siteId2], record2) || allowedUpgrade(before, after, siteId2)), "Immutable procedural Cave finale reservation changed or disappeared");
+  for (const [siteId2, record2] of Object.entries(older)) requireContract(Boolean(newer[siteId2]) && (same15(newer[siteId2], record2) || allowedUpgrade(before, after, siteId2)), "Immutable procedural Cave finale reservation changed or disappeared");
   for (const [siteId2, record2] of Object.entries(newer)) if (!older[siteId2]) {
     requireContract(!before.d9World.functionalSitesById[siteId2] && after.d9World.functionalSitesById[siteId2], "Finale reservation appeared without Cave activation");
     validateWoodlandCaveFinaleReservationD13D_A(record2, after.d9World.functionalSitesById[siteId2]);
   }
   const oldDeploy = before.campaign.siteFinaleDeploymentsById ?? {}, newDeploy = after.campaign.siteFinaleDeploymentsById ?? {};
-  for (const [siteId2, record2] of Object.entries(oldDeploy)) requireContract(same14(newDeploy[siteId2], record2) || allowedDeploymentUpgrade(before, after, siteId2), "Immutable Small Cave finale deployment changed or disappeared");
+  for (const [siteId2, record2] of Object.entries(oldDeploy)) requireContract(same15(newDeploy[siteId2], record2) || allowedDeploymentUpgrade(before, after, siteId2), "Immutable Small Cave finale deployment changed or disappeared");
   for (const siteId2 of Object.keys(newDeploy)) if (!oldDeploy[siteId2]) requireContract(!older[siteId2] || allowedUpgrade(before, after, siteId2), "Small Cave finale deployment appeared without activation or migration");
   return true;
 }
@@ -19769,7 +19793,7 @@ function contextForGroup(state, groupId) {
   }
   return null;
 }
-var same15 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same16 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var claimSourceId = (groupId, economy) => episodeRewardId(groupId, economy.episode, "chest", 0);
 function occupantsAtClear(state, site) {
   const spaces = new Set(site.floors.map((floor) => floor.spaceInstanceId));
@@ -19809,7 +19833,7 @@ function validatePersonalFinaleClaimsD13D_G1(state, groupId, economy) {
   closedRecord(record2, ["version", "sourceEntityId", "siteId", "groupId", "episode", "clearedTick", "eligiblePlayerIds", "claimedByPlayerId"]);
   requireContract(record2.version === PERSONAL_FINALE_CLAIMS_D13D_G1 && record2.sourceEntityId === expectedSource && record2.siteId === context.site.siteId && record2.groupId === groupId && record2.episode === economy.episode && record2.clearedTick === economy.clearedTick, "Personal completion claim identity drift");
   safeInteger(record2.clearedTick, economy.startedTick, state.tick);
-  requireContract(record2.eligiblePlayerIds.length <= 4 && same15([...new Set(record2.eligiblePlayerIds)].sort(), record2.eligiblePlayerIds) && record2.eligiblePlayerIds.every((id) => state.playersById[id]), "Invalid completion eligibility snapshot");
+  requireContract(record2.eligiblePlayerIds.length <= 4 && same16([...new Set(record2.eligiblePlayerIds)].sort(), record2.eligiblePlayerIds) && record2.eligiblePlayerIds.every((id) => state.playersById[id]), "Invalid completion eligibility snapshot");
   closedRecord(record2.claimedByPlayerId, [], record2.eligiblePlayerIds);
   const claimed = Object.keys(record2.claimedByPlayerId).sort();
   for (const [playerId, row] of Object.entries(record2.claimedByPlayerId)) {
@@ -19818,7 +19842,7 @@ function validatePersonalFinaleClaimsD13D_G1(state, groupId, economy) {
     requireContract(state.playersById[playerId], "Unknown completion claimant");
   }
   const used = economy.usedResources[expectedSource];
-  if (claimed.length) requireContract(used && same15(used.playerIds, claimed) && used.tick === Math.min(...Object.values(record2.claimedByPlayerId).map((row) => row.tick)), "Personal completion provenance drift");
+  if (claimed.length) requireContract(used && same16(used.playerIds, claimed) && used.tick === Math.min(...Object.values(record2.claimedByPlayerId).map((row) => row.tick)), "Personal completion provenance drift");
   else requireContract(!used, "Unclaimed completion source was consumed");
   return true;
 }
@@ -19848,7 +19872,7 @@ var receiptBounds = (state) => {
   const groups = Math.max(...Object.values(MULTIROOM_POLICY.floors)), members = hasWorldCombat(state) ? WORLD_COMBAT_POLICY.maximumFloorMembers : 10;
   return { groups, members, total: groups * members };
 };
-var same16 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same17 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var hash322 = (text) => {
   let value = 2166136261;
   for (let index = 0; index < text.length; index++) value = Math.imul(value ^ text.charCodeAt(index), 16777619) >>> 0;
@@ -19938,7 +19962,7 @@ function migrationEvidenceTick(state, siteId2) {
     if (group.lastRequiredTick !== null) ticks.push(group.lastRequiredTick);
     if (group.entityIds.some((id) => {
       const actor = state.entitiesById[id];
-      return actor && (!actor.alive || !same16(actor.hp, actor.maxHp));
+      return actor && (!actor.alive || !same17(actor.hp, actor.maxHp));
     })) ticks.push(state.encounterEconomy?.groups?.[group.groupId]?.startedTick ?? state.tick);
     if (Object.keys(state.encounterEconomy?.groups?.[group.groupId]?.usedResources ?? {}).length) ticks.push(state.encounterEconomy.groups[group.groupId].startedTick);
   }
@@ -20175,7 +20199,7 @@ function validateSiteRunEpisodesD13B(state) {
   if (records2 === void 0) return true;
   closedRecord(records2, [], Object.keys(records2));
   const expected = implementedSiteIds(state);
-  requireContract(expected.length <= 4096 && same16(Object.keys(records2).sort(), expected), "Site episode inventory mismatch");
+  requireContract(expected.length <= 4096 && same17(Object.keys(records2).sort(), expected), "Site episode inventory mismatch");
   for (const siteId2 of expected) {
     const record2 = records2[siteId2];
     closedRecord(record2, ["version", "siteId", "episode", "episodeSeed", "status", "effectiveLevel", "startedTick", "clearedTick", "vacantSinceTick", "activeSigilModifierRef", "historyArchive", "completionHistory", "lastReset"]);
@@ -20198,7 +20222,7 @@ function validateSiteRunEpisodesD13B(state) {
     else {
       const r = record2.lastReset, retired = record2.completionHistory.at(-1);
       closedRecord(r, ["version", "resetId", "siteId", "fromEpisode", "toEpisode", "resetTick", "retiredReceiptCommitment", "retiredGroupIds", "retiredEntityIds", "newGroupIds", "newEntityIds"]);
-      requireContract(r.version === SITE_RESET_RECEIPT_D13C1 && /^reset:[a-f0-9]{32}$/.test(r.resetId) && r.siteId === siteId2 && r.fromEpisode === record2.episode - 1 && r.toEpisode === record2.episode && r.resetTick === retired.resetTick && r.retiredReceiptCommitment === retired.commitment && same16(r.retiredGroupIds, retired.groups.map((row) => row.groupId)) && r.retiredEntityIds.length === retired.enemyCount && new Set(r.retiredEntityIds).size === r.retiredEntityIds.length && same16(r.newGroupIds, currentGroupIds(state, siteId2)), "Invalid site reset receipt");
+      requireContract(r.version === SITE_RESET_RECEIPT_D13C1 && /^reset:[a-f0-9]{32}$/.test(r.resetId) && r.siteId === siteId2 && r.fromEpisode === record2.episode - 1 && r.toEpisode === record2.episode && r.resetTick === retired.resetTick && r.retiredReceiptCommitment === retired.commitment && same17(r.retiredGroupIds, retired.groups.map((row) => row.groupId)) && r.retiredEntityIds.length === retired.enemyCount && new Set(r.retiredEntityIds).size === r.retiredEntityIds.length && same17(r.newGroupIds, currentGroupIds(state, siteId2)), "Invalid site reset receipt");
       safeInteger(r.resetTick, 0, state.tick);
       requireContract(r.retiredEntityIds.every((id) => /^ent:[a-f0-9]{32}$/.test(id) && !state.entitiesById[id]) && r.retiredGroupIds.every((id) => !state.groupsById[id] && !state.encounterEconomy.groups[id] && !state.d9World.episodes[id]) && r.newEntityIds.length >= 1 && r.newEntityIds.every((id) => state.entitiesById[id]?.team === "hostile"), "Invalid reset authority retirement");
     }
@@ -20219,7 +20243,7 @@ function validateSiteRunEpisodeProgressD13B(before, after) {
     const next = newer[siteId2];
     requireContract(next && record2.siteId === next.siteId && record2.effectiveLevel === next.effectiveLevel && record2.activeSigilModifierRef === next.activeSigilModifierRef, "Site episode identity changed");
     if (next.episode === record2.episode) {
-      requireContract(next.episodeSeed === record2.episodeSeed && same16(next.historyArchive, record2.historyArchive) && same16(next.completionHistory, record2.completionHistory) && rank[next.status] >= rank[record2.status], "Site episode lifecycle regressed");
+      requireContract(next.episodeSeed === record2.episodeSeed && same17(next.historyArchive, record2.historyArchive) && same17(next.completionHistory, record2.completionHistory) && rank[next.status] >= rank[record2.status], "Site episode lifecycle regressed");
       if (record2.startedTick !== null) requireContract(next.startedTick === record2.startedTick, "Site episode start changed");
       if (record2.clearedTick !== null) requireContract(next.clearedTick === record2.clearedTick, "Site episode clearance changed");
     } else {
@@ -20233,14 +20257,14 @@ function validateSiteRunEpisodeProgressD13B(before, after) {
         archive.archivedEpisodes = shifted.episode;
         archive.archivedCommitment = shifted.commitment;
       }
-      requireContract(same16(expected, next.completionHistory) && same16(archive, next.historyArchive), "Site reset receipt window drift");
+      requireContract(same17(expected, next.completionHistory) && same17(archive, next.historyArchive), "Site reset receipt window drift");
     }
   }
   return true;
 }
 
 // src/shared/contracts/functional_site_d9.js
-var same17 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same18 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var digest8 = (v) => typeof v === "string" && /^[a-f0-9]{64}$/.test(v);
 var FUNCTIONAL_SITE_D9 = "functional-site-d9-v1";
 var isGeneratedCaveFamilyD12 = (site) => [FUNCTIONAL_SITE_FAMILY_D12, FUNCTIONAL_SITE_FAMILY_D12_1, FUNCTIONAL_SITE_FAMILY_D12_2].includes(site?.version);
@@ -20260,7 +20284,7 @@ function migrateLegacyFunctionalSitesD10(world) {
     const legacy = world.functionalSite;
     if (legacy) {
       const prior = sites4[legacy.siteId];
-      requireContract(!prior || same17(prior, legacy), "Conflicting legacy functional site");
+      requireContract(!prior || same18(prior, legacy), "Conflicting legacy functional site");
       sites4[legacy.siteId] = copyWire(legacy);
     }
     delete world.functionalSite;
@@ -20278,7 +20302,7 @@ function validateFunctionalSiteD9(site) {
     const multi = site.generatorVersion === MULTIROOM_VERSION, modern = [FUNCTIONAL_SITE_FAMILY_D12_1, FUNCTIONAL_SITE_FAMILY_D12_2].includes(site.version), natural = site.version === FUNCTIONAL_SITE_FAMILY_D12_2;
     closedRecord(site, natural ? ["version", "siteId", "packageId", "packageVersion", "contentHash", "label", "siteKind", "familyId", "familyVersion", "generatorVersion", "moduleCatalogVersion", "siteSeed", "layoutSeed", "regionName", "geographicQualifier", "spawnProvenance", "layoutProvenance", "sizeTier", "floorCount", "floorIds", "layoutHash", "encounterProvenance", "rewardProvenance", "socket", "spaceInstanceId", "interior", "floors", "conqueredTick", "discoveredByPlayerIds", "instanceHash"] : modern ? ["version", "siteId", "packageId", "packageVersion", "contentHash", "label", "siteKind", "familyId", "familyVersion", "generatorVersion", "moduleCatalogVersion", "siteSeed", "layoutSeed", "geographicQualifier", "spawnProvenance", "layoutProvenance", "sizeTier", "floorCount", "floorIds", "layoutHash", "encounterProvenance", "rewardProvenance", "socket", "spaceInstanceId", "interior", "floors", "conqueredTick", "discoveredByPlayerIds", "instanceHash"] : ["version", "siteId", "packageId", "packageVersion", "contentHash", "label", "siteKind", "familyId", "familyVersion", "generatorVersion", "moduleCatalogVersion", "siteSeed", "spawnProvenance", "sizeTier", "floorCount", "floorIds", "layoutHash", "encounterProvenance", "rewardProvenance", "socket", "spaceInstanceId", "interior", "floors", "conqueredTick", "discoveredByPlayerIds", "instanceHash"]);
     const definition2 = functionalSiteDefinitionD10(site.packageId, site.packageVersion);
-    requireContract(definition2?.placement === "generated-interior-family" && site.familyId === WOODLAND_CAVE_FAMILY_ID && site.siteId === site.socket.siteId && site.floorCount === site.floors.length && site.floorCount >= 1 && site.floorCount <= 4 && site.spaceInstanceId === site.floors[0].spaceInstanceId && same17(site.floorIds, site.floors.map((f3) => f3.floorId)) && digest8(site.siteSeed) && digest8(site.layoutHash) && digest8(site.instanceHash), "Invalid generated cave family identity");
+    requireContract(definition2?.placement === "generated-interior-family" && site.familyId === WOODLAND_CAVE_FAMILY_ID && site.siteId === site.socket.siteId && site.floorCount === site.floors.length && site.floorCount >= 1 && site.floorCount <= 4 && site.spaceInstanceId === site.floors[0].spaceInstanceId && same18(site.floorIds, site.floors.map((f3) => f3.floorId)) && digest8(site.siteSeed) && digest8(site.layoutHash) && digest8(site.instanceHash), "Invalid generated cave family identity");
     validateSiteSocketD9(site.socket);
     const spaces = /* @__PURE__ */ new Set(), groups = /* @__PURE__ */ new Set(), enemies = /* @__PURE__ */ new Set(), rewards = /* @__PURE__ */ new Set();
     for (const [i, f3] of site.floors.entries()) {
@@ -20286,7 +20310,7 @@ function validateFunctionalSiteD9(site) {
       requireContract(f3.version === (multi ? MULTIROOM_VERSION : natural ? "generated-site-floor-d12-2-v1" : modern ? "generated-site-floor-d12-1-v1" : "generated-site-floor-d12-v1") && f3.index === i && f3.floorId === site.floorIds[i] && digest8(f3.floorSeed) && /^spi:[a-f0-9]{32}$/.test(f3.spaceInstanceId) && /^spc:[a-f0-9]{32}$/.test(f3.logicalSpaceId) && !spaces.has(f3.spaceInstanceId) && !groups.has(f3.groupId), "Invalid generated cave floor identity");
       spaces.add(f3.spaceInstanceId);
       groups.add(f3.groupId);
-      requireContract(f3.collision.tileSize === 32 && f3.collision.width >= 20 && f3.collision.width <= (natural ? 180 : modern ? 64 : 48) && f3.collision.height >= 20 && f3.collision.height <= (natural ? 150 : modern ? 52 : 32) && f3.collision.tiles.length === f3.collision.height && f3.collision.tiles.every((r) => r.length === f3.collision.width && /^[01]+$/.test(r)) && same17(f3.visual.terrain, f3.collision.tiles), "Generated cave collision/visual drift");
+      requireContract(f3.collision.tileSize === 32 && f3.collision.width >= 20 && f3.collision.width <= (natural ? 180 : modern ? 64 : 48) && f3.collision.height >= 20 && f3.collision.height <= (natural ? 150 : modern ? 52 : 32) && f3.collision.tiles.length === f3.collision.height && f3.collision.tiles.every((r) => r.length === f3.collision.width && /^[01]+$/.test(r)) && same18(f3.visual.terrain, f3.collision.tiles), "Generated cave collision/visual drift");
       requireContract(f3.enemyIds.length === f3.encounter.members.length && f3.enemyIds.length >= 1 && f3.enemyIds.length <= (f3.encounter.combatVersion ? 40 : 5) && f3.enemyIds.every((id) => /^ent:[a-f0-9]{32}$/.test(id) && !enemies.has(id)), "Generated cave encounter identity");
       for (const id of f3.enemyIds) enemies.add(id);
       requireContract(f3.reward === null === (f3.rewardId === null) && (!f3.rewardId || !rewards.has(f3.rewardId)), "Generated cave reward identity");
@@ -20299,7 +20323,7 @@ function validateFunctionalSiteD9(site) {
       requireContract(site.floorCount === MULTIROOM_POLICY.floors[site.sizeTier], "Multiroom Cave floor count");
       for (const f3 of site.floors) validateMultiroomFloor(f3, site.layoutSeed, "cave", site.sizeTier, f3.index);
     }
-    requireContract(site.interior.groupId === site.floors[0].groupId && site.interior.logicalSpaceId === site.floors[0].logicalSpaceId && same17(site.interior.collision, site.floors[0].collision), "Generated cave compatibility view drift");
+    requireContract(site.interior.groupId === site.floors[0].groupId && site.interior.logicalSpaceId === site.floors[0].logicalSpaceId && same18(site.interior.collision, site.floors[0].collision), "Generated cave compatibility view drift");
     if (site.conqueredTick !== null) safeInteger(site.conqueredTick);
     return site;
   }
@@ -20312,7 +20336,7 @@ function validateFunctionalSiteD9(site) {
     requireContract(site.compound.version === WOODLAND_FORT_VERSION && site.compound.pages.length === 4 && new Set(site.compound.pages.map((p) => p.chunkX + "," + p.chunkY)).size === 4, "Fort parcel inventory");
     const d2 = site.interior;
     closedRecord(d2, ["recipeVersion", "siteId", "logicalSpaceId", "contentHash", "collision", "entrance", "rooms", "decorations", "groupId", "visual"]);
-    requireContract(d2.siteId === site.siteId && d2.recipeVersion === definition2.package.packageVersion && d2.contentHash === site.contentHash && same17(d2.collision, definition2.template.keep.collision) && same17(d2.entrance, definition2.template.keep.entrance) && same17(d2.visual, definition2.template.keep.visual), "Fort keep drift");
+    requireContract(d2.siteId === site.siteId && d2.recipeVersion === definition2.package.packageVersion && d2.contentHash === site.contentHash && same18(d2.collision, definition2.template.keep.collision) && same18(d2.entrance, definition2.template.keep.entrance) && same18(d2.visual, definition2.template.keep.visual), "Fort keep drift");
     requireContract(site.initial.group.groupId === d2.groupId && site.initial.group.spaceInstanceId !== site.spaceInstanceId && site.initial.actors.length === definition2.template.encounter.members.length && site.initial.group.entityIds.length === site.initial.actors.length && site.initial.resource.groupId === d2.groupId, "Fort encounter definition drift");
     if (site.conqueredTick !== null) safeInteger(site.conqueredTick);
     return site;
@@ -20327,7 +20351,7 @@ function validateFunctionalSiteD9(site) {
   const d = site.interior, visual2 = Boolean(definition.template.visual);
   closedRecord(d, ["recipeVersion", "siteId", "logicalSpaceId", "contentHash", "collision", "entrance", "rooms", "decorations", "groupId"], visual2 ? ["visual"] : []);
   const interiorError = site.packageId === WOODLAND_RUIN_PACKAGE_ID ? "Corrupt Woodland ruin interior" : "Corrupt functional Woodland interior";
-  requireContract(d.recipeVersion === definition.package.packageVersion && d.siteId === site.siteId && d.contentHash === site.contentHash && /^spc:[a-f0-9]{32}$/.test(d.logicalSpaceId) && d.groupId === "site:" + site.siteId + ":" + definition.groupSuffix && same17(d.collision, definition.template.collision) && same17(d.entrance, definition.template.entrance) && same17(d.rooms, definition.template.rooms) && same17(d.decorations, definition.template.decorations) && (!visual2 || same17(d.visual, definition.template.visual)), interiorError);
+  requireContract(d.recipeVersion === definition.package.packageVersion && d.siteId === site.siteId && d.contentHash === site.contentHash && /^spc:[a-f0-9]{32}$/.test(d.logicalSpaceId) && d.groupId === "site:" + site.siteId + ":" + definition.groupSuffix && same18(d.collision, definition.template.collision) && same18(d.entrance, definition.template.entrance) && same18(d.rooms, definition.template.rooms) && same18(d.decorations, definition.template.decorations) && (!visual2 || same18(d.visual, definition.template.visual)), interiorError);
   if (site.conqueredTick !== null) safeInteger(site.conqueredTick);
   return site;
 }
@@ -20357,7 +20381,7 @@ function validateFunctionalSiteStateD9(state) {
       let cleared = true;
       for (const floor of f3.floors) {
         const space2 = state.spacesByInstanceId[floor.spaceInstanceId], group2 = state.groupsById[floor.groupId], episode2 = state.d9World.episodes[floor.groupId], economy2 = state.encounterEconomy.groups[floor.groupId];
-        requireContract(space2?.spaceId === floor.logicalSpaceId && same17(space2.collision, floor.collision) && group2?.siteId === f3.siteId && group2.spaceInstanceId === floor.spaceInstanceId && same17(group2.entityIds, floor.enemyIds) && episode2 && economy2, "Generated cave floor runtime drift");
+        requireContract(space2?.spaceId === floor.logicalSpaceId && same18(space2.collision, floor.collision) && group2?.siteId === f3.siteId && group2.spaceInstanceId === floor.spaceInstanceId && same18(group2.entityIds, floor.enemyIds) && episode2 && economy2, "Generated cave floor runtime drift");
         requireContract(group2.cleared === group2.entityIds.every((id) => !state.entitiesById[id].alive), "Generated cave floor clear/liveness mismatch");
         cleared &&= group2.cleared;
         const resources2 = state.d9World.runtime.resources.filter((r) => r.groupId === floor.groupId);
@@ -20371,7 +20395,7 @@ function validateFunctionalSiteStateD9(state) {
     }
     if (f3.version === "functional-site-d10-compound-v1") {
       const keep = state.spacesByInstanceId[f3.spaceInstanceId], group2 = state.groupsById[f3.interior.groupId], resident = f3.compound.pages.filter((p) => state.d9World.runtime.chunks.some((c) => c.chunkX === p.chunkX && c.chunkY === p.chunkY)).length;
-      requireContract(keep?.spaceId === f3.interior.logicalSpaceId && same17(keep.collision, f3.interior.collision) && (resident === 0 || resident === 4), "Fort keep/parcel residency drift");
+      requireContract(keep?.spaceId === f3.interior.logicalSpaceId && same18(keep.collision, f3.interior.collision) && (resident === 0 || resident === 4), "Fort keep/parcel residency drift");
       if (resident) {
         const definition = functionalSiteDefinitionD10(f3.packageId, f3.packageVersion), economy2 = state.encounterEconomy.groups[f3.interior.groupId], resources2 = state.d9World.runtime.resources.filter((r) => r.groupId === f3.interior.groupId);
         requireContract(group2?.siteId === f3.siteId && group2.spaceInstanceId === state.overworldInstanceId && group2.entityIds.length === definition.template.encounter.members.length && economy2 && resources2.length === 1 && resources2[0].spaceInstanceId === state.overworldInstanceId, "Fort courtyard residency drift");
@@ -20380,7 +20404,7 @@ function validateFunctionalSiteStateD9(state) {
       continue;
     }
     const space = state.spacesByInstanceId[f3.spaceInstanceId], group = state.groupsById[f3.interior.groupId], episode = state.d9World.episodes[f3.interior.groupId], economy = state.encounterEconomy.groups[f3.interior.groupId];
-    requireContract(space?.spaceId === f3.interior.logicalSpaceId && same17(space.collision, f3.interior.collision), "Functional site space drift");
+    requireContract(space?.spaceId === f3.interior.logicalSpaceId && same18(space.collision, f3.interior.collision), "Functional site space drift");
     const size = functionalSiteDefinitionD10(f3.packageId, f3.packageVersion).template.encounter.members.length;
     requireContract(group?.siteId === f3.siteId && group.spaceInstanceId === f3.spaceInstanceId && group.entityIds.length === size && episode && economy, "Functional site encounter drift");
     requireContract(group.cleared === group.entityIds.every((id) => !state.entitiesById[id].alive), "Functional site clear/liveness mismatch");
@@ -20393,7 +20417,7 @@ function validateFunctionalSiteStateD9(state) {
 // src/shared/contracts/world_chunk_delta_d9.js
 var CHUNK_DELTA_D9 = "world-chunk-delta-d9-v1";
 var CHUNK_DELTA_ELITES_V2 = "world-chunk-delta-d9-v2-elites";
-var same18 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same19 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var inChunk = (p, c) => p.chunkX === c.chunkX && p.chunkY === c.chunkY;
 var choose = (record2, predicate) => Object.fromEntries(Object.entries(record2 ?? {}).filter(([id, v]) => predicate(v, id)).map(([id, v]) => [id, copyWire(v)]));
 function proceduralGroupPinnedD9(state, groupId) {
@@ -20418,14 +20442,14 @@ function proceduralGroupPinnedD9(state, groupId) {
   }))) return true;
   return def.members.some((m) => {
     const a = state.entitiesById[m.entityId];
-    return a.alive && (!same18(a.hp, a.maxHp) || Math.hypot(a.position.x - m.position.x, a.position.y - m.position.y) > 1e-7);
+    return a.alive && (!same19(a.hp, a.maxHp) || Math.hypot(a.position.x - m.position.x, a.position.y - m.position.y) > 1e-7);
   });
 }
 function proceduralGroupDetachmentHomeD9(state, groupId) {
   const group = state.groupsById[groupId], episode = state.d9World.episodes[groupId], definition = state.d9World.runtime.groups.find((g) => g.groupId === groupId);
   if (!group || !episode || episode.origin || !definition || proceduralGroupPinnedD9(state, groupId)) return null;
   const groupIds = [...group.entityIds].sort(), definitionIds2 = definition.members.map((m) => m.entityId).sort();
-  if (!same18(groupIds, definitionIds2) || group.entityIds.some((id) => !state.entitiesById[id])) return null;
+  if (!same19(groupIds, definitionIds2) || group.entityIds.some((id) => !state.entitiesById[id])) return null;
   return { chunkX: episode.geography.chunkX, chunkY: episode.geography.chunkY };
 }
 function detachableProceduralGroupIdsD9(state, chunk) {
@@ -20744,7 +20768,7 @@ function rebaseWorldRuntimeD9(state, newFrames) {
 }
 
 // src/shared/contracts/world_paging_d9.js
-var same19 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same20 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var emptyWorldPagingD9 = (playerIds) => ({ version: "world-paging-d9-v1", players: Object.fromEntries(playerIds.map((id) => [id, { gold: "0", souls: 0, salvageCredits: {} }])), originsByGroup: {}, indexedRevisions: {}, remoteGearByPlayer: Object.fromEntries(playerIds.map((id) => [id, {}])), coldObligations: {} });
 function validateWorldPagingD9(paging) {
   closedRecord(paging, ["version", "players", "originsByGroup", "indexedRevisions", "remoteGearByPlayer", "coldObligations"]);
@@ -20806,6 +20830,7 @@ function accounting(state, delta, direction2) {
   const players = copyWire(state.d9World.paging.players);
   for (const [id, totals2] of Object.entries(chunkPagedAccountingD9(delta))) {
     const p = players[id];
+    if (!p && direction2 === -1 && !state.playersById[id]) continue;
     requireContract(p, "Unknown paged account owner");
     p.gold = direction2 === 1 ? addAmount(p.gold, totals2.gold) : subtractAmount(p.gold, totals2.gold);
     p.souls = safeInteger(p.souls + direction2 * totals2.souls);
@@ -20833,7 +20858,7 @@ function detachChunksRuntimeD9(state, transfers) {
     chunkIds.add(chunk.identity.id);
     requireContract(root === prepared.expectedRoot, "Stale chunk page root");
     root = prepared.root;
-    requireContract(same19(captureChunkDeltaD9(state, chunk), delta), "Chunk changed during page preparation");
+    requireContract(same20(captureChunkDeltaD9(state, chunk), delta), "Chunk changed during page preparation");
     requireContract(Object.values(delta.drops).every((rows3) => Object.keys(rows3).length === 0), "Deliberate Drops require their ownership-page handoff");
     for (const e of delta.encounters) {
       requireContract(!groups.has(e.group.groupId), "Duplicate encounter detachment");
@@ -20886,7 +20911,7 @@ function attachChunkRuntimeD9(state, chunk, delta) {
       requireContract(!state.groupsById[e.group.groupId] && e.actors.every((a) => !state.entitiesById[a.entityId]), "Duplicate encounter load");
       for (const [pid, rows3] of Object.entries(e.players)) {
         const p = state.playersById[pid];
-        requireContract(p, "Unknown paged owner");
+        if (!p) continue;
         for (const id of Object.keys(rows3.rewards)) requireContract(!p.inventory.rewardsByEntityId[id], "Duplicate paged reward");
       }
     }
@@ -20913,7 +20938,9 @@ function attachChunkRuntimeD9(state, chunk, delta) {
       Object.assign(state.hostileCombat.actionsByEntityId, copyWire(e.hostileActions));
     }
     for (const [pid, rows3] of Object.entries(e.players)) {
-      const p = state.playersById[pid], i = p.inventory;
+      const p = state.playersById[pid];
+      if (!p) continue;
+      const i = p.inventory;
       Object.assign(i.rewardsByEntityId, copyWire(rows3.rewards));
       Object.assign(i.goldAwardsByEntityId, copyWire(rows3.gold));
       Object.assign(i.economy.soulAwardsByEntityId, copyWire(rows3.souls));
@@ -20986,7 +21013,7 @@ function retireRewardMaterials(renewal, materials3) {
   const t = renewal.retiredMaterials ??= {};
   for (const [k, n] of Object.entries(materials3)) t[k] = safeInteger((t[k] ?? 0) + n);
 }
-var same20 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same21 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var itemId = (p, id) => `item:${p.playerId}:${id ?? "starter"}`;
 var AUTO_SALVAGE_ACTIVE_TICKS = 5 * 60 * 60;
 function inventoryOrigin(state, sourceId) {
@@ -21036,7 +21063,7 @@ function validateCombatRewardSourceV1(state, source8, spawnEntityId, live, recip
   }
   if (live) {
     const snapshot = state.d9World.episodes[source8.groupId]?.snapshot, quality = source8.kind === "chest" ? roadsideChestV1(state, source8) ? "elite" : "completion" : source8.kind === "enemy" && (state.eliteCombat?.elitesByEntityId[spawnEntityId] || state.bossCombat?.bossesByEntityId[spawnEntityId]) ? "elite" : "ordinary";
-    requireContract(snapshot && same20(p.sourceDepth, snapshot.sourceDepth) && p.episodeSnapshotId === snapshot.snapshotId && p.combatQuality === quality, "Reward locked level/quality mismatch");
+    requireContract(snapshot && same21(p.sourceDepth, snapshot.sourceDepth) && p.episodeSnapshotId === snapshot.snapshotId && p.combatQuality === quality, "Reward locked level/quality mismatch");
   }
 }
 function gearOrigin(state, p, r) {
@@ -21076,7 +21103,17 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
   const inv = p.inventory, n = inv.renewal;
   closedRecord(inv, ["version", "economy", "revision", "gold", "goldAwardsByEntityId", "itemsById", "equipped", "rewardsByEntityId", "lastEquipmentChange", "topologyMigration", "renewal"], ["subweapons", "d7", "services", "classKit"]);
   validateSettlementServices(state, p, validateCommand2);
-  closedRecord(n, ["version", "baseGold", "baseSouls", "retiredGold", "retiredSouls", "defeats", "groundBySourceId", "originsByItemId", "lastDrop", "lastGroundPickup"], ["retiredMaterials"]);
+  closedRecord(n, ["version", "baseGold", "baseSouls", "retiredGold", "retiredSouls", "defeats", "groundBySourceId", "originsByItemId", "lastDrop", "lastGroundPickup"], ["retiredMaterials", "arrival"]);
+  if (n.arrival) {
+    const r = n.arrival;
+    closedRecord(r, ["version", "heroId", "slotLevels", "materials"]);
+    requireContract(r.version === HERO_ARRIVAL_VERSION && validHeroId(r.heroId), "Unknown hero arrival");
+    closedRecord(r.slotLevels, [], equipmentSlots(inv));
+    for (const v of Object.values(r.slotLevels)) safeInteger(v, 1, 100);
+    closedRecord(r.materials, [], FORGE_MATERIALS);
+    for (const v of Object.values(r.materials)) safeInteger(v, 1);
+  }
+  ;
   if (n.retiredMaterials) {
     closedRecord(n.retiredMaterials, [], DROP_MATERIALS_V1);
     for (const v of Object.values(n.retiredMaterials)) safeInteger(v, 1);
@@ -21095,6 +21132,11 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
   const items = Object.values(inv.itemsById), drops = Object.values(n.groundBySourceId), starter = itemId(p, null);
   requireContract(items.length >= 1 && items.length <= (p.d8 ? D8_OWNERSHIP_BOUND : 64) && inv.itemsById[starter]?.definitionId === "worn-sword", "Owned inventory/starter bound");
   function origin2(o, id) {
+    if (o?.carried !== void 0) {
+      closedRecord(o, ["carried", "sourceEntityId"], ["witness"]);
+      requireContract(n.arrival && o.carried === n.arrival.heroId && o.sourceEntityId === id, "Unknown carried provenance");
+      return;
+    }
     if (o?.servicePurchase) {
       validateServiceOrigin(p, o, id);
       return;
@@ -21122,7 +21164,11 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
     else requireContract(o.episode === o.archive.sourceEpisode, "Archived gear episode drift");
   }
   function item(i) {
-    validateWorkshopItem(p, i);
+    const carried = [n.originsByItemId[i.itemId], n.groundBySourceId[i.sourceEntityId]?.origin, inv.d7?.salvaged[i.itemId]?.origin, inv.d7?.autoSalvaged[i.itemId]?.origin, inv.services?.salesByItemId[i.itemId]?.origin].find((o) => o?.carried !== void 0);
+    if (carried && i.workshop) {
+      closedRecord(i.workshop, ["version", "steps"]);
+      workshopResult(i);
+    } else validateWorkshopItem(p, i);
     if (p.inventory.services?.purchasesBySourceId[i.sourceEntityId]) {
       validateServiceItem(state, p, i);
       return;
@@ -21130,9 +21176,12 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
     closedRecord(i, ["itemId", "definitionId", "ownerPlayerId", "sourceEntityId"], ["generated", "workshop"]);
     if (i.generated) {
       requireContract(inv.d7, "Generated gear without version");
-      const o = n.originsByItemId[i.itemId] ?? n.groundBySourceId[i.sourceEntityId]?.origin ?? inv.d7.salvaged[i.itemId]?.origin ?? inv.d7.autoSalvaged[i.itemId]?.origin ?? inv.services?.salesByItemId[i.itemId]?.origin, group = state.groupsById[o?.groupId], progression = o?.progression ?? (group ? prototypeRewardProgression(ordinaryTier(state.entitiesById[group.entityIds[0]].contentDefinitionId) ?? "C", i.sourceEntityId) : null), depth = progression?.sourceDepth;
-      requireContract(same20(depth, i.generated.contentDepth), "Generated content depth differs from origin");
-      validateGeneratedGear(i.generated, gearSeed(state, p, i.sourceEntityId), progression);
+      if (carried) validateCarriedGear(i.generated, carried.witness);
+      else {
+        const o = n.originsByItemId[i.itemId] ?? n.groundBySourceId[i.sourceEntityId]?.origin ?? inv.d7.salvaged[i.itemId]?.origin ?? inv.d7.autoSalvaged[i.itemId]?.origin ?? inv.services?.salesByItemId[i.itemId]?.origin, group = state.groupsById[o?.groupId], progression = o?.progression ?? (group ? prototypeRewardProgression(ordinaryTier(state.entitiesById[group.entityIds[0]].contentDefinitionId) ?? "C", i.sourceEntityId) : null), depth = progression?.sourceDepth;
+        requireContract(same21(depth, i.generated.contentDepth), "Generated content depth differs from origin");
+        validateGeneratedGear(i.generated, gearSeed(state, p, i.sourceEntityId), progression);
+      }
     }
     requireContract(i.ownerPlayerId === p.playerId && i.itemId === itemId(p, i.sourceEntityId) && EQUIPMENT[i.definitionId], "Gear ownership/identity");
     const t = provisionType(p, i.sourceEntityId);
@@ -21202,11 +21251,11 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
       if (s.progression) {
         validateRewardProgression(s.progression);
         requireContract(s.progression.sourceId === id, "Reward progression source mismatch");
-        if (s.progression.policy === "prototype-rank-depth-v1") requireContract(same20(Object.fromEntries(Object.entries({ ...s.progression, quality: 1, tomeEligibility: "base-single-d7-v1" }).filter(([k]) => k !== "modifiers")), prototypeRewardProgression(s.rank, id)), "Prototype progression drift");
+        if (s.progression.policy === "prototype-rank-depth-v1") requireContract(same21(Object.fromEntries(Object.entries({ ...s.progression, quality: 1, tomeEligibility: "base-single-d7-v1" }).filter(([k]) => k !== "modifiers")), prototypeRewardProgression(s.rank, id)), "Prototype progression drift");
       }
       requireContract(id === episodeRewardId(s.groupId, s.episode, s.kind, s.ordinal) && r.rewardVersion === CONTENT_REWARD_VERSION, "Reward incarnation mismatch");
       const expected = rollContentReward(state, p, { sourceEntityId: id, rank: s.rank, kind: s.kind, ordinal: r.ordinal, modifiers: s.progression?.modifiers ?? null, progression: s.progression ?? null, rewardClass: s.rewardClass ?? null });
-      requireContract(r.definitionId === expected.definitionId && inv.goldAwardsByEntityId[id]?.amount === expected.gold && inv.economy.soulAwardsByEntityId[id] === expected.souls && same20(r.materials ?? null, expected.materials ?? null) && r.healing === expected.healing, "Content reward drift");
+      requireContract(r.definitionId === expected.definitionId && inv.goldAwardsByEntityId[id]?.amount === expected.gold && inv.economy.soulAwardsByEntityId[id] === expected.souls && same21(r.materials ?? null, expected.materials ?? null) && r.healing === expected.healing, "Content reward drift");
       if (live) {
         const group = state.groupsById[s.groupId];
         requireContract(s.rank === (ordinaryTier(state.entitiesById[group.entityIds[0]].contentDefinitionId) ?? "C"), "Reward rank differs from content");
@@ -21218,7 +21267,7 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
       }
     } else {
       const enemy = state.entitiesById[id], expected = legacyDefeatReward(state, p, enemy, r.ordinal, r.rewardVersion);
-      requireContract(enemy && !enemy.alive && same20(enemy.position, r.position) && enemy.residency.spaceInstanceId === r.spaceInstanceId && expected.definitionId === r.definitionId && inv.goldAwardsByEntityId[id]?.amount === expected.gold, "Legacy reward changed");
+      requireContract(enemy && !enemy.alive && same21(enemy.position, r.position) && enemy.residency.spaceInstanceId === r.spaceInstanceId && expected.definitionId === r.definitionId && inv.goldAwardsByEntityId[id]?.amount === expected.gold, "Legacy reward changed");
     }
     if (r.claimed) {
       if (r.autoSalvage) {
@@ -21228,7 +21277,7 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
       } else receipt(r.pickup, "loot.pickup");
       if (r.definitionId) {
         const owned = inv.itemsById[itemId(p, id)] ?? n.groundBySourceId[id]?.item ?? inv.d7?.salvaged[itemId(p, id)]?.item ?? inv.d7?.autoSalvaged[itemId(p, id)]?.item ?? inv.services?.salesByItemId[itemId(p, id)]?.item ?? state.d9World?.paging.remoteGearByPlayer[p.playerId]?.[itemId(p, id)]?.item;
-        requireContract(owned && owned.definitionId === r.definitionId && same20(owned.generated ?? null, r.generated ?? null), "Collected gear ownership missing or rewritten");
+        requireContract(owned && owned.definitionId === r.definitionId && same21(owned.generated ?? null, r.generated ?? null), "Collected gear ownership missing or rewritten");
       }
     } else {
       requireContract(r.pickup === null && (r.autoSalvage ?? null) === null, "Unclaimed gear has resolution receipt");
@@ -21264,16 +21313,17 @@ function validateRenewableInventoryProgress(before, after, pid) {
   const original = before.playersById[pid].inventory, a = before.d9World ? original : copyWire(original), b = after.playersById[pid].inventory;
   if (!a.subweapons && b.subweapons) installSubweaponInventory({ inventory: a });
   const x = a.renewal, y = b.renewal;
+  requireContract(same21(x.arrival ?? null, y.arrival ?? null), "Hero arrival rewritten");
   if (a.subweapons) validateProvisionProgress(a, b);
   validateClassKitProgress(a, b);
-  requireContract(same20(x.baseGold, y.baseGold) && x.baseSouls === y.baseSouls && compareAmount(y.retiredGold, x.retiredGold) >= 0 && y.retiredSouls >= x.retiredSouls && y.defeats >= x.defeats && b.revision >= a.revision, "Economy baseline/counters regressed");
+  requireContract(same21(x.baseGold, y.baseGold) && x.baseSouls === y.baseSouls && compareAmount(y.retiredGold, x.retiredGold) >= 0 && y.retiredSouls >= x.retiredSouls && y.defeats >= x.defeats && b.revision >= a.revision, "Economy baseline/counters regressed");
   for (const [id, item] of Object.entries(a.itemsById)) {
     const terminal = b.d7?.salvaged[id] ?? b.services?.salesByItemId[id], next = b.itemsById[id] ?? b.renewal.groundBySourceId[item.sourceEntityId]?.item ?? terminal?.item;
-    requireContract(same20(item, next) || validWorkshopChange(after.playersById[pid], item, next), "Owned gear destroyed or rewritten");
+    requireContract(same21(item, next) || validWorkshopChange(after.playersById[pid], item, next), "Owned gear destroyed or rewritten");
     if (!b.itemsById[id] && !terminal) requireContract(y.lastDrop?.authorityOrder > before.lastAppliedAuthorityOrder && y.lastDrop.revision > a.revision, "Drop lacks later authoritative command");
   }
   for (const [id, g] of Object.entries(x.groundBySourceId)) {
-    requireContract(same20(g.item, b.itemsById[g.item.itemId] ?? y.groundBySourceId[id]?.item ?? b.d7?.salvaged[g.item.itemId]?.item), "Dropped gear disappeared");
+    requireContract(same21(g.item, b.itemsById[g.item.itemId] ?? y.groundBySourceId[id]?.item ?? b.d7?.salvaged[g.item.itemId]?.item), "Dropped gear disappeared");
     if (!y.groundBySourceId[id]) requireContract(y.lastGroundPickup?.authorityOrder > before.lastAppliedAuthorityOrder && y.lastGroundPickup.revision > a.revision, "Ground pickup lacks later authoritative command");
   }
   const withoutArchive = (reward) => {
@@ -21303,17 +21353,17 @@ function validateRenewableInventoryProgress(before, after, pid) {
       } else requireContract(!r.claimed, "Unclaimed non-gear reward cannot be claimed");
     } else {
       const reset = Object.values(after.campaign.siteRunEpisodesById ?? {}).find((record2) => record2.lastReset?.retiredGroupIds.includes(o.groupId) && record2.lastReset.toEpisode === record2.episode), retiredNow = r.retiredTick === void 0 && n.retiredTick !== void 0 && reset, archivedNow = !r.episodeSource?.archive && n.episodeSource?.archive && reset;
-      const unchanged = same20(withoutArchive(r), withoutArchive(n)) && (!r.claimed || n.claimed) && (r.retiredTick === n.retiredTick || retiredNow) && (!n.episodeSource?.archive || r.episodeSource?.archive || archivedNow);
+      const unchanged = same21(withoutArchive(r), withoutArchive(n)) && (!r.claimed || n.claimed) && (r.retiredTick === n.retiredTick || retiredNow) && (!n.episodeSource?.archive || r.episodeSource?.archive || archivedNow);
       if (!unchanged) {
-        const left = withoutArchive(r), right = withoutArchive(n), keys2 = [.../* @__PURE__ */ new Set([...Object.keys(left), ...Object.keys(right)])].filter((k) => !same20(left[k] ?? null, right[k] ?? null));
+        const left = withoutArchive(r), right = withoutArchive(n), keys2 = [.../* @__PURE__ */ new Set([...Object.keys(left), ...Object.keys(right)])].filter((k) => !same21(left[k] ?? null, right[k] ?? null));
         throw new TypeError("Reward history rewritten: " + JSON.stringify({ sourceEntityId: id, fields: keys2, before: Object.fromEntries(keys2.map((k) => [k, left[k]])), after: Object.fromEntries(keys2.map((k) => [k, right[k]])), claimed: [r.claimed, n.claimed], retired: [r.retiredTick ?? null, n.retiredTick ?? null] }));
       }
     }
   }
-  requireContract(same20(y.retiredGold, retiredGold) && y.retiredSouls === retiredSouls && same20(y.retiredMaterials ?? {}, retiredMaterials), "Retired reward aggregate drift");
+  requireContract(same21(y.retiredGold, retiredGold) && y.retiredSouls === retiredSouls && same21(y.retiredMaterials ?? {}, retiredMaterials), "Retired reward aggregate drift");
   requireContract(!a.d7 || b.d7, "D7 inventory version removed");
   if (b.d7) validateSalvageProgress(a, b, before, after);
-  if (!same20(a.equipped, b.equipped)) requireContract(b.lastEquipmentChange?.authorityOrder > before.lastAppliedAuthorityOrder, "Equipment lacks new command");
+  if (!same21(a.equipped, b.equipped)) requireContract(b.lastEquipmentChange?.authorityOrder > before.lastAppliedAuthorityOrder, "Equipment lacks new command");
 }
 
 // src/shared/contracts/identities.js
@@ -21421,7 +21471,7 @@ function validateOrdinaryPopulation(m, collision2 = null) {
 
 // src/shared/contracts/origin_hordes_v1.js
 var ORIGIN_HORDE_VERSION = "world-origin-horde-overlay-v1";
-var same21 = (a, b) => a === b || a !== void 0 && b !== void 0 && canonicalStringify(a) === canonicalStringify(b);
+var same22 = (a, b) => a === b || a !== void 0 && b !== void 0 && canonicalStringify(a) === canonicalStringify(b);
 var distance4 = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 var originFor = (s) => s.content.definitionsById[s.campaign.overworld.manifestDefinitionId];
 var originalGroups = (origin2) => [...origin2.population?.groups ?? [], ...(origin2.siteInteriors ?? []).flatMap((d) => d.groups)];
@@ -21532,9 +21582,9 @@ function originHordeUpgradeForGroup(a, b, id) {
     const genesis = !a.d9World?.plannedWorld && a.tick === 0 && b.tick === 0 && a.d9World.runtime.chunks.length === 0 && Object.keys(a.d9World.siteReservationsById).length === 0;
     if (!hasWorldCombat(a) && !genesis || !hasWorldCombat(b) || a.tick !== b.tick) return false;
     const row = b.d9World.originHordes?.groupsById[id], oldRow = a.d9World.originHordes?.groupsById[id], g = a.groupsById[id], next = b.groupsById[id], original = originalGroups(originFor(a)).find((g2) => g2.groupId === id);
-    if (!row || same21(row, oldRow) || !original || !g || !next || row.appliedTick !== b.tick || row.episode !== a.encounterEconomy.groups[id].episode || g.cleared || hasHistory(a, id) || g.entityIds.length !== 2 || !same21(g.entityIds, original.members.map((m) => m.entityId))) return false;
-    if (!genesis && !same21(a.playersById, b.playersById) || !same21(a.encounterEconomy.groups[id].usedResources, b.encounterEconomy.groups[id].usedResources)) return false;
-    if (g.entityIds.some((key9) => !same21(genesis ? { ...a.entitiesById[key9], attackReach: 32, attackReachMode: "clearHullGap" } : a.entitiesById[key9], b.entitiesById[key9]))) return false;
+    if (!row || same22(row, oldRow) || !original || !g || !next || row.appliedTick !== b.tick || row.episode !== a.encounterEconomy.groups[id].episode || g.cleared || hasHistory(a, id) || g.entityIds.length !== 2 || !same22(g.entityIds, original.members.map((m) => m.entityId))) return false;
+    if (!genesis && !same22(a.playersById, b.playersById) || !same22(a.encounterEconomy.groups[id].usedResources, b.encounterEconomy.groups[id].usedResources)) return false;
+    if (g.entityIds.some((key9) => !same22(genesis ? { ...a.entitiesById[key9], attackReach: 32, attackReachMode: "clearHullGap" } : a.entitiesById[key9], b.entitiesById[key9]))) return false;
     const draft = copyWire(genesis ? b : a);
     if (genesis) {
       delete draft.d9World.originHordes.groupsById[id];
@@ -21545,7 +21595,7 @@ function originHordeUpgradeForGroup(a, b, id) {
       for (const m of row.definition.members.slice(2)) delete draft.entitiesById[m.entityId];
     }
     upgradeOriginHordes(draft);
-    return same21(draft.d9World.originHordes.groupsById[id], row) && same21(draft.groupsById[id], next) && same21(draft.d9World.episodes[id], b.d9World.episodes[id]) && same21(draft.encounterEconomy.groups[id], b.encounterEconomy.groups[id]) && row.definition.members.slice(2).every((m) => !a.entitiesById[m.entityId] && same21(draft.entitiesById[m.entityId], b.entitiesById[m.entityId]));
+    return same22(draft.d9World.originHordes.groupsById[id], row) && same22(draft.groupsById[id], next) && same22(draft.d9World.episodes[id], b.d9World.episodes[id]) && same22(draft.encounterEconomy.groups[id], b.encounterEconomy.groups[id]) && row.definition.members.slice(2).every((m) => !a.entitiesById[m.entityId] && same22(draft.entitiesById[m.entityId], b.entitiesById[m.entityId]));
   } catch {
     return false;
   }
@@ -21558,20 +21608,20 @@ function validateOriginHordes(s, origin2, collision2) {
     const original = originalGroups(origin2).find((g) => g.groupId === id);
     requireContract(original, "Origin horde group not in immutable origin");
     const definition = row.status === "expanded" ? originHordeDefinition(s, origin2, collision2, original) : original;
-    requireContract(same21(definition, row.definition), "Origin horde deterministic definition changed");
+    requireContract(same22(definition, row.definition), "Origin horde deterministic definition changed");
     requireContract(row.appliedTick <= s.tick && row.episode <= s.encounterEconomy.groups[id].episode, "Origin horde chronology changed");
     requireContract(row.status !== "expanded" || row.protectedEpisode === false, "Expanded origin horde has protected episode");
-    requireContract(same21(s.groupsById[id].entityIds, definition.members.map((m) => m.entityId)), "Origin horde live membership mismatch");
+    requireContract(same22(s.groupsById[id].entityIds, definition.members.map((m) => m.entityId)), "Origin horde live membership mismatch");
     requireContract(s.d9World.episodes[id]?.origin, "Origin horde has no episode provenance");
   }
 }
 function validateOriginHordeProgress(a, b) {
   const before = a.d9World?.originHordes?.groupsById ?? {}, after = b.d9World?.originHordes?.groupsById ?? {};
-  for (const id of /* @__PURE__ */ new Set([...Object.keys(before), ...Object.keys(after)])) requireContract(same21(before[id], after[id]) || originHordeUpgradeForGroup(a, b, id), "Origin horde overlay history changed");
+  for (const id of /* @__PURE__ */ new Set([...Object.keys(before), ...Object.keys(after)])) requireContract(same22(before[id], after[id]) || originHordeUpgradeForGroup(a, b, id), "Origin horde overlay history changed");
 }
 
 // src/shared/contracts/encounter_economy.js
-var same22 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same23 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var inSettlement = (s, m, a) => a.residency.spaceInstanceId === s.overworldInstanceId && m.safeRegions.some((r) => a.position.x >= r.x && a.position.x < r.x + r.width && a.position.y >= r.y && a.position.y < r.y + r.height);
 function installEncounterEconomy(s, m) {
   if (s.encounterEconomy) return s;
@@ -21642,7 +21692,7 @@ function validateEncounterEconomy(s, m) {
   safeInteger(e.revision);
   safeInteger(e.returnSequence);
   if (e.lastReturnTick !== null) safeInteger(e.lastReturnTick, 0, s.tick);
-  requireContract(same22(Object.keys(e.groups).sort(), Object.keys(s.groupsById).sort()), "Episode registry differs from encounters");
+  requireContract(same23(Object.keys(e.groups).sort(), Object.keys(s.groupsById).sort()), "Episode registry differs from encounters");
   closedRecord(e.outingsByPlayer, s.session.playerIds);
   for (const o of Object.values(e.outingsByPlayer)) {
     closedRecord(o, ["wasInTown", "earnedOutside"]);
@@ -21654,7 +21704,7 @@ function validateEncounterEconomy(s, m) {
     if (r.contentDepth !== void 0) {
       if (s.d9World?.episodes[id]) {
         positiveProgression(r.contentDepth);
-        requireContract(same22(r.contentDepth, s.d9World.episodes[id].snapshot?.sourceDepth ?? s.d9World.episodes[id].geography.minimumLevel), "Episode depth drift");
+        requireContract(same23(r.contentDepth, s.d9World.episodes[id].snapshot?.sourceDepth ?? s.d9World.episodes[id].geography.minimumLevel), "Episode depth drift");
       } else safeInteger(r.contentDepth, 1, 1e4);
     }
     safeInteger(r.episode);
@@ -21668,7 +21718,7 @@ function validateEncounterEconomy(s, m) {
       requireContract(valid.has(key9), "Resource incarnation mismatch");
       closedRecord(v, ["tick", "playerIds"]);
       safeInteger(v.tick, r.startedTick, s.tick);
-      requireContract(v.playerIds.length > 0 && same22([...new Set(v.playerIds)].sort(), v.playerIds) && v.playerIds.every((id2) => s.playersById[id2]), "Resource award participants");
+      requireContract(v.playerIds.length > 0 && same23([...new Set(v.playerIds)].sort(), v.playerIds) && v.playerIds.every((id2) => s.playersById[id2]), "Resource award participants");
     }
     validatePersonalFinaleClaimsD13D_G1(s, id, r);
   }
@@ -21690,8 +21740,8 @@ function validateEncounterEconomyProgress(a, b) {
     }
     requireContract(n && n.episode >= g.episode && n.startedTick >= g.startedTick, "Encounter episode regressed");
     if (prior) {
-      requireContract(next && next.anchorId === prior.anchorId && same22(next.geography, prior.geography), "Procedural encounter geography changed");
-      if (n.episode === g.episode && prior.snapshot) requireContract(same22(prior.snapshot, next.snapshot), "Frozen procedural progression changed");
+      requireContract(next && next.anchorId === prior.anchorId && same23(next.geography, prior.geography), "Procedural encounter geography changed");
+      if (n.episode === g.episode && prior.snapshot) requireContract(same23(prior.snapshot, next.snapshot), "Frozen procedural progression changed");
       if (n.episode > g.episode && !prior.origin) {
         const r = next.renewalReceipt;
         requireContract(r?.version === "procedural-renewal-d9-v1" && r.fromEpisode === n.episode - 1 && r.renewedTick === n.startedTick && r.renewedTick >= a.tick && r.clearedTick !== null && r.vacatedTick >= r.clearedTick && r.renewedTick - r.vacatedTick >= D9_PROFILE.renewalVacancyTicks, "Procedural renewal lacks vacancy receipt");
@@ -21701,12 +21751,12 @@ function validateEncounterEconomyProgress(a, b) {
       requireContract(n.startedTick === g.startedTick, "Episode start changed");
       for (const [key9, personal] of Object.entries(g.personalCompletionClaimsBySourceId ?? {})) {
         const nextRecord = n.personalCompletionClaimsBySourceId?.[key9], beforeClaimed = Object.keys(personal.claimedByPlayerId), afterClaimed = Object.keys(nextRecord?.claimedByPlayerId ?? {});
-        requireContract(nextRecord && same22({ ...personal, claimedByPlayerId: {} }, { ...nextRecord, claimedByPlayerId: {} }) && beforeClaimed.every((playerId) => same22(personal.claimedByPlayerId[playerId], nextRecord.claimedByPlayerId[playerId])) && beforeClaimed.every((playerId) => afterClaimed.includes(playerId)), "Personal completion claim regressed");
+        requireContract(nextRecord && same23({ ...personal, claimedByPlayerId: {} }, { ...nextRecord, claimedByPlayerId: {} }) && beforeClaimed.every((playerId) => same23(personal.claimedByPlayerId[playerId], nextRecord.claimedByPlayerId[playerId])) && beforeClaimed.every((playerId) => afterClaimed.includes(playerId)), "Personal completion claim regressed");
       }
       for (const [key9, r] of Object.entries(g.usedResources)) {
         const personal = g.personalCompletionClaimsBySourceId?.[key9] || ["spore", "hollow", "cursed_shrine"].includes(eventKind(a, id)) && key9 === episodeRewardId(id, g.episode, "chest", ["hollow", "cursed_shrine"].includes(eventKind(a, id)) ? 0 : 3);
         if (personal) requireContract(r.tick === n.usedResources[key9]?.tick && r.playerIds.every((playerId) => n.usedResources[key9]?.playerIds.includes(playerId)), "Personal completion provenance regressed");
-        else requireContract(same22(n.usedResources[key9], r), "Consumed resource reset");
+        else requireContract(same23(n.usedResources[key9], r), "Consumed resource reset");
       }
     } else if (!prior || prior.origin) requireContract(n.startedTick >= a.tick && (y.returnSequence > x.returnSequence || g.eligibleReturn > 0), "Renewal lacks settlement return");
   }
@@ -21883,7 +21933,7 @@ function installForgeStations(state, manifest) {
 
 // src/shared/contracts/forge_economy.js
 var FORGE_INVENTORY_VERSION = "player-inventory-d5-v1";
-var same23 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same24 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var emptyEconomy = () => ({ version: "forge-economy-v1", origin: "normal", legacyRewardIds: [], slotLevels: Object.fromEntries(EQUIPMENT_SLOTS.map((k) => [k, 0])), materials: {}, soulAwardsByEntityId: {}, lastAttunementsBySlot: {} });
 function migrateForgeInventory(p) {
   if (p.inventory.version === FORGE_INVENTORY_VERSION) return p.inventory;
@@ -21914,7 +21964,7 @@ function validateForgeEconomy(p, state, validateCommand2) {
   closedRecord(e.slotLevels, equipmentSlots(inv));
   closedRecord(e.materials, [], FORGE_MATERIALS);
   closedRecord(e.lastAttunementsBySlot, [], equipmentSlots(inv));
-  requireContract(Array.isArray(e.legacyRewardIds) && e.legacyRewardIds.length <= 63 && same23([...new Set(e.legacyRewardIds)].sort(), e.legacyRewardIds), "Invalid legacy reward set");
+  requireContract(Array.isArray(e.legacyRewardIds) && e.legacyRewardIds.length <= 63 && same24([...new Set(e.legacyRewardIds)].sort(), e.legacyRewardIds), "Invalid legacy reward set");
   const drops = {}, addDrops = (m) => {
     for (const [k, n] of Object.entries(m ?? {})) drops[k] = (drops[k] ?? 0) + n;
   };
@@ -21937,6 +21987,7 @@ function validateForgeEconomy(p, state, validateCommand2) {
     gold = addAmount(inv.renewal.baseGold, inv.renewal.retiredGold);
     souls = inv.renewal.baseSouls + inv.renewal.retiredSouls;
     addDrops(inv.renewal.retiredMaterials);
+    addDrops(inv.renewal.arrival?.materials);
     for (const [id, r] of Object.entries(inv.rewardsByEntityId)) if (r.episodeSource) {
       gold = addAmount(gold, rewardAmount(inv.goldAwardsByEntityId[id].amount));
       souls += e.soulAwardsByEntityId[id] ?? 0;
@@ -21957,7 +22008,7 @@ function validateForgeEconomy(p, state, validateCommand2) {
     spentGold = addAmount(spentGold, spent.gold);
     for (const [k, v] of Object.entries(spent.materials)) spentMaterials[k] = (spentMaterials[k] ?? 0) + v;
     const receipt = e.lastAttunementsBySlot[slot];
-    if (!level) {
+    if (level <= (inv.renewal?.arrival?.slotLevels[slot] ?? 0)) {
       requireContract(receipt === void 0, "Unexpected attunement receipt");
       continue;
     }
@@ -21988,7 +22039,7 @@ function validateForgeEconomy(p, state, validateCommand2) {
   return e;
 }
 function validateForgeProgress(a, b, before) {
-  requireContract(same23(a.economy.origin, b.economy.origin) && same23(a.economy.legacyRewardIds, b.economy.legacyRewardIds), "Economy origin changed");
+  requireContract(same24(a.economy.origin, b.economy.origin) && same24(a.economy.legacyRewardIds, b.economy.legacyRewardIds), "Economy origin changed");
   if (!a.renewal) for (const [id, q] of Object.entries(a.economy.soulAwardsByEntityId)) requireContract(b.economy.soulAwardsByEntityId[id] === q, "Material history changed");
   let delta = 0;
   for (const slot of equipmentSlots(b)) {
@@ -21996,7 +22047,7 @@ function validateForgeProgress(a, b, before) {
     requireContract(y >= x, "Attunement regressed");
     delta += y - x;
     const r = b.economy.lastAttunementsBySlot[slot];
-    if (y === x) requireContract(same23(a.economy.lastAttunementsBySlot[slot] ?? null, r ?? null), "Attunement receipt changed without level");
+    if (y === x) requireContract(same24(a.economy.lastAttunementsBySlot[slot] ?? null, r ?? null), "Attunement receipt changed without level");
     else requireContract(r.authorityOrder > before.lastAppliedAuthorityOrder && r.tick >= before.tick && r.revision > a.revision, "Attunement lacks later command");
   }
   return delta;
@@ -22530,7 +22581,7 @@ var SLIME_CLEARING = freezeWire({
 // src/shared/contracts/primary.js
 var PRIMARY_RECENT_WINDOW = 16;
 var COMPLETED_COMBAT_WINDOW = 16;
-var same24 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same25 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 function validatePrimaryAim(aim) {
   closedRecord(aim, ["x", "y"]);
   requireContract(
@@ -22541,7 +22592,7 @@ function validatePrimaryAim(aim) {
 function primaryProfile(state, entityId2) {
   const id = state.primary?.actorsById[entityId2]?.profileId;
   const profile2 = state.content?.definitionsById[id];
-  requireContract(profile2?.kind === "primaryProfile" && same24(profile2, SHIELD_SWORD_PRIMARY), "Unsupported equipped primary profile");
+  requireContract(profile2?.kind === "primaryProfile" && same25(profile2, SHIELD_SWORD_PRIMARY), "Unsupported equipped primary profile");
   return hasWorldCombat(state) ? { ...profile2, forwardDotMinimum: 0.1 } : profile2;
 }
 function primaryRecords(state) {
@@ -22581,7 +22632,7 @@ function validatePrimaryState(state) {
   requireContract(state.history && state.multiplayer && state.space, "Primary needs bounded plural combat state");
   closedRecord(value, ["contractVersion", "actorsById", "completedById", "actionIdHighWatermark", "eventIdHighWatermark"]);
   requireContract(value.contractVersion === 1, "Unsupported primary contract");
-  requireContract(same24(Object.keys(value.actorsById).sort(), Object.values(state.playersById).map((p) => p.entityId).sort()), "Primary owner inventory mismatch");
+  requireContract(same25(Object.keys(value.actorsById).sort(), Object.values(state.playersById).map((p) => p.entityId).sort()), "Primary owner inventory mismatch");
   for (const [field2, kind2] of [["actionIdHighWatermark", "primaryActionId"], ["eventIdHighWatermark", "eventId"]]) if (value[field2] !== null) validateId(kind2, value[field2]);
   requireContract(Object.keys(value.completedById).length <= PRIMARY_RECENT_WINDOW, "Completed primary retention bound");
   requireContract(Object.keys(state.combat.appliedActionsById).length <= COMPLETED_COMBAT_WINDOW, "Manual damage retention bound");
@@ -22658,7 +22709,7 @@ function validatePrimaryState(state) {
     const timing = profile2.steps[record2.comboStep - 1], ends = record2.startedTick + timing.startup + timing.active + timing.recovery;
     if (record2.completedTick === null) {
       requireContract(owner.current?.primaryActionId === record2.primaryActionId && record2.finishEventSequence === null && !record2.interrupted, "Active primary ownership mismatch");
-      requireContract(state.tick < ends && same24(primaryPhaseAt(record2, profile2, state.tick), { phase: record2.phase, phaseStartedTick: record2.phaseStartedTick, phaseEndsTick: record2.phaseEndsTick }), "Primary phase timing mismatch");
+      requireContract(state.tick < ends && same25(primaryPhaseAt(record2, profile2, state.tick), { phase: record2.phase, phaseStartedTick: record2.phaseStartedTick, phaseEndsTick: record2.phaseEndsTick }), "Primary phase timing mismatch");
       requireContract(record2.hitResolved ? state.tick >= record2.startedTick + timing.startup : state.tick <= record2.startedTick + timing.startup, "Primary hit phase mismatch");
     } else {
       requireContract(value.completedById[record2.primaryActionId] === record2 && record2.phase === "complete", "Completed primary identity mismatch");
@@ -25063,7 +25114,7 @@ function campaignTavernCollision(floor, services = false) {
   return c;
 }
 var token6 = (campaignId, label2) => [0, 1, 2, 3].map((lane) => mixPlan(PLANNED_TOWN_VERSION + "/" + campaignId + "/" + PLANNED_TOWN_ID + "/" + TOWN_TAVERN.id + "/" + label2 + "/" + lane).toString(16).padStart(8, "0")).join("");
-var same25 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same26 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var tavernSpaceIds = (s) => Object.values(s.d9World?.settlementInterior?.binding.floorSpaces ?? {});
 async function installCampaignTavern(s, sha256) {
   requireContract(s.d9World.plannedWorld?.townPrototype && [PLANNED_TOWN_VERSION, PLANNED_TOWN_START_VERSION].includes(s.d9World.plannedWorld.townPrototype) && !s.d9World.settlementInterior, "Tavern installation requires opted-in genesis");
@@ -25084,11 +25135,11 @@ function validateCampaignTavern(s) {
   if (!r) return;
   if (s.d9World.plannedWorld.townPrototype === PLANNED_TOWN_START_VERSION) {
     const a = plannedStartTiles(s.d9World.plannedWorld)[0], expected2 = { chunkX: String(1024 + Math.floor(a.x / 32)), chunkY: String(1024 + Math.floor(a.y / 26)), localX: (a.x % 32 + 0.5) * 32, localY: (a.y % 26 + 0.5) * 32 };
-    requireContract(same25(s.d9World.plannedStart, expected2), "Town campaign start drift");
+    requireContract(same26(s.d9World.plannedStart, expected2), "Town campaign start drift");
   }
   closedRecord(r, ["version", "siteId", "binding", "floorLogicalIds"]);
   const b = r.binding;
-  requireContract(r.version === PLANNED_TOWN_VERSION && r.siteId === "loc:" + token6(s.campaign.campaignId, "entrance") && b.campaignId === s.campaign.campaignId && b.settlementId === PLANNED_TOWN_ID && b.buildingId === TOWN_TAVERN.id && b.exteriorSpaceId === s.overworldInstanceId && same25(b.frontage, townFrontageV1()), "Tavern exterior identity drift");
+  requireContract(r.version === PLANNED_TOWN_VERSION && r.siteId === "loc:" + token6(s.campaign.campaignId, "entrance") && b.campaignId === s.campaign.campaignId && b.settlementId === PLANNED_TOWN_ID && b.buildingId === TOWN_TAVERN.id && b.exteriorSpaceId === s.overworldInstanceId && same26(b.frontage, townFrontageV1()), "Tavern exterior identity drift");
   const expected = createTavernBinding({ campaignId: b.campaignId, settlementId: b.settlementId, buildingId: b.buildingId, exteriorSpaceId: b.exteriorSpaceId, frontage: b.frontage, exteriorDimensions: [14, 12] });
   requireContract(b.identity === expected.identity && b.version === expected.version && b.recipeVersion === expected.recipeVersion && Object.keys(b).sort().join(",") === Object.keys(expected).sort().join(","), "Tavern recipe/binding drift");
   closedRecord(b.floorSpaces, ["ground", "upper"]);
@@ -25097,7 +25148,7 @@ function validateCampaignTavern(s) {
   for (const f3 of ["ground", "upper"]) {
     requireContract(b.floorSpaces[f3] === "spi:" + token6(s.campaign.campaignId, f3) && r.floorLogicalIds[f3] === "spc:" + token6(s.campaign.campaignId, "logical/" + f3), "Tavern deterministic floor identity drift");
     const space = s.spacesByInstanceId[b.floorSpaces[f3]];
-    requireContract(space && space.spaceId === r.floorLogicalIds[f3] && same25(space.collision, campaignTavernCollision(f3, hasSettlementLife(s.d9World.plannedWorld))), "Tavern floor geometry drift");
+    requireContract(space && space.spaceId === r.floorLogicalIds[f3] && same26(space.collision, campaignTavernCollision(f3, hasSettlementLife(s.d9World.plannedWorld))), "Tavern floor geometry drift");
   }
 }
 
@@ -25105,7 +25156,7 @@ function validateCampaignTavern(s) {
 var SITE_RECIPE_VERSION = "bounded-stone-rooms-d2-v1";
 var SITE_INTERACTION_RADIUS = 64;
 var SITE_EXIT_PROTECTION_TICKS = 120;
-var same26 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same27 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 function siteInstanceId(campaignId, siteId2) {
   validateId("campaignId", campaignId);
   validateId("locationId", siteId2);
@@ -25209,19 +25260,19 @@ function validateSiteState(s, m) {
     return;
   }
   const records2 = s.campaign.sitesById;
-  requireContract(records2 && same26(Object.keys(records2).sort(), m.siteInteriors.map((d) => d.siteId).sort()), "Site state inventory");
+  requireContract(records2 && same27(Object.keys(records2).sort(), m.siteInteriors.map((d) => d.siteId).sort()), "Site state inventory");
   for (const d of m.siteInteriors) {
     const r = records2[d.siteId];
     closedRecord(r, ["spaceInstanceId", "conqueredTick"]);
     requireContract(r.spaceInstanceId === siteInstanceId(s.campaign.campaignId, d.siteId) && r.spaceInstanceId !== s.overworldInstanceId, "Site instance binding");
     const space = s.spacesByInstanceId[r.spaceInstanceId];
-    requireContract(space?.spaceId === d.logicalSpaceId && same26(space.collision, d.collision), "Stored site geometry mismatch");
+    requireContract(space?.spaceId === d.logicalSpaceId && same27(space.collision, d.collision), "Stored site geometry mismatch");
     const cleared = d.groups.every((g) => s.groupsById[g.groupId]?.cleared);
     requireContract(s.encounterEconomy ? !cleared || r.conqueredTick !== null : cleared === (r.conqueredTick !== null), "Site conquest/group mismatch");
     if (r.conqueredTick !== null) safeInteger(r.conqueredTick, 0, s.tick);
     for (const g of d.groups) {
       const live = s.groupsById[g.groupId];
-      requireContract(live?.siteId === d.siteId && live.spaceInstanceId === r.spaceInstanceId && same26(live.entityIds, g.members.map((a) => a.entityId)), "Site group binding");
+      requireContract(live?.siteId === d.siteId && live.spaceInstanceId === r.spaceInstanceId && same27(live.entityIds, g.members.map((a) => a.entityId)), "Site group binding");
       for (const a of g.members) requireContract(s.entitiesById[a.entityId]?.contentDefinitionId === a.profileId && ORDINARY_ACQUIRE_RANGES.includes(s.entitiesById[a.entityId].ai?.acquireRange), "Site actor profile mismatch");
     }
   }
@@ -26240,7 +26291,7 @@ function samePlayerMembership(before, after) {
 }
 
 // src/shared/contracts/encounter_proof.js
-var same27 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same28 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var initialEncounterProof = () => ({ encounterId: SLIME_CLEARING.encounterId, cleared: false, requiredHostileIds: [] });
 function proofClearingForState(state) {
   const manifest = manifestForState(state);
@@ -26272,7 +26323,7 @@ function validateEncounterProof(state) {
     validateId("entityId", id);
     requireContract(state.space.entitiesById[id]?.contentDefinitionId === SLIME_CLEARING.hostileProfileId, "Authored hostile membership mismatch");
   } else requireContract(p.requiredHostileIds.length === 0, "Safe proof retains hostile membership");
-  requireContract(same27(Object.values(state.space.entitiesById).filter((a) => a.team === "hostile").map((a) => a.entityId).sort(), p.requiredHostileIds), "Extra authored hostile");
+  requireContract(same28(Object.values(state.space.entitiesById).filter((a) => a.team === "hostile").map((a) => a.entityId).sort(), p.requiredHostileIds), "Extra authored hostile");
 }
 function canActivateProof(state) {
   const proof2 = state.campaign?.encounterProof;
@@ -26340,23 +26391,23 @@ function validatePrimaryProgress(before, source8) {
   requireContract(before.primary && source8.primary && source8.tick >= before.tick, "Invalid primary progress context");
   validateCampaignDiscoveryProgress(before, source8);
   for (const key9 of ["session", "content", "activeSpaceRef", "rngStatesByName"])
-    requireContract(same27(before[key9], source8[key9]), `Primary progress changed ${key9}`);
-  requireContract(same27(before.multiplayer.encounterParticipants, source8.multiplayer.encounterParticipants), "Primary progress changed frozen roster");
-  requireContract(same27(Object.keys(before.playersById).sort(), Object.keys(source8.playersById).sort()), "Primary player membership changed");
-  for (const [id, player] of Object.entries(before.playersById)) requireContract(same27({ ...player, connectionStatus: source8.playersById[id].connectionStatus }, source8.playersById[id]), "Primary ownership changed");
+    requireContract(same28(before[key9], source8[key9]), `Primary progress changed ${key9}`);
+  requireContract(same28(before.multiplayer.encounterParticipants, source8.multiplayer.encounterParticipants), "Primary progress changed frozen roster");
+  requireContract(same28(Object.keys(before.playersById).sort(), Object.keys(source8.playersById).sort()), "Primary player membership changed");
+  for (const [id, player] of Object.entries(before.playersById)) requireContract(same28({ ...player, connectionStatus: source8.playersById[id].connectionStatus }, source8.playersById[id]), "Primary ownership changed");
   for (const key9 of ["encounterId", "encounterAttemptId", "collision", "contentDefinitionId"])
-    requireContract(same27(before.space[key9], source8.space[key9]), "Primary space changed");
-  requireContract(same27(Object.keys(before.space.entitiesById).sort(), Object.keys(source8.space.entitiesById).sort()), "Primary actor inventory changed");
+    requireContract(same28(before.space[key9], source8.space[key9]), "Primary space changed");
+  requireContract(same28(Object.keys(before.space.entitiesById).sort(), Object.keys(source8.space.entitiesById).sort()), "Primary actor inventory changed");
   for (const [id, actor] of Object.entries(before.space.entitiesById)) {
     const current = source8.space.entitiesById[id], normalized = copyWire(current);
     for (const key9 of ["hp", "alive", "position", "movementIntent", "attackTimer", "nextAttackActionSequence", "movedLastTick", "ai"]) normalized[key9] = copyWire(actor[key9]);
-    requireContract(same27(actor, normalized) && boundedCombatInteger(current.hp) <= boundedCombatInteger(actor.hp) && current.nextAttackActionSequence >= actor.nextAttackActionSequence, "Primary actor rules/resources changed");
-    if (actor.ai) requireContract(same27({ ...current.ai, updatesApplied: actor.ai.updatesApplied }, actor.ai) && current.ai.updatesApplied >= actor.ai.updatesApplied, "Primary AI rules changed");
+    requireContract(same28(actor, normalized) && boundedCombatInteger(current.hp) <= boundedCombatInteger(actor.hp) && current.nextAttackActionSequence >= actor.nextAttackActionSequence, "Primary actor rules/resources changed");
+    if (actor.ai) requireContract(same28({ ...current.ai, updatesApplied: actor.ai.updatesApplied }, actor.ai) && current.ai.updatesApplied >= actor.ai.updatesApplied, "Primary AI rules changed");
     const old = before.history.combatBaseline.actorsById[id], now = source8.history.combatBaseline.actorsById[id];
     requireContract(now.lastSourceSequence >= old.lastSourceSequence && boundedCombatInteger(now.hp) <= boundedCombatInteger(old.hp), "Primary retirement actor anchor regressed");
   }
   requireContract(source8.eventEmission.lastEventSequence >= before.eventEmission.lastEventSequence && source8.lastAppliedAuthorityOrder >= before.lastAppliedAuthorityOrder && source8.history.commandFloor.authorityOrder >= before.history.commandFloor.authorityOrder, "Primary authority cursor regressed");
-  for (const key9 of ["sessionGeneration", "sessionIdHighWatermark"]) requireContract(same27(before.history[key9], source8.history[key9]), "Primary session fence changed");
+  for (const key9 of ["sessionGeneration", "sessionIdHighWatermark"]) requireContract(same28(before.history[key9], source8.history[key9]), "Primary session fence changed");
   for (const key9 of ["eventSequence", "tick", "attackActionIdHighWatermark", "eventIdHighWatermark"])
     requireContract(before.history.combatBaseline[key9] === null || source8.history.combatBaseline[key9] >= before.history.combatBaseline[key9], "Primary retirement cursor regressed");
   for (const key9 of ["actionIdHighWatermark", "eventIdHighWatermark"]) requireContract(before.primary[key9] === null || source8.primary[key9] >= before.primary[key9], "Primary identity fence regressed");
@@ -26999,7 +27050,7 @@ function ordinaryRangedProfile(actor) {
 var HOSTILE_PROJECTILES_VERSION = "hostile-projectiles-v1";
 var HOSTILE_PROJECTILE_STYLES = Object.freeze(["thorn", "frost", "fireball", "maelstrom", "void", "clockwork", "arrow"]);
 var HOSTILE_PROJECTILE_LIMITS = Object.freeze({ global: 128, perSource: 4, lifeTicks: 80, travelRange: 336, radius: 6, speed: 4.2 });
-var same28 = (a, b) => a === b || a !== void 0 && b !== void 0 && canonicalStringify(a) === canonicalStringify(b);
+var same29 = (a, b) => a === b || a !== void 0 && b !== void 0 && canonicalStringify(a) === canonicalStringify(b);
 var ranged3 = ordinaryRangedProfile;
 var vector = (v, unit3 = false) => {
   closedRecord(v, ["x", "y"]);
@@ -27071,8 +27122,8 @@ function validateHostileProjectiles(state) {
     validateInteger(b.attack);
     requireContract(integerBigInt(b.attack) > 0n, "Hostile projectile attack");
     positiveProgression(b.sourceLevel);
-    requireContract(same28(g?.threatSnapshot?.levelsByEntityId[b.sourceId], b.sourceLevel), "Hostile projectile locked level");
-    requireContract(same28(source8.attackDamage, b.attack), "Hostile projectile captured attack");
+    requireContract(same29(g?.threatSnapshot?.levelsByEntityId[b.sourceId], b.sourceLevel), "Hostile projectile locked level");
+    requireContract(same29(source8.attackDamage, b.attack), "Hostile projectile captured attack");
     counts.set(b.sourceId, (counts.get(b.sourceId) ?? 0) + 1);
     requireContract(counts.get(b.sourceId) <= HOSTILE_PROJECTILE_LIMITS.perSource, "Hostile projectile source bound");
   }
@@ -27083,7 +27134,7 @@ var DUNGEON_MOB_CATALOG_UPGRADE = "dungeon-mob-catalog-upgrade-v1";
 var additions = [...DUNGEON_MOBS_V1_ENEMIES, ...DUNGEON_MOBS_V1_PROFILES];
 var addedIds = new Set(additions.map((d) => d.contentDefinitionId));
 var laterIds = new Set([...DUNGEON_MOBS_V2_ENEMIES, ...DUNGEON_MOBS_V2_PROFILES].map((d) => d.contentDefinitionId));
-var same29 = (a, b) => a === b || a !== void 0 && b !== void 0 && canonicalStringify(a) === canonicalStringify(b);
+var same30 = (a, b) => a === b || a !== void 0 && b !== void 0 && canonicalStringify(a) === canonicalStringify(b);
 var hasLaterEntries = (state) => Object.keys(state.content.definitionsById).some((id) => laterIds.has(id));
 function dungeonMobV1CatalogPrefix(state) {
   if (!hasLaterEntries(state)) return state.content;
@@ -27094,12 +27145,12 @@ function dungeonMobV1CatalogPrefix(state) {
   };
 }
 function hasDungeonMobCatalog(state) {
-  return additions.every((d) => same29(state.content.definitionsById[d.contentDefinitionId], d));
+  return additions.every((d) => same30(state.content.definitionsById[d.contentDefinitionId], d));
 }
 function validateOrdinaryCatalog(state) {
   const prefix2 = dungeonMobV1CatalogPrefix(state), defs = prefix2.definitionsById, full = hasDungeonMobCatalog(state);
   requireContract(full || !additions.some((d) => Object.hasOwn(defs, d.contentDefinitionId)), "Partial Dungeon mob catalog");
-  for (const d of full ? [...DUNGEON_MOBS_V1_CATALOG_ENEMIES, ...DUNGEON_MOBS_V1_CATALOG_PROFILES] : [...LEGACY_ORDINARY_ENEMIES, ...LEGACY_ORDINARY_PROFILES]) requireContract(same29(defs[d.contentDefinitionId], d), "Ordinary content drift");
+  for (const d of full ? [...DUNGEON_MOBS_V1_CATALOG_ENEMIES, ...DUNGEON_MOBS_V1_CATALOG_PROFILES] : [...LEGACY_ORDINARY_ENEMIES, ...LEGACY_ORDINARY_PROFILES]) requireContract(same30(defs[d.contentDefinitionId], d), "Ordinary content drift");
   const receipt = state.hostileCombat?.catalogUpgrade;
   if (receipt) {
     closedRecord(receipt, ["version", "appliedTick", "fromFingerprint", "toFingerprint"]);
@@ -27120,13 +27171,13 @@ function isDungeonMobCatalogUpgrade(before, after) {
     if (!hasWorldCombat(before) || !hasWorldCombat(after) || hasDungeonMobCatalog(before) || !hasDungeonMobCatalog(after) || hasLaterEntries(before) || hasLaterEntries(after)) return false;
     const r = after.hostileCombat?.catalogUpgrade;
     if (!r || r.version !== DUNGEON_MOB_CATALOG_UPGRADE || before.hostileCombat?.catalogUpgrade || r.appliedTick !== before.tick || after.tick !== before.tick || r.fromFingerprint !== before.content.fingerprint || r.toFingerprint !== after.content.fingerprint) return false;
-    if (!same29(previousDungeonMobCatalog(after), before.content)) return false;
+    if (!same30(previousDungeonMobCatalog(after), before.content)) return false;
     const expected = copyWire(before);
     expected.content = copyWire(after.content);
     expected.campaign.contentFingerprint = after.content.fingerprint;
     installHostileProjectiles(expected);
     expected.hostileCombat.catalogUpgrade = copyWire(r);
-    return same29(expected, after);
+    return same30(expected, after);
   } catch {
     return false;
   }
@@ -27142,9 +27193,9 @@ function previousDungeonMobOriginDocument(state, document) {
 // src/shared/contracts/dungeon_mob_catalog_v2.js
 var DUNGEON_MOB_CATALOG_UPGRADE_V2 = "dungeon-mob-catalog-upgrade-v2";
 var additions2 = [...DUNGEON_MOBS_V2_ENEMIES, ...DUNGEON_MOBS_V2_PROFILES];
-var same30 = (a, b) => a === b || a !== void 0 && b !== void 0 && canonicalStringify(a) === canonicalStringify(b);
+var same31 = (a, b) => a === b || a !== void 0 && b !== void 0 && canonicalStringify(a) === canonicalStringify(b);
 function hasDungeonMobCatalogV2(state) {
-  return hasDungeonMobCatalog(state) && additions2.every((d) => same30(state.content.definitionsById[d.contentDefinitionId], d));
+  return hasDungeonMobCatalog(state) && additions2.every((d) => same31(state.content.definitionsById[d.contentDefinitionId], d));
 }
 function validateOrdinaryCatalogV2(state) {
   const defs = state.content.definitionsById, full = hasDungeonMobCatalogV2(state);
@@ -27168,13 +27219,13 @@ function isDungeonMobCatalogUpgradeV2(before, after) {
     if (!hasWorldCombat(before) || !hasWorldCombat(after) || !hasDungeonMobCatalog(before) || hasDungeonMobCatalogV2(before) || !hasDungeonMobCatalogV2(after)) return false;
     const r = after.hostileCombat?.catalogUpgradeV2;
     if (!r || r.version !== DUNGEON_MOB_CATALOG_UPGRADE_V2 || before.hostileCombat?.catalogUpgradeV2 || r.appliedTick !== before.tick || after.tick !== before.tick || r.fromFingerprint !== before.content.fingerprint || r.toFingerprint !== after.content.fingerprint) return false;
-    if (!same30(previousDungeonMobCatalogV2(after), before.content)) return false;
+    if (!same31(previousDungeonMobCatalogV2(after), before.content)) return false;
     const expected = copyWire(before);
     expected.content = copyWire(after.content);
     expected.campaign.contentFingerprint = after.content.fingerprint;
     installHostileProjectiles(expected);
     expected.hostileCombat.catalogUpgradeV2 = copyWire(r);
-    return same30(expected, after);
+    return same31(expected, after);
   } catch {
     return false;
   }
@@ -27182,7 +27233,7 @@ function isDungeonMobCatalogUpgradeV2(before, after) {
 function validateDungeonMobCatalogProgress(before, after) {
   for (const [key9, admitted] of [["catalogUpgrade", isDungeonMobCatalogUpgrade], ["catalogUpgradeV2", isDungeonMobCatalogUpgradeV2]]) {
     const a = before.hostileCombat?.[key9], b = after.hostileCombat?.[key9];
-    requireContract(same30(a, b) || a === void 0 && b !== void 0 && admitted(before, after), "Dungeon mob catalog receipt history changed");
+    requireContract(same31(a, b) || a === void 0 && b !== void 0 && admitted(before, after), "Dungeon mob catalog receipt history changed");
   }
 }
 function previousDungeonMobOriginDocumentV2(state, document) {
@@ -27397,11 +27448,15 @@ function validateActivityCommand(command) {
   requireContract(["worldEvent.activate", "discovery.readNote", "quest.act", "movement.setIntent", "combat.primaryIntent", "combat.guardIntent", "combat.shadowDash", "combat.skill", "subweapon.claim", "classkit.claim", "service.modify", "service.material", "service.breakdown", "service.buy", "service.sell", "service.rest", "supply.use", "ferry.travel", "map.travel", "site.transition", "player.respawn", "loot.pickup", "gear.salvage", "gear.drop", "resource.interact", "progression.change", "forge.attune", "equipment.equip", "equipment.unequip"].includes(command.kind), "Unsupported activity command");
   return command;
 }
-var same31 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same32 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 function validateActivityState(s) {
   validateWorldEventsState(s);
   validateWire(s);
-  closedRecord(s, ["format", "protocolVersion", "ticksPerSecond", "tick", "content", "campaign", "session", "playersById", "spacesByInstanceId", "entitiesById", "groupsById", "primary", "eventEmission", "appliedCommandsById", "appliedClientSequences", "lastAppliedAuthorityOrder", "identitySequence", "overworldInstanceId", "proofCase", "residencyHistoryByEntityId", "primaryContextsById"], ["siteExitProtectionByEntityId", "playerRespawnsById", "encounterEconomy", "subweaponCombat", "d9World", "eliteCombat", "bossCombat", "hostileCombat", "wildernessCrowdGraceByEntityId"]);
+  closedRecord(s, ["format", "protocolVersion", "ticksPerSecond", "tick", "content", "campaign", "session", "playersById", "spacesByInstanceId", "entitiesById", "groupsById", "primary", "eventEmission", "appliedCommandsById", "appliedClientSequences", "lastAppliedAuthorityOrder", "identitySequence", "overworldInstanceId", "proofCase", "residencyHistoryByEntityId", "primaryContextsById"], ["siteExitProtectionByEntityId", "playerRespawnsById", "encounterEconomy", "subweaponCombat", "d9World", "eliteCombat", "bossCombat", "hostileCombat", "wildernessCrowdGraceByEntityId", "waitingRoom"]);
+  if (s.waitingRoom) {
+    closedRecord(s.waitingRoom, ["version", "spaceInstanceId"]);
+    requireContract(s.waitingRoom.version === "world-waiting-room-v1" && s.spacesByInstanceId[s.waitingRoom.spaceInstanceId] && s.waitingRoom.spaceInstanceId !== s.overworldInstanceId, "Invalid waiting room");
+  }
   validateCampaignTavern(s);
   validateTownInteriors(s);
   const d9 = Boolean(s.d9World);
@@ -27417,13 +27472,13 @@ function validateActivityState(s) {
   validateCampaignState(s.campaign);
   validateSessionState(s.session);
   requireContract(s.campaign.contentFingerprint === s.content.fingerprint && s.session.campaignId === s.campaign.campaignId, "Campaign/content mismatch");
-  requireContract(same31(s.session.playerIds, Object.keys(s.playersById).sort()) && s.session.playerIds.length >= 1, "Party inventory mismatch");
+  requireContract(same32(s.session.playerIds, Object.keys(s.playersById).sort()) && s.session.playerIds.length >= 1, "Party inventory mismatch");
   requireContract(["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O"].includes(s.proofCase), "Unknown activity fixture");
   const manifest = manifestForState(s), origin2 = originManifestForState(s);
   requireContract(manifest?.manifestVersion === 2, "Stored generated manifest required");
   validateOverworldCampaign(s.campaign.overworld, origin2);
   if (d9) {
-    requireContract(same31(s.d9World.content.historical, historicalSiteContentD9(origin2, s.d9World.origin.manifestHash).historical), "Historical site content changed");
+    requireContract(same32(s.d9World.content.historical, historicalSiteContentD9(origin2, s.d9World.origin.manifestHash).historical), "Historical site content changed");
     for (const chunk of s.d9World.runtime.chunks) for (const site of chunk.sites ?? []) validateSiteSocketD9(site);
   }
   const spaces = Object.values(s.spacesByInstanceId), functionalSpaceCount = functionalSitesD10(s).reduce((n, site) => n + functionalSiteSpaceIdsD12(site).length, 0);
@@ -27442,16 +27497,16 @@ function validateActivityState(s) {
     const c = overworld.collision;
     closedRecord(c, ["version", "tileSize", "width", "height", "origin", "frames", "pages"]);
     requireContract(c.version === D9_COLLISION_VERSION && c.tileSize === 32 && c.width === 20480 && c.height === 3328, "D9 collision frame contract");
-    requireContract(same31(c.origin, applyOriginEgress(originCollision, s.d9World.origin.egress)) && same31(c.frames, s.d9World.runtime.frames), "D9 origin/frame geometry mismatch");
+    requireContract(same32(c.origin, applyOriginEgress(originCollision, s.d9World.origin.egress)) && same32(c.frames, s.d9World.runtime.frames), "D9 origin/frame geometry mismatch");
     requireContract(c.pages.length === s.d9World.runtime.chunks.length, "D9 collision page count");
     for (let i = 0; i < c.pages.length; i++) {
       const page = s.d9World.runtime.chunks[i];
-      requireContract(same31(c.pages[i], runtimeCollisionPageD92(page)), "D9 collision page drift");
+      requireContract(same32(c.pages[i], runtimeCollisionPageD92(page)), "D9 collision page drift");
     }
-    for (const a of Object.values(s.entitiesById)) if (a.residency.spaceInstanceId === s.overworldInstanceId) requireContract(same31(s.d9World.positions[a.entityId], localFramePositionD9(a.position, c.frames)), "D9 canonical address drift");
+    for (const a of Object.values(s.entitiesById)) if (a.residency.spaceInstanceId === s.overworldInstanceId) requireContract(same32(s.d9World.positions[a.entityId], localFramePositionD9(a.position, c.frames)), "D9 canonical address drift");
   } else {
     requireContract(overworld.collision.width * manifest.tileSize === manifest.dimensions.width && overworld.collision.height * manifest.tileSize === manifest.dimensions.height, "Overworld binding mismatch");
-    requireContract(same31(overworld.collision, originCollision), "Collision differs from generated manifest");
+    requireContract(same32(overworld.collision, originCollision), "Collision differs from generated manifest");
   }
   if (s.campaign.forgeStations) validateForgeStations(s.campaign.forgeStations, origin2, originCollision);
   validateSiteInteriors(origin2, originCollision);
@@ -27469,10 +27524,10 @@ function validateActivityState(s) {
       validateOrdinaryRosterV2State(s);
     }
     validateOrdinaryCatalogV2(s);
-    requireContract(same31(Object.keys(s.groupsById).sort(), [...manifest.population.groups, ...(manifest.siteInteriors ?? []).flatMap((d) => d.groups)].map((g) => g.groupId).concat(functionalSitesD10(s).filter((f3) => f3.siteKind !== "woodland-fort").flatMap(functionalSiteGroupsD12)).sort()), "Population inventory mismatch");
+    requireContract(same32(Object.keys(s.groupsById).sort(), [...manifest.population.groups, ...(manifest.siteInteriors ?? []).flatMap((d) => d.groups)].map((g) => g.groupId).concat(functionalSitesD10(s).filter((f3) => f3.siteKind !== "woodland-fort").flatMap(functionalSiteGroupsD12)).sort()), "Population inventory mismatch");
     for (const g of manifest.population.groups) {
       const live = s.groupsById[g.groupId];
-      requireContract((live.siteId !== null || live.regionId === g.regionId) && live.spaceInstanceId === s.overworldInstanceId && same31(live.entityIds, g.members.map((a) => a.entityId)), "Population group drift");
+      requireContract((live.siteId !== null || live.regionId === g.regionId) && live.spaceInstanceId === s.overworldInstanceId && same32(live.entityIds, g.members.map((a) => a.entityId)), "Population group drift");
       for (const member of g.members) {
         const a = s.entitiesById[member.entityId];
         requireContract(a?.contentDefinitionId === member.profileId && ORDINARY_ACQUIRE_RANGES.includes(a.ai?.acquireRange), "Generated actor definition drift");
@@ -27507,7 +27562,7 @@ function validateActivityState(s) {
     owned.add(p.entityId);
     safeInteger(s.appliedClientSequences[id]);
   }
-  requireContract(same31(Object.keys(s.appliedClientSequences).sort(), s.session.playerIds), "Applied cursor owners");
+  requireContract(same32(Object.keys(s.appliedClientSequences).sort(), s.session.playerIds), "Applied cursor owners");
   requireContract(d9 ? withinRetainedSiteBudgetsD9(s) : Object.keys(s.entitiesById).length <= 64, "Bounded dormant actor inventory");
   for (const [id, a] of Object.entries(s.entitiesById)) {
     (d6 ? validateFractionalActor : validateEntityState)(actorRules(a), s.subweaponCombat?.version === "subweapon-combat-integer-v2");
@@ -27535,7 +27590,7 @@ function validateActivityState(s) {
       p = { ...p, maxHp: d6 ? resolved.maxHp : combatIntegerWire(resolved.maxHp), attackDamage: d6 ? resolved.attack : combatIntegerWire(resolved.attack), moveSpeed: resolved.moveSpeed, ...hasWorldCombat(s) ? { attackReach: 32 } : {} };
     } else if (d3 && groupByEntity.has(id)) p = encounterActorProfile(s, groupByEntity.get(id), a);
     if (d6) p = { ...p, maxHp: (s.subweaponCombat?.version === "subweapon-combat-integer-v2" ? combatInteger : asCombatAmount)(p.maxHp), attackDamage: (s.subweaponCombat?.version === "subweapon-combat-integer-v2" ? combatInteger : asCombatAmount)(p.attackDamage) };
-    for (const key9 of ["team", "maxHp", "hullRadius", "combatRadius", "moveSpeed", "attackDamage", "attackReach", "attackReachMode", "attackDelayTicks"]) requireContract(same31(a[key9], p[key9]), "Actor profile drift");
+    for (const key9 of ["team", "maxHp", "hullRadius", "combatRadius", "moveSpeed", "attackDamage", "attackReach", "attackReachMode", "attackDelayTicks"]) requireContract(same32(a[key9], p[key9]), "Actor profile drift");
     if (a.team === "party") requireContract(owned.has(id), "Unowned party actor");
     else if (a.residency.spaceInstanceId === s.overworldInstanceId) requireContract(!manifest.safeRegions.some((r) => a.position.x + a.hullRadius > r.x && a.position.x - a.hullRadius < r.x + r.width && a.position.y + a.hullRadius > r.y && a.position.y - a.hullRadius < r.y + r.height), "Hostile overlaps safe settlement");
   }
@@ -27572,7 +27627,7 @@ function validateActivityState(s) {
     requireContract(g.cleared === (g.entityIds.every((id2) => !s.entitiesById[id2].alive) && eventReadyToClear(s, g.groupId)), "Clear/liveness mismatch");
   }
   requireContract(Object.values(s.entitiesById).filter((a) => a.team === "hostile").every((a) => grouped.has(a.entityId)), "Ungrouped hostile");
-  requireContract(same31(Object.keys(s.residencyHistoryByEntityId).sort(), [...owned].sort()), "Residency history owners");
+  requireContract(same32(Object.keys(s.residencyHistoryByEntityId).sort(), [...owned].sort()), "Residency history owners");
   for (const [id, history3] of Object.entries(s.residencyHistoryByEntityId)) {
     requireContract(Object.keys(history3).length <= 72, "Retained residency bound");
     const current = s.entitiesById[id].residency;
@@ -27610,7 +27665,7 @@ function validateActivityState(s) {
   }
   const primary = s.primary;
   closedRecord(primary, ["contractVersion", "actorsById", "completedById", "actionIdHighWatermark", "eventIdHighWatermark"]);
-  requireContract(primary.contractVersion === 1 && same31(Object.keys(primary.actorsById).sort(), [...owned].sort()) && Object.keys(primary.completedById).length <= 16, "Primary inventory");
+  requireContract(primary.contractVersion === 1 && same32(Object.keys(primary.actorsById).sort(), [...owned].sort()) && Object.keys(primary.completedById).length <= 16, "Primary inventory");
   const records2 = primaryRecords(s), sequences = {};
   for (const [id, a] of Object.entries(primary.actorsById)) {
     closedRecord(a, ["profileId", "facing", "heldCommandId", "queuedCommandId", "current", "nextComboStep", "comboDeadline", "nextSourceSequence", "retiredSourceSequence"]);
@@ -27626,7 +27681,7 @@ function validateActivityState(s) {
       requireContract(s.appliedCommandsById[cid]?.playerId === Object.values(s.playersById).find((p2) => p2.entityId === id).playerId, "Primary command owner");
     }
   }
-  requireContract(same31(Object.keys(s.primaryContextsById).sort(), records2.map((r) => r.primaryActionId).sort()), "Primary context inventory");
+  requireContract(same32(Object.keys(s.primaryContextsById).sort(), records2.map((r) => r.primaryActionId).sort()), "Primary context inventory");
   const eventSequences = /* @__PURE__ */ new Set();
   let lastTick = -1;
   for (const r of records2.sort((a, b) => a.startEventSequence - b.startEventSequence)) {
@@ -27654,7 +27709,7 @@ function validateActivityState(s) {
     if (r.completedTick === null) {
       requireContract(owner.current?.primaryActionId === r.primaryActionId && r.finishEventSequence === null, "Current primary ownership");
       const expected = primaryPhaseAt(r, primaryProfile(s, r.sourceEntityId), s.tick);
-      requireContract(s.tick < expected.phaseEndsTick && same31(expected, { phase: r.phase, phaseStartedTick: r.phaseStartedTick, phaseEndsTick: r.phaseEndsTick }), "Primary timing drift");
+      requireContract(s.tick < expected.phaseEndsTick && same32(expected, { phase: r.phase, phaseStartedTick: r.phaseStartedTick, phaseEndsTick: r.phaseEndsTick }), "Primary timing drift");
     } else {
       safeInteger(r.completedTick, r.startedTick, s.tick);
       requireContract(primary.completedById[r.primaryActionId] === r && r.phase === "complete" && (r.interrupted ? r.finishEventSequence === null : r.finishEventSequence > r.startEventSequence), "Completed primary state");
@@ -27732,7 +27787,7 @@ function upgradeLegacyActivityState(input) {
   for (const g of Object.values(state.groupsById)) {
     const used = g.lastRequiredTick !== null || g.entityIds.some((id) => {
       const a = state.entitiesById[id];
-      return !a.alive || !same31(a.hp, a.maxHp);
+      return !a.alive || !same32(a.hp, a.maxHp);
     });
     g.threatSnapshot = used ? { version: ENCOUNTER_PROGRESSION_VERSION, activatedTick: g.lastRequiredTick ?? state.tick, levelsByEntityId: Object.fromEntries(g.entityIds.map((id) => [id, 1])) } : null;
     g.threatReady = !used;
@@ -27765,7 +27820,7 @@ function installD8(s) {
 }
 
 // src/storage/activity_campaign_store.js
-var same32 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same33 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 function activityGeneration(state) {
   const m = manifestForState(state);
   return freezeWire({ seed: state.campaign.seed, generatorVersion: m.generation.generatorVersion, manifestId: m.manifestId, manifestHash: m.manifestHash });
@@ -27775,7 +27830,7 @@ function validateActivityCut(cut) {
   closedRecord(cut, ["generation", "snapshot"]);
   closedRecord(cut.snapshot, ["state"]);
   const state = createActivityState(cut.snapshot.state);
-  requireContract(same32(cut.generation, activityGeneration(state)), "Immutable generated-world binding mismatch");
+  requireContract(same33(cut.generation, activityGeneration(state)), "Immutable generated-world binding mismatch");
   return cut;
 }
 function validateActivityEnvelope(e) {
@@ -27807,17 +27862,17 @@ function validateActivityProgress(a, b) {
   const x = upgradeActivityState(a.cut.snapshot.state), y = upgradeActivityState(b.cut.snapshot.state);
   const formats = ["saq-world-activity-1", D3_ACTIVITY_FORMAT, LEGACY_D4_ACTIVITY_FORMAT, D4_ACTIVITY_FORMAT, D6_ACTIVITY_FORMAT];
   requireContract(formats.indexOf(b.cut.snapshot.state.format) >= formats.indexOf(a.cut.snapshot.state.format), "Progression format regressed");
-  requireContract(a.campaignId === b.campaignId && b.saveRevision > a.saveRevision && same32(a.cut.generation, b.cut.generation), "Generated world/revision changed");
-  for (const k of ["content", "session", "spacesByInstanceId", "overworldInstanceId", "proofCase"]) requireContract(same32(x[k], y[k]), "Immutable campaign registry changed");
-  requireContract(same32(Object.keys(x.playersById).sort(), Object.keys(y.playersById).sort()), "Participant inventory changed");
+  requireContract(a.campaignId === b.campaignId && b.saveRevision > a.saveRevision && same33(a.cut.generation, b.cut.generation), "Generated world/revision changed");
+  for (const k of ["content", "session", "spacesByInstanceId", "overworldInstanceId", "proofCase"]) requireContract(same33(x[k], y[k]), "Immutable campaign registry changed");
+  requireContract(same33(Object.keys(x.playersById).sort(), Object.keys(y.playersById).sort()), "Participant inventory changed");
   const resets = siteResetTransitionsD13C(x, y), addedEntities = resets.flatMap((row) => row.newEntityIds), addedGroups = resets.flatMap((row) => row.newGroupIds), retiredEntities = new Set(resets.flatMap((row) => row.retiredEntityIds)), retiredGroups = new Set(resets.flatMap((row) => row.retiredGroupIds));
   for (const [id, p] of Object.entries(x.playersById)) {
     const { progression: before, inventory: oldInventory, d8: oldD8, ...identity } = p, { progression: after, inventory: newInventory, d8: newD8, ...nextIdentity } = y.playersById[id], comparableD8 = copyWire(oldD8);
     for (const entityId2 of retiredEntities) delete comparableD8.causalXp[entityId2];
-    requireContract(same32(identity, nextIdentity) && after.totalXp >= before.totalXp, "Participant identity/progression regressed");
+    requireContract(same33(identity, nextIdentity) && after.totalXp >= before.totalXp, "Participant identity/progression regressed");
     validateD8Advance(comparableD8, newD8, before.level, after.level, x.lastAppliedAuthorityOrder);
   }
-  requireContract(same32(x.campaign.charactersById, y.campaign.charactersById) && same32([...Object.keys(x.entitiesById).filter((id) => !retiredEntities.has(id)), ...addedEntities].sort(), Object.keys(y.entitiesById).sort()) && same32([...Object.keys(x.groupsById).filter((id) => !retiredGroups.has(id)), ...addedGroups].sort(), Object.keys(y.groupsById).sort()), "Canonical identity inventory changed");
+  requireContract(same33(x.campaign.charactersById, y.campaign.charactersById) && same33([...Object.keys(x.entitiesById).filter((id) => !retiredEntities.has(id)), ...addedEntities].sort(), Object.keys(y.entitiesById).sort()) && same33([...Object.keys(x.groupsById).filter((id) => !retiredGroups.has(id)), ...addedGroups].sort(), Object.keys(y.groupsById).sort()), "Canonical identity inventory changed");
   requireContract(y.tick >= x.tick && y.identitySequence >= x.identitySequence && y.lastAppliedAuthorityOrder >= x.lastAppliedAuthorityOrder && y.eventEmission.lastEventSequence >= x.eventEmission.lastEventSequence, "Cut chronology regressed");
   for (const [id, r] of Object.entries(x.campaign.sitesById ?? {})) {
     const next = y.campaign.sitesById?.[id];
@@ -27832,11 +27887,11 @@ function validateActivityProgress(a, b) {
       continue;
     }
     const h = y.groupsById[id], renewed = encounterAdvanced(x, y, id);
-    requireContract(same32({ ...g, cleared: false, lastRequiredTick: null, threatSnapshot: null, threatReady: false }, { ...h, cleared: false, lastRequiredTick: null, threatSnapshot: null, threatReady: false }) && (!g.cleared || h.cleared || renewed), "Group identity/clear regressed");
+    requireContract(same33({ ...g, cleared: false, lastRequiredTick: null, threatSnapshot: null, threatReady: false }, { ...h, cleared: false, lastRequiredTick: null, threatSnapshot: null, threatReady: false }) && (!g.cleared || h.cleared || renewed), "Group identity/clear regressed");
     requireContract(g.lastRequiredTick === null || h.lastRequiredTick !== null && h.lastRequiredTick >= g.lastRequiredTick, "Group relevance history regressed");
     if ([D3_ACTIVITY_FORMAT, LEGACY_D4_ACTIVITY_FORMAT, D4_ACTIVITY_FORMAT, D6_ACTIVITY_FORMAT].includes(b.cut.snapshot.state.format) && g.threatSnapshot) {
       requireContract(h.threatSnapshot && h.threatSnapshot.activatedTick >= g.threatSnapshot.activatedTick, "Threat history regressed");
-      if (g.siteId !== null) requireContract(same32(g.threatSnapshot, h.threatSnapshot), "Site encounter rescaled");
+      if (g.siteId !== null) requireContract(same33(g.threatSnapshot, h.threatSnapshot), "Site encounter rescaled");
       for (const entityId2 of g.entityIds) if (!renewed && !x.entitiesById[entityId2].alive) requireContract(g.threatSnapshot.levelsByEntityId[entityId2] === h.threatSnapshot.levelsByEntityId[entityId2], "Defeated threat changed");
     }
   }
@@ -27869,13 +27924,13 @@ async function createActivityEnvelope(cut, kind2, { sha256, measure }) {
 async function verifyActivityEnvelope(e, { sha256, expectedContentFingerprint, expectedGenerationBinding, measure }) {
   e = freezeWire(validateActivityEnvelope(e));
   expectedGenerationBinding = freezeWire(expectedGenerationBinding);
-  requireContract(same32(e.cut.generation, expectedGenerationBinding) && e.cut.snapshot.state.content.fingerprint === expectedContentFingerprint, "Unsupported immutable campaign identity");
+  requireContract(same33(e.cut.generation, expectedGenerationBinding) && e.cut.snapshot.state.content.fingerprint === expectedContentFingerprint, "Unsupported immutable campaign identity");
   await verifyContentFingerprint(e.cut.snapshot.state.content, { sha256 });
   requireContract(e.cutHash === await digest9(e.cut, sha256, measure), "Cut digest mismatch");
   const s = e.cut.snapshot.state;
   await verifyBoundOverworldGeometry({ ...s, space: { collision: s.spacesByInstanceId[s.overworldInstanceId].collision } }, { sha256 });
   const compiled = compileBoundOverworld(s);
-  requireContract(same32(compiled.collision, s.spacesByInstanceId[s.overworldInstanceId].collision), "Stored collision differs from authoritative manifest");
+  requireContract(same33(compiled.collision, s.spacesByInstanceId[s.overworldInstanceId].collision), "Stored collision differs from authoritative manifest");
   return freezeWire(e);
 }
 var activityCampaignTransactions = createCampaignStoreTransactions({
@@ -28129,7 +28184,7 @@ function activeTravelSpace(state) {
   if (manifest) return compileBoundOverworld(state);
   return state.campaign.geography ? oldwardSpace(state.space.spaceId) : activeSpaceFixture(state.space.spaceId);
 }
-var same33 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same34 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 function validateSafeFixture(state) {
   const fixture = activeTravelSpace(state);
   requireContract(
@@ -28137,11 +28192,11 @@ function validateSafeFixture(state) {
     "Travel unavailable during unresolved encounter"
   );
   requireContract(
-    same33(state.space.collision, fixture.collision) && state.space.contentDefinitionId === fixture.contentDefinitionId,
+    same34(state.space.collision, fixture.collision) && state.space.contentDefinitionId === fixture.contentDefinitionId,
     "Active fixture geometry mismatch"
   );
   requireContract(
-    same33(Object.keys(state.space.entitiesById).sort(), Object.values(state.playersById).map((p) => p.entityId).sort()),
+    same34(Object.keys(state.space.entitiesById).sort(), Object.values(state.playersById).map((p) => p.entityId).sort()),
     "Safe fixture only supports party actors"
   );
   return fixture;
@@ -28153,23 +28208,23 @@ function validateSafeProgress(before, source8) {
   requireContract(samePlayerMembership(before.playersById, source8.playersById), "Safe player membership changed");
   validateCampaignDiscoveryProgress(before, source8);
   for (const key9 of ["session", "content", "activeSpaceRef", "rngStatesByName", "combat", "eventEmission"])
-    requireContract(same33(before[key9], source8[key9]), `Safe progress changed ${key9}`);
-  requireContract(same33(before.multiplayer.encounterParticipants, source8.multiplayer.encounterParticipants), "Safe progress changed participants");
+    requireContract(same34(before[key9], source8[key9]), `Safe progress changed ${key9}`);
+  requireContract(same34(before.multiplayer.encounterParticipants, source8.multiplayer.encounterParticipants), "Safe progress changed participants");
   requireContract(Boolean(before.primary) === Boolean(source8.primary), "Safe primary extension changed");
   if (before.primary) {
     const normalized = copyWire(source8.primary);
     for (const id of Object.keys(normalized.actorsById)) normalized.actorsById[id].facing = copyWire(before.primary.actorsById[id].facing);
-    requireContract(same33(normalized, before.primary), "Safe progress changed primary rules/history");
+    requireContract(same34(normalized, before.primary), "Safe progress changed primary rules/history");
   }
   requireContract(source8.lastAppliedAuthorityOrder >= before.lastAppliedAuthorityOrder, "Safe command order went backward");
   requireContract(source8.history.commandFloor.authorityOrder >= before.history.commandFloor.authorityOrder, "Safe command floor went backward");
   for (const [sessionId, summary] of Object.entries(before.history.sessionsById)) {
     const retained = source8.history.sessionsById[sessionId];
-    if (retained) requireContract(sessionId === before.session.sessionId ? retained.firstAuthorityOrder === summary.firstAuthorityOrder : same33(retained, summary), "Safe progress changed established session summary");
+    if (retained) requireContract(sessionId === before.session.sessionId ? retained.firstAuthorityOrder === summary.firstAuthorityOrder : same34(retained, summary), "Safe progress changed established session summary");
   }
   for (const key9 of ["combatBaseline", "sessionIdHighWatermark", "sessionGeneration"])
-    requireContract(same33(before.history[key9], source8.history[key9]), "Safe progress changed history anchors");
-  requireContract(same33(Object.keys(before.space.entitiesById).sort(), Object.keys(source8.space.entitiesById).sort()), "Safe actor inventory changed");
+    requireContract(same34(before.history[key9], source8.history[key9]), "Safe progress changed history anchors");
+  requireContract(same34(Object.keys(before.space.entitiesById).sort(), Object.keys(source8.space.entitiesById).sort()), "Safe actor inventory changed");
   for (const playerId of before.session.playerIds) requireContract(
     appliedClientSequence(source8, playerId) >= appliedClientSequence(before, playerId),
     "Safe client sequence went backward"
@@ -28177,7 +28232,7 @@ function validateSafeProgress(before, source8) {
   for (const [id, actor] of Object.entries(before.space.entitiesById)) {
     const normalized = copyWire(source8.space.entitiesById[id]);
     for (const key9 of ["position", "movementIntent", "attackTimer", "movedLastTick"]) normalized[key9] = copyWire(actor[key9]);
-    requireContract(same33(normalized, actor), "Safe progress changed actor rules or health");
+    requireContract(same34(normalized, actor), "Safe progress changed actor rules or health");
     const current = source8.space.entitiesById[id];
     requireContract(!collidesWithTiles(source8.space.collision, current.position.x, current.position.y, current.hullRadius), "Safe actor in blocked tile");
   }
@@ -29536,6 +29591,119 @@ async function readNavigationWindowD9({ root, playerId, spaceInstanceId, level, 
   return { version: VERSION2, root, level, pages };
 }
 
+// src/shared/contracts/world_seats_v1.js
+var WORLD_SEAT_LIMIT = 4;
+var actorOf = (state, pid) => state.entitiesById[state.playersById[pid].entityId];
+function waitingRoomId(state) {
+  return state.waitingRoom?.spaceInstanceId ?? null;
+}
+var waitingRoomSpaceIds = (state) => state.waitingRoom ? [state.waitingRoom.spaceInstanceId] : [];
+function isWaiting(state, pid) {
+  const id = waitingRoomId(state);
+  return Boolean(id) && actorOf(state, pid).residency.spaceInstanceId === id;
+}
+var TARGET_KEYS = /* @__PURE__ */ new Set(["targetEntityId", "intendedTargetId", "targetId"]);
+var OWN_ROWS = ["playersById", "primary", "residencyHistoryByEntityId", "subweaponCombat", "d9World"];
+function eachTarget(state, visit) {
+  const walk = (v) => {
+    if (Array.isArray(v)) {
+      for (const x of v) if (x && typeof x === "object") walk(x);
+      return;
+    }
+    for (const [k, x] of Object.entries(v)) {
+      if (TARGET_KEYS.has(k) && typeof x === "string") visit(v, k);
+      else if (x && typeof x === "object") walk(x);
+    }
+  };
+  for (const [key9, v] of Object.entries(state)) if (v && typeof v === "object" && !OWN_ROWS.includes(key9)) walk(v);
+  if (state.subweaponCombat) {
+    for (const [key9, v] of Object.entries(state.subweaponCombat)) if (key9 !== "actors" && key9 !== "mastery" && v && typeof v === "object") walk(v);
+  }
+}
+var playerSet = (s) => new Set(s.session.playerIds);
+function isSeatChangeV1(a, b) {
+  if (a.tick !== b.tick) return false;
+  if (canonicalStringify(a.session.playerIds) !== canonicalStringify(b.session.playerIds) || canonicalStringify(a.waitingRoom ?? null) !== canonicalStringify(b.waitingRoom ?? null)) return true;
+  return Boolean(b.waitingRoom) && b.session.playerIds.some((pid) => a.playersById[pid] && isWaiting(a, pid) !== isWaiting(b, pid));
+}
+function seatComparable(s, kept, party2, room2) {
+  const c = copyWire(s), keep = (pid) => kept.has(pid), only = (rows3) => {
+    if (rows3) {
+      for (const pid of Object.keys(rows3)) if (!keep(pid)) delete rows3[pid];
+    }
+  };
+  delete c.session.playerIds;
+  delete c.waitingRoom;
+  delete c.identitySequence;
+  for (const pid of Object.keys(c.playersById)) {
+    if (!keep(pid)) {
+      delete c.playersById[pid];
+      continue;
+    }
+    c.playersById[pid].connectionStatus = null;
+  }
+  only(c.appliedClientSequences);
+  for (const [id, r] of Object.entries(c.appliedCommandsById)) if (!keep(r.playerId)) delete c.appliedCommandsById[id];
+  for (const id of Object.keys(c.campaign.charactersById)) if (!party2.characters.has(id)) delete c.campaign.charactersById[id];
+  for (const id of party2.entities) {
+    const e = c.entitiesById[id];
+    if (!e) continue;
+    if (!party2.kept.has(id)) {
+      delete c.entitiesById[id];
+      delete c.primary.actorsById[id];
+      delete c.residencyHistoryByEntityId[id];
+      if (c.subweaponCombat) {
+        delete c.subweaponCombat.actors[id];
+        if (c.subweaponCombat.mastery) delete c.subweaponCombat.mastery[id];
+      }
+      if (c.d9World?.positions) delete c.d9World.positions[id];
+      continue;
+    }
+    Object.assign(e, { residency: null, position: null, movementIntent: null, movedLastTick: null });
+    delete c.residencyHistoryByEntityId[id];
+    if (c.d9World?.positions) delete c.d9World.positions[id];
+    const pr = c.primary.actorsById[id];
+    if (pr) Object.assign(pr, { current: null, heldCommandId: null, queuedCommandId: null, comboDeadline: null, nextComboStep: null });
+  }
+  if (room2) delete c.spacesByInstanceId[room2];
+  const strip = (frames) => {
+    for (const f3 of frames ?? []) f3.playerIds = [];
+  };
+  strip(c.spacesByInstanceId[c.overworldInstanceId]?.collision.frames);
+  const w = c.d9World, mark = (pid) => keep(pid) ? pid : "?";
+  if (w) {
+    strip(w.runtime?.frames);
+    only(w.paging?.players);
+    only(w.paging?.remoteGearByPlayer);
+    only(w.paging?.indexedRevisions);
+    for (const rows3 of Object.values(w.paging?.coldObligations ?? {})) only(rows3);
+    only(w.quests?.byPlayer);
+    for (const row of w.navigation?.pending ?? []) row.playerId = null;
+    for (const e of Object.values(w.episodes ?? {})) for (const x of e.snapshot?.participants ?? []) x.playerId = mark(x.playerId);
+    for (const e of Object.values(w.episodes ?? {})) e.snapshot?.participants?.sort((x, y) => canonicalStringify(x).localeCompare(canonicalStringify(y)));
+  }
+  for (const g of Object.values(c.encounterEconomy?.groups ?? {})) for (const r of Object.values(g.usedResources ?? {})) if (r.playerIds) r.playerIds = r.playerIds.map(mark).sort();
+  only(c.encounterEconomy?.outingsByPlayer);
+  only(c.playerRespawnsById);
+  eachTarget(c, (row, key9) => {
+    if (party2.entities.has(row[key9])) row[key9] = "?";
+  });
+  return canonicalStringify(c);
+}
+function validateSeatChangeV1(a, b) {
+  requireContract(b.session.playerIds.length <= WORLD_SEAT_LIMIT && b.identitySequence >= a.identitySequence, "Seat change out of bounds");
+  if (a.waitingRoom) requireContract(canonicalStringify(a.waitingRoom) === canonicalStringify(b.waitingRoom), "Waiting room changed");
+  const A = playerSet(a), B2 = playerSet(b), kept = new Set([...A].filter((pid) => B2.has(pid)));
+  const entities = new Set([...Object.values(a.playersById), ...Object.values(b.playersById)].map((p) => p.entityId)), characters = new Set(Object.keys(a.campaign.charactersById).filter((id) => !Object.values(b.playersById).some((p) => p.characterId === id) && !Object.values(a.playersById).some((p) => p.characterId === id)));
+  for (const p of Object.values(a.playersById)) {
+    requireContract(Object.values(b.playersById).some((q) => q.entityId === p.entityId && q.characterId === p.characterId), "Seat body lost");
+    requireContract(b.residencyHistoryByEntityId[p.entityId] && Object.keys(a.residencyHistoryByEntityId[p.entityId]).every((r) => r === String(a.entitiesById[p.entityId].residency.residencyRevision) || canonicalStringify(a.residencyHistoryByEntityId[p.entityId][r]) === canonicalStringify(b.residencyHistoryByEntityId[p.entityId][r])), "Seat residency history rewritten");
+  }
+  const party2 = { entities, characters, kept: new Set([...kept].map((pid) => b.playersById[pid].entityId)) };
+  const room2 = a.waitingRoom ? null : b.waitingRoom?.spaceInstanceId ?? null;
+  requireContract(seatComparable(a, kept, party2, null) === seatComparable(b, kept, party2, room2), "Seat change touched more than seats");
+}
+
 // src/shared/generation/site_discovery_d9.js
 var W8 = 32n;
 var H8 = 26n;
@@ -29779,7 +29947,7 @@ function overlayWoodlandRuinExteriorD11_3_2(chunk, bootstrap) {
 }
 
 // src/storage/world_gear_pages_d9.js
-var same34 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same35 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var GEAR_PAGE_D9 = "world-owned-gear-d9-v1";
 var gearOwnershipKeyD9 = (ownerPlayerId, itemId2, sha256) => pageDigest({ version: GEAR_PAGE_D9, ownerPlayerId, itemId: itemId2 }, sha256);
 var gearObligationKeyD9 = (ownerPlayerId, groupId, sha256) => pageDigest({ version: "world-gear-obligation-d9-v1", ownerPlayerId, groupId }, sha256);
@@ -29847,7 +30015,7 @@ async function prepareGearIndexD9(state, { sha256, readPage, additionalRows = {}
     if (ref) {
       requireContract(ref.version === "world-page-ref-d9-v1", "Ground chunk index reference");
       const doc = await readPage(ref.pageId);
-      requireContract(await pageDigest(doc, sha256) === ref.pageId && doc.kind === "ground-chunk" && same34(doc.payload.address, address), "Ground chunk commitment/address mismatch");
+      requireContract(await pageDigest(doc, sha256) === ref.pageId && doc.kind === "ground-chunk" && same35(doc.payload.address, address), "Ground chunk commitment/address mismatch");
       children = copyWire(doc.payload.cells);
     }
     const entry = { key: key9, address, cells: children };
@@ -29861,7 +30029,7 @@ async function prepareGearIndexD9(state, { sha256, readPage, additionalRows = {}
     let items = {};
     if (ref) {
       const doc = await readPage(ref);
-      requireContract(await pageDigest(doc, sha256) === ref && doc.kind === "ground-cell" && same34(doc.payload.cell, descriptor), "Ground cell commitment/address mismatch");
+      requireContract(await pageDigest(doc, sha256) === ref && doc.kind === "ground-cell" && same35(doc.payload.cell, descriptor), "Ground cell commitment/address mismatch");
       items = copyWire(doc.payload.items);
     }
     const entry = { key: key9, cell: descriptor, items, parent, ordinal };
@@ -29895,7 +30063,7 @@ async function prepareGearIndexD9(state, { sha256, readPage, additionalRows = {}
     const rows3 = [...inventoryRows(state, p), ...additionalRows[p.playerId] ?? []];
     for (const [itemId2, proof2] of Object.entries(state.d9World.paging.remoteGearByPlayer[p.playerId] ?? {})) if (proof2.origin?.archive) {
       const key9 = await gearOwnershipKeyD9(p.playerId, itemId2, sha256), prior = await owners.get(key9);
-      if (prior && !same34(prior.origin, proof2.origin)) rows3.push({ ...copyWire(prior), origin: copyWire(proof2.origin) });
+      if (prior && !same35(prior.origin, proof2.origin)) rows3.push({ ...copyWire(prior), origin: copyWire(proof2.origin) });
     }
     for (let row of rows3) {
       validateOwnedGearPageD9(row);
@@ -29903,8 +30071,8 @@ async function prepareGearIndexD9(state, { sha256, readPage, additionalRows = {}
       if (prior) {
         validateOwnedGearPageD9(prior);
         if (prior.sourceGeography && !row.sourceGeography) row = { ...row, sourceGeography: copyWire(prior.sourceGeography) };
-        requireContract((same34(prior.item, row.item) || !["SALVAGED", "AUTO_SALVAGED", "SOLD"].includes(prior.disposition) && workshopExtension(prior.item, row.item)) && same34(provenance(prior.origin), provenance(row.origin)) && same34(prior.sourceGeography ?? null, row.sourceGeography ?? null) && (!prior.origin.archive || same34(prior.origin.archive, row.origin.archive)), "Gear payload/provenance changed");
-        if (same34(prior, row)) continue;
+        requireContract((same35(prior.item, row.item) || !["SALVAGED", "AUTO_SALVAGED", "SOLD"].includes(prior.disposition) && workshopExtension(prior.item, row.item)) && same35(provenance(prior.origin), provenance(row.origin)) && same35(prior.sourceGeography ?? null, row.sourceGeography ?? null) && (!prior.origin.archive || same35(prior.origin.archive, row.origin.archive)), "Gear payload/provenance changed");
+        if (same35(prior, row)) continue;
         requireContract(!["SALVAGED", "AUTO_SALVAGED", "SOLD"].includes(prior.disposition) || prior.disposition === row.disposition, "Terminal gear resurrected");
       }
       if (physical(prior)) {
@@ -29952,21 +30120,21 @@ async function readGroundChunkD9(root, address, { readPage, sha256 }) {
   const tx = createPageTransaction({ root, readPage, sha256 }), ref = await tx.get(await gearChunkKeyD9(address, sha256));
   if (!ref) return null;
   const doc = await readPage(ref.pageId);
-  requireContract(await pageDigest(doc, sha256) === ref.pageId && doc.kind === "ground-chunk" && same34(doc.payload.address, address), "Ground chunk commitment/address mismatch");
+  requireContract(await pageDigest(doc, sha256) === ref.pageId && doc.kind === "ground-chunk" && same35(doc.payload.address, address), "Ground chunk commitment/address mismatch");
   requireContract(Object.keys(doc.payload.cells).length <= 56, "Ground chunk cell bound");
   return copyWire(doc.payload);
 }
 async function readGroundCellPageD9(id, descriptor, { readPage, sha256 }) {
   if (!id) return [];
   const doc = await readPage(id);
-  requireContract(await pageDigest(doc, sha256) === id && doc.kind === "ground-cell" && same34(doc.payload.cell, descriptor), "Ground cell commitment/address mismatch");
+  requireContract(await pageDigest(doc, sha256) === id && doc.kind === "ground-cell" && same35(doc.payload.cell, descriptor), "Ground cell commitment/address mismatch");
   const rows3 = Object.values(doc.payload.items);
   requireContract(rows3.length <= 64, "Ground cell bound");
   return rows3.map((r) => copyWire(validateOwnedGearPageD9(r)));
 }
 
 // src/storage/world_gear_knowledge_d9.js
-var same35 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same36 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 async function prepareGearKnowledgeD9(state, { readPage, sha256, excludingGround = {} }) {
   const root = state.d9World.ownershipIndex, tx = createPageTransaction({ root, readPage, sha256 }), remoteGearByPlayer = {}, coldObligations = {}, revisions = {};
   for (const p of Object.values(state.playersById)) {
@@ -29979,7 +30147,7 @@ async function prepareGearKnowledgeD9(state, { readPage, sha256, excludingGround
       const marker = id.lastIndexOf(":ent:"), sourceEntityId = marker >= 0 ? id.slice(marker + 1) : null, reward = sourceEntityId ? inv.rewardsByEntityId[sourceEntityId] : null;
       if (inv.itemsById[id] || sourceEntityId && inv.renewal.groundBySourceId[sourceEntityId] && !excludingGround[p.playerId]?.includes(sourceEntityId) || inv.d7.salvaged[id] || inv.d7.autoSalvaged[id] || inv.services?.salesByItemId[id]) continue;
       const row = await readOwnedGearD9(root, p.playerId, id, { readPage, sha256 });
-      requireContract(row && ["DROPPED", "SALVAGED", "AUTO_SALVAGED", "SOLD"].includes(row.disposition) && (!reward || row.item.definitionId === reward.definitionId && same35(row.item.generated ?? null, reward.generated ?? null)), "Claimed reward lost its current owned disposition");
+      requireContract(row && ["DROPPED", "SALVAGED", "AUTO_SALVAGED", "SOLD"].includes(row.disposition) && (!reward || row.item.definitionId === reward.definitionId && same36(row.item.generated ?? null, reward.generated ?? null)), "Claimed reward lost its current owned disposition");
       remote[id] = { item: copyWire(row.item), origin: copyWire(row.origin), disposition: row.disposition, recordHash: await pageDigest(row, sha256) };
     }
     const hot = /* @__PURE__ */ new Map();
@@ -29998,7 +30166,7 @@ async function prepareGearKnowledgeD9(state, { readPage, sha256, excludingGround
   return { root, revisions, groupIds: Object.keys(state.groupsById).sort(), remoteGearByPlayer, coldObligations };
 }
 function installGearKnowledgeD9(state, plan) {
-  requireContract(state.d9World.ownershipIndex === plan.root && same35(Object.keys(state.groupsById).sort(), plan.groupIds), "Gear knowledge context changed");
+  requireContract(state.d9World.ownershipIndex === plan.root && same36(Object.keys(state.groupsById).sort(), plan.groupIds), "Gear knowledge context changed");
   for (const [id, revision2] of Object.entries(plan.revisions)) requireContract(state.playersById[id].inventory.revision === revision2, "Gear knowledge inventory changed");
   state.d9World.paging.remoteGearByPlayer = copyWire(plan.remoteGearByPlayer);
   state.d9World.paging.coldObligations = copyWire(plan.coldObligations);
@@ -30006,7 +30174,7 @@ function installGearKnowledgeD9(state, plan) {
 async function verifyRemoteGearKnowledgeD9(state, { readPage, sha256 }) {
   for (const [pid, rows3] of Object.entries(state.d9World.paging.remoteGearByPlayer)) for (const [id, proof2] of Object.entries(rows3)) {
     const row = await readOwnedGearD9(state.d9World.ownershipIndex, pid, id, { readPage, sha256 });
-    requireContract(row && await pageDigest(row, sha256) === proof2.recordHash && same35(row.item, proof2.item) && same35(row.origin, proof2.origin) && row.disposition === proof2.disposition, "Remote gear proof differs from its ownership page");
+    requireContract(row && await pageDigest(row, sha256) === proof2.recordHash && same36(row.item, proof2.item) && same36(row.origin, proof2.origin) && row.disposition === proof2.disposition, "Remote gear proof differs from its ownership page");
   }
 }
 
@@ -30022,7 +30190,7 @@ async function readSiteBindingD9(content, siteId2, { readPage, sha256 }) {
 }
 
 // src/storage/world_snapshot_d9.js
-var same36 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same37 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 async function prepareWorldSnapshotD9(state, { sha256, previous = null, checkpointId, stagedPages = [] }) {
   validateActivityState(state);
   requireContract(state.d9World, "D9 state required");
@@ -30036,7 +30204,7 @@ async function prepareWorldSnapshotD9(state, { sha256, previous = null, checkpoi
     pages.set(id, { id, value });
     return id;
   };
-  const functionalIds = /* @__PURE__ */ new Set([...functionalSitesD10(state).flatMap(functionalSiteSpaceIdsD12), ...tavernSpaceIds(state), ...townInteriorSpaceIds(state)]), origin2 = worldDocument("origin", { version: "world-origin-static-d9-v1", content: copyWire(state.content), origin: copyWire(state.d9World.origin), collisions: Object.fromEntries(Object.entries(state.spacesByInstanceId).filter(([id]) => !functionalIds.has(id)).map(([id, s]) => [id, copyWire(id === state.overworldInstanceId ? s.collision.origin : s.collision)])) });
+  const functionalIds = /* @__PURE__ */ new Set([...functionalSitesD10(state).flatMap(functionalSiteSpaceIdsD12), ...tavernSpaceIds(state), ...townInteriorSpaceIds(state), ...waitingRoomSpaceIds(state)]), origin2 = worldDocument("origin", { version: "world-origin-static-d9-v1", content: copyWire(state.content), origin: copyWire(state.d9World.origin), collisions: Object.fromEntries(Object.entries(state.spacesByInstanceId).filter(([id]) => !functionalIds.has(id)).map(([id, s]) => [id, copyWire(id === state.overworldInstanceId ? s.collision.origin : s.collision)])) });
   const originPage = await add(origin2);
   if (previous && previous.root.originPage !== originPage) {
     const old = state.hostileCombat?.catalogUpgradeV2 ? previousDungeonMobOriginDocumentV2(state, origin2) : previousDungeonMobOriginDocument(state, origin2);
@@ -30075,13 +30243,13 @@ async function openWorldSnapshotD9(publication, { sha256, readPage, generatePlan
   state.content = copyWire(origin2.payload.content);
   state.d9World.origin = copyWire(origin2.payload.origin);
   state.playersById = {};
-  requireContract(same36(Object.keys(runtime.payload.participantPages).sort(), state.session.playerIds), "Participant page inventory mismatch");
+  requireContract(same37(Object.keys(runtime.payload.participantPages).sort(), state.session.playerIds), "Participant page inventory mismatch");
   for (const [id, ref] of Object.entries(runtime.payload.participantPages)) {
     const page = await read(ref);
     requireContract(page.kind === "participant" && page.payload.version === "world-participant-cut-d9-v1" && page.payload.player.playerId === id, "Participant page owner mismatch");
     state.playersById[id] = copyWire(page.payload.player);
   }
-  const functionalIds = /* @__PURE__ */ new Set([...functionalSitesD10(state).flatMap(functionalSiteSpaceIdsD12), ...tavernSpaceIds(state), ...townInteriorSpaceIds(state)]);
+  const functionalIds = /* @__PURE__ */ new Set([...functionalSitesD10(state).flatMap(functionalSiteSpaceIdsD12), ...tavernSpaceIds(state), ...townInteriorSpaceIds(state), ...waitingRoomSpaceIds(state)]);
   for (const [id, s] of Object.entries(state.spacesByInstanceId)) {
     if (functionalIds.has(id)) {
       requireContract(s.collision && origin2.payload.collisions[id] === void 0, "Functional site collision must belong to runtime cut");
@@ -30303,7 +30471,7 @@ async function changedPageEntriesD9({ before, after, readPage, sha256, limit = 1
 }
 
 // src/storage/world_transition_pages_d9.js
-var same37 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same38 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 async function reconcileWorldComparisonPagesD9(a, b, { readPage, sha256 }) {
   const pages = createWorldPageBufferD9({ readPage, sha256 }), cache4 = /* @__PURE__ */ new Map();
   const read = async (s, geo) => {
@@ -30330,7 +30498,7 @@ async function reconcileWorldComparisonPagesD9(a, b, { readPage, sha256 }) {
       requireContract(i, "Cold participant mismatch");
       const merge = (to, from) => {
         for (const [id2, v] of Object.entries(from)) {
-          requireContract(!Object.hasOwn(to, id2) || same37(to[id2], v), "Cold receipt contradicts live ownership");
+          requireContract(!Object.hasOwn(to, id2) || same38(to[id2], v), "Cold receipt contradicts live ownership");
           to[id2] = copyWire(v);
         }
       };
@@ -30358,7 +30526,7 @@ async function reconcileWorldComparisonPagesD9(a, b, { readPage, sha256 }) {
     requireContract(geo && !other.d9World.episodes[id].origin, "Historical origin cannot leave the live cut");
     const delta = await read(target, geo), e = delta?.encounters.find((e2) => e2.group.groupId === id);
     if (!e) return;
-    requireContract(e.episode.anchorId === other.d9World.episodes[id].anchorId && same37(e.episode.geography, geo), "Cold encounter geography changed");
+    requireContract(e.episode.anchorId === other.d9World.episodes[id].anchorId && same38(e.episode.geography, geo), "Cold encounter geography changed");
     inject(target, e);
   }
   const aIds = Object.keys(a.groupsById), bIds = Object.keys(b.groupsById);
@@ -30382,7 +30550,7 @@ async function reconcileWorldComparisonPagesD9(a, b, { readPage, sha256 }) {
 }
 
 // src/shared/contracts/site_reset_d13c.js
-var same38 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same39 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var physicalFloor = (floor) => {
   const copy = copyWire(floor);
   delete copy.groupId;
@@ -30404,37 +30572,37 @@ function pendingFinaleIdentityD13D_B(state, currentSite, nextSite) {
   if (record2?.version !== SITE_FINALE_RESERVATION_D13D_B || record2.siteId !== currentSite.siteId || record2.sizeTier !== "small" || currentSite.sizeTier !== "small" || record2.finalFloorIndex !== currentSite.floors.length - 1 || deployment?.version !== SITE_FINALE_DEPLOYMENT_D13D_B || deployment.siteId !== currentSite.siteId || deployment.reservationId !== record2.reservationId || !episode || deployment.firstMaterializedEpisode !== episode.episode + 1 || !Array.isArray(members) || members.length !== 2) return false;
   if (members[0].memberKey !== SMALL_CAVE_FINALE_LEADER_KEY_D13D_B || members[1].memberKey !== SMALL_CAVE_FINALE_ESCORT_KEY_D13D_B || currentSite.floors.some((floor) => floor.encounter.members.some((member) => finaleKeys.has(member.memberKey)))) return false;
   const expected = physicalSiteIdentityD13C(currentSite), finalFloor = expected.floors[record2.finalFloorIndex], keys2 = expected.encounterProvenance?.floorMemberKeys?.[record2.finalFloorId];
-  if (!finalFloor || finalFloor.floorId !== record2.finalFloorId || !Array.isArray(keys2) || !same38(keys2, finalFloor.encounter.members.map((member) => member.memberKey))) return false;
+  if (!finalFloor || finalFloor.floorId !== record2.finalFloorId || !Array.isArray(keys2) || !same39(keys2, finalFloor.encounter.members.map((member) => member.memberKey))) return false;
   finalFloor.encounter.members.push(...copyWire(members));
   keys2.push(...members.map((member) => member.memberKey));
-  return same38(expected, physicalSiteIdentityD13C(nextSite));
+  return same39(expected, physicalSiteIdentityD13C(nextSite));
 }
 var standardFinaleKeys = /* @__PURE__ */ new Set([STANDARD_CAVE_FINALE_BOSS_KEY_D13D_D, ...STANDARD_CAVE_FINALE_COCOON_KEYS_D13D_D]);
 function pendingStandardFinaleIdentityD13D_D(state, currentSite, nextSite) {
   const record2 = state.campaign.siteFinaleReservationsById?.[currentSite.siteId], deployment = state.campaign.siteFinaleDeploymentsById?.[currentSite.siteId], episode = resolveSiteRunEpisodeD13B(state, currentSite.siteId), members = record2?.encounterBinding?.members;
   if (record2?.version !== SITE_FINALE_RESERVATION_D13D_E || record2.siteId !== currentSite.siteId || record2.sizeTier !== "standard" || currentSite.sizeTier !== "standard" || record2.rewardBinding?.version !== STANDARD_CAVE_FINALE_REWARD_D13D_E || record2.finalFloorIndex !== currentSite.floors.length - 1 || deployment?.version !== SITE_FINALE_DEPLOYMENT_D13D_D || deployment.siteId !== currentSite.siteId || deployment.reservationId !== record2.reservationId || !episode || deployment.firstMaterializedEpisode !== episode.episode + 1 || !Array.isArray(members) || members.length !== 4) return false;
-  if (members[0].memberKey !== STANDARD_CAVE_FINALE_BOSS_KEY_D13D_D || !same38(members.slice(1).map((member) => member.memberKey), STANDARD_CAVE_FINALE_COCOON_KEYS_D13D_D) || currentSite.floors.some((floor) => floor.encounter.members.some((member) => standardFinaleKeys.has(member.memberKey)))) return false;
+  if (members[0].memberKey !== STANDARD_CAVE_FINALE_BOSS_KEY_D13D_D || !same39(members.slice(1).map((member) => member.memberKey), STANDARD_CAVE_FINALE_COCOON_KEYS_D13D_D) || currentSite.floors.some((floor) => floor.encounter.members.some((member) => standardFinaleKeys.has(member.memberKey)))) return false;
   const expected = physicalSiteIdentityD13C(currentSite), finalFloor = expected.floors[record2.finalFloorIndex], keys2 = expected.encounterProvenance?.floorMemberKeys?.[record2.finalFloorId];
-  if (!finalFloor || finalFloor.floorId !== record2.finalFloorId || !Array.isArray(keys2) || !same38(keys2, finalFloor.encounter.members.map((member) => member.memberKey))) return false;
+  if (!finalFloor || finalFloor.floorId !== record2.finalFloorId || !Array.isArray(keys2) || !same39(keys2, finalFloor.encounter.members.map((member) => member.memberKey))) return false;
   finalFloor.encounter.members = copyWire(members);
   expected.encounterProvenance.floorMemberKeys[record2.finalFloorId] = members.map((member) => member.memberKey);
-  return same38(expected, physicalSiteIdentityD13C(nextSite));
+  return same39(expected, physicalSiteIdentityD13C(nextSite));
 }
 function pendingLargeFinaleIdentityD13D_F(state, currentSite, nextSite) {
   const record2 = state.campaign.siteFinaleReservationsById?.[currentSite.siteId], deployment = state.campaign.siteFinaleDeploymentsById?.[currentSite.siteId], episode = resolveSiteRunEpisodeD13B(state, currentSite.siteId);
-  if (record2?.version !== SITE_FINALE_RESERVATION_D13D_G || currentSite.sizeTier !== "large" || record2.rewardBinding?.balanceStatus !== "provisional" || deployment?.version !== SITE_FINALE_DEPLOYMENT_D13D_F || deployment.siteId !== currentSite.siteId || deployment.reservationId !== record2.reservationId || !episode || deployment.firstMaterializedEpisode !== episode.episode + 1 || !same38(record2, deriveWoodlandCaveFinaleReservationD13D_G(currentSite)) || currentSite.floors.some((f3) => f3.encounter.members.some((m) => String(m.memberKey).startsWith("finale:")))) return false;
+  if (record2?.version !== SITE_FINALE_RESERVATION_D13D_G || currentSite.sizeTier !== "large" || record2.rewardBinding?.balanceStatus !== "provisional" || deployment?.version !== SITE_FINALE_DEPLOYMENT_D13D_F || deployment.siteId !== currentSite.siteId || deployment.reservationId !== record2.reservationId || !episode || deployment.firstMaterializedEpisode !== episode.episode + 1 || !same39(record2, deriveWoodlandCaveFinaleReservationD13D_G(currentSite)) || currentSite.floors.some((f3) => f3.encounter.members.some((m) => String(m.memberKey).startsWith("finale:")))) return false;
   const expected = physicalSiteIdentityD13C(currentSite), floor = expected.floors[record2.finalFloorIndex], keys2 = expected.encounterProvenance.floorMemberKeys[record2.finalFloorId];
-  if (!same38(keys2, floor.encounter.members.map((m) => m.memberKey))) return false;
+  if (!same39(keys2, floor.encounter.members.map((m) => m.memberKey))) return false;
   floor.encounter.members = copyWire(record2.encounterBinding.members);
   expected.encounterProvenance.floorMemberKeys[record2.finalFloorId] = record2.encounterBinding.members.map((m) => m.memberKey);
-  return same38(expected, physicalSiteIdentityD13C(nextSite));
+  return same39(expected, physicalSiteIdentityD13C(nextSite));
 }
 function siteResetIdentityMatchesD13C(state, currentSite, nextSite) {
-  return same38(physicalSiteIdentityD13C(currentSite), physicalSiteIdentityD13C(nextSite)) || pendingFinaleIdentityD13D_B(state, currentSite, nextSite) || pendingStandardFinaleIdentityD13D_D(state, currentSite, nextSite) || pendingLargeFinaleIdentityD13D_F(state, currentSite, nextSite);
+  return same39(physicalSiteIdentityD13C(currentSite), physicalSiteIdentityD13C(nextSite)) || pendingFinaleIdentityD13D_B(state, currentSite, nextSite) || pendingStandardFinaleIdentityD13D_D(state, currentSite, nextSite) || pendingLargeFinaleIdentityD13D_F(state, currentSite, nextSite);
 }
 
 // src/storage/world_transition_d9.js
-var same39 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same40 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 function comparable(state) {
   const s = copyWire(state), frames = s.d9World.runtime.frames, point14 = (p, space) => space === s.overworldInstanceId ? copyWire(localFramePositionD9(p, frames)) : p;
   for (const p of Object.values(s.playersById)) {
@@ -30461,42 +30629,46 @@ function alignWorldReceiptComparisonD9(state, frames) {
 async function validateWorldAdvanceD9(a, b, options) {
   validateActivityState(b);
   requireContract(a.d9World && b.d9World, "D9 transition required");
+  if (isSeatChangeV1(a, b)) {
+    validateSeatChangeV1(a, b);
+    return;
+  }
   const catalogUpgrade = isDungeonMobCatalogUpgrade(a, b) || isDungeonMobCatalogUpgradeV2(a, b);
   validateDungeonMobCatalogProgress(a, b);
-  for (const key9 of ["content", "session", "overworldInstanceId", "proofCase"]) requireContract(same39(a[key9], b[key9]) || key9 === "content" && catalogUpgrade, "Immutable campaign identity changed");
-  for (const key9 of ["campaignId", "seed", "charactersById"]) requireContract(same39(a.campaign[key9], b.campaign[key9]), "Campaign identity changed");
+  for (const key9 of ["content", "session", "overworldInstanceId", "proofCase"]) requireContract(same40(a[key9], b[key9]) || key9 === "content" && catalogUpgrade, "Immutable campaign identity changed");
+  for (const key9 of ["campaignId", "seed", "charactersById"]) requireContract(same40(a.campaign[key9], b.campaign[key9]), "Campaign identity changed");
   requireContract(a.campaign.saveRevision === b.campaign.saveRevision && a.campaign.checkpointId === b.campaign.checkpointId, "Unconfirmed campaign revision");
   if (a.d9World.plannedWorld) requireContract(a.d9World.runtimePolicy === b.d9World.runtimePolicy, "Runtime retention contract changed inside campaign");
-  if (a.d9World.plannedWorld) requireContract(same39(a.d9World.plannedWorld, b.d9World.plannedWorld) && same39(a.d9World.plannedStart, b.d9World.plannedStart), "Pinned planned world changed");
+  if (a.d9World.plannedWorld) requireContract(same40(a.d9World.plannedWorld, b.d9World.plannedWorld) && same40(a.d9World.plannedStart, b.d9World.plannedStart), "Pinned planned world changed");
   else if (b.d9World.plannedWorld) requireContract(a.tick === 0 && b.tick === 0 && a.d9World.runtime.chunks.length === 0 && Object.keys(a.d9World.siteReservationsById).length === 0, "Planned binding is genesis-only");
-  if (a.d9World.plannedWorld?.cavePrototype) requireContract(same39(a.d9World.siteReservationsById, b.d9World.siteReservationsById), "Pinned planned Cave reservation changed");
-  for (const key9 of ["origin", "profile", "migration"]) requireContract(same39(a.d9World[key9], b.d9World[key9]), "Pinned world provenance changed");
+  if (a.d9World.plannedWorld?.cavePrototype) requireContract(same40(a.d9World.siteReservationsById, b.d9World.siteReservationsById), "Pinned planned Cave reservation changed");
+  for (const key9 of ["origin", "profile", "migration"]) requireContract(same40(a.d9World[key9], b.d9World[key9]), "Pinned world provenance changed");
   for (const key9 of ["tick", "identitySequence", "lastAppliedAuthorityOrder"]) requireContract(b[key9] >= a[key9], "World chronology regressed");
   requireContract(b.eventEmission.lastEventSequence >= a.eventEmission.lastEventSequence, "Event cursor regressed");
-  if (a.d9World.settlementInterior) requireContract(same39(a.d9World.settlementInterior, b.d9World.settlementInterior), "Immutable town/tavern binding changed");
+  if (a.d9World.settlementInterior) requireContract(same40(a.d9World.settlementInterior, b.d9World.settlementInterior), "Immutable town/tavern binding changed");
   const addedTavern = a.d9World.settlementInterior ? [] : tavernSpaceIds(b);
   requireContract(!addedTavern.length || !a.d9World.plannedWorld && b.tick === 0, "Tavern spaces are genesis-only");
-  if (a.d9World.townInteriors) requireContract(same39(a.d9World.townInteriors, b.d9World.townInteriors), "Immutable town interiors changed");
+  if (a.d9World.townInteriors) requireContract(same40(a.d9World.townInteriors, b.d9World.townInteriors), "Immutable town interiors changed");
   const addedTown = a.d9World.townInteriors ? [] : townInteriorSpaceIds(b);
   requireContract(!addedTown.length || !a.d9World.plannedWorld && b.tick === 0, "Town interiors are genesis-only");
   const oldSpaces = Object.keys(a.spacesByInstanceId).sort(), newSpaces = Object.keys(b.spacesByInstanceId).sort(), addedSiteRecords = Object.entries(b.d9World.functionalSitesById).filter(([id]) => !a.d9World.functionalSitesById[id]), addedSites = addedSiteRecords.flatMap(([, site]) => functionalSiteSpaceIdsD12(site));
-  requireContract(same39([...oldSpaces, ...addedSites, ...addedTavern, ...addedTown].sort(), newSpaces), "Historical space inventory changed");
+  requireContract(same40([...oldSpaces, ...addedSites, ...addedTavern, ...addedTown].sort(), newSpaces), "Historical space inventory changed");
   for (const [id, space] of Object.entries(a.spacesByInstanceId)) {
-    if (id !== a.overworldInstanceId) requireContract(same39(space, b.spacesByInstanceId[id]), "Historical interior changed");
+    if (id !== a.overworldInstanceId) requireContract(same40(space, b.spacesByInstanceId[id]), "Historical interior changed");
     else {
       const { collision: collision2, ...identity } = space, { collision: ignored, ...next } = b.spacesByInstanceId[id];
-      requireContract(same39(identity, next), "Overworld space changed");
+      requireContract(same40(identity, next), "Overworld space changed");
     }
   }
   const resets = siteResetTransitionsD13C(a, b), resetSites = new Set(resets.map((row) => row.siteId)), retiredGroups = new Set(resets.flatMap((row) => row.retiredGroupIds)), retiredEntities = new Set(resets.flatMap((row) => row.retiredEntityIds));
   for (const [id, x] of Object.entries(a.d9World.functionalSitesById)) {
-    const y = b.d9World.functionalSitesById[id], identity = resetSites.has(id) ? siteResetIdentityMatchesD13C(a, x, y) : isFortFamily(x) || (isRuinFamily(x) || isCryptFamily(x)) ? same39({ ...x, conqueredTick: null, discoveredByPlayerIds: [] }, { ...y, conqueredTick: null, discoveredByPlayerIds: [] }) && x.discoveredByPlayerIds.every((id2) => y.discoveredByPlayerIds.includes(id2)) : same39({ ...x, conqueredTick: null }, { ...y, conqueredTick: null });
+    const y = b.d9World.functionalSitesById[id], identity = resetSites.has(id) ? siteResetIdentityMatchesD13C(a, x, y) : isFortFamily(x) || (isRuinFamily(x) || isCryptFamily(x)) ? same40({ ...x, conqueredTick: null, discoveredByPlayerIds: [] }, { ...y, conqueredTick: null, discoveredByPlayerIds: [] }) && x.discoveredByPlayerIds.every((id2) => y.discoveredByPlayerIds.includes(id2)) : same40({ ...x, conqueredTick: null }, { ...y, conqueredTick: null });
     requireContract(y && identity && (x.conqueredTick === null || y.conqueredTick === x.conqueredTick), "Functional site identity/completion regressed");
   }
   for (const [id, y] of Object.entries(b.d9World.functionalSitesById)) if (!a.d9World.functionalSitesById[id]) requireContract(y.conqueredTick === null || Number.isSafeInteger(y.conqueredTick) && y.conqueredTick >= a.tick && y.conqueredTick <= b.tick, "New functional site completion predates the confirmed cut");
   for (const id of a.session.playerIds) {
     const p = a.playersById[id], q = b.playersById[id], { progression, inventory, d8, ...identity } = p, { progression: nextProgression, inventory: nextInventory, d8: nextD8, ...nextIdentity } = q;
-    requireContract(same39(identity, nextIdentity) && progressionBigInt(q.progression.totalXp) >= progressionBigInt(p.progression.totalXp), "Participant identity/progression regressed");
+    requireContract(same40(identity, nextIdentity) && progressionBigInt(q.progression.totalXp) >= progressionBigInt(p.progression.totalXp), "Participant identity/progression regressed");
     validateD8Advance({ ...d8, causalXp: {} }, nextD8, progression.level, nextProgression.level, a.lastAppliedAuthorityOrder);
     requireContract(b.appliedClientSequences[id] >= a.appliedClientSequences[id], "Applied command cursor regressed");
   }
@@ -30525,10 +30697,10 @@ async function validateWorldAdvanceD9(a, b, options) {
       continue;
     }
     const h = b.groupsById[id], originUpgrade = originHordeUpgradeForGroup(a, b, id);
-    requireContract(h && (same39(g.entityIds, h.entityIds) || originUpgrade) && g.spaceInstanceId === h.spaceInstanceId && g.siteId === h.siteId, "Resident group identity changed");
+    requireContract(h && (same40(g.entityIds, h.entityIds) || originUpgrade) && g.spaceInstanceId === h.spaceInstanceId && g.siteId === h.siteId, "Resident group identity changed");
     const renewed = encounterAdvanced(a, b, id);
     requireContract(!g.cleared || h.cleared || renewed, "Encounter clear regressed");
-    if (g.threatSnapshot && (g.siteId !== null || a.d9World.episodes[id]?.snapshot) && !renewed) requireContract(same39(g.threatSnapshot, h.threatSnapshot) || originUpgrade, "Frozen encounter rescaled");
+    if (g.threatSnapshot && (g.siteId !== null || a.d9World.episodes[id]?.snapshot) && !renewed) requireContract(same40(g.threatSnapshot, h.threatSnapshot) || originUpgrade, "Frozen encounter rescaled");
   }
   for (const [id, actor] of Object.entries(a.entitiesById)) {
     if (retiredEntities.has(id)) {
@@ -30547,7 +30719,7 @@ async function validateWorldAdvanceD9(a, b, options) {
 // src/storage/world_save_task_d9.js
 function createWorldSaveTaskD9({ store, sha256, generatePlannedChunk = null }) {
   let confirmed = null, pending = null, busy = false;
-  const same42 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+  const same43 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
   async function open2(campaignId) {
     requireContract(!busy && !pending, "World cut is pending");
     busy = true;
@@ -30589,7 +30761,7 @@ function createWorldSaveTaskD9({ store, sha256, generatePlannedChunk = null }) {
         const envelope = parseActivityEnvelope(legacyCheckpoint), legacy = envelope.cut.snapshot.state;
         await verifyActivityEnvelope(envelope, { sha256, expectedContentFingerprint: legacy.content.fingerprint, expectedGenerationBinding: activityGeneration(legacy) });
         const migration = await prepareD9OriginMigration(legacy, { sha256 });
-        requireContract(same42(migration.state, state), "First D9 cut must be the exact historical migration");
+        requireContract(same43(migration.state, state), "First D9 cut must be the exact historical migration");
       } else {
         if (confirmed?.publication.id !== head.id) confirmed = { publication: head, state: await openWorldSnapshotD9(head, { sha256, readPage: store.worldPages.readPage, generatePlannedChunk }) };
         const staged = new Map((request.stagedPages ?? []).map((p) => [p.id, p.value]));
@@ -30621,7 +30793,7 @@ function createWorldSaveTaskD9({ store, sha256, generatePlannedChunk = null }) {
 }
 
 // src/storage/world_ground_residency_d9.js
-var same40 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same41 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 async function prepareGroundResidenceD9(state, { remove = {}, load = [] }, { sha256, readPage }) {
   requireContract(load.length <= 256 && new Set(load.map((r) => r.ownerPlayerId + "\0" + r.itemId)).size === load.length, "Ground projection request bound/duplicate");
   const roots = { ownership: state.d9World.ownershipIndex, ground: state.d9World.groundIndex }, removed = {}, loaded2 = [];
@@ -30633,7 +30805,7 @@ async function prepareGroundResidenceD9(state, { remove = {}, load = [] }, { sha
       const d = p.inventory.renewal.groundBySourceId[id];
       requireContract(d, "Ground item already absent");
       const row = await readOwnedGearD9(roots.ownership, pid, d.item.itemId, { readPage, sha256 }), location = { spaceInstanceId: d.spaceInstanceId, position: d.spaceInstanceId === state.overworldInstanceId ? localFramePositionD9(d.position, state.d9World.runtime.frames) : legacyWorldPosition(d.position) };
-      requireContract(row?.disposition === "DROPPED" && same40(row.item, d.item) && same40(row.origin, d.origin) && same40(row.location, location) && same40(row.drop.receipt, d.receipt), "Ground item must reach its ownership page before eviction");
+      requireContract(row?.disposition === "DROPPED" && same41(row.item, d.item) && same41(row.origin, d.origin) && same41(row.location, location) && same41(row.drop.receipt, d.receipt), "Ground item must reach its ownership page before eviction");
       removed[pid][id] = copyWire(d);
     }
   }
@@ -30661,7 +30833,7 @@ async function prepareGroundResidenceD9(state, { remove = {}, load = [] }, { sha
 }
 function applyGroundResidenceD9(state, plan) {
   requireContract(state.d9World.ownershipIndex === plan.roots.ownership && state.d9World.groundIndex === plan.roots.ground && canonicalStringify(state.d9World.runtime.frames) === plan.frames, "Ground residency context changed");
-  for (const [pid, rows3] of Object.entries(plan.removed)) for (const [id, d] of Object.entries(rows3)) requireContract(same40(state.playersById[pid].inventory.renewal.groundBySourceId[id], d), "Ground item changed before eviction");
+  for (const [pid, rows3] of Object.entries(plan.removed)) for (const [id, d] of Object.entries(rows3)) requireContract(same41(state.playersById[pid].inventory.renewal.groundBySourceId[id], d), "Ground item changed before eviction");
   const obligations = copyWire(plan.knowledge.coldObligations), origins = copyWire(state.d9World.paging.originsByGroup);
   for (const { pid, row } of plan.loaded) {
     const gid = row.origin.groupId;
@@ -31046,7 +31218,7 @@ async function prepareWorldEncountersD9(before, { sha256 }) {
 }
 
 // src/storage/world_cold_deadlines_d9.js
-var same41 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same42 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 async function settleColdDeadlinesD9(state, buffer, { sha256, limit = 8 }) {
   const deadlines = createPageTransaction({ root: state.d9World.deadlineIndex, readPage: buffer.readPage, sha256 }), due = await dueWorldDeadlines(deadlines, state.tick, limit), chunks2 = /* @__PURE__ */ new Map(), additionalRows = {}, changedGroups = /* @__PURE__ */ new Set();
   async function chunk(row) {
@@ -31065,7 +31237,7 @@ async function settleColdDeadlinesD9(state, buffer, { sha256, limit = 8 }) {
       const r = e.players[row.ownerPlayerId]?.rewards[row.sourceId], p = state.playersById[row.ownerPlayerId];
       if (!r || !p || !r.generated || r.claimed || r.autoSalvageEligibleTick === null || r.autoSalvageEligibleTick > state.tick) continue;
       const itemId2 = `item:${p.playerId}:${r.sourceEntityId}`, owned = await readOwnedGearD9(state.d9World.ownershipIndex, p.playerId, itemId2, { sha256, readPage: buffer.readPage });
-      requireContract(owned?.disposition === "UNCLAIMED" && same41(owned.item.generated, r.generated) && owned.origin.groupId === groupId && owned.origin.episode === e.economy.episode, "Cold salvage lacks current unclaimed ownership");
+      requireContract(owned?.disposition === "UNCLAIMED" && same42(owned.item.generated, r.generated) && owned.origin.groupId === groupId && owned.origin.episode === e.economy.episode, "Cold salvage lacks current unclaimed ownership");
       requireContract(!p.inventory.itemsById[itemId2] && !p.inventory.renewal.groundBySourceId[r.sourceEntityId], "Cold salvage item is locally owned");
       const working = copyWire(p), terminal = autoSalvageReward(state, working, r, owned.origin);
       p.inventory.revision = working.inventory.revision;

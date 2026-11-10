@@ -18654,8 +18654,15 @@ function validateProvisions(p, s, validateCommand2) {
   requireContract(s.format === D6_ACTIVITY_FORMAT && b.version === "base-provisions-d6-1", "Invalid provision version");
   closedRecord(b.claims, [], SUBWEAPON_TYPES);
   for (const [type, r] of Object.entries(b.claims)) {
-    closedRecord(r, ["sourceEntityId", "command", "authorityOrder", "tick", "revision"]);
+    const carried = r.arrival !== void 0;
+    closedRecord(r, ["sourceEntityId", ...carried ? ["arrival"] : ["command", "authorityOrder", "tick", "revision"]]);
     requireContract(/^ent:[0-9a-f]{32}$/.test(r.sourceEntityId) && BigInt("0x" + r.sourceEntityId.slice(4)) <= BigInt(s.identitySequence), "Invalid provision identity fence");
+    if (carried) {
+      requireContract(r.arrival === i.renewal?.arrival?.heroId, "Provision arrival mismatch");
+      const item2 = i.itemsById[`item:${p.playerId}:${r.sourceEntityId}`] ?? i.renewal.groundBySourceId[r.sourceEntityId]?.item;
+      requireContract(item2?.definitionId === SUBWEAPONS[type].definitionId, "Claimed subweapon lost or replaced");
+      continue;
+    }
     validateCommand2(r.command);
     const c = r.command;
     requireContract(c.kind === "subweapon.claim" && c.payload.subType === type && c.playerId === p.playerId && c.sessionId === s.session.sessionId && c.campaignId === s.campaign.campaignId && provisionLevelAllowed(p, type), "Invalid provision receipt");
@@ -18701,7 +18708,8 @@ function claimClassKit(s, p, c, order) {
 }
 function validateClassKit(p, s, validateCommand2) {
   const i = p.inventory, k = i.classKit;
-  closedRecord(k, ["version", "heroClass", "sourceEntityIds", "command", "authorityOrder", "tick", "revision"]);
+  closedRecord(k, ["version", "heroClass", "sourceEntityIds", ...k.arrival !== void 0 ? ["arrival"] : ["command", "authorityOrder", "tick", "revision"]]);
+  requireContract(k.arrival === void 0 || k.arrival === i.renewal?.arrival?.heroId, "Class kit arrival mismatch");
   requireContract(s.format === D6_ACTIVITY_FORMAT && k.version === CLASS_KIT_VERSION && i.subweapons, "Invalid class kit version");
   requireContract(heroClassOf(p.d8)?.id === k.heroClass && Boolean(CLASS_KITS[k.heroClass]), "Class kit for another class");
   requireContract(Array.isArray(k.sourceEntityIds) && k.sourceEntityIds.length === CLASS_KIT_PIECES.length && new Set(k.sourceEntityIds).size === CLASS_KIT_PIECES.length, "Invalid class kit pieces");
@@ -18710,6 +18718,7 @@ function validateClassKit(p, s, validateCommand2) {
     const item = i.itemsById[`item:${p.playerId}:${id}`] ?? i.renewal.groundBySourceId[id]?.item;
     requireContract(item?.definitionId === CLASS_KITS[k.heroClass][CLASS_KIT_PIECES[n]], "Class kit piece lost or replaced");
   }
+  if (k.arrival !== void 0) return;
   validateCommand2(k.command);
   const c = k.command;
   requireContract(c.kind === "classkit.claim" && c.playerId === p.playerId && c.sessionId === s.session.sessionId && c.campaignId === s.campaign.campaignId, "Invalid class kit receipt");
@@ -24133,6 +24142,50 @@ function groundSpacingPredicateD9(state, p, spaceId, point14, hot) {
   };
 }
 
+// src/shared/contracts/hero_arrival_v1.js
+var HERO_PASSPORT_VERSION = "hero-passport-v1";
+var HERO_ARRIVAL_VERSION = "hero-arrival-v1";
+var HERO_ID = /^hero:[0-9a-z-]{1,64}$/;
+var validHeroId = (id) => typeof id === "string" && HERO_ID.test(id);
+var same23 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var witnessCache = /* @__PURE__ */ new Map();
+function carriedGearWitness(g) {
+  if (!g) return null;
+  const text = canonicalStringify(g);
+  if (witnessCache.has(text)) {
+    const w2 = witnessCache.get(text);
+    return w2 && { ...w2 };
+  }
+  const w = findWitness(g);
+  if (witnessCache.size >= 256) witnessCache.clear();
+  witnessCache.set(text, w);
+  return w && { ...w };
+}
+function findWitness(g) {
+  try {
+    validateGeneratedGear(g, g.seed, g.progression ?? g.contentDepth);
+    return {};
+  } catch {
+  }
+  const family2 = g.definition?.slot, forced = [{ tier: g.rarityTier, family: family2 }, { tier: g.rarityTier, family: family2, subType: g.definition?.subType ?? null }, { tier: g.rarityTier, family: family2, subType: g.definition?.subType ?? null, noun: g.definition?.noun ?? null }];
+  for (const options of forced) {
+    try {
+      if (same23(generateGear3(g.seed, g.progression, options), g)) return options;
+    } catch {
+    }
+  }
+  return null;
+}
+function validateCarriedGear(g, witness) {
+  if (!witness || !Object.keys(witness).length) {
+    validateGeneratedGear(g, g.seed, g.progression ?? g.contentDepth);
+    return g;
+  }
+  closedRecord(witness, [], ["tier", "family", "subType", "noun"]);
+  requireContract(same23(generateGear3(g.seed, g.progression, witness), g), "Carried gear differs from its own seed");
+  return g;
+}
+
 // src/shared/contracts/forge_stations.js
 var FORGE_INTERACTION_RADIUS = 48;
 var layouts = /* @__PURE__ */ new WeakMap();
@@ -24180,7 +24233,7 @@ function nearbyForge(state, p) {
 
 // src/shared/contracts/forge_economy.js
 var FORGE_INVENTORY_VERSION = "player-inventory-d5-v1";
-var same23 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same24 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var emptyEconomy = () => ({ version: "forge-economy-v1", origin: "normal", legacyRewardIds: [], slotLevels: Object.fromEntries(EQUIPMENT_SLOTS.map((k) => [k, 0])), materials: {}, soulAwardsByEntityId: {}, lastAttunementsBySlot: {} });
 function migrateForgeInventory(p) {
   if (p.inventory.version === FORGE_INVENTORY_VERSION) return p.inventory;
@@ -24255,7 +24308,7 @@ function validateForgeEconomy(p, state, validateCommand2) {
   closedRecord(e.slotLevels, equipmentSlots(inv));
   closedRecord(e.materials, [], FORGE_MATERIALS);
   closedRecord(e.lastAttunementsBySlot, [], equipmentSlots(inv));
-  requireContract(Array.isArray(e.legacyRewardIds) && e.legacyRewardIds.length <= 63 && same23([...new Set(e.legacyRewardIds)].sort(), e.legacyRewardIds), "Invalid legacy reward set");
+  requireContract(Array.isArray(e.legacyRewardIds) && e.legacyRewardIds.length <= 63 && same24([...new Set(e.legacyRewardIds)].sort(), e.legacyRewardIds), "Invalid legacy reward set");
   const drops = {}, addDrops = (m) => {
     for (const [k, n] of Object.entries(m ?? {})) drops[k] = (drops[k] ?? 0) + n;
   };
@@ -24278,6 +24331,7 @@ function validateForgeEconomy(p, state, validateCommand2) {
     gold = addAmount(inv.renewal.baseGold, inv.renewal.retiredGold);
     souls = inv.renewal.baseSouls + inv.renewal.retiredSouls;
     addDrops(inv.renewal.retiredMaterials);
+    addDrops(inv.renewal.arrival?.materials);
     for (const [id, r] of Object.entries(inv.rewardsByEntityId)) if (r.episodeSource) {
       gold = addAmount(gold, rewardAmount(inv.goldAwardsByEntityId[id].amount));
       souls += e.soulAwardsByEntityId[id] ?? 0;
@@ -24298,7 +24352,7 @@ function validateForgeEconomy(p, state, validateCommand2) {
     spentGold = addAmount(spentGold, spent.gold);
     for (const [k, v] of Object.entries(spent.materials)) spentMaterials[k] = (spentMaterials[k] ?? 0) + v;
     const receipt = e.lastAttunementsBySlot[slot];
-    if (!level) {
+    if (level <= (inv.renewal?.arrival?.slotLevels[slot] ?? 0)) {
       requireContract(receipt === void 0, "Unexpected attunement receipt");
       continue;
     }
@@ -24329,7 +24383,7 @@ function validateForgeEconomy(p, state, validateCommand2) {
   return e;
 }
 function validateForgeProgress(a, b, before) {
-  requireContract(same23(a.economy.origin, b.economy.origin) && same23(a.economy.legacyRewardIds, b.economy.legacyRewardIds), "Economy origin changed");
+  requireContract(same24(a.economy.origin, b.economy.origin) && same24(a.economy.legacyRewardIds, b.economy.legacyRewardIds), "Economy origin changed");
   if (!a.renewal) for (const [id, q] of Object.entries(a.economy.soulAwardsByEntityId)) requireContract(b.economy.soulAwardsByEntityId[id] === q, "Material history changed");
   let delta = 0;
   for (const slot of equipmentSlots(b)) {
@@ -24337,7 +24391,7 @@ function validateForgeProgress(a, b, before) {
     requireContract(y >= x, "Attunement regressed");
     delta += y - x;
     const r = b.economy.lastAttunementsBySlot[slot];
-    if (y === x) requireContract(same23(a.economy.lastAttunementsBySlot[slot] ?? null, r ?? null), "Attunement receipt changed without level");
+    if (y === x) requireContract(same24(a.economy.lastAttunementsBySlot[slot] ?? null, r ?? null), "Attunement receipt changed without level");
     else requireContract(r.authorityOrder > before.lastAppliedAuthorityOrder && r.tick >= before.tick && r.revision > a.revision, "Attunement lacks later command");
   }
   return delta;
@@ -24751,7 +24805,7 @@ function acceptedEventGearGeographyV2(groupId, g) {
 }
 
 // src/shared/contracts/world_chunk_delta_d9.js
-var same24 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same25 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 function proceduralGroupPinnedD9(state, groupId) {
   const group = state.groupsById[groupId], runtime = state.d9World.runtime, def = runtime.groups.find((g) => g.groupId === groupId);
   if (!group || !def) return true;
@@ -24774,14 +24828,14 @@ function proceduralGroupPinnedD9(state, groupId) {
   }))) return true;
   return def.members.some((m) => {
     const a = state.entitiesById[m.entityId];
-    return a.alive && (!same24(a.hp, a.maxHp) || Math.hypot(a.position.x - m.position.x, a.position.y - m.position.y) > 1e-7);
+    return a.alive && (!same25(a.hp, a.maxHp) || Math.hypot(a.position.x - m.position.x, a.position.y - m.position.y) > 1e-7);
   });
 }
 function proceduralGroupDetachmentHomeD9(state, groupId) {
   const group = state.groupsById[groupId], episode = state.d9World.episodes[groupId], definition = state.d9World.runtime.groups.find((g) => g.groupId === groupId);
   if (!group || !episode || episode.origin || !definition || proceduralGroupPinnedD9(state, groupId)) return null;
   const groupIds = [...group.entityIds].sort(), definitionIds2 = definition.members.map((m) => m.entityId).sort();
-  if (!same24(groupIds, definitionIds2) || group.entityIds.some((id) => !state.entitiesById[id])) return null;
+  if (!same25(groupIds, definitionIds2) || group.entityIds.some((id) => !state.entitiesById[id])) return null;
   return { chunkX: episode.geography.chunkX, chunkY: episode.geography.chunkY };
 }
 
@@ -24866,7 +24920,7 @@ function retireRewardMaterials(renewal, materials2) {
   const t = renewal.retiredMaterials ??= {};
   for (const [k, n] of Object.entries(materials2)) t[k] = safeInteger((t[k] ?? 0) + n);
 }
-var same25 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
+var same26 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var itemId = (p, id) => `item:${p.playerId}:${id ?? "starter"}`;
 var AUTO_SALVAGE_ACTIVE_TICKS = 5 * 60 * 60;
 function inventoryOrigin(state, sourceId) {
@@ -24916,7 +24970,7 @@ function validateCombatRewardSourceV1(state, source7, spawnEntityId, live, recip
   }
   if (live) {
     const snapshot = state.d9World.episodes[source7.groupId]?.snapshot, quality = source7.kind === "chest" ? roadsideChestV1(state, source7) ? "elite" : "completion" : source7.kind === "enemy" && (state.eliteCombat?.elitesByEntityId[spawnEntityId] || state.bossCombat?.bossesByEntityId[spawnEntityId]) ? "elite" : "ordinary";
-    requireContract(snapshot && same25(p.sourceDepth, snapshot.sourceDepth) && p.episodeSnapshotId === snapshot.snapshotId && p.combatQuality === quality, "Reward locked level/quality mismatch");
+    requireContract(snapshot && same26(p.sourceDepth, snapshot.sourceDepth) && p.episodeSnapshotId === snapshot.snapshotId && p.combatQuality === quality, "Reward locked level/quality mismatch");
   }
 }
 function gearOrigin(state, p, r) {
@@ -25044,7 +25098,17 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
   const inv = p.inventory, n = inv.renewal;
   closedRecord(inv, ["version", "economy", "revision", "gold", "goldAwardsByEntityId", "itemsById", "equipped", "rewardsByEntityId", "lastEquipmentChange", "topologyMigration", "renewal"], ["subweapons", "d7", "services", "classKit"]);
   validateSettlementServices(state, p, validateCommand2);
-  closedRecord(n, ["version", "baseGold", "baseSouls", "retiredGold", "retiredSouls", "defeats", "groundBySourceId", "originsByItemId", "lastDrop", "lastGroundPickup"], ["retiredMaterials"]);
+  closedRecord(n, ["version", "baseGold", "baseSouls", "retiredGold", "retiredSouls", "defeats", "groundBySourceId", "originsByItemId", "lastDrop", "lastGroundPickup"], ["retiredMaterials", "arrival"]);
+  if (n.arrival) {
+    const r = n.arrival;
+    closedRecord(r, ["version", "heroId", "slotLevels", "materials"]);
+    requireContract(r.version === HERO_ARRIVAL_VERSION && validHeroId(r.heroId), "Unknown hero arrival");
+    closedRecord(r.slotLevels, [], equipmentSlots(inv));
+    for (const v of Object.values(r.slotLevels)) safeInteger(v, 1, 100);
+    closedRecord(r.materials, [], FORGE_MATERIALS);
+    for (const v of Object.values(r.materials)) safeInteger(v, 1);
+  }
+  ;
   if (n.retiredMaterials) {
     closedRecord(n.retiredMaterials, [], DROP_MATERIALS_V1);
     for (const v of Object.values(n.retiredMaterials)) safeInteger(v, 1);
@@ -25063,6 +25127,11 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
   const items = Object.values(inv.itemsById), drops = Object.values(n.groundBySourceId), starter = itemId(p, null);
   requireContract(items.length >= 1 && items.length <= (p.d8 ? D8_OWNERSHIP_BOUND : 64) && inv.itemsById[starter]?.definitionId === "worn-sword", "Owned inventory/starter bound");
   function origin2(o, id) {
+    if (o?.carried !== void 0) {
+      closedRecord(o, ["carried", "sourceEntityId"], ["witness"]);
+      requireContract(n.arrival && o.carried === n.arrival.heroId && o.sourceEntityId === id, "Unknown carried provenance");
+      return;
+    }
     if (o?.servicePurchase) {
       validateServiceOrigin(p, o, id);
       return;
@@ -25090,7 +25159,11 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
     else requireContract(o.episode === o.archive.sourceEpisode, "Archived gear episode drift");
   }
   function item(i) {
-    validateWorkshopItem(p, i);
+    const carried = [n.originsByItemId[i.itemId], n.groundBySourceId[i.sourceEntityId]?.origin, inv.d7?.salvaged[i.itemId]?.origin, inv.d7?.autoSalvaged[i.itemId]?.origin, inv.services?.salesByItemId[i.itemId]?.origin].find((o) => o?.carried !== void 0);
+    if (carried && i.workshop) {
+      closedRecord(i.workshop, ["version", "steps"]);
+      workshopResult(i);
+    } else validateWorkshopItem(p, i);
     if (p.inventory.services?.purchasesBySourceId[i.sourceEntityId]) {
       validateServiceItem(state, p, i);
       return;
@@ -25098,9 +25171,12 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
     closedRecord(i, ["itemId", "definitionId", "ownerPlayerId", "sourceEntityId"], ["generated", "workshop"]);
     if (i.generated) {
       requireContract(inv.d7, "Generated gear without version");
-      const o = n.originsByItemId[i.itemId] ?? n.groundBySourceId[i.sourceEntityId]?.origin ?? inv.d7.salvaged[i.itemId]?.origin ?? inv.d7.autoSalvaged[i.itemId]?.origin ?? inv.services?.salesByItemId[i.itemId]?.origin, group = state.groupsById[o?.groupId], progression = o?.progression ?? (group ? prototypeRewardProgression(ordinaryTier(state.entitiesById[group.entityIds[0]].contentDefinitionId) ?? "C", i.sourceEntityId) : null), depth = progression?.sourceDepth;
-      requireContract(same25(depth, i.generated.contentDepth), "Generated content depth differs from origin");
-      validateGeneratedGear(i.generated, gearSeed(state, p, i.sourceEntityId), progression);
+      if (carried) validateCarriedGear(i.generated, carried.witness);
+      else {
+        const o = n.originsByItemId[i.itemId] ?? n.groundBySourceId[i.sourceEntityId]?.origin ?? inv.d7.salvaged[i.itemId]?.origin ?? inv.d7.autoSalvaged[i.itemId]?.origin ?? inv.services?.salesByItemId[i.itemId]?.origin, group = state.groupsById[o?.groupId], progression = o?.progression ?? (group ? prototypeRewardProgression(ordinaryTier(state.entitiesById[group.entityIds[0]].contentDefinitionId) ?? "C", i.sourceEntityId) : null), depth = progression?.sourceDepth;
+        requireContract(same26(depth, i.generated.contentDepth), "Generated content depth differs from origin");
+        validateGeneratedGear(i.generated, gearSeed(state, p, i.sourceEntityId), progression);
+      }
     }
     requireContract(i.ownerPlayerId === p.playerId && i.itemId === itemId(p, i.sourceEntityId) && EQUIPMENT[i.definitionId], "Gear ownership/identity");
     const t = provisionType(p, i.sourceEntityId);
@@ -25170,11 +25246,11 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
       if (s.progression) {
         validateRewardProgression(s.progression);
         requireContract(s.progression.sourceId === id, "Reward progression source mismatch");
-        if (s.progression.policy === "prototype-rank-depth-v1") requireContract(same25(Object.fromEntries(Object.entries({ ...s.progression, quality: 1, tomeEligibility: "base-single-d7-v1" }).filter(([k]) => k !== "modifiers")), prototypeRewardProgression(s.rank, id)), "Prototype progression drift");
+        if (s.progression.policy === "prototype-rank-depth-v1") requireContract(same26(Object.fromEntries(Object.entries({ ...s.progression, quality: 1, tomeEligibility: "base-single-d7-v1" }).filter(([k]) => k !== "modifiers")), prototypeRewardProgression(s.rank, id)), "Prototype progression drift");
       }
       requireContract(id === episodeRewardId(s.groupId, s.episode, s.kind, s.ordinal) && r.rewardVersion === CONTENT_REWARD_VERSION, "Reward incarnation mismatch");
       const expected = rollContentReward(state, p, { sourceEntityId: id, rank: s.rank, kind: s.kind, ordinal: r.ordinal, modifiers: s.progression?.modifiers ?? null, progression: s.progression ?? null, rewardClass: s.rewardClass ?? null });
-      requireContract(r.definitionId === expected.definitionId && inv.goldAwardsByEntityId[id]?.amount === expected.gold && inv.economy.soulAwardsByEntityId[id] === expected.souls && same25(r.materials ?? null, expected.materials ?? null) && r.healing === expected.healing, "Content reward drift");
+      requireContract(r.definitionId === expected.definitionId && inv.goldAwardsByEntityId[id]?.amount === expected.gold && inv.economy.soulAwardsByEntityId[id] === expected.souls && same26(r.materials ?? null, expected.materials ?? null) && r.healing === expected.healing, "Content reward drift");
       if (live) {
         const group = state.groupsById[s.groupId];
         requireContract(s.rank === (ordinaryTier(state.entitiesById[group.entityIds[0]].contentDefinitionId) ?? "C"), "Reward rank differs from content");
@@ -25186,7 +25262,7 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
       }
     } else {
       const enemy = state.entitiesById[id], expected = legacyDefeatReward(state, p, enemy, r.ordinal, r.rewardVersion);
-      requireContract(enemy && !enemy.alive && same25(enemy.position, r.position) && enemy.residency.spaceInstanceId === r.spaceInstanceId && expected.definitionId === r.definitionId && inv.goldAwardsByEntityId[id]?.amount === expected.gold, "Legacy reward changed");
+      requireContract(enemy && !enemy.alive && same26(enemy.position, r.position) && enemy.residency.spaceInstanceId === r.spaceInstanceId && expected.definitionId === r.definitionId && inv.goldAwardsByEntityId[id]?.amount === expected.gold, "Legacy reward changed");
     }
     if (r.claimed) {
       if (r.autoSalvage) {
@@ -25196,7 +25272,7 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
       } else receipt(r.pickup, "loot.pickup");
       if (r.definitionId) {
         const owned = inv.itemsById[itemId(p, id)] ?? n.groundBySourceId[id]?.item ?? inv.d7?.salvaged[itemId(p, id)]?.item ?? inv.d7?.autoSalvaged[itemId(p, id)]?.item ?? inv.services?.salesByItemId[itemId(p, id)]?.item ?? state.d9World?.paging.remoteGearByPlayer[p.playerId]?.[itemId(p, id)]?.item;
-        requireContract(owned && owned.definitionId === r.definitionId && same25(owned.generated ?? null, r.generated ?? null), "Collected gear ownership missing or rewritten");
+        requireContract(owned && owned.definitionId === r.definitionId && same26(owned.generated ?? null, r.generated ?? null), "Collected gear ownership missing or rewritten");
       }
     } else {
       requireContract(r.pickup === null && (r.autoSalvage ?? null) === null, "Unclaimed gear has resolution receipt");
@@ -25232,16 +25308,17 @@ function validateRenewableInventoryProgress(before, after, pid) {
   const original = before.playersById[pid].inventory, a = before.d9World ? original : copyWire(original), b = after.playersById[pid].inventory;
   if (!a.subweapons && b.subweapons) installSubweaponInventory({ inventory: a });
   const x = a.renewal, y = b.renewal;
+  requireContract(same26(x.arrival ?? null, y.arrival ?? null), "Hero arrival rewritten");
   if (a.subweapons) validateProvisionProgress(a, b);
   validateClassKitProgress(a, b);
-  requireContract(same25(x.baseGold, y.baseGold) && x.baseSouls === y.baseSouls && compareAmount(y.retiredGold, x.retiredGold) >= 0 && y.retiredSouls >= x.retiredSouls && y.defeats >= x.defeats && b.revision >= a.revision, "Economy baseline/counters regressed");
+  requireContract(same26(x.baseGold, y.baseGold) && x.baseSouls === y.baseSouls && compareAmount(y.retiredGold, x.retiredGold) >= 0 && y.retiredSouls >= x.retiredSouls && y.defeats >= x.defeats && b.revision >= a.revision, "Economy baseline/counters regressed");
   for (const [id, item] of Object.entries(a.itemsById)) {
     const terminal = b.d7?.salvaged[id] ?? b.services?.salesByItemId[id], next = b.itemsById[id] ?? b.renewal.groundBySourceId[item.sourceEntityId]?.item ?? terminal?.item;
-    requireContract(same25(item, next) || validWorkshopChange(after.playersById[pid], item, next), "Owned gear destroyed or rewritten");
+    requireContract(same26(item, next) || validWorkshopChange(after.playersById[pid], item, next), "Owned gear destroyed or rewritten");
     if (!b.itemsById[id] && !terminal) requireContract(y.lastDrop?.authorityOrder > before.lastAppliedAuthorityOrder && y.lastDrop.revision > a.revision, "Drop lacks later authoritative command");
   }
   for (const [id, g] of Object.entries(x.groundBySourceId)) {
-    requireContract(same25(g.item, b.itemsById[g.item.itemId] ?? y.groundBySourceId[id]?.item ?? b.d7?.salvaged[g.item.itemId]?.item), "Dropped gear disappeared");
+    requireContract(same26(g.item, b.itemsById[g.item.itemId] ?? y.groundBySourceId[id]?.item ?? b.d7?.salvaged[g.item.itemId]?.item), "Dropped gear disappeared");
     if (!y.groundBySourceId[id]) requireContract(y.lastGroundPickup?.authorityOrder > before.lastAppliedAuthorityOrder && y.lastGroundPickup.revision > a.revision, "Ground pickup lacks later authoritative command");
   }
   const withoutArchive = (reward) => {
@@ -25271,17 +25348,17 @@ function validateRenewableInventoryProgress(before, after, pid) {
       } else requireContract(!r.claimed, "Unclaimed non-gear reward cannot be claimed");
     } else {
       const reset = Object.values(after.campaign.siteRunEpisodesById ?? {}).find((record) => record.lastReset?.retiredGroupIds.includes(o.groupId) && record.lastReset.toEpisode === record.episode), retiredNow = r.retiredTick === void 0 && n.retiredTick !== void 0 && reset, archivedNow = !r.episodeSource?.archive && n.episodeSource?.archive && reset;
-      const unchanged = same25(withoutArchive(r), withoutArchive(n)) && (!r.claimed || n.claimed) && (r.retiredTick === n.retiredTick || retiredNow) && (!n.episodeSource?.archive || r.episodeSource?.archive || archivedNow);
+      const unchanged = same26(withoutArchive(r), withoutArchive(n)) && (!r.claimed || n.claimed) && (r.retiredTick === n.retiredTick || retiredNow) && (!n.episodeSource?.archive || r.episodeSource?.archive || archivedNow);
       if (!unchanged) {
-        const left = withoutArchive(r), right = withoutArchive(n), keys2 = [.../* @__PURE__ */ new Set([...Object.keys(left), ...Object.keys(right)])].filter((k) => !same25(left[k] ?? null, right[k] ?? null));
+        const left = withoutArchive(r), right = withoutArchive(n), keys2 = [.../* @__PURE__ */ new Set([...Object.keys(left), ...Object.keys(right)])].filter((k) => !same26(left[k] ?? null, right[k] ?? null));
         throw new TypeError("Reward history rewritten: " + JSON.stringify({ sourceEntityId: id, fields: keys2, before: Object.fromEntries(keys2.map((k) => [k, left[k]])), after: Object.fromEntries(keys2.map((k) => [k, right[k]])), claimed: [r.claimed, n.claimed], retired: [r.retiredTick ?? null, n.retiredTick ?? null] }));
       }
     }
   }
-  requireContract(same25(y.retiredGold, retiredGold) && y.retiredSouls === retiredSouls && same25(y.retiredMaterials ?? {}, retiredMaterials), "Retired reward aggregate drift");
+  requireContract(same26(y.retiredGold, retiredGold) && y.retiredSouls === retiredSouls && same26(y.retiredMaterials ?? {}, retiredMaterials), "Retired reward aggregate drift");
   requireContract(!a.d7 || b.d7, "D7 inventory version removed");
   if (b.d7) validateSalvageProgress(a, b, before, after);
-  if (!same25(a.equipped, b.equipped)) requireContract(b.lastEquipmentChange?.authorityOrder > before.lastAppliedAuthorityOrder, "Equipment lacks new command");
+  if (!same26(a.equipped, b.equipped)) requireContract(b.lastEquipmentChange?.authorityOrder > before.lastAppliedAuthorityOrder, "Equipment lacks new command");
 }
 
 // src/shared/contracts/player_inventory_perf1r_legacy.js
@@ -27803,6 +27880,7 @@ export {
   addAmount,
   subtractAmount,
   compareAmount,
+  multiplyAmount,
   wholeAmount,
   formatAmount,
   UNIQUE_ITEMS,
@@ -27832,15 +27910,21 @@ export {
   affixRollRange,
   RESONANCE_SETS,
   workshopResult,
+  SUBWEAPON_TYPES,
   SUBWEAPONS,
+  FORGE_MATERIALS,
   attunementCost,
+  attunementSpent,
   effectiveEquipmentBonuses,
+  CLASS_KIT_VERSION,
   CLASS_KIT_PIECES,
   CLASS_KITS,
   itemDefinition,
   equipmentRequiredLevel,
   equipmentLevelAllowed,
+  EQUIPMENT,
   capeSlotAvailable,
+  equipmentSlots,
   retiredGear,
   listedEquipmentSlots,
   equipmentAfter,
@@ -28250,9 +28334,11 @@ export {
   emptyMasteryTransient,
   validateD8Advance,
   D6_ACTIVITY_FORMAT,
+  provisionType,
   installSubweaponInventory,
   canClaimSubweapon,
   claimSubweapon,
+  classKitPiece,
   canClaimClassKit,
   claimClassKit,
   workshopMaterialPrices,
@@ -28280,6 +28366,7 @@ export {
   supplyCount,
   serviceActionProblem,
   applyServiceAction,
+  serviceGoldAdjustment,
   projectedServiceNpcs,
   installD7,
   salvageQuote,
@@ -28407,6 +28494,10 @@ export {
   participantGroundCoverageRefreshDueD9,
   groundCoverageStatusD9,
   installGroundOccupancyD9,
+  HERO_PASSPORT_VERSION,
+  HERO_ARRIVAL_VERSION,
+  validHeroId,
+  carriedGearWitness,
   runtimeCollisionPageD92 as runtimeCollisionPageD9,
   runtimeHollowVisualV4,
   acceptedEventGearGeographyV2,

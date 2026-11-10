@@ -1176,6 +1176,14 @@ body.skill-arc-v1 .subweapon-hud{left:calc(12px + var(--world-safe-left));right:
 body #world-inventory .hero-slots button{min-height:40px;padding:0 16px;border:1px solid #6d5a3c;border-radius:999px;background:linear-gradient(#3a3222,#241f16);color:#fff3cf;font:600 13px var(--rpg-ui)}
 body #world-inventory .hero-slots button.is-quiet{border-color:#3a4652;background:transparent;color:#c9d0d3}
 body #world-inventory .hero-slots button.is-danger{border-color:#b34e57;background:linear-gradient(#5a2228,#2e1215);color:#fff}
+/* Co-op step 1: Play in which world? */
+.hero-slot-worlds{grid-column:1/-1;display:grid;gap:6px}
+.hero-slots-grid:has(.hero-slot-worlds){align-items:start}
+.hero-slot-worlds .hero-slot-confirm{color:#f4e7c4}
+body #world-inventory .hero-slots .hero-slot-worlds button{display:grid;justify-items:start;gap:2px;min-height:48px;padding:6px 14px;border-radius:12px;text-align:left}
+body #world-inventory .hero-slots .hero-slot-worlds button small{font:12px var(--rpg-ui);color:var(--rpg-muted)}
+body #world-inventory .hero-slots .hero-slot-worlds button.is-current{border-color:#e9c46a}
+.hero-slot-world.is-visiting{color:#9dd6c0}
 
 /* Gear screen v2 (gear_screen_v2.js, inventory_presentation.js). Mockup: claude.ai/artifact/VLkAtCyFHGUFcrnUZXxHkT */
 #world-inventory[data-section=equipment] #world-bag-browse>section,#world-inventory[data-section=bag] #world-bag-browse>section{max-width:560px;margin:0 auto}

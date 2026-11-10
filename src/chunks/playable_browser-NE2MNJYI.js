@@ -58,6 +58,7 @@ import {
   CAVE_INTERIOR_NAVIGATION_D12_3A,
   CLASS_KITS,
   CLASS_KIT_PIECES,
+  CLASS_KIT_VERSION,
   CLASS_SKILLS,
   CLASS_SKILL_AUGMENTS,
   CLASS_SKILL_IDS,
@@ -108,6 +109,7 @@ import {
   ELITE_TYPES_V2,
   ENCHANTER_TOWER_V1,
   ENCOUNTER_PROGRESSION_VERSION,
+  EQUIPMENT,
   FERRY_HASH,
   FERRY_NETWORK,
   FERRY_VERSION,
@@ -115,6 +117,7 @@ import {
   FIRST_CAVE_SELECTION,
   FOREST_STANDS_VERSION,
   FORGE_INTERACTION_RADIUS,
+  FORGE_MATERIALS,
   FORT_CATALOG_V2,
   FORT_FAMILY_PACKAGE_ID,
   FORT_TIER_POLICY,
@@ -123,8 +126,10 @@ import {
   FUNCTIONAL_RUIN_FAMILY,
   GLACIAL_WARDEN_AFFIX_ID,
   GLACIAL_WARDEN_D12_4E,
+  HERO_ARRIVAL_VERSION,
   HERO_CLASSES,
   HERO_NAME_MAX,
+  HERO_PASSPORT_VERSION,
   HOLLOW_EVENT,
   HOLLOW_HASH,
   HOLLOW_LEDGER_VERSION,
@@ -265,6 +270,7 @@ import {
   STARTER_VILLAGE_ID,
   STARTER_VILLAGE_NAME,
   SUBWEAPONS,
+  SUBWEAPON_TYPES,
   SWIFT_COMMANDER_AFFIX_ID,
   SWIFT_COMMANDER_D12_4D,
   TAVERN_INTERIOR_V1,
@@ -353,6 +359,7 @@ import {
   assertNoNewActorGeometryFailureD9,
   assertReleasedActorFootprintsD9,
   attunementCost,
+  attunementSpent,
   augmentAvailability,
   authoredGeographyDefinition,
   autoSalvageEligibleRewards,
@@ -390,6 +397,7 @@ import {
   canonicalStringify,
   capeSlotAvailable,
   captureWorldPositionsD9,
+  carriedGearWitness,
   certifyNumeric,
   chunkAddressKey,
   chunkScalesV1,
@@ -398,6 +406,7 @@ import {
   classAugments,
   classGearAllowed,
   classGearRefusal,
+  classKitPiece,
   classRank,
   classSkillsFor,
   classTierGate,
@@ -467,6 +476,7 @@ import {
   equipmentAfter,
   equipmentLevelAllowed,
   equipmentRequiredLevel,
+  equipmentSlots,
   equippedWeaponVisual,
   eventAtSlotV1,
   eventCacheTileV1,
@@ -616,6 +626,7 @@ import {
   mitigatePlayerDamage,
   mitigateWorldPlayerDamage,
   mixPlan,
+  multiplyAmount,
   multiplyCombat,
   nearbyForge,
   nestBiomeV1,
@@ -718,6 +729,7 @@ import {
   proofClearingForState,
   propsFor,
   prototypeRewardProgression,
+  provisionType,
   purchaseAvailability,
   queuePacedSporeV5,
   readStandsCell,
@@ -767,6 +779,7 @@ import {
   selectSimpleEnemyTarget,
   semanticPlaceAtWorldPosition,
   serviceActionProblem,
+  serviceGoldAdjustment,
   serviceNpcByIdV1,
   serviceNpcsFor,
   settleGuard,
@@ -851,6 +864,7 @@ import {
   usesSpawnLevelsV1,
   usesWildernessFairnessV3_2,
   utf8,
+  validHeroId,
   validHeroName,
   validateAttackTiming,
   validateBossCombatD12_5A,
@@ -938,7 +952,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-LRCFPIUZ.js";
+} from "./chunk-XKTANNOO.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -54715,12 +54729,13 @@ function heroCard(spec) {
   }
   return { cls: spec.cls ?? null, look: { hair: l.hair, hairColor: l.hairColor, skin: l.skin, facialHair: l.facialHair, helmet: l.helmet, name: "" }, gear: gear2, offType: spec.offType ?? null };
 }
-var blank = (slot) => ({ slot, name: "", level: 1, hero: null, world: null });
+var blank = (slot) => ({ slot, name: "", level: 1, hero: null, world: null, heroId: null, plays: null });
+var HERO_ID = /^hero:[0-9a-z-]{1,64}$/;
 var SEED = /^[A-Za-z0-9 .:#'-]{1,40}$/;
 var worldOf = (raw) => raw && typeof raw === "object" && typeof raw.seed === "string" && SEED.test(raw.seed) ? { seed: raw.seed } : null;
 function entry(raw) {
   if (!raw || typeof raw !== "object" || !Number.isInteger(raw.slot) || raw.slot < 1 || raw.slot > HERO_SLOT_LIMIT) return null;
-  return { slot: raw.slot, name: typeof raw.name === "string" && NAME.test(raw.name) ? raw.name : "", level: Number.isInteger(raw.level) && raw.level >= 1 && raw.level <= 999 ? raw.level : 1, hero: raw.hero == null ? null : heroCard(raw.hero), world: worldOf(raw.world) };
+  return { slot: raw.slot, name: typeof raw.name === "string" && NAME.test(raw.name) ? raw.name : "", level: Number.isInteger(raw.level) && raw.level >= 1 && raw.level <= 999 ? raw.level : 1, hero: raw.hero == null ? null : heroCard(raw.hero), world: worldOf(raw.world), heroId: typeof raw.heroId === "string" && HERO_ID.test(raw.heroId) ? raw.heroId : null, plays: Number.isInteger(raw.plays) && raw.plays >= 1 && raw.plays <= HERO_SLOT_LIMIT && raw.plays !== raw.slot ? raw.plays : null };
 }
 function parse(storage, channel2) {
   let data = null;
@@ -54748,10 +54763,6 @@ function write(storage, channel2, record2) {
     return false;
   }
 }
-function chooseHero(storage, channel2, slot) {
-  const r = readHeroSlots(storage, channel2);
-  return r.heroes.some((h) => h.slot === slot) && write(storage, channel2, { ...r, active: slot });
-}
 function addHero(storage, channel2) {
   const r = readHeroSlots(storage, channel2);
   let slot = 1;
@@ -54761,23 +54772,36 @@ function addHero(storage, channel2) {
 }
 function dropHero(storage, channel2, slot) {
   const r = readHeroSlots(storage, channel2);
-  return slot !== r.active && r.heroes.some((h) => h.slot === slot) && write(storage, channel2, { ...r, heroes: r.heroes.filter((h) => h.slot !== slot) });
+  return slot !== r.active && r.heroes.some((h) => h.slot === slot) && !worldInUse(r, slot) && write(storage, channel2, { ...r, heroes: r.heroes.filter((h) => h.slot !== slot) });
+}
+var heroWorld = (hero) => hero.plays ?? hero.slot;
+var worldInUse = (record2, slot) => record2.heroes.some((h) => h.slot !== slot && heroWorld(h) === slot);
+function playHeroIn(storage, channel2, slot, worldSlot) {
+  const r = readHeroSlots(storage, channel2);
+  if (!r.heroes.some((h) => h.slot === slot) || !r.heroes.some((h) => h.slot === worldSlot)) return false;
+  return write(storage, channel2, { active: slot, heroes: r.heroes.map((h) => h.slot === slot ? { ...h, plays: worldSlot === slot ? null : worldSlot } : h) });
+}
+function ensureHeroIds(storage, channel2, makeId) {
+  const r = readHeroSlots(storage, channel2);
+  if (r.heroes.every((h) => h.heroId)) return r;
+  const next = { ...r, heroes: r.heroes.map((h) => h.heroId ? h : { ...h, heroId: makeId() }) };
+  return write(storage, channel2, next) ? next : r;
 }
 function restoreHeroes(storage, channel2, slots2) {
   const r = readHeroSlots(storage, channel2), missing = [...new Set(slots2)].filter((slot) => Number.isInteger(slot) && slot >= 1 && slot <= HERO_SLOT_LIMIT && !r.heroes.some((h) => h.slot === slot));
   return missing.length > 0 && write(storage, channel2, { ...r, heroes: [...r.heroes, ...missing.map(blank)].sort((a, b) => a.slot - b.slot) });
 }
-function createHeroRosterWriter({ storage, channel: channel2 = "", slot = 1 }) {
+function createHeroRosterWriter({ storage, channel: channel2 = "", slot = 1, visiting = false }) {
   let last = null, world = null;
   const update = (next) => {
     const r = readHeroSlots(storage, channel2), heroes = r.heroes.some((h) => h.slot === slot) ? r.heroes : [...r.heroes, blank(slot)];
-    write(storage, channel2, { ...r, heroes: heroes.map((h) => h.slot === slot ? { ...blank(slot), ...next } : h).sort((a, b) => a.slot - b.slot) });
+    write(storage, channel2, { ...r, heroes: heroes.map((h) => h.slot === slot ? { ...blank(slot), world: h.world, heroId: h.heroId, plays: h.plays, ...next } : h).sort((a, b) => a.slot - b.slot) });
   };
   return Object.freeze({
     observe(model) {
       const player = model?.playersById?.[model.localPlayerId], actor = player && model.entitiesById?.[player.entityId];
       if (!actor?.heroLook || !storage) return;
-      const name = actor.heroLook.look?.name, next = { name: typeof name === "string" && NAME.test(name) ? name : "", level: player.progression?.level ?? 1, hero: heroCard(heroSpecForActor(actor)), world };
+      const name = actor.heroLook.look?.name, next = { name: typeof name === "string" && NAME.test(name) ? name : "", level: player.progression?.level ?? 1, hero: heroCard(heroSpecForActor(actor)), ...visiting ? {} : { world } };
       const text2 = JSON.stringify(next);
       if (text2 === last) return;
       last = text2;
@@ -54789,9 +54813,287 @@ function createHeroRosterWriter({ storage, channel: channel2 = "", slot = 1 }) {
     // The open hero's save was reset: keep the seat, forget how they looked.
     clear() {
       last = null;
-      if (storage) update({});
+      if (storage) update(visiting ? {} : { world: null });
     }
   });
+}
+
+// src/shared/contracts/hero_passport_v1.js
+var WORLD_LOCAL_D8 = ["lastChange", "causalXp", "transient"];
+function itemContent(item) {
+  return { definitionId: item.definitionId, ...item.generated ? { generated: copyWire(item.generated) } : {}, ...item.workshop ? { workshop: copyWire(item.workshop) } : {} };
+}
+function extractHeroPassport(state, playerId, { heroId }) {
+  requireContract(validHeroId(heroId), "Hero passport needs a hero id");
+  const p = state.playersById[playerId];
+  requireContract(p?.inventory?.renewal && p.d8, "Hero passport needs a seated hero");
+  const inv = p.inventory, e = inv.economy, d8 = copyWire(p.d8);
+  for (const k of WORLD_LOCAL_D8) delete d8[k];
+  const items = [], keyOf2 = {}, gear2 = [];
+  for (const item of Object.values(inv.itemsById)) {
+    if (item.sourceEntityId === null) {
+      keyOf2[item.itemId] = "starter";
+      items.push({ key: "starter", kind: "starter", ...itemContent(item) });
+      continue;
+    }
+    const piece3 = classKitPiece(p, item.sourceEntityId);
+    if (piece3) {
+      keyOf2[item.itemId] = "kit:" + piece3;
+      items.push({ key: "kit:" + piece3, kind: "kit", piece: piece3, ...itemContent(item) });
+      continue;
+    }
+    const type = provisionType(p, item.sourceEntityId);
+    if (type) {
+      keyOf2[item.itemId] = "provision:" + type;
+      items.push({ key: "provision:" + type, kind: "provision", provision: type, ...itemContent(item) });
+      continue;
+    }
+    gear2.push(item);
+  }
+  gear2.map((item) => ({ item, text: canonicalStringify(itemContent(item)) })).sort((a, b) => a.text < b.text ? -1 : a.text > b.text ? 1 : 0).forEach(({ item }, n) => {
+    const key2 = "gear:" + n, witness = item.generated ? carriedGearWitness(item.generated) : null;
+    keyOf2[item.itemId] = key2;
+    items.push({ key: key2, kind: "gear", ...itemContent(item), ...item.generated ? { witness } : {} });
+  });
+  items.sort((a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0);
+  const equipped = {};
+  for (const [slot, id] of Object.entries(inv.equipped)) equipped[slot] = id === null ? null : keyOf2[id];
+  const potions = inv.services?.potions, services = inv.services;
+  return {
+    version: HERO_PASSPORT_VERSION,
+    heroId,
+    progression: copyWire(p.progression),
+    d8,
+    gold: inv.gold,
+    materials: copyWire(e.materials),
+    slotLevels: copyWire(e.slotLevels),
+    potions: services ? { count: safeInteger(services.supplyPurchases + (potions?.grants ?? 0) - services.suppliesUsed, 0), capacityUpgrades: potions?.capacityUpgrades ?? 0, potencyUpgrades: potions?.potencyUpgrades ?? 0 } : null,
+    kit: inv.classKit ? inv.classKit.heroClass : null,
+    provisions: Object.keys(inv.subweapons?.claims ?? {}).sort(),
+    items,
+    equipped
+  };
+}
+function validateHeroPassport(passport) {
+  closedRecord(passport, ["version", "heroId", "progression", "d8", "gold", "materials", "slotLevels", "potions", "kit", "provisions", "items", "equipped"]);
+  requireContract(passport.version === HERO_PASSPORT_VERSION && validHeroId(passport.heroId), "Unknown hero passport");
+  amount(passport.gold);
+  closedRecord(passport.materials, [], FORGE_MATERIALS);
+  for (const v of Object.values(passport.materials)) safeInteger(v, 1);
+  for (const v of Object.values(passport.slotLevels)) safeInteger(v, 0, 100);
+  requireContract(Array.isArray(passport.items) && passport.items.length >= 1 && passport.items.length <= 4096, "Hero passport items");
+  const keys2 = /* @__PURE__ */ new Set();
+  for (const item of passport.items) {
+    requireContract(typeof item.key === "string" && !keys2.has(item.key) && EQUIPMENT[item.definitionId] || item.generated, "Hero passport item");
+    keys2.add(item.key);
+  }
+  requireContract(keys2.has("starter"), "Hero passport lost the starter sword");
+  for (const key2 of Object.values(passport.equipped)) requireContract(key2 === null || keys2.has(key2), "Hero passport equips a missing item");
+  for (const t of passport.provisions) requireContract(SUBWEAPON_TYPES.includes(t) && keys2.has("provision:" + t), "Hero passport provision");
+  if (passport.kit !== null) for (const piece3 of CLASS_KIT_PIECES) requireContract(keys2.has("kit:" + piece3), "Hero passport class kit");
+  return passport;
+}
+var passportText = (passport) => canonicalStringify(passport);
+var samePassport = (a, b) => Boolean(a && b) && passportText(a) === passportText(b);
+function seedWords(text2) {
+  let h = 2166136261;
+  const words = [];
+  for (let j = 0; j < 4; j++) {
+    for (let i = 0; i < text2.length; i++) {
+      h = Math.imul(h ^ text2.charCodeAt(i), 16777619) >>> 0;
+    }
+    h = Math.imul(h ^ j, 16777619) >>> 0;
+    words.push(h);
+  }
+  if (words.every((x) => x === 0)) words[0] = 1;
+  return words;
+}
+function mint(state, prefix2 = "ent") {
+  return `${prefix2}:${safeInteger(++state.identitySequence, 1).toString(16).padStart(32, "0")}`;
+}
+var WORKSHOP_KEYS = ["records", "materialPurchases", "materialReceipts", "materialGold", "scrapBreaks", "scrapReceipts"];
+function arriveHeroPassport(state, playerId, passport) {
+  validateHeroPassport(passport);
+  const p = state.playersById[playerId];
+  requireContract(p?.inventory?.renewal, "Arrival needs a seat");
+  const old2 = p.inventory, a = state.entitiesById[p.entityId];
+  p.progression = copyWire(passport.progression);
+  p.d8 = { ...copyWire(passport.d8), lastChange: null, causalXp: {}, transient: emptyMasteryTransient() };
+  if (passport.kit !== null) requireContract(heroClassOf(p.d8)?.id === passport.kit && CLASS_KITS[passport.kit], "Class kit for another class");
+  const inv = {
+    version: old2.version,
+    economy: { version: old2.economy.version, origin: "normal", legacyRewardIds: [], slotLevels: {}, materials: copyWire(passport.materials), soulAwardsByEntityId: {}, lastAttunementsBySlot: {} },
+    revision: 0,
+    gold: passport.gold,
+    goldAwardsByEntityId: {},
+    itemsById: {},
+    equipped: {},
+    rewardsByEntityId: {},
+    lastEquipmentChange: null,
+    topologyMigration: old2.topologyMigration ?? null,
+    renewal: { version: old2.renewal.version, baseGold: "0", baseSouls: 0, retiredGold: "0", retiredSouls: 0, defeats: 0, groundBySourceId: {}, originsByItemId: {}, lastDrop: null, lastGroundPickup: null, arrival: { version: HERO_ARRIVAL_VERSION, heroId: passport.heroId, slotLevels: {}, materials: {} } }
+  };
+  if (old2.subweapons) inv.subweapons = { version: old2.subweapons.version, claims: {} };
+  if (old2.d7) inv.d7 = { version: old2.d7.version, autoSalvaged: {}, credits: {}, retiredCredits: {}, salvaged: {} };
+  if (old2.services) {
+    const s = old2.services, potions = passport.potions ?? { count: 3, capacityUpgrades: 0, potencyUpgrades: 0 };
+    inv.services = {
+      version: s.version,
+      purchasesBySourceId: {},
+      salesByItemId: {},
+      retiredSaleGold: "0",
+      supplyPurchases: 0,
+      suppliesUsed: 0,
+      restCount: 0,
+      lastTransaction: null,
+      ...Object.hasOwn(s, "combatHash") ? { combatHash: s.combatHash } : {},
+      potions: { grants: potions.count, capacityUpgrades: potions.capacityUpgrades, potencyUpgrades: potions.potencyUpgrades, lastUseTick: null }
+    };
+    if (s.workshop) {
+      inv.services.workshop = { version: s.workshop.version };
+      for (const k of WORKSHOP_KEYS) if (Object.hasOwn(s.workshop, k)) inv.services.workshop[k] = {};
+    }
+  }
+  p.inventory = inv;
+  const idOf = {}, kitIds = {};
+  for (const item of passport.items) {
+    const sourceEntityId = item.kind === "starter" ? null : mint(state), itemId = `item:${playerId}:${sourceEntityId ?? "starter"}`;
+    idOf[item.key] = itemId;
+    inv.itemsById[itemId] = { itemId, definitionId: item.definitionId, ownerPlayerId: playerId, sourceEntityId, ...item.generated ? { generated: copyWire(item.generated) } : {}, ...item.workshop ? { workshop: copyWire(item.workshop) } : {} };
+    if (item.kind === "starter") continue;
+    if (item.kind === "kit") {
+      kitIds[item.piece] = sourceEntityId;
+      inv.renewal.originsByItemId[itemId] = { kit: item.piece, sourceEntityId };
+      continue;
+    }
+    if (item.kind === "provision") {
+      requireContract(inv.subweapons, "Provision without offhand slot");
+      inv.subweapons.claims[item.provision] = { sourceEntityId, arrival: passport.heroId };
+      inv.renewal.originsByItemId[itemId] = { provision: item.provision, sourceEntityId };
+      continue;
+    }
+    if (item.generated) requireContract(item.witness !== null, "Carried gear has no seed witness");
+    inv.renewal.originsByItemId[itemId] = { carried: passport.heroId, sourceEntityId, ...item.generated && Object.keys(item.witness).length ? { witness: copyWire(item.witness) } : {} };
+  }
+  if (passport.kit !== null) inv.classKit = { version: CLASS_KIT_VERSION, heroClass: passport.kit, sourceEntityIds: CLASS_KIT_PIECES.map((piece3) => kitIds[piece3]), arrival: passport.heroId };
+  const slots2 = equipmentSlots({ ...inv, equipped: passport.equipped });
+  for (const slot of slots2) {
+    inv.equipped[slot] = passport.equipped[slot] == null ? null : idOf[passport.equipped[slot]];
+    const level = passport.slotLevels[slot] ?? 0;
+    inv.economy.slotLevels[slot] = level;
+    if (level) inv.renewal.arrival.slotLevels[slot] = level;
+  }
+  let spentGold = multiplyAmount(p.d8.attributeResetCount ?? "0", "2500");
+  const spentMaterials = {};
+  let levels = 0;
+  for (const slot of slots2) {
+    const level = inv.economy.slotLevels[slot], spent = attunementSpent(level, p);
+    levels += level;
+    spentGold = addAmount(spentGold, spent.gold);
+    for (const [k, v] of Object.entries(spent.materials)) spentMaterials[k] = (spentMaterials[k] ?? 0) + v;
+  }
+  const held = addAmount(passport.gold, spentGold), adjusted = serviceGoldAdjustment(p, held);
+  requireContract(compareAmount(held, adjusted) >= 0, "Arrival service income");
+  inv.renewal.baseGold = addAmount(held, subtractAmount(held, adjusted));
+  for (const k of FORGE_MATERIALS) {
+    const n = (passport.materials[k] ?? 0) + (spentMaterials[k] ?? 0);
+    if (!n) continue;
+    if (k === "Monster Soul") inv.renewal.baseSouls = n;
+    else inv.renewal.arrival.materials[k] = n;
+  }
+  inv.revision = levels + 1;
+  const stats3 = resolvePlayerStats(p);
+  a.hp = copyWire(stats3.maxHp);
+  a.maxHp = copyWire(stats3.maxHp);
+  a.attackDamage = copyWire(stats3.attack);
+  a.moveSpeed = stats3.moveSpeed;
+  a.movementIntent = { x: 0, y: 0 };
+  const c = state.subweaponCombat;
+  if (c?.actors[p.entityId]) {
+    const v = c.actors[p.entityId];
+    delete v.skills;
+    Object.assign(v, { rng: copyWire(createRngState(seedWords(`d6-combat/${state.campaign.seed.seedHex}/${playerId}`))), delivery: { status: "idle", tick: state.tick }, guard: createShieldGuard(a.alive), pressure: 0, fatigue: 0, counterCooldown: 0, barrier: "0", dash: { frames: 0, cooldown: 0, remaining: 0, x: 1, y: 0 } });
+    if ("barrierRechargeRemainder" in v) v.barrierRechargeRemainder = 0;
+  }
+  if (c?.mastery?.[p.entityId]) c.mastery[p.entityId] = { hazards: {}, poisons: {}, razors: {}, statuses: {} };
+  return p;
+}
+
+// src/storage/hero_store_v1.js
+var HERO_STORE_VERSION = "hero-store-v1";
+var heroStoreKey = (channel2) => `${channel2}saq-world-hero-store-v1`;
+var PLAYER = /^ply:[0-9a-f]{32}$/;
+var worldKey = (slot) => Number.isInteger(slot) && slot >= 1 && slot <= HERO_SLOT_LIMIT ? String(slot) : null;
+function read(storage, channel2) {
+  let data = null;
+  try {
+    data = JSON.parse(storage?.getItem(heroStoreKey(channel2)) ?? "null");
+  } catch {
+  }
+  const ok = data?.version === HERO_STORE_VERSION;
+  return { version: HERO_STORE_VERSION, passports: ok && data.passports && typeof data.passports === "object" ? data.passports : {}, lastWorld: ok && data.lastWorld && typeof data.lastWorld === "object" ? data.lastWorld : {}, worlds: ok && data.worlds && typeof data.worlds === "object" ? data.worlds : {} };
+}
+function write2(storage, channel2, record2) {
+  try {
+    storage.setItem(heroStoreKey(channel2), JSON.stringify(record2));
+    return true;
+  } catch {
+    return false;
+  }
+}
+function readHeroPassport(storage, channel2, heroId) {
+  if (!validHeroId(heroId)) return null;
+  const passport = read(storage, channel2).passports[heroId];
+  try {
+    validateHeroPassport(passport);
+    return passport.heroId === heroId ? passport : null;
+  } catch {
+    return null;
+  }
+}
+function heroLastWorld(storage, channel2, heroId) {
+  const slot = read(storage, channel2).lastWorld[heroId];
+  return worldKey(slot) ? slot : null;
+}
+function writeHeroPassport(storage, channel2, passport, worldSlot) {
+  validateHeroPassport(passport);
+  const r = read(storage, channel2), old2 = r.passports[passport.heroId];
+  if (old2 && r.lastWorld[passport.heroId] === worldSlot) {
+    try {
+      if (passportText(old2) === passportText(passport)) return false;
+    } catch {
+    }
+  }
+  r.passports[passport.heroId] = passport;
+  if (worldKey(worldSlot)) r.lastWorld[passport.heroId] = worldSlot;
+  return write2(storage, channel2, r);
+}
+function readWorldSeats(storage, channel2, worldSlot) {
+  const key2 = worldKey(worldSlot), raw = key2 ? read(storage, channel2).worlds[key2] : null, seats = {};
+  for (const [pid, heroId] of Object.entries(raw?.seats ?? {})) if (PLAYER.test(pid) && validHeroId(heroId)) seats[pid] = heroId;
+  return seats;
+}
+function writeWorldSeats(storage, channel2, worldSlot, seats) {
+  const key2 = worldKey(worldSlot);
+  if (!key2) return false;
+  const r = read(storage, channel2);
+  r.worlds[key2] = { seats: { ...seats } };
+  return write2(storage, channel2, r);
+}
+function forgetWorld(storage, channel2, worldSlot) {
+  const key2 = worldKey(worldSlot);
+  if (!key2) return false;
+  const r = read(storage, channel2);
+  delete r.worlds[key2];
+  for (const [heroId, slot] of Object.entries(r.lastWorld)) if (slot === worldSlot) delete r.lastWorld[heroId];
+  return write2(storage, channel2, r);
+}
+function forgetHero(storage, channel2, heroId) {
+  const r = read(storage, channel2);
+  delete r.passports[heroId];
+  delete r.lastWorld[heroId];
+  for (const world of Object.values(r.worlds)) for (const [pid, id] of Object.entries(world?.seats ?? {})) if (id === heroId) delete world.seats[pid];
+  return write2(storage, channel2, r);
 }
 
 // src/dev/hydrology_review_v1.js
@@ -57078,14 +57380,14 @@ function startWorldBuildV1({ environment, seed: seed2, save, workerUrl = worldMa
   });
   result.catch(() => {
   });
-  function read() {
+  function read2() {
     if (stored) return { fraction: 1, stage: WORLD_BUILD_STAGES.length, failed: null };
     let done3 = 0;
     for (let i = 0; i < stage2; i++) done3 += WORLD_BUILD_STAGES[i].share;
     const current = WORLD_BUILD_STAGES[stage2], part3 = current ? Math.min(0.9, (now3() - stageStarted) / (current.share * total)) : 0;
     return { fraction: Math.min(0.99, done3 + (current?.share ?? 0) * part3), stage: stage2, failed };
   }
-  return Object.freeze({ seed: seed2, result, read, onChange(f) {
+  return Object.freeze({ seed: seed2, result, read: read2, onChange(f) {
     listeners.add(f);
     return () => listeners.delete(f);
   }, cancel() {
@@ -61092,7 +61394,7 @@ function migrateIntegerCombat(s) {
 }
 
 // src/shared/contracts/subweapon_combat.js
-function seedWords(text2) {
+function seedWords2(text2) {
   let h = 2166136261;
   const words = [];
   for (let j = 0; j < 4; j++) {
@@ -61159,7 +61461,7 @@ function installSubweaponCombat(s) {
     a.hp = copyWire(asCombatAmount(a.hp));
     a.maxHp = copyWire(stats3.maxHp);
     a.attackDamage = copyWire(stats3.attack);
-    s.subweaponCombat.actors[p.entityId] = { rng: copyWire(createRngState(seedWords(`d6-combat/${s.campaign.seed.seedHex}/${p.playerId}`))), delivery: { status: "idle", tick: s.tick }, guard: createShieldGuard(a.alive), pressure: 0, fatigue: 0, counterCooldown: 0, barrier: combatAmount(0), dash: { frames: 0, cooldown: 0, remaining: 0, x: 1, y: 0 } };
+    s.subweaponCombat.actors[p.entityId] = { rng: copyWire(createRngState(seedWords2(`d6-combat/${s.campaign.seed.seedHex}/${p.playerId}`))), delivery: { status: "idle", tick: s.tick }, guard: createShieldGuard(a.alive), pressure: 0, fatigue: 0, counterCooldown: 0, barrier: combatAmount(0), dash: { frames: 0, cooldown: 0, remaining: 0, x: 1, y: 0 } };
   }
   for (const a of Object.values(s.entitiesById)) for (const k of ["hp", "maxHp", "attackDamage"]) a[k] = copyWire(asCombatAmount(a[k]));
   return migrateIntegerCombat(s);
@@ -62210,7 +62512,11 @@ var same7 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 function validateActivityState(s) {
   validateWorldEventsState(s);
   validateWire(s);
-  closedRecord(s, ["format", "protocolVersion", "ticksPerSecond", "tick", "content", "campaign", "session", "playersById", "spacesByInstanceId", "entitiesById", "groupsById", "primary", "eventEmission", "appliedCommandsById", "appliedClientSequences", "lastAppliedAuthorityOrder", "identitySequence", "overworldInstanceId", "proofCase", "residencyHistoryByEntityId", "primaryContextsById"], ["siteExitProtectionByEntityId", "playerRespawnsById", "encounterEconomy", "subweaponCombat", "d9World", "eliteCombat", "bossCombat", "hostileCombat", "wildernessCrowdGraceByEntityId"]);
+  closedRecord(s, ["format", "protocolVersion", "ticksPerSecond", "tick", "content", "campaign", "session", "playersById", "spacesByInstanceId", "entitiesById", "groupsById", "primary", "eventEmission", "appliedCommandsById", "appliedClientSequences", "lastAppliedAuthorityOrder", "identitySequence", "overworldInstanceId", "proofCase", "residencyHistoryByEntityId", "primaryContextsById"], ["siteExitProtectionByEntityId", "playerRespawnsById", "encounterEconomy", "subweaponCombat", "d9World", "eliteCombat", "bossCombat", "hostileCombat", "wildernessCrowdGraceByEntityId", "waitingRoom"]);
+  if (s.waitingRoom) {
+    closedRecord(s.waitingRoom, ["version", "spaceInstanceId"]);
+    requireContract(s.waitingRoom.version === "world-waiting-room-v1" && s.spacesByInstanceId[s.waitingRoom.spaceInstanceId] && s.waitingRoom.spaceInstanceId !== s.overworldInstanceId, "Invalid waiting room");
+  }
   validateCampaignTavern(s);
   validateTownInteriors(s);
   const d9 = Boolean(s.d9World);
@@ -72029,7 +72335,7 @@ function createSiteTruthReuseV1(resolve) {
   resolve ??= (state) => resolveSiteTruthD12_4C(state, { includeFinaleDiagnostics: false });
   const entries = /* @__PURE__ */ new WeakMap();
   let hits2 = 0, misses = 0, residencyRefreshes = 0, semanticSerializations = 0, keyCharacters = 0;
-  const read = (state) => {
+  const read2 = (state) => {
     const origin = originManifestForState(state), { chunks: rows, ...semantic } = dependencies(state), key2 = refreshable ? null : JSON.stringify(semantic), residencyKey = JSON.stringify(rows), prior = entries.get(state);
     if (!refreshable) semanticSerializations++;
     if (prior && prior.content === state.content && prior.origin === origin && (refreshable ? siteTruthJsonEqualV1(semantic, prior.snapshot.node) : prior.key === key2)) {
@@ -72054,8 +72360,8 @@ function createSiteTruthReuseV1(resolve) {
     misses++;
     return value2;
   };
-  read.inspect = () => ({ version: SITE_TRUTH_REUSE_V1, hits: hits2, misses, residencyRefreshes, semanticSerializations, keyCharacters, weakStateKeys: true, viewsPerState: 1, finaleDiagnosticsCached: false });
-  return read;
+  read2.inspect = () => ({ version: SITE_TRUTH_REUSE_V1, hits: hits2, misses, residencyRefreshes, semanticSerializations, keyCharacters, weakStateKeys: true, viewsPerState: 1, finaleDiagnosticsCached: false });
+  return read2;
 }
 var sharedSiteTruthReuseV1 = createSiteTruthReuseV1();
 
@@ -72077,7 +72383,7 @@ function createSiteAnchorProjectionCacheV1(project2 = projectToLocalFrameD9) {
     }
     return Object.freeze(rows);
   }
-  function read(siteTruth, frames) {
+  function read2(siteTruth, frames) {
     const owned2 = isOwnedSiteTruthProjectionV1(siteTruth);
     const inputs = owned2 ? frameCaptureInputs(frames) : null;
     if (!inputs) {
@@ -72094,8 +72400,8 @@ function createSiteAnchorProjectionCacheV1(project2 = projectToLocalFrameD9) {
     misses++;
     return rows;
   }
-  read.inspect = () => ({ version: SITE_ANCHOR_PROJECTION_CACHE_V1, hits: hits2, misses, bypasses, projections, retainedViews: Number(prior !== null) });
-  return read;
+  read2.inspect = () => ({ version: SITE_ANCHOR_PROJECTION_CACHE_V1, hits: hits2, misses, bypasses, projections, retainedViews: Number(prior !== null) });
+  return read2;
 }
 
 // src/host/activity_client_port.js
@@ -77553,7 +77859,7 @@ function createHeroSlotsView({ document: document2, environment, heroSlots }) {
   root2.id = "world-heroes-view";
   root2.className = "hero-slots";
   root2.hidden = true;
-  let shown2 = false, confirming = null, busy = null, error = "";
+  let shown2 = false, confirming = null, choosing = null, busy = null, error = "";
   function el(tag, cls, text2) {
     const e = document2.createElement(tag);
     if (cls) e.className = cls;
@@ -77591,28 +77897,52 @@ function createHeroSlotsView({ document: document2, environment, heroSlots }) {
     }
     busy = null;
     confirming = null;
+    choosing = null;
     render();
   }
   function render() {
     const { active: active2, heroes } = heroSlots.list(), grid = el("div", "hero-slots-grid"), portraits = [];
+    const label4 = (h) => h.name || (h.slot === active2 ? "Your hero" : "Unnamed hero"), made = (h) => Boolean(h.name || h.hero), worldOf2 = (h) => h.plays ?? h.slot;
+    const owner = (slot) => heroes.find((x) => x.slot === slot), worldsFor = (h) => [h.slot, ...heroes.filter((x) => x.slot !== h.slot && made(x)).map((x) => x.slot)];
     for (const h of heroes) {
       const card = el("article", "hero-slot" + (h.slot === active2 ? " is-active" : "")), canvas = el("canvas", "hero-slot-portrait"), info2 = el("div", "hero-slot-info"), actions = el("div", "hero-slot-actions");
       card.dataset.slot = String(h.slot);
       canvas.setAttribute("aria-hidden", "true");
-      const name = h.name || (h.slot === active2 ? "Your hero" : "Unnamed hero");
+      const name = label4(h), world = worldOf2(h), visiting = world !== h.slot && owner(world);
       info2.append(el("strong", "hero-slot-name", name), el("small", "hero-slot-class", `${h.hero?.cls ? CLASS_NAMES[h.hero.cls] : "No class yet"} \xB7 Level ${h.level}`));
-      if (h.name || h.hero) info2.append(el("small", "hero-slot-world" + (h.world ? " is-seeded" : ""), h.world ? `World seed ${h.world.seed}` : "Classic world"));
-      if (h.slot === active2) actions.append(el("span", "hero-slot-badge", "Playing"));
-      else if (confirming === h.slot) actions.append(button("Delete", () => act("delete", () => heroSlots.remove(h.slot)), "is-danger"), button("Keep", () => {
+      if (visiting) info2.append(el("small", "hero-slot-world is-visiting", `In ${label4(visiting)}\u2019s world`));
+      else if (h.name || h.hero) info2.append(el("small", "hero-slot-world" + (h.world ? " is-seeded" : ""), h.world ? `World seed ${h.world.seed}` : "Classic world"));
+      const choices = worldsFor(h).filter((slot) => h.slot !== active2 || slot !== world), choose = () => {
+        choosing = h.slot;
+        confirming = null;
+        render();
+      };
+      if (confirming === h.slot) actions.append(button("Delete", () => act("delete", () => heroSlots.remove(h.slot)), "is-danger"), button("Keep", () => {
         confirming = null;
         render();
       }, "is-quiet"));
-      else actions.append(button("Play", () => act("play", () => heroSlots.play(h.slot))), button("Delete", () => {
+      else if (choosing === h.slot) actions.append(button("Back", () => {
+        choosing = null;
+        render();
+      }, "is-quiet"));
+      else if (h.slot === active2) actions.append(el("span", "hero-slot-badge", "Playing"), ...choices.length ? [button("World", choose, "is-quiet")] : []);
+      else actions.append(button("Play", choices.length > 1 ? choose : () => act("play", () => heroSlots.play(h.slot))), button("Delete", () => {
         confirming = h.slot;
         render();
       }, "is-quiet"));
       card.append(canvas, info2, actions);
       if (confirming === h.slot) card.append(el("p", "hero-slot-confirm", `Delete ${name} for good? Their world, bag and gear go with them.`));
+      if (choosing === h.slot) {
+        const pick4 = el("div", "hero-slot-worlds");
+        pick4.append(el("p", "hero-slot-confirm", "Play in which world?"));
+        for (const slot of choices) {
+          const o = owner(slot), b = button(slot === h.slot ? "Their own world" : `${label4(o)}\u2019s world`, () => act("play", () => heroSlots.play(h.slot, slot)), slot === world ? "is-current" : "");
+          const where = o?.world ? `Seed ${o.world.seed}` : "Classic world", people = heroes.filter((x) => x.slot !== h.slot && worldOf2(x) === slot && made(x)).map(label4);
+          b.append(el("small", "", people.length ? `${where} \xB7 ${people.join(", ")} here` : where));
+          pick4.append(b);
+        }
+        card.append(pick4);
+      }
       grid.append(card);
       portraits.push([canvas, h.hero]);
     }
@@ -77624,7 +77954,7 @@ function createHeroSlotsView({ document: document2, environment, heroSlots }) {
       grid.append(card);
     }
     const status2 = busy === "delete" ? "Deleting\u2026" : busy ? "Saving your hero\u2026" : error;
-    root2.replaceChildren(el("p", "hero-slots-intro", "Each hero has their own world, bag and gear. Switching saves this hero first."), grid, ...status2 ? [el("p", "hero-slots-status", status2)] : []);
+    root2.replaceChildren(el("p", "hero-slots-intro", "Each hero has their own world, bag and gear, and can play in any hero\u2019s world. Switching saves this hero first."), grid, ...status2 ? [el("p", "hero-slots-status", status2)] : []);
     environment.requestAnimationFrame(() => {
       for (const [canvas, hero] of portraits) paint2(canvas, hero);
     });
@@ -77637,6 +77967,7 @@ function createHeroSlotsView({ document: document2, environment, heroSlots }) {
       if (visible3 && !shown2) render();
       if (!visible3) {
         confirming = null;
+        choosing = null;
         error = "";
       }
       shown2 = visible3;
@@ -87306,7 +87637,7 @@ function createFrameSamples() {
     }
     last = time;
   }
-  function read(time) {
+  function read2(time) {
     let sum2 = 0, n = 0, worst = 0;
     for (let j = 0; j < count; j++) {
       const i = (index - 1 - j + 2048) % 2048, age = time - times2[i];
@@ -87319,7 +87650,7 @@ function createFrameSamples() {
     }
     return { fps: sum2 ? 1e3 * n / sum2 : 0, frameMs: count ? durations[(index + 2047) % 2048] : 0, worstMs: worst };
   }
-  return { observe, read, reset };
+  return { observe, read: read2, reset };
 }
 
 // src/client/diagnostic_overlays.js
@@ -87867,7 +88198,7 @@ function createGroundItemPresentation() {
 var DYNAMIC_WORLD_LIGHTS_VERSION = "dynamic-world-lights-v2";
 var PORTAL_OUTER = "#6cc6ff";
 var PORTAL_INNER = "#c4b5fd";
-var PLAYER = "#ffe9c4";
+var PLAYER2 = "#ffe9c4";
 var MAX_LOOT_LIGHTS = 12;
 var MAX_FOE_LIGHTS = 48;
 function createDynamicWorldLightsV1(doc) {
@@ -87923,7 +88254,7 @@ function createDynamicWorldLightsV1(doc) {
       pool3(drop.position.x, drop.position.y - 4, 36 + tier2 * 8, RARITY_COLORS[tier2], 0.3 + tier2 * 0.07);
       loot++;
     }
-    if (player?.alive && !interior2) pool3(player.position.x, player.position.y - 6, 124, PLAYER, 0.68);
+    if (player?.alive && !interior2) pool3(player.position.x, player.position.y - 6, 124, PLAYER2, 0.68);
     let foes = 0;
     for (const id in model.entitiesById ?? {}) {
       if (foes >= MAX_FOE_LIGHTS) break;
@@ -87931,7 +88262,7 @@ function createDynamicWorldLightsV1(doc) {
       if (!a?.alive || a.team !== "hostile" || !a.position) continue;
       const radius = Math.max(30, Math.min(64, (a.hullRadius ?? 10) * 3.2)), x = a.position.x, y = a.position.y - 4;
       if (x + radius < view3.x || y + radius < view3.y || x - radius > view3.x + view3.width || y - radius > view3.y + view3.height) continue;
-      pool3(x, y, radius, PLAYER, interior2 ? 0.3 : 0.4);
+      pool3(x, y, radius, PLAYER2, interior2 ? 0.3 : 0.4);
       foes++;
     }
     lc.restore();
@@ -87960,7 +88291,7 @@ function createDynamicWorldLightsV1(doc) {
       const tier2 = Math.max(0, Math.min(RARITY_COLORS.length - 1, groundItemPresentation(drop, time).rarity));
       bounce(drop.position.x, drop.position.y - 4, 28 + tier2 * 6, RARITY_COLORS[tier2], 0.1 + tier2 * 0.03);
     }
-    if (player?.alive) bounce(player.position.x, player.position.y - 6, 96, PLAYER, 0.06);
+    if (player?.alive) bounce(player.position.x, player.position.y - 6, 96, PLAYER2, 0.06);
     ctx.globalCompositeOperation = "lighter";
     const pulse3 = 0.85 + 0.15 * Math.sin(time * 4e-3);
     for (const core5 of portalCores(model, view3, frame3)) {
@@ -107350,7 +107681,7 @@ function createWalletDisplay() {
     running2 = false;
     initialized = true;
   }
-  function read(time) {
+  function read2(time) {
     if (!running2) return value2;
     const t = Math.max(0, Math.min(1, (time - started) / 420));
     if (t === 1) {
@@ -107369,16 +107700,16 @@ function createWalletDisplay() {
     value2 = digits;
     return value2;
   }
-  return Object.freeze({ read, observe(a, time, { reset = false, pending = false } = {}) {
+  return Object.freeze({ read: read2, observe(a, time, { reset = false, pending = false } = {}) {
     if (!initialized || reset || compareAmount(a, authority) < 0) {
       snap(a);
       return;
     }
-    read(time);
+    read2(time);
     if (a !== authority && !pending) snap(a);
     else authority = a;
   }, settle(time) {
-    read(time);
+    read2(time);
     from = value2;
     target = authority;
     started = time;
@@ -116860,7 +117191,7 @@ var chunkDeltaKeyD9 = (address3, sha256) => pageDigest({ version: "world-chunk-k
 function createWorldPageBufferD9({ readPage, sha256, limit = D9_RUNTIME_POLICY.dirtyPages, now: now3 = () => Date.now() }) {
   const staged = /* @__PURE__ */ new Map(), stagedAt = /* @__PURE__ */ new Map(), ownedRows = /* @__PURE__ */ new WeakSet();
   let rowValidations = 0, checkpointReuses = 0;
-  const read = async (id) => staged.get(id)?.value ?? readPage(id);
+  const read2 = async (id) => staged.get(id)?.value ?? readPage(id);
   const ownRow = (p) => {
     const row2 = freezeWire(p);
     if (row2 && typeof row2 === "object") ownedRows.add(row2);
@@ -116886,21 +117217,21 @@ function createWorldPageBufferD9({ readPage, sha256, limit = D9_RUNTIME_POLICY.d
   }
   async function readChunk(root2, address3) {
     if (!root2) return null;
-    const tx = createPageTransaction({ root: root2, readPage: read, sha256 }), ref = await tx.get(await chunkDeltaKeyD9(address3, sha256));
+    const tx = createPageTransaction({ root: root2, readPage: read2, sha256 }), ref = await tx.get(await chunkDeltaKeyD9(address3, sha256));
     if (!ref) return null;
     requireContract(ref.version === "world-page-ref-d9-v1", "Chunk index reference version");
-    const doc = await read(ref.pageId);
+    const doc = await read2(ref.pageId);
     requireContract(doc && await pageDigest(doc, sha256) === ref.pageId && doc.kind === "chunk-delta", "Missing/corrupt chunk delta");
     requireContract(doc.payload.chunkX === address3.chunkX && doc.payload.chunkY === address3.chunkY, "Chunk delta address mismatch");
     return copyWire(doc.payload);
   }
   async function prepareChunk(root2, delta3) {
-    const doc = worldDocument("chunk-delta", delta3), pageId = await pageDigest(doc, sha256), tx = createPageTransaction({ root: root2, readPage: read, sha256 });
+    const doc = worldDocument("chunk-delta", delta3), pageId = await pageDigest(doc, sha256), tx = createPageTransaction({ root: root2, readPage: read2, sha256 });
     await tx.set(await chunkDeltaKeyD9(delta3, sha256), { version: "world-page-ref-d9-v1", pageId });
     return { expectedRoot: root2, root: tx.root(), pages: [{ id: pageId, value: doc }, ...tx.pages()] };
   }
   return {
-    readPage: read,
+    readPage: read2,
     readChunk,
     prepareChunk,
     stage: stage2,
@@ -117073,7 +117404,7 @@ function captureGroundCoverageQueryV1(state) {
 }
 async function prepareGroundCoverageQueryV1(query, { readPage, sha256, stagedPages = [], yieldTask = () => new Promise((resolve) => setTimeout(resolve, 0)) }) {
   const staged = new Map(stagedPages.map((p) => [p.id, p.value])), reads = /* @__PURE__ */ new Map();
-  const read = (id) => {
+  const read2 = (id) => {
     if (!reads.has(id)) {
       if (reads.size >= 1024) {
         const e = new Error("Optional ground query page-work limit");
@@ -117091,7 +117422,7 @@ async function prepareGroundCoverageQueryV1(query, { readPage, sha256, stagedPag
   requireContract(query.root === state.d9World.groundIndex, "Ground query root mismatch");
   for (const p of Object.values(state.playersById)) {
     const window = groundOccupancyWindowD9(state, p, D9_RUNTIME_POLICY.occupancyRadius);
-    const rows = await readParticipantGroundWindowD9(state, p, { readPage: read, sha256, radius: D9_RUNTIME_POLICY.occupancyRadius, center: window.center });
+    const rows = await readParticipantGroundWindowD9(state, p, { readPage: read2, sha256, radius: D9_RUNTIME_POLICY.occupancyRadius, center: window.center });
     const points2 = [];
     for (let i = 0; i < rows.length; i += 128) points2.push(rows.slice(i, i + 128).map((row2) => copyWire(row2.row.location.position)));
     coverage.push({ playerId: p.playerId, spaceInstanceId: state.overworldInstanceId, ...window, radius: D9_RUNTIME_POLICY.occupancyRadius, points: points2 });
@@ -118196,6 +118527,234 @@ async function activateFunctionalSiteD9({ authority, pageBuffer, playerId, siteI
   });
 }
 
+// src/shared/contracts/world_seats_v1.js
+var WORLD_SEAT_LIMIT = 4;
+var WAITING_ROOM_VERSION = "world-waiting-room-v1";
+var ROOM = 8;
+function mint2(state, prefix2) {
+  const text2 = `${state.campaign.campaignId}/${prefix2}/${safeInteger(++state.identitySequence, 1)}`;
+  let hex4 = "";
+  for (let j = 0; j < 4; j++) {
+    let h = 2166136261 ^ j;
+    for (let i = 0; i < text2.length; i++) h = Math.imul(h ^ text2.charCodeAt(i), 16777619) >>> 0;
+    hex4 += h.toString(16).padStart(8, "0");
+  }
+  return `${prefix2}:${hex4}`;
+}
+var actorOf = (state, pid) => state.entitiesById[state.playersById[pid].entityId];
+function waitingRoomId(state) {
+  return state.waitingRoom?.spaceInstanceId ?? null;
+}
+function ensureWaitingRoom(state) {
+  if (state.waitingRoom) return state.waitingRoom.spaceInstanceId;
+  const spaceInstanceId = mint2(state, "spi"), spaceId = mint2(state, "spc");
+  state.spacesByInstanceId[spaceInstanceId] = { spaceInstanceId, spaceId, spaceRevision: 1, collision: { tileSize: 32, width: ROOM, height: ROOM, tiles: Array.from({ length: ROOM }, (_, i) => i === 0 || i === ROOM - 1 ? "0".repeat(ROOM) : "0" + "1".repeat(ROOM - 2) + "0") } };
+  state.waitingRoom = { version: WAITING_ROOM_VERSION, spaceInstanceId };
+  return spaceInstanceId;
+}
+function isWaiting(state, pid) {
+  const id = waitingRoomId(state);
+  return Boolean(id) && actorOf(state, pid).residency.spaceInstanceId === id;
+}
+function moveResidency(state, actor, spaceInstanceId, position4) {
+  const history = state.residencyHistoryByEntityId[actor.entityId], current = history[String(actor.residency.residencyRevision)], next = actor.residency.residencyRevision + 1;
+  if (current) {
+    current.endTick = state.tick;
+    current.endEventSequence = state.eventEmission.lastEventSequence;
+    current.endAuthorityOrder = state.lastAppliedAuthorityOrder;
+  }
+  history[String(next)] = { spaceInstanceId, spaceRevision: state.spacesByInstanceId[spaceInstanceId].spaceRevision, residencyRevision: next, tick: state.tick, afterEventSequence: state.eventEmission.lastEventSequence, afterAuthorityOrder: state.lastAppliedAuthorityOrder, endTick: null, endEventSequence: null, endAuthorityOrder: null };
+  actor.residency = { spaceInstanceId, residencyRevision: next };
+  actor.position = { x: position4.x, y: position4.y };
+  actor.movementIntent = { x: 0, y: 0 };
+  actor.movedLastTick = false;
+  const primary = state.primary.actorsById[actor.entityId];
+  if (primary) {
+    primary.current = null;
+    primary.heldCommandId = null;
+    primary.queuedCommandId = null;
+    primary.comboDeadline = null;
+    primary.nextComboStep = 1;
+  }
+}
+function setFrameMember(state, pid, on, position4) {
+  const w = state.d9World;
+  if (!w?.runtime) return;
+  const lists = [w.runtime.frames, state.spacesByInstanceId[state.overworldInstanceId].collision.frames ?? []];
+  for (const frames of lists) for (const f of frames) {
+    const i = f.playerIds.indexOf(pid);
+    if (i >= 0) f.playerIds.splice(i, 1);
+  }
+  if (!on) return;
+  const host = position4.hostPid;
+  for (const frames of lists) {
+    const f = frames.find((x) => x.playerIds.includes(host)) ?? frames.at(-1);
+    if (f) {
+      f.playerIds.push(pid);
+      f.playerIds.sort();
+    }
+  }
+}
+var TARGET_KEYS = /* @__PURE__ */ new Set(["targetEntityId", "intendedTargetId", "targetId"]);
+var OWN_ROWS = ["playersById", "primary", "residencyHistoryByEntityId", "subweaponCombat", "d9World"];
+function eachTarget(state, visit) {
+  const walk = (v) => {
+    if (Array.isArray(v)) {
+      for (const x of v) if (x && typeof x === "object") walk(x);
+      return;
+    }
+    for (const [k, x] of Object.entries(v)) {
+      if (TARGET_KEYS.has(k) && typeof x === "string") visit(v, k);
+      else if (x && typeof x === "object") walk(x);
+    }
+  };
+  for (const [key2, v] of Object.entries(state)) if (v && typeof v === "object" && !OWN_ROWS.includes(key2)) walk(v);
+  if (state.subweaponCombat) {
+    for (const [key2, v] of Object.entries(state.subweaponCombat)) if (key2 !== "actors" && key2 !== "mastery" && v && typeof v === "object") walk(v);
+  }
+}
+function parkSeat(state, pid, heirPid = null) {
+  const actor = actorOf(state, pid), room = ensureWaitingRoom(state);
+  if (actor.residency.spaceInstanceId === room) return;
+  const heir = heirPid && heirPid !== pid && !isWaiting(state, heirPid) ? actorOf(state, heirPid).entityId : null;
+  if (heir) eachTarget(state, (row2, key2) => {
+    if (row2[key2] === actor.entityId) row2[key2] = heir;
+  });
+  moveResidency(state, actor, room, { x: ROOM * 16, y: ROOM * 16 });
+  setFrameMember(state, pid, false);
+  state.playersById[pid].connectionStatus = "disconnected";
+  captureWorldPositionsD9(state);
+}
+function unparkSeat(state, pid, hostPid) {
+  const actor = actorOf(state, pid), host = actorOf(state, hostPid), space = host.residency.spaceInstanceId;
+  requireContract(space !== waitingRoomId(state), "Nowhere to stand");
+  moveResidency(state, actor, space, host.position);
+  if (space === state.overworldInstanceId) setFrameMember(state, pid, true, { hostPid });
+  state.playersById[pid].connectionStatus = "connected";
+  captureWorldPositionsD9(state);
+}
+function addSeat(state, templatePid) {
+  requireContract(state.session.playerIds.length < WORLD_SEAT_LIMIT, "This world has no free seat");
+  const t = state.playersById[templatePid], ta = state.entitiesById[t.entityId];
+  requireContract(t && ta, "Seat template missing");
+  const characterId = mint2(state, "chr"), entityId2 = mint2(state, "ent"), playerId = mint2(state, "ply");
+  state.campaign.charactersById[characterId] = { characterId };
+  const a = copyWire(ta);
+  Object.assign(a, { entityId: entityId2, ownerCharacterId: characterId, alive: true, residency: { spaceInstanceId: ta.residency.spaceInstanceId, residencyRevision: 1 }, movementIntent: { x: 0, y: 0 }, movedLastTick: false, nextAttackActionSequence: 1 });
+  state.entitiesById[entityId2] = a;
+  state.residencyHistoryByEntityId[entityId2] = { "1": { spaceInstanceId: a.residency.spaceInstanceId, spaceRevision: state.spacesByInstanceId[a.residency.spaceInstanceId].spaceRevision, residencyRevision: 1, tick: state.tick, afterEventSequence: state.eventEmission.lastEventSequence, afterAuthorityOrder: state.lastAppliedAuthorityOrder, endTick: null, endEventSequence: null, endAuthorityOrder: null } };
+  const tp = state.primary.actorsById[t.entityId];
+  state.primary.actorsById[entityId2] = { ...copyWire(tp), comboDeadline: null, current: null, heldCommandId: null, queuedCommandId: null, nextComboStep: 1, nextSourceSequence: 1, retiredSourceSequence: 0 };
+  if (state.subweaponCombat) {
+    state.subweaponCombat.actors[entityId2] = copyWire(state.subweaponCombat.actors[t.entityId]);
+    if (state.subweaponCombat.mastery) state.subweaponCombat.mastery[entityId2] = { hazards: {}, poisons: {}, razors: {}, statuses: {} };
+  }
+  state.playersById[playerId] = { ...copyWire(t), playerId, characterId, entityId: entityId2, connectionStatus: "connected" };
+  seatWorldRows(state, playerId, templatePid);
+  if (ta.residency.spaceInstanceId === state.overworldInstanceId) setFrameMember(state, playerId, true, { hostPid: templatePid });
+  captureWorldPositionsD9(state);
+  return playerId;
+}
+function seatWorldRows(state, pid, templatePid) {
+  state.session.playerIds = [...state.session.playerIds.filter((id) => id !== pid), pid].sort();
+  state.appliedClientSequences[pid] = 0;
+  const paging = state.d9World?.paging;
+  if (paging) {
+    paging.players[pid] = { gold: "0", salvageCredits: {}, souls: 0 };
+    if (paging.remoteGearByPlayer) paging.remoteGearByPlayer[pid] = {};
+    for (const rows of Object.values(paging.coldObligations ?? {})) rows[pid] = 0;
+  }
+  const outings = state.encounterEconomy?.outingsByPlayer;
+  if (outings) outings[pid] = copyWire(outings[templatePid] ?? { earnedOutside: false, wasInTown: true });
+}
+function renewSeat(state, oldPid, { keepQuests = false } = {}) {
+  const p = state.playersById[oldPid], playerId = mint2(state, "ply");
+  delete state.playersById[oldPid];
+  state.playersById[playerId] = { ...p, playerId };
+  state.session.playerIds = state.session.playerIds.filter((id) => id !== oldPid);
+  delete state.appliedClientSequences[oldPid];
+  const paging = state.d9World?.paging;
+  if (paging) {
+    delete paging.players[oldPid];
+    if (paging.remoteGearByPlayer) delete paging.remoteGearByPlayer[oldPid];
+    if (paging.indexedRevisions) delete paging.indexedRevisions[oldPid];
+    for (const rows of Object.values(paging.coldObligations ?? {})) delete rows[oldPid];
+  }
+  for (const e of Object.values(state.d9World?.episodes ?? {})) if (e.snapshot?.participants?.some((x) => x.playerId === oldPid)) {
+    for (const x of e.snapshot.participants) if (x.playerId === oldPid) x.playerId = playerId;
+    e.snapshot.participants.sort((x, y) => x.playerId.localeCompare(y.playerId));
+  }
+  for (const g of Object.values(state.encounterEconomy?.groups ?? {})) for (const r of Object.values(g.usedResources ?? {})) if (r.playerIds?.includes(oldPid)) r.playerIds = r.playerIds.map((id) => id === oldPid ? playerId : id);
+  const outings = state.encounterEconomy?.outingsByPlayer, outing = outings?.[oldPid];
+  if (outings) delete outings[oldPid];
+  for (const [id, r] of Object.entries(state.appliedCommandsById)) if (r.playerId === oldPid) delete state.appliedCommandsById[id];
+  if (state.d9World?.navigation?.pending) {
+    for (const row2 of state.d9World.navigation.pending) if (row2.playerId === oldPid) row2.playerId = playerId;
+  }
+  if (state.playerRespawnsById?.[oldPid]) {
+    state.playerRespawnsById[playerId] = state.playerRespawnsById[oldPid];
+    delete state.playerRespawnsById[oldPid];
+  }
+  for (const frames of [state.d9World?.runtime.frames ?? [], state.spacesByInstanceId[state.overworldInstanceId].collision.frames ?? []]) for (const f of frames) {
+    const i = f.playerIds.indexOf(oldPid);
+    if (i >= 0) {
+      f.playerIds[i] = playerId;
+      f.playerIds.sort();
+    }
+  }
+  const quests = state.d9World?.quests?.byPlayer;
+  if (quests?.[oldPid]) {
+    if (keepQuests) quests[playerId] = quests[oldPid];
+    delete quests[oldPid];
+  }
+  seatWorldRows(state, playerId, playerId);
+  if (outings && outing) outings[playerId] = outing;
+  return playerId;
+}
+function seatHeroV1(state, { passport, heroId = passport?.heroId, seats, lastPlayerId, heroIds = null, seatWins = false }) {
+  requireContract(validHeroId(heroId) && (!passport || passport.heroId === heroId), "Seating needs a hero");
+  if (lastPlayerId && !state.playersById[lastPlayerId]) lastPlayerId = null;
+  const next = { ...seats };
+  for (const pid2 of Object.keys(next)) if (!state.playersById[pid2] || heroIds && next[pid2] !== heroId && !heroIds.includes(next[pid2])) delete next[pid2];
+  let pid = Object.keys(next).find((id) => next[id] === heroId) ?? null, changed = false;
+  if (!passport && !pid) {
+    const own = lastPlayerId && state.playersById[lastPlayerId] && !next[lastPlayerId] ? lastPlayerId : state.session.playerIds.length === 1 && !Object.keys(next).length ? state.session.playerIds[0] : null;
+    requireContract(own, "A new hero starts in a new world");
+    pid = own;
+    next[pid] = heroId;
+  }
+  if (pid && passport && !seatWins && !samePassport(extractHeroPassport(state, pid, { heroId }), passport)) {
+    const renewed = renewSeat(state, pid, { keepQuests: true });
+    if (lastPlayerId === pid) lastPlayerId = renewed;
+    delete next[pid];
+    pid = renewed;
+    next[pid] = heroId;
+    arriveHeroPassport(state, pid, passport);
+    changed = true;
+  }
+  if (!pid) {
+    const unclaimed = state.session.playerIds.filter((id) => !next[id]), free = unclaimed.find((id) => isWaiting(state, id)) ?? unclaimed[0] ?? null;
+    if (free) {
+      pid = renewSeat(state, free);
+      if (lastPlayerId === free) lastPlayerId = pid;
+    } else pid = addSeat(state, lastPlayerId ?? state.session.playerIds[0]);
+    next[pid] = heroId;
+    arriveHeroPassport(state, pid, passport);
+    changed = true;
+  }
+  const host = lastPlayerId && state.playersById[lastPlayerId] && !isWaiting(state, lastPlayerId) ? lastPlayerId : state.session.playerIds.find((id) => !isWaiting(state, id));
+  if (isWaiting(state, pid)) {
+    requireContract(host, "Nowhere to stand");
+    unparkSeat(state, pid, host);
+    changed = true;
+  }
+  for (const id of state.session.playerIds) if (id !== pid && !isWaiting(state, id)) {
+    parkSeat(state, id, pid);
+    changed = true;
+  }
+  return { state, playerId: pid, seats: next, changed };
+}
+
 // src/shared/contracts/site_reset_d13c.js
 var SITE_RESET_D13C = "site-reset-d13c1-v1";
 var same11 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
@@ -118454,6 +119013,17 @@ async function createLocalEndlessSessionD9(options) {
       opened = await worker.open(draft.campaign.campaignId);
     }
   }
+  if (options.heroSeat) {
+    const seat = options.heroSeat, draft = copyWire(opened.state), seated = seatHeroV1(draft, { passport: seat.passport ?? null, heroId: seat.heroId, seats: seat.seats ?? {}, lastPlayerId: localPlayerId ?? null, heroIds: seat.heroIds ?? null, seatWins: seat.seatWins === true });
+    if (seated.changed) {
+      let saved = await worker.commit({ state: draft, expectedRoot: opened.publication.id, checkpointId: createId("checkpointId", nextToken()) });
+      if (saved.status === "unknown") saved = await worker.reconcile();
+      requireContract(saved.status === "committed", saved.reason ?? "Hero seat publication did not commit");
+      opened = await worker.open(draft.campaign.campaignId);
+    }
+    localPlayerId = seated.playerId;
+    seat.onSeated?.({ playerId: localPlayerId, seats: seated.seats });
+  }
   requireContract(opened?.state.proofCase === proofCase && opened.state.playersById[localPlayerId], "D9 stored controller/case mismatch");
   const origin = { originWidthChunks: opened.state.d9World.origin.width / 1024, originHeightChunks: opened.state.d9World.origin.height / 832, egress: opened.state.d9World.origin.egress };
   if (!opened.state.d9World.plannedWorld && !Object.keys(opened.state.d9World.siteReservationsById ?? {}).length && worker.siteReservations) {
@@ -118487,7 +119057,9 @@ async function createLocalEndlessSessionD9(options) {
   const fortParcel = Object.values(opened.state.d9World.siteReservationsById ?? {}).find((r) => r.packageId === "woodland-fort")?.parcel ?? null, caveParcel = Object.values(opened.state.d9World.siteReservationsById ?? {}).find((r) => r.packageId === WOODLAND_CAVE_PACKAGE_ID)?.parcel ?? null, caveParcels = Object.values(opened.state.d9World.siteReservationsById ?? {}).filter((r) => r.packageId === WOODLAND_CAVE_FAMILY_PACKAGE_ID).map((r) => r.parcel).sort((a, b) => (a.regionKey ?? "").localeCompare(b.regionKey ?? "") || a.spawnOrdinal - b.spawnOrdinal);
   const stream = createWorldResidencyD9({ authority, worker, pageBuffer: pages2, siteBootstrap, ruinSocket: ruinReservation?.socket ?? null, fortParcel, caveParcel, caveParcels, measure: measure2, now: now3 }), clientPort = createActivityClientPort({ authority, localPlayerId, measure: measure2 });
   const store2 = storeFactory(opened.state.content.fingerprint, activityGeneration(opened.state), activityCampaignCodec);
-  await store2.writeLocalLauncher?.(proofCase, { campaignId: opened.state.campaign.campaignId, playerId: localPlayerId });
+  await Promise.resolve(store2.writeLocalLauncher?.(proofCase, { campaignId: opened.state.campaign.campaignId, playerId: localPlayerId })).catch((error) => {
+    if (!options.heroSeat || !/Launcher must reference/.test(error?.message)) throw error;
+  });
   const GATE_TIMEOUT_MS = 15e3, RETRY_MS = 1e3, STREAM_SERVICE_MS = 100, STREAM_IDLE_SERVICE_MS = 500;
   let lastStreamAnchor = null;
   const streamAnchor = () => authority.withAuthority((a) => a.withAuthorityState((s) => Object.values(s.playersById).map((p) => {
@@ -119291,8 +119863,9 @@ async function startWorldClient(environment) {
     deviceStorage = environment.localStorage;
   } catch {
   }
-  const channel2 = saveChannelPrefix(environment.location), heroSlot = readHeroSlots(deviceStorage, channel2).active, heroPrefix = heroSavePrefix(heroSlot);
-  const roster = createHeroRosterWriter({ storage: deviceStorage, channel: channel2, slot: heroSlot });
+  const channel2 = saveChannelPrefix(environment.location), heroRecord = ensureHeroIds(deviceStorage, channel2, () => "hero:" + Array.from(environment.crypto.getRandomValues(new Uint8Array(8)), (v) => v.toString(16).padStart(2, "0")).join("")), heroSlot = heroRecord.active, heroEntry = heroRecord.heroes.find((h) => h.slot === heroSlot), heroId = heroEntry?.heroId ?? null;
+  const worldSlot = heroEntry && heroRecord.heroes.some((h) => h.slot === heroWorld(heroEntry)) ? heroWorld(heroEntry) : heroSlot, visiting = worldSlot !== heroSlot, heroPrefix = heroSavePrefix(worldSlot);
+  const roster = createHeroRosterWriter({ storage: deviceStorage, channel: channel2, slot: heroSlot, visiting });
   const saveIndexedDb = channelIndexedDb(environment.indexedDB, channel2 + heroPrefix);
   const startupLoading = environment.__SAQ_STARTUP_LOADING_V1__ ?? null;
   let client = null;
@@ -119343,6 +119916,13 @@ async function startWorldClient(environment) {
     forgetCamp();
   };
   const reset = async () => {
+    if (visiting) {
+      playHeroIn(deviceStorage, channel2, heroSlot, heroSlot);
+      environment.location.reload();
+      return;
+    }
+    forgetWorld(deviceStorage, channel2, worldSlot);
+    if (heroId) forgetHero(deviceStorage, channel2, heroId);
     await deleteLocalWorldCampaignDatabase({ indexedDB: saveIndexedDb, ...activity ? { databaseName } : {} });
     policy.forget();
     forgetCamp();
@@ -119430,7 +120010,7 @@ async function startWorldClient(environment) {
         const release = environment.document.documentElement.dataset.worldRelease;
         if (release) workerUrl.searchParams.set("v", release);
       }
-      if (heroSlot > 1) workerUrl.searchParams.set("hero", String(heroSlot));
+      if (worldSlot > 1) workerUrl.searchParams.set("hero", String(worldSlot));
       if (plannedReview) {
         workerUrl.searchParams.set("plannedReview", "1");
         if (environment.document.body.dataset.worldCombat === "v1") workerUrl.searchParams.set("worldCombat", "1");
@@ -119482,6 +120062,7 @@ async function startWorldClient(environment) {
       resume: launch.resume,
       worldWorker: worldBridge,
       durabilityTask: saveBridge,
+      heroSeat: worldBridge && heroId ? { heroId, passport: readHeroPassport(deviceStorage, channel2, heroId), seats: readWorldSeats(deviceStorage, channel2, worldSlot), heroIds: heroRecord.heroes.map((h) => h.heroId).filter(Boolean), seatWins: heroLastWorld(deviceStorage, channel2, heroId) === worldSlot, onSeated: ({ seats }) => writeWorldSeats(deviceStorage, channel2, worldSlot, seats) } : null,
       onStartupProgress: (message) => startupLoading?.note(message),
       plannedWorld: plannedReview?.binding,
       plannedTargets: plannedReview?.targets,
@@ -119694,19 +120275,47 @@ async function startWorldClient(environment) {
   environmentArt = await createBreakablePropArtV1(environment, environmentArt);
   environmentArt = await createSporeArtV1(environment, environmentArt);
   environmentArt = await createHollowArtV1(environment, environmentArt);
+  let passportMark = null, passportAt = -Infinity;
+  const saveHeroPassport = (force = true) => {
+    if (!worldBridge || !heroId) return;
+    try {
+      const pid = opened.localPlayerId, now3 = environment.performance.now(), passport = session.authority.withAuthority((a) => a.withAuthorityState((s) => {
+        const p = s.playersById[pid];
+        if (!p) return null;
+        const i = p.inventory, mark = JSON.stringify([i.revision, i.gold, i.economy?.materials, i.economy?.slotLevels, i.services?.supplyPurchases, i.services?.suppliesUsed, p.d8.revision, p.progression.totalXp]);
+        if (!force && mark === passportMark && now3 - passportAt < 6e4) return null;
+        passportMark = mark;
+        passportAt = now3;
+        return extractHeroPassport(s, pid, { heroId });
+      }));
+      if (passport) writeHeroPassport(deviceStorage, channel2, passport, worldSlot);
+    } catch {
+    }
+  };
+  if (worldBridge && heroId) {
+    saveHeroPassport();
+    environment.setInterval(() => saveHeroPassport(false), 5e3);
+    environment.addEventListener("pagehide", saveHeroPassport);
+    environment.document.addEventListener("visibilitychange", () => {
+      if (environment.document.hidden) saveHeroPassport();
+    });
+  }
   const saveNow = async () => {
     try {
       await Promise.race([Promise.resolve(activity ? session.save?.() : null), new Promise((resolve) => environment.setTimeout(resolve, 4e3))]);
     } catch {
     }
+    saveHeroPassport();
   };
   const heroSlots = Object.freeze({
     active: heroSlot,
+    world: worldSlot,
     list: () => readHeroSlots(deviceStorage, channel2),
     observe: (model) => roster.observe(model),
-    async play(slot) {
+    // world: the slot of the hero whose world to play in (default: the hero's own).
+    async play(slot, world = slot) {
       await saveNow();
-      if (!chooseHero(deviceStorage, channel2, slot)) return false;
+      if (!playHeroIn(deviceStorage, channel2, slot, world)) return false;
       environment.location.reload();
     },
     async create() {
@@ -119716,6 +120325,9 @@ async function startWorldClient(environment) {
     },
     async remove(slot) {
       if (slot === heroSlot) return false;
+      const record2 = readHeroSlots(deviceStorage, channel2);
+      if (worldInUse(record2, slot)) throw Error("Another hero is playing in this world. Send them home first.");
+      const gone = record2.heroes.find((h) => h.slot === slot)?.heroId;
       const prefix2 = heroSavePrefix(slot), indexedDB = channelIndexedDb(environment.indexedDB, channel2 + prefix2), names2 = /* @__PURE__ */ new Set([activity ? databaseName : WORLD_CAMPAIGN_DATABASE_NAME]);
       if (prefix2 && typeof environment.indexedDB?.databases === "function") {
         for (const d of await environment.indexedDB.databases()) if (d.name?.startsWith(channel2 + prefix2)) names2.add(d.name.slice(channel2.length + prefix2.length));
@@ -119725,6 +120337,8 @@ async function startWorldClient(environment) {
         launcherCapability(environment, prefix2).removeItem(launcherKey);
       } catch {
       }
+      forgetWorld(deviceStorage, channel2, slot);
+      if (gone) forgetHero(deviceStorage, channel2, gone);
       return dropHero(deviceStorage, channel2, slot);
     }
   });
