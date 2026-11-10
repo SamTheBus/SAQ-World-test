@@ -4604,6 +4604,7 @@ var SPAWN_LEVELS_V1 = freezeWire({
 });
 var cap = (level) => Math.max(1, Math.min(SPAWN_LEVELS_V1.levelCap, level));
 var areaLevelForQuantileV1 = (q) => cap(1 + Math.floor(SPAWN_LEVELS_V1.levelCap * q));
+var PACK_LEVEL_SPREAD_V1 = Math.max(...SPAWN_LEVELS_V1.packOffsets) - Math.min(...SPAWN_LEVELS_V1.packOffsets);
 
 // src/shared/generation/world_maker_v1/layout.js
 var CHUNK_KEYS = /* @__PURE__ */ new Set(["core", "expansion", "sockets"]);

@@ -514,6 +514,7 @@ import {
   groundOccupancyWindowD9,
   groundPotionPosition,
   groundPotions,
+  groupBaseLevelV1,
   guardIntent,
   guardsSource,
   hasAlphaPopulation,
@@ -602,6 +603,8 @@ import {
   masteryPower,
   masteryRequirement,
   maxCombat,
+  memberLevelFitsV1,
+  memberLevelV1,
   migrateD4Inventory,
   migrateD9Participant,
   migrateForgeInventory,
@@ -639,7 +642,6 @@ import {
   originManifestForState,
   outgoingCombat,
   ownedItem,
-  packMemberLevelV1,
   packageEligibleD9,
   pageDigest,
   parseCampaignEnvelope,
@@ -936,7 +938,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-HEG4JGY7.js";
+} from "./chunk-LRCFPIUZ.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -61353,7 +61355,7 @@ function birthSafe(s, definition2) {
 function originEpisode(s, g, definition2) {
   const site = siteFor(originFor(s), g.groupId), address3 = legacyWorldPosition(site?.returnAnchor ?? definition2.anchor), rank = tier(definition2.members[0].profileId), e = s.encounterEconomy.groups[g.groupId], record2 = { ...unfrozenEpisodeD9("origin:" + g.groupId, e.episode, { origin: true }), geography: { chunkX: address3.chunkX, chunkY: address3.chunkY, anchorOrdinal: 0, minimumLevel: 1, rank } };
   if (g.threatSnapshot) {
-    const level = copyWire(g.threatSnapshot.levelsByEntityId[g.entityIds.find((id) => s.entitiesById[id].alive) ?? g.entityIds[0]]);
+    const level = groupBaseLevelV1(s, g);
     record2.snapshot = { version: "episode-progression-d9-v1", snapshotId: record2.anchorId + "/episode/" + String(record2.episode), activatedTick: g.threatSnapshot.activatedTick, trigger: "activation", minimumLevel: 1, effectiveLevel: level, sourceDepth: copyWire(level), mappingVersion: "effective-level-depth-d9-v1", rank, participants: [] };
   }
   return record2;
@@ -61382,7 +61384,7 @@ function upgradeOriginHordes(s) {
     if (expand) {
       if (g.threatSnapshot) {
         const level = copyWire(s.d9World.episodes[g.groupId].snapshot.effectiveLevel);
-        for (const m of definition2.members.slice(2)) g.threatSnapshot.levelsByEntityId[m.entityId] = copyWire(level);
+        for (const m of definition2.members.slice(2)) g.threatSnapshot.levelsByEntityId[m.entityId] = memberLevelV1(s, level, m.entityId);
       }
       for (const member of definition2.members.slice(2)) {
         requireContract(!s.entitiesById[member.entityId], "Origin extension identity collision");
@@ -63752,9 +63754,9 @@ function createActivityProgression(state, manifest, measure2) {
       let level = state.d9World ? resolveEncounterLevelV2(episode?.geography.minimumLevel ?? 1, !spawnLevels || !episode || chunkScalesV1(state, episode.geography.chunkX, episode.geography.chunkY) ? eligible2 : []) : Math.max(...eligible2.map((p) => p.progression.level));
       if (episode?.snapshot) level = episode.snapshot.effectiveLevel;
       if (episode) admitContentNumericD9(level, episode.geography.rank);
-      const levelsByEntityId = Object.fromEntries(group.entityIds.map((id) => [id, copyWire(state.entitiesById[id].alive ? spawnLevels && !state.bossCombat?.bossesByEntityId?.[id] ? packMemberLevelV1(level, id) : level : group.threatSnapshot?.levelsByEntityId[id] ?? 1)]));
-      const snapshot = { version: state.d9World ? D9_THREAT_VERSION : ENCOUNTER_PROGRESSION_VERSION, activatedTick: state.tick, levelsByEntityId };
       adoptEncounterCompositionV1(state, group, level);
+      const levelsByEntityId = Object.fromEntries(group.entityIds.map((id) => [id, copyWire(state.entitiesById[id].alive ? spawnLevels ? memberLevelV1(state, level, id) : level : group.threatSnapshot?.levelsByEntityId[id] ?? 1)]));
+      const snapshot = { version: state.d9World ? D9_THREAT_VERSION : ENCOUNTER_PROGRESSION_VERSION, activatedTick: state.tick, levelsByEntityId };
       const profiles2 = live.map((actor) => [actor, encounterActorProfile(state, { ...group, threatSnapshot: snapshot }, actor)]);
       if (episode && !episode.snapshot) {
         episode.snapshot = { version: "episode-progression-d9-v1", snapshotId: episode.anchorId + "/episode/" + String(episode.episode), activatedTick: state.tick, trigger, minimumLevel: copyWire(episode.geography.minimumLevel), effectiveLevel: copyWire(level), sourceDepth: copyWire(level), mappingVersion: "effective-level-depth-d9-v1", rank: episode.geography.rank, participants: eligible2.map((p) => ({ playerId: p.playerId, heroLevel: copyWire(p.progression.level) })) };
@@ -63901,7 +63903,7 @@ function createActivityProgression(state, manifest, measure2) {
         return episode.effectiveLevel;
       }
       requireContract(frozen !== void 0 || episode, "Hostile combat level is not frozen");
-      if (frozen !== void 0 && episode) requireContract(progressionBigInt(frozen) === progressionBigInt(episode.effectiveLevel), "Hostile combat level snapshot mismatch");
+      if (frozen !== void 0 && episode) requireContract(memberLevelFitsV1(state, progressionBigInt(frozen), progressionBigInt(episode.effectiveLevel)), "Hostile combat level snapshot mismatch");
       return frozen ?? episode.effectiveLevel;
     },
     prepareCombat(actor, radius) {

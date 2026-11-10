@@ -13545,7 +13545,18 @@ function siteLevelV1(state, socket) {
 var siteMinimumLevelV1 = (state, socket) => usesSpawnLevelsV1(state) ? siteLevelV1(state, socket) : socket.minimumLevel;
 var siteScalesV1 = (state, socket) => !usesSpawnLevelsV1(state) || areaScalesV1(state, socket.region?.biome);
 var packLevelOffsetV1 = (entityId) => SPAWN_LEVELS_V1.packOffsets[hash7("spawn-levels-v1/pack/" + entityId) % SPAWN_LEVELS_V1.packOffsets.length];
-var packMemberLevelV1 = (level, entityId) => String(cap(Number(level) + packLevelOffsetV1(entityId)));
+var memberLevelOffsetV1 = (state, entityId) => !usesSpawnLevelsV1(state) || state.bossCombat?.bossesByEntityId?.[entityId] || state.bossCombat?.summonsByEntityId?.[entityId] || state.eliteCombat?.elitesByEntityId?.[entityId] ? 0 : packLevelOffsetV1(entityId);
+var memberLevelV1 = (state, level, entityId) => cap(Number(level) + memberLevelOffsetV1(state, entityId));
+var PACK_LEVEL_SPREAD_V1 = Math.max(...SPAWN_LEVELS_V1.packOffsets) - Math.min(...SPAWN_LEVELS_V1.packOffsets);
+var memberLevelFitsV1 = (state, memberLevel, encounterLevel) => {
+  const d = Number(memberLevel) - Number(encounterLevel);
+  return usesSpawnLevelsV1(state) ? d >= Math.min(...SPAWN_LEVELS_V1.packOffsets) && d <= Math.max(...SPAWN_LEVELS_V1.packOffsets) : d === 0;
+};
+function groupBaseLevelV1(state, group) {
+  const live = group.entityIds.filter((id) => state.entitiesById[id]?.alive), ids = live.length ? live : group.entityIds, levels2 = group.threatSnapshot.levelsByEntityId;
+  const at2 = ids.find((id) => memberLevelOffsetV1(state, id) === 0) ?? ids[0];
+  return cap(Number(levels2[at2]) - memberLevelOffsetV1(state, at2));
+}
 function noteAreaBossV1(state, groupId) {
   if (!usesSpawnLevelsV1(state) || !state.campaign) return null;
   for (const site of Object.values(state.d9World?.functionalSitesById ?? {})) {
@@ -14487,7 +14498,8 @@ function validateEncounterProgression(state, group) {
     else safeInteger(snapshot.levelsByEntityId[id], 1, MAX_PLAYER_LEVEL);
     if (state.entitiesById[id].alive) liveLevels.add(progressionBigInt(snapshot.levelsByEntityId[id]).toString());
   }
-  requireContract(liveLevels.size <= 1, "Split live group threat");
+  const live = [...liveLevels].map(BigInt);
+  requireContract(usesSpawnLevelsV1(state) ? !live.length || live.reduce((a, b) => a > b ? a : b) - live.reduce((a, b) => a < b ? a : b) <= BigInt(PACK_LEVEL_SPREAD_V1) : liveLevels.size <= 1, "Split live group threat");
   if (group.siteId !== null) requireContract(!group.threatReady || state.d9World?.episodes[group.groupId]?.snapshot === null, "Site snapshot cannot thaw");
 }
 
@@ -28101,7 +28113,9 @@ export {
   useSeededReservationsV1,
   usesSpawnLevelsV1,
   chunkScalesV1,
-  packMemberLevelV1,
+  memberLevelV1,
+  memberLevelFitsV1,
+  groupBaseLevelV1,
   noteAreaBossV1,
   BUILD_BALANCE_HASH,
   usesBuildBalanceV2,

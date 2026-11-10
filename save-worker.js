@@ -9257,6 +9257,15 @@ function siteLevelV1(state, socket) {
 }
 var siteMinimumLevelV1 = (state, socket) => usesSpawnLevelsV1(state) ? siteLevelV1(state, socket) : socket.minimumLevel;
 var siteScalesV1 = (state, socket) => !usesSpawnLevelsV1(state) || areaScalesV1(state, socket.region?.biome);
+var packLevelOffsetV1 = (entityId2) => SPAWN_LEVELS_V1.packOffsets[hash10("spawn-levels-v1/pack/" + entityId2) % SPAWN_LEVELS_V1.packOffsets.length];
+var memberLevelOffsetV1 = (state, entityId2) => !usesSpawnLevelsV1(state) || state.bossCombat?.bossesByEntityId?.[entityId2] || state.bossCombat?.summonsByEntityId?.[entityId2] || state.eliteCombat?.elitesByEntityId?.[entityId2] ? 0 : packLevelOffsetV1(entityId2);
+var memberLevelV1 = (state, level, entityId2) => cap(Number(level) + memberLevelOffsetV1(state, entityId2));
+var PACK_LEVEL_SPREAD_V1 = Math.max(...SPAWN_LEVELS_V1.packOffsets) - Math.min(...SPAWN_LEVELS_V1.packOffsets);
+function groupBaseLevelV1(state, group) {
+  const live = group.entityIds.filter((id) => state.entitiesById[id]?.alive), ids = live.length ? live : group.entityIds, levels2 = group.threatSnapshot.levelsByEntityId;
+  const at2 = ids.find((id) => memberLevelOffsetV1(state, id) === 0) ?? ids[0];
+  return cap(Number(levels2[at2]) - memberLevelOffsetV1(state, at2));
+}
 
 // src/shared/contracts/d9_numeric_expression.js
 var ceilDiv = (n, d) => (n + d - 1n) / d;
@@ -10110,7 +10119,8 @@ function validateEncounterProgression(state, group) {
     else safeInteger(snapshot.levelsByEntityId[id], 1, MAX_PLAYER_LEVEL);
     if (state.entitiesById[id].alive) liveLevels.add(progressionBigInt(snapshot.levelsByEntityId[id]).toString());
   }
-  requireContract(liveLevels.size <= 1, "Split live group threat");
+  const live = [...liveLevels].map(BigInt);
+  requireContract(usesSpawnLevelsV1(state) ? !live.length || live.reduce((a, b) => a > b ? a : b) - live.reduce((a, b) => a < b ? a : b) <= BigInt(PACK_LEVEL_SPREAD_V1) : liveLevels.size <= 1, "Split live group threat");
   if (group.siteId !== null) requireContract(!group.threatReady || state.d9World?.episodes[group.groupId]?.snapshot === null, "Site snapshot cannot thaw");
 }
 
@@ -21470,7 +21480,7 @@ function birthSafe(s, definition) {
 function originEpisode(s, g, definition) {
   const site = siteFor(originFor(s), g.groupId), address = legacyWorldPosition(site?.returnAnchor ?? definition.anchor), rank = tier(definition.members[0].profileId), e = s.encounterEconomy.groups[g.groupId], record2 = { ...unfrozenEpisodeD9("origin:" + g.groupId, e.episode, { origin: true }), geography: { chunkX: address.chunkX, chunkY: address.chunkY, anchorOrdinal: 0, minimumLevel: 1, rank } };
   if (g.threatSnapshot) {
-    const level = copyWire(g.threatSnapshot.levelsByEntityId[g.entityIds.find((id) => s.entitiesById[id].alive) ?? g.entityIds[0]]);
+    const level = groupBaseLevelV1(s, g);
     record2.snapshot = { version: "episode-progression-d9-v1", snapshotId: record2.anchorId + "/episode/" + String(record2.episode), activatedTick: g.threatSnapshot.activatedTick, trigger: "activation", minimumLevel: 1, effectiveLevel: level, sourceDepth: copyWire(level), mappingVersion: "effective-level-depth-d9-v1", rank, participants: [] };
   }
   return record2;
@@ -21499,7 +21509,7 @@ function upgradeOriginHordes(s) {
     if (expand) {
       if (g.threatSnapshot) {
         const level = copyWire(s.d9World.episodes[g.groupId].snapshot.effectiveLevel);
-        for (const m of definition.members.slice(2)) g.threatSnapshot.levelsByEntityId[m.entityId] = copyWire(level);
+        for (const m of definition.members.slice(2)) g.threatSnapshot.levelsByEntityId[m.entityId] = memberLevelV1(s, level, m.entityId);
       }
       for (const member of definition.members.slice(2)) {
         requireContract(!s.entitiesById[member.entityId], "Origin extension identity collision");
