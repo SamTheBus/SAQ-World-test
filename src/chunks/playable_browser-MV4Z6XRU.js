@@ -397,7 +397,6 @@ import {
   canonicalStringify,
   capeSlotAvailable,
   captureWorldPositionsD9,
-  carriedGearWitness,
   certifyNumeric,
   chunkAddressKey,
   chunkScalesV1,
@@ -952,7 +951,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-XKTANNOO.js";
+} from "./chunk-ZSDJHW4R.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -52633,7 +52632,7 @@ function falchion(c, A) {
   gem(c, 16.7, 0, 1.4, A.gem);
 }
 var LEAF = { b: "#58a55c", d: "#3f7d43" };
-var stoneOf3 = (A, plain2) => A.gem ? { b: A.c, d: A.d } : plain2;
+var stoneOf3 = (A, plain3) => A.gem ? { b: A.c, d: A.d } : plain3;
 function stoneGlow(c, A, x, y, r, t, speed = 3) {
   if (!A.gem) return;
   const [cr, cg, cb] = hexRgb(A.c);
@@ -54851,9 +54850,9 @@ function extractHeroPassport(state, playerId, { heroId }) {
     gear2.push(item);
   }
   gear2.map((item) => ({ item, text: canonicalStringify(itemContent(item)) })).sort((a, b) => a.text < b.text ? -1 : a.text > b.text ? 1 : 0).forEach(({ item }, n) => {
-    const key2 = "gear:" + n, witness = item.generated ? carriedGearWitness(item.generated) : null;
+    const key2 = "gear:" + n;
     keyOf2[item.itemId] = key2;
-    items.push({ key: key2, kind: "gear", ...itemContent(item), ...item.generated ? { witness } : {} });
+    items.push({ key: key2, kind: "gear", ...itemContent(item) });
   });
   items.sort((a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0);
   const equipped = {};
@@ -54874,6 +54873,15 @@ function extractHeroPassport(state, playerId, { heroId }) {
     equipped
   };
 }
+var plain2 = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
+function validatePassportItem(item) {
+  requireContract(plain2(item), "Hero passport item");
+  const extra = { kit: ["piece"], provision: ["provision"] }[item.kind] ?? [];
+  closedRecord(item, ["key", "kind", "definitionId", ...extra], ["generated", "workshop"]);
+  requireContract(typeof item.key === "string" && Boolean(EQUIPMENT[item.definitionId]), "Hero passport item definition");
+  requireContract(item.kind === "starter" ? item.key === "starter" && item.definitionId === "worn-sword" : item.kind === "kit" ? CLASS_KIT_PIECES.includes(item.piece) && item.key === "kit:" + item.piece : item.kind === "provision" ? SUBWEAPON_TYPES.includes(item.provision) && item.key === "provision:" + item.provision : item.kind === "gear" && /^gear:[0-9]{1,4}$/.test(item.key), "Hero passport item kind");
+  requireContract((item.generated === void 0 || plain2(item.generated)) && (item.workshop === void 0 || plain2(item.workshop)), "Hero passport item data");
+}
 function validateHeroPassport(passport) {
   closedRecord(passport, ["version", "heroId", "progression", "d8", "gold", "materials", "slotLevels", "potions", "kit", "provisions", "items", "equipped"]);
   requireContract(passport.version === HERO_PASSPORT_VERSION && validHeroId(passport.heroId), "Unknown hero passport");
@@ -54884,7 +54892,8 @@ function validateHeroPassport(passport) {
   requireContract(Array.isArray(passport.items) && passport.items.length >= 1 && passport.items.length <= 4096, "Hero passport items");
   const keys2 = /* @__PURE__ */ new Set();
   for (const item of passport.items) {
-    requireContract(typeof item.key === "string" && !keys2.has(item.key) && EQUIPMENT[item.definitionId] || item.generated, "Hero passport item");
+    validatePassportItem(item);
+    requireContract(!keys2.has(item.key), "Hero passport item key repeats");
     keys2.add(item.key);
   }
   requireContract(keys2.has("starter"), "Hero passport lost the starter sword");
@@ -54972,8 +54981,7 @@ function arriveHeroPassport(state, playerId, passport) {
       inv.renewal.originsByItemId[itemId] = { provision: item.provision, sourceEntityId };
       continue;
     }
-    if (item.generated) requireContract(item.witness !== null, "Carried gear has no seed witness");
-    inv.renewal.originsByItemId[itemId] = { carried: passport.heroId, sourceEntityId, ...item.generated && Object.keys(item.witness).length ? { witness: copyWire(item.witness) } : {} };
+    inv.renewal.originsByItemId[itemId] = { carried: passport.heroId, sourceEntityId };
   }
   if (passport.kit !== null) inv.classKit = { version: CLASS_KIT_VERSION, heroClass: passport.kit, sourceEntityIds: CLASS_KIT_PIECES.map((piece3) => kitIds[piece3]), arrival: passport.heroId };
   const slots2 = equipmentSlots({ ...inv, equipped: passport.equipped });
@@ -56458,8 +56466,8 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
   const standsRow = (c, x, y) => {
     const s = stands.tileAt(x, y);
     if (!s || c.kind === "bridge" || c.material === "H" || c.material === "V") return ".";
-    const plain2 = c.town || c.caveExterior || c.fortExterior || c.ruinExterior || c.wildernessTrack || c.wildernessClearing || c.route > 0 || c.collision !== "1";
-    return standsCell(s.zone, !plain2 && s.cover, !plain2 && s.trail);
+    const plain3 = c.town || c.caveExterior || c.fortExterior || c.ruinExterior || c.wildernessTrack || c.wildernessClearing || c.route > 0 || c.collision !== "1";
+    return standsCell(s.zone, !plain3 && s.cover, !plain3 && s.trail);
   };
   const accessChunks = /* @__PURE__ */ new Set();
   if (asset.firstJourney) {
@@ -73313,8 +73321,8 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     h.append(el("small", n?.roleLabel ?? ""));
     who.append(h);
     const acts = el("div", null, "qx-acts");
-    const btn = (label4, fn, plain2) => {
-      const b = el("button", label4, "qx-btn" + (plain2 ? " is-plain" : ""));
+    const btn = (label4, fn, plain3) => {
+      const b = el("button", label4, "qx-btn" + (plain3 ? " is-plain" : ""));
       b.type = "button";
       b.disabled = busy;
       b.onclick = fn;
@@ -80478,7 +80486,7 @@ var WEAPONS2 = {
 };
 var LEAF2 = { b: "#58a55c", d: "#3f7d43", l: "#79c47c" };
 var OPEN = "#1d232b";
-var stoneOf4 = (A, plain2) => A.gem ? { b: A.c, d: A.d, l: "#ffffff" } : plain2;
+var stoneOf4 = (A, plain3) => A.gem ? { b: A.c, d: A.d, l: "#ffffff" } : plain3;
 function arcBand2(cx, cy2, r0, r1, a0, a1, n = 12) {
   const pts2 = [];
   for (let i = 0; i <= n; i++) {
