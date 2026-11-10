@@ -74,6 +74,31 @@ function walkWire(value, mode) {
   const cloned = visit(value, 0);
   return mode ? cloned : value;
 }
+function validateWire(value) {
+  return walkWire(value, 0);
+}
+function closedRecord(value, required, optional = []) {
+  requireContract(value !== null && typeof value === "object" && !Array.isArray(value), "Expected record");
+  const keys = Object.keys(value);
+  requireContract(required.every((key2) => Object.hasOwn(value, key2)), "Missing field");
+  requireContract(keys.every((key2) => required.includes(key2) || optional.includes(key2)), "Unknown field");
+  return value;
+}
+function safeInteger(value, minimum = 0, maximum = Number.MAX_SAFE_INTEGER) {
+  requireContract(Number.isSafeInteger(value) && value >= minimum && value <= maximum, "Invalid safe integer");
+  return value;
+}
+function validateBigNumWire(value) {
+  validateWire(value);
+  closedRecord(value, ["m", "e"]);
+  requireContract(typeof value.m === "number" && Number.isFinite(value.m), "Invalid mantissa");
+  safeInteger(value.e, -Number.MAX_SAFE_INTEGER);
+  requireContract(
+    value.m === 0 ? value.e === 0 : Math.abs(value.m) >= 1 && Math.abs(value.m) < 10,
+    "BigNum wire must be normalized"
+  );
+  return value;
+}
 function freezeWire(value) {
   return walkWire(value, 2);
 }
@@ -612,6 +637,77 @@ var BIOME_BOSS_POOLS_V1 = Object.freeze({ ghostfire: Object.freeze([44, 300]), s
 // src/shared/content/recovered_boss_catalog_v4.js
 var RECOVERED_BOSSES2 = Object.freeze({ ...RECOVERED_BOSSES, corrosive_abomination: Object.freeze({ ...RECOVERED_BOSSES.corrosive_abomination, adds: CORROSIVE_SHEDDING_V4.maxDamageSheds, sheddingPolicy: 4 }), ...BIOME_BOSSES_V1 });
 
+// src/shared/contracts/combat_integer.js
+var MAX_BOUNDED_COMBAT_INTEGER = 1e9;
+function decimalCoefficient(value) {
+  const match = /^(\d+)(?:\.(\d+))?(?:e([+-]?\d+))?$/i.exec(String(value));
+  requireContract(match !== null, "Invalid combat mantissa decimal form");
+  const fraction = match[2] ?? "";
+  return {
+    coefficient: BigInt(`${match[1]}${fraction}`),
+    exponent: Number(match[3] ?? 0) - fraction.length
+  };
+}
+function boundedCombatInteger(value) {
+  validateBigNumWire(value);
+  requireContract(value.m >= 0, "Bounded combat integer cannot be negative");
+  if (value.m === 0) return 0;
+  const decimal = decimalCoefficient(value.m);
+  const exponent = decimal.exponent + value.e;
+  requireContract(exponent >= -32 && exponent <= 9, "Bounded combat integer is out of range");
+  let integer;
+  if (exponent >= 0) integer = decimal.coefficient * 10n ** BigInt(exponent);
+  else {
+    const divisor = 10n ** BigInt(-exponent);
+    requireContract(decimal.coefficient % divisor === 0n, "Bounded combat value is fractional");
+    integer = decimal.coefficient / divisor;
+  }
+  requireContract(integer <= BigInt(MAX_BOUNDED_COMBAT_INTEGER), "Bounded combat integer is out of range");
+  return Number(integer);
+}
+function combatIntegerWire(value) {
+  safeInteger(value, 0, MAX_BOUNDED_COMBAT_INTEGER);
+  if (value === 0) return freezeWire({ m: 0, e: 0 });
+  const digits = String(value);
+  const exponent = digits.length - 1;
+  const mantissa = Number(exponent === 0 ? digits : `${digits[0]}.${digits.slice(1)}`);
+  const wire = freezeWire({ m: mantissa, e: exponent });
+  requireContract(boundedCombatInteger(wire) === value, "Combat integer codec round-trip failure");
+  return wire;
+}
+
+// src/shared/content/bosses_d12_5.js
+var ARACHNID_TREANT_BOSS_ID = "arachnid_treant";
+var ARACHNID_TREANT_PROFILE = freezeWire({
+  contentDefinitionId: "def:d4500000000000000000000000000001",
+  kind: "actorProfile",
+  profileKey: "boss-arachnid-treant",
+  team: "hostile",
+  maxHp: combatIntegerWire(960),
+  attackDamage: combatIntegerWire(18),
+  moveSpeed: 1.3,
+  hullRadius: 34,
+  combatRadius: 36,
+  attackReach: 32,
+  attackReachMode: "center",
+  attackDelayTicks: 50,
+  aiKind: "simpleMelee",
+  isBoss: true
+});
+var ARACHNID_TREANT_D12_5A = freezeWire({
+  bossId: ARACHNID_TREANT_BOSS_ID,
+  label: "ARACHNID TREANT",
+  phaseTwoHealth: { numerator: 1, denominator: 2 },
+  pursuitRange: 220,
+  closeStrikeRange: 32,
+  closeStrikeCooldownTicks: 50,
+  abilityRecoveryTicks: 120,
+  telegraphTicks: 75,
+  slam: { radius: 64, damage: { numerator: 18, denominator: 10 } },
+  rootSnare: { impactRadius: 75, damage: { numerator: 13, denominator: 10 }, durationTicks: 132, movementMultiplier: { numerator: 2, denominator: 5 }, hazardDurationTicks: 300, hazardRadiusX: 75, hazardRadiusY: 33.75, statusId: "treant_root_snare" },
+  barkShield: { damageMultiplier: { numerator: 1, denominator: 10 }, summonCount: 3, cocoonRadius: 54, hatchTicks: 240, breakRecoveryTicks: 60 }
+});
+
 // src/shared/content/world_profile_d9.js
 var D9_PROFILE = freezeWire({
   version: "world-geography-d9-v1",
@@ -648,26 +744,6 @@ var D9_PROFILE = freezeWire({
 // src/shared/contracts/local_world_frames_d9.js
 var FRAME_CHUNKS = 64;
 var STRIDE = FRAME_CHUNKS * 2 * D9_PROFILE.chunkWidth;
-
-// src/shared/content/boss_hosting_v1.js
-var BOSS_HOSTING_VERSION = "site-boss-hosting-v1";
-var BOSS_HOSTING_POLICY = freezeWire({ version: BOSS_HOSTING_VERSION, parentRuntime: "c36909555b042989", parentGeneration: "core-families-multiroom-v1", playerCount: 4, playerHull: 9, bossHull: 34, roomSelection: "explicit-final-reward", preserveGeometry: true, preserveRosterIdentities: true, preserveAttacks: true, partyStagingSeparation: 64, partyArrivalVersion: "site-party-arrival-v1", missingBoss: "structured-hard-failure", supportHullUpperBound: 20, scope: "constructed-arena-capacity-not-network-or-balance-approval" });
-
-// src/shared/generation/forest_stands_v2.js
-var FOREST_STANDS_VERSION = "forest-stands-v2";
-var FOREST_STANDS_PREFIX = FOREST_STANDS_VERSION + ":";
-var FOREST_STAND_PROFILES = Object.freeze({
-  w: { glade: 0.36, forest: 0.5, core: 0.8, treeOpen: 0.34, treeForest: 0.92, lone: 0.05, massCore: 0.9, massForest: 0.06, cover: "fern", coverAt: 0.66, water: 0, height: 0 },
-  t: { glade: 0.2, forest: 0.32, core: 0.62, treeOpen: 0.5, treeForest: 0.96, lone: 0.08, massCore: 0.95, massForest: 0.3, cover: "fern", coverAt: 0.56, water: 0.06, height: 0, grove: "bamboo" },
-  m: { glade: 0.4, forest: 0.56, core: 0.84, treeOpen: 0.3, treeForest: 0.86, lone: 0.06, massCore: 0.8, massForest: 0.05, cover: "reed", coverAt: 0.48, water: 0.42, height: 0 },
-  a: { scale: 0.5, glade: 0.68, forest: 0.79, core: 0.95, treeOpen: 0.22, treeForest: 0.9, lone: 0.035, massCore: 0.7, massForest: 0, cover: "grass", coverAt: 0.58, water: 0.2, height: 0, hedges: true },
-  r: { glade: 0.44, forest: 0.56, core: 0.86, treeOpen: 0.28, treeForest: 0.88, lone: 0.03, massCore: 0.6, massForest: 0, cover: "heather", coverAt: 0.54, water: 0.08, height: 0.55, outcrop: 0.7 },
-  s: { glade: 0.44, forest: 0.56, core: 0.88, treeOpen: 0.26, treeForest: 0.9, lone: 0.03, massCore: 0.5, massForest: 0, cover: null, coverAt: 1, water: 0, height: 0.5, outcrop: 0.74 },
-  d: { glade: 0.64, forest: 2, core: 2, treeOpen: 0.2, treeForest: 0, lone: 0.018, massCore: 0, massForest: 0, cover: null, coverAt: 1, water: 0.9, height: 0, outcrop: 0.7, oasis: true },
-  l: { glade: 0.56, forest: 2, core: 2, treeOpen: 0.38, treeForest: 0, lone: 0.02, massCore: 0, massForest: 0, cover: null, coverAt: 1, water: 0, height: 0, outcrop: 0.62 }
-});
-var STAND_ZONE = Object.freeze({ GLADE: 0, OPEN: 1, FOREST: 2, CORE: 3 });
-var ROCK_MASSES = Object.freeze(["outcrop", "mesa", "lava-rock"]);
 
 // src/shared/contracts/integer_domain.js
 var INTEGER_MAX_DIGITS = 65536;
@@ -765,6 +841,48 @@ var DROP_MATERIALS_V1 = Object.freeze([...ECONOMY_V1.materialDrops.materials]);
 // src/shared/content/world_combat_v1.js
 var WORLD_COMBAT_VERSION = "world-combat-hordes-progression-v1";
 var WORLD_COMBAT_POLICY = freezeWire({ version: WORLD_COMBAT_VERSION, parentRuntime: "3da5e7e40452aa32", reviewRevision: 3, parentCombatRuntime: "f474d024b06426c4", bandLevels: [1, 6, 11, 21, 41], primary: { reachClearHullGapPixels: 32, forwardDotMinimum: 0.1, cleaveTargetsByCombo: [4, 6, 8], cadence: "existing 22/24/40 tick combo, movement multipliers unchanged" }, forge: { firstAttuneGold: 30, firstAttuneSouls: 2, flatAttackPerWeaponAttune: 2, flatArmorHpPerAttune: 8, enchantSlotLevel: 3, pricing: "World progression successor; Dungeon mechanics and UI retained" }, ordinaryPack: [6, 12], floorPacks: { small: 3, standard: 3, large: 4, deep: 4 }, floorPackSize: [6, 8], maximumFloorMembers: 40, activeActors: 192, retainedSiteActors: 4096, retainedSiteGroups: 128, worldActors: 192, renewalVacancyTicks: 18e3, gearChancePercent: 10, soulChancePercent: 35, equipmentLevel: "encounter level equals item power; regional minimum and participant escalation preserved", ordinaryStats: "HP=(30+6*(L-1)+(L-1)^2/8)*familyHP/45*rank; damage=(3+2*(L-1))*familyDamage/6*rank", xp: "per recipient: reward level min(locked encounter level,hero level+2); base1+integerSqrt(reward level); rankC100/B140/A200/S300hundredths, elitex3 or bossx15atC, ceil rank reward; multiply4/(4+max(abs(enemy level-hero level)-2,0)^2),floor and allow0; mastery applies afterward", levelGap: { graceLevels: 2, outgoing: "4/(4+max(enemy level-hero level-2,0)^2)", incoming: "min(4,(4+max(enemy level-hero level-2,0)^2)/4)", policy: "Deterministic per-recipient frozen enemy level and current hero level; every delivered damage packet once, after attack/crit and before wards, barrier or defense; no random misses" }, engagement: { threat: "actor-relative threat with frozen encounter level retained", initialAcquireLineOfSight: true, attackLineOfSight: true, interiorPursuitMemoryTicks: 600, disengageTicks: 120, returnHealing: false }, equipmentRequirement: "World combat generated itemPower <= hero level; higher-level finds remain owned, sellable and salvageable", rarity: { unit: "basis points", status: "provisional World tuning; natural drops unlock Legendary at21 and Mythic at41; existing Awaken path retained", below21: { ordinary: [7e3, 2400, 500, 100, 0, 0], completion: [0, 6500, 3e3, 500, 0, 0] }, from21: { ordinary: [7e3, 2400, 500, 95, 5, 0], completion: [0, 6500, 3e3, 450, 50, 0] }, from41: { ordinary: [7e3, 2400, 500, 90, 9, 1], completion: [0, 6500, 3e3, 400, 90, 10] } }, economy: "enemy gold 1+level/4; chest 20+4*level and guaranteed gear; elite gold x3 and guaranteed gear", safety: "all settlement/site/faction/future-island protected chunks plus one-chunk collar; ferry and spawn safety; prepare at 768px, no placement within 384px of any actor", respawn: "existing 18000 active tick vacant cleared encounter renewal, unresolved ownership gates retained", simulation: "60Hz unchanged; spatial activation, separation, LOS and interior navigation retained" });
+
+// src/shared/content/wilderness_fairness_v3_2.js
+var WILDERNESS_FAIRNESS_V3_2_VERSION = "wilderness-v3-2-level-fairness-1";
+var WILDERNESS_FAIRNESS_V3_2 = Object.freeze({
+  version: WILDERNESS_FAIRNESS_V3_2_VERSION,
+  enemyBaseDamage: "unchanged; no additional multiplier from level difference",
+  enemyDamageAmplification: "boss/elite abilities remain independent of level difference",
+  playerOffense: "preserve exact existing higher-level resistance",
+  historicWorldCombatV1: "immutable; retain published level-gap contract for legacy non-wilderness worlds",
+  eligibility: "world-combat-v1 plus committed wilderness-v2 world binding",
+  pendingSeparateTuning: "cleave reach and simultaneous incoming hit protection"
+});
+
+// src/shared/content/brimstone_colossus_v1.js
+var BRIMSTONE = freezeWire({
+  label: "BRIMSTONE COLOSSUS",
+  range: 220,
+  recoveryTicks: 120,
+  strike: { telegraphTicks: 24, recoveryTicks: 50, radius: 52, halfAngle: 0.95, damageNumerator: 10 },
+  slam: { telegraphTicks: 75, radius: 64, damageNumerator: 18 },
+  magma_vents: { telegraphTicks: 75, count: 2, boilTicks: 270, flashTicks: 18, reach: 96, halfWidth: 12, damageNumerator: 13, maxActive: 6 }
+});
+
+// src/shared/content/boss_hosting_v1.js
+var BOSS_HOSTING_VERSION = "site-boss-hosting-v1";
+var BOSS_HOSTING_POLICY = freezeWire({ version: BOSS_HOSTING_VERSION, parentRuntime: "c36909555b042989", parentGeneration: "core-families-multiroom-v1", playerCount: 4, playerHull: 9, bossHull: 34, roomSelection: "explicit-final-reward", preserveGeometry: true, preserveRosterIdentities: true, preserveAttacks: true, partyStagingSeparation: 64, partyArrivalVersion: "site-party-arrival-v1", missingBoss: "structured-hard-failure", supportHullUpperBound: 20, scope: "constructed-arena-capacity-not-network-or-balance-approval" });
+
+// src/shared/generation/forest_stands_v2.js
+var FOREST_STANDS_VERSION = "forest-stands-v2";
+var FOREST_STANDS_PREFIX = FOREST_STANDS_VERSION + ":";
+var FOREST_STAND_PROFILES = Object.freeze({
+  w: { glade: 0.36, forest: 0.5, core: 0.8, treeOpen: 0.34, treeForest: 0.92, lone: 0.05, massCore: 0.9, massForest: 0.06, cover: "fern", coverAt: 0.66, water: 0, height: 0 },
+  t: { glade: 0.2, forest: 0.32, core: 0.62, treeOpen: 0.5, treeForest: 0.96, lone: 0.08, massCore: 0.95, massForest: 0.3, cover: "fern", coverAt: 0.56, water: 0.06, height: 0, grove: "bamboo" },
+  m: { glade: 0.4, forest: 0.56, core: 0.84, treeOpen: 0.3, treeForest: 0.86, lone: 0.06, massCore: 0.8, massForest: 0.05, cover: "reed", coverAt: 0.48, water: 0.42, height: 0 },
+  a: { scale: 0.5, glade: 0.68, forest: 0.79, core: 0.95, treeOpen: 0.22, treeForest: 0.9, lone: 0.035, massCore: 0.7, massForest: 0, cover: "grass", coverAt: 0.58, water: 0.2, height: 0, hedges: true },
+  r: { glade: 0.44, forest: 0.56, core: 0.86, treeOpen: 0.28, treeForest: 0.88, lone: 0.03, massCore: 0.6, massForest: 0, cover: "heather", coverAt: 0.54, water: 0.08, height: 0.55, outcrop: 0.7 },
+  s: { glade: 0.44, forest: 0.56, core: 0.88, treeOpen: 0.26, treeForest: 0.9, lone: 0.03, massCore: 0.5, massForest: 0, cover: null, coverAt: 1, water: 0, height: 0.5, outcrop: 0.74 },
+  d: { glade: 0.64, forest: 2, core: 2, treeOpen: 0.2, treeForest: 0, lone: 0.018, massCore: 0, massForest: 0, cover: null, coverAt: 1, water: 0.9, height: 0, outcrop: 0.7, oasis: true },
+  l: { glade: 0.56, forest: 2, core: 2, treeOpen: 0.38, treeForest: 0, lone: 0.02, massCore: 0, massForest: 0, cover: null, coverAt: 1, water: 0, height: 0, outcrop: 0.62 }
+});
+var STAND_ZONE = Object.freeze({ GLADE: 0, OPEN: 1, FOREST: 2, CORE: 3 });
+var ROCK_MASSES = Object.freeze(["outcrop", "mesa", "lava-rock"]);
 
 // src/shared/content/settlement_life_alpha_v1.js
 var LIFE_VILLAGE_ID = "settlement-slot:village-outpost:02";

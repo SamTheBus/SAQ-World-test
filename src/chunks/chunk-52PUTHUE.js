@@ -3111,6 +3111,126 @@ function recoveredBossForReservation2(reservationId, family2, index, floorCount,
   return native?.family === family2 ? native : null;
 }
 
+// src/shared/content/bosses_d12_5.js
+var ARACHNID_TREANT_BOSS_ID = "arachnid_treant";
+var ARACHNID_TREANT_PROFILE = freezeWire({
+  contentDefinitionId: "def:d4500000000000000000000000000001",
+  kind: "actorProfile",
+  profileKey: "boss-arachnid-treant",
+  team: "hostile",
+  maxHp: combatIntegerWire(960),
+  attackDamage: combatIntegerWire(18),
+  moveSpeed: 1.3,
+  hullRadius: 34,
+  combatRadius: 36,
+  attackReach: 32,
+  attackReachMode: "center",
+  attackDelayTicks: 50,
+  aiKind: "simpleMelee",
+  isBoss: true
+});
+var ARACHNID_TREANT_D12_5A = freezeWire({
+  bossId: ARACHNID_TREANT_BOSS_ID,
+  label: "ARACHNID TREANT",
+  phaseTwoHealth: { numerator: 1, denominator: 2 },
+  pursuitRange: 220,
+  closeStrikeRange: 32,
+  closeStrikeCooldownTicks: 50,
+  abilityRecoveryTicks: 120,
+  telegraphTicks: 75,
+  slam: { radius: 64, damage: { numerator: 18, denominator: 10 } },
+  rootSnare: { impactRadius: 75, damage: { numerator: 13, denominator: 10 }, durationTicks: 132, movementMultiplier: { numerator: 2, denominator: 5 }, hazardDurationTicks: 300, hazardRadiusX: 75, hazardRadiusY: 33.75, statusId: "treant_root_snare" },
+  barkShield: { damageMultiplier: { numerator: 1, denominator: 10 }, summonCount: 3, cocoonRadius: 54, hatchTicks: 240, breakRecoveryTicks: 60 }
+});
+
+// src/shared/content/wilderness_fairness_v3_2.js
+var WILDERNESS_FAIRNESS_V3_2_VERSION = "wilderness-v3-2-level-fairness-1";
+var WILDERNESS_FAIRNESS_V3_2 = Object.freeze({
+  version: WILDERNESS_FAIRNESS_V3_2_VERSION,
+  enemyBaseDamage: "unchanged; no additional multiplier from level difference",
+  enemyDamageAmplification: "boss/elite abilities remain independent of level difference",
+  playerOffense: "preserve exact existing higher-level resistance",
+  historicWorldCombatV1: "immutable; retain published level-gap contract for legacy non-wilderness worlds",
+  eligibility: "world-combat-v1 plus committed wilderness-v2 world binding",
+  pendingSeparateTuning: "cleave reach and simultaneous incoming hit protection"
+});
+var usesWildernessFairnessV3_2 = (state) => hasWorldCombat(state) && hasWilderness(state?.d9World?.plannedWorld);
+function wildernessFairLevelGap(heroLevel, enemyLevel) {
+  const old = worldLevelGapMultiplier(heroLevel, enemyLevel);
+  return { outgoing: old.outgoing, incoming: combatAmount(1) };
+}
+
+// src/shared/content/brimstone_colossus_v1.js
+var BRIMSTONE_ID = "overlord_iron_vault";
+var BRIMSTONE_PROFILE = ARACHNID_TREANT_PROFILE;
+var BRIMSTONE = freezeWire({
+  label: "BRIMSTONE COLOSSUS",
+  range: 220,
+  recoveryTicks: 120,
+  strike: { telegraphTicks: 24, recoveryTicks: 50, radius: 52, halfAngle: 0.95, damageNumerator: 10 },
+  slam: { telegraphTicks: 75, radius: 64, damageNumerator: 18 },
+  magma_vents: { telegraphTicks: 75, count: 2, boilTicks: 270, flashTicks: 18, reach: 96, halfWidth: 12, damageNumerator: 13, maxActive: 6 }
+});
+var brimstoneFortHereV1 = (reservationId) => {
+  const s = worldSiteV1(reservationId);
+  return !s || s.biome === "volcanic";
+};
+var brimstoneFortFloor = (site, index) => site.familyId === "site-family:fort" && site.sizeTier === "large" && index === site.floorCount - 1 && brimstoneFortHereV1(site.socket?.provenance?.reservationId);
+function brimstoneVolcanicRuinFloorV4(site, index, state) {
+  return site?.familyId === "site-family:ruin" && site.sizeTier === "large" && index === site.floorCount - 1 && site.socket?.provenance?.reservationId === bossSiteV1("brimstone_colossus") && site.socket?.region?.biome === "volcanic" && usesWildernessFairnessV3_2(state);
+}
+function brimstoneRuinArenaProofV4(c, position) {
+  if (collidesWithTiles(c, position.x, position.y, 34)) return null;
+  const arms = brimstoneVentArms(c, position);
+  const horizontal = arms.east + arms.west, vertical = arms.north + arms.south;
+  if (Math.min(...Object.values(arms)) < 24 || horizontal < 112 || vertical < 112) return null;
+  return { arms, horizontal, vertical, shortest: Math.min(...Object.values(arms)) };
+}
+function chooseBrimstoneRuinAnchorV4(recipe) {
+  const c = recipe?.collision, leader = recipe?.encounter?.members?.[0];
+  if (!c || !leader) return null;
+  const others = recipe.encounter.members.slice(1).map((m) => m.position);
+  const room2 = recipe.graph?.rooms?.find((r) => r.roomId === leader.roomId);
+  const boxes = [...room2?.bounds ? [room2.bounds] : room2 && Number.isInteger(room2.cx) ? [
+    { x: room2.cx - room2.rx, y: room2.cy - room2.ry, width: room2.rx * 2 + 1, height: room2.ry * 2 + 1 }
+  ] : [], { x: 2, y: 2, width: c.width - 4, height: c.height - 4 }];
+  const options = [];
+  for (const [scope, b] of boxes.entries()) for (let y = b.y; y < b.y + b.height; y++) for (let x = b.x; x < b.x + b.width; x++) {
+    if (x <= 1 || y <= 1 || x >= c.width - 2 || y >= c.height - 2 || c.tiles[y]?.[x] !== "1") continue;
+    const p = { x: (x + 0.5) * c.tileSize, y: (y + 0.5) * c.tileSize }, distance4 = Math.hypot(p.x - leader.position.x, p.y - leader.position.y);
+    if (distance4 > 416 || Math.hypot(p.x - recipe.entrance.x, p.y - recipe.entrance.y) < 160 || others.some((m) => Math.hypot(m.x - p.x, m.y - p.y) < 62)) continue;
+    const proof2 = brimstoneRuinArenaProofV4(c, p);
+    if (!proof2) continue;
+    options.push({ position: p, scope, proof: proof2, score: Math.min(proof2.horizontal, proof2.vertical) * 2 + proof2.shortest * 3 - distance4 * 0.3 });
+  }
+  options.sort((a, b) => a.scope - b.scope || b.score - a.score || a.position.y - b.position.y || a.position.x - b.position.x);
+  return options[0] ? { position: options[0].position, ...options[0].proof } : null;
+}
+function brimstoneLineClear(c, a, b) {
+  const n = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 2));
+  for (let i = 0; i <= n; i++) {
+    const q = i / n;
+    if (collidesWithTiles(c, a.x + (b.x - a.x) * q, a.y + (b.y - a.y) * q, 1)) return false;
+  }
+  return true;
+}
+function brimstoneVentArms(c, p) {
+  const arms = {};
+  for (const [key5, dx, dy] of [["east", 1, 0], ["west", -1, 0], ["north", 0, -1], ["south", 0, 1]]) {
+    let length = 0;
+    for (let d = 2; d <= 96; d += 2) {
+      if (collidesWithTiles(c, p.x + dx * d, p.y + dy * d, 12)) break;
+      length = d;
+    }
+    arms[key5] = length;
+  }
+  return arms;
+}
+function brimstoneVentContains(v, p) {
+  const x = p.x - v.position.x, y = p.y - v.position.y;
+  return Math.abs(y) <= 12 && x >= -v.arms.west && x <= v.arms.east || Math.abs(x) <= 12 && y >= -v.arms.north && y <= v.arms.south;
+}
+
 // src/shared/content/boss_hosting_v1.js
 var BOSS_HOSTING_VERSION = "site-boss-hosting-v1";
 var BOSS_HOSTING_POLICY = freezeWire({ version: BOSS_HOSTING_VERSION, parentRuntime: "c36909555b042989", parentGeneration: "core-families-multiroom-v1", playerCount: 4, playerHull: 9, bossHull: 34, roomSelection: "explicit-final-reward", preserveGeometry: true, preserveRosterIdentities: true, preserveAttacks: true, partyStagingSeparation: 64, partyArrivalVersion: "site-party-arrival-v1", missingBoss: "structured-hard-failure", supportHullUpperBound: 20, scope: "constructed-arena-capacity-not-network-or-balance-approval" });
@@ -3136,7 +3256,7 @@ function bossHostingSpecV1({ family: family2, tier, index, floorCount, reservati
   const restored = [RECOVERED_BOSSES2[bossAtSiteV1(reservationId)]].find((b) => b?.family === family2);
   if (restored) return { kind: restored.id, hullRadius: 34, supportCount: restored.adds, liveSupportCount: restored.id === "corrosive_abomination" ? 6 : restored.adds };
   if (family2 === "fort" && (tier === "standard" || tier === "deep" && wilderness && reservationId === bossSiteV1("aegis_goliath"))) return { kind: "aegis_goliath", hullRadius: 34, supportCount: 3, liveSupportCount: 3 };
-  if (family2 === "fort" && tier === "large" || family2 === "ruin" && wilderness && tier === "large" && reservationId === bossSiteV1("brimstone_colossus")) return { kind: "overlord_iron_vault", hullRadius: 34, supportCount: 0, liveSupportCount: 0 };
+  if (family2 === "fort" && tier === "large" && brimstoneFortHereV1(reservationId) || family2 === "ruin" && wilderness && tier === "large" && reservationId === bossSiteV1("brimstone_colossus")) return { kind: "overlord_iron_vault", hullRadius: 34, supportCount: 0, liveSupportCount: 0 };
   return null;
 }
 function fieldDistance(allowed, start) {
@@ -4868,23 +4988,6 @@ for (const [biome, roles] of Object.entries(WILDERNESS_ECOLOGY_V3_MATRIX)) {
   }
 }
 for (const f3 of Object.values(WILDERNESS_ECOLOGY_RARE_SITE_THEMES).flat()) if (!existingCreature(f3)) throw Error("Unknown exotic creature " + f3);
-
-// src/shared/content/wilderness_fairness_v3_2.js
-var WILDERNESS_FAIRNESS_V3_2_VERSION = "wilderness-v3-2-level-fairness-1";
-var WILDERNESS_FAIRNESS_V3_2 = Object.freeze({
-  version: WILDERNESS_FAIRNESS_V3_2_VERSION,
-  enemyBaseDamage: "unchanged; no additional multiplier from level difference",
-  enemyDamageAmplification: "boss/elite abilities remain independent of level difference",
-  playerOffense: "preserve exact existing higher-level resistance",
-  historicWorldCombatV1: "immutable; retain published level-gap contract for legacy non-wilderness worlds",
-  eligibility: "world-combat-v1 plus committed wilderness-v2 world binding",
-  pendingSeparateTuning: "cleave reach and simultaneous incoming hit protection"
-});
-var usesWildernessFairnessV3_2 = (state) => hasWorldCombat(state) && hasWilderness(state?.d9World?.plannedWorld);
-function wildernessFairLevelGap(heroLevel, enemyLevel) {
-  const old = worldLevelGapMultiplier(heroLevel, enemyLevel);
-  return { outgoing: old.outgoing, incoming: combatAmount(1) };
-}
 
 // src/shared/content/alpha_site_population_v1.js
 var ALPHA_POPULATION_VERSION = "planned-alpha-site-population-v1";
@@ -14244,38 +14347,6 @@ function resetEncounterSnapshotV2(prior, { tick, minimumLevel, participants, sca
   return { ...prior, activatedTick: tick, minimumLevel: progressionWire(progressionBigInt(minimumLevel)), effectiveLevel: level, sourceDepth: level, participants: participants.map((p) => ({ playerId: p.playerId, heroLevel: progressionWire(progressionBigInt(p.heroLevel)) })) };
 }
 
-// src/shared/content/bosses_d12_5.js
-var ARACHNID_TREANT_BOSS_ID = "arachnid_treant";
-var ARACHNID_TREANT_PROFILE = freezeWire({
-  contentDefinitionId: "def:d4500000000000000000000000000001",
-  kind: "actorProfile",
-  profileKey: "boss-arachnid-treant",
-  team: "hostile",
-  maxHp: combatIntegerWire(960),
-  attackDamage: combatIntegerWire(18),
-  moveSpeed: 1.3,
-  hullRadius: 34,
-  combatRadius: 36,
-  attackReach: 32,
-  attackReachMode: "center",
-  attackDelayTicks: 50,
-  aiKind: "simpleMelee",
-  isBoss: true
-});
-var ARACHNID_TREANT_D12_5A = freezeWire({
-  bossId: ARACHNID_TREANT_BOSS_ID,
-  label: "ARACHNID TREANT",
-  phaseTwoHealth: { numerator: 1, denominator: 2 },
-  pursuitRange: 220,
-  closeStrikeRange: 32,
-  closeStrikeCooldownTicks: 50,
-  abilityRecoveryTicks: 120,
-  telegraphTicks: 75,
-  slam: { radius: 64, damage: { numerator: 18, denominator: 10 } },
-  rootSnare: { impactRadius: 75, damage: { numerator: 13, denominator: 10 }, durationTicks: 132, movementMultiplier: { numerator: 2, denominator: 5 }, hazardDurationTicks: 300, hazardRadiusX: 75, hazardRadiusY: 33.75, statusId: "treant_root_snare" },
-  barkShield: { damageMultiplier: { numerator: 1, denominator: 10 }, summonCount: 3, cocoonRadius: 54, hatchTicks: 240, breakRecoveryTicks: 60 }
-});
-
 // src/shared/content/archived_boss_fight_profiles_v1.js
 var ARCHIVED_FIGHT_PROFILE_VERSION = "boss-archive-parity-v1";
 var ARCHIVED_FIGHT_PROFILES = Object.freeze({
@@ -14644,73 +14715,6 @@ function recoveredStatusForActor(state, entityId) {
     if (s && s.expiresTick > state.tick) return { statusId: s.kind, sourceBossId: b.bossId, applicationTick: s.startedTick, expirationTick: s.expiresTick, remainingTicks: s.expiresTick - state.tick, movementMultiplier: s.movementMultiplier, reversed: s.kind === "control_glitch" };
   }
   return null;
-}
-
-// src/shared/content/brimstone_colossus_v1.js
-var BRIMSTONE_ID = "overlord_iron_vault";
-var BRIMSTONE_PROFILE = ARACHNID_TREANT_PROFILE;
-var BRIMSTONE = freezeWire({
-  label: "BRIMSTONE COLOSSUS",
-  range: 220,
-  recoveryTicks: 120,
-  strike: { telegraphTicks: 24, recoveryTicks: 50, radius: 52, halfAngle: 0.95, damageNumerator: 10 },
-  slam: { telegraphTicks: 75, radius: 64, damageNumerator: 18 },
-  magma_vents: { telegraphTicks: 75, count: 2, boilTicks: 270, flashTicks: 18, reach: 96, halfWidth: 12, damageNumerator: 13, maxActive: 6 }
-});
-var brimstoneFortFloor = (site, index) => site.familyId === "site-family:fort" && site.sizeTier === "large" && index === site.floorCount - 1;
-function brimstoneVolcanicRuinFloorV4(site, index, state) {
-  return site?.familyId === "site-family:ruin" && site.sizeTier === "large" && index === site.floorCount - 1 && site.socket?.provenance?.reservationId === bossSiteV1("brimstone_colossus") && site.socket?.region?.biome === "volcanic" && usesWildernessFairnessV3_2(state);
-}
-function brimstoneRuinArenaProofV4(c, position) {
-  if (collidesWithTiles(c, position.x, position.y, 34)) return null;
-  const arms = brimstoneVentArms(c, position);
-  const horizontal = arms.east + arms.west, vertical = arms.north + arms.south;
-  if (Math.min(...Object.values(arms)) < 24 || horizontal < 112 || vertical < 112) return null;
-  return { arms, horizontal, vertical, shortest: Math.min(...Object.values(arms)) };
-}
-function chooseBrimstoneRuinAnchorV4(recipe) {
-  const c = recipe?.collision, leader = recipe?.encounter?.members?.[0];
-  if (!c || !leader) return null;
-  const others = recipe.encounter.members.slice(1).map((m) => m.position);
-  const room2 = recipe.graph?.rooms?.find((r) => r.roomId === leader.roomId);
-  const boxes = [...room2?.bounds ? [room2.bounds] : room2 && Number.isInteger(room2.cx) ? [
-    { x: room2.cx - room2.rx, y: room2.cy - room2.ry, width: room2.rx * 2 + 1, height: room2.ry * 2 + 1 }
-  ] : [], { x: 2, y: 2, width: c.width - 4, height: c.height - 4 }];
-  const options = [];
-  for (const [scope, b] of boxes.entries()) for (let y = b.y; y < b.y + b.height; y++) for (let x = b.x; x < b.x + b.width; x++) {
-    if (x <= 1 || y <= 1 || x >= c.width - 2 || y >= c.height - 2 || c.tiles[y]?.[x] !== "1") continue;
-    const p = { x: (x + 0.5) * c.tileSize, y: (y + 0.5) * c.tileSize }, distance4 = Math.hypot(p.x - leader.position.x, p.y - leader.position.y);
-    if (distance4 > 416 || Math.hypot(p.x - recipe.entrance.x, p.y - recipe.entrance.y) < 160 || others.some((m) => Math.hypot(m.x - p.x, m.y - p.y) < 62)) continue;
-    const proof2 = brimstoneRuinArenaProofV4(c, p);
-    if (!proof2) continue;
-    options.push({ position: p, scope, proof: proof2, score: Math.min(proof2.horizontal, proof2.vertical) * 2 + proof2.shortest * 3 - distance4 * 0.3 });
-  }
-  options.sort((a, b) => a.scope - b.scope || b.score - a.score || a.position.y - b.position.y || a.position.x - b.position.x);
-  return options[0] ? { position: options[0].position, ...options[0].proof } : null;
-}
-function brimstoneLineClear(c, a, b) {
-  const n = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 2));
-  for (let i = 0; i <= n; i++) {
-    const q = i / n;
-    if (collidesWithTiles(c, a.x + (b.x - a.x) * q, a.y + (b.y - a.y) * q, 1)) return false;
-  }
-  return true;
-}
-function brimstoneVentArms(c, p) {
-  const arms = {};
-  for (const [key5, dx, dy] of [["east", 1, 0], ["west", -1, 0], ["north", 0, -1], ["south", 0, 1]]) {
-    let length = 0;
-    for (let d = 2; d <= 96; d += 2) {
-      if (collidesWithTiles(c, p.x + dx * d, p.y + dy * d, 12)) break;
-      length = d;
-    }
-    arms[key5] = length;
-  }
-  return arms;
-}
-function brimstoneVentContains(v, p) {
-  const x = p.x - v.position.x, y = p.y - v.position.y;
-  return Math.abs(y) <= 12 && x >= -v.arms.west && x <= v.arms.east || Math.abs(x) <= 12 && y >= -v.arms.north && y <= v.arms.south;
 }
 
 // src/shared/contracts/brimstone_colossus_v1.js
@@ -16778,7 +16782,7 @@ async function buildFortFamilyV1(state, socket, binding, { sha256, runEpisode = 
     p.episode.snapshot.activatedTick = state.tick;
     p.economy.episode = runEpisode - 1;
     for (const a of p.actors) a.ai.interiorNavigation = initialCaveInteriorNavigationD12_3A(state.tick);
-    const leader = recipe.encounter.members[0], brimstone = multi && hasWorldCombat(state) && brimstoneFortFloor({ familyId: "site-family:fort", sizeTier: tier, floorCount: recipes2.length }, i), restoredTarget = multi && hasWorldCombat(state) && recoveredBossForReservation2(socket.provenance.reservationId, "fort", i, recipes2.length, true), aegis = !restoredTarget && multi && hasWorldCombat(state) && aegisFortFloor({ familyId: "site-family:fort", sizeTier: tier, floorCount: recipes2.length, socket }, i, state);
+    const leader = recipe.encounter.members[0], brimstone = multi && hasWorldCombat(state) && brimstoneFortFloor({ familyId: "site-family:fort", sizeTier: tier, floorCount: recipes2.length, socket }, i), restoredTarget = multi && hasWorldCombat(state) && recoveredBossForReservation2(socket.provenance.reservationId, "fort", i, recipes2.length, true), aegis = !restoredTarget && multi && hasWorldCombat(state) && aegisFortFloor({ familyId: "site-family:fort", sizeTier: tier, floorCount: recipes2.length, socket }, i, state);
     if (aegis) {
       const a = p.actors[0], profile2 = AEGIS_PHYSICAL_PROFILE, stats = worldBossStats(p.episode.snapshot.effectiveLevel), budget = aegisHealthBudget(stats.maxHp);
       if (hosting) {
@@ -28660,6 +28664,13 @@ export {
   CORROSIVE_SHEDDING_V4,
   corrosiveShedKindV4,
   recoveredBossForId,
+  ARACHNID_TREANT_PROFILE,
+  ARACHNID_TREANT_D12_5A,
+  BRIMSTONE_ID,
+  BRIMSTONE,
+  brimstoneLineClear,
+  brimstoneVentArms,
+  brimstoneVentContains,
   BOSS_HOSTING_VERSION,
   BOSS_HOSTING_HASH,
   hasBossHostingV1,
@@ -28793,15 +28804,8 @@ export {
   buildBalanceDatabaseV2,
   siteClearXpV2,
   resolveEncounterLevelV2,
-  ARACHNID_TREANT_PROFILE,
-  ARACHNID_TREANT_D12_5A,
   archivedCombatProfile,
   recoveredBossRecord,
-  BRIMSTONE_ID,
-  BRIMSTONE,
-  brimstoneLineClear,
-  brimstoneVentArms,
-  brimstoneVentContains,
   unfrozenEpisodeD9,
   advanceVacancyD9,
   D9_HERO_VERSION,
