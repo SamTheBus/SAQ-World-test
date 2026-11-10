@@ -3910,8 +3910,8 @@ function* paintPremiumBuilding(c, b, biome) {
       c.fillRect(x0, bot + 0.8, x1 - x0, 1.4);
     }
     const capCol = S6.roof === "snow" ? "#ffffff" : S6.roof === "reed" || S6.roof === "palm" ? tone(col2, -0.25) : tone(col2, 0.24);
-    const cap4 = rr(x0 - 1, ridge2 - 4, x1 - x0 + 2, 8, 4);
-    prop(c, [[cap4, capCol]], 2);
+    const cap5 = rr(x0 - 1, ridge2 - 4, x1 - x0 + 2, 8, 4);
+    prop(c, [[cap5, capCol]], 2);
     if (S6.roof === "tile" || S6.roof === "shingle" || S6.roof === "slate") {
       for (let q = x0 + 6; q < x1; q += 12) {
         line(c, [[q, ridge2 - 3.5], [q, ridge2 + 3.5]], tone(capCol, -0.35), 1);
@@ -5880,12 +5880,12 @@ function lanternPillar(c, x, y) {
     c.fillRect(x - 4, ly - 13, 2.4, 8);
   });
   line(c, [[x, ly - 16], [x, ly]], "#8a6420", 1.2);
-  const cap4 = new Path2D();
-  cap4.moveTo(x - 9, ly - 16);
-  cap4.quadraticCurveTo(x - 9, ly - 26, x, ly - 30);
-  cap4.quadraticCurveTo(x + 9, ly - 26, x + 9, ly - 16);
-  cap4.closePath();
-  prop(c, [[cap4, "#c99a3a"]], 1);
+  const cap5 = new Path2D();
+  cap5.moveTo(x - 9, ly - 16);
+  cap5.quadraticCurveTo(x - 9, ly - 26, x, ly - 30);
+  cap5.quadraticCurveTo(x + 9, ly - 26, x + 9, ly - 16);
+  cap5.closePath();
+  prop(c, [[cap5, "#c99a3a"]], 1);
   prop(c, [[ell(x, ly - 31, 1.8, 1.8), "#c99a3a"]], 0.6);
 }
 function signpostDesert(c, x, y) {
@@ -9209,18 +9209,18 @@ function clothRoof(c, x, w, roofTop, eave, pal2, seed2) {
       c.fill();
     }
   });
-  const cap4 = new Path2D();
-  cap4.moveTo(x - 6, roofTop + 2);
-  cap4.quadraticCurveTo(x + w / 2, roofTop - 7, x + w + 6, roofTop + 2);
-  cap4.quadraticCurveTo(x + w / 2, roofTop + 4, x - 6, roofTop + 2);
-  cap4.closePath();
+  const cap5 = new Path2D();
+  cap5.moveTo(x - 6, roofTop + 2);
+  cap5.quadraticCurveTo(x + w / 2, roofTop - 7, x + w + 6, roofTop + 2);
+  cap5.quadraticCurveTo(x + w / 2, roofTop + 4, x - 6, roofTop + 2);
+  cap5.closePath();
   c.strokeStyle = OL10;
   c.lineWidth = 1.6;
   c.beginPath();
   c.moveTo(x - 4, roofTop);
   c.lineTo(x + w + 4, roofTop);
   c.stroke();
-  prop(c, [[cap4, SNOW]], 1.1);
+  prop(c, [[cap5, SNOW]], 1.1);
 }
 function valance(c, x, w, eave, pal2, seed2) {
   const [c1, c2] = pal2;
@@ -10710,14 +10710,14 @@ function lychgate(c, x, y, st) {
   cross(c, x, y - 86, "#e9e2d0", 0.7);
 }
 function graveItemsSnow(E5, label4, opt = {}) {
-  const OO = { ...SNOW_CHAPEL_OPT, ...opt }, x = E5.x * T9, y = E5.y * T9, w = E5.w * T9, h = E5.h * T9, r = rng2(hash2(x, y, 47)), st = "#b8c2cb", gx = x + w / 2, items = [], cap4 = label4 === "Cathedral";
+  const OO = { ...SNOW_CHAPEL_OPT, ...opt }, x = E5.x * T9, y = E5.y * T9, w = E5.w * T9, h = E5.h * T9, r = rng2(hash2(x, y, 47)), st = "#b8c2cb", gx = x + w / 2, items = [], cap5 = label4 === "Cathedral";
   items.push({ y: y - 2, draw: (c) => wallRunF(c, x, y, w, st, rng2(hash2(x, y, 1))) });
   for (const sx of [x + 5, x + w - 5]) items.push({ y: y + h - 8, draw: (c) => wallRunS(c, sx, y, y + h, st) });
   items.push({ y: y + h, draw: (c) => {
     const rr22 = rng2(hash2(x, y, 2));
     wallRunF(c, x, y + h, w / 2 - 26, st, rr22);
     wallRunF(c, gx + 26, y + h, w / 2 - 26, st, rr22);
-    if (cap4) {
+    if (cap5) {
       railing(c, x, y + h, w / 2 - 26);
       railing(c, gx + 26, y + h, w / 2 - 26);
     }
@@ -11756,14 +11756,14 @@ function lychgate2(c, x, y, st) {
 function graveItems(E5, biome, label4) {
   if (biome === "desert") return graveItemsDesert(E5, label4);
   if (biome === "frostland") return graveItemsSnow(E5, label4);
-  const x = E5.x * T10, y = E5.y * T10, w = E5.w * T10, h = E5.h * T10, r = rng2(hash2(x, y, 47)), st = biome === "desert" ? "#d2b48a" : biome === "frostland" ? "#b8c2cb" : "#b3ad9f", gx = x + w / 2, items = [], cap4 = label4 === "Cathedral";
+  const x = E5.x * T10, y = E5.y * T10, w = E5.w * T10, h = E5.h * T10, r = rng2(hash2(x, y, 47)), st = biome === "desert" ? "#d2b48a" : biome === "frostland" ? "#b8c2cb" : "#b3ad9f", gx = x + w / 2, items = [], cap5 = label4 === "Cathedral";
   items.push({ y: y - 2, draw: (c) => wallRunF2(c, x, y, w, st, rng2(hash2(x, y, 1))) });
   for (const sx of [x + 5, x + w - 5]) items.push({ y: y + h - 8, draw: (c) => wallRunS2(c, sx, y, y + h, st) });
   items.push({ y: y + h, draw: (c) => {
     const rr22 = rng2(hash2(x, y, 2));
     wallRunF2(c, x, y + h, w / 2 - 26, st, rr22);
     wallRunF2(c, gx + 26, y + h, w / 2 - 26, st, rr22);
-    if (cap4) {
+    if (cap5) {
       railing2(c, x, y + h, w / 2 - 26);
       railing2(c, gx + 26, y + h, w / 2 - 26);
     }
@@ -14268,8 +14268,8 @@ function snowShrub(c, x, y, rx, ry, col2 = "#3f6f34") {
   c.beginPath();
   c.ellipse(x - rx * 0.3, y - ry * 0.3, rx * 0.5, ry * 0.38, 0, 0, TAU19);
   c.fill();
-  const cap4 = new Path2D();
-  cap4.ellipse(x, y - ry * 0.18, rx * 0.98, ry * 0.86, 0, Math.PI * 1.03, Math.PI * 1.97);
+  const cap5 = new Path2D();
+  cap5.ellipse(x, y - ry * 0.18, rx * 0.98, ry * 0.86, 0, Math.PI * 1.03, Math.PI * 1.97);
   const p = new Path2D();
   p.moveTo(x - rx * 0.96, y - ry * 0.12);
   p.quadraticCurveTo(x - rx * 0.5, y + ry * (deep2() ? 0.1 : -0.35), x, y - ry * (deep2() ? 0.12 : 0.5));
@@ -18645,8 +18645,8 @@ function snowHouseItems(b, style = "log", opt = {}) {
     });
     barge2(c, [[x0 + 6, Rtop], [x0, ridge2], [x0 - 3, eave + 8]], K6.timber);
     barge2(c, [[x1 - 6, Rtop], [x1, ridge2], [x1 + 3, eave + 8]], K6.timber);
-    const cap4 = rr2(x0 - 1, ridge2 - 4, x1 - x0 + 2, 8, 4), capCol = MODE === "light" ? tone17(roofCol, 0.2) : SNOW2;
-    prop2(c, [[cap4, capCol]], 1.8);
+    const cap5 = rr2(x0 - 1, ridge2 - 4, x1 - x0 + 2, 8, 4), capCol = MODE === "light" ? tone17(roofCol, 0.2) : SNOW2;
+    prop2(c, [[cap5, capCol]], 1.8);
     for (let q = x0 + 8; q < x1; q += 14) line3(c, [[q, ridge2 - 3.5], [q, ridge2 + 3.5]], tone17(capCol, -0.35), 1);
     c.fillStyle = tone17(capCol, 0.28);
     c.fillRect(x0 + 2, ridge2 - 3, x1 - x0 - 4, 1.4);
@@ -19282,8 +19282,8 @@ function houseItems(b, biome, door5) {
     });
     barge3(c, [[x0 + 6, Rtop], [x0, ridge2], [x0 - 3, eave + 8]], K6.timber);
     barge3(c, [[x1 - 6, Rtop], [x1, ridge2], [x1 + 3, eave + 8]], K6.timber);
-    const cap4 = rr2(x0 - 1, ridge2 - 4, x1 - x0 + 2, 8, 4), capCol = tone18(roofCol, 0.2);
-    prop2(c, [[cap4, capCol]], 1.8);
+    const cap5 = rr2(x0 - 1, ridge2 - 4, x1 - x0 + 2, 8, 4), capCol = tone18(roofCol, 0.2);
+    prop2(c, [[cap5, capCol]], 1.8);
     for (let q = x0 + 8; q < x1; q += 14) line3(c, [[q, ridge2 - 3.5], [q, ridge2 + 3.5]], tone18(capCol, -0.35), 1);
     c.fillStyle = tone18(capCol, 0.28);
     c.fillRect(x0 + 2, ridge2 - 3, x1 - x0 - 4, 1.4);
@@ -19566,12 +19566,12 @@ function brassLantern2(c, x, y, s = 1) {
     c.fillRect(x - 2.6 * s, y + 4, 1.6 * s, 7 * s);
   });
   line3(c, [[x, y + 2], [x, y + 14 * s]], "#7a5418", 1);
-  const cap4 = new Path2D();
-  cap4.moveTo(x - 6 * s, y + 2);
-  cap4.quadraticCurveTo(x - 6 * s, y - 3 * s, x, y - 6 * s);
-  cap4.quadraticCurveTo(x + 6 * s, y - 3 * s, x + 6 * s, y + 2);
-  cap4.closePath();
-  prop2(c, [[cap4, BRASS2]], 0.9);
+  const cap5 = new Path2D();
+  cap5.moveTo(x - 6 * s, y + 2);
+  cap5.quadraticCurveTo(x - 6 * s, y - 3 * s, x, y - 6 * s);
+  cap5.quadraticCurveTo(x + 6 * s, y - 3 * s, x + 6 * s, y + 2);
+  cap5.closePath();
+  prop2(c, [[cap5, BRASS2]], 0.9);
   prop2(c, [[poly2([[x - 3 * s, y + 14 * s], [x + 3 * s, y + 14 * s], [x, y + 18 * s]]), BRASS2]], 0.7);
 }
 function olla2(c, x, y, s, col2) {
@@ -19682,17 +19682,17 @@ function windTower2(c, tx, yb, yt, r) {
   c.fillStyle = tone19(WALL3, -0.22);
   c.fillRect(x, yt + 38, w, 2);
   c.fillRect(x, yb - 24, w, 2);
-  const cap4 = new Path2D();
-  cap4.moveTo(x - 4, yt + 4);
-  cap4.lineTo(x - 4, yt - 3);
-  cap4.lineTo(x + 6, yt - 3);
-  cap4.lineTo(x + 6, yt - 9);
-  cap4.lineTo(x + w - 6, yt - 9);
-  cap4.lineTo(x + w - 6, yt - 3);
-  cap4.lineTo(x + w + 4, yt - 3);
-  cap4.lineTo(x + w + 4, yt + 4);
-  cap4.closePath();
-  prop2(c, [[cap4, tone19(WALL3, 0.1)]], 1.4);
+  const cap5 = new Path2D();
+  cap5.moveTo(x - 4, yt + 4);
+  cap5.lineTo(x - 4, yt - 3);
+  cap5.lineTo(x + 6, yt - 3);
+  cap5.lineTo(x + 6, yt - 9);
+  cap5.lineTo(x + w - 6, yt - 9);
+  cap5.lineTo(x + w - 6, yt - 3);
+  cap5.lineTo(x + w + 4, yt - 3);
+  cap5.lineTo(x + w + 4, yt + 4);
+  cap5.closePath();
+  prop2(c, [[cap5, tone19(WALL3, 0.1)]], 1.4);
 }
 function chimneyPot(c, x, y) {
   prop2(c, [[poly2([[x - 7, y], [x + 7, y], [x + 5, y - 16], [x - 5, y - 16]]), "#c97a4a"]], 1.2);
@@ -21985,13 +21985,13 @@ function runeCourtItemsSnow(E5, opt = {}) {
       c.moveTo(sx + 3, sy - 24);
       c.lineTo(sx + 3, sy - 12);
       c.stroke();
-      const cap4 = new Path2D();
-      cap4.moveTo(sx - 8.6, sy - 26);
-      cap4.quadraticCurveTo(sx - 6, sy - 37, sx, sy - 38);
-      cap4.quadraticCurveTo(sx + 7, sy - 36, sx + 8.8, sy - 26);
-      cap4.quadraticCurveTo(sx, sy - 30, sx - 8.6, sy - 26);
-      cap4.closePath();
-      prop2(c, [[cap4, SNOW]], 1);
+      const cap5 = new Path2D();
+      cap5.moveTo(sx - 8.6, sy - 26);
+      cap5.quadraticCurveTo(sx - 6, sy - 37, sx, sy - 38);
+      cap5.quadraticCurveTo(sx + 7, sy - 36, sx + 8.8, sy - 26);
+      cap5.quadraticCurveTo(sx, sy - 30, sx - 8.6, sy - 26);
+      cap5.closePath();
+      prop2(c, [[cap5, SNOW]], 1);
       drift(c, sx, sy + 1, 22, 5);
     } });
   }
@@ -24587,12 +24587,12 @@ function lanternD(c, x, y, s, glass7) {
     c.fillRect(x - 3 * s, y - 10 * s, 1.6 * s, 7 * s);
   });
   line(c, [[x, y - 12 * s], [x, y]], "#7a5418", 1);
-  const cap4 = new Path2D();
-  cap4.moveTo(x - 6 * s, y - 12 * s);
-  cap4.quadraticCurveTo(x - 6 * s, y - 18 * s, x, y - 21 * s);
-  cap4.quadraticCurveTo(x + 6 * s, y - 18 * s, x + 6 * s, y - 12 * s);
-  cap4.closePath();
-  prop(c, [[cap4, GOLD5]], 1);
+  const cap5 = new Path2D();
+  cap5.moveTo(x - 6 * s, y - 12 * s);
+  cap5.quadraticCurveTo(x - 6 * s, y - 18 * s, x, y - 21 * s);
+  cap5.quadraticCurveTo(x + 6 * s, y - 18 * s, x + 6 * s, y - 12 * s);
+  cap5.closePath();
+  prop(c, [[cap5, GOLD5]], 1);
   prop(c, [[ell(x, y - 22 * s, 1.4 * s, 1.4 * s), GOLD5]], 0.6);
 }
 function goodsD(c, kind, x0, x1, y, r) {
@@ -46170,15 +46170,15 @@ function drawNamedEliteRingD11(c, shadow38, scale, tick) {
   c.stroke();
   c.restore();
 }
-function drawNamedEliteNameD11(c, named, profile) {
+function drawNamedEliteNameD11(c, named2, profile) {
   const y = profile.labels.healthBarY - 10;
   c.textAlign = "center";
   c.font = "800 8px system-ui";
   c.lineWidth = 2.6;
   c.strokeStyle = "#2a1a04";
-  c.strokeText(named.label, 0, y);
+  c.strokeText(named2.label, 0, y);
   c.fillStyle = "#ffd75a";
-  c.fillText(named.label, 0, y);
+  c.fillText(named2.label, 0, y);
   c.textAlign = "left";
 }
 function drawChampionNameD11(c, champion2, profile) {
@@ -46202,8 +46202,8 @@ function drawChampionNameD11(c, champion2, profile) {
 function drawCreatureLabelsLocalD11(c, actor, profile) {
   if (actor.champion && actor.alive) drawChampionNameD11(c, actor.champion, profile);
   if (drawEliteV2LabelsD11(c, actor, profile)) return;
-  const named = actor.alive ? NAMED_ELITES_V1[actor.elite?.namedEliteId] : null;
-  if (named) actor = Object.create(actor, { elite: { value: { ...actor.elite, label: "" }, enumerable: true } });
+  const named2 = actor.alive ? NAMED_ELITES_V1[actor.elite?.namedEliteId] : null;
+  if (named2) actor = Object.create(actor, { elite: { value: { ...actor.elite, label: "" }, enumerable: true } });
   const ratio = actor.hp.m / actor.maxHp.m * 10 ** (actor.hp.e - actor.maxHp.e);
   const barWidth = Math.max(18, Math.min(34, profile.visualBounds.width * 0.68)), barHeight = profile.visualScale < 0.72 ? 3 : 4, barX = -barWidth / 2, barY = profile.labels.healthBarY;
   if (actor.alive) {
@@ -46226,7 +46226,7 @@ function drawCreatureLabelsLocalD11(c, actor, profile) {
     drawEliteAffixIdentitySlot(c, actor, profile);
     drawActorStatusRow(c, actor, profile);
   }
-  if (named) drawNamedEliteNameD11(c, named, profile);
+  if (named2) drawNamedEliteNameD11(c, named2, profile);
 }
 function drawCreatureLabelsD11(c, actor) {
   if (!actor.alive) return;
@@ -55179,28 +55179,27 @@ var compassV1 = (from, to) => {
 var titleCase = (s) => String(s).toLowerCase().replace(/\b[a-z]/g, (c) => c.toUpperCase());
 var huntSpecV1 = (site) => site?.tier === "small" && ["fort", "ruin", "crypt"].includes(site.family) && typeof site.reservationId === "string" ? siteEndSpecV1({ family: site.family, tier: "small", index: 0, floorCount: 1, reservationId: site.reservationId, biome: site.biome }) : null;
 var huntableSiteV1 = (site) => huntSpecV1(site)?.role === "elite";
-var LAND_ROOTS = {
-  woodland: ["Moss", "Briar", "Bark", "Fern", "Gloom", "Oak"],
-  grassland: ["Thistle", "Barley", "Meadow", "Clover", "Hay", "Flint"],
-  desert: ["Dune", "Sand", "Scorch", "Sun", "Dust", "Bone"],
-  frostland: ["Frost", "Rime", "Ice", "Sleet", "Snow", "Hoar"],
-  upland: ["Crag", "Ridge", "Stone", "Slate", "Cliff", "Gale"],
-  wetland: ["Bog", "Mire", "Reed", "Murk", "Fen", "Silt"],
-  tropical: ["Vine", "Jade", "Lotus", "Coral", "Fig", "Palm"],
-  volcanic: ["Cinder", "Ash", "Slag", "Ember", "Soot", "Char"]
+var AFFIX_WORDS = {
+  swift_commander: "Swift",
+  iron_citadel: "Ironhide",
+  glacial_warden: "Frostbound",
+  blood_berserker: "Berserk",
+  nullifier: "Nullifying",
+  slag_shaper: "Slagfire",
+  toxic_decay: "Toxic",
+  vitality_weaver: "Regrowing",
+  web_weaver: "Webspinner"
 };
-var ENDINGS = ["maw", "hide", "scar", "bane", "fang", "claw", "jaw", "back", "horn", "tooth", "eye", "heart"];
 var aOrAn = (w) => (/^[aeiou]/i.test(w) ? "an " : "a ") + w;
 function huntTargetV1(site) {
   const spec = huntSpecV1(site);
   if (spec?.role !== "elite") return null;
   if (spec.named) {
-    const name2 = titleCase(NAMED_ELITES_V1[spec.named].label);
-    return { name: name2, who: name2 };
+    const name = titleCase(NAMED_ELITES_V1[spec.named].label);
+    return { kind: name, a: name, the: name };
   }
-  const creature = String(spec.family).replace(/_/g, " "), affix = titleCase(eliteAffixDefinitionD12_4(spec.affixId)?.label ?? ""), key2 = site.reservationId + "/hunt-name";
-  const name = pick3(LAND_ROOTS[site.biome] ?? ["Grim", "Dread", "Black", "Red", "Wild", "Old"], key2 + "/root") + pick3(ENDINGS, key2 + "/end");
-  return { name, who: name + ", " + aOrAn((affix ? affix + " " : "") + creature) + "," };
+  const word = AFFIX_WORDS[spec.affixId] ?? titleCase(eliteAffixDefinitionD12_4(spec.affixId)?.label ?? "").split(" ")[0], kind = [word, titleCase(String(spec.family).replace(/_/g, " "))].filter(Boolean).join(" ");
+  return { kind, a: aOrAn(kind), the: "the " + kind };
 }
 function landOf(view3, town) {
   let best = null, d = Infinity;
@@ -55275,8 +55274,8 @@ function questRewardV1(source3, kind, level) {
 var ITEMS = ["satchel", "silver locket", "map case", "wedding ring", "brass lantern", "field journal", "spice box", "old compass"];
 var CAPTIVES = ["the miller's son", "a traveling tinker", "the shepherd Ada", "a young courier", "the herbalist Moss", "a lost pilgrim"];
 var FOLK = {
-  clear: { general: "Bandits from the {label} {dir} of here keep raiding my wagons. Clear the place out and I'll pay you well.", smith: "Something in the {label} {dir} of here has been stealing my iron. Clear it out?", innkeeper: "Travelers won't come past the {label} {dir} of here anymore. Clear it and I'll make it worth your while.", enchanter: "The {label} {dir} of here hums with a bad magic. Clear whatever is in there before it spreads." },
-  hunt: { general: "{who} has been tearing up the road traders. It lairs in the {label} {dir} of here. Bring it down.", smith: "{who} broke my apprentice's arm. It hides in the {label} {dir} of here. Put an end to it.", innkeeper: "Every hunter who went after {who} ended up in my beds. It lairs in the {label} {dir} of here. You try.", enchanter: "{who} carries a shard of something old. Find it in the {label} {dir} of here and destroy it." },
+  clear: { general: "Bandits from {label}, {dir} of {town}, keep raiding my wagons. Clear the place out and I'll pay you well.", smith: "Something in {label}, {dir} of {town}, has been stealing my iron. Clear it out?", innkeeper: "Travelers won't go near {label}, {dir} of {town}, anymore. Clear it and I'll make it worth your while.", enchanter: "{label}, {dir} of {town}, hums with a bad magic. Clear whatever is in there before it spreads." },
+  hunt: { general: "{a} has been tearing up the road traders near {label}, {dir} of {town}. Bring it down.", smith: "{a} broke my apprentice's arm. It lairs in {label}, {dir} of {town}. Put an end to it.", innkeeper: "Every hunter who went after {the} at {label}, {dir} of {town}, ended up in my beds. You try.", enchanter: "{a} in {label}, {dir} of {town}, carries a shard of something old. Destroy it." },
   carry: { general: "Take this order to {dest} for me. Their merchant owes me.", smith: "Run these plans to {dest}. Their smith is waiting.", innkeeper: "My sister lives in {dest}. Would you carry her a letter?", enchanter: "Deliver this sealed scroll to {dest}. Don't open it." },
   find: { general: "I dropped my {item} near a clearing {dir} of town. Will you look for it?", smith: "My {item} was lost in a clearing {dir} of here. Find it?", innkeeper: "A guest left their {item} at a clearing {dir} of town. Fetch it?", enchanter: "My {item} fell in a clearing {dir} of here. It matters more than it looks." },
   rescue: { general: "Looters took {captive} to their camp {dir} of town. Please, bring them home.", smith: "{captive} was dragged off to a looters' camp {dir} of here. Get them out.", innkeeper: "{captive} never came back from the road. Looters, they say, camped {dir} of here.", enchanter: "I saw it in the glass: {captive}, held at a looters' camp {dir} of here. Hurry." }
@@ -55287,33 +55286,33 @@ var fill = (s, v) => s.replace(/\{(\w+)\}/g, (_, k) => {
 });
 var sentences = (s) => s.replace(/(^|[.!?]\s+)([a-z])/g, (_, a, b) => a + b.toUpperCase());
 function questTextV1(q, names2) {
-  const key2 = q.id, dir = compassV1(names2.townAt ?? { x: q.tx, y: q.ty }, { x: q.tx, y: q.ty }), hunt = names2.elite ?? { name: "the beast", who: "A beast" };
-  const v = { dir, label: names2.label ?? "marked dungeon", town: names2.town ?? "town", dest: names2.dest ?? "the town to the " + dir, item: pick3(ITEMS, key2 + "/item"), captive: pick3(CAPTIVES, key2 + "/captive"), elite: hunt.name, who: hunt.who };
+  const key2 = q.id, dir = compassV1(names2.townAt ?? { x: q.tx, y: q.ty }, { x: q.tx, y: q.ty }), hunt = names2.elite ?? {};
+  const v = { dir, label: names2.label, town: names2.town, dest: names2.dest ?? "the town to the " + dir, item: pick3(ITEMS, key2 + "/item"), captive: pick3(CAPTIVES, key2 + "/captive"), kind: hunt.kind, a: hunt.a, the: hunt.the };
   const found = Boolean(names2.found);
   let title, step, note;
   if (q.kind === "clear") {
-    title = "Trouble at the " + v.label;
-    note = "Something has moved into the " + v.label + " " + dir + " of " + v.town + ". Clear it out.";
-    step = found ? "Clear the " + v.label : "Find the " + v.label + " \xB7 search the marked area";
+    title = fill("Trouble at {label}", v);
+    note = fill("Something has moved into {label}, {dir} of {town}. Clear it out.", v);
+    step = fill(found ? "Clear {label}" : "Find {label} \xB7 search the marked area", v);
   } else if (q.kind === "hunt") {
-    title = "Wanted: " + v.elite;
-    note = v.who + " lairs in the " + v.label + " " + dir + " of " + v.town + ". Hunt it down.";
-    step = "Hunt " + v.elite + " at the " + v.label;
+    title = fill("Wanted: {kind}", v);
+    note = fill("{a} lairs in {label}, {dir} of {town}. Hunt it down.", v);
+    step = fill("Hunt {the} at {label}", v);
   } else if (q.kind === "carry") {
     title = "Letter for " + (names2.dest ?? "a far town");
     note = "Carry a letter to " + v.dest + ". Paid when you hand it over at their notice board.";
     step = "Carry the letter to " + v.dest;
   } else if (q.kind === "find") {
     title = "The lost " + v.item;
-    note = (/^[aeiou]/.test(v.item) ? "An " : "A ") + v.item + " was lost in a clearing " + dir + " of " + v.town + ". Search the clearing and bring it back.";
+    note = fill(aOrAn(v.item) + " was lost in a clearing {dir} of {town}. Search the clearing and bring it back.", v);
     step = found ? "Search the clearing for the " + v.item : "Find the clearing \xB7 search the marked area";
   } else {
     title = "Taken by looters";
-    note = "Looters took " + v.captive + " to their camp " + dir + " of " + v.town + ". Drive them off and free the captive.";
+    note = fill("Looters took {captive} to their camp {dir} of {town}. Drive them off and free the captive.", v);
     step = "Free " + v.captive + " at the looters' camp";
   }
   if (q.source === "folk" && names2.role) note = fill(FOLK[q.kind][names2.role] ?? FOLK[q.kind].general, v);
-  if (q.status === "ready") step = q.source === "folk" ? "Return to " + (names2.giverName ?? "the one who asked") + " in " + v.town : "Return to the " + v.town + " notice board";
+  if (q.status === "ready") step = fill(q.source === "folk" ? "Return to {giver} in {town}" : "Return to the {town} notice board", { ...v, giver: names2.giverName });
   return { title: sentences(title), note: sentences(note), step: sentences(step) };
 }
 
@@ -55782,6 +55781,48 @@ function createFerryOverlay(binding) {
   return Object.freeze({ at: (x, y) => tiles5.has(x + "," + y), size: tiles5.size });
 }
 
+// src/shared/generation/site_names_v1.js
+var LAND = {
+  woodland: ["Mossy", "Bramble", "Fernshade", "Oakroot", "Thornwood", "Gloomwood", "Briar", "Ivy"],
+  grassland: ["Windswept", "Thistle", "Meadow", "Barley", "Clover", "Sunfield", "Hayfield", "Greenhill"],
+  desert: ["Sunbaked", "Dune", "Sandscour", "Dustwind", "Scorched", "Mirage", "Saltpan", "Redrock"],
+  frostland: ["Frozen", "Rimefrost", "Snowdrift", "Icebound", "Frostfang", "Whitecap", "Sleetwind", "Hoarfrost"],
+  upland: ["Craggy", "Highridge", "Windcrest", "Stonefall", "Slate", "Cliffside", "Eagle", "Greyrock"],
+  wetland: ["Mire", "Boggy", "Reedwater", "Fen", "Murkwater", "Mistmarsh", "Willow", "Siltbank"],
+  tropical: ["Vinewrapped", "Jade", "Orchid", "Monsoon", "Palmshade", "Coral", "Lotus", "Junglemoss"],
+  volcanic: ["Cinder", "Ashen", "Emberglow", "Slag", "Smoldering", "Blackrock", "Brimstone", "Charred"]
+};
+var TYPE = { cave: ["Cave", "Cave", "Hollow", "Grotto"], fort: ["Fort", "Fort", "Keep", "Outpost"], ruin: ["Ruin", "Ruins"], crypt: ["Crypt", "Crypt", "Tomb", "Barrow"] };
+var cap3 = (s) => s[0].toUpperCase() + s.slice(1);
+var named = /* @__PURE__ */ new WeakMap();
+function siteNamesV1(asset) {
+  let out = named.get(asset);
+  if (out) return out;
+  out = /* @__PURE__ */ new Map();
+  const first = worldRolesV1().firstCave, used = /* @__PURE__ */ new Set(), seed2 = String(asset.campaignSeedHex ?? asset.seedDigest ?? "");
+  const sites = (asset.sites ?? []).map((s) => s.id).filter((id) => !id.includes(":signature:") && id !== first).sort();
+  for (const id of sites) {
+    const sel = newPopulationSelection(id);
+    if (!sel) continue;
+    const family = sel.familyId.split(":")[1], biome = plannedSiteBiome(asset, id);
+    const words = LAND[biome] ?? [cap3(biome)], types = TYPE[family] ?? [cap3(family)];
+    const best = /* @__PURE__ */ new Map();
+    types.forEach((t, i) => {
+      for (const w of words) {
+        const n = w + " " + t, d = mixPlan(seed2 + "/" + id + "/" + n + "/" + i);
+        if (!best.has(n) || d < best.get(n)) best.set(n, d);
+      }
+    });
+    const order2 = [...best].sort((a, b) => a[1] - b[1] || a[0].localeCompare(b[0])).map(([n]) => n);
+    const name = order2.find((n) => !used.has(n)) ?? order2.map((n) => "Old " + n).find((n) => !used.has(n)) ?? order2[0];
+    used.add(name);
+    out.set(id, name);
+  }
+  named.set(asset, out);
+  return out;
+}
+var siteNameV1 = (asset, id) => siteNamesV1(asset).get(id) ?? null;
+
 // src/shared/content/planned_ruin_exterior_v3.js
 var PLANNED_RUIN_ENTRY_MASK = freezeWire(["111010111", "100000001", "000111000", "000111000"]);
 var PLANNED_RUIN_EXTERIOR_VERSION = "planned-ruin-centered-storybook-v3";
@@ -56151,7 +56192,7 @@ async function completePopulationReservation(r, asset, binding, sha256) {
     n.socket.provenance.placementVersion = n.parcel.version = CRYPT_POPULATION_VERSION;
   }
   n.socket.provenance.populationHash = ALPHA_POPULATION_HASH;
-  n.parcel.label = s.id === worldRolesV1().firstCave ? "Alderwood Outskirts Cave" : label(n.parcel.tier ?? s.tier, plannedSiteBiome(asset, s.id), family);
+  n.parcel.label = s.id === worldRolesV1().firstCave ? "Alderwood Outskirts Cave" : siteNameV1(asset, s.id) ?? label(n.parcel.tier ?? s.tier, plannedSiteBiome(asset, s.id), family);
   const version = n.socket.provenance.placementVersion, extra = family === "ruin" || family === "crypt" ? "/" + PLANNED_RUIN_EXTERIOR_VERSION2 + (family === "ruin" && s.tier === "standard" ? "/" + STANDARD_RUIN_KIT_VERSION : "") : "";
   const c = await worldIdentity(PLANNED_WORLD_VERSION + "/" + NATURAL_CLUSTER_VERSION + "/" + asset.campaignSeedHex + "/" + binding.assetHash + (binding.townPrototype ? "/" + binding.townPrototype : "") + "/" + version + extra, "chunk", [n.socket.entrance.chunkX, n.socket.entrance.chunkY], sha256);
   n.socket.provenance.chunkId = c.id;
@@ -57845,10 +57886,10 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
     }, t);
   }
   function confirmState() {
-    const named = namedOk(look.name.trim()), hasClass = Boolean(heroClass());
+    const named2 = namedOk(look.name.trim()), hasClass = Boolean(heroClass());
     if (busy) return ["Working\u2026", false];
     if (mode === "class") return cls ? [`Become a ${HERO_CLASSES[cls].name}`, true] : ["Pick a class", false];
-    if (!named) return ["Name your hero", false];
+    if (!named2) return ["Name your hero", false];
     if (mode === "look") return ["Save look", true];
     if (hasClass) return ["Begin", true];
     if (cls) return [`Begin as a ${HERO_CLASSES[cls].name}`, true];
@@ -64774,11 +64815,11 @@ function createEncounterContainmentD11_2(state, { participantPolicy = () => null
       const collision = state.spacesByInstanceId[group.spaceInstanceId]?.collision;
       if (!collision) continue;
       for (const target of participantsByGroup.get(group.groupId) ?? []) {
-        const cap4 = wildernessGlobalPursuerCap(state, group, target, globalStartLocal);
-        if (cap4 === null) continue;
+        const cap5 = wildernessGlobalPursuerCap(state, group, target, globalStartLocal);
+        if (cap5 === null) continue;
         let row2 = byHero.get(target.entityId);
         if (!row2) {
-          row2 = { cap: cap4, candidates: [] };
+          row2 = { cap: cap5, candidates: [] };
           byHero.set(target.entityId, row2);
         }
         for (const id of group.entityIds) {
@@ -64795,8 +64836,8 @@ function createEncounterContainmentD11_2(state, { participantPolicy = () => null
     for (const [id, row2] of byHero) globalSlotsByPlayer.set(id, new Set(selectWildernessGlobalPursuers(row2.candidates, row2.cap)));
   }
   function globalPursuitAllowed(group, actor, target) {
-    const cap4 = wildernessGlobalPursuerCap(state, group, target, globalStartLocal);
-    if (cap4 === null || actor.boss || state.bossCombat?.bossesByEntityId?.[actor.entityId] || state.eliteCombat?.elitesByEntityId?.[actor.entityId]) return true;
+    const cap5 = wildernessGlobalPursuerCap(state, group, target, globalStartLocal);
+    if (cap5 === null || actor.boss || state.bossCombat?.bossesByEntityId?.[actor.entityId] || state.eliteCombat?.elitesByEntityId?.[actor.entityId]) return true;
     const close = actor.attackReach + actor.combatRadius + target.combatRadius + 4;
     if (distance4(actor.position, target.position) <= close || actor.ai?.melee?.phase && actor.ai.melee.phase !== "idle") return true;
     return globalSlotsByPlayer.get(target.entityId)?.has(actor.entityId) === true;
@@ -67007,7 +67048,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (n) growIce(a, combat, T52.zero.worth * n, T52.zero.cap);
   }
   function growIce(a, combat, percent, capPercent) {
-    const stats3 = getStats(a.entityId), ice = combat.skills?.ice, had = ice ? ice.hp : "0", cap4 = combatInteger(multiplyCombat(stats3.maxHp, capPercent, 100)), gain = combatInteger(multiplyCombat(stats3.maxHp, percent, 100)), hp = compareCombat(had, cap4) >= 0 ? had : combatInteger(minCombat(cap4, addCombat(had, gain)));
+    const stats3 = getStats(a.entityId), ice = combat.skills?.ice, had = ice ? ice.hp : "0", cap5 = combatInteger(multiplyCombat(stats3.maxHp, capPercent, 100)), gain = combatInteger(multiplyCombat(stats3.maxHp, percent, 100)), hp = compareCombat(had, cap5) >= 0 ? had : combatInteger(minCombat(cap5, addCombat(had, gain)));
     if (compareCombat(hp, 0) > 0) classSkillsRecord(combat).ice = { hp, ticks: ICE_TICKS };
   }
   function stepBlooms(a, combat) {
@@ -75177,9 +75218,9 @@ function crack(c, x, y, len, ang, seed2, col2 = RUNE, w = 2.2) {
   c.restore();
 }
 function obelisk(c, x, y, h, w, P14, lit, seed2, glyph2 = 0) {
-  const t = w * 0.68, cap4 = w * 0.62, L = poly8([[x - w / 2, y], [x, y + 2], [x, y - h], [x - t / 2, y - h]]), Rr = poly8([[x, y + 2], [x + w / 2, y], [x + t / 2, y - h], [x, y - h]]), C1 = poly8([[x - t / 2, y - h], [x, y - h], [x, y - h - cap4]]), C22 = poly8([[x, y - h], [x + t / 2, y - h], [x, y - h - cap4]]);
+  const t = w * 0.68, cap5 = w * 0.62, L = poly8([[x - w / 2, y], [x, y + 2], [x, y - h], [x - t / 2, y - h]]), Rr = poly8([[x, y + 2], [x + w / 2, y], [x + t / 2, y - h], [x, y - h]]), C1 = poly8([[x - t / 2, y - h], [x, y - h], [x, y - h - cap5]]), C22 = poly8([[x, y - h], [x + t / 2, y - h], [x, y - h - cap5]]);
   shadow33(c, x + 3, y + 1, w * 0.85, w * 0.28, 0.32);
-  prop4(c, [[L, P14.l], [Rr, P14.d], [C1, P14.h], [C22, P14.m]], 2, [poly8([[x, y + 2], [x, y - h - cap4]], false)]);
+  prop4(c, [[L, P14.l], [Rr, P14.d], [C1, P14.h], [C22, P14.m]], 2, [poly8([[x, y + 2], [x, y - h - cap5]], false)]);
   c.strokeStyle = P14.d2;
   c.lineWidth = 1;
   c.beginPath();
@@ -75219,7 +75260,7 @@ function obelisk(c, x, y, h, w, P14, lit, seed2, glyph2 = 0) {
   c.lineWidth = lit ? 1.5 : 1.2;
   c.stroke(g);
   c.restore();
-  if (lit) light(c, x, y - h - cap4 * 0.4, w * 1.1, w * 1.1, "rgba(194,125,255,A)", 0.5);
+  if (lit) light(c, x, y - h - cap5 * 0.4, w * 1.1, w * 1.1, "rgba(194,125,255,A)", 0.5);
 }
 function curseFire(c, x, y, s = 1) {
   c.save();
@@ -76330,14 +76371,14 @@ function nestUprightsV1(e, time) {
 }
 function propPiece(c, b, i, S6, time) {
   if (b === "woodland") {
-    const P14 = ramp3("#e6d6c4"), cap4 = ramp3(i % 3 ? "#8f6aa0" : "#c8e86a");
+    const P14 = ramp3("#e6d6c4"), cap5 = ramp3(i % 3 ? "#8f6aa0" : "#c8e86a");
     prop4(c, [[poly8([[-1.4, 0], [1.4, 0], [1, -7], [-1, -7]]), P14.l]], 1);
     const p = new Path2D();
     p.moveTo(-5, -6);
     p.quadraticCurveTo(0, -13, 5, -6);
     p.closePath();
-    prop4(c, [[p, cap4.m]], 1.1);
-    c.fillStyle = cap4.h;
+    prop4(c, [[p, cap5.m]], 1.1);
+    c.fillStyle = cap5.h;
     c.fill(ell7(-1.5, -9, 1.4, 1));
     if (i % 3 === 0) lightA(c, 0, -8, 9, 7, S6.glow, 0.3);
   } else if (b === "desert") {
@@ -82133,11 +82174,11 @@ function createInventoryPresentation({ document: document2, environment, readMod
     } catch {
     }
     const fresh = owned2.filter((id) => !worn.has(id) && !seen4.ids.has(id)).length, look = m.entitiesById[local7.entityId]?.heroLook, name = look?.look?.name || "Your hero", cls = HERO_CLASSES[local7.d8?.heroClass]?.name ?? "No class yet", level = local7.progression.level;
-    const cap4 = local7.d8 ? inventoryIntakeCapacity(local7.d8) : 64, wallet = `${formatAmount(inv.gold)}/${owned2.length}/${cap4}`;
+    const cap5 = local7.d8 ? inventoryIntakeCapacity(local7.d8) : 64, wallet = `${formatAmount(inv.gold)}/${owned2.length}/${cap5}`;
     if (summaryKey !== wallet) {
       summaryKey = wallet;
       const goldArt = document2.querySelector("#world-wallet svg")?.cloneNode(true) ?? icon("gold");
-      document2.getElementById("world-bag-summary").replaceChildren(goldArt, element("strong", `${formatAmount(inv.gold)} gold`), element("span", `${owned2.length} / ${cap4} owned`));
+      document2.getElementById("world-bag-summary").replaceChildren(goldArt, element("strong", `${formatAmount(inv.gold)} gold`), element("span", `${owned2.length} / ${cap5} owned`));
     }
     const done3 = (m.quests?.active ?? []).filter((q) => q.status === "ready").length;
     const next = [fresh, upCount, ap, pts2, level, name, cls, done3].join("/");
@@ -83480,7 +83521,7 @@ function createSettlementServicesMenu2(options) {
     if (badge) t.append(markup(el("span", void 0, "tn-badge is-" + badge), badge === "up" ? UP : badge === "pick" ? CHECK : LOCK));
     return t;
   }
-  function cell(item, { badge, cost, costClass, label: label4, cls, fn, id, named = true } = {}) {
+  function cell(item, { badge, cost, costClass, label: label4, cls, fn, id, named: named2 = true } = {}) {
     const d = itemDefinition(item), b = el("button", void 0, "tn-cell" + (cls ? " " + cls : ""));
     b.type = "button";
     if (id) b.dataset.serviceAction = id;
@@ -83488,7 +83529,7 @@ function createSettlementServicesMenu2(options) {
     b.onclick = fn;
     b.style.setProperty("--r", RARITY_COLORS[tierOf(d)]);
     b.append(tile(item, badge));
-    if (named) b.append(el("span", displayName(d), "tn-nm"));
+    if (named2) b.append(el("span", displayName(d), "tn-nm"));
     if (label4) b.append(el("span", label4, "tn-pr is-sold"));
     else if (cost !== void 0) b.append(price(cost, costClass));
     b.setAttribute("aria-label", displayName(d) + (label4 ? ", " + label4 : cost !== void 0 ? ", " + formatAmount(cost) + " gold" : ""));
@@ -85476,7 +85517,7 @@ var SHOP_NAME = { merchant: "Merchant", forge: "Smith", inn: "Inn", enchanter: "
 var EVENT_NAME = { cursed_shrine: "Cursed Shrine", nests: "Nests", hollow: "Hidden Hollow", spore: "Spore Outbreak", raided_camp: "Raided Camp", buried_cache: "Buried Cache", road_ambush: "Road Ambush", wayside_shrine: "Wayside Shrine", trophy_hunt: "Trophy Hunt" };
 var stirIcon = (kind) => kind === "trophy_hunt" ? "horn" : "event";
 var stirName = (r) => EVENT_NAME[r.kind] ?? "Event";
-var cap3 = (s) => s ? s[0].toUpperCase() + s.slice(1) : "";
+var cap4 = (s) => s ? s[0].toUpperCase() + s.slice(1) : "";
 var fontsRequested2 = false;
 function loadMapFonts(env, done3) {
   if (fontsRequested2 || typeof env.FontFace !== "function") return;
@@ -86059,12 +86100,12 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
   };
   function subtitle(m) {
     if (m.kind === "settlement") {
-      const t = m.town, w = t ? SIZE_WORD[t.size] ?? "Town" : CLASS_WORD[m.row.class] ?? "Town", biome = t ? cap3(t.biome) : "";
+      const t = m.town, w = t ? SIZE_WORD[t.size] ?? "Town" : CLASS_WORD[m.row.class] ?? "Town", biome = t ? cap4(t.biome) : "";
       return [t?.walled ? "Walled " + w.toLowerCase() : w, biome, "Band " + m.band].filter(Boolean).join(" \xB7 ");
     }
     if (m.kind === "site") {
       const s = m.site;
-      return [cap3(s.tier) + " " + s.family, cap3(String(s.biome).replaceAll("-", " ")), "Band " + s.band].join(" \xB7 ");
+      return [cap4(s.tier) + " " + s.family, cap4(String(s.biome).replaceAll("-", " ")), "Band " + s.band].join(" \xB7 ");
     }
     if (m.kind === "ferry") return "Ferry landing \xB7 Band " + m.band;
     if (m.rumored) return "From a torn journal: dig under the flag";
@@ -86096,7 +86137,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
       row2("town", "Towns and villages", small_.filter((s) => k?.visited[s.id] !== void 0).length + " / " + small_.length);
       row2("city", "Cities and capitals", big.filter((s) => k?.visited[s.id] !== void 0).length + " / " + big.length);
       row2("unknown", "Town not found yet", sets.filter((s) => k?.visited[s.id] === void 0).length + " left");
-      for (const f of ["cave", "fort", "ruin", "crypt"]) row2(f, cap3(f) + "s", count((m2) => m2.kind === "site" && !m2.rumored && m2.site.family === f) + " found");
+      for (const f of ["cave", "fort", "ruin", "crypt"]) row2(f, cap4(f) + "s", count((m2) => m2.kind === "site" && !m2.rumored && m2.site.family === f) + " found");
       row2("event", "Event clearings", count((m2) => m2.kind === "event" && !m2.rumored) + " found");
       row2("ferry", "Ferry landings", count((m2) => m2.kind === "ferry") + " found");
       row2("quest", "Tracked place", tracked && placeById(tracked) ? "1" : "none");
@@ -86447,9 +86488,9 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
   function bannerFor(m) {
     if (m.kind === "settlement") {
       const t = m.town;
-      return { kind: m.icon, top: "You have entered", name: m.label, sub: t ? ((t.walled ? "Walled " : "") + (SIZE_WORD[t.size] ?? "Town").toLowerCase() + " of the " + cap3(t.biome)).replace(/^./, (ch) => ch.toUpperCase()) : CLASS_WORD[m.row.class] ?? "Settlement", chip: m.travel ? "Fast travel unlocked" : null };
+      return { kind: m.icon, top: "You have entered", name: m.label, sub: t ? ((t.walled ? "Walled " : "") + (SIZE_WORD[t.size] ?? "Town").toLowerCase() + " of the " + cap4(t.biome)).replace(/^./, (ch) => ch.toUpperCase()) : CLASS_WORD[m.row.class] ?? "Settlement", chip: m.travel ? "Fast travel unlocked" : null };
     }
-    if (m.kind === "site") return { kind: m.icon, top: "Discovered", name: m.label, sub: cap3(m.site.tier) + " " + m.site.family + " \xB7 Band " + m.site.band, chip: "Fast travel unlocked" };
+    if (m.kind === "site") return { kind: m.icon, top: "Discovered", name: m.label, sub: cap4(m.site.tier) + " " + m.site.family + " \xB7 Band " + m.site.band, chip: "Fast travel unlocked" };
     if (m.kind === "ferry") return { kind: "ferry", top: "Discovered", name: m.label, sub: "Ferry landing", chip: null };
     return { kind: "event", top: "Discovered", name: eventName(m), sub: "Events return to this clearing", chip: null };
   }
@@ -88479,7 +88520,7 @@ function hull(points2) {
   return [...low.slice(0, -1), ...high.slice(0, -1)];
 }
 function shadowPolygonV1(caster2, frame3) {
-  const scale = clamp31(caster2.height / 96, 0.12, 1.2), length = Math.hypot(frame3.vector.x, frame3.vector.y) * scale, cap4 = length > 160 ? 160 / length : 1, vx = frame3.vector.x * scale * cap4, vy = frame3.vector.y * scale * cap4, points2 = [];
+  const scale = clamp31(caster2.height / 96, 0.12, 1.2), length = Math.hypot(frame3.vector.x, frame3.vector.y) * scale, cap5 = length > 160 ? 160 / length : 1, vx = frame3.vector.x * scale * cap5, vy = frame3.vector.y * scale * cap5, points2 = [];
   if (caster2.round) {
     for (let i = 0; i < 8; i++) {
       const a = i * Math.PI / 4, x = caster2.x + caster2.w * 0.5 + Math.cos(a) * caster2.w * 0.44, y = caster2.y + caster2.h * 0.73 + Math.sin(a) * caster2.h * 0.22;
@@ -88724,7 +88765,7 @@ function recordSpriteDrawsV1(paint2) {
   return { handled: handled && draws.length > 0, draws, procedural, base: Number.isFinite(base) ? base : 0, height: Number.isFinite(base) ? base - top : 0 };
 }
 function shadowProjectionV1(vector2, baseY, height, limits = SILHOUETTE_LIMITS) {
-  const length = Math.hypot(vector2.x, vector2.y) * height / limits.referenceHeight, cap4 = length > limits.maximumLength ? limits.maximumLength / length : 1, kx = vector2.x / limits.referenceHeight * cap4, ky = vector2.y / limits.referenceHeight * cap4;
+  const length = Math.hypot(vector2.x, vector2.y) * height / limits.referenceHeight, cap5 = length > limits.maximumLength ? limits.maximumLength / length : 1, kx = vector2.x / limits.referenceHeight * cap5, ky = vector2.y / limits.referenceHeight * cap5;
   return [1, 0, -kx, -ky, kx * baseY, baseY * (1 + ky)];
 }
 function createSilhouetteShadowsV1(doc, limits = SILHOUETTE_LIMITS) {
@@ -100954,10 +100995,10 @@ function backWall(c, W4, windows, t) {
   }
 }
 function wallCaps(c, W4, H7, door5) {
-  const cap4 = "#6a5640", top = "#8a7458";
-  prop2(c, [[rect3(0, 26, 24, H7 - 26), cap4]], 1.4);
-  prop2(c, [[rect3(W4 - 24, 26, 24, H7 - 26), cap4]], 1.4);
-  prop2(c, [[rect3(0, H7 - 26, W4, 26), cap4]], 1.4);
+  const cap5 = "#6a5640", top = "#8a7458";
+  prop2(c, [[rect3(0, 26, 24, H7 - 26), cap5]], 1.4);
+  prop2(c, [[rect3(W4 - 24, 26, 24, H7 - 26), cap5]], 1.4);
+  prop2(c, [[rect3(0, H7 - 26, W4, 26), cap5]], 1.4);
   for (const [x, y, w, h] of [[0, 26, 24, H7 - 26], [W4 - 24, 26, 24, H7 - 26], [0, H7 - 26, W4, 26]]) {
     px6(c, x + 3, y + 3, w - 6, h - 6, top);
     c.fillStyle = tone2(top, -0.12);
@@ -101310,14 +101351,14 @@ function stairsDown(c, p) {
 var RUNS = [[160, 32, 32, 64], [160, 160, 32, 96], [160, 320, 32, 38], [256, 32, 32, 64], [256, 160, 32, 96], [256, 320, 32, 38], [24, 192, 168, 32], [256, 192, 168, 32]];
 var FACES = [[24, 224, 136], [288, 224, 136], [160, 256, 32], [256, 256, 32], [160, 96, 32], [256, 96, 32]];
 function partitions(c) {
-  const cap4 = "#6a5640", top = "#8a7458";
+  const cap5 = "#6a5640", top = "#8a7458";
   for (const [x, y, w] of FACES) {
     prop2(c, [[rect3(x, y, w, 8), tone2(PLASTER4, -0.12)]], 1.2);
     px6(c, x, y + 5, w, 3, BEAM3);
   }
   c.fillStyle = OL53;
   for (const [x, y, w, h] of RUNS) c.fillRect(x - 1.4, y - 1.4, w + 2.8, h + 2.8);
-  c.fillStyle = cap4;
+  c.fillStyle = cap5;
   for (const [x, y, w, h] of RUNS) c.fillRect(x, y, w, h);
   c.fillStyle = top;
   for (const [x, y, w, h] of RUNS) c.fillRect(x + 3, y + 3, w - 6, h - 6);
@@ -108912,7 +108953,7 @@ var BIOME = {
   volcanic: { stone: ["#423d3e", "#3a3536", "#1a1718"], wall: ["#3b3637", "#5a5354"], earth: ["#2f2a29", "#383231"], touch: "embers" }
 };
 function kitFor(site) {
-  const kind = site?.siteKind ?? "", family = kind.includes("crypt") ? "crypt" : kind.includes("cave") ? "cave" : kind.includes("fort") ? "fort" : "ruin", named = /\b(woodland|grassland|wetland|upland|desert|frostland|tropical|volcanic)\b/i.exec(site?.label ?? "")?.[1]?.toLowerCase(), biome = BIOME[site?.socket?.region?.biome] ? site.socket.region.biome : named ?? (kind.startsWith("woodland") ? "woodland" : "grassland"), B5 = BIOME[biome];
+  const kind = site?.siteKind ?? "", family = kind.includes("crypt") ? "crypt" : kind.includes("cave") ? "cave" : kind.includes("fort") ? "fort" : "ruin", named2 = /\b(woodland|grassland|wetland|upland|desert|frostland|tropical|volcanic)\b/i.exec(site?.label ?? "")?.[1]?.toLowerCase(), biome = BIOME[site?.socket?.region?.biome] ? site.socket.region.biome : named2 ?? (kind.startsWith("woodland") ? "woodland" : "grassland"), B5 = BIOME[biome];
   const pale = family === "ruin" ? 0.35 : family === "crypt" ? -0.12 : 0, tone44 = (c) => pale > 0 ? mix30(c, "#e8e4d6", pale) : pale < 0 ? mix30(c, "#0a0c0a", -pale) : c;
   return {
     family,
@@ -109058,12 +109099,12 @@ function floorTouch(c, k, x, y, t, nearWall) {
   }
 }
 function wallFace(c, k, x, y, t, rows) {
-  const px7 = x * t, py = y * t, cap4 = 11, n = hash35(x, y, 60);
+  const px7 = x * t, py = y * t, cap5 = 11, n = hash35(x, y, 60);
   c.fillStyle = k.face;
-  c.fillRect(px7, py + cap4, t, t - cap4);
+  c.fillRect(px7, py + cap5, t, t - cap5);
   if (k.walls === "rock") {
     for (let i = 0; i < 4; i++) {
-      const u = hash35(x, y, 61 + i), bx = px7 + u % t - 6, by = py + cap4 + (u >>> 6) % (t - cap4 - 6);
+      const u = hash35(x, y, 61 + i), bx = px7 + u % t - 6, by = py + cap5 + (u >>> 6) % (t - cap5 - 6);
       c.fillStyle = mix30(k.face, i % 2 ? "#000000" : "#ffffff", 0.12);
       c.beginPath();
       c.moveTo(bx, by);
@@ -109078,29 +109119,29 @@ function wallFace(c, k, x, y, t, rows) {
     }
   } else {
     const ch = k.walls === "brick" ? 7 : 10, cw = k.walls === "brick" ? 14 : t;
-    for (let yy = py + cap4, r = 0; yy < py + t; yy += ch, r++) for (let xx = px7 - r % 2 * cw / 2; xx < px7 + t; xx += cw) {
+    for (let yy = py + cap5, r = 0; yy < py + t; yy += ch, r++) for (let xx = px7 - r % 2 * cw / 2; xx < px7 + t; xx += cw) {
       c.fillStyle = mix30(k.face, "#000000", unit14(Math.round(xx), r + y * 9, 62) * 0.22);
       c.fillRect(Math.max(px7, xx + 1), yy + 1, Math.min(cw - 2, px7 + t - Math.max(px7, xx + 1)), ch - 2);
       c.fillStyle = "rgba(255,255,255,.07)";
       c.fillRect(Math.max(px7, xx + 1), yy + 1, Math.min(cw - 2, px7 + t - Math.max(px7, xx + 1)), 1);
     }
   }
-  const g = c.createLinearGradient(0, py + cap4, 0, py + t);
+  const g = c.createLinearGradient(0, py + cap5, 0, py + t);
   g.addColorStop(0, "rgba(0,0,0,0)");
   g.addColorStop(1, "rgba(0,0,0,.38)");
   c.fillStyle = g;
-  c.fillRect(px7, py + cap4, t, t - cap4);
+  c.fillRect(px7, py + cap5, t, t - cap5);
   if (k.walls !== "rock" && x % 4 === 0) {
     c.fillStyle = k.cap;
-    c.fillRect(px7 + t / 2 - 5, py + cap4, 10, t - cap4);
+    c.fillRect(px7 + t / 2 - 5, py + cap5, 10, t - cap5);
     c.fillStyle = mix30(k.cap, "#000000", 0.25);
-    c.fillRect(px7 + t / 2 + 1, py + cap4, 4, t - cap4);
+    c.fillRect(px7 + t / 2 + 1, py + cap5, 4, t - cap5);
     c.strokeStyle = INK50;
     c.lineWidth = 1.2;
-    c.strokeRect(px7 + t / 2 - 5, py + cap4, 10, t - cap4);
+    c.strokeRect(px7 + t / 2 - 5, py + cap5, 10, t - cap5);
   } else if (k.family === "crypt" && n % 5 === 0) {
     c.fillStyle = "#14181a";
-    c.fillRect(px7 + 8, py + cap4 + 3, t - 16, t - cap4 - 7);
+    c.fillRect(px7 + 8, py + cap5 + 3, t - 16, t - cap5 - 7);
     c.fillStyle = "#e8e0cc";
     c.beginPath();
     c.arc(px7 + t / 2, py + t - 8, 3, 0, TAU125);
@@ -109108,21 +109149,21 @@ function wallFace(c, k, x, y, t, rows) {
   }
   if (k.biome === "desert" && k.family !== "cave") {
     c.fillStyle = "#2f5fa8";
-    c.fillRect(px7, py + cap4 + 2, t, 4);
+    c.fillRect(px7, py + cap5 + 2, t, 4);
     c.fillStyle = "#e9b93a";
-    for (let i = 0; i < 4; i++) c.fillRect(px7 + 3 + i * 8, py + cap4 + 3, 2, 2);
+    for (let i = 0; i < 4; i++) c.fillRect(px7 + 3 + i * 8, py + cap5 + 3, 2, 2);
   }
   if ((k.touch === "vines" || k.family === "ruin" && k.touch === "moss") && n % 3 === 0) {
     c.strokeStyle = "#3f6b35";
     c.lineWidth = 1.6;
     c.beginPath();
-    c.moveTo(px7 + 6 + n % 20, py + cap4);
-    c.quadraticCurveTo(px7 + 10 + n % 14, py + cap4 + 10, px7 + 4 + n % 22, py + t);
+    c.moveTo(px7 + 6 + n % 20, py + cap5);
+    c.quadraticCurveTo(px7 + 10 + n % 14, py + cap5 + 10, px7 + 4 + n % 22, py + t);
     c.stroke();
     c.fillStyle = "#5f8f43";
     for (let i = 0; i < 3; i++) {
       c.beginPath();
-      c.ellipse(px7 + 6 + n % 20 + i, py + cap4 + 5 + i * 6, 2.6, 1.6, 0, 0, TAU125);
+      c.ellipse(px7 + 6 + n % 20 + i, py + cap5 + 5 + i * 6, 2.6, 1.6, 0, 0, TAU125);
       c.fill();
     }
   }
@@ -109131,9 +109172,9 @@ function wallFace(c, k, x, y, t, rows) {
     for (let i = 0; i < 4; i++) {
       const ix = px7 + 3 + i * 8 + n % 3;
       c.beginPath();
-      c.moveTo(ix, py + cap4);
-      c.lineTo(ix + 3, py + cap4);
-      c.lineTo(ix + 1.5, py + cap4 + 5 + (n >>> i) % 5);
+      c.moveTo(ix, py + cap5);
+      c.lineTo(ix + 3, py + cap5);
+      c.lineTo(ix + 1.5, py + cap5 + 5 + (n >>> i) % 5);
       c.closePath();
       c.fill();
     }
@@ -109142,12 +109183,12 @@ function wallFace(c, k, x, y, t, rows) {
     c.strokeStyle = "#ff7a2a";
     c.lineWidth = 1.2;
     c.beginPath();
-    c.moveTo(px7 + 5, py + cap4 + 4);
+    c.moveTo(px7 + 5, py + cap5 + 4);
     c.lineTo(px7 + 12, py + t - 8);
     c.lineTo(px7 + 20, py + t - 4);
     c.stroke();
   }
-  wallCap(c, k, x, y, t, rows, cap4);
+  wallCap(c, k, x, y, t, rows, cap5);
   c.strokeStyle = INK50;
   c.lineWidth = 1.6;
   c.beginPath();
@@ -112094,14 +112135,14 @@ function masonry2(c, x, y, w, h, P14, R9) {
   flags5(c, x, y, w, h, P14, R9, 1);
   c.restore();
 }
-function post3(c, x, y, h, P14, w = 3.6, cap4 = true, snow = false) {
+function post3(c, x, y, h, P14, w = 3.6, cap5 = true, snow = false) {
   const p = rect5(x - w / 2, y - h, w, h);
   prop5(c, [[p, P14.m]], 1.1);
   c.fillStyle = P14.l;
   c.fillRect(x - w / 2, y - h, 1.1, h);
   c.fillStyle = P14.d;
   c.fillRect(x + w / 2 - 1, y - h, 1, h);
-  if (cap4) {
+  if (cap5) {
     const q = rect5(x - w / 2 - 0.8, y - h - 1.6, w + 1.6, 2.2);
     prop5(c, [[q, P14.d]], 1);
   }

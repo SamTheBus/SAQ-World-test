@@ -2568,8 +2568,8 @@ function siteEndSpecV1({ family: family2, tier: tier2, index, floorCount, reserv
   const matrix = WILDERNESS_ECOLOGY_V3_MATRIX[biome], pool = SITE_ENDS_POLICY.picks[biome]?.[role] ?? (matrix?.[family2]?.length ? matrix[family2] : matrix?.surface ?? []);
   if (!role || !pool.length) return null;
   const turn = role === "elite" && SITE_ENDS_POLICY.picks[biome] ? eliteTurnV1(reservationId) : void 0;
-  const affixes = SITE_ENDS_POLICY.eliteAffixes, creature = pool[(turn ?? hash(reservationId + "/creature")) % pool.length], named = role === "elite" ? namedEliteForV1(biome, creature) : null;
-  return { version: SITE_ENDS_VERSION, role, family: creature, affixId: named ? named.affixId : affixes[hash(reservationId + "/affix") % affixes.length], ...named ? { named: named.id } : {}, hullRadius: SITE_ENDS_POLICY.anchorHull[role], supportCount: SITE_ENDS_POLICY.supportCount[role] };
+  const affixes = SITE_ENDS_POLICY.eliteAffixes, creature = pool[(turn ?? hash(reservationId + "/creature")) % pool.length], named2 = role === "elite" ? namedEliteForV1(biome, creature) : null;
+  return { version: SITE_ENDS_VERSION, role, family: creature, affixId: named2 ? named2.affixId : affixes[hash(reservationId + "/affix") % affixes.length], ...named2 ? { named: named2.id } : {}, hullRadius: SITE_ENDS_POLICY.anchorHull[role], supportCount: SITE_ENDS_POLICY.supportCount[role] };
 }
 var siteEndSpecForSiteV1 = (site, index) => siteEndSpecV1({ family: site.familyId.split(":")[1], tier: site.sizeTier, index, floorCount: site.floorCount, reservationId: site.socket?.provenance?.reservationId, biome: site.socket?.region?.biome });
 function siteEndRecipeV1(original, spec) {
@@ -3275,14 +3275,14 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
     const b = base(x, y);
     return !b.walkable && b.kind !== "ocean";
   };
-  function ringDistance(x, y, cap2, hit) {
+  function ringDistance(x, y, cap3, hit) {
     if (hit(x, y)) return 0;
-    for (let d = 1; d < cap2; d++) {
+    for (let d = 1; d < cap3; d++) {
       for (let i = 0; i < d; i++) {
         if (hit(x + i, y - d + i) || hit(x + d - i, y + i) || hit(x - i, y + d - i) || hit(x - d + i, y - i)) return d;
       }
     }
-    return cap2;
+    return cap3;
   }
   const roadDistance = (x, y) => ringDistance(x, y, 5, (a, b) => routeAt(a, b) > 0);
   function wetAt(x, y, code) {
@@ -3987,10 +3987,10 @@ function townArtBlockersV1(t) {
   for (const p of plazas) {
     const fx = (p.x + p.w / 2) * T8, fy = (p.y + p.h / 2) * T8 + 20;
     if (zone) {
-      const cap2 = t.size === "capital", d = cap2 ? 230 : 200;
+      const cap3 = t.size === "capital", d = cap3 ? 230 : 200;
       for (const s of [-1, 1]) {
         box3(fx + s * d - 22, fy - 56, fx + s * d + 22, fy - 32);
-        const bx = fx + s * (cap2 ? 160 : 140);
+        const bx = fx + s * (cap3 ? 160 : 140);
         box3(bx - 18, fy - 8, bx + 18, fy + 10);
       }
       for (const st of t.features.filter((f3) => f3.type === "stalls")) for (const s of st.stalls) out.push({ x: s.x, y: p.y + p.h - 3, w: 3, h: 2 });
@@ -8532,6 +8532,48 @@ var CRYPT_POPULATION_TIERS = freezeWire({ small: { floors: [{ role: "burial-cham
 var cryptPopulationRecipe = (seed, tier2, index) => tier2 === "small" ? cryptFloorRecipe(seed, tier2, index) : cryptFloorRecipeV2(seed, tier2, index);
 var cryptPopulationLinks = (tier2) => tier2 === "small" ? cryptFloorLinks(tier2) : cryptFloorLinksV2(tier2);
 
+// src/shared/generation/site_names_v1.js
+var LAND = {
+  woodland: ["Mossy", "Bramble", "Fernshade", "Oakroot", "Thornwood", "Gloomwood", "Briar", "Ivy"],
+  grassland: ["Windswept", "Thistle", "Meadow", "Barley", "Clover", "Sunfield", "Hayfield", "Greenhill"],
+  desert: ["Sunbaked", "Dune", "Sandscour", "Dustwind", "Scorched", "Mirage", "Saltpan", "Redrock"],
+  frostland: ["Frozen", "Rimefrost", "Snowdrift", "Icebound", "Frostfang", "Whitecap", "Sleetwind", "Hoarfrost"],
+  upland: ["Craggy", "Highridge", "Windcrest", "Stonefall", "Slate", "Cliffside", "Eagle", "Greyrock"],
+  wetland: ["Mire", "Boggy", "Reedwater", "Fen", "Murkwater", "Mistmarsh", "Willow", "Siltbank"],
+  tropical: ["Vinewrapped", "Jade", "Orchid", "Monsoon", "Palmshade", "Coral", "Lotus", "Junglemoss"],
+  volcanic: ["Cinder", "Ashen", "Emberglow", "Slag", "Smoldering", "Blackrock", "Brimstone", "Charred"]
+};
+var TYPE = { cave: ["Cave", "Cave", "Hollow", "Grotto"], fort: ["Fort", "Fort", "Keep", "Outpost"], ruin: ["Ruin", "Ruins"], crypt: ["Crypt", "Crypt", "Tomb", "Barrow"] };
+var cap = (s) => s[0].toUpperCase() + s.slice(1);
+var named = /* @__PURE__ */ new WeakMap();
+function siteNamesV1(asset) {
+  let out = named.get(asset);
+  if (out) return out;
+  out = /* @__PURE__ */ new Map();
+  const first = worldRolesV1().firstCave, used = /* @__PURE__ */ new Set(), seed = String(asset.campaignSeedHex ?? asset.seedDigest ?? "");
+  const sites4 = (asset.sites ?? []).map((s) => s.id).filter((id) => !id.includes(":signature:") && id !== first).sort();
+  for (const id of sites4) {
+    const sel = newPopulationSelection(id);
+    if (!sel) continue;
+    const family2 = sel.familyId.split(":")[1], biome = plannedSiteBiome(asset, id);
+    const words = LAND[biome] ?? [cap(biome)], types = TYPE[family2] ?? [cap(family2)];
+    const best = /* @__PURE__ */ new Map();
+    types.forEach((t, i) => {
+      for (const w of words) {
+        const n = w + " " + t, d = mixPlan(seed + "/" + id + "/" + n + "/" + i);
+        if (!best.has(n) || d < best.get(n)) best.set(n, d);
+      }
+    });
+    const order2 = [...best].sort((a, b) => a[1] - b[1] || a[0].localeCompare(b[0])).map(([n]) => n);
+    const name = order2.find((n) => !used.has(n)) ?? order2.map((n) => "Old " + n).find((n) => !used.has(n)) ?? order2[0];
+    used.add(name);
+    out.set(id, name);
+  }
+  named.set(asset, out);
+  return out;
+}
+var siteNameV1 = (asset, id) => siteNamesV1(asset).get(id) ?? null;
+
 // src/shared/content/planned_ruin_exterior_v3.js
 var PLANNED_RUIN_ENTRY_MASK = freezeWire(["111010111", "100000001", "000111000", "000111000"]);
 var PLANNED_RUIN_EXTERIOR_VERSION = "planned-ruin-centered-storybook-v3";
@@ -9079,7 +9121,7 @@ async function completePopulationReservation(r, asset, binding, sha256) {
     n.socket.provenance.placementVersion = n.parcel.version = CRYPT_POPULATION_VERSION;
   }
   n.socket.provenance.populationHash = ALPHA_POPULATION_HASH;
-  n.parcel.label = s.id === worldRolesV1().firstCave ? "Alderwood Outskirts Cave" : label(n.parcel.tier ?? s.tier, plannedSiteBiome(asset, s.id), family2);
+  n.parcel.label = s.id === worldRolesV1().firstCave ? "Alderwood Outskirts Cave" : siteNameV1(asset, s.id) ?? label(n.parcel.tier ?? s.tier, plannedSiteBiome(asset, s.id), family2);
   const version = n.socket.provenance.placementVersion, extra = family2 === "ruin" || family2 === "crypt" ? "/" + PLANNED_RUIN_EXTERIOR_VERSION2 + (family2 === "ruin" && s.tier === "standard" ? "/" + STANDARD_RUIN_KIT_VERSION : "") : "";
   const c = await worldIdentity(PLANNED_WORLD_VERSION + "/" + NATURAL_CLUSTER_VERSION + "/" + asset.campaignSeedHex + "/" + binding.assetHash + (binding.townPrototype ? "/" + binding.townPrototype : "") + "/" + version + extra, "chunk", [n.socket.entrance.chunkX, n.socket.entrance.chunkY], sha256);
   n.socket.provenance.chunkId = c.id;
@@ -9244,7 +9286,7 @@ var hash10 = (text) => {
   for (let i = 0; i < text.length; i++) value = Math.imul(value ^ text.charCodeAt(i), 16777619);
   return value >>> 0;
 };
-var cap = (level) => Math.max(1, Math.min(SPAWN_LEVELS_V1.levelCap, level));
+var cap2 = (level) => Math.max(1, Math.min(SPAWN_LEVELS_V1.levelCap, level));
 var usesSpawnLevelsV1 = (state) => state?.d9World?.plannedWorld?.worldMaker !== void 0;
 var pageAt = (state, chunkX, chunkY) => state?.d9World?.runtime?.chunks?.find((p) => String(p.chunkX) === String(chunkX) && String(p.chunkY) === String(chunkY)) ?? null;
 var areaScalesV1 = (state, biome) => Boolean(biome && state?.campaign?.areaBossesByBiome?.[biome]);
@@ -9253,18 +9295,18 @@ var isHighSiteV1 = (socket) => Boolean(siteKey(socket)) && !/(^|:)signature:/.te
 function siteLevelV1(state, socket) {
   const page = pageAt(state, socket.entrance?.chunkX, socket.entrance?.chunkY), base = Number(page?.region?.minimumLevel ?? socket.minimumLevel), S = SPAWN_LEVELS_V1.site;
   const offset = isHighSiteV1(socket) ? base < S.highOffset.lateFrom ? S.highOffset.early : S.highOffset.late : S.offsets[hash10("spawn-levels-v1/offset/" + siteKey(socket)) % S.offsets.length];
-  return cap(base + offset);
+  return cap2(base + offset);
 }
 var siteMinimumLevelV1 = (state, socket) => usesSpawnLevelsV1(state) ? siteLevelV1(state, socket) : socket.minimumLevel;
 var siteScalesV1 = (state, socket) => !usesSpawnLevelsV1(state) || areaScalesV1(state, socket.region?.biome);
 var packLevelOffsetV1 = (entityId2) => SPAWN_LEVELS_V1.packOffsets[hash10("spawn-levels-v1/pack/" + entityId2) % SPAWN_LEVELS_V1.packOffsets.length];
 var memberLevelOffsetV1 = (state, entityId2) => !usesSpawnLevelsV1(state) || state.bossCombat?.bossesByEntityId?.[entityId2] || state.bossCombat?.summonsByEntityId?.[entityId2] || state.eliteCombat?.elitesByEntityId?.[entityId2] ? 0 : packLevelOffsetV1(entityId2);
-var memberLevelV1 = (state, level, entityId2) => cap(Number(level) + memberLevelOffsetV1(state, entityId2));
+var memberLevelV1 = (state, level, entityId2) => cap2(Number(level) + memberLevelOffsetV1(state, entityId2));
 var PACK_LEVEL_SPREAD_V1 = Math.max(...SPAWN_LEVELS_V1.packOffsets) - Math.min(...SPAWN_LEVELS_V1.packOffsets);
 function groupBaseLevelV1(state, group) {
   const live = group.entityIds.filter((id) => state.entitiesById[id]?.alive), ids = live.length ? live : group.entityIds, levels2 = group.threatSnapshot.levelsByEntityId;
   const at2 = ids.find((id) => memberLevelOffsetV1(state, id) === 0) ?? ids[0];
-  return cap(Number(levels2[at2]) - memberLevelOffsetV1(state, at2));
+  return cap2(Number(levels2[at2]) - memberLevelOffsetV1(state, at2));
 }
 
 // src/shared/contracts/d9_numeric_expression.js
@@ -9753,9 +9795,9 @@ function createEliteForAffixD13D_B(source8, affixId, capabilities) {
   return createElite({ ...source8, affixId }, capabilities);
 }
 async function createNamedEliteV1(source8, namedEliteId, capabilities) {
-  const named = NAMED_ELITES_V1[namedEliteId];
-  requireContract(named, "Unknown named elite");
-  return freezeWire({ ...await createEliteForAffixD13D_B(source8, named.affixId, capabilities), namedEliteId });
+  const named2 = NAMED_ELITES_V1[namedEliteId];
+  requireContract(named2, "Unknown named elite");
+  return freezeWire({ ...await createEliteForAffixD13D_B(source8, named2.affixId, capabilities), namedEliteId });
 }
 function eliteActorProfileD12_4(state, actor, profile2) {
   return applyEliteActorStatsD12_4(profile2, state.eliteCombat?.elitesByEntityId?.[actor.entityId] ?? null);
@@ -11551,8 +11593,8 @@ function classTreeSpent(d8, treeId, belowTier = Infinity) {
   return n;
 }
 function classTreePoints(d8) {
-  const level = d8?.heroClass ? progressionBigInt(d8.highestHeroLevel) - 1n : 0n, cap2 = BigInt(CLASS_TREE_POINT_CAP), earned = level < cap2 ? level : cap2, spent = BigInt(Object.values(d8?.classRanks ?? {}).reduce((a, b) => a + b, 0));
-  return { earned, spent, unspent: earned - spent, cap: cap2 };
+  const level = d8?.heroClass ? progressionBigInt(d8.highestHeroLevel) - 1n : 0n, cap3 = BigInt(CLASS_TREE_POINT_CAP), earned = level < cap3 ? level : cap3, spent = BigInt(Object.values(d8?.classRanks ?? {}).reduce((a, b) => a + b, 0));
+  return { earned, spent, unspent: earned - spent, cap: cap3 };
 }
 function learnedClassActives(d8) {
   if (!d8?.heroClass || !d8.classRanks) return [];
@@ -13321,7 +13363,7 @@ function affixRollRangeD9(g, key9) {
   const tier2 = safeInteger(g.rarityTier, 0, 5), p = g.itemPower, overall = g.definition.slot === "overall";
   return certifyNumeric((c) => {
     const P2 = c.q((100 + 15 * tier2) * (overall ? 18 : 10), 1e3), R2 = c.q((100 + 7 * tier2) * (overall ? 18 : 10), 1e3), I = c.q, mul2 = c.mul;
-    const cap2 = (a, b) => ({ lo: a.lo < b.lo ? a.lo : b.lo, hi: a.hi < b.hi ? a.hi : b.hi }), ceil = (x) => progressionWire(c.endpoint(x, "ceil")), round44 = (x) => decimalWire(c.endpoint(x, "round", 4), 4);
+    const cap3 = (a, b) => ({ lo: a.lo < b.lo ? a.lo : b.lo, hi: a.hi < b.hi ? a.hi : b.hi }), ceil = (x) => progressionWire(c.endpoint(x, "ceil")), round44 = (x) => decimalWire(c.endpoint(x, "round", 4), 4);
     let minimum, maximum;
     const star = c.q(100 + 5 * tier2, 100);
     if (PERCENT_STAT_RANGES[key9]) {
@@ -13358,8 +13400,8 @@ function affixRollRangeD9(g, key9) {
       maximum = round44(mul2(I(3, 100), scale2));
     } else if (["critChance", "critDamage", "block", "parry"].includes(key9)) {
       const scale2 = mul2(c.root(I(p), 2), P2), v3 = g.progression?.affixes === AFFIXES_V2, lo = key9 === "critChance" ? v3 ? I(1, 100) : I(15, 1e3) : key9 === "critDamage" ? I(3, 100) : I(5, 1e3), hi = key9 === "critChance" ? v3 ? I(2, 100) : I(4, 100) : key9 === "critDamage" ? I(6, 100) : I(15, 1e3), limit = key9 === "critChance" ? v3 ? I(1, 10) : I(2, 10) : I(15, 100);
-      minimum = round44(key9 === "critDamage" ? mul2(lo, scale2) : cap2(mul2(lo, scale2), limit));
-      maximum = round44(key9 === "critDamage" ? mul2(hi, scale2) : cap2(mul2(hi, scale2), limit));
+      minimum = round44(key9 === "critDamage" ? mul2(lo, scale2) : cap3(mul2(lo, scale2), limit));
+      maximum = round44(key9 === "critDamage" ? mul2(hi, scale2) : cap3(mul2(hi, scale2), limit));
     } else {
       const scale2 = mul2(c.add(I(3), c.frac(I(p), 3, 4)), I(100 + 25 * tier2, 100)), lo = progressionBigInt(c.endpoint(mul2(I(4, 10), scale2), "ceil")), hi = progressionBigInt(c.endpoint(mul2(I(8, 10), scale2), "ceil")), limit = progressionBigInt(c.endpoint(c.add(I(2), mul2(I(p), I(3, 4))))), f3 = progressionBigInt(c.endpoint(mul2(I(p), I(45, 100)))), fallback = f3 < 1n ? 1n : f3, values = [];
       if (lo <= limit) {
@@ -18397,7 +18439,7 @@ async function buildFortFamilyV1(state, socket, binding, { sha256, runEpisode = 
     }
     if (hosting && restored) requireContract(restoredInstalled, "Required restored Fort boss was not installed");
     if (!aegis && !brimstone && !restoredInstalled && leader.eliteAffixId) {
-      const a = p.actors[0], source8 = { campaignSeed: state.campaign.seed.seedHex, siteId: socket.siteId, floorId: floorIds[i], groupId: p.group.groupId, roomId: leader.roomId, entityId: a.entityId, activatedTick: state.tick }, named = recipe.encounter.siteEnd?.named, elite = await (named ? createNamedEliteV1(source8, named, { sha256 }) : createEliteForAffixD13D_B(source8, leader.eliteAffixId, { sha256 })), stats = applyEliteActorStatsD12_4({ maxHp: a.maxHp, attackDamage: a.attackDamage }, elite);
+      const a = p.actors[0], source8 = { campaignSeed: state.campaign.seed.seedHex, siteId: socket.siteId, floorId: floorIds[i], groupId: p.group.groupId, roomId: leader.roomId, entityId: a.entityId, activatedTick: state.tick }, named2 = recipe.encounter.siteEnd?.named, elite = await (named2 ? createNamedEliteV1(source8, named2, { sha256 }) : createEliteForAffixD13D_B(source8, leader.eliteAffixId, { sha256 })), stats = applyEliteActorStatsD12_4({ maxHp: a.maxHp, attackDamage: a.attackDamage }, elite);
       a.hp = combatInteger(stats.maxHp);
       a.maxHp = combatInteger(stats.maxHp);
       a.attackDamage = combatInteger(stats.attackDamage);
@@ -24458,9 +24500,9 @@ var times2 = (a, b) => {
   b = asCombatAmount(b);
   return multiplyCombat(a, b.n, b.d);
 };
-function guardChanceExact(raw, cap2, unit3 = 1e3) {
+function guardChanceExact(raw, cap3, unit3 = 1e3) {
   raw = asCombatAmount(raw);
-  const half = combatAmount(cap2, 2);
+  const half = combatAmount(cap3, 2);
   if (compareCombat(raw, half) <= 0) return multiplyCombat(raw, 1, unit3);
   const delta = subtractCombat(raw, half), den = addCombat(delta, half);
   return addCombat(multiplyCombat(half, 1, unit3), multiplyCombat(times2(half, delta), den.d, BigInt(den.n) * BigInt(unit3)));
@@ -24724,10 +24766,10 @@ function freezeResolved(value) {
   }
   return value;
 }
-function guardChance(raw, cap2, unit3 = 1e3) {
-  const half = cap2 / 2;
+function guardChance(raw, cap3, unit3 = 1e3) {
+  const half = cap3 / 2;
   if (raw <= half) return combatAmount(raw, unit3);
-  return addCombat(combatAmount(half, unit3), combatAmount(BigInt(cap2 - half) * BigInt(raw - half), BigInt(unit3) * BigInt(raw - half + cap2 - half)));
+  return addCombat(combatAmount(half, unit3), combatAmount(BigInt(cap3 - half) * BigInt(raw - half), BigInt(unit3) * BigInt(raw - half + cap3 - half)));
 }
 
 // src/shared/contracts/progression_commands.js
