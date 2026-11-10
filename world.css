@@ -1782,60 +1782,61 @@ body.skill-arc-v1 .shadow-dash:disabled,body.skill-arc-v1 .shield-guard:disabled
 .cs-wheel-spot[data-picked=true] .cs-wheel-icon{transform:scale(1.08);box-shadow:0 0 0 3px #f4cf6a,0 0 14px #f4cf6aaa}
 .cs-wheel-name{max-width:56px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center}
 .cs-wheel-gap{flex:none;width:1px;align-self:stretch;margin:4px 2px 18px;background:#2f3a46}
-/* HUD v2: brass and leather (mockup VPa1GhLKCHdvc2TnJ3BKeC, picks 1A + 2A, 2026-11-09).
-   Matches the brass compass minimap: a brass level medallion with XP as a gold ring (vitals_hud_v4.js draws it
-   from #world-level and #world-xp-bar, which stay as the value source), a leather strap for HP, gold, XP and
-   status, and round brass Bag and Menu knobs with a small label. Only the look changes; positions stay close. */
+/* HUD v3: slate (mockup KLqEnsiJj2TSpY1KDRa9Jx, all A, 2026-11-09; was HUD v2 brass).
+   Built like the Attack button and the field note: slate fill, dark outline, a thin pale-gold edge and a hard drop
+   shadow. vitals_hud_v4.js draws the slate level disc with XP as a gold ring (from #world-level and #world-xp-bar,
+   which stay as the value source); the HP, gold, XP and status sit on a slate panel; Bag and Menu are slate discs
+   with a small caps label. Only the look changes; positions stay as they were. */
 html body #world-hud-vitals{--m:66px;--sh:52px;--hp:18px;isolation:isolate;top:calc(14px + var(--world-safe-top))!important;left:calc(14px + var(--world-safe-left))!important;width:318px!important;height:var(--m)!important;padding:calc((var(--m) - var(--sh)) / 2 + 7px) 12px 0 calc(var(--m) + 6px)!important;display:grid!important;grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:var(--hp) 13px;align-content:start;column-gap:9px;row-gap:5px;border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important;overflow:visible}
-html body #world-hud-vitals::before{content:""!important;display:block!important;position:absolute;z-index:-1;left:calc(var(--m) * .5);right:0;top:calc((var(--m) - var(--sh)) / 2);width:auto;height:var(--sh);box-sizing:border-box;border:2px solid #120c07;border-radius:10px;background:linear-gradient(#4a3a2a,#241a12);box-shadow:inset 0 0 0 1px #241a12,inset 0 0 0 2px #c9a45ebb,0 3px 6px #0007;transform:none;letter-spacing:0}
+html body #world-hud-vitals::before{content:""!important;display:block!important;position:absolute;z-index:-1;left:calc(var(--m) * .5);right:0;top:calc((var(--m) - var(--sh)) / 2);width:auto;height:var(--sh);box-sizing:border-box;border:2px solid #0b1015;border-radius:10px;background:linear-gradient(#34434e,#1d2a34);box-shadow:inset 0 0 0 1px #d4b98acc,0 3px 0 #070b10,0 5px 10px #0006;transform:none;letter-spacing:0}
 html body #world-hud-vitals::after{display:none!important;content:none!important}
 html body #world-hud-vitals.saq-critical-health-v3{background:none!important;border:0!important;box-shadow:none!important}
-html body #world-hud-vitals.saq-critical-health-v3::before{border-color:#4a0d0d;box-shadow:inset 0 0 0 1px #241a12,inset 0 0 0 2px #e0645cbb,0 0 12px #c8253b88}
+html body #world-hud-vitals.saq-critical-health-v3::before{border-color:#4a0d0d;box-shadow:inset 0 0 0 1px #e0645ccc,0 3px 0 #070b10,0 0 12px #c8253b88}
 html body #world-hud-vitals .vital-bars,html body #world-hud-vitals #world-progression{display:contents!important}
 html body #world-hud-vitals #world-progression[hidden]{display:none!important}
 html body #world-hud-vitals .hp-track{grid-column:1 / -1;grid-row:1;height:var(--hp)!important;margin:0!important;min-width:0}
-html body #world-hud-vitals .vbar-hp{background:#2a0f0c;box-shadow:inset 0 1px 3px #000c,0 0 0 1.5px #0e0805}
+html body #world-hud-vitals .vbar-hp{background:#1a0d10;box-shadow:inset 0 1px 3px #000c,0 0 0 1.5px #0b1015}
 html body #world-hud-vitals .vbar-hp .vbar-fill{background:linear-gradient(180deg,#ff7a62 0%,#e2392a 50%,#a81e16 100%);box-shadow:inset 0 -2px 0 #00000030}
 html body #world-hud-vitals .vbar-hp .vbar-ticks{display:none}
 html body #world-hud-vitals #world-health{font:800 10.5px/var(--hp) var(--rpg-ui)!important;letter-spacing:.02em;color:#fff;text-shadow:0 0 2px #3a0b07,0 1px 0 #3a0b07,1px 0 0 #3a0b07,-1px 0 0 #3a0b07}
-html body #world-hud-vitals #world-wallet{grid-column:1;grid-row:2;position:relative!important;inset:auto!important;display:flex;align-items:center;gap:4px;min-width:0;margin:0;padding:0;border:0;background:none;color:#f6e7c0;font:700 10.5px/13px var(--rpg-ui)}
+html body #world-hud-vitals #world-wallet{grid-column:1;grid-row:2;position:relative!important;inset:auto!important;display:flex;align-items:center;gap:4px;min-width:0;margin:0;padding:0;border:0;background:none;color:#efe3ca;font:700 10.5px/13px var(--rpg-ui)}
 html body #world-hud-vitals #world-wallet>svg{width:11px;height:12px}
-html body #world-hud-vitals #world-xp{grid-column:2;grid-row:2;position:relative!important;inset:auto!important;margin:0;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;text-align:left;color:#d8c79a;font:600 9.5px/13px var(--rpg-ui)!important;letter-spacing:.01em;text-shadow:none}
+html body #world-hud-vitals #world-xp{grid-column:2;grid-row:2;position:relative!important;inset:auto!important;margin:0;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;text-align:left;color:#aeb5b6;font:600 9.5px/13px var(--rpg-ui)!important;letter-spacing:.01em;text-shadow:none}
 html body #world-hud-vitals #world-status{grid-column:3;grid-row:2;position:relative!important;inset:auto!important;display:block;max-width:100px;margin:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#bfe3a8;font:600 9.5px/13px var(--rpg-ui)}
 html body #world-hud-vitals #world-status::before{content:"\25CF";margin-right:3px;font-size:8px;vertical-align:1px}
 html body #world-hud-vitals #world-status:empty{display:none}
 html body #world-hud-vitals #world-level{position:absolute!important;left:0!important;top:0!important;width:var(--m)!important;height:var(--m)!important;margin:0;padding:0;border:0!important;border-radius:50%;background:none!important;box-shadow:none!important;color:transparent!important;font-size:1px!important;overflow:hidden}
 html body #world-hud-vitals #world-xp-bar{position:absolute!important;left:0;top:0;width:var(--m)!important;height:var(--m)!important;margin:0;opacity:0;pointer-events:none}
 html body #world-hud-vitals .vbar-xp{display:none!important}
-html body #world-hud-vitals .vmed{position:absolute;left:0;top:0;z-index:1;width:var(--m);height:var(--m);pointer-events:none;filter:drop-shadow(0 2px 2px #0009)}
+html body #world-hud-vitals .vmed{position:absolute;left:0;top:0;z-index:1;width:var(--m);height:var(--m);pointer-events:none}
 html body #world-hud-vitals .vmed svg{display:block;width:100%;height:100%}
 html body #world-hud-vitals .vmed .vmed-ring{transition:stroke-dasharray .55s cubic-bezier(.25,.8,.25,1)}
 html body #world-hud-vitals .vmed.instant .vmed-ring{transition:none}
 html body #world-hud-vitals .vmed.gain .vmed-ring{animation:vmed-gain .6s ease-out}
-@keyframes vmed-gain{0%{stroke:#fffbe8;stroke-width:4.6}100%{stroke:#ffe08a;stroke-width:3.6}}
-html body #world-hud-vitals .vmed b{position:absolute;left:0;right:0;top:22%;text-align:center;font:400 calc(var(--m) * .14)/1 var(--rpg-title);font-variant:small-caps;color:#e6c47a}
+@keyframes vmed-gain{0%{stroke:#fffbe8;stroke-width:4.4}100%{stroke:#f0c862;stroke-width:3.4}}
+html body #world-hud-vitals .vmed b{position:absolute;left:0;right:0;top:23%;text-align:center;font:700 calc(var(--m) * .13)/1 var(--rpg-ui);letter-spacing:.08em;color:#d4b98a}
 html body #world-hud-vitals .vmed strong{position:absolute;left:0;right:0;top:39%;text-align:center;font:800 calc(var(--m) * .3)/1 var(--rpg-ui);color:#fff4dc;text-shadow:0 1px 0 #000}
 html body #world-hud-vitals .vmed strong.long{font-size:calc(var(--m) * .24);top:42%}
-html body #world-hud-vitals .vmed small{position:absolute;left:50%;bottom:-3px;transform:translateX(-50%);padding:0 5px;border:1px solid #c9a45e;border-radius:7px;background:#3a2a14;color:#ffe08a;font:800 9px/12px var(--rpg-ui);white-space:nowrap}
+html body #world-hud-vitals .vmed small{position:absolute;left:50%;bottom:-3px;transform:translateX(-50%);padding:0 5px;border:1px solid #d4b98a;border-radius:7px;background:#17242e;color:#f0c862;font:800 9px/12px var(--rpg-ui);white-space:nowrap}
 html body #world-hud-vitals .vmed small[hidden]{display:none}
 html body #world-hud-vitals:has(#world-progression[hidden]) .vmed{display:none}
 html body #world-hud-vitals:has(#world-progression[hidden]){padding-left:14px!important}
 html body #world-hud-vitals:has(#world-progression[hidden])::before{left:0}
 
-/* Bag and Menu: round brass knobs like the minimap's + and -, with a small label under them (2A). */
-html body #world-bag,html body #local-world-controls:not([open])>summary{--k:52px;position:relative;width:var(--k)!important;height:var(--k)!important;min-width:0!important;min-height:0!important;padding:0!important;display:grid!important;place-items:center;box-sizing:border-box;border:2px solid #1a120a!important;border-radius:50%!important;background:radial-gradient(circle at 40% 35%,#f6e2a6,#b98d45 70%,#8a6a32)!important;box-shadow:inset 0 1px 0 #fff5,inset 0 -2px 3px #5a3d1a88,0 3px 5px #0008!important;color:transparent!important;font-size:0!important;line-height:0!important;letter-spacing:0!important;overflow:visible;text-align:center}
+/* Bag and Menu: small slate discs like Attack, ivory line icons, a small caps label under them (2A). */
+html body #world-bag,html body #local-world-controls:not([open])>summary{--k:52px;position:relative;width:var(--k)!important;height:var(--k)!important;min-width:0!important;min-height:0!important;padding:0!important;display:grid!important;place-items:center;box-sizing:border-box;border:2.5px solid #0b1015!important;border-radius:50%!important;background:radial-gradient(circle at 38% 26%,#5c6d78,#2b3b46 55%,#17242e)!important;box-shadow:inset 0 0 0 1.5px #d4b98a,inset 0 -6px 10px #0007,0 3px 0 #070b10,0 6px 12px #0006!important;color:transparent!important;font-size:0!important;line-height:0!important;letter-spacing:0!important;overflow:visible;text-align:center}
 html body #world-bag{position:absolute!important;bottom:calc(36px + var(--world-safe-bottom))!important;left:calc(22px + var(--world-safe-left))!important}
 html body #world-bag::before,html body #local-world-controls:not([open])>summary::before{content:""!important;display:block!important;width:calc(var(--k) * .52)!important;height:calc(var(--k) * .52)!important;margin:0!important;background:center/contain no-repeat;float:none}
-html body #world-bag::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-10 -11 20 20'%3E%3Cpath d='M-7 -2Q-8 8 0 8Q8 8 7 -2Q4 -5 0 -5Q-4 -5 -7 -2Z' fill='%232a1d12'/%3E%3Cpath d='M-3.5 -5Q-3.5 -9 0 -9Q3.5 -9 3.5 -5' fill='none' stroke='%232a1d12' stroke-width='1.8'/%3E%3Cpath d='M-7 1H7' stroke='%23e9cf8c' stroke-width='1.2'/%3E%3Crect x='-1.6' y='-.2' width='3.2' height='3' rx='.6' fill='%23e9cf8c'/%3E%3C/svg%3E")!important}
-html body #local-world-controls:not([open])>summary::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-10 -10 20 20'%3E%3Crect x='-7' y='-7' width='14' height='14' rx='2' fill='%232a1d12'/%3E%3Cpath d='M-4 -3H4M-4 0H4M-4 3H2' stroke='%23e9cf8c' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E")!important}
-html body #world-bag::after,html body #local-world-controls:not([open])>summary::after{position:absolute;left:50%;top:calc(100% + 1px);transform:translateX(-50%);display:block;margin:0;padding:0;font:400 12px/14px var(--rpg-title)!important;font-variant:small-caps;letter-spacing:.03em!important;color:#f6e7c0!important;text-shadow:0 0 2px #1a120a,0 1px 0 #1a120a,1px 0 0 #1a120a,-1px 0 0 #1a120a,0 -1px 0 #1a120a;white-space:nowrap;float:none;pointer-events:none}
+html body #world-bag::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-10 -10 20 20'%3E%3Cpath d='M-6.2 -3.2H6.2L7 7.6H-7Z' fill='none' stroke='%23efe3ca' stroke-width='1.7' stroke-linejoin='round'/%3E%3Cpath d='M-3.2 -3.2V-4.8Q-3.2 -8.2 0 -8.2Q3.2 -8.2 3.2 -4.8V-3.2' fill='none' stroke='%23efe3ca' stroke-width='1.7'/%3E%3C/svg%3E")!important}
+html body #local-world-controls:not([open])>summary::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-10 -10 20 20'%3E%3Cpath d='M-6.5 -4.6H6.5M-6.5 0H6.5M-6.5 4.6H6.5' stroke='%23efe3ca' stroke-width='1.9' stroke-linecap='round'/%3E%3C/svg%3E")!important}
+html body #world-bag::after,html body #local-world-controls:not([open])>summary::after{position:absolute;left:50%;top:calc(100% + 1px);transform:translateX(-50%);display:block;margin:0;padding:0;font:700 11px/14px var(--rpg-ui)!important;font-variant:normal;letter-spacing:.06em!important;text-transform:uppercase;color:#efe3ca!important;text-shadow:0 0 2px #0b1015,0 1px 0 #0b1015,1px 0 0 #0b1015,-1px 0 0 #0b1015,0 -1px 0 #0b1015;white-space:nowrap;float:none;pointer-events:none}
 html body #world-bag::after{content:"Bag"!important}
 html body #local-world-controls:not([open])>summary::after{content:"Menu"!important}
 html body #local-world-controls:not([open]){width:auto!important;height:auto!important;overflow:visible}
-/* Desktop: the brass minimap now sits in the top-right corner, so Menu goes under it instead of behind it. */
+/* Desktop: the round minimap now sits in the top-right corner, so Menu goes under it instead of behind it. */
 @media(min-width:601px) and (min-height:501px){html body #local-world-controls:not([open]){top:calc(208px + var(--world-safe-top))!important;right:calc(71px + var(--world-safe-right))!important}}
-@media(hover:hover) and (pointer:fine){html body #world-bag:hover,html body #local-world-controls:not([open])>summary:hover{border-color:#1a120a!important;background:radial-gradient(circle at 40% 35%,#fff0c4,#cfa257 70%,#97743a)!important}}
-html body #world-bag:active,html body #local-world-controls:not([open])>summary:active{transform:translateY(1px);box-shadow:inset 0 1px 0 #fff5,inset 0 -1px 2px #5a3d1a88,0 1px 3px #0008!important}
+@media(hover:hover) and (pointer:fine){html body #world-bag:hover,html body #local-world-controls:not([open])>summary:hover{border-color:#0b1015!important;background:radial-gradient(circle at 38% 26%,#6e808c,#34475a 55%,#1b2a35)!important}}
+html body #world-bag:active,html body #local-world-controls:not([open])>summary:active{transform:translateY(2px);box-shadow:inset 0 0 0 1.5px #d4b98a,inset 0 -4px 8px #0007,0 1px 0 #070b10!important}
 
 /* Phones held upright. */
 @media(max-width:600px){
@@ -1847,7 +1848,7 @@ html body #world-bag:active,html body #local-world-controls:not([open])>summary:
  html body #world-bag,html body #local-world-controls:not([open])>summary{--k:42px}
  html body #world-bag{bottom:auto!important;left:auto!important;right:calc(88px + var(--world-safe-right))!important}
  html body #local-world-controls:not([open]){right:calc(20px + var(--world-safe-right))!important}
- html body #world-bag::after,html body #local-world-controls:not([open])>summary::after{font-size:11px!important;line-height:12px!important}
+ html body #world-bag::after,html body #local-world-controls:not([open])>summary::after{font-size:10px!important;line-height:12px!important}
 }
 /* Phones held sideways. */
 @media(max-height:500px) and (min-width:601px){
@@ -1860,6 +1861,13 @@ html body #world-bag:active,html body #local-world-controls:not([open])>summary:
  html body #world-bag{left:var(--hud-lc)!important;bottom:calc(var(--hud-bc) + 14px)!important}
  html body #world-bag::after,html body #local-world-controls:not([open])>summary::after{font-size:11px!important;line-height:12px!important}
 }
+/* Potion pass (HUD v3): rounder, a pill with the flask in a round well; keeps its red glass and gold edge. */
+html body #carried-rations.potion-button{border-radius:999px!important;padding-right:18px!important}
+html body #carried-rations.potion-button .potion-socket{border-radius:50%!important}
+/* Place name (HUD v3): the same slate panel as the HP panel, Georgia lettering, no fade or side bar. */
+html body #world-hud-title{border:2px solid #0b1015!important;border-radius:10px!important;background:linear-gradient(#34434ef2,#1d2a34f2)!important;box-shadow:inset 0 0 0 1px #d4b98a99,0 3px 0 #070b10,0 5px 10px #0005!important;padding:6px 14px 7px!important}
+html body #world-hud-title::before,html body #world-hud-title::after{content:none!important;display:none!important}
+html body #space-label{color:#f6e7c0!important;text-shadow:0 1px 0 #0b1015!important}
 /* Co-op step 2: host lobby, join screen, in-game bar */
 .coop-screen{position:fixed;inset:0;z-index:2650;display:grid;place-items:center;overflow:auto;padding:calc(10px + var(--world-safe-top,0px)) calc(10px + var(--world-safe-right,0px)) calc(10px + var(--world-safe-bottom,0px)) calc(10px + var(--world-safe-left,0px));background:#060a0ed9;color:var(--rpg-ivory,#eee7d9);font:13px var(--rpg-ui)}
 .coop-card{width:min(520px,100%);max-height:100%;overflow:auto;box-sizing:border-box;display:grid;grid-template-columns:minmax(0,1fr);gap:12px;padding:16px 18px;border:1px solid var(--rpg-brass,#b7a077);border-radius:14px;background:linear-gradient(#1c2731,#121a22);box-shadow:0 20px 60px #000c}

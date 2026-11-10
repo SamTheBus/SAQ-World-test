@@ -73374,11 +73374,25 @@ function createWorldEventHudV4(document2, onActivate = () => {
   const blessing = badge.cloneNode(true);
   blessing.id = "world-event-blessing-v4";
   const [blessingName, blessingTime] = blessing.querySelectorAll("strong,time");
+  const dials = document2.createElement("div");
+  dials.className = "wev-dials";
+  root2.append(dials);
   stack.append(root2, badge, blessing);
+  function placeBadges() {
+    const inside5 = !root2.hidden;
+    for (const b of [badge, blessing]) {
+      const want = inside5 ? dials : stack;
+      if (b.parentElement !== want) want.append(b);
+      const t = inside5 ? b.querySelector("strong").textContent + " " + b.querySelector("time").textContent : "";
+      if (b.title !== t) b.title = t;
+    }
+    const on = inside5 && (!badge.hidden || !blessing.hidden);
+    if (root2.hasAttribute("data-dials") !== on) root2.toggleAttribute("data-dials", on);
+  }
   const style = document2.createElement("style");
   style.textContent = `#world-event-stack-v4{position:absolute;z-index:7;top:76px;left:12px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;pointer-events:none}#world-event-hud-v4{--accent:#c27dff;position:relative;width:min(300px,56vw);padding:9px 13px 10px 16px;border-radius:7px;background:#11171ce0;box-shadow:inset 0 0 0 1px #ffffff14;color:#f3ead2;font:12px/1.35 system-ui;box-sizing:border-box}#world-event-hud-v4::before{content:'';position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:0 2px 2px 0;background:var(--accent)}#world-event-stack-v4 [hidden]{display:none!important}#world-event-hud-v4 small{display:block;color:var(--accent);font-size:10px;font-weight:700;letter-spacing:.15em}#world-event-hud-v4>div:first-of-type{display:flex;align-items:baseline;gap:8px}#world-event-hud-v4 strong{flex:1;font:700 20px/1.2 Georgia,serif;margin:1px 0 4px}#world-event-hud-v4 time{font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;color:var(--accent)}#world-event-hud-v4 time:empty{display:none}#world-event-hud-v4>div:nth-of-type(2){display:flex;align-items:center;gap:10px;margin:3px 0 2px}#world-event-hud-v4>div:nth-of-type(2)[data-empty]{display:none}#world-event-hud-v4 em{display:inline-block;width:9px;height:9px;margin:0 5px 0 2px;transform:rotate(45deg);border:1.5px solid #ffffff5c;background:#ffffff14}#world-event-hud-v4 em[data-on]{border-color:#f2dcff;background:var(--accent)}#world-event-hud-v4 span:last-child{position:relative;flex:1;height:13px;border-radius:7px;background:#ffffff1a;overflow:hidden}#world-event-hud-v4 i{position:absolute;inset:0 auto 0 0;border-radius:7px;background:var(--accent);min-width:13px}#world-event-hud-v4 b{position:relative;padding-left:8px;font-size:10px;line-height:13px;color:#fff;text-shadow:0 1px 1px #0008}#world-event-hud-v4 p{margin:5px 0 0;color:#c9c2ae;font-size:12px}#world-event-hud-v4 p:empty{display:none}#world-event-hud-v4 button{pointer-events:auto;touch-action:manipulation;margin-top:8px;padding:6px 10px;font:600 12px system-ui;border:1px solid #e8c37a99;border-radius:5px;background:#1b232b;color:#f3ead2}#world-event-hud-v4 button:disabled{opacity:.6}
 #world-event-boon-v4,#world-event-blessing-v4{--boon:#ffcf5a;--left:1;display:flex;align-items:center;gap:8px;padding:4px 11px 4px 4px;border-radius:22px;background:#11171ce0;box-shadow:inset 0 0 0 1px #ffffff14;color:#f3ead2;font:12px/1.2 system-ui}#world-event-boon-v4>span:first-child,#world-event-blessing-v4>span:first-child{width:30px;height:30px;border-radius:50%;background:radial-gradient(circle,#11171c 0 52%,transparent 54%),conic-gradient(var(--boon) calc(var(--left)*360deg),#ffffff1f 0);position:relative}#world-event-boon-v4>span:first-child::after,#world-event-blessing-v4>span:first-child::after{content:'';position:absolute;inset:10px;border-radius:50%;background:var(--boon);box-shadow:0 0 8px var(--boon)}#world-event-boon-v4 strong,#world-event-blessing-v4 strong{display:block;font:700 13px/1.2 Georgia,serif}#world-event-boon-v4 time,#world-event-blessing-v4 time{display:block;font-weight:700;font-size:11px;color:var(--boon);font-variant-numeric:tabular-nums}
-@media(max-width:600px){#world-event-stack-v4{top:68px;left:8px}#world-event-hud-v4{width:min(230px,54vw);padding:7px 10px 8px 13px;font-size:11px}#world-event-hud-v4 strong{font-size:16px}}@media(max-height:450px){#world-event-stack-v4{top:62px}#world-event-hud-v4{padding:5px 10px 6px 13px}#world-event-hud-v4 p{display:none}}`;
+#world-event-hud-v4 .wev-dials{position:absolute;right:10px;bottom:9px;display:flex;gap:5px}#world-event-hud-v4[data-dials] p{padding-right:52px}#world-event-hud-v4[data-dials]>div:nth-of-type(2){padding-right:52px}#world-event-hud-v4 .wev-dials>div{padding:0;background:none;box-shadow:none;border-radius:50%}#world-event-hud-v4 .wev-dials>div>span:first-child{width:20px;height:20px;flex:none;background:radial-gradient(circle,#11171c 0 50%,transparent 53%),conic-gradient(var(--boon) calc(var(--left)*360deg),#ffffff22 0)}#world-event-hud-v4 .wev-dials>div>span:first-child::after{inset:7px}#world-event-hud-v4 .wev-dials>div>span:last-child{display:none}#world-event-hud-v4 .wev-dials>div[hidden]{display:none}@media(max-width:600px){#world-event-stack-v4{top:68px;left:8px}#world-event-hud-v4{width:min(230px,54vw);padding:7px 10px 8px 13px;font-size:11px}#world-event-hud-v4 strong{font-size:16px}}@media(max-height:450px){#world-event-stack-v4{top:62px}#world-event-hud-v4{padding:5px 10px 6px 13px}#world-event-hud-v4 p{display:none}}`;
   document2.head.append(style);
   (document2.getElementById("world-view")?.parentElement ?? document2.body).append(stack);
   let previous = "", previousBadge = "", previousBlessing = "", current = null, placedAt = 0;
@@ -73403,12 +73417,14 @@ function createWorldEventHudV4(document2, onActivate = () => {
       root2.hidden = true;
       current = null;
       previous = "";
+      placeBadges();
       return false;
     }
     const key3 = JSON.stringify(trackerRow);
     if (key3 === previous && !root2.hidden) return true;
     previous = key3;
     root2.hidden = false;
+    placeBadges();
     current = trackerRow.groupId;
     place3();
     root2.style.setProperty("--accent", trackerRow.accent ?? "#c27dff");
@@ -73439,6 +73455,7 @@ function createWorldEventHudV4(document2, onActivate = () => {
     if (!visible3 || !b) {
       badge.hidden = true;
       previousBadge = "";
+      placeBadges();
       return;
     }
     const key3 = b.boon + "/" + b.clock + "/" + b.fx;
@@ -73450,11 +73467,13 @@ function createWorldEventHudV4(document2, onActivate = () => {
     badge.style.setProperty("--left", String(Math.max(0, Math.min(1, b.fraction))));
     badgeName.textContent = b.name + (b.fx ? " \xB7 " + b.fx : "");
     badgeTime.textContent = b.clock;
+    placeBadges();
   }
   function refreshBlessing(b, visible3 = true) {
     if (!visible3 || !b) {
       blessing.hidden = true;
       previousBlessing = "";
+      placeBadges();
       return;
     }
     const key3 = b.boon + "/" + b.clock;
@@ -73466,6 +73485,7 @@ function createWorldEventHudV4(document2, onActivate = () => {
     blessing.style.setProperty("--left", String(Math.max(0, Math.min(1, b.fraction))));
     blessingName.textContent = b.name + (b.fx ? " \xB7 " + b.fx : "");
     blessingTime.textContent = b.clock;
+    placeBadges();
   }
   return Object.freeze({ refresh, refreshBoon, refreshBlessing, destroy() {
     stack.remove();
@@ -73526,17 +73546,75 @@ var CSS2 = `
 #quest-talk .qx-acts{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
 #quest-talk .qx-acts .qx-pay{margin-right:auto;white-space:nowrap}
 @media (max-width:560px){#quest-talk .qx-acts .qx-pay{flex-basis:100%}#quest-talk .qx-acts button{flex:1 1 0;min-width:0;padding-left:6px;padding-right:6px}}
-#quest-tracker{pointer-events:auto;display:grid;grid-template-columns:28px 1fr;gap:2px 8px;align-items:center;width:min(280px,56vw);padding:7px 11px 8px 8px;border-radius:9px;border:1.5px solid #2a1d12;background:linear-gradient(#f3e8c8f2,#e6d5a8f2);box-shadow:inset 0 0 0 2px #c9a45e,0 3px 10px #0006;color:#2a1d12;text-align:left;font:12px/1.3 "Baloo 2",system-ui,sans-serif;cursor:pointer}
+#quest-tracker{pointer-events:auto;display:grid;grid-template-columns:28px 1fr;gap:2px 8px;align-items:center;width:min(280px,56vw);padding:7px 11px 8px 8px;border-radius:10px;border:2px solid #0b1015;background:linear-gradient(#34434ef2,#1d2a34f2);box-shadow:inset 0 0 0 1px #d4b98acc,0 3px 0 #070b10,0 5px 10px #0005;color:#efe3ca;text-align:left;font:12px/1.3 "Baloo 2",system-ui,sans-serif;cursor:pointer}
 #quest-tracker[hidden]{display:none}
-#quest-tracker .qx-tico{grid-row:span 2;width:28px;height:28px;border-radius:7px;background:#2a1d12;color:#f0c862;display:grid;place-items:center}
+#quest-tracker .qx-tico{grid-row:span 2;width:28px;height:28px;border-radius:7px;background:#0b1015;color:#f0c862;box-shadow:inset 0 0 0 1px #d4b98a88;display:grid;place-items:center}
 #quest-tracker .qx-tico svg{width:17px;height:17px}
-#quest-tracker strong{font:15px/1.15 Georgia,serif;font-variant:small-caps;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#quest-tracker span{color:#4a3720;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-#quest-tracker.is-ready{box-shadow:inset 0 0 0 2px #f0c862,0 0 0 2px #f0c86288,0 3px 10px #0006}
-#quest-tracker.is-ready span{color:#3e6a2a;font-weight:700}
+#quest-tracker strong{font:15px/1.15 Georgia,serif;font-variant:small-caps;color:#f6e7c0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#quest-tracker strong>i{font-style:normal}
+#quest-tracker span{color:#b9c0bf;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#quest-tracker.is-ready{box-shadow:inset 0 0 0 2px #f0c862,0 0 0 2px #f0c86266,0 3px 0 #070b10}
+#quest-tracker.is-ready span{color:#9fd88a;font-weight:700}
 #quest-tracker.qx-fixed{position:absolute;z-index:7;left:12px;top:120px}
 @media(max-width:600px){#quest-tracker{width:min(230px,54vw);padding:5px 9px 6px 6px}#quest-tracker strong{font-size:14px}}
-@media(max-height:450px){#quest-tracker{padding:4px 8px 5px 5px}#quest-tracker strong{font-size:13px}}`;
+@media(max-height:450px){#quest-tracker{padding:4px 8px 5px 5px}#quest-tracker strong{font-size:13px}}
+/* 5A: while an event runs, the tracked quest is one quiet line at the foot of the event card: same dark glass, a hairline
+   on top, no frame or shadow, so it reads as part of the card and not as a button. */
+#quest-tracker.qx-under{grid-template-columns:auto minmax(0,1fr);gap:7px;width:min(300px,56vw);box-sizing:border-box;margin-top:-6px;padding:6px 13px 8px 16px;border:0;border-radius:0 0 7px 7px;background:#11171ce0;box-shadow:inset 0 1px 0 #ffffff14;position:relative}
+#quest-tracker.qx-under::before{content:"";position:absolute;left:0;top:0;bottom:8px;width:3px;background:var(--qx-accent,#c27dff)}
+#quest-tracker.qx-under .qx-tico{grid-row:auto;width:auto;height:auto;background:none;box-shadow:none;color:#d4b98a}
+#quest-tracker.qx-under .qx-tico svg{width:12px;height:12px}
+#quest-tracker.qx-under strong{font:12px/14px system-ui,sans-serif;font-variant:normal;color:#e4ddcc}
+#quest-tracker.qx-under strong::before{content:"Quest";margin-right:7px;font:700 9.5px/14px system-ui,sans-serif;letter-spacing:.15em;text-transform:uppercase;color:#d4b98a}
+#quest-tracker.qx-under span:not(.qx-tico){display:none}
+#quest-tracker.qx-under.is-ready{box-shadow:inset 0 1px 0 #ffffff14}
+#quest-tracker.qx-under.is-ready strong>i{color:#9fd88a}
+#world-event-hud-v4:has(+#quest-tracker.qx-under){border-bottom-left-radius:0;border-bottom-right-radius:0}
+@media(max-width:600px){#quest-tracker.qx-under{width:min(230px,54vw);padding:5px 10px 7px 13px}}
+/* 4A: the quest log as a page inside the RPG menu, slate like Gear and Skills. */
+#world-inventory[data-section=quests] #world-bag-browse,#world-inventory[data-section=quests] #world-materials-view,#world-inventory[data-section=quests] #world-forge-view,#world-inventory[data-section=quests] #world-bag-summary,#world-inventory[data-section=quests] #world-bag-stats{display:none}
+.qp{display:flex;flex-direction:column;gap:12px;padding:14px 18px;min-height:0;overflow:auto;color:#e4ddcc;font:14px/1.35 var(--rpg-ui,"Segoe UI",system-ui,sans-serif);box-sizing:border-box}
+.qp[hidden]{display:none}
+.qp *{box-sizing:border-box}
+.qp small.qp-eye{display:block;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#d4b98a}
+.qp-story{display:flex;gap:12px;align-items:center;padding:10px 14px;border-radius:10px;background:linear-gradient(100deg,#2a2416,#151d26 70%);box-shadow:inset 0 0 0 1px #f0c86255}
+.qp-seal{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#0b1015;color:#f0c862;box-shadow:inset 0 0 0 1px #d4b98a;font-size:16px}
+.qp-story b{display:block;font:18px/1.2 Georgia,serif;color:#f6e7c0}
+.qp-story span{color:#aeb5b6;font-size:12.5px}
+.qp-main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:12px;align-items:start}
+.qp-list{display:flex;flex-direction:column;gap:8px;min-width:0}
+.qp button.qp-card{position:relative;display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;min-height:0;margin:0;padding:10px 12px;border:0;border-radius:10px;background:#151d26;box-shadow:inset 0 0 0 1px #ffffff12;color:inherit;font:inherit;text-align:left;cursor:pointer;touch-action:manipulation}
+.qp button.qp-card.on{background:#1d2833;box-shadow:inset 0 0 0 1px #f0c86299}
+.qp button.qp-card.on::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:0 2px 2px 0;background:#f0c862}
+.qp button.qp-card:focus-visible,.qp-acts button:focus-visible{outline:2px solid #f0c862;outline-offset:2px}
+.qp-ico{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;background:#0b1015;color:#f0c862;box-shadow:inset 0 0 0 1px #d4b98a77}
+.qp-ico svg{width:20px;height:20px}
+.qp-txt{min-width:0}
+.qp-txt b{display:block;margin:1px 0 2px;font:16px/1.2 Georgia,serif;color:#f6e7c0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qp-txt>span{display:block;color:#aeb5b6;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qp-tag{margin-left:6px;padding:0 6px;border-radius:6px;background:#f0c862;color:#1a140e;letter-spacing:.06em}
+.qp-tag.ready{background:#9fd88a}
+.qp-pay{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.qp-pay i,.qp-rew i{display:inline-flex;align-items:center;gap:4px;font-style:normal;font-weight:700;color:#f0c862;font-size:12.5px;white-space:nowrap}
+.qp-pay i.x,.qp-rew i.x{color:#9dbca5}
+.qp-detail{display:flex;flex-direction:column;gap:10px;min-width:0;padding:14px 16px;border-radius:12px;background:#151d26;box-shadow:inset 0 0 0 1px #ffffff14}
+.qp-detail h3,#world-inventory .qp-detail h3{margin:0!important;padding:0!important;border:0!important;background:none!important;font:22px/1.15 Georgia,serif!important;letter-spacing:0!important;text-transform:none!important;font-variant:normal!important;color:#f6e7c0!important}
+.qp-say{margin:0;font:italic 14px/1.45 Georgia,serif;color:#cfc6b0}
+.qp-step{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:9px;background:#0f151c}
+.qp-step .dot{flex:none;width:10px;height:10px;margin-top:5px;transform:rotate(45deg);background:#f0c862}
+.qp-step b{display:block;color:#efe3ca;font-weight:600}
+.qp-step span{color:#aeb5b6;font-size:12.5px}
+.qp-step.ready .dot{background:#9fd88a}.qp-step.ready span{color:#9fd88a}
+.qp-rew{display:flex;flex-wrap:wrap;gap:12px;align-items:center;color:#aeb5b6;font-size:12.5px}
+.qp-acts{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.qp-acts button,#world-inventory .qp-acts button{min-width:0;min-height:36px;height:auto;margin:0;padding:8px 14px;border:0!important;border-radius:9px!important;background:#202a34!important;box-shadow:inset 0 0 0 1px #766b55!important;color:#e4ddcc!important;font:700 13px/1.2 var(--rpg-ui,"Segoe UI",system-ui,sans-serif);letter-spacing:0;text-transform:none;cursor:pointer;touch-action:manipulation}
+#world-inventory .qp-acts button.gold,.qp-acts button.gold{background:linear-gradient(#ffe08a,#d9a63e)!important;box-shadow:inset 0 0 0 1px #fff6,0 0 0 1.5px #0b1015!important;color:#1a140e!important}
+#world-inventory .qp-acts button.warn,.qp-acts button.warn{box-shadow:inset 0 0 0 1px #e0645c!important;color:#ffb3a8!important}
+.qp-acts button:disabled{opacity:.55;cursor:default}
+.qp-empty{margin:4px 2px;color:#aeb5b6;font-style:italic}
+.qp-note{margin:0;color:#ff9d8f;font-size:13px}
+@media(max-width:600px){.qp{padding:10px}.qp-main{grid-template-columns:1fr}.qp-detail{order:-1}.qp-list button.qp-card.on{display:none}#world-inventory .qp-detail h3{font-size:19px!important}}
+@media(max-height:500px) and (min-width:601px){.qp{padding:8px 12px;gap:8px}.qp-story{padding:6px 10px}.qp-story span,.qp-say{display:none}.qp button.qp-card{padding:6px 10px}.qp-txt>span{display:none}.qp-detail{padding:10px 12px;gap:7px}#world-inventory .qp-detail h3{font-size:18px!important}}`;
 function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () => {
 }, restoreFocus = () => {
 }, openShop = () => {
@@ -73790,6 +73868,7 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     if (board.open) drawBoard();
     if (talk.open) drawTalk();
     if (log.open) drawLog();
+    if (menuPage.open) drawPage();
   }
   function setTrack(id) {
     tracked = id;
@@ -73809,6 +73888,10 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
   const tIco = el2("span", null, "qx-tico"), tTitle = el2("strong"), tStep = el2("span");
   tracker.append(tIco, tTitle, tStep);
   tracker.onclick = () => openLog();
+  const eventCard = () => {
+    const e = doc.getElementById("world-event-hud-v4");
+    return e && !e.hidden ? e : null;
+  };
   let trackerKey = "", lastStatuses = /* @__PURE__ */ new Map(), primed = false;
   let placedAt = 0;
   function place3(box5) {
@@ -73829,10 +73912,13 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
   function mount() {
     const stack = doc.getElementById("world-event-stack-v4");
     if (stack) {
-      if (tracker.parentElement !== stack) {
-        tracker.classList.remove("qx-fixed");
-        stack.prepend(tracker);
-      }
+      const card = eventCard();
+      tracker.classList.remove("qx-fixed");
+      tracker.classList.toggle("qx-under", Boolean(card));
+      if (card) {
+        if (card.nextElementSibling !== tracker) card.after(tracker);
+        tracker.style.setProperty("--qx-accent", card.style.getPropertyValue("--accent") || "#c27dff");
+      } else if (stack.firstElementChild !== tracker) stack.prepend(tracker);
       place3(stack);
     } else if (tracker.parentElement) place3(tracker);
     else if (!tracker.parentElement) {
@@ -73847,16 +73933,127 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     map()?.trackQuest?.(target);
     const key3 = visible3 && cur ? [cur.id, cur.status, cur.title, cur.step].join("|") : "";
     if (key3 === trackerKey) return;
+    if (menuPage.open) drawPage();
     trackerKey = key3;
     tracker.hidden = !key3;
     if (!key3) return;
     tIco.innerHTML = ICONS3[cur.kind] ?? "";
-    tTitle.textContent = cur.title;
+    tTitle.replaceChildren(el2("i", cur.title));
     tStep.textContent = cur.step;
     tracker.classList.toggle("is-ready", cur.status === "ready");
     tracker.setAttribute("aria-label", "Tracked quest: " + cur.title + ". " + cur.step + ". Open the quest log.");
   }
+  let menuOpener = null, pageSel = null, pageKey = "";
+  const pageRoot = el2("div", null, "qp");
+  pageRoot.id = "world-quests-view";
+  pageRoot.hidden = true;
+  const menuPage = { root: pageRoot, open: false, refresh(visible3) {
+    menuPage.open = Boolean(visible3);
+    pageRoot.hidden = !visible3;
+    if (visible3) drawPage();
+    else {
+      pageKey = "";
+      dropArm = null;
+    }
+  } };
+  function drawPage(force) {
+    if (!menuPage.open) return;
+    const q = quests(), cur = trackedQuest(q), active2 = q?.active ?? [];
+    if (!active2.some((a2) => a2.id === pageSel)) pageSel = cur?.id ?? active2[0]?.id ?? null;
+    const key3 = JSON.stringify([q?.revision, active2.map((a2) => [a2.id, a2.status, a2.step, a2.title]), cur?.id, pageSel, dropArm, busy, notice]);
+    if (!force && key3 === pageKey) return;
+    pageKey = key3;
+    const story = el2("div", null, "qp-story"), seal = el2("span", "\u2726", "qp-seal"), st = el2("div");
+    st.append(el2("small", "Main story", "qp-eye"), el2("b", "The Cracking Seals"), el2("span", "Begins soon"));
+    story.append(seal, st);
+    const kids = [story];
+    if (notice) kids.push(el2("p", notice, "qp-note"));
+    if (!active2.length) {
+      kids.push(el2("p", "No quests yet. Read a town's notice board, or talk to townsfolk with a gold ! over their head.", "qp-empty"));
+      pageRoot.replaceChildren(...kids);
+      return;
+    }
+    const main = el2("div", null, "qp-main"), list = el2("div", null, "qp-list");
+    const pay2 = (a2, cls) => {
+      const g = el2("i");
+      g.innerHTML = COIN;
+      g.append(formatAmount(a2.gold));
+      const x = el2("i", "+" + Number(a2.xp).toLocaleString("en-US") + " XP", "x");
+      const w = el2("span", null, cls);
+      w.append(g, x);
+      return w;
+    };
+    for (const a2 of active2) {
+      const c = el2("button", null, "qp-card" + (a2.id === pageSel ? " on" : ""));
+      c.type = "button";
+      c.setAttribute("aria-pressed", String(a2.id === pageSel));
+      const t = el2("span", null, "qp-txt"), eye6 = el2("small", KIND_LABEL[a2.kind] ?? "Quest", "qp-eye");
+      if (a2.status === "ready") eye6.append(el2("span", "Done", "qp-tag ready"));
+      else if (cur?.id === a2.id) eye6.append(el2("span", "Tracking", "qp-tag"));
+      t.append(eye6, el2("b", a2.title), el2("span", a2.step));
+      c.append(icon(a2.kind, "qp-ico"), t, pay2(a2, "qp-pay"));
+      c.onclick = () => {
+        pageSel = a2.id;
+        dropArm = null;
+        drawPage();
+      };
+      list.append(c);
+    }
+    const a = active2.find((v) => v.id === pageSel) ?? active2[0], d = el2("aside", null, "qp-detail"), from = a.giverName ? a.giverName + ", " + a.town : a.town ? "Notice board, " + a.town : "";
+    d.append(el2("small", (KIND_LABEL[a.kind] ?? "Quest") + (from ? " \xB7 from " + from : ""), "qp-eye"), el2("h3", a.title));
+    if (a.note) d.append(el2("p", "\u201C" + a.note + "\u201D", "qp-say"));
+    const ready = a.status === "ready", step = el2("div", null, "qp-step" + (ready ? " ready" : "")), sv = el2("div");
+    sv.append(el2("b", a.step), el2("span", ready ? "Ready to hand in" : a.target?.found ? "Marked on your map" : "Not found yet"));
+    step.append(el2("span", null, "dot"), sv);
+    d.append(step);
+    const rew = el2("div", null, "qp-rew");
+    rew.append(el2("span", "Reward"), ...pay2(a, "").childNodes);
+    d.append(rew);
+    const acts = el2("div", null, "qp-acts"), btn = (label4, cls, fn) => {
+      const b = el2("button", label4, cls);
+      b.type = "button";
+      b.disabled = busy;
+      b.onclick = fn;
+      acts.append(b);
+      return b;
+    };
+    btn(dropArm === a.id ? "Tap to drop" : "Drop", dropArm === a.id ? "warn" : "", () => {
+      if (dropArm === a.id) {
+        dropArm = null;
+        act("abandon", a.id);
+      } else {
+        dropArm = a.id;
+        drawPage();
+      }
+    });
+    const m = map();
+    if (m?.show && m?.view) {
+      const target = ready && a.turnIn ? a.turnIn : a.target;
+      btn("Show on map", "", () => {
+        setTrack(a.id);
+        closeMenu?.();
+        m.show();
+        m.view(target.x, target.y, 600);
+      });
+    }
+    btn(cur?.id === a.id ? "Tracking \u2713" : "Track", cur?.id === a.id ? "gold" : "", () => {
+      setTrack(a.id);
+      drawPage(true);
+    });
+    d.append(acts);
+    main.append(list, d);
+    kids.push(main);
+    pageRoot.replaceChildren(...kids);
+  }
+  let closeMenu = null;
   function openLog() {
+    if (menuOpener) {
+      clearInput();
+      notice = "";
+      dropArm = null;
+      menuOpener();
+      return;
+    }
     if (openLogHook) {
       openLogHook();
       return;
@@ -73889,6 +74086,12 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
       if (!talk.open) talk.showModal();
     },
     openLog,
+    // 4A: the RPG menu shows menuPage.root as its Quests page and hands over how to open and close itself.
+    menuPage,
+    attachMenu(open2, close2) {
+      menuOpener = open2;
+      closeMenu = close2;
+    },
     drawLogInto(root2) {
       const was = log.open;
       drawLog();
@@ -73916,7 +74119,7 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
       }
     },
     destroy() {
-      for (const e of [board, talk, log, tracker, style]) e.remove();
+      for (const e of [board, talk, log, tracker, style, pageRoot]) e.remove();
     }
   };
 }
@@ -82903,7 +83106,7 @@ var MENU_ICONS = Object.freeze({
   heroes: menuIcon('<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 19c0-3.3 2.7-6 6-6s6 2.7 6 6M15 14.2c3 .2 5 2.3 5 4.8"/>')
 });
 function createInventoryPresentation({ document: document2, environment, readModel, adapter, clearInput, restoreGameplayFocus = () => {
-}, heroSlots = null }) {
+}, heroSlots = null, questsPage = null }) {
   const panel = document2.getElementById("world-inventory"), openButton = document2.getElementById("world-bag"), pickup = document2.getElementById("world-pickup");
   if (!panel || !openButton || !pickup) return { refresh() {
   }, isOpen: () => false, destroy() {
@@ -82958,11 +83161,20 @@ function createInventoryPresentation({ document: document2, environment, readMod
   panel.querySelector(".bag-section-tabs").insertBefore(bestiaryButton, statsButton);
   document2.querySelector(".bag-body").append(bestiaryView.root);
   const questsButton = button2("QUESTS", () => {
+    if (questsPage) {
+      forgeSession = false;
+      section = "quests";
+      inspect = false;
+      key3 = null;
+      refresh(readModel());
+      return;
+    }
     close();
     document2.dispatchEvent(new (environment.CustomEvent ?? CustomEvent)("saq-open-quests"));
   });
   questsButton.id = "world-quests-tab";
   panel.querySelector(".bag-section-tabs").append(questsButton);
+  if (questsPage) document2.querySelector(".bag-body").append(questsPage.root);
   if (heroesView) {
     heroesButton.id = "world-heroes-tab";
     panel.querySelector(".bag-section-tabs").append(heroesButton);
@@ -83050,6 +83262,20 @@ function createInventoryPresentation({ document: document2, environment, readMod
     key3 = null;
     refresh(readModel());
     closeButton.focus();
+  }
+  function openQuests() {
+    const m = readModel();
+    if (!questsPage || !m.inventory) return false;
+    clearInput();
+    forgeSession = false;
+    section = "quests";
+    open2 = true;
+    inspect = false;
+    error = "";
+    key3 = null;
+    refresh(readModel());
+    closeButton.focus();
+    return true;
   }
   function openHeroes() {
     const m = readModel();
@@ -83239,6 +83465,8 @@ function createInventoryPresentation({ document: document2, environment, readMod
     statsButton.setAttribute("aria-pressed", String(section === "stats"));
     heroesView?.refresh(open2 && section === "heroes");
     heroesButton?.setAttribute("aria-pressed", String(section === "heroes"));
+    questsPage?.refresh(open2 && section === "quests");
+    questsButton.setAttribute("aria-pressed", String(section === "quests"));
     bestiaryView.refresh(m, open2 && section === "bestiary");
     bestiaryButton.setAttribute("aria-pressed", String(section === "bestiary"));
     if (open2) paintMenu(m, local7, inv);
@@ -83247,11 +83475,11 @@ function createInventoryPresentation({ document: document2, environment, readMod
     gearSwitch.hidden = !open2 || !forgeSession;
     gearSwitch.textContent = section === "forge" ? "Carried gear" : "Attunement";
     if (!open2) return;
-    if (section === "progression" || section === "stats" || section === "heroes" || section === "bestiary") {
+    if (section === "progression" || section === "stats" || section === "heroes" || section === "bestiary" || section === "quests") {
       panel.dataset.section = section;
       panel.classList.remove("is-inspecting");
       comparison.hidden = true;
-      document2.getElementById("world-bag-title").textContent = section === "stats" ? "Stats" : section === "heroes" ? "Heroes" : section === "bestiary" ? "Bestiary" : "Skills";
+      document2.getElementById("world-bag-title").textContent = section === "stats" ? "Stats" : section === "heroes" ? "Heroes" : section === "bestiary" ? "Bestiary" : section === "quests" ? "Quests" : "Skills";
       for (const id of ["equipment", "bag", "materials"]) document2.getElementById(`world-${id}-tab`).setAttribute("aria-pressed", "false");
       status2.textContent = error;
       return;
@@ -83900,7 +84128,9 @@ function createInventoryPresentation({ document: document2, environment, readMod
   openButton.addEventListener("click", toggle);
   closeButton.addEventListener("click", close);
   environment.addEventListener("keydown", keyboard);
-  return Object.freeze({ refresh, openForge, openHeroes, isOpen: () => open2, destroy() {
+  return Object.freeze({ refresh, openForge, openHeroes, openQuests, close: () => {
+    if (open2) close();
+  }, isOpen: () => open2, destroy() {
     contextInput.destroy();
     progressionView.destroy();
     progressionButton.remove();
@@ -85088,7 +85318,7 @@ function createVitalsHudV4(doc) {
     med.setAttribute("aria-hidden", "true");
     const svg2 = doc.createElementNS(NS, "svg");
     svg2.setAttribute("viewBox", "0 0 60 60");
-    svg2.innerHTML = '<defs><linearGradient id="vmed-brass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3dc98"/><stop offset=".55" stop-color="#c9a45e"/><stop offset="1" stop-color="#7d5c2a"/></linearGradient></defs><circle cx="30" cy="30" r="29.6" fill="#120c07"/><circle cx="30" cy="30" r="28" fill="url(#vmed-brass)"/><circle cx="30" cy="30" r="24.8" fill="none" stroke="#3a2a14" stroke-width="3.6"/><circle class="vmed-ring" cx="30" cy="30" r="24.8" fill="none" stroke="#ffe08a" stroke-width="3.6" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 30 30)"/><circle cx="30" cy="30" r="21.4" fill="#1a140e" stroke="#120c07" stroke-width="1.5"/><path d="M14 22a18 18 0 0 1 32 0" fill="none" stroke="#fff" stroke-opacity=".07" stroke-width="3"/>';
+    svg2.innerHTML = '<defs><radialGradient id="vmed-slate" cx=".38" cy=".26" r=".8"><stop offset="0" stop-color="#5c6d78"/><stop offset=".55" stop-color="#2b3b46"/><stop offset="1" stop-color="#17242e"/></radialGradient></defs><circle cx="30" cy="31.4" r="28.4" fill="#070b10"/><circle cx="30" cy="30" r="28.4" fill="#0b1015"/><circle cx="30" cy="30" r="26.6" fill="url(#vmed-slate)"/><circle cx="30" cy="30" r="23.2" fill="none" stroke="#0b1015" stroke-width="4.2"/><circle class="vmed-ring" cx="30" cy="30" r="23.2" fill="none" stroke="#f0c862" stroke-width="3.4" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 30 30)"/><circle cx="30" cy="30" r="19.9" fill="none" stroke="#d4b98a" stroke-opacity=".9" stroke-width="1.1"/><path d="M15 23a17 17 0 0 1 30 0" fill="none" stroke="#fff" stroke-opacity=".06" stroke-width="3"/>';
     ring6 = svg2.querySelector(".vmed-ring");
     const lv = doc.createElement("b");
     lv.textContent = "Lv";
@@ -86506,7 +86736,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
   }, style = el2("style");
   style.textContent = `
 .chart-mini.m2-mini{position:fixed;right:calc(10px + var(--world-safe-right,0px));top:calc(6px + var(--world-safe-top,0px));z-index:6;padding:0;border:0;border-radius:50%;background:none;box-shadow:none;color:#efe2c2}.chart-mini.m2-mini::before,.chart-mini.m2-mini::after{content:none}
-.m2-mini canvas{display:block;cursor:pointer;-webkit-tap-highlight-color:transparent}.m2-mini .m2-zoom{position:absolute;width:24px;height:24px;min-height:0;padding:0;display:grid;place-items:center;border:1.5px solid #1a120a;border-radius:50%;background:radial-gradient(circle at 40% 35%,#f0d68e,#b98d45 70%);color:#2a1d12;font:800 15px/1 ${UI_FONT};box-shadow:0 2px 4px #0008;cursor:pointer;-webkit-tap-highlight-color:transparent}.m2-mini .m2-zoom::after{content:"";position:absolute;inset:-7px;border-radius:50%}
+.m2-mini canvas{display:block;cursor:pointer;-webkit-tap-highlight-color:transparent}.m2-mini .m2-zoom{position:absolute;width:24px;height:24px;min-height:0;padding:0;display:grid;place-items:center;border:2px solid #0b1015;border-radius:50%;background:radial-gradient(circle at 38% 26%,#5c6d78,#2b3b46 55%,#17242e);color:#efe3ca;font:800 15px/1 ${UI_FONT};box-shadow:inset 0 0 0 1px #d4b98a,0 2px 0 #070b10;cursor:pointer;-webkit-tap-highlight-color:transparent}.m2-mini .m2-zoom::after{content:"";position:absolute;inset:-7px;border-radius:50%}
 .m2-mini .m2-placeline{position:absolute;left:50%;top:calc(100% + 16px);transform:translateX(-50%);white-space:nowrap;font:17px ${MAP_FONT};color:#f6e7c0;text-shadow:0 0 3px #1a120a,0 0 3px #1a120a,0 1px 2px #1a120a;pointer-events:none;opacity:0;transition:opacity .5s}.m2-mini .m2-placeline.on{opacity:1}
 .m2-atlas{position:fixed;inset:calc(6px + var(--world-safe-top,0px)) calc(6px + var(--world-safe-right,0px)) calc(6px + var(--world-safe-bottom,0px)) calc(6px + var(--world-safe-left,0px));max-width:1400px;margin:auto;z-index:45;overflow:hidden;background:#bed0ce;color:#2a1d12;border-radius:6px;box-shadow:0 10px 45px #000c;font:14px ${UI_FONT};overscroll-behavior:contain}.m2-atlas[hidden],.m2-mini[hidden],.m2-atlas [hidden]{display:none!important}
 .m2-atlas>canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block;touch-action:none}
@@ -86728,72 +86958,70 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     c.height = Math.round(H7 * ratio);
     const x = c.getContext("2d");
     x.scale(ratio, ratio);
-    x.fillStyle = "rgba(0,0,0,.42)";
-    x.beginPath();
-    x.arc(cx + 1, cy2 + 3, R9 + 11, 0, 7);
-    x.arc(cx, cy2, R9, 0, 7, true);
-    x.fill();
-    const g = x.createLinearGradient(0, cy2 - R9 - 10, 0, cy2 + R9 + 10);
-    g.addColorStop(0, "#4a3f30");
-    g.addColorStop(0.5, "#2a231b");
-    g.addColorStop(1, "#16120d");
-    x.fillStyle = g;
-    x.beginPath();
-    x.arc(cx, cy2, R9 + 10, 0, 7);
-    x.arc(cx, cy2, R9, 0, 7, true);
-    x.fill();
-    x.strokeStyle = "#d8b56a";
-    x.lineWidth = 1;
-    x.beginPath();
-    x.arc(cx, cy2, R9 + 9.2, 0, 7);
-    x.stroke();
-    for (let i = 0; i < 16; i++) {
-      const a = i * Math.PI / 8;
-      x.strokeStyle = i % 4 ? "rgba(216,181,106,.55)" : "#e9c77a";
-      x.lineWidth = i % 4 ? 1 : 1.8;
+    const ring6 = (r0, r1, fill6, dy = 0) => {
+      x.fillStyle = fill6;
       x.beginPath();
-      x.moveTo(cx + Math.cos(a) * (R9 + 3), cy2 + Math.sin(a) * (R9 + 3));
-      x.lineTo(cx + Math.cos(a) * (R9 + (i % 4 ? 6 : 8)), cy2 + Math.sin(a) * (R9 + (i % 4 ? 6 : 8)));
+      x.arc(cx, cy2 + dy, r1, 0, 7);
+      x.arc(cx, cy2 + dy, r0, 0, 7, true);
+      x.fill();
+    }, line26 = (r, col2, w) => {
+      x.strokeStyle = col2;
+      x.lineWidth = w;
+      x.beginPath();
+      x.arc(cx, cy2, r, 0, 7);
       x.stroke();
-    }
-    x.strokeStyle = "#1a140e";
-    x.lineWidth = 2.2;
-    x.beginPath();
-    x.arc(cx, cy2, R9 + 1, 0, 7);
-    x.stroke();
-    x.strokeStyle = "#c9a45e";
-    x.lineWidth = 1.4;
-    x.beginPath();
-    x.arc(cx, cy2, R9 + 2.6, 0, 7);
-    x.stroke();
-    x.save();
-    x.translate(cx, cy2 - R9 - 6);
-    x.fillStyle = "#1a140e";
-    x.beginPath();
-    x.moveTo(-9, -7);
-    x.lineTo(9, -7);
-    x.lineTo(9, 3);
-    x.lineTo(0, 9);
-    x.lineTo(-9, 3);
-    x.closePath();
-    x.fill();
-    x.fillStyle = "#8f2a1c";
-    x.strokeStyle = "#e0bd72";
+    };
+    ring6(R9 + 6, R9 + 13, "rgba(0,0,0,.22)", 5);
+    ring6(R9, R9 + 11.5, "#070b10", 3);
+    const g = x.createRadialGradient(cx - R9 * 0.35, cy2 - R9 * 0.7, R9 * 0.2, cx, cy2, R9 + 11);
+    g.addColorStop(0, "#6a7c88");
+    g.addColorStop(0.75, "#2b3b46");
+    g.addColorStop(1, "#17242e");
+    ring6(R9, R9 + 10, g);
+    line26(R9 + 10, "#0b1015", 2.2);
+    line26(R9 + 0.9, "#0b1015", 2);
+    line26(R9 + 2.6, "#d4b98a", 1.4);
+    x.strokeStyle = "rgba(255,255,255,.10)";
     x.lineWidth = 1.2;
     x.beginPath();
-    x.moveTo(-7.5, -5.5);
-    x.lineTo(7.5, -5.5);
-    x.lineTo(7.5, 2.2);
-    x.lineTo(0, 7.2);
-    x.lineTo(-7.5, 2.2);
-    x.closePath();
-    x.fill();
+    x.arc(cx, cy2, R9 + 8.4, Math.PI * 1.1, Math.PI * 1.9);
     x.stroke();
-    x.font = "12px " + MAP_FONT;
-    x.fillStyle = "#f6e2b0";
+    for (let i = 0; i < 3; i++) {
+      const a = i * Math.PI / 2;
+      x.strokeStyle = "#d4b98a";
+      x.lineWidth = 1.8;
+      x.beginPath();
+      x.moveTo(cx + Math.cos(a) * (R9 + 4.5), cy2 + Math.sin(a) * (R9 + 4.5));
+      x.lineTo(cx + Math.cos(a) * (R9 + 8), cy2 + Math.sin(a) * (R9 + 8));
+      x.stroke();
+    }
+    x.save();
+    x.translate(cx, cy2 - R9 - 6);
+    x.fillStyle = "#070b10";
+    x.beginPath();
+    x.arc(0, 2.2, 9.6, 0, 7);
+    x.fill();
+    x.fillStyle = "#0b1015";
+    x.beginPath();
+    x.arc(0, 0, 9.6, 0, 7);
+    x.fill();
+    const gg = x.createRadialGradient(-2, -3, 1, 0, 0, 9);
+    gg.addColorStop(0, "#6a7c88");
+    gg.addColorStop(1, "#1f2d38");
+    x.fillStyle = gg;
+    x.beginPath();
+    x.arc(0, 0, 8, 0, 7);
+    x.fill();
+    x.strokeStyle = "#d4b98a";
+    x.lineWidth = 1.1;
+    x.beginPath();
+    x.arc(0, 0, 6.9, 0, 7);
+    x.stroke();
+    x.font = "800 10px " + UI_FONT;
+    x.fillStyle = "#f0c862";
     x.textAlign = "center";
     x.textBaseline = "middle";
-    x.fillText("N", 0, -0.6);
+    x.fillText("N", 0, 0.5);
     x.restore();
     bezel = { key: key4, canvas: c };
     return c;
@@ -117470,11 +117698,12 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
   const primary = button2 ? createPrimaryInput({ button: button2, environment, adapter, readModel, isBlocked: gameplayInputBlocked, restoreGameplayFocus, reportError: (text2) => {
     message = text2;
   } }) : null;
-  inventory = createInventoryPresentation({ document: doc, environment, readModel, adapter, restoreGameplayFocus, heroSlots, clearInput: () => {
+  inventory = createInventoryPresentation({ document: doc, environment, readModel, adapter, restoreGameplayFocus, heroSlots, questsPage: questUi?.menuPage ?? null, clearInput: () => {
     subweaponHud?.clear();
     input.clear();
     primary?.clear();
   } });
+  questUi?.attachMenu?.(() => inventory.openQuests(), () => inventory.close());
   navigation = createWorldMapD9({ document: doc, environment, port: viewPort, issue: (kind, payload) => adapter.issue(kind, payload), releaseInput: () => {
     subweaponHud?.clear();
     input.clear();
