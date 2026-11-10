@@ -65540,6 +65540,327 @@ function createInteriorNavigationD12_3A(state, { eligible: eligible2 = (source3,
   return Object.freeze({ refreshGroups, startTick, finishTick, inspect, intentFor: (actor) => timed(() => intentFor(actor)), alert: (actor, target) => timed(() => alert(actor, target)), manages: (actor) => groupsByActor.has(actor.entityId), groupForActor: (id) => groupsByActor.get(id) ?? null, participantPolicy: (group, target, phase2) => timed(() => participantPolicy(group, target, phase2)), targetPolicy });
 }
 
+// src/shared/contracts/world_seats_v1.js
+var WORLD_SEAT_LIMIT = 4;
+var WAITING_ROOM_VERSION = "world-waiting-room-v1";
+var ROOM = 8;
+function mint2(state, prefix2) {
+  const text2 = `${state.campaign.campaignId}/${prefix2}/${safeInteger(++state.identitySequence, 1)}`;
+  let hex5 = "";
+  for (let j = 0; j < 4; j++) {
+    let h = 2166136261 ^ j;
+    for (let i = 0; i < text2.length; i++) h = Math.imul(h ^ text2.charCodeAt(i), 16777619) >>> 0;
+    hex5 += h.toString(16).padStart(8, "0");
+  }
+  return `${prefix2}:${hex5}`;
+}
+var actorOf = (state, pid) => state.entitiesById[state.playersById[pid].entityId];
+function waitingRoomId(state) {
+  return state.waitingRoom?.spaceInstanceId ?? null;
+}
+function ensureWaitingRoom(state) {
+  if (state.waitingRoom) return state.waitingRoom.spaceInstanceId;
+  const spaceInstanceId = mint2(state, "spi"), spaceId = mint2(state, "spc");
+  state.spacesByInstanceId[spaceInstanceId] = { spaceInstanceId, spaceId, spaceRevision: 1, collision: { tileSize: 32, width: ROOM, height: ROOM, tiles: Array.from({ length: ROOM }, (_, i) => i === 0 || i === ROOM - 1 ? "0".repeat(ROOM) : "0" + "1".repeat(ROOM - 2) + "0") } };
+  state.waitingRoom = { version: WAITING_ROOM_VERSION, spaceInstanceId };
+  return spaceInstanceId;
+}
+function isWaiting(state, pid) {
+  const id = waitingRoomId(state);
+  return Boolean(id) && actorOf(state, pid).residency.spaceInstanceId === id;
+}
+function moveResidency(state, actor, spaceInstanceId, position4) {
+  const history = state.residencyHistoryByEntityId[actor.entityId], current = history[String(actor.residency.residencyRevision)], next = actor.residency.residencyRevision + 1;
+  if (current) {
+    current.endTick = state.tick;
+    current.endEventSequence = state.eventEmission.lastEventSequence;
+    current.endAuthorityOrder = state.lastAppliedAuthorityOrder;
+  }
+  history[String(next)] = { spaceInstanceId, spaceRevision: state.spacesByInstanceId[spaceInstanceId].spaceRevision, residencyRevision: next, tick: state.tick, afterEventSequence: state.eventEmission.lastEventSequence, afterAuthorityOrder: state.lastAppliedAuthorityOrder, endTick: null, endEventSequence: null, endAuthorityOrder: null };
+  actor.residency = { spaceInstanceId, residencyRevision: next };
+  actor.position = { x: position4.x, y: position4.y };
+  actor.movementIntent = { x: 0, y: 0 };
+  actor.movedLastTick = false;
+  const primary = state.primary.actorsById[actor.entityId];
+  if (primary) {
+    primary.current = null;
+    primary.heldCommandId = null;
+    primary.queuedCommandId = null;
+    primary.comboDeadline = null;
+    primary.nextComboStep = 1;
+  }
+}
+function setFrameMember(state, pid, on, position4) {
+  const w = state.d9World;
+  if (!w?.runtime) return;
+  const lists = [w.runtime.frames, state.spacesByInstanceId[state.overworldInstanceId].collision.frames ?? []];
+  for (const frames of lists) for (const f of frames) {
+    const i = f.playerIds.indexOf(pid);
+    if (i >= 0) f.playerIds.splice(i, 1);
+  }
+  if (!on) return;
+  const host = position4.hostPid;
+  for (const frames of lists) {
+    const f = frames.find((x) => x.playerIds.includes(host)) ?? frames.at(-1);
+    if (f) {
+      f.playerIds.push(pid);
+      f.playerIds.sort();
+    }
+  }
+}
+var TARGET_KEYS = /* @__PURE__ */ new Set(["targetEntityId", "intendedTargetId", "targetId"]);
+var OWN_ROWS = ["playersById", "primary", "residencyHistoryByEntityId", "subweaponCombat", "d9World"];
+function eachTarget(state, visit) {
+  const walk = (v) => {
+    if (Array.isArray(v)) {
+      for (const x of v) if (x && typeof x === "object") walk(x);
+      return;
+    }
+    for (const [k, x] of Object.entries(v)) {
+      if (TARGET_KEYS.has(k) && typeof x === "string") visit(v, k);
+      else if (x && typeof x === "object") walk(x);
+    }
+  };
+  for (const [key3, v] of Object.entries(state)) if (v && typeof v === "object" && !OWN_ROWS.includes(key3)) walk(v);
+  if (state.subweaponCombat) {
+    for (const [key3, v] of Object.entries(state.subweaponCombat)) if (key3 !== "actors" && key3 !== "mastery" && v && typeof v === "object") walk(v);
+  }
+}
+function parkSeat(state, pid, heirPid = null) {
+  const actor = actorOf(state, pid), room = ensureWaitingRoom(state);
+  if (actor.residency.spaceInstanceId === room) return;
+  const heir = heirPid && heirPid !== pid && !isWaiting(state, heirPid) ? actorOf(state, heirPid).entityId : null;
+  if (heir) eachTarget(state, (row2, key3) => {
+    if (row2[key3] === actor.entityId) row2[key3] = heir;
+  });
+  moveResidency(state, actor, room, { x: ROOM * 16, y: ROOM * 16 });
+  setFrameMember(state, pid, false);
+  state.playersById[pid].connectionStatus = "disconnected";
+  captureWorldPositionsD9(state);
+}
+function unparkSeat(state, pid, hostPid) {
+  const actor = actorOf(state, pid), host = actorOf(state, hostPid), space = host.residency.spaceInstanceId;
+  requireContract(space !== waitingRoomId(state), "Nowhere to stand");
+  moveResidency(state, actor, space, host.position);
+  if (space === state.overworldInstanceId) setFrameMember(state, pid, true, { hostPid });
+  state.playersById[pid].connectionStatus = "connected";
+  captureWorldPositionsD9(state);
+}
+function addSeat(state, templatePid) {
+  requireContract(state.session.playerIds.length < WORLD_SEAT_LIMIT, "This world has no free seat");
+  const t = state.playersById[templatePid], ta = state.entitiesById[t.entityId];
+  requireContract(t && ta, "Seat template missing");
+  const characterId = mint2(state, "chr"), entityId2 = mint2(state, "ent"), playerId = mint2(state, "ply");
+  state.campaign.charactersById[characterId] = { characterId };
+  const a = copyWire(ta);
+  Object.assign(a, { entityId: entityId2, ownerCharacterId: characterId, alive: true, residency: { spaceInstanceId: ta.residency.spaceInstanceId, residencyRevision: 1 }, movementIntent: { x: 0, y: 0 }, movedLastTick: false, nextAttackActionSequence: 1 });
+  state.entitiesById[entityId2] = a;
+  state.residencyHistoryByEntityId[entityId2] = { "1": { spaceInstanceId: a.residency.spaceInstanceId, spaceRevision: state.spacesByInstanceId[a.residency.spaceInstanceId].spaceRevision, residencyRevision: 1, tick: state.tick, afterEventSequence: state.eventEmission.lastEventSequence, afterAuthorityOrder: state.lastAppliedAuthorityOrder, endTick: null, endEventSequence: null, endAuthorityOrder: null } };
+  const tp = state.primary.actorsById[t.entityId];
+  state.primary.actorsById[entityId2] = { ...copyWire(tp), comboDeadline: null, current: null, heldCommandId: null, queuedCommandId: null, nextComboStep: 1, nextSourceSequence: 1, retiredSourceSequence: 0 };
+  if (state.subweaponCombat) {
+    state.subweaponCombat.actors[entityId2] = copyWire(state.subweaponCombat.actors[t.entityId]);
+    if (state.subweaponCombat.mastery) state.subweaponCombat.mastery[entityId2] = { hazards: {}, poisons: {}, razors: {}, statuses: {} };
+  }
+  state.playersById[playerId] = { ...copyWire(t), playerId, characterId, entityId: entityId2, connectionStatus: "connected" };
+  seatWorldRows(state, playerId, templatePid);
+  if (ta.residency.spaceInstanceId === state.overworldInstanceId) setFrameMember(state, playerId, true, { hostPid: templatePid });
+  captureWorldPositionsD9(state);
+  return playerId;
+}
+function seatWorldRows(state, pid, templatePid) {
+  state.session.playerIds = [...state.session.playerIds.filter((id) => id !== pid), pid].sort();
+  state.appliedClientSequences[pid] = 0;
+  const paging = state.d9World?.paging;
+  if (paging) {
+    paging.players[pid] = { gold: "0", salvageCredits: {}, souls: 0 };
+    if (paging.remoteGearByPlayer) paging.remoteGearByPlayer[pid] = {};
+    for (const rows of Object.values(paging.coldObligations ?? {})) rows[pid] = 0;
+  }
+  const outings = state.encounterEconomy?.outingsByPlayer;
+  if (outings) outings[pid] = copyWire(outings[templatePid] ?? { earnedOutside: false, wasInTown: true });
+}
+function renewSeat(state, oldPid, { keepQuests = false } = {}) {
+  const p = state.playersById[oldPid], playerId = mint2(state, "ply");
+  delete state.playersById[oldPid];
+  state.playersById[playerId] = { ...p, playerId };
+  state.session.playerIds = state.session.playerIds.filter((id) => id !== oldPid);
+  delete state.appliedClientSequences[oldPid];
+  const paging = state.d9World?.paging;
+  if (paging) {
+    delete paging.players[oldPid];
+    if (paging.remoteGearByPlayer) delete paging.remoteGearByPlayer[oldPid];
+    if (paging.indexedRevisions) delete paging.indexedRevisions[oldPid];
+    for (const rows of Object.values(paging.coldObligations ?? {})) delete rows[oldPid];
+  }
+  for (const e of Object.values(state.d9World?.episodes ?? {})) if (e.snapshot?.participants?.some((x) => x.playerId === oldPid)) {
+    for (const x of e.snapshot.participants) if (x.playerId === oldPid) x.playerId = playerId;
+    e.snapshot.participants.sort((x, y) => x.playerId.localeCompare(y.playerId));
+  }
+  for (const g of Object.values(state.encounterEconomy?.groups ?? {})) for (const r of Object.values(g.usedResources ?? {})) if (r.playerIds?.includes(oldPid)) r.playerIds = r.playerIds.map((id) => id === oldPid ? playerId : id);
+  const outings = state.encounterEconomy?.outingsByPlayer, outing = outings?.[oldPid];
+  if (outings) delete outings[oldPid];
+  for (const [id, r] of Object.entries(state.appliedCommandsById)) if (r.playerId === oldPid) delete state.appliedCommandsById[id];
+  if (state.d9World?.navigation?.pending) {
+    for (const row2 of state.d9World.navigation.pending) if (row2.playerId === oldPid) row2.playerId = playerId;
+  }
+  if (state.playerRespawnsById?.[oldPid]) {
+    state.playerRespawnsById[playerId] = state.playerRespawnsById[oldPid];
+    delete state.playerRespawnsById[oldPid];
+  }
+  for (const frames of [state.d9World?.runtime.frames ?? [], state.spacesByInstanceId[state.overworldInstanceId].collision.frames ?? []]) for (const f of frames) {
+    const i = f.playerIds.indexOf(oldPid);
+    if (i >= 0) {
+      f.playerIds[i] = playerId;
+      f.playerIds.sort();
+    }
+  }
+  const quests = state.d9World?.quests?.byPlayer;
+  if (quests?.[oldPid]) {
+    if (keepQuests) quests[playerId] = quests[oldPid];
+    delete quests[oldPid];
+  }
+  seatWorldRows(state, playerId, playerId);
+  if (outings && outing) outings[playerId] = outing;
+  return playerId;
+}
+function seatHeroV1(state, { passport, heroId = passport?.heroId, seats, lastPlayerId, heroIds = null, seatWins = false, stand = [] }) {
+  requireContract(validHeroId(heroId) && (!passport || passport.heroId === heroId), "Seating needs a hero");
+  if (lastPlayerId && !state.playersById[lastPlayerId]) lastPlayerId = null;
+  const next = { ...seats };
+  for (const pid2 of Object.keys(next)) if (!state.playersById[pid2] || heroIds && next[pid2] !== heroId && !heroIds.includes(next[pid2])) delete next[pid2];
+  let pid = Object.keys(next).find((id) => next[id] === heroId) ?? null, changed = false;
+  if (!passport && !pid) {
+    const own = lastPlayerId && state.playersById[lastPlayerId] && !next[lastPlayerId] ? lastPlayerId : state.session.playerIds.length === 1 && !Object.keys(next).length ? state.session.playerIds[0] : null;
+    requireContract(own, "A new hero starts in a new world");
+    pid = own;
+    next[pid] = heroId;
+  }
+  if (pid && passport && !seatWins && !samePassport(extractHeroPassport(state, pid, { heroId }), passport)) {
+    const renewed = renewSeat(state, pid, { keepQuests: true });
+    if (lastPlayerId === pid) lastPlayerId = renewed;
+    delete next[pid];
+    pid = renewed;
+    next[pid] = heroId;
+    arriveHeroPassport(state, pid, passport);
+    changed = true;
+  }
+  if (!pid) {
+    const unclaimed = state.session.playerIds.filter((id) => !next[id]), free = unclaimed.find((id) => isWaiting(state, id)) ?? unclaimed[0] ?? null;
+    if (free) {
+      pid = renewSeat(state, free);
+      if (lastPlayerId === free) lastPlayerId = pid;
+    } else pid = addSeat(state, lastPlayerId ?? state.session.playerIds[0]);
+    next[pid] = heroId;
+    arriveHeroPassport(state, pid, passport);
+    changed = true;
+  }
+  const host = lastPlayerId && state.playersById[lastPlayerId] && !isWaiting(state, lastPlayerId) ? lastPlayerId : state.session.playerIds.find((id) => !isWaiting(state, id));
+  if (isWaiting(state, pid)) {
+    requireContract(host, "Nowhere to stand");
+    unparkSeat(state, pid, host);
+    changed = true;
+  }
+  for (const id of state.session.playerIds) if (id !== pid && !stand.includes(id) && !isWaiting(state, id)) {
+    parkSeat(state, id, pid);
+    changed = true;
+  }
+  return { state, playerId: pid, seats: next, changed };
+}
+function seatPartyV1(state, { host, guests = [], seats, lastPlayerId, heroIds = null }) {
+  requireContract(guests.length < WORLD_SEAT_LIMIT, "This world has no free seat");
+  const ids4 = heroIds ? [.../* @__PURE__ */ new Set([...heroIds, ...guests.map((g) => g.heroId)])] : null;
+  const first = seatHeroV1(state, { ...host, seats, lastPlayerId, heroIds: ids4 });
+  let next = first.seats, changed = first.changed;
+  const party = { [host.heroId]: first.playerId };
+  for (const g of guests) {
+    requireContract(g.passport && g.passport.heroId === g.heroId && !party[g.heroId], "A guest brings their own hero");
+    const r = seatHeroV1(state, { passport: g.passport, heroId: g.heroId, seats: next, lastPlayerId: first.playerId, heroIds: ids4, stand: Object.values(party) });
+    party[g.heroId] = r.playerId;
+    next = r.seats;
+    changed = changed || r.changed;
+  }
+  return { state, playerId: first.playerId, seats: next, party, changed };
+}
+var playerSet = (s) => new Set(s.session.playerIds);
+function seatComparable(s, kept, party, room) {
+  const c = copyWire(s), keep4 = (pid) => kept.has(pid), only = (rows) => {
+    if (rows) {
+      for (const pid of Object.keys(rows)) if (!keep4(pid)) delete rows[pid];
+    }
+  };
+  delete c.session.playerIds;
+  delete c.waitingRoom;
+  delete c.identitySequence;
+  for (const pid of Object.keys(c.playersById)) {
+    if (!keep4(pid)) {
+      delete c.playersById[pid];
+      continue;
+    }
+    c.playersById[pid].connectionStatus = null;
+  }
+  only(c.appliedClientSequences);
+  for (const [id, r] of Object.entries(c.appliedCommandsById)) if (!keep4(r.playerId)) delete c.appliedCommandsById[id];
+  for (const id of Object.keys(c.campaign.charactersById)) if (!party.characters.has(id)) delete c.campaign.charactersById[id];
+  for (const id of party.entities) {
+    const e = c.entitiesById[id];
+    if (!e) continue;
+    if (!party.kept.has(id)) {
+      delete c.entitiesById[id];
+      delete c.primary.actorsById[id];
+      delete c.residencyHistoryByEntityId[id];
+      if (c.subweaponCombat) {
+        delete c.subweaponCombat.actors[id];
+        if (c.subweaponCombat.mastery) delete c.subweaponCombat.mastery[id];
+      }
+      if (c.d9World?.positions) delete c.d9World.positions[id];
+      continue;
+    }
+    Object.assign(e, { residency: null, position: null, movementIntent: null, movedLastTick: null });
+    delete c.residencyHistoryByEntityId[id];
+    if (c.d9World?.positions) delete c.d9World.positions[id];
+    const pr = c.primary.actorsById[id];
+    if (pr) Object.assign(pr, { current: null, heldCommandId: null, queuedCommandId: null, comboDeadline: null, nextComboStep: null });
+  }
+  if (room) delete c.spacesByInstanceId[room];
+  const strip = (frames) => {
+    for (const f of frames ?? []) f.playerIds = [];
+  };
+  strip(c.spacesByInstanceId[c.overworldInstanceId]?.collision.frames);
+  const w = c.d9World, mark = (pid) => keep4(pid) ? pid : "?";
+  if (w) {
+    strip(w.runtime?.frames);
+    only(w.paging?.players);
+    only(w.paging?.remoteGearByPlayer);
+    only(w.paging?.indexedRevisions);
+    for (const rows of Object.values(w.paging?.coldObligations ?? {})) only(rows);
+    only(w.quests?.byPlayer);
+    for (const row2 of w.navigation?.pending ?? []) row2.playerId = null;
+    for (const e of Object.values(w.episodes ?? {})) for (const x of e.snapshot?.participants ?? []) x.playerId = mark(x.playerId);
+    for (const e of Object.values(w.episodes ?? {})) e.snapshot?.participants?.sort((x, y) => canonicalStringify(x).localeCompare(canonicalStringify(y)));
+  }
+  for (const g of Object.values(c.encounterEconomy?.groups ?? {})) for (const r of Object.values(g.usedResources ?? {})) if (r.playerIds) r.playerIds = r.playerIds.map(mark).sort();
+  only(c.encounterEconomy?.outingsByPlayer);
+  only(c.playerRespawnsById);
+  eachTarget(c, (row2, key3) => {
+    if (party.entities.has(row2[key3])) row2[key3] = "?";
+  });
+  return canonicalStringify(c);
+}
+function validateSeatChangeV1(a, b) {
+  requireContract(b.session.playerIds.length <= WORLD_SEAT_LIMIT && b.identitySequence >= a.identitySequence, "Seat change out of bounds");
+  if (a.waitingRoom) requireContract(canonicalStringify(a.waitingRoom) === canonicalStringify(b.waitingRoom), "Waiting room changed");
+  const A = playerSet(a), B5 = playerSet(b), kept = new Set([...A].filter((pid) => B5.has(pid)));
+  const entities = new Set([...Object.values(a.playersById), ...Object.values(b.playersById)].map((p) => p.entityId)), characters = new Set(Object.keys(a.campaign.charactersById).filter((id) => !Object.values(b.playersById).some((p) => p.characterId === id) && !Object.values(a.playersById).some((p) => p.characterId === id)));
+  for (const p of Object.values(a.playersById)) {
+    requireContract(Object.values(b.playersById).some((q) => q.entityId === p.entityId && q.characterId === p.characterId), "Seat body lost");
+    requireContract(b.residencyHistoryByEntityId[p.entityId] && Object.keys(a.residencyHistoryByEntityId[p.entityId]).every((r) => r === String(a.entitiesById[p.entityId].residency.residencyRevision) || canonicalStringify(a.residencyHistoryByEntityId[p.entityId][r]) === canonicalStringify(b.residencyHistoryByEntityId[p.entityId][r])), "Seat residency history rewritten");
+  }
+  const party = { entities, characters, kept: new Set([...kept].map((pid) => b.playersById[pid].entityId)) };
+  const room = a.waitingRoom ? null : b.waitingRoom?.spaceInstanceId ?? null;
+  requireContract(seatComparable(a, kept, party, null) === seatComparable(b, kept, party, room), "Seat change touched more than seats");
+}
+
 // src/simulation/activity_spatial.js
 function createSpatialIndex(cellSize = 256) {
   const cells = /* @__PURE__ */ new Map(), keysById = /* @__PURE__ */ new Map();
@@ -71812,11 +72133,25 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
     observeSiteRunEpisodesD13B(snapshot);
     return createActivityState(snapshot);
   };
+  function seatPresenceV1(playerId, away, hostPlayerId) {
+    requireContract(playerId !== hostPlayerId && state.playersById[playerId] && state.playersById[hostPlayerId] && !isWaiting(state, hostPlayerId), "Unknown seat");
+    if (Boolean(away) === isWaiting(state, playerId)) return freezeWire({ status: "unchanged", waiting: Boolean(away) });
+    const change = (s) => away ? parkSeat(s, playerId, hostPlayerId) : unparkSeat(s, playerId, hostPlayerId), draft = copyWire(state);
+    change(draft);
+    validateActivityState(draft);
+    validateSeatChangeV1(state, draft);
+    change(state);
+    schedule();
+    refreshSpatial();
+    version++;
+    return freezeWire({ status: "changed", waiting: Boolean(away) });
+  }
   return Object.freeze({
     advanceOneTick,
     apply: apply2,
     relocateForFixture,
     developerRelocateToWorld,
+    seatPresenceV1,
     readState,
     getSnapshot: () => ({ state: readState() }),
     refreshWorldResidency() {
@@ -119906,249 +120241,6 @@ async function activateFunctionalSiteD9({ authority, pageBuffer, playerId, siteI
   });
 }
 
-// src/shared/contracts/world_seats_v1.js
-var WORLD_SEAT_LIMIT = 4;
-var WAITING_ROOM_VERSION = "world-waiting-room-v1";
-var ROOM = 8;
-function mint2(state, prefix2) {
-  const text2 = `${state.campaign.campaignId}/${prefix2}/${safeInteger(++state.identitySequence, 1)}`;
-  let hex5 = "";
-  for (let j = 0; j < 4; j++) {
-    let h = 2166136261 ^ j;
-    for (let i = 0; i < text2.length; i++) h = Math.imul(h ^ text2.charCodeAt(i), 16777619) >>> 0;
-    hex5 += h.toString(16).padStart(8, "0");
-  }
-  return `${prefix2}:${hex5}`;
-}
-var actorOf = (state, pid) => state.entitiesById[state.playersById[pid].entityId];
-function waitingRoomId(state) {
-  return state.waitingRoom?.spaceInstanceId ?? null;
-}
-function ensureWaitingRoom(state) {
-  if (state.waitingRoom) return state.waitingRoom.spaceInstanceId;
-  const spaceInstanceId = mint2(state, "spi"), spaceId = mint2(state, "spc");
-  state.spacesByInstanceId[spaceInstanceId] = { spaceInstanceId, spaceId, spaceRevision: 1, collision: { tileSize: 32, width: ROOM, height: ROOM, tiles: Array.from({ length: ROOM }, (_, i) => i === 0 || i === ROOM - 1 ? "0".repeat(ROOM) : "0" + "1".repeat(ROOM - 2) + "0") } };
-  state.waitingRoom = { version: WAITING_ROOM_VERSION, spaceInstanceId };
-  return spaceInstanceId;
-}
-function isWaiting(state, pid) {
-  const id = waitingRoomId(state);
-  return Boolean(id) && actorOf(state, pid).residency.spaceInstanceId === id;
-}
-function moveResidency(state, actor, spaceInstanceId, position4) {
-  const history = state.residencyHistoryByEntityId[actor.entityId], current = history[String(actor.residency.residencyRevision)], next = actor.residency.residencyRevision + 1;
-  if (current) {
-    current.endTick = state.tick;
-    current.endEventSequence = state.eventEmission.lastEventSequence;
-    current.endAuthorityOrder = state.lastAppliedAuthorityOrder;
-  }
-  history[String(next)] = { spaceInstanceId, spaceRevision: state.spacesByInstanceId[spaceInstanceId].spaceRevision, residencyRevision: next, tick: state.tick, afterEventSequence: state.eventEmission.lastEventSequence, afterAuthorityOrder: state.lastAppliedAuthorityOrder, endTick: null, endEventSequence: null, endAuthorityOrder: null };
-  actor.residency = { spaceInstanceId, residencyRevision: next };
-  actor.position = { x: position4.x, y: position4.y };
-  actor.movementIntent = { x: 0, y: 0 };
-  actor.movedLastTick = false;
-  const primary = state.primary.actorsById[actor.entityId];
-  if (primary) {
-    primary.current = null;
-    primary.heldCommandId = null;
-    primary.queuedCommandId = null;
-    primary.comboDeadline = null;
-    primary.nextComboStep = 1;
-  }
-}
-function setFrameMember(state, pid, on, position4) {
-  const w = state.d9World;
-  if (!w?.runtime) return;
-  const lists = [w.runtime.frames, state.spacesByInstanceId[state.overworldInstanceId].collision.frames ?? []];
-  for (const frames of lists) for (const f of frames) {
-    const i = f.playerIds.indexOf(pid);
-    if (i >= 0) f.playerIds.splice(i, 1);
-  }
-  if (!on) return;
-  const host = position4.hostPid;
-  for (const frames of lists) {
-    const f = frames.find((x) => x.playerIds.includes(host)) ?? frames.at(-1);
-    if (f) {
-      f.playerIds.push(pid);
-      f.playerIds.sort();
-    }
-  }
-}
-var TARGET_KEYS = /* @__PURE__ */ new Set(["targetEntityId", "intendedTargetId", "targetId"]);
-var OWN_ROWS = ["playersById", "primary", "residencyHistoryByEntityId", "subweaponCombat", "d9World"];
-function eachTarget(state, visit) {
-  const walk = (v) => {
-    if (Array.isArray(v)) {
-      for (const x of v) if (x && typeof x === "object") walk(x);
-      return;
-    }
-    for (const [k, x] of Object.entries(v)) {
-      if (TARGET_KEYS.has(k) && typeof x === "string") visit(v, k);
-      else if (x && typeof x === "object") walk(x);
-    }
-  };
-  for (const [key3, v] of Object.entries(state)) if (v && typeof v === "object" && !OWN_ROWS.includes(key3)) walk(v);
-  if (state.subweaponCombat) {
-    for (const [key3, v] of Object.entries(state.subweaponCombat)) if (key3 !== "actors" && key3 !== "mastery" && v && typeof v === "object") walk(v);
-  }
-}
-function parkSeat(state, pid, heirPid = null) {
-  const actor = actorOf(state, pid), room = ensureWaitingRoom(state);
-  if (actor.residency.spaceInstanceId === room) return;
-  const heir = heirPid && heirPid !== pid && !isWaiting(state, heirPid) ? actorOf(state, heirPid).entityId : null;
-  if (heir) eachTarget(state, (row2, key3) => {
-    if (row2[key3] === actor.entityId) row2[key3] = heir;
-  });
-  moveResidency(state, actor, room, { x: ROOM * 16, y: ROOM * 16 });
-  setFrameMember(state, pid, false);
-  state.playersById[pid].connectionStatus = "disconnected";
-  captureWorldPositionsD9(state);
-}
-function unparkSeat(state, pid, hostPid) {
-  const actor = actorOf(state, pid), host = actorOf(state, hostPid), space = host.residency.spaceInstanceId;
-  requireContract(space !== waitingRoomId(state), "Nowhere to stand");
-  moveResidency(state, actor, space, host.position);
-  if (space === state.overworldInstanceId) setFrameMember(state, pid, true, { hostPid });
-  state.playersById[pid].connectionStatus = "connected";
-  captureWorldPositionsD9(state);
-}
-function addSeat(state, templatePid) {
-  requireContract(state.session.playerIds.length < WORLD_SEAT_LIMIT, "This world has no free seat");
-  const t = state.playersById[templatePid], ta = state.entitiesById[t.entityId];
-  requireContract(t && ta, "Seat template missing");
-  const characterId = mint2(state, "chr"), entityId2 = mint2(state, "ent"), playerId = mint2(state, "ply");
-  state.campaign.charactersById[characterId] = { characterId };
-  const a = copyWire(ta);
-  Object.assign(a, { entityId: entityId2, ownerCharacterId: characterId, alive: true, residency: { spaceInstanceId: ta.residency.spaceInstanceId, residencyRevision: 1 }, movementIntent: { x: 0, y: 0 }, movedLastTick: false, nextAttackActionSequence: 1 });
-  state.entitiesById[entityId2] = a;
-  state.residencyHistoryByEntityId[entityId2] = { "1": { spaceInstanceId: a.residency.spaceInstanceId, spaceRevision: state.spacesByInstanceId[a.residency.spaceInstanceId].spaceRevision, residencyRevision: 1, tick: state.tick, afterEventSequence: state.eventEmission.lastEventSequence, afterAuthorityOrder: state.lastAppliedAuthorityOrder, endTick: null, endEventSequence: null, endAuthorityOrder: null } };
-  const tp = state.primary.actorsById[t.entityId];
-  state.primary.actorsById[entityId2] = { ...copyWire(tp), comboDeadline: null, current: null, heldCommandId: null, queuedCommandId: null, nextComboStep: 1, nextSourceSequence: 1, retiredSourceSequence: 0 };
-  if (state.subweaponCombat) {
-    state.subweaponCombat.actors[entityId2] = copyWire(state.subweaponCombat.actors[t.entityId]);
-    if (state.subweaponCombat.mastery) state.subweaponCombat.mastery[entityId2] = { hazards: {}, poisons: {}, razors: {}, statuses: {} };
-  }
-  state.playersById[playerId] = { ...copyWire(t), playerId, characterId, entityId: entityId2, connectionStatus: "connected" };
-  seatWorldRows(state, playerId, templatePid);
-  if (ta.residency.spaceInstanceId === state.overworldInstanceId) setFrameMember(state, playerId, true, { hostPid: templatePid });
-  captureWorldPositionsD9(state);
-  return playerId;
-}
-function seatWorldRows(state, pid, templatePid) {
-  state.session.playerIds = [...state.session.playerIds.filter((id) => id !== pid), pid].sort();
-  state.appliedClientSequences[pid] = 0;
-  const paging = state.d9World?.paging;
-  if (paging) {
-    paging.players[pid] = { gold: "0", salvageCredits: {}, souls: 0 };
-    if (paging.remoteGearByPlayer) paging.remoteGearByPlayer[pid] = {};
-    for (const rows of Object.values(paging.coldObligations ?? {})) rows[pid] = 0;
-  }
-  const outings = state.encounterEconomy?.outingsByPlayer;
-  if (outings) outings[pid] = copyWire(outings[templatePid] ?? { earnedOutside: false, wasInTown: true });
-}
-function renewSeat(state, oldPid, { keepQuests = false } = {}) {
-  const p = state.playersById[oldPid], playerId = mint2(state, "ply");
-  delete state.playersById[oldPid];
-  state.playersById[playerId] = { ...p, playerId };
-  state.session.playerIds = state.session.playerIds.filter((id) => id !== oldPid);
-  delete state.appliedClientSequences[oldPid];
-  const paging = state.d9World?.paging;
-  if (paging) {
-    delete paging.players[oldPid];
-    if (paging.remoteGearByPlayer) delete paging.remoteGearByPlayer[oldPid];
-    if (paging.indexedRevisions) delete paging.indexedRevisions[oldPid];
-    for (const rows of Object.values(paging.coldObligations ?? {})) delete rows[oldPid];
-  }
-  for (const e of Object.values(state.d9World?.episodes ?? {})) if (e.snapshot?.participants?.some((x) => x.playerId === oldPid)) {
-    for (const x of e.snapshot.participants) if (x.playerId === oldPid) x.playerId = playerId;
-    e.snapshot.participants.sort((x, y) => x.playerId.localeCompare(y.playerId));
-  }
-  for (const g of Object.values(state.encounterEconomy?.groups ?? {})) for (const r of Object.values(g.usedResources ?? {})) if (r.playerIds?.includes(oldPid)) r.playerIds = r.playerIds.map((id) => id === oldPid ? playerId : id);
-  const outings = state.encounterEconomy?.outingsByPlayer, outing = outings?.[oldPid];
-  if (outings) delete outings[oldPid];
-  for (const [id, r] of Object.entries(state.appliedCommandsById)) if (r.playerId === oldPid) delete state.appliedCommandsById[id];
-  if (state.d9World?.navigation?.pending) {
-    for (const row2 of state.d9World.navigation.pending) if (row2.playerId === oldPid) row2.playerId = playerId;
-  }
-  if (state.playerRespawnsById?.[oldPid]) {
-    state.playerRespawnsById[playerId] = state.playerRespawnsById[oldPid];
-    delete state.playerRespawnsById[oldPid];
-  }
-  for (const frames of [state.d9World?.runtime.frames ?? [], state.spacesByInstanceId[state.overworldInstanceId].collision.frames ?? []]) for (const f of frames) {
-    const i = f.playerIds.indexOf(oldPid);
-    if (i >= 0) {
-      f.playerIds[i] = playerId;
-      f.playerIds.sort();
-    }
-  }
-  const quests = state.d9World?.quests?.byPlayer;
-  if (quests?.[oldPid]) {
-    if (keepQuests) quests[playerId] = quests[oldPid];
-    delete quests[oldPid];
-  }
-  seatWorldRows(state, playerId, playerId);
-  if (outings && outing) outings[playerId] = outing;
-  return playerId;
-}
-function seatHeroV1(state, { passport, heroId = passport?.heroId, seats, lastPlayerId, heroIds = null, seatWins = false, stand = [] }) {
-  requireContract(validHeroId(heroId) && (!passport || passport.heroId === heroId), "Seating needs a hero");
-  if (lastPlayerId && !state.playersById[lastPlayerId]) lastPlayerId = null;
-  const next = { ...seats };
-  for (const pid2 of Object.keys(next)) if (!state.playersById[pid2] || heroIds && next[pid2] !== heroId && !heroIds.includes(next[pid2])) delete next[pid2];
-  let pid = Object.keys(next).find((id) => next[id] === heroId) ?? null, changed = false;
-  if (!passport && !pid) {
-    const own = lastPlayerId && state.playersById[lastPlayerId] && !next[lastPlayerId] ? lastPlayerId : state.session.playerIds.length === 1 && !Object.keys(next).length ? state.session.playerIds[0] : null;
-    requireContract(own, "A new hero starts in a new world");
-    pid = own;
-    next[pid] = heroId;
-  }
-  if (pid && passport && !seatWins && !samePassport(extractHeroPassport(state, pid, { heroId }), passport)) {
-    const renewed = renewSeat(state, pid, { keepQuests: true });
-    if (lastPlayerId === pid) lastPlayerId = renewed;
-    delete next[pid];
-    pid = renewed;
-    next[pid] = heroId;
-    arriveHeroPassport(state, pid, passport);
-    changed = true;
-  }
-  if (!pid) {
-    const unclaimed = state.session.playerIds.filter((id) => !next[id]), free = unclaimed.find((id) => isWaiting(state, id)) ?? unclaimed[0] ?? null;
-    if (free) {
-      pid = renewSeat(state, free);
-      if (lastPlayerId === free) lastPlayerId = pid;
-    } else pid = addSeat(state, lastPlayerId ?? state.session.playerIds[0]);
-    next[pid] = heroId;
-    arriveHeroPassport(state, pid, passport);
-    changed = true;
-  }
-  const host = lastPlayerId && state.playersById[lastPlayerId] && !isWaiting(state, lastPlayerId) ? lastPlayerId : state.session.playerIds.find((id) => !isWaiting(state, id));
-  if (isWaiting(state, pid)) {
-    requireContract(host, "Nowhere to stand");
-    unparkSeat(state, pid, host);
-    changed = true;
-  }
-  for (const id of state.session.playerIds) if (id !== pid && !stand.includes(id) && !isWaiting(state, id)) {
-    parkSeat(state, id, pid);
-    changed = true;
-  }
-  return { state, playerId: pid, seats: next, changed };
-}
-function seatPartyV1(state, { host, guests = [], seats, lastPlayerId, heroIds = null }) {
-  requireContract(guests.length < WORLD_SEAT_LIMIT, "This world has no free seat");
-  const ids4 = heroIds ? [.../* @__PURE__ */ new Set([...heroIds, ...guests.map((g) => g.heroId)])] : null;
-  const first = seatHeroV1(state, { ...host, seats, lastPlayerId, heroIds: ids4 });
-  let next = first.seats, changed = first.changed;
-  const party = { [host.heroId]: first.playerId };
-  for (const g of guests) {
-    requireContract(g.passport && g.passport.heroId === g.heroId && !party[g.heroId], "A guest brings their own hero");
-    const r = seatHeroV1(state, { passport: g.passport, heroId: g.heroId, seats: next, lastPlayerId: first.playerId, heroIds: ids4, stand: Object.values(party) });
-    party[g.heroId] = r.playerId;
-    next = r.seats;
-    changed = changed || r.changed;
-  }
-  return { state, playerId: first.playerId, seats: next, party, changed };
-}
-
 // src/shared/contracts/site_reset_d13c.js
 var SITE_RESET_D13C = "site-reset-d13c1-v1";
 var same11 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
@@ -121003,7 +121095,37 @@ async function createLocalEndlessSessionD9(options) {
     })();
     return ferryPending;
   };
-  const coop = Object.freeze({ hostPlayerId: () => localPlayerId, readModel: (pid) => seatPort(pid).getReadModel(), passport: (pid, heroId) => authority.withAuthority((a) => a.withAuthorityState((s) => s.playersById[pid] ? extractHeroPassport(s, pid, { heroId }) : null)), inventoryMark: (pid) => authority.withAuthority((a) => a.withAuthorityState((s) => {
+  const seatPresence = (pid, away) => {
+    if (servicePending || ferryPending || respawnPending || functionalCommands.busy() || fatalInvariant || authority.getStatus().phase !== "ready") return Promise.resolve({ status: "busy" });
+    servicePending = (async () => {
+      reviewTravelPending = true;
+      try {
+        if (groundPreparation) await groundPreparation.promise;
+        if (saving) await saving;
+        await stream.settled();
+        authority.drainCommands();
+        let durable = await save();
+        requireContract(durable.status === "committed", durable.reason ?? "Seat change save failed");
+        if (saving) await saving;
+        await stream.settled();
+        const result = authority.withReadyAuthority((a) => a.seatPresenceV1(pid, away, localPlayerId));
+        if (result.status === "changed") {
+          durable = await save();
+          requireContract(durable.status === "committed", durable.reason ?? "Seat change save failed");
+        }
+        return result;
+      } catch (error) {
+        lastError = error.message;
+        throw error;
+      } finally {
+        reviewTravelPending = false;
+        servicePending = null;
+        void stream.pump();
+      }
+    })();
+    return servicePending;
+  };
+  const coop = Object.freeze({ hostPlayerId: () => localPlayerId, seatPresence, waiting: (pid) => authority.withAuthority((a) => a.withAuthorityState((s) => Boolean(s.waitingRoom) && s.entitiesById[s.playersById[pid].entityId]?.residency.spaceInstanceId === s.waitingRoom.spaceInstanceId)), readModel: (pid) => seatPort(pid).getReadModel(), passport: (pid, heroId) => authority.withAuthority((a) => a.withAuthorityState((s) => s.playersById[pid] ? extractHeroPassport(s, pid, { heroId }) : null)), inventoryMark: (pid) => authority.withAuthority((a) => a.withAuthorityState((s) => {
     const p = s.playersById[pid];
     if (!p) return null;
     const i = p.inventory;
@@ -121310,20 +121432,47 @@ function writeCoopIntentV1(environment, intent) {
 }
 var MODEL_INTERVAL_MS = 33;
 var PASSPORT_INTERVAL_MS = 3e3;
-function createCoopHostV1({ build: build2, hostName, world, readWorldFile = null, now: now3 = () => performance.now(), setInterval: setInterval2 = globalThis.setInterval.bind(globalThis), clearInterval: clearInterval2 = globalThis.clearInterval.bind(globalThis), nextToken, onChange = () => {
-} }) {
-  const guests = /* @__PURE__ */ new Map();
+var AWAY_WAIT_MS = 5e3;
+var KEEP_PASSPORTS = 12;
+function createCoopHostV1({ build: build2, hostName, world, readWorldFile = null, now: now3 = () => performance.now(), setInterval: setInterval2 = globalThis.setInterval.bind(globalThis), clearInterval: clearInterval2 = globalThis.clearInterval.bind(globalThis), setTimeout: setTimeout2 = globalThis.setTimeout.bind(globalThis), clearTimeout: clearTimeout2 = globalThis.clearTimeout.bind(globalThis), nextToken, onChange = () => {
+}, validatePassport = validateHeroPassport }) {
+  const guests = /* @__PURE__ */ new Map(), held = /* @__PURE__ */ new Map();
   let session = null, started = false, timer = null, closed = false;
-  const roster = () => [...guests.values()].filter((g) => g.hello).map((g) => ({ name: g.hello.name, heroId: g.hello.heroId, playerId: g.playerId ?? null, via: g.link.kind }));
+  const roster = () => [...guests.values()].filter((g) => g.hello).map((g) => ({ name: g.hello.name, heroId: g.hello.heroId, playerId: g.playerId ?? null, via: g.via }));
   const tellLobby = () => {
     const players = [{ name: hostName, heroId: null }, ...roster()];
     for (const g of guests.values()) if (g.hello) g.link.send({ t: "lobby", players });
     onChange(players);
   };
+  const wait = (ms) => new Promise((resolve) => setTimeout2(resolve, ms));
+  let presenceQueue = Promise.resolve();
+  function presence(pid, away2) {
+    const run3 = async () => {
+      for (let i = 0; i < 120 && !closed; i++) {
+        let r;
+        try {
+          r = await session.coop.seatPresence(pid, away2);
+        } catch (error) {
+          console.warn("Co-op seat change failed", error);
+          return false;
+        }
+        if (r?.status !== "busy") return true;
+        await wait(500);
+      }
+      return false;
+    };
+    presenceQueue = presenceQueue.then(run3, run3);
+    return presenceQueue;
+  }
   function drop(g, reason) {
     if (!guests.has(g.id)) return;
     guests.delete(g.id);
-    if (session && g.playerId) stopHero(g);
+    if (g.awayTimer !== null) clearTimeout2(g.awayTimer);
+    if (session && g.playerId) {
+      stopHero(g);
+      held.set(g.hello.heroId, { hello: g.hello, playerId: g.playerId, sent: g.sent, via: g.via, left: g.left === true });
+      presence(g.playerId, true);
+    }
     tellLobby();
     if (!g.link.closed) {
       g.link.send({ t: "bye", reason });
@@ -121338,14 +121487,41 @@ function createCoopHostV1({ build: build2, hostName, world, readWorldFile = null
     } catch {
     }
   }
-  function add(link, id = crypto.randomUUID()) {
+  function away(g, on) {
+    if (!session || !g.playerId) return;
+    if (on) {
+      if (g.awayTimer !== null || g.parked) return;
+      g.awayTimer = setTimeout2(() => {
+        g.awayTimer = null;
+        if (!guests.has(g.id)) return;
+        stopHero(g);
+        g.parked = true;
+        presence(g.playerId, true);
+      }, AWAY_WAIT_MS);
+      return;
+    }
+    if (g.awayTimer !== null) {
+      clearTimeout2(g.awayTimer);
+      g.awayTimer = null;
+    }
+    if (g.parked) {
+      g.parked = false;
+      presence(g.playerId, false);
+    }
+  }
+  const remember = (g, passport) => {
+    g.sent.push(passport);
+    if (g.sent.length > KEEP_PASSPORTS) g.sent.splice(1, 1);
+  };
+  function add(link, { via = link.kind } = {}) {
     if (closed) {
       link.close("closed");
       return;
     }
-    const g = { id, link, hello: null, playerId: null, ready: false, encoder: createModelEncoderV1(), mark: null, passportAt: -Infinity, lastModel: null, lastSent: -Infinity };
-    guests.set(id, g);
+    const g = { id: crypto.randomUUID(), link, via, hello: null, playerId: null, ready: false, parked: false, awayTimer: null, sent: [], encoder: createModelEncoderV1(), mark: null, passportAt: -Infinity, lastModel: null, lastSent: -Infinity };
+    guests.set(g.id, g);
     link.onClose(() => drop(g, "left"));
+    link.onQuiet?.((on) => away(g, on));
     link.onMessage((m) => {
       if (m.t === "hello") {
         if (g.hello) return;
@@ -121358,14 +121534,30 @@ function createCoopHostV1({ build: build2, hostName, world, readWorldFile = null
           return;
         }
         try {
-          validateHeroPassport(m.passport);
+          validatePassport(m.passport);
           if (m.passport.heroId !== m.heroId) throw Error();
         } catch {
           drop(g, "Your hero could not be read. Play them once in your own world first.");
           return;
         }
         if (started) {
-          drop(g, "This game has already started. Ask the host to open a new game.");
+          const seat = held.get(m.heroId);
+          if (!seat) {
+            drop(g, "This game has already started. Ask the host to open a new game.");
+            return;
+          }
+          if (!seat.sent.some((p) => samePassport(p, m.passport))) {
+            drop(g, `${m.name} played somewhere else since leaving this game, so they can\u2019t come back into it.`);
+            return;
+          }
+          held.delete(m.heroId);
+          Object.assign(g, { hello: m, playerId: seat.playerId, sent: seat.sent });
+          link.send({ t: "welcome", protocol: COOP_PROTOCOL, build: build2, hostName, world });
+          presence(g.playerId, false).then(() => {
+            if (guests.get(g.id) !== g) return;
+            link.send({ t: "start", playerId: g.playerId });
+            tellLobby();
+          });
           return;
         }
         if ([...guests.values()].some((o) => o !== g && o.hello?.heroId === m.heroId) || [...guests.values()].filter((o) => o.hello).length >= COOP_PARTY_LIMIT - 1) {
@@ -121373,6 +121565,7 @@ function createCoopHostV1({ build: build2, hostName, world, readWorldFile = null
           return;
         }
         g.hello = m;
+        g.sent = [m.passport];
         link.send({ t: "welcome", protocol: COOP_PROTOCOL, build: build2, hostName, world });
         tellLobby();
       } else if (m.t === "worldfile" && g.hello && readWorldFile) {
@@ -121381,9 +121574,11 @@ function createCoopHostV1({ build: build2, hostName, world, readWorldFile = null
         g.encoder = createModelEncoderV1();
         g.lastModel = null;
         g.ready = true;
-      } else if (m.t === "cmd" && session && g.playerId) run2(g, m);
+      } else if (m.t === "away" || m.t === "back") away(g, m.t === "away");
+      else if (m.t === "cmd" && session && g.playerId && !g.parked) run2(g, m);
       else if (m.t === "bye") {
         if (session && g.playerId) sendPassport(g, true);
+        g.left = true;
         drop(g, "left");
       }
     });
@@ -121413,6 +121608,7 @@ function createCoopHostV1({ build: build2, hostName, world, readWorldFile = null
       const passport = session.coop.passport(g.playerId, g.hello.heroId);
       if (passport) {
         g.link.send({ t: "pass", passport });
+        remember(g, passport);
         g.mark = mark;
         g.passportAt = t;
       }
@@ -121423,7 +121619,7 @@ function createCoopHostV1({ build: build2, hostName, world, readWorldFile = null
     if (!session) return;
     const t = now3();
     for (const g of guests.values()) {
-      if (!g.playerId || g.link.closed) continue;
+      if (!g.playerId || g.link.closed || g.parked) continue;
       if (g.ready && t - g.lastSent >= MODEL_INTERVAL_MS && !g.link.busy()) {
         let model;
         try {
@@ -121467,6 +121663,8 @@ function createCoopHostV1({ build: build2, hostName, world, readWorldFile = null
     },
     tick: pump,
     guests: () => guests.size,
+    // For the host's bar: who is playing, who stepped away, and whose seat waits for them.
+    status: () => ({ playing: [...guests.values()].filter((g) => g.playerId && !g.parked && g.awayTimer === null).map((g) => g.hello.name), away: [...guests.values()].filter((g) => g.playerId && (g.parked || g.awayTimer !== null)).map((g) => g.hello.name), held: [...held.values()].map((h) => ({ name: h.hello.name, via: h.via, left: h.left })) }),
     // Before the host's page goes away: send everyone their hero one last time, then say goodbye.
     close(reason = "The host closed the game") {
       if (closed) return;
@@ -121538,12 +121736,13 @@ function beginCoopGuestV1({ link, build: build2, hero, onLobby = () => {
 function createCoopGuestSessionV1({ link, playerId, early = [], release = () => {
 }, cartographyWindow = null, onPassport, onEnd, setTimeout: setTimeout2 = globalThis.setTimeout.bind(globalThis) }) {
   const decoder = createModelDecoderV1(), waiting = /* @__PURE__ */ new Map(), now3 = () => performance.now();
-  let lastSequence = 0, lastSentAt = -Infinity, lastStep = 0, nextId = 1, ended = false, firstModel = null, leaving = null;
+  let lastSequence = 0, lastSentAt = -Infinity, lastStep = 0, nextId = 1, ended = false, firstModel = null, leaving = null, lastFrameAt = now3();
   const ready = new Promise((resolve) => {
     firstModel = resolve;
   });
   const handle = (m) => {
     if (m.t === "m") {
+      lastFrameAt = now3();
       try {
         decoder.apply(m);
         firstModel?.();
@@ -121568,7 +121767,7 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
       }
     } else if (m.t === "bye") end(m.reason || "The host closed the game");
   };
-  function end(reason) {
+  function end(reason, lost = false) {
     if (leaving) {
       leaving();
       return;
@@ -121577,13 +121776,16 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
     ended = true;
     for (const w of waiting.values()) w.reject(Error(reason));
     waiting.clear();
-    onEnd(reason);
+    onEnd(reason, { lost });
   }
   link.onMessage(handle);
   release();
   early.splice(0).forEach(handle);
   link.send({ t: "ready" });
-  link.onClose((reason) => end(reason === "left" || reason === "host left" ? "The host closed the game" : "Lost the connection to the host"));
+  link.onClose((reason) => {
+    const left = reason === "left" || reason === "host left";
+    end(left ? "The host closed the game" : "Lost the connection to the host", !left);
+  });
   const clientPort = Object.freeze({
     getReadModel: () => decoder.model(),
     send(command) {
@@ -121609,6 +121811,14 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
     ready,
     coopGuest: true,
     clientPort,
+    // The guest's game went to the background (true) or came back (false).
+    away(on) {
+      if (!ended && !leaving) link.send({ t: on ? "away" : "back" });
+    },
+    // How long since the host's last frame (the host's game may be paused or gone).
+    quietMs: () => now3() - lastFrameAt,
+    // True from Leave on (Leave, or switching heroes): the page must not come back into the game.
+    isLeaving: () => leaving !== null,
     step() {
       const f = decoder.frames();
       if (f === lastStep) return false;
@@ -121666,7 +121876,8 @@ __export(coop_screen_v1_exports, {
   mountCoopBarV1: () => mountCoopBarV1,
   runCoopJoinV1: () => runCoopJoinV1,
   runCoopLobbyV1: () => runCoopLobbyV1,
-  showCoopEndedV1: () => showCoopEndedV1
+  showCoopEndedV1: () => showCoopEndedV1,
+  showInviteBackV1: () => showInviteBackV1
 });
 
 // src/client/vendor/qrcode-generator-2.0.4.mjs
@@ -123386,7 +123597,7 @@ var CHUNK = 15e3;
 var DIRECT_WAIT_MS = 1e4;
 var GATHER_WAIT_MS = 3e3;
 function createLink(kind, sendText, closeTransport, busy = () => false) {
-  const onMessage = /* @__PURE__ */ new Set(), onClose = /* @__PURE__ */ new Set(), parts = /* @__PURE__ */ new Map();
+  const onMessage = /* @__PURE__ */ new Set(), onClose = /* @__PURE__ */ new Set(), onQuiet = /* @__PURE__ */ new Set(), parts = /* @__PURE__ */ new Map();
   let closed = false, seq = 0;
   const deliver = (text2) => {
     let m;
@@ -123450,6 +123661,18 @@ function createLink(kind, sendText, closeTransport, busy = () => false) {
       else onClose.add(fn);
       return () => onClose.delete(fn);
     },
+    // A direct path that stops answering (the other device went to the background) is quiet until it
+    // answers again or fails.
+    onQuiet(fn) {
+      onQuiet.add(fn);
+      return () => onQuiet.delete(fn);
+    },
+    quiet(on) {
+      if (!closed) for (const fn of onQuiet) try {
+        fn(on);
+      } catch {
+      }
+    },
     close(reason = "closed") {
       if (closed) return;
       closed = true;
@@ -123476,7 +123699,10 @@ function channelLink(pc2, channel2) {
   channel2.onmessage = (e) => link.receive(e.data);
   channel2.onclose = () => link.close("direct channel closed");
   pc2.addEventListener("connectionstatechange", () => {
-    if (pc2.connectionState === "failed" || pc2.connectionState === "closed") link.close("connection lost");
+    const st = pc2.connectionState;
+    if (st === "failed" || st === "closed") link.close("connection lost");
+    else if (st === "disconnected") link.quiet(true);
+    else if (st === "connected") link.quiet(false);
   });
   return link;
 }
@@ -123556,12 +123782,13 @@ function socket(url, WebSocket) {
   });
 }
 async function hostRoomV1({ server, code: code2, onGuest, onLeft = () => {
-}, WebSocket = globalThis.WebSocket, RTCPeerConnection = globalThis.RTCPeerConnection, iceServers = COOP_ICE_SERVERS }) {
-  const ws = await socket(wsUrl(server, "/rooms/" + code2 + "/host"), WebSocket), guests = /* @__PURE__ */ new Map();
+}, WebSocket = globalThis.WebSocket, RTCPeerConnection = globalThis.RTCPeerConnection, iceServers = COOP_ICE_SERVERS, setTimeout: setTimeout2 = globalThis.setTimeout.bind(globalThis) }) {
+  const guests = /* @__PURE__ */ new Map(), url = wsUrl(server, "/rooms/" + code2 + "/host");
+  let ws = null, closed = false;
   const to = (id, data) => {
-    if (ws.readyState === 1) ws.send(JSON.stringify({ type: "to", id, data }));
+    if (ws?.readyState === 1) ws.send(JSON.stringify({ type: "to", id, data }));
   };
-  ws.onmessage = async (e) => {
+  const onmessage = async (e) => {
     let m;
     try {
       m = JSON.parse(e.data);
@@ -123605,16 +123832,39 @@ async function hostRoomV1({ server, code: code2, onGuest, onLeft = () => {
       }
     } else if (m.type === "left") {
       const g = guests.get(m.id);
+      if (!g) return;
+      if (g.link?.kind === "direct") return;
       guests.delete(m.id);
-      g?.link?.close("guest left");
-      g?.pc.close();
+      g.link?.close("guest left");
+      g.pc.close();
       onLeft(m.id);
     }
   };
-  ws.onclose = () => {
-    for (const g of guests.values()) if (g.link?.kind === "relay") g.link.close("join server closed");
+  const attach = (socketWs) => {
+    ws = socketWs;
+    ws.onmessage = onmessage;
+    ws.onclose = () => {
+      for (const [id, g] of guests) if (g.link?.kind !== "direct") {
+        guests.delete(id);
+        g.link?.close("join server closed");
+        g.pc.close();
+      }
+      if (!closed) retry(1e3);
+    };
   };
+  const retry = (ms) => setTimeout2(() => {
+    if (closed) return;
+    socket(url, WebSocket).then((w) => {
+      if (closed) {
+        w.close();
+        return;
+      }
+      attach(w);
+    }, () => retry(Math.min(ms * 2, 1e4)));
+  }, ms);
+  attach(await socket(url, WebSocket));
   return { close() {
+    closed = true;
     try {
       ws.close();
     } catch {
@@ -123633,6 +123883,12 @@ async function joinRoomV1({ server, code: code2, WebSocket = globalThis.WebSocke
   };
   return withTimeout(new Promise((resolve, reject) => {
     pc2.ondatachannel = (e) => opened(e.channel).then(() => {
+      ws.onclose = null;
+      ws.onmessage = null;
+      try {
+        ws.close(1e3, "direct");
+      } catch {
+      }
       resolve(channelLink(pc2, e.channel));
     });
     ws.onmessage = async (e) => {
@@ -123777,28 +124033,9 @@ function pasteRow(document2, label4, onCode) {
   }));
   return row2;
 }
-function runCoopLobbyV1({ environment, coopHost, server, hostName }) {
-  const ui = shell(environment, "Play together", `Friends join ${hostName}\u2019s world with their own heroes. Up to 3 friends.`), { document: document2, card } = ui;
-  const players = playerList(document2);
-  players.show([{ name: hostName }]);
-  const codeBox = el(document2, "div", "coop-section"), qrBox = el(document2, "div", "coop-section"), actions = el(document2, "div", "coop-actions");
-  let room = null, offer = null;
-  codeBox.append(el(document2, "h3", "", "Join code"));
-  if (server) {
-    const code2 = el(document2, "p", "coop-code", "\u2026");
-    codeBox.append(code2, el(document2, "p", "coop-hint", "Friends choose Join a game and type this code."));
-    createRoomV1(server).then((c) => {
-      code2.textContent = c;
-      return hostRoomV1({ server, code: c, onGuest: (link) => coopHost.add(link) });
-    }).then((r) => {
-      room = r;
-    }, (e) => {
-      code2.textContent = "\u2014";
-      ui.say(e.message);
-    });
-  } else codeBox.append(el(document2, "p", "coop-hint", "Join codes need the join server, which isn\u2019t set up yet. Use Same room below."));
-  qrBox.append(el(document2, "h3", "", "Same room"), el(document2, "p", "coop-hint", "For a friend next to you: they scan your invite, then you scan their answer."));
-  const qrArea = el(document2, "div", "coop-qr-area");
+function inviteArea({ environment, ui, coopHost }) {
+  const { document: document2 } = ui, qrArea = el(document2, "div", "coop-qr-area");
+  let offer = null;
   const nextInvite = async () => {
     offer?.close?.();
     offer = null;
@@ -123814,7 +124051,7 @@ function runCoopLobbyV1({ environment, coopHost, server, hostName }) {
       try {
         const link = await offer.accept(code2);
         offer = null;
-        coopHost.add(link);
+        coopHost.add(link, { via: "qr" });
         ui.say("Connected. Make another invite for the next friend.");
         qrArea.replaceChildren(button(document2, "coop-secondary", "Invite another friend", nextInvite));
       } catch (e) {
@@ -123831,6 +124068,33 @@ function runCoopLobbyV1({ environment, coopHost, server, hostName }) {
     });
     qrArea.replaceChildren(drawQr(document2, offer.code), el(document2, "p", "coop-hint", "Invite: let your friend scan this."), scan, pasteRow(document2, "Or paste their answer", accept));
   };
+  return { qrArea, nextInvite, close: () => {
+    offer?.close?.();
+    offer = null;
+  } };
+}
+function runCoopLobbyV1({ environment, coopHost, server, hostName }) {
+  const ui = shell(environment, "Play together", `Friends join ${hostName}\u2019s world with their own heroes. Up to 3 friends.`), { document: document2, card } = ui;
+  const players = playerList(document2);
+  players.show([{ name: hostName }]);
+  const codeBox = el(document2, "div", "coop-section"), qrBox = el(document2, "div", "coop-section"), actions = el(document2, "div", "coop-actions");
+  let room = null;
+  codeBox.append(el(document2, "h3", "", "Join code"));
+  if (server) {
+    const code2 = el(document2, "p", "coop-code", "\u2026");
+    codeBox.append(code2, el(document2, "p", "coop-hint", "Friends choose Join a game and type this code."));
+    createRoomV1(server).then((c) => {
+      code2.textContent = c;
+      return hostRoomV1({ server, code: c, onGuest: (link) => coopHost.add(link, { via: "code" }) });
+    }).then((r) => {
+      room = r;
+    }, (e) => {
+      code2.textContent = "\u2014";
+      ui.say(e.message);
+    });
+  } else codeBox.append(el(document2, "p", "coop-hint", "Join codes need the join server, which isn\u2019t set up yet. Use Same room below."));
+  qrBox.append(el(document2, "h3", "", "Same room"), el(document2, "p", "coop-hint", "For a friend next to you: they scan your invite, then you scan their answer."));
+  const invite = inviteArea({ environment, ui, coopHost }), { qrArea, nextInvite } = invite;
   const showInvite = button(document2, "coop-secondary coop-invite", "Show invite", () => {
     showInvite.remove();
     nextInvite();
@@ -123845,7 +124109,7 @@ function runCoopLobbyV1({ environment, coopHost, server, hostName }) {
   });
   coopHost.onPlayers?.((p) => players.show(p));
   function done3(go) {
-    offer?.close?.();
+    invite.close();
     ui.close();
     if (!go) {
       room?.close();
@@ -123855,22 +124119,33 @@ function runCoopLobbyV1({ environment, coopHost, server, hostName }) {
   }
   return Object.assign(result, { players });
 }
-function runCoopJoinV1({ environment, server, build: build2, hero, onWorldFile }) {
-  const ui = shell(environment, "Join a game", `${hero.name} joins a friend\u2019s world. Everything ${hero.name} earns comes home.`), { document: document2, card } = ui;
+function showInviteBackV1({ environment, coopHost, names: names2 }) {
+  const ui = shell(environment, "Invite back", `${names2} can come back: they choose Join again and scan this invite, then you scan their answer.`), invite = inviteArea({ environment, ui, coopHost }), actions = el(ui.document, "div", "coop-actions");
+  actions.append(button(ui.document, "coop-primary", "Done", () => {
+    invite.close();
+    ui.close();
+  }));
+  ui.card.append(invite.qrArea, ui.status, actions);
+  invite.nextInvite();
+  return ui;
+}
+function runCoopJoinV1({ environment, server, build: build2, hero, onWorldFile, autoCode = null }) {
+  const ui = shell(environment, autoCode ? "Coming back" : "Join a game", autoCode ? `${hero.name} is going back into the game.` : `${hero.name} joins a friend\u2019s world. Everything ${hero.name} earns comes home.`), { document: document2, card } = ui;
   const players = playerList(document2), codeBox = el(document2, "div", "coop-section"), qrBox = el(document2, "div", "coop-section"), actions = el(document2, "div", "coop-actions");
   let finish3 = null, busy = false;
   const result = new Promise((resolve) => {
     finish3 = resolve;
   });
+  let via = null, joinedCode = null;
   const connected = async (link) => {
     codeBox.hidden = true;
     qrBox.hidden = true;
-    ui.say("Connected. Waiting for the host to start\u2026");
+    ui.say(autoCode ? "Connected. Taking your seat\u2026" : "Connected. Waiting for the host to start\u2026");
     card.insertBefore(players.list, ui.status);
     try {
       const start = await beginCoopGuestV1({ link, build: build2, hero, onLobby: (p) => players.show(p), onWorldFile });
       ui.close();
-      finish3({ link, start });
+      finish3({ link, start, via, code: joinedCode });
     } catch (e) {
       ui.say(e.message);
       link.close("left");
@@ -123886,6 +124161,7 @@ function runCoopJoinV1({ environment, server, build: build2, hero, onWorldFile }
     input.maxLength = 8;
     input.autocapitalize = "characters";
     input.autocomplete = "off";
+    let tries = 0;
     const go = button(document2, "coop-primary", "Join", async () => {
       if (busy) return;
       const code2 = input.value.trim().toUpperCase();
@@ -123894,12 +124170,18 @@ function runCoopJoinV1({ environment, server, build: build2, hero, onWorldFile }
         return;
       }
       busy = true;
-      ui.say("Joining\u2026");
+      ui.say(autoCode ? "Reaching the host\u2026" : "Joining\u2026");
       try {
-        connected(await joinRoomV1({ server, code: code2 }));
+        const link = await joinRoomV1({ server, code: code2 });
+        via = "code";
+        joinedCode = code2;
+        connected(link);
       } catch (e) {
         busy = false;
-        ui.say(e.message);
+        if (autoCode && code2 === autoCode && ++tries < 20) {
+          ui.say("Waiting for the host\u2019s game\u2026 (" + e.message + ")");
+          environment.setTimeout(() => go.click(), 3e3);
+        } else ui.say(e.message);
       }
     });
     input.addEventListener("keydown", (e) => {
@@ -123917,7 +124199,9 @@ function runCoopJoinV1({ environment, server, build: build2, hero, onWorldFile }
       const answer = await guestAnswerByCodeV1(code2);
       qrArea.replaceChildren(drawQr(document2, answer.code), el(document2, "p", "coop-hint", "Answer: let the host scan this."));
       ui.say("Waiting for the host to scan your answer\u2026");
-      connected(await answer.link);
+      const link = await answer.link;
+      via = "qr";
+      connected(link);
     } catch (e) {
       busy = false;
       ui.say(e.message);
@@ -123937,21 +124221,43 @@ function runCoopJoinV1({ environment, server, build: build2, hero, onWorldFile }
     finish3(null);
   }));
   card.append(codeBox, qrBox, ui.status, actions);
+  if (autoCode && server) {
+    codeBox.querySelector(".coop-code-input").value = autoCode;
+    codeBox.querySelector(".coop-primary").click();
+  }
   return result;
 }
 function mountCoopBarV1({ environment, label: label4, action: action2, onAction }) {
-  const document2 = environment.document, bar = el(document2, "div", "coop-bar"), text2 = el(document2, "span", "coop-bar-text", label4);
-  bar.append(text2, button(document2, "coop-bar-action", action2, onAction));
+  const document2 = environment.document, bar = el(document2, "div", "coop-bar"), text2 = el(document2, "span", "coop-bar-text", label4), main = button(document2, "coop-bar-action", action2, onAction);
+  let extra = null, extraLabel = null;
+  bar.append(text2, main);
   document2.body.append(bar);
-  return { say: (t) => {
-    text2.textContent = t;
-  }, remove: () => bar.remove() };
+  return {
+    say: (t) => {
+      if (text2.textContent !== t) text2.textContent = t;
+    },
+    remove: () => bar.remove(),
+    setExtra(label22, onClick) {
+      if (label22 === extraLabel) return;
+      extra?.remove();
+      extra = null;
+      extraLabel = label22;
+      if (label22) {
+        extra = button(document2, "coop-bar-action", label22, onClick);
+        bar.insertBefore(extra, main);
+      }
+    }
+  };
 }
-function showCoopEndedV1({ environment, title = "Back home", reason, onHome }) {
+function showCoopEndedV1({ environment, title = "Back home", reason, onHome, again = null }) {
   const ui = shell(environment, title, reason), actions = el(ui.document, "div", "coop-actions");
-  actions.append(button(ui.document, "coop-primary", "Back to my world", () => {
+  actions.append(button(ui.document, again ? "coop-secondary" : "coop-primary", "Back to my world", () => {
     ui.close();
     onHome();
+  }));
+  if (again) actions.append(button(ui.document, "coop-primary", again.label, () => {
+    ui.close();
+    again.onClick();
   }));
   ui.card.append(actions);
   return ui;
@@ -124156,7 +124462,7 @@ async function startWorldClient(environment) {
     }
     try {
       builtWorlds = createBuiltWorldStoreV1({ indexedDB: saveIndexedDb, sha256 });
-      coopJoin = await coopScreens.runCoopJoinV1({ environment, server: coopJoinServerV1(environment), build: coopBuild, hero: { heroId, name: heroName, passport }, onWorldFile: async (w) => Boolean(await builtWorlds.info(w.hash)) });
+      coopJoin = await coopScreens.runCoopJoinV1({ environment, server: coopJoinServerV1(environment), build: coopBuild, hero: { heroId, name: heroName, passport }, autoCode: coopIntent?.code ?? null, onWorldFile: async (w) => Boolean(await builtWorlds.info(w.hash)) });
       if (!coopJoin) {
         home();
         return null;
@@ -124286,9 +124592,9 @@ async function startWorldClient(environment) {
       if (["A", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O"].includes(proofCase)) worldBridge = createWorldWorkerBridgeD9(new environment.Worker(workerUrl, { type: "module" }), { record: performanceProbe?.record, diagnostics: () => performanceProbe?.isRecording() === true, now: () => environment.performance.now(), expectedDatabaseName: environment.document.body.dataset.wildernessV3 === "true" ? databaseName : null });
     }
     const openCoopGuest = async () => {
-      const guest = createCoopGuestSessionV1({ link: coopJoin.link, playerId: coopJoin.start.playerId, early: coopJoin.start.early, release: coopJoin.start.release, cartographyWindow: worldBridge?.cartographyWindow && plannedReview ? (request) => worldBridge.cartographyWindow({ ...request, binding: plannedReview.binding }) : null, onPassport: (passport) => writeHeroPassport(deviceStorage, channel2, passport, null), onEnd: (reason) => {
-        coopEndReason = reason;
-        coopEnded?.(reason);
+      const guest = createCoopGuestSessionV1({ link: coopJoin.link, playerId: coopJoin.start.playerId, early: coopJoin.start.early, release: coopJoin.start.release, cartographyWindow: worldBridge?.cartographyWindow && plannedReview ? (request) => worldBridge.cartographyWindow({ ...request, binding: plannedReview.binding }) : null, onPassport: (passport) => writeHeroPassport(deviceStorage, channel2, passport, null), onEnd: (reason, how) => {
+        coopEndReason = { reason, lost: Boolean(how?.lost) };
+        coopEnded?.(coopEndReason);
       } });
       await Promise.race([guest.ready, new Promise((_, reject) => environment.setTimeout(() => reject(Error("The host\u2019s world did not arrive")), 2e4))]);
       return guest;
@@ -124576,8 +124882,9 @@ async function startWorldClient(environment) {
     };
     environment.addEventListener("pagehide", () => endCoop("The host closed the game"));
     const sayParty = () => {
-      const n = coopHost.guests();
-      coopBar?.say(n ? `Playing together \xB7 ${n} ${n === 1 ? "friend" : "friends"}` : "Your friends have left");
+      const st = coopHost.status(), n = st.playing.length, out = [...st.away, ...st.held.filter((h) => !h.left).map((h) => h.name)], back = st.held.filter((h) => !h.left && h.via === "qr").map((h) => h.name);
+      coopBar?.say([n ? `Playing together \xB7 ${n} ${n === 1 ? "friend" : "friends"}` : "", out.length ? `${out.join(", ")} away` : ""].filter(Boolean).join(" \xB7 ") || "Your friends have left");
+      coopBar?.setExtra(back.length ? "Invite back" : null, () => coopScreens.showInviteBackV1({ environment, coopHost, names: back.join(" and ") }));
     };
     coopBar = coopScreens.mountCoopBarV1({ environment, label: "", action: "End game", onAction: () => {
       endCoop("The host ended the game");
@@ -124587,19 +124894,49 @@ async function startWorldClient(environment) {
     environment.setInterval(sayParty, 2e3);
   }
   if (coopGuest) {
-    const heroName = heroEntry?.name || "Your hero";
-    coopBar = coopScreens.mountCoopBarV1({ environment, label: `In ${coopJoin.start.welcome.hostName}\u2019s world`, action: "Leave", onAction: async () => {
+    const heroName = heroEntry?.name || "Your hero", hostName = coopJoin.start.welcome.hostName, inWorld = `In ${hostName}\u2019s world`;
+    const comeBack = coopJoin.via === "code" && coopJoin.code ? { role: "guest", code: coopJoin.code } : { role: "guest" }, rejoin = () => {
+      writeCoopIntentV1(environment, comeBack);
+      environment.location.reload();
+    }, home = () => {
+      writeCoopIntentV1(environment, null);
+      environment.location.reload();
+    };
+    coopBar = coopScreens.mountCoopBarV1({ environment, label: inWorld, action: "Leave", onAction: async () => {
       coopBar.say("Saving your hero\u2026");
       await session.leave();
       environment.location.reload();
     } });
-    coopEnded = (reason) => {
-      coopBar.remove();
+    environment.document.addEventListener("visibilitychange", () => {
+      const hidden = environment.document.hidden;
+      if (session.isLeaving() || coopEndReason) return;
+      session.away?.(hidden);
+      writeCoopIntentV1(environment, hidden ? comeBack : null);
+    });
+    environment.setInterval(() => {
+      if (!coopEndReason) coopBar.say(session.quietMs() > 3e3 && !environment.document.hidden ? `Waiting for ${hostName}\u2026` : inWorld);
+    }, 1e3);
+    coopEnded = ({ reason, lost }) => {
       try {
         suspend();
       } catch {
       }
-      coopScreens.showCoopEndedV1({ environment, reason: `${reason}. Everything ${heroName} earned is saved.`, onHome: () => environment.location.reload() });
+      if (session.isLeaving()) return;
+      if (lost && comeBack.code) {
+        coopBar.say("Reconnecting\u2026");
+        const go = () => {
+          if (!environment.document.hidden) rejoin();
+        };
+        environment.document.addEventListener("visibilitychange", go);
+        go();
+        return;
+      }
+      coopBar.remove();
+      if (lost) {
+        coopScreens.showCoopEndedV1({ environment, title: "Connection lost", reason: `${reason}. Everything ${heroName} earned is saved. To come back, ${hostName} shows an invite (Invite back) and you scan it.`, onHome: home, again: { label: "Join again", onClick: rejoin } });
+        return;
+      }
+      coopScreens.showCoopEndedV1({ environment, reason: `${reason}. Everything ${heroName} earned is saved.`, onHome: home });
     };
     if (coopEndReason) coopEnded(coopEndReason);
   }
