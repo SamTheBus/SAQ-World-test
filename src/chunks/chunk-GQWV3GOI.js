@@ -12109,8 +12109,18 @@ var MULTIROOM_VERSION = "core-families-multiroom-v1";
 var MULTIROOM_POLICY = freezeWire({ version: MULTIROOM_VERSION, parentRuntime: "c224c9e8b940ebab", floors: { small: 1, standard: 2, large: 3, deep: 4 }, rooms: { small: [4, 5], standard: [5, 6], large: [6, 7], deep: [7, 8] }, maximumAttempts: 48, minimumStairRouteTiles: 32, minimumStairRoomEdges: 3, corridorWidthTiles: 5, maximumFloorTiles: [80, 44], allowQuarterTurn: true, wholeFloorOccupancyRadius: 1500, maximumOrdinaryActorsPerFloor: 5, encounterCounts: { fort: 3, ruin: { small: 2, standard: 3, large: 4, deep: 5 }, crypt: { small: 3, standard: 4, large: 4, deep: 4 } }, preserveGearProvenanceRosterCounts: true, exteriorAndSiteIdentitiesUnchanged: true, stairSelection: "farthest-safe-room-by-walkable-route-with-optional-branch", generation: "seeded-connected-room-graph-family-grammar", oldSaveMigration: false });
 var MULTIROOM_HASH = "da5bdc04ec8045a117ddaad78525e60abccc860feb723f49d9b56cc54d900d51";
 var usesMultiroom = (b) => b?.interiorGeneration === MULTIROOM_VERSION && b.interiorGenerationHash === MULTIROOM_HASH;
-var multiroomLinks = (tier) => Array.from({ length: MULTIROOM_POLICY.floors[tier] }, (_, i) => ({ up: i ? i - 1 : null, down: i + 1 < MULTIROOM_POLICY.floors[tier] ? i + 1 : null }));
-var multiroomPolicy = (tier) => ({ floors: Array.from({ length: MULTIROOM_POLICY.floors[tier] }, (_, i) => ({ role: "floor-" + i })) });
+var MULTIROOM_SEEDED_POLICY = freezeWire({ floors: { small: 1, standard: 2, large: 3, deep: 5 }, rooms: { small: [4, 4], standard: [5, 6], large: [6, 7], deep: [7, 8] }, minimumStairRoomEdges: { small: 2, standard: 3, large: 3, deep: 3 }, maximumAttempts: { small: 192, standard: 48, large: 48, deep: 48 } });
+var seededMultiroomV1 = (reservationId) => typeof reservationId === "string" && worldSiteV1(reservationId) !== null;
+var multiroomFloorCountV1 = (tier, seeded2 = false) => (seeded2 ? MULTIROOM_SEEDED_POLICY : MULTIROOM_POLICY).floors[tier];
+var multiroomRoomRangeV1 = (tier, seeded2 = false) => (seeded2 ? MULTIROOM_SEEDED_POLICY : MULTIROOM_POLICY).rooms[tier];
+var multiroomMaximumAttemptsV1 = (tier, seeded2 = false) => seeded2 ? MULTIROOM_SEEDED_POLICY.maximumAttempts[tier] : MULTIROOM_POLICY.maximumAttempts;
+var multiroomMinimumRoomEdgesV1 = (tier, seeded2 = false) => seeded2 ? MULTIROOM_SEEDED_POLICY.minimumStairRoomEdges[tier] : MULTIROOM_POLICY.minimumStairRoomEdges;
+var multiroomMostFloorsV1 = () => Math.max(...Object.values((worldSitesV1() ? MULTIROOM_SEEDED_POLICY : MULTIROOM_POLICY).floors));
+var multiroomLinks = (tier, seeded2 = false) => {
+  const n = multiroomFloorCountV1(tier, seeded2);
+  return Array.from({ length: n }, (_, i) => ({ up: i ? i - 1 : null, down: i + 1 < n ? i + 1 : null }));
+};
+var multiroomPolicy = (tier, seeded2 = false) => ({ floors: Array.from({ length: multiroomFloorCountV1(tier, seeded2) }, (_, i) => ({ role: "floor-" + i })) });
 
 // src/shared/content/planned_crypt_policy_v1.js
 var PLANNED_CRYPT_VERSION = "planned-small-crypt-candidate-v1";
@@ -12155,8 +12165,8 @@ function cryptIdsForBinding(b) {
 function cryptGroupInfoV2(id) {
   const old = cryptGroupInfo(id);
   if (old) return old;
-  const m = /^site:site:[a-f0-9]{32}:crypt-(standard|large|deep)-floor-([0-3])(?::episode-([1-9][0-9]*))?$/.exec(id ?? "");
-  return m && (!m[3] || Number(m[3]) >= 2) && Number(m[2]) < CRYPT_TIER_POLICY_V2[m[1]].floors.length ? { floor: Number(m[2]), count: 4 } : null;
+  const m = /^site:site:[a-f0-9]{32}:crypt-(standard|large|deep)-floor-([0-4])(?::episode-([1-9][0-9]*))?$/.exec(id ?? "");
+  return m && (!m[3] || Number(m[3]) >= 2) && Number(m[2]) < CRYPT_TIER_POLICY_V2[m[1]].floors.length + (m[1] === "deep" ? 1 : 0) ? { floor: Number(m[2]), count: 4 } : null;
 }
 
 // src/shared/content/planned_ruin_policy_v1.js
@@ -12200,8 +12210,8 @@ var ruinTierPolicyForVersion = (v) => v === PLANNED_RUIN_V2 ? RUIN_TIER_POLICY_V
 function ruinGroupInfoV2(id) {
   const old = ruinGroupInfoV1(id);
   if (old) return old;
-  const m = /^site:site:[a-f0-9]{32}:ruin-(large|deep)-floor-([0-3])(?::episode-([1-9][0-9]*))?$/.exec(id ?? "");
-  if (!m || m[1] === "large" && m[2] === "3" || m[3] && Number(m[3]) < 2) return null;
+  const m = /^site:site:[a-f0-9]{32}:ruin-(large|deep)-floor-([0-4])(?::episode-([1-9][0-9]*))?$/.exec(id ?? "");
+  if (!m || m[1] === "large" && m[2] >= "3" || m[3] && Number(m[3]) < 2) return null;
   return { floor: Number(m[2]), count: m[1] === "large" ? 4 : 5 };
 }
 
@@ -12225,7 +12235,7 @@ var PLANNED_FORT_CATALOG = freezeWire({ schemaVersion: "site-content-catalog-d9-
 var isFortFamily = (site) => site?.version === FUNCTIONAL_FORT_FAMILY;
 var plannedFortIds = (binding) => binding?.fortPrototype === PLANNED_FORT_VERSION ? ALPHA_FORT_RESERVATION_IDS : [];
 function fortGroupFloorIndexV1(groupId) {
-  const m = /^site:site:[a-f0-9]{32}:fort-floor-([0-3])(?::episode-([1-9][0-9]*))?$/.exec(groupId ?? "");
+  const m = /^site:site:[a-f0-9]{32}:fort-floor-([0-4])(?::episode-([1-9][0-9]*))?$/.exec(groupId ?? "");
   if (!m) return null;
   if (m[2] && (!Number.isSafeInteger(Number(m[2])) || Number(m[2]) < 2)) return null;
   return Number(m[1]);
@@ -14260,20 +14270,78 @@ function eliteTurnV1(reservationId) {
   }
   return classicTurns.get(reservationId);
 }
-function siteEndSpecV1({ family: family2, tier, index, floorCount, reservationId, biome }) {
+function endRoleV1({ family: family2, tier, index, floorCount, reservationId }) {
   if (index !== floorCount - 1 || !["fort", "ruin", "crypt", "cave"].includes(family2) || typeof reservationId !== "string") return null;
-  if (family2 === "cave") {
-    if (tier === "small" || arachnidTreantCaveHereV1(reservationId)) return null;
-    biome = worldSiteV1(reservationId).biome;
-  }
+  if (family2 === "cave" && (tier === "small" || arachnidTreantCaveHereV1(reservationId))) return null;
   if (bossAtSiteV1(reservationId)) return null;
   let role = SITE_ENDS_POLICY.roles[tier];
   if (role === "boss") {
     if (bossHostingSpecV1({ family: family2, tier, index, floorCount, reservationId, enabled: true, wilderness: true })) return null;
     role = "mini-boss";
   }
-  const matrix = WILDERNESS_ECOLOGY_V3_MATRIX[biome], pool = SITE_ENDS_POLICY.picks[biome]?.[role] ?? (matrix?.[family2]?.length ? matrix[family2] : matrix?.surface ?? []);
-  if (!role || !pool.length) return null;
+  return role ?? null;
+}
+var sitePoolV1 = (biome, family2, role) => {
+  const matrix = WILDERNESS_ECOLOGY_V3_MATRIX[biome];
+  return SITE_ENDS_POLICY.picks[biome]?.[role] ?? (matrix?.[family2]?.length ? matrix[family2] : matrix?.surface ?? []);
+};
+var SITE_ENDS_SEEDED_V1 = freezeWire({ nearCells: 24, nearWeight: 4, ownBonus: 1 });
+var landPoolV1 = (biome) => [.../* @__PURE__ */ new Set([...Object.values(WILDERNESS_ECOLOGY_V3_MATRIX[biome] ?? {}).flat(), ...Object.values(SITE_ENDS_POLICY.picks[biome] ?? {}).flat()])].sort();
+var seededEnds = null;
+var seededRevision = -1;
+function seededEndsV1() {
+  if (seededRevision === worldRevisionV1()) return seededEnds;
+  const S = SITE_ENDS_SEEDED_V1, affixes = SITE_ENDS_POLICY.eliteAffixes, byLand = /* @__PURE__ */ new Map(), out = /* @__PURE__ */ new Map();
+  for (const site of worldSitesV1() ?? []) {
+    const family2 = site.id.split(":")[1], floorCount = multiroomFloorCountV1(site.tier, true), role = endRoleV1({ family: family2, tier: site.tier, index: floorCount - 1, floorCount, reservationId: site.id });
+    if (role) {
+      if (!byLand.has(site.biome)) byLand.set(site.biome, []);
+      byLand.get(site.biome).push({ id: site.id, family: family2, role, anchor: site.anchor });
+    }
+  }
+  for (const [biome, sites4] of byLand) {
+    sites4.sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
+    const pool = landPoolV1(biome), done = [], uses = /* @__PURE__ */ new Map(), pairs = /* @__PURE__ */ new Map(), affixUses = /* @__PURE__ */ new Map();
+    const take = (site, creature, affixId) => {
+      site.creature = creature;
+      site.affixId = affixId;
+      done.push(site);
+      uses.set(creature, (uses.get(creature) ?? 0) + 1);
+      pairs.set(creature + "/" + affixId, (pairs.get(creature + "/" + affixId) ?? 0) + 1);
+      affixUses.set(affixId, (affixUses.get(affixId) ?? 0) + 1);
+      out.set(site.id, { creature, affixId });
+    };
+    for (const site of sites4) if (site.role === "elite" && SITE_ENDS_POLICY.picks[biome]) {
+      const picks = SITE_ENDS_POLICY.picks[biome].elite, creature = picks[(eliteTurnV1(site.id) ?? hash3(site.id + "/creature")) % picks.length], named = namedEliteForV1(biome, creature);
+      take(site, creature, named ? named.affixId : affixes[hash3(site.id + "/affix") % affixes.length]);
+    }
+    for (const site of sites4) {
+      if (site.creature) continue;
+      const own2 = new Set(sitePoolV1(biome, site.family, site.role)), near = (c) => done.reduce((n, o) => o.creature === c ? n + Math.max(0, S.nearCells - dist2(site.anchor, o.anchor)) / S.nearCells : n, 0);
+      const cost = (c) => S.nearWeight * near(c) + (uses.get(c) ?? 0) - (own2.has(c) ? S.ownBonus : 0);
+      const creature = pool.map((c) => ({ c, k: cost(c), h: hash3(site.id + "/creature/" + c) })).sort((a, b) => a.k - b.k || a.h - b.h)[0]?.c;
+      if (!creature) continue;
+      const named = site.role === "elite" ? namedEliteForV1(biome, creature) : null;
+      const affixId = named ? named.affixId : affixes.map((a) => ({ a, k: (pairs.get(creature + "/" + a) ?? 0) * 16 + (affixUses.get(a) ?? 0), h: hash3(site.id + "/affix/" + a) })).sort((x, y) => x.k - y.k || x.h - y.h)[0].a;
+      take(site, creature, affixId);
+    }
+  }
+  seededEnds = out;
+  seededRevision = worldRevisionV1();
+  return out;
+}
+function siteEndSpecV1({ family: family2, tier, index, floorCount, reservationId, biome }) {
+  const role = endRoleV1({ family: family2, tier, index, floorCount, reservationId });
+  if (!role) return null;
+  const built = worldSiteV1(reservationId);
+  if (family2 === "cave" || built) biome = built.biome;
+  const seeded2 = built ? seededEndsV1().get(reservationId) : null;
+  if (seeded2) {
+    const named2 = role === "elite" ? namedEliteForV1(biome, seeded2.creature) : null;
+    return { version: SITE_ENDS_VERSION, role, family: seeded2.creature, affixId: seeded2.affixId, ...named2 ? { named: named2.id } : {}, hullRadius: SITE_ENDS_POLICY.anchorHull[role], supportCount: SITE_ENDS_POLICY.supportCount[role] };
+  }
+  const pool = sitePoolV1(biome, family2, role);
+  if (!pool.length) return null;
   const turn = role === "elite" && SITE_ENDS_POLICY.picks[biome] ? eliteTurnV1(reservationId) : void 0;
   const affixes = SITE_ENDS_POLICY.eliteAffixes, creature = pool[(turn ?? hash3(reservationId + "/creature")) % pool.length], named = role === "elite" ? namedEliteForV1(biome, creature) : null;
   return { version: SITE_ENDS_VERSION, role, family: creature, affixId: named ? named.affixId : affixes[hash3(reservationId + "/affix") % affixes.length], ...named ? { named: named.id } : {}, hullRadius: SITE_ENDS_POLICY.anchorHull[role], supportCount: SITE_ENDS_POLICY.supportCount[role] };
@@ -14368,9 +14436,9 @@ var hash4 = (s) => {
   return h;
 };
 var cache3 = /* @__PURE__ */ new Map();
-function populateCombatRooms(base, seed, family2, tier, index) {
-  const key5 = [seed, family2, tier, index].join("/");
-  if (cache3.has(key5)) return cache3.get(key5);
+function populateCombatRooms(base, seed, family2, tier, index, seeded2 = false) {
+  const key5 = [seed, family2, tier, index].join("/"), cacheKey = key5 + (seeded2 ? "/seeded" : "");
+  if (cache3.has(cacheKey)) return cache3.get(cacheKey);
   const rooms = base.graph.rooms.filter((r) => r.role !== "arrival"), ranked = rooms.map((r) => ({ r, n: hash4(WORLD_COMBAT_VERSION + key5 + r.roomId) })).sort((a, b) => a.n - b.n), chosen = ranked.slice(0, Math.min(WORLD_COMBAT_POLICY.floorPacks[tier], rooms.length)), members = [], packs = [];
   const families = family2 === "cave" ? ["slime", "rust_nibbler", "gargoyle"] : family2 === "fort" ? ["animated_armor", "gargoyle", "golem"] : ["cursed_blade", "gargoyle", "rust_nibbler"];
   for (const [i, { r, n }] of chosen.entries()) {
@@ -14394,7 +14462,7 @@ function populateCombatRooms(base, seed, family2, tier, index) {
   }
   const result = freezeWire({ ...base, encounter: { rank: "C", combatVersion: WORLD_COMBAT_VERSION, packs, members } });
   if (cache3.size >= 128) cache3.delete(cache3.keys().next().value);
-  cache3.set(key5, result);
+  cache3.set(cacheKey, result);
   return result;
 }
 
@@ -14440,11 +14508,12 @@ function tileDistances(collision2, origin2) {
   }
   return d;
 }
-var roleFor = (family2, i) => ({ cave: ["branching-caverns", "rift-passages", "deep-grotto", "buried-sanctum"], fort: ["gate-halls", "barracks-halls", "tower-cellars", "buried-citadel"], ruin: ["broken-courtyard", "fractured-galleries", "buried-wing", "sunken-sanctuary"], crypt: ["burial-chambers", "family-vaults", "catacomb-loops", "royal-tomb"] })[family2][i];
-function buildRecipe(seed, family2, tier, index) {
-  requireContract(["cave", "fort", "ruin", "crypt"].includes(family2) && MULTIROOM_POLICY.floors[tier] && index >= 0 && index < MULTIROOM_POLICY.floors[tier], "Unknown multiroom input");
-  for (let attempt = 0; attempt < MULTIROOM_POLICY.maximumAttempts; attempt++) {
-    const roll2 = rng2(MULTIROOM_VERSION + "/" + seed + "/" + family2 + "/" + tier + "/" + index + "/" + attempt), range = MULTIROOM_POLICY.rooms[tier], count2 = range[0] + roll2(range[1] - range[0] + 1), nodes = [{ x: roll2(4), y: roll2(2) }], edges = [];
+var roleFor = (family2, i) => ({ cave: ["branching-caverns", "rift-passages", "deep-grotto", "buried-sanctum", "abyssal-hollow"], fort: ["gate-halls", "barracks-halls", "tower-cellars", "buried-citadel", "sunken-keep"], ruin: ["broken-courtyard", "fractured-galleries", "buried-wing", "sunken-sanctuary", "drowned-throne"], crypt: ["burial-chambers", "family-vaults", "catacomb-loops", "royal-tomb", "founders-tomb"] })[family2][i];
+function buildRecipe(seed, family2, tier, index, seeded2 = false) {
+  const floorCount = multiroomFloorCountV1(tier, seeded2), minimumDepth = multiroomMinimumRoomEdgesV1(tier, seeded2);
+  requireContract(["cave", "fort", "ruin", "crypt"].includes(family2) && floorCount && index >= 0 && index < floorCount, "Unknown multiroom input");
+  for (let attempt = 0, attempts = multiroomMaximumAttemptsV1(tier, seeded2); attempt < attempts; attempt++) {
+    const roll2 = rng2(MULTIROOM_VERSION + "/" + seed + "/" + family2 + "/" + tier + "/" + index + "/" + attempt), range = multiroomRoomRangeV1(tier, seeded2), count2 = range[0] + roll2(range[1] - range[0] + 1), nodes = [{ x: roll2(4), y: roll2(2) }], edges = [];
     while (nodes.length < count2) {
       const frontier = [];
       for (let a = 0; a < nodes.length; a++) for (const [dx, dy] of dirs2) {
@@ -14464,7 +14533,7 @@ function buildRecipe(seed, family2, tier, index) {
         end = b;
       }
     }
-    if (best < 3 || best === count2 - 1) continue;
+    if (best < minimumDepth || best === count2 - 1) continue;
     if (roll2(2)) {
       const t = start;
       start = end;
@@ -14547,7 +14616,7 @@ function buildRecipe(seed, family2, tier, index) {
     const arrivalFacing = roll2(4), onwardFacing = roll2(4);
     if (family2 === "cave") {
       if (index > 0) decorations3.push({ kind: "cave-stairs-up", x: arrival.x / 32, y: arrival.y / 32, facing: arrivalFacing });
-      if (index + 1 < MULTIROOM_POLICY.floors[tier]) decorations3.push({ kind: "cave-stairs-down", x: down.x / 32, y: down.y / 32, facing: onwardFacing });
+      if (index + 1 < floorCount) decorations3.push({ kind: "cave-stairs-down", x: down.x / 32, y: down.y / 32, facing: onwardFacing });
       for (const ri of optional) decorations3.push({ kind: "cave-glow-mushrooms", x: rooms[ri].cx - 3, y: rooms[ri].cy + 2, variant: roll2(3) });
     }
     const graph = { version: MULTIROOM_VERSION, rooms, edges: corridors.map((e) => ({ ...e, walkable: true })), topology: { form: "branched-" + family2, startNodeId: rooms[start].roomId, endNodeId: last.roomId }, navigation: { attempt, arrivalFacing, onwardFacing, arrivalRoomId: rooms[start].roomId, onwardRoomId: last.roomId, optionalRoomIds: optional.map((i) => rooms[i].roomId), minimumRoomEdges: depth, onwardRouteTiles: stair.d, loopCount: edges.filter((e) => e.kind === "loop").length } };
@@ -14556,11 +14625,11 @@ function buildRecipe(seed, family2, tier, index) {
   throw new TypeError("MULTIROOM_BOUNDED_GENERATION_EXHAUSTED:" + family2 + "/" + tier + "/" + index);
 }
 var recipeCache = /* @__PURE__ */ new Map();
-function multiroomRecipe(seed, family2, tier, index, combat = false) {
-  if (combat) return populateCombatRooms(multiroomRecipe(seed, family2, tier, index), seed, family2, tier, index);
-  const k = seed + "/" + family2 + "/" + tier + "/" + index;
+function multiroomRecipe(seed, family2, tier, index, combat = false, seeded2 = false) {
+  if (combat) return populateCombatRooms(multiroomRecipe(seed, family2, tier, index, false, seeded2), seed, family2, tier, index, seeded2);
+  const k = seed + "/" + family2 + "/" + tier + "/" + index + (seeded2 ? "/seeded" : "");
   if (!recipeCache.has(k)) {
-    const r = buildRecipe(seed, family2, tier, index);
+    const r = buildRecipe(seed, family2, tier, index, seeded2);
     if (recipeCache.size >= 128) recipeCache.delete(recipeCache.keys().next().value);
     recipeCache.set(k, r);
   }
@@ -14585,25 +14654,25 @@ function matcher(expected) {
   };
 }
 var proofs = /* @__PURE__ */ new Map();
-function proof(seed, family2, tier, index, combat = false, hosting = null) {
-  const k = JSON.stringify(hosting) + String(combat) + seed + "/" + family2 + "/" + tier + "/" + index;
+function proof(seed, family2, tier, index, combat = false, hosting = null, seeded2 = false) {
+  const k = JSON.stringify(hosting) + String(combat) + seed + "/" + family2 + "/" + tier + "/" + index + (seeded2 ? "/seeded" : "");
   if (!proofs.has(k)) {
-    const base = multiroomRecipe(seed, family2, tier, index, combat), r = hosting?.siteEnd ? expectedSiteEndRecipeV1(base, { family: family2, tier, index, ...hosting }) : hosting ? expectedBossRecipeV1(base, { family: family2, tier, index, ...hosting }) : base, d = tileDistances(r.collision, r.entrance), fields = Object.fromEntries(Object.entries(r).map(([k2, v]) => [k2, matcher(v)]));
+    const base = multiroomRecipe(seed, family2, tier, index, combat, seeded2), r = hosting?.siteEnd ? expectedSiteEndRecipeV1(base, { family: family2, tier, index, ...hosting }) : hosting ? expectedBossRecipeV1(base, { family: family2, tier, index, ...hosting }) : base, d = tileDistances(r.collision, r.entrance), fields = Object.fromEntries(Object.entries(r).map(([k2, v]) => [k2, matcher(v)]));
     if (proofs.size >= 128) proofs.delete(proofs.keys().next().value);
     proofs.set(k, { r, d, fields });
   }
   return proofs.get(k);
 }
-function validateMultiroomRecipe(f3, seed, family2, tier, index, hosting = null) {
-  const p = proof(seed, family2, tier, index, Boolean(f3.encounter.combatVersion), hosting);
+function validateMultiroomRecipe(f3, seed, family2, tier, index, hosting = null, seeded2 = false) {
+  const p = proof(seed, family2, tier, index, Boolean(f3.encounter.combatVersion), hosting, seeded2);
   for (const [k, m] of Object.entries(p.fields)) requireContract(m(f3[k], /* @__PURE__ */ new WeakSet()), "Multiroom immutable " + k + " drift");
   return f3;
 }
-function validateMultiroomFloor(f3, seed, family2, tier, index) {
-  const { r, d, fields } = proof(seed, family2, tier, index, Boolean(f3.encounter.combatVersion));
+function validateMultiroomFloor(f3, seed, family2, tier, index, seeded2 = false) {
+  const { r, d, fields } = proof(seed, family2, tier, index, Boolean(f3.encounter.combatVersion), null, seeded2);
   for (const k of ["version", "graph", "collision", "visual", "entrance"]) requireContract(fields[k](f3[k], /* @__PURE__ */ new WeakSet()), "Multiroom immutable geometry drift");
   const at2 = (p) => d[Math.floor(p.y / 32) * f3.collision.width + Math.floor(p.x / 32)];
-  requireContract(f3.graph.navigation.minimumRoomEdges >= MULTIROOM_POLICY.minimumStairRoomEdges && f3.graph.navigation.optionalRoomIds.length > 0 && at2(r.stairAnchors.down) >= MULTIROOM_POLICY.minimumStairRouteTiles, "Multiroom exploration/stair separation");
+  requireContract(f3.graph.navigation.minimumRoomEdges >= multiroomMinimumRoomEdgesV1(tier, seeded2) && f3.graph.navigation.optionalRoomIds.length > 0 && at2(r.stairAnchors.down) >= MULTIROOM_POLICY.minimumStairRouteTiles, "Multiroom exploration/stair separation");
   for (const p of [f3.entrance, r.stairAnchors.down, r.reward.position, ...f3.encounter.members.map((m) => m.position)]) requireContract(at2(p) >= 0 && !collidesWithTiles(f3.collision, p.x, p.y, 14), "Multiroom unreachable/hull-unsafe anchor");
   return f3;
 }
@@ -15414,15 +15483,15 @@ function initialCaveInteriorNavigationD12_3A(tick) {
 
 // src/shared/content/ruin_family_runtime_v1.js
 async function buildRuinFamilyV1(state, socket, binding, { sha256, runEpisode = 1, resetParticipants = null, familyDefinition = null } = {}) {
-  const version = socket.provenance.placementVersion, pkg = familyDefinition?.package ?? ruinPackageForVersion(version), multi = usesMultiroom(state.d9World.plannedWorld), hosting = hasBossHostingV1(state.d9World.plannedWorld), family2 = familyDefinition?.familyId?.split(":")[1] ?? "ruin", recipeFor = multi ? (seed, tier2, i) => multiroomRecipe(seed, family2, tier2, i, hasWorldCombat(state)) : familyDefinition?.recipe ?? (version === PLANNED_RUIN_V2 ? ruinFloorRecipeV2 : ruinFloorRecipe), packageId = pkg.packageId, siteKind = familyDefinition?.siteKind ?? "procedural-ruin";
+  const version = socket.provenance.placementVersion, pkg = familyDefinition?.package ?? ruinPackageForVersion(version), multi = usesMultiroom(state.d9World.plannedWorld), seeded2 = multi && seededMultiroomV1(socket.provenance.reservationId), hosting = hasBossHostingV1(state.d9World.plannedWorld), family2 = familyDefinition?.familyId?.split(":")[1] ?? "ruin", recipeFor = multi ? (seed, tier2, i) => multiroomRecipe(seed, family2, tier2, i, hasWorldCombat(state), seeded2) : familyDefinition?.recipe ?? (version === PLANNED_RUIN_V2 ? ruinFloorRecipeV2 : ruinFloorRecipe), packageId = pkg.packageId, siteKind = familyDefinition?.siteKind ?? "procedural-ruin";
   requireContract(familyDefinition ? version === familyDefinition.version : [PLANNED_RUIN_VERSION, PLANNED_RUIN_V2].includes(version), "Unknown Ruin generation version");
   requireContract(binding.packageId === packageId && binding.packageVersion === version && binding.contentHash === pkg.contentHash && Number.isSafeInteger(runEpisode) && runEpisode >= 1, "Invalid Ruin family binding/episode");
-  const reservation = state.d9World.siteReservationsById[socket.siteId], tier = reservation?.parcel.tier, policy = multi ? multiroomPolicy(tier) : (familyDefinition?.policy ?? ruinTierPolicyForVersion(version))[tier];
+  const reservation = state.d9World.siteReservationsById[socket.siteId], tier = reservation?.parcel.tier, policy = multi ? multiroomPolicy(tier, seeded2) : (familyDefinition?.policy ?? ruinTierPolicyForVersion(version))[tier];
   requireContract(policy, "Missing Ruin reservation");
   const floorIds = [], floors = [], spaces = [], actors2 = [], groups = [], economies = [], episodes = [], resources = [], elites = [], bosses = [], recipes2 = policy.floors.map((_, i) => {
     const recipe = recipeFor(socket.siteSeed, tier, i), end = multi && siteEndsActiveV1(state) ? siteEndSpecV1({ family: family2, tier, index: i, floorCount: policy.floors.length, reservationId: socket.provenance.reservationId, biome: socket.region?.biome }) : null, spec = end ? null : bossHostingSpecV1({ family: family2, tier, index: i, floorCount: policy.floors.length, reservationId: socket.provenance.reservationId, enabled: hosting && multi && hasWorldCombat(state), wilderness: usesWildernessFairnessV3_2(state) });
     return end ? siteEndRecipeV1(recipe, end) : spec ? bossHostingRecipeV1(recipe, spec) : recipe;
-  }), links2 = multi ? multiroomLinks(tier) : (familyDefinition?.links ?? (version === PLANNED_RUIN_V2 ? ruinFloorLinksV2 : ruinFloorLinks))(tier);
+  }), links2 = multi ? multiroomLinks(tier, seeded2) : (familyDefinition?.links ?? (version === PLANNED_RUIN_V2 ? ruinFloorLinksV2 : ruinFloorLinks))(tier);
   const token6 = async (key5) => bytesToHex((await hashBytes(frameUtf8([version, socket.siteId, key5]), sha256)).slice(0, 16));
   for (let i = 0; i < recipes2.length; i++) floorIds.push("floor:" + await token6("floor-" + i));
   for (let i = 0; i < recipes2.length; i++) {
@@ -15614,13 +15683,13 @@ function validateRuinFamily(site, { familyDefinition = null } = {}) {
   closedRecord(site, ["version", "siteId", "packageId", "packageVersion", "contentHash", "label", "siteKind", "familyId", "siteSeed", "layoutSeed", "sizeTier", "floorCount", "floorIds", "layoutHash", "socket", "spaceInstanceId", "interior", "floors", "encounterProvenance", "conqueredTick", "discoveredByPlayerIds", "instanceHash"]);
   requireContract(site.version === (familyDefinition?.functionalVersion ?? FUNCTIONAL_RUIN_FAMILY) && site.packageId === (familyDefinition?.package.packageId ?? RUIN_FAMILY_PACKAGE_ID) && (familyDefinition ? site.packageVersion === familyDefinition.version : [PLANNED_RUIN_VERSION, PLANNED_RUIN_V2].includes(site.packageVersion)) && site.packageVersion === site.socket.provenance.placementVersion && site.contentHash === (familyDefinition?.package ?? ruinPackageForVersion(site.packageVersion)).contentHash && site.siteKind === (familyDefinition?.siteKind ?? "procedural-ruin") && site.familyId === (familyDefinition?.familyId ?? "site-family:ruin") && site.siteId === site.socket.siteId && site.siteSeed === site.socket.siteSeed && site.layoutSeed === site.siteSeed && digest3(site.layoutHash) && digest3(site.instanceHash), "Ruin identity drift");
   (familyDefinition?.validateSocket ?? validatePlannedRuinSocket)(site.socket);
-  const multi = site.floors[0]?.version === MULTIROOM_VERSION, policy = multi ? multiroomPolicy(site.sizeTier) : (familyDefinition?.policy ?? ruinTierPolicyForVersion(site.packageVersion))[site.sizeTier], links2 = multi ? multiroomLinks(site.sizeTier) : (familyDefinition?.links ?? (site.packageVersion === PLANNED_RUIN_V2 ? ruinFloorLinksV2 : ruinFloorLinks))(site.sizeTier);
+  const multi = site.floors[0]?.version === MULTIROOM_VERSION, seeded2 = multi && seededMultiroomV1(site.socket.provenance.reservationId), policy = multi ? multiroomPolicy(site.sizeTier, seeded2) : (familyDefinition?.policy ?? ruinTierPolicyForVersion(site.packageVersion))[site.sizeTier], links2 = multi ? multiroomLinks(site.sizeTier, seeded2) : (familyDefinition?.links ?? (site.packageVersion === PLANNED_RUIN_V2 ? ruinFloorLinksV2 : ruinFloorLinks))(site.sizeTier);
   requireContract(site.floorCount === policy.floors.length && site.floorCount === site.floors.length && site.spaceInstanceId === site.floors[0].spaceInstanceId && same8(site.floorIds, site.floors.map((f3) => f3.floorId)), "Ruin floor inventory drift");
   const ids = /* @__PURE__ */ new Set();
   for (const [i, f3] of site.floors.entries()) {
     closedRecord(f3, ["version", "role", "collision", "visual", "entrance", "stairAnchors", "graph", "encounter", "reward", "floorId", "index", "floorSeed", "logicalSpaceId", "spaceInstanceId", "groupId", "enemyIds", "rewardId", "transitions"]);
-    const recipe = multi ? multiroomRecipe(site.siteSeed, site.familyId.split(":")[1], site.sizeTier, i, Boolean(f3.encounter.combatVersion)) : (familyDefinition?.recipe ?? (site.packageVersion === PLANNED_RUIN_V2 ? ruinFloorRecipeV2 : ruinFloorRecipe))(site.siteSeed, site.sizeTier, i);
-    if (multi) validateMultiroomRecipe(f3, site.siteSeed, site.familyId.split(":")[1], site.sizeTier, i, f3.encounter.siteEnd ? { floorCount: site.floorCount, reservationId: site.socket.provenance.reservationId, biome: site.socket.region?.biome, siteEnd: true } : f3.encounter.bossHosting ? { floorCount: site.floorCount, reservationId: site.socket.provenance.reservationId } : null);
+    const recipe = multi ? multiroomRecipe(site.siteSeed, site.familyId.split(":")[1], site.sizeTier, i, Boolean(f3.encounter.combatVersion), seeded2) : (familyDefinition?.recipe ?? (site.packageVersion === PLANNED_RUIN_V2 ? ruinFloorRecipeV2 : ruinFloorRecipe))(site.siteSeed, site.sizeTier, i);
+    if (multi) validateMultiroomRecipe(f3, site.siteSeed, site.familyId.split(":")[1], site.sizeTier, i, f3.encounter.siteEnd ? { floorCount: site.floorCount, reservationId: site.socket.provenance.reservationId, biome: site.socket.region?.biome, siteEnd: true } : f3.encounter.bossHosting ? { floorCount: site.floorCount, reservationId: site.socket.provenance.reservationId } : null, seeded2);
     else for (const key5 of Object.keys(recipe)) requireContract(same8(f3[key5], recipe[key5]), "Ruin immutable floor " + key5 + " drift");
     requireContract(f3.index === i && /^floor:[a-f0-9]{32}$/.test(f3.floorId) && /^spi:[a-f0-9]{32}$/.test(f3.spaceInstanceId) && /^spc:[a-f0-9]{32}$/.test(f3.logicalSpaceId) && f3.enemyIds.length === recipe.encounter.members.length, "Ruin floor identity drift");
     for (const id of [f3.floorId, f3.spaceInstanceId, f3.logicalSpaceId, f3.groupId, ...f3.enemyIds, f3.rewardId]) {
@@ -16012,13 +16081,13 @@ function validateFortFamily(site) {
   closedRecord(site, ["version", "siteId", "packageId", "packageVersion", "contentHash", "label", "siteKind", "familyId", "siteSeed", "layoutSeed", "sizeTier", "floorCount", "floorIds", "layoutHash", "socket", "spaceInstanceId", "interior", "floors", "encounterProvenance", "conqueredTick", "discoveredByPlayerIds", "instanceHash"]);
   requireContract(site.version === FUNCTIONAL_FORT_FAMILY && site.packageId === FORT_FAMILY_PACKAGE_ID && [PLANNED_FORT_VERSION, PLANNED_FORT_V2].includes(site.packageVersion) && site.packageVersion === site.socket.provenance.placementVersion && site.contentHash === fortPackageForVersion(site.packageVersion).contentHash && site.siteKind === "procedural-fort" && site.familyId === "site-family:fort" && site.siteId === site.socket.siteId && site.siteSeed === site.socket.siteSeed && site.layoutSeed === site.siteSeed && digest5(site.layoutHash) && digest5(site.instanceHash), "Fort identity drift");
   validatePlannedFortSocket(site.socket);
-  const multi = site.floors[0]?.version === MULTIROOM_VERSION, policy = multi ? multiroomPolicy(site.sizeTier) : FORT_TIER_POLICY[site.sizeTier], links2 = multi ? multiroomLinks(site.sizeTier) : fortFloorLinks(site.sizeTier);
+  const multi = site.floors[0]?.version === MULTIROOM_VERSION, seeded2 = multi && seededMultiroomV1(site.socket.provenance.reservationId), policy = multi ? multiroomPolicy(site.sizeTier, seeded2) : FORT_TIER_POLICY[site.sizeTier], links2 = multi ? multiroomLinks(site.sizeTier, seeded2) : fortFloorLinks(site.sizeTier);
   requireContract(site.floorCount === policy.floors.length && site.floorCount === site.floors.length && site.spaceInstanceId === site.floors[0].spaceInstanceId && same11(site.floorIds, site.floors.map((f3) => f3.floorId)), "Fort floor inventory drift");
   const ids = /* @__PURE__ */ new Set();
   for (const [i, f3] of site.floors.entries()) {
     closedRecord(f3, ["version", "role", "collision", "visual", "entrance", "stairAnchors", "graph", "encounter", "reward", "floorId", "index", "floorSeed", "logicalSpaceId", "spaceInstanceId", "groupId", "enemyIds", "rewardId", "transitions"]);
-    const recipe = multi ? multiroomRecipe(site.siteSeed, "fort", site.sizeTier, i, Boolean(f3.encounter.combatVersion)) : (site.packageVersion === PLANNED_FORT_V2 ? fortFloorRecipeV2 : fortFloorRecipe)(site.siteSeed, site.sizeTier, i);
-    if (multi) validateMultiroomRecipe(f3, site.siteSeed, site.familyId.split(":")[1], site.sizeTier, i, f3.encounter.siteEnd ? { floorCount: site.floorCount, reservationId: site.socket.provenance.reservationId, biome: site.socket.region?.biome, siteEnd: true } : f3.encounter.bossHosting ? { floorCount: site.floorCount, reservationId: site.socket.provenance.reservationId } : null);
+    const recipe = multi ? multiroomRecipe(site.siteSeed, "fort", site.sizeTier, i, Boolean(f3.encounter.combatVersion), seeded2) : (site.packageVersion === PLANNED_FORT_V2 ? fortFloorRecipeV2 : fortFloorRecipe)(site.siteSeed, site.sizeTier, i);
+    if (multi) validateMultiroomRecipe(f3, site.siteSeed, site.familyId.split(":")[1], site.sizeTier, i, f3.encounter.siteEnd ? { floorCount: site.floorCount, reservationId: site.socket.provenance.reservationId, biome: site.socket.region?.biome, siteEnd: true } : f3.encounter.bossHosting ? { floorCount: site.floorCount, reservationId: site.socket.provenance.reservationId } : null, seeded2);
     else for (const key5 of Object.keys(recipe)) requireContract(same11(f3[key5], recipe[key5]), "Fort immutable floor " + key5 + " drift");
     requireContract(f3.index === i && /^floor:[a-f0-9]{32}$/.test(f3.floorId) && /^spi:[a-f0-9]{32}$/.test(f3.spaceInstanceId) && /^spc:[a-f0-9]{32}$/.test(f3.logicalSpaceId) && f3.enemyIds.length === recipe.encounter.members.length, "Fort floor identity drift");
     for (const id of [f3.floorId, f3.spaceInstanceId, f3.logicalSpaceId, f3.groupId, ...f3.enemyIds, f3.rewardId]) {
@@ -16767,15 +16836,15 @@ var D9_SITE_CONTENT_CATALOG = freezeWire({ schemaVersion: SITE_CATALOG_D9, catal
 
 // src/shared/content/fort_family_runtime_v1.js
 async function buildFortFamilyV1(state, socket, binding, { sha256, runEpisode = 1, resetParticipants = null } = {}) {
-  const version = socket.provenance.placementVersion, pkg = fortPackageForVersion(version), multi = usesMultiroom(state.d9World.plannedWorld), hosting = hasBossHostingV1(state.d9World.plannedWorld), recipeFor = multi ? (seed, tier2, i) => multiroomRecipe(seed, "fort", tier2, i, hasWorldCombat(state)) : version === PLANNED_FORT_V2 ? fortFloorRecipeV2 : fortFloorRecipe;
+  const version = socket.provenance.placementVersion, pkg = fortPackageForVersion(version), multi = usesMultiroom(state.d9World.plannedWorld), seeded2 = multi && seededMultiroomV1(socket.provenance.reservationId), hosting = hasBossHostingV1(state.d9World.plannedWorld), recipeFor = multi ? (seed, tier2, i) => multiroomRecipe(seed, "fort", tier2, i, hasWorldCombat(state), seeded2) : version === PLANNED_FORT_V2 ? fortFloorRecipeV2 : fortFloorRecipe;
   requireContract([PLANNED_FORT_VERSION, PLANNED_FORT_V2].includes(version), "Unknown Fort generation version");
   requireContract(binding.packageId === FORT_FAMILY_PACKAGE_ID && binding.packageVersion === version && binding.contentHash === pkg.contentHash && Number.isSafeInteger(runEpisode) && runEpisode >= 1, "Invalid Fort family binding/episode");
-  const reservation = state.d9World.siteReservationsById[socket.siteId], tier = reservation?.parcel.tier, policy = multi ? multiroomPolicy(tier) : FORT_TIER_POLICY[tier];
+  const reservation = state.d9World.siteReservationsById[socket.siteId], tier = reservation?.parcel.tier, policy = multi ? multiroomPolicy(tier, seeded2) : FORT_TIER_POLICY[tier];
   requireContract(policy, "Missing Fort reservation");
   const floorIds = [], floors = [], spaces = [], actors2 = [], groups = [], economies = [], episodes = [], resources = [], elites = [], bosses = [], recipes2 = policy.floors.map((_, i) => {
     const recipe = recipeFor(socket.siteSeed, tier, i), end = multi && siteEndsActiveV1(state) ? siteEndSpecV1({ family: "fort", tier, index: i, floorCount: policy.floors.length, reservationId: socket.provenance.reservationId, biome: socket.region?.biome }) : null, spec = end ? null : bossHostingSpecV1({ family: "fort", tier, index: i, floorCount: policy.floors.length, reservationId: socket.provenance.reservationId, enabled: hosting && multi && hasWorldCombat(state), wilderness: usesWildernessFairnessV3_2(state) });
     return end ? siteEndRecipeV1(recipe, end) : spec ? bossHostingRecipeV1(recipe, spec) : recipe;
-  }), links2 = multi ? multiroomLinks(tier) : fortFloorLinks(tier);
+  }), links2 = multi ? multiroomLinks(tier, seeded2) : fortFloorLinks(tier);
   const token6 = async (key5) => bytesToHex((await hashBytes(frameUtf8([version, socket.siteId, key5]), sha256)).slice(0, 16));
   for (let i = 0; i < recipes2.length; i++) floorIds.push("floor:" + await token6("floor-" + i));
   for (let i = 0; i < recipes2.length; i++) {
@@ -17761,9 +17830,9 @@ function validateGeneratedWoodlandCaveD12_2(g) {
 async function generateMultiroomCave({ campaignSeed, site, reservation, combat = false, spawnOrdinal = 0 }, { sha256 }) {
   const d = await deriveWoodlandCaveIdentityD12_2({ campaignSeed, site, label: reservation.label, regionName: reservation.regionName, geographicQualifier: reservation.geographicQualifier }, { sha256 });
   requireContract(d.layoutSeed === reservation.layoutSeed && d.siteSeed === reservation.siteSeed, "Multiroom Cave identity drift");
-  const count2 = MULTIROOM_POLICY.floors[d.tier], floors = [];
+  const seeded2 = seededMultiroomV1(site.provenance?.reservationId), count2 = multiroomFloorCountV1(d.tier, seeded2), floors = [];
   for (let i = 0; i < count2; i++) {
-    const r = multiroomRecipe(d.layoutSeed, "cave", d.tier, i, combat), id = `floor:${site.siteId}:${i}`, reward = i === count2 - 1 ? { rewardId: `reward:${site.siteId}:${i}:0`, ...copyWire(WOODLAND_CAVE_FAMILY_D12_2.rewardPolicy), position: copyWire(r.reward.position) } : null;
+    const r = multiroomRecipe(d.layoutSeed, "cave", d.tier, i, combat, seeded2), id = `floor:${site.siteId}:${i}`, reward = i === count2 - 1 ? { rewardId: `reward:${site.siteId}:${i}:0`, ...copyWire(WOODLAND_CAVE_FAMILY_D12_2.rewardPolicy), position: copyWire(r.reward.position) } : null;
     floors.push({ version: MULTIROOM_VERSION, floorId: id, index: i, floorSeed: bytesToHex(await hashBytes(utf8(MULTIROOM_VERSION + "/" + d.layoutSeed + "/" + i), sha256)), graph: copyWire(r.graph), collision: copyWire(r.collision), visual: copyWire(r.visual), entrance: copyWire(r.entrance), transitions: { up: i ? { transitionId: `transition:${site.siteId}:${i}:up`, floorId: `floor:${site.siteId}:${i - 1}`, anchor: copyWire(r.stairAnchors.up) } : null, down: i < count2 - 1 ? { transitionId: `transition:${site.siteId}:${i}:down`, floorId: `floor:${site.siteId}:${i + 1}`, anchor: copyWire(r.stairAnchors.down) } : null }, encounter: copyWire(r.encounter), reward, decorationIds: [] });
   }
   return freezeWire({ version: GENERATED_SITE_D12_2, familyId: WOODLAND_CAVE_FAMILY_ID, familyVersion: WOODLAND_CAVE_FAMILY_VERSION_D12_2, generatorVersion: MULTIROOM_VERSION, moduleCatalogVersion: MULTIROOM_VERSION, siteId: site.siteId, siteSeed: d.siteSeed, layoutSeed: d.layoutSeed, sizeTier: d.tier, regionName: d.regionName, geographicQualifier: d.geographicQualifier, label: d.label, floorCount: count2, floorIds: floors.map((f3) => f3.floorId), layoutHash: bytesToHex(await hashBytes(utf8(canonicalStringify(floors)), sha256)), spawnProvenance: { kind: "existing-planned-reservation", ordinal: spawnOrdinal, region: copyWire(site.region), socket: copyWire(site) }, layoutProvenance: { layoutSeed: d.layoutSeed, moduleCatalogVersion: MULTIROOM_VERSION, policyHash: MULTIROOM_HASH }, encounterProvenance: { policy: copyWire(WOODLAND_CAVE_FAMILY_D12_2.encounterPolicy), floorMemberKeys: Object.fromEntries(floors.map((f3) => [f3.floorId, f3.encounter.members.map((m) => m.memberKey)])) }, rewardProvenance: { policy: copyWire(WOODLAND_CAVE_FAMILY_D12_2.rewardPolicy), rewardIds: floors.flatMap((f3) => f3.reward ? [f3.reward.rewardId] : []) }, floors });
@@ -18213,7 +18282,7 @@ function validateBase(record, site) {
   closedRecord(record, ["version", "reservationId", "siteId", "familyId", "sizeTier", "requiredFinaleClass", "finalFloorId", "finalFloorIndex", "finalFloorSpaceInstanceId", "finaleChamberId", "arenaAnchor", "rewardAnchorRef", "contentBinding", "encounterBinding", "rewardBinding"]);
   requireContract([SITE_FINALE_RESERVATION_D13D_A, SITE_FINALE_RESERVATION_D13D_B, SITE_FINALE_RESERVATION_D13D_D, SITE_FINALE_RESERVATION_D13D_E, SITE_FINALE_RESERVATION_D13D_F, SITE_FINALE_RESERVATION_D13D_G].includes(record.version) && /^finale:[a-f0-9]{32}$/.test(record.reservationId) && record.siteId === site.siteId && record.familyId === WOODLAND_CAVE_FAMILY_ID, "Invalid procedural Cave finale identity");
   requireContract(Object.hasOwn(WOODLAND_CAVE_FINALE_POLICY_D13D_A, record.sizeTier) && record.requiredFinaleClass === finaleClassForCaveTierD13D_A(record.sizeTier), "Invalid procedural Cave finale policy");
-  safeInteger(record.finalFloorIndex, 0, 3);
+  safeInteger(record.finalFloorIndex, 0, seededMultiroomV1(caveReservationIdV1(site)) ? 4 : 3);
   requireContract(/^floor:site:[a-f0-9]{32}:\d+$/.test(record.finalFloorId) && (record.finalFloorSpaceInstanceId === null || /^spi:[a-f0-9]{32}$/.test(record.finalFloorSpaceInstanceId)) && /^(?:node:\d+:\d+|floor-\d+-room-\d+)$/.test(record.finaleChamberId), "Invalid procedural Cave finale geometry identity");
   closedRecord(record.arenaAnchor, ["x", "y"]);
   closedRecord(record.rewardAnchorRef, ["rewardId", "position"]);
@@ -20472,7 +20541,7 @@ var SITE_RESET_RECEIPT_D13C1 = "site-reset-d13c1-v1";
 var WOODLAND_FORT_WIDTH_TILES = 48;
 var WOODLAND_FORT_HEIGHT_TILES = 36;
 var receiptBounds = (state) => {
-  const groups = Math.max(...Object.values(MULTIROOM_POLICY.floors)), members = hasWorldCombat(state) ? WORLD_COMBAT_POLICY.maximumFloorMembers : 10;
+  const groups = multiroomMostFloorsV1(), members = hasWorldCombat(state) ? WORLD_COMBAT_POLICY.maximumFloorMembers : 10;
   return { groups, members, total: groups * members };
 };
 var same18 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
@@ -20952,10 +21021,10 @@ function validateFunctionalSiteD9(site) {
   if (isRuinFamily(site)) return validateRuinFamily(site);
   if (isFortFamily(site)) return validateFortFamily(site);
   if (isGeneratedCaveFamilyD12(site)) {
-    const multi = site.generatorVersion === MULTIROOM_VERSION, modern = [FUNCTIONAL_SITE_FAMILY_D12_1, FUNCTIONAL_SITE_FAMILY_D12_2].includes(site.version), natural = site.version === FUNCTIONAL_SITE_FAMILY_D12_2;
+    const multi = site.generatorVersion === MULTIROOM_VERSION, seeded2 = multi && seededMultiroomV1(site.socket?.provenance?.reservationId), modern = [FUNCTIONAL_SITE_FAMILY_D12_1, FUNCTIONAL_SITE_FAMILY_D12_2].includes(site.version), natural = site.version === FUNCTIONAL_SITE_FAMILY_D12_2;
     closedRecord(site, natural ? ["version", "siteId", "packageId", "packageVersion", "contentHash", "label", "siteKind", "familyId", "familyVersion", "generatorVersion", "moduleCatalogVersion", "siteSeed", "layoutSeed", "regionName", "geographicQualifier", "spawnProvenance", "layoutProvenance", "sizeTier", "floorCount", "floorIds", "layoutHash", "encounterProvenance", "rewardProvenance", "socket", "spaceInstanceId", "interior", "floors", "conqueredTick", "discoveredByPlayerIds", "instanceHash"] : modern ? ["version", "siteId", "packageId", "packageVersion", "contentHash", "label", "siteKind", "familyId", "familyVersion", "generatorVersion", "moduleCatalogVersion", "siteSeed", "layoutSeed", "geographicQualifier", "spawnProvenance", "layoutProvenance", "sizeTier", "floorCount", "floorIds", "layoutHash", "encounterProvenance", "rewardProvenance", "socket", "spaceInstanceId", "interior", "floors", "conqueredTick", "discoveredByPlayerIds", "instanceHash"] : ["version", "siteId", "packageId", "packageVersion", "contentHash", "label", "siteKind", "familyId", "familyVersion", "generatorVersion", "moduleCatalogVersion", "siteSeed", "spawnProvenance", "sizeTier", "floorCount", "floorIds", "layoutHash", "encounterProvenance", "rewardProvenance", "socket", "spaceInstanceId", "interior", "floors", "conqueredTick", "discoveredByPlayerIds", "instanceHash"]);
     const definition2 = functionalSiteDefinitionD10(site.packageId, site.packageVersion);
-    requireContract(definition2?.placement === "generated-interior-family" && site.familyId === WOODLAND_CAVE_FAMILY_ID && site.siteId === site.socket.siteId && site.floorCount === site.floors.length && site.floorCount >= 1 && site.floorCount <= 4 && site.spaceInstanceId === site.floors[0].spaceInstanceId && same19(site.floorIds, site.floors.map((f3) => f3.floorId)) && digest8(site.siteSeed) && digest8(site.layoutHash) && digest8(site.instanceHash), "Invalid generated cave family identity");
+    requireContract(definition2?.placement === "generated-interior-family" && site.familyId === WOODLAND_CAVE_FAMILY_ID && site.siteId === site.socket.siteId && site.floorCount === site.floors.length && site.floorCount >= 1 && site.floorCount <= (seeded2 ? 5 : 4) && site.spaceInstanceId === site.floors[0].spaceInstanceId && same19(site.floorIds, site.floors.map((f3) => f3.floorId)) && digest8(site.siteSeed) && digest8(site.layoutHash) && digest8(site.instanceHash), "Invalid generated cave family identity");
     validateSiteSocketD9(site.socket);
     const spaces = /* @__PURE__ */ new Set(), groups = /* @__PURE__ */ new Set(), enemies = /* @__PURE__ */ new Set(), rewards = /* @__PURE__ */ new Set();
     for (const [i, f3] of site.floors.entries()) {
@@ -20973,8 +21042,8 @@ function validateFunctionalSiteD9(site) {
       if (f3.transitions.down) requireContract(f3.transitions.down.floorId === site.floors[i + 1].floorId && f3.transitions.down.spaceInstanceId === site.floors[i + 1].spaceInstanceId, "Generated cave downward target drift");
     }
     if (multi) {
-      requireContract(site.floorCount === MULTIROOM_POLICY.floors[site.sizeTier], "Multiroom Cave floor count");
-      for (const f3 of site.floors) validateMultiroomFloor(f3, site.layoutSeed, "cave", site.sizeTier, f3.index);
+      requireContract(site.floorCount === multiroomFloorCountV1(site.sizeTier, seeded2), "Multiroom Cave floor count");
+      for (const f3 of site.floors) validateMultiroomFloor(f3, site.layoutSeed, "cave", site.sizeTier, f3.index, seeded2);
     }
     requireContract(site.interior.groupId === site.floors[0].groupId && site.interior.logicalSpaceId === site.floors[0].logicalSpaceId && same19(site.interior.collision, site.floors[0].collision), "Generated cave compatibility view drift");
     if (site.conqueredTick !== null) safeInteger(site.conqueredTick);
@@ -25437,10 +25506,10 @@ function validateWorldPagingD9(paging) {
   }
   for (const [id, g] of Object.entries(paging.originsByGroup)) {
     closedRecord(g, ["groupId", "episode", "rank", "chunkX", "chunkY", "anchorOrdinal", "entityIds"], ["combatHash"]);
-    const site = functionalSiteDefinitionForGroupD10(id), generated = /^site:site:[a-f0-9]{32}:cave-floor-[0-3]$/.test(id), fortFloor = fortGroupFloorIndexV1(id), ruin = cryptGroupInfoV2(id) ?? ruinGroupInfoV2(id), count2 = ruin ? ruin.count : fortFloor !== null ? 3 : site?.template.encounter.members.length ?? (generated ? null : 2);
+    const site = functionalSiteDefinitionForGroupD10(id), generated = /^site:site:[a-f0-9]{32}:cave-floor-[0-4]$/.test(id), floor4 = /-floor-4(?::episode-[1-9][0-9]*)?$/.test(id), fortFloor = fortGroupFloorIndexV1(id), ruin = cryptGroupInfoV2(id) ?? ruinGroupInfoV2(id), count2 = ruin ? ruin.count : fortFloor !== null ? 3 : site?.template.encounter.members.length ?? (generated ? null : 2);
     requireContract(g.groupId === id && ["C", "B", "A", "S"].includes(g.rank) && (g.combatHash === WORLD_COMBAT_HASH ? g.entityIds.length >= 1 && g.entityIds.length <= 48 : count2 === null ? g.entityIds.length >= 1 && g.entityIds.length <= 5 : g.entityIds.length === count2), "Cold origin identity");
     safeInteger(g.episode);
-    if (!acceptedEventGearGeographyV2(id, g)) safeInteger(g.anchorOrdinal, 0, generated || fortFloor !== null || ruin ? 3 : 1);
+    if (!acceptedEventGearGeographyV2(id, g)) safeInteger(g.anchorOrdinal, 0, generated || fortFloor !== null || ruin ? floor4 ? 4 : 3 : 1);
     if (g.combatHash !== void 0) requireContract(g.combatHash === WORLD_COMBAT_HASH, "Unknown roster provenance policy");
     if (fortFloor !== null) requireContract(g.anchorOrdinal === fortFloor, "Fort gear floor provenance drift");
     if (ruin) requireContract(g.anchorOrdinal === ruin.floor, "Ruin gear floor provenance drift");
@@ -28357,6 +28426,7 @@ export {
   worldRolesV1,
   ferryNetworkV1,
   settlementV1,
+  worldSitesV1,
   worldSiteV1,
   worldRevisionV1,
   STARTER_VERSION,
@@ -28707,6 +28777,8 @@ export {
   MULTIROOM_VERSION,
   MULTIROOM_HASH,
   usesMultiroom,
+  seededMultiroomV1,
+  multiroomFloorCountV1,
   PLANNED_CRYPT_VERSION,
   PLANNED_CRYPT_SOCKET,
   PLANNED_CRYPT_RESERVATION,

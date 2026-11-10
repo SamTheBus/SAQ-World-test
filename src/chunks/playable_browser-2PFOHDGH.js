@@ -654,6 +654,7 @@ import {
   mixPlan,
   multiplyAmount,
   multiplyCombat,
+  multiroomFloorCountV1,
   nearbyForge,
   nestBiomeV1,
   nestBoonV1,
@@ -808,6 +809,7 @@ import {
   saleQuote,
   salvageQuote,
   seededCommitmentsV1,
+  seededMultiroomV1,
   selectForwardActors,
   selectSimpleEnemyTarget,
   semanticPlaceAtWorldPosition,
@@ -986,10 +988,11 @@ import {
   worldRevisionV1,
   worldRolesV1,
   worldSiteV1,
+  worldSitesV1,
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-XTDYI5OF.js";
+} from "./chunk-GQWV3GOI.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -62665,6 +62668,7 @@ function actorContext(state, entityId2) {
 }
 
 // src/shared/contracts/site_definition_d13a.js
+var cryptPopulationFloorsV1 = (tier2, reservationId) => seededMultiroomV1(reservationId) ? multiroomFloorCountV1(tier2, true) : CRYPT_POPULATION_TIERS[tier2].floors.length;
 var UNIVERSAL_SITE_DEFINITION_D13A = "universal-site-definition-d13a-v2";
 var STONEWATCH_LOCATION_DEFINITION_ID = "def:d2000000000000000000000000000002";
 var SITE_FAMILY_REGISTRY_D13A = freezeWire([
@@ -62703,7 +62707,7 @@ function resolveFunctional(state, manifest, siteId) {
   const definition2 = functionalSiteDefinitionD10(packageId, site?.packageVersion ?? (packageId === CRYPT_PACKAGE_ID ? reservation?.socket.provenance.placementVersion : null));
   if (!definition2) return null;
   const socket2 = site?.socket ?? reservation?.socket, parcel2 = reservation?.parcel ?? null, generated = definition2.placement === "generated-interior-family";
-  const floorCount = site?.floorCount ?? (packageId === CRYPT_PACKAGE_ID && [PLANNED_CRYPT_V2, CRYPT_POPULATION_VERSION].includes(socket2.provenance.placementVersion) ? (socket2.provenance.placementVersion === CRYPT_POPULATION_VERSION ? CRYPT_POPULATION_TIERS : CRYPT_TIER_POLICY_V2)[parcel2.tier].floors.length : blueprint.fixedFloorCount);
+  const floorCount = site?.floorCount ?? (packageId === CRYPT_PACKAGE_ID && [PLANNED_CRYPT_V2, CRYPT_POPULATION_VERSION].includes(socket2.provenance.placementVersion) ? socket2.provenance.placementVersion === CRYPT_POPULATION_VERSION ? cryptPopulationFloorsV1(parcel2.tier, socket2.provenance.reservationId) : CRYPT_TIER_POLICY_V2[parcel2.tier].floors.length : blueprint.fixedFloorCount);
   return freezeWire({
     version: UNIVERSAL_SITE_DEFINITION_D13A,
     siteId,
@@ -62783,7 +62787,7 @@ function validateResolvedSiteDefinitionD13A(definition2) {
   requireContract(["fixed-authored", "seeded-procedural"].includes(definition2.layoutClass), "Invalid site layout class");
   for (const key3 of ["encounterProfileRef", "rewardProfileRef", "resetPolicyRef"]) requireContract(typeof definition2[key3] === "string" && definition2[key3].length >= 1, "Missing site profile reference");
   for (const key3 of ["finaleProfileRef", "uniqueLootProfileRef", "artifactRef", "sigilModifierSlot"]) requireContract(definition2[key3] === null || typeof definition2[key3] === "string", "Invalid optional site reference");
-  if (definition2.familyId === "crypt" && definition2.namedVariantId === null && definition2.encounterProfileRef === `${CRYPT_PACKAGE_ID}:${CRYPT_POPULATION_VERSION}:encounter`) requireContract(definition2.rewardProfileRef === `${CRYPT_PACKAGE_ID}:${CRYPT_POPULATION_VERSION}:reward` && definition2.placementClass === "family-instance" && definition2.layoutClass === "seeded-procedural" && CRYPT_POPULATION_TIERS[definition2.tier]?.floors.length === definition2.floorCount && definition2.floorCountRule === "floor-count-rule:crypt-reservation-population-v3", "Invalid population Crypt definition");
+  if (definition2.familyId === "crypt" && definition2.namedVariantId === null && definition2.encounterProfileRef === `${CRYPT_PACKAGE_ID}:${CRYPT_POPULATION_VERSION}:encounter`) requireContract(definition2.rewardProfileRef === `${CRYPT_PACKAGE_ID}:${CRYPT_POPULATION_VERSION}:reward` && definition2.placementClass === "family-instance" && definition2.layoutClass === "seeded-procedural" && (CRYPT_POPULATION_TIERS[definition2.tier]?.floors.length === definition2.floorCount || worldSitesV1() !== null && multiroomFloorCountV1(definition2.tier, true) === definition2.floorCount) && definition2.floorCountRule === "floor-count-rule:crypt-reservation-population-v3", "Invalid population Crypt definition");
   else if (definition2.familyId === "crypt" && definition2.namedVariantId === null && definition2.encounterProfileRef === `${CRYPT_PACKAGE_ID}:${PLANNED_CRYPT_V2}:encounter`) requireContract(definition2.rewardProfileRef === `${CRYPT_PACKAGE_ID}:${PLANNED_CRYPT_V2}:reward` && definition2.placementClass === "family-instance" && definition2.layoutClass === "seeded-procedural" && CRYPT_TIER_POLICY_V2[definition2.tier]?.floors.length === definition2.floorCount && definition2.floorCountRule === "floor-count-rule:crypt-family-v2", "Invalid repeatable Crypt V2 definition");
   else if (definition2.familyId === "crypt" && definition2.namedVariantId === null) requireContract(definition2.encounterProfileRef === `${CRYPT_PACKAGE_ID}:${PLANNED_CRYPT_VERSION}:encounter` && definition2.rewardProfileRef === `${CRYPT_PACKAGE_ID}:${PLANNED_CRYPT_VERSION}:reward` && definition2.placementClass === "family-instance" && definition2.layoutClass === "seeded-procedural" && definition2.tier === "small" && definition2.floorCount === 1, "Invalid repeatable Small Crypt definition");
   else if (definition2.familyId === "crypt") requireContract(definition2.namedVariantId === "stonewatch" && definition2.displayName === "Stonewatch" && definition2.placementClass === "unique-landmark" && definition2.layoutClass === "fixed-authored", "Invalid Stonewatch Crypt definition");
@@ -118958,10 +118962,10 @@ function validateOwnedGearPageD9(row2) {
   requireContract(row2.item.itemId === `item:${row2.ownerPlayerId}:${row2.item.sourceEntityId}` && row2.origin.sourceEntityId === row2.item.sourceEntityId, "Owned gear source identity");
   requireContract(Boolean(row2.location) === physical(row2) && Boolean(row2.drop) === (row2.disposition === "DROPPED") && Boolean(row2.terminal) === ["SALVAGED", "AUTO_SALVAGED", "SOLD"].includes(row2.disposition), "Owned gear disposition fields");
   if (row2.sourceGeography) {
-    const g = row2.sourceGeography, site = functionalSiteDefinitionForGroupD10(row2.origin.groupId), generated = /^site:site:[a-f0-9]{32}:cave-floor-[0-3]$/.test(row2.origin.groupId), fortFloor = fortGroupFloorIndexV1(row2.origin.groupId), ruin = cryptGroupInfoV2(row2.origin.groupId) ?? ruinGroupInfoV2(row2.origin.groupId), count = ruin ? ruin.count : fortFloor !== null ? 3 : site?.template.encounter.members.length ?? (generated ? null : 2);
+    const g = row2.sourceGeography, site = functionalSiteDefinitionForGroupD10(row2.origin.groupId), generated = /^site:site:[a-f0-9]{32}:cave-floor-[0-4]$/.test(row2.origin.groupId), floor4 = /-floor-4(?::episode-[1-9][0-9]*)?$/.test(row2.origin.groupId), fortFloor = fortGroupFloorIndexV1(row2.origin.groupId), ruin = cryptGroupInfoV2(row2.origin.groupId) ?? ruinGroupInfoV2(row2.origin.groupId), count = ruin ? ruin.count : fortFloor !== null ? 3 : site?.template.encounter.members.length ?? (generated ? null : 2);
     closedRecord(g, ["chunkX", "chunkY", "anchorOrdinal", "rank", "entityIds"], ["combatHash"]);
     validateWorldPosition({ chunkX: g.chunkX, chunkY: g.chunkY, localX: 0, localY: 0 });
-    if (!acceptedEventGearGeographyV2(row2.origin.groupId, g)) safeInteger(g.anchorOrdinal, 0, generated || fortFloor !== null || ruin ? 3 : 1);
+    if (!acceptedEventGearGeographyV2(row2.origin.groupId, g)) safeInteger(g.anchorOrdinal, 0, generated || fortFloor !== null || ruin ? floor4 ? 4 : 3 : 1);
     if (g.combatHash !== void 0) requireContract(g.combatHash === WORLD_COMBAT_HASH, "Unknown roster provenance policy");
     if (fortFloor !== null) requireContract(g.anchorOrdinal === fortFloor, "Fort gear floor provenance drift");
     if (ruin) requireContract(g.anchorOrdinal === ruin.floor, "Ruin gear floor provenance drift");

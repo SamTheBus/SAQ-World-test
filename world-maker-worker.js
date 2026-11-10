@@ -2232,6 +2232,7 @@ var SETTLEMENT_LIFE_POLICY = freezeWire({
 // src/shared/content/multiroom_policy_v1.js
 var MULTIROOM_VERSION = "core-families-multiroom-v1";
 var MULTIROOM_POLICY = freezeWire({ version: MULTIROOM_VERSION, parentRuntime: "c224c9e8b940ebab", floors: { small: 1, standard: 2, large: 3, deep: 4 }, rooms: { small: [4, 5], standard: [5, 6], large: [6, 7], deep: [7, 8] }, maximumAttempts: 48, minimumStairRouteTiles: 32, minimumStairRoomEdges: 3, corridorWidthTiles: 5, maximumFloorTiles: [80, 44], allowQuarterTurn: true, wholeFloorOccupancyRadius: 1500, maximumOrdinaryActorsPerFloor: 5, encounterCounts: { fort: 3, ruin: { small: 2, standard: 3, large: 4, deep: 5 }, crypt: { small: 3, standard: 4, large: 4, deep: 4 } }, preserveGearProvenanceRosterCounts: true, exteriorAndSiteIdentitiesUnchanged: true, stairSelection: "farthest-safe-room-by-walkable-route-with-optional-branch", generation: "seeded-connected-room-graph-family-grammar", oldSaveMigration: false });
+var MULTIROOM_SEEDED_POLICY = freezeWire({ floors: { small: 1, standard: 2, large: 3, deep: 5 }, rooms: { small: [4, 4], standard: [5, 6], large: [6, 7], deep: [7, 8] }, minimumStairRoomEdges: { small: 2, standard: 3, large: 3, deep: 3 }, maximumAttempts: { small: 192, standard: 48, large: 48, deep: 48 } });
 
 // src/shared/content/seeded_world_v1.js
 function presentSeededWorldV1(a) {
