@@ -225,7 +225,7 @@ var RESHAPE_TIERS = Object.freeze({ "repeatable-slot:ruin:wetland:standard:067":
 var RESHAPE_VERSION = "world-reshape-v2";
 var RESHAPE_HASH = "ac15d856c2dbbe38203480172b32aae7d19ccdd61cef10eee16aade24a0900d2";
 var RESHAPE_HYDROLOGY_HASH = "e12fd26221c55e0357b674d4beaf28cc522ef5f9dde420b073373f0ef7be1b65";
-var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-camps";
+var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-hunts";
 var hasWorldReshape = (b) => b?.reshapeVersion === RESHAPE_VERSION && b?.reshapeHash === RESHAPE_HASH;
 var reshapedSite = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_SITES, id) ? RESHAPE_SITES[id] : null;
 var reshapedTier = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_TIERS, id) ? RESHAPE_TIERS[id] : null;
@@ -3130,7 +3130,7 @@ function validateMajorPlaceNames(manifest) {
   }
   requireContract(manifest.majorNamePolicyVersion === MAJOR_NAME_POLICY_VERSION, "Unknown major name policy");
   const registry = createMajorNameRegistry();
-  for (const place2 of manifest.settlements) registry.reserve(place2.label);
+  for (const place3 of manifest.settlements) registry.reserve(place3.label);
   for (const site of manifest.sites) if (site.properName !== void 0) registry.reserve(site.properName);
 }
 
@@ -3409,7 +3409,7 @@ function eventAtSlotV1(asset, eventSlotId) {
 }
 
 // src/shared/content/planned_events_v1.js
-var BUILT_EVENT_KINDS = Object.freeze(["cursed_shrine", "nests", "road_ambush", "wayside_shrine", "raided_camp", "buried_cache"]);
+var BUILT_EVENT_KINDS = Object.freeze(["cursed_shrine", "nests", "road_ambush", "wayside_shrine", "raided_camp", "buried_cache", "trophy_hunt"]);
 var CATEGORIES = Object.freeze(["pathside", "backcountry", "deep_wild"]);
 var BASE = 1e5;
 var ROADSIDE_KINDS = Object.freeze(["road_ambush", "wayside_shrine"]);
@@ -3492,7 +3492,11 @@ var PLANNED_EVENT_FAMILIES = freezeWire({
   volcanic: [...mix("hell_bat", "lava_serpent"), "lava_serpent"]
 });
 var BROOD_ROSTER = freezeWire(["brood_mother", "broodling", "broodling", "broodling", ...Array(24).fill("hatchling")]);
-var plannedEventFamiliesV1 = (biome) => [...PLANNED_EVENT_FAMILIES[biome] ?? PLANNED_EVENT_FAMILIES.woodland, ...BROOD_ROSTER];
+var plannedEventFamiliesV1 = (biome, category = null) => {
+  const crew = [...PLANNED_EVENT_FAMILIES[biome] ?? PLANNED_EVENT_FAMILIES.woodland];
+  if (category === "deep_wild") crew[12] = huntChampionOfV1(biome).family;
+  return [...crew, ...BROOD_ROSTER];
+};
 var PLANNED_EVENT_CREW = 13;
 var PLANNED_EVENT_MEMBERS = PLANNED_EVENT_CREW + BROOD_ROSTER.length;
 var NESTS_VERSION = "nests-v2";
@@ -3599,7 +3603,7 @@ var roadsideSkinOfV1 = (biome) => ROADSIDE_SKINS[biome] ?? "woodland";
 var roadsideChestV1 = (s, source7) => {
   if (source7.kind !== "chest") return false;
   const n = s.d9World?.episodes?.[source7.groupId]?.geography?.anchorOrdinal;
-  return Boolean(roadsideOrdinalV1(n) || plannedEventOrdinal(n) && plannedEventFirstKind(n) === "buried_cache");
+  return Boolean(roadsideOrdinalV1(n) || plannedEventOrdinal(n) && (plannedEventFirstKind(n) === "buried_cache" || s.d9World.worldEvents?.records[source7.groupId]?.kind === "trophy_hunt"));
 };
 var ROADSIDE_LABELS = freezeWire({ road_ambush: "Road Ambush", wayside_shrine: "Wayside Shrine" });
 var CAMP_CREW = freezeWire(["bandit_cutthroat", "bandit_brute", "bandit_cutthroat", "bandit_archer", "bandit_cutthroat", "bandit_cutthroat"]);
@@ -3646,6 +3650,42 @@ var CACHE_POLICY = freezeWire({
   simulationHz: 60
 });
 var CAMP_CACHE_LABELS = freezeWire({ raided_camp: "Raided Camp", buried_cache: "Buried Cache" });
+var HUNT_VERSION = "trophy-hunt-v1";
+var HUNT_POLICY = freezeWire({
+  version: HUNT_VERSION,
+  // World px from the clearing's ground center (the anchor, where the chest stands).
+  post: [-38, -8],
+  ground: { rx: 96, ry: 40 },
+  triggerRadius: 72,
+  champion: 12,
+  // It answers chargeTicks after the horn from the first open spot just past the trampled ground, close
+  // enough (inside ORDINARY_ACQUIRE_RANGE of the post) that it comes straight for whoever blew the horn.
+  chargeTicks: 150,
+  charge: [[190, -40], [-190, -40], [170, 80], [-170, 80], [40, -150], [-40, 150], [140, -110], [-140, 110]],
+  home: [34, 26],
+  swiftTicks: 3600,
+  quickClearQualityHundredths: 100,
+  presentationScale: 2,
+  activeRadius: 768,
+  playerClearance: 56,
+  reward: "one completion chest per hero who fought here, rolled like an elite drop; a step better after a swift kill",
+  reset: "nobody left nearby before it falls: the champion slinks back into the trees at full health and the horn hangs on the post again",
+  simulationHz: 60
+});
+var HUNT_CHAMPIONS = freezeWire({
+  woodland: { family: "golem", name: "Mossback", affix: "iron_citadel", trophy: "golem" },
+  grassland: { family: "tusk_boar", name: "Gorehide", affix: "blood_berserker", trophy: "boar" },
+  desert: { family: "dune_scorpion", name: "Sunsting", affix: "toxic_decay", trophy: "scorpion" },
+  frostland: { family: "wyrmling", name: "Rimecoil", affix: "glacial_warden", trophy: "wyrm" },
+  wetland: { family: "marsh_ghost", name: "Mirewail", affix: "swift_commander", trophy: "ghost" },
+  upland: { family: "gilded_scuttler", name: "Goldcarapace", affix: "iron_citadel", trophy: "scorpion" },
+  tropical: { family: "thorn_wyrm", name: "Briarfang", affix: "web_weaver", trophy: "wyrm" },
+  volcanic: { family: "lava_serpent", name: "Emberjaw", affix: "blood_berserker", trophy: "wyrm" }
+});
+function huntChampionOfV1(biome) {
+  return HUNT_CHAMPIONS[biome] ?? HUNT_CHAMPIONS.woodland;
+}
+var huntSkinOfV1 = (biome) => ROADSIDE_SKINS[biome] ?? "woodland";
 
 // src/shared/content/wilderness_ecology_v3.js
 var existingCreature = (family2) => ORDINARY_ENEMIES.some((row) => row.family === family2);
@@ -4395,7 +4435,11 @@ var wrathDamageV1 = (s, playerId, raw) => boonOfV1(s, playerId)?.boon === "wrath
 var insightXpV1 = (s, playerId, xp) => boonOfV1(s, playerId)?.boon === "insight" ? multiplyCombat(xp, 100 + BOON_EFFECTS.insight.xpPercent, 100) : xp;
 var captureBoonRewardV1 = (s, player, progression) => progression.rarityPolicyHash !== void 0 && boonOfV1(s, player.playerId)?.boon === "fortune" ? { ...progression, boon: "fortune" } : progression;
 var boonRewardQualityV1 = (progression) => progression.boon === "fortune" ? BOON_EFFECTS.fortune.qualityHundredths : 0;
-var captureQuickClearRewardV1 = (s, source7, progression) => progression.rarityPolicyHash !== void 0 && source7.kind === "chest" && s.d9World?.worldEvents?.records[source7.groupId]?.nest?.rage ? { ...progression, quickClear: true } : progression;
+var captureQuickClearRewardV1 = (s, source7, progression) => {
+  if (progression.rarityPolicyHash === void 0 || source7.kind !== "chest") return progression;
+  const r = s.d9World?.worldEvents?.records[source7.groupId];
+  return r?.nest?.rage || r?.hunt?.swift === true ? { ...progression, quickClear: true } : progression;
+};
 var quickClearRewardQualityV1 = (progression) => progression.quickClear ? NEST_POLICY.quickClearQualityHundredths : 0;
 var blessingOfV1 = (s, playerId) => {
   const b = playerId && s.d9World?.worldEvents?.blessings?.[playerId];
@@ -8283,8 +8327,8 @@ function perWorldV1(make) {
     return value;
   };
 }
-var moved2 = (list2, place2) => {
-  const out = list2.map(place2);
+var moved2 = (list2, place3) => {
+  const out = list2.map(place3);
   return out.every((v, i) => v === list2[i]) ? list2 : freezeWire(out);
 };
 var townTilesV1 = (id, list2) => moved2(list2, (t) => townTileV1(id, t));
@@ -12012,6 +12056,134 @@ function projectNestsV1(r, s, g) {
   };
 }
 
+// src/shared/contracts/trophy_hunt_v1.js
+var HUNT_MEMBERS = PLANNED_EVENT_CREW;
+var initialHuntV1 = () => ({ rulesVersion: HUNT_VERSION, hunt: { hornElapsed: 0, arrivedElapsed: null, doneElapsed: null, swift: null, waiting: false, resets: 0 } });
+var huntStagesV1 = () => Array.from({ length: HUNT_MEMBERS }, (_, n) => n === HUNT_POLICY.champion ? { phase: "growing", at: 0 } : { phase: "cancelled", at: 0 });
+var huntPointV1 = (a, [x, y]) => ({ x: a.x + x, y: a.y + y });
+var hornPostPointV1 = (a) => huntPointV1(a, HUNT_POLICY.post);
+var huntReadyV1 = (r) => r.stages[HUNT_POLICY.champion].phase === "defeated";
+function validateHuntV1(r) {
+  requireContract(r.kind === "trophy_hunt" && r.rulesVersion === HUNT_VERSION && r.stages.length === HUNT_MEMBERS, "Hunt policy/membership");
+  closedRecord(r.hunt, ["hornElapsed", "arrivedElapsed", "doneElapsed", "swift", "waiting", "resets"]);
+  const h = r.hunt, t = r.stages[HUNT_POLICY.champion];
+  safeInteger(h.hornElapsed, 0, r.elapsedTicks);
+  safeInteger(h.resets);
+  requireContract(typeof h.waiting === "boolean", "Hunt waiting");
+  r.stages.forEach((s, n) => {
+    if (n !== HUNT_POLICY.champion) requireContract(s.phase === "cancelled", "Hunt crew comes out");
+  });
+  requireContract(["pending", "growing", "hatched", "defeated"].includes(t.phase) && h.waiting === (t.phase === "pending"), "Hunt champion phase");
+  requireContract(h.arrivedElapsed === null === ["pending", "growing"].includes(t.phase), "Hunt arrival");
+  if (h.arrivedElapsed !== null) safeInteger(h.arrivedElapsed, h.hornElapsed, r.elapsedTicks);
+  requireContract(h.doneElapsed === null === (t.phase !== "defeated") && h.swift === null === (t.phase !== "defeated"), "Hunt finish");
+  if (h.doneElapsed !== null) {
+    safeInteger(h.doneElapsed, h.arrivedElapsed, r.elapsedTicks);
+    requireContract(h.swift === h.doneElapsed - h.arrivedElapsed <= HUNT_POLICY.swiftTicks, "Hunt swift kill");
+  }
+  if (r.status === "completed") requireContract(huntReadyV1(r) && !h.waiting, "Incomplete hunt completion");
+}
+function place2(g, a, p) {
+  a.position = { ...p };
+  a.movementIntent = { x: 0, y: 0 };
+  if (g.containment) g.containment.memberHomesById[a.entityId] = { ...p };
+}
+function fell(r) {
+  const h = r.hunt;
+  r.stages[HUNT_POLICY.champion] = { phase: "defeated", at: r.elapsedTicks };
+  h.doneElapsed = r.elapsedTicks;
+  h.swift = h.doneElapsed - h.arrivedElapsed <= HUNT_POLICY.swiftTicks;
+}
+function advanceHuntV1(s, r, g, d, { activeActors, hardActors }) {
+  const h = r.hunt, n = HUNT_POLICY.champion, t = r.stages[n], a = s.entitiesById[g.entityIds[n]];
+  if (t.phase === "hatched" && !a.alive) {
+    fell(r);
+    return true;
+  }
+  if (h.waiting || t.phase !== "growing" || r.elapsedTicks - h.hornElapsed < HUNT_POLICY.chargeTicks || activeActors >= hardActors) return false;
+  const c = s.spacesByInstanceId[g.spaceInstanceId].collision;
+  const spots = [...HUNT_POLICY.charge.map((_, i) => huntPointV1(d.anchor, HUNT_POLICY.charge[(i + h.resets * 3) % HUNT_POLICY.charge.length])), d.members[n].position];
+  const p = spots.find((q) => !collidesWithTiles(c, q.x, q.y, a.hullRadius) && !Object.values(s.playersById).some((player) => {
+    const b = s.entitiesById[player.entityId];
+    return b.alive && b.residency.spaceInstanceId === g.spaceInstanceId && Math.hypot(b.position.x - q.x, b.position.y - q.y) < HUNT_POLICY.playerClearance;
+  })) ?? d.members[n].position;
+  a.position = { ...p };
+  a.movementIntent = { x: 0, y: 0 };
+  const home = huntPointV1(d.anchor, HUNT_POLICY.home);
+  if (g.containment) g.containment.memberHomesById[a.entityId] = !collidesWithTiles(c, home.x, home.y, a.hullRadius) ? home : { ...d.anchor };
+  r.stages[n] = { phase: "hatched", at: r.elapsedTicks };
+  h.arrivedElapsed = r.elapsedTicks;
+  return true;
+}
+function resetHuntV1(s, r, g, d) {
+  const h = r.hunt, n = HUNT_POLICY.champion, t = r.stages[n], a = s.entitiesById[g.entityIds[n]];
+  if (r.status !== "active" || h.waiting || t.phase === "defeated") return false;
+  if (t.phase === "hatched" && !a.alive) {
+    fell(r);
+    return true;
+  }
+  place2(g, a, d.members[n].position);
+  a.hp = copyWire(a.maxHp);
+  r.stages[n] = { phase: "pending", at: r.elapsedTicks };
+  h.arrivedElapsed = null;
+  h.waiting = true;
+  h.resets++;
+  return true;
+}
+function restartHuntV1(r, p) {
+  const h = r.hunt;
+  h.waiting = false;
+  h.hornElapsed = r.elapsedTicks;
+  r.stages[HUNT_POLICY.champion] = { phase: "growing", at: r.elapsedTicks };
+  if (!r.eligiblePlayerIds.includes(p.playerId)) {
+    r.eligiblePlayerIds.push(p.playerId);
+    r.eligiblePlayerIds.sort();
+  }
+}
+function projectHuntV1(r, s, g) {
+  const n = HUNT_POLICY.champion, a = g ? s.entitiesById[g.entityIds[n]] : null;
+  if (!r || r.hunt.waiting) return { phase: "idle", resets: r?.hunt.resets ?? 0, hornAgeTicks: null, chargeTicksLeft: HUNT_POLICY.chargeTicks, swiftTicksLeft: HUNT_POLICY.swiftTicks, swiftTicks: HUNT_POLICY.swiftTicks, ratio: 1, swift: null, trophy: false, championId: a?.entityId ?? null, arrivedAgeTicks: null };
+  const h = r.hunt, t = r.stages[n], e = r.elapsedTicks;
+  return {
+    phase: t.phase === "growing" ? "horn" : t.phase === "hatched" ? "fight" : "won",
+    resets: h.resets,
+    hornAgeTicks: e - h.hornElapsed,
+    chargeTicksLeft: t.phase === "growing" ? Math.max(0, HUNT_POLICY.chargeTicks - (e - h.hornElapsed)) : 0,
+    swiftTicksLeft: h.arrivedElapsed === null ? HUNT_POLICY.swiftTicks : Math.max(0, HUNT_POLICY.swiftTicks - ((h.doneElapsed ?? e) - h.arrivedElapsed)),
+    swiftTicks: HUNT_POLICY.swiftTicks,
+    ratio: t.phase === "hatched" && a ? integerRatio(a.hp, a.maxHp) : t.phase === "defeated" ? 0 : 1,
+    swift: h.swift,
+    trophy: t.phase === "defeated",
+    championId: a?.entityId ?? null,
+    arrivedAgeTicks: h.arrivedElapsed === null ? null : e - h.arrivedElapsed
+  };
+}
+function huntChampionViewsV1(s) {
+  const out = /* @__PURE__ */ new Map();
+  for (const r of Object.values(s.d9World?.worldEvents?.records ?? {})) {
+    if (r.kind !== "trophy_hunt" || r.stages[HUNT_POLICY.champion].phase !== "hatched") continue;
+    const g = s.groupsById[r.groupId];
+    if (!g) continue;
+    out.set(g.entityIds[HUNT_POLICY.champion], { presentationScale: HUNT_POLICY.presentationScale, champion: { groupId: r.groupId, name: huntChampionOfV1(nestBiomeV1(s, r.groupId)).name, arrivedAgeTicks: r.elapsedTicks - r.hunt.arrivedElapsed } });
+  }
+  return out;
+}
+function huntChampionIdV1(s, g) {
+  if (!g || !plannedEventGroupV1(s, g.groupId)) return null;
+  const n = s.d9World.episodes[g.groupId].geography.anchorOrdinal;
+  return plannedEventKindV1(s.campaign.seed.seedHex, n, s.encounterEconomy?.groups[g.groupId]?.episode ?? 0) === "trophy_hunt" ? g.entityIds[HUNT_POLICY.champion] ?? null : null;
+}
+function huntChampionElitesV1(s, g, { includeDefeated = false } = {}) {
+  const id = huntChampionIdV1(s, g);
+  if (!id || !includeDefeated && !s.entitiesById[id]?.alive) return [];
+  return [{ id, n: HUNT_POLICY.champion, primary: huntChampionOfV1(nestBiomeV1(s, g.groupId)).affix }];
+}
+function huntChampionProfileV1(s, g, actor, profile2) {
+  if (!profile2 || !s.eliteCombat?.elitesByEntityId[actor.entityId] || huntChampionIdV1(s, g) !== actor.entityId) return profile2;
+  const m = SITE_MINI_BOSS_V1;
+  return { ...profile2, maxHp: combatInteger(multiplyCombat(profile2.maxHp, m.maxHp.numerator, m.maxHp.denominator), "round"), attackDamage: combatInteger(multiplyCombat(profile2.attackDamage, m.attackDamage.numerator, m.attackDamage.denominator), "round") };
+}
+
 // src/shared/contracts/named_elite_tricks_v1.js
 var CHARGE_PHASES = ["ready", "windup", "charging", "recover"];
 var point = (p) => {
@@ -12597,10 +12769,10 @@ function broodElitesV1(s, g, { includeDefeated = false } = {}) {
   return ids.map((id) => ({ id, n: g.entityIds.indexOf(id), primary }));
 }
 function compositionCandidatesV1(s, g, level, { includeDefeated = false } = {}) {
-  const f3 = floorFor(s, g), chance = compositionBandV1(level).chancePercent, key5 = COMPOSITION_V1 + "/" + s.campaign.seed.seedHex + "/" + g.groupId + "/" + String(s.encounterEconomy.groups[g.groupId].episode) + "/" + String(level);
+  const f3 = floorFor(s, g), champion = huntChampionIdV1(s, g), chance = compositionBandV1(level).chancePercent, key5 = COMPOSITION_V1 + "/" + s.campaign.seed.seedHex + "/" + g.groupId + "/" + String(s.encounterEconomy.groups[g.groupId].episode) + "/" + String(level);
   const candidates = g.entityIds.flatMap((id, n) => {
     const a = s.entitiesById[id], spec = f3?.encounter.members[n];
-    if (!a || !includeDefeated && !a.alive || a.boss || s.content?.definitionsById[a.contentDefinitionId]?.isBoss || s.bossCombat?.bossesByEntityId?.[id] || String(spec?.memberKey).startsWith("finale:") || !ordinaryEnemyForProfile(a.contentDefinitionId) || BROOD_CREATURE_FAMILIES_V1.includes(familyOf(s, id))) return [];
+    if (!a || !includeDefeated && !a.alive || a.boss || s.content?.definitionsById[a.contentDefinitionId]?.isBoss || s.bossCombat?.bossesByEntityId?.[id] || String(spec?.memberKey).startsWith("finale:") || !ordinaryEnemyForProfile(a.contentDefinitionId) || BROOD_CREATURE_FAMILIES_V1.includes(familyOf(s, id)) || id === champion) return [];
     return [{ id, n, roll: compositionHashV1(key5 + "/" + id), primary: COMPOSITION_POLICY_V1.primaryAffixes[compositionHashV1(key5 + "/" + id + "/primary") % COMPOSITION_POLICY_V1.primaryAffixes.length] }];
   }).sort((a, b) => a.roll - b.roll || a.id.localeCompare(b.id));
   const rolled = candidates.filter((c) => c.roll % 100 < chance);
@@ -12610,7 +12782,7 @@ function adoptEncounterCompositionV1(s, g, level, { rescale = false } = {}) {
   if (!hasWorldCombat(s) || g.cleared) return [];
   const root = s.eliteCombat ??= initialEliteCombatD12_4(), f3 = floorFor(s, g), changed = [], budget = Math.min(COMPOSITION_POLICY_V1.maximumElitesPerGroup, Math.max(1, Math.ceil(g.entityIds.length / COMPOSITION_POLICY_V1.membersPerEliteBudget)));
   let count = g.entityIds.filter((id) => root.elitesByEntityId[id] && familyOf(s, id) !== "broodling").length;
-  const chosen = new Map([...broodElitesV1(s, g), ...compositionCandidatesV1(s, g, level).filter((c) => !root.elitesByEntityId[c.id]).slice(0, Math.max(0, budget - count))].filter((c) => !root.elitesByEntityId[c.id]).map((c) => [c.id, c]));
+  const chosen = new Map([...broodElitesV1(s, g), ...huntChampionElitesV1(s, g), ...compositionCandidatesV1(s, g, level).filter((c) => !root.elitesByEntityId[c.id]).slice(0, Math.max(0, budget - count))].filter((c) => !root.elitesByEntityId[c.id]).map((c) => [c.id, c]));
   for (const [n, id] of g.entityIds.entries()) {
     const prior = root.elitesByEntityId[id], c = chosen.get(id), spec = f3?.encounter.members[n];
     if (prior?.version === COMPOSITION_ELITE_V1 || String(spec?.memberKey).startsWith("finale:") || !prior && !c) continue;
@@ -12643,7 +12815,7 @@ function validateCompositionEliteV1(s, e) {
   requireContract(canonicalStringify(e.affixIds.slice(1)) === canonicalStringify(passiveEliteTraitsV1(e.identitySource, level)), "Composition passive roll changed");
   if (!e.composition.inherited) {
     requireContract(e.eliteId === generatedEliteId(e.identitySource), "Generated elite identity changed");
-    const row = [...broodElitesV1(s, g, { includeDefeated: true }), ...compositionCandidatesV1(s, g, level, { includeDefeated: true })].find((c) => c.id === e.entityId);
+    const row = [...broodElitesV1(s, g, { includeDefeated: true }), ...huntChampionElitesV1(s, g, { includeDefeated: true }), ...compositionCandidatesV1(s, g, level, { includeDefeated: true })].find((c) => c.id === e.entityId);
     requireContract(row && row.primary === e.affixIds[0], "Composition candidate roll changed");
   }
 }
@@ -14107,7 +14279,7 @@ function encounterActorProfile(state, group, actor) {
     profile2 = { ...state.content.definitionsById[actor.contentDefinitionId], maxHp: stats.maxHp, attackDamage: stats.attackDamage };
   } else profile2 = enemy && level !== void 0 ? resolveOrdinaryProfile(enemy, ordinaryTier(actor.contentDefinitionId), level) : state.content.definitionsById[actor.contentDefinitionId];
   if (hasWorldCombat(state) && profile2?.isBoss && level !== void 0) profile2 = { ...profile2, ...worldBossStats(level) };
-  return aegisComponentProfile(state, actor, siteEndActorProfileV1(state, group, actor, eliteActorProfileD12_4(state, actor, worldOrdinaryMeleeProfile(state, profile2))));
+  return aegisComponentProfile(state, actor, huntChampionProfileV1(state, group, actor, siteEndActorProfileV1(state, group, actor, eliteActorProfileD12_4(state, actor, worldOrdinaryMeleeProfile(state, profile2)))));
 }
 function ordinaryKillXp(actor, group, state = null, participant = null) {
   const enemy = ordinaryEnemyForProfile(actor.contentDefinitionId);
@@ -27404,6 +27576,9 @@ export {
   CACHE_VERSION,
   CACHE_POLICY,
   CAMP_CACHE_LABELS,
+  HUNT_POLICY,
+  huntChampionOfV1,
+  huntSkinOfV1,
   WILDERNESS_VERSION,
   WILDERNESS_HASH,
   hasWilderness,
@@ -27701,6 +27876,17 @@ export {
   nestBiomeV1,
   nestBroodViewsV1,
   projectNestsV1,
+  HUNT_MEMBERS,
+  initialHuntV1,
+  huntStagesV1,
+  hornPostPointV1,
+  huntReadyV1,
+  validateHuntV1,
+  advanceHuntV1,
+  resetHuntV1,
+  restartHuntV1,
+  projectHuntV1,
+  huntChampionViewsV1,
   ELITE_TYPES_V2,
   eliteTypeV2For,
   ELITE_HASTE_D12_4D_VERSION,
