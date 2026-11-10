@@ -4196,12 +4196,22 @@ function townRasterV1(t) {
     if (mat[idx(x, y)] === 1) mat[idx(x, y)] = 3;
   });
   const onStreet = (x, y, pad) => streets.some(([pts, sw]) => segDist(pts, x + 0.5, y + 0.5) <= sw / 2 + pad);
+  const RL = geo.river ? geo.river.pts : [], RA = [0];
+  for (let i = 1; i < RL.length; i++) RA.push(RA[i - 1] + hyp2(RL[i][0] - RL[i - 1][0], RL[i][1] - RL[i - 1][1]));
+  const riverAt = (s) => {
+    let i = 1;
+    while (i < RL.length - 1 && RA[i] < s) i++;
+    const f3 = (s - RA[i - 1]) / (RA[i] - RA[i - 1] || 1);
+    return [RL[i - 1][0] + (RL[i][0] - RL[i - 1][0]) * f3, RL[i - 1][1] + (RL[i][1] - RL[i - 1][1]) * f3];
+  };
+  const axes = geo.river ? geo.river.bridges.map((b) => b.parts.map((q, k) => ({ c: k ? riverAt(q.s) : [b.x, b.y], ang: q.ang, w: q.w }))) : [];
+  const onAxis = (k, px, py) => axes[k].some((a) => Math.abs(-(px - a.c[0]) * PM.sin(a.ang) + (py - a.c[1]) * PM.cos(a.ang)) <= a.w / 2 + 0.02);
   if (geo.river) stroke(geo.river.pts, geo.river.w / 2 + 0.4, (x, y) => {
     const i = idx(x, y);
     let near = -1, nd = 1e9;
     if (crossers.some(([pts, sw]) => segDist(pts, x + 0.5, y + 0.5) <= sw / 2 + 0.3)) geo.river.bridges.forEach((b, k) => {
       const d = hyp2(x + 0.5 - b.x, y + 0.5 - b.y);
-      if (d <= geo.river.w / 2 + b.w && d < nd) {
+      if (d <= geo.river.w / 2 + b.w && d < nd && onAxis(k, x + 0.5, y + 0.5)) {
         nd = d;
         near = k;
       }
