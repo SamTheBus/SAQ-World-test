@@ -4178,6 +4178,7 @@ function affixSkill(key5, cls, random) {
 
 // src/shared/content/uniques_v1.js
 var unique = (id, name, family2, subType, noun, cls, from, biome, effect, flavor) => ({ id, name, family: family2, subType, noun, cls, look: id, from, biome, effect, flavor });
+var trophy = (...args) => ({ ...unique(...args), trophy: true });
 var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
   // Barrow King: ghostfire, graves and risen wights.
   unique(
@@ -4325,6 +4326,103 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "desert",
     "Your critical hits leave a glass shard in the enemy, and it bleeds ({0} of a normal bleed).",
     "Sand the lightning struck never forgets."
+  ),
+  // Trophy Hunt champions (planned_events_v1.js HUNT_CHAMPIONS): `from` is the champion's name.
+  trophy(
+    "mossback-pelt",
+    "Mossback Pelt",
+    "overall",
+    null,
+    "Pelt",
+    null,
+    "mossback",
+    "woodland",
+    "Every 10 s, moss grows over you: a shield worth {0} of your Max Health.",
+    "It grew back faster than anyone could cut it."
+  ),
+  trophy(
+    "gorehide-stompers",
+    "Gorehide Stompers",
+    "boots",
+    null,
+    "Stompers",
+    null,
+    "gorehide",
+    "grassland",
+    "Your Dash, Blink or Shield Charge gores every enemy you pass through for {0} of your Attack.",
+    "The boar never learned to stop."
+  ),
+  trophy(
+    "sunsting-grips",
+    "Sunsting Grips",
+    "gloves",
+    null,
+    "Grips",
+    null,
+    "sunsting",
+    "desert",
+    "Your critical hits poison the enemy for {0} of the hit over 4 s.",
+    "The sting is still in them."
+  ),
+  trophy(
+    "rimecoil-hood",
+    "Rimecoil Hood",
+    "helmet",
+    null,
+    "Scaled Hood",
+    null,
+    "rimecoil",
+    "frostland",
+    "Enemies that hit you are chilled, 30% slower for {0}.",
+    "Cold enough to bite back."
+  ),
+  trophy(
+    "mirewail-veil",
+    "Mirewail Veil",
+    "cape",
+    null,
+    "Cloak",
+    null,
+    "mirewail",
+    "wetland",
+    "After a kill you fade into mist: the next hit in 3 s misses you. Once every {0}.",
+    "You hear the wail only after it has passed."
+  ),
+  trophy(
+    "goldcarapace-band",
+    "Goldcarapace Band",
+    "ring",
+    null,
+    "Band Ring",
+    null,
+    "goldcarapace",
+    "upland",
+    "A gold shell takes the edge off the next hit worth more than 20% of your Max Health: {0} less damage. It grows back after 15 s.",
+    "Gold is soft. This gold is not."
+  ),
+  trophy(
+    "briarfang-thornmantle",
+    "Briarfang Thornmantle",
+    "cape",
+    null,
+    "Mantle",
+    null,
+    "briarfang",
+    "tropical",
+    "Enemies that hit you up close take {0} of that damage back as thorns.",
+    "Embrace it at your peril."
+  ),
+  trophy(
+    "emberjaw-fang",
+    "Emberjaw Fang",
+    "ring",
+    null,
+    "Seal Ring",
+    null,
+    "emberjaw",
+    "volcanic",
+    "Hitting a burning enemy heals you for {0} of the damage.",
+    "Still warm."
   )
 ].map((u) => [u.id, u])));
 var UNIQUE_IDS = Object.freeze(Object.keys(UNIQUE_ITEMS));
@@ -4341,7 +4439,16 @@ var UNIQUE_TIERS = freezeWire({
   "bristleback-mantle": { lines: ["maxHpPct", "defPct", "str", "lifeKill", "moveSpeed"], stars: [3, 4, 5, 6], unit: "pct" },
   "jacks-band": { lines: ["lifeHit", "atkPct", "maxHpPct", "eliteDmg", "critChance"], stars: [20, 25, 30, 40], unit: "permille" },
   "kheptra-signet": { lines: ["defPct", "maxHpPct", "cdr", "atkPct", "moveSpeed"], stars: [840, 720, 600, 480], unit: "ticks" },
-  "glasstail-cloak": { lines: ["critChance", "dex", "critDamage", "lifeKill", "moveSpeed"], stars: [60, 80, 100, 125], unit: "pct" }
+  "glasstail-cloak": { lines: ["critChance", "dex", "critDamage", "lifeKill", "moveSpeed"], stars: [60, 80, 100, 125], unit: "pct" },
+  // Trophies (Nov 9 mockup, Sammy: 1A-4A).
+  "mossback-pelt": { lines: ["maxHpPct", "defPct", "lifeKill", "cdr", "atkPct"], stars: [8, 10, 12, 15], unit: "pct" },
+  "gorehide-stompers": { lines: ["moveSpeed", "atkPct", "critDamage", "eliteDmg", "lifeKill"], stars: [60, 80, 100, 130], unit: "pct" },
+  "sunsting-grips": { lines: ["critChance", "critDamage", "atkPct", "dex", "eliteDmg"], stars: [20, 30, 40, 50], unit: "pct" },
+  "rimecoil-hood": { lines: ["maxHpPct", "defPct", "int", "cdr", "lifeHit"], stars: [90, 120, 150, 180], unit: "ticks" },
+  "mirewail-veil": { lines: ["moveSpeed", "critChance", "lifeKill", "defPct", "cdr"], stars: [480, 420, 360, 300], unit: "ticks" },
+  "goldcarapace-band": { lines: ["defPct", "maxHpPct", "str", "lifeHit", "eliteDmg"], stars: [40, 50, 60, 75], unit: "pct" },
+  "briarfang-thornmantle": { lines: ["maxHpPct", "defPct", "str", "atkPct", "lifeKill"], stars: [30, 40, 50, 65], unit: "pct" },
+  "emberjaw-fang": { lines: ["fireDmg", "atkPct", "critChance", "lifeHit", "maxHpPct"], stars: [20, 30, 40, 50], unit: "permille" }
 });
 var UNIQUE_LINE_UNLOCKS = Object.freeze([2, 2, 3, 4, 5]);
 function uniqueStarValue(id, tier) {
@@ -4363,6 +4470,7 @@ function uniqueEffectText(unique2, tier) {
 }
 var uniqueOf = (definition) => UNIQUE_ITEMS[definition?.unique] ?? null;
 var uniquesFrom = (source7, cls) => UNIQUE_IDS.filter((id) => UNIQUE_ITEMS[id].from === source7 && (UNIQUE_ITEMS[id].cls === null || UNIQUE_ITEMS[id].cls === cls));
+var trophyFromV1 = (biome) => Object.values(UNIQUE_ITEMS).find((u) => u.trophy && u.biome === biome)?.from ?? null;
 var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh"]);
 var UNIQUE_DROP_CHANCE = Object.freeze({ boss: 0.25, named: 0.1, world: 2e-3 });
 function uniqueDropV1({ from = null, biome = null, cls }, chance, pick6) {
@@ -4986,7 +5094,7 @@ function generateAtPrecision(c, seed, input, { tier = null, family: family2 = nu
   const rarityTier = uq && rolledTier < UNIQUE_MIN_RARITY ? UNIQUE_MIN_RARITY : progression.swiftKill && rolledTier < 1 ? 1 : rolledTier;
   safeInteger(rarityTier, 0, 5);
   const cls = progression.gearClass ?? null, classOffhand = cls ? CLASS_GEAR[cls].offhand : null, wardrobe = Boolean(cls) && progression.wardrobe === WARDROBE_V1, classFamilies = wardrobe ? CLASS_GEAR_FAMILIES_V2 : CLASS_GEAR_FAMILIES, families = cls ? classFamilies : progression.armor === "overall" ? ONE_PIECE_GEAR_FAMILIES : GEAR_FAMILIES;
-  const type = family2 ?? pick6(families), sub = type === "subweapon" ? subType ?? (cls ? classOffhand : pick6(["shield", "dagger", "tome"])) : null, own2 = type === "cape" ? CAPE_NOUNS : cls && type !== "ring" ? classGearNouns(cls, type) : GEAR_NOUNS[sub ?? type], shared = wardrobe && type === "helmet" ? SHARED_HELMET_NOUNS : [], nouns = [...own2 ?? [], ...shared], n = noun ?? (shared.length && random() < 0.2 ? pick6(shared) : pick6(own2));
+  const type = family2 ?? pick6(families), sub = type === "subweapon" ? subType ?? (cls ? classOffhand : pick6(["shield", "dagger", "tome"])) : null, own2 = type === "cape" ? CAPE_NOUNS : cls && type !== "ring" ? classGearNouns(cls, type) : GEAR_NOUNS[sub ?? type], shared = wardrobe && type === "helmet" ? SHARED_HELMET_NOUNS : [], nouns = [...own2 ?? [], ...shared, ...uq?.trophy ? [uq.noun] : []], n = noun ?? (shared.length && random() < 0.2 ? pick6(shared) : pick6(own2));
   requireContract((family2 ? cls ? classFamilies : GEAR_FAMILIES : families).includes(type) && (!cls || type !== "subweapon" || sub === classOffhand) && nouns?.includes(n), "Unknown generated family/noun");
   const E = c.dungeonScale(power2).E, R = c.q(100 + 7 * rarityTier, 100), P2 = c.q((100 + 15 * rarityTier) * (type === "overall" ? 18 : 10), 1e3), flatR = c.mul(R, c.q(type === "overall" ? 18 : 10, 10));
   const I = (v) => {
@@ -5070,7 +5178,7 @@ function generateAtPrecision(c, seed, input, { tier = null, family: family2 = nu
   }
   const adj = { atk: "Fierce", maxHp: "Grizzled", def: "Hardened", moveSpeed: "Fleet", critChance: "Precise", critDamage: "Savage", block: "Stalwart", parry: "Nimble", str: "Heavy", dex: "Swift", int: "Erudite", activeSpd: "Hasty" };
   const dominant = Object.keys(adj).reduce((a, k) => compareCombat(exactDecimal(bonus[k] ?? 0), exactDecimal(bonus[a] ?? 0)) > 0 ? k : a, "");
-  const definition = { numericVersion: "generated-numeric-d9-v1", definitionId: `d7-${type}-${sub ?? "ordinary"}`, name: uq ? `${uq.name} (Lv. ${power2})` : `${dominant ? adj[dominant] : "Standard"} ${n} (Lv. ${power2})`, slot: type, subType: sub, spellType: raw.spellType ?? null, noun: n, rarityTier, itemPower: power2, bonuses: { attack: sumGear(raw.baseAtk, bonus.atk ?? 0), maxHp: sumGear(raw.baseMaxHp, bonus.maxHp ?? 0), defense: sumGear(raw.baseDef, bonus.def ?? 0) }, attributes: { str: sumGear(raw.baseStr, bonus.str ?? 0), dex: sumGear(raw.baseDex, bonus.dex ?? 0), int: sumGear(raw.baseInt, bonus.int ?? 0) }, effects: { moveSpeed: sumGear(raw.baseMoveSpeed, bonus.moveSpeed ?? 0), critChance: sumGear(raw.baseCritChance, bonus.critChance ?? 0), critDamage: sumGear(raw.baseCritDamage, bonus.critDamage ?? 0), block: sumGear(raw.baseBlock, bonus.block ?? 0), parry: sumGear(raw.baseParry, bonus.parry ?? 0), activeSpeed: bonus.activeSpd ?? 0, bonusAreaRadius: bonus.bonusAreaRadius ?? 0, ...Object.fromEntries(["atkPct", "maxHpPct", "defPct", "moveSpeedPct", "strPct", "dexPct", "intPct"].map((k) => [k, bonus[k] ? sumGear(raw[k] ?? 0, bonus[k]) : raw[k] ?? 0])) }, family: { ...Object.fromEntries(["subArchetype", "blockCapBonus", "reflectDamage", "bashAtkBonus", "parryCapBonus", "parryMitigation", "riposteDamage", "bleedChance", "offhandChance", "offhandDmg"].map((k) => [k, raw[k] ?? null])), fireChanceNumerator: 50 + 3 * rarityTier, fireChanceDenominator: 150, firePowerNumerator: 18 + 2 * rarityTier }, weaponVisual: type === "weapon" ? "iron" : null, ...cls && !sharedGear(type, n) ? { gearClass: cls } : {}, ...uq ? { unique: uq.id } : {} };
+  const definition = { numericVersion: "generated-numeric-d9-v1", definitionId: `d7-${type}-${sub ?? "ordinary"}`, name: uq ? `${uq.name} (Lv. ${power2})` : `${dominant ? adj[dominant] : "Standard"} ${n} (Lv. ${power2})`, slot: type, subType: sub, spellType: raw.spellType ?? null, noun: n, rarityTier, itemPower: power2, bonuses: { attack: sumGear(raw.baseAtk, bonus.atk ?? 0), maxHp: sumGear(raw.baseMaxHp, bonus.maxHp ?? 0), defense: sumGear(raw.baseDef, bonus.def ?? 0) }, attributes: { str: sumGear(raw.baseStr, bonus.str ?? 0), dex: sumGear(raw.baseDex, bonus.dex ?? 0), int: sumGear(raw.baseInt, bonus.int ?? 0) }, effects: { moveSpeed: sumGear(raw.baseMoveSpeed, bonus.moveSpeed ?? 0), critChance: sumGear(raw.baseCritChance, bonus.critChance ?? 0), critDamage: sumGear(raw.baseCritDamage, bonus.critDamage ?? 0), block: sumGear(raw.baseBlock, bonus.block ?? 0), parry: sumGear(raw.baseParry, bonus.parry ?? 0), activeSpeed: bonus.activeSpd ?? 0, bonusAreaRadius: bonus.bonusAreaRadius ?? 0, ...Object.fromEntries(["atkPct", "maxHpPct", "defPct", "moveSpeedPct", "strPct", "dexPct", "intPct"].map((k) => [k, bonus[k] ? sumGear(raw[k] ?? 0, bonus[k]) : raw[k] ?? 0])) }, family: { ...Object.fromEntries(["subArchetype", "blockCapBonus", "reflectDamage", "bashAtkBonus", "parryCapBonus", "parryMitigation", "riposteDamage", "bleedChance", "offhandChance", "offhandDmg"].map((k) => [k, raw[k] ?? null])), fireChanceNumerator: 50 + 3 * rarityTier, fireChanceDenominator: 150, firePowerNumerator: 18 + 2 * rarityTier }, weaponVisual: type === "weapon" ? "iron" : null, ...cls && !sharedGear(type, n) && !uq?.trophy ? { gearClass: cls } : {}, ...uq ? { unique: uq.id } : {} };
   if (sub === "tome" && raw.spellType !== "fire") {
     delete definition.family.fireChanceNumerator;
     delete definition.family.fireChanceDenominator;
@@ -24403,7 +24511,7 @@ var BY_NOUN = Object.freeze({
   "Silk Wraps": "wraps",
   "Silk Slippers": "slippers"
 });
-var OVERALL_LEGS = Object.freeze({ plate: "greaves", hauberk: "chausses", doublet: "breeches", leather: "trousers" });
+var OVERALL_LEGS = Object.freeze({ plate: "greaves", hauberk: "chausses", doublet: "breeches", leather: "trousers", "mossback-pelt": "pelt" });
 var TOME_LOOKS = Object.freeze({ fire: "tome-fire", lightning: "tome-storm", frost: "tome-frost" });
 var LOOK_POOLS = Object.freeze({
   sword: Object.freeze(["sword", "broadsword", "leaf-sword"]),
@@ -24557,14 +24665,22 @@ function validateSporeGenerationProgressV4(a, b) {
 }
 
 // src/shared/contracts/unique_rewards_v1.js
+var HUNT_LANDS = Object.fromEntries(["woodland", "grassland", "desert", "frostland", "wetland", "upland", "tropical", "volcanic"].map((b) => [b, huntChampionOfV1(b)]));
 function uniqueRewardV1(state, source7, cls, key5) {
   if (source7?.kind !== "enemy" || !cls) return null;
   const id = state.groupsById[source7.groupId]?.entityIds[source7.spawnOrdinal ?? source7.ordinal];
-  const from = state.bossCombat?.bossesByEntityId?.[id]?.bossDefinitionId ?? state.eliteCombat?.elitesByEntityId?.[id]?.namedEliteId ?? null;
-  let biome = null;
-  for (const site of Object.values(state.d9World?.functionalSitesById ?? {})) if (site.floors?.some((f3) => f3.groupId === source7.groupId)) {
-    biome = site.socket?.region?.biome ?? null;
-    break;
+  let from = state.bossCombat?.bossesByEntityId?.[id]?.bossDefinitionId ?? state.eliteCombat?.elitesByEntityId?.[id]?.namedEliteId ?? null, biome = null;
+  const group = state.groupsById[source7.groupId];
+  if (!from && id && huntChampionIdV1(state, group) === id) {
+    const champion = huntChampionOfV1(nestBiomeV1(state, source7.groupId));
+    biome = Object.entries(HUNT_LANDS).find(([, c]) => c === champion)?.[0] ?? null;
+    from = biome ? trophyFromV1(biome) : null;
+  }
+  if (!biome) {
+    for (const site of Object.values(state.d9World?.functionalSitesById ?? {})) if (site.floors?.some((f3) => f3.groupId === source7.groupId)) {
+      biome = site.socket?.region?.biome ?? null;
+      break;
+    }
   }
   if (!biome) {
     const family2 = state.content?.definitionsById?.[state.entitiesById?.[id]?.contentDefinitionId]?.family, biomes = BIOME_CREATURES_V1_METADATA[family2]?.eligibility?.biomes;

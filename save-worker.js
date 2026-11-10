@@ -12429,6 +12429,7 @@ function affixSkill(key9, cls, random) {
 
 // src/shared/content/uniques_v1.js
 var unique = (id, name, family2, subType, noun, cls, from, biome, effect, flavor) => ({ id, name, family: family2, subType, noun, cls, look: id, from, biome, effect, flavor });
+var trophy = (...args) => ({ ...unique(...args), trophy: true });
 var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
   // Barrow King: ghostfire, graves and risen wights.
   unique(
@@ -12576,6 +12577,103 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "desert",
     "Your critical hits leave a glass shard in the enemy, and it bleeds ({0} of a normal bleed).",
     "Sand the lightning struck never forgets."
+  ),
+  // Trophy Hunt champions (planned_events_v1.js HUNT_CHAMPIONS): `from` is the champion's name.
+  trophy(
+    "mossback-pelt",
+    "Mossback Pelt",
+    "overall",
+    null,
+    "Pelt",
+    null,
+    "mossback",
+    "woodland",
+    "Every 10 s, moss grows over you: a shield worth {0} of your Max Health.",
+    "It grew back faster than anyone could cut it."
+  ),
+  trophy(
+    "gorehide-stompers",
+    "Gorehide Stompers",
+    "boots",
+    null,
+    "Stompers",
+    null,
+    "gorehide",
+    "grassland",
+    "Your Dash, Blink or Shield Charge gores every enemy you pass through for {0} of your Attack.",
+    "The boar never learned to stop."
+  ),
+  trophy(
+    "sunsting-grips",
+    "Sunsting Grips",
+    "gloves",
+    null,
+    "Grips",
+    null,
+    "sunsting",
+    "desert",
+    "Your critical hits poison the enemy for {0} of the hit over 4 s.",
+    "The sting is still in them."
+  ),
+  trophy(
+    "rimecoil-hood",
+    "Rimecoil Hood",
+    "helmet",
+    null,
+    "Scaled Hood",
+    null,
+    "rimecoil",
+    "frostland",
+    "Enemies that hit you are chilled, 30% slower for {0}.",
+    "Cold enough to bite back."
+  ),
+  trophy(
+    "mirewail-veil",
+    "Mirewail Veil",
+    "cape",
+    null,
+    "Cloak",
+    null,
+    "mirewail",
+    "wetland",
+    "After a kill you fade into mist: the next hit in 3 s misses you. Once every {0}.",
+    "You hear the wail only after it has passed."
+  ),
+  trophy(
+    "goldcarapace-band",
+    "Goldcarapace Band",
+    "ring",
+    null,
+    "Band Ring",
+    null,
+    "goldcarapace",
+    "upland",
+    "A gold shell takes the edge off the next hit worth more than 20% of your Max Health: {0} less damage. It grows back after 15 s.",
+    "Gold is soft. This gold is not."
+  ),
+  trophy(
+    "briarfang-thornmantle",
+    "Briarfang Thornmantle",
+    "cape",
+    null,
+    "Mantle",
+    null,
+    "briarfang",
+    "tropical",
+    "Enemies that hit you up close take {0} of that damage back as thorns.",
+    "Embrace it at your peril."
+  ),
+  trophy(
+    "emberjaw-fang",
+    "Emberjaw Fang",
+    "ring",
+    null,
+    "Seal Ring",
+    null,
+    "emberjaw",
+    "volcanic",
+    "Hitting a burning enemy heals you for {0} of the damage.",
+    "Still warm."
   )
 ].map((u) => [u.id, u])));
 var UNIQUE_IDS = Object.freeze(Object.keys(UNIQUE_ITEMS));
@@ -12592,7 +12690,16 @@ var UNIQUE_TIERS = freezeWire({
   "bristleback-mantle": { lines: ["maxHpPct", "defPct", "str", "lifeKill", "moveSpeed"], stars: [3, 4, 5, 6], unit: "pct" },
   "jacks-band": { lines: ["lifeHit", "atkPct", "maxHpPct", "eliteDmg", "critChance"], stars: [20, 25, 30, 40], unit: "permille" },
   "kheptra-signet": { lines: ["defPct", "maxHpPct", "cdr", "atkPct", "moveSpeed"], stars: [840, 720, 600, 480], unit: "ticks" },
-  "glasstail-cloak": { lines: ["critChance", "dex", "critDamage", "lifeKill", "moveSpeed"], stars: [60, 80, 100, 125], unit: "pct" }
+  "glasstail-cloak": { lines: ["critChance", "dex", "critDamage", "lifeKill", "moveSpeed"], stars: [60, 80, 100, 125], unit: "pct" },
+  // Trophies (Nov 9 mockup, Sammy: 1A-4A).
+  "mossback-pelt": { lines: ["maxHpPct", "defPct", "lifeKill", "cdr", "atkPct"], stars: [8, 10, 12, 15], unit: "pct" },
+  "gorehide-stompers": { lines: ["moveSpeed", "atkPct", "critDamage", "eliteDmg", "lifeKill"], stars: [60, 80, 100, 130], unit: "pct" },
+  "sunsting-grips": { lines: ["critChance", "critDamage", "atkPct", "dex", "eliteDmg"], stars: [20, 30, 40, 50], unit: "pct" },
+  "rimecoil-hood": { lines: ["maxHpPct", "defPct", "int", "cdr", "lifeHit"], stars: [90, 120, 150, 180], unit: "ticks" },
+  "mirewail-veil": { lines: ["moveSpeed", "critChance", "lifeKill", "defPct", "cdr"], stars: [480, 420, 360, 300], unit: "ticks" },
+  "goldcarapace-band": { lines: ["defPct", "maxHpPct", "str", "lifeHit", "eliteDmg"], stars: [40, 50, 60, 75], unit: "pct" },
+  "briarfang-thornmantle": { lines: ["maxHpPct", "defPct", "str", "atkPct", "lifeKill"], stars: [30, 40, 50, 65], unit: "pct" },
+  "emberjaw-fang": { lines: ["fireDmg", "atkPct", "critChance", "lifeHit", "maxHpPct"], stars: [20, 30, 40, 50], unit: "permille" }
 });
 var UNIQUE_LINE_UNLOCKS = Object.freeze([2, 2, 3, 4, 5]);
 var NTH = Object.freeze({ 2: "second", 3: "third", 4: "fourth", 5: "fifth" });
@@ -13097,7 +13204,7 @@ function generateAtPrecision(c, seed, input, { tier: tier2 = null, family: famil
   const rarityTier = uq && rolledTier < UNIQUE_MIN_RARITY ? UNIQUE_MIN_RARITY : progression.swiftKill && rolledTier < 1 ? 1 : rolledTier;
   safeInteger(rarityTier, 0, 5);
   const cls = progression.gearClass ?? null, classOffhand = cls ? CLASS_GEAR[cls].offhand : null, wardrobe = Boolean(cls) && progression.wardrobe === WARDROBE_V1, classFamilies = wardrobe ? CLASS_GEAR_FAMILIES_V2 : CLASS_GEAR_FAMILIES, families = cls ? classFamilies : progression.armor === "overall" ? ONE_PIECE_GEAR_FAMILIES : GEAR_FAMILIES;
-  const type = family2 ?? pick6(families), sub = type === "subweapon" ? subType ?? (cls ? classOffhand : pick6(["shield", "dagger", "tome"])) : null, own2 = type === "cape" ? CAPE_NOUNS : cls && type !== "ring" ? classGearNouns(cls, type) : GEAR_NOUNS[sub ?? type], shared = wardrobe && type === "helmet" ? SHARED_HELMET_NOUNS : [], nouns = [...own2 ?? [], ...shared], n = noun ?? (shared.length && random() < 0.2 ? pick6(shared) : pick6(own2));
+  const type = family2 ?? pick6(families), sub = type === "subweapon" ? subType ?? (cls ? classOffhand : pick6(["shield", "dagger", "tome"])) : null, own2 = type === "cape" ? CAPE_NOUNS : cls && type !== "ring" ? classGearNouns(cls, type) : GEAR_NOUNS[sub ?? type], shared = wardrobe && type === "helmet" ? SHARED_HELMET_NOUNS : [], nouns = [...own2 ?? [], ...shared, ...uq?.trophy ? [uq.noun] : []], n = noun ?? (shared.length && random() < 0.2 ? pick6(shared) : pick6(own2));
   requireContract((family2 ? cls ? classFamilies : GEAR_FAMILIES : families).includes(type) && (!cls || type !== "subweapon" || sub === classOffhand) && nouns?.includes(n), "Unknown generated family/noun");
   const E = c.dungeonScale(power2).E, R2 = c.q(100 + 7 * rarityTier, 100), P2 = c.q((100 + 15 * rarityTier) * (type === "overall" ? 18 : 10), 1e3), flatR = c.mul(R2, c.q(type === "overall" ? 18 : 10, 10));
   const I = (v) => {
@@ -13181,7 +13288,7 @@ function generateAtPrecision(c, seed, input, { tier: tier2 = null, family: famil
   }
   const adj = { atk: "Fierce", maxHp: "Grizzled", def: "Hardened", moveSpeed: "Fleet", critChance: "Precise", critDamage: "Savage", block: "Stalwart", parry: "Nimble", str: "Heavy", dex: "Swift", int: "Erudite", activeSpd: "Hasty" };
   const dominant = Object.keys(adj).reduce((a, k) => compareCombat(exactDecimal(bonus[k] ?? 0), exactDecimal(bonus[a] ?? 0)) > 0 ? k : a, "");
-  const definition = { numericVersion: "generated-numeric-d9-v1", definitionId: `d7-${type}-${sub ?? "ordinary"}`, name: uq ? `${uq.name} (Lv. ${power2})` : `${dominant ? adj[dominant] : "Standard"} ${n} (Lv. ${power2})`, slot: type, subType: sub, spellType: raw.spellType ?? null, noun: n, rarityTier, itemPower: power2, bonuses: { attack: sumGear(raw.baseAtk, bonus.atk ?? 0), maxHp: sumGear(raw.baseMaxHp, bonus.maxHp ?? 0), defense: sumGear(raw.baseDef, bonus.def ?? 0) }, attributes: { str: sumGear(raw.baseStr, bonus.str ?? 0), dex: sumGear(raw.baseDex, bonus.dex ?? 0), int: sumGear(raw.baseInt, bonus.int ?? 0) }, effects: { moveSpeed: sumGear(raw.baseMoveSpeed, bonus.moveSpeed ?? 0), critChance: sumGear(raw.baseCritChance, bonus.critChance ?? 0), critDamage: sumGear(raw.baseCritDamage, bonus.critDamage ?? 0), block: sumGear(raw.baseBlock, bonus.block ?? 0), parry: sumGear(raw.baseParry, bonus.parry ?? 0), activeSpeed: bonus.activeSpd ?? 0, bonusAreaRadius: bonus.bonusAreaRadius ?? 0, ...Object.fromEntries(["atkPct", "maxHpPct", "defPct", "moveSpeedPct", "strPct", "dexPct", "intPct"].map((k) => [k, bonus[k] ? sumGear(raw[k] ?? 0, bonus[k]) : raw[k] ?? 0])) }, family: { ...Object.fromEntries(["subArchetype", "blockCapBonus", "reflectDamage", "bashAtkBonus", "parryCapBonus", "parryMitigation", "riposteDamage", "bleedChance", "offhandChance", "offhandDmg"].map((k) => [k, raw[k] ?? null])), fireChanceNumerator: 50 + 3 * rarityTier, fireChanceDenominator: 150, firePowerNumerator: 18 + 2 * rarityTier }, weaponVisual: type === "weapon" ? "iron" : null, ...cls && !sharedGear(type, n) ? { gearClass: cls } : {}, ...uq ? { unique: uq.id } : {} };
+  const definition = { numericVersion: "generated-numeric-d9-v1", definitionId: `d7-${type}-${sub ?? "ordinary"}`, name: uq ? `${uq.name} (Lv. ${power2})` : `${dominant ? adj[dominant] : "Standard"} ${n} (Lv. ${power2})`, slot: type, subType: sub, spellType: raw.spellType ?? null, noun: n, rarityTier, itemPower: power2, bonuses: { attack: sumGear(raw.baseAtk, bonus.atk ?? 0), maxHp: sumGear(raw.baseMaxHp, bonus.maxHp ?? 0), defense: sumGear(raw.baseDef, bonus.def ?? 0) }, attributes: { str: sumGear(raw.baseStr, bonus.str ?? 0), dex: sumGear(raw.baseDex, bonus.dex ?? 0), int: sumGear(raw.baseInt, bonus.int ?? 0) }, effects: { moveSpeed: sumGear(raw.baseMoveSpeed, bonus.moveSpeed ?? 0), critChance: sumGear(raw.baseCritChance, bonus.critChance ?? 0), critDamage: sumGear(raw.baseCritDamage, bonus.critDamage ?? 0), block: sumGear(raw.baseBlock, bonus.block ?? 0), parry: sumGear(raw.baseParry, bonus.parry ?? 0), activeSpeed: bonus.activeSpd ?? 0, bonusAreaRadius: bonus.bonusAreaRadius ?? 0, ...Object.fromEntries(["atkPct", "maxHpPct", "defPct", "moveSpeedPct", "strPct", "dexPct", "intPct"].map((k) => [k, bonus[k] ? sumGear(raw[k] ?? 0, bonus[k]) : raw[k] ?? 0])) }, family: { ...Object.fromEntries(["subArchetype", "blockCapBonus", "reflectDamage", "bashAtkBonus", "parryCapBonus", "parryMitigation", "riposteDamage", "bleedChance", "offhandChance", "offhandDmg"].map((k) => [k, raw[k] ?? null])), fireChanceNumerator: 50 + 3 * rarityTier, fireChanceDenominator: 150, firePowerNumerator: 18 + 2 * rarityTier }, weaponVisual: type === "weapon" ? "iron" : null, ...cls && !sharedGear(type, n) && !uq?.trophy ? { gearClass: cls } : {}, ...uq ? { unique: uq.id } : {} };
   if (sub === "tome" && raw.spellType !== "fire") {
     delete definition.family.fireChanceNumerator;
     delete definition.family.fireChanceDenominator;
@@ -14795,6 +14902,9 @@ function validateWorldEventsProgress(a, b) {
     requireContract(r.stages.every((t, i) => r.kind === "nests" && n.nest.resets > r.nest.resets && t.phase === "hatched" && n.stages[i].phase === "pending" || r.kind === "road_ambush" && n.ambush.resets > r.ambush.resets && ["hatched", "growing", "cancelled"].includes(t.phase) && n.stages[i].phase === "pending" || r.kind === "buried_cache" && n.cache.resets > r.cache.resets && ["hatched", "growing"].includes(t.phase) && n.stages[i].phase === "pending" || r.kind === "trophy_hunt" && n.hunt.resets > r.hunt.resets && ["hatched", "growing"].includes(t.phase) && n.stages[i].phase === "pending" || adoptingSporeV5(r, n) && t.phase === "queued" && n.stages[i].phase === "pending" && n.stages[i].generation === t.generation || generations && n.stages[i].generation > t.generation || order2[n.stages[i].phase] >= order2[t.phase] && (!["cancelled", "defeated"].includes(t.phase) || n.stages[i].phase === t.phase)), "Event growth regressed");
   }
 }
+
+// src/shared/contracts/unique_rewards_v1.js
+var HUNT_LANDS = Object.fromEntries(["woodland", "grassland", "desert", "frostland", "wetland", "upland", "tropical", "volcanic"].map((b) => [b, huntChampionOfV1(b)]));
 
 // src/shared/contracts/class_kit_inventory.js
 var isClassKitSource = (p, sourceEntityId) => Boolean(sourceEntityId) && Boolean(p.inventory?.classKit?.sourceEntityIds.includes(sourceEntityId));
@@ -21699,7 +21809,7 @@ var BY_NOUN = Object.freeze({
   "Silk Wraps": "wraps",
   "Silk Slippers": "slippers"
 });
-var OVERALL_LEGS = Object.freeze({ plate: "greaves", hauberk: "chausses", doublet: "breeches", leather: "trousers" });
+var OVERALL_LEGS = Object.freeze({ plate: "greaves", hauberk: "chausses", doublet: "breeches", leather: "trousers", "mossback-pelt": "pelt" });
 var TOME_LOOKS = Object.freeze({ fire: "tome-fire", lightning: "tome-storm", frost: "tome-frost" });
 var LOOK_POOLS = Object.freeze({
   sword: Object.freeze(["sword", "broadsword", "leaf-sword"]),
@@ -22989,7 +23099,11 @@ var WAIL_MAX_TICKS = 2400;
 var SHELL_MAX_TICKS = 840;
 var SUN_MAX = 4;
 var SUNFALL_MAX_CASTS = 5;
-var LIVE = ["aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var MOSS_TICKS = 600;
+var MIST_TICKS = 180;
+var VEIL_MAX_TICKS = 480;
+var GOLD_TICKS = 900;
+var LIVE = ["moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
 function validateClassSkillState(s, combat, actor) {
   const k = combat.skills;
   if (k === void 0) return;
@@ -23011,6 +23125,14 @@ function validateClassSkillState(s, combat, actor) {
     safeInteger(k.pool.ticks, 1, POOL_MAX_TICKS);
     safeInteger(k.pool.next, 1, POOL_PULSE_TICKS);
   }
+  if (k.moss !== void 0) {
+    closedRecord(k.moss, ["ticks"], ["hp"]);
+    safeInteger(k.moss.ticks, 1, MOSS_TICKS);
+    requireContract(k.moss.hp === void 0 || typeof k.moss.hp === "string" && /^[1-9][0-9]{0,29}$/.test(k.moss.hp), "Invalid moss");
+  }
+  if (k.mist !== void 0) safeInteger(k.mist, 1, MIST_TICKS);
+  if (k.veil !== void 0) safeInteger(k.veil, 1, VEIL_MAX_TICKS);
+  if (k.gold !== void 0) safeInteger(k.gold, 1, GOLD_TICKS);
   if (k.wail !== void 0) safeInteger(k.wail, 1, WAIL_MAX_TICKS);
   if (k.shell !== void 0) safeInteger(k.shell, 1, SHELL_MAX_TICKS);
   if (k.sun !== void 0) safeInteger(k.sun, 1, SUN_MAX);
@@ -23330,7 +23452,7 @@ function validateDamageSourceItem(v) {
 }
 
 // src/shared/contracts/mastery_combat.js
-var TREE_STATUSES = Object.freeze({ mark: [5, 300], deathmark: [5, 360], kindle: [5, 240], struck: [3, 600], hinder: [6, 60] });
+var TREE_STATUSES = Object.freeze({ mark: [5, 300], deathmark: [5, 360], kindle: [5, 240], struck: [3, 600], hinder: [6, 60], rime: [1, 180] });
 var emptyMasteryCombat = () => ({ poisons: {}, statuses: {}, hazards: {}, razors: {} });
 function installMasteryCombat(s) {
   s.subweaponCombat.mastery ??= Object.fromEntries(Object.values(s.playersById).map((p) => [p.entityId, emptyMasteryCombat()]));
@@ -24802,7 +24924,7 @@ function validateSubweaponCombat(s) {
     closedRecord(e, ["id", "sourceId", "targetId", "spaceInstanceId", "kind", "stacks", "nextTick", "expiresTick", ...integer2 ? ["attack", "rulesVersion"] : ["damage"]], ["sourceItem", "toxicRank"]);
     if (e.toxicRank !== void 0) validateInteger(e.toxicRank);
     if (e.sourceItem !== void 0) validateDamageSourceItem(e.sourceItem);
-    requireContract(e.id === id && c.actors[e.sourceId] && combatTargetV4(s, e.targetId)?.alive && ["bleed", "burn"].includes(e.kind), "Periodic ownership");
+    requireContract(e.id === id && c.actors[e.sourceId] && combatTargetV4(s, e.targetId)?.alive && ["bleed", "burn", "sting"].includes(e.kind), "Periodic ownership");
     safeInteger(e.stacks, 1, e.kind === "bleed" ? 5 : 1);
     safeInteger(e.nextTick, s.tick + 1, s.tick + 60);
     safeInteger(e.expiresTick, s.tick + 1, s.tick + (e.kind === "bleed" ? 1350 : 540));

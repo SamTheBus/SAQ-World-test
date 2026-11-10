@@ -936,7 +936,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-G7NA4NKL.js";
+} from "./chunk-HEG4JGY7.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -52013,7 +52013,7 @@ var ROBES = /* @__PURE__ */ new Set(["robe", "apprentice-robe"]);
 var HATS = /* @__PURE__ */ new Set(["hat", "cowl", "bandana", "leather-cap", "feathered-cap", "wide-brim-hat", "circlet", "moon-hat", "backwards-cap"]);
 var HOOD_FACE = /* @__PURE__ */ new Set(["hood", "bandit-hood"]);
 var COIF_FACE = /* @__PURE__ */ new Set(["coif", "kettle-hat", "nasal-helm", "barbute"]);
-var OPEN_HOOD_FACE = /* @__PURE__ */ new Set(["scout-hood", "mage-hood"]);
+var OPEN_HOOD_FACE = /* @__PURE__ */ new Set(["scout-hood", "mage-hood", "rimecoil-hood"]);
 var HAIR_SHOWS = /* @__PURE__ */ new Set(["circlet"]);
 function kit(spec) {
   const k = KITS3[spec.cls] ?? KITS3.knight, g = spec.gear ?? {}, look = (slot, fallback) => g[slot] ? g[slot].kind ?? fallback : null;
@@ -52041,7 +52041,7 @@ function mailRows(c, x, y, w, h) {
 function legs2(c, w, S6, step) {
   const lift = [Math.max(0, step) * 1.4, Math.max(0, -step) * 1.4];
   if (w.legs) {
-    const lp = w.legs === "greaves" ? P7.plate : w.legs === "chausses" ? M.mail : w.legs === "breeches" ? M.breeches : w.legs === "trousers" || w.legs === "cloth" ? P7.darkPants : P7.pants, A2 = accOf(w.g.legs);
+    const lp = w.legs === "greaves" ? P7.plate : w.legs === "chausses" ? M.mail : w.legs === "breeches" ? M.breeches : w.legs === "trousers" || w.legs === "cloth" ? P7.darkPants : w.legs === "pelt" ? TROPHY.stoneDark : P7.pants, A2 = accOf(w.g.legs);
     c.save();
     c.translate(0, -lift[0]);
     R3(c, -6.6, 12, 4.4, 5.6, { b: lp.d, d: lp.d }, { nohi: true });
@@ -52070,6 +52070,7 @@ function legs2(c, w, S6, step) {
   c.save();
   c.translate(0, -lift[0]);
   if (w.boots === "sabatons") R3(c, -7.2, 16.6, 5.4, 3.4, P7.plateDark, { nohi: true });
+  else if (w.boots === "gorehide-stompers") R3(c, -7.2, 15.2, 5.4, 4.8, { b: TROPHY.hide.d, d: TROPHY.hide.d }, { nohi: true });
   else if (w.boots === "tall") R3(c, -7.2, 14.4, 5.4, 5.6, { b: P7.leather.d, d: P7.leather.d }, { nohi: true });
   else if (w.boots === "boots") R3(c, -7.2, 15.8, 5.4, 4.2, { b: P7.strap.b, d: P7.strap.b }, { nohi: true });
   else if (w.boots === "slippers" || w.boots === "apprentice-slippers") R3(c, -6.4, 18.2, 5, 1.8, { b: w.boots === "slippers" ? P7.cover.d : M.blue.d }, { lw: 1.1 });
@@ -52080,6 +52081,12 @@ function legs2(c, w, S6, step) {
   if (w.boots === "sabatons") {
     R3(c, -2, 16.6, 6.8, 3.4, P7.helm, { split: 0.7 });
     px3(c, 2.4, 17.2, 0.9, 2.8, A.c);
+  } else if (w.boots === "gorehide-stompers") {
+    R3(c, -2, 15.2, 6.8, 4.8, TROPHY.hide, { split: 0.72 });
+    R3(c, -2.4, 14.2, 7.6, 1.8, TROPHY.bristle, { flat: true, lw: 1 });
+    for (let i = 0; i < 4; i++) px3(c, -2 + i * 1.9, 13.2, 0.8, 1.2, TROPHY.bristle.b);
+    G(c, [4.4, 18.4, 6.4, 15.6, 8.4, 14.6, 8.8, 15.4, 7.2, 16.8, 5.8, 19.2], TROPHY.tusk, { split: 0.6, lw: 0.9 });
+    px3(c, 0.4, 17, 1.2, 1.2, A.c);
   } else if (w.boots === "tall") {
     R3(c, -2, 14.4, 6.8, 5.6, P7.leather);
     R3(c, -2.3, 13.6, 7.4, 1.8, P7.leatherLight, { flat: true, lw: 1.1 });
@@ -52160,7 +52167,16 @@ function body4(c, w, red) {
     gem(c, -6.6, 10.3, 1.3, A.gem);
   } else if (w.body === "robe") robeBody(c, A, acc2, P7.purple, P7.purpleDark, P7.purpleInner);
   else if (w.body === "apprentice-robe") robeBody(c, A, acc2, M.blue, M.blueDark, M.blueInner, M.rope);
-  else {
+  else if (w.body === "mossback-pelt") {
+    R3(c, -8, 0, 14, 12.6, TROPHY.stone);
+    for (const [x, y] of [[-6.4, 4.6], [1.6, 6.2], [-3, 8.6]]) R3(c, x, y, 2.4, 1.8, TROPHY.stoneLight, { flat: true, lw: 0.8 });
+    G(c, [-8.8, 3, -9, -1.2, -5.6, -1.8, -2.8, -0.6, 0, -1.8, 3.2, -0.6, 6.6, -1.4, 6.8, 3, 4, 4.2, 1.4, 2.8, -1.6, 4.4, -4.6, 2.8, -7, 4.2], TROPHY.moss, { split: 0.7, lw: 1.2 });
+    px3(c, -6, 0.2, 0.9, 0.9, TROPHY.bloom);
+    px3(c, 3.2, 0.4, 0.9, 0.9, TROPHY.bloom);
+    R3(c, -8.4, 9.4, 14.8, 2.4, TROPHY.hide, { flat: true, lw: 1.3 });
+    R3(c, -1.2, 9, 3, 3.2, acc2, { flat: true, lw: 1.2 });
+    gem(c, 0.3, 10.6, 1.4, A.gem);
+  } else {
     R3(c, -8, 0, 14, 12.6, P7.linen);
     c.lineWidth = 1.1;
     c.strokeStyle = tint("#8a6a45");
@@ -52304,6 +52320,45 @@ var CAPES = {
       for (const [x, y] of [[-5.2, 17.6], [-9, 18], [-13, 18.2], [-17, 18.4], [-8, 13.8], [-15, 14.6], [-11.6, 9.6]]) cloth(c, [x, y, x - 1, y - 2.4, x - 2, y], UQ.glass, { flat: true, lw: 0.7 });
     },
     front: (c, A) => collar(c, A, UQ.sand, UQ.glass)
+  },
+  // Trophies (Trophy Hunt champions): the Mirewail Veil, a thin marsh-gray veil torn into wisps with two pale lights in its
+  // folds; the Briarfang Thornmantle, jungle green bound in a thorny briar.
+  "mirewail-veil": {
+    back(c, A) {
+      const len = 18, back = -22.4, hem = [];
+      for (let i = 0; i <= 12; i++) hem.push(back + 20.4 * i / 12, len + (i % 2 ? -3.4 - (i % 4 === 1 ? 1.4 : 0) : 0.4));
+      c.save();
+      c.globalAlpha = 0.86;
+      cloth(c, [-2.4, -0.8, -8.8, -1.2, -11, 0.6, -11.4 + back * 0.22, len * 0.42, ...hem.slice(0, -2), -2, len], TROPHY.mist);
+      c.restore();
+      folds(c, len, back);
+      for (const [x, y] of [[-9.6, 7.4], [-15.6, 9.8]]) {
+        const q = warp([x, y]);
+        c.beginPath();
+        c.arc(q[0], q[1], 1, 0, Math.PI * 2);
+        c.fillStyle = TROPHY.wisp;
+        c.fill();
+      }
+    },
+    front: (c, A) => collar(c, A, TROPHY.mistDark)
+  },
+  "briarfang-thornmantle": {
+    back(c, A) {
+      plainCape(c, A, TROPHY.briar, 16.8, -21.4, null);
+      const q = warp([-3, 15, -11, 2, -19, 14]);
+      for (const [w, col2] of [[1.9, "#000000"], [1.2, TROPHY.thorn.b]]) {
+        c.lineWidth = w;
+        c.strokeStyle = tint(col2);
+        c.beginPath();
+        c.moveTo(q[0], q[1]);
+        c.quadraticCurveTo(q[2], q[3], q[4], q[5]);
+        c.stroke();
+      }
+      for (const [x, y, s] of [[-11.6, 6.6, -1], [-21.4, 9, -1], [-20.8, 14, -1], [-5, 11.4, 1], [-16, 9.6, -1]]) cloth(c, [x, y - 0.8, x + s * 2.4, y, x, y + 0.8], TROPHY.tusk, { flat: true, lw: 0.6 });
+      dot4(c, -8.6, 9.4, 1.3, 1.3, TROPHY.berry);
+      dot4(c, -15.4, 11.8, 1.3, 1.3, TROPHY.berry);
+    },
+    front: (c, A) => collar(c, A, TROPHY.briar, TROPHY.thorn)
   },
   // Cape: a plain traveler's cape; a ragged one with a torn hem and a stitched patch; a magic cape with its lining showing.
   "traveler-cape": { back: (c, A) => plainCape(c, A, CAPE_CLOTH.travel, 14, -20, null), front: (c, A) => collar(c, A, CAPE_CLOTH.travel) },
@@ -52613,6 +52668,27 @@ var UQ = {
   straw: { b: "#d9b65a", d: "#b08e3c", l: "#f0d78a" },
   sunface: { b: "#ffd970", d: "#e6b23a" },
   bristle: { b: "#2e221a", d: "#21180f" }
+};
+var TROPHY = {
+  moss: { b: "#5f7d3a", d: "#4a6230", l: "#7f9f4e" },
+  stone: { b: "#8a8f86", d: "#6c7069", l: "#a7ada3" },
+  stoneLight: { b: "#a7ada3", d: "#8a8f86" },
+  stoneDark: { b: "#6c7069", d: "#55594f" },
+  bloom: "#f2e36a",
+  rime: { b: "#9fd2ec", d: "#6fa8cc", l: "#dff3ff" },
+  ice: { b: "#e4f6ff", d: "#b6dcf0" },
+  amber: { b: "#d79a3a", d: "#a8742a", l: "#f0bf6a" },
+  chitin: { b: "#3a2a1a", d: "#2a1e12" },
+  venom: "#8fdc4a",
+  hide: { b: "#7a4f30", d: "#5c3a22", l: "#956543" },
+  bristle: { b: "#2e221a", d: "#21180f" },
+  tusk: { b: "#efe4c8", d: "#cbbd98" },
+  mist: { b: "#8fa6a0", d: "#6f8781", l: "#b9cec8" },
+  mistDark: { b: "#6f8781", d: "#566c67" },
+  wisp: "#d8fff0",
+  briar: { b: "#3f5f2c", d: "#2f4721", l: "#557a3c" },
+  thorn: { b: "#6a4a2c", d: "#4c341e" },
+  berry: "#c8322a"
 };
 function gravecleaver(c, A, t = 0) {
   const pulse3 = 0.5 + 0.5 * Math.sin(t * 3);
@@ -54087,12 +54163,15 @@ function sleeve3(c, w, S6) {
     R3(c, 0, -2.2, 8.4, 4.4, M.doublet, { split: 0.7 });
     R3(c, 5.4, -2.6, 3.2, 5.2, P7.strap, { flat: true, lw: 1.1 });
   } else if (ROBES.has(w.body)) G(c, [0, -2.4, 7.6, -3.8, 7.6, 3.8, 0, 2.4], w.body === "robe" ? P7.purple : M.blue, { split: 0.6, lw: 1.3 });
-  else {
+  else if (w.body === "mossback-pelt") {
+    R3(c, 0, -2.4, 8.6, 4.8, TROPHY.stone, { split: 0.7 });
+    R3(c, 0, -2.6, 4, 2, TROPHY.moss, { flat: true, lw: 0.9 });
+  } else {
     R3(c, 4, -1.8, 4.6, 3.6, S6, { lw: 1.2, nohi: true });
     R3(c, 0, -2.4, 4.4, 4.8, P7.linen, { lw: 1.2 });
   }
 }
-var GLOVES = { gauntlets: P7.plateDark, gloves: P7.strap, wraps: M.blueDark };
+var GLOVES = { gauntlets: P7.plateDark, gloves: P7.strap, wraps: M.blueDark, "sunsting-grips": TROPHY.amber };
 function hand3(c, w, S6) {
   const g = w.gloves;
   if (g === "gauntlets" || !g && w.body === "plate") R3(c, 8.2, -2.8, 4.4, 5.6, P7.plateDark, { split: 0.6 });
@@ -54101,6 +54180,12 @@ function hand3(c, w, S6) {
     R3(c, 7.8, -2.4, 4.2, 4.8, M.blueDark, { split: 0.6, lw: 1.2 });
     px3(c, 8, -1.4, 3.8, 0.7, P7.linen.b);
     px3(c, 8, 0.4, 3.8, 0.7, P7.linen.b);
+  } else if (g === "sunsting-grips") {
+    R3(c, 8, -2.8, 4.4, 5.6, TROPHY.amber, { split: 0.6, lw: 1.2 });
+    px3(c, 8.6, -0.4, 3.4, 0.6, "#00000055");
+    R3(c, 6.6, -3, 1.8, 6, TROPHY.chitin, { flat: true, lw: 1 });
+    G(c, [7.2, -3, 6.4, -6, 8.2, -7.4, 8.6, -6.4, 7.8, -5.2, 8.4, -3], TROPHY.chitin, { flat: true, lw: 0.8 });
+    px3(c, 7.8, -8.2, 1.2, 1.2, TROPHY.venom);
   } else R3(c, 7.8, -2.3, 4, 4.6, S6, { lw: 1.2, nohi: true });
 }
 var palm2 = (c, w, S6, x, y, wd) => GLOVES[w.gloves] ? R3(c, x, y, wd, 4.6, GLOVES[w.gloves], { split: 0.6, lw: 1.2 }) : R3(c, x, y, wd, 4.6, S6, { lw: 1.2, nohi: true });
@@ -54123,6 +54208,12 @@ function pauldron(c, w, far) {
   } else if (w.body === "doublet") {
     if (far) R3(c, -9.2, -0.4, 5.2, 3.4, M.doublet, { split: 0.6, lw: 1.2 });
     else R3(c, 2.6, -1, 5.4, 3.4, M.doublet, { split: 0.6, lw: 1.2 });
+  } else if (w.body === "mossback-pelt") {
+    if (far) R3(c, -9.6, -0.8, 6, 4.2, TROPHY.moss, { split: 0.6, lw: 1.2 });
+    else {
+      R3(c, 2.2, -1.4, 6.2, 4.2, TROPHY.moss, { split: 0.6, lw: 1.2 });
+      px3(c, 4, -0.6, 0.9, 0.9, TROPHY.bloom);
+    }
   }
 }
 var OPENING = "#1d232b";
@@ -54276,6 +54367,24 @@ var HELMET_LOOKS = {
     px3(c, -6, -12.4, 1.4, 1, A.c);
   },
   // Cowl: a blue hood with a rope-trimmed opening and a drooping point.
+  // Rimecoil Hood (a trophy): pale blue wyrm scales, two short horns swept back, an icy brow band; open at the face.
+  "rimecoil-hood"(c, A, face3) {
+    G(c, [-8, -14, -14, -20.4, -6.4, -16.6], TROPHY.ice, { split: 0.5, lw: 1.1 });
+    G(c, [-3.6, -15, -6, -22, -0.4, -16.4], TROPHY.ice, { split: 0.5, lw: 1.1 });
+    G(c, [-10.4, 1.6, -10.4, -11.6, -7.6, -15.2, 5, -15.2, 8.4, -12, 8.4, 1.6], TROPHY.rime, { split: 0.74 });
+    for (let r = 0; r < 4; r++) for (let i = 0; i < 3; i++) {
+      c.beginPath();
+      c.arc(-8.6 + i * 3 + r % 2 * 1.5, -12.4 + r * 3.4, 1.2, 0, Math.PI);
+      c.lineWidth = 0.7;
+      c.strokeStyle = tint("#4f86a8");
+      c.stroke();
+    }
+    if (face3) face3(c);
+    else R3(c, -1.2, -10.4, 8.6, 9.6, { b: OPENING }, { lw: 1.2, flat: true });
+    R3(c, -1.6, -12, 10.2, 1.6, TROPHY.ice, { split: 0.7, lw: 1 });
+    px3(c, -10.4, -1.4, 9, 1, A.c);
+    gem(c, -6, -6.4, 1.4, A.gem);
+  },
   "mage-hood"(c, A, face3) {
     G(c, [-10, -14, -15.4, -16.6, -16, -11.4, -10, -8.6], M.blue, { split: 0.6, lw: 1.3 });
     R3(c, -10, -14, 18, 15, M.blue, { split: 0.75 });
@@ -57995,8 +58104,12 @@ var WAIL_MAX_TICKS = 2400;
 var SHELL_MAX_TICKS = 840;
 var SUN_MAX = 4;
 var SUNFALL_MAX_CASTS = 5;
-var TIMED = ["surge", "enGarde", "rush", "wail", "shell", "riposte", "keen", "evade", "rest", "mend", "titan", "spite", "stepped", "quick", "wave", "phoenix", "hymn", "firm", "jugg", "cloak", "twinned", "regrow"];
-var LIVE = ["aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var MOSS_TICKS = 600;
+var MIST_TICKS = 180;
+var VEIL_MAX_TICKS = 480;
+var GOLD_TICKS = 900;
+var TIMED = ["mist", "veil", "gold", "surge", "enGarde", "rush", "wail", "shell", "riposte", "keen", "evade", "rest", "mend", "titan", "spite", "stepped", "quick", "wave", "phoenix", "hymn", "firm", "jugg", "cloak", "twinned", "regrow"];
+var LIVE = ["moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
 function skillCooldown(combat, skillId) {
   return combat?.skills?.cooldowns?.[skillId] ?? 0;
 }
@@ -58129,6 +58242,14 @@ function validateClassSkillState(s, combat, actor) {
     safeInteger(k.pool.ticks, 1, POOL_MAX_TICKS);
     safeInteger(k.pool.next, 1, POOL_PULSE_TICKS);
   }
+  if (k.moss !== void 0) {
+    closedRecord(k.moss, ["ticks"], ["hp"]);
+    safeInteger(k.moss.ticks, 1, MOSS_TICKS);
+    requireContract(k.moss.hp === void 0 || typeof k.moss.hp === "string" && /^[1-9][0-9]{0,29}$/.test(k.moss.hp), "Invalid moss");
+  }
+  if (k.mist !== void 0) safeInteger(k.mist, 1, MIST_TICKS);
+  if (k.veil !== void 0) safeInteger(k.veil, 1, VEIL_MAX_TICKS);
+  if (k.gold !== void 0) safeInteger(k.gold, 1, GOLD_TICKS);
   if (k.wail !== void 0) safeInteger(k.wail, 1, WAIL_MAX_TICKS);
   if (k.shell !== void 0) safeInteger(k.shell, 1, SHELL_MAX_TICKS);
   if (k.sun !== void 0) safeInteger(k.sun, 1, SUN_MAX);
@@ -59943,7 +60064,7 @@ function combatTargetV4(s, id) {
 var combatTargetsV4 = (s) => [...Object.values(s.entitiesById), ...podCombatTargetsV4(s)];
 
 // src/shared/contracts/mastery_combat.js
-var TREE_STATUSES = Object.freeze({ mark: [5, 300], deathmark: [5, 360], kindle: [5, 240], struck: [3, 600], hinder: [6, 60] });
+var TREE_STATUSES = Object.freeze({ mark: [5, 300], deathmark: [5, 360], kindle: [5, 240], struck: [3, 600], hinder: [6, 60], rime: [1, 180] });
 var emptyMasteryCombat = () => ({ poisons: {}, statuses: {}, hazards: {}, razors: {} });
 function installMasteryCombat(s) {
   s.subweaponCombat.mastery ??= Object.fromEntries(Object.values(s.playersById).map((p) => [p.entityId, emptyMasteryCombat()]));
@@ -60835,6 +60956,15 @@ function aegisTakes(combat, out) {
   const damage = combatInteger(subtractCombat(out.damage, taken));
   return { ...out, damage, aegis: broke ? "broke" : "hit", ...out.defense === null && compareCombat(damage, 0) === 0 ? { defense: "barrier" } : {} };
 }
+function mossTakes(combat, out) {
+  const m = combat.skills?.moss;
+  if (!m?.hp || compareCombat(out.damage, 0) === 0) return out;
+  const taken = combatInteger(minCombat(m.hp, out.damage)), left = combatInteger(subtractCombat(m.hp, taken));
+  if (compareCombat(left, 0) === 0) delete m.hp;
+  else m.hp = left;
+  const damage = combatInteger(subtractCombat(out.damage, taken));
+  return { ...out, damage, ...out.defense === null && compareCombat(damage, 0) === 0 ? { defense: "barrier" } : {} };
+}
 function incomingSubweaponHit({ combat, stats: stats3, raw, boss = false, actor = null, source: source3 = null, suppressed = false, knight = false, wall = 0, steady = 0 }) {
   if (suppressed) return { damage: combatInteger(mitigated(raw, stats3)), absorbed: "0", defense: null, counter: null, suppressed: true };
   if (combat.skills?.counter) {
@@ -60860,7 +60990,7 @@ function incomingSubweaponHit({ combat, stats: stats3, raw, boss = false, actor 
   const parryReady = family === "dagger" && Boolean(combat.skills?.parry);
   if (parryReady) spendParryWindow(combat);
   const guarded = activeGuard || parryReady || compareCombat(chance, 0) > 0 && combatRoll(combat, multiplyCombat(chance, (boss ? 65 : 100) * (combat.fatigue ? 50 : 100), 1e4));
-  if (!guarded) return aegisTakes(combat, { damage: combatInteger(net), absorbed, defense: null, counter: null });
+  if (!guarded) return mossTakes(combat, aegisTakes(combat, { damage: combatInteger(net), absorbed, defense: null, counter: null }));
   if (activeGuard) spendGuard(combat.guard, net, steady);
   combat.fatigue = 30;
   if (family === "shield" && knight) reduceSkillCooldown(combat, "shield_bash", BLOCK_BASH_REFUND_TICKS);
@@ -60868,7 +60998,7 @@ function incomingSubweaponHit({ combat, stats: stats3, raw, boss = false, actor 
   const mitigation = multiplyCombat(family === "shield" ? stats3.familyProperties?.blockMitigation ?? combatAmount(7, 10) : stats3.familyProperties?.parryMitigation ?? combatAmount(3, 5), boss ? 65 : 100, 100);
   const damage = combatInteger(multiplyCombat(net, subtractCombat(1, mitigation).n, subtractCombat(1, mitigation).d));
   const masteryCounterEligible = !boss || combat.counterCooldown === 0;
-  return aegisTakes(combat, { damage, absorbed, prevented: subtractCombat(net, damage), masteryCounterEligible, defense: family === "shield" ? "block" : "parry", counter: null });
+  return mossTakes(combat, aegisTakes(combat, { damage, absorbed, prevented: subtractCombat(net, damage), masteryCounterEligible, defense: family === "shield" ? "block" : "parry", counter: null }));
 }
 
 // src/shared/contracts/tome_cast.js
@@ -61098,7 +61228,7 @@ function validateSubweaponCombat(s) {
     closedRecord(e, ["id", "sourceId", "targetId", "spaceInstanceId", "kind", "stacks", "nextTick", "expiresTick", ...integer ? ["attack", "rulesVersion"] : ["damage"]], ["sourceItem", "toxicRank"]);
     if (e.toxicRank !== void 0) validateInteger(e.toxicRank);
     if (e.sourceItem !== void 0) validateDamageSourceItem(e.sourceItem);
-    requireContract(e.id === id && c.actors[e.sourceId] && combatTargetV4(s, e.targetId)?.alive && ["bleed", "burn"].includes(e.kind), "Periodic ownership");
+    requireContract(e.id === id && c.actors[e.sourceId] && combatTargetV4(s, e.targetId)?.alive && ["bleed", "burn", "sting"].includes(e.kind), "Periodic ownership");
     safeInteger(e.stacks, 1, e.kind === "bleed" ? 5 : 1);
     safeInteger(e.nextTick, s.tick + 1, s.tick + 60);
     safeInteger(e.expiresTick, s.tick + 1, s.tick + (e.kind === "bleed" ? 1350 : 540));
@@ -63546,7 +63676,7 @@ function applyFrostControl(s, source3, target, stats3, chillTicks = 240, boost =
   }
   return effect;
 }
-var STATUS_RATE = { stun: () => 0, slow: (r) => 1 - 0.2 * r, daze: (r) => 1 - 0.06 * r, hinder: (r) => 1 - 0.05 * r };
+var STATUS_RATE = { stun: () => 0, slow: (r) => 1 - 0.2 * r, daze: (r) => 1 - 0.06 * r, hinder: (r) => 1 - 0.05 * r, rime: () => 0.7 };
 function statusRates(s, visit) {
   const owners = new Map(Object.values(s.playersById ?? {}).map((p) => [p.entityId, p]));
   for (const [owner, b] of Object.entries(s.subweaponCombat.mastery ?? {})) {
@@ -64902,7 +65032,7 @@ function createActivityScheduler(state, options = {}, { beforeSleep = () => true
 // src/simulation/mastery_effects.js
 var times = (a, b) => multiplyCombat(a, b.n, b.d);
 function periodicPacket(e) {
-  let value2 = multiplyCombat(e.attack, (e.kind === "bleed" ? 5 : e.kind === "poison" ? 10 * e.rank : 15) * e.stacks, 100);
+  let value2 = multiplyCombat(e.attack, (e.kind === "bleed" ? 5 : e.kind === "poison" ? 10 * e.rank : e.kind === "sting" ? 100 : 15) * e.stacks, 100);
   if (e.kind !== "burn" && e.toxicRank) value2 = times(value2, masteryPower(51, 50, e.toxicRank));
   return value2;
 }
@@ -65267,6 +65397,7 @@ var CLASS_SKILL_TUNING_V1 = Object.freeze({
   styles: { buckler: { cooldown: [3, 4] }, tower: { stun: [3, 2], knockback: [5, 4] }, "main-gauche": { parry: true }, stiletto: { critBonus: [25, 100] }, kris: { bleed: true } }
 });
 var U = Object.freeze({ ring: 64, burst: 56, pool: 40, beam: { reach: 200, attack: [1, 1] }, sunfall: { radius: 40, attack: [1, 1] }, wail: { radius: 110, slow: 2, ticks: 180, below: 30 }, hide: 5, eyeBurn: 10, heal: 3 });
+var TROPHY2 = Object.freeze({ goldOver: 20, stingPulses: 4 });
 function offhandStyle(player) {
   const inv = player?.inventory, item = inv?.itemsById[inv.equipped?.subweapon], type = item ? itemLookType(item) : null;
   return T52.styles[type] ? type : null;
@@ -65579,11 +65710,13 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
         a.position = { x, y };
         a.movedLastTick = true;
       }
-      if (aug(a, "shield_charge", 0)) for (const t of around3(a, a.position, (a.hullRadius ?? 0) + 6)) {
+      const ram = aug(a, "shield_charge", 0), gore = worn(a, "gorehide-stompers");
+      if (ram || gore) for (const t of around3(a, a.position, (a.hullRadius ?? 0) + 6)) {
         const hit2 = r.hit ?? [];
         if (hit2.includes(t.entityId) || hit2.length >= 24) continue;
         r.hit = [...hit2, t.entityId];
-        damage(a, t, breakerHit(a, stats3, R9.ram), "bash", null, { sourceItem, trigger: "skill" });
+        if (ram) damage(a, t, breakerHit(a, stats3, R9.ram), "bash", null, { sourceItem, trigger: "skill" });
+        if (gore && t.alive) damage(a, t, multiplyCombat(stats3.attack, gore, 100), "offhand", null, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "proc" });
       }
     }
     if (--r.ticks > 0 && left > R9.step) return;
@@ -66272,6 +66405,22 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     const w = c.actors[a.entityId]?.skills?.wall;
     return Boolean(w && a.alive && fromWall(w, a.position) <= T52.flameWall.near);
   };
+  function moss4(a, combat) {
+    const share = a.alive ? worn(a, "mossback-pelt") : null, k = combat.skills;
+    if (!share) {
+      if (k?.moss) clearSkillState(combat, "moss");
+      return;
+    }
+    if (k?.moss && --k.moss.ticks > 0) return;
+    const hp = combatInteger(multiplyCombat(getStats(a.entityId).maxHp, share, 100));
+    classSkillsRecord(combat).moss = compareCombat(hp, 0) > 0 ? { ticks: MOSS_TICKS, hp } : { ticks: MOSS_TICKS };
+  }
+  function sting(a, t, amount2) {
+    if (!t.alive || isPodCombatTargetV4(t)) return;
+    const old2 = c.effects[a.entityId + "/" + t.entityId + "/sting"], left = old2 ? multiplyCombat(old2.attack, Math.max(0, Math.floor((old2.expiresTick - old2.nextTick) / 60) + 1), 1) : 0;
+    const each = combatInteger(multiplyCombat(addCombat(left, amount2), 1, TROPHY2.stingPulses));
+    if (compareCombat(each, 0) > 0) periodic(a, t, "sting", each, { sourceItem: damageSourceItem(owner(a), "poison") });
+  }
   function stepWall(a, combat) {
     const w = combat.skills?.wall;
     if (!w) return;
@@ -66690,6 +66839,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     as("glacial_burst", stepRime, a, combat);
     as("thunderfall", stepThunder, a, combat);
     wail(a, combat);
+    moss4(a, combat);
     const string = combat.skills?.flurry;
     if (!string || s.tick < string.nextTick) return;
     const stats3 = getStats(a.entityId);
@@ -66737,6 +66887,16 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (k?.spin && aug(target, "whirling_blades", 2)) out = multiplyCombat(out, T52.ward, 100);
     if (blinded(source3)) out = multiplyCombat(out, T52.blind, 100);
     if (k?.cloak) return multiplyCombat(out, 0, 1);
+    const own = c.actors[target.entityId];
+    if (k?.mist) {
+      clearSkillState(own, "mist");
+      return multiplyCombat(out, 0, 1);
+    }
+    const gold = own && !k?.gold ? worn(target, "goldcarapace-band") : null, maxHp = gold ? getStats(target.entityId)?.maxHp : void 0;
+    if (gold && maxHp !== void 0 && compareCombat(multiplyCombat(out, 100, 1), multiplyCombat(maxHp, TROPHY2.goldOver, 1)) > 0) {
+      out = multiplyCombat(out, 100 - gold, 100);
+      classSkillsRecord(own).gold = GOLD_TICKS;
+    }
     const shellCombat = c.actors[target.entityId];
     if (shellCombat && !shellCombat.skills?.shell && wears(target, "kheptra-signet")) {
       out = multiplyCombat(out, 50, 100);
@@ -66876,6 +67036,14 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       const shard4 = critical && target.alive ? worn(source3, "glasstail-cloak") : null;
       if (shard4) bleed(source3, target, getStats(source3.entityId), shard4 - 100);
     }
+    {
+      const venom = critical && target.alive ? worn(source3, "sunsting-grips") : null;
+      if (venom) sting(source3, target, multiplyCombat(out, venom, 100));
+    }
+    {
+      const ember2 = source3.alive ? worn(source3, "emberjaw-fang") : null;
+      if (ember2 && Object.values(c.effects).some((e) => e.targetId === target.entityId && e.kind === "burn")) healFlat(source3, combatInteger(multiplyCombat(out, ember2, 1e3)));
+    }
     const blood = rank(source3, "blood_for_blood");
     if (blood && source3.alive && marks2.ticking(target, "bleed")) heal(source3, getStats(source3.entityId), 5 * blood, 1e3);
     const run2 = rank(source3, "hit_and_run");
@@ -66992,6 +67160,14 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       const k = classSkillsRecord(combat);
       k.hide = { stacks: Math.min(MAX_HIDE, (k.hide?.stacks ?? 0) + 1), ticks: HIDE_TICKS };
     }
+    {
+      const chill = source3.alive && canStun(target) && !isPodCombatTargetV4(source3) ? worn(target, "rimecoil-hood") : null;
+      if (chill) effects2.status(target, source3, "rime", 1, chill);
+    }
+    {
+      const thorns2 = source3.alive && !attribution?.projectileImpact ? worn(target, "briarfang-thornmantle") : null, back = thorns2 ? combatInteger(multiplyCombat(addCombat(defense.prevented ?? 0, defense.damage ?? 0), thorns2, 100)) : null;
+      if (back && compareCombat(back, 0) > 0) damage(target, source3, back, "riposte", null, { sourceItem: damageSourceItem(p, "bash"), trigger: "reactive" });
+    }
   }
   function speed(entityId2) {
     const p = players.get(entityId2);
@@ -67034,6 +67210,13 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       if (r) reduceSkillCooldown(combat, "flurry", T52.bladeRush * r);
     }
     if (rank(a, "evasive")) classSkillsRecord(combat).evade = EVADE_TICKS;
+    {
+      const gore = worn(a, "gorehide-stompers");
+      if (gore) {
+        const stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "offhand");
+        for (const t of alongPath(a, from, to)) damage(a, t, multiplyCombat(stats3.attack, gore, 100), "offhand", null, { sourceItem, trigger: "proc" });
+      }
+    }
     const cross3 = rank(a, "crosscut");
     if (cross3) {
       const stats3 = getStats(a.entityId);
@@ -67078,6 +67261,14 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     {
       const harvest2 = a.alive ? worn(a, "jacks-band") : null;
       if (harvest2) heal(a, getStats(a.entityId), harvest2, 1e3);
+    }
+    {
+      const own = c.actors[a.entityId], every2 = a.alive && own && !own.skills?.veil ? worn(a, "mirewail-veil") : null;
+      if (every2) {
+        const k = classSkillsRecord(own);
+        k.mist = MIST_TICKS;
+        k.veil = every2;
+      }
     }
     const kill = gearAffixTotalsV2(owner(a)).lifeKill;
     if (a.alive && kill) heal(a, getStats(a.entityId), kill, 1e4);
@@ -67144,7 +67335,7 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
   const effects2 = createMasteryEffects(s, { damage, eligible: eligible2, identity: identity2, getStats: stats3, awards: mastery, bleed: (a, t, captured) => periodic(a, t, "bleed", captured.attack, captured) });
   function periodic(source3, target, kind, attack, captured) {
     if (!target.alive) return;
-    const id = `${source3.entityId}/${target.entityId}/${kind}`, old2 = c.effects[id], longer = heroRank(players.get(source3.entityId), kind === "bleed" ? "serrated_edge" : "searing"), lingering = kind === "bleed" ? heroRank(players.get(source3.entityId), "lingering_venom") : 0, eye6 = kind === "burn" ? wornUniqueValue(players.get(source3.entityId), "eye-of-the-sun")?.[0] ?? 0 : 0, life = Math.min(kind === "bleed" ? 1350 : 540, Math.round((kind === "bleed" ? 600 : 240) * (100 + 10 * longer) * (100 + eye6) * (100 + 10 * lingering) / 1e6) + (captured.extra ?? 0));
+    const id = `${source3.entityId}/${target.entityId}/${kind}`, old2 = c.effects[id], longer = heroRank(players.get(source3.entityId), kind === "bleed" ? "serrated_edge" : "searing"), lingering = kind === "bleed" ? heroRank(players.get(source3.entityId), "lingering_venom") : 0, eye6 = kind === "burn" ? wornUniqueValue(players.get(source3.entityId), "eye-of-the-sun")?.[0] ?? 0 : 0, life = kind === "sting" ? 240 : Math.min(kind === "bleed" ? 1350 : 540, Math.round((kind === "bleed" ? 600 : 240) * (100 + 10 * longer) * (100 + eye6) * (100 + 10 * lingering) / 1e6) + (captured.extra ?? 0));
     c.effects[id] = {
       id,
       sourceId: source3.entityId,
@@ -67267,7 +67458,7 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
       }
       if (s.tick >= e.nextTick) {
         if (eligible2(source3, target)) {
-          damage(source3, target, periodicPacket(e), e.kind, null, { sourceItem: e.sourceItem ?? null, trigger: "periodic" });
+          damage(source3, target, periodicPacket(e), e.kind === "sting" ? "poison" : e.kind, null, { sourceItem: e.sourceItem ?? null, trigger: "periodic" });
           if (e.kind === "burn") skills.spread(source3, target, e);
         }
         e.nextTick += 60;
@@ -71568,7 +71759,7 @@ function projectWorldTerrainD9(state, compiled, { x, y, width = 88, height = 88 
 function projectCombatPresentation(state, visibleIds) {
   const ids4 = new Set(visibleIds), lanes2 = /* @__PURE__ */ new Map();
   const mastery = Object.values(state.subweaponCombat.mastery ?? {});
-  return { masteryHazards: mastery.flatMap((b) => Object.values(b.hazards)).filter((e) => ids4.has(e.sourceId)).map((e) => ({ position: { ...e.position }, radius: e.radius, expiresTick: e.expiresTick })), masteryRazors: mastery.flatMap((b) => Object.values(b.razors)).filter((e) => ids4.has(e.sourceId)).map((e) => ({ position: { ...e.position }, direction: { ...e.direction } })), statuses: [...Object.values(state.subweaponCombat.effects), ...mastery.flatMap((b) => [...Object.values(b.poisons).map((e) => ({ ...e, id: e.sourceId + "/" + e.id, kind: "poison" })), ...Object.values(b.statuses).filter((e) => e.kind !== "grudge" && e.kind !== "weaken").map((e) => ({ ...e, id: e.sourceId + "/" + e.id, stacks: e.rank, nextTick: e.expiresTick, appliedTick: e.expiresTick - (e.kind === "expose" ? 300 : e.kind === "slow" ? 240 : 90) }))]), ...Object.values(state.subweaponCombat.controls ?? {}).map((e) => ({ ...e, kind: e.phase, nextTick: e.expiresTick }))].filter((e) => ids4.has(e.targetId) && e.expiresTick > state.tick).map((e) => ({ lane: (lanes2.set(e.targetId, (lanes2.get(e.targetId) ?? -1) + 1), lanes2.get(e.targetId)), id: e.id, sourceId: e.sourceId, targetId: e.targetId, kind: e.kind, stacks: e.stacks, expiresTick: e.expiresTick, nextTick: e.nextTick, durationFrames: ["bleed", "poison"].includes(e.kind) ? 600 : e.kind === "burn" ? 240 : e.expiresTick - e.appliedTick })), families: Object.fromEntries(Object.entries(state.subweaponCombat.actors).filter(([id]) => ids4.has(id)).map(([id, c]) => [id, { mastery: (() => {
+  return { masteryHazards: mastery.flatMap((b) => Object.values(b.hazards)).filter((e) => ids4.has(e.sourceId)).map((e) => ({ position: { ...e.position }, radius: e.radius, expiresTick: e.expiresTick })), masteryRazors: mastery.flatMap((b) => Object.values(b.razors)).filter((e) => ids4.has(e.sourceId)).map((e) => ({ position: { ...e.position }, direction: { ...e.direction } })), statuses: [...Object.values(state.subweaponCombat.effects).map((e) => e.kind === "sting" ? { ...e, kind: "poison", sting: true } : e), ...mastery.flatMap((b) => [...Object.values(b.poisons).map((e) => ({ ...e, id: e.sourceId + "/" + e.id, kind: "poison" })), ...Object.values(b.statuses).filter((e) => e.kind !== "grudge" && e.kind !== "weaken").map((e) => ({ ...e, id: e.sourceId + "/" + e.id, kind: e.kind === "rime" ? "slow" : e.kind, stacks: e.rank, nextTick: e.expiresTick, appliedTick: e.expiresTick - (e.kind === "expose" ? 300 : e.kind === "slow" ? 240 : e.kind === "rime" ? 180 : 90) }))]), ...Object.values(state.subweaponCombat.controls ?? {}).map((e) => ({ ...e, kind: e.phase, nextTick: e.expiresTick }))].filter((e) => ids4.has(e.targetId) && e.expiresTick > state.tick).map((e) => ({ lane: (lanes2.set(e.targetId, (lanes2.get(e.targetId) ?? -1) + 1), lanes2.get(e.targetId)), id: e.id, sourceId: e.sourceId, targetId: e.targetId, kind: e.kind, stacks: e.stacks, expiresTick: e.expiresTick, nextTick: e.nextTick, durationFrames: e.sting ? 240 : ["bleed", "poison"].includes(e.kind) ? 600 : e.kind === "burn" ? 240 : e.expiresTick - e.appliedTick })), families: Object.fromEntries(Object.entries(state.subweaponCombat.actors).filter(([id]) => ids4.has(id)).map(([id, c]) => [id, { mastery: (() => {
     const p = Object.values(state.playersById).find((p2) => p2.entityId === id), d = p?.d8, t = d?.transient;
     return t ? { pulseBlocks: t.pulseBlocks, syphon: finiteNodeRank(d, "tome_arcane_syphon") > 0, earthBreaker: finiteNodeRank(d, "shield_earth_breaker_bash") > 0, singularity: finiteNodeRank(d, "tome_keystone_singularity") > 0, anchor: t.lastAnchor, fortitudeStacks: t.fortitudeStacks, retaliatoryReady: t.retaliatoryReady, colossus: t.colossusTicks > 0, shadowStep: t.shadowStepTicks > 0, syphonStacks: t.syphonStacks, weavingStacks: t.weavingStacks } : null;
   })(), element: Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.itemsById[Object.values(state.playersById).find((p) => p.entityId === id)?.inventory.equipped.subweapon]?.generated?.definition.spellType ?? "fire", guard: c.guard ? { ...c.guard, integrity: presentCombat(c.guard.integrity), direction: { ...c.guard.direction } } : null, pressure: c.pressure, dash: { ...c.dash }, blink: itemDefinition(((p) => p?.inventory.itemsById[p.inventory.equipped.subweapon])(Object.values(state.playersById).find((p) => p.entityId === id)))?.subType === "tome", delivery: { ...c.delivery }, skill: c.skills?.last ? { ...c.skills.last } : null, parry: c.skills?.parry ?? c.skills?.counter ?? 0, orbs: c.skills?.orbs?.map((o) => ({ x: o.x, y: o.y, dx: o.dx, dy: o.dy, ticks: o.ticks, boom: Boolean(o.boom) })) ?? null, trail: c.skills?.trail ? { x: c.skills.trail.x, y: c.skills.trail.y, x2: c.skills.trail.x2, y2: c.skills.trail.y2, ticks: c.skills.trail.ticks } : null, pool: c.skills?.pool ? { x: c.skills.pool.x, y: c.skills.pool.y, ticks: c.skills.pool.ticks } : null, thrown: c.skills?.thrown ? { x: c.skills.thrown.x, y: c.skills.thrown.y } : null, banner: c.skills?.banner ? { x: c.skills.banner.x, y: c.skills.banner.y, ticks: c.skills.banner.ticks } : null, smoke: c.skills?.smoke ? { x: c.skills.smoke.x, y: c.skills.smoke.y, ticks: c.skills.smoke.ticks } : null, flameWall: c.skills?.wall ? { x: c.skills.wall.x, y: c.skills.wall.y, dx: c.skills.wall.dx, dy: c.skills.wall.dy, ticks: c.skills.wall.ticks, ring: Boolean(c.skills.wall.ring) } : null, field: c.skills?.field ? { x: c.skills.field.x, y: c.skills.field.y, ticks: c.skills.field.ticks } : null, ice: c.skills?.ice ? { ticks: c.skills.ice.ticks } : null, aegis: c.skills?.aegis ? { ticks: c.skills.aegis.ticks, over: Boolean(c.skills.aegis.over), echo: Boolean(c.skills.aegis.echo) } : null, crack: c.skills?.crack ? { x: c.skills.crack.x, y: c.skills.crack.y, r: c.skills.crack.r, ticks: c.skills.crack.ticks } : null, flower: c.skills?.flower ? { x: c.skills.flower.x, y: c.skills.flower.y, r: c.skills.flower.r, ticks: c.skills.flower.ticks } : null, echo: c.skills?.echo ? { x: c.skills.echo.x, y: c.skills.echo.y, ticks: c.skills.echo.ticks } : null, meteors: c.skills?.meteors ? c.skills.meteors.map((m) => ({ x: m.x, y: m.y, fall: m.fall, ticks: m.ticks, r: m.r })) : null, stepped: Boolean(c.skills?.stepped), riposte: c.skills?.riposte ?? 0, keen: Boolean(c.skills?.keen), sun: c.skills?.sun ?? 0, wail: c.skills?.wail ?? 0, shell: c.skills?.shell ?? 0, wave: c.skills?.wave ?? 0, shake: c.skills?.shake ? { x: c.skills.shake.x, y: c.skills.shake.y, dx: c.skills.shake.dx, dy: c.skills.shake.dy, r: c.skills.shake.r, ticks: c.skills.shake.ticks } : null, storm: Boolean(c.skills?.storm), duel: c.skills?.duel ? { target: c.skills.duel.target, stacks: c.skills.duel.stacks, ticks: c.skills.duel.ticks } : null, phoenix: c.skills?.phoenix ?? 0, shade: c.skills?.shade ? { x: c.skills.shade.x, y: c.skills.shade.y } : null, blooms: c.skills?.blooms ? c.skills.blooms.map((b) => ({ x: b.x, y: b.y, r: b.r, ticks: b.ticks })) : null, aftershock: c.skills?.aftershock ? { x: c.skills.aftershock.x, y: c.skills.aftershock.y, r: c.skills.aftershock.r } : null, fault: c.skills?.fault ? { x: c.skills.fault.x, y: c.skills.fault.y, r: c.skills.fault.r, ticks: c.skills.fault.ticks } : null, rime: c.skills?.rime ? { x: c.skills.rime.x, y: c.skills.rime.y, r: c.skills.rime.r, ticks: c.skills.rime.ticks } : null, seeds: c.skills?.seeds ? c.skills.seeds.map((e) => ({ x: e.x, y: e.y, r: e.r, ticks: e.ticks })) : null, thaw: c.skills?.thaw ? c.skills.thaw.map((e) => e.target) : null, spin: c.skills?.spin ? { ticks: c.skills.spin.ticks, hits: c.skills.spin.hits ?? 0 } : null, thunder: c.skills?.thunder ?? 0, leap: c.skills?.leap?.of ? c.skills.leap.ticks : 0, hymn: Boolean(c.skills?.hymn), firm: Boolean(c.skills?.firm), jugg: Boolean(c.skills?.jugg), cloak: Boolean(c.skills?.cloak), wall: ((d) => classRank(d, "bulwark_colossus") ? 10 : classRank(d, "iron_wall"))(Object.values(state.playersById).find((p) => p.entityId === id)?.d8) }])) };
@@ -80422,6 +80613,167 @@ Object.assign(RINGS, {
     c.stroke();
     px4(c, 15.7, 10.6, 0.6, 7.6, "#e9b93a");
     gem2(c, 16, 14.4, 1.4, A.gem);
+  }
+});
+var TQ = {
+  moss: { b: "#5f7d3a", d: "#4a6230", l: "#7f9f4e" },
+  stone: { b: "#8a8f86", d: "#6c7069", l: "#a7ada3" },
+  tusk: { b: "#efe4c8", d: "#cbbd98", l: "#fff8e6" },
+  leather: { b: "#7a4f30", d: "#5c3a22", l: "#956543" },
+  amber: { b: "#d79a3a", d: "#a8742a", l: "#f0bf6a" },
+  venom: { b: "#8fdc4a", d: "#5fae2e" },
+  rime: { b: "#9fd2ec", d: "#6fa8cc", l: "#dff3ff" },
+  ice: { b: "#e4f6ff", d: "#b6dcf0" },
+  chitin: { b: "#3a2a1a", d: "#2a1e12", l: "#5a4430" },
+  mist: { b: "#8fa6a0", d: "#6f8781", l: "#b9cec8" },
+  shell: { b: "#e8b83c", d: "#b98c22", l: "#ffe08a" },
+  briar: { b: "#3f5f2c", d: "#2f4721", l: "#557a3c" },
+  thorn: { b: "#6a4a2c", d: "#4c341e" },
+  bristle: { b: "#2e221a", d: "#21180f" },
+  obsidian: { b: "#2e2a30", d: "#1e1b20", l: "#4a4450" },
+  ember: { b: "#ff8a2a", d: "#d4561a" }
+};
+BODIES["mossback-pelt"] = (c, A) => {
+  outfit(c, { torso: TQ.stone, sleeve: TQ.stone, legs: { b: "#6c7069", d: "#55594f", l: "#8a8f86" } });
+  for (const [x, y, w, h] of [[10.2, 12.4, 3, 2.4], [18, 10.6, 2.8, 2.2], [11.6, 22.4, 2.6, 2], [18, 24.6, 2.6, 2]]) R7(c, x, y, w, h, { b: "#a7ada3", d: "#8a8f86" }, { split: 0.6, lw: 0.8 });
+  G2(c, [3.6, 9.8, 3.4, 6.4, 7, 5, 10.6, 6.2, 13.4, 4.8, 16, 6, 18.6, 4.8, 21.4, 6.2, 25, 5, 28.6, 6.4, 28.4, 9.8, 25.6, 11, 22.6, 9.6, 19.6, 11.2, 16, 9.8, 12.4, 11.2, 9.4, 9.6, 6.4, 11], TQ.moss, { split: 0.68 });
+  for (const [x, y] of [[6.8, 7.2], [25.6, 7.4], [16, 7.2]]) px4(c, x, y, 1, 1, "#f2e36a");
+  R7(c, 8.4, 16.4, 15.2, 2.4, TQ.leather, { flat: true, lw: 1.1 });
+  R7(c, 14.4, 16, 3.2, 3.2, accPal2(A), { flat: true, lw: 1 });
+  gem2(c, 16, 17.6, 1.8, A.gem);
+};
+BOOTS["gorehide-stompers"] = (c, A) => {
+  boot(c, A, { body: TQ.leather, cuff: TQ.bristle });
+  for (let i = 0; i < 6; i++) {
+    const x = 8.4 + i * 1.8;
+    G2(c, [x, 4, x + 0.9, 0.6 + i % 2 * 1.2, x + 1.8, 4], { b: TQ.bristle.b }, { flat: true, lw: 0.7 });
+  }
+  G2(c, [25.6, 22, 27.8, 18.4, 30.4, 16.8, 31, 17.8, 29, 19.6, 27.6, 22.6], TQ.tusk, { split: 0.6, lw: 0.9 });
+};
+GLOVES2["sunsting-grips"] = (c, A) => {
+  glove(c, A, { hand: TQ.amber, cuff: TQ.chitin, joints: true });
+  G2(c, [23.4, 22.8, 27.4, 19.4, 29.6, 14.6, 28.2, 12.8, 27.6, 16.8, 24.8, 20.2], TQ.chitin, { split: 0.5, lw: 0.9 });
+  c.beginPath();
+  c.arc(28.4, 11.4, 1.1, 0, Math.PI * 2);
+  c.fillStyle = TQ.venom.b;
+  c.fill();
+  c.lineWidth = 0.8;
+  c.strokeStyle = K3;
+  c.stroke();
+};
+HELMETS["rimecoil-hood"] = (c, A) => {
+  G2(c, [7, 10.4, 3.4, 5.6, 8.8, 8], TQ.ice, { split: 0.5, lw: 1 });
+  G2(c, [10.6, 8.4, 8.8, 2.6, 13.4, 7.4], TQ.ice, { split: 0.5, lw: 1 });
+  const pts2 = [4.6, 29, 4.6, 23, 6, 21.4, 6, 12, 9.4, 7.8, 22.8, 7.8, 26, 11, 26.4, 21.4, 27.8, 23, 27.8, 29];
+  G2(c, pts2, TQ.rime, { split: 0.72 });
+  c.save();
+  shape(c, pts2);
+  c.clip();
+  for (let r = 0; r < 5; r++) for (let i = 0; i < 6; i++) {
+    c.beginPath();
+    c.arc(6.4 + i * 3.6 + r % 2 * 1.8, 10.4 + r * 3.8, 1.5, 0, Math.PI);
+    c.lineWidth = 0.7;
+    c.strokeStyle = "#4f86a8";
+    c.stroke();
+  }
+  c.restore();
+  opening2(c, 15.6, 11.6, 10.4, 11);
+  R7(c, 14.8, 10.2, 12, 1.8, TQ.ice, { split: 0.7, lw: 0.9 });
+  trim(c, 4.6, 23.6, 23.2, A);
+};
+Object.assign(CAPE_ICONS, {
+  // Mirewail Veil: a thin marsh-gray veil, torn into wisps at the hem, two pale lights in its folds.
+  "mirewail-veil"(c, A) {
+    const hem = [];
+    for (let i = 0; i <= 12; i++) hem.push(27.4 - 22.8 * i / 12, i % 2 ? 22.6 + (i % 4 === 1 ? 1.8 : 0) : 28.2);
+    c.save();
+    c.globalAlpha = 0.88;
+    G2(c, [10.4, 7, 21.6, 7, ...hem], TQ.mist, { split: 0.68 });
+    c.restore();
+    capeFolds(c);
+    for (const [x, y] of [[12.2, 14.6], [19.2, 16.8]]) {
+      c.beginPath();
+      c.arc(x, y, 2.2, 0, Math.PI * 2);
+      c.fillStyle = "#d8fff040";
+      c.fill();
+      c.beginPath();
+      c.arc(x, y, 1.1, 0, Math.PI * 2);
+      c.fillStyle = "#d8fff0";
+      c.fill();
+    }
+    G2(c, [10.2, 4.4, 21.8, 4.4, 21, 7.6, 11, 7.6], { b: "#6f8781", d: "#566c67" }, { split: 0.72, lw: 1 });
+    gem2(c, 16, 6, 2.2, A.gem);
+  },
+  // Briarfang Thornmantle: dark jungle green bound in brown briars, thorns poking out of the edges.
+  "briarfang-thornmantle"(c, A) {
+    G2(c, capeBody(7, 27.6, 11), TQ.briar, { split: 0.68 });
+    capeFolds(c);
+    capeHem(c, A, 27.6, 11);
+    const vines2 = [[[7, 24], [16, 12], [25, 22]], [[9, 16], [16, 21], [23, 14]]];
+    for (const [w, col2] of [[1.9, K3], [1.2, TQ.thorn.b]]) {
+      c.lineWidth = w;
+      c.strokeStyle = col2;
+      for (const [a, b, d] of vines2) {
+        c.beginPath();
+        c.moveTo(a[0], a[1]);
+        c.quadraticCurveTo(b[0], b[1], d[0], d[1]);
+        c.stroke();
+      }
+    }
+    for (const [x, y, s] of [[5.6, 22.6, -1], [26.4, 21.8, 1], [7.2, 15.2, -1], [24.8, 14.4, 1], [12, 17.6, -1], [20.4, 17.4, 1]]) G2(c, [x, y - 0.9, x + s * 2.6, y, x, y + 0.9], TQ.tusk, { flat: true, lw: 0.6 });
+    px4(c, 14.8, 15.4, 1.4, 1.4, "#c8322a");
+    px4(c, 18.6, 19.2, 1.4, 1.4, "#c8322a");
+    capeCollar(c, A, TQ.briar);
+  }
+});
+Object.assign(RINGS, {
+  // Goldcarapace Band: a gold band capped with a ridged scuttler shell.
+  "goldcarapace-band"(c, A) {
+    band3(c, GOLD13, { rx: 6.8, ry: 5, thick: 2.4 });
+    const dome3 = () => {
+      c.beginPath();
+      c.ellipse(16, 14.6, 5.4, 4.6, 0, Math.PI, 0);
+      c.closePath();
+    };
+    dome3();
+    c.fillStyle = TQ.shell.b;
+    c.fill();
+    c.save();
+    dome3();
+    c.clip();
+    c.fillStyle = TQ.shell.d;
+    c.fillRect(18.4, 8, 4, 8);
+    c.fillStyle = TQ.shell.l;
+    c.fillRect(12, 10.6, 4, 0.7);
+    c.restore();
+    dome3();
+    c.lineWidth = 1;
+    c.strokeStyle = K3;
+    c.stroke();
+    c.lineWidth = 0.6;
+    for (const x of [13.4, 16, 18.6]) {
+      c.beginPath();
+      c.moveTo(x, 10 + Math.abs(x - 16) * 0.5);
+      c.lineTo(x, 14.6);
+      c.stroke();
+    }
+    gem2(c, 16, 23.8, 1.8, A.gem);
+  },
+  // Emberjaw Fang: an obsidian band veined with ember, a serpent's fang set at the front.
+  "emberjaw-fang"(c, A) {
+    band3(c, TQ.obsidian, { thick: 2.1 });
+    c.strokeStyle = TQ.ember.b;
+    c.lineWidth = 0.6;
+    for (const [a, b] of [[0.2, 0.45], [0.6, 0.8], [1.15, 1.35]]) {
+      c.beginPath();
+      c.ellipse(16, 20, 5.4, 3.8, 0, a * Math.PI, b * Math.PI);
+      c.stroke();
+    }
+    G2(c, [14, 14.4, 16, 5.6, 18, 14.4], TQ.tusk, { split: 0.55, lw: 1 });
+    px4(c, 15.6, 10.6, 0.8, 2.4, TQ.ember.b);
+    R7(c, 13.4, 13.6, 5.2, 2.4, TQ.obsidian, { split: 0.6, lw: 0.9 });
+    px4(c, 14.6, 14.4, 2.6, 0.6, TQ.ember.b);
+    gem2(c, 16, 23.6, 1.6, A.gem);
   }
 });
 var ART3 = { main: WEAPONS2, gloves: GLOVES2, boots: BOOTS, helmet: HELMETS, body: BODIES, ring: RINGS, cape: CAPE_ICONS };
