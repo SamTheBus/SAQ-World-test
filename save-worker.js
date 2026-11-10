@@ -1309,152 +1309,12 @@ for (const [biome, roles] of Object.entries(WILDERNESS_ECOLOGY_V3_MATRIX)) {
 }
 for (const f3 of Object.values(WILDERNESS_ECOLOGY_RARE_SITE_THEMES).flat()) if (!existingCreature(f3)) throw Error("Unknown exotic creature " + f3);
 
-// src/shared/content/recovered_boss_catalog_v1.js
-var RECOVERED_BOSS_VERSION = "recovered-boss-v1";
-var RECOVERED_BOSSES = Object.freeze({
-  corrosive_abomination: Object.freeze({
-    id: "corrosive_abomination",
-    label: "CORROSIVE ABOMINATION",
-    site: "repeatable-slot:ruin:wetland:standard:033",
-    family: "ruin",
-    biome: "wetland",
-    color: "#91e56b",
-    secondary: "#436f3f",
-    adds: 6,
-    attacks: Object.freeze({ corrosive_slam: 75, spore_storm: 85, acid_spill: 45 })
-  }),
-  void_overseer: Object.freeze({
-    id: "void_overseer",
-    label: "VOID OVERSEER",
-    site: "repeatable-slot:ruin:frostland:deep:01",
-    family: "ruin",
-    biome: "frostland",
-    color: "#fa78d5",
-    secondary: "#38234a",
-    adds: 0,
-    attacks: Object.freeze({ eye_lance: 75, singularity: 360 })
-  }),
-  chronos_arbitrator: Object.freeze({
-    id: "chronos_arbitrator",
-    label: "CHRONOS ARBITRATOR",
-    site: "repeatable-slot:ruin:upland:standard:049",
-    family: "ruin",
-    biome: "upland",
-    color: "#e8c874",
-    secondary: "#536c8a",
-    adds: 0,
-    attacks: Object.freeze({ chronos_slam: 75, time_field: 60, chronos_rewind: 240 })
-  }),
-  nexus_overseer: Object.freeze({
-    id: "nexus_overseer",
-    label: "NEXUS OVERSEER",
-    site: "repeatable-slot:ruin:tropical:standard:037",
-    family: "ruin",
-    biome: "tropical",
-    color: "#5cecf5",
-    secondary: "#a078ff",
-    adds: 2,
-    attacks: Object.freeze({ prism_collapse: 110, control_glitch: 60, prism_slam: 75 })
-  }),
-  gilded_vault_keeper: Object.freeze({
-    id: "gilded_vault_keeper",
-    label: "GILDED VAULT KEEPER",
-    site: "repeatable-slot:crypt:upland:standard:01",
-    family: "crypt",
-    biome: "upland",
-    color: "#ffd16a",
-    secondary: "#aa3155",
-    adds: 0,
-    attacks: Object.freeze({ vault_crush: 75, gold_fall: 75, taxation: 240 })
-  }),
-  marcus: Object.freeze({
-    id: "marcus",
-    label: "GOLDSPUR THE OUTLAW",
-    site: "repeatable-slot:fort:grassland:standard:040",
-    family: "fort",
-    biome: "grassland",
-    color: "#ffb968",
-    secondary: "#bd4d39",
-    adds: 0,
-    attacks: Object.freeze({ coin_barrage: 65, gold_rush: 55, gilded_lasso: 55, inversion: 80, molten_shield: 240 })
-  }),
-  ashfang: Object.freeze({
-    id: "ashfang",
-    label: "ASHFANG",
-    site: "repeatable-slot:ruin:desert:standard:056",
-    family: "ruin",
-    biome: "desert",
-    color: "#ef5b57",
-    secondary: "#63283a",
-    adds: 0,
-    attacks: Object.freeze({ scarlet_fire: 90, hooked_tail: 70, arena_collapse: 100 })
-  }),
-  cinderhart: Object.freeze({
-    id: "cinderhart",
-    label: "CINDERHART",
-    site: "repeatable-slot:ruin:woodland:standard:054",
-    family: "ruin",
-    biome: "woodland",
-    color: "#ff983e",
-    secondary: "#432b25",
-    adds: 5,
-    attacks: Object.freeze({ warren_call: 60, fire_charge: 54 })
-  })
-});
-var RECOVERED_BOSS_IDS = Object.freeze(Object.keys(RECOVERED_BOSSES));
-function recoveredBossForReservation(reservationId, family2, index, floorCount, enabled2 = true) {
-  if (!enabled2 || !Number.isInteger(index) || index !== floorCount - 1) return null;
-  const boss = RECOVERED_BOSSES[bossAtSiteV1(reservationId)];
-  return boss?.family === family2 ? boss : null;
-}
-
-// src/shared/content/corrosive_shedding_v4.js
-var CORROSIVE_SHEDDING_V4 = Object.freeze({ version: 4, stepPercent: 8, maxLive: 6, maxDamageSheds: 12, maxLiveSlag: 2, slagEveryChunks: 3, flightTicks: 18, coalescenceTicks: 12 });
-
-// src/shared/content/biome_bosses_v1.js
-var BIOME_BOSSES_V1 = Object.freeze({
-  barrow_king: Object.freeze({
-    id: "barrow_king",
-    label: "BARROW KING",
-    site: "repeatable-slot:ruin:wetland:standard:067",
-    family: "ruin",
-    biome: "grassland",
-    color: "#9be37a",
-    secondary: "#5a2f6e",
-    adds: 4,
-    summonKind: "wight",
-    attacks: Object.freeze({ grave_cleave: 70, crown_flame: 80, barrow_call: 60 })
-  }),
-  sun_pharaoh: Object.freeze({
-    id: "sun_pharaoh",
-    label: "SUN PHARAOH",
-    site: "repeatable-slot:crypt:frostland:deep:01",
-    family: "crypt",
-    biome: "desert",
-    color: "#ffcf4a",
-    secondary: "#2f5fa8",
-    adds: 4,
-    summonKind: "scarab",
-    attacks: Object.freeze({ solar_beam: 75, sunfall: 90, scarab_swarm: 60 })
-  })
-});
-var BIOME_BOSS_IDS_V1 = Object.freeze(Object.keys(BIOME_BOSSES_V1));
-var BIOME_BOSS_DAMAGE_V1 = Object.freeze({ grave_cleave: 19, crown_flame: 15, solar_beam: 17, sunfall: 15 });
-var BIOME_BOSS_REACH_V1 = Object.freeze({ grave_cleave: 78, crown_flame: 70, solar_beam: 280, solarBeamHalfWidth: 24, sunfall: 40 });
-var BIOME_BOSS_POOLS_V1 = Object.freeze({ ghostfire: Object.freeze([44, 300]), sunfire: Object.freeze([30, 240]) });
-
-// src/shared/content/recovered_boss_catalog_v4.js
-var RECOVERED_BOSSES2 = Object.freeze({ ...RECOVERED_BOSSES, corrosive_abomination: Object.freeze({ ...RECOVERED_BOSSES.corrosive_abomination, adds: CORROSIVE_SHEDDING_V4.maxDamageSheds, sheddingPolicy: 4 }), ...BIOME_BOSSES_V1 });
-var recoveredBossForId = (id) => RECOVERED_BOSSES2[id] ?? null;
-function recoveredBossForReservation2(reservationId, family2, index, floorCount, enabled2 = true) {
-  const row = recoveredBossForReservation(reservationId, family2, index, floorCount, enabled2);
-  if (row) return recoveredBossForId(row.id);
-  if (!enabled2 || !Number.isInteger(index) || index !== floorCount - 1) return null;
-  const native = BIOME_BOSSES_V1[bossAtSiteV1(reservationId)];
-  return native?.family === family2 ? native : null;
-}
-
 // src/shared/content/bosses_d12_5.js
+var arachnidTreantCaveHereV1 = (reservationId) => {
+  const s = worldSiteV1(reservationId);
+  return !s || s.biome === "tropical";
+};
+var caveReservationIdV1 = (site) => site?.socket?.provenance?.reservationId ?? site?.spawnProvenance?.socket?.provenance?.reservationId ?? null;
 var ARACHNID_TREANT_BOSS_ID = "arachnid_treant";
 var ARACHNID_TREANT_PROFILE = freezeWire({
   contentDefinitionId: "def:d4500000000000000000000000000001",
@@ -1486,773 +1346,294 @@ var ARACHNID_TREANT_D12_5A = freezeWire({
   barkShield: { damageMultiplier: { numerator: 1, denominator: 10 }, summonCount: 3, cocoonRadius: 54, hatchTicks: 240, breakRecoveryTicks: 60 }
 });
 
-// src/shared/content/world_profile_d9.js
-var D9_PROFILE = freezeWire({
-  version: "world-geography-d9-v1",
-  coordinateVersion: "world-address-d9-v1",
-  progressionPolicy: "effective-level-depth-d9-v1",
-  chunkWidth: 1024,
-  chunkHeight: 832,
-  tileSize: 32,
-  regionChunks: 8,
-  coordinateDigits: 256,
-  biomes: ["woodland", "rocky-uplands", "marsh"],
-  floorBands: [[1, 5], [6, 10], [11, 20], [21, 40], [41, 80]],
-  lowFloorPercent: 20,
-  anomalyPercent: 10,
-  originCollarChunks: 1,
-  renewalVacancyTicks: 18e3,
-  prepareRadius: 768,
-  leaveRadius: 960,
-  projectionRadius: 900,
-  placementSafetyRadius: 384,
-  placementCandidates: 64,
-  residentRadiusChunks: 2,
-  preloadRadiusChunks: 3,
-  softActors: 24,
-  hardActors: 48,
-  minimapWidth: 128,
-  minimapHeight: 96,
-  mapTileBudget: 128,
-  siteSocketVersion: "site-socket-d9-v1",
-  siteSocketSlots: 1,
-  siteSocketChanceDenominator: 8
-});
+// src/shared/content/world_melee_geometry.js
+function worldOrdinaryMeleeProfile(state, profile2) {
+  return hasWorldCombat(state) && ordinaryEnemyForProfile(profile2?.contentDefinitionId) ? { ...profile2, attackReach: 32, attackReachMode: "clearHullGap" } : profile2;
+}
 
-// src/shared/contracts/world_address.js
-function signedAddress(value) {
-  requireContract(typeof value === "string" && /^(0|[1-9][0-9]*|-[1-9][0-9]*)$/.test(value), "Noncanonical world address");
-  if (value.replace("-", "").length > D9_PROFILE.coordinateDigits) {
-    const e = new RangeError("World-address extension required");
-    e.code = "WORLD_ADDRESS_EXTENSION_REQUIRED";
-    throw e;
+// src/shared/content/spawn_levels_v1.js
+var SPAWN_LEVELS_V1 = freezeWire({
+  version: "spawn-levels-v1",
+  levelCap: 50,
+  // Each pack member's offset from the encounter level, picked by its id (out of 20).
+  packOffsets: [-1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2],
+  site: { offsets: [1, 2], highEvery: 10, highTiers: ["small", "standard"], highOffset: { early: 10, late: 15, lateFrom: 25 } },
+  lairTiers: ["large", "deep"]
+});
+var hash = (text) => {
+  let value = 2166136261;
+  for (let i = 0; i < text.length; i++) value = Math.imul(value ^ text.charCodeAt(i), 16777619);
+  return value >>> 0;
+};
+var cap = (level) => Math.max(1, Math.min(SPAWN_LEVELS_V1.levelCap, level));
+var usesSpawnLevelsV1 = (state) => state?.d9World?.plannedWorld?.worldMaker !== void 0;
+var pageAt = (state, chunkX, chunkY) => state?.d9World?.runtime?.chunks?.find((p) => String(p.chunkX) === String(chunkX) && String(p.chunkY) === String(chunkY)) ?? null;
+var areaScalesV1 = (state, biome) => Boolean(biome && state?.campaign?.areaBossesByBiome?.[biome]);
+var siteKey = (socket) => socket?.provenance?.reservationId ?? socket?.siteId ?? "";
+var isHighSiteV1 = (socket) => Boolean(siteKey(socket)) && !/(^|:)signature:/.test(siteKey(socket)) && SPAWN_LEVELS_V1.site.highTiers.includes(socket?.provenance?.sizeTier) && hash("spawn-levels-v1/high/" + siteKey(socket)) % SPAWN_LEVELS_V1.site.highEvery === 0;
+function siteLevelV1(state, socket) {
+  const page = pageAt(state, socket.entrance?.chunkX, socket.entrance?.chunkY), base = Number(page?.region?.minimumLevel ?? socket.minimumLevel), S = SPAWN_LEVELS_V1.site;
+  const offset = isHighSiteV1(socket) ? base < S.highOffset.lateFrom ? S.highOffset.early : S.highOffset.late : S.offsets[hash("spawn-levels-v1/offset/" + siteKey(socket)) % S.offsets.length];
+  return cap(base + offset);
+}
+var siteMinimumLevelV1 = (state, socket) => usesSpawnLevelsV1(state) ? siteLevelV1(state, socket) : socket.minimumLevel;
+var siteScalesV1 = (state, socket) => !usesSpawnLevelsV1(state) || areaScalesV1(state, socket.region?.biome);
+var packLevelOffsetV1 = (entityId2) => SPAWN_LEVELS_V1.packOffsets[hash("spawn-levels-v1/pack/" + entityId2) % SPAWN_LEVELS_V1.packOffsets.length];
+var memberLevelOffsetV1 = (state, entityId2) => !usesSpawnLevelsV1(state) || state.bossCombat?.bossesByEntityId?.[entityId2] || state.bossCombat?.summonsByEntityId?.[entityId2] || state.eliteCombat?.elitesByEntityId?.[entityId2] ? 0 : packLevelOffsetV1(entityId2);
+var memberLevelV1 = (state, level, entityId2) => cap(Number(level) + memberLevelOffsetV1(state, entityId2));
+var PACK_LEVEL_SPREAD_V1 = Math.max(...SPAWN_LEVELS_V1.packOffsets) - Math.min(...SPAWN_LEVELS_V1.packOffsets);
+function groupBaseLevelV1(state, group) {
+  const live = group.entityIds.filter((id) => state.entitiesById[id]?.alive), ids = live.length ? live : group.entityIds, levels2 = group.threatSnapshot.levelsByEntityId;
+  const at2 = ids.find((id) => memberLevelOffsetV1(state, id) === 0) ?? ids[0];
+  return cap(Number(levels2[at2]) - memberLevelOffsetV1(state, at2));
+}
+
+// src/shared/contracts/hashing.js
+function utf8(value) {
+  requireContract(typeof value === "string" && !value.includes("\0"), "Invalid UTF-8 input");
+  const bytes = [];
+  for (let i = 0; i < value.length; i++) {
+    let point14 = value.charCodeAt(i);
+    if (point14 >= 55296 && point14 <= 56319) {
+      const low = value.charCodeAt(++i);
+      requireContract(low >= 56320 && low <= 57343, "Unpaired surrogate");
+      point14 = 65536 + (point14 - 55296 << 10) + low - 56320;
+    } else requireContract(point14 < 56320 || point14 > 57343, "Unpaired surrogate");
+    if (point14 < 128) bytes.push(point14);
+    else if (point14 < 2048) bytes.push(192 | point14 >>> 6, 128 | point14 & 63);
+    else if (point14 < 65536) bytes.push(224 | point14 >>> 12, 128 | point14 >>> 6 & 63, 128 | point14 & 63);
+    else bytes.push(240 | point14 >>> 18, 128 | point14 >>> 12 & 63, 128 | point14 >>> 6 & 63, 128 | point14 & 63);
   }
+  return bytes;
+}
+function validateBytes(bytes, size) {
+  requireContract(Number.isSafeInteger(size) && size >= 0 && size <= 16777216 && Array.isArray(bytes) && Object.getPrototypeOf(bytes) === Array.prototype && bytes.length === size, `Expected ${size} bytes`);
+  const keys2 = Reflect.ownKeys(bytes);
+  requireContract(keys2.length === size + 1, "Extended byte array");
+  for (let i = 0; i < size; i++) {
+    const descriptor = Object.getOwnPropertyDescriptor(bytes, String(i));
+    requireContract(descriptor && "value" in descriptor && descriptor.enumerable && Number.isInteger(descriptor.value) && descriptor.value >= 0 && descriptor.value <= 255, "Invalid byte data");
+  }
+  return bytes;
+}
+var textEncoder = typeof TextEncoder === "function" ? new TextEncoder() : null;
+async function hashUtf8(text, sha256) {
+  requireContract(typeof sha256 === "function", "Explicit SHA-256 provider required");
+  if (!textEncoder || typeof text !== "string" || typeof text.isWellFormed !== "function") return hashBytes(utf8(text), sha256);
+  requireContract(!text.includes("\0"), "Invalid UTF-8 input");
+  requireContract(text.isWellFormed(), "Unpaired surrogate");
+  const bytes = textEncoder.encode(text);
+  requireContract(bytes.length <= 16777216, `Expected ${bytes.length} bytes`);
+  const result = await sha256(bytes);
+  validateBytes(result, 32);
+  return [...result];
+}
+function bytesToHex(bytes) {
+  validateBytes(bytes, bytes.length);
+  return bytes.map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+function validateHex(value, bytes) {
+  requireContract(typeof value === "string" && new RegExp(`^[0-9a-f]{${bytes * 2}}$`).test(value), "Invalid canonical hex");
   return value;
 }
-var addressWire = (value) => signedAddress(String(value));
-function floorDiv(a, b) {
-  requireContract(typeof a === "bigint" && typeof b === "bigint" && b > 0n, "Invalid exact floor division");
-  const q = a / b;
-  return a % b < 0n ? q - 1n : q;
+function frameUtf8(fields) {
+  validateWire(fields);
+  requireContract(Array.isArray(fields) && fields.length <= 32, "Invalid framing fields");
+  const output = [];
+  for (const field2 of fields) {
+    const bytes = utf8(field2);
+    requireContract(bytes.length <= 4096, "Framing field too long");
+    const length = bytes.length;
+    output.push(length >>> 24 & 255, length >>> 16 & 255, length >>> 8 & 255, length & 255, ...bytes);
+  }
+  return output;
 }
-function regionAddress(chunkX, chunkY) {
-  const x = BigInt(signedAddress(chunkX)), y = BigInt(signedAddress(chunkY)), n = BigInt(D9_PROFILE.regionChunks), rx = floorDiv(x, n), ry = floorDiv(y, n);
-  return freezeWire({ regionX: addressWire(rx), regionY: addressWire(ry), chunkX: Number(x - rx * n), chunkY: Number(y - ry * n) });
-}
-function validateWorldPosition(p) {
-  closedRecord(p, ["chunkX", "chunkY", "localX", "localY"]);
-  signedAddress(p.chunkX);
-  signedAddress(p.chunkY);
-  requireContract(Number.isFinite(p.localX) && p.localX >= 0 && p.localX < D9_PROFILE.chunkWidth && Number.isFinite(p.localY) && p.localY >= 0 && p.localY < D9_PROFILE.chunkHeight, "Invalid local world position");
-  return p;
-}
-function normalizeWorldPosition(p) {
-  signedAddress(p.chunkX);
-  signedAddress(p.chunkY);
-  requireContract(Number.isFinite(p.localX) && Number.isFinite(p.localY), "Invalid local movement");
-  const dx = Math.floor(p.localX / D9_PROFILE.chunkWidth), dy = Math.floor(p.localY / D9_PROFILE.chunkHeight);
-  requireContract(Number.isSafeInteger(dx) && Number.isSafeInteger(dy), "Unbounded local movement");
-  const normalized = Object.assign(/* @__PURE__ */ Object.create(null), { chunkX: addressWire(BigInt(p.chunkX) + BigInt(dx)), chunkY: addressWire(BigInt(p.chunkY) + BigInt(dy)), localX: p.localX - dx * D9_PROFILE.chunkWidth, localY: p.localY - dy * D9_PROFILE.chunkHeight });
-  return Object.freeze(validateWorldPosition(normalized));
-}
-var legacyWorldPosition = (p) => normalizeWorldPosition({ chunkX: "0", chunkY: "0", localX: p.x, localY: p.y });
-function relativeWorldPosition(p, origin2, maxChunkDelta = 8) {
-  validateWorldPosition(p);
-  signedAddress(origin2.chunkX);
-  signedAddress(origin2.chunkY);
-  requireContract(Number.isSafeInteger(maxChunkDelta) && maxChunkDelta >= 0 && maxChunkDelta <= 64, "Invalid local frame radius");
-  const dx = BigInt(p.chunkX) - BigInt(origin2.chunkX), dy = BigInt(p.chunkY) - BigInt(origin2.chunkY), limit = BigInt(maxChunkDelta);
-  if (dx < -limit || dx > limit || dy < -limit || dy > limit) return null;
-  return { x: Number(dx) * D9_PROFILE.chunkWidth + p.localX, y: Number(dy) * D9_PROFILE.chunkHeight + p.localY };
+async function hashBytes(bytes, sha256) {
+  requireContract(typeof sha256 === "function", "Explicit SHA-256 provider required");
+  validateBytes(bytes, bytes.length);
+  const result = await sha256(Object.freeze([...bytes]));
+  validateBytes(result, 32);
+  return [...result];
 }
 
-// src/shared/contracts/local_world_frames_d9.js
-var FRAME_CHUNKS = 64;
-var STRIDE = FRAME_CHUNKS * 2 * D9_PROFILE.chunkWidth;
-var abs = (n) => n < 0n ? -n : n;
-function planLocalFramesD9(participants, { keepOrigin = false, preparationAnchor = false } = {}) {
-  requireContract(participants.length >= Number(!keepOrigin) && participants.length <= (preparationAnchor ? 5 : 4) && (!preparationAnchor || participants.filter((p) => p.playerId === "destination-preparation").length === 1), "D9 participant frame bound");
-  const sorted2 = [...participants].sort((a, b) => a.playerId.localeCompare(b.playerId));
-  for (const p of sorted2) validateWorldPosition(p.position);
-  const parent = sorted2.map((_, i) => i), find = (i) => parent[i] === i ? i : parent[i] = find(parent[i]);
-  const mergeChunks = 2 * D9_PROFILE.preloadRadiusChunks + 2;
-  for (let i = 0; i < sorted2.length; i++) for (let j = i + 1; j < sorted2.length; j++) if (abs(BigInt(sorted2[i].position.chunkX) - BigInt(sorted2[j].position.chunkX)) <= BigInt(mergeChunks) && abs(BigInt(sorted2[i].position.chunkY) - BigInt(sorted2[j].position.chunkY)) <= BigInt(mergeChunks)) parent[find(j)] = find(i);
-  const components = /* @__PURE__ */ new Map();
-  for (let i = 0; i < sorted2.length; i++) {
-    const root2 = find(i);
-    if (!components.has(root2)) components.set(root2, []);
-    components.get(root2).push(sorted2[i]);
+// src/shared/contracts/d9_numeric_expression.js
+var ceilDiv = (n, d) => (n + d - 1n) / d;
+function numericContext(precision = 48) {
+  requireContract(Number.isSafeInteger(precision) && precision >= 16 && precision <= 8192, "Invalid proof precision");
+  const S = 10n ** BigInt(precision);
+  let work = 0;
+  const budget = () => {
+    if (++work > 2e4) numericExtension("D9 numeric proof work");
+  };
+  const pair = (lo, hi = lo) => {
+    requireContract(lo >= 0n && hi >= lo, "Invalid numeric interval");
+    if (hi.toString().length > INTEGER_MAX_DIGITS + precision + 4) numericExtension("D9 numeric magnitude");
+    return { lo, hi };
+  };
+  const q = (n, d = 1n) => {
+    n = progressionBigInt(n);
+    d = progressionBigInt(d);
+    requireContract(d > 0n, "Zero denominator");
+    return pair(n * S / d, ceilDiv(n * S, d));
+  };
+  const add = (a, b) => pair(a.lo + b.lo, a.hi + b.hi);
+  const sub = (a, b) => {
+    requireContract(a.lo >= b.hi, "Unproven positive subtraction");
+    return pair(a.lo - b.hi, a.hi - b.lo);
+  };
+  const mul2 = (a, b) => {
+    budget();
+    return pair(a.lo * b.lo / S, ceilDiv(a.hi * b.hi, S));
+  };
+  const div = (a, b) => {
+    budget();
+    requireContract(b.lo > 0n, "Unproven divisor");
+    return pair(a.lo * S / b.hi, ceilDiv(a.hi * S, b.lo));
+  };
+  const power2 = (a, n) => {
+    let out = q(1), base = a;
+    while (n) {
+      budget();
+      if (n & 1n) out = mul2(out, base);
+      n >>= 1n;
+      if (n) base = mul2(base, base);
+    }
+    return out;
+  };
+  function rootInteger(n, k) {
+    if (n < 2n) return n;
+    let x = 1n << BigInt(Math.ceil(n.toString(2).length / k));
+    for (; ; ) {
+      budget();
+      const y = (BigInt(k - 1) * x + n / x ** BigInt(k - 1)) / BigInt(k);
+      if (y >= x) return x;
+      x = y;
+    }
   }
-  const groups = [...components.values()], originPlayers = keepOrigin ? groups.filter((ps) => ps.some((p) => abs(BigInt(p.position.chunkX)) <= 32n && abs(BigInt(p.position.chunkY)) <= 32n)).flat() : [];
-  const remote = groups.filter((ps) => !originPlayers.includes(ps[0]));
-  return freezeWire([...keepOrigin ? [{ id: 0, chunkX: "0", chunkY: "0", offsetX: 0, offsetY: 0, playerIds: originPlayers.map((p) => p.playerId) }] : [], ...remote.map((ps, j) => {
-    const i = j + (keepOrigin ? 1 : 0);
-    return { id: i, chunkX: ps[0].position.chunkX, chunkY: ps[0].position.chunkY, offsetX: i * STRIDE + FRAME_CHUNKS * D9_PROFILE.chunkWidth, offsetY: FRAME_CHUNKS * D9_PROFILE.chunkHeight, playerIds: ps.map((p) => p.playerId) };
-  })]);
-}
-function projectToLocalFrameD9(position2, frames) {
-  validateWorldPosition(position2);
-  const origin2 = frames.find((f3) => f3.originBounds);
-  if (origin2 && BigInt(position2.chunkX) >= -2n && BigInt(position2.chunkY) >= -2n && BigInt(position2.chunkX) < BigInt(origin2.originBounds.width) + 2n && BigInt(position2.chunkY) < BigInt(origin2.originBounds.height) + 2n) {
-    const p = relativeWorldPosition(position2, origin2, FRAME_CHUNKS - 1);
-    if (p) return { frameId: origin2.id, x: p.x + origin2.offsetX, y: p.y + origin2.offsetY };
+  const root2 = (a, k) => {
+    requireContract(Number.isSafeInteger(k) && k >= 1 && k <= 100, "Invalid root degree");
+    const factor = S ** BigInt(k - 1), lo = rootInteger(a.lo * factor, k), hi = rootInteger(a.hi * factor, k);
+    return pair(lo, hi ** BigInt(k) === a.hi * factor ? hi : hi + 1n);
+  };
+  const frac = (a, p, d) => root2(power2(a, BigInt(p)), d);
+  function lnReduced(a) {
+    requireContract(a.lo >= S && a.hi <= 2n * S, "Log reduction required");
+    const z = div(sub(a, q(1)), add(a, q(1))), z2 = mul2(z, z);
+    let term = z, sum2 = pair(0n), i = 1n;
+    for (; ; ) {
+      budget();
+      sum2 = add(sum2, div(term, q(i)));
+      term = mul2(term, z2);
+      i += 2n;
+      const tail = div(div(term, q(i)), sub(q(1), z2));
+      if (tail.hi <= 2n) return pair(2n * sum2.lo, 2n * (sum2.hi + tail.hi));
+    }
   }
-  let best = null, bestDistance = Infinity;
-  for (const f3 of frames) {
-    const p = relativeWorldPosition(position2, f3, FRAME_CHUNKS - 1);
-    if (p) {
-      const distance5 = Math.hypot(p.x, p.y);
-      if (distance5 < bestDistance) {
-        best = { frameId: f3.id, x: p.x + f3.offsetX, y: p.y + f3.offsetY };
-        bestDistance = distance5;
+  const ln2 = () => lnReduced(q(2));
+  function log2Integer(n) {
+    n = progressionBigInt(n);
+    requireContract(n >= 1n, "Log requires positive integer");
+    const exponent = n.toString(2).length - 1, den = 1n << BigInt(exponent);
+    if (n === den) return q(exponent);
+    return add(q(exponent), div(lnReduced(q(n, den)), ln2()));
+  }
+  function exp2(a) {
+    if (a.hi > 150000n * S) numericExtension("D9 exponential output admission");
+    let x = a, k = 0;
+    while (x.hi > S / 8n) {
+      x = pair(x.lo / 2n, ceilDiv(x.hi, 2n));
+      k++;
+    }
+    let term = q(1), sum2 = q(1), i = 0;
+    for (; ; ) {
+      budget();
+      i++;
+      term = div(mul2(term, x), q(i));
+      sum2 = add(sum2, term);
+      const next = div(mul2(term, x), q(i + 1)), ratio = div(x, q(i + 2)), tail = div(next, sub(q(1), ratio));
+      if (tail.hi <= 2n) {
+        sum2 = pair(sum2.lo, sum2.hi + tail.hi);
+        break;
       }
     }
+    for (let j = 0; j < k; j++) sum2 = mul2(sum2, sum2);
+    return sum2;
   }
-  return best;
-}
-function localFramePositionD9(position2, frames) {
-  const f3 = frames.find((f4) => position2.x >= f4.offsetX - FRAME_CHUNKS * D9_PROFILE.chunkWidth && position2.x < f4.offsetX + FRAME_CHUNKS * D9_PROFILE.chunkWidth && position2.y >= f4.offsetY - FRAME_CHUNKS * D9_PROFILE.chunkHeight && position2.y < f4.offsetY + FRAME_CHUNKS * D9_PROFILE.chunkHeight);
-  requireContract(f3, "Position outside computation atlas");
-  return normalizeWorldPosition({ chunkX: f3.chunkX, chunkY: f3.chunkY, localX: position2.x - f3.offsetX, localY: position2.y - f3.offsetY });
-}
-function chunkAddressKey(x, y) {
-  return signedAddress(x) + "," + signedAddress(y);
-}
-
-// src/shared/contracts/paged_collision_d9.js
-var D9_COLLISION_VERSION = "paged-collision-d9-v1";
-var indices = /* @__PURE__ */ new WeakMap();
-var atlasIndices = /* @__PURE__ */ new WeakMap();
-function pageIndex(pages) {
-  let index = indices.get(pages);
-  if (!index) {
-    requireContract(Array.isArray(pages) && pages.length <= 100, "Collision residency bound");
-    index = new Map(pages.map((p) => [chunkAddressKey(p.chunkX, p.chunkY), p]));
-    requireContract(index.size === pages.length, "Duplicate collision page");
-    indices.set(pages, index);
-  }
-  return index;
-}
-function collisionTileD9(collision2, tileX, tileY) {
-  requireContract(collision2.version === D9_COLLISION_VERSION, "Paged collision version");
-  if (!Number.isSafeInteger(tileX) || !Number.isSafeInteger(tileY)) return "0";
-  if (collision2.origin && tileX >= 0 && tileY >= 0 && tileX < collision2.origin.width && tileY < collision2.origin.height) return collision2.origin.tiles[tileY][tileX];
-  let cached = atlasIndices.get(collision2);
-  if (!cached || cached.pages !== collision2.pages || cached.frames !== collision2.frames) {
-    pageIndex(collision2.pages);
-    const index = /* @__PURE__ */ new Map();
-    for (const page2 of collision2.pages) for (const frame of collision2.frames) {
-      const p = relativeWorldPosition({ chunkX: page2.chunkX, chunkY: page2.chunkY, localX: 0, localY: 0 }, frame, 63);
-      if (p) index.set(Math.floor((p.x + frame.offsetX) / D9_PROFILE.chunkWidth) + "," + Math.floor((p.y + frame.offsetY) / D9_PROFILE.chunkHeight), page2);
-    }
-    cached = { pages: collision2.pages, frames: collision2.frames, index };
-    atlasIndices.set(collision2, cached);
-  }
-  const cx = Math.floor(tileX / 32), cy = Math.floor(tileY / 26), page = cached.index.get(cx + "," + cy);
-  return page?.tiles[tileY - cy * 26]?.[tileX - cx * 32] ?? "0";
-}
-function collisionTileDetailD9(collision2, tileX, tileY) {
-  requireContract(collision2.version === D9_COLLISION_VERSION, "Paged collision version");
-  if (!Number.isSafeInteger(tileX) || !Number.isSafeInteger(tileY)) return { tile: "0", source: "invalidCoordinate", chunkKey: null };
-  if (collision2.origin && tileX >= 0 && tileY >= 0 && tileX < collision2.origin.width && tileY < collision2.origin.height) return { tile: collision2.origin.tiles[tileY][tileX], source: "historicalOrigin", chunkKey: null };
-  collisionTileD9(collision2, tileX, tileY);
-  const cached = atlasIndices.get(collision2), cx = Math.floor(tileX / 32), cy = Math.floor(tileY / 26), page = cached?.index.get(cx + "," + cy);
-  if (page) return { tile: page.tiles[tileY - cy * 26]?.[tileX - cx * 32] ?? "0", source: "residentPage", chunkKey: chunkAddressKey(page.chunkX, page.chunkY), localTileX: tileX - cx * 32, localTileY: tileY - cy * 26 };
-  try {
-    const world = localFramePositionD9({ x: tileX * D9_PROFILE.tileSize + D9_PROFILE.tileSize / 2, y: tileY * D9_PROFILE.tileSize + D9_PROFILE.tileSize / 2 }, collision2.frames);
-    return { tile: "0", source: "missingResidentPage", chunkKey: chunkAddressKey(world.chunkX, world.chunkY) };
-  } catch {
-    return { tile: "0", source: "outsideLocalFrame", chunkKey: null };
-  }
-}
-
-// src/shared/rules/world_geometry.js
-var collisionTile = (collision2, x, y) => collision2.version === D9_COLLISION_VERSION ? collisionTileD9(collision2, x, y) : collision2.tiles[y]?.[x] ?? "0";
-function collidesWithTiles(collision2, x, y, radius) {
-  const minTileX = Math.floor((x - radius) / collision2.tileSize);
-  const maxTileX = Math.floor((x + radius) / collision2.tileSize);
-  const minTileY = Math.floor((y - radius) / collision2.tileSize);
-  const maxTileY = Math.floor((y + radius) / collision2.tileSize);
-  for (let tileY = minTileY; tileY <= maxTileY; tileY++) {
-    for (let tileX = minTileX; tileX <= maxTileX; tileX++) {
-      if (collision2.version !== D9_COLLISION_VERSION && (tileY < 0 || tileY >= collision2.height || tileX < 0 || tileX >= collision2.width)) return true;
-      const tile = collisionTile(collision2, tileX, tileY);
-      if (tile === "0" || tile === "2") return true;
-    }
-  }
-  return false;
-}
-function collisionBlockDetail(collision2, x, y, radius) {
-  const minTileX = Math.floor((x - radius) / collision2.tileSize), maxTileX = Math.floor((x + radius) / collision2.tileSize), minTileY = Math.floor((y - radius) / collision2.tileSize), maxTileY = Math.floor((y + radius) / collision2.tileSize);
-  for (let tileY = minTileY; tileY <= maxTileY; tileY++) for (let tileX = minTileX; tileX <= maxTileX; tileX++) {
-    if (collision2.version !== D9_COLLISION_VERSION && (tileY < 0 || tileY >= collision2.height || tileX < 0 || tileX >= collision2.width)) return { reason: "oldFiniteBound", tileX, tileY, chunkKey: null };
-    const detail = collision2.version === D9_COLLISION_VERSION ? collisionTileDetailD9(collision2, tileX, tileY) : { tile: collisionTile(collision2, tileX, tileY), source: "residentPage", chunkKey: null };
-    if (detail.tile === "0" || detail.tile === "2") return { reason: detail.source === "missingResidentPage" ? "missingResidentPage" : detail.source === "outsideLocalFrame" ? "outsideLocalFrame" : "genuineBlocker", tile: detail.tile, tileX, tileY, chunkKey: detail.chunkKey, localTileX: detail.localTileX, localTileY: detail.localTileY, source: detail.source };
-  }
-  return null;
-}
-
-// src/shared/content/wilderness_v2.js
-var WILDERNESS_VERSION = "wilderness-distribution-v2-native";
-var WILDERNESS_HASH = "ed2f7fcafeac4305b6658242d232d8d79dade9ecb6b43ea74125fc1318cc282f";
-var WILDERNESS_SITE_SELECTIONS = freezeWire([{ "id": "repeatable-slot:cave:grassland:small:031", "anchor": { "key": "65,134", "x": 65, "y": 134 }, "familyId": "site-family:cave", "tier": "small", "band": 2, "footprint": [{ "x": 131, "y": 269 }], "approach": [{ "x": 132, "y": 269 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:fort:upland:standard:032", "anchor": { "key": "71,10", "x": 71, "y": 10 }, "familyId": "site-family:fort", "tier": "standard", "band": 4, "footprint": [{ "x": 143, "y": 21 }, { "x": 144, "y": 21 }, { "x": 143, "y": 22 }, { "x": 144, "y": 22 }, { "x": 143, "y": 23 }, { "x": 144, "y": 23 }], "approach": [{ "x": 145, "y": 22 }, { "x": 146, "y": 22 }], "landmassId": "landmass:medium-island:d14l1a:04:961b5a82", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:wetland:standard:033", "anchor": { "key": "34,34", "x": 34, "y": 34 }, "familyId": "site-family:ruin", "tier": "standard", "band": 3, "footprint": [{ "x": 69, "y": 69 }, { "x": 70, "y": 69 }, { "x": 69, "y": 70 }, { "x": 70, "y": 70 }], "approach": [{ "x": 71, "y": 69 }, { "x": 72, "y": 69 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:cave:woodland:small:034", "anchor": { "key": "116,61", "x": 116, "y": 61 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 233, "y": 123 }], "approach": [{ "x": 234, "y": 123 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:cave:volcanic:small:035", "anchor": { "key": "80,38", "x": 80, "y": 38 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 161, "y": 77 }], "approach": [{ "x": 162, "y": 77 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:036", "anchor": { "key": "71,99", "x": 71, "y": 99 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 143, "y": 199 }], "approach": [{ "x": 144, "y": 199 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:ruin:tropical:standard:037", "anchor": { "key": "117,110", "x": 117, "y": 110 }, "familyId": "site-family:ruin", "tier": "standard", "band": 5, "footprint": [{ "x": 234, "y": 221 }, { "x": 235, "y": 221 }, { "x": 234, "y": 222 }, { "x": 235, "y": 222 }], "approach": [{ "x": 236, "y": 221 }, { "x": 237, "y": 221 }], "landmassId": "landmass:medium-island:d14l1a:03:c2624ecc", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:crypt:frostland:small:038", "anchor": { "key": "61,99", "x": 61, "y": 99 }, "familyId": "site-family:crypt", "tier": "small", "band": 3, "footprint": [{ "x": 123, "y": 199 }], "approach": [{ "x": 124, "y": 199 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:cave:upland:small:039", "anchor": { "key": "55,111", "x": 55, "y": 111 }, "familyId": "site-family:cave", "tier": "small", "band": 2, "footprint": [{ "x": 111, "y": 223 }], "approach": [{ "x": 112, "y": 223 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:fort:grassland:standard:040", "anchor": { "key": "37,47", "x": 37, "y": 47 }, "familyId": "site-family:fort", "tier": "standard", "band": 4, "footprint": [{ "x": 75, "y": 95 }, { "x": 76, "y": 95 }, { "x": 75, "y": 96 }, { "x": 76, "y": 96 }, { "x": 75, "y": 97 }, { "x": 76, "y": 97 }], "approach": [{ "x": 77, "y": 96 }, { "x": 78, "y": 96 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:041", "anchor": { "key": "45,85", "x": 45, "y": 85 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 91, "y": 171 }], "approach": [{ "x": 92, "y": 171 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:cave:wetland:small:042", "anchor": { "key": "39,71", "x": 39, "y": 71 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 79, "y": 143 }], "approach": [{ "x": 80, "y": 143 }], "landmassId": "landmass:medium-island:d14l1a:01:83c7b775", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:cave:volcanic:small:043", "anchor": { "key": "86,33", "x": 86, "y": 33 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 173, "y": 67 }], "approach": [{ "x": 174, "y": 67 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:fort:frostland:standard:044", "anchor": { "key": "111,90", "x": 111, "y": 90 }, "familyId": "site-family:fort", "tier": "standard", "band": 3, "footprint": [{ "x": 223, "y": 181 }, { "x": 224, "y": 181 }, { "x": 223, "y": 182 }, { "x": 224, "y": 182 }, { "x": 223, "y": 183 }, { "x": 224, "y": 183 }], "approach": [{ "x": 225, "y": 182 }, { "x": 226, "y": 182 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:cave:woodland:small:045", "anchor": { "key": "45,108", "x": 45, "y": 108 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 90, "y": 217 }], "approach": [{ "x": 91, "y": 217 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:046", "anchor": { "key": "54,98", "x": 54, "y": 98 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 109, "y": 197 }], "approach": [{ "x": 110, "y": 197 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:crypt:tropical:small:047", "anchor": { "key": "51,29", "x": 51, "y": 29 }, "familyId": "site-family:crypt", "tier": "small", "band": 3, "footprint": [{ "x": 103, "y": 59 }], "approach": [{ "x": 104, "y": 59 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:fort:grassland:standard:048", "anchor": { "key": "81,114", "x": 81, "y": 114 }, "familyId": "site-family:fort", "tier": "standard", "band": 3, "footprint": [{ "x": 163, "y": 229 }, { "x": 164, "y": 229 }, { "x": 163, "y": 230 }, { "x": 164, "y": 230 }, { "x": 163, "y": 231 }, { "x": 164, "y": 231 }], "approach": [{ "x": 165, "y": 230 }, { "x": 166, "y": 230 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:upland:standard:049", "anchor": { "key": "55,119", "x": 55, "y": 119 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 111, "y": 239 }, { "x": 112, "y": 239 }, { "x": 111, "y": 240 }, { "x": 112, "y": 240 }], "approach": [{ "x": 113, "y": 239 }, { "x": 114, "y": 239 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:cave:frostland:small:050", "anchor": { "key": "117,86", "x": 117, "y": 86 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 235, "y": 173 }], "approach": [{ "x": 236, "y": 173 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:cave:tropical:small:051", "anchor": { "key": "51,39", "x": 51, "y": 39 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 103, "y": 79 }], "approach": [{ "x": 104, "y": 79 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:ruin:volcanic:standard:052", "anchor": { "key": "78,46", "x": 78, "y": 46 }, "familyId": "site-family:ruin", "tier": "standard", "band": 3, "footprint": [{ "x": 157, "y": 93 }, { "x": 158, "y": 93 }, { "x": 157, "y": 94 }, { "x": 158, "y": 94 }], "approach": [{ "x": 159, "y": 93 }, { "x": 160, "y": 93 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:fort:grassland:standard:053", "anchor": { "key": "85,108", "x": 85, "y": 108 }, "familyId": "site-family:fort", "tier": "standard", "band": 3, "footprint": [{ "x": 171, "y": 217 }, { "x": 172, "y": 217 }, { "x": 171, "y": 218 }, { "x": 172, "y": 218 }, { "x": 171, "y": 219 }, { "x": 172, "y": 219 }], "approach": [{ "x": 173, "y": 218 }, { "x": 174, "y": 218 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:woodland:standard:054", "anchor": { "key": "25,119", "x": 25, "y": 119 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 51, "y": 239 }, { "x": 52, "y": 239 }, { "x": 51, "y": 240 }, { "x": 52, "y": 240 }], "approach": [{ "x": 53, "y": 239 }, { "x": 54, "y": 239 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:cave:woodland:small:055", "anchor": { "key": "66,4", "x": 66, "y": 4 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 132, "y": 9 }], "approach": [{ "x": 133, "y": 9 }], "landmassId": "landmass:medium-island:d14l1a:04:961b5a82", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:desert:standard:056", "anchor": { "key": "116,32", "x": 116, "y": 32 }, "familyId": "site-family:ruin", "tier": "standard", "band": 4, "footprint": [{ "x": 233, "y": 65 }, { "x": 234, "y": 65 }, { "x": 233, "y": 66 }, { "x": 234, "y": 66 }], "approach": [{ "x": 235, "y": 65 }, { "x": 236, "y": 65 }], "landmassId": "landmass:medium-island:d14l1a:02:799115ea", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:ruin:upland:standard:057", "anchor": { "key": "96,35", "x": 96, "y": 35 }, "familyId": "site-family:ruin", "tier": "standard", "band": 4, "footprint": [{ "x": 193, "y": 71 }, { "x": 194, "y": 71 }, { "x": 193, "y": 72 }, { "x": 194, "y": 72 }], "approach": [{ "x": 195, "y": 71 }, { "x": 196, "y": 71 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:woodland:standard:058", "anchor": { "key": "39,110", "x": 39, "y": 110 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 79, "y": 221 }, { "x": 80, "y": 221 }, { "x": 79, "y": 222 }, { "x": 80, "y": 222 }], "approach": [{ "x": 81, "y": 221 }, { "x": 82, "y": 221 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:crypt:frostland:small:059", "anchor": { "key": "63,85", "x": 63, "y": 85 }, "familyId": "site-family:crypt", "tier": "small", "band": 3, "footprint": [{ "x": 127, "y": 171 }], "approach": [{ "x": 128, "y": 171 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:cave:grassland:small:060", "anchor": { "key": "94,43", "x": 94, "y": 43 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 189, "y": 87 }], "approach": [{ "x": 190, "y": 87 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:fort:volcanic:standard:061", "anchor": { "key": "32,99", "x": 32, "y": 99 }, "familyId": "site-family:fort", "tier": "standard", "band": 2, "footprint": [{ "x": 64, "y": 198 }, { "x": 65, "y": 198 }, { "x": 64, "y": 199 }, { "x": 65, "y": 199 }, { "x": 64, "y": 200 }, { "x": 65, "y": 200 }], "approach": [{ "x": 66, "y": 199 }, { "x": 67, "y": 199 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:crypt:frostland:small:062", "anchor": { "key": "110,80", "x": 110, "y": 80 }, "familyId": "site-family:crypt", "tier": "small", "band": 4, "footprint": [{ "x": 221, "y": 161 }], "approach": [{ "x": 222, "y": 161 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:cave:wetland:small:063", "anchor": { "key": "38,29", "x": 38, "y": 29 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 76, "y": 59 }], "approach": [{ "x": 77, "y": 59 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:fort:grassland:standard:064", "anchor": { "key": "91,105", "x": 91, "y": 105 }, "familyId": "site-family:fort", "tier": "standard", "band": 3, "footprint": [{ "x": 183, "y": 211 }, { "x": 184, "y": 211 }, { "x": 183, "y": 212 }, { "x": 184, "y": 212 }, { "x": 183, "y": 213 }, { "x": 184, "y": 213 }], "approach": [{ "x": 185, "y": 212 }, { "x": 186, "y": 212 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:fort:frostland:standard:065", "anchor": { "key": "28,80", "x": 28, "y": 80 }, "familyId": "site-family:fort", "tier": "standard", "band": 4, "footprint": [{ "x": 56, "y": 161 }, { "x": 57, "y": 161 }, { "x": 56, "y": 162 }, { "x": 57, "y": 162 }, { "x": 56, "y": 163 }, { "x": 57, "y": 163 }], "approach": [{ "x": 58, "y": 162 }, { "x": 59, "y": 162 }], "landmassId": "landmass:medium-island:d14l1a:01:83c7b775", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:upland:standard:066", "anchor": { "key": "59,130", "x": 59, "y": 130 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 119, "y": 260 }, { "x": 120, "y": 260 }, { "x": 119, "y": 261 }, { "x": 120, "y": 261 }], "approach": [{ "x": 121, "y": 260 }, { "x": 122, "y": 260 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:wetland:standard:067", "anchor": { "key": "32,46", "x": 32, "y": 46 }, "familyId": "site-family:ruin", "tier": "standard", "band": 4, "footprint": [{ "x": 65, "y": 93 }, { "x": 66, "y": 93 }, { "x": 65, "y": 94 }, { "x": 66, "y": 94 }], "approach": [{ "x": 67, "y": 93 }, { "x": 68, "y": 93 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:cave:volcanic:small:068", "anchor": { "key": "124,41", "x": 124, "y": 41 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 249, "y": 83 }], "approach": [{ "x": 250, "y": 83 }], "landmassId": "landmass:medium-island:d14l1a:02:799115ea", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:069", "anchor": { "key": "78,102", "x": 78, "y": 102 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 156, "y": 205 }], "approach": [{ "x": 157, "y": 205 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:fort:upland:standard:070", "anchor": { "key": "51,105", "x": 51, "y": 105 }, "familyId": "site-family:fort", "tier": "standard", "band": 3, "footprint": [{ "x": 103, "y": 211 }, { "x": 104, "y": 211 }, { "x": 103, "y": 212 }, { "x": 104, "y": 212 }, { "x": 103, "y": 213 }, { "x": 104, "y": 213 }], "approach": [{ "x": 105, "y": 212 }, { "x": 106, "y": 212 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:tropical:standard:071", "anchor": { "key": "119,50", "x": 119, "y": 50 }, "familyId": "site-family:ruin", "tier": "standard", "band": 4, "footprint": [{ "x": 239, "y": 101 }, { "x": 240, "y": 101 }, { "x": 239, "y": 102 }, { "x": 240, "y": 102 }], "approach": [{ "x": 241, "y": 101 }, { "x": 242, "y": 101 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:fort:volcanic:standard:072", "anchor": { "key": "80,65", "x": 80, "y": 65 }, "familyId": "site-family:fort", "tier": "standard", "band": 4, "footprint": [{ "x": 161, "y": 131 }, { "x": 162, "y": 131 }, { "x": 161, "y": 132 }, { "x": 162, "y": 132 }, { "x": 161, "y": 133 }, { "x": 162, "y": 133 }], "approach": [{ "x": 163, "y": 132 }, { "x": 164, "y": 132 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:ruin:grassland:standard:073", "anchor": { "key": "108,112", "x": 108, "y": 112 }, "familyId": "site-family:ruin", "tier": "standard", "band": 5, "footprint": [{ "x": 217, "y": 225 }, { "x": 218, "y": 225 }, { "x": 217, "y": 226 }, { "x": 218, "y": 226 }], "approach": [{ "x": 219, "y": 225 }, { "x": 220, "y": 225 }], "landmassId": "landmass:medium-island:d14l1a:03:c2624ecc", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:crypt:wetland:small:074", "anchor": { "key": "46,42", "x": 46, "y": 42 }, "familyId": "site-family:crypt", "tier": "small", "band": 3, "footprint": [{ "x": 93, "y": 85 }], "approach": [{ "x": 94, "y": 85 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:grassland:standard:075", "anchor": { "key": "71,135", "x": 71, "y": 135 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 143, "y": 271 }, { "x": 144, "y": 271 }, { "x": 143, "y": 272 }, { "x": 144, "y": 272 }], "approach": [{ "x": 145, "y": 271 }, { "x": 146, "y": 271 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:woodland:standard:076", "anchor": { "key": "65,140", "x": 65, "y": 140 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 130, "y": 281 }, { "x": 131, "y": 281 }, { "x": 130, "y": 282 }, { "x": 131, "y": 282 }], "approach": [{ "x": 132, "y": 281 }, { "x": 133, "y": 281 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:077", "anchor": { "key": "67,103", "x": 67, "y": 103 }, "familyId": "site-family:cave", "tier": "small", "band": 2, "footprint": [{ "x": 135, "y": 207 }], "approach": [{ "x": 136, "y": 207 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:ruin:desert:standard:078", "anchor": { "key": "76,31", "x": 76, "y": 31 }, "familyId": "site-family:ruin", "tier": "standard", "band": 3, "footprint": [{ "x": 153, "y": 63 }, { "x": 154, "y": 63 }, { "x": 153, "y": 64 }, { "x": 154, "y": 64 }], "approach": [{ "x": 155, "y": 63 }, { "x": 156, "y": 63 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:ruin:tropical:standard:079", "anchor": { "key": "40,36", "x": 40, "y": 36 }, "familyId": "site-family:ruin", "tier": "standard", "band": 3, "footprint": [{ "x": 80, "y": 73 }, { "x": 81, "y": 73 }, { "x": 80, "y": 74 }, { "x": 81, "y": 74 }], "approach": [{ "x": 82, "y": 73 }, { "x": 83, "y": 73 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:cave:frostland:small:080", "anchor": { "key": "121,71", "x": 121, "y": 71 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 242, "y": 143 }], "approach": [{ "x": 243, "y": 143 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:tropical:standard:081", "anchor": { "key": "42,127", "x": 42, "y": 127 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 85, "y": 255 }, { "x": 86, "y": 255 }, { "x": 85, "y": 256 }, { "x": 86, "y": 256 }], "approach": [{ "x": 87, "y": 255 }, { "x": 88, "y": 255 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:ruin:upland:standard:082", "anchor": { "key": "50,112", "x": 50, "y": 112 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 101, "y": 225 }, { "x": 102, "y": 225 }, { "x": 101, "y": 226 }, { "x": 102, "y": 226 }], "approach": [{ "x": 103, "y": 225 }, { "x": 104, "y": 225 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:cave:woodland:small:083", "anchor": { "key": "57,10", "x": 57, "y": 10 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 115, "y": 21 }], "approach": [{ "x": 116, "y": 21 }], "landmassId": "landmass:medium-island:d14l1a:04:961b5a82", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:wetland:standard:084", "anchor": { "key": "65,152", "x": 65, "y": 152 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 131, "y": 305 }, { "x": 132, "y": 305 }, { "x": 131, "y": 306 }, { "x": 132, "y": 306 }], "approach": [{ "x": 133, "y": 305 }, { "x": 134, "y": 305 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:cave:volcanic:small:085", "anchor": { "key": "110,41", "x": 110, "y": 41 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 221, "y": 83 }], "approach": [{ "x": 222, "y": 83 }], "landmassId": "landmass:medium-island:d14l1a:02:799115ea", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:ruin:wetland:standard:086", "anchor": { "key": "71,152", "x": 71, "y": 152 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 143, "y": 305 }, { "x": 144, "y": 305 }, { "x": 143, "y": 306 }, { "x": 144, "y": 306 }], "approach": [{ "x": 145, "y": 305 }, { "x": 146, "y": 305 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:tropical:standard:087", "anchor": { "key": "125,61", "x": 125, "y": 61 }, "familyId": "site-family:ruin", "tier": "standard", "band": 4, "footprint": [{ "x": 251, "y": 123 }, { "x": 252, "y": 123 }, { "x": 251, "y": 124 }, { "x": 252, "y": 124 }], "approach": [{ "x": 253, "y": 123 }, { "x": 254, "y": 123 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:ruin:upland:standard:088", "anchor": { "key": "48,92", "x": 48, "y": 92 }, "familyId": "site-family:ruin", "tier": "standard", "band": 3, "footprint": [{ "x": 96, "y": 185 }, { "x": 97, "y": 185 }, { "x": 96, "y": 186 }, { "x": 97, "y": 186 }], "approach": [{ "x": 98, "y": 185 }, { "x": 99, "y": 185 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:cave:woodland:small:089", "anchor": { "key": "46,139", "x": 46, "y": 139 }, "familyId": "site-family:cave", "tier": "small", "band": 1, "footprint": [{ "x": 93, "y": 279 }], "approach": [{ "x": 94, "y": 279 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:crypt:wetland:small:090", "anchor": { "key": "22,70", "x": 22, "y": 70 }, "familyId": "site-family:crypt", "tier": "small", "band": 4, "footprint": [{ "x": 45, "y": 141 }], "approach": [{ "x": 46, "y": 141 }], "landmassId": "landmass:medium-island:d14l1a:01:83c7b775", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:volcanic:standard:091", "anchor": { "key": "74,61", "x": 74, "y": 61 }, "familyId": "site-family:ruin", "tier": "standard", "band": 4, "footprint": [{ "x": 149, "y": 123 }, { "x": 150, "y": 123 }, { "x": 149, "y": 124 }, { "x": 150, "y": 124 }], "approach": [{ "x": 151, "y": 123 }, { "x": 152, "y": 123 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:cave:frostland:small:092", "anchor": { "key": "61,78", "x": 61, "y": 78 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 123, "y": 157 }], "approach": [{ "x": 124, "y": 157 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:desert:standard:093", "anchor": { "key": "62,108", "x": 62, "y": 108 }, "familyId": "site-family:ruin", "tier": "standard", "band": 3, "footprint": [{ "x": 125, "y": 216 }, { "x": 126, "y": 216 }, { "x": 125, "y": 217 }, { "x": 126, "y": 217 }], "approach": [{ "x": 127, "y": 216 }, { "x": 128, "y": 216 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:crypt:tropical:small:094", "anchor": { "key": "72,40", "x": 72, "y": 40 }, "familyId": "site-family:crypt", "tier": "small", "band": 3, "footprint": [{ "x": 145, "y": 81 }], "approach": [{ "x": 146, "y": 81 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:fort:grassland:standard:095", "anchor": { "key": "75,124", "x": 75, "y": 124 }, "familyId": "site-family:fort", "tier": "standard", "band": 3, "footprint": [{ "x": 151, "y": 248 }, { "x": 152, "y": 248 }, { "x": 151, "y": 249 }, { "x": 152, "y": 249 }, { "x": 151, "y": 250 }, { "x": 152, "y": 250 }], "approach": [{ "x": 153, "y": 249 }, { "x": 154, "y": 249 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:crypt:woodland:small:096", "anchor": { "key": "31,124", "x": 31, "y": 124 }, "familyId": "site-family:crypt", "tier": "small", "band": 2, "footprint": [{ "x": 63, "y": 249 }], "approach": [{ "x": 64, "y": 249 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:cave:frostland:small:097", "anchor": { "key": "118,95", "x": 118, "y": 95 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 237, "y": 190 }], "approach": [{ "x": 238, "y": 190 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:098", "anchor": { "key": "55,104", "x": 55, "y": 104 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 111, "y": 209 }], "approach": [{ "x": 112, "y": 209 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:cave:upland:small:099", "anchor": { "key": "89,37", "x": 89, "y": 37 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 178, "y": 75 }], "approach": [{ "x": 179, "y": 75 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:crypt:wetland:small:100", "anchor": { "key": "45,55", "x": 45, "y": 55 }, "familyId": "site-family:crypt", "tier": "small", "band": 4, "footprint": [{ "x": 91, "y": 111 }], "approach": [{ "x": 92, "y": 111 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:cave:upland:small:101", "anchor": { "key": "48,108", "x": 48, "y": 108 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 97, "y": 217 }], "approach": [{ "x": 98, "y": 217 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:woodland:standard:102", "anchor": { "key": "30,117", "x": 30, "y": 117 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 61, "y": 234 }, { "x": 62, "y": 234 }, { "x": 61, "y": 235 }, { "x": 62, "y": 235 }], "approach": [{ "x": 63, "y": 234 }, { "x": 64, "y": 234 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:103", "anchor": { "key": "76,89", "x": 76, "y": 89 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 153, "y": 179 }], "approach": [{ "x": 154, "y": 179 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }]);
-var hasWilderness = (b) => b?.wildernessVersion === WILDERNESS_VERSION && b?.wildernessHash === WILDERNESS_HASH;
-var wildernessSelection = (id) => WILDERNESS_SITE_SELECTIONS.find((row) => row.id === id) ?? null;
-
-// src/shared/content/wilderness_fairness_v3_2.js
-var WILDERNESS_FAIRNESS_V3_2_VERSION = "wilderness-v3-2-level-fairness-1";
-var WILDERNESS_FAIRNESS_V3_2 = Object.freeze({
-  version: WILDERNESS_FAIRNESS_V3_2_VERSION,
-  enemyBaseDamage: "unchanged; no additional multiplier from level difference",
-  enemyDamageAmplification: "boss/elite abilities remain independent of level difference",
-  playerOffense: "preserve exact existing higher-level resistance",
-  historicWorldCombatV1: "immutable; retain published level-gap contract for legacy non-wilderness worlds",
-  eligibility: "world-combat-v1 plus committed wilderness-v2 world binding",
-  pendingSeparateTuning: "cleave reach and simultaneous incoming hit protection"
-});
-var usesWildernessFairnessV3_2 = (state) => hasWorldCombat(state) && hasWilderness(state?.d9World?.plannedWorld);
-
-// src/shared/content/brimstone_colossus_v1.js
-var BRIMSTONE_ID = "overlord_iron_vault";
-var BRIMSTONE_PROFILE = ARACHNID_TREANT_PROFILE;
-var BRIMSTONE = freezeWire({
-  label: "BRIMSTONE COLOSSUS",
-  range: 220,
-  recoveryTicks: 120,
-  strike: { telegraphTicks: 24, recoveryTicks: 50, radius: 52, halfAngle: 0.95, damageNumerator: 10 },
-  slam: { telegraphTicks: 75, radius: 64, damageNumerator: 18 },
-  magma_vents: { telegraphTicks: 75, count: 2, boilTicks: 270, flashTicks: 18, reach: 96, halfWidth: 12, damageNumerator: 13, maxActive: 6 }
-});
-var brimstoneFortHereV1 = (reservationId) => {
-  const s = worldSiteV1(reservationId);
-  return !s || s.biome === "volcanic";
-};
-var brimstoneFortFloor = (site, index) => site.familyId === "site-family:fort" && site.sizeTier === "large" && index === site.floorCount - 1 && brimstoneFortHereV1(site.socket?.provenance?.reservationId);
-function brimstoneVolcanicRuinFloorV4(site, index, state) {
-  return site?.familyId === "site-family:ruin" && site.sizeTier === "large" && index === site.floorCount - 1 && site.socket?.provenance?.reservationId === bossSiteV1("brimstone_colossus") && site.socket?.region?.biome === "volcanic" && usesWildernessFairnessV3_2(state);
-}
-function brimstoneRuinArenaProofV4(c, position2) {
-  if (collidesWithTiles(c, position2.x, position2.y, 34)) return null;
-  const arms = brimstoneVentArms(c, position2);
-  const horizontal = arms.east + arms.west, vertical = arms.north + arms.south;
-  if (Math.min(...Object.values(arms)) < 24 || horizontal < 112 || vertical < 112) return null;
-  return { arms, horizontal, vertical, shortest: Math.min(...Object.values(arms)) };
-}
-function chooseBrimstoneRuinAnchorV4(recipe) {
-  const c = recipe?.collision, leader = recipe?.encounter?.members?.[0];
-  if (!c || !leader) return null;
-  const others = recipe.encounter.members.slice(1).map((m) => m.position);
-  const room2 = recipe.graph?.rooms?.find((r) => r.roomId === leader.roomId);
-  const boxes = [...room2?.bounds ? [room2.bounds] : room2 && Number.isInteger(room2.cx) ? [
-    { x: room2.cx - room2.rx, y: room2.cy - room2.ry, width: room2.rx * 2 + 1, height: room2.ry * 2 + 1 }
-  ] : [], { x: 2, y: 2, width: c.width - 4, height: c.height - 4 }];
-  const options = [];
-  for (const [scope, b] of boxes.entries()) for (let y = b.y; y < b.y + b.height; y++) for (let x = b.x; x < b.x + b.width; x++) {
-    if (x <= 1 || y <= 1 || x >= c.width - 2 || y >= c.height - 2 || c.tiles[y]?.[x] !== "1") continue;
-    const p = { x: (x + 0.5) * c.tileSize, y: (y + 0.5) * c.tileSize }, distance5 = Math.hypot(p.x - leader.position.x, p.y - leader.position.y);
-    if (distance5 > 416 || Math.hypot(p.x - recipe.entrance.x, p.y - recipe.entrance.y) < 160 || others.some((m) => Math.hypot(m.x - p.x, m.y - p.y) < 62)) continue;
-    const proof2 = brimstoneRuinArenaProofV4(c, p);
-    if (!proof2) continue;
-    options.push({ position: p, scope, proof: proof2, score: Math.min(proof2.horizontal, proof2.vertical) * 2 + proof2.shortest * 3 - distance5 * 0.3 });
-  }
-  options.sort((a, b) => a.scope - b.scope || b.score - a.score || a.position.y - b.position.y || a.position.x - b.position.x);
-  return options[0] ? { position: options[0].position, ...options[0].proof } : null;
-}
-function brimstoneVentArms(c, p) {
-  const arms = {};
-  for (const [key9, dx, dy] of [["east", 1, 0], ["west", -1, 0], ["north", 0, -1], ["south", 0, 1]]) {
-    let length = 0;
-    for (let d = 2; d <= 96; d += 2) {
-      if (collidesWithTiles(c, p.x + dx * d, p.y + dy * d, 12)) break;
-      length = d;
-    }
-    arms[key9] = length;
-  }
-  return arms;
-}
-
-// src/shared/content/boss_hosting_v1.js
-var BOSS_HOSTING_VERSION = "site-boss-hosting-v1";
-var BOSS_HOSTING_POLICY = freezeWire({ version: BOSS_HOSTING_VERSION, parentRuntime: "c36909555b042989", parentGeneration: "core-families-multiroom-v1", playerCount: 4, playerHull: 9, bossHull: 34, roomSelection: "explicit-final-reward", preserveGeometry: true, preserveRosterIdentities: true, preserveAttacks: true, partyStagingSeparation: 64, partyArrivalVersion: "site-party-arrival-v1", missingBoss: "structured-hard-failure", supportHullUpperBound: 20, scope: "constructed-arena-capacity-not-network-or-balance-approval" });
-var BOSS_HOSTING_HASH = "0405745d2de42e6f1e8a5d508d507c5db3379e8efc1ea2db41c4f0dc26352a3e";
-var hasBossHostingV1 = (b) => b?.bossHostingVersion === BOSS_HOSTING_VERSION && b.bossHostingHash === BOSS_HOSTING_HASH;
-var TILE = 32;
-var dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
-var key = (p) => p.x + "," + p.y;
-var dirs = [[0, -1], [1, 0], [0, 1], [-1, 0]];
-function box(room2) {
-  return room2.bounds ?? { x: room2.cx - room2.rx, y: room2.cy - room2.ry, width: room2.rx * 2 + 1, height: room2.ry * 2 + 1 };
-}
-function bossRoomCellsV1(recipe, room2, hull = 9) {
-  const b = box(room2), out = [];
-  for (let y = b.y; y < b.y + b.height; y++) for (let x = b.x; x < b.x + b.width; x++) {
-    const p = { x: (x + 0.5) * TILE, y: (y + 0.5) * TILE };
-    if (!collidesWithTiles(recipe.collision, p.x, p.y, hull)) out.push(p);
-  }
-  return out;
-}
-function bossHostingSpecV1({ family: family2, tier: tier2, index, floorCount, reservationId, enabled: enabled2 = true, wilderness = true }) {
-  if (!enabled2 || index !== floorCount - 1) return null;
-  const restored = [RECOVERED_BOSSES2[bossAtSiteV1(reservationId)]].find((b) => b?.family === family2);
-  if (restored) return { kind: restored.id, hullRadius: 34, supportCount: restored.adds, liveSupportCount: restored.id === "corrosive_abomination" ? 6 : restored.adds };
-  if (family2 === "fort" && (tier2 === "standard" || tier2 === "deep" && wilderness && reservationId === bossSiteV1("aegis_goliath"))) return { kind: "aegis_goliath", hullRadius: 34, supportCount: 3, liveSupportCount: 3 };
-  if (family2 === "fort" && tier2 === "large" && brimstoneFortHereV1(reservationId) || family2 === "ruin" && wilderness && tier2 === "large" && reservationId === bossSiteV1("brimstone_colossus")) return { kind: "overlord_iron_vault", hullRadius: 34, supportCount: 0, liveSupportCount: 0 };
-  return null;
-}
-function fieldDistance(allowed, start) {
-  const d = /* @__PURE__ */ new Map([[key(start), 0]]), q = [start];
-  for (let i = 0; i < q.length; i++) for (const [dx, dy] of dirs) {
-    const p = { x: q[i].x + dx * TILE, y: q[i].y + dy * TILE }, k = key(p);
-    if (allowed.has(k) && !d.has(k)) {
-      d.set(k, d.get(key(q[i])) + TILE);
-      q.push(p);
-    }
-  }
-  return d;
-}
-function choosePads(cells3, position2, protectedPoints) {
-  const chosen = [];
-  for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
-    const ideal = { x: position2.x + sx * 160, y: position2.y + sy * 128 };
-    const sorted2 = cells3.filter((p2) => (p2.x - position2.x) * sx >= 96 && (p2.y - position2.y) * sy >= 64 && protectedPoints.every((q) => dist(p2, q) >= 40)).sort((a, b) => dist(a, ideal) - dist(b, ideal) || a.y - b.y || a.x - b.x);
-    const p = sorted2.find((p2) => chosen.every((q) => dist(p2, q) >= 64));
-    if (!p) return null;
-    chosen.push(p);
-  }
-  return chosen;
-}
-function freeForHero(p, boss, supports) {
-  return !(Math.abs(p.x - boss.x) <= 47 && Math.abs(p.y - boss.y) <= 47) && supports.every((q) => Math.abs(p.x - q.x) > 33 || Math.abs(p.y - q.y) > 33);
-}
-function proveBossArenaV1(recipe, kind2, position2, { supportPositions = [], liveSupportCount = 0 } = {}) {
-  const room2 = recipe.graph.rooms.find((r) => r.roomId === recipe.graph.topology.endNodeId);
-  requireContract(room2, "BOSS_HOST:FINAL_ROOM_MISSING");
-  const b = box(room2);
-  requireContract(position2.x >= b.x * TILE && position2.x < (b.x + b.width) * TILE && position2.y >= b.y * TILE && position2.y < (b.y + b.height) * TILE && !collidesWithTiles(recipe.collision, position2.x, position2.y, 34), "BOSS_HOST:UNSAFE_OR_WRONG_CHAMBER");
-  const cells3 = bossRoomCellsV1(recipe, room2, 9), protectedPoints = [recipe.reward?.position, ...Object.values(recipe.stairAnchors ?? {})].filter(Boolean), pads = choosePads(cells3, position2, protectedPoints);
-  requireContract(pads?.length === 4, "BOSS_HOST:FOUR_STAGING_POSITIONS_UNAVAILABLE");
-  const physical2 = cells3.filter((p) => freeForHero(p, position2, supportPositions.slice(0, liveSupportCount))), allowed = new Set(physical2.map(key)), routes = [];
-  requireContract(pads.every((p) => allowed.has(key(p))), "BOSS_HOST:SUPPORT_STAGING_CONFLICT");
-  for (let i = 0; i < 4; i++) {
-    const d = fieldDistance(allowed, pads[i]), target = pads[(i + 1) % 4];
-    requireContract(d.has(key(target)), "BOSS_HOST:PARTY_CIRCULATION_BLOCKED");
-    const exits = physical2.filter((p) => dist(p, pads[i]) >= 73 && d.has(key(p))).map((p) => d.get(key(p)));
-    requireContract(exits.length, "BOSS_HOST:NO_TARGETED_SLAM_ESCAPE");
-    routes.push({ from: i, to: (i + 1) % 4, routePx: d.get(key(target)), targeted64pxSlamEscapePx: Math.min(...exits), idealEscapeTicks: Math.ceil(Math.min(...exits) / 3) });
-  }
-  const central = cells3.filter((p) => freeForHero(p, position2, supportPositions.slice(0, liveSupportCount)) && dist(p, position2) > 73), centralAllowed = new Set(central.map(key));
-  requireContract(pads.every((p) => centralAllowed.has(key(p))), "BOSS_HOST:CENTRAL_SLAM_STAGING_CONFLICT");
-  const connected4 = fieldDistance(centralAllowed, pads[0]);
-  requireContract(pads.every((p) => connected4.has(key(p))), "BOSS_HOST:CENTRAL_SLAM_ESCAPE_DISCONNECTED");
-  const arms = {};
-  for (const [name, dx, dy] of [["east", 1, 0], ["west", -1, 0], ["north", 0, -1], ["south", 0, 1]]) {
-    let v = 0;
-    for (let n = 4; n <= 300; n += 4) {
-      if (collidesWithTiles(recipe.collision, position2.x + dx * n, position2.y + dy * n, 34)) break;
-      v = n;
-    }
-    arms[name] = v;
-  }
-  if (kind2 === "cinderhart") requireContract(Math.min(...Object.values(arms)) >= 220, "BOSS_HOST:CHARGE_LANES_TOO_SHORT");
-  if (kind2 === "void_overseer") requireContract(Math.max(arms.east + 34, arms.west + 34) >= 260 && Math.max(arms.north + 34, arms.south + 34) >= 260, "BOSS_HOST:BEAM_AXES_TOO_SHORT");
-  if (kind2 === "ashfang") {
-    for (let y = -7; y <= 7; y++) for (let x = -7; x <= 7; x++) if (Math.abs(x) === 7 || Math.abs(y) === 7) requireContract(!collidesWithTiles(recipe.collision, position2.x + x * TILE, position2.y + y * TILE, 9), "BOSS_HOST:COLLAPSE_RING_LEAVES_CHAMBER");
-  }
-  return { version: BOSS_HOSTING_VERSION, policyHash: BOSS_HOSTING_HASH, kind: kind2, roomId: room2.roomId, boundsTiles: copyWire(b), stagingPositions: pads, playerHullRadius: 9, bossHullRadius: 34, playerSafeTileCenters: cells3.length, connectedSafeCentersAfterCentral64pxSlam: connected4.size, liveSupportCount, supportHullUpperBound: 20, routes, chargeClearancePx: arms, claims: ["four-distinct-static-staging", "room-contained-player-circulation-with-live-support-bodies", "targeted64px-telegraph-egress", "central64px-slam-connected-safe-space"], limits: ["not-all-possible-hazard-combinations", "not-party-balance-or-network-proof", "native-persistent-hazard-fights-required"] };
-}
-function bossHostingRecipeV1(original, spec) {
-  if (!spec) return original;
-  const recipe = copyWire(original), room2 = recipe.graph.rooms.find((r) => r.roomId === recipe.graph.topology.endNodeId);
-  requireContract(room2, "BOSS_HOST:FINAL_ROOM_MISSING");
-  requireContract(recipe.encounter.members.length >= spec.supportCount + 1, "BOSS_HOST:SUPPORT_ROSTER_CAPACITY");
-  const center2 = { x: (room2.cx + 0.5) * TILE, y: (room2.cy + 0.5) * TILE }, candidates = bossRoomCellsV1(recipe, room2, spec.hullRadius ?? 34).sort((a, b) => dist(a, center2) - dist(b, center2) || a.y - b.y || a.x - b.x);
-  const position2 = candidates[0];
-  requireContract(position2, "BOSS_HOST:SAFE_ANCHOR_UNAVAILABLE");
-  const cells3 = bossRoomCellsV1(recipe, room2, 20), pads = choosePads(bossRoomCellsV1(recipe, room2, 9), position2, [recipe.reward?.position, ...Object.values(recipe.stairAnchors ?? {})].filter(Boolean));
-  requireContract(pads, "BOSS_HOST:FOUR_STAGING_POSITIONS_UNAVAILABLE");
-  const supports = [];
-  for (let i = 0; i < spec.supportCount; i++) {
-    const a = i * Math.PI * 2 / spec.supportCount, r = spec.kind === "aegis_goliath" ? 62 : 96, ideal = { x: position2.x + Math.cos(a) * r, y: position2.y + Math.sin(a) * r };
-    let p = spec.kind === "aegis_goliath" && !collidesWithTiles(recipe.collision, ideal.x, ideal.y, 20) && supports.every((q) => dist(q, ideal) >= 40) ? ideal : null;
-    if (!p) p = cells3.filter((p2) => dist(p2, position2) >= 68 && dist(p2, position2) <= 176 && supports.every((q) => dist(p2, q) >= 40) && pads.every((q) => dist(p2, q) >= 72)).sort((a2, b) => dist(a2, ideal) - dist(b, ideal) || a2.y - b.y || a2.x - b.x)[0];
-    requireContract(p, "BOSS_HOST:SUPPORT_FOOTPRINT_UNAVAILABLE");
-    supports.push(p);
-  }
-  const used = [position2, ...supports];
-  for (let i = 0; i < recipe.encounter.members.length; i++) {
-    const m = recipe.encounter.members[i];
-    if (i === 0 || i <= spec.supportCount) {
-      m.position = copyWire(i ? supports[i - 1] : position2);
-      m.roomId = room2.roomId;
-      continue;
-    }
-    if (m.roomId !== room2.roomId) continue;
-    const valid = (p2) => dist(p2, position2) >= 92 && supports.every((q) => dist(p2, q) >= 44) && pads.every((q) => dist(p2, q) >= 72) && used.every((q) => dist(p2, q) >= 40) && [recipe.reward.position, ...Object.values(recipe.stairAnchors)].every((q) => dist(p2, q) >= 40);
-    const p = valid(m.position) ? m.position : cells3.filter(valid).sort((a, b) => dist(a, m.position) - dist(b, m.position) || a.y - b.y || a.x - b.x)[0];
-    requireContract(p, "BOSS_HOST:ORDINARY_PACK_CONFLICT");
-    m.position = copyWire(p);
-    used.push(p);
-  }
-  const proof2 = proveBossArenaV1(recipe, spec.kind, position2, { supportPositions: supports, liveSupportCount: spec.liveSupportCount ?? spec.supportCount });
-  recipe.encounter.bossHosting = { version: BOSS_HOSTING_VERSION, policyHash: BOSS_HOSTING_HASH, kind: spec.kind, roomId: room2.roomId, position: copyWire(position2), supportPositions: copyWire(supports), proof: proof2 };
-  return freezeWire(recipe);
-}
-function expectedBossRecipeV1(recipe, { family: family2, tier: tier2, index, floorCount, reservationId }) {
-  return bossHostingRecipeV1(recipe, bossHostingSpecV1({ family: family2, tier: tier2, index, floorCount, reservationId, enabled: Boolean(recipe.encounter.combatVersion) }));
-}
-function validateBossFloorBindingV1(state, site, floor) {
-  if (!hasBossHostingV1(state.d9World?.plannedWorld)) return;
-  const spec = bossHostingSpecV1({ family: site.familyId.split(":")[1], tier: site.sizeTier, index: floor.index, floorCount: site.floorCount, reservationId: site.socket.provenance.reservationId, enabled: Boolean(floor.encounter.combatVersion) }), h = floor.encounter.bossHosting;
-  requireContract(Boolean(h) === Boolean(spec), "BOSS_HOST:REQUIRED_HOST_MISSING_OR_UNEXPECTED");
-  if (!spec) return;
-  const id = floor.enemyIds[0], boss = state.bossCombat?.bossesByEntityId?.[id], home = state.groupsById?.[floor.groupId]?.containment?.memberHomesById?.[id];
-  requireContract(h.version === BOSS_HOSTING_VERSION && h.policyHash === BOSS_HOSTING_HASH && h.kind === spec.kind && h.roomId === floor.graph.topology.endNodeId && boss?.bossDefinitionId === spec.kind && boss.roomId === h.roomId && canonicalStringify(boss.homePosition) === canonicalStringify(h.position) && canonicalStringify(home) === canonicalStringify(h.position), "BOSS_HOST:LIVE_BINDING_DRIFT");
-}
-
-// src/shared/content/encounter_composition_v1.js
-var COMPOSITION_V1 = "encounter-composition-v1";
-var COMPOSITION_ELITE_V1 = "elite-record-composition-v1";
-var COMPOSITION_POLICY_V1 = Object.freeze({ version: COMPOSITION_V1, parentRuntime: "85aab6555235ddfe", bands: [{ from: 1, chancePercent: 0 }, { from: 5, chancePercent: 4 }, { from: 15, chancePercent: 8 }, { from: 30, chancePercent: 14 }, { from: 45, chancePercent: 20 }], minimumOrdinaryEliteFromLevel: 15, minimumEligibleMembers: 6, maximumElitesPerGroup: 4, membersPerEliteBudget: 6, primaryAffixes: ["swift_commander", "iron_citadel", "blood_berserker", "glacial_warden"], additionalAffixes: "Hardened (+25% HP), Brutal (+20% damage); second affix starts at15, third at30. One active mechanic, up to two distinct passive traits.", density: "No additional actors or changed layout/placement in V1. Existing novice pursuit restraint and higher-level full-pack retaliation retained." });
-var PASSIVE_ELITE_TRAITS_V1 = Object.freeze({ hardened: { label: "Hardened", hp: 125, damage: 100 }, brutal: { label: "Brutal", hp: 100, damage: 120 } });
-var compositionHashV1 = (text) => {
-  let h = 2166136261;
-  for (const c of text) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
-  return h >>> 0;
-};
-function compositionBandV1(level) {
-  const n = progressionBigInt(level);
-  return [...COMPOSITION_POLICY_V1.bands].reverse().find((b) => n >= BigInt(b.from));
-}
-function passiveEliteTraitsV1(source8, level) {
-  const n = progressionBigInt(level), key9 = COMPOSITION_V1 + "/" + source8.campaignSeed + "/" + source8.entityId + "/" + String(level), out = [];
-  if (n >= 15n && compositionHashV1(key9 + "/second") % 100 < (n >= 45n ? 100 : n >= 30n ? 75 : 35)) out.push(compositionHashV1(key9 + "/trait") % 2 ? "brutal" : "hardened");
-  if (n >= 30n && out.length && compositionHashV1(key9 + "/third") % 100 < (n >= 45n ? 60 : 25)) out.push(out[0] === "brutal" ? "hardened" : "brutal");
-  return out;
-}
-
-// src/shared/content/elite_affixes_d12_4.js
-var ELITE_AFFIX_CATALOG_D12_4_VERSION = "elite-affix-catalog-d12.4-v1";
-var VITALITY_WEAVER_AFFIX_ID = "vitality_weaver";
-var SWIFT_COMMANDER_AFFIX_ID = "swift_commander";
-var GLACIAL_WARDEN_AFFIX_ID = "glacial_warden";
-var TOXIC_DECAY_AFFIX_ID = "toxic_decay";
-var IRON_CITADEL_AFFIX_ID = "iron_citadel";
-var BLOOD_BERSERKER_AFFIX_ID = "blood_berserker";
-var NULLIFIER_AFFIX_ID = "nullifier";
-var WEB_WEAVER_AFFIX_ID = "web_weaver";
-var SLAG_SHAPER_AFFIX_ID = "slag_shaper";
-var VITALITY_WEAVER_D12_4 = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: VITALITY_WEAVER_AFFIX_ID,
-  tier: "elite",
-  label: "VITALITY WEAVER",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 90, radius: 120, maximumTargets: 3, ordinaryHeal: { numerator: 6, denominator: 100 }, reservedBossHeal: { numerator: 15, denominator: 1e3 } },
-  presentation: { scale: 1.25, accent: "#39d27d", accentDark: "#123e31", accentLight: "#c5f28c" }
-});
-var SWIFT_COMMANDER_D12_4D = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: SWIFT_COMMANDER_AFFIX_ID,
-  tier: "elite",
-  label: "SWIFT COMMANDER",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 90, radius: 140, maxStacks: 3, perStackSpeedPercent: 15, lingerTicks: 300, decayTicks: 150 },
-  presentation: { scale: 1.25, accent: "#00d2ff", accentDark: "#123a50", accentLight: "#b9f4ff", commandGold: "#f0c95a" }
-});
-var GLACIAL_WARDEN_D12_4E = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: GLACIAL_WARDEN_AFFIX_ID,
-  tier: "elite",
-  label: "GLACIAL WARDEN",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 120, radius: 110, statusId: "glacial_warden_snare", durationTicks: 60, movementMultiplier: { numerator: 2, denominator: 5 } },
-  presentation: { scale: 1.25, accent: "#38bdf8", accentDark: "#153756", accentLight: "#d9f7ff", iceBlue: "#79d7ff" }
-});
-var TOXIC_DECAY_D12_4F = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: TOXIC_DECAY_AFFIX_ID,
-  tier: "elite",
-  label: "TOXIC DECAY",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 120, statusId: "toxic_decay_poison", durationTicks: 240, tickTicks: 60, maxStacks: 3, damageMaxHp: { numerator: 12, denominator: 1e3 } },
-  presentation: { scale: 1.25, accent: "#69e09b", accentDark: "#241735", accentLight: "#c7ff9a", sludge: "#70408f" }
-});
-var IRON_CITADEL_D12_4G = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: IRON_CITADEL_AFFIX_ID,
-  tier: "elite",
-  label: "IRON CITADEL",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 90, radius: 100, maxStacks: 3, perStackMitigationPercent: 15, lingerTicks: 300, decayTicks: 150 },
-  presentation: { scale: 1.25, accent: "#7196b5", accentDark: "#182a38", accentLight: "#d2e2eb", steel: "#45657d" }
-});
-var BLOOD_BERSERKER_D12_4H_A = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: BLOOD_BERSERKER_AFFIX_ID,
-  tier: "elite",
-  label: "BERSERKER",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 90, radius: 110, maxStacks: 3, perStackAttackPercent: 15, lingerTicks: 300, decayTicks: 150, statusId: "blood_berserker_attack" },
-  presentation: { scale: 1.25, accent: "#c83f4f", accentDark: "#35131c", accentLight: "#ffb067", bloodGold: "#e2b85a" }
-});
-var NULLIFIER_D12_4I = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: NULLIFIER_AFFIX_ID,
-  tier: "elite",
-  label: "NULLIFIER",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 300, chargeTicks: 60, radius: 90, statusId: "nullified", durationTicks: 120, resistanceTicks: 90 },
-  presentation: { scale: 1.25, accent: "#9b5de5", accentDark: "#251339", accentLight: "#e4c7ff", fracture: "#c98cff" }
-});
-var WEB_WEAVER_D12_4J = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: WEB_WEAVER_AFFIX_ID,
-  tier: "elite",
-  label: "WEB WEAVER",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 210, radius: 220, windupTicks: 45, hazardKind: "web_weaver_web", durationTicks: 240, statusId: "webbed", geometry: { kind: "ellipse", radiusX: 75, radiusY: 33.75 }, movementMultiplier: { numerator: 2, denominator: 5 }, maxActivePerSource: 2 },
-  presentation: { scale: 1.25, accent: "#a9f3ff", accentDark: "#241b4b", accentLight: "#f1fdff", thread: "#c7e9ef" }
-});
-var SLAG_SHAPER_D12_4K = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  affixId: SLAG_SHAPER_AFFIX_ID,
-  tier: "elite",
-  label: "SLAG SHAPER",
-  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
-  pulse: { cadenceTicks: 180, windupTicks: 30, hazardKind: "slag_shaper_pool", durationTicks: 300, statusId: "slag_burn", geometry: { kind: "ellipse", radiusX: 12, radiusY: 6 }, damageMaxHp: { numerator: 15, denominator: 1e3 }, damageIntervalTicks: 45, nonlethal: false, maxActivePerSource: 2 },
-  presentation: { scale: 1.25, accent: "#f97316", accentDark: "#25130f", accentLight: "#fff0a8", crust: "#211a19" }
-});
-var ELITE_AFFIX_CATALOG_D12_4 = freezeWire({
-  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
-  definitionsById: { [VITALITY_WEAVER_AFFIX_ID]: VITALITY_WEAVER_D12_4, [SWIFT_COMMANDER_AFFIX_ID]: SWIFT_COMMANDER_D12_4D, [GLACIAL_WARDEN_AFFIX_ID]: GLACIAL_WARDEN_D12_4E, [TOXIC_DECAY_AFFIX_ID]: TOXIC_DECAY_D12_4F, [IRON_CITADEL_AFFIX_ID]: IRON_CITADEL_D12_4G, [BLOOD_BERSERKER_AFFIX_ID]: BLOOD_BERSERKER_D12_4H_A, [NULLIFIER_AFFIX_ID]: NULLIFIER_D12_4I, [WEB_WEAVER_AFFIX_ID]: WEB_WEAVER_D12_4J, [SLAG_SHAPER_AFFIX_ID]: SLAG_SHAPER_D12_4K }
-});
-function eliteAffixDefinitionD12_4(affixId) {
-  return ELITE_AFFIX_CATALOG_D12_4.definitionsById[affixId] ?? null;
-}
-function applyEliteActorStatsD12_4(profile2, elite) {
-  if (!elite) return profile2;
-  requireContract(elite.tier === "elite" && (elite.affixIds.length === 1 || elite.version === COMPOSITION_ELITE_V1 && elite.affixIds.length <= 3 && elite.affixIds.slice(1).every((id) => PASSIVE_ELITE_TRAITS_V1[id]) && new Set(elite.affixIds).size === elite.affixIds.length), "Unsupported D12.4 elite loadout");
-  const definition = eliteAffixDefinitionD12_4(elite.affixIds[0]);
-  requireContract(definition, "Unsupported D12.4 elite loadout");
-  const d = COMBAT_BALANCE_V3.elite, extra = elite.affixIds.slice(1).map((id) => PASSIVE_ELITE_TRAITS_V1[id]);
-  return {
-    ...profile2,
-    maxHp: combatInteger(extra.reduce((hp, t) => multiplyCombat(hp, t.hp, 100), multiplyCombat(profile2.maxHp, d.maxHp.numerator, d.maxHp.denominator)), "round"),
-    attackDamage: combatInteger(extra.reduce((damage, t) => multiplyCombat(damage, t.damage, 100), multiplyCombat(profile2.attackDamage, d.attackDamage.numerator, d.attackDamage.denominator)), "round")
+  const dungeonScale = (powerValue) => {
+    const p = progressionBigInt(powerValue), band = (p + 3n) / 4n * 4n;
+    const effective = band <= 100n ? q(band) : add(q(100), mul2(q(3, 2), frac(q(band - 100n), 7, 10)));
+    const E = mul2(exp2(mul2(effective, lnReduced(q(253, 250)))), add(q(1), mul2(q(3, 200), effective)));
+    return { effective, E };
   };
-}
-
-// src/shared/content/multiroom_policy_v1.js
-var MULTIROOM_VERSION = "core-families-multiroom-v1";
-var MULTIROOM_POLICY = freezeWire({ version: MULTIROOM_VERSION, parentRuntime: "c224c9e8b940ebab", floors: { small: 1, standard: 2, large: 3, deep: 4 }, rooms: { small: [4, 5], standard: [5, 6], large: [6, 7], deep: [7, 8] }, maximumAttempts: 48, minimumStairRouteTiles: 32, minimumStairRoomEdges: 3, corridorWidthTiles: 5, maximumFloorTiles: [80, 44], allowQuarterTurn: true, wholeFloorOccupancyRadius: 1500, maximumOrdinaryActorsPerFloor: 5, encounterCounts: { fort: 3, ruin: { small: 2, standard: 3, large: 4, deep: 5 }, crypt: { small: 3, standard: 4, large: 4, deep: 4 } }, preserveGearProvenanceRosterCounts: true, exteriorAndSiteIdentitiesUnchanged: true, stairSelection: "farthest-safe-room-by-walkable-route-with-optional-branch", generation: "seeded-connected-room-graph-family-grammar", oldSaveMigration: false });
-var MULTIROOM_HASH = "da5bdc04ec8045a117ddaad78525e60abccc860feb723f49d9b56cc54d900d51";
-var usesMultiroom = (b) => b?.interiorGeneration === MULTIROOM_VERSION && b.interiorGenerationHash === MULTIROOM_HASH;
-var multiroomLinks = (tier2) => Array.from({ length: MULTIROOM_POLICY.floors[tier2] }, (_, i) => ({ up: i ? i - 1 : null, down: i + 1 < MULTIROOM_POLICY.floors[tier2] ? i + 1 : null }));
-var multiroomPolicy = (tier2) => ({ floors: Array.from({ length: MULTIROOM_POLICY.floors[tier2] }, (_, i) => ({ role: "floor-" + i })) });
-
-// src/shared/content/named_elites_v1.js
-var NAMED_ELITES_V1 = Object.freeze({
-  old_bristleback: Object.freeze({ id: "old_bristleback", label: "OLD BRISTLEBACK", family: "tusk_boar", biome: "grassland", affixId: "swift_commander" }),
-  hollow_jack: Object.freeze({ id: "hollow_jack", label: "HOLLOW JACK", family: "field_scarecrow", biome: "grassland", affixId: "glacial_warden" }),
-  queen_kheptra: Object.freeze({ id: "queen_kheptra", label: "QUEEN KHEPTRA", family: "sand_scarab", biome: "desert", affixId: "web_weaver" }),
-  glasstail: Object.freeze({ id: "glasstail", label: "GLASSTAIL", family: "dune_scorpion", biome: "desert", affixId: "slag_shaper" })
-});
-var NAMED_ELITE_IDS_V1 = Object.freeze(Object.keys(NAMED_ELITES_V1));
-var NAMED_ELITE_HULL_V1 = 11;
-var NAMED_ELITE_TRICKS_V1 = Object.freeze({
-  old_bristleback: Object.freeze({ kind: "charge", firstDelayTicks: 90, minRange: 56, maxRange: 160, windupTicks: 42, chargeTicks: 26, speed: 7, contactRadius: 24, damageTenths: 16, knockback: 10, knockbackTicks: 12, recoverTicks: 45, cooldownTicks: 180 }),
-  queen_kheptra: Object.freeze({ kind: "shell", absorbNumerator: 4, absorbDenominator: 5, capNumerator: 1, capDenominator: 4, regrowTicks: 120, crackTicks: 36 })
-});
-var namedEliteForV1 = (biome, family2) => Object.values(NAMED_ELITES_V1).find((n) => n.biome === biome && n.family === family2) ?? null;
-
-// src/shared/content/site_end_profile_v1.js
-var SITE_MINI_BOSS_V1 = freezeWire({ hullRadius: 16, combatRadius: 17.28, maxHp: { numerator: 6, denominator: 1 }, attackDamage: { numerator: 3, denominator: 2 } });
-function miniBossProfileV1(profile2) {
-  const m = SITE_MINI_BOSS_V1;
-  return {
-    ...profile2,
-    hullRadius: m.hullRadius,
-    combatRadius: m.combatRadius,
-    maxHp: combatInteger(multiplyCombat(profile2.maxHp, m.maxHp.numerator, m.maxHp.denominator), "round"),
-    attackDamage: combatInteger(multiplyCombat(profile2.attackDamage, m.attackDamage.numerator, m.attackDamage.denominator), "round")
-  };
-}
-var NAMED_ELITE_HEALTH_V1 = freezeWire({ numerator: 3, denominator: 1 });
-function namedEliteProfileV1(profile2) {
-  return {
-    ...profile2,
-    hullRadius: NAMED_ELITE_HULL_V1,
-    combatRadius: Math.round(NAMED_ELITE_HULL_V1 * 108) / 100,
-    maxHp: combatInteger(multiplyCombat(profile2.maxHp, NAMED_ELITE_HEALTH_V1.numerator, NAMED_ELITE_HEALTH_V1.denominator), "round")
-  };
-}
-var siteEndBodyV1 = (end, profile2) => end?.role === "mini-boss" ? miniBossProfileV1(profile2) : end?.role === "elite" && end.named ? namedEliteProfileV1(profile2) : profile2;
-var siteEndRoleV1 = (floor, entityId2) => floor?.encounter?.siteEnd && floor.enemyIds?.[0] === entityId2 ? floor.encounter.siteEnd.role : null;
-var siteEndProfileV1 = (floor, entityId2, profile2) => siteEndRoleV1(floor, entityId2) ? siteEndBodyV1(floor.encounter.siteEnd, profile2) : profile2;
-function isSiteEndLeaderV1(state, groupId, entityId2) {
-  for (const site of Object.values(state.d9World?.functionalSitesById ?? {})) for (const floor of site.floors ?? []) if (floor.groupId === groupId) return siteEndRoleV1(floor, entityId2) !== null;
-  return false;
-}
-function siteEndActorProfileV1(state, group, actor, profile2) {
-  if (!profile2 || !group?.siteId) return profile2;
-  for (const site of Object.values(state.d9World?.functionalSitesById ?? {})) for (const floor of site.floors ?? []) if (floor.groupId === group.groupId) return siteEndProfileV1(floor, actor.entityId, profile2);
-  return profile2;
-}
-
-// src/shared/content/site_rewards_v1.js
-var SITE_REWARDS_VERSION = "site-rewards-v1";
-var SITE_REWARDS_POLICY = freezeWire({
-  version: SITE_REWARDS_VERSION,
-  kinds: { "site-end-elite": { role: "boss", floor: 1, quality: 0 }, "mini-boss": { role: "boss", floor: 0, quality: 0 }, "lair-boss": { role: "boss", floor: 2, quality: 0 }, "lair-chest": { role: "completion", floor: 0, quality: 300 }, "standard-chest": { role: "completion", floor: 0, quality: 0 } }
-});
-var kind = (k) => SITE_REWARDS_POLICY.kinds[k];
-var siteRewardRoleV1 = (k) => k ? kind(k).role : null;
-var siteRewardQualityV1 = (k) => k ? kind(k).quality : 0;
-var siteRewardRarityV1 = (k, tier2) => k ? Math.max(tier2, kind(k).floor) : tier2;
-function validateSiteRewardProgressionV1(p) {
-  if (p.siteReward === void 0) return p;
-  requireContract(Object.hasOwn(SITE_REWARDS_POLICY.kinds, p.siteReward) && p.rarityPolicyHash !== void 0 && p.rarityRole === kind(p.siteReward).role, "Site reward rule");
-  return p;
-}
-
-// src/shared/content/world_loot_v3.js
-var WORLD_LOOT_V3_VERSION = "world-loot-v3";
-var WORLD_LOOT_V3_HASH = "5945f4f6a6c02522b745889a88f4cd1034d8e4b89266517a2c31825741ef5cdf";
-var WORLD_LOOT_V3_POLICY = freezeWire({
-  version: WORLD_LOOT_V3_VERSION,
-  parentCombatHash: WORLD_COMBAT_HASH,
-  unlockLevels: [1, 1, 10, 20, 35, 50],
-  // gearPerMille: chance this source drops gear; uncommon: basis points of non-rare gear;
-  // rare: [level, basis points] anchors, linear between them, 0 before the first, flat after the last.
-  sources: {
-    ordinary: { gearPerMille: 15, uncommon: 2e3, rare: [[10, 100], [50, 200]], rich: false },
-    elite: { gearPerMille: 250, uncommon: 4500, rare: [[10, 300], [50, 600]], rich: false },
-    smallEnd: { gearPerMille: 500, uncommon: 4500, rare: [[10, 300], [50, 600]], rich: false },
-    mini: { gearPerMille: 1e3, uncommon: 6e3, rare: [[10, 800], [50, 1500]], rich: false },
-    boss: { gearPerMille: 1e3, uncommon: 8e3, rare: [[10, 1500], [20, 2e3], [30, 2800], [40, 3500]], rich: true },
-    smallChest: { gearPerMille: 150, uncommon: 2500, rare: [], rich: false },
-    standardChest: { gearPerMille: 400, uncommon: 5e3, rare: [[10, 300], [50, 800]], rich: false },
-    bossChest: { gearPerMille: 1e3, uncommon: 7e3, rare: [[10, 1e3], [20, 1500], [30, 2200], [40, 3e3]], rich: true }
-  },
-  // How Rare-or-better gear splits into Rare / Epic / Legendary / Mythic (basis points).
-  split: [
-    { minimumLevel: 1, plain: [1e4, 0, 0, 0], rich: [1e4, 0, 0, 0] },
-    { minimumLevel: 20, plain: [9e3, 1e3, 0, 0], rich: [8e3, 2e3, 0, 0] },
-    { minimumLevel: 35, plain: [8200, 1500, 300, 0], rich: [6800, 2500, 700, 0] },
-    { minimumLevel: 50, plain: [7700, 1700, 500, 100], rich: [6e3, 2800, 1e3, 200] }
-  ],
-  qualityFromLevel: 30,
-  gate: "min(frozen encounter level, personal hero level when the reward is captured). Pickup, reopen and portal use never reroll."
-});
-var SOURCES = WORLD_LOOT_V3_POLICY.sources;
-function lootSourceV3(role, siteReward = null) {
-  if (role === "ordinary" || role === "elite") return role;
-  if (role === "boss") return siteReward === "site-end-elite" ? "smallEnd" : siteReward === "mini-boss" ? "mini" : "boss";
-  requireContract(role === "completion", "Loot v3 role");
-  return siteReward === "lair-chest" ? "bossChest" : siteReward === "standard-chest" ? "standardChest" : "smallChest";
-}
-function lootGearPerMilleV3(role, siteReward = null, occurrenceHundredths = 100) {
-  return Math.min(1e3, Math.floor(SOURCES[lootSourceV3(role, siteReward)].gearPerMille * occurrenceHundredths / 100));
-}
-function rareShare(anchors2, level) {
-  if (!anchors2.length || level < BigInt(anchors2[0][0])) return 0n;
-  for (let i = 1; i < anchors2.length; i++) {
-    const [a, va] = anchors2[i - 1], [b, vb] = anchors2[i];
-    if (level < BigInt(b)) return BigInt(va) + (BigInt(vb) - BigInt(va)) * (level - BigInt(a)) / BigInt(b - a);
+  function endpoint(a, mode = "round", places = 0) {
+    const scale2 = 10n ** BigInt(places), f3 = (n) => mode === "ceil" ? ceilDiv(n * scale2, S) : mode === "floor" ? n * scale2 / S : (2n * n * scale2 + S) / (2n * S), lo = f3(a.lo), hi = f3(a.hi);
+    if (lo !== hi) {
+      const e = new RangeError("Numeric proof requires refinement");
+      e.code = "NUMERIC_PROOF_REFINE";
+      throw e;
+    }
+    return integerWire(lo);
   }
-  return BigInt(anchors2.at(-1)[1]);
+  return { q, add, sub, mul: mul2, div, power: power2, root: root2, frac, log2Integer, exp: exp2, dungeonScale, endpoint, scale: S };
 }
-function worldLootWeightsV3(encounter, hero, role, siteReward = null, qualityHundredths = 0) {
-  positiveProgression(encounter);
-  positiveProgression(hero);
-  const a = progressionBigInt(encounter), b = progressionBigInt(hero), level = a < b ? a : b, q = progressionBigInt(qualityHundredths);
-  requireContract(q >= 0n, "Loot v3 quality");
-  const src = SOURCES[lootSourceV3(role, siteReward)], rare = rareShare(src.rare, level), rest = 10000n - rare, u = rest * BigInt(src.uncommon) / 10000n;
-  const row = [...WORLD_LOOT_V3_POLICY.split].reverse().find((r) => level >= BigInt(r.minimumLevel))[src.rich ? "rich" : "plain"];
-  const top = row.slice(1).map((w2) => rare * BigInt(w2) / 10000n), w = [rest - u, u, rare - top.reduce((x, y) => x + y, 0n), ...top];
-  const boost = level >= BigInt(WORLD_LOOT_V3_POLICY.qualityFromLevel) ? q : 0n;
-  return w.map((n, i) => level < BigInt(WORLD_LOOT_V3_POLICY.unlockLevels[i]) ? 0n : n * (10000n + boost * BigInt(i * 10)));
-}
-function worldGearRarityV3(encounter, hero, role, siteReward, draw, qualityHundredths = 0) {
-  requireContract(Number.isFinite(draw) && draw >= 0 && draw < 1, "Loot v3 draw");
-  const weights = worldLootWeightsV3(encounter, hero, role, siteReward, qualityHundredths), total = weights.reduce((a, b) => a + b, 0n), roll = BigInt(Math.floor(draw * 4294967296)) * total;
-  let sum2 = 0n;
-  for (let i = 0; i < weights.length; i++) {
-    sum2 += weights[i];
-    if (roll < sum2 * 4294967296n) return i;
+function certifyNumeric(evaluate) {
+  for (const p of [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]) {
+    try {
+      return evaluate(numericContext(p));
+    } catch (e) {
+      if (e.code !== "NUMERIC_PROOF_REFINE") throw e;
+    }
   }
-  requireContract(false, "Loot v3 weights failed");
+  numericExtension("D9 endpoint proof precision");
 }
 
-// src/shared/content/world_loot_v4.js
-var WORLD_LOOT_V4_VERSION = "world-loot-v4";
-var WORLD_LOOT_V4_HASH = "4322b61b219906b7d6792c64bdef13dcbb1c2e09cb5ddb21a38047f108de4c92";
-var WORLD_LOOT_V4_POLICY = freezeWire({
-  version: WORLD_LOOT_V4_VERSION,
-  parentCombatHash: WORLD_COMBAT_HASH,
-  unlockLevels: [1, 1, 10, 20, 35, 50],
-  sources: {
-    ordinary: { gearPerMille: 40, common: [[1, 8e3], [10, 5e3], [20, 0]], rare: [[9, 0], [10, 200], [20, 1e3], [30, 4500], [40, 1e4]], rich: false },
-    elite: { gearPerMille: 500, common: [[1, 5500], [10, 3e3], [20, 0]], rare: [[9, 0], [10, 400], [20, 1500], [30, 5e3], [40, 1e4]], rich: false },
-    smallEnd: { gearPerMille: 700, common: [[1, 5500], [10, 3e3], [20, 0]], rare: [[9, 0], [10, 400], [20, 1500], [30, 5e3], [40, 1e4]], rich: false },
-    mini: { gearPerMille: 1e3, common: [[1, 4e3], [10, 2e3], [20, 0]], rare: [[9, 0], [10, 800], [20, 2e3], [30, 5500], [40, 1e4]], rich: false },
-    boss: { gearPerMille: 1e3, common: [[1, 2e3], [10, 0]], rare: [[9, 0], [10, 1500], [20, 4e3], [30, 1e4]], rich: true },
-    smallChest: { gearPerMille: 350, common: [[1, 7500], [10, 5e3], [20, 0]], rare: [[20, 0], [30, 3e3], [40, 1e4]], rich: false },
-    standardChest: { gearPerMille: 650, common: [[1, 5e3], [10, 3e3], [20, 0]], rare: [[9, 0], [10, 300], [20, 1200], [30, 5e3], [40, 1e4]], rich: false },
-    bossChest: { gearPerMille: 1e3, common: [[1, 3e3], [10, 0]], rare: [[9, 0], [10, 1e3], [20, 3500], [30, 1e4]], rich: true }
-  },
-  split: [
-    { minimumLevel: 1, plain: [1e4, 0, 0, 0], rich: [1e4, 0, 0, 0] },
-    { minimumLevel: 20, plain: [9e3, 1e3, 0, 0], rich: [8e3, 2e3, 0, 0] },
-    { minimumLevel: 35, plain: [8200, 1500, 300, 0], rich: [6800, 2500, 700, 0] },
-    { minimumLevel: 50, plain: [7700, 1700, 500, 100], rich: [6e3, 2800, 1e3, 200] }
-  ],
-  qualityFromLevel: 30,
-  gate: "min(frozen encounter level, personal hero level when the reward is captured). Pickup, reopen and portal use never reroll."
+// src/shared/contracts/threat_power_d9.js
+function threatEndpointsD9(level, tier2, { hp = 1, damage = 1, xp = 1 } = {}) {
+  const rank = THREAT_TIERS.indexOf(tier2);
+  requireContract(rank >= 0, "Invalid threat rank");
+  return certifyNumeric((c) => {
+    const power2 = c.mul(c.add(c.q(1), c.mul(c.q(7, 20), c.log2Integer(level))), c.q([100, 125, 160, 200][rank], 100));
+    return { maxHp: c.endpoint(c.mul(c.q(hp), c.root(power2, 2))), attackDamage: c.endpoint(c.mul(c.q(damage), power2)), xp: c.endpoint(c.mul(c.q(xp), power2)), power: combatAmount(c.endpoint(power2, "round", 12), 1000000000000n) };
+  });
+}
+
+// src/shared/content/hero_leveling_v2.js
+var HERO_LEVELING_V2_VERSION = "hero-leveling-v2";
+var HERO_LEVELING_V2_POLICY = freezeWire({
+  version: HERO_LEVELING_V2_VERSION,
+  levelCap: 50,
+  // XP from level L to L+1, for L = 1..49.
+  steps: [140, 180, 220, 390, 450, 500, 560, 620, 880, 960, 1e3, 1100, 1200, 1300, 1400, 1800, 1900, 2e3, 2100, 2200, 2300, 2400, 2500, 2600, 3200, 3400, 3500, 3600, 3700, 3800, 4e3, 4100, 4200, 4300, 4400, 5200, 5400, 5500, 5600, 5800, 5900, 6100, 6200, 6300, 6500, 6600, 6700, 6900, 8100],
+  paragonStep: 4400,
+  siteClearKills: { "site-end-elite": 5, "mini-boss": 15, "lair-boss": 40 }
 });
-var SOURCES2 = WORLD_LOOT_V4_POLICY.sources;
-function lootGearPerMilleV4(role, siteReward = null, occurrenceHundredths = 100) {
-  return Math.min(1e3, Math.floor(SOURCES2[lootSourceV3(role, siteReward)].gearPerMille * occurrenceHundredths / 100));
+var P = HERO_LEVELING_V2_POLICY;
+var TOTALS = [0n];
+for (const s of P.steps) TOTALS.push(TOTALS.at(-1) + BigInt(s));
+var HERO_LEVEL_CAP = P.levelCap;
+function heroLevelAtXpV2(totalXp) {
+  const xp = BigInt(totalXp);
+  let l = 1;
+  while (l < P.levelCap && xp >= TOTALS[l]) l++;
+  return l;
 }
-function curve(anchors2, level) {
-  if (level <= BigInt(anchors2[0][0])) return BigInt(anchors2[0][1]);
-  for (let i = 1; i < anchors2.length; i++) {
-    const [a, va] = anchors2[i - 1], [b, vb] = anchors2[i];
-    if (level < BigInt(b)) return BigInt(va) + (BigInt(vb) - BigInt(va)) * (level - BigInt(a)) / BigInt(b - a);
+
+// src/shared/contracts/encounter_level_v2.js
+function resolveEncounterLevelV2(minimumLevel, participants) {
+  positiveProgression(minimumLevel);
+  let level = progressionBigInt(minimumLevel);
+  for (const p of participants) {
+    const value = p.heroLevel ?? p.progression?.level;
+    positiveProgression(value);
+    if (progressionBigInt(value) > level) level = progressionBigInt(value);
   }
-  return BigInt(anchors2.at(-1)[1]);
+  return progressionWire(level > BigInt(HERO_LEVEL_CAP) ? BigInt(HERO_LEVEL_CAP) : level);
 }
-function worldLootWeightsV4(encounter, hero, role, siteReward = null, qualityHundredths = 0) {
-  positiveProgression(encounter);
-  positiveProgression(hero);
-  const a = progressionBigInt(encounter), b = progressionBigInt(hero), level = a < b ? a : b, q = progressionBigInt(qualityHundredths);
-  requireContract(q >= 0n, "Loot v4 quality");
-  const src = SOURCES2[lootSourceV3(role, siteReward)], common = curve(src.common, level), rare = curve(src.rare, level), uncommon = 10000n - common - rare;
-  requireContract(uncommon >= 0n, "Loot v4 shares");
-  const row = [...WORLD_LOOT_V4_POLICY.split].reverse().find((r) => level >= BigInt(r.minimumLevel))[src.rich ? "rich" : "plain"];
-  const top = row.slice(1).map((w2) => rare * BigInt(w2) / 10000n), w = [common, uncommon, rare - top.reduce((x, y) => x + y, 0n), ...top];
-  const boost = level >= BigInt(WORLD_LOOT_V4_POLICY.qualityFromLevel) ? q : 0n;
-  return w.map((n, i) => level < BigInt(WORLD_LOOT_V4_POLICY.unlockLevels[i]) ? 0n : n * (10000n + boost * BigInt(i * 10)));
-}
-function worldGearRarityV4(encounter, hero, role, siteReward, draw, qualityHundredths = 0) {
-  requireContract(Number.isFinite(draw) && draw >= 0 && draw < 1, "Loot v4 draw");
-  const weights = worldLootWeightsV4(encounter, hero, role, siteReward, qualityHundredths), total = weights.reduce((a, b) => a + b, 0n), roll = BigInt(Math.floor(draw * 4294967296)) * total;
-  let sum2 = 0n;
-  requireContract(total > 0n, "Loot v4 weights empty");
-  for (let i = 0; i < weights.length; i++) {
-    sum2 += weights[i];
-    if (roll < sum2 * 4294967296n) return i;
-  }
-  requireContract(false, "Loot v4 weights failed");
-}
-var isSourceLootV4 = (hash21) => hash21 === WORLD_LOOT_V3_HASH || hash21 === WORLD_LOOT_V4_HASH;
-function lootGearPerMilleFor(hash21, role, siteReward = null, occurrenceHundredths = 100) {
-  requireContract(isSourceLootV4(hash21), "Loot table");
-  return (hash21 === WORLD_LOOT_V4_HASH ? lootGearPerMilleV4 : lootGearPerMilleV3)(role, siteReward, occurrenceHundredths);
-}
-function worldGearRarityFor(hash21, encounter, hero, role, siteReward, draw, qualityHundredths = 0) {
-  requireContract(isSourceLootV4(hash21), "Loot table");
-  return (hash21 === WORLD_LOOT_V4_HASH ? worldGearRarityV4 : worldGearRarityV3)(encounter, hero, role, siteReward, draw, qualityHundredths);
+function resetEncounterSnapshotV2(prior, { tick, minimumLevel, participants, scale: scale2 = true }) {
+  if (!prior) throw new TypeError("Reset lacks an existing progression snapshot");
+  if (!participants) return prior;
+  const level = resolveEncounterLevelV2(minimumLevel, scale2 ? participants : []);
+  return { ...prior, activatedTick: tick, minimumLevel: progressionWire(progressionBigInt(minimumLevel)), effectiveLevel: level, sourceDepth: level, participants: participants.map((p) => ({ playerId: p.playerId, heroLevel: progressionWire(progressionBigInt(p.heroLevel)) })) };
 }
 
 // src/shared/content/planned_events_v1.js
@@ -2535,6 +1916,648 @@ function huntChampionOfV1(biome) {
   return HUNT_CHAMPIONS[biome] ?? HUNT_CHAMPIONS.woodland;
 }
 
+// src/shared/content/world_profile_d9.js
+var D9_PROFILE = freezeWire({
+  version: "world-geography-d9-v1",
+  coordinateVersion: "world-address-d9-v1",
+  progressionPolicy: "effective-level-depth-d9-v1",
+  chunkWidth: 1024,
+  chunkHeight: 832,
+  tileSize: 32,
+  regionChunks: 8,
+  coordinateDigits: 256,
+  biomes: ["woodland", "rocky-uplands", "marsh"],
+  floorBands: [[1, 5], [6, 10], [11, 20], [21, 40], [41, 80]],
+  lowFloorPercent: 20,
+  anomalyPercent: 10,
+  originCollarChunks: 1,
+  renewalVacancyTicks: 18e3,
+  prepareRadius: 768,
+  leaveRadius: 960,
+  projectionRadius: 900,
+  placementSafetyRadius: 384,
+  placementCandidates: 64,
+  residentRadiusChunks: 2,
+  preloadRadiusChunks: 3,
+  softActors: 24,
+  hardActors: 48,
+  minimapWidth: 128,
+  minimapHeight: 96,
+  mapTileBudget: 128,
+  siteSocketVersion: "site-socket-d9-v1",
+  siteSocketSlots: 1,
+  siteSocketChanceDenominator: 8
+});
+
+// src/shared/contracts/world_address.js
+function signedAddress(value) {
+  requireContract(typeof value === "string" && /^(0|[1-9][0-9]*|-[1-9][0-9]*)$/.test(value), "Noncanonical world address");
+  if (value.replace("-", "").length > D9_PROFILE.coordinateDigits) {
+    const e = new RangeError("World-address extension required");
+    e.code = "WORLD_ADDRESS_EXTENSION_REQUIRED";
+    throw e;
+  }
+  return value;
+}
+var addressWire = (value) => signedAddress(String(value));
+function floorDiv(a, b) {
+  requireContract(typeof a === "bigint" && typeof b === "bigint" && b > 0n, "Invalid exact floor division");
+  const q = a / b;
+  return a % b < 0n ? q - 1n : q;
+}
+function regionAddress(chunkX, chunkY) {
+  const x = BigInt(signedAddress(chunkX)), y = BigInt(signedAddress(chunkY)), n = BigInt(D9_PROFILE.regionChunks), rx = floorDiv(x, n), ry = floorDiv(y, n);
+  return freezeWire({ regionX: addressWire(rx), regionY: addressWire(ry), chunkX: Number(x - rx * n), chunkY: Number(y - ry * n) });
+}
+function validateWorldPosition(p) {
+  closedRecord(p, ["chunkX", "chunkY", "localX", "localY"]);
+  signedAddress(p.chunkX);
+  signedAddress(p.chunkY);
+  requireContract(Number.isFinite(p.localX) && p.localX >= 0 && p.localX < D9_PROFILE.chunkWidth && Number.isFinite(p.localY) && p.localY >= 0 && p.localY < D9_PROFILE.chunkHeight, "Invalid local world position");
+  return p;
+}
+function normalizeWorldPosition(p) {
+  signedAddress(p.chunkX);
+  signedAddress(p.chunkY);
+  requireContract(Number.isFinite(p.localX) && Number.isFinite(p.localY), "Invalid local movement");
+  const dx = Math.floor(p.localX / D9_PROFILE.chunkWidth), dy = Math.floor(p.localY / D9_PROFILE.chunkHeight);
+  requireContract(Number.isSafeInteger(dx) && Number.isSafeInteger(dy), "Unbounded local movement");
+  const normalized = Object.assign(/* @__PURE__ */ Object.create(null), { chunkX: addressWire(BigInt(p.chunkX) + BigInt(dx)), chunkY: addressWire(BigInt(p.chunkY) + BigInt(dy)), localX: p.localX - dx * D9_PROFILE.chunkWidth, localY: p.localY - dy * D9_PROFILE.chunkHeight });
+  return Object.freeze(validateWorldPosition(normalized));
+}
+var legacyWorldPosition = (p) => normalizeWorldPosition({ chunkX: "0", chunkY: "0", localX: p.x, localY: p.y });
+function relativeWorldPosition(p, origin2, maxChunkDelta = 8) {
+  validateWorldPosition(p);
+  signedAddress(origin2.chunkX);
+  signedAddress(origin2.chunkY);
+  requireContract(Number.isSafeInteger(maxChunkDelta) && maxChunkDelta >= 0 && maxChunkDelta <= 64, "Invalid local frame radius");
+  const dx = BigInt(p.chunkX) - BigInt(origin2.chunkX), dy = BigInt(p.chunkY) - BigInt(origin2.chunkY), limit = BigInt(maxChunkDelta);
+  if (dx < -limit || dx > limit || dy < -limit || dy > limit) return null;
+  return { x: Number(dx) * D9_PROFILE.chunkWidth + p.localX, y: Number(dy) * D9_PROFILE.chunkHeight + p.localY };
+}
+
+// src/shared/contracts/episode_progression_d9.js
+var D9_EPISODE_VERSION = "encounter-episode-d9-v1";
+function unfrozenEpisodeD9(anchorId, episode = 0, { origin: origin2 = false } = {}) {
+  return { version: D9_EPISODE_VERSION, anchorId, episode: progressionWire(progressionBigInt(episode)), origin: origin2, snapshot: null, placement: null, clearedTick: null, vacatedTick: null, renewalEligible: false };
+}
+var pointDistance = (a, b) => {
+  const local = relativeWorldPosition(a, b, 4);
+  return local ? Math.hypot(local.x - b.localX, local.y - b.localY) : Infinity;
+};
+function prepareEpisodeSnapshotD9(episode, { tick, minimumLevel, participants, anchor, spaceInstanceId, rank, trigger, scale: scale2 = true }) {
+  requireContract(["activation", "combat", "resource"].includes(trigger), "Invalid progression trigger");
+  if (episode.snapshot) return episode.snapshot;
+  positiveProgression(minimumLevel);
+  validateWorldPosition(anchor);
+  const eligible3 = participants.filter((p) => p.alive && p.spaceInstanceId === spaceInstanceId && pointDistance(p.position, anchor) <= D9_PROFILE.prepareRadius).sort((a, b) => a.playerId.localeCompare(b.playerId));
+  requireContract(eligible3.length > 0, "Episode activation has no eligible participant");
+  const level = resolveEncounterLevelV2(minimumLevel, scale2 ? eligible3 : []);
+  return freezeWire({ version: "episode-progression-d9-v1", snapshotId: episode.anchorId + "/episode/" + String(episode.episode), activatedTick: tick, trigger, minimumLevel: progressionWire(progressionBigInt(minimumLevel)), effectiveLevel: progressionWire(level), sourceDepth: progressionWire(level), mappingVersion: D9_PROFILE.progressionPolicy, rank, participants: eligible3.map((p) => ({ playerId: p.playerId, heroLevel: progressionWire(progressionBigInt(p.heroLevel)) })) });
+}
+function chooseEpisodePlacementD9({ candidates, participants, spaceInstanceId, isLegal, combat = false, hollow = false, planned = false }) {
+  requireContract(candidates.length <= D9_PROFILE.placementCandidates, "Placement work bound");
+  for (const pair of candidates) {
+    requireContract(combat ? pair.length >= 6 && pair.length <= (planned ? PLANNED_EVENT_MEMBERS : hollow ? 13 : 12) : pair.length === 2, "D9 encounter member capacity");
+    if (pair.every((p) => isLegal(p) && participants.every((a) => a.spaceInstanceId !== spaceInstanceId || pointDistance(p, a.position) >= D9_PROFILE.placementSafetyRadius))) return freezeWire(pair);
+  }
+  return null;
+}
+
+// src/shared/content/recovered_boss_catalog_v1.js
+var RECOVERED_BOSS_VERSION = "recovered-boss-v1";
+var RECOVERED_BOSSES = Object.freeze({
+  corrosive_abomination: Object.freeze({
+    id: "corrosive_abomination",
+    label: "CORROSIVE ABOMINATION",
+    site: "repeatable-slot:ruin:wetland:standard:033",
+    family: "ruin",
+    biome: "wetland",
+    color: "#91e56b",
+    secondary: "#436f3f",
+    adds: 6,
+    attacks: Object.freeze({ corrosive_slam: 75, spore_storm: 85, acid_spill: 45 })
+  }),
+  void_overseer: Object.freeze({
+    id: "void_overseer",
+    label: "VOID OVERSEER",
+    site: "repeatable-slot:ruin:frostland:deep:01",
+    family: "ruin",
+    biome: "frostland",
+    color: "#fa78d5",
+    secondary: "#38234a",
+    adds: 0,
+    attacks: Object.freeze({ eye_lance: 75, singularity: 360 })
+  }),
+  chronos_arbitrator: Object.freeze({
+    id: "chronos_arbitrator",
+    label: "CHRONOS ARBITRATOR",
+    site: "repeatable-slot:ruin:upland:standard:049",
+    family: "ruin",
+    biome: "upland",
+    color: "#e8c874",
+    secondary: "#536c8a",
+    adds: 0,
+    attacks: Object.freeze({ chronos_slam: 75, time_field: 60, chronos_rewind: 240 })
+  }),
+  nexus_overseer: Object.freeze({
+    id: "nexus_overseer",
+    label: "NEXUS OVERSEER",
+    site: "repeatable-slot:ruin:tropical:standard:037",
+    family: "ruin",
+    biome: "tropical",
+    color: "#5cecf5",
+    secondary: "#a078ff",
+    adds: 2,
+    attacks: Object.freeze({ prism_collapse: 110, control_glitch: 60, prism_slam: 75 })
+  }),
+  gilded_vault_keeper: Object.freeze({
+    id: "gilded_vault_keeper",
+    label: "GILDED VAULT KEEPER",
+    site: "repeatable-slot:crypt:upland:standard:01",
+    family: "crypt",
+    biome: "upland",
+    color: "#ffd16a",
+    secondary: "#aa3155",
+    adds: 0,
+    attacks: Object.freeze({ vault_crush: 75, gold_fall: 75, taxation: 240 })
+  }),
+  marcus: Object.freeze({
+    id: "marcus",
+    label: "GOLDSPUR THE OUTLAW",
+    site: "repeatable-slot:fort:grassland:standard:040",
+    family: "fort",
+    biome: "grassland",
+    color: "#ffb968",
+    secondary: "#bd4d39",
+    adds: 0,
+    attacks: Object.freeze({ coin_barrage: 65, gold_rush: 55, gilded_lasso: 55, inversion: 80, molten_shield: 240 })
+  }),
+  ashfang: Object.freeze({
+    id: "ashfang",
+    label: "ASHFANG",
+    site: "repeatable-slot:ruin:desert:standard:056",
+    family: "ruin",
+    biome: "desert",
+    color: "#ef5b57",
+    secondary: "#63283a",
+    adds: 0,
+    attacks: Object.freeze({ scarlet_fire: 90, hooked_tail: 70, arena_collapse: 100 })
+  }),
+  cinderhart: Object.freeze({
+    id: "cinderhart",
+    label: "CINDERHART",
+    site: "repeatable-slot:ruin:woodland:standard:054",
+    family: "ruin",
+    biome: "woodland",
+    color: "#ff983e",
+    secondary: "#432b25",
+    adds: 5,
+    attacks: Object.freeze({ warren_call: 60, fire_charge: 54 })
+  })
+});
+var RECOVERED_BOSS_IDS = Object.freeze(Object.keys(RECOVERED_BOSSES));
+function recoveredBossForReservation(reservationId, family2, index, floorCount, enabled2 = true) {
+  if (!enabled2 || !Number.isInteger(index) || index !== floorCount - 1) return null;
+  const boss = RECOVERED_BOSSES[bossAtSiteV1(reservationId)];
+  return boss?.family === family2 ? boss : null;
+}
+
+// src/shared/content/biome_bosses_v1.js
+var BIOME_BOSSES_V1 = Object.freeze({
+  barrow_king: Object.freeze({
+    id: "barrow_king",
+    label: "BARROW KING",
+    site: "repeatable-slot:ruin:wetland:standard:067",
+    family: "ruin",
+    biome: "grassland",
+    color: "#9be37a",
+    secondary: "#5a2f6e",
+    adds: 4,
+    summonKind: "wight",
+    attacks: Object.freeze({ grave_cleave: 70, crown_flame: 80, barrow_call: 60 })
+  }),
+  sun_pharaoh: Object.freeze({
+    id: "sun_pharaoh",
+    label: "SUN PHARAOH",
+    site: "repeatable-slot:crypt:frostland:deep:01",
+    family: "crypt",
+    biome: "desert",
+    color: "#ffcf4a",
+    secondary: "#2f5fa8",
+    adds: 4,
+    summonKind: "scarab",
+    attacks: Object.freeze({ solar_beam: 75, sunfall: 90, scarab_swarm: 60 })
+  })
+});
+var BIOME_BOSS_IDS_V1 = Object.freeze(Object.keys(BIOME_BOSSES_V1));
+var BIOME_BOSS_DAMAGE_V1 = Object.freeze({ grave_cleave: 19, crown_flame: 15, solar_beam: 17, sunfall: 15 });
+var BIOME_BOSS_REACH_V1 = Object.freeze({ grave_cleave: 78, crown_flame: 70, solar_beam: 280, solarBeamHalfWidth: 24, sunfall: 40 });
+var BIOME_BOSS_POOLS_V1 = Object.freeze({ ghostfire: Object.freeze([44, 300]), sunfire: Object.freeze([30, 240]) });
+
+// src/shared/content/bestiary_bosses_v1.js
+var LABELS = { aegis_goliath: "AEGIS GOLIATH", brimstone_colossus: "BRIMSTONE COLOSSUS", arachnid_treant: "ARACHNID TREANT" };
+var title = (label2) => String(label2).toLowerCase().replace(/(^|[\s-])([a-z])/g, (m, a, b) => a + b.toUpperCase()).replace(/ (The|Of) /g, (w) => w.toLowerCase());
+var BOSS_PAGE_IDS = freezeWire([...WORLD_BOSS_ROLES]);
+var BOSS_PAGE_NAMES = freezeWire(Object.fromEntries([...BOSS_PAGE_IDS, "arachnid_treant"].map((id) => [id, title(RECOVERED_BOSSES[id]?.label ?? BIOME_BOSSES_V1[id]?.label ?? LABELS[id] ?? id.replace(/_/g, " "))])));
+
+// src/shared/content/bestiary_v1.js
+var BESTIARY_VERSION = "bestiary-v1";
+var RARE_HEALTH_X100 = 300;
+var RARE_DAMAGE_X100 = 150;
+var RARE_CARD_STACK = freezeWire([3, 8]);
+var CARD_DROP = freezeWire({ ordinary: { per10000: 50, stack: [1, 1] }, elite: { per10000: 500, stack: [1, 3] }, boss: { per10000: 2e3, stack: [1, 1] } });
+var TIERS = freezeWire(["Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic"]);
+var TIER_COLORS = freezeWire(["#ffffff", "#2ecc71", "#3498db", "#9b59b6", "#e67e22", "#e74c3c"]);
+var TIER_CARDS = freezeWire([1, 25, 100, 300, 600, 1e3]);
+var BOSS_TIER_CARDS = freezeWire([1, 5, 15, 35, 65, 100]);
+var TIER_SOULS = freezeWire([0, 10, 30, 80, 200, 500]);
+var TIER_GOLD = freezeWire([0, 5e4, 1e6, 1e7, 75e6, 3e8]);
+var BIG = [50, 75, 100, 125, 150, 200];
+var SMALL = [25, 35, 50, 60, 75, 100];
+var CRITDMG = [100, 150, 200, 250, 300, 400];
+var DMG = [null, null, 100, 200, 300, 500];
+var FIND = [null, null, 100, 200, 300, 400];
+var DOUBLE = [null, null, 200, 400, 600, 800];
+var TEN = [null, null, 200, 400, 600, 1e3];
+var LIFE = [null, null, 25, 50, 75, 100];
+var POTCD = [null, null, 200, 400, 600, 800];
+var RANGE = [null, null, 500, 1e3, 1500, 2e3];
+var BESTIARY_STATS = freezeWire({
+  atkPct: ["Attack", [...BIG], true],
+  defPct: ["Defense", [...BIG], true],
+  maxHpPct: ["Max health", [...BIG], true],
+  strPct: ["Strength", [...BIG], true],
+  dexPct: ["Dexterity", [...BIG], true],
+  intPct: ["Intelligence", [...BIG], true],
+  moveSpeedPct: ["Move speed", [...BIG], true],
+  attackSpeed: ["Attack speed", [...BIG], true],
+  critChance: ["Crit chance", [...SMALL], true],
+  block: ["Block chance", [...SMALL], true],
+  parry: ["Parry chance", [...SMALL], true],
+  cdr: ["Cooldown reduction", [...SMALL], true],
+  critDamage: ["Crit damage", [...CRITDMG], true],
+  fireDmg: ["Fire damage", [...DMG], true],
+  frostDmg: ["Frost damage", [...DMG], true],
+  lightningDmg: ["Lightning damage", [...DMG], true],
+  bleedDmg: ["Bleed damage", [...DMG], true],
+  poisonDmg: ["Poison damage", [...DMG], true],
+  shockDmg: ["Shock damage", [...DMG], true],
+  counterDmg: ["Counter damage", [...DMG], true],
+  eliteDmg: ["Elite damage", [...DMG], true],
+  executeDmg: ["Execute", [...DMG], false],
+  rareDmg: ["Rare damage", [...DMG], false],
+  nightDmg: ["Night damage", [...DMG], false],
+  goldFind: ["Gold find", [...FIND], false],
+  goldFindX2: ["Gold find", [...DOUBLE], false],
+  xpFind: ["XP", [...FIND], false],
+  soulFind: ["Monster Soul find", [...FIND], false],
+  potionHeal: ["Potion healing", [...FIND], false],
+  cardFind: ["Card find", [...FIND], false],
+  itemFind: ["Item find", [...FIND], false],
+  itemQuality: ["Item quality", [...FIND], false],
+  thorns: ["Thorns", [...TEN], false],
+  statusResist: ["Status resist", [...TEN], false],
+  lifeKill: ["Life on kill", [...LIFE], true],
+  potionCooldown: ["Potion cooldown", [...POTCD], false],
+  pickupRange: ["Pickup range", [...RANGE], false]
+});
+var STAT_POOL = freezeWire({ goldFindX2: "goldFind" });
+var HUNTER_DAMAGE = freezeWire([0, 0, 0, 0, 1e3, 2e3]);
+var HUNTER_RARE = freezeWire([0, 0, 0, 0, 5e3, 1e4]);
+var BESTIARY_GROUPS = freezeWire([
+  { id: "woodland", name: "Woodland", set: "maxHpPct" },
+  { id: "grassland", name: "Grassland", set: "xpFind" },
+  { id: "desert", name: "Desert", set: "goldFind" },
+  { id: "frost", name: "Frost & Upland", set: "cdr" },
+  { id: "wetland", name: "Wetland", set: "potionHeal" },
+  { id: "volcanic", name: "Volcanic", set: "atkPct" },
+  { id: "ruins", name: "Ruins & Forts", set: "itemFind" },
+  { id: "wanderers", name: "Wanderers", set: "rareChance" },
+  { id: "roads", name: "Roads & Camps", set: "moveSpeedPct" }
+]);
+var BESTIARY_CARDS = freezeWire([
+  ["slime", "Green Slime", "woodland", "maxHpPct", "potionHeal"],
+  ["sprout", "Sprout", "woodland", "cdr", "xpFind"],
+  ["golem", "Stone Golem", "woodland", "defPct", "thorns"],
+  ["thorn_wyrm", "Thorn Wyrm", "woodland", "atkPct", "bleedDmg"],
+  ["tusk_boar", "Tusk Boar", "grassland", "maxHpPct", "goldFind"],
+  ["field_scarecrow", "Field Scarecrow", "grassland", "critChance", "nightDmg"],
+  ["barrow_wight", "Barrow Wight", "grassland", "intPct", "soulFind"],
+  ["sand_scarab", "Sand Scarab", "desert", "defPct", "pickupRange"],
+  ["dune_scorpion", "Dune Scorpion", "desert", "critDamage", "poisonDmg"],
+  ["tomb_mummy", "Tomb Mummy", "desert", "maxHpPct", "lifeKill"],
+  ["wyrmling", "Frost Wyrmling", "frost", "atkPct", "frostDmg"],
+  ["gilded_scuttler", "Gilded Scuttler", "frost", "critChance", "itemFind"],
+  ["mimic_shield", "Mimic Shield", "frost", "block", "counterDmg"],
+  ["swamp_basilisk", "Swamp Basilisk", "wetland", "maxHpPct", "statusResist"],
+  ["toxic_fly", "Toxic Fly", "wetland", "moveSpeedPct", "poisonDmg"],
+  ["marsh_ghost", "Marsh Ghost", "wetland", "parry", "potionCooldown"],
+  ["corroded_golem", "Corroded Golem", "wetland", "defPct", "soulFind"],
+  ["magma_elemental", "Magma Elemental", "volcanic", "atkPct", "fireDmg"],
+  ["lava_serpent", "Lava Serpent", "volcanic", "critDamage", "executeDmg"],
+  ["hell_bat", "Hell Bat", "volcanic", "attackSpeed", "lifeKill"],
+  ["slag_slime", "Slag Slime", "volcanic", "maxHpPct", "fireDmg"],
+  ["gargoyle", "Gargoyle Warden", "ruins", "strPct", "eliteDmg"],
+  ["rust_nibbler", "Rust Nibbler", "ruins", "critChance", "itemQuality"],
+  ["animated_armor", "Animated Armor", "ruins", "block", "counterDmg"],
+  ["cursed_blade", "Cursed Blade", "ruins", "critDamage", "bleedDmg"],
+  ["void_orb", "Void Orb", "wanderers", "atkPct", "rareDmg"],
+  ["void_crawler", "Void Crawler", "wanderers", "dexPct", "goldFind"],
+  ["void_spectre", "Void Spectre", "wanderers", "parry", "itemQuality"],
+  ["void_wraith", "Void Wraith", "wanderers", "critDamage", "lifeKill"],
+  ["rift_drifter", "Rift Drifter", "wanderers", "moveSpeedPct", "xpFind"],
+  ["clockwork_scarab", "Clockwork Scarab", "wanderers", "defPct", "shockDmg"],
+  ["star_weaver", "Star Weaver", "wanderers", "intPct", "lightningDmg"],
+  ["coin_elemental", "Coin Elemental", "wanderers", "maxHpPct", "goldFindX2"],
+  ["temporal_watcher", "Temporal Watcher", "wanderers", "cdr", "potionCooldown"],
+  ["clockwork_drone", "Clockwork Drone", "wanderers", "attackSpeed", "shockDmg"],
+  ["neon_spider", "Neon Spider", "wanderers", "critChance", "rareDmg"],
+  ["wireframe_orb", "Wireframe Orb", "wanderers", "maxHpPct", "cardFind"],
+  ["cyber_wraith", "Cyber Wraith", "wanderers", "critDamage", "eliteDmg"],
+  ["bandit_cutthroat", "Cutthroat", "roads", "dexPct", "executeDmg"],
+  ["bandit_archer", "Bandit Archer", "roads", "attackSpeed", "eliteDmg"],
+  ["bandit_brute", "Bandit Brute", "roads", "strPct", "lifeKill"],
+  ["bandit_captain", "Bandit Captain", "roads", "defPct", "itemFind"],
+  ["burrower", "Burrower", "roads", "parry", "pickupRange"]
+]);
+var CARD_BY_FAMILY = freezeWire(Object.fromEntries(BESTIARY_CARDS.map((c) => [c[0], { family: c[0], name: c[1], group: c[2], line1: c[3], line2: c[4] }])));
+var SET_STEP = [100, 200, 300, 400, 500, 600];
+var SET_LADDER = freezeWire({ cdr: [50, 100, 150, 200, 250, 300], rareChance: [200, 400, 600, 800, 1e3, 1200] });
+var setLadder = (stat) => SET_LADDER[stat] ?? SET_STEP;
+var BOSS_SET = freezeWire({ stats: ["atkPct", "defPct", "maxHpPct"], ladder: SET_STEP });
+var BESTIARY_CAPS = freezeWire({ potionCooldown: 5e3, statusResist: 5e3 });
+
+// src/shared/contracts/bestiary_album_v1.js
+var MYTHIC = TIER_CARDS.length - 1;
+var count = (v) => Number.isSafeInteger(v) && v > 0 ? v : 0;
+function emptyAlbum() {
+  return { version: BESTIARY_VERSION, cards: {}, tiers: {}, souls: 0, spare: {}, bosses: {}, bossTiers: {}, bossNames: {} };
+}
+function normalizeAlbum(raw) {
+  const a = emptyAlbum();
+  if (!raw || raw.version !== BESTIARY_VERSION) return a;
+  a.souls = count(raw.souls);
+  for (const [f3, n] of Object.entries(raw.cards ?? {})) if (CARD_BY_FAMILY[f3] && count(n)) {
+    a.cards[f3] = n;
+    const t = raw.tiers?.[f3];
+    a.tiers[f3] = Number.isInteger(t) && t >= 0 && t <= MYTHIC && n >= TIER_CARDS[t] ? t : 0;
+    if (count(raw.spare?.[f3])) a.spare[f3] = raw.spare[f3];
+  }
+  for (const [id, n] of Object.entries(raw.bosses ?? {})) if (/^[a-z0-9_:-]{1,80}$/.test(id) && count(n)) {
+    a.bosses[id] = n;
+    const t = raw.bossTiers?.[id];
+    a.bossTiers[id] = Number.isInteger(t) && t >= 0 && t <= MYTHIC && n >= BOSS_TIER_CARDS[t] ? t : 0;
+    const nm = raw.bossNames?.[id];
+    if (typeof nm === "string" && nm.length <= 60) a.bossNames[id] = nm;
+  }
+  return a;
+}
+var sorted = (v) => v === null || typeof v !== "object" ? JSON.stringify(v) : Array.isArray(v) ? "[" + v.map(sorted).join(",") + "]" : "{" + Object.keys(v).sort().map((k) => JSON.stringify(k) + ":" + sorted(v[k])).join(",") + "}";
+var albumText = (a) => sorted(normalizeAlbum(a));
+var albumIsNormal = (a) => sorted(a) === albumText(a);
+function setTier(album, groupId) {
+  let low = MYTHIC;
+  for (const c of BESTIARY_CARDS) if (c[2] === groupId) {
+    const t = album.tiers[c[0]];
+    if (!Number.isInteger(t)) return -1;
+    low = Math.min(low, t);
+  }
+  return low;
+}
+function bossSetTier(album, bossIds) {
+  if (!bossIds.length) return -1;
+  let low = MYTHIC;
+  for (const id of bossIds) {
+    const t = album.bossTiers[id];
+    if (!Number.isInteger(t)) return -1;
+    low = Math.min(low, t);
+  }
+  return low;
+}
+function albumBonuses(album, { bossIds = [] } = {}) {
+  const stats = {}, hunter = {}, sets = {};
+  const add = (k, v) => {
+    if (v) {
+      k = STAT_POOL[k] ?? k;
+      stats[k] = (stats[k] ?? 0) + v;
+    }
+  };
+  for (const [f3, t] of Object.entries(album.tiers)) {
+    const c = CARD_BY_FAMILY[f3];
+    if (!c) continue;
+    add(c.line1, BESTIARY_STATS[c.line1][1][t] ?? 0);
+    add(c.line2, BESTIARY_STATS[c.line2][1][t] ?? 0);
+    if (HUNTER_DAMAGE[t] || HUNTER_RARE[t]) hunter[f3] = { damage: HUNTER_DAMAGE[t], rare: HUNTER_RARE[t] };
+  }
+  for (const g of BESTIARY_GROUPS) {
+    const t = setTier(album, g.id);
+    sets[g.id] = t;
+    if (t >= 0) add(g.set, setLadder(g.set)[t]);
+  }
+  const bt = bossSetTier(album, bossIds);
+  sets.bosses = bt;
+  if (bt >= 0) for (const k of BOSS_SET.stats) add(k, BOSS_SET.ladder[bt]);
+  for (const [k, cap3] of Object.entries(BESTIARY_CAPS)) if (stats[k] > cap3) stats[k] = cap3;
+  return { stats, hunter, sets };
+}
+
+// src/shared/content/encounter_composition_v1.js
+var COMPOSITION_V1 = "encounter-composition-v1";
+var COMPOSITION_ELITE_V1 = "elite-record-composition-v1";
+var COMPOSITION_POLICY_V1 = Object.freeze({ version: COMPOSITION_V1, parentRuntime: "85aab6555235ddfe", bands: [{ from: 1, chancePercent: 0 }, { from: 5, chancePercent: 4 }, { from: 15, chancePercent: 8 }, { from: 30, chancePercent: 14 }, { from: 45, chancePercent: 20 }], minimumOrdinaryEliteFromLevel: 15, minimumEligibleMembers: 6, maximumElitesPerGroup: 4, membersPerEliteBudget: 6, primaryAffixes: ["swift_commander", "iron_citadel", "blood_berserker", "glacial_warden"], additionalAffixes: "Hardened (+25% HP), Brutal (+20% damage); second affix starts at15, third at30. One active mechanic, up to two distinct passive traits.", density: "No additional actors or changed layout/placement in V1. Existing novice pursuit restraint and higher-level full-pack retaliation retained." });
+var PASSIVE_ELITE_TRAITS_V1 = Object.freeze({ hardened: { label: "Hardened", hp: 125, damage: 100 }, brutal: { label: "Brutal", hp: 100, damage: 120 } });
+var compositionHashV1 = (text) => {
+  let h = 2166136261;
+  for (const c of text) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
+  return h >>> 0;
+};
+function compositionBandV1(level) {
+  const n = progressionBigInt(level);
+  return [...COMPOSITION_POLICY_V1.bands].reverse().find((b) => n >= BigInt(b.from));
+}
+function passiveEliteTraitsV1(source8, level) {
+  const n = progressionBigInt(level), key9 = COMPOSITION_V1 + "/" + source8.campaignSeed + "/" + source8.entityId + "/" + String(level), out = [];
+  if (n >= 15n && compositionHashV1(key9 + "/second") % 100 < (n >= 45n ? 100 : n >= 30n ? 75 : 35)) out.push(compositionHashV1(key9 + "/trait") % 2 ? "brutal" : "hardened");
+  if (n >= 30n && out.length && compositionHashV1(key9 + "/third") % 100 < (n >= 45n ? 60 : 25)) out.push(out[0] === "brutal" ? "hardened" : "brutal");
+  return out;
+}
+
+// src/shared/content/named_elites_v1.js
+var NAMED_ELITES_V1 = Object.freeze({
+  old_bristleback: Object.freeze({ id: "old_bristleback", label: "OLD BRISTLEBACK", family: "tusk_boar", biome: "grassland", affixId: "swift_commander" }),
+  hollow_jack: Object.freeze({ id: "hollow_jack", label: "HOLLOW JACK", family: "field_scarecrow", biome: "grassland", affixId: "glacial_warden" }),
+  queen_kheptra: Object.freeze({ id: "queen_kheptra", label: "QUEEN KHEPTRA", family: "sand_scarab", biome: "desert", affixId: "web_weaver" }),
+  glasstail: Object.freeze({ id: "glasstail", label: "GLASSTAIL", family: "dune_scorpion", biome: "desert", affixId: "slag_shaper" })
+});
+var NAMED_ELITE_IDS_V1 = Object.freeze(Object.keys(NAMED_ELITES_V1));
+var NAMED_ELITE_HULL_V1 = 11;
+var NAMED_ELITE_TRICKS_V1 = Object.freeze({
+  old_bristleback: Object.freeze({ kind: "charge", firstDelayTicks: 90, minRange: 56, maxRange: 160, windupTicks: 42, chargeTicks: 26, speed: 7, contactRadius: 24, damageTenths: 16, knockback: 10, knockbackTicks: 12, recoverTicks: 45, cooldownTicks: 180 }),
+  queen_kheptra: Object.freeze({ kind: "shell", absorbNumerator: 4, absorbDenominator: 5, capNumerator: 1, capDenominator: 4, regrowTicks: 120, crackTicks: 36 })
+});
+var namedEliteForV1 = (biome, family2) => Object.values(NAMED_ELITES_V1).find((n) => n.biome === biome && n.family === family2) ?? null;
+
+// src/shared/content/site_end_profile_v1.js
+var SITE_MINI_BOSS_V1 = freezeWire({ hullRadius: 16, combatRadius: 17.28, maxHp: { numerator: 6, denominator: 1 }, attackDamage: { numerator: 3, denominator: 2 } });
+function miniBossProfileV1(profile2) {
+  const m = SITE_MINI_BOSS_V1;
+  return {
+    ...profile2,
+    hullRadius: m.hullRadius,
+    combatRadius: m.combatRadius,
+    maxHp: combatInteger(multiplyCombat(profile2.maxHp, m.maxHp.numerator, m.maxHp.denominator), "round"),
+    attackDamage: combatInteger(multiplyCombat(profile2.attackDamage, m.attackDamage.numerator, m.attackDamage.denominator), "round")
+  };
+}
+var NAMED_ELITE_HEALTH_V1 = freezeWire({ numerator: 3, denominator: 1 });
+function namedEliteProfileV1(profile2) {
+  return {
+    ...profile2,
+    hullRadius: NAMED_ELITE_HULL_V1,
+    combatRadius: Math.round(NAMED_ELITE_HULL_V1 * 108) / 100,
+    maxHp: combatInteger(multiplyCombat(profile2.maxHp, NAMED_ELITE_HEALTH_V1.numerator, NAMED_ELITE_HEALTH_V1.denominator), "round")
+  };
+}
+var siteEndBodyV1 = (end, profile2) => end?.role === "mini-boss" ? miniBossProfileV1(profile2) : end?.role === "elite" && end.named ? namedEliteProfileV1(profile2) : profile2;
+var siteEndRoleV1 = (floor, entityId2) => floor?.encounter?.siteEnd && floor.enemyIds?.[0] === entityId2 ? floor.encounter.siteEnd.role : null;
+var siteEndProfileV1 = (floor, entityId2, profile2) => siteEndRoleV1(floor, entityId2) ? siteEndBodyV1(floor.encounter.siteEnd, profile2) : profile2;
+function isSiteEndLeaderV1(state, groupId, entityId2) {
+  for (const site of Object.values(state.d9World?.functionalSitesById ?? {})) for (const floor of site.floors ?? []) if (floor.groupId === groupId) return siteEndRoleV1(floor, entityId2) !== null;
+  return false;
+}
+function siteEndActorProfileV1(state, group, actor, profile2) {
+  if (!profile2 || !group?.siteId) return profile2;
+  for (const site of Object.values(state.d9World?.functionalSitesById ?? {})) for (const floor of site.floors ?? []) if (floor.groupId === group.groupId) return siteEndProfileV1(floor, actor.entityId, profile2);
+  return profile2;
+}
+
+// src/shared/contracts/local_world_frames_d9.js
+var FRAME_CHUNKS = 64;
+var STRIDE = FRAME_CHUNKS * 2 * D9_PROFILE.chunkWidth;
+var abs = (n) => n < 0n ? -n : n;
+function planLocalFramesD9(participants, { keepOrigin = false, preparationAnchor = false } = {}) {
+  requireContract(participants.length >= Number(!keepOrigin) && participants.length <= (preparationAnchor ? 5 : 4) && (!preparationAnchor || participants.filter((p) => p.playerId === "destination-preparation").length === 1), "D9 participant frame bound");
+  const sorted2 = [...participants].sort((a, b) => a.playerId.localeCompare(b.playerId));
+  for (const p of sorted2) validateWorldPosition(p.position);
+  const parent = sorted2.map((_, i) => i), find = (i) => parent[i] === i ? i : parent[i] = find(parent[i]);
+  const mergeChunks = 2 * D9_PROFILE.preloadRadiusChunks + 2;
+  for (let i = 0; i < sorted2.length; i++) for (let j = i + 1; j < sorted2.length; j++) if (abs(BigInt(sorted2[i].position.chunkX) - BigInt(sorted2[j].position.chunkX)) <= BigInt(mergeChunks) && abs(BigInt(sorted2[i].position.chunkY) - BigInt(sorted2[j].position.chunkY)) <= BigInt(mergeChunks)) parent[find(j)] = find(i);
+  const components = /* @__PURE__ */ new Map();
+  for (let i = 0; i < sorted2.length; i++) {
+    const root2 = find(i);
+    if (!components.has(root2)) components.set(root2, []);
+    components.get(root2).push(sorted2[i]);
+  }
+  const groups = [...components.values()], originPlayers = keepOrigin ? groups.filter((ps) => ps.some((p) => abs(BigInt(p.position.chunkX)) <= 32n && abs(BigInt(p.position.chunkY)) <= 32n)).flat() : [];
+  const remote = groups.filter((ps) => !originPlayers.includes(ps[0]));
+  return freezeWire([...keepOrigin ? [{ id: 0, chunkX: "0", chunkY: "0", offsetX: 0, offsetY: 0, playerIds: originPlayers.map((p) => p.playerId) }] : [], ...remote.map((ps, j) => {
+    const i = j + (keepOrigin ? 1 : 0);
+    return { id: i, chunkX: ps[0].position.chunkX, chunkY: ps[0].position.chunkY, offsetX: i * STRIDE + FRAME_CHUNKS * D9_PROFILE.chunkWidth, offsetY: FRAME_CHUNKS * D9_PROFILE.chunkHeight, playerIds: ps.map((p) => p.playerId) };
+  })]);
+}
+function projectToLocalFrameD9(position2, frames) {
+  validateWorldPosition(position2);
+  const origin2 = frames.find((f3) => f3.originBounds);
+  if (origin2 && BigInt(position2.chunkX) >= -2n && BigInt(position2.chunkY) >= -2n && BigInt(position2.chunkX) < BigInt(origin2.originBounds.width) + 2n && BigInt(position2.chunkY) < BigInt(origin2.originBounds.height) + 2n) {
+    const p = relativeWorldPosition(position2, origin2, FRAME_CHUNKS - 1);
+    if (p) return { frameId: origin2.id, x: p.x + origin2.offsetX, y: p.y + origin2.offsetY };
+  }
+  let best = null, bestDistance = Infinity;
+  for (const f3 of frames) {
+    const p = relativeWorldPosition(position2, f3, FRAME_CHUNKS - 1);
+    if (p) {
+      const distance5 = Math.hypot(p.x, p.y);
+      if (distance5 < bestDistance) {
+        best = { frameId: f3.id, x: p.x + f3.offsetX, y: p.y + f3.offsetY };
+        bestDistance = distance5;
+      }
+    }
+  }
+  return best;
+}
+function localFramePositionD9(position2, frames) {
+  const f3 = frames.find((f4) => position2.x >= f4.offsetX - FRAME_CHUNKS * D9_PROFILE.chunkWidth && position2.x < f4.offsetX + FRAME_CHUNKS * D9_PROFILE.chunkWidth && position2.y >= f4.offsetY - FRAME_CHUNKS * D9_PROFILE.chunkHeight && position2.y < f4.offsetY + FRAME_CHUNKS * D9_PROFILE.chunkHeight);
+  requireContract(f3, "Position outside computation atlas");
+  return normalizeWorldPosition({ chunkX: f3.chunkX, chunkY: f3.chunkY, localX: position2.x - f3.offsetX, localY: position2.y - f3.offsetY });
+}
+function chunkAddressKey(x, y) {
+  return signedAddress(x) + "," + signedAddress(y);
+}
+
+// src/shared/contracts/paged_collision_d9.js
+var D9_COLLISION_VERSION = "paged-collision-d9-v1";
+var indices = /* @__PURE__ */ new WeakMap();
+var atlasIndices = /* @__PURE__ */ new WeakMap();
+function pageIndex(pages) {
+  let index = indices.get(pages);
+  if (!index) {
+    requireContract(Array.isArray(pages) && pages.length <= 100, "Collision residency bound");
+    index = new Map(pages.map((p) => [chunkAddressKey(p.chunkX, p.chunkY), p]));
+    requireContract(index.size === pages.length, "Duplicate collision page");
+    indices.set(pages, index);
+  }
+  return index;
+}
+function collisionTileD9(collision2, tileX, tileY) {
+  requireContract(collision2.version === D9_COLLISION_VERSION, "Paged collision version");
+  if (!Number.isSafeInteger(tileX) || !Number.isSafeInteger(tileY)) return "0";
+  if (collision2.origin && tileX >= 0 && tileY >= 0 && tileX < collision2.origin.width && tileY < collision2.origin.height) return collision2.origin.tiles[tileY][tileX];
+  let cached = atlasIndices.get(collision2);
+  if (!cached || cached.pages !== collision2.pages || cached.frames !== collision2.frames) {
+    pageIndex(collision2.pages);
+    const index = /* @__PURE__ */ new Map();
+    for (const page2 of collision2.pages) for (const frame of collision2.frames) {
+      const p = relativeWorldPosition({ chunkX: page2.chunkX, chunkY: page2.chunkY, localX: 0, localY: 0 }, frame, 63);
+      if (p) index.set(Math.floor((p.x + frame.offsetX) / D9_PROFILE.chunkWidth) + "," + Math.floor((p.y + frame.offsetY) / D9_PROFILE.chunkHeight), page2);
+    }
+    cached = { pages: collision2.pages, frames: collision2.frames, index };
+    atlasIndices.set(collision2, cached);
+  }
+  const cx = Math.floor(tileX / 32), cy = Math.floor(tileY / 26), page = cached.index.get(cx + "," + cy);
+  return page?.tiles[tileY - cy * 26]?.[tileX - cx * 32] ?? "0";
+}
+function collisionTileDetailD9(collision2, tileX, tileY) {
+  requireContract(collision2.version === D9_COLLISION_VERSION, "Paged collision version");
+  if (!Number.isSafeInteger(tileX) || !Number.isSafeInteger(tileY)) return { tile: "0", source: "invalidCoordinate", chunkKey: null };
+  if (collision2.origin && tileX >= 0 && tileY >= 0 && tileX < collision2.origin.width && tileY < collision2.origin.height) return { tile: collision2.origin.tiles[tileY][tileX], source: "historicalOrigin", chunkKey: null };
+  collisionTileD9(collision2, tileX, tileY);
+  const cached = atlasIndices.get(collision2), cx = Math.floor(tileX / 32), cy = Math.floor(tileY / 26), page = cached?.index.get(cx + "," + cy);
+  if (page) return { tile: page.tiles[tileY - cy * 26]?.[tileX - cx * 32] ?? "0", source: "residentPage", chunkKey: chunkAddressKey(page.chunkX, page.chunkY), localTileX: tileX - cx * 32, localTileY: tileY - cy * 26 };
+  try {
+    const world = localFramePositionD9({ x: tileX * D9_PROFILE.tileSize + D9_PROFILE.tileSize / 2, y: tileY * D9_PROFILE.tileSize + D9_PROFILE.tileSize / 2 }, collision2.frames);
+    return { tile: "0", source: "missingResidentPage", chunkKey: chunkAddressKey(world.chunkX, world.chunkY) };
+  } catch {
+    return { tile: "0", source: "outsideLocalFrame", chunkKey: null };
+  }
+}
+
+// src/shared/rules/world_geometry.js
+var collisionTile = (collision2, x, y) => collision2.version === D9_COLLISION_VERSION ? collisionTileD9(collision2, x, y) : collision2.tiles[y]?.[x] ?? "0";
+function collidesWithTiles(collision2, x, y, radius) {
+  const minTileX = Math.floor((x - radius) / collision2.tileSize);
+  const maxTileX = Math.floor((x + radius) / collision2.tileSize);
+  const minTileY = Math.floor((y - radius) / collision2.tileSize);
+  const maxTileY = Math.floor((y + radius) / collision2.tileSize);
+  for (let tileY = minTileY; tileY <= maxTileY; tileY++) {
+    for (let tileX = minTileX; tileX <= maxTileX; tileX++) {
+      if (collision2.version !== D9_COLLISION_VERSION && (tileY < 0 || tileY >= collision2.height || tileX < 0 || tileX >= collision2.width)) return true;
+      const tile = collisionTile(collision2, tileX, tileY);
+      if (tile === "0" || tile === "2") return true;
+    }
+  }
+  return false;
+}
+function collisionBlockDetail(collision2, x, y, radius) {
+  const minTileX = Math.floor((x - radius) / collision2.tileSize), maxTileX = Math.floor((x + radius) / collision2.tileSize), minTileY = Math.floor((y - radius) / collision2.tileSize), maxTileY = Math.floor((y + radius) / collision2.tileSize);
+  for (let tileY = minTileY; tileY <= maxTileY; tileY++) for (let tileX = minTileX; tileX <= maxTileX; tileX++) {
+    if (collision2.version !== D9_COLLISION_VERSION && (tileY < 0 || tileY >= collision2.height || tileX < 0 || tileX >= collision2.width)) return { reason: "oldFiniteBound", tileX, tileY, chunkKey: null };
+    const detail = collision2.version === D9_COLLISION_VERSION ? collisionTileDetailD9(collision2, tileX, tileY) : { tile: collisionTile(collision2, tileX, tileY), source: "residentPage", chunkKey: null };
+    if (detail.tile === "0" || detail.tile === "2") return { reason: detail.source === "missingResidentPage" ? "missingResidentPage" : detail.source === "outsideLocalFrame" ? "outsideLocalFrame" : "genuineBlocker", tile: detail.tile, tileX, tileY, chunkKey: detail.chunkKey, localTileX: detail.localTileX, localTileY: detail.localTileY, source: detail.source };
+  }
+  return null;
+}
+
 // src/shared/contracts/nests_v1.js
 var MOTHER = NEST_POLICY.motherMember;
 var clutchMembersV1 = (e) => [NEST_POLICY.broodlings[e], ...Array.from({ length: NEST_POLICY.hatchlingsPerEgg }, (_, k) => NEST_POLICY.firstHatchling + e * NEST_POLICY.hatchlingsPerEgg + k)];
@@ -2625,6 +2648,1586 @@ function huntChampionProfileV1(s, g, actor, profile2) {
   return { ...profile2, maxHp: combatInteger(multiplyCombat(profile2.maxHp, m.maxHp.numerator, m.maxHp.denominator), "round"), attackDamage: combatInteger(multiplyCombat(profile2.attackDamage, m.attackDamage.numerator, m.attackDamage.denominator), "round") };
 }
 
+// src/shared/content/spore_outbreak_v5.js
+var SPORE_V5 = "spore-outbreak-v5-paced-pressure";
+var SPORE_V5_POLICY = Object.freeze({
+  version: SPORE_V5,
+  parent: "spore-outbreak-v4-continuous-pods",
+  simulationHz: 60,
+  firstPulseTicks: 240,
+  pulseTicks: 180,
+  recycleDelayTicks: 480,
+  living: 9,
+  pool: 12,
+  launchesPerPulse: 1,
+  backlog: 0,
+  damageRetaliation: "Shares the next available launch cadence; threshold hits never bank reinforcements.",
+  adoption: "Active V4 records retain health, landings, actors, rewards and launched spores; discard only unlaunched demand and restart the opening delay."
+});
+
+// src/shared/content/spore_outbreak_v4.js
+var SPORE_V4 = "spore-outbreak-v4-continuous-pods";
+var SPORE_V4_POLICY = Object.freeze({ version: SPORE_V4, parent: "spore-outbreak-v3-active-pressure", pool: 12, living: 9, recycleDelayTicks: 150, rewards: "First defeat of each admitted slot only; recycled reinforcements grant no additional hero XP, gear, gold or materials. Personal completion chest unchanged.", activation: "Deliberate interaction; four active events; nearby authority time only", completion: "Destroy all three pods and clear their surviving launched enemies" });
+
+// src/shared/contracts/spore_pacing_v5.js
+var isSporeV5 = (r) => r?.rulesVersion === SPORE_V5;
+var adoptingSporeV5 = (a, b) => a?.rulesVersion === SPORE_V4 && a.status === "active" && isSporeV5(b);
+
+// src/shared/contracts/spore_continuous_v4.js
+var isSporeV4 = (r) => [SPORE_V4, SPORE_V5].includes(r?.rulesVersion);
+function sporeGenerationV4(s, id) {
+  for (const r of Object.values(s.d9World?.worldEvents?.records ?? {})) {
+    if (!isSporeV4(r)) continue;
+    const n = s.groupsById[r.groupId]?.entityIds.indexOf(id) ?? -1;
+    if (n >= 0) return r.stages[n];
+  }
+  return null;
+}
+function rewardedSporeRecycledV4(s, id, defeatedTick) {
+  const t = sporeGenerationV4(s, id);
+  return Boolean(t && t.generation > 0 && t.firstRecycleTick > defeatedTick && t.firstRecycleTick <= s.tick);
+}
+function validateSporeGenerationV4(r, t) {
+  safeInteger(t.generation);
+  requireContract(t.generation <= Math.floor(r.elapsedTicks / SPORE_V4_POLICY.recycleDelayTicks), "Spore recycle frequency");
+  if (t.generation === 0) requireContract(t.firstRecycleTick === null, "Unexpected recycled receipt");
+  else safeInteger(t.firstRecycleTick, r.startedTick + 1);
+}
+function validateSporeGenerationProgressV4(a, b) {
+  if (!isSporeV4(b)) return false;
+  if (!isSporeV4(a)) return false;
+  for (let i = 0; i < a.stages.length; i++) {
+    const t = a.stages[i], n = b.stages[i];
+    requireContract(n.generation >= t.generation && (t.firstRecycleTick === null || t.firstRecycleTick === n.firstRecycleTick), "Spore generation regressed");
+    requireContract(n.generation - t.generation <= Math.floor((b.elapsedTicks - a.elapsedTicks + (t.phase === "defeated" ? a.elapsedTicks - t.at : 0) + 1) / (isSporeV5(a) ? SPORE_V5_POLICY.recycleDelayTicks : SPORE_V4_POLICY.recycleDelayTicks)), "Spore recycle skipped its cooldown");
+    if (n.generation > t.generation) requireContract(a.status === "active" && b.pods[i % 3] && n.firstRecycleTick !== null, "Spore recycle outside active event");
+  }
+  return true;
+}
+function sporeActorRenewedV5(a, b, id) {
+  for (const prior of Object.values(a.d9World?.worldEvents?.records ?? {})) {
+    if (!isSporeV4(prior) || prior.status !== "active") continue;
+    const next = b.d9World?.worldEvents?.records?.[prior.groupId], g = a.groupsById[prior.groupId], h = b.groupsById[prior.groupId], n = g?.entityIds.indexOf(id) ?? -1;
+    if (n < 0) continue;
+    if (!h || h.entityIds[n] !== id || !isSporeV4(next) || next.startedTick !== prior.startedTick) return false;
+    validateSporeGenerationProgressV4(prior, next);
+    return next.stages[n].generation > prior.stages[n].generation;
+  }
+  return false;
+}
+
+// src/shared/contracts/economy_amount.js
+function amount(value) {
+  requireContract(typeof value === "string" && value.length <= 512 && /^(0|[1-9][0-9]*)(\.[0-9]*[1-9])?$/.test(value), "Invalid economy amount");
+  return value;
+}
+var parts = (value) => {
+  const [whole, fraction = ""] = amount(value).split(".");
+  return [BigInt(whole + fraction), fraction.length];
+};
+function wire(n, scale2) {
+  requireContract(n >= 0n, "Insufficient economy amount");
+  let digits = n.toString().padStart(scale2 + 1, "0");
+  if (scale2) digits = digits.slice(0, -scale2) + "." + digits.slice(-scale2);
+  if (digits.includes(".")) digits = digits.replace(/0+$/, "").replace(/\.$/, "");
+  return amount(digits);
+}
+function aligned(a, b) {
+  const [x, s] = parts(a), [y, t] = parts(b), scale2 = Math.max(s, t);
+  return [x * 10n ** BigInt(scale2 - s), y * 10n ** BigInt(scale2 - t), scale2];
+}
+function addAmount(a, b) {
+  const [x, y, s] = aligned(a, b);
+  return wire(x + y, s);
+}
+function subtractAmount(a, b) {
+  const [x, y, s] = aligned(a, b);
+  return wire(x - y, s);
+}
+function compareAmount(a, b) {
+  const [x, y] = aligned(a, b);
+  return x < y ? -1 : x > y ? 1 : 0;
+}
+function multiplyAmount(a, b) {
+  const [x, s] = parts(a), [y, t] = parts(b);
+  return wire(x * y, s + t);
+}
+function powerAmount(a, n) {
+  safeInteger(n, 0, 100);
+  const [x, s] = parts(a);
+  return wire(x ** BigInt(n), s * n);
+}
+function wholeAmount(n) {
+  safeInteger(n);
+  return amount(String(n));
+}
+var rewardAmount = (value) => typeof value === "number" ? wholeAmount(value) : amount(value);
+
+// src/shared/contracts/bestiary_world_v1.js
+var BESTIARY_ROOT_V1 = "bestiary-world-v1";
+var GROUND = Object.freeze({ settleTicks: 30, pickupRadius: 34, lifetimeTicks: 18e3, maximum: 24, spread: 18 });
+var root = (s) => s.bestiary;
+var playerAlbumV1 = (s, playerId) => root(s)?.albumsByPlayerId[playerId] ?? null;
+var familyOf = (s, id) => ordinaryEnemyForProfile(s.entitiesById[id]?.contentDefinitionId)?.family;
+var episodeOf = (s, groupId) => s.encounterEconomy?.groups[groupId]?.episode;
+var BESTIARY_BONUS_V1 = "bestiary-bonus-v1";
+function bestiaryBonusV1(album) {
+  const b = albumBonuses(album, { bossIds: BOSS_PAGE_IDS });
+  return { version: BESTIARY_BONUS_V1, stats: b.stats, hunter: b.hunter };
+}
+var sortedText = (v) => v === null || typeof v !== "object" ? JSON.stringify(v) : "{" + Object.keys(v).sort().map((k) => JSON.stringify(k) + ":" + sortedText(v[k])).join(",") + "}";
+function validateBestiaryBonusV1(s, p, bonus) {
+  const album = playerAlbumV1(s, p.playerId);
+  if (!album) {
+    requireContract(bonus === void 0, "Bestiary bonus without an album");
+    return;
+  }
+  requireContract(bonus !== void 0 && sortedText(bonus) === sortedText(bestiaryBonusV1(album)), "Bestiary bonus drift");
+}
+function isRareV1(s, id) {
+  const x = root(s)?.raresByEntityId[id];
+  return Boolean(x && x.episode === episodeOf(s, x.groupId) && familyOf(s, id) === x.family);
+}
+function rareActorProfileV1(s, actor, profile2) {
+  if (!profile2 || !isRareV1(s, actor.entityId)) return profile2;
+  return { ...profile2, maxHp: combatInteger(multiplyCombat(profile2.maxHp, RARE_HEALTH_X100, 100), "round"), attackDamage: combatInteger(multiplyCombat(profile2.attackDamage, RARE_DAMAGE_X100, 100), "round") };
+}
+function validateBestiaryRootV1(s) {
+  const r = root(s);
+  if (r === void 0) return;
+  closedRecord(r, ["version", "albumsByPlayerId", "raresByEntityId", "groundByPlayerId"]);
+  requireContract(r.version === BESTIARY_ROOT_V1, "Unsupported Bestiary root");
+  for (const [pid, a] of Object.entries(r.albumsByPlayerId)) requireContract(s.playersById[pid] && albumIsNormal(a), "Invalid Bestiary album");
+  const ids = Object.keys(r.raresByEntityId);
+  requireContract(ids.length <= 4096, "Too many rares");
+  for (const id of ids) {
+    const x = r.raresByEntityId[id];
+    closedRecord(x, ["groupId", "episode", "family"]);
+    requireContract(typeof x.groupId === "string" && x.groupId.length <= 240 && CARD_BY_FAMILY[x.family], "Invalid rare");
+    safeInteger(x.episode, 0);
+  }
+  for (const [pid, ground] of Object.entries(r.groundByPlayerId)) {
+    requireContract(s.playersById[pid] && Object.keys(ground).length <= GROUND.maximum, "Invalid ground cards");
+    for (const [id, d] of Object.entries(ground)) {
+      requireContract(id.length <= 240, "Ground card id");
+      closedRecord(d, ["family", "count", "spaceInstanceId", "tick"], ["world", "position", "boss"]);
+      requireContract((d.boss === void 0 ? CARD_BY_FAMILY[d.family] : d.boss === true && BOSS_PAGE_NAMES[d.family]) && typeof d.spaceInstanceId === "string" && d.spaceInstanceId.length <= 240, "Ground card");
+      safeInteger(d.count, 1, 100);
+      safeInteger(d.tick, 0, s.tick);
+      requireContract(d.world === void 0 !== (d.position === void 0), "Ground card place");
+      if (d.world) validateWorldPosition(d.world);
+      else {
+        closedRecord(d.position, ["x", "y"]);
+        requireContract(Number.isFinite(d.position.x) && Number.isFinite(d.position.y), "Ground card position");
+      }
+    }
+  }
+}
+
+// src/shared/content/aegis_mimics_v2.js
+var AEGIS_MIMICS_VERSION = "aegis-mimics-v2";
+var AEGIS_MIMICS = Object.freeze({ count: 3, orbitRadius: 62, orbitSpeed: 0.012, detachNumerator: 1, detachDenominator: 2, landingTicks: 30, recallTicks: 120, enrageRecoveryTicks: 75, enrageMoveSpeed: 2, affixId: "swift_commander" });
+function aegisHealthBudget(total) {
+  const n = integerBigInt(total), body = n * 4n / 5n, pool = n - body, each = pool / 3n, remainder = Number(pool % 3n);
+  return { body: String(body), mimics: Array.from({ length: 3 }, (_, i) => String(each + (i < remainder ? 1n : 0n))) };
+}
+function aegisMimicFor(state, entityId2) {
+  for (const boss of Object.values(state.bossCombat?.bossesByEntityId ?? {})) {
+    const mimic = boss.mimicEncounter?.mimicsByEntityId?.[entityId2];
+    if (mimic) return { boss, mimic };
+  }
+  return null;
+}
+function aegisMimicOrbitPosition(bossPosition, tick, ordinal) {
+  const a = tick * AEGIS_MIMICS.orbitSpeed + ordinal * Math.PI * 2 / 3;
+  return { x: bossPosition.x + Math.cos(a) * 62, y: bossPosition.y + Math.sin(a) * 62 };
+}
+function aegisComponentProfile(state, actor, profile2) {
+  const boss = state.bossCombat?.bossesByEntityId?.[actor.entityId];
+  if (boss?.mimicEncounter) return { ...profile2, maxHp: aegisHealthBudget(boss.mimicEncounter.totalMaxHp).body };
+  const row = aegisMimicFor(state, actor.entityId);
+  return row ? { ...profile2, maxHp: row.mimic.maxHp } : profile2;
+}
+function createAegisMimicEncounter(totalMaxHp, members, tick) {
+  return { version: AEGIS_MIMICS_VERSION, totalMaxHp: copyWire(totalMaxHp), recallStartedTick: null, recallEndsTick: null, recallResolvedTick: null, towerMaxHp: "0", enragedTick: null, mimicsByEntityId: Object.fromEntries(members.map((m, ordinal) => [m.entityId, { entityId: m.entityId, ordinal, roomId: m.roomId, homePosition: copyWire(m.position), maxHp: m.maxHp, stage: "orbiting", stageStartedTick: tick, detachedTick: null, defeatedTick: null }])) };
+}
+function livingFusedMimics(state, boss) {
+  return Object.values(boss.mimicEncounter?.mimicsByEntityId ?? {}).filter((m) => m.stage === "fused" && state.entitiesById[m.entityId]?.alive).sort((a, b) => a.ordinal - b.ordinal);
+}
+
+// src/shared/contracts/hero_progression_d9.js
+var D9_HERO_VERSION = "player-progression-d9-v2";
+function d9LevelAtXp(totalXp) {
+  const xp = progressionBigInt(totalXp);
+  integerWire(xp);
+  return progressionWire(BigInt(heroLevelAtXpV2(xp)));
+}
+function d9ProgressionAtXp(totalXp) {
+  return freezeWire({ version: D9_HERO_VERSION, totalXp: progressionWire(progressionBigInt(totalXp)), level: d9LevelAtXp(totalXp) });
+}
+function validateD9Hero(p) {
+  closedRecord(p, ["version", "totalXp", "level"]);
+  requireContract(p.version === D9_HERO_VERSION, "Hero progression version");
+  positiveProgression(p.level);
+  requireContract(progressionBigInt(p.level) === progressionBigInt(d9LevelAtXp(p.totalXp)), "Hero XP/level disagreement");
+  return p;
+}
+function d9LevelStats(level) {
+  positiveProgression(level);
+  const n = progressionBigInt(level) - 1n;
+  return { maxHp: progressionWire(100n + 15n * n), attack: progressionWire(15n + 3n * n), defense: progressionWire(2n * n) };
+}
+function d9Entitlements(highest) {
+  positiveProgression(highest);
+  const n = progressionBigInt(highest) - 1n;
+  return { attributeEarned: progressionWire(3n * n), utilityEarned: progressionWire(n) };
+}
+
+// src/shared/contracts/participant_progression_d9.js
+var D9_PARTICIPANT_VERSION = "participant-progression-d9-v1";
+var isD9Progression = (s) => s?.version === D9_PARTICIPANT_VERSION;
+function migrateD9Participant(state) {
+  const n = copyWire(state);
+  n.version = D9_PARTICIPANT_VERSION;
+  n.highestHeroLevel = progressionWire(progressionBigInt(state.highestHeroLevel));
+  for (const k of ["str", "dex", "int"]) n.allocated[k] = progressionWire(progressionBigInt(state.allocated[k]));
+  return n;
+}
+function validateD9Entitlements(state, heroLevel) {
+  positiveProgression(state.highestHeroLevel);
+  requireContract(progressionBigInt(state.highestHeroLevel) >= progressionBigInt(heroLevel), "Hero high-water regressed");
+  const spent = Object.values(state.allocated).reduce((n, v) => n + progressionBigInt(v), 0n);
+  requireContract(spent <= progressionBigInt(d9Entitlements(state.highestHeroLevel).attributeEarned), "Overspent attributes");
+}
+function d9AttributeBalance(state) {
+  const earned = progressionBigInt(d9Entitlements(state.highestHeroLevel).attributeEarned), spent = Object.values(state.allocated).reduce((a, b) => a + progressionBigInt(b), 0n);
+  requireContract(spent <= earned, "Overspent attributes");
+  return { attributeEarned: progressionWire(earned), attributeUnspent: progressionWire(earned - spent) };
+}
+
+// src/shared/contracts/player_progression.js
+var PLAYER_PROGRESSION_VERSION = "player-progression-d3-v1";
+var D3_ACTIVITY_FORMAT = "saq-world-activity-d3-1";
+var MAX_PLAYER_LEVEL = 50;
+var xpAtLevel = (level) => {
+  safeInteger(level, 1, MAX_PLAYER_LEVEL);
+  return 25 * (level - 1) * (level + 2);
+};
+var MAX_PLAYER_XP = xpAtLevel(MAX_PLAYER_LEVEL);
+function levelAtXp(totalXp) {
+  safeInteger(totalXp, 0, MAX_PLAYER_XP);
+  let level = 1;
+  while (level < MAX_PLAYER_LEVEL && totalXp >= xpAtLevel(level + 1)) level++;
+  return level;
+}
+var progressionAtXp = (totalXp, participantProgression = null) => isD9Progression(participantProgression) ? d9ProgressionAtXp(totalXp) : freezeWire({ version: PLAYER_PROGRESSION_VERSION, totalXp, level: levelAtXp(totalXp) });
+function validatePlayerProgression(value) {
+  if (value?.version === D9_HERO_VERSION) return validateD9Hero(value);
+  closedRecord(value, ["version", "totalXp", "level"]);
+  requireContract(value.version === PLAYER_PROGRESSION_VERSION, "Unsupported player progression");
+  safeInteger(value.level, 1, MAX_PLAYER_LEVEL);
+  requireContract(value.level === levelAtXp(value.totalXp), "Level/XP disagreement");
+  return value;
+}
+
+// src/shared/content/elite_affixes_d12_4.js
+var ELITE_AFFIX_CATALOG_D12_4_VERSION = "elite-affix-catalog-d12.4-v1";
+var VITALITY_WEAVER_AFFIX_ID = "vitality_weaver";
+var SWIFT_COMMANDER_AFFIX_ID = "swift_commander";
+var GLACIAL_WARDEN_AFFIX_ID = "glacial_warden";
+var TOXIC_DECAY_AFFIX_ID = "toxic_decay";
+var IRON_CITADEL_AFFIX_ID = "iron_citadel";
+var BLOOD_BERSERKER_AFFIX_ID = "blood_berserker";
+var NULLIFIER_AFFIX_ID = "nullifier";
+var WEB_WEAVER_AFFIX_ID = "web_weaver";
+var SLAG_SHAPER_AFFIX_ID = "slag_shaper";
+var VITALITY_WEAVER_D12_4 = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: VITALITY_WEAVER_AFFIX_ID,
+  tier: "elite",
+  label: "VITALITY WEAVER",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 90, radius: 120, maximumTargets: 3, ordinaryHeal: { numerator: 6, denominator: 100 }, reservedBossHeal: { numerator: 15, denominator: 1e3 } },
+  presentation: { scale: 1.25, accent: "#39d27d", accentDark: "#123e31", accentLight: "#c5f28c" }
+});
+var SWIFT_COMMANDER_D12_4D = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: SWIFT_COMMANDER_AFFIX_ID,
+  tier: "elite",
+  label: "SWIFT COMMANDER",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 90, radius: 140, maxStacks: 3, perStackSpeedPercent: 15, lingerTicks: 300, decayTicks: 150 },
+  presentation: { scale: 1.25, accent: "#00d2ff", accentDark: "#123a50", accentLight: "#b9f4ff", commandGold: "#f0c95a" }
+});
+var GLACIAL_WARDEN_D12_4E = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: GLACIAL_WARDEN_AFFIX_ID,
+  tier: "elite",
+  label: "GLACIAL WARDEN",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 120, radius: 110, statusId: "glacial_warden_snare", durationTicks: 60, movementMultiplier: { numerator: 2, denominator: 5 } },
+  presentation: { scale: 1.25, accent: "#38bdf8", accentDark: "#153756", accentLight: "#d9f7ff", iceBlue: "#79d7ff" }
+});
+var TOXIC_DECAY_D12_4F = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: TOXIC_DECAY_AFFIX_ID,
+  tier: "elite",
+  label: "TOXIC DECAY",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 120, statusId: "toxic_decay_poison", durationTicks: 240, tickTicks: 60, maxStacks: 3, damageMaxHp: { numerator: 12, denominator: 1e3 } },
+  presentation: { scale: 1.25, accent: "#69e09b", accentDark: "#241735", accentLight: "#c7ff9a", sludge: "#70408f" }
+});
+var IRON_CITADEL_D12_4G = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: IRON_CITADEL_AFFIX_ID,
+  tier: "elite",
+  label: "IRON CITADEL",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 90, radius: 100, maxStacks: 3, perStackMitigationPercent: 15, lingerTicks: 300, decayTicks: 150 },
+  presentation: { scale: 1.25, accent: "#7196b5", accentDark: "#182a38", accentLight: "#d2e2eb", steel: "#45657d" }
+});
+var BLOOD_BERSERKER_D12_4H_A = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: BLOOD_BERSERKER_AFFIX_ID,
+  tier: "elite",
+  label: "BERSERKER",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 90, radius: 110, maxStacks: 3, perStackAttackPercent: 15, lingerTicks: 300, decayTicks: 150, statusId: "blood_berserker_attack" },
+  presentation: { scale: 1.25, accent: "#c83f4f", accentDark: "#35131c", accentLight: "#ffb067", bloodGold: "#e2b85a" }
+});
+var NULLIFIER_D12_4I = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: NULLIFIER_AFFIX_ID,
+  tier: "elite",
+  label: "NULLIFIER",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 300, chargeTicks: 60, radius: 90, statusId: "nullified", durationTicks: 120, resistanceTicks: 90 },
+  presentation: { scale: 1.25, accent: "#9b5de5", accentDark: "#251339", accentLight: "#e4c7ff", fracture: "#c98cff" }
+});
+var WEB_WEAVER_D12_4J = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: WEB_WEAVER_AFFIX_ID,
+  tier: "elite",
+  label: "WEB WEAVER",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 210, radius: 220, windupTicks: 45, hazardKind: "web_weaver_web", durationTicks: 240, statusId: "webbed", geometry: { kind: "ellipse", radiusX: 75, radiusY: 33.75 }, movementMultiplier: { numerator: 2, denominator: 5 }, maxActivePerSource: 2 },
+  presentation: { scale: 1.25, accent: "#a9f3ff", accentDark: "#241b4b", accentLight: "#f1fdff", thread: "#c7e9ef" }
+});
+var SLAG_SHAPER_D12_4K = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  affixId: SLAG_SHAPER_AFFIX_ID,
+  tier: "elite",
+  label: "SLAG SHAPER",
+  statMultipliers: { maxHp: { numerator: 3, denominator: 2 }, attackDamage: { numerator: 5, denominator: 4 } },
+  pulse: { cadenceTicks: 180, windupTicks: 30, hazardKind: "slag_shaper_pool", durationTicks: 300, statusId: "slag_burn", geometry: { kind: "ellipse", radiusX: 12, radiusY: 6 }, damageMaxHp: { numerator: 15, denominator: 1e3 }, damageIntervalTicks: 45, nonlethal: false, maxActivePerSource: 2 },
+  presentation: { scale: 1.25, accent: "#f97316", accentDark: "#25130f", accentLight: "#fff0a8", crust: "#211a19" }
+});
+var ELITE_AFFIX_CATALOG_D12_4 = freezeWire({
+  version: ELITE_AFFIX_CATALOG_D12_4_VERSION,
+  definitionsById: { [VITALITY_WEAVER_AFFIX_ID]: VITALITY_WEAVER_D12_4, [SWIFT_COMMANDER_AFFIX_ID]: SWIFT_COMMANDER_D12_4D, [GLACIAL_WARDEN_AFFIX_ID]: GLACIAL_WARDEN_D12_4E, [TOXIC_DECAY_AFFIX_ID]: TOXIC_DECAY_D12_4F, [IRON_CITADEL_AFFIX_ID]: IRON_CITADEL_D12_4G, [BLOOD_BERSERKER_AFFIX_ID]: BLOOD_BERSERKER_D12_4H_A, [NULLIFIER_AFFIX_ID]: NULLIFIER_D12_4I, [WEB_WEAVER_AFFIX_ID]: WEB_WEAVER_D12_4J, [SLAG_SHAPER_AFFIX_ID]: SLAG_SHAPER_D12_4K }
+});
+function eliteAffixDefinitionD12_4(affixId) {
+  return ELITE_AFFIX_CATALOG_D12_4.definitionsById[affixId] ?? null;
+}
+function applyEliteActorStatsD12_4(profile2, elite) {
+  if (!elite) return profile2;
+  requireContract(elite.tier === "elite" && (elite.affixIds.length === 1 || elite.version === COMPOSITION_ELITE_V1 && elite.affixIds.length <= 3 && elite.affixIds.slice(1).every((id) => PASSIVE_ELITE_TRAITS_V1[id]) && new Set(elite.affixIds).size === elite.affixIds.length), "Unsupported D12.4 elite loadout");
+  const definition = eliteAffixDefinitionD12_4(elite.affixIds[0]);
+  requireContract(definition, "Unsupported D12.4 elite loadout");
+  const d = COMBAT_BALANCE_V3.elite, extra = elite.affixIds.slice(1).map((id) => PASSIVE_ELITE_TRAITS_V1[id]);
+  return {
+    ...profile2,
+    maxHp: combatInteger(extra.reduce((hp, t) => multiplyCombat(hp, t.hp, 100), multiplyCombat(profile2.maxHp, d.maxHp.numerator, d.maxHp.denominator)), "round"),
+    attackDamage: combatInteger(extra.reduce((damage, t) => multiplyCombat(damage, t.damage, 100), multiplyCombat(profile2.attackDamage, d.attackDamage.numerator, d.attackDamage.denominator)), "round")
+  };
+}
+
+// src/shared/contracts/encounter_composition_v1.js
+var generatedEliteId = (source8) => /^ent:[a-f0-9]{32}$/.test(source8.entityId) ? "elite:" + source8.entityId.slice(4) : "elite:" + Array.from({ length: 4 }, (_, i) => compositionHashV1(COMPOSITION_V1 + "/" + canonicalStringify(source8) + "/" + i).toString(16).padStart(8, "0")).join("");
+var floorFor = (s, g) => s.d9World?.functionalSitesById?.[g.siteId]?.floors?.find((f3) => f3.groupId === g.groupId);
+var familyOf2 = (s, id) => ordinaryEnemyForProfile(s.entitiesById[id]?.contentDefinitionId)?.family;
+function broodElitesV1(s, g, { includeDefeated = false } = {}) {
+  const ids = g.entityIds.filter((id) => familyOf2(s, id) === "broodling" && (includeDefeated || s.entitiesById[id].alive));
+  if (!ids.length) return [];
+  const primary = NEST_POLICY.broodAffixes[nestSkinOfV1(nestBiomeV1(s, g.groupId))];
+  return ids.map((id) => ({ id, n: g.entityIds.indexOf(id), primary }));
+}
+function compositionCandidatesV1(s, g, level, { includeDefeated = false } = {}) {
+  const f3 = floorFor(s, g), champion = huntChampionIdV1(s, g), chance = compositionBandV1(level).chancePercent, key9 = COMPOSITION_V1 + "/" + s.campaign.seed.seedHex + "/" + g.groupId + "/" + String(s.encounterEconomy.groups[g.groupId].episode) + "/" + String(level);
+  const candidates = g.entityIds.flatMap((id, n) => {
+    const a = s.entitiesById[id], spec = f3?.encounter.members[n];
+    if (!a || !includeDefeated && !a.alive || a.boss || s.content?.definitionsById[a.contentDefinitionId]?.isBoss || s.bossCombat?.bossesByEntityId?.[id] || String(spec?.memberKey).startsWith("finale:") || !ordinaryEnemyForProfile(a.contentDefinitionId) || BROOD_CREATURE_FAMILIES_V1.includes(familyOf2(s, id)) || id === champion) return [];
+    return [{ id, n, roll: compositionHashV1(key9 + "/" + id), primary: COMPOSITION_POLICY_V1.primaryAffixes[compositionHashV1(key9 + "/" + id + "/primary") % COMPOSITION_POLICY_V1.primaryAffixes.length] }];
+  }).sort((a, b) => a.roll - b.roll || a.id.localeCompare(b.id));
+  const rolled = candidates.filter((c) => c.roll % 100 < chance);
+  return rolled.length ? rolled : progressionBigInt(level) >= 15n && candidates.length >= 6 ? candidates.slice(0, 1) : [];
+}
+function validateCompositionEliteV1(s, e) {
+  requireContract(e.version === COMPOSITION_ELITE_V1, "Composition elite version");
+  closedRecord(e.composition, ["version", "level", "inherited"]);
+  requireContract(e.composition.version === COMPOSITION_V1 && typeof e.composition.inherited === "boolean", "Composition provenance");
+  const g = s.groupsById[e.groupId], level = g?.threatSnapshot?.levelsByEntityId[e.entityId];
+  requireContract(level !== void 0 && canonicalStringify(level) === canonicalStringify(e.composition.level), "Composition locked level");
+  requireContract(canonicalStringify(e.affixIds.slice(1)) === canonicalStringify(passiveEliteTraitsV1(e.identitySource, level)), "Composition passive roll changed");
+  if (!e.composition.inherited) {
+    requireContract(e.eliteId === generatedEliteId(e.identitySource), "Generated elite identity changed");
+    const row = [...broodElitesV1(s, g, { includeDefeated: true }), ...huntChampionElitesV1(s, g, { includeDefeated: true }), ...compositionCandidatesV1(s, g, level, { includeDefeated: true })].find((c) => c.id === e.entityId);
+    requireContract(row && row.primary === e.affixIds[0], "Composition candidate roll changed");
+  }
+}
+
+// src/shared/contracts/named_elite_tricks_v1.js
+var CHARGE_PHASES = ["ready", "windup", "charging", "recover"];
+var point = (p) => {
+  closedRecord(p, ["x", "y"]);
+  requireContract(Number.isFinite(p.x) && Number.isFinite(p.y), "Invalid named trick point");
+  return p;
+};
+function validateNamedTrickV1(state, e) {
+  const k = e.namedTrick, t = NAMED_ELITE_TRICKS_V1[e.namedEliteId];
+  requireContract(t && k?.kind === t.kind, "Invalid named trick");
+  if (t.kind === "shell") {
+    closedRecord(k, ["kind", "crackedTick"]);
+    if (k.crackedTick !== null) safeInteger(k.crackedTick, 0, state.tick);
+    return;
+  }
+  closedRecord(k, ["kind", "phase", "phaseEndsTick", "sequence", "origin", "direction", "hitEntityIds", "knockbacksByEntityId"]);
+  requireContract(CHARGE_PHASES.includes(k.phase), "Invalid named charge phase");
+  safeInteger(k.sequence, 0);
+  safeInteger(k.phaseEndsTick, 0, state.tick + (k.phase === "windup" ? t.windupTicks : k.phase === "charging" ? t.chargeTicks : k.phase === "recover" ? t.recoverTicks : Math.max(t.cooldownTicks, t.firstDelayTicks)));
+  if (k.phase === "ready") requireContract(k.origin === null && k.direction === null && k.hitEntityIds.length === 0, "Invalid resting named charge");
+  else {
+    point(k.origin);
+    point(k.direction);
+    requireContract(Math.abs(Math.hypot(k.direction.x, k.direction.y) - 1) < 1e-9, "Invalid named charge direction");
+  }
+  requireContract(Array.isArray(k.hitEntityIds) && k.hitEntityIds.every((id, i) => typeof id === "string" && k.hitEntityIds.indexOf(id) === i), "Invalid named charge hits");
+  for (const [id, b] of Object.entries(k.knockbacksByEntityId)) {
+    closedRecord(b, ["velocity", "expiresTick", "residencyRevision"]);
+    point(b.velocity);
+    requireContract(Math.hypot(b.velocity.x, b.velocity.y) <= t.knockback + 1e-9, "Invalid named charge knockback");
+    safeInteger(b.expiresTick, 0, state.tick + t.knockbackTicks);
+    safeInteger(b.residencyRevision, 0);
+  }
+}
+
+// src/shared/content/elite_types_v2.js
+var ELITE_MOVE_KINDS_V2 = Object.freeze(["lane", "ring", "leap", "cone"]);
+var ELITE_MOVE_PHASES_V2 = Object.freeze(["ready", "windup", "strike", "recover"]);
+var ELITE_TYPES_V2 = Object.freeze({
+  swift_commander: Object.freeze({
+    id: "swift_commander",
+    name: "Swift Commander",
+    look: "gale",
+    // A touch faster on its own feet, on top of its pack's haste.
+    speedPercent: 115,
+    move: Object.freeze({ kind: "lane", name: "Rally Charge", firstDelayTicks: 60, minRange: 40, maxRange: 150, windupTicks: 54, strikeTicks: 18, speed: 8, width: 24, contactRadius: 22, damageTenths: 14, knockback: 9, knockbackTicks: 12, recoverTicks: 36, cooldownTicks: 210 })
+  }),
+  iron_citadel: Object.freeze({
+    id: "iron_citadel",
+    name: "Iron Citadel",
+    look: "bastion",
+    speedPercent: 100,
+    move: Object.freeze({ kind: "ring", name: "Bulwark Slam", firstDelayTicks: 60, minRange: 0, maxRange: 58, windupTicks: 60, strikeTicks: 6, radius: 54, damageTenths: 15, knockback: 10, knockbackTicks: 12, recoverTicks: 40, cooldownTicks: 240 })
+  }),
+  blood_berserker: Object.freeze({
+    id: "blood_berserker",
+    name: "Berserker",
+    look: "bloodrage",
+    speedPercent: 100,
+    move: Object.freeze({ kind: "leap", name: "Blood Leap", firstDelayTicks: 60, minRange: 56, maxRange: 150, windupTicks: 60, strikeTicks: 20, radius: 26, landShort: 18, damageTenths: 16, knockback: 7, knockbackTicks: 10, recoverTicks: 40, cooldownTicks: 240 })
+  }),
+  glacial_warden: Object.freeze({
+    id: "glacial_warden",
+    name: "Glacial Warden",
+    look: "frost",
+    speedPercent: 100,
+    move: Object.freeze({ kind: "cone", name: "Frost Breath", firstDelayTicks: 60, minRange: 0, maxRange: 88, windupTicks: 54, strikeTicks: 30, length: 96, halfAngle: 0.4, damageTenths: 10, recoverTicks: 30, cooldownTicks: 210 })
+  })
+});
+var eliteTypeV2For = (e, family2) => !e || e.namedEliteId || BROOD_CREATURE_FAMILIES_V1.includes(family2) ? null : ELITE_TYPES_V2[e.affixIds?.[0]] ?? null;
+var eliteMovePhaseCapV2 = (m, phase) => phase === "windup" ? m.windupTicks : phase === "strike" ? m.strikeTicks : phase === "recover" ? m.recoverTicks : Math.max(m.cooldownTicks, m.firstDelayTicks);
+
+// src/shared/contracts/elite_moves_v2.js
+var point2 = (p) => {
+  closedRecord(p, ["x", "y"]);
+  requireContract(Number.isFinite(p.x) && Number.isFinite(p.y), "Invalid elite move point");
+  return p;
+};
+function validateEliteMoveV2(state, e) {
+  const k = e.move, t = eliteTypeV2For(e, ordinaryEnemyForProfile(state.entitiesById[e.entityId]?.contentDefinitionId)?.family), m = t?.move;
+  requireContract(m && k?.kind === m.kind, "Invalid elite move");
+  closedRecord(k, ["kind", "phase", "phaseEndsTick", "sequence", "origin", "direction", "target", "hitEntityIds", "knockbacksByEntityId"]);
+  requireContract(ELITE_MOVE_PHASES_V2.includes(k.phase), "Invalid elite move phase");
+  safeInteger(k.sequence, 0);
+  safeInteger(k.phaseEndsTick, 0, state.tick + eliteMovePhaseCapV2(m, k.phase));
+  if (k.phase === "ready") requireContract(k.origin === null && k.direction === null && k.target === null && k.hitEntityIds.length === 0, "Invalid resting elite move");
+  else {
+    point2(k.origin);
+    point2(k.direction);
+    requireContract(Math.abs(Math.hypot(k.direction.x, k.direction.y) - 1) < 1e-9, "Invalid elite move direction");
+    if (m.kind === "leap") point2(k.target);
+    else requireContract(k.target === null, "Invalid elite move target");
+  }
+  requireContract(Array.isArray(k.hitEntityIds) && k.hitEntityIds.every((id, i) => typeof id === "string" && k.hitEntityIds.indexOf(id) === i), "Invalid elite move hits");
+  for (const b of Object.values(k.knockbacksByEntityId)) {
+    closedRecord(b, ["velocity", "expiresTick", "residencyRevision"]);
+    point2(b.velocity);
+    requireContract(Math.hypot(b.velocity.x, b.velocity.y) <= (m.knockback ?? 0) + 1e-9, "Invalid elite move knockback");
+    safeInteger(b.expiresTick, 0, state.tick + (m.knockbackTicks ?? 0));
+    safeInteger(b.residencyRevision, 0);
+  }
+}
+
+// src/shared/contracts/elite_combat_d12_4.js
+var ELITE_COMBAT_D12_4_VERSION = "elite-combat-d12.4-v1";
+var ELITE_RECORD_D12_4_VERSION = "elite-record-d12.4-v1";
+var ELITE_HASTE_D12_4D_VERSION = "elite-haste-d12.4d-v1";
+var TIMED_ACTOR_STATUS_D12_4E_VERSION = "timed-actor-status-d12.4e-v1";
+var TIMED_PLAYER_POISON_D12_4F_VERSION = "timed-player-poison-d12.4f-v1";
+var ELITE_GUARD_D12_4G_VERSION = "elite-guard-d12.4g-v1";
+var ELITE_ATTACK_AURA_D12_4H_A_VERSION = "elite-attack-aura-d12.4h-a-v1";
+var TIMED_NULLIFIED_D12_4I_VERSION = "timed-nullified-d12.4i-v1";
+var NULLIFICATION_RESISTANCE_D12_4I_VERSION = "nullification-resistance-d12.4i-v1";
+var PENDING_HOSTILE_HAZARD_D12_4J_VERSION = "pending-hostile-hazard-d12.4j-v1";
+var HOSTILE_FLOOR_HAZARD_D12_4J_VERSION = "hostile-floor-hazard-d12.4j-v1";
+var WEBBED_STATUS_D12_4J_VERSION = "webbed-status-d12.4j-v1";
+var SLAG_BURN_STATUS_D12_4K_VERSION = "slag-burn-status-d12.4k-v1";
+function hostileHazardIdD12_4J(eliteId, sequence) {
+  requireContract(/^elite:[a-f0-9]{32}$/.test(eliteId) && Number.isSafeInteger(sequence) && sequence >= 1, "Invalid hostile hazard identity source");
+  return `hazard:${eliteId.slice(6, 30)}${sequence.toString(16).padStart(8, "0")}`;
+}
+async function createElite({ campaignSeed, siteId: siteId2, floorId, groupId, roomId, entityId: entityId2, activatedTick, affixId }, { sha256 }) {
+  const definition = eliteAffixDefinitionD12_4(affixId);
+  requireContract(definition, "Unknown elite affix");
+  const source8 = { campaignSeed, siteId: siteId2, floorId, groupId, roomId, entityId: entityId2, affixId };
+  const eliteId = "elite:" + bytesToHex((await hashBytes(frameUtf8([ELITE_RECORD_D12_4_VERSION, ...Object.values(source8)]), sha256)).slice(0, 16));
+  return freezeWire({ version: ELITE_RECORD_D12_4_VERSION, eliteId, entityId: entityId2, groupId, siteId: siteId2, floorId, roomId, tier: "elite", affixIds: [affixId], identitySource: source8, activatedTick, nextPulseTick: affixId === TOXIC_DECAY_AFFIX_ID ? activatedTick : activatedTick + definition.pulse.cadenceTicks, pulseSequence: 0, lastPulse: null });
+}
+function createVitalityWeaverEliteD12_4(source8, capabilities) {
+  return createElite({ ...source8, affixId: VITALITY_WEAVER_AFFIX_ID }, capabilities);
+}
+function createSwiftCommanderEliteD12_4D(source8, capabilities) {
+  return createElite({ ...source8, affixId: SWIFT_COMMANDER_AFFIX_ID }, capabilities);
+}
+function createGlacialWardenEliteD12_4E(source8, capabilities) {
+  return createElite({ ...source8, affixId: GLACIAL_WARDEN_AFFIX_ID }, capabilities);
+}
+function createToxicDecayEliteD12_4F(source8, capabilities) {
+  return createElite({ ...source8, affixId: TOXIC_DECAY_AFFIX_ID }, capabilities);
+}
+function createIronCitadelEliteD12_4G(source8, capabilities) {
+  return createElite({ ...source8, affixId: IRON_CITADEL_AFFIX_ID }, capabilities);
+}
+function createBloodBerserkerEliteD12_4H_A(source8, capabilities) {
+  return createElite({ ...source8, affixId: BLOOD_BERSERKER_AFFIX_ID }, capabilities);
+}
+function createNullifierEliteD12_4I(source8, capabilities) {
+  return createElite({ ...source8, affixId: NULLIFIER_AFFIX_ID }, capabilities);
+}
+function createWebWeaverEliteD12_4J(source8, capabilities) {
+  return createElite({ ...source8, affixId: WEB_WEAVER_AFFIX_ID }, capabilities);
+}
+function createSlagShaperEliteD12_4K(source8, capabilities) {
+  return createElite({ ...source8, affixId: SLAG_SHAPER_AFFIX_ID }, capabilities);
+}
+function createEliteForAffixD13D_B(source8, affixId, capabilities) {
+  return createElite({ ...source8, affixId }, capabilities);
+}
+async function createNamedEliteV1(source8, namedEliteId, capabilities) {
+  const named2 = NAMED_ELITES_V1[namedEliteId];
+  requireContract(named2, "Unknown named elite");
+  return freezeWire({ ...await createEliteForAffixD13D_B(source8, named2.affixId, capabilities), namedEliteId });
+}
+function eliteActorProfileD12_4(state, actor, profile2) {
+  return applyEliteActorStatsD12_4(profile2, state.eliteCombat?.elitesByEntityId?.[actor.entityId] ?? null);
+}
+function validatePulseRecord(state, e, definition, group) {
+  if (e.lastPulse === null) return;
+  closedRecord(e.lastPulse, ["tick", "sequence", "recipients"]);
+  safeInteger(e.lastPulse.tick, e.activatedTick, state.tick);
+  safeInteger(e.lastPulse.sequence, 1, e.pulseSequence);
+  const seen = /* @__PURE__ */ new Set();
+  if (e.affixIds[0] === VITALITY_WEAVER_AFFIX_ID) {
+    requireContract(e.lastPulse.recipients.length >= 1 && e.lastPulse.recipients.length <= definition.pulse.maximumTargets, "Invalid elite pulse recipients");
+    for (const row of e.lastPulse.recipients) {
+      closedRecord(row, ["entityId", "amount"]);
+      requireContract(group.entityIds.includes(row.entityId) && row.entityId !== e.entityId && !seen.has(row.entityId), "Invalid elite heal target");
+      seen.add(row.entityId);
+      validateInteger(row.amount);
+    }
+  } else if (e.affixIds[0] === SWIFT_COMMANDER_AFFIX_ID) {
+    requireContract(e.lastPulse.recipients.length <= Object.keys(state.entitiesById).length, "Invalid Commander pulse recipients");
+    for (const row of e.lastPulse.recipients) {
+      closedRecord(row, ["entityId", "previousStacks", "stacks"]);
+      const actor = state.entitiesById[row.entityId];
+      requireContract(actor?.team === "hostile" && actor.residency.spaceInstanceId === state.entitiesById[e.entityId].residency.spaceInstanceId && row.entityId !== e.entityId && !seen.has(row.entityId), "Invalid Commander haste target");
+      seen.add(row.entityId);
+      safeInteger(row.previousStacks, 0, definition.pulse.maxStacks);
+      safeInteger(row.stacks, row.previousStacks, definition.pulse.maxStacks);
+    }
+  } else if (e.affixIds[0] === IRON_CITADEL_AFFIX_ID) {
+    requireContract(e.lastPulse.recipients.length <= Object.keys(state.entitiesById).length, "Invalid Iron Citadel pulse recipients");
+    for (const row of e.lastPulse.recipients) {
+      closedRecord(row, ["entityId", "previousStacks", "stacks"]);
+      const actor = state.entitiesById[row.entityId];
+      requireContract(actor?.team === "hostile" && row.entityId !== e.entityId && !seen.has(row.entityId), "Invalid Iron Citadel Guard target");
+      seen.add(row.entityId);
+      safeInteger(row.previousStacks, 0, definition.pulse.maxStacks);
+      safeInteger(row.stacks, row.previousStacks, definition.pulse.maxStacks);
+    }
+  } else if (e.affixIds[0] === BLOOD_BERSERKER_AFFIX_ID) {
+    requireContract(e.lastPulse.recipients.length <= Object.keys(state.entitiesById).length, "Invalid Berserker pulse recipients");
+    for (const row of e.lastPulse.recipients) {
+      closedRecord(row, ["entityId", "previousStacks", "stacks"]);
+      const actor = state.entitiesById[row.entityId];
+      requireContract(actor?.team === "hostile" && group.entityIds.includes(row.entityId) && row.entityId !== e.entityId && !seen.has(row.entityId), "Invalid Berserker attack target");
+      seen.add(row.entityId);
+      safeInteger(row.previousStacks, 0, definition.pulse.maxStacks);
+      safeInteger(row.stacks, row.previousStacks, definition.pulse.maxStacks);
+    }
+  } else if (e.affixIds[0] === GLACIAL_WARDEN_AFFIX_ID) {
+    requireContract(e.affixIds[0] === GLACIAL_WARDEN_AFFIX_ID && e.lastPulse.recipients.length <= Object.keys(state.playersById).length, "Invalid Glacial Warden pulse recipients");
+    for (const row of e.lastPulse.recipients) {
+      closedRecord(row, ["entityId", "statusId", "expiresTick", "movementMultiplier"]);
+      const actor = state.entitiesById[row.entityId];
+      requireContract(actor?.team === "party" && actor.residency.spaceInstanceId === state.entitiesById[e.entityId].residency.spaceInstanceId && !seen.has(row.entityId), "Invalid Glacial Warden snare target");
+      seen.add(row.entityId);
+      requireContract(row.statusId === definition.pulse.statusId && row.expiresTick === e.lastPulse.tick + definition.pulse.durationTicks && row.movementMultiplier === definition.pulse.movementMultiplier.numerator / definition.pulse.movementMultiplier.denominator, "Invalid Glacial Warden snare pulse");
+    }
+  } else if (e.affixIds[0] === NULLIFIER_AFFIX_ID) {
+    requireContract(e.lastPulse.recipients.length <= Object.keys(state.playersById).length, "Invalid Nullifier pulse recipients");
+    for (const row of e.lastPulse.recipients) {
+      closedRecord(row, ["entityId", "statusId", "expiresTick", "resistanceUntil"]);
+      const actor = state.entitiesById[row.entityId];
+      requireContract(actor?.team === "party" && Object.values(state.playersById).some((player) => player.entityId === row.entityId) && !seen.has(row.entityId), "Invalid Nullifier target");
+      seen.add(row.entityId);
+      requireContract(row.statusId === definition.pulse.statusId && row.expiresTick === e.lastPulse.tick + definition.pulse.durationTicks && row.resistanceUntil === row.expiresTick + definition.pulse.resistanceTicks, "Invalid Nullifier pulse");
+    }
+  } else if (e.affixIds[0] === WEB_WEAVER_AFFIX_ID) {
+    requireContract(e.lastPulse.recipients.length <= 1, "Invalid Web Weaver cast recipients");
+    for (const row of e.lastPulse.recipients) {
+      closedRecord(row, ["entityId", "hazardId", "resolvesTick", "position"]);
+      const actor = state.entitiesById[row.entityId];
+      requireContract(actor?.team === "party" && Object.values(state.playersById).some((player) => player.entityId === row.entityId) && !seen.has(row.entityId), "Invalid Web Weaver target");
+      seen.add(row.entityId);
+      requireContract(row.hazardId === hostileHazardIdD12_4J(e.eliteId, e.lastPulse.sequence) && row.resolvesTick === e.lastPulse.tick + definition.pulse.windupTicks && Number.isFinite(row.position?.x) && Number.isFinite(row.position?.y), "Invalid Web Weaver cast");
+    }
+  } else if (e.affixIds[0] === SLAG_SHAPER_AFFIX_ID) {
+    requireContract(e.lastPulse.recipients.length <= 1, "Invalid Slag Shaper formation recipients");
+    for (const row of e.lastPulse.recipients) {
+      closedRecord(row, ["hazardId", "resolvesTick", "position"]);
+      requireContract(row.hazardId === hostileHazardIdD12_4J(e.eliteId, e.lastPulse.sequence) && row.resolvesTick === e.lastPulse.tick + definition.pulse.windupTicks && Number.isFinite(row.position?.x) && Number.isFinite(row.position?.y), "Invalid Slag Shaper formation");
+    }
+  } else {
+    requireContract(e.affixIds[0] === TOXIC_DECAY_AFFIX_ID && e.lastPulse.recipients.length === 1, "Invalid Toxic Decay application recipients");
+    const row = e.lastPulse.recipients[0], actor = state.entitiesById[row.entityId];
+    closedRecord(row, ["entityId", "statusId", "previousStacks", "stacks", "stackAdded", "expiresTick", "nextTickAt"]);
+    requireContract(actor?.team === "party" && Object.values(state.playersById).some((player) => player.entityId === row.entityId), "Invalid Toxic Decay target");
+    safeInteger(row.previousStacks, 0, definition.pulse.maxStacks);
+    safeInteger(row.stacks, row.previousStacks, definition.pulse.maxStacks);
+    requireContract(typeof row.stackAdded === "boolean" && row.stackAdded === row.stacks > row.previousStacks && row.statusId === definition.pulse.statusId && row.expiresTick === e.lastPulse.tick + definition.pulse.durationTicks && row.nextTickAt > e.lastPulse.tick, "Invalid Toxic Decay application");
+  }
+}
+function validateEliteCombatD12_4(state) {
+  const root2 = state.eliteCombat;
+  if (root2 === void 0) return;
+  closedRecord(root2, ["version", "elitesByEntityId"], ["hasteByEntityId", "timedStatusesByEntityId", "guardByEntityId", "attackAuraByEntityId", "nullificationResistanceByEntityId", "pendingHazardsBySourceEliteId", "hazardsById", "webbedByEntityId", "slagBurnByEntityId"]);
+  requireContract(root2.version === ELITE_COMBAT_D12_4_VERSION, "Unsupported elite combat state");
+  for (const [entityId2, e] of Object.entries(root2.elitesByEntityId)) {
+    closedRecord(e, ["version", "eliteId", "entityId", "groupId", "siteId", "floorId", "roomId", "tier", "affixIds", "identitySource", "activatedTick", "nextPulseTick", "pulseSequence", "lastPulse"], ["composition", "namedEliteId", "namedTrick", "move"]);
+    if (e.namedEliteId !== void 0) requireContract(Object.hasOwn(NAMED_ELITES_V1, e.namedEliteId) && NAMED_ELITES_V1[e.namedEliteId].affixId === e.affixIds[0], "Unknown named elite");
+    if (e.namedTrick !== void 0) validateNamedTrickV1(state, e);
+    if (e.move !== void 0) validateEliteMoveV2(state, e);
+    requireContract([ELITE_RECORD_D12_4_VERSION, COMPOSITION_ELITE_V1].includes(e.version) && /^elite:[a-f0-9]{32}$/.test(e.eliteId) && entityId2 === e.entityId && e.tier === "elite", "Invalid elite identity");
+    if (e.version === COMPOSITION_ELITE_V1) validateCompositionEliteV1(state, e);
+    else requireContract(e.composition === void 0 && e.affixIds.length === 1, "Unsupported elite affix loadout");
+    const affixId = e.affixIds[0], definition = eliteAffixDefinitionD12_4(affixId);
+    requireContract(definition, "Unsupported elite affix loadout");
+    const actor = state.entitiesById[entityId2], group = state.groupsById[e.groupId], site = state.d9World?.functionalSitesById?.[e.siteId], floor = site?.floors?.find((row) => row.floorId === e.floorId), index = floor?.enemyIds?.indexOf(entityId2) ?? -1;
+    const originPack = e.version === COMPOSITION_ELITE_V1 && e.floorId === null && e.roomId === "overworld-pack" && state.d9World?.episodes[e.groupId]?.origin === true && !site?.floors?.some((row) => row.groupId === e.groupId);
+    requireContract(actor?.team === "hostile" && group?.entityIds.includes(entityId2) && group.siteId === e.siteId && (originPack || (e.version === COMPOSITION_ELITE_V1 && e.siteId === null ? e.floorId === null && e.roomId === "overworld-pack" && state.d9World.runtime.groups.some((d) => d.groupId === group.groupId && d.members.some((m) => m.entityId === entityId2)) : floor?.groupId === e.groupId && index >= 0 && floor.encounter.members[index]?.roomId === e.roomId)), "Elite ownership drift");
+    closedRecord(e.identitySource, ["campaignSeed", "siteId", "floorId", "groupId", "roomId", "entityId", "affixId"]);
+    requireContract(e.identitySource.campaignSeed === state.campaign.seed.seedHex && e.identitySource.siteId === e.siteId && e.identitySource.floorId === e.floorId && e.identitySource.groupId === e.groupId && e.identitySource.roomId === e.roomId && e.identitySource.entityId === e.entityId && e.identitySource.affixId === affixId, "Elite identity source drift");
+    safeInteger(e.activatedTick, 0, state.tick);
+    safeInteger(e.pulseSequence, 0);
+    safeInteger(e.nextPulseTick, e.activatedTick + (affixId === TOXIC_DECAY_AFFIX_ID ? 0 : definition.pulse.cadenceTicks));
+    if (affixId === TOXIC_DECAY_AFFIX_ID) {
+      requireContract(e.pulseSequence === 0 ? e.nextPulseTick === e.activatedTick : e.lastPulse?.sequence === e.pulseSequence && e.nextPulseTick === e.lastPulse.tick + definition.pulse.cadenceTicks, "Toxic Decay cooldown schedule drift");
+    } else requireContract(e.nextPulseTick === e.activatedTick + (e.pulseSequence + 1) * definition.pulse.cadenceTicks, "Elite pulse schedule drift");
+    validatePulseRecord(state, e, definition, group);
+  }
+  for (const [entityId2, h] of Object.entries(root2.hasteByEntityId ?? {})) {
+    closedRecord(h, ["version", "entityId", "stacks", "sourceEliteIds", "lastRefreshTick", "lingerExpiresTick", "nextDecayTick", "lastStackTick", "lastDecayTick"]);
+    requireContract(h.version === ELITE_HASTE_D12_4D_VERSION && h.entityId === entityId2, "Invalid haste identity");
+    const actor = state.entitiesById[entityId2];
+    requireContract(actor?.team === "hostile", "Invalid haste recipient");
+    safeInteger(h.stacks, 0, SWIFT_COMMANDER_D12_4D.pulse.maxStacks);
+    requireContract(Array.isArray(h.sourceEliteIds) && h.sourceEliteIds.length <= Object.keys(root2.elitesByEntityId).length && h.sourceEliteIds.every((id, index) => typeof id === "string" && (index === 0 || h.sourceEliteIds[index - 1] < id)), "Invalid haste sources");
+    for (const eliteId of h.sourceEliteIds) {
+      const e = Object.values(root2.elitesByEntityId).find((row) => row.eliteId === eliteId), source8 = state.entitiesById[e?.entityId];
+      requireContract(e?.affixIds[0] === SWIFT_COMMANDER_AFFIX_ID && source8?.alive && actor.alive && source8.residency.spaceInstanceId === actor.residency.spaceInstanceId && Math.hypot(source8.position.x - actor.position.x, source8.position.y - actor.position.y) <= SWIFT_COMMANDER_D12_4D.pulse.radius, "Invalid active haste source");
+    }
+    safeInteger(h.lastRefreshTick, 0, state.tick);
+    safeInteger(h.lingerExpiresTick, h.lastRefreshTick, state.tick + SWIFT_COMMANDER_D12_4D.pulse.lingerTicks);
+    requireContract(h.lingerExpiresTick === h.lastRefreshTick + SWIFT_COMMANDER_D12_4D.pulse.lingerTicks, "Haste linger schedule drift");
+    if (h.nextDecayTick !== null) safeInteger(h.nextDecayTick, 0, state.tick + SWIFT_COMMANDER_D12_4D.pulse.lingerTicks);
+    if (h.sourceEliteIds.length) requireContract(h.nextDecayTick === h.lingerExpiresTick, "Active haste source lost linger boundary");
+    else if (h.stacks > 0) requireContract(h.nextDecayTick === (h.lastDecayTick === null ? h.lingerExpiresTick : h.lastDecayTick + SWIFT_COMMANDER_D12_4D.pulse.decayTicks), "Haste decay schedule drift");
+    else requireContract(h.nextDecayTick === null, "Zero-stack haste cannot decay");
+    for (const key9 of ["lastStackTick", "lastDecayTick"]) if (h[key9] !== null) safeInteger(h[key9], 0, state.tick);
+  }
+  for (const [entityId2, g] of Object.entries(root2.guardByEntityId ?? {})) {
+    closedRecord(g, ["version", "entityId", "spaceInstanceId", "stacks", "sourceEliteIds", "lastRefreshTick", "lingerExpiresTick", "nextDecayTick", "lastStackTick", "lastDecayTick", "lastImpact"]);
+    requireContract(g.version === ELITE_GUARD_D12_4G_VERSION && g.entityId === entityId2, "Invalid Guard identity");
+    const actor = state.entitiesById[entityId2];
+    requireContract(actor?.team === "hostile" && actor.alive && actor.residency.spaceInstanceId === g.spaceInstanceId, "Invalid Guard recipient");
+    safeInteger(g.stacks, 0, IRON_CITADEL_D12_4G.pulse.maxStacks);
+    requireContract(Array.isArray(g.sourceEliteIds) && g.sourceEliteIds.length <= Object.keys(root2.elitesByEntityId).length && g.sourceEliteIds.every((id, index) => typeof id === "string" && (index === 0 || g.sourceEliteIds[index - 1] < id)), "Invalid Guard sources");
+    for (const eliteId of g.sourceEliteIds) {
+      const e = Object.values(root2.elitesByEntityId).find((row) => row.eliteId === eliteId), source8 = state.entitiesById[e?.entityId];
+      requireContract(e?.affixIds[0] === IRON_CITADEL_AFFIX_ID && source8?.alive && source8.residency.spaceInstanceId === actor.residency.spaceInstanceId && Math.hypot(source8.position.x - actor.position.x, source8.position.y - actor.position.y) <= IRON_CITADEL_D12_4G.pulse.radius, "Invalid active Guard source");
+    }
+    safeInteger(g.lastRefreshTick, 0, state.tick);
+    safeInteger(g.lingerExpiresTick, g.lastRefreshTick, state.tick + IRON_CITADEL_D12_4G.pulse.lingerTicks);
+    requireContract(g.lingerExpiresTick === g.lastRefreshTick + IRON_CITADEL_D12_4G.pulse.lingerTicks, "Guard linger schedule drift");
+    safeInteger(g.nextDecayTick, 0, state.tick + IRON_CITADEL_D12_4G.pulse.lingerTicks);
+    if (g.sourceEliteIds.length) requireContract(g.nextDecayTick === g.lingerExpiresTick, "Active Guard source lost linger boundary");
+    else requireContract(g.nextDecayTick === (g.lastDecayTick === null ? g.lingerExpiresTick : g.lastDecayTick + IRON_CITADEL_D12_4G.pulse.decayTicks), "Guard decay schedule drift");
+    for (const key9 of ["lastStackTick", "lastDecayTick"]) if (g[key9] !== null) safeInteger(g[key9], 0, state.tick);
+    if (g.lastImpact !== null) {
+      closedRecord(g.lastImpact, ["tick", "sourceEntityId", "damageBefore", "damageAfter", "mitigated", "stacks"]);
+      safeInteger(g.lastImpact.tick, 0, state.tick);
+      requireContract(state.entitiesById[g.lastImpact.sourceEntityId]?.team === "party", "Invalid Guard impact source");
+      for (const key9 of ["damageBefore", "damageAfter", "mitigated"]) validateInteger(g.lastImpact[key9]);
+      safeInteger(g.lastImpact.stacks, 1, IRON_CITADEL_D12_4G.pulse.maxStacks);
+    }
+  }
+  for (const [entityId2, aura] of Object.entries(root2.attackAuraByEntityId ?? {})) {
+    closedRecord(aura, ["version", "entityId", "groupId", "spaceInstanceId", "stacks", "sourceEliteIds", "lastRefreshTick", "lingerExpiresTick", "nextDecayTick", "lastStackTick", "lastDecayTick"]);
+    requireContract(aura.version === ELITE_ATTACK_AURA_D12_4H_A_VERSION && aura.entityId === entityId2, "Invalid attack-aura identity");
+    const actor = state.entitiesById[entityId2], group = state.groupsById[aura.groupId];
+    requireContract(actor?.team === "hostile" && actor.alive && group?.entityIds.includes(entityId2) && actor.residency.spaceInstanceId === aura.spaceInstanceId, "Invalid attack-aura recipient");
+    safeInteger(aura.stacks, 0, BLOOD_BERSERKER_D12_4H_A.pulse.maxStacks);
+    requireContract(Array.isArray(aura.sourceEliteIds) && aura.sourceEliteIds.length <= Object.keys(root2.elitesByEntityId).length && aura.sourceEliteIds.every((id, index) => typeof id === "string" && (index === 0 || aura.sourceEliteIds[index - 1] < id)), "Invalid attack-aura sources");
+    for (const eliteId of aura.sourceEliteIds) {
+      const e = Object.values(root2.elitesByEntityId).find((row) => row.eliteId === eliteId), source8 = state.entitiesById[e?.entityId];
+      requireContract(e?.affixIds[0] === BLOOD_BERSERKER_AFFIX_ID && e.groupId === aura.groupId && source8?.alive && source8.residency.spaceInstanceId === actor.residency.spaceInstanceId && Math.hypot(source8.position.x - actor.position.x, source8.position.y - actor.position.y) <= BLOOD_BERSERKER_D12_4H_A.pulse.radius, "Invalid active attack-aura source");
+    }
+    safeInteger(aura.lastRefreshTick, 0, state.tick);
+    safeInteger(aura.lingerExpiresTick, aura.lastRefreshTick, state.tick + BLOOD_BERSERKER_D12_4H_A.pulse.lingerTicks);
+    requireContract(aura.lingerExpiresTick === aura.lastRefreshTick + BLOOD_BERSERKER_D12_4H_A.pulse.lingerTicks, "Attack-aura linger schedule drift");
+    safeInteger(aura.nextDecayTick, 0, state.tick + BLOOD_BERSERKER_D12_4H_A.pulse.lingerTicks);
+    if (aura.sourceEliteIds.length) requireContract(aura.nextDecayTick === aura.lingerExpiresTick, "Active attack-aura source lost linger boundary");
+    else requireContract(aura.nextDecayTick === (aura.lastDecayTick === null ? aura.lingerExpiresTick : aura.lastDecayTick + BLOOD_BERSERKER_D12_4H_A.pulse.decayTicks), "Attack-aura decay schedule drift");
+    for (const key9 of ["lastStackTick", "lastDecayTick"]) if (aura[key9] !== null) safeInteger(aura[key9], 0, state.tick);
+  }
+  for (const [entityId2, statuses] of Object.entries(root2.timedStatusesByEntityId ?? {})) {
+    const actor = state.entitiesById[entityId2];
+    requireContract(actor?.team === "party" && statuses && typeof statuses === "object" && !Array.isArray(statuses), "Invalid timed-status owner");
+    for (const [statusId, status] of Object.entries(statuses)) {
+      if (statusId === GLACIAL_WARDEN_D12_4E.pulse.statusId) {
+        closedRecord(status, ["version", "entityId", "statusId", "sourceEliteId", "applicationTick", "expirationTick", "magnitude"]);
+        requireContract(status.version === TIMED_ACTOR_STATUS_D12_4E_VERSION && status.entityId === entityId2 && status.statusId === statusId, "Invalid timed actor status identity");
+        const source8 = Object.values(root2.elitesByEntityId).find((row) => row.eliteId === status.sourceEliteId);
+        requireContract(source8?.affixIds[0] === GLACIAL_WARDEN_AFFIX_ID, "Invalid timed actor status source");
+        safeInteger(status.applicationTick, 0, state.tick);
+        safeInteger(status.expirationTick, status.applicationTick + 1, state.tick + GLACIAL_WARDEN_D12_4E.pulse.durationTicks);
+        requireContract(status.expirationTick === status.applicationTick + GLACIAL_WARDEN_D12_4E.pulse.durationTicks, "Timed actor status duration drift");
+        closedRecord(status.magnitude, ["movementMultiplier"]);
+        requireContract(status.magnitude.movementMultiplier === GLACIAL_WARDEN_D12_4E.pulse.movementMultiplier.numerator / GLACIAL_WARDEN_D12_4E.pulse.movementMultiplier.denominator, "Timed actor status magnitude drift");
+        requireContract(state.tick < status.expirationTick, "Expired timed actor status retained");
+      } else if (statusId === NULLIFIER_D12_4I.pulse.statusId) {
+        closedRecord(status, ["version", "entityId", "statusId", "sourceEliteId", "applicationTick", "expirationTick"]);
+        requireContract(status.version === TIMED_NULLIFIED_D12_4I_VERSION && status.entityId === entityId2 && status.statusId === statusId && actor.alive, "Invalid Nullified status identity");
+        const source8 = Object.values(root2.elitesByEntityId).find((row) => row.eliteId === status.sourceEliteId);
+        requireContract(source8?.affixIds[0] === NULLIFIER_AFFIX_ID, "Invalid Nullified source");
+        safeInteger(status.applicationTick, 0, state.tick);
+        safeInteger(status.expirationTick, state.tick + 1, state.tick + NULLIFIER_D12_4I.pulse.durationTicks);
+        requireContract(status.expirationTick === status.applicationTick + NULLIFIER_D12_4I.pulse.durationTicks && state.tick < status.expirationTick, "Nullified duration drift");
+      } else {
+        requireContract(statusId === TOXIC_DECAY_D12_4F.pulse.statusId, "Invalid timed actor status identity");
+        closedRecord(status, ["version", "entityId", "statusId", "sourceEliteId", "applicationTick", "lastApplicationTick", "lastApplicationAdded", "expirationTick", "nextTickAt", "tickIntervalTicks", "stacks", "damagePerStack", "lastTick"]);
+        requireContract(status.version === TIMED_PLAYER_POISON_D12_4F_VERSION && status.entityId === entityId2 && status.statusId === statusId && actor.alive && typeof status.lastApplicationAdded === "boolean", "Invalid Toxic Decay status identity");
+        const source8 = Object.values(root2.elitesByEntityId).find((row) => row.eliteId === status.sourceEliteId);
+        requireContract(source8?.affixIds[0] === TOXIC_DECAY_AFFIX_ID, "Invalid Toxic Decay source");
+        safeInteger(status.applicationTick, 0, state.tick);
+        safeInteger(status.lastApplicationTick, status.applicationTick, state.tick);
+        safeInteger(status.expirationTick, state.tick + 1, state.tick + TOXIC_DECAY_D12_4F.pulse.durationTicks);
+        safeInteger(status.nextTickAt, state.tick + 1, status.expirationTick);
+        safeInteger(status.stacks, 1, TOXIC_DECAY_D12_4F.pulse.maxStacks);
+        validateInteger(status.damagePerStack);
+        requireContract(status.damagePerStack !== "0" && status.expirationTick === status.lastApplicationTick + TOXIC_DECAY_D12_4F.pulse.durationTicks && status.tickIntervalTicks === TOXIC_DECAY_D12_4F.pulse.tickTicks && (status.nextTickAt - status.applicationTick) % status.tickIntervalTicks === 0, "Toxic Decay schedule drift");
+        if (status.lastTick !== null) {
+          closedRecord(status.lastTick, ["tick", "damage", "stacks", "sourceEliteId", "targetAlive"]);
+          safeInteger(status.lastTick.tick, status.applicationTick + status.tickIntervalTicks, state.tick);
+          validateInteger(status.lastTick.damage);
+          safeInteger(status.lastTick.stacks, 1, TOXIC_DECAY_D12_4F.pulse.maxStacks);
+          const tickSource = Object.values(root2.elitesByEntityId).find((row) => row.eliteId === status.lastTick.sourceEliteId);
+          requireContract(typeof status.lastTick.targetAlive === "boolean" && tickSource?.affixIds[0] === TOXIC_DECAY_AFFIX_ID, "Invalid Toxic Decay tick attribution");
+        }
+      }
+    }
+  }
+  for (const [entityId2, resistance] of Object.entries(root2.nullificationResistanceByEntityId ?? {})) {
+    closedRecord(resistance, ["version", "entityId", "statusId", "sourceEliteId", "startedTick", "expirationTick"]);
+    const actor = state.entitiesById[entityId2], source8 = Object.values(root2.elitesByEntityId).find((row) => row.eliteId === resistance.sourceEliteId);
+    requireContract(resistance.version === NULLIFICATION_RESISTANCE_D12_4I_VERSION && resistance.entityId === entityId2 && resistance.statusId === NULLIFIER_D12_4I.pulse.statusId && actor?.team === "party" && actor.alive && source8?.affixIds[0] === NULLIFIER_AFFIX_ID, "Invalid Nullifier resistance identity");
+    safeInteger(resistance.startedTick, 0, state.tick);
+    safeInteger(resistance.expirationTick, state.tick + 1, state.tick + NULLIFIER_D12_4I.pulse.resistanceTicks);
+    requireContract(resistance.expirationTick === resistance.startedTick + NULLIFIER_D12_4I.pulse.resistanceTicks && state.tick < resistance.expirationTick && !root2.timedStatusesByEntityId?.[entityId2]?.[NULLIFIER_D12_4I.pulse.statusId], "Nullifier resistance schedule drift");
+  }
+  const web = WEB_WEAVER_D12_4J.pulse, slag = SLAG_SHAPER_D12_4K.pulse, partyEntityIds = new Set(Object.values(state.playersById).map((player) => player.entityId)), sourceByEliteId = new Map(Object.values(root2.elitesByEntityId).map((elite) => [elite.eliteId, elite])), activeCountBySource = /* @__PURE__ */ new Map();
+  const validateWebShape = (row) => {
+    closedRecord(row.geometry, ["kind", "radiusX", "radiusY"]);
+    closedRecord(row.effect, ["statusId", "movementMultiplier"]);
+    requireContract(row.kind === web.hazardKind && row.geometry.kind === web.geometry.kind && row.geometry.radiusX === web.geometry.radiusX && row.geometry.radiusY === web.geometry.radiusY && row.effect.statusId === web.statusId && row.effect.movementMultiplier === web.movementMultiplier.numerator / web.movementMultiplier.denominator, "Web hazard definition drift");
+  };
+  const validateSlagShape = (row) => {
+    closedRecord(row.geometry, ["kind", "radiusX", "radiusY"]);
+    closedRecord(row.effect, ["statusId", "damageFraction", "damageIntervalTicks", "nonlethal"]);
+    closedRecord(row.effect.damageFraction, ["numerator", "denominator"]);
+    requireContract(row.kind === slag.hazardKind && row.geometry.kind === slag.geometry.kind && row.geometry.radiusX === slag.geometry.radiusX && row.geometry.radiusY === slag.geometry.radiusY && row.effect.statusId === slag.statusId && row.effect.damageFraction.numerator === slag.damageMaxHp.numerator && row.effect.damageFraction.denominator === slag.damageMaxHp.denominator && row.effect.damageIntervalTicks === slag.damageIntervalTicks && row.effect.nonlethal === false, "Slag hazard definition drift");
+  };
+  for (const [sourceEliteId, pending] of Object.entries(root2.pendingHazardsBySourceEliteId ?? {})) {
+    const sourceElite = sourceByEliteId.get(sourceEliteId), source8 = state.entitiesById[pending.sourceEntityId], base = pending.version === PENDING_HOSTILE_HAZARD_D12_4J_VERSION && sourceElite?.entityId === pending.sourceEntityId && pending.sourceEliteId === sourceEliteId && pending.hazardId === hostileHazardIdD12_4J(sourceEliteId, sourceElite.pulseSequence) && source8?.alive && source8.residency.spaceInstanceId === pending.spaceInstanceId && state.spacesByInstanceId[pending.spaceInstanceId] && Number.isFinite(pending.position?.x) && Number.isFinite(pending.position?.y);
+    requireContract(base, "Invalid pending hostile hazard");
+    safeInteger(pending.startedTick, 0, state.tick);
+    if (pending.kind === web.hazardKind) {
+      closedRecord(pending, ["version", "hazardId", "kind", "sourceEliteId", "sourceEntityId", "targetEntityId", "spaceInstanceId", "position", "startedTick", "resolvesTick", "geometry", "effect"]);
+      requireContract(sourceElite.affixIds[0] === WEB_WEAVER_AFFIX_ID && partyEntityIds.has(pending.targetEntityId), "Invalid pending Web Weaver cast");
+      safeInteger(pending.resolvesTick, state.tick + 1, state.tick + web.windupTicks);
+      requireContract(pending.resolvesTick === pending.startedTick + web.windupTicks, "Web Weaver cast schedule drift");
+      validateWebShape(pending);
+    } else {
+      closedRecord(pending, ["version", "hazardId", "kind", "sourceEliteId", "sourceEntityId", "spaceInstanceId", "position", "startedTick", "resolvesTick", "geometry", "effect"]);
+      requireContract(sourceElite.affixIds[0] === SLAG_SHAPER_AFFIX_ID, "Invalid pending Slag Shaper formation");
+      safeInteger(pending.resolvesTick, state.tick + 1, state.tick + slag.windupTicks);
+      requireContract(pending.resolvesTick === pending.startedTick + slag.windupTicks, "Slag Shaper formation schedule drift");
+      validateSlagShape(pending);
+    }
+  }
+  for (const [hazardId, hazard] of Object.entries(root2.hazardsById ?? {})) {
+    const sourceElite = sourceByEliteId.get(hazard.sourceEliteId), base = hazard.version === HOSTILE_FLOOR_HAZARD_D12_4J_VERSION && hazard.hazardId === hazardId && /^hazard:[a-f0-9]{32}$/.test(hazardId) && sourceElite?.entityId === hazard.sourceEntityId && state.spacesByInstanceId[hazard.spaceInstanceId] && Number.isFinite(hazard.position?.x) && Number.isFinite(hazard.position?.y);
+    requireContract(base, "Invalid hostile floor hazard identity");
+    safeInteger(hazard.creationTick, 0, state.tick);
+    if (hazard.kind === web.hazardKind) {
+      closedRecord(hazard, ["version", "hazardId", "kind", "sourceEliteId", "sourceEntityId", "spaceInstanceId", "position", "creationTick", "expirationTick", "geometry", "effect"]);
+      requireContract(sourceElite.affixIds[0] === WEB_WEAVER_AFFIX_ID, "Invalid Web Weaver hazard source");
+      safeInteger(hazard.expirationTick, state.tick + 1, state.tick + web.durationTicks);
+      requireContract(hazard.expirationTick === hazard.creationTick + web.durationTicks && state.tick < hazard.expirationTick, "Web hazard schedule drift");
+      validateWebShape(hazard);
+    } else {
+      closedRecord(hazard, ["version", "hazardId", "kind", "sourceEliteId", "sourceEntityId", "spaceInstanceId", "position", "creationTick", "expirationTick", "geometry", "effect", "nextDamageTick", "affectedEntityIds", "lastDamageEvents"]);
+      requireContract(sourceElite.affixIds[0] === SLAG_SHAPER_AFFIX_ID, "Invalid Slag Shaper hazard source");
+      safeInteger(hazard.expirationTick, state.tick + 1, state.tick + slag.durationTicks);
+      safeInteger(hazard.nextDamageTick, state.tick + 1, hazard.expirationTick + slag.damageIntervalTicks);
+      requireContract(hazard.expirationTick === hazard.creationTick + slag.durationTicks && state.tick < hazard.expirationTick && (hazard.nextDamageTick - hazard.creationTick) % slag.damageIntervalTicks === 0, "Slag hazard schedule drift");
+      validateSlagShape(hazard);
+      requireContract(Array.isArray(hazard.affectedEntityIds) && hazard.affectedEntityIds.every((id, index) => partyEntityIds.has(id) && (index === 0 || hazard.affectedEntityIds[index - 1] < id)), "Invalid Slag affected actors");
+      for (const id of hazard.affectedEntityIds) {
+        const actor = state.entitiesById[id], dx = actor.position.x - hazard.position.x, dy = actor.position.y - hazard.position.y, rx = slag.geometry.radiusX + actor.hullRadius, ry = slag.geometry.radiusY + actor.hullRadius;
+        requireContract(actor.alive && actor.residency.spaceInstanceId === hazard.spaceInstanceId && dx * dx / (rx * rx) + dy * dy / (ry * ry) <= 1, "Slag affected actor outside hazard");
+      }
+      requireContract(Array.isArray(hazard.lastDamageEvents) && hazard.lastDamageEvents.every((event, index) => index === 0 || hazard.lastDamageEvents[index - 1].targetEntityId < event.targetEntityId), "Invalid Slag damage event order");
+      for (const event of hazard.lastDamageEvents) {
+        closedRecord(event, ["hazardId", "sourceEliteId", "sourceEntityId", "targetEntityId", "scheduledTick", "attemptedDamage", "actualDamage", "resultingHp"]);
+        requireContract(event.hazardId === hazardId && event.sourceEliteId === hazard.sourceEliteId && event.sourceEntityId === hazard.sourceEntityId && partyEntityIds.has(event.targetEntityId), "Invalid Slag damage attribution");
+        safeInteger(event.scheduledTick, hazard.creationTick + slag.damageIntervalTicks, state.tick);
+        requireContract(event.scheduledTick < hazard.expirationTick && (event.scheduledTick - hazard.creationTick) % slag.damageIntervalTicks === 0, "Invalid Slag damage tick");
+        validateInteger(event.attemptedDamage);
+        validateInteger(event.actualDamage);
+        validateInteger(event.resultingHp);
+      }
+    }
+    const countKey = hazard.sourceEliteId + "/" + hazard.kind;
+    activeCountBySource.set(countKey, (activeCountBySource.get(countKey) ?? 0) + 1);
+  }
+  for (const [key9, count2] of activeCountBySource) requireContract(count2 <= (key9.endsWith("/" + web.hazardKind) ? web.maxActivePerSource : slag.maxActivePerSource), "Hostile active-hazard cap exceeded");
+  for (const [entityId2, status] of Object.entries(root2.webbedByEntityId ?? {})) {
+    closedRecord(status, ["version", "entityId", "statusId", "spaceInstanceId", "hazardIds", "startedTick", "lastEvaluatedTick", "movementMultiplier"]);
+    const actor = state.entitiesById[entityId2];
+    requireContract(status.version === WEBBED_STATUS_D12_4J_VERSION && status.entityId === entityId2 && status.statusId === web.statusId && partyEntityIds.has(entityId2) && actor?.alive && actor.residency.spaceInstanceId === status.spaceInstanceId && status.movementMultiplier === web.movementMultiplier.numerator / web.movementMultiplier.denominator, "Invalid Webbed status identity");
+    safeInteger(status.startedTick, 0, state.tick);
+    requireContract(status.lastEvaluatedTick === state.tick && Array.isArray(status.hazardIds) && status.hazardIds.length >= 1 && status.hazardIds.every((id, index) => typeof id === "string" && (index === 0 || status.hazardIds[index - 1] < id)), "Invalid Webbed status sources");
+    for (const id of status.hazardIds) {
+      const hazard = root2.hazardsById[id], dx = actor.position.x - hazard?.position.x, dy = actor.position.y - hazard?.position.y, rx = web.geometry.radiusX + actor.hullRadius, ry = web.geometry.radiusY + actor.hullRadius;
+      requireContract(hazard?.kind === web.hazardKind && hazard.spaceInstanceId === status.spaceInstanceId && dx * dx / (rx * rx) + dy * dy / (ry * ry) <= 1, "Webbed actor outside authoritative hazard");
+    }
+  }
+  for (const [entityId2, status] of Object.entries(root2.slagBurnByEntityId ?? {})) {
+    closedRecord(status, ["version", "entityId", "statusId", "spaceInstanceId", "hazardIds", "startedTick", "lastEvaluatedTick"]);
+    const actor = state.entitiesById[entityId2];
+    requireContract(status.version === SLAG_BURN_STATUS_D12_4K_VERSION && status.entityId === entityId2 && status.statusId === slag.statusId && partyEntityIds.has(entityId2) && actor?.alive && actor.residency.spaceInstanceId === status.spaceInstanceId, "Invalid Slag Burn status identity");
+    safeInteger(status.startedTick, 0, state.tick);
+    requireContract(status.lastEvaluatedTick === state.tick && Array.isArray(status.hazardIds) && status.hazardIds.length >= 1 && status.hazardIds.every((id, index) => typeof id === "string" && (index === 0 || status.hazardIds[index - 1] < id)), "Invalid Slag Burn sources");
+    for (const id of status.hazardIds) requireContract(root2.hazardsById[id]?.kind === slag.hazardKind && root2.hazardsById[id].affectedEntityIds.includes(entityId2), "Slag Burn actor outside authoritative hazard");
+  }
+}
+
+// src/shared/contracts/fair_play_v1.js
+var PARTY_HEALTH_PERCENT_V1 = Object.freeze([100, 160, 220, 280]);
+function partySizeV1(snapshot) {
+  return snapshot?.partySize ?? 1;
+}
+function validatePartySizeV1(snapshot) {
+  if (snapshot?.partySize !== void 0) requireContract(Number.isSafeInteger(snapshot.partySize) && snapshot.partySize >= 2 && snapshot.partySize <= PARTY_HEALTH_PERCENT_V1.length, "Invalid party size");
+}
+function partyHealthPercentV1(snapshot) {
+  return PARTY_HEALTH_PERCENT_V1[Math.min(PARTY_HEALTH_PERCENT_V1.length, Math.max(1, partySizeV1(snapshot))) - 1];
+}
+
+// src/shared/contracts/encounter_progression.js
+var ENCOUNTER_PROGRESSION_VERSION = "encounter-progression-d3-v1";
+var D9_THREAT_VERSION = "encounter-progression-d9-v1";
+var ORDINARY_ACTIVITY_RADII = Object.freeze({ prepareRadius: 768, leaveRadius: 960 });
+function ordinaryTier(profileId) {
+  const index = ORDINARY_PROFILES.findIndex((p) => p.contentDefinitionId === profileId);
+  return index < 0 ? null : THREAT_TIERS[index % 4];
+}
+function encounterActorProfile(state, group, actor) {
+  const enemy = ordinaryEnemyForProfile(actor.contentDefinitionId);
+  const level = group.threatSnapshot?.levelsByEntityId[actor.entityId];
+  let profile2;
+  if (enemy && level !== void 0 && group.threatSnapshot.version === D9_THREAT_VERSION) {
+    const stats = hasWorldCombat(state) ? worldEnemyStats(level, ordinaryTier(actor.contentDefinitionId), enemy.budget) : threatEndpointsD9(level, ordinaryTier(actor.contentDefinitionId), enemy.budget);
+    profile2 = { ...state.content.definitionsById[actor.contentDefinitionId], maxHp: stats.maxHp, attackDamage: stats.attackDamage };
+  } else profile2 = enemy && level !== void 0 ? resolveOrdinaryProfile(enemy, ordinaryTier(actor.contentDefinitionId), level) : state.content.definitionsById[actor.contentDefinitionId];
+  if (hasWorldCombat(state) && profile2?.isBoss && level !== void 0) profile2 = { ...profile2, ...worldBossStats(level) };
+  const out = rareActorProfileV1(state, actor, aegisComponentProfile(state, actor, huntChampionProfileV1(state, group, actor, siteEndActorProfileV1(state, group, actor, eliteActorProfileD12_4(state, actor, worldOrdinaryMeleeProfile(state, profile2))))));
+  const party2 = partyHealthPercentV1(group.threatSnapshot);
+  return party2 !== 100 && state.subweaponCombat && out?.maxHp !== void 0 ? { ...out, maxHp: combatInteger(multiplyCombat(out.maxHp, party2, 100)) } : out;
+}
+function validateEncounterProgression(state, group) {
+  requireContract(typeof group.threatReady === "boolean", "Missing encounter reset state");
+  const snapshot = group.threatSnapshot;
+  if (snapshot === null) {
+    requireContract(group.threatReady, "Missing locked threat snapshot");
+    return;
+  }
+  closedRecord(snapshot, ["version", "activatedTick", "levelsByEntityId"], state.d9World ? ["partySize"] : []);
+  validatePartySizeV1(snapshot);
+  requireContract(snapshot.version === ENCOUNTER_PROGRESSION_VERSION || state.d9World && snapshot.version === D9_THREAT_VERSION, "Unsupported encounter progression");
+  safeInteger(snapshot.activatedTick, 0, state.tick);
+  closedRecord(snapshot.levelsByEntityId, group.entityIds);
+  const liveLevels = /* @__PURE__ */ new Set();
+  for (const id of group.entityIds) {
+    if (snapshot.version === D9_THREAT_VERSION) positiveProgression(snapshot.levelsByEntityId[id]);
+    else safeInteger(snapshot.levelsByEntityId[id], 1, MAX_PLAYER_LEVEL);
+    if (state.entitiesById[id].alive) liveLevels.add(progressionBigInt(snapshot.levelsByEntityId[id]).toString());
+  }
+  const live = [...liveLevels].map(BigInt);
+  requireContract(usesSpawnLevelsV1(state) ? !live.length || live.reduce((a, b) => a > b ? a : b) - live.reduce((a, b) => a < b ? a : b) <= BigInt(PACK_LEVEL_SPREAD_V1) : liveLevels.size <= 1, "Split live group threat");
+  if (group.siteId !== null) requireContract(!group.threatReady || state.d9World?.episodes[group.groupId]?.snapshot === null, "Site snapshot cannot thaw");
+}
+
+// src/shared/content/encounter_motion_d11_2.js
+var ENCOUNTER_CONTAINMENT_D11_2_VERSION = "encounter-containment-d11.2-v1";
+var HOSTILE_MOTION_D11_2_VERSION = "hostile-motion-d11.2-v1";
+var SITE_CONTAINMENT_D11_2 = freezeWire({
+  woodlandRuin: { acquireRadius: 260, pursuitRadius: 420, disengageTicks: 24, homeTolerance: 3, approachRadius: 17 },
+  woodlandFort: { acquireRadius: 360, pursuitRadius: 520, disengageTicks: 30, homeTolerance: 3, approachRadius: 17 },
+  woodlandCave: { acquireRadius: 260, pursuitRadius: 390, disengageTicks: 24, homeTolerance: 3, approachRadius: 17 }
+});
+var LEGACY_HOSTILE_MELEE_MOTION_D11_2 = freezeWire({
+  gargoyle: { windupTicks: 11, impactTicks: 3, recoveryTicks: 9 },
+  rust_nibbler: { windupTicks: 7, impactTicks: 2, recoveryTicks: 7 },
+  animated_armor: { windupTicks: 14, impactTicks: 3, recoveryTicks: 12 },
+  cursed_blade: { windupTicks: 9, impactTicks: 3, recoveryTicks: 8 }
+});
+var HOSTILE_MELEE_MOTION_D11_2 = freezeWire({ ...LEGACY_HOSTILE_MELEE_MOTION_D11_2, ...DUNGEON_MOBS_V1_MELEE_MOTION, ...DUNGEON_MOBS_V2_MELEE_MOTION, ...BIOME_CREATURES_V1_MELEE_MOTION, ...BROOD_CREATURES_V1_MELEE_MOTION, ...BANDITS_V1_MELEE_MOTION, ...BURROWERS_V1_MELEE_MOTION });
+var hostileMeleeMotionD11_2 = (family2) => HOSTILE_MELEE_MOTION_D11_2[family2] ?? null;
+
+// src/shared/content/site_definition_runtime_d10.js
+var actorAi = (family2, tick) => {
+  const timing = hostileMeleeMotionD11_2(family2);
+  return { kind: "simpleMelee", acquireRange: ORDINARY_ACQUIRE_RANGE, updatesApplied: 0, ...timing ? { melee: { version: HOSTILE_MOTION_D11_2_VERSION, phase: "idle", phaseStartedTick: tick, phaseEndsTick: tick, targetEntityId: null, actionSequence: 0 }, motion: { version: HOSTILE_MOTION_D11_2_VERSION, startedTick: null, lastMovedTick: null } } : {} };
+};
+var containment = (definition, members, tick) => {
+  if (!definition.containment) return null;
+  const x = members.reduce((n, m) => n + m.position.x, 0) / members.length, y = members.reduce((n, m) => n + m.position.y, 0) / members.length;
+  return { version: ENCOUNTER_CONTAINMENT_D11_2_VERSION, homeAnchor: { x, y }, memberHomesById: Object.fromEntries(members.map((m) => [m.entityId, copyWire(m.position)])), ...copyWire(definition.containment), mode: "guard", outsideTicks: 0, modeStartedTick: tick };
+};
+async function buildDefinedFunctionalSiteD10(state, site, binding, definition, { sha256, identityDomain = null, frozenSnapshot = null } = {}) {
+  const { package: pkg, template, groupSuffix } = definition;
+  requireContract(binding.packageId === pkg.packageId && binding.packageVersion === pkg.packageVersion && binding.contentHash === pkg.contentHash, "Missing or corrupt site package");
+  const token7 = async (key9) => bytesToHex((await hashBytes(frameUtf8([pkg.packageVersion, site.siteId, identityDomain === null ? key9 : identityDomain + "/" + key9]), sha256)).slice(0, 16));
+  const spaceInstanceId = "spi:" + await token7("space-instance"), logicalSpaceId = "spc:" + await token7("logical-space"), groupId = "site:" + site.siteId + ":" + groupSuffix;
+  const members = [], actors = [], entityIds = [];
+  for (let n = 0; n < template.encounter.members.length; n++) {
+    const spec = template.encounter.members[n], enemy = ORDINARY_ENEMIES.find((e) => e.family === spec.family);
+    requireContract(enemy, "Unknown site enemy");
+    const profile2 = worldOrdinaryMeleeProfile(state, resolveOrdinaryProfile(enemy, template.encounter.rank)), entityId2 = "ent:" + await token7("enemy-" + n);
+    entityIds.push(entityId2);
+    members.push({ entityId: entityId2, enemyDefinitionId: enemy.enemyDefinitionId, profileId: profile2.contentDefinitionId, position: { x: spec.x, y: spec.y } });
+  }
+  const episode = { ...unfrozenEpisodeD9("site-anchor:" + site.siteId, 0), geography: { chunkX: site.entrance.chunkX, chunkY: site.entrance.chunkY, anchorOrdinal: 0, minimumLevel: copyWire(siteMinimumLevelV1(state, site)), rank: template.encounter.rank } };
+  episode.snapshot = frozenSnapshot ? copyWire(frozenSnapshot) : prepareEpisodeSnapshotD9(episode, { tick: state.tick, minimumLevel: siteMinimumLevelV1(state, site), scale: siteScalesV1(state, site), participants: Object.values(state.playersById).map((p) => {
+    const a = state.entitiesById[p.entityId];
+    return { playerId: p.playerId, alive: a.alive, spaceInstanceId: a.residency.spaceInstanceId, position: copyWire(state.d9World.positions[a.entityId] ?? site.entrance), heroLevel: p.progression.level };
+  }), anchor: site.entrance, spaceInstanceId: state.overworldInstanceId, rank: template.encounter.rank, trigger: "activation" });
+  for (const member of members) {
+    const profile2 = worldOrdinaryMeleeProfile(state, state.content.definitionsById[member.profileId]), enemy = ORDINARY_ENEMIES.find((e) => e.enemyDefinitionId === member.enemyDefinitionId), stats = (hasWorldCombat(state) ? worldEnemyStats : threatEndpointsD9)(episode.snapshot.effectiveLevel, template.encounter.rank, enemy.budget);
+    actors.push({ entityId: member.entityId, contentDefinitionId: profile2.contentDefinitionId, kind: "actor", ownerCharacterId: null, team: "hostile", hp: combatInteger(stats.maxHp), maxHp: combatInteger(stats.maxHp), position: copyWire(member.position), hullRadius: profile2.hullRadius, combatRadius: profile2.combatRadius, movementIntent: { x: 0, y: 0 }, moveSpeed: profile2.moveSpeed, alive: true, attackDamage: combatInteger(stats.attackDamage), attackReach: profile2.attackReach, attackReachMode: profile2.attackReachMode, attackDelayTicks: profile2.attackDelayTicks, attackTimer: profile2.attackDelayTicks, nextAttackActionSequence: 1, movedLastTick: false, ai: actorAi(enemy.family, state.tick), residency: { spaceInstanceId, residencyRevision: 1 } });
+  }
+  const interior = { recipeVersion: pkg.packageVersion, siteId: site.siteId, logicalSpaceId, contentHash: pkg.contentHash, collision: copyWire(template.collision), entrance: copyWire(template.entrance), rooms: copyWire(template.rooms), decorations: copyWire(template.decorations), groupId, ...template.visual ? { visual: copyWire(template.visual) } : {} };
+  const functionalSite = { version: "functional-site-d9-v1", siteId: site.siteId, packageId: binding.packageId, packageVersion: binding.packageVersion, contentHash: binding.contentHash, label: template.label, siteKind: template.siteKind, socket: copyWire(site), spaceInstanceId, interior, conqueredTick: null };
+  const group = { groupId, siteId: site.siteId, spaceInstanceId, entityIds, cleared: false, lastRequiredTick: null, threatSnapshot: { version: D9_THREAT_VERSION, activatedTick: state.tick, levelsByEntityId: Object.fromEntries(entityIds.map((id) => [id, copyWire(episode.snapshot.effectiveLevel)])) }, threatReady: false, ...definition.containment ? { containment: containment(definition, members, state.tick) } : {} };
+  const economy = { episode: 0, startedTick: state.tick, eligibleReturn: 0, clearedTick: null, vacatedTick: null, usedResources: {}, contentDepth: copyWire(episode.snapshot.sourceDepth) };
+  const resource = { groupId, ordinal: 0, kind: "chest", art: "chest", position: copyWire(template.reward.position), spaceInstanceId, completion: true };
+  functionalSite.instanceHash = bytesToHex(await hashBytes(utf8(canonicalStringify({ functionalSite, group, economy, episode, actors, resource })), sha256));
+  return freezeWire({ functionalSite, space: { spaceId: logicalSpaceId, spaceInstanceId, spaceRevision: 1, collision: copyWire(interior.collision) }, group, economy, episode, actors, resource, members });
+}
+async function buildDefinedWorldCompoundD10(state, parcel2, binding, definition, { sha256 }) {
+  const site = parcel2.socket, { package: pkg, template, groupSuffix } = definition;
+  requireContract(template.placement === "overworld-compound" && site.siteId === parcel2.siteId && binding.packageId === pkg.packageId && binding.packageVersion === pkg.packageVersion && binding.contentHash === pkg.contentHash, "Invalid compound binding");
+  const token7 = async (key9) => bytesToHex((await hashBytes(frameUtf8([pkg.packageVersion, site.siteId, key9]), sha256)).slice(0, 16));
+  const spaceInstanceId = "spi:" + await token7("space-instance"), logicalSpaceId = "spc:" + await token7("logical-space"), groupId = "site:" + site.siteId + ":" + groupSuffix;
+  const members = [], actors = [], entityIds = [];
+  for (let n = 0; n < template.encounter.members.length; n++) {
+    const spec = template.encounter.members[n], enemy = ORDINARY_ENEMIES.find((e) => e.family === spec.family);
+    requireContract(enemy, "Unknown compound enemy");
+    const profile2 = worldOrdinaryMeleeProfile(state, resolveOrdinaryProfile(enemy, template.encounter.rank)), entityId2 = "ent:" + await token7("enemy-" + n), stats = threatEndpointsD9(site.minimumLevel, template.encounter.rank, enemy.budget), position2 = { x: spec.x, y: spec.y };
+    entityIds.push(entityId2);
+    members.push({ entityId: entityId2, enemyDefinitionId: enemy.enemyDefinitionId, profileId: profile2.contentDefinitionId, position: copyWire(position2) });
+    actors.push({ entityId: entityId2, contentDefinitionId: profile2.contentDefinitionId, kind: "actor", ownerCharacterId: null, team: "hostile", hp: combatInteger(stats.maxHp), maxHp: combatInteger(stats.maxHp), position: copyWire(position2), hullRadius: profile2.hullRadius, combatRadius: profile2.combatRadius, movementIntent: { x: 0, y: 0 }, moveSpeed: profile2.moveSpeed, alive: true, attackDamage: combatInteger(stats.attackDamage), attackReach: profile2.attackReach, attackReachMode: profile2.attackReachMode, attackDelayTicks: profile2.attackDelayTicks, attackTimer: profile2.attackDelayTicks, nextAttackActionSequence: 1, movedLastTick: false, ai: actorAi(spec.family, state.tick), residency: { spaceInstanceId: state.overworldInstanceId, residencyRevision: 1 } });
+  }
+  const episode = { ...unfrozenEpisodeD9("site-anchor:" + site.siteId, 0), geography: { chunkX: site.entrance.chunkX, chunkY: site.entrance.chunkY, anchorOrdinal: 0, minimumLevel: copyWire(site.minimumLevel), rank: template.encounter.rank } };
+  const group = { groupId, siteId: site.siteId, spaceInstanceId: state.overworldInstanceId, entityIds, cleared: false, lastRequiredTick: null, threatSnapshot: { version: D9_THREAT_VERSION, activatedTick: state.tick, levelsByEntityId: Object.fromEntries(entityIds.map((id) => [id, copyWire(site.minimumLevel)])) }, threatReady: false, ...definition.containment ? { containment: containment(definition, members, state.tick) } : {} };
+  const economy = { episode: 0, startedTick: state.tick, eligibleReturn: 0, clearedTick: null, vacatedTick: null, usedResources: {}, contentDepth: copyWire(site.minimumLevel) };
+  const resource = { groupId, ordinal: 0, kind: "chest", art: "chest", position: copyWire(template.reward.position), spaceInstanceId: state.overworldInstanceId, completion: true };
+  const definitionRow = { groupId, regionId: "d9-region:" + site.region.regionX + "," + site.region.regionY, anchor: { x: template.keepDoor.x, y: template.keepDoor.y + 128 }, members: copyWire(members) };
+  const interior = { recipeVersion: pkg.packageVersion, siteId: site.siteId, logicalSpaceId, contentHash: pkg.contentHash, collision: copyWire(template.keep.collision), entrance: copyWire(template.keep.entrance), rooms: [{ roomId: "keep", role: "arrival", x: 1, y: 1, width: 12, height: 10 }], decorations: copyWire(template.keep.visual.decorations ?? []), groupId, visual: copyWire(template.keep.visual) };
+  const functionalSite = { version: "functional-site-d10-compound-v1", siteId: site.siteId, packageId: binding.packageId, packageVersion: binding.packageVersion, contentHash: binding.contentHash, label: template.label, siteKind: template.siteKind, socket: copyWire(site), spaceInstanceId, interior, compound: copyWire(parcel2), initial: { group, economy, episode, actors, resource, definition: definitionRow }, conqueredTick: null };
+  functionalSite.instanceHash = bytesToHex(await hashBytes(utf8(canonicalStringify(functionalSite)), sha256));
+  return freezeWire({ functionalSite, space: { spaceId: logicalSpaceId, spaceInstanceId, spaceRevision: 1, collision: copyWire(interior.collision) } });
+}
+
+// src/shared/content/woodland_cave_d10.js
+var WOODLAND_CAVE_PACKAGE_ID = "woodland-cave";
+var WOODLAND_CAVE_VERSION = "woodland-cave-d10-2-v1";
+var WOODLAND_CAVE_CONTENT_HASH = "a01314559a5a07e22ba47688b59047f5274314c3ad5188c0fd9e67cd4baaf16b";
+var WOODLAND_CAVE_PACKAGE = freezeWire({ packageId: WOODLAND_CAVE_PACKAGE_ID, packageVersion: WOODLAND_CAVE_VERSION, contentHash: WOODLAND_CAVE_CONTENT_HASH, siteClass: "dungeon", capabilities: ["interior"], biomes: ["woodland"], minimumLevel: 1, maximumLevel: null, repeatable: false, unique: true, reservedSiteId: null });
+var W = 28;
+var H = 20;
+var tiles = Array.from({ length: H }, () => Array(W).fill("0"));
+var zones = [
+  [[9, 3], [14, 3], [17, 5], [19, 7], [18, 9], [19, 11], [17, 13], [15, 15], [11, 14], [8, 15], [6, 13], [4, 12], [3, 9], [5, 7], [6, 5]],
+  [[13, 18.9], [16, 18.9], [16, 17.2], [15.3, 16.1], [17, 14.3], [15.5, 13.2], [13, 14], [12, 15.6], [13, 17]],
+  [[16.5, 6.8], [21.7, 6.5], [22.1, 9.7], [17.2, 10.2]],
+  [[22, 3.8], [25, 4.2], [27, 6], [26.5, 9.5], [24.7, 11], [21.2, 10.3], [20.4, 8], [21, 5.5]]
+];
+var inside = (x, y, p) => {
+  let yes = false;
+  for (let i = 0, j = p.length - 1; i < p.length; j = i++) if (p[i][1] > y !== p[j][1] > y && x < (p[j][0] - p[i][0]) * (y - p[i][1]) / (p[j][1] - p[i][1]) + p[i][0]) yes = !yes;
+  return yes;
+};
+for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) if (zones.some((p) => inside(x + 0.5, y + 0.5, p))) tiles[y][x] = "1";
+tiles[9][8] = "0";
+tiles[6][16] = "0";
+var rows = tiles.map((r) => r.join(""));
+var decorations = [
+  { kind: "cave-light-shaft", x: 14.5, y: 17.4, variant: 0 },
+  { kind: "cave-glow-mushrooms", x: 6.4, y: 11.5, variant: 0 },
+  { kind: "cave-glow-mushrooms", x: 15.7, y: 5.4, variant: 1 },
+  { kind: "cave-glow-mushrooms", x: 25, y: 9.2, variant: 2 },
+  { kind: "cave-stalagmites", x: 5.7, y: 8, variant: 0 },
+  { kind: "cave-stalagmites", x: 16.2, y: 12, variant: 1 },
+  { kind: "cave-stalactites", x: 11.8, y: 4, variant: 0 },
+  { kind: "cave-rubble", x: 9.5, y: 13, variant: 0 },
+  { kind: "cave-wall-roots", x: 18.35, y: 10.7, variant: 0 },
+  { kind: "cave-remains", x: 20.8, y: 8.8, variant: 0 },
+  { kind: "cave-mineral-deposit", x: 8.25, y: 9.15, variant: 0 },
+  { kind: "cave-reward-nook", x: 23.5, y: 7.25, variant: 0 }
+];
+var WOODLAND_CAVE_EXTERIOR = freezeWire({ width: 12, height: 9, entranceTile: { x: 5, y: 3 }, collision: [
+  "000000000000",
+  "000000000000",
+  "000000000000",
+  "000001100000",
+  "000001100000",
+  "011111111110",
+  "111111111111",
+  "111111111111",
+  "111111111111"
+], terrain: ["rrrrrrrrrrrr", "rrrrrrrrrrrr", "rrrrrpprrrrr", "rrrrpppprrrr", "ggrrpppprrgg", "gggrpppprggg", "gggrrppprggg", "ggggrpppgggg", "gggggppggggg"], blockers: [
+  { kind: "cave-rock-wall", detail: "back-cliff", x: 0, y: 0, width: 12, height: 2 },
+  { kind: "cave-rock-wall", detail: "mouth-backstop", x: 5, y: 2, width: 2, height: 1 },
+  { kind: "cave-rock-wall", detail: "left-mouth", x: 0, y: 2, width: 5, height: 2 },
+  { kind: "cave-rock-wall", detail: "right-mouth", x: 7, y: 2, width: 5, height: 2 },
+  { kind: "cave-rock-wall", detail: "left-shoulder", x: 0, y: 4, width: 5, height: 1 },
+  { kind: "cave-rock-wall", detail: "right-shoulder-log", x: 7, y: 4, width: 5, height: 1 },
+  { kind: "cave-rock-wall", detail: "left-edge", x: 0, y: 5, width: 1, height: 1 },
+  { kind: "cave-rock-wall", detail: "right-edge", x: 11, y: 5, width: 1, height: 1 }
+], decorations: [{ kind: "cave-mouth", x: 5.5, y: 3.55, variant: 0 }, { kind: "cave-shrub", x: 1.35, y: 6.35, variant: 0 }, { kind: "cave-shrub", x: 10.35, y: 6.05, variant: 1 }, { kind: "cave-roots-exterior", x: 8.55, y: 3.7, variant: 0 }, { kind: "cave-vines-exterior", x: 2.25, y: 3.15, variant: 0 }, { kind: "cave-grass-tuft", x: 3.45, y: 6.5, variant: 0 }, { kind: "cave-grass-tuft", x: 8.25, y: 6.85, variant: 1 }, { kind: "cave-trail-stones", x: 5.9, y: 6.55, variant: 0 }] });
+var WOODLAND_CAVE_TEMPLATE = freezeWire({
+  version: WOODLAND_CAVE_VERSION,
+  label: "Woodland Cave",
+  siteKind: "woodland-cave",
+  collision: { tileSize: 32, width: W, height: H, tiles: [...rows] },
+  entrance: { x: 464, y: 592 },
+  rooms: [{ roomId: "entrance-passage", role: "arrival", x: 12, y: 13, width: 6, height: 6 }, { roomId: "main-cavern", role: "encounter", x: 3, y: 3, width: 17, height: 13 }, { roomId: "reward-pocket", role: "reward", x: 20, y: 4, width: 7, height: 8 }],
+  decorations: decorations.map((d) => ({ ...d })),
+  visual: { originTile: { x: 0, y: 0 }, terrain: [...rows], blockers: [], decorations: decorations.map((d) => ({ ...d })) },
+  encounter: { rank: "C", members: [{ family: "golem", x: 352, y: 288 }, { family: "slime", x: 496, y: 288 }, { family: "sprout", x: 416, y: 384 }] },
+  reward: { kind: "chest", art: "chest", position: { x: 752, y: 256 } }
+});
+var WOODLAND_CAVE_DEFINITION = freezeWire({ package: WOODLAND_CAVE_PACKAGE, template: WOODLAND_CAVE_TEMPLATE, groupSuffix: "hollow-depths" });
+var buildWoodlandCaveD10 = (state, site, binding, options) => buildDefinedFunctionalSiteD10(state, site, binding, WOODLAND_CAVE_DEFINITION, options);
+
+// src/shared/content/site_families_d12.js
+var SITE_FAMILY_DEFINITION_D12 = "site-family-definition-d12-v1";
+var WOODLAND_CAVE_FAMILY_ID = "family:woodland-cave-d12";
+var WOODLAND_CAVE_FAMILY_VERSION = "woodland-cave-family-d12-v1";
+var WOODLAND_CAVE_GENERATOR_VERSION = "woodland-cave-generator-d12-v1";
+var WOODLAND_CAVE_MODULE_CATALOG_VERSION = "woodland-cave-modules-d12-v1";
+var WOODLAND_CAVE_FAMILY_CONTENT_HASH = "9088fb632063a7d4416a52ff0456b33cddd11bd85e26e11b7cf3c2d7931ab01b";
+var WOODLAND_CAVE_FAMILY_PACKAGE_ID = "woodland-cave-family";
+var WOODLAND_CAVE_MODULE_ROLES = freezeWire([
+  "arrival",
+  "encounter",
+  "small-chamber",
+  "large-chamber",
+  "straight-tunnel",
+  "turning-tunnel",
+  "junction",
+  "loop",
+  "reward-dead-end",
+  "stairs-down",
+  "stairs-up",
+  "final-reward"
+]);
+var WOODLAND_CAVE_FAMILY_D12 = freezeWire({
+  version: SITE_FAMILY_DEFINITION_D12,
+  familyId: WOODLAND_CAVE_FAMILY_ID,
+  familyVersion: WOODLAND_CAVE_FAMILY_VERSION,
+  siteKind: "woodland-cave",
+  visualKey: "d10.2.1-woodland-cave",
+  label: "Woodland Cave",
+  biomes: ["woodland"],
+  placement: { kind: "road-connected-exterior", footprint: { width: WOODLAND_CAVE_EXTERIOR.width, height: WOODLAND_CAVE_EXTERIOR.height }, exteriorVersion: "woodland-cave-d10-2-v1" },
+  generatorVersion: WOODLAND_CAVE_GENERATOR_VERSION,
+  moduleCatalogVersion: WOODLAND_CAVE_MODULE_CATALOG_VERSION,
+  tiers: [
+    { tier: "small", weight: 34, floors: [1, 1], rooms: [4, 5], threat: [2, 3], rewardBudget: 1 },
+    { tier: "standard", weight: 38, floors: [1, 2], rooms: [5, 7], threat: [2, 4], rewardBudget: 2 },
+    { tier: "large", weight: 22, floors: [2, 3], rooms: [7, 9], threat: [3, 5], rewardBudget: 3 },
+    { tier: "deep", weight: 6, floors: [3, 4], rooms: [8, 10], threat: [3, 5], rewardBudget: 4 }
+  ],
+  encounterPolicy: { rank: "C", families: ["rust_nibbler", "slime", "sprout", "golem"], maximumMembersPerFloor: 5 },
+  rewardPolicy: { kind: "chest", art: "chest", completion: true },
+  supportedModuleRoles: WOODLAND_CAVE_MODULE_ROLES,
+  source: { milestone: "D12", reference: "D10.2.1 Woodland Cave", provenance: "World-owned deterministic hybrid cave modules" }
+});
+var WOODLAND_CAVE_FAMILY_PACKAGE_D12 = freezeWire({
+  packageId: WOODLAND_CAVE_FAMILY_PACKAGE_ID,
+  packageVersion: WOODLAND_CAVE_FAMILY_VERSION,
+  contentHash: WOODLAND_CAVE_FAMILY_CONTENT_HASH,
+  siteClass: "dungeon",
+  capabilities: ["interior"],
+  biomes: ["woodland"],
+  minimumLevel: 1,
+  maximumLevel: null,
+  repeatable: true,
+  unique: false,
+  reservedSiteId: null
+});
+
+// src/shared/content/corrosive_shedding_v4.js
+var CORROSIVE_SHEDDING_V4 = Object.freeze({ version: 4, stepPercent: 8, maxLive: 6, maxDamageSheds: 12, maxLiveSlag: 2, slagEveryChunks: 3, flightTicks: 18, coalescenceTicks: 12 });
+
+// src/shared/content/recovered_boss_catalog_v4.js
+var RECOVERED_BOSSES2 = Object.freeze({ ...RECOVERED_BOSSES, corrosive_abomination: Object.freeze({ ...RECOVERED_BOSSES.corrosive_abomination, adds: CORROSIVE_SHEDDING_V4.maxDamageSheds, sheddingPolicy: 4 }), ...BIOME_BOSSES_V1 });
+var recoveredBossForId = (id) => RECOVERED_BOSSES2[id] ?? null;
+function recoveredBossForReservation2(reservationId, family2, index, floorCount, enabled2 = true) {
+  const row = recoveredBossForReservation(reservationId, family2, index, floorCount, enabled2);
+  if (row) return recoveredBossForId(row.id);
+  if (!enabled2 || !Number.isInteger(index) || index !== floorCount - 1) return null;
+  const native = BIOME_BOSSES_V1[bossAtSiteV1(reservationId)];
+  return native?.family === family2 ? native : null;
+}
+
+// src/shared/content/wilderness_v2.js
+var WILDERNESS_VERSION = "wilderness-distribution-v2-native";
+var WILDERNESS_HASH = "ed2f7fcafeac4305b6658242d232d8d79dade9ecb6b43ea74125fc1318cc282f";
+var WILDERNESS_SITE_SELECTIONS = freezeWire([{ "id": "repeatable-slot:cave:grassland:small:031", "anchor": { "key": "65,134", "x": 65, "y": 134 }, "familyId": "site-family:cave", "tier": "small", "band": 2, "footprint": [{ "x": 131, "y": 269 }], "approach": [{ "x": 132, "y": 269 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:fort:upland:standard:032", "anchor": { "key": "71,10", "x": 71, "y": 10 }, "familyId": "site-family:fort", "tier": "standard", "band": 4, "footprint": [{ "x": 143, "y": 21 }, { "x": 144, "y": 21 }, { "x": 143, "y": 22 }, { "x": 144, "y": 22 }, { "x": 143, "y": 23 }, { "x": 144, "y": 23 }], "approach": [{ "x": 145, "y": 22 }, { "x": 146, "y": 22 }], "landmassId": "landmass:medium-island:d14l1a:04:961b5a82", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:wetland:standard:033", "anchor": { "key": "34,34", "x": 34, "y": 34 }, "familyId": "site-family:ruin", "tier": "standard", "band": 3, "footprint": [{ "x": 69, "y": 69 }, { "x": 70, "y": 69 }, { "x": 69, "y": 70 }, { "x": 70, "y": 70 }], "approach": [{ "x": 71, "y": 69 }, { "x": 72, "y": 69 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:cave:woodland:small:034", "anchor": { "key": "116,61", "x": 116, "y": 61 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 233, "y": 123 }], "approach": [{ "x": 234, "y": 123 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:cave:volcanic:small:035", "anchor": { "key": "80,38", "x": 80, "y": 38 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 161, "y": 77 }], "approach": [{ "x": 162, "y": 77 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:036", "anchor": { "key": "71,99", "x": 71, "y": 99 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 143, "y": 199 }], "approach": [{ "x": 144, "y": 199 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:ruin:tropical:standard:037", "anchor": { "key": "117,110", "x": 117, "y": 110 }, "familyId": "site-family:ruin", "tier": "standard", "band": 5, "footprint": [{ "x": 234, "y": 221 }, { "x": 235, "y": 221 }, { "x": 234, "y": 222 }, { "x": 235, "y": 222 }], "approach": [{ "x": 236, "y": 221 }, { "x": 237, "y": 221 }], "landmassId": "landmass:medium-island:d14l1a:03:c2624ecc", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:crypt:frostland:small:038", "anchor": { "key": "61,99", "x": 61, "y": 99 }, "familyId": "site-family:crypt", "tier": "small", "band": 3, "footprint": [{ "x": 123, "y": 199 }], "approach": [{ "x": 124, "y": 199 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:cave:upland:small:039", "anchor": { "key": "55,111", "x": 55, "y": 111 }, "familyId": "site-family:cave", "tier": "small", "band": 2, "footprint": [{ "x": 111, "y": 223 }], "approach": [{ "x": 112, "y": 223 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:fort:grassland:standard:040", "anchor": { "key": "37,47", "x": 37, "y": 47 }, "familyId": "site-family:fort", "tier": "standard", "band": 4, "footprint": [{ "x": 75, "y": 95 }, { "x": 76, "y": 95 }, { "x": 75, "y": 96 }, { "x": 76, "y": 96 }, { "x": 75, "y": 97 }, { "x": 76, "y": 97 }], "approach": [{ "x": 77, "y": 96 }, { "x": 78, "y": 96 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:041", "anchor": { "key": "45,85", "x": 45, "y": 85 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 91, "y": 171 }], "approach": [{ "x": 92, "y": 171 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:cave:wetland:small:042", "anchor": { "key": "39,71", "x": 39, "y": 71 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 79, "y": 143 }], "approach": [{ "x": 80, "y": 143 }], "landmassId": "landmass:medium-island:d14l1a:01:83c7b775", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:cave:volcanic:small:043", "anchor": { "key": "86,33", "x": 86, "y": 33 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 173, "y": 67 }], "approach": [{ "x": 174, "y": 67 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:fort:frostland:standard:044", "anchor": { "key": "111,90", "x": 111, "y": 90 }, "familyId": "site-family:fort", "tier": "standard", "band": 3, "footprint": [{ "x": 223, "y": 181 }, { "x": 224, "y": 181 }, { "x": 223, "y": 182 }, { "x": 224, "y": 182 }, { "x": 223, "y": 183 }, { "x": 224, "y": 183 }], "approach": [{ "x": 225, "y": 182 }, { "x": 226, "y": 182 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:cave:woodland:small:045", "anchor": { "key": "45,108", "x": 45, "y": 108 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 90, "y": 217 }], "approach": [{ "x": 91, "y": 217 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:046", "anchor": { "key": "54,98", "x": 54, "y": 98 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 109, "y": 197 }], "approach": [{ "x": 110, "y": 197 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:crypt:tropical:small:047", "anchor": { "key": "51,29", "x": 51, "y": 29 }, "familyId": "site-family:crypt", "tier": "small", "band": 3, "footprint": [{ "x": 103, "y": 59 }], "approach": [{ "x": 104, "y": 59 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:fort:grassland:standard:048", "anchor": { "key": "81,114", "x": 81, "y": 114 }, "familyId": "site-family:fort", "tier": "standard", "band": 3, "footprint": [{ "x": 163, "y": 229 }, { "x": 164, "y": 229 }, { "x": 163, "y": 230 }, { "x": 164, "y": 230 }, { "x": 163, "y": 231 }, { "x": 164, "y": 231 }], "approach": [{ "x": 165, "y": 230 }, { "x": 166, "y": 230 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:upland:standard:049", "anchor": { "key": "55,119", "x": 55, "y": 119 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 111, "y": 239 }, { "x": 112, "y": 239 }, { "x": 111, "y": 240 }, { "x": 112, "y": 240 }], "approach": [{ "x": 113, "y": 239 }, { "x": 114, "y": 239 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:cave:frostland:small:050", "anchor": { "key": "117,86", "x": 117, "y": 86 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 235, "y": 173 }], "approach": [{ "x": 236, "y": 173 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:cave:tropical:small:051", "anchor": { "key": "51,39", "x": 51, "y": 39 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 103, "y": 79 }], "approach": [{ "x": 104, "y": 79 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:ruin:volcanic:standard:052", "anchor": { "key": "78,46", "x": 78, "y": 46 }, "familyId": "site-family:ruin", "tier": "standard", "band": 3, "footprint": [{ "x": 157, "y": 93 }, { "x": 158, "y": 93 }, { "x": 157, "y": 94 }, { "x": 158, "y": 94 }], "approach": [{ "x": 159, "y": 93 }, { "x": 160, "y": 93 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:fort:grassland:standard:053", "anchor": { "key": "85,108", "x": 85, "y": 108 }, "familyId": "site-family:fort", "tier": "standard", "band": 3, "footprint": [{ "x": 171, "y": 217 }, { "x": 172, "y": 217 }, { "x": 171, "y": 218 }, { "x": 172, "y": 218 }, { "x": 171, "y": 219 }, { "x": 172, "y": 219 }], "approach": [{ "x": 173, "y": 218 }, { "x": 174, "y": 218 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:woodland:standard:054", "anchor": { "key": "25,119", "x": 25, "y": 119 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 51, "y": 239 }, { "x": 52, "y": 239 }, { "x": 51, "y": 240 }, { "x": 52, "y": 240 }], "approach": [{ "x": 53, "y": 239 }, { "x": 54, "y": 239 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:cave:woodland:small:055", "anchor": { "key": "66,4", "x": 66, "y": 4 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 132, "y": 9 }], "approach": [{ "x": 133, "y": 9 }], "landmassId": "landmass:medium-island:d14l1a:04:961b5a82", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:desert:standard:056", "anchor": { "key": "116,32", "x": 116, "y": 32 }, "familyId": "site-family:ruin", "tier": "standard", "band": 4, "footprint": [{ "x": 233, "y": 65 }, { "x": 234, "y": 65 }, { "x": 233, "y": 66 }, { "x": 234, "y": 66 }], "approach": [{ "x": 235, "y": 65 }, { "x": 236, "y": 65 }], "landmassId": "landmass:medium-island:d14l1a:02:799115ea", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:ruin:upland:standard:057", "anchor": { "key": "96,35", "x": 96, "y": 35 }, "familyId": "site-family:ruin", "tier": "standard", "band": 4, "footprint": [{ "x": 193, "y": 71 }, { "x": 194, "y": 71 }, { "x": 193, "y": 72 }, { "x": 194, "y": 72 }], "approach": [{ "x": 195, "y": 71 }, { "x": 196, "y": 71 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:woodland:standard:058", "anchor": { "key": "39,110", "x": 39, "y": 110 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 79, "y": 221 }, { "x": 80, "y": 221 }, { "x": 79, "y": 222 }, { "x": 80, "y": 222 }], "approach": [{ "x": 81, "y": 221 }, { "x": 82, "y": 221 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:crypt:frostland:small:059", "anchor": { "key": "63,85", "x": 63, "y": 85 }, "familyId": "site-family:crypt", "tier": "small", "band": 3, "footprint": [{ "x": 127, "y": 171 }], "approach": [{ "x": 128, "y": 171 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:cave:grassland:small:060", "anchor": { "key": "94,43", "x": 94, "y": 43 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 189, "y": 87 }], "approach": [{ "x": 190, "y": 87 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:fort:volcanic:standard:061", "anchor": { "key": "32,99", "x": 32, "y": 99 }, "familyId": "site-family:fort", "tier": "standard", "band": 2, "footprint": [{ "x": 64, "y": 198 }, { "x": 65, "y": 198 }, { "x": 64, "y": 199 }, { "x": 65, "y": 199 }, { "x": 64, "y": 200 }, { "x": 65, "y": 200 }], "approach": [{ "x": 66, "y": 199 }, { "x": 67, "y": 199 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:crypt:frostland:small:062", "anchor": { "key": "110,80", "x": 110, "y": 80 }, "familyId": "site-family:crypt", "tier": "small", "band": 4, "footprint": [{ "x": 221, "y": 161 }], "approach": [{ "x": 222, "y": 161 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:cave:wetland:small:063", "anchor": { "key": "38,29", "x": 38, "y": 29 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 76, "y": 59 }], "approach": [{ "x": 77, "y": 59 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:fort:grassland:standard:064", "anchor": { "key": "91,105", "x": 91, "y": 105 }, "familyId": "site-family:fort", "tier": "standard", "band": 3, "footprint": [{ "x": 183, "y": 211 }, { "x": 184, "y": 211 }, { "x": 183, "y": 212 }, { "x": 184, "y": 212 }, { "x": 183, "y": 213 }, { "x": 184, "y": 213 }], "approach": [{ "x": 185, "y": 212 }, { "x": 186, "y": 212 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:fort:frostland:standard:065", "anchor": { "key": "28,80", "x": 28, "y": 80 }, "familyId": "site-family:fort", "tier": "standard", "band": 4, "footprint": [{ "x": 56, "y": 161 }, { "x": 57, "y": 161 }, { "x": 56, "y": 162 }, { "x": 57, "y": 162 }, { "x": 56, "y": 163 }, { "x": 57, "y": 163 }], "approach": [{ "x": 58, "y": 162 }, { "x": 59, "y": 162 }], "landmassId": "landmass:medium-island:d14l1a:01:83c7b775", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:upland:standard:066", "anchor": { "key": "59,130", "x": 59, "y": 130 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 119, "y": 260 }, { "x": 120, "y": 260 }, { "x": 119, "y": 261 }, { "x": 120, "y": 261 }], "approach": [{ "x": 121, "y": 260 }, { "x": 122, "y": 260 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:wetland:standard:067", "anchor": { "key": "32,46", "x": 32, "y": 46 }, "familyId": "site-family:ruin", "tier": "standard", "band": 4, "footprint": [{ "x": 65, "y": 93 }, { "x": 66, "y": 93 }, { "x": 65, "y": 94 }, { "x": 66, "y": 94 }], "approach": [{ "x": 67, "y": 93 }, { "x": 68, "y": 93 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:cave:volcanic:small:068", "anchor": { "key": "124,41", "x": 124, "y": 41 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 249, "y": 83 }], "approach": [{ "x": 250, "y": 83 }], "landmassId": "landmass:medium-island:d14l1a:02:799115ea", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:069", "anchor": { "key": "78,102", "x": 78, "y": 102 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 156, "y": 205 }], "approach": [{ "x": 157, "y": 205 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:fort:upland:standard:070", "anchor": { "key": "51,105", "x": 51, "y": 105 }, "familyId": "site-family:fort", "tier": "standard", "band": 3, "footprint": [{ "x": 103, "y": 211 }, { "x": 104, "y": 211 }, { "x": 103, "y": 212 }, { "x": 104, "y": 212 }, { "x": 103, "y": 213 }, { "x": 104, "y": 213 }], "approach": [{ "x": 105, "y": 212 }, { "x": 106, "y": 212 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:tropical:standard:071", "anchor": { "key": "119,50", "x": 119, "y": 50 }, "familyId": "site-family:ruin", "tier": "standard", "band": 4, "footprint": [{ "x": 239, "y": 101 }, { "x": 240, "y": 101 }, { "x": 239, "y": 102 }, { "x": 240, "y": 102 }], "approach": [{ "x": 241, "y": 101 }, { "x": 242, "y": 101 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:fort:volcanic:standard:072", "anchor": { "key": "80,65", "x": 80, "y": 65 }, "familyId": "site-family:fort", "tier": "standard", "band": 4, "footprint": [{ "x": 161, "y": 131 }, { "x": 162, "y": 131 }, { "x": 161, "y": 132 }, { "x": 162, "y": 132 }, { "x": 161, "y": 133 }, { "x": 162, "y": 133 }], "approach": [{ "x": 163, "y": 132 }, { "x": 164, "y": 132 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:ruin:grassland:standard:073", "anchor": { "key": "108,112", "x": 108, "y": 112 }, "familyId": "site-family:ruin", "tier": "standard", "band": 5, "footprint": [{ "x": 217, "y": 225 }, { "x": 218, "y": 225 }, { "x": 217, "y": 226 }, { "x": 218, "y": 226 }], "approach": [{ "x": 219, "y": 225 }, { "x": 220, "y": 225 }], "landmassId": "landmass:medium-island:d14l1a:03:c2624ecc", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:crypt:wetland:small:074", "anchor": { "key": "46,42", "x": 46, "y": 42 }, "familyId": "site-family:crypt", "tier": "small", "band": 3, "footprint": [{ "x": 93, "y": 85 }], "approach": [{ "x": 94, "y": 85 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:grassland:standard:075", "anchor": { "key": "71,135", "x": 71, "y": 135 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 143, "y": 271 }, { "x": 144, "y": 271 }, { "x": 143, "y": 272 }, { "x": 144, "y": 272 }], "approach": [{ "x": 145, "y": 271 }, { "x": 146, "y": 271 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:woodland:standard:076", "anchor": { "key": "65,140", "x": 65, "y": 140 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 130, "y": 281 }, { "x": 131, "y": 281 }, { "x": 130, "y": 282 }, { "x": 131, "y": 282 }], "approach": [{ "x": 132, "y": 281 }, { "x": 133, "y": 281 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:077", "anchor": { "key": "67,103", "x": 67, "y": 103 }, "familyId": "site-family:cave", "tier": "small", "band": 2, "footprint": [{ "x": 135, "y": 207 }], "approach": [{ "x": 136, "y": 207 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:ruin:desert:standard:078", "anchor": { "key": "76,31", "x": 76, "y": 31 }, "familyId": "site-family:ruin", "tier": "standard", "band": 3, "footprint": [{ "x": 153, "y": 63 }, { "x": 154, "y": 63 }, { "x": 153, "y": 64 }, { "x": 154, "y": 64 }], "approach": [{ "x": 155, "y": 63 }, { "x": 156, "y": 63 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:ruin:tropical:standard:079", "anchor": { "key": "40,36", "x": 40, "y": 36 }, "familyId": "site-family:ruin", "tier": "standard", "band": 3, "footprint": [{ "x": 80, "y": 73 }, { "x": 81, "y": 73 }, { "x": 80, "y": 74 }, { "x": 81, "y": 74 }], "approach": [{ "x": 82, "y": 73 }, { "x": 83, "y": 73 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:cave:frostland:small:080", "anchor": { "key": "121,71", "x": 121, "y": 71 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 242, "y": 143 }], "approach": [{ "x": 243, "y": 143 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:tropical:standard:081", "anchor": { "key": "42,127", "x": 42, "y": 127 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 85, "y": 255 }, { "x": 86, "y": 255 }, { "x": 85, "y": 256 }, { "x": 86, "y": 256 }], "approach": [{ "x": 87, "y": 255 }, { "x": 88, "y": 255 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:ruin:upland:standard:082", "anchor": { "key": "50,112", "x": 50, "y": 112 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 101, "y": 225 }, { "x": 102, "y": 225 }, { "x": 101, "y": 226 }, { "x": 102, "y": 226 }], "approach": [{ "x": 103, "y": 225 }, { "x": 104, "y": 225 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:cave:woodland:small:083", "anchor": { "key": "57,10", "x": 57, "y": 10 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 115, "y": 21 }], "approach": [{ "x": 116, "y": 21 }], "landmassId": "landmass:medium-island:d14l1a:04:961b5a82", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:wetland:standard:084", "anchor": { "key": "65,152", "x": 65, "y": 152 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 131, "y": 305 }, { "x": 132, "y": 305 }, { "x": 131, "y": 306 }, { "x": 132, "y": 306 }], "approach": [{ "x": 133, "y": 305 }, { "x": 134, "y": 305 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:cave:volcanic:small:085", "anchor": { "key": "110,41", "x": 110, "y": 41 }, "familyId": "site-family:cave", "tier": "small", "band": 4, "footprint": [{ "x": 221, "y": 83 }], "approach": [{ "x": 222, "y": 83 }], "landmassId": "landmass:medium-island:d14l1a:02:799115ea", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:ruin:wetland:standard:086", "anchor": { "key": "71,152", "x": 71, "y": 152 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 143, "y": 305 }, { "x": 144, "y": 305 }, { "x": 143, "y": 306 }, { "x": 144, "y": 306 }], "approach": [{ "x": 145, "y": 305 }, { "x": 146, "y": 305 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:tropical:standard:087", "anchor": { "key": "125,61", "x": 125, "y": 61 }, "familyId": "site-family:ruin", "tier": "standard", "band": 4, "footprint": [{ "x": 251, "y": 123 }, { "x": 252, "y": 123 }, { "x": 251, "y": 124 }, { "x": 252, "y": 124 }], "approach": [{ "x": 253, "y": 123 }, { "x": 254, "y": 123 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:ruin:upland:standard:088", "anchor": { "key": "48,92", "x": 48, "y": 92 }, "familyId": "site-family:ruin", "tier": "standard", "band": 3, "footprint": [{ "x": 96, "y": 185 }, { "x": 97, "y": 185 }, { "x": 96, "y": 186 }, { "x": 97, "y": 186 }], "approach": [{ "x": 98, "y": 185 }, { "x": 99, "y": 185 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:cave:woodland:small:089", "anchor": { "key": "46,139", "x": 46, "y": 139 }, "familyId": "site-family:cave", "tier": "small", "band": 1, "footprint": [{ "x": 93, "y": 279 }], "approach": [{ "x": 94, "y": 279 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:crypt:wetland:small:090", "anchor": { "key": "22,70", "x": 22, "y": 70 }, "familyId": "site-family:crypt", "tier": "small", "band": 4, "footprint": [{ "x": 45, "y": 141 }], "approach": [{ "x": 46, "y": 141 }], "landmassId": "landmass:medium-island:d14l1a:01:83c7b775", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:volcanic:standard:091", "anchor": { "key": "74,61", "x": 74, "y": 61 }, "familyId": "site-family:ruin", "tier": "standard", "band": 4, "footprint": [{ "x": 149, "y": 123 }, { "x": 150, "y": 123 }, { "x": 149, "y": 124 }, { "x": 150, "y": 124 }], "approach": [{ "x": 151, "y": 123 }, { "x": 152, "y": 123 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "volcanic", "added": true, "old": false }, { "id": "repeatable-slot:cave:frostland:small:092", "anchor": { "key": "61,78", "x": 61, "y": 78 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 123, "y": 157 }], "approach": [{ "x": 124, "y": 157 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:desert:standard:093", "anchor": { "key": "62,108", "x": 62, "y": 108 }, "familyId": "site-family:ruin", "tier": "standard", "band": 3, "footprint": [{ "x": 125, "y": 216 }, { "x": 126, "y": 216 }, { "x": 125, "y": 217 }, { "x": 126, "y": 217 }], "approach": [{ "x": 127, "y": 216 }, { "x": 128, "y": 216 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:crypt:tropical:small:094", "anchor": { "key": "72,40", "x": 72, "y": 40 }, "familyId": "site-family:crypt", "tier": "small", "band": 3, "footprint": [{ "x": 145, "y": 81 }], "approach": [{ "x": 146, "y": 81 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "tropical", "added": true, "old": false }, { "id": "repeatable-slot:fort:grassland:standard:095", "anchor": { "key": "75,124", "x": 75, "y": 124 }, "familyId": "site-family:fort", "tier": "standard", "band": 3, "footprint": [{ "x": 151, "y": 248 }, { "x": 152, "y": 248 }, { "x": 151, "y": 249 }, { "x": 152, "y": 249 }, { "x": 151, "y": 250 }, { "x": 152, "y": 250 }], "approach": [{ "x": 153, "y": 249 }, { "x": 154, "y": 249 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "grassland", "added": true, "old": false }, { "id": "repeatable-slot:crypt:woodland:small:096", "anchor": { "key": "31,124", "x": 31, "y": 124 }, "familyId": "site-family:crypt", "tier": "small", "band": 2, "footprint": [{ "x": 63, "y": 249 }], "approach": [{ "x": 64, "y": 249 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:cave:frostland:small:097", "anchor": { "key": "118,95", "x": 118, "y": 95 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 237, "y": 190 }], "approach": [{ "x": 238, "y": 190 }], "landmassId": "landmass:major-island:d14l1a:03:578d626c", "biome": "frostland", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:098", "anchor": { "key": "55,104", "x": 55, "y": 104 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 111, "y": 209 }], "approach": [{ "x": 112, "y": 209 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }, { "id": "repeatable-slot:cave:upland:small:099", "anchor": { "key": "89,37", "x": 89, "y": 37 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 178, "y": 75 }], "approach": [{ "x": 179, "y": 75 }], "landmassId": "landmass:major-island:d14l1a:02:ffa5fe6c", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:crypt:wetland:small:100", "anchor": { "key": "45,55", "x": 45, "y": 55 }, "familyId": "site-family:crypt", "tier": "small", "band": 4, "footprint": [{ "x": 91, "y": 111 }], "approach": [{ "x": 92, "y": 111 }], "landmassId": "landmass:major-island:d14l1a:01:296d6010", "biome": "wetland", "added": true, "old": false }, { "id": "repeatable-slot:cave:upland:small:101", "anchor": { "key": "48,108", "x": 48, "y": 108 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 97, "y": 217 }], "approach": [{ "x": 98, "y": 217 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "upland", "added": true, "old": false }, { "id": "repeatable-slot:ruin:woodland:standard:102", "anchor": { "key": "30,117", "x": 30, "y": 117 }, "familyId": "site-family:ruin", "tier": "standard", "band": 2, "footprint": [{ "x": 61, "y": 234 }, { "x": 62, "y": 234 }, { "x": 61, "y": 235 }, { "x": 62, "y": 235 }], "approach": [{ "x": 63, "y": 234 }, { "x": 64, "y": 234 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "woodland", "added": true, "old": false }, { "id": "repeatable-slot:cave:desert:small:103", "anchor": { "key": "76,89", "x": 76, "y": 89 }, "familyId": "site-family:cave", "tier": "small", "band": 3, "footprint": [{ "x": 153, "y": 179 }], "approach": [{ "x": 154, "y": 179 }], "landmassId": "landmass:primary-mainland:d14l1a:01:ccdbc2ca", "biome": "desert", "added": true, "old": false }]);
+var hasWilderness = (b) => b?.wildernessVersion === WILDERNESS_VERSION && b?.wildernessHash === WILDERNESS_HASH;
+var wildernessSelection = (id) => WILDERNESS_SITE_SELECTIONS.find((row) => row.id === id) ?? null;
+
+// src/shared/content/wilderness_fairness_v3_2.js
+var WILDERNESS_FAIRNESS_V3_2_VERSION = "wilderness-v3-2-level-fairness-1";
+var WILDERNESS_FAIRNESS_V3_2 = Object.freeze({
+  version: WILDERNESS_FAIRNESS_V3_2_VERSION,
+  enemyBaseDamage: "unchanged; no additional multiplier from level difference",
+  enemyDamageAmplification: "boss/elite abilities remain independent of level difference",
+  playerOffense: "preserve exact existing higher-level resistance",
+  historicWorldCombatV1: "immutable; retain published level-gap contract for legacy non-wilderness worlds",
+  eligibility: "world-combat-v1 plus committed wilderness-v2 world binding",
+  pendingSeparateTuning: "cleave reach and simultaneous incoming hit protection"
+});
+var usesWildernessFairnessV3_2 = (state) => hasWorldCombat(state) && hasWilderness(state?.d9World?.plannedWorld);
+
+// src/shared/content/brimstone_colossus_v1.js
+var BRIMSTONE_ID = "overlord_iron_vault";
+var BRIMSTONE_PROFILE = ARACHNID_TREANT_PROFILE;
+var BRIMSTONE = freezeWire({
+  label: "BRIMSTONE COLOSSUS",
+  range: 220,
+  recoveryTicks: 120,
+  strike: { telegraphTicks: 24, recoveryTicks: 50, radius: 52, halfAngle: 0.95, damageNumerator: 10 },
+  slam: { telegraphTicks: 75, radius: 64, damageNumerator: 18 },
+  magma_vents: { telegraphTicks: 75, count: 2, boilTicks: 270, flashTicks: 18, reach: 96, halfWidth: 12, damageNumerator: 13, maxActive: 6 }
+});
+var brimstoneFortHereV1 = (reservationId) => {
+  const s = worldSiteV1(reservationId);
+  return !s || s.biome === "volcanic";
+};
+var brimstoneFortFloor = (site, index) => site.familyId === "site-family:fort" && site.sizeTier === "large" && index === site.floorCount - 1 && brimstoneFortHereV1(site.socket?.provenance?.reservationId);
+function brimstoneVolcanicRuinFloorV4(site, index, state) {
+  return site?.familyId === "site-family:ruin" && site.sizeTier === "large" && index === site.floorCount - 1 && site.socket?.provenance?.reservationId === bossSiteV1("brimstone_colossus") && site.socket?.region?.biome === "volcanic" && usesWildernessFairnessV3_2(state);
+}
+function brimstoneRuinArenaProofV4(c, position2) {
+  if (collidesWithTiles(c, position2.x, position2.y, 34)) return null;
+  const arms = brimstoneVentArms(c, position2);
+  const horizontal = arms.east + arms.west, vertical = arms.north + arms.south;
+  if (Math.min(...Object.values(arms)) < 24 || horizontal < 112 || vertical < 112) return null;
+  return { arms, horizontal, vertical, shortest: Math.min(...Object.values(arms)) };
+}
+function chooseBrimstoneRuinAnchorV4(recipe) {
+  const c = recipe?.collision, leader = recipe?.encounter?.members?.[0];
+  if (!c || !leader) return null;
+  const others = recipe.encounter.members.slice(1).map((m) => m.position);
+  const room2 = recipe.graph?.rooms?.find((r) => r.roomId === leader.roomId);
+  const boxes = [...room2?.bounds ? [room2.bounds] : room2 && Number.isInteger(room2.cx) ? [
+    { x: room2.cx - room2.rx, y: room2.cy - room2.ry, width: room2.rx * 2 + 1, height: room2.ry * 2 + 1 }
+  ] : [], { x: 2, y: 2, width: c.width - 4, height: c.height - 4 }];
+  const options = [];
+  for (const [scope, b] of boxes.entries()) for (let y = b.y; y < b.y + b.height; y++) for (let x = b.x; x < b.x + b.width; x++) {
+    if (x <= 1 || y <= 1 || x >= c.width - 2 || y >= c.height - 2 || c.tiles[y]?.[x] !== "1") continue;
+    const p = { x: (x + 0.5) * c.tileSize, y: (y + 0.5) * c.tileSize }, distance5 = Math.hypot(p.x - leader.position.x, p.y - leader.position.y);
+    if (distance5 > 416 || Math.hypot(p.x - recipe.entrance.x, p.y - recipe.entrance.y) < 160 || others.some((m) => Math.hypot(m.x - p.x, m.y - p.y) < 62)) continue;
+    const proof2 = brimstoneRuinArenaProofV4(c, p);
+    if (!proof2) continue;
+    options.push({ position: p, scope, proof: proof2, score: Math.min(proof2.horizontal, proof2.vertical) * 2 + proof2.shortest * 3 - distance5 * 0.3 });
+  }
+  options.sort((a, b) => a.scope - b.scope || b.score - a.score || a.position.y - b.position.y || a.position.x - b.position.x);
+  return options[0] ? { position: options[0].position, ...options[0].proof } : null;
+}
+function brimstoneVentArms(c, p) {
+  const arms = {};
+  for (const [key9, dx, dy] of [["east", 1, 0], ["west", -1, 0], ["north", 0, -1], ["south", 0, 1]]) {
+    let length = 0;
+    for (let d = 2; d <= 96; d += 2) {
+      if (collidesWithTiles(c, p.x + dx * d, p.y + dy * d, 12)) break;
+      length = d;
+    }
+    arms[key9] = length;
+  }
+  return arms;
+}
+
+// src/shared/content/boss_hosting_v1.js
+var BOSS_HOSTING_VERSION = "site-boss-hosting-v1";
+var BOSS_HOSTING_POLICY = freezeWire({ version: BOSS_HOSTING_VERSION, parentRuntime: "c36909555b042989", parentGeneration: "core-families-multiroom-v1", playerCount: 4, playerHull: 9, bossHull: 34, roomSelection: "explicit-final-reward", preserveGeometry: true, preserveRosterIdentities: true, preserveAttacks: true, partyStagingSeparation: 64, partyArrivalVersion: "site-party-arrival-v1", missingBoss: "structured-hard-failure", supportHullUpperBound: 20, scope: "constructed-arena-capacity-not-network-or-balance-approval" });
+var BOSS_HOSTING_HASH = "0405745d2de42e6f1e8a5d508d507c5db3379e8efc1ea2db41c4f0dc26352a3e";
+var hasBossHostingV1 = (b) => b?.bossHostingVersion === BOSS_HOSTING_VERSION && b.bossHostingHash === BOSS_HOSTING_HASH;
+var TILE = 32;
+var dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+var key = (p) => p.x + "," + p.y;
+var dirs = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+function box(room2) {
+  return room2.bounds ?? { x: room2.cx - room2.rx, y: room2.cy - room2.ry, width: room2.rx * 2 + 1, height: room2.ry * 2 + 1 };
+}
+function bossRoomCellsV1(recipe, room2, hull = 9) {
+  const b = box(room2), out = [];
+  for (let y = b.y; y < b.y + b.height; y++) for (let x = b.x; x < b.x + b.width; x++) {
+    const p = { x: (x + 0.5) * TILE, y: (y + 0.5) * TILE };
+    if (!collidesWithTiles(recipe.collision, p.x, p.y, hull)) out.push(p);
+  }
+  return out;
+}
+function bossHostingSpecV1({ family: family2, tier: tier2, index, floorCount, reservationId, enabled: enabled2 = true, wilderness = true }) {
+  if (!enabled2 || index !== floorCount - 1) return null;
+  const restored = [RECOVERED_BOSSES2[bossAtSiteV1(reservationId)]].find((b) => b?.family === family2);
+  if (restored) return { kind: restored.id, hullRadius: 34, supportCount: restored.adds, liveSupportCount: restored.id === "corrosive_abomination" ? 6 : restored.adds };
+  if (family2 === "fort" && (tier2 === "standard" || tier2 === "deep" && wilderness && reservationId === bossSiteV1("aegis_goliath"))) return { kind: "aegis_goliath", hullRadius: 34, supportCount: 3, liveSupportCount: 3 };
+  if (family2 === "fort" && tier2 === "large" && brimstoneFortHereV1(reservationId) || family2 === "ruin" && wilderness && tier2 === "large" && reservationId === bossSiteV1("brimstone_colossus")) return { kind: "overlord_iron_vault", hullRadius: 34, supportCount: 0, liveSupportCount: 0 };
+  return null;
+}
+function fieldDistance(allowed, start) {
+  const d = /* @__PURE__ */ new Map([[key(start), 0]]), q = [start];
+  for (let i = 0; i < q.length; i++) for (const [dx, dy] of dirs) {
+    const p = { x: q[i].x + dx * TILE, y: q[i].y + dy * TILE }, k = key(p);
+    if (allowed.has(k) && !d.has(k)) {
+      d.set(k, d.get(key(q[i])) + TILE);
+      q.push(p);
+    }
+  }
+  return d;
+}
+function choosePads(cells3, position2, protectedPoints) {
+  const chosen = [];
+  for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+    const ideal = { x: position2.x + sx * 160, y: position2.y + sy * 128 };
+    const sorted2 = cells3.filter((p2) => (p2.x - position2.x) * sx >= 96 && (p2.y - position2.y) * sy >= 64 && protectedPoints.every((q) => dist(p2, q) >= 40)).sort((a, b) => dist(a, ideal) - dist(b, ideal) || a.y - b.y || a.x - b.x);
+    const p = sorted2.find((p2) => chosen.every((q) => dist(p2, q) >= 64));
+    if (!p) return null;
+    chosen.push(p);
+  }
+  return chosen;
+}
+function freeForHero(p, boss, supports) {
+  return !(Math.abs(p.x - boss.x) <= 47 && Math.abs(p.y - boss.y) <= 47) && supports.every((q) => Math.abs(p.x - q.x) > 33 || Math.abs(p.y - q.y) > 33);
+}
+function proveBossArenaV1(recipe, kind2, position2, { supportPositions = [], liveSupportCount = 0 } = {}) {
+  const room2 = recipe.graph.rooms.find((r) => r.roomId === recipe.graph.topology.endNodeId);
+  requireContract(room2, "BOSS_HOST:FINAL_ROOM_MISSING");
+  const b = box(room2);
+  requireContract(position2.x >= b.x * TILE && position2.x < (b.x + b.width) * TILE && position2.y >= b.y * TILE && position2.y < (b.y + b.height) * TILE && !collidesWithTiles(recipe.collision, position2.x, position2.y, 34), "BOSS_HOST:UNSAFE_OR_WRONG_CHAMBER");
+  const cells3 = bossRoomCellsV1(recipe, room2, 9), protectedPoints = [recipe.reward?.position, ...Object.values(recipe.stairAnchors ?? {})].filter(Boolean), pads = choosePads(cells3, position2, protectedPoints);
+  requireContract(pads?.length === 4, "BOSS_HOST:FOUR_STAGING_POSITIONS_UNAVAILABLE");
+  const physical2 = cells3.filter((p) => freeForHero(p, position2, supportPositions.slice(0, liveSupportCount))), allowed = new Set(physical2.map(key)), routes = [];
+  requireContract(pads.every((p) => allowed.has(key(p))), "BOSS_HOST:SUPPORT_STAGING_CONFLICT");
+  for (let i = 0; i < 4; i++) {
+    const d = fieldDistance(allowed, pads[i]), target = pads[(i + 1) % 4];
+    requireContract(d.has(key(target)), "BOSS_HOST:PARTY_CIRCULATION_BLOCKED");
+    const exits = physical2.filter((p) => dist(p, pads[i]) >= 73 && d.has(key(p))).map((p) => d.get(key(p)));
+    requireContract(exits.length, "BOSS_HOST:NO_TARGETED_SLAM_ESCAPE");
+    routes.push({ from: i, to: (i + 1) % 4, routePx: d.get(key(target)), targeted64pxSlamEscapePx: Math.min(...exits), idealEscapeTicks: Math.ceil(Math.min(...exits) / 3) });
+  }
+  const central = cells3.filter((p) => freeForHero(p, position2, supportPositions.slice(0, liveSupportCount)) && dist(p, position2) > 73), centralAllowed = new Set(central.map(key));
+  requireContract(pads.every((p) => centralAllowed.has(key(p))), "BOSS_HOST:CENTRAL_SLAM_STAGING_CONFLICT");
+  const connected4 = fieldDistance(centralAllowed, pads[0]);
+  requireContract(pads.every((p) => connected4.has(key(p))), "BOSS_HOST:CENTRAL_SLAM_ESCAPE_DISCONNECTED");
+  const arms = {};
+  for (const [name, dx, dy] of [["east", 1, 0], ["west", -1, 0], ["north", 0, -1], ["south", 0, 1]]) {
+    let v = 0;
+    for (let n = 4; n <= 300; n += 4) {
+      if (collidesWithTiles(recipe.collision, position2.x + dx * n, position2.y + dy * n, 34)) break;
+      v = n;
+    }
+    arms[name] = v;
+  }
+  if (kind2 === "cinderhart") requireContract(Math.min(...Object.values(arms)) >= 220, "BOSS_HOST:CHARGE_LANES_TOO_SHORT");
+  if (kind2 === "void_overseer") requireContract(Math.max(arms.east + 34, arms.west + 34) >= 260 && Math.max(arms.north + 34, arms.south + 34) >= 260, "BOSS_HOST:BEAM_AXES_TOO_SHORT");
+  if (kind2 === "ashfang") {
+    for (let y = -7; y <= 7; y++) for (let x = -7; x <= 7; x++) if (Math.abs(x) === 7 || Math.abs(y) === 7) requireContract(!collidesWithTiles(recipe.collision, position2.x + x * TILE, position2.y + y * TILE, 9), "BOSS_HOST:COLLAPSE_RING_LEAVES_CHAMBER");
+  }
+  return { version: BOSS_HOSTING_VERSION, policyHash: BOSS_HOSTING_HASH, kind: kind2, roomId: room2.roomId, boundsTiles: copyWire(b), stagingPositions: pads, playerHullRadius: 9, bossHullRadius: 34, playerSafeTileCenters: cells3.length, connectedSafeCentersAfterCentral64pxSlam: connected4.size, liveSupportCount, supportHullUpperBound: 20, routes, chargeClearancePx: arms, claims: ["four-distinct-static-staging", "room-contained-player-circulation-with-live-support-bodies", "targeted64px-telegraph-egress", "central64px-slam-connected-safe-space"], limits: ["not-all-possible-hazard-combinations", "not-party-balance-or-network-proof", "native-persistent-hazard-fights-required"] };
+}
+function bossHostingRecipeV1(original, spec) {
+  if (!spec) return original;
+  const recipe = copyWire(original), room2 = recipe.graph.rooms.find((r) => r.roomId === recipe.graph.topology.endNodeId);
+  requireContract(room2, "BOSS_HOST:FINAL_ROOM_MISSING");
+  requireContract(recipe.encounter.members.length >= spec.supportCount + 1, "BOSS_HOST:SUPPORT_ROSTER_CAPACITY");
+  const center2 = { x: (room2.cx + 0.5) * TILE, y: (room2.cy + 0.5) * TILE }, candidates = bossRoomCellsV1(recipe, room2, spec.hullRadius ?? 34).sort((a, b) => dist(a, center2) - dist(b, center2) || a.y - b.y || a.x - b.x);
+  const position2 = candidates[0];
+  requireContract(position2, "BOSS_HOST:SAFE_ANCHOR_UNAVAILABLE");
+  const cells3 = bossRoomCellsV1(recipe, room2, 20), pads = choosePads(bossRoomCellsV1(recipe, room2, 9), position2, [recipe.reward?.position, ...Object.values(recipe.stairAnchors ?? {})].filter(Boolean));
+  requireContract(pads, "BOSS_HOST:FOUR_STAGING_POSITIONS_UNAVAILABLE");
+  const supports = [];
+  for (let i = 0; i < spec.supportCount; i++) {
+    const a = i * Math.PI * 2 / spec.supportCount, r = spec.kind === "aegis_goliath" ? 62 : 96, ideal = { x: position2.x + Math.cos(a) * r, y: position2.y + Math.sin(a) * r };
+    let p = spec.kind === "aegis_goliath" && !collidesWithTiles(recipe.collision, ideal.x, ideal.y, 20) && supports.every((q) => dist(q, ideal) >= 40) ? ideal : null;
+    if (!p) p = cells3.filter((p2) => dist(p2, position2) >= 68 && dist(p2, position2) <= 176 && supports.every((q) => dist(p2, q) >= 40) && pads.every((q) => dist(p2, q) >= 72)).sort((a2, b) => dist(a2, ideal) - dist(b, ideal) || a2.y - b.y || a2.x - b.x)[0];
+    requireContract(p, "BOSS_HOST:SUPPORT_FOOTPRINT_UNAVAILABLE");
+    supports.push(p);
+  }
+  const used = [position2, ...supports];
+  for (let i = 0; i < recipe.encounter.members.length; i++) {
+    const m = recipe.encounter.members[i];
+    if (i === 0 || i <= spec.supportCount) {
+      m.position = copyWire(i ? supports[i - 1] : position2);
+      m.roomId = room2.roomId;
+      continue;
+    }
+    if (m.roomId !== room2.roomId) continue;
+    const valid = (p2) => dist(p2, position2) >= 92 && supports.every((q) => dist(p2, q) >= 44) && pads.every((q) => dist(p2, q) >= 72) && used.every((q) => dist(p2, q) >= 40) && [recipe.reward.position, ...Object.values(recipe.stairAnchors)].every((q) => dist(p2, q) >= 40);
+    const p = valid(m.position) ? m.position : cells3.filter(valid).sort((a, b) => dist(a, m.position) - dist(b, m.position) || a.y - b.y || a.x - b.x)[0];
+    requireContract(p, "BOSS_HOST:ORDINARY_PACK_CONFLICT");
+    m.position = copyWire(p);
+    used.push(p);
+  }
+  const proof2 = proveBossArenaV1(recipe, spec.kind, position2, { supportPositions: supports, liveSupportCount: spec.liveSupportCount ?? spec.supportCount });
+  recipe.encounter.bossHosting = { version: BOSS_HOSTING_VERSION, policyHash: BOSS_HOSTING_HASH, kind: spec.kind, roomId: room2.roomId, position: copyWire(position2), supportPositions: copyWire(supports), proof: proof2 };
+  return freezeWire(recipe);
+}
+function expectedBossRecipeV1(recipe, { family: family2, tier: tier2, index, floorCount, reservationId }) {
+  return bossHostingRecipeV1(recipe, bossHostingSpecV1({ family: family2, tier: tier2, index, floorCount, reservationId, enabled: Boolean(recipe.encounter.combatVersion) }));
+}
+function validateBossFloorBindingV1(state, site, floor) {
+  if (!hasBossHostingV1(state.d9World?.plannedWorld)) return;
+  const spec = bossHostingSpecV1({ family: site.familyId.split(":")[1], tier: site.sizeTier, index: floor.index, floorCount: site.floorCount, reservationId: site.socket.provenance.reservationId, enabled: Boolean(floor.encounter.combatVersion) }), h = floor.encounter.bossHosting;
+  requireContract(Boolean(h) === Boolean(spec), "BOSS_HOST:REQUIRED_HOST_MISSING_OR_UNEXPECTED");
+  if (!spec) return;
+  const id = floor.enemyIds[0], boss = state.bossCombat?.bossesByEntityId?.[id], home = state.groupsById?.[floor.groupId]?.containment?.memberHomesById?.[id];
+  requireContract(h.version === BOSS_HOSTING_VERSION && h.policyHash === BOSS_HOSTING_HASH && h.kind === spec.kind && h.roomId === floor.graph.topology.endNodeId && boss?.bossDefinitionId === spec.kind && boss.roomId === h.roomId && canonicalStringify(boss.homePosition) === canonicalStringify(h.position) && canonicalStringify(home) === canonicalStringify(h.position), "BOSS_HOST:LIVE_BINDING_DRIFT");
+}
+
+// src/shared/content/multiroom_policy_v1.js
+var MULTIROOM_VERSION = "core-families-multiroom-v1";
+var MULTIROOM_POLICY = freezeWire({ version: MULTIROOM_VERSION, parentRuntime: "c224c9e8b940ebab", floors: { small: 1, standard: 2, large: 3, deep: 4 }, rooms: { small: [4, 5], standard: [5, 6], large: [6, 7], deep: [7, 8] }, maximumAttempts: 48, minimumStairRouteTiles: 32, minimumStairRoomEdges: 3, corridorWidthTiles: 5, maximumFloorTiles: [80, 44], allowQuarterTurn: true, wholeFloorOccupancyRadius: 1500, maximumOrdinaryActorsPerFloor: 5, encounterCounts: { fort: 3, ruin: { small: 2, standard: 3, large: 4, deep: 5 }, crypt: { small: 3, standard: 4, large: 4, deep: 4 } }, preserveGearProvenanceRosterCounts: true, exteriorAndSiteIdentitiesUnchanged: true, stairSelection: "farthest-safe-room-by-walkable-route-with-optional-branch", generation: "seeded-connected-room-graph-family-grammar", oldSaveMigration: false });
+var MULTIROOM_HASH = "da5bdc04ec8045a117ddaad78525e60abccc860feb723f49d9b56cc54d900d51";
+var usesMultiroom = (b) => b?.interiorGeneration === MULTIROOM_VERSION && b.interiorGenerationHash === MULTIROOM_HASH;
+var multiroomLinks = (tier2) => Array.from({ length: MULTIROOM_POLICY.floors[tier2] }, (_, i) => ({ up: i ? i - 1 : null, down: i + 1 < MULTIROOM_POLICY.floors[tier2] ? i + 1 : null }));
+var multiroomPolicy = (tier2) => ({ floors: Array.from({ length: MULTIROOM_POLICY.floors[tier2] }, (_, i) => ({ role: "floor-" + i })) });
+
+// src/shared/content/site_rewards_v1.js
+var SITE_REWARDS_VERSION = "site-rewards-v1";
+var SITE_REWARDS_POLICY = freezeWire({
+  version: SITE_REWARDS_VERSION,
+  kinds: { "site-end-elite": { role: "boss", floor: 1, quality: 0 }, "mini-boss": { role: "boss", floor: 0, quality: 0 }, "lair-boss": { role: "boss", floor: 2, quality: 0 }, "lair-chest": { role: "completion", floor: 0, quality: 300 }, "standard-chest": { role: "completion", floor: 0, quality: 0 } }
+});
+var kind = (k) => SITE_REWARDS_POLICY.kinds[k];
+var siteRewardRoleV1 = (k) => k ? kind(k).role : null;
+var siteRewardQualityV1 = (k) => k ? kind(k).quality : 0;
+var siteRewardRarityV1 = (k, tier2) => k ? Math.max(tier2, kind(k).floor) : tier2;
+function validateSiteRewardProgressionV1(p) {
+  if (p.siteReward === void 0) return p;
+  requireContract(Object.hasOwn(SITE_REWARDS_POLICY.kinds, p.siteReward) && p.rarityPolicyHash !== void 0 && p.rarityRole === kind(p.siteReward).role, "Site reward rule");
+  return p;
+}
+
+// src/shared/content/world_loot_v3.js
+var WORLD_LOOT_V3_VERSION = "world-loot-v3";
+var WORLD_LOOT_V3_HASH = "5945f4f6a6c02522b745889a88f4cd1034d8e4b89266517a2c31825741ef5cdf";
+var WORLD_LOOT_V3_POLICY = freezeWire({
+  version: WORLD_LOOT_V3_VERSION,
+  parentCombatHash: WORLD_COMBAT_HASH,
+  unlockLevels: [1, 1, 10, 20, 35, 50],
+  // gearPerMille: chance this source drops gear; uncommon: basis points of non-rare gear;
+  // rare: [level, basis points] anchors, linear between them, 0 before the first, flat after the last.
+  sources: {
+    ordinary: { gearPerMille: 15, uncommon: 2e3, rare: [[10, 100], [50, 200]], rich: false },
+    elite: { gearPerMille: 250, uncommon: 4500, rare: [[10, 300], [50, 600]], rich: false },
+    smallEnd: { gearPerMille: 500, uncommon: 4500, rare: [[10, 300], [50, 600]], rich: false },
+    mini: { gearPerMille: 1e3, uncommon: 6e3, rare: [[10, 800], [50, 1500]], rich: false },
+    boss: { gearPerMille: 1e3, uncommon: 8e3, rare: [[10, 1500], [20, 2e3], [30, 2800], [40, 3500]], rich: true },
+    smallChest: { gearPerMille: 150, uncommon: 2500, rare: [], rich: false },
+    standardChest: { gearPerMille: 400, uncommon: 5e3, rare: [[10, 300], [50, 800]], rich: false },
+    bossChest: { gearPerMille: 1e3, uncommon: 7e3, rare: [[10, 1e3], [20, 1500], [30, 2200], [40, 3e3]], rich: true }
+  },
+  // How Rare-or-better gear splits into Rare / Epic / Legendary / Mythic (basis points).
+  split: [
+    { minimumLevel: 1, plain: [1e4, 0, 0, 0], rich: [1e4, 0, 0, 0] },
+    { minimumLevel: 20, plain: [9e3, 1e3, 0, 0], rich: [8e3, 2e3, 0, 0] },
+    { minimumLevel: 35, plain: [8200, 1500, 300, 0], rich: [6800, 2500, 700, 0] },
+    { minimumLevel: 50, plain: [7700, 1700, 500, 100], rich: [6e3, 2800, 1e3, 200] }
+  ],
+  qualityFromLevel: 30,
+  gate: "min(frozen encounter level, personal hero level when the reward is captured). Pickup, reopen and portal use never reroll."
+});
+var SOURCES = WORLD_LOOT_V3_POLICY.sources;
+function lootSourceV3(role, siteReward = null) {
+  if (role === "ordinary" || role === "elite") return role;
+  if (role === "boss") return siteReward === "site-end-elite" ? "smallEnd" : siteReward === "mini-boss" ? "mini" : "boss";
+  requireContract(role === "completion", "Loot v3 role");
+  return siteReward === "lair-chest" ? "bossChest" : siteReward === "standard-chest" ? "standardChest" : "smallChest";
+}
+function lootGearPerMilleV3(role, siteReward = null, occurrenceHundredths = 100) {
+  return Math.min(1e3, Math.floor(SOURCES[lootSourceV3(role, siteReward)].gearPerMille * occurrenceHundredths / 100));
+}
+function rareShare(anchors2, level) {
+  if (!anchors2.length || level < BigInt(anchors2[0][0])) return 0n;
+  for (let i = 1; i < anchors2.length; i++) {
+    const [a, va] = anchors2[i - 1], [b, vb] = anchors2[i];
+    if (level < BigInt(b)) return BigInt(va) + (BigInt(vb) - BigInt(va)) * (level - BigInt(a)) / BigInt(b - a);
+  }
+  return BigInt(anchors2.at(-1)[1]);
+}
+function worldLootWeightsV3(encounter, hero, role, siteReward = null, qualityHundredths = 0) {
+  positiveProgression(encounter);
+  positiveProgression(hero);
+  const a = progressionBigInt(encounter), b = progressionBigInt(hero), level = a < b ? a : b, q = progressionBigInt(qualityHundredths);
+  requireContract(q >= 0n, "Loot v3 quality");
+  const src = SOURCES[lootSourceV3(role, siteReward)], rare = rareShare(src.rare, level), rest = 10000n - rare, u = rest * BigInt(src.uncommon) / 10000n;
+  const row = [...WORLD_LOOT_V3_POLICY.split].reverse().find((r) => level >= BigInt(r.minimumLevel))[src.rich ? "rich" : "plain"];
+  const top = row.slice(1).map((w2) => rare * BigInt(w2) / 10000n), w = [rest - u, u, rare - top.reduce((x, y) => x + y, 0n), ...top];
+  const boost = level >= BigInt(WORLD_LOOT_V3_POLICY.qualityFromLevel) ? q : 0n;
+  return w.map((n, i) => level < BigInt(WORLD_LOOT_V3_POLICY.unlockLevels[i]) ? 0n : n * (10000n + boost * BigInt(i * 10)));
+}
+function worldGearRarityV3(encounter, hero, role, siteReward, draw, qualityHundredths = 0) {
+  requireContract(Number.isFinite(draw) && draw >= 0 && draw < 1, "Loot v3 draw");
+  const weights = worldLootWeightsV3(encounter, hero, role, siteReward, qualityHundredths), total = weights.reduce((a, b) => a + b, 0n), roll = BigInt(Math.floor(draw * 4294967296)) * total;
+  let sum2 = 0n;
+  for (let i = 0; i < weights.length; i++) {
+    sum2 += weights[i];
+    if (roll < sum2 * 4294967296n) return i;
+  }
+  requireContract(false, "Loot v3 weights failed");
+}
+
+// src/shared/content/world_loot_v4.js
+var WORLD_LOOT_V4_VERSION = "world-loot-v4";
+var WORLD_LOOT_V4_HASH = "4322b61b219906b7d6792c64bdef13dcbb1c2e09cb5ddb21a38047f108de4c92";
+var WORLD_LOOT_V4_POLICY = freezeWire({
+  version: WORLD_LOOT_V4_VERSION,
+  parentCombatHash: WORLD_COMBAT_HASH,
+  unlockLevels: [1, 1, 10, 20, 35, 50],
+  sources: {
+    ordinary: { gearPerMille: 40, common: [[1, 8e3], [10, 5e3], [20, 0]], rare: [[9, 0], [10, 200], [20, 1e3], [30, 4500], [40, 1e4]], rich: false },
+    elite: { gearPerMille: 500, common: [[1, 5500], [10, 3e3], [20, 0]], rare: [[9, 0], [10, 400], [20, 1500], [30, 5e3], [40, 1e4]], rich: false },
+    smallEnd: { gearPerMille: 700, common: [[1, 5500], [10, 3e3], [20, 0]], rare: [[9, 0], [10, 400], [20, 1500], [30, 5e3], [40, 1e4]], rich: false },
+    mini: { gearPerMille: 1e3, common: [[1, 4e3], [10, 2e3], [20, 0]], rare: [[9, 0], [10, 800], [20, 2e3], [30, 5500], [40, 1e4]], rich: false },
+    boss: { gearPerMille: 1e3, common: [[1, 2e3], [10, 0]], rare: [[9, 0], [10, 1500], [20, 4e3], [30, 1e4]], rich: true },
+    smallChest: { gearPerMille: 350, common: [[1, 7500], [10, 5e3], [20, 0]], rare: [[20, 0], [30, 3e3], [40, 1e4]], rich: false },
+    standardChest: { gearPerMille: 650, common: [[1, 5e3], [10, 3e3], [20, 0]], rare: [[9, 0], [10, 300], [20, 1200], [30, 5e3], [40, 1e4]], rich: false },
+    bossChest: { gearPerMille: 1e3, common: [[1, 3e3], [10, 0]], rare: [[9, 0], [10, 1e3], [20, 3500], [30, 1e4]], rich: true }
+  },
+  split: [
+    { minimumLevel: 1, plain: [1e4, 0, 0, 0], rich: [1e4, 0, 0, 0] },
+    { minimumLevel: 20, plain: [9e3, 1e3, 0, 0], rich: [8e3, 2e3, 0, 0] },
+    { minimumLevel: 35, plain: [8200, 1500, 300, 0], rich: [6800, 2500, 700, 0] },
+    { minimumLevel: 50, plain: [7700, 1700, 500, 100], rich: [6e3, 2800, 1e3, 200] }
+  ],
+  qualityFromLevel: 30,
+  gate: "min(frozen encounter level, personal hero level when the reward is captured). Pickup, reopen and portal use never reroll."
+});
+var SOURCES2 = WORLD_LOOT_V4_POLICY.sources;
+function lootGearPerMilleV4(role, siteReward = null, occurrenceHundredths = 100) {
+  return Math.min(1e3, Math.floor(SOURCES2[lootSourceV3(role, siteReward)].gearPerMille * occurrenceHundredths / 100));
+}
+function curve(anchors2, level) {
+  if (level <= BigInt(anchors2[0][0])) return BigInt(anchors2[0][1]);
+  for (let i = 1; i < anchors2.length; i++) {
+    const [a, va] = anchors2[i - 1], [b, vb] = anchors2[i];
+    if (level < BigInt(b)) return BigInt(va) + (BigInt(vb) - BigInt(va)) * (level - BigInt(a)) / BigInt(b - a);
+  }
+  return BigInt(anchors2.at(-1)[1]);
+}
+function worldLootWeightsV4(encounter, hero, role, siteReward = null, qualityHundredths = 0) {
+  positiveProgression(encounter);
+  positiveProgression(hero);
+  const a = progressionBigInt(encounter), b = progressionBigInt(hero), level = a < b ? a : b, q = progressionBigInt(qualityHundredths);
+  requireContract(q >= 0n, "Loot v4 quality");
+  const src = SOURCES2[lootSourceV3(role, siteReward)], common = curve(src.common, level), rare = curve(src.rare, level), uncommon = 10000n - common - rare;
+  requireContract(uncommon >= 0n, "Loot v4 shares");
+  const row = [...WORLD_LOOT_V4_POLICY.split].reverse().find((r) => level >= BigInt(r.minimumLevel))[src.rich ? "rich" : "plain"];
+  const top = row.slice(1).map((w2) => rare * BigInt(w2) / 10000n), w = [common, uncommon, rare - top.reduce((x, y) => x + y, 0n), ...top];
+  const boost = level >= BigInt(WORLD_LOOT_V4_POLICY.qualityFromLevel) ? q : 0n;
+  return w.map((n, i) => level < BigInt(WORLD_LOOT_V4_POLICY.unlockLevels[i]) ? 0n : n * (10000n + boost * BigInt(i * 10)));
+}
+function worldGearRarityV4(encounter, hero, role, siteReward, draw, qualityHundredths = 0) {
+  requireContract(Number.isFinite(draw) && draw >= 0 && draw < 1, "Loot v4 draw");
+  const weights = worldLootWeightsV4(encounter, hero, role, siteReward, qualityHundredths), total = weights.reduce((a, b) => a + b, 0n), roll = BigInt(Math.floor(draw * 4294967296)) * total;
+  let sum2 = 0n;
+  requireContract(total > 0n, "Loot v4 weights empty");
+  for (let i = 0; i < weights.length; i++) {
+    sum2 += weights[i];
+    if (roll < sum2 * 4294967296n) return i;
+  }
+  requireContract(false, "Loot v4 weights failed");
+}
+var isSourceLootV4 = (hash21) => hash21 === WORLD_LOOT_V3_HASH || hash21 === WORLD_LOOT_V4_HASH;
+function lootGearPerMilleFor(hash21, role, siteReward = null, occurrenceHundredths = 100) {
+  requireContract(isSourceLootV4(hash21), "Loot table");
+  return (hash21 === WORLD_LOOT_V4_HASH ? lootGearPerMilleV4 : lootGearPerMilleV3)(role, siteReward, occurrenceHundredths);
+}
+function worldGearRarityFor(hash21, encounter, hero, role, siteReward, draw, qualityHundredths = 0) {
+  requireContract(isSourceLootV4(hash21), "Loot table");
+  return (hash21 === WORLD_LOOT_V4_HASH ? worldGearRarityV4 : worldGearRarityV3)(encounter, hero, role, siteReward, draw, qualityHundredths);
+}
+
 // src/shared/content/world_reshape_reservations_v1.js
 var RESHAPE_RESERVATIONS = freezeWire([{ "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Woodland Cave", "layoutSeed": "2a68162575c8bc3baa1d4a159e1f35a9c0b0470827e259b67804b91bfcd17430", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "6a469e48269807e65d00f288dd0c9621a9f8427ea7eb5e1e6fe6bdc40c607bf0", "chunkX": "1094", "chunkY": "1256" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:woodland:small:01", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "136,157", "regionName": "Woodland", "roadAnchor": { "tileX": "35021", "tileY": "32667" }, "siteId": "site:d14106e89211e6856de651f731d9c01d", "siteSeed": "d66b70a3def97fcd50b750b2215ea2212ad1d19a95df2c3afe07642af19eebec", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1094", "chunkY": "1256", "localX": 432, "localY": 208 }, "minimumLevel": 6, "provenance": { "approachChunk": { "x": 71, "y": 232 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:6a469e48269807e65d00f288dd0c9621", "footprintChunk": { "x": 70, "y": 232 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:woodland:small:01", "sizeTier": "small" }, "region": { "biome": "woodland", "regionX": "136", "regionY": "157" }, "siteClass": "dungeon", "siteId": "site:d14106e89211e6856de651f731d9c01d", "siteSeed": "d14106e89211e6856de651f731d9c01d86616fa48760873b5700cd6afa405f31", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "35016", "tileY": "32659", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:d14106e89211e6856de651f731d9c01d", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1094", "chunkY": "1256", "localX": 432, "localY": 208 }, "minimumLevel": 6, "provenance": { "approachChunk": { "x": 71, "y": 232 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:6a469e48269807e65d00f288dd0c9621", "footprintChunk": { "x": 70, "y": 232 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:woodland:small:01", "sizeTier": "small" }, "region": { "biome": "woodland", "regionX": "136", "regionY": "157" }, "siteClass": "dungeon", "siteId": "site:d14106e89211e6856de651f731d9c01d", "siteSeed": "d14106e89211e6856de651f731d9c01d86616fa48760873b5700cd6afa405f31", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Desert Cave", "layoutSeed": "b14501306e5bf934783b5fcf12990307423cedfe0b47b6da0dc4c284e60dafcd", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "790d934573830e9847bc773cbb811ec074ec68dd728307cb41b2e5a9bb2d601b", "chunkX": "1178", "chunkY": "1214" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:desert:standard:01", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "147,151", "regionName": "Desert", "roadAnchor": { "tileX": "37709", "tileY": "31575" }, "siteId": "site:7eee18f257e1dd8e286abc31ffc936d1", "siteSeed": "5bbcc2bb8ab2c1cfb1722deec942a28672a968ae289a19edb006eccb191f41a8", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1178", "chunkY": "1214", "localX": 432, "localY": 208 }, "minimumLevel": 11, "provenance": { "approachChunk": { "x": 155, "y": 190 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:790d934573830e9847bc773cbb811ec0", "footprintChunk": { "x": 154, "y": 190 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:desert:standard:01", "sizeTier": "standard" }, "region": { "biome": "desert", "regionX": "147", "regionY": "151" }, "siteClass": "dungeon", "siteId": "site:7eee18f257e1dd8e286abc31ffc936d1", "siteSeed": "7eee18f257e1dd8e286abc31ffc936d15111099485a4bd8434b5fa31551625c2", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "standard", "tileX": "37704", "tileY": "31567", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:7eee18f257e1dd8e286abc31ffc936d1", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1178", "chunkY": "1214", "localX": 432, "localY": 208 }, "minimumLevel": 11, "provenance": { "approachChunk": { "x": 155, "y": 190 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:790d934573830e9847bc773cbb811ec0", "footprintChunk": { "x": 154, "y": 190 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:desert:standard:01", "sizeTier": "standard" }, "region": { "biome": "desert", "regionX": "147", "regionY": "151" }, "siteClass": "dungeon", "siteId": "site:7eee18f257e1dd8e286abc31ffc936d1", "siteSeed": "7eee18f257e1dd8e286abc31ffc936d15111099485a4bd8434b5fa31551625c2", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Grassland Cave", "layoutSeed": "f8973bec1c3e4ae3e832949c76025c03a46c7b88ebadc18f9aa17292854138b9", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "2f7cef674e9fa6b6558c641420ccbb976fa4b80a7d59cf32a856b982cc52b10e", "chunkX": "1088", "chunkY": "1244" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:upland:large:01", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "136,155", "regionName": "Grassland", "roadAnchor": { "tileX": "34829", "tileY": "32355" }, "siteId": "site:4e17e793c0cd89c98a40d4e56b2793ac", "siteSeed": "700776b262ca484a0160f5dfba17d1b584c83306a5bb5299b2ba3cc9a52e632c", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1088", "chunkY": "1244", "localX": 432, "localY": 208 }, "minimumLevel": 6, "provenance": { "approachChunk": { "x": 65, "y": 220 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:2f7cef674e9fa6b6558c641420ccbb97", "footprintChunk": { "x": 64, "y": 220 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:upland:large:01", "sizeTier": "large" }, "region": { "biome": "grassland", "regionX": "136", "regionY": "155" }, "siteClass": "dungeon", "siteId": "site:4e17e793c0cd89c98a40d4e56b2793ac", "siteSeed": "4e17e793c0cd89c98a40d4e56b2793ac91310a80d83747228d9420d62cf1b828", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "large", "tileX": "34824", "tileY": "32347", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:4e17e793c0cd89c98a40d4e56b2793ac", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1088", "chunkY": "1244", "localX": 432, "localY": 208 }, "minimumLevel": 6, "provenance": { "approachChunk": { "x": 65, "y": 220 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:2f7cef674e9fa6b6558c641420ccbb97", "footprintChunk": { "x": 64, "y": 220 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:upland:large:01", "sizeTier": "large" }, "region": { "biome": "grassland", "regionX": "136", "regionY": "155" }, "siteClass": "dungeon", "siteId": "site:4e17e793c0cd89c98a40d4e56b2793ac", "siteSeed": "4e17e793c0cd89c98a40d4e56b2793ac91310a80d83747228d9420d62cf1b828", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Frostland Cave", "layoutSeed": "84e8dfce71c733aeb0ef45ba0a74f559a2d2239c68df515d4772d1833e077b84", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "82b8a7e69055b66bcdc1bdb377e747ced384fe3ed3471fed7696f6888bcfad61", "chunkX": "1140", "chunkY": "1096" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:tropical:deep:01", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "142,137", "regionName": "Frostland", "roadAnchor": { "tileX": "36493", "tileY": "28507" }, "siteId": "site:d9c7701d9b9395e73e2f93278fdbf268", "siteSeed": "3785757fa16555a5960571cef1fa11470cd6502f926d4da0ef47d16e07609f56", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1140", "chunkY": "1096", "localX": 432, "localY": 208 }, "minimumLevel": 41, "provenance": { "approachChunk": { "x": 117, "y": 72 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:82b8a7e69055b66bcdc1bdb377e747ce", "footprintChunk": { "x": 116, "y": 72 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:tropical:deep:01", "sizeTier": "deep" }, "region": { "biome": "frostland", "regionX": "142", "regionY": "137" }, "siteClass": "dungeon", "siteId": "site:d9c7701d9b9395e73e2f93278fdbf268", "siteSeed": "d9c7701d9b9395e73e2f93278fdbf2680b886c760d6c442fa82224125440a4d2", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "deep", "tileX": "36488", "tileY": "28499", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:d9c7701d9b9395e73e2f93278fdbf268", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1140", "chunkY": "1096", "localX": 432, "localY": 208 }, "minimumLevel": 41, "provenance": { "approachChunk": { "x": 117, "y": 72 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:82b8a7e69055b66bcdc1bdb377e747ce", "footprintChunk": { "x": 116, "y": 72 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:tropical:deep:01", "sizeTier": "deep" }, "region": { "biome": "frostland", "regionX": "142", "regionY": "137" }, "siteClass": "dungeon", "siteId": "site:d9c7701d9b9395e73e2f93278fdbf268", "siteSeed": "d9c7701d9b9395e73e2f93278fdbf2680b886c760d6c442fa82224125440a4d2", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Desert Cave", "layoutSeed": "4ca2016e86e73ef967866bf17c5ecbcb4656b90618a4cca261c85d962364df41", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "e07e62e7ef6fd4c6a8c1989b3a8b3a4c244e4791c4910d7309d27365449c8796", "chunkX": "1168", "chunkY": "1198" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:desert:small:01", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "146,149", "regionName": "Desert", "roadAnchor": { "tileX": "37389", "tileY": "31159" }, "siteId": "site:187f55bf314156b61be3dba5aed40d01", "siteSeed": "7397be003b1093ae7782aca1ffa801243c1a59d2cf23543c6196d4f20dccdf75", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1168", "chunkY": "1198", "localX": 432, "localY": 208 }, "minimumLevel": 11, "provenance": { "approachChunk": { "x": 145, "y": 174 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:e07e62e7ef6fd4c6a8c1989b3a8b3a4c", "footprintChunk": { "x": 144, "y": 174 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:desert:small:01", "sizeTier": "small" }, "region": { "biome": "desert", "regionX": "146", "regionY": "149" }, "siteClass": "dungeon", "siteId": "site:187f55bf314156b61be3dba5aed40d01", "siteSeed": "187f55bf314156b61be3dba5aed40d016bea6f27c697cb8208915fb9124025d2", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "37384", "tileY": "31151", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:187f55bf314156b61be3dba5aed40d01", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1168", "chunkY": "1198", "localX": 432, "localY": 208 }, "minimumLevel": 11, "provenance": { "approachChunk": { "x": 145, "y": 174 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:e07e62e7ef6fd4c6a8c1989b3a8b3a4c", "footprintChunk": { "x": 144, "y": 174 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:desert:small:01", "sizeTier": "small" }, "region": { "biome": "desert", "regionX": "146", "regionY": "149" }, "siteClass": "dungeon", "siteId": "site:187f55bf314156b61be3dba5aed40d01", "siteSeed": "187f55bf314156b61be3dba5aed40d016bea6f27c697cb8208915fb9124025d2", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Large Frostland Cave", "layoutSeed": "0f40992670ada9fd3eb2523a9024a34ed6be67deeadbd44aa710257b92e7fc1e", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "6a089ff4a036e6a53d2e1a7ee8fe75e4d8229efae500625f504ad2ee571064f7", "chunkX": "1250", "chunkY": "1168" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:frostland:large:01", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "156,146", "regionName": "Frostland", "roadAnchor": { "tileX": "40013", "tileY": "30379" }, "siteId": "site:51e63e304f4ee8c65d9f27d2ea4ea6e3", "siteSeed": "8801d0a74ac3050eee733990438d3db7e8ce5c1aadb9cd39b2daa1eb1e8a6b3b", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1250", "chunkY": "1168", "localX": 432, "localY": 208 }, "minimumLevel": 11, "provenance": { "approachChunk": { "x": 227, "y": 144 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:6a089ff4a036e6a53d2e1a7ee8fe75e4", "footprintChunk": { "x": 226, "y": 144 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:frostland:large:01", "sizeTier": "large" }, "region": { "biome": "frostland", "regionX": "156", "regionY": "146" }, "siteClass": "dungeon", "siteId": "site:51e63e304f4ee8c65d9f27d2ea4ea6e3", "siteSeed": "51e63e304f4ee8c65d9f27d2ea4ea6e396e23412f2bea5ccfc590fad5d81b0be", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "large", "tileX": "40008", "tileY": "30371", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:51e63e304f4ee8c65d9f27d2ea4ea6e3", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1250", "chunkY": "1168", "localX": 432, "localY": 208 }, "minimumLevel": 11, "provenance": { "approachChunk": { "x": 227, "y": 144 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:6a089ff4a036e6a53d2e1a7ee8fe75e4", "footprintChunk": { "x": 226, "y": 144 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:frostland:large:01", "sizeTier": "large" }, "region": { "biome": "frostland", "regionX": "156", "regionY": "146" }, "siteClass": "dungeon", "siteId": "site:51e63e304f4ee8c65d9f27d2ea4ea6e3", "siteSeed": "51e63e304f4ee8c65d9f27d2ea4ea6e396e23412f2bea5ccfc590fad5d81b0be", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Woodland Cave", "layoutSeed": "770fad7f1c980017a567f6b4d69e9bab4f4e68905c50227b79f7587680dd1246", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "2a0f324e1fa7bba9067a07704759a1165983680835d1c9313b6133cbbde03935", "chunkX": "1248", "chunkY": "1264" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:grassland:small:01", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "156,158", "regionName": "Woodland", "roadAnchor": { "tileX": "39949", "tileY": "32875" }, "siteId": "site:b18cb1ff3b9b9dc5fe0f1ec018363ee8", "siteSeed": "cd0fcecd5c7a1d7fc278de9ab81b14370d3124e14bc25f555a889ca3e107b418", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1248", "chunkY": "1264", "localX": 432, "localY": 208 }, "minimumLevel": 11, "provenance": { "approachChunk": { "x": 225, "y": 240 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:2a0f324e1fa7bba9067a07704759a116", "footprintChunk": { "x": 224, "y": 240 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:grassland:small:01", "sizeTier": "small" }, "region": { "biome": "woodland", "regionX": "156", "regionY": "158" }, "siteClass": "dungeon", "siteId": "site:b18cb1ff3b9b9dc5fe0f1ec018363ee8", "siteSeed": "b18cb1ff3b9b9dc5fe0f1ec018363ee8a91fa2bd58af86e53f8d3b5d67e16982", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "39944", "tileY": "32867", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:b18cb1ff3b9b9dc5fe0f1ec018363ee8", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1248", "chunkY": "1264", "localX": 432, "localY": 208 }, "minimumLevel": 11, "provenance": { "approachChunk": { "x": 225, "y": 240 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:2a0f324e1fa7bba9067a07704759a116", "footprintChunk": { "x": 224, "y": 240 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:grassland:small:01", "sizeTier": "small" }, "region": { "biome": "woodland", "regionX": "156", "regionY": "158" }, "siteClass": "dungeon", "siteId": "site:b18cb1ff3b9b9dc5fe0f1ec018363ee8", "siteSeed": "b18cb1ff3b9b9dc5fe0f1ec018363ee8a91fa2bd58af86e53f8d3b5d67e16982", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Standard Frostland Cave", "layoutSeed": "838625495e7912fddb90392419498126fac246128c412c0878ec97cacc4271bb", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "290aa124a864f4be0b7b45608a45af26ea7e1f8a5a1369ffb53af0ce1582ec5f", "chunkX": "1150", "chunkY": "1048" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:upland:standard:01", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "143,131", "regionName": "Frostland", "roadAnchor": { "tileX": "36813", "tileY": "27259" }, "siteId": "site:7121db385eb3eafd1d0de2f63b962b79", "siteSeed": "7920c9299ea9db61955d186909657d5cd343ca76c5e028aa2e7c007ec07fc472", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1150", "chunkY": "1048", "localX": 432, "localY": 208 }, "minimumLevel": 41, "provenance": { "approachChunk": { "x": 127, "y": 24 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:290aa124a864f4be0b7b45608a45af26", "footprintChunk": { "x": 126, "y": 24 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:upland:standard:01", "sizeTier": "standard" }, "region": { "biome": "frostland", "regionX": "143", "regionY": "131" }, "siteClass": "dungeon", "siteId": "site:7121db385eb3eafd1d0de2f63b962b79", "siteSeed": "7121db385eb3eafd1d0de2f63b962b7937a81bc62d6a74c3b9aad2ffb0335f52", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "standard", "tileX": "36808", "tileY": "27251", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:7121db385eb3eafd1d0de2f63b962b79", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1150", "chunkY": "1048", "localX": 432, "localY": 208 }, "minimumLevel": 41, "provenance": { "approachChunk": { "x": 127, "y": 24 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:290aa124a864f4be0b7b45608a45af26", "footprintChunk": { "x": 126, "y": 24 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:upland:standard:01", "sizeTier": "standard" }, "region": { "biome": "frostland", "regionX": "143", "regionY": "131" }, "siteClass": "dungeon", "siteId": "site:7121db385eb3eafd1d0de2f63b962b79", "siteSeed": "7121db385eb3eafd1d0de2f63b962b7937a81bc62d6a74c3b9aad2ffb0335f52", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Deep Desert Cave", "layoutSeed": "f84b33b0c226956c2f3bf8c63657479bfe4c519c31c3570594847a7e9db44784", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "2ab5bea00d3fc62882bdc74779792e288105fb87f6c36328e972d31d6eee24c5", "chunkX": "1182", "chunkY": "1136" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:volcanic:deep:01", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "147,142", "regionName": "Desert", "roadAnchor": { "tileX": "37837", "tileY": "29547" }, "siteId": "site:d3c8467a6debcc243695dc42118afa16", "siteSeed": "adc209b8fb017b01896f1b88ba6757ff7dcf9fc25831ee2ab12c7597fd58566f", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1182", "chunkY": "1136", "localX": 432, "localY": 208 }, "minimumLevel": 11, "provenance": { "approachChunk": { "x": 159, "y": 112 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:2ab5bea00d3fc62882bdc74779792e28", "footprintChunk": { "x": 158, "y": 112 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:volcanic:deep:01", "sizeTier": "deep" }, "region": { "biome": "desert", "regionX": "147", "regionY": "142" }, "siteClass": "dungeon", "siteId": "site:d3c8467a6debcc243695dc42118afa16", "siteSeed": "d3c8467a6debcc243695dc42118afa1608f7461293e9b1ecf171b1caa93e7f50", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "deep", "tileX": "37832", "tileY": "29539", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:d3c8467a6debcc243695dc42118afa16", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1182", "chunkY": "1136", "localX": 432, "localY": 208 }, "minimumLevel": 11, "provenance": { "approachChunk": { "x": 159, "y": 112 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:2ab5bea00d3fc62882bdc74779792e28", "footprintChunk": { "x": 158, "y": 112 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:volcanic:deep:01", "sizeTier": "deep" }, "region": { "biome": "desert", "regionX": "147", "regionY": "142" }, "siteClass": "dungeon", "siteId": "site:d3c8467a6debcc243695dc42118afa16", "siteSeed": "d3c8467a6debcc243695dc42118afa1608f7461293e9b1ecf171b1caa93e7f50", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Grassland Cave", "layoutSeed": "88ea1023da872a957c7f431d0c4a8da5663c2f9d25455fce8f88d03cb57555e3", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "bac50d35cda50b192ac60d88c10cbab1723e98089e9fcb7b765baf615b17a818", "chunkX": "1094", "chunkY": "1134" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:wetland:small:01", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "136,141", "regionName": "Grassland", "roadAnchor": { "tileX": "35021", "tileY": "29495" }, "siteId": "site:7f2ef8e9733c98c8e4bbf16c74e83c11", "siteSeed": "122df9b72eef6a64fae79e372cc23b923830af124684974e6f9368348ee1c97a", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1094", "chunkY": "1134", "localX": 432, "localY": 208 }, "minimumLevel": 41, "provenance": { "approachChunk": { "x": 71, "y": 110 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:bac50d35cda50b192ac60d88c10cbab1", "footprintChunk": { "x": 70, "y": 110 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:wetland:small:01", "sizeTier": "small" }, "region": { "biome": "grassland", "regionX": "136", "regionY": "141" }, "siteClass": "dungeon", "siteId": "site:7f2ef8e9733c98c8e4bbf16c74e83c11", "siteSeed": "7f2ef8e9733c98c8e4bbf16c74e83c116dc4f91a9e992d2a4da62a07a862fb56", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "35016", "tileY": "29487", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:7f2ef8e9733c98c8e4bbf16c74e83c11", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1094", "chunkY": "1134", "localX": 432, "localY": 208 }, "minimumLevel": 41, "provenance": { "approachChunk": { "x": 71, "y": 110 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:bac50d35cda50b192ac60d88c10cbab1", "footprintChunk": { "x": 70, "y": 110 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:wetland:small:01", "sizeTier": "small" }, "region": { "biome": "grassland", "regionX": "136", "regionY": "141" }, "siteClass": "dungeon", "siteId": "site:7f2ef8e9733c98c8e4bbf16c74e83c11", "siteSeed": "7f2ef8e9733c98c8e4bbf16c74e83c116dc4f91a9e992d2a4da62a07a862fb56", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Standard Wetland Cave", "layoutSeed": "3edc6c33fef810ce265d8e8d317adaa4bac91c6e9dc3a81d2cf4a84df94e4909", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "1221f6dcac5b96c96c850d1b6dccadfff8a04f949ac413ac64993363b922300a", "chunkX": "1118", "chunkY": "1124" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:wetland:standard:01", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "139,140", "regionName": "Wetland", "roadAnchor": { "tileX": "35789", "tileY": "29235" }, "siteId": "site:0a0d547d361f87391d8452e6f8396309", "siteSeed": "3a4e1c63ac0167dfe32870a2d47130c5b21be96d77ec2294fae957f71462beba", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1118", "chunkY": "1124", "localX": 432, "localY": 208 }, "minimumLevel": 41, "provenance": { "approachChunk": { "x": 95, "y": 100 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:1221f6dcac5b96c96c850d1b6dccadff", "footprintChunk": { "x": 94, "y": 100 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:wetland:standard:01", "sizeTier": "standard" }, "region": { "biome": "wetland", "regionX": "139", "regionY": "140" }, "siteClass": "dungeon", "siteId": "site:0a0d547d361f87391d8452e6f8396309", "siteSeed": "0a0d547d361f87391d8452e6f839630939dba5372bae2a37f49908c3b3711af0", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "standard", "tileX": "35784", "tileY": "29227", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:0a0d547d361f87391d8452e6f8396309", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1118", "chunkY": "1124", "localX": 432, "localY": 208 }, "minimumLevel": 41, "provenance": { "approachChunk": { "x": 95, "y": 100 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:1221f6dcac5b96c96c850d1b6dccadff", "footprintChunk": { "x": 94, "y": 100 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:wetland:standard:01", "sizeTier": "standard" }, "region": { "biome": "wetland", "regionX": "139", "regionY": "140" }, "siteClass": "dungeon", "siteId": "site:0a0d547d361f87391d8452e6f8396309", "siteSeed": "0a0d547d361f87391d8452e6f839630939dba5372bae2a37f49908c3b3711af0", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Standard Woodland Cave", "layoutSeed": "c397f12da35f7530b9668fe17c732c0e8bc9c3d277cfbe3f9267c5fbc3f23b1b", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "aa73ff6c4474987891e2a9e4d447e83de4f601aebe20543eb7c0ee354c14041c", "chunkX": "1062", "chunkY": "1268" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:woodland:standard:01", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "132,158", "regionName": "Woodland", "roadAnchor": { "tileX": "33997", "tileY": "32979" }, "siteId": "site:70f485b1862ac199814be0b2530e986a", "siteSeed": "7299ddef9137a31a6de8f79ba3a71d922bffb128accfccc056b06c8364ce89f2", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1062", "chunkY": "1268", "localX": 432, "localY": 208 }, "minimumLevel": 11, "provenance": { "approachChunk": { "x": 39, "y": 244 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:aa73ff6c4474987891e2a9e4d447e83d", "footprintChunk": { "x": 38, "y": 244 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:woodland:standard:01", "sizeTier": "standard" }, "region": { "biome": "woodland", "regionX": "132", "regionY": "158" }, "siteClass": "dungeon", "siteId": "site:70f485b1862ac199814be0b2530e986a", "siteSeed": "70f485b1862ac199814be0b2530e986ab95a3ecabddb617f2b60e71c69f18fdf", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "standard", "tileX": "33992", "tileY": "32971", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:70f485b1862ac199814be0b2530e986a", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1062", "chunkY": "1268", "localX": 432, "localY": 208 }, "minimumLevel": 11, "provenance": { "approachChunk": { "x": 39, "y": 244 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:aa73ff6c4474987891e2a9e4d447e83d", "footprintChunk": { "x": 38, "y": 244 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:woodland:standard:01", "sizeTier": "standard" }, "region": { "biome": "woodland", "regionX": "132", "regionY": "158" }, "siteClass": "dungeon", "siteId": "site:70f485b1862ac199814be0b2530e986a", "siteSeed": "70f485b1862ac199814be0b2530e986ab95a3ecabddb617f2b60e71c69f18fdf", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "procedural-fort-family", "parcel": { "familyId": "site-family:fort", "height": 36, "label": "Upland Fort", "layoutSeed": "ffe8b1fc8cecccfdb3fb9d44dd6a9aea518fb07f02fb7382f89eec73e3a730cc", "packageId": "procedural-fort-family", "pages": [{ "chunkX": "1199", "chunkY": "1113" }, { "chunkX": "1200", "chunkY": "1113" }, { "chunkX": "1199", "chunkY": "1114" }, { "chunkX": "1200", "chunkY": "1114" }], "roadAnchor": { "tileX": "38423", "tileY": "28951" }, "siteId": "site:ffe8b1fc8cecccfdb3fb9d44dd6a9aea", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1200", "chunkY": "1113", "localX": 16, "localY": 624 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 177, "y": 89 }, { "x": 178, "y": 89 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:d2bca65778026e908f0b7f0c39cad025", "footprintChunks": [{ "x": 175, "y": 89 }, { "x": 176, "y": 89 }, { "x": 175, "y": 90 }, { "x": 176, "y": 90 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:fort:grassland:small:01", "sizeTier": "small" }, "region": { "biome": "upland", "regionX": "150", "regionY": "139" }, "siteClass": "dungeon", "siteId": "site:ffe8b1fc8cecccfdb3fb9d44dd6a9aea", "siteSeed": "ffe8b1fc8cecccfdb3fb9d44dd6a9aea518fb07f02fb7382f89eec73e3a730cc", "version": "site-socket-planned-fort-v1" }, "tier": "small", "tileX": "38376", "tileY": "28938", "version": "planned-fort-family-candidate-v1", "width": 48 }, "siteId": "site:ffe8b1fc8cecccfdb3fb9d44dd6a9aea", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1200", "chunkY": "1113", "localX": 16, "localY": 624 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 177, "y": 89 }, { "x": 178, "y": 89 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:d2bca65778026e908f0b7f0c39cad025", "footprintChunks": [{ "x": 175, "y": 89 }, { "x": 176, "y": 89 }, { "x": 175, "y": 90 }, { "x": 176, "y": 90 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:fort:grassland:small:01", "sizeTier": "small" }, "region": { "biome": "upland", "regionX": "150", "regionY": "139" }, "siteClass": "dungeon", "siteId": "site:ffe8b1fc8cecccfdb3fb9d44dd6a9aea", "siteSeed": "ffe8b1fc8cecccfdb3fb9d44dd6a9aea518fb07f02fb7382f89eec73e3a730cc", "version": "site-socket-planned-fort-v1" }, "version": "site-reservation-planned-fort-v1" }, { "packageId": "procedural-fort-family", "parcel": { "familyId": "site-family:fort", "height": 60, "label": "Woodland Fort", "layoutSeed": "11bfa3b7b65142fb1b16282ce202a296511bb27178c413720c7a9eeded5058b5", "packageId": "procedural-fort-family", "pages": [{ "chunkX": "1065", "chunkY": "1278" }, { "chunkX": "1066", "chunkY": "1278" }, { "chunkX": "1065", "chunkY": "1279" }, { "chunkX": "1066", "chunkY": "1279" }, { "chunkX": "1065", "chunkY": "1280" }, { "chunkX": "1066", "chunkY": "1280" }], "roadAnchor": { "tileX": "34139", "tileY": "33267" }, "siteId": "site:11bfa3b7b65142fb1b16282ce202a296", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1066", "chunkY": "1279", "localX": 16, "localY": 112 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 43, "y": 255 }, { "x": 44, "y": 255 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:8b98ed6032309b7e1bc5f5ecf30a3d6d", "footprintChunks": [{ "x": 41, "y": 254 }, { "x": 42, "y": 254 }, { "x": 41, "y": 255 }, { "x": 42, "y": 255 }, { "x": 41, "y": 256 }, { "x": 42, "y": 256 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:fort:woodland:standard:01", "sizeTier": "standard" }, "region": { "biome": "woodland", "regionX": "133", "regionY": "159" }, "siteClass": "dungeon", "siteId": "site:11bfa3b7b65142fb1b16282ce202a296", "siteSeed": "11bfa3b7b65142fb1b16282ce202a296511bb27178c413720c7a9eeded5058b5", "version": "site-socket-planned-fort-v1" }, "tier": "standard", "tileX": "34084", "tileY": "33228", "version": "planned-fort-family-candidate-v1", "width": 56 }, "siteId": "site:11bfa3b7b65142fb1b16282ce202a296", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1066", "chunkY": "1279", "localX": 16, "localY": 112 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 43, "y": 255 }, { "x": 44, "y": 255 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:8b98ed6032309b7e1bc5f5ecf30a3d6d", "footprintChunks": [{ "x": 41, "y": 254 }, { "x": 42, "y": 254 }, { "x": 41, "y": 255 }, { "x": 42, "y": 255 }, { "x": 41, "y": 256 }, { "x": 42, "y": 256 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:fort:woodland:standard:01", "sizeTier": "standard" }, "region": { "biome": "woodland", "regionX": "133", "regionY": "159" }, "siteClass": "dungeon", "siteId": "site:11bfa3b7b65142fb1b16282ce202a296", "siteSeed": "11bfa3b7b65142fb1b16282ce202a296511bb27178c413720c7a9eeded5058b5", "version": "site-socket-planned-fort-v1" }, "version": "site-reservation-planned-fort-v1" }, { "packageId": "procedural-fort-family", "parcel": { "familyId": "site-family:fort", "height": 70, "label": "Tropical Fort", "layoutSeed": "dba6c6435b9bca6d810e5bb462e98f803dd98d8061af5c2511feae6721f729b9", "packageId": "procedural-fort-family", "pages": [{ "chunkX": "1272", "chunkY": "1244" }, { "chunkX": "1273", "chunkY": "1244" }, { "chunkX": "1274", "chunkY": "1244" }, { "chunkX": "1272", "chunkY": "1245" }, { "chunkX": "1273", "chunkY": "1245" }, { "chunkX": "1274", "chunkY": "1245" }, { "chunkX": "1272", "chunkY": "1246" }, { "chunkX": "1273", "chunkY": "1246" }, { "chunkX": "1274", "chunkY": "1246" }], "roadAnchor": { "tileX": "40751", "tileY": "32413" }, "siteId": "site:dba6c6435b9bca6d810e5bb462e98f80", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1273", "chunkY": "1245", "localX": 528, "localY": 240 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 249, "y": 223 }, { "x": 249, "y": 224 }, { "x": 249, "y": 225 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:50534e0e5a2b25f305278b0cca66d44f", "footprintChunks": [{ "x": 248, "y": 220 }, { "x": 249, "y": 220 }, { "x": 250, "y": 220 }, { "x": 248, "y": 221 }, { "x": 249, "y": 221 }, { "x": 250, "y": 221 }, { "x": 248, "y": 222 }, { "x": 249, "y": 222 }, { "x": 250, "y": 222 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v2", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:fort:tropical:large:01", "sizeTier": "large" }, "region": { "biome": "tropical", "regionX": "159", "regionY": "155" }, "siteClass": "dungeon", "siteId": "site:dba6c6435b9bca6d810e5bb462e98f80", "siteSeed": "dba6c6435b9bca6d810e5bb462e98f803dd98d8061af5c2511feae6721f729b9", "version": "site-socket-planned-fort-v1" }, "tier": "large", "tileX": "40712", "tileY": "32344", "version": "planned-fort-family-candidate-v2", "width": 80 }, "siteId": "site:dba6c6435b9bca6d810e5bb462e98f80", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1273", "chunkY": "1245", "localX": 528, "localY": 240 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 249, "y": 223 }, { "x": 249, "y": 224 }, { "x": 249, "y": 225 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:50534e0e5a2b25f305278b0cca66d44f", "footprintChunks": [{ "x": 248, "y": 220 }, { "x": 249, "y": 220 }, { "x": 250, "y": 220 }, { "x": 248, "y": 221 }, { "x": 249, "y": 221 }, { "x": 250, "y": 221 }, { "x": 248, "y": 222 }, { "x": 249, "y": 222 }, { "x": 250, "y": 222 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v2", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:fort:tropical:large:01", "sizeTier": "large" }, "region": { "biome": "tropical", "regionX": "159", "regionY": "155" }, "siteClass": "dungeon", "siteId": "site:dba6c6435b9bca6d810e5bb462e98f80", "siteSeed": "dba6c6435b9bca6d810e5bb462e98f803dd98d8061af5c2511feae6721f729b9", "version": "site-socket-planned-fort-v1" }, "version": "site-reservation-planned-fort-v1" }, { "packageId": "procedural-fort-family", "parcel": { "familyId": "site-family:fort", "height": 60, "label": "Standard Desert Fort", "layoutSeed": "f4f18e33059ebae951c5efda7927adcddf49a40844fd199d20d252bb636c8807", "packageId": "procedural-fort-family", "pages": [{ "chunkX": "1159", "chunkY": "1204" }, { "chunkX": "1160", "chunkY": "1204" }, { "chunkX": "1159", "chunkY": "1205" }, { "chunkX": "1160", "chunkY": "1205" }, { "chunkX": "1159", "chunkY": "1206" }, { "chunkX": "1160", "chunkY": "1206" }], "roadAnchor": { "tileX": "37147", "tileY": "31343" }, "siteId": "site:f4f18e33059ebae951c5efda7927adcd", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1160", "chunkY": "1205", "localX": 16, "localY": 112 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 137, "y": 181 }, { "x": 138, "y": 181 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:b0ccfc0d05c9971d4d21e3ea0be66455", "footprintChunks": [{ "x": 135, "y": 180 }, { "x": 136, "y": 180 }, { "x": 135, "y": 181 }, { "x": 136, "y": 181 }, { "x": 135, "y": 182 }, { "x": 136, "y": 182 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:desert:standard:01", "sizeTier": "standard" }, "region": { "biome": "desert", "regionX": "145", "regionY": "150" }, "siteClass": "dungeon", "siteId": "site:f4f18e33059ebae951c5efda7927adcd", "siteSeed": "f4f18e33059ebae951c5efda7927adcddf49a40844fd199d20d252bb636c8807", "version": "site-socket-planned-fort-v1" }, "tier": "standard", "tileX": "37092", "tileY": "31304", "version": "planned-fort-family-candidate-v1", "width": 56 }, "siteId": "site:f4f18e33059ebae951c5efda7927adcd", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1160", "chunkY": "1205", "localX": 16, "localY": 112 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 137, "y": 181 }, { "x": 138, "y": 181 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:b0ccfc0d05c9971d4d21e3ea0be66455", "footprintChunks": [{ "x": 135, "y": 180 }, { "x": 136, "y": 180 }, { "x": 135, "y": 181 }, { "x": 136, "y": 181 }, { "x": 135, "y": 182 }, { "x": 136, "y": 182 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:desert:standard:01", "sizeTier": "standard" }, "region": { "biome": "desert", "regionX": "145", "regionY": "150" }, "siteClass": "dungeon", "siteId": "site:f4f18e33059ebae951c5efda7927adcd", "siteSeed": "f4f18e33059ebae951c5efda7927adcddf49a40844fd199d20d252bb636c8807", "version": "site-socket-planned-fort-v1" }, "version": "site-reservation-planned-fort-v1" }, { "packageId": "procedural-fort-family", "parcel": { "familyId": "site-family:fort", "height": 70, "label": "Deep Upland Fort", "layoutSeed": "008569b825d37f670bef85494852022f4d731cbf8b797338ebc376d93f3fdb6f", "packageId": "procedural-fort-family", "pages": [{ "chunkX": "1214", "chunkY": "1092" }, { "chunkX": "1215", "chunkY": "1092" }, { "chunkX": "1216", "chunkY": "1092" }, { "chunkX": "1217", "chunkY": "1092" }, { "chunkX": "1214", "chunkY": "1093" }, { "chunkX": "1215", "chunkY": "1093" }, { "chunkX": "1216", "chunkY": "1093" }, { "chunkX": "1217", "chunkY": "1093" }, { "chunkX": "1214", "chunkY": "1094" }, { "chunkX": "1215", "chunkY": "1094" }, { "chunkX": "1216", "chunkY": "1094" }, { "chunkX": "1217", "chunkY": "1094" }], "roadAnchor": { "tileX": "38951", "tileY": "28431" }, "siteId": "site:008569b825d37f670bef85494852022f", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1216", "chunkY": "1093", "localX": 16, "localY": 240 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 194, "y": 69 }, { "x": 195, "y": 69 }, { "x": 196, "y": 69 }, { "x": 197, "y": 69 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:e871d3db32be11afd76de53f28dd2123", "footprintChunks": [{ "x": 190, "y": 68 }, { "x": 191, "y": 68 }, { "x": 192, "y": 68 }, { "x": 193, "y": 68 }, { "x": 190, "y": 69 }, { "x": 191, "y": 69 }, { "x": 192, "y": 69 }, { "x": 193, "y": 69 }, { "x": 190, "y": 70 }, { "x": 191, "y": 70 }, { "x": 192, "y": 70 }, { "x": 193, "y": 70 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v2", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:upland:deep:01", "sizeTier": "deep" }, "region": { "biome": "upland", "regionX": "152", "regionY": "136" }, "siteClass": "dungeon", "siteId": "site:008569b825d37f670bef85494852022f", "siteSeed": "008569b825d37f670bef85494852022f4d731cbf8b797338ebc376d93f3fdb6f", "version": "site-socket-planned-fort-v1" }, "tier": "deep", "tileX": "38872", "tileY": "28392", "version": "planned-fort-family-candidate-v2", "width": 80 }, "siteId": "site:008569b825d37f670bef85494852022f", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1216", "chunkY": "1093", "localX": 16, "localY": 240 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 194, "y": 69 }, { "x": 195, "y": 69 }, { "x": 196, "y": 69 }, { "x": 197, "y": 69 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:e871d3db32be11afd76de53f28dd2123", "footprintChunks": [{ "x": 190, "y": 68 }, { "x": 191, "y": 68 }, { "x": 192, "y": 68 }, { "x": 193, "y": 68 }, { "x": 190, "y": 69 }, { "x": 191, "y": 69 }, { "x": 192, "y": 69 }, { "x": 193, "y": 69 }, { "x": 190, "y": 70 }, { "x": 191, "y": 70 }, { "x": 192, "y": 70 }, { "x": 193, "y": 70 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v2", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:upland:deep:01", "sizeTier": "deep" }, "region": { "biome": "upland", "regionX": "152", "regionY": "136" }, "siteClass": "dungeon", "siteId": "site:008569b825d37f670bef85494852022f", "siteSeed": "008569b825d37f670bef85494852022f4d731cbf8b797338ebc376d93f3fdb6f", "version": "site-socket-planned-fort-v1" }, "version": "site-reservation-planned-fort-v1" }, { "packageId": "procedural-fort-family", "parcel": { "familyId": "site-family:fort", "height": 60, "label": "Standard Frostland Fort", "layoutSeed": "02a269ea8794bf78db4404a2a38a323d2afec6dcf20d81815f5c32a0448ada6a", "packageId": "procedural-fort-family", "pages": [{ "chunkX": "1173", "chunkY": "1062" }, { "chunkX": "1174", "chunkY": "1062" }, { "chunkX": "1173", "chunkY": "1063" }, { "chunkX": "1174", "chunkY": "1063" }, { "chunkX": "1173", "chunkY": "1064" }, { "chunkX": "1174", "chunkY": "1064" }], "roadAnchor": { "tileX": "37551", "tileY": "27671" }, "siteId": "site:02a269ea8794bf78db4404a2a38a323d", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1174", "chunkY": "1063", "localX": 16, "localY": 112 }, "minimumLevel": 41, "provenance": { "approachChunks": [{ "x": 149, "y": 41 }, { "x": 149, "y": 42 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:1df586302e37d4d307b7c920faa7bc06", "footprintChunks": [{ "x": 149, "y": 38 }, { "x": 150, "y": 38 }, { "x": 149, "y": 39 }, { "x": 150, "y": 39 }, { "x": 149, "y": 40 }, { "x": 150, "y": 40 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:upland:standard:01", "sizeTier": "standard" }, "region": { "biome": "frostland", "regionX": "146", "regionY": "132" }, "siteClass": "dungeon", "siteId": "site:02a269ea8794bf78db4404a2a38a323d", "siteSeed": "02a269ea8794bf78db4404a2a38a323d2afec6dcf20d81815f5c32a0448ada6a", "version": "site-socket-planned-fort-v1" }, "tier": "standard", "tileX": "37540", "tileY": "27612", "version": "planned-fort-family-candidate-v1", "width": 56 }, "siteId": "site:02a269ea8794bf78db4404a2a38a323d", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1174", "chunkY": "1063", "localX": 16, "localY": 112 }, "minimumLevel": 41, "provenance": { "approachChunks": [{ "x": 149, "y": 41 }, { "x": 149, "y": 42 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:1df586302e37d4d307b7c920faa7bc06", "footprintChunks": [{ "x": 149, "y": 38 }, { "x": 150, "y": 38 }, { "x": 149, "y": 39 }, { "x": 150, "y": 39 }, { "x": 149, "y": 40 }, { "x": 150, "y": 40 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:upland:standard:01", "sizeTier": "standard" }, "region": { "biome": "frostland", "regionX": "146", "regionY": "132" }, "siteClass": "dungeon", "siteId": "site:02a269ea8794bf78db4404a2a38a323d", "siteSeed": "02a269ea8794bf78db4404a2a38a323d2afec6dcf20d81815f5c32a0448ada6a", "version": "site-socket-planned-fort-v1" }, "version": "site-reservation-planned-fort-v1" }, { "packageId": "procedural-fort-family", "parcel": { "familyId": "site-family:fort", "height": 36, "label": "Small Volcanic Fort", "layoutSeed": "0904c59ac05bc284028fc18b3029f7f3a97b06bd420bb79eaa2595c88e7db527", "packageId": "procedural-fort-family", "pages": [{ "chunkX": "1111", "chunkY": "1175" }, { "chunkX": "1112", "chunkY": "1175" }, { "chunkX": "1111", "chunkY": "1176" }, { "chunkX": "1112", "chunkY": "1176" }], "roadAnchor": { "tileX": "35607", "tileY": "30563" }, "siteId": "site:0904c59ac05bc284028fc18b3029f7f3", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1112", "chunkY": "1175", "localX": 16, "localY": 624 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 89, "y": 151 }, { "x": 90, "y": 151 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:7a40893d6503fdf87f83f3b756205a1c", "footprintChunks": [{ "x": 87, "y": 151 }, { "x": 88, "y": 151 }, { "x": 87, "y": 152 }, { "x": 88, "y": 152 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:wetland:small:01", "sizeTier": "small" }, "region": { "biome": "volcanic", "regionX": "139", "regionY": "146" }, "siteClass": "dungeon", "siteId": "site:0904c59ac05bc284028fc18b3029f7f3", "siteSeed": "0904c59ac05bc284028fc18b3029f7f3a97b06bd420bb79eaa2595c88e7db527", "version": "site-socket-planned-fort-v1" }, "tier": "small", "tileX": "35560", "tileY": "30550", "version": "planned-fort-family-candidate-v1", "width": 48 }, "siteId": "site:0904c59ac05bc284028fc18b3029f7f3", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1112", "chunkY": "1175", "localX": 16, "localY": 624 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 89, "y": 151 }, { "x": 90, "y": 151 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:7a40893d6503fdf87f83f3b756205a1c", "footprintChunks": [{ "x": 87, "y": 151 }, { "x": 88, "y": 151 }, { "x": 87, "y": 152 }, { "x": 88, "y": 152 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:wetland:small:01", "sizeTier": "small" }, "region": { "biome": "volcanic", "regionX": "139", "regionY": "146" }, "siteClass": "dungeon", "siteId": "site:0904c59ac05bc284028fc18b3029f7f3", "siteSeed": "0904c59ac05bc284028fc18b3029f7f3a97b06bd420bb79eaa2595c88e7db527", "version": "site-socket-planned-fort-v1" }, "version": "site-reservation-planned-fort-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Woodland Ruin", "layoutSeed": "4f56d59338391bf09150f20f6fc0a87bf42e2129e6ff56999662b16f573fcbc9", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1102", "chunkY": "1287" }, { "chunkX": "1102", "chunkY": "1288" }], "roadAnchor": { "tileX": "35292", "tileY": "33475" }, "siteId": "site:4f56d59338391bf09150f20f6fc0a87b", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1102", "chunkY": "1287", "localX": 528, "localY": 720 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 79, "y": 263 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:c572bf0e9c70664b53819b8e03e6d4db", "footprintChunks": [{ "x": 78, "y": 263 }, { "x": 78, "y": 264 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:ruin:woodland:small:01", "sizeTier": "small" }, "region": { "biome": "woodland", "regionX": "137", "regionY": "160" }, "siteClass": "dungeon", "siteId": "site:4f56d59338391bf09150f20f6fc0a87b", "siteSeed": "4f56d59338391bf09150f20f6fc0a87bf42e2129e6ff56999662b16f573fcbc9", "version": "site-socket-planned-ruin-v1" }, "tier": "small", "tileX": "35267", "tileY": "33462", "version": "planned-ruin-family-candidate-v1", "width": 26 }, "siteId": "site:4f56d59338391bf09150f20f6fc0a87b", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1102", "chunkY": "1287", "localX": 528, "localY": 720 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 79, "y": 263 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:c572bf0e9c70664b53819b8e03e6d4db", "footprintChunks": [{ "x": 78, "y": 263 }, { "x": 78, "y": 264 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:ruin:woodland:small:01", "sizeTier": "small" }, "region": { "biome": "woodland", "regionX": "137", "regionY": "160" }, "siteClass": "dungeon", "siteId": "site:4f56d59338391bf09150f20f6fc0a87b", "siteSeed": "4f56d59338391bf09150f20f6fc0a87bf42e2129e6ff56999662b16f573fcbc9", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Grassland Ruin", "layoutSeed": "e0f695606062eb7a85ce00dd45b05b8a939f3ec5d7f8a7447ddfc8a48fc8d0a1", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1099", "chunkY": "1223" }, { "chunkX": "1100", "chunkY": "1223" }, { "chunkX": "1099", "chunkY": "1224" }, { "chunkX": "1100", "chunkY": "1224" }], "roadAnchor": { "tileX": "35227", "tileY": "31811" }, "siteId": "site:e0f695606062eb7a85ce00dd45b05b8a", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1100", "chunkY": "1223", "localX": 16, "localY": 720 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 77, "y": 199 }, { "x": 78, "y": 199 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:b31ae50d694953b5a2dfe29bc6a987bd", "footprintChunks": [{ "x": 75, "y": 199 }, { "x": 76, "y": 199 }, { "x": 75, "y": 200 }, { "x": 76, "y": 200 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:ruin:upland:standard:01", "sizeTier": "standard" }, "region": { "biome": "grassland", "regionX": "137", "regionY": "152" }, "siteClass": "dungeon", "siteId": "site:e0f695606062eb7a85ce00dd45b05b8a", "siteSeed": "e0f695606062eb7a85ce00dd45b05b8a939f3ec5d7f8a7447ddfc8a48fc8d0a1", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "35172", "tileY": "31798", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:e0f695606062eb7a85ce00dd45b05b8a", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1100", "chunkY": "1223", "localX": 16, "localY": 720 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 77, "y": 199 }, { "x": 78, "y": 199 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:b31ae50d694953b5a2dfe29bc6a987bd", "footprintChunks": [{ "x": 75, "y": 199 }, { "x": 76, "y": 199 }, { "x": 75, "y": 200 }, { "x": 76, "y": 200 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:ruin:upland:standard:01", "sizeTier": "standard" }, "region": { "biome": "grassland", "regionX": "137", "regionY": "152" }, "siteClass": "dungeon", "siteId": "site:e0f695606062eb7a85ce00dd45b05b8a", "siteSeed": "e0f695606062eb7a85ce00dd45b05b8a939f3ec5d7f8a7447ddfc8a48fc8d0a1", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 70, "label": "Volcanic Ruin", "layoutSeed": "4771323d4642197a072f5637cb1e7376fe6a8f3de942361adbf6b26c67e56298", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1273", "chunkY": "1094" }, { "chunkX": "1274", "chunkY": "1094" }, { "chunkX": "1273", "chunkY": "1095" }, { "chunkX": "1274", "chunkY": "1095" }, { "chunkX": "1273", "chunkY": "1096" }, { "chunkX": "1274", "chunkY": "1096" }], "roadAnchor": { "tileX": "40795", "tileY": "28483" }, "siteId": "site:4771323d4642197a072f5637cb1e7376", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1274", "chunkY": "1095", "localX": 16, "localY": 304 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 251, "y": 71 }, { "x": 252, "y": 71 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:bbf74776904f36594cc0410a2fd9ca6a", "footprintChunks": [{ "x": 249, "y": 70 }, { "x": 250, "y": 70 }, { "x": 249, "y": 71 }, { "x": 250, "y": 71 }, { "x": 249, "y": 72 }, { "x": 250, "y": 72 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v2", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:ruin:volcanic:large:01", "sizeTier": "large" }, "region": { "biome": "volcanic", "regionX": "159", "regionY": "136" }, "siteClass": "dungeon", "siteId": "site:4771323d4642197a072f5637cb1e7376", "siteSeed": "4771323d4642197a072f5637cb1e7376fe6a8f3de942361adbf6b26c67e56298", "version": "site-socket-planned-ruin-v1" }, "tier": "large", "tileX": "40740", "tileY": "28444", "version": "planned-ruin-family-candidate-v2", "width": 56 }, "siteId": "site:4771323d4642197a072f5637cb1e7376", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1274", "chunkY": "1095", "localX": 16, "localY": 304 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 251, "y": 71 }, { "x": 252, "y": 71 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:bbf74776904f36594cc0410a2fd9ca6a", "footprintChunks": [{ "x": 249, "y": 70 }, { "x": 250, "y": 70 }, { "x": 249, "y": 71 }, { "x": 250, "y": 71 }, { "x": 249, "y": 72 }, { "x": 250, "y": 72 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v2", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:ruin:volcanic:large:01", "sizeTier": "large" }, "region": { "biome": "volcanic", "regionX": "159", "regionY": "136" }, "siteClass": "dungeon", "siteId": "site:4771323d4642197a072f5637cb1e7376", "siteSeed": "4771323d4642197a072f5637cb1e7376fe6a8f3de942361adbf6b26c67e56298", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Standard Wetland Ruin", "layoutSeed": "697285318a41d7cf65e88e0182d8c8cd9956af42f3d36f643b24803e8e77c628", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1137", "chunkY": "1199" }, { "chunkX": "1138", "chunkY": "1199" }, { "chunkX": "1137", "chunkY": "1200" }, { "chunkX": "1138", "chunkY": "1200" }], "roadAnchor": { "tileX": "36443", "tileY": "31187" }, "siteId": "site:697285318a41d7cf65e88e0182d8c8cd", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1138", "chunkY": "1199", "localX": 16, "localY": 720 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 115, "y": 175 }, { "x": 116, "y": 175 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:10b17d673ed29ff7f52ad7d33b8ceaee", "footprintChunks": [{ "x": 113, "y": 175 }, { "x": 114, "y": 175 }, { "x": 113, "y": 176 }, { "x": 114, "y": 176 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:desert:standard:01", "sizeTier": "standard" }, "region": { "biome": "wetland", "regionX": "142", "regionY": "149" }, "siteClass": "dungeon", "siteId": "site:697285318a41d7cf65e88e0182d8c8cd", "siteSeed": "697285318a41d7cf65e88e0182d8c8cd9956af42f3d36f643b24803e8e77c628", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "36388", "tileY": "31174", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:697285318a41d7cf65e88e0182d8c8cd", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1138", "chunkY": "1199", "localX": 16, "localY": 720 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 115, "y": 175 }, { "x": 116, "y": 175 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:10b17d673ed29ff7f52ad7d33b8ceaee", "footprintChunks": [{ "x": 113, "y": 175 }, { "x": 114, "y": 175 }, { "x": 113, "y": 176 }, { "x": 114, "y": 176 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:desert:standard:01", "sizeTier": "standard" }, "region": { "biome": "wetland", "regionX": "142", "regionY": "149" }, "siteClass": "dungeon", "siteId": "site:697285318a41d7cf65e88e0182d8c8cd", "siteSeed": "697285318a41d7cf65e88e0182d8c8cd9956af42f3d36f643b24803e8e77c628", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 70, "label": "Deep Frostland Ruin", "layoutSeed": "0b4deace0faad9ece59d8e720f79da22710c36a03abb1b0a924ebe6cbb64efeb", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1248", "chunkY": "1178" }, { "chunkX": "1249", "chunkY": "1178" }, { "chunkX": "1250", "chunkY": "1178" }, { "chunkX": "1248", "chunkY": "1179" }, { "chunkX": "1249", "chunkY": "1179" }, { "chunkX": "1250", "chunkY": "1179" }, { "chunkX": "1248", "chunkY": "1180" }, { "chunkX": "1249", "chunkY": "1180" }, { "chunkX": "1250", "chunkY": "1180" }], "roadAnchor": { "tileX": "40011", "tileY": "30667" }, "siteId": "site:0b4deace0faad9ece59d8e720f79da22", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1249", "chunkY": "1179", "localX": 528, "localY": 304 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 227, "y": 155 }, { "x": 228, "y": 155 }, { "x": 229, "y": 155 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:2a3c6d058bff73e97d1aef594d0c6dcb", "footprintChunks": [{ "x": 224, "y": 154 }, { "x": 225, "y": 154 }, { "x": 226, "y": 154 }, { "x": 224, "y": 155 }, { "x": 225, "y": 155 }, { "x": 226, "y": 155 }, { "x": 224, "y": 156 }, { "x": 225, "y": 156 }, { "x": 226, "y": 156 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v2", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:frostland:deep:01", "sizeTier": "deep" }, "region": { "biome": "frostland", "regionX": "156", "regionY": "147" }, "siteClass": "dungeon", "siteId": "site:0b4deace0faad9ece59d8e720f79da22", "siteSeed": "0b4deace0faad9ece59d8e720f79da22710c36a03abb1b0a924ebe6cbb64efeb", "version": "site-socket-planned-ruin-v1" }, "tier": "deep", "tileX": "39956", "tileY": "30628", "version": "planned-ruin-family-candidate-v2", "width": 56 }, "siteId": "site:0b4deace0faad9ece59d8e720f79da22", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1249", "chunkY": "1179", "localX": 528, "localY": 304 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 227, "y": 155 }, { "x": 228, "y": 155 }, { "x": 229, "y": 155 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:2a3c6d058bff73e97d1aef594d0c6dcb", "footprintChunks": [{ "x": 224, "y": 154 }, { "x": 225, "y": 154 }, { "x": 226, "y": 154 }, { "x": 224, "y": 155 }, { "x": 225, "y": 155 }, { "x": 226, "y": 155 }, { "x": 224, "y": 156 }, { "x": 225, "y": 156 }, { "x": 226, "y": 156 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v2", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:frostland:deep:01", "sizeTier": "deep" }, "region": { "biome": "frostland", "regionX": "156", "regionY": "147" }, "siteClass": "dungeon", "siteId": "site:0b4deace0faad9ece59d8e720f79da22", "siteSeed": "0b4deace0faad9ece59d8e720f79da22710c36a03abb1b0a924ebe6cbb64efeb", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Standard Volcanic Ruin", "layoutSeed": "d08fd18faf311f7ffa05cfa8bde9aa11c4a314e877e8434d7c0fb9f7d524caba", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1079", "chunkY": "1169" }, { "chunkX": "1080", "chunkY": "1169" }, { "chunkX": "1079", "chunkY": "1170" }, { "chunkX": "1080", "chunkY": "1170" }], "roadAnchor": { "tileX": "34587", "tileY": "30407" }, "siteId": "site:d08fd18faf311f7ffa05cfa8bde9aa11", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1080", "chunkY": "1169", "localX": 16, "localY": 720 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 57, "y": 145 }, { "x": 58, "y": 145 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:5fd93836f9def82469cb6b9c47176c94", "footprintChunks": [{ "x": 55, "y": 145 }, { "x": 56, "y": 145 }, { "x": 55, "y": 146 }, { "x": 56, "y": 146 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:frostland:standard:01", "sizeTier": "standard" }, "region": { "biome": "volcanic", "regionX": "135", "regionY": "146" }, "siteClass": "dungeon", "siteId": "site:d08fd18faf311f7ffa05cfa8bde9aa11", "siteSeed": "d08fd18faf311f7ffa05cfa8bde9aa11c4a314e877e8434d7c0fb9f7d524caba", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "34532", "tileY": "30394", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:d08fd18faf311f7ffa05cfa8bde9aa11", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1080", "chunkY": "1169", "localX": 16, "localY": 720 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 57, "y": 145 }, { "x": 58, "y": 145 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:5fd93836f9def82469cb6b9c47176c94", "footprintChunks": [{ "x": 55, "y": 145 }, { "x": 56, "y": 145 }, { "x": 55, "y": 146 }, { "x": 56, "y": 146 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:frostland:standard:01", "sizeTier": "standard" }, "region": { "biome": "volcanic", "regionX": "135", "regionY": "146" }, "siteClass": "dungeon", "siteId": "site:d08fd18faf311f7ffa05cfa8bde9aa11", "siteSeed": "d08fd18faf311f7ffa05cfa8bde9aa11c4a314e877e8434d7c0fb9f7d524caba", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Small Grassland Ruin", "layoutSeed": "df07be841312306cd9aa2d6b4280f159b89465ee2003f7587d1ce515f8f6aac8", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1170", "chunkY": "1311" }, { "chunkX": "1170", "chunkY": "1312" }], "roadAnchor": { "tileX": "37468", "tileY": "34099" }, "siteId": "site:df07be841312306cd9aa2d6b4280f159", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1170", "chunkY": "1311", "localX": 528, "localY": 720 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 147, "y": 287 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:f175b6de4db123d3775bf4d7bb597f3d", "footprintChunks": [{ "x": 146, "y": 287 }, { "x": 146, "y": 288 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:grassland:small:01", "sizeTier": "small" }, "region": { "biome": "grassland", "regionX": "146", "regionY": "163" }, "siteClass": "dungeon", "siteId": "site:df07be841312306cd9aa2d6b4280f159", "siteSeed": "df07be841312306cd9aa2d6b4280f159b89465ee2003f7587d1ce515f8f6aac8", "version": "site-socket-planned-ruin-v1" }, "tier": "small", "tileX": "37443", "tileY": "34086", "version": "planned-ruin-family-candidate-v1", "width": 26 }, "siteId": "site:df07be841312306cd9aa2d6b4280f159", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1170", "chunkY": "1311", "localX": 528, "localY": 720 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 147, "y": 287 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:f175b6de4db123d3775bf4d7bb597f3d", "footprintChunks": [{ "x": 146, "y": 287 }, { "x": 146, "y": 288 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:grassland:small:01", "sizeTier": "small" }, "region": { "biome": "grassland", "regionX": "146", "regionY": "163" }, "siteClass": "dungeon", "siteId": "site:df07be841312306cd9aa2d6b4280f159", "siteSeed": "df07be841312306cd9aa2d6b4280f159b89465ee2003f7587d1ce515f8f6aac8", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Small Frostland Ruin", "layoutSeed": "1cefe829831df323286a2462e554e4f37527187790def930435cd24a3d3f8025", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1112", "chunkY": "1085" }, { "chunkX": "1112", "chunkY": "1086" }], "roadAnchor": { "tileX": "35599", "tileY": "28253" }, "siteId": "site:1cefe829831df323286a2462e554e4f3", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1112", "chunkY": "1085", "localX": 528, "localY": 720 }, "minimumLevel": 41, "provenance": { "approachChunks": [{ "x": 88, "y": 63 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:dd6aa5a36302610eab80a0a7bbb8bc39", "footprintChunks": [{ "x": 88, "y": 61 }, { "x": 88, "y": 62 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:tropical:small:01", "sizeTier": "small" }, "region": { "biome": "frostland", "regionX": "139", "regionY": "135" }, "siteClass": "dungeon", "siteId": "site:1cefe829831df323286a2462e554e4f3", "siteSeed": "1cefe829831df323286a2462e554e4f37527187790def930435cd24a3d3f8025", "version": "site-socket-planned-ruin-v1" }, "tier": "small", "tileX": "35587", "tileY": "28210", "version": "planned-ruin-family-candidate-v1", "width": 26 }, "siteId": "site:1cefe829831df323286a2462e554e4f3", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1112", "chunkY": "1085", "localX": 528, "localY": 720 }, "minimumLevel": 41, "provenance": { "approachChunks": [{ "x": 88, "y": 63 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:dd6aa5a36302610eab80a0a7bbb8bc39", "footprintChunks": [{ "x": 88, "y": 61 }, { "x": 88, "y": 62 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:tropical:small:01", "sizeTier": "small" }, "region": { "biome": "frostland", "regionX": "139", "regionY": "135" }, "siteClass": "dungeon", "siteId": "site:1cefe829831df323286a2462e554e4f3", "siteSeed": "1cefe829831df323286a2462e554e4f37527187790def930435cd24a3d3f8025", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Small Upland Ruin", "layoutSeed": "3efb34e4196ff2a0ef998fc7a70d3e06c9a5a0ea1385de29ae39ea6b03d636ab", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1228", "chunkY": "1201" }, { "chunkX": "1228", "chunkY": "1202" }], "roadAnchor": { "tileX": "39324", "tileY": "31239" }, "siteId": "site:3efb34e4196ff2a0ef998fc7a70d3e06", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1228", "chunkY": "1201", "localX": 528, "localY": 720 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 205, "y": 177 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:b35f7dd237c5051c1d01cd02240bc548", "footprintChunks": [{ "x": 204, "y": 177 }, { "x": 204, "y": 178 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:wetland:small:01", "sizeTier": "small" }, "region": { "biome": "upland", "regionX": "153", "regionY": "150" }, "siteClass": "dungeon", "siteId": "site:3efb34e4196ff2a0ef998fc7a70d3e06", "siteSeed": "3efb34e4196ff2a0ef998fc7a70d3e06c9a5a0ea1385de29ae39ea6b03d636ab", "version": "site-socket-planned-ruin-v1" }, "tier": "small", "tileX": "39299", "tileY": "31226", "version": "planned-ruin-family-candidate-v1", "width": 26 }, "siteId": "site:3efb34e4196ff2a0ef998fc7a70d3e06", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1228", "chunkY": "1201", "localX": 528, "localY": 720 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 205, "y": 177 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:b35f7dd237c5051c1d01cd02240bc548", "footprintChunks": [{ "x": 204, "y": 177 }, { "x": 204, "y": 178 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:wetland:small:01", "sizeTier": "small" }, "region": { "biome": "upland", "regionX": "153", "regionY": "150" }, "siteClass": "dungeon", "siteId": "site:3efb34e4196ff2a0ef998fc7a70d3e06", "siteSeed": "3efb34e4196ff2a0ef998fc7a70d3e06c9a5a0ea1385de29ae39ea6b03d636ab", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-crypt-family", "parcel": { "familyId": "site-family:crypt", "height": 12, "label": "Woodland Crypt", "layoutSeed": "800b36cde9b897db64bfa945cd595725dcdbd8573e74ddb1881a88eac5c47d28", "packageId": "procedural-crypt-family", "pages": [{ "chunkX": "1142", "chunkY": "1300" }], "roadAnchor": { "tileX": "36591", "tileY": "33813" }, "siteId": "site:800b36cde9b897db64bfa945cd595725", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1142", "chunkY": "1300", "localX": 528, "localY": 432 }, "minimumLevel": 1, "provenance": { "approachChunks": [{ "x": 119, "y": 276 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 1, "chunkId": "chunk:b6025f928343917b690c91db7187fd80", "footprintChunks": [{ "x": 118, "y": 276 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-small-crypt-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:crypt:grassland:small:01", "sizeTier": "small" }, "region": { "biome": "woodland", "regionX": "142", "regionY": "162" }, "siteClass": "dungeon", "siteId": "site:800b36cde9b897db64bfa945cd595725", "siteSeed": "800b36cde9b897db64bfa945cd595725dcdbd8573e74ddb1881a88eac5c47d28", "version": "site-socket-planned-crypt-v1" }, "tier": "small", "tileX": "36554", "tileY": "33805", "version": "planned-small-crypt-candidate-v1", "width": 12 }, "siteId": "site:800b36cde9b897db64bfa945cd595725", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1142", "chunkY": "1300", "localX": 528, "localY": 432 }, "minimumLevel": 1, "provenance": { "approachChunks": [{ "x": 119, "y": 276 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 1, "chunkId": "chunk:b6025f928343917b690c91db7187fd80", "footprintChunks": [{ "x": 118, "y": 276 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-small-crypt-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:crypt:grassland:small:01", "sizeTier": "small" }, "region": { "biome": "woodland", "regionX": "142", "regionY": "162" }, "siteClass": "dungeon", "siteId": "site:800b36cde9b897db64bfa945cd595725", "siteSeed": "800b36cde9b897db64bfa945cd595725dcdbd8573e74ddb1881a88eac5c47d28", "version": "site-socket-planned-crypt-v1" }, "version": "site-reservation-planned-crypt-v1" }, { "packageId": "procedural-crypt-family", "parcel": { "familyId": "site-family:crypt", "height": 12, "label": "Upland Crypt", "layoutSeed": "9de05c09fb01ec39abd41f273ac80306e552f4b58f7ffb069766d235ee527daf", "packageId": "procedural-crypt-family", "pages": [{ "chunkX": "1172", "chunkY": "1246" }], "roadAnchor": { "tileX": "37551", "tileY": "32409" }, "siteId": "site:9de05c09fb01ec39abd41f273ac80306", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1172", "chunkY": "1246", "localX": 528, "localY": 432 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 149, "y": 222 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:e13393b33168c95cf7fca05c820abe05", "footprintChunks": [{ "x": 148, "y": 222 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-family-candidate-v2", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:crypt:upland:standard:01", "sizeTier": "standard" }, "region": { "biome": "upland", "regionX": "146", "regionY": "155" }, "siteClass": "dungeon", "siteId": "site:9de05c09fb01ec39abd41f273ac80306", "siteSeed": "9de05c09fb01ec39abd41f273ac80306e552f4b58f7ffb069766d235ee527daf", "version": "site-socket-planned-crypt-v1" }, "tier": "standard", "tileX": "37514", "tileY": "32401", "version": "planned-crypt-family-candidate-v2", "width": 12 }, "siteId": "site:9de05c09fb01ec39abd41f273ac80306", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1172", "chunkY": "1246", "localX": 528, "localY": 432 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 149, "y": 222 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:e13393b33168c95cf7fca05c820abe05", "footprintChunks": [{ "x": 148, "y": 222 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-family-candidate-v2", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:crypt:upland:standard:01", "sizeTier": "standard" }, "region": { "biome": "upland", "regionX": "146", "regionY": "155" }, "siteClass": "dungeon", "siteId": "site:9de05c09fb01ec39abd41f273ac80306", "siteSeed": "9de05c09fb01ec39abd41f273ac80306e552f4b58f7ffb069766d235ee527daf", "version": "site-socket-planned-crypt-v1" }, "version": "site-reservation-planned-crypt-v1" }, { "packageId": "procedural-crypt-family", "parcel": { "familyId": "site-family:crypt", "height": 12, "label": "Desert Crypt", "layoutSeed": "6ec0a8b8de3eb59c3633478d2879932f76283bf376ce9fb2f910e84c5dbdedaa", "packageId": "procedural-crypt-family", "pages": [{ "chunkX": "1162", "chunkY": "1180" }], "roadAnchor": { "tileX": "37199", "tileY": "30719" }, "siteId": "site:6ec0a8b8de3eb59c3633478d2879932f", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1162", "chunkY": "1180", "localX": 528, "localY": 432 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 138, "y": 157 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:e6f37f0aadaa8748dda841613daf5eec", "footprintChunks": [{ "x": 138, "y": 156 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-family-candidate-v2", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:crypt:frostland:deep:01", "sizeTier": "deep" }, "region": { "biome": "desert", "regionX": "145", "regionY": "147" }, "siteClass": "dungeon", "siteId": "site:6ec0a8b8de3eb59c3633478d2879932f", "siteSeed": "6ec0a8b8de3eb59c3633478d2879932f76283bf376ce9fb2f910e84c5dbdedaa", "version": "site-socket-planned-crypt-v1" }, "tier": "deep", "tileX": "37194", "tileY": "30685", "version": "planned-crypt-family-candidate-v2", "width": 12 }, "siteId": "site:6ec0a8b8de3eb59c3633478d2879932f", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1162", "chunkY": "1180", "localX": 528, "localY": 432 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 138, "y": 157 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:e6f37f0aadaa8748dda841613daf5eec", "footprintChunks": [{ "x": 138, "y": 156 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-family-candidate-v2", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:crypt:frostland:deep:01", "sizeTier": "deep" }, "region": { "biome": "desert", "regionX": "145", "regionY": "147" }, "siteClass": "dungeon", "siteId": "site:6ec0a8b8de3eb59c3633478d2879932f", "siteSeed": "6ec0a8b8de3eb59c3633478d2879932f76283bf376ce9fb2f910e84c5dbdedaa", "version": "site-socket-planned-crypt-v1" }, "version": "site-reservation-planned-crypt-v1" }, { "packageId": "procedural-crypt-family", "parcel": { "familyId": "site-family:crypt", "height": 12, "label": "Small Desert Crypt", "layoutSeed": "4cfe6569f91776f28741686d64ac712508fe8b09db3eefb788f89cbfcf560580", "packageId": "procedural-crypt-family", "pages": [{ "chunkX": "1248", "chunkY": "1090" }], "roadAnchor": { "tileX": "39983", "tileY": "28353" }, "siteId": "site:4cfe6569f91776f28741686d64ac7125", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1248", "chunkY": "1090", "localX": 528, "localY": 432 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 225, "y": 66 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:6b86fc25b367214ea1686752df6ba034", "footprintChunks": [{ "x": 224, "y": 66 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-reservation-population-v3", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:crypt:desert:small:01", "sizeTier": "small" }, "region": { "biome": "desert", "regionX": "156", "regionY": "136" }, "siteClass": "dungeon", "siteId": "site:4cfe6569f91776f28741686d64ac7125", "siteSeed": "4cfe6569f91776f28741686d64ac712508fe8b09db3eefb788f89cbfcf560580", "version": "site-socket-planned-crypt-v1" }, "tier": "small", "tileX": "39946", "tileY": "28345", "version": "planned-crypt-reservation-population-v3", "width": 12 }, "siteId": "site:4cfe6569f91776f28741686d64ac7125", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1248", "chunkY": "1090", "localX": 528, "localY": 432 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 225, "y": 66 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:6b86fc25b367214ea1686752df6ba034", "footprintChunks": [{ "x": 224, "y": 66 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-reservation-population-v3", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:crypt:desert:small:01", "sizeTier": "small" }, "region": { "biome": "desert", "regionX": "156", "regionY": "136" }, "siteClass": "dungeon", "siteId": "site:4cfe6569f91776f28741686d64ac7125", "siteSeed": "4cfe6569f91776f28741686d64ac712508fe8b09db3eefb788f89cbfcf560580", "version": "site-socket-planned-crypt-v1" }, "version": "site-reservation-planned-crypt-v1" }, { "packageId": "procedural-crypt-family", "parcel": { "familyId": "site-family:crypt", "height": 12, "label": "Large Frostland Crypt", "layoutSeed": "de6f521d5903c22f45195c330e85e6c314b1037aa1c2c6814ce1cc1c96d75bdd", "packageId": "procedural-crypt-family", "pages": [{ "chunkX": "1260", "chunkY": "1170" }], "roadAnchor": { "tileX": "40367", "tileY": "30433" }, "siteId": "site:de6f521d5903c22f45195c330e85e6c3", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1260", "chunkY": "1170", "localX": 528, "localY": 432 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 237, "y": 146 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:95be1578a6b38d12e86cb474e748e64c", "footprintChunks": [{ "x": 236, "y": 146 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-reservation-population-v3", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:crypt:frostland:large:01", "sizeTier": "large" }, "region": { "biome": "frostland", "regionX": "157", "regionY": "146" }, "siteClass": "dungeon", "siteId": "site:de6f521d5903c22f45195c330e85e6c3", "siteSeed": "de6f521d5903c22f45195c330e85e6c314b1037aa1c2c6814ce1cc1c96d75bdd", "version": "site-socket-planned-crypt-v1" }, "tier": "large", "tileX": "40330", "tileY": "30425", "version": "planned-crypt-reservation-population-v3", "width": 12 }, "siteId": "site:de6f521d5903c22f45195c330e85e6c3", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1260", "chunkY": "1170", "localX": 528, "localY": 432 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 237, "y": 146 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:95be1578a6b38d12e86cb474e748e64c", "footprintChunks": [{ "x": 236, "y": 146 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-reservation-population-v3", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:crypt:frostland:large:01", "sizeTier": "large" }, "region": { "biome": "frostland", "regionX": "157", "regionY": "146" }, "siteClass": "dungeon", "siteId": "site:de6f521d5903c22f45195c330e85e6c3", "siteSeed": "de6f521d5903c22f45195c330e85e6c314b1037aa1c2c6814ce1cc1c96d75bdd", "version": "site-socket-planned-crypt-v1" }, "version": "site-reservation-planned-crypt-v1" }, { "packageId": "procedural-crypt-family", "parcel": { "familyId": "site-family:crypt", "height": 12, "label": "Standard Volcanic Crypt", "layoutSeed": "dd829cb154fad69e6c4bd1caac3a79fbbb3a4bb10949a82ef97a45ce7fbae2ae", "packageId": "procedural-crypt-family", "pages": [{ "chunkX": "1088", "chunkY": "1164" }], "roadAnchor": { "tileX": "34863", "tileY": "30277" }, "siteId": "site:dd829cb154fad69e6c4bd1caac3a79fb", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1088", "chunkY": "1164", "localX": 528, "localY": 432 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 65, "y": 140 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:a250bd37ab26228b3a394f7d9bff809e", "footprintChunks": [{ "x": 64, "y": 140 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-reservation-population-v3", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:crypt:wetland:standard:01", "sizeTier": "standard" }, "region": { "biome": "volcanic", "regionX": "136", "regionY": "145" }, "siteClass": "dungeon", "siteId": "site:dd829cb154fad69e6c4bd1caac3a79fb", "siteSeed": "dd829cb154fad69e6c4bd1caac3a79fbbb3a4bb10949a82ef97a45ce7fbae2ae", "version": "site-socket-planned-crypt-v1" }, "tier": "standard", "tileX": "34826", "tileY": "30269", "version": "planned-crypt-reservation-population-v3", "width": 12 }, "siteId": "site:dd829cb154fad69e6c4bd1caac3a79fb", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1088", "chunkY": "1164", "localX": 528, "localY": 432 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 65, "y": 140 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:a250bd37ab26228b3a394f7d9bff809e", "footprintChunks": [{ "x": 64, "y": 140 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-reservation-population-v3", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:crypt:wetland:standard:01", "sizeTier": "standard" }, "region": { "biome": "volcanic", "regionX": "136", "regionY": "145" }, "siteClass": "dungeon", "siteId": "site:dd829cb154fad69e6c4bd1caac3a79fb", "siteSeed": "dd829cb154fad69e6c4bd1caac3a79fbbb3a4bb10949a82ef97a45ce7fbae2ae", "version": "site-socket-planned-crypt-v1" }, "version": "site-reservation-planned-crypt-v1" }, { "packageId": "procedural-crypt-family", "parcel": { "familyId": "site-family:crypt", "height": 12, "label": "Small Woodland Crypt", "layoutSeed": "7fe72ebc439393ca1acd958facfe038fc264d6b9ab928a115f0d27ccedbc54f9", "packageId": "procedural-crypt-family", "pages": [{ "chunkX": "1102", "chunkY": "1268" }], "roadAnchor": { "tileX": "35311", "tileY": "32981" }, "siteId": "site:7fe72ebc439393ca1acd958facfe038f", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1102", "chunkY": "1268", "localX": 528, "localY": 432 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 79, "y": 244 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:85691a1e3610f67d18341f0be1ecae22", "footprintChunks": [{ "x": 78, "y": 244 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-reservation-population-v3", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:crypt:woodland:small:01", "sizeTier": "small" }, "region": { "biome": "woodland", "regionX": "137", "regionY": "158" }, "siteClass": "dungeon", "siteId": "site:7fe72ebc439393ca1acd958facfe038f", "siteSeed": "7fe72ebc439393ca1acd958facfe038fc264d6b9ab928a115f0d27ccedbc54f9", "version": "site-socket-planned-crypt-v1" }, "tier": "small", "tileX": "35274", "tileY": "32973", "version": "planned-crypt-reservation-population-v3", "width": 12 }, "siteId": "site:7fe72ebc439393ca1acd958facfe038f", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1102", "chunkY": "1268", "localX": 528, "localY": 432 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 79, "y": 244 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:85691a1e3610f67d18341f0be1ecae22", "footprintChunks": [{ "x": 78, "y": 244 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-reservation-population-v3", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:crypt:woodland:small:01", "sizeTier": "small" }, "region": { "biome": "woodland", "regionX": "137", "regionY": "158" }, "siteClass": "dungeon", "siteId": "site:7fe72ebc439393ca1acd958facfe038f", "siteSeed": "7fe72ebc439393ca1acd958facfe038fc264d6b9ab928a115f0d27ccedbc54f9", "version": "site-socket-planned-crypt-v1" }, "version": "site-reservation-planned-crypt-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Woodland Cave", "layoutSeed": "139ec2fdcd47b475ff35ce94c6e8ea49761d5833858c22fd2e72071c3efe468a", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "4d3d5c5abf8341667284877cef4a88434fc3697fd3806b381d2ebce56a669bc9", "chunkX": "1155", "chunkY": "1293" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:grassland:small:031", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "144,161", "regionName": "Woodland", "roadAnchor": { "tileX": "36973", "tileY": "33629" }, "siteId": "site:980e40784b9f1d96eeaddd448d2ab1f7", "siteSeed": "8aba77ea73eeedcd34855542e022827b74481812a3c7b26011cf662d5f98f568", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1155", "chunkY": "1293", "localX": 432, "localY": 208 }, "minimumLevel": 1, "provenance": { "approachChunk": { "x": 132, "y": 269 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 1, "chunkId": "chunk:4d3d5c5abf8341667284877cef4a8843", "footprintChunk": { "x": 131, "y": 269 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:grassland:small:031", "sizeTier": "small" }, "region": { "biome": "woodland", "regionX": "144", "regionY": "161" }, "siteClass": "dungeon", "siteId": "site:980e40784b9f1d96eeaddd448d2ab1f7", "siteSeed": "980e40784b9f1d96eeaddd448d2ab1f7c2c8c6fc7dad3efcff03030e90ec61ec", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "36968", "tileY": "33621", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:980e40784b9f1d96eeaddd448d2ab1f7", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1155", "chunkY": "1293", "localX": 432, "localY": 208 }, "minimumLevel": 1, "provenance": { "approachChunk": { "x": 132, "y": 269 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 1, "chunkId": "chunk:4d3d5c5abf8341667284877cef4a8843", "footprintChunk": { "x": 131, "y": 269 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:grassland:small:031", "sizeTier": "small" }, "region": { "biome": "woodland", "regionX": "144", "regionY": "161" }, "siteClass": "dungeon", "siteId": "site:980e40784b9f1d96eeaddd448d2ab1f7", "siteSeed": "980e40784b9f1d96eeaddd448d2ab1f7c2c8c6fc7dad3efcff03030e90ec61ec", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Frostland Cave", "layoutSeed": "a1bc7c7e24512819c48f266698321896183a01dd29790cba7db0842bbc097935", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "d165e99916b1679cad64adef49838588b740642274c375990fe3426e9d3c3c18", "chunkX": "1257", "chunkY": "1147" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:woodland:small:034", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "157,143", "regionName": "Frostland", "roadAnchor": { "tileX": "40237", "tileY": "29833" }, "siteId": "site:e20fe5adb7c9c628ccf5a2d6cc375354", "siteSeed": "7d561538feffe191185cec20683531e4e74363871c54714e1ceee134696f56e4", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1257", "chunkY": "1147", "localX": 432, "localY": 208 }, "minimumLevel": 11, "provenance": { "approachChunk": { "x": 234, "y": 123 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:d165e99916b1679cad64adef49838588", "footprintChunk": { "x": 233, "y": 123 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:woodland:small:034", "sizeTier": "small" }, "region": { "biome": "frostland", "regionX": "157", "regionY": "143" }, "siteClass": "dungeon", "siteId": "site:e20fe5adb7c9c628ccf5a2d6cc375354", "siteSeed": "e20fe5adb7c9c628ccf5a2d6cc375354259f2e074bf0fd998ea9b47e3de59845", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "40232", "tileY": "29825", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:e20fe5adb7c9c628ccf5a2d6cc375354", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1257", "chunkY": "1147", "localX": 432, "localY": 208 }, "minimumLevel": 11, "provenance": { "approachChunk": { "x": 234, "y": 123 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:d165e99916b1679cad64adef49838588", "footprintChunk": { "x": 233, "y": 123 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:woodland:small:034", "sizeTier": "small" }, "region": { "biome": "frostland", "regionX": "157", "regionY": "143" }, "siteClass": "dungeon", "siteId": "site:e20fe5adb7c9c628ccf5a2d6cc375354", "siteSeed": "e20fe5adb7c9c628ccf5a2d6cc375354259f2e074bf0fd998ea9b47e3de59845", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Tropical Cave", "layoutSeed": "e7b32f1b42516ba8afb45d4af099c05ddfa6ec4aa9df9707270edb059a02d39b", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "70b882775705c51bb6c1cbf4262f15ce0af49dddf991a6f5bf8a7c67d40303de", "chunkX": "1185", "chunkY": "1101" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:volcanic:small:035", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "148,137", "regionName": "Tropical", "roadAnchor": { "tileX": "37933", "tileY": "28637" }, "siteId": "site:232e8fb0d76656b7eae051a9a2972b99", "siteSeed": "2e785be3e8b339e465562508e7f7dd32ff8cec7d48026e14044c2618723384db", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1185", "chunkY": "1101", "localX": 432, "localY": 208 }, "minimumLevel": 21, "provenance": { "approachChunk": { "x": 162, "y": 77 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:70b882775705c51bb6c1cbf4262f15ce", "footprintChunk": { "x": 161, "y": 77 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:volcanic:small:035", "sizeTier": "small" }, "region": { "biome": "tropical", "regionX": "148", "regionY": "137" }, "siteClass": "dungeon", "siteId": "site:232e8fb0d76656b7eae051a9a2972b99", "siteSeed": "232e8fb0d76656b7eae051a9a2972b99ac7f1d281da2e30a97b9b4ed66b2cf3f", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "37928", "tileY": "28629", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:232e8fb0d76656b7eae051a9a2972b99", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1185", "chunkY": "1101", "localX": 432, "localY": 208 }, "minimumLevel": 21, "provenance": { "approachChunk": { "x": 162, "y": 77 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:70b882775705c51bb6c1cbf4262f15ce", "footprintChunk": { "x": 161, "y": 77 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:volcanic:small:035", "sizeTier": "small" }, "region": { "biome": "tropical", "regionX": "148", "regionY": "137" }, "siteClass": "dungeon", "siteId": "site:232e8fb0d76656b7eae051a9a2972b99", "siteSeed": "232e8fb0d76656b7eae051a9a2972b99ac7f1d281da2e30a97b9b4ed66b2cf3f", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Desert Cave", "layoutSeed": "65d347db614b849b072837b98f345c35105338b3b69e3d06716132cc9ef22d82", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "131d03507197d75d42cafe2f21639143d09757c33a8694199cdf243b8695fb2d", "chunkX": "1167", "chunkY": "1223" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:desert:small:036", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "145,152", "regionName": "Desert", "roadAnchor": { "tileX": "37357", "tileY": "31809" }, "siteId": "site:73eb9a4f23152ca039a28ced43da8858", "siteSeed": "912b114421cde17ef3a1dfaf702aa1e937f22d477d32be781355e70b14bdffa4", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1167", "chunkY": "1223", "localX": 432, "localY": 208 }, "minimumLevel": 6, "provenance": { "approachChunk": { "x": 144, "y": 199 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:131d03507197d75d42cafe2f21639143", "footprintChunk": { "x": 143, "y": 199 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:desert:small:036", "sizeTier": "small" }, "region": { "biome": "desert", "regionX": "145", "regionY": "152" }, "siteClass": "dungeon", "siteId": "site:73eb9a4f23152ca039a28ced43da8858", "siteSeed": "73eb9a4f23152ca039a28ced43da885800f1705ab24e93e99cf9681a01a3b8f3", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "37352", "tileY": "31801", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:73eb9a4f23152ca039a28ced43da8858", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1167", "chunkY": "1223", "localX": 432, "localY": 208 }, "minimumLevel": 6, "provenance": { "approachChunk": { "x": 144, "y": 199 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:131d03507197d75d42cafe2f21639143", "footprintChunk": { "x": 143, "y": 199 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:desert:small:036", "sizeTier": "small" }, "region": { "biome": "desert", "regionX": "145", "regionY": "152" }, "siteClass": "dungeon", "siteId": "site:73eb9a4f23152ca039a28ced43da8858", "siteSeed": "73eb9a4f23152ca039a28ced43da885800f1705ab24e93e99cf9681a01a3b8f3", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Upland Cave", "layoutSeed": "7d1cfeef31f8bd0bf660a32c40e97a7680fff47003d9fb5bbff8ec41fe3c65fb", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "63093e19a3e60c5d6b92ecbc573bdc0ec70ed9b5dba4a78be13480ed0713918b", "chunkX": "1135", "chunkY": "1247" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:upland:small:039", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "141,155", "regionName": "Upland", "roadAnchor": { "tileX": "36333", "tileY": "32433" }, "siteId": "site:1e8f34f90407d03427e87f2a39ba6fa4", "siteSeed": "d8ecbfb00a1008bbc9311ec85ec4466ef0d07f5acb423e755c4b798ca446ce89", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1135", "chunkY": "1247", "localX": 432, "localY": 208 }, "minimumLevel": 6, "provenance": { "approachChunk": { "x": 112, "y": 223 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:63093e19a3e60c5d6b92ecbc573bdc0e", "footprintChunk": { "x": 111, "y": 223 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:upland:small:039", "sizeTier": "small" }, "region": { "biome": "upland", "regionX": "141", "regionY": "155" }, "siteClass": "dungeon", "siteId": "site:1e8f34f90407d03427e87f2a39ba6fa4", "siteSeed": "1e8f34f90407d03427e87f2a39ba6fa469808d22b520e44648862b96aee721b3", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "36328", "tileY": "32425", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:1e8f34f90407d03427e87f2a39ba6fa4", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1135", "chunkY": "1247", "localX": 432, "localY": 208 }, "minimumLevel": 6, "provenance": { "approachChunk": { "x": 112, "y": 223 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:63093e19a3e60c5d6b92ecbc573bdc0e", "footprintChunk": { "x": 111, "y": 223 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:upland:small:039", "sizeTier": "small" }, "region": { "biome": "upland", "regionX": "141", "regionY": "155" }, "siteClass": "dungeon", "siteId": "site:1e8f34f90407d03427e87f2a39ba6fa4", "siteSeed": "1e8f34f90407d03427e87f2a39ba6fa469808d22b520e44648862b96aee721b3", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Wetland Cave", "layoutSeed": "6dbe47970710b2e2ba4d0dd4eef15308308cd1c8d1b865aa6b2aa44339ea481f", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "7b41ab8942c89ef88137a91aa6286bbb8d7cc24b6962671eda34ea407520f85c", "chunkX": "1115", "chunkY": "1195" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:desert:small:041", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "139,149", "regionName": "Wetland", "roadAnchor": { "tileX": "35693", "tileY": "31081" }, "siteId": "site:d68c037d7fbe47d8abd7e56822325674", "siteSeed": "ec6d45c84970e229e2f06adea1aa81d44800b1b0381ab4c4cbbd8172370b28f4", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1115", "chunkY": "1195", "localX": 432, "localY": 208 }, "minimumLevel": 11, "provenance": { "approachChunk": { "x": 92, "y": 171 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:7b41ab8942c89ef88137a91aa6286bbb", "footprintChunk": { "x": 91, "y": 171 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:desert:small:041", "sizeTier": "small" }, "region": { "biome": "wetland", "regionX": "139", "regionY": "149" }, "siteClass": "dungeon", "siteId": "site:d68c037d7fbe47d8abd7e56822325674", "siteSeed": "d68c037d7fbe47d8abd7e56822325674c11a69c257cfb03a89cc09cfe04da1dc", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "35688", "tileY": "31073", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:d68c037d7fbe47d8abd7e56822325674", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1115", "chunkY": "1195", "localX": 432, "localY": 208 }, "minimumLevel": 11, "provenance": { "approachChunk": { "x": 92, "y": 171 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:7b41ab8942c89ef88137a91aa6286bbb", "footprintChunk": { "x": 91, "y": 171 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:desert:small:041", "sizeTier": "small" }, "region": { "biome": "wetland", "regionX": "139", "regionY": "149" }, "siteClass": "dungeon", "siteId": "site:d68c037d7fbe47d8abd7e56822325674", "siteSeed": "d68c037d7fbe47d8abd7e56822325674c11a69c257cfb03a89cc09cfe04da1dc", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Volcanic Cave", "layoutSeed": "67a35abe5136832bc0c82c39543ef86e9f0cbc56ce6036713bae4dbf048c9a95", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "9e5a705abec398f89fa6aa42a97aec2d58c536a503a39cb4a65638a858ec3e41", "chunkX": "1103", "chunkY": "1167" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:wetland:small:042", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "137,145", "regionName": "Volcanic", "roadAnchor": { "tileX": "35309", "tileY": "30353" }, "siteId": "site:ee7b3fe1bb279c336cb0cefcc61f32c1", "siteSeed": "cfbc2c6761dab68347b09373dfc0c6e1c0a48a81e03750b4c82f013a391098af", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1103", "chunkY": "1167", "localX": 432, "localY": 208 }, "minimumLevel": 21, "provenance": { "approachChunk": { "x": 80, "y": 143 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:9e5a705abec398f89fa6aa42a97aec2d", "footprintChunk": { "x": 79, "y": 143 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:wetland:small:042", "sizeTier": "small" }, "region": { "biome": "volcanic", "regionX": "137", "regionY": "145" }, "siteClass": "dungeon", "siteId": "site:ee7b3fe1bb279c336cb0cefcc61f32c1", "siteSeed": "ee7b3fe1bb279c336cb0cefcc61f32c134e7ff01b6fc8b9e6107516eb2f3d9db", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "35304", "tileY": "30345", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:ee7b3fe1bb279c336cb0cefcc61f32c1", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1103", "chunkY": "1167", "localX": 432, "localY": 208 }, "minimumLevel": 21, "provenance": { "approachChunk": { "x": 80, "y": 143 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:9e5a705abec398f89fa6aa42a97aec2d", "footprintChunk": { "x": 79, "y": 143 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:wetland:small:042", "sizeTier": "small" }, "region": { "biome": "volcanic", "regionX": "137", "regionY": "145" }, "siteClass": "dungeon", "siteId": "site:ee7b3fe1bb279c336cb0cefcc61f32c1", "siteSeed": "ee7b3fe1bb279c336cb0cefcc61f32c134e7ff01b6fc8b9e6107516eb2f3d9db", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Tropical Cave", "layoutSeed": "5393be9a7c93584257bad6015b47314bfa1a5de267dadc453f87d74a282acaad", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "7fea9c93c0ea7a94edb16622be22529ef0268288812d4011a1283fb1d1fcdfbe", "chunkX": "1197", "chunkY": "1091" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:volcanic:small:043", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "149,136", "regionName": "Tropical", "roadAnchor": { "tileX": "38317", "tileY": "28377" }, "siteId": "site:48dd95cf9d629f9358019a8449bcd04e", "siteSeed": "b2a6f28c1a90bbb3de9efb2df2bd0eab5072cd3b7e055071d6fb55fdbba6cdb7", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1197", "chunkY": "1091", "localX": 432, "localY": 208 }, "minimumLevel": 21, "provenance": { "approachChunk": { "x": 174, "y": 67 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:7fea9c93c0ea7a94edb16622be22529e", "footprintChunk": { "x": 173, "y": 67 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:volcanic:small:043", "sizeTier": "small" }, "region": { "biome": "tropical", "regionX": "149", "regionY": "136" }, "siteClass": "dungeon", "siteId": "site:48dd95cf9d629f9358019a8449bcd04e", "siteSeed": "48dd95cf9d629f9358019a8449bcd04ea58bf034b266e1b90e80e6ba9ccc49b2", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "38312", "tileY": "28369", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:48dd95cf9d629f9358019a8449bcd04e", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1197", "chunkY": "1091", "localX": 432, "localY": 208 }, "minimumLevel": 21, "provenance": { "approachChunk": { "x": 174, "y": 67 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:7fea9c93c0ea7a94edb16622be22529e", "footprintChunk": { "x": 173, "y": 67 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:volcanic:small:043", "sizeTier": "small" }, "region": { "biome": "tropical", "regionX": "149", "regionY": "136" }, "siteClass": "dungeon", "siteId": "site:48dd95cf9d629f9358019a8449bcd04e", "siteSeed": "48dd95cf9d629f9358019a8449bcd04ea58bf034b266e1b90e80e6ba9ccc49b2", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Grassland Cave", "layoutSeed": "3ce5c1f67beb4ea2f90f267c53c2aeef3e76c69638d4aed18fa141d11e4a6380", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "9e5b9fc5224e04c2dc00666e05fcc930d5a321bcc36a00a1bb942e1fb6d8cd17", "chunkX": "1114", "chunkY": "1241" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:woodland:small:045", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "139,155", "regionName": "Grassland", "roadAnchor": { "tileX": "35661", "tileY": "32277" }, "siteId": "site:2ee4f56c1c0df2d6c9fcceb2b0a50be7", "siteSeed": "dc708508b611e6e707f1949c6e6ddcaf7dd431b45d1130314e58aaaed1bbb783", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1114", "chunkY": "1241", "localX": 432, "localY": 208 }, "minimumLevel": 6, "provenance": { "approachChunk": { "x": 91, "y": 217 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:9e5b9fc5224e04c2dc00666e05fcc930", "footprintChunk": { "x": 90, "y": 217 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:woodland:small:045", "sizeTier": "small" }, "region": { "biome": "grassland", "regionX": "139", "regionY": "155" }, "siteClass": "dungeon", "siteId": "site:2ee4f56c1c0df2d6c9fcceb2b0a50be7", "siteSeed": "2ee4f56c1c0df2d6c9fcceb2b0a50be7ecbf5e358090ee5260ac694d89cb14e8", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "35656", "tileY": "32269", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:2ee4f56c1c0df2d6c9fcceb2b0a50be7", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1114", "chunkY": "1241", "localX": 432, "localY": 208 }, "minimumLevel": 6, "provenance": { "approachChunk": { "x": 91, "y": 217 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:9e5b9fc5224e04c2dc00666e05fcc930", "footprintChunk": { "x": 90, "y": 217 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:woodland:small:045", "sizeTier": "small" }, "region": { "biome": "grassland", "regionX": "139", "regionY": "155" }, "siteClass": "dungeon", "siteId": "site:2ee4f56c1c0df2d6c9fcceb2b0a50be7", "siteSeed": "2ee4f56c1c0df2d6c9fcceb2b0a50be7ecbf5e358090ee5260ac694d89cb14e8", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Wetland Cave", "layoutSeed": "372c566c54991d11ec21c715266fb6403cb5177b0dc5c4f4788364fa455f9f7b", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "e1a1b4e9cddf56d2a7ac23557479f4e2ce0b420527ec3381061ddffd95a1824f", "chunkX": "1133", "chunkY": "1221" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:desert:small:046", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "141,152", "regionName": "Wetland", "roadAnchor": { "tileX": "36269", "tileY": "31757" }, "siteId": "site:8b4d76f54fcff5e86aee2bcc2bdcb612", "siteSeed": "fd40cf2b34da1a085b8f397fd0550704c59497e709540c1e99841135263b3d26", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1133", "chunkY": "1221", "localX": 432, "localY": 208 }, "minimumLevel": 6, "provenance": { "approachChunk": { "x": 110, "y": 197 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:e1a1b4e9cddf56d2a7ac23557479f4e2", "footprintChunk": { "x": 109, "y": 197 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:desert:small:046", "sizeTier": "small" }, "region": { "biome": "wetland", "regionX": "141", "regionY": "152" }, "siteClass": "dungeon", "siteId": "site:8b4d76f54fcff5e86aee2bcc2bdcb612", "siteSeed": "8b4d76f54fcff5e86aee2bcc2bdcb612651cafd837030ed1d2a2354a5576e2e4", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "36264", "tileY": "31749", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:8b4d76f54fcff5e86aee2bcc2bdcb612", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1133", "chunkY": "1221", "localX": 432, "localY": 208 }, "minimumLevel": 6, "provenance": { "approachChunk": { "x": 110, "y": 197 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:e1a1b4e9cddf56d2a7ac23557479f4e2", "footprintChunk": { "x": 109, "y": 197 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:desert:small:046", "sizeTier": "small" }, "region": { "biome": "wetland", "regionX": "141", "regionY": "152" }, "siteClass": "dungeon", "siteId": "site:8b4d76f54fcff5e86aee2bcc2bdcb612", "siteSeed": "8b4d76f54fcff5e86aee2bcc2bdcb612651cafd837030ed1d2a2354a5576e2e4", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Upland Cave", "layoutSeed": "449d5c6bb0c22eb54a8d81c0a30a0c4f8c43b868cd87aad55ee445a7f6d2b52c", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "ba2938e053af36578c160c0af6f7fa224ac4926f424f68bd491ad978d93b62ef", "chunkX": "1259", "chunkY": "1197" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:frostland:small:050", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "157,149", "regionName": "Upland", "roadAnchor": { "tileX": "40301", "tileY": "31133" }, "siteId": "site:72cd825a1027838976ab2ec027399aef", "siteSeed": "51603db3e1702bbc4b2e6f405479a97f5aba19190abc2fbe1001eedaa29e94e7", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1259", "chunkY": "1197", "localX": 432, "localY": 208 }, "minimumLevel": 21, "provenance": { "approachChunk": { "x": 236, "y": 173 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:ba2938e053af36578c160c0af6f7fa22", "footprintChunk": { "x": 235, "y": 173 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:frostland:small:050", "sizeTier": "small" }, "region": { "biome": "upland", "regionX": "157", "regionY": "149" }, "siteClass": "dungeon", "siteId": "site:72cd825a1027838976ab2ec027399aef", "siteSeed": "72cd825a1027838976ab2ec027399aef510042f903a2c9980f204e17080207d5", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "40296", "tileY": "31125", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:72cd825a1027838976ab2ec027399aef", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1259", "chunkY": "1197", "localX": 432, "localY": 208 }, "minimumLevel": 21, "provenance": { "approachChunk": { "x": 236, "y": 173 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:ba2938e053af36578c160c0af6f7fa22", "footprintChunk": { "x": 235, "y": 173 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:frostland:small:050", "sizeTier": "small" }, "region": { "biome": "upland", "regionX": "157", "regionY": "149" }, "siteClass": "dungeon", "siteId": "site:72cd825a1027838976ab2ec027399aef", "siteSeed": "72cd825a1027838976ab2ec027399aef510042f903a2c9980f204e17080207d5", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Wetland Cave", "layoutSeed": "136225f1f2bd76975b547507ab237afc3ebf29a9d0af4546d6af4124fe668f45", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "889d20daeb0901c773b6c0d4e1623bf12838c9866c76d58089e31a2c40a1d6fc", "chunkX": "1127", "chunkY": "1103" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:tropical:small:051", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "140,137", "regionName": "Wetland", "roadAnchor": { "tileX": "36077", "tileY": "28689" }, "siteId": "site:03e890c7399505650a4370aa380df2ad", "siteSeed": "b09c91d464ce20cb51824ba82a391823a1f0f6256db31e4275aadbea6a94062b", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1127", "chunkY": "1103", "localX": 432, "localY": 208 }, "minimumLevel": 41, "provenance": { "approachChunk": { "x": 104, "y": 79 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:889d20daeb0901c773b6c0d4e1623bf1", "footprintChunk": { "x": 103, "y": 79 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:tropical:small:051", "sizeTier": "small" }, "region": { "biome": "wetland", "regionX": "140", "regionY": "137" }, "siteClass": "dungeon", "siteId": "site:03e890c7399505650a4370aa380df2ad", "siteSeed": "03e890c7399505650a4370aa380df2ad36bdb6977d25697932b57020676b84c1", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "36072", "tileY": "28681", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:03e890c7399505650a4370aa380df2ad", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1127", "chunkY": "1103", "localX": 432, "localY": 208 }, "minimumLevel": 41, "provenance": { "approachChunk": { "x": 104, "y": 79 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:889d20daeb0901c773b6c0d4e1623bf1", "footprintChunk": { "x": 103, "y": 79 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:tropical:small:051", "sizeTier": "small" }, "region": { "biome": "wetland", "regionX": "140", "regionY": "137" }, "siteClass": "dungeon", "siteId": "site:03e890c7399505650a4370aa380df2ad", "siteSeed": "03e890c7399505650a4370aa380df2ad36bdb6977d25697932b57020676b84c1", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Frostland Cave", "layoutSeed": "5904367bba7cedfc8e41c8564518dc1c8b674cab813ef06e83a79652ccf91f89", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "3cf19727e03b816e1327cdc0641e8d2f9234e7ffb2afd5cb7b146acab1f14862", "chunkX": "1156", "chunkY": "1033" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:woodland:small:055", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "144,129", "regionName": "Frostland", "roadAnchor": { "tileX": "37005", "tileY": "26869" }, "siteId": "site:62e47154d1b9191c7420fde760152e8a", "siteSeed": "dd0884a26eea438d512f8efb25cb8a3cb1cef659f76616b69fbd3d9f86d0dbbb", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1156", "chunkY": "1033", "localX": 432, "localY": 208 }, "minimumLevel": 21, "provenance": { "approachChunk": { "x": 133, "y": 9 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:3cf19727e03b816e1327cdc0641e8d2f", "footprintChunk": { "x": 132, "y": 9 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:woodland:small:055", "sizeTier": "small" }, "region": { "biome": "frostland", "regionX": "144", "regionY": "129" }, "siteClass": "dungeon", "siteId": "site:62e47154d1b9191c7420fde760152e8a", "siteSeed": "62e47154d1b9191c7420fde760152e8a2eaafc2bc91aa06167890e7c964c0214", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "37000", "tileY": "26861", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:62e47154d1b9191c7420fde760152e8a", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1156", "chunkY": "1033", "localX": 432, "localY": 208 }, "minimumLevel": 21, "provenance": { "approachChunk": { "x": 133, "y": 9 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:3cf19727e03b816e1327cdc0641e8d2f", "footprintChunk": { "x": 132, "y": 9 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:woodland:small:055", "sizeTier": "small" }, "region": { "biome": "frostland", "regionX": "144", "regionY": "129" }, "siteClass": "dungeon", "siteId": "site:62e47154d1b9191c7420fde760152e8a", "siteSeed": "62e47154d1b9191c7420fde760152e8a2eaafc2bc91aa06167890e7c964c0214", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Upland Cave", "layoutSeed": "a9393de4099e60f59835024adfde711421505ce734a8a3a0df15c896f9042192", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "e548462224cdf536a846b65b96767d4877e6a1523213e0cef86eed47e18191a8", "chunkX": "1213", "chunkY": "1111" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:grassland:small:060", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "151,138", "regionName": "Upland", "roadAnchor": { "tileX": "38829", "tileY": "28897" }, "siteId": "site:e8cbe698241a33b7d8de1c37e4d2e2da", "siteSeed": "97409091e1999b136d12362809ff2b24ea78e78e92ae78e54e7e37f95cc09032", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1213", "chunkY": "1111", "localX": 432, "localY": 208 }, "minimumLevel": 21, "provenance": { "approachChunk": { "x": 190, "y": 87 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:e548462224cdf536a846b65b96767d48", "footprintChunk": { "x": 189, "y": 87 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:grassland:small:060", "sizeTier": "small" }, "region": { "biome": "upland", "regionX": "151", "regionY": "138" }, "siteClass": "dungeon", "siteId": "site:e8cbe698241a33b7d8de1c37e4d2e2da", "siteSeed": "e8cbe698241a33b7d8de1c37e4d2e2da6d70faff50df88142a65d09cc5fb400c", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "38824", "tileY": "28889", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:e8cbe698241a33b7d8de1c37e4d2e2da", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1213", "chunkY": "1111", "localX": 432, "localY": 208 }, "minimumLevel": 21, "provenance": { "approachChunk": { "x": 190, "y": 87 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:e548462224cdf536a846b65b96767d48", "footprintChunk": { "x": 189, "y": 87 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:grassland:small:060", "sizeTier": "small" }, "region": { "biome": "upland", "regionX": "151", "regionY": "138" }, "siteClass": "dungeon", "siteId": "site:e8cbe698241a33b7d8de1c37e4d2e2da", "siteSeed": "e8cbe698241a33b7d8de1c37e4d2e2da6d70faff50df88142a65d09cc5fb400c", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Wetland Cave", "layoutSeed": "43a86f699300781fda9e68dce5fee1b21d3fa7d2220c969b0deb4b6e00898083", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "829475ed3497d1417220a817f8b32a2b2e7ca1296b3882cd3b87340b1f1d4b4d", "chunkX": "1100", "chunkY": "1083" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:wetland:small:063", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "137,135", "regionName": "Wetland", "roadAnchor": { "tileX": "35213", "tileY": "28169" }, "siteId": "site:b7084a61781a086d5ddcd5477885d4ce", "siteSeed": "5e7ec7347f20751489942689043954f42468e510c744d68422bc272933497775", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1100", "chunkY": "1083", "localX": 432, "localY": 208 }, "minimumLevel": 21, "provenance": { "approachChunk": { "x": 77, "y": 59 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:829475ed3497d1417220a817f8b32a2b", "footprintChunk": { "x": 76, "y": 59 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:wetland:small:063", "sizeTier": "small" }, "region": { "biome": "wetland", "regionX": "137", "regionY": "135" }, "siteClass": "dungeon", "siteId": "site:b7084a61781a086d5ddcd5477885d4ce", "siteSeed": "b7084a61781a086d5ddcd5477885d4cec75d261cceffaea4a1dab1c48268b7ea", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "35208", "tileY": "28161", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:b7084a61781a086d5ddcd5477885d4ce", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1100", "chunkY": "1083", "localX": 432, "localY": 208 }, "minimumLevel": 21, "provenance": { "approachChunk": { "x": 77, "y": 59 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:829475ed3497d1417220a817f8b32a2b", "footprintChunk": { "x": 76, "y": 59 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:wetland:small:063", "sizeTier": "small" }, "region": { "biome": "wetland", "regionX": "137", "regionY": "135" }, "siteClass": "dungeon", "siteId": "site:b7084a61781a086d5ddcd5477885d4ce", "siteSeed": "b7084a61781a086d5ddcd5477885d4cec75d261cceffaea4a1dab1c48268b7ea", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Volcanic Cave", "layoutSeed": "1029e1ea3018221bde73ac597bdbe466153c2ea3c466c7c801c604fdcaa67f2d", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "4ccddea5be2937e77f1b037d6e7cfac8622aa921a4deb93e0e421cc7a24f422c", "chunkX": "1273", "chunkY": "1107" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:volcanic:small:068", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "159,138", "regionName": "Volcanic", "roadAnchor": { "tileX": "40749", "tileY": "28793" }, "siteId": "site:4761ee9a102280022c966104bc14c965", "siteSeed": "2f2982b1ffdd05439462cef2165b8b096d812fd6303cd4208549b94d35e80b39", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1273", "chunkY": "1107", "localX": 432, "localY": 208 }, "minimumLevel": 21, "provenance": { "approachChunk": { "x": 250, "y": 83 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:4ccddea5be2937e77f1b037d6e7cfac8", "footprintChunk": { "x": 249, "y": 83 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:volcanic:small:068", "sizeTier": "small" }, "region": { "biome": "volcanic", "regionX": "159", "regionY": "138" }, "siteClass": "dungeon", "siteId": "site:4761ee9a102280022c966104bc14c965", "siteSeed": "4761ee9a102280022c966104bc14c965435b98ea2f7e34e4e909653a6ce411c6", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "40744", "tileY": "28785", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:4761ee9a102280022c966104bc14c965", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1273", "chunkY": "1107", "localX": 432, "localY": 208 }, "minimumLevel": 21, "provenance": { "approachChunk": { "x": 250, "y": 83 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:4ccddea5be2937e77f1b037d6e7cfac8", "footprintChunk": { "x": 249, "y": 83 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:volcanic:small:068", "sizeTier": "small" }, "region": { "biome": "volcanic", "regionX": "159", "regionY": "138" }, "siteClass": "dungeon", "siteId": "site:4761ee9a102280022c966104bc14c965", "siteSeed": "4761ee9a102280022c966104bc14c965435b98ea2f7e34e4e909653a6ce411c6", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Desert Cave", "layoutSeed": "8814e2ac611e9702292b968e6ed829fc3611ec2f2b8c202f097acd077eb4d8c5", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "be59c44dffb52b47dd02da669648e1863ffd4fa0b8641bc6c47cdd783374a75d", "chunkX": "1180", "chunkY": "1229" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:desert:small:069", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "147,153", "regionName": "Desert", "roadAnchor": { "tileX": "37773", "tileY": "31965" }, "siteId": "site:73b3b142fb9938442f5dcebe0369c789", "siteSeed": "83328bca64012dfdb75f51636c503639ab89b26dbcd48ea72ef68e4e0f436afd", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1180", "chunkY": "1229", "localX": 432, "localY": 208 }, "minimumLevel": 11, "provenance": { "approachChunk": { "x": 157, "y": 205 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:be59c44dffb52b47dd02da669648e186", "footprintChunk": { "x": 156, "y": 205 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:desert:small:069", "sizeTier": "small" }, "region": { "biome": "desert", "regionX": "147", "regionY": "153" }, "siteClass": "dungeon", "siteId": "site:73b3b142fb9938442f5dcebe0369c789", "siteSeed": "73b3b142fb9938442f5dcebe0369c789014b06d6f74ed329a4190e08e232e1f6", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "37768", "tileY": "31957", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:73b3b142fb9938442f5dcebe0369c789", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1180", "chunkY": "1229", "localX": 432, "localY": 208 }, "minimumLevel": 11, "provenance": { "approachChunk": { "x": 157, "y": 205 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:be59c44dffb52b47dd02da669648e186", "footprintChunk": { "x": 156, "y": 205 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:desert:small:069", "sizeTier": "small" }, "region": { "biome": "desert", "regionX": "147", "regionY": "153" }, "siteClass": "dungeon", "siteId": "site:73b3b142fb9938442f5dcebe0369c789", "siteSeed": "73b3b142fb9938442f5dcebe0369c789014b06d6f74ed329a4190e08e232e1f6", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Upland Cave", "layoutSeed": "821780b4ecc416260c0310551ab48c371d99464f6a2f7741405b6e297ac60f26", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "59c45ba0ff8ae135b3334acf439b2708ac96d446907e614f406bd41e1ba078be", "chunkX": "1159", "chunkY": "1231" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:desert:small:077", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "144,153", "regionName": "Upland", "roadAnchor": { "tileX": "37101", "tileY": "32017" }, "siteId": "site:361c8b89d468823f78bf63d3bc0b1ac1", "siteSeed": "b8fc8520b105e204e38c7583f2c31182e12098e3d65e483ff3087948c6db4091", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1159", "chunkY": "1231", "localX": 432, "localY": 208 }, "minimumLevel": 6, "provenance": { "approachChunk": { "x": 136, "y": 207 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:59c45ba0ff8ae135b3334acf439b2708", "footprintChunk": { "x": 135, "y": 207 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:desert:small:077", "sizeTier": "small" }, "region": { "biome": "upland", "regionX": "144", "regionY": "153" }, "siteClass": "dungeon", "siteId": "site:361c8b89d468823f78bf63d3bc0b1ac1", "siteSeed": "361c8b89d468823f78bf63d3bc0b1ac13e6c96ef51638b358b8113deab11ac80", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "37096", "tileY": "32009", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:361c8b89d468823f78bf63d3bc0b1ac1", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1159", "chunkY": "1231", "localX": 432, "localY": 208 }, "minimumLevel": 6, "provenance": { "approachChunk": { "x": 136, "y": 207 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:59c45ba0ff8ae135b3334acf439b2708", "footprintChunk": { "x": 135, "y": 207 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:desert:small:077", "sizeTier": "small" }, "region": { "biome": "upland", "regionX": "144", "regionY": "153" }, "siteClass": "dungeon", "siteId": "site:361c8b89d468823f78bf63d3bc0b1ac1", "siteSeed": "361c8b89d468823f78bf63d3bc0b1ac13e6c96ef51638b358b8113deab11ac80", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Frostland Cave", "layoutSeed": "f904281f10c89b76a6042ae01cf023702e432bc669cf55e642a8c74d1085b365", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "0d9a796cde678c07ea81d7594e37c738f98ea1e6f996bc866f5b426468bd1f0d", "chunkX": "1266", "chunkY": "1167" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:frostland:small:080", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "158,145", "regionName": "Frostland", "roadAnchor": { "tileX": "40525", "tileY": "30353" }, "siteId": "site:8ce671edfae48ee6302cf59cc6f99eee", "siteSeed": "504eb5d1c41281f3edcaaef2e12d1b8ca3a6ddbd326fa76a7e094a1fb1135c9f", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1266", "chunkY": "1167", "localX": 432, "localY": 208 }, "minimumLevel": 11, "provenance": { "approachChunk": { "x": 243, "y": 143 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:0d9a796cde678c07ea81d7594e37c738", "footprintChunk": { "x": 242, "y": 143 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:frostland:small:080", "sizeTier": "small" }, "region": { "biome": "frostland", "regionX": "158", "regionY": "145" }, "siteClass": "dungeon", "siteId": "site:8ce671edfae48ee6302cf59cc6f99eee", "siteSeed": "8ce671edfae48ee6302cf59cc6f99eee6002497b053670550d528772ed2897cd", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "40520", "tileY": "30345", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:8ce671edfae48ee6302cf59cc6f99eee", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1266", "chunkY": "1167", "localX": 432, "localY": 208 }, "minimumLevel": 11, "provenance": { "approachChunk": { "x": 243, "y": 143 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:0d9a796cde678c07ea81d7594e37c738", "footprintChunk": { "x": 242, "y": 143 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:frostland:small:080", "sizeTier": "small" }, "region": { "biome": "frostland", "regionX": "158", "regionY": "145" }, "siteClass": "dungeon", "siteId": "site:8ce671edfae48ee6302cf59cc6f99eee", "siteSeed": "8ce671edfae48ee6302cf59cc6f99eee6002497b053670550d528772ed2897cd", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Frostland Cave", "layoutSeed": "2e3e8abcbf0bc9093d159d615fadfb0de7a913d7c2478459228428064b02b36d", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "a9fe2a640418dc681b44fcd2075935bb5fabecf7d325331d42ef94309d341d37", "chunkX": "1139", "chunkY": "1045" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:woodland:small:083", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "142,130", "regionName": "Frostland", "roadAnchor": { "tileX": "36461", "tileY": "27181" }, "siteId": "site:3f2998522981341906e708769de745cd", "siteSeed": "c3eb8e44a59e56d6d3359cfb5703724963cbac485a230b3412b3414a3ffa8711", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1139", "chunkY": "1045", "localX": 432, "localY": 208 }, "minimumLevel": 41, "provenance": { "approachChunk": { "x": 116, "y": 21 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:a9fe2a640418dc681b44fcd2075935bb", "footprintChunk": { "x": 115, "y": 21 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:woodland:small:083", "sizeTier": "small" }, "region": { "biome": "frostland", "regionX": "142", "regionY": "130" }, "siteClass": "dungeon", "siteId": "site:3f2998522981341906e708769de745cd", "siteSeed": "3f2998522981341906e708769de745cd2c0c6b0f7d1186a8e88ab36728a33be9", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "36456", "tileY": "27173", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:3f2998522981341906e708769de745cd", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1139", "chunkY": "1045", "localX": 432, "localY": 208 }, "minimumLevel": 41, "provenance": { "approachChunk": { "x": 116, "y": 21 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:a9fe2a640418dc681b44fcd2075935bb", "footprintChunk": { "x": 115, "y": 21 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:woodland:small:083", "sizeTier": "small" }, "region": { "biome": "frostland", "regionX": "142", "regionY": "130" }, "siteClass": "dungeon", "siteId": "site:3f2998522981341906e708769de745cd", "siteSeed": "3f2998522981341906e708769de745cd2c0c6b0f7d1186a8e88ab36728a33be9", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Desert Cave", "layoutSeed": "c3251f62182eadc0cf7adf02895cbd6d0021f7ad1c64954393a296d33bca70a8", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "4092677eb795258da73de5dedad7eff7f5f3bdaba7a51974c0fd8eb86d2beb8d", "chunkX": "1245", "chunkY": "1107" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:volcanic:small:085", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "155,138", "regionName": "Desert", "roadAnchor": { "tileX": "39853", "tileY": "28793" }, "siteId": "site:13401daa5abc4df08b7401d4fdef9f02", "siteSeed": "1aa0d9f7a33919e6d7a2683d540ba7e28a0d81fbd1cb9f8ac93c53eb9a6167d7", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1245", "chunkY": "1107", "localX": 432, "localY": 208 }, "minimumLevel": 41, "provenance": { "approachChunk": { "x": 222, "y": 83 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:4092677eb795258da73de5dedad7eff7", "footprintChunk": { "x": 221, "y": 83 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:volcanic:small:085", "sizeTier": "small" }, "region": { "biome": "desert", "regionX": "155", "regionY": "138" }, "siteClass": "dungeon", "siteId": "site:13401daa5abc4df08b7401d4fdef9f02", "siteSeed": "13401daa5abc4df08b7401d4fdef9f02f78f6721b71788549e81b23d1cf0d400", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "39848", "tileY": "28785", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:13401daa5abc4df08b7401d4fdef9f02", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1245", "chunkY": "1107", "localX": 432, "localY": 208 }, "minimumLevel": 41, "provenance": { "approachChunk": { "x": 222, "y": 83 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:4092677eb795258da73de5dedad7eff7", "footprintChunk": { "x": 221, "y": 83 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:volcanic:small:085", "sizeTier": "small" }, "region": { "biome": "desert", "regionX": "155", "regionY": "138" }, "siteClass": "dungeon", "siteId": "site:13401daa5abc4df08b7401d4fdef9f02", "siteSeed": "13401daa5abc4df08b7401d4fdef9f02f78f6721b71788549e81b23d1cf0d400", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Woodland Cave", "layoutSeed": "06d07bf28345d585aa468a0d2e4d7538abb1225a853f855001a3d7a22004a6b1", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "1b398d728b42bd7950ca95ceaa565319b7ec3241f32c6b8c91a35a7a25107314", "chunkX": "1117", "chunkY": "1303" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:woodland:small:089", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "139,162", "regionName": "Woodland", "roadAnchor": { "tileX": "35757", "tileY": "33889" }, "siteId": "site:fe17ab2445dfc73ff5e446826d95feaf", "siteSeed": "6f73e8b00d1c8cd2bca127c0c1586ac398ae58e675f6878cc478fdc623974ac2", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1117", "chunkY": "1303", "localX": 432, "localY": 208 }, "minimumLevel": 1, "provenance": { "approachChunk": { "x": 94, "y": 279 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 1, "chunkId": "chunk:1b398d728b42bd7950ca95ceaa565319", "footprintChunk": { "x": 93, "y": 279 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:woodland:small:089", "sizeTier": "small" }, "region": { "biome": "woodland", "regionX": "139", "regionY": "162" }, "siteClass": "dungeon", "siteId": "site:fe17ab2445dfc73ff5e446826d95feaf", "siteSeed": "fe17ab2445dfc73ff5e446826d95feaff99198ee8a40999b65e88b236c7fe933", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "35752", "tileY": "33881", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:fe17ab2445dfc73ff5e446826d95feaf", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1117", "chunkY": "1303", "localX": 432, "localY": 208 }, "minimumLevel": 1, "provenance": { "approachChunk": { "x": 94, "y": 279 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 1, "chunkId": "chunk:1b398d728b42bd7950ca95ceaa565319", "footprintChunk": { "x": 93, "y": 279 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:woodland:small:089", "sizeTier": "small" }, "region": { "biome": "woodland", "regionX": "139", "regionY": "162" }, "siteClass": "dungeon", "siteId": "site:fe17ab2445dfc73ff5e446826d95feaf", "siteSeed": "fe17ab2445dfc73ff5e446826d95feaff99198ee8a40999b65e88b236c7fe933", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Wetland Cave", "layoutSeed": "772fb5adb96745ab9bc6b22504bba326f8563f20c0f3dbc20a0ee05bb2042159", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "a09c520f8294ee82c4c1363ee3bc05f61f17878229ece5efe5fac7725c83da02", "chunkX": "1147", "chunkY": "1181" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:frostland:small:092", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "143,147", "regionName": "Wetland", "roadAnchor": { "tileX": "36717", "tileY": "30717" }, "siteId": "site:65c7f6afb31eabdda9ee097e9655adfc", "siteSeed": "eace44e73803682fd123de3b15801d090fd0504079ec67378769ec123c4555ae", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1147", "chunkY": "1181", "localX": 432, "localY": 208 }, "minimumLevel": 11, "provenance": { "approachChunk": { "x": 124, "y": 157 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:a09c520f8294ee82c4c1363ee3bc05f6", "footprintChunk": { "x": 123, "y": 157 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:frostland:small:092", "sizeTier": "small" }, "region": { "biome": "wetland", "regionX": "143", "regionY": "147" }, "siteClass": "dungeon", "siteId": "site:65c7f6afb31eabdda9ee097e9655adfc", "siteSeed": "65c7f6afb31eabdda9ee097e9655adfce67bed8e8739dd2cc93d6e041f949d46", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "36712", "tileY": "30709", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:65c7f6afb31eabdda9ee097e9655adfc", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1147", "chunkY": "1181", "localX": 432, "localY": 208 }, "minimumLevel": 11, "provenance": { "approachChunk": { "x": 124, "y": 157 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:a09c520f8294ee82c4c1363ee3bc05f6", "footprintChunk": { "x": 123, "y": 157 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:frostland:small:092", "sizeTier": "small" }, "region": { "biome": "wetland", "regionX": "143", "regionY": "147" }, "siteClass": "dungeon", "siteId": "site:65c7f6afb31eabdda9ee097e9655adfc", "siteSeed": "65c7f6afb31eabdda9ee097e9655adfce67bed8e8739dd2cc93d6e041f949d46", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Frostland Cave", "layoutSeed": "08d7921c10a7205d50493fd286719d454088bff876b4d26192d503ac7f840bb9", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "056daf87bcc5cfd677a7135be993b3d76bc61f669e3c7ed8fef99293a97335fa", "chunkX": "1261", "chunkY": "1214" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:frostland:small:097", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "157,151", "regionName": "Frostland", "roadAnchor": { "tileX": "40365", "tileY": "31575" }, "siteId": "site:9d14d83d5cf247d749c2b2a8422fc7fd", "siteSeed": "ac12ee5174292b8a741d140c8aa2b5b88a9435c148a1f40c57ed84a871165c86", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1261", "chunkY": "1214", "localX": 432, "localY": 208 }, "minimumLevel": 21, "provenance": { "approachChunk": { "x": 238, "y": 190 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:056daf87bcc5cfd677a7135be993b3d7", "footprintChunk": { "x": 237, "y": 190 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:frostland:small:097", "sizeTier": "small" }, "region": { "biome": "frostland", "regionX": "157", "regionY": "151" }, "siteClass": "dungeon", "siteId": "site:9d14d83d5cf247d749c2b2a8422fc7fd", "siteSeed": "9d14d83d5cf247d749c2b2a8422fc7fd86fbe2d9a86b114eb0b4f8f308450495", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "40360", "tileY": "31567", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:9d14d83d5cf247d749c2b2a8422fc7fd", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1261", "chunkY": "1214", "localX": 432, "localY": 208 }, "minimumLevel": 21, "provenance": { "approachChunk": { "x": 238, "y": 190 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:056daf87bcc5cfd677a7135be993b3d7", "footprintChunk": { "x": 237, "y": 190 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:frostland:small:097", "sizeTier": "small" }, "region": { "biome": "frostland", "regionX": "157", "regionY": "151" }, "siteClass": "dungeon", "siteId": "site:9d14d83d5cf247d749c2b2a8422fc7fd", "siteSeed": "9d14d83d5cf247d749c2b2a8422fc7fd86fbe2d9a86b114eb0b4f8f308450495", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Upland Cave", "layoutSeed": "93cb020a6b349448c92bdb09c4d98c36c732abf2d0914edd58ef1dc32c108864", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "108066e49b43f1819f418b2716c3b87e82ab5d08fb9f74cc336c19332bc538dc", "chunkX": "1135", "chunkY": "1233" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:desert:small:098", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "141,154", "regionName": "Upland", "roadAnchor": { "tileX": "36333", "tileY": "32069" }, "siteId": "site:62bdc5c39a22fe053e24d5d9abc0496c", "siteSeed": "8ae8852c2f6b1cf90348640d3cfe3d9397e5119760b17bb54c4d4fbdec130d46", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1135", "chunkY": "1233", "localX": 432, "localY": 208 }, "minimumLevel": 6, "provenance": { "approachChunk": { "x": 112, "y": 209 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:108066e49b43f1819f418b2716c3b87e", "footprintChunk": { "x": 111, "y": 209 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:desert:small:098", "sizeTier": "small" }, "region": { "biome": "upland", "regionX": "141", "regionY": "154" }, "siteClass": "dungeon", "siteId": "site:62bdc5c39a22fe053e24d5d9abc0496c", "siteSeed": "62bdc5c39a22fe053e24d5d9abc0496cf0bcb8aa5256e75d5887e8f922104f9e", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "36328", "tileY": "32061", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:62bdc5c39a22fe053e24d5d9abc0496c", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1135", "chunkY": "1233", "localX": 432, "localY": 208 }, "minimumLevel": 6, "provenance": { "approachChunk": { "x": 112, "y": 209 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:108066e49b43f1819f418b2716c3b87e", "footprintChunk": { "x": 111, "y": 209 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:desert:small:098", "sizeTier": "small" }, "region": { "biome": "upland", "regionX": "141", "regionY": "154" }, "siteClass": "dungeon", "siteId": "site:62bdc5c39a22fe053e24d5d9abc0496c", "siteSeed": "62bdc5c39a22fe053e24d5d9abc0496cf0bcb8aa5256e75d5887e8f922104f9e", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Upland Cave", "layoutSeed": "860c01ac5e891e9cc3146a8e90377927a0c9c49d17bd642fac37b9656cf91eb4", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "0da7fcc48eb86f39663f8aac23f9da52878247c4602b8ce1dd35b2be000d30f4", "chunkX": "1202", "chunkY": "1099" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:upland:small:099", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "150,137", "regionName": "Upland", "roadAnchor": { "tileX": "38477", "tileY": "28585" }, "siteId": "site:309c00e6810609e6ca92c169f3e6908a", "siteSeed": "00fb5449cf4170075995065f162e30408a0ae6b54539cea11d96f0e1096e890c", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1202", "chunkY": "1099", "localX": 432, "localY": 208 }, "minimumLevel": 21, "provenance": { "approachChunk": { "x": 179, "y": 75 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:0da7fcc48eb86f39663f8aac23f9da52", "footprintChunk": { "x": 178, "y": 75 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:upland:small:099", "sizeTier": "small" }, "region": { "biome": "upland", "regionX": "150", "regionY": "137" }, "siteClass": "dungeon", "siteId": "site:309c00e6810609e6ca92c169f3e6908a", "siteSeed": "309c00e6810609e6ca92c169f3e6908a8202ab678bb0da71b5ee0dc462ad565e", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "38472", "tileY": "28577", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:309c00e6810609e6ca92c169f3e6908a", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1202", "chunkY": "1099", "localX": 432, "localY": 208 }, "minimumLevel": 21, "provenance": { "approachChunk": { "x": 179, "y": 75 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:0da7fcc48eb86f39663f8aac23f9da52", "footprintChunk": { "x": 178, "y": 75 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:upland:small:099", "sizeTier": "small" }, "region": { "biome": "upland", "regionX": "150", "regionY": "137" }, "siteClass": "dungeon", "siteId": "site:309c00e6810609e6ca92c169f3e6908a", "siteSeed": "309c00e6810609e6ca92c169f3e6908a8202ab678bb0da71b5ee0dc462ad565e", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Grassland Cave", "layoutSeed": "c8167187a53e401560b981339c06fbe0c62b196a460bff963317f5b83ba4ae3f", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "e7f4a06104378665f80b00335bd0642492416f6db497a26f0a8808b3d944499f", "chunkX": "1121", "chunkY": "1241" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:upland:small:101", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "140,155", "regionName": "Grassland", "roadAnchor": { "tileX": "35885", "tileY": "32277" }, "siteId": "site:420265c6108b477c376bc73761b6fc07", "siteSeed": "d4b5ca1aebc8a3149c1ae05681345c40067f2f524603c4e2b9794b1ed69b4326", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1121", "chunkY": "1241", "localX": 432, "localY": 208 }, "minimumLevel": 6, "provenance": { "approachChunk": { "x": 98, "y": 217 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:e7f4a06104378665f80b00335bd06424", "footprintChunk": { "x": 97, "y": 217 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:upland:small:101", "sizeTier": "small" }, "region": { "biome": "grassland", "regionX": "140", "regionY": "155" }, "siteClass": "dungeon", "siteId": "site:420265c6108b477c376bc73761b6fc07", "siteSeed": "420265c6108b477c376bc73761b6fc07c8b4a60a186e08f7a349e901f2357126", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "35880", "tileY": "32269", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:420265c6108b477c376bc73761b6fc07", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1121", "chunkY": "1241", "localX": 432, "localY": 208 }, "minimumLevel": 6, "provenance": { "approachChunk": { "x": 98, "y": 217 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:e7f4a06104378665f80b00335bd06424", "footprintChunk": { "x": 97, "y": 217 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:upland:small:101", "sizeTier": "small" }, "region": { "biome": "grassland", "regionX": "140", "regionY": "155" }, "siteClass": "dungeon", "siteId": "site:420265c6108b477c376bc73761b6fc07", "siteSeed": "420265c6108b477c376bc73761b6fc07c8b4a60a186e08f7a349e901f2357126", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Small Desert Cave", "layoutSeed": "8aebb4a796d9482992fc1eb596e186f5bf7d0c6cf2b6ff01503875301caa3141", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "6e10e9c70bb347574829d87d3d88bd6c82347cfb77e37fb34f54c89b7130f817", "chunkX": "1177", "chunkY": "1203" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:desert:small:103", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "147,150", "regionName": "Desert", "roadAnchor": { "tileX": "37677", "tileY": "31289" }, "siteId": "site:bfa54a944afcccefd063a8dc8ff44a93", "siteSeed": "9a50006170d2b50654d8eb218a69f37367284194429754b22dc7479795f8499b", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1177", "chunkY": "1203", "localX": 432, "localY": 208 }, "minimumLevel": 11, "provenance": { "approachChunk": { "x": 154, "y": 179 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:6e10e9c70bb347574829d87d3d88bd6c", "footprintChunk": { "x": 153, "y": 179 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:desert:small:103", "sizeTier": "small" }, "region": { "biome": "desert", "regionX": "147", "regionY": "150" }, "siteClass": "dungeon", "siteId": "site:bfa54a944afcccefd063a8dc8ff44a93", "siteSeed": "bfa54a944afcccefd063a8dc8ff44a93d53f9acaa399ea3427d174e1bc23550a", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "37672", "tileY": "31281", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:bfa54a944afcccefd063a8dc8ff44a93", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1177", "chunkY": "1203", "localX": 432, "localY": 208 }, "minimumLevel": 11, "provenance": { "approachChunk": { "x": 154, "y": 179 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:6e10e9c70bb347574829d87d3d88bd6c", "footprintChunk": { "x": 153, "y": 179 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:desert:small:103", "sizeTier": "small" }, "region": { "biome": "desert", "regionX": "147", "regionY": "150" }, "siteClass": "dungeon", "siteId": "site:bfa54a944afcccefd063a8dc8ff44a93", "siteSeed": "bfa54a944afcccefd063a8dc8ff44a93d53f9acaa399ea3427d174e1bc23550a", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }, { "packageId": "procedural-fort-family", "parcel": { "familyId": "site-family:fort", "height": 60, "label": "Standard Frostland Fort", "layoutSeed": "3906a1d7fc327cdff170c55e49ed919ae9a6cf4c4876817884ae98ca057c7860", "packageId": "procedural-fort-family", "pages": [{ "chunkX": "1167", "chunkY": "1045" }, { "chunkX": "1168", "chunkY": "1045" }, { "chunkX": "1167", "chunkY": "1046" }, { "chunkX": "1168", "chunkY": "1046" }, { "chunkX": "1167", "chunkY": "1047" }, { "chunkX": "1168", "chunkY": "1047" }], "roadAnchor": { "tileX": "37403", "tileY": "27209" }, "siteId": "site:3906a1d7fc327cdff170c55e49ed919a", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1168", "chunkY": "1046", "localX": 16, "localY": 112 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 145, "y": 22 }, { "x": 146, "y": 22 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:2007e0fbb79a18243131b1bd158c99cb", "footprintChunks": [{ "x": 143, "y": 21 }, { "x": 144, "y": 21 }, { "x": 143, "y": 22 }, { "x": 144, "y": 22 }, { "x": 143, "y": 23 }, { "x": 144, "y": 23 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:upland:standard:032", "sizeTier": "standard" }, "region": { "biome": "frostland", "regionX": "146", "regionY": "130" }, "siteClass": "dungeon", "siteId": "site:3906a1d7fc327cdff170c55e49ed919a", "siteSeed": "3906a1d7fc327cdff170c55e49ed919ae9a6cf4c4876817884ae98ca057c7860", "version": "site-socket-planned-fort-v1" }, "tier": "standard", "tileX": "37348", "tileY": "27170", "version": "planned-fort-family-candidate-v1", "width": 56 }, "siteId": "site:3906a1d7fc327cdff170c55e49ed919a", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1168", "chunkY": "1046", "localX": 16, "localY": 112 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 145, "y": 22 }, { "x": 146, "y": 22 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:2007e0fbb79a18243131b1bd158c99cb", "footprintChunks": [{ "x": 143, "y": 21 }, { "x": 144, "y": 21 }, { "x": 143, "y": 22 }, { "x": 144, "y": 22 }, { "x": 143, "y": 23 }, { "x": 144, "y": 23 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:upland:standard:032", "sizeTier": "standard" }, "region": { "biome": "frostland", "regionX": "146", "regionY": "130" }, "siteClass": "dungeon", "siteId": "site:3906a1d7fc327cdff170c55e49ed919a", "siteSeed": "3906a1d7fc327cdff170c55e49ed919ae9a6cf4c4876817884ae98ca057c7860", "version": "site-socket-planned-fort-v1" }, "version": "site-reservation-planned-fort-v1" }, { "packageId": "procedural-fort-family", "parcel": { "familyId": "site-family:fort", "height": 60, "label": "Standard Grassland Fort", "layoutSeed": "759dab16d5a65827412f21a9501c2a4c789ea88cb8b23ac1451d4aca402125f9", "packageId": "procedural-fort-family", "pages": [{ "chunkX": "1099", "chunkY": "1119" }, { "chunkX": "1100", "chunkY": "1119" }, { "chunkX": "1099", "chunkY": "1120" }, { "chunkX": "1100", "chunkY": "1120" }, { "chunkX": "1099", "chunkY": "1121" }, { "chunkX": "1100", "chunkY": "1121" }], "roadAnchor": { "tileX": "35227", "tileY": "29133" }, "siteId": "site:759dab16d5a65827412f21a9501c2a4c", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1100", "chunkY": "1120", "localX": 16, "localY": 112 }, "minimumLevel": 41, "provenance": { "approachChunks": [{ "x": 77, "y": 96 }, { "x": 78, "y": 96 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:24f9a87a158dd4b5b97715bd3288a857", "footprintChunks": [{ "x": 75, "y": 95 }, { "x": 76, "y": 95 }, { "x": 75, "y": 96 }, { "x": 76, "y": 96 }, { "x": 75, "y": 97 }, { "x": 76, "y": 97 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:grassland:standard:040", "sizeTier": "standard" }, "region": { "biome": "grassland", "regionX": "137", "regionY": "140" }, "siteClass": "dungeon", "siteId": "site:759dab16d5a65827412f21a9501c2a4c", "siteSeed": "759dab16d5a65827412f21a9501c2a4c789ea88cb8b23ac1451d4aca402125f9", "version": "site-socket-planned-fort-v1" }, "tier": "standard", "tileX": "35172", "tileY": "29094", "version": "planned-fort-family-candidate-v1", "width": 56 }, "siteId": "site:759dab16d5a65827412f21a9501c2a4c", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1100", "chunkY": "1120", "localX": 16, "localY": 112 }, "minimumLevel": 41, "provenance": { "approachChunks": [{ "x": 77, "y": 96 }, { "x": 78, "y": 96 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:24f9a87a158dd4b5b97715bd3288a857", "footprintChunks": [{ "x": 75, "y": 95 }, { "x": 76, "y": 95 }, { "x": 75, "y": 96 }, { "x": 76, "y": 96 }, { "x": 75, "y": 97 }, { "x": 76, "y": 97 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:grassland:standard:040", "sizeTier": "standard" }, "region": { "biome": "grassland", "regionX": "137", "regionY": "140" }, "siteClass": "dungeon", "siteId": "site:759dab16d5a65827412f21a9501c2a4c", "siteSeed": "759dab16d5a65827412f21a9501c2a4c789ea88cb8b23ac1451d4aca402125f9", "version": "site-socket-planned-fort-v1" }, "version": "site-reservation-planned-fort-v1" }, { "packageId": "procedural-fort-family", "parcel": { "familyId": "site-family:fort", "height": 60, "label": "Standard Upland Fort", "layoutSeed": "fd316756352499ca7544e2b846e066880e5f8cb7860eeaf2f7ce611f85b6dd27", "packageId": "procedural-fort-family", "pages": [{ "chunkX": "1247", "chunkY": "1205" }, { "chunkX": "1248", "chunkY": "1205" }, { "chunkX": "1247", "chunkY": "1206" }, { "chunkX": "1248", "chunkY": "1206" }, { "chunkX": "1247", "chunkY": "1207" }, { "chunkX": "1248", "chunkY": "1207" }], "roadAnchor": { "tileX": "39963", "tileY": "31369" }, "siteId": "site:fd316756352499ca7544e2b846e06688", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1248", "chunkY": "1206", "localX": 16, "localY": 112 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 225, "y": 182 }, { "x": 226, "y": 182 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:74d3f0d48f8ef515ef5c7da08b8d54b9", "footprintChunks": [{ "x": 223, "y": 181 }, { "x": 224, "y": 181 }, { "x": 223, "y": 182 }, { "x": 224, "y": 182 }, { "x": 223, "y": 183 }, { "x": 224, "y": 183 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:frostland:standard:044", "sizeTier": "standard" }, "region": { "biome": "upland", "regionX": "156", "regionY": "150" }, "siteClass": "dungeon", "siteId": "site:fd316756352499ca7544e2b846e06688", "siteSeed": "fd316756352499ca7544e2b846e066880e5f8cb7860eeaf2f7ce611f85b6dd27", "version": "site-socket-planned-fort-v1" }, "tier": "standard", "tileX": "39908", "tileY": "31330", "version": "planned-fort-family-candidate-v1", "width": 56 }, "siteId": "site:fd316756352499ca7544e2b846e06688", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1248", "chunkY": "1206", "localX": 16, "localY": 112 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 225, "y": 182 }, { "x": 226, "y": 182 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:74d3f0d48f8ef515ef5c7da08b8d54b9", "footprintChunks": [{ "x": 223, "y": 181 }, { "x": 224, "y": 181 }, { "x": 223, "y": 182 }, { "x": 224, "y": 182 }, { "x": 223, "y": 183 }, { "x": 224, "y": 183 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:frostland:standard:044", "sizeTier": "standard" }, "region": { "biome": "upland", "regionX": "156", "regionY": "150" }, "siteClass": "dungeon", "siteId": "site:fd316756352499ca7544e2b846e06688", "siteSeed": "fd316756352499ca7544e2b846e066880e5f8cb7860eeaf2f7ce611f85b6dd27", "version": "site-socket-planned-fort-v1" }, "version": "site-reservation-planned-fort-v1" }, { "packageId": "procedural-fort-family", "parcel": { "familyId": "site-family:fort", "height": 60, "label": "Standard Upland Fort", "layoutSeed": "8315531d3f00416043afd9dc17f02cb1158bea5a36738ef8d9eee7addf850388", "packageId": "procedural-fort-family", "pages": [{ "chunkX": "1187", "chunkY": "1253" }, { "chunkX": "1188", "chunkY": "1253" }, { "chunkX": "1187", "chunkY": "1254" }, { "chunkX": "1188", "chunkY": "1254" }, { "chunkX": "1187", "chunkY": "1255" }, { "chunkX": "1188", "chunkY": "1255" }], "roadAnchor": { "tileX": "38043", "tileY": "32617" }, "siteId": "site:8315531d3f00416043afd9dc17f02cb1", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1188", "chunkY": "1254", "localX": 16, "localY": 112 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 165, "y": 230 }, { "x": 166, "y": 230 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:d898bffc73dd04c835e6eff1f0dd458c", "footprintChunks": [{ "x": 163, "y": 229 }, { "x": 164, "y": 229 }, { "x": 163, "y": 230 }, { "x": 164, "y": 230 }, { "x": 163, "y": 231 }, { "x": 164, "y": 231 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:grassland:standard:048", "sizeTier": "standard" }, "region": { "biome": "upland", "regionX": "148", "regionY": "156" }, "siteClass": "dungeon", "siteId": "site:8315531d3f00416043afd9dc17f02cb1", "siteSeed": "8315531d3f00416043afd9dc17f02cb1158bea5a36738ef8d9eee7addf850388", "version": "site-socket-planned-fort-v1" }, "tier": "standard", "tileX": "37988", "tileY": "32578", "version": "planned-fort-family-candidate-v1", "width": 56 }, "siteId": "site:8315531d3f00416043afd9dc17f02cb1", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1188", "chunkY": "1254", "localX": 16, "localY": 112 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 165, "y": 230 }, { "x": 166, "y": 230 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:d898bffc73dd04c835e6eff1f0dd458c", "footprintChunks": [{ "x": 163, "y": 229 }, { "x": 164, "y": 229 }, { "x": 163, "y": 230 }, { "x": 164, "y": 230 }, { "x": 163, "y": 231 }, { "x": 164, "y": 231 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:grassland:standard:048", "sizeTier": "standard" }, "region": { "biome": "upland", "regionX": "148", "regionY": "156" }, "siteClass": "dungeon", "siteId": "site:8315531d3f00416043afd9dc17f02cb1", "siteSeed": "8315531d3f00416043afd9dc17f02cb1158bea5a36738ef8d9eee7addf850388", "version": "site-socket-planned-fort-v1" }, "version": "site-reservation-planned-fort-v1" }, { "packageId": "procedural-fort-family", "parcel": { "familyId": "site-family:fort", "height": 60, "label": "Standard Upland Fort", "layoutSeed": "e7432c35ed62a3c5aef8d8742a6edff3a023a16fefd25312a8956d739c51fa14", "packageId": "procedural-fort-family", "pages": [{ "chunkX": "1195", "chunkY": "1241" }, { "chunkX": "1196", "chunkY": "1241" }, { "chunkX": "1195", "chunkY": "1242" }, { "chunkX": "1196", "chunkY": "1242" }, { "chunkX": "1195", "chunkY": "1243" }, { "chunkX": "1196", "chunkY": "1243" }], "roadAnchor": { "tileX": "38299", "tileY": "32305" }, "siteId": "site:e7432c35ed62a3c5aef8d8742a6edff3", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1196", "chunkY": "1242", "localX": 16, "localY": 112 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 173, "y": 218 }, { "x": 174, "y": 218 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:f6240496c19fd73e95fff52dfee9603c", "footprintChunks": [{ "x": 171, "y": 217 }, { "x": 172, "y": 217 }, { "x": 171, "y": 218 }, { "x": 172, "y": 218 }, { "x": 171, "y": 219 }, { "x": 172, "y": 219 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:grassland:standard:053", "sizeTier": "standard" }, "region": { "biome": "upland", "regionX": "149", "regionY": "155" }, "siteClass": "dungeon", "siteId": "site:e7432c35ed62a3c5aef8d8742a6edff3", "siteSeed": "e7432c35ed62a3c5aef8d8742a6edff3a023a16fefd25312a8956d739c51fa14", "version": "site-socket-planned-fort-v1" }, "tier": "standard", "tileX": "38244", "tileY": "32266", "version": "planned-fort-family-candidate-v1", "width": 56 }, "siteId": "site:e7432c35ed62a3c5aef8d8742a6edff3", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1196", "chunkY": "1242", "localX": 16, "localY": 112 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 173, "y": 218 }, { "x": 174, "y": 218 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:f6240496c19fd73e95fff52dfee9603c", "footprintChunks": [{ "x": 171, "y": 217 }, { "x": 172, "y": 217 }, { "x": 171, "y": 218 }, { "x": 172, "y": 218 }, { "x": 171, "y": 219 }, { "x": 172, "y": 219 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:grassland:standard:053", "sizeTier": "standard" }, "region": { "biome": "upland", "regionX": "149", "regionY": "155" }, "siteClass": "dungeon", "siteId": "site:e7432c35ed62a3c5aef8d8742a6edff3", "siteSeed": "e7432c35ed62a3c5aef8d8742a6edff3a023a16fefd25312a8956d739c51fa14", "version": "site-socket-planned-fort-v1" }, "version": "site-reservation-planned-fort-v1" }, { "packageId": "procedural-fort-family", "parcel": { "familyId": "site-family:fort", "height": 60, "label": "Standard Grassland Fort", "layoutSeed": "7bcbc6a0f0f12eb917127938c081344a8334f7e127c6ecb6f9b5f3d5be1b0065", "packageId": "procedural-fort-family", "pages": [{ "chunkX": "1088", "chunkY": "1222" }, { "chunkX": "1089", "chunkY": "1222" }, { "chunkX": "1088", "chunkY": "1223" }, { "chunkX": "1089", "chunkY": "1223" }, { "chunkX": "1088", "chunkY": "1224" }, { "chunkX": "1089", "chunkY": "1224" }], "roadAnchor": { "tileX": "34875", "tileY": "31811" }, "siteId": "site:7bcbc6a0f0f12eb917127938c081344a", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1089", "chunkY": "1223", "localX": 16, "localY": 112 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 66, "y": 199 }, { "x": 67, "y": 199 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:ae8e06cdf2e2ba6342d8137eccdbe52c", "footprintChunks": [{ "x": 64, "y": 198 }, { "x": 65, "y": 198 }, { "x": 64, "y": 199 }, { "x": 65, "y": 199 }, { "x": 64, "y": 200 }, { "x": 65, "y": 200 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:volcanic:standard:061", "sizeTier": "standard" }, "region": { "biome": "grassland", "regionX": "136", "regionY": "152" }, "siteClass": "dungeon", "siteId": "site:7bcbc6a0f0f12eb917127938c081344a", "siteSeed": "7bcbc6a0f0f12eb917127938c081344a8334f7e127c6ecb6f9b5f3d5be1b0065", "version": "site-socket-planned-fort-v1" }, "tier": "standard", "tileX": "34820", "tileY": "31772", "version": "planned-fort-family-candidate-v1", "width": 56 }, "siteId": "site:7bcbc6a0f0f12eb917127938c081344a", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1089", "chunkY": "1223", "localX": 16, "localY": 112 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 66, "y": 199 }, { "x": 67, "y": 199 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:ae8e06cdf2e2ba6342d8137eccdbe52c", "footprintChunks": [{ "x": 64, "y": 198 }, { "x": 65, "y": 198 }, { "x": 64, "y": 199 }, { "x": 65, "y": 199 }, { "x": 64, "y": 200 }, { "x": 65, "y": 200 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:volcanic:standard:061", "sizeTier": "standard" }, "region": { "biome": "grassland", "regionX": "136", "regionY": "152" }, "siteClass": "dungeon", "siteId": "site:7bcbc6a0f0f12eb917127938c081344a", "siteSeed": "7bcbc6a0f0f12eb917127938c081344a8334f7e127c6ecb6f9b5f3d5be1b0065", "version": "site-socket-planned-fort-v1" }, "version": "site-reservation-planned-fort-v1" }, { "packageId": "procedural-fort-family", "parcel": { "familyId": "site-family:fort", "height": 60, "label": "Standard Upland Fort", "layoutSeed": "7237afdaa6b7f9df71c0dce1c7cb5401226286db553d9163e73b51f32319ca86", "packageId": "procedural-fort-family", "pages": [{ "chunkX": "1207", "chunkY": "1235" }, { "chunkX": "1208", "chunkY": "1235" }, { "chunkX": "1207", "chunkY": "1236" }, { "chunkX": "1208", "chunkY": "1236" }, { "chunkX": "1207", "chunkY": "1237" }, { "chunkX": "1208", "chunkY": "1237" }], "roadAnchor": { "tileX": "38683", "tileY": "32149" }, "siteId": "site:7237afdaa6b7f9df71c0dce1c7cb5401", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1208", "chunkY": "1236", "localX": 16, "localY": 112 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 185, "y": 212 }, { "x": 186, "y": 212 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:4ab0dd9480899eb8d5453266acf03c7c", "footprintChunks": [{ "x": 183, "y": 211 }, { "x": 184, "y": 211 }, { "x": 183, "y": 212 }, { "x": 184, "y": 212 }, { "x": 183, "y": 213 }, { "x": 184, "y": 213 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:grassland:standard:064", "sizeTier": "standard" }, "region": { "biome": "upland", "regionX": "151", "regionY": "154" }, "siteClass": "dungeon", "siteId": "site:7237afdaa6b7f9df71c0dce1c7cb5401", "siteSeed": "7237afdaa6b7f9df71c0dce1c7cb5401226286db553d9163e73b51f32319ca86", "version": "site-socket-planned-fort-v1" }, "tier": "standard", "tileX": "38628", "tileY": "32110", "version": "planned-fort-family-candidate-v1", "width": 56 }, "siteId": "site:7237afdaa6b7f9df71c0dce1c7cb5401", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1208", "chunkY": "1236", "localX": 16, "localY": 112 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 185, "y": 212 }, { "x": 186, "y": 212 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:4ab0dd9480899eb8d5453266acf03c7c", "footprintChunks": [{ "x": 183, "y": 211 }, { "x": 184, "y": 211 }, { "x": 183, "y": 212 }, { "x": 184, "y": 212 }, { "x": 183, "y": 213 }, { "x": 184, "y": 213 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:grassland:standard:064", "sizeTier": "standard" }, "region": { "biome": "upland", "regionX": "151", "regionY": "154" }, "siteClass": "dungeon", "siteId": "site:7237afdaa6b7f9df71c0dce1c7cb5401", "siteSeed": "7237afdaa6b7f9df71c0dce1c7cb5401226286db553d9163e73b51f32319ca86", "version": "site-socket-planned-fort-v1" }, "version": "site-reservation-planned-fort-v1" }, { "packageId": "procedural-fort-family", "parcel": { "familyId": "site-family:fort", "height": 60, "label": "Standard Volcanic Fort", "layoutSeed": "42ee97506b0859a1f7789a3382d1530158dd6e1dcf5683d414b41fbeb57eae8b", "packageId": "procedural-fort-family", "pages": [{ "chunkX": "1080", "chunkY": "1185" }, { "chunkX": "1081", "chunkY": "1185" }, { "chunkX": "1080", "chunkY": "1186" }, { "chunkX": "1081", "chunkY": "1186" }, { "chunkX": "1080", "chunkY": "1187" }, { "chunkX": "1081", "chunkY": "1187" }], "roadAnchor": { "tileX": "34619", "tileY": "30849" }, "siteId": "site:42ee97506b0859a1f7789a3382d15301", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1081", "chunkY": "1186", "localX": 16, "localY": 112 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 58, "y": 162 }, { "x": 59, "y": 162 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:0a25d8bd6f20ab58a98f529cefcbee70", "footprintChunks": [{ "x": 56, "y": 161 }, { "x": 57, "y": 161 }, { "x": 56, "y": 162 }, { "x": 57, "y": 162 }, { "x": 56, "y": 163 }, { "x": 57, "y": 163 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:frostland:standard:065", "sizeTier": "standard" }, "region": { "biome": "volcanic", "regionX": "135", "regionY": "148" }, "siteClass": "dungeon", "siteId": "site:42ee97506b0859a1f7789a3382d15301", "siteSeed": "42ee97506b0859a1f7789a3382d1530158dd6e1dcf5683d414b41fbeb57eae8b", "version": "site-socket-planned-fort-v1" }, "tier": "standard", "tileX": "34564", "tileY": "30810", "version": "planned-fort-family-candidate-v1", "width": 56 }, "siteId": "site:42ee97506b0859a1f7789a3382d15301", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1081", "chunkY": "1186", "localX": 16, "localY": 112 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 58, "y": 162 }, { "x": 59, "y": 162 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:0a25d8bd6f20ab58a98f529cefcbee70", "footprintChunks": [{ "x": 56, "y": 161 }, { "x": 57, "y": 161 }, { "x": 56, "y": 162 }, { "x": 57, "y": 162 }, { "x": 56, "y": 163 }, { "x": 57, "y": 163 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:frostland:standard:065", "sizeTier": "standard" }, "region": { "biome": "volcanic", "regionX": "135", "regionY": "148" }, "siteClass": "dungeon", "siteId": "site:42ee97506b0859a1f7789a3382d15301", "siteSeed": "42ee97506b0859a1f7789a3382d1530158dd6e1dcf5683d414b41fbeb57eae8b", "version": "site-socket-planned-fort-v1" }, "version": "site-reservation-planned-fort-v1" }, { "packageId": "procedural-fort-family", "parcel": { "familyId": "site-family:fort", "height": 60, "label": "Standard Grassland Fort", "layoutSeed": "6916491598574a613ad3098eb40ed9b4ddc8dd4ec2c6bbeda7be4ffc7625001e", "packageId": "procedural-fort-family", "pages": [{ "chunkX": "1127", "chunkY": "1235" }, { "chunkX": "1128", "chunkY": "1235" }, { "chunkX": "1127", "chunkY": "1236" }, { "chunkX": "1128", "chunkY": "1236" }, { "chunkX": "1127", "chunkY": "1237" }, { "chunkX": "1128", "chunkY": "1237" }], "roadAnchor": { "tileX": "36123", "tileY": "32149" }, "siteId": "site:6916491598574a613ad3098eb40ed9b4", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1128", "chunkY": "1236", "localX": 16, "localY": 112 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 105, "y": 212 }, { "x": 106, "y": 212 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:1614462bf52eccdd23e0270027b00c1d", "footprintChunks": [{ "x": 103, "y": 211 }, { "x": 104, "y": 211 }, { "x": 103, "y": 212 }, { "x": 104, "y": 212 }, { "x": 103, "y": 213 }, { "x": 104, "y": 213 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:upland:standard:070", "sizeTier": "standard" }, "region": { "biome": "grassland", "regionX": "141", "regionY": "154" }, "siteClass": "dungeon", "siteId": "site:6916491598574a613ad3098eb40ed9b4", "siteSeed": "6916491598574a613ad3098eb40ed9b4ddc8dd4ec2c6bbeda7be4ffc7625001e", "version": "site-socket-planned-fort-v1" }, "tier": "standard", "tileX": "36068", "tileY": "32110", "version": "planned-fort-family-candidate-v1", "width": 56 }, "siteId": "site:6916491598574a613ad3098eb40ed9b4", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1128", "chunkY": "1236", "localX": 16, "localY": 112 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 105, "y": 212 }, { "x": 106, "y": 212 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:1614462bf52eccdd23e0270027b00c1d", "footprintChunks": [{ "x": 103, "y": 211 }, { "x": 104, "y": 211 }, { "x": 103, "y": 212 }, { "x": 104, "y": 212 }, { "x": 103, "y": 213 }, { "x": 104, "y": 213 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:upland:standard:070", "sizeTier": "standard" }, "region": { "biome": "grassland", "regionX": "141", "regionY": "154" }, "siteClass": "dungeon", "siteId": "site:6916491598574a613ad3098eb40ed9b4", "siteSeed": "6916491598574a613ad3098eb40ed9b4ddc8dd4ec2c6bbeda7be4ffc7625001e", "version": "site-socket-planned-fort-v1" }, "version": "site-reservation-planned-fort-v1" }, { "packageId": "procedural-fort-family", "parcel": { "familyId": "site-family:fort", "height": 60, "label": "Standard Desert Fort", "layoutSeed": "f733563bfce198566d484b7c63ab770ccb5a7afcaed3dbd3b91bed4126bea660", "packageId": "procedural-fort-family", "pages": [{ "chunkX": "1185", "chunkY": "1155" }, { "chunkX": "1186", "chunkY": "1155" }, { "chunkX": "1185", "chunkY": "1156" }, { "chunkX": "1186", "chunkY": "1156" }, { "chunkX": "1185", "chunkY": "1157" }, { "chunkX": "1186", "chunkY": "1157" }], "roadAnchor": { "tileX": "37979", "tileY": "30069" }, "siteId": "site:f733563bfce198566d484b7c63ab770c", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1186", "chunkY": "1156", "localX": 16, "localY": 112 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 163, "y": 132 }, { "x": 164, "y": 132 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:ae3110c78fb3cbce8730ff30ff3e22d9", "footprintChunks": [{ "x": 161, "y": 131 }, { "x": 162, "y": 131 }, { "x": 161, "y": 132 }, { "x": 162, "y": 132 }, { "x": 161, "y": 133 }, { "x": 162, "y": 133 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:volcanic:standard:072", "sizeTier": "standard" }, "region": { "biome": "desert", "regionX": "148", "regionY": "144" }, "siteClass": "dungeon", "siteId": "site:f733563bfce198566d484b7c63ab770c", "siteSeed": "f733563bfce198566d484b7c63ab770ccb5a7afcaed3dbd3b91bed4126bea660", "version": "site-socket-planned-fort-v1" }, "tier": "standard", "tileX": "37924", "tileY": "30030", "version": "planned-fort-family-candidate-v1", "width": 56 }, "siteId": "site:f733563bfce198566d484b7c63ab770c", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1186", "chunkY": "1156", "localX": 16, "localY": 112 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 163, "y": 132 }, { "x": 164, "y": 132 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:ae3110c78fb3cbce8730ff30ff3e22d9", "footprintChunks": [{ "x": 161, "y": 131 }, { "x": 162, "y": 131 }, { "x": 161, "y": 132 }, { "x": 162, "y": 132 }, { "x": 161, "y": 133 }, { "x": 162, "y": 133 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:volcanic:standard:072", "sizeTier": "standard" }, "region": { "biome": "desert", "regionX": "148", "regionY": "144" }, "siteClass": "dungeon", "siteId": "site:f733563bfce198566d484b7c63ab770c", "siteSeed": "f733563bfce198566d484b7c63ab770ccb5a7afcaed3dbd3b91bed4126bea660", "version": "site-socket-planned-fort-v1" }, "version": "site-reservation-planned-fort-v1" }, { "packageId": "procedural-fort-family", "parcel": { "familyId": "site-family:fort", "height": 60, "label": "Standard Woodland Fort", "layoutSeed": "393eed767560f2115b0a58aa4e627890c8cf2ab8bac1bed3799e332123a8ca83", "packageId": "procedural-fort-family", "pages": [{ "chunkX": "1175", "chunkY": "1272" }, { "chunkX": "1176", "chunkY": "1272" }, { "chunkX": "1175", "chunkY": "1273" }, { "chunkX": "1176", "chunkY": "1273" }, { "chunkX": "1175", "chunkY": "1274" }, { "chunkX": "1176", "chunkY": "1274" }], "roadAnchor": { "tileX": "37659", "tileY": "33111" }, "siteId": "site:393eed767560f2115b0a58aa4e627890", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1176", "chunkY": "1273", "localX": 16, "localY": 112 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 153, "y": 249 }, { "x": 154, "y": 249 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:058cdc0210a025e841418f172b154682", "footprintChunks": [{ "x": 151, "y": 248 }, { "x": 152, "y": 248 }, { "x": 151, "y": 249 }, { "x": 152, "y": 249 }, { "x": 151, "y": 250 }, { "x": 152, "y": 250 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:grassland:standard:095", "sizeTier": "standard" }, "region": { "biome": "woodland", "regionX": "147", "regionY": "159" }, "siteClass": "dungeon", "siteId": "site:393eed767560f2115b0a58aa4e627890", "siteSeed": "393eed767560f2115b0a58aa4e627890c8cf2ab8bac1bed3799e332123a8ca83", "version": "site-socket-planned-fort-v1" }, "tier": "standard", "tileX": "37604", "tileY": "33072", "version": "planned-fort-family-candidate-v1", "width": 56 }, "siteId": "site:393eed767560f2115b0a58aa4e627890", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1176", "chunkY": "1273", "localX": 16, "localY": 112 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 153, "y": 249 }, { "x": 154, "y": 249 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:058cdc0210a025e841418f172b154682", "footprintChunks": [{ "x": 151, "y": 248 }, { "x": 152, "y": 248 }, { "x": 151, "y": 249 }, { "x": 152, "y": 249 }, { "x": 151, "y": 250 }, { "x": 152, "y": 250 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-fort", "placementVersion": "planned-fort-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:fort:grassland:standard:095", "sizeTier": "standard" }, "region": { "biome": "woodland", "regionX": "147", "regionY": "159" }, "siteClass": "dungeon", "siteId": "site:393eed767560f2115b0a58aa4e627890", "siteSeed": "393eed767560f2115b0a58aa4e627890c8cf2ab8bac1bed3799e332123a8ca83", "version": "site-socket-planned-fort-v1" }, "version": "site-reservation-planned-fort-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Standard Wetland Ruin", "layoutSeed": "6b419fd70f8b9affe31148426160c6f732c0a8124c7d89f09be7cac28cf70e71", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1093", "chunkY": "1093" }, { "chunkX": "1094", "chunkY": "1093" }, { "chunkX": "1093", "chunkY": "1094" }, { "chunkX": "1094", "chunkY": "1094" }], "roadAnchor": { "tileX": "35035", "tileY": "28429" }, "siteId": "site:6b419fd70f8b9affe31148426160c6f7", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1094", "chunkY": "1093", "localX": 16, "localY": 720 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 71, "y": 69 }, { "x": 72, "y": 69 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:145985bb6304a482e1174c0e71b1c23d", "footprintChunks": [{ "x": 69, "y": 69 }, { "x": 70, "y": 69 }, { "x": 69, "y": 70 }, { "x": 70, "y": 70 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:wetland:standard:033", "sizeTier": "standard" }, "region": { "biome": "wetland", "regionX": "136", "regionY": "136" }, "siteClass": "dungeon", "siteId": "site:6b419fd70f8b9affe31148426160c6f7", "siteSeed": "6b419fd70f8b9affe31148426160c6f732c0a8124c7d89f09be7cac28cf70e71", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "34980", "tileY": "28418", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:6b419fd70f8b9affe31148426160c6f7", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1094", "chunkY": "1093", "localX": 16, "localY": 720 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 71, "y": 69 }, { "x": 72, "y": 69 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:145985bb6304a482e1174c0e71b1c23d", "footprintChunks": [{ "x": 69, "y": 69 }, { "x": 70, "y": 69 }, { "x": 69, "y": 70 }, { "x": 70, "y": 70 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:wetland:standard:033", "sizeTier": "standard" }, "region": { "biome": "wetland", "regionX": "136", "regionY": "136" }, "siteClass": "dungeon", "siteId": "site:6b419fd70f8b9affe31148426160c6f7", "siteSeed": "6b419fd70f8b9affe31148426160c6f732c0a8124c7d89f09be7cac28cf70e71", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Standard Tropical Ruin", "layoutSeed": "c175e0f5c06823f50ccd5dc6c007cb115acccb5a5ee8b5cf396ea9263d484770", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1258", "chunkY": "1245" }, { "chunkX": "1259", "chunkY": "1245" }, { "chunkX": "1258", "chunkY": "1246" }, { "chunkX": "1259", "chunkY": "1246" }], "roadAnchor": { "tileX": "40315", "tileY": "32381" }, "siteId": "site:c175e0f5c06823f50ccd5dc6c007cb11", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1259", "chunkY": "1245", "localX": 16, "localY": 720 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 236, "y": 221 }, { "x": 237, "y": 221 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:9901286ad334a8c799d7692af63d5c8b", "footprintChunks": [{ "x": 234, "y": 221 }, { "x": 235, "y": 221 }, { "x": 234, "y": 222 }, { "x": 235, "y": 222 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:tropical:standard:037", "sizeTier": "standard" }, "region": { "biome": "tropical", "regionX": "157", "regionY": "155" }, "siteClass": "dungeon", "siteId": "site:c175e0f5c06823f50ccd5dc6c007cb11", "siteSeed": "c175e0f5c06823f50ccd5dc6c007cb115acccb5a5ee8b5cf396ea9263d484770", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "40260", "tileY": "32370", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:c175e0f5c06823f50ccd5dc6c007cb11", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1259", "chunkY": "1245", "localX": 16, "localY": 720 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 236, "y": 221 }, { "x": 237, "y": 221 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:9901286ad334a8c799d7692af63d5c8b", "footprintChunks": [{ "x": 234, "y": 221 }, { "x": 235, "y": 221 }, { "x": 234, "y": 222 }, { "x": 235, "y": 222 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:tropical:standard:037", "sizeTier": "standard" }, "region": { "biome": "tropical", "regionX": "157", "regionY": "155" }, "siteClass": "dungeon", "siteId": "site:c175e0f5c06823f50ccd5dc6c007cb11", "siteSeed": "c175e0f5c06823f50ccd5dc6c007cb115acccb5a5ee8b5cf396ea9263d484770", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Standard Upland Ruin", "layoutSeed": "7b2c4038edb1f6cb0055a7f4baaba0af6c42b2287b14359a8760f36330da6c29", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1135", "chunkY": "1263" }, { "chunkX": "1136", "chunkY": "1263" }, { "chunkX": "1135", "chunkY": "1264" }, { "chunkX": "1136", "chunkY": "1264" }], "roadAnchor": { "tileX": "36379", "tileY": "32849" }, "siteId": "site:7b2c4038edb1f6cb0055a7f4baaba0af", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1136", "chunkY": "1263", "localX": 16, "localY": 720 }, "minimumLevel": 1, "provenance": { "approachChunks": [{ "x": 113, "y": 239 }, { "x": 114, "y": 239 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 1, "chunkId": "chunk:2c677b6eb200357b836b733660a6bd0e", "footprintChunks": [{ "x": 111, "y": 239 }, { "x": 112, "y": 239 }, { "x": 111, "y": 240 }, { "x": 112, "y": 240 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:upland:standard:049", "sizeTier": "standard" }, "region": { "biome": "upland", "regionX": "142", "regionY": "157" }, "siteClass": "dungeon", "siteId": "site:7b2c4038edb1f6cb0055a7f4baaba0af", "siteSeed": "7b2c4038edb1f6cb0055a7f4baaba0af6c42b2287b14359a8760f36330da6c29", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "36324", "tileY": "32838", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:7b2c4038edb1f6cb0055a7f4baaba0af", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1136", "chunkY": "1263", "localX": 16, "localY": 720 }, "minimumLevel": 1, "provenance": { "approachChunks": [{ "x": 113, "y": 239 }, { "x": 114, "y": 239 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 1, "chunkId": "chunk:2c677b6eb200357b836b733660a6bd0e", "footprintChunks": [{ "x": 111, "y": 239 }, { "x": 112, "y": 239 }, { "x": 111, "y": 240 }, { "x": 112, "y": 240 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:upland:standard:049", "sizeTier": "standard" }, "region": { "biome": "upland", "regionX": "142", "regionY": "157" }, "siteClass": "dungeon", "siteId": "site:7b2c4038edb1f6cb0055a7f4baaba0af", "siteSeed": "7b2c4038edb1f6cb0055a7f4baaba0af6c42b2287b14359a8760f36330da6c29", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Standard Tropical Ruin", "layoutSeed": "1c45ea81210761d4f88e38c2925bf1309fbc2d612566e39890014b731cc6ca6d", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1181", "chunkY": "1117" }, { "chunkX": "1182", "chunkY": "1117" }, { "chunkX": "1181", "chunkY": "1118" }, { "chunkX": "1182", "chunkY": "1118" }], "roadAnchor": { "tileX": "37851", "tileY": "29053" }, "siteId": "site:1c45ea81210761d4f88e38c2925bf130", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1182", "chunkY": "1117", "localX": 16, "localY": 720 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 159, "y": 93 }, { "x": 160, "y": 93 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:163fee1ac905b08aed04af5dccce2297", "footprintChunks": [{ "x": 157, "y": 93 }, { "x": 158, "y": 93 }, { "x": 157, "y": 94 }, { "x": 158, "y": 94 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:volcanic:standard:052", "sizeTier": "standard" }, "region": { "biome": "tropical", "regionX": "147", "regionY": "139" }, "siteClass": "dungeon", "siteId": "site:1c45ea81210761d4f88e38c2925bf130", "siteSeed": "1c45ea81210761d4f88e38c2925bf1309fbc2d612566e39890014b731cc6ca6d", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "37796", "tileY": "29042", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:1c45ea81210761d4f88e38c2925bf130", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1182", "chunkY": "1117", "localX": 16, "localY": 720 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 159, "y": 93 }, { "x": 160, "y": 93 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:163fee1ac905b08aed04af5dccce2297", "footprintChunks": [{ "x": 157, "y": 93 }, { "x": 158, "y": 93 }, { "x": 157, "y": 94 }, { "x": 158, "y": 94 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:volcanic:standard:052", "sizeTier": "standard" }, "region": { "biome": "tropical", "regionX": "147", "regionY": "139" }, "siteClass": "dungeon", "siteId": "site:1c45ea81210761d4f88e38c2925bf130", "siteSeed": "1c45ea81210761d4f88e38c2925bf1309fbc2d612566e39890014b731cc6ca6d", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Standard Woodland Ruin", "layoutSeed": "2fb4829aa86fef6317e13fd30017c235f6269da4c1dd0b177d745896d29aa0ac", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1075", "chunkY": "1263" }, { "chunkX": "1076", "chunkY": "1263" }, { "chunkX": "1075", "chunkY": "1264" }, { "chunkX": "1076", "chunkY": "1264" }], "roadAnchor": { "tileX": "34459", "tileY": "32849" }, "siteId": "site:2fb4829aa86fef6317e13fd30017c235", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1076", "chunkY": "1263", "localX": 16, "localY": 720 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 53, "y": 239 }, { "x": 54, "y": 239 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:b33ff0057abbc4fd7191dba39fcfcbe1", "footprintChunks": [{ "x": 51, "y": 239 }, { "x": 52, "y": 239 }, { "x": 51, "y": 240 }, { "x": 52, "y": 240 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:woodland:standard:054", "sizeTier": "standard" }, "region": { "biome": "woodland", "regionX": "134", "regionY": "157" }, "siteClass": "dungeon", "siteId": "site:2fb4829aa86fef6317e13fd30017c235", "siteSeed": "2fb4829aa86fef6317e13fd30017c235f6269da4c1dd0b177d745896d29aa0ac", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "34404", "tileY": "32838", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:2fb4829aa86fef6317e13fd30017c235", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1076", "chunkY": "1263", "localX": 16, "localY": 720 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 53, "y": 239 }, { "x": 54, "y": 239 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:b33ff0057abbc4fd7191dba39fcfcbe1", "footprintChunks": [{ "x": 51, "y": 239 }, { "x": 52, "y": 239 }, { "x": 51, "y": 240 }, { "x": 52, "y": 240 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:woodland:standard:054", "sizeTier": "standard" }, "region": { "biome": "woodland", "regionX": "134", "regionY": "157" }, "siteClass": "dungeon", "siteId": "site:2fb4829aa86fef6317e13fd30017c235", "siteSeed": "2fb4829aa86fef6317e13fd30017c235f6269da4c1dd0b177d745896d29aa0ac", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Standard Desert Ruin", "layoutSeed": "c7b25f1c657e70b52014b0d4974f210d4fac2dbe622c4991098c8ee688673ab5", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1257", "chunkY": "1089" }, { "chunkX": "1258", "chunkY": "1089" }, { "chunkX": "1257", "chunkY": "1090" }, { "chunkX": "1258", "chunkY": "1090" }], "roadAnchor": { "tileX": "40283", "tileY": "28325" }, "siteId": "site:c7b25f1c657e70b52014b0d4974f210d", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1258", "chunkY": "1089", "localX": 16, "localY": 720 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 235, "y": 65 }, { "x": 236, "y": 65 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:e09c0cd7b1af7d3a9c7b7ee45d16f316", "footprintChunks": [{ "x": 233, "y": 65 }, { "x": 234, "y": 65 }, { "x": 233, "y": 66 }, { "x": 234, "y": 66 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:desert:standard:056", "sizeTier": "standard" }, "region": { "biome": "desert", "regionX": "157", "regionY": "136" }, "siteClass": "dungeon", "siteId": "site:c7b25f1c657e70b52014b0d4974f210d", "siteSeed": "c7b25f1c657e70b52014b0d4974f210d4fac2dbe622c4991098c8ee688673ab5", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "40228", "tileY": "28314", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:c7b25f1c657e70b52014b0d4974f210d", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1258", "chunkY": "1089", "localX": 16, "localY": 720 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 235, "y": 65 }, { "x": 236, "y": 65 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:e09c0cd7b1af7d3a9c7b7ee45d16f316", "footprintChunks": [{ "x": 233, "y": 65 }, { "x": 234, "y": 65 }, { "x": 233, "y": 66 }, { "x": 234, "y": 66 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:desert:standard:056", "sizeTier": "standard" }, "region": { "biome": "desert", "regionX": "157", "regionY": "136" }, "siteClass": "dungeon", "siteId": "site:c7b25f1c657e70b52014b0d4974f210d", "siteSeed": "c7b25f1c657e70b52014b0d4974f210d4fac2dbe622c4991098c8ee688673ab5", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Standard Upland Ruin", "layoutSeed": "7914aef6322203a681a4696ded7364249ba6372eb48e10901eb1b6a826ad2358", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1217", "chunkY": "1095" }, { "chunkX": "1218", "chunkY": "1095" }, { "chunkX": "1217", "chunkY": "1096" }, { "chunkX": "1218", "chunkY": "1096" }], "roadAnchor": { "tileX": "39003", "tileY": "28481" }, "siteId": "site:7914aef6322203a681a4696ded736424", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1218", "chunkY": "1095", "localX": 16, "localY": 720 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 195, "y": 71 }, { "x": 196, "y": 71 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:37dc2e8e97185935cd754443cef17985", "footprintChunks": [{ "x": 193, "y": 71 }, { "x": 194, "y": 71 }, { "x": 193, "y": 72 }, { "x": 194, "y": 72 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:upland:standard:057", "sizeTier": "standard" }, "region": { "biome": "upland", "regionX": "152", "regionY": "136" }, "siteClass": "dungeon", "siteId": "site:7914aef6322203a681a4696ded736424", "siteSeed": "7914aef6322203a681a4696ded7364249ba6372eb48e10901eb1b6a826ad2358", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "38948", "tileY": "28470", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:7914aef6322203a681a4696ded736424", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1218", "chunkY": "1095", "localX": 16, "localY": 720 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 195, "y": 71 }, { "x": 196, "y": 71 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:37dc2e8e97185935cd754443cef17985", "footprintChunks": [{ "x": 193, "y": 71 }, { "x": 194, "y": 71 }, { "x": 193, "y": 72 }, { "x": 194, "y": 72 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:upland:standard:057", "sizeTier": "standard" }, "region": { "biome": "upland", "regionX": "152", "regionY": "136" }, "siteClass": "dungeon", "siteId": "site:7914aef6322203a681a4696ded736424", "siteSeed": "7914aef6322203a681a4696ded7364249ba6372eb48e10901eb1b6a826ad2358", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Standard Grassland Ruin", "layoutSeed": "1cfc44a2b19c5596139e7be36c4b31cd3869f1527128b0a7530fd569905aedaa", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1103", "chunkY": "1245" }, { "chunkX": "1104", "chunkY": "1245" }, { "chunkX": "1103", "chunkY": "1246" }, { "chunkX": "1104", "chunkY": "1246" }], "roadAnchor": { "tileX": "35355", "tileY": "32381" }, "siteId": "site:1cfc44a2b19c5596139e7be36c4b31cd", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1104", "chunkY": "1245", "localX": 16, "localY": 720 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 81, "y": 221 }, { "x": 82, "y": 221 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:f2bac12801a9d6c92e36cc0ac1f2d287", "footprintChunks": [{ "x": 79, "y": 221 }, { "x": 80, "y": 221 }, { "x": 79, "y": 222 }, { "x": 80, "y": 222 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:woodland:standard:058", "sizeTier": "standard" }, "region": { "biome": "grassland", "regionX": "138", "regionY": "155" }, "siteClass": "dungeon", "siteId": "site:1cfc44a2b19c5596139e7be36c4b31cd", "siteSeed": "1cfc44a2b19c5596139e7be36c4b31cd3869f1527128b0a7530fd569905aedaa", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "35300", "tileY": "32370", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:1cfc44a2b19c5596139e7be36c4b31cd", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1104", "chunkY": "1245", "localX": 16, "localY": 720 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 81, "y": 221 }, { "x": 82, "y": 221 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:f2bac12801a9d6c92e36cc0ac1f2d287", "footprintChunks": [{ "x": 79, "y": 221 }, { "x": 80, "y": 221 }, { "x": 79, "y": 222 }, { "x": 80, "y": 222 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:woodland:standard:058", "sizeTier": "standard" }, "region": { "biome": "grassland", "regionX": "138", "regionY": "155" }, "siteClass": "dungeon", "siteId": "site:1cfc44a2b19c5596139e7be36c4b31cd", "siteSeed": "1cfc44a2b19c5596139e7be36c4b31cd3869f1527128b0a7530fd569905aedaa", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Standard Woodland Ruin", "layoutSeed": "d082f3ba6a55c9c7917e3b9286d5a03ba1dc6eeef2ae65206ecb0e877045281e", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1143", "chunkY": "1284" }, { "chunkX": "1144", "chunkY": "1284" }, { "chunkX": "1143", "chunkY": "1285" }, { "chunkX": "1144", "chunkY": "1285" }], "roadAnchor": { "tileX": "36635", "tileY": "33395" }, "siteId": "site:d082f3ba6a55c9c7917e3b9286d5a03b", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1144", "chunkY": "1284", "localX": 16, "localY": 720 }, "minimumLevel": 1, "provenance": { "approachChunks": [{ "x": 121, "y": 260 }, { "x": 122, "y": 260 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 1, "chunkId": "chunk:d7ec6a36dfa453620e3b8220eacfff44", "footprintChunks": [{ "x": 119, "y": 260 }, { "x": 120, "y": 260 }, { "x": 119, "y": 261 }, { "x": 120, "y": 261 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:upland:standard:066", "sizeTier": "standard" }, "region": { "biome": "woodland", "regionX": "143", "regionY": "160" }, "siteClass": "dungeon", "siteId": "site:d082f3ba6a55c9c7917e3b9286d5a03b", "siteSeed": "d082f3ba6a55c9c7917e3b9286d5a03ba1dc6eeef2ae65206ecb0e877045281e", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "36580", "tileY": "33384", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:d082f3ba6a55c9c7917e3b9286d5a03b", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1144", "chunkY": "1284", "localX": 16, "localY": 720 }, "minimumLevel": 1, "provenance": { "approachChunks": [{ "x": 121, "y": 260 }, { "x": 122, "y": 260 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 1, "chunkId": "chunk:d7ec6a36dfa453620e3b8220eacfff44", "footprintChunks": [{ "x": 119, "y": 260 }, { "x": 120, "y": 260 }, { "x": 119, "y": 261 }, { "x": 120, "y": 261 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:upland:standard:066", "sizeTier": "standard" }, "region": { "biome": "woodland", "regionX": "143", "regionY": "160" }, "siteClass": "dungeon", "siteId": "site:d082f3ba6a55c9c7917e3b9286d5a03b", "siteSeed": "d082f3ba6a55c9c7917e3b9286d5a03ba1dc6eeef2ae65206ecb0e877045281e", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 70, "label": "Large Grassland Ruin", "layoutSeed": "45c89be0a25b5d7862539ea3580e0dd469dd246294f0d3366c86f79232135dd0", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1089", "chunkY": "1116" }, { "chunkX": "1090", "chunkY": "1116" }, { "chunkX": "1089", "chunkY": "1117" }, { "chunkX": "1090", "chunkY": "1117" }, { "chunkX": "1089", "chunkY": "1118" }, { "chunkX": "1090", "chunkY": "1118" }], "roadAnchor": { "tileX": "34907", "tileY": "29053" }, "siteId": "site:45c89be0a25b5d7862539ea3580e0dd4", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1090", "chunkY": "1117", "localX": 16, "localY": 304 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 67, "y": 93 }, { "x": 68, "y": 93 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:bdab0e6e835ff67aa74ea45a2b5f6d3d", "footprintChunks": [{ "x": 65, "y": 92 }, { "x": 66, "y": 92 }, { "x": 65, "y": 93 }, { "x": 66, "y": 93 }, { "x": 65, "y": 94 }, { "x": 66, "y": 94 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v2", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:wetland:standard:067", "sizeTier": "large" }, "region": { "biome": "grassland", "regionX": "136", "regionY": "139" }, "siteClass": "dungeon", "siteId": "site:45c89be0a25b5d7862539ea3580e0dd4", "siteSeed": "45c89be0a25b5d7862539ea3580e0dd469dd246294f0d3366c86f79232135dd0", "version": "site-socket-planned-ruin-v1" }, "tier": "large", "tileX": "34852", "tileY": "29016", "version": "planned-ruin-family-candidate-v2", "width": 56 }, "siteId": "site:45c89be0a25b5d7862539ea3580e0dd4", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1090", "chunkY": "1117", "localX": 16, "localY": 304 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 67, "y": 93 }, { "x": 68, "y": 93 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:bdab0e6e835ff67aa74ea45a2b5f6d3d", "footprintChunks": [{ "x": 65, "y": 92 }, { "x": 66, "y": 92 }, { "x": 65, "y": 93 }, { "x": 66, "y": 93 }, { "x": 65, "y": 94 }, { "x": 66, "y": 94 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v2", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:wetland:standard:067", "sizeTier": "large" }, "region": { "biome": "grassland", "regionX": "136", "regionY": "139" }, "siteClass": "dungeon", "siteId": "site:45c89be0a25b5d7862539ea3580e0dd4", "siteSeed": "45c89be0a25b5d7862539ea3580e0dd469dd246294f0d3366c86f79232135dd0", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Standard Frostland Ruin", "layoutSeed": "ba040ab7996a3c4a9ef73c0cc2912ef86ead50b379a704d60de11d1605e71572", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1263", "chunkY": "1125" }, { "chunkX": "1264", "chunkY": "1125" }, { "chunkX": "1263", "chunkY": "1126" }, { "chunkX": "1264", "chunkY": "1126" }], "roadAnchor": { "tileX": "40475", "tileY": "29261" }, "siteId": "site:ba040ab7996a3c4a9ef73c0cc2912ef8", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1264", "chunkY": "1125", "localX": 16, "localY": 720 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 241, "y": 101 }, { "x": 242, "y": 101 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:53745ea83d5119cd869806d3bbe103a8", "footprintChunks": [{ "x": 239, "y": 101 }, { "x": 240, "y": 101 }, { "x": 239, "y": 102 }, { "x": 240, "y": 102 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:tropical:standard:071", "sizeTier": "standard" }, "region": { "biome": "frostland", "regionX": "158", "regionY": "140" }, "siteClass": "dungeon", "siteId": "site:ba040ab7996a3c4a9ef73c0cc2912ef8", "siteSeed": "ba040ab7996a3c4a9ef73c0cc2912ef86ead50b379a704d60de11d1605e71572", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "40420", "tileY": "29250", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:ba040ab7996a3c4a9ef73c0cc2912ef8", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1264", "chunkY": "1125", "localX": 16, "localY": 720 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 241, "y": 101 }, { "x": 242, "y": 101 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:53745ea83d5119cd869806d3bbe103a8", "footprintChunks": [{ "x": 239, "y": 101 }, { "x": 240, "y": 101 }, { "x": 239, "y": 102 }, { "x": 240, "y": 102 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:tropical:standard:071", "sizeTier": "standard" }, "region": { "biome": "frostland", "regionX": "158", "regionY": "140" }, "siteClass": "dungeon", "siteId": "site:ba040ab7996a3c4a9ef73c0cc2912ef8", "siteSeed": "ba040ab7996a3c4a9ef73c0cc2912ef86ead50b379a704d60de11d1605e71572", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Standard Woodland Ruin", "layoutSeed": "63374a6a5deb6c1e42aa1eeb7ee6b707bbbe7147942812c9d5a790db1afa398f", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1241", "chunkY": "1249" }, { "chunkX": "1242", "chunkY": "1249" }, { "chunkX": "1241", "chunkY": "1250" }, { "chunkX": "1242", "chunkY": "1250" }], "roadAnchor": { "tileX": "39771", "tileY": "32485" }, "siteId": "site:63374a6a5deb6c1e42aa1eeb7ee6b707", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1242", "chunkY": "1249", "localX": 16, "localY": 720 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 219, "y": 225 }, { "x": 220, "y": 225 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:8df8920631fbf5e7e3d6cf7df5d9b56f", "footprintChunks": [{ "x": 217, "y": 225 }, { "x": 218, "y": 225 }, { "x": 217, "y": 226 }, { "x": 218, "y": 226 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:grassland:standard:073", "sizeTier": "standard" }, "region": { "biome": "woodland", "regionX": "155", "regionY": "156" }, "siteClass": "dungeon", "siteId": "site:63374a6a5deb6c1e42aa1eeb7ee6b707", "siteSeed": "63374a6a5deb6c1e42aa1eeb7ee6b707bbbe7147942812c9d5a790db1afa398f", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "39716", "tileY": "32474", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:63374a6a5deb6c1e42aa1eeb7ee6b707", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1242", "chunkY": "1249", "localX": 16, "localY": 720 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 219, "y": 225 }, { "x": 220, "y": 225 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:8df8920631fbf5e7e3d6cf7df5d9b56f", "footprintChunks": [{ "x": 217, "y": 225 }, { "x": 218, "y": 225 }, { "x": 217, "y": 226 }, { "x": 218, "y": 226 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:grassland:standard:073", "sizeTier": "standard" }, "region": { "biome": "woodland", "regionX": "155", "regionY": "156" }, "siteClass": "dungeon", "siteId": "site:63374a6a5deb6c1e42aa1eeb7ee6b707", "siteSeed": "63374a6a5deb6c1e42aa1eeb7ee6b707bbbe7147942812c9d5a790db1afa398f", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Standard Grassland Ruin", "layoutSeed": "7201ba294dd329248dd695be3223e2f930b1939c67be67871aa3fb09c231c623", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1167", "chunkY": "1295" }, { "chunkX": "1168", "chunkY": "1295" }, { "chunkX": "1167", "chunkY": "1296" }, { "chunkX": "1168", "chunkY": "1296" }], "roadAnchor": { "tileX": "37403", "tileY": "33681" }, "siteId": "site:7201ba294dd329248dd695be3223e2f9", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1168", "chunkY": "1295", "localX": 16, "localY": 720 }, "minimumLevel": 1, "provenance": { "approachChunks": [{ "x": 145, "y": 271 }, { "x": 146, "y": 271 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 1, "chunkId": "chunk:f409153c4f9183c7cf3ae26cdc87f2b6", "footprintChunks": [{ "x": 143, "y": 271 }, { "x": 144, "y": 271 }, { "x": 143, "y": 272 }, { "x": 144, "y": 272 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:grassland:standard:075", "sizeTier": "standard" }, "region": { "biome": "grassland", "regionX": "146", "regionY": "161" }, "siteClass": "dungeon", "siteId": "site:7201ba294dd329248dd695be3223e2f9", "siteSeed": "7201ba294dd329248dd695be3223e2f930b1939c67be67871aa3fb09c231c623", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "37348", "tileY": "33670", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:7201ba294dd329248dd695be3223e2f9", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1168", "chunkY": "1295", "localX": 16, "localY": 720 }, "minimumLevel": 1, "provenance": { "approachChunks": [{ "x": 145, "y": 271 }, { "x": 146, "y": 271 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 1, "chunkId": "chunk:f409153c4f9183c7cf3ae26cdc87f2b6", "footprintChunks": [{ "x": 143, "y": 271 }, { "x": 144, "y": 271 }, { "x": 143, "y": 272 }, { "x": 144, "y": 272 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:grassland:standard:075", "sizeTier": "standard" }, "region": { "biome": "grassland", "regionX": "146", "regionY": "161" }, "siteClass": "dungeon", "siteId": "site:7201ba294dd329248dd695be3223e2f9", "siteSeed": "7201ba294dd329248dd695be3223e2f930b1939c67be67871aa3fb09c231c623", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Standard Woodland Ruin", "layoutSeed": "1c65196e365cc52382a82299ff8847c2628720680380c084f68b0bc0d99897df", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1154", "chunkY": "1305" }, { "chunkX": "1155", "chunkY": "1305" }, { "chunkX": "1154", "chunkY": "1306" }, { "chunkX": "1155", "chunkY": "1306" }], "roadAnchor": { "tileX": "36987", "tileY": "33941" }, "siteId": "site:1c65196e365cc52382a82299ff8847c2", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1155", "chunkY": "1305", "localX": 16, "localY": 720 }, "minimumLevel": 1, "provenance": { "approachChunks": [{ "x": 132, "y": 281 }, { "x": 133, "y": 281 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 1, "chunkId": "chunk:9f3dbfd56ce12c917cf955d885247195", "footprintChunks": [{ "x": 130, "y": 281 }, { "x": 131, "y": 281 }, { "x": 130, "y": 282 }, { "x": 131, "y": 282 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:woodland:standard:076", "sizeTier": "standard" }, "region": { "biome": "woodland", "regionX": "144", "regionY": "163" }, "siteClass": "dungeon", "siteId": "site:1c65196e365cc52382a82299ff8847c2", "siteSeed": "1c65196e365cc52382a82299ff8847c2628720680380c084f68b0bc0d99897df", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "36932", "tileY": "33930", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:1c65196e365cc52382a82299ff8847c2", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1155", "chunkY": "1305", "localX": 16, "localY": 720 }, "minimumLevel": 1, "provenance": { "approachChunks": [{ "x": 132, "y": 281 }, { "x": 133, "y": 281 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 1, "chunkId": "chunk:9f3dbfd56ce12c917cf955d885247195", "footprintChunks": [{ "x": 130, "y": 281 }, { "x": 131, "y": 281 }, { "x": 130, "y": 282 }, { "x": 131, "y": 282 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:woodland:standard:076", "sizeTier": "standard" }, "region": { "biome": "woodland", "regionX": "144", "regionY": "163" }, "siteClass": "dungeon", "siteId": "site:1c65196e365cc52382a82299ff8847c2", "siteSeed": "1c65196e365cc52382a82299ff8847c2628720680380c084f68b0bc0d99897df", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Standard Tropical Ruin", "layoutSeed": "1c4d76f497584f59e4b891bb8ec49a36768de7df838b39d869cb77859d67d0c1", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1177", "chunkY": "1087" }, { "chunkX": "1178", "chunkY": "1087" }, { "chunkX": "1177", "chunkY": "1088" }, { "chunkX": "1178", "chunkY": "1088" }], "roadAnchor": { "tileX": "37723", "tileY": "28273" }, "siteId": "site:1c4d76f497584f59e4b891bb8ec49a36", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1178", "chunkY": "1087", "localX": 16, "localY": 720 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 155, "y": 63 }, { "x": 156, "y": 63 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:dd9f6edfcf4cb7566f90570f4e7eceda", "footprintChunks": [{ "x": 153, "y": 63 }, { "x": 154, "y": 63 }, { "x": 153, "y": 64 }, { "x": 154, "y": 64 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:desert:standard:078", "sizeTier": "standard" }, "region": { "biome": "tropical", "regionX": "147", "regionY": "135" }, "siteClass": "dungeon", "siteId": "site:1c4d76f497584f59e4b891bb8ec49a36", "siteSeed": "1c4d76f497584f59e4b891bb8ec49a36768de7df838b39d869cb77859d67d0c1", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "37668", "tileY": "28262", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:1c4d76f497584f59e4b891bb8ec49a36", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1178", "chunkY": "1087", "localX": 16, "localY": 720 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 155, "y": 63 }, { "x": 156, "y": 63 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:dd9f6edfcf4cb7566f90570f4e7eceda", "footprintChunks": [{ "x": 153, "y": 63 }, { "x": 154, "y": 63 }, { "x": 153, "y": 64 }, { "x": 154, "y": 64 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:desert:standard:078", "sizeTier": "standard" }, "region": { "biome": "tropical", "regionX": "147", "regionY": "135" }, "siteClass": "dungeon", "siteId": "site:1c4d76f497584f59e4b891bb8ec49a36", "siteSeed": "1c4d76f497584f59e4b891bb8ec49a36768de7df838b39d869cb77859d67d0c1", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Standard Frostland Ruin", "layoutSeed": "a69e0593a0e03557b3b834577665164e89dbc16f7c5597f11e2417659bb7217d", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1104", "chunkY": "1097" }, { "chunkX": "1105", "chunkY": "1097" }, { "chunkX": "1104", "chunkY": "1098" }, { "chunkX": "1105", "chunkY": "1098" }], "roadAnchor": { "tileX": "35387", "tileY": "28533" }, "siteId": "site:a69e0593a0e03557b3b834577665164e", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1105", "chunkY": "1097", "localX": 16, "localY": 720 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 82, "y": 73 }, { "x": 83, "y": 73 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:7b1f9987265268ed241c4ef74a62f068", "footprintChunks": [{ "x": 80, "y": 73 }, { "x": 81, "y": 73 }, { "x": 80, "y": 74 }, { "x": 81, "y": 74 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:tropical:standard:079", "sizeTier": "standard" }, "region": { "biome": "frostland", "regionX": "138", "regionY": "137" }, "siteClass": "dungeon", "siteId": "site:a69e0593a0e03557b3b834577665164e", "siteSeed": "a69e0593a0e03557b3b834577665164e89dbc16f7c5597f11e2417659bb7217d", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "35332", "tileY": "28522", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:a69e0593a0e03557b3b834577665164e", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1105", "chunkY": "1097", "localX": 16, "localY": 720 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 82, "y": 73 }, { "x": 83, "y": 73 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:7b1f9987265268ed241c4ef74a62f068", "footprintChunks": [{ "x": 80, "y": 73 }, { "x": 81, "y": 73 }, { "x": 80, "y": 74 }, { "x": 81, "y": 74 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:tropical:standard:079", "sizeTier": "standard" }, "region": { "biome": "frostland", "regionX": "138", "regionY": "137" }, "siteClass": "dungeon", "siteId": "site:a69e0593a0e03557b3b834577665164e", "siteSeed": "a69e0593a0e03557b3b834577665164e89dbc16f7c5597f11e2417659bb7217d", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Standard Woodland Ruin", "layoutSeed": "b61529cbda3827a4590ce5492fee83e3444e5a40114ed491c86bb7fa32d02fe4", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1109", "chunkY": "1279" }, { "chunkX": "1110", "chunkY": "1279" }, { "chunkX": "1109", "chunkY": "1280" }, { "chunkX": "1110", "chunkY": "1280" }], "roadAnchor": { "tileX": "35547", "tileY": "33265" }, "siteId": "site:b61529cbda3827a4590ce5492fee83e3", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1110", "chunkY": "1279", "localX": 16, "localY": 720 }, "minimumLevel": 1, "provenance": { "approachChunks": [{ "x": 87, "y": 255 }, { "x": 88, "y": 255 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 1, "chunkId": "chunk:9af05d79101e65738bf9aaa6dbcc6e67", "footprintChunks": [{ "x": 85, "y": 255 }, { "x": 86, "y": 255 }, { "x": 85, "y": 256 }, { "x": 86, "y": 256 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:tropical:standard:081", "sizeTier": "standard" }, "region": { "biome": "woodland", "regionX": "138", "regionY": "159" }, "siteClass": "dungeon", "siteId": "site:b61529cbda3827a4590ce5492fee83e3", "siteSeed": "b61529cbda3827a4590ce5492fee83e3444e5a40114ed491c86bb7fa32d02fe4", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "35492", "tileY": "33254", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:b61529cbda3827a4590ce5492fee83e3", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1110", "chunkY": "1279", "localX": 16, "localY": 720 }, "minimumLevel": 1, "provenance": { "approachChunks": [{ "x": 87, "y": 255 }, { "x": 88, "y": 255 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 1, "chunkId": "chunk:9af05d79101e65738bf9aaa6dbcc6e67", "footprintChunks": [{ "x": 85, "y": 255 }, { "x": 86, "y": 255 }, { "x": 85, "y": 256 }, { "x": 86, "y": 256 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:tropical:standard:081", "sizeTier": "standard" }, "region": { "biome": "woodland", "regionX": "138", "regionY": "159" }, "siteClass": "dungeon", "siteId": "site:b61529cbda3827a4590ce5492fee83e3", "siteSeed": "b61529cbda3827a4590ce5492fee83e3444e5a40114ed491c86bb7fa32d02fe4", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Standard Grassland Ruin", "layoutSeed": "d6cb4f95ad923f0662a15d5e093e9e493f2c6f9c29703ae0a04065020b8bc127", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1125", "chunkY": "1249" }, { "chunkX": "1126", "chunkY": "1249" }, { "chunkX": "1125", "chunkY": "1250" }, { "chunkX": "1126", "chunkY": "1250" }], "roadAnchor": { "tileX": "36059", "tileY": "32485" }, "siteId": "site:d6cb4f95ad923f0662a15d5e093e9e49", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1126", "chunkY": "1249", "localX": 16, "localY": 720 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 103, "y": 225 }, { "x": 104, "y": 225 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:826eea3c009c7547380243266d2d8ed1", "footprintChunks": [{ "x": 101, "y": 225 }, { "x": 102, "y": 225 }, { "x": 101, "y": 226 }, { "x": 102, "y": 226 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:upland:standard:082", "sizeTier": "standard" }, "region": { "biome": "grassland", "regionX": "140", "regionY": "156" }, "siteClass": "dungeon", "siteId": "site:d6cb4f95ad923f0662a15d5e093e9e49", "siteSeed": "d6cb4f95ad923f0662a15d5e093e9e493f2c6f9c29703ae0a04065020b8bc127", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "36004", "tileY": "32474", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:d6cb4f95ad923f0662a15d5e093e9e49", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1126", "chunkY": "1249", "localX": 16, "localY": 720 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 103, "y": 225 }, { "x": 104, "y": 225 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:826eea3c009c7547380243266d2d8ed1", "footprintChunks": [{ "x": 101, "y": 225 }, { "x": 102, "y": 225 }, { "x": 101, "y": 226 }, { "x": 102, "y": 226 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:upland:standard:082", "sizeTier": "standard" }, "region": { "biome": "grassland", "regionX": "140", "regionY": "156" }, "siteClass": "dungeon", "siteId": "site:d6cb4f95ad923f0662a15d5e093e9e49", "siteSeed": "d6cb4f95ad923f0662a15d5e093e9e493f2c6f9c29703ae0a04065020b8bc127", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Standard Grassland Ruin", "layoutSeed": "e6144f6ad0bce68d7f1fefe35f22880824e13454f8a833323b906de6f2adad6d", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1155", "chunkY": "1329" }, { "chunkX": "1156", "chunkY": "1329" }, { "chunkX": "1155", "chunkY": "1330" }, { "chunkX": "1156", "chunkY": "1330" }], "roadAnchor": { "tileX": "37019", "tileY": "34565" }, "siteId": "site:e6144f6ad0bce68d7f1fefe35f228808", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1156", "chunkY": "1329", "localX": 16, "localY": 720 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 133, "y": 305 }, { "x": 134, "y": 305 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:1a25dc4a313cc6084dc7ce487d157643", "footprintChunks": [{ "x": 131, "y": 305 }, { "x": 132, "y": 305 }, { "x": 131, "y": 306 }, { "x": 132, "y": 306 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:wetland:standard:084", "sizeTier": "standard" }, "region": { "biome": "grassland", "regionX": "144", "regionY": "166" }, "siteClass": "dungeon", "siteId": "site:e6144f6ad0bce68d7f1fefe35f228808", "siteSeed": "e6144f6ad0bce68d7f1fefe35f22880824e13454f8a833323b906de6f2adad6d", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "36964", "tileY": "34554", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:e6144f6ad0bce68d7f1fefe35f228808", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1156", "chunkY": "1329", "localX": 16, "localY": 720 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 133, "y": 305 }, { "x": 134, "y": 305 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:1a25dc4a313cc6084dc7ce487d157643", "footprintChunks": [{ "x": 131, "y": 305 }, { "x": 132, "y": 305 }, { "x": 131, "y": 306 }, { "x": 132, "y": 306 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:wetland:standard:084", "sizeTier": "standard" }, "region": { "biome": "grassland", "regionX": "144", "regionY": "166" }, "siteClass": "dungeon", "siteId": "site:e6144f6ad0bce68d7f1fefe35f228808", "siteSeed": "e6144f6ad0bce68d7f1fefe35f22880824e13454f8a833323b906de6f2adad6d", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Standard Grassland Ruin", "layoutSeed": "f8be7dc6644f1f072c60833bbedee648b2f21cd85fbf443c5bb35538c165c18a", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1167", "chunkY": "1329" }, { "chunkX": "1168", "chunkY": "1329" }, { "chunkX": "1167", "chunkY": "1330" }, { "chunkX": "1168", "chunkY": "1330" }], "roadAnchor": { "tileX": "37403", "tileY": "34565" }, "siteId": "site:f8be7dc6644f1f072c60833bbedee648", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1168", "chunkY": "1329", "localX": 16, "localY": 720 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 145, "y": 305 }, { "x": 146, "y": 305 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:5821ede25f7134c879a0486780db1bc6", "footprintChunks": [{ "x": 143, "y": 305 }, { "x": 144, "y": 305 }, { "x": 143, "y": 306 }, { "x": 144, "y": 306 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:wetland:standard:086", "sizeTier": "standard" }, "region": { "biome": "grassland", "regionX": "146", "regionY": "166" }, "siteClass": "dungeon", "siteId": "site:f8be7dc6644f1f072c60833bbedee648", "siteSeed": "f8be7dc6644f1f072c60833bbedee648b2f21cd85fbf443c5bb35538c165c18a", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "37348", "tileY": "34554", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:f8be7dc6644f1f072c60833bbedee648", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1168", "chunkY": "1329", "localX": 16, "localY": 720 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 145, "y": 305 }, { "x": 146, "y": 305 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:5821ede25f7134c879a0486780db1bc6", "footprintChunks": [{ "x": 143, "y": 305 }, { "x": 144, "y": 305 }, { "x": 143, "y": 306 }, { "x": 144, "y": 306 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:wetland:standard:086", "sizeTier": "standard" }, "region": { "biome": "grassland", "regionX": "146", "regionY": "166" }, "siteClass": "dungeon", "siteId": "site:f8be7dc6644f1f072c60833bbedee648", "siteSeed": "f8be7dc6644f1f072c60833bbedee648b2f21cd85fbf443c5bb35538c165c18a", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Standard Frostland Ruin", "layoutSeed": "cb4759d98d3dfcd05e8c1f7b1e502da00b4bd3fbec469af3c813f0d4ec5f8425", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1275", "chunkY": "1147" }, { "chunkX": "1276", "chunkY": "1147" }, { "chunkX": "1275", "chunkY": "1148" }, { "chunkX": "1276", "chunkY": "1148" }], "roadAnchor": { "tileX": "40859", "tileY": "29833" }, "siteId": "site:cb4759d98d3dfcd05e8c1f7b1e502da0", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1276", "chunkY": "1147", "localX": 16, "localY": 720 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 253, "y": 123 }, { "x": 254, "y": 123 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:e433d9f73c46f49152c2e5d8b959679c", "footprintChunks": [{ "x": 251, "y": 123 }, { "x": 252, "y": 123 }, { "x": 251, "y": 124 }, { "x": 252, "y": 124 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:tropical:standard:087", "sizeTier": "standard" }, "region": { "biome": "frostland", "regionX": "159", "regionY": "143" }, "siteClass": "dungeon", "siteId": "site:cb4759d98d3dfcd05e8c1f7b1e502da0", "siteSeed": "cb4759d98d3dfcd05e8c1f7b1e502da00b4bd3fbec469af3c813f0d4ec5f8425", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "40804", "tileY": "29822", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:cb4759d98d3dfcd05e8c1f7b1e502da0", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1276", "chunkY": "1147", "localX": 16, "localY": 720 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 253, "y": 123 }, { "x": 254, "y": 123 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:e433d9f73c46f49152c2e5d8b959679c", "footprintChunks": [{ "x": 251, "y": 123 }, { "x": 252, "y": 123 }, { "x": 251, "y": 124 }, { "x": 252, "y": 124 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:tropical:standard:087", "sizeTier": "standard" }, "region": { "biome": "frostland", "regionX": "159", "regionY": "143" }, "siteClass": "dungeon", "siteId": "site:cb4759d98d3dfcd05e8c1f7b1e502da0", "siteSeed": "cb4759d98d3dfcd05e8c1f7b1e502da00b4bd3fbec469af3c813f0d4ec5f8425", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Standard Wetland Ruin", "layoutSeed": "cd7264f1b67a9bf7291e57e1e817e3af41bc178367d45c5e7b28e0b4988b5721", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1120", "chunkY": "1209" }, { "chunkX": "1121", "chunkY": "1209" }, { "chunkX": "1120", "chunkY": "1210" }, { "chunkX": "1121", "chunkY": "1210" }], "roadAnchor": { "tileX": "35899", "tileY": "31445" }, "siteId": "site:cd7264f1b67a9bf7291e57e1e817e3af", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1121", "chunkY": "1209", "localX": 16, "localY": 720 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 98, "y": 185 }, { "x": 99, "y": 185 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:361609502c5ece34567aa30193785909", "footprintChunks": [{ "x": 96, "y": 185 }, { "x": 97, "y": 185 }, { "x": 96, "y": 186 }, { "x": 97, "y": 186 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:upland:standard:088", "sizeTier": "standard" }, "region": { "biome": "wetland", "regionX": "140", "regionY": "151" }, "siteClass": "dungeon", "siteId": "site:cd7264f1b67a9bf7291e57e1e817e3af", "siteSeed": "cd7264f1b67a9bf7291e57e1e817e3af41bc178367d45c5e7b28e0b4988b5721", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "35844", "tileY": "31434", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:cd7264f1b67a9bf7291e57e1e817e3af", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1121", "chunkY": "1209", "localX": 16, "localY": 720 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 98, "y": 185 }, { "x": 99, "y": 185 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:361609502c5ece34567aa30193785909", "footprintChunks": [{ "x": 96, "y": 185 }, { "x": 97, "y": 185 }, { "x": 96, "y": 186 }, { "x": 97, "y": 186 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:upland:standard:088", "sizeTier": "standard" }, "region": { "biome": "wetland", "regionX": "140", "regionY": "151" }, "siteClass": "dungeon", "siteId": "site:cd7264f1b67a9bf7291e57e1e817e3af", "siteSeed": "cd7264f1b67a9bf7291e57e1e817e3af41bc178367d45c5e7b28e0b4988b5721", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Standard Desert Ruin", "layoutSeed": "4a1c235a2496fcf81a0f5e3533ff24567030211aa502920045c6ba804467ab8a", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1173", "chunkY": "1147" }, { "chunkX": "1174", "chunkY": "1147" }, { "chunkX": "1173", "chunkY": "1148" }, { "chunkX": "1174", "chunkY": "1148" }], "roadAnchor": { "tileX": "37595", "tileY": "29833" }, "siteId": "site:4a1c235a2496fcf81a0f5e3533ff2456", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1174", "chunkY": "1147", "localX": 16, "localY": 720 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 151, "y": 123 }, { "x": 152, "y": 123 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:bf37686a9d06fe51632e5f6f447d5048", "footprintChunks": [{ "x": 149, "y": 123 }, { "x": 150, "y": 123 }, { "x": 149, "y": 124 }, { "x": 150, "y": 124 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:volcanic:standard:091", "sizeTier": "standard" }, "region": { "biome": "desert", "regionX": "146", "regionY": "143" }, "siteClass": "dungeon", "siteId": "site:4a1c235a2496fcf81a0f5e3533ff2456", "siteSeed": "4a1c235a2496fcf81a0f5e3533ff24567030211aa502920045c6ba804467ab8a", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "37540", "tileY": "29822", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:4a1c235a2496fcf81a0f5e3533ff2456", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1174", "chunkY": "1147", "localX": 16, "localY": 720 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 151, "y": 123 }, { "x": 152, "y": 123 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:bf37686a9d06fe51632e5f6f447d5048", "footprintChunks": [{ "x": 149, "y": 123 }, { "x": 150, "y": 123 }, { "x": 149, "y": 124 }, { "x": 150, "y": 124 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:volcanic:standard:091", "sizeTier": "standard" }, "region": { "biome": "desert", "regionX": "146", "regionY": "143" }, "siteClass": "dungeon", "siteId": "site:4a1c235a2496fcf81a0f5e3533ff2456", "siteSeed": "4a1c235a2496fcf81a0f5e3533ff24567030211aa502920045c6ba804467ab8a", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Standard Upland Ruin", "layoutSeed": "de9ecd0425c4be53cd70f481fd8f74cc19194f6436b0e8dad58c16104251620a", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1149", "chunkY": "1240" }, { "chunkX": "1150", "chunkY": "1240" }, { "chunkX": "1149", "chunkY": "1241" }, { "chunkX": "1150", "chunkY": "1241" }], "roadAnchor": { "tileX": "36827", "tileY": "32251" }, "siteId": "site:de9ecd0425c4be53cd70f481fd8f74cc", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1150", "chunkY": "1240", "localX": 16, "localY": 720 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 127, "y": 216 }, { "x": 128, "y": 216 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:9b0780ffad5509649c4cefa8a691cd4d", "footprintChunks": [{ "x": 125, "y": 216 }, { "x": 126, "y": 216 }, { "x": 125, "y": 217 }, { "x": 126, "y": 217 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:desert:standard:093", "sizeTier": "standard" }, "region": { "biome": "upland", "regionX": "143", "regionY": "155" }, "siteClass": "dungeon", "siteId": "site:de9ecd0425c4be53cd70f481fd8f74cc", "siteSeed": "de9ecd0425c4be53cd70f481fd8f74cc19194f6436b0e8dad58c16104251620a", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "36772", "tileY": "32240", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:de9ecd0425c4be53cd70f481fd8f74cc", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1150", "chunkY": "1240", "localX": 16, "localY": 720 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 127, "y": 216 }, { "x": 128, "y": 216 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:9b0780ffad5509649c4cefa8a691cd4d", "footprintChunks": [{ "x": 125, "y": 216 }, { "x": 126, "y": 216 }, { "x": 125, "y": 217 }, { "x": 126, "y": 217 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:desert:standard:093", "sizeTier": "standard" }, "region": { "biome": "upland", "regionX": "143", "regionY": "155" }, "siteClass": "dungeon", "siteId": "site:de9ecd0425c4be53cd70f481fd8f74cc", "siteSeed": "de9ecd0425c4be53cd70f481fd8f74cc19194f6436b0e8dad58c16104251620a", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-ruin-family", "parcel": { "familyId": "site-family:ruin", "height": 44, "label": "Standard Woodland Ruin", "layoutSeed": "887454525b515f08f145cc018309e68b41e2b0f5711fb1090a0410b338bb4e6b", "packageId": "procedural-ruin-family", "pages": [{ "chunkX": "1085", "chunkY": "1258" }, { "chunkX": "1086", "chunkY": "1258" }, { "chunkX": "1085", "chunkY": "1259" }, { "chunkX": "1086", "chunkY": "1259" }], "roadAnchor": { "tileX": "34779", "tileY": "32719" }, "siteId": "site:887454525b515f08f145cc018309e68b", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1086", "chunkY": "1258", "localX": 16, "localY": 720 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 63, "y": 234 }, { "x": 64, "y": 234 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:c8d8fb2f1569e15224f43f7cceb41589", "footprintChunks": [{ "x": 61, "y": 234 }, { "x": 62, "y": 234 }, { "x": 61, "y": 235 }, { "x": 62, "y": 235 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:woodland:standard:102", "sizeTier": "standard" }, "region": { "biome": "woodland", "regionX": "135", "regionY": "157" }, "siteClass": "dungeon", "siteId": "site:887454525b515f08f145cc018309e68b", "siteSeed": "887454525b515f08f145cc018309e68b41e2b0f5711fb1090a0410b338bb4e6b", "version": "site-socket-planned-ruin-v1" }, "tier": "standard", "tileX": "34724", "tileY": "32708", "version": "planned-ruin-family-candidate-v1", "width": 56 }, "siteId": "site:887454525b515f08f145cc018309e68b", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1086", "chunkY": "1258", "localX": 16, "localY": 720 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 63, "y": 234 }, { "x": 64, "y": 234 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:c8d8fb2f1569e15224f43f7cceb41589", "footprintChunks": [{ "x": 61, "y": 234 }, { "x": 62, "y": 234 }, { "x": 61, "y": 235 }, { "x": 62, "y": 235 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-ruin", "placementVersion": "planned-ruin-family-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:ruin:woodland:standard:102", "sizeTier": "standard" }, "region": { "biome": "woodland", "regionX": "135", "regionY": "157" }, "siteClass": "dungeon", "siteId": "site:887454525b515f08f145cc018309e68b", "siteSeed": "887454525b515f08f145cc018309e68b41e2b0f5711fb1090a0410b338bb4e6b", "version": "site-socket-planned-ruin-v1" }, "version": "site-reservation-planned-ruin-v1" }, { "packageId": "procedural-crypt-family", "parcel": { "familyId": "site-family:crypt", "height": 12, "label": "Small Desert Crypt", "layoutSeed": "8f3793c1fad6e517ec1149f18ee77c4b652f3f12727c014c2d8a2033a2716ef4", "packageId": "procedural-crypt-family", "pages": [{ "chunkX": "1147", "chunkY": "1223" }], "roadAnchor": { "tileX": "36749", "tileY": "31809" }, "siteId": "site:8f3793c1fad6e517ec1149f18ee77c4b", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1147", "chunkY": "1223", "localX": 528, "localY": 432 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 124, "y": 199 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:8b2a6aa966777c26053fbdf537b2dbd3", "footprintChunks": [{ "x": 123, "y": 199 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-reservation-population-v3", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:crypt:frostland:small:038", "sizeTier": "small" }, "region": { "biome": "desert", "regionX": "143", "regionY": "152" }, "siteClass": "dungeon", "siteId": "site:8f3793c1fad6e517ec1149f18ee77c4b", "siteSeed": "8f3793c1fad6e517ec1149f18ee77c4b652f3f12727c014c2d8a2033a2716ef4", "version": "site-socket-planned-crypt-v1" }, "tier": "small", "tileX": "36714", "tileY": "31803", "version": "planned-crypt-reservation-population-v3", "width": 12 }, "siteId": "site:8f3793c1fad6e517ec1149f18ee77c4b", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1147", "chunkY": "1223", "localX": 528, "localY": 432 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 124, "y": 199 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:8b2a6aa966777c26053fbdf537b2dbd3", "footprintChunks": [{ "x": 123, "y": 199 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-reservation-population-v3", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:crypt:frostland:small:038", "sizeTier": "small" }, "region": { "biome": "desert", "regionX": "143", "regionY": "152" }, "siteClass": "dungeon", "siteId": "site:8f3793c1fad6e517ec1149f18ee77c4b", "siteSeed": "8f3793c1fad6e517ec1149f18ee77c4b652f3f12727c014c2d8a2033a2716ef4", "version": "site-socket-planned-crypt-v1" }, "version": "site-reservation-planned-crypt-v1" }, { "packageId": "procedural-crypt-family", "parcel": { "familyId": "site-family:crypt", "height": 12, "label": "Small Frostland Crypt", "layoutSeed": "ccee9f51ed115df956095aedec673e8caf203d0f647d4e44d02c3079f22c86bd", "packageId": "procedural-crypt-family", "pages": [{ "chunkX": "1127", "chunkY": "1083" }], "roadAnchor": { "tileX": "36109", "tileY": "28169" }, "siteId": "site:ccee9f51ed115df956095aedec673e8c", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1127", "chunkY": "1083", "localX": 528, "localY": 432 }, "minimumLevel": 41, "provenance": { "approachChunks": [{ "x": 104, "y": 59 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:a50942984e52f852a76b3c5f377efde0", "footprintChunks": [{ "x": 103, "y": 59 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-reservation-population-v3", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:crypt:tropical:small:047", "sizeTier": "small" }, "region": { "biome": "frostland", "regionX": "140", "regionY": "135" }, "siteClass": "dungeon", "siteId": "site:ccee9f51ed115df956095aedec673e8c", "siteSeed": "ccee9f51ed115df956095aedec673e8caf203d0f647d4e44d02c3079f22c86bd", "version": "site-socket-planned-crypt-v1" }, "tier": "small", "tileX": "36074", "tileY": "28163", "version": "planned-crypt-reservation-population-v3", "width": 12 }, "siteId": "site:ccee9f51ed115df956095aedec673e8c", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1127", "chunkY": "1083", "localX": 528, "localY": 432 }, "minimumLevel": 41, "provenance": { "approachChunks": [{ "x": 104, "y": 59 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:a50942984e52f852a76b3c5f377efde0", "footprintChunks": [{ "x": 103, "y": 59 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-reservation-population-v3", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:crypt:tropical:small:047", "sizeTier": "small" }, "region": { "biome": "frostland", "regionX": "140", "regionY": "135" }, "siteClass": "dungeon", "siteId": "site:ccee9f51ed115df956095aedec673e8c", "siteSeed": "ccee9f51ed115df956095aedec673e8caf203d0f647d4e44d02c3079f22c86bd", "version": "site-socket-planned-crypt-v1" }, "version": "site-reservation-planned-crypt-v1" }, { "packageId": "procedural-crypt-family", "parcel": { "familyId": "site-family:crypt", "height": 12, "label": "Small Desert Crypt", "layoutSeed": "2a758bb18212ac1dd897648c444861728eb6dbdfaa768e5ad3bd7b96bb416854", "packageId": "procedural-crypt-family", "pages": [{ "chunkX": "1151", "chunkY": "1195" }], "roadAnchor": { "tileX": "36877", "tileY": "31081" }, "siteId": "site:2a758bb18212ac1dd897648c44486172", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1151", "chunkY": "1195", "localX": 528, "localY": 432 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 128, "y": 171 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:a682cbb64fca73f25c5c7517f099a097", "footprintChunks": [{ "x": 127, "y": 171 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-reservation-population-v3", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:crypt:frostland:small:059", "sizeTier": "small" }, "region": { "biome": "desert", "regionX": "143", "regionY": "149" }, "siteClass": "dungeon", "siteId": "site:2a758bb18212ac1dd897648c44486172", "siteSeed": "2a758bb18212ac1dd897648c444861728eb6dbdfaa768e5ad3bd7b96bb416854", "version": "site-socket-planned-crypt-v1" }, "tier": "small", "tileX": "36842", "tileY": "31075", "version": "planned-crypt-reservation-population-v3", "width": 12 }, "siteId": "site:2a758bb18212ac1dd897648c44486172", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1151", "chunkY": "1195", "localX": 528, "localY": 432 }, "minimumLevel": 11, "provenance": { "approachChunks": [{ "x": 128, "y": 171 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 3, "chunkId": "chunk:a682cbb64fca73f25c5c7517f099a097", "footprintChunks": [{ "x": 127, "y": 171 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-reservation-population-v3", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:crypt:frostland:small:059", "sizeTier": "small" }, "region": { "biome": "desert", "regionX": "143", "regionY": "149" }, "siteClass": "dungeon", "siteId": "site:2a758bb18212ac1dd897648c44486172", "siteSeed": "2a758bb18212ac1dd897648c444861728eb6dbdfaa768e5ad3bd7b96bb416854", "version": "site-socket-planned-crypt-v1" }, "version": "site-reservation-planned-crypt-v1" }, { "packageId": "procedural-crypt-family", "parcel": { "familyId": "site-family:crypt", "height": 12, "label": "Small Frostland Crypt", "layoutSeed": "2a181d59bad11bdca1c0203fbe726c3997579744e7c61153cab66a33e9e75e98", "packageId": "procedural-crypt-family", "pages": [{ "chunkX": "1245", "chunkY": "1185" }], "roadAnchor": { "tileX": "39885", "tileY": "30821" }, "siteId": "site:2a181d59bad11bdca1c0203fbe726c39", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1245", "chunkY": "1185", "localX": 528, "localY": 432 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 222, "y": 161 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:3fc15237a77f619eae1697be194fac80", "footprintChunks": [{ "x": 221, "y": 161 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-reservation-population-v3", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:crypt:frostland:small:062", "sizeTier": "small" }, "region": { "biome": "frostland", "regionX": "155", "regionY": "148" }, "siteClass": "dungeon", "siteId": "site:2a181d59bad11bdca1c0203fbe726c39", "siteSeed": "2a181d59bad11bdca1c0203fbe726c3997579744e7c61153cab66a33e9e75e98", "version": "site-socket-planned-crypt-v1" }, "tier": "small", "tileX": "39850", "tileY": "30815", "version": "planned-crypt-reservation-population-v3", "width": 12 }, "siteId": "site:2a181d59bad11bdca1c0203fbe726c39", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1245", "chunkY": "1185", "localX": 528, "localY": 432 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 222, "y": 161 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:3fc15237a77f619eae1697be194fac80", "footprintChunks": [{ "x": 221, "y": 161 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-reservation-population-v3", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:crypt:frostland:small:062", "sizeTier": "small" }, "region": { "biome": "frostland", "regionX": "155", "regionY": "148" }, "siteClass": "dungeon", "siteId": "site:2a181d59bad11bdca1c0203fbe726c39", "siteSeed": "2a181d59bad11bdca1c0203fbe726c3997579744e7c61153cab66a33e9e75e98", "version": "site-socket-planned-crypt-v1" }, "version": "site-reservation-planned-crypt-v1" }, { "packageId": "procedural-crypt-family", "parcel": { "familyId": "site-family:crypt", "height": 12, "label": "Small Wetland Crypt", "layoutSeed": "51adb24e566d98e906bdd9bf93265d2bd1617f01593c4d5835c37c041a82ab12", "packageId": "procedural-crypt-family", "pages": [{ "chunkX": "1117", "chunkY": "1109" }], "roadAnchor": { "tileX": "35789", "tileY": "28845" }, "siteId": "site:51adb24e566d98e906bdd9bf93265d2b", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1117", "chunkY": "1109", "localX": 528, "localY": 432 }, "minimumLevel": 41, "provenance": { "approachChunks": [{ "x": 94, "y": 85 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:131600f62d418b1d1bc3403280c3d19f", "footprintChunks": [{ "x": 93, "y": 85 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-reservation-population-v3", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:crypt:wetland:small:074", "sizeTier": "small" }, "region": { "biome": "wetland", "regionX": "139", "regionY": "138" }, "siteClass": "dungeon", "siteId": "site:51adb24e566d98e906bdd9bf93265d2b", "siteSeed": "51adb24e566d98e906bdd9bf93265d2bd1617f01593c4d5835c37c041a82ab12", "version": "site-socket-planned-crypt-v1" }, "tier": "small", "tileX": "35754", "tileY": "28839", "version": "planned-crypt-reservation-population-v3", "width": 12 }, "siteId": "site:51adb24e566d98e906bdd9bf93265d2b", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1117", "chunkY": "1109", "localX": 528, "localY": 432 }, "minimumLevel": 41, "provenance": { "approachChunks": [{ "x": 94, "y": 85 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:131600f62d418b1d1bc3403280c3d19f", "footprintChunks": [{ "x": 93, "y": 85 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-reservation-population-v3", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:crypt:wetland:small:074", "sizeTier": "small" }, "region": { "biome": "wetland", "regionX": "139", "regionY": "138" }, "siteClass": "dungeon", "siteId": "site:51adb24e566d98e906bdd9bf93265d2b", "siteSeed": "51adb24e566d98e906bdd9bf93265d2bd1617f01593c4d5835c37c041a82ab12", "version": "site-socket-planned-crypt-v1" }, "version": "site-reservation-planned-crypt-v1" }, { "packageId": "procedural-crypt-family", "parcel": { "familyId": "site-family:crypt", "height": 12, "label": "Small Volcanic Crypt", "layoutSeed": "32d061200e6c840a8c6e3b92b4af172aa69865b55ec6371e0d78e658edf66485", "packageId": "procedural-crypt-family", "pages": [{ "chunkX": "1069", "chunkY": "1165" }], "roadAnchor": { "tileX": "34253", "tileY": "30301" }, "siteId": "site:32d061200e6c840a8c6e3b92b4af172a", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1069", "chunkY": "1165", "localX": 528, "localY": 432 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 46, "y": 141 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:565107ef74b605dc7c0c0b3ea1997959", "footprintChunks": [{ "x": 45, "y": 141 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-reservation-population-v3", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:crypt:wetland:small:090", "sizeTier": "small" }, "region": { "biome": "volcanic", "regionX": "133", "regionY": "145" }, "siteClass": "dungeon", "siteId": "site:32d061200e6c840a8c6e3b92b4af172a", "siteSeed": "32d061200e6c840a8c6e3b92b4af172aa69865b55ec6371e0d78e658edf66485", "version": "site-socket-planned-crypt-v1" }, "tier": "small", "tileX": "34218", "tileY": "30295", "version": "planned-crypt-reservation-population-v3", "width": 12 }, "siteId": "site:32d061200e6c840a8c6e3b92b4af172a", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1069", "chunkY": "1165", "localX": 528, "localY": 432 }, "minimumLevel": 21, "provenance": { "approachChunks": [{ "x": 46, "y": 141 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 4, "chunkId": "chunk:565107ef74b605dc7c0c0b3ea1997959", "footprintChunks": [{ "x": 45, "y": 141 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-reservation-population-v3", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:crypt:wetland:small:090", "sizeTier": "small" }, "region": { "biome": "volcanic", "regionX": "133", "regionY": "145" }, "siteClass": "dungeon", "siteId": "site:32d061200e6c840a8c6e3b92b4af172a", "siteSeed": "32d061200e6c840a8c6e3b92b4af172aa69865b55ec6371e0d78e658edf66485", "version": "site-socket-planned-crypt-v1" }, "version": "site-reservation-planned-crypt-v1" }, { "packageId": "procedural-crypt-family", "parcel": { "familyId": "site-family:crypt", "height": 12, "label": "Small Wetland Crypt", "layoutSeed": "6c31db3ead778874e8c6def18e8dc6480b91e86ce5476209c04a2d42bc09cac3", "packageId": "procedural-crypt-family", "pages": [{ "chunkX": "1169", "chunkY": "1105" }], "roadAnchor": { "tileX": "37453", "tileY": "28741" }, "siteId": "site:6c31db3ead778874e8c6def18e8dc648", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1169", "chunkY": "1105", "localX": 528, "localY": 432 }, "minimumLevel": 41, "provenance": { "approachChunks": [{ "x": 146, "y": 81 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:47a0f58b376e3b4757098cacb96d05eb", "footprintChunks": [{ "x": 145, "y": 81 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-reservation-population-v3", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:crypt:tropical:small:094", "sizeTier": "small" }, "region": { "biome": "wetland", "regionX": "146", "regionY": "138" }, "siteClass": "dungeon", "siteId": "site:6c31db3ead778874e8c6def18e8dc648", "siteSeed": "6c31db3ead778874e8c6def18e8dc6480b91e86ce5476209c04a2d42bc09cac3", "version": "site-socket-planned-crypt-v1" }, "tier": "small", "tileX": "37418", "tileY": "28735", "version": "planned-crypt-reservation-population-v3", "width": 12 }, "siteId": "site:6c31db3ead778874e8c6def18e8dc648", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1169", "chunkY": "1105", "localX": 528, "localY": 432 }, "minimumLevel": 41, "provenance": { "approachChunks": [{ "x": 146, "y": 81 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:47a0f58b376e3b4757098cacb96d05eb", "footprintChunks": [{ "x": 145, "y": 81 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-reservation-population-v3", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:crypt:tropical:small:094", "sizeTier": "small" }, "region": { "biome": "wetland", "regionX": "146", "regionY": "138" }, "siteClass": "dungeon", "siteId": "site:6c31db3ead778874e8c6def18e8dc648", "siteSeed": "6c31db3ead778874e8c6def18e8dc6480b91e86ce5476209c04a2d42bc09cac3", "version": "site-socket-planned-crypt-v1" }, "version": "site-reservation-planned-crypt-v1" }, { "packageId": "procedural-crypt-family", "parcel": { "familyId": "site-family:crypt", "height": 12, "label": "Small Woodland Crypt", "layoutSeed": "9653be9a0eeaa4ec4a92b057863f407b90b4072cc53ecf9b6fb06b6adae6f4e6", "packageId": "procedural-crypt-family", "pages": [{ "chunkX": "1087", "chunkY": "1273" }], "roadAnchor": { "tileX": "34829", "tileY": "33109" }, "siteId": "site:9653be9a0eeaa4ec4a92b057863f407b", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1087", "chunkY": "1273", "localX": 528, "localY": 432 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 64, "y": 249 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:d2682456a156790c334e189a25b5af77", "footprintChunks": [{ "x": 63, "y": 249 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-reservation-population-v3", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:crypt:woodland:small:096", "sizeTier": "small" }, "region": { "biome": "woodland", "regionX": "135", "regionY": "159" }, "siteClass": "dungeon", "siteId": "site:9653be9a0eeaa4ec4a92b057863f407b", "siteSeed": "9653be9a0eeaa4ec4a92b057863f407b90b4072cc53ecf9b6fb06b6adae6f4e6", "version": "site-socket-planned-crypt-v1" }, "tier": "small", "tileX": "34794", "tileY": "33103", "version": "planned-crypt-reservation-population-v3", "width": 12 }, "siteId": "site:9653be9a0eeaa4ec4a92b057863f407b", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1087", "chunkY": "1273", "localX": 528, "localY": 432 }, "minimumLevel": 6, "provenance": { "approachChunks": [{ "x": 64, "y": 249 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 2, "chunkId": "chunk:d2682456a156790c334e189a25b5af77", "footprintChunks": [{ "x": 63, "y": 249 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-reservation-population-v3", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:crypt:woodland:small:096", "sizeTier": "small" }, "region": { "biome": "woodland", "regionX": "135", "regionY": "159" }, "siteClass": "dungeon", "siteId": "site:9653be9a0eeaa4ec4a92b057863f407b", "siteSeed": "9653be9a0eeaa4ec4a92b057863f407b90b4072cc53ecf9b6fb06b6adae6f4e6", "version": "site-socket-planned-crypt-v1" }, "version": "site-reservation-planned-crypt-v1" }, { "packageId": "procedural-crypt-family", "parcel": { "familyId": "site-family:crypt", "height": 12, "label": "Small Grassland Crypt", "layoutSeed": "c038fe17c945814c9f2d49ea7a7fcbafc31f6bf7d6bc30661c021936021d3da9", "packageId": "procedural-crypt-family", "pages": [{ "chunkX": "1115", "chunkY": "1135" }], "roadAnchor": { "tileX": "35725", "tileY": "29521" }, "siteId": "site:c038fe17c945814c9f2d49ea7a7fcbaf", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1115", "chunkY": "1135", "localX": 528, "localY": 432 }, "minimumLevel": 41, "provenance": { "approachChunks": [{ "x": 92, "y": 111 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:77c338fad7146083480abcb36a4d4ed3", "footprintChunks": [{ "x": 91, "y": 111 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-reservation-population-v3", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:crypt:wetland:small:100", "sizeTier": "small" }, "region": { "biome": "grassland", "regionX": "139", "regionY": "141" }, "siteClass": "dungeon", "siteId": "site:c038fe17c945814c9f2d49ea7a7fcbaf", "siteSeed": "c038fe17c945814c9f2d49ea7a7fcbafc31f6bf7d6bc30661c021936021d3da9", "version": "site-socket-planned-crypt-v1" }, "tier": "small", "tileX": "35690", "tileY": "29515", "version": "planned-crypt-reservation-population-v3", "width": 12 }, "siteId": "site:c038fe17c945814c9f2d49ea7a7fcbaf", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1115", "chunkY": "1135", "localX": 528, "localY": 432 }, "minimumLevel": 41, "provenance": { "approachChunks": [{ "x": 92, "y": 111 }], "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 5, "chunkId": "chunk:77c338fad7146083480abcb36a4d4ed3", "footprintChunks": [{ "x": 91, "y": 111 }], "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-crypt", "placementVersion": "planned-crypt-reservation-population-v3", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:crypt:wetland:small:100", "sizeTier": "small" }, "region": { "biome": "grassland", "regionX": "139", "regionY": "141" }, "siteClass": "dungeon", "siteId": "site:c038fe17c945814c9f2d49ea7a7fcbaf", "siteSeed": "c038fe17c945814c9f2d49ea7a7fcbafc31f6bf7d6bc30661c021936021d3da9", "version": "site-socket-planned-crypt-v1" }, "version": "site-reservation-planned-crypt-v1" }, { "packageId": "woodland-cave-family", "parcel": { "familyId": "family:woodland-cave-d12", "geographicQualifier": "", "height": 9, "label": "Alderwood Outskirts Cave", "layoutSeed": "cc6136358ed0d87428b4fe10e989b6bec07c3c021ce63a1a1b3263f172cfcca8", "orientation": "south-facing", "packageId": "woodland-cave-family", "pages": [{ "baseDigest": "36ed7ed4c80b2e6ad4ebeebf850582a842579ed03519da711561fb28a0118869", "chunkX": "1132", "chunkY": "1291" }], "placementProvenance": { "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "kind": "existing-planned-reservation", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "reservationId": "repeatable-slot:cave:woodland:small:109", "version": "planned-cave-integration-candidate-v1" }, "regionKey": "141,161", "regionName": "Woodland", "roadAnchor": { "tileX": "36237", "tileY": "33577" }, "siteId": "site:e9e47a4915126f03e7bd1bc35974274c", "siteSeed": "317cbd2251f205618767aef3caf4b3fb6da82aa2a308279ccd6e946d5c7442ba", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1132", "chunkY": "1291", "localX": 432, "localY": 208 }, "minimumLevel": 1, "provenance": { "approachChunk": { "x": 109, "y": 267 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 1, "chunkId": "chunk:36ed7ed4c80b2e6ad4ebeebf850582a8", "footprintChunk": { "x": 108, "y": 267 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:woodland:small:109", "sizeTier": "small" }, "region": { "biome": "woodland", "regionX": "141", "regionY": "161" }, "siteClass": "dungeon", "siteId": "site:e9e47a4915126f03e7bd1bc35974274c", "siteSeed": "e9e47a4915126f03e7bd1bc35974274ceb8273ce5c9d84dbffd4eb443e9c820b", "version": "site-socket-planned-cave-v1" }, "spawnOrdinal": 0, "tier": "small", "tileX": "36232", "tileY": "33569", "version": "planned-cave-parcel-v1", "width": 12 }, "siteId": "site:e9e47a4915126f03e7bd1bc35974274c", "socket": { "capabilities": ["interior"], "entrance": { "chunkX": "1132", "chunkY": "1291", "localX": 432, "localY": 208 }, "minimumLevel": 1, "provenance": { "approachChunk": { "x": 109, "y": 267 }, "assetHash": "476acfb7307b20243b081588dd885a64dff6f20e90227020011cde946fe7293a", "band": 1, "chunkId": "chunk:36ed7ed4c80b2e6ad4ebeebf850582a8", "footprintChunk": { "x": 108, "y": 267 }, "geographyVersion": "planned-world-water-v3", "identityDomain": "planned-reservation-cave", "placementVersion": "planned-cave-integration-candidate-v1", "planHash": "4b8a96248e24b3ef7ebd64c306b030840274d0722aa6a286fb697f7e1888bf0d", "populationHash": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e", "reservationId": "repeatable-slot:cave:woodland:small:109", "sizeTier": "small" }, "region": { "biome": "woodland", "regionX": "141", "regionY": "161" }, "siteClass": "dungeon", "siteId": "site:e9e47a4915126f03e7bd1bc35974274c", "siteSeed": "e9e47a4915126f03e7bd1bc35974274ceb8273ce5c9d84dbffd4eb443e9c820b", "version": "site-socket-planned-cave-v1" }, "version": "site-reservation-planned-cave-v1" }]);
 
@@ -2640,7 +4243,7 @@ var SITE_ENDS_POLICY = freezeWire({
   anchorHull: { elite: 20, "mini-boss": 34 },
   supportCount: { elite: 2, "mini-boss": 3 }
 });
-var hash = (s) => {
+var hash2 = (s) => {
   let h = 2166136261;
   for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0;
   return h;
@@ -2669,7 +4272,11 @@ function eliteTurnV1(reservationId) {
   return classicTurns.get(reservationId);
 }
 function siteEndSpecV1({ family: family2, tier: tier2, index, floorCount, reservationId, biome }) {
-  if (index !== floorCount - 1 || !["fort", "ruin", "crypt"].includes(family2) || typeof reservationId !== "string") return null;
+  if (index !== floorCount - 1 || !["fort", "ruin", "crypt", "cave"].includes(family2) || typeof reservationId !== "string") return null;
+  if (family2 === "cave") {
+    if (tier2 === "small" || arachnidTreantCaveHereV1(reservationId)) return null;
+    biome = worldSiteV1(reservationId).biome;
+  }
   if (bossAtSiteV1(reservationId)) return null;
   let role = SITE_ENDS_POLICY.roles[tier2];
   if (role === "boss") {
@@ -2679,10 +4286,10 @@ function siteEndSpecV1({ family: family2, tier: tier2, index, floorCount, reserv
   const matrix = WILDERNESS_ECOLOGY_V3_MATRIX[biome], pool = SITE_ENDS_POLICY.picks[biome]?.[role] ?? (matrix?.[family2]?.length ? matrix[family2] : matrix?.surface ?? []);
   if (!role || !pool.length) return null;
   const turn = role === "elite" && SITE_ENDS_POLICY.picks[biome] ? eliteTurnV1(reservationId) : void 0;
-  const affixes = SITE_ENDS_POLICY.eliteAffixes, creature = pool[(turn ?? hash(reservationId + "/creature")) % pool.length], named2 = role === "elite" ? namedEliteForV1(biome, creature) : null;
-  return { version: SITE_ENDS_VERSION, role, family: creature, affixId: named2 ? named2.affixId : affixes[hash(reservationId + "/affix") % affixes.length], ...named2 ? { named: named2.id } : {}, hullRadius: SITE_ENDS_POLICY.anchorHull[role], supportCount: SITE_ENDS_POLICY.supportCount[role] };
+  const affixes = SITE_ENDS_POLICY.eliteAffixes, creature = pool[(turn ?? hash2(reservationId + "/creature")) % pool.length], named2 = role === "elite" ? namedEliteForV1(biome, creature) : null;
+  return { version: SITE_ENDS_VERSION, role, family: creature, affixId: named2 ? named2.affixId : affixes[hash2(reservationId + "/affix") % affixes.length], ...named2 ? { named: named2.id } : {}, hullRadius: SITE_ENDS_POLICY.anchorHull[role], supportCount: SITE_ENDS_POLICY.supportCount[role] };
 }
-var siteEndSpecForSiteV1 = (site, index) => siteEndSpecV1({ family: site.familyId.split(":")[1], tier: site.sizeTier, index, floorCount: site.floorCount, reservationId: site.socket?.provenance?.reservationId, biome: site.socket?.region?.biome });
+var siteEndSpecForSiteV1 = (site, index) => siteEndSpecV1({ family: site.familyId === WOODLAND_CAVE_FAMILY_ID ? "cave" : site.familyId.split(":")[1], tier: site.sizeTier, index, floorCount: site.floorCount, reservationId: site.socket?.provenance?.reservationId, biome: site.socket?.region?.biome });
 function siteEndRecipeV1(original, spec) {
   if (!spec) return original;
   const recipe = copyWire(original), room2 = recipe.graph.rooms.find((r) => r.roomId === recipe.graph.topology.endNodeId);
@@ -2732,6 +4339,10 @@ function validateSiteEndFloorV1(state, site, floor) {
   requireContract(elite?.affixIds?.[0] === end.affixId && elite.floorId === floor.floorId && (elite.namedEliteId ?? null) === (end.named ?? null), "SITE_END:ELITE_MISSING");
   return true;
 }
+function validateCaveSiteEndsV1(state, site) {
+  for (const floor of site.floors) if (!validateSiteEndFloorV1(state, site, floor)) requireContract(!(siteEndsActiveV1(state) && siteEndSpecForSiteV1(site, floor.index)), "SITE_END:CAVE_END_MISSING");
+  return site;
+}
 function siteRewardKindV1(state, source8, spawnEntityId = null, standardChest = false) {
   if (!["enemy", "chest"].includes(source8?.kind)) return null;
   if (source8.kind === "enemy") {
@@ -2755,27 +4366,6 @@ function siteRewardKindV1(state, source8, spawnEntityId = null, standardChest = 
   const role = siteEndRoleV1(floor, id);
   if (role) return role === "elite" ? "site-end-elite" : "mini-boss";
   return site.sizeTier === "small" && floor.encounter?.members?.[0]?.memberKey === "finale:elite-leader" && floor.enemyIds?.[0] === id && state.eliteCombat?.elitesByEntityId?.[id] ? "site-end-elite" : null;
-}
-
-// src/shared/content/hero_leveling_v2.js
-var HERO_LEVELING_V2_VERSION = "hero-leveling-v2";
-var HERO_LEVELING_V2_POLICY = freezeWire({
-  version: HERO_LEVELING_V2_VERSION,
-  levelCap: 50,
-  // XP from level L to L+1, for L = 1..49.
-  steps: [140, 180, 220, 390, 450, 500, 560, 620, 880, 960, 1e3, 1100, 1200, 1300, 1400, 1800, 1900, 2e3, 2100, 2200, 2300, 2400, 2500, 2600, 3200, 3400, 3500, 3600, 3700, 3800, 4e3, 4100, 4200, 4300, 4400, 5200, 5400, 5500, 5600, 5800, 5900, 6100, 6200, 6300, 6500, 6600, 6700, 6900, 8100],
-  paragonStep: 4400,
-  siteClearKills: { "site-end-elite": 5, "mini-boss": 15, "lair-boss": 40 }
-});
-var P = HERO_LEVELING_V2_POLICY;
-var TOTALS = [0n];
-for (const s of P.steps) TOTALS.push(TOTALS.at(-1) + BigInt(s));
-var HERO_LEVEL_CAP = P.levelCap;
-function heroLevelAtXpV2(totalXp) {
-  const xp = BigInt(totalXp);
-  let l = 1;
-  while (l < P.levelCap && xp >= TOTALS[l]) l++;
-  return l;
 }
 
 // src/shared/content/quests_v1.js
@@ -3694,9 +5284,9 @@ var SPOT_NAMES = Object.freeze({
 var hyp = PM.hypot;
 
 // src/shared/generation/world_maker_v1/core.js
-var W = 150;
-var H = 160;
-var N = W * H;
+var W2 = 150;
+var H2 = 160;
+var N = W2 * H2;
 var CODE = { woodland: "w", grassland: "a", wetland: "m", upland: "r", desert: "d", frostland: "s", tropical: "t", volcanic: "l" };
 
 // src/shared/generation/generated_towns_v1.js
@@ -4791,7 +6381,7 @@ var CAST_KITS = freezeWire({
 var CLOTH = ["#3f7a52", "#2f5f8a", "#8a3a3a", "#2f7a74", "#6a3a6e", "#a8742a", "#4a4f5a", "#7a4a6a", "#3a5a3a", "#8a5a2a"];
 var ROBES = ["#7d3c98", "#2f4f8a", "#8a2a3a", "#1f6a64", "#2f5a32", "#3a3a4a", "#9a5a1a", "#5a3a8a"];
 var ROLE_LABEL = { general: "General merchant", smith: "Smith", innkeeper: "Innkeeper", enchanter: "Enchanter" };
-function hash2(s) {
+function hash3(s) {
   let h = 2166136261;
   for (let i = 0; i < s.length; i++) {
     h ^= s.charCodeAt(i);
@@ -4800,7 +6390,7 @@ function hash2(s) {
   return h >>> 0;
 }
 function rng(s) {
-  let a = hash2(s) || 1;
+  let a = hash3(s) || 1;
   return () => {
     a = a + 1831565813 >>> 0;
     let t = a;
@@ -7193,74 +8783,6 @@ function createPlannedTerrain(p) {
   return Object.freeze({ base, sampleBase: (x, y) => base(x, y, true), macro, widthTiles: width * 64, heightTiles: height * 52, riverSegments: p.hydrologyPlan ? null : riverSegments, shoreline, waterGeometry });
 }
 
-// src/shared/contracts/hashing.js
-function utf8(value) {
-  requireContract(typeof value === "string" && !value.includes("\0"), "Invalid UTF-8 input");
-  const bytes = [];
-  for (let i = 0; i < value.length; i++) {
-    let point14 = value.charCodeAt(i);
-    if (point14 >= 55296 && point14 <= 56319) {
-      const low = value.charCodeAt(++i);
-      requireContract(low >= 56320 && low <= 57343, "Unpaired surrogate");
-      point14 = 65536 + (point14 - 55296 << 10) + low - 56320;
-    } else requireContract(point14 < 56320 || point14 > 57343, "Unpaired surrogate");
-    if (point14 < 128) bytes.push(point14);
-    else if (point14 < 2048) bytes.push(192 | point14 >>> 6, 128 | point14 & 63);
-    else if (point14 < 65536) bytes.push(224 | point14 >>> 12, 128 | point14 >>> 6 & 63, 128 | point14 & 63);
-    else bytes.push(240 | point14 >>> 18, 128 | point14 >>> 12 & 63, 128 | point14 >>> 6 & 63, 128 | point14 & 63);
-  }
-  return bytes;
-}
-function validateBytes(bytes, size) {
-  requireContract(Number.isSafeInteger(size) && size >= 0 && size <= 16777216 && Array.isArray(bytes) && Object.getPrototypeOf(bytes) === Array.prototype && bytes.length === size, `Expected ${size} bytes`);
-  const keys2 = Reflect.ownKeys(bytes);
-  requireContract(keys2.length === size + 1, "Extended byte array");
-  for (let i = 0; i < size; i++) {
-    const descriptor = Object.getOwnPropertyDescriptor(bytes, String(i));
-    requireContract(descriptor && "value" in descriptor && descriptor.enumerable && Number.isInteger(descriptor.value) && descriptor.value >= 0 && descriptor.value <= 255, "Invalid byte data");
-  }
-  return bytes;
-}
-var textEncoder = typeof TextEncoder === "function" ? new TextEncoder() : null;
-async function hashUtf8(text, sha256) {
-  requireContract(typeof sha256 === "function", "Explicit SHA-256 provider required");
-  if (!textEncoder || typeof text !== "string" || typeof text.isWellFormed !== "function") return hashBytes(utf8(text), sha256);
-  requireContract(!text.includes("\0"), "Invalid UTF-8 input");
-  requireContract(text.isWellFormed(), "Unpaired surrogate");
-  const bytes = textEncoder.encode(text);
-  requireContract(bytes.length <= 16777216, `Expected ${bytes.length} bytes`);
-  const result = await sha256(bytes);
-  validateBytes(result, 32);
-  return [...result];
-}
-function bytesToHex(bytes) {
-  validateBytes(bytes, bytes.length);
-  return bytes.map((byte) => byte.toString(16).padStart(2, "0")).join("");
-}
-function validateHex(value, bytes) {
-  requireContract(typeof value === "string" && new RegExp(`^[0-9a-f]{${bytes * 2}}$`).test(value), "Invalid canonical hex");
-  return value;
-}
-function frameUtf8(fields) {
-  validateWire(fields);
-  requireContract(Array.isArray(fields) && fields.length <= 32, "Invalid framing fields");
-  const output = [];
-  for (const field2 of fields) {
-    const bytes = utf8(field2);
-    requireContract(bytes.length <= 4096, "Framing field too long");
-    const length = bytes.length;
-    output.push(length >>> 24 & 255, length >>> 16 & 255, length >>> 8 & 255, length & 255, ...bytes);
-  }
-  return output;
-}
-async function hashBytes(bytes, sha256) {
-  requireContract(typeof sha256 === "function", "Explicit SHA-256 provider required");
-  validateBytes(bytes, bytes.length);
-  const result = await sha256(Object.freeze([...bytes]));
-  validateBytes(result, 32);
-  return [...result];
-}
-
 // src/shared/generation/hidden_hollow_obstacle_v1.js
 var HOLLOW_OBSTACLE_VERSION = "hidden-hollow-trunk-v2-recessed-mouth";
 var HOLLOW_TRUNK_CELLS = Object.freeze([
@@ -7302,7 +8824,7 @@ var hollowOrdinal = (n) => n === HOLLOW_EVENT.ordinal;
 var HOLLOW_HASH = "4843c693cbb430c877f93108d33d8d78485d15fdf24b4bff89fc819102668a33";
 
 // src/shared/generation/woodland_forest_pilot_v1.js
-var hash3 = (s) => {
+var hash4 = (s) => {
   let n = 2166136261;
   for (let i = 0; i < s.length; i++) n = Math.imul(n ^ s.charCodeAt(i), 16777619);
   n = Math.imul(n ^ n >>> 16, 2146121005);
@@ -7311,7 +8833,7 @@ var hash3 = (s) => {
 };
 var smooth = (n) => n * n * (3 - 2 * n);
 function woodlandForestField(seed, x, y) {
-  const xx = x / 78, yy = y / 78, gx = Math.floor(xx), gy = Math.floor(yy), u = smooth(xx - gx), v = smooth(yy - gy), h = (a, b) => hash3(seed + "/forest-field/" + a + "," + b) / 4294967295;
+  const xx = x / 78, yy = y / 78, gx = Math.floor(xx), gy = Math.floor(yy), u = smooth(xx - gx), v = smooth(yy - gy), h = (a, b) => hash4(seed + "/forest-field/" + a + "," + b) / 4294967295;
   return (h(gx, gy) * (1 - u) + h(gx + 1, gy) * u) * (1 - v) + (h(gx, gy + 1) * (1 - u) + h(gx + 1, gy + 1) * u) * v;
 }
 function createWoodlandForestSampler(seed) {
@@ -7320,7 +8842,7 @@ function createWoodlandForestSampler(seed) {
   const descriptor = (gx, gy) => {
     const key9 = gx + "," + gy;
     if (cache4.has(key9)) return cache4.get(key9);
-    const n = hash3(seed + "/" + WOODLAND_FOREST_VERSION + "/" + key9), x = gx * WOODLAND_FOREST_POLICY.cellTiles + 1 + n % 2, y = gy * WOODLAND_FOREST_POLICY.cellTiles + 1 + (n >>> 7) % 2, field2 = woodlandForestField(seed, x, y), admitted = (n >>> 13) % 100 < 32 + field2 * 62;
+    const n = hash4(seed + "/" + WOODLAND_FOREST_VERSION + "/" + key9), x = gx * WOODLAND_FOREST_POLICY.cellTiles + 1 + n % 2, y = gy * WOODLAND_FOREST_POLICY.cellTiles + 1 + (n >>> 7) % 2, field2 = woodlandForestField(seed, x, y), admitted = (n >>> 13) % 100 < 32 + field2 * 62;
     let role = n % 19 === 0 ? "rock" : n % 29 === 0 ? "log" : n % 31 === 0 ? "stump" : n % 9 === 0 ? "shrub" : n % 13 === 0 ? "sapling" : "tree";
     const p = { n, x, y, field: field2, admitted, role };
     if (cache4.size === 256) cache4.delete(cache4.keys().next().value);
@@ -7348,7 +8870,7 @@ function createWoodlandForestSampler(seed) {
 }
 
 // src/shared/generation/world_combat_packs_v2.js
-var hash4 = (s) => {
+var hash5 = (s) => {
   let h = 2166136261;
   for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0;
   return h;
@@ -7388,7 +8910,7 @@ function createRoadsidePackSampler(asset, binding, tile) {
       counts.status = "protected-reservation";
       return done3([]);
     }
-    const h = hash4(ROADSIDE_VERSION + "/" + asset.campaignSeedHex + "/" + cx + "/" + cy);
+    const h = hash5(ROADSIDE_VERSION + "/" + asset.campaignSeedHex + "/" + cx + "/" + cy);
     if (h % 100 >= ROADSIDE_POLICY.packChancePercent) {
       counts.status = "quiet-chunk";
       return done3([]);
@@ -7396,7 +8918,7 @@ function createRoadsidePackSampler(asset, binding, tile) {
     const count2 = 6 + (h >>> 8) % 7;
     for (let a = 0; a < 24; a++) {
       counts.centers++;
-      const x = cx * 32 + 7 + hash4(h + "/x/" + a) % 18, y = cy * 26 + 6 + hash4(h + "/y/" + a) % 14, b = tile(x, y);
+      const x = cx * 32 + 7 + hash5(h + "/x/" + a) % 18, y = cy * 26 + 6 + hash5(h + "/y/" + a) % 14, b = tile(x, y);
       if (!safe(x, y)) {
         counts.safety++;
         continue;
@@ -7414,7 +8936,7 @@ function createRoadsidePackSampler(asset, binding, tile) {
           const t = tile(xx + ox, yy + oy);
           if (t.collision !== "1" || t.route > 0 || t.bank || t.kind === "shore") clear = false;
         }
-        if (clear) candidates.push({ x: (xx - cx * 32) * 32 + 16, y: (yy - cy * 26) * 32 + 16, n: hash4(h + "/member/" + dx + "/" + dy) });
+        if (clear) candidates.push({ x: (xx - cx * 32) * 32 + 16, y: (yy - cy * 26) * 32 + 16, n: hash5(h + "/member/" + dx + "/" + dy) });
       }
       candidates.sort((a2, b2) => a2.n - b2.n);
       const chosen = [];
@@ -7439,7 +8961,7 @@ function createRoadsidePackSampler(asset, binding, tile) {
 }
 
 // src/shared/generation/world_combat_packs_v1.js
-var hash5 = (s) => {
+var hash6 = (s) => {
   let h = 2166136261;
   for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0;
   return h;
@@ -7468,11 +8990,11 @@ function createWorldPackSampler(asset, binding, tile) {
   const safe = (x, y) => !protectedChunks.has(Math.floor(x / 32) + "," + Math.floor(y / 26)) && Math.hypot(x - asset.spawnTile.x, y - asset.spawnTile.y) > 24 && ferryNetworkV1().landings.every((l) => Math.hypot(x - l.tile.x, y - l.tile.y) > 32);
   return (cx, cy, digest11) => {
     if (!hasWorldCombat(binding) || protectedChunks.has(cx + "," + cy)) return [];
-    const h = hash5(WORLD_COMBAT_VERSION + "/" + asset.campaignSeedHex + "/" + cx + "/" + cy);
+    const h = hash6(WORLD_COMBAT_VERSION + "/" + asset.campaignSeedHex + "/" + cx + "/" + cy);
     if (h % 100 >= 60) return [];
     const count2 = 6 + (h >>> 8) % 7, candidates = [];
     for (let a = 0; a < 24; a++) {
-      const x = cx * 32 + 7 + hash5(h + "/x/" + a) % 18, y = cy * 26 + 6 + hash5(h + "/y/" + a) % 14, b = tile(x, y);
+      const x = cx * 32 + 7 + hash6(h + "/x/" + a) % 18, y = cy * 26 + 6 + hash6(h + "/y/" + a) % 14, b = tile(x, y);
       if (!safe(x, y) || b.collision !== "1" || b.kind === "bridge" || b.town || b.fortExterior || b.ruinExterior || b.caveExterior) continue;
       const positions = [];
       for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) {
@@ -7480,7 +9002,7 @@ function createWorldPackSampler(asset, binding, tile) {
         if (!safe(xx, yy) || q.collision !== "1" || q.landmassId !== b.landmassId || q.kind === "bridge" || q.town || q.fortExterior || q.ruinExterior || q.caveExterior) continue;
         let clear = true;
         for (let oy = -1; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) if (tile(xx + ox, yy + oy).collision !== "1") clear = false;
-        if (clear) positions.push({ x: (xx - cx * 32) * 32 + 16, y: (yy - cy * 26) * 32 + 16, n: hash5(h + "/member/" + dx + "/" + dy) });
+        if (clear) positions.push({ x: (xx - cx * 32) * 32 + 16, y: (yy - cy * 26) * 32 + 16, n: hash6(h + "/member/" + dx + "/" + dy) });
       }
       positions.sort((a2, b2) => a2.n - b2.n);
       const chosen = [];
@@ -8434,7 +9956,7 @@ var box2 = (list2) => {
   return { x, y, w: Math.max(...xs) - x + 1, h: Math.max(...ys) - y + 1 };
 };
 var span = (L2, f3, u, k0, k1, j0, j1) => box2([{ x: L2.x + f3.x * k0 + u.x * j0, y: L2.y + f3.y * k0 + u.y * j0 }, { x: L2.x + f3.x * k1 + u.x * j1, y: L2.y + f3.y * k1 + u.y * j1 }]);
-var inside = (r, x, y) => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h;
+var inside2 = (r, x, y) => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h;
 function harborLayoutV1(landing, length, id = "ferry:landing") {
   const f3 = landing.facing, facing = FACING[f3.x + "," + f3.y];
   if (!facing) return null;
@@ -8499,11 +10021,11 @@ function createHarborTownTiles(terrain2, h) {
   const t = h.template, o = h.origin, materials3 = materialsFor(t), solid = new Set(harborDressingTiles(h).map((p) => p.x + "," + p.y)), deck = h.f.x ? "H" : "V";
   for (let y = 0; y < t.core[1]; y++) for (let x = 0; x < t.core[0]; x++) requireContract(terrain2.base(o.x + x, o.y + y).walkable, "Harbor town cannot replace water");
   return (x, y, b) => {
-    if (inside(h.body, x, y)) {
+    if (inside2(h.body, x, y)) {
       const lx = x - o.x, ly = y - o.y, material = materials3.get(lx + "," + ly) ?? "g", { naturalKind, naturalClusterId, ...rest } = b;
       return { ...rest, collision: blocked(t, lx, ly) || solid.has(x + "," + y) ? "2" : "1", material, route: material === "r" || material === "p" ? 2 : 0, town: true };
     }
-    if (inside(h.pier, x, y)) {
+    if (inside2(h.pier, x, y)) {
       const { naturalKind, naturalClusterId, ...rest } = b;
       return { ...rest, walkable: true, kind: "bridge", underlyingKind: b.kind, pier: true, collision: solid.has(x + "," + y) ? "2" : "1", material: deck, route: 1, town: true };
     }
@@ -8534,14 +10056,14 @@ function createFerryOverlay(binding) {
 }
 
 // src/shared/generation/crypt_family_v1.js
-var hash6 = (s) => {
+var hash7 = (s) => {
   let n = 2166136261;
   for (const c of s) n = Math.imul(n ^ c.charCodeAt(0), 16777619) >>> 0;
   return n;
 };
 function cryptFloorRecipe(seed, tier2, index) {
   requireContract(tier2 === "small" && index === 0, "Only Small Crypt implemented");
-  const w = 26, h = 28, n = hash6(PLANNED_CRYPT_VERSION + "/" + seed), cells3 = Array.from({ length: h }, (_, y) => Array.from({ length: w }, (_2, x) => !x || !y || x === w - 1 || y === h - 1 ? "0" : "1")), blockers2 = [], decorations3 = [];
+  const w = 26, h = 28, n = hash7(PLANNED_CRYPT_VERSION + "/" + seed), cells3 = Array.from({ length: h }, (_, y) => Array.from({ length: w }, (_2, x) => !x || !y || x === w - 1 || y === h - 1 ? "0" : "1")), blockers2 = [], decorations3 = [];
   const wall = (x, y, width, height, kind2 = "ruin-collapsed-masonry") => {
     for (let dy = 0; dy < height; dy++) for (let dx = 0; dx < width; dx++) cells3[y + dy][x + dx] = "0";
     blockers2.push({ kind: kind2, x, y, width, height });
@@ -8563,7 +10085,7 @@ var cryptFloorLinks = (tier2) => {
 };
 
 // src/shared/generation/crypt_family_v2.js
-var hash7 = (s) => {
+var hash8 = (s) => {
   let n = 2166136261;
   for (const c of s) n = Math.imul(n ^ c.charCodeAt(0), 16777619) >>> 0;
   return n;
@@ -8571,7 +10093,7 @@ var hash7 = (s) => {
 function cryptFloorRecipeV2(seed, tier2, index) {
   const f3 = CRYPT_TIER_POLICY_V2[tier2]?.floors[index];
   requireContract(f3, "Unknown Crypt V2 floor");
-  const [w, h] = f3.tiles, n = hash7(PLANNED_CRYPT_V2 + "/" + seed + "/" + tier2 + "/" + index), mid = Math.floor(w / 2), cells3 = Array.from({ length: h }, (_, y) => Array.from({ length: w }, (_2, x) => !x || !y || x === w - 1 || y === h - 1 ? "0" : "1")), blockers2 = [], decorations3 = [], rooms = [];
+  const [w, h] = f3.tiles, n = hash8(PLANNED_CRYPT_V2 + "/" + seed + "/" + tier2 + "/" + index), mid = Math.floor(w / 2), cells3 = Array.from({ length: h }, (_, y) => Array.from({ length: w }, (_2, x) => !x || !y || x === w - 1 || y === h - 1 ? "0" : "1")), blockers2 = [], decorations3 = [], rooms = [];
   const wall = (x, y, width, height, kind2 = "ruin-collapsed-masonry") => {
     requireContract(width > 0 && height > 0 && x > 0 && y > 0 && x + width < w && y + height < h, "Crypt masonry bounds");
     for (let dy = 0; dy < height; dy++) for (let dx = 0; dx < width; dx++) cells3[y + dy][x + dx] = "0";
@@ -8648,7 +10170,7 @@ var LAND = {
   volcanic: ["Cinder", "Ashen", "Emberglow", "Slag", "Smoldering", "Blackrock", "Brimstone", "Charred"]
 };
 var TYPE = { cave: ["Cave", "Cave", "Hollow", "Grotto"], fort: ["Fort", "Fort", "Keep", "Outpost"], ruin: ["Ruin", "Ruins"], crypt: ["Crypt", "Crypt", "Tomb", "Barrow"] };
-var cap = (s) => s[0].toUpperCase() + s.slice(1);
+var cap2 = (s) => s[0].toUpperCase() + s.slice(1);
 var named = /* @__PURE__ */ new WeakMap();
 function siteNamesV1(asset) {
   let out = named.get(asset);
@@ -8660,7 +10182,7 @@ function siteNamesV1(asset) {
     const sel = newPopulationSelection(id);
     if (!sel) continue;
     const family2 = sel.familyId.split(":")[1], biome = plannedSiteBiome(asset, id);
-    const words = LAND[biome] ?? [cap(biome)], types = TYPE[family2] ?? [cap(family2)];
+    const words = LAND[biome] ?? [cap2(biome)], types = TYPE[family2] ?? [cap2(family2)];
     const best = /* @__PURE__ */ new Map();
     types.forEach((t, i) => {
       for (const w of words) {
@@ -8697,7 +10219,7 @@ var NATURAL_CLUSTER_RULES = freezeWire({
   profiles: { w: { admission: 59, scale: 1 }, t: { admission: 51, scale: 0.98 }, m: { admission: 40, scale: 0.86 }, a: { admission: 25, scale: 0.76 }, r: { admission: 29, scale: 0.79 }, d: { admission: 21, scale: 0.72 }, s: { admission: 22, scale: 0.74 }, l: { admission: 32, scale: 0.8 } },
   protection: { routeShoulderTiles: 1, waterMarginTiles: 1, reservationMarginTiles: 1 }
 });
-var hash8 = (text) => {
+var hash9 = (text) => {
   let h = 2166136261;
   for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619);
   return h >>> 0;
@@ -8710,7 +10232,7 @@ function createNaturalClusterSampler(seedDigest) {
   function descriptor(gx, gy) {
     const key9 = gx + "," + gy;
     if (cache4.has(key9)) return cache4.get(key9);
-    const n = hash8(seedDigest + "/" + NATURAL_CLUSTER_VERSION + "/" + key9), a = hash8(n + "/shape"), b = hash8(n + "/lobes"), angle = unit2(a, 0) * Math.PI;
+    const n = hash9(seedDigest + "/" + NATURAL_CLUSTER_VERSION + "/" + key9), a = hash9(n + "/shape"), b = hash9(n + "/lobes"), angle = unit2(a, 0) * Math.PI;
     const p = {
       id: NATURAL_CLUSTER_VERSION + ":" + n.toString(16).padStart(8, "0") + ":" + key9,
       n,
@@ -8903,7 +10425,7 @@ var ruinModulePose = (id, x, y) => {
 // src/shared/generation/ruin_groves_v1.js
 var RUIN_GROVE_VERSION = "small-woodland-grove-composition-v1";
 var isRuinGrovePilot = (asset, reservation) => asset.assetId === "alpha" && reservation.id === "repeatable-slot:ruin:woodland:small:01" && reservation.tier === "small";
-var hash9 = (s) => {
+var hash10 = (s) => {
   let n = 2166136261;
   for (const c of s) n = Math.imul(n ^ c.charCodeAt(0), 16777619) >>> 0;
   return n;
@@ -8934,9 +10456,9 @@ function createRuinGrovePlan(ruin, seed, nativeTile) {
   }
   const occupied = /* @__PURE__ */ new Map(), pieces = [], clusters = [];
   for (const [index, cells3] of components.entries()) {
-    const id = "grove:" + hash9(domain + "/cluster/" + index).toString(16).padStart(8, "0"), candidates = [];
+    const id = "grove:" + hash10(domain + "/cluster/" + index).toString(16).padStart(8, "0"), candidates = [];
     for (const p of cells3) for (const [dx, dy] of [[0, 0], [16, 0], [0, 16], [16, 16]]) {
-      const n = hash9(domain + "/shrub/" + p.x + "/" + p.y + "/" + dx + "/" + dy), width = [72, 80, 84][n % 3], variant = (n >>> 6) % 4 === 0 ? 5 : 3, h = width * ratios[variant], cx = p.x * 32 + 16 + dx + ((n >>> 12) % 9 - 4), cy = p.y * 32 + 16 + dy + ((n >>> 16) % 9 - 4), ground = cy + h * 0.39;
+      const n = hash10(domain + "/shrub/" + p.x + "/" + p.y + "/" + dx + "/" + dy), width = [72, 80, 84][n % 3], variant = (n >>> 6) % 4 === 0 ? 5 : 3, h = width * ratios[variant], cx = p.x * 32 + 16 + dx + ((n >>> 12) % 9 - 4), cy = p.y * 32 + 16 + dy + ((n >>> 16) % 9 - 4), ground = cy + h * 0.39;
       if (cx - width / 2 < ruin.left * 32 + 4 || cx + width / 2 > (ruin.left + ruin.width) * 32 - 4 || ground - h * 0.94 < ruin.top * 32 + 4 || ground + h * 0.06 > (ruin.top + ruin.height) * 32 - 4) continue;
       const covers = cells3.filter((q) => ((q.x * 32 + 16 - cx) / (width * 0.4)) ** 2 + ((q.y * 32 + 16 - cy) / (h * 0.36)) ** 2 <= 0.78 && (q.y * 32 + 16 - cy) / h + 0.55 <= 0.78);
       if (covers.length < 2) continue;
@@ -8947,7 +10469,7 @@ function createRuinGrovePlan(ruin, seed, nativeTile) {
       }
       if (clear) candidates.push({ cx, cy, ground, width, variant, covers, n });
     }
-    const claimed = /* @__PURE__ */ new Set(), target = Math.ceil(cells3.length * (0.7 + hash9(id) % 13 / 100)), chosen = [];
+    const claimed = /* @__PURE__ */ new Set(), target = Math.ceil(cells3.length * (0.7 + hash10(id) % 13 / 100)), chosen = [];
     while (claimed.size < target) {
       let best = null, score = -Infinity;
       for (const p of candidates) {
@@ -8970,7 +10492,7 @@ function createRuinGrovePlan(ruin, seed, nativeTile) {
     const member = cells3.filter((p) => claimed.has(key2(p.x, p.y)));
     if (!member.length) continue;
     for (const [i, p] of chosen.entries()) pieces.push({ id: id + "/shrub/" + i, kind: "ruin-grove-shrub-" + p.variant, x: p.cx / 32, y: p.ground / 32, width: p.width, variant: p.n % 4, clusterId: id });
-    const treeCandidates = member.map((p) => ({ ...p, n: hash9(domain + "/tree/" + p.x + "/" + p.y) })).sort((a, b) => a.n - b.n || order(a, b)), trees = [];
+    const treeCandidates = member.map((p) => ({ ...p, n: hash10(domain + "/tree/" + p.x + "/" + p.y) })).sort((a, b) => a.n - b.n || order(a, b)), trees = [];
     for (const p of treeCandidates) {
       if (trees.length >= Math.min(3, Math.floor(member.length / 6))) break;
       const x = p.x * 32 + 16 + (p.n % 9 - 4), y = p.y * 32 + 23 + ((p.n >>> 8) % 7 - 3);
@@ -9370,1515 +10892,6 @@ async function derivePlannedFortReservationV2(asset, binding, sha256, { reservat
   const parcel2 = { version: PLANNED_FORT_V2, siteId: siteId2, socket: copyWire(socket), familyId: "site-family:fort", packageId: "procedural-fort-family", tier: r.tier, label: fixture ? "Deep Fort fixture" : biome[0].toUpperCase() + biome.slice(1) + " Fort", tileX: String(PLANNED_ADDRESS_OFFSET.chunkX * 32 + g.left), tileY: String(PLANNED_ADDRESS_OFFSET.chunkY * 26 + g.top), width: g.width, height: g.height, layoutSeed: identity.digest, pages: r.footprint.map((c) => ({ chunkX: String(1024 + c.x), chunkY: String(1024 + c.y) })), roadAnchor: { tileX: String(1024 * 32 + g.gate.x), tileY: String(1024 * 26 + g.gate.y) } };
   return freezeWire({ version: "site-reservation-planned-fort-v1", siteId: siteId2, packageId: "procedural-fort-family", socket, parcel: parcel2 });
 }
-
-// src/shared/content/world_melee_geometry.js
-function worldOrdinaryMeleeProfile(state, profile2) {
-  return hasWorldCombat(state) && ordinaryEnemyForProfile(profile2?.contentDefinitionId) ? { ...profile2, attackReach: 32, attackReachMode: "clearHullGap" } : profile2;
-}
-
-// src/shared/content/spawn_levels_v1.js
-var SPAWN_LEVELS_V1 = freezeWire({
-  version: "spawn-levels-v1",
-  levelCap: 50,
-  // Each pack member's offset from the encounter level, picked by its id (out of 20).
-  packOffsets: [-1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2],
-  site: { offsets: [1, 2], highEvery: 10, highTiers: ["small", "standard"], highOffset: { early: 10, late: 15, lateFrom: 25 } },
-  lairTiers: ["large", "deep"]
-});
-var hash10 = (text) => {
-  let value = 2166136261;
-  for (let i = 0; i < text.length; i++) value = Math.imul(value ^ text.charCodeAt(i), 16777619);
-  return value >>> 0;
-};
-var cap2 = (level) => Math.max(1, Math.min(SPAWN_LEVELS_V1.levelCap, level));
-var usesSpawnLevelsV1 = (state) => state?.d9World?.plannedWorld?.worldMaker !== void 0;
-var pageAt = (state, chunkX, chunkY) => state?.d9World?.runtime?.chunks?.find((p) => String(p.chunkX) === String(chunkX) && String(p.chunkY) === String(chunkY)) ?? null;
-var areaScalesV1 = (state, biome) => Boolean(biome && state?.campaign?.areaBossesByBiome?.[biome]);
-var siteKey = (socket) => socket?.provenance?.reservationId ?? socket?.siteId ?? "";
-var isHighSiteV1 = (socket) => Boolean(siteKey(socket)) && !/(^|:)signature:/.test(siteKey(socket)) && SPAWN_LEVELS_V1.site.highTiers.includes(socket?.provenance?.sizeTier) && hash10("spawn-levels-v1/high/" + siteKey(socket)) % SPAWN_LEVELS_V1.site.highEvery === 0;
-function siteLevelV1(state, socket) {
-  const page = pageAt(state, socket.entrance?.chunkX, socket.entrance?.chunkY), base = Number(page?.region?.minimumLevel ?? socket.minimumLevel), S = SPAWN_LEVELS_V1.site;
-  const offset = isHighSiteV1(socket) ? base < S.highOffset.lateFrom ? S.highOffset.early : S.highOffset.late : S.offsets[hash10("spawn-levels-v1/offset/" + siteKey(socket)) % S.offsets.length];
-  return cap2(base + offset);
-}
-var siteMinimumLevelV1 = (state, socket) => usesSpawnLevelsV1(state) ? siteLevelV1(state, socket) : socket.minimumLevel;
-var siteScalesV1 = (state, socket) => !usesSpawnLevelsV1(state) || areaScalesV1(state, socket.region?.biome);
-var packLevelOffsetV1 = (entityId2) => SPAWN_LEVELS_V1.packOffsets[hash10("spawn-levels-v1/pack/" + entityId2) % SPAWN_LEVELS_V1.packOffsets.length];
-var memberLevelOffsetV1 = (state, entityId2) => !usesSpawnLevelsV1(state) || state.bossCombat?.bossesByEntityId?.[entityId2] || state.bossCombat?.summonsByEntityId?.[entityId2] || state.eliteCombat?.elitesByEntityId?.[entityId2] ? 0 : packLevelOffsetV1(entityId2);
-var memberLevelV1 = (state, level, entityId2) => cap2(Number(level) + memberLevelOffsetV1(state, entityId2));
-var PACK_LEVEL_SPREAD_V1 = Math.max(...SPAWN_LEVELS_V1.packOffsets) - Math.min(...SPAWN_LEVELS_V1.packOffsets);
-function groupBaseLevelV1(state, group) {
-  const live = group.entityIds.filter((id) => state.entitiesById[id]?.alive), ids = live.length ? live : group.entityIds, levels2 = group.threatSnapshot.levelsByEntityId;
-  const at2 = ids.find((id) => memberLevelOffsetV1(state, id) === 0) ?? ids[0];
-  return cap2(Number(levels2[at2]) - memberLevelOffsetV1(state, at2));
-}
-
-// src/shared/contracts/d9_numeric_expression.js
-var ceilDiv = (n, d) => (n + d - 1n) / d;
-function numericContext(precision = 48) {
-  requireContract(Number.isSafeInteger(precision) && precision >= 16 && precision <= 8192, "Invalid proof precision");
-  const S = 10n ** BigInt(precision);
-  let work = 0;
-  const budget = () => {
-    if (++work > 2e4) numericExtension("D9 numeric proof work");
-  };
-  const pair = (lo, hi = lo) => {
-    requireContract(lo >= 0n && hi >= lo, "Invalid numeric interval");
-    if (hi.toString().length > INTEGER_MAX_DIGITS + precision + 4) numericExtension("D9 numeric magnitude");
-    return { lo, hi };
-  };
-  const q = (n, d = 1n) => {
-    n = progressionBigInt(n);
-    d = progressionBigInt(d);
-    requireContract(d > 0n, "Zero denominator");
-    return pair(n * S / d, ceilDiv(n * S, d));
-  };
-  const add = (a, b) => pair(a.lo + b.lo, a.hi + b.hi);
-  const sub = (a, b) => {
-    requireContract(a.lo >= b.hi, "Unproven positive subtraction");
-    return pair(a.lo - b.hi, a.hi - b.lo);
-  };
-  const mul2 = (a, b) => {
-    budget();
-    return pair(a.lo * b.lo / S, ceilDiv(a.hi * b.hi, S));
-  };
-  const div = (a, b) => {
-    budget();
-    requireContract(b.lo > 0n, "Unproven divisor");
-    return pair(a.lo * S / b.hi, ceilDiv(a.hi * S, b.lo));
-  };
-  const power2 = (a, n) => {
-    let out = q(1), base = a;
-    while (n) {
-      budget();
-      if (n & 1n) out = mul2(out, base);
-      n >>= 1n;
-      if (n) base = mul2(base, base);
-    }
-    return out;
-  };
-  function rootInteger(n, k) {
-    if (n < 2n) return n;
-    let x = 1n << BigInt(Math.ceil(n.toString(2).length / k));
-    for (; ; ) {
-      budget();
-      const y = (BigInt(k - 1) * x + n / x ** BigInt(k - 1)) / BigInt(k);
-      if (y >= x) return x;
-      x = y;
-    }
-  }
-  const root2 = (a, k) => {
-    requireContract(Number.isSafeInteger(k) && k >= 1 && k <= 100, "Invalid root degree");
-    const factor = S ** BigInt(k - 1), lo = rootInteger(a.lo * factor, k), hi = rootInteger(a.hi * factor, k);
-    return pair(lo, hi ** BigInt(k) === a.hi * factor ? hi : hi + 1n);
-  };
-  const frac = (a, p, d) => root2(power2(a, BigInt(p)), d);
-  function lnReduced(a) {
-    requireContract(a.lo >= S && a.hi <= 2n * S, "Log reduction required");
-    const z = div(sub(a, q(1)), add(a, q(1))), z2 = mul2(z, z);
-    let term = z, sum2 = pair(0n), i = 1n;
-    for (; ; ) {
-      budget();
-      sum2 = add(sum2, div(term, q(i)));
-      term = mul2(term, z2);
-      i += 2n;
-      const tail = div(div(term, q(i)), sub(q(1), z2));
-      if (tail.hi <= 2n) return pair(2n * sum2.lo, 2n * (sum2.hi + tail.hi));
-    }
-  }
-  const ln2 = () => lnReduced(q(2));
-  function log2Integer(n) {
-    n = progressionBigInt(n);
-    requireContract(n >= 1n, "Log requires positive integer");
-    const exponent = n.toString(2).length - 1, den = 1n << BigInt(exponent);
-    if (n === den) return q(exponent);
-    return add(q(exponent), div(lnReduced(q(n, den)), ln2()));
-  }
-  function exp2(a) {
-    if (a.hi > 150000n * S) numericExtension("D9 exponential output admission");
-    let x = a, k = 0;
-    while (x.hi > S / 8n) {
-      x = pair(x.lo / 2n, ceilDiv(x.hi, 2n));
-      k++;
-    }
-    let term = q(1), sum2 = q(1), i = 0;
-    for (; ; ) {
-      budget();
-      i++;
-      term = div(mul2(term, x), q(i));
-      sum2 = add(sum2, term);
-      const next = div(mul2(term, x), q(i + 1)), ratio = div(x, q(i + 2)), tail = div(next, sub(q(1), ratio));
-      if (tail.hi <= 2n) {
-        sum2 = pair(sum2.lo, sum2.hi + tail.hi);
-        break;
-      }
-    }
-    for (let j = 0; j < k; j++) sum2 = mul2(sum2, sum2);
-    return sum2;
-  }
-  const dungeonScale = (powerValue) => {
-    const p = progressionBigInt(powerValue), band = (p + 3n) / 4n * 4n;
-    const effective = band <= 100n ? q(band) : add(q(100), mul2(q(3, 2), frac(q(band - 100n), 7, 10)));
-    const E = mul2(exp2(mul2(effective, lnReduced(q(253, 250)))), add(q(1), mul2(q(3, 200), effective)));
-    return { effective, E };
-  };
-  function endpoint(a, mode = "round", places = 0) {
-    const scale2 = 10n ** BigInt(places), f3 = (n) => mode === "ceil" ? ceilDiv(n * scale2, S) : mode === "floor" ? n * scale2 / S : (2n * n * scale2 + S) / (2n * S), lo = f3(a.lo), hi = f3(a.hi);
-    if (lo !== hi) {
-      const e = new RangeError("Numeric proof requires refinement");
-      e.code = "NUMERIC_PROOF_REFINE";
-      throw e;
-    }
-    return integerWire(lo);
-  }
-  return { q, add, sub, mul: mul2, div, power: power2, root: root2, frac, log2Integer, exp: exp2, dungeonScale, endpoint, scale: S };
-}
-function certifyNumeric(evaluate) {
-  for (const p of [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]) {
-    try {
-      return evaluate(numericContext(p));
-    } catch (e) {
-      if (e.code !== "NUMERIC_PROOF_REFINE") throw e;
-    }
-  }
-  numericExtension("D9 endpoint proof precision");
-}
-
-// src/shared/contracts/threat_power_d9.js
-function threatEndpointsD9(level, tier2, { hp = 1, damage = 1, xp = 1 } = {}) {
-  const rank = THREAT_TIERS.indexOf(tier2);
-  requireContract(rank >= 0, "Invalid threat rank");
-  return certifyNumeric((c) => {
-    const power2 = c.mul(c.add(c.q(1), c.mul(c.q(7, 20), c.log2Integer(level))), c.q([100, 125, 160, 200][rank], 100));
-    return { maxHp: c.endpoint(c.mul(c.q(hp), c.root(power2, 2))), attackDamage: c.endpoint(c.mul(c.q(damage), power2)), xp: c.endpoint(c.mul(c.q(xp), power2)), power: combatAmount(c.endpoint(power2, "round", 12), 1000000000000n) };
-  });
-}
-
-// src/shared/contracts/encounter_level_v2.js
-function resolveEncounterLevelV2(minimumLevel, participants) {
-  positiveProgression(minimumLevel);
-  let level = progressionBigInt(minimumLevel);
-  for (const p of participants) {
-    const value = p.heroLevel ?? p.progression?.level;
-    positiveProgression(value);
-    if (progressionBigInt(value) > level) level = progressionBigInt(value);
-  }
-  return progressionWire(level > BigInt(HERO_LEVEL_CAP) ? BigInt(HERO_LEVEL_CAP) : level);
-}
-function resetEncounterSnapshotV2(prior, { tick, minimumLevel, participants, scale: scale2 = true }) {
-  if (!prior) throw new TypeError("Reset lacks an existing progression snapshot");
-  if (!participants) return prior;
-  const level = resolveEncounterLevelV2(minimumLevel, scale2 ? participants : []);
-  return { ...prior, activatedTick: tick, minimumLevel: progressionWire(progressionBigInt(minimumLevel)), effectiveLevel: level, sourceDepth: level, participants: participants.map((p) => ({ playerId: p.playerId, heroLevel: progressionWire(progressionBigInt(p.heroLevel)) })) };
-}
-
-// src/shared/contracts/episode_progression_d9.js
-var D9_EPISODE_VERSION = "encounter-episode-d9-v1";
-function unfrozenEpisodeD9(anchorId, episode = 0, { origin: origin2 = false } = {}) {
-  return { version: D9_EPISODE_VERSION, anchorId, episode: progressionWire(progressionBigInt(episode)), origin: origin2, snapshot: null, placement: null, clearedTick: null, vacatedTick: null, renewalEligible: false };
-}
-var pointDistance = (a, b) => {
-  const local = relativeWorldPosition(a, b, 4);
-  return local ? Math.hypot(local.x - b.localX, local.y - b.localY) : Infinity;
-};
-function prepareEpisodeSnapshotD9(episode, { tick, minimumLevel, participants, anchor, spaceInstanceId, rank, trigger, scale: scale2 = true }) {
-  requireContract(["activation", "combat", "resource"].includes(trigger), "Invalid progression trigger");
-  if (episode.snapshot) return episode.snapshot;
-  positiveProgression(minimumLevel);
-  validateWorldPosition(anchor);
-  const eligible3 = participants.filter((p) => p.alive && p.spaceInstanceId === spaceInstanceId && pointDistance(p.position, anchor) <= D9_PROFILE.prepareRadius).sort((a, b) => a.playerId.localeCompare(b.playerId));
-  requireContract(eligible3.length > 0, "Episode activation has no eligible participant");
-  const level = resolveEncounterLevelV2(minimumLevel, scale2 ? eligible3 : []);
-  return freezeWire({ version: "episode-progression-d9-v1", snapshotId: episode.anchorId + "/episode/" + String(episode.episode), activatedTick: tick, trigger, minimumLevel: progressionWire(progressionBigInt(minimumLevel)), effectiveLevel: progressionWire(level), sourceDepth: progressionWire(level), mappingVersion: D9_PROFILE.progressionPolicy, rank, participants: eligible3.map((p) => ({ playerId: p.playerId, heroLevel: progressionWire(progressionBigInt(p.heroLevel)) })) });
-}
-function chooseEpisodePlacementD9({ candidates, participants, spaceInstanceId, isLegal, combat = false, hollow = false, planned = false }) {
-  requireContract(candidates.length <= D9_PROFILE.placementCandidates, "Placement work bound");
-  for (const pair of candidates) {
-    requireContract(combat ? pair.length >= 6 && pair.length <= (planned ? PLANNED_EVENT_MEMBERS : hollow ? 13 : 12) : pair.length === 2, "D9 encounter member capacity");
-    if (pair.every((p) => isLegal(p) && participants.every((a) => a.spaceInstanceId !== spaceInstanceId || pointDistance(p, a.position) >= D9_PROFILE.placementSafetyRadius))) return freezeWire(pair);
-  }
-  return null;
-}
-
-// src/shared/content/bestiary_bosses_v1.js
-var LABELS = { aegis_goliath: "AEGIS GOLIATH", brimstone_colossus: "BRIMSTONE COLOSSUS", arachnid_treant: "ARACHNID TREANT" };
-var title = (label2) => String(label2).toLowerCase().replace(/(^|[\s-])([a-z])/g, (m, a, b) => a + b.toUpperCase()).replace(/ (The|Of) /g, (w) => w.toLowerCase());
-var BOSS_PAGE_IDS = freezeWire([...WORLD_BOSS_ROLES]);
-var BOSS_PAGE_NAMES = freezeWire(Object.fromEntries([...BOSS_PAGE_IDS, "arachnid_treant"].map((id) => [id, title(RECOVERED_BOSSES[id]?.label ?? BIOME_BOSSES_V1[id]?.label ?? LABELS[id] ?? id.replace(/_/g, " "))])));
-
-// src/shared/content/bestiary_v1.js
-var BESTIARY_VERSION = "bestiary-v1";
-var RARE_HEALTH_X100 = 300;
-var RARE_DAMAGE_X100 = 150;
-var RARE_CARD_STACK = freezeWire([3, 8]);
-var CARD_DROP = freezeWire({ ordinary: { per10000: 50, stack: [1, 1] }, elite: { per10000: 500, stack: [1, 3] }, boss: { per10000: 2e3, stack: [1, 1] } });
-var TIERS = freezeWire(["Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic"]);
-var TIER_COLORS = freezeWire(["#ffffff", "#2ecc71", "#3498db", "#9b59b6", "#e67e22", "#e74c3c"]);
-var TIER_CARDS = freezeWire([1, 25, 100, 300, 600, 1e3]);
-var BOSS_TIER_CARDS = freezeWire([1, 5, 15, 35, 65, 100]);
-var TIER_SOULS = freezeWire([0, 10, 30, 80, 200, 500]);
-var TIER_GOLD = freezeWire([0, 5e4, 1e6, 1e7, 75e6, 3e8]);
-var BIG = [50, 75, 100, 125, 150, 200];
-var SMALL = [25, 35, 50, 60, 75, 100];
-var CRITDMG = [100, 150, 200, 250, 300, 400];
-var DMG = [null, null, 100, 200, 300, 500];
-var FIND = [null, null, 100, 200, 300, 400];
-var DOUBLE = [null, null, 200, 400, 600, 800];
-var TEN = [null, null, 200, 400, 600, 1e3];
-var LIFE = [null, null, 25, 50, 75, 100];
-var POTCD = [null, null, 200, 400, 600, 800];
-var RANGE = [null, null, 500, 1e3, 1500, 2e3];
-var BESTIARY_STATS = freezeWire({
-  atkPct: ["Attack", [...BIG], true],
-  defPct: ["Defense", [...BIG], true],
-  maxHpPct: ["Max health", [...BIG], true],
-  strPct: ["Strength", [...BIG], true],
-  dexPct: ["Dexterity", [...BIG], true],
-  intPct: ["Intelligence", [...BIG], true],
-  moveSpeedPct: ["Move speed", [...BIG], true],
-  attackSpeed: ["Attack speed", [...BIG], true],
-  critChance: ["Crit chance", [...SMALL], true],
-  block: ["Block chance", [...SMALL], true],
-  parry: ["Parry chance", [...SMALL], true],
-  cdr: ["Cooldown reduction", [...SMALL], true],
-  critDamage: ["Crit damage", [...CRITDMG], true],
-  fireDmg: ["Fire damage", [...DMG], true],
-  frostDmg: ["Frost damage", [...DMG], true],
-  lightningDmg: ["Lightning damage", [...DMG], true],
-  bleedDmg: ["Bleed damage", [...DMG], true],
-  poisonDmg: ["Poison damage", [...DMG], true],
-  shockDmg: ["Shock damage", [...DMG], true],
-  counterDmg: ["Counter damage", [...DMG], true],
-  eliteDmg: ["Elite damage", [...DMG], true],
-  executeDmg: ["Execute", [...DMG], false],
-  rareDmg: ["Rare damage", [...DMG], false],
-  nightDmg: ["Night damage", [...DMG], false],
-  goldFind: ["Gold find", [...FIND], false],
-  goldFindX2: ["Gold find", [...DOUBLE], false],
-  xpFind: ["XP", [...FIND], false],
-  soulFind: ["Monster Soul find", [...FIND], false],
-  potionHeal: ["Potion healing", [...FIND], false],
-  cardFind: ["Card find", [...FIND], false],
-  itemFind: ["Item find", [...FIND], false],
-  itemQuality: ["Item quality", [...FIND], false],
-  thorns: ["Thorns", [...TEN], false],
-  statusResist: ["Status resist", [...TEN], false],
-  lifeKill: ["Life on kill", [...LIFE], true],
-  potionCooldown: ["Potion cooldown", [...POTCD], false],
-  pickupRange: ["Pickup range", [...RANGE], false]
-});
-var STAT_POOL = freezeWire({ goldFindX2: "goldFind" });
-var HUNTER_DAMAGE = freezeWire([0, 0, 0, 0, 1e3, 2e3]);
-var HUNTER_RARE = freezeWire([0, 0, 0, 0, 5e3, 1e4]);
-var BESTIARY_GROUPS = freezeWire([
-  { id: "woodland", name: "Woodland", set: "maxHpPct" },
-  { id: "grassland", name: "Grassland", set: "xpFind" },
-  { id: "desert", name: "Desert", set: "goldFind" },
-  { id: "frost", name: "Frost & Upland", set: "cdr" },
-  { id: "wetland", name: "Wetland", set: "potionHeal" },
-  { id: "volcanic", name: "Volcanic", set: "atkPct" },
-  { id: "ruins", name: "Ruins & Forts", set: "itemFind" },
-  { id: "wanderers", name: "Wanderers", set: "rareChance" },
-  { id: "roads", name: "Roads & Camps", set: "moveSpeedPct" }
-]);
-var BESTIARY_CARDS = freezeWire([
-  ["slime", "Green Slime", "woodland", "maxHpPct", "potionHeal"],
-  ["sprout", "Sprout", "woodland", "cdr", "xpFind"],
-  ["golem", "Stone Golem", "woodland", "defPct", "thorns"],
-  ["thorn_wyrm", "Thorn Wyrm", "woodland", "atkPct", "bleedDmg"],
-  ["tusk_boar", "Tusk Boar", "grassland", "maxHpPct", "goldFind"],
-  ["field_scarecrow", "Field Scarecrow", "grassland", "critChance", "nightDmg"],
-  ["barrow_wight", "Barrow Wight", "grassland", "intPct", "soulFind"],
-  ["sand_scarab", "Sand Scarab", "desert", "defPct", "pickupRange"],
-  ["dune_scorpion", "Dune Scorpion", "desert", "critDamage", "poisonDmg"],
-  ["tomb_mummy", "Tomb Mummy", "desert", "maxHpPct", "lifeKill"],
-  ["wyrmling", "Frost Wyrmling", "frost", "atkPct", "frostDmg"],
-  ["gilded_scuttler", "Gilded Scuttler", "frost", "critChance", "itemFind"],
-  ["mimic_shield", "Mimic Shield", "frost", "block", "counterDmg"],
-  ["swamp_basilisk", "Swamp Basilisk", "wetland", "maxHpPct", "statusResist"],
-  ["toxic_fly", "Toxic Fly", "wetland", "moveSpeedPct", "poisonDmg"],
-  ["marsh_ghost", "Marsh Ghost", "wetland", "parry", "potionCooldown"],
-  ["corroded_golem", "Corroded Golem", "wetland", "defPct", "soulFind"],
-  ["magma_elemental", "Magma Elemental", "volcanic", "atkPct", "fireDmg"],
-  ["lava_serpent", "Lava Serpent", "volcanic", "critDamage", "executeDmg"],
-  ["hell_bat", "Hell Bat", "volcanic", "attackSpeed", "lifeKill"],
-  ["slag_slime", "Slag Slime", "volcanic", "maxHpPct", "fireDmg"],
-  ["gargoyle", "Gargoyle Warden", "ruins", "strPct", "eliteDmg"],
-  ["rust_nibbler", "Rust Nibbler", "ruins", "critChance", "itemQuality"],
-  ["animated_armor", "Animated Armor", "ruins", "block", "counterDmg"],
-  ["cursed_blade", "Cursed Blade", "ruins", "critDamage", "bleedDmg"],
-  ["void_orb", "Void Orb", "wanderers", "atkPct", "rareDmg"],
-  ["void_crawler", "Void Crawler", "wanderers", "dexPct", "goldFind"],
-  ["void_spectre", "Void Spectre", "wanderers", "parry", "itemQuality"],
-  ["void_wraith", "Void Wraith", "wanderers", "critDamage", "lifeKill"],
-  ["rift_drifter", "Rift Drifter", "wanderers", "moveSpeedPct", "xpFind"],
-  ["clockwork_scarab", "Clockwork Scarab", "wanderers", "defPct", "shockDmg"],
-  ["star_weaver", "Star Weaver", "wanderers", "intPct", "lightningDmg"],
-  ["coin_elemental", "Coin Elemental", "wanderers", "maxHpPct", "goldFindX2"],
-  ["temporal_watcher", "Temporal Watcher", "wanderers", "cdr", "potionCooldown"],
-  ["clockwork_drone", "Clockwork Drone", "wanderers", "attackSpeed", "shockDmg"],
-  ["neon_spider", "Neon Spider", "wanderers", "critChance", "rareDmg"],
-  ["wireframe_orb", "Wireframe Orb", "wanderers", "maxHpPct", "cardFind"],
-  ["cyber_wraith", "Cyber Wraith", "wanderers", "critDamage", "eliteDmg"],
-  ["bandit_cutthroat", "Cutthroat", "roads", "dexPct", "executeDmg"],
-  ["bandit_archer", "Bandit Archer", "roads", "attackSpeed", "eliteDmg"],
-  ["bandit_brute", "Bandit Brute", "roads", "strPct", "lifeKill"],
-  ["bandit_captain", "Bandit Captain", "roads", "defPct", "itemFind"],
-  ["burrower", "Burrower", "roads", "parry", "pickupRange"]
-]);
-var CARD_BY_FAMILY = freezeWire(Object.fromEntries(BESTIARY_CARDS.map((c) => [c[0], { family: c[0], name: c[1], group: c[2], line1: c[3], line2: c[4] }])));
-var SET_STEP = [100, 200, 300, 400, 500, 600];
-var SET_LADDER = freezeWire({ cdr: [50, 100, 150, 200, 250, 300], rareChance: [200, 400, 600, 800, 1e3, 1200] });
-var setLadder = (stat) => SET_LADDER[stat] ?? SET_STEP;
-var BOSS_SET = freezeWire({ stats: ["atkPct", "defPct", "maxHpPct"], ladder: SET_STEP });
-var BESTIARY_CAPS = freezeWire({ potionCooldown: 5e3, statusResist: 5e3 });
-
-// src/shared/contracts/bestiary_album_v1.js
-var MYTHIC = TIER_CARDS.length - 1;
-var count = (v) => Number.isSafeInteger(v) && v > 0 ? v : 0;
-function emptyAlbum() {
-  return { version: BESTIARY_VERSION, cards: {}, tiers: {}, souls: 0, spare: {}, bosses: {}, bossTiers: {}, bossNames: {} };
-}
-function normalizeAlbum(raw) {
-  const a = emptyAlbum();
-  if (!raw || raw.version !== BESTIARY_VERSION) return a;
-  a.souls = count(raw.souls);
-  for (const [f3, n] of Object.entries(raw.cards ?? {})) if (CARD_BY_FAMILY[f3] && count(n)) {
-    a.cards[f3] = n;
-    const t = raw.tiers?.[f3];
-    a.tiers[f3] = Number.isInteger(t) && t >= 0 && t <= MYTHIC && n >= TIER_CARDS[t] ? t : 0;
-    if (count(raw.spare?.[f3])) a.spare[f3] = raw.spare[f3];
-  }
-  for (const [id, n] of Object.entries(raw.bosses ?? {})) if (/^[a-z0-9_:-]{1,80}$/.test(id) && count(n)) {
-    a.bosses[id] = n;
-    const t = raw.bossTiers?.[id];
-    a.bossTiers[id] = Number.isInteger(t) && t >= 0 && t <= MYTHIC && n >= BOSS_TIER_CARDS[t] ? t : 0;
-    const nm = raw.bossNames?.[id];
-    if (typeof nm === "string" && nm.length <= 60) a.bossNames[id] = nm;
-  }
-  return a;
-}
-var sorted = (v) => v === null || typeof v !== "object" ? JSON.stringify(v) : Array.isArray(v) ? "[" + v.map(sorted).join(",") + "]" : "{" + Object.keys(v).sort().map((k) => JSON.stringify(k) + ":" + sorted(v[k])).join(",") + "}";
-var albumText = (a) => sorted(normalizeAlbum(a));
-var albumIsNormal = (a) => sorted(a) === albumText(a);
-function setTier(album, groupId) {
-  let low = MYTHIC;
-  for (const c of BESTIARY_CARDS) if (c[2] === groupId) {
-    const t = album.tiers[c[0]];
-    if (!Number.isInteger(t)) return -1;
-    low = Math.min(low, t);
-  }
-  return low;
-}
-function bossSetTier(album, bossIds) {
-  if (!bossIds.length) return -1;
-  let low = MYTHIC;
-  for (const id of bossIds) {
-    const t = album.bossTiers[id];
-    if (!Number.isInteger(t)) return -1;
-    low = Math.min(low, t);
-  }
-  return low;
-}
-function albumBonuses(album, { bossIds = [] } = {}) {
-  const stats = {}, hunter = {}, sets = {};
-  const add = (k, v) => {
-    if (v) {
-      k = STAT_POOL[k] ?? k;
-      stats[k] = (stats[k] ?? 0) + v;
-    }
-  };
-  for (const [f3, t] of Object.entries(album.tiers)) {
-    const c = CARD_BY_FAMILY[f3];
-    if (!c) continue;
-    add(c.line1, BESTIARY_STATS[c.line1][1][t] ?? 0);
-    add(c.line2, BESTIARY_STATS[c.line2][1][t] ?? 0);
-    if (HUNTER_DAMAGE[t] || HUNTER_RARE[t]) hunter[f3] = { damage: HUNTER_DAMAGE[t], rare: HUNTER_RARE[t] };
-  }
-  for (const g of BESTIARY_GROUPS) {
-    const t = setTier(album, g.id);
-    sets[g.id] = t;
-    if (t >= 0) add(g.set, setLadder(g.set)[t]);
-  }
-  const bt = bossSetTier(album, bossIds);
-  sets.bosses = bt;
-  if (bt >= 0) for (const k of BOSS_SET.stats) add(k, BOSS_SET.ladder[bt]);
-  for (const [k, cap3] of Object.entries(BESTIARY_CAPS)) if (stats[k] > cap3) stats[k] = cap3;
-  return { stats, hunter, sets };
-}
-
-// src/shared/content/spore_outbreak_v5.js
-var SPORE_V5 = "spore-outbreak-v5-paced-pressure";
-var SPORE_V5_POLICY = Object.freeze({
-  version: SPORE_V5,
-  parent: "spore-outbreak-v4-continuous-pods",
-  simulationHz: 60,
-  firstPulseTicks: 240,
-  pulseTicks: 180,
-  recycleDelayTicks: 480,
-  living: 9,
-  pool: 12,
-  launchesPerPulse: 1,
-  backlog: 0,
-  damageRetaliation: "Shares the next available launch cadence; threshold hits never bank reinforcements.",
-  adoption: "Active V4 records retain health, landings, actors, rewards and launched spores; discard only unlaunched demand and restart the opening delay."
-});
-
-// src/shared/content/spore_outbreak_v4.js
-var SPORE_V4 = "spore-outbreak-v4-continuous-pods";
-var SPORE_V4_POLICY = Object.freeze({ version: SPORE_V4, parent: "spore-outbreak-v3-active-pressure", pool: 12, living: 9, recycleDelayTicks: 150, rewards: "First defeat of each admitted slot only; recycled reinforcements grant no additional hero XP, gear, gold or materials. Personal completion chest unchanged.", activation: "Deliberate interaction; four active events; nearby authority time only", completion: "Destroy all three pods and clear their surviving launched enemies" });
-
-// src/shared/contracts/spore_pacing_v5.js
-var isSporeV5 = (r) => r?.rulesVersion === SPORE_V5;
-var adoptingSporeV5 = (a, b) => a?.rulesVersion === SPORE_V4 && a.status === "active" && isSporeV5(b);
-
-// src/shared/contracts/spore_continuous_v4.js
-var isSporeV4 = (r) => [SPORE_V4, SPORE_V5].includes(r?.rulesVersion);
-function sporeGenerationV4(s, id) {
-  for (const r of Object.values(s.d9World?.worldEvents?.records ?? {})) {
-    if (!isSporeV4(r)) continue;
-    const n = s.groupsById[r.groupId]?.entityIds.indexOf(id) ?? -1;
-    if (n >= 0) return r.stages[n];
-  }
-  return null;
-}
-function rewardedSporeRecycledV4(s, id, defeatedTick) {
-  const t = sporeGenerationV4(s, id);
-  return Boolean(t && t.generation > 0 && t.firstRecycleTick > defeatedTick && t.firstRecycleTick <= s.tick);
-}
-function validateSporeGenerationV4(r, t) {
-  safeInteger(t.generation);
-  requireContract(t.generation <= Math.floor(r.elapsedTicks / SPORE_V4_POLICY.recycleDelayTicks), "Spore recycle frequency");
-  if (t.generation === 0) requireContract(t.firstRecycleTick === null, "Unexpected recycled receipt");
-  else safeInteger(t.firstRecycleTick, r.startedTick + 1);
-}
-function validateSporeGenerationProgressV4(a, b) {
-  if (!isSporeV4(b)) return false;
-  if (!isSporeV4(a)) return false;
-  for (let i = 0; i < a.stages.length; i++) {
-    const t = a.stages[i], n = b.stages[i];
-    requireContract(n.generation >= t.generation && (t.firstRecycleTick === null || t.firstRecycleTick === n.firstRecycleTick), "Spore generation regressed");
-    requireContract(n.generation - t.generation <= Math.floor((b.elapsedTicks - a.elapsedTicks + (t.phase === "defeated" ? a.elapsedTicks - t.at : 0) + 1) / (isSporeV5(a) ? SPORE_V5_POLICY.recycleDelayTicks : SPORE_V4_POLICY.recycleDelayTicks)), "Spore recycle skipped its cooldown");
-    if (n.generation > t.generation) requireContract(a.status === "active" && b.pods[i % 3] && n.firstRecycleTick !== null, "Spore recycle outside active event");
-  }
-  return true;
-}
-function sporeActorRenewedV5(a, b, id) {
-  for (const prior of Object.values(a.d9World?.worldEvents?.records ?? {})) {
-    if (!isSporeV4(prior) || prior.status !== "active") continue;
-    const next = b.d9World?.worldEvents?.records?.[prior.groupId], g = a.groupsById[prior.groupId], h = b.groupsById[prior.groupId], n = g?.entityIds.indexOf(id) ?? -1;
-    if (n < 0) continue;
-    if (!h || h.entityIds[n] !== id || !isSporeV4(next) || next.startedTick !== prior.startedTick) return false;
-    validateSporeGenerationProgressV4(prior, next);
-    return next.stages[n].generation > prior.stages[n].generation;
-  }
-  return false;
-}
-
-// src/shared/contracts/economy_amount.js
-function amount(value) {
-  requireContract(typeof value === "string" && value.length <= 512 && /^(0|[1-9][0-9]*)(\.[0-9]*[1-9])?$/.test(value), "Invalid economy amount");
-  return value;
-}
-var parts = (value) => {
-  const [whole, fraction = ""] = amount(value).split(".");
-  return [BigInt(whole + fraction), fraction.length];
-};
-function wire(n, scale2) {
-  requireContract(n >= 0n, "Insufficient economy amount");
-  let digits = n.toString().padStart(scale2 + 1, "0");
-  if (scale2) digits = digits.slice(0, -scale2) + "." + digits.slice(-scale2);
-  if (digits.includes(".")) digits = digits.replace(/0+$/, "").replace(/\.$/, "");
-  return amount(digits);
-}
-function aligned(a, b) {
-  const [x, s] = parts(a), [y, t] = parts(b), scale2 = Math.max(s, t);
-  return [x * 10n ** BigInt(scale2 - s), y * 10n ** BigInt(scale2 - t), scale2];
-}
-function addAmount(a, b) {
-  const [x, y, s] = aligned(a, b);
-  return wire(x + y, s);
-}
-function subtractAmount(a, b) {
-  const [x, y, s] = aligned(a, b);
-  return wire(x - y, s);
-}
-function compareAmount(a, b) {
-  const [x, y] = aligned(a, b);
-  return x < y ? -1 : x > y ? 1 : 0;
-}
-function multiplyAmount(a, b) {
-  const [x, s] = parts(a), [y, t] = parts(b);
-  return wire(x * y, s + t);
-}
-function powerAmount(a, n) {
-  safeInteger(n, 0, 100);
-  const [x, s] = parts(a);
-  return wire(x ** BigInt(n), s * n);
-}
-function wholeAmount(n) {
-  safeInteger(n);
-  return amount(String(n));
-}
-var rewardAmount = (value) => typeof value === "number" ? wholeAmount(value) : amount(value);
-
-// src/shared/contracts/bestiary_world_v1.js
-var BESTIARY_ROOT_V1 = "bestiary-world-v1";
-var GROUND = Object.freeze({ settleTicks: 30, pickupRadius: 34, lifetimeTicks: 18e3, maximum: 24, spread: 18 });
-var root = (s) => s.bestiary;
-var playerAlbumV1 = (s, playerId) => root(s)?.albumsByPlayerId[playerId] ?? null;
-var familyOf = (s, id) => ordinaryEnemyForProfile(s.entitiesById[id]?.contentDefinitionId)?.family;
-var episodeOf = (s, groupId) => s.encounterEconomy?.groups[groupId]?.episode;
-var BESTIARY_BONUS_V1 = "bestiary-bonus-v1";
-function bestiaryBonusV1(album) {
-  const b = albumBonuses(album, { bossIds: BOSS_PAGE_IDS });
-  return { version: BESTIARY_BONUS_V1, stats: b.stats, hunter: b.hunter };
-}
-var sortedText = (v) => v === null || typeof v !== "object" ? JSON.stringify(v) : "{" + Object.keys(v).sort().map((k) => JSON.stringify(k) + ":" + sortedText(v[k])).join(",") + "}";
-function validateBestiaryBonusV1(s, p, bonus) {
-  const album = playerAlbumV1(s, p.playerId);
-  if (!album) {
-    requireContract(bonus === void 0, "Bestiary bonus without an album");
-    return;
-  }
-  requireContract(bonus !== void 0 && sortedText(bonus) === sortedText(bestiaryBonusV1(album)), "Bestiary bonus drift");
-}
-function isRareV1(s, id) {
-  const x = root(s)?.raresByEntityId[id];
-  return Boolean(x && x.episode === episodeOf(s, x.groupId) && familyOf(s, id) === x.family);
-}
-function rareActorProfileV1(s, actor, profile2) {
-  if (!profile2 || !isRareV1(s, actor.entityId)) return profile2;
-  return { ...profile2, maxHp: combatInteger(multiplyCombat(profile2.maxHp, RARE_HEALTH_X100, 100), "round"), attackDamage: combatInteger(multiplyCombat(profile2.attackDamage, RARE_DAMAGE_X100, 100), "round") };
-}
-function validateBestiaryRootV1(s) {
-  const r = root(s);
-  if (r === void 0) return;
-  closedRecord(r, ["version", "albumsByPlayerId", "raresByEntityId", "groundByPlayerId"]);
-  requireContract(r.version === BESTIARY_ROOT_V1, "Unsupported Bestiary root");
-  for (const [pid, a] of Object.entries(r.albumsByPlayerId)) requireContract(s.playersById[pid] && albumIsNormal(a), "Invalid Bestiary album");
-  const ids = Object.keys(r.raresByEntityId);
-  requireContract(ids.length <= 4096, "Too many rares");
-  for (const id of ids) {
-    const x = r.raresByEntityId[id];
-    closedRecord(x, ["groupId", "episode", "family"]);
-    requireContract(typeof x.groupId === "string" && x.groupId.length <= 240 && CARD_BY_FAMILY[x.family], "Invalid rare");
-    safeInteger(x.episode, 0);
-  }
-  for (const [pid, ground] of Object.entries(r.groundByPlayerId)) {
-    requireContract(s.playersById[pid] && Object.keys(ground).length <= GROUND.maximum, "Invalid ground cards");
-    for (const [id, d] of Object.entries(ground)) {
-      requireContract(id.length <= 240, "Ground card id");
-      closedRecord(d, ["family", "count", "spaceInstanceId", "tick"], ["world", "position", "boss"]);
-      requireContract((d.boss === void 0 ? CARD_BY_FAMILY[d.family] : d.boss === true && BOSS_PAGE_NAMES[d.family]) && typeof d.spaceInstanceId === "string" && d.spaceInstanceId.length <= 240, "Ground card");
-      safeInteger(d.count, 1, 100);
-      safeInteger(d.tick, 0, s.tick);
-      requireContract(d.world === void 0 !== (d.position === void 0), "Ground card place");
-      if (d.world) validateWorldPosition(d.world);
-      else {
-        closedRecord(d.position, ["x", "y"]);
-        requireContract(Number.isFinite(d.position.x) && Number.isFinite(d.position.y), "Ground card position");
-      }
-    }
-  }
-}
-
-// src/shared/content/aegis_mimics_v2.js
-var AEGIS_MIMICS_VERSION = "aegis-mimics-v2";
-var AEGIS_MIMICS = Object.freeze({ count: 3, orbitRadius: 62, orbitSpeed: 0.012, detachNumerator: 1, detachDenominator: 2, landingTicks: 30, recallTicks: 120, enrageRecoveryTicks: 75, enrageMoveSpeed: 2, affixId: "swift_commander" });
-function aegisHealthBudget(total) {
-  const n = integerBigInt(total), body = n * 4n / 5n, pool = n - body, each = pool / 3n, remainder = Number(pool % 3n);
-  return { body: String(body), mimics: Array.from({ length: 3 }, (_, i) => String(each + (i < remainder ? 1n : 0n))) };
-}
-function aegisMimicFor(state, entityId2) {
-  for (const boss of Object.values(state.bossCombat?.bossesByEntityId ?? {})) {
-    const mimic = boss.mimicEncounter?.mimicsByEntityId?.[entityId2];
-    if (mimic) return { boss, mimic };
-  }
-  return null;
-}
-function aegisMimicOrbitPosition(bossPosition, tick, ordinal) {
-  const a = tick * AEGIS_MIMICS.orbitSpeed + ordinal * Math.PI * 2 / 3;
-  return { x: bossPosition.x + Math.cos(a) * 62, y: bossPosition.y + Math.sin(a) * 62 };
-}
-function aegisComponentProfile(state, actor, profile2) {
-  const boss = state.bossCombat?.bossesByEntityId?.[actor.entityId];
-  if (boss?.mimicEncounter) return { ...profile2, maxHp: aegisHealthBudget(boss.mimicEncounter.totalMaxHp).body };
-  const row = aegisMimicFor(state, actor.entityId);
-  return row ? { ...profile2, maxHp: row.mimic.maxHp } : profile2;
-}
-function createAegisMimicEncounter(totalMaxHp, members, tick) {
-  return { version: AEGIS_MIMICS_VERSION, totalMaxHp: copyWire(totalMaxHp), recallStartedTick: null, recallEndsTick: null, recallResolvedTick: null, towerMaxHp: "0", enragedTick: null, mimicsByEntityId: Object.fromEntries(members.map((m, ordinal) => [m.entityId, { entityId: m.entityId, ordinal, roomId: m.roomId, homePosition: copyWire(m.position), maxHp: m.maxHp, stage: "orbiting", stageStartedTick: tick, detachedTick: null, defeatedTick: null }])) };
-}
-function livingFusedMimics(state, boss) {
-  return Object.values(boss.mimicEncounter?.mimicsByEntityId ?? {}).filter((m) => m.stage === "fused" && state.entitiesById[m.entityId]?.alive).sort((a, b) => a.ordinal - b.ordinal);
-}
-
-// src/shared/contracts/hero_progression_d9.js
-var D9_HERO_VERSION = "player-progression-d9-v2";
-function d9LevelAtXp(totalXp) {
-  const xp = progressionBigInt(totalXp);
-  integerWire(xp);
-  return progressionWire(BigInt(heroLevelAtXpV2(xp)));
-}
-function d9ProgressionAtXp(totalXp) {
-  return freezeWire({ version: D9_HERO_VERSION, totalXp: progressionWire(progressionBigInt(totalXp)), level: d9LevelAtXp(totalXp) });
-}
-function validateD9Hero(p) {
-  closedRecord(p, ["version", "totalXp", "level"]);
-  requireContract(p.version === D9_HERO_VERSION, "Hero progression version");
-  positiveProgression(p.level);
-  requireContract(progressionBigInt(p.level) === progressionBigInt(d9LevelAtXp(p.totalXp)), "Hero XP/level disagreement");
-  return p;
-}
-function d9LevelStats(level) {
-  positiveProgression(level);
-  const n = progressionBigInt(level) - 1n;
-  return { maxHp: progressionWire(100n + 15n * n), attack: progressionWire(15n + 3n * n), defense: progressionWire(2n * n) };
-}
-function d9Entitlements(highest) {
-  positiveProgression(highest);
-  const n = progressionBigInt(highest) - 1n;
-  return { attributeEarned: progressionWire(3n * n), utilityEarned: progressionWire(n) };
-}
-
-// src/shared/contracts/participant_progression_d9.js
-var D9_PARTICIPANT_VERSION = "participant-progression-d9-v1";
-var isD9Progression = (s) => s?.version === D9_PARTICIPANT_VERSION;
-function migrateD9Participant(state) {
-  const n = copyWire(state);
-  n.version = D9_PARTICIPANT_VERSION;
-  n.highestHeroLevel = progressionWire(progressionBigInt(state.highestHeroLevel));
-  for (const k of ["str", "dex", "int"]) n.allocated[k] = progressionWire(progressionBigInt(state.allocated[k]));
-  return n;
-}
-function validateD9Entitlements(state, heroLevel) {
-  positiveProgression(state.highestHeroLevel);
-  requireContract(progressionBigInt(state.highestHeroLevel) >= progressionBigInt(heroLevel), "Hero high-water regressed");
-  const spent = Object.values(state.allocated).reduce((n, v) => n + progressionBigInt(v), 0n);
-  requireContract(spent <= progressionBigInt(d9Entitlements(state.highestHeroLevel).attributeEarned), "Overspent attributes");
-}
-function d9AttributeBalance(state) {
-  const earned = progressionBigInt(d9Entitlements(state.highestHeroLevel).attributeEarned), spent = Object.values(state.allocated).reduce((a, b) => a + progressionBigInt(b), 0n);
-  requireContract(spent <= earned, "Overspent attributes");
-  return { attributeEarned: progressionWire(earned), attributeUnspent: progressionWire(earned - spent) };
-}
-
-// src/shared/contracts/player_progression.js
-var PLAYER_PROGRESSION_VERSION = "player-progression-d3-v1";
-var D3_ACTIVITY_FORMAT = "saq-world-activity-d3-1";
-var MAX_PLAYER_LEVEL = 50;
-var xpAtLevel = (level) => {
-  safeInteger(level, 1, MAX_PLAYER_LEVEL);
-  return 25 * (level - 1) * (level + 2);
-};
-var MAX_PLAYER_XP = xpAtLevel(MAX_PLAYER_LEVEL);
-function levelAtXp(totalXp) {
-  safeInteger(totalXp, 0, MAX_PLAYER_XP);
-  let level = 1;
-  while (level < MAX_PLAYER_LEVEL && totalXp >= xpAtLevel(level + 1)) level++;
-  return level;
-}
-var progressionAtXp = (totalXp, participantProgression = null) => isD9Progression(participantProgression) ? d9ProgressionAtXp(totalXp) : freezeWire({ version: PLAYER_PROGRESSION_VERSION, totalXp, level: levelAtXp(totalXp) });
-function validatePlayerProgression(value) {
-  if (value?.version === D9_HERO_VERSION) return validateD9Hero(value);
-  closedRecord(value, ["version", "totalXp", "level"]);
-  requireContract(value.version === PLAYER_PROGRESSION_VERSION, "Unsupported player progression");
-  safeInteger(value.level, 1, MAX_PLAYER_LEVEL);
-  requireContract(value.level === levelAtXp(value.totalXp), "Level/XP disagreement");
-  return value;
-}
-
-// src/shared/contracts/encounter_composition_v1.js
-var generatedEliteId = (source8) => /^ent:[a-f0-9]{32}$/.test(source8.entityId) ? "elite:" + source8.entityId.slice(4) : "elite:" + Array.from({ length: 4 }, (_, i) => compositionHashV1(COMPOSITION_V1 + "/" + canonicalStringify(source8) + "/" + i).toString(16).padStart(8, "0")).join("");
-var floorFor = (s, g) => s.d9World?.functionalSitesById?.[g.siteId]?.floors?.find((f3) => f3.groupId === g.groupId);
-var familyOf2 = (s, id) => ordinaryEnemyForProfile(s.entitiesById[id]?.contentDefinitionId)?.family;
-function broodElitesV1(s, g, { includeDefeated = false } = {}) {
-  const ids = g.entityIds.filter((id) => familyOf2(s, id) === "broodling" && (includeDefeated || s.entitiesById[id].alive));
-  if (!ids.length) return [];
-  const primary = NEST_POLICY.broodAffixes[nestSkinOfV1(nestBiomeV1(s, g.groupId))];
-  return ids.map((id) => ({ id, n: g.entityIds.indexOf(id), primary }));
-}
-function compositionCandidatesV1(s, g, level, { includeDefeated = false } = {}) {
-  const f3 = floorFor(s, g), champion = huntChampionIdV1(s, g), chance = compositionBandV1(level).chancePercent, key9 = COMPOSITION_V1 + "/" + s.campaign.seed.seedHex + "/" + g.groupId + "/" + String(s.encounterEconomy.groups[g.groupId].episode) + "/" + String(level);
-  const candidates = g.entityIds.flatMap((id, n) => {
-    const a = s.entitiesById[id], spec = f3?.encounter.members[n];
-    if (!a || !includeDefeated && !a.alive || a.boss || s.content?.definitionsById[a.contentDefinitionId]?.isBoss || s.bossCombat?.bossesByEntityId?.[id] || String(spec?.memberKey).startsWith("finale:") || !ordinaryEnemyForProfile(a.contentDefinitionId) || BROOD_CREATURE_FAMILIES_V1.includes(familyOf2(s, id)) || id === champion) return [];
-    return [{ id, n, roll: compositionHashV1(key9 + "/" + id), primary: COMPOSITION_POLICY_V1.primaryAffixes[compositionHashV1(key9 + "/" + id + "/primary") % COMPOSITION_POLICY_V1.primaryAffixes.length] }];
-  }).sort((a, b) => a.roll - b.roll || a.id.localeCompare(b.id));
-  const rolled = candidates.filter((c) => c.roll % 100 < chance);
-  return rolled.length ? rolled : progressionBigInt(level) >= 15n && candidates.length >= 6 ? candidates.slice(0, 1) : [];
-}
-function validateCompositionEliteV1(s, e) {
-  requireContract(e.version === COMPOSITION_ELITE_V1, "Composition elite version");
-  closedRecord(e.composition, ["version", "level", "inherited"]);
-  requireContract(e.composition.version === COMPOSITION_V1 && typeof e.composition.inherited === "boolean", "Composition provenance");
-  const g = s.groupsById[e.groupId], level = g?.threatSnapshot?.levelsByEntityId[e.entityId];
-  requireContract(level !== void 0 && canonicalStringify(level) === canonicalStringify(e.composition.level), "Composition locked level");
-  requireContract(canonicalStringify(e.affixIds.slice(1)) === canonicalStringify(passiveEliteTraitsV1(e.identitySource, level)), "Composition passive roll changed");
-  if (!e.composition.inherited) {
-    requireContract(e.eliteId === generatedEliteId(e.identitySource), "Generated elite identity changed");
-    const row = [...broodElitesV1(s, g, { includeDefeated: true }), ...huntChampionElitesV1(s, g, { includeDefeated: true }), ...compositionCandidatesV1(s, g, level, { includeDefeated: true })].find((c) => c.id === e.entityId);
-    requireContract(row && row.primary === e.affixIds[0], "Composition candidate roll changed");
-  }
-}
-
-// src/shared/contracts/named_elite_tricks_v1.js
-var CHARGE_PHASES = ["ready", "windup", "charging", "recover"];
-var point = (p) => {
-  closedRecord(p, ["x", "y"]);
-  requireContract(Number.isFinite(p.x) && Number.isFinite(p.y), "Invalid named trick point");
-  return p;
-};
-function validateNamedTrickV1(state, e) {
-  const k = e.namedTrick, t = NAMED_ELITE_TRICKS_V1[e.namedEliteId];
-  requireContract(t && k?.kind === t.kind, "Invalid named trick");
-  if (t.kind === "shell") {
-    closedRecord(k, ["kind", "crackedTick"]);
-    if (k.crackedTick !== null) safeInteger(k.crackedTick, 0, state.tick);
-    return;
-  }
-  closedRecord(k, ["kind", "phase", "phaseEndsTick", "sequence", "origin", "direction", "hitEntityIds", "knockbacksByEntityId"]);
-  requireContract(CHARGE_PHASES.includes(k.phase), "Invalid named charge phase");
-  safeInteger(k.sequence, 0);
-  safeInteger(k.phaseEndsTick, 0, state.tick + (k.phase === "windup" ? t.windupTicks : k.phase === "charging" ? t.chargeTicks : k.phase === "recover" ? t.recoverTicks : Math.max(t.cooldownTicks, t.firstDelayTicks)));
-  if (k.phase === "ready") requireContract(k.origin === null && k.direction === null && k.hitEntityIds.length === 0, "Invalid resting named charge");
-  else {
-    point(k.origin);
-    point(k.direction);
-    requireContract(Math.abs(Math.hypot(k.direction.x, k.direction.y) - 1) < 1e-9, "Invalid named charge direction");
-  }
-  requireContract(Array.isArray(k.hitEntityIds) && k.hitEntityIds.every((id, i) => typeof id === "string" && k.hitEntityIds.indexOf(id) === i), "Invalid named charge hits");
-  for (const [id, b] of Object.entries(k.knockbacksByEntityId)) {
-    closedRecord(b, ["velocity", "expiresTick", "residencyRevision"]);
-    point(b.velocity);
-    requireContract(Math.hypot(b.velocity.x, b.velocity.y) <= t.knockback + 1e-9, "Invalid named charge knockback");
-    safeInteger(b.expiresTick, 0, state.tick + t.knockbackTicks);
-    safeInteger(b.residencyRevision, 0);
-  }
-}
-
-// src/shared/content/elite_types_v2.js
-var ELITE_MOVE_KINDS_V2 = Object.freeze(["lane", "ring", "leap", "cone"]);
-var ELITE_MOVE_PHASES_V2 = Object.freeze(["ready", "windup", "strike", "recover"]);
-var ELITE_TYPES_V2 = Object.freeze({
-  swift_commander: Object.freeze({
-    id: "swift_commander",
-    name: "Swift Commander",
-    look: "gale",
-    // A touch faster on its own feet, on top of its pack's haste.
-    speedPercent: 115,
-    move: Object.freeze({ kind: "lane", name: "Rally Charge", firstDelayTicks: 60, minRange: 40, maxRange: 150, windupTicks: 54, strikeTicks: 18, speed: 8, width: 24, contactRadius: 22, damageTenths: 14, knockback: 9, knockbackTicks: 12, recoverTicks: 36, cooldownTicks: 210 })
-  }),
-  iron_citadel: Object.freeze({
-    id: "iron_citadel",
-    name: "Iron Citadel",
-    look: "bastion",
-    speedPercent: 100,
-    move: Object.freeze({ kind: "ring", name: "Bulwark Slam", firstDelayTicks: 60, minRange: 0, maxRange: 58, windupTicks: 60, strikeTicks: 6, radius: 54, damageTenths: 15, knockback: 10, knockbackTicks: 12, recoverTicks: 40, cooldownTicks: 240 })
-  }),
-  blood_berserker: Object.freeze({
-    id: "blood_berserker",
-    name: "Berserker",
-    look: "bloodrage",
-    speedPercent: 100,
-    move: Object.freeze({ kind: "leap", name: "Blood Leap", firstDelayTicks: 60, minRange: 56, maxRange: 150, windupTicks: 60, strikeTicks: 20, radius: 26, landShort: 18, damageTenths: 16, knockback: 7, knockbackTicks: 10, recoverTicks: 40, cooldownTicks: 240 })
-  }),
-  glacial_warden: Object.freeze({
-    id: "glacial_warden",
-    name: "Glacial Warden",
-    look: "frost",
-    speedPercent: 100,
-    move: Object.freeze({ kind: "cone", name: "Frost Breath", firstDelayTicks: 60, minRange: 0, maxRange: 88, windupTicks: 54, strikeTicks: 30, length: 96, halfAngle: 0.4, damageTenths: 10, recoverTicks: 30, cooldownTicks: 210 })
-  })
-});
-var eliteTypeV2For = (e, family2) => !e || e.namedEliteId || BROOD_CREATURE_FAMILIES_V1.includes(family2) ? null : ELITE_TYPES_V2[e.affixIds?.[0]] ?? null;
-var eliteMovePhaseCapV2 = (m, phase) => phase === "windup" ? m.windupTicks : phase === "strike" ? m.strikeTicks : phase === "recover" ? m.recoverTicks : Math.max(m.cooldownTicks, m.firstDelayTicks);
-
-// src/shared/contracts/elite_moves_v2.js
-var point2 = (p) => {
-  closedRecord(p, ["x", "y"]);
-  requireContract(Number.isFinite(p.x) && Number.isFinite(p.y), "Invalid elite move point");
-  return p;
-};
-function validateEliteMoveV2(state, e) {
-  const k = e.move, t = eliteTypeV2For(e, ordinaryEnemyForProfile(state.entitiesById[e.entityId]?.contentDefinitionId)?.family), m = t?.move;
-  requireContract(m && k?.kind === m.kind, "Invalid elite move");
-  closedRecord(k, ["kind", "phase", "phaseEndsTick", "sequence", "origin", "direction", "target", "hitEntityIds", "knockbacksByEntityId"]);
-  requireContract(ELITE_MOVE_PHASES_V2.includes(k.phase), "Invalid elite move phase");
-  safeInteger(k.sequence, 0);
-  safeInteger(k.phaseEndsTick, 0, state.tick + eliteMovePhaseCapV2(m, k.phase));
-  if (k.phase === "ready") requireContract(k.origin === null && k.direction === null && k.target === null && k.hitEntityIds.length === 0, "Invalid resting elite move");
-  else {
-    point2(k.origin);
-    point2(k.direction);
-    requireContract(Math.abs(Math.hypot(k.direction.x, k.direction.y) - 1) < 1e-9, "Invalid elite move direction");
-    if (m.kind === "leap") point2(k.target);
-    else requireContract(k.target === null, "Invalid elite move target");
-  }
-  requireContract(Array.isArray(k.hitEntityIds) && k.hitEntityIds.every((id, i) => typeof id === "string" && k.hitEntityIds.indexOf(id) === i), "Invalid elite move hits");
-  for (const b of Object.values(k.knockbacksByEntityId)) {
-    closedRecord(b, ["velocity", "expiresTick", "residencyRevision"]);
-    point2(b.velocity);
-    requireContract(Math.hypot(b.velocity.x, b.velocity.y) <= (m.knockback ?? 0) + 1e-9, "Invalid elite move knockback");
-    safeInteger(b.expiresTick, 0, state.tick + (m.knockbackTicks ?? 0));
-    safeInteger(b.residencyRevision, 0);
-  }
-}
-
-// src/shared/contracts/elite_combat_d12_4.js
-var ELITE_COMBAT_D12_4_VERSION = "elite-combat-d12.4-v1";
-var ELITE_RECORD_D12_4_VERSION = "elite-record-d12.4-v1";
-var ELITE_HASTE_D12_4D_VERSION = "elite-haste-d12.4d-v1";
-var TIMED_ACTOR_STATUS_D12_4E_VERSION = "timed-actor-status-d12.4e-v1";
-var TIMED_PLAYER_POISON_D12_4F_VERSION = "timed-player-poison-d12.4f-v1";
-var ELITE_GUARD_D12_4G_VERSION = "elite-guard-d12.4g-v1";
-var ELITE_ATTACK_AURA_D12_4H_A_VERSION = "elite-attack-aura-d12.4h-a-v1";
-var TIMED_NULLIFIED_D12_4I_VERSION = "timed-nullified-d12.4i-v1";
-var NULLIFICATION_RESISTANCE_D12_4I_VERSION = "nullification-resistance-d12.4i-v1";
-var PENDING_HOSTILE_HAZARD_D12_4J_VERSION = "pending-hostile-hazard-d12.4j-v1";
-var HOSTILE_FLOOR_HAZARD_D12_4J_VERSION = "hostile-floor-hazard-d12.4j-v1";
-var WEBBED_STATUS_D12_4J_VERSION = "webbed-status-d12.4j-v1";
-var SLAG_BURN_STATUS_D12_4K_VERSION = "slag-burn-status-d12.4k-v1";
-function hostileHazardIdD12_4J(eliteId, sequence) {
-  requireContract(/^elite:[a-f0-9]{32}$/.test(eliteId) && Number.isSafeInteger(sequence) && sequence >= 1, "Invalid hostile hazard identity source");
-  return `hazard:${eliteId.slice(6, 30)}${sequence.toString(16).padStart(8, "0")}`;
-}
-async function createElite({ campaignSeed, siteId: siteId2, floorId, groupId, roomId, entityId: entityId2, activatedTick, affixId }, { sha256 }) {
-  const definition = eliteAffixDefinitionD12_4(affixId);
-  requireContract(definition, "Unknown elite affix");
-  const source8 = { campaignSeed, siteId: siteId2, floorId, groupId, roomId, entityId: entityId2, affixId };
-  const eliteId = "elite:" + bytesToHex((await hashBytes(frameUtf8([ELITE_RECORD_D12_4_VERSION, ...Object.values(source8)]), sha256)).slice(0, 16));
-  return freezeWire({ version: ELITE_RECORD_D12_4_VERSION, eliteId, entityId: entityId2, groupId, siteId: siteId2, floorId, roomId, tier: "elite", affixIds: [affixId], identitySource: source8, activatedTick, nextPulseTick: affixId === TOXIC_DECAY_AFFIX_ID ? activatedTick : activatedTick + definition.pulse.cadenceTicks, pulseSequence: 0, lastPulse: null });
-}
-function createVitalityWeaverEliteD12_4(source8, capabilities) {
-  return createElite({ ...source8, affixId: VITALITY_WEAVER_AFFIX_ID }, capabilities);
-}
-function createSwiftCommanderEliteD12_4D(source8, capabilities) {
-  return createElite({ ...source8, affixId: SWIFT_COMMANDER_AFFIX_ID }, capabilities);
-}
-function createGlacialWardenEliteD12_4E(source8, capabilities) {
-  return createElite({ ...source8, affixId: GLACIAL_WARDEN_AFFIX_ID }, capabilities);
-}
-function createToxicDecayEliteD12_4F(source8, capabilities) {
-  return createElite({ ...source8, affixId: TOXIC_DECAY_AFFIX_ID }, capabilities);
-}
-function createIronCitadelEliteD12_4G(source8, capabilities) {
-  return createElite({ ...source8, affixId: IRON_CITADEL_AFFIX_ID }, capabilities);
-}
-function createBloodBerserkerEliteD12_4H_A(source8, capabilities) {
-  return createElite({ ...source8, affixId: BLOOD_BERSERKER_AFFIX_ID }, capabilities);
-}
-function createNullifierEliteD12_4I(source8, capabilities) {
-  return createElite({ ...source8, affixId: NULLIFIER_AFFIX_ID }, capabilities);
-}
-function createWebWeaverEliteD12_4J(source8, capabilities) {
-  return createElite({ ...source8, affixId: WEB_WEAVER_AFFIX_ID }, capabilities);
-}
-function createSlagShaperEliteD12_4K(source8, capabilities) {
-  return createElite({ ...source8, affixId: SLAG_SHAPER_AFFIX_ID }, capabilities);
-}
-function createEliteForAffixD13D_B(source8, affixId, capabilities) {
-  return createElite({ ...source8, affixId }, capabilities);
-}
-async function createNamedEliteV1(source8, namedEliteId, capabilities) {
-  const named2 = NAMED_ELITES_V1[namedEliteId];
-  requireContract(named2, "Unknown named elite");
-  return freezeWire({ ...await createEliteForAffixD13D_B(source8, named2.affixId, capabilities), namedEliteId });
-}
-function eliteActorProfileD12_4(state, actor, profile2) {
-  return applyEliteActorStatsD12_4(profile2, state.eliteCombat?.elitesByEntityId?.[actor.entityId] ?? null);
-}
-function validatePulseRecord(state, e, definition, group) {
-  if (e.lastPulse === null) return;
-  closedRecord(e.lastPulse, ["tick", "sequence", "recipients"]);
-  safeInteger(e.lastPulse.tick, e.activatedTick, state.tick);
-  safeInteger(e.lastPulse.sequence, 1, e.pulseSequence);
-  const seen = /* @__PURE__ */ new Set();
-  if (e.affixIds[0] === VITALITY_WEAVER_AFFIX_ID) {
-    requireContract(e.lastPulse.recipients.length >= 1 && e.lastPulse.recipients.length <= definition.pulse.maximumTargets, "Invalid elite pulse recipients");
-    for (const row of e.lastPulse.recipients) {
-      closedRecord(row, ["entityId", "amount"]);
-      requireContract(group.entityIds.includes(row.entityId) && row.entityId !== e.entityId && !seen.has(row.entityId), "Invalid elite heal target");
-      seen.add(row.entityId);
-      validateInteger(row.amount);
-    }
-  } else if (e.affixIds[0] === SWIFT_COMMANDER_AFFIX_ID) {
-    requireContract(e.lastPulse.recipients.length <= Object.keys(state.entitiesById).length, "Invalid Commander pulse recipients");
-    for (const row of e.lastPulse.recipients) {
-      closedRecord(row, ["entityId", "previousStacks", "stacks"]);
-      const actor = state.entitiesById[row.entityId];
-      requireContract(actor?.team === "hostile" && actor.residency.spaceInstanceId === state.entitiesById[e.entityId].residency.spaceInstanceId && row.entityId !== e.entityId && !seen.has(row.entityId), "Invalid Commander haste target");
-      seen.add(row.entityId);
-      safeInteger(row.previousStacks, 0, definition.pulse.maxStacks);
-      safeInteger(row.stacks, row.previousStacks, definition.pulse.maxStacks);
-    }
-  } else if (e.affixIds[0] === IRON_CITADEL_AFFIX_ID) {
-    requireContract(e.lastPulse.recipients.length <= Object.keys(state.entitiesById).length, "Invalid Iron Citadel pulse recipients");
-    for (const row of e.lastPulse.recipients) {
-      closedRecord(row, ["entityId", "previousStacks", "stacks"]);
-      const actor = state.entitiesById[row.entityId];
-      requireContract(actor?.team === "hostile" && row.entityId !== e.entityId && !seen.has(row.entityId), "Invalid Iron Citadel Guard target");
-      seen.add(row.entityId);
-      safeInteger(row.previousStacks, 0, definition.pulse.maxStacks);
-      safeInteger(row.stacks, row.previousStacks, definition.pulse.maxStacks);
-    }
-  } else if (e.affixIds[0] === BLOOD_BERSERKER_AFFIX_ID) {
-    requireContract(e.lastPulse.recipients.length <= Object.keys(state.entitiesById).length, "Invalid Berserker pulse recipients");
-    for (const row of e.lastPulse.recipients) {
-      closedRecord(row, ["entityId", "previousStacks", "stacks"]);
-      const actor = state.entitiesById[row.entityId];
-      requireContract(actor?.team === "hostile" && group.entityIds.includes(row.entityId) && row.entityId !== e.entityId && !seen.has(row.entityId), "Invalid Berserker attack target");
-      seen.add(row.entityId);
-      safeInteger(row.previousStacks, 0, definition.pulse.maxStacks);
-      safeInteger(row.stacks, row.previousStacks, definition.pulse.maxStacks);
-    }
-  } else if (e.affixIds[0] === GLACIAL_WARDEN_AFFIX_ID) {
-    requireContract(e.affixIds[0] === GLACIAL_WARDEN_AFFIX_ID && e.lastPulse.recipients.length <= Object.keys(state.playersById).length, "Invalid Glacial Warden pulse recipients");
-    for (const row of e.lastPulse.recipients) {
-      closedRecord(row, ["entityId", "statusId", "expiresTick", "movementMultiplier"]);
-      const actor = state.entitiesById[row.entityId];
-      requireContract(actor?.team === "party" && actor.residency.spaceInstanceId === state.entitiesById[e.entityId].residency.spaceInstanceId && !seen.has(row.entityId), "Invalid Glacial Warden snare target");
-      seen.add(row.entityId);
-      requireContract(row.statusId === definition.pulse.statusId && row.expiresTick === e.lastPulse.tick + definition.pulse.durationTicks && row.movementMultiplier === definition.pulse.movementMultiplier.numerator / definition.pulse.movementMultiplier.denominator, "Invalid Glacial Warden snare pulse");
-    }
-  } else if (e.affixIds[0] === NULLIFIER_AFFIX_ID) {
-    requireContract(e.lastPulse.recipients.length <= Object.keys(state.playersById).length, "Invalid Nullifier pulse recipients");
-    for (const row of e.lastPulse.recipients) {
-      closedRecord(row, ["entityId", "statusId", "expiresTick", "resistanceUntil"]);
-      const actor = state.entitiesById[row.entityId];
-      requireContract(actor?.team === "party" && Object.values(state.playersById).some((player) => player.entityId === row.entityId) && !seen.has(row.entityId), "Invalid Nullifier target");
-      seen.add(row.entityId);
-      requireContract(row.statusId === definition.pulse.statusId && row.expiresTick === e.lastPulse.tick + definition.pulse.durationTicks && row.resistanceUntil === row.expiresTick + definition.pulse.resistanceTicks, "Invalid Nullifier pulse");
-    }
-  } else if (e.affixIds[0] === WEB_WEAVER_AFFIX_ID) {
-    requireContract(e.lastPulse.recipients.length <= 1, "Invalid Web Weaver cast recipients");
-    for (const row of e.lastPulse.recipients) {
-      closedRecord(row, ["entityId", "hazardId", "resolvesTick", "position"]);
-      const actor = state.entitiesById[row.entityId];
-      requireContract(actor?.team === "party" && Object.values(state.playersById).some((player) => player.entityId === row.entityId) && !seen.has(row.entityId), "Invalid Web Weaver target");
-      seen.add(row.entityId);
-      requireContract(row.hazardId === hostileHazardIdD12_4J(e.eliteId, e.lastPulse.sequence) && row.resolvesTick === e.lastPulse.tick + definition.pulse.windupTicks && Number.isFinite(row.position?.x) && Number.isFinite(row.position?.y), "Invalid Web Weaver cast");
-    }
-  } else if (e.affixIds[0] === SLAG_SHAPER_AFFIX_ID) {
-    requireContract(e.lastPulse.recipients.length <= 1, "Invalid Slag Shaper formation recipients");
-    for (const row of e.lastPulse.recipients) {
-      closedRecord(row, ["hazardId", "resolvesTick", "position"]);
-      requireContract(row.hazardId === hostileHazardIdD12_4J(e.eliteId, e.lastPulse.sequence) && row.resolvesTick === e.lastPulse.tick + definition.pulse.windupTicks && Number.isFinite(row.position?.x) && Number.isFinite(row.position?.y), "Invalid Slag Shaper formation");
-    }
-  } else {
-    requireContract(e.affixIds[0] === TOXIC_DECAY_AFFIX_ID && e.lastPulse.recipients.length === 1, "Invalid Toxic Decay application recipients");
-    const row = e.lastPulse.recipients[0], actor = state.entitiesById[row.entityId];
-    closedRecord(row, ["entityId", "statusId", "previousStacks", "stacks", "stackAdded", "expiresTick", "nextTickAt"]);
-    requireContract(actor?.team === "party" && Object.values(state.playersById).some((player) => player.entityId === row.entityId), "Invalid Toxic Decay target");
-    safeInteger(row.previousStacks, 0, definition.pulse.maxStacks);
-    safeInteger(row.stacks, row.previousStacks, definition.pulse.maxStacks);
-    requireContract(typeof row.stackAdded === "boolean" && row.stackAdded === row.stacks > row.previousStacks && row.statusId === definition.pulse.statusId && row.expiresTick === e.lastPulse.tick + definition.pulse.durationTicks && row.nextTickAt > e.lastPulse.tick, "Invalid Toxic Decay application");
-  }
-}
-function validateEliteCombatD12_4(state) {
-  const root2 = state.eliteCombat;
-  if (root2 === void 0) return;
-  closedRecord(root2, ["version", "elitesByEntityId"], ["hasteByEntityId", "timedStatusesByEntityId", "guardByEntityId", "attackAuraByEntityId", "nullificationResistanceByEntityId", "pendingHazardsBySourceEliteId", "hazardsById", "webbedByEntityId", "slagBurnByEntityId"]);
-  requireContract(root2.version === ELITE_COMBAT_D12_4_VERSION, "Unsupported elite combat state");
-  for (const [entityId2, e] of Object.entries(root2.elitesByEntityId)) {
-    closedRecord(e, ["version", "eliteId", "entityId", "groupId", "siteId", "floorId", "roomId", "tier", "affixIds", "identitySource", "activatedTick", "nextPulseTick", "pulseSequence", "lastPulse"], ["composition", "namedEliteId", "namedTrick", "move"]);
-    if (e.namedEliteId !== void 0) requireContract(Object.hasOwn(NAMED_ELITES_V1, e.namedEliteId) && NAMED_ELITES_V1[e.namedEliteId].affixId === e.affixIds[0], "Unknown named elite");
-    if (e.namedTrick !== void 0) validateNamedTrickV1(state, e);
-    if (e.move !== void 0) validateEliteMoveV2(state, e);
-    requireContract([ELITE_RECORD_D12_4_VERSION, COMPOSITION_ELITE_V1].includes(e.version) && /^elite:[a-f0-9]{32}$/.test(e.eliteId) && entityId2 === e.entityId && e.tier === "elite", "Invalid elite identity");
-    if (e.version === COMPOSITION_ELITE_V1) validateCompositionEliteV1(state, e);
-    else requireContract(e.composition === void 0 && e.affixIds.length === 1, "Unsupported elite affix loadout");
-    const affixId = e.affixIds[0], definition = eliteAffixDefinitionD12_4(affixId);
-    requireContract(definition, "Unsupported elite affix loadout");
-    const actor = state.entitiesById[entityId2], group = state.groupsById[e.groupId], site = state.d9World?.functionalSitesById?.[e.siteId], floor = site?.floors?.find((row) => row.floorId === e.floorId), index = floor?.enemyIds?.indexOf(entityId2) ?? -1;
-    const originPack = e.version === COMPOSITION_ELITE_V1 && e.floorId === null && e.roomId === "overworld-pack" && state.d9World?.episodes[e.groupId]?.origin === true && !site?.floors?.some((row) => row.groupId === e.groupId);
-    requireContract(actor?.team === "hostile" && group?.entityIds.includes(entityId2) && group.siteId === e.siteId && (originPack || (e.version === COMPOSITION_ELITE_V1 && e.siteId === null ? e.floorId === null && e.roomId === "overworld-pack" && state.d9World.runtime.groups.some((d) => d.groupId === group.groupId && d.members.some((m) => m.entityId === entityId2)) : floor?.groupId === e.groupId && index >= 0 && floor.encounter.members[index]?.roomId === e.roomId)), "Elite ownership drift");
-    closedRecord(e.identitySource, ["campaignSeed", "siteId", "floorId", "groupId", "roomId", "entityId", "affixId"]);
-    requireContract(e.identitySource.campaignSeed === state.campaign.seed.seedHex && e.identitySource.siteId === e.siteId && e.identitySource.floorId === e.floorId && e.identitySource.groupId === e.groupId && e.identitySource.roomId === e.roomId && e.identitySource.entityId === e.entityId && e.identitySource.affixId === affixId, "Elite identity source drift");
-    safeInteger(e.activatedTick, 0, state.tick);
-    safeInteger(e.pulseSequence, 0);
-    safeInteger(e.nextPulseTick, e.activatedTick + (affixId === TOXIC_DECAY_AFFIX_ID ? 0 : definition.pulse.cadenceTicks));
-    if (affixId === TOXIC_DECAY_AFFIX_ID) {
-      requireContract(e.pulseSequence === 0 ? e.nextPulseTick === e.activatedTick : e.lastPulse?.sequence === e.pulseSequence && e.nextPulseTick === e.lastPulse.tick + definition.pulse.cadenceTicks, "Toxic Decay cooldown schedule drift");
-    } else requireContract(e.nextPulseTick === e.activatedTick + (e.pulseSequence + 1) * definition.pulse.cadenceTicks, "Elite pulse schedule drift");
-    validatePulseRecord(state, e, definition, group);
-  }
-  for (const [entityId2, h] of Object.entries(root2.hasteByEntityId ?? {})) {
-    closedRecord(h, ["version", "entityId", "stacks", "sourceEliteIds", "lastRefreshTick", "lingerExpiresTick", "nextDecayTick", "lastStackTick", "lastDecayTick"]);
-    requireContract(h.version === ELITE_HASTE_D12_4D_VERSION && h.entityId === entityId2, "Invalid haste identity");
-    const actor = state.entitiesById[entityId2];
-    requireContract(actor?.team === "hostile", "Invalid haste recipient");
-    safeInteger(h.stacks, 0, SWIFT_COMMANDER_D12_4D.pulse.maxStacks);
-    requireContract(Array.isArray(h.sourceEliteIds) && h.sourceEliteIds.length <= Object.keys(root2.elitesByEntityId).length && h.sourceEliteIds.every((id, index) => typeof id === "string" && (index === 0 || h.sourceEliteIds[index - 1] < id)), "Invalid haste sources");
-    for (const eliteId of h.sourceEliteIds) {
-      const e = Object.values(root2.elitesByEntityId).find((row) => row.eliteId === eliteId), source8 = state.entitiesById[e?.entityId];
-      requireContract(e?.affixIds[0] === SWIFT_COMMANDER_AFFIX_ID && source8?.alive && actor.alive && source8.residency.spaceInstanceId === actor.residency.spaceInstanceId && Math.hypot(source8.position.x - actor.position.x, source8.position.y - actor.position.y) <= SWIFT_COMMANDER_D12_4D.pulse.radius, "Invalid active haste source");
-    }
-    safeInteger(h.lastRefreshTick, 0, state.tick);
-    safeInteger(h.lingerExpiresTick, h.lastRefreshTick, state.tick + SWIFT_COMMANDER_D12_4D.pulse.lingerTicks);
-    requireContract(h.lingerExpiresTick === h.lastRefreshTick + SWIFT_COMMANDER_D12_4D.pulse.lingerTicks, "Haste linger schedule drift");
-    if (h.nextDecayTick !== null) safeInteger(h.nextDecayTick, 0, state.tick + SWIFT_COMMANDER_D12_4D.pulse.lingerTicks);
-    if (h.sourceEliteIds.length) requireContract(h.nextDecayTick === h.lingerExpiresTick, "Active haste source lost linger boundary");
-    else if (h.stacks > 0) requireContract(h.nextDecayTick === (h.lastDecayTick === null ? h.lingerExpiresTick : h.lastDecayTick + SWIFT_COMMANDER_D12_4D.pulse.decayTicks), "Haste decay schedule drift");
-    else requireContract(h.nextDecayTick === null, "Zero-stack haste cannot decay");
-    for (const key9 of ["lastStackTick", "lastDecayTick"]) if (h[key9] !== null) safeInteger(h[key9], 0, state.tick);
-  }
-  for (const [entityId2, g] of Object.entries(root2.guardByEntityId ?? {})) {
-    closedRecord(g, ["version", "entityId", "spaceInstanceId", "stacks", "sourceEliteIds", "lastRefreshTick", "lingerExpiresTick", "nextDecayTick", "lastStackTick", "lastDecayTick", "lastImpact"]);
-    requireContract(g.version === ELITE_GUARD_D12_4G_VERSION && g.entityId === entityId2, "Invalid Guard identity");
-    const actor = state.entitiesById[entityId2];
-    requireContract(actor?.team === "hostile" && actor.alive && actor.residency.spaceInstanceId === g.spaceInstanceId, "Invalid Guard recipient");
-    safeInteger(g.stacks, 0, IRON_CITADEL_D12_4G.pulse.maxStacks);
-    requireContract(Array.isArray(g.sourceEliteIds) && g.sourceEliteIds.length <= Object.keys(root2.elitesByEntityId).length && g.sourceEliteIds.every((id, index) => typeof id === "string" && (index === 0 || g.sourceEliteIds[index - 1] < id)), "Invalid Guard sources");
-    for (const eliteId of g.sourceEliteIds) {
-      const e = Object.values(root2.elitesByEntityId).find((row) => row.eliteId === eliteId), source8 = state.entitiesById[e?.entityId];
-      requireContract(e?.affixIds[0] === IRON_CITADEL_AFFIX_ID && source8?.alive && source8.residency.spaceInstanceId === actor.residency.spaceInstanceId && Math.hypot(source8.position.x - actor.position.x, source8.position.y - actor.position.y) <= IRON_CITADEL_D12_4G.pulse.radius, "Invalid active Guard source");
-    }
-    safeInteger(g.lastRefreshTick, 0, state.tick);
-    safeInteger(g.lingerExpiresTick, g.lastRefreshTick, state.tick + IRON_CITADEL_D12_4G.pulse.lingerTicks);
-    requireContract(g.lingerExpiresTick === g.lastRefreshTick + IRON_CITADEL_D12_4G.pulse.lingerTicks, "Guard linger schedule drift");
-    safeInteger(g.nextDecayTick, 0, state.tick + IRON_CITADEL_D12_4G.pulse.lingerTicks);
-    if (g.sourceEliteIds.length) requireContract(g.nextDecayTick === g.lingerExpiresTick, "Active Guard source lost linger boundary");
-    else requireContract(g.nextDecayTick === (g.lastDecayTick === null ? g.lingerExpiresTick : g.lastDecayTick + IRON_CITADEL_D12_4G.pulse.decayTicks), "Guard decay schedule drift");
-    for (const key9 of ["lastStackTick", "lastDecayTick"]) if (g[key9] !== null) safeInteger(g[key9], 0, state.tick);
-    if (g.lastImpact !== null) {
-      closedRecord(g.lastImpact, ["tick", "sourceEntityId", "damageBefore", "damageAfter", "mitigated", "stacks"]);
-      safeInteger(g.lastImpact.tick, 0, state.tick);
-      requireContract(state.entitiesById[g.lastImpact.sourceEntityId]?.team === "party", "Invalid Guard impact source");
-      for (const key9 of ["damageBefore", "damageAfter", "mitigated"]) validateInteger(g.lastImpact[key9]);
-      safeInteger(g.lastImpact.stacks, 1, IRON_CITADEL_D12_4G.pulse.maxStacks);
-    }
-  }
-  for (const [entityId2, aura] of Object.entries(root2.attackAuraByEntityId ?? {})) {
-    closedRecord(aura, ["version", "entityId", "groupId", "spaceInstanceId", "stacks", "sourceEliteIds", "lastRefreshTick", "lingerExpiresTick", "nextDecayTick", "lastStackTick", "lastDecayTick"]);
-    requireContract(aura.version === ELITE_ATTACK_AURA_D12_4H_A_VERSION && aura.entityId === entityId2, "Invalid attack-aura identity");
-    const actor = state.entitiesById[entityId2], group = state.groupsById[aura.groupId];
-    requireContract(actor?.team === "hostile" && actor.alive && group?.entityIds.includes(entityId2) && actor.residency.spaceInstanceId === aura.spaceInstanceId, "Invalid attack-aura recipient");
-    safeInteger(aura.stacks, 0, BLOOD_BERSERKER_D12_4H_A.pulse.maxStacks);
-    requireContract(Array.isArray(aura.sourceEliteIds) && aura.sourceEliteIds.length <= Object.keys(root2.elitesByEntityId).length && aura.sourceEliteIds.every((id, index) => typeof id === "string" && (index === 0 || aura.sourceEliteIds[index - 1] < id)), "Invalid attack-aura sources");
-    for (const eliteId of aura.sourceEliteIds) {
-      const e = Object.values(root2.elitesByEntityId).find((row) => row.eliteId === eliteId), source8 = state.entitiesById[e?.entityId];
-      requireContract(e?.affixIds[0] === BLOOD_BERSERKER_AFFIX_ID && e.groupId === aura.groupId && source8?.alive && source8.residency.spaceInstanceId === actor.residency.spaceInstanceId && Math.hypot(source8.position.x - actor.position.x, source8.position.y - actor.position.y) <= BLOOD_BERSERKER_D12_4H_A.pulse.radius, "Invalid active attack-aura source");
-    }
-    safeInteger(aura.lastRefreshTick, 0, state.tick);
-    safeInteger(aura.lingerExpiresTick, aura.lastRefreshTick, state.tick + BLOOD_BERSERKER_D12_4H_A.pulse.lingerTicks);
-    requireContract(aura.lingerExpiresTick === aura.lastRefreshTick + BLOOD_BERSERKER_D12_4H_A.pulse.lingerTicks, "Attack-aura linger schedule drift");
-    safeInteger(aura.nextDecayTick, 0, state.tick + BLOOD_BERSERKER_D12_4H_A.pulse.lingerTicks);
-    if (aura.sourceEliteIds.length) requireContract(aura.nextDecayTick === aura.lingerExpiresTick, "Active attack-aura source lost linger boundary");
-    else requireContract(aura.nextDecayTick === (aura.lastDecayTick === null ? aura.lingerExpiresTick : aura.lastDecayTick + BLOOD_BERSERKER_D12_4H_A.pulse.decayTicks), "Attack-aura decay schedule drift");
-    for (const key9 of ["lastStackTick", "lastDecayTick"]) if (aura[key9] !== null) safeInteger(aura[key9], 0, state.tick);
-  }
-  for (const [entityId2, statuses] of Object.entries(root2.timedStatusesByEntityId ?? {})) {
-    const actor = state.entitiesById[entityId2];
-    requireContract(actor?.team === "party" && statuses && typeof statuses === "object" && !Array.isArray(statuses), "Invalid timed-status owner");
-    for (const [statusId, status] of Object.entries(statuses)) {
-      if (statusId === GLACIAL_WARDEN_D12_4E.pulse.statusId) {
-        closedRecord(status, ["version", "entityId", "statusId", "sourceEliteId", "applicationTick", "expirationTick", "magnitude"]);
-        requireContract(status.version === TIMED_ACTOR_STATUS_D12_4E_VERSION && status.entityId === entityId2 && status.statusId === statusId, "Invalid timed actor status identity");
-        const source8 = Object.values(root2.elitesByEntityId).find((row) => row.eliteId === status.sourceEliteId);
-        requireContract(source8?.affixIds[0] === GLACIAL_WARDEN_AFFIX_ID, "Invalid timed actor status source");
-        safeInteger(status.applicationTick, 0, state.tick);
-        safeInteger(status.expirationTick, status.applicationTick + 1, state.tick + GLACIAL_WARDEN_D12_4E.pulse.durationTicks);
-        requireContract(status.expirationTick === status.applicationTick + GLACIAL_WARDEN_D12_4E.pulse.durationTicks, "Timed actor status duration drift");
-        closedRecord(status.magnitude, ["movementMultiplier"]);
-        requireContract(status.magnitude.movementMultiplier === GLACIAL_WARDEN_D12_4E.pulse.movementMultiplier.numerator / GLACIAL_WARDEN_D12_4E.pulse.movementMultiplier.denominator, "Timed actor status magnitude drift");
-        requireContract(state.tick < status.expirationTick, "Expired timed actor status retained");
-      } else if (statusId === NULLIFIER_D12_4I.pulse.statusId) {
-        closedRecord(status, ["version", "entityId", "statusId", "sourceEliteId", "applicationTick", "expirationTick"]);
-        requireContract(status.version === TIMED_NULLIFIED_D12_4I_VERSION && status.entityId === entityId2 && status.statusId === statusId && actor.alive, "Invalid Nullified status identity");
-        const source8 = Object.values(root2.elitesByEntityId).find((row) => row.eliteId === status.sourceEliteId);
-        requireContract(source8?.affixIds[0] === NULLIFIER_AFFIX_ID, "Invalid Nullified source");
-        safeInteger(status.applicationTick, 0, state.tick);
-        safeInteger(status.expirationTick, state.tick + 1, state.tick + NULLIFIER_D12_4I.pulse.durationTicks);
-        requireContract(status.expirationTick === status.applicationTick + NULLIFIER_D12_4I.pulse.durationTicks && state.tick < status.expirationTick, "Nullified duration drift");
-      } else {
-        requireContract(statusId === TOXIC_DECAY_D12_4F.pulse.statusId, "Invalid timed actor status identity");
-        closedRecord(status, ["version", "entityId", "statusId", "sourceEliteId", "applicationTick", "lastApplicationTick", "lastApplicationAdded", "expirationTick", "nextTickAt", "tickIntervalTicks", "stacks", "damagePerStack", "lastTick"]);
-        requireContract(status.version === TIMED_PLAYER_POISON_D12_4F_VERSION && status.entityId === entityId2 && status.statusId === statusId && actor.alive && typeof status.lastApplicationAdded === "boolean", "Invalid Toxic Decay status identity");
-        const source8 = Object.values(root2.elitesByEntityId).find((row) => row.eliteId === status.sourceEliteId);
-        requireContract(source8?.affixIds[0] === TOXIC_DECAY_AFFIX_ID, "Invalid Toxic Decay source");
-        safeInteger(status.applicationTick, 0, state.tick);
-        safeInteger(status.lastApplicationTick, status.applicationTick, state.tick);
-        safeInteger(status.expirationTick, state.tick + 1, state.tick + TOXIC_DECAY_D12_4F.pulse.durationTicks);
-        safeInteger(status.nextTickAt, state.tick + 1, status.expirationTick);
-        safeInteger(status.stacks, 1, TOXIC_DECAY_D12_4F.pulse.maxStacks);
-        validateInteger(status.damagePerStack);
-        requireContract(status.damagePerStack !== "0" && status.expirationTick === status.lastApplicationTick + TOXIC_DECAY_D12_4F.pulse.durationTicks && status.tickIntervalTicks === TOXIC_DECAY_D12_4F.pulse.tickTicks && (status.nextTickAt - status.applicationTick) % status.tickIntervalTicks === 0, "Toxic Decay schedule drift");
-        if (status.lastTick !== null) {
-          closedRecord(status.lastTick, ["tick", "damage", "stacks", "sourceEliteId", "targetAlive"]);
-          safeInteger(status.lastTick.tick, status.applicationTick + status.tickIntervalTicks, state.tick);
-          validateInteger(status.lastTick.damage);
-          safeInteger(status.lastTick.stacks, 1, TOXIC_DECAY_D12_4F.pulse.maxStacks);
-          const tickSource = Object.values(root2.elitesByEntityId).find((row) => row.eliteId === status.lastTick.sourceEliteId);
-          requireContract(typeof status.lastTick.targetAlive === "boolean" && tickSource?.affixIds[0] === TOXIC_DECAY_AFFIX_ID, "Invalid Toxic Decay tick attribution");
-        }
-      }
-    }
-  }
-  for (const [entityId2, resistance] of Object.entries(root2.nullificationResistanceByEntityId ?? {})) {
-    closedRecord(resistance, ["version", "entityId", "statusId", "sourceEliteId", "startedTick", "expirationTick"]);
-    const actor = state.entitiesById[entityId2], source8 = Object.values(root2.elitesByEntityId).find((row) => row.eliteId === resistance.sourceEliteId);
-    requireContract(resistance.version === NULLIFICATION_RESISTANCE_D12_4I_VERSION && resistance.entityId === entityId2 && resistance.statusId === NULLIFIER_D12_4I.pulse.statusId && actor?.team === "party" && actor.alive && source8?.affixIds[0] === NULLIFIER_AFFIX_ID, "Invalid Nullifier resistance identity");
-    safeInteger(resistance.startedTick, 0, state.tick);
-    safeInteger(resistance.expirationTick, state.tick + 1, state.tick + NULLIFIER_D12_4I.pulse.resistanceTicks);
-    requireContract(resistance.expirationTick === resistance.startedTick + NULLIFIER_D12_4I.pulse.resistanceTicks && state.tick < resistance.expirationTick && !root2.timedStatusesByEntityId?.[entityId2]?.[NULLIFIER_D12_4I.pulse.statusId], "Nullifier resistance schedule drift");
-  }
-  const web = WEB_WEAVER_D12_4J.pulse, slag = SLAG_SHAPER_D12_4K.pulse, partyEntityIds = new Set(Object.values(state.playersById).map((player) => player.entityId)), sourceByEliteId = new Map(Object.values(root2.elitesByEntityId).map((elite) => [elite.eliteId, elite])), activeCountBySource = /* @__PURE__ */ new Map();
-  const validateWebShape = (row) => {
-    closedRecord(row.geometry, ["kind", "radiusX", "radiusY"]);
-    closedRecord(row.effect, ["statusId", "movementMultiplier"]);
-    requireContract(row.kind === web.hazardKind && row.geometry.kind === web.geometry.kind && row.geometry.radiusX === web.geometry.radiusX && row.geometry.radiusY === web.geometry.radiusY && row.effect.statusId === web.statusId && row.effect.movementMultiplier === web.movementMultiplier.numerator / web.movementMultiplier.denominator, "Web hazard definition drift");
-  };
-  const validateSlagShape = (row) => {
-    closedRecord(row.geometry, ["kind", "radiusX", "radiusY"]);
-    closedRecord(row.effect, ["statusId", "damageFraction", "damageIntervalTicks", "nonlethal"]);
-    closedRecord(row.effect.damageFraction, ["numerator", "denominator"]);
-    requireContract(row.kind === slag.hazardKind && row.geometry.kind === slag.geometry.kind && row.geometry.radiusX === slag.geometry.radiusX && row.geometry.radiusY === slag.geometry.radiusY && row.effect.statusId === slag.statusId && row.effect.damageFraction.numerator === slag.damageMaxHp.numerator && row.effect.damageFraction.denominator === slag.damageMaxHp.denominator && row.effect.damageIntervalTicks === slag.damageIntervalTicks && row.effect.nonlethal === false, "Slag hazard definition drift");
-  };
-  for (const [sourceEliteId, pending] of Object.entries(root2.pendingHazardsBySourceEliteId ?? {})) {
-    const sourceElite = sourceByEliteId.get(sourceEliteId), source8 = state.entitiesById[pending.sourceEntityId], base = pending.version === PENDING_HOSTILE_HAZARD_D12_4J_VERSION && sourceElite?.entityId === pending.sourceEntityId && pending.sourceEliteId === sourceEliteId && pending.hazardId === hostileHazardIdD12_4J(sourceEliteId, sourceElite.pulseSequence) && source8?.alive && source8.residency.spaceInstanceId === pending.spaceInstanceId && state.spacesByInstanceId[pending.spaceInstanceId] && Number.isFinite(pending.position?.x) && Number.isFinite(pending.position?.y);
-    requireContract(base, "Invalid pending hostile hazard");
-    safeInteger(pending.startedTick, 0, state.tick);
-    if (pending.kind === web.hazardKind) {
-      closedRecord(pending, ["version", "hazardId", "kind", "sourceEliteId", "sourceEntityId", "targetEntityId", "spaceInstanceId", "position", "startedTick", "resolvesTick", "geometry", "effect"]);
-      requireContract(sourceElite.affixIds[0] === WEB_WEAVER_AFFIX_ID && partyEntityIds.has(pending.targetEntityId), "Invalid pending Web Weaver cast");
-      safeInteger(pending.resolvesTick, state.tick + 1, state.tick + web.windupTicks);
-      requireContract(pending.resolvesTick === pending.startedTick + web.windupTicks, "Web Weaver cast schedule drift");
-      validateWebShape(pending);
-    } else {
-      closedRecord(pending, ["version", "hazardId", "kind", "sourceEliteId", "sourceEntityId", "spaceInstanceId", "position", "startedTick", "resolvesTick", "geometry", "effect"]);
-      requireContract(sourceElite.affixIds[0] === SLAG_SHAPER_AFFIX_ID, "Invalid pending Slag Shaper formation");
-      safeInteger(pending.resolvesTick, state.tick + 1, state.tick + slag.windupTicks);
-      requireContract(pending.resolvesTick === pending.startedTick + slag.windupTicks, "Slag Shaper formation schedule drift");
-      validateSlagShape(pending);
-    }
-  }
-  for (const [hazardId, hazard] of Object.entries(root2.hazardsById ?? {})) {
-    const sourceElite = sourceByEliteId.get(hazard.sourceEliteId), base = hazard.version === HOSTILE_FLOOR_HAZARD_D12_4J_VERSION && hazard.hazardId === hazardId && /^hazard:[a-f0-9]{32}$/.test(hazardId) && sourceElite?.entityId === hazard.sourceEntityId && state.spacesByInstanceId[hazard.spaceInstanceId] && Number.isFinite(hazard.position?.x) && Number.isFinite(hazard.position?.y);
-    requireContract(base, "Invalid hostile floor hazard identity");
-    safeInteger(hazard.creationTick, 0, state.tick);
-    if (hazard.kind === web.hazardKind) {
-      closedRecord(hazard, ["version", "hazardId", "kind", "sourceEliteId", "sourceEntityId", "spaceInstanceId", "position", "creationTick", "expirationTick", "geometry", "effect"]);
-      requireContract(sourceElite.affixIds[0] === WEB_WEAVER_AFFIX_ID, "Invalid Web Weaver hazard source");
-      safeInteger(hazard.expirationTick, state.tick + 1, state.tick + web.durationTicks);
-      requireContract(hazard.expirationTick === hazard.creationTick + web.durationTicks && state.tick < hazard.expirationTick, "Web hazard schedule drift");
-      validateWebShape(hazard);
-    } else {
-      closedRecord(hazard, ["version", "hazardId", "kind", "sourceEliteId", "sourceEntityId", "spaceInstanceId", "position", "creationTick", "expirationTick", "geometry", "effect", "nextDamageTick", "affectedEntityIds", "lastDamageEvents"]);
-      requireContract(sourceElite.affixIds[0] === SLAG_SHAPER_AFFIX_ID, "Invalid Slag Shaper hazard source");
-      safeInteger(hazard.expirationTick, state.tick + 1, state.tick + slag.durationTicks);
-      safeInteger(hazard.nextDamageTick, state.tick + 1, hazard.expirationTick + slag.damageIntervalTicks);
-      requireContract(hazard.expirationTick === hazard.creationTick + slag.durationTicks && state.tick < hazard.expirationTick && (hazard.nextDamageTick - hazard.creationTick) % slag.damageIntervalTicks === 0, "Slag hazard schedule drift");
-      validateSlagShape(hazard);
-      requireContract(Array.isArray(hazard.affectedEntityIds) && hazard.affectedEntityIds.every((id, index) => partyEntityIds.has(id) && (index === 0 || hazard.affectedEntityIds[index - 1] < id)), "Invalid Slag affected actors");
-      for (const id of hazard.affectedEntityIds) {
-        const actor = state.entitiesById[id], dx = actor.position.x - hazard.position.x, dy = actor.position.y - hazard.position.y, rx = slag.geometry.radiusX + actor.hullRadius, ry = slag.geometry.radiusY + actor.hullRadius;
-        requireContract(actor.alive && actor.residency.spaceInstanceId === hazard.spaceInstanceId && dx * dx / (rx * rx) + dy * dy / (ry * ry) <= 1, "Slag affected actor outside hazard");
-      }
-      requireContract(Array.isArray(hazard.lastDamageEvents) && hazard.lastDamageEvents.every((event, index) => index === 0 || hazard.lastDamageEvents[index - 1].targetEntityId < event.targetEntityId), "Invalid Slag damage event order");
-      for (const event of hazard.lastDamageEvents) {
-        closedRecord(event, ["hazardId", "sourceEliteId", "sourceEntityId", "targetEntityId", "scheduledTick", "attemptedDamage", "actualDamage", "resultingHp"]);
-        requireContract(event.hazardId === hazardId && event.sourceEliteId === hazard.sourceEliteId && event.sourceEntityId === hazard.sourceEntityId && partyEntityIds.has(event.targetEntityId), "Invalid Slag damage attribution");
-        safeInteger(event.scheduledTick, hazard.creationTick + slag.damageIntervalTicks, state.tick);
-        requireContract(event.scheduledTick < hazard.expirationTick && (event.scheduledTick - hazard.creationTick) % slag.damageIntervalTicks === 0, "Invalid Slag damage tick");
-        validateInteger(event.attemptedDamage);
-        validateInteger(event.actualDamage);
-        validateInteger(event.resultingHp);
-      }
-    }
-    const countKey = hazard.sourceEliteId + "/" + hazard.kind;
-    activeCountBySource.set(countKey, (activeCountBySource.get(countKey) ?? 0) + 1);
-  }
-  for (const [key9, count2] of activeCountBySource) requireContract(count2 <= (key9.endsWith("/" + web.hazardKind) ? web.maxActivePerSource : slag.maxActivePerSource), "Hostile active-hazard cap exceeded");
-  for (const [entityId2, status] of Object.entries(root2.webbedByEntityId ?? {})) {
-    closedRecord(status, ["version", "entityId", "statusId", "spaceInstanceId", "hazardIds", "startedTick", "lastEvaluatedTick", "movementMultiplier"]);
-    const actor = state.entitiesById[entityId2];
-    requireContract(status.version === WEBBED_STATUS_D12_4J_VERSION && status.entityId === entityId2 && status.statusId === web.statusId && partyEntityIds.has(entityId2) && actor?.alive && actor.residency.spaceInstanceId === status.spaceInstanceId && status.movementMultiplier === web.movementMultiplier.numerator / web.movementMultiplier.denominator, "Invalid Webbed status identity");
-    safeInteger(status.startedTick, 0, state.tick);
-    requireContract(status.lastEvaluatedTick === state.tick && Array.isArray(status.hazardIds) && status.hazardIds.length >= 1 && status.hazardIds.every((id, index) => typeof id === "string" && (index === 0 || status.hazardIds[index - 1] < id)), "Invalid Webbed status sources");
-    for (const id of status.hazardIds) {
-      const hazard = root2.hazardsById[id], dx = actor.position.x - hazard?.position.x, dy = actor.position.y - hazard?.position.y, rx = web.geometry.radiusX + actor.hullRadius, ry = web.geometry.radiusY + actor.hullRadius;
-      requireContract(hazard?.kind === web.hazardKind && hazard.spaceInstanceId === status.spaceInstanceId && dx * dx / (rx * rx) + dy * dy / (ry * ry) <= 1, "Webbed actor outside authoritative hazard");
-    }
-  }
-  for (const [entityId2, status] of Object.entries(root2.slagBurnByEntityId ?? {})) {
-    closedRecord(status, ["version", "entityId", "statusId", "spaceInstanceId", "hazardIds", "startedTick", "lastEvaluatedTick"]);
-    const actor = state.entitiesById[entityId2];
-    requireContract(status.version === SLAG_BURN_STATUS_D12_4K_VERSION && status.entityId === entityId2 && status.statusId === slag.statusId && partyEntityIds.has(entityId2) && actor?.alive && actor.residency.spaceInstanceId === status.spaceInstanceId, "Invalid Slag Burn status identity");
-    safeInteger(status.startedTick, 0, state.tick);
-    requireContract(status.lastEvaluatedTick === state.tick && Array.isArray(status.hazardIds) && status.hazardIds.length >= 1 && status.hazardIds.every((id, index) => typeof id === "string" && (index === 0 || status.hazardIds[index - 1] < id)), "Invalid Slag Burn sources");
-    for (const id of status.hazardIds) requireContract(root2.hazardsById[id]?.kind === slag.hazardKind && root2.hazardsById[id].affectedEntityIds.includes(entityId2), "Slag Burn actor outside authoritative hazard");
-  }
-}
-
-// src/shared/contracts/fair_play_v1.js
-var PARTY_HEALTH_PERCENT_V1 = Object.freeze([100, 160, 220, 280]);
-function partySizeV1(snapshot) {
-  return snapshot?.partySize ?? 1;
-}
-function validatePartySizeV1(snapshot) {
-  if (snapshot?.partySize !== void 0) requireContract(Number.isSafeInteger(snapshot.partySize) && snapshot.partySize >= 2 && snapshot.partySize <= PARTY_HEALTH_PERCENT_V1.length, "Invalid party size");
-}
-function partyHealthPercentV1(snapshot) {
-  return PARTY_HEALTH_PERCENT_V1[Math.min(PARTY_HEALTH_PERCENT_V1.length, Math.max(1, partySizeV1(snapshot))) - 1];
-}
-
-// src/shared/contracts/encounter_progression.js
-var ENCOUNTER_PROGRESSION_VERSION = "encounter-progression-d3-v1";
-var D9_THREAT_VERSION = "encounter-progression-d9-v1";
-var ORDINARY_ACTIVITY_RADII = Object.freeze({ prepareRadius: 768, leaveRadius: 960 });
-function ordinaryTier(profileId) {
-  const index = ORDINARY_PROFILES.findIndex((p) => p.contentDefinitionId === profileId);
-  return index < 0 ? null : THREAT_TIERS[index % 4];
-}
-function encounterActorProfile(state, group, actor) {
-  const enemy = ordinaryEnemyForProfile(actor.contentDefinitionId);
-  const level = group.threatSnapshot?.levelsByEntityId[actor.entityId];
-  let profile2;
-  if (enemy && level !== void 0 && group.threatSnapshot.version === D9_THREAT_VERSION) {
-    const stats = hasWorldCombat(state) ? worldEnemyStats(level, ordinaryTier(actor.contentDefinitionId), enemy.budget) : threatEndpointsD9(level, ordinaryTier(actor.contentDefinitionId), enemy.budget);
-    profile2 = { ...state.content.definitionsById[actor.contentDefinitionId], maxHp: stats.maxHp, attackDamage: stats.attackDamage };
-  } else profile2 = enemy && level !== void 0 ? resolveOrdinaryProfile(enemy, ordinaryTier(actor.contentDefinitionId), level) : state.content.definitionsById[actor.contentDefinitionId];
-  if (hasWorldCombat(state) && profile2?.isBoss && level !== void 0) profile2 = { ...profile2, ...worldBossStats(level) };
-  const out = rareActorProfileV1(state, actor, aegisComponentProfile(state, actor, huntChampionProfileV1(state, group, actor, siteEndActorProfileV1(state, group, actor, eliteActorProfileD12_4(state, actor, worldOrdinaryMeleeProfile(state, profile2))))));
-  const party2 = partyHealthPercentV1(group.threatSnapshot);
-  return party2 !== 100 && state.subweaponCombat && out?.maxHp !== void 0 ? { ...out, maxHp: combatInteger(multiplyCombat(out.maxHp, party2, 100)) } : out;
-}
-function validateEncounterProgression(state, group) {
-  requireContract(typeof group.threatReady === "boolean", "Missing encounter reset state");
-  const snapshot = group.threatSnapshot;
-  if (snapshot === null) {
-    requireContract(group.threatReady, "Missing locked threat snapshot");
-    return;
-  }
-  closedRecord(snapshot, ["version", "activatedTick", "levelsByEntityId"], state.d9World ? ["partySize"] : []);
-  validatePartySizeV1(snapshot);
-  requireContract(snapshot.version === ENCOUNTER_PROGRESSION_VERSION || state.d9World && snapshot.version === D9_THREAT_VERSION, "Unsupported encounter progression");
-  safeInteger(snapshot.activatedTick, 0, state.tick);
-  closedRecord(snapshot.levelsByEntityId, group.entityIds);
-  const liveLevels = /* @__PURE__ */ new Set();
-  for (const id of group.entityIds) {
-    if (snapshot.version === D9_THREAT_VERSION) positiveProgression(snapshot.levelsByEntityId[id]);
-    else safeInteger(snapshot.levelsByEntityId[id], 1, MAX_PLAYER_LEVEL);
-    if (state.entitiesById[id].alive) liveLevels.add(progressionBigInt(snapshot.levelsByEntityId[id]).toString());
-  }
-  const live = [...liveLevels].map(BigInt);
-  requireContract(usesSpawnLevelsV1(state) ? !live.length || live.reduce((a, b) => a > b ? a : b) - live.reduce((a, b) => a < b ? a : b) <= BigInt(PACK_LEVEL_SPREAD_V1) : liveLevels.size <= 1, "Split live group threat");
-  if (group.siteId !== null) requireContract(!group.threatReady || state.d9World?.episodes[group.groupId]?.snapshot === null, "Site snapshot cannot thaw");
-}
-
-// src/shared/content/encounter_motion_d11_2.js
-var ENCOUNTER_CONTAINMENT_D11_2_VERSION = "encounter-containment-d11.2-v1";
-var HOSTILE_MOTION_D11_2_VERSION = "hostile-motion-d11.2-v1";
-var SITE_CONTAINMENT_D11_2 = freezeWire({
-  woodlandRuin: { acquireRadius: 260, pursuitRadius: 420, disengageTicks: 24, homeTolerance: 3, approachRadius: 17 },
-  woodlandFort: { acquireRadius: 360, pursuitRadius: 520, disengageTicks: 30, homeTolerance: 3, approachRadius: 17 },
-  woodlandCave: { acquireRadius: 260, pursuitRadius: 390, disengageTicks: 24, homeTolerance: 3, approachRadius: 17 }
-});
-var LEGACY_HOSTILE_MELEE_MOTION_D11_2 = freezeWire({
-  gargoyle: { windupTicks: 11, impactTicks: 3, recoveryTicks: 9 },
-  rust_nibbler: { windupTicks: 7, impactTicks: 2, recoveryTicks: 7 },
-  animated_armor: { windupTicks: 14, impactTicks: 3, recoveryTicks: 12 },
-  cursed_blade: { windupTicks: 9, impactTicks: 3, recoveryTicks: 8 }
-});
-var HOSTILE_MELEE_MOTION_D11_2 = freezeWire({ ...LEGACY_HOSTILE_MELEE_MOTION_D11_2, ...DUNGEON_MOBS_V1_MELEE_MOTION, ...DUNGEON_MOBS_V2_MELEE_MOTION, ...BIOME_CREATURES_V1_MELEE_MOTION, ...BROOD_CREATURES_V1_MELEE_MOTION, ...BANDITS_V1_MELEE_MOTION, ...BURROWERS_V1_MELEE_MOTION });
-var hostileMeleeMotionD11_2 = (family2) => HOSTILE_MELEE_MOTION_D11_2[family2] ?? null;
-
-// src/shared/content/site_definition_runtime_d10.js
-var actorAi = (family2, tick) => {
-  const timing = hostileMeleeMotionD11_2(family2);
-  return { kind: "simpleMelee", acquireRange: ORDINARY_ACQUIRE_RANGE, updatesApplied: 0, ...timing ? { melee: { version: HOSTILE_MOTION_D11_2_VERSION, phase: "idle", phaseStartedTick: tick, phaseEndsTick: tick, targetEntityId: null, actionSequence: 0 }, motion: { version: HOSTILE_MOTION_D11_2_VERSION, startedTick: null, lastMovedTick: null } } : {} };
-};
-var containment = (definition, members, tick) => {
-  if (!definition.containment) return null;
-  const x = members.reduce((n, m) => n + m.position.x, 0) / members.length, y = members.reduce((n, m) => n + m.position.y, 0) / members.length;
-  return { version: ENCOUNTER_CONTAINMENT_D11_2_VERSION, homeAnchor: { x, y }, memberHomesById: Object.fromEntries(members.map((m) => [m.entityId, copyWire(m.position)])), ...copyWire(definition.containment), mode: "guard", outsideTicks: 0, modeStartedTick: tick };
-};
-async function buildDefinedFunctionalSiteD10(state, site, binding, definition, { sha256, identityDomain = null, frozenSnapshot = null } = {}) {
-  const { package: pkg, template, groupSuffix } = definition;
-  requireContract(binding.packageId === pkg.packageId && binding.packageVersion === pkg.packageVersion && binding.contentHash === pkg.contentHash, "Missing or corrupt site package");
-  const token7 = async (key9) => bytesToHex((await hashBytes(frameUtf8([pkg.packageVersion, site.siteId, identityDomain === null ? key9 : identityDomain + "/" + key9]), sha256)).slice(0, 16));
-  const spaceInstanceId = "spi:" + await token7("space-instance"), logicalSpaceId = "spc:" + await token7("logical-space"), groupId = "site:" + site.siteId + ":" + groupSuffix;
-  const members = [], actors = [], entityIds = [];
-  for (let n = 0; n < template.encounter.members.length; n++) {
-    const spec = template.encounter.members[n], enemy = ORDINARY_ENEMIES.find((e) => e.family === spec.family);
-    requireContract(enemy, "Unknown site enemy");
-    const profile2 = worldOrdinaryMeleeProfile(state, resolveOrdinaryProfile(enemy, template.encounter.rank)), entityId2 = "ent:" + await token7("enemy-" + n);
-    entityIds.push(entityId2);
-    members.push({ entityId: entityId2, enemyDefinitionId: enemy.enemyDefinitionId, profileId: profile2.contentDefinitionId, position: { x: spec.x, y: spec.y } });
-  }
-  const episode = { ...unfrozenEpisodeD9("site-anchor:" + site.siteId, 0), geography: { chunkX: site.entrance.chunkX, chunkY: site.entrance.chunkY, anchorOrdinal: 0, minimumLevel: copyWire(siteMinimumLevelV1(state, site)), rank: template.encounter.rank } };
-  episode.snapshot = frozenSnapshot ? copyWire(frozenSnapshot) : prepareEpisodeSnapshotD9(episode, { tick: state.tick, minimumLevel: siteMinimumLevelV1(state, site), scale: siteScalesV1(state, site), participants: Object.values(state.playersById).map((p) => {
-    const a = state.entitiesById[p.entityId];
-    return { playerId: p.playerId, alive: a.alive, spaceInstanceId: a.residency.spaceInstanceId, position: copyWire(state.d9World.positions[a.entityId] ?? site.entrance), heroLevel: p.progression.level };
-  }), anchor: site.entrance, spaceInstanceId: state.overworldInstanceId, rank: template.encounter.rank, trigger: "activation" });
-  for (const member of members) {
-    const profile2 = worldOrdinaryMeleeProfile(state, state.content.definitionsById[member.profileId]), enemy = ORDINARY_ENEMIES.find((e) => e.enemyDefinitionId === member.enemyDefinitionId), stats = (hasWorldCombat(state) ? worldEnemyStats : threatEndpointsD9)(episode.snapshot.effectiveLevel, template.encounter.rank, enemy.budget);
-    actors.push({ entityId: member.entityId, contentDefinitionId: profile2.contentDefinitionId, kind: "actor", ownerCharacterId: null, team: "hostile", hp: combatInteger(stats.maxHp), maxHp: combatInteger(stats.maxHp), position: copyWire(member.position), hullRadius: profile2.hullRadius, combatRadius: profile2.combatRadius, movementIntent: { x: 0, y: 0 }, moveSpeed: profile2.moveSpeed, alive: true, attackDamage: combatInteger(stats.attackDamage), attackReach: profile2.attackReach, attackReachMode: profile2.attackReachMode, attackDelayTicks: profile2.attackDelayTicks, attackTimer: profile2.attackDelayTicks, nextAttackActionSequence: 1, movedLastTick: false, ai: actorAi(enemy.family, state.tick), residency: { spaceInstanceId, residencyRevision: 1 } });
-  }
-  const interior = { recipeVersion: pkg.packageVersion, siteId: site.siteId, logicalSpaceId, contentHash: pkg.contentHash, collision: copyWire(template.collision), entrance: copyWire(template.entrance), rooms: copyWire(template.rooms), decorations: copyWire(template.decorations), groupId, ...template.visual ? { visual: copyWire(template.visual) } : {} };
-  const functionalSite = { version: "functional-site-d9-v1", siteId: site.siteId, packageId: binding.packageId, packageVersion: binding.packageVersion, contentHash: binding.contentHash, label: template.label, siteKind: template.siteKind, socket: copyWire(site), spaceInstanceId, interior, conqueredTick: null };
-  const group = { groupId, siteId: site.siteId, spaceInstanceId, entityIds, cleared: false, lastRequiredTick: null, threatSnapshot: { version: D9_THREAT_VERSION, activatedTick: state.tick, levelsByEntityId: Object.fromEntries(entityIds.map((id) => [id, copyWire(episode.snapshot.effectiveLevel)])) }, threatReady: false, ...definition.containment ? { containment: containment(definition, members, state.tick) } : {} };
-  const economy = { episode: 0, startedTick: state.tick, eligibleReturn: 0, clearedTick: null, vacatedTick: null, usedResources: {}, contentDepth: copyWire(episode.snapshot.sourceDepth) };
-  const resource = { groupId, ordinal: 0, kind: "chest", art: "chest", position: copyWire(template.reward.position), spaceInstanceId, completion: true };
-  functionalSite.instanceHash = bytesToHex(await hashBytes(utf8(canonicalStringify({ functionalSite, group, economy, episode, actors, resource })), sha256));
-  return freezeWire({ functionalSite, space: { spaceId: logicalSpaceId, spaceInstanceId, spaceRevision: 1, collision: copyWire(interior.collision) }, group, economy, episode, actors, resource, members });
-}
-async function buildDefinedWorldCompoundD10(state, parcel2, binding, definition, { sha256 }) {
-  const site = parcel2.socket, { package: pkg, template, groupSuffix } = definition;
-  requireContract(template.placement === "overworld-compound" && site.siteId === parcel2.siteId && binding.packageId === pkg.packageId && binding.packageVersion === pkg.packageVersion && binding.contentHash === pkg.contentHash, "Invalid compound binding");
-  const token7 = async (key9) => bytesToHex((await hashBytes(frameUtf8([pkg.packageVersion, site.siteId, key9]), sha256)).slice(0, 16));
-  const spaceInstanceId = "spi:" + await token7("space-instance"), logicalSpaceId = "spc:" + await token7("logical-space"), groupId = "site:" + site.siteId + ":" + groupSuffix;
-  const members = [], actors = [], entityIds = [];
-  for (let n = 0; n < template.encounter.members.length; n++) {
-    const spec = template.encounter.members[n], enemy = ORDINARY_ENEMIES.find((e) => e.family === spec.family);
-    requireContract(enemy, "Unknown compound enemy");
-    const profile2 = worldOrdinaryMeleeProfile(state, resolveOrdinaryProfile(enemy, template.encounter.rank)), entityId2 = "ent:" + await token7("enemy-" + n), stats = threatEndpointsD9(site.minimumLevel, template.encounter.rank, enemy.budget), position2 = { x: spec.x, y: spec.y };
-    entityIds.push(entityId2);
-    members.push({ entityId: entityId2, enemyDefinitionId: enemy.enemyDefinitionId, profileId: profile2.contentDefinitionId, position: copyWire(position2) });
-    actors.push({ entityId: entityId2, contentDefinitionId: profile2.contentDefinitionId, kind: "actor", ownerCharacterId: null, team: "hostile", hp: combatInteger(stats.maxHp), maxHp: combatInteger(stats.maxHp), position: copyWire(position2), hullRadius: profile2.hullRadius, combatRadius: profile2.combatRadius, movementIntent: { x: 0, y: 0 }, moveSpeed: profile2.moveSpeed, alive: true, attackDamage: combatInteger(stats.attackDamage), attackReach: profile2.attackReach, attackReachMode: profile2.attackReachMode, attackDelayTicks: profile2.attackDelayTicks, attackTimer: profile2.attackDelayTicks, nextAttackActionSequence: 1, movedLastTick: false, ai: actorAi(spec.family, state.tick), residency: { spaceInstanceId: state.overworldInstanceId, residencyRevision: 1 } });
-  }
-  const episode = { ...unfrozenEpisodeD9("site-anchor:" + site.siteId, 0), geography: { chunkX: site.entrance.chunkX, chunkY: site.entrance.chunkY, anchorOrdinal: 0, minimumLevel: copyWire(site.minimumLevel), rank: template.encounter.rank } };
-  const group = { groupId, siteId: site.siteId, spaceInstanceId: state.overworldInstanceId, entityIds, cleared: false, lastRequiredTick: null, threatSnapshot: { version: D9_THREAT_VERSION, activatedTick: state.tick, levelsByEntityId: Object.fromEntries(entityIds.map((id) => [id, copyWire(site.minimumLevel)])) }, threatReady: false, ...definition.containment ? { containment: containment(definition, members, state.tick) } : {} };
-  const economy = { episode: 0, startedTick: state.tick, eligibleReturn: 0, clearedTick: null, vacatedTick: null, usedResources: {}, contentDepth: copyWire(site.minimumLevel) };
-  const resource = { groupId, ordinal: 0, kind: "chest", art: "chest", position: copyWire(template.reward.position), spaceInstanceId: state.overworldInstanceId, completion: true };
-  const definitionRow = { groupId, regionId: "d9-region:" + site.region.regionX + "," + site.region.regionY, anchor: { x: template.keepDoor.x, y: template.keepDoor.y + 128 }, members: copyWire(members) };
-  const interior = { recipeVersion: pkg.packageVersion, siteId: site.siteId, logicalSpaceId, contentHash: pkg.contentHash, collision: copyWire(template.keep.collision), entrance: copyWire(template.keep.entrance), rooms: [{ roomId: "keep", role: "arrival", x: 1, y: 1, width: 12, height: 10 }], decorations: copyWire(template.keep.visual.decorations ?? []), groupId, visual: copyWire(template.keep.visual) };
-  const functionalSite = { version: "functional-site-d10-compound-v1", siteId: site.siteId, packageId: binding.packageId, packageVersion: binding.packageVersion, contentHash: binding.contentHash, label: template.label, siteKind: template.siteKind, socket: copyWire(site), spaceInstanceId, interior, compound: copyWire(parcel2), initial: { group, economy, episode, actors, resource, definition: definitionRow }, conqueredTick: null };
-  functionalSite.instanceHash = bytesToHex(await hashBytes(utf8(canonicalStringify(functionalSite)), sha256));
-  return freezeWire({ functionalSite, space: { spaceId: logicalSpaceId, spaceInstanceId, spaceRevision: 1, collision: copyWire(interior.collision) } });
-}
-
-// src/shared/content/woodland_cave_d10.js
-var WOODLAND_CAVE_PACKAGE_ID = "woodland-cave";
-var WOODLAND_CAVE_VERSION = "woodland-cave-d10-2-v1";
-var WOODLAND_CAVE_CONTENT_HASH = "a01314559a5a07e22ba47688b59047f5274314c3ad5188c0fd9e67cd4baaf16b";
-var WOODLAND_CAVE_PACKAGE = freezeWire({ packageId: WOODLAND_CAVE_PACKAGE_ID, packageVersion: WOODLAND_CAVE_VERSION, contentHash: WOODLAND_CAVE_CONTENT_HASH, siteClass: "dungeon", capabilities: ["interior"], biomes: ["woodland"], minimumLevel: 1, maximumLevel: null, repeatable: false, unique: true, reservedSiteId: null });
-var W2 = 28;
-var H2 = 20;
-var tiles = Array.from({ length: H2 }, () => Array(W2).fill("0"));
-var zones = [
-  [[9, 3], [14, 3], [17, 5], [19, 7], [18, 9], [19, 11], [17, 13], [15, 15], [11, 14], [8, 15], [6, 13], [4, 12], [3, 9], [5, 7], [6, 5]],
-  [[13, 18.9], [16, 18.9], [16, 17.2], [15.3, 16.1], [17, 14.3], [15.5, 13.2], [13, 14], [12, 15.6], [13, 17]],
-  [[16.5, 6.8], [21.7, 6.5], [22.1, 9.7], [17.2, 10.2]],
-  [[22, 3.8], [25, 4.2], [27, 6], [26.5, 9.5], [24.7, 11], [21.2, 10.3], [20.4, 8], [21, 5.5]]
-];
-var inside2 = (x, y, p) => {
-  let yes = false;
-  for (let i = 0, j = p.length - 1; i < p.length; j = i++) if (p[i][1] > y !== p[j][1] > y && x < (p[j][0] - p[i][0]) * (y - p[i][1]) / (p[j][1] - p[i][1]) + p[i][0]) yes = !yes;
-  return yes;
-};
-for (let y = 1; y < H2 - 1; y++) for (let x = 1; x < W2 - 1; x++) if (zones.some((p) => inside2(x + 0.5, y + 0.5, p))) tiles[y][x] = "1";
-tiles[9][8] = "0";
-tiles[6][16] = "0";
-var rows = tiles.map((r) => r.join(""));
-var decorations = [
-  { kind: "cave-light-shaft", x: 14.5, y: 17.4, variant: 0 },
-  { kind: "cave-glow-mushrooms", x: 6.4, y: 11.5, variant: 0 },
-  { kind: "cave-glow-mushrooms", x: 15.7, y: 5.4, variant: 1 },
-  { kind: "cave-glow-mushrooms", x: 25, y: 9.2, variant: 2 },
-  { kind: "cave-stalagmites", x: 5.7, y: 8, variant: 0 },
-  { kind: "cave-stalagmites", x: 16.2, y: 12, variant: 1 },
-  { kind: "cave-stalactites", x: 11.8, y: 4, variant: 0 },
-  { kind: "cave-rubble", x: 9.5, y: 13, variant: 0 },
-  { kind: "cave-wall-roots", x: 18.35, y: 10.7, variant: 0 },
-  { kind: "cave-remains", x: 20.8, y: 8.8, variant: 0 },
-  { kind: "cave-mineral-deposit", x: 8.25, y: 9.15, variant: 0 },
-  { kind: "cave-reward-nook", x: 23.5, y: 7.25, variant: 0 }
-];
-var WOODLAND_CAVE_EXTERIOR = freezeWire({ width: 12, height: 9, entranceTile: { x: 5, y: 3 }, collision: [
-  "000000000000",
-  "000000000000",
-  "000000000000",
-  "000001100000",
-  "000001100000",
-  "011111111110",
-  "111111111111",
-  "111111111111",
-  "111111111111"
-], terrain: ["rrrrrrrrrrrr", "rrrrrrrrrrrr", "rrrrrpprrrrr", "rrrrpppprrrr", "ggrrpppprrgg", "gggrpppprggg", "gggrrppprggg", "ggggrpppgggg", "gggggppggggg"], blockers: [
-  { kind: "cave-rock-wall", detail: "back-cliff", x: 0, y: 0, width: 12, height: 2 },
-  { kind: "cave-rock-wall", detail: "mouth-backstop", x: 5, y: 2, width: 2, height: 1 },
-  { kind: "cave-rock-wall", detail: "left-mouth", x: 0, y: 2, width: 5, height: 2 },
-  { kind: "cave-rock-wall", detail: "right-mouth", x: 7, y: 2, width: 5, height: 2 },
-  { kind: "cave-rock-wall", detail: "left-shoulder", x: 0, y: 4, width: 5, height: 1 },
-  { kind: "cave-rock-wall", detail: "right-shoulder-log", x: 7, y: 4, width: 5, height: 1 },
-  { kind: "cave-rock-wall", detail: "left-edge", x: 0, y: 5, width: 1, height: 1 },
-  { kind: "cave-rock-wall", detail: "right-edge", x: 11, y: 5, width: 1, height: 1 }
-], decorations: [{ kind: "cave-mouth", x: 5.5, y: 3.55, variant: 0 }, { kind: "cave-shrub", x: 1.35, y: 6.35, variant: 0 }, { kind: "cave-shrub", x: 10.35, y: 6.05, variant: 1 }, { kind: "cave-roots-exterior", x: 8.55, y: 3.7, variant: 0 }, { kind: "cave-vines-exterior", x: 2.25, y: 3.15, variant: 0 }, { kind: "cave-grass-tuft", x: 3.45, y: 6.5, variant: 0 }, { kind: "cave-grass-tuft", x: 8.25, y: 6.85, variant: 1 }, { kind: "cave-trail-stones", x: 5.9, y: 6.55, variant: 0 }] });
-var WOODLAND_CAVE_TEMPLATE = freezeWire({
-  version: WOODLAND_CAVE_VERSION,
-  label: "Woodland Cave",
-  siteKind: "woodland-cave",
-  collision: { tileSize: 32, width: W2, height: H2, tiles: [...rows] },
-  entrance: { x: 464, y: 592 },
-  rooms: [{ roomId: "entrance-passage", role: "arrival", x: 12, y: 13, width: 6, height: 6 }, { roomId: "main-cavern", role: "encounter", x: 3, y: 3, width: 17, height: 13 }, { roomId: "reward-pocket", role: "reward", x: 20, y: 4, width: 7, height: 8 }],
-  decorations: decorations.map((d) => ({ ...d })),
-  visual: { originTile: { x: 0, y: 0 }, terrain: [...rows], blockers: [], decorations: decorations.map((d) => ({ ...d })) },
-  encounter: { rank: "C", members: [{ family: "golem", x: 352, y: 288 }, { family: "slime", x: 496, y: 288 }, { family: "sprout", x: 416, y: 384 }] },
-  reward: { kind: "chest", art: "chest", position: { x: 752, y: 256 } }
-});
-var WOODLAND_CAVE_DEFINITION = freezeWire({ package: WOODLAND_CAVE_PACKAGE, template: WOODLAND_CAVE_TEMPLATE, groupSuffix: "hollow-depths" });
-var buildWoodlandCaveD10 = (state, site, binding, options) => buildDefinedFunctionalSiteD10(state, site, binding, WOODLAND_CAVE_DEFINITION, options);
-
-// src/shared/content/site_families_d12.js
-var SITE_FAMILY_DEFINITION_D12 = "site-family-definition-d12-v1";
-var WOODLAND_CAVE_FAMILY_ID = "family:woodland-cave-d12";
-var WOODLAND_CAVE_FAMILY_VERSION = "woodland-cave-family-d12-v1";
-var WOODLAND_CAVE_GENERATOR_VERSION = "woodland-cave-generator-d12-v1";
-var WOODLAND_CAVE_MODULE_CATALOG_VERSION = "woodland-cave-modules-d12-v1";
-var WOODLAND_CAVE_FAMILY_CONTENT_HASH = "9088fb632063a7d4416a52ff0456b33cddd11bd85e26e11b7cf3c2d7931ab01b";
-var WOODLAND_CAVE_FAMILY_PACKAGE_ID = "woodland-cave-family";
-var WOODLAND_CAVE_MODULE_ROLES = freezeWire([
-  "arrival",
-  "encounter",
-  "small-chamber",
-  "large-chamber",
-  "straight-tunnel",
-  "turning-tunnel",
-  "junction",
-  "loop",
-  "reward-dead-end",
-  "stairs-down",
-  "stairs-up",
-  "final-reward"
-]);
-var WOODLAND_CAVE_FAMILY_D12 = freezeWire({
-  version: SITE_FAMILY_DEFINITION_D12,
-  familyId: WOODLAND_CAVE_FAMILY_ID,
-  familyVersion: WOODLAND_CAVE_FAMILY_VERSION,
-  siteKind: "woodland-cave",
-  visualKey: "d10.2.1-woodland-cave",
-  label: "Woodland Cave",
-  biomes: ["woodland"],
-  placement: { kind: "road-connected-exterior", footprint: { width: WOODLAND_CAVE_EXTERIOR.width, height: WOODLAND_CAVE_EXTERIOR.height }, exteriorVersion: "woodland-cave-d10-2-v1" },
-  generatorVersion: WOODLAND_CAVE_GENERATOR_VERSION,
-  moduleCatalogVersion: WOODLAND_CAVE_MODULE_CATALOG_VERSION,
-  tiers: [
-    { tier: "small", weight: 34, floors: [1, 1], rooms: [4, 5], threat: [2, 3], rewardBudget: 1 },
-    { tier: "standard", weight: 38, floors: [1, 2], rooms: [5, 7], threat: [2, 4], rewardBudget: 2 },
-    { tier: "large", weight: 22, floors: [2, 3], rooms: [7, 9], threat: [3, 5], rewardBudget: 3 },
-    { tier: "deep", weight: 6, floors: [3, 4], rooms: [8, 10], threat: [3, 5], rewardBudget: 4 }
-  ],
-  encounterPolicy: { rank: "C", families: ["rust_nibbler", "slime", "sprout", "golem"], maximumMembersPerFloor: 5 },
-  rewardPolicy: { kind: "chest", art: "chest", completion: true },
-  supportedModuleRoles: WOODLAND_CAVE_MODULE_ROLES,
-  source: { milestone: "D12", reference: "D10.2.1 Woodland Cave", provenance: "World-owned deterministic hybrid cave modules" }
-});
-var WOODLAND_CAVE_FAMILY_PACKAGE_D12 = freezeWire({
-  packageId: WOODLAND_CAVE_FAMILY_PACKAGE_ID,
-  packageVersion: WOODLAND_CAVE_FAMILY_VERSION,
-  contentHash: WOODLAND_CAVE_FAMILY_CONTENT_HASH,
-  siteClass: "dungeon",
-  capabilities: ["interior"],
-  biomes: ["woodland"],
-  minimumLevel: 1,
-  maximumLevel: null,
-  repeatable: true,
-  unique: false,
-  reservedSiteId: null
-});
 
 // src/shared/content/woodland_cave_formations_d12_2.js
 var WOODLAND_CAVE_FORMATION_CATALOG_D12_2_VERSION = "woodland-cave-formations-d12-2-v1";
@@ -19631,6 +19644,7 @@ function deriveWoodlandCaveFinaleReservationD13D_F(site) {
   return freezeWire({ ...base, version: SITE_FINALE_RESERVATION_D13D_F, ...copyWire(binding), rewardBinding: null });
 }
 function deriveWoodlandCaveFinaleReservationD13D_G(site) {
+  if (["standard", "large"].includes(site.sizeTier) && !arachnidTreantCaveHereV1(caveReservationIdV1(site))) return freezeWire(baseReservation(site));
   const prior = deriveWoodlandCaveFinaleReservationD13D_F(site);
   if (prior.version !== SITE_FINALE_RESERVATION_D13D_F) return prior;
   return freezeWire({ ...prior, version: SITE_FINALE_RESERVATION_D13D_G, rewardBinding: { version: LARGE_CAVE_FINALE_REWARD_D13D_G, profileId: LARGE_CAVE_FINALE_REWARD_PROFILE_D13D_G, rewardClass: SITE_FINALE_PROVISIONAL_COMPLETION_REWARD_CLASS, balanceStatus: "provisional" } });
@@ -20020,11 +20034,14 @@ async function buildWoodlandCaveFamilyD12_2(state, site, binding, { sha256, runE
   if (!multi) validateGeneratedWoodlandCaveD12_2(generated);
   const episodeKey = (key9) => runEpisode === 1 ? key9 : `episode-${runEpisode}/${key9}`;
   const token7 = async (key9) => bytesToHex((await hashBytes(frameUtf8([WOODLAND_CAVE_FAMILY_PACKAGE_D12_2.packageVersion, site.siteId, episodeKey(key9)]), sha256)).slice(0, 16));
-  const spaces = [], groups = [], economies = [], episodes = [], actors = [], resources = [], floorRecords = [], elites = [], bosses = [], smallFinale = generated.sizeTier === "small" ? deriveSmallCaveFinaleBindingsD13D_B(generated) : null, largeFinale = generated.sizeTier === "large" ? deriveLargeCaveFinaleBindingsD13D_F(generated) : null, standardFinale = generated.sizeTier === "standard" ? deriveStandardCaveFinaleBindingsD13D_D(generated) : null;
-  for (const floor of generated.floors) {
+  const spaces = [], groups = [], economies = [], episodes = [], actors = [], resources = [], floorRecords = [], elites = [], bosses = [], smallFinale = generated.sizeTier === "small" ? deriveSmallCaveFinaleBindingsD13D_B(generated) : null, treant = arachnidTreantCaveHereV1(site.provenance?.reservationId), largeFinale = generated.sizeTier === "large" && treant ? deriveLargeCaveFinaleBindingsD13D_F(generated) : null, standardFinale = generated.sizeTier === "standard" && treant ? deriveStandardCaveFinaleBindingsD13D_D(generated) : null;
+  const caveEnd = (floor) => multi && siteEndsActiveV1(state) ? siteEndSpecV1({ family: "cave", tier: generated.sizeTier, index: floor.index, floorCount: generated.floorCount, reservationId: site.provenance?.reservationId, biome: site.region?.biome }) : null;
+  for (const generatedFloor of generated.floors) {
+    const end = caveEnd(generatedFloor), floor = end ? { ...generatedFloor, encounter: copyWire(siteEndRecipeV1({ ...copyWire(generatedFloor), stairAnchors: Object.fromEntries(Object.entries(generatedFloor.transitions).filter(([, t]) => t).map(([k, t]) => [k, t.anchor])) }, end).encounter) } : generatedFloor;
     const existingFloor = state.d9World.functionalSitesById?.[site.siteId]?.floors?.[floor.index], spaceInstanceId = runEpisode === 1 ? "spi:" + await token7(`floor-${floor.index}-instance`) : existingFloor?.spaceInstanceId, logicalSpaceId = runEpisode === 1 ? "spc:" + await token7(`floor-${floor.index}-space`) : existingFloor?.logicalSpaceId;
     requireContract(spaceInstanceId && logicalSpaceId, "Reset Cave floor identity missing");
     const groupId = `site:${site.siteId}:cave-floor-${floor.index}${runEpisode === 1 ? "" : `:episode-${runEpisode}`}`, entityIds = [], members = [], reviewBossRoster = arachnidTreantReviewRosterD12_5A(state, reservation, floor), slagRoster = slagShaperReviewRosterD12_4K(state, reservation, floor), webRoster = webWeaverReviewRosterD12_4J(state, reservation, floor), nullifierRoster = nullifierReviewRosterD12_4I(state, reservation, floor), berserkerRoster = bloodBerserkerReviewRosterD12_4H_A(state, reservation, floor), citadelRoster = ironCitadelReviewRosterD12_4G(state, reservation, floor), toxicRoster = toxicDecayReviewRosterD12_4F(state, reservation, floor), glacialRoster = glacialWardenReviewRosterD12_4E(state, reservation, floor), swiftRoster = swiftCommanderReviewRosterD12_4D(state, reservation, floor), reviewRoster = reviewBossRoster ?? slagRoster ?? webRoster ?? nullifierRoster ?? berserkerRoster ?? citadelRoster ?? toxicRoster ?? glacialRoster ?? swiftRoster ?? vitalityWeaverReviewRosterD12_4(state, reservation, floor), productionBossRoster = (standardFinale ?? largeFinale) && floor.index === generated.floorCount - 1 && !reviewRoster ? (standardFinale ?? largeFinale).encounterBinding.members : null, bossRoster = reviewBossRoster ?? productionBossRoster, finaleMembers = smallFinale && floor.index === generated.floorCount - 1 && !reviewRoster ? smallFinale.encounterBinding.members : [], encounterMembers = bossRoster ? hasWorldCombat(state) ? [...bossRoster, ...floor.encounter.members.filter((m) => m.roomId !== bossRoster[0].roomId)] : bossRoster : reviewRoster ?? [...floor.encounter.members, ...finaleMembers];
+    requireContract(!end || !reviewRoster && !bossRoster, "Cave site end meets a review or boss roster");
     const episode = { ...unfrozenEpisodeD9(`site-anchor:${site.siteId}:floor:${floor.index}`, runEpisode - 1), geography: { chunkX: site.entrance.chunkX, chunkY: site.entrance.chunkY, anchorOrdinal: floor.index, minimumLevel: copyWire(siteMinimumLevelV1(state, site)), rank: floor.encounter.rank } };
     if (runEpisode === 1) episode.snapshot = prepareEpisodeSnapshotD9(episode, { tick: state.tick, minimumLevel: siteMinimumLevelV1(state, site), scale: siteScalesV1(state, site), participants: Object.values(state.playersById).map((p) => {
       const a = state.entitiesById[p.entityId];
@@ -20038,12 +20055,13 @@ async function buildWoodlandCaveFamilyD12_2(state, site, binding, { sha256, runE
     for (let n = 0; n < encounterMembers.length; n++) {
       const spec = encounterMembers[n], boss = spec.role === "arachnid-treant", enemy = boss ? null : ORDINARY_ENEMIES.find((e) => e.family === spec.family);
       requireContract(boss || enemy, "Unknown D12 cave enemy");
-      const profile2 = boss ? ARACHNID_TREANT_PROFILE : resolveOrdinaryProfile(enemy, floor.encounter.rank), entityId2 = "ent:" + await token7(`floor-${floor.index}-enemy-${n}`), resolved = worldOrdinaryMeleeProfile(state, state.content.definitionsById[profile2.contentDefinitionId]), baseStats = boss ? hasWorldCombat(state) ? worldBossStats(episode.snapshot.effectiveLevel) : { maxHp: profile2.maxHp, attackDamage: profile2.attackDamage } : (hasWorldCombat(state) ? worldEnemyStats : threatEndpointsD9)(episode.snapshot.effectiveLevel, floor.encounter.rank, enemy.budget), source8 = { campaignSeed: state.campaign.seed.seedHex, siteId: site.siteId, floorId: floor.floorId, groupId, roomId: spec.roomId, entityId: entityId2, activatedTick: state.tick }, elite = boss ? null : spec.memberKey === LARGE_CAVE_FINALE_ELITE_KEY_D13D_F ? await createEliteForAffixD13D_B(source8, largeFinale.contentBinding.eliteAffixId, { sha256 }) : spec.memberKey === SMALL_CAVE_FINALE_LEADER_KEY_D13D_B ? await createEliteForAffixD13D_B(source8, smallFinale.contentBinding.eliteAffixId, { sha256 }) : slagRoster && n === 0 ? await createSlagShaperEliteD12_4K(source8, { sha256 }) : webRoster && n === 0 ? await createWebWeaverEliteD12_4J(source8, { sha256 }) : nullifierRoster && n === 0 ? await createNullifierEliteD12_4I(source8, { sha256 }) : berserkerRoster && n === 0 ? await createBloodBerserkerEliteD12_4H_A(source8, { sha256 }) : citadelRoster && n === 0 ? await createIronCitadelEliteD12_4G(source8, { sha256 }) : toxicRoster && n === 0 ? await createToxicDecayEliteD12_4F(source8, { sha256 }) : glacialRoster && n === 0 ? await createGlacialWardenEliteD12_4E(source8, { sha256 }) : swiftRoster && n === 0 ? await createSwiftCommanderEliteD12_4D(source8, { sha256 }) : swiftRoster && n === 1 ? await createVitalityWeaverEliteD12_4(source8, { sha256 }) : reviewRoster && !bossRoster && n === 0 ? await createVitalityWeaverEliteD12_4(source8, { sha256 }) : null, stats = applyEliteActorStatsD12_4(baseStats, elite);
+      const profile2 = boss ? ARACHNID_TREANT_PROFILE : resolveOrdinaryProfile(enemy, floor.encounter.rank), entityId2 = "ent:" + await token7(`floor-${floor.index}-enemy-${n}`), resolved = worldOrdinaryMeleeProfile(state, state.content.definitionsById[profile2.contentDefinitionId]), baseStats = boss ? hasWorldCombat(state) ? worldBossStats(episode.snapshot.effectiveLevel) : { maxHp: profile2.maxHp, attackDamage: profile2.attackDamage } : (hasWorldCombat(state) ? worldEnemyStats : threatEndpointsD9)(episode.snapshot.effectiveLevel, floor.encounter.rank, enemy.budget), source8 = { campaignSeed: state.campaign.seed.seedHex, siteId: site.siteId, floorId: floor.floorId, groupId, roomId: spec.roomId, entityId: entityId2, activatedTick: state.tick }, elite = boss ? null : end && n === 0 ? await (floor.encounter.siteEnd.named ? createNamedEliteV1(source8, floor.encounter.siteEnd.named, { sha256 }) : createEliteForAffixD13D_B(source8, spec.eliteAffixId, { sha256 })) : spec.memberKey === LARGE_CAVE_FINALE_ELITE_KEY_D13D_F ? await createEliteForAffixD13D_B(source8, largeFinale.contentBinding.eliteAffixId, { sha256 }) : spec.memberKey === SMALL_CAVE_FINALE_LEADER_KEY_D13D_B ? await createEliteForAffixD13D_B(source8, smallFinale.contentBinding.eliteAffixId, { sha256 }) : slagRoster && n === 0 ? await createSlagShaperEliteD12_4K(source8, { sha256 }) : webRoster && n === 0 ? await createWebWeaverEliteD12_4J(source8, { sha256 }) : nullifierRoster && n === 0 ? await createNullifierEliteD12_4I(source8, { sha256 }) : berserkerRoster && n === 0 ? await createBloodBerserkerEliteD12_4H_A(source8, { sha256 }) : citadelRoster && n === 0 ? await createIronCitadelEliteD12_4G(source8, { sha256 }) : toxicRoster && n === 0 ? await createToxicDecayEliteD12_4F(source8, { sha256 }) : glacialRoster && n === 0 ? await createGlacialWardenEliteD12_4E(source8, { sha256 }) : swiftRoster && n === 0 ? await createSwiftCommanderEliteD12_4D(source8, { sha256 }) : swiftRoster && n === 1 ? await createVitalityWeaverEliteD12_4(source8, { sha256 }) : reviewRoster && !bossRoster && n === 0 ? await createVitalityWeaverEliteD12_4(source8, { sha256 }) : null, stats = applyEliteActorStatsD12_4(baseStats, elite);
       requireContract(resolved, "Missing D12 cave actor profile");
+      const body = siteEndBodyV1(end && n === 0 ? floor.encounter.siteEnd : null, { ...stats, hullRadius: resolved.hullRadius, combatRadius: resolved.combatRadius });
       if (elite) elites.push(elite);
       entityIds.push(entityId2);
       members.push({ entityId: entityId2, enemyDefinitionId: boss ? ARACHNID_TREANT_PROFILE.contentDefinitionId : enemy.enemyDefinitionId, profileId: resolved.contentDefinitionId, position: copyWire(spec.position) });
-      actors.push({ entityId: entityId2, contentDefinitionId: resolved.contentDefinitionId, kind: "actor", ownerCharacterId: null, team: "hostile", hp: combatInteger(stats.maxHp), maxHp: combatInteger(stats.maxHp), position: copyWire(spec.position), hullRadius: resolved.hullRadius, combatRadius: resolved.combatRadius, movementIntent: { x: 0, y: 0 }, moveSpeed: resolved.moveSpeed, alive: true, attackDamage: combatInteger(stats.attackDamage), attackReach: resolved.attackReach, attackReachMode: resolved.attackReachMode, attackDelayTicks: resolved.attackDelayTicks, attackTimer: resolved.attackDelayTicks, nextAttackActionSequence: 1, movedLastTick: false, ai: boss ? { kind: "simpleMelee", acquireRange: ORDINARY_ACQUIRE_RANGE, updatesApplied: 0, interiorNavigation: initialCaveInteriorNavigationD12_3A(state.tick) } : actorAi4(enemy.family, state.tick), residency: { spaceInstanceId, residencyRevision: 1 } });
+      actors.push({ entityId: entityId2, contentDefinitionId: resolved.contentDefinitionId, kind: "actor", ownerCharacterId: null, team: "hostile", hp: combatInteger(body.maxHp), maxHp: combatInteger(body.maxHp), position: copyWire(spec.position), hullRadius: body.hullRadius, combatRadius: body.combatRadius, movementIntent: { x: 0, y: 0 }, moveSpeed: resolved.moveSpeed, alive: true, attackDamage: combatInteger(body.attackDamage), attackReach: resolved.attackReach, attackReachMode: resolved.attackReachMode, attackDelayTicks: resolved.attackDelayTicks, attackTimer: resolved.attackDelayTicks, nextAttackActionSequence: 1, movedLastTick: false, ai: boss ? { kind: "simpleMelee", acquireRange: ORDINARY_ACQUIRE_RANGE, updatesApplied: 0, interiorNavigation: initialCaveInteriorNavigationD12_3A(state.tick) } : actorAi4(enemy.family, state.tick), residency: { spaceInstanceId, residencyRevision: 1 } });
     }
     if (bossRoster && multi && hasBossHostingV1(state.d9World.plannedWorld)) proveBossArenaV1(floor, "arachnid_treant", bossRoster[0].position, { supportPositions: bossRoster.slice(1, 4).map((m) => m.position), liveSupportCount: 3 });
     if (bossRoster) bosses.push(await createArachnidTreantD12_5A({ campaignSeed: state.campaign.seed.seedHex, siteId: site.siteId, floorId: floor.floorId, groupId, roomId: bossRoster[0].roomId, entityId: entityIds[0], homePosition: bossRoster[0].position, summons: bossRoster.slice(1, 4).map((row, index) => ({ entityId: entityIds[index + 1], position: row.position })), activatedTick: state.tick }, { sha256 }));
@@ -20711,6 +20729,7 @@ function validateFunctionalSiteStateD9(state) {
       if (isCryptFamily(f3)) validateCryptRuntime(state, f3);
       if (isFortFamily(f3)) validateFortRuntimeV1(state, f3);
       if (isRuinFamily(f3)) validateRuinRuntimeV1(state, f3);
+      if (isGeneratedCaveFamilyD12(f3)) validateCaveSiteEndsV1(state, f3);
       let cleared = true;
       for (const floor of f3.floors) {
         const space2 = state.spacesByInstanceId[floor.spaceInstanceId], group2 = state.groupsById[floor.groupId], episode2 = state.d9World.episodes[floor.groupId], economy2 = state.encounterEconomy.groups[floor.groupId];
