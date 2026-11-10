@@ -936,7 +936,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-DFYWMG3H.js";
+} from "./chunk-5XDIBZXF.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -76507,9 +76507,9 @@ function huntTrackerV1(e) {
     tag: "TROPHY TAKEN",
     title: h.swift ? "Swift kill!" : name + " falls",
     done: 3,
-    line: (h.swift ? "The chest rolls a step better. " : "") + (e.rewardClaimed ? "Chest claimed. Its trophy hangs on the post." : "Open the chest by the horn post.")
+    line: (h.swift ? "The chest holds gear, never a Common. " : "") + (e.rewardClaimed ? "Chest claimed. Its trophy hangs on the post." : "Open the chest by the horn post.")
   };
-  if (h.phase === "horn") return { ...base, title: name + " answers!", done: 1, bar: 1, barText: "Swift kill " + clockV4(h.swiftTicks), line: "Beat the champion inside a minute for a better chest." };
+  if (h.phase === "horn") return { ...base, title: name + " answers!", done: 1, bar: 1, barText: "Swift kill " + clockV4(h.swiftTicks), line: "Beat the champion inside a minute and its chest is sure to hold gear." };
   const left = h.swiftTicksLeft, pct2 = Math.max(0, Math.round(h.ratio * 100));
   return {
     ...base,

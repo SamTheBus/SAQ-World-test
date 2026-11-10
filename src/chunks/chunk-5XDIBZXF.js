@@ -3667,11 +3667,13 @@ var HUNT_POLICY = freezeWire({
   charge: [[190, -40], [-190, -40], [170, 80], [-170, 80], [40, -150], [-40, 150], [140, -110], [-140, 110]],
   home: [34, 26],
   swiftTicks: 3600,
-  quickClearQualityHundredths: 100,
   presentationScale: 2,
+  // On top of its S rank and elite numbers: 3x health and 2/3 damage, about 36x an ordinary enemy's health
+  // and 5x its damage (a lair boss is 45x and 4x). Its kill drops like a site mini-boss's (site_ends_v1.js).
+  championStats: { maxHp: { numerator: 3, denominator: 1 }, attackDamage: { numerator: 2, denominator: 3 } },
   activeRadius: 768,
   playerClearance: 56,
-  reward: "one completion chest per hero who fought here, rolled like an elite drop; a step better after a swift kill",
+  reward: "the champion drops like a site mini-boss; one completion chest per hero who fought here, rolled like an elite drop; after a swift kill the chest always holds gear and never a Common",
   reset: "nobody left nearby before it falls: the champion slinks back into the trees at full health and the horn hangs on the post again",
   simulationHz: 60
 });
@@ -4387,7 +4389,8 @@ function rewardProgressionD9(depth, sourceId) {
   return freezeWire(validateRewardProgressionD9({ version: D9_REWARD_PROGRESSION, policy: D9_PROFILE.progressionPolicy, sourceDepth: progressionWire(progressionBigInt(depth)), quality: 1, sourceId, tomeEligibility: "base-single-d7-v1" }));
 }
 function validateRewardProgressionD9(v) {
-  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "siteReward", "gearClass", "armor", "wardrobe", "unique", "boon", "quickClear", "affixes"]);
+  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "siteReward", "gearClass", "armor", "wardrobe", "unique", "boon", "quickClear", "swiftKill", "affixes"]);
+  requireContract(v.swiftKill === void 0 || v.swiftKill === true && v.rarityPolicyHash !== void 0, "Swift kill reward policy");
   requireContract(v.affixes === void 0 || v.affixes === AFFIXES_V2 && v.gearClass !== void 0, "Affix pool policy");
   requireContract(v.boon === void 0 || v.boon === "fortune" && v.rarityPolicyHash !== void 0, "Boon reward policy");
   requireContract(v.quickClear === void 0 || v.quickClear === true && v.rarityPolicyHash !== void 0 && v.combatQuality === "completion", "Quick clear reward policy");
@@ -4441,7 +4444,7 @@ var boonRewardQualityV1 = (progression) => progression.boon === "fortune" ? BOON
 var captureQuickClearRewardV1 = (s, source7, progression) => {
   if (progression.rarityPolicyHash === void 0 || source7.kind !== "chest") return progression;
   const r = s.d9World?.worldEvents?.records[source7.groupId];
-  return r?.nest?.rage || r?.hunt?.swift === true ? { ...progression, quickClear: true } : progression;
+  return r?.hunt?.swift === true ? { ...progression, swiftKill: true } : r?.nest?.rage ? { ...progression, quickClear: true } : progression;
 };
 var quickClearRewardQualityV1 = (progression) => progression.quickClear ? NEST_POLICY.quickClearQualityHundredths : 0;
 var blessingOfV1 = (s, playerId) => {
@@ -4980,7 +4983,7 @@ function generateAtPrecision(c, seed, input, { tier = null, family: family2 = nu
   }
   const rng3 = rewardStream(seed), random = () => rng3.random(), pick6 = (a) => a[Math.floor(random() * a.length)], power2 = progression.combatHash ? depth : progressionWire(progressionBigInt(depth) / 4n + 1n);
   const rarityRandom = progression.combatHash ? random() : null, rolledTier = tier ?? (progression.combatHash ? isSourceLootV4(progression.rarityPolicyHash) ? worldGearRarityFor(progression.rarityPolicyHash, depth, progression.rarityHeroLevel, progression.rarityRole, progression.siteReward ?? null, rarityRandom, (progression.modifiers?.qualityHundredths ?? 0) + boonRewardQualityV1(progression) + quickClearRewardQualityV1(progression)) : hasWorldRarityV2(progression) ? siteRewardRarityV1(progression.siteReward, worldGearRarityV2(depth, progression.rarityHeroLevel, progression.rarityRole, rarityRandom, (progression.modifiers?.qualityHundredths ?? 0) + siteRewardQualityV1(progression.siteReward) + boonRewardQualityV1(progression) + quickClearRewardQualityV1(progression))) : worldGearRarity(depth, progression.combatQuality, rarityRandom, progression.modifiers?.qualityHundredths ?? 0) : rollRarityD9(depth, progression.quality, random));
-  const rarityTier = uq && rolledTier < UNIQUE_MIN_RARITY ? UNIQUE_MIN_RARITY : rolledTier;
+  const rarityTier = uq && rolledTier < UNIQUE_MIN_RARITY ? UNIQUE_MIN_RARITY : progression.swiftKill && rolledTier < 1 ? 1 : rolledTier;
   safeInteger(rarityTier, 0, 5);
   const cls = progression.gearClass ?? null, classOffhand = cls ? CLASS_GEAR[cls].offhand : null, wardrobe = Boolean(cls) && progression.wardrobe === WARDROBE_V1, classFamilies = wardrobe ? CLASS_GEAR_FAMILIES_V2 : CLASS_GEAR_FAMILIES, families = cls ? classFamilies : progression.armor === "overall" ? ONE_PIECE_GEAR_FAMILIES : GEAR_FAMILIES;
   const type = family2 ?? pick6(families), sub = type === "subweapon" ? subType ?? (cls ? classOffhand : pick6(["shield", "dagger", "tome"])) : null, own2 = type === "cape" ? CAPE_NOUNS : cls && type !== "ring" ? classGearNouns(cls, type) : GEAR_NOUNS[sub ?? type], shared = wardrobe && type === "helmet" ? SHARED_HELMET_NOUNS : [], nouns = [...own2 ?? [], ...shared], n = noun ?? (shared.length && random() < 0.2 ? pick6(shared) : pick6(own2));
@@ -6420,7 +6423,7 @@ function rollContentReward(state, player, { sourceEntityId, rank, kind: kind2, o
   const gold = (n) => !modifiers || modifiers.goldHundredths === 100 ? n : multiplyAmount(rewardAmount(n), `${Math.floor(modifiers.goldHundredths / 100)}.${String(modifiers.goldHundredths % 100).padStart(2, "0")}`.replace(/0+$/, "").replace(/\.$/, ""));
   const profile2 = progression?.version === D9_REWARD_PROGRESSION ? rewardProfileD9(progression, rank) : rewardProfile(rank), key5 = `d5-eco-v1/${state.campaign.seed.seedHex}/${player.playerId}/${sourceEntityId}`, roll = hashReward(key5 + "/branch") % 100, pool = REWARD_POOLS[Math.min(2, ["C", "B", "A", "S"].indexOf(rank))];
   if (hasWorldCombat(state)) {
-    const l = BigInt(progression?.sourceDepth ?? 1), elite = progression?.combatQuality === "elite", source7 = rewardSourceV1(progression), unit3 = BigInt(goldUnit(l > 50n ? 50 : Number(l))), value = String(kind2 === "chest" ? unit3 * BigInt(ECONOMY_V1.chestUnits) * (progression?.siteReward === "lair-chest" ? BigInt(ECONOMY_V1.bossChestGold) : 1n) : unit3 * BigInt(ECONOMY_V1.sourceGold[source7])), gear = isSourceLootV4(progression?.rarityPolicyHash) ? hashReward(key5 + "/combat-gear-v3") % 1e3 < lootGearPerMilleFor(progression.rarityPolicyHash, progression.rarityRole, progression.siteReward ?? null, modifiers?.occurrenceHundredths ?? 100) : kind2 === "chest" || elite || occurrence(hashReward(key5 + "/combat-gear"), 10, key5 + "/combat-gear");
+    const l = BigInt(progression?.sourceDepth ?? 1), elite = progression?.combatQuality === "elite", source7 = rewardSourceV1(progression), unit3 = BigInt(goldUnit(l > 50n ? 50 : Number(l))), value = String(kind2 === "chest" ? unit3 * BigInt(ECONOMY_V1.chestUnits) * (progression?.siteReward === "lair-chest" ? BigInt(ECONOMY_V1.bossChestGold) : 1n) : unit3 * BigInt(ECONOMY_V1.sourceGold[source7])), gear = progression?.swiftKill === true || (isSourceLootV4(progression?.rarityPolicyHash) ? hashReward(key5 + "/combat-gear-v3") % 1e3 < lootGearPerMilleFor(progression.rarityPolicyHash, progression.rarityRole, progression.siteReward ?? null, modifiers?.occurrenceHundredths ?? 100) : kind2 === "chest" || elite || occurrence(hashReward(key5 + "/combat-gear"), 10, key5 + "/combat-gear"));
     return {
       gold: gold(value),
       souls: kind2 === "chest" ? hashReward(key5 + "/combat-soul") % 100 < 35 ? 1 : 0 : source7 === "ordinary" ? hashReward(key5 + "/combat-soul") % 100 < ECONOMY_V1.ordinarySoulPercent ? 1 : 0 : ECONOMY_V1.sourceSouls[source7],
@@ -12220,7 +12223,7 @@ function huntChampionElitesV1(s, g, { includeDefeated = false } = {}) {
 }
 function huntChampionProfileV1(s, g, actor, profile2) {
   if (!profile2 || !s.eliteCombat?.elitesByEntityId[actor.entityId] || huntChampionIdV1(s, g) !== actor.entityId) return profile2;
-  const m = SITE_MINI_BOSS_V1;
+  const m = HUNT_POLICY.championStats;
   return { ...profile2, maxHp: combatInteger(multiplyCombat(profile2.maxHp, m.maxHp.numerator, m.maxHp.denominator), "round"), attackDamage: combatInteger(multiplyCombat(profile2.attackDamage, m.attackDamage.numerator, m.attackDamage.denominator), "round") };
 }
 
@@ -12968,7 +12971,12 @@ function validateSiteEndFloorV1(state, site, floor) {
   return true;
 }
 function siteRewardKindV1(state, source7, spawnEntityId = null, standardChest = false) {
-  if (!["enemy", "chest"].includes(source7?.kind) || !siteEndsActiveV1(state)) return null;
+  if (!["enemy", "chest"].includes(source7?.kind)) return null;
+  if (source7.kind === "enemy") {
+    const g = state.groupsById?.[source7.groupId], id2 = spawnEntityId ?? g?.entityIds[source7.spawnOrdinal ?? source7.ordinal];
+    if (id2 && huntChampionIdV1(state, g) === id2) return "mini-boss";
+  }
+  if (!siteEndsActiveV1(state)) return null;
   let site = null, floor = null;
   for (const s of Object.values(state.d9World.functionalSitesById ?? {})) {
     floor = s.floors?.find((f3) => f3.groupId === source7.groupId) ?? null;
