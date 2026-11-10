@@ -185,6 +185,7 @@ import {
   ORDINARY_ENEMIES,
   ORDINARY_PROFILES,
   OVERALL_LEGS,
+  PARTY_HEALTH_PERCENT_V1,
   PENDING_HOSTILE_HAZARD_D12_4J_VERSION,
   PLANNED_ADDRESS_OFFSET,
   PLANNED_CAVE_ID,
@@ -441,6 +442,7 @@ import {
   combatInteger,
   combatIntegerWire,
   combatPlayer,
+  combatRatioV1,
   compareAmount,
   compareCombat,
   compileBoundOverworld,
@@ -498,6 +500,10 @@ import {
   eventAtSlotV1,
   eventCacheTileV1,
   eventOrdinal,
+  fairChestViewV1,
+  fairLevelsV1,
+  fairPlayOnV1,
+  fairRewardSourceV1,
   ferryNetworkV1,
   findRuntimeSiteSocketD9,
   finiteNodeRank,
@@ -699,6 +705,7 @@ import {
   plannedStartTiles,
   playerAlbumV1,
   playerXpProgress,
+  playingHeroesV1,
   pointBalances,
   populationPointAllowed,
   populationRegionAt,
@@ -982,7 +989,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-37TNQPR6.js";
+} from "./chunk-BH2GIHXB.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -62189,7 +62196,7 @@ function useEconomicResource(s, m, p, payload, prepareEpisode = null, primaryDam
     prepareEpisode(s.groupsById[r.groupId], r.position);
   }
   const rewardClass = rewardClassForCompletionResourceD13D_C(s, r), source3 = episodeSource(s, s.groupsById[r.groupId], r.kind, r.ordinal, rewardClass), personal = eventPersonalClaim(s, r, p.playerId) ?? personalFinaleClaimD13D_G1(s, r.groupId, source3.sourceEntityId, p.playerId), players = personal ? [p] : Object.values(s.playersById).filter((p2) => lineToPoint(s, s.entitiesById[p2.entityId], r.spaceInstanceId, r.position, ORDINARY_ACTIVITY_RADII.prepareRadius)).sort((a, b) => a.playerId.localeCompare(b.playerId));
-  const plans2 = s.d9World ? players.map((p2) => prepareEpisodeReward(s, p2, source3, r.position, r.spaceInstanceId)) : null;
+  const plans2 = s.d9World ? players.map((p2) => prepareEpisodeReward(s, p2, fairRewardSourceV1(source3, fairChestViewV1(s, r.groupId, p2)), r.position, r.spaceInstanceId)) : null;
   if (eventPersonalClaim(s, r, p.playerId)) markEventClaim(s, r, p);
   else if (personal) markPersonalFinaleClaimD13D_G1(s, r.groupId, source3.sourceEntityId, p.playerId);
   else s.encounterEconomy.groups[r.groupId].usedResources[source3.sourceEntityId] = { tick: s.tick, playerIds: players.map((p2) => p2.playerId) };
@@ -64431,6 +64438,46 @@ function createActivityProgression(state, manifest, measure2) {
       counters.threatSnapshots++;
     });
   }
+  function lockPartySize(group, radius) {
+    const snap = group.threatSnapshot;
+    if (!state.d9World || !state.subweaponCombat || !snap || snap.version !== D9_THREAT_VERSION || snap.partySize !== void 0 || group.cleared) return;
+    const live = group.entityIds.map((id) => state.entitiesById[id]).filter((a) => a.alive);
+    if (!live.length) return;
+    const n = Math.min(PARTY_HEALTH_PERCENT_V1.length, eligibleNearbyParticipants(state, group.spaceInstanceId, live.map((a) => a.position), radius).length);
+    if (n < 2) return;
+    group.threatSnapshot = { ...snap, partySize: n };
+    for (const actor of group.entityIds.map((id) => state.entitiesById[id])) {
+      const oldMax = asCombatAmount(actor.maxHp), newMax = asCombatAmount(encounterActorProfile(state, group, actor).maxHp);
+      if (actor.alive) actor.hp = combatInteger(minCombat(newMax, maxCombat(1, addCombat(actor.hp, subtractCombat(newMax, oldMax)))));
+      actor.maxHp = combatInteger(newMax);
+    }
+  }
+  function fairView(entityId2, player) {
+    const group = groupsByEntity.get(entityId2);
+    if (!group?.threatSnapshot || !player) return null;
+    let member;
+    try {
+      member = api.combatLevel(entityId2);
+    } catch {
+      return null;
+    }
+    const view3 = fairLevelsV1(state, group.groupId, member, player);
+    return view3 ? { ...view3, base: member, group } : null;
+  }
+  const profileAt = (group, actor, level) => encounterActorProfile(state, { ...group, threatSnapshot: { ...group.threatSnapshot, levelsByEntityId: { ...group.threatSnapshot.levelsByEntityId, [actor.entityId]: level } } }, actor);
+  function fairHit(source3, target) {
+    const hero = source3.team === "party" && target.team === "hostile" ? source3 : source3.team === "hostile" && target.team === "party" ? target : null;
+    if (!hero) return null;
+    const enemy = hero === source3 ? target : source3, view3 = fairView(enemy.entityId, playersByEntity.get(hero.entityId));
+    if (!view3) return null;
+    const base = profileAt(view3.group, enemy, view3.base), seen4 = profileAt(view3.group, enemy, view3.member);
+    if (hero === source3) {
+      const r2 = combatRatioV1(base.maxHp, seen4.maxHp);
+      return r2 ? { ...r2, back: { n: r2.d, d: r2.n }, member: view3.member } : null;
+    }
+    const r = combatRatioV1(seen4.attackDamage, base.attackDamage);
+    return r ? { ...r, back: null, member: view3.member } : null;
+  }
   function resetGroup(group) {
     if (state.d9World?.episodes[group.groupId]?.snapshot) return;
     if (group.siteId !== null || group.cleared) return;
@@ -64448,13 +64495,17 @@ function createActivityProgression(state, manifest, measure2) {
     if (!group || target.team !== "hostile") return [];
     const reward = ordinaryKillXp(target, group, state);
     if (!reward) return [];
+    const seenGroup = (player) => {
+      const view3 = fairView(target.entityId, player);
+      return view3 ? { view: view3, group: { ...group, threatSnapshot: { ...group.threatSnapshot, levelsByEntityId: { ...group.threatSnapshot.levelsByEntityId, [target.entityId]: view3.member } } } } : { view: null, group };
+    };
     const siteKind = siteRewardKindV1(state, { kind: "enemy", groupId: group.groupId }, target.entityId), killXp = (player) => {
-      const base = ordinaryKillXp(target, group, state, player);
-      return siteKind ? String(BigInt(base) + BigInt(siteClearXpV2(siteKind, group.threatSnapshot.levelsByEntityId[target.entityId], player.progression.level))) : base;
+      const seen4 = seenGroup(player).group, base = ordinaryKillXp(target, seen4, state, player);
+      return siteKind ? String(BigInt(base) + BigInt(siteClearXpV2(siteKind, seen4.threatSnapshot.levelsByEntityId[target.entityId], player.progression.level))) : base;
     };
     const xpOnly = BROOD_XP_ONLY_V1.includes(ordinaryEnemyForProfile(target.contentDefinitionId)?.family);
     const rows = eligibleNearbyParticipants(state, target.residency.spaceInstanceId, [target.position], radius).map((player) => {
-      const inventoryPlan = xpOnly ? null : prepareEpisodeReward(state, player, episodeSource(state, group, "enemy", group.entityIds.indexOf(target.entityId)), target.position, target.residency.spaceInstanceId), rate = stats3.get(player.entityId).heroXpRate;
+      const inventoryPlan = xpOnly ? null : prepareEpisodeReward(state, player, fairSource(episodeSource(state, group, "enemy", group.entityIds.indexOf(target.entityId)), seenGroup(player).view), target.position, target.residency.spaceInstanceId), rate = stats3.get(player.entityId).heroXpRate;
       const next = awardPlayerXp(player.progression, combatInteger(multiplyCombat(insightXpV1(state, player.playerId, multiplyCombat(killXp(player), rate?.n ?? 1, rate?.d ?? 1)), 1e4 + (player.bestiary?.stats.xpFind ?? 0), 1e4))), d8 = player.d8 ? updateHighestHeroLevel(player.d8, next.level) : null, leveled = progressionBigInt(next.level) > progressionBigInt(player.progression.level);
       const resolved = leveled ? resolvePlayerStats({ ...player, progression: next, ...d8 ? { d8 } : {} }) : null;
       return { player, inventoryPlan, xpOnly, next, d8, resolved, levels: progressionBigInt(next.level) - progressionBigInt(player.progression.level) };
@@ -64462,6 +64513,7 @@ function createActivityProgression(state, manifest, measure2) {
     progressionWire(rows.reduce((sum2, row2) => sum2 + row2.levels, progressionBigInt(counters.levelUps)));
     return rows;
   }
+  const fairSource = fairRewardSourceV1;
   function awardDefeat(target, radius, prepared = null) {
     const group = groupsByEntity.get(target.entityId);
     if (!group || target.team !== "hostile") return;
@@ -64473,7 +64525,7 @@ function createActivityProgression(state, manifest, measure2) {
         applyEpisodeReward(state, player, row2.inventoryPlan);
         if (!row2.xpOnly) {
           dropPotions(state, player, target, potionDropCount(state, player, target));
-          bestiaryDefeatV1(state, player, target, { elite: Boolean(state.eliteCombat?.elitesByEntityId[target.entityId]), level: Number(group.threatSnapshot?.levelsByEntityId[target.entityId] ?? 1) });
+          bestiaryDefeatV1(state, player, target, { elite: Boolean(state.eliteCombat?.elitesByEntityId[target.entityId]), level: Number(fairView(target.entityId, player)?.member ?? group.threatSnapshot?.levelsByEntityId[target.entityId] ?? 1) });
         }
         markEarning(state, manifest, player);
         player.progression = copyWire(next);
@@ -64546,7 +64598,7 @@ function createActivityProgression(state, manifest, measure2) {
     if (key3.some((v, i) => v !== old2?.[i])) equipmentChanged(p);
     return stats3.get(id);
   }
-  return Object.freeze({
+  const api = Object.freeze({
     resolvedStats,
     freezeGroup,
     resetGroup,
@@ -64554,6 +64606,8 @@ function createActivityProgression(state, manifest, measure2) {
     prepareDefeat,
     refreshGroups,
     equipmentChanged,
+    fairHit,
+    fairView,
     combatLevel(entityId2) {
       const player = playersByEntity.get(entityId2);
       if (player) return player.progression.level;
@@ -64569,7 +64623,10 @@ function createActivityProgression(state, manifest, measure2) {
     },
     prepareCombat(actor, radius) {
       const group = groupsByEntity.get(actor.entityId);
-      if (group) freezeGroup(group, radius, "combat");
+      if (group) {
+        freezeGroup(group, radius, "combat");
+        lockPartySize(group, radius);
+      }
     },
     prepareResource(group, point13) {
       freezeGroup(group, 768, "resource", [point13]);
@@ -64584,6 +64641,7 @@ function createActivityProgression(state, manifest, measure2) {
     },
     inspect: () => ({ ...counters, cachedPlayers: stats3.size })
   });
+  return api;
 }
 
 // src/simulation/ordinary_evade.js
@@ -71583,7 +71641,8 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
       progression.prepareCombat(target, scheduler.config.prepareRadius);
     }
     const levelGapForWorld = usesWildernessFairnessV3_2(state) ? wildernessFairLevelGap : worldLevelGapMultiplier;
-    const levelGap = hasWorldCombat(state) && !usesSpawnLevelsV1(state) && source3.team !== target.team ? levelGapForWorld(progression.combatLevel(source3.team === "party" ? source3.entityId : target.entityId), source3.team === "hostile" && attribution?.sourceLevel !== void 0 ? attribution.sourceLevel : progression.combatLevel(source3.team === "hostile" ? source3.entityId : target.entityId)) : null;
+    const fair = progression.fairHit(source3, target);
+    const levelGap = hasWorldCombat(state) && !usesSpawnLevelsV1(state) && source3.team !== target.team ? levelGapForWorld(progression.combatLevel(source3.team === "party" ? source3.entityId : target.entityId), fair ? fair.member : source3.team === "hostile" && attribution?.sourceLevel !== void 0 ? attribution.sourceLevel : progression.combatLevel(source3.team === "hostile" ? source3.entityId : target.entityId)) : null;
     let raw = requested ?? asCombatAmount(source3.attackDamage), critical = resolvedComponent ? attribution.inheritedCritical === true : false, defense = null, defenseStats = null, barrierAbsorption = null, pendingPlayerRng = null, pendingForcedTransient = null, eliteGuard = null, eliteAttack = null;
     const sourceSubweaponSuppressed = source3.team === "party" && subweaponSuppressedD12_4I(state, source3.entityId);
     if (!resolvedComponent && mechanic === "main") {
@@ -71612,6 +71671,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
       raw = multiplyCombat(raw, levelGap.incoming.n, levelGap.incoming.d);
       if (periodic) raw = combatInteger(raw);
     }
+    if (fair && !resolvedComponent) raw = outgoingCombat(multiplyCombat(raw, fair.n, fair.d));
     if (target.team === "hostile" && !periodic) {
       raw = bossCombat.mitigateIncoming(target, raw, source3, attribution).damage;
       const guarded = eliteCombat.mitigateDirectDamage(source3, target, raw, { periodic, trigger: attribution?.trigger ?? null, scripted: attribution?.scripted === true });
@@ -71710,7 +71770,8 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
     if (!target.alive) cancelSubweaponResidency(state, target.entityId);
     if (target.team === "party") family.reconcile(target.entityId);
     if (defense?.counter && target.alive && source3.alive && clearHullGap(target, source3) <= 20 && meleeLineClear(state.spacesByInstanceId[target.residency.spaceInstanceId].collision, target, source3)) damage(target, source3, defense.counter.damage, defense.counter.mechanic, null, { sourceItem: damageSourceItem(playerFor(target.entityId), defense.counter.mechanic), trigger: "reactive" });
-    return { critical, attemptedDamage: combatInteger(raw), damage: result.damage, defeated: !result.targetAlive, targetAlive: result.targetAlive, eliteGuard, eliteAttack };
+    const back = fair && !resolvedComponent ? fair.back : null, own = (v) => back ? combatInteger(multiplyCombat(v, back.n, back.d)) : v;
+    return { critical, attemptedDamage: own(combatInteger(raw)), damage: own(result.damage), defeated: !result.targetAlive, targetAlive: result.targetAlive, eliteGuard, eliteAttack };
   }
   const hostileMotion = (a) => worldHostileMeleeTiming(state, ordinaryEnemyForProfile(a.contentDefinitionId)?.family);
   function advanceHostileMelee(a, impacts2) {
@@ -73147,7 +73208,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
   const presentationSiteAnchors = createSiteAnchorProjectionCacheV1();
   let cachedKey = null, cachedModel = null, page = null, pageKey = null, compiled = null, inventoryKey = null, inventory = null;
   let safeRegions = null;
-  const playerViews = /* @__PURE__ */ new Map(), creatureFacingViews = /* @__PURE__ */ new Map();
+  const playerViews = /* @__PURE__ */ new Map(), creatureFacingViews = /* @__PURE__ */ new Map(), fairRatios = /* @__PURE__ */ new Map();
   let eventKey = null, eventView = null;
   const SITE_TRUTH_REFRESH_TICKS = 15;
   let siteTruthState = null, siteTruthKey = null, siteTruthTick = -Infinity, siteTruthView = null;
@@ -73225,6 +73286,22 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
           return [{ ...r, ...bossCompletion ? { bossCompletion } : {}, ...finaleCompletion ? { finaleCompletion } : {}, canUse: canUseResource(state, m, player, { groupId: r.groupId, episode: r.episode, ordinal: r.ordinal, inventoryRevision: player.inventory.revision }) }];
         }));
         const hostileHazards = projectHostileHazardsD12_4J(state, ctx.spaceInstanceId), bossHazards = projectBossHazardsD12_5A(state, ctx.spaceInstanceId);
+        const fairOn = fairPlayOnV1(state), fairOf = (a, group) => {
+          if (!fairOn || a?.team !== "hostile" || !group?.threatSnapshot) return null;
+          const episode = state.d9World?.episodes[group.groupId]?.snapshot;
+          if (!episode) return null;
+          const member = state.bossCombat?.summonsByEntityId?.[a.entityId] ? episode.effectiveLevel : group.threatSnapshot.levelsByEntityId[a.entityId] ?? episode.effectiveLevel, view3 = fairLevelsV1(state, group.groupId, member, player);
+          if (!view3) return null;
+          const key4 = [a.entityId, String(member), String(view3.member), group.threatSnapshot.activatedTick, group.threatSnapshot.partySize ?? 1].join("|");
+          let r = fairRatios.get(key4);
+          if (r === void 0) {
+            const at8 = (l) => encounterActorProfile(state, { ...group, threatSnapshot: { ...group.threatSnapshot, levelsByEntityId: { ...group.threatSnapshot.levelsByEntityId, [a.entityId]: l } } }, a).maxHp;
+            r = combatRatioV1(at8(view3.member), at8(member));
+            if (fairRatios.size > 2e3) fairRatios.clear();
+            fairRatios.set(key4, r);
+          }
+          return r ? { view: view3, ...r } : null;
+        }, fairAmount = (v, f) => combatInteger(multiplyCombat(v, f.n, f.d)), groupOfEntity = (id) => Object.values(state.groupsById).find((g) => g.entityIds.includes(id));
         const brood = nestBroodViewsV1(state), hunts = huntChampionViewsV1(state), visible3 = engine.nearby(local7, 900).filter((a) => !eventActorDormant(state, a.entityId) && bossActorTargetableD12_5A(state, a.entityId));
         for (const defeated of Object.values(state.entitiesById)) if (!defeated.alive && defeated.ai?.defeatedTick !== void 0 && state.tick - defeated.ai.defeatedTick <= 36 && defeated.residency.spaceInstanceId === ctx.spaceInstanceId && Math.hypot(defeated.position.x - local7.position.x, defeated.position.y - local7.position.y) <= 900 && !visible3.some((a) => a.entityId === defeated.entityId)) visible3.push(defeated);
         if (!visible3.some((a) => a.entityId === local7.entityId)) visible3.push(local7);
@@ -73235,6 +73312,15 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
             const p2 = Object.values(state.playersById).find((p3) => p3.entityId === a.entityId);
             return Object.fromEntries(["weapon", "subweapon"].map((slot) => [slot, p2.inventory.itemsById[p2.inventory.equipped[slot]] ?? null]));
           })() : null, guard: state.subweaponCombat.actors[a.entityId]?.guard ? { ...state.subweaponCombat.actors[a.entityId].guard, direction: { ...state.subweaponCombat.actors[a.entityId].guard.direction } } : null, subType: a.team === "party" ? playersById[Object.values(state.playersById).find((p2) => p2.entityId === a.entityId).playerId].stats.subType : null, alive: a.alive, deathAge: a.ai?.defeatedTick === void 0 ? null : state.tick - a.ai.defeatedTick, hullRadius: a.hullRadius, movedLastTick: a.movedLastTick, motion: a.ai?.motion ? { startedTick: a.ai.motion.startedTick, lastMovedTick: a.ai.motion.lastMovedTick } : null, meleePhase: a.ai?.melee ? { phase: a.ai.melee.phase, phaseStartedTick: a.ai.melee.phaseStartedTick, phaseEndsTick: a.ai.melee.phaseEndsTick, targetEntityId: a.ai.melee.targetEntityId, actionSequence: a.ai.melee.actionSequence } : null, meleeAction: a.team === "hostile" && (a.ai?.melee ? a.ai.melee.phase !== "idle" : a.attackTimer < Math.min(10, a.attackDelayTicks)), meleeGeometry: hasWorldCombat(state) && family ? { reach: a.attackReach, mode: a.attackReachMode, sourceRadius: a.combatRadius, targetRadius: attackTarget?.combatRadius ?? 9, targetPosition: attackTarget ? { ...attackTarget.position } : null } : null, encounterMode: group?.containment?.mode ?? null, team: a.team, levelLabel: a.team === "hostile" && state.d9World?.episodes[group?.groupId]?.snapshot ? "Lv. " + formatLarge(statValue(state.d9World.episodes[group.groupId].snapshot.effectiveLevel).toString()) : null, enemyFamily: family, ...brood.get(a.entityId) ?? {}, ...hunts.get(a.entityId) ?? {}, ...(family?.startsWith("bandit_") || family === "burrower") && group ? { gang: roadsideGangOfV1(state, group.groupId) } : {}, presentationFacingX, visualKey: creature?.visualKey ?? null, visualSeed: deterministicCreatureVisualSeed(a.entityId), groundAnchorY: creature?.presentation.groundAnchor.y ?? creature?.body.groundAnchorY ?? a.hullRadius * 0.45, weaponVisual: a.team === "party" ? equippedWeaponVisual(Object.values(state.playersById).find((p2) => p2.entityId === a.entityId)) : null };
+          {
+            const f = fairOf(a, group);
+            if (f) {
+              const e = entitiesById[a.entityId];
+              e.hpExact = integerWire(fairAmount(a.hp, f));
+              e.maxHpExact = integerWire(fairAmount(a.maxHp, f));
+              if (e.levelLabel) e.levelLabel = "Lv. " + formatLarge(statValue(f.view.area).toString());
+            }
+          }
           const rangedAction = state.hostileCombat?.actionsByEntityId[a.entityId];
           if (ordinaryRangedProfile(a)) {
             const aim2 = rangedAction?.aim ?? null;
@@ -73259,9 +73345,14 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
           if (p) primaryActors[a.entityId] = { facing: { ...p.facing }, nextSourceSequence: p.nextSourceSequence, current: p.current ? { comboStep: p.current.comboStep, phase: p.current.phase, phaseStartedTick: p.current.phaseStartedTick, phaseEndsTick: p.current.phaseEndsTick, aim: { ...p.current.aim }, primaryActionId: p.current.primaryActionId } : null, held: p.heldCommandId !== null, queued: p.queuedCommandId !== null, nextComboStep: p.nextComboStep, comboDeadline: p.comboDeadline };
         }
         for (const id of creatureFacingViews.keys()) if (!entitiesById[id]) creatureFacingViews.delete(id);
-        const history = engine.events(), nextEventKey = `${ctx.spaceInstanceId}/${history.at(-1)?.eventId}/${Object.keys(entitiesById).join("|")}`;
+        const history = engine.events(), nextEventKey = `${ctx.spaceInstanceId}/${history.at(-1)?.eventId}/${Object.keys(entitiesById).join("|")}/${fairOn ? playingHeroesV1(state).map((p) => String(p.progression.level)).join(",") : ""}`;
         if (eventKey !== nextEventKey) {
-          eventView = freezeWire(history.filter((e) => e.spaceInstanceId === ctx.spaceInstanceId && (entitiesById[e.source.entityId] || entitiesById[e.subject.entityId])));
+          const fairEvent = (e) => {
+            if (!fairOn || e.kind !== "combat.damageApplied") return e;
+            const t = state.entitiesById[e.subject.entityId], f = t?.team === "hostile" ? fairOf(t, groupOfEntity(t.entityId)) : null;
+            return f ? { ...e, payload: { ...e.payload, damage: fairAmount(e.payload.damage, f), resultingHp: fairAmount(e.payload.resultingHp, f) } } : e;
+          };
+          eventView = freezeWire(history.filter((e) => e.spaceInstanceId === ctx.spaceInstanceId && (entitiesById[e.source.entityId] || entitiesById[e.subject.entityId])).map(fairEvent));
           eventKey = nextEventKey;
         }
         const events = eventView;

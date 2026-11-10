@@ -734,7 +734,7 @@ function albumBonuses(album, { bossIds = [] } = {}) {
   const bt = bossSetTier(album, bossIds);
   sets.bosses = bt;
   if (bt >= 0) for (const k of BOSS_SET.stats) add(k, BOSS_SET.ladder[bt]);
-  for (const [k, cap2] of Object.entries(BESTIARY_CAPS)) if (stats[k] > cap2) stats[k] = cap2;
+  for (const [k, cap3] of Object.entries(BESTIARY_CAPS)) if (stats[k] > cap3) stats[k] = cap3;
   return { stats, hunter, sets };
 }
 
@@ -3506,8 +3506,8 @@ function classTreeSpent(d8, treeId, belowTier = Infinity) {
   return n;
 }
 function classTreePoints(d8) {
-  const level = d8?.heroClass ? progressionBigInt(d8.highestHeroLevel) - 1n : 0n, cap2 = BigInt(CLASS_TREE_POINT_CAP), earned = level < cap2 ? level : cap2, spent = BigInt(Object.values(d8?.classRanks ?? {}).reduce((a, b) => a + b, 0));
-  return { earned, spent, unspent: earned - spent, cap: cap2 };
+  const level = d8?.heroClass ? progressionBigInt(d8.highestHeroLevel) - 1n : 0n, cap3 = BigInt(CLASS_TREE_POINT_CAP), earned = level < cap3 ? level : cap3, spent = BigInt(Object.values(d8?.classRanks ?? {}).reduce((a, b) => a + b, 0));
+  return { earned, spent, unspent: earned - spent, cap: cap3 };
 }
 function learnedClassActives(d8) {
   if (!d8?.heroClass || !d8.classRanks) return [];
@@ -5529,7 +5529,8 @@ function rewardProgressionD9(depth, sourceId) {
   return freezeWire(validateRewardProgressionD9({ version: D9_REWARD_PROGRESSION, policy: D9_PROFILE.progressionPolicy, sourceDepth: progressionWire(progressionBigInt(depth)), quality: 1, sourceId, tomeEligibility: "base-single-d7-v1" }));
 }
 function validateRewardProgressionD9(v) {
-  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "siteReward", "gearClass", "armor", "wardrobe", "unique", "boon", "quickClear", "swiftKill", "affixes", "bestiaryQuality"]);
+  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "siteReward", "gearClass", "armor", "wardrobe", "unique", "boon", "quickClear", "swiftKill", "affixes", "bestiaryQuality", "lockedDepth"]);
+  requireContract(v.lockedDepth === void 0 || v.episodeSnapshotId !== void 0 && progressionBigInt(v.lockedDepth) >= 1n, "Co-op reward depth policy");
   requireContract(v.bestiaryQuality === void 0 || Number.isSafeInteger(v.bestiaryQuality) && v.bestiaryQuality > 0 && v.bestiaryQuality <= 1e4 && v.rarityPolicyHash !== void 0, "Bestiary quality policy");
   requireContract(v.swiftKill === void 0 || v.swiftKill === true && v.rarityPolicyHash !== void 0, "Swift kill reward policy");
   requireContract(v.affixes === void 0 || v.affixes === AFFIXES_V2 && v.gearClass !== void 0, "Affix pool policy");
@@ -6236,7 +6237,7 @@ function affixRollRangeD9(g, key5) {
   const tier = safeInteger(g.rarityTier, 0, 5), p = g.itemPower, overall = g.definition.slot === "overall";
   return certifyNumeric((c) => {
     const P2 = c.q((100 + 15 * tier) * (overall ? 18 : 10), 1e3), R = c.q((100 + 7 * tier) * (overall ? 18 : 10), 1e3), I = c.q, mul2 = c.mul;
-    const cap2 = (a, b) => ({ lo: a.lo < b.lo ? a.lo : b.lo, hi: a.hi < b.hi ? a.hi : b.hi }), ceil = (x) => progressionWire(c.endpoint(x, "ceil")), round44 = (x) => decimalWire(c.endpoint(x, "round", 4), 4);
+    const cap3 = (a, b) => ({ lo: a.lo < b.lo ? a.lo : b.lo, hi: a.hi < b.hi ? a.hi : b.hi }), ceil = (x) => progressionWire(c.endpoint(x, "ceil")), round44 = (x) => decimalWire(c.endpoint(x, "round", 4), 4);
     let minimum, maximum;
     const star = c.q(100 + 5 * tier, 100);
     if (PERCENT_STAT_RANGES[key5]) {
@@ -6273,8 +6274,8 @@ function affixRollRangeD9(g, key5) {
       maximum = round44(mul2(I(3, 100), scale2));
     } else if (["critChance", "critDamage", "block", "parry"].includes(key5)) {
       const scale2 = mul2(c.root(I(p), 2), P2), v3 = g.progression?.affixes === AFFIXES_V2, lo = key5 === "critChance" ? v3 ? I(1, 100) : I(15, 1e3) : key5 === "critDamage" ? I(3, 100) : I(5, 1e3), hi = key5 === "critChance" ? v3 ? I(2, 100) : I(4, 100) : key5 === "critDamage" ? I(6, 100) : I(15, 1e3), limit = key5 === "critChance" ? v3 ? I(1, 10) : I(2, 10) : I(15, 100);
-      minimum = round44(key5 === "critDamage" ? mul2(lo, scale2) : cap2(mul2(lo, scale2), limit));
-      maximum = round44(key5 === "critDamage" ? mul2(hi, scale2) : cap2(mul2(hi, scale2), limit));
+      minimum = round44(key5 === "critDamage" ? mul2(lo, scale2) : cap3(mul2(lo, scale2), limit));
+      maximum = round44(key5 === "critDamage" ? mul2(hi, scale2) : cap3(mul2(hi, scale2), limit));
     } else {
       const scale2 = mul2(c.add(I(3), c.frac(I(p), 3, 4)), I(100 + 25 * tier, 100)), lo = progressionBigInt(c.endpoint(mul2(I(4, 10), scale2), "ceil")), hi = progressionBigInt(c.endpoint(mul2(I(8, 10), scale2), "ceil")), limit = progressionBigInt(c.endpoint(c.add(I(2), mul2(I(p), I(3, 4))))), f3 = progressionBigInt(c.endpoint(mul2(I(p), I(45, 100)))), fallback = f3 < 1n ? 1n : f3, values = [];
       if (lo <= limit) {
@@ -8942,10 +8943,10 @@ function townArtBlockersV1(t) {
   for (const p of plazas) {
     const fx = (p.x + p.w / 2) * T4, fy = (p.y + p.h / 2) * T4 + 20;
     if (zone) {
-      const cap2 = t.size === "capital", d = cap2 ? 230 : 200;
+      const cap3 = t.size === "capital", d = cap3 ? 230 : 200;
       for (const s of [-1, 1]) {
         box2(fx + s * d - 22, fy - 56, fx + s * d + 22, fy - 32);
-        const bx = fx + s * (cap2 ? 160 : 140);
+        const bx = fx + s * (cap3 ? 160 : 140);
         box2(bx - 18, fy - 8, bx + 18, fy + 10);
       }
       for (const st of t.features.filter((f3) => f3.type === "stalls")) for (const s of st.stalls) out.push({ x: s.x, y: p.y + p.h - 3, w: 3, h: 2 });
@@ -11597,14 +11598,14 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
     const b = base(x, y);
     return !b.walkable && b.kind !== "ocean";
   };
-  function ringDistance(x, y, cap2, hit) {
+  function ringDistance(x, y, cap3, hit) {
     if (hit(x, y)) return 0;
-    for (let d = 1; d < cap2; d++) {
+    for (let d = 1; d < cap3; d++) {
       for (let i = 0; i < d; i++) {
         if (hit(x + i, y - d + i) || hit(x + d - i, y + i) || hit(x - i, y + d - i) || hit(x - d + i, y - i)) return d;
       }
     }
-    return cap2;
+    return cap3;
   }
   const roadDistance = (x, y) => ringDistance(x, y, 5, (a, b) => routeAt(a, b) > 0);
   function wetAt(x, y, code) {
@@ -15064,6 +15065,57 @@ function playerXpProgress(progression) {
   });
 }
 
+// src/shared/contracts/fair_play_v1.js
+var PARTY_HEALTH_PERCENT_V1 = Object.freeze([100, 160, 220, 280]);
+var cap2 = () => BigInt(HERO_LEVEL_CAP);
+function playingHeroesV1(state) {
+  const room2 = state.waitingRoom?.spaceInstanceId ?? null;
+  return Object.values(state.playersById ?? {}).filter((p) => {
+    const a = state.entitiesById[p.entityId];
+    return a && (!room2 || a.residency?.spaceInstanceId !== room2);
+  });
+}
+function fairPlayOnV1(state) {
+  return Boolean(state.d9World) && playingHeroesV1(state).length >= 2;
+}
+function combatRatioV1(a, b) {
+  const x = asCombatAmount(a), y = asCombatAmount(b), n = BigInt(x.n) * BigInt(y.d), d = BigInt(x.d) * BigInt(y.n);
+  return n > 0n && d > 0n ? { n, d } : null;
+}
+function partySizeV1(snapshot) {
+  return snapshot?.partySize ?? 1;
+}
+function validatePartySizeV1(snapshot) {
+  if (snapshot?.partySize !== void 0) requireContract(Number.isSafeInteger(snapshot.partySize) && snapshot.partySize >= 2 && snapshot.partySize <= PARTY_HEALTH_PERCENT_V1.length, "Invalid party size");
+}
+function partyHealthPercentV1(snapshot) {
+  return PARTY_HEALTH_PERCENT_V1[Math.min(PARTY_HEALTH_PERCENT_V1.length, Math.max(1, partySizeV1(snapshot))) - 1];
+}
+function fairLevelsV1(state, groupId, memberLevel, player) {
+  if (!player || memberLevel === void 0 || memberLevel === null || !fairPlayOnV1(state)) return null;
+  const snap = state.d9World.episodes[groupId]?.snapshot;
+  if (!snap) return null;
+  const playing = playingHeroesV1(state);
+  if (!playing.some((p) => p.playerId === player.playerId)) return null;
+  const area = progressionBigInt(snap.effectiveLevel), member = progressionBigInt(memberLevel), own2 = progressionBigInt(player.progression.level);
+  let top = 0n;
+  for (const p of playing) {
+    const l = progressionBigInt(p.progression.level);
+    if (l > top) top = l;
+  }
+  const max = cap2(), clamp2 = (v) => v < 1n ? 1n : v > max ? max : v, viewArea = clamp2(own2 + (area > top ? area - top : 0n)), viewMember = clamp2(viewArea + member - area);
+  if (viewArea === area && viewMember === member) return null;
+  return { area: progressionWire(viewArea), member: progressionWire(viewMember) };
+}
+function fairRewardSourceV1(source7, view2) {
+  const p = source7.progression;
+  if (!view2 || !p || p.version !== "reward-progression-d9-v1") return source7;
+  return { ...source7, progression: { ...p, sourceDepth: progressionWire(progressionBigInt(view2.area)), lockedDepth: p.sourceDepth } };
+}
+function fairChestViewV1(state, groupId, player) {
+  return fairLevelsV1(state, groupId, state.d9World?.episodes[groupId]?.snapshot?.effectiveLevel, player);
+}
+
 // src/shared/contracts/encounter_progression.js
 var ENCOUNTER_PROGRESSION_VERSION = "encounter-progression-d3-v1";
 var D9_THREAT_VERSION = "encounter-progression-d9-v1";
@@ -15081,7 +15133,9 @@ function encounterActorProfile(state, group, actor) {
     profile2 = { ...state.content.definitionsById[actor.contentDefinitionId], maxHp: stats.maxHp, attackDamage: stats.attackDamage };
   } else profile2 = enemy && level !== void 0 ? resolveOrdinaryProfile(enemy, ordinaryTier(actor.contentDefinitionId), level) : state.content.definitionsById[actor.contentDefinitionId];
   if (hasWorldCombat(state) && profile2?.isBoss && level !== void 0) profile2 = { ...profile2, ...worldBossStats(level) };
-  return rareActorProfileV1(state, actor, aegisComponentProfile(state, actor, huntChampionProfileV1(state, group, actor, siteEndActorProfileV1(state, group, actor, eliteActorProfileD12_4(state, actor, worldOrdinaryMeleeProfile(state, profile2))))));
+  const out = rareActorProfileV1(state, actor, aegisComponentProfile(state, actor, huntChampionProfileV1(state, group, actor, siteEndActorProfileV1(state, group, actor, eliteActorProfileD12_4(state, actor, worldOrdinaryMeleeProfile(state, profile2))))));
+  const party2 = partyHealthPercentV1(group.threatSnapshot);
+  return party2 !== 100 && state.subweaponCombat && out?.maxHp !== void 0 ? { ...out, maxHp: combatInteger(multiplyCombat(out.maxHp, party2, 100)) } : out;
 }
 function ordinaryKillXp(actor, group, state = null, participant = null) {
   const enemy = ordinaryEnemyForProfile(actor.contentDefinitionId);
@@ -15113,7 +15167,8 @@ function validateEncounterProgression(state, group) {
     requireContract(group.threatReady, "Missing locked threat snapshot");
     return;
   }
-  closedRecord(snapshot, ["version", "activatedTick", "levelsByEntityId"]);
+  closedRecord(snapshot, ["version", "activatedTick", "levelsByEntityId"], state.d9World ? ["partySize"] : []);
+  validatePartySizeV1(snapshot);
   requireContract(snapshot.version === ENCOUNTER_PROGRESSION_VERSION || state.d9World && snapshot.version === D9_THREAT_VERSION, "Unsupported encounter progression");
   safeInteger(snapshot.activatedTick, 0, state.tick);
   closedRecord(snapshot.levelsByEntityId, group.entityIds);
@@ -25450,7 +25505,7 @@ function validateCombatRewardSourceV1(state, source7, spawnEntityId, live, recip
   }
   if (live) {
     const snapshot = state.d9World.episodes[source7.groupId]?.snapshot, quality = source7.kind === "chest" ? roadsideChestV1(state, source7) ? "elite" : "completion" : source7.kind === "enemy" && (state.eliteCombat?.elitesByEntityId[spawnEntityId] || state.bossCombat?.bossesByEntityId[spawnEntityId] || isRareV1(state, spawnEntityId)) ? "elite" : "ordinary";
-    requireContract(snapshot && same25(p.sourceDepth, snapshot.sourceDepth) && p.episodeSnapshotId === snapshot.snapshotId && p.combatQuality === quality, "Reward locked level/quality mismatch");
+    requireContract(snapshot && same25(p.lockedDepth ?? p.sourceDepth, snapshot.sourceDepth) && p.episodeSnapshotId === snapshot.snapshotId && p.combatQuality === quality, "Reward locked level/quality mismatch");
   }
 }
 function gearOrigin(state, p, r) {
@@ -26215,9 +26270,9 @@ var times2 = (a, b) => {
   b = asCombatAmount(b);
   return multiplyCombat(a, b.n, b.d);
 };
-function guardChanceExact(raw, cap2, unit3 = 1e3) {
+function guardChanceExact(raw, cap3, unit3 = 1e3) {
   raw = asCombatAmount(raw);
-  const half = combatAmount(cap2, 2);
+  const half = combatAmount(cap3, 2);
   if (compareCombat(raw, half) <= 0) return multiplyCombat(raw, 1, unit3);
   const delta = subtractCombat(raw, half), den = addCombat(delta, half);
   return addCombat(multiplyCombat(half, 1, unit3), multiplyCombat(times2(half, delta), den.d, BigInt(den.n) * BigInt(unit3)));
@@ -26486,10 +26541,10 @@ function freezeResolved(value) {
   }
   return value;
 }
-function guardChance(raw, cap2, unit3 = 1e3) {
-  const half = cap2 / 2;
+function guardChance(raw, cap3, unit3 = 1e3) {
+  const half = cap3 / 2;
   if (raw <= half) return combatAmount(raw, unit3);
-  return addCombat(combatAmount(half, unit3), combatAmount(BigInt(cap2 - half) * BigInt(raw - half), BigInt(unit3) * BigInt(raw - half + cap2 - half)));
+  return addCombat(combatAmount(half, unit3), combatAmount(BigInt(cap3 - half) * BigInt(raw - half), BigInt(unit3) * BigInt(raw - half + cap3 - half)));
 }
 function mitigateFractionalPlayerDamage(raw, defense) {
   raw = asCombatAmount(raw);
@@ -28758,6 +28813,13 @@ export {
   validatePlayerProgression,
   awardPlayerXp,
   playerXpProgress,
+  PARTY_HEALTH_PERCENT_V1,
+  playingHeroesV1,
+  fairPlayOnV1,
+  combatRatioV1,
+  fairLevelsV1,
+  fairRewardSourceV1,
+  fairChestViewV1,
   ENCOUNTER_PROGRESSION_VERSION,
   D9_THREAT_VERSION,
   ORDINARY_ACTIVITY_RADII,

@@ -10508,6 +10508,18 @@ function validateEliteCombatD12_4(state) {
   }
 }
 
+// src/shared/contracts/fair_play_v1.js
+var PARTY_HEALTH_PERCENT_V1 = Object.freeze([100, 160, 220, 280]);
+function partySizeV1(snapshot) {
+  return snapshot?.partySize ?? 1;
+}
+function validatePartySizeV1(snapshot) {
+  if (snapshot?.partySize !== void 0) requireContract(Number.isSafeInteger(snapshot.partySize) && snapshot.partySize >= 2 && snapshot.partySize <= PARTY_HEALTH_PERCENT_V1.length, "Invalid party size");
+}
+function partyHealthPercentV1(snapshot) {
+  return PARTY_HEALTH_PERCENT_V1[Math.min(PARTY_HEALTH_PERCENT_V1.length, Math.max(1, partySizeV1(snapshot))) - 1];
+}
+
 // src/shared/contracts/encounter_progression.js
 var ENCOUNTER_PROGRESSION_VERSION = "encounter-progression-d3-v1";
 var D9_THREAT_VERSION = "encounter-progression-d9-v1";
@@ -10525,7 +10537,9 @@ function encounterActorProfile(state, group, actor) {
     profile2 = { ...state.content.definitionsById[actor.contentDefinitionId], maxHp: stats.maxHp, attackDamage: stats.attackDamage };
   } else profile2 = enemy && level !== void 0 ? resolveOrdinaryProfile(enemy, ordinaryTier(actor.contentDefinitionId), level) : state.content.definitionsById[actor.contentDefinitionId];
   if (hasWorldCombat(state) && profile2?.isBoss && level !== void 0) profile2 = { ...profile2, ...worldBossStats(level) };
-  return rareActorProfileV1(state, actor, aegisComponentProfile(state, actor, huntChampionProfileV1(state, group, actor, siteEndActorProfileV1(state, group, actor, eliteActorProfileD12_4(state, actor, worldOrdinaryMeleeProfile(state, profile2))))));
+  const out = rareActorProfileV1(state, actor, aegisComponentProfile(state, actor, huntChampionProfileV1(state, group, actor, siteEndActorProfileV1(state, group, actor, eliteActorProfileD12_4(state, actor, worldOrdinaryMeleeProfile(state, profile2))))));
+  const party2 = partyHealthPercentV1(group.threatSnapshot);
+  return party2 !== 100 && state.subweaponCombat && out?.maxHp !== void 0 ? { ...out, maxHp: combatInteger(multiplyCombat(out.maxHp, party2, 100)) } : out;
 }
 function validateEncounterProgression(state, group) {
   requireContract(typeof group.threatReady === "boolean", "Missing encounter reset state");
@@ -10534,7 +10548,8 @@ function validateEncounterProgression(state, group) {
     requireContract(group.threatReady, "Missing locked threat snapshot");
     return;
   }
-  closedRecord(snapshot, ["version", "activatedTick", "levelsByEntityId"]);
+  closedRecord(snapshot, ["version", "activatedTick", "levelsByEntityId"], state.d9World ? ["partySize"] : []);
+  validatePartySizeV1(snapshot);
   requireContract(snapshot.version === ENCOUNTER_PROGRESSION_VERSION || state.d9World && snapshot.version === D9_THREAT_VERSION, "Unsupported encounter progression");
   safeInteger(snapshot.activatedTick, 0, state.tick);
   closedRecord(snapshot.levelsByEntityId, group.entityIds);
@@ -13050,7 +13065,8 @@ function rewardProgressionD9(depth, sourceId) {
   return freezeWire(validateRewardProgressionD9({ version: D9_REWARD_PROGRESSION, policy: D9_PROFILE.progressionPolicy, sourceDepth: progressionWire(progressionBigInt(depth)), quality: 1, sourceId, tomeEligibility: "base-single-d7-v1" }));
 }
 function validateRewardProgressionD9(v) {
-  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "siteReward", "gearClass", "armor", "wardrobe", "unique", "boon", "quickClear", "swiftKill", "affixes", "bestiaryQuality"]);
+  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "siteReward", "gearClass", "armor", "wardrobe", "unique", "boon", "quickClear", "swiftKill", "affixes", "bestiaryQuality", "lockedDepth"]);
+  requireContract(v.lockedDepth === void 0 || v.episodeSnapshotId !== void 0 && progressionBigInt(v.lockedDepth) >= 1n, "Co-op reward depth policy");
   requireContract(v.bestiaryQuality === void 0 || Number.isSafeInteger(v.bestiaryQuality) && v.bestiaryQuality > 0 && v.bestiaryQuality <= 1e4 && v.rarityPolicyHash !== void 0, "Bestiary quality policy");
   requireContract(v.swiftKill === void 0 || v.swiftKill === true && v.rarityPolicyHash !== void 0, "Swift kill reward policy");
   requireContract(v.affixes === void 0 || v.affixes === AFFIXES_V2 && v.gearClass !== void 0, "Affix pool policy");
@@ -21376,7 +21392,7 @@ function validateCombatRewardSourceV1(state, source8, spawnEntityId, live, recip
   }
   if (live) {
     const snapshot = state.d9World.episodes[source8.groupId]?.snapshot, quality = source8.kind === "chest" ? roadsideChestV1(state, source8) ? "elite" : "completion" : source8.kind === "enemy" && (state.eliteCombat?.elitesByEntityId[spawnEntityId] || state.bossCombat?.bossesByEntityId[spawnEntityId] || isRareV1(state, spawnEntityId)) ? "elite" : "ordinary";
-    requireContract(snapshot && same20(p.sourceDepth, snapshot.sourceDepth) && p.episodeSnapshotId === snapshot.snapshotId && p.combatQuality === quality, "Reward locked level/quality mismatch");
+    requireContract(snapshot && same20(p.lockedDepth ?? p.sourceDepth, snapshot.sourceDepth) && p.episodeSnapshotId === snapshot.snapshotId && p.combatQuality === quality, "Reward locked level/quality mismatch");
   }
 }
 function gearOrigin(state, p, r) {
