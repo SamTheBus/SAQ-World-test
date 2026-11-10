@@ -809,6 +809,7 @@ import {
   townCastleYewsV1,
   townChunkBlockers,
   townConnectorsV1,
+  townDryStreetsV1,
   townFountainArtV1,
   townGardenDepthV1,
   townGardenSideV1,
@@ -935,7 +936,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-JBOSP6LM.js";
+} from "./chunk-DFYWMG3H.js";
 
 // src/storage/save_channel_v1.js
 var TEST_SAVE_PREFIX = "saq-test-site:";
@@ -6353,6 +6354,7 @@ function gardenWallFrontDesert(c, b, d = 3) {
 }
 
 // src/client/generated_town_streets_v1.js
+var MOUTH_CURB = 10;
 var T5 = 32;
 var TAU7 = Math.PI * 2;
 var OL6 = "#151515";
@@ -6710,6 +6712,39 @@ function bandPoly(P14, half) {
   p.closePath();
   return p;
 }
+function squareGap(c, P14, x, y, w, h, half, S6, stone3, lattice) {
+  const CB = MOUTH_CURB, inside5 = ([a, b]) => a > x && a < x + w && b > y && b < y + h;
+  for (let i = 1; i < P14.length; i++) {
+    if (inside5(P14[i - 1]) === inside5(P14[i])) continue;
+    let A = P14[i - 1], B5 = P14[i];
+    const inA = inside5(A);
+    for (let k = 0; k < 16; k++) {
+      const M4 = [(A[0] + B5[0]) / 2, (A[1] + B5[1]) / 2];
+      if (inside5(M4) === inA) A = M4;
+      else B5 = M4;
+    }
+    const q = [(A[0] + B5[0]) / 2, (A[1] + B5[1]) / 2], L = Math.hypot(P14[i][0] - P14[i - 1][0], P14[i][1] - P14[i - 1][1]) || 1, dx = (P14[i][0] - P14[i - 1][0]) / L, dy = (P14[i][1] - P14[i - 1][1]) / L;
+    const d = [[q[1] - y, "n"], [y + h - q[1], "s"], [q[0] - x, "w"], [x + w - q[0], "e"]].sort((u, v) => u[0] - v[0])[0][1], hz = d === "n" || d === "s";
+    const g = Math.min(half * 2.2, (half - 3) / Math.max(0.4, Math.abs(hz ? dy : dx))), lo = (hz ? x : y) + 14, hi = (hz ? x + w : y + h) - 14, mid = Math.min(Math.max(hz ? q[0] : q[1], lo + g), hi - g), a0 = Math.max(lo, mid - g), a1 = Math.min(hi, mid + g);
+    if (a1 - a0 < 20) continue;
+    const r = hz ? { x: a0, y: d === "n" ? y - CB - 2 : y + h - 3, w: a1 - a0, h: CB + 5 } : { x: d === "w" ? x - CB - 2 : x + w - 3, y: a0, w: CB + 5, h: a1 - a0 };
+    c.save();
+    c.beginPath();
+    c.rect(r.x, r.y, r.w, r.h);
+    c.clip();
+    c.fillStyle = tone(S6, -0.36);
+    c.fillRect(r.x, r.y, r.w, r.h);
+    lattice(r.x - 4, r.y - 4, r.x + r.w + 4, r.y + r.h + 4, (u, v) => stone3(u, v, false));
+    c.restore();
+    const mc = (d === "n" ? y : d === "w" ? x : d === "s" ? y + h : x + w) + (d === "n" || d === "w" ? -CB / 2 : CB / 2);
+    for (const e of [a0, a1]) {
+      const cx = hz ? e : mc, cy2 = hz ? mc : e;
+      prop(c, [[rr(cx - 6, cy2 - 6, 12, 12, 5), tone(S6, 0.2)]], 1.4);
+      c.fillStyle = tone(S6, 0.34);
+      c.fillRect(cx - 3.5, cy2 - 4, 6, 1.5);
+    }
+  }
+}
 function squareMouths(c, p, streets, paved = false, biome) {
   const x = p.x * T5, y = p.y * T5, w = p.w * T5, h = p.h * T5, S6 = biome === "desert" ? DESERT_PAVE : biome === "frostland" ? SNOW_PAVE : paved ? "#bdb39e" : "#bdb39a", span2 = 64, pad2 = paved ? 26 : 18;
   const stone3 = (xx, yy, backing) => {
@@ -6767,7 +6802,7 @@ function squareMouths(c, p, streets, paved = false, biome) {
       if (e) P14.push(ext);
       else P14.unshift(ext);
     }
-    {
+    if (paved || biome === "desert") {
       c.save();
       c.beginPath();
       c.rect(x - pad2, y - pad2, w + pad2 * 2, h + pad2 * 2);
@@ -6778,7 +6813,7 @@ function squareMouths(c, p, streets, paved = false, biome) {
       c.fillRect(x - pad2, y - pad2, w + pad2 * 2, h + pad2 * 2);
       lattice(x - pad2, y - pad2, x + w + pad2, y + h + pad2, (a, b) => stone3(a, b, false));
       c.restore();
-    }
+    } else squareGap(c, P14, x, y, w, h, half, S6, stone3, lattice);
     if (paved) {
       const D2 = [];
       for (let i = 1; i < P14.length; i++) {
@@ -6811,6 +6846,7 @@ function squareMouths(c, p, streets, paved = false, biome) {
       }
       continue;
     }
+    if (biome !== "desert") continue;
     const near4 = (a, b) => a > x - 56 && a < x + w + 56 && b > y - 56 && b < y + h + 56, inside5 = (a, b) => a > x && a < x + w && b > y && b < y + h;
     for (const e of [0, P14.length - 1]) {
       if (!near4(...P14[e])) continue;
@@ -98687,7 +98723,7 @@ function layersOf(t) {
   if (!townNewArtV1(t)) return L;
   const geo = townGeometryV1(t), zone = t.features.some((f) => f.type === "zone"), plazas = t.features.filter((f) => f.type === "plaza"), greens = t.features.filter((f) => f.type === "green"), big = t.size === "city" || t.size === "capital";
   const streets = [...t.streets, ...townConnectorsV1(t).map((c) => [c.pts, c.w, false])];
-  const paved = zone ? t.streets.filter((s) => s[2]) : [], dirt2 = t.streets.filter((s) => !s[2]), sq = (f) => ({ x0: f.x * T53, y0: f.y * T53, x1: (f.x + f.w) * T53, y1: (f.y + f.h) * T53 });
+  const paved = zone ? townDryStreetsV1(t).filter((s) => s[2]) : [], dirt2 = t.streets.filter((s) => !s[2]), sq = (f) => ({ x0: f.x * T53, y0: f.y * T53, x1: (f.x + f.w) * T53, y1: (f.y + f.h) * T53 });
   const near4 = (h, pts2) => {
     let best = 1e9;
     for (let i = 1; i < pts2.length; i++) {

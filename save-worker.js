@@ -3800,7 +3800,7 @@ function townRasterV1(t) {
   const rectDo = (r, fn) => {
     for (let y = r.y; y < r.y + r.h; y++) for (let x = r.x; x < r.x + r.w; x++) if (ok(x, y)) fn(x, y);
   };
-  const streets = allStreets(t), geo = townGeometryV1(t), tp = townTemplateV1(t);
+  const streets = allStreets(t), geo = townGeometryV1(t), tp = townTemplateV1(t), crossers = geo.river ? streets.filter(([pts]) => townCrossingsV1([[pts, 0]], geo.river.pts).list.length) : [];
   for (const [pts, sw] of streets) stroke(pts, sw / 2, (x, y) => {
     mat[idx(x, y)] = 2;
   });
@@ -3824,7 +3824,7 @@ function townRasterV1(t) {
   if (geo.river) stroke(geo.river.pts, geo.river.w / 2 + 0.4, (x, y) => {
     const i = idx(x, y);
     let near = -1, nd = 1e9;
-    if (onStreet(x, y, 0.3)) geo.river.bridges.forEach((b, k) => {
+    if (crossers.some(([pts, sw]) => segDist(pts, x + 0.5, y + 0.5) <= sw / 2 + 0.3)) geo.river.bridges.forEach((b, k) => {
       const d = hyp2(x + 0.5 - b.x, y + 0.5 - b.y);
       if (d <= geo.river.w / 2 + b.w && d < nd) {
         nd = d;

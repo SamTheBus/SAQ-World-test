@@ -7524,6 +7524,43 @@ function wallMarks(t, f3, open) {
   return { gates, towers, at: at2, len };
 }
 var geoCache = /* @__PURE__ */ new WeakMap();
+var dryCache = /* @__PURE__ */ new WeakMap();
+function townDryStreetsV1(t) {
+  let D = dryCache.get(t);
+  if (D) return D;
+  const river = t.features.find((f3) => f3.type === "river");
+  if (!river) {
+    dryCache.set(t, t.streets);
+    return t.streets;
+  }
+  D = [];
+  for (const s of t.streets) {
+    const pts = s[0], R = river.w / 2 + 0.5 + s[1] / 2, far = (p) => segDist(river.pts, p[0], p[1]) > R;
+    const cut = (a, b) => {
+      let A = a, B2 = b;
+      for (let k = 0; k < 20; k++) {
+        const M = [(A[0] + B2[0]) / 2, (A[1] + B2[1]) / 2];
+        if (far(M)) A = M;
+        else B2 = M;
+      }
+      return A;
+    };
+    if (townCrossingsV1([[pts, 0]], river.pts).list.length || pts.every(far)) {
+      D.push(s);
+      continue;
+    }
+    let i = 0, j = pts.length - 1;
+    while (i <= j && !far(pts[i])) i++;
+    while (j >= i && !far(pts[j])) j--;
+    if (j - i < 1 && !(i === j && (i > 0 || j < pts.length - 1))) continue;
+    const P2 = pts.slice(i, j + 1);
+    if (i > 0) P2.unshift(cut(pts[i], pts[i - 1]));
+    if (j < pts.length - 1) P2.push(cut(pts[j], pts[j + 1]));
+    if (P2.length >= 2) D.push([P2, ...s.slice(1)]);
+  }
+  dryCache.set(t, D);
+  return D;
+}
 function townGeometryV1(t) {
   let g = geoCache.get(t);
   if (g) return g;
@@ -7989,7 +8026,7 @@ function townRasterV1(t) {
   const rectDo = (r, fn) => {
     for (let y = r.y; y < r.y + r.h; y++) for (let x = r.x; x < r.x + r.w; x++) if (ok(x, y)) fn(x, y);
   };
-  const streets = allStreets(t), geo = townGeometryV1(t), tp = townTemplateV1(t);
+  const streets = allStreets(t), geo = townGeometryV1(t), tp = townTemplateV1(t), crossers = geo.river ? streets.filter(([pts]) => townCrossingsV1([[pts, 0]], geo.river.pts).list.length) : [];
   for (const [pts, sw] of streets) stroke(pts, sw / 2, (x, y) => {
     mat[idx(x, y)] = 2;
   });
@@ -8013,7 +8050,7 @@ function townRasterV1(t) {
   if (geo.river) stroke(geo.river.pts, geo.river.w / 2 + 0.4, (x, y) => {
     const i = idx(x, y);
     let near = -1, nd = 1e9;
-    if (onStreet(x, y, 0.3)) geo.river.bridges.forEach((b, k) => {
+    if (crossers.some(([pts, sw]) => segDist(pts, x + 0.5, y + 0.5) <= sw / 2 + 0.3)) geo.river.bridges.forEach((b, k) => {
       const d = hyp2(x + 0.5 - b.x, y + 0.5 - b.y);
       if (d <= geo.river.w / 2 + b.w && d < nd) {
         nd = d;
@@ -27719,6 +27756,7 @@ export {
   generatedTownV1,
   townGateSpanV1,
   townGateGapV1,
+  townDryStreetsV1,
   townGeometryV1,
   townNewArtV1,
   townLanesV1,
