@@ -1,3 +1,9 @@
+var __defProp = Object.defineProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+
 // src/shared/contracts/wire.js
 function requireContract(condition, message) {
   if (!condition) throw new TypeError(message);
@@ -28103,6 +28109,7 @@ function createCampaignAuthority({
 }
 
 export {
+  __export,
   WORLD_COMBAT_CONTRACT_VERSION,
   requireContract,
   validateWire,

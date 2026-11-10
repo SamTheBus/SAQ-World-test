@@ -1860,3 +1860,34 @@ html body #world-bag:active,html body #local-world-controls:not([open])>summary:
  html body #world-bag{left:var(--hud-lc)!important;bottom:calc(var(--hud-bc) + 14px)!important}
  html body #world-bag::after,html body #local-world-controls:not([open])>summary::after{font-size:11px!important;line-height:12px!important}
 }
+/* Co-op step 2: host lobby, join screen, in-game bar */
+.coop-screen{position:fixed;inset:0;z-index:2650;display:grid;place-items:center;overflow:auto;padding:calc(10px + var(--world-safe-top,0px)) calc(10px + var(--world-safe-right,0px)) calc(10px + var(--world-safe-bottom,0px)) calc(10px + var(--world-safe-left,0px));background:#060a0ed9;color:var(--rpg-ivory,#eee7d9);font:13px var(--rpg-ui)}
+.coop-card{width:min(520px,100%);max-height:100%;overflow:auto;box-sizing:border-box;display:grid;grid-template-columns:minmax(0,1fr);gap:12px;padding:16px 18px;border:1px solid var(--rpg-brass,#b7a077);border-radius:14px;background:linear-gradient(#1c2731,#121a22);box-shadow:0 20px 60px #000c}
+.coop-title{margin:0;text-align:center;font:700 24px var(--rpg-title,Georgia,serif);color:#f4e7c4}
+.coop-intro,.coop-hint{margin:0;font:13px/1.45 var(--rpg-ui);color:#aeb7ba}
+.coop-intro{text-align:center}
+.coop-section{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;padding:12px;border:1px solid #26313b;border-radius:12px;background:#0f161d}
+.coop-section[hidden]{display:none}
+.coop-section h3{margin:0;font:700 13px var(--rpg-ui);letter-spacing:.08em;text-transform:uppercase;color:#e9c46a}
+.coop-code{margin:0;font:700 34px/1.1 ui-monospace,Consolas,monospace;letter-spacing:.18em;color:#fff3cf;text-align:center}
+.coop-qr-area{display:grid;justify-items:center;gap:8px}
+.coop-qr{width:min(260px,70vw);height:auto;border-radius:8px;image-rendering:pixelated}
+.coop-camera{width:min(300px,80vw);border-radius:8px;background:#000}
+.coop-paste{display:flex;gap:8px;width:100%}
+.coop-input{flex:1;width:0;min-width:0;min-height:40px;padding:0 12px;box-sizing:border-box;border:1px solid #3a4652;border-radius:10px;background:#0a1015;color:#fff3cf;font:14px var(--rpg-ui)}
+.coop-code-input{font:700 20px ui-monospace,Consolas,monospace;letter-spacing:.18em;text-transform:uppercase}
+.coop-input:focus-visible,.coop-screen button:focus-visible,.coop-bar button:focus-visible{outline:2px solid #e9c46a;outline-offset:2px}
+.coop-players{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.coop-players li{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border:1px solid #26313b;border-radius:10px;background:#141d26;font:600 14px var(--rpg-ui);color:#f4e7c4}
+.coop-tag{padding:2px 8px;border:1px solid #e9c46a;border-radius:999px;font:700 10px var(--rpg-ui);letter-spacing:.08em;text-transform:uppercase;color:#fff3cf}
+.coop-status{min-height:1.4em;margin:0;text-align:center;font:13px/1.4 var(--rpg-ui);color:#e9c46a}
+.coop-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.coop-screen button,.coop-bar button{min-height:40px;padding:0 16px;border-radius:999px;font:600 14px var(--rpg-ui);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.coop-screen .coop-secondary{border:1px solid #6d5a3c;background:linear-gradient(#3a3222,#241f16);color:#fff3cf}
+.coop-screen .coop-primary{min-width:140px;border:1px solid #ffe39a;background:linear-gradient(#f4cf6a,#c98d1d);color:#1f1404;font-weight:700}
+.coop-bar{position:fixed;z-index:1200;left:50%;top:calc(6px + var(--world-safe-top,0px));transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:4px 4px 4px 12px;border:1px solid #6d5a3c;border-radius:999px;background:#121a22e6;color:#f4e7c4;font:600 12px var(--rpg-ui);white-space:nowrap}
+.coop-bar button{min-height:30px;padding:0 12px;border:1px solid #6d5a3c;background:linear-gradient(#3a3222,#241f16);color:#fff3cf;font-size:12px}
+/* Phones: the bar sits above the potion, clear of the HP panel and the skill buttons */
+@media (max-width:700px){.coop-bar{left:calc(10px + var(--world-safe-left,0px));top:auto;bottom:calc(180px + var(--world-safe-bottom,0px));transform:none}}
+.hero-slots-coop{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.hero-slots-coop strong{margin-right:auto;font:700 14px var(--rpg-title);color:#f4e7c4}

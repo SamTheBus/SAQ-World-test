@@ -329,6 +329,7 @@ import {
   WORLD_COMBAT_HASH,
   WORLD_COMBAT_VERSION,
   WORLD_TIME_POLICY,
+  __export,
   acceptedEventGearGeographyV2,
   accessibleServiceNpc,
   activeTravelSpace,
@@ -981,7 +982,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-AX37PEZS.js";
+} from "./chunk-37TNQPR6.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -1179,10 +1180,10 @@ function createHeroFacing() {
       r.y = p.y;
     }
   }, update(model) {
-    const key2 = spaceKey(model);
-    if (context !== key2) {
+    const key3 = spaceKey(model);
+    if (context !== key3) {
       records.clear();
-      context = key2;
+      context = key3;
     }
     for (const id of records.keys()) if (!model.entitiesById[id]) records.delete(id);
     const result = {};
@@ -1222,12 +1223,12 @@ function createCamera() {
   return Object.freeze({ read: () => current, update: (model, width, height, time = null) => {
     const actor = selectedActor(model), c = model.space.collision, baseZoom = cameraZoomForViewport(width, height);
     const bound = (target2, map, view3) => c.endless ? target2 - view3 / 2 : map <= view3 ? (map - view3) / 2 : Math.max(0, Math.min(map - view3, target2 - view3 / 2));
-    const mapWidth = c.width * c.tileSize, mapHeight = c.height * c.tileSize, key2 = `${model.context.sessionId}/${model.context.spaceInstanceId}/${model.context.spaceRevision}`, zoom = baseZoom, viewWidth = width / zoom, viewHeight = height / zoom, focusY = actor.position.y - 20, target = { x: bound(actor.position.x, mapWidth, viewWidth), y: bound(focusY, mapHeight, viewHeight) }, elapsed = Number(time) - Number(lastTime), actorJump = lastActor ? Math.hypot(actor.position.x - lastActor.x, actor.position.y - lastActor.y) : Infinity;
-    const snap = !Number.isFinite(Number(time)) || lastTime === null || elapsed <= 0 || elapsed >= SNAP_GAP_MS || current.spaceKey !== key2 || lastWidth !== width || lastHeight !== height || current.zoom !== zoom || actorJump >= SNAP_DISTANCE;
-    if (snap) current = Object.freeze({ ...target, zoom, spaceKey: key2 });
+    const mapWidth = c.width * c.tileSize, mapHeight = c.height * c.tileSize, key3 = `${model.context.sessionId}/${model.context.spaceInstanceId}/${model.context.spaceRevision}`, zoom = baseZoom, viewWidth = width / zoom, viewHeight = height / zoom, focusY = actor.position.y - 20, target = { x: bound(actor.position.x, mapWidth, viewWidth), y: bound(focusY, mapHeight, viewHeight) }, elapsed = Number(time) - Number(lastTime), actorJump = lastActor ? Math.hypot(actor.position.x - lastActor.x, actor.position.y - lastActor.y) : Infinity;
+    const snap = !Number.isFinite(Number(time)) || lastTime === null || elapsed <= 0 || elapsed >= SNAP_GAP_MS || current.spaceKey !== key3 || lastWidth !== width || lastHeight !== height || current.zoom !== zoom || actorJump >= SNAP_DISTANCE;
+    if (snap) current = Object.freeze({ ...target, zoom, spaceKey: key3 });
     else {
       const goal = (value2, wanted, zone) => Math.abs(wanted - value2) <= zone ? value2 : wanted - Math.sign(wanted - value2) * zone, alpha2 = 1 - Math.exp(-elapsed / FOLLOW_TIME_MS), clamp55 = (value2, map, view3) => c.endless ? value2 : map <= view3 ? (map - view3) / 2 : Math.max(0, Math.min(map - view3, value2));
-      current = Object.freeze({ x: clamp55(current.x + (goal(current.x, target.x, DEAD_ZONE_X) - current.x) * alpha2, mapWidth, viewWidth), y: clamp55(current.y + (goal(current.y, target.y, DEAD_ZONE_Y) - current.y) * alpha2, mapHeight, viewHeight), zoom, spaceKey: key2 });
+      current = Object.freeze({ x: clamp55(current.x + (goal(current.x, target.x, DEAD_ZONE_X) - current.x) * alpha2, mapWidth, viewWidth), y: clamp55(current.y + (goal(current.y, target.y, DEAD_ZONE_Y) - current.y) * alpha2, mapHeight, viewHeight), zoom, spaceKey: key3 });
     }
     lastTime = Number.isFinite(Number(time)) ? Number(time) : null;
     lastWidth = width;
@@ -1246,7 +1247,7 @@ function createPaintedPrompt() {
     record: (box5) => {
       painted4 = Object.freeze({ ...box5 });
     },
-    hit: (x, y, key2, layout, context) => painted4 && painted4.key === key2 && painted4.layout === layout && painted4.context === context && x >= painted4.x && x <= painted4.x + painted4.width && y >= painted4.y && y <= painted4.y + painted4.height ? painted4.exitId : null
+    hit: (x, y, key3, layout, context) => painted4 && painted4.key === key3 && painted4.layout === layout && painted4.context === context && x >= painted4.x && x <= painted4.x + painted4.width && y >= painted4.y && y <= painted4.y + painted4.height ? painted4.exitId : null
   });
 }
 function createPresentationQueue() {
@@ -1337,9 +1338,9 @@ function createActorMotionPresentationV1({ collisionProbe = null, now: now3 = ()
     resets++;
   }
   function observe(model, time) {
-    const key2 = scopeFor(model), tick = model.tick;
-    if (scope !== null && (scope !== key2 || !Number.isFinite(time) || time < lastCallAt || time - lastCallAt >= P.stallResetMs || tick < lastTick)) clear2(scope !== key2 ? "context-or-frame" : "clock-discontinuity");
-    scope = key2;
+    const key3 = scopeFor(model), tick = model.tick;
+    if (scope !== null && (scope !== key3 || !Number.isFinite(time) || time < lastCallAt || time - lastCallAt >= P.stallResetMs || tick < lastTick)) clear2(scope !== key3 ? "context-or-frame" : "clock-discontinuity");
+    scope = key3;
     lastCallAt = time;
     observations2++;
     if (lastTick !== tick) {
@@ -4363,7 +4364,7 @@ var fountainCenter = (f) => ({ x: (f.x + 0.5) * T, y: f.y * T + 26 });
 var BIOMES = { w: "woodland", a: "grassland", m: "wetland", r: "upland", d: "desert", s: "frostland", t: "tropical", l: "volcanic" };
 var biomes = /* @__PURE__ */ new Map();
 function settlementBiomeV1(space, o, t, id) {
-  const key2 = id + "@" + worldRevisionV1(), known2 = biomes.get(key2);
+  const key3 = id + "@" + worldRevisionV1(), known2 = biomes.get(key3);
   if (known2) return known2;
   const v = space.visual;
   if (!v?.biomes) return "woodland";
@@ -4375,7 +4376,7 @@ function settlementBiomeV1(space, o, t, id) {
     n++;
     if ((count[name] = (count[name] ?? 0) + 1) > (count[best] ?? 0)) best = name;
   }
-  if (n >= 40) biomes.set(key2, best);
+  if (n >= 40) biomes.set(key3, best);
   return best;
 }
 var sprites = /* @__PURE__ */ new Map();
@@ -4393,7 +4394,7 @@ var deadline = 0;
 var stats = { spriteBuilds: 0, spriteSteps: 0, buildMs: 0, worstFrameMs: 0, fallbackDraws: 0 };
 var clock = () => (globalThis.performance ?? Date).now();
 var quantize = (s) => Math.max(0.5, Math.min(2, Math.round(s * 20) / 20));
-function makeSprite(key2, item, scale) {
+function makeSprite(key3, item, scale) {
   const doc = globalThis.document;
   if (!doc?.createElement) return null;
   const box5 = item.box, canvas = doc.createElement("canvas");
@@ -4401,8 +4402,8 @@ function makeSprite(key2, item, scale) {
   canvas.height = Math.ceil(box5.h * scale);
   const g = canvas.getContext("2d", { willReadFrequently: true });
   g.setTransform(scale, 0, 0, scale, -box5.x * scale, -box5.y * scale);
-  const s = { key: key2, canvas, steps: item.paint(g), done: false, used: frame, px: canvas.width * canvas.height };
-  sprites.set(key2, s);
+  const s = { key: key3, canvas, steps: item.paint(g), done: false, used: frame, px: canvas.width * canvas.height };
+  sprites.set(key3, s);
   pixels += s.px;
   return s;
 }
@@ -4429,20 +4430,20 @@ function evict() {
   }
 }
 function planFor(kind, t, biome) {
-  const key2 = kind + "|" + t.id + "|" + biome;
-  let list = plans.get(key2);
+  const key3 = kind + "|" + t.id + "|" + biome;
+  let list = plans.get(key3);
   if (list) return list;
   list = [];
   for (const b of t.buildings) {
     if (b.art) continue;
-    list.push({ id: key2 + "|" + b.id, building: b, box: { x: b.x * T - PAD.left, y: b.y * T - PAD.top, w: b.w * T + PAD.left + PAD.right, h: b.h * T + PAD.top + PAD.bottom }, paint: (g) => paintPremiumBuilding(g, b, biome) });
+    list.push({ id: key3 + "|" + b.id, building: b, box: { x: b.x * T - PAD.left, y: b.y * T - PAD.top, w: b.w * T + PAD.left + PAD.right, h: b.h * T + PAD.top + PAD.bottom }, paint: (g) => paintPremiumBuilding(g, b, biome) });
   }
   for (const [label4, p, , opt] of t.places) {
     if (opt?.bare) continue;
     const R9 = { x: p.x * T - 4, y: p.y * T - 4, w: p.w * T + 8, h: p.h * T + 8 };
     for (let ty = R9.y; ty < R9.y + R9.h; ty += GROUND_TILE) for (let tx = R9.x; tx < R9.x + R9.w; tx += GROUND_TILE) {
       const box5 = { x: tx - SEAM, y: ty - SEAM, w: Math.min(GROUND_TILE, R9.x + R9.w - tx) + SEAM * 2, h: Math.min(GROUND_TILE, R9.y + R9.h - ty) + SEAM * 2 };
-      list.push({ id: key2 + "|ground|" + label4 + "|" + tx + "," + ty, ground: true, box: box5, paint: (g) => {
+      list.push({ id: key3 + "|ground|" + label4 + "|" + tx + "," + ty, ground: true, box: box5, paint: (g) => {
         g.beginPath();
         g.rect(box5.x, box5.y, box5.w, box5.h);
         g.clip();
@@ -4452,11 +4453,11 @@ function planFor(kind, t, biome) {
   }
   for (const f of fountainsFor(t)) {
     const { x, y } = fountainCenter(f);
-    list.push({ id: key2 + "|fountain|" + f.x + "," + f.y, box: { x: x - 56, y: y - 56, w: 116, h: 94 }, anchor: { x, y: y + 30 }, paint: function* (g) {
+    list.push({ id: key3 + "|fountain|" + f.x + "," + f.y, box: { x: x - 56, y: y - 56, w: 116, h: 94 }, anchor: { x, y: y + 30 }, paint: function* (g) {
       fountain(g, x, y, biome);
     } });
   }
-  plans.set(key2, list);
+  plans.set(key3, list);
   return list;
 }
 var near = (o, b, v, m) => o.x + b.x < v.x + v.width + m && o.x + b.x + b.w > v.x - m && o.y + b.y < v.y + v.height + m && o.y + b.y + b.h > v.y - m;
@@ -4472,15 +4473,15 @@ function prepareSettlementArtV1(kind, t, o, biome, v) {
   }
   for (const margin of [0, AHEAD]) for (const item of planFor(kind, t, biome)) {
     if (!near(o, item.box, v, margin)) continue;
-    const key2 = item.id + "@" + mainScale;
-    let s = sprites.get(key2);
+    const key3 = item.id + "@" + mainScale;
+    let s = sprites.get(key3);
     if (s) {
       s.used = frame;
       if (s.done) continue;
     }
     const now3 = !margin && jump;
     if (!now3 && clock() >= deadline) continue;
-    s ??= makeSprite(key2, item, mainScale);
+    s ??= makeSprite(key3, item, mainScale);
     if (s) run(s, now3 ? null : deadline);
   }
   evict();
@@ -13236,8 +13237,8 @@ var HOLE = "#3a2418";
 var SIZE = { village: { WH: 36, TW: 34, k: 0.9 }, town: { WH: 40, TW: 36, k: 1 }, city: { WH: 50, TW: 40, k: 1.15 }, capital: { WH: 58, TW: 44, k: 1.3 } };
 var pats = /* @__PURE__ */ new Map();
 function earthPat(c, S6) {
-  const key2 = "e" + S6;
-  if (pats.has(key2)) return pats.get(key2);
+  const key3 = "e" + S6;
+  if (pats.has(key3)) return pats.get(key3);
   const cv = document.createElement("canvas");
   cv.width = 48;
   cv.height = 48;
@@ -13264,12 +13265,12 @@ function earthPat(c, S6) {
     g.fillRect(hx - 0.5, hy + 3.6, 5.4, 1);
   }
   const p = c.createPattern(cv, "repeat");
-  pats.set(key2, p);
+  pats.set(key3, p);
   return p;
 }
 function walkPatD(c, S6) {
-  const key2 = "w" + S6;
-  if (pats.has(key2)) return pats.get(key2);
+  const key3 = "w" + S6;
+  if (pats.has(key3)) return pats.get(key3);
   const cv = document.createElement("canvas");
   cv.width = 26;
   cv.height = 26;
@@ -13286,7 +13287,7 @@ function walkPatD(c, S6) {
   g.fillStyle = tone9(S6, -0.04);
   g.fillRect(0, 12, 26, 1);
   const p = c.createPattern(cv, "repeat");
-  pats.set(key2, p);
+  pats.set(key3, p);
   return p;
 }
 function earthFace(c, x, y, w, h, S6, r) {
@@ -27960,8 +27961,8 @@ function coneTop(c, x, top, r, S6, cr, opt) {
   }
 }
 function facePat(c, S6) {
-  const key2 = "f" + S6;
-  if (pats2.has(key2)) return pats2.get(key2);
+  const key3 = "f" + S6;
+  if (pats2.has(key3)) return pats2.get(key3);
   const cv = document.createElement("canvas");
   cv.width = 44;
   cv.height = 22;
@@ -27978,12 +27979,12 @@ function facePat(c, S6) {
     g.fillRect(xx + 2, j * 11 + 1.3, 17, 1.2);
   }
   const p = c.createPattern(cv, "repeat");
-  pats2.set(key2, p);
+  pats2.set(key3, p);
   return p;
 }
 function walkPat(c, S6) {
-  const key2 = "w" + S6;
-  if (pats2.has(key2)) return pats2.get(key2);
+  const key3 = "w" + S6;
+  if (pats2.has(key3)) return pats2.get(key3);
   const cv = document.createElement("canvas");
   cv.width = 26;
   cv.height = 26;
@@ -27997,7 +27998,7 @@ function walkPat(c, S6) {
     g.fill();
   }
   const p = c.createPattern(cv, "repeat");
-  pats2.set(key2, p);
+  pats2.set(key3, p);
   return p;
 }
 var P3 = (c, pts2, dy = 0) => {
@@ -28465,8 +28466,8 @@ var WOOD27 = "#6a4428";
 var SIZE3 = { village: { WH: 36, TW: 34, k: 0.9 }, town: { WH: 40, TW: 36, k: 1 }, city: { WH: 50, TW: 40, k: 1.15 }, capital: { WH: 58, TW: 44, k: 1.3 } };
 var pats3 = /* @__PURE__ */ new Map();
 function facePat2(c, S6) {
-  const key2 = "f" + S6;
-  if (pats3.has(key2)) return pats3.get(key2);
+  const key3 = "f" + S6;
+  if (pats3.has(key3)) return pats3.get(key3);
   const cv = document.createElement("canvas");
   cv.width = 44;
   cv.height = 22;
@@ -28483,12 +28484,12 @@ function facePat2(c, S6) {
     g.fillRect(xx + 2, j * 11 + 1.3, 17, 1.2);
   }
   const p = c.createPattern(cv, "repeat");
-  pats3.set(key2, p);
+  pats3.set(key3, p);
   return p;
 }
 function walkPat2(c, S6) {
-  const key2 = "w" + S6;
-  if (pats3.has(key2)) return pats3.get(key2);
+  const key3 = "w" + S6;
+  if (pats3.has(key3)) return pats3.get(key3);
   const cv = document.createElement("canvas");
   cv.width = 26;
   cv.height = 26;
@@ -28502,7 +28503,7 @@ function walkPat2(c, S6) {
     g.fill();
   }
   const p = c.createPattern(cv, "repeat");
-  pats3.set(key2, p);
+  pats3.set(key3, p);
   return p;
 }
 var P4 = (c, pts2, dy = 0) => {
@@ -30688,8 +30689,8 @@ function townPiecesV1(t) {
   pieceCache.set(t, list);
   if (!townNewArtV1(t)) return list;
   const biome = t.biome, size = t.size, slot = slotOf(t), zone = t.features.some((f) => f.type === "zone"), A = townArtBuildingsV1(t), tp = new Map(townTemplateV1(t).buildings.map((b) => [b.id, b])), B5 = (b) => tp.get(b.id) ?? b;
-  const add = (key2, make, region, fade = false) => {
-    make().forEach((it, i) => list.push({ id: key2 + ":" + i, y: it.y, make, i, region: typeof region === "function" ? region(it) : region, fade0: fade }));
+  const add = (key3, make, region, fade = false) => {
+    make().forEach((it, i) => list.push({ id: key3 + ":" + i, y: it.y, make, i, region: typeof region === "function" ? region(it) : region, fade0: fade }));
   };
   for (const h of A.houses) {
     const b = B5(h);
@@ -30899,7 +30900,7 @@ function measure(p) {
   p.box = { x: R9.x0, y: R9.y0, w: R9.x1 - R9.x0, h: R9.y1 - R9.y0 };
   p.fade = true;
 }
-function build(key2, p, s, now3) {
+function build(key3, p, s, now3) {
   const at8 = clock2();
   if (p.box === void 0) {
     measure(p);
@@ -30909,7 +30910,7 @@ function build(key2, p, s, now3) {
     }
   }
   if (!p.box) {
-    sprites2.set(key2, null);
+    sprites2.set(key3, null);
     return;
   }
   const b = p.box, cv = canvasOf2(Math.ceil(b.w * s), Math.ceil(b.h * s));
@@ -30920,7 +30921,7 @@ function build(key2, p, s, now3) {
     withFx(skipFx, () => p.make()[p.i].draw(g));
   } catch {
   }
-  sprites2.set(key2, { cv, used: frame2, px: cv.width * cv.height });
+  sprites2.set(key3, { cv, used: frame2, px: cv.width * cv.height });
   pixels2 += cv.width * cv.height;
   stats2.built++;
   stats2.buildMs += clock2() - at8;
@@ -30946,7 +30947,7 @@ function prepareTownBuildingsV1(c, list, v) {
   deadline2 = start + BUDGET_MS2;
   for (const margin of [0, AHEAD2]) for (const { t, o } of list) for (const p of townPiecesV1(t)) {
     if (p.box === null || !near2(o, boxR(p), v, margin)) continue;
-    const key2 = keyOf(t, p, mainScale2), s = sprites2.get(key2);
+    const key3 = keyOf(t, p, mainScale2), s = sprites2.get(key3);
     if (s) {
       s.used = frame2;
       continue;
@@ -30954,7 +30955,7 @@ function prepareTownBuildingsV1(c, list, v) {
     if (s === null) continue;
     const now3 = margin === 0 && jump2;
     if (!now3 && clock2() >= deadline2) continue;
-    build(key2, p, mainScale2, now3);
+    build(key3, p, mainScale2, now3);
   }
   evict2();
   stats2.worstFrameMs = Math.max(stats2.worstFrameMs, clock2() - start);
@@ -30983,7 +30984,7 @@ function drawPiece(c, t, o, p, fade) {
   }
   c.restore();
 }
-function townBuildingDepthItemsV1(t, o, v, actor, key2, env) {
+function townBuildingDepthItemsV1(t, o, v, actor, key3, env) {
   const out = [];
   if (!townNewArtV1(t)) return out;
   const ax = actor?.position.x, ay = actor?.position.y;
@@ -30992,16 +30993,16 @@ function townBuildingDepthItemsV1(t, o, v, actor, key2, env) {
     const R9 = boxR(p);
     if (!near2(o, R9, v, 0)) continue;
     const fade = Boolean(actor && p.fade && p.box && ay < o.y + p.y && ay > o.y + p.box.y + 24 && ax > o.x + p.box.x + 10 && ax < o.x + p.box.x + p.box.w - 10);
-    out.push(depthItem({ id: key2 + p.id, anchorX: o.x + (R9.x0 + R9.x1) / 2, anchorY: o.y + p.y, draw: (c) => drawPiece(c, t, o, p, fade) }));
+    out.push(depthItem({ id: key3 + p.id, anchorX: o.x + (R9.x0 + R9.x1) / 2, anchorY: o.y + p.y, draw: (c) => drawPiece(c, t, o, p, fade) }));
     if (p.fx) {
       const fx = p.fx;
-      out.push(depthItem({ id: key2 + p.id + "/fx", anchorX: o.x + (R9.x0 + R9.x1) / 2, anchorY: o.y + p.y + 0.5, draw: (c) => drawTownFxV1(c, fx, o.x, o.y, clock2() / 1e3) }));
+      out.push(depthItem({ id: key3 + p.id + "/fx", anchorX: o.x + (R9.x0 + R9.x1) / 2, anchorY: o.y + p.y + 0.5, draw: (c) => drawTownFxV1(c, fx, o.x, o.y, clock2() / 1e3) }));
     }
   }
   if (env?.drawNatureProp) for (const [k, g] of townGreenOaksV1(t).entries()) {
     const x = o.x + g.x, y = o.y + g.y;
     if (x < v.x - 200 || x > v.x + v.width + 200 || y < v.y - 40 || y > v.y + v.height + 320) continue;
-    out.push(depthItem({ id: key2 + "oak:" + k, anchorX: x, anchorY: y, draw: (c) => env.drawNatureProp(c, t.biome, "oak", x, y, g.s, g.n) }));
+    out.push(depthItem({ id: key3 + "oak:" + k, anchorX: x, anchorY: y, draw: (c) => env.drawNatureProp(c, t.biome, "oak", x, y, g.s, g.n) }));
   }
   return out;
 }
@@ -31082,24 +31083,24 @@ function worldLightDescriptors(space, base = [], { authoredFort = true } = {}) {
   for (const g of space.generatedTowns ?? []) {
     const tt = generatedTownV1(g.id);
     if (!tt) continue;
-    const key2 = "gen/" + tt.id.replace("settlement-slot:", "") + "/";
+    const key3 = "gen/" + tt.id.replace("settlement-slot:", "") + "/";
     if (townNewArtV1(tt)) {
       for (const [i, p] of townStreetPlanV1(tt).entries()) {
         if (p.kind !== "lampV" && p.kind !== "lampT") continue;
         const lx = g.x + p.x * t, ly = g.y + p.y * t - 4, v = p.kind === "lampV", x = v ? lx + 15 : lx, y = v ? ly - 46 : ly - 81;
-        add(key2 + "lamp/" + i, x, y, { type: "glass-lantern", width: v ? 7 : 12, height: v ? 10 : 16 }, { radius: 130, intensity: 1, anchorY: ly + 3, occlusionOrigin: { x: lx, y: openBelow(lx, ly + 6) } });
+        add(key3 + "lamp/" + i, x, y, { type: "glass-lantern", width: v ? 7 : 12, height: v ? 10 : 16 }, { radius: 130, intensity: 1, anchorY: ly + 3, occlusionOrigin: { x: lx, y: openBelow(lx, ly + 6) } });
       }
       for (const w of townGlowV1(tt)) {
         const small = w.w * w.h < 60, x = g.x + w.x, y = g.y + w.y, foot = g.y + w.foot;
-        add(key2 + w.id, x, y, small ? { type: "glass-lantern", width: w.w, height: w.h } : { type: "pane", width: w.w, height: w.h }, { radius: small ? 110 : 96, intensity: small ? 0.9 : 0.8, dynamic: small, anchorY: foot + 2, occlusionOrigin: { x, y: openBelow(x, foot + 6) }, facing: "south" });
+        add(key3 + w.id, x, y, small ? { type: "glass-lantern", width: w.w, height: w.h } : { type: "pane", width: w.w, height: w.h }, { radius: small ? 110 : 96, intensity: small ? 0.9 : 0.8, dynamic: small, anchorY: foot + 2, occlusionOrigin: { x, y: openBelow(x, foot + 6) }, facing: "south" });
       }
       continue;
     }
     for (const b of townTemplateV1(tt).buildings) {
       if (!admitted2.has(tt.id + ":" + b.id)) continue;
       const front2 = g.y + (b.y + b.h) * t, glass7 = premiumBuildingLightsV1(b, tt.biome);
-      glass7.windows.forEach((q, i) => add(key2 + b.id + "/window/" + i, g.x + q.x, g.y + q.y, { type: "pane", width: q.w, height: q.h, lattice: tt.biome === "desert" }, { radius: 88, intensity: 0.48, dynamic: false, anchorY: front2 + 2, occlusionOrigin: { x: g.x + q.x, y: front2 + 6 }, facing: "south" }));
-      if (glass7.lamp) add(key2 + b.id + "/front-lamp", g.x + glass7.lamp.x, g.y + glass7.lamp.y, { type: "glass-lantern", width: glass7.lamp.w, height: glass7.lamp.h }, { radius: 112, intensity: 0.65, anchorY: front2 + 3, occlusionOrigin: { x: g.x + glass7.lamp.x, y: front2 + 12 }, facing: "south" });
+      glass7.windows.forEach((q, i) => add(key3 + b.id + "/window/" + i, g.x + q.x, g.y + q.y, { type: "pane", width: q.w, height: q.h, lattice: tt.biome === "desert" }, { radius: 88, intensity: 0.48, dynamic: false, anchorY: front2 + 2, occlusionOrigin: { x: g.x + q.x, y: front2 + 6 }, facing: "south" }));
+      if (glass7.lamp) add(key3 + b.id + "/front-lamp", g.x + glass7.lamp.x, g.y + glass7.lamp.y, { type: "glass-lantern", width: glass7.lamp.w, height: glass7.lamp.h }, { radius: 112, intensity: 0.65, anchorY: front2 + 3, occlusionOrigin: { x: g.x + glass7.lamp.x, y: front2 + 12 }, facing: "south" });
     }
   }
   if (harbor) {
@@ -31375,8 +31376,8 @@ async function createSporeArtV1(env, prior, { root: root2 = new URL("../../asset
   } catch (e) {
     error = e.message;
   }
-  const art = { paint(ctx, key2, x, y, width) {
-    const image = sprites6.get(key2);
+  const art = { paint(ctx, key3, x, y, width) {
+    const image = sprites6.get(key3);
     if (!image) return false;
     const h = width * image.height / image.width;
     ctx.drawImage(image, x - width / 2, y - h * 0.94, width, h);
@@ -31398,14 +31399,14 @@ function sporeDepthItems(model, viewport, art) {
         const active2 = e.status === "active" && !pod.used, impact = hit ? 1 - pod.hitAge / 12 : 0, width = (modern ? 88 : 72) * (pod.used ? 0.82 : 1 + (tell ? 0.065 : active2 ? 0.016 : 0) * Math.sin(e.elapsedTicks * Math.PI / (tell ? 8 : 65)));
         ctx.translate(hit ? Math.sin(pod.hitAge * 2.7) * 4 * impact : 0, hit ? -3 * impact : 0);
         ctx.globalAlpha = pod.used ? 0.66 : 1;
-        const key2 = pod.used || active2 ? "spore-pod-open" : "spore-pod";
+        const key3 = pod.used || active2 ? "spore-pod-open" : "spore-pod";
         if (pod.used) {
           ctx.save();
           ctx.translate(x, y + 10);
           ctx.scale(1, 0.35);
           art?.paint(ctx, "spore-pod-open", 0, 0, width * 0.8);
           ctx.restore();
-        } else if (!art?.paint(ctx, key2, x, y + 10, width)) {
+        } else if (!art?.paint(ctx, key3, x, y + 10, width)) {
           ctx.fillStyle = pod.used ? "#695443" : "#df4e4e";
           ctx.strokeStyle = "#203a2a";
           ctx.lineWidth = 2;
@@ -31437,7 +31438,7 @@ function sporeDepthItems(model, viewport, art) {
           ctx.save();
           ctx.globalCompositeOperation = "screen";
           ctx.globalAlpha = 0.75 * impact;
-          art.paint(ctx, key2, x, y + 10, width);
+          art.paint(ctx, key3, x, y + 10, width);
           ctx.restore();
         }
         if (active2) {
@@ -31610,8 +31611,8 @@ function hollowPlantPlacements(space, event) {
     cache6 = /* @__PURE__ */ new Map();
     placements.set(v, cache6);
   }
-  const key2 = event.groupId + "/" + event.position.x + "/" + event.position.y;
-  if (cache6.has(key2)) return cache6.get(key2);
+  const key3 = event.groupId + "/" + event.position.x + "/" + event.position.y;
+  if (cache6.has(key3)) return cache6.get(key3);
   const t = space.collision.tileSize, ox = v.originTile?.x ?? 0, oy = v.originTile?.y ?? 0;
   const clear2 = (x, y, width) => {
     for (const [dx, dy] of [[0, 0], [-width * 0.3, 0], [width * 0.3, 0], [0, -5], [0, 5]]) {
@@ -31621,8 +31622,8 @@ function hollowPlantPlacements(space, event) {
     return true;
   };
   const out = HOLLOW_PLANT_LAYOUT.map(([id, dx, dy, width], index) => ({ id, index, x: event.position.x + dx, y: event.position.y + dy, width })).filter((p) => clear2(p.x, p.y, p.width));
-  cache6.set(key2, Object.freeze(out.map(Object.freeze)));
-  return cache6.get(key2);
+  cache6.set(key3, Object.freeze(out.map(Object.freeze)));
+  return cache6.get(key3);
 }
 function hollowGroundCoverDepthItems(model, event, art) {
   if (!art) return [];
@@ -31667,8 +31668,8 @@ async function createHollowArtV1(env, prior, { root: root2 = new URL("../../asse
     error = e.message;
   }
   const groundCover = await createHollowGroundCoverV1(env);
-  const art = { groundCover, paint(ctx, key2, x, y, width) {
-    const image = sprites6.get(key2);
+  const art = { groundCover, paint(ctx, key3, x, y, width) {
+    const image = sprites6.get(key3);
     if (!image) return false;
     ctx.drawImage(image, x - width / 2, y - width * image.height / image.width, width, width * image.height / image.width);
     painted4++;
@@ -31785,8 +31786,8 @@ async function createBreakablePropArtV1(env, prior, options = {}) {
     error = e.message;
   }
   const loadMs = env.performance.now() - start;
-  function paint2(ctx, key2, x, bottom, w, h, alpha2 = 1) {
-    const image = data?.sprites.get(key2);
+  function paint2(ctx, key3, x, bottom, w, h, alpha2 = 1) {
+    const image = data?.sprites.get(key3);
     if (!image) return false;
     if (alpha2 <= 0) return true;
     const scale = Math.min(w / image.width, h / image.height), width = image.width * scale, height = image.height * scale;
@@ -31796,7 +31797,7 @@ async function createBreakablePropArtV1(env, prior, options = {}) {
     ctx.imageSmoothingQuality = "high";
     ctx.drawImage(image, x - width / 2, bottom - height, width, height);
     ctx.restore();
-    paintedStates[key2] = (paintedStates[key2] ?? 0) + 1;
+    paintedStates[key3] = (paintedStates[key3] ?? 0) + 1;
     return true;
   }
   const art = Object.freeze({
@@ -31872,7 +31873,7 @@ function createBrowserLoopHealth({ now: now3, visibility, runtimeId }) {
 function hybridArtTerrainBinding(binding) {
   validatePlannedBinding(binding);
   const geometry = {};
-  for (const key2 of ["version", "assetId", "assetHash", "planHash", "routeHash", "planningHash", "physicalHash"]) geometry[key2] = binding[key2];
+  for (const key3 of ["version", "assetId", "assetHash", "planHash", "routeHash", "planningHash", "physicalHash"]) geometry[key3] = binding[key3];
   return Object.freeze({ version: "hybrid-art-terrain-binding-v1", kitId: "hybrid-art-v2", geometry: Object.freeze(geometry), coverage: "compatible-terrain", supportedBiomeCodes: Object.freeze(["w", "a"]) });
 }
 
@@ -33167,8 +33168,8 @@ function drawSlagSlimeV4(c, m, time, seed2) {
     c.clip();
     plate(c, q, [[-1, 0.63], [-0.56, 0.72], [-0.18, 0.65], [0.2, 0.75], [0.56, 0.62], [1, 0.55], [1, 1.1], [-1, 1.1]], "#ffb33b");
     plate(c, q, [[-1, 0.87], [-0.5, 0.95], [0.05, 0.87], [0.5, 0.91], [1, 0.73], [1, 1.1], [-1, 1.1]], "#da5223");
-    const shell = [[-1.1, -1.1], [1.1, -1.1], [1.1, 0.28], [0.87, 0.45], [0.59, 0.42], [0.33, 0.62], [0.1, 0.48], [-0.2, 0.62], [-0.45, 0.51], [-0.64, 0.63], [-1.1, 0.46]];
-    plate(c, q, shell, "#503d3e");
+    const shell2 = [[-1.1, -1.1], [1.1, -1.1], [1.1, 0.28], [0.87, 0.45], [0.59, 0.42], [0.33, 0.62], [0.1, 0.48], [-0.2, 0.62], [-0.45, 0.51], [-0.64, 0.63], [-1.1, 0.46]];
+    plate(c, q, shell2, "#503d3e");
     c.strokeStyle = INK2;
     c.lineWidth = LINE * 0.7;
     c.stroke();
@@ -36533,16 +36534,16 @@ function drawStarWeaverV4(c, m, time, seed2) {
   c.lineJoin = "round";
   walking(c, m, time, seed2, cx, cy2);
   c.translate(cx, cy2);
-  const shell = [[-11, 0], [-7, -8], [0, -12.5], [7.5, -7.5], [10, 0], [5.5, 9], [-4, 10], [-9, 5]];
-  polygon8(c, shell, color13(flash, "#5ca9db"));
+  const shell2 = [[-11, 0], [-7, -8], [0, -12.5], [7.5, -7.5], [10, 0], [5.5, 9], [-4, 10], [-9, 5]];
+  polygon8(c, shell2, color13(flash, "#5ca9db"));
   polygon8(c, [[-11, 0], [-3, 1], [5.5, 9], [-4, 10], [-9, 5]], color13(flash, "#2e5e91"));
   polygon8(c, [[-7, -8], [0, -12.5], [7.5, -7.5], [-3, 1]], color13(flash, "#b9e6fa"));
   polygon8(c, [[7.5, -7.5], [10, 0], [5.5, 9], [-3, 1]], color13(flash, "#4589bd"));
   c.strokeStyle = INK15;
   c.lineWidth = LINE13;
   c.beginPath();
-  c.moveTo(...shell[0]);
-  for (const p of shell.slice(1)) c.lineTo(...p);
+  c.moveTo(...shell2[0]);
+  for (const p of shell2.slice(1)) c.lineTo(...p);
   c.closePath();
   c.stroke();
   polygon8(c, [[-6, -0.3], [-1.7, -5.8], [3.4, -1], [0.4, 5.4]], color13(flash, "#244f78"), true);
@@ -41069,10 +41070,10 @@ var ART = {
     strokes(c, [[[14, -9.6], [17.4, -14.6]]], "#7b6e92", 0.6);
     part(c, [[blade(14.6, -5.4, 3.4, 0.35, 0.8, 0.3), "#e3b53e"]], 0.8);
     eye2(c, 12.4, -7.6, 0.7, "#ffe27a");
-    const shell = sm([[-11, -6], [-10, -12], [-4.6, -15.6], [2.6, -15.8], [8.2, -12.6], [9.6, -6.6], [6, -4.2], [-7, -4]]);
-    part(c, [[shell, "#2a8a8a"]], 1.6);
+    const shell2 = sm([[-11, -6], [-10, -12], [-4.6, -15.6], [2.6, -15.8], [8.2, -12.6], [9.6, -6.6], [6, -4.2], [-7, -4]]);
+    part(c, [[shell2, "#2a8a8a"]], 1.6);
     c.save();
-    c.clip(shell);
+    c.clip(shell2);
     const g = c.createLinearGradient(-10, -16, 8, -4);
     g.addColorStop(0, "#6fe0c8");
     g.addColorStop(0.45, "#2a8a9a");
@@ -41085,7 +41086,7 @@ var ART = {
     c.fill();
     c.strokeStyle = "#e3b53e";
     c.lineWidth = 1.6;
-    c.stroke(shell);
+    c.stroke(shell2);
     c.restore();
     strokes(c, [[[-0.6, -15.6], [-1.4, -4.4]]], OC, 1.1);
     strokes(c, [[[-7, -11], [-4, -13.2]], [[3.6, -13.4], [6.2, -11]]], "rgba(200,255,240,.5)", 0.8);
@@ -41224,10 +41225,10 @@ var NAMED_ART = {
     eye2(c, -16, -31, 0.55, "#ffde5a");
   } },
   queen_kheptra: { family: "sand_scarab", bounds: [-16, -24, 38, 27], over(c) {
-    const shell = sm([[-11, -6], [-10, -12], [-4.6, -15.6], [2.6, -15.8], [8.2, -12.6], [9.6, -6.6], [6, -4.2], [-7, -4]]);
-    part(c, [[shell, "#e9b93a"]], 1.6);
+    const shell2 = sm([[-11, -6], [-10, -12], [-4.6, -15.6], [2.6, -15.8], [8.2, -12.6], [9.6, -6.6], [6, -4.2], [-7, -4]]);
+    part(c, [[shell2, "#e9b93a"]], 1.6);
     c.save();
-    c.clip(shell);
+    c.clip(shell2);
     const g = c.createLinearGradient(-10, -16, 8, -4);
     g.addColorStop(0, "#fff0a8");
     g.addColorStop(0.5, "#e9b93a");
@@ -41290,9 +41291,9 @@ var NAMED_ART = {
   } }
 };
 var NAMED_ELITE_ART_IDS_V1 = Object.freeze(Object.keys(NAMED_ART));
-var artFor = (key2) => {
-  const n = NAMED_ART[key2];
-  if (!n) return ART[key2];
+var artFor = (key3) => {
+  const n = NAMED_ART[key3];
+  if (!n) return ART[key3];
   return (c) => {
     const [x, y, w, h] = n.bounds;
     ART[n.family](c);
@@ -41323,8 +41324,8 @@ function surface(w, h) {
   return null;
 }
 function sprite(art, white) {
-  const key2 = art + (white ? "/flash" : "");
-  if (cache.has(key2)) return cache.get(key2);
+  const key3 = art + (white ? "/flash" : "");
+  if (cache.has(key3)) return cache.get(key3);
   let out = null;
   try {
     if (typeof Path2D === "function" && typeof DOMMatrix === "function") {
@@ -41345,7 +41346,7 @@ function sprite(art, white) {
   } catch {
     out = null;
   }
-  cache.set(key2, out);
+  cache.set(key3, out);
   return out;
 }
 function plain(c, family, flash) {
@@ -45284,7 +45285,7 @@ function createHealthTrailsV3() {
   function sample(id, ratio, time) {
     const actual = clampHealthRatio(ratio), now3 = Number.isFinite(time) ? time : 0;
     if (entries.size > 256) {
-      for (const [key2, value2] of entries) if (now3 - value2.at > 8e3) entries.delete(key2);
+      for (const [key3, value2] of entries) if (now3 - value2.at > 8e3) entries.delete(key3);
       if (entries.size > 384) entries.delete(entries.keys().next().value);
     }
     let item = entries.get(id);
@@ -47450,13 +47451,13 @@ function createWoodlandForestSampler(seed2) {
   const cache6 = /* @__PURE__ */ new Map();
   let samples = 0;
   const descriptor = (gx, gy) => {
-    const key2 = gx + "," + gy;
-    if (cache6.has(key2)) return cache6.get(key2);
-    const n = hash16(seed2 + "/" + WOODLAND_FOREST_VERSION + "/" + key2), x = gx * WOODLAND_FOREST_POLICY.cellTiles + 1 + n % 2, y = gy * WOODLAND_FOREST_POLICY.cellTiles + 1 + (n >>> 7) % 2, field3 = woodlandForestField(seed2, x, y), admitted2 = (n >>> 13) % 100 < 32 + field3 * 62;
+    const key3 = gx + "," + gy;
+    if (cache6.has(key3)) return cache6.get(key3);
+    const n = hash16(seed2 + "/" + WOODLAND_FOREST_VERSION + "/" + key3), x = gx * WOODLAND_FOREST_POLICY.cellTiles + 1 + n % 2, y = gy * WOODLAND_FOREST_POLICY.cellTiles + 1 + (n >>> 7) % 2, field3 = woodlandForestField(seed2, x, y), admitted2 = (n >>> 13) % 100 < 32 + field3 * 62;
     let role = n % 19 === 0 ? "rock" : n % 29 === 0 ? "log" : n % 31 === 0 ? "stump" : n % 9 === 0 ? "shrub" : n % 13 === 0 ? "sapling" : "tree";
     const p = { n, x, y, field: field3, admitted: admitted2, role };
     if (cache6.size === 256) cache6.delete(cache6.keys().next().value);
-    cache6.set(key2, p);
+    cache6.set(key3, p);
     return p;
   };
   function applies(x, y, biome) {
@@ -47500,11 +47501,11 @@ function createNaturalClusterSampler(seedDigest) {
   const cache6 = /* @__PURE__ */ new Map();
   let sampled = 0, created = 0, maxCandidates = 0;
   function descriptor(gx, gy) {
-    const key2 = gx + "," + gy;
-    if (cache6.has(key2)) return cache6.get(key2);
-    const n = hash17(seedDigest + "/" + NATURAL_CLUSTER_VERSION + "/" + key2), a = hash17(n + "/shape"), b = hash17(n + "/lobes"), angle3 = unit2(a, 0) * Math.PI;
+    const key3 = gx + "," + gy;
+    if (cache6.has(key3)) return cache6.get(key3);
+    const n = hash17(seedDigest + "/" + NATURAL_CLUSTER_VERSION + "/" + key3), a = hash17(n + "/shape"), b = hash17(n + "/lobes"), angle3 = unit2(a, 0) * Math.PI;
     const p = {
-      id: NATURAL_CLUSTER_VERSION + ":" + n.toString(16).padStart(8, "0") + ":" + key2,
+      id: NATURAL_CLUSTER_VERSION + ":" + n.toString(16).padStart(8, "0") + ":" + key3,
       n,
       x: gx * 12 + 2 + unit2(n, 0) * 8,
       y: gy * 12 + 2 + unit2(n, 8) * 8,
@@ -47521,7 +47522,7 @@ function createNaturalClusterSampler(seedDigest) {
       rock: n % 13 === 0
     };
     if (cache6.size === 256) cache6.delete(cache6.keys().next().value);
-    cache6.set(key2, p);
+    cache6.set(key3, p);
     created++;
     return p;
   }
@@ -47645,8 +47646,8 @@ function* prepareEnvironmentLayout(space) {
     } else if (b.kind === "thicket" || b.kind === "trees" || b.kind === "rock") {
       const landmark = woodlandLandmarkForBlocker(space, b.source), left = Math.floor(b.x / t), top = Math.floor(b.y / t), right = Math.ceil((b.x + b.w) / t), bottom = Math.ceil((b.y + b.h) / t);
       for (let ty = top; ty < bottom; ty++) for (let tx = left; tx < right; tx++) {
-        const key2 = tx + "," + ty, forestRole = woodlandForestRole(b.naturalClusterId), n = forestRole ? woodlandForestVisualHash(b.naturalClusterId, tx + offset2.x / t, ty + offset2.y / t) : terrainHash(tx + offset2.x / t, ty + offset2.y / t, seed2 + 113), code2 = biome(tx, ty) ?? (b.kind === "rock" ? "r" : "w");
-        obstacleTiles.add(key2);
+        const key3 = tx + "," + ty, forestRole = woodlandForestRole(b.naturalClusterId), n = forestRole ? woodlandForestVisualHash(b.naturalClusterId, tx + offset2.x / t, ty + offset2.y / t) : terrainHash(tx + offset2.x / t, ty + offset2.y / t, seed2 + 113), code2 = biome(tx, ty) ?? (b.kind === "rock" ? "r" : "w");
+        obstacleTiles.add(key3);
         if (naturalVisualKind(code2, b.kind) === "rock") {
           const id = obstacleTileVisualId(b, tx, ty, "rock"), canopy2 = Boolean(b.naturalClusterId) && natureCanopyAt(code2, n, tx + offset2.x / t, ty + offset2.y / t, seed2);
           rocks.push({ id, obstacleId: b.id, ...b.naturalClusterId ? naturalRockPose(n, tx, ty, t) : { x: tx * t - 2, y: ty * t + 2, size: t + 4 }, n, forestRole, biome: code2, organic: Boolean(b.naturalClusterId), canopy: canopy2, tileX: tx, tileY: ty });
@@ -47866,12 +47867,12 @@ function routeContoursV2(at8, bounds2, seed2, o = { x: 0, y: 0 }) {
   const cols = Math.ceil((bounds2.x + bounds2.width - left + pad2) / step) + 1, rows = Math.ceil((bounds2.y + bounds2.height - top + pad2) / step) + 1;
   const samples = new Float32Array(cols * rows), edges = [], links = /* @__PURE__ */ new Map();
   for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) samples[y * cols + x] = x === 0 || y === 0 || x === cols - 1 || y === rows - 1 ? -1 : routeFieldV2(at8, left + x * step, top + y * step, seed2, o);
-  const key2 = (p) => p[0].toFixed(4) + "," + p[1].toFixed(4);
+  const key3 = (p) => p[0].toFixed(4) + "," + p[1].toFixed(4);
   function add(a, b) {
     const i = edges.length;
     edges.push([a, b]);
     for (const p of [a, b]) {
-      const k = key2(p), list = links.get(k) ?? [];
+      const k = key3(p), list = links.get(k) ?? [];
       list.push(i);
       links.set(k, list);
     }
@@ -47903,15 +47904,15 @@ function routeContoursV2(at8, bounds2, seed2, o = { x: 0, y: 0 }) {
   for (let i = 0; i < edges.length; i++) {
     if (used[i]) continue;
     used[i] = 1;
-    const path10 = [...edges[i]], start = key2(path10[0]);
-    let last = key2(path10[1]);
+    const path10 = [...edges[i]], start = key3(path10[0]);
+    let last = key3(path10[1]);
     while (last !== start) {
       const next = (links.get(last) ?? []).find((n) => !used[n]);
       if (next === void 0) break;
       used[next] = 1;
-      const e = edges[next], p = key2(e[0]) === last ? e[1] : e[0];
+      const e = edges[next], p = key3(e[0]) === last ? e[1] : e[0];
       path10.push(p);
-      last = key2(p);
+      last = key3(p);
     }
     if (last === start && path10.length >= 4) loops.push(path10);
   }
@@ -47956,26 +47957,26 @@ var stampGroups = /* @__PURE__ */ new WeakMap();
 var fallbackMaterial = {};
 var PAGE = 256;
 function stampCache(material) {
-  const key2 = material ?? fallbackMaterial;
-  let cache6 = stampGroups.get(key2);
+  const key3 = material ?? fallbackMaterial;
+  let cache6 = stampGroups.get(key3);
   if (!cache6) {
     cache6 = /* @__PURE__ */ new Map();
-    stampGroups.set(key2, cache6);
+    stampGroups.set(key3, cache6);
   }
   return cache6;
 }
 function fixedContours(at8, x, y, seed2, o) {
   let signature = "";
   for (let ty = Math.floor((y - 96) / 32); ty <= Math.ceil((y + PAGE + 96) / 32); ty++) for (let tx = Math.floor((x - 96) / 32); tx <= Math.ceil((x + PAGE + 96) / 32); tx++) signature += at8(tx, ty) ?? "?";
-  const key2 = seed2 + "/" + o.x + "/" + o.y + "/" + x + "/" + y + "/" + signature;
-  let result = contourCache.get(key2);
+  const key3 = seed2 + "/" + o.x + "/" + o.y + "/" + x + "/" + y + "/" + signature;
+  let result = contourCache.get(key3);
   if (result) {
-    contourCache.delete(key2);
-    contourCache.set(key2, result);
+    contourCache.delete(key3);
+    contourCache.set(key3, result);
     return result;
   }
-  result = { ...routeContoursV2(at8, { x, y, width: PAGE, height: PAGE }, seed2, o), cacheKey: key2 };
-  contourCache.set(key2, result);
+  result = { ...routeContoursV2(at8, { x, y, width: PAGE, height: PAGE }, seed2, o), cacheKey: key3 };
+  contourCache.set(key3, result);
   while (contourCache.size > 64) contourCache.delete(contourCache.keys().next().value);
   return result;
 }
@@ -47993,11 +47994,11 @@ function drawStyledRoutes(c, space, bounds2, at8, material = null) {
     segments += contours.segments;
     let biomeKey = "";
     for (let y = Math.floor((py - 96) / 32); y <= Math.ceil((py + PAGE + 96) / 32); y++) for (let x = Math.floor((px7 - 96) / 32); x <= Math.ceil((px7 + PAGE + 96) / 32); x++) biomeKey += v.biomes?.[y - oy]?.[x - ox] ?? "?";
-    const cache6 = stampCache(material), key2 = contours.cacheKey + "/" + biomeKey;
-    let stamp6 = cache6.get(key2);
+    const cache6 = stampCache(material), key3 = contours.cacheKey + "/" + biomeKey;
+    let stamp6 = cache6.get(key3);
     if (stamp6) {
-      cache6.delete(key2);
-      cache6.set(key2, stamp6);
+      cache6.delete(key3);
+      cache6.set(key3, stamp6);
     } else {
       const surface3 = typeof OffscreenCanvas === "function" ? new OffscreenCanvas(PAGE, PAGE) : c.canvas?.ownerDocument?.createElement?.("canvas");
       const g = surface3 ? surface3.getContext("2d") : c;
@@ -48034,7 +48035,7 @@ function drawStyledRoutes(c, space, bounds2, at8, material = null) {
       g.restore();
       if (surface3) {
         stamp6 = surface3;
-        cache6.set(key2, stamp6);
+        cache6.set(key3, stamp6);
         while (cache6.size > 32) {
           const first = cache6.keys().next().value, old2 = cache6.get(first);
           cache6.delete(first);
@@ -48278,8 +48279,8 @@ async function createPaintedRoutesV1(env, review, prior, { worldCoverage = false
     if (!paintedPageIntersects(scope, b.x, b.y, b.width, b.height, o)) return true;
     const seed2 = environmentSeed(s);
     for (const [x, y] of pagePositions(b, o)) {
-      const key2 = pageKey(s, x, y, at8, o, seed2);
-      if (key2 && !cache6.has(key2)) return false;
+      const key3 = pageKey(s, x, y, at8, o, seed2);
+      if (key3 && !cache6.has(key3)) return false;
     }
     return true;
   }
@@ -48297,12 +48298,12 @@ async function createPaintedRoutesV1(env, review, prior, { worldCoverage = false
     })();
   }
   function* makePage(space, px7, py, at8, o, seed2, build2 = true) {
-    const v = space.visual, ox = v.originTile?.x ?? 0, oy = v.originTile?.y ?? 0, key2 = pageKey(space, px7, py, at8, o, seed2);
-    if (key2 === null) return null;
-    let page = cache6.get(key2);
+    const v = space.visual, ox = v.originTile?.x ?? 0, oy = v.originTile?.y ?? 0, key3 = pageKey(space, px7, py, at8, o, seed2);
+    if (key3 === null) return null;
+    let page = cache6.get(key3);
     if (page) {
-      cache6.delete(key2);
-      cache6.set(key2, page);
+      cache6.delete(key3);
+      cache6.set(key3, page);
       stats3.cacheHits++;
       return page;
     }
@@ -48388,7 +48389,7 @@ async function createPaintedRoutesV1(env, review, prior, { worldCoverage = false
     }
     g.putImageData(im, 0, 0);
     page = c;
-    cache6.set(key2, page);
+    cache6.set(key3, page);
     while (cache6.size > PAINTED_PAGE_LIMIT) {
       const k = cache6.keys().next().value;
       cache6.delete(k);
@@ -48848,8 +48849,8 @@ function createStandPieces(doc) {
   const cache6 = /* @__PURE__ */ new Map(), RES3 = 2;
   let bytes = 0;
   function sprite6(name, variant, args = []) {
-    const key2 = name + "/" + variant + "/" + JSON.stringify(args);
-    let s = cache6.get(key2);
+    const key3 = name + "/" + variant + "/" + JSON.stringify(args);
+    let s = cache6.get(key3);
     if (s) return s;
     const piece3 = PIECES[name];
     if (!piece3) return null;
@@ -48863,7 +48864,7 @@ function createStandPieces(doc) {
     piece3.fn(g, Math.imul(variant + 1, 2654435761) >>> 0 | 1, ...args);
     bytes += c.width * c.height * 4;
     s = Object.freeze({ image: c, w: r - l, h: b - t, ax: -l, ay: -t });
-    cache6.set(key2, s);
+    cache6.set(key3, s);
     return s;
   }
   return Object.freeze({ sprite: sprite6, resources: () => ({ sprites: cache6.size, bytes }) });
@@ -48914,8 +48915,8 @@ var STAMP_SCALE = 2;
 function createStandLanes(doc = null) {
   const stamps = /* @__PURE__ */ new Map();
   function stamp6(f, st, v) {
-    const key2 = f + "/" + st.body + "/" + st.w + "/" + v;
-    let s = stamps.get(key2);
+    const key3 = f + "/" + st.body + "/" + st.w + "/" + v;
+    let s = stamps.get(key3);
     if (s) return s;
     s = doc.createElement("canvas");
     s.width = s.height = REACH2 * 2 * STAMP_SCALE;
@@ -48923,12 +48924,12 @@ function createStandLanes(doc = null) {
     g.setTransform(STAMP_SCALE, 0, 0, STAMP_SCALE, REACH2 * STAMP_SCALE, REACH2 * STAMP_SCALE);
     g.lineCap = g.lineJoin = "round";
     FX[f](g, st, [{ x: 0, y: 0, n: H(v + 1, 977) }], [], { x: 0, y: 0 });
-    stamps.set(key2, s);
+    stamps.set(key3, s);
     return s;
   }
   function* draw(c, bounds2, { lane: lane2, terrain, code: code2, seed: seed2, world, sprite: sprite6, skip = null, kinds: kinds2 = KINDS2 }) {
     const X0 = bounds2.x - PAD2, Y0 = bounds2.y - PAD2, W4 = bounds2.width + PAD2 * 2, Hh = bounds2.height + PAD2 * 2, tx0 = Math.floor(X0 / T46) - 1, ty0 = Math.floor(Y0 / T46) - 1, tx1 = Math.floor((X0 + W4) / T46) + 1, ty1 = Math.floor((Y0 + Hh) / T46) + 1;
-    const tiles5 = /* @__PURE__ */ new Map(), key2 = (x, y) => x + "," + y;
+    const tiles5 = /* @__PURE__ */ new Map(), key3 = (x, y) => x + "," + y;
     const make = (x, y, k) => {
       const raw = code2(x, y), lc = LANES[raw] ? raw : "w";
       return { tx: x, ty: y, k, code: lc, ghost: Boolean(skip?.(raw, k)), n: seed2(x, y) };
@@ -48938,12 +48939,12 @@ function createStandLanes(doc = null) {
       const k = lane2(tx, ty);
       if (k) {
         const t = make(tx, ty, k);
-        tiles5.set(key2(tx, ty), t);
+        tiles5.set(key3(tx, ty), t);
         if (!t.ghost && kinds2.includes(k)) own++;
       }
     }
     if (!own) return 0;
-    const get = (x, y) => tiles5.get(key2(x, y)) ?? (x < tx0 - 1 || y < ty0 - 1 || x > tx1 + 1 || y > ty1 + 1 ? lane2(x, y) ? make(x, y, lane2(x, y)) : null : null);
+    const get = (x, y) => tiles5.get(key3(x, y)) ?? (x < tx0 - 1 || y < ty0 - 1 || x > tx1 + 1 || y > ty1 + 1 ? lane2(x, y) ? make(x, y, lane2(x, y)) : null : null);
     const bridged = (x, y) => {
       const m = terrain(x, y);
       return m === "H" || m === "V";
@@ -48970,7 +48971,7 @@ function createStandLanes(doc = null) {
       for (let ty = ty0; ty <= ty1; ty++) {
         let start = null;
         for (let tx = tx0; tx <= tx1 + 1; tx++) {
-          const t = tx <= tx1 && tiles5.get(key2(tx, ty)), ok = tx <= tx1 && !CUT.has(terrain(tx, ty)) && !(ghosts && t?.ghost);
+          const t = tx <= tx1 && tiles5.get(key3(tx, ty)), ok = tx <= tx1 && !CUT.has(terrain(tx, ty)) && !(ghosts && t?.ghost);
           if (tx <= tx1 && !ok) held = true;
           if (ok && start === null) start = tx;
           else if (!ok && start !== null) {
@@ -49384,9 +49385,9 @@ var FX = {
     for (const q of pts2) {
       const wx = q.x + world.x, wy = q.y + world.y;
       for (let cy2 = Math.floor((wy - 24) / h); cy2 <= Math.ceil((wy + 24) / h); cy2++) for (let cx = Math.floor((wx - 24) / (s * 1.5)); cx <= Math.ceil((wx + 24) / (s * 1.5)); cx++) {
-        const key2 = cx + "," + cy2;
-        if (done3.has(key2)) continue;
-        done3.add(key2);
+        const key3 = cx + "," + cy2;
+        if (done3.has(key3)) continue;
+        done3.add(key3);
         const x = cx * s * 1.5 - world.x, y = cy2 * h + (cx & 1 ? h / 2 : 0) - world.y, n = H(cx * 7919 + cy2 * 104729, 62), p = f.at(tone39("#4a4346", (n % 5 - 2) * 0.05));
         for (let i = 0; i < 6; i++) {
           const a = i / 6 * TAU88;
@@ -49539,8 +49540,8 @@ function createForestStandsArtV2(env, prior) {
   let plateBytes = 0;
   const stats3 = { platesBuilt: 0, trees: 0, faded: 0, replays: 0, lanePages: 0 };
   function kit2(code2, kind, h = 0) {
-    const key2 = code2 + "/" + kind + "/" + h % 6;
-    if (kits.has(key2)) return kits.get(key2);
+    const key3 = code2 + "/" + kind + "/" + h % 6;
+    if (kits.has(key3)) return kits.get(key3);
     let s = null;
     if (prior.drawNatureProp) {
       const rc = { save() {
@@ -49554,7 +49555,7 @@ function createForestStandsArtV2(env, prior) {
         s = null;
       }
     }
-    kits.set(key2, s);
+    kits.set(key3, s);
     return s;
   }
   const fit = (p, max, n) => p ? Math.min(1, max / p.w) * (0.9 + (n >>> 7) % 3 * 0.05) : 1;
@@ -49605,8 +49606,8 @@ function createForestStandsArtV2(env, prior) {
   const seedAt = (m, x, y) => standsTileHash(m.seed, x + m.wox, y + m.woy);
   const owns = (b) => Boolean(standsPiece(b?.naturalClusterId));
   function blockFor(m, bx, by) {
-    const key2 = bx + "," + by;
-    let B5 = m.blocks.get(key2);
+    const key3 = bx + "," + by;
+    let B5 = m.blocks.get(key3);
     if (B5) return B5;
     const items = [], trees = [], flats = [], masses = /* @__PURE__ */ new Set();
     for (let ty = by * BLOCK; ty < (by + 1) * BLOCK; ty++) for (let tx = bx * BLOCK; tx < (bx + 1) * BLOCK; tx++) {
@@ -49679,7 +49680,7 @@ function createForestStandsArtV2(env, prior) {
       }
     }
     B5 = { items, trees, flats, masses: [...masses] };
-    m.blocks.set(key2, B5);
+    m.blocks.set(key3, B5);
     return B5;
   }
   function blocksAround(m, r, pad2) {
@@ -49687,13 +49688,13 @@ function createForestStandsArtV2(env, prior) {
     for (let by = Math.floor((r.y0 - pad2) / T47 / BLOCK); by <= Math.floor((r.y1 + pad2) / T47 / BLOCK); by++) for (let bx = Math.floor((r.x0 - pad2) / T47 / BLOCK); bx <= Math.floor((r.x1 + pad2) / T47 / BLOCK); bx++) out.push(blockFor(m, bx, by));
     return out;
   }
-  function plateFor(m, key2) {
-    let local7 = m.plates.get(key2);
+  function plateFor(m, key3) {
+    let local7 = m.plates.get(key3);
     if (local7 !== void 0) return local7;
     local7 = null;
-    const tiles5 = m.masses.get(key2), code2 = tiles5 && codeAt(m, tiles5[0][0], tiles5[0][1]);
+    const tiles5 = m.masses.get(key3), code2 = tiles5 && codeAt(m, tiles5[0][0], tiles5[0][1]);
     if (tiles5 && PLATE[code2]) {
-      const world = tiles5.map(([x, y]) => [x + m.wox, y + m.woy]).sort((a, b) => a[1] - b[1] || a[0] - b[0]), id = m.seed + "|" + code2 + "|" + key2 + "|" + world.join(";");
+      const world = tiles5.map(([x, y]) => [x + m.wox, y + m.woy]).sort((a, b) => a[1] - b[1] || a[0] - b[0]), id = m.seed + "|" + code2 + "|" + key3 + "|" + world.join(";");
       let p = plates.get(id);
       if (p) {
         plates.delete(id);
@@ -49710,9 +49711,9 @@ function createForestStandsArtV2(env, prior) {
         }
       }
       const dx = m.wox * T47, dy = m.woy * T47;
-      local7 = p.slices.map((sl) => ({ id: "stand-plate/" + key2 + "/" + sl.row, plate: true, img: sl.img, gx: sl.x0 - dx, gy: sl.y - dy, x0: sl.x0 - dx, x1: sl.x1 - dx, y0: sl.y0 - dy, y1: sl.y1 - dy }));
+      local7 = p.slices.map((sl) => ({ id: "stand-plate/" + key3 + "/" + sl.row, plate: true, img: sl.img, gx: sl.x0 - dx, gy: sl.y - dy, x0: sl.x0 - dx, x1: sl.x1 - dx, y0: sl.y0 - dy, y1: sl.y1 - dy }));
     }
-    m.plates.set(key2, local7);
+    m.plates.set(key3, local7);
     return local7;
   }
   function buildPlate(code2, tiles5, seed2) {
@@ -49981,11 +49982,11 @@ function createForestStandsArtV2(env, prior) {
     for (const B5 of blocks2) {
       for (const f of B5.flats) if (overlaps(f, r)) flats.push(f);
       for (const it of B5.items) if (overlaps(it, r)) list.push(it);
-      for (const key2 of B5.masses) {
-        if (seen4.has(key2)) continue;
-        seen4.add(key2);
+      for (const key3 of B5.masses) {
+        if (seen4.has(key3)) continue;
+        seen4.add(key3);
         yield;
-        for (const sl of plateFor(m, key2) ?? []) if (overlaps(sl, r)) list.push(sl);
+        for (const sl of plateFor(m, key3) ?? []) if (overlaps(sl, r)) list.push(sl);
       }
     }
     list.sort((a, b) => a.gy - b.gy || a.gx - b.gx || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
@@ -50064,7 +50065,7 @@ function createForestStandsArtV2(env, prior) {
     f = [];
     for (const B5 of blocksAround(m, tr, T47 * 2)) {
       for (const it of B5.items) if (it.gy > tr.gy && touchesTree(tr, it)) f.push(it);
-      for (const key2 of B5.masses) for (const sl of plateFor(m, key2) ?? []) if (sl.gy > tr.gy && !f.includes(sl) && touchesTree(tr, sl)) f.push(sl);
+      for (const key3 of B5.masses) for (const sl of plateFor(m, key3) ?? []) if (sl.gy > tr.gy && !f.includes(sl) && touchesTree(tr, sl)) f.push(sl);
     }
     fronts.set(tr, f);
     return f;
@@ -50102,7 +50103,7 @@ function createForestStandsArtV2(env, prior) {
       if (!overlaps(box5, r, T47)) continue;
       for (const B5 of blocksAround(m, box5, T47 * 2)) {
         for (const it of B5.items) if (it.gy > a.y - 14 && overlaps(it, box5)) replay(it, box5, "actor");
-        for (const key2 of B5.masses) for (const sl of plateFor(m, key2) ?? []) if (sl.gy > a.y - 14 && overlaps(sl, box5)) replay(sl, box5, "actor/" + Math.round(a.x) + "," + Math.round(a.y));
+        for (const key3 of B5.masses) for (const sl of plateFor(m, key3) ?? []) if (sl.gy > a.y - 14 && overlaps(sl, box5)) replay(sl, box5, "actor/" + Math.round(a.x) + "," + Math.round(a.y));
       }
     }
     return items;
@@ -51553,10 +51554,10 @@ function createCurvedRoutesV1(env, review, prior) {
         if (near4((a[0] + c[0]) / 2, (a[1] + c[1]) / 2)) segs.push([a, c]);
       }
     }
-    const key2 = (p) => p[0].toFixed(3) + "," + p[1].toFixed(3), ends = /* @__PURE__ */ new Map(), used = new Uint8Array(segs.length), out = [];
+    const key3 = (p) => p[0].toFixed(3) + "," + p[1].toFixed(3), ends = /* @__PURE__ */ new Map(), used = new Uint8Array(segs.length), out = [];
     segs.forEach((s, i) => {
       for (const p of s) {
-        const k = key2(p);
+        const k = key3(p);
         if (!ends.has(k)) ends.set(k, []);
         ends.get(k).push(i);
       }
@@ -51567,10 +51568,10 @@ function createCurvedRoutesV1(env, review, prior) {
       let chain2 = [segs[i][0], segs[i][1]];
       for (const dir of [1, 0]) {
         for (; ; ) {
-          const tip = dir ? chain2[chain2.length - 1] : chain2[0], next = (ends.get(key2(tip)) ?? []).find((n) => !used[n]);
+          const tip = dir ? chain2[chain2.length - 1] : chain2[0], next = (ends.get(key3(tip)) ?? []).find((n) => !used[n]);
           if (next === void 0) break;
           used[next] = 1;
-          const s = segs[next], p = key2(s[0]) === key2(tip) ? s[1] : s[0];
+          const s = segs[next], p = key3(s[0]) === key3(tip) ? s[1] : s[0];
           if (dir) chain2.push(p);
           else chain2.unshift(p);
         }
@@ -51785,8 +51786,8 @@ function createCurvedRoutesV1(env, review, prior) {
   const pageKey = (m, b) => b.x + m.dx + "," + (b.y + m.dy) + "," + b.width + "," + b.height;
   function needsPaint(m, b) {
     if (!edgeArt) return false;
-    const key2 = pageKey(m, b);
-    let n = needs.get(key2);
+    const key3 = pageKey(m, b);
+    let n = needs.get(key3);
     if (n !== void 0) return n;
     n = false;
     const x0 = Math.floor(b.x / T49) - 1, y0 = Math.floor(b.y / T49) - 1, x1 = Math.floor((b.x + b.width) / T49) + 1, y1 = Math.floor((b.y + b.height) / T49) + 1;
@@ -51802,20 +51803,20 @@ function createCurvedRoutesV1(env, review, prior) {
         break;
       }
     }
-    needs.set(key2, n);
+    needs.set(key3, n);
     while (needs.size > 4096) needs.delete(needs.keys().next().value);
     return n;
   }
   function* layerFor(m, b, view3 = null) {
-    const key2 = pageKey(m, b);
-    if (layers.has(key2)) {
-      const l2 = layers.get(key2);
-      layers.delete(key2);
-      layers.set(key2, l2);
+    const key3 = pageKey(m, b);
+    if (layers.has(key3)) {
+      const l2 = layers.get(key3);
+      layers.delete(key3);
+      layers.set(key3, l2);
       return l2;
     }
     const l = yield* painted4(m, b, (view3 ?? gather(m, b)).raw);
-    layers.set(key2, l);
+    layers.set(key3, l);
     while (layers.size > LAYERS2) layers.delete(layers.keys().next().value);
     return l;
   }
@@ -51828,7 +51829,7 @@ function createCurvedRoutesV1(env, review, prior) {
       const code2 = biomeOf3(m, x, y);
       if (code2) codes.add(code2);
     }
-    const paints = [...codes].some((code2) => PAINTED.has(code2)) && needsPaint(m, b), key2 = pageKey(m, b), layer2 = !paints ? void 0 : quick ? layers.get(key2) : yield* layerFor(m, b, view3);
+    const paints = [...codes].some((code2) => PAINTED.has(code2)) && needsPaint(m, b), key3 = pageKey(m, b), layer2 = !paints ? void 0 : quick ? layers.get(key3) : yield* layerFor(m, b, view3);
     for (const code2 of codes) {
       if (layer2 !== void 0 && PAINTED.has(code2)) continue;
       const clip12 = tileClip(m, b, (x, y) => biomeOf3(m, x, y) === code2 && !CUT2.has(terrainOf(m, x, y)));
@@ -55125,9 +55126,9 @@ function extractHeroPassport(state, playerId, { heroId }) {
     gear2.push(item);
   }
   gear2.map((item) => ({ item, text: canonicalStringify(itemContent(item)) })).sort((a, b) => a.text < b.text ? -1 : a.text > b.text ? 1 : 0).forEach(({ item }, n) => {
-    const key2 = "gear:" + n;
-    keyOf2[item.itemId] = key2;
-    items.push({ key: key2, kind: "gear", ...itemContent(item) });
+    const key3 = "gear:" + n;
+    keyOf2[item.itemId] = key3;
+    items.push({ key: key3, kind: "gear", ...itemContent(item) });
   });
   items.sort((a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0);
   const equipped = {};
@@ -55172,7 +55173,7 @@ function validateHeroPassport(passport) {
     keys2.add(item.key);
   }
   requireContract(keys2.has("starter"), "Hero passport lost the starter sword");
-  for (const key2 of Object.values(passport.equipped)) requireContract(key2 === null || keys2.has(key2), "Hero passport equips a missing item");
+  for (const key3 of Object.values(passport.equipped)) requireContract(key3 === null || keys2.has(key3), "Hero passport equips a missing item");
   for (const t of passport.provisions) requireContract(SUBWEAPON_TYPES.includes(t) && keys2.has("provision:" + t), "Hero passport provision");
   if (passport.kit !== null) for (const piece3 of CLASS_KIT_PIECES) requireContract(keys2.has("kit:" + piece3), "Hero passport class kit");
   return passport;
@@ -55340,34 +55341,35 @@ function heroLastWorld(storage, channel2, heroId) {
 }
 function writeHeroPassport(storage, channel2, passport, worldSlot) {
   validateHeroPassport(passport);
-  const r = read(storage, channel2), old2 = r.passports[passport.heroId];
-  if (old2 && r.lastWorld[passport.heroId] === worldSlot) {
+  const r = read(storage, channel2), old2 = r.passports[passport.heroId], where = worldKey(worldSlot) ? worldSlot : null;
+  if (old2 && (r.lastWorld[passport.heroId] ?? null) === where) {
     try {
       if (passportText(old2) === passportText(passport)) return false;
     } catch {
     }
   }
   r.passports[passport.heroId] = passport;
-  if (worldKey(worldSlot)) r.lastWorld[passport.heroId] = worldSlot;
+  if (where) r.lastWorld[passport.heroId] = where;
+  else delete r.lastWorld[passport.heroId];
   return write2(storage, channel2, r);
 }
 function readWorldSeats(storage, channel2, worldSlot) {
-  const key2 = worldKey(worldSlot), raw = key2 ? read(storage, channel2).worlds[key2] : null, seats = {};
+  const key3 = worldKey(worldSlot), raw = key3 ? read(storage, channel2).worlds[key3] : null, seats = {};
   for (const [pid, heroId] of Object.entries(raw?.seats ?? {})) if (PLAYER.test(pid) && validHeroId(heroId)) seats[pid] = heroId;
   return seats;
 }
 function writeWorldSeats(storage, channel2, worldSlot, seats) {
-  const key2 = worldKey(worldSlot);
-  if (!key2) return false;
+  const key3 = worldKey(worldSlot);
+  if (!key3) return false;
   const r = read(storage, channel2);
-  r.worlds[key2] = { seats: { ...seats } };
+  r.worlds[key3] = { seats: { ...seats } };
   return write2(storage, channel2, r);
 }
 function forgetWorld(storage, channel2, worldSlot) {
-  const key2 = worldKey(worldSlot);
-  if (!key2) return false;
+  const key3 = worldKey(worldSlot);
+  if (!key3) return false;
   const r = read(storage, channel2);
-  delete r.worlds[key2];
+  delete r.worlds[key3];
   for (const [heroId, slot] of Object.entries(r.lastWorld)) if (slot === worldSlot) delete r.lastWorld[heroId];
   return write2(storage, channel2, r);
 }
@@ -55430,7 +55432,7 @@ function unit3(text2) {
   return ((h ^ h >>> 16) >>> 0) / 4294967296;
 }
 var questHash = (text2) => Math.floor(unit3(text2) * 4294967296);
-var pick3 = (list, key2) => list[questHash(key2) % list.length];
+var pick3 = (list, key3) => list[questHash(key3) % list.length];
 var clearings = [];
 function useQuestWorldV1(asset) {
   const out = [];
@@ -55487,31 +55489,31 @@ function landOf(view3, town) {
   }
   return best;
 }
-function nearest(list, town, land, band4, key2, preferUnfound) {
+function nearest(list, town, land, band4, key3, preferUnfound) {
   const ok = list.filter((t) => {
     const d = Math.hypot(t.x - town.x, t.y - town.y);
     return d >= P8.reach.min && d <= P8.reach.max && (t.band ?? 1) <= band4 + 1 && (!land || !t.landmassId || t.landmassId === land);
   });
   const unfound = preferUnfound ? ok.filter((t) => !t.found) : [], pool3 = (unfound.length ? unfound : ok).sort((a, b) => Math.hypot(a.x - town.x, a.y - town.y) - Math.hypot(b.x - town.x, b.y - town.y) || (a.id ?? a.siteId).localeCompare(b.id ?? b.siteId)).slice(0, P8.reach.pool);
-  return pool3.length ? pick3(pool3, key2) : null;
+  return pool3.length ? pick3(pool3, key3) : null;
 }
-function questTargetV1(view3, town, kind, key2) {
+function questTargetV1(view3, town, kind, key3) {
   const land = view3.land?.get(town.id) ?? landOf(view3, town), band4 = town.band ?? 1;
   let t;
   if (kind === "clear") {
-    t = nearest(view3.sites.filter((s) => s.tier === "standard" && !view3.eliteSites.has(s.reservationId)), town, land, band4, key2, true);
+    t = nearest(view3.sites.filter((s) => s.tier === "standard" && !view3.eliteSites.has(s.reservationId)), town, land, band4, key3, true);
     if (t) return { kind, target: t.siteId, tx: Math.floor(t.x), ty: Math.floor(t.y), band: t.band ?? 1 };
   } else if (kind === "hunt") {
-    t = nearest(view3.sites.filter(huntableSiteV1), town, land, band4, key2, false);
+    t = nearest(view3.sites.filter(huntableSiteV1), town, land, band4, key3, false);
     if (t) return { kind, target: t.siteId, tx: Math.floor(t.x), ty: Math.floor(t.y), band: t.band ?? 1 };
   } else if (kind === "carry") {
-    t = nearest(view3.settlements.filter((s) => s.id !== town.id && s.board), town, null, band4, key2, true);
+    t = nearest(view3.settlements.filter((s) => s.id !== town.id && s.board), town, null, band4, key3, true);
     if (t) return { kind, target: t.id, tx: Math.floor(t.x), ty: Math.floor(t.y), band: t.band ?? 1 };
   } else if (kind === "find") {
-    t = nearest(view3.clearings.filter((c) => c.category !== "pathside" && c.event !== "raided_camp"), town, land, band4, key2, true);
+    t = nearest(view3.clearings.filter((c) => c.category !== "pathside" && c.event !== "raided_camp"), town, land, band4, key3, true);
     if (t) return { kind, target: t.id, tx: Math.floor(t.x), ty: Math.floor(t.y), band: t.band ?? band4 };
   } else if (kind === "rescue") {
-    t = nearest(view3.clearings.filter((c) => c.event === "raided_camp"), town, land, band4, key2, false) ?? nearest(view3.clearings.filter((c) => c.category === "backcountry"), town, land, band4, key2 + "/any", false);
+    t = nearest(view3.clearings.filter((c) => c.event === "raided_camp"), town, land, band4, key3, false) ?? nearest(view3.clearings.filter((c) => c.category === "backcountry"), town, land, band4, key3 + "/any", false);
     if (t) return { kind, target: t.id, tx: Math.floor(t.x), ty: Math.floor(t.y), band: t.band ?? band4 };
   }
   return null;
@@ -55561,8 +55563,8 @@ var fill = (s, v) => s.replace(/\{(\w+)\}/g, (_, k) => {
 });
 var sentences = (s) => s.replace(/(^|[.!?]\s+)([a-z])/g, (_, a, b) => a + b.toUpperCase());
 function questTextV1(q, names2) {
-  const key2 = q.id, dir = compassV1(names2.townAt ?? { x: q.tx, y: q.ty }, { x: q.tx, y: q.ty }), hunt = names2.elite ?? {};
-  const v = { dir, label: names2.label, town: names2.town, dest: names2.dest ?? "the town to the " + dir, item: pick3(ITEMS, key2 + "/item"), captive: pick3(CAPTIVES, key2 + "/captive"), kind: hunt.kind, a: hunt.a, the: hunt.the };
+  const key3 = q.id, dir = compassV1(names2.townAt ?? { x: q.tx, y: q.ty }, { x: q.tx, y: q.ty }), hunt = names2.elite ?? {};
+  const v = { dir, label: names2.label, town: names2.town, dest: names2.dest ?? "the town to the " + dir, item: pick3(ITEMS, key3 + "/item"), captive: pick3(CAPTIVES, key3 + "/captive"), kind: hunt.kind, a: hunt.a, the: hunt.the };
   const found = Boolean(names2.found);
   let title, step, note;
   if (q.kind === "clear") {
@@ -55623,7 +55625,7 @@ function applyAlphaPopulationOverlay(base, binding, delta3) {
     if (!pages2.has(p.key)) pages2.set(p.key, Array.from({ length: 26 }, () => Array(32).fill("0")));
     for (let y = 0; y < 26; y++) for (let x = 0; x < 32; x++) pages2.get(p.key)[y][x] = String(Math.max(Number(pages2.get(p.key)[y][x]), Number(p.rows[y][x])));
   }
-  a.routes.routePages = [...pages2].sort((a2, b) => a2[0].localeCompare(b[0])).map(([key2, rows]) => ({ key: key2, rows: rows.map((r) => r.join("")) }));
+  a.routes.routePages = [...pages2].sort((a2, b) => a2[0].localeCompare(b[0])).map(([key3, rows]) => ({ key: key3, rows: rows.map((r) => r.join("")) }));
   a.populationOverlay = { version: ALPHA_POPULATION_VERSION, hash: ALPHA_POPULATION_HASH, planHash: delta3.planHash, routeHash: delta3.routeHash, parentAssetHash: binding.assetHash, parentPlanHash: binding.planHash, parentRouteHash: binding.routeHash };
   for (const r of ALPHA_POPULATION_SELECTIONS) {
     const s = a.sites.find((s2) => s2.id === r.id);
@@ -55929,8 +55931,8 @@ function roadTiles(asset, slot) {
       for (let k = 0; k <= steps3; k++) {
         const px7 = ax + (bx - ax) * k / steps3, py = ay + (by - ay) * k / steps3, d = Math.hypot(px7 - x, py - y);
         if (d > ROADSIDE_REACH) continue;
-        const tx = Math.round(px7), ty = Math.round(py), key2 = tx + "," + ty, score = d + steep;
-        if (!out.has(key2) || out.get(key2).score > score) out.set(key2, { x: tx, y: ty, score });
+        const tx = Math.round(px7), ty = Math.round(py), key3 = tx + "," + ty, score = d + steep;
+        if (!out.has(key3) || out.get(key3).score > score) out.set(key3, { x: tx, y: ty, score });
       }
     }
   }
@@ -56112,15 +56114,15 @@ var PLANNED_RUIN_EXTERIOR_POLICY2 = freezeWire({ version: PLANNED_RUIN_EXTERIOR_
 function createPlannedCryptExterior(asset, id, terrain = createPlannedTerrain(asset)) {
   const r = asset.sites.find((s) => s.id === id), d = asset.routes.destinations.find((s) => s.id === id);
   requireContract(r?.familyId === "site-family:crypt" && r.tier === "small" && r.footprint.length === 1 && r.approach.length === 1 && d?.point, "Small Crypt needs its existing compact reservation");
-  const f = r.footprint[0], left = f.x * 32 + 10, top = f.y * 26 + 5, width = 12, height = 12, entrance = { x: left + 6, y: top + 8 }, allowed = (x, y) => [...r.footprint, ...r.approach].some((c) => Math.floor(x / 32) === c.x && Math.floor(y / 26) === c.y), inside5 = (x, y) => x >= left && x < left + width && y >= top && y < top + height, solids = /* @__PURE__ */ new Set(), trail2 = /* @__PURE__ */ new Set(), circulation = /* @__PURE__ */ new Set(), key2 = (x, y) => x + "," + y;
-  for (let y = 0; y < PLANNED_RUIN_ENTRY_MASK.length; y++) for (let x = 0; x < 9; x++) if (PLANNED_RUIN_ENTRY_MASK[y][x] === "0") solids.add(key2(entrance.x - 4 + x, entrance.y - 4 + y));
+  const f = r.footprint[0], left = f.x * 32 + 10, top = f.y * 26 + 5, width = 12, height = 12, entrance = { x: left + 6, y: top + 8 }, allowed = (x, y) => [...r.footprint, ...r.approach].some((c) => Math.floor(x / 32) === c.x && Math.floor(y / 26) === c.y), inside5 = (x, y) => x >= left && x < left + width && y >= top && y < top + height, solids = /* @__PURE__ */ new Set(), trail2 = /* @__PURE__ */ new Set(), circulation = /* @__PURE__ */ new Set(), key3 = (x, y) => x + "," + y;
+  for (let y = 0; y < PLANNED_RUIN_ENTRY_MASK.length; y++) for (let x = 0; x < 9; x++) if (PLANNED_RUIN_ENTRY_MASK[y][x] === "0") solids.add(key3(entrance.x - 4 + x, entrance.y - 4 + y));
   const safe = (x, y) => {
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
       const p = terrain.base(x + dx, y + dy);
-      if (!allowed(x + dx, y + dy) || !p.walkable || p.landmassId !== r.landmassId || solids.has(key2(x + dx, y + dy))) return false;
+      if (!allowed(x + dx, y + dy) || !p.walkable || p.landmassId !== r.landmassId || solids.has(key3(x + dx, y + dy))) return false;
     }
     return true;
-  }, q = [d.point], parents = /* @__PURE__ */ new Map([[key2(d.point.x, d.point.y), null]]);
+  }, q = [d.point], parents = /* @__PURE__ */ new Map([[key3(d.point.x, d.point.y), null]]);
   let end = null;
   for (let i = 0; i < q.length; i++) {
     const p = q[i];
@@ -56129,7 +56131,7 @@ function createPlannedCryptExterior(asset, id, terrain = createPlannedTerrain(as
       break;
     }
     for (const [dx, dy] of [[0, 1], [-1, 0], [1, 0], [0, -1]]) {
-      const x = p.x + dx, y = p.y + dy, k = key2(x, y);
+      const x = p.x + dx, y = p.y + dy, k = key3(x, y);
       if (!parents.has(k) && safe(x, y)) {
         parents.set(k, p);
         q.push({ x, y });
@@ -56138,40 +56140,40 @@ function createPlannedCryptExterior(asset, id, terrain = createPlannedTerrain(as
   }
   requireContract(end, "Crypt has no safe reserved approach");
   const connector = [];
-  for (let p = end; p; p = parents.get(key2(p.x, p.y))) connector.push(p);
+  for (let p = end; p; p = parents.get(key3(p.x, p.y))) connector.push(p);
   connector.reverse();
   connector.push(entrance);
-  for (const p of connector) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if ((p.y !== entrance.y || dy >= 0) && allowed(p.x + dx, p.y + dy) && !solids.has(key2(p.x + dx, p.y + dy))) trail2.add(key2(p.x + dx, p.y + dy));
+  for (const p of connector) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if ((p.y !== entrance.y || dy >= 0) && allowed(p.x + dx, p.y + dy) && !solids.has(key3(p.x + dx, p.y + dy))) trail2.add(key3(p.x + dx, p.y + dy));
   for (let y = top; y < top + height; y++) for (let x = left; x < left + width; x++) {
     const p = terrain.base(x, y);
     requireContract(allowed(x, y) && p.walkable && p.landmassId === r.landmassId, "Crypt exterior replaces water or protected land");
-    circulation.add(key2(x, y));
+    circulation.add(key3(x, y));
   }
   requireContract(terrain.base(entrance.x, entrance.y).biome === BIOME_CODES[plannedSiteBiome(asset, r.id)], "Crypt entrance biome mismatch");
-  const apply2 = (x, y, b) => solids.has(key2(x, y)) ? { ...b, collision: "2", material: "g", route: 0, ruinExterior: true } : trail2.has(key2(x, y)) ? { ...b, collision: "1", material: "p", route: 1, ruinExterior: true } : circulation.has(key2(x, y)) ? { ...b, collision: "1", material: "g", route: 0, ruinExterior: true } : b;
+  const apply2 = (x, y, b) => solids.has(key3(x, y)) ? { ...b, collision: "2", material: "g", route: 0, ruinExterior: true } : trail2.has(key3(x, y)) ? { ...b, collision: "1", material: "p", route: 1, ruinExterior: true } : circulation.has(key3(x, y)) ? { ...b, collision: "1", material: "g", route: 0, ruinExterior: true } : b;
   const presentation = (cx, cy2, siteId) => ({ blockers: [...solids].map((k) => k.split(",").map(Number)).filter(([x, y]) => Math.floor(x / 32) === cx && Math.floor(y / 26) === cy2).map(([x, y]) => ({ id: "ruin:" + siteId + ":crypt-door-" + x + "-" + y, kind: "ruin-exterior-masonry", presentationPart: "entry-structure", detail: "crypt-entry", x: x - cx * 32, y: y - cy2 * 26, width: 1, height: 1 })), decorations: Math.floor(entrance.x / 32) === cx && Math.floor(entrance.y / 26) === cy2 ? [{ id: "ruin-art:" + siteId + ":entry", kind: "ruin-entry-facade", x: entrance.x + 0.5 - cx * 32, y: entrance.y + 0.5 - cy2 * 26, variant: 0 }] : [] });
-  return Object.freeze({ reservation: r, destination: d, left, top, width, height, entrance, road: d.point, allowed, inside: inside5, ownsStructure: (x, y) => solids.has(key2(x, y)), trail: trail2, circulation, connector, apply: apply2, presentation, terrain, realizationVersion: PLANNED_CRYPT_VERSION });
+  return Object.freeze({ reservation: r, destination: d, left, top, width, height, entrance, road: d.point, allowed, inside: inside5, ownsStructure: (x, y) => solids.has(key3(x, y)), trail: trail2, circulation, connector, apply: apply2, presentation, terrain, realizationVersion: PLANNED_CRYPT_VERSION });
 }
 async function derivePlannedCryptReservation(asset, binding, sha256, { reservationId, terrain } = {}) {
   const g = createPlannedCryptExterior(asset, reservationId, terrain), r = g.reservation, biome = plannedSiteBiome(asset, r.id), identity2 = await worldIdentity(asset.campaignSeedHex, PLANNED_CRYPT_VERSION, [binding.assetHash, r.id, r.tier], sha256), siteId = "site:" + identity2.digest.slice(0, 32), entrance = tileAddress(g.entrance.x, g.entrance.y), region = regionAddress(entrance.chunkX, entrance.chunkY), chunk2 = await worldIdentity(PLANNED_WORLD_VERSION + "/" + NATURAL_CLUSTER_VERSION + "/" + asset.campaignSeedHex + "/" + binding.assetHash + "/" + binding.townPrototype + "/" + PLANNED_CRYPT_VERSION + "/" + PLANNED_RUIN_EXTERIOR_VERSION2, "chunk", [entrance.chunkX, entrance.chunkY], sha256);
-  const socket = { version: PLANNED_CRYPT_SOCKET, siteId, siteSeed: identity2.digest, entrance, siteClass: "dungeon", capabilities: ["interior"], region: { regionX: region.regionX, regionY: region.regionY, biome }, minimumLevel: [0, 1, 6, 11, 21, 41][r.band], provenance: { geographyVersion: asset.version, chunkId: chunk2.id, placementVersion: PLANNED_CRYPT_VERSION, identityDomain: "planned-reservation-crypt", reservationId: r.id, assetHash: binding.assetHash, planHash: binding.planHash, sizeTier: r.tier, band: r.band, footprintChunks: copyWire(r.footprint), approachChunks: copyWire(r.approach) } };
-  const parcel2 = { version: PLANNED_CRYPT_VERSION, siteId, socket: copyWire(socket), familyId: "site-family:crypt", packageId: CRYPT_PACKAGE_ID, tier: r.tier, label: biome[0].toUpperCase() + biome.slice(1) + " Crypt", tileX: String(1024 * 32 + g.left), tileY: String(1024 * 26 + g.top), width: g.width, height: g.height, layoutSeed: identity2.digest, pages: r.footprint.map((c) => ({ chunkX: String(1024 + c.x), chunkY: String(1024 + c.y) })), roadAnchor: { tileX: String(1024 * 32 + g.road.x), tileY: String(1024 * 26 + g.road.y) } };
-  return freezeWire({ version: PLANNED_CRYPT_RESERVATION, siteId, packageId: CRYPT_PACKAGE_ID, socket, parcel: parcel2 });
+  const socket2 = { version: PLANNED_CRYPT_SOCKET, siteId, siteSeed: identity2.digest, entrance, siteClass: "dungeon", capabilities: ["interior"], region: { regionX: region.regionX, regionY: region.regionY, biome }, minimumLevel: [0, 1, 6, 11, 21, 41][r.band], provenance: { geographyVersion: asset.version, chunkId: chunk2.id, placementVersion: PLANNED_CRYPT_VERSION, identityDomain: "planned-reservation-crypt", reservationId: r.id, assetHash: binding.assetHash, planHash: binding.planHash, sizeTier: r.tier, band: r.band, footprintChunks: copyWire(r.footprint), approachChunks: copyWire(r.approach) } };
+  const parcel2 = { version: PLANNED_CRYPT_VERSION, siteId, socket: copyWire(socket2), familyId: "site-family:crypt", packageId: CRYPT_PACKAGE_ID, tier: r.tier, label: biome[0].toUpperCase() + biome.slice(1) + " Crypt", tileX: String(1024 * 32 + g.left), tileY: String(1024 * 26 + g.top), width: g.width, height: g.height, layoutSeed: identity2.digest, pages: r.footprint.map((c) => ({ chunkX: String(1024 + c.x), chunkY: String(1024 + c.y) })), roadAnchor: { tileX: String(1024 * 32 + g.road.x), tileY: String(1024 * 26 + g.road.y) } };
+  return freezeWire({ version: PLANNED_CRYPT_RESERVATION, siteId, packageId: CRYPT_PACKAGE_ID, socket: socket2, parcel: parcel2 });
 }
 
 // src/shared/generation/planned_crypt_v2.js
 function createPlannedCryptExteriorV2(asset, id, terrain = createPlannedTerrain(asset)) {
   const r = asset.sites.find((s) => s.id === id), d = asset.routes.destinations.find((s) => s.id === id);
   requireContract(r?.familyId === "site-family:crypt" && ["standard", "large", "deep"].includes(r.tier) && r.footprint.length === 1 && r.approach.length === 1 && d?.point, "Crypt V2 needs its existing compact reservation");
-  const f = r.footprint[0], left = f.x * 32 + 10, top = f.y * 26 + 5, width = 12, height = 12, entrance = { x: left + 6, y: top + 8 }, allowed = (x, y) => [...r.footprint, ...r.approach].some((c) => Math.floor(x / 32) === c.x && Math.floor(y / 26) === c.y), inside5 = (x, y) => x >= left && x < left + width && y >= top && y < top + height, solids = /* @__PURE__ */ new Set(), trail2 = /* @__PURE__ */ new Set(), circulation = /* @__PURE__ */ new Set(), key2 = (x, y) => x + "," + y;
-  for (let y = 0; y < PLANNED_RUIN_ENTRY_MASK.length; y++) for (let x = 0; x < 9; x++) if (PLANNED_RUIN_ENTRY_MASK[y][x] === "0") solids.add(key2(entrance.x - 4 + x, entrance.y - 4 + y));
+  const f = r.footprint[0], left = f.x * 32 + 10, top = f.y * 26 + 5, width = 12, height = 12, entrance = { x: left + 6, y: top + 8 }, allowed = (x, y) => [...r.footprint, ...r.approach].some((c) => Math.floor(x / 32) === c.x && Math.floor(y / 26) === c.y), inside5 = (x, y) => x >= left && x < left + width && y >= top && y < top + height, solids = /* @__PURE__ */ new Set(), trail2 = /* @__PURE__ */ new Set(), circulation = /* @__PURE__ */ new Set(), key3 = (x, y) => x + "," + y;
+  for (let y = 0; y < PLANNED_RUIN_ENTRY_MASK.length; y++) for (let x = 0; x < 9; x++) if (PLANNED_RUIN_ENTRY_MASK[y][x] === "0") solids.add(key3(entrance.x - 4 + x, entrance.y - 4 + y));
   const safe = (x, y) => {
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
       const p = terrain.base(x + dx, y + dy);
-      if (!allowed(x + dx, y + dy) || !p.walkable || p.landmassId !== r.landmassId || solids.has(key2(x + dx, y + dy))) return false;
+      if (!allowed(x + dx, y + dy) || !p.walkable || p.landmassId !== r.landmassId || solids.has(key3(x + dx, y + dy))) return false;
     }
     return true;
-  }, q = [d.point], parents = /* @__PURE__ */ new Map([[key2(d.point.x, d.point.y), null]]);
+  }, q = [d.point], parents = /* @__PURE__ */ new Map([[key3(d.point.x, d.point.y), null]]);
   let end = null;
   for (let i = 0; i < q.length; i++) {
     const p = q[i];
@@ -56180,7 +56182,7 @@ function createPlannedCryptExteriorV2(asset, id, terrain = createPlannedTerrain(
       break;
     }
     for (const [dx, dy] of [[0, 1], [-1, 0], [1, 0], [0, -1]]) {
-      const x = p.x + dx, y = p.y + dy, k = key2(x, y);
+      const x = p.x + dx, y = p.y + dy, k = key3(x, y);
       if (!parents.has(k) && safe(x, y)) {
         parents.set(k, p);
         q.push({ x, y });
@@ -56189,25 +56191,25 @@ function createPlannedCryptExteriorV2(asset, id, terrain = createPlannedTerrain(
   }
   requireContract(end, "Crypt has no safe reserved approach");
   const connector = [];
-  for (let p = end; p; p = parents.get(key2(p.x, p.y))) connector.push(p);
+  for (let p = end; p; p = parents.get(key3(p.x, p.y))) connector.push(p);
   connector.reverse();
   connector.push(entrance);
-  for (const p of connector) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if ((p.y !== entrance.y || dy >= 0) && allowed(p.x + dx, p.y + dy) && !solids.has(key2(p.x + dx, p.y + dy))) trail2.add(key2(p.x + dx, p.y + dy));
+  for (const p of connector) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if ((p.y !== entrance.y || dy >= 0) && allowed(p.x + dx, p.y + dy) && !solids.has(key3(p.x + dx, p.y + dy))) trail2.add(key3(p.x + dx, p.y + dy));
   for (let y = top; y < top + height; y++) for (let x = left; x < left + width; x++) {
     const p = terrain.base(x, y);
     requireContract(allowed(x, y) && p.walkable && p.landmassId === r.landmassId, "Crypt exterior replaces water or protected land");
-    circulation.add(key2(x, y));
+    circulation.add(key3(x, y));
   }
   requireContract(terrain.base(entrance.x, entrance.y).biome === BIOME_CODES[plannedSiteBiome(asset, r.id)], "Crypt entrance biome mismatch");
-  const apply2 = (x, y, b) => solids.has(key2(x, y)) ? { ...b, collision: "2", material: "g", route: 0, ruinExterior: true } : trail2.has(key2(x, y)) ? { ...b, collision: "1", material: "p", route: 1, ruinExterior: true } : circulation.has(key2(x, y)) ? { ...b, collision: "1", material: "g", route: 0, ruinExterior: true } : b;
+  const apply2 = (x, y, b) => solids.has(key3(x, y)) ? { ...b, collision: "2", material: "g", route: 0, ruinExterior: true } : trail2.has(key3(x, y)) ? { ...b, collision: "1", material: "p", route: 1, ruinExterior: true } : circulation.has(key3(x, y)) ? { ...b, collision: "1", material: "g", route: 0, ruinExterior: true } : b;
   const presentation = (cx, cy2, siteId) => ({ blockers: [...solids].map((k) => k.split(",").map(Number)).filter(([x, y]) => Math.floor(x / 32) === cx && Math.floor(y / 26) === cy2).map(([x, y]) => ({ id: "ruin:" + siteId + ":crypt-door-" + x + "-" + y, kind: "ruin-exterior-masonry", presentationPart: "entry-structure", detail: "crypt-entry", x: x - cx * 32, y: y - cy2 * 26, width: 1, height: 1 })), decorations: Math.floor(entrance.x / 32) === cx && Math.floor(entrance.y / 26) === cy2 ? [{ id: "ruin-art:" + siteId + ":entry", kind: "ruin-entry-facade", x: entrance.x + 0.5 - cx * 32, y: entrance.y + 0.5 - cy2 * 26, variant: 0 }] : [] });
-  return Object.freeze({ reservation: r, destination: d, left, top, width, height, entrance, road: d.point, allowed, inside: inside5, ownsStructure: (x, y) => solids.has(key2(x, y)), trail: trail2, circulation, connector, apply: apply2, presentation, terrain, realizationVersion: PLANNED_CRYPT_V2 });
+  return Object.freeze({ reservation: r, destination: d, left, top, width, height, entrance, road: d.point, allowed, inside: inside5, ownsStructure: (x, y) => solids.has(key3(x, y)), trail: trail2, circulation, connector, apply: apply2, presentation, terrain, realizationVersion: PLANNED_CRYPT_V2 });
 }
 async function derivePlannedCryptReservationV2(asset, binding, sha256, { reservationId, terrain } = {}) {
   const g = createPlannedCryptExteriorV2(asset, reservationId, terrain), r = g.reservation, biome = plannedSiteBiome(asset, r.id), identity2 = await worldIdentity(asset.campaignSeedHex, PLANNED_CRYPT_V2, [binding.assetHash, r.id, r.tier], sha256), siteId = "site:" + identity2.digest.slice(0, 32), entrance = tileAddress(g.entrance.x, g.entrance.y), region = regionAddress(entrance.chunkX, entrance.chunkY), chunk2 = await worldIdentity(PLANNED_WORLD_VERSION + "/" + NATURAL_CLUSTER_VERSION + "/" + asset.campaignSeedHex + "/" + binding.assetHash + (binding.townPrototype ? "/" + binding.townPrototype : "") + "/" + PLANNED_CRYPT_V2 + "/" + PLANNED_RUIN_EXTERIOR_VERSION2, "chunk", [entrance.chunkX, entrance.chunkY], sha256);
-  const socket = { version: PLANNED_CRYPT_SOCKET, siteId, siteSeed: identity2.digest, entrance, siteClass: "dungeon", capabilities: ["interior"], region: { regionX: region.regionX, regionY: region.regionY, biome }, minimumLevel: [0, 1, 6, 11, 21, 41][r.band], provenance: { geographyVersion: asset.version, chunkId: chunk2.id, placementVersion: PLANNED_CRYPT_V2, identityDomain: "planned-reservation-crypt", reservationId: r.id, assetHash: binding.assetHash, planHash: binding.planHash, sizeTier: r.tier, band: r.band, footprintChunks: copyWire(r.footprint), approachChunks: copyWire(r.approach) } };
-  const parcel2 = { version: PLANNED_CRYPT_V2, siteId, socket: copyWire(socket), familyId: "site-family:crypt", packageId: CRYPT_PACKAGE_ID, tier: r.tier, label: biome[0].toUpperCase() + biome.slice(1) + " Crypt", tileX: String(1024 * 32 + g.left), tileY: String(1024 * 26 + g.top), width: g.width, height: g.height, layoutSeed: identity2.digest, pages: r.footprint.map((c) => ({ chunkX: String(1024 + c.x), chunkY: String(1024 + c.y) })), roadAnchor: { tileX: String(1024 * 32 + g.road.x), tileY: String(1024 * 26 + g.road.y) } };
-  return freezeWire({ version: PLANNED_CRYPT_RESERVATION, siteId, packageId: CRYPT_PACKAGE_ID, socket, parcel: parcel2 });
+  const socket2 = { version: PLANNED_CRYPT_SOCKET, siteId, siteSeed: identity2.digest, entrance, siteClass: "dungeon", capabilities: ["interior"], region: { regionX: region.regionX, regionY: region.regionY, biome }, minimumLevel: [0, 1, 6, 11, 21, 41][r.band], provenance: { geographyVersion: asset.version, chunkId: chunk2.id, placementVersion: PLANNED_CRYPT_V2, identityDomain: "planned-reservation-crypt", reservationId: r.id, assetHash: binding.assetHash, planHash: binding.planHash, sizeTier: r.tier, band: r.band, footprintChunks: copyWire(r.footprint), approachChunks: copyWire(r.approach) } };
+  const parcel2 = { version: PLANNED_CRYPT_V2, siteId, socket: copyWire(socket2), familyId: "site-family:crypt", packageId: CRYPT_PACKAGE_ID, tier: r.tier, label: biome[0].toUpperCase() + biome.slice(1) + " Crypt", tileX: String(1024 * 32 + g.left), tileY: String(1024 * 26 + g.top), width: g.width, height: g.height, layoutSeed: identity2.digest, pages: r.footprint.map((c) => ({ chunkX: String(1024 + c.x), chunkY: String(1024 + c.y) })), roadAnchor: { tileX: String(1024 * 32 + g.road.x), tileY: String(1024 * 26 + g.road.y) } };
+  return freezeWire({ version: PLANNED_CRYPT_RESERVATION, siteId, packageId: CRYPT_PACKAGE_ID, socket: socket2, parcel: parcel2 });
 }
 
 // src/shared/content/planned_ruin_standard_kit_v1.js
@@ -56331,7 +56333,7 @@ function createPlannedRuinExterior(asset, reservationId, terrain = createPlanned
       if (!base.walkable || base.landmassId !== r.landmassId || inside5(xx, yy) && walk[yy - top][xx - left] !== "1") return false;
     }
     return true;
-  }, start = d.point, key2 = (x, y) => x + "," + y, queue = [start], parents = /* @__PURE__ */ new Map([[key2(start.x, start.y), null]]);
+  }, start = d.point, key3 = (x, y) => x + "," + y, queue = [start], parents = /* @__PURE__ */ new Map([[key3(start.x, start.y), null]]);
   let found = null;
   for (let head13 = 0; head13 < queue.length; head13++) {
     const p = queue[head13];
@@ -56340,7 +56342,7 @@ function createPlannedRuinExterior(asset, reservationId, terrain = createPlanned
       break;
     }
     for (const [dx, dy] of [[0, 1], [1, 0], [0, -1], [-1, 0]]) {
-      const x = p.x + dx, y = p.y + dy, k = key2(x, y);
+      const x = p.x + dx, y = p.y + dy, k = key3(x, y);
       if (!parents.has(k) && safe(x, y)) {
         parents.set(k, p);
         queue.push({ x, y });
@@ -56349,7 +56351,7 @@ function createPlannedRuinExterior(asset, reservationId, terrain = createPlanned
   }
   requireContract(found, "Ruin has no connected reserved three-tile approach");
   const connector = [];
-  for (let p = found; p; p = parents.get(key2(p.x, p.y))) connector.push(p);
+  for (let p = found; p; p = parents.get(key3(p.x, p.y))) connector.push(p);
   connector.reverse();
   connector.push(entrance);
   for (const p of connector) for (let oy = -1; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) if (p.y !== entrance.y || oy >= 0) put2(p.x + ox, p.y + oy);
@@ -56357,8 +56359,8 @@ function createPlannedRuinExterior(asset, reservationId, terrain = createPlanned
     const b = terrain.base(x, y);
     requireContract(b.walkable && b.landmassId === r.landmassId, "Ruin cannot replace water or another landmass");
   }
-  for (const key3 of trail2) {
-    const [x, y] = key3.split(",").map(Number), b = terrain.base(x, y);
+  for (const key4 of trail2) {
+    const [x, y] = key4.split(",").map(Number), b = terrain.base(x, y);
     requireContract(b.walkable && b.landmassId === r.landmassId, "Ruin approach intersects authoritative water");
     if (inside5(x, y)) {
       requireContract(walk[y - top][x - left] === "1", "Ruin approach intersects a building or wall");
@@ -56367,7 +56369,7 @@ function createPlannedRuinExterior(asset, reservationId, terrain = createPlanned
   }
   const circulation = /* @__PURE__ */ new Set();
   for (const goal of [{ x: entrance.x, y: entrance.y - 7 }, { x: entrance.x - 6, y: entrance.y + 4 }, { x: entrance.x + 6, y: entrance.y + 4 }, ...r.tier === "small" ? [{ x: entrance.x - 6, y: entrance.y - 9 }, { x: entrance.x, y: entrance.y + 8 }] : []]) {
-    const origin = { x: entrance.x, y: entrance.y + 1 }, q = [origin], parents2 = /* @__PURE__ */ new Map([[key2(origin.x, origin.y), null]]);
+    const origin = { x: entrance.x, y: entrance.y + 1 }, q = [origin], parents2 = /* @__PURE__ */ new Map([[key3(origin.x, origin.y), null]]);
     let end = null;
     for (let i = 0; i < q.length; i++) {
       const p = q[i];
@@ -56376,28 +56378,28 @@ function createPlannedRuinExterior(asset, reservationId, terrain = createPlanned
         break;
       }
       for (const [dx, dy] of [[0, 1], [-1, 0], [1, 0], [0, -1]]) {
-        const x = p.x + dx, y = p.y + dy, k = key2(x, y);
+        const x = p.x + dx, y = p.y + dy, k = key3(x, y);
         if (!parents2.has(k) && inside5(x, y) && safe(x, y)) {
           parents2.set(k, p);
           q.push({ x, y });
         }
       }
     }
-    requireContract(end, "Ruin circulation cannot reach " + r.id + " courtyard " + key2(goal.x, goal.y));
-    for (let p = end; p; p = parents2.get(key2(p.x, p.y))) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (inside5(p.x + dx, p.y + dy)) circulation.add(key2(p.x + dx, p.y + dy));
+    requireContract(end, "Ruin circulation cannot reach " + r.id + " courtyard " + key3(goal.x, goal.y));
+    for (let p = end; p; p = parents2.get(key3(p.x, p.y))) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (inside5(p.x + dx, p.y + dy)) circulation.add(key3(p.x + dx, p.y + dy));
   }
   const ownsStructure = (x, y) => inside5(x, y) && walk[y - top][x - left] === "2";
   const clearEntrance = (x, y) => x >= entrance.x - 4 && x <= entrance.x + 4 && y >= entrance.y - 4 && y <= entrance.y + 3 && !ownsStructure(x, y);
-  const apply2 = (x, y, b) => ownsStructure(x, y) ? { ...b, collision: "2", material: "g", route: 0, ruinExterior: true } : trail2.has(x + "," + y) ? { ...b, collision: "1", material: "p", route: 1, ruinExterior: true } : clearEntrance(x, y) || circulation.has(key2(x, y)) || moduleClear.has(key2(x, y)) ? { ...b, collision: "1", material: "g", route: 0, ruinExterior: true } : b;
+  const apply2 = (x, y, b) => ownsStructure(x, y) ? { ...b, collision: "2", material: "g", route: 0, ruinExterior: true } : trail2.has(x + "," + y) ? { ...b, collision: "1", material: "p", route: 1, ruinExterior: true } : clearEntrance(x, y) || circulation.has(key3(x, y)) || moduleClear.has(key3(x, y)) ? { ...b, collision: "1", material: "g", route: 0, ruinExterior: true } : b;
   const presentation = (cx, cy2, siteId) => ({ blockers: blockers.filter((b) => left + b.x < cx * 32 + 32 && left + b.x + b.width > cx * 32 && top + b.y < cy2 * 26 + 26 && top + b.y + b.height > cy2 * 26).map((b) => ({ ...b, id: "ruin:" + siteId + ":" + b.detail, x: left + b.x - cx * 32, y: top + b.y - cy2 * 26 })), decorations: decorations.filter((q) => Math.floor((left + q.x) / 32) === cx && Math.floor((top + q.y) / 26) === cy2).map((q, i) => ({ ...q, id: "ruin-art:" + siteId + ":" + q.kind + ":" + (q.standardRuinKit ? q.x + "," + q.y : i), x: left + q.x - cx * 32, y: top + q.y - cy2 * 26 })) });
   return Object.freeze({ reservation: r, destination: d, policy, left, top, width, height, entrance, gate, road: d.point, side, connector, trail: trail2, circulation, allowed, inside: inside5, ownsStructure, apply: apply2, presentation, terrain, realizationVersion: realization?.version ?? (r.tier === "standard" ? STANDARD_RUIN_KIT_VERSION : PLANNED_RUIN_EXTERIOR_VERSION2), variant: variation.toString(16).padStart(8, "0") });
 }
 async function derivePlannedRuinReservation(asset, binding, sha256, { reservationId, terrain, realization = null } = {}) {
   const g = createPlannedRuinExterior(asset, reservationId, terrain, realization), r = g.reservation, biome = plannedSiteBiome(asset, r.id), identity2 = await worldIdentity(asset.campaignSeedHex, PLANNED_RUIN_VERSION, [binding.assetHash, r.id, r.tier], sha256), siteId = "site:" + identity2.digest.slice(0, 32), entrance = tileAddress(g.entrance.x, g.entrance.y), region = regionAddress(entrance.chunkX, entrance.chunkY);
   requireContract(g.terrain.base(g.entrance.x, g.entrance.y).biome === BIOME_CODES[biome], "Ruin entrance biome incompatible");
-  const chunk2 = await worldIdentity(PLANNED_WORLD_VERSION + "/" + NATURAL_CLUSTER_VERSION + "/" + asset.campaignSeedHex + "/" + binding.assetHash + (binding.townPrototype ? "/" + binding.townPrototype : "") + "/" + PLANNED_RUIN_VERSION + "/" + PLANNED_RUIN_EXTERIOR_VERSION2 + (r.tier === "standard" ? "/" + STANDARD_RUIN_KIT_VERSION : "") + (isRuinGrovePilot(asset, r) ? "/" + RUIN_GROVE_VERSION : ""), "chunk", [entrance.chunkX, entrance.chunkY], sha256), socket = { version: PLANNED_RUIN_SOCKET, siteId, siteSeed: identity2.digest, entrance, siteClass: "dungeon", capabilities: ["interior"], region: { regionX: region.regionX, regionY: region.regionY, biome }, minimumLevel: [0, 1, 6, 11, 21, 41][r.band], provenance: { geographyVersion: asset.version, chunkId: chunk2.id, placementVersion: PLANNED_RUIN_VERSION, identityDomain: "planned-reservation-ruin", reservationId: r.id, assetHash: binding.assetHash, planHash: binding.planHash, sizeTier: r.tier, band: r.band, footprintChunks: copyWire(r.footprint), approachChunks: copyWire(r.approach) } };
-  const parcel2 = { version: PLANNED_RUIN_VERSION, siteId, socket: copyWire(socket), familyId: "site-family:ruin", packageId: RUIN_FAMILY_PACKAGE_ID, tier: r.tier, label: biome[0].toUpperCase() + biome.slice(1) + " Ruin", tileX: String(PLANNED_ADDRESS_OFFSET.chunkX * 32 + g.left), tileY: String(PLANNED_ADDRESS_OFFSET.chunkY * 26 + g.top), width: g.width, height: g.height, layoutSeed: identity2.digest, pages: r.footprint.map((c) => ({ chunkX: String(1024 + c.x), chunkY: String(1024 + c.y) })), roadAnchor: { tileX: String(1024 * 32 + g.gate.x), tileY: String(1024 * 26 + g.gate.y) } };
-  return freezeWire({ version: PLANNED_RUIN_RESERVATION, siteId, packageId: RUIN_FAMILY_PACKAGE_ID, socket, parcel: parcel2 });
+  const chunk2 = await worldIdentity(PLANNED_WORLD_VERSION + "/" + NATURAL_CLUSTER_VERSION + "/" + asset.campaignSeedHex + "/" + binding.assetHash + (binding.townPrototype ? "/" + binding.townPrototype : "") + "/" + PLANNED_RUIN_VERSION + "/" + PLANNED_RUIN_EXTERIOR_VERSION2 + (r.tier === "standard" ? "/" + STANDARD_RUIN_KIT_VERSION : "") + (isRuinGrovePilot(asset, r) ? "/" + RUIN_GROVE_VERSION : ""), "chunk", [entrance.chunkX, entrance.chunkY], sha256), socket2 = { version: PLANNED_RUIN_SOCKET, siteId, siteSeed: identity2.digest, entrance, siteClass: "dungeon", capabilities: ["interior"], region: { regionX: region.regionX, regionY: region.regionY, biome }, minimumLevel: [0, 1, 6, 11, 21, 41][r.band], provenance: { geographyVersion: asset.version, chunkId: chunk2.id, placementVersion: PLANNED_RUIN_VERSION, identityDomain: "planned-reservation-ruin", reservationId: r.id, assetHash: binding.assetHash, planHash: binding.planHash, sizeTier: r.tier, band: r.band, footprintChunks: copyWire(r.footprint), approachChunks: copyWire(r.approach) } };
+  const parcel2 = { version: PLANNED_RUIN_VERSION, siteId, socket: copyWire(socket2), familyId: "site-family:ruin", packageId: RUIN_FAMILY_PACKAGE_ID, tier: r.tier, label: biome[0].toUpperCase() + biome.slice(1) + " Ruin", tileX: String(PLANNED_ADDRESS_OFFSET.chunkX * 32 + g.left), tileY: String(PLANNED_ADDRESS_OFFSET.chunkY * 26 + g.top), width: g.width, height: g.height, layoutSeed: identity2.digest, pages: r.footprint.map((c) => ({ chunkX: String(1024 + c.x), chunkY: String(1024 + c.y) })), roadAnchor: { tileX: String(1024 * 32 + g.gate.x), tileY: String(1024 * 26 + g.gate.y) } };
+  return freezeWire({ version: PLANNED_RUIN_RESERVATION, siteId, packageId: RUIN_FAMILY_PACKAGE_ID, socket: socket2, parcel: parcel2 });
 }
 
 // src/shared/generation/planned_ruin_v2.js
@@ -56427,9 +56429,9 @@ async function derivePlannedRuinReservationV2(asset, binding, sha256, { reservat
   const r = asset.sites.find((s) => s.id === reservationId);
   if (["small", "standard"].includes(r?.tier)) return derivePlannedRuinReservation(asset, binding, sha256, { reservationId, terrain });
   const g = createPlannedRuinExteriorV2(asset, reservationId, terrain), biome = plannedSiteBiome(asset, r.id), identity2 = await worldIdentity(asset.campaignSeedHex, PLANNED_RUIN_V2, [binding.assetHash, r.id, r.tier], sha256), siteId = "site:" + identity2.digest.slice(0, 32), entrance = tileAddress(g.entrance.x, g.entrance.y), region = regionAddress(entrance.chunkX, entrance.chunkY), chunk2 = await worldIdentity(PLANNED_WORLD_VERSION + "/" + NATURAL_CLUSTER_VERSION + "/" + asset.campaignSeedHex + "/" + binding.assetHash + (binding.townPrototype ? "/" + binding.townPrototype : "") + "/" + PLANNED_RUIN_V2, "chunk", [entrance.chunkX, entrance.chunkY], sha256);
-  const socket = { version: PLANNED_RUIN_SOCKET, siteId, siteSeed: identity2.digest, entrance, siteClass: "dungeon", capabilities: ["interior"], region: { regionX: region.regionX, regionY: region.regionY, biome }, minimumLevel: [0, 1, 6, 11, 21, 41][r.band], provenance: { geographyVersion: asset.version, chunkId: chunk2.id, placementVersion: PLANNED_RUIN_V2, identityDomain: r.id === DEEP_RUIN_FIXTURE_ID ? "isolated-development-ruin" : "planned-reservation-ruin", reservationId: r.id, assetHash: binding.assetHash, planHash: binding.planHash, sizeTier: r.tier, band: r.band, footprintChunks: copyWire(r.footprint), approachChunks: copyWire(r.approach) } };
-  const parcel2 = { version: PLANNED_RUIN_V2, siteId, socket: copyWire(socket), familyId: "site-family:ruin", packageId: RUIN_FAMILY_PACKAGE_ID, tier: r.tier, label: r.id === DEEP_RUIN_FIXTURE_ID ? "Deep Ruin fixture" : biome[0].toUpperCase() + biome.slice(1) + " Ruin", tileX: String(1024 * 32 + g.left), tileY: String(1024 * 26 + g.top), width: g.width, height: g.height, layoutSeed: identity2.digest, pages: r.footprint.map((c) => ({ chunkX: String(1024 + c.x), chunkY: String(1024 + c.y) })), roadAnchor: { tileX: String(1024 * 32 + g.gate.x), tileY: String(1024 * 26 + g.gate.y) } };
-  return freezeWire({ version: PLANNED_RUIN_RESERVATION, siteId, packageId: RUIN_FAMILY_PACKAGE_ID, socket, parcel: parcel2 });
+  const socket2 = { version: PLANNED_RUIN_SOCKET, siteId, siteSeed: identity2.digest, entrance, siteClass: "dungeon", capabilities: ["interior"], region: { regionX: region.regionX, regionY: region.regionY, biome }, minimumLevel: [0, 1, 6, 11, 21, 41][r.band], provenance: { geographyVersion: asset.version, chunkId: chunk2.id, placementVersion: PLANNED_RUIN_V2, identityDomain: r.id === DEEP_RUIN_FIXTURE_ID ? "isolated-development-ruin" : "planned-reservation-ruin", reservationId: r.id, assetHash: binding.assetHash, planHash: binding.planHash, sizeTier: r.tier, band: r.band, footprintChunks: copyWire(r.footprint), approachChunks: copyWire(r.approach) } };
+  const parcel2 = { version: PLANNED_RUIN_V2, siteId, socket: copyWire(socket2), familyId: "site-family:ruin", packageId: RUIN_FAMILY_PACKAGE_ID, tier: r.tier, label: r.id === DEEP_RUIN_FIXTURE_ID ? "Deep Ruin fixture" : biome[0].toUpperCase() + biome.slice(1) + " Ruin", tileX: String(1024 * 32 + g.left), tileY: String(1024 * 26 + g.top), width: g.width, height: g.height, layoutSeed: identity2.digest, pages: r.footprint.map((c) => ({ chunkX: String(1024 + c.x), chunkY: String(1024 + c.y) })), roadAnchor: { tileX: String(1024 * 32 + g.gate.x), tileY: String(1024 * 26 + g.gate.y) } };
+  return freezeWire({ version: PLANNED_RUIN_RESERVATION, siteId, packageId: RUIN_FAMILY_PACKAGE_ID, socket: socket2, parcel: parcel2 });
 }
 
 // src/shared/generation/alpha_population_runtime_v1.js
@@ -56519,7 +56521,7 @@ function createPlannedFortExterior(asset, reservationId, terrain = createPlanned
       if (!base.walkable || base.landmassId !== r.landmassId || inside5(xx, yy) && walk[yy - top][xx - left] !== "1") return false;
     }
     return true;
-  }, start = d.point, key2 = (x, y) => x + "," + y, queue = [start], parents = /* @__PURE__ */ new Map([[key2(start.x, start.y), null]]);
+  }, start = d.point, key3 = (x, y) => x + "," + y, queue = [start], parents = /* @__PURE__ */ new Map([[key3(start.x, start.y), null]]);
   let found = null;
   for (let head13 = 0; head13 < queue.length; head13++) {
     const p = queue[head13];
@@ -56528,7 +56530,7 @@ function createPlannedFortExterior(asset, reservationId, terrain = createPlanned
       break;
     }
     for (const [dx, dy] of [[0, 1], [1, 0], [0, -1], [-1, 0]]) {
-      const x = p.x + dx, y = p.y + dy, k = key2(x, y);
+      const x = p.x + dx, y = p.y + dy, k = key3(x, y);
       if (!parents.has(k) && safe(x, y)) {
         parents.set(k, p);
         queue.push({ x, y });
@@ -56537,7 +56539,7 @@ function createPlannedFortExterior(asset, reservationId, terrain = createPlanned
   }
   requireContract(found, "Fort has no connected reserved three-tile approach");
   const connector = [];
-  for (let p = found; p; p = parents.get(key2(p.x, p.y))) connector.push(p);
+  for (let p = found; p; p = parents.get(key3(p.x, p.y))) connector.push(p);
   connector.reverse();
   connector.push(entrance);
   for (const p of connector) for (let oy = -1; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) if (p.y !== entrance.y || oy >= 0) put2(p.x + ox, p.y + oy);
@@ -56546,8 +56548,8 @@ function createPlannedFortExterior(asset, reservationId, terrain = createPlanned
     requireContract(b.walkable && b.landmassId === r.landmassId, "Fort cannot replace water or another landmass");
     if (x - left > 4 && x - left < width - 5 && y - top > 4 && y - top < height - 5) ground[y - top][x - left] = "r";
   }
-  for (const key3 of trail2) {
-    const [x, y] = key3.split(",").map(Number), b = terrain.base(x, y);
+  for (const key4 of trail2) {
+    const [x, y] = key4.split(",").map(Number), b = terrain.base(x, y);
     requireContract(b.walkable && b.landmassId === r.landmassId, "Fort approach intersects authoritative water");
     if (inside5(x, y)) {
       requireContract(walk[y - top][x - left] === "1", "Fort approach intersects a building or wall");
@@ -56562,9 +56564,9 @@ function createPlannedFortExterior(asset, reservationId, terrain = createPlanned
 async function derivePlannedFortReservation(asset, binding, sha256, { reservationId, terrain } = {}) {
   const g = createPlannedFortExterior(asset, reservationId, terrain), r = g.reservation, biome = plannedSiteBiome(asset, r.id), identity2 = await worldIdentity(asset.campaignSeedHex, PLANNED_FORT_VERSION, [binding.assetHash, r.id, r.tier], sha256), siteId = "site:" + identity2.digest.slice(0, 32), entrance = tileAddress(g.entrance.x, g.entrance.y), region = regionAddress(entrance.chunkX, entrance.chunkY);
   requireContract(g.terrain.base(g.entrance.x, g.entrance.y).biome === BIOME_CODES[biome], "Fort entrance biome incompatible");
-  const chunk2 = await worldIdentity(PLANNED_WORLD_VERSION + "/" + NATURAL_CLUSTER_VERSION + "/" + asset.campaignSeedHex + "/" + binding.assetHash + (binding.townPrototype ? "/" + binding.townPrototype : "") + "/" + PLANNED_FORT_VERSION, "chunk", [entrance.chunkX, entrance.chunkY], sha256), socket = { version: PLANNED_FORT_SOCKET, siteId, siteSeed: identity2.digest, entrance, siteClass: "dungeon", capabilities: ["interior"], region: { regionX: region.regionX, regionY: region.regionY, biome }, minimumLevel: [0, 1, 6, 11, 21, 41][r.band], provenance: { geographyVersion: asset.version, chunkId: chunk2.id, placementVersion: PLANNED_FORT_VERSION, identityDomain: "planned-reservation-fort", reservationId: r.id, assetHash: binding.assetHash, planHash: binding.planHash, sizeTier: r.tier, band: r.band, footprintChunks: copyWire(r.footprint), approachChunks: copyWire(r.approach) } };
-  const parcel2 = { version: PLANNED_FORT_VERSION, siteId, socket: copyWire(socket), familyId: "site-family:fort", packageId: FORT_FAMILY_PACKAGE_ID, tier: r.tier, label: biome[0].toUpperCase() + biome.slice(1) + " Fort", tileX: String(PLANNED_ADDRESS_OFFSET.chunkX * 32 + g.left), tileY: String(PLANNED_ADDRESS_OFFSET.chunkY * 26 + g.top), width: g.width, height: g.height, layoutSeed: identity2.digest, pages: r.footprint.map((c) => ({ chunkX: String(1024 + c.x), chunkY: String(1024 + c.y) })), roadAnchor: { tileX: String(1024 * 32 + g.gate.x), tileY: String(1024 * 26 + g.gate.y) } };
-  return freezeWire({ version: PLANNED_FORT_RESERVATION, siteId, packageId: FORT_FAMILY_PACKAGE_ID, socket, parcel: parcel2 });
+  const chunk2 = await worldIdentity(PLANNED_WORLD_VERSION + "/" + NATURAL_CLUSTER_VERSION + "/" + asset.campaignSeedHex + "/" + binding.assetHash + (binding.townPrototype ? "/" + binding.townPrototype : "") + "/" + PLANNED_FORT_VERSION, "chunk", [entrance.chunkX, entrance.chunkY], sha256), socket2 = { version: PLANNED_FORT_SOCKET, siteId, siteSeed: identity2.digest, entrance, siteClass: "dungeon", capabilities: ["interior"], region: { regionX: region.regionX, regionY: region.regionY, biome }, minimumLevel: [0, 1, 6, 11, 21, 41][r.band], provenance: { geographyVersion: asset.version, chunkId: chunk2.id, placementVersion: PLANNED_FORT_VERSION, identityDomain: "planned-reservation-fort", reservationId: r.id, assetHash: binding.assetHash, planHash: binding.planHash, sizeTier: r.tier, band: r.band, footprintChunks: copyWire(r.footprint), approachChunks: copyWire(r.approach) } };
+  const parcel2 = { version: PLANNED_FORT_VERSION, siteId, socket: copyWire(socket2), familyId: "site-family:fort", packageId: FORT_FAMILY_PACKAGE_ID, tier: r.tier, label: biome[0].toUpperCase() + biome.slice(1) + " Fort", tileX: String(PLANNED_ADDRESS_OFFSET.chunkX * 32 + g.left), tileY: String(PLANNED_ADDRESS_OFFSET.chunkY * 26 + g.top), width: g.width, height: g.height, layoutSeed: identity2.digest, pages: r.footprint.map((c) => ({ chunkX: String(1024 + c.x), chunkY: String(1024 + c.y) })), roadAnchor: { tileX: String(1024 * 32 + g.gate.x), tileY: String(1024 * 26 + g.gate.y) } };
+  return freezeWire({ version: PLANNED_FORT_RESERVATION, siteId, packageId: FORT_FAMILY_PACKAGE_ID, socket: socket2, parcel: parcel2 });
 }
 
 // src/shared/generation/planned_fort_v2.js
@@ -56608,9 +56610,9 @@ async function derivePlannedFortReservationV2(asset, binding, sha256, { reservat
   if (g.realizationVersion === PLANNED_FORT_VERSION) return derivePlannedFortReservation(asset, binding, sha256, { reservationId, terrain });
   const r = g.reservation, fixture = r.id === DEEP_FORT_FIXTURE_ID, biome = plannedSiteBiome(asset, r.id), identity2 = await worldIdentity(asset.campaignSeedHex, PLANNED_FORT_V2, [binding.assetHash, r.id, r.tier], sha256), siteId = "site:" + identity2.digest.slice(0, 32), entrance = tileAddress(g.entrance.x, g.entrance.y), region = regionAddress(entrance.chunkX, entrance.chunkY);
   requireContract(g.terrain.base(g.entrance.x, g.entrance.y).biome === BIOME_CODES[biome], "Fort V2 entrance biome incompatible");
-  const chunk2 = await worldIdentity(PLANNED_WORLD_VERSION + "/" + NATURAL_CLUSTER_VERSION + "/" + asset.campaignSeedHex + "/" + binding.assetHash + (binding.townPrototype ? "/" + binding.townPrototype : "") + "/" + PLANNED_FORT_V2, "chunk", [entrance.chunkX, entrance.chunkY], sha256), socket = { version: "site-socket-planned-fort-v1", siteId, siteSeed: identity2.digest, entrance, siteClass: "dungeon", capabilities: ["interior"], region: { regionX: region.regionX, regionY: region.regionY, biome }, minimumLevel: [0, 1, 6, 11, 21, 41][r.band], provenance: { geographyVersion: asset.version, chunkId: chunk2.id, placementVersion: PLANNED_FORT_V2, identityDomain: fixture ? "isolated-development-fort" : "planned-reservation-fort", reservationId: r.id, assetHash: binding.assetHash, planHash: binding.planHash, sizeTier: r.tier, band: r.band, footprintChunks: copyWire(r.footprint), approachChunks: copyWire(r.approach) } };
-  const parcel2 = { version: PLANNED_FORT_V2, siteId, socket: copyWire(socket), familyId: "site-family:fort", packageId: "procedural-fort-family", tier: r.tier, label: fixture ? "Deep Fort fixture" : biome[0].toUpperCase() + biome.slice(1) + " Fort", tileX: String(PLANNED_ADDRESS_OFFSET.chunkX * 32 + g.left), tileY: String(PLANNED_ADDRESS_OFFSET.chunkY * 26 + g.top), width: g.width, height: g.height, layoutSeed: identity2.digest, pages: r.footprint.map((c) => ({ chunkX: String(1024 + c.x), chunkY: String(1024 + c.y) })), roadAnchor: { tileX: String(1024 * 32 + g.gate.x), tileY: String(1024 * 26 + g.gate.y) } };
-  return freezeWire({ version: "site-reservation-planned-fort-v1", siteId, packageId: "procedural-fort-family", socket, parcel: parcel2 });
+  const chunk2 = await worldIdentity(PLANNED_WORLD_VERSION + "/" + NATURAL_CLUSTER_VERSION + "/" + asset.campaignSeedHex + "/" + binding.assetHash + (binding.townPrototype ? "/" + binding.townPrototype : "") + "/" + PLANNED_FORT_V2, "chunk", [entrance.chunkX, entrance.chunkY], sha256), socket2 = { version: "site-socket-planned-fort-v1", siteId, siteSeed: identity2.digest, entrance, siteClass: "dungeon", capabilities: ["interior"], region: { regionX: region.regionX, regionY: region.regionY, biome }, minimumLevel: [0, 1, 6, 11, 21, 41][r.band], provenance: { geographyVersion: asset.version, chunkId: chunk2.id, placementVersion: PLANNED_FORT_V2, identityDomain: fixture ? "isolated-development-fort" : "planned-reservation-fort", reservationId: r.id, assetHash: binding.assetHash, planHash: binding.planHash, sizeTier: r.tier, band: r.band, footprintChunks: copyWire(r.footprint), approachChunks: copyWire(r.approach) } };
+  const parcel2 = { version: PLANNED_FORT_V2, siteId, socket: copyWire(socket2), familyId: "site-family:fort", packageId: "procedural-fort-family", tier: r.tier, label: fixture ? "Deep Fort fixture" : biome[0].toUpperCase() + biome.slice(1) + " Fort", tileX: String(PLANNED_ADDRESS_OFFSET.chunkX * 32 + g.left), tileY: String(PLANNED_ADDRESS_OFFSET.chunkY * 26 + g.top), width: g.width, height: g.height, layoutSeed: identity2.digest, pages: r.footprint.map((c) => ({ chunkX: String(1024 + c.x), chunkY: String(1024 + c.y) })), roadAnchor: { tileX: String(1024 * 32 + g.gate.x), tileY: String(1024 * 26 + g.gate.y) } };
+  return freezeWire({ version: "site-reservation-planned-fort-v1", siteId, packageId: "procedural-fort-family", socket: socket2, parcel: parcel2 });
 }
 
 // src/shared/generation/planned_cave_v1.js
@@ -56642,9 +56644,9 @@ function createPlannedCaveExterior(asset, reservationId = PLANNED_CAVE_ID, share
 async function derivePlannedCaveReservation(asset, binding, sha256, { reservationId = PLANNED_CAVE_ID, terrain = null } = {}) {
   const g = createPlannedCaveExterior(asset, reservationId, terrain), r = g.reservation, identity2 = await worldIdentity(asset.campaignSeedHex, PLANNED_CAVE_VERSION, [binding.assetHash, r.id, r.tier], sha256), siteId = "site:" + identity2.digest.slice(0, 32), entrance = tileAddress(g.entrance.x, g.entrance.y), region = regionAddress(entrance.chunkX, entrance.chunkY), biome = plannedSiteBiome(asset, r.id);
   requireContract(Object.hasOwn(BIOME_CODES, biome) && g.terrain.base(g.entrance.x, g.entrance.y).biome === BIOME_CODES[biome], "Cave entrance biome disagrees with reservation");
-  const chunk2 = await worldIdentity(PLANNED_WORLD_VERSION + "/" + NATURAL_CLUSTER_VERSION + "/" + asset.campaignSeedHex + "/" + binding.assetHash + "/" + binding.townPrototype + "/" + PLANNED_CAVE_VERSION, "chunk", [entrance.chunkX, entrance.chunkY], sha256), socket = { version: PLANNED_CAVE_SOCKET, siteId, siteSeed: identity2.digest, entrance, siteClass: "dungeon", capabilities: ["interior"], region: { regionX: region.regionX, regionY: region.regionY, biome }, minimumLevel: [0, 1, 6, 11, 21, 41][r.band], provenance: { geographyVersion: asset.version, chunkId: chunk2.id, placementVersion: PLANNED_CAVE_VERSION, identityDomain: "planned-reservation-cave", reservationId: r.id, assetHash: binding.assetHash, planHash: binding.planHash, sizeTier: r.tier, band: r.band, footprintChunk: copyWire(g.footprint), approachChunk: copyWire(g.approach) } };
-  const regionName = biome[0].toUpperCase() + biome.slice(1), stable3 = await deriveWoodlandCaveIdentityD12_2({ campaignSeed: asset.campaignSeedHex, site: socket, label: regionName + " Cave", regionName, geographicQualifier: "" }, { sha256 }), parcel2 = { version: PLANNED_CAVE_PARCEL, siteId, socket: copyWire(socket), familyId: WOODLAND_CAVE_FAMILY_ID, packageId: WOODLAND_CAVE_FAMILY_PACKAGE_ID, spawnOrdinal: 0, regionKey: region.regionX + "," + region.regionY, regionName, geographicQualifier: "", label: stable3.label, tileX: String(PLANNED_ADDRESS_OFFSET.chunkX * 32 + g.left), tileY: String(PLANNED_ADDRESS_OFFSET.chunkY * 26 + g.top), width: WOODLAND_CAVE_EXTERIOR.width, height: WOODLAND_CAVE_EXTERIOR.height, orientation: "south-facing", pages: [{ chunkX: entrance.chunkX, chunkY: entrance.chunkY, baseDigest: chunk2.digest }], roadAnchor: { tileX: String(PLANNED_ADDRESS_OFFSET.chunkX * 32 + g.entrance.x), tileY: String(PLANNED_ADDRESS_OFFSET.chunkY * 26 + g.top + WOODLAND_CAVE_EXTERIOR.height - 1) }, tier: r.tier, siteSeed: stable3.siteSeed, layoutSeed: stable3.layoutSeed, placementProvenance: { version: PLANNED_CAVE_VERSION, kind: "existing-planned-reservation", reservationId: r.id, assetHash: binding.assetHash, planHash: binding.planHash } };
-  return freezeWire({ version: PLANNED_CAVE_RESERVATION, siteId, packageId: WOODLAND_CAVE_FAMILY_PACKAGE_ID, socket, parcel: parcel2 });
+  const chunk2 = await worldIdentity(PLANNED_WORLD_VERSION + "/" + NATURAL_CLUSTER_VERSION + "/" + asset.campaignSeedHex + "/" + binding.assetHash + "/" + binding.townPrototype + "/" + PLANNED_CAVE_VERSION, "chunk", [entrance.chunkX, entrance.chunkY], sha256), socket2 = { version: PLANNED_CAVE_SOCKET, siteId, siteSeed: identity2.digest, entrance, siteClass: "dungeon", capabilities: ["interior"], region: { regionX: region.regionX, regionY: region.regionY, biome }, minimumLevel: [0, 1, 6, 11, 21, 41][r.band], provenance: { geographyVersion: asset.version, chunkId: chunk2.id, placementVersion: PLANNED_CAVE_VERSION, identityDomain: "planned-reservation-cave", reservationId: r.id, assetHash: binding.assetHash, planHash: binding.planHash, sizeTier: r.tier, band: r.band, footprintChunk: copyWire(g.footprint), approachChunk: copyWire(g.approach) } };
+  const regionName = biome[0].toUpperCase() + biome.slice(1), stable3 = await deriveWoodlandCaveIdentityD12_2({ campaignSeed: asset.campaignSeedHex, site: socket2, label: regionName + " Cave", regionName, geographicQualifier: "" }, { sha256 }), parcel2 = { version: PLANNED_CAVE_PARCEL, siteId, socket: copyWire(socket2), familyId: WOODLAND_CAVE_FAMILY_ID, packageId: WOODLAND_CAVE_FAMILY_PACKAGE_ID, spawnOrdinal: 0, regionKey: region.regionX + "," + region.regionY, regionName, geographicQualifier: "", label: stable3.label, tileX: String(PLANNED_ADDRESS_OFFSET.chunkX * 32 + g.left), tileY: String(PLANNED_ADDRESS_OFFSET.chunkY * 26 + g.top), width: WOODLAND_CAVE_EXTERIOR.width, height: WOODLAND_CAVE_EXTERIOR.height, orientation: "south-facing", pages: [{ chunkX: entrance.chunkX, chunkY: entrance.chunkY, baseDigest: chunk2.digest }], roadAnchor: { tileX: String(PLANNED_ADDRESS_OFFSET.chunkX * 32 + g.entrance.x), tileY: String(PLANNED_ADDRESS_OFFSET.chunkY * 26 + g.top + WOODLAND_CAVE_EXTERIOR.height - 1) }, tier: r.tier, siteSeed: stable3.siteSeed, layoutSeed: stable3.layoutSeed, placementProvenance: { version: PLANNED_CAVE_VERSION, kind: "existing-planned-reservation", reservationId: r.id, assetHash: binding.assetHash, planHash: binding.planHash } };
+  return freezeWire({ version: PLANNED_CAVE_RESERVATION, siteId, packageId: WOODLAND_CAVE_FAMILY_PACKAGE_ID, socket: socket2, parcel: parcel2 });
 }
 
 // src/shared/generation/outdoor_bridge_v1.js
@@ -56662,8 +56664,8 @@ function createOutdoorBridgeDecks(records, terrain) {
       const x = a.x + dx * n - dy * cross3, y = a.y + dy * n + dx * cross3, c = terrain.base(x, y);
       requirePlan(c.landmassId === bridge.landmassId && (c.walkable || c.kind === "river"), "Bridge cannot cross ocean, lake, or another landmass");
       if (c.kind === "river") river = true;
-      const key2 = x + "," + y;
-      if (!tiles5.has(key2)) tiles5.set(key2, { id: bridge.id, material: dx ? "H" : "V", underlyingKind: c.kind, version: OUTDOOR_BRIDGE_VERSION });
+      const key3 = x + "," + y;
+      if (!tiles5.has(key3)) tiles5.set(key3, { id: bridge.id, material: dx ? "H" : "V", underlyingKind: c.kind, version: OUTDOOR_BRIDGE_VERSION });
     }
     requirePlan(river, "Bridge must cross a local channel");
   }
@@ -56709,9 +56711,9 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
   const ruinReservations = Promise.all(ruinIds.map((reservationId) => hasAlphaPopulation(binding) && newPopulationSelection(reservationId) ? derivePopulationRuinReservation(asset, binding, sha256, { reservationId, terrain }) : (binding.ruinPrototype === PLANNED_RUIN_V2 ? derivePlannedRuinReservationV2 : derivePlannedRuinReservation)(asset, binding, sha256, { reservationId, terrain }).then((r) => completePopulationReservation(r, asset, binding, sha256))));
   const cryptIds = cryptIdsForBinding(binding), crypts = cryptIds.map((id) => hasAlphaPopulation(binding) && newPopulationSelection(id) ? createPopulationCryptExterior(asset, id, terrain) : (id.includes(":small:") ? createPlannedCryptExterior : createPlannedCryptExteriorV2)(asset, id, terrain));
   for (const crypt of crypts) for (const c of [...crypt.reservation.footprint, ...crypt.reservation.approach]) {
-    const key2 = c.x + "," + c.y;
-    requirePlan(!ruinByChunk.has(key2) && !caveByChunk.has(key2) && !fortByChunk.has(key2), "Crypt protected overlap");
-    ruinByChunk.set(key2, crypt);
+    const key3 = c.x + "," + c.y;
+    requirePlan(!ruinByChunk.has(key3) && !caveByChunk.has(key3) && !fortByChunk.has(key3), "Crypt protected overlap");
+    ruinByChunk.set(key3, crypt);
   }
   const cryptReservations = Promise.all(cryptIds.map((reservationId) => (reservationId.includes(":small:") ? derivePlannedCryptReservation : derivePlannedCryptReservationV2)(asset, binding, sha256, { reservationId, terrain }).then((r) => completePopulationReservation(r, asset, binding, sha256))));
   const starterBiomeName = () => {
@@ -56727,8 +56729,8 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
   if (["planned-world-shoreline-v2", "planned-world-water-v3"].includes(asset.version)) for (const e of asset.routes.edges) for (let i = 0; i < e.path.length; i++) {
     const q = e.path[i], prev = e.path[i - 1] ?? q, steps3 = Math.max(Math.abs(q.x - prev.x), Math.abs(q.y - prev.y));
     for (let n = 0; n <= steps3; n++) {
-      const x = Math.round(prev.x + (q.x - prev.x) * n / (steps3 || 1)), y = Math.round(prev.y + (q.y - prev.y) * n / (steps3 || 1)), key2 = y * terrain.widthTiles + x, value2 = e.kind === "main" || e.kind === "secondary" ? "R" : "T";
-      if (mapFeatures.get(key2) !== "R") mapFeatures.set(key2, value2);
+      const x = Math.round(prev.x + (q.x - prev.x) * n / (steps3 || 1)), y = Math.round(prev.y + (q.y - prev.y) * n / (steps3 || 1)), key3 = y * terrain.widthTiles + x, value2 = e.kind === "main" || e.kind === "secondary" ? "R" : "T";
+      if (mapFeatures.get(key3) !== "R") mapFeatures.set(key3, value2);
     }
   }
   const wilderness = asset.wildernessExtension ?? null, branchTrails = new Map((wilderness?.trailTiles ?? []).map((c) => [c.x + "," + c.y, c.kind])), eventClearings = new Set((wilderness?.eventCapacities ?? []).flatMap((e) => e.cells.map((c) => c.x + "," + c.y)));
@@ -56753,22 +56755,22 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
   }
   const nature = createNaturalClusterSampler(asset.seedDigest), protection = createNaturalProtection(asset, { ruinFootprints: [...ruins, ...crypts].flatMap((r) => r.reservation.footprint) }), nativeCache = /* @__PURE__ */ new Map();
   const standsClear = (x, y, b) => {
-    const key2 = x + "," + y;
-    if (routeAt(x, y) > 0 || b.bank || b.kind === "shore" || protection.at(x, y) || branchTrails.has(key2) || eventClearings.has(key2) || Math.abs(x - asset.spawnTile.x) <= 3 && Math.abs(y - asset.spawnTile.y) <= 3) return true;
+    const key3 = x + "," + y;
+    if (routeAt(x, y) > 0 || b.bank || b.kind === "shore" || protection.at(x, y) || branchTrails.has(key3) || eventClearings.has(key3) || Math.abs(x - asset.spawnTile.x) <= 3 && Math.abs(y - asset.spawnTile.y) <= 3) return true;
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (routeAt(x + dx, y + dy) || bridgeDecks.has(x + dx + "," + (y + dy)) || protection.at(x + dx, y + dy)) return true;
     return false;
   };
   const stands = hasForestStands(binding) ? createForestStandsV2({ seedDigest: asset.seedDigest, asset, terrain, routeAt, clearAt: standsClear, protectedChunk: (cx, cy2) => protection.at(cx * 32, cy2 * 26), events: (wilderness?.eventCapacities ?? []).map((e) => e.position) }) : null;
   function originalTile(x, y) {
     if (pilotRuins.some((r) => r.inside(x, y))) return acceptedPilotTile(x, y);
-    const key2 = x + "," + y;
-    if (nativeCache.has(key2)) return nativeCache.get(key2);
-    const b = terrain.base(x, y), deck2 = bridgeDecks.get(key2), route = routeAt(x, y);
+    const key3 = x + "," + y;
+    if (nativeCache.has(key3)) return nativeCache.get(key3);
+    const b = terrain.base(x, y), deck2 = bridgeDecks.get(key3), route = routeAt(x, y);
     let result;
     if (deck2) result = { ...b, walkable: true, kind: "bridge", underlyingKind: deck2.underlyingKind, bridgeId: deck2.id, collision: "1", material: deck2.material, route: route || 1 };
     else if (!b.walkable) result = { ...b, collision: "2", material: b.kind === "ocean" ? "O" : b.kind === "lake" ? "L" : "W", route: 0 };
     else {
-      let clear2 = route > 0 || Boolean(forest?.applies(x, y, b.biome) && (forestEvents.has(key2) || branchTrails.has(key2))) || b.bank || b.kind === "shore" || protection.at(x, y) || Math.abs(x - asset.spawnTile.x) <= 3 && Math.abs(y - asset.spawnTile.y) <= 3;
+      let clear2 = route > 0 || Boolean(forest?.applies(x, y, b.biome) && (forestEvents.has(key3) || branchTrails.has(key3))) || b.bank || b.kind === "shore" || protection.at(x, y) || Math.abs(x - asset.spawnTile.x) <= 3 && Math.abs(y - asset.spawnTile.y) <= 3;
       for (let dy = -1; dy <= 1 && !clear2; dy++) for (let dx = -1; dx <= 1; dx++) if (routeAt(x + dx, y + dy) || forest?.applies(x, y, b.biome) && branchTrails.has(x + dx + "," + (y + dy)) || bridgeDecks.has(x + dx + "," + (y + dy)) || protection.at(x + dx, y + dy)) {
         clear2 = true;
         break;
@@ -56786,7 +56788,7 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     }
     if (nativeCache.size === 4096) nativeCache.delete(nativeCache.keys().next().value);
     Object.freeze(result);
-    nativeCache.set(key2, result);
+    nativeCache.set(key3, result);
     return result;
   }
   const tile = (x, y) => {
@@ -57073,17 +57075,17 @@ function validateStirringV1(st) {
   requireContract(st.version === STIR_VERSION, "Stirring version");
   safeInteger(st.nextTick);
   requireContract(st.rows && typeof st.rows === "object" && !Array.isArray(st.rows) && Object.keys(st.rows).length <= STIR_POLICY.maxRows, "Stirring rows");
-  for (const [key2, r] of Object.entries(st.rows)) {
+  for (const [key3, r] of Object.entries(st.rows)) {
     closedRecord(r, ["ordinal", "kind", "startedTick", "untilTick", "tile", "center"]);
-    requireContract(plannedEventOrdinal(r.ordinal) && key2 === String(r.ordinal % 1e3) && BUILT_EVENT_KINDS.includes(r.kind), "Stirring row identity");
+    requireContract(plannedEventOrdinal(r.ordinal) && key3 === String(r.ordinal % 1e3) && BUILT_EVENT_KINDS.includes(r.kind), "Stirring row identity");
     safeInteger(r.startedTick);
     safeInteger(r.untilTick, r.startedTick);
     validateTile(r.tile);
     validateTile(r.center);
   }
   requireContract(st.rest && typeof st.rest === "object" && !Array.isArray(st.rest) && Object.keys(st.rest).length <= STIR_POLICY.maxRest, "Stirring rest");
-  for (const [key2, until] of Object.entries(st.rest)) {
-    requireContract(/^[1-9][0-9]{0,2}$/.test(key2), "Stirring rest slot");
+  for (const [key3, until] of Object.entries(st.rest)) {
+    requireContract(/^[1-9][0-9]{0,2}$/.test(key3), "Stirring rest slot");
     safeInteger(until);
   }
 }
@@ -57124,11 +57126,11 @@ function advanceStirringV1(s) {
   if (!st && !heroes.length) return false;
   const root2 = install(s), loaded = new Set(s.d9World.runtime.chunks.map((c) => c.chunkX + "," + c.chunkY)), anchored = new Set(s.d9World.runtime.chunks.flatMap((c) => (c.anchors ?? []).map((a) => a.ordinal)));
   let changed = !st;
-  for (const [key2, until] of Object.entries(root2.rest)) if (until <= s.tick) {
-    delete root2.rest[key2];
+  for (const [key3, until] of Object.entries(root2.rest)) if (until <= s.tick) {
+    delete root2.rest[key3];
     changed = true;
   }
-  for (const [key2, r] of Object.entries(root2.rows)) {
+  for (const [key3, r] of Object.entries(root2.rows)) {
     const g = groupAt(s, r.ordinal), rec = g ? s.d9World.worldEvents.records[g.groupId] : null, slot = slots.find((q) => q.n === r.ordinal % 1e3);
     if (g) {
       const anchor = s.d9World.runtime.groups.find((d) => d.groupId === g.groupId)?.anchor, q = anchor && tileOf(s, anchor);
@@ -57139,8 +57141,8 @@ function advanceStirringV1(s) {
     }
     const running2 = rec && rec.status === "active", gone = !g && slot && !anchored.has(r.ordinal) && loaded.has(chunkKey(slot.x, slot.y)) && loaded.has(chunkKey(slot.home.x, slot.home.y));
     if (rec?.status === "completed" || g?.cleared && !running2 || s.tick >= r.untilTick && !running2 || gone || !slot) {
-      delete root2.rows[key2];
-      if (Object.keys(root2.rest).length < P14.maxRest) root2.rest[key2] = s.tick + P14.restTicks;
+      delete root2.rows[key3];
+      if (Object.keys(root2.rest).length < P14.maxRest) root2.rest[key3] = s.tick + P14.restTicks;
       root2.nextTick = Math.max(root2.nextTick, s.tick + gap(s, r.ordinal));
       changed = true;
     }
@@ -57194,9 +57196,9 @@ function projectStirringV1(s, actor) {
   if (!st || actor?.residency?.spaceInstanceId !== s.overworldInstanceId) return [];
   const k = s.d9World.navigation?.knowledge, h = tileOf(s, actor.position);
   if (!h) return [];
-  return Object.entries(st.rows).filter(([, r]) => Math.hypot(r.tile.x - h.x, r.tile.y - h.y) <= STIR_POLICY.reachTiles * 1.5).map(([key2, r]) => {
+  return Object.entries(st.rows).filter(([, r]) => Math.hypot(r.tile.x - h.x, r.tile.y - h.y) <= STIR_POLICY.reachTiles * 1.5).map(([key3, r]) => {
     const g = groupAt(s, r.ordinal), rec = g ? s.d9World.worldEvents.records[g.groupId] : null;
-    return { id: "stir:" + key2, slot: plannedEventSlot(r.ordinal), kind: r.kind, tile: { x: r.tile.x + 0.5, y: r.tile.y + 0.5 }, center: { x: r.center.x + 0.5, y: r.center.y + 0.5 }, radius: STIR_POLICY.circleTiles, found: k?.visited[eventMapId(r.tile.x, r.tile.y)] !== void 0 || Boolean(rec), started: Boolean(rec), ageTicks: s.tick - r.startedTick, ticksLeft: rec ? null : Math.max(0, r.untilTick - s.tick) };
+    return { id: "stir:" + key3, slot: plannedEventSlot(r.ordinal), kind: r.kind, tile: { x: r.tile.x + 0.5, y: r.tile.y + 0.5 }, center: { x: r.center.x + 0.5, y: r.center.y + 0.5 }, radius: STIR_POLICY.circleTiles, found: k?.visited[eventMapId(r.tile.x, r.tile.y)] !== void 0 || Boolean(rec), started: Boolean(rec), ageTicks: s.tick - r.startedTick, ticksLeft: rec ? null : Math.max(0, r.untilTick - s.tick) };
   }).sort((a, b) => a.id.localeCompare(b.id));
 }
 
@@ -57232,8 +57234,8 @@ function createPlannedWorldAssetStore({ readText, sha256, readWorld = null }) {
       const policy = await readText("assets/roadside-encounters-v1/policy.json");
       requirePlan(bytesToHex(await sha256(new TextEncoder().encode(policy))) === ROADSIDE_HASH, "Roadside policy commitment mismatch");
     }
-    const key2 = plannedWorldAssetCacheKey(binding);
-    if (!prepared.has(key2)) prepared.set(key2, (async () => {
+    const key3 = plannedWorldAssetCacheKey(binding);
+    if (!prepared.has(key3)) prepared.set(key3, (async () => {
       if (isSeededBindingV1(binding)) return prepareSeeded(binding);
       const text2 = await readText(plannedAssetDirectory(binding) + "/" + binding.assetId + ".json");
       requirePlan(bytesToHex(await sha256(new TextEncoder().encode(text2))) === binding.assetHash, "Planned asset commitment mismatch");
@@ -57285,12 +57287,12 @@ function createPlannedWorldAssetStore({ readText, sha256, readWorld = null }) {
       freezePlan(asset);
       return asset;
     })());
-    return prepared.get(key2);
+    return prepared.get(key3);
   }
   async function load(binding) {
-    const asset = await prepare(binding), key2 = plannedWorldAssetCacheKey(binding);
-    if (!cache6.has(key2)) cache6.set(key2, derive(asset, binding));
-    return cache6.get(key2);
+    const asset = await prepare(binding), key3 = plannedWorldAssetCacheKey(binding);
+    if (!cache6.has(key3)) cache6.set(key3, derive(asset, binding));
+    return cache6.get(key3);
   }
   return Object.freeze({ load, prepare, sha256, async generate(request) {
     const { generator } = await load(request.plannedWorld);
@@ -57591,8 +57593,8 @@ function createBuiltWorldStoreV1({ indexedDB, sha256 }) {
       });
     });
   };
-  const get = (name, key2) => run2([name], "readonly", (tx, done3) => {
-    const q = tx.objectStore(name).get(key2);
+  const get = (name, key3) => run2([name], "readonly", (tx, done3) => {
+    const q = tx.objectStore(name).get(key3);
     q.onsuccess = () => done3(q.result ?? null);
   });
   const describe = async (hash40) => HASH.test(hash40) ? info(await get(WORLDS, hash40)) : null, campaignWorld = async (campaignId) => (await get(CAMPAIGNS, campaignId))?.hash ?? null;
@@ -57847,8 +57849,8 @@ function laneFor(doc) {
     card.addEventListener("pointerup", end);
     card.addEventListener("pointercancel", end);
   }
-  function show({ kind = "loot", title, sub = "", accent = null, image = null, key: key2 = null, ms = DEFAULT_MS }) {
-    const id = key2 ?? kind + "/" + title, prior = cards.get(id);
+  function show({ kind = "loot", title, sub = "", accent = null, image = null, key: key3 = null, ms = DEFAULT_MS }) {
+    const id = key3 ?? kind + "/" + title, prior = cards.get(id);
     if (prior) {
       const n = Number(prior.dataset.count || 1) + 1;
       prior.dataset.count = String(n);
@@ -57934,34 +57936,34 @@ var namedOk = (name) => name.length > 0 && validHeroName(name);
 function createHeroCreatorV1({ document: document2, environment, readModel, adapter, reportError = () => {
 }, onClose = () => {
 }, openHeroes = null, otherHeroes = () => false, beforeGame = null, startingHero = null }) {
-  const el = (tag, cls2 = "", text2 = "") => {
+  const el2 = (tag, cls2 = "", text2 = "") => {
     const e = document2.createElement(tag);
     if (cls2) e.className = cls2;
     if (text2) e.textContent = text2;
     return e;
   };
-  const button = (cls2, text2, onClick) => {
-    const b = el("button", cls2, text2);
+  const button2 = (cls2, text2, onClick) => {
+    const b = el2("button", cls2, text2);
     b.type = "button";
     b.addEventListener("click", onClick);
     return b;
   };
-  const root2 = el("section", "hero-creator-v1" + (beforeGame ? " is-before-game" : ""));
+  const root2 = el2("section", "hero-creator-v1" + (beforeGame ? " is-before-game" : ""));
   root2.hidden = true;
   root2.setAttribute("role", "dialog");
   root2.setAttribute("aria-modal", "true");
   root2.setAttribute("aria-labelledby", "hero-creator-title");
-  const panel = el("div", "hc-panel"), head13 = el("header", "hc-head"), title = el("h2", "", "Create your hero"), intro = el("p", "hc-intro");
+  const panel = el2("div", "hc-panel"), head13 = el2("header", "hc-head"), title = el2("h2", "", "Create your hero"), intro = el2("p", "hc-intro");
   title.id = "hero-creator-title";
   head13.append(title, intro);
   if (beforeGame?.strip) head13.append(beforeGame.strip);
-  const body5 = el("div", "hc-body"), preview = el("div", "hc-preview"), stage2 = el("canvas", "hc-stage"), bar = el("div", "hc-bar");
+  const body5 = el2("div", "hc-body"), preview = el2("div", "hc-preview"), stage2 = el2("canvas", "hc-stage"), bar = el2("div", "hc-bar");
   stage2.setAttribute("role", "img");
   stage2.setAttribute("aria-label", "Preview of your hero");
-  const options = el("div", "hc-options"), foot = el("footer", "hc-foot"), status2 = el("p", "hc-status"), cancel = button("hc-later", "Cancel", () => {
+  const options = el2("div", "hc-options"), foot = el2("footer", "hc-foot"), status2 = el2("p", "hc-status"), cancel = button2("hc-later", "Cancel", () => {
     if (!busy) close();
-  }), confirm = button("hc-confirm", "", () => save());
-  const switchHero = button("hc-later", "Switch hero", () => {
+  }), confirm = button2("hc-confirm", "", () => save());
+  const switchHero = button2("hc-later", "Switch hero", () => {
     if (!busy && openHeroes) {
       root2.hidden = true;
       opener = null;
@@ -57972,7 +57974,7 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
   foot.append(status2, switchHero, cancel, confirm);
   let mode = "create", cls = null, deferClass = false, look = { ...DEFAULT_LOOK }, facing2 = 1, showGear = true, busy = false, thumbsKey = "", opener = null, kitBusy = false, kitRetryAt = 0, roomNoticed = false;
   const toggle = (text2, get, set) => {
-    const b = button("hc-toggle", text2, () => {
+    const b = button2("hc-toggle", text2, () => {
       set(!get());
       paint2();
     });
@@ -57985,25 +57987,25 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
   }), helmToggle = toggle("Helmet", () => look.helmet, (v) => {
     look.helmet = v;
   });
-  const randomButton = button("hc-toggle", "Random look", randomLook);
-  bar.append(button("hc-toggle", "Turn", () => {
+  const randomButton = button2("hc-toggle", "Random look", randomLook);
+  bar.append(button2("hc-toggle", "Turn", () => {
     facing2 = -facing2;
   }), gearToggle.b, helmToggle.b, randomButton);
   preview.append(stage2, bar);
   const field3 = (label4, content, id) => {
-    const f = el("fieldset", "hc-field"), l = el("legend", "", label4), pick4 = el("span", "hc-pick");
+    const f = el2("fieldset", "hc-field"), l = el2("legend", "", label4), pick4 = el2("span", "hc-pick");
     if (id) pick4.id = id;
     l.append(" ", pick4);
     f.append(l, ...content);
     options.append(f);
     return { f, pick: pick4 };
   };
-  const classCards = el("div", "hc-classes"), cardButtons = {};
+  const classCards = el2("div", "hc-classes"), cardButtons = {};
   for (const c of ["knight", "rogue", "mage"].map((id) => HERO_CLASSES[id])) {
-    const b = el("button", "hc-class"), canvas = el("canvas"), skill = CLASS_SKILLS[c.signature];
+    const b = el2("button", "hc-class"), canvas = el2("canvas"), skill = CLASS_SKILLS[c.signature];
     b.type = "button";
     b.style.setProperty("--class", c.color);
-    b.append(canvas, el("strong", "", c.name), el("span", "", `${OFFHAND_NAMES[c.offhand]} \xB7 ${c.move.name} on Shift`), el("small", "", `Free skill: ${skill.name}`));
+    b.append(canvas, el2("strong", "", c.name), el2("span", "", `${OFFHAND_NAMES[c.offhand]} \xB7 ${c.move.name} on Shift`), el2("small", "", `Free skill: ${skill.name}`));
     b.addEventListener("click", () => {
       if (!busy) {
         cls = c.id;
@@ -58014,16 +58016,16 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
     cardButtons[c.id] = { b, canvas };
     classCards.append(b);
   }
-  const laterClass = button("hc-toggle hc-class-later", "Decide later", () => {
+  const laterClass = button2("hc-toggle hc-class-later", "Decide later", () => {
     if (!busy) {
       cls = null;
       deferClass = true;
       paint2();
     }
-  }), laterRow = el("div", "hc-class-later-row");
-  laterRow.append(laterClass, el("p", "hc-sub", "Pick a class any time from the skill wheel or Stats."));
+  }), laterRow = el2("div", "hc-class-later-row");
+  laterRow.append(laterClass, el2("p", "hc-sub", "Pick a class any time from the skill wheel or Stats."));
   const classField = field3("Class", [classCards, laterRow]);
-  const nameInput = el("input", "hc-name");
+  const nameInput = el2("input", "hc-name");
   nameInput.type = "text";
   nameInput.maxLength = HERO_NAME_MAX * 2;
   nameInput.placeholder = "Name your hero";
@@ -58037,14 +58039,14 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
     paint2();
   });
   const nameField = field3("Name", [nameInput]);
-  const tiles5 = (list, key2, id) => {
-    const box5 = el("div", "hc-tiles"), map = {};
+  const tiles5 = (list, key3, id) => {
+    const box5 = el2("div", "hc-tiles"), map = {};
     for (const [value2, name] of list) {
-      const b = el("button", "hc-tile"), canvas = el("canvas");
+      const b = el2("button", "hc-tile"), canvas = el2("canvas");
       b.type = "button";
-      b.append(canvas, el("span", "", name));
+      b.append(canvas, el2("span", "", name));
       b.addEventListener("click", () => {
-        look[key2] = value2;
+        look[key3] = value2;
         paint2();
       });
       map[value2] = { b, canvas };
@@ -58052,16 +58054,16 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
     }
     return { box: box5, map };
   };
-  const swatches = (list, key2) => {
-    const box5 = el("div", "hc-swatches"), map = {};
+  const swatches = (list, key3) => {
+    const box5 = el2("div", "hc-swatches"), map = {};
     for (const [value2, name, hex5] of list) {
-      const b = el("button", "hc-swatch");
+      const b = el2("button", "hc-swatch");
       b.type = "button";
       b.style.background = hex5;
       b.title = name;
       b.setAttribute("aria-label", name);
       b.addEventListener("click", () => {
-        look[key2] = value2;
+        look[key3] = value2;
         paint2();
       });
       map[value2] = b;
@@ -58070,7 +58072,7 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
     return { box: box5, map };
   };
   const hairTiles = tiles5(LOOK_OPTIONS.hairStyles, "hair"), natural = swatches(LOOK_OPTIONS.hairColors.filter((x) => !x[3]), "hairColor"), bold = swatches(LOOK_OPTIONS.hairColors.filter((x) => x[3]), "hairColor"), skins = swatches(LOOK_OPTIONS.skins, "skin"), beardTiles = tiles5(LOOK_OPTIONS.facialHair, "facialHair");
-  const hairField = field3("Hair", [hairTiles.box]), hairColorField = field3("Hair color", [natural.box, el("p", "hc-sub", "Bold"), bold.box]), skinField = field3("Skin", [skins.box]), beardField = field3("Facial hair", [beardTiles.box]);
+  const hairField = field3("Hair", [hairTiles.box]), hairColorField = field3("Hair color", [natural.box, el2("p", "hc-sub", "Bold"), bold.box]), skinField = field3("Skin", [skins.box]), beardField = field3("Facial hair", [beardTiles.box]);
   const lookFields = [nameField, hairField, hairColorField, skinField, beardField];
   body5.append(preview, options);
   panel.append(head13, body5, foot);
@@ -58142,9 +58144,9 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
     c.scale(w / s, w / s);
   };
   function paintThumbs() {
-    const key2 = JSON.stringify([{ ...look, name: "" }, cls, mode]);
-    if (key2 === thumbsKey) return;
-    thumbsKey = key2;
+    const key3 = JSON.stringify([{ ...look, name: "" }, cls, mode]);
+    if (key3 === thumbsKey) return;
+    thumbsKey = key3;
     for (const [value2, { canvas }] of Object.entries(hairTiles.map)) draw(canvas, { cls: null, look: { ...look, hair: value2, helmet: false }, gear: {} }, headFrame(8, 0.9, 25.5), null);
     for (const [value2, { canvas }] of Object.entries(beardTiles.map)) draw(canvas, { cls: null, look: { ...look, facialHair: value2, helmet: false }, gear: {} }, headFrame(2, 0.6, 22), null);
     for (const [id, { canvas }] of Object.entries(cardButtons)) draw(canvas, specFor(id, kitGear(id)), (c, w, h) => {
@@ -58373,31 +58375,31 @@ var ICONS2 = {
   dice: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"/></svg>'
 };
 function dom(document2) {
-  const el = (tag, cls = "", text2 = "") => {
+  const el2 = (tag, cls = "", text2 = "") => {
     const e = document2.createElement(tag);
     if (cls) e.className = cls;
     if (text2) e.textContent = text2;
     return e;
   };
-  const button = (cls, text2, onClick) => {
-    const b = el("button", cls, text2);
+  const button2 = (cls, text2, onClick) => {
+    const b = el2("button", cls, text2);
     b.type = "button";
     b.addEventListener("click", onClick);
     return b;
   };
   const icon = (name, cls) => {
-    const s = el("span", cls);
+    const s = el2("span", cls);
     s.innerHTML = ICONS2[name];
     return s;
   };
   const dialog = (labelId) => {
-    const root2 = el("section", "new-world-v1");
+    const root2 = el2("section", "new-world-v1");
     root2.setAttribute("role", "dialog");
     root2.setAttribute("aria-modal", "true");
     root2.setAttribute("aria-labelledby", labelId);
     return root2;
   };
-  return { el, button, icon, dialog };
+  return { el: el2, button: button2, icon, dialog };
 }
 async function newWorldFlowV1({ environment, save, startBuild = startWorldBuildV1 }) {
   const randomUint32 = () => environment.crypto.getRandomValues(new Uint32Array(1))[0];
@@ -58406,27 +58408,27 @@ async function newWorldFlowV1({ environment, save, startBuild = startWorldBuildV
   return buildWithHero(environment, choice.seed, save, startBuild);
 }
 function chooseWorld(document2, { pick: pick4, text: text2, roll: roll6 }) {
-  const { el, button, icon, dialog } = dom(document2);
+  const { el: el2, button: button2, icon, dialog } = dom(document2);
   return new Promise((resolve) => {
-    const root2 = dialog("new-world-title"), panel = el("div", "nw-panel"), head13 = el("header", "nw-head"), title = el("h2", "", "Choose your world");
+    const root2 = dialog("new-world-title"), panel = el2("div", "nw-panel"), head13 = el2("header", "nw-head"), title = el2("h2", "", "Choose your world");
     title.id = "new-world-title";
-    head13.append(title, el("p", "nw-intro", "Each hero lives in one world. Play the classic map, or grow a new one from a seed."));
-    const body5 = el("div", "nw-body"), cards = el("div", "nw-cards"), legend = el("p", "nw-legend", "World");
+    head13.append(title, el2("p", "nw-intro", "Each hero lives in one world. Play the classic map, or grow a new one from a seed."));
+    const body5 = el2("div", "nw-body"), cards = el2("div", "nw-cards"), legend = el2("p", "nw-legend", "World");
     const card = (kind, name, about, tag) => {
-      const b = button("nw-card is-" + kind, "", () => {
+      const b = button2("nw-card is-" + kind, "", () => {
         pick4 = kind;
         paint2();
       });
       b.dataset.world = kind;
-      const words = el("span", "nw-card-words");
-      words.append(el("strong", "", name), el("span", "", about), el("small", "", tag));
+      const words = el2("span", "nw-card-words");
+      words.append(el2("strong", "", name), el2("span", "", about), el2("small", "", tag));
       b.append(icon(kind, "nw-card-icon"), words);
       cards.append(b);
       return b;
     };
     const classicCard = card("classic", "Classic world", "The map every hero has played so far: Alderwood, the Woodland and the seven lands beyond.", "Same map for everyone \xB7 starts right away");
     const seededCard = card("seeded", "New world", "A whole new map from a seed, with its own coasts, rivers, roads, towns, caves, forts, ruins and crypts.", "Builds while you make your hero");
-    const seedBox = el("div", "nw-seed"), label4 = el("label", "nw-legend", "Seed"), row2 = el("div", "nw-seed-row"), input = el("input", "nw-seed-input"), rollButton = button("nw-roll", "", () => {
+    const seedBox = el2("div", "nw-seed"), label4 = el2("label", "nw-legend", "Seed"), row2 = el2("div", "nw-seed-row"), input = el2("input", "nw-seed-input"), rollButton = button2("nw-roll", "", () => {
       input.value = roll6();
       paint2();
     });
@@ -58440,12 +58442,12 @@ function chooseWorld(document2, { pick: pick4, text: text2, roll: roll6 }) {
     input.setAttribute("autocapitalize", "off");
     rollButton.append(icon("dice", "nw-roll-icon"), "Roll");
     row2.append(input, rollButton);
-    const word = el("p", "nw-word");
+    const word = el2("p", "nw-word");
     word.setAttribute("aria-live", "polite");
-    seedBox.append(label4, row2, word, el("p", "nw-note", "Seeds are numbers; a word you type becomes one. The same seed always makes the same world, so friends can share one. Building takes about a minute, and you make your hero meanwhile."));
-    const ready = el("p", "nw-note nw-ready", "Nothing to build: the classic world is ready now.");
+    seedBox.append(label4, row2, word, el2("p", "nw-note", "Seeds are numbers; a word you type becomes one. The same seed always makes the same world, so friends can share one. Building takes about a minute, and you make your hero meanwhile."));
+    const ready = el2("p", "nw-note nw-ready", "Nothing to build: the classic world is ready now.");
     body5.append(legend, cards, seedBox, ready);
-    const foot = el("footer", "nw-foot"), next = button("nw-next", "", () => {
+    const foot = el2("footer", "nw-foot"), next = button2("nw-next", "", () => {
       const seed2 = worldSeedV1(input.value);
       if (pick4 === "seeded" && !seed2) return;
       root2.remove();
@@ -58470,7 +58472,7 @@ function chooseWorld(document2, { pick: pick4, text: text2, roll: roll6 }) {
       word.hidden = !(seeded && seed2?.word);
       word.replaceChildren();
       if (!word.hidden) {
-        const n = el("strong", "", seed2.seed);
+        const n = el2("strong", "", seed2.seed);
         word.append(`\u201C${seed2.word}\u201D becomes seed `, n);
       }
       const blocked3 = seeded && !seed2;
@@ -58537,16 +58539,16 @@ async function buildWithHero(environment, seed2, save, startBuild) {
   }
 }
 function buildStrip(document2, seed2) {
-  const { el, icon } = dom(document2);
-  const root2 = el("div", "nw-strip"), title = el("strong", "nw-strip-title"), detail = el("span", "nw-strip-detail"), bar = el("span", "nw-bar"), fill6 = el("span", "nw-bar-fill"), percent = el("span", "nw-strip-percent");
+  const { el: el2, icon } = dom(document2);
+  const root2 = el2("div", "nw-strip"), title = el2("strong", "nw-strip-title"), detail = el2("span", "nw-strip-detail"), bar = el2("span", "nw-bar"), fill6 = el2("span", "nw-bar-fill"), percent = el2("span", "nw-strip-percent");
   root2.setAttribute("role", "status");
   bar.append(fill6);
   root2.append(icon("seeded", "nw-strip-icon"), title, detail, bar, percent);
   let last = "";
   return { root: root2, paint(state) {
-    const key2 = JSON.stringify([Math.floor(state.fraction * 100), state.stage, state.failed]);
-    if (key2 === last) return;
-    last = key2;
+    const key3 = JSON.stringify([Math.floor(state.fraction * 100), state.stage, state.failed]);
+    if (key3 === last) return;
+    last = key3;
     const done3 = state.stage === WORLD_BUILD_STAGES.length, shown2 = Math.floor(state.fraction * 100);
     root2.classList.toggle("is-failed", Boolean(state.failed));
     root2.classList.toggle("is-done", done3);
@@ -58558,29 +58560,29 @@ function buildStrip(document2, seed2) {
   } };
 }
 function waitingPanel(document2, environment, seed2) {
-  const { el, button, dialog } = dom(document2);
-  const root2 = dialog("new-world-wait-title"), panel = el("div", "nw-panel nw-wait-panel"), head13 = el("header", "nw-head"), title = el("h2", "", "Your world is almost ready"), intro = el("p", "nw-intro");
+  const { el: el2, button: button2, dialog } = dom(document2);
+  const root2 = dialog("new-world-wait-title"), panel = el2("div", "nw-panel nw-wait-panel"), head13 = el2("header", "nw-head"), title = el2("h2", "", "Your world is almost ready"), intro = el2("p", "nw-intro");
   title.id = "new-world-wait-title";
   head13.append(title, intro);
   root2.hidden = true;
-  const body5 = el("div", "nw-wait"), heroBox = el("div", "nw-wait-hero"), portrait = el("canvas", "nw-wait-portrait"), heroName = el("strong", "nw-wait-name"), heroClass = el("span", "nw-wait-class");
+  const body5 = el2("div", "nw-wait"), heroBox = el2("div", "nw-wait-hero"), portrait = el2("canvas", "nw-wait-portrait"), heroName = el2("strong", "nw-wait-name"), heroClass = el2("span", "nw-wait-class");
   portrait.setAttribute("aria-hidden", "true");
   heroBox.append(portrait, heroName, heroClass);
-  const side = el("div", "nw-wait-build"), top = el("div", "nw-wait-top"), seedLine = el("span", "nw-wait-seed"), bar = el("span", "nw-bar"), fill6 = el("span", "nw-bar-fill"), barRow = el("div", "nw-wait-bar"), percent = el("span", "nw-strip-percent");
-  seedLine.append("Seed ", el("strong", "", seed2.seed));
-  top.append(el("p", "nw-legend", "Building your world"), seedLine);
+  const side = el2("div", "nw-wait-build"), top = el2("div", "nw-wait-top"), seedLine = el2("span", "nw-wait-seed"), bar = el2("span", "nw-bar"), fill6 = el2("span", "nw-bar-fill"), barRow = el2("div", "nw-wait-bar"), percent = el2("span", "nw-strip-percent");
+  seedLine.append("Seed ", el2("strong", "", seed2.seed));
+  top.append(el2("p", "nw-legend", "Building your world"), seedLine);
   bar.append(fill6);
   barRow.append(bar, percent);
-  const steps3 = el("ol", "nw-steps"), stepItems = WORLD_BUILD_STAGES.map((s) => {
-    const li = el("li", "nw-step");
-    li.append(el("span", "nw-step-mark"), el("span", "", s.label));
+  const steps3 = el2("ol", "nw-steps"), stepItems = WORLD_BUILD_STAGES.map((s) => {
+    const li = el2("li", "nw-step");
+    li.append(el2("span", "nw-step-mark"), el2("span", "", s.label));
     steps3.append(li);
     return li;
   });
-  const note = el("p", "nw-note");
+  const note = el2("p", "nw-note");
   side.append(top, barRow, steps3, note);
   body5.append(heroBox, side);
-  const foot = el("footer", "nw-foot"), status2 = el("p", "nw-status");
+  const foot = el2("footer", "nw-foot"), status2 = el2("p", "nw-status");
   status2.setAttribute("role", "status");
   let settle = null;
   const answer = (value2) => {
@@ -58589,8 +58591,8 @@ function waitingPanel(document2, environment, seed2) {
     root2.hidden = true;
     s?.(value2);
   };
-  const back = button("nw-quiet", "Back to hero", () => answer("back")), start = button("nw-next", "Starts when the world is ready", () => {
-  }), retry = button("nw-next", "Try again", () => answer("retry")), classic = button("nw-quiet", "Play the classic world", () => answer("classic"));
+  const back = button2("nw-quiet", "Back to hero", () => answer("back")), start = button2("nw-next", "Starts when the world is ready", () => {
+  }), retry = button2("nw-next", "Try again", () => answer("retry")), classic = button2("nw-quiet", "Play the classic world", () => answer("classic"));
   start.disabled = true;
   foot.append(status2, back, classic, retry, start);
   panel.append(head13, body5, foot);
@@ -58772,7 +58774,7 @@ function classSkillsRecord(combat) {
 }
 function prune(combat) {
   const k = combat.skills;
-  if (k && !Object.keys(k.cooldowns).length && !LIVE.some((key2) => k[key2])) delete combat.skills;
+  if (k && !Object.keys(k.cooldowns).length && !LIVE.some((key3) => k[key3])) delete combat.skills;
 }
 function openParryWindow(combat) {
   classSkillsRecord(combat).parry = PARRY_WINDOW_TICKS;
@@ -58814,13 +58816,13 @@ function advanceClassSkillTimers(tick, combat) {
       delete k.counters;
     } else k.counter--;
   }
-  for (const key2 of TIMED) if (k[key2]) {
-    if (k[key2] <= 1) delete k[key2];
-    else k[key2]--;
+  for (const key3 of TIMED) if (k[key3]) {
+    if (k[key3] <= 1) delete k[key3];
+    else k[key3]--;
   }
-  for (const key2 of ["bulwark", "charge", "hide", "weave", "ice", "aegis", "shake", "duel", "shade"]) if (k[key2]) {
-    if (k[key2].ticks <= 1) delete k[key2];
-    else k[key2].ticks--;
+  for (const key3 of ["bulwark", "charge", "hide", "weave", "ice", "aegis", "shake", "duel", "shade"]) if (k[key3]) {
+    if (k[key3].ticks <= 1) delete k[key3];
+    else k[key3].ticks--;
   }
   prune(combat);
 }
@@ -58861,13 +58863,13 @@ function cancelClassSkillAction(combat) {
     delete combat.skills.pool;
     delete combat.skills.ram;
     delete combat.skills.thrown;
-    for (const key2 of ["banner", "smoke", "wall", "field", "leap", "cuts", "flower", "echo", "meteors", "crack", "storm", "blooms", "shake", "shade", "duel", "aftershock", "fault", "spin", "seeds", "thaw", "rime", "thunder", "twin"]) delete combat.skills[key2];
+    for (const key3 of ["banner", "smoke", "wall", "field", "leap", "cuts", "flower", "echo", "meteors", "crack", "storm", "blooms", "shake", "shade", "duel", "aftershock", "fault", "spin", "seeds", "thaw", "rime", "thunder", "twin"]) delete combat.skills[key3];
     prune(combat);
   }
 }
-function clearSkillState(combat, key2) {
-  if (combat?.skills?.[key2] !== void 0) {
-    delete combat.skills[key2];
+function clearSkillState(combat, key3) {
+  if (combat?.skills?.[key3] !== void 0) {
+    delete combat.skills[key3];
     prune(combat);
   }
 }
@@ -58882,7 +58884,7 @@ function validateClassSkillState(s, combat, actor) {
   if (k.rush !== void 0) safeInteger(k.rush, 1, RUSH_TICKS);
   if (k.trail !== void 0) {
     closedRecord(k.trail, ["x", "y", "x2", "y2", "ticks", "next"], ["fire", "frost", "spark"]);
-    requireContract(["x", "y", "x2", "y2"].every((key2) => Number.isFinite(k.trail[key2])) && ["fire", "frost", "spark"].every((key2) => k.trail[key2] === void 0 || k.trail[key2] === true) && actor.alive, "Invalid trail");
+    requireContract(["x", "y", "x2", "y2"].every((key3) => Number.isFinite(k.trail[key3])) && ["fire", "frost", "spark"].every((key3) => k.trail[key3] === void 0 || k.trail[key3] === true) && actor.alive, "Invalid trail");
     safeInteger(k.trail.ticks, 1, TRAIL_MAX_TICKS);
     safeInteger(k.trail.next, 1, TRAIL_PULSE_TICKS);
   }
@@ -58904,10 +58906,10 @@ function validateClassSkillState(s, combat, actor) {
   if (k.shell !== void 0) safeInteger(k.shell, 1, SHELL_MAX_TICKS);
   if (k.sun !== void 0) safeInteger(k.sun, 1, SUN_MAX);
   if (k.casts !== void 0) safeInteger(k.casts, 1, SUNFALL_MAX_CASTS - 1);
-  for (const [key2, stacks, ticks] of [["bulwark", 3, BULWARK_TICKS], ["charge", 5, CHARGE_TICKS], ["hide", MAX_HIDE, HIDE_TICKS]]) if (k[key2] !== void 0) {
-    closedRecord(k[key2], ["stacks", "ticks"]);
-    safeInteger(k[key2].stacks, 1, stacks);
-    safeInteger(k[key2].ticks, 1, ticks);
+  for (const [key3, stacks, ticks] of [["bulwark", 3, BULWARK_TICKS], ["charge", 5, CHARGE_TICKS], ["hide", MAX_HIDE, HIDE_TICKS]]) if (k[key3] !== void 0) {
+    closedRecord(k[key3], ["stacks", "ticks"]);
+    safeInteger(k[key3].stacks, 1, stacks);
+    safeInteger(k[key3].ticks, 1, ticks);
   }
   if (k.focus !== void 0) {
     closedRecord(k.focus, ["target", "hits"]);
@@ -58951,11 +58953,11 @@ function validateClassSkillState(s, combat, actor) {
     requireContract(SPELL_ELEMENTS.includes(k.weave.element), "Invalid Spell Weaving element");
     safeInteger(k.weave.ticks, 1, WEAVE_TICKS);
   }
-  for (const [key2, max] of [["smoke", SMOKE_MAX], ["field", FIELD_MAX]]) if (k[key2] !== void 0) {
-    closedRecord(k[key2], ["x", "y", "ticks", "next"]);
-    requireContract(pos(k[key2]) && actor.alive, "Invalid " + key2);
-    safeInteger(k[key2].ticks, 1, max);
-    safeInteger(k[key2].next, 1, PULSE_TICKS);
+  for (const [key3, max] of [["smoke", SMOKE_MAX], ["field", FIELD_MAX]]) if (k[key3] !== void 0) {
+    closedRecord(k[key3], ["x", "y", "ticks", "next"]);
+    requireContract(pos(k[key3]) && actor.alive, "Invalid " + key3);
+    safeInteger(k[key3].ticks, 1, max);
+    safeInteger(k[key3].next, 1, PULSE_TICKS);
   }
   if (k.wall !== void 0) {
     closedRecord(k.wall, ["x", "y", "dx", "dy", "ticks", "next"], ["ring"]);
@@ -58980,13 +58982,13 @@ function validateClassSkillState(s, combat, actor) {
     safeInteger(k.leap.ticks, 1, k.leap.of ?? LEAP_TICKS);
   }
   const own = (v) => typeof v === "string" && v.length <= 200;
-  for (const [key2, max] of [["aftershock", AFTERSHOCK_TICKS], ["fault", FAULT_TICKS], ["rime", RIME_TICKS]]) if (k[key2] !== void 0) {
-    closedRecord(k[key2], ["x", "y", "r", "ticks"], key2 === "aftershock" ? [] : ["next"]);
-    requireContract(pos(k[key2]) && reach(k[key2].r) && actor.alive && key2 === "aftershock" === (k[key2].next === void 0), "Invalid " + key2);
-    safeInteger(k[key2].ticks, 1, max);
-    if (k[key2].next !== void 0) safeInteger(k[key2].next, 1, PULSE_TICKS);
+  for (const [key3, max] of [["aftershock", AFTERSHOCK_TICKS], ["fault", FAULT_TICKS], ["rime", RIME_TICKS]]) if (k[key3] !== void 0) {
+    closedRecord(k[key3], ["x", "y", "r", "ticks"], key3 === "aftershock" ? [] : ["next"]);
+    requireContract(pos(k[key3]) && reach(k[key3].r) && actor.alive && key3 === "aftershock" === (k[key3].next === void 0), "Invalid " + key3);
+    safeInteger(k[key3].ticks, 1, max);
+    if (k[key3].next !== void 0) safeInteger(k[key3].next, 1, PULSE_TICKS);
   }
-  for (const [key2, max] of [["hymn", HYMN_TICKS], ["firm", FIRM_TICKS], ["jugg", JUGG_TICKS], ["cloak", CLOAK_TICKS], ["twinned", STEPPED_TICKS], ["regrow", ICE_TICKS], ["thunder", THUNDER_TICKS]]) if (k[key2] !== void 0) safeInteger(k[key2], 1, max);
+  for (const [key3, max] of [["hymn", HYMN_TICKS], ["firm", FIRM_TICKS], ["jugg", JUGG_TICKS], ["cloak", CLOAK_TICKS], ["twinned", STEPPED_TICKS], ["regrow", ICE_TICKS], ["thunder", THUNDER_TICKS]]) if (k[key3] !== void 0) safeInteger(k[key3], 1, max);
   if (k.counters !== void 0) {
     safeInteger(k.counters, 1, MAX_COUNTERS);
     requireContract(k.counter !== void 0, "Invalid Riposte Chain");
@@ -59029,7 +59031,7 @@ function validateClassSkillState(s, combat, actor) {
       safeInteger(e.at, 0, s.tick + 600);
     }
   }
-  for (const [key2, max] of [["titan", TITAN_TICKS], ["spite", SPITE_TICKS], ["stepped", STEPPED_TICKS], ["quick", QUICK_TICKS]]) if (k[key2] !== void 0) safeInteger(k[key2], 1, max);
+  for (const [key3, max] of [["titan", TITAN_TICKS], ["spite", SPITE_TICKS], ["stepped", STEPPED_TICKS], ["quick", QUICK_TICKS]]) if (k[key3] !== void 0) safeInteger(k[key3], 1, max);
   if (k.held !== void 0) {
     requireContract(Array.isArray(k.held) && k.held.length >= 1 && k.held.length <= HELD_MAX, "Invalid Retribution");
     for (const h of k.held) {
@@ -59075,7 +59077,7 @@ function validateClassSkillState(s, combat, actor) {
     safeInteger(k.crack.ticks, 1, CRACK_MAX);
     safeInteger(k.crack.next, 1, PULSE_TICKS);
   }
-  for (const [key2, max] of [["wave", WAVE_TICKS], ["phoenix", PHOENIX_TICKS]]) if (k[key2] !== void 0) safeInteger(k[key2], 1, max);
+  for (const [key3, max] of [["wave", WAVE_TICKS], ["phoenix", PHOENIX_TICKS]]) if (k[key3] !== void 0) safeInteger(k[key3], 1, max);
   if (k.blaze !== void 0) requireContract(k.blaze === true && k.phoenix !== void 0, "Invalid Phoenix");
   if (k.shake !== void 0) {
     closedRecord(k.shake, ["x", "y", "dx", "dy", "r", "ticks"]);
@@ -59125,7 +59127,7 @@ function validateClassSkillState(s, combat, actor) {
     if (k.last.air !== void 0) safeInteger(k.last.air, 1, LEAP_TICKS + LEAP_HEAVY_TICKS);
     if (k.last.r !== void 0) requireContract(Number.isFinite(k.last.r) && k.last.r >= 0 && k.last.r <= 400, "Invalid skill reach");
     if (k.last.spread !== void 0) requireContract(Number.isFinite(k.last.spread) && k.last.spread >= 0 && k.last.spread <= 3.2, "Invalid skill spread");
-    for (const key2 of ["ox", "oy", "ox2", "oy2"]) if (k.last[key2] !== void 0) requireContract(Number.isFinite(k.last[key2]) && Math.abs(k.last[key2]) <= 400, "Invalid skill landing");
+    for (const key3 of ["ox", "oy", "ox2", "oy2"]) if (k.last[key3] !== void 0) requireContract(Number.isFinite(k.last[key3]) && Math.abs(k.last[key3]) <= 400, "Invalid skill landing");
     requireContract(CLASS_SKILL_IDS.includes(k.last.skillId) && unit15(k.last), "Invalid skill use record");
     safeInteger(k.last.tick, Math.max(0, s.tick - SKILL_LAST_TICKS - 2), s.tick);
   }
@@ -59135,7 +59137,7 @@ function validateClassSkillState(s, combat, actor) {
     safeInteger(k.flurry.nextTick, Math.max(0, s.tick - 1), s.tick + FLURRY_GAP_TICKS);
     requireContract(unit15(k.flurry) && actor.alive, "Invalid Flurry");
   }
-  requireContract(Object.keys(k.cooldowns).length || LIVE.some((key2) => k[key2]), "Empty skill record");
+  requireContract(Object.keys(k.cooldowns).length || LIVE.some((key3) => k[key3]), "Empty skill record");
 }
 
 // src/shared/content/hidden_hollow_safety_v1.js
@@ -60270,9 +60272,9 @@ var campCacheTile = (s, id) => eventCacheTileV1(plannedEventSlot(s.d9World.episo
 function markCache2(s, tile) {
   const k = s.d9World.navigation?.knowledge;
   if (!k || !tile) return;
-  const key2 = eventMapId(tile.x, tile.y);
-  if (k.rumors[key2] !== void 0 || Object.keys(k.rumors).length >= 512) return;
-  k.rumors[key2] = s.tick;
+  const key3 = eventMapId(tile.x, tile.y);
+  if (k.rumors[key3] !== void 0 || Object.keys(k.rumors).length >= 512) return;
+  k.rumors[key3] = s.tick;
   k.revision++;
   s.d9World.navigation.revision++;
 }
@@ -60337,10 +60339,10 @@ function markEventClaim(s, r, p) {
   requireContract(eventPersonalClaim(s, r, p.playerId)?.eligible && !row2.claimedPlayerIds.includes(p.playerId), "Event reward already claimed");
   row2.claimedPlayerIds.push(p.playerId);
   row2.claimedPlayerIds.sort();
-  const used = s.encounterEconomy.groups[r.groupId].usedResources, key2 = source2(s, r.groupId, "chest", CHEST0.includes(row2.kind) ? 0 : 3);
-  used[key2] ??= { tick: s.tick, playerIds: [] };
-  used[key2].playerIds.push(p.playerId);
-  used[key2].playerIds.sort();
+  const used = s.encounterEconomy.groups[r.groupId].usedResources, key3 = source2(s, r.groupId, "chest", CHEST0.includes(row2.kind) ? 0 : 3);
+  used[key3] ??= { tick: s.tick, playerIds: [] };
+  used[key3].playerIds.push(p.playerId);
+  used[key3].playerIds.sort();
   s.d9World.worldEvents.revision++;
 }
 function advanceWorldEvents(s, { activeActors = Object.keys(s.playersById).length + Object.values(s.entitiesById).filter((a) => a.team === "hostile" && a.alive && !eventActorDormant(s, a.entityId)).length, hardActors = 192, upgradePressure = true, upgradePacing = true, stirring = true } = {}) {
@@ -60780,7 +60782,7 @@ function cancelMasteryCombat(s, id) {
   const all = s.subweaponCombat.mastery;
   if (!all) return;
   if (all[id]) all[id] = emptyMasteryCombat();
-  for (const b of Object.values(all)) for (const name of ["poisons", "statuses"]) for (const [key2, e] of Object.entries(b[name])) if (e.targetId === id) delete b[name][key2];
+  for (const b of Object.values(all)) for (const name of ["poisons", "statuses"]) for (const [key3, e] of Object.entries(b[name])) if (e.targetId === id) delete b[name][key3];
 }
 
 // src/shared/contracts/quests_v1.js
@@ -60845,22 +60847,22 @@ function baseView(state) {
 }
 var atCache = { key: null, view: null };
 function viewAt(state, beforeTick) {
-  const v = baseView(state), k = state.d9World.navigation.knowledge, seen4 = k.visited, f = (id) => seen4[id] !== void 0 && seen4[id] < beforeTick, key2 = beforeTick === Infinity ? v.seed + "/now/" + k.revision + "/" + Object.keys(seen4).length : null;
-  if (key2 && atCache.key === key2 && atCache.base === v) return atCache.view;
+  const v = baseView(state), k = state.d9World.navigation.knowledge, seen4 = k.visited, f = (id) => seen4[id] !== void 0 && seen4[id] < beforeTick, key3 = beforeTick === Infinity ? v.seed + "/now/" + k.revision + "/" + Object.keys(seen4).length : null;
+  if (key3 && atCache.key === key3 && atCache.base === v) return atCache.view;
   const out = { ...v, settlements: v.settlements.map((s) => ({ ...s, found: f(s.id) })), sites: v.sites.map((s) => ({ ...s, found: f(s.siteId) })), clearings: v.clearings.map((c) => ({ ...c, found: f(c.id) })) };
-  if (key2) atCache = { key: key2, base: v, view: out };
+  if (key3) atCache = { key: key3, base: v, view: out };
   return out;
 }
 var questDayV1 = (tick) => restockDay(tick);
 var firstTickOfDay = (tick) => Math.max(0, tick - (WORLD_TIME_POLICY.cycleTicks - restockTicksLeft(tick)));
 var offerCache = /* @__PURE__ */ new Map();
 function boardOffersForV1(state, settlementId) {
-  const day = questDayV1(state.tick), key2 = state.d9World.plannedWorld.assetHash + "|" + worldRevisionV1() + "|" + settlementId + "|" + day;
-  if (!offerCache.has(key2)) {
+  const day = questDayV1(state.tick), key3 = state.d9World.plannedWorld.assetHash + "|" + worldRevisionV1() + "|" + settlementId + "|" + day;
+  if (!offerCache.has(key3)) {
     if (offerCache.size > 64) offerCache = /* @__PURE__ */ new Map();
-    offerCache.set(key2, boardOffersV1(viewAt(state, firstTickOfDay(state.tick)), state.d9World.plannedWorld.assetHash, settlementId, day));
+    offerCache.set(key3, boardOffersV1(viewAt(state, firstTickOfDay(state.tick)), state.d9World.plannedWorld.assetHash, settlementId, day));
   }
-  return offerCache.get(key2);
+  return offerCache.get(key3);
 }
 var townNpcs = (settlementId) => generatedTownNpcsV1().filter((n) => n.settlementId === settlementId);
 var folkCache = { key: null, rows: /* @__PURE__ */ new Map() };
@@ -61091,9 +61093,9 @@ function validateNavigationD9(n) {
   for (const r of n.pending) {
     closedRecord(r, ["playerId", "spaceInstanceId", "chunkX", "chunkY", "tiles", "region", "markers"]);
     validateWorldPosition({ chunkX: r.chunkX, chunkY: r.chunkY, localX: 0, localY: 0 });
-    const key2 = navigationIdentityD9(r);
-    requireContract(!seen4.has(key2) && typeof r.tiles === "string" && r.tiles.length === 832 && (["planned-world-runtime-foundation-v1", "planned-world-shoreline-v2", "planned-world-water-v3"].includes(r.region?.version) ? /^[?wormpadstlOWLRTHV]+$/ : /^[?wormp]+$/).test(r.tiles) && r.markers.length <= 32, "Invalid navigation knowledge");
-    seen4.add(key2);
+    const key3 = navigationIdentityD9(r);
+    requireContract(!seen4.has(key3) && typeof r.tiles === "string" && r.tiles.length === 832 && (["planned-world-runtime-foundation-v1", "planned-world-shoreline-v2", "planned-world-water-v3"].includes(r.region?.version) ? /^[?wormpadstlOWLRTHV]+$/ : /^[?wormp]+$/).test(r.tiles) && r.markers.length <= 32, "Invalid navigation knowledge");
+    seen4.add(key3);
   }
   return n;
 }
@@ -61366,9 +61368,9 @@ function validateD9Root(root2) {
 function originEgress(manifest, collision, resources = []) {
   const w = collision.width, h = collision.height, T57 = collision.tileSize, walk = (x, y) => collision.tiles[y]?.[x] === "1", start = { x: Math.floor(manifest.start.position.x / T57), y: Math.floor(manifest.start.position.y / T57) }, seen4 = /* @__PURE__ */ new Set(), queue = [start];
   for (let i = 0; i < queue.length; i++) {
-    const p = queue[i], key2 = p.x + "," + p.y;
-    if (seen4.has(key2) || !walk(p.x, p.y)) continue;
-    seen4.add(key2);
+    const p = queue[i], key3 = p.x + "," + p.y;
+    if (seen4.has(key3) || !walk(p.x, p.y)) continue;
+    seen4.add(key3);
     for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
       const x = p.x + dx, y = p.y + dy;
       if (x >= 0 && y >= 0 && x < w && y < h && !seen4.has(x + "," + y)) queue.push({ x, y });
@@ -61412,11 +61414,11 @@ function applyOriginEgress(collision, overlay) {
 }
 function originEgressGuidePaths(manifest, collision, overlay) {
   requireContract(overlay.version === "origin-egress-d9-v1", "Origin overlay version");
-  const applied = applyOriginEgress(collision, overlay), T57 = applied.tileSize, start = { x: Math.floor(manifest.start.position.x / T57), y: Math.floor(manifest.start.position.y / T57) }, key2 = (p) => p.x + "," + p.y, prior = /* @__PURE__ */ new Map([[key2(start), null]]), queue = [start];
+  const applied = applyOriginEgress(collision, overlay), T57 = applied.tileSize, start = { x: Math.floor(manifest.start.position.x / T57), y: Math.floor(manifest.start.position.y / T57) }, key3 = (p) => p.x + "," + p.y, prior = /* @__PURE__ */ new Map([[key3(start), null]]), queue = [start];
   for (let i = 0; i < queue.length; i++) {
     const p = queue[i];
     for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-      const n = { x: p.x + dx, y: p.y + dy }, k = key2(n);
+      const n = { x: p.x + dx, y: p.y + dy }, k = key3(n);
       if (n.x < 0 || n.y < 0 || n.x >= applied.width || n.y >= applied.height || prior.has(k) || applied.tiles[n.y][n.x] !== "1") continue;
       prior.set(k, p);
       queue.push(n);
@@ -61424,8 +61426,8 @@ function originEgressGuidePaths(manifest, collision, overlay) {
   }
   return freezeWire(overlay.openings.map((opening3) => {
     const target = opening3.inside[Math.floor(opening3.inside.length / 2)], cells = [];
-    requireContract(prior.has(key2(target)), "Origin egress lost its reachable approach");
-    for (let p = target; p; p = prior.get(key2(p))) cells.push({ x: p.x, y: p.y });
+    requireContract(prior.has(key3(target)), "Origin egress lost its reachable approach");
+    for (let p = target; p; p = prior.get(key3(p))) cells.push({ x: p.x, y: p.y });
     cells.reverse();
     const edge = opening3.cells[Math.floor(opening3.cells.length / 2)];
     cells.push({ x: edge.x, y: edge.y });
@@ -61868,9 +61870,9 @@ function validateSubweaponCombat(s) {
       validateCombatAmount(b.firePower);
       requireContract(Array.from({ length: 6 }, (_, stars) => tomeProfile(b.delivery, stars).power).some((p) => b.firePower.n === p.n && b.firePower.d === p.d), "Invalid captured Tome coefficient");
     }
-    for (const key2 of ["position", "direction"]) {
-      closedRecord(b[key2], ["x", "y"]);
-      requireContract(Number.isFinite(b[key2].x) && Number.isFinite(b[key2].y), "Projectile vector");
+    for (const key3 of ["position", "direction"]) {
+      closedRecord(b[key3], ["x", "y"]);
+      requireContract(Number.isFinite(b[key3].x) && Number.isFinite(b[key3].y), "Projectile vector");
     }
     requireContract(Math.abs(Math.hypot(b.direction.x, b.direction.y) - 1) < 1e-9, "Projectile direction");
   }
@@ -61917,7 +61919,7 @@ function cancelSubweaponResidency(s, id) {
     actor.attackDamage = copyWire(resolved.attack);
     actor.moveSpeed = resolved.moveSpeed;
   }
-  for (const [key2, e] of Object.entries(c.controls ?? {})) if (e.sourceId === id || e.targetId === id) delete c.controls[key2];
+  for (const [key3, e] of Object.entries(c.controls ?? {})) if (e.sourceId === id || e.targetId === id) delete c.controls[key3];
   const a = c.actors[id];
   if (a) {
     lowerShield(a.guard, true);
@@ -61926,20 +61928,20 @@ function cancelSubweaponResidency(s, id) {
     a.pressure = 0;
     cancelClassSkillAction(a);
   }
-  for (const [key2, b] of Object.entries(c.projectiles)) if (b.sourceId === id) delete c.projectiles[key2];
-  for (const [key2, e] of Object.entries(c.effects)) if (e.sourceId === id || e.targetId === id) delete c.effects[key2];
+  for (const [key3, b] of Object.entries(c.projectiles)) if (b.sourceId === id) delete c.projectiles[key3];
+  for (const [key3, e] of Object.entries(c.effects)) if (e.sourceId === id || e.targetId === id) delete c.effects[key3];
 }
 
 // src/shared/contracts/content_numeric_admission_d9.js
 var admitted = /* @__PURE__ */ new Map();
 function admitContentNumericD9(level, rank) {
   positiveProgression(level);
-  const key2 = progressionBigInt(level).toString() + "/" + rank;
-  if (admitted.has(key2)) return;
+  const key3 = progressionBigInt(level).toString() + "/" + rank;
+  if (admitted.has(key3)) return;
   rewardProfileD9(rewardProgressionD9(level, "numeric-admission"), rank);
   certifyNumeric((c) => c.endpoint(c.mul(c.dungeonScale(progressionBigInt(level) / 4n + 1n).E, c.q(1e4)), "ceil"));
   if (admitted.size >= 128) admitted.delete(admitted.keys().next().value);
-  admitted.set(key2, true);
+  admitted.set(key3, true);
 }
 
 // src/shared/contracts/origin_hordes_v1.js
@@ -61950,7 +61952,7 @@ var originFor = (s) => s.content.definitionsById[s.campaign.overworld.manifestDe
 var originalGroups = (origin) => [...origin.population?.groups ?? [], ...(origin.siteInteriors ?? []).flatMap((d) => d.groups)];
 var siteFor = (origin, id) => origin.siteInteriors?.find((d) => d.groups.some((g) => g.groupId === id));
 var tier = (id) => ["C", "B", "A", "S"][ORDINARY_PROFILES.findIndex((p) => p.contentDefinitionId === id) % 4];
-var token = (key2) => [0, 1, 2, 3].map((n) => hashReward(`${ORIGIN_HORDE_VERSION}/${n}/${key2}`).toString(16).padStart(8, "0")).join("");
+var token = (key3) => [0, 1, 2, 3].map((n) => hashReward(`${ORIGIN_HORDE_VERSION}/${n}/${key3}`).toString(16).padStart(8, "0")).join("");
 var entityId = (s, g, n) => "ent:" + token(`${s.campaign.seed.seedHex}/${g.groupId}/${n}`);
 var collisionFor = (s) => s.spacesByInstanceId[s.overworldInstanceId].collision.origin ?? s.spacesByInstanceId[s.overworldInstanceId].collision;
 function originHordeDefinition(s, origin, collision, g) {
@@ -61965,9 +61967,9 @@ function originHordeDefinition(s, origin, collision, g) {
       members.push({ entityId: entityId(s, g, n), enemyDefinitionId: enemy.enemyDefinitionId, profileId: profile.contentDefinitionId, position: copyWire(p) });
     }
     for (let n = 0; n < 4; n++) {
-      const d = offsets[(n + turn7) % 4], p2 = { x: p.x + d[0], y: p.y + d[1] }, key2 = p2.x + "," + p2.y;
-      if (seen4.has(key2) || distance(p2, anchor) > 160) continue;
-      seen4.add(key2);
+      const d = offsets[(n + turn7) % 4], p2 = { x: p.x + d[0], y: p.y + d[1] }, key3 = p2.x + "," + p2.y;
+      if (seen4.has(key3) || distance(p2, anchor) > 160) continue;
+      seen4.add(key3);
       if (site ? p2.x <= room.x * 32 + 14 || p2.x >= (room.x + room.width) * 32 - 14 || p2.y <= room.y * 32 + 14 || p2.y >= (room.y + room.height) * 32 - 14 || distance(p2, site.entrance) <= 320 : populationRegionAt(origin, p2)?.regionId !== g.regionId || !populationPointAllowed(origin, collision, p2)) continue;
       if (collidesWithTiles(collision, p2.x, p2.y, 14)) continue;
       queue.push(p2);
@@ -62057,7 +62059,7 @@ function originHordeUpgradeForGroup(a, b, id) {
     const row2 = b.d9World.originHordes?.groupsById[id], oldRow = a.d9World.originHordes?.groupsById[id], g = a.groupsById[id], next = b.groupsById[id], original = originalGroups(originFor(a)).find((g2) => g2.groupId === id);
     if (!row2 || same2(row2, oldRow) || !original || !g || !next || row2.appliedTick !== b.tick || row2.episode !== a.encounterEconomy.groups[id].episode || g.cleared || hasHistory(a, id) || g.entityIds.length !== 2 || !same2(g.entityIds, original.members.map((m) => m.entityId))) return false;
     if (!genesis && !same2(a.playersById, b.playersById) || !same2(a.encounterEconomy.groups[id].usedResources, b.encounterEconomy.groups[id].usedResources)) return false;
-    if (g.entityIds.some((key2) => !same2(genesis ? { ...a.entitiesById[key2], attackReach: 32, attackReachMode: "clearHullGap" } : a.entitiesById[key2], b.entitiesById[key2]))) return false;
+    if (g.entityIds.some((key3) => !same2(genesis ? { ...a.entitiesById[key3], attackReach: 32, attackReachMode: "clearHullGap" } : a.entitiesById[key3], b.entitiesById[key3]))) return false;
     const draft = copyWire(genesis ? b : a);
     if (genesis) {
       delete draft.d9World.originHordes.groupsById[id];
@@ -62332,8 +62334,8 @@ function validateEncounterEconomy(s, m) {
     if (r.vacatedTick !== null) safeInteger(r.vacatedTick, r.clearedTick ?? r.startedTick, s.tick);
     if (r.eligibleReturn) requireContract(s.groupsById[id].cleared && r.clearedTick !== null, "Uncleared encounter eligible for renewal");
     const valid = new Set((layout[id] ?? []).map((q) => episodeRewardId(id, r.episode, q.kind, q.ordinal)));
-    for (const [key2, v] of Object.entries(r.usedResources)) {
-      requireContract(valid.has(key2), "Resource incarnation mismatch");
+    for (const [key3, v] of Object.entries(r.usedResources)) {
+      requireContract(valid.has(key3), "Resource incarnation mismatch");
       closedRecord(v, ["tick", "playerIds"]);
       safeInteger(v.tick, r.startedTick, s.tick);
       requireContract(v.playerIds.length > 0 && same3([...new Set(v.playerIds)].sort(), v.playerIds) && v.playerIds.every((id2) => s.playersById[id2]), "Resource award participants");
@@ -62367,14 +62369,14 @@ function validateEncounterEconomyProgress(a, b) {
     } else if (g.contentDepth !== void 0 && !(next?.origin && n.episode > g.episode)) requireContract(n.contentDepth === g.contentDepth || originHordeUpgradeForGroup(a, b, id), "Frozen encounter content depth changed");
     if (n.episode === g.episode) {
       requireContract(n.startedTick === g.startedTick, "Episode start changed");
-      for (const [key2, personal] of Object.entries(g.personalCompletionClaimsBySourceId ?? {})) {
-        const nextRecord = n.personalCompletionClaimsBySourceId?.[key2], beforeClaimed = Object.keys(personal.claimedByPlayerId), afterClaimed = Object.keys(nextRecord?.claimedByPlayerId ?? {});
+      for (const [key3, personal] of Object.entries(g.personalCompletionClaimsBySourceId ?? {})) {
+        const nextRecord = n.personalCompletionClaimsBySourceId?.[key3], beforeClaimed = Object.keys(personal.claimedByPlayerId), afterClaimed = Object.keys(nextRecord?.claimedByPlayerId ?? {});
         requireContract(nextRecord && same3({ ...personal, claimedByPlayerId: {} }, { ...nextRecord, claimedByPlayerId: {} }) && beforeClaimed.every((playerId) => same3(personal.claimedByPlayerId[playerId], nextRecord.claimedByPlayerId[playerId])) && beforeClaimed.every((playerId) => afterClaimed.includes(playerId)), "Personal completion claim regressed");
       }
-      for (const [key2, r] of Object.entries(g.usedResources)) {
-        const personal = g.personalCompletionClaimsBySourceId?.[key2] || ["spore", "hollow", "cursed_shrine"].includes(eventKind(a, id)) && key2 === episodeRewardId(id, g.episode, "chest", ["hollow", "cursed_shrine"].includes(eventKind(a, id)) ? 0 : 3);
-        if (personal) requireContract(r.tick === n.usedResources[key2]?.tick && r.playerIds.every((playerId) => n.usedResources[key2]?.playerIds.includes(playerId)), "Personal completion provenance regressed");
-        else requireContract(same3(n.usedResources[key2], r), "Consumed resource reset");
+      for (const [key3, r] of Object.entries(g.usedResources)) {
+        const personal = g.personalCompletionClaimsBySourceId?.[key3] || ["spore", "hollow", "cursed_shrine"].includes(eventKind(a, id)) && key3 === episodeRewardId(id, g.episode, "chest", ["hollow", "cursed_shrine"].includes(eventKind(a, id)) ? 0 : 3);
+        if (personal) requireContract(r.tick === n.usedResources[key3]?.tick && r.playerIds.every((playerId) => n.usedResources[key3]?.playerIds.includes(playerId)), "Personal completion provenance regressed");
+        else requireContract(same3(n.usedResources[key3], r), "Consumed resource reset");
       }
     } else if (!prior || prior.origin) requireContract(n.startedTick >= a.tick && (y.returnSequence > x.returnSequence || g.eligibleReturn > 0), "Renewal lacks settlement return");
   }
@@ -62676,11 +62678,11 @@ var SITE_DEFINITION_REGISTRY_D13A = freezeWire([
 ]);
 var blueprintForPackage = (packageId) => SITE_DEFINITION_REGISTRY_D13A.find((row2) => row2.packageId === packageId) ?? null;
 var stonewatchBlueprint = () => SITE_DEFINITION_REGISTRY_D13A.find((row2) => row2.namedVariantId === "stonewatch");
-var regionIdForSocket = (socket) => socket?.region ? `d9-region:${socket.region.regionX},${socket.region.regionY}` : null;
-var regionBinding = (manifest, { socket = null, site = null, parcel: parcel2 = null, legacySite = null } = {}) => {
-  const regionId = legacySite?.regionId ?? regionIdForSocket(socket), region = manifest.regions?.find((row2) => row2.regionId === regionId) ?? null;
+var regionIdForSocket = (socket2) => socket2?.region ? `d9-region:${socket2.region.regionX},${socket2.region.regionY}` : null;
+var regionBinding = (manifest, { socket: socket2 = null, site = null, parcel: parcel2 = null, legacySite = null } = {}) => {
+  const regionId = legacySite?.regionId ?? regionIdForSocket(socket2), region = manifest.regions?.find((row2) => row2.regionId === regionId) ?? null;
   return {
-    biome: socket?.region?.biome ?? region?.biome ?? null,
+    biome: socket2?.region?.biome ?? region?.biome ?? null,
     regionId,
     regionName: site?.regionName ?? parcel2?.regionName ?? region?.label ?? null
   };
@@ -62693,26 +62695,26 @@ function resolveFunctional(state, manifest, siteId) {
   if (!blueprint) return null;
   const definition2 = functionalSiteDefinitionD10(packageId, site?.packageVersion ?? (packageId === CRYPT_PACKAGE_ID ? reservation?.socket.provenance.placementVersion : null));
   if (!definition2) return null;
-  const socket = site?.socket ?? reservation?.socket, parcel2 = reservation?.parcel ?? null, generated = definition2.placement === "generated-interior-family";
-  const floorCount = site?.floorCount ?? (packageId === CRYPT_PACKAGE_ID && [PLANNED_CRYPT_V2, CRYPT_POPULATION_VERSION].includes(socket.provenance.placementVersion) ? (socket.provenance.placementVersion === CRYPT_POPULATION_VERSION ? CRYPT_POPULATION_TIERS : CRYPT_TIER_POLICY_V2)[parcel2.tier].floors.length : blueprint.fixedFloorCount);
+  const socket2 = site?.socket ?? reservation?.socket, parcel2 = reservation?.parcel ?? null, generated = definition2.placement === "generated-interior-family";
+  const floorCount = site?.floorCount ?? (packageId === CRYPT_PACKAGE_ID && [PLANNED_CRYPT_V2, CRYPT_POPULATION_VERSION].includes(socket2.provenance.placementVersion) ? (socket2.provenance.placementVersion === CRYPT_POPULATION_VERSION ? CRYPT_POPULATION_TIERS : CRYPT_TIER_POLICY_V2)[parcel2.tier].floors.length : blueprint.fixedFloorCount);
   return freezeWire({
     version: UNIVERSAL_SITE_DEFINITION_D13A,
     siteId,
     familyId: blueprint.familyId,
     namedVariantId: blueprint.namedVariantId,
     displayName: site?.label ?? parcel2?.label ?? definition2.template?.label ?? definition2.family?.label,
-    biomeOrRegionBinding: regionBinding(manifest, { socket, site, parcel: parcel2 }),
+    biomeOrRegionBinding: regionBinding(manifest, { socket: socket2, site, parcel: parcel2 }),
     tier: site?.sizeTier ?? parcel2?.tier ?? null,
     floorCount: floorCount ?? null,
-    floorCountRule: generated ? packageId === CRYPT_PACKAGE_ID && socket.provenance.placementVersion === CRYPT_POPULATION_VERSION ? "floor-count-rule:crypt-reservation-population-v3" : packageId === CRYPT_PACKAGE_ID && socket.provenance.placementVersion === PLANNED_CRYPT_V2 ? "floor-count-rule:crypt-family-v2" : blueprint.floorCountRule : null,
+    floorCountRule: generated ? packageId === CRYPT_PACKAGE_ID && socket2.provenance.placementVersion === CRYPT_POPULATION_VERSION ? "floor-count-rule:crypt-reservation-population-v3" : packageId === CRYPT_PACKAGE_ID && socket2.provenance.placementVersion === PLANNED_CRYPT_V2 ? "floor-count-rule:crypt-family-v2" : blueprint.floorCountRule : null,
     layoutIdentity: generated ? site?.layoutSeed ?? parcel2?.layoutSeed ?? definition2.package.contentHash : site?.interior?.contentHash ?? definition2.package.contentHash,
-    minimumLevel: socket?.minimumLevel ?? definition2.package.minimumLevel ?? null,
+    minimumLevel: socket2?.minimumLevel ?? definition2.package.minimumLevel ?? null,
     placementClass: blueprint.placementClass,
     layoutClass: blueprint.layoutClass,
     encounterProfileRef: packageProfileRef(definition2, "encounter"),
     finaleProfileRef: packageId === "woodland-cave-family" ? WOODLAND_CAVE_FINALE_PROFILE_D13D_A : null,
     rewardProfileRef: packageProfileRef(definition2, "reward"),
-    resetPolicyRef: packageId === CRYPT_PACKAGE_ID && socket.provenance.placementVersion === PLANNED_CRYPT_V2 ? "reset-policy:explicit-cleared-vacant-crypt-family-v2" : blueprint.resetPolicyRef,
+    resetPolicyRef: packageId === CRYPT_PACKAGE_ID && socket2.provenance.placementVersion === PLANNED_CRYPT_V2 ? "reset-policy:explicit-cleared-vacant-crypt-family-v2" : blueprint.resetPolicyRef,
     uniqueLootProfileRef: null,
     artifactRef: null,
     sigilModifierSlot: null
@@ -62772,8 +62774,8 @@ function validateResolvedSiteDefinitionD13A(definition2) {
   if (definition2.minimumLevel !== null) safeInteger(definition2.minimumLevel, 1);
   requireContract(["unique-landmark", "family-instance"].includes(definition2.placementClass), "Invalid site placement class");
   requireContract(["fixed-authored", "seeded-procedural"].includes(definition2.layoutClass), "Invalid site layout class");
-  for (const key2 of ["encounterProfileRef", "rewardProfileRef", "resetPolicyRef"]) requireContract(typeof definition2[key2] === "string" && definition2[key2].length >= 1, "Missing site profile reference");
-  for (const key2 of ["finaleProfileRef", "uniqueLootProfileRef", "artifactRef", "sigilModifierSlot"]) requireContract(definition2[key2] === null || typeof definition2[key2] === "string", "Invalid optional site reference");
+  for (const key3 of ["encounterProfileRef", "rewardProfileRef", "resetPolicyRef"]) requireContract(typeof definition2[key3] === "string" && definition2[key3].length >= 1, "Missing site profile reference");
+  for (const key3 of ["finaleProfileRef", "uniqueLootProfileRef", "artifactRef", "sigilModifierSlot"]) requireContract(definition2[key3] === null || typeof definition2[key3] === "string", "Invalid optional site reference");
   if (definition2.familyId === "crypt" && definition2.namedVariantId === null && definition2.encounterProfileRef === `${CRYPT_PACKAGE_ID}:${CRYPT_POPULATION_VERSION}:encounter`) requireContract(definition2.rewardProfileRef === `${CRYPT_PACKAGE_ID}:${CRYPT_POPULATION_VERSION}:reward` && definition2.placementClass === "family-instance" && definition2.layoutClass === "seeded-procedural" && CRYPT_POPULATION_TIERS[definition2.tier]?.floors.length === definition2.floorCount && definition2.floorCountRule === "floor-count-rule:crypt-reservation-population-v3", "Invalid population Crypt definition");
   else if (definition2.familyId === "crypt" && definition2.namedVariantId === null && definition2.encounterProfileRef === `${CRYPT_PACKAGE_ID}:${PLANNED_CRYPT_V2}:encounter`) requireContract(definition2.rewardProfileRef === `${CRYPT_PACKAGE_ID}:${PLANNED_CRYPT_V2}:reward` && definition2.placementClass === "family-instance" && definition2.layoutClass === "seeded-procedural" && CRYPT_TIER_POLICY_V2[definition2.tier]?.floors.length === definition2.floorCount && definition2.floorCountRule === "floor-count-rule:crypt-family-v2", "Invalid repeatable Crypt V2 definition");
   else if (definition2.familyId === "crypt" && definition2.namedVariantId === null) requireContract(definition2.encounterProfileRef === `${CRYPT_PACKAGE_ID}:${PLANNED_CRYPT_VERSION}:encounter` && definition2.rewardProfileRef === `${CRYPT_PACKAGE_ID}:${PLANNED_CRYPT_VERSION}:reward` && definition2.placementClass === "family-instance" && definition2.layoutClass === "seeded-procedural" && definition2.tier === "small" && definition2.floorCount === 1, "Invalid repeatable Small Crypt definition");
@@ -62999,7 +63001,7 @@ function validateActivityState(s) {
       p = { ...p, maxHp: d6 ? resolved.maxHp : combatIntegerWire(resolved.maxHp), attackDamage: d6 ? resolved.attack : combatIntegerWire(resolved.attack), moveSpeed: resolved.moveSpeed, ...hasWorldCombat(s) ? { attackReach: 32 } : {} };
     } else if (d3 && groupByEntity.has(id)) p = encounterActorProfile(s, groupByEntity.get(id), a);
     if (d6) p = { ...p, maxHp: (s.subweaponCombat?.version === "subweapon-combat-integer-v2" ? combatInteger : asCombatAmount)(p.maxHp), attackDamage: (s.subweaponCombat?.version === "subweapon-combat-integer-v2" ? combatInteger : asCombatAmount)(p.attackDamage) };
-    for (const key2 of ["team", "maxHp", "hullRadius", "combatRadius", "moveSpeed", "attackDamage", "attackReach", "attackReachMode", "attackDelayTicks"]) requireContract(same7(a[key2], p[key2]), "Actor profile drift");
+    for (const key3 of ["team", "maxHp", "hullRadius", "combatRadius", "moveSpeed", "attackDamage", "attackReach", "attackReachMode", "attackDelayTicks"]) requireContract(same7(a[key3], p[key3]), "Actor profile drift");
     if (a.team === "party") requireContract(owned2.has(id), "Unowned party actor");
     else if (a.residency.spaceInstanceId === s.overworldInstanceId) requireContract(!manifest.safeRegions.some((r) => a.position.x + a.hullRadius > r.x && a.position.x - a.hullRadius < r.x + r.width && a.position.y + a.hullRadius > r.y && a.position.y - a.hullRadius < r.y + r.height), "Hostile overlaps safe settlement");
   }
@@ -63040,10 +63042,10 @@ function validateActivityState(s) {
   for (const [id, history] of Object.entries(s.residencyHistoryByEntityId)) {
     requireContract(Object.keys(history).length <= 72, "Retained residency bound");
     const current = s.entitiesById[id].residency;
-    for (const [key2, c] of Object.entries(history)) {
+    for (const [key3, c] of Object.entries(history)) {
       closedRecord(c, ["spaceInstanceId", "spaceRevision", "residencyRevision", "tick", "afterEventSequence", "afterAuthorityOrder", "endTick", "endEventSequence", "endAuthorityOrder"]);
       safeInteger(c.residencyRevision, 1, current.residencyRevision);
-      requireContract(String(c.residencyRevision) === key2 && s.spacesByInstanceId[c.spaceInstanceId]?.spaceRevision >= c.spaceRevision, "Invalid historical instance binding");
+      requireContract(String(c.residencyRevision) === key3 && s.spacesByInstanceId[c.spaceInstanceId]?.spaceRevision >= c.spaceRevision, "Invalid historical instance binding");
       safeInteger(c.tick, 0, s.tick);
       safeInteger(c.afterEventSequence, 0, s.eventEmission.lastEventSequence);
       safeInteger(c.afterAuthorityOrder, 0, s.lastAppliedAuthorityOrder);
@@ -63237,7 +63239,7 @@ async function generateSiteInterior(manifest, site, overworldCollision, sha256) 
     rng16 = result.state;
     return result.value;
   };
-  const token2 = async (key2) => bytesToHex((await hashBytes(frameUtf8([SITE_RECIPE_VERSION, site.locationId, key2]), sha256)).slice(0, 16));
+  const token2 = async (key3) => bytesToHex((await hashBytes(frameUtf8([SITE_RECIPE_VERSION, site.locationId, key3]), sha256)).slice(0, 16));
   const width = 48, height = 44, tiles5 = Array.from({ length: height }, () => Array(width).fill("2"));
   const centers = [[9, 34], [9, 14], [29, 11], [35, 32]], rooms = centers.map(([cx, cy2], i) => {
     const w = 9 + take(3), h = 9 + take(3);
@@ -63306,7 +63308,7 @@ var neighborsOf = (slot, slots2) => {
   const known2 = new Map(slots2.map((value2) => [keyFor(value2), value2]));
   return [[slot[0], slot[1] - 1], [slot[0] + 1, slot[1]], [slot[0], slot[1] + 1], [slot[0] - 1, slot[1]]].filter((value2) => known2.has(keyFor(value2)));
 };
-async function derivedToken(identity2, domain, key2, sha256) {
+async function derivedToken(identity2, domain, key3, sha256) {
   const digest2 = await hashBytes(frameUtf8([
     "SAQ-WORLD-GENERATED-ID-v1",
     identity2.seedHex,
@@ -63314,12 +63316,12 @@ async function derivedToken(identity2, domain, key2, sha256) {
     identity2.worldRecipeVersion,
     identity2.contentCatalogHash,
     domain,
-    key2
+    key3
   ]), sha256);
   return bytesToHex(digest2.slice(0, 16));
 }
-async function derivedId(kind, identity2, domain, key2, sha256) {
-  return createId(kind, await derivedToken(identity2, domain, key2, sha256));
+async function derivedId(kind, identity2, domain, key3, sha256) {
+  return createId(kind, await derivedToken(identity2, domain, key3, sha256));
 }
 function cursorFrom(stream) {
   let state = stream.initialState;
@@ -63345,10 +63347,10 @@ function breadthFirstSlots(slots2, start) {
     const current = queue.shift();
     result.push(current);
     for (const next of [[current[0], current[1] - 1], [current[0] + 1, current[1]], [current[0], current[1] + 1], [current[0] - 1, current[1]]]) {
-      const key2 = keyFor(next);
-      if (known2.has(key2) && !seen4.has(key2)) {
-        seen4.add(key2);
-        queue.push(known2.get(key2));
+      const key3 = keyFor(next);
+      if (known2.has(key3) && !seen4.has(key3)) {
+        seen4.add(key3);
+        queue.push(known2.get(key3));
       }
     }
   }
@@ -63370,9 +63372,9 @@ function connectedRegionCut(bfs, slots2, settlementNeighbor, random, minimumHome
   for (const root2 of bfs.slice(1)) {
     const component = /* @__PURE__ */ new Set(), pending = [keyFor(root2)];
     while (pending.length) {
-      const key2 = pending.pop();
-      component.add(key2);
-      pending.push(...children.get(key2));
+      const key3 = pending.pop();
+      component.add(key3);
+      pending.push(...children.get(key3));
     }
     if (component.size >= 2 && bfs.length - component.size >= minimumHomeChunks && !component.has(keyFor(settlementNeighbor))) candidates.push(component);
   }
@@ -64020,13 +64022,13 @@ function createHostileProjectileSimulation(state, { damage, eligible: eligible2,
     const c = root2();
     if (!c) return;
     delete c.actionsByEntityId[id];
-    for (const [key2, p] of Object.entries(c.projectiles)) if (p.sourceId === id) delete c.projectiles[key2];
+    for (const [key3, p] of Object.entries(c.projectiles)) if (p.sourceId === id) delete c.projectiles[key3];
   }
   function cancelTarget(id) {
     const c = root2();
     if (!c) return;
-    for (const [key2, a] of Object.entries(c.actionsByEntityId)) if (a.targetEntityId === id) c.actionsByEntityId[key2] = resetAction(a);
-    for (const [key2, p] of Object.entries(c.projectiles)) if (p.intendedTargetId === id) delete c.projectiles[key2];
+    for (const [key3, a] of Object.entries(c.actionsByEntityId)) if (a.targetEntityId === id) c.actionsByEntityId[key3] = resetAction(a);
+    for (const [key3, p] of Object.entries(c.projectiles)) if (p.intendedTargetId === id) delete c.projectiles[key3];
   }
   function beginTick(activeIds) {
     const c = root2();
@@ -64041,7 +64043,7 @@ function createHostileProjectileSimulation(state, { damage, eligible: eligible2,
       if (!active2.has(id)) {
         if (action2.nextShotTick !== void 0) {
           if (action2.phase !== "idle" || action2.actionSequence !== 0) c.actionsByEntityId[id] = resetAction(action2);
-          for (const [key2, p] of Object.entries(c.projectiles)) if (p.sourceId === id) delete c.projectiles[key2];
+          for (const [key3, p] of Object.entries(c.projectiles)) if (p.sourceId === id) delete c.projectiles[key3];
         } else cancelSource(id);
         continue;
       }
@@ -64540,8 +64542,8 @@ function createActivityProgression(state, manifest, measure2) {
   function resolvedStats(id) {
     const p = playersByEntity.get(id);
     if (!p) return void 0;
-    const key2 = transientKey(p), old2 = transientKeys.get(id);
-    if (key2.some((v, i) => v !== old2?.[i])) equipmentChanged(p);
+    const key3 = transientKey(p), old2 = transientKeys.get(id);
+    if (key3.some((v, i) => v !== old2?.[i])) equipmentChanged(p);
     return stats3.get(id);
   }
   return Object.freeze({
@@ -64790,8 +64792,8 @@ function createWorldPursuitPathsV1() {
     }
     const size = collision.tileSize;
     return (col2, row2) => {
-      const key2 = row2 * 1048576 + col2;
-      let v = cells.get(key2);
+      const key3 = row2 * 1048576 + col2;
+      let v = cells.get(key3);
       if (v === void 0) {
         v = 1;
         const x = col2 * size + size / 2, y = row2 * size + size / 2;
@@ -64799,7 +64801,7 @@ function createWorldPursuitPathsV1() {
           v = 0;
           break;
         }
-        cells.set(key2, v);
+        cells.set(key3, v);
       }
       return v === 1;
     };
@@ -64840,16 +64842,16 @@ function createWorldPursuitPathsV1() {
   function mapFor(collision, goalPosition, hullRadius) {
     const radius = hullRadius < collision.tileSize / 2 ? collision.tileSize / 2 - 1 : hullRadius, book2 = bookFor(collision), open2 = openFor(book2, collision, radius), goal = nearestOpen2(open2, collision.tileSize, goalPosition);
     if (!goal) return null;
-    const key2 = radius + "/" + goal.col + "," + goal.row, prior = book2.maps.get(key2);
+    const key3 = radius + "/" + goal.col + "," + goal.row, prior = book2.maps.get(key3);
     if (prior) {
       metrics.mapHits++;
-      book2.maps.delete(key2);
-      book2.maps.set(key2, prior);
+      book2.maps.delete(key3);
+      book2.maps.set(key3, prior);
       return prior;
     }
     const map = build2(open2, goal);
     metrics.mapBuilds++;
-    book2.maps.set(key2, map);
+    book2.maps.set(key3, map);
     if (book2.maps.size > P9.mapLimit) book2.maps.delete(book2.maps.keys().next().value);
     return map;
   }
@@ -64918,9 +64920,9 @@ function separationImpulse(a, b) {
     x = dx / d;
     y = dy / d;
   } else {
-    const first = a.entityId < b.entityId, key2 = first ? a.entityId + b.entityId : b.entityId + a.entityId;
+    const first = a.entityId < b.entityId, key3 = first ? a.entityId + b.entityId : b.entityId + a.entityId;
     let hash40 = 0;
-    for (let i = 0; i < key2.length; i++) hash40 = Math.imul(hash40, 31) + key2.charCodeAt(i) >>> 0;
+    for (let i = 0; i < key3.length; i++) hash40 = Math.imul(hash40, 31) + key3.charCodeAt(i) >>> 0;
     const angle3 = hash40 % 8 * Math.PI / 4, sign3 = first ? 1 : -1;
     x = Math.cos(angle3) * sign3;
     y = Math.sin(angle3) * sign3;
@@ -65335,13 +65337,13 @@ function createInteriorNavigationD12_3A(state, { eligible: eligible2 = (source3,
     for (const id of routes.keys()) if (!groupsByActor.has(id)) routes.delete(id);
   }
   function gridFor(actor) {
-    const key2 = `${actor.residency.spaceInstanceId}/${actor.hullRadius}`, prior = grids.get(key2);
+    const key3 = `${actor.residency.spaceInstanceId}/${actor.hullRadius}`, prior = grids.get(key3);
     if (prior) {
       metrics.gridCacheHits++;
       return prior;
     }
     const collision = state.spacesByInstanceId[actor.residency.spaceInstanceId].collision, grid = buildInteriorNavigationGridD12_3A(collision, actor.hullRadius);
-    grids.set(key2, grid);
+    grids.set(key3, grid);
     metrics.gridBuilds++;
     return grid;
   }
@@ -65359,13 +65361,13 @@ function createInteriorNavigationD12_3A(state, { eligible: eligible2 = (source3,
   function pairPath(actor, target) {
     const grid = gridFor(actor), start = nearestOpen(grid, actor.position), goal = nearestOpen(grid, target.position);
     if (!start || !goal) return search(actor, actor.position, target.position);
-    const key2 = `${actor.entityId}/${target.entityId}/${pointKey(start)}/${pointKey(goal)}`, cached = pairCache.get(key2);
+    const key3 = `${actor.entityId}/${target.entityId}/${pointKey(start)}/${pointKey(goal)}`, cached = pairCache.get(key3);
     if (cached && cached.expiresTick >= state.tick) {
       metrics.pairCacheHits++;
       return cached.result;
     }
     const result = search(actor, actor.position, target.position);
-    pairCache.set(key2, { expiresTick: state.tick + D.replanIntervalTicks, result });
+    pairCache.set(key3, { expiresTick: state.tick + D.replanIntervalTicks, result });
     if (pairCache.size > 256) pairCache.delete(pairCache.keys().next().value);
     return result;
   }
@@ -65541,7 +65543,7 @@ function createInteriorNavigationD12_3A(state, { eligible: eligible2 = (source3,
 // src/simulation/activity_spatial.js
 function createSpatialIndex(cellSize = 256) {
   const cells = /* @__PURE__ */ new Map(), keysById = /* @__PURE__ */ new Map();
-  const key2 = (instance, x, y) => `${instance}/${x}/${y}`;
+  const key3 = (instance, x, y) => `${instance}/${x}/${y}`;
   function remove(id) {
     for (const k of keysById.get(id) ?? []) {
       const c = cells.get(k);
@@ -65552,7 +65554,7 @@ function createSpatialIndex(cellSize = 256) {
   }
   function insert(id, instance, points2) {
     remove(id);
-    const keys2 = new Set(points2.map((p) => key2(instance, Math.floor(p.x / cellSize), Math.floor(p.y / cellSize))));
+    const keys2 = new Set(points2.map((p) => key3(instance, Math.floor(p.x / cellSize), Math.floor(p.y / cellSize))));
     for (const k of keys2) {
       if (!cells.has(k)) cells.set(k, /* @__PURE__ */ new Set());
       cells.get(k).add(id);
@@ -65562,7 +65564,7 @@ function createSpatialIndex(cellSize = 256) {
   function query(instance, point13, radius) {
     const ids4 = /* @__PURE__ */ new Set();
     for (let y = Math.floor((point13.y - radius) / cellSize); y <= Math.floor((point13.y + radius) / cellSize); y++)
-      for (let x = Math.floor((point13.x - radius) / cellSize); x <= Math.floor((point13.x + radius) / cellSize); x++) for (const id of cells.get(key2(instance, x, y)) ?? []) ids4.add(id);
+      for (let x = Math.floor((point13.x - radius) / cellSize); x <= Math.floor((point13.x + radius) / cellSize); x++) for (const id of cells.get(key3(instance, x, y)) ?? []) ids4.add(id);
     return [...ids4].sort();
   }
   return { insert, remove, query, stats: () => ({ cells: cells.size, records: keysById.size }) };
@@ -65639,19 +65641,19 @@ function createActivityScheduler(state, options = {}, { beforeSleep = () => true
     const sorted = players.slice().sort((a, b) => a.entityId.localeCompare(b.entityId)), parent = sorted.map((_, i) => i), find = (i) => parent[i] === i ? i : parent[i] = find(parent[i]);
     const relevantPairs = /* @__PURE__ */ new Set();
     for (let i = 0; i < sorted.length; i++) for (let j = i + 1; j < sorted.length; j++) {
-      const a = sorted[i], b = sorted[j], key2 = `${a.entityId}/${b.entityId}`;
-      relevantPairs.add(key2);
+      const a = sorted[i], b = sorted[j], key3 = `${a.entityId}/${b.entityId}`;
+      relevantPairs.add(key3);
       if (a.residency.spaceInstanceId !== b.residency.spaceInstanceId) {
-        separatedSince.delete(key2);
+        separatedSince.delete(key3);
         continue;
       }
       const close = Math.hypot(a.position.x - b.position.x, a.position.y - b.position.y) <= config.mergeDistance;
       const previouslyTogether = clusters.some((c) => c.playerEntityIds.includes(a.entityId) && c.playerEntityIds.includes(b.entityId));
-      if (close) separatedSince.delete(key2);
-      else if (previouslyTogether && !separatedSince.has(key2)) separatedSince.set(key2, state.tick);
-      if (close || previouslyTogether && state.tick - (separatedSince.get(key2) ?? state.tick) < config.splitTicks) parent[find(j)] = find(i);
+      if (close) separatedSince.delete(key3);
+      else if (previouslyTogether && !separatedSince.has(key3)) separatedSince.set(key3, state.tick);
+      if (close || previouslyTogether && state.tick - (separatedSince.get(key3) ?? state.tick) < config.splitTicks) parent[find(j)] = find(i);
     }
-    for (const key2 of separatedSince.keys()) if (!relevantPairs.has(key2)) separatedSince.delete(key2);
+    for (const key3 of separatedSince.keys()) if (!relevantPairs.has(key3)) separatedSince.delete(key3);
     const components = /* @__PURE__ */ new Map();
     sorted.forEach((p, i) => {
       const root2 = find(i);
@@ -69834,9 +69836,9 @@ function createArchivedBossFightRuntime(state, { pool: pool3, damage, hit, clear
       const age = state.tick - s.activatedTick - 60 - s.ordinal * 17;
       if (age < 0 || age % 90 !== 0 || d > cfgN.range || !sweptPathClear(c, decoy.position, t.position, 3)) continue;
       const direction3 = range(decoy.position, t.position) || 1, seq = Math.floor(age / 90) + 1;
-      const key2 = b.bossId + ":bolt:" + decoy.entityId + ":" + seq;
-      shots[key2] = {
-        id: key2,
+      const key3 = b.bossId + ":bolt:" + decoy.entityId + ":" + seq;
+      shots[key3] = {
+        id: key3,
         sourceEntityId: decoy.entityId,
         position: point4(decoy.position),
         previousPosition: point4(decoy.position),
@@ -69851,16 +69853,16 @@ function createArchivedBossFightRuntime(state, { pool: pool3, damage, hit, clear
       };
       if (Object.keys(shots).length > 12) delete shots[Object.keys(shots).sort((x, y) => shots[x].createdTick - shots[y].createdTick || x.localeCompare(y))[0]];
     }
-    for (const [key2, p] of Object.entries(shots).sort(([x], [y]) => x.localeCompare(y))) {
+    for (const [key3, p] of Object.entries(shots).sort(([x], [y]) => x.localeCompare(y))) {
       const actor = state.entitiesById[p.sourceEntityId];
       if (!actor?.alive || state.tick >= p.expiresTick) {
-        delete shots[key2];
+        delete shots[key3];
         continue;
       }
       if (state.tick <= p.createdTick) continue;
       const prev = point4(p.position), next = { x: prev.x + p.velocity.x, y: prev.y + p.velocity.y };
       if (!sweptPathClear(c, prev, next, cfgN.projectileRadius)) {
-        delete shots[key2];
+        delete shots[key3];
         continue;
       }
       let best = null, bestT = 2;
@@ -69878,7 +69880,7 @@ function createArchivedBossFightRuntime(state, { pool: pool3, damage, hit, clear
           projectileImpact: true,
           projectileDirection: { x: p.velocity.x / cfgN.projectileSpeed, y: p.velocity.y / cfgN.projectileSpeed }
         });
-        delete shots[key2];
+        delete shots[key3];
         continue;
       }
       p.previousPosition = prev;
@@ -72561,15 +72563,15 @@ var tileAnchor = (anchor) => {
 };
 var functionalLabel = (site, reservation, definition2) => site?.label ?? reservation?.parcel?.label ?? definition2?.template?.label ?? (reservation?.packageId === "woodland-cave-family" ? "Woodland Cave" : "Functional Site");
 var functionalKind = (site, reservation, definition2) => site?.siteKind ?? definition2?.template?.siteKind ?? (reservation?.packageId?.includes("fort") ? "woodland-fort" : reservation?.packageId?.includes("ruin") ? "woodland-ruin" : reservation?.packageId?.includes("cave") ? "woodland-cave" : reservation?.packageId === "procedural-crypt-family" ? "procedural-crypt" : "functional-site");
-var approachFor = (site, reservation, socket) => {
+var approachFor = (site, reservation, socket2) => {
   const parcel2 = reservation?.parcel;
   if (parcel2?.roadAnchor?.tileX !== void 0 && parcel2?.roadAnchor?.tileY !== void 0) return tileAnchor(parcel2.roadAnchor);
-  if (site?.siteKind === "woodland-fort" || reservation?.packageId === "woodland-fort") return copyWire(socket.entrance);
-  return normalizeWorldPosition({ ...socket.entrance, localY: socket.entrance.localY + 3 * D9_PROFILE.tileSize });
+  if (site?.siteKind === "woodland-fort" || reservation?.packageId === "woodland-fort") return copyWire(socket2.entrance);
+  return normalizeWorldPosition({ ...socket2.entrance, localY: socket2.entrance.localY + 3 * D9_PROFILE.tileSize });
 };
-var requiredChunks = (site, reservation, socket) => {
+var requiredChunks = (site, reservation, socket2) => {
   const pages2 = site?.compound?.pages ?? reservation?.parcel?.pages ?? [];
-  const rows = pages2.length ? pages2.map((p) => ({ chunkX: p.chunkX, chunkY: p.chunkY })) : [{ chunkX: socket.entrance.chunkX, chunkY: socket.entrance.chunkY }];
+  const rows = pages2.length ? pages2.map((p) => ({ chunkX: p.chunkX, chunkY: p.chunkY })) : [{ chunkX: socket2.entrance.chunkX, chunkY: socket2.entrance.chunkY }];
   return [...new Map(rows.map((p) => [p.chunkX + "," + p.chunkY, p])).values()].sort((a, b) => BigInt(a.chunkY) < BigInt(b.chunkY) ? -1 : BigInt(a.chunkY) > BigInt(b.chunkY) ? 1 : BigInt(a.chunkX) < BigInt(b.chunkX) ? -1 : BigInt(a.chunkX) > BigInt(b.chunkX) ? 1 : 0);
 };
 function resolveSiteTruthD12_4C(state, { includeRejected = false, includeFinaleDiagnostics = true } = {}) {
@@ -72587,21 +72589,21 @@ function resolveSiteTruthD12_4C(state, { includeRejected = false, includeFinaleD
   if (world) {
     const bound = world.functionalSitesById ?? {}, reservations = world.siteReservationsById ?? {}, ids4 = /* @__PURE__ */ new Set([...Object.keys(bound), ...Object.keys(reservations)]);
     for (const siteId of [...ids4].sort()) {
-      const site = bound[siteId] ?? null, reservation = reservations[siteId] ?? null, socket = site?.socket ?? reservation?.socket, definition2 = functionalSiteDefinitionD10(site?.packageId ?? reservation?.packageId, site?.packageVersion ?? null), installed = Boolean(definition2), reserved = Boolean(reservation), isBound = Boolean(site), eligible2 = Boolean(isBound || reserved && installed && eligibleFunctionalSocketD10(state, socket)), navigable = Boolean(isBound || reserved && installed && eligible2), rejectionReason = navigable ? null : !reserved ? "unreserved" : !installed ? "package-not-installed" : "activation-ineligible";
+      const site = bound[siteId] ?? null, reservation = reservations[siteId] ?? null, socket2 = site?.socket ?? reservation?.socket, definition2 = functionalSiteDefinitionD10(site?.packageId ?? reservation?.packageId, site?.packageVersion ?? null), installed = Boolean(definition2), reserved = Boolean(reservation), isBound = Boolean(site), eligible2 = Boolean(isBound || reserved && installed && eligibleFunctionalSocketD10(state, socket2)), navigable = Boolean(isBound || reserved && installed && eligible2), rejectionReason = navigable ? null : !reserved ? "unreserved" : !installed ? "package-not-installed" : "activation-ineligible";
       const universal = siteDefinitions.get(siteId) ?? null;
-      if (!socket) {
+      if (!socket2) {
         if (includeRejected) records.push({ version: SITE_TRUTH_D12_4C, siteId, label: functionalLabel(site, reservation, definition2), siteType: functionalKind(site, reservation, definition2), packageId: site?.packageId ?? reservation?.packageId ?? null, familyId: universal?.familyId ?? site?.familyId ?? reservation?.parcel?.familyId ?? null, namedVariantId: universal?.namedVariantId ?? null, bound: isBound, reserved, eligible: false, completed: false, navigable: false, historical: false, worldPosition: null, entrance: null, approachAnchor: null, interactionAnchor: null, tier: null, floorCount: null, requiredChunks: [], resident: false, rejectionReason: "missing-socket" });
         continue;
       }
-      const entrance = copyWire(socket.entrance), approachAnchor = approachFor(site, reservation, socket), interactionAnchor = site?.siteKind === "woodland-fort" ? copyWire(fortDoorWorldD10(site)) : entrance, required = requiredChunks(site, reservation, socket), finale = includeFinaleDiagnostics ? siteFinaleDiagnosticD13D_B(state, siteId) : null;
+      const entrance = copyWire(socket2.entrance), approachAnchor = approachFor(site, reservation, socket2), interactionAnchor = site?.siteKind === "woodland-fort" ? copyWire(fortDoorWorldD10(site)) : entrance, required = requiredChunks(site, reservation, socket2), finale = includeFinaleDiagnostics ? siteFinaleDiagnosticD13D_B(state, siteId) : null;
       const reviewEncounter = ["F", "G", "H", "I", "J", "K", "L", "M", "N", "O"].includes(state.proofCase) && reservation?.parcel?.placementProvenance?.guaranteed === true && reservation.parcel.placementProvenance.ordinal === 0 ? { F: "Vitality Weaver", G: "Swift Commander", H: "Glacial Warden", I: "Toxic Decay", J: "Iron Citadel", K: "Berserker", L: "Nullifier", M: "Web Weaver", N: "Slag Shaper", O: "Arachnid Treant" }[state.proofCase] : null;
       records.push({ version: SITE_TRUTH_D12_4C, siteId, label: functionalLabel(site, reservation, definition2), siteType: functionalKind(site, reservation, definition2), packageId: site?.packageId ?? reservation.packageId, familyId: universal?.familyId ?? site?.familyId ?? reservation?.parcel?.familyId ?? null, namedVariantId: universal?.namedVariantId ?? null, bound: isBound, reserved, eligible: eligible2, completed: Boolean(site?.conqueredTick !== null && site?.conqueredTick !== void 0), navigable, historical: false, worldPosition: copyWire(entrance), entrance: copyWire(entrance), approachAnchor: copyWire(approachAnchor), interactionAnchor: copyWire(interactionAnchor), tier: site?.sizeTier ?? reservation?.parcel?.tier ?? null, floorCount: site?.floorCount ?? (definition2?.placement === "generated-interior-family" ? null : 1), ...finale ? { finale: copyWire(finale) } : {}, reviewEncounter, reviewFloor: reviewEncounter ? 1 : null, requiredChunks: required, resident: required.every((p) => resident.has(p.chunkX + "," + p.chunkY)), rejectionReason });
     }
     if (includeRejected) {
-      for (const socket of world.runtime.chunks.flatMap((chunk2) => chunk2.sites ?? []).sort((a, b) => a.siteId.localeCompare(b.siteId))) {
-        if (ids4.has(socket.siteId)) continue;
-        const entrance = copyWire(socket.entrance), required = [{ chunkX: entrance.chunkX, chunkY: entrance.chunkY }];
-        records.push({ version: SITE_TRUTH_D12_4C, siteId: socket.siteId, label: "Raw candidate socket", siteType: "candidate", packageId: null, familyId: null, bound: false, reserved: false, eligible: false, completed: false, navigable: false, historical: false, worldPosition: copyWire(entrance), entrance: copyWire(entrance), approachAnchor: null, interactionAnchor: null, tier: null, floorCount: null, requiredChunks: required, resident: required.every((p) => resident.has(p.chunkX + "," + p.chunkY)), rejectionReason: "unreserved-candidate" });
+      for (const socket2 of world.runtime.chunks.flatMap((chunk2) => chunk2.sites ?? []).sort((a, b) => a.siteId.localeCompare(b.siteId))) {
+        if (ids4.has(socket2.siteId)) continue;
+        const entrance = copyWire(socket2.entrance), required = [{ chunkX: entrance.chunkX, chunkY: entrance.chunkY }];
+        records.push({ version: SITE_TRUTH_D12_4C, siteId: socket2.siteId, label: "Raw candidate socket", siteType: "candidate", packageId: null, familyId: null, bound: false, reserved: false, eligible: false, completed: false, navigable: false, historical: false, worldPosition: copyWire(entrance), entrance: copyWire(entrance), approachAnchor: null, interactionAnchor: null, tier: null, floorCount: null, requiredChunks: required, resident: required.every((p) => resident.has(p.chunkX + "," + p.chunkY)), rejectionReason: "unreserved-candidate" });
       }
     }
   }
@@ -72673,10 +72675,10 @@ function siteTruthJsonEqualV1(value2, node, arrayElement = false) {
   const proto = Object.getPrototypeOf(value2);
   if (proto !== Object.prototype && proto !== null || node.type !== "record") return false;
   let n = 0;
-  for (const key2 of Object.keys(value2)) {
-    const child = value2[key2];
+  for (const key3 of Object.keys(value2)) {
+    const child = value2[key3];
     if (child === void 0) continue;
-    if (key2 !== node.keys[n] || !siteTruthJsonEqualV1(child, node.children[n])) return false;
+    if (key3 !== node.keys[n] || !siteTruthJsonEqualV1(child, node.children[n])) return false;
     n++;
   }
   return n === node.keys.length;
@@ -72709,10 +72711,10 @@ function createSiteTruthReuseV1(resolve) {
   const entries = /* @__PURE__ */ new WeakMap();
   let hits2 = 0, misses = 0, residencyRefreshes = 0, semanticSerializations = 0, keyCharacters = 0;
   const read2 = (state) => {
-    const origin = originManifestForState(state), { chunks: rows, ...semantic } = dependencies(state), key2 = refreshable ? null : JSON.stringify(semantic), residencyKey = JSON.stringify(rows), prior = entries.get(state);
+    const origin = originManifestForState(state), { chunks: rows, ...semantic } = dependencies(state), key3 = refreshable ? null : JSON.stringify(semantic), residencyKey = JSON.stringify(rows), prior = entries.get(state);
     if (!refreshable) semanticSerializations++;
-    if (prior && prior.content === state.content && prior.origin === origin && (refreshable ? siteTruthJsonEqualV1(semantic, prior.snapshot.node) : prior.key === key2)) {
-      keyCharacters = (refreshable ? prior.snapshot.characters : key2.length) + (residencyKey === void 0 ? 0 : residencyKey.length + 10);
+    if (prior && prior.content === state.content && prior.origin === origin && (refreshable ? siteTruthJsonEqualV1(semantic, prior.snapshot.node) : prior.key === key3)) {
+      keyCharacters = (refreshable ? prior.snapshot.characters : key3.length) + (residencyKey === void 0 ? 0 : residencyKey.length + 10);
       if (prior.residencyKey === residencyKey) {
         hits2++;
         return prior.value;
@@ -72727,9 +72729,9 @@ function createSiteTruthReuseV1(resolve) {
     }
     const value2 = resolve(state), snapshot = refreshable ? siteTruthJsonSnapshotV1(semantic) : null;
     if (refreshable) semanticSerializations++;
-    keyCharacters = (refreshable ? snapshot.characters : key2.length) + (residencyKey === void 0 ? 0 : residencyKey.length + 10);
+    keyCharacters = (refreshable ? snapshot.characters : key3.length) + (residencyKey === void 0 ? 0 : residencyKey.length + 10);
     if (refreshable) ownedProjections.add(value2);
-    entries.set(state, { content: state.content, origin, key: key2, snapshot, residencyKey, value: value2 });
+    entries.set(state, { content: state.content, origin, key: key3, snapshot, residencyKey, value: value2 });
     misses++;
     return value2;
   };
@@ -72818,8 +72820,8 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
   let slowViewKey = null, slowViewState = null, slowView = /* @__PURE__ */ new Map();
   function getReadModel() {
     return authority.withAuthority((engine) => engine.withAuthorityState((state) => {
-      const status2 = authority.getStatus(), version = engine.version(), key2 = `${version}/${status2.phase}/${status2.confirmedSaveRevision}`;
-      if (key2 === cachedKey) return cachedModel;
+      const status2 = authority.getStatus(), version = engine.version(), key3 = `${version}/${status2.phase}/${status2.confirmedSaveRevision}`;
+      if (key3 === cachedKey) return cachedModel;
       return measure2("interestProjection", () => {
         const player = state.playersById[localPlayerId];
         requireContract(player, "Missing local controller");
@@ -73060,7 +73062,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
           persistence: freezeProjection({ phase: status2.phase === "ready" ? "encounter" : status2.phase, saving: Boolean(status2.saving), confirmedSaveRevision: status2.confirmedSaveRevision }),
           travel: null
         });
-        cachedKey = key2;
+        cachedKey = key3;
         return cachedModel;
       });
     }));
@@ -73387,9 +73389,9 @@ function createWorldEventHudV4(document2, onActivate = () => {
     const parent = stack.offsetParent ?? document2.body, top = parent.getBoundingClientRect().top;
     let bottom = 0;
     for (const id of ["world-hud-vitals", "world-hud-title"]) {
-      const el = document2.getElementById(id);
-      if (el?.offsetParent) {
-        const b = el.getBoundingClientRect();
+      const el2 = document2.getElementById(id);
+      if (el2?.offsetParent) {
+        const b = el2.getBoundingClientRect();
         if (b.height) bottom = Math.max(bottom, b.bottom - top);
       }
     }
@@ -73403,9 +73405,9 @@ function createWorldEventHudV4(document2, onActivate = () => {
       previous = "";
       return false;
     }
-    const key2 = JSON.stringify(trackerRow);
-    if (key2 === previous && !root2.hidden) return true;
-    previous = key2;
+    const key3 = JSON.stringify(trackerRow);
+    if (key3 === previous && !root2.hidden) return true;
+    previous = key3;
     root2.hidden = false;
     current = trackerRow.groupId;
     place3();
@@ -73439,9 +73441,9 @@ function createWorldEventHudV4(document2, onActivate = () => {
       previousBadge = "";
       return;
     }
-    const key2 = b.boon + "/" + b.clock + "/" + b.fx;
-    if (key2 === previousBadge && !badge.hidden) return;
-    previousBadge = key2;
+    const key3 = b.boon + "/" + b.clock + "/" + b.fx;
+    if (key3 === previousBadge && !badge.hidden) return;
+    previousBadge = key3;
     badge.hidden = false;
     place3();
     badge.style.setProperty("--boon", BOON_COLOR[b.boon] ?? "#ffcf5a");
@@ -73455,9 +73457,9 @@ function createWorldEventHudV4(document2, onActivate = () => {
       previousBlessing = "";
       return;
     }
-    const key2 = b.boon + "/" + b.clock;
-    if (key2 === previousBlessing && !blessing.hidden) return;
-    previousBlessing = key2;
+    const key3 = b.boon + "/" + b.clock;
+    if (key3 === previousBlessing && !blessing.hidden) return;
+    previousBlessing = key3;
     blessing.hidden = false;
     place3();
     blessing.style.setProperty("--boon", BLESSING_COLOR[b.boon] ?? "#ffcf5a");
@@ -73542,29 +73544,29 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
   const env = doc.defaultView ?? globalThis, style = doc.createElement("style");
   style.textContent = CSS2;
   doc.head.append(style);
-  const el = (tag, text2, cls) => {
+  const el2 = (tag, text2, cls) => {
     const e = doc.createElement(tag);
     if (text2 != null) e.textContent = text2;
     if (cls) e.className = cls;
     return e;
   };
   const icon = (kind, cls) => {
-    const e = el("span", null, cls);
+    const e = el2("span", null, cls);
     e.innerHTML = ICONS3[kind] ?? ICONS3.clear;
     return e;
   };
   const reward = (gold, xp) => {
-    const r = el("span", null, "qx-reward");
+    const r = el2("span", null, "qx-reward");
     r.innerHTML = COIN;
     r.append(formatAmount(gold));
-    const x = el("span", "+" + Number(xp).toLocaleString("en-US") + " XP", "qx-xp");
-    const w = el("span", null, "qx-pay");
+    const x = el2("span", "+" + Number(xp).toLocaleString("en-US") + " XP", "qx-xp");
+    const w = el2("span", null, "qx-pay");
     w.style.cssText = "display:inline-flex;gap:10px;align-items:center";
     w.append(r, x);
     return w;
   };
   function dialog(id) {
-    const d = el("dialog", null, "qx-dlg");
+    const d = el2("dialog", null, "qx-dlg");
     d.id = id;
     d.addEventListener("cancel", (e) => {
       e.preventDefault();
@@ -73628,31 +73630,31 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
   function drawBoard() {
     const q = quests(), b = q?.boards.find((b2) => b2.settlementId === boardId);
     board.replaceChildren();
-    const sheet = el("div", null, "qx-sheet"), head13 = el("div", null, "qx-head"), h = el("h3", b?.name ? b.name + " Notice Board" : "Notice Board"), x = el("button", "\xD7", "qx-x");
+    const sheet = el2("div", null, "qx-sheet"), head13 = el2("div", null, "qx-head"), h = el2("h3", b?.name ? b.name + " Notice Board" : "Notice Board"), x = el2("button", "\xD7", "qx-x");
     x.type = "button";
     x.setAttribute("aria-label", "Close");
     x.onclick = () => close(board);
     head13.append(h, x);
     sheet.append(head13);
-    const body5 = el("div", null, "qx-body");
+    const body5 = el2("div", null, "qx-body");
     sheet.append(body5);
     board.append(sheet);
     if (!b) {
-      body5.append(el("p", "Walk up to the notice board to read it.", "qx-empty"));
+      body5.append(el2("p", "Walk up to the notice board to read it.", "qx-empty"));
       return;
     }
-    if (notice) body5.append(el("p", notice, "qx-note"));
+    if (notice) body5.append(el2("p", notice, "qx-note"));
     const active2 = new Map(q.active.map((a) => [a.id, a]));
     if (b.deliveries.length || b.handIns.length) {
-      body5.append(el("p", "Hand in", "qx-sect"));
+      body5.append(el2("p", "Hand in", "qx-sect"));
       for (const id of [...b.deliveries, ...b.handIns]) {
         const a = active2.get(id);
         if (!a) continue;
-        const c = el("div", null, "qx-card");
-        c.append(icon(a.kind, "qx-ico"), el("span", a.kind === "carry" ? "Delivery" : "Done \xB7 hand it in", "qx-kind"), el("b", a.title), el("p", a.kind === "carry" ? "The letter is for this town." : a.step));
-        const row2 = el("div", null, "qx-row");
+        const c = el2("div", null, "qx-card");
+        c.append(icon(a.kind, "qx-ico"), el2("span", a.kind === "carry" ? "Delivery" : "Done \xB7 hand it in", "qx-kind"), el2("b", a.title), el2("p", a.kind === "carry" ? "The letter is for this town." : a.step));
+        const row2 = el2("div", null, "qx-row");
         row2.append(reward(a.gold, a.xp));
-        const go = el("button", a.kind === "carry" ? "Deliver" : "Hand in", "qx-btn");
+        const go = el2("button", a.kind === "carry" ? "Deliver" : "Hand in", "qx-btn");
         go.type = "button";
         go.disabled = busy;
         go.onclick = () => act(a.kind === "carry" ? "deliver" : "turnIn", a.id, () => toastV1(doc, { kind: "event", title: "Quest complete", sub: a.title + " \xB7 +" + formatAmount(a.gold) + " gold" }));
@@ -73661,14 +73663,14 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
         body5.append(c);
       }
     }
-    body5.append(el("p", "Today's notes \xB7 new ones at dawn", "qx-sect"));
-    if (!b.offers.length) body5.append(el("p", "No work posted today.", "qx-empty"));
+    body5.append(el2("p", "Today's notes \xB7 new ones at dawn", "qx-sect"));
+    if (!b.offers.length) body5.append(el2("p", "No work posted today.", "qx-empty"));
     for (const o of b.offers) {
-      const c = el("div", null, "qx-card" + (o.state === "done" ? " is-done" : ""));
-      c.append(icon(o.kind, "qx-ico"), el("span", KIND_LABEL[o.kind], "qx-kind"), el("b", o.title), el("p", o.note));
-      const row2 = el("div", null, "qx-row");
+      const c = el2("div", null, "qx-card" + (o.state === "done" ? " is-done" : ""));
+      c.append(icon(o.kind, "qx-ico"), el2("span", KIND_LABEL[o.kind], "qx-kind"), el2("b", o.title), el2("p", o.note));
+      const row2 = el2("div", null, "qx-row");
       row2.append(reward(o.gold, o.xp));
-      const go = el("button", o.state === "taken" ? "Taken" : o.state === "done" ? "Done" : "Take", "qx-btn" + (o.state === "open" ? "" : " is-plain"));
+      const go = el2("button", o.state === "taken" ? "Taken" : o.state === "done" ? "Done" : "Take", "qx-btn" + (o.state === "open" ? "" : " is-plain"));
       go.type = "button";
       go.disabled = busy || o.state !== "open" || q.active.length >= q.limit;
       go.onclick = () => act("take", o.id, () => {
@@ -73679,17 +73681,17 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
       c.append(row2);
       body5.append(c);
     }
-    if (q.active.length >= q.limit) body5.append(el("p", "Your quest log is full (" + q.limit + "). Finish or drop one to take more.", "qx-note"));
+    if (q.active.length >= q.limit) body5.append(el2("p", "Your quest log is full (" + q.limit + "). Finish or drop one to take more.", "qx-note"));
   }
   function drawTalk() {
     const q = quests(), n = readModel().serviceNpcs?.find((v) => v.id === talkNpc), f = q?.folk?.[talkNpc];
     talk.replaceChildren();
-    const sheet = el("div", null, "qx-sheet"), box5 = el("div", null, "qx-talk"), face3 = el("div", (n?.name?.[0] ?? FACE2[n?.role] ?? "?").toUpperCase(), "qx-face"), who = el("div"), h = el("h4", n?.name ?? "");
-    h.append(el("small", n?.roleLabel ?? ""));
+    const sheet = el2("div", null, "qx-sheet"), box5 = el2("div", null, "qx-talk"), face3 = el2("div", (n?.name?.[0] ?? FACE2[n?.role] ?? "?").toUpperCase(), "qx-face"), who = el2("div"), h = el2("h4", n?.name ?? "");
+    h.append(el2("small", n?.roleLabel ?? ""));
     who.append(h);
-    const acts = el("div", null, "qx-acts");
+    const acts = el2("div", null, "qx-acts");
     const btn = (label4, fn, plain3) => {
-      const b = el("button", label4, "qx-btn" + (plain3 ? " is-plain" : ""));
+      const b = el2("button", label4, "qx-btn" + (plain3 ? " is-plain" : ""));
       b.type = "button";
       b.disabled = busy;
       b.onclick = fn;
@@ -73698,14 +73700,14 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     };
     const a = f?.questId ? q.active.find((v) => v.id === f.questId) : null;
     if (a && f.ready) {
-      who.append(el("p", "You did it. Thank you. Here, take this.", "qx-say"));
+      who.append(el2("p", "You did it. Thank you. Here, take this.", "qx-say"));
       acts.append(reward(a.gold, a.xp));
       btn("Hand in", () => act("turnIn", a.id, () => {
         toastV1(doc, { kind: "event", title: "Quest complete", sub: a.title + " \xB7 +" + formatAmount(a.gold) + " gold" });
         close(talk);
       }));
     } else if (f?.offer) {
-      who.append(el("p", f.offer.note, "qx-say"));
+      who.append(el2("p", f.offer.note, "qx-say"));
       acts.append(reward(f.offer.gold, f.offer.xp));
       btn("Shop", () => {
         close(talk);
@@ -73719,14 +73721,14 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
       }));
       take.disabled = busy || q.active.length >= q.limit;
     } else {
-      who.append(el("p", a ? a.step + "." : "Good to see you.", "qx-say"));
+      who.append(el2("p", a ? a.step + "." : "Good to see you.", "qx-say"));
       btn("Shop", () => {
         close(talk);
         openShop(n);
       }, true);
       btn("Close", () => close(talk), true);
     }
-    if (notice) who.append(el("p", notice, "qx-note"));
+    if (notice) who.append(el2("p", notice, "qx-note"));
     box5.append(face3, who, acts);
     sheet.append(box5);
     talk.append(sheet);
@@ -73734,32 +73736,32 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
   function drawLog() {
     const q = quests();
     log.replaceChildren();
-    const sheet = el("div", null, "qx-sheet"), head13 = el("div", null, "qx-head"), t = el("div"), h = el("h3", "Quests");
+    const sheet = el2("div", null, "qx-sheet"), head13 = el2("div", null, "qx-head"), t = el2("div"), h = el2("h3", "Quests");
     t.style.flex = "1";
     h.style.flex = "none";
-    t.append(h, el("small", (q?.active.length ?? 0) + " / " + (q?.limit ?? 5) + " side quests"));
-    const x = el("button", "\xD7", "qx-x");
+    t.append(h, el2("small", (q?.active.length ?? 0) + " / " + (q?.limit ?? 5) + " side quests"));
+    const x = el2("button", "\xD7", "qx-x");
     x.type = "button";
     x.setAttribute("aria-label", "Close");
     x.onclick = () => close(log);
     head13.append(t, x);
     sheet.append(head13);
-    const body5 = el("div", null, "qx-body");
+    const body5 = el2("div", null, "qx-body");
     sheet.append(body5);
     log.append(sheet);
-    if (notice) body5.append(el("p", notice, "qx-note"));
-    body5.append(el("p", "Main story", "qx-sect"), el("p", "The Cracking Seals begins soon.", "qx-empty"), el("p", "Side quests", "qx-sect"));
+    if (notice) body5.append(el2("p", notice, "qx-note"));
+    body5.append(el2("p", "Main story", "qx-sect"), el2("p", "The Cracking Seals begins soon.", "qx-empty"), el2("p", "Side quests", "qx-sect"));
     if (!q?.active.length) {
-      body5.append(el("p", "No quests yet. Read a town's notice board, or talk to townsfolk with a gold ! over their head.", "qx-empty"));
+      body5.append(el2("p", "No quests yet. Read a town's notice board, or talk to townsfolk with a gold ! over their head.", "qx-empty"));
       return;
     }
     const cur = trackedQuest(q);
     for (const a of q.active) {
-      const c = el("div", null, "qx-card");
-      c.append(icon(a.kind, "qx-ico"), el("span", (a.status === "ready" ? "Done \xB7 " : "") + KIND_LABEL[a.kind], "qx-kind"), el("b", a.title), el("p", a.step + (a.town ? " \xB7 from " + (a.giverName ? a.giverName + ", " : "") + a.town : "")));
-      const row2 = el("div", null, "qx-row");
+      const c = el2("div", null, "qx-card");
+      c.append(icon(a.kind, "qx-ico"), el2("span", (a.status === "ready" ? "Done \xB7 " : "") + KIND_LABEL[a.kind], "qx-kind"), el2("b", a.title), el2("p", a.step + (a.town ? " \xB7 from " + (a.giverName ? a.giverName + ", " : "") + a.town : "")));
+      const row2 = el2("div", null, "qx-row");
       row2.append(reward(a.gold, a.xp));
-      const drop = el("button", dropArm === a.id ? "Tap to drop" : "Drop", "qx-btn is-plain");
+      const drop = el2("button", dropArm === a.id ? "Tap to drop" : "Drop", "qx-btn is-plain");
       drop.type = "button";
       drop.style.minWidth = "72px";
       drop.disabled = busy;
@@ -73772,7 +73774,7 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
           redraw();
         }
       };
-      const tr = el("button", cur?.id === a.id ? "Tracking" : "Track", "qx-btn" + (cur?.id === a.id ? " is-plain" : ""));
+      const tr = el2("button", cur?.id === a.id ? "Tracking" : "Track", "qx-btn" + (cur?.id === a.id ? " is-plain" : ""));
       tr.type = "button";
       tr.onclick = () => {
         setTrack(a.id);
@@ -73799,12 +73801,12 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     if (!q?.active.length || trackOff) return null;
     return q.active.find((a) => a.id === tracked) ?? q.active[0];
   };
-  const tracker = el("button", null, null);
+  const tracker = el2("button", null, null);
   tracker.id = "quest-tracker";
   tracker.type = "button";
   tracker.hidden = true;
   tracker.setAttribute("data-gameplay-hud", "");
-  const tIco = el("span", null, "qx-tico"), tTitle = el("strong"), tStep = el("span");
+  const tIco = el2("span", null, "qx-tico"), tTitle = el2("strong"), tStep = el2("span");
   tracker.append(tIco, tTitle, tStep);
   tracker.onclick = () => openLog();
   let trackerKey = "", lastStatuses = /* @__PURE__ */ new Map(), primed = false;
@@ -73843,11 +73845,11 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     mount();
     const target = cur ? cur.status === "ready" && cur.turnIn ? { x: cur.turnIn.x, y: cur.turnIn.y, r: 0, label: "", id: cur.id } : { x: cur.target.x, y: cur.target.y, r: cur.target.found ? 0 : cur.target.radius, label: cur.target.found ? "" : "Search here", id: cur.id } : null;
     map()?.trackQuest?.(target);
-    const key2 = visible3 && cur ? [cur.id, cur.status, cur.title, cur.step].join("|") : "";
-    if (key2 === trackerKey) return;
-    trackerKey = key2;
-    tracker.hidden = !key2;
-    if (!key2) return;
+    const key3 = visible3 && cur ? [cur.id, cur.status, cur.title, cur.step].join("|") : "";
+    if (key3 === trackerKey) return;
+    trackerKey = key3;
+    tracker.hidden = !key3;
+    if (!key3) return;
     tIco.innerHTML = ICONS3[cur.kind] ?? "";
     tTitle.textContent = cur.title;
     tStep.textContent = cur.step;
@@ -73907,9 +73909,9 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
       lastStatuses = now3;
       primed = true;
       paintTracker(m, visible3);
-      const key2 = q.revision + "|" + JSON.stringify(q.boards.map((b) => [b.settlementId, b.mark, b.offers.map((o) => o.state)])) + "|" + JSON.stringify(q.folk);
-      if (key2 !== lastKey) {
-        lastKey = key2;
+      const key3 = q.revision + "|" + JSON.stringify(q.boards.map((b) => [b.settlementId, b.mark, b.offers.map((o) => o.state)])) + "|" + JSON.stringify(q.folk);
+      if (key3 !== lastKey) {
+        lastKey = key3;
         redraw();
       }
     },
@@ -75775,11 +75777,11 @@ var SCALE23 = 1.5;
 var LIMIT2 = 40;
 var sprites3 = /* @__PURE__ */ new Map();
 var painted = 0;
-function sprite2(key2, box5, paint2) {
-  let s = sprites3.get(key2);
+function sprite2(key3, box5, paint2) {
+  let s = sprites3.get(key3);
   if (s) {
-    sprites3.delete(key2);
-    sprites3.set(key2, s);
+    sprites3.delete(key3);
+    sprites3.set(key3, s);
     return s;
   }
   const [l, t, r, b] = box5, w = Math.ceil((r - l) * SCALE23), h = Math.ceil((b - t) * SCALE23), canvas = typeof OffscreenCanvas === "function" ? new OffscreenCanvas(w, h) : globalThis.document?.createElement("canvas");
@@ -75793,7 +75795,7 @@ function sprite2(key2, box5, paint2) {
   paint2(c);
   painted++;
   s = { canvas, box: box5 };
-  sprites3.set(key2, s);
+  sprites3.set(key3, s);
   while (sprites3.size > LIMIT2) sprites3.delete(sprites3.keys().next().value);
   return s;
 }
@@ -76414,11 +76416,11 @@ var SCALE24 = 1.5;
 var LIMIT3 = 48;
 var sprites4 = /* @__PURE__ */ new Map();
 var painted2 = 0;
-function sprite3(key2, box5, paint2) {
-  let s = sprites4.get(key2);
+function sprite3(key3, box5, paint2) {
+  let s = sprites4.get(key3);
   if (s) {
-    sprites4.delete(key2);
-    sprites4.set(key2, s);
+    sprites4.delete(key3);
+    sprites4.set(key3, s);
     return s;
   }
   const [l, t, r, b] = box5, w = Math.ceil((r - l) * SCALE24), h = Math.ceil((b - t) * SCALE24), canvas = typeof OffscreenCanvas === "function" ? new OffscreenCanvas(w, h) : globalThis.document?.createElement("canvas");
@@ -76432,7 +76434,7 @@ function sprite3(key2, box5, paint2) {
   paint2(c);
   painted2++;
   s = { canvas, box: box5 };
-  sprites4.set(key2, s);
+  sprites4.set(key3, s);
   while (sprites4.size > LIMIT3) sprites4.delete(sprites4.keys().next().value);
   return s;
 }
@@ -77679,12 +77681,12 @@ function wheelKeysV1(entries) {
 }
 function createSkillWheelV1({ document: document2, environment, readModel, adapter, isBlocked, openClassPicker, reportError = () => {
 } }) {
-  const el = (tag, cls) => {
+  const el2 = (tag, cls) => {
     const e = document2.createElement(tag);
     if (cls) e.className = cls;
     return e;
   };
-  const wheel = el("div", "skill-wheel-v1"), ring6 = el("div", "skill-wheel-ring"), done3 = el("button", "skill-wheel-done");
+  const wheel = el2("div", "skill-wheel-v1"), ring6 = el2("div", "skill-wheel-ring"), done3 = el2("button", "skill-wheel-done");
   wheel.dataset.gameplayHud = "";
   wheel.setAttribute("aria-label", "Skills");
   done3.type = "button";
@@ -77693,7 +77695,7 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
   done3.setAttribute("aria-label", "Finish arranging the skill wheel");
   done3.hidden = true;
   wheel.dataset.pages = String(WHEEL_PAGES);
-  const attackSkill = el("div", "skill-wheel-attack"), attackIcon = el("span", "skill-slot-icon"), attackSweep = el("i", "skill-slot-sweep"), attackTime = el("b", "skill-slot-time");
+  const attackSkill = el2("div", "skill-wheel-attack"), attackIcon = el2("span", "skill-slot-icon"), attackSweep = el2("i", "skill-slot-sweep"), attackTime = el2("b", "skill-slot-time");
   attackSkill.append(attackSweep, attackIcon, attackTime);
   attackSkill.hidden = true;
   attackSkill.setAttribute("aria-hidden", "true");
@@ -77702,14 +77704,14 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
   document2.getElementById("world-bag").parentElement.append(wheel, done3, attackSkill);
   const slots2 = [];
   for (let i = 0; i < WHEEL_SLOTS; i++) {
-    const b = el("button", "skill-slot"), icon = el("span", "skill-slot-icon"), sweep2 = el("i", "skill-slot-sweep"), time = el("b", "skill-slot-time"), key2 = el("small", "skill-slot-key"), charge = el("b", "skill-slot-charges");
+    const b = el2("button", "skill-slot"), icon = el2("span", "skill-slot-icon"), sweep2 = el2("i", "skill-slot-sweep"), time = el2("b", "skill-slot-time"), key3 = el2("small", "skill-slot-key"), charge = el2("b", "skill-slot-charges");
     b.type = "button";
     b.dataset.slot = String(i + 1);
     b.dataset.gameplayHud = "";
     charge.hidden = true;
-    b.append(sweep2, icon, time, key2, charge);
+    b.append(sweep2, icon, time, key3, charge);
     wheel.append(b);
-    slots2.push({ b, icon, sweep: sweep2, time, key: key2, charge, paint: "" });
+    slots2.push({ b, icon, sweep: sweep2, time, key: key3, charge, paint: "" });
   }
   const listeners = [], listen = (t, type, fn, opts) => {
     t.addEventListener(type, fn, opts);
@@ -77954,9 +77956,9 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
     const moveName = MOVE_NAMES[p.stats.subType] ?? null;
     slots2.forEach((s, i) => {
       const entry2 = list[i], isMove = entry2 === MOVE_SLOT, left = CLASS_SKILLS[entry2] ? c?.skills?.cooldowns?.[entry2] ?? 0 : 0, total = (CLASS_SKILLS[entry2]?.cooldownTicks ?? 1) * (p?.d8?.classRanks?.restless ? 6 / 5 : entry2 === "cast" && p?.d8?.classRanks?.overload ? 13 / 10 : 1), state = isMove ? moveName ? "move" : "locked" : entry2 === "pick" ? "pick" : !entry2 ? arranging ? "empty" : "locked" : arranging ? "ready" : ready(m, entry2) ? "ready" : left ? "cooling" : "blocked", pickedNow = arranging && picked === i;
-      const key2 = `${entry2}/${state}/${pickedNow}/${arranging}/${moveName}/${keys2[i]}`;
-      if (s.paint !== key2) {
-        s.paint = key2;
+      const key3 = `${entry2}/${state}/${pickedNow}/${arranging}/${moveName}/${keys2[i]}`;
+      if (s.paint !== key3) {
+        s.paint = key3;
         s.b.dataset.state = state;
         s.b.dataset.skill = entry2 ?? "";
         s.b.dataset.picked = String(pickedNow);
@@ -78371,8 +78373,8 @@ function drawBossCardV1(c, id, { name = "" } = {}) {
 }
 var cache2 = /* @__PURE__ */ new Map();
 function monsterCardCanvasV1(doc, family, scale = 3, boss = false) {
-  const key2 = (boss ? "boss:" : "") + family + "/" + scale;
-  let cv = cache2.get(key2);
+  const key3 = (boss ? "boss:" : "") + family + "/" + scale;
+  let cv = cache2.get(key3);
   if (cv) return cv;
   if (!doc?.createElement) return null;
   cv = doc.createElement("canvas");
@@ -78383,7 +78385,7 @@ function monsterCardCanvasV1(doc, family, scale = 3, boss = false) {
   c.scale(scale, scale);
   if (boss) drawBossCardV1(c, family, { name: BOSS_PAGE_NAMES[family] });
   else drawMonsterCardV1(c, family);
-  cache2.set(key2, cv);
+  cache2.set(key3, cv);
   return cv;
 }
 var urls = /* @__PURE__ */ new Map();
@@ -78591,8 +78593,8 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
     st.textContent = CSS3;
     document2.head.append(st);
   }
-  let group = "woodland", selected = null, key2 = null, album = null, gold = "0", busy = false;
-  const el = (tag, cls, text2) => {
+  let group = "woodland", selected = null, key3 = null, album = null, gold = "0", busy = false;
+  const el2 = (tag, cls, text2) => {
     const e = document2.createElement(tag);
     if (cls) e.className = cls;
     if (text2 != null) e.textContent = text2;
@@ -78600,7 +78602,7 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
   };
   const dpr = () => Math.min(3, environment?.devicePixelRatio || 1);
   function soulCanvas(size) {
-    const c = el("canvas");
+    const c = el2("canvas");
     const r = dpr();
     c.width = c.height = Math.round(size * r);
     const x = c.getContext("2d");
@@ -78611,7 +78613,7 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
     return c;
   }
   function portrait(family, known2, size = 78) {
-    const c = el("canvas");
+    const c = el2("canvas");
     const r = dpr();
     c.width = c.height = Math.round(size * r);
     const x = c.getContext("2d");
@@ -78633,7 +78635,7 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
     return c;
   }
   function bossCrest(id, known2, size = 78) {
-    const c = el("canvas");
+    const c = el2("canvas");
     const r = dpr();
     c.width = c.height = Math.round(size * r);
     const x = c.getContext("2d");
@@ -78650,7 +78652,7 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
     return c;
   }
   function cardCanvas(id, boss) {
-    const c = el("canvas", "card");
+    const c = el2("canvas", "card");
     const r = dpr();
     c.width = Math.round(84 * r);
     c.height = Math.round(105 * r);
@@ -78672,61 +78674,61 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
   function render() {
     root2.replaceChildren();
     if (!album) {
-      root2.append(el("div", "bv-empty", "The Bestiary opens once you are in a world."));
+      root2.append(el2("div", "bv-empty", "The Bestiary opens once you are in a world."));
       return;
     }
     const total = Object.values(album.cards).reduce((a, b) => a + b, 0) + Object.values(album.bosses).reduce((a, b) => a + b, 0);
-    const top = el("div", "bv-top"), cards = el("span", "bv-pill", total.toLocaleString("en-US") + " cards"), souls = el("span", "bv-pill");
+    const top = el2("div", "bv-top"), cards = el2("span", "bv-pill", total.toLocaleString("en-US") + " cards"), souls = el2("span", "bv-pill");
     souls.append(soulCanvas(16), document2.createTextNode(String(album.souls) + (album.souls === 1 ? " Luminous Soul" : " Luminous Souls")));
     souls.title = "Luminous Souls, shared by every hero";
     top.append(cards, souls);
     root2.append(top);
-    const chips = el("div", "bv-chips");
+    const chips = el2("div", "bv-chips");
     for (const g2 of [...BESTIARY_GROUPS, { id: "bosses", name: "Bosses" }]) {
       const list2 = g2.id === "bosses" ? BOSS_PAGE_IDS.map((id) => album.bosses[id]) : BESTIARY_CARDS.filter((c) => c[2] === g2.id).map((c) => album.cards[c[0]]), open2 = list2.filter(Boolean).length;
-      const b = el("button", "", `${g2.name} ${open2}/${list2.length}`);
+      const b = el2("button", "", `${g2.name} ${open2}/${list2.length}`);
       b.type = "button";
       b.setAttribute("aria-pressed", String(g2.id === group));
       b.addEventListener("click", () => {
         group = g2.id;
         selected = null;
-        key2 = null;
+        key3 = null;
         render();
       });
       chips.append(b);
     }
     root2.append(chips);
     const list = pages2(), setT = group === "bosses" ? bossSetTier(album, BOSS_PAGE_IDS) : setTier(album, group), g = BESTIARY_GROUPS.find((x) => x.id === group);
-    const set = el("div", "bv-set"), t = el("div", "t"), pips = el("div", "bv-pips");
+    const set = el2("div", "bv-set"), t = el2("div", "t"), pips = el2("div", "bv-pips");
     if (group === "bosses") {
-      t.append(el("b", "", "Bosses set \xB7 Attack, Defense, Max health"), document2.createTextNode(setT >= 0 ? `${TIERS[setT]}: ${pct(BOSS_SET.ladder[setT])} each` : `Open all ${list.length} boss pages: ${pct(BOSS_SET.ladder[0])} each at Common, up to ${pct(BOSS_SET.ladder[5])} at Mythic`));
+      t.append(el2("b", "", "Bosses set \xB7 Attack, Defense, Max health"), document2.createTextNode(setT >= 0 ? `${TIERS[setT]}: ${pct(BOSS_SET.ladder[setT])} each` : `Open all ${list.length} boss pages: ${pct(BOSS_SET.ladder[0])} each at Common, up to ${pct(BOSS_SET.ladder[5])} at Mythic`));
     } else {
       const L = setLadder(g.set), word = GROUP_STAT_WORD[g.set] ?? statName(g.set);
-      t.append(el("b", "", `${g.name} set \xB7 ${word}`), document2.createTextNode(setT >= 0 ? `${TIERS[setT]}: ${pct(L[setT])}${setT < 5 ? ` \xB7 rises with your lowest page` : ""}` : `Open all ${list.length} pages: ${pct(L[0])} at Common, up to ${pct(L[5])} at Mythic`));
+      t.append(el2("b", "", `${g.name} set \xB7 ${word}`), document2.createTextNode(setT >= 0 ? `${TIERS[setT]}: ${pct(L[setT])}${setT < 5 ? ` \xB7 rises with your lowest page` : ""}` : `Open all ${list.length} pages: ${pct(L[0])} at Common, up to ${pct(L[5])} at Mythic`));
     }
     for (const p2 of list) {
-      const i = el("i");
+      const i = el2("i");
       i.style.background = tierColor(tierOf(p2));
       pips.append(i);
     }
     set.append(t, pips);
     root2.append(set);
-    const grid = el("div", "bv-grid");
+    const grid = el2("div", "bv-grid");
     if (!selected || !list.some((p2) => p2.id === selected)) selected = (list.find((p2) => tierOf(p2) >= 0) ?? list[0]).id;
     for (const p2 of list) {
-      const tr = tierOf(p2), known2 = tr >= 0, b = el("button", "bv-tile");
+      const tr = tierOf(p2), known2 = tr >= 0, b = el2("button", "bv-tile");
       b.type = "button";
       b.setAttribute("aria-pressed", String(p2.id === selected));
-      const f = el("div", "bv-frame");
+      const f = el2("div", "bv-frame");
       f.style.setProperty("--rk", tierColor(tr));
       f.append(p2.boss ? bossCrest(p2.id, known2) : portrait(p2.id, known2));
-      if (!known2 && !p2.boss) f.append(el("span", "q", "?"));
-      const rk = el("span", "bv-rk", known2 ? `${TIERS[tr]} \xB7 ${tr < 5 ? countOf(p2) + "/" + needOf(p2, tr) : countOf(p2)}` : "Find its card");
+      if (!known2 && !p2.boss) f.append(el2("span", "q", "?"));
+      const rk = el2("span", "bv-rk", known2 ? `${TIERS[tr]} \xB7 ${tr < 5 ? countOf(p2) + "/" + needOf(p2, tr) : countOf(p2)}` : "Find its card");
       rk.style.setProperty("--rk", rankColor(tr));
-      b.append(f, el("span", "bv-nm", known2 ? p2.name : "???"), rk);
+      b.append(f, el2("span", "bv-nm", known2 ? p2.name : "???"), rk);
       b.addEventListener("click", () => {
         selected = p2.id;
-        key2 = null;
+        key3 = null;
         render();
       });
       grid.append(b);
@@ -78736,26 +78738,26 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
     if (p) root2.append(detail(p));
   }
   function detail(p) {
-    const tr = tierOf(p), known2 = tr >= 0, box5 = el("div", "bv-detail"), info2 = el("div");
+    const tr = tierOf(p), known2 = tr >= 0, box5 = el2("div", "bv-detail"), info2 = el2("div");
     box5.append(known2 ? cardCanvas(p.id, p.boss) : (() => {
       const c = p.boss ? bossCrest(p.id, false, 84) : portrait(p.id, false, 84);
       c.className = "card";
       return c;
     })());
-    info2.append(el("h5", "", known2 ? p.name : "Unknown creature"));
-    const line26 = el("div", "bv-line", known2 ? `${TIERS[tr]} \xB7 ${countOf(p).toLocaleString("en-US")} card${countOf(p) === 1 ? "" : "s"}` : "No card yet");
+    info2.append(el2("h5", "", known2 ? p.name : "Unknown creature"));
+    const line26 = el2("div", "bv-line", known2 ? `${TIERS[tr]} \xB7 ${countOf(p).toLocaleString("en-US")} card${countOf(p) === 1 ? "" : "s"}` : "No card yet");
     line26.style.color = rankColor(tr);
     info2.append(line26);
-    const ladder2 = el("div", "bv-ladder");
+    const ladder2 = el2("div", "bv-ladder");
     for (let i = 0; i < 6; i++) {
-      const s = el("i");
+      const s = el2("i");
       if (known2 && i <= tr) s.style.background = TIER_COLORS[i];
       ladder2.append(s);
     }
     info2.append(ladder2);
-    const bonus = el("div", "bv-bonus");
+    const bonus = el2("div", "bv-bonus");
     const row2 = (text2, cls = "") => {
-      const d = el("div", cls, text2);
+      const d = el2("div", cls, text2);
       bonus.append(d);
       return d;
     };
@@ -78767,7 +78769,7 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
         const L = BESTIARY_STATS[k][1], now3 = known2 ? L[tr] : null, next = tr < 5 ? L[Math.max(from, tr + 1)] : null, label4 = statName(k);
         if (now3 != null) {
           const d = row2(`${label4} ${pct(now3)}`);
-          if (tr < 5 && next != null) d.append(el("span", "up", `  \u2192 ${pct(next)} at ${TIERS[tr + 1]}`));
+          if (tr < 5 && next != null) d.append(el2("span", "up", `  \u2192 ${pct(next)} at ${TIERS[tr + 1]}`));
         } else row2(`${label4} \xB7 opens at ${TIERS[from]}`, "off");
       }
       if (known2 && tr >= 4) row2(`Hunter: ${pct(HUNTER_DAMAGE[tr])} damage to ${p.name}s, rolls rare ${tr === 5 ? "2x" : "1.5x"} as often`);
@@ -78778,7 +78780,7 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
     if (known2) {
       const n = nextTier(album, p.id, { isBoss: p.boss });
       if (n) {
-        const rich = compareAmount(gold, String(n.gold)) >= 0, ok = n.enoughCards && n.enoughSouls && rich, b = el("button", "bv-raise");
+        const rich = compareAmount(gold, String(n.gold)) >= 0, ok = n.enoughCards && n.enoughSouls && rich, b = el2("button", "bv-raise");
         b.type = "button";
         b.disabled = !ok || busy;
         b.append(document2.createTextNode(`Raise to ${TIERS[n.tier]} \xB7 `), soulCanvas(18), document2.createTextNode(`${n.souls} \xB7 ${goldText(n.gold)} gold`));
@@ -78789,14 +78791,14 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
             issue("service.bestiary", { family: p.id, tier: n.tier, ...p.boss ? { boss: true } : {} });
           } finally {
             busy = false;
-            key2 = null;
+            key3 = null;
           }
         });
         box5.append(b);
         const why = !n.enoughCards ? `Needs ${n.needCards.toLocaleString("en-US")} cards (${n.cards.toLocaleString("en-US")} so far)` : !n.enoughSouls ? `Needs ${n.souls} Luminous Souls (you have ${album.souls})` : !rich ? `Needs ${goldText(n.gold)} gold` : "Souls are shared by every hero; the hero who raises it pays the gold";
-        box5.append(el("div", "bv-note", why));
-      } else box5.append(el("div", "bv-note", p.boss ? "Mythic: the top tier" : "Mythic: every 100 more cards become a Luminous Soul"));
-    } else box5.append(el("div", "bv-note", p.boss ? "Boss cards drop from that boss" : "Its card drops from this creature: 1 in 200, more from elites, always from a rare"));
+        box5.append(el2("div", "bv-note", why));
+      } else box5.append(el2("div", "bv-note", p.boss ? "Mythic: the top tier" : "Mythic: every 100 more cards become a Luminous Soul"));
+    } else box5.append(el2("div", "bv-note", p.boss ? "Boss cards drop from that boss" : "Its card drops from this creature: 1 in 200, more from elites, always from a rare"));
     return box5;
   }
   return {
@@ -78807,8 +78809,8 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
       album = m?.bestiary?.album ?? null;
       gold = m?.inventory?.gold ?? "0";
       const k = JSON.stringify([album, gold, group, selected]);
-      if (k === key2) return;
-      key2 = k;
+      if (k === key3) return;
+      key3 = k;
       render();
     },
     destroy() {
@@ -78859,14 +78861,14 @@ function createHeroSlotsView({ document: document2, environment, heroSlots }) {
   root2.className = "hero-slots";
   root2.hidden = true;
   let shown2 = false, confirming = null, choosing = null, busy = null, error = "";
-  function el(tag, cls, text2) {
+  function el2(tag, cls, text2) {
     const e = document2.createElement(tag);
     if (cls) e.className = cls;
     if (text2 != null) e.textContent = text2;
     return e;
   }
-  function button(text2, action2, cls = "") {
-    const b = el("button", cls, text2);
+  function button2(text2, action2, cls = "") {
+    const b = el2("button", cls, text2);
     b.type = "button";
     b.disabled = Boolean(busy);
     b.addEventListener("click", action2);
@@ -78900,44 +78902,44 @@ function createHeroSlotsView({ document: document2, environment, heroSlots }) {
     render();
   }
   function render() {
-    const { active: active2, heroes } = heroSlots.list(), grid = el("div", "hero-slots-grid"), portraits = [];
+    const { active: active2, heroes } = heroSlots.list(), grid = el2("div", "hero-slots-grid"), portraits = [];
     const label4 = (h) => h.name || (h.slot === active2 ? "Your hero" : "Unnamed hero"), made = (h) => Boolean(h.name || h.hero), worldOf2 = (h) => h.plays ?? h.slot;
     const owner = (slot) => heroes.find((x) => x.slot === slot), worldsFor = (h) => [h.slot, ...heroes.filter((x) => x.slot !== h.slot && made(x)).map((x) => x.slot)];
     for (const h of heroes) {
-      const card = el("article", "hero-slot" + (h.slot === active2 ? " is-active" : "")), canvas = el("canvas", "hero-slot-portrait"), info2 = el("div", "hero-slot-info"), actions = el("div", "hero-slot-actions");
+      const card = el2("article", "hero-slot" + (h.slot === active2 ? " is-active" : "")), canvas = el2("canvas", "hero-slot-portrait"), info2 = el2("div", "hero-slot-info"), actions = el2("div", "hero-slot-actions");
       card.dataset.slot = String(h.slot);
       canvas.setAttribute("aria-hidden", "true");
       const name = label4(h), world = worldOf2(h), visiting = world !== h.slot && owner(world);
-      info2.append(el("strong", "hero-slot-name", name), el("small", "hero-slot-class", `${h.hero?.cls ? CLASS_NAMES[h.hero.cls] : "No class yet"} \xB7 Level ${h.level}`));
-      if (visiting) info2.append(el("small", "hero-slot-world is-visiting", `In ${label4(visiting)}\u2019s world`));
-      else if (h.name || h.hero) info2.append(el("small", "hero-slot-world" + (h.world ? " is-seeded" : ""), h.world ? `World seed ${h.world.seed}` : "Classic world"));
+      info2.append(el2("strong", "hero-slot-name", name), el2("small", "hero-slot-class", `${h.hero?.cls ? CLASS_NAMES[h.hero.cls] : "No class yet"} \xB7 Level ${h.level}`));
+      if (visiting) info2.append(el2("small", "hero-slot-world is-visiting", `In ${label4(visiting)}\u2019s world`));
+      else if (h.name || h.hero) info2.append(el2("small", "hero-slot-world" + (h.world ? " is-seeded" : ""), h.world ? `World seed ${h.world.seed}` : "Classic world"));
       const choices = worldsFor(h).filter((slot) => h.slot !== active2 || slot !== world), choose = () => {
         choosing = h.slot;
         confirming = null;
         render();
       };
-      if (confirming === h.slot) actions.append(button("Delete", () => act("delete", () => heroSlots.remove(h.slot)), "is-danger"), button("Keep", () => {
+      if (confirming === h.slot) actions.append(button2("Delete", () => act("delete", () => heroSlots.remove(h.slot)), "is-danger"), button2("Keep", () => {
         confirming = null;
         render();
       }, "is-quiet"));
-      else if (choosing === h.slot) actions.append(button("Back", () => {
+      else if (choosing === h.slot) actions.append(button2("Back", () => {
         choosing = null;
         render();
       }, "is-quiet"));
-      else if (h.slot === active2) actions.append(el("span", "hero-slot-badge", "Playing"), ...choices.length ? [button("World", choose, "is-quiet")] : []);
-      else actions.append(button("Play", choices.length > 1 ? choose : () => act("play", () => heroSlots.play(h.slot))), button("Delete", () => {
+      else if (h.slot === active2) actions.append(el2("span", "hero-slot-badge", "Playing"), ...choices.length ? [button2("World", choose, "is-quiet")] : []);
+      else actions.append(button2("Play", choices.length > 1 ? choose : () => act("play", () => heroSlots.play(h.slot))), button2("Delete", () => {
         confirming = h.slot;
         render();
       }, "is-quiet"));
       card.append(canvas, info2, actions);
-      if (confirming === h.slot) card.append(el("p", "hero-slot-confirm", `Delete ${name} for good? Their world, bag and gear go with them.`));
+      if (confirming === h.slot) card.append(el2("p", "hero-slot-confirm", `Delete ${name} for good? Their world, bag and gear go with them.`));
       if (choosing === h.slot) {
-        const pick4 = el("div", "hero-slot-worlds");
-        pick4.append(el("p", "hero-slot-confirm", "Play in which world?"));
+        const pick4 = el2("div", "hero-slot-worlds");
+        pick4.append(el2("p", "hero-slot-confirm", "Play in which world?"));
         for (const slot of choices) {
-          const o = owner(slot), b = button(slot === h.slot ? "Their own world" : `${label4(o)}\u2019s world`, () => act("play", () => heroSlots.play(h.slot, slot)), slot === world ? "is-current" : "");
+          const o = owner(slot), b = button2(slot === h.slot ? "Their own world" : `${label4(o)}\u2019s world`, () => act("play", () => heroSlots.play(h.slot, slot)), slot === world ? "is-current" : "");
           const where = o?.world ? `Seed ${o.world.seed}` : "Classic world", people = heroes.filter((x) => x.slot !== h.slot && worldOf2(x) === slot && made(x)).map(label4);
-          b.append(el("small", "", people.length ? `${where} \xB7 ${people.join(", ")} here` : where));
+          b.append(el2("small", "", people.length ? `${where} \xB7 ${people.join(", ")} here` : where));
           pick4.append(b);
         }
         card.append(pick4);
@@ -78946,14 +78948,20 @@ function createHeroSlotsView({ document: document2, environment, heroSlots }) {
       portraits.push([canvas, h.hero]);
     }
     if (heroes.length < HERO_SLOT_LIMIT) {
-      const card = el("article", "hero-slot is-new"), info2 = el("div", "hero-slot-info"), actions = el("div", "hero-slot-actions");
-      info2.append(el("strong", "hero-slot-name", "New hero"), el("small", "hero-slot-class", `Choose a world, then make your hero \xB7 ${HERO_SLOT_LIMIT - heroes.length} open`));
-      actions.append(button("Create", () => act("new", () => heroSlots.create())));
-      card.append(el("span", "hero-slot-plus", "+"), info2, actions);
+      const card = el2("article", "hero-slot is-new"), info2 = el2("div", "hero-slot-info"), actions = el2("div", "hero-slot-actions");
+      info2.append(el2("strong", "hero-slot-name", "New hero"), el2("small", "hero-slot-class", `Choose a world, then make your hero \xB7 ${HERO_SLOT_LIMIT - heroes.length} open`));
+      actions.append(button2("Create", () => act("new", () => heroSlots.create())));
+      card.append(el2("span", "hero-slot-plus", "+"), info2, actions);
       grid.append(card);
     }
+    const coop = [];
+    if (heroSlots.coop?.available && !heroSlots.coop.role) {
+      const row2 = el2("div", "hero-slots-coop");
+      row2.append(el2("strong", "", "Play together"), button2("Host a game", () => act("coop", () => heroSlots.coop.host())), button2("Join a game", () => act("coop", () => heroSlots.coop.join()), "is-quiet"));
+      coop.push(row2);
+    }
     const status2 = busy === "delete" ? "Deleting\u2026" : busy ? "Saving your hero\u2026" : error;
-    root2.replaceChildren(el("p", "hero-slots-intro", "Each hero has their own world, bag and gear, and can play in any hero\u2019s world. Switching saves this hero first."), grid, ...status2 ? [el("p", "hero-slots-status", status2)] : []);
+    root2.replaceChildren(el2("p", "hero-slots-intro", "Each hero has their own world, bag and gear, and can play in any hero\u2019s world. Switching saves this hero first."), grid, ...coop, ...status2 ? [el2("p", "hero-slots-status", status2)] : []);
     environment.requestAnimationFrame(() => {
       for (const [canvas, hero] of portraits) paint2(canvas, hero);
     });
@@ -79449,26 +79457,26 @@ var sum = (a, b) => statDifference(a, statScale(b, -1));
 var affixLine = (k, skill) => ({ atk: "attack", def: "defense", maxHp: "maxHp", str: "str", dex: "dex", int: "int" })[k] ?? "fx:" + (k === "activeSpd" ? "activeSpeed" : k) + (skill ? ":" + skill : "");
 var affixLineKey = affixLine;
 var skillName = (id) => CLASS_TREE_SKILLS[id]?.name ?? id;
-function lineLabel(key2) {
-  const [k, skill] = (key2.startsWith("fx:") ? key2.slice(3) : key2).split(":");
-  return k === "skillDmg" ? skillName(skill) + " damage" : k === "passiveRank" ? skillName(skill) : LABELS[k] ?? key2;
+function lineLabel(key3) {
+  const [k, skill] = (key3.startsWith("fx:") ? key3.slice(3) : key3).split(":");
+  return k === "skillDmg" ? skillName(skill) + " damage" : k === "passiveRank" ? skillName(skill) : LABELS[k] ?? key3;
 }
-function lineValue(key2, v) {
-  const k = (key2.startsWith("fx:") ? key2.slice(3) : key2).split(":")[0], pct3 = key2.startsWith("fx:") && PCT.has(k);
-  return statText(pct3 ? statScale(v, 100) : v, true) + (pct3 || key2 === "fx:moveSpeed" ? "%" : "");
+function lineValue(key3, v) {
+  const k = (key3.startsWith("fx:") ? key3.slice(3) : key3).split(":")[0], pct3 = key3.startsWith("fx:") && PCT.has(k);
+  return statText(pct3 ? statScale(v, 100) : v, true) + (pct3 || key3 === "fx:moveSpeed" ? "%" : "");
 }
 var affixText = (a) => {
-  const key2 = affixLine(a.key, a.skill);
-  return "+" + lineValue(key2, a.value) + " " + lineLabel(key2);
+  const key3 = affixLine(a.key, a.skill);
+  return "+" + lineValue(key3, a.value) + " " + lineLabel(key3);
 };
 function itemLines(d) {
-  const lines2 = /* @__PURE__ */ new Map(), add = (key2, v) => {
-    if (!zero5(v) || key2 === "attack" && d.slot === "weapon") lines2.set(key2, v);
+  const lines2 = /* @__PURE__ */ new Map(), add = (key3, v) => {
+    if (!zero5(v) || key3 === "attack" && d.slot === "weapon") lines2.set(key3, v);
   };
   for (const [k, v] of Object.entries(d.bonuses ?? {})) add(k, v);
   for (const [k, v] of Object.entries(d.attributes ?? {})) add(k, v);
   for (const [k, v] of Object.entries(d.effects ?? {})) add("fx:" + k, v);
-  return [...lines2].map(([key2, value2]) => ({ key: key2, value: value2, flat: FLAT.includes(key2) })).sort((a, b) => (a.flat ? FLAT.indexOf(a.key) : 99) - (b.flat ? FLAT.indexOf(b.key) : 99));
+  return [...lines2].map(([key3, value2]) => ({ key: key3, value: value2, flat: FLAT.includes(key3) })).sort((a, b) => (a.flat ? FLAT.indexOf(a.key) : 99) - (b.flat ? FLAT.indexOf(b.key) : 99));
 }
 function rollOf(generated, a) {
   const range2 = affixRollRange(generated, a.key), span2 = statDifference(range2.maximum, range2.minimum), fixed = zero5(span2);
@@ -79476,8 +79484,8 @@ function rollOf(generated, a) {
 }
 function itemSections(d, generated) {
   const affixes = (generated?.affixes ?? []).map((a) => {
-    const key2 = affixLine(a.key, a.skill);
-    return { key: key2, value: a.value, flat: FLAT.includes(key2), roll: rollOf(generated, a) };
+    const key3 = affixLine(a.key, a.skill);
+    return { key: key3, value: a.value, flat: FLAT.includes(key3), roll: rollOf(generated, a) };
   }), rolled = /* @__PURE__ */ new Map();
   for (const a of affixes) rolled.set(a.key, rolled.has(a.key) ? sum(rolled.get(a.key), a.value) : a.value);
   const base = [];
@@ -79500,7 +79508,7 @@ function compareSections(sections, worn) {
     return { ...l, mark: s > 0 ? "up" : s < 0 ? "down" : "same", diff: s < 0 ? statScale(diff, -1) : diff };
   };
   const wornBase = byKey(worn.flatMap((w) => w.base)), wornAffixes = byKey(worn.flatMap((w) => w.affixes)), gives = new Set([...sections.base, ...sections.affixes].map((l) => l.key));
-  const lost = [...byKey(worn.flatMap((w) => [...w.base, ...w.affixes]))].filter(([k]) => !gives.has(k)).map(([key2, value2]) => ({ key: key2, value: value2, flat: FLAT.includes(key2) }));
+  const lost = [...byKey(worn.flatMap((w) => [...w.base, ...w.affixes]))].filter(([k]) => !gives.has(k)).map(([key3, value2]) => ({ key: key3, value: value2, flat: FLAT.includes(key3) }));
   return { base: sections.base.map((l) => mark(l, wornBase)), affixes: sections.affixes.map((l) => mark(l, wornAffixes)), lost };
 }
 var HERO_ROWS = [["attack", "Attack"], ["defense", "Defense"], ["maxHp", "Max HP"], ["critChance", "Crit", "pct", "critChance"], ["critMultiplier", "Crit damage", "x", "critDamage"], ["activeHaste", "Active Speed", "pct", "activeSpeed"], ["moveSpeed", "Speed", null, "moveSpeed"], ["str", "STR"], ["dex", "DEX"], ["int", "INT"]];
@@ -79541,8 +79549,8 @@ var ICON_PATHS = {
   lifeKill: ["#ff9aa6", '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"/><path d="M9 11l2 2 4-4"/>']
 };
 var ICON_ALIAS = { atkPct: "attack", defPct: "defense", maxHpPct: "maxHp", strPct: "str", dexPct: "dex", intPct: "int", moveSpeedPct: "moveSpeed", activeSpd: "activeSpeed" };
-function statIcon(key2, size = 16) {
-  const k = (key2.startsWith("fx:") ? key2.slice(3) : key2).split(":")[0], icon = ICON_PATHS[ICON_ALIAS[k] ?? k];
+function statIcon(key3, size = 16) {
+  const k = (key3.startsWith("fx:") ? key3.slice(3) : key3).split(":")[0], icon = ICON_PATHS[ICON_ALIAS[k] ?? k];
   if (!icon) return "";
   return `<svg class="gx-ic" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${icon[0]}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icon[1]}</svg>`;
 }
@@ -79642,27 +79650,27 @@ function statGain(before, after) {
   return (d > 0 ? "+" : "\u2212") + t + a.unit;
 }
 function createCharacterStatsV3({ document: doc }) {
-  const el = (tag, text2 = "", cls = "") => {
+  const el2 = (tag, text2 = "", cls = "") => {
     const e = doc.createElement(tag);
     e.textContent = text2;
     e.className = cls;
     return e;
   }, icon = (k, size) => {
-    const s = el("span", "", "sx-ic");
+    const s = el2("span", "", "sx-ic");
     s.innerHTML = statIcon(k, size);
     return s;
   };
-  const host = el("section", "", "sx-view");
+  const host = el2("section", "", "sx-view");
   host.id = "world-stats-view";
   host.hidden = true;
   doc.querySelector(".bag-body").append(host);
-  const card = el("aside", "", "sx-card sx-hero"), look = el("button", "", "sx-look");
+  const card = el2("aside", "", "sx-card sx-hero"), look = el2("button", "", "sx-look");
   look.type = "button";
   look.innerHTML = BRUSH;
   look.setAttribute("aria-label", "Change look");
   look.title = "Change look";
   look.addEventListener("click", () => doc.dispatchEvent(new CustomEvent(HERO_CREATOR_OPEN_EVENT, { detail: { mode: "look" } })));
-  const pickClass = el("button", "Choose class", "sx-pickclass");
+  const pickClass = el2("button", "Choose class", "sx-pickclass");
   pickClass.type = "button";
   pickClass.hidden = true;
   pickClass.addEventListener("click", () => doc.dispatchEvent(new CustomEvent(HERO_CREATOR_OPEN_EVENT, { detail: { mode: "class" } })));
@@ -79671,18 +79679,18 @@ function createCharacterStatsV3({ document: doc }) {
   portrait.height = 196;
   portrait.className = "sx-portrait";
   portrait.setAttribute("aria-hidden", "true");
-  const who = el("div", "", "sx-who"), name = el("strong", "", "sx-name"), sub = el("span", "", "sx-sub");
+  const who = el2("div", "", "sx-who"), name = el2("strong", "", "sx-name"), sub = el2("span", "", "sx-sub");
   who.append(name, sub);
-  const xp = el("div", "", "sx-xp"), track = el("div", "", "sx-xptrack"), fill6 = el("i"), xpText2 = el("div", "", "sx-xptext"), xpNow = el("span"), xpPct = el("span");
+  const xp = el2("div", "", "sx-xp"), track = el2("div", "", "sx-xptrack"), fill6 = el2("i"), xpText2 = el2("div", "", "sx-xptext"), xpNow = el2("span"), xpPct = el2("span");
   track.append(fill6);
   xpText2.append(xpNow, xpPct);
   xp.append(track, xpText2);
-  const keys2 = el("div", "", "sx-keys");
+  const keys2 = el2("div", "", "sx-keys");
   card.append(look, portrait, who, pickClass, xp, keys2);
-  const main = el("div", "", "sx-main"), groups = el("div", "", "sx-card sx-groups");
+  const main = el2("div", "", "sx-main"), groups = el2("div", "", "sx-card sx-groups");
   main.append(groups);
   host.append(card, main);
-  let key2 = "", lookKey = "";
+  let key3 = "", lookKey = "";
   return {
     host,
     mountAttributes(attributes) {
@@ -79709,8 +79717,8 @@ function createCharacterStatsV3({ document: doc }) {
         pct3 = 0;
       }
       const next = JSON.stringify([now3, then, d8?.look?.name, d8?.heroClass, prog.level, String(prog.current), String(prog.required), prog.capped]);
-      if (next === key2) return;
-      key2 = next;
+      if (next === key3) return;
+      key3 = next;
       name.textContent = d8?.look?.name || "Your hero";
       sub.textContent = [HERO_CLASSES[d8?.heroClass]?.name ?? "No class yet", "Level " + (prog.level ?? 1)].join(" \xB7 ");
       fill6.style.width = Math.max(0, Math.min(100, pct3 || 0)).toFixed(1) + "%";
@@ -79725,22 +79733,22 @@ function createCharacterStatsV3({ document: doc }) {
       xpPct.textContent = prog.capped ? "" : Math.floor(pct3 || 0) + "%";
       const value2 = (g, label4) => g?.flatMap((x) => x.rows).find((r) => r.label === label4)?.value;
       keys2.replaceChildren(...KEY_STATS.map(([label4, ic, short]) => {
-        const k = el("div", "", "sx-key"), txt = el("div"), gain = then ? statGain(value2(now3, label4), value2(then, label4)) : "";
-        txt.append(el("b", value2(now3, label4) ?? "\u2014"), el("small", short));
+        const k = el2("div", "", "sx-key"), txt = el2("div"), gain = then ? statGain(value2(now3, label4), value2(then, label4)) : "";
+        txt.append(el2("b", value2(now3, label4) ?? "\u2014"), el2("small", short));
         k.append(icon(ic, 16), txt);
-        if (gain) k.append(el("span", gain, "sx-gain"));
+        if (gain) k.append(el2("span", gain, "sx-gain"));
         return k;
       }));
       groups.replaceChildren();
       now3.forEach((g, gi) => {
         const rows = g.rows.filter((r) => gi > 0 || !KEY_LABELS.has(r.label));
         if (!rows.length) return;
-        groups.append(el("h4", g.title, "sx-title"));
+        groups.append(el2("h4", g.title, "sx-title"));
         for (const r of rows) {
-          const row2 = el("div", "", "sx-row"), gain = then ? statGain(r.value, then[gi]?.rows.find((x) => x.label === r.label)?.value) : "";
-          row2.append(icon(ROW_ICONS[r.label] ?? "", 14), el("span", r.label, "sx-label"));
-          if (gain) row2.append(el("span", gain, "sx-gain"));
-          row2.append(el("b", r.value, "sx-value"));
+          const row2 = el2("div", "", "sx-row"), gain = then ? statGain(r.value, then[gi]?.rows.find((x) => x.label === r.label)?.value) : "";
+          row2.append(icon(ROW_ICONS[r.label] ?? "", 14), el2("span", r.label, "sx-label"));
+          if (gain) row2.append(el2("span", gain, "sx-gain"));
+          row2.append(el2("b", r.value, "sx-value"));
           groups.append(row2);
         }
       });
@@ -79913,14 +79921,14 @@ function skillBlockerV2(d, n, offer) {
   return reason;
 }
 function createSkillTreeViewV2({ document: document2, send, only = null }) {
-  const el = (tag, text2 = "", cls = "") => {
+  const el2 = (tag, text2 = "", cls = "") => {
     const e = document2.createElement(tag);
     if (text2) e.textContent = text2;
     if (cls) e.className = cls;
     return e;
   }, svgEl = (tag) => document2.createElementNS("http://www.w3.org/2000/svg", tag);
-  const button = (text2, cls, fn) => {
-    const b = el("button", text2, cls);
+  const button2 = (text2, cls, fn) => {
+    const b = el2("button", text2, cls);
     b.type = "button";
     b.onclick = fn;
     return b;
@@ -79929,31 +79937,31 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
     void e.offsetWidth;
     e.classList.add(cls);
   };
-  const root2 = el("div", "", only ? "skills-v2 only" : "skills-v2"), top = el("div", "", "skills-top"), tabs = el("nav", "", "skills-tabs"), tabButtons = {};
+  const root2 = el2("div", "", only ? "skills-v2 only" : "skills-v2"), top = el2("div", "", "skills-top"), tabs = el2("nav", "", "skills-tabs"), tabButtons = {};
   tabs.setAttribute("aria-label", "Constellations");
   for (const name of only ? [only] : TREES) {
-    const b = button("", "", () => choose(name)), badge = el("b");
+    const b = button2("", "", () => choose(name)), badge = el2("b");
     b.style.setProperty("--tree", CONSTELLATIONS[name].color);
-    b.append(el("i"), el("span", TAB_NAMES[name]), badge);
+    b.append(el2("i"), el2("span", TAB_NAMES[name]), badge);
     tabButtons[name] = { b, badge };
     tabs.append(b);
   }
-  const head13 = el("div", "", "skills-head"), level = el("strong", "", "skills-level"), xpTrack = el("div", "", "skills-xp"), xpFill = el("i"), xpText2 = el("span"), sp = el("strong", "", "skills-sp"), mode = el("div", "", "skills-mode");
+  const head13 = el2("div", "", "skills-head"), level = el2("strong", "", "skills-level"), xpTrack = el2("div", "", "skills-xp"), xpFill = el2("i"), xpText2 = el2("span"), sp = el2("strong", "", "skills-sp"), mode = el2("div", "", "skills-mode");
   xpTrack.append(xpFill, xpText2);
-  const modeButtons = { tree: button("Tree", "", () => setView("tree")), list: button("List", "", () => setView("list")) };
+  const modeButtons = { tree: button2("Tree", "", () => setView("tree")), list: button2("List", "", () => setView("list")) };
   mode.append(modeButtons.tree, modeButtons.list);
   head13.append(level, xpTrack, sp, mode);
   top.append(tabs, head13);
-  const body5 = el("div", "", "skills-body"), scroll = el("div", "", "skills-scroll"), list = el("div", "", "skills-list"), foot = el("div", "", "skills-foot"), sheet = el("section", "", "skills-sheet"), grab = el("div", "", "skills-sheet-grab"), sheetBody = el("div", "", "skills-sheet-body");
+  const body5 = el2("div", "", "skills-body"), scroll = el2("div", "", "skills-scroll"), list = el2("div", "", "skills-list"), foot = el2("div", "", "skills-foot"), sheet = el2("section", "", "skills-sheet"), grab = el2("div", "", "skills-sheet-grab"), sheetBody = el2("div", "", "skills-sheet-body");
   sheet.setAttribute("aria-label", "Skill details");
   sheet.append(grab, sheetBody);
   body5.append(scroll, sheet);
   root2.append(top, body5);
   let tree = null, view3 = "tree", selected = null, open2 = false, confirmReset = false, d = null, ready = false, built = null, shown2 = null, lastRanks = {}, lastXp = null, drag = null;
   function disc5(n, withRank = true) {
-    const art = PROGRESSION_ICONS[n.iconKey], wrap2 = el("span", "", "skill-disc"), rank = withRank && n.maxRank !== 1 ? el("small") : null;
+    const art = PROGRESSION_ICONS[n.iconKey], wrap2 = el2("span", "", "skill-disc"), rank = withRank && n.maxRank !== 1 ? el2("small") : null;
     if (art) {
-      const img = el("img");
+      const img = el2("img");
       img.src = art.url;
       img.alt = "";
       wrap2.append(img);
@@ -79972,7 +79980,7 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
   }
   const rankText = (n, rank) => n.maxRank === "infinite" ? `${formatLarge(rank)}/\u221E` : `${formatLarge(rank)}/${n.maxRank}`;
   function build2(name) {
-    const layout = skillTreeLayoutV2(name), wrap2 = el("div", "", "skills-tree"), plane = el("div", "", "skills-plane"), svg2 = svgEl("svg"), items = {}, lines2 = [];
+    const layout = skillTreeLayoutV2(name), wrap2 = el2("div", "", "skills-tree"), plane = el2("div", "", "skills-plane"), svg2 = svgEl("svg"), items = {}, lines2 = [];
     wrap2.style.setProperty("--rows", String(layout.rows));
     svg2.setAttribute("viewBox", "0 0 100 100");
     svg2.setAttribute("preserveAspectRatio", "none");
@@ -79987,7 +79995,7 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
     }
     plane.append(svg2);
     for (const n of layout.nodes) {
-      const p = layout.place[n.id], b = el("button", "", "skill-node"), icon = disc5(n), label4 = el("span", n.name, "skill-name");
+      const p = layout.place[n.id], b = el2("button", "", "skill-node"), icon = disc5(n), label4 = el2("span", n.name, "skill-name");
       b.type = "button";
       b.dataset.node = n.id;
       b.style.left = p.x.toFixed(2) + "%";
@@ -80072,13 +80080,13 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
       xpTrack.classList.add("flat");
       return;
     }
-    const branch = d[tree], req = masteryRequirement(branch.level), key2 = `${tree}/${branch.level}/${branch.xp}`;
+    const branch = d[tree], req = masteryRequirement(branch.level), key3 = `${tree}/${branch.level}/${branch.xp}`;
     level.textContent = `Lv. ${formatLarge(branch.level)}`;
     xpText2.textContent = `${formatLarge(branch.xp)} / ${formatLarge(req)} XP`;
     xpFill.style.transform = `scaleX(${Math.max(0, Math.min(1, integerRatio(branch.xp, req))).toFixed(4)})`;
     xpTrack.classList.remove("flat");
-    if (lastXp && lastXp !== key2 && lastXp.startsWith(tree + "/")) retrigger(head13, "gained");
-    lastXp = key2;
+    if (lastXp && lastXp !== key3 && lastXp.startsWith(tree + "/")) retrigger(head13, "gained");
+    lastXp = key3;
   }
   function paintTree() {
     if (built?.name !== tree) built = build2(tree);
@@ -80104,15 +80112,15 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
       const name = tree === "utility" ? "Utility" : TIER_NAMES[n.tier];
       if (name !== group) {
         group = name;
-        rows.push(el("h4", name));
+        rows.push(el2("h4", name));
       }
-      const s = skillStateV2(d, n), row2 = el("button", "", "skills-row"), text2 = el("span");
+      const s = skillStateV2(d, n), row2 = el2("button", "", "skills-row"), text2 = el2("span");
       row2.type = "button";
       row2.dataset.node = n.id;
       stateClasses(row2, n, s);
       row2.classList.toggle("selected", n.id === selected && open2);
-      text2.append(el("strong", n.name), el("small", s.maxed ? nodeEffect(n, s.rank) : `${s.owned ? "Next" : "Learn"}: ${nodeEffect(n, integerWire(integerBigInt(s.rank) + 1n))}`));
-      row2.append(disc5(n, false).wrap, text2, el("em", s.maxed ? "Max" : s.available ? s.owned ? "Upgrade" : "Learn" : rankText(n, s.rank)));
+      text2.append(el2("strong", n.name), el2("small", s.maxed ? nodeEffect(n, s.rank) : `${s.owned ? "Next" : "Learn"}: ${nodeEffect(n, integerWire(integerBigInt(s.rank) + 1n))}`));
+      row2.append(disc5(n, false).wrap, text2, el2("em", s.maxed ? "Max" : s.available ? s.owned ? "Upgrade" : "Learn" : rankText(n, s.rank)));
       row2.onclick = () => select(n.id);
       rows.push(row2);
     }
@@ -80120,20 +80128,20 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
   }
   function paintFoot() {
     const spent = spentPoints(d, tree), parts = [];
-    if (tree === "utility") parts.push(el("p", `Inventory intake: ${inventoryIntakeCapacity(d)} items. More Utility branches arrive with new World systems.`, "skills-note"));
+    if (tree === "utility") parts.push(el2("p", `Inventory intake: ${inventoryIntakeCapacity(d)} items. More Utility branches arrive with new World systems.`, "skills-note"));
     if (confirmReset) {
-      const row2 = el("div", "", "skills-reset-confirm"), yes = button(`Reset \xB7 refund ${formatLarge(spent)} SP`, "danger", () => {
+      const row2 = el2("div", "", "skills-reset-confirm"), yes = button2(`Reset \xB7 refund ${formatLarge(spent)} SP`, "danger", () => {
         confirmReset = false;
         send({ kind: "tree.reset", tree });
-      }), no = button("Cancel", "", () => {
+      }), no = button2("Cancel", "", () => {
         confirmReset = false;
         paint2();
       });
       yes.disabled = !ready;
       row2.append(yes, no);
-      parts.push(el("p", `Unlearn every ${TAB_NAMES[tree]} skill? It's free.`, "skills-note"), row2);
+      parts.push(el2("p", `Unlearn every ${TAB_NAMES[tree]} skill? It's free.`, "skills-note"), row2);
     } else {
-      const reset = button(`Reset ${TAB_NAMES[tree]} tree`, "skills-reset", () => {
+      const reset = button2(`Reset ${TAB_NAMES[tree]} tree`, "skills-reset", () => {
         confirmReset = true;
         paint2();
       });
@@ -80147,47 +80155,47 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
     sheet.classList.toggle("open", Boolean(open2 && n));
     root2.classList.toggle("sheet-open", Boolean(open2 && n));
     if (!n) {
-      sheetBody.replaceChildren(el("p", "Tap a skill to see what it does and learn it.", "sheet-empty"));
+      sheetBody.replaceChildren(el2("p", "Tap a skill to see what it does and learn it.", "sheet-empty"));
       return;
     }
-    const s = skillStateV2(d, n), next = integerWire(integerBigInt(s.rank) + 1n), headRow = el("div", "", "sheet-head"), icon = disc5(n, false), title = el("div"), tags = el("div", "", "sheet-tags");
+    const s = skillStateV2(d, n), next = integerWire(integerBigInt(s.rank) + 1n), headRow = el2("div", "", "sheet-head"), icon = disc5(n, false), title = el2("div"), tags = el2("div", "", "sheet-tags");
     stateClasses(headRow, n, s);
-    tags.append(el("span", tree === "utility" ? "Utility" : TIER_TAGS[n.tier]), el("span", s.maxed ? "Mastered" : `Rank ${rankText(n, s.rank)}`, s.maxed ? "done" : ""));
-    title.append(el("h3", n.name), tags);
-    headRow.append(icon.wrap, title, button("\xD7", "sheet-close", close));
-    const parts = [headRow, el("p", nodeDescription(n), "sheet-desc")], effect = (label4, text2, cls = "") => {
-      const e = el("div", "", `sheet-effect ${cls}`);
-      e.append(el("b", label4), el("span", text2));
+    tags.append(el2("span", tree === "utility" ? "Utility" : TIER_TAGS[n.tier]), el2("span", s.maxed ? "Mastered" : `Rank ${rankText(n, s.rank)}`, s.maxed ? "done" : ""));
+    title.append(el2("h3", n.name), tags);
+    headRow.append(icon.wrap, title, button2("\xD7", "sheet-close", close));
+    const parts = [headRow, el2("p", nodeDescription(n), "sheet-desc")], effect = (label4, text2, cls = "") => {
+      const e = el2("div", "", `sheet-effect ${cls}`);
+      e.append(el2("b", label4), el2("span", text2));
       return e;
     };
     if (s.owned) parts.push(effect("NOW", nodeEffect(n, s.rank)));
     if (!s.maxed) parts.push(effect(s.owned ? "NEXT" : "RANK 1", nodeEffect(n, next), "next"));
-    const needs = el("div", "", "sheet-needs");
+    const needs = el2("div", "", "sheet-needs");
     if (n.isStarterToggle) {
       const met = Number(d.highestHeroLevel) >= 2;
-      needs.append(el("span", `${met ? "\u2713 " : ""}Hero Level 2`, met ? "met" : ""));
+      needs.append(el2("span", `${met ? "\u2713 " : ""}Hero Level 2`, met ? "met" : ""));
     }
     if (n.prereqs.length) {
-      needs.append(el("small", n.prereqs.length > 1 ? "Needs one of" : "Needs"));
+      needs.append(el2("small", n.prereqs.length > 1 ? "Needs one of" : "Needs"));
       for (const id of n.prereqs) {
         const p = ACTIVE_NODES[id];
         if (!p) continue;
-        const met = integerBigInt(nodeRank(d, id)) > 0n, chip2 = button(`${met ? "\u2713 " : ""}${p.name}`, met ? "met" : "", () => select(id));
+        const met = integerBigInt(nodeRank(d, id)) > 0n, chip2 = button2(`${met ? "\u2713 " : ""}${p.name}`, met ? "met" : "", () => select(id));
         needs.append(chip2);
       }
     }
     const gate = skillGateV2(n);
     if (gate) {
       const spent = integerBigInt(spentPoints(d, n.tree)), met = spent >= BigInt(gate);
-      needs.append(el("span", `${met ? "\u2713 " : ""}${formatLarge(integerWire(spent < BigInt(gate) ? spent : BigInt(gate)))}/${gate} SP spent in this tree`, met ? "met" : ""));
+      needs.append(el2("span", `${met ? "\u2713 " : ""}${formatLarge(integerWire(spent < BigInt(gate) ? spent : BigInt(gate)))}/${gate} SP spent in this tree`, met ? "met" : ""));
     }
-    if (n.tier === 4) needs.append(el("span", "Only one keystone per tree", "note"));
+    if (n.tier === 4) needs.append(el2("span", "Only one keystone per tree", "note"));
     if (needs.children.length) parts.push(needs);
-    const cost = s.offer.cost ?? (s.maxed ? null : nodeCost(n.id, next)), buy = button(s.maxed ? "Mastered" : `${s.owned ? `Upgrade to rank ${formatLarge(next)}` : "Learn"} \xB7 ${integerBigInt(cost) > 0n ? formatLarge(cost) + " SP" : "Free"}`, "sheet-buy", () => send({ kind: "node.purchase", nodeId: n.id }));
+    const cost = s.offer.cost ?? (s.maxed ? null : nodeCost(n.id, next)), buy = button2(s.maxed ? "Mastered" : `${s.owned ? `Upgrade to rank ${formatLarge(next)}` : "Learn"} \xB7 ${integerBigInt(cost) > 0n ? formatLarge(cost) + " SP" : "Free"}`, "sheet-buy", () => send({ kind: "node.purchase", nodeId: n.id }));
     buy.disabled = s.maxed || !s.available || !ready;
     parts.push(buy);
-    if (!s.maxed && !s.available) parts.push(el("p", skillBlockerV2(d, n, s.offer), "sheet-why"));
-    else if (!s.maxed && !ready) parts.push(el("p", "Skills can\u2019t change right now.", "sheet-why"));
+    if (!s.maxed && !s.available) parts.push(el2("p", skillBlockerV2(d, n, s.offer), "sheet-why"));
+    else if (!s.maxed && !ready) parts.push(el2("p", "Skills can\u2019t change right now.", "sheet-why"));
     sheetBody.replaceChildren(...parts);
   }
   function paint2() {
@@ -80199,9 +80207,9 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
     else paintList();
     paintFoot();
     paintSheet();
-    const content = view3 === "tree" ? built.wrap : list, key2 = tree + "/" + view3;
-    if (shown2 !== key2) {
-      shown2 = key2;
+    const content = view3 === "tree" ? built.wrap : list, key3 = tree + "/" + view3;
+    if (shown2 !== key3) {
+      shown2 = key3;
       scroll.replaceChildren(content, foot);
     }
     const height = open2 && selected ? sheet.offsetHeight : 0;
@@ -80238,14 +80246,14 @@ function skillStateV1(d, id) {
   return { rank, offer, open: open2, live: LIVE_CLASS_SKILLS.has(id), learned: rank > 0, maxed: rank >= s.maxRank, state: rank >= s.maxRank ? "maxed" : rank > 0 ? "learned" : !LIVE_CLASS_SKILLS.has(id) ? "soon" : offer.ok ? "available" : "locked" };
 }
 function createClassSkillsViewV1({ document: document2, send, utility }) {
-  const el = (tag, cls = "", text2 = "") => {
+  const el2 = (tag, cls = "", text2 = "") => {
     const e = document2.createElement(tag);
     if (cls) e.className = cls;
     if (text2) e.textContent = text2;
     return e;
   }, svgEl = (tag) => document2.createElementNS("http://www.w3.org/2000/svg", tag);
-  const button = (cls, text2, fn) => {
-    const b = el("button", cls, text2);
+  const button2 = (cls, text2, fn) => {
+    const b = el2("button", cls, text2);
     b.type = "button";
     b.onclick = fn;
     return b;
@@ -80254,7 +80262,7 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
     void e.offsetWidth;
     e.classList.add(cls);
   };
-  const root2 = el("div", "cs-view"), head13 = el("div", "cs-head"), points2 = el("div", "cs-points"), tabs = el("nav", "cs-tabs"), body5 = el("div", "cs-body"), utilityWrap = el("div", "cs-utility"), wheelBar = el("section", "cs-wheel");
+  const root2 = el2("div", "cs-view"), head13 = el2("div", "cs-head"), points2 = el2("div", "cs-points"), tabs = el2("nav", "cs-tabs"), body5 = el2("div", "cs-body"), utilityWrap = el2("div", "cs-utility"), wheelBar = el2("section", "cs-wheel");
   tabs.setAttribute("aria-label", "Skill trees");
   wheelBar.setAttribute("aria-label", "Skill wheel");
   head13.append(points2, tabs, wheelBar);
@@ -80271,15 +80279,15 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
     tabButtons = {};
     const list = [...trees.map((t) => ({ id: t.id, name: t.name, color: t.color })), { id: "utility", name: "Utility", color: "#b7a077" }];
     tabs.replaceChildren(...list.map((t) => {
-      const b = button("cs-tab", "", () => choose(t.id)), badge = el("b");
+      const b = button2("cs-tab", "", () => choose(t.id)), badge = el2("b");
       b.style.setProperty("--tree", t.color);
-      b.append(el("span", "", t.name), badge);
+      b.append(el2("span", "", t.name), badge);
       tabButtons[t.id] = { b, badge };
       return b;
     }));
   }
   function buildGrid(t) {
-    const wrap2 = el("section", "cs-tree"), tagline = el("p", "cs-tagline"), grid = el("div", "cs-grid"), svg2 = svgEl("svg"), bubble = el("div", "cs-bubble"), foot = el("div", "cs-foot"), tiles5 = {}, lines2 = [], gates = [];
+    const wrap2 = el2("section", "cs-tree"), tagline = el2("p", "cs-tagline"), grid = el2("div", "cs-grid"), svg2 = svgEl("svg"), bubble = el2("div", "cs-bubble"), foot = el2("div", "cs-foot"), tiles5 = {}, lines2 = [], gates = [];
     wrap2.style.setProperty("--tree", t.color);
     svg2.setAttribute("class", "cs-links");
     svg2.setAttribute("viewBox", `0 0 ${3 * COL} ${ROWS * ROW}`);
@@ -80287,19 +80295,19 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
     grid.append(svg2);
     t.rows.forEach((ids4, row2) => {
       if (row2 > 0) {
-        const g = el("span", "cs-gate", String(classTierGate(row2 + 1)));
+        const g = el2("span", "cs-gate", String(classTierGate(row2 + 1)));
         g.style.top = `${row2 * ROW + TOP + TILE8 / 2}px`;
         gates.push({ g, tier: row2 + 1 });
         grid.append(g);
       }
       ids4.forEach((id, i) => {
-        const s = CLASS_TREE_SKILLS[id], col2 = ids4.length === 1 ? 1 : i, c = center2(row2, col2), b = button("cs-skill", "", () => select(id)), tile = el("span", "cs-tile"), rank = el("b", "cs-rank");
+        const s = CLASS_TREE_SKILLS[id], col2 = ids4.length === 1 ? 1 : i, c = center2(row2, col2), b = button2("cs-skill", "", () => select(id)), tile = el2("span", "cs-tile"), rank = el2("b", "cs-rank");
         b.dataset.kind = s.kind;
         b.dataset.skill = id;
         b.style.left = `${c.x - 39}px`;
         b.style.top = `${row2 * ROW + TOP}px`;
         tile.append(icon(id, "currentColor"), rank);
-        b.append(tile, el("span", "cs-name", s.name));
+        b.append(tile, el2("span", "cs-name", s.name));
         tiles5[id] = { b, rank, row: row2, col: col2 };
         grid.append(b);
         if (s.requires) {
@@ -80324,22 +80332,22 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
     if (!hc) return;
     const slots2 = skillLoadout(d), bench8 = wheelEntriesFor(d).filter((id) => !slots2.includes(id));
     wheelBar.style.setProperty("--class", hc.color);
-    const head14 = el("div", "cs-wheel-head");
-    head14.append(el("span", "", "SKILL WHEEL"), el("small", "", wheelPick !== null ? "Now tap where it goes" : bench8.length ? "Tap two to swap. Past the line: off the wheel" : "Tap two to swap them"));
-    const spot = (key2, id) => {
-      const move2 = id === MOVE_SLOT, name = move2 ? MOVE_NAMES2[hc.offhand] ?? "Class move" : id ? CLASS_SKILLS[id]?.name ?? id : "Empty", b = button("cs-wheel-spot", "", () => pickWheel(key2)), icon2 = el("span", "cs-wheel-icon");
+    const head14 = el2("div", "cs-wheel-head");
+    head14.append(el2("span", "", "SKILL WHEEL"), el2("small", "", wheelPick !== null ? "Now tap where it goes" : bench8.length ? "Tap two to swap. Past the line: off the wheel" : "Tap two to swap them"));
+    const spot = (key3, id) => {
+      const move2 = id === MOVE_SLOT, name = move2 ? MOVE_NAMES2[hc.offhand] ?? "Class move" : id ? CLASS_SKILLS[id]?.name ?? id : "Empty", b = button2("cs-wheel-spot", "", () => pickWheel(key3)), icon2 = el2("span", "cs-wheel-icon");
       icon2.innerHTML = move2 ? SKILL_ICONS_V1[MOVE_ICON_FOR[hc.offhand]] ?? "" : id ? SKILL_ICONS_V1[id] ?? "" : "";
-      b.append(icon2, el("span", "cs-wheel-name", name));
+      b.append(icon2, el2("span", "cs-wheel-name", name));
       b.dataset.empty = String(!id);
-      b.dataset.picked = String(wheelPick === key2);
+      b.dataset.picked = String(wheelPick === key3);
       b.disabled = !ready;
-      b.setAttribute("aria-label", `${name}${key2[0] === "b" ? ", not on the wheel" : ""}. ${wheelPick === null ? "Tap to pick it up" : "Tap to swap"}`);
+      b.setAttribute("aria-label", `${name}${key3[0] === "b" ? ", not on the wheel" : ""}. ${wheelPick === null ? "Tap to pick it up" : "Tap to swap"}`);
       return b;
     };
-    const row2 = el("div", "cs-wheel-row");
+    const row2 = el2("div", "cs-wheel-row");
     row2.append(...slots2.map((id, i) => spot("w" + i, id)));
     if (bench8.length) {
-      row2.append(el("i", "cs-wheel-gap"));
+      row2.append(el2("i", "cs-wheel-gap"));
       for (const id of bench8) {
         const b = spot("b:" + id, id);
         b.classList.add("bench");
@@ -80348,22 +80356,22 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
     }
     wheelBar.replaceChildren(head14, row2);
   }
-  function pickWheel(key2) {
-    if (wheelPick === null || wheelPick === key2) {
-      wheelPick = wheelPick === key2 ? null : key2;
+  function pickWheel(key3) {
+    if (wheelPick === null || wheelPick === key3) {
+      wheelPick = wheelPick === key3 ? null : key3;
       paint2();
       return;
     }
-    const first = wheelPick, slot = (k) => k[0] === "w" ? Number(k.slice(1)) : -1, i = slot(first), j = slot(key2), next = [...skillLoadout(d)];
+    const first = wheelPick, slot = (k) => k[0] === "w" ? Number(k.slice(1)) : -1, i = slot(first), j = slot(key3), next = [...skillLoadout(d)];
     wheelPick = null;
     if (i < 0 && j < 0) {
-      wheelPick = key2;
+      wheelPick = key3;
       paint2();
       return;
     }
     if (i >= 0 && j >= 0) [next[i], next[j]] = [next[j], next[i]];
     else {
-      const at8 = i >= 0 ? i : j, id = (i >= 0 ? key2 : first).slice(2);
+      const at8 = i >= 0 ? i : j, id = (i >= 0 ? key3 : first).slice(2);
       if (next[at8] === MOVE_SLOT) {
         paint2();
         return;
@@ -80396,7 +80404,7 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
   }
   function paintHead(trees) {
     const p = classTreePoints(d), unspent = p.unspent > 0n ? p.unspent : 0n;
-    points2.replaceChildren(el("b", "", String(unspent)), el("span", "", unspent === 1n ? " skill point" : " skill points"), el("small", "", ` \xB7 1 per level, up to ${CLASS_TREE_POINT_CAP}`));
+    points2.replaceChildren(el2("b", "", String(unspent)), el2("span", "", unspent === 1n ? " skill point" : " skill points"), el2("small", "", ` \xB7 1 per level, up to ${CLASS_TREE_POINT_CAP}`));
     points2.classList.toggle("has", unspent > 0n);
     for (const [id, { b, badge }] of Object.entries(tabButtons)) {
       b.setAttribute("aria-pressed", String(id === tree));
@@ -80434,68 +80442,68 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
     g.bubble.style.top = below ? `${(row2 + 1) * ROW - 4}px` : "";
     g.bubble.style.bottom = below ? "" : `${(ROWS - row2) * ROW - TOP + 2}px`;
     g.bubble.style.setProperty("--arrow", `${center2(row2, col2).x}px`);
-    const head14 = el("div", "cs-bubble-head"), tag = el("span", "cs-kind", kindTag(s));
+    const head14 = el2("div", "cs-bubble-head"), tag = el2("span", "cs-kind", kindTag(s));
     tag.classList.toggle("active", s.kind === "active");
     tag.classList.toggle("trade", Boolean(s.tradeOff));
-    head14.append(tag, el("strong", "", s.name), el("em", "", `${st.rank}/${s.maxRank}`), button("cs-close", "\xD7", close));
+    head14.append(tag, el2("strong", "", s.name), el2("em", "", `${st.rank}/${s.maxRank}`), button2("cs-close", "\xD7", close));
     parts.push(head14);
     const gate = classTierGate(s.tier), inTree = classTreeSpent(d, s.tree, s.tier);
-    parts.push(el("p", "cs-meta", `${g.tree.name} \xB7 ${s.kind === "capstone" ? "Capstone" : `Tier ${s.tier}`}${inTree < gate ? ` \xB7 needs ${gate} points in ${g.tree.name}` : ""}`));
+    parts.push(el2("p", "cs-meta", `${g.tree.name} \xB7 ${s.kind === "capstone" ? "Capstone" : `Tier ${s.tier}`}${inTree < gate ? ` \xB7 needs ${gate} points in ${g.tree.name}` : ""}`));
     if (s.requires) {
-      const met = classRank(d, s.requires) > 0, req = el("p", "cs-req", `${met ? "\u2713 " : ""}Requires ${CLASS_TREE_SKILLS[s.requires].name}`);
+      const met = classRank(d, s.requires) > 0, req = el2("p", "cs-req", `${met ? "\u2713 " : ""}Requires ${CLASS_TREE_SKILLS[s.requires].name}`);
       req.classList.toggle("met", met);
       parts.push(req);
     }
-    parts.push(el("p", "cs-desc", s.description));
+    parts.push(el2("p", "cs-desc", s.description));
     if (s.kind === "active" && CLASS_SKILL_AUGMENTS[id]) parts.push(augmentList(id, s, st));
     if (s.kind === "active" && st.learned) {
       const onAttack = d.attackSkill === id, onWheel = skillLoadout(d).includes(id);
-      parts.push(el("p", "cs-note", onAttack ? "It\u2019s on your Attack button." : onWheel ? "It\u2019s on your skill wheel." : "Your wheel is full. Swap it in from the skill wheel at the top."));
-      const swap = button("cs-attack", onAttack ? "Back to basic attack" : "Put on Attack button", () => send(onAttack ? { kind: "skills.arrange", slots: skillLoadout({ ...d, attackSkill: void 0 }), attack: null } : { kind: "skills.arrange", slots: skillLoadout({ ...d, attackSkill: id }), attack: id }));
+      parts.push(el2("p", "cs-note", onAttack ? "It\u2019s on your Attack button." : onWheel ? "It\u2019s on your skill wheel." : "Your wheel is full. Swap it in from the skill wheel at the top."));
+      const swap = button2("cs-attack", onAttack ? "Back to basic attack" : "Put on Attack button", () => send(onAttack ? { kind: "skills.arrange", slots: skillLoadout({ ...d, attackSkill: void 0 }), attack: null } : { kind: "skills.arrange", slots: skillLoadout({ ...d, attackSkill: id }), attack: id }));
       swap.disabled = !ready;
       parts.push(swap);
     }
-    const label4 = st.maxed ? s.maxRank === 1 ? "Learned" : "Maxed" : !st.live ? "Coming soon" : st.offer.ok ? st.learned ? `Learn rank ${st.rank + 1} \xB7 1 point` : "Learn \xB7 1 point" : st.offer.reason, learn = button("cs-learn", label4, () => send({ kind: "skill.learn", skillId: id }));
+    const label4 = st.maxed ? s.maxRank === 1 ? "Learned" : "Maxed" : !st.live ? "Coming soon" : st.offer.ok ? st.learned ? `Learn rank ${st.rank + 1} \xB7 1 point` : "Learn \xB7 1 point" : st.offer.reason, learn = button2("cs-learn", label4, () => send({ kind: "skill.learn", skillId: id }));
     learn.disabled = !st.offer.ok || !ready;
     parts.push(learn);
-    if (st.offer.ok && !ready) parts.push(el("p", "cs-why", "Skills can\u2019t change right now."));
+    if (st.offer.ok && !ready) parts.push(el2("p", "cs-why", "Skills can\u2019t change right now."));
     g.bubble.replaceChildren(...parts);
   }
   function augmentList(id, s, st) {
-    const slotted = classAugments(d, id), box5 = el("div", "cs-augs"), head14 = el("div", "cs-augh");
-    head14.append(el("span", "", "AUGMENTS \xB7 PICK 2"), el("small", "", st.learned ? `${slotted.length}/${AUGMENT_SLOTS} slotted` : `Learn ${s.name} to slot them`));
+    const slotted = classAugments(d, id), box5 = el2("div", "cs-augs"), head14 = el2("div", "cs-augh");
+    head14.append(el2("span", "", "AUGMENTS \xB7 PICK 2"), el2("small", "", st.learned ? `${slotted.length}/${AUGMENT_SLOTS} slotted` : `Learn ${s.name} to slot them`));
     box5.append(head14);
     CLASS_SKILL_AUGMENTS[id].forEach((a, i) => {
-      const offer = augmentAvailability(d, id, i), on = slotted.includes(i), row2 = button("cs-aug", "", () => {
+      const offer = augmentAvailability(d, id, i), on = slotted.includes(i), row2 = button2("cs-aug", "", () => {
         const next = on ? slotted.filter((x) => x !== i) : [...slotted, i].slice(-AUGMENT_SLOTS);
         send({ kind: "augment.set", skillId: id, slots: next });
       });
       row2.dataset.on = String(on);
       row2.dataset.open = String(offer.ok);
       row2.disabled = !ready || !offer.ok && !on;
-      const text2 = el("span");
-      text2.append(el("b", "", a.name), document2.createTextNode(a.description));
-      if (!offer.ok && st.learned) text2.append(el("em", "", offer.reason));
-      row2.append(el("i"), text2);
+      const text2 = el2("span");
+      text2.append(el2("b", "", a.name), document2.createTextNode(a.description));
+      if (!offer.ok && st.learned) text2.append(el2("em", "", offer.reason));
+      row2.append(el2("i"), text2);
       box5.append(row2);
     });
     return box5;
   }
   function paintFoot(g, spent) {
     if (confirmReset) {
-      const row2 = el("div", "cs-reset-row"), yes = button("cs-reset danger", `Unlearn ${spent} point${spent === 1 ? "" : "s"}`, () => {
+      const row2 = el2("div", "cs-reset-row"), yes = button2("cs-reset danger", `Unlearn ${spent} point${spent === 1 ? "" : "s"}`, () => {
         confirmReset = false;
         send({ kind: "skill.reset", tree: g.tree.id });
-      }), no = button("cs-reset", "Cancel", () => {
+      }), no = button2("cs-reset", "Cancel", () => {
         confirmReset = false;
         paint2();
       });
       yes.disabled = !ready;
       row2.append(yes, no);
-      g.foot.replaceChildren(el("p", "cs-note", `Unlearn every ${g.tree.name} skill? It\u2019s free.`), row2);
+      g.foot.replaceChildren(el2("p", "cs-note", `Unlearn every ${g.tree.name} skill? It\u2019s free.`), row2);
       return;
     }
-    const reset = button("cs-reset", `Reset ${g.tree.name}`, () => {
+    const reset = button2("cs-reset", `Reset ${g.tree.name}`, () => {
       confirmReset = true;
       paint2();
     });
@@ -80555,19 +80563,19 @@ function createProgressionPresentation({ document: document2, readModel, issue }
   gain.setAttribute("role", "status");
   document2.body.append(gain);
   let attribute = "str", draft = { str: 0, dex: 0, int: 0 }, confirm = null, stamp6 = "", previous = null, message = "", messageUntil = 0, model = null, viewKey = "";
-  const el = (tag, text2 = "", cls = "") => {
+  const el2 = (tag, text2 = "", cls = "") => {
     const e = document2.createElement(tag);
     e.textContent = text2;
     e.className = cls;
     return e;
-  }, button = (text2, fn) => {
-    const b = el("button", text2);
+  }, button2 = (text2, fn) => {
+    const b = el2("button", text2);
     b.type = "button";
     b.onclick = fn;
     return b;
   };
-  const attributes = el("section", "", "sx-card sx-attrs"), attrHead = el("div", "", "sx-attrhead"), attrPts = el("span", "", "sx-pts"), attrRows = el("div", "", "sx-attrrows"), attrFoot = el("div", "", "sx-attrfoot");
-  const attrReset = button("", () => {
+  const attributes = el2("section", "", "sx-card sx-attrs"), attrHead = el2("div", "", "sx-attrhead"), attrPts = el2("span", "", "sx-pts"), attrRows = el2("div", "", "sx-attrrows"), attrFoot = el2("div", "", "sx-attrfoot");
+  const attrReset = button2("", () => {
     const m = readModel();
     if (confirm !== "attributes") {
       confirm = "attributes";
@@ -80575,16 +80583,16 @@ function createProgressionPresentation({ document: document2, readModel, issue }
     } else send({ kind: "attributes.reset" }, { inventoryRevision: m.inventory.revision, goldQuote: usesBuildBalanceV2({ inventory: m.inventory }) ? "0" : "2500" });
   });
   attrReset.className = "sx-reset";
-  const undo = button("Undo", () => {
+  const undo = button2("Undo", () => {
     draft = { str: 0, dex: 0, int: 0 };
     confirm = null;
     redraw();
   });
   undo.className = "sx-undo";
-  const commit = button("Confirm", () => send({ kind: "allocate", deltas: { ...draft } }));
+  const commit = button2("Confirm", () => send({ kind: "allocate", deltas: { ...draft } }));
   commit.className = "sx-confirm";
-  attrHead.append(el("h4", "Attributes", "sx-title"), attrPts, attrReset);
-  attrFoot.append(undo, el("span", "", "sx-spacer"), commit);
+  attrHead.append(el2("h4", "Attributes", "sx-title"), attrPts, attrReset);
+  attrFoot.append(undo, el2("span", "", "sx-spacer"), commit);
   attributes.append(attrHead, attrRows, attrFoot);
   let unspent = 0, held = false, holdTimer = null, repeatTimer = null;
   const ATTR_COLORS = { str: "#e8836b", dex: "#5fd38a", int: "#8f8cf0" }, ATTR_SHORT_V2 = { str: "+1 Attack \xB7 +6 Max HP \xB7 Block", dex: "+1 Attack \xB7 +0.25% Crit \xB7 Parry", int: "+1 Attack \xB7 +0.2 Defense \xB7 Tome power" }, ATTR_SHORT = { str: "+2.5 Attack \xB7 +10 Max HP \xB7 Block", dex: "+1 Attack \xB7 Dagger power \xB7 Crit damage", int: "+0.2 Defense \xB7 Tome power" };
@@ -80596,10 +80604,10 @@ function createProgressionPresentation({ document: document2, readModel, issue }
   };
   const attrRow = {};
   for (const k of ["str", "dex", "int"]) {
-    const row2 = el("div", "", "sx-arow"), ic = el("span", "", "sx-aic"), text2 = el("div", "", "sx-atext"), line26 = el("div", "", "sx-aline"), value2 = el("span", "", "sx-aval"), gain2 = el("span", "", "sx-adraft"), desc = el("div", "", "sx-adesc"), step = el("div", "", "sx-step");
+    const row2 = el2("div", "", "sx-arow"), ic = el2("span", "", "sx-aic"), text2 = el2("div", "", "sx-atext"), line26 = el2("div", "", "sx-aline"), value2 = el2("span", "", "sx-aval"), gain2 = el2("span", "", "sx-adraft"), desc = el2("div", "", "sx-adesc"), step = el2("div", "", "sx-step");
     ic.innerHTML = statIcon(k, 20);
     row2.style.setProperty("--c", ATTR_COLORS[k]);
-    line26.append(el("b", k.toUpperCase()), value2, gain2);
+    line26.append(el2("b", k.toUpperCase()), value2, gain2);
     text2.append(line26, desc);
     const add = () => {
       if (spare() <= 0) return false;
@@ -80609,7 +80617,7 @@ function createProgressionPresentation({ document: document2, readModel, issue }
       redraw();
       return true;
     };
-    const minus = button("\u2212", () => {
+    const minus = button2("\u2212", () => {
       if (draft[k] > 0) {
         draft[k] -= 1;
         confirm = null;
@@ -80618,7 +80626,7 @@ function createProgressionPresentation({ document: document2, readModel, issue }
     });
     minus.className = "sx-minus";
     minus.setAttribute("aria-label", "Take a point from " + k.toUpperCase());
-    const plus = button("+", () => {
+    const plus = button2("+", () => {
       if (held) {
         held = false;
         return;
@@ -80660,7 +80668,7 @@ function createProgressionPresentation({ document: document2, readModel, issue }
     }
     return previewStats;
   }
-  const skills = createSkillTreeViewV2({ document: document2, send: (action2) => send(action2) }), classSkills = createClassSkillsViewV1({ document: document2, send: (action2) => send(action2), utility: createSkillTreeViewV2({ document: document2, send: (action2) => send(action2), only: "utility" }) }), notice = el("p", "", "progression-notice");
+  const skills = createSkillTreeViewV2({ document: document2, send: (action2) => send(action2) }), classSkills = createClassSkillsViewV1({ document: document2, send: (action2) => send(action2), utility: createSkillTreeViewV2({ document: document2, send: (action2) => send(action2), only: "utility" }) }), notice = el2("p", "", "progression-notice");
   notice.setAttribute("role", "status");
   host.append(skills.root, classSkills.root, notice);
   statsView.mountAttributes(attributes);
@@ -80712,14 +80720,14 @@ function createProgressionPresentation({ document: document2, readModel, issue }
     gain.textContent = notice.textContent;
     gain.hidden = visible3 || statsVisible || !notice.textContent;
     if (!visible3 && !statsVisible) return;
-    const key2 = `${statsVisible}/${identity2}/${d.revision}/${m.inventory.revision}/${["shield", "dagger", "tome"].map((t) => d[t].level + ":" + d[t].xp).join()}/${attribute}/${Object.values(draft).join()}/${confirm}/${m.persistence.phase}`;
-    if (key2 === viewKey) return;
-    viewKey = key2;
+    const key3 = `${statsVisible}/${identity2}/${d.revision}/${m.inventory.revision}/${["shield", "dagger", "tome"].map((t) => d[t].level + ":" + d[t].xp).join()}/${attribute}/${Object.values(draft).join()}/${confirm}/${m.persistence.phase}`;
+    if (key3 === viewKey) return;
+    viewKey = key3;
     const points2 = pointBalances(d), remaining = points2.attributeUnspent - Object.values(draft).reduce((a, b) => a + b, 0), ready = m.persistence.phase === "encounter";
     unspent = Number(points2.attributeUnspent) || 0;
     const v2 = usesBuildBalanceV2({ inventory: m.inventory }), drafted = draft.str + draft.dex + draft.int, left = unspent - drafted, can = unspent > 0 || drafted > 0, allocatedAny = Object.values(d.allocated).some((x) => String(x) !== "0");
     attrPts.hidden = !can;
-    attrPts.replaceChildren(el("b", String(left)), el("span", drafted ? ` of ${unspent} point${unspent === 1 ? "" : "s"} left` : ` point${left === 1 ? "" : "s"} to spend`));
+    attrPts.replaceChildren(el2("b", String(left)), el2("span", drafted ? ` of ${unspent} point${unspent === 1 ? "" : "s"} left` : ` point${left === 1 ? "" : "s"} to spend`));
     attrReset.hidden = drafted > 0 || !allocatedAny;
     attrReset.textContent = confirm === "attributes" ? "Tap again to reset all" : v2 ? "Reset attributes \xB7 free" : "Reset attributes \xB7 2,500 gold";
     attrReset.disabled = !ready;
@@ -82579,23 +82587,23 @@ function useLookArt(keyOf2, urlOf) {
 var catalogArtKey = (item) => generatedArtKey(item?.generated) ?? item?.definitionId;
 var itemArtKey = (item) => lookArt?.keyOf(item) ?? catalogArtKey(item);
 Object.assign(definitions2, SUBWEAPON_ART, GENERATED_EQUIPMENT_ART, CLASS_KIT_ART);
-var EQUIPMENT_ART = Object.freeze(Object.fromEntries(Object.entries(definitions2).map(([key2, a]) => [key2, Object.freeze({ ...a, url: "data:image/svg+xml;charset=utf-8," + encodeURIComponent(a.svg) })])));
+var EQUIPMENT_ART = Object.freeze(Object.fromEntries(Object.entries(definitions2).map(([key3, a]) => [key3, Object.freeze({ ...a, url: "data:image/svg+xml;charset=utf-8," + encodeURIComponent(a.svg) })])));
 var WEAPON_ART_KEYS = Object.freeze({ worn: "worn-sword", iron: "iron-sword", guard: "guard-sword", runic: "runic-sword" });
 var SLOT_ART_KEYS = Object.freeze({ subweapon: "starter-shield", weapon: "worn-sword", helmet: "coif", chest: "chain-armor", leggings: "greaves", overall: "full-plate", boots: "sabatons", gloves: "kit-knight-gauntlets", ring1: "silver-charm", ring2: "sun-charm" });
 function createEquipmentArtCache(document2) {
   const images2 = /* @__PURE__ */ new Map();
-  return (key2) => {
-    const url = !images2.has(key2) && document2?.createElement ? EQUIPMENT_ART[key2]?.url ?? lookArt?.urlOf(key2, document2) : null;
+  return (key3) => {
+    const url = !images2.has(key3) && document2?.createElement ? EQUIPMENT_ART[key3]?.url ?? lookArt?.urlOf(key3, document2) : null;
     if (url) {
       const image2 = document2.createElement("img");
       image2.src = url;
-      images2.set(key2, image2);
+      images2.set(key3, image2);
     }
-    const image = images2.get(key2);
+    const image = images2.get(key3);
     return image?.complete && image.naturalWidth > 0 ? image : null;
   };
 }
-var EQUIPMENT_STAT_ART = Object.freeze(Object.fromEntries(Object.entries({ "attack": '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#e74c3c" fill-opacity="0" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5L3 6V3h3l11.5 11.5 M13 19l6-6 M16 16l4 4 M19 21l2-2" /></svg>', "defense": '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#3498db" fill-opacity="0.15" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>', "maxHp": '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#e74c3c" fill-opacity="0.15" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>' }).map(([key2, svg2]) => [key2, "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg2)])));
+var EQUIPMENT_STAT_ART = Object.freeze(Object.fromEntries(Object.entries({ "attack": '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#e74c3c" fill-opacity="0" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5L3 6V3h3l11.5 11.5 M13 19l6-6 M16 16l4 4 M19 21l2-2" /></svg>', "defense": '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#3498db" fill-opacity="0.15" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>', "maxHp": '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#e74c3c" fill-opacity="0.15" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>' }).map(([key3, svg2]) => [key3, "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg2)])));
 
 // src/client/item_icon_v1.js
 var HERO_SLOT = Object.freeze({ weapon: "main", subweapon: "off", helmet: "helmet", chest: "body", overall: "body", leggings: "legs", gloves: "gloves", boots: "boots", ring: "ring", cape: "cape" });
@@ -82629,8 +82637,8 @@ function fittedOffhand(document2, item) {
   return out;
 }
 function iconUrl(slot, kind, tier2, document2) {
-  const key2 = `${slot}/${kind}/${tier2}`;
-  if (!urls2.has(key2)) {
+  const key3 = `${slot}/${kind}/${tier2}`;
+  if (!urls2.has(key3)) {
     let url = null;
     try {
       const item = { slot, kind, tier: tier2 };
@@ -82656,9 +82664,9 @@ function iconUrl(slot, kind, tier2, document2) {
     } catch {
       url = null;
     }
-    urls2.set(key2, url);
+    urls2.set(key3, url);
   }
-  return urls2.get(key2);
+  return urls2.get(key3);
 }
 var iconOf = (item) => {
   const d = itemDefinition(item), slot = HERO_SLOT[d?.slot], kind = slot === "ring" ? uniqueOf(d)?.look ?? RING_KINDS[item.generated?.definition?.noun ?? item.definitionId] : slot ? itemLook(item) : null;
@@ -82667,8 +82675,8 @@ var iconOf = (item) => {
 useLookArt((item) => {
   const i = iconOf(item);
   return i ? `look/${i.slot}/${i.kind}/${i.tier}` : null;
-}, (key2, document2) => {
-  const [tag, slot, kind, tier2] = key2.split("/");
+}, (key3, document2) => {
+  const [tag, slot, kind, tier2] = key3.split("/");
   return tag === "look" ? iconUrl(slot, kind, Number(tier2), document2) : null;
 });
 function itemIconUrl(item, document2) {
@@ -82699,7 +82707,7 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
     img.height = 24;
     return img;
   };
-  const el = (tag, text2, cls = "") => {
+  const el2 = (tag, text2, cls = "") => {
     const e = document2.createElement(tag);
     e.textContent = text2;
     e.className = cls;
@@ -82711,19 +82719,19 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
     if (section === "materials") {
       materials2.replaceChildren();
       const row2 = (name, desc, tags, cls = "mt-row") => {
-        const quantity = e.materials[name] ?? 0, r = el("article", "", cls + (quantity ? "" : " is-zero")), img = icon(SALVAGE_MATERIAL_ART[name]), t = el("div", "", "mt-text"), tagRow = el("div", "", "mt-tags");
+        const quantity = e.materials[name] ?? 0, r = el2("article", "", cls + (quantity ? "" : " is-zero")), img = icon(SALVAGE_MATERIAL_ART[name]), t = el2("div", "", "mt-text"), tagRow = el2("div", "", "mt-tags");
         img.width = img.height = cls === "mt-row" ? 32 : 44;
-        for (const x of tags) tagRow.append(el("span", x, "mt-tag" + (/^Salvage/.test(x) ? " is-salvage" : "")));
-        t.append(el("strong", name), el("small", desc, "mt-desc"), tagRow);
-        r.append(img, t, el("b", quantity.toLocaleString(), "mt-count"));
+        for (const x of tags) tagRow.append(el2("span", x, "mt-tag" + (/^Salvage/.test(x) ? " is-salvage" : "")));
+        t.append(el2("strong", name), el2("small", desc, "mt-desc"), tagRow);
+        r.append(img, t, el2("b", quantity.toLocaleString(), "mt-count"));
         return r;
       };
-      materials2.append(el("p", "Souls", "mt-sec"), row2("Monster Soul", "Feeds slot upgrades and resonance", ["Elites", "Named", "Mini-bosses", "Bosses"], "mt-row mt-hero"), el("p", "Scraps", "mt-sec"));
+      materials2.append(el2("p", "Souls", "mt-sec"), row2("Monster Soul", "Feeds slot upgrades and resonance", ["Elites", "Named", "Mini-bosses", "Bosses"], "mt-row mt-hero"), el2("p", "Scraps", "mt-sec"));
       const steps3 = ["1\u201320", "21\u201340", "41\u201360", "61\u201380", "81\u2013100", "91\u2013100"];
       ["Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic"].forEach((t, i) => materials2.append(row2(t + " Scrap", (i < 5 ? "Awakens " + t + " gear \xB7 " : "") + "Upgrades " + steps3[i], ["Salvage " + t])));
-      materials2.append(el("p", "Rare materials", "mt-sec"), row2("Overlord's Sigil", "Rerolls a line when you reforge", ["Elites", "Bosses", "Town Smith"]), row2("Wakestone", "Awakens gear \xB7 Upgrades 41\u201360", ["Elites", "Bosses", "Town Smith"]), row2("Astral Essence", "Powers an enchant \xB7 Upgrades 61\u201380", ["Elites", "Bosses", "Town Smith"]), row2("Starshard", "Upgrades 81\u2013100", ["World Tiers \xB7 coming later"]));
-      materials2.append(el("p", "A Smith breaks one Scrap into three of the rarity below.", "mt-note"));
-      if (review) materials2.append(el("p", "FUNDED FORGE REVIEW \u2014 separate test campaign", "forge-review-label"));
+      materials2.append(el2("p", "Rare materials", "mt-sec"), row2("Overlord's Sigil", "Rerolls a line when you reforge", ["Elites", "Bosses", "Town Smith"]), row2("Wakestone", "Awakens gear \xB7 Upgrades 41\u201360", ["Elites", "Bosses", "Town Smith"]), row2("Astral Essence", "Powers an enchant \xB7 Upgrades 61\u201380", ["Elites", "Bosses", "Town Smith"]), row2("Starshard", "Upgrades 81\u2013100", ["World Tiers \xB7 coming later"]));
+      materials2.append(el2("p", "A Smith breaks one Scrap into three of the rarity below.", "mt-note"));
+      if (review) materials2.append(el2("p", "FUNDED FORGE REVIEW \u2014 separate test campaign", "forge-review-label"));
       return;
     }
     if (section !== "forge") return;
@@ -82731,15 +82739,15 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
     root2.replaceChildren();
     const latest = Object.values(e.lastAttunementsBySlot).sort((a, b) => b.authorityOrder - a.authorityOrder)[0];
     if (latest) {
-      const notice = el("p", `Attuned ${label2(latest.command.payload.slot)} to Lv. ${e.slotLevels[latest.command.payload.slot]}!`, "stat-gain");
+      const notice = el2("p", `Attuned ${label2(latest.command.payload.slot)} to Lv. ${e.slotLevels[latest.command.payload.slot]}!`, "stat-gain");
       notice.setAttribute("role", "status");
       root2.append(notice);
     }
-    if (review) root2.append(el("p", "FUNDED FORGE REVIEW \u2014 starting funds are for testing only.", "forge-review-label"));
-    if (!m.forgeAccess) root2.append(el("p", "Approach the Forge to attune.", "forge-access"));
-    const layout = el("div", "", "forge-layout"), list = el("div", "", "forge-slots"), details = el("div", "", "forge-details");
+    if (review) root2.append(el2("p", "FUNDED FORGE REVIEW \u2014 starting funds are for testing only.", "forge-review-label"));
+    if (!m.forgeAccess) root2.append(el2("p", "Approach the Forge to attune.", "forge-access"));
+    const layout = el2("div", "", "forge-layout"), list = el2("div", "", "forge-slots"), details = el2("div", "", "forge-details");
     for (const slot of listedEquipmentSlots(inv)) {
-      const item2 = inv.itemsById[inv.equipped[slot]], d2 = itemDefinition(item2), b = el("button", "", "forge-slot-card");
+      const item2 = inv.itemsById[inv.equipped[slot]], d2 = itemDefinition(item2), b = el2("button", "", "forge-slot-card");
       b.type = "button";
       b.dataset.forgeAction = slot;
       b.setAttribute("aria-pressed", String(slot === selected));
@@ -82752,9 +82760,9 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
         img.height = 36;
         b.append(img);
       }
-      const info2 = el("span", "", "item-info");
-      info2.append(el("strong", label2(slot)), el("small", d2?.name ?? "[EMPTY SLOT]", "item-sub"));
-      b.append(info2, el("span", `${e.slotLevels[slot]}/100`, "forge-rank"));
+      const info2 = el2("span", "", "item-info");
+      info2.append(el2("strong", label2(slot)), el2("small", d2?.name ?? "[EMPTY SLOT]", "item-sub"));
+      b.append(info2, el2("span", `${e.slotLevels[slot]}/100`, "forge-rank"));
       b.onclick = () => {
         selected = slot;
         invalidate();
@@ -82762,40 +82770,40 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
       list.append(b);
     }
     const level = e.slotLevels[selected], item = inv.itemsById[inv.equipped[selected]], d = itemDefinition(item);
-    details.append(el("h4", label2(selected).toUpperCase() + " SLOT ATTUNEMENT"), el("p", `Lv. ${level} / 100`));
+    details.append(el2("h4", label2(selected).toUpperCase() + " SLOT ATTUNEMENT"), el2("p", `Lv. ${level} / 100`));
     const progress8 = document2.createElement("progress");
     progress8.max = 100;
     progress8.value = level;
     progress8.setAttribute("aria-label", "Slot attunement");
-    details.append(progress8, el("p", "This bonus remains with the slot when gear is replaced.", "tt-muted"));
-    if (level === 100) details.append(el("p", "MAXIMUM ATTUNEMENT REACHED", "stat-gain"));
+    details.append(progress8, el2("p", "This bonus remains with the slot when gear is replaced.", "tt-muted"));
+    if (level === 100) details.append(el2("p", "MAXIMUM ATTUNEMENT REACHED", "stat-gain"));
     else {
-      const cost = attunementCost(level, { inventory: inv }), affordGold = compareAmount(inv.gold, cost.gold) >= 0, affordMaterials = Object.entries(cost.materials).every(([k, v]) => (e.materials[k] ?? 0) >= v), box5 = el("div", "", "forge-requirements");
-      box5.append(el("h4", "ATTUNEMENT REQUIREMENTS"));
-      const gold = el("p", `${formatAmount(cost.gold)} Gold`, affordGold ? "stat-gain" : "stat-loss");
+      const cost = attunementCost(level, { inventory: inv }), affordGold = compareAmount(inv.gold, cost.gold) >= 0, affordMaterials = Object.entries(cost.materials).every(([k, v]) => (e.materials[k] ?? 0) >= v), box5 = el2("div", "", "forge-requirements");
+      box5.append(el2("h4", "ATTUNEMENT REQUIREMENTS"));
+      const gold = el2("p", `${formatAmount(cost.gold)} Gold`, affordGold ? "stat-gain" : "stat-loss");
       gold.title = cost.gold + " gold exactly";
       gold.prepend(icon(EQUIPMENT_ART.gold.url));
-      box5.append(gold, el("small", `Owned: ${formatAmount(inv.gold)}`));
+      box5.append(gold, el2("small", `Owned: ${formatAmount(inv.gold)}`));
       for (const [k, v] of Object.entries(cost.materials)) {
-        const row2 = el("p", `${v.toLocaleString()} ${k}`, (e.materials[k] ?? 0) >= v ? "stat-gain" : "stat-loss");
+        const row2 = el2("p", `${v.toLocaleString()} ${k}`, (e.materials[k] ?? 0) >= v ? "stat-gain" : "stat-loss");
         if (SALVAGE_MATERIAL_ART[k]) row2.prepend(icon(SALVAGE_MATERIAL_ART[k]));
-        box5.append(row2, el("small", `Owned: ${(e.materials[k] ?? 0).toLocaleString()}`));
+        box5.append(row2, el2("small", `Owned: ${(e.materials[k] ?? 0).toLocaleString()}`));
       }
       details.append(box5);
-      if (cost.materials.Starshard) details.append(el("p", "Starshards come from World Tier bosses, which are not in the game yet.", "forge-deferred"));
+      if (cost.materials.Starshard) details.append(el2("p", "Starshards come from World Tier bosses, which are not in the game yet.", "forge-deferred"));
       if (d) {
-        const p = { d8: m.playersById[m.localPlayerId].d8, progression: progressionAtXp(m.playersById[m.localPlayerId].progression.totalXp, m.playersById[m.localPlayerId].d8), inventory: inv }, zero6 = resolvePlayerStats2({ ...p, inventory: { ...inv, economy: { ...e, slotLevels: { ...e.slotLevels, [selected]: 0 } } } }), before = resolvePlayerStats2(p), after = resolvePlayerStats2({ ...p, inventory: { ...inv, economy: { ...e, slotLevels: { ...e.slotLevels, [selected]: level + 1 } } } }), preview = el("div", "", "forge-preview");
-        preview.append(el("h4", `Equipped item \xB7 ${d.name}`), el("small", "Current attunement contribution \u2192 next level contribution"));
+        const p = { d8: m.playersById[m.localPlayerId].d8, progression: progressionAtXp(m.playersById[m.localPlayerId].progression.totalXp, m.playersById[m.localPlayerId].d8), inventory: inv }, zero6 = resolvePlayerStats2({ ...p, inventory: { ...inv, economy: { ...e, slotLevels: { ...e.slotLevels, [selected]: 0 } } } }), before = resolvePlayerStats2(p), after = resolvePlayerStats2({ ...p, inventory: { ...inv, economy: { ...e, slotLevels: { ...e.slotLevels, [selected]: level + 1 } } } }), preview = el2("div", "", "forge-preview");
+        preview.append(el2("h4", `Equipped item \xB7 ${d.name}`), el2("small", "Current attunement contribution \u2192 next level contribution"));
         for (const [k, name] of [["attack", "Attack"], ["defense", "Defense"], ["maxHp", "Max HP"], ["moveSpeed", "Speed"]]) {
           const a = statDifference(before[k], zero6[k]), b2 = statDifference(after[k], zero6[k]);
           if (!a && !b2) continue;
-          const row2 = el("p", "", statDifference(b2, a) ? "stat-gain" : "tt-muted");
-          row2.append(icon(k === "moveSpeed" ? speedUrl : EQUIPMENT_STAT_ART[k]), el("span", name), el("strong", `+${statText(a, true)} \u2192 +${statText(b2, true)}`));
+          const row2 = el2("p", "", statDifference(b2, a) ? "stat-gain" : "tt-muted");
+          row2.append(icon(k === "moveSpeed" ? speedUrl : EQUIPMENT_STAT_ART[k]), el2("span", name), el2("strong", `+${statText(a, true)} \u2192 +${statText(b2, true)}`));
           preview.append(row2);
         }
         details.append(preview);
-      } else details.append(el("p", "Empty slot \xB7 bonuses apply when equipped.", "tt-muted"));
-      const b = el("button", `ATTUNE \xB7 ${level} \u2192 ${level + 1}`, "forge-anvil-button");
+      } else details.append(el2("p", "Empty slot \xB7 bonuses apply when equipped.", "tt-muted"));
+      const b = el2("button", `ATTUNE \xB7 ${level} \u2192 ${level + 1}`, "forge-anvil-button");
       b.type = "button";
       b.dataset.forgeAction = "attune";
       b.disabled = !m.forgeAccess || m.persistence.phase !== "encounter" || !affordGold || !affordMaterials;
@@ -82810,11 +82818,11 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
 }
 
 // src/client/context_action_input.js
-function createContextActionInput({ button, activate }) {
+function createContextActionInput({ button: button2, activate }) {
   const listeners = [], owners = /* @__PURE__ */ new Set();
   const listen = (type, fn) => {
-    button.addEventListener(type, fn);
-    listeners.push(() => button.removeEventListener(type, fn));
+    button2.addEventListener(type, fn);
+    listeners.push(() => button2.removeEventListener(type, fn));
   };
   listen("pointerdown", (event) => {
     if (event.button !== 0 || owners.has(event.pointerId)) return;
@@ -82822,7 +82830,7 @@ function createContextActionInput({ button, activate }) {
     event.stopPropagation();
     owners.add(event.pointerId);
     try {
-      button.setPointerCapture(event.pointerId);
+      button2.setPointerCapture(event.pointerId);
     } catch {
     }
     activate();
@@ -82837,7 +82845,7 @@ function createContextActionInput({ button, activate }) {
   });
   function clear2() {
     for (const owner of owners) try {
-      button.releasePointerCapture(owner);
+      button2.releasePointerCapture(owner);
     } catch {
     }
     owners.clear();
@@ -82907,49 +82915,49 @@ function createInventoryPresentation({ document: document2, environment, readMod
     e.style.setProperty("--rarity", RARITY_COLORS[d.rarityTier ?? 0]);
     e.classList.add("rarity-item");
   };
-  let open2 = false, key2 = null, error = "", observed = null, toastUntil = 0, selected = null, gridKey = null, inspect = false, selectionOrigin = null, section = "bag", lastItems = "bag", menuKey = null, summaryKey = null, upCount = 0, seen4 = null, ringSlot = "ring1", bagFilter = "all", moreOpen = false, revealMore = false, heroStatsOpen = true;
+  let open2 = false, key3 = null, error = "", observed = null, toastUntil = 0, selected = null, gridKey = null, inspect = false, selectionOrigin = null, section = "bag", lastItems = "bag", menuKey = null, summaryKey = null, upCount = 0, seen4 = null, ringSlot = "ring1", bagFilter = "all", moreOpen = false, revealMore = false, heroStatsOpen = true;
   const HERO_STATS_KEY = "saq-world-hero-stats-v1";
   try {
     heroStatsOpen = environment.localStorage?.getItem(HERO_STATS_KEY) !== "off";
   } catch {
   }
   const progressionView = createProgressionPresentation({ document: document2, readModel, issue });
-  const progressionButton = button("SKILLS", () => {
+  const progressionButton = button2("SKILLS", () => {
     forgeSession = false;
     section = "progression";
     inspect = false;
-    key2 = null;
+    key3 = null;
     refresh(readModel());
   });
   progressionButton.id = "world-progression-tab";
   panel.querySelector(".bag-section-tabs").append(progressionButton);
-  const statsButton = button("STATS", () => {
+  const statsButton = button2("STATS", () => {
     forgeSession = false;
     section = "stats";
     inspect = false;
-    key2 = null;
+    key3 = null;
     refresh(readModel());
   });
   statsButton.id = "world-stats-tab";
   panel.querySelector(".bag-section-tabs").insertBefore(statsButton, progressionButton);
-  const heroesView = heroSlots ? createHeroSlotsView({ document: document2, environment, heroSlots }) : null, heroesButton = heroesView && button("HEROES", () => {
+  const heroesView = heroSlots ? createHeroSlotsView({ document: document2, environment, heroSlots }) : null, heroesButton = heroesView && button2("HEROES", () => {
     forgeSession = false;
     section = "heroes";
     inspect = false;
-    key2 = null;
+    key3 = null;
     refresh(readModel());
   });
-  const bestiaryView = createBestiaryViewV1({ document: document2, environment, issue }), bestiaryButton = button("BESTIARY", () => {
+  const bestiaryView = createBestiaryViewV1({ document: document2, environment, issue }), bestiaryButton = button2("BESTIARY", () => {
     forgeSession = false;
     section = "bestiary";
     inspect = false;
-    key2 = null;
+    key3 = null;
     refresh(readModel());
   });
   bestiaryButton.id = "world-bestiary-tab";
   panel.querySelector(".bag-section-tabs").insertBefore(bestiaryButton, statsButton);
   document2.querySelector(".bag-body").append(bestiaryView.root);
-  const questsButton = button("QUESTS", () => {
+  const questsButton = button2("QUESTS", () => {
     close();
     document2.dispatchEvent(new (environment.CustomEvent ?? CustomEvent)("saq-open-quests"));
   });
@@ -82962,7 +82970,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
   }
   const nav = panel.querySelector(".bag-section-tabs"), heading = panel.querySelector(".bag-heading");
   panel.classList.add("rpg-menu");
-  const railButton = button("", () => panel.classList.toggle("rail-open"));
+  const railButton = button2("", () => panel.classList.toggle("rail-open"));
   railButton.id = "world-menu-rail";
   railButton.className = "rm-railbtn";
   railButton.setAttribute("aria-label", "Show page names");
@@ -82981,13 +82989,13 @@ function createInventoryPresentation({ document: document2, environment, readMod
     b.addEventListener("click", () => panel.classList.remove("rail-open"));
   }
   const forge = createForgePresentation({ document: document2, issue, invalidate: () => {
-    key2 = null;
+    key3 = null;
     refresh(readModel());
   } });
-  const gearSwitch = button("Carried gear", () => {
+  const gearSwitch = button2("Carried gear", () => {
     section = section === "forge" ? "bag" : "forge";
     inspect = false;
-    key2 = null;
+    key3 = null;
     refresh(readModel());
   });
   gearSwitch.id = "world-forge-gear";
@@ -83000,9 +83008,9 @@ function createInventoryPresentation({ document: document2, environment, readMod
     e.className = cls;
     return e;
   }
-  function icon(key3, empty = false) {
+  function icon(key4, empty = false) {
     const img = document2.createElement("img");
-    img.src = EQUIPMENT_ART[key3].url;
+    img.src = EQUIPMENT_ART[key4].url;
     img.alt = "";
     img.className = "equipment-icon" + (empty ? " empty-icon" : "");
     img.width = 48;
@@ -83014,7 +83022,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     img.src = itemIconUrl(item, document2) ?? img.src;
     return img;
   }
-  function button(caption, action2, disabled = false) {
+  function button2(caption, action2, disabled = false) {
     const b = element("button", caption);
     b.type = "button";
     b.disabled = disabled;
@@ -83027,7 +83035,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     open2 = false;
     inspect = false;
     panel.hidden = true;
-    key2 = null;
+    key3 = null;
     restoreGameplayFocus();
   }
   function openForge() {
@@ -83039,7 +83047,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     open2 = true;
     inspect = false;
     error = "";
-    key2 = null;
+    key3 = null;
     refresh(readModel());
     closeButton.focus();
   }
@@ -83052,7 +83060,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     open2 = true;
     inspect = false;
     error = "";
-    key2 = null;
+    key3 = null;
     refresh(readModel());
     closeButton.focus();
     return true;
@@ -83081,7 +83089,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     open2 = true;
     error = "";
     inspect = false;
-    key2 = null;
+    key3 = null;
     refresh(readModel());
     closeButton.focus();
   }
@@ -83144,13 +83152,13 @@ function createInventoryPresentation({ document: document2, environment, readMod
     try {
       Promise.resolve(adapter.issue("progression.change", { progressionRevision: p.d8.revision, action: { kind: "look.set", look: { ...look, helmet: look.helmet === false } } }, m)).catch((e) => {
         error = e.message;
-        key2 = null;
+        key3 = null;
         refresh(readModel());
       });
     } catch (e) {
       error = e.message;
     }
-    key2 = null;
+    key3 = null;
     refresh(readModel());
   }
   function issue(kind, payload) {
@@ -83162,7 +83170,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     } catch (e) {
       error = e.message;
     }
-    key2 = null;
+    key3 = null;
     refresh(readModel());
   }
   function collect() {
@@ -83182,7 +83190,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     if (open2 && (!alive(m) || forgeSession && !m.forgeAccess)) {
       open2 = false;
       panel.hidden = true;
-      key2 = null;
+      key3 = null;
     }
     openButton.disabled = !alive(m);
     const caption = `Bag`;
@@ -83262,8 +83270,8 @@ function createInventoryPresentation({ document: document2, environment, readMod
       document2.getElementById("world-carried-count").textContent = `${Object.keys(inv.itemsById).length - [...equippedIds].filter(Boolean).length} items`;
     }
     const nextKey = `${nextGridKey}/${local7.progression.level}/${canEquip}/${m.persistence.phase}/${selected}/${inspect}/${salvagePending?.fingerprint ?? ""}/${error}/${section}/${ringSlot}/${m.forgeAccess}/${moreOpen}/${heroStatsOpen}`;
-    if (key2 === nextKey) return;
-    key2 = nextKey;
+    if (key3 === nextKey) return;
+    key3 = nextKey;
     document2.getElementById("world-bag-stats").textContent = `Attack ${statText(local7.stats.attack)}  \xB7  Defense ${statText(local7.stats.defense)}  \xB7  Max HP ${statText(local7.stats.maxHp)}`;
     document2.getElementById("world-bag-title").textContent = section === "forge" ? "Blacksmith forge" : MENU_TITLES[section] ?? "Bag";
     forge.render(m, section);
@@ -83347,13 +83355,13 @@ function createInventoryPresentation({ document: document2, environment, readMod
   }
   function slotTile(slot, inv, scan) {
     const id = inv.equipped[slot], item = id ? inv.itemsById[id] : null, d = item ? itemDefinition(item) : null, wrap2 = element("div", "", "gx-slotwrap");
-    const b = button("", () => {
+    const b = button2("", () => {
       if (item) select(id, b);
       else {
         section = "bag";
         bagFilter = slotFilterOf(slot);
         inspect = false;
-        key2 = null;
+        key3 = null;
         refresh(readModel());
       }
     });
@@ -83448,9 +83456,9 @@ function createInventoryPresentation({ document: document2, environment, readMod
     chips.setAttribute("aria-label", "Filter the bag");
     for (const [id, name] of BAG_FILTERS) {
       if (id !== "all" && !counts[id]) continue;
-      const c = button("", () => {
+      const c = button2("", () => {
         bagFilter = id;
-        key2 = null;
+        key3 = null;
         refresh(readModel());
       });
       c.className = "gx-chip";
@@ -83468,7 +83476,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     }
     const grid = element("div", "", "gx-grid");
     for (const item of shown2) {
-      const d = itemDefinition(item), cell = element("div", "", "gx-cell"), t = button("", () => select(item.itemId, t)), lock = scan.locks.get(item.itemId), lv = item.generated?.itemPower;
+      const d = itemDefinition(item), cell = element("div", "", "gx-cell"), t = button2("", () => select(item.itemId, t)), lock = scan.locks.get(item.itemId), lv = item.generated?.itemPower;
       t.className = "gx-tile" + (lock ? " is-locked" : "");
       rarityVar(cell, d);
       t.dataset.itemId = item.itemId;
@@ -83483,19 +83491,19 @@ function createInventoryPresentation({ document: document2, environment, readMod
     }
     list.replaceChildren(chips, meta, shown2.length ? grid : element("p", items.length ? "Nothing here with this filter." : "Your gear is equipped. New finds will appear here.", "gx-empty"), element("p", "Tap an item to compare it with what you\u2019re wearing.", "gx-hint"));
   }
-  function markOf(key3, mark, diff, text2) {
+  function markOf(key4, mark, diff, text2) {
     const mk = element("span", "", "gx-mark is-" + mark);
     if (mark === "up" || mark === "new") mk.innerHTML = ARROW_UP;
     if (mark === "down") mk.innerHTML = ARROW_DOWN;
-    mk.append(text2 ?? (mark === "new" ? "new" : mark === "same" ? "same" : lineValue(key3, diff)));
+    mk.append(text2 ?? (mark === "new" ? "new" : mark === "same" ? "same" : lineValue(key4, diff)));
     return mk;
   }
-  function lineRow(key3, value2, mark, diff, tag, markText) {
-    const row2 = element("div", "", "gx-line"), text2 = markup(element("span", "", "gx-linetext"), statIcon(key3));
-    text2.append(`+${lineValue(key3, value2)} ${lineLabel(key3)}`);
+  function lineRow(key4, value2, mark, diff, tag, markText) {
+    const row2 = element("div", "", "gx-line"), text2 = markup(element("span", "", "gx-linetext"), statIcon(key4));
+    text2.append(`+${lineValue(key4, value2)} ${lineLabel(key4)}`);
     if (tag) text2.append(element("small", tag, "gx-tag"));
     row2.append(text2);
-    if (mark) row2.append(markOf(key3, mark, diff, markText));
+    if (mark) row2.append(markOf(key4, mark, diff, markText));
     return row2;
   }
   function baseTile(l) {
@@ -83511,7 +83519,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     rarityVar(comparison, d);
     const target = equippedSlot || retiredGear(d) ? null : d.slot === "ring" ? ringSlot : d.slot, preview = target ? equipmentComparison(inv, item.itemId, target, local7.progression.totalXp, local7.d8) : null, worn = (preview?.displaced ?? []).map((id) => inv.itemsById[id]).filter(Boolean);
     const cmp = target ? compareSections(sections, worn.map((w) => itemSections(itemDefinition(w), w.generated))) : { ...sections, lost: [] };
-    const scroll = element("div", "", "gx-sheetscroll"), close2 = markup(button("", () => dismissTooltip()), CLOSE_SVG);
+    const scroll = element("div", "", "gx-sheetscroll"), close2 = markup(button2("", () => dismissTooltip()), CLOSE_SVG);
     close2.className = "gx-close";
     close2.dataset.action = "dismiss";
     close2.setAttribute("aria-label", "Close item");
@@ -83531,9 +83539,9 @@ function createInventoryPresentation({ document: document2, environment, readMod
       const tabs = element("div", "", "gx-ringtabs");
       tabs.append(element("span", "Compare to", "gx-compareto"));
       for (const s of ["ring1", "ring2"]) {
-        const w = inv.itemsById[inv.equipped[s]], tab = button("", () => {
+        const w = inv.itemsById[inv.equipped[s]], tab = button2("", () => {
           ringSlot = s;
-          key2 = null;
+          key3 = null;
           refresh(readModel());
         });
         tab.className = "gx-ringtab";
@@ -83598,7 +83606,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
         const sec = element("section", "", "gx-section gx-locked");
         sec.append(element("h5", "Unlocks at higher rarity", "gx-sectiontitle"));
         for (const [k, t] of locked) {
-          const [key3, skill] = k.split(":"), line26 = affixLineKey(key3, skill), row2 = element("div", "", "gx-line is-locked"), text2 = markup(element("span", "", "gx-linetext"), LOCK_BADGE);
+          const [key4, skill] = k.split(":"), line26 = affixLineKey(key4, skill), row2 = element("div", "", "gx-line is-locked"), text2 = markup(element("span", "", "gx-linetext"), LOCK_BADGE);
           text2.append(lineLabel(line26));
           const tag = element("small", RARITY_NAMES[t], "gx-unlock");
           tag.style.color = RARITY_COLORS[t];
@@ -83627,13 +83635,13 @@ function createInventoryPresentation({ document: document2, environment, readMod
     }
     const changes = preview ? heroChanges(preview) : [];
     if (changes.length) {
-      const sw = button("", () => {
+      const sw = button2("", () => {
         heroStatsOpen = !heroStatsOpen;
         try {
           environment.localStorage?.setItem(HERO_STATS_KEY, heroStatsOpen ? "on" : "off");
         } catch {
         }
-        key2 = null;
+        key3 = null;
         refresh(readModel());
       });
       sw.className = "gx-switch";
@@ -83660,7 +83668,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
       att.append(element("span", `${SLOT_NAMES[equippedSlot].replace(/ \d$/, "")} slot attunement`), bar, element("b", "Lv " + level));
       scroll.append(att);
       if (equippedSlot === "helmet" && local7.d8?.look) {
-        const shown2 = local7.d8.look.helmet !== false, sw = button("", toggleHelmet);
+        const shown2 = local7.d8.look.helmet !== false, sw = button2("", toggleHelmet);
         sw.className = "gx-switch is-row";
         sw.dataset.action = "helmet";
         sw.setAttribute("aria-pressed", String(shown2));
@@ -83673,7 +83681,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     const foot = element("div", "", "gx-sheetfoot");
     if (equippedSlot) {
       if (equippedSlot !== "weapon") {
-        const u = button("Unequip", () => {
+        const u = button2("Unequip", () => {
           inspect = false;
           issue("equipment.unequip", { slot: equippedSlot });
         }, !canEquip);
@@ -83681,22 +83689,22 @@ function createInventoryPresentation({ document: document2, environment, readMod
         u.dataset.action = "unequip";
         foot.append(u);
       }
-      const done3 = button("Done", () => dismissTooltip());
+      const done3 = button2("Done", () => dismissTooltip());
       done3.className = "gx-btn is-primary";
       done3.dataset.action = "done";
       foot.append(done3);
     } else {
-      const more = button("More", () => {
+      const more = button2("More", () => {
         moreOpen = !moreOpen;
         revealMore = moreOpen;
         salvagePending = null;
-        key2 = null;
+        key3 = null;
         refresh(readModel());
       });
       more.className = "gx-btn";
       more.dataset.action = "more";
       more.setAttribute("aria-expanded", String(moreOpen));
-      const caption = lock ? lock.text : d.slot === "ring" ? `${inv.equipped[target] ? "Replace" : "Equip to"} ${SLOT_NAMES[target]}` : "Equip", eq = button(caption, () => {
+      const caption = lock ? lock.text : d.slot === "ring" ? `${inv.equipped[target] ? "Replace" : "Equip to"} ${SLOT_NAMES[target]}` : "Equip", eq = button2(caption, () => {
         inspect = false;
         issue("equipment.equip", { itemId: item.itemId, slot: target });
       }, !canEquip || Boolean(lock));
@@ -83747,11 +83755,11 @@ function createInventoryPresentation({ document: document2, environment, readMod
       box5.append(element("small", "This item can\u2019t be dropped.", "gx-note"));
       return box5;
     }
-    const drop = button("Drop", () => {
+    const drop = button2("Drop", () => {
       issue("gear.drop", { itemId: item.itemId });
       inspect = false;
       salvagePending = null;
-      key2 = null;
+      key3 = null;
       refresh(readModel());
     }, !canEquip);
     drop.className = "gx-btn";
@@ -83759,9 +83767,9 @@ function createInventoryPresentation({ document: document2, environment, readMod
     row2.append(drop);
     const protectedItem = Object.values(inv.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item.sourceEntityId);
     if (!protectedItem) {
-      const salvage = button("Salvage", () => {
+      const salvage = button2("Salvage", () => {
         salvagePending = { ...salvageQuote(local7, item), itemId: item.itemId, inventoryRevision: inv.revision };
-        key2 = null;
+        key3 = null;
         refresh(readModel());
       }, !canEquip);
       salvage.className = "gx-btn is-danger";
@@ -83785,20 +83793,20 @@ function createInventoryPresentation({ document: document2, environment, readMod
         outputs.append(out);
       }
       confirmBox.append(outputs);
-      const confirm = button("Confirm salvage", () => {
+      const confirm = button2("Confirm salvage", () => {
         const q = salvagePending;
         if (!q) return;
         issue("gear.salvage", { itemId: q.itemId, fingerprint: q.fingerprint, inventoryRevision: q.inventoryRevision });
         salvagePending = null;
         inspect = false;
-        key2 = null;
+        key3 = null;
         refresh(readModel());
       }, !canEquip);
       confirm.className = "gx-btn is-danger";
       confirm.dataset.action = "confirm-salvage";
-      const cancel = button("Cancel", () => {
+      const cancel = button2("Cancel", () => {
         salvagePending = null;
-        key2 = null;
+        key3 = null;
         refresh(readModel());
       });
       cancel.className = "gx-btn";
@@ -83820,25 +83828,25 @@ function createInventoryPresentation({ document: document2, environment, readMod
     }
     selectionOrigin = origin;
     inspect = true;
-    key2 = null;
+    key3 = null;
     refresh(readModel());
     document2.getElementById("world-item-title")?.focus({ preventScroll: true });
   }
   const sectionButtons = ["equipment", "bag", "materials"].map((name) => {
-    const button2 = document2.getElementById(`world-${name}-tab`), listener = () => {
+    const button3 = document2.getElementById(`world-${name}-tab`), listener = () => {
       section = name;
       inspect = false;
-      key2 = null;
+      key3 = null;
       refresh(readModel());
       document2.getElementById("world-bag-browse").scrollTop = 0;
     };
-    button2.addEventListener("click", listener);
-    return { button: button2, listener };
+    button3.addEventListener("click", listener);
+    return { button: button3, listener };
   });
   function dismissTooltip(restore = true) {
     salvagePending = null;
     inspect = false;
-    key2 = null;
+    key3 = null;
     refresh(readModel());
     if (restore) (selectionOrigin?.isConnected ? selectionOrigin : closeButton).focus({ preventScroll: true });
   }
@@ -83847,7 +83855,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
   };
   panel.addEventListener("pointerdown", outside3);
   const resized = () => {
-    key2 = null;
+    key3 = null;
     if (open2) refresh(readModel());
   };
   const browse = document2.getElementById("world-bag-browse"), followAnchor = () => placeSheet(false);
@@ -83902,7 +83910,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     bestiaryView.destroy();
     bestiaryButton.remove();
     questsButton.remove();
-    for (const { button: button2, listener } of sectionButtons) button2.removeEventListener("click", listener);
+    for (const { button: button3, listener } of sectionButtons) button3.removeEventListener("click", listener);
     panel.removeEventListener("pointerdown", outside3);
     environment.removeEventListener("resize", resized);
     browse?.removeEventListener("scroll", followAnchor);
@@ -83928,32 +83936,32 @@ function interactionChoiceV2(model) {
   return action2 && label4 ? { exitId: PICKUP_CONTEXT_V2, label: label4, kind: action2.kind === "loot.pickup" ? "Ground loot" : "Nearby object" } : null;
 }
 function createInteractionHudV2({ document: doc, readModel, activate, isBlocked = () => false }) {
-  const button = doc.createElement("button");
-  button.type = "button";
-  button.id = "rpg-interaction-v2";
-  button.hidden = true;
-  button.dataset.gameplayHud = "";
-  const key2 = doc.createElement("kbd"), copy = doc.createElement("span"), kind = doc.createElement("small"), label4 = doc.createElement("strong"), tap = doc.createElement("span");
-  key2.textContent = "E";
+  const button2 = doc.createElement("button");
+  button2.type = "button";
+  button2.id = "rpg-interaction-v2";
+  button2.hidden = true;
+  button2.dataset.gameplayHud = "";
+  const key3 = doc.createElement("kbd"), copy = doc.createElement("span"), kind = doc.createElement("small"), label4 = doc.createElement("strong"), tap = doc.createElement("span");
+  key3.textContent = "E";
   tap.className = "interaction-tap";
   tap.textContent = "Tap";
   copy.append(kind, label4);
-  button.append(key2, copy, tap);
-  doc.getElementById("world-view").parentElement.append(button);
+  button2.append(key3, copy, tap);
+  doc.getElementById("world-view").parentElement.append(button2);
   doc.body.dataset.rpgInteraction = "v2";
   let previous = "", writes = 0;
   const stopRepeatedKey = (e) => {
     if (e.repeat && ["Enter", "Space"].includes(e.code)) e.preventDefault();
   };
-  button.addEventListener("keydown", stopRepeatedKey);
-  const input = createContextActionInput({ button, activate: () => {
-    if (isBlocked() || button.hidden) return;
+  button2.addEventListener("keydown", stopRepeatedKey);
+  const input = createContextActionInput({ button: button2, activate: () => {
+    if (isBlocked() || button2.hidden) return;
     const chosen = interactionChoiceV2(readModel());
     if (chosen) activate(chosen.exitId);
   } });
   function refresh(model, visible3 = true) {
     const target = visible3 && !isBlocked() ? interactionChoiceV2(model) : null;
-    button.hidden = !target;
+    button2.hidden = !target;
     if (!target) {
       previous = "";
       return false;
@@ -83963,15 +83971,15 @@ function createInteractionHudV2({ document: doc, readModel, activate, isBlocked 
       previous = signature;
       kind.textContent = target.kind;
       label4.textContent = target.label;
-      button.setAttribute("aria-label", target.label + "; press E or tap");
+      button2.setAttribute("aria-label", target.label + "; press E or tap");
       writes++;
     }
     return true;
   }
-  return Object.freeze({ button, refresh, resources: () => ({ version: "rpg-interaction-v2", labelWrites: writes }), destroy() {
+  return Object.freeze({ button: button2, refresh, resources: () => ({ version: "rpg-interaction-v2", labelWrites: writes }), destroy() {
     input.destroy();
-    button.removeEventListener("keydown", stopRepeatedKey);
-    button.remove();
+    button2.removeEventListener("keydown", stopRepeatedKey);
+    button2.remove();
     delete doc.body.dataset.rpgInteraction;
   } });
 }
@@ -84027,9 +84035,9 @@ function createWorldEventHudV3(document2, onActivate = () => {
     }
     root2.dataset.kind = event.kind;
     if (event.kind === "hollow") {
-      const h = event.hollow, key2 = JSON.stringify([selected, h, event.rewardClaimed, event.canActivate, model.tick - enteredTick < 150]);
-      if (key2 === previous) return true;
-      previous = key2;
+      const h = event.hollow, key3 = JSON.stringify([selected, h, event.rewardClaimed, event.canActivate, model.tick - enteredTick < 150]);
+      if (key3 === previous) return true;
+      previous = key3;
       currentGroup = event.groupId;
       root2.dataset.state = event.status;
       bars.hidden = true;
@@ -84110,14 +84118,14 @@ function createSettlementServicesMenu({ document: doc, adapter, readModel, clear
     confirmation = null;
     restoreFocus();
   };
-  function el(tag, text2) {
+  function el2(tag, text2) {
     const e = doc.createElement(tag);
     if (text2 !== void 0) e.textContent = text2;
     return e;
   }
-  function button(text2, fn, key2) {
-    const b = el("button", text2);
-    if (key2) b.dataset.serviceAction = key2;
+  function button2(text2, fn, key3) {
+    const b = el2("button", text2);
+    if (key3) b.dataset.serviceAction = key3;
     b.style.cssText = "padding:12px;margin:6px 0;display:block;width:100%;text-align:left";
     b.disabled = busy;
     b.onclick = fn;
@@ -84147,36 +84155,36 @@ function createSettlementServicesMenu({ document: doc, adapter, readModel, clear
   function draw(m) {
     panel.replaceChildren();
     const p = { playerId: m.localPlayerId, inventory: m.inventory }, npc = m.serviceNpcs?.find((n) => n.id === npcId), a = m.entitiesById[m.playersById[m.localPlayerId].entityId];
-    panel.append(el("h2", npc ? npc.name + " \xB7 " + npc.roleLabel : "Carried supplies"), el("p", "Gold: " + m.inventory.gold));
+    panel.append(el2("h2", npc ? npc.name + " \xB7 " + npc.roleLabel : "Carried supplies"), el2("p", "Gold: " + m.inventory.gold));
     if (notice) {
-      const status2 = el("p", notice);
+      const status2 = el2("p", notice);
       status2.setAttribute("role", "status");
       panel.append(status2);
     }
     if (npcId && (!npc || !npc.available)) {
-      panel.append(el("p", "Approach this civilian to trade or rest."));
+      panel.append(el2("p", "Approach this civilian to trade or rest."));
     } else if (npc) {
-      panel.append(el("p", npc.role === "innkeeper" ? SETTLEMENT_LIFE_POLICY.rest.effect : "Ordinary personal stock \xB7 local Band " + npc.band + ". Equipment offers do not reroll on revisits."));
+      panel.append(el2("p", npc.role === "innkeeper" ? SETTLEMENT_LIFE_POLICY.rest.effect : "Ordinary personal stock \xB7 local Band " + npc.band + ". Equipment offers do not reroll on revisits."));
       for (const q of npc.stock) {
-        const b = button((q.purchased ? "Purchased \xB7 " : q.label + " \xB7 ") + q.price + " gold", () => issue("service.buy", { npcId, offerId: q.id }), "buy:" + q.id);
+        const b = button2((q.purchased ? "Purchased \xB7 " : q.label + " \xB7 ") + q.price + " gold", () => issue("service.buy", { npcId, offerId: q.id }), "buy:" + q.id);
         b.disabled = busy || q.purchased;
         panel.append(b);
       }
       if (npc.role === "general") {
-        panel.append(button("Buy field ration \xB7 " + SETTLEMENT_LIFE_POLICY.supply.price + " gold \xB7 restores " + SETTLEMENT_LIFE_POLICY.supply.recoveryPercent + "% max HP", () => issue("service.buy", { npcId, offerId: SETTLEMENT_LIFE_POLICY.supply.id }), "buy:field-ration"));
+        panel.append(button2("Buy field ration \xB7 " + SETTLEMENT_LIFE_POLICY.supply.price + " gold \xB7 restores " + SETTLEMENT_LIFE_POLICY.supply.recoveryPercent + "% max HP", () => issue("service.buy", { npcId, offerId: SETTLEMENT_LIFE_POLICY.supply.id }), "buy:field-ration"));
       }
       if (npc.role === "innkeeper") {
-        panel.append(button("Rest \xB7 " + SETTLEMENT_LIFE_POLICY.rest.price + " gold \xB7 recover all missing HP", () => issue("service.rest", { npcId }), "rest"));
+        panel.append(button2("Rest \xB7 " + SETTLEMENT_LIFE_POLICY.rest.price + " gold \xB7 recover all missing HP", () => issue("service.rest", { npcId }), "rest"));
       }
       if (npc.role === "general" || npc.role === "smith") {
-        panel.append(el("h3", "Sell carried equipment"));
+        panel.append(el2("h3", "Sell carried equipment"));
         let count = 0;
         for (const item of Object.values(m.inventory.itemsById)) {
           const quote = saleQuote(p, item);
           if (quote === null) continue;
           count++;
           const d = itemDefinition(item);
-          panel.append(button((confirmation === item.itemId ? "Confirm sale: " : "") + d.name + " \xB7 receive " + quote + " gold", () => {
+          panel.append(button2((confirmation === item.itemId ? "Confirm sale: " : "") + d.name + " \xB7 receive " + quote + " gold", () => {
             if (confirmation === item.itemId) void issue("service.sell", { npcId, itemId: item.itemId });
             else {
               confirmation = item.itemId;
@@ -84185,12 +84193,12 @@ function createSettlementServicesMenu({ document: doc, adapter, readModel, clear
             }
           }, "sell:" + item.itemId));
         }
-        if (!count) panel.append(el("p", "No eligible ordinary loot. Equipped gear, starter gear, provisions, Unique/protected items cannot be sold."));
+        if (!count) panel.append(el2("p", "No eligible ordinary loot. Equipped gear, starter gear, provisions, Unique/protected items cannot be sold."));
       }
     }
-    panel.append(el("h3", "Field rations: " + supplyCount(p) + " / " + SETTLEMENT_LIFE_POLICY.supply.maximum));
-    panel.append(button("Use one ration \xB7 recover " + SETTLEMENT_LIFE_POLICY.supply.recoveryPercent + "% max HP \xB7 no time skip", () => issue("supply.use", {}), "use-ration"));
-    panel.append(button("Close", close, "close"));
+    panel.append(el2("h3", "Field rations: " + supplyCount(p) + " / " + SETTLEMENT_LIFE_POLICY.supply.maximum));
+    panel.append(button2("Use one ration \xB7 recover " + SETTLEMENT_LIFE_POLICY.supply.recoveryPercent + "% max HP \xB7 no time skip", () => issue("supply.use", {}), "use-ration"));
+    panel.append(button2("Close", close, "close"));
   }
   function refresh(m) {
     const enabled = Boolean(m.inventory?.services);
@@ -84198,9 +84206,9 @@ function createSettlementServicesMenu({ document: doc, adapter, readModel, clear
     if (!enabled) return;
     const p = { inventory: m.inventory };
     supplyButton.textContent = "Rations \xB7 " + supplyCount(p);
-    const key2 = m.localPlayerId + "/" + m.inventory.revision + "/" + busy + "/" + notice + "/" + confirmation + "/" + (m.serviceNpcs?.find((n) => n.id === npcId)?.available ?? false);
-    if (panel.open && key2 !== lastKey) {
-      lastKey = key2;
+    const key3 = m.localPlayerId + "/" + m.inventory.revision + "/" + busy + "/" + notice + "/" + confirmation + "/" + (m.serviceNpcs?.find((n) => n.id === npcId)?.available ?? false);
+    if (panel.open && key3 !== lastKey) {
+      lastKey = key3;
       draw(m);
     }
   }
@@ -84328,21 +84336,21 @@ function createSettlementServicesMenu2(options) {
   panel.id = "settlement-services";
   panel.setAttribute("aria-label", "Settlement services");
   doc.body.append(panel);
-  const el = (tag, text2, cls) => {
+  const el2 = (tag, text2, cls) => {
     const e = doc.createElement(tag);
     if (text2 !== void 0) e.textContent = text2;
     if (cls) e.className = cls;
     return e;
   };
-  let lastPotionCount = null, npcId = null, mode = "gear", selected = null, line26 = 0, materialQuantity = 1, key2 = null, busy = false, notice = "", confirm = null, bad = false, sheet = null, filter = "all";
+  let lastPotionCount = null, npcId = null, mode = "gear", selected = null, line26 = 0, materialQuantity = 1, key3 = null, busy = false, notice = "", confirm = null, bad = false, sheet = null, filter = "all";
   const picks = /* @__PURE__ */ new Set();
   const close = () => {
     if (busy) return;
     panel.close();
     restoreFocus();
   };
-  const button = (text2, fn, id, cls = "forge-anvil-button") => {
-    const b = el("button", text2, cls);
+  const button2 = (text2, fn, id, cls = "forge-anvil-button") => {
+    const b = el2("button", text2, cls);
     b.type = "button";
     if (id) b.dataset.serviceAction = id;
     b.disabled = busy;
@@ -84350,12 +84358,12 @@ function createSettlementServicesMenu2(options) {
     return b;
   };
   const image = (item, slot) => {
-    const i = el("img");
+    const i = el2("img");
     i.src = (item && itemIconUrl(item, doc)) ?? EQUIPMENT_ART[SLOT_ART_KEYS[slot] ?? "worn-sword"].url;
     i.alt = "";
     return i;
   };
-  const supplyButton = button("", drink, "drink-potion");
+  const supplyButton = button2("", drink, "drink-potion");
   supplyButton.addEventListener("mousedown", (e) => e.preventDefault());
   supplyButton.addEventListener("pointerdown", (e) => {
     if (e.button !== 0) return;
@@ -84378,7 +84386,7 @@ function createSettlementServicesMenu2(options) {
     if (id !== void 0) selected = id;
     line26 = 0;
     confirm = null;
-    key2 = null;
+    key3 = null;
     refresh(readModel());
   }
   async function drink() {
@@ -84397,7 +84405,7 @@ function createSettlementServicesMenu2(options) {
     busy = true;
     bad = false;
     notice = "Saving\u2026";
-    key2 = null;
+    key3 = null;
     refresh(readModel());
     try {
       const result = await adapter.issue(kind, { ...payload, inventoryRevision: readModel().inventory.revision });
@@ -84410,7 +84418,7 @@ function createSettlementServicesMenu2(options) {
     } finally {
       busy = false;
       confirm = null;
-      key2 = null;
+      key3 = null;
       refresh(readModel());
     }
   }
@@ -84432,50 +84440,50 @@ function createSettlementServicesMenu2(options) {
   const markup = (e, html) => {
     e.innerHTML = html;
     return e;
-  }, coin4 = () => el("i", void 0, "tn-coin"), tierOf = (d) => d?.rarityTier ?? 0;
+  }, coin4 = () => el2("i", void 0, "tn-coin"), tierOf = (d) => d?.rarityTier ?? 0;
   const mat = (k) => {
     if (SALVAGE_MATERIAL_ART[k]) {
-      const img = el("img", void 0, "tn-mat-art");
+      const img = el2("img", void 0, "tn-mat-art");
       img.src = SALVAGE_MATERIAL_ART[k];
       img.alt = "";
       return img;
     }
-    const i = el("i", void 0, "tn-mat");
+    const i = el2("i", void 0, "tn-mat");
     i.style.setProperty("--m", MATS[k] ?? "#9a6bff");
     return i;
   };
   const price = (n, cls) => {
-    const s = el("span", void 0, "tn-pr" + (cls ? " " + cls : ""));
+    const s = el2("span", void 0, "tn-pr" + (cls ? " " + cls : ""));
     s.append(coin4(), formatAmount(n));
     return s;
   };
   const redraw = () => {
-    key2 = null;
+    key3 = null;
     refresh(readModel());
   };
   const slotName = (slot) => (SLOT_NAMES[slot] ?? slot).replace(/ \d$/, "");
   const wornFor = (inv, d) => inv.itemsById[inv.equipped[d.slot === "ring" ? "ring1" : d.slot]];
   const sectionsOf = (item) => itemSections(itemDefinition(item), item.generated);
   function tile(item, badge) {
-    const d = itemDefinition(item), t = el("div", void 0, "tn-tile");
+    const d = itemDefinition(item), t = el2("div", void 0, "tn-tile");
     t.style.setProperty("--r", RARITY_COLORS[tierOf(d)]);
     t.append(image(item, d?.slot));
-    if (tierOf(d)) t.append(el("span", tierOf(d) + "\u2605", "tn-st"));
+    if (tierOf(d)) t.append(el2("span", tierOf(d) + "\u2605", "tn-st"));
     const lv = item?.generated?.itemPower;
-    if (lv != null) t.append(el("span", "Lv " + statText(lv), "tn-lv"));
-    if (badge) t.append(markup(el("span", void 0, "tn-badge is-" + badge), badge === "up" ? UP : badge === "pick" ? CHECK : LOCK));
+    if (lv != null) t.append(el2("span", "Lv " + statText(lv), "tn-lv"));
+    if (badge) t.append(markup(el2("span", void 0, "tn-badge is-" + badge), badge === "up" ? UP : badge === "pick" ? CHECK : LOCK));
     return t;
   }
   function cell(item, { badge, cost, costClass, label: label4, cls, fn, id, named: named2 = true } = {}) {
-    const d = itemDefinition(item), b = el("button", void 0, "tn-cell" + (cls ? " " + cls : ""));
+    const d = itemDefinition(item), b = el2("button", void 0, "tn-cell" + (cls ? " " + cls : ""));
     b.type = "button";
     if (id) b.dataset.serviceAction = id;
     b.disabled = busy;
     b.onclick = fn;
     b.style.setProperty("--r", RARITY_COLORS[tierOf(d)]);
     b.append(tile(item, badge));
-    if (named2) b.append(el("span", displayName(d), "tn-nm"));
-    if (label4) b.append(el("span", label4, "tn-pr is-sold"));
+    if (named2) b.append(el2("span", displayName(d), "tn-nm"));
+    if (label4) b.append(el2("span", label4, "tn-pr is-sold"));
     else if (cost !== void 0) b.append(price(cost, costClass));
     b.setAttribute("aria-label", displayName(d) + (label4 ? ", " + label4 : cost !== void 0 ? ", " + formatAmount(cost) + " gold" : ""));
     return b;
@@ -84488,10 +84496,10 @@ function createSettlementServicesMenu2(options) {
   }
   function markEl(l) {
     if (!l.mark) return null;
-    return el("span", l.mark === "up" ? "\u25B2 " + lineValue(l.key, l.diff) : l.mark === "down" ? "\u25BC " + lineValue(l.key, l.diff) : l.mark, "tn-mk is-" + l.mark);
+    return el2("span", l.mark === "up" ? "\u25B2 " + lineValue(l.key, l.diff) : l.mark === "down" ? "\u25BC " + lineValue(l.key, l.diff) : l.mark, "tn-mk is-" + l.mark);
   }
   function lineRow(l) {
-    const row2 = el("div", void 0, "tn-ln"), text2 = markup(el("span"), statIcon(l.key));
+    const row2 = el2("div", void 0, "tn-ln"), text2 = markup(el2("span"), statIcon(l.key));
     text2.append("+" + lineValue(l.key, l.value) + " " + lineLabel(l.key));
     row2.append(text2);
     const m = markEl(l);
@@ -84499,37 +84507,37 @@ function createSettlementServicesMenu2(options) {
     return row2;
   }
   function itemHead(item, sub) {
-    const d = itemDefinition(item), h = el("div", void 0, "tn-ihead"), info2 = el("div");
+    const d = itemDefinition(item), h = el2("div", void 0, "tn-ihead"), info2 = el2("div");
     info2.style.minWidth = "0";
-    info2.append(el("h4", displayName(d), "tn-iname"), el("div", sub ?? [RARITY_NAMES[tierOf(d)], tierOf(d) + "\u2605", slotName(d.slot === "ring" ? "ring1" : d.slot), item.generated?.itemPower != null ? "Lv " + statText(item.generated.itemPower) : null].filter(Boolean).join(" \xB7 "), "tn-isub"));
+    info2.append(el2("h4", displayName(d), "tn-iname"), el2("div", sub ?? [RARITY_NAMES[tierOf(d)], tierOf(d) + "\u2605", slotName(d.slot === "ring" ? "ring1" : d.slot), item.generated?.itemPower != null ? "Lv " + statText(item.generated.itemPower) : null].filter(Boolean).join(" \xB7 "), "tn-isub"));
     h.style.setProperty("--r", RARITY_COLORS[tierOf(d)]);
     h.append(tile(item), info2);
     return h;
   }
   function itemSheet(item, inv, foot, notes = []) {
     const d = itemDefinition(item), w = wornFor(inv, d), sec = sectionsOf(item), cmp = w ? compareSections(sec, [sectionsOf(w)]) : { base: sec.base.map((l) => ({ ...l, mark: "new" })), affixes: sec.affixes.map((l) => ({ ...l, mark: "new" })) };
-    const s = el("div", void 0, "tn-sheet");
+    const s = el2("div", void 0, "tn-sheet");
     s.style.setProperty("--r", RARITY_COLORS[tierOf(d)]);
     s.setAttribute("role", "dialog");
     s.setAttribute("aria-label", displayName(d));
-    const sc2 = el("div", void 0, "tn-sheetscroll");
+    const sc2 = el2("div", void 0, "tn-sheetscroll");
     sc2.append(itemHead(item));
     if (w) {
-      const c = el("div", void 0, "tn-cmp"), n = el("b", displayName(itemDefinition(w)));
+      const c = el2("div", void 0, "tn-cmp"), n = el2("b", displayName(itemDefinition(w)));
       n.style.color = RARITY_COLORS[tierOf(itemDefinition(w))];
       c.append("Arrows compare with your worn ", n);
       sc2.append(c);
-    } else sc2.append(el("div", "Your " + slotName(d.slot === "ring" ? "ring1" : d.slot) + " slot is empty", "tn-cmp"));
-    for (const n of notes) sc2.append(el("p", n, "tn-note is-warn"));
+    } else sc2.append(el2("div", "Your " + slotName(d.slot === "ring" ? "ring1" : d.slot) + " slot is empty", "tn-cmp"));
+    for (const n of notes) sc2.append(el2("p", n, "tn-note is-warn"));
     const flat2 = cmp.base.filter((l) => l.flat), traits = cmp.base.filter((l) => !l.flat);
     if (flat2.length || traits.length) {
-      const box5 = el("div", void 0, "tn-sec");
-      box5.append(el("p", "Base stats", "tn-sect"));
+      const box5 = el2("div", void 0, "tn-sec");
+      box5.append(el2("p", "Base stats", "tn-sect"));
       if (flat2.length) {
-        const g = el("div", void 0, "tn-bases");
+        const g = el2("div", void 0, "tn-bases");
         for (const l of flat2) {
-          const t = markup(el("div", void 0, "tn-base"), statIcon(l.key, 16));
-          t.append(el("b", lineValue(l.key, l.value)), el("small", lineLabel(l.key)));
+          const t = markup(el2("div", void 0, "tn-base"), statIcon(l.key, 16));
+          t.append(el2("b", lineValue(l.key, l.value)), el2("small", lineLabel(l.key)));
           const m = markEl(l);
           if (m) t.append(m);
           g.append(t);
@@ -84540,12 +84548,12 @@ function createSettlementServicesMenu2(options) {
       sc2.append(box5);
     }
     if (cmp.affixes.length) {
-      const box5 = el("div", void 0, "tn-sec");
-      box5.append(el("p", "Affixes \xB7 " + cmp.affixes.length, "tn-sect"));
+      const box5 = el2("div", void 0, "tn-sec");
+      box5.append(el2("p", "Affixes \xB7 " + cmp.affixes.length, "tn-sect"));
       for (const l of cmp.affixes) {
         box5.append(lineRow(l));
         if (l.roll && !l.roll.fixed) {
-          const bar = el("div", void 0, "tn-roll" + (l.roll.max ? " is-max" : "")), f2 = el("i");
+          const bar = el2("div", void 0, "tn-roll" + (l.roll.max ? " is-max" : "")), f2 = el2("i");
           f2.style.width = (l.roll.quality * 100).toFixed(1) + "%";
           bar.append(f2);
           box5.append(bar);
@@ -84553,27 +84561,27 @@ function createSettlementServicesMenu2(options) {
       }
       sc2.append(box5);
     }
-    if (!flat2.length && !traits.length && !cmp.affixes.length) sc2.append(el("p", "No stat bonus", "tn-note"));
-    const f = el("div", void 0, "tn-foot");
+    if (!flat2.length && !traits.length && !cmp.affixes.length) sc2.append(el2("p", "No stat bonus", "tn-note"));
+    const f = el2("div", void 0, "tn-foot");
     f.append(...foot);
     s.append(sc2, f);
     return s;
   }
   function costs(parent, gold, materials2, inv, npc, p) {
     if (gold === "0" && !Object.keys(materials2 ?? {}).length) return true;
-    const box5 = el("div");
-    box5.append(el("p", "Cost", "tn-sect"));
-    const row2 = el("div", void 0, "tn-costs"), haveGold = compareAmount(inv.gold, gold) >= 0;
+    const box5 = el2("div");
+    box5.append(el2("p", "Cost", "tn-sect"));
+    const row2 = el2("div", void 0, "tn-costs"), haveGold = compareAmount(inv.gold, gold) >= 0;
     let afford = haveGold;
-    const g = el("span", void 0, "tn-cost" + (haveGold ? "" : " is-short"));
-    g.append(coin4(), formatAmount(inv.gold), el("small", "/ " + formatAmount(gold)));
+    const g = el2("span", void 0, "tn-cost" + (haveGold ? "" : " is-short"));
+    g.append(coin4(), formatAmount(inv.gold), el2("small", "/ " + formatAmount(gold)));
     g.title = "You have " + formatAmount(inv.gold) + " of " + formatAmount(gold) + " gold";
     if (gold !== "0") row2.append(g);
     const buy = [];
     for (const [k, n] of Object.entries(materials2 ?? {})) {
-      const have = inv.economy.materials[k] ?? 0, c = el("span", void 0, "tn-cost" + (have >= n ? "" : " is-short"));
+      const have = inv.economy.materials[k] ?? 0, c = el2("span", void 0, "tn-cost" + (have >= n ? "" : " is-short"));
       c.title = k;
-      c.append(mat(k), String(have), el("small", "/ " + n + " " + k));
+      c.append(mat(k), String(have), el2("small", "/ " + n + " " + k));
       c.title = "You have " + have + " of " + n + " " + k;
       row2.append(c);
       if (have < n) {
@@ -84583,9 +84591,9 @@ function createSettlementServicesMenu2(options) {
       }
     }
     box5.append(row2);
-    const links = el("div", void 0, "tn-links");
+    const links = el2("div", void 0, "tn-links");
     for (const [k, n, cost] of buy) {
-      const b = button("", () => issue("service.material", { npcId, material: k, quantity: n }), "material:" + k, "tn-link");
+      const b = button2("", () => issue("service.material", { npcId, material: k, quantity: n }), "material:" + k, "tn-link");
       b.append(mat(k), "Buy " + n + " " + k + " \xB7 ", coin4(), cost);
       b.disabled = busy || compareAmount(inv.gold, cost) < 0;
       links.append(b);
@@ -84595,9 +84603,9 @@ function createSettlementServicesMenu2(options) {
     return afford;
   }
   function chips(list, current, pick4) {
-    const row2 = el("div", void 0, "tn-filters");
+    const row2 = el2("div", void 0, "tn-filters");
     for (const [id, label4] of list) {
-      const b = button(label4, () => pick4(id), "chip:" + id, "tn-chip");
+      const b = button2(label4, () => pick4(id), "chip:" + id, "tn-chip");
       b.setAttribute("aria-pressed", String(current === id));
       row2.append(b);
     }
@@ -84608,82 +84616,82 @@ function createSettlementServicesMenu2(options) {
     const kind = !npc ? "supplies" : npc.role === "enchanter" ? "altar" : npc.services?.includes("attune") ? "forge" : npc.role === "innkeeper" ? "inn" : "shop";
     panel.dataset.serviceKind = kind;
     panel.replaceChildren();
-    const shell = el("div", void 0, "tn-shell"), head13 = el("div", void 0, "tn-head"), face3 = markup(el("div", void 0, "tn-npc"), FACES2[kind]), who = el("div", void 0, "tn-who");
-    const title = el("h3", npc?.name ?? "Potions");
-    if (npc?.tier && npc.stock?.length) title.append(el("span", { village: "Village", town: "Town", city: "City" }[npc.tier], "tn-tier"));
-    who.append(title, el("small", npc?.roleLabel ?? "Your potion belt"));
-    const exit = button("", close, "close", "tn-x");
+    const shell2 = el2("div", void 0, "tn-shell"), head13 = el2("div", void 0, "tn-head"), face3 = markup(el2("div", void 0, "tn-npc"), FACES2[kind]), who = el2("div", void 0, "tn-who");
+    const title = el2("h3", npc?.name ?? "Potions");
+    if (npc?.tier && npc.stock?.length) title.append(el2("span", { village: "Village", town: "Town", city: "City" }[npc.tier], "tn-tier"));
+    who.append(title, el2("small", npc?.roleLabel ?? "Your potion belt"));
+    const exit = button2("", close, "close", "tn-x");
     exit.innerHTML = CLOSE;
     exit.setAttribute("aria-label", "Close");
     head13.append(face3, who, exit);
-    shell.append(head13);
-    panel.append(shell);
+    shell2.append(head13);
+    panel.append(shell2);
     if (npcId && (!npc || !npc.available)) {
-      const b = el("div", void 0, "tn-body");
-      b.append(el("p", "Walk up to " + (npc?.name ?? "them") + " to trade.", "tn-empty"));
-      shell.append(b);
+      const b = el2("div", void 0, "tn-body");
+      b.append(el2("p", "Walk up to " + (npc?.name ?? "them") + " to trade.", "tn-empty"));
+      shell2.append(b);
       return;
     }
     if (kind === "inn") {
-      const hero = m.entitiesById?.[m.playersById[m.localPlayerId].entityId], hp = Number(hero?.hpExact ?? 0) || 0, max = Number(hero?.maxHpExact ?? 0) || 0, box5 = el("div", void 0, "tn-body");
-      const top = el("div", void 0, "tn-ln");
-      top.append(el("span", "Health"), el("span", Math.round(hp) + " / " + Math.round(max) + (hp < max ? " \u2192 " + Math.round(max) : "")));
-      const bar = el("div", void 0, "tn-hp"), fill6 = el("i");
+      const hero = m.entitiesById?.[m.playersById[m.localPlayerId].entityId], hp = Number(hero?.hpExact ?? 0) || 0, max = Number(hero?.maxHpExact ?? 0) || 0, box5 = el2("div", void 0, "tn-body");
+      const top = el2("div", void 0, "tn-ln");
+      top.append(el2("span", "Health"), el2("span", Math.round(hp) + " / " + Math.round(max) + (hp < max ? " \u2192 " + Math.round(max) : "")));
+      const bar = el2("div", void 0, "tn-hp"), fill6 = el2("i");
       fill6.style.width = (max ? Math.min(100, hp / max * 100) : 0).toFixed(1) + "%";
       bar.append(fill6);
       box5.append(top, bar);
-      if (notice) box5.append(el("p", notice, "tn-note" + (bad ? " is-warn" : "")));
-      const rest = button("", () => issue("service.rest", { npcId }), "rest", "tn-btn is-gold");
+      if (notice) box5.append(el2("p", notice, "tn-note" + (bad ? " is-warn" : "")));
+      const rest = button2("", () => issue("service.rest", { npcId }), "rest", "tn-btn is-gold");
       rest.append("Rest by the fire \xB7 ", coin4(), formatAmount(SETTLEMENT_LIFE_POLICY.rest.price));
       rest.disabled = busy || hp >= max || compareAmount(inv.gold, SETTLEMENT_LIFE_POLICY.rest.price) < 0;
       box5.append(rest);
-      if (hp >= max) box5.append(el("p", "You are already at full health.", "tn-hint"));
-      shell.append(box5);
+      if (hp >= max) box5.append(el2("p", "You are already at full health.", "tn-hint"));
+      shell2.append(box5);
       return;
     }
-    const wallet = el("div", void 0, "tn-wallet"), g = el("span", void 0, "tn-chipv");
+    const wallet = el2("div", void 0, "tn-wallet"), g = el2("span", void 0, "tn-chipv");
     g.append(coin4(), formatAmount(inv.gold));
     wallet.append(g);
     if (kind === "forge" || kind === "altar") {
       for (const [k, n] of Object.entries(inv.economy.materials ?? {})) if (n > 0) {
-        const c = el("span", void 0, "tn-chipv");
+        const c = el2("span", void 0, "tn-chipv");
         c.title = k;
         c.append(mat(k), String(n));
         wallet.append(c);
       }
     }
-    shell.append(wallet);
+    shell2.append(wallet);
     const modes = kind === "forge" ? [...[["attune", "Upgrade"], ["reforge", "Reforge"], ["awaken", "Awaken"], ["shatter", "Salvage"], ["break", "Scraps"]].filter(([id]) => npc.services.includes(id === "break" ? "shatter" : id)), ...npc.stock?.length ? [["gear", "Buy"]] : []] : kind === "altar" ? [["enchant", "Enchant"], ["purge", "Purge"], ["resonance", "Resonance"]] : kind === "shop" ? [["gear", "Buy"], ["sell", "Sell"], ["supplies", "Potions"]] : [["supplies", "Potions"]];
     if (!modes.some(([id]) => id === mode)) mode = modes[0][0];
     if (modes.length > 1) {
-      const tabs = el("nav", void 0, "tn-tabs");
+      const tabs = el2("nav", void 0, "tn-tabs");
       tabs.setAttribute("aria-label", "Services");
       for (const [id, label4] of modes) {
-        const b = button(label4, () => {
+        const b = button2(label4, () => {
           sheet = null;
           change(id);
         }, "tab:" + id, "tn-tab");
         b.setAttribute("aria-pressed", String(mode === id));
         tabs.append(b);
       }
-      shell.append(tabs);
+      shell2.append(tabs);
     }
     if (notice) {
-      const n = el("div", notice, "tn-notice" + (bad ? " is-error" : ""));
+      const n = el2("div", notice, "tn-notice" + (bad ? " is-error" : ""));
       n.setAttribute("role", "status");
-      shell.append(n);
+      shell2.append(n);
     }
-    const body5 = el("div", void 0, "tn-body");
-    shell.append(body5);
-    const foot = el("div", void 0, "tn-foot");
+    const body5 = el2("div", void 0, "tn-body");
+    shell2.append(body5);
+    const foot = el2("div", void 0, "tn-foot");
     if (mode === "gear") {
       const offers = npc.stock ?? [], kinds2 = new Set(offers.map((q2) => bagFilterOf(itemDefinition(q2.item))));
       if (!kinds2.has(filter)) filter = "all";
       if (npc.restockTicks != null && offers.length) {
-        const r = el("div", void 0, "tn-restock"), txt = el("div"), top = Math.max(...offers.map((q2) => q2.item.generated?.rarityTier ?? 0)), mins = Math.max(1, Math.ceil(npc.restockTicks / 3600));
+        const r = el2("div", void 0, "tn-restock"), txt = el2("div"), top = Math.max(...offers.map((q2) => q2.item.generated?.rarityTier ?? 0)), mins = Math.max(1, Math.ceil(npc.restockTicks / 3600));
         r.innerHTML = RESTOCK;
-        txt.append(el("b", "Restocks at dawn"), el("small", offers.length + " items \xB7 " + (npc.tier === "village" ? "up to Uncommon" : npc.tier === "town" ? "up to Rare" : "up to Epic")));
-        r.append(txt, el("span", mins >= 60 ? "1 h" : mins + " min", "tn-when"));
+        txt.append(el2("b", "Restocks at dawn"), el2("small", offers.length + " items \xB7 " + (npc.tier === "village" ? "up to Uncommon" : npc.tier === "town" ? "up to Rare" : "up to Epic")));
+        r.append(txt, el2("span", mins >= 60 ? "1 h" : mins + " min", "tn-when"));
         r.title = "Shops restock at 06:00 each in-game day";
         body5.append(r);
       }
@@ -84691,7 +84699,7 @@ function createSettlementServicesMenu2(options) {
         filter = id;
         redraw();
       }));
-      const grid = el("div", void 0, "tn-grid");
+      const grid = el2("div", void 0, "tn-grid");
       for (const q2 of offers) {
         if (filter !== "all" && bagFilterOf(itemDefinition(q2.item)) !== filter) continue;
         const allowed = equipmentLevelAllowed(p, q2.item);
@@ -84701,20 +84709,20 @@ function createSettlementServicesMenu2(options) {
         }, id: "item:" + q2.id }));
       }
       if (offers.length) {
-        body5.append(grid, el("p", "Tap an item to see it and compare. What you buy stays sold until dawn.", "tn-hint"));
-      } else body5.append(el("p", "Nothing for sale here.", "tn-empty"));
+        body5.append(grid, el2("p", "Tap an item to see it and compare. What you buy stays sold until dawn.", "tn-hint"));
+      } else body5.append(el2("p", "Nothing for sale here.", "tn-empty"));
       const q = offers.find((q2) => q2.id === sheet);
       if (q) {
         const required = equipmentRequiredLevel(p, q.item), notes = required !== null && !equipmentLevelAllowed(p, q.item) ? ["You can wear this at hero level " + required + "."] : [];
-        const shut = button("Close", () => {
+        const shut = button2("Close", () => {
           sheet = null;
           redraw();
-        }, "close-item", "tn-btn"), buy = button("", () => issue("service.buy", { npcId, offerId: q.id }), "buy:" + q.id, "tn-btn is-gold");
+        }, "close-item", "tn-btn"), buy = button2("", () => issue("service.buy", { npcId, offerId: q.id }), "buy:" + q.id, "tn-btn is-gold");
         if (q.purchased) buy.append("Sold");
         else if (compareAmount(inv.gold, q.price) < 0) buy.append("Need ", coin4(), formatAmount(q.price));
         else buy.append("Buy \xB7 ", coin4(), formatAmount(q.price));
         buy.disabled = busy || q.purchased || compareAmount(inv.gold, q.price) < 0;
-        shell.append(itemSheet(q.item, inv, [shut, buy], notes));
+        shell2.append(itemSheet(q.item, inv, [shut, buy], notes));
       }
     } else if (mode === "sell") {
       const sellable = Object.values(inv.itemsById).map((i) => ({ i, q: saleQuote(p, i) })).filter((x) => x.q !== null);
@@ -84727,7 +84735,7 @@ function createSettlementServicesMenu2(options) {
       };
       if (sellable.length) {
         body5.append(chips([["common", "Pick all Commons"], ["uncommon", "Pick all Uncommons"], ["clear", "Clear"]], null, (id) => id === "clear" ? (picks.clear(), confirm = null, redraw()) : pickTier(id === "common" ? 0 : 1)));
-        const grid = el("div", void 0, "tn-grid");
+        const grid = el2("div", void 0, "tn-grid");
         for (const { i, q } of sellable) {
           const on = picks.has(i.itemId);
           grid.append(cell(i, { badge: on ? "pick" : null, cost: q, cls: on ? "is-picked" : "", fn: () => {
@@ -84737,11 +84745,11 @@ function createSettlementServicesMenu2(options) {
             redraw();
           }, id: "pick:" + i.itemId }));
         }
-        body5.append(grid, el("p", "Worn and Unique gear never shows up here.", "tn-hint"));
-      } else body5.append(el("p", "Nothing here this merchant will buy. Worn and Unique gear never shows up here.", "tn-empty"));
-      const chosen = sellable.filter((x) => picks.has(x.i.itemId)), total = chosen.reduce((a, x) => addAmount(a, x.q), "0"), sum2 = el("div", void 0, "tn-sum");
-      sum2.append(el("b", chosen.length === 1 ? "1 item" : chosen.length + " items"), el("small", chosen.length ? "Tap Sell to trade them for gold" : "Tap items to pick them"));
-      const sell = button("", () => {
+        body5.append(grid, el2("p", "Worn and Unique gear never shows up here.", "tn-hint"));
+      } else body5.append(el2("p", "Nothing here this merchant will buy. Worn and Unique gear never shows up here.", "tn-empty"));
+      const chosen = sellable.filter((x) => picks.has(x.i.itemId)), total = chosen.reduce((a, x) => addAmount(a, x.q), "0"), sum2 = el2("div", void 0, "tn-sum");
+      sum2.append(el2("b", chosen.length === 1 ? "1 item" : chosen.length + " items"), el2("small", chosen.length ? "Tap Sell to trade them for gold" : "Tap items to pick them"));
+      const sell = button2("", () => {
         if (confirm === "sell") sellMany(chosen.map((x) => x.i.itemId));
         else {
           confirm = "sell";
@@ -84752,47 +84760,47 @@ function createSettlementServicesMenu2(options) {
       else sell.append("Sell \xB7 +", coin4(), formatAmount(total));
       sell.disabled = busy || !chosen.length;
       foot.append(sum2, sell);
-      shell.append(foot);
+      shell2.append(foot);
     } else if (mode === "supplies") {
-      const belt = m.potions, card = el("div", void 0, "tn-card");
-      card.append(el("p", "Potion belt \xB7 " + belt.count + " / " + belt.capacity, "tn-sect"), markup(el("div", void 0, "tn-belt"), Array.from({ length: belt.capacity }, (_, n) => FLASK(n < belt.count)).join("")), el("p", "Each potion heals " + belt.healPercent + "% of max HP \xB7 " + (belt.refillPrice ? "refills in town for " + belt.refillPrice + " gold each" : "refills free in town") + " \xB7 enemies drop more", "tn-hint"));
+      const belt = m.potions, card = el2("div", void 0, "tn-card");
+      card.append(el2("p", "Potion belt \xB7 " + belt.count + " / " + belt.capacity, "tn-sect"), markup(el2("div", void 0, "tn-belt"), Array.from({ length: belt.capacity }, (_, n) => FLASK(n < belt.count)).join("")), el2("p", "Each potion heals " + belt.healPercent + "% of max HP \xB7 " + (belt.refillPrice ? "refills in town for " + belt.refillPrice + " gold each" : "refills free in town") + " \xB7 enemies drop more", "tn-hint"));
       body5.append(card);
       if (npc?.role === "general") {
         const B5 = POTION_BELT_POLICY;
         for (const [offerId, title2, max, text2, icon] of [[B5.offers.capacity, "Bigger belt", B5.maxCapacityUpgrades, () => ["Carry ", belt.capacity, belt.capacity + 1, " potions"], FLASK(true)], [B5.offers.potency, "Stronger brew", B5.maxPotencyUpgrades, () => ["Heal ", belt.healPercent + "%", belt.healPercent + B5.potencyStep + "%", " of max HP"], '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ef6f7d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"/><path d="M12 8.5v5M9.5 11h5"/></svg>']]) {
-          const u = potionUpgrade(p, offerId), row2 = el("div", void 0, "tn-card tn-upg"), info2 = el("div");
+          const u = potionUpgrade(p, offerId), row2 = el2("div", void 0, "tn-card tn-upg"), info2 = el2("div");
           info2.style.flex = "1";
-          const [a, b, c, d] = text2(), line27 = el("p");
+          const [a, b, c, d] = text2(), line27 = el2("p");
           if (u.price) {
             line27.append(a, String(b), " ");
-            const arrow2 = el("span", "\u2192 " + c, "tn-arrow");
+            const arrow2 = el2("span", "\u2192 " + c, "tn-arrow");
             line27.append(arrow2, d);
           } else line27.append("Fully upgraded");
-          const pips = el("div", void 0, "tn-pips");
-          for (let n = 0; n < max; n++) pips.append(el("i", void 0, n < u.done ? "on" : ""));
-          info2.append(el("h4", title2), line27, pips);
-          const buy = button("", () => issue("service.buy", { npcId, offerId }), "buy:" + offerId, "tn-btn is-gold is-small");
+          const pips = el2("div", void 0, "tn-pips");
+          for (let n = 0; n < max; n++) pips.append(el2("i", void 0, n < u.done ? "on" : ""));
+          info2.append(el2("h4", title2), line27, pips);
+          const buy = button2("", () => issue("service.buy", { npcId, offerId }), "buy:" + offerId, "tn-btn is-gold is-small");
           if (u.price) buy.append(coin4(), formatAmount(u.price));
           else buy.append("Done");
           buy.disabled = busy || !u.price || compareAmount(inv.gold, u.price) < 0;
           buy.setAttribute("aria-label", u.price ? title2 + ", " + u.price + " gold" : title2 + ", fully upgraded");
-          row2.append(markup(el("div", void 0, "tn-ic"), icon), info2, buy);
+          row2.append(markup(el2("div", void 0, "tn-ic"), icon), info2, buy);
           body5.append(row2);
         }
-      } else body5.append(el("p", npc ? "A general merchant can make your belt bigger and your potions stronger." : "Visit a general merchant to make your belt bigger and your potions stronger.", "tn-hint"));
+      } else body5.append(el2("p", npc ? "A general merchant can make your belt bigger and your potions stronger." : "Visit a general merchant to make your belt bigger and your potions stronger.", "tn-hint"));
     } else if (mode === "break") {
       const names2 = ["Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic"], have = (k) => inv.economy.materials[k] ?? 0;
-      body5.append(el("p", "Break one Scrap into three of the rarity below. Handy for early upgrade steps.", "tn-hint is-left"));
+      body5.append(el2("p", "Break one Scrap into three of the rarity below. Handy for early upgrade steps.", "tn-hint is-left"));
       for (let t = names2.length - 1; t >= 1; t--) {
-        const from = names2[t] + " Scrap", to = names2[t - 1] + " Scrap", n = have(from), row2 = el("div", void 0, "tn-card tn-upg tn-break"), info2 = el("div");
+        const from = names2[t] + " Scrap", to = names2[t - 1] + " Scrap", n = have(from), row2 = el2("div", void 0, "tn-card tn-upg tn-break"), info2 = el2("div");
         info2.style.flex = "1";
-        const line27 = el("p");
-        line27.append(mat(from), " 1 ", el("span", "\u2192 ", "tn-arrow"), mat(to), " 3");
-        info2.append(el("h4", from), line27, el("small", "You have " + n.toLocaleString() + " \xB7 " + have(to).toLocaleString() + " " + to));
-        const one = button("", () => issue("service.breakdown", { npcId, material: from, quantity: 1 }), "break1:" + from, "tn-btn is-small");
+        const line27 = el2("p");
+        line27.append(mat(from), " 1 ", el2("span", "\u2192 ", "tn-arrow"), mat(to), " 3");
+        info2.append(el2("h4", from), line27, el2("small", "You have " + n.toLocaleString() + " \xB7 " + have(to).toLocaleString() + " " + to));
+        const one = button2("", () => issue("service.breakdown", { npcId, material: from, quantity: 1 }), "break1:" + from, "tn-btn is-small");
         one.append("Break 1");
         one.disabled = busy || n < 1;
-        const all = button("", () => issue("service.breakdown", { npcId, material: from, quantity: n }), "breakall:" + from, "tn-btn is-gold is-small");
+        const all = button2("", () => issue("service.breakdown", { npcId, material: from, quantity: n }), "breakall:" + from, "tn-btn is-gold is-small");
         all.append("All " + n.toLocaleString());
         all.disabled = busy || n < 2;
         row2.append(info2, one, all);
@@ -84801,51 +84809,51 @@ function createSettlementServicesMenu2(options) {
     } else if (mode === "attune") {
       const slots2 = listedEquipmentSlots(inv);
       if (!slots2.includes(selected)) selected = slots2.includes("weapon") ? "weapon" : slots2[0];
-      const grid = el("div", void 0, "tn-slots");
+      const grid = el2("div", void 0, "tn-slots");
       for (const slot of slots2) {
-        const i2 = inv.itemsById[inv.equipped[slot]], b = button("", () => change(mode, slot), "slot:" + slot, "tn-slot");
+        const i2 = inv.itemsById[inv.equipped[slot]], b = button2("", () => change(mode, slot), "slot:" + slot, "tn-slot");
         b.setAttribute("aria-pressed", String(slot === selected));
-        b.append(i2 ? tile(i2) : el("div", void 0, "tn-none"), el("small", slotName(slot)), el("b", "+" + inv.economy.slotLevels[slot]));
+        b.append(i2 ? tile(i2) : el2("div", void 0, "tn-none"), el2("small", slotName(slot)), el2("b", "+" + inv.economy.slotLevels[slot]));
         b.setAttribute("aria-label", slotName(slot) + " slot, +" + inv.economy.slotLevels[slot]);
         grid.append(b);
       }
       body5.append(grid);
-      const lv = inv.economy.slotLevels[selected], i = inv.itemsById[inv.equipped[selected]], d = itemDefinition(i), card = el("div", void 0, "tn-card"), bar = el("div", void 0, "tn-bar"), fill6 = el("i");
+      const lv = inv.economy.slotLevels[selected], i = inv.itemsById[inv.equipped[selected]], d = itemDefinition(i), card = el2("div", void 0, "tn-card"), bar = el2("div", void 0, "tn-bar"), fill6 = el2("i");
       fill6.style.width = lv + "%";
       bar.append(fill6);
-      card.append(el("p", slotName(selected) + " slot \xB7 +" + lv + (lv < 100 ? " \u2192 +" + (lv + 1) : " \xB7 max"), "tn-sect"), bar);
+      card.append(el2("p", slotName(selected) + " slot \xB7 +" + lv + (lv < 100 ? " \u2192 +" + (lv + 1) : " \xB7 max"), "tn-sect"), bar);
       if (d && lv < 100) {
         const before = effectiveEquipmentBonuses(d, selected, lv, combatPlayer(p)), after = effectiveEquipmentBonuses(d, selected, lv + 1, combatPlayer(p));
         for (const k of Object.keys(before)) {
           if (String(before[k]) === String(after[k]) && !Number(before[k])) continue;
-          const row2 = el("div", void 0, "tn-ln"), left = markup(el("span"), statIcon(k));
+          const row2 = el2("div", void 0, "tn-ln"), left = markup(el2("span"), statIcon(k));
           left.append(lineLabel(k));
-          const right = el("span");
-          right.append(el("b", statText(before[k])), " ", el("span", "\u2192 " + statText(after[k]), "tn-arrow"));
+          const right = el2("span");
+          right.append(el2("b", statText(before[k])), " ", el2("span", "\u2192 " + statText(after[k]), "tn-arrow"));
           row2.append(left, right);
           card.append(row2);
         }
       }
-      card.append(el("p", "Stays with the slot when you change gear \xB7 max +100", "tn-hint is-left"));
+      card.append(el2("p", "Stays with the slot when you change gear \xB7 max +100", "tn-hint is-left"));
       body5.append(card);
       if (lv < 100) {
         const q = attunementCost(lv, p), afford = costs(body5, q.gold, q.materials, inv, npc, p);
-        if (q.materials.Starshard) body5.append(el("p", "Starshards come from World Tier bosses, which are not in the game yet.", "tn-note is-warn"));
-        if (!m.forgeAccess) body5.append(el("p", "Stand by the forge to upgrade.", "tn-note is-warn"));
-        const b = button("", () => issue("forge.attune", { slot: selected, expectedLevel: lv }), "attune", "tn-btn is-gold");
+        if (q.materials.Starshard) body5.append(el2("p", "Starshards come from World Tier bosses, which are not in the game yet.", "tn-note is-warn"));
+        if (!m.forgeAccess) body5.append(el2("p", "Stand by the forge to upgrade.", "tn-note is-warn"));
+        const b = button2("", () => issue("forge.attune", { slot: selected, expectedLevel: lv }), "attune", "tn-btn is-gold");
         b.append("Upgrade \xB7 ", coin4(), formatAmount(q.gold));
         b.disabled = busy || !m.forgeAccess || !afford;
         foot.append(b);
-        shell.append(foot);
-      } else body5.append(el("p", "This slot is fully upgraded.", "tn-hint"));
+        shell2.append(foot);
+      } else body5.append(el2("p", "This slot is fully upgraded.", "tn-hint"));
     } else {
       const worn = new Set(Object.values(inv.equipped)), items = Object.values(inv.itemsById).filter((i2) => i2.generated && !i2.unique && !i2.protected && !(mode === "shatter" && worn.has(i2.itemId)));
       if (!items.some((i2) => i2.itemId === selected)) selected = items[0]?.itemId;
       if (!items.length) {
-        body5.append(el("p", "Bring gear with stars (drops or shop gear) to work on it here.", "tn-empty"));
+        body5.append(el2("p", "Bring gear with stars (drops or shop gear) to work on it here.", "tn-empty"));
         return;
       }
-      const strip = el("div", void 0, "tn-strip");
+      const strip = el2("div", void 0, "tn-strip");
       for (const i2 of items) {
         const r2 = workshopResult(i2), b2 = cell(i2, { named: false, fn: () => change(mode, i2.itemId), id: "select:" + i2.itemId });
         b2.setAttribute("aria-pressed", String(i2.itemId === selected));
@@ -84857,28 +84865,28 @@ function createSettlementServicesMenu2(options) {
       if (on) requestAnimationFrame(() => {
         strip.scrollLeft += on.getBoundingClientRect().left - strip.getBoundingClientRect().left - (strip.clientWidth - on.offsetWidth) / 2;
       });
-      const i = items.find((i2) => i2.itemId === selected), r = workshopResult(i), card = el("div", void 0, "tn-card");
+      const i = items.find((i2) => i2.itemId === selected), r = workshopResult(i), card = el2("div", void 0, "tn-card");
       card.style.borderTop = "3px solid " + (RARITY_COLORS[r.tier] ?? "#3a4654");
       card.append(itemHead(i, [RARITY_NAMES[r.tier], r.tier + "\u2605", r.enchants ? r.enchants + " enchant" + (r.enchants > 1 ? "s" : "") : null, r.set ? r.set + " set" : null].filter(Boolean).join(" \xB7 ")));
       body5.append(card);
       const q = workshopQuote(p, i, mode, line26);
       if (mode === "reforge") {
-        const box5 = el("div");
-        box5.append(el("p", "Pick a line to reroll", "tn-sect"));
+        const box5 = el2("div");
+        box5.append(el2("p", "Pick a line to reroll", "tn-sect"));
         r.affixes.forEach((a, index) => {
-          const b2 = button("", () => {
+          const b2 = button2("", () => {
             line26 = index;
             confirm = null;
             redraw();
-          }, "line:" + index, "tn-radio"), txt = markup(el("span"), statIcon(affixLineKey(a.key, a.skill)));
+          }, "line:" + index, "tn-radio"), txt = markup(el2("span"), statIcon(affixLineKey(a.key, a.skill)));
           txt.append(affixText(a));
-          b2.append(el("span", void 0, "tn-dot"), txt);
+          b2.append(el2("span", void 0, "tn-dot"), txt);
           b2.disabled = busy || r.lockedLine !== null && r.lockedLine !== index;
           b2.setAttribute("aria-pressed", String(line26 === index));
           box5.append(b2);
         });
-        if (!r.affixes.length) box5.append(el("p", "This item has no lines to reroll.", "tn-hint is-left"));
-        else box5.append(el("p", r.lockedLine === null ? "It becomes a random new line this item can roll. After the first reforge, only this line can be rerolled." : "Only this line can be rerolled now.", "tn-hint is-left"));
+        if (!r.affixes.length) box5.append(el2("p", "This item has no lines to reroll.", "tn-hint is-left"));
+        else box5.append(el2("p", r.lockedLine === null ? "It becomes a random new line this item can roll. After the first reforge, only this line can be rerolled." : "Only this line can be rerolled now.", "tn-hint is-left"));
         body5.append(box5);
       } else if (mode === "resonance") {
         const worn2 = {};
@@ -84891,30 +84899,30 @@ function createSettlementServicesMenu2(options) {
           for (const [k, v] of Object.entries(e.three)) t[k] = (t[k] ?? 0) + v;
           return t;
         };
-        const now3 = el("div", void 0, "tn-card tn-setnow");
-        now3.append(el("p", "Set on this item", "tn-sect"), el("b", r.set ?? "No set yet", "tn-setname"), el("p", r.set ? "You wear " + (worn2[r.set] ?? 0) + " " + r.set + " piece" + ((worn2[r.set] ?? 0) === 1 ? "" : "s") + ". Changing rolls a different set at random." : "Give it a set at random. Wear 2 of a set for its first bonus, 3 for the full bonus.", "tn-hint is-left"));
+        const now3 = el2("div", void 0, "tn-card tn-setnow");
+        now3.append(el2("p", "Set on this item", "tn-sect"), el2("b", r.set ?? "No set yet", "tn-setname"), el2("p", r.set ? "You wear " + (worn2[r.set] ?? 0) + " " + r.set + " piece" + ((worn2[r.set] ?? 0) === 1 ? "" : "s") + ". Changing rolls a different set at random." : "Give it a set at random. Wear 2 of a set for its first bonus, 3 for the full bonus.", "tn-hint is-left"));
         body5.append(now3);
-        body5.append(el("p", "Sets", "tn-sect"));
-        const grid = el("div", void 0, "tn-setgrid");
+        body5.append(el2("p", "Sets", "tn-sect"));
+        const grid = el2("div", void 0, "tn-setgrid");
         for (const [name, e] of Object.entries(RESONANCE_SETS)) {
-          const n = worn2[name] ?? 0, c = el("div", void 0, "tn-set" + (name === r.set ? " is-now" : ""));
-          const h = el("div", void 0, "tn-seth");
-          h.append(markup(el("span", void 0, "tn-seti"), statIcon("fx:" + Object.keys(e.two)[0])), el("b", name));
-          if (n) h.append(el("small", n + " worn", "tn-setn"));
+          const n = worn2[name] ?? 0, c = el2("div", void 0, "tn-set" + (name === r.set ? " is-now" : ""));
+          const h = el2("div", void 0, "tn-seth");
+          h.append(markup(el2("span", void 0, "tn-seti"), statIcon("fx:" + Object.keys(e.two)[0])), el2("b", name));
+          if (n) h.append(el2("small", n + " worn", "tn-setn"));
           c.append(h);
           for (const [pc2, vals] of [[2, e.two], [3, total(e)]]) {
-            const row2 = el("div", void 0, "tn-pc" + (n >= pc2 ? " is-on" : ""));
-            row2.append(el("i", pc2 + " pc"), el("span", fx(vals)));
+            const row2 = el2("div", void 0, "tn-pc" + (n >= pc2 ? " is-on" : ""));
+            row2.append(el2("i", pc2 + " pc"), el2("span", fx(vals)));
             c.append(row2);
           }
           grid.append(c);
         }
         body5.append(grid);
-      } else if (mode === "shatter" && q.preview && typeof q.preview === "object") body5.append(el("p", "Salvage breaks this item for " + Object.entries(q.preview).map(([k, v]) => v + " " + k).join(", ") + ". It is gone for good.", "tn-note"));
-      else if (typeof q.preview === "string") body5.append(el("p", q.preview, "tn-note"));
-      if (q.problem) body5.append(el("p", q.problem, "tn-note is-warn"));
+      } else if (mode === "shatter" && q.preview && typeof q.preview === "object") body5.append(el2("p", "Salvage breaks this item for " + Object.entries(q.preview).map(([k, v]) => v + " " + k).join(", ") + ". It is gone for good.", "tn-note"));
+      else if (typeof q.preview === "string") body5.append(el2("p", q.preview, "tn-note"));
+      if (q.problem) body5.append(el2("p", q.problem, "tn-note is-warn"));
       const afford = q.gold !== void 0 ? costs(body5, q.gold, q.materials, inv, npc, p) : false, risky = mode === "shatter" || mode === "purge", verb = { reforge: "Reforge this line", awaken: "Awaken \xB7 +1 star", enchant: "Enchant", purge: "Purge enchantments", resonance: "Change set", shatter: "Salvage" }[mode];
-      const b = button(risky && confirm === i.itemId ? "Tap again to " + verb.toLowerCase() : verb, () => {
+      const b = button2(risky && confirm === i.itemId ? "Tap again to " + verb.toLowerCase() : verb, () => {
         if (!risky || confirm === i.itemId) issue("service.modify", { npcId, itemId: i.itemId, operation: mode, line: line26 });
         else {
           confirm = i.itemId;
@@ -84923,7 +84931,7 @@ function createSettlementServicesMenu2(options) {
       }, "execute:" + mode, "tn-btn is-gold");
       b.disabled = busy || !afford || Boolean(q.problem);
       foot.append(b);
-      shell.append(foot);
+      shell2.append(foot);
     }
   }
   async function sellMany(ids4) {
@@ -84972,9 +84980,9 @@ function createSettlementServicesMenu2(options) {
     supplyButton.style.setProperty("--potion-cooldown", String(cooling ? belt.cooldownTicks / belt.cooldownTotal : 0));
     supplyButton.setAttribute("aria-label", "Drink health potion, " + belt.count + " of " + belt.capacity + ", heals " + belt.healPercent + " percent");
     const next = m.localPlayerId + "/" + m.inventory.revision + "/" + m.playersById[m.localPlayerId].progression.level + "/" + npcId + "/" + mode + "/" + selected + "/" + line26 + "/" + materialQuantity + "/" + busy + "/" + notice + "/" + confirm + "/" + sheet + "/" + filter + "/" + [...picks].join(",") + "/" + (m.serviceNpcs?.find((n) => n.id === npcId)?.available ?? false) + "/" + (m.serviceNpcs?.find((n) => n.id === npcId)?.stock?.map((q) => q.id + (q.purchased ? "!" : "")).join() ?? "") + "/" + Math.ceil((m.serviceNpcs?.find((n) => n.id === npcId)?.restockTicks ?? 0) / 3600);
-    if (panel.open && key2 !== next) {
+    if (panel.open && key3 !== next) {
       const focus = doc.activeElement?.dataset.serviceAction;
-      key2 = next;
+      key3 = next;
       draw(m);
       if (focus) [...panel.querySelectorAll("[data-service-action]")].find((e) => e.dataset.serviceAction === focus)?.focus({ preventScroll: true });
     }
@@ -84991,7 +84999,7 @@ function createSettlementServicesMenu2(options) {
     sheet = null;
     filter = "all";
     picks.clear();
-    key2 = null;
+    key3 = null;
     panel.showModal();
     refresh(readModel());
   }
@@ -85092,9 +85100,9 @@ function createVitalsHudV4(doc) {
   }
   const setRing = (v, instant) => {
     if (!ring6) return;
-    const r = Math.max(0, Math.min(1, v)), key2 = r.toFixed(3) + (instant ? "i" : "");
-    if (key2 === lastRing) return;
-    lastRing = key2;
+    const r = Math.max(0, Math.min(1, v)), key3 = r.toFixed(3) + (instant ? "i" : "");
+    if (key3 === lastRing) return;
+    lastRing = key3;
     med.classList.toggle("instant", Boolean(instant));
     ring6.setAttribute("stroke-dasharray", `${(r * 100).toFixed(2)} 100`);
     ring6.style.opacity = r < 4e-3 ? "0" : "1";
@@ -85132,18 +85140,18 @@ function createVitalsHudV4(doc) {
       hpTrack.append(s);
     }
   }
-  const paint2 = (el, text2) => {
-    if (painted4.get(el) !== text2) {
-      painted4.set(el, text2);
-      el.style.transform = text2;
+  const paint2 = (el2, text2) => {
+    if (painted4.get(el2) !== text2) {
+      painted4.set(el2, text2);
+      el2.style.transform = text2;
     }
   };
-  const scale = (el, value2) => paint2(el, `scaleX(${Math.max(0, Math.min(1, value2)).toFixed(4)})`);
-  const slide = (el, value2) => paint2(el, `translateX(${((Math.max(0, Math.min(1, value2)) - 1) * 100).toFixed(2)}%)`);
-  const retrigger = (el, cls) => {
-    el.classList.remove(cls);
-    void el.offsetWidth;
-    el.classList.add(cls);
+  const scale = (el2, value2) => paint2(el2, `scaleX(${Math.max(0, Math.min(1, value2)).toFixed(4)})`);
+  const slide = (el2, value2) => paint2(el2, `translateX(${((Math.max(0, Math.min(1, value2)) - 1) * 100).toFixed(2)}%)`);
+  const retrigger = (el2, cls) => {
+    el2.classList.remove(cls);
+    void el2.offsetWidth;
+    el2.classList.add(cls);
   };
   function update(hpData) {
     if (hp && hpData) {
@@ -85258,7 +85266,7 @@ function createWoodlandClueHudV3_8(document2) {
 
 // src/client/civilian_context_input.js
 function createCivilianContextInput({ environment, readModel, activate, isBlocked = () => false, resolveTarget = null }) {
-  const key2 = (e) => {
+  const key3 = (e) => {
     if (e.code !== "KeyE" || e.repeat || isBlocked() || /INPUT|SELECT|TEXTAREA/.test(e.target?.tagName ?? "")) return;
     const m = readModel(), a = m.entitiesById[m.playersById[m.localPlayerId].entityId], exit = resolveTarget ? resolveTarget(m) : m.space.exits?.find((e2) => Math.hypot(a.position.x - e2.x, a.position.y - e2.y) <= e2.radius);
     if (exit) {
@@ -85266,8 +85274,8 @@ function createCivilianContextInput({ environment, readModel, activate, isBlocke
       activate(exit.exitId);
     }
   };
-  environment.addEventListener("keydown", key2);
-  return { destroy: () => environment.removeEventListener("keydown", key2) };
+  environment.addEventListener("keydown", key3);
+  return { destroy: () => environment.removeEventListener("keydown", key3) };
 }
 
 // src/client/chart_layers_v1.js
@@ -86105,9 +86113,9 @@ function atlasStamps(c, raster, view3, s, avoid, meta) {
     if (!isLand(b) || b === 66) continue;
     if ([[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => isWet(code(raster, jx + dx * m, jy + dy * m)))) continue;
     if (avoid.some((a) => jx > a.x0 && jx < a.x1 && jy > a.y0 && jy < a.y1)) continue;
-    const key2 = String.fromCharCode(b), dens = { w: 0.75, t: 0.8, r: 0.55, l: 0.5, s: 0.45, d: 0.45, m: 0.45, a: 0.28, o: 0.3 }[key2] ?? 0.3;
+    const key3 = String.fromCharCode(b), dens = { w: 0.75, t: 0.8, r: 0.55, l: 0.5, s: 0.45, d: 0.45, m: 0.45, a: 0.28, o: 0.3 }[key3] ?? 0.3;
     if (hash22(tx, ty, 3) > dens) continue;
-    cand.push([jy, jx, key2, tx, ty]);
+    cand.push([jy, jx, key3, tx, ty]);
   }
   cand.sort((a, b) => a[0] - b[0]);
   const P14 = (x, y) => [(x - view3.x) * s, (y - view3.y) * s];
@@ -86490,12 +86498,12 @@ var store = { get(k) {
   }
 } };
 function createAtlasMapV2({ document: doc, environment: env, port, releaseInput, issue = null }) {
-  const el = (tag, cls, text2) => {
+  const el2 = (tag, cls, text2) => {
     const e = doc.createElement(tag);
     if (cls) e.className = cls;
     if (text2 !== void 0) e.textContent = text2;
     return e;
-  }, style = el("style");
+  }, style = el2("style");
   style.textContent = `
 .chart-mini.m2-mini{position:fixed;right:calc(10px + var(--world-safe-right,0px));top:calc(6px + var(--world-safe-top,0px));z-index:6;padding:0;border:0;border-radius:50%;background:none;box-shadow:none;color:#efe2c2}.chart-mini.m2-mini::before,.chart-mini.m2-mini::after{content:none}
 .m2-mini canvas{display:block;cursor:pointer;-webkit-tap-highlight-color:transparent}.m2-mini .m2-zoom{position:absolute;width:24px;height:24px;min-height:0;padding:0;display:grid;place-items:center;border:1.5px solid #1a120a;border-radius:50%;background:radial-gradient(circle at 40% 35%,#f0d68e,#b98d45 70%);color:#2a1d12;font:800 15px/1 ${UI_FONT};box-shadow:0 2px 4px #0008;cursor:pointer;-webkit-tap-highlight-color:transparent}.m2-mini .m2-zoom::after{content:"";position:absolute;inset:-7px;border-radius:50%}
@@ -86523,7 +86531,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
 `;
   doc.head.append(style);
   const ICON = { plus: '<path d="M12 5v14M5 12h14"/>', minus: '<path d="M5 12h14"/>', locate: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4"/>', world: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>', key: '<path d="M5 6h14M5 12h14M5 18h9"/>', close: '<path d="M6 6l12 12M18 6 6 18"/>' };
-  const mini = el("section", "chart-mini m2-mini"), small = el("canvas"), zoomIn = el("button", "m2-zoom", "+"), zoomOut = el("button", "m2-zoom", "\u2212"), placeLine = el("div", "m2-placeline");
+  const mini = el2("section", "chart-mini m2-mini"), small = el2("canvas"), zoomIn = el2("button", "m2-zoom", "+"), zoomOut = el2("button", "m2-zoom", "\u2212"), placeLine = el2("div", "m2-placeline");
   mini.dataset.gameplayHud = "";
   small.setAttribute("aria-label", "Minimap \u2014 open world map");
   small.setAttribute("role", "button");
@@ -86532,27 +86540,27 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
   zoomIn.setAttribute("aria-label", "Zoom minimap in");
   zoomOut.setAttribute("aria-label", "Zoom minimap out");
   mini.append(small, zoomIn, zoomOut, placeLine);
-  const atlas = el("section", "m2-atlas"), large = el("canvas"), title = el("div", "m2-title"), titleSub = el("span"), tools2 = el("div", "m2-tools"), sheet = el("aside", "m2-sheet"), toast = el("div", "m2-toast"), kneelBox = el("div", "m2-kneel"), kneelMedal = el("canvas"), kneelText = el("strong"), kneelBar = el("b"), banner4 = el("div", "m2-banner"), bannerCanvas = el("canvas"), notice = el("div", "m2-notice"), noticeIcon = el("canvas"), noticeTop = el("small"), noticeName = el("strong");
+  const atlas = el2("section", "m2-atlas"), large = el2("canvas"), title = el2("div", "m2-title"), titleSub = el2("span"), tools2 = el2("div", "m2-tools"), sheet = el2("aside", "m2-sheet"), toast = el2("div", "m2-toast"), kneelBox = el2("div", "m2-kneel"), kneelMedal = el2("canvas"), kneelText = el2("strong"), kneelBar = el2("b"), banner4 = el2("div", "m2-banner"), bannerCanvas = el2("canvas"), notice = el2("div", "m2-notice"), noticeIcon = el2("canvas"), noticeTop = el2("small"), noticeName = el2("strong");
   atlas.hidden = true;
   atlas.setAttribute("role", "dialog");
   atlas.setAttribute("aria-modal", "true");
   atlas.setAttribute("aria-label", "World map");
-  title.append(el("strong", void 0, "The Known World"), titleSub);
+  title.append(el2("strong", void 0, "The Known World"), titleSub);
   sheet.hidden = true;
   sheet.setAttribute("aria-live", "polite");
   toast.hidden = true;
   kneelBox.hidden = true;
   banner4.hidden = true;
   {
-    const bar = el("i");
+    const bar = el2("i");
     bar.append(kneelBar);
-    const t = el("div");
+    const t = el2("div");
     t.append(kneelText, bar);
     kneelBox.append(kneelMedal, t);
   }
   banner4.append(bannerCanvas);
   {
-    const t = el("div");
+    const t = el2("div");
     t.append(noticeTop, noticeName);
     notice.append(noticeIcon, t);
     notice.hidden = true;
@@ -86582,8 +86590,8 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
   };
   env.addEventListener("resize", invalidateSize);
   env.addEventListener("orientationchange", invalidateSize);
-  const button = (parent, label4, icon, fn, cls) => {
-    const b = el("button", cls);
+  const button2 = (parent, label4, icon, fn, cls) => {
+    const b = el2("button", cls);
     b.type = "button";
     b.setAttribute("aria-label", label4);
     b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICON[icon] + "</svg>";
@@ -86595,7 +86603,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     return b;
   };
   const medalCanvas = (kind, css, opt = {}) => {
-    const c = el("canvas"), r = Math.min(2, env.devicePixelRatio || 1);
+    const c = el2("canvas"), r = Math.min(2, env.devicePixelRatio || 1);
     c.width = c.height = Math.round(css * r);
     const x = c.getContext("2d");
     x.scale(r, r);
@@ -86613,9 +86621,9 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
   function places() {
     const k = knowledge();
     if (!meta || !k) return [];
-    const key3 = k.revision + "/" + Object.keys(k.visited).length + "/" + Object.keys(k.rumors).length + "/" + JSON.stringify(model.navigation.navigableSitesById ? Object.keys(model.navigation.navigableSitesById).length : 0);
-    if (key3 === placesKey) return placesList;
-    placesKey = key3;
+    const key4 = k.revision + "/" + Object.keys(k.visited).length + "/" + Object.keys(k.rumors).length + "/" + JSON.stringify(model.navigation.navigableSitesById ? Object.keys(model.navigation.navigableSitesById).length : 0);
+    if (key4 === placesKey) return placesList;
+    placesKey = key4;
     const out = [], towns2 = townsById(), states = model.navigation.navigableSitesById ?? {};
     for (const s of meta.settlements) {
       const big = s.class === "capital-great-hold" || s.class === "city";
@@ -86713,9 +86721,9 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     setMiniZoom(e.deltaY > 0 ? 1 : -1);
   }, { passive: false });
   function bezelImage(D2, ratio) {
-    const key3 = D2 + "/" + ratio;
-    if (bezel?.key === key3) return bezel.canvas;
-    const W4 = D2 + 28, H7 = D2 + 34, R9 = D2 / 2, cx = W4 / 2, cy2 = 20 + R9, c = el("canvas");
+    const key4 = D2 + "/" + ratio;
+    if (bezel?.key === key4) return bezel.canvas;
+    const W4 = D2 + 28, H7 = D2 + 34, R9 = D2 / 2, cx = W4 / 2, cy2 = 20 + R9, c = el2("canvas");
     c.width = Math.round(W4 * ratio);
     c.height = Math.round(H7 * ratio);
     const x = c.getContext("2d");
@@ -86787,15 +86795,15 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     x.textBaseline = "middle";
     x.fillText("N", 0, -0.6);
     x.restore();
-    bezel = { key: key3, canvas: c };
+    bezel = { key: key4, canvas: c };
     return c;
   }
   function requestRaster(store_, view3, width, height, cssWidth, cssHeight, ratio, keep4) {
-    const rounded4 = { x: Math.floor(view3.x), y: Math.floor(view3.y), width: Math.ceil(view3.width), height: Math.ceil(view3.height) }, key3 = JSON.stringify([rounded4, width, height, cssWidth, cssHeight, ratio]);
-    if (store_.has(key3)) {
-      const v = store_.get(key3);
-      store_.delete(key3);
-      store_.set(key3, v);
+    const rounded4 = { x: Math.floor(view3.x), y: Math.floor(view3.y), width: Math.ceil(view3.width), height: Math.ceil(view3.height) }, key4 = JSON.stringify([rounded4, width, height, cssWidth, cssHeight, ratio]);
+    if (store_.has(key4)) {
+      const v = store_.get(key4);
+      store_.delete(key4);
+      store_.set(key4, v);
       cacheHits++;
       return v;
     }
@@ -86808,7 +86816,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
         const surface3 = doc.createElement("canvas");
         surface3.width = Math.round(cssWidth * ratio);
         surface3.height = Math.round(cssHeight * ratio);
-        store_.set(key3, { key: key3, raster, surface: surface3, cssWidth, cssHeight, paintKey: null });
+        store_.set(key4, { key: key4, raster, surface: surface3, cssWidth, cssHeight, paintKey: null });
         while (store_.size > keep4) store_.delete(store_.keys().next().value);
         dirty = true;
       }).catch((e) => {
@@ -87033,22 +87041,22 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     }
     dirty = true;
   }
-  const closeButton = button(tools2, "Close world map", "close", hide, "m2-close");
-  button(tools2, "Zoom in", "plus", () => zoom(1 / 1.6));
-  button(tools2, "Zoom out", "minus", () => zoom(1.6));
-  button(tools2, "Center on me", "locate", () => {
+  const closeButton = button2(tools2, "Close world map", "close", hide, "m2-close");
+  button2(tools2, "Zoom in", "plus", () => zoom(1 / 1.6));
+  button2(tools2, "Zoom out", "minus", () => zoom(1.6));
+  button2(tools2, "Center on me", "locate", () => {
     center3 = { ...player() };
     span2 = 600;
     dirty = true;
   });
-  button(tools2, "Whole world", "world", () => {
+  button2(tools2, "Whole world", "world", () => {
     if (!meta) return;
     const r = atlasDims();
     center3 = { x: meta.widthTiles / 2, y: meta.heightTiles / 2 };
     span2 = Math.min(maxSpan(), Math.max(meta.widthTiles * 1.04, meta.heightTiles * r.width / r.height * 1.04));
     dirty = true;
   });
-  const keyButton = button(tools2, "Map key and found places", "key", () => {
+  const keyButton = button2(tools2, "Map key and found places", "key", () => {
     sheetMode = sheetMode === "key" ? null : "key";
     selected = null;
     renderSheet();
@@ -87081,7 +87089,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
   function renderSheet() {
     sheet.replaceChildren();
     keyButton.setAttribute("aria-pressed", String(sheetMode === "key"));
-    const x = el("button", "m2-x", "\xD7");
+    const x = el2("button", "m2-x", "\xD7");
     x.type = "button";
     x.setAttribute("aria-label", "Close");
     x.onclick = (e) => {
@@ -87092,12 +87100,12 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
       dirty = true;
     };
     if (sheetMode === "key") {
-      sheet.append(el("h4", void 0, "Map key"));
-      const grid = el("div", "m2-key"), list = places(), count = (f) => list.filter(f).length, row2 = (kind, text2, value2) => {
-        const d2 = el("div");
-        d2.append(medalCanvas(kind, 24), el("em", void 0, text2));
+      sheet.append(el2("h4", void 0, "Map key"));
+      const grid = el2("div", "m2-key"), list = places(), count = (f) => list.filter(f).length, row2 = (kind, text2, value2) => {
+        const d2 = el2("div");
+        d2.append(medalCanvas(kind, 24), el2("em", void 0, text2));
         d2.lastChild.style.fontStyle = "normal";
-        d2.append(el("span", void 0, value2));
+        d2.append(el2("span", void 0, value2));
         grid.append(d2);
       };
       const sets = meta?.settlements ?? [], small_ = sets.filter((s) => s.class !== "city" && s.class !== "capital-great-hold"), big = sets.filter((s) => s.class === "city" || s.class === "capital-great-hold"), k = knowledge();
@@ -87108,9 +87116,9 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
       row2("event", "Event clearings", count((m2) => m2.kind === "event" && !m2.rumored) + " found");
       row2("ferry", "Ferry landings", count((m2) => m2.kind === "ferry") + " found");
       row2("quest", "Tracked place", tracked && placeById(tracked) ? "1" : "none");
-      sheet.append(grid, el("p", "m2-note", "Every town, city and capital shows as ? until you reach it; dungeons appear once you find them. Every town and dungeon you find is a fast travel point. A green tick marks a cleared dungeon."));
+      sheet.append(grid, el2("p", "m2-note", "Every town, city and capital shows as ? until you reach it; dungeons appear once you find them. Every town and dungeon you find is a fast travel point. A green tick marks a cleared dungeon."));
       const notes = knowledge()?.journal ?? [];
-      if (notes.length) sheet.append(el("p", "m2-note", "Journal: " + TRAIL_NOTE_TEXT));
+      if (notes.length) sheet.append(el2("p", "m2-note", "Journal: " + TRAIL_NOTE_TEXT));
       sheet.append(x);
       sheet.hidden = false;
       return;
@@ -87121,10 +87129,10 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     }
     const m = placeById(selected.id) ?? selected;
     if (sheetMode === "confirm") {
-      const head14 = el("div", "m2-head");
-      head14.append(medalCanvas(m.icon, 48), el("div"));
-      head14.lastChild.append(el("h3", void 0, "Travel to " + m.label + "?"), el("div", "m2-sub", "You kneel for 3 seconds. Moving or taking a hit cancels it."));
-      const b2 = el("div", "m2-btns"), go = el("button", "m2-gold", "Travel"), no = el("button", "m2-plain", "Cancel");
+      const head14 = el2("div", "m2-head");
+      head14.append(medalCanvas(m.icon, 48), el2("div"));
+      head14.lastChild.append(el2("h3", void 0, "Travel to " + m.label + "?"), el2("div", "m2-sub", "You kneel for 3 seconds. Moving or taking a hit cancels it."));
+      const b2 = el2("div", "m2-btns"), go = el2("button", "m2-gold", "Travel"), no = el2("button", "m2-plain", "Cancel");
       go.type = no.type = "button";
       const block2 = travelBlock();
       go.disabled = Boolean(block2);
@@ -87139,34 +87147,34 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
       };
       b2.append(go, no);
       sheet.append(head14);
-      if (block2) sheet.append(el("p", "m2-note", block2));
+      if (block2) sheet.append(el2("p", "m2-note", block2));
       sheet.append(b2, x);
       sheet.hidden = false;
       return;
     }
-    const head13 = el("div", "m2-head");
-    head13.append(medalCanvas(m.icon, 48, { done: m.done }), el("div"));
-    head13.lastChild.append(el("h3", void 0, m.kind === "event" ? eventName(m) : m.label), el("div", "m2-sub", subtitle(m)));
+    const head13 = el2("div", "m2-head");
+    head13.append(medalCanvas(m.icon, 48, { done: m.done }), el2("div"));
+    head13.lastChild.append(el2("h3", void 0, m.kind === "event" ? eventName(m) : m.label), el2("div", "m2-sub", subtitle(m)));
     sheet.append(head13);
     if (m.kind === "settlement" && m.town) {
-      const kinds2 = [...new Set(m.town.buildings.map((b2) => b2[4]).filter(Boolean))].sort((a, b2) => Object.keys(SHOP_NAME).indexOf(a) - Object.keys(SHOP_NAME).indexOf(b2)), chips = el("div", "m2-chips");
+      const kinds2 = [...new Set(m.town.buildings.map((b2) => b2[4]).filter(Boolean))].sort((a, b2) => Object.keys(SHOP_NAME).indexOf(a) - Object.keys(SHOP_NAME).indexOf(b2)), chips = el2("div", "m2-chips");
       for (const k of kinds2) {
-        const chip2 = el("span", "m2-chip");
-        chip2.append(medalCanvas(k, 22), el("span", void 0, SHOP_NAME[k]));
+        const chip2 = el2("span", "m2-chip");
+        chip2.append(medalCanvas(k, 22), el2("span", void 0, SHOP_NAME[k]));
         chips.append(chip2);
       }
       if (kinds2.length) sheet.append(chips);
     }
-    const status2 = el("div", "m2-status"), p = player(), d = p ? Math.hypot(m.x - p.x, m.y - p.y) : 0, mark = el("b", void 0, m.unknown ? "Not found yet" : m.rumored ? "Rumored" : m.done ? "\u2713 Cleared" : "\u2713 Found");
+    const status2 = el2("div", "m2-status"), p = player(), d = p ? Math.hypot(m.x - p.x, m.y - p.y) : 0, mark = el2("b", void 0, m.unknown ? "Not found yet" : m.rumored ? "Rumored" : m.done ? "\u2713 Cleared" : "\u2713 Found");
     if (m.unknown) mark.style.color = "#8a6232";
     status2.append(mark);
     const here = Boolean(p) && (d < 6 || m.kind === "settlement" && insideTownAt(p) === m.id);
-    if (p) status2.append(el("span", void 0, here ? "You are here" : fmt(d) + " tiles \xB7 " + walk(d)));
+    if (p) status2.append(el2("span", void 0, here ? "You are here" : fmt(d) + " tiles \xB7 " + walk(d)));
     sheet.append(status2);
-    if (m.unknown) sheet.append(el("p", "m2-note", "Reach it to learn its name and unlock fast travel."));
-    const b = el("div", "m2-btns");
+    if (m.unknown) sheet.append(el2("p", "m2-note", "Reach it to learn its name and unlock fast travel."));
+    const b = el2("div", "m2-btns");
     if (m.travel && !here) {
-      const go = el("button", "m2-gold", "Travel here");
+      const go = el2("button", "m2-gold", "Travel here");
       go.type = "button";
       go.onclick = (e) => {
         e.preventDefault();
@@ -87175,7 +87183,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
       };
       b.append(go);
     }
-    const tr = el("button", "m2-plain", tracked === m.id ? "Stop tracking" : "Track");
+    const tr = el2("button", "m2-plain", tracked === m.id ? "Stop tracking" : "Track");
     tr.type = "button";
     tr.onclick = (e) => {
       e.preventDefault();
@@ -87475,9 +87483,9 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
   }
   let stirSeen = null, stirKey = "";
   function stepStirring() {
-    const rows = model?.stirring ?? [], key3 = rows.map((r) => r.id + "/" + r.kind + "/" + r.found + "/" + r.started).join("|");
-    if (key3 === stirKey) return;
-    stirKey = key3;
+    const rows = model?.stirring ?? [], key4 = rows.map((r) => r.id + "/" + r.kind + "/" + r.found + "/" + r.started).join("|");
+    if (key4 === stirKey) return;
+    stirKey = key4;
     dirty = true;
     const now3 = new Set(rows.map((r) => r.id));
     if (stirSeen === null) {
@@ -87655,7 +87663,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     });
   }
   metadata();
-  const key2 = (e) => {
+  const key3 = (e) => {
     if (e.code === "Escape" && open2) {
       e.preventDefault();
       hide();
@@ -87664,7 +87672,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
       open2 ? hide() : show();
     }
   };
-  env.addEventListener("keydown", key2);
+  env.addEventListener("keydown", key3);
   small.onclick = show;
   small.onkeydown = (e) => {
     if (e.key === "Enter" || e.key === " ") {
@@ -87792,7 +87800,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
       sizeObserver?.disconnect();
       env.removeEventListener("resize", invalidateSize);
       env.removeEventListener("orientationchange", invalidateSize);
-      env.removeEventListener("keydown", key2);
+      env.removeEventListener("keydown", key3);
       for (const e of [mini, atlas, style, toast, kneelBox, banner4]) e.remove();
       cache6.clear();
       miniCache.clear();
@@ -87892,8 +87900,8 @@ function addJoinedKnowledge(ctx, page, x, y, cw, ch, cols, rows, predicate) {
   }
 }
 function addRoadShape(ctx, road, x, y, cw, ch, radius) {
-  for (const key2 of road) {
-    const [px7, py] = key2.split(",").map(Number);
+  for (const key3 of road) {
+    const [px7, py] = key3.split(",").map(Number);
     ctx.roundRect(x + px7 * cw - radius * 0.35, y + py * ch - radius * 0.35, cw + radius * 0.7, ch + radius * 0.7, radius);
   }
 }
@@ -87902,8 +87910,8 @@ function drawCartographyD9(ctx, { pages: pages2, pending = [], viewport, width, 
   ctx.fillRect(0, 0, width, height);
   const byKey = new Map(pages2.filter((p) => p.level === level).map((p) => [p.chunkX + "," + p.chunkY, p]));
   if (level === 0) for (const p of pending) {
-    const key2 = p.chunkX + "," + p.chunkY, old2 = byKey.get(key2);
-    byKey.set(key2, { ...p, level: 0, tiles: [...p.tiles].map((c, i) => c === "?" ? old2?.tiles[i] ?? "?" : c).join(""), markers: [...old2?.markers ?? [], ...p.markers] });
+    const key3 = p.chunkX + "," + p.chunkY, old2 = byKey.get(key3);
+    byKey.set(key3, { ...p, level: 0, tiles: [...p.tiles].map((c, i) => c === "?" ? old2?.tiles[i] ?? "?" : c).join(""), markers: [...old2?.markers ?? [], ...p.markers] });
   }
   const visible3 = [], markers = [];
   for (const page of byKey.values()) {
@@ -88077,11 +88085,11 @@ function createWorldMapD9({ document: doc, environment, port, releaseInput, issu
 @media(max-height:550px){.world-mini{top:calc(56px + var(--world-safe-top));width:104px}.world-mini canvas{width:98px;height:62px}.world-atlas header{padding:3px}.world-atlas p{padding:3px;min-height:24px}}
 `;
   doc.head.append(style);
-  const el = (tag, text2) => {
+  const el2 = (tag, text2) => {
     const e = doc.createElement(tag);
     if (text2) e.textContent = text2;
     return e;
-  }, mini = el("section"), small = el("canvas"), footer = el("footer"), atlas = el("section"), header = el("header"), large = el("canvas"), detail = el("p", "Drag to explore known geography. Pinch or use + / \u2212 to zoom.");
+  }, mini = el2("section"), small = el2("canvas"), footer = el2("footer"), atlas = el2("section"), header = el2("header"), large = el2("canvas"), detail = el2("p", "Drag to explore known geography. Pinch or use + / \u2212 to zoom.");
   mini.className = "world-mini";
   mini.dataset.gameplayHud = "";
   atlas.className = "world-atlas";
@@ -88093,8 +88101,8 @@ function createWorldMapD9({ document: doc, environment, port, releaseInput, issu
   small.height = 76 * MINIMAP_PIXEL_RATIO;
   small.setAttribute("aria-label", "Minimap \u2014 open world map");
   small.tabIndex = 0;
-  const button = (text2, fn, parent, className = "") => {
-    const b = el("button", text2);
+  const button2 = (text2, fn, parent, className = "") => {
+    const b = el2("button", text2);
     b.type = "button";
     b.className = className;
     let held = null;
@@ -88119,9 +88127,9 @@ function createWorldMapD9({ document: doc, environment, port, releaseInput, issu
     parent.append(b);
     return b;
   };
-  header.append(el("strong", "WORLD MAP"));
+  header.append(el2("strong", "WORLD MAP"));
   mini.append(small, footer);
-  footer.append(el("span", "N \u2191"));
+  footer.append(el2("span", "N \u2191"));
   atlas.append(header, large, detail);
   doc.body.append(mini, atlas);
   let open2 = false, hudAllowed = true, center3 = null, level = 0, miniZoom = 1, busy = false, closed = false, lastKey = null, cache6 = [], cacheRevision = 0, lastModel = null, marks2 = [], miniMarks = [], reviewMarks = [], terrainHits = [], lastTime = -1e3, staticLayer = null, staticKey = null, staticBuilds = 0, staticHits = 0, miniBackingCenter = null, miniRequestedCenter = null, miniRecenters = 0;
@@ -88164,12 +88172,12 @@ function createWorldMapD9({ document: doc, environment, port, releaseInput, issu
     lastKey = null;
     if (planned) detail.textContent = "Observed terrain \xB7 zoom " + 2 ** level + "\xD7 span \xB7 solid gold road / dashed trail / white bridge";
   };
-  button("\u2212", () => zoom(1), header, "map-zoom-out");
-  button("+", () => zoom(-1), header);
-  button("Recenter", recenter, header);
-  const closeButton = button("\xD7", hide, header, "map-close");
+  button2("\u2212", () => zoom(1), header, "map-zoom-out");
+  button2("+", () => zoom(-1), header);
+  button2("Recenter", recenter, header);
+  const closeButton = button2("\xD7", hide, header, "map-close");
   closeButton.setAttribute("aria-label", "Close world map");
-  const miniButton = button("1\xD7", () => {
+  const miniButton = button2("1\xD7", () => {
     miniZoom = miniZoom === 1 ? 2 : 1;
     miniButton.textContent = miniZoom + "\xD7";
     lastKey = null;
@@ -88269,11 +88277,11 @@ function createWorldMapD9({ document: doc, environment, port, releaseInput, issu
       const drift5 = worldScreenDeltaD9(n.position, miniBackingCenter, scale);
       if (Math.abs(drift5.x) >= recenterDistance || Math.abs(drift5.y) >= recenterDistance) miniRequestedCenter = { ...n.position };
     }
-    const requestCenter = open2 ? center3 : miniRequestedCenter ?? miniBackingCenter, requestViewport = mapViewportD9(requestCenter, lod, backingWidth, backingHeight, scale), query = { playerId: model.localPlayerId, spaceInstanceId: model.context.spaceInstanceId, level: lod, x: requestViewport.x, y: requestViewport.y, width: requestViewport.width, height: requestViewport.height }, key2 = JSON.stringify([query, n.root, n.revision]), requestMode = open2 ? "atlas" : "minimap", requestedMiniCenter = !open2 ? { ...requestCenter } : null;
-    if (!busy && key2 !== lastKey && time - lastTime >= 150) {
+    const requestCenter = open2 ? center3 : miniRequestedCenter ?? miniBackingCenter, requestViewport = mapViewportD9(requestCenter, lod, backingWidth, backingHeight, scale), query = { playerId: model.localPlayerId, spaceInstanceId: model.context.spaceInstanceId, level: lod, x: requestViewport.x, y: requestViewport.y, width: requestViewport.width, height: requestViewport.height }, key3 = JSON.stringify([query, n.root, n.revision]), requestMode = open2 ? "atlas" : "minimap", requestedMiniCenter = !open2 ? { ...requestCenter } : null;
+    if (!busy && key3 !== lastKey && time - lastTime >= 150) {
       busy = true;
       lastTime = time;
-      lastKey = key2;
+      lastKey = key3;
       port.mapWindow(query).then((r) => {
         if (!closed) {
           cache6 = r.pages;
@@ -88397,12 +88405,12 @@ function createWorldMapD9({ document: doc, environment, port, releaseInput, issu
 }
 
 // src/client/shield_guard_input.js
-function createShieldGuardInput({ button, environment, readModel, adapter, isBlocked, clearPrimary, reportError }) {
+function createShieldGuardInput({ button: button2, environment, readModel, adapter, isBlocked, clearPrimary, reportError }) {
   const owners = /* @__PURE__ */ new Set(), listeners = [];
   let context = null, shown2 = null;
-  const listen = (el, type, fn) => {
-    el.addEventListener(type, fn);
-    listeners.push(() => el.removeEventListener(type, fn));
+  const listen = (el2, type, fn) => {
+    el2.addEventListener(type, fn);
+    listeners.push(() => el2.removeEventListener(type, fn));
   };
   function send(pressed) {
     const m = readModel(), p = m.playersById[m.localPlayerId];
@@ -88431,18 +88439,18 @@ function createShieldGuardInput({ button, environment, readModel, adapter, isBlo
     owners.clear();
     if (had || g?.requested || g?.raised || g?.mustRelease) send(false);
   }
-  listen(button, "pointerdown", (e) => {
+  listen(button2, "pointerdown", (e) => {
     if (e.button !== 0) return;
     e.preventDefault();
     e.stopPropagation();
     down(e.pointerId);
     try {
-      button.setPointerCapture(e.pointerId);
+      button2.setPointerCapture(e.pointerId);
     } catch {
     }
   });
-  for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) listen(button, type, (e) => up(e.pointerId));
-  listen(button, "click", (e) => e.preventDefault());
+  for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) listen(button2, type, (e) => up(e.pointerId));
+  listen(button2, "click", (e) => e.preventDefault());
   listen(environment, "keydown", (e) => {
     if (!["ShiftLeft", "ShiftRight"].includes(e.code) || e.repeat || ["INPUT", "TEXTAREA", "SELECT", "BUTTON"].includes(e.target?.tagName)) return;
     if (readModel().playersById[readModel().localPlayerId].stats.subType === "shield") {
@@ -88465,27 +88473,27 @@ function createShieldGuardInput({ button, environment, readModel, adapter, isBlo
     }
     if (isBlocked() || m.subweapon?.suppressed || !m.entitiesById[p.entityId].alive) clear2();
     const hide = Boolean(p.stats.subType !== "shield" || isBlocked() || m.subweapon?.suppressed);
-    if (button.hidden !== hide) button.hidden = hide;
+    if (button2.hidden !== hide) button2.hidden = hide;
     if (hide) return;
     const alive = m.entitiesById[p.entityId].alive, next = `${alive}/${Boolean(g?.raised)}/${Boolean(g?.mustRelease)}/${Boolean(g?.requested)}/${(g?.integrity ?? 0).toFixed(1)}`;
     if (next === shown2) return;
     shown2 = next;
-    button.disabled = !alive;
-    button.setAttribute("aria-pressed", String(Boolean(g?.raised)));
-    button.setAttribute("aria-label", `Raise Shield \u2014 hold Shift or touch. Guard Integrity ${Math.floor(g?.integrity ?? 0)} of 32`);
-    button.style.setProperty("--guard-fill", `${100 * (g?.integrity ?? 0) / 32}%`);
-    button.style.setProperty("--cool", (1 - Math.min(32, g?.integrity ?? 0) / 32).toFixed(3));
-    button.dataset.raised = String(Boolean(g?.raised));
-    button.dataset.empty = String((g?.integrity ?? 0) < 8);
+    button2.disabled = !alive;
+    button2.setAttribute("aria-pressed", String(Boolean(g?.raised)));
+    button2.setAttribute("aria-label", `Raise Shield \u2014 hold Shift or touch. Guard Integrity ${Math.floor(g?.integrity ?? 0)} of 32`);
+    button2.style.setProperty("--guard-fill", `${100 * (g?.integrity ?? 0) / 32}%`);
+    button2.style.setProperty("--cool", (1 - Math.min(32, g?.integrity ?? 0) / 32).toFixed(3));
+    button2.dataset.raised = String(Boolean(g?.raised));
+    button2.dataset.empty = String((g?.integrity ?? 0) < 8);
     const text2 = `${g?.raised ? "RAISED" : g?.mustRelease ? "RELEASE" : g?.requested ? "RAISING\u2026" : "GUARD"}
 INTEGRITY
 ${(g?.integrity ?? 0).toFixed(1)} / 32`;
-    button.innerText = text2;
+    button2.innerText = text2;
   }
   return { refresh, clear: clear2, read: () => ({ owners: [...owners] }), destroy() {
     clear2();
     listeners.forEach((f) => f());
-    button.remove();
+    button2.remove();
   } };
 }
 
@@ -88536,11 +88544,11 @@ function createSubweaponHud({ document: document2, environment, readModel, adapt
   guardButton.className = "shield-guard";
   guardButton.dataset.gameplayHud = "";
   {
-    const key2 = document2.createElement("small");
-    key2.className = "move-key";
-    key2.textContent = "\u21E7";
-    key2.setAttribute("aria-hidden", "true");
-    guardButton.append(key2);
+    const key3 = document2.createElement("small");
+    key3.className = "move-key";
+    key3.textContent = "\u21E7";
+    key3.setAttribute("aria-hidden", "true");
+    guardButton.append(key3);
   }
   document2.getElementById("world-bag").parentElement.append(guardButton);
   const guard = createShieldGuardInput({ button: guardButton, environment, readModel, adapter, isBlocked, clearPrimary, reportError });
@@ -88553,9 +88561,9 @@ function createSubweaponHud({ document: document2, environment, readModel, adapt
   dash.setAttribute("aria-label", "Shadow Dash \u2014 Shift");
   document2.getElementById("world-bag").parentElement.append(panel, dash);
   const listeners = [], owners = /* @__PURE__ */ new Set();
-  const listen = (el, type, fn) => {
-    el.addEventListener(type, fn);
-    listeners.push(() => el.removeEventListener(type, fn));
+  const listen = (el2, type, fn) => {
+    el2.addEventListener(type, fn);
+    listeners.push(() => el2.removeEventListener(type, fn));
   };
   function activate() {
     const m = readModel(), id = m.playersById[m.localPlayerId].entityId;
@@ -88640,11 +88648,11 @@ ${(c.dash.cooldown / 60).toFixed(1)}s`;
       time.className = "move-time";
       time.textContent = ready ? "" : (c.dash.cooldown / 60).toFixed(1);
       dash.innerHTML = SKILL_ICONS_V1[blink ? "blink" : "dash"];
-      const key2 = document2.createElement("small");
-      key2.className = "move-key";
-      key2.textContent = "\u21E7";
-      key2.setAttribute("aria-hidden", "true");
-      dash.append(time, label4, key2);
+      const key3 = document2.createElement("small");
+      key3.className = "move-key";
+      key3.textContent = "\u21E7";
+      key3.setAttribute("aria-hidden", "true");
+      dash.append(time, label4, key3);
       dash.dataset.label = value2;
       dash.dataset.move = blink ? "blink" : "dash";
       dash.setAttribute("aria-label", `${blink ? "Blink" : "Shadow Dash"} \u2014 Shift`);
@@ -88674,10 +88682,10 @@ function createDpsSamples() {
     cursor = 0;
   }
   function observe(model, time) {
-    const key2 = model.context.campaignId + "/" + model.context.sessionId + "/" + model.localPlayerId, events = model.primary?.events ?? [];
-    if (domain !== key2) {
+    const key3 = model.context.campaignId + "/" + model.context.sessionId + "/" + model.localPlayerId, events = model.primary?.events ?? [];
+    if (domain !== key3) {
       reset();
-      domain = key2;
+      domain = key3;
       cursor = events.at(-1)?.eventSequence ?? 0;
       return;
     }
@@ -88747,9 +88755,9 @@ function createDiagnosticOverlays({ document: document2, environment, releaseInp
   }
   const dps = createDpsSamples(), frames = createFrameSamples(), widgets = {}, listeners = [];
   let dragging = null, nextPaint = 0, writes = 0, measured = 0;
-  const listen = (el, type, fn, options) => {
-    el.addEventListener(type, fn, options);
-    listeners.push(() => el.removeEventListener(type, fn, options));
+  const listen = (el2, type, fn, options) => {
+    el2.addEventListener(type, fn, options);
+    listeners.push(() => el2.removeEventListener(type, fn, options));
   };
   const save = () => {
     try {
@@ -88774,38 +88782,38 @@ function createDiagnosticOverlays({ document: document2, environment, releaseInp
     w.el.style.top = w.y + "px";
   }
   for (const [kind, label4] of [["fps", "FPS / frame time"], ["dps", "Dungeon DPS"]]) {
-    const pref = preferences?.[kind], el = document2.createElement("div");
-    el.id = "world-" + kind + "-overlay";
-    el.className = "diagnostic-overlay " + kind;
-    el.title = "Drag to move";
-    el.tabIndex = 0;
-    el.setAttribute("aria-label", label4 + " overlay; drag or use arrow keys to move");
-    document2.getElementById("world-app").append(el);
-    const w = { el, enabled: pref?.enabled === true, collapsed: kind === "fps" && pref?.collapsed === true, x: Number.isFinite(pref?.x) ? pref.x : Math.max(0, environment.innerWidth - 220), y: Number.isFinite(pref?.y) ? pref.y : kind === "fps" ? 110 : 175 };
+    const pref = preferences?.[kind], el2 = document2.createElement("div");
+    el2.id = "world-" + kind + "-overlay";
+    el2.className = "diagnostic-overlay " + kind;
+    el2.title = "Drag to move";
+    el2.tabIndex = 0;
+    el2.setAttribute("aria-label", label4 + " overlay; drag or use arrow keys to move");
+    document2.getElementById("world-app").append(el2);
+    const w = { el: el2, enabled: pref?.enabled === true, collapsed: kind === "fps" && pref?.collapsed === true, x: Number.isFinite(pref?.x) ? pref.x : Math.max(0, environment.innerWidth - 220), y: Number.isFinite(pref?.y) ? pref.y : kind === "fps" ? 110 : 175 };
     widgets[kind] = w;
     if (kind === "fps") {
-      const header = document2.createElement("div"), button = document2.createElement("button"), status2 = document2.createElement("span"), body5 = document2.createElement("span");
+      const header = document2.createElement("div"), button2 = document2.createElement("button"), status2 = document2.createElement("span"), body5 = document2.createElement("span");
       header.className = "diagnostic-metrics-header";
-      button.type = "button";
-      button.className = "diagnostic-collapse";
+      button2.type = "button";
+      button2.className = "diagnostic-collapse";
       status2.className = "diagnostic-sample-state";
       status2.textContent = performanceProbe ? performanceProbe.isRecording() ? "\u25CF REC" : "\u25CB Capture frozen" : "\u25CB Sample off";
       body5.className = "diagnostic-metrics-body";
       body5.textContent = "FPS: \u2014 \xB7 Frame: \u2014 ms\nWorst 5s: \u2014 ms";
-      header.append(button, status2);
-      el.append(header, body5);
+      header.append(button2, status2);
+      el2.append(header, body5);
       w.body = body5;
       w.status = status2;
       const sync = () => {
-        el.dataset.collapsed = String(w.collapsed);
+        el2.dataset.collapsed = String(w.collapsed);
         body5.hidden = w.collapsed;
-        button.textContent = w.collapsed ? "+" : "\u2212";
-        button.setAttribute("aria-label", w.collapsed ? "Expand performance metrics" : "Collapse performance metrics");
-        button.setAttribute("aria-expanded", String(!w.collapsed));
+        button2.textContent = w.collapsed ? "+" : "\u2212";
+        button2.setAttribute("aria-label", w.collapsed ? "Expand performance metrics" : "Collapse performance metrics");
+        button2.setAttribute("aria-expanded", String(!w.collapsed));
       };
       sync();
-      listen(button, "pointerdown", (e) => e.stopPropagation());
-      listen(button, "click", (e) => {
+      listen(button2, "pointerdown", (e) => e.stopPropagation());
+      listen(button2, "click", (e) => {
         e.preventDefault();
         e.stopPropagation();
         w.collapsed = !w.collapsed;
@@ -88815,14 +88823,14 @@ function createDiagnosticOverlays({ document: document2, environment, releaseInp
         place3(w);
         save();
       });
-    } else el.textContent = "DPS: 0.0";
+    } else el2.textContent = "DPS: 0.0";
     const row2 = document2.createElement("label"), toggle = document2.createElement("input");
     toggle.type = "checkbox";
     toggle.id = "world-" + kind + "-toggle";
     toggle.checked = w.enabled;
     row2.append(toggle, document2.createTextNode(label4));
     controls.append(row2);
-    el.hidden = !w.enabled;
+    el2.hidden = !w.enabled;
     if (w.enabled) {
       bounds2(w);
       place3(w);
@@ -88830,7 +88838,7 @@ function createDiagnosticOverlays({ document: document2, environment, releaseInp
     listen(toggle, "change", () => {
       releaseInput();
       w.enabled = toggle.checked;
-      el.hidden = !w.enabled;
+      el2.hidden = !w.enabled;
       (kind === "fps" ? frames : dps).reset();
       nextPaint = 0;
       if (w.enabled) {
@@ -88839,16 +88847,16 @@ function createDiagnosticOverlays({ document: document2, environment, releaseInp
       }
       save();
     });
-    listen(el, "pointerdown", (e) => {
+    listen(el2, "pointerdown", (e) => {
       if (e.button !== 0 || dragging || e.target.closest?.("button")) return;
       e.preventDefault();
       e.stopPropagation();
       releaseInput();
       bounds2(w);
       dragging = { w, id: e.pointerId, x: e.clientX, y: e.clientY, left: w.x, top: w.y };
-      el.setPointerCapture(e.pointerId);
+      el2.setPointerCapture(e.pointerId);
     });
-    listen(el, "pointermove", (e) => {
+    listen(el2, "pointermove", (e) => {
       if (dragging?.id !== e.pointerId || dragging.w !== w) return;
       e.preventDefault();
       e.stopPropagation();
@@ -88861,17 +88869,17 @@ function createDiagnosticOverlays({ document: document2, environment, releaseInp
       e.stopPropagation();
       dragging = null;
       try {
-        el.releasePointerCapture(e.pointerId);
+        el2.releasePointerCapture(e.pointerId);
       } catch {
       }
       save();
     };
-    for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) listen(el, type, stop2);
-    for (const type of ["click", "dblclick", "contextmenu"]) listen(el, type, (e) => {
+    for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) listen(el2, type, stop2);
+    for (const type of ["click", "dblclick", "contextmenu"]) listen(el2, type, (e) => {
       e.preventDefault();
       e.stopPropagation();
     });
-    listen(el, "keydown", (e) => {
+    listen(el2, "keydown", (e) => {
       e.stopPropagation();
       if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.code)) {
         e.preventDefault();
@@ -88883,7 +88891,7 @@ function createDiagnosticOverlays({ document: document2, environment, releaseInp
         save();
       } else if (e.code === "Space") e.preventDefault();
     });
-    listen(el, "keyup", (e) => e.stopPropagation());
+    listen(el2, "keyup", (e) => e.stopPropagation());
   }
   listen(environment, "resize", () => {
     for (const w of Object.values(widgets)) if (w.enabled) {
@@ -88955,19 +88963,19 @@ Worst 5s: ${legacy.worstMs.toFixed(1)} ms`;
 var xpText = (v) => formatLarge(integerWire(v));
 function createDeathPresentation({ document: document2, readModel, adapter, clearInput, restoreGameplayFocus = () => {
 } }) {
-  const panel = document2.getElementById("world-death"), button = document2.getElementById("world-respawn");
-  if (!panel || !button) return { refresh() {
+  const panel = document2.getElementById("world-death"), button2 = document2.getElementById("world-respawn");
+  if (!panel || !button2) return { refresh() {
   }, destroy() {
   } };
   const set = (id, text2) => {
-    const el = document2.getElementById(id);
-    if (el.textContent !== text2) el.textContent = text2;
+    const el2 = document2.getElementById(id);
+    if (el2.textContent !== text2) el2.textContent = text2;
   };
   let showing = false, error = "";
   const suspended = /* @__PURE__ */ new Set();
   function suspendBackground(dead) {
     if (!dead) {
-      for (const el of suspended) el.inert = false;
+      for (const el2 of suspended) el2.inert = false;
       suspended.clear();
       return;
     }
@@ -88999,7 +89007,7 @@ function createDeathPresentation({ document: document2, readModel, adapter, clea
     }
     refresh(readModel());
   };
-  button.addEventListener("click", respawn);
+  button2.addEventListener("click", respawn);
   function refresh(model) {
     const participant = model.playersById[model.localPlayerId], hero = model.entitiesById[participant.entityId];
     const dead = Boolean(model.recovery) && !hero.alive;
@@ -89016,20 +89024,20 @@ function createDeathPresentation({ document: document2, readModel, adapter, clea
       error = "";
       return;
     }
-    if (!wasShowing) button.focus?.({ preventScroll: true });
+    if (!wasShowing) button2.focus?.({ preventScroll: true });
     const xp = participant.progression;
     set("world-death-level", `Level ${xpText(xp.level)}`);
     set("world-death-xp", xp.capped ? `XP ${xpText(xp.totalXp)} \xB7 Maximum level` : `XP ${xpText(xp.totalXp)} total \xB7 ${xpText(xp.current)}/${xpText(xp.required)} to next level`);
     set("world-death-anchor", `Return to ${model.recovery.anchorLabel}`);
     const disabled = !model.recovery.canRespawn || model.persistence.phase !== "encounter";
-    if (button.disabled !== disabled) button.disabled = disabled;
-    set("world-death-status", error || (button.disabled ? "Resolve the save status above to respawn." : ""));
+    if (button2.disabled !== disabled) button2.disabled = disabled;
+    set("world-death-status", error || (button2.disabled ? "Resolve the save status above to respawn." : ""));
   }
   return Object.freeze({ refresh, destroy: () => {
     suspendBackground(false);
     document2.removeEventListener("keydown", blockBackgroundKey, true);
     document2.removeEventListener("keyup", blockBackgroundKey, true);
-    button.removeEventListener("click", respawn);
+    button2.removeEventListener("click", respawn);
   } });
 }
 
@@ -89288,7 +89296,7 @@ function createDynamicWorldLightsV1(doc) {
   const stamps = /* @__PURE__ */ new Map();
   let drawn = 0, cores = 0;
   function stamp6(color28, core5 = false) {
-    const key2 = color28 + (core5 ? "/core" : ""), cached = stamps.get(key2);
+    const key3 = color28 + (core5 ? "/core" : ""), cached = stamps.get(key3);
     if (cached) return cached;
     const c = doc.createElement("canvas");
     c.width = c.height = 128;
@@ -89305,7 +89313,7 @@ function createDynamicWorldLightsV1(doc) {
     }
     g.fillStyle = gradient;
     g.fillRect(0, 0, 128, 128);
-    stamps.set(key2, c);
+    stamps.set(key3, c);
     return c;
   }
   const darknessOf = (frame3) => {
@@ -89940,7 +89948,7 @@ function createSilhouetteShadowsV1(doc, limits = SILHOUETTE_LIMITS) {
       }
       stats3.actors++;
     }
-    for (const [key2, a] of actors2) if (frameNo - a.seen > limits.actorStaleFrames) actors2.delete(key2);
+    for (const [key3, a] of actors2) if (frameNo - a.seen > limits.actorStaleFrames) actors2.delete(key3);
     lc.setTransform(1, 0, 0, 1, 0, 0);
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -89964,10 +89972,10 @@ function createHeroLevelUpV3() {
   function observe(model, now3) {
     const p = model.playersById?.[model.localPlayerId];
     if (!p?.progression) return;
-    const key2 = model.context.campaignId + "/" + model.localPlayerId, next = progressionBigInt(p.progression.level);
-    if (key2 === identity2 && next > level) active2 = { id: p.entityId, elapsed: 0, last: null };
-    else if (key2 !== identity2) active2 = null;
-    identity2 = key2;
+    const key3 = model.context.campaignId + "/" + model.localPlayerId, next = progressionBigInt(p.progression.level);
+    if (key3 === identity2 && next > level) active2 = { id: p.entityId, elapsed: 0, last: null };
+    else if (key3 !== identity2) active2 = null;
+    identity2 = key3;
     level = next;
   }
   function trigger(entityId2) {
@@ -90809,12 +90817,12 @@ function createBossPolishPresentation() {
     lastTick = -1;
   };
   function update(model) {
-    const tick = model.tick, key2 = [model.context?.campaignId, model.context?.sessionId, model.context?.spaceInstanceId ?? model.space?.spaceId, model.context?.spaceRevision, model.context?.residencyRevision].join("/");
-    if (context !== key2 || tick < lastTick) {
+    const tick = model.tick, key3 = [model.context?.campaignId, model.context?.sessionId, model.context?.spaceInstanceId ?? model.space?.spaceId, model.context?.spaceRevision, model.context?.residencyRevision].join("/");
+    if (context !== key3 || tick < lastTick) {
       retained.clear();
       warnings.clear();
     }
-    context = key2;
+    context = key3;
     lastTick = tick;
     const live = new Set(actors(model).map(([id, a]) => identity(id, a)));
     for (const row2 of model.bossHazards?.aegisTelegraphs ?? []) if (live.has(row2.bossId)) warnings.set(row2.bossId, { ability: row2.ability, angle: row2.angle, resolvesTick: row2.resolvesTick });
@@ -91445,17 +91453,17 @@ function surface2(w, h) {
   }
   return null;
 }
-function sprite4(key2, white) {
-  const id = key2 + (white ? "/flash" : "");
+function sprite4(key3, white) {
+  const id = key3 + (white ? "/flash" : "");
   if (cache3.has(id)) return cache3.get(id);
   let out = null;
   try {
     if (canPaint()) {
-      const [x, y, w, h] = BOUNDS2[key2], canvas = surface2(Math.ceil(w * RES2), Math.ceil(h * RES2)), c = canvas?.getContext("2d");
+      const [x, y, w, h] = BOUNDS2[key3], canvas = surface2(Math.ceil(w * RES2), Math.ceil(h * RES2)), c = canvas?.getContext("2d");
       if (c) {
         c.scale(RES2, RES2);
         c.translate(-x, -y);
-        DRAW2[key2](c);
+        DRAW2[key3](c);
         if (white) {
           c.setTransform(1, 0, 0, 1, 0, 0);
           c.globalCompositeOperation = "source-atop";
@@ -91471,13 +91479,13 @@ function sprite4(key2, white) {
   cache3.set(id, out);
   return out;
 }
-function stamp3(c, key2, flash) {
-  const s = sprite4(key2, false);
+function stamp3(c, key3, flash) {
+  const s = sprite4(key3, false);
   if (!s) return;
   c.imageSmoothingEnabled = true;
   c.drawImage(s.canvas, s.x, s.y, s.w, s.h);
   if (flash) {
-    const f = sprite4(key2, true);
+    const f = sprite4(key3, true);
     if (f) {
       c.save();
       c.globalAlpha *= 0.85;
@@ -91491,14 +91499,14 @@ function cast(boss, t) {
   return { ability: p?.ability ?? null, charge: p ? ease6((t - p.startedTick) / Math.max(1, p.resolvesTick - p.startedTick)) : 0, last: l?.ability ?? null, since: l ? t - l.resolvedTick : 999, target: p?.targetPosition ?? l?.targetPosition ?? null };
 }
 function view2(a, q) {
-  const key2 = a.boss.bossId ?? "boss", v = views.get(key2) ?? { x: a.position.x, y: a.position.y, facing: 1, move: 0 };
+  const key3 = a.boss.bossId ?? "boss", v = views.get(key3) ?? { x: a.position.x, y: a.position.y, facing: 1, move: 0 };
   const dx = a.position.x - v.x, dy = a.position.y - v.y, aim2 = q.ability || q.since < 30 ? q.target : null;
   if (aim2 && Math.abs(aim2.x - a.position.x) > 4) v.facing = aim2.x < a.position.x ? -1 : 1;
   else if (Math.abs(dx) > 0.3) v.facing = dx < 0 ? -1 : 1;
   v.move = v.move * 0.8 + (Math.hypot(dx, dy) > 0.15 ? 0.2 : 0);
   v.x = a.position.x;
   v.y = a.position.y;
-  views.set(key2, v);
+  views.set(key3, v);
   return v;
 }
 function swordPose(q, t) {
@@ -92291,13 +92299,13 @@ function bankPath(c, points2, width, offset2, seed2) {
 function chains(rows) {
   const result = [], previous = /* @__PURE__ */ new Map();
   for (const row2 of [...rows].sort((a, b) => a.createdTick - b.createdTick || String(a.id).localeCompare(String(b.id)))) {
-    const key2 = String(row2.chainId ?? row2.sourceEntityId) + "/" + row2.kind;
-    const old2 = previous.get(key2);
+    const key3 = String(row2.chainId ?? row2.sourceEntityId) + "/" + row2.kind;
+    const old2 = previous.get(key3);
     if (old2 && distance9(old2.at(-1).to, row2.from) < 0.01) old2.push(row2);
     else {
       const list = [row2];
       result.push(list);
-      previous.set(key2, list);
+      previous.set(key3, list);
     }
   }
   return result;
@@ -96503,11 +96511,11 @@ function archivedBossArtModel(model, tick) {
   });
   const originalTrails = [], trailGroups = /* @__PURE__ */ new Map();
   for (const p of acid) {
-    const key2 = p.bossId + "/" + p.kind, rows = trailGroups.get(key2) ?? [];
+    const key3 = p.bossId + "/" + p.kind, rows = trailGroups.get(key3) ?? [];
     rows.push(p);
-    trailGroups.set(key2, rows);
+    trailGroups.set(key3, rows);
   }
-  for (const [key2, rows] of trailGroups) {
+  for (const [key3, rows] of trailGroups) {
     rows.sort((a, b) => a.createdTick - b.createdTick || a.id.localeCompare(b.id));
     const owner = byBossId.get(rows[0].bossId), kind = rows[0].kind === "slag" ? "slag" : "boss";
     const segments = rows.map((p, i) => {
@@ -96520,7 +96528,7 @@ function archivedBossArtModel(model, tick) {
         expiresTick: p.expiresTick
       };
     });
-    originalTrails.push({ id: key2, sourceEntityId: owner?.entityId ?? rows[0].bossId, kind, radius: rows[0].radius, segments });
+    originalTrails.push({ id: key3, sourceEntityId: owner?.entityId ?? rows[0].bossId, kind, radius: rows[0].radius, segments });
   }
   const cTele = tele.filter((q) => corrosive(q.bossDefinitionId)).map((q) => {
     const b = byBossId.get(q.bossId), at8 = q.position, target = q.position, origin = b?.position ?? target;
@@ -99272,9 +99280,9 @@ function createBrimstoneEruptionPresentation() {
     lastTick = -1;
   };
   function update(model) {
-    const tick = model.tick, key2 = [model.context?.campaignId, model.context?.sessionId, model.context?.spaceInstanceId ?? model.space?.spaceId, model.context?.spaceRevision, model.context?.residencyRevision].join("/");
-    if (key2 !== context || tick < lastTick) recent.clear();
-    context = key2;
+    const tick = model.tick, key3 = [model.context?.campaignId, model.context?.sessionId, model.context?.spaceInstanceId ?? model.space?.spaceId, model.context?.spaceRevision, model.context?.residencyRevision].join("/");
+    if (key3 !== context || tick < lastTick) recent.clear();
+    context = key3;
     lastTick = tick;
     const live = new Set(Object.values(model.entitiesById ?? {}).filter((a) => a.alive !== false && a.boss?.bossDefinitionId === BRIMSTONE_ID).map((a) => a.boss.bossId));
     const current = model.bossHazards?.brimstoneVents ?? [], ids4 = new Set(current.map((v) => v.id));
@@ -99488,7 +99496,7 @@ function ventMouthGround(c, p, q, tick) {
   }
   c.restore();
 }
-var armSpecs = (v) => [["east", 1, 0], ["west", -1, 0], ["north", 0, -1], ["south", 0, 1]].map(([key2, x, y]) => ({ key: key2, x, y, length: v.arms[key2] }));
+var armSpecs = (v) => [["east", 1, 0], ["west", -1, 0], ["north", 0, -1], ["south", 0, 1]].map(([key3, x, y]) => ({ key: key3, x, y, length: v.arms[key3] }));
 function ventFissure(c, v, q, erupt, tick) {
   const since = tick - v.createdTick, reveal = ease19(since / 45), duration = (v.presentationUntilTick ?? v.expiresTick) - v.detonatesTick, age = tick - v.detonatesTick;
   const cooling = erupt ? 1 - ease19((age - duration * 0.24) / (duration * 0.6)) : 1;
@@ -99503,13 +99511,13 @@ function ventFissure(c, v, q, erupt, tick) {
     c.save();
     c.translate(v.position.x, v.position.y);
     c.rotate(Math.atan2(a.y, a.x));
-    const seed2 = hash33(v.id + a.key), path10 = [[0, 0]], opened = a.length * (erupt ? 1 : reveal);
-    for (let d = 8; d < opened; d += 10) path10.push([d, Math.sin(d * 0.19 + seed2) * 4]);
-    path10.push([opened, 0]);
+    const seed2 = hash33(v.id + a.key), path10 = [[0, 0]], opened2 = a.length * (erupt ? 1 : reveal);
+    for (let d = 8; d < opened2; d += 10) path10.push([d, Math.sin(d * 0.19 + seed2) * 4]);
+    path10.push([opened2, 0]);
     line21(c, path10, "#1b1c27a8", 18);
     line21(c, path10, erupt ? "#64372f" : "#8c4739", 7 + q * 2);
     if (erupt) {
-      for (let d = 8; d < opened - 4; d += 17) {
+      for (let d = 8; d < opened2 - 4; d += 17) {
         const e = brimstoneEruptionEnvelope(v, tick, d), y = Math.sin(d * 0.19 + seed2) * 3.3, split = e.height * 2.8;
         for (const side of [-1, 1]) {
           const y0 = y + side * (4 + split), y1 = y + side * (8 + split);
@@ -99526,7 +99534,7 @@ function ventFissure(c, v, q, erupt, tick) {
       }
       c.restore();
     } else line21(c, path10, "#fa7239", 1.4 + q * 2);
-    for (let d = 19; d < opened - 4; d += 25) {
+    for (let d = 19; d < opened2 - 4; d += 25) {
       const sign3 = Math.sin(d + seed2) > 0 ? 1 : -1, y = Math.sin(d * 0.19 + seed2) * 4;
       line21(c, [[d, y], [d + 4, sign3 * 7], [d + 11, sign3 * 11]], erupt ? cooling > 0.5 ? GOLD21 : "#754935" : q > 0.8 ? GOLD21 : "#c47443", erupt ? 1.7 : 1);
     }
@@ -99712,11 +99720,11 @@ function brimstoneEffectDepthItems(model, tick, viewport = null) {
     });
   }
   for (const s of brimstoneSlams(model, tick)) {
-    const age = tick - s.resolvedTick, p = s.targetPosition, key2 = "slam/" + s.resolvedTick + "/" + p.x + "/" + p.y;
-    if (age < 18) add(key2 + "/core", p, (c) => lavaJet(c, p, (1 - ease19((age - 5) / 13)) * 58, 22, age, 3, 1 - clamp49((age - 12) / 6)));
+    const age = tick - s.resolvedTick, p = s.targetPosition, key3 = "slam/" + s.resolvedTick + "/" + p.x + "/" + p.y;
+    if (age < 18) add(key3 + "/core", p, (c) => lavaJet(c, p, (1 - ease19((age - 5) / 13)) * 58, 22, age, 3, 1 - clamp49((age - 12) / 6)));
     if (age < 30) for (let i = 0; i < 10; i++) {
       const q = age / 30, a = i * TAU118 / 10 + 0.2, r = 9 + q * (29 + i % 3 * 7), contact = { x: p.x + Math.cos(a) * r, y: p.y + Math.sin(a) * r }, lift = Math.sin(q * Math.PI) * (29 + i % 3 * 9), size = (3 + i % 3 * 0.8) * (1 - q * 0.45);
-      add(key2 + "/shard/" + i, contact, (c) => {
+      add(key3 + "/shard/" + i, contact, (c) => {
         c.save();
         c.translate(contact.x, contact.y - lift);
         c.rotate(i * 0.8 + q * (i % 2 ? 2 : -2));
@@ -100632,16 +100640,16 @@ var canvasOf3 = (w, h) => {
   return c;
 };
 function pageFor(t, which, layer2, px7, py, s, budget) {
-  const key2 = t.id + "|" + which + "|" + px7 + "," + py + "|" + s;
-  let p = pages.get(key2);
+  const key3 = t.id + "|" + which + "|" + px7 + "," + py + "|" + s;
+  let p = pages.get(key3);
   if (p !== void 0) {
-    pages.delete(key2);
-    pages.set(key2, p);
+    pages.delete(key3);
+    pages.set(key3, p);
     return p;
   }
   const b = { x0: px7, y0: py, x1: px7 + PAGE2, y1: py + PAGE2 };
   if (!layer2.boxes.some((r) => hits(r, b))) {
-    pages.set(key2, null);
+    pages.set(key3, null);
     return null;
   }
   if (budget.left <= 0) return void 0;
@@ -100649,7 +100657,7 @@ function pageFor(t, which, layer2, px7, py, s, budget) {
   const started = globalThis.performance?.now?.() ?? 0;
   const W4 = Math.ceil((PAGE2 + PAD3 * 2) * s), cv = canvasOf3(W4, W4);
   if (!cv) {
-    pages.set(key2, null);
+    pages.set(key3, null);
     return null;
   }
   const c = cv.getContext("2d");
@@ -100663,7 +100671,7 @@ function pageFor(t, which, layer2, px7, py, s, budget) {
   } finally {
     c.restore();
   }
-  pages.set(key2, cv);
+  pages.set(key3, cv);
   pageStats.pixels += cv.width * cv.height;
   trim2();
   pageStats.made++;
@@ -100844,8 +100852,8 @@ function generatedTownDepthItems(m, v, env = null) {
   const out = [];
   const actor = m.entitiesById?.[m.playersById?.[m.localPlayerId]?.entityId], ax = actor?.position.x, ay = actor?.position.y, ids4 = admittedSet(m.space.visual);
   for (const { t, o } of towns(m, v)) {
-    const tp = templateOf(t), key2 = "gen-town/" + t.id.replace("settlement-slot:", "") + "/", art = townNewArtV1(t);
-    out.push(...settlementDepthItemsV1("generated", tp, o, t.biome, v, { actor, props: townPropsV1(t), idPrefix: key2, fallback: drawSettlementBuilding, admitted: (b) => ids4.has(t.id + ":" + b.id) }));
+    const tp = templateOf(t), key3 = "gen-town/" + t.id.replace("settlement-slot:", "") + "/", art = townNewArtV1(t);
+    out.push(...settlementDepthItemsV1("generated", tp, o, t.biome, v, { actor, props: townPropsV1(t), idPrefix: key3, fallback: drawSettlementBuilding, admitted: (b) => ids4.has(t.id + ":" + b.id) }));
     const S6 = stoneOf5(t.biome);
     for (const [i, p] of wallParts(t).entries()) {
       if (art) continue;
@@ -100853,7 +100861,7 @@ function generatedTownDepthItems(m, v, env = null) {
         const x = o.x + p.x * T53, y = o.y + p.y * T53;
         if (!seen3(v, x - 40, y - 110, 80, 130)) continue;
         const behind2 = actor && ay < y + 14 && ay > y - 110 && Math.abs(ax - x) < 40;
-        out.push(depthItem({ id: key2 + "tower:" + i, anchorX: x, anchorY: y + 14, draw: (c) => {
+        out.push(depthItem({ id: key3 + "tower:" + i, anchorX: x, anchorY: y + 14, draw: (c) => {
           c.save();
           if (behind2) c.globalAlpha = 0.55;
           tower4(c, x, y, S6, p.gate);
@@ -100864,7 +100872,7 @@ function generatedTownDepthItems(m, v, env = null) {
       const pts2 = p.pts.map(([x, y]) => [o.x + x * T53, o.y + y * T53]), b = boxOf(pts2);
       if (!seen3(v, b.x0 - 20, b.y0 - WH - 20, b.x1 - b.x0 + 40, b.y1 - b.y0 + WH + 30)) continue;
       const behind = actor && ay < b.y1 + 6 && ay > b.y0 - WH - 40 && ax > b.x0 - 14 && ax < b.x1 + 14;
-      out.push(depthItem({ id: key2 + "wall:" + i, anchorX: b.x0, anchorY: b.y1 + 6, draw: (c) => {
+      out.push(depthItem({ id: key3 + "wall:" + i, anchorX: b.x0, anchorY: b.y1 + 6, draw: (c) => {
         c.save();
         if (behind) c.globalAlpha = 0.55;
         wallPiece3(c, pts2, S6);
@@ -100872,11 +100880,11 @@ function generatedTownDepthItems(m, v, env = null) {
       } }));
     }
     if (art) {
-      out.push(...townBuildingDepthItemsV1(t, o, v, actor, key2, env));
+      out.push(...townBuildingDepthItemsV1(t, o, v, actor, key3, env));
       for (const [i, p] of townStreetPlanV1(t).entries()) {
         const lx = p.x * T53, ly = p.y * T53 - 4, x = o.x + lx, y = o.y + ly;
         if (!seen3(v, x - 50, y - 100, 100, 110)) continue;
-        out.push(depthItem({ id: key2 + "prop:" + i, anchorX: x, anchorY: y, draw: (c) => {
+        out.push(depthItem({ id: key3 + "prop:" + i, anchorX: x, anchorY: y, draw: (c) => {
           c.save();
           c.translate(o.x, o.y);
           streetProp(c, p.kind, lx, ly, i, t.biome);
@@ -100887,13 +100895,13 @@ function generatedTownDepthItems(m, v, env = null) {
         const x = o.x + b.x * T53, y0 = o.y + (south ? b.y + b.h : b.y - d) * T53;
         if (!seen3(v, x - 10, y0 - 30, b.w * T53 + 20, d * T53 + 40)) continue;
         const side = o.y + (south ? (b.y + b.h + d) * T53 - 8 : b.y * T53 - 8), front2 = o.y + (south ? (b.y + b.h + d) * T53 - 6 : (b.y - d) * T53 + 4);
-        out.push(depthItem({ id: key2 + "pickets:" + b.id, anchorX: x, anchorY: side, draw: (c) => {
+        out.push(depthItem({ id: key3 + "pickets:" + b.id, anchorX: x, anchorY: side, draw: (c) => {
           c.save();
           c.translate(o.x, o.y);
           picketFence(c, b, d, t.biome);
           c.restore();
         } }));
-        out.push(depthItem({ id: key2 + "picket-front:" + b.id, anchorX: x, anchorY: front2, draw: (c) => {
+        out.push(depthItem({ id: key3 + "picket-front:" + b.id, anchorX: x, anchorY: front2, draw: (c) => {
           c.save();
           c.translate(o.x, o.y);
           picketFront(c, b, d, t.biome);
@@ -100904,11 +100912,11 @@ function generatedTownDepthItems(m, v, env = null) {
     for (const f of t.features) {
       if (f.type === "lamps" && !art) for (const [i, l] of f.lamps.entries()) {
         const x = o.x + l.x * T53 + 16, y = o.y + l.y * T53 + 24;
-        if (seen3(v, x - 20, y - 80, 40, 90)) out.push(depthItem({ id: key2 + "lamp:" + i, anchorX: x, anchorY: y, draw: (c) => lamp2(c, x, y) }));
+        if (seen3(v, x - 20, y - 80, 40, 90)) out.push(depthItem({ id: key3 + "lamp:" + i, anchorX: x, anchorY: y, draw: (c) => lamp2(c, x, y) }));
       }
       if (f.type === "stalls" && !art) for (const [i, s] of f.stalls.entries()) {
         const x = o.x + s.x * T53 + 2, y = o.y + s.y * T53 + 30;
-        if (seen3(v, x - 10, y - 60, 80, 70)) out.push(depthItem({ id: key2 + "stall:" + i, anchorX: x, anchorY: y, draw: (c) => stall3(c, x, y, i + t.buildings.length) }));
+        if (seen3(v, x - 10, y - 60, 80, 70)) out.push(depthItem({ id: key3 + "stall:" + i, anchorX: x, anchorY: y, draw: (c) => stall3(c, x, y, i + t.buildings.length) }));
       }
     }
   }
@@ -101174,13 +101182,13 @@ var SWAPS = {
 };
 var mapCache = /* @__PURE__ */ new Map();
 function swapMap(kit2, role, cloth2, skirt) {
-  const key2 = kit2 + "|" + role + "|" + cloth2 + "|" + skirt;
-  let m = mapCache.get(key2);
+  const key3 = kit2 + "|" + role + "|" + cloth2 + "|" + skirt;
+  let m = mapCache.get(key3);
   if (m) return m;
   m = {};
   const S6 = SWAPS[role === "enchanter" && kit2 === "young" ? "young-enchanter" : kit2] ?? {};
   for (const [from, v] of Object.entries(S6)) m[from] = v === "b" ? skirt : v === "b+" ? tone2(skirt, 0.15) : tone2(cloth2, v);
-  mapCache.set(key2, m);
+  mapCache.set(key3, m);
   return m;
 }
 function remap(c, m) {
@@ -102929,8 +102937,8 @@ function createGroundGlowClipsV1() {
     const start = (Math.floor(y / t) - top) * w + Math.floor(x / t) - left;
     if (mask[start] !== "1") return false;
     if (!mask.includes("0")) return true;
-    const key2 = [id, left, top, w, h, mask].join("/");
-    let path10 = clips.get(key2);
+    const key3 = [id, left, top, w, h, mask].join("/");
+    let path10 = clips.get(key3);
     if (!path10) {
       path10 = new Path2D();
       const queue = [start], seen4 = new Set(queue);
@@ -102942,7 +102950,7 @@ function createGroundGlowClipsV1() {
           queue.push(j);
         }
       }
-      clips.set(key2, path10);
+      clips.set(key3, path10);
       builds++;
       while (clips.size > NIGHT_READABILITY_LIMITS.clipPages) clips.delete(clips.keys().next().value);
     }
@@ -103280,11 +103288,11 @@ function createNightGroundItemsV1({ enabled = () => true } = {}) {
     counts.lights = lights;
   }
   function labelSprite(ctx, name, tier2) {
-    const max = Math.max(12, Math.min(240, view3.width - 24)), key2 = name + "/" + tier2 + "/" + max;
-    let result = labelStamps.get(key2);
+    const max = Math.max(12, Math.min(240, view3.width - 24)), key3 = name + "/" + tier2 + "/" + max;
+    let result = labelStamps.get(key3);
     if (result) {
-      labelStamps.delete(key2);
-      labelStamps.set(key2, result);
+      labelStamps.delete(key3);
+      labelStamps.set(key3, result);
       return result;
     }
     let text2 = name, width = ctx.measureText(text2).width;
@@ -103314,7 +103322,7 @@ function createNightGroundItemsV1({ enabled = () => true } = {}) {
     c.fillStyle = LOOT_LABEL_COLORS[tier2];
     c.fillText(text2, width / 2, 13);
     result = { image, width };
-    labelStamps.set(key2, result);
+    labelStamps.set(key3, result);
     while (labelStamps.size > 16) labelStamps.delete(labelStamps.keys().next().value);
     return result;
   }
@@ -105877,15 +105885,15 @@ function drawAegisShell(ctx, x, y, ticks, time, near4, over = false) {
   ctx.rect(x - 40, near4 ? cy2 : cy2 - 40, 80, 40);
   ctx.clip();
   ctx.globalAlpha *= fade;
-  const shell = () => {
+  const shell2 = () => {
     ctx.beginPath();
     ctx.ellipse(x, cy2, rx, ry, 0, 0, TAU97);
   };
-  shell();
+  shell2();
   ctx.fillStyle = over ? near4 ? "rgba(175,228,250,.32)" : "rgba(140,205,240,.22)" : near4 ? "rgba(150,215,245,.2)" : "rgba(120,190,230,.13)";
   ctx.fill();
   ctx.save();
-  shell();
+  shell2();
   ctx.clip();
   ctx.strokeStyle = "rgba(214,241,255,.5)";
   ctx.lineWidth = 0.8;
@@ -105899,7 +105907,7 @@ function drawAegisShell(ctx, x, y, ticks, time, near4, over = false) {
   }
   ctx.stroke();
   ctx.restore();
-  neon(ctx, K6, over ? 2.4 : 1.5, shell, 0.95);
+  neon(ctx, K6, over ? 2.4 : 1.5, shell2, 0.95);
   if (over) neon(ctx, K6, 1, () => {
     ctx.beginPath();
     ctx.ellipse(x, cy2, rx + 4 + Math.sin(t * 9), ry + 4 + Math.sin(t * 9), 0, 0, TAU97);
@@ -107269,7 +107277,7 @@ function drawBlinkGhost(ctx, m, b, age, time) {
 }
 var castElement = (m, id, element) => (m.bolts ?? []).find((b) => b.sourceId === id)?.delivery ?? (["fire", "frost", "lightning"].includes(element) ? element : "fire");
 function createCombatVfx() {
-  let key2 = null, seen4 = false, lastModel = null;
+  let key3 = null, seen4 = false, lastModel = null;
   const statuses = /* @__PURE__ */ new Map(), families3 = /* @__PURE__ */ new Map(), bursts = [], live = /* @__PURE__ */ new Set(), wards = /* @__PURE__ */ new Map(), parrySpent = /* @__PURE__ */ new Map(), facings = /* @__PURE__ */ new Map(), afterimages = [];
   function spawnAfterimage(ctx, id, a, f, time) {
     const last = afterimages.findLast((i) => i.id === id);
@@ -107313,8 +107321,8 @@ function createCombatVfx() {
     if (m === lastModel) return;
     lastModel = m;
     const next = m.context.campaignId + "/" + m.context.spaceInstanceId;
-    if (key2 !== next) {
-      key2 = next;
+    if (key3 !== next) {
+      key3 = next;
       statuses.clear();
       families3.clear();
       wards.clear();
@@ -107669,10 +107677,10 @@ function createResourcePresentation() {
   let domain = null;
   const seen4 = /* @__PURE__ */ new Map();
   function depthItems2(model, time, viewport) {
-    const key2 = model.context.sessionId + "/" + model.context.spaceInstanceId;
-    if (domain !== key2) {
+    const key3 = model.context.sessionId + "/" + model.context.spaceInstanceId;
+    if (domain !== key3) {
       seen4.clear();
-      domain = key2;
+      domain = key3;
     }
     const visible3 = /* @__PURE__ */ new Set(), items = [];
     for (const r of model.resources ?? []) {
@@ -107761,9 +107769,9 @@ function createResourceDebrisV1({ art = null, presentation = null, remnants = nu
   let identity2 = null, counts = { breaks: 0, flying: 0, settled: 0, fallbackFragments: 0 };
   function depthItems2(model, time, viewport) {
     if (art?.enabled?.() === false) return legacy.depthItems(model, time, viewport);
-    const key2 = model.context.sessionId + "/" + model.context.spaceInstanceId;
-    if (key2 !== identity2) {
-      identity2 = key2;
+    const key3 = model.context.sessionId + "/" + model.context.spaceInstanceId;
+    if (key3 !== identity2) {
+      identity2 = key3;
       seen4.clear();
     }
     counts = { breaks: 0, flying: 0, settled: 0, fallbackFragments: 0 };
@@ -107881,10 +107889,10 @@ function createResourcePresentationV2({ art = null } = {}) {
   let domain = null;
   const seen4 = /* @__PURE__ */ new Map();
   function depthItems2(model, time, viewport) {
-    const key2 = model.context.sessionId + "/" + model.context.spaceInstanceId;
-    if (domain !== key2) {
+    const key3 = model.context.sessionId + "/" + model.context.spaceInstanceId;
+    if (domain !== key3) {
       seen4.clear();
-      domain = key2;
+      domain = key3;
     }
     const visible3 = /* @__PURE__ */ new Set(), items = [];
     for (const r of model.resources ?? []) {
@@ -108248,9 +108256,9 @@ function createInteriorLightClips() {
       clear2();
       identity2 = site.contentHash;
     }
-    const key2 = light2.id + "/" + light2.x + "/" + light2.y + "/" + light2.radius;
-    if (dynamic && moving?.key === key2) return moving.path;
-    if (!dynamic && fixed.has(key2)) return fixed.get(key2);
+    const key3 = light2.id + "/" + light2.x + "/" + light2.y + "/" + light2.radius;
+    if (dynamic && moving?.key === key3) return moving.path;
+    if (!dynamic && fixed.has(key3)) return fixed.get(key3);
     const start = performance.now(), v = space.visual, t = space.collision.tileSize, ox = v.originTile?.x ?? 0, oy = v.originTile?.y ?? 0;
     const floor = (x, y) => v.terrain[y - oy]?.[x - ox] === "1";
     const radius = Math.min(208, light2.radius), path10 = new Path2D();
@@ -108307,9 +108315,9 @@ function createInteriorLightClips() {
     builds++;
     if (dynamic) {
       movingBuilds++;
-      moving = { key: key2, path: path10 };
+      moving = { key: key3, path: path10 };
     } else {
-      fixed.set(key2, path10);
+      fixed.set(key3, path10);
       while (fixed.size > 64) fixed.delete(fixed.keys().next().value);
     }
     worstMs = Math.max(worstMs, performance.now() - start);
@@ -108458,8 +108466,8 @@ function createLighting(canvas, { presentation = null } = {}) {
       torchStamps.clear();
       fieldKey = site.contentHash;
     }
-    const key2 = site.contentHash + "/" + light2.id;
-    let stamp6 = torchStamps.get(key2);
+    const key3 = site.contentHash + "/" + light2.id;
+    let stamp6 = torchStamps.get(key3);
     if (stamp6) return stamp6;
     const at8 = performance.now(), field3 = floorLightField(source3, light2), radius = 240;
     fieldBuilds++;
@@ -108499,7 +108507,7 @@ function createLighting(canvas, { presentation = null } = {}) {
     g.clip(path10);
     g.drawImage(stamps.get("torch"), light2.x - core5, light2.y - core5, core5 * 2, core5 * 2);
     g.restore();
-    torchStamps.set(key2, stamp6);
+    torchStamps.set(key3, stamp6);
     while (torchStamps.size > LIGHT_LIMITS.descriptors) torchStamps.delete(torchStamps.keys().next().value);
     worstStaticBuildMs = Math.max(worstStaticBuildMs, performance.now() - at8);
     return stamp6;
@@ -108540,14 +108548,14 @@ function createLighting(canvas, { presentation = null } = {}) {
       outdoorPages.set(space.visual, page);
       while (outdoorPages.size > LIGHT_LIMITS.outdoorClipPages) outdoorPages.delete(outdoorPages.keys().next().value);
     }
-    const key2 = [light2.id, light2.x, light2.y, light2.radius, light2.facing, light2.occlusionOrigin?.x, light2.occlusionOrigin?.y].join("/");
-    let proof = page.get(key2);
+    const key3 = [light2.id, light2.x, light2.y, light2.radius, light2.facing, light2.occlusionOrigin?.x, light2.occlusionOrigin?.y].join("/");
+    let proof = page.get(key3);
     if (!proof) {
       proof = outdoorLightClipV1(space, light2);
       outdoorBuilds++;
       outdoorMaxRays = Math.max(outdoorMaxRays, proof.rays);
       outdoorMaxBlockers = Math.max(outdoorMaxBlockers, proof.blockers);
-      page.set(key2, proof);
+      page.set(key3, proof);
       while (page.size > LIGHT_LIMITS.outdoorClips) page.delete(page.keys().next().value);
     }
     return proof.path;
@@ -109018,17 +109026,17 @@ function createRewardFeedback(canvas) {
     if (kind === "soul" || kind === "heal") return;
     if (lastTime - lastPulse[kind] < 250) return;
     lastPulse[kind] = lastTime;
-    const el = doc.getElementById(kind === "xp" ? "world-xp-bar" : "world-wallet");
-    el?.animate?.([{ filter: kind === "gold" ? "brightness(1.18)" : "brightness(1.8)" }, { filter: "brightness(1)" }], { duration: 240 });
+    const el2 = doc.getElementById(kind === "xp" ? "world-xp-bar" : "world-wallet");
+    el2?.animate?.([{ filter: kind === "gold" ? "brightness(1.18)" : "brightness(1.8)" }, { filter: "brightness(1)" }], { duration: 240 });
   }
   function render(model, time, cam) {
     if (!ctx) return;
     if (!geometry) resize();
     ctx.clearRect(0, 0, overlay.width, overlay.height);
-    const key2 = spaceKey(model) + "/" + model.localPlayerId, inv = model.inventory;
-    const reset = domain !== key2 || lastTime !== null && (time - lastTime > 1e3 || time < lastTime) || doc.hidden;
-    if (domain !== key2 || lastTime !== null && (time - lastTime > 1e3 || time < lastTime) || doc.hidden) {
-      domain = key2;
+    const key3 = spaceKey(model) + "/" + model.localPlayerId, inv = model.inventory;
+    const reset = domain !== key3 || lastTime !== null && (time - lastTime > 1e3 || time < lastTime) || doc.hidden;
+    if (domain !== key3 || lastTime !== null && (time - lastTime > 1e3 || time < lastTime) || doc.hidden) {
+      domain = key3;
       particles = [];
       clearGain();
       seen4 = new Set(Object.keys(inv?.rewardsByEntityId ?? {}));
@@ -110660,9 +110668,9 @@ function exteriorRootFoliage(ctx, x, y, seed2, side) {
 var freezeRoadCell = (cell) => Object.freeze({ x: cell.x, y: cell.y });
 function ruinApproachGeometryD11_3_6(exit, roadAnchor, tileSize = 32) {
   const sx = Math.floor(exit.x / tileSize), sy = Math.floor(exit.y / tileSize), valid = Number.isFinite(roadAnchor?.x) && Number.isFinite(roadAnchor?.y) && roadAnchor.y >= exit.y + 18 && Math.hypot(roadAnchor.x - exit.x, roadAnchor.y - exit.y) <= 240, ax = valid ? Math.floor(roadAnchor.x / tileSize) : sx, ay = valid ? Math.floor(roadAnchor.y / tileSize) : sy + 4, cells = [], seen4 = /* @__PURE__ */ new Set(), push = (x, y) => {
-    const key2 = x + "," + y;
-    if (!seen4.has(key2)) {
-      seen4.add(key2);
+    const key3 = x + "," + y;
+    if (!seen4.has(key3)) {
+      seen4.add(key3);
       cells.push(freezeRoadCell({ x, y }));
     }
   }, line26 = (x1, y1, x2, y2) => {
@@ -110997,8 +111005,8 @@ var rgbOut = [0, 0, 0];
 function tintColorV1(color28, biome) {
   const s = SPECS[biome];
   if (!s || typeof color28 !== "string") return color28;
-  const key2 = biome + "|" + color28;
-  let v = colorCache.get(key2);
+  const key3 = biome + "|" + color28;
+  let v = colorCache.get(key3);
   if (v !== void 0) return v;
   v = color28;
   let m = /^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.exec(color28);
@@ -111012,7 +111020,7 @@ function tintColorV1(color28, biome) {
     v = m[4] === void 0 ? `rgb(${r},${g},${b})` : `rgba(${r},${g},${b},${m[4]})`;
   }
   if (colorCache.size > 4e3) colorCache.clear();
-  colorCache.set(key2, v);
+  colorCache.set(key3, v);
   return v;
 }
 var images = /* @__PURE__ */ new WeakMap();
@@ -111064,19 +111072,19 @@ function siteTintedContextV1(ctx, biome) {
   if (proxy) return proxy;
   const bound = /* @__PURE__ */ new Map(), drawImage = (image, ...rest) => ctx.drawImage(tintImageV1(image, biome), ...rest);
   proxy = new Proxy(ctx, {
-    get(target, key2) {
-      if (key2 === "drawImage") return drawImage;
-      const v = target[key2];
+    get(target, key3) {
+      if (key3 === "drawImage") return drawImage;
+      const v = target[key3];
       if (typeof v !== "function") return v;
-      let f = bound.get(key2);
+      let f = bound.get(key3);
       if (!f) {
         f = v.bind(target);
-        bound.set(key2, f);
+        bound.set(key3, f);
       }
       return f;
     },
-    set(target, key2, value2) {
-      target[key2] = key2 === "fillStyle" || key2 === "strokeStyle" || key2 === "shadowColor" ? tintColorV1(value2, biome) : value2;
+    set(target, key3, value2) {
+      target[key3] = key3 === "fillStyle" || key3 === "strokeStyle" || key3 === "shadowColor" ? tintColorV1(value2, biome) : value2;
       return true;
     }
   });
@@ -111269,11 +111277,11 @@ var SCALE26 = 1.5;
 var LIMIT4 = 12;
 var sprites5 = /* @__PURE__ */ new Map();
 var painted3 = 0;
-function sprite5(key2, box5, paint2) {
-  let s = sprites5.get(key2);
+function sprite5(key3, box5, paint2) {
+  let s = sprites5.get(key3);
   if (s) {
-    sprites5.delete(key2);
-    sprites5.set(key2, s);
+    sprites5.delete(key3);
+    sprites5.set(key3, s);
     return s;
   }
   const [l, t, r, b] = box5, w = Math.ceil((r - l) * SCALE26), h = Math.ceil((b - t) * SCALE26), canvas = typeof OffscreenCanvas === "function" ? new OffscreenCanvas(w, h) : globalThis.document?.createElement("canvas");
@@ -111287,7 +111295,7 @@ function sprite5(key2, box5, paint2) {
   paint2(c);
   painted3++;
   s = { canvas, box: box5 };
-  sprites5.set(key2, s);
+  sprites5.set(key3, s);
   while (sprites5.size > LIMIT4) sprites5.delete(sprites5.keys().next().value);
   return s;
 }
@@ -111353,11 +111361,11 @@ function drawSiteEntranceV3(ctx, e, art = null) {
 }
 var queued = /* @__PURE__ */ new Set();
 function prewarmSiteEntranceV3(e, art = null) {
-  const key2 = entranceKey(e, art);
-  if (sprites5.has(key2) || queued.has(key2)) return;
-  queued.add(key2);
+  const key3 = entranceKey(e, art);
+  if (sprites5.has(key3) || queued.has(key3)) return;
+  queued.add(key3);
   const run2 = () => {
-    queued.delete(key2);
+    queued.delete(key3);
     entranceSprite(e, art);
   };
   if (typeof requestIdleCallback === "function") requestIdleCallback(run2, { timeout: 1500 });
@@ -111748,9 +111756,9 @@ function createSiteEnvironment(canvas, { authoredArt = null } = {}) {
     }
     let painted4 = 0;
     for (let py = Math.max(0, Math.floor(view3.y / extent)); py <= Math.min(Math.ceil(space.collision.height / size) - 1, Math.floor((view3.y + view3.height) / extent)); py++) for (let px7 = Math.max(0, Math.floor(view3.x / extent)); px7 <= Math.min(Math.ceil(space.collision.width / size) - 1, Math.floor((view3.x + view3.width) / extent)); px7++) {
-      const key2 = px7 + "," + py;
-      let page = pages2.get(key2);
-      if (page) pages2.delete(key2);
+      const key3 = px7 + "," + py;
+      let page = pages2.get(key3);
+      if (page) pages2.delete(key3);
       else {
         page = canvas.ownerDocument.createElement("canvas");
         page.width = extent;
@@ -111760,7 +111768,7 @@ function createSiteEnvironment(canvas, { authoredArt = null } = {}) {
         for (let y = py * size; y < Math.min(space.collision.height, (py + 1) * size); y++) for (let x = px7 * size; x < Math.min(space.collision.width, (px7 + 1) * size); x++) drawTile(pc2, v, x, y, t, mode, space);
         builds++;
       }
-      pages2.set(key2, page);
+      pages2.set(key3, page);
       while (pages2.size > 24) pages2.delete(pages2.keys().next().value);
       ctx.drawImage(page, px7 * extent, py * extent);
       painted4 += size * size;
@@ -112140,10 +112148,10 @@ function hitIcon(n) {
 var TEXT_DRIFT = 6;
 var easeOut2 = (t) => 1 - (1 - t) ** 3;
 var backOut = (t) => 1 + 2.9 * (t - 1) ** 3 + 1.9 * (t - 1) ** 2;
-var boundedSet = (map, key2, value2) => {
-  map.delete(key2);
+var boundedSet = (map, key3, value2) => {
+  map.delete(key3);
   if (map.size >= HIT_FEEDBACK.maxReactions) map.delete(map.keys().next().value);
-  map.set(key2, value2);
+  map.set(key3, value2);
 };
 function createCombatFeedback() {
   loadNumberFont();
@@ -112151,19 +112159,19 @@ function createCombatFeedback() {
   const reactions = /* @__PURE__ */ new Map(), primaries = /* @__PURE__ */ new Map(), ticks = /* @__PURE__ */ new Map();
   function update(model, time) {
     lastModel = model;
-    const nextDomain = model.context.campaignId + "/" + model.context.sessionId, key2 = spaceKey(model);
+    const nextDomain = model.context.campaignId + "/" + model.context.sessionId, key3 = spaceKey(model);
     if (domain !== nextDomain) {
       domain = nextDomain;
       cursor = 0;
       context = null;
     }
-    if (context !== key2) {
+    if (context !== key3) {
       numbers = [];
       impacts2 = [];
       reactions.clear();
       primaries.clear();
       ticks.clear();
-      context = key2;
+      context = key3;
     }
     numbers = numbers.filter((n) => n.shown === void 0 ? time - n.born <= HIT_FEEDBACK.placementMs : time - n.shown < combatTextStyle(n).life);
     impacts2 = impacts2.filter((n) => time - n.born < 520);
@@ -112287,9 +112295,9 @@ function createCombatFeedback() {
   function ground(ctx, time, viewport = null) {
     const drawn = /* @__PURE__ */ new Set(), seen4 = seenIn(viewport);
     for (const n of impacts2) {
-      const key2 = n.sourceId + "/" + n.eventTick;
-      if (!n.earthBreaker || !n.sourcePosition || drawn.has(key2) || !seen4(n.sourcePosition)) continue;
-      drawn.add(key2);
+      const key3 = n.sourceId + "/" + n.eventTick;
+      if (!n.earthBreaker || !n.sourcePosition || drawn.has(key3) || !seen4(n.sourcePosition)) continue;
+      drawn.add(key3);
       drawEarthBreaker(ctx, n.sourcePosition, n.direction, time - n.born);
     }
   }
@@ -112436,8 +112444,8 @@ function shore(loops, offset2, seed2, box5) {
   return out;
 }
 var axes = /* @__PURE__ */ new Map();
-function flowAxis(at8, waterAt2, x, y, key2) {
-  if (axes.has(key2)) return axes.get(key2);
+function flowAxis(at8, waterAt2, x, y, key3) {
+  if (axes.has(key3)) return axes.get(key3);
   let a = 0, b = 0, d = 0, known2 = true;
   for (let j = -6; j <= 6 && known2; j++) for (let i = -6; i <= 6; i++) if (at8(x + i, y + j) === void 0) {
     known2 = false;
@@ -112458,7 +112466,7 @@ function flowAxis(at8, waterAt2, x, y, key2) {
   }
   if (known2) {
     if (axes.size > 4e4) axes.clear();
-    axes.set(key2, r);
+    axes.set(key3, r);
   }
   return r;
 }
@@ -114333,7 +114341,7 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
     }
   }
   let lastView = null, travelX = 0, travelY = 0, exitsKey = null;
-  let layoutJob = null, activeJob = null, planKey = null, planVisual = null, key2 = null, scaleKey = null, queue = [], routeQueue = [], routeBurst = 0, pending = null, generation = 0, visualGeneration = 0, rasterGeneration = 0, currentVisual = null, currentSpace = null, frameSequence = 0, visibleIds = /* @__PURE__ */ new Set(), nearIds = /* @__PURE__ */ new Set(), pathScreenIds = /* @__PURE__ */ new Set(), preloadIds = /* @__PURE__ */ new Set(), recentIds = /* @__PURE__ */ new Set(), recentSeen = /* @__PURE__ */ new Map(), protectedIds = /* @__PURE__ */ new Set(), lastFlowers = [], requiredTasks = [], builds = 0, created = 0, worstBuildMs = 0, descriptorReuses = 0, retentionHits = 0, peakNeeded = 0, peakPrefetched = 0, capacity = BASE_LIMIT, evictions = 0, misses = 0, fallbackBuilds = 0, fallbackHits = 0, peakFallbackPages = 0, visibleRasterPages = 0, fallbackPages = 0, activeColliderVisuals = 0, missingColliderVisuals = 0, underCoveredColliderVisuals = 0, lastColliderRepair = null, lastColliderAudit = null, lastRasterLifecycle = null, staleRasterDiscards = 0, atomicRasterReplacements = 0, rasterCompletenessRepairs = 0, clearCount = 0, lastClearReason = "none", lastMissReason = "none", clearReasons = /* @__PURE__ */ Object.create(null);
+  let layoutJob = null, activeJob = null, planKey = null, planVisual = null, key3 = null, scaleKey = null, queue = [], routeQueue = [], routeBurst = 0, pending = null, generation = 0, visualGeneration = 0, rasterGeneration = 0, currentVisual = null, currentSpace = null, frameSequence = 0, visibleIds = /* @__PURE__ */ new Set(), nearIds = /* @__PURE__ */ new Set(), pathScreenIds = /* @__PURE__ */ new Set(), preloadIds = /* @__PURE__ */ new Set(), recentIds = /* @__PURE__ */ new Set(), recentSeen = /* @__PURE__ */ new Map(), protectedIds = /* @__PURE__ */ new Set(), lastFlowers = [], requiredTasks = [], builds = 0, created = 0, worstBuildMs = 0, descriptorReuses = 0, retentionHits = 0, peakNeeded = 0, peakPrefetched = 0, capacity = BASE_LIMIT, evictions = 0, misses = 0, fallbackBuilds = 0, fallbackHits = 0, peakFallbackPages = 0, visibleRasterPages = 0, fallbackPages = 0, activeColliderVisuals = 0, missingColliderVisuals = 0, underCoveredColliderVisuals = 0, lastColliderRepair = null, lastColliderAudit = null, lastRasterLifecycle = null, staleRasterDiscards = 0, atomicRasterReplacements = 0, rasterCompletenessRepairs = 0, clearCount = 0, lastClearReason = "none", lastMissReason = "none", clearReasons = /* @__PURE__ */ Object.create(null);
   const emit = (kind, values = {}) => {
     if (diagnostics) diagnostics({ kind, at: performance.now(), ...values });
   };
@@ -114417,7 +114425,7 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
     recentIds.clear();
     recentSeen.clear();
     protectedIds.clear();
-    key2 = null;
+    key3 = null;
     scaleKey = null;
     planKey = null;
     planVisual = null;
@@ -114691,10 +114699,10 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
       }
       exitsKey = nextExits;
     }
-    if (key2 !== nextKey || scaleKey !== renderScale) {
-      const reason = key2 === null ? "initial" : key2 !== nextKey ? "visual-identity-change" : "render-scale-change";
+    if (key3 !== nextKey || scaleKey !== renderScale) {
+      const reason = key3 === null ? "initial" : key3 !== nextKey ? "visual-identity-change" : "render-scale-change";
       clear2(reason);
-      key2 = nextKey;
+      key3 = nextKey;
       scaleKey = renderScale;
     }
     currentSpace = space;
@@ -116265,9 +116273,9 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
   function render(model, time, input, authorityDeadline = null) {
     heroLevelUp.observe(model, time);
     prompt.clear();
-    const actor = selectedActor(model), key2 = spaceKey(model), c = model.space.collision;
+    const actor = selectedActor(model), key3 = spaceKey(model), c = model.space.collision;
     const frames = model.navigation?.position ? model.navigation.frames : null, frameKey2 = frames ? JSON.stringify(frames) : null;
-    const residencyChanged = previous && previous.key !== key2;
+    const residencyChanged = previous && previous.key !== key3;
     if (residencyChanged) {
       previous = null;
       combatVfx.clear();
@@ -116292,9 +116300,9 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
     observedFrameKey = frameKey2;
     if (performanceProbe) performanceProbe.measure("combatFeedback", () => feedback.update(model, time));
     else feedback.update(model, time);
-    if (previous?.key === key2 && actor.position.x !== previous.x) facing2 = actor.position.x > previous.x ? 1 : -1;
-    else if (previous?.key !== key2) facing2 = 1;
-    previous = { key: key2, x: actor.position.x, y: actor.position.y };
+    if (previous?.key === key3 && actor.position.x !== previous.x) facing2 = actor.position.x > previous.x ? 1 : -1;
+    else if (previous?.key !== key3) facing2 = 1;
+    previous = { key: key3, x: actor.position.x, y: actor.position.y };
     const heroPoses = heroFacing.update(model);
     combatVfx.update(model, time, heroPoses);
     const displayedPositions = actorMotion.sample(model, time, authorityDeadline);
@@ -116668,7 +116676,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
     if (interaction) {
       const screenX = (interaction.x - cam.x) * cam.zoom, screenY = (interaction.y - cam.y) * cam.zoom;
       drawInteractionCueV2(ctx, screenX, screenY);
-      prompt.record({ x: screenX - 18, y: screenY - 14, width: 36, height: 28, exitId: interaction.exitId, key: key2, layout, context: ctx });
+      prompt.record({ x: screenX - 18, y: screenY - 14, width: 36, height: 28, exitId: interaction.exitId, key: key3, layout, context: ctx });
     }
     const joy = input?.read().joystick;
     if (joy) {
@@ -116748,10 +116756,10 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
 }
 
 // src/client/primary_input.js
-function createPrimaryInput({ button, environment, adapter, readModel, reportError, isBlocked = () => false, restoreGameplayFocus = () => {
+function createPrimaryInput({ button: button2, environment, adapter, readModel, reportError, isBlocked = () => false, restoreGameplayFocus = () => {
 } }) {
   const listeners = [], owners = /* @__PURE__ */ new Set();
-  let key2 = spaceKey(readModel()), needsCancel = false;
+  let key3 = spaceKey(readModel()), needsCancel = false;
   function listen(target, type, handler) {
     target.addEventListener(type, handler);
     listeners.push(() => target.removeEventListener(type, handler));
@@ -116796,30 +116804,30 @@ function createPrimaryInput({ button, environment, adapter, readModel, reportErr
       send(false, true);
     } else needsCancel = false;
     for (const owner of previous) if (typeof owner === "number") try {
-      button.releasePointerCapture(owner);
+      button2.releasePointerCapture(owner);
     } catch {
     }
   }
-  listen(button, "pointerdown", (event) => {
+  listen(button2, "pointerdown", (event) => {
     if (event.button !== 0) return;
     event.preventDefault();
     down(event.pointerId);
     try {
-      button.setPointerCapture(event.pointerId);
+      button2.setPointerCapture(event.pointerId);
     } catch {
     }
   });
-  listen(button, "pointerup", (event) => {
+  listen(button2, "pointerup", (event) => {
     event.preventDefault();
     up(event.pointerId);
   });
-  for (const type of ["pointercancel", "lostpointercapture"]) listen(button, type, (event) => up(event.pointerId, true));
-  listen(button, "click", (event) => {
+  for (const type of ["pointercancel", "lostpointercapture"]) listen(button2, type, (event) => up(event.pointerId, true));
+  listen(button2, "click", (event) => {
     event.preventDefault();
     restoreGameplayFocus();
   });
   listen(environment, "keydown", (event) => {
-    if (event.code !== "Space" || event.repeat || ["INPUT", "SELECT", "TEXTAREA"].includes(event.target?.tagName) || event.target?.tagName === "BUTTON" && event.target !== button) return;
+    if (event.code !== "Space" || event.repeat || ["INPUT", "SELECT", "TEXTAREA"].includes(event.target?.tagName) || event.target?.tagName === "BUTTON" && event.target !== button2) return;
     event.preventDefault();
     down("keyboard");
   });
@@ -116834,21 +116842,21 @@ function createPrimaryInput({ button, environment, adapter, readModel, reportErr
     if (environment.document.hidden) clear2();
   });
   function refresh(model = readModel()) {
-    if (key2 !== spaceKey(model)) {
+    if (key3 !== spaceKey(model)) {
       clear2(false);
-      key2 = spaceKey(model);
+      key3 = spaceKey(model);
     }
     if (isBlocked() || !model.entitiesById[model.playersById[model.localPlayerId].entityId].alive || !["encounter"].includes(model.persistence.phase)) {
       if (owners.size || needsCancel) clear2(false);
     } else if (needsCancel) send(false, true, model);
     const hidden = !model.primary, disabled = isBlocked() || model.persistence.phase !== "encounter" || !model.entitiesById[model.playersById[model.localPlayerId].entityId].alive;
-    if (button.hidden !== hidden) button.hidden = hidden;
-    if (button.disabled !== disabled) button.disabled = disabled;
+    if (button2.hidden !== hidden) button2.hidden = hidden;
+    if (button2.disabled !== disabled) button2.disabled = disabled;
     const a = model.primary?.actorsById[model.playersById[model.localPlayerId].entityId];
     const held = String(Boolean(a?.held)), step = String(a?.current?.comboStep ?? a?.nextComboStep ?? 1), pressed = String(owners.size > 0);
-    if (button.dataset.held !== held) button.dataset.held = held;
-    if (button.dataset.step !== step) button.dataset.step = step;
-    if (button.getAttribute?.("aria-pressed") !== pressed) button.setAttribute("aria-pressed", pressed);
+    if (button2.dataset.held !== held) button2.dataset.held = held;
+    if (button2.dataset.step !== step) button2.dataset.step = step;
+    if (button2.getAttribute?.("aria-pressed") !== pressed) button2.setAttribute("aria-pressed", pressed);
   }
   return Object.freeze({ refresh, clear: clear2, read: () => ({ owners: [...owners] }), destroy: () => {
     clear2();
@@ -116863,7 +116871,7 @@ function createWorldInput({ canvas, environment, renderer, profile, adapter, rea
 }, openQuestBoard = () => {
 }, retryRejectedStop = false, readCommandModel = readModel }) {
   const keys2 = /* @__PURE__ */ new Set(), actionOwners = /* @__PURE__ */ new Set(), listeners = [];
-  let movementOwner = null, joystick = null, cursor = null, suppressedUntil = -1, lastIntent = "0,0", key2 = spaceKey(readModel());
+  let movementOwner = null, joystick = null, cursor = null, suppressedUntil = -1, lastIntent = "0,0", key3 = spaceKey(readModel());
   const directional = /* @__PURE__ */ new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "KeyW", "KeyA", "KeyS", "KeyD"]);
   let stopPending = false;
   function retryStop() {
@@ -116907,9 +116915,9 @@ function createWorldInput({ canvas, environment, renderer, profile, adapter, rea
     }
   }
   function refresh(model = readModel()) {
-    if (spaceKey(model) !== key2) {
+    if (spaceKey(model) !== key3) {
       clear2(false);
-      key2 = spaceKey(model);
+      key3 = spaceKey(model);
     }
     if (stopPending && !retryStop()) return;
     if (isBlocked() || !selectedActor(model).alive) {
@@ -117093,7 +117101,7 @@ var contextKey = (m) => {
   return [c.campaignId, c.sessionId, m?.localPlayerId, c.spaceInstanceId, c.spaceRevision, c.residencyRevision].join("/");
 };
 function createNavigatorSnapshotV1({ readDeveloper }) {
-  let opened = false, context = null, snapshot = null, selectedId = null, reads = 0;
+  let opened2 = false, context = null, snapshot = null, selectedId = null, reads = 0;
   return Object.freeze({
     observe(model) {
       const next = contextKey(model);
@@ -117103,11 +117111,11 @@ function createNavigatorSnapshotV1({ readDeveloper }) {
       return true;
     },
     setOpen(value2) {
-      opened = Boolean(value2);
-      if (!opened) snapshot = null;
+      opened2 = Boolean(value2);
+      if (!opened2) snapshot = null;
     },
     read() {
-      if (!opened) return null;
+      if (!opened2) return null;
       const next = readDeveloper();
       reads++;
       snapshot = next;
@@ -117119,7 +117127,7 @@ function createNavigatorSnapshotV1({ readDeveloper }) {
       selectedId = id;
     },
     selectedId: () => selectedId,
-    inspect: () => ({ opened, context, hasSnapshot: Boolean(snapshot), selectedId, reads })
+    inspect: () => ({ opened: opened2, context, hasSnapshot: Boolean(snapshot), selectedId, reads })
   });
 }
 var EMPTY = Object.freeze({ refresh() {
@@ -117167,7 +117175,7 @@ function createSiteNavigatorD12_4C({ document: doc, port, enabled = false, relea
     if (!nav) {
       output.textContent = message || "No current snapshot. Choose Refresh sites.";
       valid.textContent = counts.textContent = rejected.textContent = "";
-      for (const [name, button] of Object.entries(buttons)) button.disabled = pending || name !== "refresh";
+      for (const [name, button2] of Object.entries(buttons)) button2.disabled = pending || name !== "refresh";
       return;
     }
     freshness.textContent = "Snapshot at tick " + model.tick + ". Distances, completion and reset eligibility are not live; choose Refresh sites to update.";
@@ -117379,7 +117387,7 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
   const restoreGameplayFocus = () => canvas.focus({ preventScroll: true });
   let observedProgression = null, levelNoticeUntil = 0, inventory = null, diagnostics = null, subweaponHud = null, heroCreator = null, skillBar = null, navigation = null, siteNavigator = null, ferryMenu = null, serviceMenu = null, renderModel = null;
   const readModel = () => renderModel ?? port.getReadModel(), viewPort = Object.freeze({ ...port, getReadModel: readModel });
-  let message = "", key2 = spaceKey(port.getReadModel()), lastTravel = null;
+  let message = "", key3 = spaceKey(port.getReadModel()), lastTravel = null;
   const presentationSpace = (m) => `${m.context.sessionId}/${m.localPlayerId}/${m.context.spaceInstanceId}`;
   const preparation = createSpacePreparationGate(presentationSpace(readModel()));
   const loading = doc.createElement("div");
@@ -117450,8 +117458,8 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
   ferryMenu = createFerryMenu({ document: doc, adapter, clearInput: () => input.clear(), restoreFocus: restoreGameplayFocus, reportError: (text2) => {
     message = text2;
   } });
-  const button = doc.getElementById("primary-attack");
-  const gameSurfaces = [canvas, button, doc.getElementById("world-pickup"), interactionHud.button].filter(Boolean), gestureListeners = [];
+  const button2 = doc.getElementById("primary-attack");
+  const gameSurfaces = [canvas, button2, doc.getElementById("world-pickup"), interactionHud.button].filter(Boolean), gestureListeners = [];
   for (const surface3 of gameSurfaces) for (const type of ["touchstart", "touchmove", "touchend", "dblclick", "contextmenu"]) {
     const handler = (event) => {
       if (event.cancelable) event.preventDefault();
@@ -117459,7 +117467,7 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
     surface3.addEventListener(type, handler, { passive: false });
     gestureListeners.push(() => surface3.removeEventListener(type, handler));
   }
-  const primary = button ? createPrimaryInput({ button, environment, adapter, readModel, isBlocked: gameplayInputBlocked, restoreGameplayFocus, reportError: (text2) => {
+  const primary = button2 ? createPrimaryInput({ button: button2, environment, adapter, readModel, isBlocked: gameplayInputBlocked, restoreGameplayFocus, reportError: (text2) => {
     message = text2;
   } }) : null;
   inventory = createInventoryPresentation({ document: doc, environment, readModel, adapter, restoreGameplayFocus, heroSlots, clearInput: () => {
@@ -117558,8 +117566,8 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
         disclosure.insertBefore(campaign, review);
       }
       for (const id of ["start-new-campaign", "reset-local-world-data"]) {
-        const button2 = doc.getElementById(id);
-        if (button2 && button2.parentElement !== campaign) campaign.append(button2);
+        const button3 = doc.getElementById(id);
+        if (button3 && button3.parentElement !== campaign) campaign.append(button3);
       }
     }
     resize();
@@ -117615,11 +117623,11 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
       }
     }
     diagnostics.update(model, time);
-    if (spaceKey(model) !== key2) {
+    if (spaceKey(model) !== key3) {
       input.clear(false);
       primary?.clear(false);
       renderer.invalidate("space-change");
-      key2 = spaceKey(model);
+      key3 = spaceKey(model);
       message = "Travel committed.";
     }
     if (model.travel && `${model.travel.requestId}/${model.travel.status}` !== lastTravel) {
@@ -117988,7 +117996,7 @@ function createBrowserPerformanceProbe({ now: now3, enabled, initiallyRecording 
       slowEvents.length = 0;
       slowEventDrops = 0;
       slowEventsSnapshot = null;
-      for (const key2 of Object.keys(gauges)) delete gauges[key2];
+      for (const key3 of Object.keys(gauges)) delete gauges[key3];
       lastFrameTime = null;
       startedAt = at8;
     } else if (!recording) startedAt += at8 - stoppedAt;
@@ -118056,9 +118064,9 @@ function createBrowserPerformanceProbe({ now: now3, enabled, initiallyRecording 
 function createDiagnosticDownloadD9({ environment, document: document2, runtimeId, readPayload }) {
   let sequence = 0;
   const filename = (kind) => `SAQ-World-${kind}-${runtimeId}-${(/* @__PURE__ */ new Date()).toISOString().replace(/[:.]/g, "-")}-${++sequence}.json`;
-  const json = () => JSON.stringify(readPayload(), null, 2);
+  const json2 = () => JSON.stringify(readPayload(), null, 2);
   function download(kind) {
-    const blob6 = new environment.Blob([json()], { type: "application/json" }), url = environment.URL.createObjectURL(blob6), link = document2.createElement("a");
+    const blob6 = new environment.Blob([json2()], { type: "application/json" }), url = environment.URL.createObjectURL(blob6), link = document2.createElement("a");
     link.href = url;
     link.download = filename(kind);
     link.hidden = true;
@@ -118069,7 +118077,7 @@ function createDiagnosticDownloadD9({ environment, document: document2, runtimeI
     return link.download;
   }
   async function copy() {
-    const value2 = json();
+    const value2 = json2();
     if (environment.navigator.clipboard?.writeText) {
       try {
         await environment.navigator.clipboard.writeText(value2);
@@ -118226,7 +118234,7 @@ function createWorldWorkerBridgeD9(worker, { record: record2 = () => {
     requestCounts[kind] = (requestCounts[kind] ?? 0) + 1;
     if ((typeof diagnostics === "function" ? diagnostics() : diagnostics) && (requestCounts[kind] === 1 || requestCounts[kind] % 64 === 0 || !requestDiagnostics[kind])) {
       const at8 = now3(), encoder = new TextEncoder(), fields = {};
-      for (const [key2, value2] of Object.entries(request)) fields[key2] = encoder.encode(JSON.stringify(value2)).byteLength;
+      for (const [key3, value2] of Object.entries(request)) fields[key3] = encoder.encode(JSON.stringify(value2)).byteLength;
       const bytes = encoder.encode(JSON.stringify(request)).byteLength;
       requestDiagnostics[kind] = { bytes, fields, at: at8, sample: requestCounts[kind] };
       record2("worker.requestInspect", now3() - at8);
@@ -118440,14 +118448,14 @@ function applyWorldTransferPatchD9(state, patch) {
     requireContract(change.path[0] !== "hostileCombat" || change.path[1] === "actionsByEntityId", "Cold transfer cannot rewrite hostile shots or catalog history");
     requireContract(change.path[0] !== "eliteCombat" || change.path[1] === "elitesByEntityId", "Cold transfer cannot rewrite elite effects");
     let parent = state;
-    for (const key3 of change.path.slice(0, -1)) {
-      requireContract(parent && Object.hasOwn(parent, key3), "World transfer parent disappeared");
-      parent = parent[key3];
+    for (const key4 of change.path.slice(0, -1)) {
+      requireContract(parent && Object.hasOwn(parent, key4), "World transfer parent disappeared");
+      parent = parent[key4];
     }
-    const key2 = change.path.at(-1), exists = Object.hasOwn(parent, key2), bulk = revisionGuardedBulkPath(change.path);
-    const unchanged = exists === change.before.exists && (!exists || bulk || same10(parent[key2], change.before.value));
+    const key3 = change.path.at(-1), exists = Object.hasOwn(parent, key3), bulk = revisionGuardedBulkPath(change.path);
+    const unchanged = exists === change.before.exists && (!exists || bulk || same10(parent[key3], change.before.value));
     requireContract(unchanged, unchanged ? "" : "World state changed during preparation: " + change.path.slice(0, 4).join("."));
-    targets.push({ parent, key: key2, after: change.after, bulk });
+    targets.push({ parent, key: key3, after: change.after, bulk });
   }
   const values = targets.map((t) => t.after.exists ? t.bulk ? t.after.value : copyWire(t.after.value) : null);
   const geometryChanges = patch.changes.filter((c) => c.path[0] === "entitiesById" || c.path[0] === "spacesByInstanceId");
@@ -118456,10 +118464,10 @@ function applyWorldTransferPatchD9(state, patch) {
     for (const change of geometryChanges) {
       let parent = proposal;
       const path10 = change.path;
-      for (const key2 of path10.slice(0, -1)) {
-        if (parent[key2] === void 0) break;
-        parent[key2] = Array.isArray(parent[key2]) ? [...parent[key2]] : { ...parent[key2] };
-        parent = parent[key2];
+      for (const key3 of path10.slice(0, -1)) {
+        if (parent[key3] === void 0) break;
+        parent[key3] = Array.isArray(parent[key3]) ? [...parent[key3]] : { ...parent[key3] };
+        parent = parent[key3];
       }
       if (change.after.exists) parent[path10.at(-1)] = change.after.value;
       else delete parent[path10.at(-1)];
@@ -118490,9 +118498,9 @@ function applyWorldTransferPatchD9(state, patch) {
     assertNoNewActorGeometryFailureD9(state, proposal, { mutation: "prepared world transfer before installation", phase: "residency integration" });
   }
   for (let i = 0; i < targets.length; i++) {
-    const { parent, key: key2, after } = targets[i];
-    if (after.exists) parent[key2] = values[i];
-    else delete parent[key2];
+    const { parent, key: key3, after } = targets[i];
+    if (after.exists) parent[key3] = values[i];
+    else delete parent[key3];
   }
   for (const p of patch.placements) {
     state.encounterEconomy.groups[p.groupId].startedTick = state.tick;
@@ -118630,10 +118638,10 @@ function originGeometry(state, manifest) {
   return c;
 }
 function participantRadius(p) {
-  const key2 = (p.inventory?.revision ?? 0) + "/" + (p.d8?.revision ?? 0);
+  const key3 = (p.inventory?.revision ?? 0) + "/" + (p.d8?.revision ?? 0);
   let prior = radii.get(p);
-  if (prior?.key !== key2) {
-    prior = { key: key2, value: revealRadiusD9(resolvePlayerStats(p).attributes?.int ?? 5) };
+  if (prior?.key !== key3) {
+    prior = { key: key3, value: revealRadiusD9(resolvePlayerStats(p).attributes?.int ?? 5) };
     radii.set(p, prior);
   }
   return prior.value;
@@ -118656,18 +118664,18 @@ function revealNavigationD9(state) {
   for (const p of Object.values(state.playersById)) {
     const a = state.entitiesById[p.entityId];
     if (!a.alive || a.residency.spaceInstanceId !== state.overworldInstanceId) continue;
-    const center3 = localFramePositionD9(a.position, w.runtime.frames), radius = participantRadius(p), tx = BigInt(center3.chunkX) * 32n + BigInt(Math.floor(center3.localX / 32)), ty = BigInt(center3.chunkY) * 26n + BigInt(Math.floor(center3.localY / 32)), key2 = JSON.stringify([tx.toString(), ty.toString(), radius, w.runtime.revision]);
-    nextKeys.set(p.playerId, key2);
-    participants.push({ p, tx, ty, radius, key: key2 });
+    const center3 = localFramePositionD9(a.position, w.runtime.frames), radius = participantRadius(p), tx = BigInt(center3.chunkX) * 32n + BigInt(Math.floor(center3.localX / 32)), ty = BigInt(center3.chunkY) * 26n + BigInt(Math.floor(center3.localY / 32)), key3 = JSON.stringify([tx.toString(), ty.toString(), radius, w.runtime.revision]);
+    nextKeys.set(p.playerId, key3);
+    participants.push({ p, tx, ty, radius, key: key3 });
   }
-  if (participants.every(({ p, key: key2 }) => prior.get(p.playerId) === key2) && prior.size === nextKeys.size) return false;
+  if (participants.every(({ p, key: key3 }) => prior.get(p.playerId) === key3) && prior.size === nextKeys.size) return false;
   observeMapKnowledge(state);
   const manifest = originManifestForState(state), origin = originGeometry(state, manifest), siteTruth = sharedSiteTruthReuseV1(state), pending = new Map(nav.pending.map((r) => [navigationIdentityD9(r), r]));
   let changed = false;
   const chunks2 = new Map(w.runtime.chunks.map((c) => [c.chunkX + "," + c.chunkY, c])), originChunks = new Set(manifest.chunks.map((c) => c.origin.x / 1024 + "," + c.origin.y / 832)), markCache3 = /* @__PURE__ */ new Map(), remembered = known.get(state) ?? /* @__PURE__ */ new Map();
   known.set(state, remembered);
-  for (const { p, tx, ty, radius, key: key2 } of participants) {
-    if (prior.get(p.playerId) === key2) continue;
+  for (const { p, tx, ty, radius, key: key3 } of participants) {
+    if (prior.get(p.playerId) === key3) continue;
     const edits = /* @__PURE__ */ new Map();
     for (let dy = -radius; dy <= radius; dy++) for (let dx = -radius; dx <= radius; dx++) {
       if (dx * dx + dy * dy > radius * radius) continue;
@@ -118917,8 +118925,8 @@ function actorFootprintPinsD9(s) {
     const center3 = localFramePositionD9(a.position, w.runtime.frames);
     if (pageableHome && chunkAddressKey(center3.chunkX, center3.chunkY) === pageableHome && center3.localX >= r && center3.localX < D9_PROFILE.chunkWidth - r && center3.localY >= r && center3.localY < D9_PROFILE.chunkHeight - r) continue;
     for (const x of [a.position.x - r, a.position.x + r]) for (const y of [a.position.y - r, a.position.y + r]) {
-      const q = localFramePositionD9({ x, y }, w.runtime.frames), key2 = chunkAddressKey(q.chunkX, q.chunkY), historical = BigInt(q.chunkX) >= 0n && BigInt(q.chunkY) >= 0n && BigInt(q.chunkX) < BigInt(w.origin.width / D9_PROFILE.chunkWidth) && BigInt(q.chunkY) < BigInt(w.origin.height / D9_PROFILE.chunkHeight);
-      if (key2 !== pageableHome && !historical) pinned.add(key2);
+      const q = localFramePositionD9({ x, y }, w.runtime.frames), key3 = chunkAddressKey(q.chunkX, q.chunkY), historical = BigInt(q.chunkX) >= 0n && BigInt(q.chunkY) >= 0n && BigInt(q.chunkX) < BigInt(w.origin.width / D9_PROFILE.chunkWidth) && BigInt(q.chunkY) < BigInt(w.origin.height / D9_PROFILE.chunkHeight);
+      if (key3 !== pageableHome && !historical) pinned.add(key3);
     }
   }
   for (const b of Object.values(s.hostileCombat?.projectiles ?? {})) if (b.spaceInstanceId === s.overworldInstanceId) {
@@ -118935,7 +118943,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
   const RELEASE_COOLDOWN_TICKS = 900, releaseCooldown = /* @__PURE__ */ new Map();
   const COMPANION_TICKS = 1800, companions = /* @__PURE__ */ new Map();
   const coolRelease = (v, release) => {
-    for (const [key2, c] of v.resident) if (release.includes(c.id)) releaseCooldown.set(key2, v.tick + RELEASE_COOLDOWN_TICKS);
+    for (const [key3, c] of v.resident) if (release.includes(c.id)) releaseCooldown.set(key3, v.tick + RELEASE_COOLDOWN_TICKS);
   };
   const farthestFirst = (rows, v) => {
     const gap2 = (row2) => Math.min(...v.players.map((p) => Math.max(Math.abs(Number(BigInt(row2.chunkX) - BigInt(p.position.chunkX))), Math.abs(Number(BigInt(row2.chunkY) - BigInt(p.position.chunkY))))));
@@ -119002,19 +119010,19 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
       const wanted = filter(participantWindowsD9(residencyPlayers)), preload = filter(participantWindowsD9(residencyPlayers, D9_PROFILE.preloadRadiusChunks));
       if (destinationTarget) for (const address3 of destinationTarget.requiredChunks) {
         if (historical(address3)) continue;
-        const key2 = chunkAddressKey(address3.chunkX, address3.chunkY), row2 = { chunkX: address3.chunkX, chunkY: address3.chunkY, distance: 0 };
-        wanted.set(key2, row2);
-        preload.set(key2, row2);
+        const key3 = chunkAddressKey(address3.chunkX, address3.chunkY), row2 = { chunkX: address3.chunkX, chunkY: address3.chunkY, distance: 0 };
+        wanted.set(key3, row2);
+        preload.set(key3, row2);
       }
-      for (const [key2, c] of companions) {
+      for (const [key3, c] of companions) {
         if (c.until <= s.tick) {
-          companions.delete(key2);
+          companions.delete(key3);
           continue;
         }
-        if (historical(c) || wanted.has(key2)) continue;
+        if (historical(c) || wanted.has(key3)) continue;
         const row2 = { chunkX: c.chunkX, chunkY: c.chunkY, distance: D9_PROFILE.residentRadiusChunks };
-        wanted.set(key2, row2);
-        preload.set(key2, row2);
+        wanted.set(key3, row2);
+        preload.set(key3, row2);
       }
       const reservations = w.plannedWorld ? [] : Object.values(w.siteReservationsById ?? {}), familyParcels = reservations.filter((r) => r.packageId === WOODLAND_CAVE_FAMILY_PACKAGE_ID).map((r) => r.parcel), regionKeys = new Set((w.plannedWorld ? [] : [...wanted.values()]).map((a) => {
         const r = regionAddress(a.chunkX, a.chunkY);
@@ -119040,23 +119048,23 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
   };
   const observedView = () => measure2("residencyQuery", view3);
   function cleanCache(v) {
-    for (const key2 of prepared.keys()) if (!v.preload.has(key2) || v.resident.has(key2)) {
-      prepared.delete(key2);
+    for (const key3 of prepared.keys()) if (!v.preload.has(key3) || v.resident.has(key3)) {
+      prepared.delete(key3);
       discarded++;
     }
   }
   async function generate(address3, v) {
-    const key2 = chunkAddressKey(address3.chunkX, address3.chunkY);
-    if (prepared.has(key2) || v.resident.has(key2)) return;
+    const key3 = chunkAddressKey(address3.chunkX, address3.chunkY);
+    if (prepared.has(key3) || v.resident.has(key3)) return;
     const generatedChunk = await worker.generate({ seed: v.seed, chunkX: address3.chunkX, chunkY: address3.chunkY, profile: D9_PROFILE.version, origin: v.origin, ...v.plannedWorld ? { plannedWorld: v.plannedWorld } : {} }), historical = overlayWoodlandCaveParcelD10(overlayWoodlandFortParcelD10(overlayWoodlandRuinExteriorD11_3_2(overlayFunctionalSiteBootstrapD9(generatedChunk, siteBootstrap), ruinSocket ?? siteBootstrap), fortParcel), caveParcel), legacy = overlayWoodlandCaveFamilyParcelsD12(historical, v.familyParcels.filter((parcel2) => ![WOODLAND_CAVE_FAMILY_PARCEL_D12_1, WOODLAND_CAVE_FAMILY_PARCEL_D12_2, PLANNED_CAVE_PARCEL].includes(parcel2.version))), modern = overlayWoodlandCaveFamilyParcelsD12_1(legacy, v.familyParcels.filter((parcel2) => parcel2.version === WOODLAND_CAVE_FAMILY_PARCEL_D12_1)), chunk2 = overlayWoodlandCaveFamilyParcelsD12_2(modern, v.familyParcels.filter((parcel2) => parcel2.version === WOODLAND_CAVE_FAMILY_PARCEL_D12_2));
     generated++;
     const current = observedView();
-    if (closed || !current.preload.has(key2) || current.resident.has(key2)) {
+    if (closed || !current.preload.has(key3) || current.resident.has(key3)) {
       discarded++;
       return;
     }
     requireContract(prepared.size < D9_RUNTIME_POLICY.preparedChunks, "World prepared terrain bound");
-    prepared.set(key2, chunk2);
+    prepared.set(key3, chunk2);
   }
   async function prepareLocalEncounters(v) {
     const requestedKey = v.encounterKey;
@@ -119165,7 +119173,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
           return false;
         }
       }
-      const urgentWanted = [...v.wanted].some(([key2]) => !v.resident.has(key2));
+      const urgentWanted = [...v.wanted].some(([key3]) => !v.resident.has(key3));
       if (urgentWanted) {
         if (wantedMissingSinceTick === null) wantedMissingSinceTick = v.tick;
         progressState = "wanted";
@@ -119219,13 +119227,13 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
         }
         return false;
       }
-      const missing = [...v.wanted].filter(([key2]) => !v.resident.has(key2) && !prepared.has(key2)).map(([, a]) => a).sort((a, b) => priority(a, v) - priority(b, v) || a.distance - b.distance).slice(0, D9_RUNTIME_POLICY.generationBatch);
+      const missing = [...v.wanted].filter(([key3]) => !v.resident.has(key3) && !prepared.has(key3)).map(([, a]) => a).sort((a, b) => priority(a, v) - priority(b, v) || a.distance - b.distance).slice(0, D9_RUNTIME_POLICY.generationBatch);
       if (missing.length) await Promise.all(missing.map((a) => generate(a, v)));
       if (closed) return false;
       v = observedView();
       cleanCache(v);
-      const candidates = [...v.wanted].filter(([key2]) => !v.resident.has(key2) && prepared.has(key2)).sort((a, b) => priority(a[1], v) - priority(b[1], v) || a[1].distance - b[1].distance), free = Math.max(0, D9_RUNTIME_POLICY.residentChunks - v.resident.size), evictable = farthestFirst([...v.resident].filter(([key2]) => !v.wanted.has(key2) && !v.pinned.has(key2) && !(releaseCooldown.get(key2) > v.tick)), v), parcelWanted = parcelKeys.some((k) => v.wanted.has(k)), parcelResident = parcelKeys.filter((k) => v.resident.has(k)), parcelMissing = parcelKeys.filter((k) => !v.resident.has(k));
-      for (const [key2, until] of releaseCooldown) if (until <= v.tick || !v.resident.has(key2)) releaseCooldown.delete(key2);
+      const candidates = [...v.wanted].filter(([key3]) => !v.resident.has(key3) && prepared.has(key3)).sort((a, b) => priority(a[1], v) - priority(b[1], v) || a[1].distance - b[1].distance), free = Math.max(0, D9_RUNTIME_POLICY.residentChunks - v.resident.size), evictable = farthestFirst([...v.resident].filter(([key3]) => !v.wanted.has(key3) && !v.pinned.has(key3) && !(releaseCooldown.get(key3) > v.tick)), v), parcelWanted = parcelKeys.some((k) => v.wanted.has(k)), parcelResident = parcelKeys.filter((k) => v.resident.has(k)), parcelMissing = parcelKeys.filter((k) => !v.resident.has(k));
+      for (const [key3, until] of releaseCooldown) if (until <= v.tick || !v.resident.has(key3)) releaseCooldown.delete(key3);
       let release = [], admit = [];
       if (parcelWanted && parcelMissing.length) {
         if (parcelMissing.every((k) => prepared.has(k))) {
@@ -119249,7 +119257,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
         const snapshot = capture("residency"), stagedPages = pageBuffer.capture(), result = await worker.prepareResidency({ state: snapshot, release, admit, stagedPages });
         if (closed) return false;
         const current = observedView();
-        if (release.some((id) => [...current.resident].some(([key2, c]) => c.id === id && (current.wanted.has(key2) || current.pinned.has(key2)))) || admit.some((c) => !current.wanted.has(chunkAddressKey(c.chunkX, c.chunkY)))) {
+        if (release.some((id) => [...current.resident].some(([key3, c]) => c.id === id && (current.wanted.has(key3) || current.pinned.has(key3)))) || admit.some((c) => !current.wanted.has(chunkAddressKey(c.chunkX, c.chunkY)))) {
           coolRelease(current, release);
           retry("window moved during preparation");
           return false;
@@ -119304,7 +119312,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
           throw e;
         }
       } else {
-        const ahead = pageBuffer.resources().dirtyPages > D9_RUNTIME_POLICY.flushPages ? [] : [...v.preload].filter(([key2]) => !v.resident.has(key2) && !prepared.has(key2)).map(([, a]) => a).sort((a, b) => priority(a, v) - priority(b, v) || a.distance - b.distance).slice(0, D9_RUNTIME_POLICY.generationBatch);
+        const ahead = pageBuffer.resources().dirtyPages > D9_RUNTIME_POLICY.flushPages ? [] : [...v.preload].filter(([key3]) => !v.resident.has(key3) && !prepared.has(key3)).map(([, a]) => a).sort((a, b) => priority(a, v) - priority(b, v) || a.distance - b.distance).slice(0, D9_RUNTIME_POLICY.generationBatch);
         if (ahead.length) await Promise.all(ahead.map((a) => generate(a, v)));
         else if (worker.collect && v.tick - lastCollectTick >= 600) {
           try {
@@ -119316,7 +119324,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
         }
       }
       v = observedView();
-      const ready = [...v.wanted.keys()].every((key2) => v.resident.has(key2));
+      const ready = [...v.wanted.keys()].every((key3) => v.resident.has(key3));
       if (ready) {
         wantedMissingSinceTick = null;
         progressState = "ready";
@@ -119346,8 +119354,8 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
     return running2;
   }
   async function syncNavigation() {
-    const request = borrow((s) => ({ root: s.d9World.discoveryIndex, navigation: copyWire(s.d9World.navigation), stagedPages: pageBuffer.capture() })), key2 = String(request.root) + "/" + request.navigation.revision + "/" + request.navigation.pending.length;
-    if (navigationPreparing?.key === key2) {
+    const request = borrow((s) => ({ root: s.d9World.discoveryIndex, navigation: copyWire(s.d9World.navigation), stagedPages: pageBuffer.capture() })), key3 = String(request.root) + "/" + request.navigation.revision + "/" + request.navigation.pending.length;
+    if (navigationPreparing?.key === key3) {
       navigationCoalesced++;
       return navigationPreparing.promise;
     }
@@ -119371,10 +119379,10 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
         if (/changed|pending page buffer/.test(e.message)) return false;
         throw e;
       } finally {
-        if (navigationPreparing?.key === key2) navigationPreparing = null;
+        if (navigationPreparing?.key === key3) navigationPreparing = null;
       }
     })();
-    navigationPreparing = { key: key2, promise };
+    navigationPreparing = { key: key3, promise };
     return promise;
   }
   async function warmGround() {
@@ -119427,7 +119435,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
     for (let attempt = 0; attempt < D9_RUNTIME_POLICY.preparedChunks && !closed && !error; attempt++) {
       await pump();
       const v = observedView();
-      if (!error && [...v.wanted.keys()].every((key2) => v.resident.has(key2)) && (!v.approach || hasWorldCombat(v.plannedWorld))) return true;
+      if (!error && [...v.wanted.keys()].every((key3) => v.resident.has(key3)) && (!v.approach || hasWorldCombat(v.plannedWorld))) return true;
     }
     return false;
   }
@@ -119504,11 +119512,11 @@ async function prepareD9OriginMigration(state, { sha256 }) {
   for (const playerId of next.session.playerIds) {
     const rows = /* @__PURE__ */ new Map();
     for (const mark of marks2) {
-      const a = legacyWorldPosition(mark.position), key2 = a.chunkX + "," + a.chunkY;
-      let row2 = rows.get(key2);
+      const a = legacyWorldPosition(mark.position), key3 = a.chunkX + "," + a.chunkY;
+      let row2 = rows.get(key3);
       if (!row2) {
         row2 = { playerId, spaceInstanceId: next.overworldInstanceId, chunkX: a.chunkX, chunkY: a.chunkY, tiles: "?".repeat(832), region: null, markers: [] };
-        rows.set(key2, row2);
+        rows.set(key3, row2);
       }
       row2.markers.push({ id: mark.id, label: mark.label, kind: mark.kind, x: a.localX, y: a.localY });
     }
@@ -119750,17 +119758,17 @@ function eachTarget(state, visit) {
       else if (x && typeof x === "object") walk(x);
     }
   };
-  for (const [key2, v] of Object.entries(state)) if (v && typeof v === "object" && !OWN_ROWS.includes(key2)) walk(v);
+  for (const [key3, v] of Object.entries(state)) if (v && typeof v === "object" && !OWN_ROWS.includes(key3)) walk(v);
   if (state.subweaponCombat) {
-    for (const [key2, v] of Object.entries(state.subweaponCombat)) if (key2 !== "actors" && key2 !== "mastery" && v && typeof v === "object") walk(v);
+    for (const [key3, v] of Object.entries(state.subweaponCombat)) if (key3 !== "actors" && key3 !== "mastery" && v && typeof v === "object") walk(v);
   }
 }
 function parkSeat(state, pid, heirPid = null) {
   const actor = actorOf(state, pid), room = ensureWaitingRoom(state);
   if (actor.residency.spaceInstanceId === room) return;
   const heir = heirPid && heirPid !== pid && !isWaiting(state, heirPid) ? actorOf(state, heirPid).entityId : null;
-  if (heir) eachTarget(state, (row2, key2) => {
-    if (row2[key2] === actor.entityId) row2[key2] = heir;
+  if (heir) eachTarget(state, (row2, key3) => {
+    if (row2[key3] === actor.entityId) row2[key3] = heir;
   });
   moveResidency(state, actor, room, { x: ROOM * 16, y: ROOM * 16 });
   setFrameMember(state, pid, false);
@@ -119853,7 +119861,7 @@ function renewSeat(state, oldPid, { keepQuests = false } = {}) {
   if (outings && outing) outings[playerId] = outing;
   return playerId;
 }
-function seatHeroV1(state, { passport, heroId = passport?.heroId, seats, lastPlayerId, heroIds = null, seatWins = false }) {
+function seatHeroV1(state, { passport, heroId = passport?.heroId, seats, lastPlayerId, heroIds = null, seatWins = false, stand = [] }) {
   requireContract(validHeroId(heroId) && (!passport || passport.heroId === heroId), "Seating needs a hero");
   if (lastPlayerId && !state.playersById[lastPlayerId]) lastPlayerId = null;
   const next = { ...seats };
@@ -119890,11 +119898,26 @@ function seatHeroV1(state, { passport, heroId = passport?.heroId, seats, lastPla
     unparkSeat(state, pid, host);
     changed = true;
   }
-  for (const id of state.session.playerIds) if (id !== pid && !isWaiting(state, id)) {
+  for (const id of state.session.playerIds) if (id !== pid && !stand.includes(id) && !isWaiting(state, id)) {
     parkSeat(state, id, pid);
     changed = true;
   }
   return { state, playerId: pid, seats: next, changed };
+}
+function seatPartyV1(state, { host, guests = [], seats, lastPlayerId, heroIds = null }) {
+  requireContract(guests.length < WORLD_SEAT_LIMIT, "This world has no free seat");
+  const ids4 = heroIds ? [.../* @__PURE__ */ new Set([...heroIds, ...guests.map((g) => g.heroId)])] : null;
+  const first = seatHeroV1(state, { ...host, seats, lastPlayerId, heroIds: ids4 });
+  let next = first.seats, changed = first.changed;
+  const party = { [host.heroId]: first.playerId };
+  for (const g of guests) {
+    requireContract(g.passport && g.passport.heroId === g.heroId && !party[g.heroId], "A guest brings their own hero");
+    const r = seatHeroV1(state, { passport: g.passport, heroId: g.heroId, seats: next, lastPlayerId: first.playerId, heroIds: ids4, stand: Object.values(party) });
+    party[g.heroId] = r.playerId;
+    next = r.seats;
+    changed = changed || r.changed;
+  }
+  return { state, playerId: first.playerId, seats: next, party, changed };
 }
 
 // src/shared/contracts/site_reset_d13c.js
@@ -120088,8 +120111,8 @@ async function createLocalEndlessSessionD9(options) {
   };
   report(resume ? "Restoring the saved world\u2026" : "Preparing a new world\u2026");
   requireContract(worker, "D9 requires its save/generation Worker");
-  let opened = resume ? await worker.open(resume.campaignId) : null, localPlayerId = resume?.playerId, generationDiagnostics = null;
-  if (!opened) {
+  let opened2 = resume ? await worker.open(resume.campaignId) : null, localPlayerId = resume?.playerId, generationDiagnostics = null;
+  if (!opened2) {
     report("Generating terrain, roads and site entrances\u2026");
     const legacy = await createLocalActivitySession(options), source3 = legacy.authority.withAuthority((a) => a.readState());
     generationDiagnostics = legacy.generationDiagnostics;
@@ -120099,86 +120122,86 @@ async function createLocalEndlessSessionD9(options) {
     let result = await worker.commit({ state: migration.state, expectedRoot: null, checkpointId: createId("checkpointId", nextToken()) });
     if (result.status === "unknown") result = await worker.reconcile();
     requireContract(result.status === "committed", result.reason ?? "D9 origin publication did not commit");
-    opened = await worker.open(source3.campaign.campaignId);
+    opened2 = await worker.open(source3.campaign.campaignId);
   }
   report("Connecting the planned wilderness\u2026");
-  if (options.plannedWorld && !opened.state.d9World.plannedWorld) {
-    const draft = await worker.bindPlanned({ state: opened.state, binding: options.plannedWorld });
-    const published = await worker.commit({ state: draft, expectedRoot: opened.publication.id, checkpointId: createId("checkpointId", nextToken()) });
+  if (options.plannedWorld && !opened2.state.d9World.plannedWorld) {
+    const draft = await worker.bindPlanned({ state: opened2.state, binding: options.plannedWorld });
+    const published = await worker.commit({ state: draft, expectedRoot: opened2.publication.id, checkpointId: createId("checkpointId", nextToken()) });
     requireContract(published.status === "committed", published.reason ?? "Planned campaign binding failed");
-    opened = await worker.open(draft.campaign.campaignId);
+    opened2 = await worker.open(draft.campaign.campaignId);
   }
-  if (options.plannedWorld) requireContract(opened.state.d9World.plannedWorld?.assetHash === options.plannedWorld.assetHash, "Saved planned world binding differs from review selection");
+  if (options.plannedWorld) requireContract(opened2.state.d9World.plannedWorld?.assetHash === options.plannedWorld.assetHash, "Saved planned world binding differs from review selection");
   report("Checking enemy rosters and existing progress\u2026");
   {
-    const draft = copyWire(opened.state), upgrade = await upgradeDungeonMobCatalog(draft, { sha256 });
+    const draft = copyWire(opened2.state), upgrade = await upgradeDungeonMobCatalog(draft, { sha256 });
     if (upgrade.changed) {
-      let saved = await worker.commit({ state: draft, expectedRoot: opened.publication.id, checkpointId: createId("checkpointId", nextToken()) });
+      let saved = await worker.commit({ state: draft, expectedRoot: opened2.publication.id, checkpointId: createId("checkpointId", nextToken()) });
       if (saved.status === "unknown") saved = await worker.reconcile();
       requireContract(saved.status === "committed", saved.reason ?? "Dungeon mob catalog publication did not commit");
-      opened = await worker.open(draft.campaign.campaignId);
+      opened2 = await worker.open(draft.campaign.campaignId);
     }
   }
   {
-    const draft = copyWire(opened.state), upgrade = await upgradeDungeonMobCatalogV2(draft, { sha256 });
+    const draft = copyWire(opened2.state), upgrade = await upgradeDungeonMobCatalogV2(draft, { sha256 });
     if (upgrade.changed) {
-      let saved = await worker.commit({ state: draft, expectedRoot: opened.publication.id, checkpointId: createId("checkpointId", nextToken()) });
+      let saved = await worker.commit({ state: draft, expectedRoot: opened2.publication.id, checkpointId: createId("checkpointId", nextToken()) });
       if (saved.status === "unknown") saved = await worker.reconcile();
       requireContract(saved.status === "committed", saved.reason ?? "Dungeon mob V2 catalog publication did not commit");
-      opened = await worker.open(draft.campaign.campaignId);
+      opened2 = await worker.open(draft.campaign.campaignId);
     }
   }
   {
-    const draft = copyWire(opened.state), upgrade = upgradeOriginHordes(draft);
+    const draft = copyWire(opened2.state), upgrade = upgradeOriginHordes(draft);
     if (upgrade.changed) {
-      let saved = await worker.commit({ state: draft, expectedRoot: opened.publication.id, checkpointId: createId("checkpointId", nextToken()) });
+      let saved = await worker.commit({ state: draft, expectedRoot: opened2.publication.id, checkpointId: createId("checkpointId", nextToken()) });
       if (saved.status === "unknown") saved = await worker.reconcile();
       requireContract(saved.status === "committed", saved.reason ?? "Origin horde publication did not commit");
-      opened = await worker.open(draft.campaign.campaignId);
+      opened2 = await worker.open(draft.campaign.campaignId);
     }
   }
   {
-    const draft = copyWire(opened.state), adoption = adoptOrdinaryRosters(draft);
+    const draft = copyWire(opened2.state), adoption = adoptOrdinaryRosters(draft);
     if (adoption.changed) {
-      let saved = await worker.commit({ state: draft, expectedRoot: opened.publication.id, checkpointId: createId("checkpointId", nextToken()) });
+      let saved = await worker.commit({ state: draft, expectedRoot: opened2.publication.id, checkpointId: createId("checkpointId", nextToken()) });
       if (saved.status === "unknown") saved = await worker.reconcile();
       requireContract(saved.status === "committed", saved.reason ?? "Dungeon mob roster publication did not commit");
-      opened = await worker.open(draft.campaign.campaignId);
+      opened2 = await worker.open(draft.campaign.campaignId);
     }
   }
   {
-    const draft = copyWire(opened.state), adoption = adoptOrdinaryRostersV2(draft);
+    const draft = copyWire(opened2.state), adoption = adoptOrdinaryRostersV2(draft);
     if (adoption.changed) {
-      let saved = await worker.commit({ state: draft, expectedRoot: opened.publication.id, checkpointId: createId("checkpointId", nextToken()) });
+      let saved = await worker.commit({ state: draft, expectedRoot: opened2.publication.id, checkpointId: createId("checkpointId", nextToken()) });
       if (saved.status === "unknown") saved = await worker.reconcile();
       requireContract(saved.status === "committed", saved.reason ?? "Dungeon mob V2 roster publication did not commit");
-      opened = await worker.open(draft.campaign.campaignId);
+      opened2 = await worker.open(draft.campaign.campaignId);
     }
   }
   if (options.heroSeat) {
-    const seat = options.heroSeat, draft = copyWire(opened.state), seated = seatHeroV1(draft, { passport: seat.passport ?? null, heroId: seat.heroId, seats: seat.seats ?? {}, lastPlayerId: localPlayerId ?? null, heroIds: seat.heroIds ?? null, seatWins: seat.seatWins === true });
+    const seat = options.heroSeat, draft = copyWire(opened2.state), seated = seat.party?.length ? seatPartyV1(draft, { host: { passport: seat.passport ?? null, heroId: seat.heroId, seatWins: seat.seatWins === true }, guests: seat.party, seats: seat.seats ?? {}, lastPlayerId: localPlayerId ?? null, heroIds: seat.heroIds ?? null }) : seatHeroV1(draft, { passport: seat.passport ?? null, heroId: seat.heroId, seats: seat.seats ?? {}, lastPlayerId: localPlayerId ?? null, heroIds: seat.heroIds ?? null, seatWins: seat.seatWins === true });
     if (seated.changed) {
-      let saved = await worker.commit({ state: draft, expectedRoot: opened.publication.id, checkpointId: createId("checkpointId", nextToken()) });
+      let saved = await worker.commit({ state: draft, expectedRoot: opened2.publication.id, checkpointId: createId("checkpointId", nextToken()) });
       if (saved.status === "unknown") saved = await worker.reconcile();
       requireContract(saved.status === "committed", saved.reason ?? "Hero seat publication did not commit");
-      opened = await worker.open(draft.campaign.campaignId);
+      opened2 = await worker.open(draft.campaign.campaignId);
     }
     localPlayerId = seated.playerId;
-    seat.onSeated?.({ playerId: localPlayerId, seats: seated.seats });
+    seat.onSeated?.({ playerId: localPlayerId, seats: seated.seats, party: seated.party ?? null });
   }
-  if (options.bestiaryAlbum && opened.state.d9World) {
-    const draft = copyWire(opened.state);
+  if (options.bestiaryAlbum && opened2.state.d9World) {
+    const draft = copyWire(opened2.state);
     if (installBestiaryAlbumV1(draft, localPlayerId, options.bestiaryAlbum)) {
-      let saved = await worker.commit({ state: draft, expectedRoot: opened.publication.id, checkpointId: createId("checkpointId", nextToken()) });
+      let saved = await worker.commit({ state: draft, expectedRoot: opened2.publication.id, checkpointId: createId("checkpointId", nextToken()) });
       if (saved.status === "unknown") saved = await worker.reconcile();
       requireContract(saved.status === "committed", saved.reason ?? "Bestiary album publication did not commit");
-      opened = await worker.open(draft.campaign.campaignId);
+      opened2 = await worker.open(draft.campaign.campaignId);
     }
   }
-  requireContract(opened?.state.proofCase === proofCase && opened.state.playersById[localPlayerId], "D9 stored controller/case mismatch");
-  const origin = { originWidthChunks: opened.state.d9World.origin.width / 1024, originHeightChunks: opened.state.d9World.origin.height / 832, egress: opened.state.d9World.origin.egress };
-  if (!opened.state.d9World.plannedWorld && !Object.keys(opened.state.d9World.siteReservationsById ?? {}).length && worker.siteReservations) {
-    const existingRuin = Object.values(opened.state.d9World.functionalSitesById).find((site) => site.packageId === WOODLAND_RUIN_PACKAGE_ID), reserved = await worker.siteReservations({ seed: opened.state.campaign.seed.seedHex, origin, ...existingRuin ? { ruinSocket: existingRuin.socket } : {} }), draft = copyWire(opened.state), ruin = existingRuin?.socket ?? reserved.ruin.guaranteedCandidate, fort = reserved.fort, cave = reserved.cave, caves = reserved.caves ?? [];
+  requireContract(opened2?.state.proofCase === proofCase && opened2.state.playersById[localPlayerId], "D9 stored controller/case mismatch");
+  const origin = { originWidthChunks: opened2.state.d9World.origin.width / 1024, originHeightChunks: opened2.state.d9World.origin.height / 832, egress: opened2.state.d9World.origin.egress };
+  if (!opened2.state.d9World.plannedWorld && !Object.keys(opened2.state.d9World.siteReservationsById ?? {}).length && worker.siteReservations) {
+    const existingRuin = Object.values(opened2.state.d9World.functionalSitesById).find((site) => site.packageId === WOODLAND_RUIN_PACKAGE_ID), reserved = await worker.siteReservations({ seed: opened2.state.campaign.seed.seedHex, origin, ...existingRuin ? { ruinSocket: existingRuin.socket } : {} }), draft = copyWire(opened2.state), ruin = existingRuin?.socket ?? reserved.ruin.guaranteedCandidate, fort = reserved.fort, cave = reserved.cave, caves = reserved.caves ?? [];
     draft.d9World.siteReservationsById[ruin.siteId] = { version: "site-reservation-d10-v1", siteId: ruin.siteId, packageId: WOODLAND_RUIN_PACKAGE_ID, socket: copyWire(ruin), parcel: null };
     if (fort) draft.d9World.siteReservationsById[fort.siteId] = { version: "site-reservation-d10-v1", siteId: fort.siteId, packageId: "woodland-fort", socket: copyWire(fort.socket), parcel: copyWire(fort) };
     if (cave) draft.d9World.siteReservationsById[cave.siteId] = { version: "site-reservation-d10-v1", siteId: cave.siteId, packageId: WOODLAND_CAVE_PACKAGE_ID, socket: copyWire(cave.socket), parcel: copyWire(cave) };
@@ -120196,19 +120219,27 @@ async function createLocalEndlessSessionD9(options) {
       commitCaveReservationBindingD10(draft, referenceCaveBinding);
       for (const page of referenceCaveBinding.pages) staged.set(page.id, page);
     }
-    let saved = await worker.commit({ state: draft, expectedRoot: opened.publication.id, checkpointId: createId("checkpointId", nextToken()), stagedPages: [...staged.values()] });
+    let saved = await worker.commit({ state: draft, expectedRoot: opened2.publication.id, checkpointId: createId("checkpointId", nextToken()), stagedPages: [...staged.values()] });
     if (saved.status === "unknown") saved = await worker.reconcile();
     requireContract(saved.status === "committed", saved.reason ?? "Site reservation publication did not commit");
-    opened = await worker.open(draft.campaign.campaignId);
+    opened2 = await worker.open(draft.campaign.campaignId);
   }
   report("Finalizing local world streaming\u2026");
-  const boundSites = Object.values(opened.state.d9World.functionalSitesById), ruinReservation = Object.values(opened.state.d9World.siteReservationsById ?? {}).find((r) => r.packageId === WOODLAND_RUIN_PACKAGE_ID), boundSite = boundSites.find((site) => site.socket.version === SITE_BOOTSTRAP_SOCKET_D9), boundBootstrap = ruinReservation?.socket.version === SITE_BOOTSTRAP_SOCKET_D9 ? Object.freeze({ bootstrap: ruinReservation.socket }) : boundSite ? Object.freeze({ bootstrap: boundSite.socket }) : null, plannedBootstrap = !opened.state.d9World.plannedWorld && !boundSites.some((site) => site.packageId === WOODLAND_RUIN_PACKAGE_ID) && worker.siteBootstrap ? await worker.siteBootstrap({ seed: opened.state.campaign.seed.seedHex, origin, maxRouteTiles: 160 }) : null;
+  const boundSites = Object.values(opened2.state.d9World.functionalSitesById), ruinReservation = Object.values(opened2.state.d9World.siteReservationsById ?? {}).find((r) => r.packageId === WOODLAND_RUIN_PACKAGE_ID), boundSite = boundSites.find((site) => site.socket.version === SITE_BOOTSTRAP_SOCKET_D9), boundBootstrap = ruinReservation?.socket.version === SITE_BOOTSTRAP_SOCKET_D9 ? Object.freeze({ bootstrap: ruinReservation.socket }) : boundSite ? Object.freeze({ bootstrap: boundSite.socket }) : null, plannedBootstrap = !opened2.state.d9World.plannedWorld && !boundSites.some((site) => site.packageId === WOODLAND_RUIN_PACKAGE_ID) && worker.siteBootstrap ? await worker.siteBootstrap({ seed: opened2.state.campaign.seed.seedHex, origin, maxRouteTiles: 160 }) : null;
   const siteBootstrap = boundBootstrap ?? plannedBootstrap;
-  const pages2 = createWorldPageBufferD9({ readPage: worker.readPage, sha256, now: now3 }), authority = createPagedWorldAuthorityD9({ initialState: opened.state, publication: opened.publication, task: worker, measure: measure2, developerCapabilities: { siteNavigator: siteNavigatorEnabled }, capturePages: pages2.capture, confirmedPages: pages2.acknowledge });
-  const fortParcel = Object.values(opened.state.d9World.siteReservationsById ?? {}).find((r) => r.packageId === "woodland-fort")?.parcel ?? null, caveParcel = Object.values(opened.state.d9World.siteReservationsById ?? {}).find((r) => r.packageId === WOODLAND_CAVE_PACKAGE_ID)?.parcel ?? null, caveParcels = Object.values(opened.state.d9World.siteReservationsById ?? {}).filter((r) => r.packageId === WOODLAND_CAVE_FAMILY_PACKAGE_ID).map((r) => r.parcel).sort((a, b) => (a.regionKey ?? "").localeCompare(b.regionKey ?? "") || a.spawnOrdinal - b.spawnOrdinal);
-  const stream = createWorldResidencyD9({ authority, worker, pageBuffer: pages2, siteBootstrap, ruinSocket: ruinReservation?.socket ?? null, fortParcel, caveParcel, caveParcels, measure: measure2, now: now3 }), clientPort = createActivityClientPort({ authority, localPlayerId, measure: measure2 });
-  const store2 = storeFactory(opened.state.content.fingerprint, activityGeneration(opened.state), activityCampaignCodec);
-  await Promise.resolve(store2.writeLocalLauncher?.(proofCase, { campaignId: opened.state.campaign.campaignId, playerId: localPlayerId })).catch((error) => {
+  const pages2 = createWorldPageBufferD9({ readPage: worker.readPage, sha256, now: now3 }), authority = createPagedWorldAuthorityD9({ initialState: opened2.state, publication: opened2.publication, task: worker, measure: measure2, developerCapabilities: { siteNavigator: siteNavigatorEnabled }, capturePages: pages2.capture, confirmedPages: pages2.acknowledge });
+  const fortParcel = Object.values(opened2.state.d9World.siteReservationsById ?? {}).find((r) => r.packageId === "woodland-fort")?.parcel ?? null, caveParcel = Object.values(opened2.state.d9World.siteReservationsById ?? {}).find((r) => r.packageId === WOODLAND_CAVE_PACKAGE_ID)?.parcel ?? null, caveParcels = Object.values(opened2.state.d9World.siteReservationsById ?? {}).filter((r) => r.packageId === WOODLAND_CAVE_FAMILY_PACKAGE_ID).map((r) => r.parcel).sort((a, b) => (a.regionKey ?? "").localeCompare(b.regionKey ?? "") || a.spawnOrdinal - b.spawnOrdinal);
+  const stream = createWorldResidencyD9({ authority, worker, pageBuffer: pages2, siteBootstrap, ruinSocket: ruinReservation?.socket ?? null, fortParcel, caveParcel, caveParcels, measure: measure2, now: now3 }), hostPort = createActivityClientPort({ authority, localPlayerId, measure: measure2 }), seatPorts = /* @__PURE__ */ new Map(), seatPort = (pid) => {
+    if (pid === localPlayerId) return hostPort;
+    let p = seatPorts.get(pid);
+    if (!p) {
+      p = createActivityClientPort({ authority, localPlayerId: pid, measure: measure2 });
+      seatPorts.set(pid, p);
+    }
+    return p;
+  }, clientPort = Object.freeze({ ...hostPort, send: (c) => seatPort(c?.playerId).send(c) });
+  const store2 = storeFactory(opened2.state.content.fingerprint, activityGeneration(opened2.state), activityCampaignCodec);
+  await Promise.resolve(store2.writeLocalLauncher?.(proofCase, { campaignId: opened2.state.campaign.campaignId, playerId: localPlayerId })).catch((error) => {
     if (!options.heroSeat || !/Launcher must reference/.test(error?.message)) throw error;
   });
   const GATE_TIMEOUT_MS = 15e3, RETRY_MS = 1e3, STREAM_SERVICE_MS = 100, STREAM_IDLE_SERVICE_MS = 500;
@@ -120217,7 +120248,7 @@ async function createLocalEndlessSessionD9(options) {
     const e = s.entitiesById[p.entityId];
     return e.residency.spaceInstanceId + "/" + Math.floor(e.position.x / 64) + "," + Math.floor(e.position.y / 64);
   }).join("|")));
-  let saving = null, saveAgain = false, lastError = null, lastSavedTick = opened.state.tick, lastLife = null, lastCritical = null, lastLifeSaveTick = -Infinity, savePhase = "idle", savePhaseAt = now3(), gateSince = null, gateTimedOut = false, durabilityFailed = false, fatalInvariant = null, failedCuts = 0, retriedCuts = 0, lastSuccessfulCommitAt = now3(), lastSaveAttemptAt = -Infinity, lastStreamServiceAt = -Infinity;
+  let saving = null, saveAgain = false, lastError = null, lastSavedTick = opened2.state.tick, lastLife = null, lastCritical = null, lastLifeSaveTick = -Infinity, savePhase = "idle", savePhaseAt = now3(), gateSince = null, gateTimedOut = false, durabilityFailed = false, fatalInvariant = null, failedCuts = 0, retriedCuts = 0, lastSuccessfulCommitAt = now3(), lastSaveAttemptAt = -Infinity, lastStreamServiceAt = -Infinity;
   const isGeometryFailure = (failure) => failure?.code === "WORLD_ACTOR_GEOMETRY_INVALID" || /Invalid canonical actor geometry/.test(failure?.reason ?? failure?.message ?? "");
   const liveGeometry = () => authority.withAuthority((a) => a.withAuthorityState((s) => firstInvalidActorGeometryD9(s, { mutation: "worker result live-state probe", phase: savePhase })));
   function discardStaleGeometry(failure, source3) {
@@ -120281,7 +120312,7 @@ async function createLocalEndlessSessionD9(options) {
   const lifecycle = () => authority.withAuthority((a) => a.withAuthorityState((s) => s.session.playerIds.map((id) => `${s.entitiesById[s.playersById[id].entityId].alive}/${s.playerRespawnsById?.[id]?.count ?? 0}/${s.playersById[id].inventory.revision}/${s.playersById[id].d8.lastChange?.authorityOrder ?? 0}`).join("|") + "/" + s.encounterEconomy.revision));
   lastLife = lifecycle();
   lastCritical = criticalLifecycle();
-  if (opened.state.d9World.groundIndex) await stream.warmGround();
+  if (opened2.state.d9World.groundIndex) await stream.warmGround();
   else {
     const query = authority.withReadyAuthority((a) => a.withAuthorityState(captureGroundCoverageQueryV1)), result = await prepareGroundCoverageQueryV1(query, { sha256, readPage: store2.worldPages?.readPage });
     if (result.coverage.length) requireContract(authority.withReadyAuthority((a) => a.withAuthorityState((s) => installGroundCoverageQueryV1(s, result))), "Initial ground proof changed before play");
@@ -120459,8 +120490,8 @@ async function createLocalEndlessSessionD9(options) {
       })();
       return ferryPending;
     }
-    if (command.kind === "player.respawn" && opened.state.d9World.plannedWorld) {
-      respawnPending = executePlannedRespawnV1({ command, binding: opened.state.d9World.plannedWorld, start: opened.state.d9World.plannedStart, stream, clientPort, authority, waitForPreparation: async () => {
+    if (command.kind === "player.respawn" && opened2.state.d9World.plannedWorld) {
+      respawnPending = executePlannedRespawnV1({ command, binding: opened2.state.d9World.plannedWorld, start: opened2.state.d9World.plannedStart, stream, clientPort, authority, waitForPreparation: async () => {
         if (groundPreparation) await groundPreparation.promise;
         if (saving) await saving;
       }, save }).catch((error) => {
@@ -120520,9 +120551,9 @@ async function createLocalEndlessSessionD9(options) {
       if (collidesWithTiles(collision, point13.x, point13.y, radius)) continue;
       if (Math.hypot(point13.x - to.x, point13.y - to.y) <= SITE_INTERACTION_RADIUS - D9_PROFILE.tileSize / 2) return true;
       for (const [dx, dy] of [[0, -1], [-1, 0], [1, 0], [0, 1]]) {
-        const x = cell.x + dx, y = cell.y + dy, key2 = x + "," + y;
-        if (seen4.has(key2) || Math.abs(x - start.x) + Math.abs(y - start.y) > limit) continue;
-        seen4.add(key2);
+        const x = cell.x + dx, y = cell.y + dy, key3 = x + "," + y;
+        if (seen4.has(key3) || Math.abs(x - start.x) + Math.abs(y - start.y) > limit) continue;
+        seen4.add(key3);
         queue.push({ x, y });
       }
     }
@@ -120556,7 +120587,7 @@ async function createLocalEndlessSessionD9(options) {
       const face3 = { x: entry2.x - local7.x, y: entry2.y - local7.y };
       return { world, local: { x: local7.x, y: local7.y }, facing: preferred?.facing ?? face3, revealDistance, distance: distance11 };
     }
-    throw new Error("No walkable exterior landing is available for " + record2.label + " (" + Object.entries(rejected).map(([key2, value2]) => key2 + "=" + value2).join(", ") + ")");
+    throw new Error("No walkable exterior landing is available for " + record2.label + " (" + Object.entries(rejected).map(([key3, value2]) => key3 + "=" + value2).join(", ") + ")");
   }));
   const siteNavigator = async (request) => {
     requireContract(siteNavigatorEnabled, "Developer Site Navigator capability unavailable");
@@ -120707,7 +120738,7 @@ async function createLocalEndlessSessionD9(options) {
     }
   }
   const plannedTravel = async (targetId) => {
-    requireContract(siteNavigatorEnabled && opened.state.d9World.plannedWorld, "Planned review travel unavailable");
+    requireContract(siteNavigatorEnabled && opened2.state.d9World.plannedWorld, "Planned review travel unavailable");
     requireContract(!ferryPending && !respawnPending && !servicePending && !functionalCommands.busy(), "Finish the current transition before review travel");
     const target = options.plannedTargets?.find((t) => t.id === targetId);
     requireContract(target, "Unknown planned review target");
@@ -120743,9 +120774,16 @@ async function createLocalEndlessSessionD9(options) {
     })();
     return ferryPending;
   };
+  const coop = Object.freeze({ hostPlayerId: () => localPlayerId, readModel: (pid) => seatPort(pid).getReadModel(), passport: (pid, heroId) => authority.withAuthority((a) => a.withAuthorityState((s) => s.playersById[pid] ? extractHeroPassport(s, pid, { heroId }) : null)), inventoryMark: (pid) => authority.withAuthority((a) => a.withAuthorityState((s) => {
+    const p = s.playersById[pid];
+    if (!p) return null;
+    const i = p.inventory;
+    return JSON.stringify([i.revision, i.gold, i.economy?.materials, i.economy?.slotLevels, i.services?.supplyPurchases, i.services?.suppliesUsed, p.d8.revision, p.progression.totalXp]);
+  })) });
   return Object.freeze({
     plannedTravel,
     authority,
+    coop,
     clientPort: functionalPort,
     generationDiagnostics,
     save,
@@ -120809,7 +120847,7 @@ function measureWorldViewport(environment) {
     height: Math.max(1, Math.round(visual ? viewport.height : fallback(root2.clientHeight, environment.innerHeight)))
   });
 }
-function coordinateWorldViewport({ environment, shell, onResize = () => {
+function coordinateWorldViewport({ environment, shell: shell2, onResize = () => {
 } }) {
   let frame3 = null, disposed = false;
   const listeners = [];
@@ -120818,10 +120856,10 @@ function coordinateWorldViewport({ environment, shell, onResize = () => {
     const bounds2 = measureWorldViewport(environment);
     for (const name of ["left", "top", "width", "height"]) {
       const value2 = bounds2[name] + "px";
-      if (shell.style[name] !== value2) shell.style[name] = value2;
+      if (shell2.style[name] !== value2) shell2.style[name] = value2;
     }
-    shell.style.right = "auto";
-    shell.style.bottom = "auto";
+    shell2.style.right = "auto";
+    shell2.style.bottom = "auto";
     onResize();
   }
   function request() {
@@ -120934,6 +120972,2762 @@ function watchForUpdatesV1(environment, { save = null, intervalMs = 18e4, firstC
   } });
 }
 
+// src/shared/contracts/coop_wire_v1.js
+var COOP_PROTOCOL = "saq-coop-v1";
+var COOP_PARTY_LIMIT = 4;
+var COOP_WAITED_COMMANDS = /^(service\.|forge\.attune$|discovery\.readNote$|quest\.act$|ferry\.travel$|map\.travel$|player\.respawn$|site\.transition$)/;
+var COOP_TRADE_COMMANDS = /^(service\.|forge\.)/;
+var json = (v) => v === void 0 ? "null" : JSON.stringify(v);
+var key2 = (k) => JSON.stringify(k);
+function createModelEncoderV1() {
+  let refs = /* @__PURE__ */ new Map(), texts = /* @__PURE__ */ new Map(), entRefs = /* @__PURE__ */ new Map(), entTexts = /* @__PURE__ */ new Map(), sent = 0;
+  return Object.freeze({
+    reset() {
+      refs = /* @__PURE__ */ new Map();
+      texts = /* @__PURE__ */ new Map();
+      entRefs = /* @__PURE__ */ new Map();
+      entTexts = /* @__PURE__ */ new Map();
+    },
+    encode(model) {
+      const set = [], del = [], es = [], ed = [];
+      for (const [k, v] of Object.entries(model)) {
+        if (k === "entitiesById") {
+          const seen4 = /* @__PURE__ */ new Set();
+          for (const [id, e] of Object.entries(v ?? {})) {
+            seen4.add(id);
+            if (entRefs.get(id) === e && entTexts.has(id)) continue;
+            entRefs.set(id, e);
+            const s2 = json(e);
+            if (entTexts.get(id) === s2) continue;
+            entTexts.set(id, s2);
+            es.push(key2(id) + ":" + s2);
+          }
+          for (const id of [...entTexts.keys()]) if (!seen4.has(id)) {
+            entTexts.delete(id);
+            entRefs.delete(id);
+            ed.push(key2(id));
+          }
+          continue;
+        }
+        if (refs.get(k) === v && texts.has(k)) continue;
+        refs.set(k, v);
+        const s = json(v);
+        if (texts.get(k) === s) continue;
+        texts.set(k, s);
+        set.push(key2(k) + ":" + s);
+      }
+      for (const k of [...texts.keys()]) if (!Object.hasOwn(model, k)) {
+        texts.delete(k);
+        refs.delete(k);
+        del.push(key2(k));
+      }
+      if (!set.length && !del.length && !es.length && !ed.length) return null;
+      sent++;
+      return '{"t":"m","n":' + sent + ',"set":{' + set.join(",") + '},"del":[' + del.join(",") + '],"es":{' + es.join(",") + '},"ed":[' + ed.join(",") + "]}";
+    }
+  });
+}
+function createModelDecoderV1() {
+  let parts = {}, ents = {}, entities = {}, model = null, last = 0;
+  return Object.freeze({
+    apply(message) {
+      if (message.n !== last + 1 && last !== 0 && message.n !== 1) throw Error("Co-op frame missed");
+      if (message.n === 1) {
+        parts = {};
+        ents = {};
+      }
+      last = message.n;
+      for (const [k, v] of Object.entries(message.set)) parts[k] = v;
+      for (const k of message.del) delete parts[k];
+      let changed = message.n === 1;
+      for (const [id, e] of Object.entries(message.es)) {
+        ents[id] = e;
+        changed = true;
+      }
+      for (const id of message.ed) {
+        delete ents[id];
+        changed = true;
+      }
+      if (changed) entities = { ...ents };
+      model = { ...parts, entitiesById: entities };
+      return model;
+    },
+    model: () => model,
+    frames: () => last
+  });
+}
+function checkHelloV1(m) {
+  return Boolean(m && m.t === "hello" && m.protocol === COOP_PROTOCOL && typeof m.build === "string" && typeof m.heroId === "string" && typeof m.name === "string" && m.name.length <= 32 && m.passport && typeof m.passport === "object");
+}
+
+// src/client/coop_session_v1.js
+var COOP_INTENT_KEY = "saq-coop-intent-v1";
+function readCoopIntentV1(environment) {
+  try {
+    const v = JSON.parse(environment.sessionStorage.getItem(COOP_INTENT_KEY) ?? "null");
+    return v && (v.role === "host" || v.role === "guest") ? v : null;
+  } catch {
+    return null;
+  }
+}
+function writeCoopIntentV1(environment, intent) {
+  try {
+    if (intent) environment.sessionStorage.setItem(COOP_INTENT_KEY, JSON.stringify(intent));
+    else environment.sessionStorage.removeItem(COOP_INTENT_KEY);
+    return true;
+  } catch {
+    return false;
+  }
+}
+var MODEL_INTERVAL_MS = 33;
+var PASSPORT_INTERVAL_MS = 3e3;
+function createCoopHostV1({ build: build2, hostName, world, readWorldFile = null, now: now3 = () => performance.now(), setInterval: setInterval2 = globalThis.setInterval.bind(globalThis), clearInterval: clearInterval2 = globalThis.clearInterval.bind(globalThis), nextToken, onChange = () => {
+} }) {
+  const guests = /* @__PURE__ */ new Map();
+  let session = null, started = false, timer = null, closed = false;
+  const roster = () => [...guests.values()].filter((g) => g.hello).map((g) => ({ name: g.hello.name, heroId: g.hello.heroId, playerId: g.playerId ?? null, via: g.link.kind }));
+  const tellLobby = () => {
+    const players = [{ name: hostName, heroId: null }, ...roster()];
+    for (const g of guests.values()) if (g.hello) g.link.send({ t: "lobby", players });
+    onChange(players);
+  };
+  function drop(g, reason) {
+    if (!guests.has(g.id)) return;
+    guests.delete(g.id);
+    if (session && g.playerId) stopHero(g);
+    tellLobby();
+    if (!g.link.closed) {
+      g.link.send({ t: "bye", reason });
+      g.link.close(reason);
+    }
+  }
+  function stopHero(g) {
+    try {
+      const adapter = createClientCommandAdapter({ port: { getReadModel: () => session.coop.readModel(g.playerId), send: (c) => session.clientPort.send(c) }, nextCommandToken: nextToken });
+      adapter.issue("movement.setIntent", { x: 0, y: 0 });
+      adapter.issue("combat.primaryIntent", { pressed: false, aim: { x: 1, y: 0 } });
+    } catch {
+    }
+  }
+  function add(link, id = crypto.randomUUID()) {
+    if (closed) {
+      link.close("closed");
+      return;
+    }
+    const g = { id, link, hello: null, playerId: null, ready: false, encoder: createModelEncoderV1(), mark: null, passportAt: -Infinity, lastModel: null, lastSent: -Infinity };
+    guests.set(id, g);
+    link.onClose(() => drop(g, "left"));
+    link.onMessage((m) => {
+      if (m.t === "hello") {
+        if (g.hello) return;
+        if (!checkHelloV1(m)) {
+          drop(g, "This game is a different version. Update both games and try again.");
+          return;
+        }
+        if (m.build !== build2) {
+          drop(g, "The host plays a different version of the game. Update both games and try again.");
+          return;
+        }
+        try {
+          validateHeroPassport(m.passport);
+          if (m.passport.heroId !== m.heroId) throw Error();
+        } catch {
+          drop(g, "Your hero could not be read. Play them once in your own world first.");
+          return;
+        }
+        if (started) {
+          drop(g, "This game has already started. Ask the host to open a new game.");
+          return;
+        }
+        if ([...guests.values()].some((o) => o !== g && o.hello?.heroId === m.heroId) || [...guests.values()].filter((o) => o.hello).length >= COOP_PARTY_LIMIT - 1) {
+          drop(g, "This game is full.");
+          return;
+        }
+        g.hello = m;
+        link.send({ t: "welcome", protocol: COOP_PROTOCOL, build: build2, hostName, world });
+        tellLobby();
+      } else if (m.t === "worldfile" && g.hello && readWorldFile) {
+        readWorldFile().then((text2) => link.send({ t: "worldfile", text: text2 }), () => drop(g, "The host could not send their world."));
+      } else if (m.t === "ready" && g.playerId) {
+        g.encoder = createModelEncoderV1();
+        g.lastModel = null;
+        g.ready = true;
+      } else if (m.t === "cmd" && session && g.playerId) run2(g, m);
+      else if (m.t === "bye") {
+        if (session && g.playerId) sendPassport(g, true);
+        drop(g, "left");
+      }
+    });
+  }
+  async function run2(g, m) {
+    const c = m.c, waited = c && typeof c.kind === "string" && COOP_WAITED_COMMANDS.test(c.kind);
+    try {
+      if (!c || c.playerId !== g.playerId) throw Error("That command is for another hero");
+      const r = await session.clientPort.send(c);
+      if (waited || r?.status === "busy") g.link.send({ t: "ack", id: m.id, status: r?.status ?? "admitted" });
+      if (COOP_TRADE_COMMANDS.test(c.kind)) sendPassport(g, true);
+    } catch (error) {
+      g.link.send({ t: "ack", id: m.id, status: "failed", reason: error.message });
+    }
+  }
+  function sendPassport(g, force) {
+    const t = now3();
+    let mark = null;
+    try {
+      mark = session.coop.inventoryMark(g.playerId);
+    } catch {
+      return;
+    }
+    if (!force && mark === g.mark && t - g.passportAt < 6e4) return;
+    if (!force && t - g.passportAt < PASSPORT_INTERVAL_MS) return;
+    try {
+      const passport = session.coop.passport(g.playerId, g.hello.heroId);
+      if (passport) {
+        g.link.send({ t: "pass", passport });
+        g.mark = mark;
+        g.passportAt = t;
+      }
+    } catch {
+    }
+  }
+  function pump() {
+    if (!session) return;
+    const t = now3();
+    for (const g of guests.values()) {
+      if (!g.playerId || g.link.closed) continue;
+      if (g.ready && t - g.lastSent >= MODEL_INTERVAL_MS && !g.link.busy()) {
+        let model;
+        try {
+          model = session.coop.readModel(g.playerId);
+        } catch {
+          continue;
+        }
+        if (model !== g.lastModel) {
+          g.lastModel = model;
+          const text2 = g.encoder.encode(model);
+          if (text2) {
+            g.link.send(text2);
+            g.lastSent = t;
+          }
+        }
+      }
+      sendPassport(g, false);
+    }
+  }
+  return Object.freeze({
+    add,
+    players: roster,
+    party: () => [...guests.values()].filter((g) => g.hello).map((g) => ({ heroId: g.hello.heroId, passport: g.hello.passport })),
+    start() {
+      started = true;
+      for (const g of [...guests.values()]) if (!g.hello) drop(g, "The game started without you.");
+    },
+    attach(s, party) {
+      session = s;
+      for (const g of [...guests.values()]) {
+        const pid = party?.[g.hello.heroId];
+        if (!pid) {
+          drop(g, "There was no seat for your hero.");
+          continue;
+        }
+        g.playerId = pid;
+        g.link.send({ t: "start", playerId: pid });
+      }
+      tellLobby();
+      timer = setInterval2(pump, MODEL_INTERVAL_MS);
+    },
+    tick: pump,
+    guests: () => guests.size,
+    // Before the host's page goes away: send everyone their hero one last time, then say goodbye.
+    close(reason = "The host closed the game") {
+      if (closed) return;
+      closed = true;
+      if (timer !== null) clearInterval2(timer);
+      for (const g of [...guests.values()]) {
+        if (session && g.playerId && g.hello) sendPassport(g, true);
+        drop(g, reason);
+      }
+    }
+  });
+}
+function beginCoopGuestV1({ link, build: build2, hero, onLobby = () => {
+}, onWorldFile = null }) {
+  return new Promise((resolve, reject) => {
+    let welcome = null, worldText = null, wantFile = false;
+    const early = [];
+    const fail = (reason) => {
+      off();
+      reject(Error(reason));
+    };
+    const offClose = link.onClose((reason) => fail(reason === "left" ? "The host closed the game" : "Lost the connection to the host"));
+    const off = () => {
+      offMessage();
+      offClose();
+    };
+    const offMessage = link.onMessage((m) => {
+      if (m.t === "welcome") {
+        if (m.protocol !== COOP_PROTOCOL || m.build !== build2) {
+          link.send({ t: "bye" });
+          fail("The host plays a different version of the game. Update both games and try again.");
+          return;
+        }
+        welcome = m;
+        if (m.world?.kind === "seeded" && onWorldFile) {
+          wantFile = true;
+          Promise.resolve(onWorldFile(m.world)).then((have) => {
+            if (have) {
+              wantFile = false;
+              return;
+            }
+            link.send({ t: "worldfile" });
+          });
+        }
+      } else if (m.t === "worldfile") {
+        worldText = m.text;
+        wantFile = false;
+      } else if (m.t === "lobby") onLobby(m.players);
+      else if (m.t === "bye") fail(m.reason || "The host closed the game");
+      else if (m.t === "start") {
+        const wait = () => {
+          if (wantFile) {
+            setTimeout(wait, 100);
+            return;
+          }
+          offClose();
+          offMessage();
+          const keep4 = link.onMessage((x) => {
+            if (x.t === "pass" || x.t === "bye") early.push(x);
+          });
+          resolve({ playerId: m.playerId, welcome, worldText, early, release: keep4 });
+        };
+        wait();
+      } else if (m.t === "pass") early.push(m);
+    });
+    link.send({ t: "hello", protocol: COOP_PROTOCOL, build: build2, heroId: hero.heroId, name: hero.name, passport: hero.passport });
+  });
+}
+function createCoopGuestSessionV1({ link, playerId, early = [], release = () => {
+}, cartographyWindow = null, onPassport, onEnd, setTimeout: setTimeout2 = globalThis.setTimeout.bind(globalThis) }) {
+  const decoder = createModelDecoderV1(), waiting = /* @__PURE__ */ new Map(), now3 = () => performance.now();
+  let lastSequence = 0, lastSentAt = -Infinity, lastStep = 0, nextId = 1, ended = false, firstModel = null, leaving = null;
+  const ready = new Promise((resolve) => {
+    firstModel = resolve;
+  });
+  const handle = (m) => {
+    if (m.t === "m") {
+      try {
+        decoder.apply(m);
+        firstModel?.();
+        firstModel = null;
+      } catch (error) {
+        end("The game fell out of step with the host (" + error.message + ")");
+      }
+    } else if (m.t === "pass") {
+      try {
+        validateHeroPassport(m.passport);
+        onPassport(m.passport);
+      } catch {
+      }
+      if (leaving) leaving();
+    } else if (m.t === "ack") {
+      if (m.status === "failed") lastSequence = 0;
+      const w = waiting.get(m.id);
+      if (w) {
+        waiting.delete(m.id);
+        if (m.status === "failed") w.reject(Error(m.reason || "The host could not do that"));
+        else w.resolve({ status: m.status });
+      }
+    } else if (m.t === "bye") end(m.reason || "The host closed the game");
+  };
+  function end(reason) {
+    if (leaving) {
+      leaving();
+      return;
+    }
+    if (ended) return;
+    ended = true;
+    for (const w of waiting.values()) w.reject(Error(reason));
+    waiting.clear();
+    onEnd(reason);
+  }
+  link.onMessage(handle);
+  release();
+  early.splice(0).forEach(handle);
+  link.send({ t: "ready" });
+  link.onClose((reason) => end(reason === "left" || reason === "host left" ? "The host closed the game" : "Lost the connection to the host"));
+  const clientPort = Object.freeze({
+    getReadModel: () => decoder.model(),
+    send(command) {
+      if (ended) return { status: "busy" };
+      const model = decoder.model(), base = model?.context?.nextClientSequence ?? 1, sequence = now3() - lastSentAt < 500 ? Math.max(base, lastSequence + 1) : base;
+      lastSequence = sequence;
+      lastSentAt = now3();
+      const c = { ...command, clientSequence: sequence }, id = nextId++;
+      if (COOP_WAITED_COMMANDS.test(c.kind)) {
+        const p = new Promise((resolve, reject) => waiting.set(id, { resolve, reject }));
+        link.send({ t: "cmd", id, c });
+        return p;
+      }
+      link.send({ t: "cmd", id, c });
+      return { status: "admitted" };
+    },
+    reconcile: () => ({ status: "committed" }),
+    // The map is drawn from the world file alone, so the guest's own device charts it.
+    cartographyWindow,
+    resources: () => ({ coopFrames: decoder.frames(), link: link.kind })
+  });
+  return Object.freeze({
+    ready,
+    coopGuest: true,
+    clientPort,
+    step() {
+      const f = decoder.frames();
+      if (f === lastStep) return false;
+      lastStep = f;
+      return true;
+    },
+    save: async () => ({ status: "committed" }),
+    saveStatus: () => ({ pending: false, phase: "idle" }),
+    resources: () => clientPort.resources(),
+    // Leaving asks the host for the hero one last time, then closes (waiting at most 2 s).
+    leave() {
+      if (ended || leaving) return Promise.resolve();
+      return new Promise((resolve) => {
+        let timer = null;
+        leaving = () => {
+          leaving = () => {
+          };
+          ended = true;
+          clearTimeout(timer);
+          link.close("left");
+          resolve();
+        };
+        timer = setTimeout2(() => leaving(), 2e3);
+        link.send({ t: "bye" });
+      });
+    },
+    destroy() {
+      if (!ended) link.send({ t: "bye" });
+      link.close("left");
+    }
+  });
+}
+
+// src/shared/content/coop_server_v1.js
+var COOP_JOIN_SERVER = "";
+var KEY = "saq-coop-server-v1";
+function coopJoinServerV1(environment) {
+  let url = null;
+  try {
+    url = new URL(environment.location.href).searchParams.get("coopServer");
+  } catch {
+  }
+  try {
+    if (url) environment.localStorage.setItem(KEY, url);
+    else url = environment.localStorage.getItem(KEY);
+  } catch {
+  }
+  const chosen = url || COOP_JOIN_SERVER;
+  return /^https?:\/\/[^\s]+$/.test(chosen) ? chosen.replace(/\/$/, "") : null;
+}
+
+// src/client/coop_screen_v1.js
+var coop_screen_v1_exports = {};
+__export(coop_screen_v1_exports, {
+  mountCoopBarV1: () => mountCoopBarV1,
+  runCoopJoinV1: () => runCoopJoinV1,
+  runCoopLobbyV1: () => runCoopLobbyV1,
+  showCoopEndedV1: () => showCoopEndedV1
+});
+
+// src/client/vendor/qrcode-generator-2.0.4.mjs
+var qrcode = function(typeNumber, errorCorrectionLevel) {
+  const PAD0 = 236;
+  const PAD1 = 17;
+  let _typeNumber = typeNumber;
+  const _errorCorrectionLevel = QRErrorCorrectionLevel[errorCorrectionLevel];
+  let _modules = null;
+  let _moduleCount = 0;
+  let _dataCache = null;
+  const _dataList = [];
+  const _this = {};
+  const makeImpl = function(test, maskPattern) {
+    _moduleCount = _typeNumber * 4 + 17;
+    _modules = (function(moduleCount) {
+      const modules = new Array(moduleCount);
+      for (let row2 = 0; row2 < moduleCount; row2 += 1) {
+        modules[row2] = new Array(moduleCount);
+        for (let col2 = 0; col2 < moduleCount; col2 += 1) {
+          modules[row2][col2] = null;
+        }
+      }
+      return modules;
+    })(_moduleCount);
+    setupPositionProbePattern(0, 0);
+    setupPositionProbePattern(_moduleCount - 7, 0);
+    setupPositionProbePattern(0, _moduleCount - 7);
+    setupPositionAdjustPattern();
+    setupTimingPattern();
+    setupTypeInfo(test, maskPattern);
+    if (_typeNumber >= 7) {
+      setupTypeNumber(test);
+    }
+    if (_dataCache == null) {
+      _dataCache = createData(_typeNumber, _errorCorrectionLevel, _dataList);
+    }
+    mapData(_dataCache, maskPattern);
+  };
+  const setupPositionProbePattern = function(row2, col2) {
+    for (let r = -1; r <= 7; r += 1) {
+      if (row2 + r <= -1 || _moduleCount <= row2 + r) continue;
+      for (let c = -1; c <= 7; c += 1) {
+        if (col2 + c <= -1 || _moduleCount <= col2 + c) continue;
+        if (0 <= r && r <= 6 && (c == 0 || c == 6) || 0 <= c && c <= 6 && (r == 0 || r == 6) || 2 <= r && r <= 4 && 2 <= c && c <= 4) {
+          _modules[row2 + r][col2 + c] = true;
+        } else {
+          _modules[row2 + r][col2 + c] = false;
+        }
+      }
+    }
+  };
+  const getBestMaskPattern = function() {
+    let minLostPoint = 0;
+    let pattern = 0;
+    for (let i = 0; i < 8; i += 1) {
+      makeImpl(true, i);
+      const lostPoint = QRUtil.getLostPoint(_this);
+      if (i == 0 || minLostPoint > lostPoint) {
+        minLostPoint = lostPoint;
+        pattern = i;
+      }
+    }
+    return pattern;
+  };
+  const setupTimingPattern = function() {
+    for (let r = 8; r < _moduleCount - 8; r += 1) {
+      if (_modules[r][6] != null) {
+        continue;
+      }
+      _modules[r][6] = r % 2 == 0;
+    }
+    for (let c = 8; c < _moduleCount - 8; c += 1) {
+      if (_modules[6][c] != null) {
+        continue;
+      }
+      _modules[6][c] = c % 2 == 0;
+    }
+  };
+  const setupPositionAdjustPattern = function() {
+    const pos = QRUtil.getPatternPosition(_typeNumber);
+    for (let i = 0; i < pos.length; i += 1) {
+      for (let j = 0; j < pos.length; j += 1) {
+        const row2 = pos[i];
+        const col2 = pos[j];
+        if (_modules[row2][col2] != null) {
+          continue;
+        }
+        for (let r = -2; r <= 2; r += 1) {
+          for (let c = -2; c <= 2; c += 1) {
+            if (r == -2 || r == 2 || c == -2 || c == 2 || r == 0 && c == 0) {
+              _modules[row2 + r][col2 + c] = true;
+            } else {
+              _modules[row2 + r][col2 + c] = false;
+            }
+          }
+        }
+      }
+    }
+  };
+  const setupTypeNumber = function(test) {
+    const bits = QRUtil.getBCHTypeNumber(_typeNumber);
+    for (let i = 0; i < 18; i += 1) {
+      const mod = !test && (bits >> i & 1) == 1;
+      _modules[Math.floor(i / 3)][i % 3 + _moduleCount - 8 - 3] = mod;
+    }
+    for (let i = 0; i < 18; i += 1) {
+      const mod = !test && (bits >> i & 1) == 1;
+      _modules[i % 3 + _moduleCount - 8 - 3][Math.floor(i / 3)] = mod;
+    }
+  };
+  const setupTypeInfo = function(test, maskPattern) {
+    const data = _errorCorrectionLevel << 3 | maskPattern;
+    const bits = QRUtil.getBCHTypeInfo(data);
+    for (let i = 0; i < 15; i += 1) {
+      const mod = !test && (bits >> i & 1) == 1;
+      if (i < 6) {
+        _modules[i][8] = mod;
+      } else if (i < 8) {
+        _modules[i + 1][8] = mod;
+      } else {
+        _modules[_moduleCount - 15 + i][8] = mod;
+      }
+    }
+    for (let i = 0; i < 15; i += 1) {
+      const mod = !test && (bits >> i & 1) == 1;
+      if (i < 8) {
+        _modules[8][_moduleCount - i - 1] = mod;
+      } else if (i < 9) {
+        _modules[8][15 - i - 1 + 1] = mod;
+      } else {
+        _modules[8][15 - i - 1] = mod;
+      }
+    }
+    _modules[_moduleCount - 8][8] = !test;
+  };
+  const mapData = function(data, maskPattern) {
+    let inc = -1;
+    let row2 = _moduleCount - 1;
+    let bitIndex = 7;
+    let byteIndex = 0;
+    const maskFunc = QRUtil.getMaskFunction(maskPattern);
+    for (let col2 = _moduleCount - 1; col2 > 0; col2 -= 2) {
+      if (col2 == 6) col2 -= 1;
+      while (true) {
+        for (let c = 0; c < 2; c += 1) {
+          if (_modules[row2][col2 - c] == null) {
+            let dark = false;
+            if (byteIndex < data.length) {
+              dark = (data[byteIndex] >>> bitIndex & 1) == 1;
+            }
+            const mask = maskFunc(row2, col2 - c);
+            if (mask) {
+              dark = !dark;
+            }
+            _modules[row2][col2 - c] = dark;
+            bitIndex -= 1;
+            if (bitIndex == -1) {
+              byteIndex += 1;
+              bitIndex = 7;
+            }
+          }
+        }
+        row2 += inc;
+        if (row2 < 0 || _moduleCount <= row2) {
+          row2 -= inc;
+          inc = -inc;
+          break;
+        }
+      }
+    }
+  };
+  const createBytes = function(buffer, rsBlocks) {
+    let offset2 = 0;
+    let maxDcCount = 0;
+    let maxEcCount = 0;
+    const dcdata = new Array(rsBlocks.length);
+    const ecdata = new Array(rsBlocks.length);
+    for (let r = 0; r < rsBlocks.length; r += 1) {
+      const dcCount = rsBlocks[r].dataCount;
+      const ecCount = rsBlocks[r].totalCount - dcCount;
+      maxDcCount = Math.max(maxDcCount, dcCount);
+      maxEcCount = Math.max(maxEcCount, ecCount);
+      dcdata[r] = new Array(dcCount);
+      for (let i = 0; i < dcdata[r].length; i += 1) {
+        dcdata[r][i] = 255 & buffer.getBuffer()[i + offset2];
+      }
+      offset2 += dcCount;
+      const rsPoly = QRUtil.getErrorCorrectPolynomial(ecCount);
+      const rawPoly = qrPolynomial(dcdata[r], rsPoly.getLength() - 1);
+      const modPoly = rawPoly.mod(rsPoly);
+      ecdata[r] = new Array(rsPoly.getLength() - 1);
+      for (let i = 0; i < ecdata[r].length; i += 1) {
+        const modIndex = i + modPoly.getLength() - ecdata[r].length;
+        ecdata[r][i] = modIndex >= 0 ? modPoly.getAt(modIndex) : 0;
+      }
+    }
+    let totalCodeCount = 0;
+    for (let i = 0; i < rsBlocks.length; i += 1) {
+      totalCodeCount += rsBlocks[i].totalCount;
+    }
+    const data = new Array(totalCodeCount);
+    let index = 0;
+    for (let i = 0; i < maxDcCount; i += 1) {
+      for (let r = 0; r < rsBlocks.length; r += 1) {
+        if (i < dcdata[r].length) {
+          data[index] = dcdata[r][i];
+          index += 1;
+        }
+      }
+    }
+    for (let i = 0; i < maxEcCount; i += 1) {
+      for (let r = 0; r < rsBlocks.length; r += 1) {
+        if (i < ecdata[r].length) {
+          data[index] = ecdata[r][i];
+          index += 1;
+        }
+      }
+    }
+    return data;
+  };
+  const createData = function(typeNumber2, errorCorrectionLevel2, dataList) {
+    const rsBlocks = QRRSBlock.getRSBlocks(typeNumber2, errorCorrectionLevel2);
+    const buffer = qrBitBuffer();
+    for (let i = 0; i < dataList.length; i += 1) {
+      const data = dataList[i];
+      buffer.put(data.getMode(), 4);
+      buffer.put(data.getLength(), QRUtil.getLengthInBits(data.getMode(), typeNumber2));
+      data.write(buffer);
+    }
+    let totalDataCount = 0;
+    for (let i = 0; i < rsBlocks.length; i += 1) {
+      totalDataCount += rsBlocks[i].dataCount;
+    }
+    if (buffer.getLengthInBits() > totalDataCount * 8) {
+      throw "code length overflow. (" + buffer.getLengthInBits() + ">" + totalDataCount * 8 + ")";
+    }
+    if (buffer.getLengthInBits() + 4 <= totalDataCount * 8) {
+      buffer.put(0, 4);
+    }
+    while (buffer.getLengthInBits() % 8 != 0) {
+      buffer.putBit(false);
+    }
+    while (true) {
+      if (buffer.getLengthInBits() >= totalDataCount * 8) {
+        break;
+      }
+      buffer.put(PAD0, 8);
+      if (buffer.getLengthInBits() >= totalDataCount * 8) {
+        break;
+      }
+      buffer.put(PAD1, 8);
+    }
+    return createBytes(buffer, rsBlocks);
+  };
+  _this.addData = function(data, mode) {
+    mode = mode || "Byte";
+    let newData = null;
+    switch (mode) {
+      case "Numeric":
+        newData = qrNumber(data);
+        break;
+      case "Alphanumeric":
+        newData = qrAlphaNum(data);
+        break;
+      case "Byte":
+        newData = qr8BitByte(data);
+        break;
+      case "Kanji":
+        newData = qrKanji(data);
+        break;
+      default:
+        throw "mode:" + mode;
+    }
+    _dataList.push(newData);
+    _dataCache = null;
+  };
+  _this.isDark = function(row2, col2) {
+    if (row2 < 0 || _moduleCount <= row2 || col2 < 0 || _moduleCount <= col2) {
+      throw row2 + "," + col2;
+    }
+    return _modules[row2][col2];
+  };
+  _this.getModuleCount = function() {
+    return _moduleCount;
+  };
+  _this.make = function() {
+    if (_typeNumber < 1) {
+      let typeNumber2 = 1;
+      for (; typeNumber2 < 40; typeNumber2++) {
+        const rsBlocks = QRRSBlock.getRSBlocks(typeNumber2, _errorCorrectionLevel);
+        const buffer = qrBitBuffer();
+        for (let i = 0; i < _dataList.length; i++) {
+          const data = _dataList[i];
+          buffer.put(data.getMode(), 4);
+          buffer.put(data.getLength(), QRUtil.getLengthInBits(data.getMode(), typeNumber2));
+          data.write(buffer);
+        }
+        let totalDataCount = 0;
+        for (let i = 0; i < rsBlocks.length; i++) {
+          totalDataCount += rsBlocks[i].dataCount;
+        }
+        if (buffer.getLengthInBits() <= totalDataCount * 8) {
+          break;
+        }
+      }
+      _typeNumber = typeNumber2;
+    }
+    makeImpl(false, getBestMaskPattern());
+  };
+  _this.createTableTag = function(cellSize, margin) {
+    cellSize = cellSize || 2;
+    margin = typeof margin == "undefined" ? cellSize * 4 : margin;
+    let qrHtml = "";
+    qrHtml += '<table style="';
+    qrHtml += " border-width: 0px; border-style: none;";
+    qrHtml += " border-collapse: collapse;";
+    qrHtml += " padding: 0px; margin: " + margin + "px;";
+    qrHtml += '">';
+    qrHtml += "<tbody>";
+    for (let r = 0; r < _this.getModuleCount(); r += 1) {
+      qrHtml += "<tr>";
+      for (let c = 0; c < _this.getModuleCount(); c += 1) {
+        qrHtml += '<td style="';
+        qrHtml += " border-width: 0px; border-style: none;";
+        qrHtml += " border-collapse: collapse;";
+        qrHtml += " padding: 0px; margin: 0px;";
+        qrHtml += " width: " + cellSize + "px;";
+        qrHtml += " height: " + cellSize + "px;";
+        qrHtml += " background-color: ";
+        qrHtml += _this.isDark(r, c) ? "#000000" : "#ffffff";
+        qrHtml += ";";
+        qrHtml += '"/>';
+      }
+      qrHtml += "</tr>";
+    }
+    qrHtml += "</tbody>";
+    qrHtml += "</table>";
+    return qrHtml;
+  };
+  _this.createSvgTag = function(cellSize, margin, alt, title) {
+    let opts = {};
+    if (typeof arguments[0] == "object") {
+      opts = arguments[0];
+      cellSize = opts.cellSize;
+      margin = opts.margin;
+      alt = opts.alt;
+      title = opts.title;
+    }
+    cellSize = cellSize || 2;
+    margin = typeof margin == "undefined" ? cellSize * 4 : margin;
+    alt = typeof alt === "string" ? { text: alt } : alt || {};
+    alt.text = alt.text || null;
+    alt.id = alt.text ? alt.id || "qrcode-description" : null;
+    title = typeof title === "string" ? { text: title } : title || {};
+    title.text = title.text || null;
+    title.id = title.text ? title.id || "qrcode-title" : null;
+    const size = _this.getModuleCount() * cellSize + margin * 2;
+    let c, mc, r, mr, qrSvg = "", rect6;
+    rect6 = "l" + cellSize + ",0 0," + cellSize + " -" + cellSize + ",0 0,-" + cellSize + "z ";
+    qrSvg += '<svg version="1.1" xmlns="http://www.w3.org/2000/svg"';
+    qrSvg += !opts.scalable ? ' width="' + size + 'px" height="' + size + 'px"' : "";
+    qrSvg += ' viewBox="0 0 ' + size + " " + size + '" ';
+    qrSvg += ' preserveAspectRatio="xMinYMin meet"';
+    qrSvg += title.text || alt.text ? ' role="img" aria-labelledby="' + escapeXml([title.id, alt.id].join(" ").trim()) + '"' : "";
+    qrSvg += ">";
+    qrSvg += title.text ? '<title id="' + escapeXml(title.id) + '">' + escapeXml(title.text) + "</title>" : "";
+    qrSvg += alt.text ? '<description id="' + escapeXml(alt.id) + '">' + escapeXml(alt.text) + "</description>" : "";
+    qrSvg += '<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>';
+    qrSvg += '<path d="';
+    for (r = 0; r < _this.getModuleCount(); r += 1) {
+      mr = r * cellSize + margin;
+      for (c = 0; c < _this.getModuleCount(); c += 1) {
+        if (_this.isDark(r, c)) {
+          mc = c * cellSize + margin;
+          qrSvg += "M" + mc + "," + mr + rect6;
+        }
+      }
+    }
+    qrSvg += '" stroke="transparent" fill="black"/>';
+    qrSvg += "</svg>";
+    return qrSvg;
+  };
+  _this.createDataURL = function(cellSize, margin) {
+    cellSize = cellSize || 2;
+    margin = typeof margin == "undefined" ? cellSize * 4 : margin;
+    const size = _this.getModuleCount() * cellSize + margin * 2;
+    const min = margin;
+    const max = size - margin;
+    return createDataURL(size, size, function(x, y) {
+      if (min <= x && x < max && min <= y && y < max) {
+        const c = Math.floor((x - min) / cellSize);
+        const r = Math.floor((y - min) / cellSize);
+        return _this.isDark(r, c) ? 0 : 1;
+      } else {
+        return 1;
+      }
+    });
+  };
+  _this.createImgTag = function(cellSize, margin, alt) {
+    cellSize = cellSize || 2;
+    margin = typeof margin == "undefined" ? cellSize * 4 : margin;
+    const size = _this.getModuleCount() * cellSize + margin * 2;
+    let img = "";
+    img += "<img";
+    img += ' src="';
+    img += _this.createDataURL(cellSize, margin);
+    img += '"';
+    img += ' width="';
+    img += size;
+    img += '"';
+    img += ' height="';
+    img += size;
+    img += '"';
+    if (alt) {
+      img += ' alt="';
+      img += escapeXml(alt);
+      img += '"';
+    }
+    img += "/>";
+    return img;
+  };
+  const escapeXml = function(s) {
+    let escaped = "";
+    for (let i = 0; i < s.length; i += 1) {
+      const c = s.charAt(i);
+      switch (c) {
+        case "<":
+          escaped += "&lt;";
+          break;
+        case ">":
+          escaped += "&gt;";
+          break;
+        case "&":
+          escaped += "&amp;";
+          break;
+        case '"':
+          escaped += "&quot;";
+          break;
+        default:
+          escaped += c;
+          break;
+      }
+    }
+    return escaped;
+  };
+  const _createHalfASCII = function(margin) {
+    const cellSize = 1;
+    margin = typeof margin == "undefined" ? cellSize * 2 : margin;
+    const size = _this.getModuleCount() * cellSize + margin * 2;
+    const min = margin;
+    const max = size - margin;
+    let y, x, r1, r2, p;
+    const blocks2 = {
+      "\u2588\u2588": "\u2588",
+      "\u2588 ": "\u2580",
+      " \u2588": "\u2584",
+      "  ": " "
+    };
+    const blocksLastLineNoMargin = {
+      "\u2588\u2588": "\u2580",
+      "\u2588 ": "\u2580",
+      " \u2588": " ",
+      "  ": " "
+    };
+    let ascii = "";
+    for (y = 0; y < size; y += 2) {
+      r1 = Math.floor((y - min) / cellSize);
+      r2 = Math.floor((y + 1 - min) / cellSize);
+      for (x = 0; x < size; x += 1) {
+        p = "\u2588";
+        if (min <= x && x < max && min <= y && y < max && _this.isDark(r1, Math.floor((x - min) / cellSize))) {
+          p = " ";
+        }
+        if (min <= x && x < max && min <= y + 1 && y + 1 < max && _this.isDark(r2, Math.floor((x - min) / cellSize))) {
+          p += " ";
+        } else {
+          p += "\u2588";
+        }
+        ascii += margin < 1 && y + 1 >= max ? blocksLastLineNoMargin[p] : blocks2[p];
+      }
+      ascii += "\n";
+    }
+    if (size % 2 && margin > 0) {
+      return ascii.substring(0, ascii.length - size - 1) + Array(size + 1).join("\u2580");
+    }
+    return ascii.substring(0, ascii.length - 1);
+  };
+  _this.createASCII = function(cellSize, margin) {
+    cellSize = cellSize || 1;
+    if (cellSize < 2) {
+      return _createHalfASCII(margin);
+    }
+    cellSize -= 1;
+    margin = typeof margin == "undefined" ? cellSize * 2 : margin;
+    const size = _this.getModuleCount() * cellSize + margin * 2;
+    const min = margin;
+    const max = size - margin;
+    let y, x, r, p;
+    const white = Array(cellSize + 1).join("\u2588\u2588");
+    const black = Array(cellSize + 1).join("  ");
+    let ascii = "";
+    let line26 = "";
+    for (y = 0; y < size; y += 1) {
+      r = Math.floor((y - min) / cellSize);
+      line26 = "";
+      for (x = 0; x < size; x += 1) {
+        p = 1;
+        if (min <= x && x < max && min <= y && y < max && _this.isDark(r, Math.floor((x - min) / cellSize))) {
+          p = 0;
+        }
+        line26 += p ? white : black;
+      }
+      for (r = 0; r < cellSize; r += 1) {
+        ascii += line26 + "\n";
+      }
+    }
+    return ascii.substring(0, ascii.length - 1);
+  };
+  _this.renderTo2dContext = function(context, cellSize) {
+    cellSize = cellSize || 2;
+    const length = _this.getModuleCount();
+    for (let row2 = 0; row2 < length; row2++) {
+      for (let col2 = 0; col2 < length; col2++) {
+        context.fillStyle = _this.isDark(row2, col2) ? "black" : "white";
+        context.fillRect(col2 * cellSize, row2 * cellSize, cellSize, cellSize);
+      }
+    }
+  };
+  return _this;
+};
+qrcode.stringToBytes = function(s) {
+  const bytes = [];
+  for (let i = 0; i < s.length; i += 1) {
+    const c = s.charCodeAt(i);
+    bytes.push(c & 255);
+  }
+  return bytes;
+};
+qrcode.createStringToBytes = function(unicodeData, numChars) {
+  const unicodeMap = (function() {
+    const bin = base64DecodeInputStream(unicodeData);
+    const read2 = function() {
+      const b = bin.read();
+      if (b == -1) throw "eof";
+      return b;
+    };
+    let count = 0;
+    const unicodeMap2 = {};
+    while (true) {
+      const b0 = bin.read();
+      if (b0 == -1) break;
+      const b1 = read2();
+      const b2 = read2();
+      const b3 = read2();
+      const k = String.fromCharCode(b0 << 8 | b1);
+      const v = b2 << 8 | b3;
+      unicodeMap2[k] = v;
+      count += 1;
+    }
+    if (count != numChars) {
+      throw count + " != " + numChars;
+    }
+    return unicodeMap2;
+  })();
+  const unknownChar = "?".charCodeAt(0);
+  return function(s) {
+    const bytes = [];
+    for (let i = 0; i < s.length; i += 1) {
+      const c = s.charCodeAt(i);
+      if (c < 128) {
+        bytes.push(c);
+      } else {
+        const b = unicodeMap[s.charAt(i)];
+        if (typeof b == "number") {
+          if ((b & 255) == b) {
+            bytes.push(b);
+          } else {
+            bytes.push(b >>> 8);
+            bytes.push(b & 255);
+          }
+        } else {
+          bytes.push(unknownChar);
+        }
+      }
+    }
+    return bytes;
+  };
+};
+var QRMode = {
+  MODE_NUMBER: 1 << 0,
+  MODE_ALPHA_NUM: 1 << 1,
+  MODE_8BIT_BYTE: 1 << 2,
+  MODE_KANJI: 1 << 3
+};
+var QRErrorCorrectionLevel = {
+  L: 1,
+  M: 0,
+  Q: 3,
+  H: 2
+};
+var QRMaskPattern = {
+  PATTERN000: 0,
+  PATTERN001: 1,
+  PATTERN010: 2,
+  PATTERN011: 3,
+  PATTERN100: 4,
+  PATTERN101: 5,
+  PATTERN110: 6,
+  PATTERN111: 7
+};
+var QRUtil = (function() {
+  const PATTERN_POSITION_TABLE = [
+    [],
+    [6, 18],
+    [6, 22],
+    [6, 26],
+    [6, 30],
+    [6, 34],
+    [6, 22, 38],
+    [6, 24, 42],
+    [6, 26, 46],
+    [6, 28, 50],
+    [6, 30, 54],
+    [6, 32, 58],
+    [6, 34, 62],
+    [6, 26, 46, 66],
+    [6, 26, 48, 70],
+    [6, 26, 50, 74],
+    [6, 30, 54, 78],
+    [6, 30, 56, 82],
+    [6, 30, 58, 86],
+    [6, 34, 62, 90],
+    [6, 28, 50, 72, 94],
+    [6, 26, 50, 74, 98],
+    [6, 30, 54, 78, 102],
+    [6, 28, 54, 80, 106],
+    [6, 32, 58, 84, 110],
+    [6, 30, 58, 86, 114],
+    [6, 34, 62, 90, 118],
+    [6, 26, 50, 74, 98, 122],
+    [6, 30, 54, 78, 102, 126],
+    [6, 26, 52, 78, 104, 130],
+    [6, 30, 56, 82, 108, 134],
+    [6, 34, 60, 86, 112, 138],
+    [6, 30, 58, 86, 114, 142],
+    [6, 34, 62, 90, 118, 146],
+    [6, 30, 54, 78, 102, 126, 150],
+    [6, 24, 50, 76, 102, 128, 154],
+    [6, 28, 54, 80, 106, 132, 158],
+    [6, 32, 58, 84, 110, 136, 162],
+    [6, 26, 54, 82, 110, 138, 166],
+    [6, 30, 58, 86, 114, 142, 170]
+  ];
+  const G15 = 1 << 10 | 1 << 8 | 1 << 5 | 1 << 4 | 1 << 2 | 1 << 1 | 1 << 0;
+  const G18 = 1 << 12 | 1 << 11 | 1 << 10 | 1 << 9 | 1 << 8 | 1 << 5 | 1 << 2 | 1 << 0;
+  const G15_MASK = 1 << 14 | 1 << 12 | 1 << 10 | 1 << 4 | 1 << 1;
+  const _this = {};
+  const getBCHDigit = function(data) {
+    let digit = 0;
+    while (data != 0) {
+      digit += 1;
+      data >>>= 1;
+    }
+    return digit;
+  };
+  _this.getBCHTypeInfo = function(data) {
+    let d = data << 10;
+    while (getBCHDigit(d) - getBCHDigit(G15) >= 0) {
+      d ^= G15 << getBCHDigit(d) - getBCHDigit(G15);
+    }
+    return (data << 10 | d) ^ G15_MASK;
+  };
+  _this.getBCHTypeNumber = function(data) {
+    let d = data << 12;
+    while (getBCHDigit(d) - getBCHDigit(G18) >= 0) {
+      d ^= G18 << getBCHDigit(d) - getBCHDigit(G18);
+    }
+    return data << 12 | d;
+  };
+  _this.getPatternPosition = function(typeNumber) {
+    return PATTERN_POSITION_TABLE[typeNumber - 1];
+  };
+  _this.getMaskFunction = function(maskPattern) {
+    switch (maskPattern) {
+      case QRMaskPattern.PATTERN000:
+        return function(i, j) {
+          return (i + j) % 2 == 0;
+        };
+      case QRMaskPattern.PATTERN001:
+        return function(i, j) {
+          return i % 2 == 0;
+        };
+      case QRMaskPattern.PATTERN010:
+        return function(i, j) {
+          return j % 3 == 0;
+        };
+      case QRMaskPattern.PATTERN011:
+        return function(i, j) {
+          return (i + j) % 3 == 0;
+        };
+      case QRMaskPattern.PATTERN100:
+        return function(i, j) {
+          return (Math.floor(i / 2) + Math.floor(j / 3)) % 2 == 0;
+        };
+      case QRMaskPattern.PATTERN101:
+        return function(i, j) {
+          return i * j % 2 + i * j % 3 == 0;
+        };
+      case QRMaskPattern.PATTERN110:
+        return function(i, j) {
+          return (i * j % 2 + i * j % 3) % 2 == 0;
+        };
+      case QRMaskPattern.PATTERN111:
+        return function(i, j) {
+          return (i * j % 3 + (i + j) % 2) % 2 == 0;
+        };
+      default:
+        throw "bad maskPattern:" + maskPattern;
+    }
+  };
+  _this.getErrorCorrectPolynomial = function(errorCorrectLength) {
+    let a = qrPolynomial([1], 0);
+    for (let i = 0; i < errorCorrectLength; i += 1) {
+      a = a.multiply(qrPolynomial([1, QRMath.gexp(i)], 0));
+    }
+    return a;
+  };
+  _this.getLengthInBits = function(mode, type) {
+    if (1 <= type && type < 10) {
+      switch (mode) {
+        case QRMode.MODE_NUMBER:
+          return 10;
+        case QRMode.MODE_ALPHA_NUM:
+          return 9;
+        case QRMode.MODE_8BIT_BYTE:
+          return 8;
+        case QRMode.MODE_KANJI:
+          return 8;
+        default:
+          throw "mode:" + mode;
+      }
+    } else if (type < 27) {
+      switch (mode) {
+        case QRMode.MODE_NUMBER:
+          return 12;
+        case QRMode.MODE_ALPHA_NUM:
+          return 11;
+        case QRMode.MODE_8BIT_BYTE:
+          return 16;
+        case QRMode.MODE_KANJI:
+          return 10;
+        default:
+          throw "mode:" + mode;
+      }
+    } else if (type < 41) {
+      switch (mode) {
+        case QRMode.MODE_NUMBER:
+          return 14;
+        case QRMode.MODE_ALPHA_NUM:
+          return 13;
+        case QRMode.MODE_8BIT_BYTE:
+          return 16;
+        case QRMode.MODE_KANJI:
+          return 12;
+        default:
+          throw "mode:" + mode;
+      }
+    } else {
+      throw "type:" + type;
+    }
+  };
+  _this.getLostPoint = function(qrcode2) {
+    const moduleCount = qrcode2.getModuleCount();
+    let lostPoint = 0;
+    for (let row2 = 0; row2 < moduleCount; row2 += 1) {
+      for (let col2 = 0; col2 < moduleCount; col2 += 1) {
+        let sameCount = 0;
+        const dark = qrcode2.isDark(row2, col2);
+        for (let r = -1; r <= 1; r += 1) {
+          if (row2 + r < 0 || moduleCount <= row2 + r) {
+            continue;
+          }
+          for (let c = -1; c <= 1; c += 1) {
+            if (col2 + c < 0 || moduleCount <= col2 + c) {
+              continue;
+            }
+            if (r == 0 && c == 0) {
+              continue;
+            }
+            if (dark == qrcode2.isDark(row2 + r, col2 + c)) {
+              sameCount += 1;
+            }
+          }
+        }
+        if (sameCount > 5) {
+          lostPoint += 3 + sameCount - 5;
+        }
+      }
+    }
+    ;
+    for (let row2 = 0; row2 < moduleCount - 1; row2 += 1) {
+      for (let col2 = 0; col2 < moduleCount - 1; col2 += 1) {
+        let count = 0;
+        if (qrcode2.isDark(row2, col2)) count += 1;
+        if (qrcode2.isDark(row2 + 1, col2)) count += 1;
+        if (qrcode2.isDark(row2, col2 + 1)) count += 1;
+        if (qrcode2.isDark(row2 + 1, col2 + 1)) count += 1;
+        if (count == 0 || count == 4) {
+          lostPoint += 3;
+        }
+      }
+    }
+    for (let row2 = 0; row2 < moduleCount; row2 += 1) {
+      for (let col2 = 0; col2 < moduleCount - 6; col2 += 1) {
+        if (qrcode2.isDark(row2, col2) && !qrcode2.isDark(row2, col2 + 1) && qrcode2.isDark(row2, col2 + 2) && qrcode2.isDark(row2, col2 + 3) && qrcode2.isDark(row2, col2 + 4) && !qrcode2.isDark(row2, col2 + 5) && qrcode2.isDark(row2, col2 + 6)) {
+          lostPoint += 40;
+        }
+      }
+    }
+    for (let col2 = 0; col2 < moduleCount; col2 += 1) {
+      for (let row2 = 0; row2 < moduleCount - 6; row2 += 1) {
+        if (qrcode2.isDark(row2, col2) && !qrcode2.isDark(row2 + 1, col2) && qrcode2.isDark(row2 + 2, col2) && qrcode2.isDark(row2 + 3, col2) && qrcode2.isDark(row2 + 4, col2) && !qrcode2.isDark(row2 + 5, col2) && qrcode2.isDark(row2 + 6, col2)) {
+          lostPoint += 40;
+        }
+      }
+    }
+    let darkCount = 0;
+    for (let col2 = 0; col2 < moduleCount; col2 += 1) {
+      for (let row2 = 0; row2 < moduleCount; row2 += 1) {
+        if (qrcode2.isDark(row2, col2)) {
+          darkCount += 1;
+        }
+      }
+    }
+    const ratio = Math.abs(100 * darkCount / moduleCount / moduleCount - 50) / 5;
+    lostPoint += ratio * 10;
+    return lostPoint;
+  };
+  return _this;
+})();
+var QRMath = (function() {
+  const EXP_TABLE = new Array(256);
+  const LOG_TABLE = new Array(256);
+  for (let i = 0; i < 8; i += 1) {
+    EXP_TABLE[i] = 1 << i;
+  }
+  for (let i = 8; i < 256; i += 1) {
+    EXP_TABLE[i] = EXP_TABLE[i - 4] ^ EXP_TABLE[i - 5] ^ EXP_TABLE[i - 6] ^ EXP_TABLE[i - 8];
+  }
+  for (let i = 0; i < 255; i += 1) {
+    LOG_TABLE[EXP_TABLE[i]] = i;
+  }
+  const _this = {};
+  _this.glog = function(n) {
+    if (n < 1) {
+      throw "glog(" + n + ")";
+    }
+    return LOG_TABLE[n];
+  };
+  _this.gexp = function(n) {
+    while (n < 0) {
+      n += 255;
+    }
+    while (n >= 256) {
+      n -= 255;
+    }
+    return EXP_TABLE[n];
+  };
+  return _this;
+})();
+var qrPolynomial = function(num, shift4) {
+  if (typeof num.length == "undefined") {
+    throw num.length + "/" + shift4;
+  }
+  const _num = (function() {
+    let offset2 = 0;
+    while (offset2 < num.length && num[offset2] == 0) {
+      offset2 += 1;
+    }
+    const _num2 = new Array(num.length - offset2 + shift4);
+    for (let i = 0; i < num.length - offset2; i += 1) {
+      _num2[i] = num[i + offset2];
+    }
+    return _num2;
+  })();
+  const _this = {};
+  _this.getAt = function(index) {
+    return _num[index];
+  };
+  _this.getLength = function() {
+    return _num.length;
+  };
+  _this.multiply = function(e) {
+    const num2 = new Array(_this.getLength() + e.getLength() - 1);
+    for (let i = 0; i < _this.getLength(); i += 1) {
+      for (let j = 0; j < e.getLength(); j += 1) {
+        num2[i + j] ^= QRMath.gexp(QRMath.glog(_this.getAt(i)) + QRMath.glog(e.getAt(j)));
+      }
+    }
+    return qrPolynomial(num2, 0);
+  };
+  _this.mod = function(e) {
+    if (_this.getLength() - e.getLength() < 0) {
+      return _this;
+    }
+    const ratio = QRMath.glog(_this.getAt(0)) - QRMath.glog(e.getAt(0));
+    const num2 = new Array(_this.getLength());
+    for (let i = 0; i < _this.getLength(); i += 1) {
+      num2[i] = _this.getAt(i);
+    }
+    for (let i = 0; i < e.getLength(); i += 1) {
+      num2[i] ^= QRMath.gexp(QRMath.glog(e.getAt(i)) + ratio);
+    }
+    return qrPolynomial(num2, 0).mod(e);
+  };
+  return _this;
+};
+var QRRSBlock = (function() {
+  const RS_BLOCK_TABLE = [
+    // L
+    // M
+    // Q
+    // H
+    // 1
+    [1, 26, 19],
+    [1, 26, 16],
+    [1, 26, 13],
+    [1, 26, 9],
+    // 2
+    [1, 44, 34],
+    [1, 44, 28],
+    [1, 44, 22],
+    [1, 44, 16],
+    // 3
+    [1, 70, 55],
+    [1, 70, 44],
+    [2, 35, 17],
+    [2, 35, 13],
+    // 4
+    [1, 100, 80],
+    [2, 50, 32],
+    [2, 50, 24],
+    [4, 25, 9],
+    // 5
+    [1, 134, 108],
+    [2, 67, 43],
+    [2, 33, 15, 2, 34, 16],
+    [2, 33, 11, 2, 34, 12],
+    // 6
+    [2, 86, 68],
+    [4, 43, 27],
+    [4, 43, 19],
+    [4, 43, 15],
+    // 7
+    [2, 98, 78],
+    [4, 49, 31],
+    [2, 32, 14, 4, 33, 15],
+    [4, 39, 13, 1, 40, 14],
+    // 8
+    [2, 121, 97],
+    [2, 60, 38, 2, 61, 39],
+    [4, 40, 18, 2, 41, 19],
+    [4, 40, 14, 2, 41, 15],
+    // 9
+    [2, 146, 116],
+    [3, 58, 36, 2, 59, 37],
+    [4, 36, 16, 4, 37, 17],
+    [4, 36, 12, 4, 37, 13],
+    // 10
+    [2, 86, 68, 2, 87, 69],
+    [4, 69, 43, 1, 70, 44],
+    [6, 43, 19, 2, 44, 20],
+    [6, 43, 15, 2, 44, 16],
+    // 11
+    [4, 101, 81],
+    [1, 80, 50, 4, 81, 51],
+    [4, 50, 22, 4, 51, 23],
+    [3, 36, 12, 8, 37, 13],
+    // 12
+    [2, 116, 92, 2, 117, 93],
+    [6, 58, 36, 2, 59, 37],
+    [4, 46, 20, 6, 47, 21],
+    [7, 42, 14, 4, 43, 15],
+    // 13
+    [4, 133, 107],
+    [8, 59, 37, 1, 60, 38],
+    [8, 44, 20, 4, 45, 21],
+    [12, 33, 11, 4, 34, 12],
+    // 14
+    [3, 145, 115, 1, 146, 116],
+    [4, 64, 40, 5, 65, 41],
+    [11, 36, 16, 5, 37, 17],
+    [11, 36, 12, 5, 37, 13],
+    // 15
+    [5, 109, 87, 1, 110, 88],
+    [5, 65, 41, 5, 66, 42],
+    [5, 54, 24, 7, 55, 25],
+    [11, 36, 12, 7, 37, 13],
+    // 16
+    [5, 122, 98, 1, 123, 99],
+    [7, 73, 45, 3, 74, 46],
+    [15, 43, 19, 2, 44, 20],
+    [3, 45, 15, 13, 46, 16],
+    // 17
+    [1, 135, 107, 5, 136, 108],
+    [10, 74, 46, 1, 75, 47],
+    [1, 50, 22, 15, 51, 23],
+    [2, 42, 14, 17, 43, 15],
+    // 18
+    [5, 150, 120, 1, 151, 121],
+    [9, 69, 43, 4, 70, 44],
+    [17, 50, 22, 1, 51, 23],
+    [2, 42, 14, 19, 43, 15],
+    // 19
+    [3, 141, 113, 4, 142, 114],
+    [3, 70, 44, 11, 71, 45],
+    [17, 47, 21, 4, 48, 22],
+    [9, 39, 13, 16, 40, 14],
+    // 20
+    [3, 135, 107, 5, 136, 108],
+    [3, 67, 41, 13, 68, 42],
+    [15, 54, 24, 5, 55, 25],
+    [15, 43, 15, 10, 44, 16],
+    // 21
+    [4, 144, 116, 4, 145, 117],
+    [17, 68, 42],
+    [17, 50, 22, 6, 51, 23],
+    [19, 46, 16, 6, 47, 17],
+    // 22
+    [2, 139, 111, 7, 140, 112],
+    [17, 74, 46],
+    [7, 54, 24, 16, 55, 25],
+    [34, 37, 13],
+    // 23
+    [4, 151, 121, 5, 152, 122],
+    [4, 75, 47, 14, 76, 48],
+    [11, 54, 24, 14, 55, 25],
+    [16, 45, 15, 14, 46, 16],
+    // 24
+    [6, 147, 117, 4, 148, 118],
+    [6, 73, 45, 14, 74, 46],
+    [11, 54, 24, 16, 55, 25],
+    [30, 46, 16, 2, 47, 17],
+    // 25
+    [8, 132, 106, 4, 133, 107],
+    [8, 75, 47, 13, 76, 48],
+    [7, 54, 24, 22, 55, 25],
+    [22, 45, 15, 13, 46, 16],
+    // 26
+    [10, 142, 114, 2, 143, 115],
+    [19, 74, 46, 4, 75, 47],
+    [28, 50, 22, 6, 51, 23],
+    [33, 46, 16, 4, 47, 17],
+    // 27
+    [8, 152, 122, 4, 153, 123],
+    [22, 73, 45, 3, 74, 46],
+    [8, 53, 23, 26, 54, 24],
+    [12, 45, 15, 28, 46, 16],
+    // 28
+    [3, 147, 117, 10, 148, 118],
+    [3, 73, 45, 23, 74, 46],
+    [4, 54, 24, 31, 55, 25],
+    [11, 45, 15, 31, 46, 16],
+    // 29
+    [7, 146, 116, 7, 147, 117],
+    [21, 73, 45, 7, 74, 46],
+    [1, 53, 23, 37, 54, 24],
+    [19, 45, 15, 26, 46, 16],
+    // 30
+    [5, 145, 115, 10, 146, 116],
+    [19, 75, 47, 10, 76, 48],
+    [15, 54, 24, 25, 55, 25],
+    [23, 45, 15, 25, 46, 16],
+    // 31
+    [13, 145, 115, 3, 146, 116],
+    [2, 74, 46, 29, 75, 47],
+    [42, 54, 24, 1, 55, 25],
+    [23, 45, 15, 28, 46, 16],
+    // 32
+    [17, 145, 115],
+    [10, 74, 46, 23, 75, 47],
+    [10, 54, 24, 35, 55, 25],
+    [19, 45, 15, 35, 46, 16],
+    // 33
+    [17, 145, 115, 1, 146, 116],
+    [14, 74, 46, 21, 75, 47],
+    [29, 54, 24, 19, 55, 25],
+    [11, 45, 15, 46, 46, 16],
+    // 34
+    [13, 145, 115, 6, 146, 116],
+    [14, 74, 46, 23, 75, 47],
+    [44, 54, 24, 7, 55, 25],
+    [59, 46, 16, 1, 47, 17],
+    // 35
+    [12, 151, 121, 7, 152, 122],
+    [12, 75, 47, 26, 76, 48],
+    [39, 54, 24, 14, 55, 25],
+    [22, 45, 15, 41, 46, 16],
+    // 36
+    [6, 151, 121, 14, 152, 122],
+    [6, 75, 47, 34, 76, 48],
+    [46, 54, 24, 10, 55, 25],
+    [2, 45, 15, 64, 46, 16],
+    // 37
+    [17, 152, 122, 4, 153, 123],
+    [29, 74, 46, 14, 75, 47],
+    [49, 54, 24, 10, 55, 25],
+    [24, 45, 15, 46, 46, 16],
+    // 38
+    [4, 152, 122, 18, 153, 123],
+    [13, 74, 46, 32, 75, 47],
+    [48, 54, 24, 14, 55, 25],
+    [42, 45, 15, 32, 46, 16],
+    // 39
+    [20, 147, 117, 4, 148, 118],
+    [40, 75, 47, 7, 76, 48],
+    [43, 54, 24, 22, 55, 25],
+    [10, 45, 15, 67, 46, 16],
+    // 40
+    [19, 148, 118, 6, 149, 119],
+    [18, 75, 47, 31, 76, 48],
+    [34, 54, 24, 34, 55, 25],
+    [20, 45, 15, 61, 46, 16]
+  ];
+  const qrRSBlock = function(totalCount, dataCount) {
+    const _this2 = {};
+    _this2.totalCount = totalCount;
+    _this2.dataCount = dataCount;
+    return _this2;
+  };
+  const _this = {};
+  const getRsBlockTable = function(typeNumber, errorCorrectionLevel) {
+    switch (errorCorrectionLevel) {
+      case QRErrorCorrectionLevel.L:
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0];
+      case QRErrorCorrectionLevel.M:
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1];
+      case QRErrorCorrectionLevel.Q:
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2];
+      case QRErrorCorrectionLevel.H:
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3];
+      default:
+        return void 0;
+    }
+  };
+  _this.getRSBlocks = function(typeNumber, errorCorrectionLevel) {
+    const rsBlock = getRsBlockTable(typeNumber, errorCorrectionLevel);
+    if (typeof rsBlock == "undefined") {
+      throw "bad rs block @ typeNumber:" + typeNumber + "/errorCorrectionLevel:" + errorCorrectionLevel;
+    }
+    const length = rsBlock.length / 3;
+    const list = [];
+    for (let i = 0; i < length; i += 1) {
+      const count = rsBlock[i * 3 + 0];
+      const totalCount = rsBlock[i * 3 + 1];
+      const dataCount = rsBlock[i * 3 + 2];
+      for (let j = 0; j < count; j += 1) {
+        list.push(qrRSBlock(totalCount, dataCount));
+      }
+    }
+    return list;
+  };
+  return _this;
+})();
+var qrBitBuffer = function() {
+  const _buffer = [];
+  let _length = 0;
+  const _this = {};
+  _this.getBuffer = function() {
+    return _buffer;
+  };
+  _this.getAt = function(index) {
+    const bufIndex = Math.floor(index / 8);
+    return (_buffer[bufIndex] >>> 7 - index % 8 & 1) == 1;
+  };
+  _this.put = function(num, length) {
+    for (let i = 0; i < length; i += 1) {
+      _this.putBit((num >>> length - i - 1 & 1) == 1);
+    }
+  };
+  _this.getLengthInBits = function() {
+    return _length;
+  };
+  _this.putBit = function(bit) {
+    const bufIndex = Math.floor(_length / 8);
+    if (_buffer.length <= bufIndex) {
+      _buffer.push(0);
+    }
+    if (bit) {
+      _buffer[bufIndex] |= 128 >>> _length % 8;
+    }
+    _length += 1;
+  };
+  return _this;
+};
+var qrNumber = function(data) {
+  const _mode = QRMode.MODE_NUMBER;
+  const _data = data;
+  const _this = {};
+  _this.getMode = function() {
+    return _mode;
+  };
+  _this.getLength = function(buffer) {
+    return _data.length;
+  };
+  _this.write = function(buffer) {
+    const data2 = _data;
+    let i = 0;
+    while (i + 2 < data2.length) {
+      buffer.put(strToNum(data2.substring(i, i + 3)), 10);
+      i += 3;
+    }
+    if (i < data2.length) {
+      if (data2.length - i == 1) {
+        buffer.put(strToNum(data2.substring(i, i + 1)), 4);
+      } else if (data2.length - i == 2) {
+        buffer.put(strToNum(data2.substring(i, i + 2)), 7);
+      }
+    }
+  };
+  const strToNum = function(s) {
+    let num = 0;
+    for (let i = 0; i < s.length; i += 1) {
+      num = num * 10 + chatToNum(s.charAt(i));
+    }
+    return num;
+  };
+  const chatToNum = function(c) {
+    if ("0" <= c && c <= "9") {
+      return c.charCodeAt(0) - "0".charCodeAt(0);
+    }
+    throw "illegal char :" + c;
+  };
+  return _this;
+};
+var qrAlphaNum = function(data) {
+  const _mode = QRMode.MODE_ALPHA_NUM;
+  const _data = data;
+  const _this = {};
+  _this.getMode = function() {
+    return _mode;
+  };
+  _this.getLength = function(buffer) {
+    return _data.length;
+  };
+  _this.write = function(buffer) {
+    const s = _data;
+    let i = 0;
+    while (i + 1 < s.length) {
+      buffer.put(
+        getCode(s.charAt(i)) * 45 + getCode(s.charAt(i + 1)),
+        11
+      );
+      i += 2;
+    }
+    if (i < s.length) {
+      buffer.put(getCode(s.charAt(i)), 6);
+    }
+  };
+  const getCode = function(c) {
+    if ("0" <= c && c <= "9") {
+      return c.charCodeAt(0) - "0".charCodeAt(0);
+    } else if ("A" <= c && c <= "Z") {
+      return c.charCodeAt(0) - "A".charCodeAt(0) + 10;
+    } else {
+      switch (c) {
+        case " ":
+          return 36;
+        case "$":
+          return 37;
+        case "%":
+          return 38;
+        case "*":
+          return 39;
+        case "+":
+          return 40;
+        case "-":
+          return 41;
+        case ".":
+          return 42;
+        case "/":
+          return 43;
+        case ":":
+          return 44;
+        default:
+          throw "illegal char :" + c;
+      }
+    }
+  };
+  return _this;
+};
+var qr8BitByte = function(data) {
+  const _mode = QRMode.MODE_8BIT_BYTE;
+  const _data = data;
+  const _bytes = qrcode.stringToBytes(data);
+  const _this = {};
+  _this.getMode = function() {
+    return _mode;
+  };
+  _this.getLength = function(buffer) {
+    return _bytes.length;
+  };
+  _this.write = function(buffer) {
+    for (let i = 0; i < _bytes.length; i += 1) {
+      buffer.put(_bytes[i], 8);
+    }
+  };
+  return _this;
+};
+var qrKanji = function(data) {
+  const _mode = QRMode.MODE_KANJI;
+  const _data = data;
+  const stringToBytes2 = qrcode.stringToBytes;
+  !(function(c, code2) {
+    const test = stringToBytes2(c);
+    if (test.length != 2 || (test[0] << 8 | test[1]) != code2) {
+      throw "sjis not supported.";
+    }
+  })("\u53CB", 38726);
+  const _bytes = stringToBytes2(data);
+  const _this = {};
+  _this.getMode = function() {
+    return _mode;
+  };
+  _this.getLength = function(buffer) {
+    return ~~(_bytes.length / 2);
+  };
+  _this.write = function(buffer) {
+    const data2 = _bytes;
+    let i = 0;
+    while (i + 1 < data2.length) {
+      let c = (255 & data2[i]) << 8 | 255 & data2[i + 1];
+      if (33088 <= c && c <= 40956) {
+        c -= 33088;
+      } else if (57408 <= c && c <= 60351) {
+        c -= 49472;
+      } else {
+        throw "illegal char at " + (i + 1) + "/" + c;
+      }
+      c = (c >>> 8 & 255) * 192 + (c & 255);
+      buffer.put(c, 13);
+      i += 2;
+    }
+    if (i < data2.length) {
+      throw "illegal char at " + (i + 1);
+    }
+  };
+  return _this;
+};
+var byteArrayOutputStream = function() {
+  const _bytes = [];
+  const _this = {};
+  _this.writeByte = function(b) {
+    _bytes.push(b & 255);
+  };
+  _this.writeShort = function(i) {
+    _this.writeByte(i);
+    _this.writeByte(i >>> 8);
+  };
+  _this.writeBytes = function(b, off, len) {
+    off = off || 0;
+    len = len || b.length;
+    for (let i = 0; i < len; i += 1) {
+      _this.writeByte(b[i + off]);
+    }
+  };
+  _this.writeString = function(s) {
+    for (let i = 0; i < s.length; i += 1) {
+      _this.writeByte(s.charCodeAt(i));
+    }
+  };
+  _this.toByteArray = function() {
+    return _bytes;
+  };
+  _this.toString = function() {
+    let s = "";
+    s += "[";
+    for (let i = 0; i < _bytes.length; i += 1) {
+      if (i > 0) {
+        s += ",";
+      }
+      s += _bytes[i];
+    }
+    s += "]";
+    return s;
+  };
+  return _this;
+};
+var base64EncodeOutputStream = function() {
+  let _buffer = 0;
+  let _buflen = 0;
+  let _length = 0;
+  let _base64 = "";
+  const _this = {};
+  const writeEncoded = function(b) {
+    _base64 += String.fromCharCode(encode(b & 63));
+  };
+  const encode = function(n) {
+    if (n < 0) {
+      throw "n:" + n;
+    } else if (n < 26) {
+      return 65 + n;
+    } else if (n < 52) {
+      return 97 + (n - 26);
+    } else if (n < 62) {
+      return 48 + (n - 52);
+    } else if (n == 62) {
+      return 43;
+    } else if (n == 63) {
+      return 47;
+    } else {
+      throw "n:" + n;
+    }
+  };
+  _this.writeByte = function(n) {
+    _buffer = _buffer << 8 | n & 255;
+    _buflen += 8;
+    _length += 1;
+    while (_buflen >= 6) {
+      writeEncoded(_buffer >>> _buflen - 6);
+      _buflen -= 6;
+    }
+  };
+  _this.flush = function() {
+    if (_buflen > 0) {
+      writeEncoded(_buffer << 6 - _buflen);
+      _buffer = 0;
+      _buflen = 0;
+    }
+    if (_length % 3 != 0) {
+      const padlen = 3 - _length % 3;
+      for (let i = 0; i < padlen; i += 1) {
+        _base64 += "=";
+      }
+    }
+  };
+  _this.toString = function() {
+    return _base64;
+  };
+  return _this;
+};
+var base64DecodeInputStream = function(str) {
+  const _str = str;
+  let _pos = 0;
+  let _buffer = 0;
+  let _buflen = 0;
+  const _this = {};
+  _this.read = function() {
+    while (_buflen < 8) {
+      if (_pos >= _str.length) {
+        if (_buflen == 0) {
+          return -1;
+        }
+        throw "unexpected end of file./" + _buflen;
+      }
+      const c = _str.charAt(_pos);
+      _pos += 1;
+      if (c == "=") {
+        _buflen = 0;
+        return -1;
+      } else if (c.match(/^\s$/)) {
+        continue;
+      }
+      _buffer = _buffer << 6 | decode(c.charCodeAt(0));
+      _buflen += 6;
+    }
+    const n = _buffer >>> _buflen - 8 & 255;
+    _buflen -= 8;
+    return n;
+  };
+  const decode = function(c) {
+    if (65 <= c && c <= 90) {
+      return c - 65;
+    } else if (97 <= c && c <= 122) {
+      return c - 97 + 26;
+    } else if (48 <= c && c <= 57) {
+      return c - 48 + 52;
+    } else if (c == 43) {
+      return 62;
+    } else if (c == 47) {
+      return 63;
+    } else {
+      throw "c:" + c;
+    }
+  };
+  return _this;
+};
+var gifImage = function(width, height) {
+  const _width = width;
+  const _height = height;
+  const _data = new Array(width * height);
+  const _this = {};
+  _this.setPixel = function(x, y, pixel) {
+    _data[y * _width + x] = pixel;
+  };
+  _this.write = function(out) {
+    out.writeString("GIF87a");
+    out.writeShort(_width);
+    out.writeShort(_height);
+    out.writeByte(128);
+    out.writeByte(0);
+    out.writeByte(0);
+    out.writeByte(0);
+    out.writeByte(0);
+    out.writeByte(0);
+    out.writeByte(255);
+    out.writeByte(255);
+    out.writeByte(255);
+    out.writeString(",");
+    out.writeShort(0);
+    out.writeShort(0);
+    out.writeShort(_width);
+    out.writeShort(_height);
+    out.writeByte(0);
+    const lzwMinCodeSize = 2;
+    const raster = getLZWRaster(lzwMinCodeSize);
+    out.writeByte(lzwMinCodeSize);
+    let offset2 = 0;
+    while (raster.length - offset2 > 255) {
+      out.writeByte(255);
+      out.writeBytes(raster, offset2, 255);
+      offset2 += 255;
+    }
+    out.writeByte(raster.length - offset2);
+    out.writeBytes(raster, offset2, raster.length - offset2);
+    out.writeByte(0);
+    out.writeString(";");
+  };
+  const bitOutputStream = function(out) {
+    const _out = out;
+    let _bitLength = 0;
+    let _bitBuffer = 0;
+    const _this2 = {};
+    _this2.write = function(data, length) {
+      if (data >>> length != 0) {
+        throw "length over";
+      }
+      while (_bitLength + length >= 8) {
+        _out.writeByte(255 & (data << _bitLength | _bitBuffer));
+        length -= 8 - _bitLength;
+        data >>>= 8 - _bitLength;
+        _bitBuffer = 0;
+        _bitLength = 0;
+      }
+      _bitBuffer = data << _bitLength | _bitBuffer;
+      _bitLength = _bitLength + length;
+    };
+    _this2.flush = function() {
+      if (_bitLength > 0) {
+        _out.writeByte(_bitBuffer);
+      }
+    };
+    return _this2;
+  };
+  const getLZWRaster = function(lzwMinCodeSize) {
+    const clearCode = 1 << lzwMinCodeSize;
+    const endCode = (1 << lzwMinCodeSize) + 1;
+    let bitLength = lzwMinCodeSize + 1;
+    const table2 = lzwTable();
+    for (let i = 0; i < clearCode; i += 1) {
+      table2.add(String.fromCharCode(i));
+    }
+    table2.add(String.fromCharCode(clearCode));
+    table2.add(String.fromCharCode(endCode));
+    const byteOut = byteArrayOutputStream();
+    const bitOut = bitOutputStream(byteOut);
+    bitOut.write(clearCode, bitLength);
+    let dataIndex = 0;
+    let s = String.fromCharCode(_data[dataIndex]);
+    dataIndex += 1;
+    while (dataIndex < _data.length) {
+      const c = String.fromCharCode(_data[dataIndex]);
+      dataIndex += 1;
+      if (table2.contains(s + c)) {
+        s = s + c;
+      } else {
+        bitOut.write(table2.indexOf(s), bitLength);
+        if (table2.size() < 4095) {
+          if (table2.size() == 1 << bitLength) {
+            bitLength += 1;
+          }
+          table2.add(s + c);
+        }
+        s = c;
+      }
+    }
+    bitOut.write(table2.indexOf(s), bitLength);
+    bitOut.write(endCode, bitLength);
+    bitOut.flush();
+    return byteOut.toByteArray();
+  };
+  const lzwTable = function() {
+    const _map = {};
+    let _size = 0;
+    const _this2 = {};
+    _this2.add = function(key3) {
+      if (_this2.contains(key3)) {
+        throw "dup key:" + key3;
+      }
+      _map[key3] = _size;
+      _size += 1;
+    };
+    _this2.size = function() {
+      return _size;
+    };
+    _this2.indexOf = function(key3) {
+      return _map[key3];
+    };
+    _this2.contains = function(key3) {
+      return typeof _map[key3] != "undefined";
+    };
+    return _this2;
+  };
+  return _this;
+};
+var createDataURL = function(width, height, getPixel) {
+  const gif = gifImage(width, height);
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      gif.setPixel(x, y, getPixel(x, y));
+    }
+  }
+  const b = byteArrayOutputStream();
+  gif.write(b);
+  const base64 = base64EncodeOutputStream();
+  const bytes = b.toByteArray();
+  for (let i = 0; i < bytes.length; i += 1) {
+    base64.writeByte(bytes[i]);
+  }
+  base64.flush();
+  return "data:image/gif;base64," + base64;
+};
+var qrcode_generator_2_0_4_default = qrcode;
+var stringToBytes = qrcode.stringToBytes;
+
+// src/shared/contracts/coop_sdp_v1.js
+var COOP_SDP_VERSION = "1";
+var FIELD = /^[\x21-\x7e]+$/;
+function compactSdpV1(type, sdp) {
+  if (type !== "offer" && type !== "answer") throw Error("Unknown SDP type");
+  const lines2 = String(sdp).split(/\r?\n/);
+  const pick4 = (prefix2) => lines2.find((l) => l.startsWith(prefix2))?.slice(prefix2.length).trim() ?? null;
+  const ufrag = pick4("a=ice-ufrag:"), pwd = pick4("a=ice-pwd:"), fp = pick4("a=fingerprint:sha-256 "), setup = pick4("a=setup:");
+  if (!ufrag || !pwd || !fp || !setup) throw Error("Connection details incomplete");
+  const hex5 = fp.replace(/:/g, "").toLowerCase();
+  if (!/^[0-9a-f]{64}$/.test(hex5)) throw Error("Unknown fingerprint");
+  const candidates = [];
+  for (const l of lines2) {
+    if (!l.startsWith("a=candidate:")) continue;
+    const p = l.slice(12).trim().split(/\s+/);
+    if (p.length < 8 || p[1] !== "1" || p[2].toLowerCase() !== "udp" || p[6] !== "typ") continue;
+    const kind = { host: "h", srflx: "s", relay: "r", prflx: "p" }[p[7]];
+    if (!kind) continue;
+    candidates.push(kind + p[4] + "~" + p[5]);
+  }
+  if (!candidates.length) throw Error("No connection path found");
+  for (const v of [ufrag, pwd, ...candidates]) if (!FIELD.test(v) || v.includes("|")) throw Error("Unusual connection details");
+  const role = { actpass: "x", active: "a", passive: "p" }[setup];
+  if (!role) throw Error("Unknown DTLS role");
+  return [COOP_SDP_VERSION, type === "offer" ? "o" : "a", role, ufrag, pwd, base64url(hex5), ...candidates].join("|");
+}
+function expandSdpV1(text2) {
+  const p = String(text2).split("|");
+  if (p[0] !== COOP_SDP_VERSION || p.length < 7) throw Error("This code is from another version of the game");
+  const type = p[1] === "o" ? "offer" : p[1] === "a" ? "answer" : null, setup = { x: "actpass", a: "active", p: "passive" }[p[2]];
+  if (!type || !setup) throw Error("Unreadable connection code");
+  const [ufrag, pwd] = [p[3], p[4]], hex5 = unbase64url(p[5]);
+  if (!/^[0-9a-f]{64}$/.test(hex5)) throw Error("Unreadable connection code");
+  const fp = hex5.match(/../g).join(":").toUpperCase();
+  const kinds2 = { h: "host", s: "srflx", r: "relay", p: "prflx" };
+  const candidates = p.slice(6).map((c, i) => {
+    const kind = kinds2[c[0]], cut = c.lastIndexOf("~"), address3 = c.slice(1, cut), port = Number(c.slice(cut + 1));
+    if (!kind || cut < 2 || !Number.isInteger(port) || port < 1 || port > 65535) throw Error("Unreadable connection code");
+    const priority = (kind === "host" ? 126 : kind === "prflx" ? 110 : kind === "srflx" ? 100 : 0) * 16777216 + 65535 * 256 + 255 - i;
+    return `a=candidate:${i + 1} 1 udp ${priority} ${address3} ${port} typ ${kind}${kind === "host" ? "" : " raddr 0.0.0.0 rport 0"}`;
+  });
+  const sdp = [
+    "v=0",
+    "o=- 1 2 IN IP4 127.0.0.1",
+    "s=-",
+    "t=0 0",
+    "a=group:BUNDLE 0",
+    "a=msid-semantic: WMS",
+    "m=application 9 UDP/DTLS/SCTP webrtc-datachannel",
+    "c=IN IP4 0.0.0.0",
+    ...candidates,
+    "a=end-of-candidates",
+    `a=ice-ufrag:${ufrag}`,
+    `a=ice-pwd:${pwd}`,
+    `a=fingerprint:sha-256 ${fp}`,
+    `a=setup:${setup}`,
+    "a=mid:0",
+    "a=sctp-port:5000",
+    "a=max-message-size:262144",
+    ""
+  ].join("\r\n");
+  return { type, sdp };
+}
+function base64url(hex5) {
+  let s = "";
+  for (let i = 0; i < hex5.length; i += 2) s += String.fromCharCode(parseInt(hex5.slice(i, i + 2), 16));
+  return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+function unbase64url(text2) {
+  try {
+    const s = atob(text2.replace(/-/g, "+").replace(/_/g, "/"));
+    return Array.from(s, (c) => c.charCodeAt(0).toString(16).padStart(2, "0")).join("");
+  } catch {
+    return "";
+  }
+}
+
+// src/client/coop_link_v1.js
+var COOP_ICE_SERVERS = Object.freeze([{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun.cloudflare.com:3478" }]);
+var CHUNK = 15e3;
+var DIRECT_WAIT_MS = 1e4;
+var GATHER_WAIT_MS = 3e3;
+function createLink(kind, sendText, closeTransport, busy = () => false) {
+  const onMessage = /* @__PURE__ */ new Set(), onClose = /* @__PURE__ */ new Set(), parts = /* @__PURE__ */ new Map();
+  let closed = false, seq = 0;
+  const deliver = (text2) => {
+    let m;
+    try {
+      m = JSON.parse(text2);
+    } catch {
+      return;
+    }
+    for (const fn of onMessage) try {
+      fn(m);
+    } catch (error) {
+      console.error("Co-op message failed", error);
+    }
+  };
+  const link = {
+    kind,
+    send(message) {
+      if (closed) return false;
+      const text2 = typeof message === "string" ? message : JSON.stringify(message);
+      try {
+        if (text2.length <= CHUNK) sendText(text2);
+        else {
+          const id = (++seq).toString(36), n = Math.ceil(text2.length / CHUNK);
+          for (let i = 0; i < n; i++) sendText("" + id + "|" + i + "|" + n + "|" + text2.slice(i * CHUNK, (i + 1) * CHUNK));
+        }
+        return true;
+      } catch {
+        link.close("send failed");
+        return false;
+      }
+    },
+    receive(text2) {
+      if (typeof text2 !== "string") return;
+      if (text2[0] !== "") {
+        deliver(text2);
+        return;
+      }
+      const a = text2.indexOf("|"), b = text2.indexOf("|", a + 1), c = text2.indexOf("|", b + 1), id = text2.slice(1, a), i = Number(text2.slice(a + 1, b)), n = Number(text2.slice(b + 1, c));
+      if (!(n > 0 && n <= 4096 && i >= 0 && i < n)) return;
+      let p = parts.get(id);
+      if (!p) {
+        p = { n, got: 0, list: new Array(n) };
+        parts.set(id, p);
+      }
+      if (p.list[i] === void 0) {
+        p.list[i] = text2.slice(c + 1);
+        p.got++;
+      }
+      if (p.got === p.n) {
+        parts.delete(id);
+        deliver(p.list.join(""));
+      }
+    },
+    busy,
+    onMessage(fn) {
+      onMessage.add(fn);
+      return () => onMessage.delete(fn);
+    },
+    onClose(fn) {
+      if (closed) fn();
+      else onClose.add(fn);
+      return () => onClose.delete(fn);
+    },
+    close(reason = "closed") {
+      if (closed) return;
+      closed = true;
+      try {
+        closeTransport();
+      } catch {
+      }
+      for (const fn of onClose) try {
+        fn(reason);
+      } catch {
+      }
+    },
+    get closed() {
+      return closed;
+    }
+  };
+  return link;
+}
+function channelLink(pc2, channel2) {
+  const link = createLink("direct", (text2) => channel2.send(text2), () => {
+    channel2.close();
+    pc2.close();
+  }, () => channel2.bufferedAmount > 1 << 20);
+  channel2.onmessage = (e) => link.receive(e.data);
+  channel2.onclose = () => link.close("direct channel closed");
+  pc2.addEventListener("connectionstatechange", () => {
+    if (pc2.connectionState === "failed" || pc2.connectionState === "closed") link.close("connection lost");
+  });
+  return link;
+}
+var opened = (channel2) => new Promise((resolve, reject) => {
+  if (channel2.readyState === "open") {
+    resolve();
+    return;
+  }
+  channel2.onopen = () => resolve();
+  channel2.onerror = () => reject(Error("Direct channel failed"));
+});
+function gathered(pc2) {
+  return new Promise((resolve) => {
+    if (pc2.iceGatheringState === "complete") {
+      resolve();
+      return;
+    }
+    const done3 = () => {
+      if (pc2.iceGatheringState === "complete") {
+        pc2.removeEventListener("icegatheringstatechange", done3);
+        resolve();
+      }
+    };
+    pc2.addEventListener("icegatheringstatechange", done3);
+    setTimeout(resolve, GATHER_WAIT_MS);
+  });
+}
+async function hostOfferByCodeV1({ RTCPeerConnection = globalThis.RTCPeerConnection, iceServers = COOP_ICE_SERVERS } = {}) {
+  const pc2 = new RTCPeerConnection({ iceServers }), channel2 = pc2.createDataChannel("saq", { ordered: true });
+  await pc2.setLocalDescription(await pc2.createOffer());
+  await gathered(pc2);
+  return {
+    code: compactSdpV1("offer", pc2.localDescription.sdp),
+    async accept(answerCode) {
+      const answer = expandSdpV1(answerCode);
+      if (answer.type !== "answer") throw Error("That is an invite, not an answer");
+      await pc2.setRemoteDescription(answer);
+      await withTimeout(opened(channel2), 2e4, "The other device could not be reached. Are both on the same Wi-Fi?");
+      return channelLink(pc2, channel2);
+    },
+    close: () => pc2.close()
+  };
+}
+async function guestAnswerByCodeV1(offerCode, { RTCPeerConnection = globalThis.RTCPeerConnection, iceServers = COOP_ICE_SERVERS } = {}) {
+  const offer = expandSdpV1(offerCode);
+  if (offer.type !== "offer") throw Error("That is an answer, not an invite");
+  const pc2 = new RTCPeerConnection({ iceServers });
+  const channel2 = new Promise((resolve) => {
+    pc2.ondatachannel = (e) => resolve(e.channel);
+  });
+  await pc2.setRemoteDescription(offer);
+  await pc2.setLocalDescription(await pc2.createAnswer());
+  await gathered(pc2);
+  return {
+    code: compactSdpV1("answer", pc2.localDescription.sdp),
+    link: withTimeout(channel2.then(async (c) => {
+      await opened(c);
+      return channelLink(pc2, c);
+    }), 12e4, "The host did not read the answer in time"),
+    close: () => pc2.close()
+  };
+}
+var wsUrl = (server, path10) => server.replace(/^http/, "ws").replace(/\/$/, "") + path10;
+async function createRoomV1(server, { fetch = globalThis.fetch } = {}) {
+  const r = await fetch(server.replace(/\/$/, "") + "/rooms", { method: "POST" });
+  if (!r.ok) throw Error("The join server is not answering");
+  const { code: code2 } = await r.json();
+  if (!/^[A-Z0-9]{4,8}$/.test(code2)) throw Error("The join server sent a bad code");
+  return code2;
+}
+function socket(url, WebSocket) {
+  return new Promise((resolve, reject) => {
+    const ws = new WebSocket(url);
+    ws.onopen = () => resolve(ws);
+    ws.onerror = () => reject(Error("Could not reach the join server"));
+    ws.onclose = (e) => reject(Error(e.reason || "The join server closed the room"));
+  });
+}
+async function hostRoomV1({ server, code: code2, onGuest, onLeft = () => {
+}, WebSocket = globalThis.WebSocket, RTCPeerConnection = globalThis.RTCPeerConnection, iceServers = COOP_ICE_SERVERS }) {
+  const ws = await socket(wsUrl(server, "/rooms/" + code2 + "/host"), WebSocket), guests = /* @__PURE__ */ new Map();
+  const to = (id, data) => {
+    if (ws.readyState === 1) ws.send(JSON.stringify({ type: "to", id, data }));
+  };
+  ws.onmessage = async (e) => {
+    let m;
+    try {
+      m = JSON.parse(e.data);
+    } catch {
+      return;
+    }
+    if (m.type === "guest") {
+      const pc2 = new RTCPeerConnection({ iceServers }), channel2 = pc2.createDataChannel("saq", { ordered: true }), g = { pc: pc2, relay: null, link: null };
+      guests.set(m.id, g);
+      pc2.onicecandidate = (x) => {
+        if (x.candidate) to(m.id, { sig: { candidate: x.candidate.toJSON() } });
+      };
+      await pc2.setLocalDescription(await pc2.createOffer());
+      to(m.id, { sig: { sdp: pc2.localDescription.toJSON() } });
+      const settle = (link) => {
+        if (g.link) return;
+        g.link = link;
+        link.onClose(() => {
+          if (guests.get(m.id) === g) guests.delete(m.id);
+        });
+        onGuest(link, m.id);
+      };
+      withTimeout(opened(channel2), DIRECT_WAIT_MS, "").then(() => settle(channelLink(pc2, channel2)), () => {
+        if (g.link) return;
+        pc2.close();
+        to(m.id, { relay: "open" });
+        g.relay = createLink("relay", (text2) => to(m.id, { relay: text2 }), () => to(m.id, { relay: "close" }));
+        settle(g.relay);
+      });
+    } else if (m.type === "from") {
+      const g = guests.get(m.id);
+      if (!g) return;
+      const d = m.data ?? {};
+      if (d.sig?.sdp) await g.pc.setRemoteDescription(d.sig.sdp).catch(() => {
+      });
+      else if (d.sig?.candidate) await g.pc.addIceCandidate(d.sig.candidate).catch(() => {
+      });
+      else if (typeof d.relay === "string" && g.relay) {
+        if (d.relay === "close") g.relay.close("guest left");
+        else if (d.relay !== "open") g.relay.receive(d.relay);
+      }
+    } else if (m.type === "left") {
+      const g = guests.get(m.id);
+      guests.delete(m.id);
+      g?.link?.close("guest left");
+      g?.pc.close();
+      onLeft(m.id);
+    }
+  };
+  ws.onclose = () => {
+    for (const g of guests.values()) if (g.link?.kind === "relay") g.link.close("join server closed");
+  };
+  return { close() {
+    try {
+      ws.close();
+    } catch {
+    }
+  }, guests: () => guests.size };
+}
+async function joinRoomV1({ server, code: code2, WebSocket = globalThis.WebSocket, RTCPeerConnection = globalThis.RTCPeerConnection, iceServers = COOP_ICE_SERVERS }) {
+  const ws = await socket(wsUrl(server, "/rooms/" + code2.toUpperCase() + "/guest"), WebSocket);
+  const up = (data) => {
+    if (ws.readyState === 1) ws.send(JSON.stringify({ type: "up", data }));
+  };
+  const pc2 = new RTCPeerConnection({ iceServers });
+  let relay = null;
+  pc2.onicecandidate = (x) => {
+    if (x.candidate) up({ sig: { candidate: x.candidate.toJSON() } });
+  };
+  return withTimeout(new Promise((resolve, reject) => {
+    pc2.ondatachannel = (e) => opened(e.channel).then(() => {
+      resolve(channelLink(pc2, e.channel));
+    });
+    ws.onmessage = async (e) => {
+      let m;
+      try {
+        m = JSON.parse(e.data);
+      } catch {
+        return;
+      }
+      if (m.type === "closed") {
+        reject(Error(m.reason || "The host closed the game"));
+        relay?.close("host left");
+        return;
+      }
+      if (m.type !== "from") return;
+      const d = m.data ?? {};
+      if (d.sig?.sdp) {
+        await pc2.setRemoteDescription(d.sig.sdp);
+        await pc2.setLocalDescription(await pc2.createAnswer());
+        up({ sig: { sdp: pc2.localDescription.toJSON() } });
+      } else if (d.sig?.candidate) await pc2.addIceCandidate(d.sig.candidate).catch(() => {
+      });
+      else if (d.relay === "open") {
+        pc2.close();
+        relay = createLink("relay", (text2) => up({ relay: text2 }), () => {
+          up({ relay: "close" });
+          ws.close();
+        });
+        resolve(relay);
+      } else if (d.relay === "close") relay?.close("host left");
+      else if (typeof d.relay === "string") relay?.receive(d.relay);
+    };
+    ws.onclose = (e) => {
+      reject(Error(e.reason || "The join server closed the room"));
+      relay?.close("join server closed");
+    };
+  }), 3e4, "Could not reach the host. Check the code.");
+}
+function withTimeout(promise, ms, message) {
+  let t;
+  return Promise.race([promise.finally(() => clearTimeout(t)), new Promise((_, reject) => {
+    t = setTimeout(() => reject(Error(message || "Timed out")), ms);
+  })]);
+}
+
+// src/client/coop_screen_v1.js
+var el = (document2, tag, cls = "", text2 = "") => {
+  const e = document2.createElement(tag);
+  if (cls) e.className = cls;
+  if (text2) e.textContent = text2;
+  return e;
+};
+function button(document2, cls, text2, onClick) {
+  const b = el(document2, "button", cls, text2);
+  b.type = "button";
+  b.addEventListener("click", onClick);
+  return b;
+}
+function drawQr(document2, text2) {
+  const q = qrcode_generator_2_0_4_default(0, "L");
+  q.addData(text2);
+  q.make();
+  const n = q.getModuleCount(), scale = Math.max(3, Math.floor(300 / (n + 8))), canvas = el(document2, "canvas", "coop-qr");
+  canvas.width = canvas.height = (n + 8) * scale;
+  const g = canvas.getContext("2d");
+  g.fillStyle = "#fff";
+  g.fillRect(0, 0, canvas.width, canvas.height);
+  g.fillStyle = "#000";
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) g.fillRect((c + 4) * scale, (r + 4) * scale, scale, scale);
+  canvas.dataset.code = text2;
+  return canvas;
+}
+async function scanQr(environment, host) {
+  const document2 = environment.document, video = el(document2, "video", "coop-camera"), canvas = el(document2, "canvas"), stop2 = button(document2, "coop-secondary", "Stop camera", () => finish3(null));
+  video.setAttribute("playsinline", "");
+  video.muted = true;
+  let stream = null, timer = null, done3 = null;
+  const finish3 = (v) => {
+    if (timer) environment.clearInterval(timer);
+    stream?.getTracks().forEach((t) => t.stop());
+    video.remove();
+    stop2.remove();
+    done3?.(v);
+  };
+  const result = new Promise((resolve) => {
+    done3 = resolve;
+  });
+  const mod = await import("./jsqr-1.4.0-NMFRJJEX.js"), jsQR = mod.default ?? environment.jsQR;
+  try {
+    stream = await environment.navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+  } catch {
+    throw Error("The camera is not available. Paste the code instead.");
+  }
+  video.srcObject = stream;
+  host.append(video, stop2);
+  await video.play().catch(() => {
+  });
+  const g = canvas.getContext("2d", { willReadFrequently: true });
+  timer = environment.setInterval(() => {
+    const w = video.videoWidth, h = video.videoHeight;
+    if (!w || !h) return;
+    const s = Math.min(1, 640 / Math.max(w, h));
+    canvas.width = Math.round(w * s);
+    canvas.height = Math.round(h * s);
+    g.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const found = jsQR(g.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height, { inversionAttempts: "dontInvert" });
+    if (found?.data) finish3(found.data);
+  }, 200);
+  return result;
+}
+function shell(environment, title, intro) {
+  const document2 = environment.document, root2 = el(document2, "div", "coop-screen"), card = el(document2, "div", "coop-card");
+  root2.setAttribute("role", "dialog");
+  root2.setAttribute("aria-label", title);
+  card.append(el(document2, "h2", "coop-title", title), el(document2, "p", "coop-intro", intro));
+  root2.append(card);
+  document2.body.append(root2);
+  const status2 = el(document2, "p", "coop-status");
+  status2.setAttribute("aria-live", "polite");
+  return { document: document2, root: root2, card, status: status2, say: (t) => {
+    status2.textContent = t;
+  }, close: () => root2.remove() };
+}
+function playerList(document2) {
+  const list = el(document2, "ul", "coop-players");
+  return { list, show(players) {
+    list.replaceChildren(...players.map((p, i) => {
+      const li = el(document2, "li", "", p.name || "Hero");
+      if (i === 0) li.append(el(document2, "span", "coop-tag", "Host"));
+      return li;
+    }));
+  } };
+}
+function pasteRow(document2, label4, onCode) {
+  const row2 = el(document2, "div", "coop-paste"), input = el(document2, "input", "coop-input");
+  input.placeholder = label4;
+  input.autocomplete = "off";
+  input.spellcheck = false;
+  row2.append(input, button(document2, "coop-secondary", "Use", () => {
+    const v = input.value.trim();
+    if (v) onCode(v);
+  }));
+  return row2;
+}
+function runCoopLobbyV1({ environment, coopHost, server, hostName }) {
+  const ui = shell(environment, "Play together", `Friends join ${hostName}\u2019s world with their own heroes. Up to 3 friends.`), { document: document2, card } = ui;
+  const players = playerList(document2);
+  players.show([{ name: hostName }]);
+  const codeBox = el(document2, "div", "coop-section"), qrBox = el(document2, "div", "coop-section"), actions = el(document2, "div", "coop-actions");
+  let room = null, offer = null;
+  codeBox.append(el(document2, "h3", "", "Join code"));
+  if (server) {
+    const code2 = el(document2, "p", "coop-code", "\u2026");
+    codeBox.append(code2, el(document2, "p", "coop-hint", "Friends choose Join a game and type this code."));
+    createRoomV1(server).then((c) => {
+      code2.textContent = c;
+      return hostRoomV1({ server, code: c, onGuest: (link) => coopHost.add(link) });
+    }).then((r) => {
+      room = r;
+    }, (e) => {
+      code2.textContent = "\u2014";
+      ui.say(e.message);
+    });
+  } else codeBox.append(el(document2, "p", "coop-hint", "Join codes need the join server, which isn\u2019t set up yet. Use Same room below."));
+  qrBox.append(el(document2, "h3", "", "Same room"), el(document2, "p", "coop-hint", "For a friend next to you: they scan your invite, then you scan their answer."));
+  const qrArea = el(document2, "div", "coop-qr-area");
+  const nextInvite = async () => {
+    offer?.close?.();
+    offer = null;
+    qrArea.replaceChildren(el(document2, "p", "coop-hint", "Making an invite\u2026"));
+    try {
+      offer = await hostOfferByCodeV1();
+    } catch (e) {
+      qrArea.replaceChildren(el(document2, "p", "coop-hint", e.message));
+      return;
+    }
+    const accept = async (code2) => {
+      ui.say("Connecting\u2026");
+      try {
+        const link = await offer.accept(code2);
+        offer = null;
+        coopHost.add(link);
+        ui.say("Connected. Make another invite for the next friend.");
+        qrArea.replaceChildren(button(document2, "coop-secondary", "Invite another friend", nextInvite));
+      } catch (e) {
+        ui.say(e.message);
+      }
+    };
+    const scan = button(document2, "coop-secondary", "Scan their answer", async () => {
+      try {
+        const code2 = await scanQr(environment, qrArea);
+        if (code2) accept(code2);
+      } catch (e) {
+        ui.say(e.message);
+      }
+    });
+    qrArea.replaceChildren(drawQr(document2, offer.code), el(document2, "p", "coop-hint", "Invite: let your friend scan this."), scan, pasteRow(document2, "Or paste their answer", accept));
+  };
+  const showInvite = button(document2, "coop-secondary coop-invite", "Show invite", () => {
+    showInvite.remove();
+    nextInvite();
+  });
+  qrBox.append(qrArea, showInvite);
+  const start = button(document2, "coop-primary", "Start", () => done3(true)), back = button(document2, "coop-secondary", "Play alone", () => done3(false));
+  actions.append(back, start);
+  card.append(players.list, codeBox, qrBox, ui.status, actions);
+  let finish3 = null;
+  const result = new Promise((resolve) => {
+    finish3 = resolve;
+  });
+  coopHost.onPlayers?.((p) => players.show(p));
+  function done3(go) {
+    offer?.close?.();
+    ui.close();
+    if (!go) {
+      room?.close();
+      coopHost.close("The host went back to playing alone");
+    }
+    finish3(go ? { host: coopHost, room } : null);
+  }
+  return Object.assign(result, { players });
+}
+function runCoopJoinV1({ environment, server, build: build2, hero, onWorldFile }) {
+  const ui = shell(environment, "Join a game", `${hero.name} joins a friend\u2019s world. Everything ${hero.name} earns comes home.`), { document: document2, card } = ui;
+  const players = playerList(document2), codeBox = el(document2, "div", "coop-section"), qrBox = el(document2, "div", "coop-section"), actions = el(document2, "div", "coop-actions");
+  let finish3 = null, busy = false;
+  const result = new Promise((resolve) => {
+    finish3 = resolve;
+  });
+  const connected = async (link) => {
+    codeBox.hidden = true;
+    qrBox.hidden = true;
+    ui.say("Connected. Waiting for the host to start\u2026");
+    card.insertBefore(players.list, ui.status);
+    try {
+      const start = await beginCoopGuestV1({ link, build: build2, hero, onLobby: (p) => players.show(p), onWorldFile });
+      ui.close();
+      finish3({ link, start });
+    } catch (e) {
+      ui.say(e.message);
+      link.close("left");
+      codeBox.hidden = !server;
+      qrBox.hidden = false;
+      busy = false;
+    }
+  };
+  codeBox.append(el(document2, "h3", "", "Join code"));
+  if (server) {
+    const input = el(document2, "input", "coop-input coop-code-input");
+    input.placeholder = "Code";
+    input.maxLength = 8;
+    input.autocapitalize = "characters";
+    input.autocomplete = "off";
+    const go = button(document2, "coop-primary", "Join", async () => {
+      if (busy) return;
+      const code2 = input.value.trim().toUpperCase();
+      if (!/^[A-Z0-9]{4,8}$/.test(code2)) {
+        ui.say("Type the code the host sees.");
+        return;
+      }
+      busy = true;
+      ui.say("Joining\u2026");
+      try {
+        connected(await joinRoomV1({ server, code: code2 }));
+      } catch (e) {
+        busy = false;
+        ui.say(e.message);
+      }
+    });
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") go.click();
+    });
+    codeBox.append(el(document2, "div", "coop-paste", ""), el(document2, "p", "coop-hint", "Type the code from the host\u2019s screen."));
+    codeBox.querySelector(".coop-paste").append(input, go);
+  } else codeBox.append(el(document2, "p", "coop-hint", "Join codes need the join server, which isn\u2019t set up yet. Use Same room below."));
+  const qrArea = el(document2, "div", "coop-qr-area");
+  const useInvite = async (code2) => {
+    if (busy) return;
+    busy = true;
+    ui.say("Reading the invite\u2026");
+    try {
+      const answer = await guestAnswerByCodeV1(code2);
+      qrArea.replaceChildren(drawQr(document2, answer.code), el(document2, "p", "coop-hint", "Answer: let the host scan this."));
+      ui.say("Waiting for the host to scan your answer\u2026");
+      connected(await answer.link);
+    } catch (e) {
+      busy = false;
+      ui.say(e.message);
+    }
+  };
+  qrBox.append(el(document2, "h3", "", "Same room"), el(document2, "p", "coop-hint", "Scan the host\u2019s invite, then show them your answer."), qrArea);
+  qrArea.append(button(document2, "coop-secondary", "Scan invite", async () => {
+    try {
+      const code2 = await scanQr(environment, qrArea);
+      if (code2) useInvite(code2);
+    } catch (e) {
+      ui.say(e.message);
+    }
+  }), pasteRow(document2, "Or paste the invite", useInvite));
+  actions.append(button(document2, "coop-secondary", "Back to my world", () => {
+    ui.close();
+    finish3(null);
+  }));
+  card.append(codeBox, qrBox, ui.status, actions);
+  return result;
+}
+function mountCoopBarV1({ environment, label: label4, action: action2, onAction }) {
+  const document2 = environment.document, bar = el(document2, "div", "coop-bar"), text2 = el(document2, "span", "coop-bar-text", label4);
+  bar.append(text2, button(document2, "coop-bar-action", action2, onAction));
+  document2.body.append(bar);
+  return { say: (t) => {
+    text2.textContent = t;
+  }, remove: () => bar.remove() };
+}
+function showCoopEndedV1({ environment, title = "Back home", reason, onHome }) {
+  const ui = shell(environment, title, reason), actions = el(ui.document, "div", "coop-actions");
+  actions.append(button(ui.document, "coop-primary", "Back to my world", () => {
+    ui.close();
+    onHome();
+  }));
+  ui.card.append(actions);
+  return ui;
+}
+
 // src/entrypoints/playable_browser.js
 var plannedBossHostingNamespaceV1 = (binding) => hasBossHostingV1(binding) ? "saq-world-boss-hosting-v1-" : null;
 function applyBossHostingWorkerBindingV1(workerUrl, binding) {
@@ -120944,7 +123738,7 @@ function applyBossHostingWorkerBindingV1(workerUrl, binding) {
 function launcherCapability(environment, heroPrefix = "") {
   try {
     const storage = environment.localStorage;
-    return heroPrefix ? Object.freeze({ getItem: (key2) => storage.getItem(heroPrefix + key2), setItem: (key2, value2) => storage.setItem(heroPrefix + key2, value2), removeItem: (key2) => storage.removeItem(heroPrefix + key2) }) : storage;
+    return heroPrefix ? Object.freeze({ getItem: (key3) => storage.getItem(heroPrefix + key3), setItem: (key3, value2) => storage.setItem(heroPrefix + key3, value2), removeItem: (key3) => storage.removeItem(heroPrefix + key3) }) : storage;
   } catch (error) {
     return Object.freeze({ getItem() {
       throw error;
@@ -121015,8 +123809,10 @@ async function startWorldClient(environment) {
   } catch {
   }
   const channel2 = saveChannelPrefix(environment.location), heroRecord = ensureHeroIds(deviceStorage, channel2, () => "hero:" + Array.from(environment.crypto.getRandomValues(new Uint8Array(8)), (v) => v.toString(16).padStart(2, "0")).join("")), heroSlot = heroRecord.active, heroEntry = heroRecord.heroes.find((h) => h.slot === heroSlot), heroId = heroEntry?.heroId ?? null;
+  const coopIntent = heroId ? readCoopIntentV1(environment) : null;
+  writeCoopIntentV1(environment, null);
   const worldSlot = heroEntry && heroRecord.heroes.some((h) => h.slot === heroWorld(heroEntry)) ? heroWorld(heroEntry) : heroSlot, visiting = worldSlot !== heroSlot, heroPrefix = heroSavePrefix(worldSlot);
-  const roster = createHeroRosterWriter({ storage: deviceStorage, channel: channel2, slot: heroSlot, visiting });
+  const roster = createHeroRosterWriter({ storage: deviceStorage, channel: channel2, slot: heroSlot, visiting: visiting || coopIntent?.role === "guest" });
   const saveIndexedDb = channelIndexedDb(environment.indexedDB, channel2 + heroPrefix);
   const startupLoading = environment.__SAQ_STARTUP_LOADING_V1__ ?? null;
   let client = null;
@@ -121057,17 +123853,21 @@ async function startWorldClient(environment) {
   environment.document.documentElement.dataset.batteryPresentation = batteryPresentation ? "30" : "full";
   const activity = scenario === "procedural" && location.searchParams.get("runtime") !== "legacy";
   const proofCase = location.searchParams.get("activityCase") ?? "A";
+  const coopReady = Boolean(plannedOpening) && activity && proofCase === "A" && !FORGE_REVIEW_BUILD, coopGuest = coopReady && coopIntent?.role === "guest", coopHosting = coopReady && coopIntent?.role === "host";
+  const coopBuild = environment.document.documentElement.dataset.worldRelease ?? "source";
+  let coopScreens = null, coopJoin = null, coopHost = null, coopRoom = null, coopParty = null, coopEnded = null, coopEndReason = null;
   const launcherKey = hasWorldReshape(plannedOpening?.binding) ? RESHAPE_DATABASE : hasRoadsideEncounters(plannedOpening?.binding) ? ROADSIDE_DATABASE : hasFirstJourney(plannedOpening?.binding) ? ACCESS_DATABASE : hasHydrologyV1(plannedOpening?.binding) ? HYDROLOGY_DATABASE : buildBalanceDatabaseV2(environment.document.body.dataset.worldBuildBalance === "v2", plannedOpening?.assetId, plannedOpening ? plannedNamespace + plannedOpening.assetId : activity ? `${FORGE_REVIEW_BUILD ? "saq-world-forge-review" : "saq-world-activity-launcher-v1"}-${proofCase}` : scenario === "procedural" ? WORLD_PROCEDURAL_LAUNCHER_KEY : WORLD_SEAMLESS_LAUNCHER_KEY);
   const policy = createLocalLaunchPolicy({ launcherStore: launcherCapability(environment, heroPrefix), url: location, launcherKey });
   const launcherDatabase = activity ? createLocalIndexedDbCampaignStore({ indexedDB: saveIndexedDb, sha256, databaseName }) : null;
   const forgetCamp = () => roster.clear();
   const forget = async () => {
+    if (coopGuest) return;
     await launcherDatabase?.writeLocalLauncher(proofCase, null);
     policy.forget();
     forgetCamp();
   };
   const reset = async () => {
-    if (visiting) {
+    if (visiting || coopGuest) {
       playHeroIn(deviceStorage, channel2, heroSlot, heroSlot);
       environment.location.reload();
       return;
@@ -121080,7 +123880,8 @@ async function startWorldClient(environment) {
     cleanAndReload(environment, policy);
   };
   let launch;
-  try {
+  if (coopGuest) launch = { source: "coop-guest", resume: null };
+  else try {
     launch = policy.select();
     if (activity && launch.source !== "explicit") {
       const durable = await launcherDatabase.readLocalLauncher(proofCase);
@@ -121101,7 +123902,7 @@ async function startWorldClient(environment) {
     });
     return null;
   }
-  if (!FORGE_REVIEW_BUILD && activity && proofCase === "A" && !launch.resume && location.searchParams.get("activityNew") !== "1" && launcherCapability(environment, heroPrefix).getItem(WORLD_PROCEDURAL_LAUNCHER_KEY)) {
+  if (!coopGuest && !FORGE_REVIEW_BUILD && activity && proofCase === "A" && !launch.resume && location.searchParams.get("activityNew") !== "1" && launcherCapability(environment, heroPrefix).getItem(WORLD_PROCEDURAL_LAUNCHER_KEY)) {
     showStartupRecovery(environment, { title: "Earlier prototype campaign retained", detail: "This authority checkpoint uses a new save format. Your earlier campaign is still stored. Choose Start New Campaign to create a separate X-C campaign." }, {
       retry: () => environment.location.reload(),
       forget,
@@ -121117,7 +123918,33 @@ async function startWorldClient(environment) {
     return null;
   }
   let plannedReview = null, builtWorlds = null, builtWorld = null, startingHero = null;
-  if (plannedOpening) {
+  if (coopGuest) {
+    coopScreens = coop_screen_v1_exports;
+    const passport = readHeroPassport(deviceStorage, channel2, heroId), heroName = heroEntry?.name || "Your hero", home = () => environment.location.reload();
+    if (!passport) {
+      coopScreens.showCoopEndedV1({ environment, title: "Join a game", reason: `Play ${heroName} once in their own world first, then join.`, onHome: home });
+      return null;
+    }
+    try {
+      builtWorlds = createBuiltWorldStoreV1({ indexedDB: saveIndexedDb, sha256 });
+      coopJoin = await coopScreens.runCoopJoinV1({ environment, server: coopJoinServerV1(environment), build: coopBuild, hero: { heroId, name: heroName, passport }, onWorldFile: async (w) => Boolean(await builtWorlds.info(w.hash)) });
+      if (!coopJoin) {
+        home();
+        return null;
+      }
+      const world = coopJoin.start.welcome.world;
+      if (world?.kind === "seeded") {
+        if (coopJoin.start.worldText && (await builtWorlds.put(coopJoin.start.worldText)).hash !== world.hash) throw Error("The host\u2019s world did not arrive whole");
+        builtWorld = await builtWorlds.info(world.hash);
+        if (!builtWorld) throw Error("The host\u2019s world did not arrive");
+        plannedReview = await plannedOpening.open({ hash: builtWorld.hash, commitments: builtWorld.commitments, read: builtWorlds.read });
+      } else plannedReview = await plannedOpening.open(null);
+    } catch (error) {
+      coopJoin?.link.close("left");
+      coopScreens.showCoopEndedV1({ environment, title: "Join a game", reason: error.message, onHome: home });
+      return null;
+    }
+  } else if (plannedOpening) {
     if (activity) try {
       builtWorlds = createBuiltWorldStoreV1({ indexedDB: saveIndexedDb, sha256 });
       let requested = location.searchParams.get("builtWorld");
@@ -121150,6 +123977,33 @@ async function startWorldClient(environment) {
     roster.setWorld(builtWorld ? { seed: builtWorld.seed } : null);
     if (woodlandReview && plannedReview?.asset.assetId === "alpha") plannedReview.targets.push(...WOODLAND_REVIEW_TARGETS_V1, ...PAINTED_REVIEW_TARGETS);
     if (plannedReview?.binding.woodlandForestVersion) plannedReview.targets.push({ id: "forest:entry", label: "Woodland forest V1 \xB7 walkable forest entry (inspection)", tile: { x: 3222, y: 6990 } });
+  }
+  if (coopHosting) {
+    coopScreens = coop_screen_v1_exports;
+    let lobby = null;
+    const hostName = heroEntry?.name || "Host";
+    const host = createCoopHostV1({
+      build: coopBuild,
+      hostName,
+      world: builtWorld ? { kind: "seeded", hash: builtWorld.hash } : { kind: "classic" },
+      nextToken,
+      onChange: (players) => lobby?.players.show(players),
+      readWorldFile: builtWorld ? async () => {
+        const text2 = await builtWorlds.read(builtWorld.hash);
+        if (!text2) throw Error("World missing");
+        return text2;
+      } : null
+    });
+    lobby = coopScreens.runCoopLobbyV1({ environment, coopHost: host, server: coopJoinServerV1(environment), hostName });
+    const started = await lobby;
+    if (started && host.party().length) {
+      coopHost = host;
+      coopRoom = started.room;
+      host.start();
+    } else if (started) {
+      host.close("The host went back to playing alone");
+      started.room?.close();
+    }
   }
   startupLoading?.stage(2, "Finding your saved campaign\u2026");
   startupLoading?.stage(3, "Opening your world\u2026");
@@ -121202,7 +124056,15 @@ async function startWorldClient(environment) {
       saveBridge = createActivitySaveBridge(new environment.Worker(workerUrl, { type: "module" }), { record: performanceProbe?.record, now: performanceProbe ? () => environment.performance.now() : null, expectedDatabaseName: environment.document.body.dataset.wildernessV3 === "true" ? databaseName : null });
       if (["A", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O"].includes(proofCase)) worldBridge = createWorldWorkerBridgeD9(new environment.Worker(workerUrl, { type: "module" }), { record: performanceProbe?.record, diagnostics: () => performanceProbe?.isRecording() === true, now: () => environment.performance.now(), expectedDatabaseName: environment.document.body.dataset.wildernessV3 === "true" ? databaseName : null });
     }
-    const opening3 = (worldBridge ? createLocalEndlessSessionD9 : activity ? createLocalActivitySession : createLocalWorldSession)({
+    const openCoopGuest = async () => {
+      const guest = createCoopGuestSessionV1({ link: coopJoin.link, playerId: coopJoin.start.playerId, early: coopJoin.start.early, release: coopJoin.start.release, cartographyWindow: worldBridge?.cartographyWindow && plannedReview ? (request) => worldBridge.cartographyWindow({ ...request, binding: plannedReview.binding }) : null, onPassport: (passport) => writeHeroPassport(deviceStorage, channel2, passport, null), onEnd: (reason) => {
+        coopEndReason = reason;
+        coopEnded?.(reason);
+      } });
+      await Promise.race([guest.ready, new Promise((_, reject) => environment.setTimeout(() => reject(Error("The host\u2019s world did not arrive")), 2e4))]);
+      return guest;
+    };
+    const opening3 = coopGuest ? openCoopGuest() : (worldBridge ? createLocalEndlessSessionD9 : activity ? createLocalActivitySession : createLocalWorldSession)({
       sha256,
       nextToken,
       scenario,
@@ -121213,7 +124075,10 @@ async function startWorldClient(environment) {
       resume: launch.resume,
       worldWorker: worldBridge,
       durabilityTask: saveBridge,
-      heroSeat: worldBridge && heroId ? { heroId, passport: readHeroPassport(deviceStorage, channel2, heroId), seats: readWorldSeats(deviceStorage, channel2, worldSlot), heroIds: heroRecord.heroes.map((h) => h.heroId).filter(Boolean), seatWins: heroLastWorld(deviceStorage, channel2, heroId) === worldSlot, onSeated: ({ seats }) => writeWorldSeats(deviceStorage, channel2, worldSlot, seats) } : null,
+      heroSeat: worldBridge && heroId ? { heroId, passport: readHeroPassport(deviceStorage, channel2, heroId), seats: readWorldSeats(deviceStorage, channel2, worldSlot), heroIds: heroRecord.heroes.map((h) => h.heroId).filter(Boolean), seatWins: heroLastWorld(deviceStorage, channel2, heroId) === worldSlot, party: coopHost?.party() ?? null, onSeated: ({ seats, party }) => {
+        coopParty = party;
+        writeWorldSeats(deviceStorage, channel2, worldSlot, seats);
+      } } : null,
       bestiaryAlbum: worldBridge ? readAlbum(deviceStorage, channel2) : null,
       onStartupProgress: (message) => startupLoading?.note(message),
       plannedWorld: plannedReview?.binding,
@@ -121239,6 +124104,13 @@ async function startWorldClient(environment) {
   } catch (error) {
     saveBridge?.destroy();
     worldBridge?.destroy();
+    if (coopGuest) {
+      coopJoin.link.close("left");
+      coopScreens.showCoopEndedV1({ environment, title: "Join a game", reason: error.message, onHome: () => environment.location.reload() });
+      return null;
+    }
+    coopHost?.close("The host\u2019s world could not open");
+    coopRoom?.close();
     console.error("SAQ initial game startup stack:", error?.stack ?? error);
     const failure = classifyLocalLaunchError(error);
     showStartupRecovery(environment, failure, {
@@ -121293,9 +124165,9 @@ async function startWorldClient(environment) {
     value: Object.freeze({ snapshot: performanceSnapshot }),
     configurable: true
   });
-  const opened = clientPort.getReadModel();
-  try {
-    policy.remember({ campaignId: opened.context.campaignId, playerId: opened.localPlayerId });
+  const opened2 = clientPort.getReadModel();
+  if (!coopGuest) try {
+    policy.remember({ campaignId: opened2.context.campaignId, playerId: opened2.localPlayerId });
   } catch (error) {
     showStartupRecovery(environment, classifyLocalLaunchError(error), {
       retry: () => environment.location.reload(),
@@ -121332,16 +124204,16 @@ async function startWorldClient(environment) {
       status2.textContent = classifyLocalLaunchError(error).detail;
     }
   };
-  if (plannedReview) mountPlannedReviewControlsV1({ environment, controls, review: plannedReview, session });
+  if (plannedReview && !coopGuest) mountPlannedReviewControlsV1({ environment, controls, review: plannedReview, session });
   if (activity) {
-    const button = environment.document.createElement("button");
-    button.textContent = "Save campaign";
-    controls.appendChild(button);
-    button.onclick = async () => {
-      button.disabled = true;
+    const button2 = environment.document.createElement("button");
+    button2.textContent = "Save campaign";
+    controls.appendChild(button2);
+    button2.onclick = async () => {
+      button2.disabled = true;
       const result = await session.save();
-      button.textContent = result.status === "committed" ? "Saved" : "Save needs retry";
-      button.disabled = false;
+      button2.textContent = result.status === "committed" ? "Saved" : "Save needs retry";
+      button2.disabled = false;
     };
     if (performanceProbe) {
       const full = environment.document.createElement("button"), battery = environment.document.createElement("button"), sample = environment.document.createElement("button"), download = environment.document.createElement("button");
@@ -121431,7 +124303,7 @@ async function startWorldClient(environment) {
   const saveHeroPassport = (force = true) => {
     if (!worldBridge || !heroId) return;
     try {
-      const pid = opened.localPlayerId, now3 = environment.performance.now(), passport = session.authority.withAuthority((a) => a.withAuthorityState((s) => {
+      const pid = opened2.localPlayerId, now3 = environment.performance.now(), passport = session.authority.withAuthority((a) => a.withAuthorityState((s) => {
         const p = s.playersById[pid];
         if (!p) return null;
         const i = p.inventory, mark = JSON.stringify([i.revision, i.gold, i.economy?.materials, i.economy?.slotLevels, i.services?.supplyPurchases, i.services?.suppliesUsed, p.d8.revision, p.progression.totalXp]);
@@ -121454,7 +124326,7 @@ async function startWorldClient(environment) {
   }
   const saveAlbum = () => {
     try {
-      const pid = opened.localPlayerId, album = session.authority.withAuthority((a) => a.withAuthorityState((s) => playerAlbumV1(s, pid)));
+      const pid = opened2.localPlayerId, album = session.authority.withAuthority((a) => a.withAuthorityState((s) => playerAlbumV1(s, pid)));
       if (album) writeAlbum(deviceStorage, channel2, album);
     } catch {
     }
@@ -121466,7 +124338,47 @@ async function startWorldClient(environment) {
       if (environment.document.hidden) saveAlbum();
     });
   }
+  let coopBar = null;
+  if (coopHost) {
+    coopHost.attach(session, coopParty);
+    const endCoop = (reason) => {
+      coopHost.close(reason);
+      coopRoom?.close();
+    };
+    environment.addEventListener("pagehide", () => endCoop("The host closed the game"));
+    const sayParty = () => {
+      const n = coopHost.guests();
+      coopBar?.say(n ? `Playing together \xB7 ${n} ${n === 1 ? "friend" : "friends"}` : "Your friends have left");
+    };
+    coopBar = coopScreens.mountCoopBarV1({ environment, label: "", action: "End game", onAction: () => {
+      endCoop("The host ended the game");
+      coopBar.remove();
+    } });
+    sayParty();
+    environment.setInterval(sayParty, 2e3);
+  }
+  if (coopGuest) {
+    const heroName = heroEntry?.name || "Your hero";
+    coopBar = coopScreens.mountCoopBarV1({ environment, label: `In ${coopJoin.start.welcome.hostName}\u2019s world`, action: "Leave", onAction: async () => {
+      coopBar.say("Saving your hero\u2026");
+      await session.leave();
+      environment.location.reload();
+    } });
+    coopEnded = (reason) => {
+      coopBar.remove();
+      try {
+        suspend();
+      } catch {
+      }
+      coopScreens.showCoopEndedV1({ environment, reason: `${reason}. Everything ${heroName} earned is saved.`, onHome: () => environment.location.reload() });
+    };
+    if (coopEndReason) coopEnded(coopEndReason);
+  }
   const saveNow = async () => {
+    if (coopGuest) {
+      await session.leave();
+      return;
+    }
     try {
       await Promise.race([Promise.resolve(activity ? session.save?.() : null), new Promise((resolve) => environment.setTimeout(resolve, 4e3))]);
     } catch {
@@ -121489,6 +124401,21 @@ async function startWorldClient(environment) {
       if (addHero(deviceStorage, channel2) === null) return false;
       environment.location.reload();
     },
+    // Co-op step 2: the next start opens the host's lobby or the join screen for the hero being played.
+    coop: Object.freeze({
+      role: coopGuest ? "guest" : coopHost ? "host" : null,
+      available: coopReady && Boolean(heroId) && (coopGuest || Boolean(worldBridge)),
+      async host() {
+        await saveNow();
+        writeCoopIntentV1(environment, { role: "host" });
+        environment.location.reload();
+      },
+      async join() {
+        await saveNow();
+        writeCoopIntentV1(environment, { role: "guest" });
+        environment.location.reload();
+      }
+    }),
     async remove(slot) {
       if (slot === heroSlot) return false;
       const record2 = readHeroSlots(deviceStorage, channel2);
@@ -121515,7 +124442,7 @@ async function startWorldClient(environment) {
     environment,
     heroSlots,
     startingHero,
-    actorCollisionProbe: activity ? createActorPresentationCollisionProbeV1(session.authority) : null,
+    actorCollisionProbe: activity && session.authority ? createActorPresentationCollisionProbeV1(session.authority) : null,
     nextCommandToken: nextToken,
     performanceProbe,
     environmentArt,
@@ -121945,7 +124872,10 @@ async function startWorldClient(environment) {
     else environment.clearInterval(timer);
     timer = null;
   }
-  environment.addEventListener("blur", suspend);
+  environment.addEventListener("blur", () => {
+    if (coopHost?.guests()) client.releaseInput();
+    else suspend();
+  });
   environment.addEventListener("focus", resume);
   environment.document.addEventListener("visibilitychange", () => {
     if (!environment.document.hidden) return resume();
@@ -121971,8 +124901,8 @@ async function startWorldClient(environment) {
   resume();
   return Object.freeze({
     launchSource: launch.source,
-    campaignId: opened.context.campaignId,
-    playerId: opened.localPlayerId,
+    campaignId: opened2.context.campaignId,
+    playerId: opened2.localPlayerId,
     launcherKey,
     generationDiagnostics: session.generationDiagnostics
   });
