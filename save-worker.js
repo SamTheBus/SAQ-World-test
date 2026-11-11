@@ -15362,6 +15362,22 @@ function validateWaysideV1(r) {
 // src/shared/contracts/camp_cache_v1.js
 var CAMP_MEMBERS = CAMP_CREW.length;
 var CACHE_MEMBERS = CACHE_CREW.length;
+var campPointV1 = (a, [x, y]) => ({ x: a.x + x, y: a.y + y });
+function campCratePointsV1(c, anchor, hull = 14) {
+  const out = [];
+  for (const offset of CAMP_POLICY.crates) {
+    const home = campPointV1(anchor, offset);
+    let best = null;
+    for (let r = 0; r <= 64 && !best; r += 8) for (let k = 0, n = r ? Math.max(8, Math.round(r / 4)) : 1; k < n; k++) {
+      const a = k / n * Math.PI * 2, p = { x: Math.round(home.x + Math.cos(a) * r), y: Math.round(home.y + Math.sin(a) * r) };
+      if (c && collidesWithTiles(c, p.x, p.y, hull) || out.some((o) => Math.hypot(o.x - p.x, o.y - p.y) < 30)) continue;
+      best = p;
+      break;
+    }
+    out.push(best ?? home);
+  }
+  return out;
+}
 var campReadyV1 = (r) => Boolean(r.camp);
 function validateCampV1(r) {
   requireContract(r.kind === "raided_camp" && r.rulesVersion === CAMP_VERSION && r.stages.length === CAMP_MEMBERS, "Camp policy/membership");
@@ -31840,7 +31856,7 @@ async function prepareWorldEncountersD9(before, { sha256 }) {
     if (plannedEventOrdinal(c.anchor.ordinal)) {
       const q = plan.resources[0];
       plan.resources = [{ ...q, ordinal: 0, kind: "chest", art: "chest", completion: true, position: { ...plan.definition.anchor } }];
-      if (plannedEventFirstKind(c.anchor.ordinal) === "raided_camp") plan.resources = CAMP_POLICY.crates.map(([x, y], n) => ({ groupId: q.groupId, ordinal: n, kind: "breakable", art: "camp_crate", spaceInstanceId: q.spaceInstanceId, position: { x: plan.definition.anchor.x + x, y: plan.definition.anchor.y + y } }));
+      if (plannedEventFirstKind(c.anchor.ordinal) === "raided_camp") plan.resources = campCratePointsV1(state.spacesByInstanceId[q.spaceInstanceId]?.collision, plan.definition.anchor).map((position2, n) => ({ groupId: q.groupId, ordinal: n, kind: "breakable", art: "camp_crate", spaceInstanceId: q.spaceInstanceId, position: position2 }));
     }
     if (c.renewal) applyProceduralRenewalD9(state, plan);
     else admitProceduralEncounterD9(state, plan);

@@ -94380,7 +94380,7 @@ function createCampJournalNoticeV1(doc) {
 function interactionExitV2(model) {
   const p = model.playersById?.[model.localPlayerId], actor = p && model.entitiesById?.[p.entityId];
   if (!actor?.alive || model.siteActivationPending) return null;
-  const exits = model.space.exits ?? (model.space.exit ? [model.space.exit] : []), exit = exits.find((e) => Math.hypot(actor.position.x - e.x, actor.position.y - e.y) <= e.radius);
+  const exits = model.space.exits ?? (model.space.exit ? [model.space.exit] : []), d = (e) => Math.hypot(actor.position.x - e.x, actor.position.y - e.y), exit = exits.filter((e) => d(e) <= e.radius).sort((a, b) => d(a) - d(b))[0];
   if (!exit) return null;
   const contextual = exit.questBoardId || exit.questSpot || exit.eventAction || exit.noteId || exit.siteAction || exit.forgeAction || exit.ferryLandingId || exit.serviceNpcId;
   if (contextual ? !(exit.available && ["safe", "encounter"].includes(model.persistence.phase)) : model.persistence.phase !== "safe") return null;
@@ -100355,7 +100355,10 @@ function interactionChoiceV2(model) {
   const player = model.playersById?.[model.localPlayerId], actor = player && model.entitiesById?.[player.entityId];
   if (!actor?.alive || model.siteActivationPending) return null;
   const exit = interactionExitV2(model);
-  if (exit) return { exitId: exit.exitId, label: exit.label ?? "Use passage", kind: interactionKindV2(exit) };
+  if (exit && !(exit.questSpot && pickupChoice(model))) return { exitId: exit.exitId, label: exit.label ?? "Use passage", kind: interactionKindV2(exit) };
+  return pickupChoice(model);
+}
+function pickupChoice(model) {
   if (model.persistence.phase !== "encounter" || !model.inventory) return null;
   const action2 = contextActionForModel(model);
   if (action2?.kind === "resource.interact" && model.resources?.some((r) => r.eventPod && r.groupId === action2.payload.groupId && r.ordinal === action2.payload.ordinal)) return null;
