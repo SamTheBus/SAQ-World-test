@@ -75846,7 +75846,7 @@ function dom(document2) {
     b.addEventListener("click", onClick);
     return b;
   };
-  const icon = (name, cls) => {
+  const icon2 = (name, cls) => {
     const s = el3("span", cls);
     s.innerHTML = ICONS2[name];
     return s;
@@ -75858,7 +75858,7 @@ function dom(document2) {
     root3.setAttribute("aria-labelledby", labelId);
     return root3;
   };
-  return { el: el3, button: button3, icon, dialog };
+  return { el: el3, button: button3, icon: icon2, dialog };
 }
 async function newWorldFlowV1({ environment, save, startBuild = startWorldBuildV1 }) {
   const randomUint32 = () => environment.crypto.getRandomValues(new Uint32Array(1))[0];
@@ -75867,7 +75867,7 @@ async function newWorldFlowV1({ environment, save, startBuild = startWorldBuildV
   return buildWithHero(environment, choice.seed, save, startBuild);
 }
 function chooseWorld(document2, { pick: pick4, text: text3, roll: roll6 }) {
-  const { el: el3, button: button3, icon, dialog } = dom(document2);
+  const { el: el3, button: button3, icon: icon2, dialog } = dom(document2);
   return new Promise((resolve) => {
     const root3 = dialog("new-world-title"), panel = el3("div", "nw-panel"), head16 = el3("header", "nw-head"), title = el3("h2", "", "Choose your world");
     title.id = "new-world-title";
@@ -75881,7 +75881,7 @@ function chooseWorld(document2, { pick: pick4, text: text3, roll: roll6 }) {
       b.dataset.world = kind;
       const words = el3("span", "nw-card-words");
       words.append(el3("strong", "", name), el3("span", "", about), el3("small", "", tag));
-      b.append(icon(kind, "nw-card-icon"), words);
+      b.append(icon2(kind, "nw-card-icon"), words);
       cards.append(b);
       return b;
     };
@@ -75899,7 +75899,7 @@ function chooseWorld(document2, { pick: pick4, text: text3, roll: roll6 }) {
     input.autocomplete = "off";
     input.spellcheck = false;
     input.setAttribute("autocapitalize", "off");
-    rollButton.append(icon("dice", "nw-roll-icon"), "Roll");
+    rollButton.append(icon2("dice", "nw-roll-icon"), "Roll");
     row2.append(input, rollButton);
     const word = el3("p", "nw-word");
     word.setAttribute("aria-live", "polite");
@@ -75998,11 +75998,11 @@ async function buildWithHero(environment, seed2, save, startBuild) {
   }
 }
 function buildStrip(document2, seed2) {
-  const { el: el3, icon } = dom(document2);
+  const { el: el3, icon: icon2 } = dom(document2);
   const root3 = el3("div", "nw-strip"), title = el3("strong", "nw-strip-title"), detail = el3("span", "nw-strip-detail"), bar = el3("span", "nw-bar"), fill6 = el3("span", "nw-bar-fill"), percent = el3("span", "nw-strip-percent");
   root3.setAttribute("role", "status");
   bar.append(fill6);
-  root3.append(icon("seeded", "nw-strip-icon"), title, detail, bar, percent);
+  root3.append(icon2("seeded", "nw-strip-icon"), title, detail, bar, percent);
   let last = "";
   return { root: root3, paint(state) {
     const key3 = JSON.stringify([Math.floor(state.fraction * 100), state.stage, state.failed]);
@@ -92061,7 +92061,7 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     if (cls) e.className = cls;
     return e;
   };
-  const icon = (kind, cls) => {
+  const icon2 = (kind, cls) => {
     const e = el3("span", null, cls);
     e.innerHTML = ICONS3[kind] ?? ICONS3.clear;
     return e;
@@ -92162,7 +92162,7 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
         const a = active2.get(id);
         if (!a) continue;
         const c = el3("div", null, "qx-card");
-        c.append(icon(a.kind, "qx-ico"), el3("span", a.kind === "carry" ? "Delivery" : "Done \xB7 hand it in", "qx-kind"), el3("b", a.title), el3("p", a.kind === "carry" ? "The letter is for this town." : a.step));
+        c.append(icon2(a.kind, "qx-ico"), el3("span", a.kind === "carry" ? "Delivery" : "Done \xB7 hand it in", "qx-kind"), el3("b", a.title), el3("p", a.kind === "carry" ? "The letter is for this town." : a.step));
         const row2 = el3("div", null, "qx-row");
         row2.append(reward(a.gold, a.xp));
         const go = el3("button", a.kind === "carry" ? "Deliver" : "Hand in", "qx-btn");
@@ -92178,7 +92178,7 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     if (!b.offers.length) body5.append(el3("p", "No work posted today.", "qx-empty"));
     for (const o of b.offers) {
       const c = el3("div", null, "qx-card" + (o.state === "done" ? " is-done" : ""));
-      c.append(icon(o.kind, "qx-ico"), el3("span", KIND_LABEL[o.kind], "qx-kind"), el3("b", o.title), el3("p", o.note));
+      c.append(icon2(o.kind, "qx-ico"), el3("span", KIND_LABEL[o.kind], "qx-kind"), el3("b", o.title), el3("p", o.note));
       const row2 = el3("div", null, "qx-row");
       row2.append(reward(o.gold, o.xp));
       const go = el3("button", o.state === "taken" ? "Taken" : o.state === "done" ? "Done" : "Take", "qx-btn" + (o.state === "open" ? "" : " is-plain"));
@@ -92269,7 +92269,7 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     const cur = trackedQuest(q);
     for (const a of q.active) {
       const c = el3("div", null, "qx-card");
-      c.append(icon(a.kind, "qx-ico"), el3("span", (a.status === "ready" ? "Done \xB7 " : "") + KIND_LABEL[a.kind], "qx-kind"), el3("b", a.title), el3("p", a.step + (a.town ? " \xB7 from " + (a.giverName ? a.giverName + ", " : "") + a.town : "")));
+      c.append(icon2(a.kind, "qx-ico"), el3("span", (a.status === "ready" ? "Done \xB7 " : "") + KIND_LABEL[a.kind], "qx-kind"), el3("b", a.title), el3("p", a.step + (a.town ? " \xB7 from " + (a.giverName ? a.giverName + ", " : "") + a.town : "")));
       const row2 = el3("div", null, "qx-row");
       row2.append(reward(a.gold, a.xp));
       const drop2 = el3("button", dropArm === a.id ? "Tap to drop" : "Drop", "qx-btn is-plain");
@@ -92424,7 +92424,7 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
       if (a2.status === "ready") eye6.append(el3("span", "Done", "qp-tag ready"));
       else if (cur?.id === a2.id) eye6.append(el3("span", "Tracking", "qp-tag"));
       t.append(eye6, el3("b", a2.title), el3("span", a2.step));
-      c.append(icon(a2.kind, "qp-ico"), t, pay2(a2, "qp-pay"));
+      c.append(icon2(a2.kind, "qp-ico"), t, pay2(a2, "qp-pay"));
       c.onclick = () => {
         pageSel = a2.id;
         dropArm = null;
@@ -96433,14 +96433,14 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
   document2.getElementById("world-bag").parentElement.append(wheel, done3, attackSkill);
   const slots2 = [];
   for (let i = 0; i < WHEEL_SLOTS; i++) {
-    const b = el3("button", "skill-slot"), icon = el3("span", "skill-slot-icon"), sweep2 = el3("i", "skill-slot-sweep"), time3 = el3("b", "skill-slot-time"), key3 = el3("small", "skill-slot-key"), charge = el3("b", "skill-slot-charges");
+    const b = el3("button", "skill-slot"), icon2 = el3("span", "skill-slot-icon"), sweep2 = el3("i", "skill-slot-sweep"), time3 = el3("b", "skill-slot-time"), key3 = el3("small", "skill-slot-key"), charge = el3("b", "skill-slot-charges");
     b.type = "button";
     b.dataset.slot = String(i + 1);
     b.dataset.gameplayHud = "";
     charge.hidden = true;
-    b.append(sweep2, icon, time3, key3, charge);
+    b.append(sweep2, icon2, time3, key3, charge);
     wheel.append(b);
-    slots2.push({ b, icon, sweep: sweep2, time: time3, key: key3, charge, paint: "" });
+    slots2.push({ b, icon: icon2, sweep: sweep2, time: time3, key: key3, charge, paint: "" });
   }
   const listeners = [], listen = (t, type, fn, opts) => {
     t.addEventListener(type, fn, opts);
@@ -96537,7 +96537,8 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
     wheel.dataset.page = String(next + 1);
     animate();
   }
-  const angleAt = (e) => Math.atan2(e.clientY - geometry.cy - geometry.top, e.clientX - geometry.cx - geometry.left) * 180 / Math.PI;
+  const flip = () => document2.documentElement.dataset.hand === "left" ? -1 : 1;
+  const angleAt = (e) => Math.atan2(e.clientY - geometry.cy - geometry.top, (e.clientX - geometry.cx - geometry.left) * flip()) * 180 / Math.PI;
   listen(ring6, "pointerdown", (e) => {
     if (!geometry || WHEEL_PAGES < 2) return;
     e.preventDefault();
@@ -96605,9 +96606,9 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
   function layout() {
     const g = geometry;
     if (!g) return;
-    const at8 = (deg, r, size) => {
+    const f = flip(), at8 = (deg, r, size) => {
       const a = deg * Math.PI / 180;
-      return { x: g.cx + Math.cos(a) * r - size / 2, y: g.cy + Math.sin(a) * r - size / 2 };
+      return { x: g.cx + f * Math.cos(a) * r - size / 2, y: g.cy + Math.sin(a) * r - size / 2 };
     }, css = (p) => `translate(${p.x.toFixed(1)}px,${p.y.toFixed(1)}px)`, settled = turn7 === target && !drag;
     slots2.forEach((s, i) => {
       const own = Math.floor(i / WHEEL_PAGE), p = at8(PAGE_ANGLES[own][i % WHEEL_PAGE] + turn7 * TURN, g.radius, g.slot), away = settled && own !== page;
@@ -97548,6 +97549,91 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
   };
 }
 
+// src/client/menu_hub_v1.js
+var MENU_HUB_GROUPS = Object.freeze({ equipment: "hero", bag: "hero", materials: "hero", stats: "hero", progression: "hero", forge: "hero", hub: "world", quests: "world", bestiary: "world", heroes: "world", settings: "world" });
+var icon = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+var MENU_HUB_ICONS = Object.freeze({
+  map: icon('<path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20z"/><path d="M9 4v13.5M15 6.5V20"/>'),
+  settings: icon('<circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r="6.6"/><path d="M12 2.6v2.8M12 18.6v2.8M2.6 12h2.8M18.6 12h2.8M5.4 5.4l2 2M16.6 16.6l2 2M5.4 18.6l2-2M16.6 7.4l2-2"/>'),
+  home: icon('<rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/>')
+});
+var CSS4 = `
+#world-inventory[data-group=hero] .rm-page[data-group=world],#world-inventory[data-group=world] .rm-page[data-group=hero]{display:none!important}
+#world-inventory[data-group=world] .rm-who{display:none!important}
+#world-inventory[data-section=hub] .bag-section-tabs{display:none!important}
+#world-inventory[data-section=hub] #world-bag-browse,#world-inventory[data-section=hub] #world-materials-view,#world-inventory[data-section=hub] #world-forge-view,#world-inventory[data-section=hub] #world-bag-summary,#world-inventory[data-section=hub] #world-bag-stats,
+#world-inventory[data-section=settings] #world-bag-browse,#world-inventory[data-section=settings] #world-materials-view,#world-inventory[data-section=settings] #world-forge-view,#world-inventory[data-section=settings] #world-bag-summary,#world-inventory[data-section=settings] #world-bag-stats{display:none!important}
+body #world-inventory.rpg-menu[data-group=world]:not([data-section=hub]) button.rm-railbtn{display:grid!important}
+body #world-inventory.rpg-menu[data-section=hub] button.rm-railbtn{display:none!important}
+.mh{flex:1;min-width:0;min-height:0;overflow:auto;display:flex;align-items:center;justify-content:center;padding:18px 22px;box-sizing:border-box}
+.mh[hidden]{display:none}
+.mh-grid{width:100%;max-width:980px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+#world-inventory .mh button.mh-tile{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;min-height:0;height:auto;padding:22px 8px 18px;border-radius:14px;border:1px solid #34444f;background:linear-gradient(180deg,#26343f,#1a2530);box-shadow:inset 0 1px 0 #ffffff10,0 3px 0 #070b10;color:#e9dfc8;font:700 13px var(--rpg-ui,"Segoe UI",sans-serif);letter-spacing:.09em;text-transform:uppercase;cursor:pointer;text-align:center}
+#world-inventory .mh button.mh-tile:hover{border-color:#d4b98a88}
+#world-inventory .mh button.mh-tile:active{transform:translateY(2px);box-shadow:inset 0 1px 0 #ffffff10,0 1px 0 #070b10}
+.mh-ic{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 38% 26%,#4c5d68,#25343f 60%,#17242e);border:1px solid #0b1015;box-shadow:inset 0 0 0 1px #d4b98a66;flex:none}
+.mh-ic svg{width:34px;height:34px}
+.mh-tile small{font:600 11px var(--rpg-ui,"Segoe UI",sans-serif);letter-spacing:.02em;text-transform:none;color:#a9b4b6}
+.mh-badge{position:absolute;top:8px;right:8px;min-width:20px;height:20px;padding:0 6px;box-sizing:border-box;border-radius:10px;background:#f0c862;color:#1b1406;font:800 12px/20px var(--rpg-ui,"Segoe UI",sans-serif);letter-spacing:0}
+.mh-badge:empty{display:none}
+@media(max-height:500px) and (min-width:601px){.mh{padding:10px 14px}.mh-grid{gap:10px}#world-inventory .mh button.mh-tile{padding:16px 6px 14px;gap:6px;font-size:12px}.mh-ic{width:52px;height:52px}.mh-ic svg{width:28px;height:28px}.mh-tile small{font-size:10px}}
+@media(max-width:600px){.mh{align-items:flex-start;padding:14px}.mh-grid{grid-template-columns:1fr;gap:10px}#world-inventory .mh button.mh-tile{flex-direction:row;justify-content:flex-start;padding:12px 16px;gap:16px;text-align:left}.mh-tile small{margin-left:auto;padding-right:22px}.mh-ic{width:52px;height:52px}.mh-badge{top:50%;margin-top:-10px;right:12px}}
+`;
+function createMenuHubV1({ document: doc, tiles: tiles6 }) {
+  if (!doc.getElementById("menu-hub-v1-css")) {
+    const st = doc.createElement("style");
+    st.id = "menu-hub-v1-css";
+    st.textContent = CSS4;
+    doc.head.append(st);
+  }
+  const root3 = doc.createElement("div");
+  root3.className = "mh";
+  root3.id = "world-menu-hub";
+  root3.hidden = true;
+  const grid = doc.createElement("div");
+  grid.className = "mh-grid";
+  root3.append(grid);
+  const parts = /* @__PURE__ */ new Map();
+  for (const t of tiles6) {
+    const b = doc.createElement("button");
+    b.type = "button";
+    b.className = "mh-tile";
+    b.dataset.tile = t.id;
+    const ic = doc.createElement("span");
+    ic.className = "mh-ic";
+    ic.innerHTML = t.icon;
+    const name = doc.createElement("span");
+    name.textContent = t.name;
+    const sub = doc.createElement("small");
+    const badge = doc.createElement("span");
+    badge.className = "mh-badge";
+    b.append(ic, name, sub, badge);
+    b.addEventListener("click", t.pick);
+    grid.append(b);
+    parts.set(t.id, { b, sub, badge, name: t.name });
+  }
+  let last = "";
+  return Object.freeze({
+    root: root3,
+    // info: {id:{sub,badge,hidden}}
+    paint(info2) {
+      const key3 = JSON.stringify(info2);
+      if (key3 === last) return;
+      last = key3;
+      for (const [id, p] of parts) {
+        const i = info2[id] ?? {};
+        p.b.hidden = Boolean(i.hidden);
+        p.sub.textContent = i.sub ?? "";
+        p.badge.textContent = i.badge ?? "";
+        p.b.setAttribute("aria-label", p.name + (i.sub ? ", " + i.sub : "") + (i.badge ? ", new" : ""));
+      }
+    },
+    refresh(visible3) {
+      root3.hidden = !visible3;
+    }
+  });
+}
+
 // src/client/bestiary_toasts_v1.js
 function createBestiaryToastsV1(doc) {
   let seen4 = null, who = null;
@@ -98472,7 +98558,7 @@ function compareSections(sections, worn) {
 var HERO_ROWS = [["attack", "Attack"], ["defense", "Defense"], ["maxHp", "Max HP"], ["critChance", "Crit", "pct", "critChance"], ["critMultiplier", "Crit damage", "x", "critDamage"], ["activeHaste", "Active Speed", "pct", "activeSpeed"], ["moveSpeed", "Speed", null, "moveSpeed"], ["str", "STR"], ["dex", "DEX"], ["int", "INT"]];
 var heroValue = (v, f) => f === "pct" ? statText(statScale(v, 100)) + "%" : f === "x" ? statText(v) + "\xD7" : statText(v);
 function heroChanges(preview) {
-  return HERO_ROWS.filter(([k]) => preview.difference[k] && !zero6(preview.difference[k])).map(([k, label4, f, icon]) => ({ label: label4, icon: icon ?? k, before: heroValue(preview.before[k], f), after: heroValue(preview.after[k], f), up: sign2(preview.difference[k]) > 0 }));
+  return HERO_ROWS.filter(([k]) => preview.difference[k] && !zero6(preview.difference[k])).map(([k, label4, f, icon2]) => ({ label: label4, icon: icon2 ?? k, before: heroValue(preview.before[k], f), after: heroValue(preview.after[k], f), up: sign2(preview.difference[k]) > 0 }));
 }
 var isUpgrade = (preview) => Boolean(preview) && Object.values(preview.difference).some((v) => sign2(v) > 0) && !Object.values(preview.difference).some((v) => sign2(v) < 0);
 var ICON_PATHS = {
@@ -98508,9 +98594,9 @@ var ICON_PATHS = {
 };
 var ICON_ALIAS = { atkPct: "attack", defPct: "defense", maxHpPct: "maxHp", strPct: "str", dexPct: "dex", intPct: "int", moveSpeedPct: "moveSpeed", activeSpd: "activeSpeed" };
 function statIcon(key3, size = 16) {
-  const k = (key3.startsWith("fx:") ? key3.slice(3) : key3).split(":")[0], icon = ICON_PATHS[ICON_ALIAS[k] ?? k];
-  if (!icon) return "";
-  return `<svg class="gx-ic" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${icon[0]}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icon[1]}</svg>`;
+  const k = (key3.startsWith("fx:") ? key3.slice(3) : key3).split(":")[0], icon2 = ICON_PATHS[ICON_ALIAS[k] ?? k];
+  if (!icon2) return "";
+  return `<svg class="gx-ic" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${icon2[0]}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icon2[1]}</svg>`;
 }
 function drawHeroPortrait(canvas, heroLook) {
   const ctx = canvas.getContext?.("2d");
@@ -98613,7 +98699,7 @@ function createCharacterStatsV3({ document: doc }) {
     e.textContent = text3;
     e.className = cls;
     return e;
-  }, icon = (k, size) => {
+  }, icon2 = (k, size) => {
     const s = el3("span", "", "sx-ic");
     s.innerHTML = statIcon(k, size);
     return s;
@@ -98693,7 +98779,7 @@ function createCharacterStatsV3({ document: doc }) {
       keys2.replaceChildren(...KEY_STATS.map(([label4, ic, short]) => {
         const k = el3("div", "", "sx-key"), txt = el3("div"), gain = then ? statGain(value2(now3, label4), value2(then, label4)) : "";
         txt.append(el3("b", value2(now3, label4) ?? "\u2014"), el3("small", short));
-        k.append(icon(ic, 16), txt);
+        k.append(icon2(ic, 16), txt);
         if (gain) k.append(el3("span", gain, "sx-gain"));
         return k;
       }));
@@ -98704,7 +98790,7 @@ function createCharacterStatsV3({ document: doc }) {
         groups.append(el3("h4", g.title, "sx-title"));
         for (const r of rows) {
           const row2 = el3("div", "", "sx-row"), gain = then ? statGain(r.value, then[gi]?.rows.find((x) => x.label === r.label)?.value) : "";
-          row2.append(icon(ROW_ICONS[r.label] ?? "", 14), el3("span", r.label, "sx-label"));
+          row2.append(icon2(ROW_ICONS[r.label] ?? "", 14), el3("span", r.label, "sx-label"));
           if (gain) row2.append(el3("span", gain, "sx-gain"));
           row2.append(el3("b", r.value, "sx-value"));
           groups.append(row2);
@@ -98953,15 +99039,15 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
     }
     plane.append(svg2);
     for (const n of layout.nodes) {
-      const p = layout.place[n.id], b = el3("button", "", "skill-node"), icon = disc5(n), label4 = el3("span", n.name, "skill-name");
+      const p = layout.place[n.id], b = el3("button", "", "skill-node"), icon2 = disc5(n), label4 = el3("span", n.name, "skill-name");
       b.type = "button";
       b.dataset.node = n.id;
       b.style.left = p.x.toFixed(2) + "%";
       b.style.top = p.y.toFixed(2) + "%";
       b.style.width = p.label.toFixed(2) + "%";
-      b.append(icon.wrap, label4);
+      b.append(icon2.wrap, label4);
       b.onclick = () => select(n.id);
-      items[n.id] = { b, rank: icon.rank, n };
+      items[n.id] = { b, rank: icon2.rank, n };
       plane.append(b);
     }
     wrap3.append(plane);
@@ -99116,11 +99202,11 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
       sheetBody.replaceChildren(el3("p", "Tap a skill to see what it does and learn it.", "sheet-empty"));
       return;
     }
-    const s = skillStateV2(d, n), next = integerWire(integerBigInt(s.rank) + 1n), headRow = el3("div", "", "sheet-head"), icon = disc5(n, false), title = el3("div"), tags = el3("div", "", "sheet-tags");
+    const s = skillStateV2(d, n), next = integerWire(integerBigInt(s.rank) + 1n), headRow = el3("div", "", "sheet-head"), icon2 = disc5(n, false), title = el3("div"), tags = el3("div", "", "sheet-tags");
     stateClasses(headRow, n, s);
     tags.append(el3("span", tree === "utility" ? "Utility" : TIER_TAGS[n.tier]), el3("span", s.maxed ? "Mastered" : `Rank ${rankText(n, s.rank)}`, s.maxed ? "done" : ""));
     title.append(el3("h3", n.name), tags);
-    headRow.append(icon.wrap, title, button3("\xD7", "sheet-close", close));
+    headRow.append(icon2.wrap, title, button3("\xD7", "sheet-close", close));
     const parts = [headRow, el3("p", nodeDescription(n), "sheet-desc")], effect = (label4, text3, cls = "") => {
       const e = el3("div", "", `sheet-effect ${cls}`);
       e.append(el3("b", label4), el3("span", text3));
@@ -99227,7 +99313,7 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
   root3.append(head16, body5);
   utilityWrap.append(utility.root);
   let d = null, ready = false, classId = null, tree = null, selected = null, confirmReset = false, grids = {}, tabButtons = {}, lastRanks = {}, wheelPick = null;
-  function icon(id, color28) {
+  function icon2(id, color28) {
     const svg2 = svgEl("svg");
     for (const [k, v] of Object.entries({ viewBox: "0 0 24 24", fill: "none", stroke: color28, "stroke-width": "1.9", "stroke-linecap": "round", "stroke-linejoin": "round", "aria-hidden": "true" })) svg2.setAttribute(k, v);
     svg2.innerHTML = CLASS_TREE_ICONS_V1[id] ?? "";
@@ -99264,7 +99350,7 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
         b.dataset.skill = id;
         b.style.left = `${c.x - 39}px`;
         b.style.top = `${row2 * ROW + TOP2}px`;
-        tile.append(icon(id, "currentColor"), rank);
+        tile.append(icon2(id, "currentColor"), rank);
         b.append(tile, el3("span", "cs-name", s.name));
         tiles6[id] = { b, rank, row: row2, col: col2 };
         grid.append(b);
@@ -99293,9 +99379,9 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
     const head17 = el3("div", "cs-wheel-head");
     head17.append(el3("span", "", "SKILL WHEEL"), el3("small", "", wheelPick !== null ? "Now tap where it goes" : bench10.length ? "Tap two to swap. Past the line: off the wheel" : "Tap two to swap them"));
     const spot = (key3, id) => {
-      const move2 = id === MOVE_SLOT, name = move2 ? MOVE_NAMES2[hc.offhand] ?? "Class move" : id ? CLASS_SKILLS[id]?.name ?? id : "Empty", b = button3("cs-wheel-spot", "", () => pickWheel(key3)), icon2 = el3("span", "cs-wheel-icon");
-      icon2.innerHTML = move2 ? SKILL_ICONS_V1[MOVE_ICON_FOR[hc.offhand]] ?? "" : id ? SKILL_ICONS_V1[id] ?? "" : "";
-      b.append(icon2, el3("span", "cs-wheel-name", name));
+      const move2 = id === MOVE_SLOT, name = move2 ? MOVE_NAMES2[hc.offhand] ?? "Class move" : id ? CLASS_SKILLS[id]?.name ?? id : "Empty", b = button3("cs-wheel-spot", "", () => pickWheel(key3)), icon3 = el3("span", "cs-wheel-icon");
+      icon3.innerHTML = move2 ? SKILL_ICONS_V1[MOVE_ICON_FOR[hc.offhand]] ?? "" : id ? SKILL_ICONS_V1[id] ?? "" : "";
+      b.append(icon3, el3("span", "cs-wheel-name", name));
       b.dataset.empty = String(!id);
       b.dataset.picked = String(wheelPick === key3);
       b.disabled = !ready;
@@ -101657,7 +101743,7 @@ var soulUrl2 = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(MONSTER_
 function createForgePresentation({ document: document2, issue, invalidate }) {
   const root3 = document2.getElementById("world-forge-view"), materials2 = document2.getElementById("world-materials-view");
   let selected = "weapon";
-  const icon = (url) => {
+  const icon2 = (url) => {
     const img = document2.createElement("img");
     img.src = url;
     img.alt = "";
@@ -101677,7 +101763,7 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
     if (section === "materials") {
       materials2.replaceChildren();
       const row2 = (name, desc, tags, cls = "mt-row") => {
-        const quantity = e.materials[name] ?? 0, r = el3("article", "", cls + (quantity ? "" : " is-zero")), img = icon(SALVAGE_MATERIAL_ART[name]), t = el3("div", "", "mt-text"), tagRow = el3("div", "", "mt-tags");
+        const quantity = e.materials[name] ?? 0, r = el3("article", "", cls + (quantity ? "" : " is-zero")), img = icon2(SALVAGE_MATERIAL_ART[name]), t = el3("div", "", "mt-text"), tagRow = el3("div", "", "mt-tags");
         img.width = img.height = cls === "mt-row" ? 32 : 44;
         for (const x of tags) tagRow.append(el3("span", x, "mt-tag" + (/^Salvage/.test(x) ? " is-salvage" : "")));
         t.append(el3("strong", name), el3("small", desc, "mt-desc"), tagRow);
@@ -101740,11 +101826,11 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
       box5.append(el3("h4", "ATTUNEMENT REQUIREMENTS"));
       const gold = el3("p", `${formatAmount(cost.gold)} Gold`, affordGold ? "stat-gain" : "stat-loss");
       gold.title = cost.gold + " gold exactly";
-      gold.prepend(icon(EQUIPMENT_ART.gold.url));
+      gold.prepend(icon2(EQUIPMENT_ART.gold.url));
       box5.append(gold, el3("small", `Owned: ${formatAmount(inv.gold)}`));
       for (const [k, v] of Object.entries(cost.materials)) {
         const row2 = el3("p", `${v.toLocaleString()} ${k}`, (e.materials[k] ?? 0) >= v ? "stat-gain" : "stat-loss");
-        if (SALVAGE_MATERIAL_ART[k]) row2.prepend(icon(SALVAGE_MATERIAL_ART[k]));
+        if (SALVAGE_MATERIAL_ART[k]) row2.prepend(icon2(SALVAGE_MATERIAL_ART[k]));
         box5.append(row2, el3("small", `Owned: ${(e.materials[k] ?? 0).toLocaleString()}`));
       }
       details.append(box5);
@@ -101756,7 +101842,7 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
           const a = statDifference(before[k], zero7[k]), b2 = statDifference(after[k], zero7[k]);
           if (!a && !b2) continue;
           const row2 = el3("p", "", statDifference(b2, a) ? "stat-gain" : "tt-muted");
-          row2.append(icon(k === "moveSpeed" ? speedUrl : EQUIPMENT_STAT_ART[k]), el3("span", name), el3("strong", `+${statText(a, true)} \u2192 +${statText(b2, true)}`));
+          row2.append(icon2(k === "moveSpeed" ? speedUrl : EQUIPMENT_STAT_ART[k]), el3("span", name), el3("strong", `+${statText(a, true)} \u2192 +${statText(b2, true)}`));
           preview.append(row2);
         }
         details.append(preview);
@@ -101845,7 +101931,7 @@ function contextActionLabelForModel(model, action2 = contextActionForModel(model
   if (!resource) return null;
   return resource.eventPod ? "Destroy spore pod" : resource.kind === "chest" ? model.space?.site?.siteKind === "woodland-cave" ? "Open Chest" : "Open chest" : resource.art === "camp_crate" ? "Break the crate" : resource.art === "barrel" ? "Break barrel" : resource.art === "urn" ? "Break urn" : "Break pot";
 }
-var MENU_PAGES = [["equipment", "Gear"], ["bag", "Bag"], ["materials", "Materials"], ["bestiary", "Bestiary"], ["stats", "Stats"], ["progression", "Skills"], ["quests", "Quests"], ["heroes", "Heroes"]];
+var MENU_PAGES = [["equipment", "Gear"], ["bag", "Bag"], ["materials", "Materials"], ["bestiary", "Bestiary"], ["stats", "Stats"], ["progression", "Skills"], ["quests", "Quests"], ["heroes", "Heroes"], ["settings", "Settings"]];
 var MENU_TITLES = { equipment: "Gear", bag: "Bag", materials: "Materials" };
 var SEEN_KEY = "saq-world-seen-items-v1:";
 var menuIcon = (d) => `<svg class="rm-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
@@ -101858,10 +101944,11 @@ var MENU_ICONS = Object.freeze({
   materials: menuIcon('<path d="M12 3l7 5-3 11H8L5 8z"/><path d="M5 8h14M12 3l-4 16M12 3l4 16"/>'),
   stats: menuIcon('<path d="M5 20V11M10 20V5M15 20v-7M20 20V8"/>'),
   progression: menuIcon('<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.5 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/>'),
-  heroes: menuIcon('<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 19c0-3.3 2.7-6 6-6s6 2.7 6 6M15 14.2c3 .2 5 2.3 5 4.8"/>')
+  heroes: menuIcon('<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 19c0-3.3 2.7-6 6-6s6 2.7 6 6M15 14.2c3 .2 5 2.3 5 4.8"/>'),
+  settings: menuIcon('<circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r="6.6"/><path d="M12 2.6v2.8M12 18.6v2.8M2.6 12h2.8M18.6 12h2.8M5.4 5.4l2 2M16.6 16.6l2 2M5.4 18.6l2-2M16.6 7.4l2-2"/>')
 });
 function createInventoryPresentation({ document: document2, environment, readModel, adapter, clearInput, restoreGameplayFocus = () => {
-}, heroSlots = null, questsPage = null }) {
+}, heroSlots = null, questsPage = null, settingsPage = null, openMap = null }) {
   const panel = document2.getElementById("world-inventory"), openButton = document2.getElementById("world-bag"), pickup = document2.getElementById("world-pickup");
   if (!panel || !openButton || !pickup) return { refresh() {
   }, isOpen: () => false, destroy() {
@@ -101935,9 +102022,44 @@ function createInventoryPresentation({ document: document2, environment, readMod
     panel.querySelector(".bag-section-tabs").append(heroesButton);
     document2.querySelector(".bag-body").append(heroesView.root);
   }
+  const settingsButton = settingsPage ? button3("SETTINGS", () => go("settings")) : null;
+  if (settingsButton) {
+    settingsButton.id = "world-settings-tab";
+    panel.querySelector(".bag-section-tabs").append(settingsButton);
+    document2.querySelector(".bag-body").append(settingsPage.root);
+  }
+  panel.querySelector(".bag-section-tabs").insertBefore(questsButton, bestiaryButton);
+  const groupOf = (s) => MENU_HUB_GROUPS[s] ?? "hero", plainIcon = (svg2) => svg2.replace(' class="rm-icon"', "");
+  function go(next) {
+    forgeSession = false;
+    section = next;
+    inspect = false;
+    key3 = null;
+    refresh(readModel());
+  }
+  const hub = createMenuHubV1({ document: document2, tiles: [{ id: "quests", name: "Quests", icon: plainIcon(MENU_ICONS.quests), pick: () => questsButton.click() }, { id: "map", name: "Map", icon: MENU_HUB_ICONS.map, pick: () => {
+    close();
+    environment.setTimeout(() => openMap?.(), 80);
+  } }, { id: "bestiary", name: "Bestiary", icon: plainIcon(MENU_ICONS.bestiary), pick: () => go("bestiary") }, { id: "heroes", name: "Heroes", icon: plainIcon(MENU_ICONS.heroes), pick: () => go("heroes") }, { id: "settings", name: "Settings", icon: MENU_HUB_ICONS.settings, pick: () => go("settings") }] });
+  document2.querySelector(".bag-body").append(hub.root);
+  function paintHub(m) {
+    const active2 = m.quests?.active ?? [], done3 = active2.filter((q) => q.status === "ready").length;
+    let heroes = 1;
+    try {
+      heroes = heroSlots?.list()?.heroes?.length || 1;
+    } catch {
+    }
+    hub.paint({ quests: { sub: active2.length ? active2.length + " active" : "None yet", badge: done3 ? "!" : "" }, map: { sub: "The whole world" }, bestiary: { sub: "Monster cards" }, heroes: { sub: heroes === 1 ? "1 hero" : heroes + " heroes", hidden: !heroesView }, settings: { sub: "Sound \xB7 controls", hidden: !settingsPage } });
+  }
   const nav = panel.querySelector(".bag-section-tabs"), heading = panel.querySelector(".bag-heading");
   panel.classList.add("rpg-menu");
-  const railButton = button3("", () => panel.classList.toggle("rail-open"));
+  const railButton = button3("", () => {
+    if (groupOf(section) === "world" && section !== "hub") {
+      go("hub");
+      return;
+    }
+    panel.classList.toggle("rail-open");
+  });
   railButton.id = "world-menu-rail";
   railButton.className = "rm-railbtn";
   railButton.setAttribute("aria-label", "Show page names");
@@ -101950,6 +102072,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     const b = document2.getElementById(`world-${id}-tab`);
     if (!b) continue;
     b.classList.add("rm-page");
+    b.dataset.group = groupOf(id);
     b.innerHTML = MENU_ICONS[id];
     b.append(element("span", name, "rm-label"), element("span", "", "rm-badge"));
     b.setAttribute("aria-label", name);
@@ -101975,7 +102098,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     e.className = cls;
     return e;
   }
-  function icon(key4, empty2 = false) {
+  function icon2(key4, empty2 = false) {
     const img = document2.createElement("img");
     img.src = EQUIPMENT_ART[key4].url;
     img.alt = "";
@@ -101985,7 +102108,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     return img;
   }
   function itemIcon(item) {
-    const img = icon("worn-sword");
+    const img = icon2("worn-sword");
     img.src = itemIconUrl(item, document2) ?? img.src;
     return img;
   }
@@ -102032,6 +102155,20 @@ function createInventoryPresentation({ document: document2, environment, readMod
     closeButton.focus();
     return true;
   }
+  function openMenu() {
+    if (open2 && groupOf(section) === "world") return close();
+    const m = readModel();
+    if (!m.inventory || !alive(m)) return;
+    clearInput();
+    forgeSession = false;
+    section = "hub";
+    open2 = true;
+    inspect = false;
+    error = "";
+    key3 = null;
+    refresh(readModel());
+    closeButton.focus();
+  }
   function openHeroes() {
     const m = readModel();
     if (!heroesView || !m.inventory) return false;
@@ -102047,7 +102184,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     return true;
   }
   function toggle() {
-    if (open2) return close();
+    if (open2 && groupOf(section) === "hero") return close();
     forgeSession = false;
     if (!["equipment", "bag", "materials"].includes(section)) section = lastItems;
     const m = readModel();
@@ -102106,7 +102243,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     const cap6 = local7.d8 ? inventoryIntakeCapacity(local7.d8) : 64, wallet = `${formatAmount(inv.gold)}/${owned2.length}/${cap6}`;
     if (summaryKey !== wallet) {
       summaryKey = wallet;
-      const goldArt = document2.querySelector("#world-wallet svg")?.cloneNode(true) ?? icon("gold");
+      const goldArt = document2.querySelector("#world-wallet svg")?.cloneNode(true) ?? icon2("gold");
       document2.getElementById("world-bag-summary").replaceChildren(goldArt, element("strong", `${formatAmount(inv.gold)} gold`), element("span", `${owned2.length} / ${cap6} owned`));
     }
     const done3 = (m.quests?.active ?? []).filter((q) => q.status === "ready").length;
@@ -102222,6 +102359,18 @@ function createInventoryPresentation({ document: document2, environment, readMod
     heroesButton?.setAttribute("aria-pressed", String(section === "heroes"));
     questsPage?.refresh(open2 && section === "quests");
     questsButton.setAttribute("aria-pressed", String(section === "quests"));
+    settingsPage?.refresh(open2 && section === "settings");
+    settingsButton?.setAttribute("aria-pressed", String(section === "settings"));
+    hub.refresh(open2 && section === "hub");
+    if (open2) {
+      const g = groupOf(section);
+      if (panel.dataset.group !== g) {
+        panel.dataset.group = g;
+        railButton.innerHTML = g === "world" ? MENU_HUB_ICONS.home.replace("<svg ", '<svg class="rm-icon" ') : MENU_ICONS.menu;
+        railButton.setAttribute("aria-label", g === "world" ? "Back to Menu" : "Show page names");
+      }
+      if (section === "hub") paintHub(m);
+    }
     bestiaryView.refresh(m, open2 && section === "bestiary");
     bestiaryButton.setAttribute("aria-pressed", String(section === "bestiary"));
     if (open2) paintMenu(m, local7, inv);
@@ -102230,11 +102379,11 @@ function createInventoryPresentation({ document: document2, environment, readMod
     gearSwitch.hidden = !open2 || !forgeSession;
     gearSwitch.textContent = section === "forge" ? "Carried gear" : "Attunement";
     if (!open2) return;
-    if (section === "progression" || section === "stats" || section === "heroes" || section === "bestiary" || section === "quests") {
+    if (section === "progression" || section === "stats" || section === "heroes" || section === "bestiary" || section === "quests" || section === "hub" || section === "settings") {
       panel.dataset.section = section;
       panel.classList.remove("is-inspecting");
       comparison.hidden = true;
-      document2.getElementById("world-bag-title").textContent = section === "stats" ? "Stats" : section === "heroes" ? "Heroes" : section === "bestiary" ? "Bestiary" : section === "quests" ? "Quests" : "Skills";
+      document2.getElementById("world-bag-title").textContent = section === "stats" ? "Stats" : section === "heroes" ? "Heroes" : section === "bestiary" ? "Bestiary" : section === "quests" ? "Quests" : section === "hub" ? "Menu" : section === "settings" ? "Settings" : "Skills";
       for (const id of ["equipment", "bag", "materials"]) document2.getElementById(`world-${id}-tab`).setAttribute("aria-pressed", "false");
       status2.textContent = error;
       return;
@@ -102883,7 +103032,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
   openButton.addEventListener("click", toggle);
   closeButton.addEventListener("click", close);
   environment.addEventListener("keydown", keyboard);
-  return Object.freeze({ refresh, openForge, openHeroes, openQuests, close: () => {
+  return Object.freeze({ refresh, openForge, openHeroes, openQuests, openMenu, close: () => {
     if (open2) close();
   }, isOpen: () => open2, destroy() {
     contextInput.destroy();
@@ -102895,6 +103044,9 @@ function createInventoryPresentation({ document: document2, environment, readMod
     bestiaryView.destroy();
     bestiaryButton.remove();
     questsButton.remove();
+    settingsButton?.remove();
+    settingsPage?.root.remove();
+    hub.root.remove();
     for (const { button: button4, listener } of sectionButtons) button4.removeEventListener("click", listener);
     panel.removeEventListener("pointerdown", outside3);
     environment.removeEventListener("resize", resized);
@@ -103755,7 +103907,7 @@ function createSettlementServicesMenu2(options) {
       body5.append(card);
       if (npc?.role === "general") {
         const B6 = POTION_BELT_POLICY;
-        for (const [offerId, title2, max, text3, icon] of [[B6.offers.capacity, "Bigger belt", B6.maxCapacityUpgrades, () => ["Carry ", belt.capacity, belt.capacity + 1, " potions"], FLASK(true)], [B6.offers.potency, "Stronger brew", B6.maxPotencyUpgrades, () => ["Heal ", belt.healPercent + "%", belt.healPercent + B6.potencyStep + "%", " of max HP"], '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ef6f7d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"/><path d="M12 8.5v5M9.5 11h5"/></svg>']]) {
+        for (const [offerId, title2, max, text3, icon2] of [[B6.offers.capacity, "Bigger belt", B6.maxCapacityUpgrades, () => ["Carry ", belt.capacity, belt.capacity + 1, " potions"], FLASK(true)], [B6.offers.potency, "Stronger brew", B6.maxPotencyUpgrades, () => ["Heal ", belt.healPercent + "%", belt.healPercent + B6.potencyStep + "%", " of max HP"], '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ef6f7d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"/><path d="M12 8.5v5M9.5 11h5"/></svg>']]) {
           const u = potionUpgrade(p, offerId), row2 = el3("div", void 0, "tn-card tn-upg"), info2 = el3("div");
           info2.style.flex = "1";
           const [a, b, c, d] = text3(), line30 = el3("p");
@@ -103772,7 +103924,7 @@ function createSettlementServicesMenu2(options) {
           else buy.append("Done");
           buy.disabled = busy || !u.price || compareAmount(inv.gold, u.price) < 0;
           buy.setAttribute("aria-label", u.price ? title2 + ", " + u.price + " gold" : title2 + ", fully upgraded");
-          row2.append(markup(el3("div", void 0, "tn-ic"), icon), info2, buy);
+          row2.append(markup(el3("div", void 0, "tn-ic"), icon2), info2, buy);
           body5.append(row2);
         }
       } else body5.append(el3("p", npc ? "A general merchant can make your belt bigger and your potions stronger." : "Visit a general merchant to make your belt bigger and your potions stronger.", "tn-hint"));
@@ -104044,6 +104196,302 @@ function createFerryMenu({ document: doc, adapter, clearInput, restoreFocus, rep
     panel.showModal();
   }, destroy() {
     panel.remove();
+  } });
+}
+
+// src/client/settings_page_v1.js
+var SETTINGS_V1_KEY = "saq-world-settings-v1";
+var DEFAULTS = Object.freeze({ music: 70, effects: 85, mute: false, leftHanded: false, damageNumbers: true });
+function readSettingsV1(storage) {
+  let saved = null;
+  try {
+    saved = JSON.parse(storage?.getItem(SETTINGS_V1_KEY) ?? "null");
+  } catch {
+  }
+  const s = { ...DEFAULTS };
+  if (saved && typeof saved === "object") {
+    for (const k of Object.keys(DEFAULTS)) if (typeof saved[k] === typeof DEFAULTS[k]) s[k] = saved[k];
+  }
+  s.music = Math.max(0, Math.min(100, Math.round(s.music)));
+  s.effects = Math.max(0, Math.min(100, Math.round(s.effects)));
+  return s;
+}
+var CSS5 = `
+.st{flex:1;min-width:0;min-height:0;overflow:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 20px;align-content:start;padding:16px 20px;box-sizing:border-box;color:#e9dfc8;font:14px/1.35 var(--rpg-ui,"Segoe UI",system-ui,sans-serif)}
+.st[hidden]{display:none}
+.st-sec{border:1px solid #33424e;border-radius:14px;background:linear-gradient(180deg,#212f3a,#18232d);padding:12px 16px 14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+#world-inventory .st-sec h3,.st-sec h3{margin:0!important;padding:0!important;border:0!important;background:none!important;font:700 11px/1.2 var(--rpg-ui,"Segoe UI",sans-serif)!important;letter-spacing:.12em!important;text-transform:uppercase;color:#d4b98a!important}
+.st-line{display:flex;align-items:center;gap:12px;min-height:32px;font-weight:600;font-size:14px}
+.st-line>.st-name{flex:1;min-width:0}.st-line>.st-name.fixed{flex:0 0 108px}
+.st-line small{display:block;font-weight:500;font-size:11px;color:#9aa6a9;margin-top:1px}
+.st input[type=range]{flex:1;min-width:0;height:24px;margin:0;background:none;-webkit-appearance:none;appearance:none;--v:50%;cursor:pointer}
+.st input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:4px;background:linear-gradient(90deg,#c9a24a,#f0c862) 0/var(--v) 100% no-repeat,#0b1015;box-shadow:inset 0 0 0 1px #2e3d48}
+.st input[type=range]::-moz-range-track{height:8px;border-radius:4px;background:linear-gradient(90deg,#c9a24a,#f0c862) 0/var(--v) 100% no-repeat,#0b1015;box-shadow:inset 0 0 0 1px #2e3d48}
+.st input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;margin-top:-6px;border-radius:50%;background:radial-gradient(circle at 38% 30%,#5c6d78,#2b3b46 60%,#17242e);border:2px solid #0b1015;box-shadow:inset 0 0 0 1.5px #f0c862,0 2px 0 #070b10}
+.st input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 38% 30%,#5c6d78,#2b3b46 60%,#17242e);border:2px solid #0b1015;box-shadow:inset 0 0 0 1.5px #f0c862,0 2px 0 #070b10}
+.st input[type=range]:disabled{opacity:.45}
+.st-val{flex:0 0 28px;text-align:right;font:700 12px var(--rpg-ui,"Segoe UI",sans-serif);color:#c9bf9f}
+#world-inventory .st button.st-tog{flex:0 0 46px;width:46px;min-width:46px;height:26px;min-height:26px;padding:0;margin-left:auto;border:0;border-radius:13px;background:#0b1015;box-shadow:inset 0 0 0 1px #2e3d48;position:relative;cursor:pointer}
+#world-inventory .st button.st-tog::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#4a5a65;box-shadow:inset 0 0 0 1px #6c7c86;transition:left .15s}
+#world-inventory .st button.st-tog[aria-checked=true]{background:#5a4718;box-shadow:inset 0 0 0 1px #f0c862}
+#world-inventory .st button.st-tog[aria-checked=true]::after{left:23px;background:radial-gradient(circle at 38% 30%,#fff2c4,#f0c862 60%,#b98a2c)}
+.st-seg{margin-left:auto;display:flex;border-radius:16px;background:#0b1015;padding:3px;box-shadow:inset 0 0 0 1px #2e3d48;flex:none}
+#world-inventory .st .st-seg button{min-height:0;height:auto;border:0;background:none;box-shadow:none;font:700 11px var(--rpg-ui,"Segoe UI",sans-serif);letter-spacing:.06em;text-transform:uppercase;color:#a9b4b6;padding:6px 11px;border-radius:13px;cursor:pointer}
+#world-inventory .st .st-seg button[aria-pressed=true]{background:linear-gradient(180deg,#3a4955,#25333e);color:#f6e7c0;box-shadow:inset 0 0 0 1px #d4b98a}
+#world-inventory .st button.st-btn{flex:none;min-height:0;height:auto;font:700 11px var(--rpg-ui,"Segoe UI",sans-serif);letter-spacing:.07em;text-transform:uppercase;color:#1b1406;background:linear-gradient(180deg,#f6d77d,#d9ab45);border:1px solid #0b1015;border-radius:16px;padding:7px 13px;box-shadow:0 2px 0 #070b10;white-space:nowrap;cursor:pointer}
+#world-inventory .st button.st-btn.ghost{background:#1a2530;color:#e9dfc8;box-shadow:inset 0 0 0 1px #4a5a65,0 2px 0 #070b10}
+#world-inventory .st button.st-btn.danger{background:#2a1a1c;color:#f0b3a8;box-shadow:inset 0 0 0 1px #8a4a44,0 2px 0 #070b10}
+#world-inventory .st button.st-btn:disabled{opacity:.55;cursor:default}
+.st-acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+@media(max-height:500px) and (min-width:601px){.st{padding:10px 14px;gap:10px 12px}.st-sec{padding:8px 12px 10px;gap:5px}.st-line{min-height:28px;font-size:13px}.st-line>.st-name.fixed{flex-basis:92px}.st-line small{font-size:10px}}
+@media(max-width:600px){.st{grid-template-columns:1fr;padding:12px;gap:12px}}
+`;
+function createSettingsPageV1({ document: doc, environment: env }) {
+  const storage = (() => {
+    try {
+      return env.localStorage ?? null;
+    } catch {
+      return null;
+    }
+  })();
+  let s = readSettingsV1(storage);
+  const html = doc.documentElement, listeners = /* @__PURE__ */ new Set();
+  const apply2 = () => {
+    html.dataset.hand = s.leftHanded ? "left" : "right";
+    html.dataset.damageNumbers = s.damageNumbers ? "on" : "off";
+    for (const f of listeners) f(s);
+  };
+  const save = () => {
+    try {
+      storage?.setItem(SETTINGS_V1_KEY, JSON.stringify(s));
+    } catch {
+    }
+  };
+  const set = (k, v) => {
+    s = { ...s, [k]: v };
+    save();
+    apply2();
+    paint3();
+  };
+  if (!doc.getElementById("settings-v1-css")) {
+    const st = doc.createElement("style");
+    st.id = "settings-v1-css";
+    st.textContent = CSS5;
+    doc.head.append(st);
+  }
+  const el3 = (tag, cls, text3) => {
+    const e = doc.createElement(tag);
+    if (cls) e.className = cls;
+    if (text3 !== void 0) e.textContent = text3;
+    return e;
+  };
+  const name = (title, note, fixed) => {
+    const n = el3("div", "st-name" + (fixed ? " fixed" : ""), title);
+    if (note) n.append(el3("small", null, note));
+    return n;
+  };
+  const line29 = (...kids) => {
+    const l = el3("div", "st-line");
+    l.append(...kids);
+    return l;
+  };
+  const section = (title, ...lines2) => {
+    const sec = el3("section", "st-sec");
+    sec.append(el3("h3", null, title), ...lines2);
+    return sec;
+  };
+  const toggle = (label4, key3) => {
+    const b = el3("button", "st-tog");
+    b.type = "button";
+    b.setAttribute("role", "switch");
+    b.setAttribute("aria-label", label4);
+    b.addEventListener("click", () => set(key3, !s[key3]));
+    return b;
+  };
+  const slider = (label4, key3) => {
+    const r = el3("input");
+    r.type = "range";
+    r.min = "0";
+    r.max = "100";
+    r.step = "5";
+    r.setAttribute("aria-label", label4);
+    const v = el3("span", "st-val");
+    r.addEventListener("input", () => {
+      s = { ...s, [key3]: Number(r.value) };
+      r.style.setProperty("--v", r.value + "%");
+      v.textContent = r.value;
+    });
+    r.addEventListener("change", () => {
+      save();
+      apply2();
+    });
+    return { r, v };
+  };
+  const btn = (text3, cls, fn) => {
+    const b = el3("button", "st-btn" + (cls ? " " + cls : ""), text3);
+    b.type = "button";
+    b.addEventListener("click", fn);
+    return b;
+  };
+  const root3 = el3("div", "st");
+  root3.id = "world-settings-view";
+  root3.hidden = true;
+  const music = slider("Music volume", "music"), effects2 = slider("Sound effects volume", "effects"), mute = toggle("Mute all", "mute");
+  const modeSelect = () => doc.getElementById("control-mode");
+  const seg2 = el3("div", "st-seg"), joystick = el3("button", null, "Joystick"), cursor = el3("button", null, "Tap to move");
+  joystick.type = cursor.type = "button";
+  seg2.append(joystick, cursor);
+  const pickMode = (v) => {
+    const sel = modeSelect();
+    if (!sel || sel.value === v) return paint3();
+    sel.value = v;
+    sel.dispatchEvent(new (env.Event ?? Event)("change", { bubbles: true }));
+    paint3();
+  };
+  joystick.addEventListener("click", () => pickMode("joystick"));
+  cursor.addEventListener("click", () => pickMode("cursor"));
+  const left = toggle("Left-handed", "leftHanded"), numbers = toggle("Damage numbers", "damageNumbers");
+  const byId = (id) => doc.getElementById(id);
+  const saveNote = el3("small", null, "Your game saves on its own too");
+  const saveBtn = btn("Save now", "", async () => {
+    const b = byId("world-save-campaign");
+    if (!b || b.disabled) return;
+    saveBtn.disabled = true;
+    saveNote.textContent = "Saving\u2026";
+    b.click();
+    for (let i = 0; i < 40 && b.disabled; i++) await new Promise((r) => env.setTimeout(r, 100));
+    saveBtn.disabled = false;
+    saveNote.textContent = b.textContent === "Saved" ? "Saved just now" : b.textContent === "Save needs retry" ? "Save needs a retry" : "Your game saves on its own too";
+  });
+  const saveName = name("Save");
+  saveName.append(saveNote);
+  let newArmed = false;
+  const campNote = el3("small", null, "Starts a new world for this hero slot");
+  const newBtn = btn("New", "ghost", () => {
+    if (!newArmed) {
+      newArmed = true;
+      newBtn.textContent = "Sure?";
+      campNote.textContent = "Tap again to start over";
+      env.setTimeout(() => {
+        newArmed = false;
+        newBtn.textContent = "New";
+        campNote.textContent = "Starts a new world for this hero slot";
+      }, 4e3);
+      return;
+    }
+    byId("start-new-campaign")?.click();
+  });
+  const resetBtn = btn("Reset", "danger", () => byId("reset-local-world-data")?.click());
+  const campName = name("Campaign");
+  campName.append(campNote);
+  const campActs = el3("div", "st-acts");
+  campActs.append(newBtn, resetBtn);
+  const perfNote = el3("small", null, "");
+  const perfName = name("Performance sample");
+  perfName.append(perfNote);
+  const perfToggle = btn("Start", "", () => {
+    byId("world-perf-sample")?.click();
+    paint3();
+  }), perfDownload = btn("Download", "ghost", () => byId("world-perf-download")?.click());
+  const perfActs = el3("div", "st-acts");
+  perfActs.append(perfToggle, perfDownload);
+  const perfLine = line29(perfName, perfActs);
+  const gameSec = section("Game", line29(saveName, saveBtn), line29(campName, campActs), perfLine);
+  root3.append(
+    section("Sound", line29(name("Music", null, true), music.r, music.v), line29(name("Sound effects", null, true), effects2.r, effects2.v), line29(name("Mute all"), mute)),
+    section("Controls", line29(name("Movement"), seg2), line29(name("Left-handed", "Attack, skills and Potion swap to the left"), left)),
+    section("Screen", line29(name("Damage numbers", "Numbers that pop off hits"), numbers)),
+    gameSec
+  );
+  function paint3() {
+    for (const [b, k] of [[mute, "mute"], [left, "leftHanded"], [numbers, "damageNumbers"]]) b.setAttribute("aria-checked", String(Boolean(s[k])));
+    for (const [o, k] of [[music, "music"], [effects2, "effects"]]) {
+      o.r.value = String(s[k]);
+      o.r.style.setProperty("--v", s[k] + "%");
+      o.v.textContent = String(s[k]);
+      o.r.disabled = s.mute;
+    }
+    const mode = modeSelect()?.value ?? "joystick";
+    joystick.setAttribute("aria-pressed", String(mode === "joystick"));
+    cursor.setAttribute("aria-pressed", String(mode === "cursor"));
+    const sample = byId("world-perf-sample");
+    perfLine.hidden = !sample;
+    if (sample) {
+      const rec = sample.getAttribute("aria-pressed") === "true";
+      perfToggle.textContent = rec ? "Stop" : "Start";
+      perfNote.textContent = rec ? "Recording now" : "Paused";
+    }
+    saveBtn.hidden = !byId("world-save-campaign");
+    newBtn.hidden = !byId("start-new-campaign");
+    resetBtn.hidden = !byId("reset-local-world-data");
+  }
+  apply2();
+  return Object.freeze({ root: root3, settings: () => s, onChange(f) {
+    listeners.add(f);
+    return () => listeners.delete(f);
+  }, refresh(visible3) {
+    root3.hidden = !visible3;
+    if (visible3) paint3();
+  } });
+}
+
+// src/client/hand_mirror_v1.js
+var TARGETS = ["#primary-attack", "#world-bag", "#carried-rations", "#rpg-interaction-v2", ".subweapon-hud", "#world-pickup"];
+function createHandMirrorV1({ document: doc, environment: env }) {
+  const html = doc.documentElement;
+  let on = false, timer = null;
+  const moved = /* @__PURE__ */ new Set();
+  const unpin = (e) => {
+    e.style.removeProperty("left");
+    e.style.removeProperty("right");
+    delete e.dataset.handMirrored;
+  };
+  function place3() {
+    if (!on) return;
+    for (const e of moved) unpin(e);
+    moved.clear();
+    const W10 = env.innerWidth || html.clientWidth, H7 = env.innerHeight || html.clientHeight, plan = [];
+    for (const sel of TARGETS) for (const e of doc.querySelectorAll(sel)) {
+      const r = e.getBoundingClientRect();
+      if (!r.width || !r.height) continue;
+      if (r.top < H7 * 0.45) continue;
+      if (Math.abs((r.left + r.right) / 2 - W10 / 2) < W10 * 0.06) continue;
+      const cb = e.offsetParent?.getBoundingClientRect() ?? { left: 0, width: W10 }, tx = r.left - cb.left - (e.offsetLeft || 0);
+      plan.push([e, cb.width - (r.right - cb.left) - tx]);
+    }
+    for (const [e, left] of plan) {
+      e.style.setProperty("left", left.toFixed(1) + "px", "important");
+      e.style.setProperty("right", "auto", "important");
+      e.dataset.handMirrored = "true";
+      moved.add(e);
+    }
+  }
+  function sync() {
+    const want = html.dataset.hand === "left";
+    if (want === on) {
+      if (on) place3();
+      return;
+    }
+    on = want;
+    if (on) {
+      place3();
+      timer = env.setInterval(place3, 500);
+      env.addEventListener("resize", place3);
+    } else {
+      env.clearInterval(timer);
+      timer = null;
+      env.removeEventListener("resize", place3);
+      for (const e of moved) unpin(e);
+      moved.clear();
+    }
+  }
+  sync();
+  return Object.freeze({ sync, destroy() {
+    on = false;
+    env.clearInterval(timer);
+    env.removeEventListener("resize", place3);
+    for (const e of moved) unpin(e);
+    moved.clear();
   } });
 }
 
@@ -105580,11 +106028,11 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
   };
   env.addEventListener("resize", invalidateSize);
   env.addEventListener("orientationchange", invalidateSize);
-  const button3 = (parent, label4, icon, fn, cls) => {
+  const button3 = (parent, label4, icon2, fn, cls) => {
     const b = el3("button", cls);
     b.type = "button";
     b.setAttribute("aria-label", label4);
-    b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICON[icon] + "</svg>";
+    b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICON[icon2] + "</svg>";
     b.onclick = (e) => {
       e.preventDefault();
       fn();
@@ -107427,7 +107875,9 @@ function createWorldMapD9({ document: doc, environment, port, releaseInput, issu
     }
   }
   syncVisibility();
-  return { refresh, isOpen: () => open2, resources: () => ({ ...atlasSize.resources(), cartographyStaticBuilds: staticBuilds, cartographyStaticHits: staticHits, cartographyStaticKey: staticKey, minimapPixelRatio: MINIMAP_PIXEL_RATIO, minimapCachePaddingPx: MINIMAP_CACHE_PADDING_PX, minimapRecenterScreenPx: MINIMAP_RECENTER_SCREEN_PX, minimapBackingRecenters: miniRecenters, mapLevel: level, mapMaximumLevel: planned ? PLANNED_MAP_MAX_LEVEL : D9_RUNTIME_POLICY.mapOverviewLevels, cartographyMode: planned ? "observed-crisp-v2" : "legacy" }), destroy() {
+  return { refresh, isOpen: () => open2, open: () => {
+    if (!open2) show();
+  }, resources: () => ({ ...atlasSize.resources(), cartographyStaticBuilds: staticBuilds, cartographyStaticHits: staticHits, cartographyStaticKey: staticKey, minimapPixelRatio: MINIMAP_PIXEL_RATIO, minimapCachePaddingPx: MINIMAP_CACHE_PADDING_PX, minimapRecenterScreenPx: MINIMAP_RECENTER_SCREEN_PX, minimapBackingRecenters: miniRecenters, mapLevel: level, mapMaximumLevel: planned ? PLANNED_MAP_MAX_LEVEL : D9_RUNTIME_POLICY.mapOverviewLevels, cartographyMode: planned ? "observed-crisp-v2" : "legacy" }), destroy() {
     closed = true;
     atlasSize.destroy();
     doc.documentElement.dataset.worldMapOpen = "false";
@@ -107544,11 +107994,11 @@ function barrierSvg() {
 }
 var defensePaths = /* @__PURE__ */ new Map();
 function drawDungeonDefense(ctx, kind, x, y, size = 18) {
-  const icon = DUNGEON_COMBAT_ICONS[kind];
-  if (!icon) return;
+  const icon2 = DUNGEON_COMBAT_ICONS[kind];
+  if (!icon2) return;
   let path11 = defensePaths.get(kind);
   if (!path11) {
-    path11 = new Path2D(icon.path);
+    path11 = new Path2D(icon2.path);
     defensePaths.set(kind, path11);
   }
   ctx.save();
@@ -107559,7 +108009,7 @@ function drawDungeonDefense(ctx, kind, x, y, size = 18) {
   ctx.strokeStyle = "#150e20";
   ctx.lineWidth = 5;
   ctx.stroke(path11);
-  ctx.strokeStyle = icon.color;
+  ctx.strokeStyle = icon2.color;
   ctx.lineWidth = 2.3;
   ctx.stroke(path11);
   if (kind === "block") {
@@ -107654,8 +108104,8 @@ function createSubweaponHud({ document: document2, environment, readModel, adapt
         if (shielded) panel.replaceChildren(fire2, document2.createTextNode(" \xB7 "), barrier);
         else panel.replaceChildren(fire2);
       } else if (type === "shield") {
-        const icon = document2.createElement("span"), label4 = document2.createElement("span"), pips = document2.createElement("span");
-        icon.innerHTML = `<svg aria-hidden="true" viewBox="0 0 24 24" width="17" height="17" fill="#34475b" stroke="#f1c40f" stroke-width="2"><path d="${DUNGEON_COMBAT_ICONS.block.path}"/></svg>`;
+        const icon2 = document2.createElement("span"), label4 = document2.createElement("span"), pips = document2.createElement("span");
+        icon2.innerHTML = `<svg aria-hidden="true" viewBox="0 0 24 24" width="17" height="17" fill="#34475b" stroke="#f1c40f" stroke-width="2"><path d="${DUNGEON_COMBAT_ICONS.block.path}"/></svg>`;
         label4.textContent = "PRESSURE";
         pips.className = "guard-pressure-pips";
         pips.setAttribute("aria-label", `${c.pressure} of 3 Guard Pressure`);
@@ -107666,7 +108116,7 @@ function createSubweaponHud({ document: document2, environment, readModel, adapt
         }
         const ready2 = document2.createElement("span");
         ready2.textContent = c.pressure === 3 ? "BASH READY" : "";
-        panel.replaceChildren(icon, label4, pips, ready2);
+        panel.replaceChildren(icon2, label4, pips, ready2);
       } else panel.textContent = next;
       text3 = next;
     }
@@ -131405,13 +131855,15 @@ function createCombatFeedback() {
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
     ctx.lineJoin = "round";
+    const numbersOff = globalThis.document?.documentElement?.dataset?.damageNumbers === "off";
     for (const n of numbers) {
+      if (numbersOff) break;
       if (n.shown === void 0 && time3 - n.born > HIT_FEEDBACK.placementMs) continue;
       const p = point13(n.position);
       if (p.x < 0 || p.x > ctx.canvas.width || p.y < 0 || p.y > ctx.canvas.height) continue;
-      const style = combatTextStyle(n), icon = hitIcon(n), iconSize = Math.max(13, Math.min(20, style.size * 1.05)), mechanicWidth = icon ? (iconSize + 3) * scale : 0, critWidth = n.critical ? 17 * scale : 0, iconWidth = mechanicWidth + critWidth;
+      const style = combatTextStyle(n), icon2 = hitIcon(n), iconSize = Math.max(13, Math.min(20, style.size * 1.05)), mechanicWidth = icon2 ? (iconSize + 3) * scale : 0, critWidth = n.critical ? 17 * scale : 0, iconWidth = mechanicWidth + critWidth;
       ctx.font = numberFont(style.maxSize * scale);
-      const measure2 = ctx.measureText(n.text), textWidth = Math.max(measure2.width, (measure2.actualBoundingBoxLeft || 0) + (measure2.actualBoundingBoxRight || 0)), height = Math.max(style.maxSize, (measure2.actualBoundingBoxAscent || 0) / scale + (measure2.actualBoundingBoxDescent || 0) / scale, icon ? iconSize : 0) * scale + 6 * scale, size = { width: textWidth + iconWidth + 6 * scale, height };
+      const measure2 = ctx.measureText(n.text), textWidth = Math.max(measure2.width, (measure2.actualBoundingBoxLeft || 0) + (measure2.actualBoundingBoxRight || 0)), height = Math.max(style.maxSize, (measure2.actualBoundingBoxAscent || 0) / scale + (measure2.actualBoundingBoxDescent || 0) / scale, icon2 ? iconSize : 0) * scale + 6 * scale, size = { width: textWidth + iconWidth + 6 * scale, height };
       const old2 = n.path ? { x: p.x + n.path.x, y: p.y + n.path.y, direction: n.path.direction } : null;
       const localTop = Math.min(p.y - 36 * transform.d, ...(lastModel?.combatPresentation?.statuses ?? []).filter((e) => e.targetId === n.targetId).map((e) => p.y - (68 + (e.lane ?? 0) * 18) * transform.d));
       const chosen = old2 ? { ...old2, box: { x: p.x + n.path.box.x, y: p.y + n.path.box.y, width: n.path.box.width, height: n.path.box.height } } : chooseTextPath({ x: p.x, y: localTop - size.height / 2 - 6 * scale }, size, occupied, reserved, view3, n.eventSequence, scale);
@@ -131433,7 +131885,7 @@ function createCombatFeedback() {
       ctx.scale(zoom, zoom);
       ctx.font = numberFont(style.size * scale);
       const width = ctx.measureText(n.text).width + iconWidth, left = -width / 2, tx = left + iconWidth;
-      if (icon) drawHitIconV2(ctx, icon, left + mechanicWidth / 2 - 1.5 * scale, 0, iconSize * scale);
+      if (icon2) drawHitIconV2(ctx, icon2, left + mechanicWidth / 2 - 1.5 * scale, 0, iconSize * scale);
       if (n.critical) drawHitIconV2(ctx, "crit", left + mechanicWidth + critWidth / 2 - scale, 0, 15 * scale);
       ctx.lineWidth = 5 * scale;
       ctx.strokeStyle = ctx.fillStyle = "rgba(10,6,18,.5)";
@@ -136570,7 +137022,9 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
   const primary = button3 ? createPrimaryInput({ button: button3, environment, adapter, readModel, isBlocked: gameplayInputBlocked, restoreGameplayFocus, reportError: (text3) => {
     message = text3;
   } }) : null;
-  inventory = createInventoryPresentation({ document: doc, environment, readModel, adapter, restoreGameplayFocus, heroSlots, questsPage: questUi?.menuPage ?? null, clearInput: () => {
+  const settingsPage = createSettingsPageV1({ document: doc, environment }), handMirror = createHandMirrorV1({ document: doc, environment });
+  settingsPage.onChange(() => handMirror.sync());
+  inventory = createInventoryPresentation({ document: doc, environment, readModel, adapter, restoreGameplayFocus, heroSlots, questsPage: questUi?.menuPage ?? null, settingsPage, openMap: () => (navigation?.open ?? navigation?.show)?.(), clearInput: () => {
     subweaponHud?.clear();
     input.clear();
     primary?.clear();
@@ -136685,6 +137139,12 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
     disclosure.addEventListener("toggle", menuLayout);
     environment.addEventListener("keydown", menuEscape);
   }
+  const menuSummary = disclosure?.querySelector(":scope > summary"), openMenu = (e) => {
+    e.preventDefault();
+    if (disclosure.open) disclosure.open = false;
+    inventory?.openMenu?.();
+  };
+  menuSummary?.addEventListener("click", openMenu);
   mode.value = profile.read().mode;
   mode.addEventListener("focus", () => input.clear());
   mode.addEventListener("change", () => {
@@ -136898,6 +137358,8 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
       input.destroy();
       primary?.destroy();
       gestureListeners.forEach((remove) => remove());
+      menuSummary?.removeEventListener("click", openMenu);
+      handMirror.destroy();
       if (disclosure) {
         compact.removeEventListener?.("change", layoutDisclosure);
         disclosure.removeEventListener("toggle", menuLayout);
@@ -143871,6 +144333,7 @@ async function startWorldClient(environment) {
   if (plannedReview && !coopGuest) mountPlannedReviewControlsV1({ environment, controls, review: plannedReview, session });
   if (activity) {
     const button3 = environment.document.createElement("button");
+    button3.id = "world-save-campaign";
     button3.textContent = "Save campaign";
     controls.appendChild(button3);
     button3.onclick = async () => {
@@ -143886,6 +144349,8 @@ async function startWorldClient(environment) {
       summaryState.className = "performance-sample-state";
       controls.dataset.performanceEnabled = "true";
       controls.querySelector("summary").append(summaryState);
+      sample.id = "world-perf-sample";
+      download.id = "world-perf-download";
       full.textContent = "Full presentation";
       battery.textContent = "30 FPS presentation";
       download.textContent = "Download performance sample";
