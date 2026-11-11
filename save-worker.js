@@ -30149,6 +30149,8 @@ function seatComparable(s, kept, party2, room2) {
   for (const g of Object.values(c.encounterEconomy?.groups ?? {})) for (const r of Object.values(g.usedResources ?? {})) if (r.playerIds) r.playerIds = r.playerIds.map(mark).sort();
   only(c.encounterEconomy?.outingsByPlayer);
   only(c.playerRespawnsById);
+  only(c.bestiary?.albumsByPlayerId);
+  only(c.bestiary?.groundByPlayerId);
   eachTarget(c, (row, key9) => {
     if (party2.entities.has(row[key9])) row[key9] = "?";
   });

@@ -75942,6 +75942,7 @@ function addSeat(state, templatePid) {
     if (state.subweaponCombat.mastery) state.subweaponCombat.mastery[entityId2] = { hazards: {}, poisons: {}, razors: {}, statuses: {} };
   }
   state.playersById[playerId] = { ...copyWire(t), playerId, characterId, entityId: entityId2, connectionStatus: "connected" };
+  delete state.playersById[playerId].bestiary;
   seatWorldRows(state, playerId, templatePid);
   if (ta.residency.spaceInstanceId === state.overworldInstanceId) setFrameMember(state, playerId, true, { hostPid: templatePid });
   captureWorldPositionsD9(state);
@@ -75992,6 +75993,13 @@ function renewSeat(state, oldPid, { keepQuests = false } = {}) {
     if (i >= 0) {
       f.playerIds[i] = playerId;
       f.playerIds.sort();
+    }
+  }
+  const bestiary = state.bestiary;
+  if (bestiary) {
+    for (const rows of [bestiary.albumsByPlayerId, bestiary.groundByPlayerId]) if (rows[oldPid]) {
+      rows[playerId] = rows[oldPid];
+      delete rows[oldPid];
     }
   }
   const quests = state.d9World?.quests?.byPlayer;
@@ -76121,6 +76129,8 @@ function seatComparable(s, kept, party, room) {
   for (const g of Object.values(c.encounterEconomy?.groups ?? {})) for (const r of Object.values(g.usedResources ?? {})) if (r.playerIds) r.playerIds = r.playerIds.map(mark).sort();
   only(c.encounterEconomy?.outingsByPlayer);
   only(c.playerRespawnsById);
+  only(c.bestiary?.albumsByPlayerId);
+  only(c.bestiary?.groundByPlayerId);
   eachTarget(c, (row2, key3) => {
     if (party.entities.has(row2[key3])) row2[key3] = "?";
   });
