@@ -262,7 +262,7 @@ var RESHAPE_TIERS = Object.freeze({ "repeatable-slot:ruin:wetland:standard:067":
 var RESHAPE_VERSION = "world-reshape-v2";
 var RESHAPE_HASH = "ac15d856c2dbbe38203480172b32aae7d19ccdd61cef10eee16aade24a0900d2";
 var RESHAPE_HYDROLOGY_HASH = "e12fd26221c55e0357b674d4beaf28cc522ef5f9dde420b073373f0ef7be1b65";
-var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-wetland";
+var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-upland";
 var hasWorldReshape = (b) => b?.reshapeVersion === RESHAPE_VERSION && b?.reshapeHash === RESHAPE_HASH;
 var reshapedSite = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_SITES, id) ? RESHAPE_SITES[id] : null;
 var reshapedTier = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_TIERS, id) ? RESHAPE_TIERS[id] : null;
@@ -1124,7 +1124,7 @@ var BURROWERS_V1_MELEE_MOTION = freezeWire({ burrower: { windupTicks: 9, impactT
 
 // src/shared/content/lesser_bosses_v1.js
 var LESSER_BOSSES_V1_VERSION = "lesser-bosses-v1";
-var LESSER_BOSS_FAMILIES_V1 = Object.freeze(["vinegorger", "rotbloom", "gulpjaw", "rustmaw", "sporecrown", "gravewing", "rootgorger", "thresher", "waxcrown", "pitjaw", "spinegrove", "sirocco", "mirelily", "croakmaw", "gorgeleech"]);
+var LESSER_BOSS_FAMILIES_V1 = Object.freeze(["vinegorger", "rotbloom", "gulpjaw", "rustmaw", "sporecrown", "gravewing", "rootgorger", "thresher", "waxcrown", "pitjaw", "spinegrove", "sirocco", "mirelily", "croakmaw", "gorgeleech", "ironhorn", "stormtalon", "cairnwarden"]);
 var source7 = "SAQ World lesser bosses (code-drawn, page 7NdtTtgZ); World ordinary adaptation";
 var specs7 = [
   ["vinegorger", "Vinegorger", 50, 7, 1.5, 50, 20, 21.6, 30, 22],
@@ -1147,6 +1147,11 @@ var wetland = [
   ["croakmaw", "Croakmaw", 52, 7, 1.2, 50, 20, 21.6, 30, 22],
   ["gorgeleech", "Gorgeleech", 54, 7, 1.3, 50, 20, 21.6, 30, 22]
 ];
+var upland = [
+  ["ironhorn", "Ironhorn", 54, 7, 1.3, 50, 20, 21.6, 32, 24],
+  ["stormtalon", "Stormtalon", 52, 7, 1.4, 50, 20, 21.6, 34, 24],
+  ["cairnwarden", "Cairnwarden", 58, 7, 0.8, 56, 20, 21.6, 34, 24]
+];
 var enemy = ([family2, name, hp, damage, moveSpeed, delayTicks, hullRadius, combatRadius, reach, stopDistance], n) => {
   const enemyDefinitionId = "def:d410" + n.toString(16).padStart(28, "0");
   return {
@@ -1168,6 +1173,7 @@ var enemy = ([family2, name, hp, damage, moveSpeed, delayTicks, hullRadius, comb
 var LESSER_BOSSES_V1_ENEMIES = freezeWire(specs7.map((row2, index) => enemy(row2, index + 47)));
 var LESSER_BOSSES_V1_LATER_ENEMIES = freezeWire(later.map((row2, index) => enemy(row2, index + 55)));
 var LESSER_BOSSES_V1_WETLAND_ENEMIES = freezeWire(wetland.map((row2, index) => enemy(row2, index + 69)));
+var LESSER_BOSSES_V1_UPLAND_ENEMIES = freezeWire(upland.map((row2, index) => enemy(row2, index + 72)));
 var LESSER_BOSSES_V1_METADATA = freezeWire(Object.fromEntries(LESSER_BOSS_FAMILIES_V1.map((f3) => [f3, { eligibility: { biomes: [], sites: [] }, threatCategory: "site-warden", rewardCategory: "ordinary-gear" }])));
 var LESSER_BOSSES_V1_MELEE_MOTION = freezeWire(Object.fromEntries(LESSER_BOSS_FAMILIES_V1.map((f3) => [f3, { windupTicks: 14, impactTicks: 3, recoveryTicks: 14 }])));
 var LESSER_BOSSES_V1 = Object.freeze({
@@ -1185,7 +1191,10 @@ var LESSER_BOSSES_V1 = Object.freeze({
   sirocco: Object.freeze({ id: "sirocco", label: "SIROCCO", family: "sirocco", biome: "desert", affixId: "nullifier", sites: Object.freeze(["fort", "crypt"]), lesser: true }),
   mirelily: Object.freeze({ id: "mirelily", label: "MIRELILY", family: "mirelily", biome: "wetland", affixId: "toxic_decay", sites: Object.freeze(["ruin", "crypt"]), lesser: true }),
   croakmaw: Object.freeze({ id: "croakmaw", label: "CROAKMAW", family: "croakmaw", biome: "wetland", affixId: "iron_citadel", sites: Object.freeze(["fort"]), lesser: true }),
-  gorgeleech: Object.freeze({ id: "gorgeleech", label: "GORGELEECH", family: "gorgeleech", biome: "wetland", affixId: "vitality_weaver", sites: Object.freeze(["cave"]), lesser: true })
+  gorgeleech: Object.freeze({ id: "gorgeleech", label: "GORGELEECH", family: "gorgeleech", biome: "wetland", affixId: "vitality_weaver", sites: Object.freeze(["cave"]), lesser: true }),
+  ironhorn: Object.freeze({ id: "ironhorn", label: "IRONHORN", family: "ironhorn", biome: "upland", affixId: "iron_citadel", sites: Object.freeze(["cave"]), lesser: true }),
+  stormtalon: Object.freeze({ id: "stormtalon", label: "STORMTALON", family: "stormtalon", biome: "upland", affixId: "swift_commander", sites: Object.freeze(["fort"]), lesser: true }),
+  cairnwarden: Object.freeze({ id: "cairnwarden", label: "CAIRNWARDEN", family: "cairnwarden", biome: "upland", affixId: "vitality_weaver", sites: Object.freeze(["ruin", "crypt"]), lesser: true })
 });
 var LESSER_BOSS_IDS_V1 = Object.freeze(Object.keys(LESSER_BOSSES_V1));
 var LESSER_BOSS_BODY_V1 = freezeWire({ hullRadius: 20, combatRadius: 21.6, maxHp: { numerator: 6, denominator: 1 }, attackDamage: { numerator: 3, denominator: 2 } });
@@ -1203,6 +1212,56 @@ var LESSER_BOSS_TRICKS_V1 = Object.freeze({
   sirocco: Object.freeze({ kind: "devil", firstDelayTicks: 120, minRange: 30, maxRange: 220, castTicks: 36, warnTicks: 36, chaseTicks: 180, fadeTicks: 30, radius: 16, speed: 2.4, damageTenths: 18, knockback: 10, knockbackTicks: 12, cooldownTicks: 330 }),
   mirelily: Object.freeze({ kind: "cloud", firstDelayTicks: 120, minRange: 0, maxRange: 200, windupTicks: 42, belchTicks: 30, lingerTicks: 210, spread: 46, radius: 22, tickEveryTicks: 30, damageTenths: 5, cooldownTicks: 330 }),
   croakmaw: Object.freeze({ kind: "ripples", firstDelayTicks: 120, minRange: 0, maxRange: 180, windupTicks: 30, croakTicks: 178, tiredTicks: 72, spawns: Object.freeze([0, 54, 108]), start: 18, speed: 1.6, reachRadius: 130, ringHalfWidth: 5, gapHalf: 0.32, gaps: Object.freeze([0, -0.62, 0.52]), damageTenths: 14, knockback: 8, knockbackTicks: 10, cooldownTicks: 330 }),
+  ironhorn: Object.freeze({
+    kind: "ram",
+    firstDelayTicks: 120,
+    minRange: 40,
+    maxRange: 200,
+    windupTicks: 57,
+    chargeTicks: 24,
+    fallTicks: 36,
+    dazedTicks: 90,
+    minLength: 70,
+    length: 150,
+    stopBack: 40,
+    hornReach: 28,
+    laneHalfWidth: 15,
+    speed: 5.4,
+    contactRadius: 22,
+    chargeTenths: 16,
+    rocks: Object.freeze([Object.freeze([40, -4]), Object.freeze([8, -36]), Object.freeze([6, 36]), Object.freeze([46, 32])]),
+    lands: Object.freeze([9, 16, 23, 31]),
+    radius: 18,
+    damageTenths: 16,
+    knockback: 10,
+    knockbackTicks: 12,
+    cooldownTicks: 330
+  }),
+  stormtalon: Object.freeze({ kind: "gale", firstDelayTicks: 120, minRange: 0, maxRange: 150, windupTicks: 48, gustTicks: 90, tiredTicks: 72, beats: Object.freeze([6, 36, 66]), ahead: 30, radius: 150, halfAngle: 0.5, damageTenths: 4, knockback: 9, knockbackTicks: 12, cooldownTicks: 330 }),
+  cairnwarden: Object.freeze({
+    kind: "sling",
+    firstDelayTicks: 120,
+    minRange: 0,
+    maxRange: 200,
+    tearTicks: 30,
+    throwTicks: 108,
+    callTicks: 51,
+    returnTicks: 30,
+    staggerTicks: 30,
+    spawns: Object.freeze([0, 33, 66]),
+    fillTicks: 36,
+    radius: 17,
+    damageTenths: 16,
+    backs: Object.freeze([0, 5, 10]),
+    flyTicks: 20,
+    stoneRadius: 12,
+    returnTenths: 12,
+    heartNum: 3,
+    heartDen: 2,
+    knockback: 8,
+    knockbackTicks: 10,
+    cooldownTicks: 330
+  }),
   gorgeleech: Object.freeze({ kind: "latch", firstDelayTicks: 120, minRange: 30, maxRange: 150, windupTicks: 60, lungeTicks: 9, latchTicks: 120, slumpTicks: 72, length: 150, laneHalfWidth: 12, reach: 40, lungeTenths: 8, biteEveryTicks: 30, biteTenths: 6, healPercent: 2, slow: 0.45, breakStep: 5, cooldownTicks: 330 }),
   gulpjaw: Object.freeze({ kind: "tongue", firstDelayTicks: 120, minRange: 50, maxRange: 200, windupTicks: 60, lashTicks: 7, reelTicks: 40, crouchTicks: 15, leapTicks: 30, laneHalfWidth: 12, pullSpeed: 3.4, pullStop: 58, lashTenths: 5, radius: 25, damageTenths: 20, knockback: 10, knockbackTicks: 12, puddleTicks: 110, puddleRadius: 22, poisonTenths: 4, poisonEveryTicks: 30, cooldownTicks: 330 })
 });
@@ -1245,7 +1304,7 @@ var TROPICAL_CREATURES_V1_MELEE_MOTION = freezeWire({
 
 // src/shared/content/open_land_creatures_v1.js
 var OPEN_LAND_CREATURES_V1_VERSION = "world-open-land-creatures-v1";
-var OPEN_LAND_CREATURE_FAMILIES_V1 = Object.freeze(["field_mantis", "meadow_bee", "antlion", "cactling", "dust_imp", "bog_lily", "bog_frog", "leech"]);
+var OPEN_LAND_CREATURE_FAMILIES_V1 = Object.freeze(["field_mantis", "meadow_bee", "antlion", "cactling", "dust_imp", "bog_lily", "bog_frog", "leech", "horn_beetle", "griffling", "cairnling"]);
 var source9 = "SAQ World lesser bosses pages Nu4kjgWd + XZjKMDyM, base creatures (code-drawn); World ordinary melee adaptation";
 var specs9 = [
   ["field_mantis", "Field Mantis", 40, 7, 1.6, 48],
@@ -1256,10 +1315,14 @@ var specs9 = [
   // The Wetland's three (page PErkQupg, answer 4A): Mirelily's, Croakmaw's and Gorgeleech's small kin.
   ["bog_lily", "Bog Lily", 44, 6, 0.8, 56],
   ["bog_frog", "Bog Frog", 38, 6, 1.5, 48],
-  ["leech", "Leech", 40, 6, 1.3, 50]
+  ["leech", "Leech", 40, 6, 1.3, 50],
+  // The Upland's three (page 4AoUpBVU, answer 4A): Ironhorn's, Stormtalon's and Cairnwarden's small kin.
+  ["horn_beetle", "Horn Beetle", 46, 7, 1.3, 52],
+  ["griffling", "Griffling", 36, 6, 1.8, 46],
+  ["cairnling", "Cairnling", 50, 6, 0.9, 58]
 ];
 var OPEN_LAND_CREATURES_V1_ENEMIES = freezeWire(specs9.map(([family2, name, hp, damage, moveSpeed, delayTicks], index) => {
-  const enemyDefinitionId = "def:d410" + (index + 61).toString(16).padStart(28, "0");
+  const enemyDefinitionId = "def:d410" + (index < 8 ? index + 61 : index + 67).toString(16).padStart(28, "0");
   return {
     enemyDefinitionId,
     contentDefinitionId: enemyDefinitionId,
@@ -1286,7 +1349,10 @@ var OPEN_LAND_CREATURES_V1_METADATA = freezeWire({
   dust_imp: row("desert", "ordinary-skirmisher"),
   bog_lily: row("wetland", "ordinary-heavy"),
   bog_frog: row("wetland", "ordinary-skirmisher"),
-  leech: row("wetland", "ordinary-skirmisher")
+  leech: row("wetland", "ordinary-skirmisher"),
+  horn_beetle: row("upland", "ordinary-heavy"),
+  griffling: row("upland", "ordinary-skirmisher"),
+  cairnling: row("upland", "ordinary-heavy")
 });
 var OPEN_LAND_CREATURES_V1_MELEE_MOTION = freezeWire({
   field_mantis: { windupTicks: 10, impactTicks: 2, recoveryTicks: 9 },
@@ -1296,8 +1362,13 @@ var OPEN_LAND_CREATURES_V1_MELEE_MOTION = freezeWire({
   dust_imp: { windupTicks: 10, impactTicks: 2, recoveryTicks: 9 },
   bog_lily: { windupTicks: 14, impactTicks: 3, recoveryTicks: 11 },
   bog_frog: { windupTicks: 10, impactTicks: 2, recoveryTicks: 9 },
-  leech: { windupTicks: 12, impactTicks: 3, recoveryTicks: 10 }
+  leech: { windupTicks: 12, impactTicks: 3, recoveryTicks: 10 },
+  horn_beetle: { windupTicks: 14, impactTicks: 3, recoveryTicks: 11 },
+  griffling: { windupTicks: 9, impactTicks: 2, recoveryTicks: 9 },
+  cairnling: { windupTicks: 15, impactTicks: 3, recoveryTicks: 12 }
 });
+var OPEN_LAND_CREATURES_V1_FIRST_ENEMIES = Object.freeze(OPEN_LAND_CREATURES_V1_ENEMIES.slice(0, 8));
+var OPEN_LAND_CREATURES_V1_UPLAND_ENEMIES = Object.freeze(OPEN_LAND_CREATURES_V1_ENEMIES.slice(8));
 
 // src/shared/content/ordinary_enemies.js
 var ORDINARY_CATALOG_VERSION = "d11-world-creatures-v1";
@@ -1405,7 +1476,7 @@ var LEGACY_ORDINARY_ENEMIES = freezeWire([
   }
 ].map((d) => ({ ...d, contentDefinitionId: d.enemyDefinitionId })));
 var DUNGEON_MOBS_V1_CATALOG_ENEMIES = Object.freeze([...LEGACY_ORDINARY_ENEMIES, ...DUNGEON_MOBS_V1_ENEMIES]);
-var ORDINARY_ENEMIES = Object.freeze([...DUNGEON_MOBS_V1_CATALOG_ENEMIES, ...DUNGEON_MOBS_V2_ENEMIES, ...BIOME_CREATURES_V1_ENEMIES, ...BROOD_CREATURES_V1_ENEMIES, ...BANDITS_V1_ENEMIES, ...BURROWERS_V1_ENEMIES, ...LESSER_BOSSES_V1_ENEMIES, ...TROPICAL_CREATURES_V1_ENEMIES, ...LESSER_BOSSES_V1_LATER_ENEMIES, ...OPEN_LAND_CREATURES_V1_ENEMIES, ...LESSER_BOSSES_V1_WETLAND_ENEMIES]);
+var ORDINARY_ENEMIES = Object.freeze([...DUNGEON_MOBS_V1_CATALOG_ENEMIES, ...DUNGEON_MOBS_V2_ENEMIES, ...BIOME_CREATURES_V1_ENEMIES, ...BROOD_CREATURES_V1_ENEMIES, ...BANDITS_V1_ENEMIES, ...BURROWERS_V1_ENEMIES, ...LESSER_BOSSES_V1_ENEMIES, ...TROPICAL_CREATURES_V1_ENEMIES, ...LESSER_BOSSES_V1_LATER_ENEMIES, ...OPEN_LAND_CREATURES_V1_FIRST_ENEMIES, ...LESSER_BOSSES_V1_WETLAND_ENEMIES, ...LESSER_BOSSES_V1_UPLAND_ENEMIES, ...OPEN_LAND_CREATURES_V1_UPLAND_ENEMIES]);
 function resolveOrdinaryProfile(enemy2, tier2, progressionPower = BASELINE_PROGRESSION_POWER) {
   requireContract(ORDINARY_ENEMIES.includes(enemy2), "Unknown ordinary definition");
   const i = ORDINARY_ENEMIES.indexOf(enemy2), rank = THREAT_TIERS.indexOf(tier2), power2 = resolveThreatPower(progressionPower, tier2);
@@ -1438,14 +1509,15 @@ var LESSER_BOSSES_V1_START = BURROWERS_V1_START + BURROWERS_V1_ENEMIES.length * 
 var TROPICAL_CREATURES_V1_START = LESSER_BOSSES_V1_START + LESSER_BOSSES_V1_ENEMIES.length * THREAT_TIERS.length;
 var LESSER_LATER_START = TROPICAL_CREATURES_V1_START + TROPICAL_CREATURES_V1_ENEMIES.length * THREAT_TIERS.length;
 var OPEN_LAND_CREATURES_V1_START = LESSER_LATER_START + LESSER_BOSSES_V1_LATER_ENEMIES.length * THREAT_TIERS.length;
-var LESSER_WETLAND_START = OPEN_LAND_CREATURES_V1_START + OPEN_LAND_CREATURES_V1_ENEMIES.length * THREAT_TIERS.length;
+var LESSER_WETLAND_START = OPEN_LAND_CREATURES_V1_START + OPEN_LAND_CREATURES_V1_FIRST_ENEMIES.length * THREAT_TIERS.length;
+var OPEN_LAND_UPLAND_START = LESSER_WETLAND_START + (LESSER_BOSSES_V1_WETLAND_ENEMIES.length + LESSER_BOSSES_V1_UPLAND_ENEMIES.length) * THREAT_TIERS.length;
 var BIOME_CREATURES_V1_PROFILES = Object.freeze(ORDINARY_PROFILES.slice(BIOME_CREATURES_V1_START, BROOD_CREATURES_V1_START));
 var BROOD_CREATURES_V1_PROFILES = Object.freeze(ORDINARY_PROFILES.slice(BROOD_CREATURES_V1_START, BANDITS_V1_START));
 var BANDITS_V1_PROFILES = Object.freeze(ORDINARY_PROFILES.slice(BANDITS_V1_START, BURROWERS_V1_START));
 var BURROWERS_V1_PROFILES = Object.freeze(ORDINARY_PROFILES.slice(BURROWERS_V1_START, LESSER_BOSSES_V1_START));
-var LESSER_BOSSES_V1_PROFILES = Object.freeze([...ORDINARY_PROFILES.slice(LESSER_BOSSES_V1_START, TROPICAL_CREATURES_V1_START), ...ORDINARY_PROFILES.slice(LESSER_LATER_START, OPEN_LAND_CREATURES_V1_START), ...ORDINARY_PROFILES.slice(LESSER_WETLAND_START)]);
+var LESSER_BOSSES_V1_PROFILES = Object.freeze([...ORDINARY_PROFILES.slice(LESSER_BOSSES_V1_START, TROPICAL_CREATURES_V1_START), ...ORDINARY_PROFILES.slice(LESSER_LATER_START, OPEN_LAND_CREATURES_V1_START), ...ORDINARY_PROFILES.slice(LESSER_WETLAND_START, OPEN_LAND_UPLAND_START)]);
 var TROPICAL_CREATURES_V1_PROFILES = Object.freeze(ORDINARY_PROFILES.slice(TROPICAL_CREATURES_V1_START, LESSER_LATER_START));
-var OPEN_LAND_CREATURES_V1_PROFILES = Object.freeze(ORDINARY_PROFILES.slice(OPEN_LAND_CREATURES_V1_START, LESSER_WETLAND_START));
+var OPEN_LAND_CREATURES_V1_PROFILES = Object.freeze([...ORDINARY_PROFILES.slice(OPEN_LAND_CREATURES_V1_START, LESSER_WETLAND_START), ...ORDINARY_PROFILES.slice(OPEN_LAND_UPLAND_START)]);
 var enemyByProfile = new Map(ORDINARY_PROFILES.map((p) => [p.contentDefinitionId, ORDINARY_ENEMIES.find((d) => p.profileKey.startsWith(`ordinary-${d.family.replaceAll("_", "-")}-`))]));
 function ordinaryEnemyForProfile(id) {
   return enemyByProfile.get(id) ?? null;
@@ -1463,7 +1535,7 @@ var WILDERNESS_ECOLOGY_V3_MATRIX = freezeWire({
   woodland: { surface: ["sprout", "slime", "thorn_wyrm"], cave: ["rust_nibbler", "slime", "golem"], ruin: ["cursed_blade", "gargoyle", "sprout"], fort: ["animated_armor", "golem"], crypt: ["cursed_blade", "gargoyle"] },
   grassland: { surface: ["thorn_wyrm", "tusk_boar", "field_scarecrow", "field_mantis", "meadow_bee"], cave: ["thorn_wyrm", "tusk_boar", "field_mantis"], ruin: ["barrow_wight", "field_scarecrow", "meadow_bee"], fort: ["field_scarecrow", "tusk_boar", "field_mantis"], crypt: ["barrow_wight", "meadow_bee"] },
   wetland: { surface: ["toxic_fly", "marsh_ghost", "bog_lily", "bog_frog", "leech"], cave: ["swamp_basilisk", "corroded_golem", "leech"], ruin: ["marsh_ghost", "bog_lily"], fort: ["corroded_golem", "bog_frog"], crypt: ["marsh_ghost", "bog_lily"] },
-  upland: { surface: ["wyrmling", "gilded_scuttler"], cave: ["gilded_scuttler", "wyrmling"], ruin: ["mimic_shield", "gilded_scuttler"], fort: ["mimic_shield", "gilded_scuttler"], crypt: ["mimic_shield"] },
+  upland: { surface: ["wyrmling", "gilded_scuttler", "horn_beetle", "griffling", "cairnling"], cave: ["gilded_scuttler", "wyrmling", "horn_beetle"], ruin: ["mimic_shield", "gilded_scuttler", "cairnling"], fort: ["mimic_shield", "gilded_scuttler", "griffling"], crypt: ["mimic_shield", "cairnling"] },
   desert: { surface: ["sand_scarab", "dune_scorpion", "antlion", "cactling", "dust_imp"], cave: ["dune_scorpion", "sand_scarab", "antlion"], ruin: ["tomb_mummy", "sand_scarab", "cactling"], fort: ["dune_scorpion", "tomb_mummy", "dust_imp"], crypt: ["tomb_mummy", "sand_scarab", "dust_imp"] },
   frostland: { surface: ["wyrmling", "gilded_scuttler"], cave: ["wyrmling", "gilded_scuttler"], ruin: ["mimic_shield"], fort: ["mimic_shield", "gilded_scuttler"], crypt: ["mimic_shield"] },
   tropical: { surface: ["thorn_wyrm", "snapjaw", "dart_frog"], cave: ["thorn_wyrm", "dart_frog"], ruin: ["snapjaw", "dart_frog"], fort: ["dart_frog", "snapjaw"], crypt: ["snapjaw"] },
@@ -2462,6 +2534,9 @@ var BESTIARY_CARDS = freezeWire([
   ["wyrmling", "Frost Wyrmling", "frost", "atkPct", "frostDmg"],
   ["gilded_scuttler", "Gilded Scuttler", "frost", "critChance", "itemFind"],
   ["mimic_shield", "Mimic Shield", "frost", "block", "counterDmg"],
+  ["horn_beetle", "Horn Beetle", "frost", "defPct", "thorns"],
+  ["griffling", "Griffling", "frost", "attackSpeed", "lightningDmg"],
+  ["cairnling", "Cairnling", "frost", "strPct", "soulFind"],
   ["swamp_basilisk", "Swamp Basilisk", "wetland", "maxHpPct", "statusResist"],
   ["toxic_fly", "Toxic Fly", "wetland", "moveSpeedPct", "poisonDmg"],
   ["marsh_ghost", "Marsh Ghost", "wetland", "parry", "potionCooldown"],
@@ -3310,8 +3385,8 @@ var point = (p) => {
   requireContract(Number.isFinite(p.x) && Number.isFinite(p.y), "Invalid named trick point");
   return p;
 };
-var LESSER_PHASES = { roll: ["ready", "windup", "rolling", "dizzy"], spores: ["ready", "windup", "bursting", "recover"], dive: ["ready", "crouch", "airborne", "stuck", "rip"], burrow: ["ready", "dive", "tunnel", "warn", "up"], seeds: ["ready", "windup", "volley", "sprouts"], tongue: ["ready", "windup", "lash", "reel", "crouch", "leap", "puddle"], reap: ["ready", "windup", "second", "recover"], stings: ["ready", "windup", "volley", "tired"], pit: ["ready", "dig", "warn", "pull", "climb"], needles: ["ready", "windup", "turn", "second", "spent"], devil: ["ready", "cast", "warn", "chase", "fade"], cloud: ["ready", "windup", "belch", "linger"], ripples: ["ready", "windup", "croaks", "tired"], latch: ["ready", "windup", "lunge", "latch", "slump"] };
-var LESSER_SPANS = { roll: (t) => ({ windup: t.windupTicks, rolling: t.rollTicks, dizzy: t.dizzyTicks }), spores: (t) => ({ windup: t.windupTicks, bursting: t.gapTicks, recover: t.recoverTicks }), dive: (t) => ({ crouch: t.crouchTicks, airborne: t.airTicks, stuck: t.stuckTicks, rip: t.ripTicks }), burrow: (t) => ({ dive: t.diveTicks, tunnel: t.tunnelTicks, warn: t.warnTicks, up: t.upTicks }), seeds: (t) => ({ windup: t.windupTicks, volley: t.volleyTicks, sprouts: t.sproutTicks }), tongue: (t) => ({ windup: t.windupTicks, lash: t.lashTicks, reel: t.reelTicks, crouch: t.crouchTicks, leap: t.leapTicks, puddle: t.puddleTicks }), reap: (t) => ({ windup: t.windupTicks, second: t.secondTicks, recover: t.recoverTicks }), stings: (t) => ({ windup: t.windupTicks, volley: t.volleyTicks, tired: t.tiredTicks }), pit: (t) => ({ dig: t.digTicks, warn: t.warnTicks, pull: t.pullTicks, climb: t.climbTicks }), needles: (t) => ({ windup: t.windupTicks, turn: t.turnTicks, second: t.secondTicks, spent: t.spentTicks }), devil: (t) => ({ cast: t.castTicks, warn: t.warnTicks, chase: t.chaseTicks, fade: t.fadeTicks }), cloud: (t) => ({ windup: t.windupTicks, belch: t.belchTicks, linger: t.lingerTicks }), ripples: (t) => ({ windup: t.windupTicks, croaks: t.croakTicks, tired: t.tiredTicks }), latch: (t) => ({ windup: t.windupTicks, lunge: t.lungeTicks, latch: t.latchTicks, slump: t.slumpTicks }) };
+var LESSER_PHASES = { roll: ["ready", "windup", "rolling", "dizzy"], spores: ["ready", "windup", "bursting", "recover"], dive: ["ready", "crouch", "airborne", "stuck", "rip"], burrow: ["ready", "dive", "tunnel", "warn", "up"], seeds: ["ready", "windup", "volley", "sprouts"], tongue: ["ready", "windup", "lash", "reel", "crouch", "leap", "puddle"], reap: ["ready", "windup", "second", "recover"], stings: ["ready", "windup", "volley", "tired"], pit: ["ready", "dig", "warn", "pull", "climb"], needles: ["ready", "windup", "turn", "second", "spent"], devil: ["ready", "cast", "warn", "chase", "fade"], cloud: ["ready", "windup", "belch", "linger"], ripples: ["ready", "windup", "croaks", "tired"], latch: ["ready", "windup", "lunge", "latch", "slump"], ram: ["ready", "windup", "charge", "rockfall", "dazed"], gale: ["ready", "windup", "gusts", "tired"], sling: ["ready", "tear", "throws", "call", "return", "stagger"] };
+var LESSER_SPANS = { roll: (t) => ({ windup: t.windupTicks, rolling: t.rollTicks, dizzy: t.dizzyTicks }), spores: (t) => ({ windup: t.windupTicks, bursting: t.gapTicks, recover: t.recoverTicks }), dive: (t) => ({ crouch: t.crouchTicks, airborne: t.airTicks, stuck: t.stuckTicks, rip: t.ripTicks }), burrow: (t) => ({ dive: t.diveTicks, tunnel: t.tunnelTicks, warn: t.warnTicks, up: t.upTicks }), seeds: (t) => ({ windup: t.windupTicks, volley: t.volleyTicks, sprouts: t.sproutTicks }), tongue: (t) => ({ windup: t.windupTicks, lash: t.lashTicks, reel: t.reelTicks, crouch: t.crouchTicks, leap: t.leapTicks, puddle: t.puddleTicks }), reap: (t) => ({ windup: t.windupTicks, second: t.secondTicks, recover: t.recoverTicks }), stings: (t) => ({ windup: t.windupTicks, volley: t.volleyTicks, tired: t.tiredTicks }), pit: (t) => ({ dig: t.digTicks, warn: t.warnTicks, pull: t.pullTicks, climb: t.climbTicks }), needles: (t) => ({ windup: t.windupTicks, turn: t.turnTicks, second: t.secondTicks, spent: t.spentTicks }), devil: (t) => ({ cast: t.castTicks, warn: t.warnTicks, chase: t.chaseTicks, fade: t.fadeTicks }), cloud: (t) => ({ windup: t.windupTicks, belch: t.belchTicks, linger: t.lingerTicks }), ripples: (t) => ({ windup: t.windupTicks, croaks: t.croakTicks, tired: t.tiredTicks }), latch: (t) => ({ windup: t.windupTicks, lunge: t.lungeTicks, latch: t.latchTicks, slump: t.slumpTicks }), ram: (t) => ({ windup: t.windupTicks, charge: t.chargeTicks, rockfall: t.fallTicks, dazed: t.dazedTicks }), gale: (t) => ({ windup: t.windupTicks, gusts: t.gustTicks, tired: t.tiredTicks }), sling: (t) => ({ tear: t.tearTicks, throws: t.throwTicks, call: t.callTicks, return: t.returnTicks, stagger: t.staggerTicks }) };
 function validateLesserTrickV1(state, k, t) {
   closedRecord(k, ["kind", "phase", "phaseEndsTick", "sequence", "origin", "direction", "target", "points", "hitEntityIds", "knockbacksByEntityId"]);
   requireContract(LESSER_PHASES[t.kind].includes(k.phase), "Invalid lesser boss phase");
@@ -4438,7 +4513,7 @@ var hash2 = (s) => {
 var dist2 = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 function siteEndsActiveV1(state) {
   const w = state?.d9World?.plannedWorld, defs = state?.content?.definitionsById;
-  return Boolean(w && defs) && hasWorldReshape(w) && hasWorldCombat(state) && usesMultiroom(w) && hasBossHostingV1(w) && [...DUNGEON_MOBS_V2_ENEMIES, ...DUNGEON_MOBS_V2_PROFILES, ...BIOME_CREATURES_V1_ENEMIES, ...BIOME_CREATURES_V1_PROFILES, ...LESSER_BOSSES_V1_ENEMIES, ...LESSER_BOSSES_V1_PROFILES, ...TROPICAL_CREATURES_V1_ENEMIES, ...TROPICAL_CREATURES_V1_PROFILES, ...LESSER_BOSSES_V1_LATER_ENEMIES, ...LESSER_BOSSES_V1_WETLAND_ENEMIES, ...OPEN_LAND_CREATURES_V1_ENEMIES, ...OPEN_LAND_CREATURES_V1_PROFILES].every((p) => defs[p.contentDefinitionId]);
+  return Boolean(w && defs) && hasWorldReshape(w) && hasWorldCombat(state) && usesMultiroom(w) && hasBossHostingV1(w) && [...DUNGEON_MOBS_V2_ENEMIES, ...DUNGEON_MOBS_V2_PROFILES, ...BIOME_CREATURES_V1_ENEMIES, ...BIOME_CREATURES_V1_PROFILES, ...LESSER_BOSSES_V1_ENEMIES, ...LESSER_BOSSES_V1_PROFILES, ...TROPICAL_CREATURES_V1_ENEMIES, ...TROPICAL_CREATURES_V1_PROFILES, ...LESSER_BOSSES_V1_LATER_ENEMIES, ...LESSER_BOSSES_V1_WETLAND_ENEMIES, ...LESSER_BOSSES_V1_UPLAND_ENEMIES, ...OPEN_LAND_CREATURES_V1_ENEMIES, ...OPEN_LAND_CREATURES_V1_PROFILES].every((p) => defs[p.contentDefinitionId]);
 }
 var classicTurns = null;
 var listedTurns = /* @__PURE__ */ new WeakMap();
