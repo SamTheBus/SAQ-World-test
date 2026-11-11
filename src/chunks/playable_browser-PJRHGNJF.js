@@ -75962,7 +75962,7 @@ function siteRun(state, siteId) {
   return state.campaign.siteRunEpisodesById?.[siteId] ?? null;
 }
 function hostileNear(state, actor, px7) {
-  for (const e of Object.values(state.entitiesById)) if (e.alive && e.team === "hostile" && e.residency?.spaceInstanceId === actor.residency.spaceInstanceId && Math.hypot(e.position.x - actor.position.x, e.position.y - actor.position.y) <= px7) return true;
+  for (const e of Object.values(state.entitiesById)) if (e.alive && e.team === "hostile" && e.residency?.spaceInstanceId === actor.residency.spaceInstanceId && Math.hypot(e.position.x - actor.position.x, e.position.y - actor.position.y) <= px7 && !eventActorDormant(state, e.entityId)) return true;
   return false;
 }
 function findOffer(state, questId) {
