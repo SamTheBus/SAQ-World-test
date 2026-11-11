@@ -134111,7 +134111,7 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
   let nextEvidenceAt = -Infinity;
   const artReviewV2 = doc.body.dataset.artV2 === "true";
   function render(time2, authorityDeadline = null) {
-    const model = port.presentModel?.() ?? port.getReadModel();
+    const model = port.presentModel?.(time2) ?? port.getReadModel();
     renderModel = model;
     preparation.observe(presentationSpace(model), Boolean(model.siteActivationPending));
     if (!preparation.ready()) {
@@ -137798,13 +137798,17 @@ function beginCoopGuestV1({ link, build: build2, hero, onLobby = () => {
 var GLIDE_SNAP_PX = 160;
 var LEAD_MAX_MS = 400;
 var EASE_MS = 60;
+var CORRECT_MS = 220;
+var TICK_MS2 = 1e3 / 60;
 function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
   let from = /* @__PURE__ */ new Map(), current = null, arrivedAt = 0, gap2 = 50, cache6 = null, cacheAt = -1;
   let intent = { x: 0, y: 0 }, intentAt = 0, releasedAt = null, hold = null, speed = 0, own = null, ownAt = -1, ownId = null, lastOwn = null, err = { x: 0, y: 0 }, jump3 = true, mode = "";
+  let tickOffset = null;
+  const frameAge = (model, t) => tickOffset === null || !Number.isFinite(model?.tick) ? t - arrivedAt : Math.max(0, t - (model.tick * TICK_MS2 + tickOffset));
   function drawn(id, e, t) {
     const f = from.get(id);
     if (!f) return e.position;
-    const k = Math.min(1, (t - arrivedAt) / gap2);
+    const k = Math.max(0, Math.min(1, (t - arrivedAt) / gap2));
     return { x: f.x + (e.position.x - f.x) * k, y: f.y + (e.position.y - f.y) * k };
   }
   function reach(model, e, a, b) {
@@ -137832,8 +137836,16 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
     let target = base;
     let now_ = "base";
     if (held && speed > 0) {
-      const k = 1 / Math.hypot(intent.x, intent.y), lead = Math.min(LEAD_MAX_MS, rtt() + (t - arrivedAt));
-      target = reach(model, e, e.position, { x: e.position.x + intent.x * k * speed * lead, y: e.position.y + intent.y * k * speed * lead });
+      const k = 1 / Math.hypot(intent.x, intent.y), dx = intent.x * k, dy = intent.y * k, lead = Math.min(LEAD_MAX_MS, rtt() + frameAge(model, t));
+      target = reach(model, e, e.position, { x: e.position.x + dx * speed * lead, y: e.position.y + dy * speed * lead });
+      if (own && Math.hypot(own.x - target.x, own.y - target.y) <= GLIDE_SNAP_PX) {
+        if (mode !== "lead") mode = "lead";
+        jump3 = false;
+        const walked = reach(model, e, own, { x: own.x + dx * speed * dt, y: own.y + dy * speed * dt }), f = 1 - Math.exp(-dt / CORRECT_MS);
+        own = { x: walked.x + (target.x - walked.x) * f, y: walked.y + (target.y - walked.y) * f };
+        err = { x: own.x - target.x, y: own.y - target.y };
+        return own;
+      }
       now_ = "lead";
     } else if (hold && t - releasedAt < rtt() + gap2 + 80) {
       target = hold;
@@ -137894,15 +137906,20 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
         }
         lastOwn = { id, tick: model.tick, x: e.position.x, y: e.position.y };
       } else lastOwn = null;
+      if (model && Number.isFinite(model.tick)) {
+        const o = t - model.tick * TICK_MS2;
+        tickOffset = tickOffset === null || Math.abs(o - tickOffset) > 250 ? o : tickOffset * 0.92 + o * 0.08;
+      }
       from = next;
       current = after;
       arrivedAt = t;
       cache6 = null;
       jump3 = true;
     },
-    present(model) {
+    // time: the screen frame's time (requestAnimationFrame), so motion is even on screen.
+    present(model, time2) {
       if (!model) return model;
-      const t = now3();
+      const t = Number.isFinite(time2) ? time2 : now3();
       const id = model.playersById?.[model.localPlayerId]?.entityId, e = id ? model.entitiesById[id] : null, mine = e ? ownPosition(model, id, e, t) : null;
       const gliding = model.entitiesById === current && from.size > 0 && t - arrivedAt < gap2;
       if (!gliding && (!mine || mine.x === e.position.x && mine.y === e.position.y)) return model;
@@ -137998,7 +138015,7 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
     getReadModel: () => decoder.model(),
     // What the guest's screen draws: the host's frames come over the network at uneven times, so moving
     // things glide from where they were drawn to where the latest frame has them (commands use getReadModel).
-    presentModel: () => smooth24.present(decoder.model()),
+    presentModel: (time2) => smooth24.present(decoder.model(), Number.isFinite(time2) ? time2 : void 0),
     send(command) {
       if (ended) return { status: "busy" };
       const model = decoder.model(), base = model?.context?.nextClientSequence ?? 1, sequence = now3() - lastSentAt < 500 ? Math.max(base, lastSequence + 1) : base;
