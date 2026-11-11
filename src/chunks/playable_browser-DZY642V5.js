@@ -136994,6 +136994,7 @@ function createCoopHostV1({ build: build2, hostName, world, readWorldFile = null
         g.lastModel = null;
         g.ready = true;
       } else if (m.t === "away" || m.t === "back") away(g, m.t === "away");
+      else if (m.t === "ping" && typeof m.at === "number") link.send({ t: "pong", at: m.at });
       else if (m.t === "facts" && g.playerId && shared && m.id === shared.id) onFacts({ name: g.hello.name, facts: m.facts });
       else if (m.t === "cmd" && session && g.playerId && !g.parked) run2(g, m);
       else if (m.t === "bye") {
@@ -137157,48 +137158,128 @@ function beginCoopGuestV1({ link, build: build2, hero, onLobby = () => {
   });
 }
 var GLIDE_SNAP_PX = 160;
-function createGuestSmoothingV1(now3) {
+var LEAD_MAX_MS = 400;
+var EASE_MS = 60;
+function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
   let from = /* @__PURE__ */ new Map(), current = null, arrivedAt = 0, gap2 = 50, cache6 = null, cacheAt = -1;
+  let intent = { x: 0, y: 0 }, intentAt = 0, releasedAt = null, hold = null, speed = 0, own = null, ownAt = -1, ownId = null, lastOwn = null, err = { x: 0, y: 0 }, jump3 = true, mode = "";
   function drawn(id, e, t) {
     const f = from.get(id);
     if (!f) return e.position;
     const k = Math.min(1, (t - arrivedAt) / gap2);
     return { x: f.x + (e.position.x - f.x) * k, y: f.y + (e.position.y - f.y) * k };
   }
+  function reach(model, e, a, b) {
+    if (!collides) return a;
+    const n = Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 4);
+    let p = a;
+    for (let i = 1; i <= n; i++) {
+      const q = { x: a.x + (b.x - a.x) * i / n, y: a.y + (b.y - a.y) * i / n };
+      if (collides(model, e, q)) break;
+      p = q;
+    }
+    return p;
+  }
+  function ownPosition(model, id, e, t) {
+    if (t === ownAt && id === ownId) return own;
+    const dt = ownAt < 0 ? 16 : Math.max(0, Math.min(100, t - ownAt));
+    ownAt = t;
+    if (id !== ownId || !e.alive || !e.position) {
+      ownId = id;
+      own = e.position ? { ...e.position } : null;
+      hold = null;
+      return own;
+    }
+    const base = drawn(id, e, t), held = Math.hypot(intent.x, intent.y) > 0.1;
+    let target = base;
+    let now_ = "base";
+    if (held && speed > 0) {
+      const k = 1 / Math.hypot(intent.x, intent.y), lead = Math.min(LEAD_MAX_MS, rtt() + (t - arrivedAt));
+      target = reach(model, e, e.position, { x: e.position.x + intent.x * k * speed * lead, y: e.position.y + intent.y * k * speed * lead });
+      now_ = "lead";
+    } else if (hold && t - releasedAt < rtt() + gap2 + 80) {
+      target = hold;
+      now_ = "hold";
+    } else hold = null;
+    if (now_ !== mode) {
+      mode = now_;
+      jump3 = true;
+    }
+    if (!own) {
+      own = { ...target };
+      err = { x: 0, y: 0 };
+      jump3 = false;
+      return own;
+    }
+    if (jump3) {
+      err = { x: own.x - target.x, y: own.y - target.y };
+      jump3 = false;
+    } else {
+      const f = Math.exp(-dt / EASE_MS);
+      err = { x: err.x * f, y: err.y * f };
+    }
+    if (Math.hypot(err.x, err.y) > GLIDE_SNAP_PX) err = { x: 0, y: 0 };
+    own = { x: target.x + err.x, y: target.y + err.y };
+    return own;
+  }
   return Object.freeze({
-    arrived(before, after) {
+    // The guest held a direction (or let go): {x, y} as sent to the host.
+    intent(next) {
+      jump3 = true;
+      const was = Math.hypot(intent.x, intent.y) > 0.1, is = Math.hypot(next.x, next.y) > 0.1;
+      if (was && !is) {
+        releasedAt = now3();
+        hold = own ? { ...own } : null;
+      }
+      if (is && (!was || next.x !== intent.x || next.y !== intent.y)) intentAt = now3();
+      intent = { x: next.x, y: next.y };
+    },
+    arrived(before, after, model = null) {
       if (after === current) return;
       const t = now3(), next = /* @__PURE__ */ new Map();
       if (current && before === current) {
-        for (const [id, e] of Object.entries(after)) {
-          const old2 = current[id];
-          if (!old2 || old2 === e || !e.alive || !old2.alive || !e.position || !old2.position) continue;
-          const p = drawn(id, old2, t);
-          if (p.x === e.position.x && p.y === e.position.y) continue;
-          if (Math.hypot(e.position.x - p.x, e.position.y - p.y) > GLIDE_SNAP_PX) continue;
-          next.set(id, { x: p.x, y: p.y });
+        for (const [id2, e2] of Object.entries(after)) {
+          const old2 = current[id2];
+          if (!old2 || old2 === e2 || !e2.alive || !old2.alive || !e2.position || !old2.position) continue;
+          const p = drawn(id2, old2, t);
+          if (p.x === e2.position.x && p.y === e2.position.y) continue;
+          if (Math.hypot(e2.position.x - p.x, e2.position.y - p.y) > GLIDE_SNAP_PX) continue;
+          next.set(id2, { x: p.x, y: p.y });
         }
         gap2 = Math.max(16, Math.min(150, gap2 * 0.8 + (t - arrivedAt) * 0.2));
       }
+      const id = model?.playersById?.[model.localPlayerId]?.entityId, e = id ? after[id] : null;
+      if (e?.position && e.alive) {
+        if (lastOwn && lastOwn.id === id && model.tick > lastOwn.tick && Math.hypot(intent.x, intent.y) > 0.1 && t - intentAt > rtt() + 150) {
+          const v = Math.hypot(e.position.x - lastOwn.x, e.position.y - lastOwn.y) / ((model.tick - lastOwn.tick) * 1e3 / 60);
+          if (v > 0.01 && v < 2) speed = speed ? speed * 0.7 + v * 0.3 : v;
+        }
+        lastOwn = { id, tick: model.tick, x: e.position.x, y: e.position.y };
+      } else lastOwn = null;
       from = next;
       current = after;
       arrivedAt = t;
       cache6 = null;
+      jump3 = true;
     },
     present(model) {
-      if (!model || model.entitiesById !== current || !from.size) return model;
+      if (!model) return model;
       const t = now3();
-      if (t - arrivedAt >= gap2) return model;
+      const id = model.playersById?.[model.localPlayerId]?.entityId, e = id ? model.entitiesById[id] : null, mine = e ? ownPosition(model, id, e, t) : null;
+      const gliding = model.entitiesById === current && from.size > 0 && t - arrivedAt < gap2;
+      if (!gliding && (!mine || mine.x === e.position.x && mine.y === e.position.y)) return model;
       if (cache6 && cacheAt === t) return cache6;
-      const entitiesById = { ...current };
-      for (const id of from.keys()) {
-        const e = current[id];
-        if (e) entitiesById[id] = { ...e, position: drawn(id, e, t) };
+      const entitiesById = { ...model.entitiesById };
+      if (gliding) for (const g of from.keys()) {
+        const x = current[g];
+        if (x) entitiesById[g] = { ...x, position: drawn(g, x, t) };
       }
+      if (mine) entitiesById[id] = { ...e, position: mine };
       cache6 = { ...model, entitiesById };
       cacheAt = t;
       return cache6;
-    }
+    },
+    inspect: () => ({ gap: gap2, speed, rtt: rtt() })
   });
 }
 function createCoopGuestSessionV1({ link, playerId, early = [], release = () => {
@@ -137208,14 +137289,23 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
   const ready = new Promise((resolve) => {
     firstModel = resolve;
   });
-  const smooth24 = createGuestSmoothingV1(now3);
+  let rtt = 120;
+  const smooth24 = createGuestSmoothingV1(now3, { rtt: () => rtt, collides: (model, e, p) => {
+    const c = model.space?.collision;
+    if (!c) return true;
+    try {
+      return collidesWithTiles(c, p.x, p.y, e.hullRadius ?? 12);
+    } catch {
+      return true;
+    }
+  } });
   const handle = (m) => {
     if (m.t === "m") {
       lastFrameAt = now3();
       try {
         const before = decoder.model()?.entitiesById ?? null;
         decoder.apply(m);
-        smooth24.arrived(before, decoder.model().entitiesById);
+        smooth24.arrived(before, decoder.model().entitiesById, decoder.model());
         firstModel?.();
         firstModel = null;
       } catch (error) {
@@ -137236,6 +137326,9 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
         if (m.status === "failed") w.reject(Error(m.reason || "The host could not do that"));
         else w.resolve({ status: m.status });
       }
+    } else if (m.t === "pong" && typeof m.at === "number") {
+      const r = now3() - m.at;
+      if (r >= 0 && r < 5e3) rtt = rtt * 0.7 + r * 0.3;
     } else if (m.t === "bye") end(m.reason || "The host closed the game");
   };
   function end(reason, lost = false) {
@@ -137253,6 +137346,12 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
   release();
   early.splice(0).forEach(handle);
   link.send({ t: "ready" });
+  const ping = () => {
+    if (ended) return;
+    link.send({ t: "ping", at: now3() });
+    setTimeout2(ping, 1e3);
+  };
+  ping();
   link.onClose((reason) => {
     const left = reason === "left" || reason === "host left";
     end(left ? "The host closed the game" : "Lost the connection to the host", !left);
@@ -137268,6 +137367,7 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
       lastSequence = sequence;
       lastSentAt = now3();
       const c = { ...command, clientSequence: sequence }, id = nextId++;
+      if (c.kind === "movement.setIntent" && c.payload) smooth24.intent(c.payload);
       if (COOP_WAITED_COMMANDS.test(c.kind)) {
         const p = new Promise((resolve, reject) => waiting.set(id, { resolve, reject }));
         link.send({ t: "cmd", id, c });
@@ -137279,7 +137379,7 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
     reconcile: () => ({ status: "committed" }),
     // The map is drawn from the world file alone, so the guest's own device charts it.
     cartographyWindow,
-    resources: () => ({ coopFrames: decoder.frames(), link: link.kind })
+    resources: () => ({ coopFrames: decoder.frames(), link: link.kind, smoothing: smooth24.inspect() })
   });
   return Object.freeze({
     ready,
