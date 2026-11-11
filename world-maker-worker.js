@@ -4,6 +4,19 @@ function requireContract(condition, message) {
 }
 var RESOURCE_INVENTORY_WIRE_V1 = Object.freeze({ version: "horde-resource-inventory-wire-v1", maximumEntries: 512, ordinaryArrayMaximum: 256 });
 var GROUP_INDEX_WIRE_V1 = Object.freeze({ version: "horde-group-index-wire-v1", maximumKeys: 512, parentRecordMaximum: 256 });
+var CONTENT_CATALOG_WIRE_V1 = Object.freeze({ version: "content-catalog-wire-v1", maximumEntries: 512 });
+var DEF_ID = /^def:[0-9a-f]{32}$/;
+var own = (r, k) => {
+  const d = r && typeof r === "object" ? Object.getOwnPropertyDescriptor(r, k) : null;
+  return d && "value" in d ? d.value : void 0;
+};
+var catalogArrayV1 = (a, keys) => keys.every((k) => {
+  if (k === "length") return true;
+  const r = own(a, k);
+  if (!r || typeof r !== "object") return false;
+  if (Array.isArray(r)) return own(r, "length") === 2 && typeof own(r, "0") === "string" && DEF_ID.test(own(r, "0"));
+  return typeof own(r, "contentDefinitionId") === "string" && DEF_ID.test(own(r, "contentDefinitionId"));
+});
 var ENTITY_INDEX_WIRE_V2 = Object.freeze({ version: "entity-index-wire-capacity-v3-hordes", maximumKeys: 8192, parentRecordMaximum: 256 });
 function walkWire(value, mode) {
   const seen = /* @__PURE__ */ new WeakSet();
@@ -39,7 +52,7 @@ function walkWire(value, mode) {
     requireContract(keys.every((key2) => typeof key2 === "string"), "Symbol wire key");
     if (array) {
       const length = Object.getOwnPropertyDescriptor(current, "length").value, cloned2 = mode ? [] : null;
-      requireContract((length <= 256 || length <= 512 && keys.filter((k) => k !== "length").every((k) => {
+      requireContract((length <= 256 || length <= CONTENT_CATALOG_WIRE_V1.maximumEntries && catalogArrayV1(current, keys) || length <= 512 && keys.filter((k) => k !== "length").every((k) => {
         const d = Object.getOwnPropertyDescriptor(current, k);
         if (!d || !("value" in d)) return false;
         const r = d.value;
@@ -58,7 +71,7 @@ function walkWire(value, mode) {
       }
       return mode === 2 ? Object.freeze(cloned2) : cloned2;
     } else {
-      requireContract(keys.length <= 256 || keys.length <= ENTITY_INDEX_WIRE_V2.maximumKeys && keys.every((key2) => /^ent:[a-f0-9]{32}$/.test(key2)) || keys.length <= GROUP_INDEX_WIRE_V1.maximumKeys && keys.every((key2) => /^(ordinary|site|group|encounter):[a-zA-Z0-9:_-]+$/.test(key2)), "Oversize record");
+      requireContract(keys.length <= 256 || keys.length <= CONTENT_CATALOG_WIRE_V1.maximumEntries && keys.every((key2) => DEF_ID.test(key2)) || keys.length <= ENTITY_INDEX_WIRE_V2.maximumKeys && keys.every((key2) => /^ent:[a-f0-9]{32}$/.test(key2)) || keys.length <= GROUP_INDEX_WIRE_V1.maximumKeys && keys.every((key2) => /^(ordinary|site|group|encounter):[a-zA-Z0-9:_-]+$/.test(key2)), "Oversize record");
       const cloned2 = mode ? /* @__PURE__ */ Object.create(null) : null;
       if (mode) for (const key2 of [...keys].sort()) cloned2[key2] = null;
       for (const key2 of keys) {
@@ -5977,7 +5990,7 @@ function planCurvedRoads(asset, terrain, waterAt, ferry, stats = {}, opts = {}) 
     if (my > b[3]) b[3] = my;
   }
   const landAt = (x, y) => x < 0 || y < 0 || x >= TW || y >= TH ? -1 : land[(y / 52 | 0) * W + (x >> 6)];
-  const owner = new Int16Array(CW * H * 2), ownerKey = /* @__PURE__ */ new Map(), own = (id) => {
+  const owner = new Int16Array(CW * H * 2), ownerKey = /* @__PURE__ */ new Map(), own2 = (id) => {
     let k = ownerKey.get(id);
     if (k === void 0) {
       k = ownerKey.size + 1;
@@ -5985,9 +5998,9 @@ function planCurvedRoads(asset, terrain, waterAt, ferry, stats = {}, opts = {}) 
     }
     return k;
   };
-  for (const s of asset.settlements) for (const c of s.core) owner[c.y * CW + c.x] = own(s.id);
-  for (const s of asset.sites) for (const c of s.footprint) owner[c.y * CW + c.x] = own(s.id);
-  for (const f3 of asset.futureIslands) for (const c of [f3.entrance, f3.breathing]) owner[c.y * CW + c.x] = own(f3.id);
+  for (const s of asset.settlements) for (const c of s.core) owner[c.y * CW + c.x] = own2(s.id);
+  for (const s of asset.sites) for (const c of s.footprint) owner[c.y * CW + c.x] = own2(s.id);
+  for (const f3 of asset.futureIslands) for (const c of [f3.entrance, f3.breathing]) owner[c.y * CW + c.x] = own2(f3.id);
   const ownerAt = (x, y) => owner[(y / 26 | 0) * CW + (x >> 5)], allowOf = (ids) => ids.map((id) => ownerKey.get(id) ?? 0);
   const hl = ferry.landings[0], hb = hl?.harborTown ? harborLayoutV1(hl, hl.harborTown.pier).body : null;
   const inHarbor = (x, y) => Boolean(hb) && x >= hb.x - 1 && x <= hb.x + hb.w && y >= hb.y - 1 && y <= hb.y + hb.h, inBody0 = (x, y) => Boolean(hb) && x >= hb.x && x < hb.x + hb.w && y >= hb.y && y < hb.y + hb.h;
@@ -6889,16 +6902,16 @@ function planFerry(asset, terrain, layout) {
   for (const s of asset.settlements) for (const c of s.core) hold(c);
   for (const f3 of asset.futureIslands) for (const c of [f3.entrance, f3.breathing]) hold(c);
   const free = (x, y) => !taken.has(Math.floor(x / 32) + "," + Math.floor(y / 26));
-  const own = /* @__PURE__ */ new Set();
+  const own2 = /* @__PURE__ */ new Set();
   {
     const h = asset.settlements.find((s) => s.id === HARBOR_TOWN_ID);
-    for (const c of h?.core ?? []) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) own.add(c.x + dx + "," + (c.y + dy));
+    for (const c of h?.core ?? []) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) own2.add(c.x + dx + "," + (c.y + dy));
   }
   const others = /* @__PURE__ */ new Set();
   for (const s of asset.sites) for (const c of [...s.footprint, ...s.approach]) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) others.add(c.x + dx + "," + (c.y + dy));
   const harborFree = (x, y) => {
     const k = Math.floor(x / 32) + "," + Math.floor(y / 26);
-    return !taken.has(k) || own.has(k) && !others.has(k);
+    return !taken.has(k) || own2.has(k) && !others.has(k);
   };
   const named = {};
   for (const [n, l] of layout.landings.entries()) {
