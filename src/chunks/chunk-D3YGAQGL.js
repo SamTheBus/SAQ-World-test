@@ -4571,7 +4571,7 @@ function validateCommand(command) {
     requireContract(command.payload.noteId === "note:alderwood:woodland-trail-v1", "Unknown discovery note");
   } else if (command.kind === "quest.act") {
     closedRecord(command.payload, ["action", "questId"]);
-    requireContract(["take", "abandon", "turnIn", "search", "deliver"].includes(command.payload.action) && typeof command.payload.questId === "string" && command.payload.questId.length <= 96 && /^q[bf]:[a-z0-9:-]+$/.test(command.payload.questId), "Invalid quest command");
+    requireContract(["take", "abandon", "turnIn", "search", "deliver", "sellEtc"].includes(command.payload.action) && typeof command.payload.questId === "string" && command.payload.questId.length <= 96 && /^q[bfe]:[a-z0-9:-]+$/.test(command.payload.questId), "Invalid quest command");
   } else if (command.kind === "loot.pickup") {
     closedRecord(command.payload, ["sourceEntityId", "inventoryRevision"]);
     validateId("entityId", command.payload.sourceEntityId);
@@ -28763,6 +28763,7 @@ export {
   oldwardAreaDefinition,
   oldwardSpace,
   integerRoot,
+  goldUnit,
   minutesGold,
   potionRefillPriceV1,
   WORLD_COMBAT_VERSION,
@@ -28917,6 +28918,7 @@ export {
   HUNT_POLICY,
   huntChampionOfV1,
   huntSkinOfV1,
+  WILDERNESS_ECOLOGY_V3_MATRIX,
   WILDERNESS_VERSION,
   WILDERNESS_HASH,
   hasWilderness,

@@ -4697,9 +4697,32 @@ function siteRewardKindV1(state, source11, spawnEntityId = null, standardChest =
   return site.sizeTier === "small" && floor.encounter?.members?.[0]?.memberKey === "finale:elite-leader" && floor.enemyIds?.[0] === id && state.eliteCombat?.elitesByEntityId?.[id] ? "site-end-elite" : null;
 }
 
+// src/shared/content/quest_items_v1.js
+var QUEST_ITEM_POLICY = Object.freeze({
+  dropPer100: 50,
+  need: Object.freeze({ easy: 5, normal: 8, hard: 12 }),
+  // A leftover pile holds up to this many of one item, and this many kinds.
+  leftoverCap: 99,
+  leftoverKinds: 16
+});
+var item = (id, name, plural, creatures, art, desc, title2, why) => Object.freeze({ id, name, plural, creatures, art, desc, title: title2, why });
+var QUEST_ITEMS = Object.freeze({
+  tusk_boar: item("boar-tusk", "Boar Tusk", "Boar Tusks", "Tusk Boars", "tusk", "Pried from a Tusk Boar.", "Tusk Trouble", "Tusk Boars have been tearing up the fields {dir} of {town}."),
+  field_scarecrow: item("scarecrow-cape", "Scarecrow's Torn Cape", "Scarecrow's Torn Capes", "Field Scarecrows", "gear:cape:ragged-cape", "Torn off a Field Scarecrow.", "Rags in the Wind", "Field Scarecrows walk the meadows {dir} of {town} at all hours."),
+  slime: item("slime-jelly", "Slime Jelly", "Slime Jellies", "Green Slimes", "jelly", "Scooped from a Green Slime.", "Sticky Business", "Green Slimes have oozed into the woods {dir} of {town}."),
+  thorn_wyrm: item("wyrm-thorn", "Wyrm Thorn", "Wyrm Thorns", "Thorn Wyrms", "thorn", "Snapped off a Thorn Wyrm.", "Thorns in Our Side", "Thorn Wyrms keep coiling around the paths {dir} of {town}."),
+  griffling: item("griffling-feather", "Griffling Feather", "Griffling Feathers", "Grifflings", "feather", "Plucked from a Griffling.", "Feathers for Fletching", "Grifflings nest on the slopes {dir} of {town}."),
+  wyrmling: item("frost-scale", "Frost Scale", "Frost Scales", "Frost Wyrmlings", "scale", "Shed by a Frost Wyrmling.", "Cold Scales", "Frost Wyrmlings hunt the high ground {dir} of {town}."),
+  sand_scarab: item("scarab-shell", "Scarab Shell", "Scarab Shells", "Sand Scarabs", "shell", "Cracked off a Sand Scarab.", "Shells in the Sand", "Sand Scarabs swarm the dunes {dir} of {town}."),
+  hell_bat: item("bat-wing", "Hell Bat Wing", "Hell Bat Wings", "Hell Bats", "wing", "Torn from a Hell Bat.", "Wings of Ash", "Hell Bats circle the ash fields {dir} of {town}."),
+  bog_lily: item("lily-petal", "Bog Lily Petal", "Bog Lily Petals", "Bog Lilies", "petal", "Picked from a Bog Lily.", "Petals of the Bog", "Bog Lilies have taken root in the marsh {dir} of {town}.")
+});
+var QUEST_ITEM_FAMILIES = Object.freeze(Object.keys(QUEST_ITEMS));
+var questItemV1 = (family2) => Object.hasOwn(QUEST_ITEMS, family2) ? QUEST_ITEMS[family2] : null;
+
 // src/shared/content/quests_v1.js
 var QUESTS_VERSION = "quests-v1";
-var QUEST_KINDS = Object.freeze(["clear", "hunt", "carry", "find", "rescue"]);
+var QUEST_KINDS = Object.freeze(["clear", "hunt", "carry", "find", "rescue", "collect"]);
 var QUEST_POLICY = freezeWire({
   version: QUESTS_VERSION,
   boardNotes: 2,
@@ -4712,7 +4735,7 @@ var QUEST_POLICY = freezeWire({
   // above, and its gear piece rolls rarity like an elite kill, a mini-boss or a land boss.
   difficulty: { easy: { pay: 70, role: "elite", siteReward: null }, normal: { pay: 100, role: "boss", siteReward: "mini-boss" }, hard: { pay: 180, role: "boss", siteReward: null } },
   // About one quest in three names a gear group, most often the one that fits the job.
-  gearGroup: { oneIn: 3, fitPercent: 60, fits: { hunt: "weapons", clear: "armor", rescue: "armor", find: "accessories", carry: "accessories" } },
+  gearGroup: { oneIn: 3, fitPercent: 60, fits: { hunt: "weapons", clear: "armor", rescue: "armor", find: "accessories", carry: "accessories", collect: "weapons" } },
   // How close you must stand (pixels): a notice board, a clearing to search, and how near an enemy
   // may be when you free a captive.
   boardReach: 96,
@@ -12885,8 +12908,8 @@ function validateProvisions(p, s, validateCommand2) {
     requireContract(/^ent:[0-9a-f]{32}$/.test(r.sourceEntityId) && BigInt("0x" + r.sourceEntityId.slice(4)) <= BigInt(s.identitySequence), "Invalid provision identity fence");
     if (carried) {
       requireContract(r.arrival === i.renewal?.arrival?.heroId, "Provision arrival mismatch");
-      const item2 = i.itemsById[`item:${p.playerId}:${r.sourceEntityId}`] ?? i.renewal.groundBySourceId[r.sourceEntityId]?.item;
-      requireContract(item2?.definitionId === SUBWEAPONS[type].definitionId, "Claimed subweapon lost or replaced");
+      const item3 = i.itemsById[`item:${p.playerId}:${r.sourceEntityId}`] ?? i.renewal.groundBySourceId[r.sourceEntityId]?.item;
+      requireContract(item3?.definitionId === SUBWEAPONS[type].definitionId, "Claimed subweapon lost or replaced");
       continue;
     }
     validateCommand2(r.command);
@@ -12901,8 +12924,8 @@ function validateProvisions(p, s, validateCommand2) {
     requireContract(s.spacesByInstanceId[c.spaceInstanceId]?.spaceRevision === c.spaceRevision, "Invalid provision space");
     const applied = s.appliedCommandsById[c.commandId];
     if (applied) requireContract(applied.status === "applied" && applied.commandCanonical === canonicalStringify(c) && applied.authorityOrder === r.authorityOrder && applied.tick === r.tick, "Provision applied receipt mismatch");
-    const id = provisionSourceId(p, type), item = i.itemsById[`item:${p.playerId}:${id}`] ?? i.renewal.groundBySourceId[id]?.item;
-    requireContract(item?.definitionId === SUBWEAPONS[type].definitionId, "Claimed subweapon lost or replaced");
+    const id = provisionSourceId(p, type), item2 = i.itemsById[`item:${p.playerId}:${id}`] ?? i.renewal.groundBySourceId[id]?.item;
+    requireContract(item2?.definitionId === SUBWEAPONS[type].definitionId, "Claimed subweapon lost or replaced");
   }
 }
 function validateProvisionProgress(a, b) {
@@ -13676,7 +13699,7 @@ function rollRarityD9(depth, quality, random) {
 
 // src/shared/content/dungeon_item_bases_d9.js
 var canonicalNoun = (value) => String(value ?? "").trim().toLowerCase().replace(/[\s_-]+/g, "_");
-function dungeonItemBasesD9(item, stageScale, c) {
+function dungeonItemBasesD9(item2, stageScale, c) {
   const repScale = c.dungeonScale(stageScale).E;
   const I = (v) => {
     if (v && typeof v === "object" && "lo" in v) return v;
@@ -13684,240 +13707,240 @@ function dungeonItemBasesD9(item, stageScale, c) {
     return c.q(q.n, q.d);
   };
   const ceil = (v) => progressionWire(c.endpoint(v, "ceil"));
-  let stars = item.statsRolled || 0;
+  let stars = item2.statsRolled || 0;
   let baseRarityMult = c.q(100 + stars * 7, 100);
-  let noun = item.noun ? canonicalNoun(item.noun) : "";
-  if (item.type === "weapon" && !item.isUniqueStaff && !item.isUniqueSword && !item.isUniqueSingularity && !item.isUniqueMaelstrom) {
+  let noun = item2.noun ? canonicalNoun(item2.noun) : "";
+  if (item2.type === "weapon" && !item2.isUniqueStaff && !item2.isUniqueSword && !item2.isUniqueSingularity && !item2.isUniqueMaelstrom) {
     let baseVal = ceil(c.mul(c.mul(I(16), I(repScale)), I(baseRarityMult)));
     if (noun.includes("greatsword") || noun.includes("claymore")) {
-      item.baseAtk = ceil(c.mul(I(baseVal), I(1.15)));
-      item.baseCritDamage = 0.15;
+      item2.baseAtk = ceil(c.mul(I(baseVal), I(1.15)));
+      item2.baseCritDamage = 0.15;
     } else if (noun.includes("longsword") || noun.includes("broadsword")) {
-      item.baseAtk = ceil(c.mul(I(baseVal), I(0.95)));
-      item.baseCritChance = 0.04;
+      item2.baseAtk = ceil(c.mul(I(baseVal), I(0.95)));
+      item2.baseCritChance = 0.04;
     } else if (noun.includes("halberd") || noun.includes("battleaxe")) {
-      item.baseAtk = ceil(c.mul(I(baseVal), I(1.2)));
-      item.atkPct = 0.05;
+      item2.baseAtk = ceil(c.mul(I(baseVal), I(1.2)));
+      item2.atkPct = 0.05;
     } else if (noun.includes("warhammer") || noun.includes("mace")) {
-      item.baseAtk = ceil(c.mul(I(baseVal), I(1.1)));
-      item.baseStr = ceil(c.mul(c.mul(I(0.8), I(stageScale)), I(baseRarityMult)));
+      item2.baseAtk = ceil(c.mul(I(baseVal), I(1.1)));
+      item2.baseStr = ceil(c.mul(c.mul(I(0.8), I(stageScale)), I(baseRarityMult)));
     } else {
-      item.baseAtk = baseVal;
+      item2.baseAtk = baseVal;
     }
-  } else if (item.type === "chest" || item.type === "overall") {
-    let overallMult = item.type === "overall" ? 1.8 : 1;
+  } else if (item2.type === "chest" || item2.type === "overall") {
+    let overallMult = item2.type === "overall" ? 1.8 : 1;
     let baseDefVal = ceil(c.mul(c.mul(c.mul(I(10), I(repScale)), I(baseRarityMult)), I(overallMult)));
     let baseHpVal = ceil(c.mul(c.mul(c.mul(I(40), I(repScale)), I(baseRarityMult)), I(overallMult)));
     if (noun.includes("cuirass") || noun.includes("plate_mail") || noun.includes("full_plate")) {
-      item.baseDef = ceil(c.mul(I(baseDefVal), I(1.3)));
-      item.baseMaxHp = ceil(c.mul(I(baseHpVal), I(0.8)));
-      item.defPct = 0.04;
+      item2.baseDef = ceil(c.mul(I(baseDefVal), I(1.3)));
+      item2.baseMaxHp = ceil(c.mul(I(baseHpVal), I(0.8)));
+      item2.defPct = 0.04;
     } else if (noun.includes("hauberk") || noun.includes("chain_mail")) {
-      item.baseDef = baseDefVal;
-      item.baseMaxHp = baseHpVal;
-      item.baseBlock = 0.02;
+      item2.baseDef = baseDefVal;
+      item2.baseMaxHp = baseHpVal;
+      item2.baseBlock = 0.02;
     } else if (noun.includes("brigandine") || noun.includes("doublet") || noun.includes("trenchcoat")) {
-      item.baseDef = ceil(c.mul(I(baseDefVal), I(0.7)));
-      item.baseMaxHp = ceil(c.mul(I(baseHpVal), I(1.4)));
-      item.maxHpPct = 0.05;
+      item2.baseDef = ceil(c.mul(I(baseDefVal), I(0.7)));
+      item2.baseMaxHp = ceil(c.mul(I(baseHpVal), I(1.4)));
+      item2.maxHpPct = 0.05;
     } else if (noun.includes("exosuit")) {
-      item.baseDef = baseDefVal;
-      item.baseMaxHp = baseHpVal;
-      item.maxHpPct = 0.06;
+      item2.baseDef = baseDefVal;
+      item2.baseMaxHp = baseHpVal;
+      item2.maxHpPct = 0.06;
     } else if (noun.includes("robes")) {
-      item.baseDef = ceil(c.mul(I(baseDefVal), I(0.6)));
-      item.baseMaxHp = ceil(c.mul(I(baseHpVal), I(1.4)));
-      item.baseInt = ceil(c.mul(c.mul(I(2), I(stageScale)), I(baseRarityMult)));
+      item2.baseDef = ceil(c.mul(I(baseDefVal), I(0.6)));
+      item2.baseMaxHp = ceil(c.mul(I(baseHpVal), I(1.4)));
+      item2.baseInt = ceil(c.mul(c.mul(I(2), I(stageScale)), I(baseRarityMult)));
     } else {
-      item.baseDef = baseDefVal;
-      item.baseMaxHp = baseHpVal;
+      item2.baseDef = baseDefVal;
+      item2.baseMaxHp = baseHpVal;
     }
-  } else if (item.type === "helmet" && !item.isUniqueTempest) {
+  } else if (item2.type === "helmet" && !item2.isUniqueTempest) {
     let baseDefVal = ceil(c.mul(c.mul(I(5), I(repScale)), I(baseRarityMult)));
     let baseHpVal = ceil(c.mul(c.mul(I(20), I(repScale)), I(baseRarityMult)));
     if (noun.includes("greathelm") || noun.includes("visor")) {
-      item.baseDef = ceil(c.mul(I(baseDefVal), I(1.25)));
-      item.baseMaxHp = ceil(c.mul(I(baseHpVal), I(0.85)));
-      item.defPct = 0.03;
+      item2.baseDef = ceil(c.mul(I(baseDefVal), I(1.25)));
+      item2.baseMaxHp = ceil(c.mul(I(baseHpVal), I(0.85)));
+      item2.defPct = 0.03;
     } else if (noun.includes("armet") || noun.includes("bascinet") || noun.includes("barbuta")) {
-      item.baseDef = baseDefVal;
-      item.baseMaxHp = baseHpVal;
-      item.baseParry = 0.02;
+      item2.baseDef = baseDefVal;
+      item2.baseMaxHp = baseHpVal;
+      item2.baseParry = 0.02;
     } else if (noun.includes("circlet") || noun.includes("coif")) {
-      item.baseDef = ceil(c.mul(I(baseDefVal), I(0.65)));
-      item.baseMaxHp = ceil(c.mul(I(baseHpVal), I(1.35)));
-      item.baseCritChance = 0.03;
+      item2.baseDef = ceil(c.mul(I(baseDefVal), I(0.65)));
+      item2.baseMaxHp = ceil(c.mul(I(baseHpVal), I(1.35)));
+      item2.baseCritChance = 0.03;
     } else {
-      item.baseDef = baseDefVal;
-      item.baseMaxHp = baseHpVal;
+      item2.baseDef = baseDefVal;
+      item2.baseMaxHp = baseHpVal;
     }
-  } else if (item.type === "leggings") {
+  } else if (item2.type === "leggings") {
     let baseDefVal = ceil(c.mul(c.mul(I(5), I(repScale)), I(baseRarityMult)));
     let baseHpVal = ceil(c.mul(c.mul(I(20), I(repScale)), I(baseRarityMult)));
     if (noun.includes("legplates")) {
-      item.baseDef = ceil(c.mul(I(baseDefVal), I(1.2)));
-      item.baseMaxHp = ceil(c.mul(I(baseHpVal), I(0.8)));
-      item.defPct = 0.03;
+      item2.baseDef = ceil(c.mul(I(baseDefVal), I(1.2)));
+      item2.baseMaxHp = ceil(c.mul(I(baseHpVal), I(0.8)));
+      item2.defPct = 0.03;
     } else if (noun.includes("greaves")) {
-      item.baseDef = baseDefVal;
-      item.baseMaxHp = baseHpVal;
-      item.baseBlock = 0.02;
+      item2.baseDef = baseDefVal;
+      item2.baseMaxHp = baseHpVal;
+      item2.baseBlock = 0.02;
     } else if (noun.includes("chausses") || noun.includes("cuisses")) {
-      item.baseDef = ceil(c.mul(I(baseDefVal), I(0.7)));
-      item.baseMaxHp = ceil(c.mul(I(baseHpVal), I(1.3)));
-      item.baseParry = 0.03;
+      item2.baseDef = ceil(c.mul(I(baseDefVal), I(0.7)));
+      item2.baseMaxHp = ceil(c.mul(I(baseHpVal), I(1.3)));
+      item2.baseParry = 0.03;
     } else {
-      item.baseDef = baseDefVal;
-      item.baseMaxHp = baseHpVal;
+      item2.baseDef = baseDefVal;
+      item2.baseMaxHp = baseHpVal;
     }
-  } else if (item.type === "boots" && !item.isUniqueWarpCore) {
+  } else if (item2.type === "boots" && !item2.isUniqueWarpCore) {
     let baseDefVal = ceil(c.mul(c.mul(I(5), I(repScale)), I(baseRarityMult)));
     let baseSpdVal = ceil(c.mul(I(1), I(stageScale)));
     if (noun.includes("sabatons") || noun.includes("steel_boots") || noun.includes("steel")) {
-      item.baseDef = ceil(c.mul(I(baseDefVal), I(1.4)));
-      item.baseMoveSpeed = ceil(c.mul(I(baseSpdVal), I(0.8)));
-      item.defPct = 0.03;
+      item2.baseDef = ceil(c.mul(I(baseDefVal), I(1.4)));
+      item2.baseMoveSpeed = ceil(c.mul(I(baseSpdVal), I(0.8)));
+      item2.defPct = 0.03;
     } else if (noun.includes("sollerets")) {
-      item.baseDef = baseDefVal;
-      item.baseMoveSpeed = baseSpdVal;
-      item.baseParry = 0.02;
+      item2.baseDef = baseDefVal;
+      item2.baseMoveSpeed = baseSpdVal;
+      item2.baseParry = 0.02;
     } else if (noun.includes("treads")) {
-      item.baseDef = ceil(c.mul(I(baseDefVal), I(0.6)));
-      item.baseMoveSpeed = ceil(c.mul(I(baseSpdVal), I(1.35)));
-      item.moveSpeedPct = 0.04;
+      item2.baseDef = ceil(c.mul(I(baseDefVal), I(0.6)));
+      item2.baseMoveSpeed = ceil(c.mul(I(baseSpdVal), I(1.35)));
+      item2.moveSpeedPct = 0.04;
     } else {
-      item.baseDef = baseDefVal;
-      item.baseMoveSpeed = baseSpdVal;
+      item2.baseDef = baseDefVal;
+      item2.baseMoveSpeed = baseSpdVal;
     }
-  } else if (item.type === "ring") {
-    if (item.implicitType === void 0) {
-      if (item.baseAtk > 0) item.implicitType = "atk";
-      else if (item.baseMaxHp > 0) item.implicitType = "maxHp";
-      else item.implicitType = "def";
+  } else if (item2.type === "ring") {
+    if (item2.implicitType === void 0) {
+      if (item2.baseAtk > 0) item2.implicitType = "atk";
+      else if (item2.baseMaxHp > 0) item2.implicitType = "maxHp";
+      else item2.implicitType = "def";
     }
-    if (item.implicitType === "atk")
-      item.baseAtk = ceil(c.mul(c.mul(I(4), I(repScale)), I(baseRarityMult)));
-    else if (item.implicitType === "maxHp")
-      item.baseMaxHp = ceil(c.mul(c.mul(I(10), I(repScale)), I(baseRarityMult)));
-    else if (item.implicitType === "def")
-      item.baseDef = ceil(c.mul(c.mul(I(2.5), I(repScale)), I(baseRarityMult)));
-    if (!item.implicitPctType) {
-      if ((item.atkPct || 0) > 0) item.implicitPctType = "atkPct";
-      else if ((item.maxHpPct || 0) > 0) item.implicitPctType = "maxHpPct";
-      else if ((item.defPct || 0) > 0) item.implicitPctType = "defPct";
-      else if ((item.strPct || 0) > 0) item.implicitPctType = "strPct";
-      else if ((item.dexPct || 0) > 0) item.implicitPctType = "dexPct";
-      else if ((item.intPct || 0) > 0) item.implicitPctType = "intPct";
-      else item.implicitPctType = "atkPct";
+    if (item2.implicitType === "atk")
+      item2.baseAtk = ceil(c.mul(c.mul(I(4), I(repScale)), I(baseRarityMult)));
+    else if (item2.implicitType === "maxHp")
+      item2.baseMaxHp = ceil(c.mul(c.mul(I(10), I(repScale)), I(baseRarityMult)));
+    else if (item2.implicitType === "def")
+      item2.baseDef = ceil(c.mul(c.mul(I(2.5), I(repScale)), I(baseRarityMult)));
+    if (!item2.implicitPctType) {
+      if ((item2.atkPct || 0) > 0) item2.implicitPctType = "atkPct";
+      else if ((item2.maxHpPct || 0) > 0) item2.implicitPctType = "maxHpPct";
+      else if ((item2.defPct || 0) > 0) item2.implicitPctType = "defPct";
+      else if ((item2.strPct || 0) > 0) item2.implicitPctType = "strPct";
+      else if ((item2.dexPct || 0) > 0) item2.implicitPctType = "dexPct";
+      else if ((item2.intPct || 0) > 0) item2.implicitPctType = "intPct";
+      else item2.implicitPctType = "atkPct";
     }
     let s = progressionBigInt(stageScale);
     let implicitPctVal = Number(c.endpoint(c.add(c.q(3, 100), c.q(22n * (s - 1n), 100n * (s + 39n))), "round", 4)) / 1e4;
-    item.atkPct = 0;
-    item.maxHpPct = 0;
-    item.defPct = 0;
-    item.strPct = 0;
-    item.dexPct = 0;
-    item.intPct = 0;
-    if (item.implicitPctType) {
-      item[item.implicitPctType] = implicitPctVal;
+    item2.atkPct = 0;
+    item2.maxHpPct = 0;
+    item2.defPct = 0;
+    item2.strPct = 0;
+    item2.dexPct = 0;
+    item2.intPct = 0;
+    if (item2.implicitPctType) {
+      item2[item2.implicitPctType] = implicitPctVal;
     }
-  } else if (item.type === "subweapon" && !item.isUniqueAegis && !item.isUniqueWatch && !item.isUniqueChronicle && !item.isUniqueConduit && !item.isUniqueViper) {
-    if (item.subType === "shield") {
-      item.baseDef = ceil(c.mul(c.mul(I(1), I(repScale)), I(baseRarityMult)));
-      item.baseStr = ceil(c.mul(c.mul(I(1.5), I(stageScale)), I(baseRarityMult)));
-      let noun2 = item.noun ? canonicalNoun(item.noun) : "";
-      let stars2 = typeof item.statsRolled === "number" ? item.statsRolled : 0;
+  } else if (item2.type === "subweapon" && !item2.isUniqueAegis && !item2.isUniqueWatch && !item2.isUniqueChronicle && !item2.isUniqueConduit && !item2.isUniqueViper) {
+    if (item2.subType === "shield") {
+      item2.baseDef = ceil(c.mul(c.mul(I(1), I(repScale)), I(baseRarityMult)));
+      item2.baseStr = ceil(c.mul(c.mul(I(1.5), I(stageScale)), I(baseRarityMult)));
+      let noun2 = item2.noun ? canonicalNoun(item2.noun) : "";
+      let stars2 = typeof item2.statsRolled === "number" ? item2.statsRolled : 0;
       if (noun2.includes("tower")) {
-        item.subArchetype = "tower";
-        item.baseBlock = 0.15 + stars2 * 0.02;
-        item.blockCapBonus = 0.04 + stars2 * 8e-3;
-        item.reflectDamage = 1.2 + stars2 * 0.16;
-        item.bashAtkBonus = 0;
+        item2.subArchetype = "tower";
+        item2.baseBlock = 0.15 + stars2 * 0.02;
+        item2.blockCapBonus = 0.04 + stars2 * 8e-3;
+        item2.reflectDamage = 1.2 + stars2 * 0.16;
+        item2.bashAtkBonus = 0;
       } else if (noun2.includes("buckler")) {
-        item.subArchetype = "buckler";
-        item.baseBlock = 0.2 + stars2 * 0.025;
-        item.blockCapBonus = 0.02 + stars2 * 5e-3;
-        item.reflectDamage = 0.6 + stars2 * 0.08;
-        item.bashAtkBonus = 0.5;
+        item2.subArchetype = "buckler";
+        item2.baseBlock = 0.2 + stars2 * 0.025;
+        item2.blockCapBonus = 0.02 + stars2 * 5e-3;
+        item2.reflectDamage = 0.6 + stars2 * 0.08;
+        item2.bashAtkBonus = 0.5;
       } else {
-        item.subArchetype = "vanguard";
-        item.baseBlock = 0.15 + stars2 * 0.02;
-        item.blockCapBonus = 0.02 + stars2 * 6e-3;
-        item.reflectDamage = 1 + stars2 * 0.12;
-        item.bashAtkBonus = 0;
+        item2.subArchetype = "vanguard";
+        item2.baseBlock = 0.15 + stars2 * 0.02;
+        item2.blockCapBonus = 0.02 + stars2 * 6e-3;
+        item2.reflectDamage = 1 + stars2 * 0.12;
+        item2.bashAtkBonus = 0;
       }
-    } else if (item.subType === "dagger") {
-      item.baseAtk = ceil(c.mul(c.mul(I(0.8), I(repScale)), I(baseRarityMult)));
-      item.baseDex = ceil(c.mul(c.mul(I(1.5), I(stageScale)), I(baseRarityMult)));
-      let noun2 = item.noun ? canonicalNoun(item.noun) : "";
-      let stars2 = typeof item.statsRolled === "number" ? item.statsRolled : 0;
+    } else if (item2.subType === "dagger") {
+      item2.baseAtk = ceil(c.mul(c.mul(I(0.8), I(repScale)), I(baseRarityMult)));
+      item2.baseDex = ceil(c.mul(c.mul(I(1.5), I(stageScale)), I(baseRarityMult)));
+      let noun2 = item2.noun ? canonicalNoun(item2.noun) : "";
+      let stars2 = typeof item2.statsRolled === "number" ? item2.statsRolled : 0;
       if (noun2.includes("main")) {
-        item.subArchetype = "main_gauche";
-        item.baseParry = 0.18 + stars2 * 0.02;
-        item.parryCapBonus = 0.1 + stars2 * 0.01;
-        item.parryMitigation = 0.75;
-        item.riposteDamage = 0.8 + stars2 * 0.08;
-        item.bleedChance = 0;
-        item.offhandChance = 0;
-        item.offhandDmg = 0.35;
+        item2.subArchetype = "main_gauche";
+        item2.baseParry = 0.18 + stars2 * 0.02;
+        item2.parryCapBonus = 0.1 + stars2 * 0.01;
+        item2.parryMitigation = 0.75;
+        item2.riposteDamage = 0.8 + stars2 * 0.08;
+        item2.bleedChance = 0;
+        item2.offhandChance = 0;
+        item2.offhandDmg = 0.35;
       } else if (noun2.includes("stiletto")) {
-        item.subArchetype = "stiletto";
-        item.baseParry = 0.12 + stars2 * 0.016;
-        item.parryCapBonus = 0.02;
-        item.parryMitigation = 0.6;
-        item.riposteDamage = 1 + stars2 * 0.12;
-        item.bleedChance = 0.35 + stars2 * 0.04;
-        item.offhandChance = 0;
-        item.offhandDmg = 0.35;
+        item2.subArchetype = "stiletto";
+        item2.baseParry = 0.12 + stars2 * 0.016;
+        item2.parryCapBonus = 0.02;
+        item2.parryMitigation = 0.6;
+        item2.riposteDamage = 1 + stars2 * 0.12;
+        item2.bleedChance = 0.35 + stars2 * 0.04;
+        item2.offhandChance = 0;
+        item2.offhandDmg = 0.35;
       } else {
-        item.subArchetype = "flurry";
-        item.baseParry = 0.12 + stars2 * 0.016;
-        item.parryCapBonus = 0.02;
-        item.parryMitigation = 0.6;
-        item.riposteDamage = 0.8 + stars2 * 0.08;
-        item.offhandChance = 0.5 + stars2 * 0.05;
-        item.offhandDmg = 0.45;
-        item.bleedChance = 0.15;
+        item2.subArchetype = "flurry";
+        item2.baseParry = 0.12 + stars2 * 0.016;
+        item2.parryCapBonus = 0.02;
+        item2.parryMitigation = 0.6;
+        item2.riposteDamage = 0.8 + stars2 * 0.08;
+        item2.offhandChance = 0.5 + stars2 * 0.05;
+        item2.offhandDmg = 0.45;
+        item2.bleedChance = 0.15;
       }
-    } else if (item.subType === "tome") {
-      item.baseInt = ceil(c.mul(c.mul(I(1.5), I(stageScale)), I(baseRarityMult)));
-      item.baseAtk = ceil(c.mul(c.mul(I(0.4), I(repScale)), I(baseRarityMult)));
-      let noun2 = item.noun ? canonicalNoun(item.noun) : "";
-      let stars2 = typeof item.statsRolled === "number" ? item.statsRolled : 0;
-      if (!item.spellType) {
-        if (noun2.includes("grimoire")) item.spellType = "fire";
-        else if (noun2.includes("codex")) item.spellType = "lightning";
-        else if (noun2.includes("lexicon")) item.spellType = "frost";
-        else item.spellType = "tri";
+    } else if (item2.subType === "tome") {
+      item2.baseInt = ceil(c.mul(c.mul(I(1.5), I(stageScale)), I(baseRarityMult)));
+      item2.baseAtk = ceil(c.mul(c.mul(I(0.4), I(repScale)), I(baseRarityMult)));
+      let noun2 = item2.noun ? canonicalNoun(item2.noun) : "";
+      let stars2 = typeof item2.statsRolled === "number" ? item2.statsRolled : 0;
+      if (!item2.spellType) {
+        if (noun2.includes("grimoire")) item2.spellType = "fire";
+        else if (noun2.includes("codex")) item2.spellType = "lightning";
+        else if (noun2.includes("lexicon")) item2.spellType = "frost";
+        else item2.spellType = "tri";
       }
-      if (item.spellType === "fire") {
-        item.spellChance = Math.min(0.5, 0.25 + stars2 * 0.02);
-        item.spellPower = 1.8 + stars2 * 0.2;
-        item.baseBarrierPct = 0.2;
-        item.barrierRechargeDelay = 3;
-        item.barrierRegenRate = 0.1;
-      } else if (item.spellType === "lightning") {
-        item.spellChance = Math.min(0.6, 0.38 + stars2 * 0.03);
-        item.spellPower = 1.2 + stars2 * 0.15;
-        item.baseBarrierPct = 0.15;
-        item.barrierRechargeDelay = 2;
-        item.barrierRegenRate = 0.15;
-      } else if (item.spellType === "frost") {
-        item.spellChance = Math.min(0.5, 0.3 + stars2 * 0.025);
-        item.spellPower = 1.45 + stars2 * 0.15;
-        item.baseBarrierPct = 0.3;
-        item.barrierRechargeDelay = 4;
-        item.barrierRegenRate = 0.08;
+      if (item2.spellType === "fire") {
+        item2.spellChance = Math.min(0.5, 0.25 + stars2 * 0.02);
+        item2.spellPower = 1.8 + stars2 * 0.2;
+        item2.baseBarrierPct = 0.2;
+        item2.barrierRechargeDelay = 3;
+        item2.barrierRegenRate = 0.1;
+      } else if (item2.spellType === "lightning") {
+        item2.spellChance = Math.min(0.6, 0.38 + stars2 * 0.03);
+        item2.spellPower = 1.2 + stars2 * 0.15;
+        item2.baseBarrierPct = 0.15;
+        item2.barrierRechargeDelay = 2;
+        item2.barrierRegenRate = 0.15;
+      } else if (item2.spellType === "frost") {
+        item2.spellChance = Math.min(0.5, 0.3 + stars2 * 0.025);
+        item2.spellPower = 1.45 + stars2 * 0.15;
+        item2.baseBarrierPct = 0.3;
+        item2.barrierRechargeDelay = 4;
+        item2.barrierRegenRate = 0.08;
       } else {
-        item.spellChance = Math.min(0.5, 0.33 + stars2 * 0.02);
-        item.spellPower = 1.5 + stars2 * 0.18;
-        item.baseBarrierPct = 0.25;
-        item.barrierRechargeDelay = 3;
-        item.barrierRegenRate = 0.1;
+        item2.spellChance = Math.min(0.5, 0.33 + stars2 * 0.02);
+        item2.spellPower = 1.5 + stars2 * 0.18;
+        item2.baseBarrierPct = 0.25;
+        item2.barrierRechargeDelay = 3;
+        item2.barrierRegenRate = 0.1;
       }
     }
   }
-  return item;
+  return item2;
 }
 
 // src/shared/content/tome_profiles.js
@@ -14220,31 +14243,31 @@ function affixRollRangeD9(g, key9) {
 }
 
 // src/shared/content/dungeon_item_bases_v1.js
-function dungeonItemBases(item, stageScale) {
+function dungeonItemBases(item2, stageScale) {
   const band = Math.ceil(stageScale / 4) * 4, effective = band <= 100 ? band : 100 + Math.pow(band - 100, 0.7) * 1.5;
   const repScale = Math.pow(1.012, effective) * (1 + 0.015 * effective);
-  let stars = item.statsRolled || 0;
+  let stars = item2.statsRolled || 0;
   let baseRarityMult = 1 + stars * 0.07;
-  let noun = item.noun ? item.noun.toLowerCase() : "";
-  if (item.type === "weapon" && !item.isUniqueStaff && !item.isUniqueSword && !item.isUniqueSingularity && !item.isUniqueMaelstrom) {
+  let noun = item2.noun ? item2.noun.toLowerCase() : "";
+  if (item2.type === "weapon" && !item2.isUniqueStaff && !item2.isUniqueSword && !item2.isUniqueSingularity && !item2.isUniqueMaelstrom) {
     let baseVal = Math.ceil(16 * repScale * baseRarityMult);
     if (noun.includes("greatsword") || noun.includes("claymore")) {
-      item.baseAtk = Math.ceil(baseVal * 1.15);
-      item.baseCritDamage = 0.15;
+      item2.baseAtk = Math.ceil(baseVal * 1.15);
+      item2.baseCritDamage = 0.15;
     } else if (noun.includes("longsword") || noun.includes("broadsword")) {
-      item.baseAtk = Math.ceil(baseVal * 0.95);
-      item.baseCritChance = 0.04;
+      item2.baseAtk = Math.ceil(baseVal * 0.95);
+      item2.baseCritChance = 0.04;
     } else if (noun.includes("halberd") || noun.includes("battleaxe")) {
-      item.baseAtk = Math.ceil(baseVal * 1.2);
-      item.atkPct = 0.05;
+      item2.baseAtk = Math.ceil(baseVal * 1.2);
+      item2.atkPct = 0.05;
     } else if (noun.includes("warhammer") || noun.includes("mace")) {
-      item.baseAtk = Math.ceil(baseVal * 1.1);
-      item.baseStr = Math.ceil(0.8 * stageScale * baseRarityMult);
+      item2.baseAtk = Math.ceil(baseVal * 1.1);
+      item2.baseStr = Math.ceil(0.8 * stageScale * baseRarityMult);
     } else {
-      item.baseAtk = baseVal;
+      item2.baseAtk = baseVal;
     }
-  } else if (item.type === "chest" || item.type === "overall") {
-    let overallMult = item.type === "overall" ? 1.8 : 1;
+  } else if (item2.type === "chest" || item2.type === "overall") {
+    let overallMult = item2.type === "overall" ? 1.8 : 1;
     let baseDefVal = Math.ceil(
       10 * repScale * baseRarityMult * overallMult
     );
@@ -14252,215 +14275,215 @@ function dungeonItemBases(item, stageScale) {
       40 * repScale * baseRarityMult * overallMult
     );
     if (noun.includes("cuirass") || noun.includes("plate_mail") || noun.includes("full_plate")) {
-      item.baseDef = Math.ceil(baseDefVal * 1.3);
-      item.baseMaxHp = Math.ceil(baseHpVal * 0.8);
-      item.defPct = 0.04;
+      item2.baseDef = Math.ceil(baseDefVal * 1.3);
+      item2.baseMaxHp = Math.ceil(baseHpVal * 0.8);
+      item2.defPct = 0.04;
     } else if (noun.includes("hauberk") || noun.includes("chain_mail")) {
-      item.baseDef = baseDefVal;
-      item.baseMaxHp = baseHpVal;
-      item.baseBlock = 0.02;
+      item2.baseDef = baseDefVal;
+      item2.baseMaxHp = baseHpVal;
+      item2.baseBlock = 0.02;
     } else if (noun.includes("brigandine") || noun.includes("doublet") || noun.includes("trenchcoat")) {
-      item.baseDef = Math.ceil(baseDefVal * 0.7);
-      item.baseMaxHp = Math.ceil(baseHpVal * 1.4);
-      item.maxHpPct = 0.05;
+      item2.baseDef = Math.ceil(baseDefVal * 0.7);
+      item2.baseMaxHp = Math.ceil(baseHpVal * 1.4);
+      item2.maxHpPct = 0.05;
     } else if (noun.includes("exosuit")) {
-      item.baseDef = baseDefVal;
-      item.baseMaxHp = baseHpVal;
-      item.maxHpPct = 0.06;
+      item2.baseDef = baseDefVal;
+      item2.baseMaxHp = baseHpVal;
+      item2.maxHpPct = 0.06;
     } else if (noun.includes("robes")) {
-      item.baseDef = Math.ceil(baseDefVal * 0.6);
-      item.baseMaxHp = Math.ceil(baseHpVal * 1.4);
-      item.baseInt = Math.ceil(2 * stageScale * baseRarityMult);
+      item2.baseDef = Math.ceil(baseDefVal * 0.6);
+      item2.baseMaxHp = Math.ceil(baseHpVal * 1.4);
+      item2.baseInt = Math.ceil(2 * stageScale * baseRarityMult);
     } else {
-      item.baseDef = baseDefVal;
-      item.baseMaxHp = baseHpVal;
+      item2.baseDef = baseDefVal;
+      item2.baseMaxHp = baseHpVal;
     }
-  } else if (item.type === "helmet" && !item.isUniqueTempest) {
+  } else if (item2.type === "helmet" && !item2.isUniqueTempest) {
     let baseDefVal = Math.ceil(5 * repScale * baseRarityMult);
     let baseHpVal = Math.ceil(20 * repScale * baseRarityMult);
     if (noun.includes("greathelm") || noun.includes("visor")) {
-      item.baseDef = Math.ceil(baseDefVal * 1.25);
-      item.baseMaxHp = Math.ceil(baseHpVal * 0.85);
-      item.defPct = 0.03;
+      item2.baseDef = Math.ceil(baseDefVal * 1.25);
+      item2.baseMaxHp = Math.ceil(baseHpVal * 0.85);
+      item2.defPct = 0.03;
     } else if (noun.includes("armet") || noun.includes("bascinet") || noun.includes("barbuta")) {
-      item.baseDef = baseDefVal;
-      item.baseMaxHp = baseHpVal;
-      item.baseParry = 0.02;
+      item2.baseDef = baseDefVal;
+      item2.baseMaxHp = baseHpVal;
+      item2.baseParry = 0.02;
     } else if (noun.includes("circlet") || noun.includes("coif")) {
-      item.baseDef = Math.ceil(baseDefVal * 0.65);
-      item.baseMaxHp = Math.ceil(baseHpVal * 1.35);
-      item.baseCritChance = 0.03;
+      item2.baseDef = Math.ceil(baseDefVal * 0.65);
+      item2.baseMaxHp = Math.ceil(baseHpVal * 1.35);
+      item2.baseCritChance = 0.03;
     } else {
-      item.baseDef = baseDefVal;
-      item.baseMaxHp = baseHpVal;
+      item2.baseDef = baseDefVal;
+      item2.baseMaxHp = baseHpVal;
     }
-  } else if (item.type === "leggings") {
+  } else if (item2.type === "leggings") {
     let baseDefVal = Math.ceil(5 * repScale * baseRarityMult);
     let baseHpVal = Math.ceil(20 * repScale * baseRarityMult);
     if (noun.includes("legplates")) {
-      item.baseDef = Math.ceil(baseDefVal * 1.2);
-      item.baseMaxHp = Math.ceil(baseHpVal * 0.8);
-      item.defPct = 0.03;
+      item2.baseDef = Math.ceil(baseDefVal * 1.2);
+      item2.baseMaxHp = Math.ceil(baseHpVal * 0.8);
+      item2.defPct = 0.03;
     } else if (noun.includes("greaves")) {
-      item.baseDef = baseDefVal;
-      item.baseMaxHp = baseHpVal;
-      item.baseBlock = 0.02;
+      item2.baseDef = baseDefVal;
+      item2.baseMaxHp = baseHpVal;
+      item2.baseBlock = 0.02;
     } else if (noun.includes("chausses") || noun.includes("cuisses")) {
-      item.baseDef = Math.ceil(baseDefVal * 0.7);
-      item.baseMaxHp = Math.ceil(baseHpVal * 1.3);
-      item.baseParry = 0.03;
+      item2.baseDef = Math.ceil(baseDefVal * 0.7);
+      item2.baseMaxHp = Math.ceil(baseHpVal * 1.3);
+      item2.baseParry = 0.03;
     } else {
-      item.baseDef = baseDefVal;
-      item.baseMaxHp = baseHpVal;
+      item2.baseDef = baseDefVal;
+      item2.baseMaxHp = baseHpVal;
     }
-  } else if (item.type === "boots" && !item.isUniqueWarpCore) {
+  } else if (item2.type === "boots" && !item2.isUniqueWarpCore) {
     let baseDefVal = Math.ceil(5 * repScale * baseRarityMult);
     let baseSpdVal = Math.ceil(1 * stageScale);
     if (noun.includes("sabatons") || noun.includes("steel_boots") || noun.includes("steel")) {
-      item.baseDef = Math.ceil(baseDefVal * 1.4);
-      item.baseMoveSpeed = Math.ceil(baseSpdVal * 0.8);
-      item.defPct = 0.03;
+      item2.baseDef = Math.ceil(baseDefVal * 1.4);
+      item2.baseMoveSpeed = Math.ceil(baseSpdVal * 0.8);
+      item2.defPct = 0.03;
     } else if (noun.includes("sollerets")) {
-      item.baseDef = baseDefVal;
-      item.baseMoveSpeed = baseSpdVal;
-      item.baseParry = 0.02;
+      item2.baseDef = baseDefVal;
+      item2.baseMoveSpeed = baseSpdVal;
+      item2.baseParry = 0.02;
     } else if (noun.includes("treads")) {
-      item.baseDef = Math.ceil(baseDefVal * 0.6);
-      item.baseMoveSpeed = Math.ceil(baseSpdVal * 1.35);
-      item.moveSpeedPct = 0.04;
+      item2.baseDef = Math.ceil(baseDefVal * 0.6);
+      item2.baseMoveSpeed = Math.ceil(baseSpdVal * 1.35);
+      item2.moveSpeedPct = 0.04;
     } else {
-      item.baseDef = baseDefVal;
-      item.baseMoveSpeed = baseSpdVal;
+      item2.baseDef = baseDefVal;
+      item2.baseMoveSpeed = baseSpdVal;
     }
-  } else if (item.type === "ring") {
-    if (item.implicitType === void 0) {
-      if (item.baseAtk > 0) item.implicitType = "atk";
-      else if (item.baseMaxHp > 0) item.implicitType = "maxHp";
-      else item.implicitType = "def";
+  } else if (item2.type === "ring") {
+    if (item2.implicitType === void 0) {
+      if (item2.baseAtk > 0) item2.implicitType = "atk";
+      else if (item2.baseMaxHp > 0) item2.implicitType = "maxHp";
+      else item2.implicitType = "def";
     }
-    if (item.implicitType === "atk")
-      item.baseAtk = Math.ceil(4 * repScale * baseRarityMult);
-    else if (item.implicitType === "maxHp")
-      item.baseMaxHp = Math.ceil(10 * repScale * baseRarityMult);
-    else if (item.implicitType === "def")
-      item.baseDef = Math.ceil(2.5 * repScale * baseRarityMult);
-    if (!item.implicitPctType) {
-      if ((item.atkPct || 0) > 0) item.implicitPctType = "atkPct";
-      else if ((item.maxHpPct || 0) > 0) item.implicitPctType = "maxHpPct";
-      else if ((item.defPct || 0) > 0) item.implicitPctType = "defPct";
-      else if ((item.strPct || 0) > 0) item.implicitPctType = "strPct";
-      else if ((item.dexPct || 0) > 0) item.implicitPctType = "dexPct";
-      else if ((item.intPct || 0) > 0) item.implicitPctType = "intPct";
-      else item.implicitPctType = "atkPct";
+    if (item2.implicitType === "atk")
+      item2.baseAtk = Math.ceil(4 * repScale * baseRarityMult);
+    else if (item2.implicitType === "maxHp")
+      item2.baseMaxHp = Math.ceil(10 * repScale * baseRarityMult);
+    else if (item2.implicitType === "def")
+      item2.baseDef = Math.ceil(2.5 * repScale * baseRarityMult);
+    if (!item2.implicitPctType) {
+      if ((item2.atkPct || 0) > 0) item2.implicitPctType = "atkPct";
+      else if ((item2.maxHpPct || 0) > 0) item2.implicitPctType = "maxHpPct";
+      else if ((item2.defPct || 0) > 0) item2.implicitPctType = "defPct";
+      else if ((item2.strPct || 0) > 0) item2.implicitPctType = "strPct";
+      else if ((item2.dexPct || 0) > 0) item2.implicitPctType = "dexPct";
+      else if ((item2.intPct || 0) > 0) item2.implicitPctType = "intPct";
+      else item2.implicitPctType = "atkPct";
     }
     let s = Math.max(1, stageScale);
     let implicitPctVal = parseFloat((0.03 + 0.22 * (s - 1) / (s - 1 + 40)).toFixed(4));
-    item.atkPct = 0;
-    item.maxHpPct = 0;
-    item.defPct = 0;
-    item.strPct = 0;
-    item.dexPct = 0;
-    item.intPct = 0;
-    if (item.implicitPctType) {
-      item[item.implicitPctType] = implicitPctVal;
+    item2.atkPct = 0;
+    item2.maxHpPct = 0;
+    item2.defPct = 0;
+    item2.strPct = 0;
+    item2.dexPct = 0;
+    item2.intPct = 0;
+    if (item2.implicitPctType) {
+      item2[item2.implicitPctType] = implicitPctVal;
     }
-  } else if (item.type === "subweapon" && !item.isUniqueAegis && !item.isUniqueWatch && !item.isUniqueChronicle && !item.isUniqueConduit && !item.isUniqueViper) {
-    if (item.subType === "shield") {
-      item.baseDef = Math.ceil(1 * repScale * baseRarityMult);
-      item.baseStr = Math.ceil(1.5 * stageScale * baseRarityMult);
-      let noun2 = item.noun ? item.noun.toLowerCase() : "";
-      let stars2 = typeof item.statsRolled === "number" ? item.statsRolled : 0;
+  } else if (item2.type === "subweapon" && !item2.isUniqueAegis && !item2.isUniqueWatch && !item2.isUniqueChronicle && !item2.isUniqueConduit && !item2.isUniqueViper) {
+    if (item2.subType === "shield") {
+      item2.baseDef = Math.ceil(1 * repScale * baseRarityMult);
+      item2.baseStr = Math.ceil(1.5 * stageScale * baseRarityMult);
+      let noun2 = item2.noun ? item2.noun.toLowerCase() : "";
+      let stars2 = typeof item2.statsRolled === "number" ? item2.statsRolled : 0;
       if (noun2.includes("tower")) {
-        item.subArchetype = "tower";
-        item.baseBlock = 0.15 + stars2 * 0.02;
-        item.blockCapBonus = 0.04 + stars2 * 8e-3;
-        item.reflectDamage = 1.2 + stars2 * 0.16;
-        item.bashAtkBonus = 0;
+        item2.subArchetype = "tower";
+        item2.baseBlock = 0.15 + stars2 * 0.02;
+        item2.blockCapBonus = 0.04 + stars2 * 8e-3;
+        item2.reflectDamage = 1.2 + stars2 * 0.16;
+        item2.bashAtkBonus = 0;
       } else if (noun2.includes("buckler")) {
-        item.subArchetype = "buckler";
-        item.baseBlock = 0.2 + stars2 * 0.025;
-        item.blockCapBonus = 0.02 + stars2 * 5e-3;
-        item.reflectDamage = 0.6 + stars2 * 0.08;
-        item.bashAtkBonus = 0.5;
+        item2.subArchetype = "buckler";
+        item2.baseBlock = 0.2 + stars2 * 0.025;
+        item2.blockCapBonus = 0.02 + stars2 * 5e-3;
+        item2.reflectDamage = 0.6 + stars2 * 0.08;
+        item2.bashAtkBonus = 0.5;
       } else {
-        item.subArchetype = "vanguard";
-        item.baseBlock = 0.15 + stars2 * 0.02;
-        item.blockCapBonus = 0.02 + stars2 * 6e-3;
-        item.reflectDamage = 1 + stars2 * 0.12;
-        item.bashAtkBonus = 0;
+        item2.subArchetype = "vanguard";
+        item2.baseBlock = 0.15 + stars2 * 0.02;
+        item2.blockCapBonus = 0.02 + stars2 * 6e-3;
+        item2.reflectDamage = 1 + stars2 * 0.12;
+        item2.bashAtkBonus = 0;
       }
-    } else if (item.subType === "dagger") {
-      item.baseAtk = Math.ceil(0.8 * repScale * baseRarityMult);
-      item.baseDex = Math.ceil(1.5 * stageScale * baseRarityMult);
-      let noun2 = item.noun ? item.noun.toLowerCase() : "";
-      let stars2 = typeof item.statsRolled === "number" ? item.statsRolled : 0;
+    } else if (item2.subType === "dagger") {
+      item2.baseAtk = Math.ceil(0.8 * repScale * baseRarityMult);
+      item2.baseDex = Math.ceil(1.5 * stageScale * baseRarityMult);
+      let noun2 = item2.noun ? item2.noun.toLowerCase() : "";
+      let stars2 = typeof item2.statsRolled === "number" ? item2.statsRolled : 0;
       if (noun2.includes("main")) {
-        item.subArchetype = "main_gauche";
-        item.baseParry = 0.18 + stars2 * 0.02;
-        item.parryCapBonus = 0.1 + stars2 * 0.01;
-        item.parryMitigation = 0.75;
-        item.riposteDamage = 0.8 + stars2 * 0.08;
-        item.bleedChance = 0;
-        item.offhandChance = 0;
-        item.offhandDmg = 0.35;
+        item2.subArchetype = "main_gauche";
+        item2.baseParry = 0.18 + stars2 * 0.02;
+        item2.parryCapBonus = 0.1 + stars2 * 0.01;
+        item2.parryMitigation = 0.75;
+        item2.riposteDamage = 0.8 + stars2 * 0.08;
+        item2.bleedChance = 0;
+        item2.offhandChance = 0;
+        item2.offhandDmg = 0.35;
       } else if (noun2.includes("stiletto")) {
-        item.subArchetype = "stiletto";
-        item.baseParry = 0.12 + stars2 * 0.016;
-        item.parryCapBonus = 0.02;
-        item.parryMitigation = 0.6;
-        item.riposteDamage = 1 + stars2 * 0.12;
-        item.bleedChance = 0.35 + stars2 * 0.04;
-        item.offhandChance = 0;
-        item.offhandDmg = 0.35;
+        item2.subArchetype = "stiletto";
+        item2.baseParry = 0.12 + stars2 * 0.016;
+        item2.parryCapBonus = 0.02;
+        item2.parryMitigation = 0.6;
+        item2.riposteDamage = 1 + stars2 * 0.12;
+        item2.bleedChance = 0.35 + stars2 * 0.04;
+        item2.offhandChance = 0;
+        item2.offhandDmg = 0.35;
       } else {
-        item.subArchetype = "flurry";
-        item.baseParry = 0.12 + stars2 * 0.016;
-        item.parryCapBonus = 0.02;
-        item.parryMitigation = 0.6;
-        item.riposteDamage = 0.8 + stars2 * 0.08;
-        item.offhandChance = 0.5 + stars2 * 0.05;
-        item.offhandDmg = 0.45;
-        item.bleedChance = 0.15;
+        item2.subArchetype = "flurry";
+        item2.baseParry = 0.12 + stars2 * 0.016;
+        item2.parryCapBonus = 0.02;
+        item2.parryMitigation = 0.6;
+        item2.riposteDamage = 0.8 + stars2 * 0.08;
+        item2.offhandChance = 0.5 + stars2 * 0.05;
+        item2.offhandDmg = 0.45;
+        item2.bleedChance = 0.15;
       }
-    } else if (item.subType === "tome") {
-      item.baseInt = Math.ceil(1.5 * stageScale * baseRarityMult);
-      item.baseAtk = Math.ceil(0.4 * repScale * baseRarityMult);
-      let noun2 = item.noun ? item.noun.toLowerCase() : "";
-      let stars2 = typeof item.statsRolled === "number" ? item.statsRolled : 0;
-      if (!item.spellType) {
-        if (noun2.includes("grimoire")) item.spellType = "fire";
-        else if (noun2.includes("codex")) item.spellType = "lightning";
-        else if (noun2.includes("lexicon")) item.spellType = "frost";
-        else item.spellType = "tri";
+    } else if (item2.subType === "tome") {
+      item2.baseInt = Math.ceil(1.5 * stageScale * baseRarityMult);
+      item2.baseAtk = Math.ceil(0.4 * repScale * baseRarityMult);
+      let noun2 = item2.noun ? item2.noun.toLowerCase() : "";
+      let stars2 = typeof item2.statsRolled === "number" ? item2.statsRolled : 0;
+      if (!item2.spellType) {
+        if (noun2.includes("grimoire")) item2.spellType = "fire";
+        else if (noun2.includes("codex")) item2.spellType = "lightning";
+        else if (noun2.includes("lexicon")) item2.spellType = "frost";
+        else item2.spellType = "tri";
       }
-      if (item.spellType === "fire") {
-        item.spellChance = Math.min(0.5, 0.25 + stars2 * 0.02);
-        item.spellPower = 1.8 + stars2 * 0.2;
-        item.baseBarrierPct = 0.2;
-        item.barrierRechargeDelay = 3;
-        item.barrierRegenRate = 0.1;
-      } else if (item.spellType === "lightning") {
-        item.spellChance = Math.min(0.6, 0.38 + stars2 * 0.03);
-        item.spellPower = 1.2 + stars2 * 0.15;
-        item.baseBarrierPct = 0.15;
-        item.barrierRechargeDelay = 2;
-        item.barrierRegenRate = 0.15;
-      } else if (item.spellType === "frost") {
-        item.spellChance = Math.min(0.5, 0.3 + stars2 * 0.025);
-        item.spellPower = 1.45 + stars2 * 0.15;
-        item.baseBarrierPct = 0.3;
-        item.barrierRechargeDelay = 4;
-        item.barrierRegenRate = 0.08;
+      if (item2.spellType === "fire") {
+        item2.spellChance = Math.min(0.5, 0.25 + stars2 * 0.02);
+        item2.spellPower = 1.8 + stars2 * 0.2;
+        item2.baseBarrierPct = 0.2;
+        item2.barrierRechargeDelay = 3;
+        item2.barrierRegenRate = 0.1;
+      } else if (item2.spellType === "lightning") {
+        item2.spellChance = Math.min(0.6, 0.38 + stars2 * 0.03);
+        item2.spellPower = 1.2 + stars2 * 0.15;
+        item2.baseBarrierPct = 0.15;
+        item2.barrierRechargeDelay = 2;
+        item2.barrierRegenRate = 0.15;
+      } else if (item2.spellType === "frost") {
+        item2.spellChance = Math.min(0.5, 0.3 + stars2 * 0.025);
+        item2.spellPower = 1.45 + stars2 * 0.15;
+        item2.baseBarrierPct = 0.3;
+        item2.barrierRechargeDelay = 4;
+        item2.barrierRegenRate = 0.08;
       } else {
-        item.spellChance = Math.min(0.5, 0.33 + stars2 * 0.02);
-        item.spellPower = 1.5 + stars2 * 0.18;
-        item.baseBarrierPct = 0.25;
-        item.barrierRechargeDelay = 3;
-        item.barrierRegenRate = 0.1;
+        item2.spellChance = Math.min(0.5, 0.33 + stars2 * 0.02);
+        item2.spellPower = 1.5 + stars2 * 0.18;
+        item2.baseBarrierPct = 0.25;
+        item2.barrierRechargeDelay = 3;
+        item2.barrierRegenRate = 0.1;
       }
     }
   }
-  return item;
+  return item2;
 }
 
 // src/shared/content/dungeon_rarity.js
@@ -14639,31 +14662,31 @@ function generateGear(seed, depth, { tier: tier2 = null, family: family2 = null,
 
 // src/shared/content/dungeon_item_bases.js
 var canonicalNoun2 = (value) => String(value ?? "").trim().toLowerCase().replace(/[\s_-]+/g, "_");
-function dungeonItemBases2(item, stageScale) {
+function dungeonItemBases2(item2, stageScale) {
   const band = Math.ceil(stageScale / 4) * 4, effective = band <= 100 ? band : 100 + Math.pow(band - 100, 0.7) * 1.5;
   const repScale = Math.pow(1.012, effective) * (1 + 0.015 * effective);
-  let stars = item.statsRolled || 0;
+  let stars = item2.statsRolled || 0;
   let baseRarityMult = 1 + stars * 0.07;
-  let noun = item.noun ? canonicalNoun2(item.noun) : "";
-  if (item.type === "weapon" && !item.isUniqueStaff && !item.isUniqueSword && !item.isUniqueSingularity && !item.isUniqueMaelstrom) {
+  let noun = item2.noun ? canonicalNoun2(item2.noun) : "";
+  if (item2.type === "weapon" && !item2.isUniqueStaff && !item2.isUniqueSword && !item2.isUniqueSingularity && !item2.isUniqueMaelstrom) {
     let baseVal = Math.ceil(16 * repScale * baseRarityMult);
     if (noun.includes("greatsword") || noun.includes("claymore")) {
-      item.baseAtk = Math.ceil(baseVal * 1.15);
-      item.baseCritDamage = 0.15;
+      item2.baseAtk = Math.ceil(baseVal * 1.15);
+      item2.baseCritDamage = 0.15;
     } else if (noun.includes("longsword") || noun.includes("broadsword")) {
-      item.baseAtk = Math.ceil(baseVal * 0.95);
-      item.baseCritChance = 0.04;
+      item2.baseAtk = Math.ceil(baseVal * 0.95);
+      item2.baseCritChance = 0.04;
     } else if (noun.includes("halberd") || noun.includes("battleaxe")) {
-      item.baseAtk = Math.ceil(baseVal * 1.2);
-      item.atkPct = 0.05;
+      item2.baseAtk = Math.ceil(baseVal * 1.2);
+      item2.atkPct = 0.05;
     } else if (noun.includes("warhammer") || noun.includes("mace")) {
-      item.baseAtk = Math.ceil(baseVal * 1.1);
-      item.baseStr = Math.ceil(0.8 * stageScale * baseRarityMult);
+      item2.baseAtk = Math.ceil(baseVal * 1.1);
+      item2.baseStr = Math.ceil(0.8 * stageScale * baseRarityMult);
     } else {
-      item.baseAtk = baseVal;
+      item2.baseAtk = baseVal;
     }
-  } else if (item.type === "chest" || item.type === "overall") {
-    let overallMult = item.type === "overall" ? 1.8 : 1;
+  } else if (item2.type === "chest" || item2.type === "overall") {
+    let overallMult = item2.type === "overall" ? 1.8 : 1;
     let baseDefVal = Math.ceil(
       10 * repScale * baseRarityMult * overallMult
     );
@@ -14671,215 +14694,215 @@ function dungeonItemBases2(item, stageScale) {
       40 * repScale * baseRarityMult * overallMult
     );
     if (noun.includes("cuirass") || noun.includes("plate_mail") || noun.includes("full_plate")) {
-      item.baseDef = Math.ceil(baseDefVal * 1.3);
-      item.baseMaxHp = Math.ceil(baseHpVal * 0.8);
-      item.defPct = 0.04;
+      item2.baseDef = Math.ceil(baseDefVal * 1.3);
+      item2.baseMaxHp = Math.ceil(baseHpVal * 0.8);
+      item2.defPct = 0.04;
     } else if (noun.includes("hauberk") || noun.includes("chain_mail")) {
-      item.baseDef = baseDefVal;
-      item.baseMaxHp = baseHpVal;
-      item.baseBlock = 0.02;
+      item2.baseDef = baseDefVal;
+      item2.baseMaxHp = baseHpVal;
+      item2.baseBlock = 0.02;
     } else if (noun.includes("brigandine") || noun.includes("doublet") || noun.includes("trenchcoat")) {
-      item.baseDef = Math.ceil(baseDefVal * 0.7);
-      item.baseMaxHp = Math.ceil(baseHpVal * 1.4);
-      item.maxHpPct = 0.05;
+      item2.baseDef = Math.ceil(baseDefVal * 0.7);
+      item2.baseMaxHp = Math.ceil(baseHpVal * 1.4);
+      item2.maxHpPct = 0.05;
     } else if (noun.includes("exosuit")) {
-      item.baseDef = baseDefVal;
-      item.baseMaxHp = baseHpVal;
-      item.maxHpPct = 0.06;
+      item2.baseDef = baseDefVal;
+      item2.baseMaxHp = baseHpVal;
+      item2.maxHpPct = 0.06;
     } else if (noun.includes("robes")) {
-      item.baseDef = Math.ceil(baseDefVal * 0.6);
-      item.baseMaxHp = Math.ceil(baseHpVal * 1.4);
-      item.baseInt = Math.ceil(2 * stageScale * baseRarityMult);
+      item2.baseDef = Math.ceil(baseDefVal * 0.6);
+      item2.baseMaxHp = Math.ceil(baseHpVal * 1.4);
+      item2.baseInt = Math.ceil(2 * stageScale * baseRarityMult);
     } else {
-      item.baseDef = baseDefVal;
-      item.baseMaxHp = baseHpVal;
+      item2.baseDef = baseDefVal;
+      item2.baseMaxHp = baseHpVal;
     }
-  } else if (item.type === "helmet" && !item.isUniqueTempest) {
+  } else if (item2.type === "helmet" && !item2.isUniqueTempest) {
     let baseDefVal = Math.ceil(5 * repScale * baseRarityMult);
     let baseHpVal = Math.ceil(20 * repScale * baseRarityMult);
     if (noun.includes("greathelm") || noun.includes("visor")) {
-      item.baseDef = Math.ceil(baseDefVal * 1.25);
-      item.baseMaxHp = Math.ceil(baseHpVal * 0.85);
-      item.defPct = 0.03;
+      item2.baseDef = Math.ceil(baseDefVal * 1.25);
+      item2.baseMaxHp = Math.ceil(baseHpVal * 0.85);
+      item2.defPct = 0.03;
     } else if (noun.includes("armet") || noun.includes("bascinet") || noun.includes("barbuta")) {
-      item.baseDef = baseDefVal;
-      item.baseMaxHp = baseHpVal;
-      item.baseParry = 0.02;
+      item2.baseDef = baseDefVal;
+      item2.baseMaxHp = baseHpVal;
+      item2.baseParry = 0.02;
     } else if (noun.includes("circlet") || noun.includes("coif")) {
-      item.baseDef = Math.ceil(baseDefVal * 0.65);
-      item.baseMaxHp = Math.ceil(baseHpVal * 1.35);
-      item.baseCritChance = 0.03;
+      item2.baseDef = Math.ceil(baseDefVal * 0.65);
+      item2.baseMaxHp = Math.ceil(baseHpVal * 1.35);
+      item2.baseCritChance = 0.03;
     } else {
-      item.baseDef = baseDefVal;
-      item.baseMaxHp = baseHpVal;
+      item2.baseDef = baseDefVal;
+      item2.baseMaxHp = baseHpVal;
     }
-  } else if (item.type === "leggings") {
+  } else if (item2.type === "leggings") {
     let baseDefVal = Math.ceil(5 * repScale * baseRarityMult);
     let baseHpVal = Math.ceil(20 * repScale * baseRarityMult);
     if (noun.includes("legplates")) {
-      item.baseDef = Math.ceil(baseDefVal * 1.2);
-      item.baseMaxHp = Math.ceil(baseHpVal * 0.8);
-      item.defPct = 0.03;
+      item2.baseDef = Math.ceil(baseDefVal * 1.2);
+      item2.baseMaxHp = Math.ceil(baseHpVal * 0.8);
+      item2.defPct = 0.03;
     } else if (noun.includes("greaves")) {
-      item.baseDef = baseDefVal;
-      item.baseMaxHp = baseHpVal;
-      item.baseBlock = 0.02;
+      item2.baseDef = baseDefVal;
+      item2.baseMaxHp = baseHpVal;
+      item2.baseBlock = 0.02;
     } else if (noun.includes("chausses") || noun.includes("cuisses")) {
-      item.baseDef = Math.ceil(baseDefVal * 0.7);
-      item.baseMaxHp = Math.ceil(baseHpVal * 1.3);
-      item.baseParry = 0.03;
+      item2.baseDef = Math.ceil(baseDefVal * 0.7);
+      item2.baseMaxHp = Math.ceil(baseHpVal * 1.3);
+      item2.baseParry = 0.03;
     } else {
-      item.baseDef = baseDefVal;
-      item.baseMaxHp = baseHpVal;
+      item2.baseDef = baseDefVal;
+      item2.baseMaxHp = baseHpVal;
     }
-  } else if (item.type === "boots" && !item.isUniqueWarpCore) {
+  } else if (item2.type === "boots" && !item2.isUniqueWarpCore) {
     let baseDefVal = Math.ceil(5 * repScale * baseRarityMult);
     let baseSpdVal = Math.ceil(1 * stageScale);
     if (noun.includes("sabatons") || noun.includes("steel_boots") || noun.includes("steel")) {
-      item.baseDef = Math.ceil(baseDefVal * 1.4);
-      item.baseMoveSpeed = Math.ceil(baseSpdVal * 0.8);
-      item.defPct = 0.03;
+      item2.baseDef = Math.ceil(baseDefVal * 1.4);
+      item2.baseMoveSpeed = Math.ceil(baseSpdVal * 0.8);
+      item2.defPct = 0.03;
     } else if (noun.includes("sollerets")) {
-      item.baseDef = baseDefVal;
-      item.baseMoveSpeed = baseSpdVal;
-      item.baseParry = 0.02;
+      item2.baseDef = baseDefVal;
+      item2.baseMoveSpeed = baseSpdVal;
+      item2.baseParry = 0.02;
     } else if (noun.includes("treads")) {
-      item.baseDef = Math.ceil(baseDefVal * 0.6);
-      item.baseMoveSpeed = Math.ceil(baseSpdVal * 1.35);
-      item.moveSpeedPct = 0.04;
+      item2.baseDef = Math.ceil(baseDefVal * 0.6);
+      item2.baseMoveSpeed = Math.ceil(baseSpdVal * 1.35);
+      item2.moveSpeedPct = 0.04;
     } else {
-      item.baseDef = baseDefVal;
-      item.baseMoveSpeed = baseSpdVal;
+      item2.baseDef = baseDefVal;
+      item2.baseMoveSpeed = baseSpdVal;
     }
-  } else if (item.type === "ring") {
-    if (item.implicitType === void 0) {
-      if (item.baseAtk > 0) item.implicitType = "atk";
-      else if (item.baseMaxHp > 0) item.implicitType = "maxHp";
-      else item.implicitType = "def";
+  } else if (item2.type === "ring") {
+    if (item2.implicitType === void 0) {
+      if (item2.baseAtk > 0) item2.implicitType = "atk";
+      else if (item2.baseMaxHp > 0) item2.implicitType = "maxHp";
+      else item2.implicitType = "def";
     }
-    if (item.implicitType === "atk")
-      item.baseAtk = Math.ceil(4 * repScale * baseRarityMult);
-    else if (item.implicitType === "maxHp")
-      item.baseMaxHp = Math.ceil(10 * repScale * baseRarityMult);
-    else if (item.implicitType === "def")
-      item.baseDef = Math.ceil(2.5 * repScale * baseRarityMult);
-    if (!item.implicitPctType) {
-      if ((item.atkPct || 0) > 0) item.implicitPctType = "atkPct";
-      else if ((item.maxHpPct || 0) > 0) item.implicitPctType = "maxHpPct";
-      else if ((item.defPct || 0) > 0) item.implicitPctType = "defPct";
-      else if ((item.strPct || 0) > 0) item.implicitPctType = "strPct";
-      else if ((item.dexPct || 0) > 0) item.implicitPctType = "dexPct";
-      else if ((item.intPct || 0) > 0) item.implicitPctType = "intPct";
-      else item.implicitPctType = "atkPct";
+    if (item2.implicitType === "atk")
+      item2.baseAtk = Math.ceil(4 * repScale * baseRarityMult);
+    else if (item2.implicitType === "maxHp")
+      item2.baseMaxHp = Math.ceil(10 * repScale * baseRarityMult);
+    else if (item2.implicitType === "def")
+      item2.baseDef = Math.ceil(2.5 * repScale * baseRarityMult);
+    if (!item2.implicitPctType) {
+      if ((item2.atkPct || 0) > 0) item2.implicitPctType = "atkPct";
+      else if ((item2.maxHpPct || 0) > 0) item2.implicitPctType = "maxHpPct";
+      else if ((item2.defPct || 0) > 0) item2.implicitPctType = "defPct";
+      else if ((item2.strPct || 0) > 0) item2.implicitPctType = "strPct";
+      else if ((item2.dexPct || 0) > 0) item2.implicitPctType = "dexPct";
+      else if ((item2.intPct || 0) > 0) item2.implicitPctType = "intPct";
+      else item2.implicitPctType = "atkPct";
     }
     let s = Math.max(1, stageScale);
     let implicitPctVal = parseFloat((0.03 + 0.22 * (s - 1) / (s - 1 + 40)).toFixed(4));
-    item.atkPct = 0;
-    item.maxHpPct = 0;
-    item.defPct = 0;
-    item.strPct = 0;
-    item.dexPct = 0;
-    item.intPct = 0;
-    if (item.implicitPctType) {
-      item[item.implicitPctType] = implicitPctVal;
+    item2.atkPct = 0;
+    item2.maxHpPct = 0;
+    item2.defPct = 0;
+    item2.strPct = 0;
+    item2.dexPct = 0;
+    item2.intPct = 0;
+    if (item2.implicitPctType) {
+      item2[item2.implicitPctType] = implicitPctVal;
     }
-  } else if (item.type === "subweapon" && !item.isUniqueAegis && !item.isUniqueWatch && !item.isUniqueChronicle && !item.isUniqueConduit && !item.isUniqueViper) {
-    if (item.subType === "shield") {
-      item.baseDef = Math.ceil(1 * repScale * baseRarityMult);
-      item.baseStr = Math.ceil(1.5 * stageScale * baseRarityMult);
-      let noun2 = item.noun ? canonicalNoun2(item.noun) : "";
-      let stars2 = typeof item.statsRolled === "number" ? item.statsRolled : 0;
+  } else if (item2.type === "subweapon" && !item2.isUniqueAegis && !item2.isUniqueWatch && !item2.isUniqueChronicle && !item2.isUniqueConduit && !item2.isUniqueViper) {
+    if (item2.subType === "shield") {
+      item2.baseDef = Math.ceil(1 * repScale * baseRarityMult);
+      item2.baseStr = Math.ceil(1.5 * stageScale * baseRarityMult);
+      let noun2 = item2.noun ? canonicalNoun2(item2.noun) : "";
+      let stars2 = typeof item2.statsRolled === "number" ? item2.statsRolled : 0;
       if (noun2.includes("tower")) {
-        item.subArchetype = "tower";
-        item.baseBlock = 0.15 + stars2 * 0.02;
-        item.blockCapBonus = 0.04 + stars2 * 8e-3;
-        item.reflectDamage = 1.2 + stars2 * 0.16;
-        item.bashAtkBonus = 0;
+        item2.subArchetype = "tower";
+        item2.baseBlock = 0.15 + stars2 * 0.02;
+        item2.blockCapBonus = 0.04 + stars2 * 8e-3;
+        item2.reflectDamage = 1.2 + stars2 * 0.16;
+        item2.bashAtkBonus = 0;
       } else if (noun2.includes("buckler")) {
-        item.subArchetype = "buckler";
-        item.baseBlock = 0.2 + stars2 * 0.025;
-        item.blockCapBonus = 0.02 + stars2 * 5e-3;
-        item.reflectDamage = 0.6 + stars2 * 0.08;
-        item.bashAtkBonus = 0.5;
+        item2.subArchetype = "buckler";
+        item2.baseBlock = 0.2 + stars2 * 0.025;
+        item2.blockCapBonus = 0.02 + stars2 * 5e-3;
+        item2.reflectDamage = 0.6 + stars2 * 0.08;
+        item2.bashAtkBonus = 0.5;
       } else {
-        item.subArchetype = "vanguard";
-        item.baseBlock = 0.15 + stars2 * 0.02;
-        item.blockCapBonus = 0.02 + stars2 * 6e-3;
-        item.reflectDamage = 1 + stars2 * 0.12;
-        item.bashAtkBonus = 0;
+        item2.subArchetype = "vanguard";
+        item2.baseBlock = 0.15 + stars2 * 0.02;
+        item2.blockCapBonus = 0.02 + stars2 * 6e-3;
+        item2.reflectDamage = 1 + stars2 * 0.12;
+        item2.bashAtkBonus = 0;
       }
-    } else if (item.subType === "dagger") {
-      item.baseAtk = Math.ceil(0.8 * repScale * baseRarityMult);
-      item.baseDex = Math.ceil(1.5 * stageScale * baseRarityMult);
-      let noun2 = item.noun ? canonicalNoun2(item.noun) : "";
-      let stars2 = typeof item.statsRolled === "number" ? item.statsRolled : 0;
+    } else if (item2.subType === "dagger") {
+      item2.baseAtk = Math.ceil(0.8 * repScale * baseRarityMult);
+      item2.baseDex = Math.ceil(1.5 * stageScale * baseRarityMult);
+      let noun2 = item2.noun ? canonicalNoun2(item2.noun) : "";
+      let stars2 = typeof item2.statsRolled === "number" ? item2.statsRolled : 0;
       if (noun2.includes("main")) {
-        item.subArchetype = "main_gauche";
-        item.baseParry = 0.18 + stars2 * 0.02;
-        item.parryCapBonus = 0.1 + stars2 * 0.01;
-        item.parryMitigation = 0.75;
-        item.riposteDamage = 0.8 + stars2 * 0.08;
-        item.bleedChance = 0;
-        item.offhandChance = 0;
-        item.offhandDmg = 0.35;
+        item2.subArchetype = "main_gauche";
+        item2.baseParry = 0.18 + stars2 * 0.02;
+        item2.parryCapBonus = 0.1 + stars2 * 0.01;
+        item2.parryMitigation = 0.75;
+        item2.riposteDamage = 0.8 + stars2 * 0.08;
+        item2.bleedChance = 0;
+        item2.offhandChance = 0;
+        item2.offhandDmg = 0.35;
       } else if (noun2.includes("stiletto")) {
-        item.subArchetype = "stiletto";
-        item.baseParry = 0.12 + stars2 * 0.016;
-        item.parryCapBonus = 0.02;
-        item.parryMitigation = 0.6;
-        item.riposteDamage = 1 + stars2 * 0.12;
-        item.bleedChance = 0.35 + stars2 * 0.04;
-        item.offhandChance = 0;
-        item.offhandDmg = 0.35;
+        item2.subArchetype = "stiletto";
+        item2.baseParry = 0.12 + stars2 * 0.016;
+        item2.parryCapBonus = 0.02;
+        item2.parryMitigation = 0.6;
+        item2.riposteDamage = 1 + stars2 * 0.12;
+        item2.bleedChance = 0.35 + stars2 * 0.04;
+        item2.offhandChance = 0;
+        item2.offhandDmg = 0.35;
       } else {
-        item.subArchetype = "flurry";
-        item.baseParry = 0.12 + stars2 * 0.016;
-        item.parryCapBonus = 0.02;
-        item.parryMitigation = 0.6;
-        item.riposteDamage = 0.8 + stars2 * 0.08;
-        item.offhandChance = 0.5 + stars2 * 0.05;
-        item.offhandDmg = 0.45;
-        item.bleedChance = 0.15;
+        item2.subArchetype = "flurry";
+        item2.baseParry = 0.12 + stars2 * 0.016;
+        item2.parryCapBonus = 0.02;
+        item2.parryMitigation = 0.6;
+        item2.riposteDamage = 0.8 + stars2 * 0.08;
+        item2.offhandChance = 0.5 + stars2 * 0.05;
+        item2.offhandDmg = 0.45;
+        item2.bleedChance = 0.15;
       }
-    } else if (item.subType === "tome") {
-      item.baseInt = Math.ceil(1.5 * stageScale * baseRarityMult);
-      item.baseAtk = Math.ceil(0.4 * repScale * baseRarityMult);
-      let noun2 = item.noun ? canonicalNoun2(item.noun) : "";
-      let stars2 = typeof item.statsRolled === "number" ? item.statsRolled : 0;
-      if (!item.spellType) {
-        if (noun2.includes("grimoire")) item.spellType = "fire";
-        else if (noun2.includes("codex")) item.spellType = "lightning";
-        else if (noun2.includes("lexicon")) item.spellType = "frost";
-        else item.spellType = "tri";
+    } else if (item2.subType === "tome") {
+      item2.baseInt = Math.ceil(1.5 * stageScale * baseRarityMult);
+      item2.baseAtk = Math.ceil(0.4 * repScale * baseRarityMult);
+      let noun2 = item2.noun ? canonicalNoun2(item2.noun) : "";
+      let stars2 = typeof item2.statsRolled === "number" ? item2.statsRolled : 0;
+      if (!item2.spellType) {
+        if (noun2.includes("grimoire")) item2.spellType = "fire";
+        else if (noun2.includes("codex")) item2.spellType = "lightning";
+        else if (noun2.includes("lexicon")) item2.spellType = "frost";
+        else item2.spellType = "tri";
       }
-      if (item.spellType === "fire") {
-        item.spellChance = Math.min(0.5, 0.25 + stars2 * 0.02);
-        item.spellPower = 1.8 + stars2 * 0.2;
-        item.baseBarrierPct = 0.2;
-        item.barrierRechargeDelay = 3;
-        item.barrierRegenRate = 0.1;
-      } else if (item.spellType === "lightning") {
-        item.spellChance = Math.min(0.6, 0.38 + stars2 * 0.03);
-        item.spellPower = 1.2 + stars2 * 0.15;
-        item.baseBarrierPct = 0.15;
-        item.barrierRechargeDelay = 2;
-        item.barrierRegenRate = 0.15;
-      } else if (item.spellType === "frost") {
-        item.spellChance = Math.min(0.5, 0.3 + stars2 * 0.025);
-        item.spellPower = 1.45 + stars2 * 0.15;
-        item.baseBarrierPct = 0.3;
-        item.barrierRechargeDelay = 4;
-        item.barrierRegenRate = 0.08;
+      if (item2.spellType === "fire") {
+        item2.spellChance = Math.min(0.5, 0.25 + stars2 * 0.02);
+        item2.spellPower = 1.8 + stars2 * 0.2;
+        item2.baseBarrierPct = 0.2;
+        item2.barrierRechargeDelay = 3;
+        item2.barrierRegenRate = 0.1;
+      } else if (item2.spellType === "lightning") {
+        item2.spellChance = Math.min(0.6, 0.38 + stars2 * 0.03);
+        item2.spellPower = 1.2 + stars2 * 0.15;
+        item2.baseBarrierPct = 0.15;
+        item2.barrierRechargeDelay = 2;
+        item2.barrierRegenRate = 0.15;
+      } else if (item2.spellType === "frost") {
+        item2.spellChance = Math.min(0.5, 0.3 + stars2 * 0.025);
+        item2.spellPower = 1.45 + stars2 * 0.15;
+        item2.baseBarrierPct = 0.3;
+        item2.barrierRechargeDelay = 4;
+        item2.barrierRegenRate = 0.08;
       } else {
-        item.spellChance = Math.min(0.5, 0.33 + stars2 * 0.02);
-        item.spellPower = 1.5 + stars2 * 0.18;
-        item.baseBarrierPct = 0.25;
-        item.barrierRechargeDelay = 3;
-        item.barrierRegenRate = 0.1;
+        item2.spellChance = Math.min(0.5, 0.33 + stars2 * 0.02);
+        item2.spellPower = 1.5 + stars2 * 0.18;
+        item2.baseBarrierPct = 0.25;
+        item2.barrierRechargeDelay = 3;
+        item2.barrierRegenRate = 0.1;
       }
     }
   }
-  return item;
+  return item2;
 }
 
 // src/shared/content/generated_gear_d7_v2.js
@@ -15108,10 +15131,10 @@ function adjust(def, key9, old, value) {
   def[group][field2] = sum(sum(def[group][field2] ?? 0, old, -1), value);
 }
 var cache2 = /* @__PURE__ */ new Map();
-function workshopResult(item) {
-  const g = item.generated, steps = item.workshop?.steps ?? [];
+function workshopResult(item2) {
+  const g = item2.generated, steps = item2.workshop?.steps ?? [];
   if (!steps.length) return { definition: g?.definition, tier: g?.rarityTier ?? 0, affixes: g?.affixes ?? [], enchants: 0, lockedLine: null, set: null };
-  requireContract(g && item.workshop.version === WORKSHOP_VERSION && steps.length <= MAX_WORKSHOP_STEPS, "Invalid workshop overlay");
+  requireContract(g && item2.workshop.version === WORKSHOP_VERSION && steps.length <= MAX_WORKSHOP_STEPS, "Invalid workshop overlay");
   const key9 = canonicalStringify([g, steps]);
   if (cache2.has(key9)) return cache2.get(key9);
   let definition = copyWire(g.definition), tier2 = g.rarityTier, affixes = copyWire(g.affixes), enchants = 0, lockedLine = null, set2 = null, unenchanted = null;
@@ -15173,8 +15196,8 @@ function workshopResult(item) {
   cache2.set(key9, result);
   return result;
 }
-var unmodifiedItem = (item) => {
-  const value = { ...item };
+var unmodifiedItem = (item2) => {
+  const value = { ...item2 };
   delete value.workshop;
   return value;
 };
@@ -15370,10 +15393,10 @@ var CLASS_KIT_EQUIPMENT = Object.freeze([
 
 // src/shared/content/equipment.js
 var knownItemDefinitionId = (id, generated) => Boolean(EQUIPMENT[id]) || Boolean(generated?.definition) && typeof id === "string" && id === generated.definition.definitionId && /^d7-[a-z]+-[a-z]+$/.test(id);
-var itemDefinition = (item) => item?.workshop ? workshopResult(item).definition : item?.generated?.definition ?? EQUIPMENT[item?.definitionId];
-var equipmentRequiredLevel = (player, item) => combatPlayer(player) && item?.generated?.progression?.combatHash ? item.generated.itemPower : null;
-var equipmentLevelAllowed = (player, item) => {
-  const required = equipmentRequiredLevel(player, item);
+var itemDefinition = (item2) => item2?.workshop ? workshopResult(item2).definition : item2?.generated?.definition ?? EQUIPMENT[item2?.definitionId];
+var equipmentRequiredLevel = (player, item2) => combatPlayer(player) && item2?.generated?.progression?.combatHash ? item2.generated.itemPower : null;
+var equipmentLevelAllowed = (player, item2) => {
+  const required = equipmentRequiredLevel(player, item2);
   return required === null || progressionBigInt(player.progression.level) >= progressionBigInt(required);
 };
 var EQUIPMENT_SLOTS = Object.freeze(["weapon", "helmet", "chest", "leggings", "overall", "boots", "ring1", "ring2"]);
@@ -15801,8 +15824,8 @@ function validateClassKit(p, s, validateCommand2) {
   requireContract(Array.isArray(k.sourceEntityIds) && k.sourceEntityIds.length === CLASS_KIT_PIECES.length && new Set(k.sourceEntityIds).size === CLASS_KIT_PIECES.length, "Invalid class kit pieces");
   for (const [n, id] of k.sourceEntityIds.entries()) {
     requireContract(/^ent:[0-9a-f]{32}$/.test(id) && BigInt("0x" + id.slice(4)) <= BigInt(s.identitySequence), "Invalid class kit identity fence");
-    const item = i.itemsById[`item:${p.playerId}:${id}`] ?? i.renewal.groundBySourceId[id]?.item;
-    requireContract(item?.definitionId === CLASS_KITS[k.heroClass][CLASS_KIT_PIECES[n]], "Class kit piece lost or replaced");
+    const item2 = i.itemsById[`item:${p.playerId}:${id}`] ?? i.renewal.groundBySourceId[id]?.item;
+    requireContract(item2?.definitionId === CLASS_KITS[k.heroClass][CLASS_KIT_PIECES[n]], "Class kit piece lost or replaced");
   }
   if (k.arrival !== void 0) return;
   validateCommand2(k.command);
@@ -16033,11 +16056,11 @@ var SHOP_FAMILIES_CLASSLESS = freezeWire({ general: ["boots", "ring"], smith: ["
 var restockDay = (tick) => Math.floor((tick + RESTOCK_SHIFT) / WORLD_TIME_POLICY.cycleTicks);
 var shopTier = (npc) => /capital|city/.test(npc.settlementId ?? "") ? "city" : /town/.test(npc.settlementId ?? "") ? "town" : "village";
 var townLevel = (npc) => [1, 1, 6, 11, 21, 41][npc.band] ?? 1;
-var sellBase = (item) => {
-  const power2 = progressionBigInt(item.generated?.itemPower ?? 1), bounded2 = Number(power2 > BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) ? BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) : power2);
-  return (2 + Math.floor(bounded2 / 2)) * 2 ** (item.generated?.rarityTier ?? 0);
+var sellBase = (item2) => {
+  const power2 = progressionBigInt(item2.generated?.itemPower ?? 1), bounded2 = Number(power2 > BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) ? BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) : power2);
+  return (2 + Math.floor(bounded2 / 2)) * 2 ** (item2.generated?.rarityTier ?? 0);
 };
-var dailyBuyPrice = (item) => shopPriceV1(Number(progressionBigInt(item.generated?.itemPower ?? 1)), item.generated?.rarityTier ?? 0);
+var dailyBuyPrice = (item2) => shopPriceV1(Number(progressionBigInt(item2.generated?.itemPower ?? 1)), item2.generated?.rarityTier ?? 0);
 var purchaseCap = (s) => hasWorldCombat(s) ? MAX_DAILY_PURCHASES : SETTLEMENT_LIFE_POLICY.maximumPurchaseRecords;
 function dailyOffer(s, p, npc, day, slot, level, cls) {
   const sourceEntityId = "ent:" + token2("daily-stock-v1/" + WORLD_COMBAT_HASH + "/" + (cls ?? "-") + "/" + s.campaign.seed.seedHex + "/" + p.playerId + "/" + npc.id + "/" + day + "/" + slot), key9 = sourceEntityId + "/" + level;
@@ -16053,14 +16076,14 @@ function dailyOffer(s, p, npc, day, slot, level, cls) {
     }
     const families = cls ? SHOP_FAMILIES[npc.role] : SHOP_FAMILIES_CLASSLESS[npc.role], family2 = families[(slot + day) % families.length];
     const progression = { ...rewardProgressionD9(level, sourceEntityId), combatHash: WORLD_COMBAT_HASH, combatQuality: "ordinary", ...cls ? { gearClass: cls, wardrobe: WARDROBE_V1, affixes: AFFIXES_V2 } : { armor: "overall" } }, generated = generateGear3(gearSeed(s, p, sourceEntityId), progression, { tier: rarity, family: family2 });
-    const item = { itemId: `item:${p.playerId}:${sourceEntityId}`, definitionId: generated.definition.definitionId, ownerPlayerId: p.playerId, sourceEntityId, generated: copyWire(generated) };
+    const item2 = { itemId: `item:${p.playerId}:${sourceEntityId}`, definitionId: generated.definition.definitionId, ownerPlayerId: p.playerId, sourceEntityId, generated: copyWire(generated) };
     if (stockCache.size >= 256) stockCache.delete(stockCache.keys().next().value);
-    stockCache.set(key9, freezeWire({ offer: { id: DAILY + day + ":" + slot + ":" + level, family: family2, price: dailyBuyPrice(item) }, sourceEntityId, item }));
+    stockCache.set(key9, freezeWire({ offer: { id: DAILY + day + ":" + slot + ":" + level, family: family2, price: dailyBuyPrice(item2) }, sourceEntityId, item: item2 }));
   }
   return stockCache.get(key9);
 }
-function validateDailyItem(s, p, r, item) {
-  const [, day, slot, level] = r.offerId.split(":").map(Number), n = serviceNpcsFor(s.d9World?.plannedWorld).find((n2) => n2.id === r.npcId), base = unmodifiedItem(item);
+function validateDailyItem(s, p, r, item2) {
+  const [, day, slot, level] = r.offerId.split(":").map(Number), n = serviceNpcsFor(s.d9World?.plannedWorld).find((n2) => n2.id === r.npcId), base = unmodifiedItem(item2);
   requireContract(n && hasWorldCombat(s) && Number.isSafeInteger(day) && Number.isSafeInteger(slot) && Number.isSafeInteger(level) && restockDay(r.tick) === day && slot >= 0 && slot < SHOP_TIERS[shopTier(n)].count && level >= townLevel(n) && level <= 50, "Daily stock purchase identity");
   const q = dailyOffer(s, p, n, day, slot, level, base.generated?.progression?.gearClass ?? null);
   requireContract(q.offer.id === r.offerId && same2(q.item, base) && same2(r.item, base), "Purchased gear changed");
@@ -16072,25 +16095,25 @@ function validateServiceOrigin(p, o, id) {
   closedRecord(o, ["servicePurchase", "sourceEntityId"]);
   requireContract(o.servicePurchase === id && servicePurchase(p, id), "Unknown purchased gear provenance");
 }
-function validateServiceItem(s, p, item) {
-  const r = servicePurchase(p, item.sourceEntityId);
+function validateServiceItem(s, p, item2) {
+  const r = servicePurchase(p, item2.sourceEntityId);
   if (r?.offerId.startsWith(DAILY)) {
-    validateDailyItem(s, p, r, item);
-    return item;
+    validateDailyItem(s, p, r, item2);
+    return item2;
   }
-  const n = serviceNpcsFor(s.d9World?.plannedWorld).find((n2) => n2.id === r?.npcId), stock = n && [...serviceStock(s, p, n), ...heroClassOf(p.d8) ? serviceStock(s, p, n, null) : [], ...hasWorldCombat(s) ? serviceStock(s, p, n, null, true) : []].find((q) => q.offer.id === r.offerId && same2(q.item, unmodifiedItem(item)));
-  requireContract(stock && same2(r.item, unmodifiedItem(item)), "Purchased gear changed");
-  return item;
+  const n = serviceNpcsFor(s.d9World?.plannedWorld).find((n2) => n2.id === r?.npcId), stock = n && [...serviceStock(s, p, n), ...heroClassOf(p.d8) ? serviceStock(s, p, n, null) : [], ...hasWorldCombat(s) ? serviceStock(s, p, n, null, true) : []].find((q) => q.offer.id === r.offerId && same2(q.item, unmodifiedItem(item2)));
+  requireContract(stock && same2(r.item, unmodifiedItem(item2)), "Purchased gear changed");
+  return item2;
 }
-var worldDrop = (item, o) => Boolean(item.generated && typeof item.generated.progression?.combatHash === "string" && (o.groupId || o.servicePurchase || o.quest));
+var worldDrop = (item2, o) => Boolean(item2.generated && typeof item2.generated.progression?.combatHash === "string" && (o.groupId || o.servicePurchase || o.quest));
 var MAX_HOT_SALE_RECEIPTS = 2048;
-function saleQuote(p, item) {
-  const d = itemDefinition(item), o = p.inventory.renewal?.originsByItemId[item?.itemId];
-  if (!item || item.ownerPlayerId !== p.playerId || !o || item.sourceEntityId === null || !(ordinary.has(item.definitionId) || worldDrop(item, o)) || item.locked || item.protected || item.unique || d?.unique || d?.classification === "unique-landmark" || Object.values(p.inventory.equipped).includes(item.itemId) || Object.values(p.inventory.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item.sourceEntityId) || isClassKitSource(p, item.sourceEntityId) || (item.generated?.rarityTier ?? 0) > SETTLEMENT_LIFE_POLICY.sale.maximumRarity) return null;
+function saleQuote(p, item2) {
+  const d = itemDefinition(item2), o = p.inventory.renewal?.originsByItemId[item2?.itemId];
+  if (!item2 || item2.ownerPlayerId !== p.playerId || !o || item2.sourceEntityId === null || !(ordinary.has(item2.definitionId) || worldDrop(item2, o)) || item2.locked || item2.protected || item2.unique || d?.unique || d?.classification === "unique-landmark" || Object.values(p.inventory.equipped).includes(item2.itemId) || Object.values(p.inventory.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item2.sourceEntityId) || isClassKitSource(p, item2.sourceEntityId) || (item2.generated?.rarityTier ?? 0) > SETTLEMENT_LIFE_POLICY.sale.maximumRarity) return null;
   if (!o.servicePurchase && !o.groupId && !o.quest) return null;
-  const power2 = progressionBigInt(item.generated?.itemPower ?? 1), bounded2 = Number(power2 > BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) ? BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) : power2);
-  if (!ordinary.has(item.definitionId)) return String(combatPlayer(p) ? salePriceV1(Number(power2), item.generated?.rarityTier ?? 0) : sellBase(item));
-  return String(SETTLEMENT_LIFE_POLICY.sale.baseGold + bounded2 * SETTLEMENT_LIFE_POLICY.sale.perItemPower + (item.generated?.rarityTier ?? 0) * SETTLEMENT_LIFE_POLICY.sale.perRarityTier);
+  const power2 = progressionBigInt(item2.generated?.itemPower ?? 1), bounded2 = Number(power2 > BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) ? BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) : power2);
+  if (!ordinary.has(item2.definitionId)) return String(combatPlayer(p) ? salePriceV1(Number(power2), item2.generated?.rarityTier ?? 0) : sellBase(item2));
+  return String(SETTLEMENT_LIFE_POLICY.sale.baseGold + bounded2 * SETTLEMENT_LIFE_POLICY.sale.perItemPower + (item2.generated?.rarityTier ?? 0) * SETTLEMENT_LIFE_POLICY.sale.perRarityTier);
 }
 function serviceGoldAdjustment(p, gold) {
   const l = p.inventory.services;
@@ -16228,7 +16251,7 @@ function migrateGeneratedNouns(s) {
       requireContract(canonicalStringify(next.affixes) === canonicalStringify(g.affixes) && canonicalStringify(next.salvage) === canonicalStringify(g.salvage), "Migration rerolled gear");
       container.generated = next;
     };
-    for (const item of Object.values(inv.itemsById)) fix(item, item.sourceEntityId);
+    for (const item2 of Object.values(inv.itemsById)) fix(item2, item2.sourceEntityId);
     for (const [id, ground] of Object.entries(inv.renewal?.groundBySourceId ?? {})) fix(ground.item, id);
     for (const [id, r] of Object.entries(inv.rewardsByEntityId)) fix(r, id);
   }
@@ -16244,19 +16267,19 @@ function installD7(s) {
   }
   return migrateGeneratedNouns(s);
 }
-var salvageQuote = (p, item) => {
-  if (!item) return null;
-  const materials3 = item.generated?.salvage ?? salvagePayload4(`legacy-salvage-v1/${item.itemId}`, 0);
-  return { materials: materials3, fingerprint: gearHash4(canonicalStringify({ item, materials: copyWire(materials3) })).toString(16) };
+var salvageQuote = (p, item2) => {
+  if (!item2) return null;
+  const materials3 = item2.generated?.salvage ?? salvagePayload4(`legacy-salvage-v1/${item2.itemId}`, 0);
+  return { materials: materials3, fingerprint: gearHash4(canonicalStringify({ item: item2, materials: copyWire(materials3) })).toString(16) };
 };
 function autoSalvageReward(s, p, reward, origin2) {
   const inv = p.inventory, id = `item:${p.playerId}:${reward.sourceEntityId}`;
   requireContract(inv.d7 && reward.generated && !reward.claimed && !inv.d7.autoSalvaged[id], "Invalid automatic salvage");
-  const item = { itemId: id, definitionId: reward.definitionId, ownerPlayerId: p.playerId, sourceEntityId: reward.sourceEntityId, generated: copyWire(reward.generated) }, quote = salvageQuote(p, item);
+  const item2 = { itemId: id, definitionId: reward.definitionId, ownerPlayerId: p.playerId, sourceEntityId: reward.sourceEntityId, generated: copyWire(reward.generated) }, quote = salvageQuote(p, item2);
   reward.claimed = true;
   reward.autoSalvage = { state: "AUTO_SALVAGED", eligibleTick: reward.autoSalvageEligibleTick, tick: s.tick };
   inv.revision++;
-  inv.d7.autoSalvaged[id] = { state: "AUTO_SALVAGED", item: copyWire(item), origin: copyWire(origin2), reward: copyWire(reward), materials: copyWire(quote.materials), eligibleTick: reward.autoSalvageEligibleTick, tick: s.tick, revision: inv.revision };
+  inv.d7.autoSalvaged[id] = { state: "AUTO_SALVAGED", item: copyWire(item2), origin: copyWire(origin2), reward: copyWire(reward), materials: copyWire(quote.materials), eligibleTick: reward.autoSalvageEligibleTick, tick: s.tick, revision: inv.revision };
   for (const [k, n] of Object.entries(quote.materials)) {
     inv.d7.credits[k] = safeInteger((inv.d7.credits[k] ?? 0) + n);
     inv.economy.materials[k] = safeInteger((inv.economy.materials[k] ?? 0) + n);
@@ -16292,13 +16315,13 @@ function validateSalvage(p, s, validateCommand2) {
   let retired = 0, autoRetired = 0;
   for (const [id, r] of Object.entries(d.salvaged)) {
     closedRecord(r, ["item", "origin", "reward", "materials", "command", "authorityOrder", "tick", "revision"]);
-    const item = r.item;
-    requireContract(item.itemId === id && item.ownerPlayerId === p.playerId && item.sourceEntityId !== null && !inv.itemsById[id] && !inv.renewal.groundBySourceId[item.sourceEntityId], "Salvage terminal ownership");
-    requireContract(!Object.values(inv.subweapons.claims).some((c) => c.sourceEntityId === item.sourceEntityId), "Provision salvaged");
-    if (servicePurchase(p, item.sourceEntityId)) validateServiceItem(s, p, item);
-    else if (item.generated) validateGeneratedGear(item.generated, gearSeed(s, p, item.sourceEntityId), item.generated.contentDepth);
-    if (r.reward) requireContract(r.reward.sourceEntityId === item.sourceEntityId && r.reward.claimed && r.reward.definitionId === item.definitionId && same3(r.reward.generated ?? null, item.generated ?? null) && r.reward.pickup?.authorityOrder < r.authorityOrder, "Salvage reward ancestry");
-    const quote = salvageQuote(p, item);
+    const item2 = r.item;
+    requireContract(item2.itemId === id && item2.ownerPlayerId === p.playerId && item2.sourceEntityId !== null && !inv.itemsById[id] && !inv.renewal.groundBySourceId[item2.sourceEntityId], "Salvage terminal ownership");
+    requireContract(!Object.values(inv.subweapons.claims).some((c) => c.sourceEntityId === item2.sourceEntityId), "Provision salvaged");
+    if (servicePurchase(p, item2.sourceEntityId)) validateServiceItem(s, p, item2);
+    else if (item2.generated) validateGeneratedGear(item2.generated, gearSeed(s, p, item2.sourceEntityId), item2.generated.contentDepth);
+    if (r.reward) requireContract(r.reward.sourceEntityId === item2.sourceEntityId && r.reward.claimed && r.reward.definitionId === item2.definitionId && same3(r.reward.generated ?? null, item2.generated ?? null) && r.reward.pickup?.authorityOrder < r.authorityOrder, "Salvage reward ancestry");
+    const quote = salvageQuote(p, item2);
     requireContract(same3(r.materials, quote.materials) && (r.command.kind === "service.modify" && r.command.payload.operation === "shatter" || r.command.payload.fingerprint === quote.fingerprint) && r.command.payload.itemId === id, "Salvage quote mismatch");
     validateCommand2(r.command);
     requireContract((r.command.kind === "gear.salvage" || r.command.kind === "service.modify" && r.command.payload.operation === "shatter") && r.command.playerId === p.playerId && r.command.campaignId === s.campaign.campaignId && r.command.sessionId === s.session.sessionId, "Salvage stamp");
@@ -16307,19 +16330,19 @@ function validateSalvage(p, s, validateCommand2) {
     safeInteger(r.tick, 0, s.tick);
     safeInteger(r.revision, 1, inv.revision);
     requireContract(r.command.payload.inventoryRevision + 1 === r.revision, "Salvage revision");
-    if (!inv.rewardsByEntityId[item.sourceEntityId] && !servicePurchase(p, item.sourceEntityId)) retired++;
+    if (!inv.rewardsByEntityId[item2.sourceEntityId] && !servicePurchase(p, item2.sourceEntityId)) retired++;
     for (const [k, n] of Object.entries(r.materials)) totals2[k] = (totals2[k] ?? 0) + n;
   }
   requireContract(retired <= 128, "Salvage retention");
   for (const [id, r] of Object.entries(d.autoSalvaged ?? {})) {
     closedRecord(r, ["state", "item", "origin", "reward", "materials", "eligibleTick", "tick", "revision"]);
-    const item = r.item;
-    requireContract(r.state === "AUTO_SALVAGED" && item.itemId === id && item.ownerPlayerId === p.playerId && item.generated && !inv.itemsById[id] && !inv.renewal.groundBySourceId[item.sourceEntityId], "Automatic salvage terminal ownership");
-    const live = inv.rewardsByEntityId[item.sourceEntityId];
-    if (live) requireContract(live.claimed && live.pickup === null && same3(live.autoSalvage, r.reward.autoSalvage) && same3(live.generated, item.generated), "Automatic salvage reward ancestry");
+    const item2 = r.item;
+    requireContract(r.state === "AUTO_SALVAGED" && item2.itemId === id && item2.ownerPlayerId === p.playerId && item2.generated && !inv.itemsById[id] && !inv.renewal.groundBySourceId[item2.sourceEntityId], "Automatic salvage terminal ownership");
+    const live = inv.rewardsByEntityId[item2.sourceEntityId];
+    if (live) requireContract(live.claimed && live.pickup === null && same3(live.autoSalvage, r.reward.autoSalvage) && same3(live.generated, item2.generated), "Automatic salvage reward ancestry");
     else autoRetired++;
-    const quote = salvageQuote(p, item);
-    requireContract(same3(r.materials, quote.materials) && r.reward.sourceEntityId === item.sourceEntityId && r.reward.autoSalvage?.state === "AUTO_SALVAGED", "Automatic salvage quote/identity");
+    const quote = salvageQuote(p, item2);
+    requireContract(same3(r.materials, quote.materials) && r.reward.sourceEntityId === item2.sourceEntityId && r.reward.autoSalvage?.state === "AUTO_SALVAGED", "Automatic salvage quote/identity");
     safeInteger(r.eligibleTick, r.reward.defeatedTick, s.tick);
     safeInteger(r.tick, r.eligibleTick, s.tick);
     safeInteger(r.revision, 1, inv.revision);
@@ -16380,51 +16403,51 @@ var WORKSHOP_MATERIAL_PRICES = Object.freeze({ ...WORKSHOP_POLICY.materials, "Un
 function installWorkshop(s, p) {
   if (hasServicesV2(s.d9World?.plannedWorld)) p.inventory.services.workshop = { version: WORKSHOP_VERSION, records: {}, materialPurchases: {}, materialReceipts: {}, materialGold: {}, scrapBreaks: {}, scrapReceipts: {} };
 }
-function power(item) {
-  const n = progressionBigInt(item.generated.itemPower);
+function power(item2) {
+  const n = progressionBigInt(item2.generated.itemPower);
   requireContract(n <= 1000n, "Workshop price domain exceeds supported progression");
   return Number(n);
 }
-function exponentialCost(base, item, tierBase) {
-  const n = BigInt(5 * Math.max(0, power(item) - 1)), tier2 = workshopResult(item).tier;
+function exponentialCost(base, item2, tierBase) {
+  const n = BigInt(5 * Math.max(0, power(item2) - 1)), tier2 = workshopResult(item2).tier;
   return (BigInt(base) * 1045n ** n * BigInt(tierBase[0]) ** BigInt(tier2) / (1000n ** n * BigInt(tierBase[1]) ** BigInt(tier2))).toString();
 }
-function workshopQuote(p, item, op, line = 0) {
-  if (!item?.generated) return { problem: "Select ordinary generated equipment" };
-  const r = workshopResult(item), materials3 = {}, world = combatPlayer(p), repeats = (kind2) => (item.workshop?.steps ?? []).filter((x) => x.kind === kind2).length;
+function workshopQuote(p, item2, op, line = 0) {
+  if (!item2?.generated) return { problem: "Select ordinary generated equipment" };
+  const r = workshopResult(item2), materials3 = {}, world = combatPlayer(p), repeats = (kind2) => (item2.workshop?.steps ?? []).filter((x) => x.kind === kind2).length;
   let gold = "0", problem = null;
-  if (item.locked || item.protected || item.unique || item.generated.definition.unique || item.sourceEntityId === null || Object.values(p.inventory.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item.sourceEntityId) || isClassKitSource(p, item.sourceEntityId)) problem = "Protected equipment cannot be modified or shattered";
+  if (item2.locked || item2.protected || item2.unique || item2.generated.definition.unique || item2.sourceEntityId === null || Object.values(p.inventory.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item2.sourceEntityId) || isClassKitSource(p, item2.sourceEntityId)) problem = "Protected equipment cannot be modified or shattered";
   if (op === "awaken") {
     if (r.tier >= 5) problem = "Maximum five-star rarity";
     if (r.enchants) problem = "Purge enchantments before awakening";
     const n = r.tier + 1;
-    gold = world ? workshopGoldV1("awaken", power(item), r.tier) : String(2500 * n);
+    gold = world ? workshopGoldV1("awaken", power(item2), r.tier) : String(2500 * n);
     materials3["Wakestone"] = n;
     materials3[world ? SALVAGE_MATERIALS4[r.tier] : ["Monster Soul", "Uncommon Scrap", "Rare Scrap", "Epic Scrap", "Legendary Scrap", "Mythic Scrap"][n]] = 5 * n;
   } else if (op === "reforge") {
     if (!r.affixes.length) problem = "This item has no affix lines. Awaken it first.";
     if (r.enchants) problem = "Purge enchantments before reforging";
     if (!Number.isInteger(line) || line < 0 || line >= r.affixes.length || r.lockedLine !== null && r.lockedLine !== line) problem = "Select the unlocked reforge line";
-    gold = world ? workshopGoldV1("reforge", power(item), r.tier, repeats("reforge")) : exponentialCost(150, item, [2, 1]);
+    gold = world ? workshopGoldV1("reforge", power(item2), r.tier, repeats("reforge")) : exponentialCost(150, item2, [2, 1]);
     materials3["Overlord's Sigil"] = 1;
   } else if (op === "enchant") {
-    const slot = item.generated.definition.slot === "ring" ? "ring1" : item.generated.definition.slot, attunement = Math.max(p.inventory.economy.slotLevels[slot] ?? 0, slot === "ring1" ? p.inventory.economy.slotLevels.ring2 ?? 0 : 0);
+    const slot = item2.generated.definition.slot === "ring" ? "ring1" : item2.generated.definition.slot, attunement = Math.max(p.inventory.economy.slotLevels[slot] ?? 0, slot === "ring1" ? p.inventory.economy.slotLevels.ring2 ?? 0 : 0);
     if (r.tier < 2) problem = "Magic (2-star) or better equipment required";
     else if (attunement < (combatPlayer(p) ? 3 : 50)) problem = "Slot Attunement Level " + (combatPlayer(p) ? 3 : 50) + " required";
     else if (r.enchants >= r.tier - 1) problem = "Maximum enchantments reached; purge to replace them";
     materials3["Astral Essence"] = 1;
-    if (world) gold = workshopGoldV1("enchant", power(item), r.tier);
+    if (world) gold = workshopGoldV1("enchant", power(item2), r.tier);
   } else if (op === "purge") {
     if (!r.enchants) problem = "No enchantments to purge";
-    gold = world ? workshopGoldV1("purge", power(item), r.tier) : String(1e3 * power(item) * Math.max(1, r.tier));
+    gold = world ? workshopGoldV1("purge", power(item2), r.tier) : String(1e3 * power(item2) * Math.max(1, r.tier));
   } else if (op === "resonance") {
-    gold = world ? workshopGoldV1("resonance", power(item), r.tier, repeats("resonance")) : exponentialCost(100, item, [3, 2]);
+    gold = world ? workshopGoldV1("resonance", power(item2), r.tier, repeats("resonance")) : exponentialCost(100, item2, [3, 2]);
     materials3["Monster Soul"] = combatPlayer(p) ? 3 + 3 * r.tier : 25 + 25 * r.tier;
   } else if (op === "shatter") {
-    if (Object.values(p.inventory.equipped).includes(item.itemId)) problem = "Unequip before shattering";
+    if (Object.values(p.inventory.equipped).includes(item2.itemId)) problem = "Unequip before shattering";
   } else problem = "Unknown workshop operation";
-  if ((item.workshop?.steps.length ?? 0) >= MAX_WORKSHOP_STEPS && op !== "shatter") problem = "This item has reached its bounded modification history";
-  return { gold, materials: materials3, problem, preview: op === "shatter" ? salvageQuote(p, item).materials : op === "enchant" ? "One random active stat +25%" : op === "purge" ? "Restore the pre-enchantment stats" : op === "resonance" ? "A different supported two/three-piece set" : op === "awaken" ? `${r.tier} \u2192 ${r.tier + 1} stars; one additional modifier` : "Reroll only the selected affix; other lines remain locked" };
+  if ((item2.workshop?.steps.length ?? 0) >= MAX_WORKSHOP_STEPS && op !== "shatter") problem = "This item has reached its bounded modification history";
+  return { gold, materials: materials3, problem, preview: op === "shatter" ? salvageQuote(p, item2).materials : op === "enchant" ? "One random active stat +25%" : op === "purge" ? "Restore the pre-enchantment stats" : op === "resonance" ? "A different supported two/three-piece set" : op === "awaken" ? `${r.tier} \u2192 ${r.tier + 1} stars; one additional modifier` : "Reroll only the selected affix; other lines remain locked" };
 }
 function workshopAccounting(p) {
   let gold = "0";
@@ -16442,30 +16465,30 @@ function workshopAccounting(p) {
     materials3[lower] = (materials3[lower] ?? 0) + SCRAP_BREAK_YIELD * n;
   }
   for (const r of Object.values(w.records)) {
-    let item = copyWire(r.baseItem);
+    let item2 = copyWire(r.baseItem);
     for (const receipt of r.receipts) {
-      const c = receipt.command, q = workshopQuote(p, item, c.payload.operation, c.payload.line);
+      const c = receipt.command, q = workshopQuote(p, item2, c.payload.operation, c.payload.line);
       requireContract(!q.problem, q.problem ?? "Invalid modification");
       gold = addAmount(gold, q.gold);
       for (const [k, n] of Object.entries(q.materials)) materials3[k] = (materials3[k] ?? 0) - n;
-      item.workshop ??= { version: WORKSHOP_VERSION, steps: [] };
-      item.workshop.steps.push({ kind: c.payload.operation, ...c.payload.operation === "reforge" ? { line: c.payload.line } : {} });
+      item2.workshop ??= { version: WORKSHOP_VERSION, steps: [] };
+      item2.workshop.steps.push({ kind: c.payload.operation, ...c.payload.operation === "reforge" ? { line: c.payload.line } : {} });
     }
   }
   return { gold, materials: materials3 };
 }
-function validateWorkshopItem(p, item) {
-  const w = p.inventory.services?.workshop, r = w?.records[item.itemId];
-  if (!item.workshop) {
+function validateWorkshopItem(p, item2) {
+  const w = p.inventory.services?.workshop, r = w?.records[item2.itemId];
+  if (!item2.workshop) {
     requireContract(!r, "Modified item lost its overlay");
     return;
   }
-  requireContract(r && same4(r.baseItem, unmodifiedItem(item)), "Modification lacks original ownership");
-  closedRecord(item.workshop, ["version", "steps"]);
-  requireContract(item.workshop.version === WORKSHOP_VERSION, "Unknown modification version");
+  requireContract(r && same4(r.baseItem, unmodifiedItem(item2)), "Modification lacks original ownership");
+  closedRecord(item2.workshop, ["version", "steps"]);
+  requireContract(item2.workshop.version === WORKSHOP_VERSION, "Unknown modification version");
   const expected = r.receipts.map((q) => ({ kind: q.command.payload.operation, ...q.command.payload.operation === "reforge" ? { line: q.command.payload.line } : {} }));
-  requireContract(same4(expected, item.workshop.steps), "Modification history mismatch");
-  workshopResult(item);
+  requireContract(same4(expected, item2.workshop.steps), "Modification history mismatch");
+  workshopResult(item2);
 }
 function validateWorkshop(s, p, validateCommand2) {
   const w = p.inventory.services?.workshop;
@@ -21486,9 +21509,9 @@ function frameCaptureInputs(frames) {
     if (!Array.isArray(frames) || Object.getPrototypeOf(frames) !== Array.prototype || frames.length > 8 || Reflect.ownKeys(frames).length !== frames.length + 1) return null;
     const values = [frames.length];
     for (let i = 0; i < frames.length; i++) {
-      const item = Object.getOwnPropertyDescriptor(frames, String(i));
-      if (!item || !Object.hasOwn(item, "value")) return null;
-      const d = dataRecord(item.value, frameRequired, frameKeys);
+      const item2 = Object.getOwnPropertyDescriptor(frames, String(i));
+      if (!item2 || !Object.hasOwn(item2, "value")) return null;
+      const d = dataRecord(item2.value, frameRequired, frameKeys);
       if (!d) return null;
       const { id, chunkX, chunkY, offsetX, offsetY, playerIds } = Object.fromEntries(Object.entries(d).map(([key9, row2]) => [key9, row2.value]));
       if (!Number.isSafeInteger(id) || !Number.isFinite(offsetX) || !Number.isFinite(offsetY) || typeof chunkX !== "string" || typeof chunkY !== "string" || !Array.isArray(playerIds) || Object.getPrototypeOf(playerIds) !== Array.prototype || playerIds.length > 5 || Reflect.ownKeys(playerIds).length !== playerIds.length + 1) return null;
@@ -21864,10 +21887,10 @@ function installRenewableInventory(state, p) {
     baseSouls += spent.materials["Monster Soul"] ?? 0;
   }
   const originsByItemId = {};
-  for (const item of Object.values(inv.itemsById)) if (item.sourceEntityId !== null) {
-    const origin2 = inventoryOrigin(state, item.sourceEntityId);
+  for (const item2 of Object.values(inv.itemsById)) if (item2.sourceEntityId !== null) {
+    const origin2 = inventoryOrigin(state, item2.sourceEntityId);
     requireContract(origin2, "Unassociated legacy owned gear");
-    originsByItemId[item.itemId] = origin2;
+    originsByItemId[item2.itemId] = origin2;
   }
   inv.renewal = { version: "renewable-inventory-d5-v1", baseGold, baseSouls, retiredGold: "0", retiredSouls: 0, defeats: Object.keys(inv.rewardsByEntityId).length, groundBySourceId: {}, originsByItemId, lastDrop: null, lastGroundPickup: null };
 }
@@ -22003,7 +22026,7 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
     if (provenance) safeInteger(o.episode, 0, provenance.episode);
     else requireContract(o.episode === o.archive.sourceEpisode, "Archived gear episode drift");
   }
-  function item(i) {
+  function item2(i) {
     const carried = [n.originsByItemId[i.itemId], n.groundBySourceId[i.sourceEntityId]?.origin, inv.d7?.salvaged[i.itemId]?.origin, inv.d7?.autoSalvaged[i.itemId]?.origin, inv.services?.salesByItemId[i.itemId]?.origin].find((o) => o?.carried !== void 0);
     if (carried && i.workshop) {
       closedRecord(i.workshop, ["version", "steps"]);
@@ -22028,14 +22051,14 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
     requireContract(i.generated || EQUIPMENT[i.definitionId].slot !== "subweapon" || t && inv.subweapons?.claims[t] && i.definitionId === `starter-${t}`, "Subweapon lacks provision");
   }
   for (const [id, i] of Object.entries(inv.itemsById)) {
-    item(i);
+    item2(i);
     requireContract(id === i.itemId, "Gear registry mismatch");
     if (i.sourceEntityId !== null) origin2(n.originsByItemId[id], i.sourceEntityId);
   }
   requireContract(Object.keys(n.originsByItemId).length === items.length - 1, "Carried provenance bound");
   for (const [id, g] of Object.entries(n.groundBySourceId)) {
     closedRecord(g, ["item", "origin", "position", "spaceInstanceId", "droppedTick", "receipt"]);
-    item(g.item);
+    item2(g.item);
     origin2(g.origin, id);
     requireContract(g.item.sourceEntityId === id && !inv.itemsById[g.item.itemId] && g.item.sourceEntityId !== null, "Duplicate dropped ownership");
     safeInteger(g.droppedTick, 0, state.tick);
@@ -22131,15 +22154,15 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
   }
   validateSalvage(p, state, validateCommand2);
   for (const r of Object.values(inv.services?.salesByItemId ?? {})) {
-    item(r.item);
+    item2(r.item);
     origin2(r.origin, r.item.sourceEntityId);
   }
   for (const r of Object.values(inv.d7?.salvaged ?? {})) {
-    item(r.item);
+    item2(r.item);
     origin2(r.origin, r.item.sourceEntityId);
   }
   for (const r of Object.values(inv.d7?.autoSalvaged ?? {})) {
-    item(r.item);
+    item2(r.item);
     origin2(r.origin, r.item.sourceEntityId);
   }
   for (const r of Object.values(state.d9World?.paging.remoteGearByPlayer[p.playerId] ?? {})) {
@@ -22157,9 +22180,9 @@ function validateRenewableInventoryProgress(before, after, pid) {
   if (a.subweapons) validateProvisionProgress(a, b);
   validateClassKitProgress(a, b);
   requireContract(same20(x.baseGold, y.baseGold) && x.baseSouls === y.baseSouls && compareAmount(y.retiredGold, x.retiredGold) >= 0 && y.retiredSouls >= x.retiredSouls && y.defeats >= x.defeats && b.revision >= a.revision, "Economy baseline/counters regressed");
-  for (const [id, item] of Object.entries(a.itemsById)) {
-    const terminal = b.d7?.salvaged[id] ?? b.services?.salesByItemId[id], next = b.itemsById[id] ?? b.renewal.groundBySourceId[item.sourceEntityId]?.item ?? terminal?.item;
-    requireContract(same20(item, next) || validWorkshopChange(after.playersById[pid], item, next), "Owned gear destroyed or rewritten");
+  for (const [id, item2] of Object.entries(a.itemsById)) {
+    const terminal = b.d7?.salvaged[id] ?? b.services?.salesByItemId[id], next = b.itemsById[id] ?? b.renewal.groundBySourceId[item2.sourceEntityId]?.item ?? terminal?.item;
+    requireContract(same20(item2, next) || validWorkshopChange(after.playersById[pid], item2, next), "Owned gear destroyed or rewritten");
     if (!b.itemsById[id] && !terminal) requireContract(y.lastDrop?.authorityOrder > before.lastAppliedAuthorityOrder && y.lastDrop.revision > a.revision, "Drop lacks later authoritative command");
   }
   for (const [id, g] of Object.entries(x.groundBySourceId)) {
@@ -22900,8 +22923,8 @@ var MAX_GOLD = 1e9;
 var itemIdFor = (playerId, sourceEntityId) => `item:${playerId}:${sourceEntityId ?? "starter"}`;
 var ownedItem = (p, definitionId, sourceEntityId) => ({ itemId: itemIdFor(p.playerId, sourceEntityId), definitionId, ownerPlayerId: p.playerId, sourceEntityId });
 function initialInventory(p) {
-  const item = ownedItem(p, "worn-sword", null);
-  return { version: PLAYER_INVENTORY_VERSION, revision: 0, gold: 0, itemsById: { [item.itemId]: item }, equipped: Object.fromEntries(EQUIPMENT_SLOTS.map((slot) => [slot, slot === "weapon" ? item.itemId : null])), rewardsByEntityId: {}, lastEquipmentChange: null, topologyMigration: null };
+  const item2 = ownedItem(p, "worn-sword", null);
+  return { version: PLAYER_INVENTORY_VERSION, revision: 0, gold: 0, itemsById: { [item2.itemId]: item2 }, equipped: Object.fromEntries(EQUIPMENT_SLOTS.map((slot) => [slot, slot === "weapon" ? item2.itemId : null])), rewardsByEntityId: {}, lastEquipmentChange: null, topologyMigration: null };
 }
 function hash17(text) {
   let h = 2166136261;
@@ -22969,13 +22992,13 @@ function validatePlayerInventory(p, state, validateCommand2) {
     } else requireContract(r.pickup === null, "Unclaimed pickup receipt");
   }
   requireContract(inv.gold === Math.min(MAX_GOLD, totalGold) && inv.revision >= rewards.length + claimed, "Inventory reward accounting");
-  for (const [id, item] of items) {
-    closedRecord(item, ["itemId", "definitionId", "ownerPlayerId", "sourceEntityId"]);
-    requireContract(id === item.itemId && id === itemIdFor(p.playerId, item.sourceEntityId) && item.ownerPlayerId === p.playerId && EQUIPMENT[item.definitionId], "Item identity/owner/definition");
-    if (item.sourceEntityId === null) requireContract(id === starter && item.definitionId === "worn-sword", "Invalid starter");
+  for (const [id, item2] of items) {
+    closedRecord(item2, ["itemId", "definitionId", "ownerPlayerId", "sourceEntityId"]);
+    requireContract(id === item2.itemId && id === itemIdFor(p.playerId, item2.sourceEntityId) && item2.ownerPlayerId === p.playerId && EQUIPMENT[item2.definitionId], "Item identity/owner/definition");
+    if (item2.sourceEntityId === null) requireContract(id === starter && item2.definitionId === "worn-sword", "Invalid starter");
     else {
-      const r = inv.rewardsByEntityId[item.sourceEntityId];
-      requireContract(r?.claimed && r.definitionId === item.definitionId, "Item lacks collected reward");
+      const r = inv.rewardsByEntityId[item2.sourceEntityId];
+      requireContract(r?.claimed && r.definitionId === item2.definitionId, "Item lacks collected reward");
     }
   }
   requireContract(inv.itemsById[starter], "Starter item missing");
@@ -23004,8 +23027,8 @@ function validatePlayerInventory(p, state, validateCommand2) {
     const payload = r.command.payload;
     if (!inv.topologyMigration || r.revision > inv.topologyMigration.revision) {
       if (r.command.kind === "equipment.equip") {
-        const item = inv.itemsById[payload.itemId], slot = payload.slot ?? EQUIPMENT[item?.definitionId]?.slot;
-        requireContract(item && inv.equipped[slot] === item.itemId, "Latest equip not reflected");
+        const item2 = inv.itemsById[payload.itemId], slot = payload.slot ?? EQUIPMENT[item2?.definitionId]?.slot;
+        requireContract(item2 && inv.equipped[slot] === item2.itemId, "Latest equip not reflected");
       } else requireContract(payload.slot !== "weapon" && inv.equipped[payload.slot] === null, "Latest unequip not reflected");
     } else requireContract(canonicalStringify(inv.equipped) === canonicalStringify(inv.topologyMigration.equipped), "Migrated equipment changed without command");
   } else requireContract(canonicalStringify(inv.equipped) === canonicalStringify(inv.topologyMigration?.equipped ?? initialInventory(p).equipped), "Equipment changed without command");
@@ -23023,8 +23046,8 @@ var BASE_PICKUP_RADIUS = 48;
 var itemIdFor2 = (playerId, sourceEntityId) => `item:${playerId}:${sourceEntityId ?? "starter"}`;
 var ownedItem2 = (p, definitionId, sourceEntityId) => ({ itemId: itemIdFor2(p.playerId, sourceEntityId), definitionId, ownerPlayerId: p.playerId, sourceEntityId });
 function initialInventory2(p) {
-  const item = ownedItem2(p, "worn-sword", null);
-  return { version: FORGE_INVENTORY_VERSION, economy: emptyEconomy(), revision: 0, gold: "0", goldAwardsByEntityId: {}, itemsById: { [item.itemId]: item }, equipped: Object.fromEntries(EQUIPMENT_SLOTS.map((slot) => [slot, slot === "weapon" ? item.itemId : null])), rewardsByEntityId: {}, lastEquipmentChange: null, topologyMigration: null };
+  const item2 = ownedItem2(p, "worn-sword", null);
+  return { version: FORGE_INVENTORY_VERSION, economy: emptyEconomy(), revision: 0, gold: "0", goldAwardsByEntityId: {}, itemsById: { [item2.itemId]: item2 }, equipped: Object.fromEntries(EQUIPMENT_SLOTS.map((slot) => [slot, slot === "weapon" ? item2.itemId : null])), rewardsByEntityId: {}, lastEquipmentChange: null, topologyMigration: null };
 }
 var equipmentBonuses2 = equipmentBonuses;
 function hash18(text) {
@@ -23117,13 +23140,13 @@ function validatePlayerInventory2(p, state, validateCommand2) {
   }
   requireContract(Object.keys(inv.goldAwardsByEntityId).length === rewards.length, "Gold ledger differs from defeat receipts");
   requireContract(inv.gold === Math.min(MAX_GOLD2, totalGold) && inv.revision >= rewards.length + claimed, "Inventory reward accounting");
-  for (const [id, item] of items) {
-    closedRecord(item, ["itemId", "definitionId", "ownerPlayerId", "sourceEntityId"]);
-    requireContract(id === item.itemId && id === itemIdFor2(p.playerId, item.sourceEntityId) && item.ownerPlayerId === p.playerId && itemDefinition(item), "Item identity/owner/definition");
-    if (item.sourceEntityId === null) requireContract(id === starter && item.definitionId === "worn-sword", "Invalid starter");
+  for (const [id, item2] of items) {
+    closedRecord(item2, ["itemId", "definitionId", "ownerPlayerId", "sourceEntityId"]);
+    requireContract(id === item2.itemId && id === itemIdFor2(p.playerId, item2.sourceEntityId) && item2.ownerPlayerId === p.playerId && itemDefinition(item2), "Item identity/owner/definition");
+    if (item2.sourceEntityId === null) requireContract(id === starter && item2.definitionId === "worn-sword", "Invalid starter");
     else {
-      const r = inv.rewardsByEntityId[item.sourceEntityId];
-      requireContract(r?.claimed && r.definitionId === item.definitionId, "Item lacks collected reward");
+      const r = inv.rewardsByEntityId[item2.sourceEntityId];
+      requireContract(r?.claimed && r.definitionId === item2.definitionId, "Item lacks collected reward");
     }
   }
   requireContract(inv.itemsById[starter], "Starter item missing");
@@ -23152,8 +23175,8 @@ function validatePlayerInventory2(p, state, validateCommand2) {
     const payload = r.command.payload;
     if (!inv.topologyMigration || r.revision > inv.topologyMigration.revision) {
       if (r.command.kind === "equipment.equip") {
-        const item = inv.itemsById[payload.itemId], slot = payload.slot ?? itemDefinition(item)?.slot;
-        requireContract(item && inv.equipped[slot] === item.itemId, "Latest equip not reflected");
+        const item2 = inv.itemsById[payload.itemId], slot = payload.slot ?? itemDefinition(item2)?.slot;
+        requireContract(item2 && inv.equipped[slot] === item2.itemId, "Latest equip not reflected");
       } else requireContract(payload.slot !== "weapon" && inv.equipped[payload.slot] === null, "Latest unequip not reflected");
     } else requireContract(canonicalStringify(inv.equipped) === canonicalStringify(inv.topologyMigration.equipped), "Migrated equipment changed without command");
   } else requireContract(canonicalStringify(inv.equipped) === canonicalStringify(inv.topologyMigration?.equipped ?? initialInventory2(p).equipped), "Equipment changed without command");
@@ -23175,7 +23198,7 @@ function validateInventoryProgress(before, after) {
     const attuned = a.economy && b.economy ? validateForgeProgress(a, b, before) : 0;
     const equipmentChanged = canonicalStringify(a.lastEquipmentChange) !== canonicalStringify(b.lastEquipmentChange);
     requireContract(b.revision - a.revision >= newRewards + newClaims + Number(equipmentChanged) + attuned, "Inventory changes lack revision advancement");
-    for (const [key9, item] of Object.entries(a.itemsById)) requireContract(canonicalStringify(item) === canonicalStringify(b.itemsById[key9]), "Owned item changed or disappeared");
+    for (const [key9, item2] of Object.entries(a.itemsById)) requireContract(canonicalStringify(item2) === canonicalStringify(b.itemsById[key9]), "Owned item changed or disappeared");
     for (const [key9, r] of Object.entries(a.rewardsByEntityId)) {
       const n = b.rewardsByEntityId[key9];
       requireContract(n && canonicalStringify({ ...r, claimed: false, pickup: null }) === canonicalStringify({ ...n, claimed: false, pickup: null }) && (!r.claimed || canonicalStringify(n) === canonicalStringify(r)), "Loot history regressed");
@@ -23616,7 +23639,7 @@ function validateCommand(command) {
     requireContract(command.payload.noteId === "note:alderwood:woodland-trail-v1", "Unknown discovery note");
   } else if (command.kind === "quest.act") {
     closedRecord(command.payload, ["action", "questId"]);
-    requireContract(["take", "abandon", "turnIn", "search", "deliver"].includes(command.payload.action) && typeof command.payload.questId === "string" && command.payload.questId.length <= 96 && /^q[bf]:[a-z0-9:-]+$/.test(command.payload.questId), "Invalid quest command");
+    requireContract(["take", "abandon", "turnIn", "search", "deliver", "sellEtc"].includes(command.payload.action) && typeof command.payload.questId === "string" && command.payload.questId.length <= 96 && /^q[bfe]:[a-z0-9:-]+$/.test(command.payload.questId), "Invalid quest command");
   } else if (command.kind === "loot.pickup") {
     closedRecord(command.payload, ["sourceEntityId", "inventoryRevision"]);
     validateId("entityId", command.payload.sourceEntityId);
@@ -24423,9 +24446,10 @@ function validateMasteryCombat(s) {
 
 // src/shared/contracts/quests_v1.js
 var QUEST_STATE_VERSION = "quests-state-v1";
-var QUEST_ACTIONS = Object.freeze(["take", "abandon", "turnIn", "search", "deliver"]);
+var QUEST_ACTIONS = Object.freeze(["take", "abandon", "turnIn", "search", "deliver", "sellEtc"]);
 var ID = /^(?:qb:[a-z-]+:[0-9]{2}:[0-9]{1,6}:[0-9]|qf:civilian:seeded:[a-z-]+:[0-9]{2}:[a-z]+)$/;
 var TARGET = /^(?:site:[a-f0-9]{32}|settlement-slot:[a-z-]+:[0-9]{2}|event:[0-9]{1,6},[0-9]{1,6})$/;
+var ITEM_FAMILY = Object.fromEntries(Object.entries(QUEST_ITEMS).map(([f3, it]) => [it.id, f3]));
 function validateQuestsV1(root2) {
   const q = root2.quests;
   if (q === void 0) return;
@@ -24433,12 +24457,20 @@ function validateQuestsV1(root2) {
   requireContract(q.version === QUEST_STATE_VERSION && q.byPlayer && typeof q.byPlayer === "object" && !Array.isArray(q.byPlayer) && Object.keys(q.byPlayer).length <= 8, "Quest state shape");
   for (const [pid, log3] of Object.entries(q.byPlayer)) {
     requireContract(/^ply:[a-f0-9]{32}$/.test(pid), "Quest player identity");
-    closedRecord(log3, ["revision", "active", "boardDone", "folkDone"]);
+    closedRecord(log3, ["revision", "active", "boardDone", "folkDone"], ["etc"]);
+    if (log3.etc !== void 0) {
+      requireContract(log3.etc && typeof log3.etc === "object" && !Array.isArray(log3.etc) && Object.keys(log3.etc).length <= QUEST_ITEM_POLICY.leftoverKinds, "Quest leftovers shape");
+      for (const [f3, n] of Object.entries(log3.etc)) {
+        requireContract(Boolean(questItemV1(f3)), "Quest leftover item");
+        safeInteger(n, 1, QUEST_ITEM_POLICY.leftoverCap);
+      }
+    }
     safeInteger(log3.revision);
     requireContract(Array.isArray(log3.active) && log3.active.length <= QUEST_POLICY.activeLimit, "Quest log bound");
     const ids = /* @__PURE__ */ new Set();
     for (const r of log3.active) {
-      closedRecord(r, ["id", "kind", "source", "giver", "settlementId", "target", "tx", "ty", "band", "takenTick", "base", "status", "gold", "xp"], ["difficulty", "gearGroup", "level"]);
+      closedRecord(r, ["id", "kind", "source", "giver", "settlementId", "target", "tx", "ty", "band", "takenTick", "base", "status", "gold", "xp"], ["difficulty", "gearGroup", "level", "family", "need", "have"]);
+      requireContract(r.kind === "collect" === (r.family !== void 0) && (r.family === void 0 || Boolean(questItemV1(r.family)) && Number.isSafeInteger(r.need) && r.need >= 1 && r.need <= 99 && Number.isSafeInteger(r.have) && r.have >= 0 && r.have <= r.need), "Quest collect record");
       requireContract((r.difficulty === void 0 || Object.hasOwn(QUEST_POLICY.difficulty, r.difficulty)) && (r.gearGroup === void 0 || Object.hasOwn(QUEST_GEAR_GROUPS, r.gearGroup)), "Quest reward kind");
       if (r.level !== void 0) safeInteger(r.level, 1, 50);
       requireContract(ID.test(r.id) && !ids.has(r.id) && QUEST_KINDS.includes(r.kind) && ["board", "folk"].includes(r.source) && r.source === "folk" === r.id.startsWith("qf:") && TARGET.test(r.target) && /^settlement-slot:[a-z-]+:[0-9]{2}$/.test(r.settlementId) && typeof r.giver === "string" && r.giver.length <= 80 && ["active", "ready"].includes(r.status), "Quest record identity");
@@ -25405,8 +25437,8 @@ var MAX_GOLD3 = 1e9;
 var itemIdFor3 = (playerId, sourceEntityId) => `item:${playerId}:${sourceEntityId ?? "starter"}`;
 var ownedItem3 = (p, definitionId, sourceEntityId) => ({ itemId: itemIdFor3(p.playerId, sourceEntityId), definitionId, ownerPlayerId: p.playerId, sourceEntityId });
 function initialInventory3(p) {
-  const item = ownedItem3(p, "worn-sword", null);
-  return { version: PLAYER_INVENTORY_VERSION3, revision: 0, gold: 0, itemsById: { [item.itemId]: item }, equipped: { weapon: item.itemId, armor: null, charm: null }, rewardsByEntityId: {}, lastEquipmentChange: null };
+  const item2 = ownedItem3(p, "worn-sword", null);
+  return { version: PLAYER_INVENTORY_VERSION3, revision: 0, gold: 0, itemsById: { [item2.itemId]: item2 }, equipped: { weapon: item2.itemId, armor: null, charm: null }, rewardsByEntityId: {}, lastEquipmentChange: null };
 }
 function equipmentBonuses3(p) {
   const result = { attack: 0, maxHp: 0, defense: 0 };
@@ -25483,13 +25515,13 @@ function validatePlayerInventory3(p, state, validateCommand2) {
     } else requireContract(r.pickup === null, "Unclaimed pickup receipt");
   }
   requireContract(inv.gold === Math.min(MAX_GOLD3, totalGold) && inv.revision >= rewards.length + claimed, "Inventory reward accounting");
-  for (const [id, item] of items) {
-    closedRecord(item, ["itemId", "definitionId", "ownerPlayerId", "sourceEntityId"]);
-    requireContract(id === item.itemId && id === itemIdFor3(p.playerId, item.sourceEntityId) && item.ownerPlayerId === p.playerId && EQUIPMENT2[item.definitionId], "Item identity/owner/definition");
-    if (item.sourceEntityId === null) requireContract(id === starter && item.definitionId === "worn-sword", "Invalid starter");
+  for (const [id, item2] of items) {
+    closedRecord(item2, ["itemId", "definitionId", "ownerPlayerId", "sourceEntityId"]);
+    requireContract(id === item2.itemId && id === itemIdFor3(p.playerId, item2.sourceEntityId) && item2.ownerPlayerId === p.playerId && EQUIPMENT2[item2.definitionId], "Item identity/owner/definition");
+    if (item2.sourceEntityId === null) requireContract(id === starter && item2.definitionId === "worn-sword", "Invalid starter");
     else {
-      const r = inv.rewardsByEntityId[item.sourceEntityId];
-      requireContract(r?.claimed && r.definitionId === item.definitionId, "Item lacks collected reward");
+      const r = inv.rewardsByEntityId[item2.sourceEntityId];
+      requireContract(r?.claimed && r.definitionId === item2.definitionId, "Item lacks collected reward");
     }
   }
   requireContract(inv.itemsById[starter], "Starter item missing");
@@ -25506,8 +25538,8 @@ function validatePlayerInventory3(p, state, validateCommand2) {
     receipt(r, r.command.kind);
     const payload = r.command.payload;
     if (r.command.kind === "equipment.equip") {
-      const item = inv.itemsById[payload.itemId];
-      requireContract(item && inv.equipped[EQUIPMENT2[item.definitionId].slot] === item.itemId, "Latest equip not reflected");
+      const item2 = inv.itemsById[payload.itemId];
+      requireContract(item2 && inv.equipped[EQUIPMENT2[item2.definitionId].slot] === item2.itemId, "Latest equip not reflected");
     } else requireContract(inv.equipped[payload.slot] === null, "Latest unequip not reflected");
   } else requireContract(canonicalStringify(inv.equipped) === canonicalStringify(initialInventory3(p).equipped), "Equipment changed without command");
   return inv;
@@ -30827,15 +30859,15 @@ var gearChunkD9 = (cell) => ({ version: "world-ground-chunk-d9-v1", ownerPlayerI
 var gearChunkKeyD9 = (chunk, sha256) => pageDigest(chunk, sha256);
 function inventoryRows(state, p) {
   const inv = p.inventory, frames = state.d9World.runtime.frames, point14 = (position2, spaceInstanceId) => ({ spaceInstanceId, position: copyWire(spaceInstanceId === state.overworldInstanceId ? localFramePositionD9(position2, frames) : legacyWorldPosition(position2)) });
-  const base = (item, origin2, disposition) => {
+  const base = (item2, origin2, disposition) => {
     const episode = state.d9World.episodes[origin2.groupId], cold = state.d9World.paging.originsByGroup[origin2.groupId], g = episode && !episode.origin ? { ...episode.geography, entityIds: state.groupsById[origin2.groupId].entityIds } : cold, sourceGeography = g ? { chunkX: g.chunkX, chunkY: g.chunkY, anchorOrdinal: g.anchorOrdinal, rank: g.rank, entityIds: [...g.entityIds], ...hasWorldCombat(state) ? { combatHash: WORLD_COMBAT_HASH } : {} } : null;
-    return { version: GEAR_PAGE_D9, ownerPlayerId: p.playerId, item: copyWire(item), origin: copyWire(origin2), disposition, ...sourceGeography ? { sourceGeography } : {} };
+    return { version: GEAR_PAGE_D9, ownerPlayerId: p.playerId, item: copyWire(item2), origin: copyWire(origin2), disposition, ...sourceGeography ? { sourceGeography } : {} };
   };
   const rows3 = [];
-  for (const item of Object.values(inv.itemsById)) if (item.sourceEntityId !== null) rows3.push(base(item, inv.renewal.originsByItemId[item.itemId], "CARRIED"));
+  for (const item2 of Object.values(inv.itemsById)) if (item2.sourceEntityId !== null) rows3.push(base(item2, inv.renewal.originsByItemId[item2.itemId], "CARRIED"));
   for (const r of Object.values(inv.rewardsByEntityId)) if (r.definitionId && !r.claimed && r.retiredTick === void 0) {
-    const item = { itemId: `item:${p.playerId}:${r.sourceEntityId}`, definitionId: r.definitionId, ownerPlayerId: p.playerId, sourceEntityId: r.sourceEntityId, ...r.generated ? { generated: copyWire(r.generated) } : {} }, source11 = r.episodeSource, origin2 = source11 ? { groupId: source11.groupId, episode: source11.episode, sourceEntityId: r.sourceEntityId, ...source11.progression ? { progression: copyWire(source11.progression) } : {} } : Object.values(state.groupsById).filter((g) => g.entityIds.includes(r.sourceEntityId)).map((g) => ({ groupId: g.groupId, episode: 0, sourceEntityId: r.sourceEntityId }))[0];
-    rows3.push({ ...base(item, origin2, "UNCLAIMED"), location: point14(r.position, r.spaceInstanceId) });
+    const item2 = { itemId: `item:${p.playerId}:${r.sourceEntityId}`, definitionId: r.definitionId, ownerPlayerId: p.playerId, sourceEntityId: r.sourceEntityId, ...r.generated ? { generated: copyWire(r.generated) } : {} }, source11 = r.episodeSource, origin2 = source11 ? { groupId: source11.groupId, episode: source11.episode, sourceEntityId: r.sourceEntityId, ...source11.progression ? { progression: copyWire(source11.progression) } : {} } : Object.values(state.groupsById).filter((g) => g.entityIds.includes(r.sourceEntityId)).map((g) => ({ groupId: g.groupId, episode: 0, sourceEntityId: r.sourceEntityId }))[0];
+    rows3.push({ ...base(item2, origin2, "UNCLAIMED"), location: point14(r.position, r.spaceInstanceId) });
   }
   for (const d of Object.values(inv.renewal.groundBySourceId)) rows3.push({ ...base(d.item, d.origin, "DROPPED"), location: point14(d.position, d.spaceInstanceId), drop: { droppedTick: d.droppedTick, receipt: copyWire(d.receipt) } });
   for (const [kind2, table] of [["SALVAGED", inv.d7.salvaged], ["AUTO_SALVAGED", inv.d7.autoSalvaged]]) for (const r of Object.values(table)) rows3.push({ ...base(r.item, r.origin, kind2), terminal: { tick: r.tick, revision: r.revision, materials: copyWire(r.materials), ...r.command ? { command: copyWire(r.command), authorityOrder: r.authorityOrder } : { eligibleTick: r.eligibleTick } } });
@@ -31401,14 +31433,14 @@ async function reconcileWorldComparisonPagesD9(a, b, { readPage, sha256 }) {
   for (const pid of a.session.playerIds) {
     const x = a.playersById[pid].inventory, y = b.playersById[pid].inventory, items = /* @__PURE__ */ new Map();
     for (const inv of [x, y]) {
-      for (const item of Object.values(inv.itemsById)) if (item.sourceEntityId !== null) items.set(item.itemId, item);
+      for (const item2 of Object.values(inv.itemsById)) if (item2.sourceEntityId !== null) items.set(item2.itemId, item2);
       for (const drop of Object.values(inv.renewal.groundBySourceId)) items.set(drop.item.itemId, drop.item);
       for (const r of Object.values(inv.rewardsByEntityId)) if (r.definitionId && r.claimed) items.set(`item:${pid}:${r.sourceEntityId}`, { itemId: `item:${pid}:${r.sourceEntityId}`, sourceEntityId: r.sourceEntityId });
     }
-    for (const target of [a, b]) for (const item of items.values()) {
-      const inv = target.playersById[pid].inventory, id = item.sourceEntityId;
-      if (inv.itemsById[item.itemId] || inv.renewal.groundBySourceId[id] || inv.d7.salvaged[item.itemId] || inv.d7.autoSalvaged[item.itemId]) continue;
-      const row2 = await readOwnedGearD9(target.d9World.ownershipIndex, pid, item.itemId, { sha256, readPage });
+    for (const target of [a, b]) for (const item2 of items.values()) {
+      const inv = target.playersById[pid].inventory, id = item2.sourceEntityId;
+      if (inv.itemsById[item2.itemId] || inv.renewal.groundBySourceId[id] || inv.d7.salvaged[item2.itemId] || inv.d7.autoSalvaged[item2.itemId]) continue;
+      const row2 = await readOwnedGearD9(target.d9World.ownershipIndex, pid, item2.itemId, { sha256, readPage });
       if (row2?.disposition === "DROPPED") inv.renewal.groundBySourceId[id] = { item: copyWire(row2.item), origin: copyWire(row2.origin), position: copyWire(row2.location.position), spaceInstanceId: row2.location.spaceInstanceId, droppedTick: row2.drop.droppedTick, receipt: copyWire(row2.drop.receipt) };
     }
   }
