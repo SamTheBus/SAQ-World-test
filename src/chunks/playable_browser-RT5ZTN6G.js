@@ -133505,6 +133505,22 @@ function createWorldInput({ canvas, environment, renderer, profile, adapter, rea
     }
     return true;
   }
+  function lootAt(p, model) {
+    if (model.persistence?.phase !== "encounter" || !model.loot?.length) return null;
+    const cam = renderer.camera.read(), x = p.x / cam.zoom + cam.x, y = p.y / cam.zoom + cam.y;
+    let best = null, bestD = Infinity;
+    for (const d of model.loot) {
+      if (!d.canPickUp || !d.position) continue;
+      const dx = x - d.position.x, dy = y - d.position.y;
+      if (Math.abs(dx) > 30 || dy < -52 || dy > 22) continue;
+      const dd = Math.hypot(dx, dy + 14);
+      if (dd < bestD) {
+        bestD = dd;
+        best = d;
+      }
+    }
+    return best;
+  }
   function listen(target, type, handler, options) {
     target.addEventListener(type, handler, options);
     listeners.push(() => target.removeEventListener(type, handler, options));
@@ -133527,7 +133543,21 @@ function createWorldInput({ canvas, environment, renderer, profile, adapter, rea
     if (isBlocked() || event.button !== 0 || !selectedActor(readModel()).alive) return;
     event.preventDefault();
     suppressedUntil = now3() + 800;
-    const p = point13(event), model = readModel(), exitId = renderer.hit(p, model);
+    const p = point13(event), model = readModel(), exitId = renderer.hit(p, model), drop2 = lootAt(p, model);
+    if (drop2) {
+      clear2();
+      try {
+        adapter.issue("loot.pickup", { sourceEntityId: drop2.sourceEntityId });
+      } catch (error) {
+        reportError(error.message);
+      }
+      actionOwners.add(event.pointerId);
+      try {
+        canvas.setPointerCapture(event.pointerId);
+      } catch {
+      }
+      return;
+    }
     if (exitId) {
       action2(exitId);
       actionOwners.add(event.pointerId);
