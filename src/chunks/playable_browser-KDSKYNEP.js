@@ -1002,7 +1002,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-HBTA3Z5O.js";
+} from "./chunk-SX52UCG7.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -73294,6 +73294,16 @@ var WORLD_LOCAL_D8 = ["lastChange", "causalXp", "transient"];
 function itemContent(item) {
   return { definitionId: item.definitionId, ...item.generated ? { generated: copyWire(item.generated) } : {}, ...item.workshop ? { workshop: copyWire(item.workshop) } : {} };
 }
+function resyncHeroBodyV1(state, playerId) {
+  const p = state.playersById[playerId], a = p && state.entitiesById[p.entityId];
+  if (!a) return;
+  const v2 = state.subweaponCombat?.version === "subweapon-combat-integer-v2", n = v2 ? combatInteger : asCombatAmount;
+  const r = resolvePlayerStats(p, { legacyMigration: !v2 }), full = a.alive && compareCombat(a.hp, a.maxHp) >= 0;
+  a.hp = n(full ? r.maxHp : minCombat(a.hp, r.maxHp));
+  a.maxHp = n(r.maxHp);
+  a.attackDamage = n(r.attack);
+  a.moveSpeed = r.moveSpeed;
+}
 function extractHeroPassport(state, playerId, { heroId }) {
   requireContract(validHeroId(heroId), "Hero passport needs a hero id");
   const p = state.playersById[playerId];
@@ -141006,6 +141016,7 @@ async function createLocalEndlessSessionD9(options) {
   if (options.bestiaryAlbum && opened2.state.d9World) {
     const draft = copyWire(opened2.state);
     if (installBestiaryAlbumV1(draft, localPlayerId, options.bestiaryAlbum)) {
+      resyncHeroBodyV1(draft, localPlayerId);
       let saved = await worker.commit({ state: draft, expectedRoot: opened2.publication.id, checkpointId: createId("checkpointId", nextToken()) });
       if (saved.status === "unknown") saved = await worker.reconcile();
       requireContract(saved.status === "committed", saved.reason ?? "Bestiary album publication did not commit");

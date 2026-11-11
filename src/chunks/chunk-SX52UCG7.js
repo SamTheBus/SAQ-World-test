@@ -3125,15 +3125,16 @@ function validateBestiaryBonusV1(s, p, bonus) {
   requireContract(bonus !== void 0 && sortedText(bonus) === sortedText(bestiaryBonusV1(album)), "Bestiary bonus drift");
 }
 function installBestiaryAlbumV1(s, playerId, album) {
-  if (!s.playersById[playerId]) return false;
+  const p = s.playersById[playerId];
+  if (!p) return false;
   const next = normalizeAlbum(album), old = playerAlbumV1(s, playerId);
-  if (old && albumText(old) === albumText(next)) {
-    refreshBestiaryBonusV1(s, s.playersById[playerId]);
-    return false;
+  let changed = false;
+  if (!old || albumText(old) !== albumText(next)) {
+    writable(s).albumsByPlayerId[playerId] = next;
+    changed = true;
   }
-  writable(s).albumsByPlayerId[playerId] = next;
-  refreshBestiaryBonusV1(s, s.playersById[playerId]);
-  return true;
+  if (refreshBestiaryBonusV1(s, p)) changed = true;
+  return changed;
 }
 function rareCandidateV1(s, g, id) {
   const a = s.entitiesById[id], family2 = familyOf(s, id);
