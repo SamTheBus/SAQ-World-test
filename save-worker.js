@@ -6387,7 +6387,13 @@ function townEntrancesV1(t) {
     const [dx, dy] = b.doorPoint, [ox, oy] = { south: [0, 1], north: [0, -1], east: [1, 0], west: [-1, 0] }[b.doorSide] ?? [0, 1], [sx, sy] = [oy, ox], c = [];
     for (const k of [0, 1, 2, 3]) c.push([dx + ox * k, dy + oy * k]);
     for (const k of [1, 2]) for (const s of [1, -1]) c.push([dx + ox * k + sx * s, dy + oy * k + sy * s]);
-    const p = c.find((q) => free(...q));
+    const seen = [];
+    if (TOWN_NEW_ART.has(t.biome) && b.doorSide === "south" && type === "tower") {
+      const m = b.x + Math.floor((b.w - 1) / 2);
+      for (const k of [0, 1]) for (const x of b.w % 2 ? [m] : [m, m + 1]) seen.push([x, b.y + b.h + k]);
+    } else if (TOWN_NEW_ART.has(t.biome) && b.doorSide === "north" && type === "inn") for (const k of [0, 1]) for (const x of [b.x + 2, b.x + 1, b.x + 3]) seen.push([x, b.y + b.h + k]);
+    const reach = townReachV1(t), walk = (x, y) => free(x, y) && reach[(y - R2.y0) * R2.w + (x - R2.x0)] === 1;
+    const p = seen.find((q) => walk(...q)) ?? c.find((q) => free(...q));
     if (p) out.push(Object.freeze({ recipe, building: b.id, x: o.x + p[0], y: o.y + p[1] }));
   }
   return out;

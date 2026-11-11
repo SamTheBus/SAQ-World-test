@@ -9634,7 +9634,13 @@ function townEntrancesV1(t) {
     const [dx, dy] = b.doorPoint, [ox, oy] = { south: [0, 1], north: [0, -1], east: [1, 0], west: [-1, 0] }[b.doorSide] ?? [0, 1], [sx, sy] = [oy, ox], c = [];
     for (const k of [0, 1, 2, 3]) c.push([dx + ox * k, dy + oy * k]);
     for (const k of [1, 2]) for (const s of [1, -1]) c.push([dx + ox * k + sx * s, dy + oy * k + sy * s]);
-    const p = c.find((q) => free(...q));
+    const seen = [];
+    if (TOWN_NEW_ART.has(t.biome) && b.doorSide === "south" && type === "tower") {
+      const m = b.x + Math.floor((b.w - 1) / 2);
+      for (const k of [0, 1]) for (const x of b.w % 2 ? [m] : [m, m + 1]) seen.push([x, b.y + b.h + k]);
+    } else if (TOWN_NEW_ART.has(t.biome) && b.doorSide === "north" && type === "inn") for (const k of [0, 1]) for (const x of [b.x + 2, b.x + 1, b.x + 3]) seen.push([x, b.y + b.h + k]);
+    const reach = townReachV1(t), walk = (x, y) => free(x, y) && reach[(y - R.y0) * R.w + (x - R.x0)] === 1;
+    const p = seen.find((q) => walk(...q)) ?? c.find((q) => free(...q));
     if (p) out.push(Object.freeze({ recipe, building: b.id, x: o.x + p[0], y: o.y + p[1] }));
   }
   return out;
@@ -11423,7 +11429,8 @@ function validateTavernResidency(binding, actor, collisionFor = tavernCollision)
 
 // src/simulation/settlement_interior_transitions.js
 var CIVILIAN_TRANSITION_PROTECTION_TICKS = 18;
-var CIVILIAN_INTERACTION_RADIUS = 40;
+var CIVILIAN_INTERACTION_RADIUS = 64;
+var DOOR_LINE_RADIUS = 4;
 var TAVERN_RECIPE = Object.freeze({ floor: tavernFloor, collision: tavernCollision, labels: Object.freeze({ enter: "Tavern \xB7 Enter [E]", exit: "Tavern \xB7 Exit [E]", up: "Guest rooms \xB7 Upstairs [E]", down: "Common room \xB7 Downstairs [E]" }) });
 function tavernActions(binding, actor, tick, recipe = TAVERN_RECIPE) {
   if (!actor.alive || tick < (actor.transitionReadyTick ?? 0)) return [];
@@ -11437,7 +11444,7 @@ function tavernActions(binding, actor, tick, recipe = TAVERN_RECIPE) {
 function reachableInteraction(actor, action, collision2) {
   const dx = action.x - actor.position.x, dy = action.y - actor.position.y, d = Math.hypot(dx, dy);
   if (d > action.radius) return false;
-  for (let i = 0, n = Math.max(1, Math.ceil(d / 4)); i <= n; i++) if (collidesWithTiles(collision2, actor.position.x + dx * i / n, actor.position.y + dy * i / n, actor.hullRadius)) return false;
+  for (let i = 0, n = Math.max(1, Math.ceil(d / 4)); i <= n; i++) if (collidesWithTiles(collision2, actor.position.x + dx * i / n, actor.position.y + dy * i / n, Math.min(actor.hullRadius, DOOR_LINE_RADIUS))) return false;
   return true;
 }
 function prepareTavernTransition({ binding, actor, exitId, tick, exteriorCollision, actors: actors2 = [], recipe = TAVERN_RECIPE }) {
@@ -21241,6 +21248,7 @@ var same19 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var digest8 = (v) => typeof v === "string" && /^[a-f0-9]{64}$/.test(v);
 var FUNCTIONAL_SITE_D9 = "functional-site-d9-v1";
 var SITE_INTERACTION_RADIUS = 64;
+var DOOR_LINE_RADIUS2 = 4;
 var partyTarget = (state, actor, spaceInstanceId, anchor) => usesMultiroom(state.d9World?.plannedWorld) && hasBossHostingV1(state.d9World.plannedWorld) ? sitePartyArrivalTarget(state, actor, spaceInstanceId, anchor) : { spaceInstanceId, position: { x: anchor.x, y: anchor.y } };
 var isGeneratedCaveFamilyD12 = (site) => [FUNCTIONAL_SITE_FAMILY_D12, FUNCTIONAL_SITE_FAMILY_D12_1, FUNCTIONAL_SITE_FAMILY_D12_2].includes(site?.version);
 var functionalSitesD10 = (state) => Object.values(state.d9World?.functionalSitesById ?? {});
@@ -21383,7 +21391,7 @@ function functionalSiteTransitionTargetD9(state, actor, payload) {
     const c2 = state.spacesByInstanceId[source11].collision, steps2 = Math.max(1, Math.ceil(Math.hypot(actor.position.x - anchor2.x, actor.position.y - anchor2.y) / 4));
     for (let n = 0; n <= steps2; n++) {
       const q = n / steps2;
-      if (collidesWithTiles(c2, actor.position.x + (anchor2.x - actor.position.x) * q, actor.position.y + (anchor2.y - actor.position.y) * q, actor.hullRadius)) return null;
+      if (collidesWithTiles(c2, actor.position.x + (anchor2.x - actor.position.x) * q, actor.position.y + (anchor2.y - actor.position.y) * q, Math.min(actor.hullRadius, DOOR_LINE_RADIUS2))) return null;
     }
     return partyTarget(state, actor, targetSpace, destination2);
   }
@@ -21397,7 +21405,7 @@ function functionalSiteTransitionTargetD9(state, actor, payload) {
   const c = state.spacesByInstanceId[source10].collision, steps = Math.max(1, Math.ceil(Math.hypot(actor.position.x - anchor.x, actor.position.y - anchor.y) / 4));
   for (let n = 0; n <= steps; n++) {
     const q = n / steps;
-    if (collidesWithTiles(c, actor.position.x + (anchor.x - actor.position.x) * q, actor.position.y + (anchor.y - actor.position.y) * q, actor.hullRadius)) return null;
+    if (collidesWithTiles(c, actor.position.x + (anchor.x - actor.position.x) * q, actor.position.y + (anchor.y - actor.position.y) * q, Math.min(actor.hullRadius, DOOR_LINE_RADIUS2))) return null;
   }
   return partyTarget(state, actor, entering ? f3.spaceInstanceId : state.overworldInstanceId, destination);
 }
