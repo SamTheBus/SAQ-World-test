@@ -73600,11 +73600,11 @@ function huntTargetV1(site) {
   const spec = huntSpecV1(site);
   if (spec?.role !== "elite") return null;
   if (spec.named) {
-    const name = titleCase(NAMED_ELITES_V1[spec.named].label);
-    return { kind: name, a: name, the: name };
+    const name = titleCase(NAMED_ELITES_V1[spec.named].label), her = spec.named === "queen_kheptra";
+    return { kind: name, a: name, the: name, it: her ? "her" : "it", It: her ? "She" : "It" };
   }
   const word = AFFIX_WORDS[spec.affixId] ?? titleCase(eliteAffixDefinitionD12_4(spec.affixId)?.label ?? "").split(" ")[0], kind = [word, titleCase(String(spec.family).replace(/_/g, " "))].filter(Boolean).join(" ");
-  return { kind, a: aOrAn(kind), the: "the " + kind };
+  return { kind, a: aOrAn(kind), the: "the " + kind, it: "it", It: "It" };
 }
 function landOf(view3, town) {
   let best = null, d = Infinity;
@@ -73677,47 +73677,58 @@ function questRewardV1(source3, kind, level) {
   return { gold: minutesGold(r.minutes, lv, pct3), xp: String(BigInt(siteClearXpV2("site-end-elite", lv, lv)) * BigInt(r.xp) * BigInt(pct3) / 100n) };
 }
 var ITEMS = ["satchel", "silver locket", "map case", "wedding ring", "brass lantern", "field journal", "spice box", "old compass"];
-var CAPTIVES = ["the miller's son", "a traveling tinker", "the shepherd Ada", "a young courier", "the herbalist Moss", "a lost pilgrim"];
+var CAPTIVES = [
+  { a: "the miller's son", the: "the miller's son" },
+  { a: "a traveling tinker", the: "the tinker" },
+  { a: "the shepherd Ada", the: "Ada" },
+  { a: "a young courier", the: "the courier" },
+  { a: "the herbalist Moss", the: "Moss" },
+  { a: "a lost pilgrim", the: "the pilgrim" }
+];
+var PARCELS = { general: "order", smith: "plans", innkeeper: "letter", enchanter: "sealed scroll" };
+var PARCEL_TITLE = { order: "Order", plans: "Plans", letter: "Letter", "sealed scroll": "Sealed scroll" };
 var FOLK = {
-  clear: { general: "Bandits from {label}, {dir} of {town}, keep raiding my wagons. Clear the place out and I'll pay you well.", smith: "Something in {label}, {dir} of {town}, has been stealing my iron. Clear it out?", innkeeper: "Travelers won't go near {label}, {dir} of {town}, anymore. Clear it and I'll make it worth your while.", enchanter: "{label}, {dir} of {town}, hums with a bad magic. Clear whatever is in there before it spreads." },
-  hunt: { general: "{a} has been tearing up the road traders near {label}, {dir} of {town}. Bring it down.", smith: "{a} broke my apprentice's arm. It lairs in {label}, {dir} of {town}. Put an end to it.", innkeeper: "Every hunter who went after {the} at {label}, {dir} of {town}, ended up in my beds. You try.", enchanter: "{a} in {label}, {dir} of {town}, carries a shard of something old. Destroy it." },
-  carry: { general: "Take this order to {dest} for me. Their merchant owes me.", smith: "Run these plans to {dest}. Their smith is waiting.", innkeeper: "My sister lives in {dest}. Would you carry her a letter?", enchanter: "Deliver this sealed scroll to {dest}. Don't open it." },
-  find: { general: "I dropped my {item} near a clearing {dir} of town. Will you look for it?", smith: "My {item} was lost in a clearing {dir} of here. Find it?", innkeeper: "A guest left their {item} at a clearing {dir} of town. Fetch it?", enchanter: "My {item} fell in a clearing {dir} of here. It matters more than it looks." },
-  rescue: { general: "Looters took {captive} to their camp {dir} of town. Please, bring them home.", smith: "{captive} was dragged off to a looters' camp {dir} of here. Get them out.", innkeeper: "{captive} never came back from the road. Looters, they say, camped {dir} of here.", enchanter: "I saw it in the glass: {captive}, held at a looters' camp {dir} of here. Hurry." }
+  clear: { general: "Bandits from {label}, {dir} of {town}, keep raiding my wagons. Clear the place out and I'll pay you well.", smith: "Something in {label}, {dir} of {town}, has been stealing my iron. Will you clear it out?", innkeeper: "Travelers won't go near {label}, {dir} of {town}, anymore. Clear it out and I'll make it worth your while.", enchanter: "{label}, {dir} of {town}, hums with dark magic. Clear out whatever is in there before it spreads." },
+  hunt: { general: "{a} has been attacking traders on the road near {label}, {dir} of {town}. Bring {it} down.", smith: "{a} broke my apprentice's arm. {It} hides in {label}, {dir} of {town}. Put an end to {it}.", innkeeper: "Every hunter who went after {the} at {label}, {dir} of {town}, came back hurt. Maybe you'll have better luck.", enchanter: "{a} in {label}, {dir} of {town}, carries a shard of something old. Slay {it} before the shard wakes." },
+  carry: { general: "Take this order to {dest} for me. Their merchant owes me.", smith: "Run these plans over to {dest}. Their smith is waiting for them.", innkeeper: "My sister lives in {dest}. Would you carry this letter to her?", enchanter: "Deliver this sealed scroll to {dest}, and don't open it." },
+  find: { general: "I dropped my {item} in a clearing {dir} of town. Will you look for it?", smith: "I lost my {item} in a clearing {dir} of town. Can you find it?", innkeeper: "A guest left their {item} in a clearing {dir} of town. Would you fetch it?", enchanter: "My {item} fell in a clearing {dir} of town. It matters more than it looks." },
+  rescue: { general: "Looters took {captive} to their camp {dir} of town. Please bring {freed} home.", smith: "Looters dragged {captive} off to their camp {dir} of town. Get {freed} out of there.", innkeeper: "{captive} never came back from the road. Folk say looters have a camp {dir} of town. Please look there.", enchanter: "I saw it in the glass: {captive}, held at a looters' camp {dir} of town. Hurry." }
 };
 var fill = (s, v) => s.replace(/\{(\w+)\}/g, (_, k) => {
   if (v[k] == null) throw new TypeError("Quest words lack " + k);
   return v[k];
 });
 var sentences = (s) => s.replace(/(^|[.!?]\s+)([a-z])/g, (_, a, b) => a + b.toUpperCase());
+var giverWord = (name, town) => town && name?.startsWith(town + " ") ? "the " + name.slice(town.length + 1).toLowerCase() : name;
 function questTextV1(q, names2) {
-  const key3 = q.id, dir = compassV1(names2.townAt ?? { x: q.tx, y: q.ty }, { x: q.tx, y: q.ty }), hunt = names2.elite ?? {};
-  const v = { dir, label: names2.label, town: names2.town, dest: names2.dest ?? "the town to the " + dir, item: pick3(ITEMS, key3 + "/item"), captive: pick3(CAPTIVES, key3 + "/captive"), kind: hunt.kind, a: hunt.a, the: hunt.the };
+  const key3 = q.id, dir = compassV1(names2.townAt ?? { x: q.tx, y: q.ty }, { x: q.tx, y: q.ty }), hunt = names2.elite ?? {}, c = pick3(CAPTIVES, key3 + "/captive");
+  const folk = q.source === "folk" && names2.role ? names2.role : null, parcel2 = folk && PARCELS[folk] || "letter";
+  const v = { dir, label: names2.label, town: names2.town, dest: names2.dest ?? "the town to the " + dir, item: pick3(ITEMS, key3 + "/item"), captive: c.a, freed: c.the, kind: hunt.kind, a: hunt.a, the: hunt.the, it: hunt.it ?? "it", It: hunt.It ?? "It", parcel: parcel2 };
   const found = Boolean(names2.found);
   let title, step, note;
   if (q.kind === "clear") {
     title = fill("Trouble at {label}", v);
     note = fill("Something has moved into {label}, {dir} of {town}. Clear it out.", v);
-    step = fill(found ? "Clear {label}" : "Find {label} \xB7 search the marked area", v);
+    step = fill(found ? "Clear out {label}" : "Find {label} \xB7 search the marked area", v);
   } else if (q.kind === "hunt") {
     title = fill("Wanted: {kind}", v);
-    note = fill("{a} lairs in {label}, {dir} of {town}. Hunt it down.", v);
+    note = fill("{a} has made a lair in {label}, {dir} of {town}. Hunt {it} down.", v);
     step = fill("Hunt {the} at {label}", v);
   } else if (q.kind === "carry") {
-    title = "Letter for " + (names2.dest ?? "a far town");
-    note = "Carry a letter to " + v.dest + ". Paid when you hand it over at their notice board.";
-    step = "Carry the letter to " + v.dest;
+    title = PARCEL_TITLE[parcel2] + " for " + (names2.dest ?? "a town to the " + dir);
+    note = fill("Carry this letter to {dest} and hand it in at the notice board there.", v);
+    step = fill("Take the {parcel} to {dest}", v);
   } else if (q.kind === "find") {
     title = "The lost " + v.item;
-    note = fill(aOrAn(v.item) + " was lost in a clearing {dir} of {town}. Search the clearing and bring it back.", v);
+    note = fill("Someone lost " + aOrAn(v.item) + " in a clearing {dir} of {town}. Search the clearing and bring it back.", v);
     step = found ? "Search the clearing for the " + v.item : "Find the clearing \xB7 search the marked area";
   } else {
     title = "Taken by looters";
-    note = fill("Looters took {captive} to their camp {dir} of {town}. Drive them off and free the captive.", v);
-    step = "Free " + v.captive + " at the looters' camp";
+    note = fill("Looters are holding {captive} at their camp {dir} of {town}. Drive them off and bring {freed} home.", v);
+    step = fill("Free {freed} at the looters' camp", v);
   }
-  if (q.source === "folk" && names2.role) note = fill(FOLK[q.kind][names2.role] ?? FOLK[q.kind].general, v);
-  if (q.status === "ready") step = fill(q.source === "folk" ? "Return to {giver} in {town}" : "Return to the {town} notice board", { ...v, giver: names2.giverName });
+  if (folk) note = fill(FOLK[q.kind][folk] ?? FOLK[q.kind].general, v);
+  if (q.status === "ready") step = fill(q.source === "folk" ? "Return to {giver} in {town}" : "Return to the {town} notice board", { ...v, giver: giverWord(names2.giverName, names2.town) });
   return { title: sentences(title), note: sentences(note), step: sentences(step) };
 }
 
@@ -75137,14 +75148,6 @@ function readTrailNote(state, player, payload) {
   k.rumors[target.siteId] = state.tick;
   k.revision++;
   state.d9World.navigation.revision++;
-}
-function trailNoteExits(state, actor) {
-  const k = state.d9World?.navigation?.knowledge;
-  if (!k || !hasStarterVillage(state.d9World.plannedWorld) || k.journal.some((n) => n.id === TRAIL_NOTE_ID) || !trailNoteTarget(state) || actor.residency.spaceInstanceId !== state.overworldInstanceId) return [];
-  const p = projectToLocalFrameD9(tileMapAddress(trailNoteTileV1()), state.d9World.runtime.frames);
-  if (!p || Math.hypot(p.x - actor.position.x, p.y - actor.position.y) > 800) return [];
-  const player = Object.values(state.playersById).find((v) => v.entityId === actor.entityId);
-  return [{ exitId: TRAIL_NOTE_ID, noteId: TRAIL_NOTE_ID, siteKind: "discovery-note", x: p.x, y: p.y, radius: 80, available: canReadTrailNote(state, player, { noteId: TRAIL_NOTE_ID }), label: "Read trail note" }];
 }
 var knowledgeViews = /* @__PURE__ */ new WeakMap();
 function projectMapKnowledge(state) {
@@ -92192,7 +92195,6 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
           };
         });
         if (state.d9World) {
-          exits.push(...slowCached("trailNotes", () => trailNoteExits(state, local7)));
           exits.push(...slowCached("questExits:" + questRev, () => questExitsV1(state, local7, player)));
           for (const e of projectWorldEvents(state, local7)) if (e.status === "dormant" && e.kind !== "road_ambush" && (e.kind !== "raided_camp" || e.canActivate)) exits.push({ exitId: "event:" + e.groupId, eventAction: { groupId: e.groupId }, x: (e.interactionPosition ?? e.position).x, y: (e.interactionPosition ?? e.position).y, radius: 96, available: e.canActivate, label: e.quiet ? "Quiet for now \xB7 watch your map" : e.activeCount >= 4 ? "Four events active \u2014 finish one first" : e.kind === "wayside_shrine" ? "Pray at the Wayside Shrine" : e.kind === "raided_camp" ? "Read the torn journal" : e.kind === "trophy_hunt" ? "Blow the horn" : e.kind === "buried_cache" ? "Dig up the cache" : (e.kind === "cursed_shrine" ? "Break the seal \xB7 " : e.kind === "hollow" ? "Investigate " : e.kind === "nests" ? "Disturb the " : "Disturb ") + e.label });
           if (inFunctional) {
