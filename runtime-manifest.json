@@ -1,6 +1,6 @@
 {
-  "runtimeId": "d00d90d5b6141a60",
-  "runtimeSha256": "d00d90d5b6141a600fe5780b8f75b508542ec022e7be2339fbac6460f69e70c5",
+  "runtimeId": "cb775acf9a191ec8",
+  "runtimeSha256": "cb775acf9a191ec8ec45c2ef3f29b6aca3e6fe0b5c811f50e71ba3dca4678be1",
   "files": [
     {
       "path": ".nojekyll",
@@ -16,6 +16,41 @@
       "path": "assets/alpha-site-population-v1.json",
       "bytes": 140762,
       "sha256": "e2f7df0763c70e35143d4f032257b28fa9aefd0bc9326c0d140f150575406d2e"
+    },
+    {
+      "path": "assets/biome-ground-v1/desert.webp",
+      "bytes": 134496,
+      "sha256": "1ddc0edef4399b0e1c6279056b2ea8efa57089f30cd138d5d77baa8d4a0d3b62"
+    },
+    {
+      "path": "assets/biome-ground-v1/frostland.webp",
+      "bytes": 36746,
+      "sha256": "4b883be7bc07935cbbcdcf07747181c7a25603e6900590dabf905c6004083deb"
+    },
+    {
+      "path": "assets/biome-ground-v1/manifest.json",
+      "bytes": 88126,
+      "sha256": "0ebf4c2e5022802181785204f73e981f633d1838ffee5eae6fb4c52e87e4a7f0"
+    },
+    {
+      "path": "assets/biome-ground-v1/tropical.webp",
+      "bytes": 185830,
+      "sha256": "7ec3dea683e5e725ed486582b0861d033238742f96fcd7fd9d5c1b4b43d6030d"
+    },
+    {
+      "path": "assets/biome-ground-v1/upland.webp",
+      "bytes": 90030,
+      "sha256": "7aced48f526d0eb7e7776b7e35ea75a27811b91ea3a454fbfdd6c33ea0407831"
+    },
+    {
+      "path": "assets/biome-ground-v1/volcanic.webp",
+      "bytes": 48278,
+      "sha256": "36046e3f26f1279839b35a50dbefd9ef5d154657c502d7bf5c5717214d03ec74"
+    },
+    {
+      "path": "assets/biome-ground-v1/wetland.webp",
+      "bytes": 130276,
+      "sha256": "17085f389ad9528358fdd2787af7255e8822dfcb861aa9113aaf4589b43ef86a"
     },
     {
       "path": "assets/breakable-props-v1/kit-manifest.json",
@@ -554,8 +589,8 @@
     },
     {
       "path": "index.html",
-      "bytes": 13674,
-      "sha256": "922b411b34608a95bcdc555b6f31fb80b8cc92896d449139cea3ae01b5c8e659"
+      "bytes": 13943,
+      "sha256": "8f140f161b9e02049ceeb89bde2b8fba8261b5514aded60816dd64b217ec0248"
     },
     {
       "path": "manifest.webmanifest",
@@ -578,9 +613,9 @@
       "sha256": "7db8c23d3d071f10af27f69428fb3f40deb5eeb8a332946192a66dc1e22e73e4"
     },
     {
-      "path": "src/chunks/playable_browser-QXZLE5TN.js",
-      "bytes": 7773929,
-      "sha256": "8c106a4be0b3f9afb6e47fca83cd8e74dbefb8c2f7376e5655621d364fcc3c78"
+      "path": "src/chunks/playable_browser-BK4OAZZT.js",
+      "bytes": 7789685,
+      "sha256": "b87281e5bdd66715653605f77b9b9d534cd520150085c0da407049bea0126e2b"
     },
     {
       "path": "src/chunks/world_browser-VRH7YRIZ.js",
@@ -600,7 +635,7 @@
     {
       "path": "src/entrypoints/browser_boot.js",
       "bytes": 2158,
-      "sha256": "1eeb17da16232cf2d3fb6283f5ba37ace118bd8f3cd6a4a4a1f4368dd489e89a"
+      "sha256": "07daed932afd532dbe2387f9c36e869d43377a34a05d04c13af98343727cab5d"
     },
     {
       "path": "world-maker-worker.js",
