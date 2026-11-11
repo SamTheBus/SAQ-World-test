@@ -1928,7 +1928,7 @@ function planGeneratedTownsV1(asset, spots = null) {
   }
   return { version: GENERATED_TOWNS_VERSION, layout: TOWN_LAYOUT_VERSION, towns };
 }
-var TOWN_NEW_ART = Object.freeze(/* @__PURE__ */ new Set(["grassland", "woodland", "desert", "frostland"]));
+var TOWN_NEW_ART = Object.freeze(/* @__PURE__ */ new Set(["grassland", "woodland", "desert", "frostland", "wetland"]));
 var TOWN_SHOP_ROLES = Object.freeze({ hamlet: ["general", "innkeeper"], village: ["general", "smith", "innkeeper"], town: ["general", "smith", "innkeeper", "enchanter"], city: ["general", "smith", "innkeeper", "enchanter"], capital: ["general", "smith", "innkeeper", "enchanter"] });
 
 // src/shared/content/world_towns_v1.js

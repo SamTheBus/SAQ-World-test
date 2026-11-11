@@ -8536,7 +8536,7 @@ function generatedTownsOfV1(record) {
   if (record?.version !== GENERATED_TOWNS_VERSION || !Array.isArray(record.towns)) return [];
   let l = lists.get(record);
   if (!l) {
-    l = record.towns.filter((t) => GENERATED_TOWN_SIZES[t.id] && Number.isSafeInteger(t.origin?.x) && Number.isSafeInteger(t.origin?.y) && typeof t.seed === "string");
+    l = record.towns.filter((t) => GENERATED_TOWN_SIZES[t.id] && Number.isSafeInteger(t.origin?.x) && Number.isSafeInteger(t.origin?.y) && typeof t.seed === "string").map(unsealTownDoors);
     lists.set(record, l);
   }
   return l;
@@ -8677,7 +8677,7 @@ function townGeometryV1(t) {
   geoCache.set(t, g);
   return g;
 }
-var TOWN_NEW_ART = Object.freeze(/* @__PURE__ */ new Set(["grassland", "woodland", "desert", "frostland"]));
+var TOWN_NEW_ART = Object.freeze(/* @__PURE__ */ new Set(["grassland", "woodland", "desert", "frostland", "wetland"]));
 var townNewArtV1 = (t) => TOWN_NEW_ART.has(t?.biome);
 var LANE = 8;
 var LANE_END = 0.3;
@@ -9284,7 +9284,7 @@ function townRowDoorV1(t, b) {
   }
   return m.has(b.id) ? m.get(b.id) : null;
 }
-function townHouseDoorV1(t, b) {
+var houseDoorSpots = (t, b) => {
   const X = b.x * 32, W6 = b.w * 32, side = b.doorSide;
   let own2;
   if (side === "north") {
@@ -9296,7 +9296,26 @@ function townHouseDoorV1(t, b) {
     const x = Math.floor(px / 32) - R.x0, y = b.y + b.h - R.y0;
     return x >= 0 && y >= 0 && x < R.w && y < R.h && s[y * R.w + x] === 1;
   };
-  return [own2, 2 * X + W6 - own2].find(open) ?? own2;
+  return { own: own2, spots: [own2, 2 * X + W6 - own2], open };
+};
+function townHouseDoorV1(t, b) {
+  const { own: own2, spots, open } = houseDoorSpots(t, b);
+  return spots.find(open) ?? own2;
+}
+function unsealTownDoors(t) {
+  if (!townNewArtV1(t)) return t;
+  for (let k = 0; k < 3; k++) {
+    const drop = /* @__PURE__ */ new Set();
+    for (const b of townArtBuildingsV1(t).houses) {
+      const { own: own2, spots, open } = houseDoorSpots(t, b);
+      if (spots.some(open)) continue;
+      const x = Math.floor(own2 / 32), y = b.y + b.h;
+      for (const q of t.buildings) if ((q.kind === "home" || q.kind === "row") && q.id !== b.id && x >= q.x && x < q.x + q.w && y >= q.y && y < q.y + q.h) drop.add(q.id);
+    }
+    if (!drop.size) return t;
+    t = { ...t, buildings: t.buildings.filter((q) => !drop.has(q.id)) };
+  }
+  return t;
 }
 var startCache = /* @__PURE__ */ new WeakMap();
 function townStartV1(t) {
