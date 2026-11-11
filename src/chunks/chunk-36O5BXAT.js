@@ -1783,7 +1783,7 @@ var NEST_POLICY = freezeWire({
   rage: { damagePercent: 115, speedPercent: 110 },
   quickClearQualityHundredths: 100,
   // The elite trick a broodling carries, by nest skin.
-  broodAffixes: { woodland: "web_weaver", desert: "iron_citadel", frostland: "glacial_warden", wetland: "toxic_decay" },
+  broodAffixes: { woodland: "web_weaver", grassland: "swift_commander", desert: "iron_citadel", frostland: "glacial_warden", wetland: "toxic_decay" },
   triggerRadius: 96,
   activeRadius: 768,
   playerClearance: 48,
@@ -1795,8 +1795,8 @@ var NEST_POLICY = freezeWire({
   simulationHz: 60
 });
 var NEST_MEMBERS = PLANNED_EVENT_MEMBERS;
-var NEST_SKINS = freezeWire({ woodland: "woodland", grassland: "woodland", desert: "desert", volcanic: "desert", frostland: "frostland", upland: "frostland", wetland: "wetland", tropical: "wetland" });
-var NEST_LABELS = freezeWire({ woodland: "Spore Nest", desert: "Scarab Nest", frostland: "Frost Nest", wetland: "Bog Nest" });
+var NEST_SKINS = freezeWire({ woodland: "woodland", grassland: "grassland", desert: "desert", volcanic: "desert", frostland: "frostland", upland: "frostland", wetland: "wetland", tropical: "wetland" });
+var NEST_LABELS = freezeWire({ woodland: "Spore Nest", grassland: "Hive Nest", desert: "Scarab Nest", frostland: "Frost Nest", wetland: "Bog Nest" });
 var nestSkinOfV1 = (biome) => NEST_SKINS[biome] ?? "woodland";
 var ROADSIDE_CREW = freezeWire(["bandit_cutthroat", "bandit_archer", "bandit_cutthroat", "bandit_brute", "bandit_archer", "bandit_cutthroat", "bandit_archer", "bandit_cutthroat", "bandit_archer", "bandit_captain"]);
 var ROADSIDE_MEMBERS = ROADSIDE_CREW.length;
@@ -11637,7 +11637,7 @@ var FOREST_STAND_PROFILES = Object.freeze({
   w: { glade: 0.36, forest: 0.5, core: 0.8, treeOpen: 0.34, treeForest: 0.92, lone: 0.05, massCore: 0.9, massForest: 0.06, cover: "fern", coverAt: 0.66, water: 0, height: 0 },
   t: { glade: 0.2, forest: 0.32, core: 0.62, treeOpen: 0.5, treeForest: 0.96, lone: 0.08, massCore: 0.95, massForest: 0.3, cover: "fern", coverAt: 0.56, water: 0.06, height: 0, grove: "bamboo" },
   m: { glade: 0.4, forest: 0.56, core: 0.84, treeOpen: 0.3, treeForest: 0.86, lone: 0.06, massCore: 0.8, massForest: 0.05, cover: "reed", coverAt: 0.48, water: 0.42, height: 0 },
-  a: { scale: 0.5, glade: 0.68, forest: 0.79, core: 0.95, treeOpen: 0.22, treeForest: 0.9, lone: 0.035, massCore: 0.7, massForest: 0, cover: "grass", coverAt: 0.58, water: 0.2, height: 0, hedges: true },
+  a: { scale: 0.5, glade: 0.68, forest: 0.79, core: 0.95, treeOpen: 0.22, treeForest: 0.9, lone: 0.05, massCore: 0.7, massForest: 0, cover: "grass", coverAt: 0.58, water: 0.2, height: 0, hedges: true },
   r: { glade: 0.44, forest: 0.56, core: 0.86, treeOpen: 0.28, treeForest: 0.88, lone: 0.03, massCore: 0.6, massForest: 0, cover: "heather", coverAt: 0.54, water: 0.08, height: 0.55, outcrop: 0.7 },
   s: { glade: 0.44, forest: 0.56, core: 0.88, treeOpen: 0.26, treeForest: 0.9, lone: 0.03, massCore: 0.5, massForest: 0, cover: null, coverAt: 1, water: 0, height: 0.5, outcrop: 0.74 },
   d: { glade: 0.64, forest: 2, core: 2, treeOpen: 0.2, treeForest: 0, lone: 0.018, massCore: 0, massForest: 0, cover: null, coverAt: 1, water: 0.9, height: 0, outcrop: 0.7, oasis: true },
@@ -11924,7 +11924,7 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
     const e = envAt(x, y);
     if (!e.walkable || e.biome !== "a" || e.clear || e.road <= 2) return null;
     if (S.zone(standAt(x, y), "a") !== ZONE.GLADE) return null;
-    if (S.vnoise(K.hedge + 9, x / 220, y / 220) < 0.45) return null;
+    if (S.vnoise(K.hedge + 9, x / 220, y / 220) < 0.32) return null;
     const wy = y + Math.round((S.vnoise(K.hedge, x / 50, y / 50) - 0.5) * 6), wx = x + Math.round((S.vnoise(K.hedge + 1, x / 50, y / 50) - 0.5) * 6);
     const onH = (wy % 28 + 28) % 28 === 0, onV = (wx % 36 + 36) % 36 === 0;
     if (!onH && !onV) return null;
