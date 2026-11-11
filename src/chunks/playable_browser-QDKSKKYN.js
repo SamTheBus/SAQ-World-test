@@ -95265,6 +95265,12 @@ function createHeroSlotsView({ document: document2, environment, heroSlots }) {
   function render() {
     const { active: active2, heroes } = heroSlots.list(), grid = el3("div", "hero-slots-grid"), portraits = [];
     const label4 = (h) => h.name || (h.slot === active2 ? "Your hero" : "Unnamed hero"), made = (h) => Boolean(h.name || h.hero), worldOf2 = (h) => h.plays ?? h.slot;
+    const tell = (h) => {
+      const twins = heroes.filter((x) => x.slot !== h.slot && made(x) && label4(x) === label4(h));
+      if (!twins.length) return label4(h);
+      const cls = h.hero?.cls ? CLASS_NAMES[h.hero.cls] : null, same12 = twins.filter((x) => (x.hero?.cls ?? null) === (h.hero?.cls ?? null));
+      return (cls ? `${label4(h)} the ${cls}` : `${label4(h)} (no class yet)`) + (same12.length ? ` \xB7 level ${h.level}` : "");
+    };
     const owner = (slot) => heroes.find((x) => x.slot === slot), worldsFor = (h) => [h.slot, ...heroes.filter((x) => x.slot !== h.slot && made(x)).map((x) => x.slot)];
     const parties = heroSlots.partyWorlds?.() ?? [], copies = parties.filter((w) => !w.own), sharedOwn = (slot) => parties.some((w) => w.own && w.slot === slot), story = Boolean(heroSlots.storyDone?.());
     for (const h of heroes) {
@@ -95273,7 +95279,7 @@ function createHeroSlotsView({ document: document2, environment, heroSlots }) {
       canvas.setAttribute("aria-hidden", "true");
       const name = label4(h), world = worldOf2(h), visiting = world !== h.slot && owner(world);
       info2.append(el3("strong", "hero-slot-name", name), el3("small", "hero-slot-class", `${h.hero?.cls ? CLASS_NAMES[h.hero.cls] : "No class yet"} \xB7 Level ${h.level}`));
-      if (visiting) info2.append(el3("small", "hero-slot-world is-visiting", `In ${label4(visiting)}\u2019s world`));
+      if (visiting) info2.append(el3("small", "hero-slot-world is-visiting", `In ${tell(visiting)}\u2019s world`));
       else if (h.name || h.hero) info2.append(el3("small", "hero-slot-world" + (h.world ? " is-seeded" : ""), h.world ? `World seed ${h.world.seed}` : "Classic world"));
       const choices = worldsFor(h).filter((slot) => h.slot !== active2 || slot !== world), shared = copies.filter((w) => h.slot !== active2 || w.slot !== world), choose = () => {
         choosing = h.slot;
@@ -95302,14 +95308,14 @@ function createHeroSlotsView({ document: document2, environment, heroSlots }) {
           const o = owner(slot);
           if (slot !== h.slot && !story) {
             const box5 = el3("div", "hero-slot-shared" + (slot === world ? " is-current" : "")), row2 = el3("div");
-            box5.append(el3("strong", "", `${label4(o)}\u2019s world`), el3("small", "", "Finish the story to travel here alone."));
+            box5.append(el3("strong", "", `${tell(o)}\u2019s world`), el3("small", "", "Finish the story to travel here alone."));
             if (heroSlots.coop?.available !== false) row2.append(button3("Host for friends", () => act("coop", () => heroSlots.hostIn(h.slot, slot))));
             box5.append(row2);
             pick4.append(box5);
             continue;
           }
-          const b = button3(slot === h.slot ? "Their own world" : `${label4(o)}\u2019s world`, () => act("play", () => heroSlots.play(h.slot, slot)), slot === world ? "is-current" : "");
-          const where = (sharedOwn(slot) ? "Shared \xB7 " : "") + (o?.world ? `Seed ${o.world.seed}` : "Classic world"), people = heroes.filter((x) => x.slot !== h.slot && worldOf2(x) === slot && made(x)).map(label4);
+          const b = button3(slot === h.slot ? "Their own world" : `${tell(o)}\u2019s world`, () => act("play", () => heroSlots.play(h.slot, slot)), slot === world ? "is-current" : "");
+          const where = (sharedOwn(slot) ? "Shared \xB7 " : "") + (o?.world ? `Seed ${o.world.seed}` : "Classic world"), people = heroes.filter((x) => x.slot !== h.slot && worldOf2(x) === slot && made(x)).map(tell);
           b.append(el3("small", "", people.length ? `${where} \xB7 ${people.join(", ")} here` : where));
           pick4.append(b);
         }
