@@ -1002,7 +1002,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-YHIS7BZG.js";
+} from "./chunk-HBTA3Z5O.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -75146,9 +75146,15 @@ function trailNoteExits(state, actor) {
   const player = Object.values(state.playersById).find((v) => v.entityId === actor.entityId);
   return [{ exitId: TRAIL_NOTE_ID, noteId: TRAIL_NOTE_ID, siteKind: "discovery-note", x: p.x, y: p.y, radius: 80, available: canReadTrailNote(state, player, { noteId: TRAIL_NOTE_ID }), label: "Read trail note" }];
 }
+var knowledgeViews = /* @__PURE__ */ new WeakMap();
 function projectMapKnowledge(state) {
   const k = state.d9World?.navigation?.knowledge;
-  return k ? copyWire(k) : null;
+  if (!k) return null;
+  const hit = knowledgeViews.get(k);
+  if (hit?.revision === k.revision) return hit.view;
+  const view3 = freezeWire(k);
+  knowledgeViews.set(k, { revision: k.revision, view: view3 });
+  return view3;
 }
 var TRAIL_NOTE_TEXT = "A traveler marked a small cave in the Woodland. The entrance location has been copied onto our shared map. Watch for the cave symbol when we reach it.";
 
@@ -91972,7 +91978,12 @@ function createSiteAnchorProjectionCacheV1(project2 = projectToLocalFrameD9) {
 }
 
 // src/host/activity_client_port.js
+var DEEP_FREEZE = typeof window === "undefined" || /[?&]deepFreeze=1/.test(globalThis.location?.search ?? "");
 function freezeProjection(value2) {
+  if (!DEEP_FREEZE) {
+    if (value2 && typeof value2 === "object") Object.freeze(value2);
+    return value2;
+  }
   if (value2 && typeof value2 === "object" && !Object.isFrozen(value2)) {
     for (const child of Object.values(value2)) freezeProjection(child);
     Object.freeze(value2);
@@ -91998,6 +92009,13 @@ function rustNibblerFacingD11_2({ position: position4, previousPosition = null, 
     if (Math.abs(dx) >= 0.15 && Math.abs(dx) >= Math.abs(dy) * 0.4) facing2 = dx < 0 ? -1 : 1;
   }
   return facing2;
+}
+var sharedTruth = null;
+function sharedSiteTruthV1(state, read2, maxAge, force) {
+  const d = state.campaign.overworld.discovery, key3 = `${state.d9World.runtime.revision}/${d.discoveredSiteIds.length}`, t = sharedTruth;
+  if (!force && t && t.state === state && t.key === key3 && state.tick >= t.tick && state.tick - t.tick < maxAge) return t;
+  sharedTruth = { state, key: key3, tick: state.tick, view: read2(state) };
+  return sharedTruth;
 }
 function createActivityClientPort({ authority, localPlayerId, measure: measure2 = (_n, fn) => fn() }) {
   const presentationSiteTruth = createSiteTruthPresentationCache();
@@ -92154,10 +92172,11 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
         const events = eventView;
         const place3 = inOverworld ? semanticPlaceAtWorldPosition(m, local7.position) : null, area2 = inOverworld ? areaAtWorldPosition(m, local7.position) : null, d = state.campaign.overworld.discovery, truthKey = state.d9World ? `${state.d9World.runtime.revision}/${ctx.spaceInstanceId}/${d.discoveredSiteIds.length}` : null;
         if (state.d9World && (state !== siteTruthState || truthKey !== siteTruthKey || state.tick - siteTruthTick >= SITE_TRUTH_REFRESH_TICKS || state.tick < siteTruthTick)) {
-          siteTruthView = presentationSiteTruth(state);
+          const fresh = sharedSiteTruthV1(state, presentationSiteTruth, SITE_TRUTH_REFRESH_TICKS, state !== siteTruthState || truthKey !== siteTruthKey);
+          siteTruthView = fresh.view;
           siteTruthState = state;
           siteTruthKey = truthKey;
-          siteTruthTick = state.tick;
+          siteTruthTick = fresh.tick;
         }
         const siteTruth = state.d9World ? siteTruthView : null;
         const exits = (m.siteInteriors ?? []).filter((d2) => inOverworld || d2 === interior2).map((d2) => {
@@ -139474,11 +139493,11 @@ async function prepareGroundCoverageQueryV1(query, { readPage, sha256, stagedPag
   const state = query.state, coverage = [];
   requireContract(query.root === state.d9World.groundIndex, "Ground query root mismatch");
   for (const p of Object.values(state.playersById)) {
-    const window = groundOccupancyWindowD9(state, p, D9_RUNTIME_POLICY.occupancyRadius);
-    const rows = await readParticipantGroundWindowD9(state, p, { readPage: read2, sha256, radius: D9_RUNTIME_POLICY.occupancyRadius, center: window.center });
+    const window2 = groundOccupancyWindowD9(state, p, D9_RUNTIME_POLICY.occupancyRadius);
+    const rows = await readParticipantGroundWindowD9(state, p, { readPage: read2, sha256, radius: D9_RUNTIME_POLICY.occupancyRadius, center: window2.center });
     const points2 = [];
     for (let i = 0; i < rows.length; i += 128) points2.push(rows.slice(i, i + 128).map((row2) => copyWire(row2.row.location.position)));
-    coverage.push({ playerId: p.playerId, spaceInstanceId: state.overworldInstanceId, ...window, radius: D9_RUNTIME_POLICY.occupancyRadius, points: points2 });
+    coverage.push({ playerId: p.playerId, spaceInstanceId: state.overworldInstanceId, ...window2, radius: D9_RUNTIME_POLICY.occupancyRadius, points: points2 });
   }
   const result = freezeWire({ root: query.root, coverage, pageReads: reads.size });
   preparedResults.add(result);
@@ -139931,11 +139950,11 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
         const r = regionAddress(a.chunkX, a.chunkY);
         return r.regionX + "," + r.regionY;
       })), existingParcels = reservations.flatMap((r) => r.parcel?.tileX !== void 0 ? [copyWire(r.parcel)] : r.socket ? [{ tileX: String(BigInt(r.socket.entrance.chunkX) * 32n + BigInt(Math.floor(r.socket.entrance.localX / 32)) - 6n), tileY: String(BigInt(r.socket.entrance.chunkY) * 26n + BigInt(Math.floor(r.socket.entrance.localY / 32)) - 5n), width: 12, height: 10 }] : []);
-      for (const window of [wanted, preload]) if (parcelKeys.some((k) => window.has(k))) {
-        const distance12 = Math.min(...parcelKeys.map((k) => window.get(k)?.distance ?? Infinity));
+      for (const window2 of [wanted, preload]) if (parcelKeys.some((k) => window2.has(k))) {
+        const distance12 = Math.min(...parcelKeys.map((k) => window2.get(k)?.distance ?? Infinity));
         for (const p of fortParcel.pages) {
           const k = chunkAddressKey(p.chunkX, p.chunkY);
-          if (!window.has(k)) window.set(k, { chunkX: p.chunkX, chunkY: p.chunkY, distance: distance12 });
+          if (!window2.has(k)) window2.set(k, { chunkX: p.chunkX, chunkY: p.chunkY, distance: distance12 });
         }
       }
       return { plannedWorld: w.plannedWorld ?? null, navigation: w.navigation.pending.length, tick: s.tick, deadlines: w.deadlineIndex, ground, groundKey, seed: s.campaign.seed.seedHex, origin, players, resident, pinned, approach, encounterKey, wanted, preload, regionKeys, familyParcels, existingParcels, reviewPreparing: Boolean(destinationTarget) };
@@ -141879,7 +141898,7 @@ function writeCoopIntentV1(environment, intent) {
     return false;
   }
 }
-var MODEL_INTERVAL_MS = 33;
+var MODEL_INTERVAL_MS = 50;
 var PASSPORT_INTERVAL_MS = 3e3;
 var AWAY_WAIT_MS = 5e3;
 var KEEP_PASSPORTS = 12;
@@ -142073,7 +142092,7 @@ function createCoopHostV1({ build: build2, hostName, hostFriend = null, world, r
     const t = now3();
     for (const g of guests.values()) {
       if (!g.playerId || g.link.closed || g.parked) continue;
-      if (g.ready && t - g.lastSent >= MODEL_INTERVAL_MS && !g.link.busy()) {
+      if (g.ready && t - g.lastSent >= MODEL_INTERVAL_MS - 6 && !g.link.busy()) {
         let model;
         try {
           model = session.coop.readModel(g.playerId);
@@ -142123,7 +142142,7 @@ function createCoopHostV1({ build: build2, hostName, hostFriend = null, world, r
         g.link.send({ t: "start", playerId: pid, ...shared ? { party: shared } : {} });
       }
       tellLobby();
-      timer = setInterval2(pump, MODEL_INTERVAL_MS);
+      timer = setInterval2(pump, MODEL_INTERVAL_MS / 2);
     },
     tick: pump,
     guests: () => guests.size,

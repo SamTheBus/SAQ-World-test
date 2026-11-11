@@ -20295,14 +20295,33 @@ function worldTimeAtMinute(minute) {
 var same16 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 var ordinary = new Set(REWARD_POOLS.flat());
 var token5 = (text) => [0, 1, 2, 3].map((i) => gearHash4(text + "/" + i).toString(16).padStart(8, "0")).join("");
+var exteriorSpots = /* @__PURE__ */ new WeakMap();
+var loadedChunkSets = /* @__PURE__ */ new WeakMap();
+var loadedChunks = (chunks) => {
+  let hit = loadedChunkSets.get(chunks);
+  if (!hit || hit.length !== chunks.length) {
+    hit = { length: chunks.length, set: new Set(chunks.map((c) => c.chunkX + "," + c.chunkY)) };
+    loadedChunkSets.set(chunks, hit);
+  }
+  return hit.set;
+};
 function serviceNpcPosition(s, n) {
   if (n.space === "town-interior") {
     const q2 = townInteriorForBuilding(s, n.settlementId, n.interiorBuilding);
     return q2 ? { spaceInstanceId: q2.record.floorSpaces.ground, position: { x: (n.tile.x + 0.5) * 32, y: (n.tile.y + 0.5) * 32 } } : null;
   }
   if (n.space === "tavern-ground") return s.d9World?.settlementInterior ? { spaceInstanceId: s.d9World.settlementInterior.binding.floorSpaces.ground, position: { x: (n.tile.x + 0.5) * 32, y: (n.tile.y + 0.5) * 32 } } : null;
-  const t = n.tile, q = projectToLocalFrameD9({ chunkX: String(1024 + Math.floor(t.x / 32)), chunkY: String(1024 + Math.floor(t.y / 26)), localX: (t.x % 32 + 0.5) * 32, localY: (t.y % 26 + 0.5) * 32 }, s.d9World.runtime.frames);
-  return q ? { spaceInstanceId: s.overworldInstanceId, position: { x: q.x, y: q.y } } : null;
+  const frames = s.d9World.runtime.frames;
+  let spots = exteriorSpots.get(frames);
+  if (!spots) {
+    spots = /* @__PURE__ */ new Map();
+    exteriorSpots.set(frames, spots);
+  }
+  const key5 = s.overworldInstanceId + "|" + n.id;
+  if (spots.has(key5)) return spots.get(key5);
+  const t = n.tile, q = projectToLocalFrameD9({ chunkX: String(1024 + Math.floor(t.x / 32)), chunkY: String(1024 + Math.floor(t.y / 26)), localX: (t.x % 32 + 0.5) * 32, localY: (t.y % 26 + 0.5) * 32 }, frames), spot = q ? Object.freeze({ spaceInstanceId: s.overworldInstanceId, position: Object.freeze({ x: q.x, y: q.y }) }) : null;
+  spots.set(key5, spot);
+  return spot;
 }
 function accessibleServiceNpc(s, p, npcId) {
   if (!hasSettlementLife(s.d9World?.plannedWorld)) return null;
@@ -20371,10 +20390,16 @@ function dailyOffer(s, p, npc, day, slot, level, cls) {
   }
   return stockCache.get(key5);
 }
+var dailyLists = /* @__PURE__ */ new Map();
 function dailyStock(s, p, npc, day = restockDay(s.tick)) {
   if (!SHOP_FAMILIES[npc.role]) return [];
-  const level = Math.max(townLevel(npc), Number(p.progression?.level ?? 1)), cls = heroClassOf(p.d8)?.id ?? null;
-  return Array.from({ length: SHOP_TIERS[shopTier(npc)].count }, (_, slot) => dailyOffer(s, p, npc, day, slot, level, cls));
+  const level = Math.max(townLevel(npc), Number(p.progression?.level ?? 1)), cls = heroClassOf(p.d8)?.id ?? null, key5 = s.campaign.seed.seedHex + "/" + p.playerId + "/" + npc.id + "/" + shopTier(npc) + "/" + npc.role + "/" + day + "/" + level + "/" + cls;
+  const hit = dailyLists.get(key5);
+  if (hit) return hit;
+  const list2 = Object.freeze(Array.from({ length: SHOP_TIERS[shopTier(npc)].count }, (_, slot) => dailyOffer(s, p, npc, day, slot, level, cls)));
+  if (dailyLists.size >= 64) dailyLists.delete(dailyLists.keys().next().value);
+  dailyLists.set(key5, list2);
+  return list2;
 }
 function currentStock(s, p, npc) {
   return hasWorldCombat(s) ? dailyStock(s, p, npc) : serviceStock(s, p, npc);
@@ -20634,11 +20659,12 @@ function validateServiceProgress(before, after, pid) {
 function projectedServiceNpcs(s, p) {
   if (!hasSettlementLife(s.d9World?.plannedWorld)) return [];
   const a = s.entitiesById[p.entityId];
+  const loaded2 = loadedChunks(s.d9World.runtime.chunks);
   return serviceNpcsFor(s.d9World?.plannedWorld).flatMap((n) => {
-    if (n.space === "exterior" && !s.d9World.runtime.chunks.some((c) => c.chunkX === String(1024 + Math.floor(n.tile.x / 32)) && c.chunkY === String(1024 + Math.floor(n.tile.y / 26)))) return [];
+    if (n.space === "exterior" && !loaded2.has(1024 + Math.floor(n.tile.x / 32) + "," + (1024 + Math.floor(n.tile.y / 26)))) return [];
     const q = serviceNpcPosition(s, n);
     if (!q || q.spaceInstanceId !== a.residency.spaceInstanceId || Math.abs(q.position.x - a.position.x) > 1800 || Math.abs(q.position.y - a.position.y) > 1800) return [];
-    return [{ ...n, position: q.position, available: Boolean(accessibleServiceNpc(s, p, n.id)), tier: shopTier(n), restockTicks: hasWorldCombat(s) ? restockTicksLeft(s.tick) : null, stock: currentStock(s, p, n).map((q2) => ({ id: q2.offer.id, label: q2.item.generated.definition.name, price: q2.offer.price, item: copyWire(q2.item), purchased: Boolean(servicePurchase(p, q2.sourceEntityId)) })) }];
+    return [{ ...n, position: q.position, available: Boolean(accessibleServiceNpc(s, p, n.id)), tier: shopTier(n), restockTicks: hasWorldCombat(s) ? restockTicksLeft(s.tick) : null, stock: currentStock(s, p, n).map((q2) => ({ id: q2.offer.id, label: q2.item.generated.definition.name, price: q2.offer.price, item: q2.item, purchased: Boolean(servicePurchase(p, q2.sourceEntityId)) })) }];
   });
 }
 
