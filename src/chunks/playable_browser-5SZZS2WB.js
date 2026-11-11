@@ -1117,16 +1117,10 @@ function createAuthorityDeliveryV1({ clock: clock3, now: now3, activity = true, 
     else paint2.opportunities++;
     const due = at8 + epsilon >= clock3.inspect().deadline;
     if (driver === "paint") {
-      const timerDelivered = timer.callbacks !== timerCallbacksAtPreviousPaint;
       timerCallbacksAtPreviousPaint = timer.callbacks;
       if (!due) {
         paint2.dueZeroSkips++;
         observe?.({ driver, at: at8, gapMs: gap2, due: false, serviced: false, skipReason: "not-due" });
-        return null;
-      }
-      if (timerDelivered) {
-        paint2.timerDeliveredSkips++;
-        observe?.({ driver, at: at8, gapMs: gap2, due: true, serviced: false, skipReason: "timer-delivered" });
         return null;
       }
     }
