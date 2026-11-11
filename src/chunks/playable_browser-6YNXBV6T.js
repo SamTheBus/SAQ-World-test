@@ -92643,7 +92643,16 @@ function createHeroSlotsView({ document: document2, environment, heroSlots }) {
         const pick4 = el3("div", "hero-slot-worlds");
         pick4.append(el3("p", "hero-slot-confirm", "Play in which world?"));
         for (const slot of choices) {
-          const o = owner(slot), b = button3(slot === h.slot ? "Their own world" : `${label4(o)}\u2019s world`, () => act("play", () => heroSlots.play(h.slot, slot)), slot === world ? "is-current" : "");
+          const o = owner(slot);
+          if (slot !== h.slot && !story) {
+            const box5 = el3("div", "hero-slot-shared" + (slot === world ? " is-current" : "")), row2 = el3("div");
+            box5.append(el3("strong", "", `${label4(o)}\u2019s world`), el3("small", "", "Finish the story to travel here alone."));
+            if (heroSlots.coop?.available !== false) row2.append(button3("Host for friends", () => act("coop", () => heroSlots.hostIn(h.slot, slot))));
+            box5.append(row2);
+            pick4.append(box5);
+            continue;
+          }
+          const b = button3(slot === h.slot ? "Their own world" : `${label4(o)}\u2019s world`, () => act("play", () => heroSlots.play(h.slot, slot)), slot === world ? "is-current" : "");
           const where = (sharedOwn(slot) ? "Shared \xB7 " : "") + (o?.world ? `Seed ${o.world.seed}` : "Classic world"), people = heroes.filter((x) => x.slot !== h.slot && worldOf2(x) === slot && made(x)).map(label4);
           b.append(el3("small", "", people.length ? `${where} \xB7 ${people.join(", ")} here` : where));
           pick4.append(b);
@@ -92696,7 +92705,7 @@ function createHeroSlotsView({ document: document2, environment, heroSlots }) {
       partyBox.push(box5);
     }
     const status2 = busy === "delete" ? "Deleting\u2026" : busy === "undo" ? "Taking it back\u2026" : busy ? "Saving your hero\u2026" : error;
-    root2.replaceChildren(el3("p", "hero-slots-intro", "Each hero has their own world, bag and gear, and can play in any hero\u2019s world. Switching saves this hero first."), grid, ...partyBox, ...coop, ...status2 ? [el3("p", "hero-slots-status", status2)] : []);
+    root2.replaceChildren(el3("p", "hero-slots-intro", story ? "Each hero has their own world, bag and gear, and can play in any hero\u2019s world. Switching saves this hero first." : "Each hero has their own world, bag and gear. After the story, they can also play alone in any hero\u2019s world. Switching saves this hero first."), grid, ...partyBox, ...coop, ...status2 ? [el3("p", "hero-slots-status", status2)] : []);
     environment.requestAnimationFrame(() => {
       for (const [canvas, hero] of portraits) paint2(canvas, hero);
     });
@@ -137933,7 +137942,7 @@ async function startWorldClient(environment) {
   const storyDone = storyDoneV1(environment, deviceStorage, channel2);
   let partyWorld = coopIntent?.role === "guest" ? null : partyBySlot(deviceStorage, channel2, worldSlot), partyCtl = null, partyGuest = null;
   const partyOffers = [];
-  const partySolo = !partyWorld || partyWorld.own || storyDone;
+  const partySolo = !visiting || storyDone;
   if (heroId && !partySolo) coopIntent = { role: "host" };
   const roster = createHeroRosterWriter({ storage: deviceStorage, channel: channel2, slot: heroSlot, visiting: visiting || coopIntent?.role === "guest" });
   const saveIndexedDb = channelIndexedDb(environment.indexedDB, channel2 + heroPrefix);
@@ -137977,6 +137986,11 @@ async function startWorldClient(environment) {
   const activity = scenario === "procedural" && location.searchParams.get("runtime") !== "legacy";
   const proofCase = location.searchParams.get("activityCase") ?? "A";
   const coopReady = Boolean(plannedOpening) && activity && proofCase === "A" && !FORGE_REVIEW_BUILD, coopGuest = coopReady && coopIntent?.role === "guest", coopHosting = coopReady && coopIntent?.role === "host";
+  if (heroId && !partySolo && !coopReady) {
+    playHeroIn(deviceStorage, channel2, heroSlot, heroSlot);
+    environment.location.reload();
+    return;
+  }
   const coopBuild = environment.document.documentElement.dataset.worldRelease ?? "source";
   let coopScreens = null, coopJoin = null, coopHost = null, coopRoom = null, coopParty = null, coopEnded = null, coopEndReason = null;
   const launcherKey = hasWorldReshape(plannedOpening?.binding) ? RESHAPE_DATABASE : hasRoadsideEncounters(plannedOpening?.binding) ? ROADSIDE_DATABASE : hasFirstJourney(plannedOpening?.binding) ? ACCESS_DATABASE : hasHydrologyV1(plannedOpening?.binding) ? HYDROLOGY_DATABASE : buildBalanceDatabaseV2(environment.document.body.dataset.worldBuildBalance === "v2", plannedOpening?.assetId, plannedOpening ? plannedNamespace + plannedOpening.assetId : activity ? `${FORGE_REVIEW_BUILD ? "saq-world-forge-review" : "saq-world-activity-launcher-v1"}-${proofCase}` : scenario === "procedural" ? WORLD_PROCEDURAL_LAUNCHER_KEY : WORLD_SEAMLESS_LAUNCHER_KEY);

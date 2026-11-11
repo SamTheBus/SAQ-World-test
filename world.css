@@ -1924,5 +1924,5 @@ html body #space-label{color:#f6e7c0!important;text-shadow:0 1px 0 #0b1015!impor
 .hero-slot-tag{margin-left:6px;padding:1px 7px;border:1px solid #e9c46a;border-radius:999px;font:700 10px var(--rpg-ui);letter-spacing:.06em;text-transform:uppercase;color:#fff3cf;vertical-align:1px}
 body #world-inventory .hero-slots .hero-slot-worlds .hero-slot-shared{display:grid;gap:6px;padding:8px 12px;border:1px solid #2f3a44;border-radius:12px}
 body #world-inventory .hero-slots .hero-slot-worlds .hero-slot-shared > div{display:flex;flex-wrap:wrap;gap:6px}
-body #world-inventory .hero-slots .hero-slot-worlds .hero-slot-shared button{display:inline-flex;min-height:36px;padding:0 14px;border-radius:999px}
+body #world-inventory .hero-slots .hero-slot-worlds .hero-slot-shared button{display:inline-flex;align-items:center;min-height:36px;padding:0 14px;border-radius:999px}
 body #world-inventory .hero-slots .hero-slot-worlds .hero-slot-shared small{font:12px var(--rpg-ui);color:var(--rpg-muted)}
