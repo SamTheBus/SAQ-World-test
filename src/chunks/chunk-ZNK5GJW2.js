@@ -9766,7 +9766,7 @@ function townStationsV1(t) {
     for (const [dx, dy] of order) if (free(x + dx, y + dy)) return [x + dx, y + dy];
     return null;
   };
-  const RING = [[0, 0], [1, 0], [-1, 0], [0, 1], [1, 1], [-1, 1], [0, -1], [2, 0], [-2, 0], [2, 1], [-2, 1], [0, 2]];
+  const RING2 = [[0, 0], [1, 0], [-1, 0], [0, 1], [1, 1], [-1, 1], [0, -1], [2, 0], [-2, 0], [2, 1], [-2, 1], [0, 2]];
   const add = (role, p, facing, building, extra) => {
     if (p) out.push({ role, x: o.x + p[0], y: o.y + p[1], facing, building: building ?? null, ...extra });
   };
@@ -9774,12 +9774,12 @@ function townStationsV1(t) {
   if (roles.includes("general") && st?.stalls?.length) {
     const s = st.stalls[Math.floor((st.stalls.length - 1) / 2)];
     if (art) add("general", [s.x + 1, s.y], s.x % 2 ? 1 : -1, st.building, { reach: 52 });
-    else add("general", near(s.x + 1, s.y + 1, RING), s.x % 2 ? 1 : -1, st.building, {});
+    else add("general", near(s.x + 1, s.y + 1, RING2), s.x % 2 ? 1 : -1, st.building, {});
   }
   const fg = F("forge");
   if (roles.includes("smith") && fg?.pad) {
     const E = fg.pad;
-    add("smith", art ? [E.x + 3, E.y + 6] : near(E.x + 3, E.y + 5, RING), 1, fg.building, {});
+    add("smith", art ? [E.x + 3, E.y + 6] : near(E.x + 3, E.y + 5, RING2), 1, fg.building, {});
   }
   const inn = F("inn"), ib = inn && t.buildings.find((q) => q.id === inn.building);
   if (roles.includes("innkeeper") && ib?.doorPoint) {
@@ -9800,7 +9800,7 @@ function townStationsV1(t) {
   const tw = F("tower");
   if (roles.includes("enchanter") && tw) {
     const E = tw.circle;
-    add("enchanter", E ? near(E.x + 3, E.y + 2, RING) : null, -1, tw.building, {});
+    add("enchanter", E ? near(E.x + 3, E.y + 2, RING2) : null, -1, tw.building, {});
   }
   return out;
 }
@@ -11882,19 +11882,18 @@ var WOODLAND_FOREST_HASH = "dd44ce53f044bf57b3ece91ea2867a5f157c0990225c6d19e652
 var hasWoodlandForest = (b) => b?.woodlandForestVersion === WOODLAND_FOREST_VERSION && b?.woodlandForestHash === WOODLAND_FOREST_HASH && b?.assetId === "alpha";
 var woodlandForestRole = (id) => typeof id === "string" && id.startsWith(WOODLAND_FOREST_VERSION + "/") ? id.split("/")[1] : null;
 
-// src/shared/generation/forest_stands_v2.js
-var FOREST_STANDS_VERSION = "forest-stands-v2";
-var hasForestStands = (b) => b?.forestStandsVersion === FOREST_STANDS_VERSION;
-var FOREST_STANDS_PREFIX = FOREST_STANDS_VERSION + ":";
+// src/shared/generation/upland_terraces_v1.js
+var TERRACES_VERSION = "upland-terraces-v1";
+var TERRACE_PIECE = "terrace";
+var TERRACE_CLIFF = 3;
+var terracesForBinding = (b) => {
+  const m = /^world-maker-v1\.(\d+)$/.exec(b?.worldMaker ?? "");
+  return Boolean(m) && Number(m[1]) >= 15;
+};
 var mix2 = (n) => {
   n = Math.imul(n ^ n >>> 16, 2246822507);
   n = Math.imul(n ^ n >>> 13, 3266489909);
   return (n ^ n >>> 16) >>> 0;
-};
-var standsHashText = (t) => {
-  let n = 2166136261;
-  for (let i = 0; i < t.length; i++) n = Math.imul(n ^ t.charCodeAt(i), 16777619);
-  return mix2(n);
 };
 var lat = (k, x, y) => mix2(Math.imul(x, 668265261) ^ Math.imul(y, 374761393) ^ k) / 4294967296;
 var sm = (t) => t * t * (3 - 2 * t);
@@ -11902,7 +11901,260 @@ function vnoise(k, x, y) {
   const gx = Math.floor(x), gy = Math.floor(y), u = sm(x - gx), v = sm(y - gy), a = lat(k, gx, gy), b = lat(k, gx + 1, gy), c = lat(k, gx, gy + 1), d = lat(k, gx + 1, gy + 1);
   return a + (b - a) * u + (c + (d - c) * u - (a + (b - a) * u)) * v;
 }
-var standsTileHash = (k, x, y) => mix2(Math.imul(x, 2654435761) ^ Math.imul(y, 2246822519) ^ k);
+var terraceTileHash = (k, x, y) => mix2(Math.imul(x, 2654435761) ^ Math.imul(y, 2246822519) ^ k);
+var SIZES = { 4: [27, 21], 3: [21, 16], 2: [15, 10], 1: [9, 6] };
+var CLIFF = TERRACE_CLIFF;
+var STEPK = CLIFF + 5;
+var RAMP = 13;
+var liftAt = (i) => Math.min(CLIFF, Math.floor(i / 3));
+var terraceDetail = (d) => d.n + "_" + d.sh + "_" + (d.dir > 0 ? "e" : "w");
+var terraceKey = (d) => d.x + "," + d.y;
+function readTerrace(detail, key5) {
+  const m = /^([1234])_(\d+)_([ew])$/.exec(detail ?? ""), k = /^(-?\d+),(-?\d+)$/.exec(key5 ?? "");
+  if (!m || !k) return null;
+  return { x: Number(k[1]), y: Number(k[2]), n: Number(m[1]), sh: Number(m[2]) >>> 0, dir: m[3] === "e" ? 1 : -1 };
+}
+function terraceGeometry(d) {
+  const { x: cx, y: cy, n, sh, dir } = d, [A1, B1] = SIZES[n], levels2 = [null];
+  for (let k = 1; k <= n; k++) {
+    const A = A1 - 6 * (k - 1), top = cy - B1 + 3 * (k - 1), E = cy + B1 - STEPK * (k - 1);
+    levels2.push({ k, A, top, E, mid: (top + E + 1) / 2, hb: (E + 1 - top) / 2 });
+  }
+  const X0 = cx - 6, X1 = X0 + RAMP - 1;
+  const stair = n >= 3 ? { k: 2, x: dir > 0 ? X1 + 3 : X0 - 4 } : null;
+  for (let k = 1; k <= n; k++) {
+    const L2 = levels2[k];
+    L2.f0 = X0 - 1;
+    L2.f1 = X1 + 1;
+    if (stair?.k === k) {
+      L2.f0 = Math.min(L2.f0, stair.x - 1);
+      L2.f1 = Math.max(L2.f1, stair.x + 2);
+    }
+  }
+  const rampEast = (k) => (k - 1) % 2 === 0 === dir > 0;
+  const ramps = [];
+  for (let k = 1; k <= n; k++) {
+    const east = rampEast(k);
+    ramps.push({ k, east, x0: X0, x1: X1, low: east ? X0 : X1, high: east ? X1 : X0, E: levels2[k].E });
+  }
+  const summit = levels2[n], cairn = { x: cx, y: summit.top + 3 };
+  const x0 = cx - A1 - 2, x1 = cx + A1 + 2, y0 = cy - B1 - 2, y1 = levels2[1].E + CLIFF + 5;
+  const memo = /* @__PURE__ */ new Map();
+  function raw(k, x, y) {
+    const L2 = levels2[k];
+    if (y < L2.top || y > L2.E) return false;
+    const u = (x + 0.5 - cx) / L2.A, v = (y + 0.5 - L2.mid) / L2.hb;
+    let q = 0.35 * (u * u + v * v) + 0.65 * (u * u * u * u + v * v * v * v);
+    const au = u < 0 ? -u : u, s = v > 0 ? Math.min(1, Math.max(0.15, au * 1.7 - 0.4)) : 1;
+    q += 0.5 * s * (vnoise(sh + k * 7919 >>> 0, x / 4.5, y / 4.5) - 0.5);
+    return q <= 1;
+  }
+  function inS(k, x, y) {
+    if (k <= 0) return true;
+    if (k > n || x < x0 || x > x1 || y < y0 || y > y1) return false;
+    const key5 = (k * 4096 + (x - x0)) * 4096 + (y - y0);
+    let r = memo.get(key5);
+    if (r !== void 0) return r;
+    const L2 = levels2[k];
+    r = x >= L2.f0 && x <= L2.f1 ? y <= L2.E && y >= L2.top && (y >= L2.E - 3 || raw(k, x, y)) : raw(k, x, y);
+    if (r && k > 1) r = inS(k - 1, x, y - 3) && inS(k - 1, x - 3, y) && inS(k - 1, x + 3, y) && inS(k - 1, x, y + CLIFF + 3);
+    if (memo.size > 1 << 16) memo.clear();
+    memo.set(key5, r);
+    return r;
+  }
+  const level = (x, y) => {
+    for (let k = n; k >= 1; k--) if (inS(k, x, y)) return k;
+    return 0;
+  };
+  function rampAt(x, y) {
+    if (x < X0 || x > X1) return null;
+    for (const r of ramps) {
+      if (y < r.E + 1 || y > r.E + CLIFF + 2) continue;
+      const i = r.east ? x - X0 : X1 - x, lift = liftAt(i), r0 = r.E + CLIFF + 1 - lift;
+      if (y >= r0 && y <= r0 + 1) return { k: r.k, role: "ramp", i, lift };
+      if (y > r0 + 1) return { k: r.k, role: "rampface", i, lift };
+    }
+    return null;
+  }
+  const stairAt = (x, y) => Boolean(stair) && (x === stair.x || x === stair.x + 1) && y >= levels2[stair.k].E + 1 && y <= levels2[stair.k].E + 2 * CLIFF;
+  const cliffOver = (k, x, y) => {
+    for (let j = 1; j <= CLIFF; j++) if (inS(k, x, y - j)) return true;
+    return false;
+  };
+  const roles = /* @__PURE__ */ new Map();
+  function role(x, y) {
+    if (x < x0 || x > x1 || y < y0 || y > y1) return null;
+    const key5 = (x - x0) * 4096 + (y - y0);
+    let r = roles.get(key5);
+    if (r !== void 0) return r;
+    r = classify(x, y);
+    if (r && !r.block && pocket.has(key5)) r = { role: "edge", block: true, level: r.level };
+    if (roles.size > 1 << 16) roles.clear();
+    roles.set(key5, r);
+    return r;
+  }
+  const pocket = /* @__PURE__ */ new Set();
+  {
+    const w = x1 - x0 + 3, h = y1 - y0 + 3, seen = new Uint8Array(w * h), q = [], walk = new Uint8Array(w * h);
+    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) {
+      const x = x0 - 1 + i, y = y0 - 1 + j, r = x < x0 || x > x1 || y < y0 || y > y1 ? null : classify(x, y);
+      walk[j * w + i] = !r || !r.block ? 1 : 0;
+      if ((i === 0 || j === 0 || i === w - 1 || j === h - 1) && walk[j * w + i]) {
+        seen[j * w + i] = 1;
+        q.push(j * w + i);
+      }
+    }
+    while (q.length) {
+      const c = q.pop(), i = c % w, j = (c - i) / w;
+      for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const I = i + di, J = j + dj;
+        if (I < 0 || J < 0 || I >= w || J >= h) continue;
+        const o = J * w + I;
+        if (seen[o] || !walk[o]) continue;
+        seen[o] = 1;
+        q.push(o);
+      }
+    }
+    for (let j = 1; j < h - 1; j++) for (let i = 1; i < w - 1; i++) if (walk[j * w + i] && !seen[j * w + i]) pocket.add((i - 1) * 4096 + (j - 1));
+  }
+  function classify(x, y) {
+    const ra = rampAt(x, y);
+    if (ra && level(x, y) === ra.k - 1) return ra.role === "ramp" ? { role: "ramp", block: false, level: ra.k - 1 } : { role: "rampface", block: true, level: ra.k - 1 };
+    const k = level(x, y);
+    if (stairAt(x, y) && k === stair.k - 1) return { role: "stair", block: false, level: k };
+    if (k < n && cliffOver(k + 1, x, y)) return { role: "cliff", block: true, level: k };
+    if (k > 0) {
+      for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [-1, -1], [1, -1]]) if (level(x + dx, y + dy) < k) return { role: "edge", block: true, level: k };
+      if (k === n && x === cairn.x && y === cairn.y) return { role: "cairn", block: true, level: k };
+      return { role: "top", block: false, level: k };
+    }
+    for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) if (level(x + dx, y + dy) > 0 || cliffOver(1, x + dx, y + dy)) return { role: "apron", block: false, level: 0 };
+    return null;
+  }
+  const pathTiles = /* @__PURE__ */ new Set(), addPath = (x, y) => pathTiles.add(x + "," + y);
+  for (const r of ramps) {
+    for (let x = r.x0; x <= r.x1; x++) {
+      const i = r.east ? x - X0 : X1 - x, lift = liftAt(i);
+      addPath(x, r.E + CLIFF + 1 - lift);
+      addPath(x, r.E + CLIFF + 2 - lift);
+    }
+    const lowSide = r.low, nextLow = r.k < n ? ramps[r.k].low : null;
+    if (r.k === 1) for (let y = r.E + CLIFF + 3; y <= r.E + CLIFF + 5; y++) for (let x = lowSide - 1; x <= lowSide + 1; x++) addPath(x, y);
+    if (nextLow !== null) {
+      const top = levels2[r.k + 1].E + CLIFF + 1;
+      for (let y = top; y <= r.E; y++) for (let x = r.high - 1; x <= r.high + 1; x++) addPath(x, y);
+    } else {
+      for (let y = cairn.y + 1; y <= r.E; y++) addPath(r.high, y);
+      const a = Math.min(r.high, cairn.x), b = Math.max(r.high, cairn.x);
+      for (let x = a; x <= b; x++) addPath(x, cairn.y + 1);
+    }
+  }
+  if (stair) for (let y = levels2[stair.k].E + 1; y <= levels2[stair.k].E + 2 * CLIFF + 2; y++) {
+    addPath(stair.x, y);
+    addPath(stair.x + 1, y);
+  }
+  const onPath = (x, y) => pathTiles.has(x + "," + y);
+  function free(x, y) {
+    const r = role(x, y);
+    if (!r || r.block || r.role === "ramp" || r.role === "stair") return false;
+    for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) {
+      const q = role(x + dx, y + dy);
+      if (q && (q.block || q.role === "ramp" || q.role === "stair")) return false;
+      if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1 && onPath(x + dx, y + dy)) return false;
+    }
+    return true;
+  }
+  return Object.freeze({ d, n, levels: levels2, ramps, stair, cairn, cliff: CLIFF, ramp: RAMP, liftAt, bbox: { x0, y0, x1, y1 }, inS, level, role, onPath, free, rampAt });
+}
+var CELL = 80;
+var HIGH = 0.6;
+var KEEP = 50;
+var PEAK = [90, 180];
+var RING = [[1, 0], [-1, 0], [0, 1], [0, -1], [0.7, 0.7], [-0.7, 0.7], [0.7, -0.7], [-0.7, -0.7]];
+function createUplandTerraces({ hash: hash17, ground, high, open, biomeAt }) {
+  const cells3 = /* @__PURE__ */ new Map();
+  const deep = (x, y) => {
+    let miss = 0;
+    for (const r of [60, 120]) for (const [ux, uy] of RING) if (biomeAt(Math.floor(x + ux * r), Math.floor(y + uy * r)) !== "r" && ++miss > 1) return false;
+    return true;
+  };
+  const peak = (x, y) => {
+    for (const r of PEAK) for (const [ux, uy] of RING) if (biomeAt(Math.floor(x + ux * r), Math.floor(y + uy * r)) !== "r") return false;
+    return true;
+  };
+  function mountain2(cx, cy) {
+    const key5 = cx + "," + cy;
+    if (cells3.has(key5)) return cells3.get(key5);
+    let out = null;
+    const h = terraceTileHash(hash17, cx, cy), x = cx * CELL + 30 + h % (CELL - 60), y = cy * CELL + 26 + (h >>> 8) % (CELL - 52);
+    if (ground(x, y) && high(x, y) >= HIGH && h % 100 < KEEP && deep(x, y)) {
+      for (const n of peak(x, y) ? [4, 3, 2, 1] : [3, 2, 1]) {
+        const g = terraceGeometry({ x, y, n, sh: mix2(h ^ 1540483477), dir: h >>> 20 & 1 ? 1 : -1 }), b = g.bbox;
+        let ok = true;
+        for (let ty = b.y0 - 3; ty <= b.y1 + 3 && ok; ty++) for (let tx = b.x0 - 3; tx <= b.x1 + 3; tx++) if (!ground(tx, ty)) {
+          ok = false;
+          break;
+        }
+        for (let ty = b.y0 - 3; ty <= b.y1 + 3 && ok; ty += 3) for (let tx = b.x0 - 3; tx <= b.x1 + 3; tx += 3) if (!open(tx, ty)) {
+          ok = false;
+          break;
+        }
+        if (ok) {
+          out = g;
+          break;
+        }
+      }
+    }
+    if (cells3.size > 256) cells3.clear();
+    cells3.set(key5, out);
+    return out;
+  }
+  function at2(x, y) {
+    const cx = Math.floor(x / CELL), cy = Math.floor(y / CELL);
+    for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) {
+      const g = mountain2(cx + i, cy + j);
+      if (!g) continue;
+      const b = g.bbox;
+      if (x < b.x0 || x > b.x1 || y < b.y0 || y > b.y1) continue;
+      const r = g.role(x, y);
+      if (r) return { g, r };
+    }
+    return null;
+  }
+  function near(x0, y0, x1, y1, pad = 0) {
+    const cx0 = Math.floor((x0 - pad) / CELL) - 1, cx1 = Math.floor((x1 + pad) / CELL) + 1, cy0 = Math.floor((y0 - pad) / CELL) - 1, cy1 = Math.floor((y1 + pad) / CELL) + 1;
+    for (let cy = cy0; cy <= cy1; cy++) for (let cx = cx0; cx <= cx1; cx++) {
+      const g = mountain2(cx, cy);
+      if (!g) continue;
+      const b = g.bbox;
+      if (x0 - pad <= b.x1 && x1 + pad >= b.x0 && y0 - pad <= b.y1 && y1 + pad >= b.y0) return true;
+    }
+    return false;
+  }
+  return Object.freeze({ mountain: mountain2, at: at2, near, CELL });
+}
+
+// src/shared/generation/forest_stands_v2.js
+var FOREST_STANDS_VERSION = "forest-stands-v2";
+var hasForestStands = (b) => b?.forestStandsVersion === FOREST_STANDS_VERSION;
+var FOREST_STANDS_PREFIX = FOREST_STANDS_VERSION + ":";
+var mix3 = (n) => {
+  n = Math.imul(n ^ n >>> 16, 2246822507);
+  n = Math.imul(n ^ n >>> 13, 3266489909);
+  return (n ^ n >>> 16) >>> 0;
+};
+var standsHashText = (t) => {
+  let n = 2166136261;
+  for (let i = 0; i < t.length; i++) n = Math.imul(n ^ t.charCodeAt(i), 16777619);
+  return mix3(n);
+};
+var lat2 = (k, x, y) => mix3(Math.imul(x, 668265261) ^ Math.imul(y, 374761393) ^ k) / 4294967296;
+var sm2 = (t) => t * t * (3 - 2 * t);
+function vnoise2(k, x, y) {
+  const gx = Math.floor(x), gy = Math.floor(y), u = sm2(x - gx), v = sm2(y - gy), a = lat2(k, gx, gy), b = lat2(k, gx + 1, gy), c = lat2(k, gx, gy + 1), d = lat2(k, gx + 1, gy + 1);
+  return a + (b - a) * u + (c + (d - c) * u - (a + (b - a) * u)) * v;
+}
+var standsTileHash = (k, x, y) => mix3(Math.imul(x, 2654435761) ^ Math.imul(y, 2246822519) ^ k);
 var clamp = (v) => v < 0 ? 0 : v > 1 ? 1 : v;
 var FOREST_STAND_PROFILES = Object.freeze({
   w: { glade: 0.36, forest: 0.5, core: 0.8, treeOpen: 0.34, treeForest: 0.92, lone: 0.05, massCore: 0.9, massForest: 0.06, cover: "fern", coverAt: 0.66, water: 0, height: 0 },
@@ -11936,7 +12188,7 @@ function createStandField(seed) {
   function raw(x, y, s = 1) {
     x /= s;
     y /= s;
-    const wx = x + (vnoise(K.wx, x / 96, y / 96) - 0.5) * 80, wy = y + (vnoise(K.wy, x / 96, y / 96) - 0.5) * 80, f3 = 0.66 * vnoise(K.a, wx / 130, wy / 130) + 0.34 * vnoise(K.b, wx / 46, wy / 46);
+    const wx = x + (vnoise2(K.wx, x / 96, y / 96) - 0.5) * 80, wy = y + (vnoise2(K.wy, x / 96, y / 96) - 0.5) * 80, f3 = 0.66 * vnoise2(K.a, wx / 130, wy / 130) + 0.34 * vnoise2(K.b, wx / 46, wy / 46);
     return clamp((f3 - 0.5) * 1.9 + 0.5);
   }
   function stand(x, y, code, wet, high, guard) {
@@ -11953,23 +12205,23 @@ function createStandField(seed) {
     return s >= p.core ? ZONE.CORE : s >= p.forest ? ZONE.FOREST : s >= p.glade ? ZONE.OPEN : ZONE.GLADE;
   };
   function trailDist(x, y) {
-    const f3 = (a, b) => vnoise(K.trail, a / 84, b / 84), v = f3(x, y) - 0.5, gx = (f3(x + 1, y) - f3(x - 1, y)) / 2, gy = (f3(x, y + 1) - f3(x, y - 1)) / 2, g = Math.sqrt(gx * gx + gy * gy) || 1e-6;
+    const f3 = (a, b) => vnoise2(K.trail, a / 84, b / 84), v = f3(x, y) - 0.5, gx = (f3(x + 1, y) - f3(x - 1, y)) / 2, gy = (f3(x, y + 1) - f3(x, y - 1)) / 2, g = Math.sqrt(gx * gx + gy * gy) || 1e-6;
     return Math.abs(v) / g;
   }
-  const conifer = (x, y) => vnoise(K.conifer, x / 150, y / 150);
-  const coverAt = (x, y) => 0.62 * vnoise(K.cover, x / 11, y / 11) + 0.38 * vnoise(K.cover + 1, x / 4.5, y / 4.5);
-  const rockAt = (x, y) => 0.75 * vnoise(K.rock, x / 40, y / 40) + 0.25 * vnoise(K.rock + 7, x / 13, y / 13);
+  const conifer = (x, y) => vnoise2(K.conifer, x / 150, y / 150);
+  const coverAt = (x, y) => 0.62 * vnoise2(K.cover, x / 11, y / 11) + 0.38 * vnoise2(K.cover + 1, x / 4.5, y / 4.5);
+  const rockAt = (x, y) => 0.75 * vnoise2(K.rock, x / 40, y / 40) + 0.25 * vnoise2(K.rock + 7, x / 13, y / 13);
   function slotTrunk(x, y) {
     const sx = Math.floor(x / 3), sy = Math.floor(y / 3), h = standsTileHash(K.slot, sx, sy);
     return { x: sx * 3 + (h & 1), y: sy * 3 + (h >>> 1 & 1), h };
   }
-  return { stand, zone, trailDist, conifer, coverAt, rockAt, slotTrunk, vnoise, K };
+  return { stand, zone, trailDist, conifer, coverAt, rockAt, slotTrunk, vnoise: vnoise2, K };
 }
 var bounded = (map, limit) => {
   if (map.size >= limit) map.clear();
   return map;
 };
-function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, clearAt, protectedChunk, events = [] }) {
+function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, clearAt, protectedChunk, events = [], terraces = false }) {
   const S = createStandField(seedDigest), K = S.K, W6 = terrain2.widthTiles;
   const elevations = asset.cellRows.flatMap((r) => r.cells.map((c) => c[10])).sort((p, q) => p - q);
   const rank = (v) => {
@@ -12051,6 +12303,16 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
     }
     return Math.max(0, 1 - d / 10, eventBuckets.size ? eventGuard(x, y) : 0);
   }
+  const T4 = terraces ? createUplandTerraces({
+    hash: standsHashText(seedDigest + "/" + FOREST_STANDS_VERSION + "/terrace"),
+    high,
+    biomeAt: (x, y) => x < 0 || y < 0 || x >= W6 || y >= terrain2.heightTiles ? null : base(x, y).biome,
+    ground: (x, y) => {
+      const b = base(x, y);
+      return b.walkable && b.biome === "r" && !b.bank && b.kind !== "shore" && !clearAt(x, y, b);
+    },
+    open: (x, y) => guardAt(x, y) === 0 && roadDistance(x, y) >= 4
+  }) : null;
   const envs = /* @__PURE__ */ new Map();
   function envAt(x, y) {
     const key5 = y * W6 + x;
@@ -12091,6 +12353,7 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
         kind2 = p.grove && S.vnoise(K.grove, x / 60, y / 60) > 0.55 ? "bamboo" : "thicket";
         r = 2.2 + roll2 * 4;
       }
+      if (kind2 && T4 && T4.near(x - r * 1.32, y - r * 1.32, x + r * 1.32, y + r * 1.32, 4)) kind2 = null;
       if (kind2 && e.road > 4) {
         const a = (h >>> 18 & 255) / 255, stretch = 1.05 + (h >>> 26 & 15) / 28;
         c = { cx, cy, x, y, kind: kind2, biome: e.biome, r: Math.min(RMAX, r), pri: h, ax: a, stretch };
@@ -12206,6 +12469,17 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
     for (let yy = y - 2; yy <= y + 2; yy++) for (let xx = x - 2; xx <= x + 2; xx++) if (massAt(xx, yy)) return null;
     return (onH ? "h" : "v") + Math.floor(wx / 36) + "," + Math.floor(wy / 28);
   }
+  function mountainTrunk(g, x, y, e) {
+    const t = S.slotTrunk(x, y);
+    if (t.x !== x || t.y !== y || !g.free(x, y)) return null;
+    const r = g.role(x, y);
+    if ((t.h >>> 8) % 1e3 / 1e3 >= [0.1, 0.34, 0.26, 0.16, 0.06][r.level]) return null;
+    return pickTree(S, "r", x, y, 1, e, false, t.h);
+  }
+  function mountainTrunkNear(g, x, y, e) {
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if ((dx || dy) && mountainTrunk(g, x + dx, y + dy, e)) return true;
+    return false;
+  }
   const tiles3 = /* @__PURE__ */ new Map();
   function tileAt(x, y) {
     const key5 = y * W6 + x;
@@ -12218,6 +12492,33 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
     }
     const p = PROFILES[e.biome], s = standAt(x, y), zone = S.zone(s, e.biome);
     out = { zone, cover: false, trail: false, block: null, kind: null, clusterId: null };
+    const tm = T4?.at(x, y);
+    if (tm) {
+      const g = tm.g;
+      if (tm.r.block) {
+        out.block = TERRACE_PIECE;
+        out.kind = "rock";
+        out.clusterId = FOREST_STANDS_PREFIX + TERRACE_PIECE + ":" + terraceDetail(g.d) + ":" + terraceKey(g.d);
+      } else if (!e.clear && !g.onPath(x, y) && tm.r.role !== "ramp" && tm.r.role !== "stair") {
+        let t, b;
+        const block2 = (piece, detail, id, rock = false) => {
+          out.block = piece;
+          out.kind = rock ? "rock" : "thicket";
+          out.clusterId = FOREST_STANDS_PREFIX + piece + ":" + detail + ":" + id;
+        };
+        if (g.free(x, y) && (t = mountainTrunk(g, x, y, e))) block2("trunk", t, x + "," + y);
+        else if (g.free(x, y) && !mountainTrunkNear(g, x, y, e) && (b = bushAt(x, y))) {
+          const stone = (b.h >>> 12) % 3 === 0;
+          block2(stone ? "stone" : "bush", b.edge ? "edge" : "", x + "," + y, stone);
+        } else {
+          const c = S.coverAt(x, y), boost = zone >= ZONE.FOREST ? 0.05 : zone === ZONE.OPEN ? 0 : -0.05;
+          out.cover = Boolean(p.cover && c + boost > p.coverAt);
+        }
+      }
+      Object.freeze(out);
+      bounded(tiles3, 1 << 15).set(key5, out);
+      return out;
+    }
     if (!e.clear) {
       const trail = trailAt(x, y), m = massAt(x, y);
       out.trail = trail;
@@ -12247,7 +12548,8 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
     const [cx, cy] = key5.split(",").map(Number);
     return mass(cx, cy);
   }
-  return Object.freeze({ tileAt, massByKey, standAt, envAt });
+  const terraceAt = (x, y) => T4?.at(x, y) ?? null;
+  return Object.freeze({ tileAt, massByKey, standAt, envAt, terraceAt, terraces: T4 });
 }
 var pick = (list2, h) => {
   let total = 0;
@@ -29270,6 +29572,11 @@ export {
   BOSS_HOSTING_VERSION,
   BOSS_HOSTING_HASH,
   hasBossHostingV1,
+  TERRACES_VERSION,
+  terracesForBinding,
+  terraceTileHash,
+  readTerrace,
+  terraceGeometry,
   FOREST_STANDS_VERSION,
   hasForestStands,
   standsTileHash,

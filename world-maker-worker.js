@@ -666,6 +666,11 @@ var STRIDE = FRAME_CHUNKS * 2 * D9_PROFILE.chunkWidth;
 var BOSS_HOSTING_VERSION = "site-boss-hosting-v1";
 var BOSS_HOSTING_POLICY = freezeWire({ version: BOSS_HOSTING_VERSION, parentRuntime: "c36909555b042989", parentGeneration: "core-families-multiroom-v1", playerCount: 4, playerHull: 9, bossHull: 34, roomSelection: "explicit-final-reward", preserveGeometry: true, preserveRosterIdentities: true, preserveAttacks: true, partyStagingSeparation: 64, partyArrivalVersion: "site-party-arrival-v1", missingBoss: "structured-hard-failure", supportHullUpperBound: 20, scope: "constructed-arena-capacity-not-network-or-balance-approval" });
 
+// src/shared/generation/upland_terraces_v1.js
+var TERRACE_CLIFF = 3;
+var CLIFF = TERRACE_CLIFF;
+var STEPK = CLIFF + 5;
+
 // src/shared/generation/forest_stands_v2.js
 var FOREST_STANDS_VERSION = "forest-stands-v2";
 var FOREST_STANDS_PREFIX = FOREST_STANDS_VERSION + ":";
@@ -7150,7 +7155,7 @@ var CLASSIC_EVENT_PLAN = freezeWire({ version: WORLD_EVENT_PLAN_VERSION, events:
 
 // src/shared/generation/world_maker_v1/make.js
 var TW4 = W * 64;
-var WORLD_MAKER_VERSION = "world-maker-v1.14";
+var WORLD_MAKER_VERSION = "world-maker-v1.15";
 function makeWorld(seed, catalog, tries = 4, onStep = null) {
   const started = performance.now();
   let w, why = [];
