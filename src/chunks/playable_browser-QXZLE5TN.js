@@ -1073,7 +1073,7 @@ function createAuthorityClock({ now: now3, step, ready, observe = null, maxSteps
     else {
       const admitted2 = Math.min(due, maxStepsPerCallback);
       for (; steps4 < admitted2 && ready(); steps4++) {
-        step();
+        step(steps4, admitted2);
         deadline3 += period;
       }
       if (due > steps4) {
@@ -141289,7 +141289,18 @@ async function startWorldClient(environment) {
     startClockTimer();
   }
   const period = 1e3 / 60;
-  function tick() {
+  let goSignature = null;
+  const heroSignature = session.authority && !coopGuest ? () => {
+    try {
+      return session.authority.withAuthority((a) => a.withAuthorityState((s) => {
+        const p = s.playersById[opened2.localPlayerId], e = p && s.entitiesById[p.entityId];
+        return e ? `${e.residency.spaceInstanceId}/${e.residency.residencyRevision}/${e.alive}` : null;
+      })) + "/" + (session.authority.getStatus?.().phase ?? "");
+    } catch {
+      return null;
+    }
+  } : () => null;
+  function tick(index = 0, go = 1) {
     if (session.groundPreparationRequired?.()) {
       client.releaseInput();
       loopHealth.gate("ground-occupancy-preparation");
@@ -141301,10 +141312,15 @@ async function startWorldClient(environment) {
       });
       return;
     }
-    if (client.pollInput() === false) {
-      loopHealth.gate("space-preparation");
-      session.servicePreparation?.();
-      return;
+    const skip = go >= 3 && index > 0;
+    let signature = null;
+    if (!skip || (signature = heroSignature()) === null || signature !== goSignature) {
+      if (client.pollInput() === false) {
+        loopHealth.gate("space-preparation");
+        session.servicePreparation?.();
+        return;
+      }
+      if (go >= 3) goSignature = signature ?? heroSignature();
     }
     const advanced = performanceProbe ? performanceProbe.measure("authorityStep", session.step) : session.step();
     loopHealth.gate(advanced ? "play" : "authority-gated");
