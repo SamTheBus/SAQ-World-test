@@ -615,6 +615,7 @@ import {
   isCryptFamily,
   isFortFamily,
   isGeneratedInteriorFamily,
+  isLairSiteV1,
   isRareV1,
   isRuinFamily,
   isSeededBindingV1,
@@ -992,7 +993,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-PLEDLMJO.js";
+} from "./chunk-ERUE6ROK.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -1006,9 +1007,9 @@ function readAlbum(storage, channel2) {
 }
 function writeAlbum(storage, channel2, album) {
   try {
-    const text2 = albumText(album);
-    if (storage.getItem(bestiaryStoreKey(channel2)) === text2) return false;
-    storage.setItem(bestiaryStoreKey(channel2), text2);
+    const text3 = albumText(album);
+    if (storage.getItem(bestiaryStoreKey(channel2)) === text3) return false;
+    storage.setItem(bestiaryStoreKey(channel2), text3);
     return true;
   } catch {
     return false;
@@ -1021,7 +1022,11 @@ function saveChannelPrefix(location) {
   return /\/SAQ-World-test\//i.test(location?.pathname ?? "") ? TEST_SAVE_PREFIX : "";
 }
 var HERO_SLOT_LIMIT = 5;
-var heroSavePrefix = (slot) => Number.isInteger(slot) && slot > 1 && slot <= HERO_SLOT_LIMIT ? `saq-hero-${slot}:` : "";
+var PARTY_SLOT_BASE = 10;
+var PARTY_SLOT_LIMIT = 8;
+var isPartySlot = (slot) => Number.isInteger(slot) && slot > PARTY_SLOT_BASE && slot <= PARTY_SLOT_BASE + PARTY_SLOT_LIMIT;
+var isWorldSlot = (slot) => Number.isInteger(slot) && slot >= 1 && slot <= HERO_SLOT_LIMIT || isPartySlot(slot);
+var heroSavePrefix = (slot) => isPartySlot(slot) ? `saq-party-${slot - PARTY_SLOT_BASE}:` : Number.isInteger(slot) && slot > 1 && slot <= HERO_SLOT_LIMIT ? `saq-hero-${slot}:` : "";
 function channelIndexedDb(indexedDB, prefix2) {
   if (!prefix2 || !indexedDB) return indexedDB;
   return Object.freeze({
@@ -1123,9 +1128,9 @@ function createAuthorityDeliveryV1({ clock: clock3, now: now3, activity = true, 
     currentDriver = driver;
     try {
       onBegin(driver);
-      const wait = clock3.run();
+      const wait2 = clock3.run();
       observe?.({ driver, at: at8, gapMs: gap2, due, serviced: true });
-      return wait;
+      return wait2;
     } catch (error) {
       faults++;
       onError(error, driver);
@@ -41714,10 +41719,10 @@ function sporeDepthItems(model, viewport, art) {
           ctx.textAlign = "center";
           ctx.lineWidth = 3.5;
           ctx.strokeStyle = "#182336";
-          const text2 = formatLarge(pod.hitDamage);
-          ctx.strokeText(text2, x + 25, y - 45 - pod.hitAge);
+          const text3 = formatLarge(pod.hitDamage);
+          ctx.strokeText(text3, x + 25, y - 45 - pod.hitAge);
           ctx.fillStyle = "#fff4ed";
-          ctx.fillText(text2, x + 25, y - 45 - pod.hitAge);
+          ctx.fillText(text3, x + 25, y - 45 - pod.hitAge);
           ctx.restore();
         }
         if (hit) {
@@ -56954,12 +56959,12 @@ async function createRuinStorybookArtV1(environment, review, initial = "storyboo
   function blendGrass(c, space, bounds2, at8) {
     c.save();
     c.beginPath();
-    let any = false;
+    let any2 = false;
     for (let y = Math.floor(bounds2.y / 32) - 1; y <= Math.ceil((bounds2.y + bounds2.height) / 32); y++) for (let x = Math.floor(bounds2.x / 32) - 1; x <= Math.ceil((bounds2.x + bounds2.width) / 32); x++) if (scenePoint(space, x * 32 + 16, y * 32 + 16) && at8(x, y) === "g") {
       c.rect(x * 32, y * 32, 32, 32);
-      any = true;
+      any2 = true;
     }
-    if (any) {
+    if (any2) {
       c.clip();
       const p = blendOrigin(space);
       c.drawImage(blended[0], p.x, p.y);
@@ -56987,12 +56992,12 @@ async function createRuinStorybookArtV1(environment, review, initial = "storyboo
     c.closePath();
   }
   function roadPath(c, space, bounds2, at8) {
-    let any = false;
+    let any2 = false;
     for (let y = Math.floor(bounds2.y / 32) - 1; y <= Math.ceil((bounds2.y + bounds2.height) / 32); y++) for (let x = Math.floor(bounds2.x / 32) - 1; x <= Math.ceil((bounds2.x + bounds2.width) / 32); x++) if (scenePoint(space, x * 32 + 16, y * 32 + 16) && ["r", "p"].includes(at8(x, y))) {
-      any = true;
+      any2 = true;
       roadCell(c, x, y, at8);
     }
-    return any;
+    return any2;
   }
   function roadOverlay(c, space, bounds2, at8) {
     prior.roadOverlay?.(c, space, bounds2, at8);
@@ -57716,9 +57721,9 @@ var NATURAL_CLUSTER_RULES = freezeWire({
   profiles: { w: { admission: 59, scale: 1 }, t: { admission: 51, scale: 0.98 }, m: { admission: 40, scale: 0.86 }, a: { admission: 25, scale: 0.76 }, r: { admission: 29, scale: 0.79 }, d: { admission: 21, scale: 0.72 }, s: { admission: 22, scale: 0.74 }, l: { admission: 32, scale: 0.8 } },
   protection: { routeShoulderTiles: 1, waterMarginTiles: 1, reservationMarginTiles: 1 }
 });
-var hash21 = (text2) => {
+var hash21 = (text3) => {
   let h = 2166136261;
-  for (let i = 0; i < text2.length; i++) h = Math.imul(h ^ text2.charCodeAt(i), 16777619);
+  for (let i = 0; i < text3.length; i++) h = Math.imul(h ^ text3.charCodeAt(i), 16777619);
   return h >>> 0;
 };
 var unit2 = (h, n) => (h >>> n & 255) / 255;
@@ -60376,14 +60381,14 @@ function createForestStandsArtV2(env, prior) {
   });
   function paintedRoads(m, bounds2, at8) {
     const x0 = Math.floor(bounds2.x / T61) - 2, y0 = Math.floor(bounds2.y / T61) - 2, x1 = Math.floor((bounds2.x + bounds2.width) / T61) + 2, y1 = Math.floor((bounds2.y + bounds2.height) / T61) + 2;
-    let any = false, other = false;
+    let any2 = false, other = false;
     for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) {
       const t = at8(tx, ty);
       if (t !== "r" && t !== "p") continue;
-      if (PAINTED.has(codeAt(m, tx, ty))) any = true;
+      if (PAINTED.has(codeAt(m, tx, ty))) any2 = true;
       else other = true;
     }
-    if (!any) return null;
+    if (!any2) return null;
     if (!other) return { clip: null };
     const p = new Path2D();
     for (let ty = y0; ty <= y1; ty++) {
@@ -61752,12 +61757,12 @@ function createCurvedRoutesV1(env, review, prior) {
   function forestTrails(m, b) {
     if (!field3 || !m.v.stands) return [];
     const S6 = 0.5, pad2 = 3, tx0 = Math.floor(b.x / T63) - pad2, ty0 = Math.floor(b.y / T63) - pad2, tx1 = Math.ceil((b.x + b.width) / T63) + pad2, ty1 = Math.ceil((b.y + b.height) / T63) + pad2;
-    let any = false;
-    for (let y = ty0; y <= ty1 && !any; y++) for (let x = tx0; x <= tx1; x++) if (trailOf(m, x, y)) {
-      any = true;
+    let any2 = false;
+    for (let y = ty0; y <= ty1 && !any2; y++) for (let x = tx0; x <= tx1; x++) if (trailOf(m, x, y)) {
+      any2 = true;
       break;
     }
-    if (!any) return [];
+    if (!any2) return [];
     const wx = Math.round(m.dx / T63), wy = Math.round(m.dy / T63), cols = Math.round((tx1 - tx0) / S6) + 1, rows = Math.round((ty1 - ty0) / S6) + 1, f = new Float32Array(cols * rows);
     for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) f[j * cols + i] = field3.vnoise(field3.K.trail, (tx0 + i * S6 + wx) / 84, (ty0 + j * S6 + wy) / 84) - 0.5;
     const segs = [], near4 = (x, y) => {
@@ -61839,7 +61844,7 @@ function createCurvedRoutesV1(env, review, prior) {
   }
   function tileClip(m, b, test) {
     const p = new Path2D(), x0 = Math.floor(b.x / T63) - 3, x1 = Math.floor((b.x + b.width) / T63) + 3, y0 = Math.floor(b.y / T63) - 3, y1 = Math.floor((b.y + b.height) / T63) + 3;
-    let any = false;
+    let any2 = false;
     for (let y = y0; y <= y1; y++) {
       let start = null;
       for (let x = x0; x <= x1 + 1; x++) {
@@ -61847,12 +61852,12 @@ function createCurvedRoutesV1(env, review, prior) {
         if (ok && start === null) start = x;
         else if (!ok && start !== null) {
           p.rect(start * T63, y * T63, (x - start) * T63, T63);
-          any = true;
+          any2 = true;
           start = null;
         }
       }
     }
-    return any ? p : null;
+    return any2 ? p : null;
   }
   function* painted4(m, page, segs) {
     if (!edgeArt || !segs.length) return null;
@@ -65237,7 +65242,7 @@ var SEED = /^[A-Za-z0-9 .:#'-]{1,40}$/;
 var worldOf = (raw) => raw && typeof raw === "object" && typeof raw.seed === "string" && SEED.test(raw.seed) ? { seed: raw.seed } : null;
 function entry(raw) {
   if (!raw || typeof raw !== "object" || !Number.isInteger(raw.slot) || raw.slot < 1 || raw.slot > HERO_SLOT_LIMIT) return null;
-  return { slot: raw.slot, name: typeof raw.name === "string" && NAME.test(raw.name) ? raw.name : "", level: Number.isInteger(raw.level) && raw.level >= 1 && raw.level <= 999 ? raw.level : 1, hero: raw.hero == null ? null : heroCard(raw.hero), world: worldOf(raw.world), heroId: typeof raw.heroId === "string" && HERO_ID.test(raw.heroId) ? raw.heroId : null, plays: Number.isInteger(raw.plays) && raw.plays >= 1 && raw.plays <= HERO_SLOT_LIMIT && raw.plays !== raw.slot ? raw.plays : null };
+  return { slot: raw.slot, name: typeof raw.name === "string" && NAME.test(raw.name) ? raw.name : "", level: Number.isInteger(raw.level) && raw.level >= 1 && raw.level <= 999 ? raw.level : 1, hero: raw.hero == null ? null : heroCard(raw.hero), world: worldOf(raw.world), heroId: typeof raw.heroId === "string" && HERO_ID.test(raw.heroId) ? raw.heroId : null, plays: (Number.isInteger(raw.plays) && raw.plays >= 1 && raw.plays <= HERO_SLOT_LIMIT || isPartySlot(raw.plays)) && raw.plays !== raw.slot ? raw.plays : null };
 }
 function parse(storage, channel2) {
   let data = null;
@@ -65280,7 +65285,7 @@ var heroWorld = (hero) => hero.plays ?? hero.slot;
 var worldInUse = (record2, slot) => record2.heroes.some((h) => h.slot !== slot && heroWorld(h) === slot);
 function playHeroIn(storage, channel2, slot, worldSlot) {
   const r = readHeroSlots(storage, channel2);
-  if (!r.heroes.some((h) => h.slot === slot) || !r.heroes.some((h) => h.slot === worldSlot)) return false;
+  if (!r.heroes.some((h) => h.slot === slot) || !r.heroes.some((h) => h.slot === worldSlot) && !isPartySlot(worldSlot)) return false;
   return write(storage, channel2, { active: slot, heroes: r.heroes.map((h) => h.slot === slot ? { ...h, plays: worldSlot === slot ? null : worldSlot } : h) });
 }
 function ensureHeroIds(storage, channel2, makeId) {
@@ -65304,9 +65309,9 @@ function createHeroRosterWriter({ storage, channel: channel2 = "", slot = 1, vis
       const player = model?.playersById?.[model.localPlayerId], actor = player && model.entitiesById?.[player.entityId];
       if (!actor?.heroLook || !storage) return;
       const name = actor.heroLook.look?.name, next = { name: typeof name === "string" && NAME.test(name) ? name : "", level: player.progression?.level ?? 1, hero: heroCard(heroSpecForActor(actor)), ...visiting ? {} : { world } };
-      const text2 = JSON.stringify(next);
-      if (text2 === last) return;
-      last = text2;
+      const text3 = JSON.stringify(next);
+      if (text3 === last) return;
+      last = text3;
       update(next);
     },
     setWorld(next) {
@@ -65407,12 +65412,12 @@ function validateHeroPassport(passport) {
 }
 var passportText = (passport) => canonicalStringify(passport);
 var samePassport = (a, b) => Boolean(a && b) && passportText(a) === passportText(b);
-function seedWords(text2) {
+function seedWords(text3) {
   let h = 2166136261;
   const words = [];
   for (let j = 0; j < 4; j++) {
-    for (let i = 0; i < text2.length; i++) {
-      h = Math.imul(h ^ text2.charCodeAt(i), 16777619) >>> 0;
+    for (let i = 0; i < text3.length; i++) {
+      h = Math.imul(h ^ text3.charCodeAt(i), 16777619) >>> 0;
     }
     h = Math.imul(h ^ j, 16777619) >>> 0;
     words.push(h);
@@ -65534,7 +65539,7 @@ function arriveHeroPassport(state, playerId, passport) {
 var HERO_STORE_VERSION = "hero-store-v1";
 var heroStoreKey = (channel2) => `${channel2}saq-world-hero-store-v1`;
 var PLAYER = /^ply:[0-9a-f]{32}$/;
-var worldKey = (slot) => Number.isInteger(slot) && slot >= 1 && slot <= HERO_SLOT_LIMIT ? String(slot) : null;
+var worldKey = (slot) => isWorldSlot(slot) ? String(slot) : null;
 function read(storage, channel2) {
   let data = null;
   try {
@@ -65651,14 +65656,14 @@ var QUEST_POLICY = freezeWire({
   searchRadius: { site: 34, event: 26 }
 });
 var P9 = QUEST_POLICY;
-function unit3(text2) {
+function unit3(text3) {
   let h = 2166136261;
-  for (let i = 0; i < text2.length; i++) h = Math.imul(h ^ text2.charCodeAt(i), 16777619);
+  for (let i = 0; i < text3.length; i++) h = Math.imul(h ^ text3.charCodeAt(i), 16777619);
   h = Math.imul(h ^ h >>> 16, 2246822507);
   h = Math.imul(h ^ h >>> 13, 3266489909);
   return ((h ^ h >>> 16) >>> 0) / 4294967296;
 }
-var questHash = (text2) => Math.floor(unit3(text2) * 4294967296);
+var questHash = (text3) => Math.floor(unit3(text3) * 4294967296);
 var pick3 = (list, key3) => list[questHash(key3) % list.length];
 var clearings = [];
 function useQuestWorldV1(asset) {
@@ -66065,9 +66070,9 @@ function woodlandPilotWorldPosition(slot) {
     localY: (slot.y % 26 + 0.5) * 32
   };
 }
-var stable = (text2) => {
+var stable = (text3) => {
   let h = 2166136261;
-  for (const c of text2) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0;
+  for (const c of text3) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0;
   return h;
 };
 function openThreeByThree(tile, x, y, landmassId) {
@@ -66126,9 +66131,9 @@ async function createWoodlandPilotEventAnchors({ asset, binding, cx, cy: cy2, se
 // src/shared/generation/planned_event_anchors_v1.js
 var FIXED = new Set([...WOODLAND_EVENT_PILOT_V3_7, ...SPORE_EVENTS, HOLLOW_EVENT].map((e) => e.slotId));
 var FIXED_RESHAPED = new Set([...WOODLAND_EVENT_PILOT_V3_7, HOLLOW_EVENT].map((e) => e.slotId));
-var stable2 = (text2) => {
+var stable2 = (text3) => {
   let h = 2166136261;
-  for (const c of text2) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0;
+  for (const c of text3) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0;
   return h;
 };
 function open(tile, x, y, landmassId) {
@@ -67266,9 +67271,9 @@ var STIR_POLICY = freezeWire({
   maxRows: 8,
   maxRest: 96
 });
-function unit4(text2) {
+function unit4(text3) {
   let h = 2166136261;
-  for (let i = 0; i < text2.length; i++) h = Math.imul(h ^ text2.charCodeAt(i), 16777619);
+  for (let i = 0; i < text3.length; i++) h = Math.imul(h ^ text3.charCodeAt(i), 16777619);
   h = Math.imul(h ^ h >>> 16, 2246822507);
   h = Math.imul(h ^ h >>> 13, 3266489909);
   return ((h ^ h >>> 16) >>> 0) / 4294967296;
@@ -67439,9 +67444,9 @@ function createPlannedWorldAssetStore({ readText, sha256, readWorld = null }) {
   };
   async function prepareSeeded(binding) {
     requirePlan(readWorld, "No seeded world source");
-    const text2 = await readWorld(binding.assetHash);
-    requirePlan(typeof text2 === "string" && bytesToHex(await sha256(new TextEncoder().encode(text2))) === binding.assetHash, "Seeded world commitment mismatch");
-    const asset = presentSeededWorldV1(JSON.parse(text2));
+    const text3 = await readWorld(binding.assetHash);
+    requirePlan(typeof text3 === "string" && bytesToHex(await sha256(new TextEncoder().encode(text3))) === binding.assetHash, "Seeded world commitment mismatch");
+    const asset = presentSeededWorldV1(JSON.parse(text3));
     requirePlan(asset.upstream?.maker === binding.worldMaker && asset.upstream.planHash === binding.planHash && asset.upstream.physicalPlanHash === binding.physicalHash && asset.upstream.planningPolicyHash === binding.planningHash && asset.routeHash === binding.routeHash, "Seeded world upstream mismatch");
     validateRuntimePlan(asset);
     useWorldRolesV1(asset.contentRoles, asset.ferry, asset.settlements, asset.sites);
@@ -67464,9 +67469,9 @@ function createPlannedWorldAssetStore({ readText, sha256, readWorld = null }) {
     const key3 = plannedWorldAssetCacheKey(binding);
     if (!prepared.has(key3)) prepared.set(key3, (async () => {
       if (isSeededBindingV1(binding)) return prepareSeeded(binding);
-      const text2 = await readText(plannedAssetDirectory(binding) + "/" + binding.assetId + ".json");
-      requirePlan(bytesToHex(await sha256(new TextEncoder().encode(text2))) === binding.assetHash, "Planned asset commitment mismatch");
-      let asset = JSON.parse(text2);
+      const text3 = await readText(plannedAssetDirectory(binding) + "/" + binding.assetId + ".json");
+      requirePlan(bytesToHex(await sha256(new TextEncoder().encode(text3))) === binding.assetHash, "Planned asset commitment mismatch");
+      let asset = JSON.parse(text3);
       validateRuntimePlan(asset);
       useWorldRolesV1(asset.contentRoles, asset.ferry, asset.settlements);
       useGeneratedTownsV1(null);
@@ -67493,22 +67498,22 @@ function createPlannedWorldAssetStore({ readText, sha256, readWorld = null }) {
         validateRuntimePlan(asset);
       }
       if (hasHydrologyV1(binding)) {
-        const reshaped = hasWorldReshape(binding), text3 = await readText(reshaped ? "assets/world-reshape-v2/hydrology.json" : "assets/hydrology-v1/alpha.json");
-        requirePlan(bytesToHex(await sha256(new TextEncoder().encode(text3))) === (reshaped ? RESHAPE_HYDROLOGY_HASH : HYDROLOGY_HASH), "Hydrology asset commitment mismatch");
-        const plan = validateHydrologyPlanV1(JSON.parse(text3));
+        const reshaped = hasWorldReshape(binding), text4 = await readText(reshaped ? "assets/world-reshape-v2/hydrology.json" : "assets/hydrology-v1/alpha.json");
+        requirePlan(bytesToHex(await sha256(new TextEncoder().encode(text4))) === (reshaped ? RESHAPE_HYDROLOGY_HASH : HYDROLOGY_HASH), "Hydrology asset commitment mismatch");
+        const plan = validateHydrologyPlanV1(JSON.parse(text4));
         requirePlan(plan.parent.baseAssetHash === binding.assetHash && plan.parent.populationHash === binding.sitePopulationHash && plan.parent.wildernessHash === binding.wildernessHash && plan.parent.ferryHash === binding.ferryHash && plan.widthTiles === asset.domain.width * 64 && plan.heightTiles === asset.domain.height * 52, "Hydrology input composition mismatch");
         asset = { ...asset, hydrologyPlan: plan, routes: { ...asset.routes, bridges: plan.bridgePlan.bridges } };
       }
       if (hasFirstJourney(binding)) {
-        const text3 = await readText("assets/alderwood-access-v1/alpha.json");
-        requirePlan(bytesToHex(await sha256(new TextEncoder().encode(text3))) === ACCESS_HASH, "First-journey asset commitment mismatch");
-        asset = applyFirstJourney(asset, binding, JSON.parse(text3));
+        const text4 = await readText("assets/alderwood-access-v1/alpha.json");
+        requirePlan(bytesToHex(await sha256(new TextEncoder().encode(text4))) === ACCESS_HASH, "First-journey asset commitment mismatch");
+        asset = applyFirstJourney(asset, binding, JSON.parse(text4));
         validateRuntimePlan(asset);
       }
       if (hasWorldReshape(binding)) {
-        const text3 = await readText("assets/world-reshape-v2/alpha.json");
-        requirePlan(bytesToHex(await sha256(new TextEncoder().encode(text3))) === RESHAPE_HASH, "World reshape asset commitment mismatch");
-        asset = applyWorldReshape(asset, binding, JSON.parse(text3));
+        const text4 = await readText("assets/world-reshape-v2/alpha.json");
+        requirePlan(bytesToHex(await sha256(new TextEncoder().encode(text4))) === RESHAPE_HASH, "World reshape asset commitment mismatch");
+        asset = applyWorldReshape(asset, binding, JSON.parse(text4));
         validateRuntimePlan(asset);
       }
       freezePlan(asset);
@@ -67827,9 +67832,9 @@ function createBuiltWorldStoreV1({ indexedDB, sha256 }) {
   const describe = async (hash44) => HASH.test(hash44) ? info(await get(WORLDS, hash44)) : null, campaignWorld = async (campaignId) => (await get(CAMPAIGNS, campaignId))?.hash ?? null;
   return Object.freeze({
     // Keeps a world file the world maker built. Returns what a page needs to name it.
-    async put(text2) {
-      if (typeof text2 !== "string") throw new TypeError("A built world is JSON text");
-      const bytes = new TextEncoder().encode(text2), hash44 = bytesToHex(await sha256(bytes)), asset = JSON.parse(text2);
+    async put(text3) {
+      if (typeof text3 !== "string") throw new TypeError("A built world is JSON text");
+      const bytes = new TextEncoder().encode(text3), hash44 = bytesToHex(await sha256(bytes)), asset = JSON.parse(text3);
       const record2 = { hash: hash44, seed: String(asset.upstream?.seed ?? asset.seed), commitments: seededCommitmentsV1(asset), size: bytes.length, ...await pack(bytes) };
       await run2([WORLDS], "readwrite", (tx) => {
         tx.objectStore(WORLDS).put(record2, hash44);
@@ -67874,10 +67879,10 @@ function createBuiltWorldStoreV1({ indexedDB, sha256 }) {
 var WORLD_SEED_MAX_LENGTH = 32;
 var NUMBER = /^-?\d{1,16}$/;
 function worldSeedV1(input) {
-  const text2 = String(input ?? "").trim().replace(/\s+/g, " ").toLowerCase().slice(0, WORLD_SEED_MAX_LENGTH).trim();
-  if (!text2) return null;
-  if (NUMBER.test(text2) && Number.isSafeInteger(Number(text2))) return { seed: String(Number(text2)), word: null };
-  return { seed: String(hash32(text2)), word: text2 };
+  const text3 = String(input ?? "").trim().replace(/\s+/g, " ").toLowerCase().slice(0, WORLD_SEED_MAX_LENGTH).trim();
+  if (!text3) return null;
+  if (NUMBER.test(text3) && Number.isSafeInteger(Number(text3))) return { seed: String(Number(text3)), word: null };
+  return { seed: String(hash32(text3)), word: text3 };
 }
 var rollWorldSeedV1 = (randomUint32) => String(randomUint32() >>> 0);
 
@@ -67982,7 +67987,7 @@ function classKitDue(m) {
 }
 var classKitRoom = (m) => Object.keys(m.inventory.itemsById).length + CLASS_KIT_PIECES.length <= inventoryIntakeCapacity(local4(m).d8);
 var kitPieceFits = (inv, piece3) => piece3 === "weapon" ? inv.itemsById[inv.equipped.weapon]?.definitionId === "worn-sword" : piece3 === "overall" ? !inv.equipped.overall && !inv.equipped.chest && !inv.equipped.leggings : !inv.equipped[piece3];
-async function claimClassKit2({ readModel, adapter, wait, say = () => {
+async function claimClassKit2({ readModel, adapter, wait: wait2, say = () => {
 } }) {
   let m = readModel();
   if (!classKitDue(m) || !classKitRoom(m)) return null;
@@ -67990,7 +67995,7 @@ async function claimClassKit2({ readModel, adapter, wait, say = () => {
   say("Unpacking your starting gear\u2026");
   const rev = m.inventory.revision;
   await adapter.issue("classkit.claim", { inventoryRevision: rev });
-  if (!await wait((x) => Boolean(x.inventory?.classKit))) throw Error("Your starting gear didn\u2019t arrive. Try again.");
+  if (!await wait2((x) => Boolean(x.inventory?.classKit))) throw Error("Your starting gear didn\u2019t arrive. Try again.");
   let worn = 0;
   const ids4 = readModel().inventory.classKit.sourceEntityIds;
   for (const [n, piece3] of CLASS_KIT_PIECES.entries()) {
@@ -68000,7 +68005,7 @@ async function claimClassKit2({ readModel, adapter, wait, say = () => {
     say(`Putting on your ${itemDefinition(item).name}\u2026`);
     const before = inv.revision;
     await adapter.issue("equipment.equip", { itemId, slot: piece3, inventoryRevision: before });
-    if (await wait((x) => x.inventory.revision > before) && readModel().inventory.equipped[piece3] === itemId) worn++;
+    if (await wait2((x) => x.inventory.revision > before) && readModel().inventory.equipped[piece3] === itemId) worn++;
   }
   return { name: HERO_CLASSES[cls].name, worn };
 }
@@ -68108,17 +68113,17 @@ function laneFor(doc) {
       svg2.innerHTML = ICONS[kind] ?? ICONS.loot;
       badge.append(svg2);
     }
-    const text2 = doc.createElement("div");
-    text2.className = "toast-text";
+    const text3 = doc.createElement("div");
+    text3.className = "toast-text";
     const t = doc.createElement("strong");
     t.textContent = title;
     const s = doc.createElement("small");
     s.className = "toast-sub";
     s.textContent = sub;
-    text2.append(t, s);
+    text3.append(t, s);
     const count = doc.createElement("span");
     count.className = "toast-count";
-    card.append(badge, text2, count);
+    card.append(badge, text3, count);
     root2.prepend(card);
     cards.set(id, card);
     swipe(card);
@@ -68158,39 +68163,39 @@ function kitGear(id) {
 }
 var startingHeroSpecV1 = (hero) => ({ cls: hero.cls ?? null, look: hero.look, gear: hero.cls ? kitGear(hero.cls) : {}, offType: hero.cls ? HERO_CLASSES[hero.cls].offhand : null });
 var sameLook = (a, b) => Boolean(a && b) && Object.keys(DEFAULT_LOOK).every((k) => a[k] === b[k]);
-var cleanName = (text2) => [...String(text2).replace(/[^\p{L}\p{M}\p{N} '’.-]/gu, "").replace(/\s+/g, " ").trimStart()].slice(0, HERO_NAME_MAX).join("");
+var cleanName = (text3) => [...String(text3).replace(/[^\p{L}\p{M}\p{N} '’.-]/gu, "").replace(/\s+/g, " ").trimStart()].slice(0, HERO_NAME_MAX).join("");
 var namedOk = (name) => name.length > 0 && validHeroName(name);
 function createHeroCreatorV1({ document: document2, environment, readModel, adapter, reportError = () => {
 }, onClose = () => {
 }, openHeroes = null, otherHeroes = () => false, beforeGame = null, startingHero = null }) {
-  const el2 = (tag, cls2 = "", text2 = "") => {
+  const el3 = (tag, cls2 = "", text3 = "") => {
     const e = document2.createElement(tag);
     if (cls2) e.className = cls2;
-    if (text2) e.textContent = text2;
+    if (text3) e.textContent = text3;
     return e;
   };
-  const button2 = (cls2, text2, onClick) => {
-    const b = el2("button", cls2, text2);
+  const button3 = (cls2, text3, onClick) => {
+    const b = el3("button", cls2, text3);
     b.type = "button";
     b.addEventListener("click", onClick);
     return b;
   };
-  const root2 = el2("section", "hero-creator-v1" + (beforeGame ? " is-before-game" : ""));
+  const root2 = el3("section", "hero-creator-v1" + (beforeGame ? " is-before-game" : ""));
   root2.hidden = true;
   root2.setAttribute("role", "dialog");
   root2.setAttribute("aria-modal", "true");
   root2.setAttribute("aria-labelledby", "hero-creator-title");
-  const panel = el2("div", "hc-panel"), head13 = el2("header", "hc-head"), title = el2("h2", "", "Create your hero"), intro = el2("p", "hc-intro");
+  const panel = el3("div", "hc-panel"), head13 = el3("header", "hc-head"), title = el3("h2", "", "Create your hero"), intro = el3("p", "hc-intro");
   title.id = "hero-creator-title";
   head13.append(title, intro);
   if (beforeGame?.strip) head13.append(beforeGame.strip);
-  const body5 = el2("div", "hc-body"), preview = el2("div", "hc-preview"), stage2 = el2("canvas", "hc-stage"), bar = el2("div", "hc-bar");
+  const body5 = el3("div", "hc-body"), preview = el3("div", "hc-preview"), stage2 = el3("canvas", "hc-stage"), bar = el3("div", "hc-bar");
   stage2.setAttribute("role", "img");
   stage2.setAttribute("aria-label", "Preview of your hero");
-  const options = el2("div", "hc-options"), foot = el2("footer", "hc-foot"), status2 = el2("p", "hc-status"), cancel = button2("hc-later", "Cancel", () => {
+  const options = el3("div", "hc-options"), foot = el3("footer", "hc-foot"), status2 = el3("p", "hc-status"), cancel = button3("hc-later", "Cancel", () => {
     if (!busy) close();
-  }), confirm = button2("hc-confirm", "", () => save());
-  const switchHero = button2("hc-later", "Switch hero", () => {
+  }), confirm = button3("hc-confirm", "", () => save());
+  const switchHero = button3("hc-later", "Switch hero", () => {
     if (!busy && openHeroes) {
       root2.hidden = true;
       opener = null;
@@ -68200,8 +68205,8 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
   status2.setAttribute("role", "status");
   foot.append(status2, switchHero, cancel, confirm);
   let mode = "create", cls = null, deferClass = false, look = { ...DEFAULT_LOOK }, facing2 = 1, showGear = true, busy = false, thumbsKey = "", opener = null, kitBusy = false, kitRetryAt = 0, roomNoticed = false;
-  const toggle = (text2, get, set) => {
-    const b = button2("hc-toggle", text2, () => {
+  const toggle = (text3, get, set) => {
+    const b = button3("hc-toggle", text3, () => {
       set(!get());
       paint2();
     });
@@ -68214,25 +68219,25 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
   }), helmToggle = toggle("Helmet", () => look.helmet, (v) => {
     look.helmet = v;
   });
-  const randomButton = button2("hc-toggle", "Random look", randomLook);
-  bar.append(button2("hc-toggle", "Turn", () => {
+  const randomButton = button3("hc-toggle", "Random look", randomLook);
+  bar.append(button3("hc-toggle", "Turn", () => {
     facing2 = -facing2;
   }), gearToggle.b, helmToggle.b, randomButton);
   preview.append(stage2, bar);
   const field3 = (label4, content, id) => {
-    const f = el2("fieldset", "hc-field"), l = el2("legend", "", label4), pick4 = el2("span", "hc-pick");
+    const f = el3("fieldset", "hc-field"), l = el3("legend", "", label4), pick4 = el3("span", "hc-pick");
     if (id) pick4.id = id;
     l.append(" ", pick4);
     f.append(l, ...content);
     options.append(f);
     return { f, pick: pick4 };
   };
-  const classCards = el2("div", "hc-classes"), cardButtons = {};
+  const classCards = el3("div", "hc-classes"), cardButtons = {};
   for (const c of ["knight", "rogue", "mage"].map((id) => HERO_CLASSES[id])) {
-    const b = el2("button", "hc-class"), canvas = el2("canvas"), skill = CLASS_SKILLS[c.signature];
+    const b = el3("button", "hc-class"), canvas = el3("canvas"), skill = CLASS_SKILLS[c.signature];
     b.type = "button";
     b.style.setProperty("--class", c.color);
-    b.append(canvas, el2("strong", "", c.name), el2("span", "", `${OFFHAND_NAMES[c.offhand]} \xB7 ${c.move.name} on Shift`), el2("small", "", `Free skill: ${skill.name}`));
+    b.append(canvas, el3("strong", "", c.name), el3("span", "", `${OFFHAND_NAMES[c.offhand]} \xB7 ${c.move.name} on Shift`), el3("small", "", `Free skill: ${skill.name}`));
     b.addEventListener("click", () => {
       if (!busy) {
         cls = c.id;
@@ -68243,16 +68248,16 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
     cardButtons[c.id] = { b, canvas };
     classCards.append(b);
   }
-  const laterClass = button2("hc-toggle hc-class-later", "Decide later", () => {
+  const laterClass = button3("hc-toggle hc-class-later", "Decide later", () => {
     if (!busy) {
       cls = null;
       deferClass = true;
       paint2();
     }
-  }), laterRow = el2("div", "hc-class-later-row");
-  laterRow.append(laterClass, el2("p", "hc-sub", "Pick a class any time from the skill wheel or Stats."));
+  }), laterRow = el3("div", "hc-class-later-row");
+  laterRow.append(laterClass, el3("p", "hc-sub", "Pick a class any time from the skill wheel or Stats."));
   const classField = field3("Class", [classCards, laterRow]);
-  const nameInput = el2("input", "hc-name");
+  const nameInput = el3("input", "hc-name");
   nameInput.type = "text";
   nameInput.maxLength = HERO_NAME_MAX * 2;
   nameInput.placeholder = "Name your hero";
@@ -68267,11 +68272,11 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
   });
   const nameField = field3("Name", [nameInput]);
   const tiles6 = (list, key3, id) => {
-    const box5 = el2("div", "hc-tiles"), map = {};
+    const box5 = el3("div", "hc-tiles"), map = {};
     for (const [value2, name] of list) {
-      const b = el2("button", "hc-tile"), canvas = el2("canvas");
+      const b = el3("button", "hc-tile"), canvas = el3("canvas");
       b.type = "button";
-      b.append(canvas, el2("span", "", name));
+      b.append(canvas, el3("span", "", name));
       b.addEventListener("click", () => {
         look[key3] = value2;
         paint2();
@@ -68282,9 +68287,9 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
     return { box: box5, map };
   };
   const swatches = (list, key3) => {
-    const box5 = el2("div", "hc-swatches"), map = {};
+    const box5 = el3("div", "hc-swatches"), map = {};
     for (const [value2, name, hex5] of list) {
-      const b = el2("button", "hc-swatch");
+      const b = el3("button", "hc-swatch");
       b.type = "button";
       b.style.background = hex5;
       b.title = name;
@@ -68299,7 +68304,7 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
     return { box: box5, map };
   };
   const hairTiles = tiles6(LOOK_OPTIONS.hairStyles, "hair"), natural = swatches(LOOK_OPTIONS.hairColors.filter((x) => !x[3]), "hairColor"), bold = swatches(LOOK_OPTIONS.hairColors.filter((x) => x[3]), "hairColor"), skins = swatches(LOOK_OPTIONS.skins, "skin"), beardTiles = tiles6(LOOK_OPTIONS.facialHair, "facialHair");
-  const hairField = field3("Hair", [hairTiles.box]), hairColorField = field3("Hair color", [natural.box, el2("p", "hc-sub", "Bold"), bold.box]), skinField = field3("Skin", [skins.box]), beardField = field3("Facial hair", [beardTiles.box]);
+  const hairField = field3("Hair", [hairTiles.box]), hairColorField = field3("Hair color", [natural.box, el3("p", "hc-sub", "Bold"), bold.box]), skinField = field3("Skin", [skins.box]), beardField = field3("Facial hair", [beardTiles.box]);
   const lookFields = [nameField, hairField, hairColorField, skinField, beardField];
   body5.append(preview, options);
   panel.append(head13, body5, foot);
@@ -68315,7 +68320,7 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
   document2.addEventListener(HERO_CREATOR_OPEN_EVENT, onRequest);
   const local7 = (m) => m?.playersById?.[m.localPlayerId];
   const heroClass = () => heroClassOf(local7(readModel())?.d8);
-  const wait = async (test, ms = 4e3) => {
+  const wait2 = async (test, ms = 4e3) => {
     const until = Date.now() + ms;
     while (Date.now() < until) {
       if (test(readModel())) return true;
@@ -68437,12 +68442,12 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
       status2.textContent = "Stowing your old offhand\u2026";
       const rev = inv.revision;
       await adapter.issue("equipment.unequip", { slot: "subweapon", inventoryRevision: rev });
-      await wait((x) => x.inventory.revision > rev);
+      await wait2((x) => x.inventory.revision > rev);
     }
     m = readModel();
     status2.textContent = `Becoming a ${c.name}\u2026`;
     await adapter.issue("progression.change", { progressionRevision: local7(m).d8.revision, action: { kind: "class.choose", heroClass: classId } });
-    if (!await wait((x) => local7(x).d8?.heroClass === classId)) throw Error("The class choice didn\u2019t save. Try again.");
+    if (!await wait2((x) => local7(x).d8?.heroClass === classId)) throw Error("The class choice didn\u2019t save. Try again.");
     const owned2 = () => Object.values(readModel().inventory.itemsById).find((i) => offhandOf(i) === c.offhand);
     m = readModel();
     inv = m.inventory;
@@ -68450,7 +68455,7 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
       status2.textContent = `Claiming your ${SUBWEAPONS[c.offhand].name}\u2026`;
       const rev = inv.revision;
       await adapter.issue("subweapon.claim", { subType: c.offhand, inventoryRevision: rev });
-      await wait((x) => x.inventory.revision > rev);
+      await wait2((x) => x.inventory.revision > rev);
     }
     const item = owned2();
     m = readModel();
@@ -68459,11 +68464,11 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
       status2.textContent = `Equipping your ${OFFHAND_NAMES[c.offhand]}\u2026`;
       const rev = inv.revision;
       await adapter.issue("equipment.equip", { itemId: item.itemId, slot: "subweapon", inventoryRevision: rev });
-      await wait((x) => x.inventory.revision > rev);
+      await wait2((x) => x.inventory.revision > rev);
     }
     try {
-      kitToast(await claimClassKit2({ readModel, adapter, wait, say: (text2) => {
-        status2.textContent = text2;
+      kitToast(await claimClassKit2({ readModel, adapter, wait: wait2, say: (text3) => {
+        status2.textContent = text3;
       } }));
     } catch {
     }
@@ -68483,7 +68488,7 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
       return;
     }
     kitBusy = true;
-    claimClassKit2({ readModel, adapter, wait }).then(kitToast, () => {
+    claimClassKit2({ readModel, adapter, wait: wait2 }).then(kitToast, () => {
       kitRetryAt = Date.now() + 15e3;
     }).finally(() => {
       kitBusy = false;
@@ -68509,7 +68514,7 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
       if (mode !== "class") {
         status2.textContent = "Saving your look\u2026";
         await adapter.issue("progression.change", { progressionRevision: local7(readModel()).d8.revision, action: { kind: "look.set", look: next } });
-        if (!await wait((x) => sameLook(local7(x).d8?.look, next))) throw Error("Your look didn\u2019t save. Try again.");
+        if (!await wait2((x) => sameLook(local7(x).d8?.look, next))) throw Error("Your look didn\u2019t save. Try again.");
       }
       status2.textContent = "";
       busy = false;
@@ -68602,31 +68607,31 @@ var ICONS2 = {
   dice: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"/></svg>'
 };
 function dom(document2) {
-  const el2 = (tag, cls = "", text2 = "") => {
+  const el3 = (tag, cls = "", text3 = "") => {
     const e = document2.createElement(tag);
     if (cls) e.className = cls;
-    if (text2) e.textContent = text2;
+    if (text3) e.textContent = text3;
     return e;
   };
-  const button2 = (cls, text2, onClick) => {
-    const b = el2("button", cls, text2);
+  const button3 = (cls, text3, onClick) => {
+    const b = el3("button", cls, text3);
     b.type = "button";
     b.addEventListener("click", onClick);
     return b;
   };
   const icon = (name, cls) => {
-    const s = el2("span", cls);
+    const s = el3("span", cls);
     s.innerHTML = ICONS2[name];
     return s;
   };
   const dialog = (labelId) => {
-    const root2 = el2("section", "new-world-v1");
+    const root2 = el3("section", "new-world-v1");
     root2.setAttribute("role", "dialog");
     root2.setAttribute("aria-modal", "true");
     root2.setAttribute("aria-labelledby", labelId);
     return root2;
   };
-  return { el: el2, button: button2, icon, dialog };
+  return { el: el3, button: button3, icon, dialog };
 }
 async function newWorldFlowV1({ environment, save, startBuild = startWorldBuildV1 }) {
   const randomUint32 = () => environment.crypto.getRandomValues(new Uint32Array(1))[0];
@@ -68634,34 +68639,34 @@ async function newWorldFlowV1({ environment, save, startBuild = startWorldBuildV
   if (choice.kind === "classic") return { kind: "classic", hero: null };
   return buildWithHero(environment, choice.seed, save, startBuild);
 }
-function chooseWorld(document2, { pick: pick4, text: text2, roll: roll6 }) {
-  const { el: el2, button: button2, icon, dialog } = dom(document2);
+function chooseWorld(document2, { pick: pick4, text: text3, roll: roll6 }) {
+  const { el: el3, button: button3, icon, dialog } = dom(document2);
   return new Promise((resolve) => {
-    const root2 = dialog("new-world-title"), panel = el2("div", "nw-panel"), head13 = el2("header", "nw-head"), title = el2("h2", "", "Choose your world");
+    const root2 = dialog("new-world-title"), panel = el3("div", "nw-panel"), head13 = el3("header", "nw-head"), title = el3("h2", "", "Choose your world");
     title.id = "new-world-title";
-    head13.append(title, el2("p", "nw-intro", "Each hero lives in one world. Play the classic map, or grow a new one from a seed."));
-    const body5 = el2("div", "nw-body"), cards = el2("div", "nw-cards"), legend = el2("p", "nw-legend", "World");
+    head13.append(title, el3("p", "nw-intro", "Each hero lives in one world. Play the classic map, or grow a new one from a seed."));
+    const body5 = el3("div", "nw-body"), cards = el3("div", "nw-cards"), legend = el3("p", "nw-legend", "World");
     const card = (kind, name, about, tag) => {
-      const b = button2("nw-card is-" + kind, "", () => {
+      const b = button3("nw-card is-" + kind, "", () => {
         pick4 = kind;
         paint2();
       });
       b.dataset.world = kind;
-      const words = el2("span", "nw-card-words");
-      words.append(el2("strong", "", name), el2("span", "", about), el2("small", "", tag));
+      const words = el3("span", "nw-card-words");
+      words.append(el3("strong", "", name), el3("span", "", about), el3("small", "", tag));
       b.append(icon(kind, "nw-card-icon"), words);
       cards.append(b);
       return b;
     };
     const classicCard = card("classic", "Classic world", "The map every hero has played so far: Alderwood, the Woodland and the seven lands beyond.", "Same map for everyone \xB7 starts right away");
     const seededCard = card("seeded", "New world", "A whole new map from a seed, with its own coasts, rivers, roads, towns, caves, forts, ruins and crypts.", "Builds while you make your hero");
-    const seedBox = el2("div", "nw-seed"), label4 = el2("label", "nw-legend", "Seed"), row2 = el2("div", "nw-seed-row"), input = el2("input", "nw-seed-input"), rollButton = button2("nw-roll", "", () => {
+    const seedBox = el3("div", "nw-seed"), label4 = el3("label", "nw-legend", "Seed"), row2 = el3("div", "nw-seed-row"), input = el3("input", "nw-seed-input"), rollButton = button3("nw-roll", "", () => {
       input.value = roll6();
       paint2();
     });
     label4.htmlFor = input.id = "new-world-seed";
     input.type = "text";
-    input.value = text2;
+    input.value = text3;
     input.maxLength = WORLD_SEED_MAX_LENGTH;
     input.placeholder = "Type a number or a word";
     input.autocomplete = "off";
@@ -68669,12 +68674,12 @@ function chooseWorld(document2, { pick: pick4, text: text2, roll: roll6 }) {
     input.setAttribute("autocapitalize", "off");
     rollButton.append(icon("dice", "nw-roll-icon"), "Roll");
     row2.append(input, rollButton);
-    const word = el2("p", "nw-word");
+    const word = el3("p", "nw-word");
     word.setAttribute("aria-live", "polite");
-    seedBox.append(label4, row2, word, el2("p", "nw-note", "Seeds are numbers; a word you type becomes one. The same seed always makes the same world, so friends can share one. Building takes about a minute, and you make your hero meanwhile."));
-    const ready = el2("p", "nw-note nw-ready", "Nothing to build: the classic world is ready now.");
+    seedBox.append(label4, row2, word, el3("p", "nw-note", "Seeds are numbers; a word you type becomes one. The same seed always makes the same world, so friends can share one. Building takes about a minute, and you make your hero meanwhile."));
+    const ready = el3("p", "nw-note nw-ready", "Nothing to build: the classic world is ready now.");
     body5.append(legend, cards, seedBox, ready);
-    const foot = el2("footer", "nw-foot"), next = button2("nw-next", "", () => {
+    const foot = el3("footer", "nw-foot"), next = button3("nw-next", "", () => {
       const seed2 = worldSeedV1(input.value);
       if (pick4 === "seeded" && !seed2) return;
       root2.remove();
@@ -68699,7 +68704,7 @@ function chooseWorld(document2, { pick: pick4, text: text2, roll: roll6 }) {
       word.hidden = !(seeded && seed2?.word);
       word.replaceChildren();
       if (!word.hidden) {
-        const n = el2("strong", "", seed2.seed);
+        const n = el3("strong", "", seed2.seed);
         word.append(`\u201C${seed2.word}\u201D becomes seed `, n);
       }
       const blocked3 = seeded && !seed2;
@@ -68766,8 +68771,8 @@ async function buildWithHero(environment, seed2, save, startBuild) {
   }
 }
 function buildStrip(document2, seed2) {
-  const { el: el2, icon } = dom(document2);
-  const root2 = el2("div", "nw-strip"), title = el2("strong", "nw-strip-title"), detail = el2("span", "nw-strip-detail"), bar = el2("span", "nw-bar"), fill6 = el2("span", "nw-bar-fill"), percent = el2("span", "nw-strip-percent");
+  const { el: el3, icon } = dom(document2);
+  const root2 = el3("div", "nw-strip"), title = el3("strong", "nw-strip-title"), detail = el3("span", "nw-strip-detail"), bar = el3("span", "nw-bar"), fill6 = el3("span", "nw-bar-fill"), percent = el3("span", "nw-strip-percent");
   root2.setAttribute("role", "status");
   bar.append(fill6);
   root2.append(icon("seeded", "nw-strip-icon"), title, detail, bar, percent);
@@ -68787,29 +68792,29 @@ function buildStrip(document2, seed2) {
   } };
 }
 function waitingPanel(document2, environment, seed2) {
-  const { el: el2, button: button2, dialog } = dom(document2);
-  const root2 = dialog("new-world-wait-title"), panel = el2("div", "nw-panel nw-wait-panel"), head13 = el2("header", "nw-head"), title = el2("h2", "", "Your world is almost ready"), intro = el2("p", "nw-intro");
+  const { el: el3, button: button3, dialog } = dom(document2);
+  const root2 = dialog("new-world-wait-title"), panel = el3("div", "nw-panel nw-wait-panel"), head13 = el3("header", "nw-head"), title = el3("h2", "", "Your world is almost ready"), intro = el3("p", "nw-intro");
   title.id = "new-world-wait-title";
   head13.append(title, intro);
   root2.hidden = true;
-  const body5 = el2("div", "nw-wait"), heroBox = el2("div", "nw-wait-hero"), portrait = el2("canvas", "nw-wait-portrait"), heroName = el2("strong", "nw-wait-name"), heroClass = el2("span", "nw-wait-class");
+  const body5 = el3("div", "nw-wait"), heroBox = el3("div", "nw-wait-hero"), portrait = el3("canvas", "nw-wait-portrait"), heroName = el3("strong", "nw-wait-name"), heroClass = el3("span", "nw-wait-class");
   portrait.setAttribute("aria-hidden", "true");
   heroBox.append(portrait, heroName, heroClass);
-  const side = el2("div", "nw-wait-build"), top = el2("div", "nw-wait-top"), seedLine = el2("span", "nw-wait-seed"), bar = el2("span", "nw-bar"), fill6 = el2("span", "nw-bar-fill"), barRow = el2("div", "nw-wait-bar"), percent = el2("span", "nw-strip-percent");
-  seedLine.append("Seed ", el2("strong", "", seed2.seed));
-  top.append(el2("p", "nw-legend", "Building your world"), seedLine);
+  const side = el3("div", "nw-wait-build"), top = el3("div", "nw-wait-top"), seedLine = el3("span", "nw-wait-seed"), bar = el3("span", "nw-bar"), fill6 = el3("span", "nw-bar-fill"), barRow = el3("div", "nw-wait-bar"), percent = el3("span", "nw-strip-percent");
+  seedLine.append("Seed ", el3("strong", "", seed2.seed));
+  top.append(el3("p", "nw-legend", "Building your world"), seedLine);
   bar.append(fill6);
   barRow.append(bar, percent);
-  const steps4 = el2("ol", "nw-steps"), stepItems = WORLD_BUILD_STAGES.map((s) => {
-    const li = el2("li", "nw-step");
-    li.append(el2("span", "nw-step-mark"), el2("span", "", s.label));
+  const steps4 = el3("ol", "nw-steps"), stepItems = WORLD_BUILD_STAGES.map((s) => {
+    const li = el3("li", "nw-step");
+    li.append(el3("span", "nw-step-mark"), el3("span", "", s.label));
     steps4.append(li);
     return li;
   });
-  const note = el2("p", "nw-note");
+  const note = el3("p", "nw-note");
   side.append(top, barRow, steps4, note);
   body5.append(heroBox, side);
-  const foot = el2("footer", "nw-foot"), status2 = el2("p", "nw-status");
+  const foot = el3("footer", "nw-foot"), status2 = el3("p", "nw-status");
   status2.setAttribute("role", "status");
   let settle = null;
   const answer = (value2) => {
@@ -68818,8 +68823,8 @@ function waitingPanel(document2, environment, seed2) {
     root2.hidden = true;
     s?.(value2);
   };
-  const back = button2("nw-quiet", "Back to hero", () => answer("back")), start = button2("nw-next", "Starts when the world is ready", () => {
-  }), retry = button2("nw-next", "Try again", () => answer("retry")), classic = button2("nw-quiet", "Play the classic world", () => answer("classic"));
+  const back = button3("nw-quiet", "Back to hero", () => answer("back")), start = button3("nw-next", "Starts when the world is ready", () => {
+  }), retry = button3("nw-next", "Try again", () => answer("retry")), classic = button3("nw-quiet", "Play the classic world", () => answer("classic"));
   start.disabled = true;
   foot.append(status2, back, classic, retry, start);
   panel.append(head13, body5, foot);
@@ -69563,9 +69568,9 @@ function validateSporePressureProgressV3(a, b, fromTick, toTick) {
 var isSporeV2 = (r) => [SPORE_V2, SPORE_V3, SPORE_V4, SPORE_V5].includes(r?.rulesVersion);
 var isSporePodV2 = (s, id, n) => isSporeV2(s.d9World?.worldEvents?.records[id]) && n >= 0 && n < 3;
 var layouts = /* @__PURE__ */ new WeakMap();
-var hash24 = (text2) => {
+var hash24 = (text3) => {
   let h = 2166136261;
-  for (const c of text2) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
+  for (const c of text3) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
   return h >>> 0;
 };
 var lineOpen = (c, a, b) => {
@@ -71236,7 +71241,7 @@ function names(state, rec) {
   return { town: town?.label, townAt: town, label: site?.label, elite: site && rec.kind === "hunt" ? huntTargetV1(site) : null, dest: dest?.label ?? null, found: seen4[rec.target] !== void 0, giverName: npc?.name, role: npc?.role };
 }
 function shown(state, rec) {
-  const n = names(state, rec), text2 = questTextV1(rec, n), eventTarget = rec.target.startsWith("event:"), found = n.found || rec.kind === "carry", giverTile = rec.source === "folk" ? serviceNpcByIdV1(rec.giver)?.tile : boardTileOf(rec.giver);
+  const n = names(state, rec), text3 = questTextV1(rec, n), eventTarget = rec.target.startsWith("event:"), found = n.found || rec.kind === "carry", giverTile = rec.source === "folk" ? serviceNpcByIdV1(rec.giver)?.tile : boardTileOf(rec.giver);
   const r = found ? 0 : eventTarget ? QUEST_POLICY.searchRadius.event : QUEST_POLICY.searchRadius.site, h = [...rec.id].reduce((a, c) => a * 31 + c.charCodeAt(0) >>> 0, 7), ang = h % 360 * Math.PI / 180, off = r * 0.45;
   const circle9 = found ? { x: rec.tx + 0.5, y: rec.ty + 0.5 } : { x: rec.tx + 0.5 + Math.cos(ang) * off, y: rec.ty + 0.5 + Math.sin(ang) * off };
   return {
@@ -71244,7 +71249,7 @@ function shown(state, rec) {
     kind: rec.kind,
     source: rec.source,
     status: rec.status,
-    ...text2,
+    ...text3,
     town: n.town ?? "",
     giverName: n.giverName ?? null,
     gold: rec.gold,
@@ -71254,8 +71259,8 @@ function shown(state, rec) {
   };
 }
 var offerShown = (state, o, level, stateOf) => {
-  const reward = questRewardV1(o.source, o.kind, level), text2 = questTextV1({ ...o, status: "active" }, names(state, o));
-  return { id: o.id, kind: o.kind, source: o.source, title: text2.title, note: text2.note, step: text2.step, gold: reward.gold, xp: reward.xp, state: stateOf };
+  const reward = questRewardV1(o.source, o.kind, level), text3 = questTextV1({ ...o, status: "active" }, names(state, o));
+  return { id: o.id, kind: o.kind, source: o.source, title: text3.title, note: text3.note, step: text3.step, gold: reward.gold, xp: reward.xp, state: stateOf };
 };
 function local6(state, tile) {
   try {
@@ -71445,9 +71450,9 @@ function overlayWoodlandCaveFamilyParcelsD12_1(chunk2, parcels = []) {
 var WOODLAND_CAVE_FAMILY_PARCEL_D12_2 = "woodland-cave-family-parcel-d12-2-v1";
 var W2 = BigInt(WOODLAND_CAVE_EXTERIOR.width);
 var H5 = BigInt(WOODLAND_CAVE_EXTERIOR.height);
-var hash25 = (text2) => {
+var hash25 = (text3) => {
   let n = 2166136261;
-  for (const c of text2) {
+  for (const c of text3) {
     n ^= c.charCodeAt(0);
     n = Math.imul(n, 16777619);
   }
@@ -71969,12 +71974,12 @@ function migrateIntegerCombat(s) {
 }
 
 // src/shared/contracts/subweapon_combat.js
-function seedWords2(text2) {
+function seedWords2(text3) {
   let h = 2166136261;
   const words = [];
   for (let j = 0; j < 4; j++) {
-    for (let i = 0; i < text2.length; i++) {
-      h = Math.imul(h ^ text2.charCodeAt(i), 16777619) >>> 0;
+    for (let i = 0; i < text3.length; i++) {
+      h = Math.imul(h ^ text3.charCodeAt(i), 16777619) >>> 0;
     }
     h = Math.imul(h ^ j, 16777619) >>> 0;
     words.push(h);
@@ -75824,11 +75829,11 @@ var WORLD_SEAT_LIMIT = 4;
 var WAITING_ROOM_VERSION = "world-waiting-room-v1";
 var ROOM = 8;
 function mint2(state, prefix2) {
-  const text2 = `${state.campaign.campaignId}/${prefix2}/${safeInteger(++state.identitySequence, 1)}`;
+  const text3 = `${state.campaign.campaignId}/${prefix2}/${safeInteger(++state.identitySequence, 1)}`;
   let hex5 = "";
   for (let j = 0; j < 4; j++) {
     let h = 2166136261 ^ j;
-    for (let i = 0; i < text2.length; i++) h = Math.imul(h ^ text2.charCodeAt(i), 16777619) >>> 0;
+    for (let i = 0; i < text3.length; i++) h = Math.imul(h ^ text3.charCodeAt(i), 16777619) >>> 0;
     hex5 += h.toString(16).padStart(8, "0");
   }
   return `${prefix2}:${hex5}`;
@@ -76148,6 +76153,74 @@ function validateSeatChangeV1(a, b) {
   const party = { entities, characters, kept: new Set([...kept].map((pid) => b.playersById[pid].entityId)) };
   const room = a.waitingRoom ? null : b.waitingRoom?.spaceInstanceId ?? null;
   requireContract(seatComparable(a, kept, party, null) === seatComparable(b, kept, party, room), "Seat change touched more than seats");
+}
+
+// src/shared/contracts/party_world_v1.js
+var PARTY_CLEARS_LIMIT = 512;
+var SITE = /^site:[0-9a-z:._-]{1,150}$/;
+var partyClearsOf = (state) => state?.campaign?.partyClearsById ?? null;
+var partyClearedV1 = (state, siteId) => Boolean(partyClearsOf(state)?.[siteId]);
+var siteSocket = (state, id) => state.d9World?.functionalSitesById?.[id]?.socket ?? state.d9World?.siteReservationsById?.[id]?.socket ?? null;
+function findableV1(state, id) {
+  const w = state.d9World, k = w?.navigation?.knowledge;
+  if (!k || typeof id !== "string") return false;
+  if (id.startsWith("settlement-slot:")) return k.settlements.some((s) => s.id === id);
+  if (id.startsWith("site:")) return Boolean(w.siteReservationsById?.[id]);
+  if (id.startsWith("ferry:")) return hasFerries(w.plannedWorld) && ferryNetworkV1().landings.some((l) => l.id === id);
+  return false;
+}
+var ownClear = (state, id) => {
+  const f = state.d9World?.functionalSitesById?.[id];
+  return f?.conqueredTick !== null && f?.conqueredTick !== void 0;
+};
+function applyPartyFactsV1(state, { add = {}, remove = {} } = {}) {
+  const w = state.d9World, k = w?.navigation?.knowledge;
+  requireContract(k && state.campaign, "Party worlds need a planned world");
+  const tick = state.tick, added2 = { finds: [], clears: [], bosses: [] }, removed = { finds: [], clears: [], bosses: [] };
+  for (const id of new Set(remove.finds ?? [])) if (k.visited[id] !== void 0) {
+    delete k.visited[id];
+    removed.finds.push(id);
+  }
+  for (const id of new Set(remove.clears ?? [])) if (partyClearedV1(state, id)) {
+    delete state.campaign.partyClearsById[id];
+    removed.clears.push(id);
+  }
+  for (const biome of new Set(remove.bosses ?? [])) {
+    const r = state.campaign.areaBossesByBiome?.[biome];
+    if (r && !ownClear(state, r.siteId)) {
+      delete state.campaign.areaBossesByBiome[biome];
+      removed.bosses.push(biome);
+    }
+  }
+  if (state.campaign.partyClearsById && !Object.keys(state.campaign.partyClearsById).length) delete state.campaign.partyClearsById;
+  if (state.campaign.areaBossesByBiome && !Object.keys(state.campaign.areaBossesByBiome).length) delete state.campaign.areaBossesByBiome;
+  for (const id of new Set(add.finds ?? [])) {
+    if (k.visited[id] !== void 0 || !findableV1(state, id) || Object.keys(k.visited).length >= 512) continue;
+    k.visited[id] = tick;
+    added2.finds.push(id);
+  }
+  for (const id of new Set(add.clears ?? [])) {
+    if (!SITE.test(id) || !w.siteReservationsById?.[id] || ownClear(state, id) || partyClearedV1(state, id)) continue;
+    const rows = state.campaign.partyClearsById ??= {};
+    if (Object.keys(rows).length >= PARTY_CLEARS_LIMIT) break;
+    rows[id] = { tick };
+    added2.clears.push(id);
+    if (k.visited[id] === void 0 && Object.keys(k.visited).length < 512) {
+      k.visited[id] = tick;
+      added2.finds.push(id);
+    }
+    const socket2 = siteSocket(state, id), biome = socket2?.region?.biome;
+    if (w.plannedWorld?.worldMaker !== void 0 && biome && isLairSiteV1(socket2) && !state.campaign.areaBossesByBiome?.[biome]) {
+      (state.campaign.areaBossesByBiome ??= {})[biome] = { siteId: id, tick };
+      added2.bosses.push(biome);
+    }
+  }
+  const changed = Object.values(added2).some((a) => a.length) || Object.values(removed).some((a) => a.length);
+  if (changed) {
+    k.revision++;
+    w.navigation.revision++;
+  }
+  return { changed, tick, added: added2, removed };
 }
 
 // src/simulation/activity_spatial.js
@@ -82438,12 +82511,22 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
     version++;
     return freezeWire({ status: "changed", waiting: Boolean(away) });
   }
+  function partyFactsV1(change) {
+    const draft = copyWire(state);
+    if (!applyPartyFactsV1(draft, change).changed) return freezeWire({ status: "unchanged", changed: false });
+    validateActivityState(draft);
+    const result = applyPartyFactsV1(state, change);
+    schedule();
+    version++;
+    return freezeWire({ status: "changed", ...result });
+  }
   return Object.freeze({
     advanceOneTick,
     apply: apply2,
     relocateForFixture,
     developerRelocateToWorld,
     seatPresenceV1,
+    partyFactsV1,
     readState,
     getSnapshot: () => ({ state: readState() }),
     refreshWorldResidency() {
@@ -82625,9 +82708,9 @@ function createExactCutAuthority({
     return freezeWire(result);
   }
   async function latestEnvelope() {
-    const text2 = await store2.loadLatestCheckpoint(campaignId);
-    requireContract(typeof text2 === "string", "Missing durable plural checkpoint");
-    const envelope = await verifyPluralEnvelope(parsePluralEnvelope(text2), options);
+    const text3 = await store2.loadLatestCheckpoint(campaignId);
+    requireContract(typeof text3 === "string", "Missing durable plural checkpoint");
+    const envelope = await verifyPluralEnvelope(parsePluralEnvelope(text3), options);
     requireContract(envelope.campaignId === campaignId, "Store returned another campaign");
     return envelope;
   }
@@ -82939,7 +83022,7 @@ var transition = (a, b) => {
   return validateActivityProgress(a, b);
 };
 var digest = async (cut, sha256, measure2 = (_name, fn) => fn()) => bytesToHex(await hashBytes(utf8(measure2("saveSerialize", () => canonicalStringify(cut))), sha256));
-var parseActivityEnvelope = (text2) => freezeWire(validateActivityEnvelope(JSON.parse(text2)));
+var parseActivityEnvelope = (text3) => freezeWire(validateActivityEnvelope(JSON.parse(text3)));
 var serializeActivityEnvelope = (e) => canonicalStringify(validateActivityEnvelope(e));
 async function createActivityEnvelope(cut, kind, { sha256, measure: measure2 }) {
   cut = freezeWire(validateActivityCut(cut));
@@ -82987,8 +83070,8 @@ var fraction = (v) => {
 };
 function statValue(v) {
   const [n, d] = fraction(v), negative = n < 0n, q = (negative ? -n : n) * 1000000000000n / d, s = q.toString().padStart(13, "0"), raw = (negative ? "-" : "") + (s.slice(0, -12) + "." + s.slice(-12)).replace(/\.?0+$/, "");
-  const text2 = raw === "" || raw === "-" ? "0" : raw;
-  return Math.abs(Number(text2)) <= Number.MAX_SAFE_INTEGER && (Number(text2) === 0 || Math.abs(Number(text2)) >= 1e-6) ? Number(text2) : text2;
+  const text3 = raw === "" || raw === "-" ? "0" : raw;
+  return Math.abs(Number(text3)) <= Number.MAX_SAFE_INTEGER && (Number(text3) === 0 || Math.abs(Number(text3)) >= 1e-6) ? Number(text3) : text3;
 }
 function statDifference(a, b) {
   const [an, ad] = fraction(a), [bn, bd] = fraction(b);
@@ -82999,8 +83082,8 @@ function statScale(v, n, d = 1) {
   return statValue({ n: String(a * BigInt(n)), d: String(b * BigInt(d)) });
 }
 function statText(v, detail = false) {
-  const text2 = String(statValue(v)), negative = text2[0] === "-";
-  return (negative ? "-" : "") + formatLarge(negative ? text2.slice(1) : text2, { significant: detail ? 6 : 4 });
+  const text3 = String(statValue(v)), negative = text3[0] === "-";
+  return (negative ? "-" : "") + formatLarge(negative ? text3.slice(1) : text3, { significant: detail ? 6 : 4 });
 }
 
 // src/shared/contracts/hero_look_view.js
@@ -83286,8 +83369,8 @@ function compileJsonNode(value2) {
   return { type: "record", keys: keys2, children: keys2.map((k) => compileJsonNode(value2[k])) };
 }
 function siteTruthJsonSnapshotV1(value2) {
-  const text2 = JSON.stringify(value2);
-  return { characters: text2.length, node: compileJsonNode(JSON.parse(text2)) };
+  const text3 = JSON.stringify(value2);
+  return { characters: text3.length, node: compileJsonNode(JSON.parse(text3)) };
 }
 function siteTruthJsonEqualV1(value2, node, arrayElement = false) {
   if (value2 === void 0) return arrayElement && node === null;
@@ -83660,7 +83743,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
           eventBoon: boon ? Object.freeze({ boon: boon.boon, remainingTicks: boon.untilTick - state.tick, totalTicks: SHRINE_POLICY.boonTicks }) : null,
           eventBlessing: blessing ? Object.freeze({ blessing: blessing.blessing, remainingTicks: blessing.untilTick - state.tick, totalTicks: WAYSIDE_POLICY.blessingTicks }) : null,
           serviceNpcs: freezeProjection(serviceNpcs),
-          navigation: state.d9World ? freezeProjection({ frames: copyWire(state.d9World.runtime.frames), position: inOverworld ? localFramePositionD9(local7.position, state.d9World.runtime.frames) : null, revision: state.d9World.navigation.revision, knowledge: projectMapKnowledge(state), root: state.d9World.discoveryIndex, boundSitesById: Object.fromEntries(functionalSitesD10(state).map((site2) => [site2.siteId, { siteId: site2.siteId, label: mapSiteLabel(state, site2.siteId, site2.label), state: site2.conqueredTick === null ? "active" : "completed" }])), navigableSitesById: Object.fromEntries(siteTruth.sites.map((site2) => [site2.siteId, { siteId: site2.siteId, label: mapSiteLabel(state, site2.siteId, site2.label), state: site2.completed ? "completed" : site2.bound ? "active" : "unidentified" }])), pending: copyWire(state.d9World.navigation.pending.filter((r) => r.playerId === localPlayerId)), pips: inOverworld ? visible3.filter((a) => a.alive && a.entityId !== local7.entityId && Math.hypot(a.position.x - local7.position.x, a.position.y - local7.position.y) <= revealRadiusD9(playersById[localPlayerId].stats.attributes.int) * 32).map((a) => ({ position: localFramePositionD9(a.position, state.d9World.runtime.frames), kind: a.team === "party" ? "ally" : "hostile" })) : [] }) : null,
+          navigation: state.d9World ? freezeProjection({ frames: copyWire(state.d9World.runtime.frames), position: inOverworld ? localFramePositionD9(local7.position, state.d9World.runtime.frames) : null, revision: state.d9World.navigation.revision, knowledge: projectMapKnowledge(state), root: state.d9World.discoveryIndex, boundSitesById: Object.fromEntries(functionalSitesD10(state).map((site2) => [site2.siteId, { siteId: site2.siteId, label: mapSiteLabel(state, site2.siteId, site2.label), state: site2.conqueredTick === null ? "active" : "completed" }])), navigableSitesById: Object.fromEntries(siteTruth.sites.map((site2) => [site2.siteId, { siteId: site2.siteId, label: mapSiteLabel(state, site2.siteId, site2.label), state: site2.completed || state.campaign?.partyClearsById?.[site2.siteId] ? "completed" : site2.bound ? "active" : "unidentified" }])), pending: copyWire(state.d9World.navigation.pending.filter((r) => r.playerId === localPlayerId)), pips: inOverworld ? visible3.filter((a) => a.alive && a.entityId !== local7.entityId && Math.hypot(a.position.x - local7.position.x, a.position.y - local7.position.y) <= revealRadiusD9(playersById[localPlayerId].stats.attributes.int) * 32).map((a) => ({ position: localFramePositionD9(a.position, state.d9World.runtime.frames), kind: a.team === "party" ? "ally" : "hostile" })) : [] }) : null,
           combatPresentation: freezeProjection(projectCombatPresentation(state, Object.keys(entitiesById))),
           tomeTarget,
           subweapon: freezeProjection({ suppressed: subweaponSuppressedD12_4I(state, local7.entityId), guard: { ...state.subweaponCombat.actors[local7.entityId].guard, integrity: presentCombat(state.subweaponCombat.actors[local7.entityId].guard.integrity), direction: { ...state.subweaponCombat.actors[local7.entityId].guard.direction } }, delivery: { ...state.subweaponCombat.actors[local7.entityId].delivery }, pressure: state.subweaponCombat.actors[local7.entityId].pressure, dash: { ...state.subweaponCombat.actors[local7.entityId].dash }, skills: structuredClone(state.subweaponCombat.actors[local7.entityId].skills ?? { cooldowns: {} }), barrier: presentCombat(state.subweaponCombat.actors[local7.entityId].barrier), maxBarrier: playersById[localPlayerId].stats.maxBarrier, barrierRatio: integerRatio(state.subweaponCombat.actors[local7.entityId].barrier, playersById[localPlayerId].stats.maxBarrier), barrierLabel: formatLarge(state.subweaponCombat.actors[local7.entityId].barrier), maxBarrierLabel: formatLarge(playersById[localPlayerId].stats.maxBarrier) }),
@@ -83762,9 +83845,9 @@ async function createLocalActivitySession({ sha256, nextToken, entropy, seedInpu
   let initialState, localPlayerId, generationDiagnostics = null, store2;
   if (resume) {
     store2 = storeFactory(null, null, activityCampaignCodec);
-    const text2 = await store2.loadLatestCheckpoint(resume.campaignId);
-    requireContract(text2, "Saved activity campaign missing");
-    const envelope = parseActivityEnvelope(text2);
+    const text3 = await store2.loadLatestCheckpoint(resume.campaignId);
+    requireContract(text3, "Saved activity campaign missing");
+    const envelope = parseActivityEnvelope(text3);
     initialState = envelope.cut.snapshot.state;
     localPlayerId = resume.playerId;
     requireContract(initialState.proofCase === proofCase && initialState.playersById[localPlayerId], "Stored proof case/controller mismatch");
@@ -83963,9 +84046,9 @@ async function createLocalWorldSession({
   if (scenario === "procedural" && resume) {
     validateId("campaignId", resume.campaignId);
     validateId("playerId", resume.playerId);
-    const text2 = await storeFactory(null).loadCampaign(resume.campaignId);
-    requireContract(text2 !== null, "Campaign not found");
-    const parsed = parseCampaignEnvelope(text2), expectedContentFingerprint = parsed.snapshot.state.content.fingerprint;
+    const text3 = await storeFactory(null).loadCampaign(resume.campaignId);
+    requireContract(text3 !== null, "Campaign not found");
+    const parsed = parseCampaignEnvelope(text3), expectedContentFingerprint = parsed.snapshot.state.content.fingerprint;
     const checked = await verifyPersistedEnvelope(parsed, { sha256, expectedContentFingerprint });
     requireContract(manifestForState(checked.snapshot.state)?.sourceKind === "generated-campaign", "No B1/X-B1 save migration to procedural campaigns");
     initialState = checked.snapshot.state;
@@ -84060,9 +84143,9 @@ function createWorldEventHudV4(document2, onActivate = () => {
     const parent = stack.offsetParent ?? document2.body, top = parent.getBoundingClientRect().top;
     let bottom = 0;
     for (const id of ["world-hud-vitals", "world-hud-title"]) {
-      const el2 = document2.getElementById(id);
-      if (el2?.offsetParent) {
-        const b = el2.getBoundingClientRect();
+      const el3 = document2.getElementById(id);
+      if (el3?.offsetParent) {
+        const b = el3.getBoundingClientRect();
         if (b.height) bottom = Math.max(bottom, b.bottom - top);
       }
     }
@@ -84279,29 +84362,29 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
   const env = doc.defaultView ?? globalThis, style = doc.createElement("style");
   style.textContent = CSS2;
   doc.head.append(style);
-  const el2 = (tag, text2, cls) => {
+  const el3 = (tag, text3, cls) => {
     const e = doc.createElement(tag);
-    if (text2 != null) e.textContent = text2;
+    if (text3 != null) e.textContent = text3;
     if (cls) e.className = cls;
     return e;
   };
   const icon = (kind, cls) => {
-    const e = el2("span", null, cls);
+    const e = el3("span", null, cls);
     e.innerHTML = ICONS3[kind] ?? ICONS3.clear;
     return e;
   };
   const reward = (gold, xp) => {
-    const r = el2("span", null, "qx-reward");
+    const r = el3("span", null, "qx-reward");
     r.innerHTML = COIN;
     r.append(formatAmount(gold));
-    const x = el2("span", "+" + Number(xp).toLocaleString("en-US") + " XP", "qx-xp");
-    const w = el2("span", null, "qx-pay");
+    const x = el3("span", "+" + Number(xp).toLocaleString("en-US") + " XP", "qx-xp");
+    const w = el3("span", null, "qx-pay");
     w.style.cssText = "display:inline-flex;gap:10px;align-items:center";
     w.append(r, x);
     return w;
   };
   function dialog(id) {
-    const d = el2("dialog", null, "qx-dlg");
+    const d = el3("dialog", null, "qx-dlg");
     d.id = id;
     d.addEventListener("cancel", (e) => {
       e.preventDefault();
@@ -84365,31 +84448,31 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
   function drawBoard() {
     const q = quests(), b = q?.boards.find((b2) => b2.settlementId === boardId);
     board.replaceChildren();
-    const sheet = el2("div", null, "qx-sheet"), head13 = el2("div", null, "qx-head"), h = el2("h3", b?.name ? b.name + " Notice Board" : "Notice Board"), x = el2("button", "\xD7", "qx-x");
+    const sheet = el3("div", null, "qx-sheet"), head13 = el3("div", null, "qx-head"), h = el3("h3", b?.name ? b.name + " Notice Board" : "Notice Board"), x = el3("button", "\xD7", "qx-x");
     x.type = "button";
     x.setAttribute("aria-label", "Close");
     x.onclick = () => close(board);
     head13.append(h, x);
     sheet.append(head13);
-    const body5 = el2("div", null, "qx-body");
+    const body5 = el3("div", null, "qx-body");
     sheet.append(body5);
     board.append(sheet);
     if (!b) {
-      body5.append(el2("p", "Walk up to the notice board to read it.", "qx-empty"));
+      body5.append(el3("p", "Walk up to the notice board to read it.", "qx-empty"));
       return;
     }
-    if (notice) body5.append(el2("p", notice, "qx-note"));
+    if (notice) body5.append(el3("p", notice, "qx-note"));
     const active2 = new Map(q.active.map((a) => [a.id, a]));
     if (b.deliveries.length || b.handIns.length) {
-      body5.append(el2("p", "Hand in", "qx-sect"));
+      body5.append(el3("p", "Hand in", "qx-sect"));
       for (const id of [...b.deliveries, ...b.handIns]) {
         const a = active2.get(id);
         if (!a) continue;
-        const c = el2("div", null, "qx-card");
-        c.append(icon(a.kind, "qx-ico"), el2("span", a.kind === "carry" ? "Delivery" : "Done \xB7 hand it in", "qx-kind"), el2("b", a.title), el2("p", a.kind === "carry" ? "The letter is for this town." : a.step));
-        const row2 = el2("div", null, "qx-row");
+        const c = el3("div", null, "qx-card");
+        c.append(icon(a.kind, "qx-ico"), el3("span", a.kind === "carry" ? "Delivery" : "Done \xB7 hand it in", "qx-kind"), el3("b", a.title), el3("p", a.kind === "carry" ? "The letter is for this town." : a.step));
+        const row2 = el3("div", null, "qx-row");
         row2.append(reward(a.gold, a.xp));
-        const go = el2("button", a.kind === "carry" ? "Deliver" : "Hand in", "qx-btn");
+        const go = el3("button", a.kind === "carry" ? "Deliver" : "Hand in", "qx-btn");
         go.type = "button";
         go.disabled = busy;
         go.onclick = () => act(a.kind === "carry" ? "deliver" : "turnIn", a.id, () => toastV1(doc, { kind: "event", title: "Quest complete", sub: a.title + " \xB7 +" + formatAmount(a.gold) + " gold" }));
@@ -84398,14 +84481,14 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
         body5.append(c);
       }
     }
-    body5.append(el2("p", "Today's notes \xB7 new ones at dawn", "qx-sect"));
-    if (!b.offers.length) body5.append(el2("p", "No work posted today.", "qx-empty"));
+    body5.append(el3("p", "Today's notes \xB7 new ones at dawn", "qx-sect"));
+    if (!b.offers.length) body5.append(el3("p", "No work posted today.", "qx-empty"));
     for (const o of b.offers) {
-      const c = el2("div", null, "qx-card" + (o.state === "done" ? " is-done" : ""));
-      c.append(icon(o.kind, "qx-ico"), el2("span", KIND_LABEL[o.kind], "qx-kind"), el2("b", o.title), el2("p", o.note));
-      const row2 = el2("div", null, "qx-row");
+      const c = el3("div", null, "qx-card" + (o.state === "done" ? " is-done" : ""));
+      c.append(icon(o.kind, "qx-ico"), el3("span", KIND_LABEL[o.kind], "qx-kind"), el3("b", o.title), el3("p", o.note));
+      const row2 = el3("div", null, "qx-row");
       row2.append(reward(o.gold, o.xp));
-      const go = el2("button", o.state === "taken" ? "Taken" : o.state === "done" ? "Done" : "Take", "qx-btn" + (o.state === "open" ? "" : " is-plain"));
+      const go = el3("button", o.state === "taken" ? "Taken" : o.state === "done" ? "Done" : "Take", "qx-btn" + (o.state === "open" ? "" : " is-plain"));
       go.type = "button";
       go.disabled = busy || o.state !== "open" || q.active.length >= q.limit;
       go.onclick = () => act("take", o.id, () => {
@@ -84416,17 +84499,17 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
       c.append(row2);
       body5.append(c);
     }
-    if (q.active.length >= q.limit) body5.append(el2("p", "Your quest log is full (" + q.limit + "). Finish or drop one to take more.", "qx-note"));
+    if (q.active.length >= q.limit) body5.append(el3("p", "Your quest log is full (" + q.limit + "). Finish or drop one to take more.", "qx-note"));
   }
   function drawTalk() {
     const q = quests(), n = readModel().serviceNpcs?.find((v) => v.id === talkNpc), f = q?.folk?.[talkNpc];
     talk.replaceChildren();
-    const sheet = el2("div", null, "qx-sheet"), box5 = el2("div", null, "qx-talk"), face3 = el2("div", (n?.name?.[0] ?? FACE2[n?.role] ?? "?").toUpperCase(), "qx-face"), who = el2("div"), h = el2("h4", n?.name ?? "");
-    h.append(el2("small", n?.roleLabel ?? ""));
+    const sheet = el3("div", null, "qx-sheet"), box5 = el3("div", null, "qx-talk"), face3 = el3("div", (n?.name?.[0] ?? FACE2[n?.role] ?? "?").toUpperCase(), "qx-face"), who = el3("div"), h = el3("h4", n?.name ?? "");
+    h.append(el3("small", n?.roleLabel ?? ""));
     who.append(h);
-    const acts = el2("div", null, "qx-acts");
+    const acts = el3("div", null, "qx-acts");
     const btn = (label4, fn, plain3) => {
-      const b = el2("button", label4, "qx-btn" + (plain3 ? " is-plain" : ""));
+      const b = el3("button", label4, "qx-btn" + (plain3 ? " is-plain" : ""));
       b.type = "button";
       b.disabled = busy;
       b.onclick = fn;
@@ -84435,14 +84518,14 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     };
     const a = f?.questId ? q.active.find((v) => v.id === f.questId) : null;
     if (a && f.ready) {
-      who.append(el2("p", "You did it. Thank you. Here, take this.", "qx-say"));
+      who.append(el3("p", "You did it. Thank you. Here, take this.", "qx-say"));
       acts.append(reward(a.gold, a.xp));
       btn("Hand in", () => act("turnIn", a.id, () => {
         toastV1(doc, { kind: "event", title: "Quest complete", sub: a.title + " \xB7 +" + formatAmount(a.gold) + " gold" });
         close(talk);
       }));
     } else if (f?.offer) {
-      who.append(el2("p", f.offer.note, "qx-say"));
+      who.append(el3("p", f.offer.note, "qx-say"));
       acts.append(reward(f.offer.gold, f.offer.xp));
       btn("Shop", () => {
         close(talk);
@@ -84456,14 +84539,14 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
       }));
       take.disabled = busy || q.active.length >= q.limit;
     } else {
-      who.append(el2("p", a ? a.step + "." : "Good to see you.", "qx-say"));
+      who.append(el3("p", a ? a.step + "." : "Good to see you.", "qx-say"));
       btn("Shop", () => {
         close(talk);
         openShop(n);
       }, true);
       btn("Close", () => close(talk), true);
     }
-    if (notice) who.append(el2("p", notice, "qx-note"));
+    if (notice) who.append(el3("p", notice, "qx-note"));
     box5.append(face3, who, acts);
     sheet.append(box5);
     talk.append(sheet);
@@ -84471,36 +84554,36 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
   function drawLog() {
     const q = quests();
     log.replaceChildren();
-    const sheet = el2("div", null, "qx-sheet"), head13 = el2("div", null, "qx-head"), t = el2("div"), h = el2("h3", "Quests");
+    const sheet = el3("div", null, "qx-sheet"), head13 = el3("div", null, "qx-head"), t = el3("div"), h = el3("h3", "Quests");
     t.style.flex = "1";
     h.style.flex = "none";
-    t.append(h, el2("small", (q?.active.length ?? 0) + " / " + (q?.limit ?? 5) + " side quests"));
-    const x = el2("button", "\xD7", "qx-x");
+    t.append(h, el3("small", (q?.active.length ?? 0) + " / " + (q?.limit ?? 5) + " side quests"));
+    const x = el3("button", "\xD7", "qx-x");
     x.type = "button";
     x.setAttribute("aria-label", "Close");
     x.onclick = () => close(log);
     head13.append(t, x);
     sheet.append(head13);
-    const body5 = el2("div", null, "qx-body");
+    const body5 = el3("div", null, "qx-body");
     sheet.append(body5);
     log.append(sheet);
-    if (notice) body5.append(el2("p", notice, "qx-note"));
-    body5.append(el2("p", "Main story", "qx-sect"), el2("p", "The Cracking Seals begins soon.", "qx-empty"), el2("p", "Side quests", "qx-sect"));
+    if (notice) body5.append(el3("p", notice, "qx-note"));
+    body5.append(el3("p", "Main story", "qx-sect"), el3("p", "The Cracking Seals begins soon.", "qx-empty"), el3("p", "Side quests", "qx-sect"));
     if (!q?.active.length) {
-      body5.append(el2("p", "No quests yet. Read a town's notice board, or talk to townsfolk with a gold ! over their head.", "qx-empty"));
+      body5.append(el3("p", "No quests yet. Read a town's notice board, or talk to townsfolk with a gold ! over their head.", "qx-empty"));
       return;
     }
     const cur = trackedQuest(q);
     for (const a of q.active) {
-      const c = el2("div", null, "qx-card");
-      c.append(icon(a.kind, "qx-ico"), el2("span", (a.status === "ready" ? "Done \xB7 " : "") + KIND_LABEL[a.kind], "qx-kind"), el2("b", a.title), el2("p", a.step + (a.town ? " \xB7 from " + (a.giverName ? a.giverName + ", " : "") + a.town : "")));
-      const row2 = el2("div", null, "qx-row");
+      const c = el3("div", null, "qx-card");
+      c.append(icon(a.kind, "qx-ico"), el3("span", (a.status === "ready" ? "Done \xB7 " : "") + KIND_LABEL[a.kind], "qx-kind"), el3("b", a.title), el3("p", a.step + (a.town ? " \xB7 from " + (a.giverName ? a.giverName + ", " : "") + a.town : "")));
+      const row2 = el3("div", null, "qx-row");
       row2.append(reward(a.gold, a.xp));
-      const drop = el2("button", dropArm === a.id ? "Tap to drop" : "Drop", "qx-btn is-plain");
-      drop.type = "button";
-      drop.style.minWidth = "72px";
-      drop.disabled = busy;
-      drop.onclick = () => {
+      const drop2 = el3("button", dropArm === a.id ? "Tap to drop" : "Drop", "qx-btn is-plain");
+      drop2.type = "button";
+      drop2.style.minWidth = "72px";
+      drop2.disabled = busy;
+      drop2.onclick = () => {
         if (dropArm === a.id) {
           dropArm = null;
           act("abandon", a.id);
@@ -84509,13 +84592,13 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
           redraw();
         }
       };
-      const tr = el2("button", cur?.id === a.id ? "Tracking" : "Track", "qx-btn" + (cur?.id === a.id ? " is-plain" : ""));
+      const tr = el3("button", cur?.id === a.id ? "Tracking" : "Track", "qx-btn" + (cur?.id === a.id ? " is-plain" : ""));
       tr.type = "button";
       tr.onclick = () => {
         setTrack(a.id);
         redraw();
       };
-      row2.append(drop, tr);
+      row2.append(drop2, tr);
       c.append(row2);
       body5.append(c);
     }
@@ -84537,12 +84620,12 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     if (!q?.active.length || trackOff) return null;
     return q.active.find((a) => a.id === tracked) ?? q.active[0];
   };
-  const tracker = el2("button", null, null);
+  const tracker = el3("button", null, null);
   tracker.id = "quest-tracker";
   tracker.type = "button";
   tracker.hidden = true;
   tracker.setAttribute("data-gameplay-hud", "");
-  const tIco = el2("span", null, "qx-tico"), tTitle = el2("strong"), tStep = el2("span");
+  const tIco = el3("span", null, "qx-tico"), tTitle = el3("strong"), tStep = el3("span");
   tracker.append(tIco, tTitle, tStep);
   tracker.onclick = () => openLog();
   const eventCard = () => {
@@ -84595,13 +84678,13 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     tracker.hidden = !key3;
     if (!key3) return;
     tIco.innerHTML = ICONS3[cur.kind] ?? "";
-    tTitle.replaceChildren(el2("i", cur.title));
+    tTitle.replaceChildren(el3("i", cur.title));
     tStep.textContent = cur.step;
     tracker.classList.toggle("is-ready", cur.status === "ready");
     tracker.setAttribute("aria-label", "Tracked quest: " + cur.title + ". " + cur.step + ". Open the quest log.");
   }
   let menuOpener = null, pageSel = null, pageKey = "";
-  const pageRoot = el2("div", null, "qp");
+  const pageRoot = el3("div", null, "qp");
   pageRoot.id = "world-quests-view";
   pageRoot.hidden = true;
   const menuPage = { root: pageRoot, open: false, refresh(visible3) {
@@ -84620,34 +84703,34 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     const key3 = JSON.stringify([q?.revision, active2.map((a2) => [a2.id, a2.status, a2.step, a2.title]), cur?.id, pageSel, dropArm, busy, notice]);
     if (!force && key3 === pageKey) return;
     pageKey = key3;
-    const story = el2("div", null, "qp-story"), seal = el2("span", "\u2726", "qp-seal"), st = el2("div");
-    st.append(el2("small", "Main story", "qp-eye"), el2("b", "The Cracking Seals"), el2("span", "Begins soon"));
+    const story = el3("div", null, "qp-story"), seal = el3("span", "\u2726", "qp-seal"), st = el3("div");
+    st.append(el3("small", "Main story", "qp-eye"), el3("b", "The Cracking Seals"), el3("span", "Begins soon"));
     story.append(seal, st);
     const kids = [story];
-    if (notice) kids.push(el2("p", notice, "qp-note"));
+    if (notice) kids.push(el3("p", notice, "qp-note"));
     if (!active2.length) {
-      kids.push(el2("p", "No quests yet. Read a town's notice board, or talk to townsfolk with a gold ! over their head.", "qp-empty"));
+      kids.push(el3("p", "No quests yet. Read a town's notice board, or talk to townsfolk with a gold ! over their head.", "qp-empty"));
       pageRoot.replaceChildren(...kids);
       return;
     }
-    const main = el2("div", null, "qp-main"), list = el2("div", null, "qp-list");
+    const main = el3("div", null, "qp-main"), list = el3("div", null, "qp-list");
     const pay2 = (a2, cls) => {
-      const g = el2("i");
+      const g = el3("i");
       g.innerHTML = COIN;
       g.append(formatAmount(a2.gold));
-      const x = el2("i", "+" + Number(a2.xp).toLocaleString("en-US") + " XP", "x");
-      const w = el2("span", null, cls);
+      const x = el3("i", "+" + Number(a2.xp).toLocaleString("en-US") + " XP", "x");
+      const w = el3("span", null, cls);
       w.append(g, x);
       return w;
     };
     for (const a2 of active2) {
-      const c = el2("button", null, "qp-card" + (a2.id === pageSel ? " on" : ""));
+      const c = el3("button", null, "qp-card" + (a2.id === pageSel ? " on" : ""));
       c.type = "button";
       c.setAttribute("aria-pressed", String(a2.id === pageSel));
-      const t = el2("span", null, "qp-txt"), eye6 = el2("small", KIND_LABEL[a2.kind] ?? "Quest", "qp-eye");
-      if (a2.status === "ready") eye6.append(el2("span", "Done", "qp-tag ready"));
-      else if (cur?.id === a2.id) eye6.append(el2("span", "Tracking", "qp-tag"));
-      t.append(eye6, el2("b", a2.title), el2("span", a2.step));
+      const t = el3("span", null, "qp-txt"), eye6 = el3("small", KIND_LABEL[a2.kind] ?? "Quest", "qp-eye");
+      if (a2.status === "ready") eye6.append(el3("span", "Done", "qp-tag ready"));
+      else if (cur?.id === a2.id) eye6.append(el3("span", "Tracking", "qp-tag"));
+      t.append(eye6, el3("b", a2.title), el3("span", a2.step));
       c.append(icon(a2.kind, "qp-ico"), t, pay2(a2, "qp-pay"));
       c.onclick = () => {
         pageSel = a2.id;
@@ -84656,18 +84739,18 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
       };
       list.append(c);
     }
-    const a = active2.find((v) => v.id === pageSel) ?? active2[0], d = el2("aside", null, "qp-detail"), from = a.giverName ? a.giverName + ", " + a.town : a.town ? "Notice board, " + a.town : "";
-    d.append(el2("small", (KIND_LABEL[a.kind] ?? "Quest") + (from ? " \xB7 from " + from : ""), "qp-eye"), el2("h3", a.title));
-    if (a.note) d.append(el2("p", "\u201C" + a.note + "\u201D", "qp-say"));
-    const ready = a.status === "ready", step = el2("div", null, "qp-step" + (ready ? " ready" : "")), sv = el2("div");
-    sv.append(el2("b", a.step), el2("span", ready ? "Ready to hand in" : a.target?.found ? "Marked on your map" : "Not found yet"));
-    step.append(el2("span", null, "dot"), sv);
+    const a = active2.find((v) => v.id === pageSel) ?? active2[0], d = el3("aside", null, "qp-detail"), from = a.giverName ? a.giverName + ", " + a.town : a.town ? "Notice board, " + a.town : "";
+    d.append(el3("small", (KIND_LABEL[a.kind] ?? "Quest") + (from ? " \xB7 from " + from : ""), "qp-eye"), el3("h3", a.title));
+    if (a.note) d.append(el3("p", "\u201C" + a.note + "\u201D", "qp-say"));
+    const ready = a.status === "ready", step = el3("div", null, "qp-step" + (ready ? " ready" : "")), sv = el3("div");
+    sv.append(el3("b", a.step), el3("span", ready ? "Ready to hand in" : a.target?.found ? "Marked on your map" : "Not found yet"));
+    step.append(el3("span", null, "dot"), sv);
     d.append(step);
-    const rew = el2("div", null, "qp-rew");
-    rew.append(el2("span", "Reward"), ...pay2(a, "").childNodes);
+    const rew = el3("div", null, "qp-rew");
+    rew.append(el3("span", "Reward"), ...pay2(a, "").childNodes);
     d.append(rew);
-    const acts = el2("div", null, "qp-acts"), btn = (label4, cls, fn) => {
-      const b = el2("button", label4, cls);
+    const acts = el3("div", null, "qp-acts"), btn = (label4, cls, fn) => {
+      const b = el3("button", label4, cls);
       b.type = "button";
       b.disabled = busy;
       b.onclick = fn;
@@ -88541,12 +88624,12 @@ function wheelKeysV1(entries) {
 }
 function createSkillWheelV1({ document: document2, environment, readModel, adapter, isBlocked, openClassPicker, reportError = () => {
 } }) {
-  const el2 = (tag, cls) => {
+  const el3 = (tag, cls) => {
     const e = document2.createElement(tag);
     if (cls) e.className = cls;
     return e;
   };
-  const wheel = el2("div", "skill-wheel-v1"), ring6 = el2("div", "skill-wheel-ring"), done3 = el2("button", "skill-wheel-done");
+  const wheel = el3("div", "skill-wheel-v1"), ring6 = el3("div", "skill-wheel-ring"), done3 = el3("button", "skill-wheel-done");
   wheel.dataset.gameplayHud = "";
   wheel.setAttribute("aria-label", "Skills");
   done3.type = "button";
@@ -88555,7 +88638,7 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
   done3.setAttribute("aria-label", "Finish arranging the skill wheel");
   done3.hidden = true;
   wheel.dataset.pages = String(WHEEL_PAGES);
-  const attackSkill = el2("div", "skill-wheel-attack"), attackIcon = el2("span", "skill-slot-icon"), attackSweep = el2("i", "skill-slot-sweep"), attackTime = el2("b", "skill-slot-time");
+  const attackSkill = el3("div", "skill-wheel-attack"), attackIcon = el3("span", "skill-slot-icon"), attackSweep = el3("i", "skill-slot-sweep"), attackTime = el3("b", "skill-slot-time");
   attackSkill.append(attackSweep, attackIcon, attackTime);
   attackSkill.hidden = true;
   attackSkill.setAttribute("aria-hidden", "true");
@@ -88564,7 +88647,7 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
   document2.getElementById("world-bag").parentElement.append(wheel, done3, attackSkill);
   const slots2 = [];
   for (let i = 0; i < WHEEL_SLOTS; i++) {
-    const b = el2("button", "skill-slot"), icon = el2("span", "skill-slot-icon"), sweep2 = el2("i", "skill-slot-sweep"), time = el2("b", "skill-slot-time"), key3 = el2("small", "skill-slot-key"), charge = el2("b", "skill-slot-charges");
+    const b = el3("button", "skill-slot"), icon = el3("span", "skill-slot-icon"), sweep2 = el3("i", "skill-slot-sweep"), time = el3("b", "skill-slot-time"), key3 = el3("small", "skill-slot-key"), charge = el3("b", "skill-slot-charges");
     b.type = "button";
     b.dataset.slot = String(i + 1);
     b.dataset.gameplayHud = "";
@@ -89454,15 +89537,15 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
     document2.head.append(st);
   }
   let group = "woodland", selected = null, key3 = null, album = null, gold = "0", busy = false;
-  const el2 = (tag, cls, text2) => {
+  const el3 = (tag, cls, text3) => {
     const e = document2.createElement(tag);
     if (cls) e.className = cls;
-    if (text2 != null) e.textContent = text2;
+    if (text3 != null) e.textContent = text3;
     return e;
   };
   const dpr = () => Math.min(3, environment?.devicePixelRatio || 1);
   function soulCanvas(size) {
-    const c = el2("canvas");
+    const c = el3("canvas");
     const r = dpr();
     c.width = c.height = Math.round(size * r);
     const x = c.getContext("2d");
@@ -89473,7 +89556,7 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
     return c;
   }
   function portrait(family, known2, size = 78) {
-    const c = el2("canvas");
+    const c = el3("canvas");
     const r = dpr();
     c.width = c.height = Math.round(size * r);
     const x = c.getContext("2d");
@@ -89495,7 +89578,7 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
     return c;
   }
   function bossCrest(id, known2, size = 78) {
-    const c = el2("canvas");
+    const c = el3("canvas");
     const r = dpr();
     c.width = c.height = Math.round(size * r);
     const x = c.getContext("2d");
@@ -89512,7 +89595,7 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
     return c;
   }
   function cardCanvas(id, boss) {
-    const c = el2("canvas", "card");
+    const c = el3("canvas", "card");
     const r = dpr();
     c.width = Math.round(84 * r);
     c.height = Math.round(105 * r);
@@ -89534,19 +89617,19 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
   function render() {
     root2.replaceChildren();
     if (!album) {
-      root2.append(el2("div", "bv-empty", "The Bestiary opens once you are in a world."));
+      root2.append(el3("div", "bv-empty", "The Bestiary opens once you are in a world."));
       return;
     }
     const total = Object.values(album.cards).reduce((a, b) => a + b, 0) + Object.values(album.bosses).reduce((a, b) => a + b, 0);
-    const top = el2("div", "bv-top"), cards = el2("span", "bv-pill", total.toLocaleString("en-US") + " cards"), souls = el2("span", "bv-pill");
+    const top = el3("div", "bv-top"), cards = el3("span", "bv-pill", total.toLocaleString("en-US") + " cards"), souls = el3("span", "bv-pill");
     souls.append(soulCanvas(16), document2.createTextNode(String(album.souls) + (album.souls === 1 ? " Luminous Soul" : " Luminous Souls")));
     souls.title = "Luminous Souls, shared by every hero";
     top.append(cards, souls);
     root2.append(top);
-    const chips = el2("div", "bv-chips");
+    const chips = el3("div", "bv-chips");
     for (const g2 of [...BESTIARY_GROUPS, { id: "bosses", name: "Bosses" }]) {
       const list2 = g2.id === "bosses" ? BOSS_PAGE_IDS.map((id) => album.bosses[id]) : BESTIARY_CARDS.filter((c) => c[2] === g2.id).map((c) => album.cards[c[0]]), open2 = list2.filter(Boolean).length;
-      const b = el2("button", "", `${g2.name} ${open2}/${list2.length}`);
+      const b = el3("button", "", `${g2.name} ${open2}/${list2.length}`);
       b.type = "button";
       b.setAttribute("aria-pressed", String(g2.id === group));
       b.addEventListener("click", () => {
@@ -89559,33 +89642,33 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
     }
     root2.append(chips);
     const list = pages2(), setT = group === "bosses" ? bossSetTier(album, BOSS_PAGE_IDS) : setTier(album, group), g = BESTIARY_GROUPS.find((x) => x.id === group);
-    const set = el2("div", "bv-set"), t = el2("div", "t"), pips = el2("div", "bv-pips");
+    const set = el3("div", "bv-set"), t = el3("div", "t"), pips = el3("div", "bv-pips");
     if (group === "bosses") {
-      t.append(el2("b", "", "Bosses set \xB7 Attack, Defense, Max health"), document2.createTextNode(setT >= 0 ? `${TIERS[setT]}: ${pct(BOSS_SET.ladder[setT])} each` : `Open all ${list.length} boss pages: ${pct(BOSS_SET.ladder[0])} each at Common, up to ${pct(BOSS_SET.ladder[5])} at Mythic`));
+      t.append(el3("b", "", "Bosses set \xB7 Attack, Defense, Max health"), document2.createTextNode(setT >= 0 ? `${TIERS[setT]}: ${pct(BOSS_SET.ladder[setT])} each` : `Open all ${list.length} boss pages: ${pct(BOSS_SET.ladder[0])} each at Common, up to ${pct(BOSS_SET.ladder[5])} at Mythic`));
     } else {
       const L = setLadder(g.set), word = GROUP_STAT_WORD[g.set] ?? statName(g.set);
-      t.append(el2("b", "", `${g.name} set \xB7 ${word}`), document2.createTextNode(setT >= 0 ? `${TIERS[setT]}: ${pct(L[setT])}${setT < 5 ? ` \xB7 rises with your lowest page` : ""}` : `Open all ${list.length} pages: ${pct(L[0])} at Common, up to ${pct(L[5])} at Mythic`));
+      t.append(el3("b", "", `${g.name} set \xB7 ${word}`), document2.createTextNode(setT >= 0 ? `${TIERS[setT]}: ${pct(L[setT])}${setT < 5 ? ` \xB7 rises with your lowest page` : ""}` : `Open all ${list.length} pages: ${pct(L[0])} at Common, up to ${pct(L[5])} at Mythic`));
     }
     for (const p2 of list) {
-      const i = el2("i");
+      const i = el3("i");
       i.style.background = tierColor(tierOf(p2));
       pips.append(i);
     }
     set.append(t, pips);
     root2.append(set);
-    const grid = el2("div", "bv-grid");
+    const grid = el3("div", "bv-grid");
     if (!selected || !list.some((p2) => p2.id === selected)) selected = (list.find((p2) => tierOf(p2) >= 0) ?? list[0]).id;
     for (const p2 of list) {
-      const tr = tierOf(p2), known2 = tr >= 0, b = el2("button", "bv-tile");
+      const tr = tierOf(p2), known2 = tr >= 0, b = el3("button", "bv-tile");
       b.type = "button";
       b.setAttribute("aria-pressed", String(p2.id === selected));
-      const f = el2("div", "bv-frame");
+      const f = el3("div", "bv-frame");
       f.style.setProperty("--rk", tierColor(tr));
       f.append(p2.boss ? bossCrest(p2.id, known2) : portrait(p2.id, known2));
-      if (!known2 && !p2.boss) f.append(el2("span", "q", "?"));
-      const rk = el2("span", "bv-rk", known2 ? `${TIERS[tr]} \xB7 ${tr < 5 ? countOf(p2) + "/" + needOf(p2, tr) : countOf(p2)}` : "Find its card");
+      if (!known2 && !p2.boss) f.append(el3("span", "q", "?"));
+      const rk = el3("span", "bv-rk", known2 ? `${TIERS[tr]} \xB7 ${tr < 5 ? countOf(p2) + "/" + needOf(p2, tr) : countOf(p2)}` : "Find its card");
       rk.style.setProperty("--rk", rankColor(tr));
-      b.append(f, el2("span", "bv-nm", known2 ? p2.name : "???"), rk);
+      b.append(f, el3("span", "bv-nm", known2 ? p2.name : "???"), rk);
       b.addEventListener("click", () => {
         selected = p2.id;
         key3 = null;
@@ -89598,26 +89681,26 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
     if (p) root2.append(detail(p));
   }
   function detail(p) {
-    const tr = tierOf(p), known2 = tr >= 0, box5 = el2("div", "bv-detail"), info2 = el2("div");
+    const tr = tierOf(p), known2 = tr >= 0, box5 = el3("div", "bv-detail"), info2 = el3("div");
     box5.append(known2 ? cardCanvas(p.id, p.boss) : (() => {
       const c = p.boss ? bossCrest(p.id, false, 84) : portrait(p.id, false, 84);
       c.className = "card";
       return c;
     })());
-    info2.append(el2("h5", "", known2 ? p.name : "Unknown creature"));
-    const line29 = el2("div", "bv-line", known2 ? `${TIERS[tr]} \xB7 ${countOf(p).toLocaleString("en-US")} card${countOf(p) === 1 ? "" : "s"}` : "No card yet");
+    info2.append(el3("h5", "", known2 ? p.name : "Unknown creature"));
+    const line29 = el3("div", "bv-line", known2 ? `${TIERS[tr]} \xB7 ${countOf(p).toLocaleString("en-US")} card${countOf(p) === 1 ? "" : "s"}` : "No card yet");
     line29.style.color = rankColor(tr);
     info2.append(line29);
-    const ladder2 = el2("div", "bv-ladder");
+    const ladder2 = el3("div", "bv-ladder");
     for (let i = 0; i < 6; i++) {
-      const s = el2("i");
+      const s = el3("i");
       if (known2 && i <= tr) s.style.background = TIER_COLORS[i];
       ladder2.append(s);
     }
     info2.append(ladder2);
-    const bonus = el2("div", "bv-bonus");
-    const row2 = (text2, cls = "") => {
-      const d = el2("div", cls, text2);
+    const bonus = el3("div", "bv-bonus");
+    const row2 = (text3, cls = "") => {
+      const d = el3("div", cls, text3);
       bonus.append(d);
       return d;
     };
@@ -89629,7 +89712,7 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
         const L = BESTIARY_STATS[k][1], now3 = known2 ? L[tr] : null, next = tr < 5 ? L[Math.max(from, tr + 1)] : null, label4 = statName(k);
         if (now3 != null) {
           const d = row2(`${label4} ${pct(now3)}`);
-          if (tr < 5 && next != null) d.append(el2("span", "up", `  \u2192 ${pct(next)} at ${TIERS[tr + 1]}`));
+          if (tr < 5 && next != null) d.append(el3("span", "up", `  \u2192 ${pct(next)} at ${TIERS[tr + 1]}`));
         } else row2(`${label4} \xB7 opens at ${TIERS[from]}`, "off");
       }
       if (known2 && tr >= 4) row2(`Hunter: ${pct(HUNTER_DAMAGE[tr])} damage to ${p.name}s, rolls rare ${tr === 5 ? "2x" : "1.5x"} as often`);
@@ -89640,7 +89723,7 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
     if (known2) {
       const n = nextTier(album, p.id, { isBoss: p.boss });
       if (n) {
-        const rich = compareAmount(gold, String(n.gold)) >= 0, ok = n.enoughCards && n.enoughSouls && rich, b = el2("button", "bv-raise");
+        const rich = compareAmount(gold, String(n.gold)) >= 0, ok = n.enoughCards && n.enoughSouls && rich, b = el3("button", "bv-raise");
         b.type = "button";
         b.disabled = !ok || busy;
         b.append(document2.createTextNode(`Raise to ${TIERS[n.tier]} \xB7 `), soulCanvas(18), document2.createTextNode(`${n.souls} \xB7 ${goldText(n.gold)} gold`));
@@ -89656,9 +89739,9 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
         });
         box5.append(b);
         const why = !n.enoughCards ? `Needs ${n.needCards.toLocaleString("en-US")} cards (${n.cards.toLocaleString("en-US")} so far)` : !n.enoughSouls ? `Needs ${n.souls} Luminous Souls (you have ${album.souls})` : !rich ? `Needs ${goldText(n.gold)} gold` : "Souls are shared by every hero; the hero who raises it pays the gold";
-        box5.append(el2("div", "bv-note", why));
-      } else box5.append(el2("div", "bv-note", p.boss ? "Mythic: the top tier" : "Mythic: every 100 more cards become a Luminous Soul"));
-    } else box5.append(el2("div", "bv-note", p.boss ? "Boss cards drop from that boss" : "Its card drops from this creature: 1 in 200, more from elites, always from a rare"));
+        box5.append(el3("div", "bv-note", why));
+      } else box5.append(el3("div", "bv-note", p.boss ? "Mythic: the top tier" : "Mythic: every 100 more cards become a Luminous Soul"));
+    } else box5.append(el3("div", "bv-note", p.boss ? "Boss cards drop from that boss" : "Its card drops from this creature: 1 in 200, more from elites, always from a rare"));
     return box5;
   }
   return {
@@ -89713,6 +89796,190 @@ function createBestiaryToastsV1(doc) {
   };
 }
 
+// src/client/party_worlds_v1.js
+var PARTY_WORLDS_VERSION = "party-worlds-v1";
+var partyWorldsKey = (channel2) => `${channel2}saq-world-party-worlds-v1`;
+var GROUPS = ["finds", "clears"];
+var ID2 = /^pw:[0-9a-f]{16,40}$/;
+var HASH2 = /^[0-9a-f]{16,128}$/;
+var FACT = /^(?:site:|settlement-slot:|ferry:)/;
+var LIMIT4 = 512;
+var text2 = (v, n = 40) => typeof v === "string" && v.length <= n ? v : "";
+var empty = () => ({ finds: {}, clears: {} });
+function cleanFacts(raw, offer = false) {
+  const out = empty();
+  for (const g of GROUPS) {
+    let n = 0;
+    for (const [id, v] of Object.entries(raw?.[g] ?? {})) {
+      if (n >= LIMIT4 || typeof id !== "string" || id.length > 180 || !FACT.test(id)) continue;
+      if (g === "clears" && !id.startsWith("site:")) continue;
+      if (offer) {
+        if (!v || typeof v !== "object") continue;
+        out[g][id] = { label: text2(v.label, 80) || "A place", from: text2(v.from) || "A friend" };
+      } else out[g][id] = text2(v, 80) || "A place";
+      n++;
+    }
+  }
+  return out;
+}
+function cleanLast(raw) {
+  if (!raw || typeof raw !== "object" || !GROUPS.includes(raw.group)) return null;
+  const list = (v) => Array.isArray(v) ? v.filter((x) => typeof x === "string" && x.length <= 180).slice(0, LIMIT4) : [];
+  const added2 = { finds: list(raw.added?.finds), clears: list(raw.added?.clears), bosses: list(raw.added?.bosses) };
+  if (!added2.finds.length && !added2.clears.length) return null;
+  return { group: raw.group, from: text2(raw.from) || "A friend", at: Number.isFinite(raw.at) ? raw.at : 0, added: added2, labels: cleanFacts({ finds: raw.labels ?? {} }).finds };
+}
+function cleanWorld(raw) {
+  if (!raw || !ID2.test(raw.id) || !HASH2.test(raw.hash ?? "") || typeof raw.own !== "boolean") return null;
+  const slot = raw.own ? Number.isInteger(raw.slot) && raw.slot >= 1 && raw.slot <= 5 ? raw.slot : null : isPartySlot(raw.slot) ? raw.slot : null;
+  if (slot === null) return null;
+  return {
+    id: raw.id,
+    hash: raw.hash,
+    seed: text2(raw.seed),
+    label: text2(raw.label, 60) || "A shared world",
+    owner: text2(raw.owner) || "A friend",
+    own: raw.own,
+    slot,
+    members: Array.isArray(raw.members) ? [...new Set(raw.members.map((m) => text2(m)).filter(Boolean))].slice(0, 12) : [],
+    mine: cleanFacts(raw.mine),
+    together: cleanFacts(raw.together),
+    waiting: cleanFacts(raw.waiting, true),
+    skipped: cleanFacts(raw.skipped, true),
+    last: cleanLast(raw.last)
+  };
+}
+function readPartyWorlds(storage, channel2 = "") {
+  let data = null;
+  try {
+    data = JSON.parse(storage?.getItem(partyWorldsKey(channel2)) ?? "null");
+  } catch {
+  }
+  const worlds = {};
+  if (data?.version === PARTY_WORLDS_VERSION && data.worlds && typeof data.worlds === "object") for (const raw of Object.values(data.worlds)) {
+    const w = cleanWorld(raw);
+    if (w && !Object.values(worlds).some((x) => x.slot === w.slot && x.own === w.own)) worlds[w.id] = w;
+  }
+  return { version: PARTY_WORLDS_VERSION, worlds };
+}
+function write3(storage, channel2, record2) {
+  try {
+    storage.setItem(partyWorldsKey(channel2), JSON.stringify(record2));
+    return true;
+  } catch {
+    return false;
+  }
+}
+var partyWorldList = (storage, channel2) => Object.values(readPartyWorlds(storage, channel2).worlds);
+var partyById = (storage, channel2, id) => readPartyWorlds(storage, channel2).worlds[id] ?? null;
+var partyBySlot = (storage, channel2, slot) => partyWorldList(storage, channel2).find((w) => w.slot === slot) ?? null;
+function updatePartyWorld(storage, channel2, id, fn) {
+  const r = readPartyWorlds(storage, channel2), w = r.worlds[id];
+  if (!w) return null;
+  const next = fn(structuredClone(w));
+  if (!next) return w;
+  const clean = cleanWorld(next);
+  if (!clean) return w;
+  r.worlds[id] = clean;
+  return write3(storage, channel2, r) ? clean : w;
+}
+function sharePartyWorld(storage, channel2, { id, slot, hash: hash44, seed: seed2, owner }) {
+  const r = readPartyWorlds(storage, channel2), had = Object.values(r.worlds).find((w2) => w2.own && w2.slot === slot);
+  if (had) return had;
+  const w = cleanWorld({ id, hash: hash44, seed: seed2, owner, label: `${owner}\u2019s world`, own: true, slot, members: [owner] });
+  if (!w) return null;
+  r.worlds[id] = w;
+  return write3(storage, channel2, r) ? w : null;
+}
+function copyPartyWorld(storage, channel2, { id, hash: hash44, seed: seed2, label: label4, owner }) {
+  const r = readPartyWorlds(storage, channel2);
+  if (r.worlds[id]) return r.worlds[id];
+  let slot = PARTY_SLOT_BASE + 1;
+  while (Object.values(r.worlds).some((w2) => w2.slot === slot)) slot++;
+  if (slot > PARTY_SLOT_BASE + PARTY_SLOT_LIMIT) return null;
+  const w = cleanWorld({ id, hash: hash44, seed: seed2, label: label4, owner, own: false, slot, members: [owner] });
+  if (!w) return null;
+  r.worlds[id] = w;
+  return write3(storage, channel2, r) ? w : null;
+}
+function factsFromModelV1(model) {
+  const n = model?.navigation, k = n?.knowledge;
+  if (!k?.visited) return null;
+  const sites = n.navigableSitesById ?? {}, towns2 = new Map((k.settlements ?? []).map((s) => [s.id, s.label])), out = empty();
+  for (const id of Object.keys(k.visited)) {
+    if (id.startsWith("settlement-slot:")) out.finds[id] = towns2.get(id) ?? "A town";
+    else if (id.startsWith("site:")) out.finds[id] = sites[id]?.label ?? "A place";
+    else if (id.startsWith("ferry:")) out.finds[id] = "Ferry landing";
+  }
+  for (const [id, s] of Object.entries(sites)) if (s?.state === "completed" && id.startsWith("site:")) out.clears[id] = s.label ?? "A place";
+  return cleanFacts(out);
+}
+var factsKey = (f) => f ? GROUPS.map((g) => Object.keys(f[g]).sort().join(",")).join("|") : "";
+var drop = (w, g, id) => {
+  delete w.waiting[g][id];
+  delete w.skipped[g][id];
+};
+function noteMineV1(w, facts) {
+  w.mine = cleanFacts(facts);
+  for (const g of GROUPS) for (const id of Object.keys(w.mine[g])) {
+    drop(w, g, id);
+    delete w.together[g][id];
+  }
+  return w;
+}
+function noteOffersV1(w, from, facts) {
+  let n = 0;
+  for (const g of GROUPS) for (const [id, label4] of Object.entries(facts?.[g] ?? {})) {
+    if (w.mine[g][id] !== void 0 || w.together[g][id] !== void 0 || w.skipped[g][id] || w.waiting[g][id]) continue;
+    w.waiting[g][id] = { label: label4, from };
+    n++;
+  }
+  return n;
+}
+function noteTogetherV1(w, facts) {
+  let n = 0;
+  for (const g of GROUPS) for (const [id, label4] of Object.entries(facts?.[g] ?? {})) {
+    if (w.mine[g][id] !== void 0 || w.together[g][id] !== void 0) continue;
+    w.together[g][id] = label4;
+    drop(w, g, id);
+    n++;
+  }
+  return n;
+}
+var noteMemberV1 = (w, name) => {
+  if (name && !w.members.includes(name)) w.members.push(name);
+  return w;
+};
+var offerCount = (w, which = "waiting") => GROUPS.reduce((n, g) => n + Object.keys(w[which][g]).length, 0);
+function skipOffersV1(w, g) {
+  Object.assign(w.skipped[g], w.waiting[g]);
+  w.waiting[g] = {};
+  return w;
+}
+function noteAddedV1(w, g, result, offers) {
+  const added2 = result?.added ?? { finds: [], clears: [], bosses: [] }, labels = {};
+  for (const id of [...added2.finds, ...added2.clears]) {
+    labels[id] = offers[id]?.label ?? w.waiting.finds[id]?.label ?? w.skipped.finds[id]?.label ?? "A place";
+  }
+  for (const id of Object.keys(offers)) for (const x of GROUPS) drop(w, x, id);
+  const from = [...new Set(Object.values(offers).map((o) => o.from))];
+  w.last = added2.finds.length || added2.clears.length ? { group: g, from: from.length === 1 ? from[0] : "friends", at: Date.now(), added: added2, labels } : w.last;
+  return w;
+}
+function noteUndoneV1(w) {
+  const last = w.last;
+  if (!last) return w;
+  for (const id of last.added.clears) w.waiting.clears[id] = { label: last.labels[id] ?? "A place", from: last.from };
+  for (const id of last.added.finds) if (!last.added.clears.includes(id)) w.waiting.finds[id] = { label: last.labels[id] ?? "A place", from: last.from };
+  w.last = null;
+  return w;
+}
+function factNames(rows) {
+  const labels = Object.values(rows).map((v) => typeof v === "string" ? v : v.label), ferries = labels.filter((l) => l === "Ferry landing").length, named2 = labels.filter((l) => l !== "Ferry landing");
+  const parts = [...named2.slice(0, 6), ...named2.length > 6 ? [`${named2.length - 6} more`] : [], ...ferries ? [ferries === 1 ? "1 ferry landing" : `${ferries} ferry landings`] : []];
+  return parts.length <= 1 ? parts.join("") : parts.slice(0, -1).join(", ") + " and " + parts.at(-1);
+}
+
 // src/client/hero_slots_view_v1.js
 var CLASS_NAMES = { knight: "Knight", rogue: "Rogue", mage: "Mage" };
 function createHeroSlotsView({ document: document2, environment, heroSlots }) {
@@ -89721,14 +89988,14 @@ function createHeroSlotsView({ document: document2, environment, heroSlots }) {
   root2.className = "hero-slots";
   root2.hidden = true;
   let shown2 = false, confirming = null, choosing = null, busy = null, error = "";
-  function el2(tag, cls, text2) {
+  function el3(tag, cls, text3) {
     const e = document2.createElement(tag);
     if (cls) e.className = cls;
-    if (text2 != null) e.textContent = text2;
+    if (text3 != null) e.textContent = text3;
     return e;
   }
-  function button2(text2, action2, cls = "") {
-    const b = el2("button", cls, text2);
+  function button3(text3, action2, cls = "") {
+    const b = el3("button", cls, text3);
     b.type = "button";
     b.disabled = Boolean(busy);
     b.addEventListener("click", action2);
@@ -89762,45 +90029,56 @@ function createHeroSlotsView({ document: document2, environment, heroSlots }) {
     render();
   }
   function render() {
-    const { active: active2, heroes } = heroSlots.list(), grid = el2("div", "hero-slots-grid"), portraits = [];
+    const { active: active2, heroes } = heroSlots.list(), grid = el3("div", "hero-slots-grid"), portraits = [];
     const label4 = (h) => h.name || (h.slot === active2 ? "Your hero" : "Unnamed hero"), made = (h) => Boolean(h.name || h.hero), worldOf2 = (h) => h.plays ?? h.slot;
     const owner = (slot) => heroes.find((x) => x.slot === slot), worldsFor = (h) => [h.slot, ...heroes.filter((x) => x.slot !== h.slot && made(x)).map((x) => x.slot)];
+    const parties = heroSlots.partyWorlds?.() ?? [], copies = parties.filter((w) => !w.own), sharedOwn = (slot) => parties.some((w) => w.own && w.slot === slot), story = Boolean(heroSlots.storyDone?.());
     for (const h of heroes) {
-      const card = el2("article", "hero-slot" + (h.slot === active2 ? " is-active" : "")), canvas = el2("canvas", "hero-slot-portrait"), info2 = el2("div", "hero-slot-info"), actions = el2("div", "hero-slot-actions");
+      const card = el3("article", "hero-slot" + (h.slot === active2 ? " is-active" : "")), canvas = el3("canvas", "hero-slot-portrait"), info2 = el3("div", "hero-slot-info"), actions = el3("div", "hero-slot-actions");
       card.dataset.slot = String(h.slot);
       canvas.setAttribute("aria-hidden", "true");
       const name = label4(h), world = worldOf2(h), visiting = world !== h.slot && owner(world);
-      info2.append(el2("strong", "hero-slot-name", name), el2("small", "hero-slot-class", `${h.hero?.cls ? CLASS_NAMES[h.hero.cls] : "No class yet"} \xB7 Level ${h.level}`));
-      if (visiting) info2.append(el2("small", "hero-slot-world is-visiting", `In ${label4(visiting)}\u2019s world`));
-      else if (h.name || h.hero) info2.append(el2("small", "hero-slot-world" + (h.world ? " is-seeded" : ""), h.world ? `World seed ${h.world.seed}` : "Classic world"));
-      const choices = worldsFor(h).filter((slot) => h.slot !== active2 || slot !== world), choose = () => {
+      info2.append(el3("strong", "hero-slot-name", name), el3("small", "hero-slot-class", `${h.hero?.cls ? CLASS_NAMES[h.hero.cls] : "No class yet"} \xB7 Level ${h.level}`));
+      if (visiting) info2.append(el3("small", "hero-slot-world is-visiting", `In ${label4(visiting)}\u2019s world`));
+      else if (h.name || h.hero) info2.append(el3("small", "hero-slot-world" + (h.world ? " is-seeded" : ""), h.world ? `World seed ${h.world.seed}` : "Classic world"));
+      const choices = worldsFor(h).filter((slot) => h.slot !== active2 || slot !== world), shared = copies.filter((w) => h.slot !== active2 || w.slot !== world), choose = () => {
         choosing = h.slot;
         confirming = null;
         render();
       };
-      if (confirming === h.slot) actions.append(button2("Delete", () => act("delete", () => heroSlots.remove(h.slot)), "is-danger"), button2("Keep", () => {
+      if (confirming === h.slot) actions.append(button3("Delete", () => act("delete", () => heroSlots.remove(h.slot)), "is-danger"), button3("Keep", () => {
         confirming = null;
         render();
       }, "is-quiet"));
-      else if (choosing === h.slot) actions.append(button2("Back", () => {
+      else if (choosing === h.slot) actions.append(button3("Back", () => {
         choosing = null;
         render();
       }, "is-quiet"));
-      else if (h.slot === active2) actions.append(el2("span", "hero-slot-badge", "Playing"), ...choices.length ? [button2("World", choose, "is-quiet")] : []);
-      else actions.append(button2("Play", choices.length > 1 ? choose : () => act("play", () => heroSlots.play(h.slot))), button2("Delete", () => {
+      else if (h.slot === active2) actions.append(el3("span", "hero-slot-badge", "Playing"), ...choices.length || shared.length ? [button3("World", choose, "is-quiet")] : []);
+      else actions.append(button3("Play", choices.length + shared.length > 1 ? choose : () => act("play", () => heroSlots.play(h.slot))), button3("Delete", () => {
         confirming = h.slot;
         render();
       }, "is-quiet"));
       card.append(canvas, info2, actions);
-      if (confirming === h.slot) card.append(el2("p", "hero-slot-confirm", `Delete ${name} for good? Their world, bag and gear go with them.`));
+      if (confirming === h.slot) card.append(el3("p", "hero-slot-confirm", `Delete ${name} for good? Their world, bag and gear go with them.`));
       if (choosing === h.slot) {
-        const pick4 = el2("div", "hero-slot-worlds");
-        pick4.append(el2("p", "hero-slot-confirm", "Play in which world?"));
+        const pick4 = el3("div", "hero-slot-worlds");
+        pick4.append(el3("p", "hero-slot-confirm", "Play in which world?"));
         for (const slot of choices) {
-          const o = owner(slot), b = button2(slot === h.slot ? "Their own world" : `${label4(o)}\u2019s world`, () => act("play", () => heroSlots.play(h.slot, slot)), slot === world ? "is-current" : "");
-          const where = o?.world ? `Seed ${o.world.seed}` : "Classic world", people = heroes.filter((x) => x.slot !== h.slot && worldOf2(x) === slot && made(x)).map(label4);
-          b.append(el2("small", "", people.length ? `${where} \xB7 ${people.join(", ")} here` : where));
+          const o = owner(slot), b = button3(slot === h.slot ? "Their own world" : `${label4(o)}\u2019s world`, () => act("play", () => heroSlots.play(h.slot, slot)), slot === world ? "is-current" : "");
+          const where = (sharedOwn(slot) ? "Shared \xB7 " : "") + (o?.world ? `Seed ${o.world.seed}` : "Classic world"), people = heroes.filter((x) => x.slot !== h.slot && worldOf2(x) === slot && made(x)).map(label4);
+          b.append(el3("small", "", people.length ? `${where} \xB7 ${people.join(", ")} here` : where));
           pick4.append(b);
+        }
+        for (const w of shared) {
+          const box5 = el3("div", "hero-slot-shared" + (w.slot === world ? " is-current" : "")), row2 = el3("div");
+          const name2 = el3("strong", "", w.label);
+          name2.append(el3("span", "hero-slot-tag", "Shared"));
+          box5.append(name2, el3("small", "", story ? `Shared by ${w.owner}${w.seed ? ` \xB7 Seed ${w.seed}` : ""}` : "Finish the story to travel here alone."));
+          if (heroSlots.coop?.available !== false) row2.append(button3("Host for friends", () => act("coop", () => heroSlots.hostIn(h.slot, w.slot))));
+          if (story) row2.append(button3("Play alone", () => act("play", () => heroSlots.play(h.slot, w.slot)), "is-quiet"));
+          box5.append(row2);
+          pick4.append(box5);
         }
         card.append(pick4);
       }
@@ -89808,20 +90086,39 @@ function createHeroSlotsView({ document: document2, environment, heroSlots }) {
       portraits.push([canvas, h.hero]);
     }
     if (heroes.length < HERO_SLOT_LIMIT) {
-      const card = el2("article", "hero-slot is-new"), info2 = el2("div", "hero-slot-info"), actions = el2("div", "hero-slot-actions");
-      info2.append(el2("strong", "hero-slot-name", "New hero"), el2("small", "hero-slot-class", `Choose a world, then make your hero \xB7 ${HERO_SLOT_LIMIT - heroes.length} open`));
-      actions.append(button2("Create", () => act("new", () => heroSlots.create())));
-      card.append(el2("span", "hero-slot-plus", "+"), info2, actions);
+      const card = el3("article", "hero-slot is-new"), info2 = el3("div", "hero-slot-info"), actions = el3("div", "hero-slot-actions");
+      info2.append(el3("strong", "hero-slot-name", "New hero"), el3("small", "hero-slot-class", `Choose a world, then make your hero \xB7 ${HERO_SLOT_LIMIT - heroes.length} open`));
+      actions.append(button3("Create", () => act("new", () => heroSlots.create())));
+      card.append(el3("span", "hero-slot-plus", "+"), info2, actions);
       grid.append(card);
     }
     const coop = [];
     if (heroSlots.coop?.available && !heroSlots.coop.role) {
-      const row2 = el2("div", "hero-slots-coop");
-      row2.append(el2("strong", "", "Play together"), button2("Host a game", () => act("coop", () => heroSlots.coop.host())), button2("Join a game", () => act("coop", () => heroSlots.coop.join()), "is-quiet"));
+      const row2 = el3("div", "hero-slots-coop");
+      row2.append(el3("strong", "", "Play together"), button3("Host a game", () => act("coop", () => heroSlots.coop.host())), button3("Join a game", () => act("coop", () => heroSlots.coop.join()), "is-quiet"));
       coop.push(row2);
     }
-    const status2 = busy === "delete" ? "Deleting\u2026" : busy ? "Saving your hero\u2026" : error;
-    root2.replaceChildren(el2("p", "hero-slots-intro", "Each hero has their own world, bag and gear, and can play in any hero\u2019s world. Switching saves this hero first."), grid, ...coop, ...status2 ? [el2("p", "hero-slots-status", status2)] : []);
+    const here = heroSlots.party?.info?.(), partyBox = [];
+    if (here) {
+      const box5 = el3("div", "hero-slots-party"), members = here.members.map((m) => m === here.owner ? `${m} (owner)` : m);
+      box5.append(el3("strong", "", `${here.label} \xB7 Shared`), el3("p", "", `Shared with ${members.join(", ") || here.owner}`));
+      if (here.last) {
+        const row2 = el3("div", "hero-slots-party-row");
+        row2.append(el3("span", "", `Added from ${here.last.from}: ${factNames(here.last.labels) || (here.last.group === "clears" ? "clears" : "finds")}`), button3("Undo", () => act("undo", () => heroSlots.party.undo()), "is-quiet"));
+        box5.append(row2);
+      }
+      const waiting = GROUPS.reduce((n, g) => n + Object.keys(here.waiting[g]).length + Object.keys(here.skipped[g]).length, 0);
+      if (waiting) {
+        const row2 = el3("div", "hero-slots-party-row");
+        row2.append(el3("span", "", `Waiting for you: ${waiting} ${waiting === 1 ? "thing" : "things"} from friends`), button3("Review", () => {
+          heroSlots.party.review();
+        }));
+        box5.append(row2);
+      }
+      partyBox.push(box5);
+    }
+    const status2 = busy === "delete" ? "Deleting\u2026" : busy === "undo" ? "Taking it back\u2026" : busy ? "Saving your hero\u2026" : error;
+    root2.replaceChildren(el3("p", "hero-slots-intro", "Each hero has their own world, bag and gear, and can play in any hero\u2019s world. Switching saves this hero first."), grid, ...partyBox, ...coop, ...status2 ? [el3("p", "hero-slots-status", status2)] : []);
     environment.requestAnimationFrame(() => {
       for (const [canvas, hero] of portraits) paint2(canvas, hero);
     });
@@ -90510,27 +90807,27 @@ function statGain(before, after) {
   return (d > 0 ? "+" : "\u2212") + t + a.unit;
 }
 function createCharacterStatsV3({ document: doc }) {
-  const el2 = (tag, text2 = "", cls = "") => {
+  const el3 = (tag, text3 = "", cls = "") => {
     const e = doc.createElement(tag);
-    e.textContent = text2;
+    e.textContent = text3;
     e.className = cls;
     return e;
   }, icon = (k, size) => {
-    const s = el2("span", "", "sx-ic");
+    const s = el3("span", "", "sx-ic");
     s.innerHTML = statIcon(k, size);
     return s;
   };
-  const host = el2("section", "", "sx-view");
+  const host = el3("section", "", "sx-view");
   host.id = "world-stats-view";
   host.hidden = true;
   doc.querySelector(".bag-body").append(host);
-  const card = el2("aside", "", "sx-card sx-hero"), look = el2("button", "", "sx-look");
+  const card = el3("aside", "", "sx-card sx-hero"), look = el3("button", "", "sx-look");
   look.type = "button";
   look.innerHTML = BRUSH;
   look.setAttribute("aria-label", "Change look");
   look.title = "Change look";
   look.addEventListener("click", () => doc.dispatchEvent(new CustomEvent(HERO_CREATOR_OPEN_EVENT, { detail: { mode: "look" } })));
-  const pickClass = el2("button", "Choose class", "sx-pickclass");
+  const pickClass = el3("button", "Choose class", "sx-pickclass");
   pickClass.type = "button";
   pickClass.hidden = true;
   pickClass.addEventListener("click", () => doc.dispatchEvent(new CustomEvent(HERO_CREATOR_OPEN_EVENT, { detail: { mode: "class" } })));
@@ -90539,15 +90836,15 @@ function createCharacterStatsV3({ document: doc }) {
   portrait.height = 196;
   portrait.className = "sx-portrait";
   portrait.setAttribute("aria-hidden", "true");
-  const who = el2("div", "", "sx-who"), name = el2("strong", "", "sx-name"), sub = el2("span", "", "sx-sub");
+  const who = el3("div", "", "sx-who"), name = el3("strong", "", "sx-name"), sub = el3("span", "", "sx-sub");
   who.append(name, sub);
-  const xp = el2("div", "", "sx-xp"), track = el2("div", "", "sx-xptrack"), fill6 = el2("i"), xpText2 = el2("div", "", "sx-xptext"), xpNow = el2("span"), xpPct = el2("span");
+  const xp = el3("div", "", "sx-xp"), track = el3("div", "", "sx-xptrack"), fill6 = el3("i"), xpText2 = el3("div", "", "sx-xptext"), xpNow = el3("span"), xpPct = el3("span");
   track.append(fill6);
   xpText2.append(xpNow, xpPct);
   xp.append(track, xpText2);
-  const keys2 = el2("div", "", "sx-keys");
+  const keys2 = el3("div", "", "sx-keys");
   card.append(look, portrait, who, pickClass, xp, keys2);
-  const main = el2("div", "", "sx-main"), groups = el2("div", "", "sx-card sx-groups");
+  const main = el3("div", "", "sx-main"), groups = el3("div", "", "sx-card sx-groups");
   main.append(groups);
   host.append(card, main);
   let key3 = "", lookKey = "";
@@ -90593,22 +90890,22 @@ function createCharacterStatsV3({ document: doc }) {
       xpPct.textContent = prog.capped ? "" : Math.floor(pct3 || 0) + "%";
       const value2 = (g, label4) => g?.flatMap((x) => x.rows).find((r) => r.label === label4)?.value;
       keys2.replaceChildren(...KEY_STATS.map(([label4, ic, short]) => {
-        const k = el2("div", "", "sx-key"), txt = el2("div"), gain = then ? statGain(value2(now3, label4), value2(then, label4)) : "";
-        txt.append(el2("b", value2(now3, label4) ?? "\u2014"), el2("small", short));
+        const k = el3("div", "", "sx-key"), txt = el3("div"), gain = then ? statGain(value2(now3, label4), value2(then, label4)) : "";
+        txt.append(el3("b", value2(now3, label4) ?? "\u2014"), el3("small", short));
         k.append(icon(ic, 16), txt);
-        if (gain) k.append(el2("span", gain, "sx-gain"));
+        if (gain) k.append(el3("span", gain, "sx-gain"));
         return k;
       }));
       groups.replaceChildren();
       now3.forEach((g, gi) => {
         const rows = g.rows.filter((r) => gi > 0 || !KEY_LABELS.has(r.label));
         if (!rows.length) return;
-        groups.append(el2("h4", g.title, "sx-title"));
+        groups.append(el3("h4", g.title, "sx-title"));
         for (const r of rows) {
-          const row2 = el2("div", "", "sx-row"), gain = then ? statGain(r.value, then[gi]?.rows.find((x) => x.label === r.label)?.value) : "";
-          row2.append(icon(ROW_ICONS[r.label] ?? "", 14), el2("span", r.label, "sx-label"));
-          if (gain) row2.append(el2("span", gain, "sx-gain"));
-          row2.append(el2("b", r.value, "sx-value"));
+          const row2 = el3("div", "", "sx-row"), gain = then ? statGain(r.value, then[gi]?.rows.find((x) => x.label === r.label)?.value) : "";
+          row2.append(icon(ROW_ICONS[r.label] ?? "", 14), el3("span", r.label, "sx-label"));
+          if (gain) row2.append(el3("span", gain, "sx-gain"));
+          row2.append(el3("b", r.value, "sx-value"));
           groups.append(row2);
         }
       });
@@ -90781,14 +91078,14 @@ function skillBlockerV2(d, n, offer) {
   return reason;
 }
 function createSkillTreeViewV2({ document: document2, send, only = null }) {
-  const el2 = (tag, text2 = "", cls = "") => {
+  const el3 = (tag, text3 = "", cls = "") => {
     const e = document2.createElement(tag);
-    if (text2) e.textContent = text2;
+    if (text3) e.textContent = text3;
     if (cls) e.className = cls;
     return e;
   }, svgEl = (tag) => document2.createElementNS("http://www.w3.org/2000/svg", tag);
-  const button2 = (text2, cls, fn) => {
-    const b = el2("button", text2, cls);
+  const button3 = (text3, cls, fn) => {
+    const b = el3("button", text3, cls);
     b.type = "button";
     b.onclick = fn;
     return b;
@@ -90797,31 +91094,31 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
     void e.offsetWidth;
     e.classList.add(cls);
   };
-  const root2 = el2("div", "", only ? "skills-v2 only" : "skills-v2"), top = el2("div", "", "skills-top"), tabs = el2("nav", "", "skills-tabs"), tabButtons = {};
+  const root2 = el3("div", "", only ? "skills-v2 only" : "skills-v2"), top = el3("div", "", "skills-top"), tabs = el3("nav", "", "skills-tabs"), tabButtons = {};
   tabs.setAttribute("aria-label", "Constellations");
   for (const name of only ? [only] : TREES) {
-    const b = button2("", "", () => choose(name)), badge = el2("b");
+    const b = button3("", "", () => choose(name)), badge = el3("b");
     b.style.setProperty("--tree", CONSTELLATIONS[name].color);
-    b.append(el2("i"), el2("span", TAB_NAMES[name]), badge);
+    b.append(el3("i"), el3("span", TAB_NAMES[name]), badge);
     tabButtons[name] = { b, badge };
     tabs.append(b);
   }
-  const head13 = el2("div", "", "skills-head"), level = el2("strong", "", "skills-level"), xpTrack = el2("div", "", "skills-xp"), xpFill = el2("i"), xpText2 = el2("span"), sp = el2("strong", "", "skills-sp"), mode = el2("div", "", "skills-mode");
+  const head13 = el3("div", "", "skills-head"), level = el3("strong", "", "skills-level"), xpTrack = el3("div", "", "skills-xp"), xpFill = el3("i"), xpText2 = el3("span"), sp = el3("strong", "", "skills-sp"), mode = el3("div", "", "skills-mode");
   xpTrack.append(xpFill, xpText2);
-  const modeButtons = { tree: button2("Tree", "", () => setView("tree")), list: button2("List", "", () => setView("list")) };
+  const modeButtons = { tree: button3("Tree", "", () => setView("tree")), list: button3("List", "", () => setView("list")) };
   mode.append(modeButtons.tree, modeButtons.list);
   head13.append(level, xpTrack, sp, mode);
   top.append(tabs, head13);
-  const body5 = el2("div", "", "skills-body"), scroll = el2("div", "", "skills-scroll"), list = el2("div", "", "skills-list"), foot = el2("div", "", "skills-foot"), sheet = el2("section", "", "skills-sheet"), grab = el2("div", "", "skills-sheet-grab"), sheetBody = el2("div", "", "skills-sheet-body");
+  const body5 = el3("div", "", "skills-body"), scroll = el3("div", "", "skills-scroll"), list = el3("div", "", "skills-list"), foot = el3("div", "", "skills-foot"), sheet = el3("section", "", "skills-sheet"), grab = el3("div", "", "skills-sheet-grab"), sheetBody = el3("div", "", "skills-sheet-body");
   sheet.setAttribute("aria-label", "Skill details");
   sheet.append(grab, sheetBody);
   body5.append(scroll, sheet);
   root2.append(top, body5);
   let tree = null, view3 = "tree", selected = null, open2 = false, confirmReset = false, d = null, ready = false, built = null, shown2 = null, lastRanks = {}, lastXp = null, drag = null;
   function disc5(n, withRank = true) {
-    const art = PROGRESSION_ICONS[n.iconKey], wrap2 = el2("span", "", "skill-disc"), rank = withRank && n.maxRank !== 1 ? el2("small") : null;
+    const art = PROGRESSION_ICONS[n.iconKey], wrap2 = el3("span", "", "skill-disc"), rank = withRank && n.maxRank !== 1 ? el3("small") : null;
     if (art) {
-      const img = el2("img");
+      const img = el3("img");
       img.src = art.url;
       img.alt = "";
       wrap2.append(img);
@@ -90840,7 +91137,7 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
   }
   const rankText = (n, rank) => n.maxRank === "infinite" ? `${formatLarge(rank)}/\u221E` : `${formatLarge(rank)}/${n.maxRank}`;
   function build2(name) {
-    const layout = skillTreeLayoutV2(name), wrap2 = el2("div", "", "skills-tree"), plane = el2("div", "", "skills-plane"), svg2 = svgEl("svg"), items = {}, lines2 = [];
+    const layout = skillTreeLayoutV2(name), wrap2 = el3("div", "", "skills-tree"), plane = el3("div", "", "skills-plane"), svg2 = svgEl("svg"), items = {}, lines2 = [];
     wrap2.style.setProperty("--rows", String(layout.rows));
     svg2.setAttribute("viewBox", "0 0 100 100");
     svg2.setAttribute("preserveAspectRatio", "none");
@@ -90855,7 +91152,7 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
     }
     plane.append(svg2);
     for (const n of layout.nodes) {
-      const p = layout.place[n.id], b = el2("button", "", "skill-node"), icon = disc5(n), label4 = el2("span", n.name, "skill-name");
+      const p = layout.place[n.id], b = el3("button", "", "skill-node"), icon = disc5(n), label4 = el3("span", n.name, "skill-name");
       b.type = "button";
       b.dataset.node = n.id;
       b.style.left = p.x.toFixed(2) + "%";
@@ -90972,15 +91269,15 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
       const name = tree === "utility" ? "Utility" : TIER_NAMES[n.tier];
       if (name !== group) {
         group = name;
-        rows.push(el2("h4", name));
+        rows.push(el3("h4", name));
       }
-      const s = skillStateV2(d, n), row2 = el2("button", "", "skills-row"), text2 = el2("span");
+      const s = skillStateV2(d, n), row2 = el3("button", "", "skills-row"), text3 = el3("span");
       row2.type = "button";
       row2.dataset.node = n.id;
       stateClasses(row2, n, s);
       row2.classList.toggle("selected", n.id === selected && open2);
-      text2.append(el2("strong", n.name), el2("small", s.maxed ? nodeEffect(n, s.rank) : `${s.owned ? "Next" : "Learn"}: ${nodeEffect(n, integerWire(integerBigInt(s.rank) + 1n))}`));
-      row2.append(disc5(n, false).wrap, text2, el2("em", s.maxed ? "Max" : s.available ? s.owned ? "Upgrade" : "Learn" : rankText(n, s.rank)));
+      text3.append(el3("strong", n.name), el3("small", s.maxed ? nodeEffect(n, s.rank) : `${s.owned ? "Next" : "Learn"}: ${nodeEffect(n, integerWire(integerBigInt(s.rank) + 1n))}`));
+      row2.append(disc5(n, false).wrap, text3, el3("em", s.maxed ? "Max" : s.available ? s.owned ? "Upgrade" : "Learn" : rankText(n, s.rank)));
       row2.onclick = () => select(n.id);
       rows.push(row2);
     }
@@ -90988,20 +91285,20 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
   }
   function paintFoot() {
     const spent = spentPoints(d, tree), parts = [];
-    if (tree === "utility") parts.push(el2("p", `Inventory intake: ${inventoryIntakeCapacity(d)} items. More Utility branches arrive with new World systems.`, "skills-note"));
+    if (tree === "utility") parts.push(el3("p", `Inventory intake: ${inventoryIntakeCapacity(d)} items. More Utility branches arrive with new World systems.`, "skills-note"));
     if (confirmReset) {
-      const row2 = el2("div", "", "skills-reset-confirm"), yes = button2(`Reset \xB7 refund ${formatLarge(spent)} SP`, "danger", () => {
+      const row2 = el3("div", "", "skills-reset-confirm"), yes = button3(`Reset \xB7 refund ${formatLarge(spent)} SP`, "danger", () => {
         confirmReset = false;
         send({ kind: "tree.reset", tree });
-      }), no = button2("Cancel", "", () => {
+      }), no = button3("Cancel", "", () => {
         confirmReset = false;
         paint2();
       });
       yes.disabled = !ready;
       row2.append(yes, no);
-      parts.push(el2("p", `Unlearn every ${TAB_NAMES[tree]} skill? It's free.`, "skills-note"), row2);
+      parts.push(el3("p", `Unlearn every ${TAB_NAMES[tree]} skill? It's free.`, "skills-note"), row2);
     } else {
-      const reset = button2(`Reset ${TAB_NAMES[tree]} tree`, "skills-reset", () => {
+      const reset = button3(`Reset ${TAB_NAMES[tree]} tree`, "skills-reset", () => {
         confirmReset = true;
         paint2();
       });
@@ -91015,47 +91312,47 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
     sheet.classList.toggle("open", Boolean(open2 && n));
     root2.classList.toggle("sheet-open", Boolean(open2 && n));
     if (!n) {
-      sheetBody.replaceChildren(el2("p", "Tap a skill to see what it does and learn it.", "sheet-empty"));
+      sheetBody.replaceChildren(el3("p", "Tap a skill to see what it does and learn it.", "sheet-empty"));
       return;
     }
-    const s = skillStateV2(d, n), next = integerWire(integerBigInt(s.rank) + 1n), headRow = el2("div", "", "sheet-head"), icon = disc5(n, false), title = el2("div"), tags = el2("div", "", "sheet-tags");
+    const s = skillStateV2(d, n), next = integerWire(integerBigInt(s.rank) + 1n), headRow = el3("div", "", "sheet-head"), icon = disc5(n, false), title = el3("div"), tags = el3("div", "", "sheet-tags");
     stateClasses(headRow, n, s);
-    tags.append(el2("span", tree === "utility" ? "Utility" : TIER_TAGS[n.tier]), el2("span", s.maxed ? "Mastered" : `Rank ${rankText(n, s.rank)}`, s.maxed ? "done" : ""));
-    title.append(el2("h3", n.name), tags);
-    headRow.append(icon.wrap, title, button2("\xD7", "sheet-close", close));
-    const parts = [headRow, el2("p", nodeDescription(n), "sheet-desc")], effect = (label4, text2, cls = "") => {
-      const e = el2("div", "", `sheet-effect ${cls}`);
-      e.append(el2("b", label4), el2("span", text2));
+    tags.append(el3("span", tree === "utility" ? "Utility" : TIER_TAGS[n.tier]), el3("span", s.maxed ? "Mastered" : `Rank ${rankText(n, s.rank)}`, s.maxed ? "done" : ""));
+    title.append(el3("h3", n.name), tags);
+    headRow.append(icon.wrap, title, button3("\xD7", "sheet-close", close));
+    const parts = [headRow, el3("p", nodeDescription(n), "sheet-desc")], effect = (label4, text3, cls = "") => {
+      const e = el3("div", "", `sheet-effect ${cls}`);
+      e.append(el3("b", label4), el3("span", text3));
       return e;
     };
     if (s.owned) parts.push(effect("NOW", nodeEffect(n, s.rank)));
     if (!s.maxed) parts.push(effect(s.owned ? "NEXT" : "RANK 1", nodeEffect(n, next), "next"));
-    const needs = el2("div", "", "sheet-needs");
+    const needs = el3("div", "", "sheet-needs");
     if (n.isStarterToggle) {
       const met = Number(d.highestHeroLevel) >= 2;
-      needs.append(el2("span", `${met ? "\u2713 " : ""}Hero Level 2`, met ? "met" : ""));
+      needs.append(el3("span", `${met ? "\u2713 " : ""}Hero Level 2`, met ? "met" : ""));
     }
     if (n.prereqs.length) {
-      needs.append(el2("small", n.prereqs.length > 1 ? "Needs one of" : "Needs"));
+      needs.append(el3("small", n.prereqs.length > 1 ? "Needs one of" : "Needs"));
       for (const id of n.prereqs) {
         const p = ACTIVE_NODES[id];
         if (!p) continue;
-        const met = integerBigInt(nodeRank(d, id)) > 0n, chip2 = button2(`${met ? "\u2713 " : ""}${p.name}`, met ? "met" : "", () => select(id));
+        const met = integerBigInt(nodeRank(d, id)) > 0n, chip2 = button3(`${met ? "\u2713 " : ""}${p.name}`, met ? "met" : "", () => select(id));
         needs.append(chip2);
       }
     }
     const gate = skillGateV2(n);
     if (gate) {
       const spent = integerBigInt(spentPoints(d, n.tree)), met = spent >= BigInt(gate);
-      needs.append(el2("span", `${met ? "\u2713 " : ""}${formatLarge(integerWire(spent < BigInt(gate) ? spent : BigInt(gate)))}/${gate} SP spent in this tree`, met ? "met" : ""));
+      needs.append(el3("span", `${met ? "\u2713 " : ""}${formatLarge(integerWire(spent < BigInt(gate) ? spent : BigInt(gate)))}/${gate} SP spent in this tree`, met ? "met" : ""));
     }
-    if (n.tier === 4) needs.append(el2("span", "Only one keystone per tree", "note"));
+    if (n.tier === 4) needs.append(el3("span", "Only one keystone per tree", "note"));
     if (needs.children.length) parts.push(needs);
-    const cost = s.offer.cost ?? (s.maxed ? null : nodeCost(n.id, next)), buy = button2(s.maxed ? "Mastered" : `${s.owned ? `Upgrade to rank ${formatLarge(next)}` : "Learn"} \xB7 ${integerBigInt(cost) > 0n ? formatLarge(cost) + " SP" : "Free"}`, "sheet-buy", () => send({ kind: "node.purchase", nodeId: n.id }));
+    const cost = s.offer.cost ?? (s.maxed ? null : nodeCost(n.id, next)), buy = button3(s.maxed ? "Mastered" : `${s.owned ? `Upgrade to rank ${formatLarge(next)}` : "Learn"} \xB7 ${integerBigInt(cost) > 0n ? formatLarge(cost) + " SP" : "Free"}`, "sheet-buy", () => send({ kind: "node.purchase", nodeId: n.id }));
     buy.disabled = s.maxed || !s.available || !ready;
     parts.push(buy);
-    if (!s.maxed && !s.available) parts.push(el2("p", skillBlockerV2(d, n, s.offer), "sheet-why"));
-    else if (!s.maxed && !ready) parts.push(el2("p", "Skills can\u2019t change right now.", "sheet-why"));
+    if (!s.maxed && !s.available) parts.push(el3("p", skillBlockerV2(d, n, s.offer), "sheet-why"));
+    else if (!s.maxed && !ready) parts.push(el3("p", "Skills can\u2019t change right now.", "sheet-why"));
     sheetBody.replaceChildren(...parts);
   }
   function paint2() {
@@ -91106,14 +91403,14 @@ function skillStateV1(d, id) {
   return { rank, offer, open: open2, live: LIVE_CLASS_SKILLS.has(id), learned: rank > 0, maxed: rank >= s.maxRank, state: rank >= s.maxRank ? "maxed" : rank > 0 ? "learned" : !LIVE_CLASS_SKILLS.has(id) ? "soon" : offer.ok ? "available" : "locked" };
 }
 function createClassSkillsViewV1({ document: document2, send, utility }) {
-  const el2 = (tag, cls = "", text2 = "") => {
+  const el3 = (tag, cls = "", text3 = "") => {
     const e = document2.createElement(tag);
     if (cls) e.className = cls;
-    if (text2) e.textContent = text2;
+    if (text3) e.textContent = text3;
     return e;
   }, svgEl = (tag) => document2.createElementNS("http://www.w3.org/2000/svg", tag);
-  const button2 = (cls, text2, fn) => {
-    const b = el2("button", cls, text2);
+  const button3 = (cls, text3, fn) => {
+    const b = el3("button", cls, text3);
     b.type = "button";
     b.onclick = fn;
     return b;
@@ -91122,7 +91419,7 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
     void e.offsetWidth;
     e.classList.add(cls);
   };
-  const root2 = el2("div", "cs-view"), head13 = el2("div", "cs-head"), points2 = el2("div", "cs-points"), tabs = el2("nav", "cs-tabs"), body5 = el2("div", "cs-body"), utilityWrap = el2("div", "cs-utility"), wheelBar = el2("section", "cs-wheel");
+  const root2 = el3("div", "cs-view"), head13 = el3("div", "cs-head"), points2 = el3("div", "cs-points"), tabs = el3("nav", "cs-tabs"), body5 = el3("div", "cs-body"), utilityWrap = el3("div", "cs-utility"), wheelBar = el3("section", "cs-wheel");
   tabs.setAttribute("aria-label", "Skill trees");
   wheelBar.setAttribute("aria-label", "Skill wheel");
   head13.append(points2, tabs, wheelBar);
@@ -91139,15 +91436,15 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
     tabButtons = {};
     const list = [...trees.map((t) => ({ id: t.id, name: t.name, color: t.color })), { id: "utility", name: "Utility", color: "#b7a077" }];
     tabs.replaceChildren(...list.map((t) => {
-      const b = button2("cs-tab", "", () => choose(t.id)), badge = el2("b");
+      const b = button3("cs-tab", "", () => choose(t.id)), badge = el3("b");
       b.style.setProperty("--tree", t.color);
-      b.append(el2("span", "", t.name), badge);
+      b.append(el3("span", "", t.name), badge);
       tabButtons[t.id] = { b, badge };
       return b;
     }));
   }
   function buildGrid(t) {
-    const wrap2 = el2("section", "cs-tree"), tagline = el2("p", "cs-tagline"), grid = el2("div", "cs-grid"), svg2 = svgEl("svg"), bubble = el2("div", "cs-bubble"), foot = el2("div", "cs-foot"), tiles6 = {}, lines2 = [], gates = [];
+    const wrap2 = el3("section", "cs-tree"), tagline = el3("p", "cs-tagline"), grid = el3("div", "cs-grid"), svg2 = svgEl("svg"), bubble = el3("div", "cs-bubble"), foot = el3("div", "cs-foot"), tiles6 = {}, lines2 = [], gates = [];
     wrap2.style.setProperty("--tree", t.color);
     svg2.setAttribute("class", "cs-links");
     svg2.setAttribute("viewBox", `0 0 ${3 * COL} ${ROWS * ROW}`);
@@ -91155,19 +91452,19 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
     grid.append(svg2);
     t.rows.forEach((ids4, row2) => {
       if (row2 > 0) {
-        const g = el2("span", "cs-gate", String(classTierGate(row2 + 1)));
+        const g = el3("span", "cs-gate", String(classTierGate(row2 + 1)));
         g.style.top = `${row2 * ROW + TOP + TILE10 / 2}px`;
         gates.push({ g, tier: row2 + 1 });
         grid.append(g);
       }
       ids4.forEach((id, i) => {
-        const s = CLASS_TREE_SKILLS[id], col2 = ids4.length === 1 ? 1 : i, c = center2(row2, col2), b = button2("cs-skill", "", () => select(id)), tile = el2("span", "cs-tile"), rank = el2("b", "cs-rank");
+        const s = CLASS_TREE_SKILLS[id], col2 = ids4.length === 1 ? 1 : i, c = center2(row2, col2), b = button3("cs-skill", "", () => select(id)), tile = el3("span", "cs-tile"), rank = el3("b", "cs-rank");
         b.dataset.kind = s.kind;
         b.dataset.skill = id;
         b.style.left = `${c.x - 39}px`;
         b.style.top = `${row2 * ROW + TOP}px`;
         tile.append(icon(id, "currentColor"), rank);
-        b.append(tile, el2("span", "cs-name", s.name));
+        b.append(tile, el3("span", "cs-name", s.name));
         tiles6[id] = { b, rank, row: row2, col: col2 };
         grid.append(b);
         if (s.requires) {
@@ -91192,22 +91489,22 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
     if (!hc) return;
     const slots2 = skillLoadout(d), bench10 = wheelEntriesFor(d).filter((id) => !slots2.includes(id));
     wheelBar.style.setProperty("--class", hc.color);
-    const head14 = el2("div", "cs-wheel-head");
-    head14.append(el2("span", "", "SKILL WHEEL"), el2("small", "", wheelPick !== null ? "Now tap where it goes" : bench10.length ? "Tap two to swap. Past the line: off the wheel" : "Tap two to swap them"));
+    const head14 = el3("div", "cs-wheel-head");
+    head14.append(el3("span", "", "SKILL WHEEL"), el3("small", "", wheelPick !== null ? "Now tap where it goes" : bench10.length ? "Tap two to swap. Past the line: off the wheel" : "Tap two to swap them"));
     const spot = (key3, id) => {
-      const move2 = id === MOVE_SLOT, name = move2 ? MOVE_NAMES2[hc.offhand] ?? "Class move" : id ? CLASS_SKILLS[id]?.name ?? id : "Empty", b = button2("cs-wheel-spot", "", () => pickWheel(key3)), icon2 = el2("span", "cs-wheel-icon");
+      const move2 = id === MOVE_SLOT, name = move2 ? MOVE_NAMES2[hc.offhand] ?? "Class move" : id ? CLASS_SKILLS[id]?.name ?? id : "Empty", b = button3("cs-wheel-spot", "", () => pickWheel(key3)), icon2 = el3("span", "cs-wheel-icon");
       icon2.innerHTML = move2 ? SKILL_ICONS_V1[MOVE_ICON_FOR[hc.offhand]] ?? "" : id ? SKILL_ICONS_V1[id] ?? "" : "";
-      b.append(icon2, el2("span", "cs-wheel-name", name));
+      b.append(icon2, el3("span", "cs-wheel-name", name));
       b.dataset.empty = String(!id);
       b.dataset.picked = String(wheelPick === key3);
       b.disabled = !ready;
       b.setAttribute("aria-label", `${name}${key3[0] === "b" ? ", not on the wheel" : ""}. ${wheelPick === null ? "Tap to pick it up" : "Tap to swap"}`);
       return b;
     };
-    const row2 = el2("div", "cs-wheel-row");
+    const row2 = el3("div", "cs-wheel-row");
     row2.append(...slots2.map((id, i) => spot("w" + i, id)));
     if (bench10.length) {
-      row2.append(el2("i", "cs-wheel-gap"));
+      row2.append(el3("i", "cs-wheel-gap"));
       for (const id of bench10) {
         const b = spot("b:" + id, id);
         b.classList.add("bench");
@@ -91264,7 +91561,7 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
   }
   function paintHead(trees) {
     const p = classTreePoints(d), unspent = p.unspent > 0n ? p.unspent : 0n;
-    points2.replaceChildren(el2("b", "", String(unspent)), el2("span", "", unspent === 1n ? " skill point" : " skill points"), el2("small", "", ` \xB7 1 per level, up to ${CLASS_TREE_POINT_CAP}`));
+    points2.replaceChildren(el3("b", "", String(unspent)), el3("span", "", unspent === 1n ? " skill point" : " skill points"), el3("small", "", ` \xB7 1 per level, up to ${CLASS_TREE_POINT_CAP}`));
     points2.classList.toggle("has", unspent > 0n);
     for (const [id, { b, badge }] of Object.entries(tabButtons)) {
       b.setAttribute("aria-pressed", String(id === tree));
@@ -91302,68 +91599,68 @@ function createClassSkillsViewV1({ document: document2, send, utility }) {
     g.bubble.style.top = below ? `${(row2 + 1) * ROW - 4}px` : "";
     g.bubble.style.bottom = below ? "" : `${(ROWS - row2) * ROW - TOP + 2}px`;
     g.bubble.style.setProperty("--arrow", `${center2(row2, col2).x}px`);
-    const head14 = el2("div", "cs-bubble-head"), tag = el2("span", "cs-kind", kindTag(s));
+    const head14 = el3("div", "cs-bubble-head"), tag = el3("span", "cs-kind", kindTag(s));
     tag.classList.toggle("active", s.kind === "active");
     tag.classList.toggle("trade", Boolean(s.tradeOff));
-    head14.append(tag, el2("strong", "", s.name), el2("em", "", `${st.rank}/${s.maxRank}`), button2("cs-close", "\xD7", close));
+    head14.append(tag, el3("strong", "", s.name), el3("em", "", `${st.rank}/${s.maxRank}`), button3("cs-close", "\xD7", close));
     parts.push(head14);
     const gate = classTierGate(s.tier), inTree = classTreeSpent(d, s.tree, s.tier);
-    parts.push(el2("p", "cs-meta", `${g.tree.name} \xB7 ${s.kind === "capstone" ? "Capstone" : `Tier ${s.tier}`}${inTree < gate ? ` \xB7 needs ${gate} points in ${g.tree.name}` : ""}`));
+    parts.push(el3("p", "cs-meta", `${g.tree.name} \xB7 ${s.kind === "capstone" ? "Capstone" : `Tier ${s.tier}`}${inTree < gate ? ` \xB7 needs ${gate} points in ${g.tree.name}` : ""}`));
     if (s.requires) {
-      const met = classRank(d, s.requires) > 0, req = el2("p", "cs-req", `${met ? "\u2713 " : ""}Requires ${CLASS_TREE_SKILLS[s.requires].name}`);
+      const met = classRank(d, s.requires) > 0, req = el3("p", "cs-req", `${met ? "\u2713 " : ""}Requires ${CLASS_TREE_SKILLS[s.requires].name}`);
       req.classList.toggle("met", met);
       parts.push(req);
     }
-    parts.push(el2("p", "cs-desc", s.description));
+    parts.push(el3("p", "cs-desc", s.description));
     if (s.kind === "active" && CLASS_SKILL_AUGMENTS[id]) parts.push(augmentList(id, s, st));
     if (s.kind === "active" && st.learned) {
       const onAttack = d.attackSkill === id, onWheel = skillLoadout(d).includes(id);
-      parts.push(el2("p", "cs-note", onAttack ? "It\u2019s on your Attack button." : onWheel ? "It\u2019s on your skill wheel." : "Your wheel is full. Swap it in from the skill wheel at the top."));
-      const swap = button2("cs-attack", onAttack ? "Back to basic attack" : "Put on Attack button", () => send(onAttack ? { kind: "skills.arrange", slots: skillLoadout({ ...d, attackSkill: void 0 }), attack: null } : { kind: "skills.arrange", slots: skillLoadout({ ...d, attackSkill: id }), attack: id }));
+      parts.push(el3("p", "cs-note", onAttack ? "It\u2019s on your Attack button." : onWheel ? "It\u2019s on your skill wheel." : "Your wheel is full. Swap it in from the skill wheel at the top."));
+      const swap = button3("cs-attack", onAttack ? "Back to basic attack" : "Put on Attack button", () => send(onAttack ? { kind: "skills.arrange", slots: skillLoadout({ ...d, attackSkill: void 0 }), attack: null } : { kind: "skills.arrange", slots: skillLoadout({ ...d, attackSkill: id }), attack: id }));
       swap.disabled = !ready;
       parts.push(swap);
     }
-    const label4 = st.maxed ? s.maxRank === 1 ? "Learned" : "Maxed" : !st.live ? "Coming soon" : st.offer.ok ? st.learned ? `Learn rank ${st.rank + 1} \xB7 1 point` : "Learn \xB7 1 point" : st.offer.reason, learn = button2("cs-learn", label4, () => send({ kind: "skill.learn", skillId: id }));
+    const label4 = st.maxed ? s.maxRank === 1 ? "Learned" : "Maxed" : !st.live ? "Coming soon" : st.offer.ok ? st.learned ? `Learn rank ${st.rank + 1} \xB7 1 point` : "Learn \xB7 1 point" : st.offer.reason, learn = button3("cs-learn", label4, () => send({ kind: "skill.learn", skillId: id }));
     learn.disabled = !st.offer.ok || !ready;
     parts.push(learn);
-    if (st.offer.ok && !ready) parts.push(el2("p", "cs-why", "Skills can\u2019t change right now."));
+    if (st.offer.ok && !ready) parts.push(el3("p", "cs-why", "Skills can\u2019t change right now."));
     g.bubble.replaceChildren(...parts);
   }
   function augmentList(id, s, st) {
-    const slotted = classAugments(d, id), box5 = el2("div", "cs-augs"), head14 = el2("div", "cs-augh");
-    head14.append(el2("span", "", "AUGMENTS \xB7 PICK 2"), el2("small", "", st.learned ? `${slotted.length}/${AUGMENT_SLOTS} slotted` : `Learn ${s.name} to slot them`));
+    const slotted = classAugments(d, id), box5 = el3("div", "cs-augs"), head14 = el3("div", "cs-augh");
+    head14.append(el3("span", "", "AUGMENTS \xB7 PICK 2"), el3("small", "", st.learned ? `${slotted.length}/${AUGMENT_SLOTS} slotted` : `Learn ${s.name} to slot them`));
     box5.append(head14);
     CLASS_SKILL_AUGMENTS[id].forEach((a, i) => {
-      const offer = augmentAvailability(d, id, i), on = slotted.includes(i), row2 = button2("cs-aug", "", () => {
+      const offer = augmentAvailability(d, id, i), on = slotted.includes(i), row2 = button3("cs-aug", "", () => {
         const next = on ? slotted.filter((x) => x !== i) : [...slotted, i].slice(-AUGMENT_SLOTS);
         send({ kind: "augment.set", skillId: id, slots: next });
       });
       row2.dataset.on = String(on);
       row2.dataset.open = String(offer.ok);
       row2.disabled = !ready || !offer.ok && !on;
-      const text2 = el2("span");
-      text2.append(el2("b", "", a.name), document2.createTextNode(a.description));
-      if (!offer.ok && st.learned) text2.append(el2("em", "", offer.reason));
-      row2.append(el2("i"), text2);
+      const text3 = el3("span");
+      text3.append(el3("b", "", a.name), document2.createTextNode(a.description));
+      if (!offer.ok && st.learned) text3.append(el3("em", "", offer.reason));
+      row2.append(el3("i"), text3);
       box5.append(row2);
     });
     return box5;
   }
   function paintFoot(g, spent) {
     if (confirmReset) {
-      const row2 = el2("div", "cs-reset-row"), yes = button2("cs-reset danger", `Unlearn ${spent} point${spent === 1 ? "" : "s"}`, () => {
+      const row2 = el3("div", "cs-reset-row"), yes = button3("cs-reset danger", `Unlearn ${spent} point${spent === 1 ? "" : "s"}`, () => {
         confirmReset = false;
         send({ kind: "skill.reset", tree: g.tree.id });
-      }), no = button2("cs-reset", "Cancel", () => {
+      }), no = button3("cs-reset", "Cancel", () => {
         confirmReset = false;
         paint2();
       });
       yes.disabled = !ready;
       row2.append(yes, no);
-      g.foot.replaceChildren(el2("p", "cs-note", `Unlearn every ${g.tree.name} skill? It\u2019s free.`), row2);
+      g.foot.replaceChildren(el3("p", "cs-note", `Unlearn every ${g.tree.name} skill? It\u2019s free.`), row2);
       return;
     }
-    const reset = button2("cs-reset", `Reset ${g.tree.name}`, () => {
+    const reset = button3("cs-reset", `Reset ${g.tree.name}`, () => {
       confirmReset = true;
       paint2();
     });
@@ -91423,19 +91720,19 @@ function createProgressionPresentation({ document: document2, readModel, issue }
   gain.setAttribute("role", "status");
   document2.body.append(gain);
   let attribute = "str", draft = { str: 0, dex: 0, int: 0 }, confirm = null, stamp6 = "", previous = null, message = "", messageUntil = 0, model = null, viewKey = "";
-  const el2 = (tag, text2 = "", cls = "") => {
+  const el3 = (tag, text3 = "", cls = "") => {
     const e = document2.createElement(tag);
-    e.textContent = text2;
+    e.textContent = text3;
     e.className = cls;
     return e;
-  }, button2 = (text2, fn) => {
-    const b = el2("button", text2);
+  }, button3 = (text3, fn) => {
+    const b = el3("button", text3);
     b.type = "button";
     b.onclick = fn;
     return b;
   };
-  const attributes = el2("section", "", "sx-card sx-attrs"), attrHead = el2("div", "", "sx-attrhead"), attrPts = el2("span", "", "sx-pts"), attrRows = el2("div", "", "sx-attrrows"), attrFoot = el2("div", "", "sx-attrfoot");
-  const attrReset = button2("", () => {
+  const attributes = el3("section", "", "sx-card sx-attrs"), attrHead = el3("div", "", "sx-attrhead"), attrPts = el3("span", "", "sx-pts"), attrRows = el3("div", "", "sx-attrrows"), attrFoot = el3("div", "", "sx-attrfoot");
+  const attrReset = button3("", () => {
     const m = readModel();
     if (confirm !== "attributes") {
       confirm = "attributes";
@@ -91443,16 +91740,16 @@ function createProgressionPresentation({ document: document2, readModel, issue }
     } else send({ kind: "attributes.reset" }, { inventoryRevision: m.inventory.revision, goldQuote: usesBuildBalanceV2({ inventory: m.inventory }) ? "0" : "2500" });
   });
   attrReset.className = "sx-reset";
-  const undo = button2("Undo", () => {
+  const undo = button3("Undo", () => {
     draft = { str: 0, dex: 0, int: 0 };
     confirm = null;
     redraw();
   });
   undo.className = "sx-undo";
-  const commit = button2("Confirm", () => send({ kind: "allocate", deltas: { ...draft } }));
+  const commit = button3("Confirm", () => send({ kind: "allocate", deltas: { ...draft } }));
   commit.className = "sx-confirm";
-  attrHead.append(el2("h4", "Attributes", "sx-title"), attrPts, attrReset);
-  attrFoot.append(undo, el2("span", "", "sx-spacer"), commit);
+  attrHead.append(el3("h4", "Attributes", "sx-title"), attrPts, attrReset);
+  attrFoot.append(undo, el3("span", "", "sx-spacer"), commit);
   attributes.append(attrHead, attrRows, attrFoot);
   let unspent = 0, held = false, holdTimer = null, repeatTimer = null;
   const ATTR_COLORS = { str: "#e8836b", dex: "#5fd38a", int: "#8f8cf0" }, ATTR_SHORT_V2 = { str: "+1 Attack \xB7 +6 Max HP \xB7 Block", dex: "+1 Attack \xB7 +0.25% Crit \xB7 Parry", int: "+1 Attack \xB7 +0.2 Defense \xB7 Tome power" }, ATTR_SHORT = { str: "+2.5 Attack \xB7 +10 Max HP \xB7 Block", dex: "+1 Attack \xB7 Dagger power \xB7 Crit damage", int: "+0.2 Defense \xB7 Tome power" };
@@ -91464,11 +91761,11 @@ function createProgressionPresentation({ document: document2, readModel, issue }
   };
   const attrRow = {};
   for (const k of ["str", "dex", "int"]) {
-    const row2 = el2("div", "", "sx-arow"), ic = el2("span", "", "sx-aic"), text2 = el2("div", "", "sx-atext"), line29 = el2("div", "", "sx-aline"), value2 = el2("span", "", "sx-aval"), gain2 = el2("span", "", "sx-adraft"), desc = el2("div", "", "sx-adesc"), step = el2("div", "", "sx-step");
+    const row2 = el3("div", "", "sx-arow"), ic = el3("span", "", "sx-aic"), text3 = el3("div", "", "sx-atext"), line29 = el3("div", "", "sx-aline"), value2 = el3("span", "", "sx-aval"), gain2 = el3("span", "", "sx-adraft"), desc = el3("div", "", "sx-adesc"), step = el3("div", "", "sx-step");
     ic.innerHTML = statIcon(k, 20);
     row2.style.setProperty("--c", ATTR_COLORS[k]);
-    line29.append(el2("b", k.toUpperCase()), value2, gain2);
-    text2.append(line29, desc);
+    line29.append(el3("b", k.toUpperCase()), value2, gain2);
+    text3.append(line29, desc);
     const add = () => {
       if (spare() <= 0) return false;
       draft[k] += 1;
@@ -91477,16 +91774,16 @@ function createProgressionPresentation({ document: document2, readModel, issue }
       redraw();
       return true;
     };
-    const minus = button2("\u2212", () => {
+    const minus2 = button3("\u2212", () => {
       if (draft[k] > 0) {
         draft[k] -= 1;
         confirm = null;
         redraw();
       }
     });
-    minus.className = "sx-minus";
-    minus.setAttribute("aria-label", "Take a point from " + k.toUpperCase());
-    const plus = button2("+", () => {
+    minus2.className = "sx-minus";
+    minus2.setAttribute("aria-label", "Take a point from " + k.toUpperCase());
+    const plus = button3("+", () => {
       if (held) {
         held = false;
         return;
@@ -91506,10 +91803,10 @@ function createProgressionPresentation({ document: document2, readModel, issue }
       }, 380);
     });
     for (const e of ["pointerup", "pointerleave", "pointercancel"]) plus.addEventListener(e, stopHold);
-    step.append(minus, plus);
-    row2.append(ic, text2, step);
+    step.append(minus2, plus);
+    row2.append(ic, text3, step);
     attrRows.append(row2);
-    attrRow[k] = { row: row2, value: value2, gain: gain2, desc, minus, plus, bump: false };
+    attrRow[k] = { row: row2, value: value2, gain: gain2, desc, minus: minus2, plus, bump: false };
   }
   let previewKey = "", previewStats = null;
   function preview(m, local7, d) {
@@ -91528,7 +91825,7 @@ function createProgressionPresentation({ document: document2, readModel, issue }
     }
     return previewStats;
   }
-  const skills = createSkillTreeViewV2({ document: document2, send: (action2) => send(action2) }), classSkills = createClassSkillsViewV1({ document: document2, send: (action2) => send(action2), utility: createSkillTreeViewV2({ document: document2, send: (action2) => send(action2), only: "utility" }) }), notice = el2("p", "", "progression-notice");
+  const skills = createSkillTreeViewV2({ document: document2, send: (action2) => send(action2) }), classSkills = createClassSkillsViewV1({ document: document2, send: (action2) => send(action2), utility: createSkillTreeViewV2({ document: document2, send: (action2) => send(action2), only: "utility" }) }), notice = el3("p", "", "progression-notice");
   notice.setAttribute("role", "status");
   host.append(skills.root, classSkills.root, notice);
   statsView.mountAttributes(attributes);
@@ -91587,7 +91884,7 @@ function createProgressionPresentation({ document: document2, readModel, issue }
     unspent = Number(points2.attributeUnspent) || 0;
     const v2 = usesBuildBalanceV2({ inventory: m.inventory }), drafted = draft.str + draft.dex + draft.int, left = unspent - drafted, can = unspent > 0 || drafted > 0, allocatedAny = Object.values(d.allocated).some((x) => String(x) !== "0");
     attrPts.hidden = !can;
-    attrPts.replaceChildren(el2("b", String(left)), el2("span", drafted ? ` of ${unspent} point${unspent === 1 ? "" : "s"} left` : ` point${left === 1 ? "" : "s"} to spend`));
+    attrPts.replaceChildren(el3("b", String(left)), el3("span", drafted ? ` of ${unspent} point${unspent === 1 ? "" : "s"} left` : ` point${left === 1 ? "" : "s"} to spend`));
     attrReset.hidden = drafted > 0 || !allocatedAny;
     attrReset.textContent = confirm === "attributes" ? "Tap again to reset all" : v2 ? "Reset attributes \xB7 free" : "Reset attributes \xB7 2,500 gold";
     attrReset.disabled = !ready;
@@ -93567,9 +93864,9 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
     img.height = 24;
     return img;
   };
-  const el2 = (tag, text2, cls = "") => {
+  const el3 = (tag, text3, cls = "") => {
     const e = document2.createElement(tag);
-    e.textContent = text2;
+    e.textContent = text3;
     e.className = cls;
     return e;
   };
@@ -93579,19 +93876,19 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
     if (section === "materials") {
       materials2.replaceChildren();
       const row2 = (name, desc, tags, cls = "mt-row") => {
-        const quantity = e.materials[name] ?? 0, r = el2("article", "", cls + (quantity ? "" : " is-zero")), img = icon(SALVAGE_MATERIAL_ART[name]), t = el2("div", "", "mt-text"), tagRow = el2("div", "", "mt-tags");
+        const quantity = e.materials[name] ?? 0, r = el3("article", "", cls + (quantity ? "" : " is-zero")), img = icon(SALVAGE_MATERIAL_ART[name]), t = el3("div", "", "mt-text"), tagRow = el3("div", "", "mt-tags");
         img.width = img.height = cls === "mt-row" ? 32 : 44;
-        for (const x of tags) tagRow.append(el2("span", x, "mt-tag" + (/^Salvage/.test(x) ? " is-salvage" : "")));
-        t.append(el2("strong", name), el2("small", desc, "mt-desc"), tagRow);
-        r.append(img, t, el2("b", quantity.toLocaleString(), "mt-count"));
+        for (const x of tags) tagRow.append(el3("span", x, "mt-tag" + (/^Salvage/.test(x) ? " is-salvage" : "")));
+        t.append(el3("strong", name), el3("small", desc, "mt-desc"), tagRow);
+        r.append(img, t, el3("b", quantity.toLocaleString(), "mt-count"));
         return r;
       };
-      materials2.append(el2("p", "Souls", "mt-sec"), row2("Monster Soul", "Feeds slot upgrades and resonance", ["Elites", "Named", "Mini-bosses", "Bosses"], "mt-row mt-hero"), el2("p", "Scraps", "mt-sec"));
+      materials2.append(el3("p", "Souls", "mt-sec"), row2("Monster Soul", "Feeds slot upgrades and resonance", ["Elites", "Named", "Mini-bosses", "Bosses"], "mt-row mt-hero"), el3("p", "Scraps", "mt-sec"));
       const steps4 = ["1\u201320", "21\u201340", "41\u201360", "61\u201380", "81\u2013100", "91\u2013100"];
       ["Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic"].forEach((t, i) => materials2.append(row2(t + " Scrap", (i < 5 ? "Awakens " + t + " gear \xB7 " : "") + "Upgrades " + steps4[i], ["Salvage " + t])));
-      materials2.append(el2("p", "Rare materials", "mt-sec"), row2("Overlord's Sigil", "Rerolls a line when you reforge", ["Elites", "Bosses", "Town Smith"]), row2("Wakestone", "Awakens gear \xB7 Upgrades 41\u201360", ["Elites", "Bosses", "Town Smith"]), row2("Astral Essence", "Powers an enchant \xB7 Upgrades 61\u201380", ["Elites", "Bosses", "Town Smith"]), row2("Starshard", "Upgrades 81\u2013100", ["World Tiers \xB7 coming later"]));
-      materials2.append(el2("p", "A Smith breaks one Scrap into three of the rarity below.", "mt-note"));
-      if (review) materials2.append(el2("p", "FUNDED FORGE REVIEW \u2014 separate test campaign", "forge-review-label"));
+      materials2.append(el3("p", "Rare materials", "mt-sec"), row2("Overlord's Sigil", "Rerolls a line when you reforge", ["Elites", "Bosses", "Town Smith"]), row2("Wakestone", "Awakens gear \xB7 Upgrades 41\u201360", ["Elites", "Bosses", "Town Smith"]), row2("Astral Essence", "Powers an enchant \xB7 Upgrades 61\u201380", ["Elites", "Bosses", "Town Smith"]), row2("Starshard", "Upgrades 81\u2013100", ["World Tiers \xB7 coming later"]));
+      materials2.append(el3("p", "A Smith breaks one Scrap into three of the rarity below.", "mt-note"));
+      if (review) materials2.append(el3("p", "FUNDED FORGE REVIEW \u2014 separate test campaign", "forge-review-label"));
       return;
     }
     if (section !== "forge") return;
@@ -93599,15 +93896,15 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
     root2.replaceChildren();
     const latest = Object.values(e.lastAttunementsBySlot).sort((a, b) => b.authorityOrder - a.authorityOrder)[0];
     if (latest) {
-      const notice = el2("p", `Attuned ${label2(latest.command.payload.slot)} to Lv. ${e.slotLevels[latest.command.payload.slot]}!`, "stat-gain");
+      const notice = el3("p", `Attuned ${label2(latest.command.payload.slot)} to Lv. ${e.slotLevels[latest.command.payload.slot]}!`, "stat-gain");
       notice.setAttribute("role", "status");
       root2.append(notice);
     }
-    if (review) root2.append(el2("p", "FUNDED FORGE REVIEW \u2014 starting funds are for testing only.", "forge-review-label"));
-    if (!m.forgeAccess) root2.append(el2("p", "Approach the Forge to attune.", "forge-access"));
-    const layout = el2("div", "", "forge-layout"), list = el2("div", "", "forge-slots"), details = el2("div", "", "forge-details");
+    if (review) root2.append(el3("p", "FUNDED FORGE REVIEW \u2014 starting funds are for testing only.", "forge-review-label"));
+    if (!m.forgeAccess) root2.append(el3("p", "Approach the Forge to attune.", "forge-access"));
+    const layout = el3("div", "", "forge-layout"), list = el3("div", "", "forge-slots"), details = el3("div", "", "forge-details");
     for (const slot of listedEquipmentSlots(inv)) {
-      const item2 = inv.itemsById[inv.equipped[slot]], d2 = itemDefinition(item2), b = el2("button", "", "forge-slot-card");
+      const item2 = inv.itemsById[inv.equipped[slot]], d2 = itemDefinition(item2), b = el3("button", "", "forge-slot-card");
       b.type = "button";
       b.dataset.forgeAction = slot;
       b.setAttribute("aria-pressed", String(slot === selected));
@@ -93620,9 +93917,9 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
         img.height = 36;
         b.append(img);
       }
-      const info2 = el2("span", "", "item-info");
-      info2.append(el2("strong", label2(slot)), el2("small", d2?.name ?? "[EMPTY SLOT]", "item-sub"));
-      b.append(info2, el2("span", `${e.slotLevels[slot]}/100`, "forge-rank"));
+      const info2 = el3("span", "", "item-info");
+      info2.append(el3("strong", label2(slot)), el3("small", d2?.name ?? "[EMPTY SLOT]", "item-sub"));
+      b.append(info2, el3("span", `${e.slotLevels[slot]}/100`, "forge-rank"));
       b.onclick = () => {
         selected = slot;
         invalidate();
@@ -93630,40 +93927,40 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
       list.append(b);
     }
     const level = e.slotLevels[selected], item = inv.itemsById[inv.equipped[selected]], d = itemDefinition(item);
-    details.append(el2("h4", label2(selected).toUpperCase() + " SLOT ATTUNEMENT"), el2("p", `Lv. ${level} / 100`));
+    details.append(el3("h4", label2(selected).toUpperCase() + " SLOT ATTUNEMENT"), el3("p", `Lv. ${level} / 100`));
     const progress8 = document2.createElement("progress");
     progress8.max = 100;
     progress8.value = level;
     progress8.setAttribute("aria-label", "Slot attunement");
-    details.append(progress8, el2("p", "This bonus remains with the slot when gear is replaced.", "tt-muted"));
-    if (level === 100) details.append(el2("p", "MAXIMUM ATTUNEMENT REACHED", "stat-gain"));
+    details.append(progress8, el3("p", "This bonus remains with the slot when gear is replaced.", "tt-muted"));
+    if (level === 100) details.append(el3("p", "MAXIMUM ATTUNEMENT REACHED", "stat-gain"));
     else {
-      const cost = attunementCost(level, { inventory: inv }), affordGold = compareAmount(inv.gold, cost.gold) >= 0, affordMaterials = Object.entries(cost.materials).every(([k, v]) => (e.materials[k] ?? 0) >= v), box5 = el2("div", "", "forge-requirements");
-      box5.append(el2("h4", "ATTUNEMENT REQUIREMENTS"));
-      const gold = el2("p", `${formatAmount(cost.gold)} Gold`, affordGold ? "stat-gain" : "stat-loss");
+      const cost = attunementCost(level, { inventory: inv }), affordGold = compareAmount(inv.gold, cost.gold) >= 0, affordMaterials = Object.entries(cost.materials).every(([k, v]) => (e.materials[k] ?? 0) >= v), box5 = el3("div", "", "forge-requirements");
+      box5.append(el3("h4", "ATTUNEMENT REQUIREMENTS"));
+      const gold = el3("p", `${formatAmount(cost.gold)} Gold`, affordGold ? "stat-gain" : "stat-loss");
       gold.title = cost.gold + " gold exactly";
       gold.prepend(icon(EQUIPMENT_ART.gold.url));
-      box5.append(gold, el2("small", `Owned: ${formatAmount(inv.gold)}`));
+      box5.append(gold, el3("small", `Owned: ${formatAmount(inv.gold)}`));
       for (const [k, v] of Object.entries(cost.materials)) {
-        const row2 = el2("p", `${v.toLocaleString()} ${k}`, (e.materials[k] ?? 0) >= v ? "stat-gain" : "stat-loss");
+        const row2 = el3("p", `${v.toLocaleString()} ${k}`, (e.materials[k] ?? 0) >= v ? "stat-gain" : "stat-loss");
         if (SALVAGE_MATERIAL_ART[k]) row2.prepend(icon(SALVAGE_MATERIAL_ART[k]));
-        box5.append(row2, el2("small", `Owned: ${(e.materials[k] ?? 0).toLocaleString()}`));
+        box5.append(row2, el3("small", `Owned: ${(e.materials[k] ?? 0).toLocaleString()}`));
       }
       details.append(box5);
-      if (cost.materials.Starshard) details.append(el2("p", "Starshards come from World Tier bosses, which are not in the game yet.", "forge-deferred"));
+      if (cost.materials.Starshard) details.append(el3("p", "Starshards come from World Tier bosses, which are not in the game yet.", "forge-deferred"));
       if (d) {
-        const p = { d8: m.playersById[m.localPlayerId].d8, progression: progressionAtXp(m.playersById[m.localPlayerId].progression.totalXp, m.playersById[m.localPlayerId].d8), inventory: inv }, zero6 = resolvePlayerStats2({ ...p, inventory: { ...inv, economy: { ...e, slotLevels: { ...e.slotLevels, [selected]: 0 } } } }), before = resolvePlayerStats2(p), after = resolvePlayerStats2({ ...p, inventory: { ...inv, economy: { ...e, slotLevels: { ...e.slotLevels, [selected]: level + 1 } } } }), preview = el2("div", "", "forge-preview");
-        preview.append(el2("h4", `Equipped item \xB7 ${d.name}`), el2("small", "Current attunement contribution \u2192 next level contribution"));
+        const p = { d8: m.playersById[m.localPlayerId].d8, progression: progressionAtXp(m.playersById[m.localPlayerId].progression.totalXp, m.playersById[m.localPlayerId].d8), inventory: inv }, zero6 = resolvePlayerStats2({ ...p, inventory: { ...inv, economy: { ...e, slotLevels: { ...e.slotLevels, [selected]: 0 } } } }), before = resolvePlayerStats2(p), after = resolvePlayerStats2({ ...p, inventory: { ...inv, economy: { ...e, slotLevels: { ...e.slotLevels, [selected]: level + 1 } } } }), preview = el3("div", "", "forge-preview");
+        preview.append(el3("h4", `Equipped item \xB7 ${d.name}`), el3("small", "Current attunement contribution \u2192 next level contribution"));
         for (const [k, name] of [["attack", "Attack"], ["defense", "Defense"], ["maxHp", "Max HP"], ["moveSpeed", "Speed"]]) {
           const a = statDifference(before[k], zero6[k]), b2 = statDifference(after[k], zero6[k]);
           if (!a && !b2) continue;
-          const row2 = el2("p", "", statDifference(b2, a) ? "stat-gain" : "tt-muted");
-          row2.append(icon(k === "moveSpeed" ? speedUrl : EQUIPMENT_STAT_ART[k]), el2("span", name), el2("strong", `+${statText(a, true)} \u2192 +${statText(b2, true)}`));
+          const row2 = el3("p", "", statDifference(b2, a) ? "stat-gain" : "tt-muted");
+          row2.append(icon(k === "moveSpeed" ? speedUrl : EQUIPMENT_STAT_ART[k]), el3("span", name), el3("strong", `+${statText(a, true)} \u2192 +${statText(b2, true)}`));
           preview.append(row2);
         }
         details.append(preview);
-      } else details.append(el2("p", "Empty slot \xB7 bonuses apply when equipped.", "tt-muted"));
-      const b = el2("button", `ATTUNE \xB7 ${level} \u2192 ${level + 1}`, "forge-anvil-button");
+      } else details.append(el3("p", "Empty slot \xB7 bonuses apply when equipped.", "tt-muted"));
+      const b = el3("button", `ATTUNE \xB7 ${level} \u2192 ${level + 1}`, "forge-anvil-button");
       b.type = "button";
       b.dataset.forgeAction = "attune";
       b.disabled = !m.forgeAccess || m.persistence.phase !== "encounter" || !affordGold || !affordMaterials;
@@ -93678,11 +93975,11 @@ function createForgePresentation({ document: document2, issue, invalidate }) {
 }
 
 // src/client/context_action_input.js
-function createContextActionInput({ button: button2, activate }) {
+function createContextActionInput({ button: button3, activate }) {
   const listeners = [], owners = /* @__PURE__ */ new Set();
   const listen = (type, fn) => {
-    button2.addEventListener(type, fn);
-    listeners.push(() => button2.removeEventListener(type, fn));
+    button3.addEventListener(type, fn);
+    listeners.push(() => button3.removeEventListener(type, fn));
   };
   listen("pointerdown", (event) => {
     if (event.button !== 0 || owners.has(event.pointerId)) return;
@@ -93690,7 +93987,7 @@ function createContextActionInput({ button: button2, activate }) {
     event.stopPropagation();
     owners.add(event.pointerId);
     try {
-      button2.setPointerCapture(event.pointerId);
+      button3.setPointerCapture(event.pointerId);
     } catch {
     }
     activate();
@@ -93705,7 +94002,7 @@ function createContextActionInput({ button: button2, activate }) {
   });
   function clear2() {
     for (const owner of owners) try {
-      button2.releasePointerCapture(owner);
+      button3.releasePointerCapture(owner);
     } catch {
     }
     owners.clear();
@@ -93731,8 +94028,8 @@ function equipmentComparison(inv, itemId, slot, totalXp = 0, d8 = void 0) {
   return { equipped, before, after, displaced: Object.values(inv.equipped).filter((id) => id && !Object.values(equipped).includes(id)), difference: Object.fromEntries(Object.keys(statLabel).map((k) => [k, statDifference(after[k], before[k])])) };
 }
 function contextActionForModel(model) {
-  const drop = model.loot?.find((entry2) => entry2.canPickUp);
-  if (drop) return { kind: "loot.pickup", payload: { sourceEntityId: drop.sourceEntityId } };
+  const drop2 = model.loot?.find((entry2) => entry2.canPickUp);
+  if (drop2) return { kind: "loot.pickup", payload: { sourceEntityId: drop2.sourceEntityId } };
   const resource = model.resources?.find((entry2) => entry2.canUse);
   if (resource) return { kind: "resource.interact", payload: { groupId: resource.groupId, episode: resource.episode, ordinal: resource.ordinal } };
   return null;
@@ -93740,8 +94037,8 @@ function contextActionForModel(model) {
 function contextActionLabelForModel(model, action2 = contextActionForModel(model)) {
   if (!action2) return null;
   if (action2.kind === "loot.pickup") {
-    const drop = model.loot?.find((entry2) => entry2.sourceEntityId === action2.payload.sourceEntityId);
-    return drop ? `Pick up: ${itemDefinition(drop).name}` : null;
+    const drop2 = model.loot?.find((entry2) => entry2.sourceEntityId === action2.payload.sourceEntityId);
+    return drop2 ? `Pick up: ${itemDefinition(drop2).name}` : null;
   }
   const resource = model.resources?.find((entry2) => entry2.groupId === action2.payload.groupId && entry2.episode === action2.payload.episode && entry2.ordinal === action2.payload.ordinal);
   if (!resource) return null;
@@ -93782,7 +94079,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
   } catch {
   }
   const progressionView = createProgressionPresentation({ document: document2, readModel, issue });
-  const progressionButton = button2("SKILLS", () => {
+  const progressionButton = button3("SKILLS", () => {
     forgeSession = false;
     section = "progression";
     inspect = false;
@@ -93791,7 +94088,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
   });
   progressionButton.id = "world-progression-tab";
   panel.querySelector(".bag-section-tabs").append(progressionButton);
-  const statsButton = button2("STATS", () => {
+  const statsButton = button3("STATS", () => {
     forgeSession = false;
     section = "stats";
     inspect = false;
@@ -93800,14 +94097,14 @@ function createInventoryPresentation({ document: document2, environment, readMod
   });
   statsButton.id = "world-stats-tab";
   panel.querySelector(".bag-section-tabs").insertBefore(statsButton, progressionButton);
-  const heroesView = heroSlots ? createHeroSlotsView({ document: document2, environment, heroSlots }) : null, heroesButton = heroesView && button2("HEROES", () => {
+  const heroesView = heroSlots ? createHeroSlotsView({ document: document2, environment, heroSlots }) : null, heroesButton = heroesView && button3("HEROES", () => {
     forgeSession = false;
     section = "heroes";
     inspect = false;
     key3 = null;
     refresh(readModel());
   });
-  const bestiaryView = createBestiaryViewV1({ document: document2, environment, issue }), bestiaryButton = button2("BESTIARY", () => {
+  const bestiaryView = createBestiaryViewV1({ document: document2, environment, issue }), bestiaryButton = button3("BESTIARY", () => {
     forgeSession = false;
     section = "bestiary";
     inspect = false;
@@ -93817,7 +94114,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
   bestiaryButton.id = "world-bestiary-tab";
   panel.querySelector(".bag-section-tabs").insertBefore(bestiaryButton, statsButton);
   document2.querySelector(".bag-body").append(bestiaryView.root);
-  const questsButton = button2("QUESTS", () => {
+  const questsButton = button3("QUESTS", () => {
     if (questsPage) {
       forgeSession = false;
       section = "quests";
@@ -93839,7 +94136,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
   }
   const nav = panel.querySelector(".bag-section-tabs"), heading = panel.querySelector(".bag-heading");
   panel.classList.add("rpg-menu");
-  const railButton = button2("", () => panel.classList.toggle("rail-open"));
+  const railButton = button3("", () => panel.classList.toggle("rail-open"));
   railButton.id = "world-menu-rail";
   railButton.className = "rm-railbtn";
   railButton.setAttribute("aria-label", "Show page names");
@@ -93861,7 +94158,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     key3 = null;
     refresh(readModel());
   } });
-  const gearSwitch = button2("Carried gear", () => {
+  const gearSwitch = button3("Carried gear", () => {
     section = section === "forge" ? "bag" : "forge";
     inspect = false;
     key3 = null;
@@ -93877,11 +94174,11 @@ function createInventoryPresentation({ document: document2, environment, readMod
     e.className = cls;
     return e;
   }
-  function icon(key4, empty = false) {
+  function icon(key4, empty2 = false) {
     const img = document2.createElement("img");
     img.src = EQUIPMENT_ART[key4].url;
     img.alt = "";
-    img.className = "equipment-icon" + (empty ? " empty-icon" : "");
+    img.className = "equipment-icon" + (empty2 ? " empty-icon" : "");
     img.width = 48;
     img.height = 48;
     return img;
@@ -93891,7 +94188,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     img.src = itemIconUrl(item, document2) ?? img.src;
     return img;
   }
-  function button2(caption, action2, disabled = false) {
+  function button3(caption, action2, disabled = false) {
     const b = element("button", caption);
     b.type = "button";
     b.disabled = disabled;
@@ -94015,12 +94312,12 @@ function createInventoryPresentation({ document: document2, environment, readMod
     const next = [fresh, upCount, ap, pts2, level, name, cls, done3].join("/");
     if (menuKey === next) return;
     menuKey = next;
-    for (const [id, text2, kind] of [["equipment", upCount ? "UP" : "", "is-up"], ["bag", fresh ? fresh + " NEW" : "", "is-new"], ["stats", ap > 0 ? ap + " AP" : "", "is-points"], ["progression", pts2 > 0 ? pts2 + " PTS" : "", "is-points"], ["quests", done3 ? done3 + " DONE" : "", "is-new"]]) {
+    for (const [id, text3, kind] of [["equipment", upCount ? "UP" : "", "is-up"], ["bag", fresh ? fresh + " NEW" : "", "is-new"], ["stats", ap > 0 ? ap + " AP" : "", "is-points"], ["progression", pts2 > 0 ? pts2 + " PTS" : "", "is-points"], ["quests", done3 ? done3 + " DONE" : "", "is-new"]]) {
       const b = document2.getElementById(`world-${id}-tab`), badge = b?.querySelector(".rm-badge");
       if (!badge) continue;
-      badge.textContent = text2;
+      badge.textContent = text3;
       badge.className = "rm-badge " + kind;
-      b.setAttribute("aria-label", b.querySelector(".rm-label").textContent + (text2 ? ", " + text2.toLowerCase() : ""));
+      b.setAttribute("aria-label", b.querySelector(".rm-label").textContent + (text3 ? ", " + text3.toLowerCase() : ""));
     }
     who.replaceChildren(element("span", String(level), "rm-level"), element("strong", name, "rm-name"), element("small", cls, "rm-class"));
   }
@@ -94240,7 +94537,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
   }
   function slotTile(slot, inv, scan) {
     const id = inv.equipped[slot], item = id ? inv.itemsById[id] : null, d = item ? itemDefinition(item) : null, wrap2 = element("div", "", "gx-slotwrap");
-    const b = button2("", () => {
+    const b = button3("", () => {
       if (item) select(id, b);
       else {
         section = "bag";
@@ -94341,7 +94638,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     chips.setAttribute("aria-label", "Filter the bag");
     for (const [id, name] of BAG_FILTERS) {
       if (id !== "all" && !counts[id]) continue;
-      const c = button2("", () => {
+      const c = button3("", () => {
         bagFilter = id;
         key3 = null;
         refresh(readModel());
@@ -94361,7 +94658,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     }
     const grid = element("div", "", "gx-grid");
     for (const item of shown2) {
-      const d = itemDefinition(item), cell = element("div", "", "gx-cell"), t = button2("", () => select(item.itemId, t)), lock = scan.locks.get(item.itemId), lv = item.generated?.itemPower;
+      const d = itemDefinition(item), cell = element("div", "", "gx-cell"), t = button3("", () => select(item.itemId, t)), lock = scan.locks.get(item.itemId), lv = item.generated?.itemPower;
       t.className = "gx-tile" + (lock ? " is-locked" : "");
       rarityVar(cell, d);
       t.dataset.itemId = item.itemId;
@@ -94376,18 +94673,18 @@ function createInventoryPresentation({ document: document2, environment, readMod
     }
     list.replaceChildren(chips, meta, shown2.length ? grid : element("p", items.length ? "Nothing here with this filter." : "Your gear is equipped. New finds will appear here.", "gx-empty"), element("p", "Tap an item to compare it with what you\u2019re wearing.", "gx-hint"));
   }
-  function markOf(key4, mark, diff, text2) {
+  function markOf(key4, mark, diff, text3) {
     const mk = element("span", "", "gx-mark is-" + mark);
     if (mark === "up" || mark === "new") mk.innerHTML = ARROW_UP;
     if (mark === "down") mk.innerHTML = ARROW_DOWN;
-    mk.append(text2 ?? (mark === "new" ? "new" : mark === "same" ? "same" : lineValue(key4, diff)));
+    mk.append(text3 ?? (mark === "new" ? "new" : mark === "same" ? "same" : lineValue(key4, diff)));
     return mk;
   }
   function lineRow(key4, value2, mark, diff, tag, markText) {
-    const row2 = element("div", "", "gx-line"), text2 = markup(element("span", "", "gx-linetext"), statIcon(key4));
-    text2.append(`+${lineValue(key4, value2)} ${lineLabel(key4)}`);
-    if (tag) text2.append(element("small", tag, "gx-tag"));
-    row2.append(text2);
+    const row2 = element("div", "", "gx-line"), text3 = markup(element("span", "", "gx-linetext"), statIcon(key4));
+    text3.append(`+${lineValue(key4, value2)} ${lineLabel(key4)}`);
+    if (tag) text3.append(element("small", tag, "gx-tag"));
+    row2.append(text3);
     if (mark) row2.append(markOf(key4, mark, diff, markText));
     return row2;
   }
@@ -94404,7 +94701,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     rarityVar(comparison, d);
     const target = equippedSlot || retiredGear(d) ? null : d.slot === "ring" ? ringSlot : d.slot, preview = target ? equipmentComparison(inv, item.itemId, target, local7.progression.totalXp, local7.d8) : null, worn = (preview?.displaced ?? []).map((id) => inv.itemsById[id]).filter(Boolean);
     const cmp = target ? compareSections(sections, worn.map((w) => itemSections(itemDefinition(w), w.generated))) : { ...sections, lost: [] };
-    const scroll = element("div", "", "gx-sheetscroll"), close2 = markup(button2("", () => dismissTooltip()), CLOSE_SVG);
+    const scroll = element("div", "", "gx-sheetscroll"), close2 = markup(button3("", () => dismissTooltip()), CLOSE_SVG);
     close2.className = "gx-close";
     close2.dataset.action = "dismiss";
     close2.setAttribute("aria-label", "Close item");
@@ -94424,7 +94721,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
       const tabs = element("div", "", "gx-ringtabs");
       tabs.append(element("span", "Compare to", "gx-compareto"));
       for (const s of ["ring1", "ring2"]) {
-        const w = inv.itemsById[inv.equipped[s]], tab = button2("", () => {
+        const w = inv.itemsById[inv.equipped[s]], tab = button3("", () => {
           ringSlot = s;
           key3 = null;
           refresh(readModel());
@@ -94491,11 +94788,11 @@ function createInventoryPresentation({ document: document2, environment, readMod
         const sec = element("section", "", "gx-section gx-locked");
         sec.append(element("h5", "Unlocks at higher rarity", "gx-sectiontitle"));
         for (const [k, t] of locked) {
-          const [key4, skill] = k.split(":"), line29 = affixLineKey(key4, skill), row2 = element("div", "", "gx-line is-locked"), text2 = markup(element("span", "", "gx-linetext"), LOCK_BADGE);
-          text2.append(lineLabel(line29));
+          const [key4, skill] = k.split(":"), line29 = affixLineKey(key4, skill), row2 = element("div", "", "gx-line is-locked"), text3 = markup(element("span", "", "gx-linetext"), LOCK_BADGE);
+          text3.append(lineLabel(line29));
           const tag = element("small", RARITY_NAMES[t], "gx-unlock");
           tag.style.color = RARITY_COLORS[t];
-          row2.append(text2, tag);
+          row2.append(text3, tag);
           sec.append(row2);
         }
         scroll.append(sec);
@@ -94520,7 +94817,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     }
     const changes = preview ? heroChanges(preview) : [];
     if (changes.length) {
-      const sw = button2("", () => {
+      const sw = button3("", () => {
         heroStatsOpen = !heroStatsOpen;
         try {
           environment.localStorage?.setItem(HERO_STATS_KEY, heroStatsOpen ? "on" : "off");
@@ -94553,7 +94850,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
       att.append(element("span", `${SLOT_NAMES[equippedSlot].replace(/ \d$/, "")} slot attunement`), bar, element("b", "Lv " + level));
       scroll.append(att);
       if (equippedSlot === "helmet" && local7.d8?.look) {
-        const shown2 = local7.d8.look.helmet !== false, sw = button2("", toggleHelmet);
+        const shown2 = local7.d8.look.helmet !== false, sw = button3("", toggleHelmet);
         sw.className = "gx-switch is-row";
         sw.dataset.action = "helmet";
         sw.setAttribute("aria-pressed", String(shown2));
@@ -94566,7 +94863,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     const foot = element("div", "", "gx-sheetfoot");
     if (equippedSlot) {
       if (equippedSlot !== "weapon") {
-        const u = button2("Unequip", () => {
+        const u = button3("Unequip", () => {
           inspect = false;
           issue("equipment.unequip", { slot: equippedSlot });
         }, !canEquip);
@@ -94574,12 +94871,12 @@ function createInventoryPresentation({ document: document2, environment, readMod
         u.dataset.action = "unequip";
         foot.append(u);
       }
-      const done3 = button2("Done", () => dismissTooltip());
+      const done3 = button3("Done", () => dismissTooltip());
       done3.className = "gx-btn is-primary";
       done3.dataset.action = "done";
       foot.append(done3);
     } else {
-      const more = button2("More", () => {
+      const more = button3("More", () => {
         moreOpen = !moreOpen;
         revealMore = moreOpen;
         salvagePending = null;
@@ -94589,7 +94886,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
       more.className = "gx-btn";
       more.dataset.action = "more";
       more.setAttribute("aria-expanded", String(moreOpen));
-      const caption = lock ? lock.text : d.slot === "ring" ? `${inv.equipped[target] ? "Replace" : "Equip to"} ${SLOT_NAMES[target]}` : "Equip", eq = button2(caption, () => {
+      const caption = lock ? lock.text : d.slot === "ring" ? `${inv.equipped[target] ? "Replace" : "Equip to"} ${SLOT_NAMES[target]}` : "Equip", eq = button3(caption, () => {
         inspect = false;
         issue("equipment.equip", { itemId: item.itemId, slot: target });
       }, !canEquip || Boolean(lock));
@@ -94640,19 +94937,19 @@ function createInventoryPresentation({ document: document2, environment, readMod
       box5.append(element("small", "This item can\u2019t be dropped.", "gx-note"));
       return box5;
     }
-    const drop = button2("Drop", () => {
+    const drop2 = button3("Drop", () => {
       issue("gear.drop", { itemId: item.itemId });
       inspect = false;
       salvagePending = null;
       key3 = null;
       refresh(readModel());
     }, !canEquip);
-    drop.className = "gx-btn";
-    drop.dataset.action = "drop";
-    row2.append(drop);
+    drop2.className = "gx-btn";
+    drop2.dataset.action = "drop";
+    row2.append(drop2);
     const protectedItem = Object.values(inv.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item.sourceEntityId);
     if (!protectedItem) {
-      const salvage = button2("Salvage", () => {
+      const salvage = button3("Salvage", () => {
         salvagePending = { ...salvageQuote(local7, item), itemId: item.itemId, inventoryRevision: inv.revision };
         key3 = null;
         refresh(readModel());
@@ -94678,7 +94975,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
         outputs.append(out);
       }
       confirmBox.append(outputs);
-      const confirm = button2("Confirm salvage", () => {
+      const confirm = button3("Confirm salvage", () => {
         const q = salvagePending;
         if (!q) return;
         issue("gear.salvage", { itemId: q.itemId, fingerprint: q.fingerprint, inventoryRevision: q.inventoryRevision });
@@ -94689,7 +94986,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
       }, !canEquip);
       confirm.className = "gx-btn is-danger";
       confirm.dataset.action = "confirm-salvage";
-      const cancel = button2("Cancel", () => {
+      const cancel = button3("Cancel", () => {
         salvagePending = null;
         key3 = null;
         refresh(readModel());
@@ -94718,15 +95015,15 @@ function createInventoryPresentation({ document: document2, environment, readMod
     document2.getElementById("world-item-title")?.focus({ preventScroll: true });
   }
   const sectionButtons = ["equipment", "bag", "materials"].map((name) => {
-    const button3 = document2.getElementById(`world-${name}-tab`), listener = () => {
+    const button4 = document2.getElementById(`world-${name}-tab`), listener = () => {
       section = name;
       inspect = false;
       key3 = null;
       refresh(readModel());
       document2.getElementById("world-bag-browse").scrollTop = 0;
     };
-    button3.addEventListener("click", listener);
-    return { button: button3, listener };
+    button4.addEventListener("click", listener);
+    return { button: button4, listener };
   });
   function dismissTooltip(restore = true) {
     salvagePending = null;
@@ -94797,7 +95094,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
     bestiaryView.destroy();
     bestiaryButton.remove();
     questsButton.remove();
-    for (const { button: button3, listener } of sectionButtons) button3.removeEventListener("click", listener);
+    for (const { button: button4, listener } of sectionButtons) button4.removeEventListener("click", listener);
     panel.removeEventListener("pointerdown", outside3);
     environment.removeEventListener("resize", resized);
     browse?.removeEventListener("scroll", followAnchor);
@@ -94823,32 +95120,32 @@ function interactionChoiceV2(model) {
   return action2 && label4 ? { exitId: PICKUP_CONTEXT_V2, label: label4, kind: action2.kind === "loot.pickup" ? "Ground loot" : "Nearby object" } : null;
 }
 function createInteractionHudV2({ document: doc, readModel, activate, isBlocked = () => false }) {
-  const button2 = doc.createElement("button");
-  button2.type = "button";
-  button2.id = "rpg-interaction-v2";
-  button2.hidden = true;
-  button2.dataset.gameplayHud = "";
+  const button3 = doc.createElement("button");
+  button3.type = "button";
+  button3.id = "rpg-interaction-v2";
+  button3.hidden = true;
+  button3.dataset.gameplayHud = "";
   const key3 = doc.createElement("kbd"), copy = doc.createElement("span"), kind = doc.createElement("small"), label4 = doc.createElement("strong"), tap = doc.createElement("span");
   key3.textContent = "E";
   tap.className = "interaction-tap";
   tap.textContent = "Tap";
   copy.append(kind, label4);
-  button2.append(key3, copy, tap);
-  doc.getElementById("world-view").parentElement.append(button2);
+  button3.append(key3, copy, tap);
+  doc.getElementById("world-view").parentElement.append(button3);
   doc.body.dataset.rpgInteraction = "v2";
   let previous = "", writes = 0;
   const stopRepeatedKey = (e) => {
     if (e.repeat && ["Enter", "Space"].includes(e.code)) e.preventDefault();
   };
-  button2.addEventListener("keydown", stopRepeatedKey);
-  const input = createContextActionInput({ button: button2, activate: () => {
-    if (isBlocked() || button2.hidden) return;
+  button3.addEventListener("keydown", stopRepeatedKey);
+  const input = createContextActionInput({ button: button3, activate: () => {
+    if (isBlocked() || button3.hidden) return;
     const chosen = interactionChoiceV2(readModel());
     if (chosen) activate(chosen.exitId);
   } });
   function refresh(model, visible3 = true) {
     const target = visible3 && !isBlocked() ? interactionChoiceV2(model) : null;
-    button2.hidden = !target;
+    button3.hidden = !target;
     if (!target) {
       previous = "";
       return false;
@@ -94858,15 +95155,15 @@ function createInteractionHudV2({ document: doc, readModel, activate, isBlocked 
       previous = signature;
       kind.textContent = target.kind;
       label4.textContent = target.label;
-      button2.setAttribute("aria-label", target.label + "; press E or tap");
+      button3.setAttribute("aria-label", target.label + "; press E or tap");
       writes++;
     }
     return true;
   }
-  return Object.freeze({ button: button2, refresh, resources: () => ({ version: "rpg-interaction-v2", labelWrites: writes }), destroy() {
+  return Object.freeze({ button: button3, refresh, resources: () => ({ version: "rpg-interaction-v2", labelWrites: writes }), destroy() {
     input.destroy();
-    button2.removeEventListener("keydown", stopRepeatedKey);
-    button2.remove();
+    button3.removeEventListener("keydown", stopRepeatedKey);
+    button3.remove();
     delete doc.body.dataset.rpgInteraction;
   } });
 }
@@ -95005,13 +95302,13 @@ function createSettlementServicesMenu({ document: doc, adapter, readModel, clear
     confirmation = null;
     restoreFocus();
   };
-  function el2(tag, text2) {
+  function el3(tag, text3) {
     const e = doc.createElement(tag);
-    if (text2 !== void 0) e.textContent = text2;
+    if (text3 !== void 0) e.textContent = text3;
     return e;
   }
-  function button2(text2, fn, key3) {
-    const b = el2("button", text2);
+  function button3(text3, fn, key3) {
+    const b = el3("button", text3);
     if (key3) b.dataset.serviceAction = key3;
     b.style.cssText = "padding:12px;margin:6px 0;display:block;width:100%;text-align:left";
     b.disabled = busy;
@@ -95042,36 +95339,36 @@ function createSettlementServicesMenu({ document: doc, adapter, readModel, clear
   function draw(m) {
     panel.replaceChildren();
     const p = { playerId: m.localPlayerId, inventory: m.inventory }, npc = m.serviceNpcs?.find((n) => n.id === npcId), a = m.entitiesById[m.playersById[m.localPlayerId].entityId];
-    panel.append(el2("h2", npc ? npc.name + " \xB7 " + npc.roleLabel : "Carried supplies"), el2("p", "Gold: " + m.inventory.gold));
+    panel.append(el3("h2", npc ? npc.name + " \xB7 " + npc.roleLabel : "Carried supplies"), el3("p", "Gold: " + m.inventory.gold));
     if (notice) {
-      const status2 = el2("p", notice);
+      const status2 = el3("p", notice);
       status2.setAttribute("role", "status");
       panel.append(status2);
     }
     if (npcId && (!npc || !npc.available)) {
-      panel.append(el2("p", "Approach this civilian to trade or rest."));
+      panel.append(el3("p", "Approach this civilian to trade or rest."));
     } else if (npc) {
-      panel.append(el2("p", npc.role === "innkeeper" ? SETTLEMENT_LIFE_POLICY.rest.effect : "Ordinary personal stock \xB7 local Band " + npc.band + ". Equipment offers do not reroll on revisits."));
+      panel.append(el3("p", npc.role === "innkeeper" ? SETTLEMENT_LIFE_POLICY.rest.effect : "Ordinary personal stock \xB7 local Band " + npc.band + ". Equipment offers do not reroll on revisits."));
       for (const q of npc.stock) {
-        const b = button2((q.purchased ? "Purchased \xB7 " : q.label + " \xB7 ") + q.price + " gold", () => issue("service.buy", { npcId, offerId: q.id }), "buy:" + q.id);
+        const b = button3((q.purchased ? "Purchased \xB7 " : q.label + " \xB7 ") + q.price + " gold", () => issue("service.buy", { npcId, offerId: q.id }), "buy:" + q.id);
         b.disabled = busy || q.purchased;
         panel.append(b);
       }
       if (npc.role === "general") {
-        panel.append(button2("Buy field ration \xB7 " + SETTLEMENT_LIFE_POLICY.supply.price + " gold \xB7 restores " + SETTLEMENT_LIFE_POLICY.supply.recoveryPercent + "% max HP", () => issue("service.buy", { npcId, offerId: SETTLEMENT_LIFE_POLICY.supply.id }), "buy:field-ration"));
+        panel.append(button3("Buy field ration \xB7 " + SETTLEMENT_LIFE_POLICY.supply.price + " gold \xB7 restores " + SETTLEMENT_LIFE_POLICY.supply.recoveryPercent + "% max HP", () => issue("service.buy", { npcId, offerId: SETTLEMENT_LIFE_POLICY.supply.id }), "buy:field-ration"));
       }
       if (npc.role === "innkeeper") {
-        panel.append(button2("Rest \xB7 " + SETTLEMENT_LIFE_POLICY.rest.price + " gold \xB7 recover all missing HP", () => issue("service.rest", { npcId }), "rest"));
+        panel.append(button3("Rest \xB7 " + SETTLEMENT_LIFE_POLICY.rest.price + " gold \xB7 recover all missing HP", () => issue("service.rest", { npcId }), "rest"));
       }
       if (npc.role === "general" || npc.role === "smith") {
-        panel.append(el2("h3", "Sell carried equipment"));
+        panel.append(el3("h3", "Sell carried equipment"));
         let count = 0;
         for (const item of Object.values(m.inventory.itemsById)) {
           const quote = saleQuote(p, item);
           if (quote === null) continue;
           count++;
           const d = itemDefinition(item);
-          panel.append(button2((confirmation === item.itemId ? "Confirm sale: " : "") + d.name + " \xB7 receive " + quote + " gold", () => {
+          panel.append(button3((confirmation === item.itemId ? "Confirm sale: " : "") + d.name + " \xB7 receive " + quote + " gold", () => {
             if (confirmation === item.itemId) void issue("service.sell", { npcId, itemId: item.itemId });
             else {
               confirmation = item.itemId;
@@ -95080,12 +95377,12 @@ function createSettlementServicesMenu({ document: doc, adapter, readModel, clear
             }
           }, "sell:" + item.itemId));
         }
-        if (!count) panel.append(el2("p", "No eligible ordinary loot. Equipped gear, starter gear, provisions, Unique/protected items cannot be sold."));
+        if (!count) panel.append(el3("p", "No eligible ordinary loot. Equipped gear, starter gear, provisions, Unique/protected items cannot be sold."));
       }
     }
-    panel.append(el2("h3", "Field rations: " + supplyCount(p) + " / " + SETTLEMENT_LIFE_POLICY.supply.maximum));
-    panel.append(button2("Use one ration \xB7 recover " + SETTLEMENT_LIFE_POLICY.supply.recoveryPercent + "% max HP \xB7 no time skip", () => issue("supply.use", {}), "use-ration"));
-    panel.append(button2("Close", close, "close"));
+    panel.append(el3("h3", "Field rations: " + supplyCount(p) + " / " + SETTLEMENT_LIFE_POLICY.supply.maximum));
+    panel.append(button3("Use one ration \xB7 recover " + SETTLEMENT_LIFE_POLICY.supply.recoveryPercent + "% max HP \xB7 no time skip", () => issue("supply.use", {}), "use-ration"));
+    panel.append(button3("Close", close, "close"));
   }
   function refresh(m) {
     const enabled = Boolean(m.inventory?.services);
@@ -95223,9 +95520,9 @@ function createSettlementServicesMenu2(options) {
   panel.id = "settlement-services";
   panel.setAttribute("aria-label", "Settlement services");
   doc.body.append(panel);
-  const el2 = (tag, text2, cls) => {
+  const el3 = (tag, text3, cls) => {
     const e = doc.createElement(tag);
-    if (text2 !== void 0) e.textContent = text2;
+    if (text3 !== void 0) e.textContent = text3;
     if (cls) e.className = cls;
     return e;
   };
@@ -95236,8 +95533,8 @@ function createSettlementServicesMenu2(options) {
     panel.close();
     restoreFocus();
   };
-  const button2 = (text2, fn, id, cls = "forge-anvil-button") => {
-    const b = el2("button", text2, cls);
+  const button3 = (text3, fn, id, cls = "forge-anvil-button") => {
+    const b = el3("button", text3, cls);
     b.type = "button";
     if (id) b.dataset.serviceAction = id;
     b.disabled = busy;
@@ -95245,12 +95542,12 @@ function createSettlementServicesMenu2(options) {
     return b;
   };
   const image = (item, slot) => {
-    const i = el2("img");
+    const i = el3("img");
     i.src = (item && itemIconUrl(item, doc)) ?? EQUIPMENT_ART[SLOT_ART_KEYS[slot] ?? "worn-sword"].url;
     i.alt = "";
     return i;
   };
-  const supplyButton = button2("", drink, "drink-potion");
+  const supplyButton = button3("", drink, "drink-potion");
   supplyButton.addEventListener("mousedown", (e) => e.preventDefault());
   supplyButton.addEventListener("pointerdown", (e) => {
     if (e.button !== 0) return;
@@ -95327,20 +95624,20 @@ function createSettlementServicesMenu2(options) {
   const markup = (e, html) => {
     e.innerHTML = html;
     return e;
-  }, coin4 = () => el2("i", void 0, "tn-coin"), tierOf = (d) => d?.rarityTier ?? 0;
+  }, coin4 = () => el3("i", void 0, "tn-coin"), tierOf = (d) => d?.rarityTier ?? 0;
   const mat = (k) => {
     if (SALVAGE_MATERIAL_ART[k]) {
-      const img = el2("img", void 0, "tn-mat-art");
+      const img = el3("img", void 0, "tn-mat-art");
       img.src = SALVAGE_MATERIAL_ART[k];
       img.alt = "";
       return img;
     }
-    const i = el2("i", void 0, "tn-mat");
+    const i = el3("i", void 0, "tn-mat");
     i.style.setProperty("--m", MATS[k] ?? "#9a6bff");
     return i;
   };
   const price = (n, cls) => {
-    const s = el2("span", void 0, "tn-pr" + (cls ? " " + cls : ""));
+    const s = el3("span", void 0, "tn-pr" + (cls ? " " + cls : ""));
     s.append(coin4(), formatAmount(n));
     return s;
   };
@@ -95352,25 +95649,25 @@ function createSettlementServicesMenu2(options) {
   const wornFor = (inv, d) => inv.itemsById[inv.equipped[d.slot === "ring" ? "ring1" : d.slot]];
   const sectionsOf = (item) => itemSections(itemDefinition(item), item.generated);
   function tile(item, badge) {
-    const d = itemDefinition(item), t = el2("div", void 0, "tn-tile");
+    const d = itemDefinition(item), t = el3("div", void 0, "tn-tile");
     t.style.setProperty("--r", RARITY_COLORS[tierOf(d)]);
     t.append(image(item, d?.slot));
-    if (tierOf(d)) t.append(el2("span", tierOf(d) + "\u2605", "tn-st"));
+    if (tierOf(d)) t.append(el3("span", tierOf(d) + "\u2605", "tn-st"));
     const lv = item?.generated?.itemPower;
-    if (lv != null) t.append(el2("span", "Lv " + statText(lv), "tn-lv"));
-    if (badge) t.append(markup(el2("span", void 0, "tn-badge is-" + badge), badge === "up" ? UP : badge === "pick" ? CHECK : LOCK));
+    if (lv != null) t.append(el3("span", "Lv " + statText(lv), "tn-lv"));
+    if (badge) t.append(markup(el3("span", void 0, "tn-badge is-" + badge), badge === "up" ? UP : badge === "pick" ? CHECK : LOCK));
     return t;
   }
   function cell(item, { badge, cost, costClass, label: label4, cls, fn, id, named: named2 = true } = {}) {
-    const d = itemDefinition(item), b = el2("button", void 0, "tn-cell" + (cls ? " " + cls : ""));
+    const d = itemDefinition(item), b = el3("button", void 0, "tn-cell" + (cls ? " " + cls : ""));
     b.type = "button";
     if (id) b.dataset.serviceAction = id;
     b.disabled = busy;
     b.onclick = fn;
     b.style.setProperty("--r", RARITY_COLORS[tierOf(d)]);
     b.append(tile(item, badge));
-    if (named2) b.append(el2("span", displayName(d), "tn-nm"));
-    if (label4) b.append(el2("span", label4, "tn-pr is-sold"));
+    if (named2) b.append(el3("span", displayName(d), "tn-nm"));
+    if (label4) b.append(el3("span", label4, "tn-pr is-sold"));
     else if (cost !== void 0) b.append(price(cost, costClass));
     b.setAttribute("aria-label", displayName(d) + (label4 ? ", " + label4 : cost !== void 0 ? ", " + formatAmount(cost) + " gold" : ""));
     return b;
@@ -95383,48 +95680,48 @@ function createSettlementServicesMenu2(options) {
   }
   function markEl(l) {
     if (!l.mark) return null;
-    return el2("span", l.mark === "up" ? "\u25B2 " + lineValue(l.key, l.diff) : l.mark === "down" ? "\u25BC " + lineValue(l.key, l.diff) : l.mark, "tn-mk is-" + l.mark);
+    return el3("span", l.mark === "up" ? "\u25B2 " + lineValue(l.key, l.diff) : l.mark === "down" ? "\u25BC " + lineValue(l.key, l.diff) : l.mark, "tn-mk is-" + l.mark);
   }
   function lineRow(l) {
-    const row2 = el2("div", void 0, "tn-ln"), text2 = markup(el2("span"), statIcon(l.key));
-    text2.append("+" + lineValue(l.key, l.value) + " " + lineLabel(l.key));
-    row2.append(text2);
+    const row2 = el3("div", void 0, "tn-ln"), text3 = markup(el3("span"), statIcon(l.key));
+    text3.append("+" + lineValue(l.key, l.value) + " " + lineLabel(l.key));
+    row2.append(text3);
     const m = markEl(l);
     if (m) row2.append(m);
     return row2;
   }
   function itemHead(item, sub) {
-    const d = itemDefinition(item), h = el2("div", void 0, "tn-ihead"), info2 = el2("div");
+    const d = itemDefinition(item), h = el3("div", void 0, "tn-ihead"), info2 = el3("div");
     info2.style.minWidth = "0";
-    info2.append(el2("h4", displayName(d), "tn-iname"), el2("div", sub ?? [RARITY_NAMES[tierOf(d)], tierOf(d) + "\u2605", slotName(d.slot === "ring" ? "ring1" : d.slot), item.generated?.itemPower != null ? "Lv " + statText(item.generated.itemPower) : null].filter(Boolean).join(" \xB7 "), "tn-isub"));
+    info2.append(el3("h4", displayName(d), "tn-iname"), el3("div", sub ?? [RARITY_NAMES[tierOf(d)], tierOf(d) + "\u2605", slotName(d.slot === "ring" ? "ring1" : d.slot), item.generated?.itemPower != null ? "Lv " + statText(item.generated.itemPower) : null].filter(Boolean).join(" \xB7 "), "tn-isub"));
     h.style.setProperty("--r", RARITY_COLORS[tierOf(d)]);
     h.append(tile(item), info2);
     return h;
   }
   function itemSheet(item, inv, foot, notes = []) {
     const d = itemDefinition(item), w = wornFor(inv, d), sec = sectionsOf(item), cmp = w ? compareSections(sec, [sectionsOf(w)]) : { base: sec.base.map((l) => ({ ...l, mark: "new" })), affixes: sec.affixes.map((l) => ({ ...l, mark: "new" })) };
-    const s = el2("div", void 0, "tn-sheet");
+    const s = el3("div", void 0, "tn-sheet");
     s.style.setProperty("--r", RARITY_COLORS[tierOf(d)]);
     s.setAttribute("role", "dialog");
     s.setAttribute("aria-label", displayName(d));
-    const sc2 = el2("div", void 0, "tn-sheetscroll");
+    const sc2 = el3("div", void 0, "tn-sheetscroll");
     sc2.append(itemHead(item));
     if (w) {
-      const c = el2("div", void 0, "tn-cmp"), n = el2("b", displayName(itemDefinition(w)));
+      const c = el3("div", void 0, "tn-cmp"), n = el3("b", displayName(itemDefinition(w)));
       n.style.color = RARITY_COLORS[tierOf(itemDefinition(w))];
       c.append("Arrows compare with your worn ", n);
       sc2.append(c);
-    } else sc2.append(el2("div", "Your " + slotName(d.slot === "ring" ? "ring1" : d.slot) + " slot is empty", "tn-cmp"));
-    for (const n of notes) sc2.append(el2("p", n, "tn-note is-warn"));
+    } else sc2.append(el3("div", "Your " + slotName(d.slot === "ring" ? "ring1" : d.slot) + " slot is empty", "tn-cmp"));
+    for (const n of notes) sc2.append(el3("p", n, "tn-note is-warn"));
     const flat2 = cmp.base.filter((l) => l.flat), traits = cmp.base.filter((l) => !l.flat);
     if (flat2.length || traits.length) {
-      const box5 = el2("div", void 0, "tn-sec");
-      box5.append(el2("p", "Base stats", "tn-sect"));
+      const box5 = el3("div", void 0, "tn-sec");
+      box5.append(el3("p", "Base stats", "tn-sect"));
       if (flat2.length) {
-        const g = el2("div", void 0, "tn-bases");
+        const g = el3("div", void 0, "tn-bases");
         for (const l of flat2) {
-          const t = markup(el2("div", void 0, "tn-base"), statIcon(l.key, 16));
-          t.append(el2("b", lineValue(l.key, l.value)), el2("small", lineLabel(l.key)));
+          const t = markup(el3("div", void 0, "tn-base"), statIcon(l.key, 16));
+          t.append(el3("b", lineValue(l.key, l.value)), el3("small", lineLabel(l.key)));
           const m = markEl(l);
           if (m) t.append(m);
           g.append(t);
@@ -95435,12 +95732,12 @@ function createSettlementServicesMenu2(options) {
       sc2.append(box5);
     }
     if (cmp.affixes.length) {
-      const box5 = el2("div", void 0, "tn-sec");
-      box5.append(el2("p", "Affixes \xB7 " + cmp.affixes.length, "tn-sect"));
+      const box5 = el3("div", void 0, "tn-sec");
+      box5.append(el3("p", "Affixes \xB7 " + cmp.affixes.length, "tn-sect"));
       for (const l of cmp.affixes) {
         box5.append(lineRow(l));
         if (l.roll && !l.roll.fixed) {
-          const bar = el2("div", void 0, "tn-roll" + (l.roll.max ? " is-max" : "")), f2 = el2("i");
+          const bar = el3("div", void 0, "tn-roll" + (l.roll.max ? " is-max" : "")), f2 = el3("i");
           f2.style.width = (l.roll.quality * 100).toFixed(1) + "%";
           bar.append(f2);
           box5.append(bar);
@@ -95448,27 +95745,27 @@ function createSettlementServicesMenu2(options) {
       }
       sc2.append(box5);
     }
-    if (!flat2.length && !traits.length && !cmp.affixes.length) sc2.append(el2("p", "No stat bonus", "tn-note"));
-    const f = el2("div", void 0, "tn-foot");
+    if (!flat2.length && !traits.length && !cmp.affixes.length) sc2.append(el3("p", "No stat bonus", "tn-note"));
+    const f = el3("div", void 0, "tn-foot");
     f.append(...foot);
     s.append(sc2, f);
     return s;
   }
   function costs(parent, gold, materials2, inv, npc, p) {
     if (gold === "0" && !Object.keys(materials2 ?? {}).length) return true;
-    const box5 = el2("div");
-    box5.append(el2("p", "Cost", "tn-sect"));
-    const row2 = el2("div", void 0, "tn-costs"), haveGold = compareAmount(inv.gold, gold) >= 0;
+    const box5 = el3("div");
+    box5.append(el3("p", "Cost", "tn-sect"));
+    const row2 = el3("div", void 0, "tn-costs"), haveGold = compareAmount(inv.gold, gold) >= 0;
     let afford = haveGold;
-    const g = el2("span", void 0, "tn-cost" + (haveGold ? "" : " is-short"));
-    g.append(coin4(), formatAmount(inv.gold), el2("small", "/ " + formatAmount(gold)));
+    const g = el3("span", void 0, "tn-cost" + (haveGold ? "" : " is-short"));
+    g.append(coin4(), formatAmount(inv.gold), el3("small", "/ " + formatAmount(gold)));
     g.title = "You have " + formatAmount(inv.gold) + " of " + formatAmount(gold) + " gold";
     if (gold !== "0") row2.append(g);
     const buy = [];
     for (const [k, n] of Object.entries(materials2 ?? {})) {
-      const have = inv.economy.materials[k] ?? 0, c = el2("span", void 0, "tn-cost" + (have >= n ? "" : " is-short"));
+      const have = inv.economy.materials[k] ?? 0, c = el3("span", void 0, "tn-cost" + (have >= n ? "" : " is-short"));
       c.title = k;
-      c.append(mat(k), String(have), el2("small", "/ " + n + " " + k));
+      c.append(mat(k), String(have), el3("small", "/ " + n + " " + k));
       c.title = "You have " + have + " of " + n + " " + k;
       row2.append(c);
       if (have < n) {
@@ -95478,9 +95775,9 @@ function createSettlementServicesMenu2(options) {
       }
     }
     box5.append(row2);
-    const links = el2("div", void 0, "tn-links");
+    const links = el3("div", void 0, "tn-links");
     for (const [k, n, cost] of buy) {
-      const b = button2("", () => issue("service.material", { npcId, material: k, quantity: n }), "material:" + k, "tn-link");
+      const b = button3("", () => issue("service.material", { npcId, material: k, quantity: n }), "material:" + k, "tn-link");
       b.append(mat(k), "Buy " + n + " " + k + " \xB7 ", coin4(), cost);
       b.disabled = busy || compareAmount(inv.gold, cost) < 0;
       links.append(b);
@@ -95490,9 +95787,9 @@ function createSettlementServicesMenu2(options) {
     return afford;
   }
   function chips(list, current, pick4) {
-    const row2 = el2("div", void 0, "tn-filters");
+    const row2 = el3("div", void 0, "tn-filters");
     for (const [id, label4] of list) {
-      const b = button2(label4, () => pick4(id), "chip:" + id, "tn-chip");
+      const b = button3(label4, () => pick4(id), "chip:" + id, "tn-chip");
       b.setAttribute("aria-pressed", String(current === id));
       row2.append(b);
     }
@@ -95503,45 +95800,45 @@ function createSettlementServicesMenu2(options) {
     const kind = !npc ? "supplies" : npc.role === "enchanter" ? "altar" : npc.services?.includes("attune") ? "forge" : npc.role === "innkeeper" ? "inn" : "shop";
     panel.dataset.serviceKind = kind;
     panel.replaceChildren();
-    const shell2 = el2("div", void 0, "tn-shell"), head13 = el2("div", void 0, "tn-head"), face3 = markup(el2("div", void 0, "tn-npc"), FACES2[kind]), who = el2("div", void 0, "tn-who");
-    const title = el2("h3", npc?.name ?? "Potions");
-    if (npc?.tier && npc.stock?.length) title.append(el2("span", { village: "Village", town: "Town", city: "City" }[npc.tier], "tn-tier"));
-    who.append(title, el2("small", npc?.roleLabel ?? "Your potion belt"));
-    const exit = button2("", close, "close", "tn-x");
+    const shell2 = el3("div", void 0, "tn-shell"), head13 = el3("div", void 0, "tn-head"), face3 = markup(el3("div", void 0, "tn-npc"), FACES2[kind]), who = el3("div", void 0, "tn-who");
+    const title = el3("h3", npc?.name ?? "Potions");
+    if (npc?.tier && npc.stock?.length) title.append(el3("span", { village: "Village", town: "Town", city: "City" }[npc.tier], "tn-tier"));
+    who.append(title, el3("small", npc?.roleLabel ?? "Your potion belt"));
+    const exit = button3("", close, "close", "tn-x");
     exit.innerHTML = CLOSE;
     exit.setAttribute("aria-label", "Close");
     head13.append(face3, who, exit);
     shell2.append(head13);
     panel.append(shell2);
     if (npcId && (!npc || !npc.available)) {
-      const b = el2("div", void 0, "tn-body");
-      b.append(el2("p", "Walk up to " + (npc?.name ?? "them") + " to trade.", "tn-empty"));
+      const b = el3("div", void 0, "tn-body");
+      b.append(el3("p", "Walk up to " + (npc?.name ?? "them") + " to trade.", "tn-empty"));
       shell2.append(b);
       return;
     }
     if (kind === "inn") {
-      const hero = m.entitiesById?.[m.playersById[m.localPlayerId].entityId], hp = Number(hero?.hpExact ?? 0) || 0, max = Number(hero?.maxHpExact ?? 0) || 0, box5 = el2("div", void 0, "tn-body");
-      const top = el2("div", void 0, "tn-ln");
-      top.append(el2("span", "Health"), el2("span", Math.round(hp) + " / " + Math.round(max) + (hp < max ? " \u2192 " + Math.round(max) : "")));
-      const bar = el2("div", void 0, "tn-hp"), fill6 = el2("i");
+      const hero = m.entitiesById?.[m.playersById[m.localPlayerId].entityId], hp = Number(hero?.hpExact ?? 0) || 0, max = Number(hero?.maxHpExact ?? 0) || 0, box5 = el3("div", void 0, "tn-body");
+      const top = el3("div", void 0, "tn-ln");
+      top.append(el3("span", "Health"), el3("span", Math.round(hp) + " / " + Math.round(max) + (hp < max ? " \u2192 " + Math.round(max) : "")));
+      const bar = el3("div", void 0, "tn-hp"), fill6 = el3("i");
       fill6.style.width = (max ? Math.min(100, hp / max * 100) : 0).toFixed(1) + "%";
       bar.append(fill6);
       box5.append(top, bar);
-      if (notice) box5.append(el2("p", notice, "tn-note" + (bad ? " is-warn" : "")));
-      const rest = button2("", () => issue("service.rest", { npcId }), "rest", "tn-btn is-gold");
+      if (notice) box5.append(el3("p", notice, "tn-note" + (bad ? " is-warn" : "")));
+      const rest = button3("", () => issue("service.rest", { npcId }), "rest", "tn-btn is-gold");
       rest.append("Rest by the fire \xB7 ", coin4(), formatAmount(SETTLEMENT_LIFE_POLICY.rest.price));
       rest.disabled = busy || hp >= max || compareAmount(inv.gold, SETTLEMENT_LIFE_POLICY.rest.price) < 0;
       box5.append(rest);
-      if (hp >= max) box5.append(el2("p", "You are already at full health.", "tn-hint"));
+      if (hp >= max) box5.append(el3("p", "You are already at full health.", "tn-hint"));
       shell2.append(box5);
       return;
     }
-    const wallet = el2("div", void 0, "tn-wallet"), g = el2("span", void 0, "tn-chipv");
+    const wallet = el3("div", void 0, "tn-wallet"), g = el3("span", void 0, "tn-chipv");
     g.append(coin4(), formatAmount(inv.gold));
     wallet.append(g);
     if (kind === "forge" || kind === "altar") {
       for (const [k, n] of Object.entries(inv.economy.materials ?? {})) if (n > 0) {
-        const c = el2("span", void 0, "tn-chipv");
+        const c = el3("span", void 0, "tn-chipv");
         c.title = k;
         c.append(mat(k), String(n));
         wallet.append(c);
@@ -95551,10 +95848,10 @@ function createSettlementServicesMenu2(options) {
     const modes = kind === "forge" ? [...[["attune", "Upgrade"], ["reforge", "Reforge"], ["awaken", "Awaken"], ["shatter", "Salvage"], ["break", "Scraps"]].filter(([id]) => npc.services.includes(id === "break" ? "shatter" : id)), ...npc.stock?.length ? [["gear", "Buy"]] : []] : kind === "altar" ? [["enchant", "Enchant"], ["purge", "Purge"], ["resonance", "Resonance"]] : kind === "shop" ? [["gear", "Buy"], ["sell", "Sell"], ["supplies", "Potions"]] : [["supplies", "Potions"]];
     if (!modes.some(([id]) => id === mode)) mode = modes[0][0];
     if (modes.length > 1) {
-      const tabs = el2("nav", void 0, "tn-tabs");
+      const tabs = el3("nav", void 0, "tn-tabs");
       tabs.setAttribute("aria-label", "Services");
       for (const [id, label4] of modes) {
-        const b = button2(label4, () => {
+        const b = button3(label4, () => {
           sheet = null;
           change(id);
         }, "tab:" + id, "tn-tab");
@@ -95564,21 +95861,21 @@ function createSettlementServicesMenu2(options) {
       shell2.append(tabs);
     }
     if (notice) {
-      const n = el2("div", notice, "tn-notice" + (bad ? " is-error" : ""));
+      const n = el3("div", notice, "tn-notice" + (bad ? " is-error" : ""));
       n.setAttribute("role", "status");
       shell2.append(n);
     }
-    const body5 = el2("div", void 0, "tn-body");
+    const body5 = el3("div", void 0, "tn-body");
     shell2.append(body5);
-    const foot = el2("div", void 0, "tn-foot");
+    const foot = el3("div", void 0, "tn-foot");
     if (mode === "gear") {
       const offers = npc.stock ?? [], kinds2 = new Set(offers.map((q2) => bagFilterOf(itemDefinition(q2.item))));
       if (!kinds2.has(filter)) filter = "all";
       if (npc.restockTicks != null && offers.length) {
-        const r = el2("div", void 0, "tn-restock"), txt = el2("div"), top = Math.max(...offers.map((q2) => q2.item.generated?.rarityTier ?? 0)), mins = Math.max(1, Math.ceil(npc.restockTicks / 3600));
+        const r = el3("div", void 0, "tn-restock"), txt = el3("div"), top = Math.max(...offers.map((q2) => q2.item.generated?.rarityTier ?? 0)), mins = Math.max(1, Math.ceil(npc.restockTicks / 3600));
         r.innerHTML = RESTOCK;
-        txt.append(el2("b", "Restocks at dawn"), el2("small", offers.length + " items \xB7 " + (npc.tier === "village" ? "up to Uncommon" : npc.tier === "town" ? "up to Rare" : "up to Epic")));
-        r.append(txt, el2("span", mins >= 60 ? "1 h" : mins + " min", "tn-when"));
+        txt.append(el3("b", "Restocks at dawn"), el3("small", offers.length + " items \xB7 " + (npc.tier === "village" ? "up to Uncommon" : npc.tier === "town" ? "up to Rare" : "up to Epic")));
+        r.append(txt, el3("span", mins >= 60 ? "1 h" : mins + " min", "tn-when"));
         r.title = "Shops restock at 06:00 each in-game day";
         body5.append(r);
       }
@@ -95586,7 +95883,7 @@ function createSettlementServicesMenu2(options) {
         filter = id;
         redraw();
       }));
-      const grid = el2("div", void 0, "tn-grid");
+      const grid = el3("div", void 0, "tn-grid");
       for (const q2 of offers) {
         if (filter !== "all" && bagFilterOf(itemDefinition(q2.item)) !== filter) continue;
         const allowed = equipmentLevelAllowed(p, q2.item);
@@ -95596,15 +95893,15 @@ function createSettlementServicesMenu2(options) {
         }, id: "item:" + q2.id }));
       }
       if (offers.length) {
-        body5.append(grid, el2("p", "Tap an item to see it and compare. What you buy stays sold until dawn.", "tn-hint"));
-      } else body5.append(el2("p", "Nothing for sale here.", "tn-empty"));
+        body5.append(grid, el3("p", "Tap an item to see it and compare. What you buy stays sold until dawn.", "tn-hint"));
+      } else body5.append(el3("p", "Nothing for sale here.", "tn-empty"));
       const q = offers.find((q2) => q2.id === sheet);
       if (q) {
         const required = equipmentRequiredLevel(p, q.item), notes = required !== null && !equipmentLevelAllowed(p, q.item) ? ["You can wear this at hero level " + required + "."] : [];
-        const shut = button2("Close", () => {
+        const shut = button3("Close", () => {
           sheet = null;
           redraw();
-        }, "close-item", "tn-btn"), buy = button2("", () => issue("service.buy", { npcId, offerId: q.id }), "buy:" + q.id, "tn-btn is-gold");
+        }, "close-item", "tn-btn"), buy = button3("", () => issue("service.buy", { npcId, offerId: q.id }), "buy:" + q.id, "tn-btn is-gold");
         if (q.purchased) buy.append("Sold");
         else if (compareAmount(inv.gold, q.price) < 0) buy.append("Need ", coin4(), formatAmount(q.price));
         else buy.append("Buy \xB7 ", coin4(), formatAmount(q.price));
@@ -95622,7 +95919,7 @@ function createSettlementServicesMenu2(options) {
       };
       if (sellable.length) {
         body5.append(chips([["common", "Pick all Commons"], ["uncommon", "Pick all Uncommons"], ["clear", "Clear"]], null, (id) => id === "clear" ? (picks.clear(), confirm = null, redraw()) : pickTier(id === "common" ? 0 : 1)));
-        const grid = el2("div", void 0, "tn-grid");
+        const grid = el3("div", void 0, "tn-grid");
         for (const { i, q } of sellable) {
           const on = picks.has(i.itemId);
           grid.append(cell(i, { badge: on ? "pick" : null, cost: q, cls: on ? "is-picked" : "", fn: () => {
@@ -95632,11 +95929,11 @@ function createSettlementServicesMenu2(options) {
             redraw();
           }, id: "pick:" + i.itemId }));
         }
-        body5.append(grid, el2("p", "Worn and Unique gear never shows up here.", "tn-hint"));
-      } else body5.append(el2("p", "Nothing here this merchant will buy. Worn and Unique gear never shows up here.", "tn-empty"));
-      const chosen = sellable.filter((x) => picks.has(x.i.itemId)), total = chosen.reduce((a, x) => addAmount(a, x.q), "0"), sum2 = el2("div", void 0, "tn-sum");
-      sum2.append(el2("b", chosen.length === 1 ? "1 item" : chosen.length + " items"), el2("small", chosen.length ? "Tap Sell to trade them for gold" : "Tap items to pick them"));
-      const sell = button2("", () => {
+        body5.append(grid, el3("p", "Worn and Unique gear never shows up here.", "tn-hint"));
+      } else body5.append(el3("p", "Nothing here this merchant will buy. Worn and Unique gear never shows up here.", "tn-empty"));
+      const chosen = sellable.filter((x) => picks.has(x.i.itemId)), total = chosen.reduce((a, x) => addAmount(a, x.q), "0"), sum2 = el3("div", void 0, "tn-sum");
+      sum2.append(el3("b", chosen.length === 1 ? "1 item" : chosen.length + " items"), el3("small", chosen.length ? "Tap Sell to trade them for gold" : "Tap items to pick them"));
+      const sell = button3("", () => {
         if (confirm === "sell") sellMany(chosen.map((x) => x.i.itemId));
         else {
           confirm = "sell";
@@ -95649,45 +95946,45 @@ function createSettlementServicesMenu2(options) {
       foot.append(sum2, sell);
       shell2.append(foot);
     } else if (mode === "supplies") {
-      const belt = m.potions, card = el2("div", void 0, "tn-card");
-      card.append(el2("p", "Potion belt \xB7 " + belt.count + " / " + belt.capacity, "tn-sect"), markup(el2("div", void 0, "tn-belt"), Array.from({ length: belt.capacity }, (_, n) => FLASK(n < belt.count)).join("")), el2("p", "Each potion heals " + belt.healPercent + "% of max HP \xB7 " + (belt.refillPrice ? "refills in town for " + belt.refillPrice + " gold each" : "refills free in town") + " \xB7 enemies drop more", "tn-hint"));
+      const belt = m.potions, card = el3("div", void 0, "tn-card");
+      card.append(el3("p", "Potion belt \xB7 " + belt.count + " / " + belt.capacity, "tn-sect"), markup(el3("div", void 0, "tn-belt"), Array.from({ length: belt.capacity }, (_, n) => FLASK(n < belt.count)).join("")), el3("p", "Each potion heals " + belt.healPercent + "% of max HP \xB7 " + (belt.refillPrice ? "refills in town for " + belt.refillPrice + " gold each" : "refills free in town") + " \xB7 enemies drop more", "tn-hint"));
       body5.append(card);
       if (npc?.role === "general") {
         const B6 = POTION_BELT_POLICY;
-        for (const [offerId, title2, max, text2, icon] of [[B6.offers.capacity, "Bigger belt", B6.maxCapacityUpgrades, () => ["Carry ", belt.capacity, belt.capacity + 1, " potions"], FLASK(true)], [B6.offers.potency, "Stronger brew", B6.maxPotencyUpgrades, () => ["Heal ", belt.healPercent + "%", belt.healPercent + B6.potencyStep + "%", " of max HP"], '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ef6f7d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"/><path d="M12 8.5v5M9.5 11h5"/></svg>']]) {
-          const u = potionUpgrade(p, offerId), row2 = el2("div", void 0, "tn-card tn-upg"), info2 = el2("div");
+        for (const [offerId, title2, max, text3, icon] of [[B6.offers.capacity, "Bigger belt", B6.maxCapacityUpgrades, () => ["Carry ", belt.capacity, belt.capacity + 1, " potions"], FLASK(true)], [B6.offers.potency, "Stronger brew", B6.maxPotencyUpgrades, () => ["Heal ", belt.healPercent + "%", belt.healPercent + B6.potencyStep + "%", " of max HP"], '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ef6f7d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"/><path d="M12 8.5v5M9.5 11h5"/></svg>']]) {
+          const u = potionUpgrade(p, offerId), row2 = el3("div", void 0, "tn-card tn-upg"), info2 = el3("div");
           info2.style.flex = "1";
-          const [a, b, c, d] = text2(), line30 = el2("p");
+          const [a, b, c, d] = text3(), line30 = el3("p");
           if (u.price) {
             line30.append(a, String(b), " ");
-            const arrow2 = el2("span", "\u2192 " + c, "tn-arrow");
+            const arrow2 = el3("span", "\u2192 " + c, "tn-arrow");
             line30.append(arrow2, d);
           } else line30.append("Fully upgraded");
-          const pips = el2("div", void 0, "tn-pips");
-          for (let n = 0; n < max; n++) pips.append(el2("i", void 0, n < u.done ? "on" : ""));
-          info2.append(el2("h4", title2), line30, pips);
-          const buy = button2("", () => issue("service.buy", { npcId, offerId }), "buy:" + offerId, "tn-btn is-gold is-small");
+          const pips = el3("div", void 0, "tn-pips");
+          for (let n = 0; n < max; n++) pips.append(el3("i", void 0, n < u.done ? "on" : ""));
+          info2.append(el3("h4", title2), line30, pips);
+          const buy = button3("", () => issue("service.buy", { npcId, offerId }), "buy:" + offerId, "tn-btn is-gold is-small");
           if (u.price) buy.append(coin4(), formatAmount(u.price));
           else buy.append("Done");
           buy.disabled = busy || !u.price || compareAmount(inv.gold, u.price) < 0;
           buy.setAttribute("aria-label", u.price ? title2 + ", " + u.price + " gold" : title2 + ", fully upgraded");
-          row2.append(markup(el2("div", void 0, "tn-ic"), icon), info2, buy);
+          row2.append(markup(el3("div", void 0, "tn-ic"), icon), info2, buy);
           body5.append(row2);
         }
-      } else body5.append(el2("p", npc ? "A general merchant can make your belt bigger and your potions stronger." : "Visit a general merchant to make your belt bigger and your potions stronger.", "tn-hint"));
+      } else body5.append(el3("p", npc ? "A general merchant can make your belt bigger and your potions stronger." : "Visit a general merchant to make your belt bigger and your potions stronger.", "tn-hint"));
     } else if (mode === "break") {
       const names2 = ["Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic"], have = (k) => inv.economy.materials[k] ?? 0;
-      body5.append(el2("p", "Break one Scrap into three of the rarity below. Handy for early upgrade steps.", "tn-hint is-left"));
+      body5.append(el3("p", "Break one Scrap into three of the rarity below. Handy for early upgrade steps.", "tn-hint is-left"));
       for (let t = names2.length - 1; t >= 1; t--) {
-        const from = names2[t] + " Scrap", to = names2[t - 1] + " Scrap", n = have(from), row2 = el2("div", void 0, "tn-card tn-upg tn-break"), info2 = el2("div");
+        const from = names2[t] + " Scrap", to = names2[t - 1] + " Scrap", n = have(from), row2 = el3("div", void 0, "tn-card tn-upg tn-break"), info2 = el3("div");
         info2.style.flex = "1";
-        const line30 = el2("p");
-        line30.append(mat(from), " 1 ", el2("span", "\u2192 ", "tn-arrow"), mat(to), " 3");
-        info2.append(el2("h4", from), line30, el2("small", "You have " + n.toLocaleString() + " \xB7 " + have(to).toLocaleString() + " " + to));
-        const one = button2("", () => issue("service.breakdown", { npcId, material: from, quantity: 1 }), "break1:" + from, "tn-btn is-small");
+        const line30 = el3("p");
+        line30.append(mat(from), " 1 ", el3("span", "\u2192 ", "tn-arrow"), mat(to), " 3");
+        info2.append(el3("h4", from), line30, el3("small", "You have " + n.toLocaleString() + " \xB7 " + have(to).toLocaleString() + " " + to));
+        const one = button3("", () => issue("service.breakdown", { npcId, material: from, quantity: 1 }), "break1:" + from, "tn-btn is-small");
         one.append("Break 1");
         one.disabled = busy || n < 1;
-        const all = button2("", () => issue("service.breakdown", { npcId, material: from, quantity: n }), "breakall:" + from, "tn-btn is-gold is-small");
+        const all = button3("", () => issue("service.breakdown", { npcId, material: from, quantity: n }), "breakall:" + from, "tn-btn is-gold is-small");
         all.append("All " + n.toLocaleString());
         all.disabled = busy || n < 2;
         row2.append(info2, one, all);
@@ -95696,51 +95993,51 @@ function createSettlementServicesMenu2(options) {
     } else if (mode === "attune") {
       const slots2 = listedEquipmentSlots(inv);
       if (!slots2.includes(selected)) selected = slots2.includes("weapon") ? "weapon" : slots2[0];
-      const grid = el2("div", void 0, "tn-slots");
+      const grid = el3("div", void 0, "tn-slots");
       for (const slot of slots2) {
-        const i2 = inv.itemsById[inv.equipped[slot]], b = button2("", () => change(mode, slot), "slot:" + slot, "tn-slot");
+        const i2 = inv.itemsById[inv.equipped[slot]], b = button3("", () => change(mode, slot), "slot:" + slot, "tn-slot");
         b.setAttribute("aria-pressed", String(slot === selected));
-        b.append(i2 ? tile(i2) : el2("div", void 0, "tn-none"), el2("small", slotName(slot)), el2("b", "+" + inv.economy.slotLevels[slot]));
+        b.append(i2 ? tile(i2) : el3("div", void 0, "tn-none"), el3("small", slotName(slot)), el3("b", "+" + inv.economy.slotLevels[slot]));
         b.setAttribute("aria-label", slotName(slot) + " slot, +" + inv.economy.slotLevels[slot]);
         grid.append(b);
       }
       body5.append(grid);
-      const lv = inv.economy.slotLevels[selected], i = inv.itemsById[inv.equipped[selected]], d = itemDefinition(i), card = el2("div", void 0, "tn-card"), bar = el2("div", void 0, "tn-bar"), fill6 = el2("i");
+      const lv = inv.economy.slotLevels[selected], i = inv.itemsById[inv.equipped[selected]], d = itemDefinition(i), card = el3("div", void 0, "tn-card"), bar = el3("div", void 0, "tn-bar"), fill6 = el3("i");
       fill6.style.width = lv + "%";
       bar.append(fill6);
-      card.append(el2("p", slotName(selected) + " slot \xB7 +" + lv + (lv < 100 ? " \u2192 +" + (lv + 1) : " \xB7 max"), "tn-sect"), bar);
+      card.append(el3("p", slotName(selected) + " slot \xB7 +" + lv + (lv < 100 ? " \u2192 +" + (lv + 1) : " \xB7 max"), "tn-sect"), bar);
       if (d && lv < 100) {
         const before = effectiveEquipmentBonuses(d, selected, lv, combatPlayer(p)), after = effectiveEquipmentBonuses(d, selected, lv + 1, combatPlayer(p));
         for (const k of Object.keys(before)) {
           if (String(before[k]) === String(after[k]) && !Number(before[k])) continue;
-          const row2 = el2("div", void 0, "tn-ln"), left = markup(el2("span"), statIcon(k));
+          const row2 = el3("div", void 0, "tn-ln"), left = markup(el3("span"), statIcon(k));
           left.append(lineLabel(k));
-          const right = el2("span");
-          right.append(el2("b", statText(before[k])), " ", el2("span", "\u2192 " + statText(after[k]), "tn-arrow"));
+          const right = el3("span");
+          right.append(el3("b", statText(before[k])), " ", el3("span", "\u2192 " + statText(after[k]), "tn-arrow"));
           row2.append(left, right);
           card.append(row2);
         }
       }
-      card.append(el2("p", "Stays with the slot when you change gear \xB7 max +100", "tn-hint is-left"));
+      card.append(el3("p", "Stays with the slot when you change gear \xB7 max +100", "tn-hint is-left"));
       body5.append(card);
       if (lv < 100) {
         const q = attunementCost(lv, p), afford = costs(body5, q.gold, q.materials, inv, npc, p);
-        if (q.materials.Starshard) body5.append(el2("p", "Starshards come from World Tier bosses, which are not in the game yet.", "tn-note is-warn"));
-        if (!m.forgeAccess) body5.append(el2("p", "Stand by the forge to upgrade.", "tn-note is-warn"));
-        const b = button2("", () => issue("forge.attune", { slot: selected, expectedLevel: lv }), "attune", "tn-btn is-gold");
+        if (q.materials.Starshard) body5.append(el3("p", "Starshards come from World Tier bosses, which are not in the game yet.", "tn-note is-warn"));
+        if (!m.forgeAccess) body5.append(el3("p", "Stand by the forge to upgrade.", "tn-note is-warn"));
+        const b = button3("", () => issue("forge.attune", { slot: selected, expectedLevel: lv }), "attune", "tn-btn is-gold");
         b.append("Upgrade \xB7 ", coin4(), formatAmount(q.gold));
         b.disabled = busy || !m.forgeAccess || !afford;
         foot.append(b);
         shell2.append(foot);
-      } else body5.append(el2("p", "This slot is fully upgraded.", "tn-hint"));
+      } else body5.append(el3("p", "This slot is fully upgraded.", "tn-hint"));
     } else {
       const worn = new Set(Object.values(inv.equipped)), items = Object.values(inv.itemsById).filter((i2) => i2.generated && !i2.unique && !i2.protected && !(mode === "shatter" && worn.has(i2.itemId)));
       if (!items.some((i2) => i2.itemId === selected)) selected = items[0]?.itemId;
       if (!items.length) {
-        body5.append(el2("p", "Bring gear with stars (drops or shop gear) to work on it here.", "tn-empty"));
+        body5.append(el3("p", "Bring gear with stars (drops or shop gear) to work on it here.", "tn-empty"));
         return;
       }
-      const strip = el2("div", void 0, "tn-strip");
+      const strip = el3("div", void 0, "tn-strip");
       for (const i2 of items) {
         const r2 = workshopResult(i2), b2 = cell(i2, { named: false, fn: () => change(mode, i2.itemId), id: "select:" + i2.itemId });
         b2.setAttribute("aria-pressed", String(i2.itemId === selected));
@@ -95752,28 +96049,28 @@ function createSettlementServicesMenu2(options) {
       if (on) requestAnimationFrame(() => {
         strip.scrollLeft += on.getBoundingClientRect().left - strip.getBoundingClientRect().left - (strip.clientWidth - on.offsetWidth) / 2;
       });
-      const i = items.find((i2) => i2.itemId === selected), r = workshopResult(i), card = el2("div", void 0, "tn-card");
+      const i = items.find((i2) => i2.itemId === selected), r = workshopResult(i), card = el3("div", void 0, "tn-card");
       card.style.borderTop = "3px solid " + (RARITY_COLORS[r.tier] ?? "#3a4654");
       card.append(itemHead(i, [RARITY_NAMES[r.tier], r.tier + "\u2605", r.enchants ? r.enchants + " enchant" + (r.enchants > 1 ? "s" : "") : null, r.set ? r.set + " set" : null].filter(Boolean).join(" \xB7 ")));
       body5.append(card);
       const q = workshopQuote(p, i, mode, line29);
       if (mode === "reforge") {
-        const box5 = el2("div");
-        box5.append(el2("p", "Pick a line to reroll", "tn-sect"));
+        const box5 = el3("div");
+        box5.append(el3("p", "Pick a line to reroll", "tn-sect"));
         r.affixes.forEach((a, index) => {
-          const b2 = button2("", () => {
+          const b2 = button3("", () => {
             line29 = index;
             confirm = null;
             redraw();
-          }, "line:" + index, "tn-radio"), txt = markup(el2("span"), statIcon(affixLineKey(a.key, a.skill)));
+          }, "line:" + index, "tn-radio"), txt = markup(el3("span"), statIcon(affixLineKey(a.key, a.skill)));
           txt.append(affixText(a));
-          b2.append(el2("span", void 0, "tn-dot"), txt);
+          b2.append(el3("span", void 0, "tn-dot"), txt);
           b2.disabled = busy || r.lockedLine !== null && r.lockedLine !== index;
           b2.setAttribute("aria-pressed", String(line29 === index));
           box5.append(b2);
         });
-        if (!r.affixes.length) box5.append(el2("p", "This item has no lines to reroll.", "tn-hint is-left"));
-        else box5.append(el2("p", r.lockedLine === null ? "It becomes a random new line this item can roll. After the first reforge, only this line can be rerolled." : "Only this line can be rerolled now.", "tn-hint is-left"));
+        if (!r.affixes.length) box5.append(el3("p", "This item has no lines to reroll.", "tn-hint is-left"));
+        else box5.append(el3("p", r.lockedLine === null ? "It becomes a random new line this item can roll. After the first reforge, only this line can be rerolled." : "Only this line can be rerolled now.", "tn-hint is-left"));
         body5.append(box5);
       } else if (mode === "resonance") {
         const worn2 = {};
@@ -95786,30 +96083,30 @@ function createSettlementServicesMenu2(options) {
           for (const [k, v] of Object.entries(e.three)) t[k] = (t[k] ?? 0) + v;
           return t;
         };
-        const now3 = el2("div", void 0, "tn-card tn-setnow");
-        now3.append(el2("p", "Set on this item", "tn-sect"), el2("b", r.set ?? "No set yet", "tn-setname"), el2("p", r.set ? "You wear " + (worn2[r.set] ?? 0) + " " + r.set + " piece" + ((worn2[r.set] ?? 0) === 1 ? "" : "s") + ". Changing rolls a different set at random." : "Give it a set at random. Wear 2 of a set for its first bonus, 3 for the full bonus.", "tn-hint is-left"));
+        const now3 = el3("div", void 0, "tn-card tn-setnow");
+        now3.append(el3("p", "Set on this item", "tn-sect"), el3("b", r.set ?? "No set yet", "tn-setname"), el3("p", r.set ? "You wear " + (worn2[r.set] ?? 0) + " " + r.set + " piece" + ((worn2[r.set] ?? 0) === 1 ? "" : "s") + ". Changing rolls a different set at random." : "Give it a set at random. Wear 2 of a set for its first bonus, 3 for the full bonus.", "tn-hint is-left"));
         body5.append(now3);
-        body5.append(el2("p", "Sets", "tn-sect"));
-        const grid = el2("div", void 0, "tn-setgrid");
+        body5.append(el3("p", "Sets", "tn-sect"));
+        const grid = el3("div", void 0, "tn-setgrid");
         for (const [name, e] of Object.entries(RESONANCE_SETS)) {
-          const n = worn2[name] ?? 0, c = el2("div", void 0, "tn-set" + (name === r.set ? " is-now" : ""));
-          const h = el2("div", void 0, "tn-seth");
-          h.append(markup(el2("span", void 0, "tn-seti"), statIcon("fx:" + Object.keys(e.two)[0])), el2("b", name));
-          if (n) h.append(el2("small", n + " worn", "tn-setn"));
+          const n = worn2[name] ?? 0, c = el3("div", void 0, "tn-set" + (name === r.set ? " is-now" : ""));
+          const h = el3("div", void 0, "tn-seth");
+          h.append(markup(el3("span", void 0, "tn-seti"), statIcon("fx:" + Object.keys(e.two)[0])), el3("b", name));
+          if (n) h.append(el3("small", n + " worn", "tn-setn"));
           c.append(h);
           for (const [pc2, vals] of [[2, e.two], [3, total(e)]]) {
-            const row2 = el2("div", void 0, "tn-pc" + (n >= pc2 ? " is-on" : ""));
-            row2.append(el2("i", pc2 + " pc"), el2("span", fx(vals)));
+            const row2 = el3("div", void 0, "tn-pc" + (n >= pc2 ? " is-on" : ""));
+            row2.append(el3("i", pc2 + " pc"), el3("span", fx(vals)));
             c.append(row2);
           }
           grid.append(c);
         }
         body5.append(grid);
-      } else if (mode === "shatter" && q.preview && typeof q.preview === "object") body5.append(el2("p", "Salvage breaks this item for " + Object.entries(q.preview).map(([k, v]) => v + " " + k).join(", ") + ". It is gone for good.", "tn-note"));
-      else if (typeof q.preview === "string") body5.append(el2("p", q.preview, "tn-note"));
-      if (q.problem) body5.append(el2("p", q.problem, "tn-note is-warn"));
+      } else if (mode === "shatter" && q.preview && typeof q.preview === "object") body5.append(el3("p", "Salvage breaks this item for " + Object.entries(q.preview).map(([k, v]) => v + " " + k).join(", ") + ". It is gone for good.", "tn-note"));
+      else if (typeof q.preview === "string") body5.append(el3("p", q.preview, "tn-note"));
+      if (q.problem) body5.append(el3("p", q.problem, "tn-note is-warn"));
       const afford = q.gold !== void 0 ? costs(body5, q.gold, q.materials, inv, npc, p) : false, risky = mode === "shatter" || mode === "purge", verb = { reforge: "Reforge this line", awaken: "Awaken \xB7 +1 star", enchant: "Enchant", purge: "Purge enchantments", resonance: "Change set", shatter: "Salvage" }[mode];
-      const b = button2(risky && confirm === i.itemId ? "Tap again to " + verb.toLowerCase() : verb, () => {
+      const b = button3(risky && confirm === i.itemId ? "Tap again to " + verb.toLowerCase() : verb, () => {
         if (!risky || confirm === i.itemId) issue("service.modify", { npcId, itemId: i.itemId, operation: mode, line: line29 });
         else {
           confirm = i.itemId;
@@ -95997,11 +96294,11 @@ function createVitalsHudV4(doc) {
   };
   function medallion() {
     if (!med) return;
-    const text2 = levelText.textContent;
-    if (text2 === lastLevel) return;
-    lastLevel = text2;
-    const m = /Lv\s*([^\s·]+)(?:\s*·\s*P\s*(\S+))?/.exec(text2);
-    medNum.textContent = m ? m[1] : text2.replace(/^Lv\s*/, "");
+    const text3 = levelText.textContent;
+    if (text3 === lastLevel) return;
+    lastLevel = text3;
+    const m = /Lv\s*([^\s·]+)(?:\s*·\s*P\s*(\S+))?/.exec(text3);
+    medNum.textContent = m ? m[1] : text3.replace(/^Lv\s*/, "");
     medNum.classList.toggle("long", medNum.textContent.length > 2);
     medPar.hidden = !(m && m[2]);
     medPar.textContent = m && m[2] ? "P" + m[2] : "";
@@ -96027,18 +96324,18 @@ function createVitalsHudV4(doc) {
       hpTrack.append(s);
     }
   }
-  const paint2 = (el2, text2) => {
-    if (painted4.get(el2) !== text2) {
-      painted4.set(el2, text2);
-      el2.style.transform = text2;
+  const paint2 = (el3, text3) => {
+    if (painted4.get(el3) !== text3) {
+      painted4.set(el3, text3);
+      el3.style.transform = text3;
     }
   };
-  const scale = (el2, value2) => paint2(el2, `scaleX(${Math.max(0, Math.min(1, value2)).toFixed(4)})`);
-  const slide = (el2, value2) => paint2(el2, `translateX(${((Math.max(0, Math.min(1, value2)) - 1) * 100).toFixed(2)}%)`);
-  const retrigger = (el2, cls) => {
-    el2.classList.remove(cls);
-    void el2.offsetWidth;
-    el2.classList.add(cls);
+  const scale = (el3, value2) => paint2(el3, `scaleX(${Math.max(0, Math.min(1, value2)).toFixed(4)})`);
+  const slide = (el3, value2) => paint2(el3, `translateX(${((Math.max(0, Math.min(1, value2)) - 1) * 100).toFixed(2)}%)`);
+  const retrigger = (el3, cls) => {
+    el3.classList.remove(cls);
+    void el3.offsetWidth;
+    el3.classList.add(cls);
   };
   function update(hpData) {
     if (hp && hpData) {
@@ -96659,7 +96956,7 @@ function rimPip(c, x, y, ang, kind, r) {
   medal(c, 0, 0, r, kind, { shadow: false });
   c.restore();
 }
-function inkLabel(c, text2, x, y, o = {}) {
+function inkLabel(c, text3, x, y, o = {}) {
   c.save();
   c.font = o.font ?? "15px " + MAP_FONT;
   c.textAlign = o.align ?? "center";
@@ -96667,9 +96964,9 @@ function inkLabel(c, text2, x, y, o = {}) {
   c.lineJoin = "round";
   c.strokeStyle = o.halo ?? "rgba(240,228,200,.92)";
   c.lineWidth = o.hw ?? 3.2;
-  c.strokeText(text2, x, y);
+  c.strokeText(text3, x, y);
   c.fillStyle = o.col ?? "#2a1d12";
-  c.fillText(text2, x, y);
+  c.fillText(text3, x, y);
   c.restore();
 }
 function compassRose(c, x, y, r) {
@@ -97384,13 +97681,13 @@ var store = { get(k) {
   } catch {
   }
 } };
-function createAtlasMapV2({ document: doc, environment: env, port, releaseInput, issue = null }) {
-  const el2 = (tag, cls, text2) => {
+function createAtlasMapV2({ document: doc, environment: env, port, releaseInput, issue = null, otherLands = null }) {
+  const el3 = (tag, cls, text3) => {
     const e = doc.createElement(tag);
     if (cls) e.className = cls;
-    if (text2 !== void 0) e.textContent = text2;
+    if (text3 !== void 0) e.textContent = text3;
     return e;
-  }, style = el2("style");
+  }, style = el3("style");
   style.textContent = `
 .chart-mini.m2-mini{position:fixed;right:calc(10px + var(--world-safe-right,0px));top:calc(6px + var(--world-safe-top,0px));z-index:6;padding:0;border:0;border-radius:50%;background:none;box-shadow:none;color:#efe2c2}.chart-mini.m2-mini::before,.chart-mini.m2-mini::after{content:none}
 .m2-mini canvas{display:block;cursor:pointer;-webkit-tap-highlight-color:transparent}.m2-mini .m2-zoom{position:absolute;width:24px;height:24px;min-height:0;padding:0;display:grid;place-items:center;border:2px solid #0b1015;border-radius:50%;background:radial-gradient(circle at 38% 26%,#5c6d78,#2b3b46 55%,#17242e);color:#efe3ca;font:800 15px/1 ${UI_FONT};box-shadow:inset 0 0 0 1px #d4b98a,0 2px 0 #070b10;cursor:pointer;-webkit-tap-highlight-color:transparent}.m2-mini .m2-zoom::after{content:"";position:absolute;inset:-7px;border-radius:50%}
@@ -97411,14 +97708,16 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
 .m2-banner{position:fixed;left:50%;top:max(calc(var(--world-safe-top,0px) + 150px),17vh);z-index:39;transform:translateX(-50%);width:min(440px,100vw);pointer-events:none;opacity:0}.m2-banner[hidden]{display:none}.m2-banner canvas{display:block;width:100%;height:auto}.m2-banner.show{animation:m2banner 3.6s ease forwards}
 /* A smaller call-out for things near you (a rare, a stirring clearing); the big lettering is only for discovering places. */
 .m2-notice{position:fixed;left:50%;top:max(calc(var(--world-safe-top,0px) + 150px),17vh);z-index:39;transform:translateX(-50%);display:flex;align-items:center;gap:8px;max-width:calc(100vw - 32px);padding:5px 16px 5px 6px;border-radius:999px;background:linear-gradient(#211913,#16110c);border:1.5px solid #c9a45e;box-shadow:0 3px 10px rgba(0,0,0,.45);pointer-events:none;opacity:0}.m2-notice[hidden]{display:none}.m2-notice canvas{width:30px;height:30px;flex:none}.m2-notice div{display:flex;flex-direction:column;line-height:1.05;min-width:0}.m2-notice small{font:italic 12px "IM Fell English",Georgia,serif;color:#e6c47a;white-space:nowrap}.m2-notice strong{font:18px ${MAP_FONT};font-weight:400;color:#f6e7c0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.m2-notice[data-tone=rare]{border-color:#bfe6ff;box-shadow:0 0 12px rgba(214,236,251,.35),0 3px 10px rgba(0,0,0,.45)}.m2-notice[data-tone=rare] small{color:#ffd1e4}.m2-notice.show{animation:m2notice 3.2s ease forwards}
+/* Other lands (co-op step 4): this hero's other worlds and shared worlds, under the map key. */
+.m2-land{display:flex;align-items:center;gap:12px;padding:9px 0;border-top:1.5px solid #c9b48a}.m2-land>div{flex:1;min-width:0}.m2-land strong{display:block;font:22px/1.1 ${MAP_FONT};color:#2a1d12}.m2-land small{display:block;margin-top:2px;font:600 13px/1.3 ${UI_FONT};color:#6a5236}.m2-land button{flex:none;min-height:40px;padding:4px 16px;border:2px solid #2a1d12;border-radius:8px;background:linear-gradient(#f6d67a,#d9a845);color:#2a1d12;font:800 15px ${UI_FONT};cursor:pointer;box-shadow:0 3px 0 #2a1d12}.m2-land button:disabled{opacity:.45;cursor:default}
 @keyframes m2notice{0%{opacity:0;transform:translate(-50%,-6px)}10%{opacity:1;transform:translate(-50%,0)}82%{opacity:1}100%{opacity:0}}
 @keyframes m2banner{0%{opacity:0;transform:translate(-50%,6px)}12%{opacity:1;transform:translate(-50%,0)}80%{opacity:1}100%{opacity:0}}
 @media(max-height:500px) and (min-width:601px){.m2-banner{top:calc(4px + var(--world-safe-top,0px));width:min(380px,calc(100vw - 560px),100vw)}.m2-kneel,.m2-toast{top:calc(var(--world-safe-top,0px) + 84px)}.m2-sheet{left:auto;right:76px;transform:none;bottom:12px;width:min(420px,calc(100% - 100px))}.m2-title{transform:scale(.8);transform-origin:left top}}
 @media(max-width:600px){html body #world-bag,html body #local-world-controls:not([open]){top:calc(166px + var(--world-safe-top,0px))!important}.m2-mini .m2-placeline{top:calc(100% + 50px)}.m2-title{left:14px;top:14px;padding:4px 10px}.m2-title strong{font-size:19px}.m2-tools{right:14px;top:14px}.m2-sheet{bottom:12px;width:calc(100% - 24px);padding:12px}.m2-head h3{font-size:23px}.m2-key{grid-template-columns:1fr}}
 `;
   doc.head.append(style);
-  const ICON = { plus: '<path d="M12 5v14M5 12h14"/>', minus: '<path d="M5 12h14"/>', locate: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4"/>', world: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>', key: '<path d="M5 6h14M5 12h14M5 18h9"/>', close: '<path d="M6 6l12 12M18 6 6 18"/>' };
-  const mini = el2("section", "chart-mini m2-mini"), small = el2("canvas"), zoomIn = el2("button", "m2-zoom", "+"), zoomOut = el2("button", "m2-zoom", "\u2212"), placeLine = el2("div", "m2-placeline");
+  const ICON = { plus: '<path d="M12 5v14M5 12h14"/>', minus: '<path d="M5 12h14"/>', locate: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4"/>', world: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>', key: '<path d="M5 6h14M5 12h14M5 18h9"/>', lands: '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c3.2 3.4 3.2 13.6 0 17M12 3.5c-3.2 3.4-3.2 13.6 0 17"/>', close: '<path d="M6 6l12 12M18 6 6 18"/>' };
+  const mini = el3("section", "chart-mini m2-mini"), small = el3("canvas"), zoomIn = el3("button", "m2-zoom", "+"), zoomOut = el3("button", "m2-zoom", "\u2212"), placeLine = el3("div", "m2-placeline");
   mini.dataset.gameplayHud = "";
   small.setAttribute("aria-label", "Minimap \u2014 open world map");
   small.setAttribute("role", "button");
@@ -97427,27 +97726,27 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
   zoomIn.setAttribute("aria-label", "Zoom minimap in");
   zoomOut.setAttribute("aria-label", "Zoom minimap out");
   mini.append(small, zoomIn, zoomOut, placeLine);
-  const atlas = el2("section", "m2-atlas"), large = el2("canvas"), title = el2("div", "m2-title"), titleSub = el2("span"), tools2 = el2("div", "m2-tools"), sheet = el2("aside", "m2-sheet"), toast = el2("div", "m2-toast"), kneelBox = el2("div", "m2-kneel"), kneelMedal = el2("canvas"), kneelText = el2("strong"), kneelBar = el2("b"), banner5 = el2("div", "m2-banner"), bannerCanvas = el2("canvas"), notice = el2("div", "m2-notice"), noticeIcon = el2("canvas"), noticeTop = el2("small"), noticeName = el2("strong");
+  const atlas = el3("section", "m2-atlas"), large = el3("canvas"), title = el3("div", "m2-title"), titleSub = el3("span"), tools2 = el3("div", "m2-tools"), sheet = el3("aside", "m2-sheet"), toast = el3("div", "m2-toast"), kneelBox = el3("div", "m2-kneel"), kneelMedal = el3("canvas"), kneelText = el3("strong"), kneelBar = el3("b"), banner5 = el3("div", "m2-banner"), bannerCanvas = el3("canvas"), notice = el3("div", "m2-notice"), noticeIcon = el3("canvas"), noticeTop = el3("small"), noticeName = el3("strong");
   atlas.hidden = true;
   atlas.setAttribute("role", "dialog");
   atlas.setAttribute("aria-modal", "true");
   atlas.setAttribute("aria-label", "World map");
-  title.append(el2("strong", void 0, "The Known World"), titleSub);
+  title.append(el3("strong", void 0, "The Known World"), titleSub);
   sheet.hidden = true;
   sheet.setAttribute("aria-live", "polite");
   toast.hidden = true;
   kneelBox.hidden = true;
   banner5.hidden = true;
   {
-    const bar = el2("i");
+    const bar = el3("i");
     bar.append(kneelBar);
-    const t = el2("div");
+    const t = el3("div");
     t.append(kneelText, bar);
     kneelBox.append(kneelMedal, t);
   }
   banner5.append(bannerCanvas);
   {
-    const t = el2("div");
+    const t = el3("div");
     t.append(noticeTop, noticeName);
     notice.append(noticeIcon, t);
     notice.hidden = true;
@@ -97477,8 +97776,8 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
   };
   env.addEventListener("resize", invalidateSize);
   env.addEventListener("orientationchange", invalidateSize);
-  const button2 = (parent, label4, icon, fn, cls) => {
-    const b = el2("button", cls);
+  const button3 = (parent, label4, icon, fn, cls) => {
+    const b = el3("button", cls);
     b.type = "button";
     b.setAttribute("aria-label", label4);
     b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICON[icon] + "</svg>";
@@ -97490,7 +97789,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     return b;
   };
   const medalCanvas = (kind, css, opt = {}) => {
-    const c = el2("canvas"), r = Math.min(2, env.devicePixelRatio || 1);
+    const c = el3("canvas"), r = Math.min(2, env.devicePixelRatio || 1);
     c.width = c.height = Math.round(css * r);
     const x = c.getContext("2d");
     x.scale(r, r);
@@ -97610,7 +97909,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
   function bezelImage(D2, ratio) {
     const key4 = D2 + "/" + ratio;
     if (bezel?.key === key4) return bezel.canvas;
-    const W4 = D2 + 28, H7 = D2 + 34, R9 = D2 / 2, cx = W4 / 2, cy2 = 20 + R9, c = el2("canvas");
+    const W4 = D2 + 28, H7 = D2 + 34, R9 = D2 / 2, cx = W4 / 2, cy2 = 20 + R9, c = el3("canvas");
     c.width = Math.round(W4 * ratio);
     c.height = Math.round(H7 * ratio);
     const x = c.getContext("2d");
@@ -97926,22 +98225,22 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     }
     dirty = true;
   }
-  const closeButton = button2(tools2, "Close world map", "close", hide, "m2-close");
-  button2(tools2, "Zoom in", "plus", () => zoom(1 / 1.6));
-  button2(tools2, "Zoom out", "minus", () => zoom(1.6));
-  button2(tools2, "Center on me", "locate", () => {
+  const closeButton = button3(tools2, "Close world map", "close", hide, "m2-close");
+  button3(tools2, "Zoom in", "plus", () => zoom(1 / 1.6));
+  button3(tools2, "Zoom out", "minus", () => zoom(1.6));
+  button3(tools2, "Center on me", "locate", () => {
     center3 = { ...player() };
     span2 = 600;
     dirty = true;
   });
-  button2(tools2, "Whole world", "world", () => {
+  button3(tools2, "Whole world", "world", () => {
     if (!meta) return;
     const r = atlasDims();
     center3 = { x: meta.widthTiles / 2, y: meta.heightTiles / 2 };
     span2 = Math.min(maxSpan(), Math.max(meta.widthTiles * 1.04, meta.heightTiles * r.width / r.height * 1.04));
     dirty = true;
   });
-  const keyButton = button2(tools2, "Map key and found places", "key", () => {
+  const keyButton = button3(tools2, "Map key and found places", "key", () => {
     sheetMode = sheetMode === "key" ? null : "key";
     selected = null;
     renderSheet();
@@ -97971,10 +98270,52 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     if (m.rumored) return "From a torn journal: dig under the flag";
     return "Events return here after each run";
   }
+  const landsButton = otherLands ? button3(tools2, "Other lands", "lands", () => {
+    sheetMode = sheetMode === "lands" ? null : "lands";
+    selected = null;
+    renderSheet();
+    dirty = true;
+  }) : null;
+  let landsBusy = false;
+  function renderLands(x) {
+    sheet.append(el3("h4", void 0, "Other lands"));
+    const lands = otherLands.list(), block2 = otherLands.block?.() ?? null, story = otherLands.storyDone();
+    if (!lands.length) sheet.append(el3("p", "m2-note", "No other worlds yet. Your other heroes\u2019 worlds and friends\u2019 shared worlds show here."));
+    for (const land of lands) {
+      const row2 = el3("div", "m2-land"), words = el3("div"), go = el3("button", void 0, landsBusy === land.slot ? "Traveling\u2026" : "Travel");
+      go.type = "button";
+      words.append(el3("strong", void 0, land.label), el3("small", void 0, land.sub));
+      go.disabled = Boolean(landsBusy) || !land.open || Boolean(block2);
+      go.onclick = async (e) => {
+        e.preventDefault();
+        if (landsBusy) return;
+        landsBusy = land.slot;
+        renderSheet();
+        try {
+          if (await otherLands.travel(land.slot) === false) {
+            landsBusy = false;
+            say("That didn\u2019t work. Try again.");
+            renderSheet();
+          }
+        } catch (error) {
+          landsBusy = false;
+          say(error?.message || "That didn\u2019t work. Try again.");
+          renderSheet();
+        }
+      };
+      row2.append(words, go);
+      sheet.append(row2);
+    }
+    if (!story && lands.some((l) => !l.open)) sheet.append(el3("p", "m2-note", "Opens when this hero finishes the story."));
+    else if (block2) sheet.append(el3("p", "m2-note", block2));
+    sheet.append(el3("p", "m2-note", "You arrive where you last were in that world."), x);
+    sheet.hidden = false;
+  }
   function renderSheet() {
     sheet.replaceChildren();
     keyButton.setAttribute("aria-pressed", String(sheetMode === "key"));
-    const x = el2("button", "m2-x", "\xD7");
+    landsButton?.setAttribute("aria-pressed", String(sheetMode === "lands"));
+    const x = el3("button", "m2-x", "\xD7");
     x.type = "button";
     x.setAttribute("aria-label", "Close");
     x.onclick = (e) => {
@@ -97984,13 +98325,17 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
       renderSheet();
       dirty = true;
     };
+    if (sheetMode === "lands") {
+      renderLands(x);
+      return;
+    }
     if (sheetMode === "key") {
-      sheet.append(el2("h4", void 0, "Map key"));
-      const grid = el2("div", "m2-key"), list = places(), count = (f) => list.filter(f).length, row2 = (kind, text2, value2) => {
-        const d2 = el2("div");
-        d2.append(medalCanvas(kind, 24), el2("em", void 0, text2));
+      sheet.append(el3("h4", void 0, "Map key"));
+      const grid = el3("div", "m2-key"), list = places(), count = (f) => list.filter(f).length, row2 = (kind, text3, value2) => {
+        const d2 = el3("div");
+        d2.append(medalCanvas(kind, 24), el3("em", void 0, text3));
         d2.lastChild.style.fontStyle = "normal";
-        d2.append(el2("span", void 0, value2));
+        d2.append(el3("span", void 0, value2));
         grid.append(d2);
       };
       const sets = meta?.settlements ?? [], small_ = sets.filter((s) => s.class !== "city" && s.class !== "capital-great-hold"), big = sets.filter((s) => s.class === "city" || s.class === "capital-great-hold"), k = knowledge();
@@ -98001,9 +98346,9 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
       row2("event", "Event clearings", count((m2) => m2.kind === "event" && !m2.rumored) + " found");
       row2("ferry", "Ferry landings", count((m2) => m2.kind === "ferry") + " found");
       row2("quest", "Tracked place", tracked && placeById(tracked) ? "1" : "none");
-      sheet.append(grid, el2("p", "m2-note", "Every town, city and capital shows as ? until you reach it; dungeons appear once you find them. Every town and dungeon you find is a fast travel point. A green tick marks a cleared dungeon."));
+      sheet.append(grid, el3("p", "m2-note", "Every town, city and capital shows as ? until you reach it; dungeons appear once you find them. Every town and dungeon you find is a fast travel point. A green tick marks a cleared dungeon."));
       const notes = knowledge()?.journal ?? [];
-      if (notes.length) sheet.append(el2("p", "m2-note", "Journal: " + TRAIL_NOTE_TEXT));
+      if (notes.length) sheet.append(el3("p", "m2-note", "Journal: " + TRAIL_NOTE_TEXT));
       sheet.append(x);
       sheet.hidden = false;
       return;
@@ -98014,10 +98359,10 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     }
     const m = placeById(selected.id) ?? selected;
     if (sheetMode === "confirm") {
-      const head14 = el2("div", "m2-head");
-      head14.append(medalCanvas(m.icon, 48), el2("div"));
-      head14.lastChild.append(el2("h3", void 0, "Travel to " + m.label + "?"), el2("div", "m2-sub", "You kneel for 3 seconds. Moving or taking a hit cancels it."));
-      const b2 = el2("div", "m2-btns"), go = el2("button", "m2-gold", "Travel"), no = el2("button", "m2-plain", "Cancel");
+      const head14 = el3("div", "m2-head");
+      head14.append(medalCanvas(m.icon, 48), el3("div"));
+      head14.lastChild.append(el3("h3", void 0, "Travel to " + m.label + "?"), el3("div", "m2-sub", "You kneel for 3 seconds. Moving or taking a hit cancels it."));
+      const b2 = el3("div", "m2-btns"), go = el3("button", "m2-gold", "Travel"), no = el3("button", "m2-plain", "Cancel");
       go.type = no.type = "button";
       const block2 = travelBlock();
       go.disabled = Boolean(block2);
@@ -98032,34 +98377,34 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
       };
       b2.append(go, no);
       sheet.append(head14);
-      if (block2) sheet.append(el2("p", "m2-note", block2));
+      if (block2) sheet.append(el3("p", "m2-note", block2));
       sheet.append(b2, x);
       sheet.hidden = false;
       return;
     }
-    const head13 = el2("div", "m2-head");
-    head13.append(medalCanvas(m.icon, 48, { done: m.done }), el2("div"));
-    head13.lastChild.append(el2("h3", void 0, m.kind === "event" ? eventName(m) : m.label), el2("div", "m2-sub", subtitle(m)));
+    const head13 = el3("div", "m2-head");
+    head13.append(medalCanvas(m.icon, 48, { done: m.done }), el3("div"));
+    head13.lastChild.append(el3("h3", void 0, m.kind === "event" ? eventName(m) : m.label), el3("div", "m2-sub", subtitle(m)));
     sheet.append(head13);
     if (m.kind === "settlement" && m.town) {
-      const kinds2 = [...new Set(m.town.buildings.map((b2) => b2[4]).filter(Boolean))].sort((a, b2) => Object.keys(SHOP_NAME).indexOf(a) - Object.keys(SHOP_NAME).indexOf(b2)), chips = el2("div", "m2-chips");
+      const kinds2 = [...new Set(m.town.buildings.map((b2) => b2[4]).filter(Boolean))].sort((a, b2) => Object.keys(SHOP_NAME).indexOf(a) - Object.keys(SHOP_NAME).indexOf(b2)), chips = el3("div", "m2-chips");
       for (const k of kinds2) {
-        const chip2 = el2("span", "m2-chip");
-        chip2.append(medalCanvas(k, 22), el2("span", void 0, SHOP_NAME[k]));
+        const chip2 = el3("span", "m2-chip");
+        chip2.append(medalCanvas(k, 22), el3("span", void 0, SHOP_NAME[k]));
         chips.append(chip2);
       }
       if (kinds2.length) sheet.append(chips);
     }
-    const status2 = el2("div", "m2-status"), p = player(), d = p ? Math.hypot(m.x - p.x, m.y - p.y) : 0, mark = el2("b", void 0, m.unknown ? "Not found yet" : m.rumored ? "Rumored" : m.done ? "\u2713 Cleared" : "\u2713 Found");
+    const status2 = el3("div", "m2-status"), p = player(), d = p ? Math.hypot(m.x - p.x, m.y - p.y) : 0, mark = el3("b", void 0, m.unknown ? "Not found yet" : m.rumored ? "Rumored" : m.done ? "\u2713 Cleared" : "\u2713 Found");
     if (m.unknown) mark.style.color = "#8a6232";
     status2.append(mark);
     const here = Boolean(p) && (d < 6 || m.kind === "settlement" && insideTownAt(p) === m.id);
-    if (p) status2.append(el2("span", void 0, here ? "You are here" : fmt(d) + " tiles \xB7 " + walk(d)));
+    if (p) status2.append(el3("span", void 0, here ? "You are here" : fmt(d) + " tiles \xB7 " + walk(d)));
     sheet.append(status2);
-    if (m.unknown) sheet.append(el2("p", "m2-note", "Reach it to learn its name and unlock fast travel."));
-    const b = el2("div", "m2-btns");
+    if (m.unknown) sheet.append(el3("p", "m2-note", "Reach it to learn its name and unlock fast travel."));
+    const b = el3("div", "m2-btns");
     if (m.travel && !here) {
-      const go = el2("button", "m2-gold", "Travel here");
+      const go = el3("button", "m2-gold", "Travel here");
       go.type = "button";
       go.onclick = (e) => {
         e.preventDefault();
@@ -98068,7 +98413,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
       };
       b.append(go);
     }
-    const tr = el2("button", "m2-plain", tracked === m.id ? "Stop tracking" : "Track");
+    const tr = el3("button", "m2-plain", tracked === m.id ? "Stop tracking" : "Track");
     tr.type = "button";
     tr.onclick = (e) => {
       e.preventDefault();
@@ -98212,12 +98557,12 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
       if ((m.kind !== "settlement" || m.unknown) && m.id !== selected?.id && m.id !== tracked) continue;
       const size = m.big ? 19 : 16;
       c.font = size + "px " + MAP_FONT;
-      const text3 = m.kind === "event" ? eventName(m) : m.label, w = c.measureText(text3).width;
+      const text4 = m.kind === "event" ? eventName(m) : m.label, w = c.measureText(text4).width;
       for (const [lx, ly] of [[q.x, q.y + r + 12], [q.x + r + 6 + w / 2, q.y], [q.x - r - 6 - w / 2, q.y], [q.x, q.y - r - 11]]) {
         const box5 = { x: lx - w / 2 - 2, y: ly - size * 0.55, w: w + 4, h: size * 1.1 };
         if (box5.x < 14 || box5.x + box5.w > width - 14 || box5.y < 14 || box5.y + box5.h > height - 14 || taken.some((t) => overlap(t, box5))) continue;
         taken.push(box5);
-        inkLabel(c, text3, lx, ly, { font: size + "px " + MAP_FONT });
+        inkLabel(c, text4, lx, ly, { font: size + "px " + MAP_FONT });
         break;
       }
     }
@@ -98292,11 +98637,11 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     }
     c.restore();
     drawFrame2(c, width, height);
-    const found = meta.settlements.filter((s) => k?.visited[s.id] !== void 0).length, text2 = metadataError ? "Map detail error: " + metadataError : found + " of " + meta.settlements.length + " towns found";
-    if (titleSub.textContent !== text2) titleSub.textContent = text2;
+    const found = meta.settlements.filter((s) => k?.visited[s.id] !== void 0).length, text3 = metadataError ? "Map detail error: " + metadataError : found + " of " + meta.settlements.length + " towns found";
+    if (titleSub.textContent !== text3) titleSub.textContent = text3;
   }
-  const say = (text2, time = env.performance.now(), ms = 4200) => {
-    toast.textContent = text2;
+  const say = (text3, time = env.performance.now(), ms = 4200) => {
+    toast.textContent = text3;
     toast.hidden = false;
     toastUntil = time + ms;
   };
@@ -98946,9 +99291,9 @@ function createMapCanvasSizeCacheD9(canvas, environment) {
     environment.visualViewport?.removeEventListener("resize", invalidate);
   } };
 }
-function createWorldMapD9({ document: doc, environment, port, releaseInput, issue = null }) {
+function createWorldMapD9({ document: doc, environment, port, releaseInput, issue = null, otherLands = null }) {
   const planned = doc.body.dataset.shorelineReview === "true";
-  if (planned && port.cartographyWindow) return createAtlasMapV2({ document: doc, environment, port, releaseInput, issue });
+  if (planned && port.cartographyWindow) return createAtlasMapV2({ document: doc, environment, port, releaseInput, issue, otherLands });
   if (!port.mapWindow) return { refresh() {
   }, isOpen: () => false, destroy() {
   } };
@@ -98970,11 +99315,11 @@ function createWorldMapD9({ document: doc, environment, port, releaseInput, issu
 @media(max-height:550px){.world-mini{top:calc(56px + var(--world-safe-top));width:104px}.world-mini canvas{width:98px;height:62px}.world-atlas header{padding:3px}.world-atlas p{padding:3px;min-height:24px}}
 `;
   doc.head.append(style);
-  const el2 = (tag, text2) => {
+  const el3 = (tag, text3) => {
     const e = doc.createElement(tag);
-    if (text2) e.textContent = text2;
+    if (text3) e.textContent = text3;
     return e;
-  }, mini = el2("section"), small = el2("canvas"), footer = el2("footer"), atlas = el2("section"), header = el2("header"), large = el2("canvas"), detail = el2("p", "Drag to explore known geography. Pinch or use + / \u2212 to zoom.");
+  }, mini = el3("section"), small = el3("canvas"), footer = el3("footer"), atlas = el3("section"), header = el3("header"), large = el3("canvas"), detail = el3("p", "Drag to explore known geography. Pinch or use + / \u2212 to zoom.");
   mini.className = "world-mini";
   mini.dataset.gameplayHud = "";
   atlas.className = "world-atlas";
@@ -98986,8 +99331,8 @@ function createWorldMapD9({ document: doc, environment, port, releaseInput, issu
   small.height = 76 * MINIMAP_PIXEL_RATIO;
   small.setAttribute("aria-label", "Minimap \u2014 open world map");
   small.tabIndex = 0;
-  const button2 = (text2, fn, parent, className = "") => {
-    const b = el2("button", text2);
+  const button3 = (text3, fn, parent, className = "") => {
+    const b = el3("button", text3);
     b.type = "button";
     b.className = className;
     let held = null;
@@ -99012,9 +99357,9 @@ function createWorldMapD9({ document: doc, environment, port, releaseInput, issu
     parent.append(b);
     return b;
   };
-  header.append(el2("strong", "WORLD MAP"));
+  header.append(el3("strong", "WORLD MAP"));
   mini.append(small, footer);
-  footer.append(el2("span", "N \u2191"));
+  footer.append(el3("span", "N \u2191"));
   atlas.append(header, large, detail);
   doc.body.append(mini, atlas);
   let open2 = false, hudAllowed = true, center3 = null, level = 0, miniZoom = 1, busy = false, closed = false, lastKey = null, cache6 = [], cacheRevision = 0, lastModel = null, marks2 = [], miniMarks = [], reviewMarks = [], terrainHits = [], lastTime = -1e3, staticLayer = null, staticKey = null, staticBuilds = 0, staticHits = 0, miniBackingCenter = null, miniRequestedCenter = null, miniRecenters = 0;
@@ -99057,12 +99402,12 @@ function createWorldMapD9({ document: doc, environment, port, releaseInput, issu
     lastKey = null;
     if (planned) detail.textContent = "Observed terrain \xB7 zoom " + 2 ** level + "\xD7 span \xB7 solid gold road / dashed trail / white bridge";
   };
-  button2("\u2212", () => zoom(1), header, "map-zoom-out");
-  button2("+", () => zoom(-1), header);
-  button2("Recenter", recenter, header);
-  const closeButton = button2("\xD7", hide, header, "map-close");
+  button3("\u2212", () => zoom(1), header, "map-zoom-out");
+  button3("+", () => zoom(-1), header);
+  button3("Recenter", recenter, header);
+  const closeButton = button3("\xD7", hide, header, "map-close");
   closeButton.setAttribute("aria-label", "Close world map");
-  const miniButton = button2("1\xD7", () => {
+  const miniButton = button3("1\xD7", () => {
     miniZoom = miniZoom === 1 ? 2 : 1;
     miniButton.textContent = miniZoom + "\xD7";
     lastKey = null;
@@ -99290,12 +99635,12 @@ function createWorldMapD9({ document: doc, environment, port, releaseInput, issu
 }
 
 // src/client/shield_guard_input.js
-function createShieldGuardInput({ button: button2, environment, readModel, adapter, isBlocked, clearPrimary, reportError }) {
+function createShieldGuardInput({ button: button3, environment, readModel, adapter, isBlocked, clearPrimary, reportError }) {
   const owners = /* @__PURE__ */ new Set(), listeners = [];
   let context = null, shown2 = null;
-  const listen = (el2, type, fn) => {
-    el2.addEventListener(type, fn);
-    listeners.push(() => el2.removeEventListener(type, fn));
+  const listen = (el3, type, fn) => {
+    el3.addEventListener(type, fn);
+    listeners.push(() => el3.removeEventListener(type, fn));
   };
   function send(pressed) {
     const m = readModel(), p = m.playersById[m.localPlayerId];
@@ -99324,18 +99669,18 @@ function createShieldGuardInput({ button: button2, environment, readModel, adapt
     owners.clear();
     if (had || g?.requested || g?.raised || g?.mustRelease) send(false);
   }
-  listen(button2, "pointerdown", (e) => {
+  listen(button3, "pointerdown", (e) => {
     if (e.button !== 0) return;
     e.preventDefault();
     e.stopPropagation();
     down(e.pointerId);
     try {
-      button2.setPointerCapture(e.pointerId);
+      button3.setPointerCapture(e.pointerId);
     } catch {
     }
   });
-  for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) listen(button2, type, (e) => up(e.pointerId));
-  listen(button2, "click", (e) => e.preventDefault());
+  for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) listen(button3, type, (e) => up(e.pointerId));
+  listen(button3, "click", (e) => e.preventDefault());
   listen(environment, "keydown", (e) => {
     if (!["ShiftLeft", "ShiftRight"].includes(e.code) || e.repeat || ["INPUT", "TEXTAREA", "SELECT", "BUTTON"].includes(e.target?.tagName)) return;
     if (readModel().playersById[readModel().localPlayerId].stats.subType === "shield") {
@@ -99358,27 +99703,27 @@ function createShieldGuardInput({ button: button2, environment, readModel, adapt
     }
     if (isBlocked() || m.subweapon?.suppressed || !m.entitiesById[p.entityId].alive) clear2();
     const hide = Boolean(p.stats.subType !== "shield" || isBlocked() || m.subweapon?.suppressed);
-    if (button2.hidden !== hide) button2.hidden = hide;
+    if (button3.hidden !== hide) button3.hidden = hide;
     if (hide) return;
     const alive = m.entitiesById[p.entityId].alive, next = `${alive}/${Boolean(g?.raised)}/${Boolean(g?.mustRelease)}/${Boolean(g?.requested)}/${(g?.integrity ?? 0).toFixed(1)}`;
     if (next === shown2) return;
     shown2 = next;
-    button2.disabled = !alive;
-    button2.setAttribute("aria-pressed", String(Boolean(g?.raised)));
-    button2.setAttribute("aria-label", `Raise Shield \u2014 hold Shift or touch. Guard Integrity ${Math.floor(g?.integrity ?? 0)} of 32`);
-    button2.style.setProperty("--guard-fill", `${100 * (g?.integrity ?? 0) / 32}%`);
-    button2.style.setProperty("--cool", (1 - Math.min(32, g?.integrity ?? 0) / 32).toFixed(3));
-    button2.dataset.raised = String(Boolean(g?.raised));
-    button2.dataset.empty = String((g?.integrity ?? 0) < 8);
-    const text2 = `${g?.raised ? "RAISED" : g?.mustRelease ? "RELEASE" : g?.requested ? "RAISING\u2026" : "GUARD"}
+    button3.disabled = !alive;
+    button3.setAttribute("aria-pressed", String(Boolean(g?.raised)));
+    button3.setAttribute("aria-label", `Raise Shield \u2014 hold Shift or touch. Guard Integrity ${Math.floor(g?.integrity ?? 0)} of 32`);
+    button3.style.setProperty("--guard-fill", `${100 * (g?.integrity ?? 0) / 32}%`);
+    button3.style.setProperty("--cool", (1 - Math.min(32, g?.integrity ?? 0) / 32).toFixed(3));
+    button3.dataset.raised = String(Boolean(g?.raised));
+    button3.dataset.empty = String((g?.integrity ?? 0) < 8);
+    const text3 = `${g?.raised ? "RAISED" : g?.mustRelease ? "RELEASE" : g?.requested ? "RAISING\u2026" : "GUARD"}
 INTEGRITY
 ${(g?.integrity ?? 0).toFixed(1)} / 32`;
-    button2.innerText = text2;
+    button3.innerText = text3;
   }
   return { refresh, clear: clear2, read: () => ({ owners: [...owners] }), destroy() {
     clear2();
     listeners.forEach((f) => f());
-    button2.remove();
+    button3.remove();
   } };
 }
 
@@ -99446,9 +99791,9 @@ function createSubweaponHud({ document: document2, environment, readModel, adapt
   dash.setAttribute("aria-label", "Shadow Dash \u2014 Shift");
   document2.getElementById("world-bag").parentElement.append(panel, dash);
   const listeners = [], owners = /* @__PURE__ */ new Set();
-  const listen = (el2, type, fn) => {
-    el2.addEventListener(type, fn);
-    listeners.push(() => el2.removeEventListener(type, fn));
+  const listen = (el3, type, fn) => {
+    el3.addEventListener(type, fn);
+    listeners.push(() => el3.removeEventListener(type, fn));
   };
   function activate() {
     const m = readModel(), id = m.playersById[m.localPlayerId].entityId;
@@ -99480,7 +99825,7 @@ function createSubweaponHud({ document: document2, environment, readModel, adapt
     activate();
   });
   listen(environment, "blur", () => owners.clear());
-  let text2 = "", lastPressure = 0;
+  let text3 = "", lastPressure = 0;
   function refresh(m) {
     guard.refresh(m);
     const local7 = m.playersById[m.localPlayerId], c = m.subweapon, type = local7.stats.subType;
@@ -99494,7 +99839,7 @@ function createSubweaponHud({ document: document2, environment, readModel, adapt
     lastPressure = c.pressure;
     const element = (local7.stats.spellType ?? "fire") === "lightning" ? "STORM" : (local7.stats.spellType ?? "fire").toUpperCase();
     const shielded = c?.maxBarrier && c.maxBarrier !== "0", next = type === "tome" ? shielded ? `${element} \xB7 Barrier ${c.barrierLabel} / ${c.maxBarrierLabel}` : element : "";
-    if (next !== text2) {
+    if (next !== text3) {
       if (type === "tome") {
         const fire2 = document2.createElement("span"), barrier = document2.createElement("span");
         fire2.textContent = element;
@@ -99519,7 +99864,7 @@ function createSubweaponHud({ document: document2, environment, readModel, adapt
         ready2.textContent = c.pressure === 3 ? "BASH READY" : "";
         panel.replaceChildren(icon, label4, pips, ready2);
       } else panel.textContent = next;
-      text2 = next;
+      text3 = next;
     }
     panel.dataset.family = type ?? "";
     const blink = type === "tome", name = blink ? "BLINK" : "DASH", ready = c.dash.cooldown === 0, charges = !blink && local7.d8?.classRanks?.restless ? 2 : 1, have = ready ? 1 + (charges > 1 && c.skills?.spare ? 1 : 0) : 0, value2 = ready ? `${name} \xB7 ${have}/${charges}
@@ -99640,9 +99985,9 @@ function createDiagnosticOverlays({ document: document2, environment, releaseInp
   }
   const dps = createDpsSamples(), frames = createFrameSamples(), widgets = {}, listeners = [];
   let dragging = null, nextPaint = 0, writes = 0, measured = 0;
-  const listen = (el2, type, fn, options) => {
-    el2.addEventListener(type, fn, options);
-    listeners.push(() => el2.removeEventListener(type, fn, options));
+  const listen = (el3, type, fn, options) => {
+    el3.addEventListener(type, fn, options);
+    listeners.push(() => el3.removeEventListener(type, fn, options));
   };
   const save = () => {
     try {
@@ -99667,38 +100012,38 @@ function createDiagnosticOverlays({ document: document2, environment, releaseInp
     w.el.style.top = w.y + "px";
   }
   for (const [kind, label4] of [["fps", "FPS / frame time"], ["dps", "Dungeon DPS"]]) {
-    const pref = preferences?.[kind], el2 = document2.createElement("div");
-    el2.id = "world-" + kind + "-overlay";
-    el2.className = "diagnostic-overlay " + kind;
-    el2.title = "Drag to move";
-    el2.tabIndex = 0;
-    el2.setAttribute("aria-label", label4 + " overlay; drag or use arrow keys to move");
-    document2.getElementById("world-app").append(el2);
-    const w = { el: el2, enabled: pref?.enabled === true, collapsed: kind === "fps" && pref?.collapsed === true, x: Number.isFinite(pref?.x) ? pref.x : Math.max(0, environment.innerWidth - 220), y: Number.isFinite(pref?.y) ? pref.y : kind === "fps" ? 110 : 175 };
+    const pref = preferences?.[kind], el3 = document2.createElement("div");
+    el3.id = "world-" + kind + "-overlay";
+    el3.className = "diagnostic-overlay " + kind;
+    el3.title = "Drag to move";
+    el3.tabIndex = 0;
+    el3.setAttribute("aria-label", label4 + " overlay; drag or use arrow keys to move");
+    document2.getElementById("world-app").append(el3);
+    const w = { el: el3, enabled: pref?.enabled === true, collapsed: kind === "fps" && pref?.collapsed === true, x: Number.isFinite(pref?.x) ? pref.x : Math.max(0, environment.innerWidth - 220), y: Number.isFinite(pref?.y) ? pref.y : kind === "fps" ? 110 : 175 };
     widgets[kind] = w;
     if (kind === "fps") {
-      const header = document2.createElement("div"), button2 = document2.createElement("button"), status2 = document2.createElement("span"), body5 = document2.createElement("span");
+      const header = document2.createElement("div"), button3 = document2.createElement("button"), status2 = document2.createElement("span"), body5 = document2.createElement("span");
       header.className = "diagnostic-metrics-header";
-      button2.type = "button";
-      button2.className = "diagnostic-collapse";
+      button3.type = "button";
+      button3.className = "diagnostic-collapse";
       status2.className = "diagnostic-sample-state";
       status2.textContent = performanceProbe ? performanceProbe.isRecording() ? "\u25CF REC" : "\u25CB Capture frozen" : "\u25CB Sample off";
       body5.className = "diagnostic-metrics-body";
       body5.textContent = "FPS: \u2014 \xB7 Frame: \u2014 ms\nWorst 5s: \u2014 ms";
-      header.append(button2, status2);
-      el2.append(header, body5);
+      header.append(button3, status2);
+      el3.append(header, body5);
       w.body = body5;
       w.status = status2;
       const sync = () => {
-        el2.dataset.collapsed = String(w.collapsed);
+        el3.dataset.collapsed = String(w.collapsed);
         body5.hidden = w.collapsed;
-        button2.textContent = w.collapsed ? "+" : "\u2212";
-        button2.setAttribute("aria-label", w.collapsed ? "Expand performance metrics" : "Collapse performance metrics");
-        button2.setAttribute("aria-expanded", String(!w.collapsed));
+        button3.textContent = w.collapsed ? "+" : "\u2212";
+        button3.setAttribute("aria-label", w.collapsed ? "Expand performance metrics" : "Collapse performance metrics");
+        button3.setAttribute("aria-expanded", String(!w.collapsed));
       };
       sync();
-      listen(button2, "pointerdown", (e) => e.stopPropagation());
-      listen(button2, "click", (e) => {
+      listen(button3, "pointerdown", (e) => e.stopPropagation());
+      listen(button3, "click", (e) => {
         e.preventDefault();
         e.stopPropagation();
         w.collapsed = !w.collapsed;
@@ -99708,14 +100053,14 @@ function createDiagnosticOverlays({ document: document2, environment, releaseInp
         place3(w);
         save();
       });
-    } else el2.textContent = "DPS: 0.0";
+    } else el3.textContent = "DPS: 0.0";
     const row2 = document2.createElement("label"), toggle = document2.createElement("input");
     toggle.type = "checkbox";
     toggle.id = "world-" + kind + "-toggle";
     toggle.checked = w.enabled;
     row2.append(toggle, document2.createTextNode(label4));
     controls.append(row2);
-    el2.hidden = !w.enabled;
+    el3.hidden = !w.enabled;
     if (w.enabled) {
       bounds2(w);
       place3(w);
@@ -99723,7 +100068,7 @@ function createDiagnosticOverlays({ document: document2, environment, releaseInp
     listen(toggle, "change", () => {
       releaseInput();
       w.enabled = toggle.checked;
-      el2.hidden = !w.enabled;
+      el3.hidden = !w.enabled;
       (kind === "fps" ? frames : dps).reset();
       nextPaint = 0;
       if (w.enabled) {
@@ -99732,16 +100077,16 @@ function createDiagnosticOverlays({ document: document2, environment, releaseInp
       }
       save();
     });
-    listen(el2, "pointerdown", (e) => {
+    listen(el3, "pointerdown", (e) => {
       if (e.button !== 0 || dragging || e.target.closest?.("button")) return;
       e.preventDefault();
       e.stopPropagation();
       releaseInput();
       bounds2(w);
       dragging = { w, id: e.pointerId, x: e.clientX, y: e.clientY, left: w.x, top: w.y };
-      el2.setPointerCapture(e.pointerId);
+      el3.setPointerCapture(e.pointerId);
     });
-    listen(el2, "pointermove", (e) => {
+    listen(el3, "pointermove", (e) => {
       if (dragging?.id !== e.pointerId || dragging.w !== w) return;
       e.preventDefault();
       e.stopPropagation();
@@ -99754,17 +100099,17 @@ function createDiagnosticOverlays({ document: document2, environment, releaseInp
       e.stopPropagation();
       dragging = null;
       try {
-        el2.releasePointerCapture(e.pointerId);
+        el3.releasePointerCapture(e.pointerId);
       } catch {
       }
       save();
     };
-    for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) listen(el2, type, stop2);
-    for (const type of ["click", "dblclick", "contextmenu"]) listen(el2, type, (e) => {
+    for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) listen(el3, type, stop2);
+    for (const type of ["click", "dblclick", "contextmenu"]) listen(el3, type, (e) => {
       e.preventDefault();
       e.stopPropagation();
     });
-    listen(el2, "keydown", (e) => {
+    listen(el3, "keydown", (e) => {
       e.stopPropagation();
       if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.code)) {
         e.preventDefault();
@@ -99776,7 +100121,7 @@ function createDiagnosticOverlays({ document: document2, environment, releaseInp
         save();
       } else if (e.code === "Space") e.preventDefault();
     });
-    listen(el2, "keyup", (e) => e.stopPropagation());
+    listen(el3, "keyup", (e) => e.stopPropagation());
   }
   listen(environment, "resize", () => {
     for (const w of Object.values(widgets)) if (w.enabled) {
@@ -99803,7 +100148,7 @@ function createDiagnosticOverlays({ document: document2, environment, releaseInp
     nextPaint = time + 250;
     for (const [kind, w] of Object.entries(widgets)) {
       if (!w.enabled) continue;
-      let text2;
+      let text3;
       if (kind === "fps") {
         if (w.collapsed) {
           const compact = Math.round(frames.read(time).fps) + " FPS";
@@ -99813,7 +100158,7 @@ function createDiagnosticOverlays({ document: document2, environment, releaseInp
         const recording = performanceProbe?.isRecording?.() ?? false, status2 = performanceProbe ? recording ? "\u25CF REC" : "\u25CB Capture frozen" : "\u25CB Sample off";
         if (w.status.textContent !== status2) w.status.textContent = status2;
         const legacy = frames.read(time), snapshot = performanceProbe?.snapshot?.() ?? null, f = snapshot?.frameStats ?? null, m = snapshot?.metrics ?? {}, q = snapshot?.samples ?? {}, g = snapshot?.gauges ?? {}, runtime = readRuntimeDiagnostics?.() ?? {}, stream = runtime.d9Streaming ?? {}, worker = runtime.d9Worker ?? {}, presentation = readPresentationDiagnostics?.() ?? {}, block2 = runtime.movementBlocks?.last ?? runtime.movementBlocks ?? runtime.activity?.movementBlocks?.last;
-        text2 = f ? `LIVE ${legacy.fps.toFixed(1)} FPS \xB7 frame ${legacy.frameMs.toFixed(1)} ms \xB7 worst 5s ${legacy.worstMs.toFixed(1)} ms
+        text3 = f ? `LIVE ${legacy.fps.toFixed(1)} FPS \xB7 frame ${legacy.frameMs.toFixed(1)} ms \xB7 worst 5s ${legacy.worstMs.toFixed(1)} ms
 CAPTURE ${recording ? "recording" : "frozen"} \xB7 mean ${f.recentFps.toFixed(1)} FPS \xB7 median ${(f.medianFps ?? (f.p50Ms ? 1e3 / f.p50Ms : 0)).toFixed(1)} FPS
 p50 ${f.p50Ms.toFixed(1)} \xB7 p95 ${f.p95Ms.toFixed(1)} \xB7 p99 ${f.p99Ms.toFixed(1)} ms
 LONG >33 ${f.over33Ms} \xB7 >50 ${f.over50Ms} \xB7 >100 ${f.over100Ms} \xB7 worst ${f.worstMs.toFixed(1)}
@@ -99829,10 +100174,10 @@ LIFE clear ${presentation.environmentCacheClears ?? 0} ${presentation.environmen
 COLLIDER visible ${presentation.activeColliderVisuals ?? 0} \xB7 missing ${presentation.missingColliderVisuals ?? 0} \xB7 BLOCK ${block2?.chunkKey ?? "none"} ${block2?.obstacleId ?? ""}
 QUEUE resident ${stream.resident ?? 0} \xB7 prepared ${stream.prepared ?? 0} \xB7 missing ${stream.wantedMissing?.length ?? 0} \xB7 worker ${worker.queued ?? 0}` : `LIVE ${legacy.fps.toFixed(1)} FPS \xB7 frame ${legacy.frameMs.toFixed(1)} ms
 Worst 5s: ${legacy.worstMs.toFixed(1)} ms`;
-      } else text2 = "DPS: " + formatDungeonDps(dps.value(time));
+      } else text3 = "DPS: " + formatDungeonDps(dps.value(time));
       const target = w.body ?? w.el;
-      if (target.textContent !== text2) {
-        target.textContent = text2;
+      if (target.textContent !== text3) {
+        target.textContent = text3;
         writes++;
       }
     }
@@ -99848,19 +100193,19 @@ Worst 5s: ${legacy.worstMs.toFixed(1)} ms`;
 var xpText = (v) => formatLarge(integerWire(v));
 function createDeathPresentation({ document: document2, readModel, adapter, clearInput, restoreGameplayFocus = () => {
 } }) {
-  const panel = document2.getElementById("world-death"), button2 = document2.getElementById("world-respawn");
-  if (!panel || !button2) return { refresh() {
+  const panel = document2.getElementById("world-death"), button3 = document2.getElementById("world-respawn");
+  if (!panel || !button3) return { refresh() {
   }, destroy() {
   } };
-  const set = (id, text2) => {
-    const el2 = document2.getElementById(id);
-    if (el2.textContent !== text2) el2.textContent = text2;
+  const set = (id, text3) => {
+    const el3 = document2.getElementById(id);
+    if (el3.textContent !== text3) el3.textContent = text3;
   };
   let showing = false, error = "";
   const suspended = /* @__PURE__ */ new Set();
   function suspendBackground(dead) {
     if (!dead) {
-      for (const el2 of suspended) el2.inert = false;
+      for (const el3 of suspended) el3.inert = false;
       suspended.clear();
       return;
     }
@@ -99892,7 +100237,7 @@ function createDeathPresentation({ document: document2, readModel, adapter, clea
     }
     refresh(readModel());
   };
-  button2.addEventListener("click", respawn);
+  button3.addEventListener("click", respawn);
   function refresh(model) {
     const participant = model.playersById[model.localPlayerId], hero = model.entitiesById[participant.entityId];
     const dead = Boolean(model.recovery) && !hero.alive;
@@ -99909,20 +100254,20 @@ function createDeathPresentation({ document: document2, readModel, adapter, clea
       error = "";
       return;
     }
-    if (!wasShowing) button2.focus?.({ preventScroll: true });
+    if (!wasShowing) button3.focus?.({ preventScroll: true });
     const xp = participant.progression;
     set("world-death-level", `Level ${xpText(xp.level)}`);
     set("world-death-xp", xp.capped ? `XP ${xpText(xp.totalXp)} \xB7 Maximum level` : `XP ${xpText(xp.totalXp)} total \xB7 ${xpText(xp.current)}/${xpText(xp.required)} to next level`);
     set("world-death-anchor", `Return to ${model.recovery.anchorLabel}`);
     const disabled = !model.recovery.canRespawn || model.persistence.phase !== "encounter";
-    if (button2.disabled !== disabled) button2.disabled = disabled;
-    set("world-death-status", error || (button2.disabled ? "Resolve the save status above to respawn." : ""));
+    if (button3.disabled !== disabled) button3.disabled = disabled;
+    set("world-death-status", error || (button3.disabled ? "Resolve the save status above to respawn." : ""));
   }
   return Object.freeze({ refresh, destroy: () => {
     suspendBackground(false);
     document2.removeEventListener("keydown", blockBackgroundKey, true);
     document2.removeEventListener("keyup", blockBackgroundKey, true);
-    button2.removeEventListener("click", respawn);
+    button3.removeEventListener("click", respawn);
   } });
 }
 
@@ -99971,10 +100316,10 @@ function enemyDepthFocusPointsV1(model, view3, pad2 = 96) {
 
 // src/client/ground_item_presentation.js
 var LOOT_VISUAL_BUDGET = Object.freeze({ rich: 12, motes: 24, labels: 4 });
-function groundItemPresentation(drop, time, establish = 1, collapse = 0) {
-  const artKey = itemArtKey(drop), art = EQUIPMENT_ART[artKey], center3 = art?.visibleCenter ?? { x: 17, y: 17 }, pivot2 = art?.pivot ?? { x: 17, y: 31 }, seed2 = gearHash(drop.itemId ?? drop.sourceEntityId), phase2 = seed2 % 6283 / 1e3, scale = 26 / 34 * (1 - collapse * 0.3), bob = Math.sin(time / 430 + phase2) * 1.1 * establish;
-  const origin = { x: drop.position.x - center3.x * scale, y: drop.position.y - pivot2.y * scale - 3 + bob + (1 - establish) * 5 };
-  return { artKey, origin, scale, visibleCenter: { x: origin.x + center3.x * scale, y: origin.y + center3.y * scale }, contact: { x: origin.x + pivot2.x * scale, y: drop.position.y }, phase: phase2, alpha: establish * (1 - collapse), growth: establish, rarity: itemDefinition(drop)?.rarityTier ?? 0 };
+function groundItemPresentation(drop2, time, establish = 1, collapse = 0) {
+  const artKey = itemArtKey(drop2), art = EQUIPMENT_ART[artKey], center3 = art?.visibleCenter ?? { x: 17, y: 17 }, pivot2 = art?.pivot ?? { x: 17, y: 31 }, seed2 = gearHash(drop2.itemId ?? drop2.sourceEntityId), phase2 = seed2 % 6283 / 1e3, scale = 26 / 34 * (1 - collapse * 0.3), bob = Math.sin(time / 430 + phase2) * 1.1 * establish;
+  const origin = { x: drop2.position.x - center3.x * scale, y: drop2.position.y - pivot2.y * scale - 3 + bob + (1 - establish) * 5 };
+  return { artKey, origin, scale, visibleCenter: { x: origin.x + center3.x * scale, y: origin.y + center3.y * scale }, contact: { x: origin.x + pivot2.x * scale, y: drop2.position.y }, phase: phase2, alpha: establish * (1 - collapse), growth: establish, rarity: itemDefinition(drop2)?.rarityTier ?? 0 };
 }
 function createGroundItemPresentation() {
   let identity2 = null, records = /* @__PURE__ */ new Map(), sprites6 = /* @__PURE__ */ new Map(), counts = { rich: 0, motes: 0, labels: 0 };
@@ -100049,12 +100394,12 @@ function createGroundItemPresentation() {
       identity2 = next;
     }
     const live = /* @__PURE__ */ new Set();
-    for (const drop of model.loot ?? []) {
-      const id = drop.itemId ?? drop.sourceEntityId;
+    for (const drop2 of model.loot ?? []) {
+      const id = drop2.itemId ?? drop2.sourceEntityId;
       live.add(id);
       const previous = records.get(id);
-      if (!previous || previous.removed !== null) records.set(id, { drop, born: first ? time - 150 : time, removed: null });
-      else previous.drop = drop;
+      if (!previous || previous.removed !== null) records.set(id, { drop: drop2, born: first ? time - 150 : time, removed: null });
+      else previous.drop = drop2;
     }
     for (const [id, r] of records) if (!live.has(id)) {
       if (r.removed === null) r.removed = time;
@@ -100067,7 +100412,7 @@ function createGroundItemPresentation() {
     const actor = model.entitiesById[model.playersById[model.localPlayerId].entityId];
     const visible3 = [...records.values()].filter((r) => r.drop.position.x >= viewport.x - 20 && r.drop.position.y >= viewport.y - 80 && r.drop.position.x <= viewport.x + viewport.width + 20 && r.drop.position.y <= viewport.y + viewport.height + 30).sort((a, b) => Number(b.drop.canPickUp) - Number(a.drop.canPickUp) || Math.hypot(a.drop.position.x - actor.position.x, a.drop.position.y - actor.position.y) - Math.hypot(b.drop.position.x - actor.position.x, b.drop.position.y - actor.position.y) || (itemDefinition(b.drop)?.rarityTier ?? 0) - (itemDefinition(a.drop)?.rarityTier ?? 0));
     for (const r of visible3) {
-      const drop = r.drop, t = groundItemPresentation(drop, time, Math.min(1, (time - r.born) / 150), r.removed === null ? 0 : (time - r.removed) / 120), color28 = RARITY_COLORS[t.rarity], rich = t.rarity > 0 && counts.rich < LOOT_VISUAL_BUDGET.rich;
+      const drop2 = r.drop, t = groundItemPresentation(drop2, time, Math.min(1, (time - r.born) / 150), r.removed === null ? 0 : (time - r.removed) / 120), color28 = RARITY_COLORS[t.rarity], rich = t.rarity > 0 && counts.rich < LOOT_VISUAL_BUDGET.rich;
       ctx.save();
       ctx.globalAlpha = t.alpha;
       ctx.fillStyle = "#0005";
@@ -100075,8 +100420,8 @@ function createGroundItemPresentation() {
       ctx.ellipse(t.contact.x, t.contact.y + 2, 10, 3.5, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.strokeStyle = color28;
-      ctx.lineWidth = drop.canPickUp ? 1.4 : 0.8;
-      ctx.globalAlpha = t.alpha * (drop.canPickUp ? 0.75 : 0.35);
+      ctx.lineWidth = drop2.canPickUp ? 1.4 : 0.8;
+      ctx.globalAlpha = t.alpha * (drop2.canPickUp ? 0.75 : 0.35);
       ctx.beginPath();
       ctx.ellipse(t.contact.x, t.contact.y + 1, 10, 3.2, 0, 0, Math.PI * 2);
       ctx.stroke();
@@ -100150,11 +100495,11 @@ function createGroundItemPresentation() {
       }
       const image = art(t.artKey);
       if (image) ctx.drawImage(image, t.origin.x, t.origin.y, 34 * t.scale, 34 * t.scale);
-      if (drop.canPickUp && counts.labels < LOOT_VISUAL_BUDGET.labels && r.removed === null) {
+      if (drop2.canPickUp && counts.labels < LOOT_VISUAL_BUDGET.labels && r.removed === null) {
         counts.labels++;
         ctx.font = "bold 10px Georgia";
         ctx.textAlign = "center";
-        const name = itemDefinition(drop)?.name ?? "Gear", w = ctx.measureText(name).width;
+        const name = itemDefinition(drop2)?.name ?? "Gear", w = ctx.measureText(name).width;
         ctx.fillStyle = "#101018d0";
         ctx.fillRect(t.contact.x - w / 2 - 4, t.contact.y + 8, w + 8, 15);
         ctx.fillStyle = color28;
@@ -100224,10 +100569,10 @@ function createDynamicWorldLightsV1(doc) {
       pool3(portal.x, portal.y - 4, 56, PORTAL_INNER, 0.45);
     }
     let loot = 0;
-    for (const drop of model.loot ?? []) {
+    for (const drop2 of model.loot ?? []) {
       if (loot >= MAX_LOOT_LIGHTS) break;
-      const tier2 = Math.max(0, Math.min(RARITY_COLORS.length - 1, groundItemPresentation(drop, time).rarity));
-      pool3(drop.position.x, drop.position.y - 4, 36 + tier2 * 8, RARITY_COLORS[tier2], 0.3 + tier2 * 0.07);
+      const tier2 = Math.max(0, Math.min(RARITY_COLORS.length - 1, groundItemPresentation(drop2, time).rarity));
+      pool3(drop2.position.x, drop2.position.y - 4, 36 + tier2 * 8, RARITY_COLORS[tier2], 0.3 + tier2 * 0.07);
       loot++;
     }
     if (player?.alive && !interior2) pool3(player.position.x, player.position.y - 6, 124, PLAYER2, 0.68);
@@ -100262,10 +100607,10 @@ function createDynamicWorldLightsV1(doc) {
     };
     for (const portal of model.space.exits ?? []) if (portal.extractionPortal?.visible) bounce(portal.x, portal.y, 110, PORTAL_OUTER, 0.2);
     let loot = 0;
-    for (const drop of model.loot ?? []) {
+    for (const drop2 of model.loot ?? []) {
       if (loot++ >= MAX_LOOT_LIGHTS) break;
-      const tier2 = Math.max(0, Math.min(RARITY_COLORS.length - 1, groundItemPresentation(drop, time).rarity));
-      bounce(drop.position.x, drop.position.y - 4, 28 + tier2 * 6, RARITY_COLORS[tier2], 0.1 + tier2 * 0.03);
+      const tier2 = Math.max(0, Math.min(RARITY_COLORS.length - 1, groundItemPresentation(drop2, time).rarity));
+      bounce(drop2.position.x, drop2.position.y - 4, 28 + tier2 * 6, RARITY_COLORS[tier2], 0.1 + tier2 * 0.03);
     }
     if (player?.alive) bounce(player.position.x, player.position.y - 6, 96, PLAYER2, 0.06);
     ctx.globalCompositeOperation = "lighter";
@@ -103488,7 +103833,7 @@ function corrosiveSheddingDepthItems(model, tick, viewport, bodyPoseForActor) {
 }
 
 // src/client/boss_presentation_corrosive_v1.js
-var ID2 = "corrosive_abomination";
+var ID3 = "corrosive_abomination";
 var TAU120 = Math.PI * 2;
 var INK37 = "#11151a";
 var BASE5 = "#369a63";
@@ -103540,7 +103885,7 @@ function localTarget(actor, record2, height = 0) {
 }
 function corrosiveAttackPose(actor, tick) {
   const b = actor.boss ?? {}, pending = b.pendingAction, last = b.lastAction;
-  const active2 = actor.alive !== false && b.bossDefinitionId === ID2;
+  const active2 = actor.alive !== false && b.bossDefinitionId === ID3;
   const p = active2 && pending ? clamp38((tick - pending.startedTick) / Math.max(1, pending.resolvesTick - pending.startedTick)) : 0;
   const age = last ? tick - last.resolvedTick : Infinity;
   const recent = active2 && age >= 0 && age < 40 ? last : null;
@@ -103600,7 +103945,7 @@ function corrosiveAttackPose(actor, tick) {
 }
 function paintGel(c, actor, tick, flash = false) {
   const b = actor.boss;
-  if (b?.bossDefinitionId !== ID2) return false;
+  if (b?.bossDefinitionId !== ID3) return false;
   const pose = corrosiveAttackPose(actor, tick), death = actor.alive === false ? clamp38((actor.deathAge ?? 0) / 36) : 0;
   c.save();
   c.translate(actor.position.x, actor.position.y);
@@ -103634,7 +103979,7 @@ function surfaceFor(c) {
   return surface3;
 }
 function drawCorrosiveAbomination(c, actor, tick, flash = false, { gelOpacity = CORROSIVE_GEL_OPACITY_V4 } = {}) {
-  if (actor.boss?.bossDefinitionId !== ID2) return false;
+  if (actor.boss?.bossDefinitionId !== ID3) return false;
   const pose = corrosiveAttackPose(actor, tick), death = actor.alive === false ? clamp38((actor.deathAge ?? 0) / 36) : 0;
   const left = Math.floor(Math.min(-90, (pose.tip?.x ?? 0) - 30)), top = Math.floor(Math.min(-135, (pose.tip?.y ?? 0) - 45)), right = Math.ceil(Math.max(90, (pose.tip?.x ?? 0) + 30)), bottom = Math.ceil(Math.max(35, (pose.tip?.y ?? 0) + 30)), w = right - left, h = bottom - top;
   const surface3 = surfaceFor(c), alpha2 = flash ? 1 : clamp38(gelOpacity);
@@ -103877,7 +104222,7 @@ function corrosiveDepthItems(model, tick, viewport = null) {
   return [...items, ...corrosiveSheddingDepthItems(model, tick, viewport, corrosiveAttackPose)];
 }
 function drawCorrosiveBossHud(c, canvas, model) {
-  const a = Object.values(model.entitiesById ?? {}).find((a2) => a2.alive && a2.boss?.bossDefinitionId === ID2);
+  const a = Object.values(model.entitiesById ?? {}).find((a2) => a2.alive && a2.boss?.bossDefinitionId === ID3);
   if (!a) return false;
   const b = a.boss, w = Math.min(480, canvas.width - 24), x = (canvas.width - w) / 2, y = 10;
   const ratio = bossHealthRatioV4(a);
@@ -103907,7 +104252,7 @@ function drawCorrosiveBossHud(c, canvas, model) {
 }
 
 // src/client/boss_presentation_void_overseer_v1.js
-var ID3 = "void_overseer";
+var ID4 = "void_overseer";
 var TAU121 = Math.PI * 2;
 var INK38 = "#11151a";
 var DARK10 = "#10081c";
@@ -103970,7 +104315,7 @@ function castProgress(row2, tick) {
   return clamp39((tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick));
 }
 function voidAttackPose(actor, tick) {
-  const b = actor.boss ?? {}, alive = actor.alive !== false && b.bossDefinitionId === ID3;
+  const b = actor.boss ?? {}, alive = actor.alive !== false && b.bossDefinitionId === ID4;
   const pending = alive ? b.pendingAction : null, last = alive ? b.lastAction : null, age = last ? tick - last.resolvedTick : Infinity;
   const recent = age >= 0 && age < 40 ? last : null, p = pending ? castProgress(pending, tick) : 0;
   const record2 = pending ?? recent, aim2 = record2 ? localTarget2(actor, record2) : point9(Math.cos(b.facingAngle ?? Math.PI / 2) * 60, Math.sin(b.facingAngle ?? Math.PI / 2) * 60);
@@ -104078,7 +104423,7 @@ function core4(c, pose, flash) {
   for (const [x, y, r] of [[-10.5, -11.5, 3], [10.5, -11.5, 3], [-10.5, 11.5, 3], [10.5, 11.5, 3], [0, 0, 6.4]]) eye4(c, x * sx, y * sy, r, look, pose.charge, flash, pose.pulse ?? 0);
 }
 function drawVoidOverseer(c, actor, tick, flash = false) {
-  if (actor.boss?.bossDefinitionId !== ID3) return false;
+  if (actor.boss?.bossDefinitionId !== ID4) return false;
   const pose = voidAttackPose(actor, tick), death = actor.alive === false ? clamp39((actor.deathAge ?? 0) / 36) : 0;
   c.save();
   c.translate(actor.position.x, actor.position.y);
@@ -104173,7 +104518,7 @@ function accretion(c, p, progress8, tick, collapse = 0) {
   c.restore();
 }
 function singularityGround(c, row2, tick) {
-  const p = row2.position ?? row2.originPosition, progress8 = castProgress(row2, tick), elapsed = tick - row2.startedTick, seed2 = hash29((row2.bossId ?? row2.sourceEntityId ?? ID3) + "/" + row2.sequence);
+  const p = row2.position ?? row2.originPosition, progress8 = castProgress(row2, tick), elapsed = tick - row2.startedTick, seed2 = hash29((row2.bossId ?? row2.sourceEntityId ?? ID4) + "/" + row2.sequence);
   c.save();
   boundary(c, p, row2.radius ?? 90, progress8, "singularity");
   for (let i = 0; i < 3; i++) {
@@ -104204,7 +104549,7 @@ function slamGround2(c, row2, tick) {
 function collapseGround(c, row2, tick) {
   const age = tick - row2.resolvedTick;
   if (age < 0 || age >= 40) return;
-  const p = row2.targetPosition ?? row2.originPosition, r = row2.radius ?? 90, seed2 = hash29((row2.bossId ?? row2.sourceEntityId ?? ID3) + "/" + row2.sequence);
+  const p = row2.targetPosition ?? row2.originPosition, r = row2.radius ?? 90, seed2 = hash29((row2.bossId ?? row2.sourceEntityId ?? ID4) + "/" + row2.sequence);
   c.save();
   if (age < 12) {
     c.globalAlpha = 1 - ease10(age / 12);
@@ -104245,8 +104590,8 @@ function drawVoidGround(c, model, tick) {
 }
 function forceGeometry(row2, tick, pending) {
   if (pending) {
-    const p = castProgress(row2, tick), gather = ease10((p - 0.35) / 0.5), drop = ease10((p - 0.82) / 0.18);
-    return { visible: gather, y: -44 * gather * (1 - drop) - 6 * drop, height: 20 * gather * (1 - 0.65 * drop), width: (5 + 9 * drop) * gather, alpha: gather, drop };
+    const p = castProgress(row2, tick), gather = ease10((p - 0.35) / 0.5), drop2 = ease10((p - 0.82) / 0.18);
+    return { visible: gather, y: -44 * gather * (1 - drop2) - 6 * drop2, height: 20 * gather * (1 - 0.65 * drop2), width: (5 + 9 * drop2) * gather, alpha: gather, drop: drop2 };
   }
   const age = tick - row2.resolvedTick, q = clamp39(age / 40), rise = Math.sin(Math.PI * clamp39(age / 17));
   return { visible: age >= 0 && age < 40 ? 1 : 0, y: -6 * (1 - ease10(age / 20)), height: (7 + 15 * rise) * (1 - ease10(age / 34)), width: (14 + 8 * rise) * (1 - ease10(age / 38)), alpha: 1 - ease10(q), drop: 1 };
@@ -104399,7 +104744,7 @@ function voidDepthItems(model, tick, viewport = null) {
   return items;
 }
 function drawVoidBossHud(c, canvas, model) {
-  const a = Object.values(model.entitiesById ?? {}).find((a2) => a2.alive && a2.boss?.bossDefinitionId === ID3);
+  const a = Object.values(model.entitiesById ?? {}).find((a2) => a2.alive && a2.boss?.bossDefinitionId === ID4);
   if (!a) return false;
   const b = a.boss, w = Math.min(480, canvas.width - 24), x = (canvas.width - w) / 2, y = 10, ratio = bossHealthRatioV4(a);
   c.save();
@@ -104682,7 +105027,7 @@ function chronosSlamVisualV6(row2, tick, pending) {
   if (pending) {
     if (tick < row2.startedTick || tick > row2.resolvesTick) return null;
     const q = progress(row2, tick), gather = ease11((q - 0.13) / 0.23);
-    const wind = ease11((q - 0.16) / 0.4), drop = ease11((q - 0.82) / 0.18);
+    const wind = ease11((q - 0.16) / 0.4), drop2 = ease11((q - 0.82) / 0.18);
     return {
       center: center3,
       radius,
@@ -104691,8 +105036,8 @@ function chronosSlamVisualV6(row2, tick, pending) {
       age: 0,
       fade: 1,
       gather,
-      handAngle: 0.48 + 0.9 * wind + (Math.PI / 2 - 1.38) * drop,
-      tipY: -76 * (1 - drop) - 3,
+      handAngle: 0.48 + 0.9 * wind + (Math.PI / 2 - 1.38) * drop2,
+      tipY: -76 * (1 - drop2) - 3,
       handLength: 92,
       waveRadius: 0
     };
@@ -104877,7 +105222,7 @@ function drawChronosFieldV6(c, row2, tick, pending) {
 }
 
 // src/client/boss_presentation_chronos_arbitrator_v1.js
-var ID4 = "chronos_arbitrator";
+var ID5 = "chronos_arbitrator";
 var TAU124 = Math.PI * 2;
 var INK40 = "#11151a";
 var GOLD17 = "#e2ac43";
@@ -104963,7 +105308,7 @@ function rewindHands(b, tick) {
   return angles.map((a, i) => a + smoothIntegral(after, 20) / (i ? 108 : 600));
 }
 function chronosAttackPose(actor2, tick) {
-  const b = actor2.boss ?? {}, alive = actor2.alive !== false && b.bossDefinitionId === ID4;
+  const b = actor2.boss ?? {}, alive = actor2.alive !== false && b.bossDefinitionId === ID5;
   const pending = alive ? b.pendingAction : null, last = alive ? b.lastAction : null, age = last ? tick - last.resolvedTick : Infinity;
   const recent = age >= 0 && age < 40 ? last : null, record2 = pending ?? recent, p = pending ? progress2(pending, tick) : 0;
   const aim2 = record2?.targetPosition ?? point22(actor2.position.x + Math.cos(b.facingAngle ?? Math.PI / 2) * 60, actor2.position.y + Math.sin(b.facingAngle ?? Math.PI / 2) * 60);
@@ -105055,7 +105400,7 @@ function chronosAttackPose(actor2, tick) {
   return pose;
 }
 function drawChronosArbitrator(c, actor2, tick, flash = false) {
-  if (actor2.boss?.bossDefinitionId !== ID4) return false;
+  if (actor2.boss?.bossDefinitionId !== ID5) return false;
   const pose = chronosAttackPose(actor2, tick), death = actor2.alive === false ? clamp42((actor2.deathAge ?? 0) / 38) : 0;
   c.save();
   c.translate(actor2.position.x, actor2.position.y);
@@ -105262,7 +105607,7 @@ function chronosDepthItems(model2, tick, viewport = null) {
 }
 
 // src/client/boss_presentation_nexus_overseer_v1.js
-var ID5 = "nexus_overseer";
+var ID6 = "nexus_overseer";
 var TAU125 = Math.PI * 2;
 var INK41 = "#11151a";
 var PINK2 = "#f12c94";
@@ -105346,7 +105691,7 @@ function glow8(c, x, y, r, color82) {
   g.addColorStop(1, "#00000000");
   ellipse7(c, x, y, r, r, g);
 }
-var isMain = (a) => a?.boss?.bossDefinitionId === ID5;
+var isMain = (a) => a?.boss?.bossDefinitionId === ID6;
 var isDecoy = (a) => Boolean(a?.nexusDecoy);
 var FORMS = [
   [[-24, -22], [24, -22], [24, 22], [-24, 22], [-24, 0]],
@@ -105363,7 +105708,7 @@ function nexusAttackPose(actor2, tick) {
   const recent = age >= 0 && age < 40 ? last : null, record2 = pending ?? recent, p = pending ? progress3(pending, tick) : 0;
   const origin = record2?.originPosition ?? actor2.position;
   const aim2 = record2?.targetPosition ?? point23(actor2.position.x + Math.cos(b.facingAngle ?? actor2.facingAngle ?? Math.PI / 2) * 60, actor2.position.y + Math.sin(b.facingAngle ?? actor2.facingAngle ?? Math.PI / 2) * 60);
-  const d = unit11(aim2.x - origin.x, aim2.y - origin.y), seed2 = Number.isFinite(actor2.visualSeed) ? actor2.visualSeed : hash30(actor2.id ?? actor2.entityId ?? ID5) % 997;
+  const d = unit11(aim2.x - origin.x, aim2.y - origin.y), seed2 = Number.isFinite(actor2.visualSeed) ? actor2.visualSeed : hash30(actor2.id ?? actor2.entityId ?? ID6) % 997;
   const pose = { ability: record2?.ability ?? null, p, age, direction: d, aim: aim2, bodyX: 0, bodyY: (decoy ? -21 : -40) + Math.sin((tick + seed2 * 0.13) / 11) * (decoy ? 1.7 : 3), rotation: 0.09 + Math.sin((tick + seed2 * 0.04) / 77) * 0.12, yaw: 0.72 * Math.sin((tick + seed2 * 0.31) / 42 + 0.6), scaleX: 1, scaleY: 1, charge: 0, release: 0, lock: 0, formTime: tick + seed2 % 180, decoy };
   if (decoy) {
     const shotAge = tick - (actor2.nexusDecoy.lastShotTick ?? -Infinity), ready = actor2.nexusDecoy.aggro ? 1 - ease13(((actor2.nexusDecoy.nextShotTick ?? tick + 60) - tick) / 16) : 0;
@@ -105544,7 +105889,7 @@ function drawNexusOverseer(c, actor2, tick, flash = false) {
   const vx = pose.aim.x - actor2.position.x - pose.bodyX, vy = pose.aim.y - actor2.position.y - pose.bodyY - 17, cos = Math.cos(pose.rotation), sin = Math.sin(pose.rotation);
   const localPose = { ...pose, aim: point23(cos * vx + sin * vy, -sin * vx + cos * vy) };
   prism(c, localPose, size, flash);
-  const phase2 = ((tick + hash30(actor2.id ?? actor2.entityId ?? ID5) % 173) % 173 + 173) % 173;
+  const phase2 = ((tick + hash30(actor2.id ?? actor2.entityId ?? ID6) % 173) % 173 + 173) % 173;
   if (phase2 < 8 && !flash) {
     c.save();
     c.globalAlpha *= Math.sin(phase2 / 8 * Math.PI) * 0.45;
@@ -105855,12 +106200,12 @@ function nexusDepthItems(model2, tick, viewport = null) {
     }
   }
   for (const row2 of h.nexusProjectiles ?? []) add(row2.id, row2.position, 30, 1, (c) => bolt(c, row2, tick));
-  for (const row2 of h.nexusGlitches ?? []) add(row2.id ?? (row2.sourceBossId ?? row2.bossId ?? ID5) + "/glitch/" + row2.targetEntityId, row2.position, 65, 2, (c) => glitchStatus(c, row2, tick));
+  for (const row2 of h.nexusGlitches ?? []) add(row2.id ?? (row2.sourceBossId ?? row2.bossId ?? ID6) + "/glitch/" + row2.targetEntityId, row2.position, 65, 2, (c) => glitchStatus(c, row2, tick));
   return items;
 }
 
 // src/client/boss_presentation_ashfang_v1.js
-var ID6 = "ashfang";
+var ID7 = "ashfang";
 var TAU126 = Math.PI * 2;
 var INK42 = "#100e17";
 var BLACK = "#19151e";
@@ -105933,7 +106278,7 @@ function rotate2(x, y, a) {
 }
 function ashfangAttackPose(actor2, tick) {
   const b = actor2.boss ?? {}, alive = actor2.alive !== false, pending = alive ? b.pendingAction : null, last = alive ? b.lastAction : null, age = last ? tick - last.resolvedTick : Infinity, recent = age >= 0 && age < 42 ? last : null, row2 = pending ?? recent, q = pending ? progress4(pending, tick) : 0;
-  const facing2 = (pending?.facing ?? recent?.facing ?? b.facing ?? -1) < 0 ? -1 : 1, seed2 = hash31(actor2.entityId ?? ID6) % 193, hover = Math.sin((tick + seed2) / 13) * 1.65;
+  const facing2 = (pending?.facing ?? recent?.facing ?? b.facing ?? -1) < 0 ? -1 : 1, seed2 = hash31(actor2.entityId ?? ID7) % 193, hover = Math.sin((tick + seed2) / 13) * 1.65;
   const p = { ability: row2?.ability ?? null, p: q, age, facing: facing2, orientation: -facing2, bodyX: 22, bodyY: -14 + hover, neckX: 0, neckY: 0, headAngle: 0.025 * Math.sin(tick / 23), jaw: 0.07 + 0.025 * Math.sin(tick / 17), heat: 0, pulse: 0, wing: 0.1 * Math.sin(tick / 12), coil: 0, compression: 0, tailDrive: 0, tailReturn: 0, target: row2?.targetPosition ?? actor2.position };
   if (pending?.ability === "scarlet_fire") {
     const u = ease14(q / 0.86);
@@ -106206,7 +106551,7 @@ function torso(c, p, flash) {
   c.restore();
 }
 function drawAshfang(c, actor2, tick, flash = false) {
-  if (actor2.boss?.bossDefinitionId !== ID6) return false;
+  if (actor2.boss?.bossDefinitionId !== ID7) return false;
   const p = ashfangAttackPose(actor2, tick), death = actor2.alive === false ? ease14((actor2.deathAge ?? 0) / 42) : 0;
   c.save();
   c.translate(actor2.position.x, actor2.position.y);
@@ -106291,10 +106636,10 @@ function collapsedRing(c, row2, tick) {
     if (hot > 0) {
       glow9(c, x + s2 / 2, y + s2 * 0.6, s2 * 0.8, `rgba(191,42,35,${hot * 0.18})`);
     }
-    const local32 = Math.max(0, age - seed2 % 6), u = clamp44(local32 / 27), fall = ease14(u), drop = (u * 0.45 + u * u * 0.85) * s2, shrink = 1 - fall * 0.34;
+    const local32 = Math.max(0, age - seed2 % 6), u = clamp44(local32 / 27), fall = ease14(u), drop2 = (u * 0.45 + u * u * 0.85) * s2, shrink = 1 - fall * 0.34;
     if (fall < 1) {
       c.save();
-      c.translate(x + s2 * 0.5, y + s2 * 0.5 + drop);
+      c.translate(x + s2 * 0.5, y + s2 * 0.5 + drop2);
       c.scale((seed2 % 2 ? -1 : 1) * shrink, shrink);
       c.globalAlpha *= 1 - ease14((fall - 0.52) / 0.48);
       const h = s2 * 0.44, split = (seed2 % 5 - 2) * 1.4;
@@ -106402,7 +106747,7 @@ function drawAshfangGround(c, model2, tick) {
   }
   for (const row2 of h.ashfangImpacts ?? []) if (row2.ability === "slam") slamGround3(c, row2, tick);
   for (const actor2 of Object.values(model2.entitiesById ?? {})) {
-    if (actor2.boss?.bossDefinitionId !== ID6) continue;
+    if (actor2.boss?.bossDefinitionId !== ID7) continue;
     const age = tick - (actor2.boss.phaseStartedTick ?? -1e3);
     if (age >= 0 && age < 32) {
       c.save();
@@ -106492,7 +106837,7 @@ function ashfangDepthItems(model2, tick, viewport = null) {
 }
 
 // src/client/boss_presentation_cinderhart_v1.js
-var ID7 = "cinderhart";
+var ID8 = "cinderhart";
 var BUNNY_ID = "cinder_bunny";
 var TAU127 = Math.PI * 2;
 var INK43 = "#101318";
@@ -106768,7 +107113,7 @@ function stagBody(c, p, tick, flash) {
   stagHead(c, p, tick, flash);
 }
 function drawCinderhart(c, actor2, tick, flash = false) {
-  if (actor2.boss?.bossDefinitionId !== ID7) return false;
+  if (actor2.boss?.bossDefinitionId !== ID8) return false;
   const p = cinderhartAttackPose(actor2, tick), death = actor2.alive === false ? ease15((actor2.deathAge ?? 0) / 48) : 0;
   c.save();
   c.translate(actor2.position.x, actor2.position.y);
@@ -106999,7 +107344,7 @@ function drawCinderhartGround(c, model2, tick) {
     c.restore();
   }
   for (const actor2 of Object.values(model2.entitiesById ?? {})) {
-    if (actor2.boss?.bossDefinitionId !== ID7) continue;
+    if (actor2.boss?.bossDefinitionId !== ID8) continue;
     const age = tick - (actor2.boss.phaseStartedTick ?? -1e3);
     if (age >= 0 && age < 36) {
       c.save();
@@ -107029,7 +107374,7 @@ function cinderhartDepthItems(model2, tick, viewport = null) {
   const h = model2.bossHazards ?? {}, items = [];
   const visible3 = (p, r) => !viewport || p.x + r >= (viewport.x ?? viewport.left ?? -Infinity) && p.x - r <= (viewport.right ?? (viewport.x ?? 0) + (viewport.width ?? Infinity)) && p.y + r >= (viewport.y ?? viewport.top ?? -Infinity) && p.y - r <= (viewport.bottom ?? (viewport.y ?? 0) + (viewport.height ?? Infinity));
   for (const row2 of h.cinderhartFires ?? []) if (visible3(row2.position, row2.radius + 24)) items.push(Object.freeze({ id: "cinderhart-fire/" + row2.id, anchorX: row2.position.x, anchorY: row2.position.y + 2, draw: (c) => fireTongues(c, row2, tick) }));
-  for (const actor2 of Object.values(model2.entitiesById ?? {})) if (actor2.boss?.bossDefinitionId === ID7 && actor2.boss.rush && visible3(actor2.position, 70)) items.push(Object.freeze({ id: "cinderhart-rush/" + actor2.entityId, anchorX: actor2.position.x, anchorY: actor2.position.y - 1, draw: (c) => rushWake(c, actor2, tick) }));
+  for (const actor2 of Object.values(model2.entitiesById ?? {})) if (actor2.boss?.bossDefinitionId === ID8 && actor2.boss.rush && visible3(actor2.position, 70)) items.push(Object.freeze({ id: "cinderhart-rush/" + actor2.entityId, anchorX: actor2.position.x, anchorY: actor2.position.y - 1, draw: (c) => rushWake(c, actor2, tick) }));
   return items;
 }
 
@@ -107732,7 +108077,7 @@ function drawMarcusMoltenWardV5(c, row2, tick, { center: center3, ratio, front: 
 }
 
 // src/client/boss_presentation_marcus_the_outlaw_v1.js
-var ID8 = "marcus_the_outlaw";
+var ID9 = "marcus_the_outlaw";
 var TAU130 = Math.PI * 2;
 var INK45 = "#11151a";
 var CLOTH6 = "#261a36";
@@ -107841,7 +108186,7 @@ function coin2(c, x, y, r = 3.7, angle22 = 0, flat2 = 0.69, flash = false) {
 }
 function marcusAttackPose(actor2, tick) {
   const b = actor2.boss ?? {}, alive = actor2.alive !== false, pending = alive ? b.pendingAction : null, last = alive ? b.lastAction : null, age = last ? tick - last.resolvedTick : Infinity, recent = age >= 0 && age < 40 ? last : null, record2 = pending ?? recent, p = pending ? progress6(pending, tick) : 0;
-  const origin = record2?.originPosition ?? actor2.position, aim2 = record2?.targetPosition ?? point25(actor2.position.x + Math.cos(b.facingAngle ?? Math.PI / 2) * 60, actor2.position.y + Math.sin(b.facingAngle ?? Math.PI / 2) * 60), d = unit12(aim2.x - origin.x, aim2.y - origin.y), seed2 = Number.isFinite(actor2.visualSeed) ? actor2.visualSeed : hash35(actor2.entityId ?? ID8) % 997;
+  const origin = record2?.originPosition ?? actor2.position, aim2 = record2?.targetPosition ?? point25(actor2.position.x + Math.cos(b.facingAngle ?? Math.PI / 2) * 60, actor2.position.y + Math.sin(b.facingAngle ?? Math.PI / 2) * 60), d = unit12(aim2.x - origin.x, aim2.y - origin.y), seed2 = Number.isFinite(actor2.visualSeed) ? actor2.visualSeed : hash35(actor2.entityId ?? ID9) % 997;
   const hover = Math.sin((tick + seed2 * 0.17) / 9) * 3.4, walk = actor2.movedLastTick ? 1 : 0;
   const pose = { ability: record2?.ability ?? null, p, age, direction: d, aim: aim2, bodyX: 0, bodyY: -9 + hover, rotation: Math.sin((tick + seed2) / 41) * 0.018, scaleX: 1, scaleY: 1, gather: 0, charge: 0, release: 0, slack: 0, headDrop: 0, orbitRadius: 45, orbitTilt: Math.sin(tick / 58) * 0.17, orbitPhase: tick * 0.014, walk };
   pose.rotation += Math.sin(tick * 0.25) * 0.022 * walk;
@@ -108065,7 +108410,7 @@ function cloak(c, pose, flash) {
   c.restore();
 }
 function drawMarcusTheOutlaw(c, actor2, tick, flash = false) {
-  if (actor2.boss?.bossDefinitionId !== ID8) return false;
+  if (actor2.boss?.bossDefinitionId !== ID9) return false;
   const pose = marcusAttackPose(actor2, tick), death = actor2.alive === false ? ease16((actor2.deathAge ?? 0) / 38) : 0, coins = coinFormation(actor2, pose, tick);
   c.save();
   c.translate(actor2.position.x, actor2.position.y);
@@ -108533,7 +108878,7 @@ function marcusDepthItems(model2, tick, viewport = null) {
 }
 
 // src/client/boss_presentation_gilded_vault_keeper_v1.js
-var ID9 = "gilded_vault_keeper";
+var ID10 = "gilded_vault_keeper";
 var TAU131 = Math.PI * 2;
 var INK46 = "#11151a";
 var GOLD21 = "#e9b747";
@@ -108624,10 +108969,10 @@ function glow11(c, x, y, r, fill6) {
   ellipse12(c, x, y, r, r, g);
 }
 function gildedAttackPose(actor2, tick) {
-  const b = actor2.boss ?? {}, alive = actor2.alive !== false && b.bossDefinitionId === ID9, pending = alive ? b.pendingAction : null, last = alive ? b.lastAction : null;
+  const b = actor2.boss ?? {}, alive = actor2.alive !== false && b.bossDefinitionId === ID10, pending = alive ? b.pendingAction : null, last = alive ? b.lastAction : null;
   const age = last ? tick - last.resolvedTick : Infinity, recent = age >= 0 && age < 40 ? last : null, record2 = pending ?? recent, p = pending ? progress7(pending, tick) : 0;
   const aim2 = record2?.targetPosition ?? point26(actor2.position.x + Math.cos(b.facingAngle ?? Math.PI / 2) * 60, actor2.position.y + Math.sin(b.facingAngle ?? Math.PI / 2) * 60), origin = record2?.originPosition ?? actor2.position, d = unit13(aim2.x - origin.x, aim2.y - origin.y);
-  const seed2 = Number.isFinite(actor2.visualSeed) ? actor2.visualSeed : hash36(actor2.entityId ?? actor2.id ?? ID9) % 997, hover = Math.sin((tick + seed2 * 0.13) / 12) * 2;
+  const seed2 = Number.isFinite(actor2.visualSeed) ? actor2.visualSeed : hash36(actor2.entityId ?? actor2.id ?? ID10) % 997, hover = Math.sin((tick + seed2 * 0.13) / 12) * 2;
   const pose = { ability: record2?.ability ?? null, p, age, direction: d, aim: aim2, bodyX: 0, bodyY: -38 + hover, rotation: Math.sin(tick / 47) * 0.018, jaw: 0.2 + 0.045 * Math.sin((tick + seed2) / 17), wing: 0.08 + 0.025 * Math.sin(tick / 13), armLift: 0, armFold: 0, charge: 0, release: 0, slack: 0, strike: 0, strikeSide: d.x < 0 ? -1 : 1 };
   const tax = b.taxation, taxAge = tax?.resolvedTick == null ? Infinity : tick - tax.resolvedTick;
   const taxOwns = alive && tax && (tax.outcome === "channeling" || b.actionState === "dazed" || ["completed", "broken"].includes(tax.outcome) && taxAge >= 0 && taxAge < 36);
@@ -108868,7 +109213,7 @@ function chest2(c, pose, flash) {
   c.restore();
 }
 function drawGildedVaultKeeper(c, actor2, tick, flash = false) {
-  if (actor2.boss?.bossDefinitionId !== ID9) return false;
+  if (actor2.boss?.bossDefinitionId !== ID10) return false;
   const pose = { ...gildedAttackPose(actor2, tick), actorX: actor2.position.x, actorY: actor2.position.y }, death = actor2.alive === false ? ease17((actor2.deathAge ?? 0) / 38) : 0;
   c.save();
   c.translate(actor2.position.x, actor2.position.y);
@@ -108987,7 +109332,7 @@ function drawGildedGround(c, model2, tick) {
 function stamp4(c, row2, tick, pending) {
   const p = row2.position ?? row2.targetPosition, age = pending ? 0 : tick - row2.resolvedTick, q = pending ? progress7(row2, tick) : 1;
   if (!pending && (age < 0 || age >= 34)) return;
-  const build2 = ease17((q - 0.08) / 0.5), drop = ease17((q - 0.8) / 0.2), height = pending ? 58 * build2 * (1 - drop) : 0, fade = pending ? build2 : 1 - ease17((age - 7) / 27), ry = 12 * (pending ? 1 : 1 - 0.35 * Math.sin(Math.PI * clamp48(age / 10)));
+  const build2 = ease17((q - 0.08) / 0.5), drop2 = ease17((q - 0.8) / 0.2), height = pending ? 58 * build2 * (1 - drop2) : 0, fade = pending ? build2 : 1 - ease17((age - 7) / 27), ry = 12 * (pending ? 1 : 1 - 0.35 * Math.sin(Math.PI * clamp48(age / 10)));
   if (fade <= 0) return;
   c.save();
   c.globalAlpha *= fade;
@@ -109023,14 +109368,14 @@ function goldIngot(c, x, y, scale, angle22 = 0, flash = false) {
 function fallingGold(c, row2, index, tick, pending) {
   const p = targetRows(row2)[index], age = pending ? 0 : tick - row2.resolvedTick, q = pending ? progress7(row2, tick) : 1;
   if (!p || !pending && (age < 0 || age >= 35)) return;
-  const build2 = ease17((q - 0.06 - index * 0.08) / 0.34), drop = ease17((q - 0.72) / 0.28), height = pending ? 74 * ease17(q / 0.55) * (1 - drop) : 0, fade = pending ? build2 : 1 - ease17((age - 6) / 29);
+  const build2 = ease17((q - 0.06 - index * 0.08) / 0.34), drop2 = ease17((q - 0.72) / 0.28), height = pending ? 74 * ease17(q / 0.55) * (1 - drop2) : 0, fade = pending ? build2 : 1 - ease17((age - 6) / 29);
   if (fade <= 0) return;
   c.save();
   c.globalAlpha *= fade;
   goldIngot(c, p.x, p.y - height - 4, build2 * (pending ? 1 : 1 - 0.08 * Math.sin(Math.PI * clamp48(age / 8))), -0.12 + index * 0.15);
-  if (pending && drop > 0) {
+  if (pending && drop2 > 0) {
     c.save();
-    c.globalAlpha *= drop * 0.45;
+    c.globalAlpha *= drop2 * 0.45;
     for (const dx of [-8, 7]) line23(c, [[p.x + dx, p.y - height - 30], [p.x + dx, p.y - height - 13]], PALE10, 0.8);
     c.restore();
   }
@@ -110253,36 +110598,36 @@ function line25(c, points2, color28, width) {
 function brimstoneAttackPose(b, tick) {
   const action2 = b.pendingAction, ability = action2?.ability, p = action2 ? clamp49((tick - action2.startedTick) / Math.max(1, action2.resolvesTick - action2.startedTick)) : 0;
   const last = b.lastAction, age = last ? tick - last.resolvedTick : 999, side = Math.cos(b.facingAngle ?? Math.PI / 2) >= 0 ? 1 : -1, hands = {};
-  let drop = 0, heat = 0, strikeSide = 0;
+  let drop2 = 0, heat = 0, strikeSide = 0;
   if (ability === "slam") {
     const q = ease19(p / 0.84);
     for (const s of [-1, 1]) hands[s] = { x: s * lerp8(36, 55, q), y: lerp8(-9, -104, q) };
-    drop = -3 * q;
+    drop2 = -3 * q;
     heat = 0.3 + 0.7 * q;
   } else if (last?.ability === "slam" && age >= 0 && age < 30) {
     const q = ease19((age - 7) / 23);
     for (const s of [-1, 1]) hands[s] = { x: s * lerp8(40, 34, q), y: lerp8(-1, -8, q) };
-    drop = (1 - q) * 6;
+    drop2 = (1 - q) * 6;
     heat = (1 - q) * 0.7;
   } else if (ability === "strike") {
     strikeSide = side;
     const q = ease19(p);
     hands[side] = { x: side * lerp8(34, 49, q), y: lerp8(-8, -57, q) };
-    drop = -q;
+    drop2 = -q;
     heat = q * 0.8;
   } else if (last?.ability === "strike" && age >= 0 && age < 20) {
     strikeSide = side;
     const q = ease19((age - 3) / 17), angle3 = b.facingAngle ?? Math.PI / 2;
     hands[side] = { x: lerp8(Math.cos(angle3) * 61, side * 34, q), y: lerp8(Math.sin(angle3) * 43 - 22, -8, q) };
-    drop = 2 * (1 - q);
+    drop2 = 2 * (1 - q);
     heat = (1 - q) * 0.9;
   } else if (ability === "magma_vents") {
     const q = ease19(p);
     for (const s of [-1, 1]) hands[s] = { x: s * lerp8(34, 57, q), y: lerp8(-8, -37, q) };
-    drop = -q * 2;
+    drop2 = -q * 2;
     heat = 0.2 + 0.8 * q;
   }
-  return { hands, drop, heat, strikeSide, charge: p, ability };
+  return { hands, drop: drop2, heat, strikeSide, charge: p, ability };
 }
 function brimstoneArmAngles(side, hand4) {
   const x = hand4.x - side * 28, y = hand4.y + 61, r = Math.hypot(x, y) || 1, d = Math.max(5, Math.min(49, r));
@@ -112593,9 +112938,9 @@ function drawIronChest(ctx, cx, cy2, time, P15) {
 
 // src/client/extraction_portal_presentation_d12_5c.js
 var TAU137 = Math.PI * 2;
-var seed = (text2) => {
+var seed = (text3) => {
   let value2 = 2166136261;
-  for (let i = 0; i < text2.length; i++) value2 = Math.imul(value2 ^ text2.charCodeAt(i), 16777619);
+  for (let i = 0; i < text3.length; i++) value2 = Math.imul(value2 ^ text3.charCodeAt(i), 16777619);
   return value2 >>> 0;
 };
 var visible2 = (portal, view3) => portal.x >= view3.x - 90 && portal.y >= view3.y - 90 && portal.x <= view3.x + view3.width + 90 && portal.y <= view3.y + view3.height + 90;
@@ -113989,14 +114334,14 @@ function createNightGroundItemsV1({ enabled = () => true } = {}) {
       identity2 = next;
     }
     const live = /* @__PURE__ */ new Set();
-    for (const drop of model.loot ?? []) {
-      const id = drop.itemId ?? drop.sourceEntityId;
+    for (const drop2 of model.loot ?? []) {
+      const id = drop2.itemId ?? drop2.sourceEntityId;
       live.add(id);
       let r = records.get(id);
       if (!r || r.removed !== null) {
-        r = { drop, born: first ? time - 150 : time, removed: null };
+        r = { drop: drop2, born: first ? time - 150 : time, removed: null };
         records.set(id, r);
-      } else r.drop = drop;
+      } else r.drop = drop2;
     }
     {
       const me = model.entitiesById[model.playersById[model.localPlayerId].entityId]?.position;
@@ -114215,13 +114560,13 @@ function createNightGroundItemsV1({ enabled = () => true } = {}) {
       labelStamps.set(key3, result);
       return result;
     }
-    let text2 = name, width = ctx.measureText(text2).width;
-    while (width > max && text2.length > 4) {
-      text2 = text2.slice(0, -2);
-      width = ctx.measureText(text2 + "\u2026").width;
+    let text3 = name, width = ctx.measureText(text3).width;
+    while (width > max && text3.length > 4) {
+      text3 = text3.slice(0, -2);
+      width = ctx.measureText(text3 + "\u2026").width;
     }
-    if (text2 !== name) text2 += "\u2026";
-    width = Math.min(max, ctx.measureText(text2).width) + 12;
+    if (text3 !== name) text3 += "\u2026";
+    width = Math.min(max, ctx.measureText(text3).width) + 12;
     const image = ctx.canvas.ownerDocument.createElement("canvas");
     image.width = Math.ceil(width * 2);
     image.height = 38;
@@ -114238,9 +114583,9 @@ function createNightGroundItemsV1({ enabled = () => true } = {}) {
     c.lineJoin = "round";
     c.lineWidth = 2;
     c.strokeStyle = "#05090e";
-    c.strokeText(text2, width / 2, 13);
+    c.strokeText(text3, width / 2, 13);
     c.fillStyle = LOOT_LABEL_COLORS[tier2];
-    c.fillText(text2, width / 2, 13);
+    c.fillText(text3, width / 2, 13);
     result = { image, width };
     labelStamps.set(key3, result);
     while (labelStamps.size > 16) labelStamps.delete(labelStamps.keys().next().value);
@@ -114399,12 +114744,12 @@ function createPotionDropsV1() {
       identity2 = next;
     }
     const live = /* @__PURE__ */ new Set();
-    for (const drop of model.potions?.drops ?? []) {
-      live.add(drop.id);
-      const r = records.get(drop.id);
-      if (!r) records.set(drop.id, { drop, born: time - drop.age * TICK_MS, gone: null });
+    for (const drop2 of model.potions?.drops ?? []) {
+      live.add(drop2.id);
+      const r = records.get(drop2.id);
+      if (!r) records.set(drop2.id, { drop: drop2, born: time - drop2.age * TICK_MS, gone: null });
       else {
-        r.drop = drop;
+        r.drop = drop2;
         r.gone = null;
       }
     }
@@ -116240,8 +116585,8 @@ function drawStaticSpark(ctx, tr, time) {
   });
 }
 function drawCinderTrail(ctx, tr, time) {
-  const any = tr.fire || tr.frost || tr.spark;
-  if (tr.fire || !any) drawFireTrail(ctx, tr, time);
+  const any2 = tr.fire || tr.frost || tr.spark;
+  if (tr.fire || !any2) drawFireTrail(ctx, tr, time);
   if (tr.frost) drawFrostTrail(ctx, tr, time);
   if (tr.spark) drawStaticSpark(ctx, tr, time);
 }
@@ -117709,8 +118054,8 @@ function drawUniqueBurst(ctx, b, age, time) {
     for (let i = 0; i < 3; i++) {
       const a = i * 2.4 + 0.6, x = b.tx + (i ? Math.cos(a) * 58 : 0), y = b.ty + (i ? Math.sin(a) * 58 : 0), local7 = age - i * 90;
       if (local7 < 0) continue;
-      const drop = Math.min(1, local7 / 220), sy = lerp3(y - 120, y, ease20(drop)), hit = Math.max(0, 1 - (local7 - 220) / 420);
-      if (drop < 1) standV1(ctx, y, () => {
+      const drop2 = Math.min(1, local7 / 220), sy = lerp3(y - 120, y, ease20(drop2)), hit = Math.max(0, 1 - (local7 - 220) / 420);
+      if (drop2 < 1) standV1(ctx, y, () => {
         neon2(ctx, C2.sun, C2.sunDark, 2.4, () => {
           ctx.beginPath();
           ctx.moveTo(x, sy - 26);
@@ -119946,8 +120291,8 @@ function createRewardFeedback(canvas) {
     if (kind === "soul" || kind === "heal") return;
     if (lastTime - lastPulse[kind] < 250) return;
     lastPulse[kind] = lastTime;
-    const el2 = doc.getElementById(kind === "xp" ? "world-xp-bar" : "world-wallet");
-    el2?.animate?.([{ filter: kind === "gold" ? "brightness(1.18)" : "brightness(1.8)" }, { filter: "brightness(1)" }], { duration: 240 });
+    const el3 = doc.getElementById(kind === "xp" ? "world-xp-bar" : "world-wallet");
+    el3?.animate?.([{ filter: kind === "gold" ? "brightness(1.18)" : "brightness(1.8)" }, { filter: "brightness(1)" }], { duration: 240 });
   }
   function render(model, time, cam) {
     if (!ctx) return;
@@ -122194,7 +122539,7 @@ var BOX3 = Object.freeze({ cave: [-268, -218, 336, 116], crypt: [-226, -220, 230
 var ANCHOR = Object.freeze({ cave: -24, crypt: -84, ruin: -84 });
 var ENTRANCE = { cave: paintCaveEntranceV3, crypt: paintCryptEntranceV3, ruin: paintRuinEntranceV3 };
 var SCALE26 = 1.5;
-var LIMIT4 = 12;
+var LIMIT5 = 12;
 var sprites5 = /* @__PURE__ */ new Map();
 var painted3 = 0;
 function sprite5(key3, box5, paint2) {
@@ -122216,7 +122561,7 @@ function sprite5(key3, box5, paint2) {
   painted3++;
   s = { canvas, box: box5 };
   sprites5.set(key3, s);
-  while (sprites5.size > LIMIT4) sprites5.delete(sprites5.keys().next().value);
+  while (sprites5.size > LIMIT5) sprites5.delete(sprites5.keys().next().value);
   return s;
 }
 function stamp5(ctx, s, x, y, facing2 = 0) {
@@ -125366,14 +125711,14 @@ function createEnvironmentCache(canvas, { diagnostics = null, prepareDrawing, pr
   }
   function signature(space, x, y) {
     const v = space.visual, t = space.collision.tileSize, ox = v.originTile?.x ?? 0, oy = v.originTile?.y ?? 0;
-    let text2 = JSON.stringify(environmentWorldOffset(space)) + "|";
-    for (let row2 = y / t - 7; row2 < (y + SIZE5) / t + 7; row2++) text2 += (v.terrain[row2 - oy] ?? "").slice(Math.max(0, x / t - 7 - ox), Math.max(0, (x + SIZE5) / t + 7 - ox)) + "|";
-    for (let row2 = y / t - 2; row2 < (y + SIZE5) / t + 2; row2++) text2 += (v.biomes?.[row2 - oy] ?? "").slice(Math.max(0, x / t - 2 - ox), Math.max(0, (x + SIZE5) / t + 2 - ox)) + "|";
-    if (v.stands) for (let row2 = y / t - 3; row2 < (y + SIZE5) / t + 3; row2++) text2 += (v.stands[row2 - oy] ?? "").slice(Math.max(0, x / t - 3 - ox), Math.max(0, (x + SIZE5) / t + 3 - ox)) + "|";
-    for (const b of v.blockers) if ((b.x + b.width) * t >= x - 64 && (b.y + b.height) * t >= y - 64 && b.x * t < x + SIZE5 + 64 && b.y * t < y + SIZE5 + 64) text2 += JSON.stringify(b);
-    for (const d of v.decorations ?? []) if (d.x * t >= x - 640 && d.y * t >= y - 360 && d.x * t < x + SIZE5 + 640 && d.y * t < y + SIZE5 + 360) text2 += JSON.stringify(d);
-    for (const e of space.exits ?? []) if (e.x >= x - 640 && e.y >= y - 360 && e.x < x + SIZE5 + 640 && e.y < y + SIZE5 + 360) text2 += "|e" + e.x + "/" + e.y + "/" + e.label;
-    return text2;
+    let text3 = JSON.stringify(environmentWorldOffset(space)) + "|";
+    for (let row2 = y / t - 7; row2 < (y + SIZE5) / t + 7; row2++) text3 += (v.terrain[row2 - oy] ?? "").slice(Math.max(0, x / t - 7 - ox), Math.max(0, (x + SIZE5) / t + 7 - ox)) + "|";
+    for (let row2 = y / t - 2; row2 < (y + SIZE5) / t + 2; row2++) text3 += (v.biomes?.[row2 - oy] ?? "").slice(Math.max(0, x / t - 2 - ox), Math.max(0, (x + SIZE5) / t + 2 - ox)) + "|";
+    if (v.stands) for (let row2 = y / t - 3; row2 < (y + SIZE5) / t + 3; row2++) text3 += (v.stands[row2 - oy] ?? "").slice(Math.max(0, x / t - 3 - ox), Math.max(0, (x + SIZE5) / t + 3 - ox)) + "|";
+    for (const b of v.blockers) if ((b.x + b.width) * t >= x - 64 && (b.y + b.height) * t >= y - 64 && b.x * t < x + SIZE5 + 64 && b.y * t < y + SIZE5 + 64) text3 += JSON.stringify(b);
+    for (const d of v.decorations ?? []) if (d.x * t >= x - 640 && d.y * t >= y - 360 && d.x * t < x + SIZE5 + 640 && d.y * t < y + SIZE5 + 360) text3 += JSON.stringify(d);
+    for (const e of space.exits ?? []) if (e.x >= x - 640 && e.y >= y - 360 && e.x < x + SIZE5 + 640 && e.y < y + SIZE5 + 360) text3 += "|e" + e.x + "/" + e.y + "/" + e.label;
+    return text3;
   }
   function layoutFor(space) {
     let layout = layouts3.get(space.visual);
@@ -127676,7 +128021,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
 }
 
 // src/client/primary_input.js
-function createPrimaryInput({ button: button2, environment, adapter, readModel, reportError, isBlocked = () => false, restoreGameplayFocus = () => {
+function createPrimaryInput({ button: button3, environment, adapter, readModel, reportError, isBlocked = () => false, restoreGameplayFocus = () => {
 } }) {
   const listeners = [], owners = /* @__PURE__ */ new Set();
   let key3 = spaceKey(readModel()), needsCancel = false;
@@ -127724,30 +128069,30 @@ function createPrimaryInput({ button: button2, environment, adapter, readModel, 
       send(false, true);
     } else needsCancel = false;
     for (const owner of previous) if (typeof owner === "number") try {
-      button2.releasePointerCapture(owner);
+      button3.releasePointerCapture(owner);
     } catch {
     }
   }
-  listen(button2, "pointerdown", (event) => {
+  listen(button3, "pointerdown", (event) => {
     if (event.button !== 0) return;
     event.preventDefault();
     down(event.pointerId);
     try {
-      button2.setPointerCapture(event.pointerId);
+      button3.setPointerCapture(event.pointerId);
     } catch {
     }
   });
-  listen(button2, "pointerup", (event) => {
+  listen(button3, "pointerup", (event) => {
     event.preventDefault();
     up(event.pointerId);
   });
-  for (const type of ["pointercancel", "lostpointercapture"]) listen(button2, type, (event) => up(event.pointerId, true));
-  listen(button2, "click", (event) => {
+  for (const type of ["pointercancel", "lostpointercapture"]) listen(button3, type, (event) => up(event.pointerId, true));
+  listen(button3, "click", (event) => {
     event.preventDefault();
     restoreGameplayFocus();
   });
   listen(environment, "keydown", (event) => {
-    if (event.code !== "Space" || event.repeat || ["INPUT", "SELECT", "TEXTAREA"].includes(event.target?.tagName) || event.target?.tagName === "BUTTON" && event.target !== button2) return;
+    if (event.code !== "Space" || event.repeat || ["INPUT", "SELECT", "TEXTAREA"].includes(event.target?.tagName) || event.target?.tagName === "BUTTON" && event.target !== button3) return;
     event.preventDefault();
     down("keyboard");
   });
@@ -127770,13 +128115,13 @@ function createPrimaryInput({ button: button2, environment, adapter, readModel, 
       if (owners.size || needsCancel) clear2(false);
     } else if (needsCancel) send(false, true, model);
     const hidden = !model.primary, disabled = isBlocked() || model.persistence.phase !== "encounter" || !model.entitiesById[model.playersById[model.localPlayerId].entityId].alive;
-    if (button2.hidden !== hidden) button2.hidden = hidden;
-    if (button2.disabled !== disabled) button2.disabled = disabled;
+    if (button3.hidden !== hidden) button3.hidden = hidden;
+    if (button3.disabled !== disabled) button3.disabled = disabled;
     const a = model.primary?.actorsById[model.playersById[model.localPlayerId].entityId];
     const held = String(Boolean(a?.held)), step = String(a?.current?.comboStep ?? a?.nextComboStep ?? 1), pressed = String(owners.size > 0);
-    if (button2.dataset.held !== held) button2.dataset.held = held;
-    if (button2.dataset.step !== step) button2.dataset.step = step;
-    if (button2.getAttribute?.("aria-pressed") !== pressed) button2.setAttribute("aria-pressed", pressed);
+    if (button3.dataset.held !== held) button3.dataset.held = held;
+    if (button3.dataset.step !== step) button3.dataset.step = step;
+    if (button3.getAttribute?.("aria-pressed") !== pressed) button3.setAttribute("aria-pressed", pressed);
   }
   return Object.freeze({ refresh, clear: clear2, read: () => ({ owners: [...owners] }), destroy: () => {
     clear2();
@@ -128095,7 +128440,7 @@ function createSiteNavigatorD12_4C({ document: doc, port, enabled = false, relea
     if (!nav) {
       output.textContent = message || "No current snapshot. Choose Refresh sites.";
       valid.textContent = counts.textContent = rejected.textContent = "";
-      for (const [name, button2] of Object.entries(buttons)) button2.disabled = pending || name !== "refresh";
+      for (const [name, button3] of Object.entries(buttons)) button3.disabled = pending || name !== "refresh";
       return;
     }
     freshness.textContent = "Snapshot at tick " + model.tick + ". Distances, completion and reset eligibility are not live; choose Refresh sites to update.";
@@ -128276,7 +128621,7 @@ function createSpacePreparationGate(initialSpace) {
 
 // src/client/playable_client.js
 var progressionText = (v) => formatLarge(integerWire(v));
-function mountPlayableClient({ port, environment, nextCommandToken, capabilities, performanceProbe = null, environmentArt = null, readRuntimeDiagnostics = () => null, readSaveStatus = () => null, evidenceMode = false, evidenceIntervalMs = 0, developerMode = false, actorCollisionProbe = null, heroSlots = null, startingHero = null }) {
+function mountPlayableClient({ port, environment, nextCommandToken, capabilities, performanceProbe = null, environmentArt = null, readRuntimeDiagnostics = () => null, readSaveStatus = () => null, evidenceMode = false, evidenceIntervalMs = 0, developerMode = false, actorCollisionProbe = null, heroSlots = null, startingHero = null, otherLands = null }) {
   const doc = environment.document, canvas = doc.getElementById("world-view"), status2 = doc.getElementById("world-status");
   const levelUpCelebration = createLevelUpCelebrationV4(doc);
   if (new URL(environment.location.href).searchParams.get("previewLevelUp") === "1") environment.setTimeout(() => {
@@ -128353,8 +128698,8 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
     openFerry: (landing) => ferryMenu.open(landing),
     openForge: () => inventory?.openForge(),
     isBlocked: gameplayInputBlocked,
-    reportError: (text2) => {
-      message = text2;
+    reportError: (text3) => {
+      message = text3;
     },
     now: () => environment.performance.now()
   });
@@ -128368,18 +128713,18 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
   serviceMenu = createSettlementServicesMenu2({ document: doc, adapter, readModel, clearInput: () => {
     input.clear();
     primary?.clear();
-  }, restoreFocus: restoreGameplayFocus, reportError: (text2) => {
-    message = text2;
+  }, restoreFocus: restoreGameplayFocus, reportError: (text3) => {
+    message = text3;
   } });
   questUi = createQuestUiV1({ document: doc, adapter, readModel, clearInput: () => {
     input.clear();
     primary?.clear();
   }, restoreFocus: restoreGameplayFocus, openShop: (n) => serviceMenu.open(n), map: () => navigation });
-  ferryMenu = createFerryMenu({ document: doc, adapter, clearInput: () => input.clear(), restoreFocus: restoreGameplayFocus, reportError: (text2) => {
-    message = text2;
+  ferryMenu = createFerryMenu({ document: doc, adapter, clearInput: () => input.clear(), restoreFocus: restoreGameplayFocus, reportError: (text3) => {
+    message = text3;
   } });
-  const button2 = doc.getElementById("primary-attack");
-  const gameSurfaces = [canvas, button2, doc.getElementById("world-pickup"), interactionHud.button].filter(Boolean), gestureListeners = [];
+  const button3 = doc.getElementById("primary-attack");
+  const gameSurfaces = [canvas, button3, doc.getElementById("world-pickup"), interactionHud.button].filter(Boolean), gestureListeners = [];
   for (const surface3 of gameSurfaces) for (const type of ["touchstart", "touchmove", "touchend", "dblclick", "contextmenu"]) {
     const handler = (event) => {
       if (event.cancelable) event.preventDefault();
@@ -128387,8 +128732,8 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
     surface3.addEventListener(type, handler, { passive: false });
     gestureListeners.push(() => surface3.removeEventListener(type, handler));
   }
-  const primary = button2 ? createPrimaryInput({ button: button2, environment, adapter, readModel, isBlocked: gameplayInputBlocked, restoreGameplayFocus, reportError: (text2) => {
-    message = text2;
+  const primary = button3 ? createPrimaryInput({ button: button3, environment, adapter, readModel, isBlocked: gameplayInputBlocked, restoreGameplayFocus, reportError: (text3) => {
+    message = text3;
   } }) : null;
   inventory = createInventoryPresentation({ document: doc, environment, readModel, adapter, restoreGameplayFocus, heroSlots, questsPage: questUi?.menuPage ?? null, clearInput: () => {
     subweaponHud?.clear();
@@ -128396,7 +128741,7 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
     primary?.clear();
   } });
   questUi?.attachMenu?.(() => inventory.openQuests(), () => inventory.close());
-  navigation = createWorldMapD9({ document: doc, environment, port: viewPort, issue: (kind, payload) => adapter.issue(kind, payload), releaseInput: () => {
+  navigation = createWorldMapD9({ document: doc, environment, port: viewPort, otherLands, issue: (kind, payload) => adapter.issue(kind, payload), releaseInput: () => {
     subweaponHud?.clear();
     input.clear();
     primary?.clear();
@@ -128414,12 +128759,12 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
     const m = readModel(), p = m.primary?.actorsById[m.playersById[m.localPlayerId].entityId];
     if (primary?.read().owners.length || p?.held || p?.queued) primary?.clear();
   } });
-  subweaponHud = createSubweaponHud({ clearPrimary: () => primary?.clear(), document: doc, environment, readModel, adapter, isBlocked: gameplayInputBlocked, reportError: (text2) => {
-    message = text2;
+  subweaponHud = createSubweaponHud({ clearPrimary: () => primary?.clear(), document: doc, environment, readModel, adapter, isBlocked: gameplayInputBlocked, reportError: (text3) => {
+    message = text3;
   } });
   let campFrames = 0;
-  heroCreator = createHeroCreatorV1({ document: doc, environment, readModel, adapter, reportError: (text2) => {
-    message = text2;
+  heroCreator = createHeroCreatorV1({ document: doc, environment, readModel, adapter, reportError: (text3) => {
+    message = text3;
   }, onClose: restoreGameplayFocus, openHeroes: heroSlots ? () => inventory.openHeroes() : null, otherHeroes: () => {
     const l = heroSlots?.list();
     return Boolean(l?.heroes.some((h) => h.slot !== l.active));
@@ -128429,15 +128774,15 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
     input.clear();
     primary?.clear();
     heroCreator.open(null);
-  }, reportError: (text2) => {
-    message = text2;
+  }, reportError: (text3) => {
+    message = text3;
   } });
   const death = createDeathPresentation({ document: doc, readModel, adapter, restoreGameplayFocus, clearInput: () => {
     input.clear(false);
     primary?.clear(false);
   } });
-  const setText = (element, text2) => {
-    if (element.textContent !== text2) element.textContent = text2;
+  const setText = (element, text3) => {
+    if (element.textContent !== text3) element.textContent = text3;
   };
   doc.getElementById("world-gate-reopen")?.addEventListener("click", () => environment.location.reload());
   function resize() {
@@ -128487,8 +128832,8 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
         disclosure.insertBefore(campaign, review);
       }
       for (const id of ["start-new-campaign", "reset-local-world-data"]) {
-        const button3 = doc.getElementById(id);
-        if (button3 && button3.parentElement !== campaign) campaign.append(button3);
+        const button4 = doc.getElementById(id);
+        if (button4 && button4.parentElement !== campaign) campaign.append(button4);
       }
     }
     resize();
@@ -128749,16 +129094,16 @@ function createLocalLaunchPolicy({ launcherStore, url, launcherKey = WORLD_LOCAL
   }
   function rememberedReference() {
     if (!launcherStore) return null;
-    let text2;
+    let text3;
     try {
-      text2 = launcherStore.getItem(launcherKey);
+      text3 = launcherStore.getItem(launcherKey);
     } catch (error) {
       throw new Error("World launcher storage unavailable", { cause: error });
     }
-    if (text2 === null) return null;
-    if (typeof text2 !== "string" || text2.length > 512) throw new Error("Malformed World launcher record");
+    if (text3 === null) return null;
+    if (typeof text3 !== "string" || text3.length > 512) throw new Error("Malformed World launcher record");
     try {
-      return launcherReference(JSON.parse(text2));
+      return launcherReference(JSON.parse(text3));
     } catch (error) {
       if (error.message === "Malformed World launcher record") throw error;
       throw new Error("Malformed World launcher record", { cause: error });
@@ -131482,7 +131827,37 @@ async function createLocalEndlessSessionD9(options) {
     })();
     return servicePending;
   };
-  const coop = Object.freeze({ hostPlayerId: () => localPlayerId, seatPresence, waiting: (pid) => authority.withAuthority((a) => a.withAuthorityState((s) => Boolean(s.waitingRoom) && s.entitiesById[s.playersById[pid].entityId]?.residency.spaceInstanceId === s.waitingRoom.spaceInstanceId)), readModel: (pid) => seatPort(pid).getReadModel(), passport: (pid, heroId) => authority.withAuthority((a) => a.withAuthorityState((s) => s.playersById[pid] ? extractHeroPassport(s, pid, { heroId }) : null)), inventoryMark: (pid) => authority.withAuthority((a) => a.withAuthorityState((s) => {
+  const partyFacts = (change) => {
+    if (servicePending || ferryPending || respawnPending || functionalCommands.busy() || fatalInvariant || authority.getStatus().phase !== "ready") return Promise.resolve({ status: "busy" });
+    servicePending = (async () => {
+      reviewTravelPending = true;
+      try {
+        if (groundPreparation) await groundPreparation.promise;
+        if (saving) await saving;
+        await stream.settled();
+        authority.drainCommands();
+        let durable = await save();
+        requireContract(durable.status === "committed", durable.reason ?? "Party world save failed");
+        if (saving) await saving;
+        await stream.settled();
+        const result = authority.withReadyAuthority((a) => a.partyFactsV1(change));
+        if (result.changed) {
+          durable = await save();
+          requireContract(durable.status === "committed", durable.reason ?? "Party world save failed");
+        }
+        return result;
+      } catch (error) {
+        lastError = error.message;
+        throw error;
+      } finally {
+        reviewTravelPending = false;
+        servicePending = null;
+        void stream.pump();
+      }
+    })();
+    return servicePending;
+  };
+  const coop = Object.freeze({ hostPlayerId: () => localPlayerId, seatPresence, partyFacts, waiting: (pid) => authority.withAuthority((a) => a.withAuthorityState((s) => Boolean(s.waitingRoom) && s.entitiesById[s.playersById[pid].entityId]?.residency.spaceInstanceId === s.waitingRoom.spaceInstanceId)), readModel: (pid) => seatPort(pid).getReadModel(), passport: (pid, heroId) => authority.withAuthority((a) => a.withAuthorityState((s) => s.playersById[pid] ? extractHeroPassport(s, pid, { heroId }) : null)), inventoryMark: (pid) => authority.withAuthority((a) => a.withAuthorityState((s) => {
     const p = s.playersById[pid];
     if (!p) return null;
     const i = p.inventory;
@@ -131791,17 +132166,18 @@ var MODEL_INTERVAL_MS = 33;
 var PASSPORT_INTERVAL_MS = 3e3;
 var AWAY_WAIT_MS = 5e3;
 var KEEP_PASSPORTS = 12;
-function createCoopHostV1({ build: build2, hostName, world, readWorldFile = null, now: now3 = () => performance.now(), setInterval: setInterval2 = globalThis.setInterval.bind(globalThis), clearInterval: clearInterval2 = globalThis.clearInterval.bind(globalThis), setTimeout: setTimeout2 = globalThis.setTimeout.bind(globalThis), clearTimeout: clearTimeout2 = globalThis.clearTimeout.bind(globalThis), nextToken, onChange = () => {
+function createCoopHostV1({ build: build2, hostName, world, readWorldFile = null, onFacts = () => {
+}, now: now3 = () => performance.now(), setInterval: setInterval2 = globalThis.setInterval.bind(globalThis), clearInterval: clearInterval2 = globalThis.clearInterval.bind(globalThis), setTimeout: setTimeout2 = globalThis.setTimeout.bind(globalThis), clearTimeout: clearTimeout2 = globalThis.clearTimeout.bind(globalThis), nextToken, onChange = () => {
 }, validatePassport = validateHeroPassport }) {
   const guests = /* @__PURE__ */ new Map(), held = /* @__PURE__ */ new Map();
-  let session = null, started = false, timer = null, closed = false;
+  let session = null, started = false, timer = null, closed = false, shared = null;
   const roster = () => [...guests.values()].filter((g) => g.hello).map((g) => ({ name: g.hello.name, heroId: g.hello.heroId, playerId: g.playerId ?? null, via: g.via }));
   const tellLobby = () => {
     const players = [{ name: hostName, heroId: null }, ...roster()];
     for (const g of guests.values()) if (g.hello) g.link.send({ t: "lobby", players });
     onChange(players);
   };
-  const wait = (ms) => new Promise((resolve) => setTimeout2(resolve, ms));
+  const wait2 = (ms) => new Promise((resolve) => setTimeout2(resolve, ms));
   let presenceQueue = Promise.resolve();
   function presence(pid, away2) {
     const run3 = async () => {
@@ -131814,14 +132190,14 @@ function createCoopHostV1({ build: build2, hostName, world, readWorldFile = null
           return false;
         }
         if (r?.status !== "busy") return true;
-        await wait(500);
+        await wait2(500);
       }
       return false;
     };
     presenceQueue = presenceQueue.then(run3, run3);
     return presenceQueue;
   }
-  function drop(g, reason) {
+  function drop2(g, reason) {
     if (!guests.has(g.id)) return;
     guests.delete(g.id);
     if (g.awayTimer !== null) clearTimeout2(g.awayTimer);
@@ -131877,34 +132253,34 @@ function createCoopHostV1({ build: build2, hostName, world, readWorldFile = null
     }
     const g = { id: crypto.randomUUID(), link, via, hello: null, playerId: null, ready: false, parked: false, awayTimer: null, sent: [], encoder: createModelEncoderV1(), mark: null, passportAt: -Infinity, lastModel: null, lastSent: -Infinity };
     guests.set(g.id, g);
-    link.onClose(() => drop(g, "left"));
+    link.onClose(() => drop2(g, "left"));
     link.onQuiet?.((on) => away(g, on));
     link.onMessage((m) => {
       if (m.t === "hello") {
         if (g.hello) return;
         if (!checkHelloV1(m)) {
-          drop(g, "This game is a different version. Update both games and try again.");
+          drop2(g, "This game is a different version. Update both games and try again.");
           return;
         }
         if (m.build !== build2) {
-          drop(g, "The host plays a different version of the game. Update both games and try again.");
+          drop2(g, "The host plays a different version of the game. Update both games and try again.");
           return;
         }
         try {
           validatePassport(m.passport);
           if (m.passport.heroId !== m.heroId) throw Error();
         } catch {
-          drop(g, "Your hero could not be read. Play them once in your own world first.");
+          drop2(g, "Your hero could not be read. Play them once in your own world first.");
           return;
         }
         if (started) {
           const seat = held.get(m.heroId);
           if (!seat) {
-            drop(g, "This game has already started. Ask the host to open a new game.");
+            drop2(g, "This game has already started. Ask the host to open a new game.");
             return;
           }
           if (!seat.sent.some((p) => samePassport(p, m.passport))) {
-            drop(g, `${m.name} played somewhere else since leaving this game, so they can\u2019t come back into it.`);
+            drop2(g, `${m.name} played somewhere else since leaving this game, so they can\u2019t come back into it.`);
             return;
           }
           held.delete(m.heroId);
@@ -131912,13 +132288,13 @@ function createCoopHostV1({ build: build2, hostName, world, readWorldFile = null
           link.send({ t: "welcome", protocol: COOP_PROTOCOL, build: build2, hostName, world });
           presence(g.playerId, false).then(() => {
             if (guests.get(g.id) !== g) return;
-            link.send({ t: "start", playerId: g.playerId });
+            link.send({ t: "start", playerId: g.playerId, ...shared ? { party: shared } : {} });
             tellLobby();
           });
           return;
         }
         if ([...guests.values()].some((o) => o !== g && o.hello?.heroId === m.heroId) || [...guests.values()].filter((o) => o.hello).length >= COOP_PARTY_LIMIT - 1) {
-          drop(g, "This game is full.");
+          drop2(g, "This game is full.");
           return;
         }
         g.hello = m;
@@ -131926,17 +132302,18 @@ function createCoopHostV1({ build: build2, hostName, world, readWorldFile = null
         link.send({ t: "welcome", protocol: COOP_PROTOCOL, build: build2, hostName, world });
         tellLobby();
       } else if (m.t === "worldfile" && g.hello && readWorldFile) {
-        readWorldFile().then((text2) => link.send({ t: "worldfile", text: text2 }), () => drop(g, "The host could not send their world."));
+        readWorldFile().then((text3) => link.send({ t: "worldfile", text: text3 }), () => drop2(g, "The host could not send their world."));
       } else if (m.t === "ready" && g.playerId) {
         g.encoder = createModelEncoderV1();
         g.lastModel = null;
         g.ready = true;
       } else if (m.t === "away" || m.t === "back") away(g, m.t === "away");
+      else if (m.t === "facts" && g.playerId && shared && m.id === shared.id) onFacts({ name: g.hello.name, facts: m.facts });
       else if (m.t === "cmd" && session && g.playerId && !g.parked) run2(g, m);
       else if (m.t === "bye") {
         if (session && g.playerId) sendPassport(g, true);
         g.left = true;
-        drop(g, "left");
+        drop2(g, "left");
       }
     });
   }
@@ -131986,9 +132363,9 @@ function createCoopHostV1({ build: build2, hostName, world, readWorldFile = null
         }
         if (model !== g.lastModel) {
           g.lastModel = model;
-          const text2 = g.encoder.encode(model);
-          if (text2) {
-            g.link.send(text2);
+          const text3 = g.encoder.encode(model);
+          if (text3) {
+            g.link.send(text3);
             g.lastSent = t;
           }
         }
@@ -132000,20 +132377,23 @@ function createCoopHostV1({ build: build2, hostName, world, readWorldFile = null
     add,
     players: roster,
     party: () => [...guests.values()].filter((g) => g.hello).map((g) => ({ heroId: g.hello.heroId, passport: g.hello.passport })),
+    setParty(info2) {
+      shared = info2 ? { id: info2.id, label: info2.label, owner: info2.owner } : null;
+    },
     start() {
       started = true;
-      for (const g of [...guests.values()]) if (!g.hello) drop(g, "The game started without you.");
+      for (const g of [...guests.values()]) if (!g.hello) drop2(g, "The game started without you.");
     },
     attach(s, party) {
       session = s;
       for (const g of [...guests.values()]) {
         const pid = party?.[g.hello.heroId];
         if (!pid) {
-          drop(g, "There was no seat for your hero.");
+          drop2(g, "There was no seat for your hero.");
           continue;
         }
         g.playerId = pid;
-        g.link.send({ t: "start", playerId: pid });
+        g.link.send({ t: "start", playerId: pid, ...shared ? { party: shared } : {} });
       }
       tellLobby();
       timer = setInterval2(pump, MODEL_INTERVAL_MS);
@@ -132029,7 +132409,7 @@ function createCoopHostV1({ build: build2, hostName, world, readWorldFile = null
       if (timer !== null) clearInterval2(timer);
       for (const g of [...guests.values()]) {
         if (session && g.playerId && g.hello) sendPassport(g, true);
-        drop(g, reason);
+        drop2(g, reason);
       }
     }
   });
@@ -132072,9 +132452,9 @@ function beginCoopGuestV1({ link, build: build2, hero, onLobby = () => {
       } else if (m.t === "lobby") onLobby(m.players);
       else if (m.t === "bye") fail(m.reason || "The host closed the game");
       else if (m.t === "start") {
-        const wait = () => {
+        const wait2 = () => {
           if (wantFile) {
-            setTimeout(wait, 100);
+            setTimeout(wait2, 100);
             return;
           }
           offClose();
@@ -132082,9 +132462,9 @@ function beginCoopGuestV1({ link, build: build2, hero, onLobby = () => {
           const keep5 = link.onMessage((x) => {
             if (x.t === "pass" || x.t === "bye") early.push(x);
           });
-          resolve({ playerId: m.playerId, welcome, worldText, early, release: keep5 });
+          resolve({ playerId: m.playerId, welcome, worldText, early, release: keep5, party: m.party && typeof m.party.id === "string" ? m.party : null });
         };
-        wait();
+        wait2();
       } else if (m.t === "pass") early.push(m);
     });
     link.send({ t: "hello", protocol: COOP_PROTOCOL, build: build2, heroId: hero.heroId, name: hero.name, passport: hero.passport });
@@ -133897,8 +134277,8 @@ function compactSdpV1(type, sdp) {
   if (!role) throw Error("Unknown DTLS role");
   return [COOP_SDP_VERSION, type === "offer" ? "o" : "a", role, ufrag, pwd, base64url(hex5), ...candidates].join("|");
 }
-function expandSdpV1(text2) {
-  const p = String(text2).split("|");
+function expandSdpV1(text3) {
+  const p = String(text3).split("|");
   if (p[0] !== COOP_SDP_VERSION || p.length < 7) throw Error("This code is from another version of the game");
   const type = p[1] === "o" ? "offer" : p[1] === "a" ? "answer" : null, setup = { x: "actpass", a: "active", p: "passive" }[p[2]];
   if (!type || !setup) throw Error("Unreadable connection code");
@@ -133939,9 +134319,9 @@ function base64url(hex5) {
   for (let i = 0; i < hex5.length; i += 2) s += String.fromCharCode(parseInt(hex5.slice(i, i + 2), 16));
   return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
-function unbase64url(text2) {
+function unbase64url(text3) {
   try {
-    const s = atob(text2.replace(/-/g, "+").replace(/_/g, "/"));
+    const s = atob(text3.replace(/-/g, "+").replace(/_/g, "/"));
     return Array.from(s, (c) => c.charCodeAt(0).toString(16).padStart(2, "0")).join("");
   } catch {
     return "";
@@ -133956,10 +134336,10 @@ var GATHER_WAIT_MS = 3e3;
 function createLink(kind, sendText, closeTransport, busy = () => false) {
   const onMessage = /* @__PURE__ */ new Set(), onClose = /* @__PURE__ */ new Set(), onQuiet = /* @__PURE__ */ new Set(), parts = /* @__PURE__ */ new Map();
   let closed = false, seq = 0;
-  const deliver = (text2) => {
+  const deliver = (text3) => {
     let m;
     try {
-      m = JSON.parse(text2);
+      m = JSON.parse(text3);
     } catch {
       return;
     }
@@ -133973,12 +134353,12 @@ function createLink(kind, sendText, closeTransport, busy = () => false) {
     kind,
     send(message) {
       if (closed) return false;
-      const text2 = typeof message === "string" ? message : JSON.stringify(message);
+      const text3 = typeof message === "string" ? message : JSON.stringify(message);
       try {
-        if (text2.length <= CHUNK) sendText(text2);
+        if (text3.length <= CHUNK) sendText(text3);
         else {
-          const id = (++seq).toString(36), n = Math.ceil(text2.length / CHUNK);
-          for (let i = 0; i < n; i++) sendText("" + id + "|" + i + "|" + n + "|" + text2.slice(i * CHUNK, (i + 1) * CHUNK));
+          const id = (++seq).toString(36), n = Math.ceil(text3.length / CHUNK);
+          for (let i = 0; i < n; i++) sendText("" + id + "|" + i + "|" + n + "|" + text3.slice(i * CHUNK, (i + 1) * CHUNK));
         }
         return true;
       } catch {
@@ -133986,13 +134366,13 @@ function createLink(kind, sendText, closeTransport, busy = () => false) {
         return false;
       }
     },
-    receive(text2) {
-      if (typeof text2 !== "string") return;
-      if (text2[0] !== "") {
-        deliver(text2);
+    receive(text3) {
+      if (typeof text3 !== "string") return;
+      if (text3[0] !== "") {
+        deliver(text3);
         return;
       }
-      const a = text2.indexOf("|"), b = text2.indexOf("|", a + 1), c = text2.indexOf("|", b + 1), id = text2.slice(1, a), i = Number(text2.slice(a + 1, b)), n = Number(text2.slice(b + 1, c));
+      const a = text3.indexOf("|"), b = text3.indexOf("|", a + 1), c = text3.indexOf("|", b + 1), id = text3.slice(1, a), i = Number(text3.slice(a + 1, b)), n = Number(text3.slice(b + 1, c));
       if (!(n > 0 && n <= 4096 && i >= 0 && i < n)) return;
       let p = parts.get(id);
       if (!p) {
@@ -134000,7 +134380,7 @@ function createLink(kind, sendText, closeTransport, busy = () => false) {
         parts.set(id, p);
       }
       if (p.list[i] === void 0) {
-        p.list[i] = text2.slice(c + 1);
+        p.list[i] = text3.slice(c + 1);
         p.got++;
       }
       if (p.got === p.n) {
@@ -134049,7 +134429,7 @@ function createLink(kind, sendText, closeTransport, busy = () => false) {
   return link;
 }
 function channelLink(pc2, channel2) {
-  const link = createLink("direct", (text2) => channel2.send(text2), () => {
+  const link = createLink("direct", (text3) => channel2.send(text3), () => {
     channel2.close();
     pc2.close();
   }, () => channel2.bufferedAmount > 1 << 20);
@@ -134172,7 +134552,7 @@ async function hostRoomV1({ server, code: code2, onGuest, onLeft = () => {
         if (g.link) return;
         pc2.close();
         to(m.id, { relay: "open" });
-        g.relay = createLink("relay", (text2) => to(m.id, { relay: text2 }), () => to(m.id, { relay: "close" }));
+        g.relay = createLink("relay", (text3) => to(m.id, { relay: text3 }), () => to(m.id, { relay: "close" }));
         settle(g.relay);
       });
     } else if (m.type === "from") {
@@ -134270,7 +134650,7 @@ async function joinRoomV1({ server, code: code2, WebSocket = globalThis.WebSocke
       });
       else if (d.relay === "open") {
         pc2.close();
-        relay = createLink("relay", (text2) => up({ relay: text2 }), () => {
+        relay = createLink("relay", (text3) => up({ relay: text3 }), () => {
           up({ relay: "close" });
           ws.close();
         });
@@ -134292,21 +134672,21 @@ function withTimeout(promise, ms, message) {
 }
 
 // src/client/coop_screen_v1.js
-var el = (document2, tag, cls = "", text2 = "") => {
+var el = (document2, tag, cls = "", text3 = "") => {
   const e = document2.createElement(tag);
   if (cls) e.className = cls;
-  if (text2) e.textContent = text2;
+  if (text3) e.textContent = text3;
   return e;
 };
-function button(document2, cls, text2, onClick) {
-  const b = el(document2, "button", cls, text2);
+function button(document2, cls, text3, onClick) {
+  const b = el(document2, "button", cls, text3);
   b.type = "button";
   b.addEventListener("click", onClick);
   return b;
 }
-function drawQr(document2, text2) {
+function drawQr(document2, text3) {
   const q = qrcode_generator_2_0_4_default(0, "L");
-  q.addData(text2);
+  q.addData(text3);
   q.make();
   const n = q.getModuleCount(), scale = Math.max(3, Math.floor(300 / (n + 8))), canvas = el(document2, "canvas", "coop-qr");
   canvas.width = canvas.height = (n + 8) * scale;
@@ -134315,7 +134695,7 @@ function drawQr(document2, text2) {
   g.fillRect(0, 0, canvas.width, canvas.height);
   g.fillStyle = "#000";
   for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) g.fillRect((c + 4) * scale, (r + 4) * scale, scale, scale);
-  canvas.dataset.code = text2;
+  canvas.dataset.code = text3;
   return canvas;
 }
 async function scanQr(environment, host) {
@@ -134430,7 +134810,7 @@ function inviteArea({ environment, ui, coopHost }) {
     offer = null;
   } };
 }
-function runCoopLobbyV1({ environment, coopHost, server, hostName }) {
+function runCoopLobbyV1({ environment, coopHost, server, hostName, share = null, solo = true }) {
   const ui = shell(environment, "Play together", `Friends join ${hostName}\u2019s world with their own heroes. Up to 3 friends.`), { document: document2, card } = ui;
   const players = playerList(document2);
   players.show([{ name: hostName }]);
@@ -134457,9 +134837,26 @@ function runCoopLobbyV1({ environment, coopHost, server, hostName }) {
     nextInvite();
   });
   qrBox.append(qrArea, showInvite);
-  const start = button(document2, "coop-primary", "Start", () => done3(true)), back = button(document2, "coop-secondary", "Play alone", () => done3(false));
+  const start = button(document2, "coop-primary", "Start", () => {
+    if (!solo && !coopHost.party().length) {
+      ui.say("Wait for a friend to join first.");
+      return;
+    }
+    done3(true);
+  }), back = button(document2, "coop-secondary", solo ? "Play alone" : "Go home", () => done3(false));
   actions.append(back, start);
-  card.append(players.list, codeBox, qrBox, ui.status, actions);
+  let shareBox = null, shareInput = null;
+  if (share) {
+    shareBox = el(document2, "label", "coop-share" + (share.locked ? " is-locked" : ""));
+    shareInput = el(document2, "input");
+    shareInput.type = "checkbox";
+    shareInput.checked = Boolean(share.on);
+    shareInput.disabled = Boolean(share.locked);
+    const words = el(document2, "span", "coop-share-words");
+    words.append(el(document2, "strong", "", "Share this world"), el(document2, "small", "", share.note || "Friends who play here keep a copy and can host it later."));
+    shareBox.append(words, shareInput);
+  }
+  card.append(players.list, ...shareBox ? [shareBox] : [], codeBox, qrBox, ui.status, actions);
   let finish3 = null;
   const result = new Promise((resolve) => {
     finish3 = resolve;
@@ -134472,7 +134869,7 @@ function runCoopLobbyV1({ environment, coopHost, server, hostName }) {
       room?.close();
       coopHost.close("The host went back to playing alone");
     }
-    finish3(go ? { host: coopHost, room } : null);
+    finish3(go ? { host: coopHost, room, share: Boolean(shareInput?.checked) } : null);
   }
   return Object.assign(result, { players });
 }
@@ -134585,13 +134982,13 @@ function runCoopJoinV1({ environment, server, build: build2, hero, onWorldFile, 
   return result;
 }
 function mountCoopBarV1({ environment, label: label4, action: action2, onAction }) {
-  const document2 = environment.document, bar = el(document2, "div", "coop-bar"), text2 = el(document2, "span", "coop-bar-text", label4), main = button(document2, "coop-bar-action", action2, onAction);
+  const document2 = environment.document, bar = el(document2, "div", "coop-bar"), text3 = el(document2, "span", "coop-bar-text", label4), main = button(document2, "coop-bar-action", action2, onAction);
   let extra = null, extraLabel = null;
-  bar.append(text2, main);
+  bar.append(text3, main);
   document2.body.append(bar);
   return {
     say: (t) => {
-      if (text2.textContent !== t) text2.textContent = t;
+      if (text3.textContent !== t) text3.textContent = t;
     },
     remove: () => bar.remove(),
     setExtra(label22, onClick) {
@@ -134620,6 +135017,246 @@ function showCoopEndedV1({ environment, title = "Back home", reason, onHome, aga
   return ui;
 }
 
+// src/client/party_world_play_v1.js
+var wait = (environment, ms) => new Promise((resolve) => environment.setTimeout(resolve, ms));
+var minus = (a, b) => {
+  const out = { finds: {}, clears: {} };
+  for (const g of GROUPS) for (const [id, v] of Object.entries(a[g])) if (b[g][id] === void 0) out[g][id] = v;
+  return out;
+};
+var any = (f) => GROUPS.some((g) => Object.keys(f[g]).length);
+function createPartyPlayV1({ environment, storage, channel: channel2, worldId, session, readModel, showCard, heroName = null }) {
+  const read2 = () => partyById(storage, channel2, worldId), update = (fn) => updatePartyWorld(storage, channel2, worldId, fn);
+  async function apply2(change) {
+    for (let i = 0; i < 120; i++) {
+      const r = await session.coop.partyFacts(change);
+      if (r?.status !== "busy") return r;
+      await wait(environment, 500);
+    }
+    throw Error("The world is busy. Try again in a moment.");
+  }
+  let lastKey = null, card = null;
+  function observe() {
+    const f = factsFromModelV1(readModel());
+    if (!f) return null;
+    const k = factsKey(f);
+    if (k !== lastKey) {
+      lastKey = k;
+      update((w) => noteMineV1(w, f));
+    }
+    return f;
+  }
+  function openCard(review = false) {
+    const w = read2();
+    if (card || !w || !(offerCount(w) || review && offerCount(w, "skipped"))) return false;
+    card = showCard({
+      world: w,
+      review,
+      onAdd: async (g, offers) => {
+        const r = await apply2({ add: { [g]: Object.keys(offers) } });
+        update((x) => noteAddedV1(x, g, r, offers));
+        observe();
+        return r;
+      },
+      onSkip: (g) => {
+        update((x) => skipOffersV1(x, g));
+      },
+      onClose: () => {
+        card = null;
+      }
+    });
+    return true;
+  }
+  return Object.freeze({
+    // Once the world is up: things done together go in, then the card shows if friends left anything.
+    async begin() {
+      if (heroName) update((w) => noteMemberV1(w, heroName));
+      const t = read2()?.together;
+      if (t && any(t)) {
+        try {
+          await apply2({ add: { finds: Object.keys(t.finds), clears: Object.keys(t.clears) } });
+          update((w) => {
+            w.together = { finds: {}, clears: {} };
+            return w;
+          });
+        } catch (error) {
+          console.warn("Party world facts did not go in", error);
+        }
+      }
+      observe();
+      openCard();
+    },
+    observe,
+    // A guest's copy holds these (sent when they sit down): what this copy lacks is offered.
+    offer({ name, facts }) {
+      observe();
+      const w = update((x) => {
+        noteMemberV1(x, name);
+        noteOffersV1(x, name, facts ?? {});
+        return x;
+      });
+      if (!w || !offerCount(w)) return;
+      if (card) card.update?.(w);
+      else openCard();
+    },
+    review: () => openCard(true),
+    async undo() {
+      const w = read2();
+      if (!w?.last) return false;
+      await apply2({ remove: w.last.added });
+      update((x) => noteUndoneV1(x));
+      observe();
+      return true;
+    },
+    info: read2
+  });
+}
+function createPartyGuestV1({ storage, channel: channel2, worldId, readModel, hostName, send }) {
+  const read2 = () => partyById(storage, channel2, worldId), update = (fn) => updatePartyWorld(storage, channel2, worldId, fn);
+  let base = null, sent = false;
+  return Object.freeze({
+    observe() {
+      const f = factsFromModelV1(readModel());
+      if (!f) return;
+      if (!sent) {
+        sent = true;
+        const mine = read2()?.mine;
+        if (mine) send({ t: "facts", id: worldId, facts: mine });
+      }
+      if (!base) {
+        base = f;
+        update((w) => {
+          noteOffersV1(w, hostName, minus(f, w.mine));
+          return w;
+        });
+        return;
+      }
+      const fresh = minus(f, base);
+      if (!any(fresh)) return;
+      for (const g of GROUPS) Object.assign(base[g], fresh[g]);
+      update((w) => {
+        noteTogetherV1(w, fresh);
+        return w;
+      });
+    }
+  });
+}
+
+// src/client/party_world_screen_v1.js
+var el2 = (document2, tag, cls = "", text3 = "") => {
+  const e = document2.createElement(tag);
+  if (cls) e.className = cls;
+  if (text3) e.textContent = text3;
+  return e;
+};
+function button2(document2, cls, text3, onClick) {
+  const b = el2(document2, "button", cls, text3);
+  b.type = "button";
+  b.addEventListener("click", onClick);
+  return b;
+}
+var fromWords = (names2) => names2.length <= 1 ? names2[0] ?? "A friend" : names2.slice(0, -1).join(", ") + " and " + names2.at(-1);
+function showPartyCardV1({ environment, world, review = false, onAdd, onSkip, onClose = () => {
+} }) {
+  const document2 = environment.document, root2 = el2(document2, "div", "coop-screen party-screen"), card = el2(document2, "div", "coop-card");
+  root2.setAttribute("role", "dialog");
+  root2.setAttribute("aria-label", "While you were apart");
+  root2.append(card);
+  document2.body.append(root2);
+  const offers = {};
+  for (const g of GROUPS) offers[g] = { ...world.waiting[g], ...review ? world.skipped[g] : {} };
+  const done3 = {}, status2 = el2(document2, "p", "coop-status");
+  status2.setAttribute("aria-live", "polite");
+  let busy = false, confirming = false;
+  const close = () => {
+    root2.remove();
+    onClose();
+  };
+  const names2 = [...new Set(Object.values(offers).flatMap((o) => Object.values(o)).map((o) => o.from))];
+  async function add(g) {
+    if (busy) return;
+    busy = true;
+    status2.textContent = g === "clears" ? "Adding clears\u2026" : "Adding finds\u2026";
+    paint2();
+    try {
+      await onAdd(g, offers[g]);
+      done3[g] = "Added";
+      status2.textContent = "";
+    } catch (error) {
+      status2.textContent = error?.message || "That didn\u2019t work. Try again.";
+    }
+    busy = false;
+    confirming = false;
+    paint2();
+  }
+  function group(g) {
+    const rows = offers[g], box5 = el2(document2, "section", "party-group" + (done3[g] ? " is-done" : ""));
+    box5.append(el2(document2, "h3", "", g === "finds" ? "Map finds" : "Clears"), el2(document2, "p", "party-names", factNames(rows)));
+    if (g === "clears") box5.append(el2(document2, "p", "party-note", "These would be cleared in your world, so you wouldn\u2019t get to clear them first yourself."));
+    const actions = el2(document2, "div", "coop-actions");
+    if (done3[g]) actions.append(el2(document2, "span", "party-note", done3[g]));
+    else actions.append(button2(document2, "coop-secondary", "Skip", () => {
+      onSkip(g);
+      done3[g] = "Skipped";
+      paint2();
+    }), button2(document2, "coop-primary", g === "clears" ? "Add\u2026" : "Add", () => {
+      if (g === "clears") {
+        confirming = true;
+        paint2();
+      } else add(g);
+    }));
+    for (const b of actions.querySelectorAll("button")) b.disabled = busy;
+    box5.append(actions);
+    return box5;
+  }
+  function paint2() {
+    card.replaceChildren();
+    if (confirming) {
+      const rows = offers.clears, lairs = Object.values(rows).some((o) => /lair/i.test(o.label));
+      card.append(
+        el2(document2, "h2", "coop-title", `Add ${fromWords([...new Set(Object.values(rows).map((o) => o.from))])}\u2019s clears?`),
+        el2(document2, "p", "coop-intro", `This marks ${factNames(rows)} as cleared in your world. You won\u2019t get to clear ${Object.keys(rows).length === 1 ? "it" : "them"} first yourself.`),
+        ...lairs ? [el2(document2, "p", "party-note", "A cleared lair also makes its land rise to your level, as if you had beaten its boss.")] : [],
+        el2(document2, "p", "party-note", "Your world is saved first. You can undo this on the Heroes page.")
+      );
+      const actions2 = el2(document2, "div", "coop-actions");
+      actions2.append(button2(document2, "coop-secondary", "Go back", () => {
+        confirming = false;
+        paint2();
+      }), button2(document2, "coop-primary", "Add clears", () => add("clears")));
+      for (const b of actions2.querySelectorAll("button")) b.disabled = busy;
+      card.append(actions2, status2);
+      return;
+    }
+    card.append(el2(document2, "h2", "coop-title", "While you were apart"), el2(document2, "p", "coop-intro", `${fromWords(names2)} played this shared world. Add what they found and cleared to your copy?`));
+    for (const g of GROUPS) if (Object.keys(offers[g]).length) card.append(group(g));
+    const left = GROUPS.some((g) => Object.keys(offers[g]).length && !done3[g]), actions = el2(document2, "div", "coop-actions");
+    const end = button2(document2, left ? "coop-secondary" : "coop-primary", left ? "Decide later" : "Done", close);
+    end.disabled = busy;
+    actions.append(end);
+    card.append(status2, actions);
+  }
+  paint2();
+  function update(next) {
+    let more = false;
+    for (const g of GROUPS) {
+      const fresh = Object.entries(next.waiting[g]).filter(([id]) => !offers[g][id]);
+      if (!fresh.length) continue;
+      if (done3[g]) {
+        offers[g] = {};
+        done3[g] = void 0;
+      }
+      for (const [id, o] of fresh) offers[g][id] = o;
+      more = true;
+    }
+    if (more) {
+      names2.splice(0, names2.length, ...new Set(Object.values(offers).flatMap((o) => Object.values(o)).map((o) => o.from)));
+      if (!confirming && !busy) paint2();
+    }
+  }
+  return Object.freeze({ close, update, element: root2 });
+}
+
 // src/entrypoints/playable_browser.js
 var plannedBossHostingNamespaceV1 = (binding) => hasBossHostingV1(binding) ? "saq-world-boss-hosting-v1-" : null;
 function applyBossHostingWorkerBindingV1(workerUrl, binding) {
@@ -134639,6 +135276,17 @@ function launcherCapability(environment, heroPrefix = "") {
     }, removeItem() {
       throw error;
     } });
+  }
+}
+function storyDoneV1(environment, storage, channel2) {
+  if (!channel2 || !storage) return false;
+  const key3 = channel2 + "saq-dev-story-done", flag2 = new URL(environment.location.href).searchParams.get("story");
+  try {
+    if (flag2 === "done") storage.setItem(key3, "1");
+    else if (flag2 === "reset") storage.removeItem(key3);
+    return storage.getItem(key3) === "1";
+  } catch {
+    return false;
   }
 }
 function showStartupRecovery(environment, failure, actions) {
@@ -134701,9 +135349,14 @@ async function startWorldClient(environment) {
   } catch {
   }
   const channel2 = saveChannelPrefix(environment.location), heroRecord = ensureHeroIds(deviceStorage, channel2, () => "hero:" + Array.from(environment.crypto.getRandomValues(new Uint8Array(8)), (v) => v.toString(16).padStart(2, "0")).join("")), heroSlot = heroRecord.active, heroEntry = heroRecord.heroes.find((h) => h.slot === heroSlot), heroId = heroEntry?.heroId ?? null;
-  const coopIntent = heroId ? readCoopIntentV1(environment) : null;
+  let coopIntent = heroId ? readCoopIntentV1(environment) : null;
   writeCoopIntentV1(environment, null);
-  const worldSlot = heroEntry && heroRecord.heroes.some((h) => h.slot === heroWorld(heroEntry)) ? heroWorld(heroEntry) : heroSlot, visiting = worldSlot !== heroSlot, heroPrefix = heroSavePrefix(worldSlot);
+  const playsIn = heroEntry ? heroWorld(heroEntry) : null, worldSlot = heroEntry && (heroRecord.heroes.some((h) => h.slot === playsIn) || isPartySlot(playsIn) && partyBySlot(deviceStorage, channel2, playsIn)) ? playsIn : heroSlot, visiting = worldSlot !== heroSlot, heroPrefix = heroSavePrefix(worldSlot);
+  const storyDone = storyDoneV1(environment, deviceStorage, channel2);
+  let partyWorld = coopIntent?.role === "guest" ? null : partyBySlot(deviceStorage, channel2, worldSlot), partyCtl = null, partyGuest = null;
+  const partyOffers = [];
+  const partySolo = !partyWorld || partyWorld.own || storyDone;
+  if (heroId && !partySolo) coopIntent = { role: "host" };
   const roster = createHeroRosterWriter({ storage: deviceStorage, channel: channel2, slot: heroSlot, visiting: visiting || coopIntent?.role === "guest" });
   const saveIndexedDb = channelIndexedDb(environment.indexedDB, channel2 + heroPrefix);
   const startupLoading = environment.__SAQ_STARTUP_LOADING_V1__ ?? null;
@@ -134830,6 +135483,23 @@ async function startWorldClient(environment) {
         builtWorld = await builtWorlds.info(world.hash);
         if (!builtWorld) throw Error("The host\u2019s world did not arrive");
         plannedReview = await plannedOpening.open({ hash: builtWorld.hash, commitments: builtWorld.commitments, read: builtWorlds.read });
+        const party = coopJoin.start.party;
+        if (party) try {
+          const copy = copyPartyWorld(deviceStorage, channel2, { id: party.id, hash: world.hash, seed: builtWorld.seed, label: party.label, owner: party.owner });
+          if (copy) {
+            updatePartyWorld(deviceStorage, channel2, copy.id, (w) => noteMemberV1(noteMemberV1(w, coopJoin.start.welcome.hostName), heroName));
+            partyGuest = copy;
+            if (!copy.own) {
+              const store2 = createBuiltWorldStoreV1({ indexedDB: channelIndexedDb(environment.indexedDB, channel2 + heroSavePrefix(copy.slot)), sha256 });
+              if (!await store2.info(world.hash)) {
+                const text3 = coopJoin.start.worldText ?? await builtWorlds.read(world.hash);
+                if (text3) await store2.put(text3);
+              }
+            }
+          }
+        } catch (error) {
+          console.warn("Shared world copy not kept", error);
+        }
       } else plannedReview = await plannedOpening.open(null);
     } catch (error) {
       coopJoin?.link.close("left");
@@ -134840,8 +135510,9 @@ async function startWorldClient(environment) {
     if (activity) try {
       builtWorlds = createBuiltWorldStoreV1({ indexedDB: saveIndexedDb, sha256 });
       let requested = location.searchParams.get("builtWorld");
+      if (!launch.resume && !requested && partyWorld && !partyWorld.own) requested = partyWorld.hash;
       if (!launch.resume && !requested && !FORGE_REVIEW_BUILD && proofCase === "A" && plannedOpening.assetId === "alpha") {
-        const made = await newWorldFlowV1({ environment, save: (text2) => builtWorlds.put(text2) });
+        const made = await newWorldFlowV1({ environment, save: (text3) => builtWorlds.put(text3) });
         startingHero = made.hero;
         requested = made.world?.hash ?? null;
       }
@@ -134880,15 +135551,27 @@ async function startWorldClient(environment) {
       world: builtWorld ? { kind: "seeded", hash: builtWorld.hash } : { kind: "classic" },
       nextToken,
       onChange: (players) => lobby?.players.show(players),
+      onFacts: (f) => {
+        if (partyCtl) partyCtl.offer(f);
+        else partyOffers.push(f);
+      },
       readWorldFile: builtWorld ? async () => {
-        const text2 = await builtWorlds.read(builtWorld.hash);
-        if (!text2) throw Error("World missing");
-        return text2;
+        const text3 = await builtWorlds.read(builtWorld.hash);
+        if (!text3) throw Error("World missing");
+        return text3;
       } : null
     });
-    lobby = coopScreens.runCoopLobbyV1({ environment, coopHost: host, server: coopJoinServerV1(environment), hostName });
+    const share = builtWorld && !isPartySlot(worldSlot) || partyWorld ? partyWorld ? { on: true, locked: true, note: partyWorld.own ? "Shared. Friends who play here keep a copy and can host it later." : `${partyWorld.owner}\u2019s world, shared with you. What you all do here goes into ${partyWorld.owner}\u2019s copy too when you play together again.` } : { on: false } : null;
+    lobby = coopScreens.runCoopLobbyV1({ environment, coopHost: host, server: coopJoinServerV1(environment), hostName, share, solo: partySolo });
     const started = await lobby;
+    if (!started && !partySolo) {
+      playHeroIn(deviceStorage, channel2, heroSlot, heroSlot);
+      environment.location.reload();
+      return null;
+    }
+    if (started?.share && !partyWorld && builtWorld) partyWorld = sharePartyWorld(deviceStorage, channel2, { id: "pw:" + nextToken(), slot: worldSlot, hash: builtWorld.hash, seed: builtWorld.seed, owner: hostName });
     if (started && host.party().length) {
+      host.setParty(partyWorld);
       coopHost = host;
       coopRoom = started.room;
       host.start();
@@ -135098,14 +135781,14 @@ async function startWorldClient(environment) {
   };
   if (plannedReview && !coopGuest) mountPlannedReviewControlsV1({ environment, controls, review: plannedReview, session });
   if (activity) {
-    const button2 = environment.document.createElement("button");
-    button2.textContent = "Save campaign";
-    controls.appendChild(button2);
-    button2.onclick = async () => {
-      button2.disabled = true;
+    const button3 = environment.document.createElement("button");
+    button3.textContent = "Save campaign";
+    controls.appendChild(button3);
+    button3.onclick = async () => {
+      button3.disabled = true;
       const result = await session.save();
-      button2.textContent = result.status === "committed" ? "Saved" : "Save needs retry";
-      button2.disabled = false;
+      button3.textContent = result.status === "committed" ? "Saved" : "Save needs retry";
+      button3.disabled = false;
     };
     if (performanceProbe) {
       const full = environment.document.createElement("button"), battery = environment.document.createElement("button"), sample = environment.document.createElement("button"), download = environment.document.createElement("button");
@@ -135230,6 +135913,23 @@ async function startWorldClient(environment) {
       if (environment.document.hidden) saveAlbum();
     });
   }
+  if (partyWorld && !coopGuest && session.coop?.partyFacts) {
+    partyCtl = createPartyPlayV1({ environment, storage: deviceStorage, channel: channel2, worldId: partyWorld.id, session, readModel: () => clientPort.getReadModel(), heroName: heroEntry?.name || null, showCard: (options) => showPartyCardV1({ environment, ...options }) });
+    for (const f of partyOffers.splice(0)) partyCtl.offer(f);
+    environment.setInterval(() => partyCtl.observe(), 3e3);
+    environment.setTimeout(() => {
+      partyCtl.begin();
+    }, coopHost?.guests() ? 8e3 : 2500);
+  }
+  if (partyGuest && coopGuest) {
+    const notes = createPartyGuestV1({ storage: deviceStorage, channel: channel2, worldId: partyGuest.id, readModel: () => clientPort.getReadModel(), hostName: coopJoin.start.welcome.hostName, send: (m) => {
+      try {
+        coopJoin.link.send(m);
+      } catch {
+      }
+    } });
+    environment.setInterval(() => notes.observe(), 3e3);
+  }
   let coopBar = null;
   if (coopHost) {
     coopHost.attach(session, coopParty);
@@ -135324,6 +136024,16 @@ async function startWorldClient(environment) {
       if (addHero(deviceStorage, channel2) === null) return false;
       environment.location.reload();
     },
+    // Co-op step 4: shared worlds on this device, the one open here, and hosting a friend's shared world.
+    partyWorlds: () => partyWorldList(deviceStorage, channel2),
+    storyDone: () => storyDone,
+    party: Object.freeze({ info: () => partyCtl?.info() ?? null, review: () => Boolean(partyCtl?.review()), undo: () => partyCtl ? partyCtl.undo() : false }),
+    async hostIn(slot, world) {
+      await saveNow();
+      if (!playHeroIn(deviceStorage, channel2, slot, world)) return false;
+      writeCoopIntentV1(environment, { role: "host" });
+      environment.location.reload();
+    },
     // Co-op step 2: the next start opens the host's lobby or the join screen for the hero being played.
     coop: Object.freeze({
       role: coopGuest ? "guest" : coopHost ? "host" : null,
@@ -135360,11 +136070,25 @@ async function startWorldClient(environment) {
   });
   if (typeof environment.indexedDB?.databases === "function") environment.indexedDB.databases().then((list) => restoreHeroes(deviceStorage, channel2, list.map((d) => d.name?.startsWith(channel2) && /^saq-hero-(\d):/.exec(d.name.slice(channel2.length))?.[1]).filter(Boolean).map(Number))).catch(() => {
   });
+  const otherLands = heroId && !coopGuest && worldBridge ? Object.freeze({
+    storyDone: () => storyDone,
+    list() {
+      const r = readHeroSlots(deviceStorage, channel2), me = r.heroes.find((h) => h.slot === heroSlot), out = [];
+      const shared = (slot) => partyWorldList(deviceStorage, channel2).find((w) => w.own && w.slot === slot);
+      if (worldSlot !== heroSlot) out.push({ slot: heroSlot, label: "Your world", sub: me?.world ? `Seed ${me.world.seed}` : "Classic world", open: true });
+      for (const h of r.heroes) if (h.slot !== heroSlot && h.slot !== worldSlot && (h.name || h.hero)) out.push({ slot: h.slot, label: `${h.name || "Unnamed hero"}\u2019s world`, sub: (shared(h.slot) ? "Shared \xB7 " : "") + (h.world ? `Seed ${h.world.seed}` : "Classic world"), open: storyDone });
+      for (const w of partyWorldList(deviceStorage, channel2)) if (!w.own && w.slot !== worldSlot) out.push({ slot: w.slot, label: w.label, sub: "Shared with you", open: storyDone });
+      return out;
+    },
+    block: () => coopHost?.guests() ? "Friends are playing in your game. End the game first." : null,
+    travel: (slot) => heroSlots.play(heroSlot, slot)
+  }) : null;
   client = mountPlayableClient({
     port: clientPort,
     environment,
     heroSlots,
     startingHero,
+    otherLands,
     actorCollisionProbe: activity && session.authority ? createActorPresentationCollisionProbeV1(session.authority) : null,
     nextCommandToken: nextToken,
     performanceProbe,
@@ -135566,11 +136290,11 @@ async function startWorldClient(environment) {
   function syncTime() {
     const m = clientPort.getReadModel(), t = m.worldTime, r = dayNightReview.read();
     if (!t) return;
-    const text2 = "Day " + t.dayNumber + " \xB7 " + t.timeLabel + (r.overrideMinute !== null ? " \xB7 lighting preview" : "");
-    if (text2 !== lastClockText) {
-      clockLabel.textContent = text2;
+    const text3 = "Day " + t.dayNumber + " \xB7 " + t.timeLabel + (r.overrideMinute !== null ? " \xB7 lighting preview" : "");
+    if (text3 !== lastClockText) {
+      clockLabel.textContent = text3;
       clockLabel.dataset.period = t.period;
-      lastClockText = text2;
+      lastClockText = text3;
     }
     const nextTimeStatus = "Campaign: day " + t.dayNumber + " " + t.timeLabel + " (" + t.period + "). " + (r.overrideMinute === null ? "Following saved campaign time." : "Lighting preview " + String(Math.floor(r.overrideMinute / 60)).padStart(2, "0") + ":" + String(Math.floor(r.overrideMinute % 60)).padStart(2, "0") + "; campaign time continues normally.") + " A full cycle takes60 active minutes. Loading and suspension pause time. Sleeping/time skipping is not implemented.";
     if (timeStatus.textContent !== nextTimeStatus) timeStatus.textContent = nextTimeStatus;
@@ -135780,8 +136504,8 @@ async function startWorldClient(environment) {
   function pacedTick() {
     timer = null;
     if (!active2 || loopHealth.failed()) return;
-    const wait = authorityDelivery.timer();
-    if (wait !== null && active2 && !loopHealth.failed()) timer = environment.setTimeout(pacedTick, wait);
+    const wait2 = authorityDelivery.timer();
+    if (wait2 !== null && active2 && !loopHealth.failed()) timer = environment.setTimeout(pacedTick, wait2);
   }
   function startClockTimer() {
     if (timer !== null) return;

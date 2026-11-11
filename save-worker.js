@@ -4,7 +4,10 @@ function saveChannelPrefix(location) {
   return /\/SAQ-World-test\//i.test(location?.pathname ?? "") ? TEST_SAVE_PREFIX : "";
 }
 var HERO_SLOT_LIMIT = 5;
-var heroSavePrefix = (slot) => Number.isInteger(slot) && slot > 1 && slot <= HERO_SLOT_LIMIT ? `saq-hero-${slot}:` : "";
+var PARTY_SLOT_BASE = 10;
+var PARTY_SLOT_LIMIT = 8;
+var isPartySlot = (slot) => Number.isInteger(slot) && slot > PARTY_SLOT_BASE && slot <= PARTY_SLOT_BASE + PARTY_SLOT_LIMIT;
+var heroSavePrefix = (slot) => isPartySlot(slot) ? `saq-party-${slot - PARTY_SLOT_BASE}:` : Number.isInteger(slot) && slot > 1 && slot <= HERO_SLOT_LIMIT ? `saq-hero-${slot}:` : "";
 function heroSlotFromUrl(location) {
   const slot = Number(new URL(location.href).searchParams.get("hero"));
   return heroSavePrefix(slot) ? slot : 1;
@@ -26929,7 +26932,7 @@ function validateCharacterState(value) {
 }
 function validateCampaignState(value) {
   validateWire(value);
-  closedRecord(value, ["campaignId", "saveRevision", "seed", "contentFingerprint", "charactersById", "checkpointId"], ["geography", "encounterProof", "overworld", "sitesById", "forgeStations", "siteRunEpisodesById", "siteFinaleReservationsById", "siteFinaleDeploymentsById", "areaBossesByBiome"]);
+  closedRecord(value, ["campaignId", "saveRevision", "seed", "contentFingerprint", "charactersById", "checkpointId"], ["geography", "encounterProof", "overworld", "sitesById", "forgeStations", "siteRunEpisodesById", "siteFinaleReservationsById", "siteFinaleDeploymentsById", "areaBossesByBiome", "partyClearsById"]);
   if (value.sitesById !== void 0) {
     closedRecord(value.sitesById, [], Object.keys(value.sitesById));
     requireContract(Object.keys(value.sitesById).length === 1, "Site state budget");
@@ -26954,6 +26957,15 @@ function validateCampaignState(value) {
     for (const r of Object.values(value.areaBossesByBiome)) {
       closedRecord(r, ["siteId", "tick"]);
       requireContract(typeof r.siteId === "string" && r.siteId.length <= 160, "Area boss site");
+      safeInteger(r.tick);
+    }
+  }
+  if (value.partyClearsById !== void 0) {
+    closedRecord(value.partyClearsById, [], Object.keys(value.partyClearsById));
+    requireContract(Object.keys(value.partyClearsById).length <= 512, "Party clear budget");
+    for (const [id, r] of Object.entries(value.partyClearsById)) {
+      requireContract(/^site:[0-9a-z:._-]{1,150}$/.test(id), "Party clear site");
+      closedRecord(r, ["tick"]);
       safeInteger(r.tick);
     }
   }
