@@ -121948,7 +121948,7 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
 }
 
 // src/shared/content/coop_server_v1.js
-var COOP_JOIN_SERVER = "";
+var COOP_JOIN_SERVER = "https://saq-world-coop-join.sammyenciso.workers.dev";
 var KEY = "saq-coop-server-v1";
 function coopJoinServerV1(environment) {
   let url = null;
