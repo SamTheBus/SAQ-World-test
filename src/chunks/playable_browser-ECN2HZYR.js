@@ -6446,21 +6446,7 @@ function milestoneDesert(c, x, y) {
 function noticeDesert(c, x, y) {
   shadow4(c, x + 3, y + 1, 24, 4);
   for (const px7 of [x - 22, x + 18]) prop(c, [[rr(px7, y - 56, 5, 56, 1.5), WOOD2]], 1.2);
-  const B6 = rect2(x - 20, y - 48, 40, 30);
-  prop(c, [[B6, "#9a7048"]], 1.3);
-  clip(c, B6, () => {
-    for (let q = y - 48; q < y - 18; q += 7) line(c, [[x - 20, q], [x + 20, q]], tone("#9a7048", -0.25), 1);
-  });
-  const notes = [[x - 17, y - 45, 13, 11, "#f3ead2", -0.08], [x - 2, y - 46, 14, 15, "#efe2c0", 0.06], [x - 15, y - 32, 11, 11, "#f6efdc", 0.05], [x + 2, y - 29, 14, 9, "#ead9b4", -0.05]];
-  for (const [nx, ny, nw, nh, col2, a] of notes) {
-    c.save();
-    c.translate(nx + nw / 2, ny + nh / 2);
-    c.rotate(a);
-    prop(c, [[rect2(-nw / 2, -nh / 2, nw, nh), col2]], 0.8);
-    for (let k = -nh / 2 + 3; k < nh / 2 - 1; k += 2.6) line(c, [[-nw / 2 + 2, k], [nw / 2 - 3, k]], "#9a8a6a", 0.8);
-    prop(c, [[ell(0, -nh / 2 + 1, 1.4, 1.4), "#2f7f9f"]], 0.4);
-    c.restore();
-  }
+  noticeFaceV2(c, x, y, "#6b4a30", "#b88a58");
   const rf = poly([[x - 30, y - 62], [x + 30, y - 62], [x + 32, y - 54], [x - 32, y - 54]]);
   prop(c, [[rf, "#9a7048"]], 1.3);
   clip(c, rf, () => {
@@ -6470,6 +6456,8 @@ function noticeDesert(c, x, y) {
     }
   });
   for (const q of [x - 24, x, x + 24]) viga2(c, q, y - 53);
+  line(c, [[x + 28, y - 54], [x + 28, y - 50]], OL6, 1.2);
+  tinLantern(c, x + 28, y - 50, 0.55);
 }
 function banco(c, x, y, i = 0) {
   shadow4(c, x + 2, y + 2, 26, 5);
@@ -7046,24 +7034,97 @@ function milestone(c, x, y) {
   prop(c, [[ell(x - 6, y - 21, 3, 1.8), "#9cae62"]], 0.6);
   tuftsAt(c, x, y);
 }
-function noticeBoard(c, x, y, roof = "#b9553a") {
-  shadow5(c, x + 3, y + 1, 24, 4);
-  for (const px7 of [x - 22, x + 18]) prop(c, [[rect2(px7, y - 54, 5, 54), WOOD3]], 1.2);
-  const B6 = rect2(x - 20, y - 48, 40, 30);
-  prop(c, [[B6, "#8a6440"]], 1.3);
+function boardNote(c, cx, cy2, w, h, a, col2, inner) {
+  c.save();
+  c.translate(cx, cy2);
+  c.rotate(a);
+  c.fillStyle = "rgba(40,22,8,.28)";
+  c.fillRect(-w / 2 + 1, -h / 2 + 1.4, w, h);
+  prop(c, [[rect2(-w / 2, -h / 2, w, h), col2]], 0.8);
+  c.fillStyle = tone(col2, -0.14);
+  c.beginPath();
+  c.moveTo(w / 2, h / 2 - 3);
+  c.lineTo(w / 2 - 3, h / 2);
+  c.lineTo(w / 2, h / 2);
+  c.closePath();
+  c.fill();
+  inner(c, w, h);
+  prop(c, [[ell(0, -h / 2 + 1.3, 1.5, 1.5), "#d6ad44"]], 0.5);
+  c.fillStyle = "#fff3c0";
+  c.fillRect(-0.7, -h / 2 + 0.5, 0.7, 0.7);
+  c.restore();
+}
+function noticeFaceV2(c, x, y, frame3 = DARK, cork = "#b0814f") {
+  prop(c, [[rect2(x - 19, y - 13, 38, 3.5), frame3]], 0.9);
+  prop(c, [[rect2(x - 22, y - 50, 44, 35), frame3]], 1.4);
+  c.fillStyle = tone(frame3, 0.22);
+  c.fillRect(x - 21, y - 49, 42, 1.2);
+  const B6 = rect2(x - 19, y - 47, 38, 29);
+  prop(c, [[B6, cork]], 0.7);
   clip(c, B6, () => {
-    for (let q = y - 48; q < y - 18; q += 7) line(c, [[x - 20, q], [x + 20, q]], tone("#8a6440", -0.25), 1);
+    for (let i = 0; i < 46; i++) {
+      c.fillStyle = i % 3 ? tone(cork, -0.2) : tone(cork, 0.18);
+      c.fillRect(x - 19 + (i * 37 + i * i) % 38, y - 47 + (i * 23 + i * 7) % 29, 1.2, 1.2);
+    }
+    c.fillStyle = "rgba(0,0,0,.2)";
+    c.fillRect(x - 19, y - 47, 38, 2.2);
+    c.fillRect(x - 19, y - 47, 1.6, 29);
   });
-  const notes = [[x - 17, y - 45, 13, 11, "#f3ead2", -0.08], [x - 2, y - 46, 14, 15, "#efe2c0", 0.06], [x - 15, y - 32, 11, 11, "#f6efdc", 0.05], [x + 2, y - 29, 14, 9, "#ead9b4", -0.05]];
-  for (const [nx, ny, nw, nh, col2, a] of notes) {
-    c.save();
-    c.translate(nx + nw / 2, ny + nh / 2);
-    c.rotate(a);
-    prop(c, [[rect2(-nw / 2, -nh / 2, nw, nh), col2]], 0.8);
-    for (let k = -nh / 2 + 3; k < nh / 2 - 1; k += 2.6) line(c, [[-nw / 2 + 2, k], [nw / 2 - 3, k]], "#9a8a6a", 0.8);
-    prop(c, [[ell(0, -nh / 2 + 1, 1.4, 1.4), "#b23a32"]], 0.4);
-    c.restore();
+  for (const [nx, ny] of [[x - 20.6, y - 48.6], [x + 20.6, y - 48.6], [x - 20.6, y - 16.4], [x + 20.6, y - 16.4]]) {
+    c.fillStyle = "#d9c38a";
+    c.fillRect(nx - 0.8, ny - 0.8, 1.6, 1.6);
   }
+  boardNote(c, x - 9, y - 32, 15, 22, -0.05, "#f3ead2", (c2, w, h) => {
+    c2.fillStyle = "#a8322d";
+    c2.fillRect(-w / 2 + 1.6, -h / 2 + 3, w - 3.2, 3.2);
+    c2.fillStyle = "#f3ead2";
+    c2.fillRect(-w / 2 + 3, -h / 2 + 4.2, w - 6, 0.8);
+    c2.fillStyle = "#2a1d12";
+    c2.beginPath();
+    c2.moveTo(-4.2, -2.6);
+    c2.lineTo(-2.6, -6.2);
+    c2.lineTo(-1.2, -3.2);
+    c2.lineTo(1.2, -3.2);
+    c2.lineTo(2.6, -6.2);
+    c2.lineTo(4.2, -2.6);
+    c2.lineTo(3.6, 1.2);
+    c2.lineTo(0, 3.2);
+    c2.lineTo(-3.6, 1.2);
+    c2.closePath();
+    c2.fill();
+    c2.fillStyle = "#e8c060";
+    c2.fillRect(-2.2, -1.6, 1.3, 1.1);
+    c2.fillRect(0.9, -1.6, 1.3, 1.1);
+    for (const k of [5.4, 7.8]) line(c2, [[-w / 2 + 2.5, k], [w / 2 - 2.5, k]], "#8a7a5a", 0.9);
+  });
+  boardNote(c, x + 9, y - 39, 15, 11, 0.07, "#e9dcb6", (c2, w, h) => {
+    c2.save();
+    c2.setLineDash([1.4, 1.2]);
+    line(c2, [[-5.5, 3], [-2, 0], [1.5, 1.6], [4, -1.4]], "#6b5537", 0.9);
+    c2.restore();
+    line(c2, [[3, -2.8], [5.6, -0.2]], "#b23a32", 1.2);
+    line(c2, [[5.6, -2.8], [3, -0.2]], "#b23a32", 1.2);
+    c2.fillStyle = "#7ba05b";
+    c2.fillRect(-6, -3.4, 2.2, 1.6);
+  });
+  boardNote(c, x + 8, y - 25, 14, 10, -0.04, "#f6efdc", (c2, w, h) => {
+    for (const k of [-2, 0, 2]) line(c2, [[-w / 2 + 2.5, k], [w / 2 - 5, k]], "#9a8a6a", 0.8);
+    prop(c2, [[ell(w / 2 - 3.4, 2.2, 2, 2), "#b23a32"]], 0.5);
+    c2.fillStyle = "#e0645c";
+    c2.fillRect(w / 2 - 4, 1.4, 1, 1);
+  });
+}
+function noticeBoard(c, x, y, roof = "#b9553a") {
+  shadow5(c, x + 2, y + 1, 30, 5);
+  for (const px7 of [x - 24, x + 19]) prop(c, [[rr(px7 - 1.5, y - 5, 10, 6, 2), "#a9a294"]], 1);
+  for (const px7 of [x - 23, x + 19]) {
+    prop(c, [[rect2(px7, y - 56, 6, 52), WOOD3]], 1.2);
+    c.fillStyle = tone(WOOD3, 0.25);
+    c.fillRect(px7 + 1, y - 55, 1.4, 49);
+    c.fillStyle = tone(WOOD3, -0.28);
+    c.fillRect(px7 + 4, y - 55, 1.4, 49);
+  }
+  noticeFaceV2(c, x, y);
   const rp = poly([[x - 28, y - 50], [x, y - 64], [x + 28, y - 50], [x + 24, y - 48], [x, y - 59], [x - 24, y - 48]]);
   prop(c, [[rp, roof]], 1.4);
   c.fillStyle = tone(roof, 0.3);
@@ -7073,8 +7134,15 @@ function noticeBoard(c, x, y, roof = "#b9553a") {
   c.lineTo(x + 1, y - 60);
   c.lineTo(x - 22, y - 49);
   c.fill();
-  tuftsAt(c, x - 20, y);
-  tuftsAt(c, x + 20, y);
+  prop(c, [[ell(x, y - 60, 2.2, 2.2), tone(roof, -0.3)]], 0.6);
+  line(c, [[x + 27, y - 49.5], [x + 27, y - 43]], "#2a2a2a", 1);
+  c.save();
+  c.translate(x + 27, y - 35.5);
+  c.scale(0.62, 0.62);
+  lantern(c, 0, 0);
+  c.restore();
+  tuftsAt(c, x - 22, y);
+  tuftsAt(c, x + 22, y);
 }
 function bench2(c, x, y) {
   shadow5(c, x + 2, y + 1, 22, 4);
@@ -79163,9 +79231,17 @@ function shown(state, rec) {
     turnIn: rec.status === "ready" && giverTile ? { x: giverTile.x + 0.5, y: giverTile.y + 0.5 } : null
   };
 }
+var WHERE_LABEL = { find: "A clearing", rescue: "Looters' camp" };
+function whereOf(o, n) {
+  const at8 = n.townAt;
+  if (!at8) return null;
+  const dir = compassV1(at8, { x: o.tx, y: o.ty }), dist3 = Math.max(10, Math.round(Math.hypot(o.tx - at8.x, o.ty - at8.y) / 10) * 10);
+  const label4 = o.kind === "carry" ? n.dest ?? "A town to the " + dir : WHERE_LABEL[o.kind] ?? n.label ?? "";
+  return { label: label4, dir, dist: dist3 };
+}
 var offerShown = (state, o, level, stateOf) => {
-  const reward = questRewardV1(o.source, o.kind, level), text3 = questTextV1({ ...o, status: "active" }, names(state, o));
-  return { id: o.id, kind: o.kind, source: o.source, title: text3.title, note: text3.note, step: text3.step, gold: reward.gold, xp: reward.xp, state: stateOf };
+  const reward = questRewardV1(o.source, o.kind, level), n = names(state, o), text3 = questTextV1({ ...o, status: "active" }, n);
+  return { id: o.id, kind: o.kind, source: o.source, title: text3.title, note: text3.note, step: text3.step, gold: reward.gold, xp: reward.xp, state: stateOf, where: whereOf(o, n) };
 };
 function local6(state, tile) {
   try {
@@ -92751,6 +92827,8 @@ var ICONS3 = {
 var KIND_LABEL = { clear: "Clear a dungeon", hunt: "Hunt an elite", carry: "Carry a letter", find: "Find a lost thing", rescue: "Rescue a captive" };
 var COIN = '<svg viewBox="0 0 16 16" width="14" height="14"><circle cx="8" cy="8" r="6.5" fill="#f0c862" stroke="#8a6420" stroke-width="1.2"/><circle cx="8" cy="8" r="3.6" fill="none" stroke="#b8862e" stroke-width="1"/></svg>';
 var FACE2 = { general: "M", smith: "S", innkeeper: "I", enchanter: "E" };
+var ARROW = '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M21 12 4 4.5 8.5 12 4 19.5z" fill="currentColor"/></svg>';
+var ANGLE = { east: 0, "south-east": 45, south: 90, "south-west": 135, west: 180, "north-west": 225, north: 270, "north-east": 315 };
 var CSS2 = `
 .qx-dlg{padding:0;border:0;background:transparent;color:#2a1d12;max-width:calc(100vw - 16px);font:15px/1.4 "Baloo 2",system-ui,sans-serif}
 .qx-dlg::backdrop{background:#0009}
@@ -92780,6 +92858,36 @@ var CSS2 = `
 .qx-empty{margin:6px 2px;color:#6b5537;font-style:italic}
 .qx-note{margin:0 2px;color:#a2341f;font-size:13px}
 #quest-board .qx-sheet,#quest-log .qx-sheet{width:min(520px,calc(100vw - 16px))}
+/* The notice board screen (page A2b1HGkV..., 2026-11-11): looks like the board itself. A wooden header with the
+   town's name, a cork face, and each quest a pinned paper note; Taken / Done stamps; Turn in right on the board. */
+#quest-board .qb{width:min(520px,calc(100vw - 16px));max-height:calc(100dvh - 16px);display:flex;flex-direction:column;border-radius:12px;background:#4a3424;border:2px solid #2e1f15;box-shadow:inset 0 0 0 2px #6b4a30,0 14px 34px #000b;overflow:hidden}
+.qb-head{position:relative;flex:none;display:flex;align-items:center;gap:10px;padding:10px 10px 9px 18px;background:linear-gradient(#6b4a30,#4a3424);border-bottom:2px solid #2e1f15}
+.qb-head::before{content:"";position:absolute;left:7px;top:9px;width:5px;height:5px;border-radius:50%;background:#d6ad44;box-shadow:0 0 0 1px #2e1f15}
+.qb-title{flex:1;min-width:0}
+.qb-title strong{display:block;font:24px/1.05 Georgia,serif;font-variant:small-caps;letter-spacing:.02em;color:#f6e7c0;text-shadow:0 2px 0 #2e1f15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qb-title span{display:block;font-size:13px;line-height:1.3;color:#d8c39a}
+.qb-x{flex:none;width:36px;height:36px;border-radius:50%;border:2px solid #2e1f15;background:linear-gradient(#ffe08a,#d9a63e);color:#2a1d12;font-size:20px;line-height:1;display:grid;place-items:center}
+.qb-cork{min-height:0;padding:16px 12px 14px;display:flex;flex-direction:column;gap:14px;overflow:auto;background:radial-gradient(#7d5532 .8px,transparent 1.2px) 0 0/9px 9px,radial-gradient(#c4925e .8px,transparent 1.3px) 4px 5px/11px 11px,#a8784a;box-shadow:inset 0 3px 6px #0006}
+.qb-card{position:relative;display:grid;gap:5px;padding:15px 14px 11px;border-radius:3px;background:linear-gradient(#f6eedb,#efe2c2);box-shadow:0 2px 0 #0002,0 5px 10px #0004;transform:rotate(-.6deg)}
+.qb-card:nth-of-type(even){transform:rotate(.5deg)}
+.qb-card::before{content:"";position:absolute;top:-5px;left:50%;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff3c0,#d6ad44 45%,#8a6a20);box-shadow:0 2px 2px #0006}
+.qb-kind{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:800;line-height:1;letter-spacing:.12em;text-transform:uppercase;color:#a8322d}
+.qb-ico{flex:none;width:20px;height:20px;padding:2px;border-radius:50%;border:1.5px solid #a8322d;display:grid;place-items:center}
+.qb-ico svg{width:13px;height:13px}
+.qb-card h4{margin:0;font:700 19px/1.15 "Baloo 2",system-ui,sans-serif;color:#2a1d12}
+.qb-card p{margin:0}
+.qb-text{font:15px/1.45 Georgia,serif;color:#3a2a18}
+.qb-where{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;line-height:1.2;color:#5b4630}
+.qb-where svg{flex:none}
+.qb-foot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:5px;padding-top:8px;border-top:1px dashed #b89a63}
+.qb-foot small{font-size:13px;font-weight:600;color:#5b4630}
+.qb-foot .qx-btn{margin-left:auto}
+.qb-stamp{position:absolute;right:12px;top:11px;transform:rotate(-9deg);padding:1px 8px;border:2.5px solid currentColor;border-radius:5px;font-size:13px;font-weight:800;line-height:1.3;letter-spacing:.14em;text-transform:uppercase;opacity:.85;pointer-events:none}
+.qb-stamp.taken{color:#4a6a8a}.qb-stamp.done{color:#3e6a2a}
+.qb-card.is-taken h4,.qb-card.is-taken .qb-text{opacity:.75}
+.qb-card.is-done{opacity:.72}
+.qb-empty{margin:0;padding:14px;border-radius:3px;background:#f6eedbdd;font:italic 15px/1.4 Georgia,serif;color:#5b4630;text-align:center}
+.qb-note{margin:0;padding:7px 10px;border-radius:6px;background:#f6eedb;color:#a2341f;font-size:13px;line-height:1.35}
 #quest-talk{margin:auto auto calc(8px + env(safe-area-inset-bottom,0px));width:min(620px,calc(100vw - 16px))}
 #quest-talk .qx-talk{display:grid;grid-template-columns:72px 1fr;gap:12px;padding:14px}
 #quest-talk .qx-face{width:72px;height:72px;border-radius:50%;border:3px solid #2a1d12;background:radial-gradient(#ffe7a8,#c9a45e);display:grid;place-items:center;font:700 32px Georgia,serif;color:#2a1d12;box-shadow:inset 0 0 0 3px #f7e7b8}
@@ -92951,58 +93059,82 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
   function drawBoard() {
     const q = quests(), b = q?.boards.find((b2) => b2.settlementId === boardId);
     board.replaceChildren();
-    const sheet = el3("div", null, "qx-sheet"), head16 = el3("div", null, "qx-head"), h = el3("h3", b?.name ? b.name + " Notice Board" : "Notice Board"), x = el3("button", "\xD7", "qx-x");
+    const sheet = el3("div", null, "qb"), head16 = el3("div", null, "qb-head"), t = el3("div", null, "qb-title"), x = el3("button", "\xD7", "qb-x");
     x.type = "button";
     x.setAttribute("aria-label", "Close");
     x.onclick = () => close(board);
-    head16.append(h, x);
-    sheet.append(head16);
-    const body5 = el3("div", null, "qx-body");
-    sheet.append(body5);
+    t.append(el3("strong", b?.name ?? "Notice board"), el3("span", b ? "Notice board \xB7 new notes at dawn" : "Notice board"));
+    head16.append(t, x);
+    const body5 = el3("div", null, "qb-cork");
+    sheet.append(head16, body5);
     board.append(sheet);
+    board.setAttribute("aria-label", (b?.name ? b.name + " " : "") + "notice board");
     if (!b) {
-      body5.append(el3("p", "Walk up to the notice board to read it.", "qx-empty"));
+      body5.append(el3("p", "Walk up to the notice board to read it.", "qb-empty"));
       return;
     }
-    if (notice) body5.append(el3("p", notice, "qx-note"));
-    const active2 = new Map(q.active.map((a) => [a.id, a]));
-    if (b.deliveries.length || b.handIns.length) {
-      body5.append(el3("p", "Hand in", "qx-sect"));
-      for (const id of [...b.deliveries, ...b.handIns]) {
-        const a = active2.get(id);
-        if (!a) continue;
-        const c = el3("div", null, "qx-card");
-        c.append(icon2(a.kind, "qx-ico"), el3("span", a.kind === "carry" ? "Delivery" : "Done \xB7 hand it in", "qx-kind"), el3("b", a.title), el3("p", a.kind === "carry" ? "The letter is for this town." : a.step));
-        const row2 = el3("div", null, "qx-row");
-        row2.append(reward(a.gold, a.xp));
-        const go = el3("button", a.kind === "carry" ? "Deliver" : "Hand in", "qx-btn");
-        go.type = "button";
-        go.disabled = busy;
-        go.onclick = () => act(a.kind === "carry" ? "deliver" : "turnIn", a.id, () => toastV1(doc, { kind: "event", title: "Quest complete", sub: a.title + " \xB7 +" + formatAmount(a.gold) + " gold" }));
-        row2.append(go);
-        c.append(row2);
-        body5.append(c);
+    if (notice) body5.append(el3("p", notice, "qb-note"));
+    const active2 = new Map(q.active.map((a) => [a.id, a])), full = q.active.length >= q.limit, cur = trackedQuest(q);
+    const card = (kind, label4, title, text3, cls = "") => {
+      const c = el3("article", null, "qb-card" + cls), k = el3("span", null, "qb-kind");
+      k.append(icon2(kind, "qb-ico"), label4);
+      c.append(k, el3("h4", title), el3("p", text3, "qb-text"));
+      body5.append(c);
+      return c;
+    };
+    const stamp6 = (c, word, cls) => c.prepend(el3("span", word, "qb-stamp " + cls));
+    const foot = (c, ...kids) => {
+      const f = el3("div", null, "qb-foot");
+      f.append(...kids);
+      c.append(f);
+      return f;
+    };
+    const button3 = (label4, fn, plain3) => {
+      const go = el3("button", label4, "qx-btn" + (plain3 ? " is-plain" : ""));
+      go.type = "button";
+      go.disabled = busy;
+      go.onclick = fn;
+      return go;
+    };
+    const where = (w) => {
+      const p = el3("p", null, "qb-where");
+      p.innerHTML = ARROW;
+      p.firstChild.style.transform = "rotate(" + (ANGLE[w.dir] ?? 0) + "deg)";
+      p.append(w.label + " \xB7 " + w.dir + " \xB7 " + w.dist + " tiles");
+      return p;
+    };
+    for (const id of [...b.deliveries, ...b.handIns]) {
+      const a = active2.get(id);
+      if (!a) continue;
+      const carry = a.kind === "carry";
+      const c = card(a.kind, carry ? "Delivery" : KIND_LABEL[a.kind], a.title, carry ? "You carried this letter here. Hand it in to get paid." : a.note);
+      if (!carry) stamp6(c, "Done", "done");
+      foot(c, reward(a.gold, a.xp), button3(carry ? "Deliver" : "Turn in", () => act(carry ? "deliver" : "turnIn", a.id, () => toastV1(doc, { kind: "event", title: "Quest complete", sub: a.title + " \xB7 +" + formatAmount(a.gold) + " gold" }))));
+    }
+    if (!b.offers.length && !b.deliveries.length && !b.handIns.length) body5.append(el3("p", "No notes left today. New ones go up at dawn.", "qb-empty"));
+    for (const o of b.offers) {
+      const c = card(o.kind, KIND_LABEL[o.kind], o.title, o.note, o.state === "taken" ? " is-taken" : o.state === "done" ? " is-done" : "");
+      if (o.where) c.append(where(o.where));
+      if (o.state === "taken") {
+        stamp6(c, "Taken", "taken");
+        const on = cur?.id === o.id;
+        foot(c, el3("small", "In your quest log"), button3(on ? "Tracking" : "Track", () => {
+          setTrack(o.id);
+          redraw();
+        }, true));
+      } else if (o.state === "done") {
+        stamp6(c, "Done", "done");
+        foot(c, el3("small", "Finished today"));
+      } else {
+        const go = button3("Take", () => act("take", o.id, () => {
+          setTrack(o.id);
+          toastV1(doc, { kind: "event", title: "Quest taken", sub: o.title });
+        }));
+        go.disabled = busy || full;
+        foot(c, reward(o.gold, o.xp), go);
       }
     }
-    body5.append(el3("p", "Today's notes \xB7 new ones at dawn", "qx-sect"));
-    if (!b.offers.length) body5.append(el3("p", "No work posted today.", "qx-empty"));
-    for (const o of b.offers) {
-      const c = el3("div", null, "qx-card" + (o.state === "done" ? " is-done" : ""));
-      c.append(icon2(o.kind, "qx-ico"), el3("span", KIND_LABEL[o.kind], "qx-kind"), el3("b", o.title), el3("p", o.note));
-      const row2 = el3("div", null, "qx-row");
-      row2.append(reward(o.gold, o.xp));
-      const go = el3("button", o.state === "taken" ? "Taken" : o.state === "done" ? "Done" : "Take", "qx-btn" + (o.state === "open" ? "" : " is-plain"));
-      go.type = "button";
-      go.disabled = busy || o.state !== "open" || q.active.length >= q.limit;
-      go.onclick = () => act("take", o.id, () => {
-        setTrack(o.id);
-        toastV1(doc, { kind: "event", title: "Quest taken", sub: o.title });
-      });
-      row2.append(go);
-      c.append(row2);
-      body5.append(c);
-    }
-    if (q.active.length >= q.limit) body5.append(el3("p", "Your quest log is full (" + q.limit + "). Finish or drop one to take more.", "qx-note"));
+    if (full) body5.append(el3("p", "Your quest log is full (" + q.limit + "). Finish or drop one to take more.", "qb-note"));
   }
   function drawTalk() {
     const q = quests(), n = readModel().serviceNpcs?.find((v) => v.id === talkNpc), f = q?.folk?.[talkNpc];
