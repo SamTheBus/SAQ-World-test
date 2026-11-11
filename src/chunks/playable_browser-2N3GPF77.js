@@ -4703,20 +4703,20 @@ function materialsFor(t) {
   let m = materialCache.get(t);
   if (m) return m;
   m = /* @__PURE__ */ new Map();
-  const [W10, H7] = t.core, put2 = (x, y, type) => {
+  const [W10, H7] = t.core, put3 = (x, y, type) => {
     if (x >= 0 && y >= 0 && x < W10 && y < H7 && m.get(x + "," + y) !== "r") m.set(x + "," + y, type);
   };
   for (const [points2, width] of t.streets) for (let i = 1; i < points2.length; i++) {
     const [ax, ay] = points2[i - 1], [bx, by] = points2[i], dx = bx - ax, dy = by - ay, d = dx * dx + dy * dy;
     for (let y = Math.floor(Math.min(ay, by) - width); y <= Math.ceil(Math.max(ay, by) + width); y++) for (let x = Math.floor(Math.min(ax, bx) - width); x <= Math.ceil(Math.max(ax, bx) + width); x++) {
       const s = d ? Math.max(0, Math.min(1, ((x + 0.5 - ax) * dx + (y + 0.5 - ay) * dy) / d)) : 0;
-      if (PM.hypot(x + 0.5 - ax - s * dx, y + 0.5 - ay - s * dy) <= width / 2) put2(x, y, "r");
+      if (PM.hypot(x + 0.5 - ax - s * dx, y + 0.5 - ay - s * dy) <= width / 2) put3(x, y, "r");
     }
   }
   for (const b of t.buildings) {
-    for (const [x, y] of b.path) put2(x, y, "p");
+    for (const [x, y] of b.path) put3(x, y, "p");
     const p = b.porch;
-    for (let y = p.y; y < p.y + p.h; y++) for (let x = p.x; x < p.x + p.w; x++) put2(x, y, "p");
+    for (let y = p.y; y < p.y + p.h; y++) for (let x = p.x; x < p.x + p.w; x++) put3(x, y, "p");
   }
   materialCache.set(t, m);
   return m;
@@ -61427,10 +61427,22 @@ var SEAM2 = 26;
 var CELL = 32;
 var MIN_PATCH = 14;
 var ONLY_FIRST = 60;
+var LIT1 = [130, 190, 75];
+var LIT2 = [106, 177, 62];
+var LOW = [77, 160, 56];
+var SHADE = [18, 52, 24, 31];
+var PAD_L = 1;
+var PAD_B = 2;
 var LAYERS = [{ layer: 1, period: 768, offX: 0, offY: 0 }, { layer: 2, period: 1024, offX: 157, offY: 271 }];
 var wrap = (a) => {
   a = (a % N + N) % N;
   return a > N / 2 ? a - N : a;
+};
+var put = (im, i, c, a = 255) => {
+  im.data[i] = c[0];
+  im.data[i + 1] = c[1];
+  im.data[i + 2] = c[2];
+  im.data[i + 3] = a;
 };
 function createCrispGrassV1(doc, stamp6, clock3 = () => 0) {
   const started = clock3(), d = stamp6.getContext("2d", { willReadFrequently: true }).getImageData(0, 0, N, N).data, light2 = new Uint8Array(N * N);
@@ -61439,8 +61451,8 @@ function createCrispGrassV1(doc, stamp6, clock3 = () => 0) {
     for (let x = 0; x < N; x++) {
       const i = y * N + x, sx = x < N / 2 ? x : x - N;
       let l = 0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2];
-      if (Math.abs(sx) < SEAM2) l += (woodlandFieldV1(sx / 24 + 40, y / 24, 71) - 0.5) * 60;
-      if (Math.abs(sy) < SEAM2) l += (woodlandFieldV1(x / 24, sy / 24 + 40, 72) - 0.5) * 60;
+      if (Math.abs(sx) < SEAM2) l += (woodlandFieldV1(sx / 24 + 40, y / 24, 71) - 0.5) * 60 * (1 - Math.abs(sx) / SEAM2);
+      if (Math.abs(sy) < SEAM2) l += (woodlandFieldV1(x / 24, sy / 24 + 40, 72) - 0.5) * 60 * (1 - Math.abs(sy) / SEAM2);
       light2[i] = l > THRESHOLD ? 1 : 0;
     }
   }
@@ -61465,24 +61477,35 @@ function createCrispGrassV1(doc, stamp6, clock3 = () => 0) {
         }
       }
     }
-    patches.push({ id, size: tail2, ax, ay, x0, y0, x1, y1, sprite: null });
+    const wrapX = x1 - x0 + 1 >= N, wrapY = y1 - y0 + 1 >= N;
+    if (wrapX) {
+      x0 = Math.floor(x0 / 4) * 4;
+      x1 = x0 + N - 1;
+    }
+    if (wrapY) {
+      y0 = Math.floor(y0 / 4) * 4;
+      y1 = y0 + N - 1;
+    }
+    patches.push({ id, size: tail2, ax, ay, x0, y0, x1, y1, wraps: wrapX || wrapY, padL: wrapX ? 0 : PAD_L, padB: wrapY ? 0 : PAD_B, sprite: null });
   }
   let spritePixels = 0;
+  const inP = (id, x, y) => label4[(y % N + N) % N * N + (x % N + N) % N] === id;
   for (const p of patches) {
     if (p.size < MIN_PATCH) continue;
-    const w = p.x1 - p.x0 + 1, h = p.y1 - p.y0 + 1, c = doc.createElement("canvas");
+    const w = p.x1 - p.x0 + 1 + p.padL, h = p.y1 - p.y0 + 1 + p.padB, c = doc.createElement("canvas");
     c.width = w;
     c.height = h;
     const g = c.getContext("2d"), im = g.createImageData(w, h);
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      const sx = ((p.x0 + x) % N + N) % N, sy = ((p.y0 + y) % N + N) % N;
-      if (label4[sy * N + sx] === p.id) {
-        const i = (y * w + x) * 4;
-        im.data[i] = LIGHT2[0];
-        im.data[i + 1] = LIGHT2[1];
-        im.data[i + 2] = LIGHT2[2];
-        im.data[i + 3] = 255;
-      }
+      const sx = p.x0 - p.padL + x, sy = p.y0 + y, i = (y * w + x) * 4, n = woodlandFieldV1(sx / 7, sy / 7, 81);
+      if (inP(p.id, sx, sy)) {
+        let col2 = LIGHT2;
+        if (!inP(p.id, sx, sy - 1)) {
+          if (n > 0.28) col2 = LIT1;
+        } else if (!inP(p.id, sx, sy - 2) && n > 0.5) col2 = LIT2;
+        else if (!inP(p.id, sx, sy + 1) || !inP(p.id, sx, sy + 2) && n > 0.35) col2 = LOW;
+        put(im, i, col2);
+      } else if (inP(p.id, sx, sy - 1) || n > 0.6 && inP(p.id, sx + 1, sy - 2)) put(im, i, SHADE, SHADE[3]);
     }
     g.putImageData(im, 0, 0);
     p.sprite = c;
@@ -61492,7 +61515,7 @@ function createCrispGrassV1(doc, stamp6, clock3 = () => 0) {
   const index = LAYERS.map((L) => {
     const k = L.period / N, lo = -L.period / 2, cells = Math.ceil(2 * L.period / CELL), grid = Array.from({ length: cells * cells }, () => []);
     for (const p of kept) {
-      const bx0 = Math.max(0, Math.floor((p.x0 * k - lo) / CELL)), bx1 = Math.min(cells - 1, Math.floor(((p.x1 + 1) * k - lo) / CELL)), by0 = Math.max(0, Math.floor((p.y0 * k - lo) / CELL)), by1 = Math.min(cells - 1, Math.floor(((p.y1 + 1) * k - lo) / CELL));
+      const bx0 = Math.max(0, Math.floor(((p.x0 - p.padL) * k - lo) / CELL)), bx1 = Math.min(cells - 1, Math.floor(((p.x1 + 1) * k - lo) / CELL)), by0 = Math.max(0, Math.floor((p.y0 * k - lo) / CELL)), by1 = Math.min(cells - 1, Math.floor(((p.y1 + 1 + p.padB) * k - lo) / CELL));
       for (let by = by0; by <= by1; by++) for (let bx = bx0; bx <= bx1; bx++) grid[by * cells + bx].push(p);
     }
     return { ...L, k, lo, cells, grid };
@@ -61501,7 +61524,7 @@ function createCrispGrassV1(doc, stamp6, clock3 = () => 0) {
   let token2 = 0;
   const stats3 = { patches: kept.length, spritePixels, setupMs: clock3() - started, tiles: 0, patchDraws: 0 };
   function keeps(L, p, cx, cy2, seed2) {
-    if (p.size < ONLY_FIRST) return L.layer === 1;
+    if (p.size < ONLY_FIRST || p.wraps) return L.layer === 1;
     const wx = cx * L.period - L.offX + p.ax * L.k, wy = cy2 * L.period - L.offY + p.ay * L.k, busy = Math.max(0, Math.min(1, (woodlandFieldV1(wx / 900, wy / 900, seed2 + 1) - 0.25) / 0.5)), r = terrainHash(p.id * 7 + cx * 131, cy2 * 977 + L.layer, seed2 + 3) / 4294967296;
     return L.layer === 1 ? r < 0.8 + 0.2 * busy : r < 0.45 * busy;
   }
@@ -61521,7 +61544,7 @@ function createCrispGrassV1(doc, stamp6, clock3 = () => 0) {
         for (let by = by0; by <= by1; by++) for (let bx = bx0; bx <= bx1; bx++) for (const p of L.grid[by * L.cells + bx]) {
           if (seen4[p.id] === token2) continue;
           seen4[p.id] = token2;
-          const px7 = p.x0 * L.k - tx, py = p.y0 * L.k - ty, pw = p.sprite.width * L.k, ph = p.sprite.height * L.k, ix0 = Math.max(0, px7), iy0 = Math.max(0, py), ix1 = Math.min(w, px7 + pw), iy1 = Math.min(h, py + ph);
+          const px7 = (p.x0 - p.padL) * L.k - tx, py = p.y0 * L.k - ty, pw = p.sprite.width * L.k, ph = p.sprite.height * L.k, ix0 = Math.max(0, px7), iy0 = Math.max(0, py), ix1 = Math.min(w, px7 + pw), iy1 = Math.min(h, py + ph);
           if (ix1 <= ix0 || iy1 <= iy0) continue;
           if (!keeps(L, p, cx, cy2, seed2)) continue;
           c.drawImage(p.sprite, (ix0 - px7) / L.k, (iy0 - py) / L.k, (ix1 - ix0) / L.k, (iy1 - iy0) / L.k, x + ix0, y + iy0, ix1 - ix0, iy1 - iy0);
@@ -70805,20 +70828,20 @@ async function createPlannedEventAnchorsV1({ asset, binding, cx, cy: cy2, seed: 
 // src/shared/generation/planned_village_v1.js
 var VILLAGE_PROPS = propsFor(VILLAGE_TEMPLATE_V1);
 var materials = /* @__PURE__ */ new Map();
-var put = (x, y, type) => {
+var put2 = (x, y, type) => {
   if (x >= 0 && y >= 0 && x < 64 && y < 52 && materials.get(x + "," + y) !== "r") materials.set(x + "," + y, type);
 };
 for (const [points2, width] of VILLAGE_TEMPLATE_V1.streets) for (let i = 1; i < points2.length; i++) {
   const [ax, ay] = points2[i - 1], [bx, by] = points2[i], dx = bx - ax, dy = by - ay, d = dx * dx + dy * dy;
   for (let y = Math.floor(Math.min(ay, by) - width); y <= Math.ceil(Math.max(ay, by) + width); y++) for (let x = Math.floor(Math.min(ax, bx) - width); x <= Math.ceil(Math.max(ax, bx) + width); x++) {
     const f = d ? Math.max(0, Math.min(1, ((x + 0.5 - ax) * dx + (y + 0.5 - ay) * dy) / d)) : 0;
-    if (Math.hypot(x + 0.5 - ax - f * dx, y + 0.5 - ay - f * dy) <= width / 2) put(x, y, "r");
+    if (Math.hypot(x + 0.5 - ax - f * dx, y + 0.5 - ay - f * dy) <= width / 2) put2(x, y, "r");
   }
 }
 for (const b of VILLAGE_TEMPLATE_V1.buildings) {
-  for (const [x, y] of b.path) put(x, y, "p");
+  for (const [x, y] of b.path) put2(x, y, "p");
   const p = b.porch;
-  for (let y = p.y; y < p.y + p.h; y++) for (let x = p.x; x < p.x + p.w; x++) put(x, y, "p");
+  for (let y = p.y; y < p.y + p.h; y++) for (let x = p.x; x < p.x + p.w; x++) put2(x, y, "p");
 }
 var villageConnector = (x, y, origin = LIFE_VILLAGE_ORIGIN) => {
   const lx = x - origin.x, ly = y - origin.y;
@@ -71135,7 +71158,7 @@ function createPlannedRuinExterior(asset, reservationId, terrain = createPlanned
   decorations.push({ kind: "ruin-entry-facade", x: ex + 0.5, y: ey + 0.5, variant: variation % 4 }, { kind: "ruin-threshold-weeds", x: ex, y: ey + 3, variant: 1 });
   for (const b of blockers) if (b.presentationPart !== "entry-structure") requireContract(b.x + b.width <= ex - 5 || b.x > ex + 5 || b.y + b.height <= ey - 4 || b.y > ey + 10, "Ruin remnant obscures entrance frontage");
   for (let y = 0; y < PLANNED_RUIN_ENTRY_MASK.length; y++) for (let x = 0; x < 9; x++) requireContract(walk[ey - 4 + y][ex - 4 + x] === (PLANNED_RUIN_ENTRY_MASK[y][x] === "1" ? "1" : "2"), "Ruin facade collision differs from authored fitted entry mask");
-  const put2 = (x, y) => {
+  const put3 = (x, y) => {
     requireContract(allowed(x, y), "Ruin approach escaped reserved capacity");
     trail2.add(x + "," + y);
   };
@@ -71168,7 +71191,7 @@ function createPlannedRuinExterior(asset, reservationId, terrain = createPlanned
   for (let p = found; p; p = parents.get(key3(p.x, p.y))) connector.push(p);
   connector.reverse();
   connector.push(entrance);
-  for (const p of connector) for (let oy = -1; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) if (p.y !== entrance.y || oy >= 0) put2(p.x + ox, p.y + oy);
+  for (const p of connector) for (let oy = -1; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) if (p.y !== entrance.y || oy >= 0) put3(p.x + ox, p.y + oy);
   for (let y = top; y < top + height; y++) for (let x = left; x < left + width; x++) {
     const b = terrain.base(x, y);
     requireContract(b.walkable && b.landmassId === r.landmassId, "Ruin cannot replace water or another landmass");
@@ -71323,7 +71346,7 @@ function createPlannedFortExterior(asset, reservationId, terrain = createPlanned
     }
   }
   const entrance = { x: left + kx + Math.floor(kw / 2), y: top + ky + kh }, gate = { x: side === "east" ? left + width - 1 : side === "west" ? left : left + gateX, y: side === "south" ? top + height - 1 : side === "north" ? top : top + gateY }, trail2 = /* @__PURE__ */ new Set();
-  const put2 = (x, y) => {
+  const put3 = (x, y) => {
     requireContract(allowed(x, y), "Fort approach escaped reserved capacity");
     trail2.add(x + "," + y);
   };
@@ -71356,7 +71379,7 @@ function createPlannedFortExterior(asset, reservationId, terrain = createPlanned
   for (let p = found; p; p = parents.get(key3(p.x, p.y))) connector.push(p);
   connector.reverse();
   connector.push(entrance);
-  for (const p of connector) for (let oy = -1; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) if (p.y !== entrance.y || oy >= 0) put2(p.x + ox, p.y + oy);
+  for (const p of connector) for (let oy = -1; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) if (p.y !== entrance.y || oy >= 0) put3(p.x + ox, p.y + oy);
   for (let y = top; y < top + height; y++) for (let x = left; x < left + width; x++) {
     const b = terrain.base(x, y);
     requireContract(b.walkable && b.landmassId === r.landmassId, "Fort cannot replace water or another landmass");
@@ -71434,13 +71457,13 @@ function createPlannedCaveExterior(asset, reservationId = PLANNED_CAVE_ID, share
   const r = asset.sites.find((s) => s.id === reservationId), destination = asset.routes.destinations.find((d) => d.id === reservationId);
   requireContract(r?.familyId === "site-family:cave" && PLANNED_CAVE_TIERS.includes(r.tier) && r.footprint.length === 1 && r.approach.length === 1 && destination?.point, "Unsupported planned compact Cave reservation");
   const f = r.footprint[0], a = r.approach[0], left = f.x * 32 + 8, top = f.y * 26 + 3, entrance = { x: left + WOODLAND_CAVE_EXTERIOR.entranceTile.x, y: top + WOODLAND_CAVE_EXTERIOR.entranceTile.y }, road = destination.point;
-  const allowed = (x, y) => [f, a].some((c) => Math.floor(x / 32) === c.x && Math.floor(y / 26) === c.y), inside5 = (x, y) => x >= left && x < left + WOODLAND_CAVE_EXTERIOR.width && y >= top && y < top + WOODLAND_CAVE_EXTERIOR.height, trail2 = /* @__PURE__ */ new Set(), put2 = (x, y) => {
+  const allowed = (x, y) => [f, a].some((c) => Math.floor(x / 32) === c.x && Math.floor(y / 26) === c.y), inside5 = (x, y) => x >= left && x < left + WOODLAND_CAVE_EXTERIOR.width && y >= top && y < top + WOODLAND_CAVE_EXTERIOR.height, trail2 = /* @__PURE__ */ new Set(), put3 = (x, y) => {
     requireContract(allowed(x, y), "Cave connector escaped allocated entrance/approach");
     trail2.add(x + "," + y);
   };
   const start = { x: entrance.x, y: top + WOODLAND_CAVE_EXTERIOR.height - 1 };
-  for (let y = Math.min(start.y, road.y); y <= Math.max(start.y, road.y); y++) for (let dx = -1; dx <= 1; dx++) put2(start.x + dx, y);
-  for (let x = Math.min(start.x, road.x); x <= Math.max(start.x, road.x); x++) for (let dy = -1; dy <= 1; dy++) put2(x, road.y + dy);
+  for (let y = Math.min(start.y, road.y); y <= Math.max(start.y, road.y); y++) for (let dx = -1; dx <= 1; dx++) put3(start.x + dx, y);
+  for (let x = Math.min(start.x, road.x); x <= Math.max(start.x, road.x); x++) for (let dy = -1; dy <= 1; dy++) put3(x, road.y + dy);
   const terrain = sharedTerrain ?? createPlannedTerrain(asset);
   for (let y = top; y < top + WOODLAND_CAVE_EXTERIOR.height; y++) for (let x = left; x < left + WOODLAND_CAVE_EXTERIOR.width; x++) requireContract(terrain.base(x, y).walkable && terrain.base(x, y).landmassId === r.landmassId, "Cave cannot replace authoritative water or another landmass");
   for (const k of trail2) {
@@ -92604,36 +92627,36 @@ function drawCampCacheGroundV1(ctx, e, model, t) {
 }
 function campCacheDepthItemsV1(e, model, t) {
   const out = [], skin = e.skin, id = e.groupId;
-  const put2 = (name, q, draw, dy = 0) => out.push(depthItem({ id: id + "/" + name, anchorX: q.x, anchorY: q.y + dy, draw: (ctx) => noShadowsV1(() => draw(ctx)) }));
+  const put3 = (name, q, draw, dy = 0) => out.push(depthItem({ id: id + "/" + name, anchorX: q.x, anchorY: q.y + dy, draw: (ctx) => noShadowsV1(() => draw(ctx)) }));
   if (e.kind === "raided_camp") {
     CAMP_POLICY.tents.forEach(([x, y, state, sc2], i) => {
       const q = at3(e, [x, y]);
-      put2("tent" + i, q, (ctx) => drawCampTentV1(ctx, q.x, q.y, { skin, state, scale: sc2 * S3 }));
+      put3("tent" + i, q, (ctx) => drawCampTentV1(ctx, q.x, q.y, { skin, state, scale: sc2 * S3 }));
     });
     for (const [kind, off] of props(e)) {
       const q = at3(e, off);
-      put2(kind, q, (ctx) => drawCampPropV1(ctx, q.x, q.y, { kind, skin, scale: S3, t }));
+      put3(kind, q, (ctx) => drawCampPropV1(ctx, q.x, q.y, { kind, skin, scale: S3, t }));
     }
     for (const r of crates2(model, e)) {
       const q = r.position;
-      put2("crate" + r.ordinal, q, (ctx) => drawCampCrateV1(ctx, q.x, q.y, { skin, broken: r.used, scale: S3, seed: r.ordinal + 2 }));
+      put3("crate" + r.ordinal, q, (ctx) => drawCampCrateV1(ctx, q.x, q.y, { skin, broken: r.used, scale: S3, seed: r.ordinal + 2 }));
     }
     const j = at3(e, CAMP_POLICY.journal), glowing = e.camp.phase !== "read";
-    put2("journal", j, (ctx) => drawJournalV1(ctx, j.x, j.y, { skin, glowing, t, scale: S3 }));
+    put3("journal", j, (ctx) => drawJournalV1(ctx, j.x, j.y, { skin, glowing, t, scale: S3 }));
     const f = at3(e, CAMP_POLICY.fire);
-    put2("smoke", f, (ctx) => scaled2(ctx, f.x, f.y, () => drawSmokeTrailV1(ctx, 0, 0, { t, rise: 120 })), -1);
+    put3("smoke", f, (ctx) => scaled2(ctx, f.x, f.y, () => drawSmokeTrailV1(ctx, 0, 0, { t, rise: 120 })), -1);
     return out;
   }
   const h = e.cache, c = at3(e, CACHE_POLICY.cairn);
-  put2("cairn", c, (ctx) => drawCairnV1(ctx, c.x, c.y, { skin, t, scale: CAIRN * S3 }));
+  put3("cairn", c, (ctx) => drawCairnV1(ctx, c.x, c.y, { skin, t, scale: CAIRN * S3 }));
   if (h.phase === "dug" && e.status === "completed") {
     const p = e.position, rise = Math.min(1, h.dugTicks / 40);
-    put2("chest", p, (ctx) => drawCacheChestV1(ctx, p.x, p.y, { rise, open: e.rewardClaimed, t, scale: S3, skin }), 2);
+    put3("chest", p, (ctx) => drawCacheChestV1(ctx, p.x, p.y, { rise, open: e.rewardClaimed, t, scale: S3, skin }), 2);
   }
   const a = digger(model, e);
   if (a) {
     const face4 = faceOf(model, a), q = { x: a.position.x, y: a.position.y };
-    put2("spade", q, (ctx) => drawSpadeV1(ctx, q.x, q.y, { t, face: face4, scale: S3, skin, paused: h.paused }), 1);
+    put3("spade", q, (ctx) => drawSpadeV1(ctx, q.x, q.y, { t, face: face4, scale: S3, skin, paused: h.paused }), 1);
   }
   return out;
 }
@@ -93164,18 +93187,18 @@ function drawHuntGroundV1InWorld(ctx, e, model, t) {
 }
 function huntDepthItemsV1(e, model, t) {
   const out = [], skin = e.skin, id = e.groupId, h = e.hunt;
-  const put2 = (name, q2, draw, dy = 0) => out.push(depthItem({ id: id + "/" + name, anchorX: q2.x, anchorY: q2.y + dy, draw: (ctx) => noShadowsV1(() => draw(ctx)) }));
+  const put3 = (name, q2, draw, dy = 0) => out.push(depthItem({ id: id + "/" + name, anchorX: q2.x, anchorY: q2.y + dy, draw: (ctx) => noShadowsV1(() => draw(ctx)) }));
   const q = post3(e), glowing = h.phase === "idle" && e.status === "dormant" && !e.quiet;
-  put2("post", q, (ctx) => scaled3(ctx, q.x, q.y, () => drawHornPostV1(ctx, 0, 0, { skin, t, horn: hornHung(h) ? "hung" : "gone", trophy: h.trophy ? e.champion.trophy : null, glowing })));
-  for (const { i, q: s } of stakes(e)) put2("stake" + i, s, (ctx) => scaled3(ctx, s.x, s.y, () => drawHuntStakeV1(ctx, 0, 0, { skin, t: t + i, seed: i + 1 })));
+  put3("post", q, (ctx) => scaled3(ctx, q.x, q.y, () => drawHornPostV1(ctx, 0, 0, { skin, t, horn: hornHung(h) ? "hung" : "gone", trophy: h.trophy ? e.champion.trophy : null, glowing })));
+  for (const { i, q: s } of stakes(e)) put3("stake" + i, s, (ctx) => scaled3(ctx, s.x, s.y, () => drawHuntStakeV1(ctx, 0, 0, { skin, t: t + i, seed: i + 1 })));
   if (e.status === "completed") {
     const p = e.position;
-    put2("chest", p, (ctx) => drawCacheChestV1(ctx, p.x, p.y, { rise: 1, open: e.rewardClaimed, t, scale: CHEST * S4, skin }), 2);
+    put3("chest", p, (ctx) => drawCacheChestV1(ctx, p.x, p.y, { rise: 1, open: e.rewardClaimed, t, scale: CHEST * S4, skin }), 2);
   }
   const b = blower(model, e);
   if (b) {
     const face4 = faceOf2(model, b), k = h.hornAgeTicks / 40;
-    put2("horn", b.position, (ctx) => {
+    put3("horn", b.position, (ctx) => {
       scaled3(ctx, b.position.x + 8 * face4, b.position.y - 22, () => drawHeldHornV1(ctx, 0, 0, { face: face4 }));
       scaled3(ctx, b.position.x + 20 * face4, b.position.y - 30, () => drawHornBlastV1(ctx, 0, 0, { t: k % 1, dir: face4 }));
     }, 1);
@@ -93183,7 +93206,7 @@ function huntDepthItemsV1(e, model, t) {
   const a = champion(model, e);
   if (a && h.arrivedAgeTicks !== null && h.arrivedAgeTicks < 70) {
     const dir = a.position.x < e.position.x ? 1 : -1, fade2 = 1 - h.arrivedAgeTicks / 70;
-    put2("dust", a.position, (ctx) => {
+    put3("dust", a.position, (ctx) => {
       ctx.save();
       ctx.globalAlpha = fade2;
       scaled3(ctx, a.position.x, a.position.y, () => drawChargeDustV1(ctx, 0, 0, { dir, n: 6, col: e.skin === "frostland" ? "rgba(236,244,250," : e.skin === "desert" ? "rgba(226,200,150," : "rgba(150,130,96," }));
@@ -115898,8 +115921,8 @@ function brimstoneEffectDepthItems(model, tick, viewport = null) {
 var TAU136 = Math.PI * 2;
 var INK49 = "#101316";
 var IRON12 = "#454955";
-var LIT2 = "#777d89";
-var SHADE = "#292c37";
+var LIT3 = "#777d89";
+var SHADE2 = "#292c37";
 var DEEP3 = "#1c2029";
 var ORANGE = "#f56829";
 var HOT3 = "#ffcb61";
@@ -115943,16 +115966,16 @@ function arm6(c, side, raise, impact, t, flash, hand4 = null, heat = 0) {
   c.save();
   c.translate(side * 28, -61);
   c.rotate(angles ? angles.upper : side * (-0.12 - raise * 1.5 + impact * 0.4));
-  poly14(c, [[-8, -5], [8, -5], [10, 15], [7, 22], [-6, 22], [-10, 14]], flash ? HOT3 : SHADE);
-  poly14(c, [[-8, -5], [2, -5], [3, 16], [-6, 19], [-10, 14]], LIT2, false);
+  poly14(c, [[-8, -5], [8, -5], [10, 15], [7, 22], [-6, 22], [-10, 14]], flash ? HOT3 : SHADE2);
+  poly14(c, [[-8, -5], [2, -5], [3, 16], [-6, 19], [-10, 14]], LIT3, false);
   ellipse13(c, 0, 21, 7, 7, DEEP3);
   ellipse13(c, 0, 21, 3, 3, ORANGE, false);
   c.translate(0, 23);
   c.rotate(angles ? angles.lower : side * (raise * 0.4 + Math.sin(t * 0.06) * 0.015));
   poly14(c, [[-12, -1], [10, -1], [14, 10], [11, 28], [-11, 28], [-15, 12]], flash ? HOT3 : IRON12);
-  poly14(c, [[-12, -1], [1, -1], [-1, 20], [-11, 28], [-15, 12]], LIT2, false);
-  poly14(c, [[7, 0], [10, -1], [14, 10], [11, 28], [4, 24]], SHADE, false);
-  poly14(c, [[-11, 21], [11, 21], [13, 30], [6, 35], [-9, 33], [-14, 27]], flash ? HOT3 : SHADE);
+  poly14(c, [[-12, -1], [1, -1], [-1, 20], [-11, 28], [-15, 12]], LIT3, false);
+  poly14(c, [[7, 0], [10, -1], [14, 10], [11, 28], [4, 24]], SHADE2, false);
+  poly14(c, [[-11, 21], [11, 21], [13, 30], [6, 35], [-9, 33], [-14, 27]], flash ? HOT3 : SHADE2);
   poly14(c, [[-11, 21], [7, 21], [5, 26], [-11, 27], [-14, 25]], IRON12, false);
   poly14(c, [[-7, 3], [-1, 7], [-4, 12], [3, 17], [0, 19], [-8, 12], [-5, 8]], ORANGE, false);
   c.strokeStyle = INK49;
@@ -115989,11 +116012,11 @@ function drawBrimstoneColossus(c, a, tick, flash = false) {
     const step = side * walk * 1.5;
     c.save();
     c.translate(side * 15, step);
-    poly14(c, [[-9, -29], [9, -29], [10, -9], [7, -3], [-10, -3], [-12, -12]], SHADE);
-    poly14(c, [[-8, -28], [3, -28], [2, -12], [-8, -7], [-12, -12]], LIT2, false);
+    poly14(c, [[-9, -29], [9, -29], [10, -9], [7, -3], [-10, -3], [-12, -12]], SHADE2);
+    poly14(c, [[-8, -28], [3, -28], [2, -12], [-8, -7], [-12, -12]], LIT3, false);
     poly14(c, [[-10, -10], [7, -10], [12, -3], [12, 4], [-13, 4], [-15, -1]], IRON12);
-    poly14(c, [[-10, -10], [5, -10], [7, -6], [-10, -4], [-15, -1]], LIT2, false);
-    poly14(c, [[5, -9], [7, -10], [12, -3], [12, 4], [5, 3]], SHADE, false);
+    poly14(c, [[-10, -10], [5, -10], [7, -6], [-10, -4], [-15, -1]], LIT3, false);
+    poly14(c, [[5, -9], [7, -10], [12, -3], [12, 4], [5, 3]], SHADE2, false);
     c.restore();
   }
   c.translate(lean, breath * 0.7 + pose.drop);
@@ -116003,8 +116026,8 @@ function drawBrimstoneColossus(c, a, tick, flash = false) {
   poly14(c, [[-19, -65], [-7, -72], [-6, -38], [-13, -32]], ORANGE, false);
   poly14(c, [[17, -65], [9, -70], [6, -39], [13, -32]], ORANGE, false);
   poly14(c, [[-26, -70], [0, -78], [26, -70], [21, -51], [12, -45], [-13, -45], [-23, -53]], flash ? HOT3 : IRON12);
-  poly14(c, [[-26, -70], [0, -78], [6, -70], [-7, -58], [-23, -53]], LIT2, false);
-  poly14(c, [[14, -73], [26, -70], [21, -51], [12, -45], [6, -54]], SHADE, false);
+  poly14(c, [[-26, -70], [0, -78], [6, -70], [-7, -58], [-23, -53]], LIT3, false);
+  poly14(c, [[14, -73], [26, -70], [21, -51], [12, -45], [6, -54]], SHADE2, false);
   poly14(c, [[-12, -56], [0, -62], [13, -55], [12, -37], [0, -30], [-12, -38]], INK49);
   poly14(c, [[-8, -53], [1, -58], [9, -52], [8, -40], [0, -35], [-8, -41]], ORANGE, false);
   poly14(c, [[-5, -51], [1, -56], [5, -50], [4, -42], [0, -39], [-4, -44]], HOT3, false);
@@ -116018,13 +116041,13 @@ function drawBrimstoneColossus(c, a, tick, flash = false) {
   c.lineTo(9, -41);
   c.stroke();
   poly14(c, [[-21, -39], [-11, -42], [0, -33], [11, -42], [21, -39], [15, -28], [0, -21], [-15, -28]], IRON12);
-  poly14(c, [[-21, -39], [-11, -42], [0, -33], [0, -26], [-15, -28]], LIT2, false);
+  poly14(c, [[-21, -39], [-11, -42], [0, -33], [0, -26], [-15, -28]], LIT3, false);
   for (const side of [-1, 1]) {
     c.save();
     c.scale(side, 1);
     poly14(c, [[18, -73], [28, -83], [43, -79], [39, -69], [48, -60], [28, -61], [23, -65]], flash ? HOT3 : IRON12);
-    poly14(c, [[18, -73], [28, -83], [43, -79], [35, -75], [27, -70]], LIT2, false);
-    poly14(c, [[35, -75], [39, -69], [48, -60], [28, -61], [27, -66]], SHADE, false);
+    poly14(c, [[18, -73], [28, -83], [43, -79], [35, -75], [27, -70]], LIT3, false);
+    poly14(c, [[35, -75], [39, -69], [48, -60], [28, -61], [27, -66]], SHADE2, false);
     poly14(c, [[30, -79], [34, -91], [39, -80]], "#bc743e");
     poly14(c, [[30, -69], [37, -68], [33, -66]], ORANGE, false);
     c.restore();
@@ -116054,12 +116077,12 @@ function drawBrimstoneColossus(c, a, tick, flash = false) {
     c.restore();
   }
   poly14(c, [[-13, -97], [0, -102], [14, -96], [15, -78], [9, -69], [-10, -70], [-15, -80]], flash ? HOT3 : IRON12);
-  poly14(c, [[-13, -97], [0, -102], [3, -95], [-1, -87], [-14, -83]], LIT2, false);
-  poly14(c, [[7, -99], [14, -96], [15, -78], [9, -69], [4, -74]], SHADE, false);
+  poly14(c, [[-13, -97], [0, -102], [3, -95], [-1, -87], [-14, -83]], LIT3, false);
+  poly14(c, [[7, -99], [14, -96], [15, -78], [9, -69], [4, -74]], SHADE2, false);
   poly14(c, [[-12, -88], [11, -88], [10, -81], [0, -78], [-11, -82]], INK49);
   poly14(c, [[-9, -86], [-1, -85], [-2, -82], [-9, -83]], HOT3, false);
   poly14(c, [[2, -85], [9, -86], [9, -83], [3, -82]], HOT3, false);
-  poly14(c, [[-3, -89], [3, -89], [2, -78], [0, -75], [-3, -78]], SHADE);
+  poly14(c, [[-3, -89], [3, -89], [2, -78], [0, -75], [-3, -78]], SHADE2);
   c.restore();
   if (pose.strikeSide) arm6(c, pose.strikeSide, 0, 0, tick, flash, pose.hands[pose.strikeSide], pose.heat);
   for (let i = 0; i < 3; i++) {
@@ -123583,8 +123606,8 @@ function createCombatVfx() {
     } else drawCombatImpact(ctx, b.kind, b.x, b.y, b.dx, b.dy, age);
   }
   function depthItems2(m, time2, viewport, ctx = null) {
-    const visible3 = visibleIn(viewport), items = [], put2 = (id, x, y, paint2) => items.push(depthItem({ id: "vfx/" + id, anchorX: x, anchorY: y, draw: paint2 })), spread = (id, x, paint2) => {
-      if (ctx) spreadPiecesV1(paint2).forEach((p, k) => put2(id + "/" + k, x, p.y + 0.5, (c) => {
+    const visible3 = visibleIn(viewport), items = [], put3 = (id, x, y, paint2) => items.push(depthItem({ id: "vfx/" + id, anchorX: x, anchorY: y, draw: paint2 })), spread = (id, x, paint2) => {
+      if (ctx) spreadPiecesV1(paint2).forEach((p, k) => put3(id + "/" + k, x, p.y + 0.5, (c) => {
         c.save();
         p.draw();
         c.restore();
@@ -123596,31 +123619,31 @@ function createCombatVfx() {
         afterimages.splice(i, 1);
         continue;
       }
-      put2("after/" + g.id + "/" + g.born, g.x, g.y + AFTER - 0.5, (ctx2) => drawAfterimage(ctx2, g.image, g.x, g.y, age));
+      put3("after/" + g.id + "/" + g.born, g.x, g.y + AFTER - 0.5, (ctx2) => drawAfterimage(ctx2, g.image, g.x, g.y, age));
     }
     for (const [id, at8] of parrySpent) if (time2 - at8 > 400) parrySpent.delete(id);
     bursts.forEach((b, i) => {
       if (!visible3(b)) return;
       const age = time2 - b.born;
-      put2("burst/" + i, b.x + (b.ox ?? 0), (b.ground ?? b.y) + (b.oy ?? 0) + AFTER, (c) => inFxPassV1("upright", () => drawBurst2(c, m, b, age, time2)));
+      put3("burst/" + i, b.x + (b.ox ?? 0), (b.ground ?? b.y) + (b.oy ?? 0) + AFTER, (c) => inFxPassV1("upright", () => drawBurst2(c, m, b, age, time2)));
       if (layered(b)) spread("burst/" + i, b.x, () => drawBurst2(ctx, m, b, age, time2));
     });
     (m.combatPresentation?.statuses ?? []).forEach((e, i) => {
       const a = m.entitiesById[e.targetId];
-      if (a?.alive && visible3(a.position)) put2("status/" + (e.id ?? i), a.position.x, foot(a), (ctx2) => drawPersistentStatus(ctx2, e, a, m.tick, time2, e.lane ?? 0, "body"));
+      if (a?.alive && visible3(a.position)) put3("status/" + (e.id ?? i), a.position.x, foot(a), (ctx2) => drawPersistentStatus(ctx2, e, a, m.tick, time2, e.lane ?? 0, "body"));
     });
     (m.combatPresentation?.masteryRazors ?? []).forEach((e, i) => {
-      if (visible3(e.position)) put2("razor/" + i, e.position.x, e.position.y + 5, (ctx2) => drawMasteryRazor(ctx2, e));
+      if (visible3(e.position)) put3("razor/" + i, e.position.x, e.position.y + 5, (ctx2) => drawMasteryRazor(ctx2, e));
     });
     for (const e of m.combatPresentation?.statuses ?? []) {
       if (e.kind !== "stun") continue;
       const a = m.entitiesById[e.targetId];
-      if (a?.alive && visible3(a.position)) put2("stun/" + e.id, a.position.x, foot(a), (ctx2) => drawBashStun(ctx2, a.position.x, a.position.y, time2, shieldTypeOf(m.entitiesById[e.sourceId]?.heroLook?.gear?.off?.kind) === "tower" ? 2 : 1));
+      if (a?.alive && visible3(a.position)) put3("stun/" + e.id, a.position.x, foot(a), (ctx2) => drawBashStun(ctx2, a.position.x, a.position.y, time2, shieldTypeOf(m.entitiesById[e.sourceId]?.heroLook?.gear?.off?.kind) === "tower" ? 2 : 1));
     }
     for (const [id, f] of Object.entries(m.combatPresentation?.families ?? {})) {
       const a = m.entitiesById[id];
       if (!a || !visible3(a.position)) continue;
-      if (a.guard) for (const near4 of [false, true]) put2("ward/" + id + "/" + (near4 ? "near" : "far"), a.position.x, foot(a) - (near4 ? 0 : 1), (ctx2) => inFxPassV1("upright", () => {
+      if (a.guard) for (const near4 of [false, true]) put3("ward/" + id + "/" + (near4 ? "near" : "far"), a.position.x, foot(a) - (near4 ? 0 : 1), (ctx2) => inFxPassV1("upright", () => {
         const waist = a.position.y - 12;
         ctx2.save();
         ctx2.beginPath();
@@ -123629,7 +123652,7 @@ function createCombatVfx() {
         drawWard(ctx2, m, id, a, time2, f.wall ?? 0);
         ctx2.restore();
       }));
-      put2("hero/" + id, a.position.x, foot(a), (ctx2) => inFxPassV1("upright", () => {
+      put3("hero/" + id, a.position.x, foot(a), (ctx2) => inFxPassV1("upright", () => {
         if (f.dash.frames > 0 && f.blink) drawBlinkStreaks(ctx2, a.position.x, a.position.y, f.dash.x, f.dash.y, time2);
         else if (f.dash.frames > 0) {
           drawDashStreaks(ctx2, a.position.x, a.position.y, f.dash.x, f.dash.y, time2);
@@ -123639,24 +123662,24 @@ function createCombatVfx() {
         if (f.sun > 0) drawSunPips(ctx2, a.position.x, a.position.y, f.sun, time2);
       }));
       (f.orbs ?? []).forEach((o, k) => {
-        if (visible3(o)) put2("orb/" + id + "/" + k, o.x, o.y + 1, (ctx2) => drawLightningOrb(ctx2, o, time2));
+        if (visible3(o)) put3("orb/" + id + "/" + k, o.x, o.y + 1, (ctx2) => drawLightningOrb(ctx2, o, time2));
       });
-      if (f.thrown && visible3(f.thrown)) put2("thrown/" + id, f.thrown.x, f.thrown.y + 1, (ctx2) => inFxPassV1("upright", () => drawThrownShield(ctx2, f.thrown, time2)));
-      if (f.banner && visible3(f.banner)) put2("banner/" + id, f.banner.x, f.banner.y, (ctx2) => inFxPassV1("upright", () => drawWarBanner(ctx2, f.banner, time2)));
+      if (f.thrown && visible3(f.thrown)) put3("thrown/" + id, f.thrown.x, f.thrown.y + 1, (ctx2) => inFxPassV1("upright", () => drawThrownShield(ctx2, f.thrown, time2)));
+      if (f.banner && visible3(f.banner)) put3("banner/" + id, f.banner.x, f.banner.y, (ctx2) => inFxPassV1("upright", () => drawWarBanner(ctx2, f.banner, time2)));
       if (f.smoke && visible3(f.smoke)) spread("smoke/" + id, f.smoke.x, () => drawSmokeVeil(ctx, f.smoke, time2));
       if (f.flameWall && visible3(f.flameWall)) spread("wall/" + id, f.flameWall.x, () => drawFlameWall(ctx, f.flameWall, time2));
       if (f.field && visible3(f.field)) spread("field/" + id, f.field.x, () => drawStaticField(ctx, f.field, time2));
-      if (f.ice) for (const near4 of [false, true]) put2("ice/" + id + "/" + (near4 ? "near" : "far"), a.position.x, foot(a) - (near4 ? 0 : 1), (ctx2) => drawIceShell(ctx2, a.position.x, a.position.y, f.ice.ticks, time2, near4));
-      if (f.aegis) for (const near4 of [false, true]) put2("aegis/" + id + "/" + (near4 ? "near" : "far"), a.position.x, foot(a) - (near4 ? 0 : 1), (ctx2) => drawAegisShell(ctx2, a.position.x, a.position.y, f.aegis.ticks, time2, near4, f.aegis.over));
+      if (f.ice) for (const near4 of [false, true]) put3("ice/" + id + "/" + (near4 ? "near" : "far"), a.position.x, foot(a) - (near4 ? 0 : 1), (ctx2) => drawIceShell(ctx2, a.position.x, a.position.y, f.ice.ticks, time2, near4));
+      if (f.aegis) for (const near4 of [false, true]) put3("aegis/" + id + "/" + (near4 ? "near" : "far"), a.position.x, foot(a) - (near4 ? 0 : 1), (ctx2) => drawAegisShell(ctx2, a.position.x, a.position.y, f.aegis.ticks, time2, near4, f.aegis.over));
       if (f.flower && visible3(f.flower)) spread("flower/" + id, f.flower.x, () => drawNoxiousFlower(ctx, f.flower, time2));
-      if (f.echo && visible3(f.echo)) put2("echo/" + id, f.echo.x, f.echo.y, (ctx2) => inFxPassV1("upright", () => drawAfterimageEcho(ctx2, f.echo, time2)));
+      if (f.echo && visible3(f.echo)) put3("echo/" + id, f.echo.x, f.echo.y, (ctx2) => inFxPassV1("upright", () => drawAfterimageEcho(ctx2, f.echo, time2)));
       (f.meteors ?? []).forEach((mt, k) => {
         if (visible3(mt)) spread("meteor/" + id + "/" + k, mt.x, () => drawMeteor(ctx, mt, time2));
       });
       (f.blooms ?? []).forEach((bl, k) => {
         if (visible3(bl)) spread("bloom/" + id + "/" + k, bl.x, () => drawNoxiousFlower(ctx, bl, time2));
       });
-      if (f.storm && a.alive) put2("storm/" + id, a.position.x, foot(a) + 0.5, (ctx2) => inFxPassV1("upright", () => drawLivingStorm(ctx2, a.position.x, a.position.y, time2)));
+      if (f.storm && a.alive) put3("storm/" + id, a.position.x, foot(a) + 0.5, (ctx2) => inFxPassV1("upright", () => drawLivingStorm(ctx2, a.position.x, a.position.y, time2)));
       const tr = f.trail;
       if (tr && (visible3(tr) || visible3({ x: tr.x2, y: tr.y2 }))) spread("trail/" + id, (tr.x + tr.x2) / 2, () => drawCinderTrail(ctx, tr, time2));
       const pool3 = f.pool;
