@@ -97550,7 +97550,7 @@ function createBestiaryViewV1({ document: document2, environment, issue }) {
 }
 
 // src/client/menu_hub_v1.js
-var MENU_HUB_GROUPS = Object.freeze({ equipment: "hero", bag: "hero", materials: "hero", stats: "hero", progression: "hero", forge: "hero", hub: "world", quests: "world", bestiary: "world", heroes: "world", settings: "world" });
+var MENU_HUB_GROUPS = Object.freeze({ equipment: "hero", bag: "hero", materials: "hero", stats: "hero", progression: "hero", forge: "hero", hub: "world", quests: "world", bestiary: "world", heroes: "world", friends: "world", settings: "world" });
 var icon = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 var MENU_HUB_ICONS = Object.freeze({
   map: icon('<path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20z"/><path d="M9 4v13.5M15 6.5V20"/>'),
@@ -97567,8 +97567,9 @@ body #world-inventory.rpg-menu[data-group=world]:not([data-section=hub]) button.
 body #world-inventory.rpg-menu[data-section=hub] button.rm-railbtn{display:none!important}
 .mh{flex:1;min-width:0;min-height:0;overflow:auto;display:flex;align-items:center;justify-content:center;padding:18px 22px;box-sizing:border-box}
 .mh[hidden]{display:none}
-.mh-grid{width:100%;max-width:980px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.mh-grid{width:100%;max-width:980px;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:14px}
 #world-inventory .mh button.mh-tile{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;min-height:0;height:auto;padding:22px 8px 18px;border-radius:14px;border:1px solid #34444f;background:linear-gradient(180deg,#26343f,#1a2530);box-shadow:inset 0 1px 0 #ffffff10,0 3px 0 #070b10;color:#e9dfc8;font:700 13px var(--rpg-ui,"Segoe UI",sans-serif);letter-spacing:.09em;text-transform:uppercase;cursor:pointer;text-align:center}
+#world-inventory .mh button.mh-tile[hidden]{display:none}
 #world-inventory .mh button.mh-tile:hover{border-color:#d4b98a88}
 #world-inventory .mh button.mh-tile:active{transform:translateY(2px);box-shadow:inset 0 1px 0 #ffffff10,0 1px 0 #070b10}
 .mh-ic{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 38% 26%,#4c5d68,#25343f 60%,#17242e);border:1px solid #0b1015;box-shadow:inset 0 0 0 1px #d4b98a66;flex:none}
@@ -97577,7 +97578,7 @@ body #world-inventory.rpg-menu[data-section=hub] button.rm-railbtn{display:none!
 .mh-badge{position:absolute;top:8px;right:8px;min-width:20px;height:20px;padding:0 6px;box-sizing:border-box;border-radius:10px;background:#f0c862;color:#1b1406;font:800 12px/20px var(--rpg-ui,"Segoe UI",sans-serif);letter-spacing:0}
 .mh-badge:empty{display:none}
 @media(max-height:500px) and (min-width:601px){.mh{padding:10px 14px}.mh-grid{gap:10px}#world-inventory .mh button.mh-tile{padding:16px 6px 14px;gap:6px;font-size:12px}.mh-ic{width:52px;height:52px}.mh-ic svg{width:28px;height:28px}.mh-tile small{font-size:10px}}
-@media(max-width:600px){.mh{align-items:flex-start;padding:14px}.mh-grid{grid-template-columns:1fr;gap:10px}#world-inventory .mh button.mh-tile{flex-direction:row;justify-content:flex-start;padding:12px 16px;gap:16px;text-align:left}.mh-tile small{margin-left:auto;padding-right:22px}.mh-ic{width:52px;height:52px}.mh-badge{top:50%;margin-top:-10px;right:12px}}
+@media(max-width:600px){.mh{align-items:flex-start;padding:14px}.mh-grid{grid-auto-flow:row;grid-template-columns:1fr;gap:10px}#world-inventory .mh button.mh-tile{flex-direction:row;justify-content:flex-start;padding:12px 16px;gap:16px;text-align:left}.mh-tile small{margin-left:auto;padding-right:22px}.mh-ic{width:52px;height:52px}.mh-badge{top:50%;margin-top:-10px;right:12px}}
 `;
 function createMenuHubV1({ document: doc, tiles: tiles6 }) {
   if (!doc.getElementById("menu-hub-v1-css")) {
@@ -97982,7 +97983,7 @@ function createHeroSlotsView({ document: document2, environment, heroSlots }) {
     const coop = [];
     if (heroSlots.coop?.available && !heroSlots.coop.role) {
       const row2 = el3("div", "hero-slots-coop");
-      row2.append(el3("strong", "", "Play together"), button3("Host a game", () => act("coop", () => heroSlots.coop.host())), button3("Join a game", () => act("coop", () => heroSlots.coop.join()), "is-quiet"));
+      row2.append(el3("strong", "", "Play together"), ...heroSlots.friends?.client ? [button3("Friends", () => document2.dispatchEvent(new (environment.CustomEvent ?? CustomEvent)("saq-open-friends")))] : [], button3("Host a game", () => act("coop", () => heroSlots.coop.host())), button3("Join a game", () => act("coop", () => heroSlots.coop.join()), "is-quiet"));
       coop.push(row2);
     }
     const here = heroSlots.party?.info?.(), partyBox = [];
@@ -101900,6 +101901,517 @@ function createContextActionInput({ button: button3, activate }) {
   } });
 }
 
+// src/client/friends_v1.js
+var FRIENDS_KEY = "saq-world-friends-v1";
+var FRIEND_MODES = Object.freeze([["open", "Friends can join", "Friends tap Join and load in. Others still need your code."], ["ask", "Friends ask first", "Friends see Ask to join. You let each one in."], ["code", "Code only", "You show as playing, but only your code or QR gets people in."]]);
+var RECENT_LIMIT = 12;
+var BACKUP = /^saqf1[.\s-]*(pl_[0-9a-f]{24})[.\s-]*([0-9a-f]{48})$/i;
+var PACE_MS = Object.freeze({ idle: 2e4, world: 8e3, page: 5e3, waiting: 3e3 });
+function parseBackupCodeV1(text3) {
+  const m = BACKUP.exec(String(text3 ?? "").trim());
+  return m ? { id: m[1].toLowerCase(), secret: m[2].toLowerCase() } : null;
+}
+function createFriendsClientV1({ server, storage, key: key3 = FRIENDS_KEY, fetch = globalThis.fetch?.bind(globalThis), now: now3 = () => Date.now(), setTimeout: setTimeout2 = globalThis.setTimeout.bind(globalThis), clearTimeout: clearTimeout2 = globalThis.clearTimeout.bind(globalThis), document: document2 = null }) {
+  const read2 = () => {
+    try {
+      const v = JSON.parse(storage?.getItem(key3) ?? "null");
+      return v && typeof v === "object" ? v : {};
+    } catch {
+      return {};
+    }
+  };
+  const write4 = (v) => {
+    try {
+      storage?.setItem(key3, JSON.stringify(v));
+    } catch {
+    }
+  };
+  let me = read2(), last = null, error = "", timer = null, running2 = false, syncing = null, presenceOf = () => null;
+  const listeners = /* @__PURE__ */ new Set(), noteListeners = /* @__PURE__ */ new Set(), paces = /* @__PURE__ */ new Map();
+  const signedIn = () => Boolean(me.id && me.secret);
+  const tell = () => {
+    for (const f of listeners) try {
+      f();
+    } catch (e) {
+      console.warn("Friends view failed", e);
+    }
+  };
+  async function call(route, body5 = {}) {
+    if (!server) throw Error("Friends need the join server.");
+    if (!fetch) throw Error("Friends need a connection.");
+    let r;
+    try {
+      r = await fetch(`${server}/friends/${route}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body5) });
+    } catch {
+      throw Error("Can\u2019t reach the friends server. Check your connection.");
+    }
+    let data = null;
+    try {
+      data = await r.json();
+    } catch {
+    }
+    if (!r.ok) {
+      const e = Error(data?.error || `The friends server said ${r.status}`);
+      e.status = r.status;
+      throw e;
+    }
+    return data ?? {};
+  }
+  const auth = () => ({ id: me.id, secret: me.secret });
+  async function sync() {
+    if (!signedIn()) return null;
+    if (syncing) return syncing;
+    syncing = (async () => {
+      try {
+        let presence = null;
+        try {
+          presence = presenceOf();
+        } catch {
+        }
+        const data = await call("sync", { ...auth(), presence });
+        last = { ...data, at: now3() };
+        error = "";
+        if (data.code && data.code !== me.code) {
+          me = { ...me, code: data.code };
+          write4(me);
+        }
+        for (const n of data.notes ?? []) for (const f of noteListeners) try {
+          f(n);
+        } catch (e) {
+          console.warn("Friend note failed", e);
+        }
+      } catch (e) {
+        error = e.message;
+        if (e.status === 401) {
+          me = { mode: me.mode, recent: me.recent };
+          write4(me);
+          last = null;
+        }
+      } finally {
+        syncing = null;
+        tell();
+      }
+      return last;
+    })();
+    return syncing;
+  }
+  const pace = () => {
+    let ms = PACE_MS.idle;
+    for (const v of paces.values()) ms = Math.min(ms, v);
+    return ms;
+  };
+  function schedule(ms = pace()) {
+    if (timer !== null) clearTimeout2(timer);
+    timer = null;
+    if (!running2 || !signedIn()) return;
+    timer = setTimeout2(async () => {
+      timer = null;
+      if (!document2?.hidden) await sync();
+      schedule();
+    }, ms);
+  }
+  if (document2) document2.addEventListener("visibilitychange", () => {
+    if (running2 && !document2.hidden) {
+      sync();
+      schedule();
+    }
+  });
+  const api = {
+    available: () => Boolean(server && fetch),
+    signedIn,
+    me: () => signedIn() ? { id: me.id, code: me.code, name: me.name } : null,
+    mode: () => ["open", "ask", "code"].includes(me.mode) ? me.mode : "open",
+    setMode(mode) {
+      if (!["open", "ask", "code"].includes(mode)) return;
+      me = { ...me, mode };
+      write4(me);
+      sync();
+      tell();
+    },
+    state: () => ({ friends: last?.friends ?? [], requests: last?.requests ?? [], sent: last?.sent ?? [], at: last?.at ?? 0, error }),
+    recent: () => (me.recent ?? []).filter((r) => r.code !== me.code),
+    // Someone just played with this player (from the co-op lobby): kept for "Played with recently".
+    remember(players) {
+      const fresh = (players ?? []).filter((p) => typeof p?.friend === "string" && /^.{1,16}#\d{4}$/u.test(p.friend) && p.friend !== me.code);
+      if (!fresh.length) return;
+      const t = now3(), codes = new Set(fresh.map((p) => p.friend));
+      me = { ...me, recent: [...fresh.map((p) => ({ code: p.friend, hero: typeof p.name === "string" ? p.name.slice(0, 32) : "", at: t })), ...(me.recent ?? []).filter((r) => !codes.has(r.code))].slice(0, RECENT_LIMIT) };
+      write4(me);
+      tell();
+    },
+    subscribe(f) {
+      listeners.add(f);
+      return () => listeners.delete(f);
+    },
+    onNote(f) {
+      noteListeners.add(f);
+      return () => noteListeners.delete(f);
+    },
+    setPresence(f) {
+      presenceOf = typeof f === "function" ? f : () => null;
+    },
+    // How often to sync while something wants news soon: pace(name, ms) or pace(name, null) to stop.
+    pace(name, ms) {
+      if (ms) paces.set(name, ms);
+      else paces.delete(name);
+      if (running2) schedule();
+    },
+    start() {
+      if (running2) return;
+      running2 = true;
+      sync();
+      schedule();
+    },
+    stop() {
+      running2 = false;
+      if (timer !== null) clearTimeout2(timer);
+      timer = null;
+    },
+    sync,
+    async register(name) {
+      const data = await call("register", { name });
+      me = { ...me, id: data.id, secret: data.secret, code: data.code, name: String(name).trim().replace(/\s+/g, " ") };
+      write4(me);
+      await sync();
+      if (running2) schedule();
+      return data.code;
+    },
+    async rename(name) {
+      const data = await call("rename", { ...auth(), name });
+      me = { ...me, code: data.code, name: String(name).trim().replace(/\s+/g, " ") };
+      write4(me);
+      tell();
+      return data.code;
+    },
+    // Q5 A: a code that brings this player (code and friends) to another device.
+    backupCode: () => signedIn() ? `saqf1.${me.id}.${me.secret}` : null,
+    async restore(text3) {
+      const b = parseBackupCodeV1(text3);
+      if (!b) throw Error("That isn\u2019t a backup code. It starts with saqf1.");
+      const data = await call("sync", { id: b.id, secret: b.secret });
+      me = { ...me, id: b.id, secret: b.secret, code: data.code, name: String(data.code).replace(/#\d{4}$/, "") };
+      write4(me);
+      last = { ...data, notes: [], at: now3() };
+      error = "";
+      tell();
+      if (running2) schedule();
+      return data.code;
+    },
+    async request(code2) {
+      const r = await call("request", { ...auth(), code: code2 });
+      await sync();
+      return r;
+    },
+    async answer(from, accept) {
+      const r = await call("answer", { ...auth(), from, accept: accept === true });
+      await sync();
+      return r;
+    },
+    async remove(friend) {
+      const r = await call("remove", { ...auth(), friend });
+      await sync();
+      return r;
+    },
+    note: (to, kind, extra = {}) => call("note", { ...auth(), to, kind, ...extra }),
+    friend: (id) => (last?.friends ?? []).find((f) => f.id === id) ?? null
+  };
+  return Object.freeze(api);
+}
+var LANDS = Object.freeze({ w: "Woodland", a: "Grassland", m: "Wetland", r: "Upland", d: "Desert", s: "Snow", t: "Tropical", l: "Volcanic" });
+function presenceFromModelV1(model) {
+  const p = model?.playersById?.[model.localPlayerId], e = p && model.entitiesById?.[p.entityId];
+  if (!p || !e) return null;
+  const space = model.space, v = space?.visual, pos = e.position;
+  let land = null;
+  if (v?.biomes && pos) {
+    const code2 = v.biomes[Math.floor(pos.y / 32) - (v.originTile?.y ?? 0)]?.[Math.floor(pos.x / 32) - (v.originTile?.x ?? 0)];
+    land = LANDS[code2] ?? null;
+  }
+  const place3 = typeof space?.label === "string" ? space.label.split(" \xB7 ")[0].trim().slice(0, 40) || null : null;
+  return { hero: { name: (e.heroLook?.look?.name || p.d8?.look?.name || "").slice(0, 16) || null, cls: p.d8?.heroClass ?? null, level: p.progression?.level ?? null }, place: place3, land };
+}
+
+// src/client/friends_view_v1.js
+var CLASS_NAMES2 = { knight: "Knight", rogue: "Rogue", mage: "Mage" };
+var CSS5 = `#world-inventory[data-section=friends] #world-bag-browse,#world-inventory[data-section=friends] #world-materials-view,#world-inventory[data-section=friends] #world-forge-view,#world-inventory[data-section=friends] #world-bag-summary,#world-inventory[data-section=friends] #world-bag-stats{display:none}
+#world-inventory .friends-page{grid-column:1/-1;display:grid;gap:12px;align-content:start;min-height:0;overflow:auto;padding:10px 12px 18px;color:var(--rpg-ivory,#f4e7c4);overscroll-behavior:contain}
+#world-inventory .friends-page[hidden]{display:none}
+.fr-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:12px;align-items:start}
+.fr-box{display:grid;gap:8px;padding:10px 12px;border:1px solid #2e3a45;border-radius:12px;background:#131b23}
+.fr-box h4{display:flex;align-items:baseline;justify-content:space-between;margin:0;font:700 12px var(--rpg-ui,system-ui);letter-spacing:.08em;text-transform:uppercase;color:#c9b88f}
+.fr-box h4 span{font-weight:400;letter-spacing:0;text-transform:none;color:var(--rpg-muted,#93a0a6)}
+.fr-note,.fr-status{margin:0;font:12px/1.45 var(--rpg-ui,system-ui);color:var(--rpg-muted,#93a0a6)}
+.fr-status{color:#e9c46a}.fr-status:empty{display:none}
+.fr-code{display:flex;align-items:center;gap:10px}
+.fr-code strong{font:700 22px var(--rpg-title,serif);color:#f4e7c4}.fr-code strong span{color:#e9c46a}
+.fr-row{display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;gap:10px;padding:6px 0;border-top:1px solid #1f2a33}
+.fr-row:first-of-type{border-top:0}
+.fr-av{position:relative;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:#22303b;color:#f4e7c4;font:700 15px var(--rpg-title,serif)}
+.fr-av::after{content:'';position:absolute;right:-1px;bottom:-1px;width:11px;height:11px;border:2px solid #131b23;border-radius:50%;background:#4a5560}
+.fr-av.is-playing::after{background:#59c27a}.fr-av.is-menu::after{background:#e9c46a}
+.fr-who{display:grid;gap:2px;min-width:0}
+.fr-who b{overflow:hidden;font:700 14px var(--rpg-ui,system-ui);color:#f4e7c4;text-overflow:ellipsis;white-space:nowrap}.fr-who b small{font-weight:400;color:var(--rpg-muted,#93a0a6)}
+.fr-who span{overflow:hidden;font:12px var(--rpg-ui,system-ui);color:var(--rpg-muted,#93a0a6);text-overflow:ellipsis;white-space:nowrap}
+.fr-acts{display:flex;gap:6px;align-items:center}
+.fr-add{display:flex;gap:8px}
+.fr-add input{flex:1;min-width:0;min-height:40px;padding:0 12px;border:1px solid #3a4652;border-radius:10px;background:#0d1318;color:#f4e7c4;font:14px var(--rpg-ui,system-ui)}
+.fr-modes{display:grid;gap:6px}
+.fr-mode{display:grid;grid-template-columns:20px 1fr;gap:2px 8px;align-items:center;padding:8px 10px;border:1px solid #2e3a45;border-radius:10px;cursor:pointer}
+.fr-mode.is-on{border-color:#e9c46a;background:#1b242c}
+.fr-mode input{margin:0;accent-color:#e9c46a}.fr-mode b{font:600 13px var(--rpg-ui,system-ui);color:#f4e7c4}.fr-mode small{grid-column:2;font:12px var(--rpg-ui,system-ui);color:var(--rpg-muted,#93a0a6)}
+.fr-backup{overflow-wrap:anywhere;padding:8px 10px;border:1px dashed #3a4652;border-radius:10px;font:12px/1.4 ui-monospace,monospace;color:#c9d0d3;user-select:all}
+body #world-inventory .friends-page button{min-height:36px;padding:0 14px;border:1px solid #6d5a3c;border-radius:999px;background:linear-gradient(#3a3222,#241f16);color:#fff3cf;font:600 13px var(--rpg-ui,system-ui);white-space:nowrap}
+body #world-inventory .friends-page button.is-quiet{border-color:#3a4652;background:transparent;color:#c9d0d3}
+body #world-inventory .friends-page button.is-go{border-color:#4f9a66;background:linear-gradient(#2c5a3a,#1a3524);color:#eafff0}
+body #world-inventory .friends-page button.is-x{min-height:28px;width:28px;padding:0;border-color:transparent;background:transparent;color:#6f7b83;font-size:16px}
+body #world-inventory .friends-page button:disabled{opacity:.5}
+@media(max-width:600px){.fr-cols{grid-template-columns:1fr}}`;
+function friendStatusLine(f) {
+  if (!f.online) return f.seen ? `Last played ${ago(Date.now() - f.seen)}` : "Offline";
+  const where = [f.place, f.land].filter(Boolean).join(", ");
+  return (f.status === "playing" ? "Playing" : "In a menu") + (where ? ` \xB7 ${where}` : "");
+}
+function ago(ms) {
+  const m = Math.round(ms / 6e4);
+  if (m < 2) return "just now";
+  if (m < 60) return `${m} minutes ago`;
+  const h = Math.round(m / 60);
+  if (h < 2) return "an hour ago";
+  if (h < 24) return `${h} hours ago`;
+  const d = Math.round(h / 24);
+  return d < 2 ? "yesterday" : d < 14 ? `${d} days ago` : "a while ago";
+}
+var heroLine = (h) => h?.name ? ` \xB7 ${h.name}${h.cls || h.level ? ` (${[CLASS_NAMES2[h.cls], h.level].filter(Boolean).join(" ")})` : ""}` : "";
+function createFriendsViewV1({ document: document2, environment, friends, actions = null }) {
+  const root3 = document2.createElement("section");
+  root3.id = "world-friends-view";
+  root3.className = "friends-page";
+  root3.hidden = true;
+  if (!document2.getElementById("friends-v1-css")) {
+    const s = document2.createElement("style");
+    s.id = "friends-v1-css";
+    s.textContent = CSS5;
+    document2.head.append(s);
+  }
+  let shown2 = false, busy = null, status2 = "", showBackup = false, removing = null, renaming = false, key3 = null;
+  const el3 = (tag, cls, text3) => {
+    const e = document2.createElement(tag);
+    if (cls) e.className = cls;
+    if (text3 != null) e.textContent = text3;
+    return e;
+  };
+  const button3 = (text3, action2, cls = "") => {
+    const b = el3("button", cls, text3);
+    b.type = "button";
+    b.disabled = Boolean(busy) || Boolean(actions?.busy?.());
+    b.addEventListener("click", action2);
+    return b;
+  };
+  async function act(kind, work, done3 = "") {
+    if (busy) return;
+    busy = kind;
+    status2 = "";
+    render(true);
+    try {
+      const r = await work();
+      status2 = typeof done3 === "function" ? done3(r) : done3;
+    } catch (e) {
+      status2 = e?.message || "That didn\u2019t work. Try again.";
+    }
+    busy = null;
+    render(true);
+  }
+  const copy = async (text3, what) => {
+    try {
+      await environment.navigator.clipboard.writeText(text3);
+      status2 = `${what} copied.`;
+    } catch {
+      status2 = `Couldn\u2019t copy. Select it and copy by hand.`;
+    }
+    render(true);
+  };
+  const box5 = (title, count) => {
+    const b = el3("div", "fr-box"), h = el3("h4", "", title);
+    if (count != null) h.append(el3("span", "", String(count)));
+    b.append(h);
+    return b;
+  };
+  const input = (placeholder, max = 24) => {
+    const i = el3("input");
+    i.placeholder = placeholder;
+    i.maxLength = max;
+    i.autocomplete = "off";
+    i.spellcheck = false;
+    return i;
+  };
+  const avatar = (name, cls = "") => el3("div", "fr-av" + (cls ? " " + cls : ""), (name || "?").slice(0, 1).toUpperCase());
+  function signUp() {
+    const intro = el3("p", "fr-note", "Pick a player name. You get a friend code like Sammy#4821 to share with friends. Your heroes keep their own names.");
+    const name = input("Player name", 16), go = button3("Make my friend code", () => act("register", () => friends.register(name.value.trim()), (c) => `Your friend code is ${c}.`));
+    name.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") go.click();
+    });
+    const add2 = el3("div", "fr-add");
+    add2.append(name, go);
+    const restoreBox = box5("Moving from another device?"), code2 = input("Backup code (starts with saqf1)", 90), use = button3("Use", () => act("restore", () => friends.restore(code2.value), (c) => `Welcome back, ${c}.`), "is-quiet");
+    const row2 = el3("div", "fr-add");
+    row2.append(code2, use);
+    restoreBox.append(el3("p", "fr-note", "Type the backup code from your old device to bring your friend code and friends."), row2);
+    const first = box5("Friends");
+    first.append(intro, add2);
+    return [first, restoreBox];
+  }
+  function friendRow(f) {
+    const row2 = el3("div", "fr-row"), who = el3("div", "fr-who"), acts = el3("div", "fr-acts"), name = el3("b", "", f.name);
+    if (f.online && f.hero?.name) name.append(el3("small", "", heroLine(f.hero)));
+    who.append(name, el3("span", "", friendStatusLine(f)));
+    const can = actions && f.online;
+    if (can && f.status === "playing" && f.full) {
+      const b = button3("Full", () => {
+      }, "is-quiet");
+      b.disabled = true;
+      acts.append(b);
+    } else if (can && f.status === "playing" && f.mode === "open") acts.append(button3("Join", () => act("join", () => actions.join(f)), "is-go"));
+    else if (can && f.status === "playing" && f.mode === "ask") acts.append(button3("Ask to join", () => act("ask", () => actions.ask(f))));
+    else if (can && actions.canHost?.()) acts.append(button3("Invite", () => act("invite", () => actions.invite(f), `Invited ${f.name}.`), "is-quiet"));
+    if (removing === f.id) acts.append(button3("Remove", () => act("remove", () => friends.remove(f.id), `Removed ${f.code}.`), "is-quiet"));
+    else acts.append(button3("\xD7", () => {
+      removing = f.id;
+      render(true);
+    }, "is-x"));
+    acts.lastChild.setAttribute("aria-label", `Remove ${f.code}`);
+    row2.append(avatar(f.name, f.online ? f.status === "playing" ? "is-playing" : "is-menu" : ""), who, acts);
+    return row2;
+  }
+  function render(force = false) {
+    if (!shown2) return;
+    const me = friends.me(), st = friends.state(), k = JSON.stringify([me, st, friends.mode(), friends.recent(), busy, status2, showBackup, removing, renaming, actions?.busy?.() ?? null]);
+    if (!force && k === key3) return;
+    key3 = k;
+    const cols = el3("div", "fr-cols"), left = el3("div", "fr-cols"), right = el3("div", "fr-cols");
+    left.style.gridTemplateColumns = right.style.gridTemplateColumns = "1fr";
+    const out = [];
+    if (!friends.available()) out.push(el3("p", "fr-note", "Friends need the join server, which isn\u2019t reachable from this page."));
+    else if (!me) out.push(...signUp());
+    else {
+      const mine = box5("Your friend code", "share it once"), code2 = el3("div", "fr-code"), [n, t] = me.code.split("#"), big = el3("strong", "", n);
+      big.append(el3("span", "", "#" + t));
+      code2.append(big, button3("Copy", () => copy(me.code, "Friend code"), "is-quiet"));
+      mine.append(code2);
+      if (renaming) {
+        const name = input("New player name", 16);
+        name.value = me.name ?? n;
+        const row3 = el3("div", "fr-add");
+        row3.append(name, button3("Save", () => act("rename", async () => {
+          const c = await friends.rename(name.value.trim());
+          renaming = false;
+          return c;
+        }, (c) => `Your friend code is now ${c}.`)), button3("Cancel", () => {
+          renaming = false;
+          render(true);
+        }, "is-quiet"));
+        mine.append(row3, el3("p", "fr-note", "Friends keep you. Your old code stops working."));
+      } else mine.append(button3("Change player name", () => {
+        renaming = true;
+        render(true);
+      }, "is-quiet"));
+      const online = st.friends.filter((f) => f.online).sort((a, b) => (b.status === "playing") - (a.status === "playing")), offline = st.friends.filter((f) => !f.online).sort((a, b) => b.seen - a.seen);
+      const on = box5("Online", online.length);
+      if (online.length) on.append(...online.map(friendRow));
+      else on.append(el3("p", "fr-note", st.friends.length ? "No friends are online right now." : "Add a friend with their code, or tap Add on someone you just played with."));
+      left.append(mine, on);
+      if (offline.length) {
+        const off2 = box5("Offline", offline.length);
+        off2.append(...offline.map(friendRow));
+        left.append(off2);
+      }
+      const add2 = box5("Add a friend"), codeIn = input("Their friend code, like Kai#2290", 22), send = button3("Send", () => act("request", () => friends.request(codeIn.value), (r) => r.status === "friends" ? "You are friends now." : `Request sent to ${r.code}.`));
+      codeIn.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") send.click();
+      });
+      const row2 = el3("div", "fr-add");
+      row2.append(codeIn, send);
+      add2.append(row2, el3("p", "fr-note", "The name part is their player name; the four digits tell apart people with the same name."));
+      if (st.sent.length) add2.append(el3("p", "fr-note", `Waiting on: ${st.sent.slice(0, 6).join(", ")}`));
+      right.append(add2);
+      if (st.requests.length) {
+        const req = box5("Requests", st.requests.length);
+        for (const r of st.requests) {
+          const rr3 = el3("div", "fr-row"), who = el3("div", "fr-who"), acts = el3("div", "fr-acts");
+          who.append(el3("b", "", r.code), el3("span", "", "Wants to be friends"));
+          acts.append(button3("Decline", () => act("answer", () => friends.answer(r.id, false)), "is-quiet"), button3("Accept", () => act("answer", () => friends.answer(r.id, true), `You and ${r.code} are friends.`), "is-go"));
+          rr3.append(avatar(r.code), who, acts);
+          req.append(rr3);
+        }
+        right.append(req);
+      }
+      const codes = /* @__PURE__ */ new Set([...st.friends.map((f) => f.code.toLowerCase()), ...st.sent.map((c) => c.toLowerCase())]), recent = friends.recent();
+      if (recent.length) {
+        const rec = box5("Played with recently");
+        for (const r of recent.slice(0, 8)) {
+          const rr3 = el3("div", "fr-row"), who = el3("div", "fr-who"), acts = el3("div", "fr-acts");
+          who.append(el3("b", "", r.code), el3("span", "", `${r.hero ? r.hero + " \xB7 " : ""}played ${ago(Date.now() - r.at)}`));
+          if (codes.has(r.code.toLowerCase())) acts.append(el3("span", "fr-note", st.friends.some((f) => f.code.toLowerCase() === r.code.toLowerCase()) ? "Friends" : "Sent"));
+          else acts.append(button3("Add", () => act("request", () => friends.request(r.code), (x) => x.status === "friends" ? "You are friends now." : `Request sent to ${x.code}.`)));
+          rr3.append(avatar(r.code), who, acts);
+          rec.append(rr3);
+        }
+        right.append(rec);
+      }
+      const modes = box5("Who can join"), list = el3("div", "fr-modes");
+      for (const [id, label4, note] of FRIEND_MODES) {
+        const l = el3("label", "fr-mode" + (friends.mode() === id ? " is-on" : "")), r = el3("input");
+        r.type = "radio";
+        r.name = "fr-mode";
+        r.checked = friends.mode() === id;
+        r.addEventListener("change", () => {
+          friends.setMode(id);
+          render(true);
+        });
+        l.append(r, el3("b", "", label4), el3("small", "", note));
+        list.append(l);
+      }
+      modes.append(list, el3("p", "fr-note", "Your party is still 4 heroes. When it is full, friends see Full."));
+      right.append(modes);
+      const back = box5("Back up my friends");
+      if (showBackup) {
+        const c = friends.backupCode();
+        back.append(el3("p", "fr-note", "On a new phone, open Friends and type this code to bring your friend code and friends. Keep it private: anyone with it can be you."), el3("div", "fr-backup", c), button3("Copy backup code", () => copy(c, "Backup code"), "is-quiet"));
+      } else back.append(el3("p", "fr-note", "A code that moves your friend code and friends to a new phone."), button3("Show backup code", () => {
+        showBackup = true;
+        render(true);
+      }, "is-quiet"));
+      right.append(back);
+      cols.append(left, right);
+      out.push(cols);
+    }
+    const s = el3("p", "fr-status", status2 || (me && st.error ? st.error : ""));
+    s.setAttribute("aria-live", "polite");
+    root3.replaceChildren(s, ...out);
+  }
+  const off = friends.subscribe(() => render());
+  return Object.freeze({
+    root: root3,
+    refresh(visible3) {
+      if (visible3 === shown2) return;
+      shown2 = visible3;
+      root3.hidden = !visible3;
+      removing = null;
+      showBackup = false;
+      friends.pace("page", visible3 ? PACE_MS.page : null);
+      if (visible3) {
+        friends.sync();
+        render(true);
+      }
+    },
+    destroy() {
+      off();
+      friends.pace("page", null);
+      root3.remove();
+    }
+  });
+}
+
 // src/client/inventory_presentation.js
 var bestiaryToasts = createBestiaryToastsV1(globalThis.document);
 var resolvePlayerStats3 = (p) => {
@@ -101931,7 +102443,7 @@ function contextActionLabelForModel(model, action2 = contextActionForModel(model
   if (!resource) return null;
   return resource.eventPod ? "Destroy spore pod" : resource.kind === "chest" ? model.space?.site?.siteKind === "woodland-cave" ? "Open Chest" : "Open chest" : resource.art === "camp_crate" ? "Break the crate" : resource.art === "barrel" ? "Break barrel" : resource.art === "urn" ? "Break urn" : "Break pot";
 }
-var MENU_PAGES = [["equipment", "Gear"], ["bag", "Bag"], ["materials", "Materials"], ["bestiary", "Bestiary"], ["stats", "Stats"], ["progression", "Skills"], ["quests", "Quests"], ["heroes", "Heroes"], ["settings", "Settings"]];
+var MENU_PAGES = [["equipment", "Gear"], ["bag", "Bag"], ["materials", "Materials"], ["bestiary", "Bestiary"], ["stats", "Stats"], ["progression", "Skills"], ["quests", "Quests"], ["friends", "Friends"], ["heroes", "Heroes"], ["settings", "Settings"]];
 var MENU_TITLES = { equipment: "Gear", bag: "Bag", materials: "Materials" };
 var SEEN_KEY = "saq-world-seen-items-v1:";
 var menuIcon = (d) => `<svg class="rm-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
@@ -101945,6 +102457,7 @@ var MENU_ICONS = Object.freeze({
   stats: menuIcon('<path d="M5 20V11M10 20V5M15 20v-7M20 20V8"/>'),
   progression: menuIcon('<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.5 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/>'),
   heroes: menuIcon('<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 19c0-3.3 2.7-6 6-6s6 2.7 6 6M15 14.2c3 .2 5 2.3 5 4.8"/>'),
+  friends: menuIcon('<circle cx="8" cy="9" r="3"/><circle cx="16" cy="9" r="3"/><path d="M2.5 19c.4-3 2.7-5 5.5-5 1.6 0 3 .6 4 1.7 1-1.1 2.4-1.7 4-1.7 2.8 0 5.1 2 5.5 5"/>'),
   settings: menuIcon('<circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r="6.6"/><path d="M12 2.6v2.8M12 18.6v2.8M2.6 12h2.8M18.6 12h2.8M5.4 5.4l2 2M16.6 16.6l2 2M5.4 18.6l2-2M16.6 7.4l2-2"/>')
 });
 function createInventoryPresentation({ document: document2, environment, readModel, adapter, clearInput, restoreGameplayFocus = () => {
@@ -102017,6 +102530,32 @@ function createInventoryPresentation({ document: document2, environment, readMod
   questsButton.id = "world-quests-tab";
   panel.querySelector(".bag-section-tabs").append(questsButton);
   if (questsPage) document2.querySelector(".bag-body").append(questsPage.root);
+  const friendsView = heroSlots?.friends?.client ? createFriendsViewV1({ document: document2, environment, friends: heroSlots.friends.client, actions: heroSlots.friends.actions }) : null, friendsButton = friendsView && button3("FRIENDS", () => {
+    forgeSession = false;
+    section = "friends";
+    inspect = false;
+    key3 = null;
+    refresh(readModel());
+  });
+  if (friendsView) {
+    friendsButton.id = "world-friends-tab";
+    panel.querySelector(".bag-section-tabs").append(friendsButton);
+    document2.querySelector(".bag-body").append(friendsView.root);
+  }
+  const openFriendsEvent = () => {
+    const m = readModel();
+    if (!friendsView || !m.inventory) return;
+    clearInput();
+    forgeSession = false;
+    section = "friends";
+    open2 = true;
+    inspect = false;
+    error = "";
+    key3 = null;
+    refresh(readModel());
+    closeButton.focus();
+  };
+  document2.addEventListener("saq-open-friends", openFriendsEvent);
   if (heroesView) {
     heroesButton.id = "world-heroes-tab";
     panel.querySelector(".bag-section-tabs").append(heroesButton);
@@ -102040,8 +102579,15 @@ function createInventoryPresentation({ document: document2, environment, readMod
   const hub = createMenuHubV1({ document: document2, tiles: [{ id: "quests", name: "Quests", icon: plainIcon(MENU_ICONS.quests), pick: () => questsButton.click() }, { id: "map", name: "Map", icon: MENU_HUB_ICONS.map, pick: () => {
     close();
     environment.setTimeout(() => openMap?.(), 80);
-  } }, { id: "bestiary", name: "Bestiary", icon: plainIcon(MENU_ICONS.bestiary), pick: () => go("bestiary") }, { id: "heroes", name: "Heroes", icon: plainIcon(MENU_ICONS.heroes), pick: () => go("heroes") }, { id: "settings", name: "Settings", icon: MENU_HUB_ICONS.settings, pick: () => go("settings") }] });
+  } }, { id: "bestiary", name: "Bestiary", icon: plainIcon(MENU_ICONS.bestiary), pick: () => go("bestiary") }, { id: "friends", name: "Friends", icon: plainIcon(MENU_ICONS.friends), pick: () => go("friends") }, { id: "heroes", name: "Heroes", icon: plainIcon(MENU_ICONS.heroes), pick: () => go("heroes") }, { id: "settings", name: "Settings", icon: MENU_HUB_ICONS.settings, pick: () => go("settings") }] });
   document2.querySelector(".bag-body").append(hub.root);
+  function friendsSub() {
+    const f = heroSlots?.friends?.client;
+    if (!friendsView || !f) return { hidden: true };
+    if (!f.signedIn()) return { sub: "Get your friend code" };
+    const st = f.state(), on = st.friends.filter((x) => x.online).length;
+    return { sub: st.friends.length ? on + " online" : "Add friends", badge: st.requests.length ? String(st.requests.length) : "" };
+  }
   function paintHub(m) {
     const active2 = m.quests?.active ?? [], done3 = active2.filter((q) => q.status === "ready").length;
     let heroes = 1;
@@ -102049,7 +102595,7 @@ function createInventoryPresentation({ document: document2, environment, readMod
       heroes = heroSlots?.list()?.heroes?.length || 1;
     } catch {
     }
-    hub.paint({ quests: { sub: active2.length ? active2.length + " active" : "None yet", badge: done3 ? "!" : "" }, map: { sub: "The whole world" }, bestiary: { sub: "Monster cards" }, heroes: { sub: heroes === 1 ? "1 hero" : heroes + " heroes", hidden: !heroesView }, settings: { sub: "Sound \xB7 controls", hidden: !settingsPage } });
+    hub.paint({ quests: { sub: active2.length ? active2.length + " active" : "None yet", badge: done3 ? "!" : "" }, map: { sub: "The whole world" }, bestiary: { sub: "Monster cards" }, friends: friendsSub(), heroes: { sub: heroes === 1 ? "1 hero" : heroes + " heroes", hidden: !heroesView }, settings: { sub: "Sound \xB7 controls", hidden: !settingsPage } });
   }
   const nav = panel.querySelector(".bag-section-tabs"), heading = panel.querySelector(".bag-heading");
   panel.classList.add("rpg-menu");
@@ -102357,6 +102903,8 @@ function createInventoryPresentation({ document: document2, environment, readMod
     statsButton.setAttribute("aria-pressed", String(section === "stats"));
     heroesView?.refresh(open2 && section === "heroes");
     heroesButton?.setAttribute("aria-pressed", String(section === "heroes"));
+    friendsView?.refresh(open2 && section === "friends");
+    friendsButton?.setAttribute("aria-pressed", String(section === "friends"));
     questsPage?.refresh(open2 && section === "quests");
     questsButton.setAttribute("aria-pressed", String(section === "quests"));
     settingsPage?.refresh(open2 && section === "settings");
@@ -102379,11 +102927,11 @@ function createInventoryPresentation({ document: document2, environment, readMod
     gearSwitch.hidden = !open2 || !forgeSession;
     gearSwitch.textContent = section === "forge" ? "Carried gear" : "Attunement";
     if (!open2) return;
-    if (section === "progression" || section === "stats" || section === "heroes" || section === "bestiary" || section === "quests" || section === "hub" || section === "settings") {
+    if (section === "progression" || section === "stats" || section === "heroes" || section === "friends" || section === "bestiary" || section === "quests" || section === "hub" || section === "settings") {
       panel.dataset.section = section;
       panel.classList.remove("is-inspecting");
       comparison.hidden = true;
-      document2.getElementById("world-bag-title").textContent = section === "stats" ? "Stats" : section === "heroes" ? "Heroes" : section === "bestiary" ? "Bestiary" : section === "quests" ? "Quests" : section === "hub" ? "Menu" : section === "settings" ? "Settings" : "Skills";
+      document2.getElementById("world-bag-title").textContent = section === "stats" ? "Stats" : section === "heroes" ? "Heroes" : section === "friends" ? "Friends" : section === "bestiary" ? "Bestiary" : section === "quests" ? "Quests" : section === "hub" ? "Menu" : section === "settings" ? "Settings" : "Skills";
       for (const id of ["equipment", "bag", "materials"]) document2.getElementById(`world-${id}-tab`).setAttribute("aria-pressed", "false");
       status2.textContent = error;
       return;
@@ -103041,6 +103589,9 @@ function createInventoryPresentation({ document: document2, environment, readMod
     statsButton.remove();
     heroesView?.destroy();
     heroesButton?.remove();
+    friendsView?.destroy();
+    friendsButton?.remove();
+    document2.removeEventListener("saq-open-friends", openFriendsEvent);
     bestiaryView.destroy();
     bestiaryButton.remove();
     questsButton.remove();
@@ -104216,7 +104767,7 @@ function readSettingsV1(storage) {
   s.effects = Math.max(0, Math.min(100, Math.round(s.effects)));
   return s;
 }
-var CSS5 = `
+var CSS6 = `
 .st{flex:1;min-width:0;min-height:0;overflow:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 20px;align-content:start;padding:16px 20px;box-sizing:border-box;color:#e9dfc8;font:14px/1.35 var(--rpg-ui,"Segoe UI",system-ui,sans-serif)}
 .st[hidden]{display:none}
 .st-sec{border:1px solid #33424e;border-radius:14px;background:linear-gradient(180deg,#212f3a,#18232d);padding:12px 16px 14px;display:flex;flex-direction:column;gap:10px;min-width:0}
@@ -104276,7 +104827,7 @@ function createSettingsPageV1({ document: doc, environment: env }) {
   if (!doc.getElementById("settings-v1-css")) {
     const st = doc.createElement("style");
     st.id = "settings-v1-css";
-    st.textContent = CSS5;
+    st.textContent = CSS6;
     doc.head.append(st);
   }
   const el3 = (tag, cls, text3) => {
@@ -140543,14 +141094,15 @@ var MODEL_INTERVAL_MS = 33;
 var PASSPORT_INTERVAL_MS = 3e3;
 var AWAY_WAIT_MS = 5e3;
 var KEEP_PASSPORTS = 12;
-function createCoopHostV1({ build: build2, hostName, world, readWorldFile = null, onFacts = () => {
+function createCoopHostV1({ build: build2, hostName, hostFriend = null, world, readWorldFile = null, onFacts = () => {
 }, now: now3 = () => performance.now(), setInterval: setInterval2 = globalThis.setInterval.bind(globalThis), clearInterval: clearInterval2 = globalThis.clearInterval.bind(globalThis), setTimeout: setTimeout2 = globalThis.setTimeout.bind(globalThis), clearTimeout: clearTimeout2 = globalThis.clearTimeout.bind(globalThis), nextToken, onChange = () => {
 }, validatePassport = validateHeroPassport }) {
   const guests = /* @__PURE__ */ new Map(), held = /* @__PURE__ */ new Map();
   let session = null, started = false, timer = null, closed = false, shared = null;
-  const roster = () => [...guests.values()].filter((g) => g.hello).map((g) => ({ name: g.hello.name, heroId: g.hello.heroId, playerId: g.playerId ?? null, via: g.via }));
+  const friendOf = (m) => typeof m.friend === "string" && /^.{1,16}#\d{4}$/u.test(m.friend) ? m.friend : null;
+  const roster = () => [...guests.values()].filter((g) => g.hello).map((g) => ({ name: g.hello.name, heroId: g.hello.heroId, playerId: g.playerId ?? null, via: g.via, friend: friendOf(g.hello) }));
   const tellLobby = () => {
-    const players = [{ name: hostName, heroId: null }, ...roster()];
+    const players = [{ name: hostName, heroId: null, friend: hostFriend }, ...roster()];
     for (const g of guests.values()) if (g.hello) g.link.send({ t: "lobby", players });
     onChange(players);
   };
@@ -140758,6 +141310,14 @@ function createCoopHostV1({ build: build2, hostName, world, readWorldFile = null
     setParty(info2) {
       shared = info2 ? { id: info2.id, label: info2.label, owner: info2.owner } : null;
     },
+    // Friends v1: the host's game is about to reopen as a new lobby (to let a friend in) under this code;
+    // guests go there on their own when the link closes.
+    move(code2) {
+      for (const g of guests.values()) if (g.hello && !g.link.closed) try {
+        g.link.send({ t: "move", code: code2 });
+      } catch {
+      }
+    },
     start() {
       started = true;
       for (const g of [...guests.values()]) if (!g.hello) drop2(g, "The game started without you.");
@@ -140845,7 +141405,7 @@ function beginCoopGuestV1({ link, build: build2, hero, onLobby = () => {
         wait2();
       } else if (m.t === "pass") early.push(m);
     });
-    link.send({ t: "hello", protocol: COOP_PROTOCOL, build: build2, heroId: hero.heroId, name: hero.name, passport: hero.passport });
+    link.send({ t: "hello", protocol: COOP_PROTOCOL, build: build2, heroId: hero.heroId, name: hero.name, passport: hero.passport, ...hero.friend ? { friend: hero.friend } : {} });
   });
 }
 var GLIDE_SNAP_PX = 160;
@@ -140991,9 +141551,10 @@ function createGuestSmoothingV1(now3, { rtt = () => 0, collides = null } = {}) {
   });
 }
 function createCoopGuestSessionV1({ link, playerId, early = [], release = () => {
-}, cartographyWindow = null, onPassport, onEnd, setTimeout: setTimeout2 = globalThis.setTimeout.bind(globalThis) }) {
+}, cartographyWindow = null, onPassport, onEnd, onLobby = () => {
+}, setTimeout: setTimeout2 = globalThis.setTimeout.bind(globalThis) }) {
   const decoder = createModelDecoderV1(), waiting = /* @__PURE__ */ new Map(), now3 = () => performance.now();
-  let lastSequence = 0, lastSentAt = -Infinity, lastStep = 0, nextId = 1, ended = false, firstModel = null, leaving = null, lastFrameAt = now3();
+  let moved = null, lastSequence = 0, lastSentAt = -Infinity, lastStep = 0, nextId = 1, ended = false, firstModel = null, leaving = null, lastFrameAt = now3();
   const ready = new Promise((resolve) => {
     firstModel = resolve;
   });
@@ -141038,6 +141599,11 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
       const r = now3() - m.at;
       if (r >= 0 && r < 5e3) rtt = rtt * 0.7 + r * 0.3;
     } else if (m.t === "bye") end(m.reason || "The host closed the game");
+    else if (m.t === "move" && typeof m.code === "string" && /^[A-HJ-NP-Z2-9]{5}$/.test(m.code)) moved = m.code;
+    else if (m.t === "lobby" && Array.isArray(m.players)) try {
+      onLobby(m.players);
+    } catch {
+    }
   };
   function end(reason, lost = false) {
     if (leaving) {
@@ -141048,7 +141614,7 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
     ended = true;
     for (const w of waiting.values()) w.reject(Error(reason));
     waiting.clear();
-    onEnd(reason, { lost });
+    onEnd(reason, { lost, moved });
   }
   link.onMessage(handle);
   release();
@@ -143299,7 +143865,8 @@ function playerList(document2) {
   const list = el(document2, "ul", "coop-players");
   return { list, show(players) {
     list.replaceChildren(...players.map((p, i) => {
-      const li = el(document2, "li", "", p.name || "Hero");
+      const twin = players.some((o, j) => j !== i && (o.name || "Hero") === (p.name || "Hero")), who = twin && typeof p.friend === "string" ? " \xB7 " + p.friend.replace(/#\d{4}$/, "") : "";
+      const li = el(document2, "li", "", (p.name || "Hero") + who);
       if (i === 0) li.append(el(document2, "span", "coop-tag", "Host"));
       return li;
     }));
@@ -143356,7 +143923,8 @@ function inviteArea({ environment, ui, coopHost }) {
     offer = null;
   } };
 }
-function runCoopLobbyV1({ environment, coopHost, server, hostName, share = null, solo = true }) {
+function runCoopLobbyV1({ environment, coopHost, server, hostName, share = null, solo = true, room: roomCode = null, autoStart = null, onPlayers = () => {
+} }) {
   const ui = shell(environment, "Play together", `Friends join ${hostName}\u2019s world with their own heroes. Up to 3 friends.`), { document: document2, card } = ui;
   const players = playerList(document2);
   players.show([{ name: hostName }]);
@@ -143366,7 +143934,7 @@ function runCoopLobbyV1({ environment, coopHost, server, hostName, share = null,
   if (server) {
     const code2 = el(document2, "p", "coop-code", "\u2026");
     codeBox.append(code2, el(document2, "p", "coop-hint", "Friends choose Join a game and type this code."));
-    createRoomV1(server).then((c) => {
+    (roomCode ? Promise.resolve(roomCode) : createRoomV1(server)).then((c) => {
       code2.textContent = c;
       return hostRoomV1({ server, code: c, onGuest: (link) => coopHost.add(link, { via: "code" }) });
     }).then((r) => {
@@ -143408,7 +143976,39 @@ function runCoopLobbyV1({ environment, coopHost, server, hostName, share = null,
     finish3 = resolve;
   });
   coopHost.onPlayers?.((p) => players.show(p));
+  let autoTimer = null, ended = false;
+  if (autoStart) {
+    const expect = Math.max(1, autoStart.expect | 0);
+    ui.say(expect === 1 ? "Your friend is on the way. The game starts when they\u2019re in." : `${expect} friends are on the way. The game starts when they\u2019re in.`);
+    autoTimer = environment.setTimeout(() => {
+      autoTimer = null;
+      if (ended) return;
+      if (coopHost.party().length || solo) done3(true);
+      else ui.say("No one arrived yet. Start when they do, or go home.");
+    }, autoStart.ms ?? 6e4);
+    const check = (list) => {
+      if (!ended && list.length - 1 >= expect) environment.setTimeout(() => {
+        if (!ended) done3(true);
+      }, 800);
+    };
+    const before = players.show;
+    players.show = (list) => {
+      before(list);
+      check(list);
+    };
+  }
+  const shown2 = players.show;
+  players.show = (list) => {
+    shown2(list);
+    try {
+      onPlayers(list);
+    } catch {
+    }
+  };
   function done3(go) {
+    if (ended) return;
+    ended = true;
+    if (autoTimer !== null) environment.clearTimeout(autoTimer);
     invite.close();
     ui.close();
     if (!go) {
@@ -143429,7 +144029,8 @@ function showInviteBackV1({ environment, coopHost, names: names2 }) {
   invite.nextInvite();
   return ui;
 }
-function runCoopJoinV1({ environment, server, build: build2, hero, onWorldFile, autoCode = null }) {
+function runCoopJoinV1({ environment, server, build: build2, hero, onWorldFile, autoCode = null, onPlayers = () => {
+} }) {
   const ui = shell(environment, autoCode ? "Coming back" : "Join a game", autoCode ? `${hero.name} is going back into the game.` : `${hero.name} joins a friend\u2019s world. Everything ${hero.name} earns comes home.`), { document: document2, card } = ui;
   const players = playerList(document2), codeBox = el(document2, "div", "coop-section"), qrBox = el(document2, "div", "coop-section"), actions = el(document2, "div", "coop-actions");
   let finish3 = null, busy = false;
@@ -143443,7 +144044,13 @@ function runCoopJoinV1({ environment, server, build: build2, hero, onWorldFile, 
     ui.say(autoCode ? "Connected. Taking your seat\u2026" : "Connected. Waiting for the host to start\u2026");
     card.insertBefore(players.list, ui.status);
     try {
-      const start = await beginCoopGuestV1({ link, build: build2, hero, onLobby: (p) => players.show(p), onWorldFile });
+      const start = await beginCoopGuestV1({ link, build: build2, hero, onLobby: (p) => {
+        players.show(p);
+        try {
+          onPlayers(p);
+        } catch {
+        }
+      }, onWorldFile });
       ui.close();
       finish3({ link, start, via, code: joinedCode });
     } catch (e) {
@@ -143561,6 +144168,226 @@ function showCoopEndedV1({ environment, title = "Back home", reason, onHome, aga
   }));
   ui.card.append(actions);
   return ui;
+}
+
+// src/client/friends_flow_v1.js
+var ASK_MS = 3e4;
+var WAIT_MS = 9e4;
+var INVITE_MS = 18e4;
+var GATHER_MS = 1500;
+var CSS7 = `.fr-toast{position:fixed;left:50%;top:calc(12px + var(--world-safe-top,0px));z-index:60;transform:translateX(-50%);display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center;width:min(420px,calc(100vw - 32px));padding:12px 14px;border:1px solid #6d5a3c;border-radius:14px;background:linear-gradient(#1f2a33,#151d25);box-shadow:0 8px 28px #0008;color:#f4e7c4;font:13px/1.4 var(--rpg-ui,system-ui)}
+.fr-toast-av{grid-row:span 2;display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#2c3b47;font:700 16px var(--rpg-title,serif)}
+.fr-toast p{margin:0;font-weight:600}.fr-toast small{color:#93a0a6}
+.fr-toast-acts{grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px;margin-top:4px}
+.fr-toast-acts:empty{display:none}
+.fr-toast button{min-height:36px;padding:0 16px;border:1px solid #6d5a3c;border-radius:999px;background:linear-gradient(#3a3222,#241f16);color:#fff3cf;font:600 13px var(--rpg-ui,system-ui)}
+.fr-toast button.is-quiet{border-color:#3a4652;background:transparent;color:#c9d0d3}
+.fr-toast button.is-go{border-color:#4f9a66;background:linear-gradient(#2c5a3a,#1a3524);color:#eafff0}
+.fr-toast-bar{grid-column:1/-1;height:3px;border-radius:2px;background:#e9c46a;transform-origin:left;animation:fr-toast-bar linear forwards}
+@keyframes fr-toast-bar{to{transform:scaleX(0)}}`;
+var CLASS_NAMES3 = { knight: "Knight", rogue: "Rogue", mage: "Mage" };
+var heroWords = (h) => h?.name ? [h.name, [CLASS_NAMES3[h.cls], h.level].filter(Boolean).join(" ")].filter(Boolean).join(" \xB7 ") : "";
+var nameOf = (code2) => String(code2 ?? "A friend").replace(/#\d{4}$/, "");
+function createFriendsFlowV1({ environment, friends, game, now: now3 = () => Date.now() }) {
+  const document2 = environment.document;
+  if (!document2.getElementById("friends-flow-v1-css")) {
+    const s = document2.createElement("style");
+    s.id = "friends-flow-v1-css";
+    s.textContent = CSS7;
+    document2.head.append(s);
+  }
+  const invited = /* @__PURE__ */ new Map(), cards = [];
+  let waiting = null, letting = null, leaving = false, shown2 = null;
+  const el3 = (tag, cls, text3) => {
+    const e = document2.createElement(tag);
+    if (cls) e.className = cls;
+    if (text3 != null) e.textContent = text3;
+    return e;
+  };
+  function card({ who, title, sub, buttons = [], ms = 0, onTimeout = null, id = null }) {
+    const c = { who, title, sub, buttons, ms, onTimeout, id, timer: null };
+    cards.push(c);
+    if (!shown2) next();
+    return c;
+  }
+  function next() {
+    shown2?.root?.remove();
+    shown2 = null;
+    const c = cards.shift();
+    if (!c) return;
+    shown2 = c;
+    const root3 = el3("div", "fr-toast"), acts = el3("div", "fr-toast-acts");
+    root3.setAttribute("role", "status");
+    root3.append(el3("div", "fr-toast-av", nameOf(c.who).slice(0, 1).toUpperCase()), el3("p", "", c.title), el3("small", "", c.sub ?? ""), acts);
+    for (const [text3, cls, fn] of c.buttons) {
+      const b = el3("button", cls, text3);
+      b.type = "button";
+      b.addEventListener("click", () => {
+        close(c);
+        fn();
+      });
+      acts.append(b);
+    }
+    if (c.ms) {
+      const bar = el3("div", "fr-toast-bar");
+      bar.style.animationDuration = c.ms + "ms";
+      root3.append(bar);
+      c.timer = environment.setTimeout(() => {
+        close(c);
+        c.onTimeout?.();
+      }, c.ms);
+    }
+    c.root = root3;
+    document2.body.append(root3);
+  }
+  function close(c) {
+    if (c.timer !== null) environment.clearTimeout(c.timer);
+    c.timer = null;
+    const i = cards.indexOf(c);
+    if (i >= 0) cards.splice(i, 1);
+    if (shown2 === c) next();
+  }
+  const closeId = (id) => {
+    for (const c of [...cards, ...shown2 ? [shown2] : []]) if (c.id === id) close(c);
+  };
+  const answer = (to, accept, reason = null, room = null) => friends.note(to, "answer", { accept, ...reason ? { reason } : {}, ...room ? { room } : {} }).catch(() => {
+  });
+  function refuse(n) {
+    if (!game.canHost()) return game.role === "guest" ? `${game.name()} is playing in someone else\u2019s game.` : `${game.name()} can\u2019t host from here.`;
+    if (game.full()) return `${game.name()}\u2019s game is full.`;
+    if (leaving) return `${game.name()} is leaving the game.`;
+    return null;
+  }
+  function letIn(id) {
+    if (!letting) {
+      letting = { ids: /* @__PURE__ */ new Set(), timer: null };
+      card({ who: friends.friend(id)?.code, title: "Letting your friend in\u2026", sub: "Your game saves and opens again with them in it.", id: "letting" });
+      letting.timer = environment.setTimeout(async () => {
+        const ids4 = [...letting.ids];
+        try {
+          await game.letIn(ids4);
+        } catch (e) {
+          closeId("letting");
+          for (const x of ids4) answer(x, false, `${game.name()}\u2019s game couldn\u2019t make room.`);
+          card({ who: game.name(), title: "Couldn\u2019t let them in", sub: e?.message ?? "Try again.", ms: 6e3 });
+        }
+        letting = null;
+      }, GATHER_MS);
+    }
+    letting.ids.add(id);
+  }
+  function onAsk(n) {
+    const why = refuse(n);
+    if (why) {
+      answer(n.from, false, why);
+      return;
+    }
+    if (letting) {
+      letIn(n.from);
+      return;
+    }
+    const mode = friends.mode(), asked = n.kind === "ask", wasInvited = now3() - (invited.get(n.from) ?? -Infinity) < INVITE_MS;
+    if (wasInvited || !asked && mode === "open") {
+      invited.delete(n.from);
+      letIn(n.from);
+      return;
+    }
+    if (mode === "code") {
+      answer(n.from, false, `${game.name()} only lets people in with a code right now.`);
+      return;
+    }
+    closeId("ask:" + n.from);
+    card({
+      id: "ask:" + n.from,
+      who: n.code,
+      title: `${nameOf(n.code)} asks to join your game`,
+      sub: heroWords(n.hero) || n.code,
+      ms: ASK_MS,
+      onTimeout: () => answer(n.from, false, `${game.name()} didn\u2019t answer.`),
+      buttons: [["Not now", "is-quiet", () => answer(n.from, false, `${game.name()} said not now.`)], ["Let in", "is-go", () => {
+        const why2 = refuse(n);
+        if (why2) {
+          answer(n.from, false, why2);
+          return;
+        }
+        letIn(n.from);
+      }]]
+    });
+  }
+  async function ask(f, kind) {
+    if (waiting || letting || leaving) throw Error("Wait for the last answer first.");
+    await friends.note(f.id, kind === "invite-reply" ? "join" : kind, { hero: game.hero() });
+    waiting = { id: f.id, code: f.code, until: now3() + WAIT_MS, timer: null };
+    friends.pace("waiting", PACE_MS.waiting);
+    card({ id: "waiting", who: f.code, title: kind === "ask" ? `Asked ${nameOf(f.code)} to join` : `Joining ${nameOf(f.code)}\u2019s game\u2026`, sub: kind === "ask" ? "Waiting for their answer." : "Waiting for their game to make room.", buttons: [["Cancel", "is-quiet", stopWaiting]] });
+    waiting.timer = environment.setTimeout(() => {
+      const w = waiting;
+      stopWaiting();
+      if (w) card({ who: w.code, title: `No answer from ${nameOf(w.code)}`, sub: "Try again in a bit.", ms: 6e3 });
+    }, WAIT_MS);
+  }
+  function stopWaiting() {
+    if (!waiting) return;
+    if (waiting.timer !== null) environment.clearTimeout(waiting.timer);
+    waiting = null;
+    friends.pace("waiting", null);
+    closeId("waiting");
+  }
+  function onAnswer(n) {
+    if (!waiting || waiting.id !== n.from) return;
+    const w = waiting;
+    stopWaiting();
+    if (n.accept && n.room) {
+      leaving = true;
+      card({ who: w.code, title: `Joining ${nameOf(w.code)}\u2019s game\u2026`, sub: "Saving your hero first.", id: "joining" });
+      Promise.resolve(game.joinWith(n.room)).catch((e) => {
+        leaving = false;
+        closeId("joining");
+        card({ who: w.code, title: "Couldn\u2019t join", sub: e?.message ?? "Try again.", ms: 6e3 });
+      });
+      return;
+    }
+    card({ who: w.code, title: n.reason || `${nameOf(w.code)} said not now.`, sub: "", ms: 6e3 });
+  }
+  function onInvite(n) {
+    if (waiting || letting || leaving) return;
+    closeId("invite:" + n.from);
+    const f = friends.friend(n.from) ?? { id: n.from, code: n.code };
+    card({
+      id: "invite:" + n.from,
+      who: n.code,
+      title: `${nameOf(n.code)} invites you to their game`,
+      sub: heroWords(n.hero) || n.code,
+      ms: ASK_MS,
+      buttons: [["Not now", "is-quiet", () => {
+      }], ["Join", "is-go", () => ask(f, "invite-reply").catch((e) => card({ who: n.code, title: "Couldn\u2019t join", sub: e.message, ms: 6e3 }))]]
+    });
+  }
+  const off = friends.onNote((n) => {
+    if (n.kind === "ask" || n.kind === "join") onAsk(n);
+    else if (n.kind === "answer") onAnswer(n);
+    else if (n.kind === "invite") onInvite(n);
+  });
+  return Object.freeze({
+    // For the Friends page.
+    actions: Object.freeze({
+      join: (f) => ask(f, "join"),
+      ask: (f) => ask(f, "ask"),
+      async invite(f) {
+        if (!game.canHost()) throw Error("You can invite friends from your own world or a shared one.");
+        await friends.note(f.id, "invite", { hero: game.hero() });
+        invited.set(f.id, now3());
+      },
+      canHost: () => game.canHost() && !game.full(),
+      busy: () => waiting ? "waiting" : letting ? "letting" : leaving ? "leaving" : null
+    }),
+    destroy() {
+      off();
+      stopWaiting();
+      for (const c of [...cards]) close(c);
+      shown2?.root?.remove();
+    }
+  });
 }
 
 // src/client/party_world_play_v1.js
@@ -143897,12 +144724,13 @@ async function startWorldClient(environment) {
   const channel2 = saveChannelPrefix(environment.location), heroRecord = ensureHeroIds(deviceStorage, channel2, () => "hero:" + Array.from(environment.crypto.getRandomValues(new Uint8Array(8)), (v) => v.toString(16).padStart(2, "0")).join("")), heroSlot = heroRecord.active, heroEntry = heroRecord.heroes.find((h) => h.slot === heroSlot), heroId = heroEntry?.heroId ?? null;
   let coopIntent = heroId ? readCoopIntentV1(environment) : null;
   writeCoopIntentV1(environment, null);
+  const friends = createFriendsClientV1({ server: coopJoinServerV1(environment), storage: deviceStorage, key: channel2 + FRIENDS_KEY, document: environment.document });
   const playsIn = heroEntry ? heroWorld(heroEntry) : null, worldSlot = heroEntry && (heroRecord.heroes.some((h) => h.slot === playsIn) || isPartySlot(playsIn) && partyBySlot(deviceStorage, channel2, playsIn)) ? playsIn : heroSlot, visiting = worldSlot !== heroSlot, heroPrefix = heroSavePrefix(worldSlot);
   const storyDone = storyDoneV1(environment, deviceStorage, channel2);
   let partyWorld = coopIntent?.role === "guest" ? null : partyBySlot(deviceStorage, channel2, worldSlot), partyCtl = null, partyGuest = null;
   const partyOffers = [];
   const partySolo = !visiting || storyDone;
-  if (heroId && !partySolo) coopIntent = { role: "host" };
+  if (heroId && !partySolo) coopIntent = { ...coopIntent?.role === "host" ? coopIntent : {}, role: "host" };
   const roster = createHeroRosterWriter({ storage: deviceStorage, channel: channel2, slot: heroSlot, visiting: visiting || coopIntent?.role === "guest" });
   const saveIndexedDb = channelIndexedDb(environment.indexedDB, channel2 + heroPrefix);
   const startupLoading = environment.__SAQ_STARTUP_LOADING_V1__ ?? null;
@@ -144023,7 +144851,7 @@ async function startWorldClient(environment) {
     }
     try {
       builtWorlds = createBuiltWorldStoreV1({ indexedDB: saveIndexedDb, sha256 });
-      coopJoin = await coopScreens.runCoopJoinV1({ environment, server: coopJoinServerV1(environment), build: coopBuild, hero: { heroId, name: heroName, passport }, autoCode: coopIntent?.code ?? null, onWorldFile: async (w) => Boolean(await builtWorlds.info(w.hash)) });
+      coopJoin = await coopScreens.runCoopJoinV1({ environment, server: coopJoinServerV1(environment), build: coopBuild, hero: { heroId, name: heroName, passport, friend: friends.me()?.code ?? null }, autoCode: coopIntent?.code ?? null, onPlayers: (p) => friends.remember(p), onWorldFile: async (w) => Boolean(await builtWorlds.info(w.hash)) });
       if (!coopJoin) {
         home();
         return null;
@@ -144099,6 +144927,7 @@ async function startWorldClient(environment) {
     const host = createCoopHostV1({
       build: coopBuild,
       hostName,
+      hostFriend: friends.me()?.code ?? null,
       world: builtWorld ? { kind: "seeded", hash: builtWorld.hash } : { kind: "classic" },
       nextToken,
       onChange: (players) => lobby?.players.show(players),
@@ -144113,7 +144942,7 @@ async function startWorldClient(environment) {
       } : null
     });
     const share = builtWorld && !isPartySlot(worldSlot) || partyWorld ? partyWorld ? { on: true, locked: true, note: partyWorld.own ? "Shared. Friends who play here keep a copy and can host it later." : `${partyWorld.owner}\u2019s world, shared with you. What you all do here goes into ${partyWorld.owner}\u2019s copy too when you play together again.` } : { on: false } : null;
-    lobby = coopScreens.runCoopLobbyV1({ environment, coopHost: host, server: coopJoinServerV1(environment), hostName, share, solo: partySolo });
+    lobby = coopScreens.runCoopLobbyV1({ environment, coopHost: host, server: coopJoinServerV1(environment), hostName, share, solo: partySolo, room: typeof coopIntent?.room === "string" ? coopIntent.room : null, autoStart: coopIntent?.expect > 0 ? { expect: coopIntent.expect, ms: 6e4 } : null, onPlayers: (p) => friends.remember(p) });
     const started = await lobby;
     if (!started && !partySolo) {
       playHeroIn(deviceStorage, channel2, heroSlot, heroSlot);
@@ -144183,8 +145012,8 @@ async function startWorldClient(environment) {
       if (["A", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O"].includes(proofCase)) worldBridge = createWorldWorkerBridgeD9(new environment.Worker(workerUrl, { type: "module" }), { record: performanceProbe?.record, diagnostics: () => performanceProbe?.isRecording() === true, now: () => environment.performance.now(), expectedDatabaseName: environment.document.body.dataset.wildernessV3 === "true" ? databaseName : null });
     }
     const openCoopGuest = async () => {
-      const guest = createCoopGuestSessionV1({ link: coopJoin.link, playerId: coopJoin.start.playerId, early: coopJoin.start.early, release: coopJoin.start.release, cartographyWindow: worldBridge?.cartographyWindow && plannedReview ? (request) => worldBridge.cartographyWindow({ ...request, binding: plannedReview.binding }) : null, onPassport: (passport) => writeHeroPassport(deviceStorage, channel2, passport, null), onEnd: (reason, how) => {
-        coopEndReason = { reason, lost: Boolean(how?.lost) };
+      const guest = createCoopGuestSessionV1({ link: coopJoin.link, playerId: coopJoin.start.playerId, early: coopJoin.start.early, release: coopJoin.start.release, cartographyWindow: worldBridge?.cartographyWindow && plannedReview ? (request) => worldBridge.cartographyWindow({ ...request, binding: plannedReview.binding }) : null, onPassport: (passport) => writeHeroPassport(deviceStorage, channel2, passport, null), onLobby: (p) => friends.remember(p), onEnd: (reason, how) => {
+        coopEndReason = { reason, lost: Boolean(how?.lost), moved: how?.moved ?? null };
         coopEnded?.(coopEndReason);
       } });
       await Promise.race([guest.ready, new Promise((_, reject) => environment.setTimeout(() => reject(Error("The host\u2019s world did not arrive")), 2e4))]);
@@ -144528,12 +145357,18 @@ async function startWorldClient(environment) {
     environment.setInterval(() => {
       if (!coopEndReason) coopBar.say(session.quietMs() > 3e3 && !environment.document.hidden ? `Waiting for ${hostName}\u2026` : inWorld);
     }, 1e3);
-    coopEnded = ({ reason, lost }) => {
+    coopEnded = ({ reason, lost, moved }) => {
       try {
         suspend();
       } catch {
       }
       if (session.isLeaving()) return;
+      if (moved) {
+        coopBar.say(`${hostName} is letting a friend in\u2026`);
+        writeCoopIntentV1(environment, { role: "guest", code: moved });
+        environment.location.reload();
+        return;
+      }
       if (lost && comeBack.code) {
         coopBar.say("Reconnecting\u2026");
         const go = () => {
@@ -144563,11 +145398,62 @@ async function startWorldClient(environment) {
     }
     saveHeroPassport();
   };
+  const friendsCanHost = () => Boolean(coopReady && heroId && worldBridge && !coopGuest);
+  let friendsLand = null;
+  friends.setPresence(() => {
+    let p = null;
+    try {
+      p = presenceFromModelV1(clientPort.getReadModel());
+    } catch {
+    }
+    if (p?.land) friendsLand = p.land;
+    return { status: "playing", hero: p?.hero ?? null, place: coopGuest ? `In ${coopJoin.start.welcome.hostName}\u2019s world` : p?.place ?? null, land: p?.land ?? friendsLand, mode: friendsCanHost() ? friends.mode() : "code", full: Boolean(coopHost && coopHost.guests() >= 3) };
+  });
+  const friendsFlow = friends.available() ? createFriendsFlowV1({ environment, friends, game: {
+    name: () => friends.me()?.name ?? heroEntry?.name ?? "Your friend",
+    hero: () => {
+      try {
+        return presenceFromModelV1(clientPort.getReadModel())?.hero ?? null;
+      } catch {
+        return null;
+      }
+    },
+    role: coopGuest ? "guest" : coopHost ? "host" : null,
+    canHost: friendsCanHost,
+    guests: () => coopHost?.guests() ?? 0,
+    full: () => Boolean(coopHost && coopHost.guests() >= 3),
+    // Let friends in: a fresh join code, friends already here follow to it, the new ones get it in an
+    // answer, then this game saves and opens again as a lobby that starts once they are all in.
+    async letIn(ids4) {
+      const server = coopJoinServerV1(environment);
+      if (!server) throw Error("Letting friends in needs the join server.");
+      const code2 = await createRoomV1(server);
+      const expect = (coopHost ? coopHost.guests() : 0) + ids4.length;
+      coopHost?.move(code2);
+      await Promise.all(ids4.map((id) => friends.note(id, "answer", { accept: true, room: code2 }).catch(() => {
+      })));
+      await saveNow();
+      writeCoopIntentV1(environment, { role: "host", room: code2, expect });
+      environment.location.reload();
+      await new Promise(() => {
+      });
+    },
+    async joinWith(code2) {
+      await saveNow();
+      writeCoopIntentV1(environment, { role: "guest", code: code2 });
+      environment.location.reload();
+      await new Promise(() => {
+      });
+    }
+  } }) : null;
+  friends.pace("world", PACE_MS.world);
+  friends.start();
   const heroSlots = Object.freeze({
     active: heroSlot,
     world: worldSlot,
     list: () => readHeroSlots(deviceStorage, channel2),
     observe: (model) => roster.observe(model),
+    friends: Object.freeze({ client: friends, actions: friendsFlow?.actions ?? null }),
     // world: the slot of the hero whose world to play in (default: the hero's own).
     async play(slot, world = slot) {
       await saveNow();
