@@ -118,7 +118,6 @@ import {
   ELITE_TYPES_V2,
   ENCHANTER_TOWER_V1,
   ENCOUNTER_PROGRESSION_VERSION,
-  EQUIPMENT,
   FERRY_HASH,
   FERRY_NETWORK,
   FERRY_VERSION,
@@ -633,6 +632,7 @@ import {
   itemGearClasses,
   itemLook,
   itemLookType,
+  knownItemDefinitionId,
   laneWidthV1,
   learnAvailability,
   legacyWorldPosition,
@@ -1000,7 +1000,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-36O5BXAT.js";
+} from "./chunk-6LY3BJBV.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -70220,7 +70220,7 @@ function validatePassportItem(item) {
   requireContract(plain2(item), "Hero passport item");
   const extra = { kit: ["piece"], provision: ["provision"] }[item.kind] ?? [];
   closedRecord(item, ["key", "kind", "definitionId", ...extra], ["generated", "workshop"]);
-  requireContract(typeof item.key === "string" && Boolean(EQUIPMENT[item.definitionId]), "Hero passport item definition");
+  requireContract(typeof item.key === "string" && knownItemDefinitionId(item.definitionId, item.generated), "Hero passport item definition");
   requireContract(item.kind === "starter" ? item.key === "starter" && item.definitionId === "worn-sword" : item.kind === "kit" ? CLASS_KIT_PIECES.includes(item.piece) && item.key === "kit:" + item.piece : item.kind === "provision" ? SUBWEAPON_TYPES.includes(item.provision) && item.key === "provision:" + item.provision : item.kind === "gear" && /^gear:[0-9]{1,4}$/.test(item.key), "Hero passport item kind");
   requireContract((item.generated === void 0 || plain2(item.generated)) && (item.workshop === void 0 || plain2(item.workshop)), "Hero passport item data");
 }

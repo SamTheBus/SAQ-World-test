@@ -7569,6 +7569,7 @@ var CLASS_KIT_EQUIPMENT = Object.freeze([
 ]);
 
 // src/shared/content/equipment.js
+var knownItemDefinitionId = (id, generated) => Boolean(EQUIPMENT[id]) || Boolean(generated?.definition) && typeof id === "string" && id === generated.definition.definitionId && /^d7-[a-z]+-[a-z]+$/.test(id);
 var itemDefinition = (item) => item?.workshop ? workshopResult(item).definition : item?.generated?.definition ?? EQUIPMENT[item?.definitionId];
 var equipmentRequiredLevel = (player, item) => combatPlayer(player) && item?.generated?.progression?.combatHash ? item.generated.itemPower : null;
 var equipmentLevelAllowed = (player, item) => {
@@ -25995,7 +25996,7 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
         validateGeneratedGear(i.generated, gearSeed(state, p, i.sourceEntityId), progression);
       }
     }
-    requireContract(i.ownerPlayerId === p.playerId && i.itemId === itemId(p, i.sourceEntityId) && EQUIPMENT[i.definitionId], "Gear ownership/identity");
+    requireContract(i.ownerPlayerId === p.playerId && i.itemId === itemId(p, i.sourceEntityId) && knownItemDefinitionId(i.definitionId, i.generated), "Gear ownership/identity");
     const t = provisionType(p, i.sourceEntityId);
     requireContract(i.generated || EQUIPMENT[i.definitionId].slot !== "subweapon" || t && inv.subweapons?.claims[t] && i.definitionId === `starter-${t}`, "Subweapon lacks provision");
   }
@@ -26890,7 +26891,7 @@ function damageSourceItem(player, mechanic) {
 function validateDamageSourceItem(v) {
   if (v === null) return;
   closedRecord(v, ["itemId", "definitionId", "subType"], ["generatedFamily"]);
-  requireContract(typeof v.itemId === "string" && v.itemId.length > 0 && v.itemId.length <= 240 && Boolean(EQUIPMENT[v.definitionId]) && (v.generatedFamily ? v.generatedFamily === "weapon" && v.subType === null || v.generatedFamily === "subweapon" && ["shield", "dagger", "tome"].includes(v.subType) : v.subType === (EQUIPMENT[v.definitionId].subType ?? null)), "Invalid source item attribution");
+  requireContract(typeof v.itemId === "string" && v.itemId.length > 0 && v.itemId.length <= 240 && (Boolean(EQUIPMENT[v.definitionId]) || Boolean(v.generatedFamily) && v.definitionId === `d7-${v.generatedFamily}-${v.subType ?? "ordinary"}`) && (v.generatedFamily ? v.generatedFamily === "weapon" && v.subType === null || v.generatedFamily === "subweapon" && ["shield", "dagger", "tome"].includes(v.subType) : v.subType === (EQUIPMENT[v.definitionId].subType ?? null)), "Invalid source item attribution");
 }
 
 // src/shared/contracts/events.js
@@ -28841,10 +28842,10 @@ export {
   CLASS_KIT_VERSION,
   CLASS_KIT_PIECES,
   CLASS_KITS,
+  knownItemDefinitionId,
   itemDefinition,
   equipmentRequiredLevel,
   equipmentLevelAllowed,
-  EQUIPMENT,
   capeSlotAvailable,
   equipmentSlots,
   retiredGear,
