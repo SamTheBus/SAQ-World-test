@@ -133473,7 +133473,7 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
   let nextEvidenceAt = -Infinity;
   const artReviewV2 = doc.body.dataset.artV2 === "true";
   function render(time2, authorityDeadline = null) {
-    const model = port.getReadModel();
+    const model = port.presentModel?.() ?? port.getReadModel();
     renderModel = model;
     preparation.observe(presentationSpace(model), Boolean(model.siteActivationPending));
     if (!preparation.ready()) {
@@ -136669,16 +136669,17 @@ var COOP_TRADE_COMMANDS = /^(service\.|forge\.)/;
 var json = (v) => v === void 0 ? "null" : JSON.stringify(v);
 var key2 = (k) => JSON.stringify(k);
 function createModelEncoderV1() {
-  let refs = /* @__PURE__ */ new Map(), texts = /* @__PURE__ */ new Map(), entRefs = /* @__PURE__ */ new Map(), entTexts = /* @__PURE__ */ new Map(), sent = 0;
+  let refs = /* @__PURE__ */ new Map(), texts = /* @__PURE__ */ new Map(), subs = /* @__PURE__ */ new Map(), entRefs = /* @__PURE__ */ new Map(), entTexts = /* @__PURE__ */ new Map(), sent = 0;
   return Object.freeze({
     reset() {
       refs = /* @__PURE__ */ new Map();
       texts = /* @__PURE__ */ new Map();
+      subs = /* @__PURE__ */ new Map();
       entRefs = /* @__PURE__ */ new Map();
       entTexts = /* @__PURE__ */ new Map();
     },
     encode(model) {
-      const set = [], del = [], es = [], ed = [];
+      const set = [], del = [], sub = [], es = [], ed = [];
       for (const [k, v] of Object.entries(model)) {
         if (k === "entitiesById") {
           const seen4 = /* @__PURE__ */ new Set();
@@ -136698,8 +136699,68 @@ function createModelEncoderV1() {
           }
           continue;
         }
-        if (refs.get(k) === v && texts.has(k)) continue;
+        if (refs.get(k) === v && (texts.has(k) || subs.has(k))) continue;
         refs.set(k, v);
+        if (v !== null && typeof v === "object") {
+          const list = Array.isArray(v);
+          let st = subs.get(k), fresh = false;
+          if (!st || st.list !== list) {
+            st = { list, refs: /* @__PURE__ */ new Map(), texts: /* @__PURE__ */ new Map(), objs: /* @__PURE__ */ new Map() };
+            subs.set(k, st);
+            texts.delete(k);
+            fresh = true;
+          }
+          const cs = [], cd = [], co = [], seen4 = /* @__PURE__ */ new Set();
+          for (const [c, x] of list ? v.map((x2, i) => [String(i), x2]) : Object.entries(v)) {
+            if (!list && (x === void 0 || typeof x === "function")) continue;
+            seen4.add(c);
+            if (x !== null && typeof x === "object" && !Array.isArray(x)) {
+              let ost = st.objs.get(c), ofresh = false;
+              if (!ost) {
+                ost = { refs: /* @__PURE__ */ new Map(), texts: /* @__PURE__ */ new Map() };
+                st.objs.set(c, ost);
+                st.texts.delete(c);
+                ofresh = true;
+              }
+              if (!ofresh && st.refs.get(c) === x) continue;
+              st.refs.set(c, x);
+              const fs = [], fd = [], fseen = /* @__PURE__ */ new Set();
+              for (const [f, y] of Object.entries(x)) {
+                if (y === void 0 || typeof y === "function") continue;
+                fseen.add(f);
+                if (ost.refs.get(f) === y && ost.texts.has(f)) continue;
+                ost.refs.set(f, y);
+                const s3 = json(y);
+                if (ost.texts.get(f) === s3) continue;
+                ost.texts.set(f, s3);
+                fs.push(key2(f) + ":" + s3);
+              }
+              for (const f of [...ost.texts.keys()]) if (!fseen.has(f)) {
+                ost.texts.delete(f);
+                ost.refs.delete(f);
+                fd.push(key2(f));
+              }
+              if (fs.length || fd.length || ofresh) co.push(key2(c) + ":{" + (ofresh ? '"f":1,' : "") + '"s":{' + fs.join(",") + '},"d":[' + fd.join(",") + "]}");
+              continue;
+            }
+            if (st.objs.delete(c)) st.refs.delete(c);
+            if (st.refs.get(c) === x && st.texts.has(c)) continue;
+            st.refs.set(c, x);
+            const s2 = json(x);
+            if (st.texts.get(c) === s2) continue;
+            st.texts.set(c, s2);
+            cs.push(key2(c) + ":" + s2);
+          }
+          for (const c of /* @__PURE__ */ new Set([...st.texts.keys(), ...st.objs.keys()])) if (!seen4.has(c)) {
+            st.texts.delete(c);
+            st.objs.delete(c);
+            st.refs.delete(c);
+            cd.push(key2(c));
+          }
+          if (cs.length || cd.length || co.length || fresh) sub.push(key2(k) + ':{"a":' + (list ? 1 : 0) + (fresh ? ',"f":1' : "") + ',"s":{' + cs.join(",") + '},"o":{' + co.join(",") + '},"d":[' + cd.join(",") + "]" + (list ? ',"l":' + v.length : "") + "}");
+          continue;
+        }
+        subs.delete(k);
         const s = json(v);
         if (texts.get(k) === s) continue;
         texts.set(k, s);
@@ -136710,9 +136771,14 @@ function createModelEncoderV1() {
         refs.delete(k);
         del.push(key2(k));
       }
-      if (!set.length && !del.length && !es.length && !ed.length) return null;
+      for (const k of [...subs.keys()]) if (!Object.hasOwn(model, k)) {
+        subs.delete(k);
+        refs.delete(k);
+        del.push(key2(k));
+      }
+      if (!set.length && !del.length && !sub.length && !es.length && !ed.length) return null;
       sent++;
-      return '{"t":"m","n":' + sent + ',"set":{' + set.join(",") + '},"del":[' + del.join(",") + '],"es":{' + es.join(",") + '},"ed":[' + ed.join(",") + "]}";
+      return '{"t":"m","n":' + sent + ',"set":{' + set.join(",") + '},"del":[' + del.join(",") + '],"sub":{' + sub.join(",") + '},"es":{' + es.join(",") + '},"ed":[' + ed.join(",") + "]}";
     }
   });
 }
@@ -136728,6 +136794,20 @@ function createModelDecoderV1() {
       last = message.n;
       for (const [k, v] of Object.entries(message.set)) parts[k] = v;
       for (const k of message.del) delete parts[k];
+      for (const [k, u] of Object.entries(message.sub ?? {})) {
+        const prev = parts[k], list = u.a === 1, keep5 = !u.f && prev !== null && typeof prev === "object" && Array.isArray(prev) === list;
+        const next = list ? keep5 ? prev.slice() : [] : keep5 ? { ...prev } : {};
+        for (const [c, x] of Object.entries(u.s)) next[list ? Number(c) : c] = x;
+        for (const [c, o] of Object.entries(u.o ?? {})) {
+          const i = list ? Number(c) : c, old2 = next[i], child = !o.f && old2 !== null && typeof old2 === "object" && !Array.isArray(old2) ? { ...old2 } : {};
+          for (const [f, y] of Object.entries(o.s)) child[f] = y;
+          for (const f of o.d) delete child[f];
+          next[i] = child;
+        }
+        if (list) next.length = u.l;
+        else for (const c of u.d) delete next[c];
+        parts[k] = next;
+      }
       let changed = message.n === 1;
       for (const [id, e] of Object.entries(message.es)) {
         ents[id] = e;
@@ -137076,6 +137156,51 @@ function beginCoopGuestV1({ link, build: build2, hero, onLobby = () => {
     link.send({ t: "hello", protocol: COOP_PROTOCOL, build: build2, heroId: hero.heroId, name: hero.name, passport: hero.passport });
   });
 }
+var GLIDE_SNAP_PX = 160;
+function createGuestSmoothingV1(now3) {
+  let from = /* @__PURE__ */ new Map(), current = null, arrivedAt = 0, gap2 = 50, cache6 = null, cacheAt = -1;
+  function drawn(id, e, t) {
+    const f = from.get(id);
+    if (!f) return e.position;
+    const k = Math.min(1, (t - arrivedAt) / gap2);
+    return { x: f.x + (e.position.x - f.x) * k, y: f.y + (e.position.y - f.y) * k };
+  }
+  return Object.freeze({
+    arrived(before, after) {
+      if (after === current) return;
+      const t = now3(), next = /* @__PURE__ */ new Map();
+      if (current && before === current) {
+        for (const [id, e] of Object.entries(after)) {
+          const old2 = current[id];
+          if (!old2 || old2 === e || !e.alive || !old2.alive || !e.position || !old2.position) continue;
+          const p = drawn(id, old2, t);
+          if (p.x === e.position.x && p.y === e.position.y) continue;
+          if (Math.hypot(e.position.x - p.x, e.position.y - p.y) > GLIDE_SNAP_PX) continue;
+          next.set(id, { x: p.x, y: p.y });
+        }
+        gap2 = Math.max(16, Math.min(150, gap2 * 0.8 + (t - arrivedAt) * 0.2));
+      }
+      from = next;
+      current = after;
+      arrivedAt = t;
+      cache6 = null;
+    },
+    present(model) {
+      if (!model || model.entitiesById !== current || !from.size) return model;
+      const t = now3();
+      if (t - arrivedAt >= gap2) return model;
+      if (cache6 && cacheAt === t) return cache6;
+      const entitiesById = { ...current };
+      for (const id of from.keys()) {
+        const e = current[id];
+        if (e) entitiesById[id] = { ...e, position: drawn(id, e, t) };
+      }
+      cache6 = { ...model, entitiesById };
+      cacheAt = t;
+      return cache6;
+    }
+  });
+}
 function createCoopGuestSessionV1({ link, playerId, early = [], release = () => {
 }, cartographyWindow = null, onPassport, onEnd, setTimeout: setTimeout2 = globalThis.setTimeout.bind(globalThis) }) {
   const decoder = createModelDecoderV1(), waiting = /* @__PURE__ */ new Map(), now3 = () => performance.now();
@@ -137083,11 +137208,14 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
   const ready = new Promise((resolve) => {
     firstModel = resolve;
   });
+  const smooth24 = createGuestSmoothingV1(now3);
   const handle = (m) => {
     if (m.t === "m") {
       lastFrameAt = now3();
       try {
+        const before = decoder.model()?.entitiesById ?? null;
         decoder.apply(m);
+        smooth24.arrived(before, decoder.model().entitiesById);
         firstModel?.();
         firstModel = null;
       } catch (error) {
@@ -137131,6 +137259,9 @@ function createCoopGuestSessionV1({ link, playerId, early = [], release = () => 
   });
   const clientPort = Object.freeze({
     getReadModel: () => decoder.model(),
+    // What the guest's screen draws: the host's frames come over the network at uneven times, so moving
+    // things glide from where they were drawn to where the latest frame has them (commands use getReadModel).
+    presentModel: () => smooth24.present(decoder.model()),
     send(command) {
       if (ended) return { status: "busy" };
       const model = decoder.model(), base = model?.context?.nextClientSequence ?? 1, sequence = now3() - lastSentAt < 500 ? Math.max(base, lastSequence + 1) : base;
@@ -138935,6 +139066,7 @@ function unbase64url(text3) {
 }
 
 // src/client/coop_link_v1.js
+var LINK_BACKLOG_BYTES = 64 * 1024;
 var COOP_ICE_SERVERS = Object.freeze([{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun.cloudflare.com:3478" }]);
 var CHUNK = 15e3;
 var DIRECT_WAIT_MS = 1e4;
@@ -139038,7 +139170,7 @@ function channelLink(pc2, channel2) {
   const link = createLink("direct", (text3) => channel2.send(text3), () => {
     channel2.close();
     pc2.close();
-  }, () => channel2.bufferedAmount > 1 << 20);
+  }, () => channel2.bufferedAmount > LINK_BACKLOG_BYTES);
   channel2.onmessage = (e) => link.receive(e.data);
   channel2.onclose = () => link.close("direct channel closed");
   pc2.addEventListener("connectionstatechange", () => {
@@ -139158,7 +139290,7 @@ async function hostRoomV1({ server, code: code2, onGuest, onLeft = () => {
         if (g.link) return;
         pc2.close();
         to(m.id, { relay: "open" });
-        g.relay = createLink("relay", (text3) => to(m.id, { relay: text3 }), () => to(m.id, { relay: "close" }));
+        g.relay = createLink("relay", (text3) => to(m.id, { relay: text3 }), () => to(m.id, { relay: "close" }), () => (ws?.bufferedAmount ?? 0) > LINK_BACKLOG_BYTES);
         settle(g.relay);
       });
     } else if (m.type === "from") {
