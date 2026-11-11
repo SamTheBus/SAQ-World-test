@@ -140857,6 +140857,7 @@ async function createLocalEndlessSessionD9(options) {
       opened2 = await worker.open(draft.campaign.campaignId);
     }
   }
+  const savedPlayerId = localPlayerId;
   if (options.heroSeat) {
     const seat = options.heroSeat, draft = copyWire(opened2.state), seated = seat.party?.length ? seatPartyV1(draft, { host: { passport: seat.passport ?? null, heroId: seat.heroId, seatWins: seat.seatWins === true }, guests: seat.party, seats: seat.seats ?? {}, lastPlayerId: localPlayerId ?? null, heroIds: seat.heroIds ?? null }) : seatHeroV1(draft, { passport: seat.passport ?? null, heroId: seat.heroId, seats: seat.seats ?? {}, lastPlayerId: localPlayerId ?? null, heroIds: seat.heroIds ?? null, seatWins: seat.seatWins === true });
     if (seated.changed) {
@@ -140920,6 +140921,8 @@ async function createLocalEndlessSessionD9(options) {
   const store2 = storeFactory(opened2.state.content.fingerprint, activityGeneration(opened2.state), activityCampaignCodec);
   await Promise.resolve(store2.writeLocalLauncher?.(proofCase, { campaignId: opened2.state.campaign.campaignId, playerId: localPlayerId })).catch((error) => {
     if (!options.heroSeat || !/Launcher must reference/.test(error?.message)) throw error;
+  }).then(async () => {
+    if (options.heroSeat && savedPlayerId && savedPlayerId !== localPlayerId && !await store2.readLocalLauncher?.(proofCase)) await store2.writeLocalLauncher(proofCase, { campaignId: opened2.state.campaign.campaignId, playerId: savedPlayerId });
   });
   const GATE_TIMEOUT_MS = 15e3, RETRY_MS = 1e3, STREAM_SERVICE_MS = 100, STREAM_IDLE_SERVICE_MS = 500;
   let lastStreamAnchor = null;
@@ -145838,7 +145841,9 @@ async function startWorldClient(environment) {
       resume: launch.resume,
       worldWorker: worldBridge,
       durabilityTask: saveBridge,
-      heroSeat: worldBridge && heroId ? { heroId, passport: readHeroPassport(deviceStorage, channel2, heroId), seats: readWorldSeats(deviceStorage, channel2, worldSlot), heroIds: heroRecord.heroes.map((h) => h.heroId).filter(Boolean), seatWins: heroLastWorld(deviceStorage, channel2, heroId) === worldSlot, party: coopHost?.party() ?? null, onSeated: ({ seats, party: party3 }) => {
+      // A hero just made on the hero screen for this new world is the hero: the passport stored for this slot (an older hero
+      // whose world was lost) doesn't take their seat (Sammy 2026-11-11: made a hero, got the old one, made one again next start).
+      heroSeat: worldBridge && heroId ? { heroId, passport: startingHero ? null : readHeroPassport(deviceStorage, channel2, heroId), seats: readWorldSeats(deviceStorage, channel2, worldSlot), heroIds: heroRecord.heroes.map((h) => h.heroId).filter(Boolean), seatWins: heroLastWorld(deviceStorage, channel2, heroId) === worldSlot, party: coopHost?.party() ?? null, onSeated: ({ seats, party: party3 }) => {
         coopParty = party3;
         writeWorldSeats(deviceStorage, channel2, worldSlot, seats);
       } } : null,
