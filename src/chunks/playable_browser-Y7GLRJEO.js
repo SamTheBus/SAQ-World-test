@@ -7,6 +7,7 @@ import {
   AEGIS_GOLIATH,
   AEGIS_GOLIATH_ID,
   AEGIS_MIMICS,
+  AFFIXES_V2,
   ALPHA_POPULATION_BASE_HASH,
   ALPHA_POPULATION_HASH,
   ALPHA_POPULATION_PLAN_HASH,
@@ -220,6 +221,7 @@ import {
   PLAYER_INVENTORY_VERSION,
   PM,
   POTION_BELT_POLICY,
+  QUEST_GEAR_GROUPS,
   RARITY_COLORS,
   RARITY_NAMES,
   RESHAPE_DATABASE,
@@ -308,6 +310,7 @@ import {
   UNIQUE_TIERS,
   VITALITY_WEAVER_AFFIX_ID,
   VITALITY_WEAVER_D12_4,
+  WARDROBE_V1,
   WAYSIDE_POLICY,
   WAYSIDE_VERSION,
   WEBBED_STATUS_D12_4J_VERSION,
@@ -336,6 +339,7 @@ import {
   WORLD_COMBAT_CONTRACT_VERSION,
   WORLD_COMBAT_HASH,
   WORLD_COMBAT_VERSION,
+  WORLD_LOOT_V4_HASH,
   WORLD_TIME_POLICY,
   __export,
   acceptedEventGearGeographyV2,
@@ -542,6 +546,8 @@ import {
   fundForgeReview,
   gearAffixTotalsV2,
   gearHash,
+  gearSeed,
+  generateGear,
   generateOrdinaryPopulation,
   generatedStarterV1,
   generatedTownChunkBlockers,
@@ -774,6 +780,7 @@ import {
   prototypeRewardProgression,
   provisionType,
   purchaseAvailability,
+  questGearSourceIdV1,
   queuePacedSporeV5,
   readStandsCell,
   readyPrimarySources,
@@ -957,6 +964,7 @@ import {
   validatePlayerProgression,
   validatePlayerState,
   validatePrimaryAim,
+  validateRewardProgressionD9,
   validateRngState,
   validateRuntimePlan,
   validateSessionState,
@@ -992,6 +1000,7 @@ import {
   worldEnemyStats,
   worldEventProtectionV1,
   worldLevelGapMultiplier,
+  worldLootWeightsV4,
   worldObjectHealth,
   worldOrdinaryMeleeProfile,
   worldPointForArea,
@@ -1002,7 +1011,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-3LILMNZG.js";
+} from "./chunk-XYLKK3DI.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -75769,7 +75778,12 @@ var QUEST_POLICY = freezeWire({
   // How far a quest may send you from its town (map tiles), and how many nearest picks to draw from.
   reach: { min: 24, max: 900, pool: 6 },
   // Reward: minutes of play worth of gold at your level, and site-clear XP (5 kills) times this.
-  reward: { board: { minutes: 5, xp: 3 }, folk: { minutes: 9, xp: 5 }, carryPercent: 70 },
+  reward: { board: { minutes: 5, xp: 3 }, folk: { minutes: 9, xp: 5 } },
+  // Quest gear v1 (2026-11-11): each quest is Easy, Normal or Hard. It pays that percent of the reward
+  // above, and its gear piece rolls rarity like an elite kill, a mini-boss or a land boss.
+  difficulty: { easy: { pay: 70, role: "elite", siteReward: null }, normal: { pay: 100, role: "boss", siteReward: "mini-boss" }, hard: { pay: 180, role: "boss", siteReward: null } },
+  // About one quest in three names a gear group, most often the one that fits the job.
+  gearGroup: { oneIn: 3, fitPercent: 60, fits: { hunt: "weapons", clear: "armor", rescue: "armor", find: "accessories", carry: "accessories" } },
   // How close you must stand (pixels): a notice board, a clearing to search, and how near an enemy
   // may be when you free a captive.
   boardReach: 96,
@@ -75852,24 +75866,39 @@ function nearest(list, town, land, band5, key3, preferUnfound) {
   const unfound = preferUnfound ? ok.filter((t) => !t.found) : [], pool3 = (unfound.length ? unfound : ok).sort((a, b) => Math.hypot(a.x - town.x, a.y - town.y) - Math.hypot(b.x - town.x, b.y - town.y) || (a.id ?? a.siteId).localeCompare(b.id ?? b.siteId)).slice(0, P9.reach.pool);
   return pool3.length ? pick3(pool3, key3) : null;
 }
+var DIFFICULTY_STEPS = ["easy", "normal", "hard"];
+function questDifficultyV1(kind, { named: named2 = false, tier: tier2 = "standard", band: band5 = 1, townBand = 1 } = {}) {
+  let i = kind === "carry" || kind === "find" ? 0 : kind === "hunt" ? named2 ? 2 : 1 : kind === "clear" ? tier2 === "small" ? 0 : tier2 === "standard" ? 1 : 2 : 1;
+  if (band5 > townBand) i = Math.min(2, i + 1);
+  return DIFFICULTY_STEPS[i];
+}
+function questGearGroupV1(kind, key3) {
+  const h = questHash(key3 + "/gear"), g = P9.gearGroup;
+  if (h % g.oneIn) return "any";
+  return (h >>> 8) % 100 < g.fitPercent ? g.fits[kind] : ["weapons", "armor", "accessories"][(h >>> 16) % 3];
+}
 function questTargetV1(view3, town, kind, key3) {
   const land = view3.land?.get(town.id) ?? landOf(view3, town), band5 = town.band ?? 1;
   let t;
+  const out = (target, tBand, extra) => {
+    const b = tBand ?? 1;
+    return { kind, target, tx: Math.floor(t.x), ty: Math.floor(t.y), band: b, difficulty: questDifficultyV1(kind, { ...extra, band: b, townBand: band5 }), gearGroup: questGearGroupV1(kind, key3) };
+  };
   if (kind === "clear") {
     t = nearest(view3.sites.filter((s) => s.tier === "standard" && !view3.eliteSites.has(s.reservationId)), town, land, band5, key3, true);
-    if (t) return { kind, target: t.siteId, tx: Math.floor(t.x), ty: Math.floor(t.y), band: t.band ?? 1 };
+    if (t) return out(t.siteId, t.band, { tier: t.tier });
   } else if (kind === "hunt") {
     t = nearest(view3.sites.filter(huntableSiteV1), town, land, band5, key3, false);
-    if (t) return { kind, target: t.siteId, tx: Math.floor(t.x), ty: Math.floor(t.y), band: t.band ?? 1 };
+    if (t) return out(t.siteId, t.band, { named: Boolean(huntSpecV1(t)?.named) });
   } else if (kind === "carry") {
     t = nearest(view3.settlements.filter((s) => s.id !== town.id && s.board), town, null, band5, key3, true);
-    if (t) return { kind, target: t.id, tx: Math.floor(t.x), ty: Math.floor(t.y), band: t.band ?? 1 };
+    if (t) return out(t.id, t.band, {});
   } else if (kind === "find") {
     t = nearest(view3.clearings.filter((c) => c.category !== "pathside" && c.event !== "raided_camp"), town, land, band5, key3, true);
-    if (t) return { kind, target: t.id, tx: Math.floor(t.x), ty: Math.floor(t.y), band: t.band ?? band5 };
+    if (t) return out(t.id, t.band ?? band5, {});
   } else if (kind === "rescue") {
     t = nearest(view3.clearings.filter((c) => c.event === "raided_camp"), town, land, band5, key3, false) ?? nearest(view3.clearings.filter((c) => c.category === "backcountry"), town, land, band5, key3 + "/any", false);
-    if (t) return { kind, target: t.id, tx: Math.floor(t.x), ty: Math.floor(t.y), band: t.band ?? band5 };
+    if (t) return out(t.id, t.band ?? band5, {});
   }
   return null;
 }
@@ -75899,9 +75928,23 @@ function folkOfferV1(view3, seed2, npc, npcsOfTown) {
   }
   return null;
 }
-function questRewardV1(source3, kind, level) {
-  const r = P9.reward[source3 === "folk" ? "folk" : "board"], lv = Math.max(1, Math.min(50, Number(level) || 1)), pct3 = kind === "carry" ? P9.reward.carryPercent : 100;
+var questLevelV1 = (level) => Math.max(1, Math.min(50, Math.floor(Number(level)) || 1));
+function questRewardV1(source3, kind, level, difficulty = "normal") {
+  const r = P9.reward[source3 === "folk" ? "folk" : "board"], lv = questLevelV1(level), pct3 = P9.difficulty[difficulty].pay;
   return { gold: minutesGold(r.minutes, lv, pct3), xp: String(BigInt(siteClearXpV2("site-end-elite", lv, lv)) * BigInt(r.xp) * BigInt(pct3) / 100n) };
+}
+function questGearOddsV1(level, difficulty = "normal") {
+  const d = P9.difficulty[difficulty], lv = String(questLevelV1(level)), w = worldLootWeightsV4(lv, lv, d.role, d.siteReward), total = w.reduce((a, b) => a + b, 0n);
+  const rows = w.map((n, tier2) => ({ tier: tier2, exact: Number(n * 1000000n / total) / 1e4 })).filter((r) => r.exact > 0), out = rows.map((r) => ({ tier: r.tier, percent: Math.max(1, Math.floor(r.exact)) }));
+  let left = 100 - out.reduce((a, r) => a + r.percent, 0);
+  const order2 = rows.map((r, i) => i).sort((a, b) => rows[b].exact % 1 - rows[a].exact % 1 || rows[b].exact - rows[a].exact);
+  for (let k = 0; left > 0; k = (k + 1) % order2.length, left--) out[order2[k]].percent++;
+  while (left < 0) {
+    const i = out.reduce((m, r, j) => r.percent > out[m].percent ? j : m, 0);
+    out[i].percent--;
+    left++;
+  }
+  return out;
 }
 var ITEMS = ["satchel", "silver locket", "map case", "wedding ring", "brass lantern", "field journal", "spice box", "old compass"];
 var CAPTIVES = [
@@ -81173,7 +81216,9 @@ function validateQuestsV1(root3) {
     requireContract(Array.isArray(log.active) && log.active.length <= QUEST_POLICY.activeLimit, "Quest log bound");
     const ids4 = /* @__PURE__ */ new Set();
     for (const r of log.active) {
-      closedRecord(r, ["id", "kind", "source", "giver", "settlementId", "target", "tx", "ty", "band", "takenTick", "base", "status", "gold", "xp"]);
+      closedRecord(r, ["id", "kind", "source", "giver", "settlementId", "target", "tx", "ty", "band", "takenTick", "base", "status", "gold", "xp"], ["difficulty", "gearGroup", "level"]);
+      requireContract((r.difficulty === void 0 || Object.hasOwn(QUEST_POLICY.difficulty, r.difficulty)) && (r.gearGroup === void 0 || Object.hasOwn(QUEST_GEAR_GROUPS, r.gearGroup)), "Quest reward kind");
+      if (r.level !== void 0) safeInteger(r.level, 1, 50);
       requireContract(ID.test(r.id) && !ids4.has(r.id) && QUEST_KINDS.includes(r.kind) && ["board", "folk"].includes(r.source) && r.source === "folk" === r.id.startsWith("qf:") && TARGET.test(r.target) && /^settlement-slot:[a-z-]+:[0-9]{2}$/.test(r.settlementId) && typeof r.giver === "string" && r.giver.length <= 80 && ["active", "ready"].includes(r.status), "Quest record identity");
       ids4.add(r.id);
       safeInteger(r.tx, 0, 99999);
@@ -81291,6 +81336,7 @@ function questActionProblemV1(state, player, payload) {
   }
   if (!rec) return "You don't have that quest";
   if (payload.action === "abandon") return null;
+  if ((payload.action === "turnIn" || payload.action === "deliver") && questGearReady(state, player) && Object.keys(player.inventory.itemsById).length >= inventoryIntakeCapacity(player.d8)) return "Your bag is full. Make room for the gear first.";
   if (payload.action === "turnIn") {
     if (rec.status !== "ready") return "This quest is not done yet";
     return rec.source === "folk" ? accessibleServiceNpc(state, player, rec.giver) ? null : "Walk up to them" : nearBoard(state, actor, rec.giver) ? null : "Walk up to the notice board";
@@ -81307,12 +81353,36 @@ function questActionProblemV1(state, player, payload) {
   }
   return "Unknown quest action";
 }
+var bigMax = (a, b) => BigInt(a) >= BigInt(b) ? String(a) : String(b);
+var recDifficulty = (rec) => rec.difficulty ?? "normal";
+function questPayLevelV1(rec, player) {
+  return Math.max(rec.level ?? 1, questLevelV1(player.progression?.level ?? 1));
+}
+function payNow(rec, player) {
+  const r = questRewardV1(rec.source, rec.kind, questPayLevelV1(rec, player), recDifficulty(rec));
+  return { gold: bigMax(r.gold, rec.gold), xp: bigMax(r.xp, rec.xp) };
+}
+function questGearReady(state, player) {
+  return hasWorldCombat(state) && Boolean(player.inventory?.d7 && player.inventory.renewal && player.inventory.services);
+}
+function questGearPieceV1(state, player, rec, level) {
+  const sourceEntityId = questGearSourceIdV1(state.campaign.seed.seedHex, player.playerId, rec.id), d = QUEST_POLICY.difficulty[recDifficulty(rec)], cls = heroClassOf(player.d8)?.id ?? null, base2 = rewardProgressionD9(level, sourceEntityId);
+  const progression = validateRewardProgressionD9({ ...base2, combatHash: WORLD_COMBAT_HASH, combatQuality: d.role === "boss" ? "elite" : d.role, rarityPolicyHash: WORLD_LOOT_V4_HASH, rarityHeroLevel: base2.sourceDepth, rarityRole: d.role, ...d.siteReward ? { siteReward: d.siteReward } : {}, questGear: rec.gearGroup ?? "any", ...cls ? { gearClass: cls, wardrobe: WARDROBE_V1, affixes: AFFIXES_V2 } : { armor: "overall" } });
+  const generated = generateGear(gearSeed(state, player, sourceEntityId), progression);
+  return { item: { itemId: `item:${player.playerId}:${sourceEntityId}`, definitionId: generated.definition.definitionId, ownerPlayerId: player.playerId, sourceEntityId, generated: copyWire(generated) }, origin: { quest: rec.id, sourceEntityId, progression: copyWire(progression) } };
+}
 function pay(state, player, rec) {
-  const i = player.inventory, l = i.services;
-  l.questGold = addAmount(l.questGold ?? "0", rec.gold);
-  i.gold = addAmount(i.gold, rec.gold);
+  const i = player.inventory, l = i.services, now3 = payNow(rec, player);
+  l.questGold = addAmount(l.questGold ?? "0", now3.gold);
+  i.gold = addAmount(i.gold, now3.gold);
+  if (questGearReady(state, player)) {
+    const g = questGearPieceV1(state, player, rec, questPayLevelV1(rec, player));
+    requireContract(!i.itemsById[g.item.itemId], "Quest gear already given");
+    i.itemsById[g.item.itemId] = g.item;
+    i.renewal.originsByItemId[g.item.itemId] = g.origin;
+  }
   i.revision++;
-  return rec.xp;
+  return now3.xp;
 }
 function finish(log, rec, tick) {
   log.active = log.active.filter((r) => r !== rec);
@@ -81332,9 +81402,9 @@ function applyQuestActionV1(state, player, payload) {
   const log = ensureLog(state, player.playerId);
   log.revision++;
   if (payload.action === "take") {
-    const o = findOffer(state, payload.questId), reward = questRewardV1(o.source, o.kind, player.progression.level);
+    const o = findOffer(state, payload.questId), level = questLevelV1(player.progression.level), reward = questRewardV1(o.source, o.kind, level, o.difficulty);
     pruneBoardDone(state, log);
-    log.active.push({ id: o.id, kind: o.kind, source: o.source, giver: o.giver, settlementId: o.settlementId, target: o.target, tx: o.tx, ty: o.ty, band: Math.max(1, Math.min(9, o.band)), takenTick: state.tick, base: siteRun(state, o.target)?.episode ?? 0, status: "active", gold: reward.gold, xp: reward.xp });
+    log.active.push({ id: o.id, kind: o.kind, source: o.source, giver: o.giver, settlementId: o.settlementId, target: o.target, tx: o.tx, ty: o.ty, band: Math.max(1, Math.min(9, o.band)), takenTick: state.tick, base: siteRun(state, o.target)?.episode ?? 0, status: "active", gold: reward.gold, xp: reward.xp, difficulty: o.difficulty, gearGroup: o.gearGroup, level });
     return null;
   }
   const rec = log.active.find((r) => r.id === payload.questId);
@@ -81372,10 +81442,14 @@ function names(state, rec) {
   const v = baseView(state), seen4 = state.d9World.navigation.knowledge.visited, town = v.settlements.find((s) => s.id === rec.settlementId), site = v.sites.find((s) => s.siteId === rec.target), dest = v.settlements.find((s) => s.id === rec.target), npc = rec.source === "folk" ? serviceNpcByIdV1(rec.giver) : null;
   return { town: town?.label, townAt: town, label: site?.label, elite: site && rec.kind === "hunt" ? huntTargetV1(site) : null, dest: dest?.label ?? null, found: seen4[rec.target] !== void 0, giverName: npc?.name, role: npc?.role };
 }
-function shown(state, rec) {
+function gearShown(level, difficulty, group, player) {
+  return { group, cls: heroClassOf(player?.d8)?.id ?? null, odds: questGearOddsV1(level, difficulty) };
+}
+function shown(state, rec, player) {
   const n = names(state, rec), text3 = questTextV1(rec, n), eventTarget = rec.target.startsWith("event:"), found = n.found || rec.kind === "carry", giverTile = rec.source === "folk" ? serviceNpcByIdV1(rec.giver)?.tile : boardTileOf(rec.giver);
   const r = found ? 0 : eventTarget ? QUEST_POLICY.searchRadius.event : QUEST_POLICY.searchRadius.site, h = [...rec.id].reduce((a, c) => a * 31 + c.charCodeAt(0) >>> 0, 7), ang = h % 360 * Math.PI / 180, off = r * 0.45;
   const circle9 = found ? { x: rec.tx + 0.5, y: rec.ty + 0.5 } : { x: rec.tx + 0.5 + Math.cos(ang) * off, y: rec.ty + 0.5 + Math.sin(ang) * off };
+  const lv = questPayLevelV1(rec, player), now3 = payNow(rec, player);
   return {
     id: rec.id,
     kind: rec.kind,
@@ -81384,23 +81458,27 @@ function shown(state, rec) {
     ...text3,
     town: n.town ?? "",
     giverName: n.giverName ?? null,
-    gold: rec.gold,
-    xp: rec.xp,
+    gold: now3.gold,
+    xp: now3.xp,
+    difficulty: recDifficulty(rec),
+    gear: gearShown(lv, recDifficulty(rec), rec.gearGroup ?? "any", player),
+    where: whereOf(rec, n),
     target: { id: rec.target, x: circle9.x, y: circle9.y, radius: rec.kind === "carry" ? 0 : r, found: rec.kind === "carry" ? true : n.found, label: rec.kind === "carry" ? n.dest ?? "" : rec.kind === "hunt" || rec.kind === "clear" ? n.label ?? "" : "Clearing" },
     turnIn: rec.status === "ready" && giverTile ? { x: giverTile.x + 0.5, y: giverTile.y + 0.5 } : null
   };
 }
 var WHERE_LABEL = { find: "A clearing", rescue: "Looters' camp" };
+var TILE_FEET = 5;
 function whereOf(o, n) {
   const at8 = n.townAt;
   if (!at8) return null;
-  const dir = compassV1(at8, { x: o.tx, y: o.ty }), dist3 = Math.max(10, Math.round(Math.hypot(o.tx - at8.x, o.ty - at8.y) / 10) * 10);
+  const dir = compassV1(at8, { x: o.tx, y: o.ty }), feet = Math.round(Math.hypot(o.tx - at8.x, o.ty - at8.y) * TILE_FEET);
   const label5 = o.kind === "carry" ? n.dest ?? "A town to the " + dir : WHERE_LABEL[o.kind] ?? n.label ?? "";
-  return { label: label5, dir, dist: dist3 };
+  return { label: label5, dir, feet };
 }
-var offerShown = (state, o, level, stateOf) => {
-  const reward = questRewardV1(o.source, o.kind, level), n = names(state, o), text3 = questTextV1({ ...o, status: "active" }, n);
-  return { id: o.id, kind: o.kind, source: o.source, title: text3.title, note: text3.note, step: text3.step, gold: reward.gold, xp: reward.xp, state: stateOf, where: whereOf(o, n) };
+var offerShown = (state, o, player, stateOf) => {
+  const level = questLevelV1(player.progression?.level ?? 1), reward = questRewardV1(o.source, o.kind, level, o.difficulty), n = names(state, o), text3 = questTextV1({ ...o, status: "active" }, n);
+  return { id: o.id, kind: o.kind, source: o.source, title: text3.title, note: text3.note, step: text3.step, gold: reward.gold, xp: reward.xp, difficulty: o.difficulty, gear: gearShown(level, o.difficulty, o.gearGroup, player), state: stateOf, where: whereOf(o, n) };
 };
 function local6(state, tile) {
   try {
@@ -81412,13 +81490,13 @@ function local6(state, tile) {
 function projectQuestsV1(state, player, actor, serviceNpcs = []) {
   if (!hasQuestsV1(state)) return null;
   const log = questLogV1(state, player.playerId) ?? emptyLog(), level = player.progression?.level ?? 1, inside5 = actor.residency.spaceInstanceId === state.overworldInstanceId;
-  const out = { version: QUESTS_VERSION, limit: QUEST_POLICY.activeLimit, revision: log.revision, active: log.active.map((r) => shown(state, r)), boards: [], folk: {} };
+  const out = { version: QUESTS_VERSION, limit: QUEST_POLICY.activeLimit, revision: log.revision, active: log.active.map((r) => shown(state, r, player)), boards: [], folk: {} };
   if (inside5) {
     for (const s of baseView(state).settlements) {
       if (!s.boardTile) continue;
       const p = local6(state, s.boardTile);
       if (!p || Math.hypot(p.x - actor.position.x, p.y - actor.position.y) > 1400) continue;
-      const offers = boardOffersForV1(state, s.id).map((o) => offerShown(state, o, level, log.active.some((r) => r.id === o.id) ? "taken" : log.boardDone[o.id] !== void 0 ? "done" : "open"));
+      const offers = boardOffersForV1(state, s.id).map((o) => offerShown(state, o, player, log.active.some((r) => r.id === o.id) ? "taken" : log.boardDone[o.id] !== void 0 ? "done" : "open"));
       const handIns = log.active.filter((r) => r.source === "board" && r.giver === s.id && r.status === "ready").map((r) => r.id), deliveries = log.active.filter((r) => r.kind === "carry" && r.status === "active" && r.target === s.id).map((r) => r.id);
       out.boards.push({ settlementId: s.id, name: s.label, x: p.x, y: p.y, offers, handIns, deliveries, mark: handIns.length || deliveries.length ? "?" : offers.some((o) => o.state === "open") ? "!" : null });
     }
@@ -81426,7 +81504,7 @@ function projectQuestsV1(state, player, actor, serviceNpcs = []) {
   for (const n of serviceNpcs) {
     const id = "qf:" + n.id, rec = log.active.find((r) => r.id === id), o = !rec && log.folkDone[id] === void 0 ? folkOfferForV1(state, n.id) : null;
     if (!rec && !o) continue;
-    out.folk[n.id] = { mark: rec ? rec.status === "ready" ? "?" : null : "!", offer: o ? offerShown(state, o, level, "open") : null, questId: rec?.id ?? null, ready: rec?.status === "ready" };
+    out.folk[n.id] = { mark: rec ? rec.status === "ready" ? "?" : null : "!", offer: o ? offerShown(state, o, player, "open") : null, questId: rec?.id ?? null, ready: rec?.status === "ready" };
   }
   return copyWire(out);
 }
@@ -95098,6 +95176,147 @@ var clockV4 = (ticks) => {
   return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
 };
 
+// src/client/chart_layers_v1.js
+var CHART_COLORS = { O: "#1d4c6c", W: "#4698be", L: "#3a8aac", B: "#e0d09c", w: "#4f8946", a: "#87a656", m: "#5d8a6f", r: "#979381", d: "#d6be89", s: "#dde8ec", t: "#2f7c51", l: "#5f4c4a", o: "#6f8f63" };
+function chartPosition(p) {
+  return { x: (Number(BigInt(p.chunkX) - 1024n) * 1024 + p.localX) / 32, y: (Number(BigInt(p.chunkY) - 1024n) * 832 + p.localY) / 32 };
+}
+function chartView(center3, span2, width2, height) {
+  return { x: center3.x - span2 / 2, y: center3.y - span2 * height / width2 / 2, width: span2, height: span2 * height / width2 };
+}
+function projectChart(p, view3, width2, height) {
+  return { x: (p.x - view3.x) * width2 / view3.width, y: (p.y - view3.y) * height / view3.height };
+}
+var NOISE = (() => {
+  const g = new Float32Array(4096);
+  let s = 2463534242;
+  for (let i = 0; i < 4096; i++) {
+    s ^= s << 13;
+    s ^= s >>> 17;
+    s ^= s << 5;
+    g[i] = (s >>> 0) / 4294967296;
+  }
+  return g;
+})();
+function noise(x, y) {
+  const xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fy = y - yi, u = fx * fx * (3 - 2 * fx), v = fy * fy * (3 - 2 * fy), x0 = xi & 63, x1 = xi + 1 & 63, y0 = (yi & 63) << 6, y1 = (yi + 1 & 63) << 6, a = NOISE[y0 + x0], b = NOISE[y0 + x1], c = NOISE[y1 + x0], d = NOISE[y1 + x1];
+  return a + (b - a) * u + (c - a + (a - b - c + d) * u) * v;
+}
+var PAINT = [];
+var PR = new Uint8Array(128);
+var PG = new Uint8Array(128);
+var PB = new Uint8Array(128);
+var MOTTLE = new Float32Array(128).fill(0.05);
+var SHALLOW = [70, 140, 164];
+var SAND2 = [228, 212, 162];
+for (let c = 0; c < 128; c++) {
+  PR[c] = 111;
+  PG[c] = 143;
+  PB[c] = 99;
+}
+for (const [k, v] of Object.entries(CHART_COLORS)) {
+  const c = k.charCodeAt(0);
+  PAINT[c] = [PR[c], PG[c], PB[c]] = [parseInt(v.slice(1, 3), 16), parseInt(v.slice(3, 5), 16), parseInt(v.slice(5, 7), 16)];
+}
+for (const [k, depth] of [["w", 0.09], ["t", 0.1], ["m", 0.06], ["r", 0.06], ["a", 0.04], ["d", 0.04], ["s", 0.03], ["l", 0.08], ["o", 0.05]]) MOTTLE[k.charCodeAt(0)] = depth;
+function boxBlur(a, t, sum2, w, h, r) {
+  const inv = 1 / (2 * r + 1);
+  for (let y = 0; y < h; y++) {
+    const o = y * w;
+    let s = 0;
+    for (let x = -r; x <= r; x++) s += a[o + (x < 0 ? 0 : x >= w ? w - 1 : x)];
+    for (let x = 0; x < w; x++) {
+      t[o + x] = s * inv;
+      const add2 = x + r + 1, sub = x - r;
+      s += a[o + (add2 >= w ? w - 1 : add2)] - a[o + (sub < 0 ? 0 : sub)];
+    }
+  }
+  sum2.fill(0);
+  for (let y = -r; y <= r; y++) {
+    const o = (y < 0 ? 0 : y >= h ? h - 1 : y) * w;
+    for (let x = 0; x < w; x++) sum2[x] += t[o + x];
+  }
+  for (let y = 0; y < h; y++) {
+    const o = y * w, add2 = (y + r + 1 >= h ? h - 1 : y + r + 1) * w, sub = (y - r < 0 ? 0 : y - r) * w;
+    for (let x = 0; x < w; x++) {
+      a[o + x] = sum2[x] * inv;
+      sum2[x] += t[add2 + x] - t[sub + x];
+    }
+  }
+}
+function paintChartTerrain(data, raster, W13, H7) {
+  const rw = raster.width, rh = raster.height, view3 = raster.view, n = rw * rh, codes = new Uint8Array(n), R9 = new Float32Array(n), G3 = new Float32Array(n), B6 = new Float32Array(n), M4 = new Float32Array(n), S6 = new Float32Array(n), K6 = new Float32Array(n), t = new Float32Array(n), sum2 = new Float32Array(rw);
+  const tps = view3.width / rw, tpx = view3.width / W13, tpy = view3.height / H7, clump = 1 / Math.max(4, tpx * 4);
+  for (let y = 0; y < rh; y++) {
+    const row2 = raster.rows[y], ty = view3.y + (y + 0.5) * view3.height / rh;
+    for (let x = 0; x < rw; x++) {
+      const c = row2.charCodeAt(x) & 127, i = y * rw + x, tx = view3.x + (x + 0.5) * tps;
+      codes[i] = c;
+      if (c === 79 || c === 76 || c === 87) {
+        K6[i] = 0.96 + 0.07 * noise(tx * 0.09, ty * 0.09);
+        if (c === 79) S6[i] = 1;
+      } else {
+        R9[i] = PR[c];
+        G3[i] = PG[c];
+        B6[i] = PB[c];
+        M4[i] = 1;
+        K6[i] = (0.94 + 0.12 * noise(tx * 0.03 + 50, ty * 0.03 + 50)) * (1 + MOTTLE[c] * (noise(tx * clump + 71, ty * clump + 13) - 0.5) * 2.4);
+      }
+    }
+  }
+  const landR = Math.max(1, Math.round(4 / tps)), seaR = Math.max(1, Math.round(9 / tps));
+  for (const a of [R9, G3, B6, M4]) boxBlur(a, t, sum2, rw, rh, landR);
+  boxBlur(S6, t, sum2, rw, rh, seaR);
+  boxBlur(S6, t, sum2, rw, rh, seaR);
+  const wt = Math.min(12, Math.max(4, tpx * 2.5)), amp = wt / tps, f = 1 / (wt * 3.2), sx = rw / W13, sy = rh / H7, maxX = rw - 1.001, maxY = rh - 1.001, sea0 = PAINT[79];
+  for (let iy = 0; iy < H7; iy++) {
+    const ty = view3.y + (iy + 0.5) * tpy, ry = Math.min(rh - 1, (iy + 0.5) * sy | 0) * rw, py = (iy + 0.5) * sy - 0.5;
+    for (let ix = 0; ix < W13; ix++) {
+      const tx = view3.x + (ix + 0.5) * tpx, o = (iy * W13 + ix) * 4, n0 = ry + Math.min(rw - 1, (ix + 0.5) * sx | 0), c0 = codes[n0];
+      let r, g, b;
+      if (c0 === 76 || c0 === 87) {
+        const k = K6[n0];
+        r = PR[c0] * k;
+        g = PG[c0] * k;
+        b = PB[c0] * k;
+      } else {
+        let fx = (ix + 0.5) * sx - 0.5 + (noise(tx * f, ty * f) - 0.5) * 2 * amp, fy = py + (noise(tx * f + 19, ty * f + 7) - 0.5) * 2 * amp;
+        fx = fx < 0 ? 0 : fx > maxX ? maxX : fx;
+        fy = fy < 0 ? 0 : fy > maxY ? maxY : fy;
+        const x0 = fx | 0, y0 = fy | 0, u = fx - x0, v = fy - y0, i = y0 * rw + x0, j = x0 < rw - 1 ? i + 1 : i, l = y0 < rh - 1 ? i + rw : i, q = l + j - i, w00 = (1 - u) * (1 - v), w10 = u * (1 - v), w01 = (1 - u) * v, w11 = u * v, sea = S6[i] * w00 + S6[j] * w10 + S6[l] * w01 + S6[q] * w11, k = K6[i] * w00 + K6[j] * w10 + K6[l] * w01 + K6[q] * w11;
+        if (sea > 0.5) {
+          const d = Math.min(1, (sea - 0.5) / 0.42);
+          r = (SHALLOW[0] + (sea0[0] - SHALLOW[0]) * d) * k;
+          g = (SHALLOW[1] + (sea0[1] - SHALLOW[1]) * d) * k;
+          b = (SHALLOW[2] + (sea0[2] - SHALLOW[2]) * d) * k;
+        } else {
+          const m = M4[i] * w00 + M4[j] * w10 + M4[l] * w01 + M4[q] * w11;
+          if (m > 1e-3) {
+            const im = k / m;
+            r = (R9[i] * w00 + R9[j] * w10 + R9[l] * w01 + R9[q] * w11) * im;
+            g = (G3[i] * w00 + G3[j] * w10 + G3[l] * w01 + G3[q] * w11) * im;
+            b = (B6[i] * w00 + B6[j] * w10 + B6[l] * w01 + B6[q] * w11) * im;
+          } else {
+            r = PR[111];
+            g = PG[111];
+            b = PB[111];
+          }
+          if (sea > 0.36) {
+            const e = (sea - 0.36) / 0.14 * 0.7;
+            r += (SAND2[0] - r) * e;
+            g += (SAND2[1] - g) * e;
+            b += (SAND2[2] - b) * e;
+          }
+        }
+      }
+      data[o] = r;
+      data[o + 1] = g;
+      data[o + 2] = b;
+      data[o + 3] = 255;
+    }
+  }
+}
+
 // src/client/quest_ui_v1.js
 var ICONS3 = {
   clear: '<svg viewBox="0 0 24 24"><path d="M4 21V11a8 8 0 0 1 16 0v10" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M9 21v-6a3 3 0 0 1 6 0v6" fill="currentColor"/></svg>',
@@ -95111,6 +95330,20 @@ var COIN = '<svg viewBox="0 0 16 16" width="14" height="14"><circle cx="8" cy="8
 var FACE2 = { general: "M", smith: "S", innkeeper: "I", enchanter: "E" };
 var ARROW = '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M21 12 4 4.5 8.5 12 4 19.5z" fill="currentColor"/></svg>';
 var ANGLE = { east: 0, "south-east": 45, south: 90, "south-west": 135, west: 180, "north-west": 225, north: 270, "north-east": 315 };
+var DIRS2 = Object.keys(ANGLE);
+var TILE_FEET2 = 5;
+var questDistanceV1 = (feet) => {
+  const ft = Math.max(50, Math.round(feet / 50) * 50);
+  return ft < 1e3 ? ft + " ft" : (feet / 5280).toFixed(1) + " mi";
+};
+var DIFF_LABEL = { easy: "Easy", normal: "Normal", hard: "Hard" };
+var CLASS_LABEL = { knight: "Knight", rogue: "Rogue", mage: "Mage" };
+var GEAR_GROUP = {
+  any: () => ["A gear piece", "Rolled from every kind of gear when you get your reward"],
+  weapons: () => ["A weapon", "Rolled from weapons and offhands when you get your reward"],
+  armor: (cls) => ["A piece of armor", "Rolled from helmets, armor, " + (cls ? "gloves and " : "") + "boots when you get your reward"],
+  accessories: (cls) => ["An accessory", "Rolled from rings" + (cls ? " and capes" : "") + " when you get your reward"]
+};
 var CSS2 = `
 .qx-dlg{padding:0;border:0;background:transparent;color:#2a1d12;max-width:calc(100vw - 16px);font:15px/1.4 "Baloo 2",system-ui,sans-serif}
 .qx-dlg::backdrop{background:#0009}
@@ -95170,6 +95403,46 @@ var CSS2 = `
 .qb-card.is-done{opacity:.72}
 .qb-empty{margin:0;padding:14px;border-radius:3px;background:#f6eedbdd;font:italic 15px/1.4 Georgia,serif;color:#5b4630;text-align:center}
 .qb-note{margin:0;padding:7px 10px;border-radius:6px;background:#f6eedb;color:#a2341f;font-size:13px;line-height:1.35}
+/* Quest gear v1 note (page LYE4oiZM..., all A): a how-it-works strip, a difficulty pill, numbered steps, one boxed
+   Reward panel with the mystery gear piece and its rarity odds, and a full-width Take button. */
+.qb-how{flex:none;display:flex;flex-wrap:wrap;gap:4px 8px;padding:7px 14px;background:#2e1f15;color:#e8d6ac;font-size:12.5px;font-weight:600;line-height:1.3}
+.qb-how i{font-style:normal;color:#d6ad44}
+.qb-diff{position:absolute;right:12px;top:12px;padding:2px 9px;border-radius:999px;border:1.5px solid currentColor;font-size:11px;font-weight:800;line-height:1.4;letter-spacing:.08em;text-transform:uppercase;pointer-events:none}
+.qb-diff.easy{color:#2f7a3a;background:#e3f2dc}.qb-diff.normal{color:#9a6a12;background:#fbeccc}.qb-diff.hard{color:#a8322d;background:#f8dcd6}
+.qb-card.has-diff .qb-kind{padding-right:84px}
+.qb-steps{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.qb-steps li{display:grid;grid-template-columns:24px minmax(0,1fr);gap:9px;align-items:start}
+.qb-num{width:24px;height:24px;border-radius:50%;background:#2a1d12;color:#f6e7c0;font-size:13px;font-weight:800;line-height:24px;text-align:center}
+.qb-steps em{display:block;font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#8a6420;line-height:1.3}
+.qb-steps b{display:block;font-size:15px;line-height:1.25;color:#2a1d12}
+.qb-steps small{display:flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;color:#5b4630;line-height:1.3}
+.qb-card .qx-btn.qb-take{width:100%;height:42px;margin:10px 0 0}
+.qr{position:relative;margin-top:12px;padding:16px 11px 10px;border-radius:8px;background:#fff7e0;border:2px solid #c9952e;box-shadow:inset 0 0 0 2px #fff3c8;display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:8px 14px;align-items:center;color:#2a1d12;text-align:left}
+.qr-tab{position:absolute;left:10px;top:-11px;padding:2px 10px;border-radius:5px;border:2px solid #2a1d12;background:linear-gradient(#ffe08a,#d9a63e);color:#2a1d12;font-size:11px;font-weight:800;line-height:1.2;letter-spacing:.14em;text-transform:uppercase}
+.qr>.qb-diff{top:-11px;right:10px}
+.qr-gold{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:16px;color:#5a3f15;white-space:nowrap}
+.qr-xp{font-weight:800;font-size:15px;color:#3e6a2a;white-space:nowrap}
+.qr-item{grid-column:1/-1;display:flex;align-items:center;gap:10px;padding-top:8px;border-top:1px solid #ecd9a8}
+.qr-q{flex:none;width:42px;height:42px;border-radius:8px;background:radial-gradient(#3a4652,#1d2630);box-shadow:inset 0 0 0 1.5px #0b1015,inset 0 0 0 3px #d4b98a66;display:grid;place-items:center;font:900 26px/1 Georgia,serif;color:#f2c243;text-shadow:0 2px 0 #2a1d12,0 0 6px #f2c24399}
+.qr-item>div{min-width:0}
+.qr-item b{display:block;font-size:15.5px;line-height:1.2}
+.qr-item small{display:block;font-size:12.5px;font-weight:600;color:#6b5537;line-height:1.25}
+.qr-odds{grid-column:1/-1;display:flex;flex-direction:column;gap:3px}
+.qr-lbl{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#8a6420}
+.qr-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;box-shadow:0 0 0 1px #2a1d12}
+.qr-bar span{display:block;height:100%}
+.qr-legend{display:flex;flex-wrap:wrap;gap:2px 9px;font-size:11.5px;font-weight:700;line-height:1.2;color:#4a3a26}
+.qr-legend i{display:inline-block;width:8px;height:8px;margin-right:3px;border-radius:2px;box-shadow:0 0 0 1px #2a1d12}
+.qr-grow{grid-column:1/-1;font-size:11.5px;font-weight:600;color:#6b5537;line-height:1.3}
+#quest-talk .qr{margin:10px 0 0}
+.qp .qr{margin-top:8px;background:#0f151c;border:1px solid #d4b98a55;box-shadow:none;color:#efe3ca}
+.qp .qr-gold{color:#f0c862;font-size:14px}.qp .qr-xp{color:#9dbca5;font-size:13.5px}
+.qp .qr-item{border-top-color:#ffffff14}.qp .qr-item b{font-size:14.5px;color:#efe3ca}.qp .qr-item small,.qp .qr-grow{color:#aeb5b6}
+.qp .qr-lbl{color:#d4b98a}.qp .qr-legend{color:#cfc6b0}.qp .qr-bar,.qp .qr-legend i{box-shadow:0 0 0 1px #0b1015}
+#quest-tracker .qx-tdist{display:flex;align-items:center;gap:5px;color:#f0c862;font-weight:700;font-size:13px}
+#quest-tracker .qx-tdist svg{flex:none;width:13px;height:13px}
+#quest-tracker .qx-tdist.here{color:#9fd88a}
+#quest-tracker .qx-tdist[hidden]{display:none}
 #quest-talk{margin:auto auto calc(8px + env(safe-area-inset-bottom,0px));width:min(620px,calc(100vw - 16px))}
 #quest-talk .qx-talk{display:grid;grid-template-columns:72px 1fr;gap:12px;padding:14px}
 #quest-talk .qx-face{width:72px;height:72px;border-radius:50%;border:3px solid #2a1d12;background:radial-gradient(#ffe7a8,#c9a45e);display:grid;place-items:center;font:700 32px Georgia,serif;color:#2a1d12;box-shadow:inset 0 0 0 3px #f7e7b8}
@@ -95181,11 +95454,12 @@ var CSS2 = `
 @media (max-width:560px){#quest-talk .qx-acts .qx-pay{flex-basis:100%}#quest-talk .qx-acts button{flex:1 1 0;min-width:0;padding-left:6px;padding-right:6px}}
 #quest-tracker{pointer-events:auto;display:grid;grid-template-columns:28px 1fr;gap:2px 8px;align-items:center;width:min(280px,56vw);padding:7px 11px 8px 8px;border-radius:10px;border:2px solid #0b1015;background:linear-gradient(#34434ef2,#1d2a34f2);box-shadow:inset 0 0 0 1px #d4b98acc,0 3px 0 #070b10,0 5px 10px #0005;color:#efe3ca;text-align:left;font:12px/1.3 "Baloo 2",system-ui,sans-serif;cursor:pointer}
 #quest-tracker[hidden]{display:none}
-#quest-tracker .qx-tico{grid-row:span 2;width:28px;height:28px;border-radius:7px;background:#0b1015;color:#f0c862;box-shadow:inset 0 0 0 1px #d4b98a88;display:grid;place-items:center}
+#quest-tracker .qx-tico{grid-row:span 3;width:28px;height:28px;border-radius:7px;background:#0b1015;color:#f0c862;box-shadow:inset 0 0 0 1px #d4b98a88;display:grid;place-items:center}
 #quest-tracker .qx-tico svg{width:17px;height:17px}
 #quest-tracker strong{font:15px/1.15 Georgia,serif;font-variant:small-caps;color:#f6e7c0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #quest-tracker strong>i{font-style:normal}
 #quest-tracker span{color:#b9c0bf;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#quest-tracker.has-dist span.qx-tstep{-webkit-line-clamp:1}
 #quest-tracker.is-ready{box-shadow:inset 0 0 0 2px #f0c862,0 0 0 2px #f0c86266,0 3px 0 #070b10}
 #quest-tracker.is-ready span{color:#9fd88a;font-weight:700}
 #quest-tracker.qx-fixed{position:absolute;z-index:7;left:12px;top:120px}
@@ -95276,6 +95550,44 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     w.append(r, x);
     return w;
   };
+  function rewardPanel(gold, xp, gear2, opts = {}) {
+    const box5 = el3("div", null, "qr");
+    box5.append(el3("span", "Reward", "qr-tab"));
+    if (opts.diff) box5.append(el3("span", DIFF_LABEL[opts.diff], "qb-diff " + opts.diff));
+    const g = el3("span", null, "qr-gold");
+    g.innerHTML = COIN;
+    g.append(formatAmount(gold) + " gold");
+    box5.append(g, el3("span", "+" + Number(xp).toLocaleString("en-US") + " XP", "qr-xp"));
+    if (gear2) {
+      const [title, how] = (GEAR_GROUP[gear2.group] ?? GEAR_GROUP.any)(gear2.cls), item = el3("div", null, "qr-item"), q = el3("span", "?", "qr-q"), t = el3("div");
+      q.setAttribute("aria-hidden", "true");
+      t.append(el3("b", title + (gear2.cls ? " for your " + (CLASS_LABEL[gear2.cls] ?? gear2.cls) : "")), el3("small", how));
+      item.append(q, t);
+      box5.append(item);
+      const odds = el3("div", null, "qr-odds"), bar = el3("div", null, "qr-bar"), legend = el3("div", null, "qr-legend");
+      bar.setAttribute("aria-hidden", "true");
+      for (const r of gear2.odds ?? []) {
+        const seg2 = el3("span");
+        seg2.style.cssText = "width:" + r.percent + "%;background:" + RARITY_COLORS[r.tier];
+        bar.append(seg2);
+        const k = el3("span"), dot7 = el3("i");
+        dot7.style.background = RARITY_COLORS[r.tier];
+        k.append(dot7, RARITY_NAMES[r.tier] + " " + r.percent + "%");
+        legend.append(k);
+      }
+      odds.append(el3("span", "Rarity odds", "qr-lbl"), bar, legend);
+      box5.append(odds);
+    }
+    if (opts.grow) box5.append(el3("span", "Goes up if you level up before you get it.", "qr-grow"));
+    return box5;
+  }
+  const arrowTo = (deg) => {
+    const s = el3("span");
+    s.innerHTML = ARROW;
+    s.firstChild.style.transform = "rotate(" + Math.round(deg) + "deg)";
+    return s.firstChild;
+  };
+  const gotToast = (a) => toastV1(doc, { kind: "event", title: "Quest complete", sub: a.title + " \xB7 +" + formatAmount(a.gold) + " gold" + (a.gear ? " and a gear piece" : "") });
   function dialog(id) {
     const d = el3("dialog", null, "qx-dlg");
     d.id = id;
@@ -95347,8 +95659,12 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     x.onclick = () => close(board);
     t.append(el3("strong", b?.name ?? "Notice board"), el3("span", b ? "Notice board \xB7 new notes at dawn" : "Notice board"));
     head17.append(t, x);
-    const body5 = el3("div", null, "qb-cork");
-    sheet.append(head17, body5);
+    const body5 = el3("div", null, "qb-cork"), how = el3("div", null, "qb-how");
+    for (const [i, w] of ["Take a note", "Do the job", "Get your reward"].entries()) {
+      if (i) how.append(el3("i", "\u2192"));
+      how.append(el3("span", w));
+    }
+    sheet.append(head17, how, body5);
     board.append(sheet);
     board.setAttribute("aria-label", (b?.name ? b.name + " " : "") + "notice board");
     if (!b) {
@@ -95380,23 +95696,38 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     };
     const where = (w) => {
       const p = el3("p", null, "qb-where");
-      p.innerHTML = ARROW;
-      p.firstChild.style.transform = "rotate(" + (ANGLE[w.dir] ?? 0) + "deg)";
-      p.append(w.label + " \xB7 " + w.dir + " \xB7 " + w.dist + " tiles");
+      p.append(arrowTo(ANGLE[w.dir] ?? 0), w.label + " \xB7 " + questDistanceV1(w.feet) + " " + w.dir);
       return p;
+    };
+    const payAt = (o) => o.kind !== "carry" ? "This board, in " + b.name : o.where?.label && !/^A town to/.test(o.where.label) ? "The notice board in " + o.where.label : "The notice board there";
+    const steps4 = (o) => {
+      const ol = el3("ol", null, "qb-steps"), one = el3("li"), two = el3("li"), d1 = el3("div"), d2 = el3("div");
+      d1.append(el3("em", "Do this"), el3("b", o.step));
+      if (o.where) {
+        const sm4 = el3("small");
+        sm4.append(arrowTo(ANGLE[o.where.dir] ?? 0), questDistanceV1(o.where.feet) + " " + o.where.dir);
+        d1.append(sm4);
+      }
+      d2.append(el3("em", "Get your reward at"), el3("b", payAt(o)));
+      one.append(el3("span", "1", "qb-num"), d1);
+      two.append(el3("span", "2", "qb-num"), d2);
+      ol.append(one, two);
+      return ol;
     };
     for (const id of [...b.deliveries, ...b.handIns]) {
       const a = active2.get(id);
       if (!a) continue;
       const carry = a.kind === "carry";
-      const c = card(a.kind, carry ? "Delivery" : KIND_LABEL[a.kind], a.title, carry ? "You carried this letter here. Hand it in to get paid." : a.note);
+      const c = card(a.kind, carry ? "Delivery" : KIND_LABEL[a.kind], a.title, carry ? "You carried this letter here. Hand it in to get your reward." : a.note);
       if (!carry) stamp6(c, "Done", "done");
-      foot2(c, reward(a.gold, a.xp), button3(carry ? "Deliver" : "Turn in", () => act(carry ? "deliver" : "turnIn", a.id, () => toastV1(doc, { kind: "event", title: "Quest complete", sub: a.title + " \xB7 +" + formatAmount(a.gold) + " gold" }))));
+      const go = button3(carry ? "Deliver" : "Turn in", () => act(carry ? "deliver" : "turnIn", a.id, () => gotToast(a)));
+      go.classList.add("qb-take");
+      c.append(rewardPanel(a.gold, a.xp, a.gear, { diff: a.difficulty }), go);
     }
     if (!b.offers.length && !b.deliveries.length && !b.handIns.length) body5.append(el3("p", "No notes left today. New ones go up at dawn.", "qb-empty"));
     for (const o of b.offers) {
-      const c = card(o.kind, KIND_LABEL[o.kind], o.title, o.note, o.state === "taken" ? " is-taken" : o.state === "done" ? " is-done" : "");
-      if (o.where) c.append(where(o.where));
+      const open2 = o.state !== "taken" && o.state !== "done", c = card(o.kind, KIND_LABEL[o.kind], o.title, o.note, o.state === "taken" ? " is-taken" : o.state === "done" ? " is-done" : " has-diff");
+      if (o.where && !open2) c.append(where(o.where));
       if (o.state === "taken") {
         stamp6(c, "Taken", "taken");
         const on = cur?.id === o.id;
@@ -95408,12 +95739,15 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
         stamp6(c, "Done", "done");
         foot2(c, el3("small", "Finished today"));
       } else {
-        const go = button3("Take", () => act("take", o.id, () => {
+        if (o.difficulty) c.prepend(el3("span", DIFF_LABEL[o.difficulty], "qb-diff " + o.difficulty));
+        c.append(steps4(o), rewardPanel(o.gold, o.xp, o.gear, { grow: true }));
+        const go = button3("Take this quest", () => act("take", o.id, () => {
           setTrack(o.id);
           toastV1(doc, { kind: "event", title: "Quest taken", sub: o.title });
         }));
+        go.classList.add("qb-take");
         go.disabled = busy || full;
-        foot2(c, reward(o.gold, o.xp), go);
+        c.append(go);
       }
     }
     if (full) body5.append(el3("p", "Your quest log is full (" + q.limit + "). Finish or drop one to take more.", "qb-note"));
@@ -95435,15 +95769,13 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     };
     const a = f?.questId ? q.active.find((v) => v.id === f.questId) : null;
     if (a && f.ready) {
-      who.append(el3("p", "You did it. Thank you. Here, take this.", "qx-say"));
-      acts.append(reward(a.gold, a.xp));
+      who.append(el3("p", "You did it. Thank you. Here, take this.", "qx-say"), rewardPanel(a.gold, a.xp, a.gear, { diff: a.difficulty }));
       btn("Hand in", () => act("turnIn", a.id, () => {
-        toastV1(doc, { kind: "event", title: "Quest complete", sub: a.title + " \xB7 +" + formatAmount(a.gold) + " gold" });
+        gotToast(a);
         close(talk);
       }));
     } else if (f?.offer) {
-      who.append(el3("p", f.offer.note, "qx-say"));
-      acts.append(reward(f.offer.gold, f.offer.xp));
+      who.append(el3("p", f.offer.note, "qx-say"), rewardPanel(f.offer.gold, f.offer.xp, f.offer.gear, { diff: f.offer.difficulty, grow: true }));
       btn("Shop", () => {
         close(talk);
         openShop(n);
@@ -95542,8 +95874,9 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
   tracker.type = "button";
   tracker.hidden = true;
   tracker.setAttribute("data-gameplay-hud", "");
-  const tIco = el3("span", null, "qx-tico"), tTitle = el3("strong"), tStep = el3("span");
-  tracker.append(tIco, tTitle, tStep);
+  const tIco = el3("span", null, "qx-tico"), tTitle = el3("strong"), tStep = el3("span", null, "qx-tstep"), tDist = el3("span", null, "qx-tdist");
+  tDist.hidden = true;
+  tracker.append(tIco, tTitle, tStep, tDist);
   tracker.onclick = () => openLog();
   const eventCard = () => {
     const e = doc.getElementById("world-event-hud-v4");
@@ -95583,14 +95916,31 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
       (doc.getElementById("world-view")?.parentElement ?? doc.body).append(tracker);
     }
   }
+  function distanceLine(m, cur) {
+    const sp = m?.space, pos = m?.navigation?.position;
+    if (!pos || !sp || sp.site || sp.functionalSite || sp.settlementInterior) return null;
+    let me;
+    try {
+      me = chartPosition(pos);
+    } catch {
+      return null;
+    }
+    const ready = cur.status === "ready" && cur.turnIn, t = ready ? cur.turnIn : cur.target, r = ready || cur.target?.found ? 0 : cur.target?.radius ?? 0;
+    if (!t || !Number.isFinite(me.x) || !Number.isFinite(me.y)) return null;
+    const dx = t.x - me.x, dy = t.y - me.y, d = Math.hypot(dx, dy);
+    if (r > 0 && d <= r) return { text: "Search here", here: true };
+    if (r === 0 && d <= 3) return { text: "You\u2019re there", here: true };
+    const deg = Math.atan2(dy, dx) * 180 / Math.PI;
+    return { text: questDistanceV1((d - r) * TILE_FEET2) + " " + DIRS2[(Math.round(deg / 45) % 8 + 8) % 8], deg };
+  }
   function paintTracker(m, visible3 = true) {
     const q = m?.quests, cur = trackedQuest(q);
     mount();
     const target = cur ? cur.status === "ready" && cur.turnIn ? { x: cur.turnIn.x, y: cur.turnIn.y, r: 0, label: "", id: cur.id } : { x: cur.target.x, y: cur.target.y, r: cur.target.found ? 0 : cur.target.radius, label: cur.target.found ? "" : "Search here", id: cur.id } : null;
     map()?.trackQuest?.(target);
-    const key3 = visible3 && cur ? [cur.id, cur.status, cur.title, cur.step].join("|") : "";
+    const dist3 = visible3 && cur ? distanceLine(m, cur) : null, key3 = visible3 && cur ? [cur.id, cur.status, cur.title, cur.step, dist3?.text ?? "", dist3 ? Math.round((dist3.deg ?? 0) / 15) : ""].join("|") : "";
     if (key3 === trackerKey) return;
-    if (menuPage.open) drawPage();
+    if (menuPage.open && key3.split("|", 4).join("|") !== trackerKey.split("|", 4).join("|")) drawPage();
     trackerKey = key3;
     tracker.hidden = !key3;
     if (!key3) return;
@@ -95598,7 +95948,13 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     tTitle.replaceChildren(el3("i", cur.title));
     tStep.textContent = cur.step;
     tracker.classList.toggle("is-ready", cur.status === "ready");
-    tracker.setAttribute("aria-label", "Tracked quest: " + cur.title + ". " + cur.step + ". Open the quest log.");
+    tDist.hidden = !dist3;
+    tracker.classList.toggle("has-dist", Boolean(dist3));
+    if (dist3) {
+      tDist.classList.toggle("here", Boolean(dist3.here));
+      tDist.replaceChildren(...dist3.here ? [] : [arrowTo(dist3.deg)], el3("b", dist3.text));
+    }
+    tracker.setAttribute("aria-label", "Tracked quest: " + cur.title + ". " + cur.step + "." + (dist3 ? " " + dist3.text.replace("ft", " feet").replace("mi", " miles") + "." : "") + " Open the quest log.");
   }
   let menuOpener = null, pageSel = null, pageKey = "";
   const pageRoot = el3("div", null, "qp");
@@ -95617,7 +95973,7 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     if (!menuPage.open) return;
     const q = quests(), cur = trackedQuest(q), active2 = q?.active ?? [];
     if (!active2.some((a2) => a2.id === pageSel)) pageSel = cur?.id ?? active2[0]?.id ?? null;
-    const key3 = JSON.stringify([q?.revision, active2.map((a2) => [a2.id, a2.status, a2.step, a2.title]), cur?.id, pageSel, dropArm, busy, notice]);
+    const key3 = JSON.stringify([q?.revision, active2.map((a2) => [a2.id, a2.status, a2.step, a2.title, a2.gold, a2.xp, a2.gear?.odds]), cur?.id, pageSel, dropArm, busy, notice]);
     if (!force && key3 === pageKey) return;
     pageKey = key3;
     const story = el3("div", null, "qp-story"), seal = el3("span", "\u2726", "qp-seal"), st = el3("div");
@@ -95663,9 +96019,7 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     sv.append(el3("b", a.step), el3("span", ready ? "Ready to hand in" : a.target?.found ? "Marked on your map" : "Not found yet"));
     step.append(el3("span", null, "dot"), sv);
     d.append(step);
-    const rew = el3("div", null, "qp-rew");
-    rew.append(el3("span", "Reward"), ...pay2(a, "").childNodes);
-    d.append(rew);
+    d.append(rewardPanel(a.gold, a.xp, a.gear, { diff: a.difficulty, grow: !ready }));
     const acts = el3("div", null, "qp-acts"), btn = (label5, cls, fn) => {
       const b = el3("button", label5, cls);
       b.type = "button";
@@ -96082,7 +96436,7 @@ var SITE_BIOMES = {
   tropical: { rock: "#78866a", mound: "#357e4a", cover: "moss", leaf: "#3e9a4c", stone: "#c2b893", vine: true },
   volcanic: { rock: "#4f4644", mound: "#4b413e", cover: "ash", leaf: "#6b5e55", stone: "#615759", glow: "#ff7a2a" }
 };
-var SAND2 = { d2: "#b88c4e", d: "#cfa564", m: "#e6c587", l: "#f1d9a6", h: "#fbeccd" };
+var SAND3 = { d2: "#b88c4e", d: "#cfa564", m: "#e6c587", l: "#f1d9a6", h: "#fbeccd" };
 var ASH = { d2: "#2a2423", d: "#3a3331", m: "#5a514d", l: "#766c66", h: "#938880" };
 var pal = (base2, o = {}) => ramp3(base2, o.cool ?? "#0f1724", o.warm ?? "#fff3d6");
 function capTop(c, S6, d, P15, o = 1.1) {
@@ -96168,7 +96522,7 @@ function embers(c, out, x, y, w, h, seed2, glow12 = "#ff7a2a") {
 function cover(c, b, x, top, w, seed2, big = 1) {
   const R9 = rng17(seed2), k = b.cover;
   if (k === "snow") drift5(c, [[x - w * 0.12, top + 3, w * 0.36 * big, 5 * big], [x + w * 0.14, top + 4, w * 0.3 * big, 4.4 * big]], 1.1);
-  else if (k === "sand") heap(c, [[x + w * 0.05, top + 5, w * 0.3 * big, 4 * big]], SAND2, 1.1);
+  else if (k === "sand") heap(c, [[x + w * 0.05, top + 5, w * 0.3 * big, 4 * big]], SAND3, 1.1);
   else if (k === "ash") heap(c, [[x, top + 5, w * 0.26 * big, 3.4 * big]], ASH, 1);
   else if (k === "heather") {
     clumps(c, [[x - w * 0.1, top + 4, 5 * big], [x + w * 0.14, top + 5, 4.4 * big]], "#7e6a8f", seed2, 1.2);
@@ -96426,20 +96780,20 @@ function desertTomb(c, x, y, b, seed2) {
   dune.quadraticCurveTo(x + 40, y - 192, x + 110, y - 170);
   dune.bezierCurveTo(x + 170, y - 150, x + 196, y - 70, x + 204, y - 8);
   dune.closePath();
-  prop4(c, [[dune, SAND2.m]], 2.2);
+  prop4(c, [[dune, SAND3.m]], 2.2);
   c.save();
   c.clip(dune);
-  c.fillStyle = SAND2.d;
+  c.fillStyle = SAND3.d;
   c.fill(dune);
   const dl = new Path2D();
   dl.ellipse(x - 40, y - 110, 170, 70, -0.1, 0, TAU112);
-  c.fillStyle = SAND2.m;
+  c.fillStyle = SAND3.m;
   c.fill(dl);
   const dh = new Path2D();
   dh.ellipse(x - 70, y - 150, 110, 30, -0.15, 0, TAU112);
-  c.fillStyle = SAND2.l;
+  c.fillStyle = SAND3.l;
   c.fill(dh);
-  c.strokeStyle = SAND2.d;
+  c.strokeStyle = SAND3.d;
   c.lineWidth = 1.2;
   for (let i = 0; i < 7; i++) {
     const ry = y - 40 - i * 18;
@@ -96488,7 +96842,7 @@ function desertTomb(c, x, y, b, seed2) {
   c.fillRect(x - 128, y - 146, 256, 3);
   c.fillStyle = "#e8c66a";
   c.fillRect(x - 128, y - 143, 256, 2);
-  heap(c, [[x - 110, y - 12, 36, 10], [x + 104, y - 12, 40, 11]], SAND2, 1.2);
+  heap(c, [[x - 110, y - 12, 36, 10], [x + 104, y - 12, 40, 11]], SAND3, 1.2);
   for (const sx of [-92, 92]) brazier(c, x + sx, y - 4, "#ffb347", seed2 + sx);
 }
 function paintRuinEntranceV3(c, x, y, biome, seed2 = 31) {
@@ -96567,7 +96921,7 @@ function paintRuinEntranceV3(c, x, y, biome, seed2 = 31) {
     if (!broken) prop4(c, [[poly9([[cx - 15, base2 - h], [cx + 15, base2 - h], [cx + 13, base2 - h - 8], [cx - 13, base2 - h - 8]]), P15.l]], 2.2);
     if (b.vine && R9() < 0.75) vines(c, cx + (R9() - 0.5) * 6, base2 - h + (broken ? 0 : -4), h * 0.55, b.leaf, sd, 1);
     if (b.cover === "snow" && broken) capTop(c, shaft, 8, SNOW4);
-    if (b.cover === "sand") heap(c, [[cx - 6, base2, 10, 4]], SAND2, 1);
+    if (b.cover === "sand") heap(c, [[cx - 6, base2, 10, 4]], SAND3, 1);
   };
   col2(x - 118, 62, true, seed2 + 1);
   col2(x - 70, 96, false, seed2 + 2);
@@ -96607,7 +96961,7 @@ function paintRuinEntranceV3(c, x, y, biome, seed2 = 31) {
     clumps(c, [[x - 60, y - 182, 7], [x + 70, y - 180, 6], [x - 100, y - 160, 7], [x + 96, y - 158, 6]], b.leaf, seed2, 1.3);
   }
   if (b.cover === "heather") cover(c, b, x - 100, y - 164, 40, seed2 + 5), cover(c, b, x + 90, y - 162, 36, seed2 + 6);
-  if (b.cover === "sand") heap(c, [[x - 140, y - 14, 34, 9], [x + 142, y - 14, 30, 8], [x + 100, y - 158, 30, 5]], SAND2, 1.2);
+  if (b.cover === "sand") heap(c, [[x - 140, y - 14, 34, 9], [x + 142, y - 14, 30, 8], [x + 100, y - 158, 30, 5]], SAND3, 1.2);
   if (b.cover === "ash") heap(c, [[x - 140, y - 14, 30, 7], [x + 142, y - 14, 26, 6]], ASH, 1);
   if (biome === "volcanic") for (const sx of [-70, 70]) {
     const g = c.createRadialGradient(x + sx, y - 80, 2, x + sx, y - 80, 26);
@@ -96626,7 +96980,7 @@ function smooth20(pts2) {
   p.closePath();
   return p;
 }
-var coverPal = (b) => b.cover === "snow" ? SNOW4 : b.cover === "sand" ? SAND2 : b.cover === "ash" ? ASH : b.cover === "heather" ? pal("#8c8a5e") : pal(b.leaf, { warm: "#fff6a0" });
+var coverPal = (b) => b.cover === "snow" ? SNOW4 : b.cover === "sand" ? SAND3 : b.cover === "ash" ? ASH : b.cover === "heather" ? pal("#8c8a5e") : pal(b.leaf, { warm: "#fff6a0" });
 var green = (b) => b.cover === "grass" || b.cover === "moss";
 var SOIL3 = { woodland: "#7a5e3e", grassland: "#8a6440", wetland: "#5f5a40", upland: "#86775c", desert: "#c98a4e", frostland: "#7d8a98", tropical: "#6e5638", volcanic: "#3c3331" };
 var DEEP = { woodland: "#5fd0a0", grassland: "#6fd39a", wetland: "#7fd0b0", upland: "#9fb0ff", desert: "#ffb35a", frostland: "#8fd8ff", tropical: "#5fe0b8", volcanic: "#ff7a2a" };
@@ -96734,7 +97088,7 @@ function mound(c, cx, base2, w, h, b, seed2) {
 }
 function mossCap5(c, b, o, d = 9) {
   if (b.cover === "snow") capTop(c, o, d, SNOW4);
-  else if (b.cover === "sand") capTop(c, o, d * 0.6, SAND2);
+  else if (b.cover === "sand") capTop(c, o, d * 0.6, SAND3);
   else if (b.cover === "ash") capTop(c, o, d * 0.5, ASH);
   else if (b.cover === "heather") capTop(c, o, d * 0.7, pal("#8a8a60"));
   else capTop(c, o, d, pal(tone52(b.leaf, -0.05), { warm: "#fff6a0" }), 1.2);
@@ -96909,7 +97263,7 @@ function glow5(c, x, y, rx, ry, col2, a) {
 var warm = "rgba(255,236,170,A)";
 function touch(c, out, x, top, w, k, b, seed2) {
   if (k.touch === "frost") capTop(c, out, 6, SNOW4);
-  else if (k.touch === "sand") heap(c, [[x + w * 0.2, top + 4, w * 0.3, 3.5]], SAND2, 1);
+  else if (k.touch === "sand") heap(c, [[x + w * 0.2, top + 4, w * 0.3, 3.5]], SAND3, 1);
   else if (k.touch === "embers") capTop(c, out, 4, ASH);
   else if (b.vine && rng17(seed2)() < 0.7) clumps(c, [[x - w * 0.2, top + 3, 5], [x + w * 0.05, top + 2, 6]], b.leaf, seed2, 1.2);
 }
@@ -96965,7 +97319,7 @@ function paintStoneExitV3(c, x, y, k, biome, seed2 = 3) {
   c.fillStyle = g;
   c.fill(door7);
   if (k.touch === "frost") drift5(c, [[x - 10, y - 64, 26, 6], [x + 18, y - 63, 20, 5]], 1);
-  else if (k.touch === "sand") heap(c, [[x, y - 63, 32, 6]], SAND2, 1);
+  else if (k.touch === "sand") heap(c, [[x, y - 63, 32, 6]], SAND3, 1);
   else if (k.touch !== "embers") grass2(c, x - 12, y - 60, 10, b.leaf, 6, seed2, 1.3, 1.1), grass2(c, x + 14, y - 60, 9, b.leaf, 5, seed2 + 1, 1.3, 1.1);
   c.restore();
   treads(c, x - 32, x + 32, y + 18, y - 62, 6, k, true);
@@ -97083,7 +97437,7 @@ function paintCaveExitV3(c, x, y, k, biome, seed2 = 7) {
   c.fillStyle = g;
   c.fill(hole);
   const ground = poly9([[x - 40, y - 20], [x + 40, y - 26], [x + 40, y + 12], [x - 40, y + 12]]);
-  c.fillStyle = k.touch === "frost" ? SNOW4.m : k.touch === "sand" ? SAND2.m : k.touch === "embers" ? ASH.l : tone52(b.leaf, 0.1);
+  c.fillStyle = k.touch === "frost" ? SNOW4.m : k.touch === "sand" ? SAND3.m : k.touch === "embers" ? ASH.l : tone52(b.leaf, 0.1);
   c.fill(ground);
   if (k.touch !== "frost" && k.touch !== "sand" && k.touch !== "embers") for (const gx of [-22, -4, 16]) grass2(c, x + gx, y - 14, 12, b.leaf, 6, seed2 + gx, 1.3, 1.1);
   c.restore();
@@ -98336,9 +98690,9 @@ function strawSkep(c, st, S6, big = false) {
   }
   for (const [x, y] of [[-31, 3], [29, 3], [-22, 4], [22, 5]]) prop4(c, [[ell8(x, y, 3.2, 1.8), P15.l]], 1);
 }
-var PAINT = { woodland: sporePod, desert: scarabMound, frostland: iceClutch, wetland: bogBloat, grassland: strawSkep };
+var PAINT2 = { woodland: sporePod, desert: scarabMound, frostland: iceClutch, wetland: bogBloat, grassland: strawSkep };
 function motherSac(c, biome, st) {
-  const S6 = nestSkinV1(biome), paint3 = PAINT[biome] ?? sporePod;
+  const S6 = nestSkinV1(biome), paint3 = PAINT2[biome] ?? sporePod;
   if (st === "gone") {
     c.filter = "saturate(.25) brightness(.62)";
   }
@@ -98575,7 +98929,7 @@ function drawNestGroundV1(ctx, e, time3) {
   }
 }
 function nestUprightsV1(e, time3) {
-  const { x, y } = e.position, b = e.biome, S6 = nestSkinV1(b), L = NEST_LAYOUT_V1, paint3 = PAINT[b] ?? sporePod, out = [], id = e.groupId ?? "nest", pulse3 = 0.75 + 0.25 * Math.sin(time3 * 3.2), ms = motherStateV1(e);
+  const { x, y } = e.position, b = e.biome, S6 = nestSkinV1(b), L = NEST_LAYOUT_V1, paint3 = PAINT2[b] ?? sporePod, out = [], id = e.groupId ?? "nest", pulse3 = 0.75 + 0.25 * Math.sin(time3 * 3.2), ms = motherStateV1(e);
   L.nests.forEach((n, i) => {
     const st = nestState(e.nests?.[i]);
     out.push({ id: id + "/nest/" + i, anchorX: x + n.x, anchorY: y + n.y, draw(ctx) {
@@ -108487,147 +108841,6 @@ function createCivilianContextInput({ environment, readModel, activate, isBlocke
   };
   environment.addEventListener("keydown", key3);
   return { destroy: () => environment.removeEventListener("keydown", key3) };
-}
-
-// src/client/chart_layers_v1.js
-var CHART_COLORS = { O: "#1d4c6c", W: "#4698be", L: "#3a8aac", B: "#e0d09c", w: "#4f8946", a: "#87a656", m: "#5d8a6f", r: "#979381", d: "#d6be89", s: "#dde8ec", t: "#2f7c51", l: "#5f4c4a", o: "#6f8f63" };
-function chartPosition(p) {
-  return { x: (Number(BigInt(p.chunkX) - 1024n) * 1024 + p.localX) / 32, y: (Number(BigInt(p.chunkY) - 1024n) * 832 + p.localY) / 32 };
-}
-function chartView(center3, span2, width2, height) {
-  return { x: center3.x - span2 / 2, y: center3.y - span2 * height / width2 / 2, width: span2, height: span2 * height / width2 };
-}
-function projectChart(p, view3, width2, height) {
-  return { x: (p.x - view3.x) * width2 / view3.width, y: (p.y - view3.y) * height / view3.height };
-}
-var NOISE = (() => {
-  const g = new Float32Array(4096);
-  let s = 2463534242;
-  for (let i = 0; i < 4096; i++) {
-    s ^= s << 13;
-    s ^= s >>> 17;
-    s ^= s << 5;
-    g[i] = (s >>> 0) / 4294967296;
-  }
-  return g;
-})();
-function noise(x, y) {
-  const xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fy = y - yi, u = fx * fx * (3 - 2 * fx), v = fy * fy * (3 - 2 * fy), x0 = xi & 63, x1 = xi + 1 & 63, y0 = (yi & 63) << 6, y1 = (yi + 1 & 63) << 6, a = NOISE[y0 + x0], b = NOISE[y0 + x1], c = NOISE[y1 + x0], d = NOISE[y1 + x1];
-  return a + (b - a) * u + (c - a + (a - b - c + d) * u) * v;
-}
-var PAINT2 = [];
-var PR = new Uint8Array(128);
-var PG = new Uint8Array(128);
-var PB = new Uint8Array(128);
-var MOTTLE = new Float32Array(128).fill(0.05);
-var SHALLOW = [70, 140, 164];
-var SAND3 = [228, 212, 162];
-for (let c = 0; c < 128; c++) {
-  PR[c] = 111;
-  PG[c] = 143;
-  PB[c] = 99;
-}
-for (const [k, v] of Object.entries(CHART_COLORS)) {
-  const c = k.charCodeAt(0);
-  PAINT2[c] = [PR[c], PG[c], PB[c]] = [parseInt(v.slice(1, 3), 16), parseInt(v.slice(3, 5), 16), parseInt(v.slice(5, 7), 16)];
-}
-for (const [k, depth] of [["w", 0.09], ["t", 0.1], ["m", 0.06], ["r", 0.06], ["a", 0.04], ["d", 0.04], ["s", 0.03], ["l", 0.08], ["o", 0.05]]) MOTTLE[k.charCodeAt(0)] = depth;
-function boxBlur(a, t, sum2, w, h, r) {
-  const inv = 1 / (2 * r + 1);
-  for (let y = 0; y < h; y++) {
-    const o = y * w;
-    let s = 0;
-    for (let x = -r; x <= r; x++) s += a[o + (x < 0 ? 0 : x >= w ? w - 1 : x)];
-    for (let x = 0; x < w; x++) {
-      t[o + x] = s * inv;
-      const add2 = x + r + 1, sub = x - r;
-      s += a[o + (add2 >= w ? w - 1 : add2)] - a[o + (sub < 0 ? 0 : sub)];
-    }
-  }
-  sum2.fill(0);
-  for (let y = -r; y <= r; y++) {
-    const o = (y < 0 ? 0 : y >= h ? h - 1 : y) * w;
-    for (let x = 0; x < w; x++) sum2[x] += t[o + x];
-  }
-  for (let y = 0; y < h; y++) {
-    const o = y * w, add2 = (y + r + 1 >= h ? h - 1 : y + r + 1) * w, sub = (y - r < 0 ? 0 : y - r) * w;
-    for (let x = 0; x < w; x++) {
-      a[o + x] = sum2[x] * inv;
-      sum2[x] += t[add2 + x] - t[sub + x];
-    }
-  }
-}
-function paintChartTerrain(data, raster, W13, H7) {
-  const rw = raster.width, rh = raster.height, view3 = raster.view, n = rw * rh, codes = new Uint8Array(n), R9 = new Float32Array(n), G3 = new Float32Array(n), B6 = new Float32Array(n), M4 = new Float32Array(n), S6 = new Float32Array(n), K6 = new Float32Array(n), t = new Float32Array(n), sum2 = new Float32Array(rw);
-  const tps = view3.width / rw, tpx = view3.width / W13, tpy = view3.height / H7, clump = 1 / Math.max(4, tpx * 4);
-  for (let y = 0; y < rh; y++) {
-    const row2 = raster.rows[y], ty = view3.y + (y + 0.5) * view3.height / rh;
-    for (let x = 0; x < rw; x++) {
-      const c = row2.charCodeAt(x) & 127, i = y * rw + x, tx = view3.x + (x + 0.5) * tps;
-      codes[i] = c;
-      if (c === 79 || c === 76 || c === 87) {
-        K6[i] = 0.96 + 0.07 * noise(tx * 0.09, ty * 0.09);
-        if (c === 79) S6[i] = 1;
-      } else {
-        R9[i] = PR[c];
-        G3[i] = PG[c];
-        B6[i] = PB[c];
-        M4[i] = 1;
-        K6[i] = (0.94 + 0.12 * noise(tx * 0.03 + 50, ty * 0.03 + 50)) * (1 + MOTTLE[c] * (noise(tx * clump + 71, ty * clump + 13) - 0.5) * 2.4);
-      }
-    }
-  }
-  const landR = Math.max(1, Math.round(4 / tps)), seaR = Math.max(1, Math.round(9 / tps));
-  for (const a of [R9, G3, B6, M4]) boxBlur(a, t, sum2, rw, rh, landR);
-  boxBlur(S6, t, sum2, rw, rh, seaR);
-  boxBlur(S6, t, sum2, rw, rh, seaR);
-  const wt = Math.min(12, Math.max(4, tpx * 2.5)), amp = wt / tps, f = 1 / (wt * 3.2), sx = rw / W13, sy = rh / H7, maxX = rw - 1.001, maxY = rh - 1.001, sea0 = PAINT2[79];
-  for (let iy = 0; iy < H7; iy++) {
-    const ty = view3.y + (iy + 0.5) * tpy, ry = Math.min(rh - 1, (iy + 0.5) * sy | 0) * rw, py = (iy + 0.5) * sy - 0.5;
-    for (let ix = 0; ix < W13; ix++) {
-      const tx = view3.x + (ix + 0.5) * tpx, o = (iy * W13 + ix) * 4, n0 = ry + Math.min(rw - 1, (ix + 0.5) * sx | 0), c0 = codes[n0];
-      let r, g, b;
-      if (c0 === 76 || c0 === 87) {
-        const k = K6[n0];
-        r = PR[c0] * k;
-        g = PG[c0] * k;
-        b = PB[c0] * k;
-      } else {
-        let fx = (ix + 0.5) * sx - 0.5 + (noise(tx * f, ty * f) - 0.5) * 2 * amp, fy = py + (noise(tx * f + 19, ty * f + 7) - 0.5) * 2 * amp;
-        fx = fx < 0 ? 0 : fx > maxX ? maxX : fx;
-        fy = fy < 0 ? 0 : fy > maxY ? maxY : fy;
-        const x0 = fx | 0, y0 = fy | 0, u = fx - x0, v = fy - y0, i = y0 * rw + x0, j = x0 < rw - 1 ? i + 1 : i, l = y0 < rh - 1 ? i + rw : i, q = l + j - i, w00 = (1 - u) * (1 - v), w10 = u * (1 - v), w01 = (1 - u) * v, w11 = u * v, sea = S6[i] * w00 + S6[j] * w10 + S6[l] * w01 + S6[q] * w11, k = K6[i] * w00 + K6[j] * w10 + K6[l] * w01 + K6[q] * w11;
-        if (sea > 0.5) {
-          const d = Math.min(1, (sea - 0.5) / 0.42);
-          r = (SHALLOW[0] + (sea0[0] - SHALLOW[0]) * d) * k;
-          g = (SHALLOW[1] + (sea0[1] - SHALLOW[1]) * d) * k;
-          b = (SHALLOW[2] + (sea0[2] - SHALLOW[2]) * d) * k;
-        } else {
-          const m = M4[i] * w00 + M4[j] * w10 + M4[l] * w01 + M4[q] * w11;
-          if (m > 1e-3) {
-            const im = k / m;
-            r = (R9[i] * w00 + R9[j] * w10 + R9[l] * w01 + R9[q] * w11) * im;
-            g = (G3[i] * w00 + G3[j] * w10 + G3[l] * w01 + G3[q] * w11) * im;
-            b = (B6[i] * w00 + B6[j] * w10 + B6[l] * w01 + B6[q] * w11) * im;
-          } else {
-            r = PR[111];
-            g = PG[111];
-            b = PB[111];
-          }
-          if (sea > 0.36) {
-            const e = (sea - 0.36) / 0.14 * 0.7;
-            r += (SAND3[0] - r) * e;
-            g += (SAND3[1] - g) * e;
-            b += (SAND3[2] - b) * e;
-          }
-        }
-      }
-      data[o] = r;
-      data[o + 1] = g;
-      data[o + 2] = b;
-      data[o + 3] = 255;
-    }
-  }
 }
 
 // src/client/atlas_paint_v2.js

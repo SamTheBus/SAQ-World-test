@@ -5342,6 +5342,22 @@ function worldGearRarityFor(hash17, encounter, hero, role, siteReward, draw, qua
   return (hash17 === WORLD_LOOT_V4_HASH ? worldGearRarityV4 : worldGearRarityV3)(encounter, hero, role, siteReward, draw, qualityHundredths);
 }
 
+// src/shared/content/quest_gear_v1.js
+var QUEST_GEAR_VERSION = "quest-gear-v1";
+var QUEST_GEAR_GROUPS = Object.freeze({ any: null, weapons: Object.freeze(["weapon", "subweapon"]), armor: Object.freeze(["helmet", "chest", "leggings", "overall", "gloves", "boots"]), accessories: Object.freeze(["ring", "cape"]) });
+var questGearFamiliesV1 = (families, group) => {
+  const keep = QUEST_GEAR_GROUPS[group];
+  return keep ? families.filter((f3) => keep.includes(f3)) : families;
+};
+function h32(text) {
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619);
+  h = Math.imul(h ^ h >>> 16, 2246822507);
+  h = Math.imul(h ^ h >>> 13, 3266489909);
+  return (h ^ h >>> 16) >>> 0;
+}
+var questGearSourceIdV1 = (seedHex, playerId, questId) => "ent:" + [0, 1, 2, 3].map((i) => h32(QUEST_GEAR_VERSION + "/" + seedHex + "/" + playerId + "/" + questId + "/" + i).toString(16).padStart(8, "0")).join("");
+
 // src/shared/content/world_rarity_v2.js
 var WORLD_RARITY_VERSION = "world-rarity-rewards-v2";
 var WORLD_RARITY_HASH = "4a10af2db8e7a9a8ffd8e4d7e7b7334e4b2f5dd88254e198f73024bde4edc684";
@@ -5829,7 +5845,8 @@ function rewardProgressionD9(depth, sourceId) {
   return freezeWire(validateRewardProgressionD9({ version: D9_REWARD_PROGRESSION, policy: D9_PROFILE.progressionPolicy, sourceDepth: progressionWire(progressionBigInt(depth)), quality: 1, sourceId, tomeEligibility: "base-single-d7-v1" }));
 }
 function validateRewardProgressionD9(v) {
-  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "siteReward", "gearClass", "armor", "wardrobe", "unique", "boon", "quickClear", "swiftKill", "affixes", "bestiaryQuality", "lockedDepth"]);
+  closedRecord(v, ["version", "policy", "sourceDepth", "quality", "sourceId", "tomeEligibility"], ["modifiers", "episodeSnapshotId", "combatHash", "combatQuality", "rarityPolicyHash", "rarityHeroLevel", "rarityRole", "siteReward", "gearClass", "armor", "wardrobe", "unique", "boon", "quickClear", "swiftKill", "affixes", "bestiaryQuality", "lockedDepth", "questGear"]);
+  requireContract(v.questGear === void 0 || Object.hasOwn(QUEST_GEAR_GROUPS, v.questGear) && v.rarityPolicyHash !== void 0, "Quest gear policy");
   requireContract(v.lockedDepth === void 0 || v.episodeSnapshotId !== void 0 && progressionBigInt(v.lockedDepth) >= 1n, "Co-op reward depth policy");
   requireContract(v.bestiaryQuality === void 0 || Number.isSafeInteger(v.bestiaryQuality) && v.bestiaryQuality > 0 && v.bestiaryQuality <= 1e4 && v.rarityPolicyHash !== void 0, "Bestiary quality policy");
   requireContract(v.swiftKill === void 0 || v.swiftKill === true && v.rarityPolicyHash !== void 0, "Swift kill reward policy");
@@ -6436,7 +6453,7 @@ function generateAtPrecision(c, seed, input, { tier = null, family: family2 = nu
   ) : hasWorldRarityV2(progression) ? siteRewardRarityV1(progression.siteReward, worldGearRarityV2(depth, progression.rarityHeroLevel, progression.rarityRole, rarityRandom, (progression.modifiers?.qualityHundredths ?? 0) + siteRewardQualityV1(progression.siteReward) + boonRewardQualityV1(progression) + quickClearRewardQualityV1(progression))) : worldGearRarity(depth, progression.combatQuality, rarityRandom, progression.modifiers?.qualityHundredths ?? 0) : rollRarityD9(depth, progression.quality, random));
   const rarityTier = uq && rolledTier < UNIQUE_MIN_RARITY ? UNIQUE_MIN_RARITY : progression.swiftKill && rolledTier < 1 ? 1 : rolledTier;
   safeInteger(rarityTier, 0, 5);
-  const cls = progression.gearClass ?? null, classOffhand = cls ? CLASS_GEAR[cls].offhand : null, wardrobe = Boolean(cls) && progression.wardrobe === WARDROBE_V1, classFamilies = wardrobe ? CLASS_GEAR_FAMILIES_V2 : CLASS_GEAR_FAMILIES, families = cls ? classFamilies : progression.armor === "overall" ? ONE_PIECE_GEAR_FAMILIES : GEAR_FAMILIES;
+  const cls = progression.gearClass ?? null, classOffhand = cls ? CLASS_GEAR[cls].offhand : null, wardrobe = Boolean(cls) && progression.wardrobe === WARDROBE_V1, classFamilies = wardrobe ? CLASS_GEAR_FAMILIES_V2 : CLASS_GEAR_FAMILIES, families = questGearFamiliesV1(cls ? classFamilies : progression.armor === "overall" ? ONE_PIECE_GEAR_FAMILIES : GEAR_FAMILIES, progression.questGear);
   const type = family2 ?? pick6(families), sub = type === "subweapon" ? subType ?? (cls ? classOffhand : pick6(["shield", "dagger", "tome"])) : null, own3 = type === "cape" ? CAPE_NOUNS : cls && type !== "ring" ? classGearNouns(cls, type) : GEAR_NOUNS[sub ?? type], shared = wardrobe && type === "helmet" ? SHARED_HELMET_NOUNS : [], nouns = [...own3 ?? [], ...shared, ...uq?.trophy ? [uq.noun] : []], n = noun ?? (shared.length && random() < 0.2 ? pick6(shared) : pick6(own3));
   requireContract((family2 ? cls ? classFamilies : GEAR_FAMILIES : families).includes(type) && (!cls || type !== "subweapon" || sub === classOffhand) && nouns?.includes(n), "Unknown generated family/noun");
   const E = c.dungeonScale(power2).E, R = c.q(100 + 7 * rarityTier, 100), P2 = c.q((100 + 15 * rarityTier) * (type === "overall" ? 18 : 10), 1e3), flatR = c.mul(R, c.q(type === "overall" ? 18 : 10, 10));
@@ -20503,7 +20520,7 @@ function validateServiceItem(s, p, item) {
   requireContract(stock && same16(r.item, unmodifiedItem(item)), "Purchased gear changed");
   return item;
 }
-var worldDrop = (item, o) => Boolean(item.generated && typeof item.generated.progression?.combatHash === "string" && (o.groupId || o.servicePurchase));
+var worldDrop = (item, o) => Boolean(item.generated && typeof item.generated.progression?.combatHash === "string" && (o.groupId || o.servicePurchase || o.quest));
 var KEPT_SALE_RECEIPTS = 128;
 var MAX_HOT_SALE_RECEIPTS = 2048;
 var settledSale = (s, p, r) => {
@@ -20521,7 +20538,7 @@ function retireSettledSales(s, p) {
 function saleQuote(p, item) {
   const d = itemDefinition(item), o = p.inventory.renewal?.originsByItemId[item?.itemId];
   if (!item || item.ownerPlayerId !== p.playerId || !o || item.sourceEntityId === null || !(ordinary.has(item.definitionId) || worldDrop(item, o)) || item.locked || item.protected || item.unique || d?.unique || d?.classification === "unique-landmark" || Object.values(p.inventory.equipped).includes(item.itemId) || Object.values(p.inventory.subweapons?.claims ?? {}).some((c) => c.sourceEntityId === item.sourceEntityId) || isClassKitSource(p, item.sourceEntityId) || (item.generated?.rarityTier ?? 0) > SETTLEMENT_LIFE_POLICY.sale.maximumRarity) return null;
-  if (!o.servicePurchase && !o.groupId) return null;
+  if (!o.servicePurchase && !o.groupId && !o.quest) return null;
   const power2 = progressionBigInt(item.generated?.itemPower ?? 1), bounded2 = Number(power2 > BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) ? BigInt(SETTLEMENT_LIFE_POLICY.sale.maximumValuationPower) : power2);
   if (!ordinary.has(item.definitionId)) return String(combatPlayer(p) ? salePriceV1(Number(power2), item.generated?.rarityTier ?? 0) : sellBase(item));
   return String(SETTLEMENT_LIFE_POLICY.sale.baseGold + bounded2 * SETTLEMENT_LIFE_POLICY.sale.perItemPower + (item.generated?.rarityTier ?? 0) * SETTLEMENT_LIFE_POLICY.sale.perRarityTier);
@@ -25892,6 +25909,9 @@ function validateWorldPagingD9(paging) {
       if (r.origin.servicePurchase) {
         closedRecord(r.origin, ["servicePurchase", "sourceEntityId"]);
         requireContract(r.origin.servicePurchase === r.item.sourceEntityId, "Remote purchased origin mismatch");
+      } else if (r.origin.quest !== void 0) {
+        closedRecord(r.origin, ["quest", "sourceEntityId", "progression"]);
+        requireContract(typeof r.origin.quest === "string" && r.origin.progression?.sourceId === r.item.sourceEntityId, "Remote quest gear origin mismatch");
       } else {
         closedRecord(r.origin, ["groupId", "episode", "sourceEntityId"], ["progression", "archive"]);
         safeInteger(r.origin.episode);
@@ -26164,6 +26184,12 @@ function validateRenewableInventory(p, state, validateCommand2, legacyDefeatRewa
     }
     if (o?.servicePurchase) {
       validateServiceOrigin(p, o, id);
+      return;
+    }
+    if (o?.quest !== void 0) {
+      closedRecord(o, ["quest", "sourceEntityId", "progression"]);
+      validateRewardProgression(o.progression);
+      requireContract(typeof o.quest === "string" && /^q[bf]:/.test(o.quest) && o.sourceEntityId === id && o.progression.sourceId === id && o.progression.questGear !== void 0 && id === questGearSourceIdV1(state.campaign.seed.seedHex, p.playerId, o.quest), "Unknown quest gear provenance");
       return;
     }
     const kit = classKitPiece(p, id);
@@ -28919,6 +28945,8 @@ export {
   ALPHA_POPULATION_SELECTIONS,
   hasAlphaPopulation,
   newPopulationSelection,
+  WORLD_LOOT_V4_HASH,
+  worldLootWeightsV4,
   formatLarge,
   integerRatio,
   amount,
@@ -28928,6 +28956,8 @@ export {
   multiplyAmount,
   wholeAmount,
   formatAmount,
+  QUEST_GEAR_GROUPS,
+  questGearSourceIdV1,
   BIOME_BOSSES_V1,
   BIOME_BOSS_DAMAGE_V1,
   BIOME_BOSS_REACH_V1,
@@ -29019,6 +29049,8 @@ export {
   collectGroundCardsV1,
   validateBestiaryRootV1,
   projectBestiaryV1,
+  WARDROBE_V1,
+  AFFIXES_V2,
   CDR_CAP,
   UNIQUE_ITEMS,
   UNIQUE_TIERS,
@@ -29027,6 +29059,7 @@ export {
   uniqueEffectText,
   uniqueOf,
   rewardProgressionD9,
+  validateRewardProgressionD9,
   prototypeRewardProgression,
   rewardProgression,
   boonOfV1,
@@ -29044,7 +29077,9 @@ export {
   RARITY_NAMES4 as RARITY_NAMES,
   RARITY_COLORS4 as RARITY_COLORS,
   gearHash4 as gearHash,
+  gearSeed,
   affixRollRange,
+  generateGear3 as generateGear,
   RESONANCE_SETS,
   workshopResult,
   SUBWEAPON_TYPES,
