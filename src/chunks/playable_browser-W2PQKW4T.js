@@ -77957,62 +77957,41 @@ function shrinkPuff(c, x, y, k) {
     c.restore();
   }
 }
-var swirlCanvas = null;
+function edgeInner(c, W19, H7, b, t) {
+  const P19 = 2 * (W19 + H7), waves = Math.max(4, Math.round(P19 / Math.max(120, Math.min(W19, H7) * 0.42))), amp = b * 0.32, step = Math.max(6, b * 0.5), k = b * 1.5, d = (s2) => b + Math.sin(s2 / P19 * waves * TAU115 - t * 1.6) * amp;
+  let s = 0;
+  c.moveTo(k, d(0));
+  for (let x = k; x <= W19 - k; x += step) c.lineTo(x, d(s + x));
+  s += W19;
+  for (let y = k; y <= H7 - k; y += step) c.lineTo(W19 - d(s + y), y);
+  s += H7;
+  for (let x = W19 - k; x >= k; x -= step) c.lineTo(x, H7 - d(s + W19 - x));
+  s += W19;
+  for (let y = H7 - k; y >= k; y -= step) c.lineTo(d(s + H7 - y), y);
+  c.closePath();
+}
 function drawTripSwirl(c, W19, H7, t, amt) {
-  if (amt <= 0 || typeof document === "undefined") return;
-  const w = Math.max(32, Math.round(W19 / 4)), h = Math.max(32, Math.round(H7 / 4));
-  if (!swirlCanvas) swirlCanvas = document.createElement("canvas");
-  if (swirlCanvas.width !== w || swirlCanvas.height !== h) {
-    swirlCanvas.width = w;
-    swirlCanvas.height = h;
-  }
-  const v = swirlCanvas.getContext("2d");
-  v.setTransform(1, 0, 0, 1, 0, 0);
-  v.globalCompositeOperation = "source-over";
-  v.clearRect(0, 0, w, h);
-  const cx = w / 2, cy2 = h / 2, R10 = Math.hypot(w, h) / 2;
-  if (v.createConicGradient) {
-    const g = v.createConicGradient(t * 0.9, cx, cy2);
-    for (let i = 0; i <= 12; i++) g.addColorStop(i / 12, `hsl(${i * 30},95%,62%)`);
-    v.fillStyle = g;
-  } else v.fillStyle = `hsl(${t * 40 % 360},95%,62%)`;
-  v.fillRect(0, 0, w, h);
-  v.save();
-  v.translate(cx, cy2);
-  v.scale(w / Math.max(w, h) * 1.2, h / Math.max(w, h) * 1.2);
-  v.rotate(-t * 0.6);
-  v.lineCap = "round";
-  for (let k = 0; k < 7; k++) {
-    v.beginPath();
-    for (let a = 0; a < 3.4; a += 0.09) {
-      const r = R10 * (0.35 + a * 0.2);
-      v.lineTo(Math.cos(a + k * TAU115 / 7) * r, Math.sin(a + k * TAU115 / 7) * r);
-    }
-    v.lineWidth = R10 * 0.06;
-    v.strokeStyle = "rgba(255,255,255,.5)";
-    v.stroke();
-    v.lineWidth = R10 * 0.02;
-    v.strokeStyle = `hsla(${k * 51 + t * 60},95%,70%,.9)`;
-    v.stroke();
-  }
-  v.restore();
-  v.globalCompositeOperation = "destination-out";
-  v.save();
-  v.translate(cx, cy2);
-  v.scale(w / 2, h / 2);
-  const inner = 0.7 - 0.07 * Math.sin(t * 1.4) * amt, m = v.createRadialGradient(0, 0, 0, 0, 0, 1);
-  m.addColorStop(0, "#000");
-  m.addColorStop(inner, "#000");
-  m.addColorStop(Math.min(1, inner + 0.24), "rgba(0,0,0,0)");
-  v.fillStyle = m;
-  v.fillRect(-1.6, -1.6, 3.2, 3.2);
-  v.restore();
-  v.globalCompositeOperation = "source-over";
+  if (!(amt > 0) || !(W19 > 0 && H7 > 0)) return;
+  const b = Math.max(5, Math.min(W19, H7) * 0.022) * amt;
   c.save();
   c.setTransform(1, 0, 0, 1, 0, 0);
-  c.globalAlpha = 0.8 * amt;
-  c.imageSmoothingEnabled = true;
-  c.drawImage(swirlCanvas, 0, 0, W19, H7);
+  if (c.createConicGradient) {
+    const g = c.createConicGradient(t * 0.5, W19 / 2, H7 / 2);
+    for (let i = 0; i <= 12; i++) g.addColorStop(i / 12, `hsl(${i * 30},95%,62%)`);
+    c.fillStyle = g;
+  } else c.fillStyle = `hsl(${t * 40 % 360},95%,62%)`;
+  c.globalAlpha = 0.78;
+  c.beginPath();
+  c.rect(0, 0, W19, H7);
+  edgeInner(c, W19, H7, b, t);
+  c.fill("evenodd");
+  c.globalAlpha = 0.6;
+  c.strokeStyle = "#fff";
+  c.lineWidth = Math.max(1, b * 0.12);
+  c.lineJoin = "round";
+  c.beginPath();
+  edgeInner(c, W19, H7, b, t);
+  c.stroke();
   c.restore();
 }
 function tripCanvasFilter(t, amt) {
@@ -94812,6 +94791,172 @@ function createHeroRosterWriter({ storage, channel: channel2 = "", slot = 1, vis
   });
 }
 
+// src/shared/contracts/trip_snacks_world_v1.js
+var TRIP_ROOT_V1 = "trip-snacks-world-v1";
+var GROUND2 = Object.freeze({ settleTicks: 30, pickupRadius: 30, lifetimeTicks: 18e3, maximum: 12, spread: 16 });
+var TRIP_BAG_STACK_V1 = 99;
+var root2 = (s) => s.trips;
+var writable = (s) => s.trips ??= { version: TRIP_ROOT_V1, bagsByPlayerId: {}, groundByPlayerId: {}, tripsByPlayerId: {} };
+var familyOf = (s, id) => ordinaryEnemyForProfile(s.entitiesById[id]?.contentDefinitionId)?.family;
+var roll = (s, pid, salt) => compositionHashV1("trip-snacks-v1/" + (s.campaign?.seed?.seedHex ?? "") + "/" + pid + "/" + salt);
+var snackBagV1 = (s, playerId) => root2(s)?.bagsByPlayerId[playerId] ?? {};
+var snackCountV1 = (s, playerId, snack) => snackBagV1(s, playerId)[snack] ?? 0;
+var tripOfPlayerV1 = (s, playerId) => root2(s)?.tripsByPlayerId[playerId] ?? null;
+var tripOfEntity = (s, entityId2) => {
+  for (const p of Object.values(s.playersById ?? {})) if (p.entityId === entityId2) return tripOfPlayerV1(s, p.playerId);
+  return null;
+};
+function tripDamageV1(s, playerId, raw) {
+  const m = tripDamageMultiplierV1(playerId && tripOfPlayerV1(s, playerId), s.tick);
+  return m === 1 ? raw : combatInteger(multiplyCombat(raw, Math.round(m * 100), 100));
+}
+var tripMoveV1 = (s, playerId) => tripSpeedMultiplierV1(playerId && tripOfPlayerV1(s, playerId), s.tick);
+function passportSnacksV1(s, playerId) {
+  const bag2 = root2(s)?.bagsByPlayerId[playerId];
+  return bag2 ? copyWire(bag2) : null;
+}
+function validatePassportSnacksV1(snacks) {
+  closedRecord(snacks, [], TRIP_SNACK_IDS_V1);
+  requireContract(Object.keys(snacks).length >= 1, "Empty snack bag");
+  for (const n of Object.values(snacks)) safeInteger(n, 1, TRIP_BAG_STACK_V1);
+  return snacks;
+}
+function arriveSnacksV1(s, playerId, snacks) {
+  const r = root2(s);
+  if (r) {
+    delete r.bagsByPlayerId[playerId];
+    delete r.tripsByPlayerId[playerId];
+  }
+  if (snacks) writable(s).bagsByPlayerId[playerId] = copyWire(snacks);
+}
+function snackDefeatV1(s, p, target) {
+  const drop3 = TRIP_SNACK_DROPS_V1[familyOf(s, target.entityId)];
+  if (!drop3 || !s.campaign?.seed) return null;
+  if (roll(s, p.playerId, target.entityId + "/" + s.tick + "/drop") % 1e5 >= Math.round(drop3.chance * 1e5)) return null;
+  dropSnack(s, p, target, drop3.snack);
+  return drop3.snack;
+}
+var clearLine = (c, from, to) => {
+  const dx = to.x - from.x, dy = to.y - from.y, steps5 = Math.max(1, Math.ceil(Math.hypot(dx, dy) / (c.tileSize / 4)));
+  for (let i = 0; i <= steps5; i++) if (collidesWithTiles(c, from.x + dx * i / steps5, from.y + dy * i / steps5, 0)) return false;
+  return true;
+};
+function dropSnack(s, p, target, snack) {
+  const space = target.residency.spaceInstanceId, from = target.position, collision = s.spacesByInstanceId[space]?.collision, angle3 = roll(s, p.playerId, target.entityId + "/" + s.tick + "/angle") % 360 * Math.PI / 180;
+  let at8 = { x: from.x + Math.cos(angle3) * GROUND2.spread, y: from.y + Math.sin(angle3) * GROUND2.spread };
+  if (!collision || !clearLine(collision, from, at8)) at8 = { x: from.x, y: from.y };
+  const frames = space === s.overworldInstanceId ? s.d9World?.runtime?.frames : null, w = frames && localFramePositionD9(at8, frames);
+  const ground = writable(s).groundByPlayerId[p.playerId] ??= {};
+  ground[target.entityId + "/" + s.tick] = { snack, spaceInstanceId: space, tick: s.tick, ...w ? { world: { chunkX: w.chunkX, chunkY: w.chunkY, localX: w.localX, localY: w.localY } } : { position: at8 } };
+  const ids4 = Object.keys(ground);
+  if (ids4.length > GROUND2.maximum) for (const id of ids4.sort((a, b) => ground[a].tick - ground[b].tick).slice(0, ids4.length - GROUND2.maximum)) delete ground[id];
+}
+function groundSnackPositionV1(s, drop3) {
+  if (drop3.position) return drop3.position;
+  const frames = s.d9World?.runtime?.frames, q = frames && projectToLocalFrameD9(drop3.world, frames);
+  return q ? { x: q.x, y: q.y } : null;
+}
+function tickTripSnacksV1(s, p) {
+  const r = root2(s);
+  if (!r) return 0;
+  const trip = r.tripsByPlayerId[p.playerId];
+  if (trip && tripExpiredV1(trip, s.tick)) delete r.tripsByPlayerId[p.playerId];
+  const ground = r.groundByPlayerId[p.playerId];
+  if (!ground) return 0;
+  const a = s.entitiesById[p.entityId];
+  let got = 0;
+  for (const [id, d] of Object.entries(ground)) {
+    const age = s.tick - d.tick;
+    if (age >= GROUND2.lifetimeTicks) {
+      delete ground[id];
+      continue;
+    }
+    if (!a?.alive || age < GROUND2.settleTicks || a.residency.spaceInstanceId !== d.spaceInstanceId) continue;
+    const at8 = groundSnackPositionV1(s, d), collision = s.spacesByInstanceId[d.spaceInstanceId]?.collision;
+    if (!at8 || Math.hypot(at8.x - a.position.x, at8.y - a.position.y) > GROUND2.pickupRadius || collision && !clearLine(collision, a.position, at8)) continue;
+    const bag2 = r.bagsByPlayerId[p.playerId] ??= {};
+    if ((bag2[d.snack] ?? 0) >= TRIP_BAG_STACK_V1) continue;
+    bag2[d.snack] = (bag2[d.snack] ?? 0) + 1;
+    got++;
+    delete ground[id];
+  }
+  if (!Object.keys(ground).length) delete r.groundByPlayerId[p.playerId];
+  return got;
+}
+function tripEatProblemV1(s, p, payload) {
+  const a = s.entitiesById[p.entityId];
+  if (!a?.alive) return "Defeated heroes cannot eat";
+  if (!TRIP_SNACKS_V1[payload?.snack]) return "Unknown snack";
+  if (snackCountV1(s, p.playerId, payload.snack) < 1) return "No " + TRIP_SNACKS_V1[payload.snack].label + " left";
+  const trip = tripOfPlayerV1(s, p.playerId);
+  if (trip && s.tick < trip.endTick) return "Already on a trip";
+  return null;
+}
+function applyTripEatV1(s, p, payload) {
+  requireContract(tripEatProblemV1(s, p, payload) === null, "Snack unavailable");
+  const r = writable(s), bag2 = r.bagsByPlayerId[p.playerId];
+  bag2[payload.snack]--;
+  if (!bag2[payload.snack]) delete bag2[payload.snack];
+  if (!Object.keys(bag2).length) delete r.bagsByPlayerId[p.playerId];
+  const trip = startTripV1(payload.snack, s.tick, roll(s, p.playerId, "trip/" + s.tick) % 1e4 / 1e4);
+  r.tripsByPlayerId[p.playerId] = { ...trip };
+  return trip;
+}
+function validateTripRootV1(s) {
+  const r = root2(s);
+  if (r === void 0) return;
+  closedRecord(r, ["version", "bagsByPlayerId", "groundByPlayerId", "tripsByPlayerId"]);
+  requireContract(r.version === TRIP_ROOT_V1, "Unsupported trip snacks root");
+  for (const [pid, bag2] of Object.entries(r.bagsByPlayerId)) {
+    requireContract(s.playersById[pid] && Object.keys(bag2).length >= 1, "Invalid snack bag");
+    for (const [k, n] of Object.entries(bag2)) {
+      requireContract(TRIP_SNACKS_V1[k], "Unknown snack");
+      safeInteger(n, 1, TRIP_BAG_STACK_V1);
+    }
+  }
+  for (const [pid, ground] of Object.entries(r.groundByPlayerId)) {
+    requireContract(s.playersById[pid] && Object.keys(ground).length <= GROUND2.maximum, "Invalid ground snacks");
+    for (const [id, d] of Object.entries(ground)) {
+      requireContract(id.length <= 240, "Ground snack id");
+      closedRecord(d, ["snack", "spaceInstanceId", "tick"], ["world", "position"]);
+      requireContract(TRIP_SNACKS_V1[d.snack] && typeof d.spaceInstanceId === "string" && d.spaceInstanceId.length <= 240, "Ground snack");
+      safeInteger(d.tick, 0, s.tick);
+      requireContract(d.world === void 0 !== (d.position === void 0), "Ground snack place");
+      if (d.world) validateWorldPosition(d.world);
+      else {
+        closedRecord(d.position, ["x", "y"]);
+        requireContract(Number.isFinite(d.position.x) && Number.isFinite(d.position.y), "Ground snack position");
+      }
+    }
+  }
+  for (const [pid, t] of Object.entries(r.tripsByPlayerId)) {
+    requireContract(s.playersById[pid], "Trip without a hero");
+    closedRecord(t, ["snack", "outcome", "eatTick", "startTick", "endTick"]);
+    requireContract(TRIP_SNACKS_V1[t.snack] && t.outcome === "good", "Invalid trip");
+    safeInteger(t.eatTick, 0, s.tick);
+    requireContract(t.startTick === t.eatTick + TRIP_EAT_TICKS && t.endTick === t.startTick + TRIP_TICKS && s.tick < t.endTick + TRIP_WEAR_OFF_TICKS, "Trip timing");
+  }
+}
+function projectEntityTripV1(s, entityId2) {
+  const t = tripOfEntity(s, entityId2);
+  return t ? copyWire(t) : null;
+}
+function projectTripSnacksV1(s, playerId, spaceInstanceId = null, near5 = null) {
+  const r = root2(s);
+  if (!r) return null;
+  return {
+    bag: copyWire(r.bagsByPlayerId[playerId] ?? {}),
+    trip: copyWire(r.tripsByPlayerId[playerId] ?? null),
+    tick: s.tick,
+    ground: Object.entries(r.groundByPlayerId[playerId] ?? {}).flatMap(([id, d]) => {
+      if (spaceInstanceId && d.spaceInstanceId !== spaceInstanceId) return [];
+      const at8 = groundSnackPositionV1(s, d);
+      if (!at8 || near5 && Math.hypot(at8.x - near5.x, at8.y - near5.y) > 900) return [];
+      return [{ id, snack: d.snack, age: s.tick - d.tick, position: { x: at8.x, y: at8.y } }];
+    })
+  };
+}
+
 // src/shared/contracts/hero_passport_v1.js
 var WORLD_LOCAL_D8 = ["lastChange", "causalXp", "transient"];
 function itemContent(item2) {
@@ -94862,7 +95007,7 @@ function extractHeroPassport(state2, playerId, { heroId }) {
   items.sort((a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0);
   const equipped = {};
   for (const [slot, id] of Object.entries(inv.equipped)) equipped[slot] = id === null ? null : keyOf2[id];
-  const potions = inv.services?.potions, services = inv.services;
+  const potions = inv.services?.potions, services = inv.services, snacks = passportSnacksV1(state2, playerId);
   return {
     version: HERO_PASSPORT_VERSION,
     heroId,
@@ -94875,7 +95020,9 @@ function extractHeroPassport(state2, playerId, { heroId }) {
     kit: inv.classKit ? inv.classKit.heroClass : null,
     provisions: Object.keys(inv.subweapons?.claims ?? {}).sort(),
     items,
-    equipped
+    equipped,
+    // Trip snacks ride along when the hero has any (left out otherwise, so older passports still match).
+    ...snacks ? { snacks } : {}
   };
 }
 var plain2 = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
@@ -94888,7 +95035,8 @@ function validatePassportItem(item2) {
   requireContract((item2.generated === void 0 || plain2(item2.generated)) && (item2.workshop === void 0 || plain2(item2.workshop)), "Hero passport item data");
 }
 function validateHeroPassport(passport) {
-  closedRecord(passport, ["version", "heroId", "progression", "d8", "gold", "materials", "slotLevels", "potions", "kit", "provisions", "items", "equipped"]);
+  closedRecord(passport, ["version", "heroId", "progression", "d8", "gold", "materials", "slotLevels", "potions", "kit", "provisions", "items", "equipped"], ["snacks"]);
+  if (passport.snacks !== void 0) validatePassportSnacksV1(passport.snacks);
   requireContract(passport.version === HERO_PASSPORT_VERSION && validHeroId(passport.heroId), "Unknown hero passport");
   amount(passport.gold);
   closedRecord(passport.materials, [], FORGE_MATERIALS);
@@ -94969,6 +95117,7 @@ function arriveHeroPassport(state2, playerId, passport) {
     }
   }
   p.inventory = inv;
+  arriveSnacksV1(state2, playerId, passport.snacks ?? null);
   const idOf = {}, kitIds = {};
   for (const item2 of passport.items) {
     const sourceEntityId = item2.kind === "starter" ? null : mint(state2), itemId = `item:${playerId}:${sourceEntityId ?? "starter"}`;
@@ -98628,154 +98777,6 @@ function waitingPanel(document2, environment, seed2) {
 // src/shared/content/forge_review.js
 var FORGE_REVIEW_BUILD = false;
 var ACTIVITY_SAVE_NAMESPACE = FORGE_REVIEW_BUILD ? "saq-world-forge-review-v1" : "saq-world-activity-campaigns-v1";
-
-// src/shared/contracts/trip_snacks_world_v1.js
-var TRIP_ROOT_V1 = "trip-snacks-world-v1";
-var GROUND2 = Object.freeze({ settleTicks: 30, pickupRadius: 30, lifetimeTicks: 18e3, maximum: 12, spread: 16 });
-var TRIP_BAG_STACK_V1 = 99;
-var root2 = (s) => s.trips;
-var writable = (s) => s.trips ??= { version: TRIP_ROOT_V1, bagsByPlayerId: {}, groundByPlayerId: {}, tripsByPlayerId: {} };
-var familyOf = (s, id) => ordinaryEnemyForProfile(s.entitiesById[id]?.contentDefinitionId)?.family;
-var roll = (s, pid, salt) => compositionHashV1("trip-snacks-v1/" + (s.campaign?.seed?.seedHex ?? "") + "/" + pid + "/" + salt);
-var snackBagV1 = (s, playerId) => root2(s)?.bagsByPlayerId[playerId] ?? {};
-var snackCountV1 = (s, playerId, snack) => snackBagV1(s, playerId)[snack] ?? 0;
-var tripOfPlayerV1 = (s, playerId) => root2(s)?.tripsByPlayerId[playerId] ?? null;
-var tripOfEntity = (s, entityId2) => {
-  for (const p of Object.values(s.playersById ?? {})) if (p.entityId === entityId2) return tripOfPlayerV1(s, p.playerId);
-  return null;
-};
-function tripDamageV1(s, playerId, raw) {
-  const m = tripDamageMultiplierV1(playerId && tripOfPlayerV1(s, playerId), s.tick);
-  return m === 1 ? raw : combatInteger(multiplyCombat(raw, Math.round(m * 100), 100));
-}
-var tripMoveV1 = (s, playerId) => tripSpeedMultiplierV1(playerId && tripOfPlayerV1(s, playerId), s.tick);
-function snackDefeatV1(s, p, target) {
-  const drop3 = TRIP_SNACK_DROPS_V1[familyOf(s, target.entityId)];
-  if (!drop3 || !s.campaign?.seed) return null;
-  if (roll(s, p.playerId, target.entityId + "/" + s.tick + "/drop") % 1e5 >= Math.round(drop3.chance * 1e5)) return null;
-  dropSnack(s, p, target, drop3.snack);
-  return drop3.snack;
-}
-var clearLine = (c, from, to) => {
-  const dx = to.x - from.x, dy = to.y - from.y, steps5 = Math.max(1, Math.ceil(Math.hypot(dx, dy) / (c.tileSize / 4)));
-  for (let i = 0; i <= steps5; i++) if (collidesWithTiles(c, from.x + dx * i / steps5, from.y + dy * i / steps5, 0)) return false;
-  return true;
-};
-function dropSnack(s, p, target, snack) {
-  const space = target.residency.spaceInstanceId, from = target.position, collision = s.spacesByInstanceId[space]?.collision, angle3 = roll(s, p.playerId, target.entityId + "/" + s.tick + "/angle") % 360 * Math.PI / 180;
-  let at8 = { x: from.x + Math.cos(angle3) * GROUND2.spread, y: from.y + Math.sin(angle3) * GROUND2.spread };
-  if (!collision || !clearLine(collision, from, at8)) at8 = { x: from.x, y: from.y };
-  const frames = space === s.overworldInstanceId ? s.d9World?.runtime?.frames : null, w = frames && localFramePositionD9(at8, frames);
-  const ground = writable(s).groundByPlayerId[p.playerId] ??= {};
-  ground[target.entityId + "/" + s.tick] = { snack, spaceInstanceId: space, tick: s.tick, ...w ? { world: { chunkX: w.chunkX, chunkY: w.chunkY, localX: w.localX, localY: w.localY } } : { position: at8 } };
-  const ids4 = Object.keys(ground);
-  if (ids4.length > GROUND2.maximum) for (const id of ids4.sort((a, b) => ground[a].tick - ground[b].tick).slice(0, ids4.length - GROUND2.maximum)) delete ground[id];
-}
-function groundSnackPositionV1(s, drop3) {
-  if (drop3.position) return drop3.position;
-  const frames = s.d9World?.runtime?.frames, q = frames && projectToLocalFrameD9(drop3.world, frames);
-  return q ? { x: q.x, y: q.y } : null;
-}
-function tickTripSnacksV1(s, p) {
-  const r = root2(s);
-  if (!r) return 0;
-  const trip = r.tripsByPlayerId[p.playerId];
-  if (trip && tripExpiredV1(trip, s.tick)) delete r.tripsByPlayerId[p.playerId];
-  const ground = r.groundByPlayerId[p.playerId];
-  if (!ground) return 0;
-  const a = s.entitiesById[p.entityId];
-  let got = 0;
-  for (const [id, d] of Object.entries(ground)) {
-    const age = s.tick - d.tick;
-    if (age >= GROUND2.lifetimeTicks) {
-      delete ground[id];
-      continue;
-    }
-    if (!a?.alive || age < GROUND2.settleTicks || a.residency.spaceInstanceId !== d.spaceInstanceId) continue;
-    const at8 = groundSnackPositionV1(s, d), collision = s.spacesByInstanceId[d.spaceInstanceId]?.collision;
-    if (!at8 || Math.hypot(at8.x - a.position.x, at8.y - a.position.y) > GROUND2.pickupRadius || collision && !clearLine(collision, a.position, at8)) continue;
-    const bag2 = r.bagsByPlayerId[p.playerId] ??= {};
-    if ((bag2[d.snack] ?? 0) >= TRIP_BAG_STACK_V1) continue;
-    bag2[d.snack] = (bag2[d.snack] ?? 0) + 1;
-    got++;
-    delete ground[id];
-  }
-  if (!Object.keys(ground).length) delete r.groundByPlayerId[p.playerId];
-  return got;
-}
-function tripEatProblemV1(s, p, payload) {
-  const a = s.entitiesById[p.entityId];
-  if (!a?.alive) return "Defeated heroes cannot eat";
-  if (!TRIP_SNACKS_V1[payload?.snack]) return "Unknown snack";
-  if (snackCountV1(s, p.playerId, payload.snack) < 1) return "No " + TRIP_SNACKS_V1[payload.snack].label + " left";
-  const trip = tripOfPlayerV1(s, p.playerId);
-  if (trip && s.tick < trip.endTick) return "Already on a trip";
-  return null;
-}
-function applyTripEatV1(s, p, payload) {
-  requireContract(tripEatProblemV1(s, p, payload) === null, "Snack unavailable");
-  const r = writable(s), bag2 = r.bagsByPlayerId[p.playerId];
-  bag2[payload.snack]--;
-  if (!bag2[payload.snack]) delete bag2[payload.snack];
-  if (!Object.keys(bag2).length) delete r.bagsByPlayerId[p.playerId];
-  const trip = startTripV1(payload.snack, s.tick, roll(s, p.playerId, "trip/" + s.tick) % 1e4 / 1e4);
-  r.tripsByPlayerId[p.playerId] = { ...trip };
-  return trip;
-}
-function validateTripRootV1(s) {
-  const r = root2(s);
-  if (r === void 0) return;
-  closedRecord(r, ["version", "bagsByPlayerId", "groundByPlayerId", "tripsByPlayerId"]);
-  requireContract(r.version === TRIP_ROOT_V1, "Unsupported trip snacks root");
-  for (const [pid, bag2] of Object.entries(r.bagsByPlayerId)) {
-    requireContract(s.playersById[pid] && Object.keys(bag2).length >= 1, "Invalid snack bag");
-    for (const [k, n] of Object.entries(bag2)) {
-      requireContract(TRIP_SNACKS_V1[k], "Unknown snack");
-      safeInteger(n, 1, TRIP_BAG_STACK_V1);
-    }
-  }
-  for (const [pid, ground] of Object.entries(r.groundByPlayerId)) {
-    requireContract(s.playersById[pid] && Object.keys(ground).length <= GROUND2.maximum, "Invalid ground snacks");
-    for (const [id, d] of Object.entries(ground)) {
-      requireContract(id.length <= 240, "Ground snack id");
-      closedRecord(d, ["snack", "spaceInstanceId", "tick"], ["world", "position"]);
-      requireContract(TRIP_SNACKS_V1[d.snack] && typeof d.spaceInstanceId === "string" && d.spaceInstanceId.length <= 240, "Ground snack");
-      safeInteger(d.tick, 0, s.tick);
-      requireContract(d.world === void 0 !== (d.position === void 0), "Ground snack place");
-      if (d.world) validateWorldPosition(d.world);
-      else {
-        closedRecord(d.position, ["x", "y"]);
-        requireContract(Number.isFinite(d.position.x) && Number.isFinite(d.position.y), "Ground snack position");
-      }
-    }
-  }
-  for (const [pid, t] of Object.entries(r.tripsByPlayerId)) {
-    requireContract(s.playersById[pid], "Trip without a hero");
-    closedRecord(t, ["snack", "outcome", "eatTick", "startTick", "endTick"]);
-    requireContract(TRIP_SNACKS_V1[t.snack] && t.outcome === "good", "Invalid trip");
-    safeInteger(t.eatTick, 0, s.tick);
-    requireContract(t.startTick === t.eatTick + TRIP_EAT_TICKS && t.endTick === t.startTick + TRIP_TICKS && s.tick < t.endTick + TRIP_WEAR_OFF_TICKS, "Trip timing");
-  }
-}
-function projectEntityTripV1(s, entityId2) {
-  const t = tripOfEntity(s, entityId2);
-  return t ? copyWire(t) : null;
-}
-function projectTripSnacksV1(s, playerId, spaceInstanceId = null, near5 = null) {
-  const r = root2(s);
-  if (!r) return null;
-  return {
-    bag: copyWire(r.bagsByPlayerId[playerId] ?? {}),
-    trip: copyWire(r.tripsByPlayerId[playerId] ?? null),
-    tick: s.tick,
-    ground: Object.entries(r.groundByPlayerId[playerId] ?? {}).flatMap(([id, d]) => {
-      if (spaceInstanceId && d.spaceInstanceId !== spaceInstanceId) return [];
-      const at8 = groundSnackPositionV1(s, d);
-      if (!at8 || near5 && Math.hypot(at8.x - near5.x, at8.y - near5.y) > 900) return [];
-      return [{ id, snack: d.snack, age: s.tick - d.tick, position: { x: at8.x, y: at8.y } }];
-    })
-  };
-}
 
 // src/shared/contracts/class_skills_v1.js
 var FLURRY_CUTS = 3;
