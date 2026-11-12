@@ -74192,7 +74192,7 @@ function drawCoastV1(c, F6, bounds2, offset2, seed2, beachCode, stats3 = {}) {
 }
 
 // src/client/water_motion_v1.js
-var WATER_MOTION_VERSION = "water-motion-v2";
+var WATER_MOTION_VERSION = "water-motion-v3";
 var T61 = 32;
 var TAU107 = Math.PI * 2;
 var AB = 16;
@@ -74202,9 +74202,11 @@ var WATER_LOOKS = Object.freeze({
   s: { flow: null, glint: "#ffffff", speed: 0 },
   l: { flow: "#ffe7a0", glint: "#fff6cf", speed: 0.35, bubbles: true }
 });
-var SEA_CREST = 4.4;
-var RIVER_CREST = 2.6;
-var LAKE_CREST = 5.2;
+var SEA_CREST = 3.8;
+var RIVER_CREST = 2.8;
+var LAKE_CREST = 4.6;
+var CAP_ON = 0.55;
+var CAP_F = 8;
 var GLINT = 2.4;
 var GLINT_ON = 0.18;
 var LACE = 3.6;
@@ -74265,7 +74267,7 @@ function waterMotionItemsV1({ bounds: bounds2, offset: offset2, seed: seed2, ter
       const x = gx * 48 + h % 40 - offset2.x, y = gy * 48 + (h >>> 8) % 40 - offset2.y;
       if (!inside5(x, y) || !deep6(x, y, 34)) return;
       const [dx, dy] = heading(x, y);
-      out.push({ k: KIND.crest, x, y, p: (h >>> 16) % 1e3 / 1e3, dx, dy, b: bucket(dx, dy), c: "#d6f2fb", al: 0.7, cy: SEA_CREST, d: 26 });
+      out.push({ k: KIND.crest, x, y, p: (h >>> 16) % 1e3 / 1e3, dx, dy, b: bucket(dx, dy), c: "#e8f8fd", al: 0.85, cy: SEA_CREST, d: 4 });
     });
     grid(40, 803, (gx, gy, h) => {
       if (h % 3) return;
@@ -74350,7 +74352,7 @@ function waterMotionItemsV1({ bounds: bounds2, offset: offset2, seed: seed2, ter
       const x = px7 + 8 + (h >>> 11) % 17, y = py + 8 + (h >>> 19) % 17, L = lookAt(x, y);
       if (L.crest) {
         const a = v === "W" ? axis() : null, [dx, dy] = a ? [a.x, a.y] : WIND;
-        out.push({ k: KIND.crest, x, y, p: (h >>> 9) % 1e3 / 1e3, dx, dy, b: bucket(dx, dy), c: L.crest, al: 0.55, cy: v === "L" ? LAKE_CREST : RIVER_CREST / (L.speed || 1), d: v === "L" ? 14 : 22 });
+        out.push({ k: KIND.crest, x, y, p: (h >>> 9) % 1e3 / 1e3, dx, dy, b: bucket(dx, dy), c: L.crest, al: 0.7, cy: v === "L" ? LAKE_CREST : RIVER_CREST / (L.speed || 1), d: v === "L" ? 3 : 6 });
       }
     }
     if ((h >>> 3) % 3 === 0) {
@@ -74388,14 +74390,34 @@ function createWaterMotionV1(doc) {
     }
     return s;
   };
-  const crest = (col2, b) => spr("crest" + col2 + b, 20, 20, (g) => {
-    const a = b / AB * TAU107, nx = Math.cos(a), ny = Math.sin(a), tx = -ny, ty = nx;
+  const crest = (col2, b, f) => spr("cap" + col2 + b + ":" + f, 24, 24, (g) => {
+    const a = b / AB * TAU107, nx = Math.cos(a), ny = Math.sin(a), tx = -ny, ty = nx, P17 = (s, o) => [12 + tx * s * 7 + nx * (2.4 * (1 - s * s) + o - 1), 12 + ty * s * 7 + ny * (2.4 * (1 - s * s) + o - 1)];
     g.strokeStyle = col2;
-    g.lineWidth = 1.6;
-    g.beginPath();
-    g.moveTo(10 - tx * 6.5 - nx * 1.5, 10 - ty * 6.5 - ny * 1.5);
-    g.quadraticCurveTo(10 + nx * 2.5, 10 + ny * 2.5, 10 + tx * 6.5 - nx * 1.5, 10 + ty * 6.5 - ny * 1.5);
-    g.stroke();
+    g.fillStyle = col2;
+    const arc3 = (h, w, o, al) => {
+      g.globalAlpha = al;
+      g.lineWidth = w;
+      g.beginPath();
+      for (let i = 0; i <= 8; i++) {
+        const [x, y] = P17(-h + 2 * h * i / 8, o);
+        i ? g.lineTo(x, y) : g.moveTo(x, y);
+      }
+      g.stroke();
+    };
+    if (f <= 2) arc3([0.3, 0.6, 0.85][f], 1.3 + f * 0.15, 0, 1);
+    else if (f <= 4) {
+      arc3(f === 3 ? 0.62 : 0.5, 1, -2.6, 0.45);
+      arc3(1, f === 3 ? 1.8 : 2.2, 0, 1);
+    } else {
+      const k = f - 4;
+      for (const s of [-0.9, -0.45, 0, 0.45, 0.9]) {
+        const [x, y] = P17(s * (1 + k * 0.12), k * 1.3), r = 1.5 - k * 0.3;
+        g.globalAlpha = 1;
+        g.beginPath();
+        g.arc(x, y, r, 0, TAU107);
+        g.fill();
+      }
+    }
   });
   const glint = (col2, r) => spr("gl" + col2 + r, 9, 9, (g) => {
     g.fillStyle = col2;
@@ -74452,12 +74474,13 @@ function createWaterMotionV1(doc) {
       let u, a;
       switch (it.k) {
         case 0: {
-          u = fr(ts / it.cy + it.p);
-          a = it.al * Math.sin(u * Math.PI);
+          u = fr(ts / it.cy + it.p) / CAP_ON;
+          if (u >= 1) continue;
+          a = it.al * Math.min(1, u * 5, (1 - u) * 3.5);
           if (a < 0.06) continue;
-          const s = (u - 0.5) * it.d;
+          const s = u * it.d;
           ctx.globalAlpha = a;
-          put3(ctx, crest(it.c, it.b), it.x + it.dx * s - 10, it.y + it.dy * s - 10);
+          put3(ctx, crest(it.c, it.b, Math.min(CAP_F - 1, Math.floor(u * CAP_F))), it.x + it.dx * s - 12, it.y + it.dy * s - 12);
           break;
         }
         case 1:
