@@ -87880,6 +87880,8 @@ var CHAIN_SLAM = 30;
 var CHAIN_EXPOSE = 15;
 var CHAIN_SHATTER = 50;
 var EXPOSE_TICKS = 240;
+var PERFECT_TICKS = 18;
+var PERFECT_SHOW_TICKS = 30;
 var PIPS_MAX = 5;
 var PIPS_CAP = 7;
 var PIP_IDLE_TICKS = 360;
@@ -87888,8 +87890,8 @@ var PIP_CRIT_TICKS = 30;
 var PIP_SPENT_TICKS = 480;
 var PIP_EARNED_TICKS = 600;
 var PIP_BONUS = 15;
-var TIMED = ["mist", "veil", "gold", "surge", "enGarde", "rush", "wail", "shell", "riposte", "keen", "evade", "rest", "mend", "titan", "spite", "stepped", "quick", "wave", "phoenix", "hymn", "firm", "jugg", "cloak", "twinned", "regrow"];
-var LIVE = ["pips", "spent", "earned", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var TIMED = ["guardUp", "mist", "veil", "gold", "surge", "enGarde", "rush", "wail", "shell", "riposte", "keen", "evade", "rest", "mend", "titan", "spite", "stepped", "quick", "wave", "phoenix", "hymn", "firm", "jugg", "cloak", "twinned", "regrow"];
+var LIVE = ["pips", "spent", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
 function skillCooldown(combat, skillId) {
   return combat?.skills?.cooldowns?.[skillId] ?? 0;
 }
@@ -87955,6 +87957,7 @@ function advanceClassSkillTimers(tick, combat) {
     if (k[key3].ticks <= 1) delete k[key3];
     else k[key3].ticks--;
   }
+  if (k.perfect !== void 0 && tick - k.perfect >= PERFECT_SHOW_TICKS) delete k.perfect;
   if (k.pips) {
     const p = k.pips;
     if (p.crit) {
@@ -88294,6 +88297,9 @@ function validateClassSkillState(s, combat, actor) {
     if (k.pips.el !== void 0) requireContract(SPELL_ELEMENTS.includes(k.pips.el), "Invalid pip element");
     if (k.pips.crit !== void 0) safeInteger(k.pips.crit, 1, PIP_CRIT_TICKS);
   }
+  if (k.guarding !== void 0) requireContract(k.guarding === true && actor.alive, "Invalid guarding");
+  if (k.guardUp !== void 0) safeInteger(k.guardUp, 1, PERFECT_TICKS);
+  if (k.perfect !== void 0) safeInteger(k.perfect, Math.max(0, s.tick - PERFECT_SHOW_TICKS), s.tick);
   if (k.spent !== void 0) {
     closedRecord(k.spent, ["skillId", "n", "ticks"]);
     requireContract(CLASS_SKILL_IDS.includes(k.spent.skillId), "Invalid spent pips");
@@ -90925,14 +90931,15 @@ function incomingSubweaponHit({ combat, stats: stats3, raw, boss = false, actor 
   if (parryReady) spendParryWindow(combat);
   const guarded = activeGuard || parryReady || compareCombat(chance, 0) > 0 && combatRoll(combat, multiplyCombat(chance, (boss ? 65 : 100) * (combat.fatigue ? 50 : 100), 1e4));
   if (!guarded) return mossTakes(combat, aegisTakes(combat, { damage: combatInteger(net), absorbed, defense: null, counter: null }));
-  if (activeGuard) spendGuard(combat.guard, net, steady);
+  const perfect = activeGuard && knight && combat.skills?.guardUp > 0;
+  if (activeGuard && !perfect) spendGuard(combat.guard, net, steady);
   combat.fatigue = 30;
   if (family === "shield" && knight) reduceSkillCooldown(combat, "shield_bash", BLOCK_BASH_REFUND_TICKS);
   else if (family === "shield") combat.pressure = Math.min(3, combat.pressure + 1);
   const mitigation = multiplyCombat(family === "shield" ? stats3.familyProperties?.blockMitigation ?? combatAmount(7, 10) : stats3.familyProperties?.parryMitigation ?? combatAmount(3, 5), boss ? 65 : 100, 100);
   const damage = combatInteger(multiplyCombat(net, subtractCombat(1, mitigation).n, subtractCombat(1, mitigation).d));
   const masteryCounterEligible = !boss || combat.counterCooldown === 0;
-  return mossTakes(combat, aegisTakes(combat, { damage, absorbed, prevented: subtractCombat(net, damage), masteryCounterEligible, defense: family === "shield" ? "block" : "parry", counter: null }));
+  return mossTakes(combat, aegisTakes(combat, { damage, absorbed, prevented: subtractCombat(net, damage), masteryCounterEligible, defense: family === "shield" ? "block" : "parry", counter: null, ...perfect ? { perfect: true } : {} }));
 }
 
 // src/shared/contracts/tome_cast.js
@@ -97278,8 +97285,20 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       r.spare = true;
     }
   }
+  function guardWatch(a, combat) {
+    const up = Boolean(combat.guard?.raised && a.alive) && heroOf(a) === "knight", k = combat.skills;
+    if (up && !k?.guarding) {
+      const r = classSkillsRecord(combat);
+      r.guarding = true;
+      r.guardUp = PERFECT_TICKS;
+    } else if (!up && k?.guarding) {
+      delete k.guardUp;
+      clearSkillState(combat, "guarding");
+    }
+  }
   function step(a, suppressed) {
     const combat = c.actors[a.entityId];
+    guardWatch(a, combat);
     ironWill(a, combat);
     mend(a, combat);
     bearer(a, combat);
@@ -97607,8 +97626,14 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (combat) {
       fought(target);
       const hero = heroOf(target);
-      if (hero === "knight" && defense.defense === "block") gainPips(target, 1);
+      if (hero === "knight" && defense.defense === "block") gainPips(target, defense.perfect ? 2 : 1);
       else if (hero === "rogue" && defense.defense === "parry") gainPips(target, 2);
+    }
+    if (defense.perfect && combat) {
+      const k = classSkillsRecord(combat);
+      k.perfect = s.tick;
+      delete k.guardUp;
+      if (!isPodCombatTargetV4(source3) && !definition2(source3).isBoss && !s.bossCombat?.bossesByEntityId?.[source3.entityId]) knockback(target, source3, eliteOrBoss(source3) ? T72.bash.eliteKnockback : T72.bash.knockback);
     }
     const mirrored = attribution?.projectileImpact && (defense.defense === "block" && (defense.aegis || combat?.skills?.aegis) && aug(target, "aegis_pulse", 3) || defense.defense === "parry" && riposting && aug(target, "riposte", 3));
     if (mirrored) {
@@ -146655,6 +146680,93 @@ function createCombatFeedback() {
   });
 }
 
+// src/client/perfect_block_art_v1.js
+var LIFE = 520;
+var FONT = '800 22px "Baloo 2", system-ui, sans-serif';
+var INK55 = "#150d1f";
+var GOLD25 = "#ffd76a";
+var STARS = [[-24, -40, 5], [25, -48, 4], [20, -22, 3.2], [-20, -16, 3]];
+function star43(ctx, x, y, R9) {
+  ctx.beginPath();
+  for (let i = 0; i < 8; i++) {
+    const a = i / 8 * Math.PI * 2 - Math.PI / 2, r = i % 2 ? R9 * 0.32 : R9;
+    ctx.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r);
+  }
+  ctx.closePath();
+  ctx.fillStyle = "#ffe08a";
+  ctx.fill();
+  ctx.strokeStyle = INK55;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+}
+function createPerfectBlockArtV1() {
+  let seen4, pops = [];
+  function update(model, time3) {
+    const tick = model.subweapon?.skills?.perfect, id = model.playersById?.[model.localPlayerId]?.entityId;
+    if (tick !== void 0 && tick !== seen4 && id) {
+      if (seen4 !== void 0 || model.tick - tick < 4) pops.push({ born: time3, id });
+      if (pops.length > 3) pops.shift();
+    }
+    if (tick !== void 0) seen4 = tick;
+    pops = pops.filter((p) => time3 - p.born < LIFE);
+  }
+  const feet = (model, p) => {
+    const a = model.entitiesById?.[p.id];
+    return a?.alive ? { x: a.position.x, y: a.position.y + (a.groundAnchorY ?? (a.hullRadius ?? 10) * 0.45) } : null;
+  };
+  function drawGround2(ctx, model, time3) {
+    for (const p of pops) {
+      const at8 = feet(model, p);
+      if (!at8) continue;
+      const k = (time3 - p.born) / LIFE, grow2 = 0.82 + 0.33 * Math.min(1, k * 1.6), fade = k < 0.65 ? 1 : 1 - (k - 0.65) / 0.35;
+      for (const [rx, a, w] of [[30 * grow2, 1, 2.6], [42 * grow2, 0.55, 1.8]]) {
+        ctx.save();
+        ctx.globalAlpha = a * fade;
+        ctx.beginPath();
+        ctx.ellipse(at8.x, at8.y, rx, rx * 0.36, 0, 0, Math.PI * 2);
+        ctx.strokeStyle = "#151515";
+        ctx.lineWidth = w + 2;
+        ctx.stroke();
+        ctx.strokeStyle = GOLD25;
+        ctx.lineWidth = w;
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+  }
+  function drawTop(ctx, model, time3) {
+    for (const p of pops) {
+      const at8 = feet(model, p);
+      if (!at8) continue;
+      const k = (time3 - p.born) / LIFE, fade = k < 0.7 ? 1 : 1 - (k - 0.7) / 0.3, pop = k < 0.18 ? 1.28 - 0.28 * (k / 0.18) : 1, lift = 8 * k;
+      ctx.save();
+      ctx.globalAlpha = fade;
+      for (const [dx, dy, r] of STARS) star43(ctx, at8.x + dx, at8.y + dy - lift * 0.5, r * 1.15 * (k < 0.2 ? 0.85 + k * 0.75 : 1));
+      ctx.translate(at8.x, at8.y - 74 - lift);
+      ctx.scale(pop, pop);
+      ctx.font = FONT;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.lineJoin = "round";
+      const t = "Perfect!";
+      ctx.lineWidth = 5;
+      ctx.strokeStyle = ctx.fillStyle = "rgba(10,6,18,.5)";
+      ctx.strokeText(t, 0, 2.5);
+      ctx.fillText(t, 0, 2.5);
+      ctx.strokeStyle = INK55;
+      ctx.strokeText(t, 0, 0);
+      const g = ctx.createLinearGradient(0, -10, 0, 10);
+      g.addColorStop(0, "#fff2b8");
+      g.addColorStop(0.55, GOLD25);
+      g.addColorStop(1, "#f0a830");
+      ctx.fillStyle = g;
+      ctx.fillText(t, 0, 0);
+      ctx.restore();
+    }
+  }
+  return Object.freeze({ update, drawGround: drawGround2, drawTop, inspect: () => pops.length });
+}
+
 // src/client/river_looks_v1.js
 var OL71 = "#151515";
 var BASE6 = "#1d5a87";
@@ -150187,7 +150299,7 @@ function aegisMimicTetherDepthItems(model, tick) {
 
 // src/client/boss_presentation_aegis_v1.js
 var TAU158 = Math.PI * 2;
-var INK55 = "#11151a";
+var INK56 = "#11151a";
 var CYAN4 = "#65e6ec";
 var LIGHT12 = "#b1fcf0";
 var BLUE8 = "#298eaa";
@@ -150202,7 +150314,7 @@ function plate5(c, points2, color28, outline4 = true) {
   c.fillStyle = color28;
   c.fill();
   if (outline4) {
-    c.strokeStyle = INK55;
+    c.strokeStyle = INK56;
     c.lineWidth = 1.26;
     c.lineJoin = "round";
     c.stroke();
@@ -150259,7 +150371,7 @@ function chains2(c, t) {
       c.save();
       c.translate(x, y);
       c.rotate(side * 0.18 + Math.cos(t * 0.047 + side) * q * 0.14);
-      c.strokeStyle = INK55;
+      c.strokeStyle = INK56;
       c.lineWidth = 3.8;
       c.beginPath();
       c.ellipse(0, 0, i % 2 ? 1.7 : 2.3, 3.7, 0, 0, TAU158);
@@ -150314,7 +150426,7 @@ function tower6(c, b, t, front2, flash) {
     plate5(c, [[x2 - 4, -34], [x2 + 4, -34], [x2 + 4, -27], [x2 - 4, -27]], survivors.includes(i) ? CYAN4 : "#11151a");
   }
   rune2(c, 0, -22, 0.65);
-  c.strokeStyle = INK55;
+  c.strokeStyle = INK56;
   c.lineWidth = 1.26 / s;
   c.beginPath();
   c.moveTo(...polygon27[0]);
@@ -150350,7 +150462,7 @@ function drawAegisGoliath(c, actor, tick, flash = false) {
   plate5(c, [[0, -24], [20, -22], [26, -2], [4, -8]], flash ? LIGHT12 : "#35485c", false);
   plate5(c, [[-26, -2], [0, 28], [0, 9], [-4, -8]], flash ? LIGHT12 : "#344557", false);
   plate5(c, [[26, -2], [0, 28], [0, 9], [4, -8]], flash ? LIGHT12 : "#1b2b3d", false);
-  plate5(c, [[0, -18], [12, -6], [0, 12], [-12, -6]], INK55);
+  plate5(c, [[0, -18], [12, -6], [0, 12], [-12, -6]], INK56);
   c.save();
   c.translate(0, -4);
   c.scale(pulse3, pulse3);
@@ -150504,7 +150616,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
   let invalidations = 0, lastInvalidationReason = "none", resizeEvents = 0, resizeChanges = 0, resizeNoops = 0, lastResize = null;
   let observedFrames = null, observedFrameKey = null;
   let animatedFlowers = 0, animatedWater = 0, ambientMarks = 0, lastEnvironment = null, lastRenderedEntities = 0, seamless = false;
-  const feedback = createCombatFeedback(), healthTrails = createHealthTrailsV3(), bossEffects = createBossEffectsObserver(), observeBossEffects = bossEffects.observe;
+  const perfectBlock = createPerfectBlockArtV1(), feedback = createCombatFeedback(), healthTrails = createHealthTrailsV3(), bossEffects = createBossEffectsObserver(), observeBossEffects = bossEffects.observe;
   function invalidate(reason = "explicit") {
     invalidations++;
     lastInvalidationReason = reason;
@@ -150566,6 +150678,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
     observedFrameKey = frameKey2;
     if (performanceProbe) performanceProbe.measure("combatFeedback", () => feedback.update(model, time3));
     else feedback.update(model, time3);
+    perfectBlock.update(model, time3);
     if (previous?.key === key3 && actor.position.x !== previous.x) facing2 = actor.position.x > previous.x ? 1 : -1;
     else if (previous?.key !== key3) facing2 = 1;
     previous = { key: key3, x: actor.position.x, y: actor.position.y };
@@ -150702,6 +150815,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
       ctx.stroke();
     }
     const { bossPolishView, brimstoneView } = observeBossEffects(model), drawGroundEffects = () => {
+      perfectBlock.drawGround(ctx, visualModel, time3);
       drawWebWeaverHazardsD12_4J(ctx, model, model.tick);
       drawSlagShaperHazardsD12_4K(ctx, model, model.tick);
       drawBossPolishGround(ctx, bossPolishView, model.tick);
@@ -150933,6 +151047,7 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
     combatVfx.draw(ctx, visualModel, time3, viewport);
     if (performanceProbe) performanceProbe.measure("combatFeedback", () => feedback.draw(ctx, time3, equipmentArt, viewport));
     else feedback.draw(ctx, time3, equipmentArt, viewport);
+    perfectBlock.drawTop(ctx, visualModel, time3);
     ctx.restore();
     if (!drawRecoveredBossHudV1(ctx, canvas, model) && !drawBrimstoneBossHud(ctx, canvas, model) && !drawAegisBossHud(ctx, canvas, model)) drawArachnidTreantBossHudD12_5A(ctx, canvas, model);
     drawTreasuryBossHudV2(ctx, canvas, model);

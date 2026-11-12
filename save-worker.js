@@ -25078,12 +25078,14 @@ var MIST_TICKS = 180;
 var VEIL_MAX_TICKS = 480;
 var GOLD_TICKS = 900;
 var CLASS_FINISHERS = Object.freeze({ knight: Object.freeze(["retribution", "skyfall_leap", "aegis_pulse"]), rogue: Object.freeze(["thousand_cuts", "shadowstep", "noxious_bloom", "rupture"]), mage: Object.freeze(["meteor", "thunderfall", "glacial_burst"]) });
+var PERFECT_TICKS = 18;
+var PERFECT_SHOW_TICKS = 30;
 var PIPS_CAP = 7;
 var PIP_IDLE_TICKS = 360;
 var PIP_CRIT_TICKS = 30;
 var PIP_SPENT_TICKS = 480;
 var PIP_EARNED_TICKS = 600;
-var LIVE = ["pips", "spent", "earned", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var LIVE = ["pips", "spent", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
 function validateClassSkillState(s, combat, actor) {
   const k = combat.skills;
   if (k === void 0) return;
@@ -25355,6 +25357,9 @@ function validateClassSkillState(s, combat, actor) {
     if (k.pips.el !== void 0) requireContract(SPELL_ELEMENTS.includes(k.pips.el), "Invalid pip element");
     if (k.pips.crit !== void 0) safeInteger(k.pips.crit, 1, PIP_CRIT_TICKS);
   }
+  if (k.guarding !== void 0) requireContract(k.guarding === true && actor.alive, "Invalid guarding");
+  if (k.guardUp !== void 0) safeInteger(k.guardUp, 1, PERFECT_TICKS);
+  if (k.perfect !== void 0) safeInteger(k.perfect, Math.max(0, s.tick - PERFECT_SHOW_TICKS), s.tick);
   if (k.spent !== void 0) {
     closedRecord(k.spent, ["skillId", "n", "ticks"]);
     requireContract(CLASS_SKILL_IDS.includes(k.spent.skillId), "Invalid spent pips");
