@@ -1,6 +1,6 @@
 {
-  "runtimeId": "69a66f9a67baa1df",
-  "runtimeSha256": "69a66f9a67baa1dff706d6dbe5772c48194786c8af5fe98d91aee55f16805f93",
+  "runtimeId": "201d3f85c9faaeec",
+  "runtimeSha256": "201d3f85c9faaeec511f2f24a37c4d738e4fef6e5e56b0fd0bc781c16cb940e8",
   "files": [
     {
       "path": ".nojekyll",
@@ -590,7 +590,7 @@
     {
       "path": "index.html",
       "bytes": 13943,
-      "sha256": "8df5b9a6f0685f29a3c7d70d3117cde406034941cfca049533df104c9a15f152"
+      "sha256": "3b11f3123cbfc9c9aa664b0cf3445a6164695005dbc15289b432ee1560bef8dd"
     },
     {
       "path": "manifest.webmanifest",
@@ -599,8 +599,8 @@
     },
     {
       "path": "save-worker.js",
-      "bytes": 3111161,
-      "sha256": "f3fb3a87ba27a8359700c431b231730b4809403ea5d8e0f7950386ddf53fe5c4"
+      "bytes": 3111210,
+      "sha256": "c4391f1fa6a08cc8ef4cee2ae596caed558f2fe67dfa0fc92027a4af3e7ac48b"
     },
     {
       "path": "src/chunks/chunk-QK5YXJNW.js",
@@ -613,9 +613,9 @@
       "sha256": "7db8c23d3d071f10af27f69428fb3f40deb5eeb8a332946192a66dc1e22e73e4"
     },
     {
-      "path": "src/chunks/playable_browser-SRQ23CV2.js",
-      "bytes": 8575999,
-      "sha256": "74a87c006391ced839ebaa78b8f74ebcc09a6abdb124a4a66f4f0aaaaab91ba5"
+      "path": "src/chunks/playable_browser-TONAMGRY.js",
+      "bytes": 8585928,
+      "sha256": "9d15dbb470b26cf18deb498b2f6072aba5332984b7961c1f46cd3258a17d0281"
     },
     {
       "path": "src/chunks/world_browser-DNTZKOK5.js",
@@ -624,8 +624,8 @@
     },
     {
       "path": "src/client/startup_camp_v1.js",
-      "bytes": 95924,
-      "sha256": "87e6ae46a4ef3e612e0c2d68da33a8410012c2af8860772008127fb257ea1f78"
+      "bytes": 96106,
+      "sha256": "115bba2f0fc1a3e34461b48aaeabfb8dec60248d53ff6120425d9aa774e56c98"
     },
     {
       "path": "src/client/startup_loading_v1.js",
@@ -635,7 +635,7 @@
     {
       "path": "src/entrypoints/browser_boot.js",
       "bytes": 2158,
-      "sha256": "d94520c95587f4ba74a8fe79a2ce53a13f6945fe7b3a3b603d4f919a8ea3bb0b"
+      "sha256": "bd56db011df391fa33a4451a7d79ec004d8fe6c57e1efc3180ee6f822b6e8817"
     },
     {
       "path": "world-maker-worker.js",

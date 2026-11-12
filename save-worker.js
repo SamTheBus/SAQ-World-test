@@ -25080,6 +25080,7 @@ var GOLD_TICKS = 900;
 var CLASS_FINISHERS = Object.freeze({ knight: Object.freeze(["retribution", "skyfall_leap", "aegis_pulse"]), rogue: Object.freeze(["thousand_cuts", "shadowstep", "noxious_bloom", "rupture"]), mage: Object.freeze(["meteor", "thunderfall", "glacial_burst"]) });
 var PERFECT_TICKS = 18;
 var PERFECT_SHOW_TICKS = 30;
+var COMBO_DAMAGE = Object.freeze([90, 90, 120]);
 var PIPS_CAP = 7;
 var PIP_IDLE_TICKS = 360;
 var PIP_CRIT_TICKS = 30;
