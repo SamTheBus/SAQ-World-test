@@ -1938,3 +1938,24 @@ body #world-inventory .hero-slots .hero-slot-worlds .hero-slot-shared{display:gr
 body #world-inventory .hero-slots .hero-slot-worlds .hero-slot-shared > div{display:flex;flex-wrap:wrap;gap:6px}
 body #world-inventory .hero-slots .hero-slot-worlds .hero-slot-shared button{display:inline-flex;align-items:center;min-height:36px;padding:0 14px;border-radius:999px}
 body #world-inventory .hero-slots .hero-slot-worlds .hero-slot-shared small{font:12px var(--rpg-ui);color:var(--rpg-muted)}
+
+/* Attack button v2 (combat rhythm v1): press-down, class icon, combo notches, hit ping, pip spark, cooling shake. */
+body.skill-arc-v1 #primary-attack{transition:transform .16s cubic-bezier(.3,1.8,.5,1),box-shadow .16s,background .16s}
+body.skill-arc-v1 #primary-attack[aria-pressed=true]{transform:translateY(2px) scale(.95);transition-duration:.05s;box-shadow:inset 0 0 0 1.5px #f0d6a0,inset 0 -4px 10px #0007,0 2px 0 #070b10,0 4px 10px #0006}
+body #primary-attack[data-class]::before{background-image:var(--attack-icon)!important;width:36px!important;height:36px!important}
+#primary-attack .attack-notches{position:absolute;inset:-5px;width:calc(100% + 10px);height:calc(100% + 10px);overflow:visible;pointer-events:none;opacity:0;transition:opacity .35s}
+#primary-attack .attack-notches[data-show=true]{opacity:1;transition-duration:.06s}
+#primary-attack .attack-notch-back{fill:none;stroke:#0b1015;stroke-width:7;stroke-linecap:round}
+#primary-attack .attack-notch{fill:none;stroke:#3a4650;stroke-width:4;stroke-linecap:round;transition:stroke .08s}
+#primary-attack .attack-notch.on{stroke:var(--class,#73bedc)}
+#primary-attack .attack-notch.gold.on{stroke:#ffd76a}
+#primary-attack .attack-ping{position:absolute;inset:-3px;border-radius:50%;border:2px solid #fff;opacity:0;pointer-events:none}
+#primary-attack .attack-ping.go{animation:attack-ping .22s ease-out}
+@keyframes attack-ping{0%{opacity:.85;transform:scale(1)}100%{opacity:0;transform:scale(1.2)}}
+.attack-spark{position:absolute;left:-6px;top:-6px;width:12px;height:12px;z-index:9;pointer-events:none;background:#ffe08a;clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);filter:drop-shadow(0 0 1px #150d1f) drop-shadow(0 0 4px #ffd76a)}
+.skill-wheel-v1 .skill-slot.denied{animation:slot-deny .28s linear}
+.skill-wheel-v1 .skill-slot.denied .skill-slot-time{animation:slot-deny-time .28s ease-out}
+@keyframes slot-deny{20%{translate:-3px 0}40%{translate:3px 0}60%{translate:-2px 0}80%{translate:2px 0}}
+@keyframes slot-deny-time{30%{color:#ffc2b0;scale:1.25}}
+html[data-hand=left] #primary-attack .attack-notches{transform:scaleX(-1)}
+.skill-wheel-v1 .skill-wheel-pip[data-wait=true]{opacity:.35}
