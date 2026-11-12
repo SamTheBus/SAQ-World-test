@@ -24978,7 +24978,7 @@ var SPITE_TICKS = 300;
 var MEMORY_MAX = 600;
 var HELD_MAX = 24;
 var CUT_GAP_TICKS = 5;
-var MAX_CUTS = 9;
+var MAX_CUTS = 16;
 var FLOWER_TICKS = 300;
 var ECHO_TICKS = 30;
 var STEPPED_TICKS = 120;
@@ -25002,7 +25002,13 @@ var MOSS_TICKS = 600;
 var MIST_TICKS = 180;
 var VEIL_MAX_TICKS = 480;
 var GOLD_TICKS = 900;
-var LIVE = ["moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var CLASS_FINISHERS = Object.freeze({ knight: Object.freeze(["retribution", "skyfall_leap", "aegis_pulse"]), rogue: Object.freeze(["thousand_cuts", "shadowstep", "noxious_bloom", "rupture"]), mage: Object.freeze(["meteor", "thunderfall", "glacial_burst"]) });
+var PIPS_CAP = 7;
+var PIP_IDLE_TICKS = 360;
+var PIP_CRIT_TICKS = 30;
+var PIP_SPENT_TICKS = 480;
+var PIP_EARNED_TICKS = 600;
+var LIVE = ["pips", "spent", "earned", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
 function validateClassSkillState(s, combat, actor) {
   const k = combat.skills;
   if (k === void 0) return;
@@ -25266,6 +25272,28 @@ function validateClassSkillState(s, combat, actor) {
     safeInteger(k.flurry.cutsLeft, 1, FLURRY_CUTS);
     safeInteger(k.flurry.nextTick, Math.max(0, s.tick - 1), s.tick + FLURRY_GAP_TICKS);
     requireContract(unit3(k.flurry) && actor.alive, "Invalid Flurry");
+  }
+  if (k.pips !== void 0) {
+    closedRecord(k.pips, ["n", "idle"], ["el", "crit"]);
+    safeInteger(k.pips.n, 0, PIPS_CAP);
+    safeInteger(k.pips.idle, 1, PIP_IDLE_TICKS);
+    if (k.pips.el !== void 0) requireContract(SPELL_ELEMENTS.includes(k.pips.el), "Invalid pip element");
+    if (k.pips.crit !== void 0) safeInteger(k.pips.crit, 1, PIP_CRIT_TICKS);
+  }
+  if (k.spent !== void 0) {
+    closedRecord(k.spent, ["skillId", "n", "ticks"]);
+    requireContract(CLASS_SKILL_IDS.includes(k.spent.skillId), "Invalid spent pips");
+    safeInteger(k.spent.n, 1, PIPS_CAP);
+    safeInteger(k.spent.ticks, 1, PIP_SPENT_TICKS);
+  }
+  if (k.earned !== void 0) {
+    closedRecord(k.earned, [], CLASS_SKILL_IDS);
+    requireContract(Object.keys(k.earned).length > 0, "Invalid earned pips");
+    for (const e of Object.values(k.earned)) {
+      closedRecord(e, ["n", "ticks"]);
+      safeInteger(e.n, 1, 2);
+      safeInteger(e.ticks, 1, PIP_EARNED_TICKS);
+    }
   }
   requireContract(Object.keys(k.cooldowns).length || LIVE.some((key9) => k[key9]), "Empty skill record");
 }
