@@ -4228,7 +4228,9 @@ var TRIP_SNACK_DROPS_V1 = Object.freeze({
   gulpjaw: Object.freeze({ snack: "frog-leg", chance: 1 / 10 }),
   croakmaw: Object.freeze({ snack: "frog-leg", chance: 1 / 10 }),
   dart_frog: Object.freeze({ snack: "frog-leg", chance: 1 / 200 }),
-  bog_frog: Object.freeze({ snack: "frog-leg", chance: 1 / 200 })
+  bog_frog: Object.freeze({ snack: "frog-leg", chance: 1 / 200 }),
+  // Sammy 2026-11-12: the ordinary mushroom (Eldritch Sprout, spore outbreaks too) drops Glowcaps as often as the frogs drop legs.
+  sprout: Object.freeze({ snack: "glowcap", chance: 1 / 200 })
 });
 function tripBuffV1(trip, tick) {
   if (!trip || trip.outcome !== "good" || !(tick >= trip.startTick && tick < trip.endTick)) return null;
