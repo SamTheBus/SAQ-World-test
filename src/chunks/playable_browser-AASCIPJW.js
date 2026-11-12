@@ -1027,7 +1027,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-PT3ICDZR.js";
+} from "./chunk-QK5YXJNW.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -85656,6 +85656,7 @@ function createOutdoorBridgeDecks(records, terrain) {
 var T68 = 32;
 var CW = 32;
 var CH = 26;
+var REACH3 = 720;
 function mountainsIn(terraces, cx, cy2) {
   const out = [], x0 = cx * CW, y0 = cy2 * CH, C3 = terraces.CELL;
   for (let j = Math.floor(y0 / C3) - 1; j <= Math.floor((y0 + CH) / C3) + 1; j++) for (let i = Math.floor(x0 / C3) - 1; i <= Math.floor((x0 + CW) / C3) + 1; i++) {
@@ -85704,7 +85705,13 @@ function summitPlanV1(g, tile, cx, cy2, otherAnchors = []) {
       break;
     }
   }
-  const clamp56 = (v, hi) => Math.max(16, Math.min(hi - 16, v)), position4 = ledge3 ? { x: clamp56(Math.round((cp.x + ledge3.x) / 2), CW * T68), y: clamp56(Math.round((cp.y + ledge3.y) / 2), CH * T68) } : cp;
+  const clamp56 = (v, hi) => Math.max(16, Math.min(hi - 16, v));
+  let position4 = cp;
+  if (ledge3) {
+    const p = { x: clamp56(Math.round((cp.x + ledge3.x) / 2), CW * T68), y: clamp56(Math.round((cp.y + ledge3.y) / 2), CH * T68) };
+    if (Math.hypot(cp.x - p.x, cp.y - p.y) <= REACH3 && Math.hypot(ledge3.x - p.x, ledge3.y - p.y) <= REACH3) position4 = p;
+    else ledge3 = null;
+  }
   const chests = [{ x: cp.x - position4.x, y: cp.y - position4.y, completion: true }, ...ledge3 ? [{ x: ledge3.x - position4.x, y: ledge3.y - position4.y }] : []];
   return { position: position4, rank, members, chests };
 }
@@ -150031,7 +150038,7 @@ function createEnvironmentCache2(canvas, { authoredArt = null, ...options } = {}
 }
 
 // src/client/emissive_occlusion_v1.js
-var REACH3 = { side: 72, up: 170, down: 12 };
+var REACH4 = { side: 72, up: 170, down: 12 };
 function createEmissiveOcclusionV1(doc) {
   const pool4 = [];
   let masks = /* @__PURE__ */ new Map(), used = 0, redrawn = 0;
@@ -150075,8 +150082,8 @@ function createEmissiveOcclusionV1(doc) {
       if (i === void 0) continue;
       for (let j = i + 1; j < ordered.length; j++) {
         const item2 = ordered[j];
-        if (item2.anchorY - REACH3.up > r.y + r.h) break;
-        if (item2.anchorX + REACH3.side < r.x || item2.anchorX - REACH3.side > r.x + r.w || item2.anchorY + REACH3.down < r.y || !covers(item2)) continue;
+        if (item2.anchorY - REACH4.up > r.y + r.h) break;
+        if (item2.anchorX + REACH4.side < r.x || item2.anchorX - REACH4.side > r.x + r.w || item2.anchorY + REACH4.down < r.y || !covers(item2)) continue;
         let mask2 = masks.get(r.id);
         if (!mask2) {
           mask2 = open2(m, r);

@@ -244,7 +244,7 @@ var RESHAPE_TIERS = Object.freeze({ "repeatable-slot:ruin:wetland:standard:067":
 var RESHAPE_VERSION = "world-reshape-v2";
 var RESHAPE_HASH = "ac15d856c2dbbe38203480172b32aae7d19ccdd61cef10eee16aade24a0900d2";
 var RESHAPE_HYDROLOGY_HASH = "e12fd26221c55e0357b674d4beaf28cc522ef5f9dde420b073373f0ef7be1b65";
-var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-volcanic";
+var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-ranges";
 var hasWorldReshape = (b) => b?.reshapeVersion === RESHAPE_VERSION && b?.reshapeHash === RESHAPE_HASH;
 var reshapedSite = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_SITES, id) ? RESHAPE_SITES[id] : null;
 var reshapedTier = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_TIERS, id) ? RESHAPE_TIERS[id] : null;
@@ -11981,7 +11981,7 @@ var hasWoodlandForest = (b) => b?.woodlandForestVersion === WOODLAND_FOREST_VERS
 var woodlandForestRole = (id) => typeof id === "string" && id.startsWith(WOODLAND_FOREST_VERSION + "/") ? id.split("/")[1] : null;
 
 // src/shared/generation/upland_terraces_v1.js
-var TERRACES_VERSION = "upland-terraces-v1";
+var TERRACES_VERSION = "upland-terraces-v2";
 var TERRACE_PIECE = "terrace";
 var TERRACE_CLIFF = 3;
 var terracesForBinding = (b) => {
@@ -12005,17 +12005,30 @@ var CLIFF = TERRACE_CLIFF;
 var STEPK = CLIFF + 5;
 var RAMP = 13;
 var liftAt = (i) => Math.min(CLIFF, Math.floor(i / 3));
-var terraceDetail = (d) => d.n + "_" + d.sh + "_" + (d.dir > 0 ? "e" : "w");
+var terraceDetail = (d) => d.n + "_" + d.sh + "_" + (d.dir > 0 ? "e" : "w") + (d.s && d.s !== 10 ? "_" + d.s : "");
 var terraceKey = (d) => d.x + "," + d.y;
 function readTerrace(detail, key5) {
-  const m = /^([1234])_(\d+)_([ew])$/.exec(detail ?? ""), k = /^(-?\d+),(-?\d+)$/.exec(key5 ?? "");
+  const m = /^([1234])_(\d+)_([ew])(?:_(\d+))?$/.exec(detail ?? ""), k = /^(-?\d+),(-?\d+)$/.exec(key5 ?? "");
   if (!m || !k) return null;
-  return { x: Number(k[1]), y: Number(k[2]), n: Number(m[1]), sh: Number(m[2]) >>> 0, dir: m[3] === "e" ? 1 : -1 };
+  return { x: Number(k[1]), y: Number(k[2]), n: Number(m[1]), sh: Number(m[2]) >>> 0, dir: m[3] === "e" ? 1 : -1, s: m[4] ? Number(m[4]) : 10 };
+}
+function terraceBox(d) {
+  const { x: cx, y: cy, n, sh } = d, st = (d.s ?? 10) / 10, [A0, B0] = SIZES[n], A1 = Math.round(A0 * st), B1 = Math.round(B0 * Math.min(1.25, 1 + (st - 1) * 0.19));
+  const tilt = st > 1 ? (sh >>> 8) % 7 - 3 : 0, bend = st > 1 ? ((sh >>> 12) % 7 - 3) * 2 : 0, FLAT = 12;
+  let oLo = 0, oHi = 0;
+  if (tilt || bend) for (let x = cx - A1 - 2; x <= cx + A1 + 2; x++) {
+    const dx = x + 0.5 - cx, a = dx < 0 ? -dx : dx;
+    if (a <= FLAT) continue;
+    const u = (dx < 0 ? -1 : 1) * Math.min(1, (a - FLAT) / Math.max(1, A1 - FLAT)), o = Math.round(tilt * u + bend * u * u);
+    if (o < oLo) oLo = o;
+    if (o > oHi) oHi = o;
+  }
+  return { x0: cx - A1 - 2, y0: cy - B1 - 2 + oLo, x1: cx + A1 + 2, y1: cy + B1 + CLIFF + 5 + oHi };
 }
 function terraceGeometry(d) {
-  const { x: cx, y: cy, n, sh, dir } = d, [A1, B1] = SIZES[n], levels2 = [null];
+  const { x: cx, y: cy, n, sh, dir } = d, st = (d.s ?? 10) / 10, [A0, B0] = SIZES[n], A1 = Math.round(A0 * st), B1 = Math.round(B0 * Math.min(1.25, 1 + (st - 1) * 0.19)), levels2 = [null];
   for (let k = 1; k <= n; k++) {
-    const A = A1 - 6 * (k - 1), top = cy - B1 + 3 * (k - 1), E = cy + B1 - STEPK * (k - 1);
+    const A = Math.round(A1 - 6 * st * (k - 1)), top = cy - B1 + 3 * (k - 1), E = cy + B1 - STEPK * (k - 1);
     levels2.push({ k, A, top, E, mid: (top + E + 1) / 2, hb: (E + 1 - top) / 2 });
   }
   const X0 = cx - 6, X1 = X0 + RAMP - 1;
@@ -12036,9 +12049,18 @@ function terraceGeometry(d) {
     ramps.push({ k, east, x0: X0, x1: X1, low: east ? X0 : X1, high: east ? X1 : X0, E: levels2[k].E });
   }
   const summit = levels2[n], cairn = { x: cx, y: summit.top + 3 };
-  const x0 = cx - A1 - 2, x1 = cx + A1 + 2, y0 = cy - B1 - 2, y1 = levels2[1].E + CLIFF + 5;
+  const tilt = st > 1 ? (sh >>> 8) % 7 - 3 : 0, bend = st > 1 ? ((sh >>> 12) % 7 - 3) * 2 : 0, FLAT = 12, offM = Math.abs(tilt) + Math.abs(bend);
+  const off = (x) => {
+    if (!offM) return 0;
+    const dx = x + 0.5 - cx, a = dx < 0 ? -dx : dx;
+    if (a <= FLAT) return 0;
+    const u = (dx < 0 ? -1 : 1) * Math.min(1, (a - FLAT) / Math.max(1, A1 - FLAT));
+    return Math.round(tilt * u + bend * u * u);
+  };
+  const { x0, y0, x1, y1 } = terraceBox(d);
   const memo = /* @__PURE__ */ new Map();
   function raw(k, x, y) {
+    y -= off(x);
     const L2 = levels2[k];
     if (y < L2.top || y > L2.E) return false;
     const u = (x + 0.5 - cx) / L2.A, v = (y + 0.5 - L2.mid) / L2.hb;
@@ -12165,47 +12187,93 @@ function terraceGeometry(d) {
   return Object.freeze({ d, n, levels: levels2, ramps, stair, cairn, cliff: CLIFF, ramp: RAMP, liftAt, bbox: { x0, y0, x1, y1 }, inS, level, role, onPath, free, rampAt });
 }
 var CELL = 80;
-var HIGH = 0.6;
-var KEEP = 50;
-var PEAK = [90, 180];
+var SEG = 8 * CELL;
+var R_HIGH = 0.25;
+var R_DEEP = [20, 40];
+var R_PEAK = [60, 120];
+var R_MX = 6;
+var R_VALE = 15;
+var R_WANDER = 20;
+var R_GAP = 10;
+var R_SEGS = 96;
+var R_SEQ4 = [[4, 26], [4, 23], [4, 19], [4, 15], [3, 23], [3, 18], [3, 13], [2, 22], [2, 15], [1, 20]];
+var R_SEQ3 = [[3, 26], [3, 23], [3, 18], [3, 13], [2, 22], [2, 15], [2, 10], [1, 20], [1, 12]];
 var RING = [[1, 0], [-1, 0], [0, 1], [0, -1], [0.7, 0.7], [-0.7, 0.7], [0.7, -0.7], [-0.7, -0.7]];
 function createUplandTerraces({ hash: hash17, ground, high, open, biomeAt }) {
-  const cells3 = /* @__PURE__ */ new Map();
-  const deep = (x, y) => {
+  const rdeep = (x, y) => {
     let miss = 0;
-    for (const r of [60, 120]) for (const [ux, uy] of RING) if (biomeAt(Math.floor(x + ux * r), Math.floor(y + uy * r)) !== "r" && ++miss > 1) return false;
+    for (const r of R_DEEP) for (const [ux, uy] of RING) if (biomeAt(Math.floor(x + ux * r), Math.floor(y + uy * r)) !== "r" && ++miss > 1) return false;
     return true;
   };
-  const peak = (x, y) => {
-    for (const r of PEAK) for (const [ux, uy] of RING) if (biomeAt(Math.floor(x + ux * r), Math.floor(y + uy * r)) !== "r") return false;
+  const rpeak = (x, y) => {
+    for (const r of R_PEAK) for (const [ux, uy] of RING) if (biomeAt(Math.floor(x + ux * r), Math.floor(y + uy * r)) !== "r") return false;
     return true;
   };
-  function mountain2(cx, cy) {
-    const key5 = cx + "," + cy;
-    if (cells3.has(key5)) return cells3.get(key5);
-    let out = null;
-    const h = terraceTileHash(hash17, cx, cy), x = cx * CELL + 30 + h % (CELL - 60), y = cy * CELL + 26 + (h >>> 8) % (CELL - 52);
-    if (ground(x, y) && high(x, y) >= HIGH && h % 100 < KEEP && deep(x, y)) {
-      for (const n of peak(x, y) ? [4, 3, 2, 1] : [3, 2, 1]) {
-        const g = terraceGeometry({ x, y, n, sh: mix2(h ^ 1540483477), dir: h >>> 20 & 1 ? 1 : -1 }), b = g.bbox;
-        let ok = true;
-        for (let ty = b.y0 - 3; ty <= b.y1 + 3 && ok; ty++) for (let tx = b.x0 - 3; tx <= b.x1 + 3; tx++) if (!ground(tx, ty)) {
-          ok = false;
-          break;
-        }
-        for (let ty = b.y0 - 3; ty <= b.y1 + 3 && ok; ty += 3) for (let tx = b.x0 - 3; tx <= b.x1 + 3; tx += 3) if (!open(tx, ty)) {
-          ok = false;
-          break;
-        }
-        if (ok) {
-          out = g;
-          break;
-        }
+  const segs = /* @__PURE__ */ new Map();
+  function groundMap(xa, ya, xb, yb) {
+    const gx0 = Math.ceil(xa / 3), gy0 = Math.ceil(ya / 3), W6 = Math.floor(xb / 3) - gx0 + 1, H6 = Math.floor(yb / 3) - gy0 + 1, P2 = new Int32Array((W6 + 1) * (H6 + 1));
+    for (let j = 0; j < H6; j++) {
+      let row2 = 0;
+      for (let i = 0; i < W6; i++) {
+        if (!ground((gx0 + i) * 3, (gy0 + j) * 3)) row2++;
+        P2[(j + 1) * (W6 + 1) + i + 1] = P2[j * (W6 + 1) + i + 1] + row2;
       }
     }
-    if (cells3.size > 256) cells3.clear();
-    cells3.set(key5, out);
+    return (b) => {
+      const i0 = Math.max(0, Math.ceil((b.x0 - 3) / 3) - gx0), i1 = Math.min(W6 - 1, Math.floor((b.x1 + 3) / 3) - gx0), j0 = Math.max(0, Math.ceil((b.y0 - 3) / 3) - gy0), j1 = Math.min(H6 - 1, Math.floor((b.y1 + 3) / 3) - gy0);
+      if (i1 < i0 || j1 < j0) return true;
+      return P2[(j1 + 1) * (W6 + 1) + i1 + 1] - P2[j0 * (W6 + 1) + i1 + 1] - P2[(j1 + 1) * (W6 + 1) + i0] + P2[j0 * (W6 + 1) + i0] === 0;
+    };
+  }
+  function segment(k, j) {
+    const key5 = k + "," + j;
+    if (segs.has(key5)) return segs.get(key5);
+    const out = [];
+    const near2 = j & 1 ? [...segment(k, j - 1), ...segment(k, j + 1)] : [];
+    const X0 = k * SEG, X1 = X0 + SEG - 1 - R_MX, Y0 = j * CELL, YA = Y0 - R_WANDER, YB = Y0 + CELL - 1 + R_WANDER, h0 = terraceTileHash(hash17 ^ 739982445, k, j);
+    let cur = X0 + R_MX + h0 % 24, y = Y0 + 40 + (h0 >>> 8) % 31 - 15, minCx = -1e9, clear = null;
+    const bad = [], holds = (b, p) => p.x >= b.x0 - 3 && p.x <= b.x1 + 3 && p.y >= b.y0 - 3 && p.y <= b.y1 + 3;
+    const fits = (b) => {
+      if (bad.some((p) => holds(b, p))) return false;
+      for (let ty = b.y0 - 3; ty <= b.y1 + 3; ty += 3) for (let tx = b.x0 - 3; tx <= b.x1 + 3; tx += 3) if (!open(tx, ty)) return false;
+      for (let ty = b.y0 - 3; ty <= b.y1 + 3; ty++) for (let tx = b.x0 - 3; tx <= b.x1 + 3; tx++) if (!ground(tx, ty)) {
+        bad.push({ x: tx, y: ty });
+        return false;
+      }
+      return true;
+    };
+    for (let i = 0; cur < X1 - 24 && i < 64; i++) {
+      const h = terraceTileHash(hash17 ^ 1779033703, k * 64 + i, j);
+      if (h % 100 < R_GAP) {
+        cur += 30 + (h >>> 8) % 31;
+        continue;
+      }
+      y = Math.max(Y0 + 6, Math.min(Y0 + CELL - 7, y + (h >>> 12) % 21 - 10));
+      const sh = mix2(h ^ 1540483477), dir = h >>> 20 & 1 ? 1 : -1, probe = cur + 24;
+      let placed = null;
+      if (ground(probe, y) && high(probe, y) >= R_HIGH && rdeep(probe, y)) for (const [n, st] of (rpeak(probe, y) ? R_SEQ4 : R_SEQ3).slice((h >>> 24) % 2)) {
+        const x = Math.max(cur + Math.round(SIZES[n][0] * st / 10) + 2, minCx), b = terraceBox({ x, y, n, sh, s: st });
+        if (b.x0 < cur || b.x1 > X1 || b.y0 < YA || b.y1 > YB) continue;
+        if (near2.some((o) => b.x0 - R_VALE <= o.bbox.x1 && b.x1 + R_VALE >= o.bbox.x0 && b.y0 - R_VALE <= o.bbox.y1 && b.y1 + R_VALE >= o.bbox.y0)) continue;
+        if (!ground(x, y) || high(x, y) < R_HIGH || !rdeep(x, y)) continue;
+        clear ??= groundMap(X0 - 3, YA - 3, X1 + 3, YB + 3);
+        if (!clear(b) || !fits(b)) continue;
+        placed = terraceGeometry({ x, y, n, sh, dir, s: st });
+        break;
+      }
+      if (placed) {
+        out.push(placed);
+        cur = placed.bbox.x1 + 10 + (h >>> 16) % 9;
+        minCx = (Math.floor(placed.d.x / CELL) + 1) * CELL;
+      } else cur += 12;
+    }
+    if (segs.size > R_SEGS) segs.clear();
+    segs.set(key5, out);
     return out;
+  }
+  function mountain2(cx, cy) {
+    for (const g of segment(Math.floor(cx / 8), cy)) if (Math.floor(g.d.x / CELL) === cx) return g;
+    return null;
   }
   function at2(x, y) {
     const cx = Math.floor(x / CELL), cy = Math.floor(y / CELL);
@@ -12505,7 +12573,7 @@ var MCELL = 80;
 var VHIGH = 0.3;
 var VKEEP = 75;
 var MKEEP = 34;
-var PEAK2 = [90, 160];
+var PEAK = [90, 160];
 var RING2 = [[1, 0], [-1, 0], [0, 1], [0, -1], [0.7, 0.7], [-0.7, 0.7], [0.7, -0.7], [-0.7, -0.7]];
 function createVolcanoes({ hash: hash17, ground, high, open, biomeAt, bio = "l" }) {
   const vcells = /* @__PURE__ */ new Map(), mcells = /* @__PURE__ */ new Map();
@@ -12515,7 +12583,7 @@ function createVolcanoes({ hash: hash17, ground, high, open, biomeAt, bio = "l" 
     return true;
   };
   const peak = (x, y) => {
-    for (const r of PEAK2) for (const [ux, uy] of RING2) if (biomeAt(Math.floor(x + ux * r), Math.floor(y + uy * r)) !== bio) return false;
+    for (const r of PEAK) for (const [ux, uy] of RING2) if (biomeAt(Math.floor(x + ux * r), Math.floor(y + uy * r)) !== bio) return false;
     return true;
   };
   function fits(g) {

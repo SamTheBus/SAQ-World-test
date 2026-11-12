@@ -670,6 +670,8 @@ var BOSS_HOSTING_POLICY = freezeWire({ version: BOSS_HOSTING_VERSION, parentRunt
 var TERRACE_CLIFF = 3;
 var CLIFF = TERRACE_CLIFF;
 var STEPK = CLIFF + 5;
+var CELL = 80;
+var SEG = 8 * CELL;
 
 // src/shared/generation/volcanoes_v1.js
 var CLIFF2 = 3;
