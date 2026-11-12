@@ -4655,14 +4655,14 @@ function worldGearRarityV4(encounter, hero, role, siteReward, draw, qualityHundr
   }
   requireContract(false, "Loot v4 weights failed");
 }
-var isSourceLootV4 = (hash21) => hash21 === WORLD_LOOT_V3_HASH || hash21 === WORLD_LOOT_V4_HASH;
-function lootGearPerMilleFor(hash21, role, siteReward = null, occurrenceHundredths = 100) {
-  requireContract(isSourceLootV4(hash21), "Loot table");
-  return (hash21 === WORLD_LOOT_V4_HASH ? lootGearPerMilleV4 : lootGearPerMilleV3)(role, siteReward, occurrenceHundredths);
+var isSourceLootV4 = (hash22) => hash22 === WORLD_LOOT_V3_HASH || hash22 === WORLD_LOOT_V4_HASH;
+function lootGearPerMilleFor(hash22, role, siteReward = null, occurrenceHundredths = 100) {
+  requireContract(isSourceLootV4(hash22), "Loot table");
+  return (hash22 === WORLD_LOOT_V4_HASH ? lootGearPerMilleV4 : lootGearPerMilleV3)(role, siteReward, occurrenceHundredths);
 }
-function worldGearRarityFor(hash21, encounter, hero, role, siteReward, draw, qualityHundredths = 0) {
-  requireContract(isSourceLootV4(hash21), "Loot table");
-  return (hash21 === WORLD_LOOT_V4_HASH ? worldGearRarityV4 : worldGearRarityV3)(encounter, hero, role, siteReward, draw, qualityHundredths);
+function worldGearRarityFor(hash22, encounter, hero, role, siteReward, draw, qualityHundredths = 0) {
+  requireContract(isSourceLootV4(hash22), "Loot table");
+  return (hash22 === WORLD_LOOT_V4_HASH ? worldGearRarityV4 : worldGearRarityV3)(encounter, hero, role, siteReward, draw, qualityHundredths);
 }
 
 // src/shared/content/world_reshape_reservations_v1.js
@@ -5603,7 +5603,7 @@ var R_SEGS = 96;
 var R_SEQ4 = [[4, 26], [4, 23], [4, 19], [4, 15], [3, 23], [3, 18], [3, 13], [2, 22], [2, 15], [1, 20]];
 var R_SEQ3 = [[3, 26], [3, 23], [3, 18], [3, 13], [2, 22], [2, 15], [2, 10], [1, 20], [1, 12]];
 var RING = [[1, 0], [-1, 0], [0, 1], [0, -1], [0.7, 0.7], [-0.7, 0.7], [0.7, -0.7], [-0.7, -0.7]];
-function createUplandTerraces({ hash: hash21, ground, high, open: open2, biomeAt }) {
+function createUplandTerraces({ hash: hash22, ground, high, open: open2, biomeAt }) {
   const rdeep = (x, y) => {
     let miss = 0;
     for (const r of R_DEEP) for (const [ux, uy] of RING) if (biomeAt(Math.floor(x + ux * r), Math.floor(y + uy * r)) !== "r" && ++miss > 1) return false;
@@ -5634,7 +5634,7 @@ function createUplandTerraces({ hash: hash21, ground, high, open: open2, biomeAt
     if (segs.has(key9)) return segs.get(key9);
     const out = [];
     const near2 = j & 1 ? [...segment(k, j - 1), ...segment(k, j + 1)] : [];
-    const X0 = k * SEG, X1 = X0 + SEG - 1 - R_MX, Y0 = j * CELL, YA = Y0 - R_WANDER, YB = Y0 + CELL - 1 + R_WANDER, h0 = terraceTileHash(hash21 ^ 739982445, k, j);
+    const X0 = k * SEG, X1 = X0 + SEG - 1 - R_MX, Y0 = j * CELL, YA = Y0 - R_WANDER, YB = Y0 + CELL - 1 + R_WANDER, h0 = terraceTileHash(hash22 ^ 739982445, k, j);
     let cur = X0 + R_MX + h0 % 24, y = Y0 + 40 + (h0 >>> 8) % 31 - 15, minCx = -1e9, clear = null;
     const bad = [], holds = (b, p) => p.x >= b.x0 - 3 && p.x <= b.x1 + 3 && p.y >= b.y0 - 3 && p.y <= b.y1 + 3;
     const fits = (b) => {
@@ -5647,7 +5647,7 @@ function createUplandTerraces({ hash: hash21, ground, high, open: open2, biomeAt
       return true;
     };
     for (let i = 0; cur < X1 - 24 && i < 64; i++) {
-      const h = terraceTileHash(hash21 ^ 1779033703, k * 64 + i, j);
+      const h = terraceTileHash(hash22 ^ 1779033703, k * 64 + i, j);
       if (h % 100 < R_GAP) {
         cur += 30 + (h >>> 8) % 31;
         continue;
@@ -5974,7 +5974,7 @@ var VKEEP = 75;
 var MKEEP = 34;
 var PEAK = [90, 160];
 var RING2 = [[1, 0], [-1, 0], [0, 1], [0, -1], [0.7, 0.7], [-0.7, 0.7], [0.7, -0.7], [-0.7, -0.7]];
-function createVolcanoes({ hash: hash21, ground, high, open: open2, biomeAt, bio = "l" }) {
+function createVolcanoes({ hash: hash22, ground, high, open: open2, biomeAt, bio = "l" }) {
   const vcells = /* @__PURE__ */ new Map(), mcells = /* @__PURE__ */ new Map();
   const deep = (x, y) => {
     let miss = 0;
@@ -5995,7 +5995,7 @@ function createVolcanoes({ hash: hash21, ground, high, open: open2, biomeAt, bio
     const key9 = cx + "," + cy;
     if (vcells.has(key9)) return vcells.get(key9);
     let out = null;
-    const h = terraceTileHash(hash21 ^ 31293, cx, cy), x = cx * VCELL + 48 + h % (VCELL - 96), y = cy * VCELL + 44 + (h >>> 8) % (VCELL - 88);
+    const h = terraceTileHash(hash22 ^ 31293, cx, cy), x = cx * VCELL + 48 + h % (VCELL - 96), y = cy * VCELL + 44 + (h >>> 8) % (VCELL - 88);
     if (ground(x, y) && high(x, y) >= VHIGH && h % 100 < VKEEP && deep(x, y)) for (const n of peak(x, y) ? [4, 3] : [3]) {
       const g = volcanoGeometry({ x, y, n, sh: mix3(h ^ 1540483477), dir: h >>> 20 & 1 ? 1 : -1, kind: "v" });
       if (fits(g)) {
@@ -6020,7 +6020,7 @@ function createVolcanoes({ hash: hash21, ground, high, open: open2, biomeAt, bio
     const key9 = cx + "," + cy;
     if (mcells.has(key9)) return mcells.get(key9);
     let out = null;
-    const h = terraceTileHash(hash21 ^ 15889, cx, cy), x = cx * MCELL + 28 + h % (MCELL - 56), y = cy * MCELL + 22 + (h >>> 8) % (MCELL - 44);
+    const h = terraceTileHash(hash22 ^ 15889, cx, cy), x = cx * MCELL + 28 + h % (MCELL - 56), y = cy * MCELL + 22 + (h >>> 8) % (MCELL - 44);
     if (ground(x, y) && h % 100 < MKEEP) for (const n of (h >>> 16) % 3 ? [2, 1] : [1]) {
       const g = volcanoGeometry({ x, y, n, sh: mix3(h ^ 461845907), dir: h >>> 20 & 1 ? 1 : -1, kind: "m" }), b = g.bbox;
       if (!nearVolcano(b.x0, b.y0, b.x1, b.y1, 12) && fits(g)) {
@@ -9642,7 +9642,7 @@ var LOCAL_WATER_VERSION = "local-water-geometry-v3";
 function createLocalWaterGeometry(p, macro, shoreline, riverSegments) {
   const protectedChunks = shoreline.protectedChunks, cache5 = /* @__PURE__ */ new Map(), coastCache = /* @__PURE__ */ new Map();
   const seed = parseInt(p.seedDigest.slice(0, 8), 16) >>> 0;
-  const hash21 = (x, y, d) => {
+  const hash22 = (x, y, d) => {
     let n = seed ^ Math.imul(x + d, 73856093) ^ Math.imul(y - d, 19349663);
     n ^= n >>> 16;
     n = Math.imul(n, 2146121005);
@@ -9651,13 +9651,13 @@ function createLocalWaterGeometry(p, macro, shoreline, riverSegments) {
     return (n ^ n >>> 16) >>> 0;
   };
   function noise(x, y, size, d) {
-    const xx = x / size, yy = y / size, ix = Math.floor(xx), iy = Math.floor(yy), u = xx - ix, v = yy - iy, a = u * u * (3 - 2 * u), b = v * v * (3 - 2 * v), h = (x2, y2) => hash21(x2, y2, d) / 4294967295;
+    const xx = x / size, yy = y / size, ix = Math.floor(xx), iy = Math.floor(yy), u = xx - ix, v = yy - iy, a = u * u * (3 - 2 * u), b = v * v * (3 - 2 * v), h = (x2, y2) => hash22(x2, y2, d) / 4294967295;
     return (h(ix, iy) * (1 - a) + h(ix + 1, iy) * a) * (1 - b) + (h(ix, iy + 1) * (1 - a) + h(ix + 1, iy + 1) * a) * b;
   }
   const islandStyles = Object.freeze(p.landmasses.map((l) => {
     let d = 0;
     for (const c of l.id) d = Math.imul(d, 31) + c.charCodeAt(0) >>> 0;
-    return Object.freeze({ landmassId: l.id, domain: d % 1e5, expression: l.classId === "minor-island" ? "asymmetric-lobed-small-island" : ["angular-headlands", "asymmetric-coves", "elongated-frontage", "soft-lobes"][hash21(0, 0, d) % 4] });
+    return Object.freeze({ landmassId: l.id, domain: d % 1e5, expression: l.classId === "minor-island" ? "asymmetric-lobed-small-island" : ["angular-headlands", "asymmetric-coves", "elongated-frontage", "soft-lobes"][hash22(0, 0, d) % 4] });
   }));
   const lakeByCell = /* @__PURE__ */ new Map(), lakeBasins = [];
   for (const row2 of p.cellRows) for (const c of row2.cells) if (c[4] && !lakeByCell.has(c[0] + "," + row2.y)) {
@@ -9672,7 +9672,7 @@ function createLocalWaterGeometry(p, macro, shoreline, riverSegments) {
         }
       }
     }
-    const basin = Object.freeze({ id: "local-lake:" + c[0] + ":" + row2.y, domain: hash21(c[0], row2.y, 701) % 1e5, minX: Math.min(...cells3.map((q) => q[0])) * 64, minY: Math.min(...cells3.map((q) => q[1])) * 52, maxX: (Math.max(...cells3.map((q) => q[0])) + 1) * 64, maxY: (Math.max(...cells3.map((q) => q[1])) + 1) * 52, macroCells: cells3.length });
+    const basin = Object.freeze({ id: "local-lake:" + c[0] + ":" + row2.y, domain: hash22(c[0], row2.y, 701) % 1e5, minX: Math.min(...cells3.map((q) => q[0])) * 64, minY: Math.min(...cells3.map((q) => q[1])) * 52, maxX: (Math.max(...cells3.map((q) => q[0])) + 1) * 64, maxY: (Math.max(...cells3.map((q) => q[1])) + 1) * 52, macroCells: cells3.length });
     lakeBasins.push(basin);
     for (const [x, y] of cells3) lakeByCell.set(x + "," + y, basin);
   }
@@ -9718,7 +9718,7 @@ function createLocalWaterGeometry(p, macro, shoreline, riverSegments) {
       }
     }
     if (p.landmasses[c[1]].classId === "minor-island") {
-      const b = p.landmasses[c[1]].bounds, w = (b.maxXExclusive - b.minX) * 64, h = (b.maxYExclusive - b.minY) * 52, cx = (b.minX + b.maxXExclusive) * 32, cy = (b.minY + b.maxYExclusive) * 26, angle = (hash21(2, 3, style.domain) / 4294967295 - 0.5) * 1.2, phase = hash21(5, 7, style.domain) / 4294967295 * Math.PI * 2, dx = px - cx, dy = py - cy, rx = w * (0.35 + 0.07 * noise(cx, cy, 73, style.domain + 61)), ry = h * (0.31 + 0.08 * noise(cx, cy, 83, style.domain + 71)), u = (dx * PM.cos(angle) + dy * PM.sin(angle)) / rx, v = (-dx * PM.sin(angle) + dy * PM.cos(angle)) / ry, theta = PM.atan2(v, u), shape = (1 - PM.hypot(u, v) + 0.16 * PM.sin(3 * theta + phase) + 0.08 * PM.sin(2 * theta - phase) + 0.05 * (noise(px, py, 29, style.domain + 89) - 0.5)) * Math.min(rx, ry);
+      const b = p.landmasses[c[1]].bounds, w = (b.maxXExclusive - b.minX) * 64, h = (b.maxYExclusive - b.minY) * 52, cx = (b.minX + b.maxXExclusive) * 32, cy = (b.minY + b.maxYExclusive) * 26, angle = (hash22(2, 3, style.domain) / 4294967295 - 0.5) * 1.2, phase = hash22(5, 7, style.domain) / 4294967295 * Math.PI * 2, dx = px - cx, dy = py - cy, rx = w * (0.35 + 0.07 * noise(cx, cy, 73, style.domain + 61)), ry = h * (0.31 + 0.08 * noise(cx, cy, 83, style.domain + 71)), u = (dx * PM.cos(angle) + dy * PM.sin(angle)) / rx, v = (-dx * PM.sin(angle) + dy * PM.cos(angle)) / ry, theta = PM.atan2(v, u), shape = (1 - PM.hypot(u, v) + 0.16 * PM.sin(3 * theta + phase) + 0.08 * PM.sin(2 * theta - phase) + 0.05 * (noise(px, py, 29, style.domain + 89) - 0.5)) * Math.min(rx, ry);
       margin = shape * t + distance6 * (1 - t);
     }
     return { water: margin < 0, shore: margin >= 0 && margin < (old?.width ?? 4), classId: old?.classId ?? "exposed-rocky-shore", margin, width: old?.width ?? 4, protected: false };
@@ -9792,7 +9792,7 @@ function createLocalWaterGeometry(p, macro, shoreline, riverSegments) {
           const r = 13 + 8 * noise(x, y, 67, 419), a = sx < 0 ? lx + 0.5 : 63.5 - lx, b = sy < 0 ? ly + 0.5 : 51.5 - ly;
           if (a < r && b < r) margin = Math.min(margin, (r - PM.hypot(a - r, b - r)) * t + Math.min(a, b) * (1 - t));
         }
-        const basin = lakeByCell.get(key9), cx = (basin.minX + basin.maxX) / 2, cy = (basin.minY + basin.maxY) / 2, rx = (basin.maxX - basin.minX) * 0.47, ry = (basin.maxY - basin.minY) * 0.46, u = (x - cx) / rx, v = (y - cy) / ry, theta = PM.atan2(v, u), phase = hash21(7, 9, basin.domain) / 4294967295 * Math.PI * 2, shape = (1 - PM.hypot(u, v) + 0.1 * PM.sin(3 * theta + phase) + 0.06 * PM.sin(2 * theta - phase) + 0.05 * (noise(x, y, 47, basin.domain) - 0.5)) * Math.min(rx, ry);
+        const basin = lakeByCell.get(key9), cx = (basin.minX + basin.maxX) / 2, cy = (basin.minY + basin.maxY) / 2, rx = (basin.maxX - basin.minX) * 0.47, ry = (basin.maxY - basin.minY) * 0.46, u = (x - cx) / rx, v = (y - cy) / ry, theta = PM.atan2(v, u), phase = hash22(7, 9, basin.domain) / 4294967295 * Math.PI * 2, shape = (1 - PM.hypot(u, v) + 0.1 * PM.sin(3 * theta + phase) + 0.06 * PM.sin(2 * theta - phase) + 0.05 * (noise(x, y, 47, basin.domain) - 0.5)) * Math.min(rx, ry);
         margin = Math.min(margin, shape * t + margin * (1 - t));
         mask[ly * 64 + lx] = margin >= inset ? 1 : 0;
       }
@@ -9886,7 +9886,7 @@ function createLocalShoreline(p, macro) {
   add(p.extraProtected);
   add(p.originZone.runtimeChunks.map((c) => ({ x: c.chunkX, y: c.chunkY })));
   const seed = Number.parseInt(p.seedDigest.slice(0, 8), 16) >>> 0, cache5 = /* @__PURE__ */ new Map();
-  const hash21 = (x, y, domain) => {
+  const hash22 = (x, y, domain) => {
     let n = seed ^ Math.imul(x + domain, 73856093) ^ Math.imul(y - domain, 19349663);
     n ^= n >>> 16;
     n = Math.imul(n, 2146121005);
@@ -9895,7 +9895,7 @@ function createLocalShoreline(p, macro) {
     return (n ^ n >>> 16) >>> 0;
   };
   function noise(x, y, size, domain) {
-    const xx = x / size, yy = y / size, ix = Math.floor(xx), iy = Math.floor(yy), u = xx - ix, v = yy - iy, a = u * u * (3 - 2 * u), b = v * v * (3 - 2 * v), h = (x2, y2) => hash21(x2, y2, domain) / 4294967295;
+    const xx = x / size, yy = y / size, ix = Math.floor(xx), iy = Math.floor(yy), u = xx - ix, v = yy - iy, a = u * u * (3 - 2 * u), b = v * v * (3 - 2 * v), h = (x2, y2) => hash22(x2, y2, domain) / 4294967295;
     return (h(ix, iy) * (1 - a) + h(ix + 1, iy) * a) * (1 - b) + (h(ix, iy + 1) * (1 - a) + h(ix + 1, iy + 1) * a) * b;
   }
   function tile(x, y) {
@@ -12895,6 +12895,231 @@ async function createVolcanoSummitAnchorsV1({ volcanoes, cx, cy, seed, sha256, t
   return out;
 }
 
+// src/shared/generation/lake_landings_v1.js
+var DIRS2 = { N: [0, -1], E: [1, 0], W: [-1, 0], S: [0, 1] };
+var ORDER = ["N", "E", "W", "S"];
+var PREF = { N: 30, E: 15, W: 15, S: 0 };
+var SIZE = { h: [3, 2], n: [2, 1], r: [2, 1], c: [1, 1], l: [1, 1], b: [1, 1], o: [1, 1], s: [2, 1], z: [1, 1], e: [1, 1], q: [1, 1] };
+var SOLID = /* @__PURE__ */ new Set(["h", "n", "r", "c", "l", "o", "s", "z", "e", "q"]);
+function hash11(s) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+function lakeLandingDetailV1(L2) {
+  return [L2.kind, L2.biome, L2.dir, L2.len, L2.pieces.map((p) => p.t + ":" + (p.x - L2.root.x) + "," + (p.y - L2.root.y)).join(";")].join("|");
+}
+function createLakeLandingsV1({ asset, terrain: terrain2, routeAt, free }) {
+  const basins = (asset?.hydrologyPlan?.basins ?? []).filter((b) => b?.bounds && (b.kind === "lake" || b.kind === "pond"));
+  const near = /* @__PURE__ */ new Map();
+  for (const b of basins) {
+    const m = 10, x0 = Math.floor((b.bounds.x - m) / 32), x1 = Math.floor((b.bounds.x + b.bounds.width + m) / 32), y0 = Math.floor((b.bounds.y - m) / 26), y1 = Math.floor((b.bounds.y + b.bounds.height + m) / 26);
+    for (let cy = y0; cy <= y1; cy++) for (let cx = x0; cx <= x1; cx++) {
+      const k = cx + "," + cy;
+      if (!near.has(k)) near.set(k, []);
+      near.get(k).push(b);
+    }
+  }
+  const done3 = /* @__PURE__ */ new Map(), tiles3 = /* @__PURE__ */ new Map(), clear = /* @__PURE__ */ new Set();
+  function landingsOf(b) {
+    let got = done3.get(b.id);
+    if (got) return got;
+    got = plan(b);
+    done3.set(b.id, got);
+    for (const L2 of got) {
+      for (const q of L2.deck) tiles3.set(q.x + "," + q.y, { t: "deck", L: L2 });
+      for (const p of L2.pieces) for (let j = 0; j < p.h; j++) for (let i = 0; i < p.w; i++) if (SOLID.has(p.t)) tiles3.set(p.x + i + "," + (p.y + j), { t: p.t, L: L2 });
+      const all = [L2.root, ...L2.deck, ...L2.pieces.flatMap((p) => {
+        const o = [];
+        for (let j = 0; j < p.h; j++) for (let i = 0; i < p.w; i++) o.push({ x: p.x + i, y: p.y + j });
+        return o;
+      })];
+      for (const q of all) for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) clear.add(q.x + i + "," + (q.y + j));
+    }
+    return got;
+  }
+  const forChunk = (cx, cy) => {
+    const out = [];
+    for (const b of near.get(cx + "," + cy) ?? []) out.push(...landingsOf(b));
+    return out;
+  };
+  const touch = (x, y) => {
+    for (const b of near.get(Math.floor(x / 32) + "," + Math.floor(y / 26)) ?? []) landingsOf(b);
+  };
+  function tileAt(x, y) {
+    if (!basins.length) return null;
+    touch(x, y);
+    return tiles3.get(x + "," + y) ?? null;
+  }
+  function clearAt(x, y) {
+    if (!basins.length) return false;
+    touch(x, y);
+    return clear.has(x + "," + y);
+  }
+  function blockers2(cx, cy) {
+    const out = [], x0 = cx * 32, y0 = cy * 26;
+    for (const L2 of forChunk(cx, cy)) {
+      const b = L2.box;
+      if (b.x1 < x0 || b.x0 >= x0 + 32 || b.y1 < y0 || b.y0 >= y0 + 26) continue;
+      out.push({ id: "lake-landing:" + L2.id, x: L2.root.x - x0, y: L2.root.y - y0, width: 1, height: 1, kind: "civilian-lake-landing", detail: L2.detail });
+    }
+    return out;
+  }
+  function plan(b) {
+    const memo = /* @__PURE__ */ new Map(), base = (x, y) => {
+      const k = x + "," + y;
+      let v = memo.get(k);
+      if (!v) {
+        v = terrain2.base(x, y);
+        memo.set(k, v);
+      }
+      return v;
+    };
+    const lake = (x, y) => base(x, y).kind === "lake", land = (x, y) => {
+      const q = base(x, y);
+      return q.walkable && q.kind !== "lake" && free(x, y, q);
+    };
+    const open2 = (x, y) => land(x, y) && !routeAt(x, y);
+    const h = hash11(b.id), cx = Math.round(b.center?.x ?? b.bounds.x + b.bounds.width / 2), cy = Math.round(b.center?.y ?? b.bounds.y + b.bounds.height / 2), rx = Math.max(3, b.radii?.x ?? b.bounds.width / 2), ry = Math.max(3, b.radii?.y ?? b.bounds.height / 2);
+    const pond = b.kind === "pond";
+    if (pond && h % 2) return [];
+    const found = [];
+    for (const dir of ORDER) {
+      const [dx, dy] = DIRS2[dir], px = -dy, py = dx, span2 = dx ? ry : rx;
+      for (let s = -3; s <= 3; s++) {
+        const off = Math.round(s * span2 * 0.2);
+        let x = cx + px * off, y = cy + py * off;
+        if (!lake(x, y)) continue;
+        let steps = 0;
+        while (lake(x - dx, y - dy) && steps++ < 200) {
+          x -= dx;
+          y -= dy;
+        }
+        const rootX = x - dx, rootY = y - dy;
+        const c = candidate(dir, rootX, rootY, pond);
+        if (c) found.push({ ...c, score: c.score + PREF[dir] - Math.abs(s) * 2 });
+      }
+    }
+    found.sort((a, b2) => b2.score - a.score || a.root.y - b2.root.y || a.root.x - b2.root.x);
+    const picks = [];
+    for (const c of found) {
+      if (picks.some((p) => {
+        const d = Math.abs(p.root.x - c.root.x) + Math.abs(p.root.y - c.root.y);
+        return d < 40 || p.dir === c.dir && d < 70;
+      })) continue;
+      picks.push(c);
+      if (picks.length >= (pond || Math.max(rx, ry) < 35 ? 1 : 2)) break;
+    }
+    return picks.map((c, i) => finish(c, b.id + "/" + i));
+    function candidate(dir, rx0, ry0, small) {
+      const [dx, dy] = DIRS2[dir], px = -dy, py = dx;
+      if (!land(rx0, ry0) || !land(rx0 - dx, ry0 - dy)) return null;
+      const biome = base(rx0 + dx, ry0 + dy).biome, kind2 = biome === "s" ? "i" : biome === "l" ? small ? null : "j" : small ? "p" : "d";
+      if (!kind2) return null;
+      const len = kind2 === "p" ? 2 : kind2 === "j" ? 4 : kind2 === "i" ? 0 : 4, reach = kind2 === "i" ? 7 : len;
+      for (let k = 1; k <= reach; k++) {
+        if (!lake(rx0 + dx * k, ry0 + dy * k)) return null;
+        if (kind2 !== "i") for (const s of [-1, 1]) {
+          const u = base(rx0 + dx * k + px * s, ry0 + dy * k + py * s);
+          if (u.kind !== "lake" && k > 1) return null;
+        }
+      }
+      let road = 0;
+      for (let j = -2; j <= 2; j++) for (let i = -2; i <= 2; i++) if (routeAt(rx0 - dx + i, ry0 - dy + j)) road = 100;
+      return { dir, dx, dy, px, py, kind: kind2, biome, len, root: { x: rx0, y: ry0 }, score: road };
+    }
+    function finish(c, id) {
+      const { dx, dy, px, py, root: root2, kind: kind2, len } = c, used = /* @__PURE__ */ new Set(), pieces = [];
+      const mark = (x, y, w, hh) => {
+        for (let j = 0; j < hh; j++) for (let i = 0; i < w; i++) used.add(x + i + "," + (y + j));
+      };
+      const fits = (x, y, w, hh, ok) => {
+        for (let j = 0; j < hh; j++) for (let i = 0; i < w; i++) {
+          const k = x + i + "," + (y + j);
+          if (used.has(k) || !ok(x + i, y + j)) return false;
+        }
+        return true;
+      };
+      const put3 = (t, x, y) => {
+        pieces.push({ t, x, y });
+        mark(x, y, SIZE[t][0], SIZE[t][1]);
+      };
+      for (let k = -2; k <= Math.max(len, 0); k++) mark(root2.x + dx * k, root2.y + dy * k, 1, 1);
+      if (kind2 === "i") {
+        const ice = (x, y) => lake(x, y) && base(x, y).biome === "s";
+        for (let k = 3; k <= 6 && !pieces.length; k++) {
+          const hx = root2.x + dx * k - 1, hy = root2.y + dy * k - 1;
+          if (fits(hx, hy, 3, 2, ice)) put3("h", hx, hy);
+        }
+        if (!pieces.length) return null;
+        const H9 = pieces[0];
+        for (const [x, y] of [[H9.x + 4, H9.y + 1], [H9.x - 2, H9.y], [H9.x + 1, H9.y + 3], [H9.x - 1, H9.y + 3]]) if (pieces.filter((p) => p.t === "o").length < 2 && fits(x, y, 1, 1, ice)) put3("o", x, y);
+        for (const [x, y] of [[H9.x + 3, H9.y + 3], [H9.x - 3, H9.y + 2], [H9.x + 4, H9.y - 1]]) if (!pieces.some((p) => p.t === "s") && fits(x, y, 2, 1, ice)) put3("s", x, y);
+        return seal(c, id, pieces);
+      }
+      const side = (s) => ({ x: root2.x + px * s, y: root2.y + py * s });
+      if (kind2 === "j") {
+        put3("q", root2.x + dx * len, root2.y + dy * len);
+        for (const s of [1, -1]) {
+          const q = side(s);
+          if (!pieces.some((p) => p.t === "z") && fits(q.x, q.y, 1, 1, open2)) put3("z", q.x, q.y);
+          else if (!pieces.some((p) => p.t === "c") && fits(q.x, q.y, 1, 1, open2)) put3("c", q.x, q.y);
+        }
+        near1("e", 2, 4);
+        return seal(c, id, pieces);
+      }
+      const boats = kind2 === "p" ? 1 : 2;
+      for (const [k, s] of [[2, 1], [3, -1], [3, 1], [2, -1]]) {
+        if (pieces.filter((p) => p.t === "b").length >= boats) break;
+        const x = root2.x + dx * k + px * s, y = root2.y + dy * k + py * s;
+        if (lake(x, y) && lake(x + px * s, y + py * s)) put3("b", x, y);
+      }
+      for (const s of [1, -1]) {
+        const q = side(s);
+        if (!pieces.some((p) => p.t === "l") && kind2 === "d" && fits(q.x, q.y, 1, 1, open2)) put3("l", q.x, q.y);
+        else if (!pieces.some((p) => p.t === "c") && fits(q.x, q.y, 1, 1, open2)) put3("c", q.x, q.y);
+      }
+      if (kind2 === "d") {
+        near1("h", 2, 5);
+        near1("n", 2, 6);
+        near1("r", 2, 6);
+      }
+      return seal(c, id, pieces);
+      function near1(t, lo, hi) {
+        const [w, hh] = SIZE[t];
+        let best = null, bs = 1e9;
+        for (let j = -hi; j <= hi; j++) for (let i = -hi; i <= hi; i++) {
+          const x = root2.x + i, y = root2.y + j, cxp = x + (w - 1) / 2, cyp = y + (hh - 1) / 2, d = Math.max(Math.abs(cxp - root2.x), Math.abs(cyp - root2.y)), ahead = (cxp - root2.x) * dx + (cyp - root2.y) * dy;
+          if (d < lo || d > hi || ahead > 0 || !fits(x, y, w, hh, open2)) continue;
+          let crowd = false;
+          for (let jj = -1; jj <= hh && !crowd; jj++) for (let ii = -1; ii <= w; ii++) if (used.has(x + ii + "," + (y + jj)) && pieces.some((p) => ii + x >= p.x && ii + x < p.x + SIZE[p.t][0] && jj + y >= p.y && jj + y < p.y + SIZE[p.t][1])) {
+            crowd = true;
+            break;
+          }
+          if (crowd) continue;
+          const s = Math.abs(d - (lo + 1)) * 4 + Math.abs(ahead) + (i * 7 + j * 3 & 3);
+          if (s < bs) {
+            bs = s;
+            best = { x, y };
+          }
+        }
+        if (best) put3(t, best.x, best.y);
+      }
+    }
+    function seal(c, id, pieces) {
+      const L2 = { id, kind: c.kind, biome: c.biome, dir: c.dir, len: c.len, root: c.root, deck: Array.from({ length: c.len }, (_, k) => ({ x: c.root.x + c.dx * (k + 1), y: c.root.y + c.dy * (k + 1) })), pieces: pieces.map((p) => ({ ...p, w: SIZE[p.t][0], h: SIZE[p.t][1] })) };
+      const xs = [L2.root.x, ...L2.deck.map((q) => q.x), ...L2.pieces.flatMap((p) => [p.x, p.x + p.w - 1])], ys = [L2.root.y, ...L2.deck.map((q) => q.y), ...L2.pieces.flatMap((p) => [p.y, p.y + p.h - 1])];
+      L2.box = { x0: Math.min(...xs) - 1, x1: Math.max(...xs) + 1, y0: Math.min(...ys) - 1, y1: Math.max(...ys) + 1 };
+      L2.detail = lakeLandingDetailV1(L2);
+      return Object.freeze(L2);
+    }
+  }
+  return Object.freeze({ tileAt, clearAt, blockers: blockers2, forChunk, count: () => basins.length });
+}
+
 // src/shared/generation/planned_world_chunks_v1.js
 var cellLevels = /* @__PURE__ */ new WeakMap();
 var cellLevelAt = (asset, x, y) => {
@@ -12977,9 +13202,19 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     for (const e of wilderness?.eventCapacities ?? []) for (const c of e.cells) if (forest.applies(c.x, c.y, "w")) for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) forestEvents.add(c.x + dx + "," + (c.y + dy));
   }
   const nature = createNaturalClusterSampler(asset.seedDigest), protection = createNaturalProtection(asset, { ruinFootprints: [...ruins, ...crypts].flatMap((r) => r.reservation.footprint) }), nativeCache = /* @__PURE__ */ new Map();
+  const landings = isSeededBindingV1(binding) ? createLakeLandingsV1({ asset, terrain: terrain2, routeAt, free: (x, y, q) => {
+    const ck = Math.floor(x / 32) + "," + Math.floor(y / 26);
+    return !protection.at(x, y) && !bridgeDecks.has(x + "," + y) && !ferryAt(x, y) && !ruinByChunk.has(ck) && !fortByChunk.has(ck) && !caveByChunk.has(ck) && !(hb && x >= hb.x - 2 && x < hb.x + hb.w + 2 && y >= hb.y - 2 && y < hb.y + hb.h + 2) && !(Math.abs(x - asset.spawnTile.x) <= 4 && Math.abs(y - asset.spawnTile.y) <= 4) && !(townTiles && townTiles(x, y, q).town) && !(villageTiles && villageTiles(x, y, q).town) && !(townsTiles && townsTiles(x, y, q).town);
+  } }) : null;
+  const landTile = (x, y, c) => {
+    const q = landings.tileAt(x, y);
+    if (!q) return c;
+    const { naturalKind, naturalClusterId, ...rest } = c;
+    return q.t === "deck" ? { ...rest, walkable: true, kind: "bridge", underlyingKind: "lake", pier: true, lakeLanding: true, collision: "1", material: q.L.dx ? "H" : "V", route: 1 } : { ...rest, collision: "2", lakeLanding: true };
+  };
   const standsClear = (x, y, b) => {
     const key9 = x + "," + y;
-    if (routeAt(x, y) > 0 || b.bank || b.kind === "shore" || protection.at(x, y) || branchTrails.has(key9) || eventClearings.has(key9) || Math.abs(x - asset.spawnTile.x) <= 3 && Math.abs(y - asset.spawnTile.y) <= 3) return true;
+    if (landings?.clearAt(x, y) || routeAt(x, y) > 0 || b.bank || b.kind === "shore" || protection.at(x, y) || branchTrails.has(key9) || eventClearings.has(key9) || Math.abs(x - asset.spawnTile.x) <= 3 && Math.abs(y - asset.spawnTile.y) <= 3) return true;
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (routeAt(x + dx, y + dy) || bridgeDecks.has(x + dx + "," + (y + dy)) || protection.at(x + dx, y + dy)) return true;
     return false;
   };
@@ -12992,9 +13227,10 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     const b = terrain2.base(x, y), deck = bridgeDecks.get(key9), route = routeAt(x, y);
     let result;
     if (deck) result = { ...b, walkable: true, kind: "bridge", underlyingKind: deck.underlyingKind, bridgeId: deck.id, collision: "1", material: deck.material, route: route || 1 };
+    else if (!b.walkable && landings && b.kind === "lake" && b.biome === "s") result = { ...b, walkable: true, frozen: true, collision: "1", material: "L", route: 0 };
     else if (!b.walkable) result = { ...b, collision: "2", material: b.kind === "ocean" ? "O" : b.kind === "lake" ? "L" : "W", route: 0 };
     else {
-      let clear = route > 0 || Boolean(forest?.applies(x, y, b.biome) && (forestEvents.has(key9) || branchTrails.has(key9))) || b.bank || b.kind === "shore" || protection.at(x, y) || Math.abs(x - asset.spawnTile.x) <= 3 && Math.abs(y - asset.spawnTile.y) <= 3;
+      let clear = route > 0 || Boolean(landings?.clearAt(x, y)) || Boolean(forest?.applies(x, y, b.biome) && (forestEvents.has(key9) || branchTrails.has(key9))) || b.bank || b.kind === "shore" || protection.at(x, y) || Math.abs(x - asset.spawnTile.x) <= 3 && Math.abs(y - asset.spawnTile.y) <= 3;
       for (let dy = -1; dy <= 1 && !clear; dy++) for (let dx = -1; dx <= 1; dx++) if (routeAt(x + dx, y + dy) || forest?.applies(x, y, b.biome) && branchTrails.has(x + dx + "," + (y + dy)) || bridgeDecks.has(x + dx + "," + (y + dy)) || protection.at(x + dx, y + dy)) {
         clear = true;
         break;
@@ -13016,12 +13252,12 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     return result;
   }
   const tile = (x, y) => {
-    const native = townTiles ? townTiles(x, y, originalTile(x, y)) : originalTile(x, y), village = villageTiles ? villageTiles(x, y, native) : native, harbored = harborTiles ? harborTiles(x, y, village) : village, b = townsTiles ? townsTiles(x, y, harbored) : harbored;
+    const native = townTiles ? townTiles(x, y, originalTile(x, y)) : originalTile(x, y), village = villageTiles ? villageTiles(x, y, native) : native, harbored = harborTiles ? harborTiles(x, y, village) : village, b0 = townsTiles ? townsTiles(x, y, harbored) : harbored, b = landings ? landTile(x, y, b0) : b0;
     const cave = caveByChunk.get(Math.floor(x / 32) + "," + Math.floor(y / 26));
     const fort = fortByChunk.get(Math.floor(x / 32) + "," + Math.floor(y / 26));
     const ruin = ruinByChunk.get(Math.floor(x / 32) + "," + Math.floor(y / 26));
     const built = ruin ? ruin.apply(x, y, b) : fort ? fort.apply(x, y, b) : cave ? cave.apply(x, y, b) : b, result = groveByRuin.get(ruin)?.apply(x, y, built) ?? built;
-    if (!wilderness || !result.walkable || result.caveExterior || result.fortExterior || result.ruinExterior || result.town || result.material === "H" || result.material === "V") return result;
+    if (!wilderness || !result.walkable || result.caveExterior || result.fortExterior || result.ruinExterior || result.town || result.lakeLanding || result.material === "H" || result.material === "V") return result;
     const id = x + "," + y, track = branchTrails.get(id), clearing = eventClearings.has(id);
     if (!track && !clearing) return result;
     if (result.route > 0 && result.material === "r") return result;
@@ -13079,7 +13315,7 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
       const b = tile(cx * 32 + x, cy * 26 + y);
       return !b.town && b.naturalKind === a.naturalKind && b.naturalClusterId === a.naturalClusterId && b.biome === a.biome;
     };
-    for (let y = 0; y < 26; y++) for (let x = 0; x < 32; x++) if (!(townBlockers.length && tile(cx * 32 + x, cy * 26 + y).town) && !fort?.inside(cx * 32 + x, cy * 26 + y) && !ruin?.ownsStructure(cx * 32 + x, cy * 26 + y) && collision2[y][x] === "2" && visual2[y][x] === "g" && !used.has(y * 32 + x)) {
+    for (let y = 0; y < 26; y++) for (let x = 0; x < 32; x++) if (!tile(cx * 32 + x, cy * 26 + y).lakeLanding && !(townBlockers.length && tile(cx * 32 + x, cy * 26 + y).town) && !fort?.inside(cx * 32 + x, cy * 26 + y) && !ruin?.ownsStructure(cx * 32 + x, cy * 26 + y) && collision2[y][x] === "2" && visual2[y][x] === "g" && !used.has(y * 32 + x)) {
       const a = tile(cx * 32 + x, cy * 26 + y);
       let w = 1, h = 1;
       while (matches(x + w, y, a)) w++;
@@ -13088,7 +13324,7 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
       blockers2.push({ id: "obstacle:" + sceneryIdentity.digest.slice(0, 16) + ":" + x + ":" + y, x, y, width: w, height: h, kind: a.naturalKind ?? (["r", "l", "d", "s"].includes(a.biome) ? "rock" : "thicket"), detail: "", ...a.naturalClusterId ? { naturalClusterId: a.naturalClusterId } : {} });
     }
     const originalArt = ruin ? ruin.presentation(cx, cy, reserved.siteId) : fort ? fort.presentation(cx, cy, reserved.siteId) : cave ? cave.presentation(cx, cy, reserved.siteId) : { blockers: [], decorations: [] }, caveArt = { ...originalArt, decorations: [...originalArt.decorations, ...groveByRuin.get(ruin)?.presentation(cx, cy) ?? []] };
-    blockers2.push(...townBlockers, ...caveArt.blockers);
+    blockers2.push(...townBlockers, ...caveArt.blockers, ...landings ? landings.blockers(cx, cy) : []);
     const c = terrain2.base(cx * 32 + 16, cy * 26 + 13), biome = asset.biomeIds.find((id) => id.endsWith(":" + Object.keys({ woodland: "w", grassland: "a", wetland: "m", upland: "r", desert: "d", frostland: "s", tropical: "t", volcanic: "l" }).find((k) => ({ woodland: "w", grassland: "a", wetland: "m", upland: "r", desert: "d", frostland: "s", tropical: "t", volcanic: "l" })[k] === c.biome)))?.replace("biome:", "") ?? "ocean";
     const edges = { north: { cells: collision2[0], terrain: visual2[0] }, south: { cells: collision2[25], terrain: visual2[25] }, west: { cells: collision2.map((r) => r[0]).join(""), terrain: visual2.map((r) => r[0]).join("") }, east: { cells: collision2.map((r) => r[31]).join(""), terrain: visual2.map((r) => r[31]).join("") } };
     const regularAnchors = packAnchors(cx, cy, identity.digest);
@@ -13473,23 +13709,23 @@ function createBuiltWorldStoreV1({ indexedDB, sha256 }) {
     const q = tx.objectStore(name).get(key9);
     q.onsuccess = () => done3(q.result ?? null);
   });
-  const describe = async (hash21) => HASH.test(hash21) ? info(await get(WORLDS, hash21)) : null, campaignWorld = async (campaignId) => (await get(CAMPAIGNS, campaignId))?.hash ?? null;
+  const describe = async (hash22) => HASH.test(hash22) ? info(await get(WORLDS, hash22)) : null, campaignWorld = async (campaignId) => (await get(CAMPAIGNS, campaignId))?.hash ?? null;
   return Object.freeze({
     // Keeps a world file the world maker built. Returns what a page needs to name it.
     async put(text) {
       if (typeof text !== "string") throw new TypeError("A built world is JSON text");
-      const bytes = new TextEncoder().encode(text), hash21 = bytesToHex(await sha256(bytes)), asset = JSON.parse(text);
-      const record2 = { hash: hash21, seed: String(asset.upstream?.seed ?? asset.seed), commitments: seededCommitmentsV1(asset), size: bytes.length, ...await pack(bytes) };
+      const bytes = new TextEncoder().encode(text), hash22 = bytesToHex(await sha256(bytes)), asset = JSON.parse(text);
+      const record2 = { hash: hash22, seed: String(asset.upstream?.seed ?? asset.seed), commitments: seededCommitmentsV1(asset), size: bytes.length, ...await pack(bytes) };
       await run([WORLDS], "readwrite", (tx) => {
-        tx.objectStore(WORLDS).put(record2, hash21);
+        tx.objectStore(WORLDS).put(record2, hash22);
       });
       return info(record2);
     },
     // The world's seed, commitments and size, or null when it isn't stored.
     info: describe,
     // The world file as text, or null when it isn't stored. The asset store checks its hash.
-    async read(hash21) {
-      const r = HASH.test(hash21) ? await get(WORLDS, hash21) : null;
+    async read(hash22) {
+      const r = HASH.test(hash22) ? await get(WORLDS, hash22) : null;
       if (!r) return null;
       try {
         return new TextDecoder("utf-8", { fatal: true }).decode(r.encoding === "gzip" ? await pipe(r.bytes, new DecompressionStream("gzip")) : r.bytes);
@@ -13498,11 +13734,11 @@ function createBuiltWorldStoreV1({ indexedDB, sha256 }) {
       }
     },
     // A seeded campaign names its world before the launcher points at it.
-    bindCampaign: (campaignId, hash21) => run([WORLDS, CAMPAIGNS], "readwrite", (tx, done3, fail) => {
-      const q = tx.objectStore(WORLDS).get(hash21);
+    bindCampaign: (campaignId, hash22) => run([WORLDS, CAMPAIGNS], "readwrite", (tx, done3, fail) => {
+      const q = tx.objectStore(WORLDS).get(hash22);
       q.onsuccess = () => {
         if (!q.result) fail(new Error("Seeded world missing"));
-        else tx.objectStore(CAMPAIGNS).put({ hash: hash21 }, campaignId);
+        else tx.objectStore(CAMPAIGNS).put({ hash: hash22 }, campaignId);
       };
     }),
     // The hash of the world a campaign plays on, or null for a campaign on today's map.
@@ -13510,9 +13746,9 @@ function createBuiltWorldStoreV1({ indexedDB, sha256 }) {
     // The world a start plays on: the one a resumed campaign was made on, or for a new campaign the
     // stored world it asks for. null is today's map; a named world that isn't stored is an error.
     async forStart({ resume = null, requested = null } = {}) {
-      const hash21 = resume ? await campaignWorld(resume.campaignId) : requested || null;
-      if (!hash21) return null;
-      const found = await describe(hash21);
+      const hash22 = resume ? await campaignWorld(resume.campaignId) : requested || null;
+      if (!hash22) return null;
+      const found = await describe(hash22);
       if (!found) throw new Error("Seeded world missing");
       return found;
     }
@@ -14008,7 +14244,7 @@ var SPORE_V2_POLICY = freezeWire({
 var isSporeV2 = (r) => [SPORE_V2, SPORE_V3, SPORE_V4, SPORE_V5].includes(r?.rulesVersion);
 var isSporePodV2 = (s, id, n) => isSporeV2(s.d9World?.worldEvents?.records[id]) && n >= 0 && n < 3;
 var layouts = /* @__PURE__ */ new WeakMap();
-var hash11 = (text) => {
+var hash12 = (text) => {
   let h = 2166136261;
   for (const c of text) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
   return h >>> 0;
@@ -14051,7 +14287,7 @@ function sporeTriangleV2(s, id) {
     for (const side of SPORE_V2_POLICY.triangleSidesPixels) {
       for (const [dx, dy] of offsets) {
         for (let turn = 0; turn < 12; turn++) {
-          const angle = (hash11(id) % 12 + turn) * Math.PI / 6, radius = side / Math.sqrt(3), pods = Array.from({ length: 3 }, (_, n) => ({ x: center2.x + dx + Math.cos(angle + n * 2 * Math.PI / 3) * radius, y: center2.y + dy + Math.sin(angle + n * 2 * Math.PI / 3) * radius }));
+          const angle = (hash12(id) % 12 + turn) * Math.PI / 6, radius = side / Math.sqrt(3), pods = Array.from({ length: 3 }, (_, n) => ({ x: center2.x + dx + Math.cos(angle + n * 2 * Math.PI / 3) * radius, y: center2.y + dy + Math.sin(angle + n * 2 * Math.PI / 3) * radius }));
           const open2 = pods.every((p) => p.x >= bounds.left && p.x <= bounds.right && p.y >= bounds.top && p.y <= bounds.bottom && !collidesWithTiles(c, p.x, p.y, 28) && Array.from({ length: 8 }, (_, n) => n * Math.PI / 4).every((a) => !collidesWithTiles(c, p.x + Math.cos(a) * SPORE_V2_POLICY.podClearancePixels, p.y + Math.sin(a) * SPORE_V2_POLICY.podClearancePixels, SPORE_V2_POLICY.playerHullPixels)));
           if (!open2 || !pods.every((p, n) => lineOpen(c, p, pods[(n + 1) % 3]))) continue;
           const mid = { x: pods.reduce((v, p) => v + p.x, 0) / 3, y: pods.reduce((v, p) => v + p.y, 0) / 3 };
@@ -16534,10 +16770,10 @@ function rewardProfileD9(progression, rank) {
 function rollContentReward(state, player, { sourceEntityId, rank, kind: kind2, ordinal, modifiers = null, progression = null, rewardClass = null }) {
   if (rewardClass !== null) requireContract([BOSS_COMPLETION_REWARD_CLASS, SITE_FINALE_ELITE_PACK_COMPLETION_REWARD_CLASS, SITE_FINALE_PROVISIONAL_COMPLETION_REWARD_CLASS].includes(rewardClass) && kind2 === "chest", "Unknown economic reward classification");
   if (modifiers) validateRewardModifiers(modifiers);
-  const occurrence = (hash21, chance, key10) => {
-    if (!modifiers || modifiers.occurrenceHundredths === 100) return hash21 % 100 < chance;
+  const occurrence = (hash22, chance, key10) => {
+    if (!modifiers || modifiers.occurrenceHundredths === 100) return hash22 % 100 < chance;
     const threshold = chance * modifiers.occurrenceHundredths, whole = Math.floor(threshold / 100);
-    return hash21 % 100 < whole || hash21 % 100 === whole && hashReward(key10 + "/d8-occurrence-fraction") % 100 < threshold % 100;
+    return hash22 % 100 < whole || hash22 % 100 === whole && hashReward(key10 + "/d8-occurrence-fraction") % 100 < threshold % 100;
   };
   const gold = (n) => !modifiers || modifiers.goldHundredths === 100 ? n : multiplyAmount(rewardAmount(n), `${Math.floor(modifiers.goldHundredths / 100)}.${String(modifiers.goldHundredths % 100).padStart(2, "0")}`.replace(/0+$/, "").replace(/\.$/, ""));
   const profile2 = progression?.version === D9_REWARD_PROGRESSION ? rewardProfileD9(progression, rank) : rewardProfile(rank), key9 = `d5-eco-v1/${state.campaign.seed.seedHex}/${player.playerId}/${sourceEntityId}`, roll = hashReward(key9 + "/branch") % 100, pool = REWARD_POOLS[Math.min(2, ["C", "B", "A", "S"].indexOf(rank))];
@@ -18259,7 +18495,7 @@ function validateOrdinaryRosterV2Progress(a, b) {
 }
 
 // src/shared/generation/world_combat_rooms_v1.js
-var hash12 = (s) => {
+var hash13 = (s) => {
   let h = 2166136261;
   for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0;
   return h;
@@ -18268,14 +18504,14 @@ var cache3 = /* @__PURE__ */ new Map();
 function populateCombatRooms(base, seed, family2, tier2, index, seeded2 = false) {
   const key9 = [seed, family2, tier2, index].join("/"), cacheKey = key9 + (seeded2 ? "/seeded" : "");
   if (cache3.has(cacheKey)) return cache3.get(cacheKey);
-  const rooms = base.graph.rooms.filter((r) => r.role !== "arrival"), ranked = rooms.map((r) => ({ r, n: hash12(WORLD_COMBAT_VERSION + key9 + r.roomId) })).sort((a, b) => a.n - b.n), chosen = ranked.slice(0, Math.min(WORLD_COMBAT_POLICY.floorPacks[tier2], rooms.length)), members = [], packs = [];
+  const rooms = base.graph.rooms.filter((r) => r.role !== "arrival"), ranked = rooms.map((r) => ({ r, n: hash13(WORLD_COMBAT_VERSION + key9 + r.roomId) })).sort((a, b) => a.n - b.n), chosen = ranked.slice(0, Math.min(WORLD_COMBAT_POLICY.floorPacks[tier2], rooms.length)), members = [], packs = [];
   const families = family2 === "cave" ? ["slime", "rust_nibbler", "gargoyle"] : family2 === "fort" ? ["animated_armor", "gargoyle", "golem"] : ["cursed_blade", "gargoyle", "rust_nibbler"];
   for (const [i, { r, n }] of chosen.entries()) {
     const count2 = 6 + n % 3, candidates = [];
     for (let dy = -r.ry + 2; dy <= r.ry - 2; dy++) for (let dx = -r.rx + 2; dx <= r.rx - 2; dx++) {
       const p = { x: (r.cx + dx) * 32 + 16, y: (r.cy + dy) * 32 + 16 };
       if (collidesWithTiles(base.collision, p.x, p.y, 14) || Math.hypot(p.x - base.entrance.x, p.y - base.entrance.y) < 192 || Math.hypot(p.x - base.stairAnchors.down.x, p.y - base.stairAnchors.down.y) < 64 || Math.hypot(p.x - base.reward.position.x, p.y - base.reward.position.y) < 48) continue;
-      candidates.push({ p, n: hash12(WORLD_COMBAT_VERSION + key9 + r.roomId + dx + "," + dy) });
+      candidates.push({ p, n: hash13(WORLD_COMBAT_VERSION + key9 + r.roomId + dx + "," + dy) });
     }
     candidates.sort((a, b) => a.n - b.n);
     const used = [];
@@ -18296,7 +18532,7 @@ function populateCombatRooms(base, seed, family2, tier2, index, seeded2 = false)
 }
 
 // src/shared/generation/multiroom_v1.js
-var hash13 = (s) => {
+var hash14 = (s) => {
   let n = 2166136261;
   for (const c of s) n = Math.imul(n ^ c.charCodeAt(0), 16777619) >>> 0;
   return n;
@@ -18305,7 +18541,7 @@ var key4 = (p) => p.x + "," + p.y;
 var dirs3 = [[0, -1], [1, 0], [0, 1], [-1, 0]];
 var point4 = (p) => ({ x: p.x * 32 + 16, y: p.y * 32 + 16 });
 function rng2(s) {
-  let n = hash13(s);
+  let n = hash14(s);
   return (max2) => {
     n = Math.imul(n, 1664525) + 1013904223 >>> 0;
     return n % max2;
@@ -18427,7 +18663,7 @@ function buildRecipe(seed, family2, tier2, index, seeded2 = false) {
     }
     const collision2 = { tileSize: 32, width: w, height: h, tiles: cells3.map((r) => r.join("")) }, arrival = point4({ x: rooms[start].cx, y: rooms[start].cy }), d = tileDistances(collision2, arrival), last = rooms[end], candidate = [];
     for (let y = last.cy - 3; y <= last.cy + 3; y++) for (let x = last.cx - 4; x <= last.cx + 4; x++) if (cells3[y]?.[x] === "1") candidate.push({ x, y, d: d[y * w + x] });
-    candidate.sort((a, b) => b.d - a.d || hash13(seed + "/" + index + "/" + a.x + "/" + a.y) - hash13(seed + "/" + index + "/" + b.x + "/" + b.y));
+    candidate.sort((a, b) => b.d - a.d || hash14(seed + "/" + index + "/" + a.x + "/" + a.y) - hash14(seed + "/" + index + "/" + b.x + "/" + b.y));
     const stair = candidate[roll(Math.min(8, candidate.length))];
     if (stair.d < MULTIROOM_POLICY.minimumStairRouteTiles) continue;
     const down = point4(stair), reward = point4({ x: last.cx + (stair.x >= last.cx ? -4 : 4), y: last.cy + 3 }), combatRooms = [end, ...rooms.map((_, i) => i).filter((i) => i !== start && i !== end && !optional.includes(i)).sort((a, b) => roomDepth.get(b) - roomDepth.get(a))].slice(0, 3), families = family2 === "cave" ? ["rust_nibbler", "gargoyle", "cursed_blade"] : family2 === "fort" ? index >= 2 ? ["golem", "rust_nibbler", "gargoyle"] : ["animated_armor", "gargoyle", "animated_armor"] : ["cursed_blade", "gargoyle", "rust_nibbler"];
@@ -18973,7 +19209,7 @@ function validateBrimstoneVolcanicRuinBindingV4(state, site, floor, index, a, b)
 }
 
 // src/shared/generation/ruin_family_v1.js
-var hash14 = (text) => {
+var hash15 = (text) => {
   let n = 2166136261;
   for (const c of text) n = Math.imul(n ^ c.charCodeAt(0), 16777619) >>> 0;
   return n;
@@ -18981,7 +19217,7 @@ var hash14 = (text) => {
 function ruinFloorRecipe(seed, tier2, index) {
   const f3 = RUIN_TIER_POLICY[tier2]?.floors[index];
   requireContract(f3, "Unimplemented Ruin tier/floor");
-  const [w, h] = f3.tiles, n = hash14(PLANNED_RUIN_VERSION + "/" + seed + "/" + index), cells3 = Array.from({ length: h }, (_, y) => Array.from({ length: w }, (_2, x) => x === 0 || y === 0 || x === w - 1 || y === h - 1 ? "0" : "1")), decorations3 = [], blockers2 = [], gap = 10 + n % 3;
+  const [w, h] = f3.tiles, n = hash15(PLANNED_RUIN_VERSION + "/" + seed + "/" + index), cells3 = Array.from({ length: h }, (_, y) => Array.from({ length: w }, (_2, x) => x === 0 || y === 0 || x === w - 1 || y === h - 1 ? "0" : "1")), decorations3 = [], blockers2 = [], gap = 10 + n % 3;
   const masonry = (x, y, width, height, kind2 = "ruin-collapsed-masonry") => {
     for (let yy = y; yy < y + height; yy++) for (let xx = x; xx < x + width; xx++) cells3[yy][xx] = "0";
     blockers2.push({ kind: kind2, x, y, width, height });
@@ -19007,7 +19243,7 @@ function ruinFloorLinks(tier2) {
 }
 
 // src/shared/generation/ruin_family_v2.js
-var hash15 = (text) => {
+var hash16 = (text) => {
   let n = 2166136261;
   for (const c of text) n = Math.imul(n ^ c.charCodeAt(0), 16777619) >>> 0;
   return n;
@@ -19016,7 +19252,7 @@ function ruinFloorRecipeV2(seed, tier2, index) {
   if (tier2 === "small" || tier2 === "standard") return ruinFloorRecipe(seed, tier2, index);
   const f3 = RUIN_TIER_POLICY_V2[tier2]?.floors[index];
   requireContract(f3, "Unknown Ruin V2 tier/floor");
-  const [w, h] = f3.tiles, n = hash15(PLANNED_RUIN_V2 + "/" + seed + "/" + tier2 + "/" + index), cells3 = Array.from({ length: h }, (_, y) => Array.from({ length: w }, (_2, x) => x === 0 || y === 0 || x === w - 1 || y === h - 1 ? "0" : "1")), blockers2 = [], decorations3 = [], rooms = [];
+  const [w, h] = f3.tiles, n = hash16(PLANNED_RUIN_V2 + "/" + seed + "/" + tier2 + "/" + index), cells3 = Array.from({ length: h }, (_, y) => Array.from({ length: w }, (_2, x) => x === 0 || y === 0 || x === w - 1 || y === h - 1 ? "0" : "1")), blockers2 = [], decorations3 = [], rooms = [];
   const masonry = (x, y, width, height, kind2 = "ruin-collapsed-masonry") => {
     for (let yy = y; yy < y + height; yy++) for (let xx = x; xx < x + width; xx++) cells3[yy][xx] = "0";
     blockers2.push({ kind: kind2, x, y, width, height });
@@ -23852,7 +24088,7 @@ function migrateForgeInventory(p) {
   inv.economy.legacyRewardIds = Object.keys(inv.rewardsByEntityId).sort();
   return inv;
 }
-function hash16(text) {
+function hash17(text) {
   let h = 2166136261;
   for (let i = 0; i < text.length; i++) {
     h ^= text.charCodeAt(i);
@@ -23862,7 +24098,7 @@ function hash16(text) {
 }
 function monsterSoulReward(state, p, entityId2) {
   const key9 = `d5-monster-soul-v1/${state.campaign.seed.seedHex}/${p.playerId}/${entityId2}`;
-  return hash16(key9 + "/eligible") % 100 < 45 ? 1 + hash16(key9 + "/quantity") % 2 : 0;
+  return hash17(key9 + "/eligible") % 100 < 45 ? 1 + hash17(key9 + "/quantity") % 2 : 0;
 }
 function validateForgeEconomy(p, state, validateCommand2) {
   const inv = p.inventory, e = inv.economy;
@@ -23971,7 +24207,7 @@ function initialInventory(p) {
   const item2 = ownedItem(p, "worn-sword", null);
   return { version: PLAYER_INVENTORY_VERSION, revision: 0, gold: 0, itemsById: { [item2.itemId]: item2 }, equipped: Object.fromEntries(EQUIPMENT_SLOTS.map((slot) => [slot, slot === "weapon" ? item2.itemId : null])), rewardsByEntityId: {}, lastEquipmentChange: null, topologyMigration: null };
 }
-function hash17(text) {
+function hash18(text) {
   let h = 2166136261;
   for (let i = 0; i < text.length; i++) {
     h ^= text.charCodeAt(i);
@@ -23986,7 +24222,7 @@ function defeatReward(state, p, enemy2, ordinal, rewardVersion = PLAYER_INVENTOR
   const level = group?.threatSnapshot?.levelsByEntityId[enemy2.entityId];
   safeInteger(level, 1, 50);
   safeInteger(ordinal, 1, 63);
-  const roll = hash17(`${canonicalStringify(state.campaign.seed)}/${p.playerId}/${enemy2.entityId}/${rewardVersion}`);
+  const roll = hash18(`${canonicalStringify(state.campaign.seed)}/${p.playerId}/${enemy2.entityId}/${rewardVersion}`);
   const gold = { sprout: 5, slime: 5, golem: 7 }[family2] * (rank + 1) + Math.floor((level - 1) / 5);
   const pool = REWARD_POOLS[Math.min(2, rank)], legacy = rewardVersion === "player-inventory-d4-v1", count2 = legacy ? 3 : 7;
   requireContract(legacy || rewardVersion === PLAYER_INVENTORY_VERSION, "Unknown reward policy");
@@ -24095,7 +24331,7 @@ function initialInventory2(p) {
   return { version: FORGE_INVENTORY_VERSION, economy: emptyEconomy(), revision: 0, gold: "0", goldAwardsByEntityId: {}, itemsById: { [item2.itemId]: item2 }, equipped: Object.fromEntries(EQUIPMENT_SLOTS.map((slot) => [slot, slot === "weapon" ? item2.itemId : null])), rewardsByEntityId: {}, lastEquipmentChange: null, topologyMigration: null };
 }
 var equipmentBonuses2 = equipmentBonuses;
-function hash18(text) {
+function hash19(text) {
   let h = 2166136261;
   for (let i = 0; i < text.length; i++) {
     h ^= text.charCodeAt(i);
@@ -24110,7 +24346,7 @@ function defeatReward2(state, p, enemy2, ordinal, rewardVersion = PLAYER_INVENTO
   const level = group?.threatSnapshot?.levelsByEntityId[enemy2.entityId];
   safeInteger(level, 1, 50);
   safeInteger(ordinal, 1, 63);
-  const roll = hash18(`${canonicalStringify(state.campaign.seed)}/${p.playerId}/${enemy2.entityId}/${rewardVersion}`);
+  const roll = hash19(`${canonicalStringify(state.campaign.seed)}/${p.playerId}/${enemy2.entityId}/${rewardVersion}`);
   const gold = { sprout: 5, slime: 5, golem: 7 }[family2] * (rank + 1) + Math.floor((level - 1) / 5);
   const pool = REWARD_POOLS[Math.min(2, rank)], legacy = rewardVersion === "player-inventory-d4-v1", count2 = legacy ? 3 : 7;
   requireContract(legacy || rewardVersion === PLAYER_INVENTORY_VERSION2, "Unknown reward policy");
@@ -26058,7 +26294,7 @@ var R = 8n;
 var W7 = BigInt(WOODLAND_CAVE_EXTERIOR.width);
 var H7 = BigInt(WOODLAND_CAVE_EXTERIOR.height);
 var T8 = 32;
-var hash19 = (text) => {
+var hash20 = (text) => {
   let n = 2166136261;
   for (const c of text) {
     n ^= c.charCodeAt(0);
@@ -26123,7 +26359,7 @@ async function planWoodlandCaveRegionD12_2({ seed, origin: origin2, regionX, reg
         const px = BigInt(p.tileX) + BigInt(p.width ?? 12) / 2n, py = BigInt(p.tileY) + BigInt(p.height ?? 9) / 2n;
         return Math.hypot(Number(left + W7 / 2n - px), Number(top + H7 / 2n - py));
       })) : Infinity;
-      candidates.push({ left, top, page, road: { x: cx * CW5 + x, y: cy * CH5 + y }, score: hash19(`${seed}/${regionX}/${regionY}/${left}/${top}`), nearDistance, direction: compass(left + W7 / 2n, top + H7 / 2n, centerX, centerY) });
+      candidates.push({ left, top, page, road: { x: cx * CW5 + x, y: cy * CH5 + y }, score: hash20(`${seed}/${regionX}/${regionY}/${left}/${top}`), nearDistance, direction: compass(left + W7 / 2n, top + H7 / 2n, centerX, centerY) });
     }
   }
   candidates.sort((a, b) => (guarantee ? a.nearDistance - b.nearDistance : 0) || a.score - b.score || (a.left < b.left ? -1 : a.left > b.left ? 1 : 0) || (a.top < b.top ? -1 : 1));
@@ -26147,7 +26383,7 @@ async function planWoodlandCaveRegionD12_2({ seed, origin: origin2, regionX, reg
   }
   return freezeWire({ version: "woodland-cave-region-plan-d12-2-v1", regionKey: woodlandCaveRegionKeyD12_2(regionX, regionY), regionName: region.name, count: parcels.length, parcels });
 }
-var variantFor2 = (siteId2, kind2) => hash19(siteId2 + "/" + kind2) % 3;
+var variantFor2 = (siteId2, kind2) => hash20(siteId2 + "/" + kind2) % 3;
 function overlayWoodlandCaveFamilyParcelsD12_2(chunk, parcels = []) {
   let next = chunk;
   for (const parcel2 of parcels) {
@@ -26567,7 +26803,7 @@ function equipmentBonuses3(p) {
   }
   return result;
 }
-function hash20(text) {
+function hash21(text) {
   let h = 2166136261;
   for (let i = 0; i < text.length; i++) {
     h ^= text.charCodeAt(i);
@@ -26582,7 +26818,7 @@ function defeatReward3(state, p, enemy2, ordinal) {
   const level = group?.threatSnapshot?.levelsByEntityId[enemy2.entityId];
   safeInteger(level, 1, 50);
   safeInteger(ordinal, 1, 63);
-  const roll = hash20(`${canonicalStringify(state.campaign.seed)}/${p.playerId}/${enemy2.entityId}/${PLAYER_INVENTORY_VERSION3}`);
+  const roll = hash21(`${canonicalStringify(state.campaign.seed)}/${p.playerId}/${enemy2.entityId}/${PLAYER_INVENTORY_VERSION3}`);
   const gold = { sprout: 5, slime: 5, golem: 7 }[family2] * (rank + 1) + Math.floor((level - 1) / 5);
   const definitionId = ordinal <= 3 ? REWARD_POOLS2[Math.min(2, rank)][ordinal - 1] : roll % 100 < 35 ? REWARD_POOLS2[Math.min(2, rank)][(roll >>> 8) % 3] : null;
   return { gold, definitionId };
@@ -32323,7 +32559,7 @@ async function openWorldSnapshotD9(publication, { sha256, readPage, generatePlan
 async function prepareD9OriginMigration(state, { sha256 }) {
   validateActivityState(state);
   requireContract(!state.d9World, "World already migrated");
-  const m = manifestForState(state), collision2 = compileBoundOverworld(state).collision, hash21 = bytesToHex(await hashBytes(utf8(canonicalStringify(m)), sha256)), overlay = originEgress(m, collision2, economicResources(state, m));
+  const m = manifestForState(state), collision2 = compileBoundOverworld(state).collision, hash22 = bytesToHex(await hashBytes(utf8(canonicalStringify(m)), sha256)), overlay = originEgress(m, collision2, economicResources(state, m));
   const positions = {};
   for (const a of Object.values(state.entitiesById)) if (a.residency.spaceInstanceId === state.overworldInstanceId) positions[a.entityId] = legacyWorldPosition(a.position);
   const next = copyWire(state);
@@ -32338,7 +32574,7 @@ async function prepareD9OriginMigration(state, { sha256 }) {
     aliases[id] = { chunkX: String(ch.origin.x / D9_PROFILE.chunkWidth), chunkY: String(ch.origin.y / D9_PROFILE.chunkHeight) };
   }
   const frames = [{ id: 0, chunkX: "0", chunkY: "0", offsetX: 0, offsetY: 0, playerIds: [], originBounds: { width: m.dimensions.width / D9_PROFILE.chunkWidth, height: m.dimensions.height / D9_PROFILE.chunkHeight } }];
-  next.d9World = { version: D9_ROOT_VERSION, profile: copyWire(D9_PROFILE), origin: { manifestHash: hash21, width: m.dimensions.width, height: m.dimensions.height, chunkAliases: aliases, egress: copyWire(overlay), resources: copyWire(economicResources(state, m)) }, positions, frame: { chunkX: "0", chunkY: "0" }, regionIndex: null, discoveryIndex: null, deadlineIndex: null, migration: { version: "origin-migration-d9-v1", tick: state.tick, sourceSaveRevision: state.campaign.saveRevision }, runtime: { revision: 0, frames: copyWire(frames), chunks: [], groups: [], resources: [] }, episodes: {}, functionalSitesById: {}, siteReservationsById: {} };
+  next.d9World = { version: D9_ROOT_VERSION, profile: copyWire(D9_PROFILE), origin: { manifestHash: hash22, width: m.dimensions.width, height: m.dimensions.height, chunkAliases: aliases, egress: copyWire(overlay), resources: copyWire(economicResources(state, m)) }, positions, frame: { chunkX: "0", chunkY: "0" }, regionIndex: null, discoveryIndex: null, deadlineIndex: null, migration: { version: "origin-migration-d9-v1", tick: state.tick, sourceSaveRevision: state.campaign.saveRevision }, runtime: { revision: 0, frames: copyWire(frames), chunks: [], groups: [], resources: [] }, episodes: {}, functionalSitesById: {}, siteReservationsById: {} };
   next.spacesByInstanceId[next.overworldInstanceId].collision = { version: D9_COLLISION_VERSION, tileSize: 32, width: 20480, height: 3328, origin: copyWire(applyOriginEgress(collision2, overlay)), frames: copyWire(frames), pages: [] };
   next.d9World.runtimePolicy = D9_RUNTIME_POLICY.version;
   next.d9World.navigation = emptyNavigationD9();
@@ -32357,7 +32593,7 @@ async function prepareD9OriginMigration(state, { sha256 }) {
     }
     next.d9World.navigation.pending.push(...rows3.values());
   }
-  next.d9World.content = historicalSiteContentD9(m, hash21);
+  next.d9World.content = historicalSiteContentD9(m, hash22);
   next.d9World.paging = emptyWorldPagingD9(next.session.playerIds);
   next.d9World.ownershipIndex = null;
   next.d9World.groundIndex = null;
