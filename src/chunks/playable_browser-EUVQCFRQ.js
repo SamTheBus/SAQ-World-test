@@ -123038,14 +123038,13 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
   const attackV2 = createAttackButtonV2({ document: document2, host: wheel.parentElement });
   const slots2 = [];
   for (let i = 0; i < WHEEL_SLOTS; i++) {
-    const b = el3("button", "skill-slot"), icon2 = el3("span", "skill-slot-icon"), sweep2 = el3("i", "skill-slot-sweep"), time3 = el3("b", "skill-slot-time"), key3 = el3("small", "skill-slot-key"), cost = el3("span", "skill-slot-cost");
+    const b = el3("button", "skill-slot"), icon2 = el3("span", "skill-slot-icon"), sweep2 = el3("i", "skill-slot-sweep"), time3 = el3("b", "skill-slot-time"), key3 = el3("small", "skill-slot-key");
     b.type = "button";
     b.dataset.slot = String(i + 1);
     b.dataset.gameplayHud = "";
-    cost.hidden = true;
-    b.append(sweep2, icon2, time3, key3, cost);
+    b.append(sweep2, icon2, time3, key3);
     wheel.append(b);
-    slots2.push({ b, icon: icon2, sweep: sweep2, time: time3, key: key3, cost, costPaint: "", paint: "" });
+    slots2.push({ b, icon: icon2, sweep: sweep2, time: time3, key: key3, paint: "" });
   }
   const listeners = [], listen = (t, type, fn, opts) => {
     t.addEventListener(type, fn, opts);
@@ -123325,12 +123324,6 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
       s.sweep.style.transform = `scaleY(${left && !arranging ? Math.min(1, left / total).toFixed(3) : 0})`;
       const label7 = left && !arranging ? (left / 60).toFixed(left >= 600 ? 0 : 1) : "";
       if (s.time.textContent !== label7) s.time.textContent = label7;
-      const cost = arranging ? 0 : costFor(heroClass, entry2), have = cost ? c?.skills?.free?.[entry2] ? cost : Math.min(cost, c?.skills?.pips?.n ?? 0) : 0, costKey = cost ? `${cost}/${have}` : "";
-      if (s.costPaint !== costKey) {
-        s.costPaint = costKey;
-        s.cost.hidden = !cost;
-        s.cost.innerHTML = cost ? Array.from({ length: cost }, (_, j) => `<i data-on="${j < have}"></i>`).join("") : "";
-      }
       s.b.disabled = !arranging && state2 === "locked";
     });
     const pipN = heroClass ? Math.min(PIPS_MAX, c?.skills?.pips?.n ?? 0) : 0, full = pipN >= PIPS_MAX, shape3 = PIP_SHAPES[heroClass?.id];
