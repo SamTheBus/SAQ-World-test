@@ -14501,7 +14501,10 @@ var ARACHNID_TREANT_D12_5A = freezeWire({
   telegraphTicks: 75,
   slam: { radius: 64, damage: { numerator: 18, denominator: 10 } },
   rootSnare: { impactRadius: 75, damage: { numerator: 13, denominator: 10 }, durationTicks: 132, movementMultiplier: { numerator: 2, denominator: 5 }, hazardDurationTicks: 300, hazardRadiusX: 75, hazardRadiusY: 33.75, statusId: "treant_root_snare" },
-  barkShield: { damageMultiplier: { numerator: 1, denominator: 10 }, summonCount: 3, cocoonRadius: 54, hatchTicks: 240, breakRecoveryTicks: 60 }
+  barkShield: { damageMultiplier: { numerator: 1, denominator: 10 }, summonCount: 3, cocoonRadius: 54, hatchTicks: 240, breakRecoveryTicks: 60 },
+  // Web Spit (Nov 12): while the bark shield holds, a small ring on the target every 3 s, then a
+  // silk glob lands and leaves a small slowing web. Small damage, to keep the hero moving.
+  webSpit: { radius: 30, firstDelayTicks: 60, intervalTicks: 180, telegraphTicks: 48, damage: { numerator: 4, denominator: 10 }, webDurationTicks: 180, webRadiusX: 30, webRadiusY: 13.5, movementMultiplier: { numerator: 2, denominator: 5 } }
 });
 
 // src/shared/content/spawn_levels_v1.js
@@ -19440,8 +19443,9 @@ function validateBossCombatD12_5A(state) {
   for (const [hazardId, hazard] of Object.entries(root2.hazardsById)) {
     closedRecord(hazard, ["version", "hazardId", "kind", "bossId", "sourceEntityId", "spaceInstanceId", "position", "createdTick", "expirationTick", "geometry", "movementMultiplier"]);
     const boss = root2.bossesByEntityId[hazard.sourceEntityId];
-    requireContract(hazard.version === BOSS_HAZARD_D12_5A_VERSION && hazard.hazardId === hazardId && hazard.kind === "treant_root_web" && boss?.bossId === hazard.bossId && state.spacesByInstanceId[hazard.spaceInstanceId] && validPoint(hazard.position) && hazard.expirationTick - hazard.createdTick === ARACHNID_TREANT_D12_5A.rootSnare.hazardDurationTicks && state.tick < hazard.expirationTick, "Invalid Treant web hazard");
-    requireContract(hazard.geometry.radiusX === 75 && hazard.geometry.radiusY === 33.75 && hazard.movementMultiplier === 0.4, "Invalid Treant web geometry");
+    const spit = ARACHNID_TREANT_D12_5A.webSpit, shape = hazard.kind === "treant_root_web" ? [ARACHNID_TREANT_D12_5A.rootSnare.hazardDurationTicks, 75, 33.75, 0.4] : hazard.kind === "treant_spit_web" ? [spit.webDurationTicks, spit.webRadiusX, spit.webRadiusY, 0.4] : hazard.kind === "treant_spit_warning" ? [spit.telegraphTicks + 1, spit.radius, spit.radius, 1] : null;
+    requireContract(shape && hazard.version === BOSS_HAZARD_D12_5A_VERSION && hazard.hazardId === hazardId && boss?.bossId === hazard.bossId && state.spacesByInstanceId[hazard.spaceInstanceId] && validPoint(hazard.position) && hazard.expirationTick - hazard.createdTick === shape[0] && state.tick < hazard.expirationTick, "Invalid Treant web hazard");
+    requireContract(hazard.geometry.radiusX === shape[1] && hazard.geometry.radiusY === shape[2] && hazard.movementMultiplier === shape[3], "Invalid Treant web geometry");
     safeInteger(hazard.createdTick, 0, state.tick);
     safeInteger(hazard.expirationTick, state.tick + 1);
   }
@@ -19485,8 +19489,9 @@ function projectBossHazardsD12_5A(state, spaceInstanceId) {
   const root2 = state.bossCombat;
   if (!root2) return freezeWire({ telegraphs: [], webs: [] });
   const telegraphs = Object.values(root2.bossesByEntityId).filter((row2) => row2.bossDefinitionId === ARACHNID_TREANT_BOSS_ID && state.entitiesById[row2.entityId]?.residency.spaceInstanceId === spaceInstanceId && row2.actionState === "telegraphing").sort((a, b) => a.bossId.localeCompare(b.bossId)).map((row2) => ({ bossId: row2.bossId, sourceEntityId: row2.entityId, ability: row2.activeAbility, position: copyWire(row2.targetPosition), startedTick: row2.telegraphStartedTick, resolvesTick: row2.resolvesTick, radius: row2.activeAbility === "slam" ? 64 : 75 }));
-  const webs = Object.values(root2.hazardsById).filter((row2) => row2.spaceInstanceId === spaceInstanceId).sort((a, b) => a.hazardId.localeCompare(b.hazardId)).map((row2) => ({ ...copyWire(row2), ageTicks: state.tick - row2.createdTick, remainingTicks: row2.expirationTick - state.tick }));
-  return freezeWire({ telegraphs, webs, ...projectAegisHazards(state, spaceInstanceId), ...projectBrimstoneHazards(state, spaceInstanceId), ...projectRecoveredHazardsV1(state, spaceInstanceId) });
+  const own3 = Object.values(root2.hazardsById).filter((row2) => row2.spaceInstanceId === spaceInstanceId).sort((a, b) => a.hazardId.localeCompare(b.hazardId)), webs = own3.filter((row2) => row2.kind !== "treant_spit_warning").map((row2) => ({ ...copyWire(row2), ageTicks: state.tick - row2.createdTick, remainingTicks: row2.expirationTick - state.tick }));
+  const spits = own3.filter((row2) => row2.kind === "treant_spit_warning").map((row2) => ({ bossId: row2.bossId, sourceEntityId: row2.sourceEntityId, from: copyWire(state.entitiesById[row2.sourceEntityId]?.position ?? row2.position), to: copyWire(row2.position), startedTick: row2.createdTick, resolvesTick: row2.createdTick + ARACHNID_TREANT_D12_5A.webSpit.telegraphTicks, radius: row2.geometry.radiusX }));
+  return freezeWire({ telegraphs, webs, ...spits.length ? { treantSpits: spits } : {}, ...projectAegisHazards(state, spaceInstanceId), ...projectBrimstoneHazards(state, spaceInstanceId), ...projectRecoveredHazardsV1(state, spaceInstanceId) });
 }
 
 // src/shared/content/site_family_runtime_d12_2.js
