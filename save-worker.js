@@ -6559,6 +6559,12 @@ var H2 = 160;
 var N = W2 * H2;
 var CODE = { woodland: "w", grassland: "a", wetland: "m", upland: "r", desert: "d", frostland: "s", tropical: "t", volcanic: "l" };
 
+// src/shared/generation/lake_hamlets_v1.js
+var LAKE_HAMLET_IDS = Object.freeze(["settlement-slot:village-outpost:11", "settlement-slot:village-outpost:12", "settlement-slot:village-outpost:13", "settlement-slot:village-outpost:14", "settlement-slot:village-outpost:15"]);
+var LAKE_HAMLET_BIOMES = Object.freeze(["grassland", "woodland", "desert", "frostland", "wetland", "tropical", "upland"]);
+var NAME_OF = Object.fromEntries(Object.entries(CODE).map(([k, v]) => [v, k]));
+var hyp2 = PM.hypot;
+
 // src/shared/generation/generated_towns_v1.js
 var GENERATED_TOWNS_VERSION = "generated-towns-v1";
 var STARTER_TOWN_ID_V1 = "settlement-slot:village-outpost:01";
@@ -6589,15 +6595,46 @@ var GENERATED_TOWN_SIZES = Object.freeze({
   "settlement-slot:town:10": "town",
   "settlement-slot:town:11": "town",
   // world-maker-v1.17: the Upland town, only where no other generated town stands in Upland.
-  "settlement-slot:town:12": "town"
+  "settlement-slot:town:12": "town",
+  // world-maker-v1.18: the lake hamlets (lake_hamlets_v1.js), laid out by the world maker on their lake's shore.
+  "settlement-slot:village-outpost:11": "hamlet",
+  "settlement-slot:village-outpost:12": "hamlet",
+  "settlement-slot:village-outpost:13": "hamlet",
+  "settlement-slot:village-outpost:14": "hamlet",
+  "settlement-slot:village-outpost:15": "hamlet"
 });
-var hyp2 = PM.hypot;
+var lakeMasks = /* @__PURE__ */ new WeakMap();
+function townLakeWaterV1(t) {
+  if (!t?.lake?.water) return null;
+  let m = lakeMasks.get(t);
+  if (!m) {
+    const [W9, H9] = t.core;
+    m = new Uint8Array(W9 * H9);
+    for (let y = 0; y < H9; y++) for (let x = 0; x < W9; x++) if (t.lake.water[y]?.[x] === "1") m[y * W9 + x] = 1;
+    lakeMasks.set(t, m);
+  }
+  return m;
+}
+function townLakePiecesV1(t) {
+  if (t.arch !== "lake") return [];
+  const out = [];
+  for (const f3 of t.features) {
+    if (["smokehouse", "rack", "nets", "beached", "namesign"].includes(f3.type)) out.push({ x: f3.x, y: f3.y, w: f3.w, h: f3.h });
+    if (f3.type === "well") out.push({ x: f3.x - 1, y: f3.y - 1, w: 2, h: 2 });
+    if (f3.type === "icecamp") {
+      out.push(f3.hut);
+      if (f3.sled) out.push(f3.sled);
+    }
+  }
+  return out;
+}
+var hyp3 = PM.hypot;
 var r3 = (v) => Math.round(v * 1e3) / 1e3;
 var segDist = (pts, x, y, closed = false) => {
   let best = 1e9;
   const n = pts.length;
   for (let i = closed ? 0 : 1; i < n; i++) {
-    const a = pts[i ? i - 1 : n - 1], b = pts[i], dx = b[0] - a[0], dy = b[1] - a[1], q = dx * dx + dy * dy, f3 = q ? Math.max(0, Math.min(1, ((x - a[0]) * dx + (y - a[1]) * dy) / q)) : 0, d = hyp2(x - a[0] - f3 * dx, y - a[1] - f3 * dy);
+    const a = pts[i ? i - 1 : n - 1], b = pts[i], dx = b[0] - a[0], dy = b[1] - a[1], q = dx * dx + dy * dy, f3 = q ? Math.max(0, Math.min(1, ((x - a[0]) * dx + (y - a[1]) * dy) / q)) : 0, d = hyp3(x - a[0] - f3 * dx, y - a[1] - f3 * dy);
     if (d < best) best = d;
   }
   return best;
@@ -6610,9 +6647,9 @@ function streetEnds(streets, W9, H9) {
     for (const end of [0, 1]) {
       const e = end ? pts[pts.length - 1] : pts[0];
       let k = end ? pts.length - 2 : 1;
-      while (k >= 0 && k < pts.length && hyp2(pts[k][0] - e[0], pts[k][1] - e[1]) < 0.01) k += end ? -1 : 1;
+      while (k >= 0 && k < pts.length && hyp3(pts[k][0] - e[0], pts[k][1] - e[1]) < 0.01) k += end ? -1 : 1;
       if (k < 0 || k >= pts.length) continue;
-      const p = pts[k], l = hyp2(e[0] - p[0], e[1] - p[1]), ux = (e[0] - p[0]) / l, uy = (e[1] - p[1]) / l;
+      const p = pts[k], l = hyp3(e[0] - p[0], e[1] - p[1]), ux = (e[0] - p[0]) / l, uy = (e[1] - p[1]) / l;
       const tx = ux > 1e-6 ? (W9 - e[0]) / ux : ux < -1e-6 ? -e[0] / ux : Infinity, ty = uy > 1e-6 ? (H9 - e[1]) / uy : uy < -1e-6 ? -e[1] / uy : Infinity, edge = Math.max(0, Math.min(tx, ty));
       if (edge <= 3.5) out.push({ e, ux, uy, w, edge });
     }
@@ -6647,12 +6684,12 @@ function segX(a, b, c, d) {
 }
 function townCrossingsV1(streets, line, closed = false) {
   const L2 = closed ? [...line, line[0]] : line, acc = [0];
-  for (let i = 1; i < L2.length; i++) acc.push(acc[i - 1] + hyp2(L2[i][0] - L2[i - 1][0], L2[i][1] - L2[i - 1][1]));
+  for (let i = 1; i < L2.length; i++) acc.push(acc[i - 1] + hyp3(L2[i][0] - L2[i - 1][0], L2[i][1] - L2[i - 1][1]));
   const out = [];
   for (const [pts, w] of streets) for (let i = 1; i < pts.length; i++) for (let k = 1; k < L2.length; k++) {
     const h = segX(pts[i - 1], pts[i], L2[k - 1], L2[k]);
     if (!h) continue;
-    const s = acc[k - 1] + h.j * (acc[k] - acc[k - 1]), o = out.find((o2) => hyp2(o2.x - h.x, o2.y - h.y) < Math.max(w, o2.w) + 1.5);
+    const s = acc[k - 1] + h.j * (acc[k] - acc[k - 1]), o = out.find((o2) => hyp3(o2.x - h.x, o2.y - h.y) < Math.max(w, o2.w) + 1.5);
     if (o) o.parts.push({ s, w, ang: h.ang });
     else out.push({ ...h, w, s, parts: [{ s, w, ang: h.ang }] });
   }
@@ -6783,6 +6820,12 @@ function townGridV1(t) {
     rectDo(b, 2);
     if (b.porch) rectDo(b.porch, 2);
   }
+  const lw = townLakeWaterV1(t);
+  if (lw) {
+    for (let i = 0; i < W9 * H9; i++) if (lw[i] && !G2[i]) G2[i] = 4;
+  }
+  for (const f3 of t.features) if (f3.type === "pier") rectDo(f3, 2);
+  for (const R2 of townLakePiecesV1(t)) rectDo(R2, 2);
   const keep = t.features.find((f3) => f3.type === "castle")?.keep;
   if (keep) rectDo(keep, 2);
   gridCache.set(t, G2);
@@ -6820,7 +6863,7 @@ function townStreetPlanV1(t) {
   const take = (x, y, w, h) => {
     for (let yy = y - 1; yy <= y + h; yy++) for (let xx = x - 1; xx <= x + w; xx++) if (xx >= 0 && yy >= 0 && xx < W9 && yy < H9) occ[yy * W9 + xx] = 9;
   };
-  const far = (x, y, d) => out.every((o) => hyp2(o.x - x, o.y - y) >= d);
+  const far = (x, y, d) => out.every((o) => hyp3(o.x - x, o.y - y) >= d);
   const put3 = (kind2, x, y, w, h, d = 3) => {
     if (!fit(x, y, w, h) || !far(x + w / 2, y + h, d)) return false;
     take(x, y, w, h);
@@ -6832,7 +6875,7 @@ function townStreetPlanV1(t) {
     if (w < 3) continue;
     let acc = 3.5, side = 1;
     for (let i = 1; i < pts.length; i++) {
-      const [ax, ay] = pts[i - 1], [bx, by] = pts[i], L2 = hyp2(bx - ax, by - ay);
+      const [ax, ay] = pts[i - 1], [bx, by] = pts[i], L2 = hyp3(bx - ax, by - ay);
       if (L2 < 1e-6) continue;
       const nx = -(by - ay) / L2, ny = (bx - ax) / L2;
       for (let d = 0; d < L2; d += 0.5) {
@@ -6856,7 +6899,7 @@ function townStreetPlanV1(t) {
     const ring = [];
     for (let y = Math.floor(by0 - 5); y <= by0 + bh + 5; y++) for (let x = Math.floor(bx0 - 5); x <= bx0 + bw + 5; x++) {
       const inside5 = x >= bx0 && x < bx0 + bw && y >= by0 && y < by0 + bh, behind = y < by0 && y > by0 - 4 && x >= bx0 - 1 && x <= bx0 + bw;
-      if (!inside5 && !behind) ring.push([x, y, hyp2((x - cx) / bw, (y - cy) / bh)]);
+      if (!inside5 && !behind) ring.push([x, y, hyp3((x - cx) / bw, (y - cy) / bh)]);
     }
     ring.sort((a, b) => a[2] - b[2] || a[1] - b[1] || a[0] - b[0]);
     const want = [["notice", 2, 1], ["bench", 2, 1], ["bench", 2, 1], ["tub", 1, 1], ["tub", 1, 1]];
@@ -6868,7 +6911,7 @@ function townStreetPlanV1(t) {
   for (const [pts, w] of t.streets) {
     for (let i = 2; i < pts.length - 1; i += 3) {
       if (r() < 0.55) continue;
-      const [x, y] = pts[i], [px, py] = pts[i - 1], L2 = hyp2(x - px, y - py) || 1, s = r() < 0.5 ? 1 : -1, o = w / 2 + 1.2, tx = Math.floor(x - (y - py) / L2 * o * s), ty = Math.floor(y + (x - px) / L2 * o * s);
+      const [x, y] = pts[i], [px, py] = pts[i - 1], L2 = hyp3(x - px, y - py) || 1, s = r() < 0.5 ? 1 : -1, o = w / 2 + 1.2, tx = Math.floor(x - (y - py) / L2 * o * s), ty = Math.floor(y + (x - px) / L2 * o * s);
       const k = ["tub", "barrels", "cart", "bench", "tub"][Math.floor(r() * 5)];
       if (!inC(tx, ty)) put3(k, tx, ty, k === "cart" ? 2 : 1, 1, 6);
     }
@@ -6901,7 +6944,7 @@ function townCastleYewsV1(f3) {
   return out;
 }
 var townFountainArtV1 = (t) => {
-  if (!townNewArtV1(t)) return [];
+  if (!townNewArtV1(t) || t.arch === "lake") return [];
   const zone = t.features.some((f3) => f3.type === "zone");
   return t.features.filter((f3) => f3.type === "plaza").map((f3) => ({ x: (f3.x + f3.w / 2) * 32, y: (f3.y + f3.h / 2) * 32 + 20, size: zone ? t.size === "capital" ? "capital" : "city" : t.size === "village" || t.size === "hamlet" ? "village" : "town" }));
 };
@@ -6960,7 +7003,7 @@ function townArtBlockersV1(t) {
         box3(bx - 18, fy - 8, bx + 18, fy + 10);
       }
       for (const st of t.features.filter((f3) => f3.type === "stalls")) for (const s of st.stalls) out.push({ x: s.x, y: p.y + p.h - 3, w: 3, h: 2 });
-    } else {
+    } else if (t.arch !== "lake") {
       const d = t.size === "village" || t.size === "hamlet" ? 80 : 104;
       for (const s of [-1, 1]) box3(fx + s * d - 18, fy - 6, fx + s * d + 18, fy + 12);
     }
@@ -7088,7 +7131,7 @@ function townTemplateV1(t) {
     buildings.push({ id: "b:900", kind: "civic", label: "Castle", x: k.x, y: k.y, w: k.w, h: k.h, doorSide: "south", doorPoint: [k.x + Math.floor(k.w / 2), k.y + k.h], porch: { x: k.x + Math.floor(k.w / 2) - 1, y: k.y + k.h, w: 3, h: 2 }, path: [], target: [k.x, k.y] });
   }
   const bare = townNewArtV1(t) && t.features.some((f3) => f3.type === "zone");
-  const places = [...plaza ? [["Square", { x: plaza.x, y: plaza.y, w: plaza.w, h: plaza.h }, "public", ...bare ? [{ bare: true }] : []]] : [], ...t.places.map(([n, R2, k], i) => [n + " " + (i + 1), R2, k]), ...t.features.filter((f3) => f3.type === "manor" && f3.garden && !f3.building).map((f3, i) => ["Castle garden " + (i + 1), f3.garden, "garden"])];
+  const places = [...plaza ? [["Square", { x: plaza.x, y: plaza.y, w: plaza.w, h: plaza.h }, "public", ...bare ? [{ bare: true }] : t.arch === "lake" ? [{ well: true }] : []]] : [], ...t.places.map(([n, R2, k], i) => [n + " " + (i + 1), R2, k]), ...t.features.filter((f3) => f3.type === "manor" && f3.garden && !f3.building).map((f3, i) => ["Castle garden " + (i + 1), f3.garden, "garden"])];
   m = { id: "generated:" + t.seed + ":" + t.id.replace("settlement-slot:", ""), core: [...t.core], streets: allStreets(t).map(([p, w]) => [p, w]), buildings, places };
   templates.set(t, m);
   return m;
@@ -7105,13 +7148,13 @@ function townPropsV1(t) {
   }
   for (const b of tp.buildings.filter((b2) => b2.kind === "service")) {
     const x = b.x - 1, y = b.y + b.h - 1;
-    if (x < 1 || y < 1 || x >= W9 - 1 || y >= H9 - 1 || tp.buildings.some((q) => x >= q.x && x < q.x + q.w && y >= q.y && y < q.y + q.h) || tp.buildings.some((q) => hyp2(q.porch.x + 1 - x, q.porch.y + 1 - y) < 3)) continue;
+    if (x < 1 || y < 1 || x >= W9 - 1 || y >= H9 - 1 || tp.buildings.some((q) => x >= q.x && x < q.x + q.w && y >= q.y && y < q.y + q.h) || tp.buildings.some((q) => hyp3(q.porch.x + 1 - x, q.porch.y + 1 - y) < 3)) continue;
     p.push({ id: b.id + ":barrel", x, y });
   }
   propCache.set(t, p);
   return p;
 }
-var townFountainsV1 = (t) => townTemplateV1(t).places.filter((p) => p[2] === "public").map(([, p]) => ({ x: Math.floor(p.x + (p.w - 1) / 2), y: Math.floor(p.y + (p.h - 1) / 2) }));
+var townFountainsV1 = (t) => t.arch === "lake" ? [] : townTemplateV1(t).places.filter((p) => p[2] === "public").map(([, p]) => ({ x: Math.floor(p.x + (p.w - 1) / 2), y: Math.floor(p.y + (p.h - 1) / 2) }));
 var rasters = /* @__PURE__ */ new WeakMap();
 function townRasterV1(t) {
   let R2 = rasters.get(t);
@@ -7127,6 +7170,15 @@ function townRasterV1(t) {
   }
   const w = x1 - x0, h = y1 - y0, mat = new Uint8Array(w * h), col = new Uint8Array(w * h), deck = new Uint8Array(w * h), deckId = new Uint8Array(w * h), water = new Uint8Array(w * h), idx = (x, y) => (y - y0) * w + (x - x0), inCore = (x, y) => x >= 0 && y >= 0 && x < W9 && y < H9, ok = (x, y) => x >= x0 && y >= y0 && x < x1 && y < y1;
   for (let y = 0; y < H9; y++) for (let x = 0; x < W9; x++) mat[idx(x, y)] = 1;
+  const lakeW = new Uint8Array(w * h), lw = townLakeWaterV1(t);
+  if (lw) {
+    for (let y = 0; y < H9; y++) for (let x = 0; x < W9; x++) if (lw[y * W9 + x]) {
+      const i = idx(x, y);
+      lakeW[i] = 1;
+      water[i] = 1;
+      col[i] = 1;
+    }
+  }
   const stroke = (pts, half, fn, closed = false) => {
     const n = pts.length;
     for (let i = closed ? 0 : 1; i < n; i++) {
@@ -7134,7 +7186,7 @@ function townRasterV1(t) {
       for (let y = Math.floor(Math.min(a[1], b[1]) - half - 1); y <= Math.ceil(Math.max(a[1], b[1]) + half + 1); y++) for (let x = Math.floor(Math.min(a[0], b[0]) - half - 1); x <= Math.ceil(Math.max(a[0], b[0]) + half + 1); x++) {
         if (!ok(x, y)) continue;
         const dx = b[0] - a[0], dy = b[1] - a[1], q = dx * dx + dy * dy, f3 = q ? Math.max(0, Math.min(1, ((x + 0.5 - a[0]) * dx + (y + 0.5 - a[1]) * dy) / q)) : 0;
-        if (hyp2(x + 0.5 - a[0] - f3 * dx, y + 0.5 - a[1] - f3 * dy) <= half) fn(x, y);
+        if (hyp3(x + 0.5 - a[0] - f3 * dx, y + 0.5 - a[1] - f3 * dy) <= half) fn(x, y);
       }
     }
   };
@@ -7149,7 +7201,7 @@ function townRasterV1(t) {
     const [a, b] = l.pts, dx = b[0] - a[0], dy = b[1] - a[1], q = dx * dx + dy * dy || 1;
     stroke(l.pts, l.w / 2, (x, y) => {
       const f3 = Math.max(0, Math.min(1, ((x + 0.5 - a[0]) * dx + (y + 0.5 - a[1]) * dy) / q)), half = l.w * laneWidthV1(l, f3 * l.run) / 2;
-      if (half >= 0.5 && hyp2(x + 0.5 - a[0] - f3 * dx, y + 0.5 - a[1] - f3 * dy) <= half && (mat[idx(x, y)] === 0 || mat[idx(x, y)] === 1)) mat[idx(x, y)] = 2;
+      if (half >= 0.5 && hyp3(x + 0.5 - a[0] - f3 * dx, y + 0.5 - a[1] - f3 * dy) <= half && (mat[idx(x, y)] === 0 || mat[idx(x, y)] === 1)) mat[idx(x, y)] = 2;
     });
   }
   for (const f3 of t.features) if (f3.type === "plaza") rectDo(f3, (x, y) => {
@@ -7163,7 +7215,7 @@ function townRasterV1(t) {
   });
   const onStreet = (x, y, pad) => streets.some(([pts, sw]) => segDist(pts, x + 0.5, y + 0.5) <= sw / 2 + pad);
   const RL = geo.river ? geo.river.pts : [], RA = [0];
-  for (let i = 1; i < RL.length; i++) RA.push(RA[i - 1] + hyp2(RL[i][0] - RL[i - 1][0], RL[i][1] - RL[i - 1][1]));
+  for (let i = 1; i < RL.length; i++) RA.push(RA[i - 1] + hyp3(RL[i][0] - RL[i - 1][0], RL[i][1] - RL[i - 1][1]));
   const riverAt = (s) => {
     let i = 1;
     while (i < RL.length - 1 && RA[i] < s) i++;
@@ -7176,7 +7228,7 @@ function townRasterV1(t) {
     const i = idx(x, y);
     let near = -1, nd = 1e9;
     if (crossers.some(([pts, sw]) => segDist(pts, x + 0.5, y + 0.5) <= sw / 2 + 0.3)) geo.river.bridges.forEach((b, k) => {
-      const d = hyp2(x + 0.5 - b.x, y + 0.5 - b.y);
+      const d = hyp3(x + 0.5 - b.x, y + 0.5 - b.y);
       if (d <= geo.river.w / 2 + b.w && d < nd && onAxis(k, x + 0.5, y + 0.5)) {
         nd = d;
         near = k;
@@ -7205,9 +7257,9 @@ function townRasterV1(t) {
       return Math.abs(dy) <= span2 - 1 && Math.abs(x + 0.5 - q.x) <= 2.5;
     };
     stroke(g.pts, 1.1, (x, y) => {
-      if (!g.gates.some((q) => gap(q, x, y) || hyp2(x + 0.5 - q.x, y + 0.5 - q.y) <= q.half + 0.4 && onStreet(x, y, 0.5))) col[idx(x, y)] = 1;
+      if (!g.gates.some((q) => gap(q, x, y) || hyp3(x + 0.5 - q.x, y + 0.5 - q.y) <= q.half + 0.4 && onStreet(x, y, 0.5))) col[idx(x, y)] = 1;
     }, closed);
-    for (const tw of g.towers) for (let y = Math.floor(tw.y - 2); y <= Math.ceil(tw.y + 2); y++) for (let x = Math.floor(tw.x - 2); x <= Math.ceil(tw.x + 2); x++) if (ok(x, y) && hyp2(x + 0.5 - tw.x, y + 0.5 - tw.y) <= 1.2) col[idx(x, y)] = 1;
+    for (const tw of g.towers) for (let y = Math.floor(tw.y - 2); y <= Math.ceil(tw.y + 2); y++) for (let x = Math.floor(tw.x - 2); x <= Math.ceil(tw.x + 2); x++) if (ok(x, y) && hyp3(x + 0.5 - tw.x, y + 0.5 - tw.y) <= 1.2) col[idx(x, y)] = 1;
   }
   for (const b of tp.buildings) rectDo(townSolidRectV1(t, b), (x, y) => {
     col[idx(x, y)] = 1;
@@ -7234,6 +7286,27 @@ function townRasterV1(t) {
   for (const f3 of townFountainsV1(t)) rectDo({ x: f3.x - 1, y: f3.y, w: 3, h: 2 }, (x, y) => {
     col[idx(x, y)] = 1;
   });
+  if (lw) {
+    let k = 0;
+    for (const f3 of t.features) if (f3.type === "pier") {
+      k++;
+      rectDo(f3, (x, y) => {
+        const i = idx(x, y);
+        if (!lakeW[i]) return;
+        deck[i] = 2;
+        deckId[i] = 200 + k;
+        mat[i] = 3;
+        col[i] = 0;
+        water[i] = 0;
+      });
+    }
+    for (const R3 of townLakePiecesV1(t)) rectDo(R3, (x, y) => {
+      col[idx(x, y)] = 1;
+    });
+    for (const f3 of t.features) if (f3.type === "stalls") for (const st of f3.stalls) rectDo({ x: st.x, y: st.y, w: 3, h: 2 }, (x, y) => {
+      col[idx(x, y)] = 1;
+    });
+  }
   for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) if (!inCore(x, y) && mat[idx(x, y)] !== 2) {
     mat[idx(x, y)] = 0;
     col[idx(x, y)] = 0;
@@ -7241,7 +7314,7 @@ function townRasterV1(t) {
     deckId[idx(x, y)] = 0;
     water[idx(x, y)] = 0;
   }
-  R2 = { x0, y0, w, h, mat, col, deck, deckId, water };
+  R2 = { x0, y0, w, h, mat, col, deck, deckId, water, lakeW };
   rasters.set(t, R2);
   return R2;
 }
@@ -7317,7 +7390,7 @@ function townStartV1(t) {
   let best = null, bd = 1e9;
   for (let y = 0; y < H9 - 1; y++) for (let x = 0; x < W9 - 1; x++) {
     if (!(open2(x, y) && open2(x + 1, y) && open2(x, y + 1) && open2(x + 1, y + 1))) continue;
-    const d = hyp2(x + 1 - aim[0], y + 1 - aim[1]);
+    const d = hyp3(x + 1 - aim[0], y + 1 - aim[1]);
     if (d < bd) {
       bd = d;
       best = [x, y];
@@ -7343,6 +7416,10 @@ function createGeneratedTownTiles(terrain2, towns) {
         if (b !== b0) return b;
         continue;
       }
+      if (R2.lakeW[i]) {
+        if (R2.deck[i]) return { ...b, walkable: true, kind: "bridge", underlyingKind: "lake", bridgeId: t.id + ":pier:" + R2.deckId[i], collision: "1", material: "V", route: 2, town: true, townBridge: true, pier: true };
+        return R2.col[i] && b.walkable ? { ...b, collision: "2", town: true } : b;
+      }
       if (!b.walkable) return b;
       const { naturalKind, naturalClusterId, ...rest } = b, material = MAT[m];
       if (R2.water[i]) return { ...rest, walkable: false, kind: "river", collision: "2", material: "W", route: 0, town: true };
@@ -7354,12 +7431,13 @@ function createGeneratedTownTiles(terrain2, towns) {
 }
 var TOWN_SHOP_ROLES = Object.freeze({ hamlet: ["general", "innkeeper"], village: ["general", "smith", "innkeeper"], town: ["general", "smith", "innkeeper", "enchanter"], city: ["general", "smith", "innkeeper", "enchanter"], capital: ["general", "smith", "innkeeper", "enchanter"] });
 var stationCache = /* @__PURE__ */ new WeakMap();
+var townShopRolesV1 = (t) => t.arch === "lake" ? ["general"] : TOWN_SHOP_ROLES[t.size] ?? [];
 function townStationsV1(t) {
   let out = stationCache.get(t);
   if (out) return out;
   out = [];
   stationCache.set(t, out);
-  const R2 = townRasterV1(t), o = t.origin, art = townNewArtV1(t), roles = TOWN_SHOP_ROLES[t.size] ?? [], F = (type) => t.features.find((f3) => f3.type === type);
+  const R2 = townRasterV1(t), o = t.origin, art = townNewArtV1(t), roles = townShopRolesV1(t), F = (type) => t.features.find((f3) => f3.type === type);
   const free = (x, y) => {
     if (x < R2.x0 || y < R2.y0 || x >= R2.x0 + R2.w || y >= R2.y0 + R2.h) return false;
     const i = (y - R2.y0) * R2.w + (x - R2.x0);
@@ -7736,17 +7814,25 @@ for (const role of Object.keys(CAST_KITS)) {
   for (const [slot] of UPLAND_SPOTS) KIT_OF[slot + "|" + role] = ks2[rng("upland-kits|" + slot + "|" + role)() * ks2.length | 0];
 }
 SPOTS.push(...UPLAND_SPOTS);
+var LAKE_SPOTS = ["village-outpost:11", "village-outpost:12", "village-outpost:13", "village-outpost:14", "village-outpost:15"].map((s) => [s, "lake"]);
+{
+  const ks2 = Object.keys(CAST_KITS.general);
+  shuffled("lake-kits|general", LAKE_SPOTS.map((s) => s[0])).forEach((slot, i) => {
+    KIT_OF[slot + "|general"] = ks2[i % ks2.length];
+  });
+}
+SPOTS.push(...LAKE_SPOTS);
 var ISLAND_NAMES = [
   ["Anselm", "Baldric", "Cedric", "Darrow", "Elric", "Fergus", "Grady", "Holt", "Ingram", "Jory", "Kester", "Leof", "Morgan", "Niall", "Oswin", "Piers", "Radley", "Stellan", "Tobias", "Ulf"],
   ["Alys", "Bryony", "Cressida", "Delphine", "Eira", "Fern", "Gwen", "Hollis", "Isolde", "Jessamy", "Kerensa", "Lark", "Merry", "Nerys", "Orla", "Primrose", "Rhosyn", "Saffron", "Tilda", "Wynne"]
 ];
-var ISLAND_SLOTS = new Set([...ISLAND_SPOTS, ...UPLAND_SPOTS].map((s) => s[0]));
+var ISLAND_SLOTS = new Set([...ISLAND_SPOTS, ...UPLAND_SPOTS, ...LAKE_SPOTS].map((s) => s[0]));
 var CAST = {};
 {
   const used = /* @__PURE__ */ new Set(["Ada", "Bren", "Mara", "Selene", "Ila", "Nell", "Oren"]);
   for (const [slot, size] of SPOTS) {
     const out = {};
-    for (const role of size === "village" ? ["general", "smith", "innkeeper"] : ["general", "smith", "innkeeper", "enchanter"]) {
+    for (const role of size === "lake" ? ["general"] : size === "village" ? ["general", "smith", "innkeeper"] : ["general", "smith", "innkeeper", "enchanter"]) {
       const r = rng(slot + "|" + role), kit = KIT_OF[slot + "|" + role], K = CAST_KITS[role][kit];
       const beard = pick2(r, K.beard), look = { hair: pick2(r, K.hair), facialHair: beard, hairColor: K.old ? pick2(r, OLD) : pick2(r, COLORS), skin: pick2(r, SKINS) };
       const [bearded, smooth2] = ISLAND_SLOTS.has(slot) ? ISLAND_NAMES : [BEARDED, SMOOTH];
@@ -7790,7 +7876,7 @@ function generatedTownNpcsV1() {
     const cast = CAST[t.id];
     if (!cast) return [];
     const band = settlementV1(t.id)?.band ?? 1;
-    return townStationsV1(t).filter((s) => cast[s.role] && (TOWN_SHOP_ROLES[t.size] ?? []).includes(s.role)).map((s) => {
+    return townStationsV1(t).filter((s) => cast[s.role] && townShopRolesV1(t).includes(s.role)).map((s) => {
       const c = cast[s.role], n = { id: `civilian:seeded:${t.id.slice("settlement-slot:".length)}:${s.role}`, name: c.name, role: s.role, roleLabel: ROLE_LABEL[s.role], settlementId: t.id, buildingId: t.id + ":" + (s.building ?? s.role), band, tile: { x: s.x, y: s.y }, space: "exterior", color: c.cloth, facing: s.facing, townSize: t.size };
       if (s.reach) n.reach = s.reach;
       const e = townStationInsideV1(t, s);
@@ -9581,7 +9667,10 @@ function propsFor(t) {
 var fountainCache = /* @__PURE__ */ new WeakMap();
 function fountainsFor(t) {
   if (fountainCache.has(t)) return fountainCache.get(t);
-  const list2 = t.places.filter((p) => p[2] === "public").map(([, p]) => ({ x: Math.floor(p.x + (p.w - 1) / 2), y: Math.floor(p.y + (p.h - 1) / 2) }));
+  const list2 = t.places.filter(
+    (p) => p[2] === "public" && !p[3]?.well
+    /* a lake hamlet's square has its well */
+  ).map(([, p]) => ({ x: Math.floor(p.x + (p.w - 1) / 2), y: Math.floor(p.y + (p.h - 1) / 2) }));
   fountainCache.set(t, list2);
   return list2;
 }
@@ -10025,7 +10114,7 @@ function validateRuntimePlan(p) {
     for (const b of w.bridgeGuards) requirePlan(Object.keys(b).sort().join(",") === "x1,x2,y1,y2" && Object.values(b).every(Number.isSafeInteger) && b.x1 <= b.x2 && b.y1 <= b.y2 && b.x2 - b.x1 <= 20 && b.y2 - b.y1 <= 20, "Invalid immutable bridge guard");
   }
   requirePlan(p.scale.tilePixels === 32 && p.scale.chunkTilesX === 32 && p.scale.chunkTilesY === 26 && p.scale.macroTilesX === 64 && p.scale.macroTilesY === 52, "Planned spatial scale");
-  requirePlan(p.settlements.length >= 20 && p.settlements.length <= 28 && p.sites.length === (p.firstJourney ? 125 : p.wildernessExtension ? 124 : p.populationOverlay ? 51 : 48) && p.futureIslands.length === 6 && p.factions.length === 3 && p.stonewatch.candidateCount > 0, "Incomplete planned reservations");
+  requirePlan(p.settlements.length >= 20 && p.settlements.length <= 33 && p.sites.length === (p.firstJourney ? 125 : p.wildernessExtension ? 124 : p.populationOverlay ? 51 : 48) && p.futureIslands.length === 6 && p.factions.length === 3 && p.stonewatch.candidateCount > 0, "Incomplete planned reservations");
   if (p.worldReshape) requirePlan(p.worldReshape.version === RESHAPE_VERSION && p.worldReshape.hash === RESHAPE_HASH && p.firstJourney && p.assetId === "alpha", "Uncommitted world reshape");
   if (p.firstJourney) requirePlan(p.firstJourney.version === ACCESS_VERSION && p.firstJourney.hash === ACCESS_HASH && p.wildernessExtension && p.hydrologyPlan && p.assetId === "alpha" && p.sites.filter((s) => s.id === "repeatable-slot:cave:woodland:small:109").length === 1, "Uncommitted first journey");
   if (p.wildernessExtension) requirePlan(p.wildernessExtension.version === WILDERNESS_VERSION && p.wildernessExtension.hash === WILDERNESS_HASH && p.assetId === "alpha", "Uncommitted wilderness extension");
@@ -12923,7 +13012,8 @@ function lakeLandingDetailV1(L2) {
   return [L2.kind, L2.biome, L2.dir, L2.len, L2.pieces.map((p) => p.t + ":" + (p.x - L2.root.x) + "," + (p.y - L2.root.y)).join(";")].join("|");
 }
 function createLakeLandingsV1({ asset, terrain: terrain2, routeAt, free }) {
-  const basins = (asset?.hydrologyPlan?.basins ?? []).filter((b) => b?.bounds && (b.kind === "lake" || b.kind === "pond"));
+  const hamlets = new Set((Array.isArray(asset?.generatedTowns?.towns) ? asset.generatedTowns.towns : []).map((t) => t?.lake?.basin).filter(Boolean));
+  const basins = (asset?.hydrologyPlan?.basins ?? []).filter((b) => b?.bounds && (b.kind === "lake" || b.kind === "pond") && !hamlets.has(b.id));
   const near = /* @__PURE__ */ new Map();
   for (const b of basins) {
     const m = 10, x0 = Math.floor((b.bounds.x - m) / 32), x1 = Math.floor((b.bounds.x + b.bounds.width + m) / 32), y0 = Math.floor((b.bounds.y - m) / 26), y1 = Math.floor((b.bounds.y + b.bounds.height + m) / 26);
@@ -13396,7 +13486,7 @@ function validateMapKnowledge(k) {
   closedRecord(k, ["version", "assetHash", "revision", "settlements", "visited", "rumors", "journal"]);
   requireContract(k.version === MAP_KNOWLEDGE_VERSION && /^[a-f0-9]{64}$/.test(k.assetHash), "Map knowledge version/commitment");
   safeInteger(k.revision);
-  requireContract(Array.isArray(k.settlements) && k.settlements.length >= 20 && k.settlements.length <= 28, "Settlement map catalog");
+  requireContract(Array.isArray(k.settlements) && k.settlements.length >= 20 && k.settlements.length <= 33, "Settlement map catalog");
   const ids = /* @__PURE__ */ new Set();
   for (const s of k.settlements) {
     closedRecord(s, ["id", "kind", "class", "label", "x", "y", "band", "built"]);
