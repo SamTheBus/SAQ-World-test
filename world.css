@@ -63,16 +63,6 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; user-sel
 #world-level-up[hidden] { display:none; }
 
 /* D3-R participant-local recovery; the world and top HUD remain visible. */
-#world-death {width:min(360px,calc(100% - 32px - var(--world-safe-left) - var(--world-safe-right)));text-align:center;}
-#world-death[hidden] {display:none;}
-#world-death h2 {letter-spacing:.08em;}
-#world-death p {margin:8px 0;font-size:13px;}
-#world-death .death-policy {color:#a8dac4;font-weight:600;}
-#world-death #world-death-anchor {color:#a2b3c7;font-size:12px;}
-#world-respawn {min-height:48px;min-width:160px;margin-top:6px;border-color:#e5bd69;background:#344b60;font-weight:700;font-size:16px;}
-#world-respawn:disabled {opacity:.55;}
-#world-death-status:empty {display:none;}
-@media(max-height:450px) {#world-death {padding:12px 16px;}#world-death p {margin:5px 0;}#world-death h2 {margin-bottom:5px;}}
 
 /* D4-R: Dungeon profile framing and vector equipment in a World-native layout. */
 #world-bag,#world-pickup {position:absolute;z-index:8;min-height:48px;border:1px solid #8c6d3b;background:linear-gradient(#241a32,#100b18);color:#fef08a;font-family:Georgia,'Times New Roman',serif;font-weight:700;box-shadow:inset 0 0 8px #0008,0 3px 10px #0005;}
@@ -512,10 +502,6 @@ body #ferry-destinations{padding:25px!important;}
 body #ferry-destinations h2{font:26px var(--rpg-title);font-weight:400;color:#ecd9b3;margin:0 0 12px;}
 body #ferry-destinations p{font:13px/1.6 var(--rpg-ui);color:#b6c4cb;}
 body .chart-toast{background:#1e2d36;border:1px solid #a18c61;border-radius:3px;color:#e6d7bb;box-shadow:0 5px 18px #0005;font:13px var(--rpg-ui);}
-body #world-death{padding:30px;z-index:80;}
-body #world-death h2{font-size:30px;letter-spacing:.18em;color:#d0a49b;}
-body #world-death .death-policy{font-weight:500;color:#b0c6b1;}
-body #world-respawn{background:linear-gradient(#576057,#303c3c);border-color:#b39c70;color:#efe1c1;}
 body #world-hud-vitals.saq-critical-health-v3{border-color:#d07072;box-shadow:inset 0 0 0 3px #182029,0 0 12px #a13d4240;}
 @media(hover:hover) and (pointer:fine){body #world-inventory button:hover,body #settlement-services button:hover,body #local-world-controls button:hover,body .chart-atlas button:hover{background:#394b58;border-color:#c3ab7c;}body #world-bag:hover,body #carried-rations:hover{border-color:#f0d49c!important;background:#34434ef5!important;}}
 @media(max-width:1100px){body #world-hud-title{top:calc(138px + var(--world-safe-top));left:calc(20px + var(--world-safe-left));transform:none;align-items:flex-start;text-align:left;background:linear-gradient(90deg,#101820c4,transparent);width:auto;max-width:calc(100vw - 240px);padding:7px 12px;border-left:1px solid #a18a5b88;}body #world-hud-title strong{display:none;}body #space-label{font-size:14px;}body #world-hud-movement{right:calc(98px + var(--world-safe-right));}body #world-event-hud-v3,body #woodland-clue-v3-8{top:calc(214px + var(--world-safe-top));}}
@@ -728,20 +714,37 @@ body #world-hud-vitals{border:1px solid #a69470;box-shadow:0 0 0 2px #101922,0 3
 body #world-hud-vitals.saq-critical-health-v3{border:1px solid #d47d7d;box-shadow:0 0 0 2px #201922,0 3px 8px #0004;}
 body #world-xp-bar{border-radius:2px;box-shadow:0 0 0 1px #7faba8,0 0 0 2px #101922;}
 html[data-defeated=true] [data-gameplay-hud],html[data-defeated=true] .chart-mini{pointer-events:none!important;}
-body #world-death{width:min(380px,calc(100% - 32px));padding:26px 28px 24px;isolation:isolate;border-color:#a68e69!important;background:linear-gradient(155deg,#26343f,#141e29 70%)!important;box-shadow:0 16px 50px #0009,inset 0 0 0 4px #101821,inset 0 0 0 5px #786a4b55!important;}
-body #world-death .death-emblem{display:block;color:#d58679;font-size:28px;line-height:36px;text-shadow:0 2px #090e16;}
-body #world-death .death-eyebrow{display:block;color:#a4b6bf;font:600 9px var(--rpg-ui);letter-spacing:.2em;margin:7px 0 12px;}
-body #world-death h2{font:34px var(--rpg-title);letter-spacing:.06em;color:#f1d2be;margin:0 0 8px;}
-body #world-death .death-intro{font-size:12px;color:#b9c5cb;margin-bottom:20px;}
-body #world-death #world-death-level{color:#e5d9bf;font-weight:700;}
-body #world-death #world-death-xp{font-size:11px;color:#a9bec6;}
-body #world-death .death-policy{display:block;padding:9px 0;margin:16px 0;border-block:1px solid #64716e66;color:#bed6b6;font:600 11px var(--rpg-ui);}
-body #world-death #world-death-anchor{font-size:12px;color:#ded3bd;margin:14px 0;}
-body #world-death #world-respawn{display:block;width:100%;min-height:46px;border:1px solid #bd9b67;background:linear-gradient(#65533d,#403b32);color:#fff0d1;letter-spacing:.05em;}
-body #world-death #world-respawn:focus-visible{outline:2px solid #f0d69e;outline-offset:3px;}
-body #world-death #world-death-download{margin:12px 0 0;background:none;border:0;min-height:32px;font-size:10px;color:#a7b9c3;text-decoration:underline;}
-body #world-death button:disabled{opacity:.5;}
-@media(max-height:500px){body #world-death{padding:14px 24px;}body #world-death .death-emblem,body #world-death .death-intro{display:none;}body #world-death h2{font-size:27px;}body #world-death .death-eyebrow{margin:2px 0 6px;}body #world-death p{margin:6px 0;}body #world-death .death-policy{padding:6px 0;margin:8px 0;}}
+/* The death screen (death + respawn plan, 2026-11-12): "You died" low on the screen over a gray world, the killer's card and one Respawn button. */
+#world-view.world-down{filter:grayscale(.85);}
+body #world-death{position:absolute;inset:0;z-index:80;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:0 max(16px,var(--world-safe-right)) calc(44px + var(--world-safe-bottom)) max(16px,var(--world-safe-left));box-sizing:border-box;color:#eee7d9;font:13px/1.35 var(--rpg-ui,"Segoe UI"),system-ui,sans-serif;text-align:center;}
+body #world-death[hidden]{display:none;}
+#world-death .ds{display:grid;justify-items:center;gap:10px;width:min(660px,100%);}
+#world-death .ds-title{margin:0;font:400 66px/1 Georgia,"Times New Roman",serif;letter-spacing:.14em;padding-left:.14em;text-transform:uppercase;color:#d8524c;text-shadow:0 3px 0 #2a0b0a,0 0 2px #2a0b0a;}
+#world-death .ds-orn{display:flex;align-items:center;gap:10px;width:min(320px,70%);color:#c9ad7a;}
+#world-death .ds-orn i{flex:1;height:1px;background:linear-gradient(90deg,transparent,#c9ad7a);}#world-death .ds-orn i:last-child{background:linear-gradient(90deg,#c9ad7a,transparent);}#world-death .ds-orn b{font-size:11px;line-height:1;}
+#world-death .dcard{display:flex;align-items:center;justify-content:center;gap:16px;box-sizing:border-box;width:100%;padding:12px 14px;border:1px solid #a68e69;border-radius:8px;background:linear-gradient(155deg,#26343f,#141e29 70%);box-shadow:0 10px 30px #0008,inset 0 0 0 3px #101821,inset 0 0 0 4px #786a4b55;text-align:left;}
+#world-death .killer{display:flex;align-items:center;gap:12px;flex:1;min-width:0;}#world-death .killer[hidden]{display:none;}
+#world-death canvas.pt{width:64px;height:64px;flex:none;border-radius:50%;box-shadow:0 0 0 2px #0a0d12,0 0 0 4px var(--ring,#b8c0c6),0 0 0 5px #0a0d12;}
+#world-death .killer small{display:block;color:#9fb0b9;font:600 10px var(--rpg-ui,"Segoe UI"),system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase;}
+#world-death .killer b{display:block;font:700 18px/1.2 Georgia,serif;color:var(--ring,#b8c0c6);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#world-death .killer .mv{display:flex;align-items:baseline;flex-wrap:wrap;gap:0 8px;color:#c9d2d6;font-size:13px;}
+#world-death .dmg{font:800 21px/1 "Baloo 2",system-ui,sans-serif;color:#ff6b5e;-webkit-text-stroke:3px #1a0a0a;paint-order:stroke fill;font-style:normal;}
+#world-death .act{display:grid;gap:3px;justify-items:center;width:300px;flex:none;}
+body #world-death .go{position:relative;overflow:hidden;width:100%;min-height:48px;height:48px;display:flex;align-items:center;justify-content:center;gap:9px;margin:0;padding:0 10px;border:1px solid #8a7656;border-radius:6px;background:linear-gradient(#433a30,#2a2621);color:#cfc3ab;box-shadow:none;font:700 15px var(--rpg-ui,"Segoe UI"),system-ui,sans-serif;letter-spacing:.03em;white-space:nowrap;}
+#world-death .go .fill{position:absolute;left:0;top:0;bottom:0;width:calc(var(--wake,1) * 100%);background:linear-gradient(#7a6446,#4c4234);}
+#world-death .go .lbl,#world-death .go kbd{position:relative;}#world-death .go .lbl{min-width:0;overflow:hidden;text-overflow:ellipsis;}
+body #world-death .go.awake{border-color:#e2c27e;color:#fff4dc;box-shadow:0 0 0 1px #2a2218,0 0 14px #e2c27e55;}
+body #world-death .go:focus-visible{outline:2px solid #f0d69e;outline-offset:3px;}
+body #world-death .go:disabled{opacity:.5;}
+#world-death .go kbd{font:700 11px var(--rpg-ui,"Segoe UI"),system-ui,sans-serif;padding:2px 6px;border-radius:4px;border:1px solid #c9ad7a;color:#f3e3c2;background:#1b1712;}
+body #world-death #world-death-download{min-height:28px;margin:0;padding:3px 8px;border:0;background:none;box-shadow:none;color:#a9b6bd;font:600 11px var(--rpg-ui,"Segoe UI"),system-ui,sans-serif;text-decoration:underline;text-underline-offset:3px;}
+#world-death .rev{width:100%;font-size:11.5px;color:#ffe7a8;text-align:center;}#world-death .rev[hidden]{display:none;}
+#world-death .rev .bar{height:5px;margin:3px 0 4px;border-radius:9px;background:#0a0d12;overflow:hidden;border:1px solid #3a3226;}#world-death .rev .bar i{display:block;height:100%;background:#ffe7a8;}
+#world-death .ds-note{margin:0;color:#d4e2cf;font:600 12.5px var(--rpg-ui,"Segoe UI"),system-ui,sans-serif;text-shadow:0 1px 0 #000,0 0 4px #000;}
+#world-death #world-death-status{margin:0;color:#ffd0a8;font-size:12px;text-shadow:0 1px 0 #000;}#world-death #world-death-status:empty{display:none;}
+@media (hover:none) and (pointer:coarse){#world-death .go kbd{display:none;}}
+@media (max-height:500px){body #world-death{padding-bottom:calc(14px + var(--world-safe-bottom));}#world-death .ds{gap:6px;width:min(610px,100%);}#world-death .ds-title{font-size:40px;}#world-death .ds-orn{width:min(220px,60%);}#world-death .dcard{padding:8px 10px;gap:12px;}#world-death canvas.pt{width:50px;height:50px;}#world-death .killer b{font-size:15.5px;}body #world-death .go{height:44px;min-height:44px;font-size:14px;}#world-death .go kbd{display:none;}#world-death .act{width:240px;}#world-death .ds-note{font-size:11px;}}
+@media (max-width:560px){#world-death .ds-title{font-size:44px;}#world-death .dcard{flex-wrap:wrap;}#world-death .act{width:100%;}}
 
 /* Potion belt: one-tap health potion in the old rations slot. A flask sits in a dark
  socket and its liquid shows how full the belt is (--potion-fill); while the potion

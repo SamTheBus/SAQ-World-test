@@ -18617,11 +18617,12 @@ function buildRecipe(seed, family2, tier2, index, seeded2 = false) {
     }
     const roomDepth = distances(nodes, edges, start), back = distances(nodes, edges, end), depth = roomDepth.get(end), optional = nodes.map((_, i) => i).filter((i) => roomDepth.get(i) + back.get(i) > depth);
     if (!optional.length) continue;
+    const arena = seeded2 && tier2 !== "small" && index === floorCount - 1 ? tier2 === "standard" ? [12, 9] : [15, 11] : null, half = arena ? Math.max(...arena) : 0, margin = arena ? half + 2 : 0, spread = arena ? half + 10 : 0;
     const mirrorX = roll(2), mirrorY = roll(2), turn = roll(2), rooms = nodes.map((n, i) => {
-      const x = mirrorX ? 3 - n.x : n.x, y = mirrorY ? 1 - n.y : n.y, px = 10 + x * 19 + roll(3) - 1, py = 11 + y * 20 + roll(3) - 1, cx = turn ? py : px, cy = turn ? px : py, rx = i === end ? 9 : 5 + roll(2), ry = i === end ? 8 : 5 + roll(3), id = family2 === "cave" ? "floor-" + index + "-room-" + i : family2 + "-room:" + index + ":" + i;
+      const x = mirrorX ? 3 - n.x : n.x, y = mirrorY ? 1 - n.y : n.y, px = (arena ? margin + x * spread : 10 + x * 19) + roll(3) - 1, py = (arena ? margin + y * spread : 11 + y * 20) + roll(3) - 1, cx = turn ? py : px, cy = turn ? px : py, rx = i === end ? arena ? arena[0] : 9 : 5 + roll(2), ry = i === end ? arena ? arena[1] : 8 : 5 + roll(3), id = family2 === "cave" ? "floor-" + index + "-room-" + i : family2 + "-room:" + index + ":" + i;
       return { roomId: id, role: i === start ? "arrival" : i === end ? "final-reward" : optional.includes(i) ? "optional-branch" : "exploration", architecture: family2 === "fort" ? ["hall", "barracks", "tower", "store-room"][roll(4)] : family2 === "crypt" ? ["burial-chamber", "vault", "ossuary", "memorial"][roll(4)] : family2 === "ruin" ? ["broken-chamber", "courtyard", "cloister", "buried-room"][roll(4)] : ["cavern", "grotto", "rift-chamber"][roll(3)], cx, cy, rx, ry, bounds: { x: cx - rx, y: cy - ry, width: rx * 2 + 1, height: ry * 2 + 1 } };
     });
-    const w = turn ? 44 : 80, h = turn ? 80 : 44, cells3 = Array.from({ length: h }, () => Array(w).fill("0")), put3 = (x, y) => {
+    const across2 = arena ? 2 * margin + 3 * spread + 2 : 80, tall = arena ? 2 * margin + spread + 2 : 44, w = turn ? tall : across2, h = turn ? across2 : tall, cells3 = Array.from({ length: h }, () => Array(w).fill("0")), put3 = (x, y) => {
       if (x > 0 && x < w - 1 && y > 0 && y < h - 1) cells3[y][x] = "1";
     }, stamp = (x, y, r = 2) => {
       for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) put3(x + dx, y + dy);
@@ -25012,6 +25013,9 @@ function validateCommand(command) {
     validatePrimaryAim(command.payload.aim);
   } else if (command.kind === "player.respawn") {
     closedRecord(command.payload, []);
+  } else if (command.kind === "player.revive") {
+    closedRecord(command.payload, ["targetPlayerId", "holding"]);
+    requireContract(typeof command.payload.targetPlayerId === "string" && command.payload.targetPlayerId.length > 0 && command.payload.targetPlayerId.length <= 120 && typeof command.payload.holding === "boolean", "Invalid revive");
   } else if (command.kind === "service.bestiary") {
     closedRecord(command.payload, ["family", "tier", "inventoryRevision"], ["boss"]);
     requireContract((command.payload.boss === void 0 || command.payload.boss === true) && typeof command.payload.family === "string" && /^[a-z_]{1,40}$/.test(command.payload.family), "Invalid Bestiary page");
@@ -25060,15 +25064,33 @@ function validateCommand(command) {
   return command;
 }
 
+// src/shared/contracts/player_revive_v1.js
+var PLAYER_REVIVE_VERSION = "player-revive-v1";
+function validatePlayerRevives(state) {
+  const rows3 = state.playerRevivesById;
+  if (rows3 === void 0) return;
+  for (const [id, r] of Object.entries(rows3)) {
+    requireContract(state.playersById[id], "Revive receipt for an unknown player");
+    closedRecord(r, ["version", "count", "holderPlayerId", "startedTick", "tick"]);
+    requireContract(r.version === PLAYER_REVIVE_VERSION, "Unknown revive version");
+    safeInteger(r.count);
+    requireContract(r.holderPlayerId === null ? r.startedTick === null : Boolean(state.playersById[r.holderPlayerId]) && r.holderPlayerId !== id && Number.isSafeInteger(r.startedTick) && r.startedTick <= state.tick, "Invalid revive hold");
+    requireContract(r.tick === null || Number.isSafeInteger(r.tick) && r.tick <= state.tick, "Invalid revive tick");
+  }
+}
+var reviveCountV1 = (state, id) => state.playerRevivesById?.[id]?.count ?? 0;
+
 // src/shared/contracts/player_respawn.js
 var PLAYER_RESPAWN_VERSION = "player-respawn-d3r-v1";
+var PLAYER_RESPAWN_V2 = "player-respawn-v2";
 function validatePlayerRespawns(state, manifest) {
   const receipts = state.playerRespawnsById;
   if (receipts === void 0) return;
   closedRecord(receipts, [], state.session.playerIds);
   for (const [id, r] of Object.entries(receipts)) {
     closedRecord(r, ["version", "count", "command", "authorityOrder", "tick", "toResidencyRevision", "settlementId"]);
-    requireContract(r.version === PLAYER_RESPAWN_VERSION, "Unknown player respawn version");
+    requireContract(r.version === PLAYER_RESPAWN_VERSION || r.version === PLAYER_RESPAWN_V2, "Unknown player respawn version");
+    const near = r.version === PLAYER_RESPAWN_V2;
     const { residencyRevision, ...packet } = r.command;
     validateCommand(packet);
     safeInteger(residencyRevision, 1);
@@ -25080,11 +25102,12 @@ function validatePlayerRespawns(state, manifest) {
     safeInteger(r.toResidencyRevision, 2, actor.residency.residencyRevision);
     safeInteger(r.count, 1, r.toResidencyRevision - 1);
     requireContract(r.toResidencyRevision === residencyRevision + 1 && state.spacesByInstanceId[c.spaceInstanceId]?.spaceRevision === c.spaceRevision, "Respawn residency fence mismatch");
-    requireContract(r.settlementId === plannedStartSettlementId(state.d9World?.plannedWorld, manifest.start.settlementId), "Respawn anchor changed");
-    if (actor.residency.residencyRevision === r.toResidencyRevision) requireContract(actor.residency.spaceInstanceId === state.overworldInstanceId, "Respawn destination mismatch");
+    if (near) requireContract(r.settlementId === null || typeof r.settlementId === "string" && r.settlementId.startsWith("settlement-slot:"), "Respawn town invalid");
+    else requireContract(r.settlementId === plannedStartSettlementId(state.d9World?.plannedWorld, manifest.start.settlementId), "Respawn anchor changed");
+    if (!near && actor.residency.residencyRevision === r.toResidencyRevision) requireContract(actor.residency.spaceInstanceId === state.overworldInstanceId, "Respawn destination mismatch");
     const history3 = state.residencyHistoryByEntityId[actor.entityId], from = history3[residencyRevision], to = history3[r.toResidencyRevision];
     if (from) requireContract(from.spaceInstanceId === c.spaceInstanceId && from.spaceRevision === c.spaceRevision && from.endTick === r.tick && from.endAuthorityOrder === r.authorityOrder, "Respawn source history mismatch");
-    if (to) requireContract(to.spaceInstanceId === state.overworldInstanceId && to.tick === r.tick && to.afterAuthorityOrder === r.authorityOrder, "Respawn destination history mismatch");
+    if (to) requireContract((near || to.spaceInstanceId === state.overworldInstanceId) && to.tick === r.tick && to.afterAuthorityOrder === r.authorityOrder, "Respawn destination history mismatch");
     const applied = state.appliedCommandsById[c.commandId];
     if (applied) requireContract(applied.status === "applied" && applied.authorityOrder === r.authorityOrder && applied.tick === r.tick && applied.commandCanonical === canonicalStringify(c), "Respawn applied receipt mismatch");
   }
@@ -25097,7 +25120,7 @@ function validatePlayerRespawnProgress(before, after) {
     requireContract(nextCount >= count2, "Player respawn count regressed");
     if (nextCount === count2) requireContract(canonicalStringify(previous ?? null) === canonicalStringify(next ?? null), "Player respawn receipt changed");
     else requireContract(next.authorityOrder > before.lastAppliedAuthorityOrder && next.tick >= before.tick && next.command.clientSequence > before.appliedClientSequences[id] && next.command.residencyRevision >= actor.residency.residencyRevision && next.toResidencyRevision > actor.residency.residencyRevision, "Respawn does not follow previous cut");
-    if (!actor.alive && result.alive) requireContract(nextCount > count2, "Player revived without respawn command");
+    if (!actor.alive && result.alive) requireContract(nextCount > count2 || reviveCountV1(after, id) > reviveCountV1(before, id), "Player revived without respawn command");
   }
 }
 
@@ -29691,14 +29714,14 @@ function validateActivityCommand(command) {
   const { residencyRevision, ...legacy } = command;
   safeInteger(residencyRevision, 1);
   validateCommand(legacy);
-  requireContract(["worldEvent.activate", "discovery.readNote", "quest.act", "movement.setIntent", "combat.primaryIntent", "combat.guardIntent", "combat.shadowDash", "combat.skill", "subweapon.claim", "classkit.claim", "service.modify", "service.material", "service.breakdown", "service.bestiary", "service.buy", "service.sell", "service.rest", "supply.use", "ferry.travel", "map.travel", "site.transition", "player.respawn", "loot.pickup", "gear.salvage", "gear.drop", "resource.interact", "progression.change", "forge.attune", "equipment.equip", "equipment.unequip"].includes(command.kind), "Unsupported activity command");
+  requireContract(["worldEvent.activate", "discovery.readNote", "quest.act", "movement.setIntent", "combat.primaryIntent", "combat.guardIntent", "combat.shadowDash", "combat.skill", "subweapon.claim", "classkit.claim", "service.modify", "service.material", "service.breakdown", "service.bestiary", "service.buy", "service.sell", "service.rest", "supply.use", "ferry.travel", "map.travel", "site.transition", "player.respawn", "player.revive", "loot.pickup", "gear.salvage", "gear.drop", "resource.interact", "progression.change", "forge.attune", "equipment.equip", "equipment.unequip"].includes(command.kind), "Unsupported activity command");
   return command;
 }
 var same31 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 function validateActivityState(s) {
   validateWorldEventsState(s);
   validateWire(s);
-  closedRecord(s, ["format", "protocolVersion", "ticksPerSecond", "tick", "content", "campaign", "session", "playersById", "spacesByInstanceId", "entitiesById", "groupsById", "primary", "eventEmission", "appliedCommandsById", "appliedClientSequences", "lastAppliedAuthorityOrder", "identitySequence", "overworldInstanceId", "proofCase", "residencyHistoryByEntityId", "primaryContextsById"], ["siteExitProtectionByEntityId", "playerRespawnsById", "encounterEconomy", "subweaponCombat", "d9World", "eliteCombat", "bossCombat", "hostileCombat", "wildernessCrowdGraceByEntityId", "waitingRoom", "bestiary"]);
+  closedRecord(s, ["format", "protocolVersion", "ticksPerSecond", "tick", "content", "campaign", "session", "playersById", "spacesByInstanceId", "entitiesById", "groupsById", "primary", "eventEmission", "appliedCommandsById", "appliedClientSequences", "lastAppliedAuthorityOrder", "identitySequence", "overworldInstanceId", "proofCase", "residencyHistoryByEntityId", "primaryContextsById"], ["siteExitProtectionByEntityId", "playerRespawnsById", "playerRevivesById", "encounterEconomy", "subweaponCombat", "d9World", "eliteCombat", "bossCombat", "hostileCombat", "wildernessCrowdGraceByEntityId", "waitingRoom", "bestiary"]);
   validateBestiaryRootV1(s);
   if (s.waitingRoom) {
     closedRecord(s.waitingRoom, ["version", "spaceInstanceId"]);
@@ -29982,6 +30005,7 @@ function validateActivityState(s) {
   }
   if (s.playerRespawnsById !== void 0) requireContract(d3, "Respawn receipts need D3 progression");
   validatePlayerRespawns(s, manifest);
+  validatePlayerRevives(s);
   if (d6) validateSubweaponCombat(s);
   else requireContract(s.subweaponCombat === void 0, "D6 combat requires version");
   validateHostileProjectiles(s);
@@ -31933,6 +31957,11 @@ function seatComparable(s, kept, party2, room2) {
   for (const g of Object.values(c.encounterEconomy?.groups ?? {})) for (const r of Object.values(g.usedResources ?? {})) if (r.playerIds) r.playerIds = r.playerIds.map(mark).sort();
   only(c.encounterEconomy?.outingsByPlayer);
   only(c.playerRespawnsById);
+  only(c.playerRevivesById);
+  for (const r of Object.values(c.playerRevivesById ?? {})) if (r.holderPlayerId && !keep(r.holderPlayerId)) {
+    r.holderPlayerId = null;
+    r.startedTick = null;
+  }
   only(c.bestiary?.albumsByPlayerId);
   only(c.bestiary?.groundByPlayerId);
   eachTarget(c, (row2, key9) => {

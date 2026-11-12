@@ -4829,6 +4829,9 @@ function validateCommand(command) {
     validatePrimaryAim(command.payload.aim);
   } else if (command.kind === "player.respawn") {
     closedRecord(command.payload, []);
+  } else if (command.kind === "player.revive") {
+    closedRecord(command.payload, ["targetPlayerId", "holding"]);
+    requireContract(typeof command.payload.targetPlayerId === "string" && command.payload.targetPlayerId.length > 0 && command.payload.targetPlayerId.length <= 120 && typeof command.payload.holding === "boolean", "Invalid revive");
   } else if (command.kind === "service.bestiary") {
     closedRecord(command.payload, ["family", "tier", "inventoryRevision"], ["boss"]);
     requireContract((command.payload.boss === void 0 || command.payload.boss === true) && typeof command.payload.family === "string" && /^[a-z_]{1,40}$/.test(command.payload.family), "Invalid Bestiary page");
@@ -15846,11 +15849,12 @@ function buildRecipe(seed, family2, tier, index, seeded2 = false) {
     }
     const roomDepth = distances(nodes, edges, start), back = distances(nodes, edges, end), depth = roomDepth.get(end), optional = nodes.map((_, i) => i).filter((i) => roomDepth.get(i) + back.get(i) > depth);
     if (!optional.length) continue;
+    const arena = seeded2 && tier !== "small" && index === floorCount - 1 ? tier === "standard" ? [12, 9] : [15, 11] : null, half = arena ? Math.max(...arena) : 0, margin = arena ? half + 2 : 0, spread = arena ? half + 10 : 0;
     const mirrorX = roll2(2), mirrorY = roll2(2), turn = roll2(2), rooms = nodes.map((n, i) => {
-      const x = mirrorX ? 3 - n.x : n.x, y = mirrorY ? 1 - n.y : n.y, px = 10 + x * 19 + roll2(3) - 1, py = 11 + y * 20 + roll2(3) - 1, cx = turn ? py : px, cy = turn ? px : py, rx = i === end ? 9 : 5 + roll2(2), ry = i === end ? 8 : 5 + roll2(3), id = family2 === "cave" ? "floor-" + index + "-room-" + i : family2 + "-room:" + index + ":" + i;
+      const x = mirrorX ? 3 - n.x : n.x, y = mirrorY ? 1 - n.y : n.y, px = (arena ? margin + x * spread : 10 + x * 19) + roll2(3) - 1, py = (arena ? margin + y * spread : 11 + y * 20) + roll2(3) - 1, cx = turn ? py : px, cy = turn ? px : py, rx = i === end ? arena ? arena[0] : 9 : 5 + roll2(2), ry = i === end ? arena ? arena[1] : 8 : 5 + roll2(3), id = family2 === "cave" ? "floor-" + index + "-room-" + i : family2 + "-room:" + index + ":" + i;
       return { roomId: id, role: i === start ? "arrival" : i === end ? "final-reward" : optional.includes(i) ? "optional-branch" : "exploration", architecture: family2 === "fort" ? ["hall", "barracks", "tower", "store-room"][roll2(4)] : family2 === "crypt" ? ["burial-chamber", "vault", "ossuary", "memorial"][roll2(4)] : family2 === "ruin" ? ["broken-chamber", "courtyard", "cloister", "buried-room"][roll2(4)] : ["cavern", "grotto", "rift-chamber"][roll2(3)], cx, cy, rx, ry, bounds: { x: cx - rx, y: cy - ry, width: rx * 2 + 1, height: ry * 2 + 1 } };
     });
-    const w = turn ? 44 : 80, h = turn ? 80 : 44, cells3 = Array.from({ length: h }, () => Array(w).fill("0")), put2 = (x, y) => {
+    const across = arena ? 2 * margin + 3 * spread + 2 : 80, tall = arena ? 2 * margin + spread + 2 : 44, w = turn ? tall : across, h = turn ? across : tall, cells3 = Array.from({ length: h }, () => Array(w).fill("0")), put2 = (x, y) => {
       if (x > 0 && x < w - 1 && y > 0 && y < h - 1) cells3[y][x] = "1";
     }, stamp = (x, y, r = 2) => {
       for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) put2(x + dx, y + dy);
@@ -29731,6 +29735,7 @@ export {
   BURROWERS_V1_METADATA,
   LESSER_BOSSES_V1_VERSION,
   LESSER_BOSSES_V1_METADATA,
+  LESSER_BOSSES_V1,
   LESSER_BOSS_TRICKS_V1,
   lesserCooldownV1,
   TROPICAL_CREATURES_V1_VERSION,
@@ -29898,6 +29903,7 @@ export {
   sunfallDiscsV1,
   BOSS_PAGE_IDS,
   BOSS_PAGE_NAMES,
+  bossPageFor,
   TIERS,
   TIER_COLORS,
   TIER_CARDS,
@@ -29917,6 +29923,7 @@ export {
   NAMED_ELITES_V1,
   NAMED_ELITE_TRICKS_V1,
   NAMED_ENDS_V1,
+  siteEndRoleV1,
   signedAddress,
   addressWire,
   floorDiv,
@@ -30372,6 +30379,7 @@ export {
   buildWoodlandCaveFamilyD12_2,
   functionalSiteDefinitionD10,
   functionalSiteDefinitionForGroupD10,
+  sitePartyArrivalTarget,
   projectArachnidTreantExtractionD12_5C,
   ensurePersonalFinaleClaimsD13D_G1,
   installPersonalFinaleClaimsD13D_G1,
@@ -30460,6 +30468,7 @@ export {
   validateSiteRunEpisodeProgressD13B,
   functionalSitesD10,
   isGeneratedInteriorFamily,
+  functionalSiteFloorsD12,
   functionalSiteSpaceIdsD12,
   functionalSiteGroupsD12,
   functionalSiteForSpaceD12,
