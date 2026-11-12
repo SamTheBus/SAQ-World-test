@@ -1,6 +1,6 @@
 {
-  "runtimeId": "fcda40a001bf632f",
-  "runtimeSha256": "fcda40a001bf632f9386ad68c1269ee92927e963238ea743d0ca03bb6c5b841b",
+  "runtimeId": "cfd66f1e9272ba89",
+  "runtimeSha256": "cfd66f1e9272ba89e63732aba6e3e83dcd3ed145195979853018b6e4bcd8f698",
   "files": [
     {
       "path": ".nojekyll",
@@ -590,7 +590,7 @@
     {
       "path": "index.html",
       "bytes": 13943,
-      "sha256": "0e848cd3a2ad886c4ce12d33898482215348cb93f7adc6211ee4a20faf33d26e"
+      "sha256": "a49c6938120780e3c54d53a7caf97e41ec120b5002edc3bdad0d8b21fb0213fa"
     },
     {
       "path": "manifest.webmanifest",
@@ -613,9 +613,9 @@
       "sha256": "7db8c23d3d071f10af27f69428fb3f40deb5eeb8a332946192a66dc1e22e73e4"
     },
     {
-      "path": "src/chunks/playable_browser-TACOLIZA.js",
-      "bytes": 8690513,
-      "sha256": "a36da98ace92294c43c16c2e9b1caeaf978a7735b2fac854f24e4e40ff2aecf2"
+      "path": "src/chunks/playable_browser-A2PMMOXE.js",
+      "bytes": 8691718,
+      "sha256": "96b3246f7616aa5d9a7c85003ad6dfdccef5e1405b342feb5570329494c1dca5"
     },
     {
       "path": "src/chunks/world_browser-6F7PZAES.js",
@@ -635,7 +635,7 @@
     {
       "path": "src/entrypoints/browser_boot.js",
       "bytes": 2158,
-      "sha256": "fd316f414ac91a6b1e51d64861772141b44b21ff3329a9fe95a650cf73cef24f"
+      "sha256": "60781c80e53e6616849905f79a482d33eb0a9cfc3bc9052baafcdb027a1967f4"
     },
     {
       "path": "world-maker-worker.js",
