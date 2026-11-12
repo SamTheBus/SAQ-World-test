@@ -1,6 +1,6 @@
 {
-  "runtimeId": "b2a51765776658d3",
-  "runtimeSha256": "b2a51765776658d375930de2676e413c10692ca917378e380e9321db139ecdd5",
+  "runtimeId": "d191a4401d0b3758",
+  "runtimeSha256": "d191a4401d0b37589a1bf278127befe671b3d5f41fafe9abefc34035e7f009b4",
   "files": [
     {
       "path": ".nojekyll",
@@ -29,8 +29,8 @@
     },
     {
       "path": "assets/biome-ground-v1/manifest.json",
-      "bytes": 88126,
-      "sha256": "0ebf4c2e5022802181785204f73e981f633d1838ffee5eae6fb4c52e87e4a7f0"
+      "bytes": 88125,
+      "sha256": "fedce499e24ac391f63ee4f693007ee4a1ecb84c4afbec72047a3b2bd520a7db"
     },
     {
       "path": "assets/biome-ground-v1/tropical.webp",
@@ -39,8 +39,8 @@
     },
     {
       "path": "assets/biome-ground-v1/upland.webp",
-      "bytes": 90030,
-      "sha256": "7aced48f526d0eb7e7776b7e35ea75a27811b91ea3a454fbfdd6c33ea0407831"
+      "bytes": 96440,
+      "sha256": "332c4d30a75c76b903cceb3d5b2844d1d32ec5f643835f69fe3d18f4e7393b47"
     },
     {
       "path": "assets/biome-ground-v1/volcanic.webp",
@@ -590,7 +590,7 @@
     {
       "path": "index.html",
       "bytes": 13943,
-      "sha256": "7b189143ea0d2a411656a6546b4d18bac6c1f2ed80eb12831a6312edcfc933d9"
+      "sha256": "f35a7175ab3e62c3da8e5b33dd6e4e04c393357ad37400bd0d87328220415c58"
     },
     {
       "path": "manifest.webmanifest",
@@ -599,13 +599,13 @@
     },
     {
       "path": "save-worker.js",
-      "bytes": 3075740,
-      "sha256": "99453eca7f763c3b221bdab1b051e7f65c4f87ae76e854c218602b16b77763d3"
+      "bytes": 3075843,
+      "sha256": "f5ad82f14ce34fc84cb30bacedb1216bf715b05344096d9c3c4e561fe179a1cb"
     },
     {
-      "path": "src/chunks/chunk-M5KHNUC6.js",
-      "bytes": 2765638,
-      "sha256": "6fb84936c0257a3ce8bf06fc367182c668998f8e5a21cef1b1c00d44a9e15c62"
+      "path": "src/chunks/chunk-AANRUF7E.js",
+      "bytes": 2765741,
+      "sha256": "8c8974c01da9631ff6e2a0d8d465d5d168ae8057a76a49f67b079f2d153c7b7b"
     },
     {
       "path": "src/chunks/jsqr-1.4.0-NMFRJJEX.js",
@@ -613,14 +613,14 @@
       "sha256": "7db8c23d3d071f10af27f69428fb3f40deb5eeb8a332946192a66dc1e22e73e4"
     },
     {
-      "path": "src/chunks/playable_browser-SJ7XZTPU.js",
-      "bytes": 8301926,
-      "sha256": "3d7c6237f4770f01ca47c9e94a730e775a496e92934489a576fdb744c287ea63"
+      "path": "src/chunks/playable_browser-RZYXETOF.js",
+      "bytes": 8311974,
+      "sha256": "84147907a710bb20adaf3518cec394068319faa94ff13bbdaf7194414fcb45bd"
     },
     {
-      "path": "src/chunks/world_browser-2ZOHL4LP.js",
+      "path": "src/chunks/world_browser-3BXETFZ2.js",
       "bytes": 1416,
-      "sha256": "fd784d3d2f337821850f7a37229abf16ead22306c66af019d077d3e8a148bf7a"
+      "sha256": "707dbf8c8eabc42bba123049132888de10f1206772ba5062fa1bb6d1ecda110e"
     },
     {
       "path": "src/client/startup_camp_v1.js",
@@ -635,12 +635,12 @@
     {
       "path": "src/entrypoints/browser_boot.js",
       "bytes": 2158,
-      "sha256": "53a76f8a325d7cf5ca7bf025cebe9c45887daed8f8141dc5f50f48600c5d1649"
+      "sha256": "f776d2549cd243faa94a3d67d1ebef172de2b62ec4e23d53573abe0caf5d6085"
     },
     {
       "path": "world-maker-worker.js",
       "bytes": 397365,
-      "sha256": "e6a7e07147009669605f212df72fe4ba8f7e268b1d2aab5d97e7f389d05258dd"
+      "sha256": "9a110ac0a0d77b1d616065b4e37bfa48178d74a13403b9ad953b05e64cc69795"
     },
     {
       "path": "world.css",

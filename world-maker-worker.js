@@ -679,7 +679,7 @@ var FOREST_STAND_PROFILES = Object.freeze({
   t: { glade: 0.2, forest: 0.32, core: 0.62, treeOpen: 0.5, treeForest: 0.96, lone: 0.08, massCore: 0.95, massForest: 0.3, cover: "fern", coverAt: 0.56, water: 0.06, height: 0, grove: "bamboo" },
   m: { glade: 0.4, forest: 0.56, core: 0.84, treeOpen: 0.3, treeForest: 0.86, lone: 0.06, massCore: 0.8, massForest: 0.05, cover: "reed", coverAt: 0.48, water: 0.42, height: 0 },
   a: { scale: 0.5, glade: 0.68, forest: 0.79, core: 0.95, treeOpen: 0.22, treeForest: 0.9, lone: 0.05, massCore: 0.7, massForest: 0, cover: "grass", coverAt: 0.58, water: 0.2, height: 0, hedges: true },
-  r: { glade: 0.44, forest: 0.56, core: 0.86, treeOpen: 0.28, treeForest: 0.88, lone: 0.03, massCore: 0.6, massForest: 0, cover: "heather", coverAt: 0.54, water: 0.08, height: 0.55, outcrop: 0.7 },
+  r: { glade: 0.44, forest: 0.56, core: 0.86, treeOpen: 0.28, treeForest: 0.88, lone: 0.05, massCore: 0.6, massForest: 0, cover: "heather", coverAt: 0.54, water: 0.08, height: 0.55, outcrop: 0.7 },
   s: { glade: 0.44, forest: 0.56, core: 0.88, treeOpen: 0.26, treeForest: 0.9, lone: 0.03, massCore: 0.5, massForest: 0, cover: null, coverAt: 1, water: 0, height: 0.5, outcrop: 0.74 },
   d: { glade: 0.64, forest: 2, core: 2, treeOpen: 0.2, treeForest: 0, lone: 0.018, massCore: 0, massForest: 0, cover: null, coverAt: 1, water: 0.9, height: 0, outcrop: 0.7, oasis: true },
   l: { glade: 0.56, forest: 2, core: 2, treeOpen: 0.38, treeForest: 0, lone: 0.02, massCore: 0, massForest: 0, cover: null, coverAt: 1, water: 0, height: 0, outcrop: 0.62 }

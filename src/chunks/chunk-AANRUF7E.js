@@ -2036,7 +2036,7 @@ var NEST_POLICY = freezeWire({
   rage: { damagePercent: 115, speedPercent: 110 },
   quickClearQualityHundredths: 100,
   // The elite trick a broodling carries, by nest skin.
-  broodAffixes: { woodland: "web_weaver", grassland: "swift_commander", desert: "iron_citadel", frostland: "glacial_warden", wetland: "toxic_decay" },
+  broodAffixes: { woodland: "web_weaver", grassland: "swift_commander", desert: "iron_citadel", frostland: "glacial_warden", wetland: "toxic_decay", upland: "blood_berserker" },
   triggerRadius: 96,
   activeRadius: 768,
   playerClearance: 48,
@@ -2048,8 +2048,8 @@ var NEST_POLICY = freezeWire({
   simulationHz: 60
 });
 var NEST_MEMBERS = PLANNED_EVENT_MEMBERS;
-var NEST_SKINS = freezeWire({ woodland: "woodland", grassland: "grassland", desert: "desert", volcanic: "desert", frostland: "frostland", upland: "frostland", wetland: "wetland", tropical: "wetland" });
-var NEST_LABELS = freezeWire({ woodland: "Spore Nest", grassland: "Hive Nest", desert: "Scarab Nest", frostland: "Frost Nest", wetland: "Bog Nest" });
+var NEST_SKINS = freezeWire({ woodland: "woodland", grassland: "grassland", desert: "desert", volcanic: "desert", frostland: "frostland", upland: "upland", wetland: "wetland", tropical: "wetland" });
+var NEST_LABELS = freezeWire({ woodland: "Spore Nest", grassland: "Hive Nest", desert: "Scarab Nest", frostland: "Frost Nest", wetland: "Bog Nest", upland: "Crag Nest" });
 var nestSkinOfV1 = (biome) => NEST_SKINS[biome] ?? "woodland";
 var ROADSIDE_CREW = freezeWire(["bandit_cutthroat", "bandit_archer", "bandit_cutthroat", "bandit_brute", "bandit_archer", "bandit_cutthroat", "bandit_archer", "bandit_cutthroat", "bandit_archer", "bandit_captain"]);
 var ROADSIDE_MEMBERS = ROADSIDE_CREW.length;
@@ -12169,7 +12169,7 @@ var FOREST_STAND_PROFILES = Object.freeze({
   t: { glade: 0.2, forest: 0.32, core: 0.62, treeOpen: 0.5, treeForest: 0.96, lone: 0.08, massCore: 0.95, massForest: 0.3, cover: "fern", coverAt: 0.56, water: 0.06, height: 0, grove: "bamboo" },
   m: { glade: 0.4, forest: 0.56, core: 0.84, treeOpen: 0.3, treeForest: 0.86, lone: 0.06, massCore: 0.8, massForest: 0.05, cover: "reed", coverAt: 0.48, water: 0.42, height: 0 },
   a: { scale: 0.5, glade: 0.68, forest: 0.79, core: 0.95, treeOpen: 0.22, treeForest: 0.9, lone: 0.05, massCore: 0.7, massForest: 0, cover: "grass", coverAt: 0.58, water: 0.2, height: 0, hedges: true },
-  r: { glade: 0.44, forest: 0.56, core: 0.86, treeOpen: 0.28, treeForest: 0.88, lone: 0.03, massCore: 0.6, massForest: 0, cover: "heather", coverAt: 0.54, water: 0.08, height: 0.55, outcrop: 0.7 },
+  r: { glade: 0.44, forest: 0.56, core: 0.86, treeOpen: 0.28, treeForest: 0.88, lone: 0.05, massCore: 0.6, massForest: 0, cover: "heather", coverAt: 0.54, water: 0.08, height: 0.55, outcrop: 0.7 },
   s: { glade: 0.44, forest: 0.56, core: 0.88, treeOpen: 0.26, treeForest: 0.9, lone: 0.03, massCore: 0.5, massForest: 0, cover: null, coverAt: 1, water: 0, height: 0.5, outcrop: 0.74 },
   d: { glade: 0.64, forest: 2, core: 2, treeOpen: 0.2, treeForest: 0, lone: 0.018, massCore: 0, massForest: 0, cover: null, coverAt: 1, water: 0.9, height: 0, outcrop: 0.7, oasis: true },
   l: { glade: 0.56, forest: 2, core: 2, treeOpen: 0.38, treeForest: 0, lone: 0.02, massCore: 0, massForest: 0, cover: null, coverAt: 1, water: 0, height: 0, outcrop: 0.62 }
@@ -12581,7 +12581,7 @@ function pickTree(S, code, x, y, z, e, edge, h) {
     case "a":
       return z === 0 ? pick(["oak", 4, "apple", 1, "birch", 1], n) : pick(["oak", 4, "birch", 3, "apple", 1], n);
     case "r":
-      return pick(["pine", 4, "spruce", 4, "rowan", 1], n);
+      return z === 0 ? pick(["rowan", 3, "pine", 1, "spruce", 1], n) : pick(["pine", 4, "spruce", 4, "rowan", 1], n);
     case "s":
       return z === 0 ? pick(["snowbirch", 2, "pine", 1], n) : pick(["fir", 4, "pine", 4, "snowbirch", 1], n);
     case "d":
