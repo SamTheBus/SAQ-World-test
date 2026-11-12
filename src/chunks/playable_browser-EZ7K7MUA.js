@@ -74192,17 +74192,19 @@ function drawCoastV1(c, F6, bounds2, offset2, seed2, beachCode, stats3 = {}) {
 }
 
 // src/client/water_motion_v1.js
-var WATER_MOTION_VERSION = "water-motion-v1";
+var WATER_MOTION_VERSION = "water-motion-v2";
 var T61 = 32;
 var TAU107 = Math.PI * 2;
 var AB = 16;
 var WATER_LOOKS = Object.freeze({
-  base: { flow: "#e4f7fd", glint: "#ffffff", speed: 1 },
-  m: { flow: null, glint: "#e9f5df", speed: 0, rings: "#cfe3c4" },
+  base: { flow: "#e4f7fd", glint: "#ffffff", speed: 1, crest: "#ffffff" },
+  m: { flow: null, glint: "#e9f5df", speed: 0.45, rings: "#cfe3c4", crest: "#c4dcb8" },
   s: { flow: null, glint: "#ffffff", speed: 0 },
   l: { flow: "#ffe7a0", glint: "#fff6cf", speed: 0.35, bubbles: true }
 });
-var CREST4 = 4.8;
+var SEA_CREST = 4.4;
+var RIVER_CREST = 2.6;
+var LAKE_CREST = 5.2;
 var GLINT = 2.4;
 var GLINT_ON = 0.18;
 var LACE = 3.6;
@@ -74211,6 +74213,7 @@ var RING = 3;
 var BUBBLE = 3.2;
 var KIND = { crest: 0, glint: 1, lace: 2, dash: 3, ring: 4, bubble: 5 };
 var bucket = (x, y) => (Math.round(Math.atan2(y, x) / TAU107 * AB) % AB + AB) % AB;
+var WIND = [0.94, 0.34];
 var isWater = (v) => v === "W" || v === "L" || v === "O" || v === "H" || v === "V";
 function flowAxis(at8, x, y) {
   let a = 0, b = 0, d = 0;
@@ -74232,7 +74235,7 @@ function flowAxis(at8, x, y) {
   }
   return { x: ux, y: uy };
 }
-function waterMotionItemsV1({ bounds: bounds2, offset: offset2, seed: seed2, terrainAt, biomeTile, coast = null, noise: noise2 }) {
+function waterMotionItemsV1({ bounds: bounds2, offset: offset2, seed: seed2, terrainAt, biomeTile, pointCode = null, coast = null, noise: noise2 }) {
   const out = [], bx0 = bounds2.x, by0 = bounds2.y, bx1 = bounds2.x + bounds2.width, by1 = bounds2.y + bounds2.height, inside5 = (x, y) => x >= bx0 && y >= by0 && x < bx1 && y < by1;
   const grid = (step, salt, fn) => {
     for (let gy = Math.floor((by0 + offset2.y) / step); gy <= Math.floor((by1 - 1 + offset2.y) / step); gy++) for (let gx = Math.floor((bx0 + offset2.x) / step); gx <= Math.floor((bx1 - 1 + offset2.x) / step); gx++) fn(gx, gy, terrainHash(gx, gy, seed2 + salt));
@@ -74246,10 +74249,23 @@ function waterMotionItemsV1({ bounds: bounds2, offset: offset2, seed: seed2, ter
       const k = j * F6.nx + i;
       return F6.cls[k] >= 3 && F6.dist[k] >= min;
     };
+    const heading = (x, y) => {
+      if (!F6) return WIND;
+      const i = Math.round((x - F6.x0) / 2), j = Math.round((y - F6.y0) / 2);
+      if (i < 3 || j < 3 || i >= F6.nx - 3 || j >= F6.ny - 3) return WIND;
+      const k = j * F6.nx + i, D2 = F6.dist, d = D2[k], w = Math.max(0, Math.min(1, (140 - d) / 90));
+      if (!w) return WIND;
+      const gx = D2[k + 3] - D2[k - 3], gy = D2[k + 3 * F6.nx] - D2[k - 3 * F6.nx], l = Math.hypot(gx, gy);
+      if (l < 0.5) return WIND;
+      const hx = WIND[0] * (1 - w) - gx / l * w, hy = WIND[1] * (1 - w) - gy / l * w, m = Math.hypot(hx, hy) || 1;
+      return [hx / m, hy / m];
+    };
     grid(48, 801, (gx, gy, h) => {
       if (h % 3) return;
       const x = gx * 48 + h % 40 - offset2.x, y = gy * 48 + (h >>> 8) % 40 - offset2.y;
-      if (inside5(x, y) && deep6(x, y, 34)) out.push({ k: KIND.crest, x, y, p: (h >>> 16) % 1e3 / 1e3 });
+      if (!inside5(x, y) || !deep6(x, y, 34)) return;
+      const [dx, dy] = heading(x, y);
+      out.push({ k: KIND.crest, x, y, p: (h >>> 16) % 1e3 / 1e3, dx, dy, b: bucket(dx, dy), c: "#d6f2fb", al: 0.7, cy: SEA_CREST, d: 26 });
     });
     grid(40, 803, (gx, gy, h) => {
       if (h % 3) return;
@@ -74322,17 +74338,33 @@ function waterMotionItemsV1({ bounds: bounds2, offset: offset2, seed: seed2, ter
       }
     }
     if (deck2) continue;
-    const code2 = biomeTile(tx, ty), L = WATER_LOOKS[code2] ?? WATER_LOOKS.base, gx = Math.round(tx + offset2.x / T61), gy = Math.round(ty + offset2.y / T61), h = terrainHash(gx, gy, seed2 + 707), px7 = tx * T61, py = ty * T61;
-    if (v === "W" && L.flow && h % 3 === 0) {
-      const ax = flowAxis(terrainAt, tx, ty);
-      if (ax) for (let k = 0; k < 1; k++) {
-        const hk = terrainHash(gx * 3 + k, gy, seed2 + 709);
-        out.push({ k: KIND.dash, x: px7 + 16 + ((hk >>> 10) % 11 - 5), y: py + 16 + ((hk >>> 14) % 11 - 5), p: hk % 1e3 / 1e3, dx: ax.x, dy: ax.y, b: bucket(ax.x, ax.y), c: L.flow, sp: L.speed });
+    const gx = Math.round(tx + offset2.x / T61), gy = Math.round(ty + offset2.y / T61), h = terrainHash(gx, gy, seed2 + 707), px7 = tx * T61, py = ty * T61;
+    const lookAt = (x, y) => WATER_LOOKS[pointCode ? pointCode(x, y, tx, ty) : biomeTile(tx, ty)] ?? WATER_LOOKS.base;
+    let ax;
+    const axis = () => ax === void 0 ? ax = flowAxis(terrainAt, tx, ty) : ax;
+    if (v === "W" && h % 3 === 0) {
+      const hk = terrainHash(gx * 3, gy, seed2 + 709), x = px7 + 16 + ((hk >>> 10) % 11 - 5), y = py + 16 + ((hk >>> 14) % 11 - 5), L = lookAt(x, y);
+      if (L.flow && axis()) out.push({ k: KIND.dash, x, y, p: hk % 1e3 / 1e3, dx: ax.x, dy: ax.y, b: bucket(ax.x, ax.y), c: L.flow, sp: L.speed });
+    }
+    if ((h >>> 5) % (v === "L" ? 3 : 4) === 0) {
+      const x = px7 + 8 + (h >>> 11) % 17, y = py + 8 + (h >>> 19) % 17, L = lookAt(x, y);
+      if (L.crest) {
+        const a = v === "W" ? axis() : null, [dx, dy] = a ? [a.x, a.y] : WIND;
+        out.push({ k: KIND.crest, x, y, p: (h >>> 9) % 1e3 / 1e3, dx, dy, b: bucket(dx, dy), c: L.crest, al: 0.55, cy: v === "L" ? LAKE_CREST : RIVER_CREST / (L.speed || 1), d: v === "L" ? 14 : 22 });
       }
     }
-    if (L.glint && (h >>> 3) % 3 === 0) out.push({ k: KIND.glint, x: px7 + 8 + (h >>> 12) % 17, y: py + 8 + (h >>> 20) % 17, p: (h >>> 5) % 1e3 / 1e3, c: L.glint });
-    if (L.rings && (h >>> 4) % 6 === 0) out.push({ k: KIND.ring, x: px7 + 9 + (h >>> 9) % 15, y: py + 10 + (h >>> 17) % 13, p: (h >>> 7) % 1e3 / 1e3, c: L.rings });
-    if (L.bubbles && h % 3 === 0) out.push({ k: KIND.bubble, x: px7 + 9 + (h >>> 9) % 15, y: py + 9 + (h >>> 17) % 15, p: (h >>> 7) % 1e3 / 1e3 });
+    if ((h >>> 3) % 3 === 0) {
+      const x = px7 + 8 + (h >>> 12) % 17, y = py + 8 + (h >>> 20) % 17, L = lookAt(x, y);
+      if (L.glint) out.push({ k: KIND.glint, x, y, p: (h >>> 5) % 1e3 / 1e3, c: L.glint });
+    }
+    if ((h >>> 4) % 6 === 0) {
+      const x = px7 + 9 + (h >>> 9) % 15, y = py + 10 + (h >>> 17) % 13, L = lookAt(x, y);
+      if (L.rings) out.push({ k: KIND.ring, x, y, p: (h >>> 7) % 1e3 / 1e3, c: L.rings });
+    }
+    if (h % 3 === 0) {
+      const x = px7 + 9 + (h >>> 9) % 15, y = py + 9 + (h >>> 17) % 15, L = lookAt(x, y);
+      if (L.bubbles) out.push({ k: KIND.bubble, x, y, p: (h >>> 7) % 1e3 / 1e3 });
+    }
   }
   return Object.freeze(out);
 }
@@ -74356,12 +74388,13 @@ function createWaterMotionV1(doc) {
     }
     return s;
   };
-  const crest = () => spr("crest", 18, 8, (g) => {
-    g.strokeStyle = "#d6f2fb";
+  const crest = (col2, b) => spr("crest" + col2 + b, 20, 20, (g) => {
+    const a = b / AB * TAU107, nx = Math.cos(a), ny = Math.sin(a), tx = -ny, ty = nx;
+    g.strokeStyle = col2;
     g.lineWidth = 1.6;
     g.beginPath();
-    g.moveTo(2, 5.5);
-    g.quadraticCurveTo(9, 1.5, 16, 5.5);
+    g.moveTo(10 - tx * 6.5 - nx * 1.5, 10 - ty * 6.5 - ny * 1.5);
+    g.quadraticCurveTo(10 + nx * 2.5, 10 + ny * 2.5, 10 + tx * 6.5 - nx * 1.5, 10 + ty * 6.5 - ny * 1.5);
     g.stroke();
   });
   const glint = (col2, r) => spr("gl" + col2 + r, 9, 9, (g) => {
@@ -74418,13 +74451,15 @@ function createWaterMotionV1(doc) {
       if (it.x < x0 || it.y < y0 || it.x > x1 || it.y > y1) continue;
       let u, a;
       switch (it.k) {
-        case 0:
-          u = fr(ts / CREST4 + it.p);
-          a = 0.7 * Math.sin(u * Math.PI);
+        case 0: {
+          u = fr(ts / it.cy + it.p);
+          a = it.al * Math.sin(u * Math.PI);
           if (a < 0.06) continue;
+          const s = (u - 0.5) * it.d;
           ctx.globalAlpha = a;
-          put3(ctx, crest(), it.x - 9 + (u - 0.5) * 8, it.y - 5 - (u - 0.5) * 3);
+          put3(ctx, crest(it.c, it.b), it.x + it.dx * s - 10, it.y + it.dy * s - 10);
           break;
+        }
         case 1:
           u = fr(ts / GLINT + it.p);
           if (u >= GLINT_ON) continue;
@@ -74567,7 +74602,7 @@ function labelAt(codeAt, px7, py, mx, my, sx, sy, isle) {
   }
   return code2;
 }
-function biomeGroundLabelsV1(bounds2, offset2, codeAt) {
+function biomeGroundLabelsV1(bounds2, offset2, codeAt, isles = true) {
   const snap2 = (v, o, f) => f((v + o) / COARSE) * COARSE - o, x0 = snap2(bounds2.x - MARGIN2, offset2.x, Math.floor), y0 = snap2(bounds2.y - MARGIN2, offset2.y, Math.floor), x1 = snap2(bounds2.x + bounds2.width + MARGIN2, offset2.x, Math.ceil), y1 = snap2(bounds2.y + bounds2.height + MARGIN2, offset2.y, Math.ceil);
   const cw = Math.round((x1 - x0) / COARSE) + 1, ch = Math.round((y1 - y0) / COARSE) + 1, F6 = Array.from({ length: 5 }, () => new Float32Array(cw * ch)), coarse = new Array(cw * ch);
   const B6 = 16, gx0 = Math.floor((x0 + offset2.x) / B6) * B6 - offset2.x, gy0 = Math.floor((y0 + offset2.y) / B6) * B6 - offset2.y, gw = Math.ceil((x1 - gx0) / B6) + 1, gh = Math.ceil((y1 - gy0) / B6) + 1, G0 = new Float32Array(gw * gh), G1 = new Float32Array(gw * gh);
@@ -74583,7 +74618,7 @@ function biomeGroundLabelsV1(bounds2, offset2, codeAt) {
     F6[2][k] = f[2];
     F6[3][k] = f[3];
     F6[4][k] = f[4];
-    coarse[k] = labelAt(codeAt, px7, py, F6[0][k], F6[1][k], f[2], f[3], f[4]);
+    coarse[k] = labelAt(codeAt, px7, py, F6[0][k], F6[1][k], f[2], f[3], isles ? f[4] : 0);
   }
   const r = COARSE / STEP, nx = (cw - 1) * r + 1, ny = (ch - 1) * r + 1, labels = new Array(nx * ny), [M0, M1, S07, S1, IS] = F6;
   for (let cj = 0; cj < ch - 1; cj++) for (let ci = 0; ci < cw - 1; ci++) {
@@ -74596,7 +74631,7 @@ function biomeGroundLabelsV1(bounds2, offset2, codeAt) {
       const fy = jj / r;
       for (let ii = 0; ii <= r; ii++) {
         const fx = ii / r, w0 = (1 - fx) * (1 - fy), w1 = fx * (1 - fy), w2 = (1 - fx) * fy, w3 = fx * fy, i = ci * r + ii, j = cj * r + jj;
-        labels[j * nx + i] = labelAt(codeAt, x0 + i * STEP, y0 + j * STEP, M0[a] * w0 + M0[b] * w1 + M0[c] * w2 + M0[d] * w3, M1[a] * w0 + M1[b] * w1 + M1[c] * w2 + M1[d] * w3, S07[a] * w0 + S07[b] * w1 + S07[c] * w2 + S07[d] * w3, S1[a] * w0 + S1[b] * w1 + S1[c] * w2 + S1[d] * w3, IS[a] * w0 + IS[b] * w1 + IS[c] * w2 + IS[d] * w3);
+        labels[j * nx + i] = labelAt(codeAt, x0 + i * STEP, y0 + j * STEP, M0[a] * w0 + M0[b] * w1 + M0[c] * w2 + M0[d] * w3, M1[a] * w0 + M1[b] * w1 + M1[c] * w2 + M1[d] * w3, S07[a] * w0 + S07[b] * w1 + S07[c] * w2 + S07[d] * w3, S1[a] * w0 + S1[b] * w1 + S1[c] * w2 + S1[d] * w3, isles ? IS[a] * w0 + IS[b] * w1 + IS[c] * w2 + IS[d] * w3 : 0);
       }
     }
   }
@@ -74838,7 +74873,18 @@ async function createBiomeGroundV1(env, prior, { base: base3 = new URL("../../as
     const found = new Set([...raw].map((k) => k === "a" ? "w" : k)), g = { meadow: raw.has("a"), woodland: raw.has("w"), codeAt };
     const terrainAt = (tx, ty) => v.terrain[ty - oy]?.[tx - ox], coast = coastNeededV1(bounds2, terrainAt) ? coastFieldsV1(bounds2, o, terrainAt, tileCode) : null;
     let L = null;
-    stashWater(bounds2, waterMotionItemsV1({ bounds: bounds2, offset: o, seed: seed2, terrainAt, biomeTile: tileCode, coast, noise: biomeGroundNoiseV1 }));
+    const tileLabels = /* @__PURE__ */ new Map(), pointCode = (x, y, tx, ty) => {
+      const key3 = tx + "," + ty;
+      let L2 = tileLabels.get(key3);
+      if (L2 === void 0) {
+        L2 = waterLabels(space, tx, ty);
+        tileLabels.set(key3, L2);
+      }
+      if (!L2) return tileCode(tx, ty);
+      const i = Math.max(0, Math.min(L2.nx - 1, Math.round((x - L2.x0) / 2))), j = Math.max(0, Math.min(L2.ny - 1, Math.round((y - L2.y0) / 2)));
+      return L2.labels[j * L2.nx + i] ?? tileCode(tx, ty);
+    };
+    stashWater(bounds2, waterMotionItemsV1({ bounds: bounds2, offset: o, seed: seed2, terrainAt, biomeTile: tileCode, pointCode, coast, noise: biomeGroundNoiseV1 }));
     if (coast?.open) return drawCoastV1(c, coast, bounds2, o, seed2, () => "a", draws.coast);
     if (found.size <= 1) paint3([...found][0] ?? "w", c, bounds2, o, seed2, g);
     else {
@@ -74931,8 +74977,45 @@ async function createBiomeGroundV1(env, prior, { base: base3 = new URL("../../as
     water3.delete(key3);
     return items ?? [];
   };
+  const waterLook = (k) => k === void 0 || k === "o" || k === "a" ? "w" : k;
+  function waterLabels(space, x, y, t = 32) {
+    const v = space.visual, ox = v.originTile?.x ?? 0, oy = v.originTile?.y ?? 0, at8 = (tx, ty) => v.terrain[ty - oy]?.[tx - ox], code2 = (tx, ty) => v.biomes?.[ty - oy]?.[tx - ox], own = waterLook(code2(x, y));
+    let mixed = false;
+    for (let j = -2; j <= 2 && !mixed; j++) for (let i = -2; i <= 2; i++) {
+      const u = at8(x + i, y + j);
+      if ((u === "W" || u === "L") && waterLook(code2(x + i, y + j)) !== own) {
+        mixed = true;
+        break;
+      }
+    }
+    if (!mixed) return null;
+    const codeAt = (px7, py) => {
+      const k = code2(Math.floor(px7 / 32), Math.floor(py / 32));
+      return k === "o" ? void 0 : k === "a" ? "w" : k;
+    };
+    return biomeGroundLabelsV1({ x: x * t, y: y * t, width: t, height: t }, environmentWorldOffset(space), codeAt, false);
+  }
+  function blendWater(c, space, x, y, t, redraw) {
+    if (!world(space)) return prior.blendWater?.(c, space, x, y, t, redraw) ?? 0;
+    const v = space.visual, ox = v.originTile?.x ?? 0, oy = v.originTile?.y ?? 0, own = waterLook(v.biomes?.[y - oy]?.[x - ox]);
+    const L = waterLabels(space, x, y, t);
+    if (!L) return 0;
+    let n = 0;
+    for (const k of new Set(L.labels)) {
+      if (k === void 0 || waterLook(k) === own) continue;
+      const region = biomeGroundRegionV1(L, (q) => q !== void 0 && waterLook(q) === waterLook(k));
+      if (!region) continue;
+      c.save();
+      c.clip(region);
+      redraw(k);
+      c.restore();
+      n++;
+    }
+    draws.waterBlends = (draws.waterBlends ?? 0) + n;
+    return n;
+  }
   const coastOwns = (space, type) => (type === "O" || type === "C" || type === "K") && world(space) || Boolean(prior.coastOwns?.(space, type));
-  return Object.freeze({ ...prior, covers, coastOwns, waterMotion, drawGround: drawGround2, resources: () => ({ ...prior.resources?.(), biomeGround: { version: BIOME_GROUND_VERSION, coast: COAST_VERSION, waterMotion: WATER_MOTION_VERSION, active: true, biomes: Object.keys(kits).sort(), downloadBytes, decodedBytes, loadMs, draws: { ...draws }, kits: Object.fromEntries(Object.entries(kits).map(([k, v]) => [k, v.stats()])) } }) });
+  return Object.freeze({ ...prior, covers, coastOwns, waterMotion, blendWater, drawGround: drawGround2, resources: () => ({ ...prior.resources?.(), biomeGround: { version: BIOME_GROUND_VERSION, coast: COAST_VERSION, waterMotion: WATER_MOTION_VERSION, active: true, biomes: Object.keys(kits).sort(), downloadBytes, decodedBytes, loadMs, draws: { ...draws }, kits: Object.fromEntries(Object.entries(kits).map(([k, v]) => [k, v.stats()])) } }) });
 }
 
 // src/client/woodland_foliage_v2.js
@@ -146776,8 +146859,6 @@ var SAND_COLOR = "#ccb987";
 var WET = "#a6915f";
 var FACE4 = "#6a4c32";
 var LIP2 = "#86673f";
-var FLOW6 = { color: "#d6f2fb", alpha: 0.55, width: 1.5, len: [24, 38], chance: 3 };
-var CREST5 = { alpha: 0.5, width: 1.4, len: [9, 13], chance: 5 };
 var LILIES = 6;
 var REEDS = 8;
 function hash42(x, y, s) {
@@ -146810,33 +146891,6 @@ function shore(loops, offset2, seed2, box5) {
     out.push({ x: p[0], y: p[1], nx: dy / d, ny: -dx / d, h: hash42(Math.round((p[0] + offset2.x) * 2), Math.round((p[1] + offset2.y) * 2), seed2 + 4421) });
   }
   return out;
-}
-var axes = /* @__PURE__ */ new Map();
-function flowAxis2(at8, waterAt2, x, y, key3) {
-  if (axes.has(key3)) return axes.get(key3);
-  let a = 0, b = 0, d = 0, known2 = true;
-  for (let j = -6; j <= 6 && known2; j++) for (let i = -6; i <= 6; i++) if (at8(x + i, y + j) === void 0) {
-    known2 = false;
-    break;
-  }
-  for (let j = -5; j <= 5; j++) for (let i = -5; i <= 5; i++) {
-    const gx = (waterAt2(at8, x + i + 1, y + j) ? 1 : 0) - (waterAt2(at8, x + i - 1, y + j) ? 1 : 0), gy = (waterAt2(at8, x + i, y + j + 1) ? 1 : 0) - (waterAt2(at8, x + i, y + j - 1) ? 1 : 0);
-    if (!gx && !gy) continue;
-    const w = Math.exp(-(i * i + j * j) / 18);
-    a += w * gx * gx;
-    b += w * gx * gy;
-    d += w * gy * gy;
-  }
-  let r = null;
-  if (a + d > 0.05) {
-    const th = 0.5 * Math.atan2(2 * b, a - d);
-    r = { x: -Math.sin(th), y: Math.cos(th) };
-  }
-  if (known2) {
-    if (axes.size > 4e4) axes.clear();
-    axes.set(key3, r);
-  }
-  return r;
 }
 function lily2(c, x, y, r, a, flower2) {
   c.beginPath();
@@ -146896,7 +146950,7 @@ function reeds3(c, x, y, h) {
     }
   }
 }
-function drawRiverMix(c, loops, open2, x, y, t, offset2, seed2, at8, waterAt2, biome) {
+function drawRiverMix(c, loops, open2, x, y, t, offset2, seed2, at8, waterAt2, biome, bleed = 0.5) {
   const px7 = x * t, py = y * t, woods = biome === "w" || biome === "a", verts = open2 ? [] : shore(loops, offset2, seed2, [px7 - 40, py - 40, px7 + t + 40, py + t + 40]);
   if (!open2) {
     trace2(c, loops);
@@ -146929,56 +146983,15 @@ function drawRiverMix(c, loops, open2, x, y, t, offset2, seed2, at8, waterAt2, b
   c.save();
   if (open2) {
     c.beginPath();
-    c.rect(px7 - 0.5, py - 0.5, t + 1, t + 1);
+    c.rect(px7 - bleed, py - bleed, t + 2 * bleed, t + 2 * bleed);
   } else trace2(c, loops);
   c.clip();
   c.fillStyle = BASE6;
-  c.fillRect(px7 - 0.5, py - 0.5, t + 1, t + 1);
+  c.fillRect(px7 - bleed, py - bleed, t + 2 * bleed, t + 2 * bleed);
   if (!open2) for (const [w, col2] of BANDS2) {
     c.strokeStyle = col2;
     c.lineWidth = w;
     c.stroke();
-  }
-  const ok = (X, Y) => open2 || inside4(loops, X, Y);
-  for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) {
-    const nx = x + i, ny = y + j;
-    if (at8(nx, ny) !== "W") continue;
-    const gx = Math.round(nx + offset2.x / t), gy = Math.round(ny + offset2.y / t), h = hash42(gx, gy, seed2 + 5101);
-    if ((h >>> 3) % CREST5.chance === 0) {
-      const ax2 = flowAxis2(at8, waterAt2, nx, ny, seed2 + ":" + gx + "," + gy);
-      if (ax2) {
-        const cx2 = nx * t + 6 + (h >>> 11) % 20, cy3 = ny * t + 6 + (h >>> 19) % 20, len2 = CREST5.len[0] + (h >>> 23) % (CREST5.len[1] - CREST5.len[0] + 1), wx = ax2.y * len2 / 2, wy = -ax2.x * len2 / 2;
-        if (ok(cx2, cy3) && ok(cx2 - wx, cy3 - wy) && ok(cx2 + wx, cy3 + wy)) {
-          c.strokeStyle = "#ffffff";
-          c.globalAlpha = CREST5.alpha;
-          c.lineWidth = CREST5.width;
-          c.beginPath();
-          c.moveTo(cx2 - wx, cy3 - wy);
-          c.quadraticCurveTo(cx2 + ax2.x * 4, cy3 + ax2.y * 4, cx2 + wx, cy3 + wy);
-          c.stroke();
-          c.globalAlpha = 1;
-        }
-      }
-    }
-    if (h % FLOW6.chance) continue;
-    const ax = flowAxis2(at8, waterAt2, nx, ny, seed2 + ":" + gx + "," + gy);
-    if (!ax) continue;
-    const cx = nx * t + 6 + h % 20, cy2 = ny * t + 6 + (h >>> 5) % 20, len = FLOW6.len[0] + (h >>> 9) % (FLOW6.len[1] - FLOW6.len[0] + 1), sway = (2 + (h >>> 14) % 3) * ((h >>> 17) % 2 ? 1 : -1), ex = ax.x * len / 2, ey = ax.y * len / 2, qx = ax.y, qy = -ax.x;
-    if (!ok(cx, cy2) || !ok(cx - ex, cy2 - ey) || !ok(cx + ex, cy2 + ey)) continue;
-    const S7 = (k) => {
-      c.beginPath();
-      c.moveTo(cx - ex * k, cy2 - ey * k);
-      c.bezierCurveTo(cx - ex * k * 0.35 + qx * sway * k, cy2 - ey * k * 0.35 + qy * sway * k, cx + ex * k * 0.35 - qx * sway * k, cy2 + ey * k * 0.35 - qy * sway * k, cx + ex * k, cy2 + ey * k);
-      c.stroke();
-    };
-    c.strokeStyle = FLOW6.color;
-    c.globalAlpha = FLOW6.alpha * 0.22;
-    c.lineWidth = FLOW6.width * 3.2;
-    S7(1);
-    c.globalAlpha = FLOW6.alpha;
-    c.lineWidth = FLOW6.width;
-    S7(0.55);
-    c.globalAlpha = 1;
   }
   if (!open2) {
     trace2(c, loops, 6);
@@ -147148,24 +147161,24 @@ function outside2(c, loops, dy, x, y, t) {
     c.closePath();
   }
 }
-function drawTracedWater(c, x, y, t, biome, seed2, offset2, at8, waterTile) {
+function drawTracedWater(c, x, y, t, biome, seed2, offset2, at8, waterTile, bleed = 0.5) {
   const mixed = biome === "w" || biome === "a" || !WATER4[biome], loops = mixed ? tracedShore(at8, x, y, t, offset2, seed2, 4, 80) : tracedShore(at8, x, y, t, offset2, seed2), open2 = !loops.length;
   if (open2 && !waterTile) return false;
   const W19 = WATER4[biome] ?? WATER4.w, px7 = x * t, py = y * t, n = terrainHash(x + offset2.x / t, y + offset2.y / t, seed2 + 1723), k = WALL8;
   c.save();
   c.beginPath();
-  c.rect(px7 - 0.5, py - 0.5, t + 1, t + 1);
+  c.rect(px7 - bleed, py - bleed, t + 2 * bleed, t + 2 * bleed);
   c.clip();
   c.lineJoin = "round";
   c.lineCap = "round";
   if (mixed) {
-    drawRiverMix(c, loops, open2, x, y, t, offset2, seed2, at8, waterAt, biome);
+    drawRiverMix(c, loops, open2, x, y, t, offset2, seed2, at8, waterAt, biome, bleed);
     c.restore();
     return true;
   }
   if (open2) {
     c.beginPath();
-    c.rect(px7 - 0.5, py - 0.5, t + 1, t + 1);
+    c.rect(px7 - bleed, py - bleed, t + 2 * bleed, t + 2 * bleed);
   }
   if (W19.glow && !open2) {
     trace3(c, loops);
@@ -147202,7 +147215,7 @@ function drawTracedWater(c, x, y, t, biome, seed2, offset2, at8, waterTile) {
   c.clip();
   if (W19.kind === "lava") {
     c.fillStyle = "#ffc246";
-    c.fillRect(px7 - 0.5, py - 0.5, t + 1, t + 1);
+    c.fillRect(px7 - bleed, py - bleed, t + 2 * bleed, t + 2 * bleed);
     if (!open2) {
       c.strokeStyle = "#ff8a2a";
       c.lineWidth = 48;
@@ -147231,16 +147244,9 @@ function drawTracedWater(c, x, y, t, biome, seed2, offset2, at8, waterTile) {
       c.fillStyle = "#5a3a30";
       c.fill();
     }
-    if (waterTile && n % 3 === 0) {
-      c.strokeStyle = "#fff3b8";
-      c.lineWidth = 1.1;
-      c.beginPath();
-      c.arc(px7 + 6 + (n >>> 4) % 20, py + 6 + (n >>> 10) % 20, 1.6 + (n >>> 16) % 2, 0, Math.PI * 2);
-      c.stroke();
-    }
   } else if (W19.kind === "ice") {
     c.fillStyle = W19.deep;
-    c.fillRect(px7 - 0.5, py - 0.5, t + 1, t + 1);
+    c.fillRect(px7 - bleed, py - bleed, t + 2 * bleed, t + 2 * bleed);
     if (!open2) {
       c.strokeStyle = mix33(W19.shallow, W19.deep, 0.5);
       c.lineWidth = 40;
@@ -147277,7 +147283,7 @@ function drawTracedWater(c, x, y, t, biome, seed2, offset2, at8, waterTile) {
     }
   } else {
     c.fillStyle = mix33(W19.deep, "#06141c", 0.2);
-    c.fillRect(px7 - 0.5, py - 0.5, t + 1, t + 1);
+    c.fillRect(px7 - bleed, py - bleed, t + 2 * bleed, t + 2 * bleed);
     if (!open2) {
       c.strokeStyle = W19.deep;
       c.lineWidth = 48;
@@ -147309,17 +147315,6 @@ function drawTracedWater(c, x, y, t, biome, seed2, offset2, at8, waterTile) {
     c.strokeStyle = W19.foam;
     c.globalAlpha = 0.85;
     c.lineWidth = 1.7;
-    c.stroke();
-    c.globalAlpha = 1;
-  }
-  if (waterTile && W19.kind !== "ice" && n % 3 !== 0) {
-    const rx = px7 + 10 + (n >>> 7) % 12, ry = py + 9 + (n >>> 11) % 14, l = 3 + (n >>> 15) % 6;
-    c.strokeStyle = W19.foam;
-    c.globalAlpha = 0.6;
-    c.lineWidth = 1.2;
-    c.beginPath();
-    c.moveTo(rx - l, ry);
-    c.quadraticCurveTo(rx, ry - 2.2, rx + l, ry);
     c.stroke();
     c.globalAlpha = 1;
   }
@@ -149525,7 +149520,7 @@ function* prepareEnvironmentDrawing(ctx, space, viewport = null, layout = create
     if (terrainAt(x, y) === void 0) continue;
     paintedTerrainTiles++;
     const type = terrainAt(x, y), n = terrainHash(x + offset2.x / t, y + offset2.y / t, seed2), px7 = x * t, py = y * t;
-    drawInlandDryBank(ctx, type, v.biomes?.[y - oy]?.[x - ox], x, y, t, seed2, offset2, terrainAt);
+    if (drawInlandDryBank(ctx, type, v.biomes?.[y - oy]?.[x - ox], x, y, t, seed2, offset2, terrainAt)) pilot?.blendWater?.(ctx, space, x, y, t, (code2) => drawTracedWater(ctx, x, y, t, code2, seed2, offset2, terrainAt, false, 1));
     if (type === "v") {
       ctx.fillStyle = "#070b12";
       ctx.fillRect(px7, py, t, t);
@@ -149533,6 +149528,7 @@ function* prepareEnvironmentDrawing(ctx, space, viewport = null, layout = create
     }
     if (pilot?.coastOwns?.(space, type)) continue;
     if (drawPlannedSurfaceCell(ctx, type, v.biomes?.[y - oy]?.[x - ox], x, y, t, seed2, offset2, terrainAt)) {
+      if (type === "W" || type === "L") pilot?.blendWater?.(ctx, space, x, y, t, (code2) => drawTracedWater(ctx, x, y, t, code2, seed2, offset2, terrainAt, true, 1));
       pilot?.drawSurface(ctx, space, type, x, y, t, terrainAt);
       continue;
     }
