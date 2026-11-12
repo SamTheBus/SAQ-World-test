@@ -19432,9 +19432,9 @@ var AEGIS_GOLIATH = freezeWire({
   range: 220,
   turnSpeed: 0.038,
   abilityRecoveryTicks: 110,
-  magnetic_pull: { telegraphTicks: 90, radius: 70, pullSpeed: 2.2, damageNumerator: 16 },
-  boomerang_shield: { telegraphTicks: 60, speed: 4.5, acceleration: 0.24, maxSpeed: 5.5, radius: 8, lifeTicks: 180, damageNumerator: 9 },
-  shield_bash: { telegraphTicks: 75, radius: 64, halfAngle: 0.5, damageNumerator: 17, dazeTicks: 210 },
+  magnetic_pull: { telegraphTicks: 90, radius: 105, pullSpeed: 2.2, damageNumerator: 16 },
+  boomerang_shield: { telegraphTicks: 60, speed: 4.5, acceleration: 0.24, maxSpeed: 5.5, radius: 12, lifeTicks: 180, damageNumerator: 9 },
+  shield_bash: { telegraphTicks: 75, radius: 100, halfAngle: 0.7, damageNumerator: 17, dazeTicks: 210 },
   blockHalfAngle: 0.6
 });
 var aegisFortFloor = (site, index, state = null) => site?.familyId === "site-family:fort" && index === site.floorCount - 1 && (site.sizeTier === "standard" && !(state && siteEndsActiveV1(state) && siteEndSpecForSiteV1(site, index)) || site.sizeTier === "deep" && usesWildernessFairnessV3_2(state) && site.socket?.provenance?.reservationId === bossSiteV1("aegis_goliath") && site.socket?.region?.biome === "upland");
