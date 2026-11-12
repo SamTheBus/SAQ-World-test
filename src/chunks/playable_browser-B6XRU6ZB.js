@@ -82602,7 +82602,7 @@ function bareHead(c, st, S8, H7, blink, hat) {
   c.restore();
 }
 function facialHair(c, b, H7) {
-  const MOUTH2 = "#3b2418", o = { bottom: true, split: 0.64, lw: 1.2 }, BEARD = [-3.6, -7.4, -2.2, -7.4, -1.4, -4.2, 1.2, -3.6, 8.2, -3.6, 8.4, 0.2, 6.8, 2.2, -0.8, 2.2, -3.4, 0.2];
+  const MOUTH3 = "#3b2418", o = { bottom: true, split: 0.64, lw: 1.2 }, BEARD = [-3.6, -7.4, -2.2, -7.4, -1.4, -4.2, 1.2, -3.6, 8.2, -3.6, 8.4, 0.2, 6.8, 2.2, -0.8, 2.2, -3.4, 0.2];
   if (b === "stubble") {
     alpha(c, H7.b, 0.32, () => {
       c.fillRect(-1.4, -3.8, 9.4, 4.4);
@@ -82613,18 +82613,18 @@ function facialHair(c, b, H7) {
   if (b === "handlebar") G2(c, [1, -3, 2.4, -4.2, 7.4, -4.2, 9.2, -3.6, 10, -5.6, 11, -4.4, 9.8, -2.2, 7.2, -2.6, 4.8, -3.4, 2.4, -2.6], H7, { flat: true, lw: 1 });
   if (b === "goatee") {
     G2(c, [1.8, -4, 7.2, -4, 7.8, -3, 6.8, -2.2, 6.8, 0.4, 6, 2.4, 3.2, 2.4, 2.2, 0.4, 2.2, -2.2, 1.2, -3], H7, { bottom: true, split: 0.6, lw: 1.1 });
-    px3(c, 2.8, -1.8, 3.6, 0.8, MOUTH2);
+    px3(c, 2.8, -1.8, 3.6, 0.8, MOUTH3);
   }
   if (b === "chinstrap") G2(c, [-3.4, -7.4, -2.2, -7.4, -1.4, -1.8, 1, -0.6, 7.6, -0.6, 8.2, 0.6, 7.2, 1.8, -0.6, 1.8, -3.2, 0.2], H7, { flat: true, lw: 1.1 });
   if (b === "chops") G2(c, [-3.6, -7.6, -1.8, -7.6, -0.4, -4.6, 2, -4.2, 7.6, -4.2, 8.4, -3.2, 6.8, -2.4, 2.4, -2.6, 1.2, -1.4, 0.2, 1, -2.2, 1.2, -3.4, -0.4], H7, o);
   if (b === "bushy") {
     G2(c, [-4, -7.8, -2.2, -7.8, -1.4, -4.4, 1.2, -3.8, 8.4, -3.8, 9.6, -1.2, 9.2, 3.2, 7.6, 6.4, 4.2, 7.8, 0.8, 6.8, -1.6, 4.6, -3.8, 1.4], H7, o);
-    px3(c, 2.4, -2.6, 3.8, 0.9, MOUTH2);
+    px3(c, 2.4, -2.6, 3.8, 0.9, MOUTH3);
   }
   if (b === "short" || b === "long" || b === "braided") {
     if (b === "long") G2(c, [-1.4, 1.4, 7.8, 1.4, 6.6, 6.8, 3.6, 8.8, 0.6, 6.8], H7, { bottom: true, split: 0.6, lw: 1.2 });
     G2(c, BEARD, H7, o);
-    px3(c, 2.4, -2.6, 3.8, 0.9, MOUTH2);
+    px3(c, 2.4, -2.6, 3.8, 0.9, MOUTH3);
     if (b === "braided") {
       for (let i = 0; i < 3; i++) G2(c, oct4(2.8 - i % 2 * 0.4, 1.6 + i * 2.3, 2.8, 2.4, 0.8), H7, { bottom: true, split: 0.6, lw: 1 });
       R3(c, 3, 8.4, 2.4, 1.6, P10.bead, { flat: true, lw: 0.9 });
@@ -95242,7 +95242,7 @@ function frostMovementRates(s) {
 
 // src/shared/rules/boss_arena_v1.js
 var T73 = 32;
-var ARENA_OUTSIDE_TILES = 3;
+var ARENA_OUTSIDE_TILES = 4;
 function arenaRoomV1(floor) {
   const g = floor?.graph, r = g?.rooms?.find((x) => x.roomId === g.topology?.endNodeId);
   if (!r) return null;
@@ -151026,11 +151026,14 @@ function puff4(c, x, y, r, dark) {
   c.fillStyle = P17.hi;
   c.fill();
 }
+var MOUTH2 = 32;
+var BODY_UP = 23;
+var wallLine = (d) => d.ny ? { x: d.x, y: d.y + d.ny * MOUTH2 + BODY_UP } : { x: d.x + d.nx * MOUTH2, y: d.y + BODY_UP * 0.5 };
 function doorPoints(d) {
-  const n = Math.max(3, Math.round((d.half * 2 - 16) / STEP4) + 1), pts2 = [];
+  const n = Math.max(3, Math.round((d.half * 2 - 16) / STEP4) + 1), pts2 = [], o = wallLine(d);
   for (let i = 0; i < n; i++) {
     const u = -d.half + 8 + (d.half * 2 - 16) * i / (n - 1);
-    pts2.push(d.ny ? { x: d.x + u, y: d.y + i % 2 * 1.5 } : { x: d.x + i % 2 * 1.5, y: d.y + u });
+    pts2.push(d.ny ? { x: o.x + u, y: o.y + i % 2 * 1.5 } : { x: o.x + i % 2 * 1.5, y: o.y + u });
   }
   return pts2;
 }
@@ -151060,7 +151063,7 @@ function partsFor(model, w) {
   const out = [];
   for (const a of Object.values(model.entitiesById ?? {})) {
     if (a.team !== "party" || !a.alive) continue;
-    const d = w.door, along3 = d.ny ? Math.abs(a.position.x - d.x) : Math.abs(a.position.y - d.y), across2 = d.ny ? Math.abs(a.position.y - d.y) : Math.abs(a.position.x - d.x);
+    const d = w.door, o = wallLine(d), along3 = d.ny ? Math.abs(a.position.x - o.x) : Math.abs(a.position.y - o.y), across2 = d.ny ? Math.abs(a.position.y - o.y + BODY_UP * 0.5) : Math.abs(a.position.x - o.x);
     if (along3 <= d.half + 20 && across2 < 40) out.push({ x: a.position.x, y: a.position.y, k: 1 - across2 / 40 });
   }
   return out;
@@ -151072,11 +151075,11 @@ function columns(pts2, t, { rise, blow, parts }) {
     if (s <= 0 || b >= 1) return null;
     let dx = Math.sin(t * 0.8 + i * 2.1) * 1.6, dy = Math.sin(t * 1.7 + i * 1.3) * 1.2, k = 1;
     for (const q of parts) {
-      const d = Math.hypot(p.x - q.x, (p.y - q.y) * 2);
-      if (d < 34) {
-        const f = (1 - d / 34) * q.k;
-        dx += Math.sign(p.x - q.x || 1) * f * 16;
-        k *= 1 - f * 0.55;
+      const d = Math.hypot(p.x - q.x, (p.y - BODY_UP * 0.6 - q.y) * 1.3);
+      if (d < 44) {
+        const f = (1 - d / 44) * q.k;
+        dx += Math.sign(p.x - q.x || 1) * f * 22;
+        k *= 1 - f * 0.7;
       }
     }
     dx += Math.sign(p.x - cx || 1) * b * 20;
