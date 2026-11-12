@@ -682,7 +682,7 @@ var FOREST_STAND_PROFILES = Object.freeze({
   r: { glade: 0.44, forest: 0.56, core: 0.86, treeOpen: 0.28, treeForest: 0.88, lone: 0.05, massCore: 0.6, massForest: 0, cover: "heather", coverAt: 0.54, water: 0.08, height: 0.55, outcrop: 0.7 },
   s: { glade: 0.44, forest: 0.56, core: 0.88, treeOpen: 0.26, treeForest: 0.9, lone: 0.03, massCore: 0.5, massForest: 0, cover: null, coverAt: 1, water: 0, height: 0.5, outcrop: 0.74 },
   d: { glade: 0.64, forest: 2, core: 2, treeOpen: 0.2, treeForest: 0, lone: 0.018, massCore: 0, massForest: 0, cover: null, coverAt: 1, water: 0.9, height: 0, outcrop: 0.7, oasis: true },
-  l: { glade: 0.56, forest: 2, core: 2, treeOpen: 0.38, treeForest: 0, lone: 0.02, massCore: 0, massForest: 0, cover: null, coverAt: 1, water: 0, height: 0, outcrop: 0.62 }
+  l: { glade: 0.56, forest: 2, core: 2, treeOpen: 0.14, treeForest: 0, lone: 0.02, massCore: 0, massForest: 0, cover: null, coverAt: 1, water: 0, height: 0, outcrop: 0.62 }
 });
 var STAND_ZONE = Object.freeze({ GLADE: 0, OPEN: 1, FOREST: 2, CORE: 3 });
 var ROCK_MASSES = Object.freeze(["outcrop", "mesa", "lava-rock"]);

@@ -2125,7 +2125,7 @@ var NEST_POLICY = freezeWire({
   rage: { damagePercent: 115, speedPercent: 110 },
   quickClearQualityHundredths: 100,
   // The elite trick a broodling carries, by nest skin.
-  broodAffixes: { woodland: "web_weaver", grassland: "swift_commander", desert: "iron_citadel", frostland: "glacial_warden", wetland: "toxic_decay", upland: "blood_berserker" },
+  broodAffixes: { woodland: "web_weaver", grassland: "swift_commander", desert: "iron_citadel", frostland: "glacial_warden", wetland: "toxic_decay", upland: "blood_berserker", volcanic: "slag_shaper" },
   triggerRadius: 96,
   activeRadius: 768,
   playerClearance: 48,
@@ -2137,8 +2137,8 @@ var NEST_POLICY = freezeWire({
   simulationHz: 60
 });
 var NEST_MEMBERS = PLANNED_EVENT_MEMBERS;
-var NEST_SKINS = freezeWire({ woodland: "woodland", grassland: "grassland", desert: "desert", volcanic: "desert", frostland: "frostland", upland: "upland", wetland: "wetland", tropical: "wetland" });
-var NEST_LABELS = freezeWire({ woodland: "Spore Nest", grassland: "Hive Nest", desert: "Scarab Nest", frostland: "Frost Nest", wetland: "Bog Nest", upland: "Crag Nest" });
+var NEST_SKINS = freezeWire({ woodland: "woodland", grassland: "grassland", desert: "desert", volcanic: "volcanic", frostland: "frostland", upland: "upland", wetland: "wetland", tropical: "wetland" });
+var NEST_LABELS = freezeWire({ woodland: "Spore Nest", grassland: "Hive Nest", desert: "Scarab Nest", frostland: "Frost Nest", wetland: "Bog Nest", upland: "Crag Nest", volcanic: "Magma Nest" });
 var nestSkinOfV1 = (biome) => NEST_SKINS[biome] ?? "woodland";
 var ROADSIDE_CREW = freezeWire(["bandit_cutthroat", "bandit_archer", "bandit_cutthroat", "bandit_brute", "bandit_archer", "bandit_cutthroat", "bandit_archer", "bandit_cutthroat", "bandit_archer", "bandit_captain"]);
 var ROADSIDE_MEMBERS = ROADSIDE_CREW.length;
@@ -12261,7 +12261,7 @@ var FOREST_STAND_PROFILES = Object.freeze({
   r: { glade: 0.44, forest: 0.56, core: 0.86, treeOpen: 0.28, treeForest: 0.88, lone: 0.05, massCore: 0.6, massForest: 0, cover: "heather", coverAt: 0.54, water: 0.08, height: 0.55, outcrop: 0.7 },
   s: { glade: 0.44, forest: 0.56, core: 0.88, treeOpen: 0.26, treeForest: 0.9, lone: 0.03, massCore: 0.5, massForest: 0, cover: null, coverAt: 1, water: 0, height: 0.5, outcrop: 0.74 },
   d: { glade: 0.64, forest: 2, core: 2, treeOpen: 0.2, treeForest: 0, lone: 0.018, massCore: 0, massForest: 0, cover: null, coverAt: 1, water: 0.9, height: 0, outcrop: 0.7, oasis: true },
-  l: { glade: 0.56, forest: 2, core: 2, treeOpen: 0.38, treeForest: 0, lone: 0.02, massCore: 0, massForest: 0, cover: null, coverAt: 1, water: 0, height: 0, outcrop: 0.62 }
+  l: { glade: 0.56, forest: 2, core: 2, treeOpen: 0.14, treeForest: 0, lone: 0.02, massCore: 0, massForest: 0, cover: null, coverAt: 1, water: 0, height: 0, outcrop: 0.62 }
 });
 var PROFILES = FOREST_STAND_PROFILES;
 var STAND_ZONE = Object.freeze({ GLADE: 0, OPEN: 1, FOREST: 2, CORE: 3 });
