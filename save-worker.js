@@ -5710,6 +5710,10 @@ var volcanoesForBinding = (b) => {
   const m = /^world-maker-v1\.(\d+)$/.exec(b?.worldMaker ?? "");
   return Boolean(m) && Number(m[1]) >= 16;
 };
+var siteVolcanoesForBinding = (b) => {
+  const m = /^world-maker-v1\.(\d+)$/.exec(b?.worldMaker ?? "");
+  return Boolean(m) && Number(m[1]) >= 19;
+};
 var CLIFF2 = 3;
 var STEPK2 = CLIFF2 + 5;
 var RAMP2 = 13;
@@ -5725,22 +5729,50 @@ function vnoise2(k, x, y) {
   const gx = Math.floor(x), gy = Math.floor(y), u = sm2(x - gx), v = sm2(y - gy), a = lat2(k, gx, gy), b = lat2(k, gx + 1, gy), c = lat2(k, gx, gy + 1), d = lat2(k, gx + 1, gy + 1);
   return a + (b - a) * u + (c + (d - c) * u - (a + (b - a) * u)) * v;
 }
-var VSIZES = { 4: [34, 28], 3: [28, 23] };
+var VSIZES = { 4: [34, 28], 3: [28, 23], 2: [22, 18] };
 var MSIZES = { 2: [22, 14], 1: [15, 9] };
-var volcanoDetail = (d) => d.n + "_" + d.sh + "_" + (d.dir > 0 ? "e" : "w") + "_" + d.kind;
+var EXTRAS = ["c", "h", "t", "s", "g"];
+var EXTRA_NAMES = { c: "cut", h: "hole", t: "ch", s: "s", g: "gap" };
+var volcanoDetail = (d) => d.n + "_" + d.sh + "_" + (d.dir > 0 ? "e" : "w") + "_" + d.kind + EXTRAS.map((k) => d[EXTRA_NAMES[k]] ? "_" + k + d[EXTRA_NAMES[k]].join(".") : "").join("");
 var volcanoKey = (d) => d.x + "," + d.y;
+function volcanoBox(d) {
+  const volcano = d.kind === "v", [A1, B1] = d.s ?? (volcano ? VSIZES : MSIZES)[d.n], pad = volcano ? 8 : d.gap ? 9 : 2;
+  return { x0: d.x - A1 - pad, x1: d.x + A1 + pad, y0: d.y - B1 - 2, y1: d.y + B1 + CLIFF2 + (volcano ? 10 : 5) };
+}
+function volcanoSurelyOn(d, x, y) {
+  const [A1, B1] = d.s ?? (d.kind === "v" ? VSIZES : MSIZES)[d.n], X = x - d.x, Y = y - d.y;
+  if (d.cut && X >= d.cut[0] - 1 && Y >= d.cut[1] - 1 || d.gap && X > 0 || d.ch && X >= d.ch[0] - 1 && Y >= d.ch[1] - 1 && Y <= d.ch[2] + 1) return false;
+  if (d.hole && X >= d.hole[0] - 4 && X <= d.hole[2] + 4 && Y >= d.hole[1] - 4 && Y <= d.hole[3] + 4) return false;
+  const u = (x + 0.5 - d.x) / A1, v = Y / (B1 + 0.5), uu = u * u, vv = v * v;
+  return d.kind === "m" ? 0.2 * (uu + vv) + 0.8 * (uu * uu * uu + vv * vv * vv) <= 0.78 : uu + vv <= 0.84;
+}
 function volcanoGeometry(d) {
-  const { x: cx, y: cy, n, sh, dir, kind: kind2 } = d, volcano = kind2 === "v", [A1, B1] = (volcano ? VSIZES : MSIZES)[n], levels2 = [null];
+  const { x: cx, y: cy, n, sh, dir, kind: kind2 } = d, volcano = kind2 === "v", caldera = kind2 === "c", round2 = kind2 !== "m", [A1, B1] = d.s ?? (volcano ? VSIZES : MSIZES)[n], levels2 = [null];
+  const bare = caldera || kind2 === "m" && Boolean(d.gap);
+  const inHole = (x, y) => {
+    const h = d.hole;
+    if (!h) return false;
+    const hx = cx + (h[0] + h[2]) / 2, hy = cy + (h[1] + h[3]) / 2, u = (x + 0.5 - hx) / ((h[2] - h[0] + 1) / 2), v = (y + 0.5 - hy) / ((h[3] - h[1] + 1) / 2);
+    return u * u + v * v + 0.18 * (vnoise2((sh ^ 803294) >>> 0, x / 6, y / 6) - 0.5) <= 1;
+  };
+  const inCh = (x, y) => Boolean(d.ch) && x - cx >= d.ch[0] && y - cy >= d.ch[1] && y - cy <= d.ch[2];
+  let SG = null;
+  const stairCut = (x, y) => Boolean(SG) && x > SG.R && y >= SG.top - CLIFF2 - 1 && y <= SG.bot + CLIFF2 + 1;
+  const blocked2 = (x, y) => {
+    const X = x - cx, Y = y - cy;
+    return stairCut(x, y) || Boolean(d.cut && X >= d.cut[0] && Y >= d.cut[1] || d.hole && inHole(x, y) || d.ch && X >= d.ch[0] && Y >= d.ch[1] && Y <= d.ch[2]);
+  };
+  const inGap = (x, y) => Boolean(d.gap) && x > cx && y - cy >= d.gap[0] && y - cy <= d.gap[1];
   for (let k = 1; k <= n; k++) {
-    const A = A1 - 6 * (k - 1), top = cy - B1 + (volcano ? 5 : 3) * (k - 1), E = cy + B1 - STEPK2 * (k - 1);
+    const A = A1 - 6 * (k - 1), top = cy - B1 + (round2 ? 5 : 3) * (k - 1), E = cy + B1 - STEPK2 * (k - 1);
     levels2.push({ k, A, top, E, mid: (top + E + 1) / 2, hb: (E + 1 - top) / 2 });
   }
   const X0 = cx - 6, X1 = X0 + RAMP2 - 1;
-  const stair = n >= 3 ? { k: 2, x: dir > 0 ? X1 + 3 : X0 - 4 } : null;
+  const stair = n >= 3 && !bare ? { k: 2, x: dir > 0 ? X1 + 3 : X0 - 4 } : null;
   for (let k = 1; k <= n; k++) {
     const L2 = levels2[k];
-    L2.f0 = X0 - 1;
-    L2.f1 = X1 + 1;
+    L2.f0 = bare ? 1 : X0 - 1;
+    L2.f1 = bare ? 0 : X1 + 1;
     if (stair?.k === k) {
       L2.f0 = Math.min(L2.f0, stair.x - 1);
       L2.f1 = Math.max(L2.f1, stair.x + 2);
@@ -5748,34 +5780,50 @@ function volcanoGeometry(d) {
   }
   const rampEast = (k) => (k - 1) % 2 === 0 === dir > 0;
   const ramps = [];
-  for (let k = 1; k <= n; k++) {
+  if (!bare) for (let k = 1; k <= n; k++) {
     const east = rampEast(k);
     ramps.push({ k, east, x0: X0, x1: X1, low: east ? X0 : X1, high: east ? X1 : X0, E: levels2[k].E });
   }
   const summit = levels2[n];
   const pool = volcano ? { x: cx, y: summit.top + 3 + 4, rx: n >= 4 ? 6 : 5, ry: 4 } : null;
-  const cairn = pool ? { x: cx, y: pool.y + pool.ry + 1 } : { x: cx, y: summit.top + 3 };
-  const pad = volcano ? 8 : 2, x0 = cx - A1 - pad, x1 = cx + A1 + pad, y0 = cy - B1 - 2, y1 = levels2[1].E + CLIFF2 + (volcano ? 10 : 5);
+  const cairn = pool ? { x: cx, y: pool.y + pool.ry + 1 } : bare ? null : { x: cx, y: summit.top + 3 };
+  const pad = volcano ? 8 : d.gap ? 9 : 2, x0 = cx - A1 - pad, x1 = cx + A1 + pad, y0 = cy - B1 - 2, y1 = levels2[1].E + CLIFF2 + (volcano ? 10 : 5);
   const memo = /* @__PURE__ */ new Map();
+  if (d.gap) {
+    const top = cy + d.gap[0], bot = cy + d.gap[1], N2 = 8;
+    let R2 = Infinity;
+    for (let y = top - CLIFF2 - 1; y <= bot + CLIFF2 + 1; y++) {
+      let e = -Infinity;
+      for (let x = x1; x > cx; x--) if (raw(1, x, y)) {
+        e = x;
+        break;
+      }
+      R2 = Math.min(R2, e);
+    }
+    if (R2 > cx + 4 && R2 + N2 <= x1) {
+      const dAt = (j) => Math.min(CLIFF2, Math.floor(j / 2));
+      SG = { x0: R2 + 1, x1: R2 + N2, R: R2, top, bot, t0: top + 1, t1: bot - 1, N: N2, d: dAt };
+    }
+  }
   function raw(k, x, y) {
     const L2 = levels2[k];
     if (y < L2.top || y > L2.E) return false;
     const u = (x + 0.5 - cx) / L2.A, v = (y + 0.5 - L2.mid) / L2.hb;
-    let q = volcano ? u * u + v * v : 0.2 * (u * u + v * v) + 0.8 * (u * u * u * u * u * u + v * v * v * v * v * v);
+    let q = round2 ? u * u + v * v : 0.2 * (u * u + v * v) + 0.8 * (u * u * u * u * u * u + v * v * v * v * v * v);
     const au = u < 0 ? -u : u, s = v > 0 ? Math.min(1, Math.max(0.15, au * 1.7 - 0.4)) : 1;
-    q += (volcano ? 0.3 : 0.4) * s * (vnoise2(sh + k * 7919 >>> 0, x / 5, y / 5) - 0.5);
+    q += (round2 ? 0.3 : 0.4) * s * (vnoise2(sh + k * 7919 >>> 0, x / 5, y / 5) - 0.5);
     return q <= 1;
   }
   function inS(k, x, y) {
     if (k <= 0) return true;
-    if (k > n || x < x0 || x > x1 || y < y0 || y > y1) return false;
+    if (k > n || x < x0 || x > x1 || y < y0 || y > y1 || blocked2(x, y)) return false;
     const key9 = (k * 4096 + (x - x0)) * 4096 + (y - y0);
     let r = memo.get(key9);
     if (r !== void 0) return r;
     const L2 = levels2[k];
     r = x >= L2.f0 && x <= L2.f1 ? y <= L2.E && y >= L2.top && (y >= L2.E - 3 || raw(k, x, y)) : raw(k, x, y);
     if (r && k > 1) {
-      const G2 = volcano ? 4 : 3;
+      const G2 = round2 ? 4 : 3;
       r = inS(k - 1, x, y - G2) && inS(k - 1, x - G2, y) && inS(k - 1, x + G2, y) && inS(k - 1, x - G2 + 1, y - G2 + 1) && inS(k - 1, x + G2 - 1, y - G2 + 1) && inS(k - 1, x, y + CLIFF2 + 3);
     }
     if (memo.size > 1 << 16) memo.clear();
@@ -5807,14 +5855,22 @@ function volcanoGeometry(d) {
     return u * u + v * v + 0.35 * (vnoise2((sh ^ 5369127) >>> 0, x / 2.5, y / 2.5) - 0.5) <= 1;
   };
   function base(x, y) {
+    if (SG && x >= SG.x0 && x <= SG.x1) {
+      const dd = SG.d(x - SG.x0), lift = CLIFF2 - dd;
+      if (y >= SG.t0 + dd && y <= SG.t1 + dd) return { role: "causeway", block: false, level: 0 };
+      if ((lift > 0 || dd > SG.d(x - SG.x0 - 1)) && y === SG.t0 + dd - 1) return { role: "wall", block: true, level: 0 };
+      if (lift > 0 && y > SG.t1 + dd && y <= SG.t1 + CLIFF2) return { role: "cliff", block: true, level: 0 };
+    }
     const ra = rampAt(x, y);
     if (ra && level(x, y) === ra.k - 1) return ra.role === "ramp" ? { role: "ramp", block: false, level: ra.k - 1 } : { role: "rampface", block: true, level: ra.k - 1 };
     const k = level(x, y);
     if (stairAt(x, y) && k === stair.k - 1) return { role: "stair", block: false, level: k };
-    if (k < n && cliffOver(k + 1, x, y)) return { role: "cliff", block: true, level: k };
+    if (k < n && cliffOver(k + 1, x, y) && !inGap(x, y)) return { role: "cliff", block: true, level: k };
     if (k > 0) {
-      for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [-1, -1], [1, -1]]) if (level(x + dx, y + dy) < k) return { role: "edge", block: true, level: k };
-      if (k === n && x === cairn.x && y === cairn.y) return { role: "cairn", block: true, level: k };
+      if (!inGap(x, y)) {
+        for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [-1, -1], [1, -1]]) if (level(x + dx, y + dy) < k) return { role: "edge", block: true, level: k };
+      }
+      if (k === n && cairn && x === cairn.x && y === cairn.y) return { role: "cairn", block: true, level: k };
       if (k === n && inPool(x, y)) return { role: "lava", block: true, level: k };
       return { role: "top", block: false, level: k };
     }
@@ -5846,12 +5902,13 @@ function volcanoGeometry(d) {
   const onPath = (x, y) => pathTiles.has(x + "," + y);
   const flows = [], flowAt = /* @__PURE__ */ new Map();
   if (volcano) {
-    const sides = [stair ? dir > 0 ? -1 : 1 : sh >>> 3 & 1 ? 1 : -1];
+    const first = stair ? dir > 0 ? -1 : 1 : sh >>> 3 & 1 ? 1 : -1, sides = d.cut ? [first, -first] : [first];
     for (const side of sides) {
       let xc = pool.x + side * (pool.rx - 0.5), ground = 0, ok = true;
       const tiles3 = [], pts = [], hit = /* @__PURE__ */ new Map();
+      if (flows.length) break;
       const put3 = (x, y) => {
-        if (x < x0 || x > x1 || y < y0 || y > y1) {
+        if (x < x0 || x > x1 || y < y0 || y > y1 || blocked2(x, y)) {
           ok = false;
           return;
         }
@@ -5919,23 +5976,17 @@ function volcanoGeometry(d) {
     }
     return b;
   }
-  const roles = /* @__PURE__ */ new Map();
+  const RW = x1 - x0 + 3, RH = y1 - y0 + 3, roles = new Array(RW * RH).fill(null);
+  let pockets = 0;
   function role(x, y) {
     if (x < x0 || x > x1 || y < y0 || y > y1) return null;
-    const key9 = (x - x0) * 4096 + (y - y0);
-    let r = roles.get(key9);
-    if (r !== void 0) return r;
-    r = classify(x, y);
-    if (r && !r.block && pocket.has(key9)) r = { role: "edge", block: true, level: r.level };
-    if (roles.size > 1 << 16) roles.clear();
-    roles.set(key9, r);
-    return r;
+    return roles[(y - y0 + 1) * RW + x - x0 + 1];
   }
-  const pocket = /* @__PURE__ */ new Set();
   {
-    const w = x1 - x0 + 3, h = y1 - y0 + 3, seen = new Uint8Array(w * h), q = [], walk = new Uint8Array(w * h);
+    const w = RW, h = RH, seen = new Uint8Array(w * h), q = [], walk = new Uint8Array(w * h);
     for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) {
       const x = x0 - 1 + i, y = y0 - 1 + j, r = x < x0 || x > x1 || y < y0 || y > y1 ? null : classify(x, y);
+      roles[j * w + i] = r;
       walk[j * w + i] = !r || !r.block ? 1 : 0;
       if ((i === 0 || j === 0 || i === w - 1 || j === h - 1) && walk[j * w + i]) {
         seen[j * w + i] = 1;
@@ -5953,7 +6004,13 @@ function volcanoGeometry(d) {
         q.push(o);
       }
     }
-    for (let j = 1; j < h - 1; j++) for (let i = 1; i < w - 1; i++) if (walk[j * w + i] && !seen[j * w + i]) pocket.add((i - 1) * 4096 + (j - 1));
+    for (let j = 1; j < h - 1; j++) for (let i = 1; i < w - 1; i++) {
+      const o = j * w + i, r = roles[o];
+      if (walk[o] && !seen[o]) {
+        pockets++;
+        if (r) roles[o] = { role: "edge", block: true, level: r.level };
+      }
+    }
   }
   function free(x, y) {
     const r = role(x, y);
@@ -5965,7 +6022,36 @@ function volcanoGeometry(d) {
     }
     return true;
   }
-  return Object.freeze({ d, n, kind: kind2, piece: VOLCANO_PIECE, detail: volcanoDetail(d), key: volcanoKey(d), levels: levels2, ramps, stair, cairn, pool, flows, cliff: CLIFF2, ramp: RAMP2, liftAt: liftAt2, bbox: { x0, y0, x1, y1 }, inS, level, role, onPath, free, rampAt, pockets: pocket.size });
+  return Object.freeze({ d, n, kind: kind2, bare, inGap, piece: VOLCANO_PIECE, detail: volcanoDetail(d), key: volcanoKey(d), levels: levels2, ramps, stair, cairn, pool, flows, cliff: CLIFF2, ramp: RAMP2, liftAt: liftAt2, bbox: { x0, y0, x1, y1 }, inS, level, role, onPath, free, rampAt, pockets, gapStair: SG, inHole, inCh });
+}
+var SLOPES = /* @__PURE__ */ new Set(["ramp", "stair", "causeway"]);
+function volcanoSlopesSafe(g) {
+  const b = g.bbox, C = g.cliff, S = g.gapStair;
+  const at2 = (x, y) => {
+    const r = g.role(x, y);
+    if (r && r.block) return null;
+    if (!r || !SLOPES.has(r.role)) return { level: r ? r.level : 0 };
+    if (r.role === "ramp") {
+      const ra = g.rampAt(x, y);
+      return { lo: ra.lift === 0 ? ra.k - 1 : null, hi: ra.lift === C ? ra.k : null };
+    }
+    if (r.role === "stair") {
+      const E = g.levels[g.stair.k].E;
+      return { lo: y > E + C ? g.stair.k - 1 : null, hi: y === E + 1 ? g.stair.k : null };
+    }
+    const dd = S.d(x - S.x0);
+    return { lo: dd === C ? 0 : null, hi: dd === 0 ? 1 : null };
+  };
+  const meets = (p, q) => p.level !== void 0 ? q.level !== void 0 ? p.level === q.level : q.lo === p.level || q.hi === p.level : q.level === void 0 || p.lo === q.level || p.hi === q.level;
+  for (let y = b.y0 - 1; y <= b.y1 + 1; y++) for (let x = b.x0 - 1; x <= b.x1 + 1; x++) {
+    const p = at2(x, y);
+    if (!p) continue;
+    for (const [dx, dy] of [[1, 0], [0, 1]]) {
+      const q = at2(x + dx, y + dy);
+      if (q && !meets(p, q)) return false;
+    }
+  }
+  return true;
 }
 var VCELL = 160;
 var MCELL = 80;
@@ -5974,7 +6060,7 @@ var VKEEP = 75;
 var MKEEP = 34;
 var PEAK = [90, 160];
 var RING2 = [[1, 0], [-1, 0], [0, 1], [0, -1], [0.7, 0.7], [-0.7, 0.7], [0.7, -0.7], [-0.7, -0.7]];
-function createVolcanoes({ hash: hash22, ground, high, open: open2, biomeAt, bio = "l" }) {
+function createVolcanoes({ hash: hash22, ground, high, open: open2, biomeAt, bio = "l", sites: sites6 = [], towns = [], siteOpen = null }) {
   const vcells = /* @__PURE__ */ new Map(), mcells = /* @__PURE__ */ new Map();
   const deep = (x, y) => {
     let miss = 0;
@@ -5985,8 +6071,7 @@ function createVolcanoes({ hash: hash22, ground, high, open: open2, biomeAt, bio
     for (const r of PEAK) for (const [ux, uy] of RING2) if (biomeAt(Math.floor(x + ux * r), Math.floor(y + uy * r)) !== bio) return false;
     return true;
   };
-  function fits(g) {
-    const b = g.bbox;
+  function fits(b) {
     for (let ty = b.y0 - 3; ty <= b.y1 + 3; ty++) for (let tx = b.x0 - 3; tx <= b.x1 + 3; tx++) if (!ground(tx, ty)) return false;
     for (let ty = b.y0 - 3; ty <= b.y1 + 3; ty += 3) for (let tx = b.x0 - 3; tx <= b.x1 + 3; tx += 3) if (!open2(tx, ty)) return false;
     return true;
@@ -5997,9 +6082,9 @@ function createVolcanoes({ hash: hash22, ground, high, open: open2, biomeAt, bio
     let out = null;
     const h = terraceTileHash(hash22 ^ 31293, cx, cy), x = cx * VCELL + 48 + h % (VCELL - 96), y = cy * VCELL + 44 + (h >>> 8) % (VCELL - 88);
     if (ground(x, y) && high(x, y) >= VHIGH && h % 100 < VKEEP && deep(x, y)) for (const n of peak(x, y) ? [4, 3] : [3]) {
-      const g = volcanoGeometry({ x, y, n, sh: mix3(h ^ 1540483477), dir: h >>> 20 & 1 ? 1 : -1, kind: "v" });
-      if (fits(g)) {
-        out = g;
+      const d = { x, y, n, sh: mix3(h ^ 1540483477), dir: h >>> 20 & 1 ? 1 : -1, kind: "v" };
+      if (fits(volcanoBox(d))) {
+        out = volcanoGeometry(d);
         break;
       }
     }
@@ -6008,7 +6093,7 @@ function createVolcanoes({ hash: hash22, ground, high, open: open2, biomeAt, bio
     return out;
   }
   const nearVolcano = (x0, y0, x1, y1, pad) => {
-    for (let cy = Math.floor((y0 - pad) / VCELL) - 1; cy <= Math.floor((y1 + pad) / VCELL) + 1; cy++) for (let cx = Math.floor((x0 - pad) / VCELL) - 1; cx <= Math.floor((x1 + pad) / VCELL) + 1; cx++) {
+    for (let cy = Math.floor((y0 - pad - 156) / VCELL); cy <= Math.floor((y1 + pad - 14) / VCELL); cy++) for (let cx = Math.floor((x0 - pad - 153) / VCELL); cx <= Math.floor((x1 + pad - 6) / VCELL); cx++) {
       const g = volcano(cx, cy);
       if (!g) continue;
       const b = g.bbox;
@@ -6022,9 +6107,9 @@ function createVolcanoes({ hash: hash22, ground, high, open: open2, biomeAt, bio
     let out = null;
     const h = terraceTileHash(hash22 ^ 15889, cx, cy), x = cx * MCELL + 28 + h % (MCELL - 56), y = cy * MCELL + 22 + (h >>> 8) % (MCELL - 44);
     if (ground(x, y) && h % 100 < MKEEP) for (const n of (h >>> 16) % 3 ? [2, 1] : [1]) {
-      const g = volcanoGeometry({ x, y, n, sh: mix3(h ^ 461845907), dir: h >>> 20 & 1 ? 1 : -1, kind: "m" }), b = g.bbox;
-      if (!nearVolcano(b.x0, b.y0, b.x1, b.y1, 12) && fits(g)) {
-        out = g;
+      const d = { x, y, n, sh: mix3(h ^ 461845907), dir: h >>> 20 & 1 ? 1 : -1, kind: "m" }, b = volcanoBox(d);
+      if (!nearVolcano(b.x0, b.y0, b.x1, b.y1, 12) && !nearPieces(sitePieces(), b, 12) && fits(b)) {
+        out = volcanoGeometry(d);
         break;
       }
     }
@@ -6032,7 +6117,128 @@ function createVolcanoes({ hash: hash22, ground, high, open: open2, biomeAt, bio
     mcells.set(key9, out);
     return out;
   }
+  let pieces = null;
+  const trailEdits = /* @__PURE__ */ new Map(), openMemo = /* @__PURE__ */ new Map();
+  const openAt2 = (x, y, own3, ok) => {
+    const k = ok + "|" + x + "," + y;
+    let v = openMemo.get(k);
+    if (v === void 0) {
+      v = siteOpen(x, y, own3);
+      openMemo.set(k, v);
+    }
+    return v;
+  };
+  function fitsSite(g, s) {
+    const b = g.bbox, K = s.keep;
+    for (let y = b.y0; y <= b.y1; y++) for (let x = b.x0; x <= b.x1; x++) {
+      const r = g.role(x, y);
+      if (!r) continue;
+      if (K && x >= K.x0 && x <= K.x1 && y >= K.y0 && y <= K.y1) return false;
+      if (r.role === "apron" && !r.block) continue;
+      if (!openAt2(x, y, s.ownSet, s.ok)) return false;
+    }
+    for (const t of s.trail) {
+      const [x, y] = t.split(",").map(Number), r = g.role(x, y);
+      if (r && r.block) return false;
+    }
+    return true;
+  }
+  function roughFit(d, s) {
+    const b = volcanoBox(d);
+    if (nearVolcano(b.x0, b.y0, b.x1, b.y1, 8) || nearPieces(pieces, b, 8)) return false;
+    for (let y = b.y0; y <= b.y1; y += 2) for (let x = b.x0; x <= b.x1; x += 2) if (volcanoSurelyOn(d, x, y) && !openAt2(x, y, s.ownSet, s.ok)) return false;
+    return true;
+  }
+  const fitted = (d, s) => {
+    if (!roughFit(d, s)) return null;
+    const g = volcanoGeometry(d);
+    return volcanoSlopesSafe(g) && fitsSite(g, s) ? g : null;
+  };
+  function nearPieces(list2, b, pad) {
+    return list2.some((g) => b.x0 - pad <= g.bbox.x1 && b.x1 + pad >= g.bbox.x0 && b.y0 - pad <= g.bbox.y1 && b.y1 + pad >= g.bbox.y0);
+  }
+  const N_JOG = 8 + CLIFF2 - 1;
+  function sitePiece(site) {
+    const bx = site.box, h = terraceTileHash(hash22 ^ 20862, bx.x0, bx.y0), sh = mix3(h ^ 625341585), s = { ...site, ownSet: new Set(site.own), ok: site.own.join(";") };
+    const chunks2 = (list2) => ({ x0: Math.min(...list2.map((c) => c.x)) * 32, y0: Math.min(...list2.map((c) => c.y)) * 26, x1: (Math.max(...list2.map((c) => c.x)) + 1) * 32 - 1, y1: (Math.max(...list2.map((c) => c.y)) + 1) * 26 - 1 });
+    if (s.family === "cave") {
+      for (const n of [4, 3, 2]) for (const [fy, f3] of [[0.45, 0.35], [0.45, 0.25], [0.3, 0.35], [0.3, 0.45], [0.15, 0.45], [0, 0.55], [-0.15, 0.6], [-0.3, 0.7]]) {
+        const [A1, B1] = VSIZES[n], x = bx.x0 - 2 - Math.round(f3 * A1), y = bx.y0 - Math.round(fy * B1);
+        const g = fitted({ x, y, n, sh, dir: -1, kind: "v", cut: [bx.x0 - 2 - x, bx.y0 - y] }, s);
+        if (g) return g;
+      }
+      return null;
+    }
+    if (s.lair) {
+      const x = Math.round((bx.x0 + bx.x1) / 2), y = Math.round((bx.y0 + bx.y1) / 2), hw = (bx.x1 - bx.x0 + 1) / 2, hh = (bx.y1 - bx.y0 + 1) / 2, ha = Math.round(1.42 * (hw + 3) + 2), hb = Math.round(1.42 * (hh + 4) + 2);
+      const ys = s.trail.map((t) => t.split(",").map(Number)).filter(([tx]) => tx > bx.x1).map(([, ty]) => ty);
+      if (!ys.length) return null;
+      const a = chunks2(s.ap), ways = [[Math.min(...ys) - 5, Math.max(...ys) + 5], [a.y0 - 1, a.y1 + 1]];
+      for (const [w0, w1] of ways) for (const ring of [24, 20, 16]) {
+        const g = fitted({ x, y, n: 2, sh, dir: 1, kind: "c", s: [ha + ring, hb + ring], hole: [-ha, -hb, ha, hb], ch: [bx.x1 + 1 - x, w0 - y, w1 - y] }, s);
+        if (g) return g;
+      }
+      return null;
+    }
+    if (s.family === "fort" || s.family === "ruin") {
+      const x = Math.round((bx.x0 + bx.x1) / 2), y = Math.round((bx.y0 + bx.y1) / 2), T_ = s.trail.map((t) => t.split(",").map(Number)), ys = T_.filter(([tx]) => tx > bx.x1 && tx <= bx.x1 + 12).map(([, ty]) => ty);
+      if (!ys.length) return null;
+      const xEnd = Math.max(...T_.map((p) => p[0]));
+      for (const m of [8, 10, 12]) {
+        const d = { x, y, n: 1, sh, dir: 1, kind: "m", s: [Math.round((bx.x1 - bx.x0 + 1) / 2 + m), Math.round((bx.y1 - bx.y0 + 1) / 2 + m)], gap: [Math.min(...ys) - 1 - y, Math.max(...ys) + 1 - y] };
+        if (!roughFit(d, s)) continue;
+        const g = volcanoGeometry(d), S = g.gapStair;
+        if (!S || S.R <= bx.x1 + 3 || xEnd < S.R + N_JOG + 1 || !volcanoSlopesSafe(g)) continue;
+        const add = [], remove = T_.filter(([tx]) => tx > S.R && tx <= S.R + N_JOG).map(([tx, ty]) => tx + "," + ty), gone = new Set(remove);
+        for (let j = 0; j < S.N; j++) {
+          const dd = S.d(j);
+          for (let ty = S.t0 + dd; ty <= S.t1 + dd; ty++) add.push(S.x0 + j + "," + ty);
+        }
+        for (let k = 0; k < N_JOG - S.N; k++) {
+          const dd = Math.max(0, CLIFF2 - 1 - k);
+          for (let ty = S.t0 + dd; ty <= S.t1 + dd; ty++) add.push(S.x1 + 1 + k + "," + ty);
+        }
+        if (!fitsSite(g, { ...s, trail: [...s.trail.filter((t) => !gone.has(t)), ...add] })) continue;
+        trailEdits.set(s.id, { add, remove });
+        return g;
+      }
+      return null;
+    }
+    return null;
+  }
+  function townPiece(t) {
+    const x0 = t.origin.x, y0 = t.origin.y, x1 = x0 + t.core[0] - 1, mx = Math.round((x0 + x1) / 2), h = terraceTileHash(hash22 ^ 28841, x0, y0), sh = mix3(h ^ 1759714724), y1 = y0 + t.core[1] - 1, own3 = [];
+    for (let cy = Math.floor((y0 - 26) / 26); cy <= Math.floor((y1 + 26) / 26); cy++) for (let cx = Math.floor((x0 - 32) / 32); cx <= Math.floor((x1 + 32) / 32); cx++) own3.push(cx + "," + cy);
+    const k = t.bounds ?? { x: x0, y: y0, w: t.core[0], h: t.core[1] }, s = { ownSet: new Set(own3), ok: own3.join(";"), trail: [], keep: { x0: Math.min(x0, k.x) - 2, y0: Math.min(y0, k.y) - 2, x1: Math.max(x1, k.x + k.w - 1) + 2, y1: Math.max(y1, k.y + k.h - 1) + 2 } };
+    for (const n of [4, 3]) for (const dx of [0, -24, 24, -44, 44, -64, 64]) {
+      const [, B1] = VSIZES[n];
+      for (let lift = 4; lift <= 52; lift += 3) {
+        const g = fitted({ x: mx + dx, y: y0 - B1 - CLIFF2 - lift, n, sh, dir: h >>> 20 & 1 ? 1 : -1, kind: "v" }, s);
+        if (g) return g;
+      }
+    }
+    return null;
+  }
+  function sitePieces() {
+    if (pieces) return pieces;
+    pieces = [];
+    if (siteOpen) {
+      for (const s of sites6) {
+        const g = sitePiece(s);
+        if (g) pieces.push(g);
+      }
+      for (const t of towns) {
+        const g = townPiece(t);
+        if (g) pieces.push(g);
+      }
+    }
+    return pieces;
+  }
   function* around(x0, y0, x1, y1, pad) {
+    for (const g of sitePieces()) {
+      const b = g.bbox;
+      if (x0 - pad <= b.x1 && x1 + pad >= b.x0 && y0 - pad <= b.y1 && y1 + pad >= b.y0) yield g;
+    }
     for (const [C, get] of [[VCELL, volcano], [MCELL, mesa]]) for (let cy = Math.floor((y0 - pad) / C) - 1; cy <= Math.floor((y1 + pad) / C) + 1; cy++) for (let cx = Math.floor((x0 - pad) / C) - 1; cx <= Math.floor((x1 + pad) / C) + 1; cx++) {
       const g = get(cx, cy);
       if (g) yield g;
@@ -6054,7 +6260,10 @@ function createVolcanoes({ hash: hash22, ground, high, open: open2, biomeAt, bio
     }
     return false;
   }
-  return Object.freeze({ volcano, mesa, at: at2, near, VCELL, MCELL });
+  return Object.freeze({ volcano, mesa, at: at2, near, sitePieces, siteTrails: () => {
+    sitePieces();
+    return trailEdits;
+  }, VCELL, MCELL });
 }
 
 // src/shared/generation/forest_stands_v2.js
@@ -6135,7 +6344,7 @@ var bounded = (map, limit) => {
   if (map.size >= limit) map.clear();
   return map;
 };
-function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, clearAt, protectedChunk, events = [], terraces = false, volcanoes = false }) {
+function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, clearAt, protectedChunk, events = [], terraces = false, volcanoes = false, sites: sites6 = [], towns = [], keepOut = null }) {
   const S = createStandField(seedDigest), K = S.K, W9 = terrain2.widthTiles;
   const elevations = asset.cellRows.flatMap((r) => r.cells.map((c) => c[10])).sort((p, q) => p - q);
   const rank = (v) => {
@@ -6235,7 +6444,21 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
       const b = base(x, y);
       return b.walkable && b.biome === "l" && !b.bank && b.kind !== "shore" && !clearAt(x, y, b);
     },
-    open: (x, y) => guardAt(x, y) === 0 && roadDistance(x, y) >= 4
+    open: (x, y) => guardAt(x, y) === 0 && roadDistance(x, y) >= 4,
+    sites: sites6,
+    towns,
+    // Around a site: its own chunks are fair ground; other protected chunks keep 10 tiles off.
+    siteOpen: (x, y, own3) => {
+      const b = base(x, y);
+      if (!b.walkable || b.biome !== "l" || b.bank || b.kind === "shore" || roadDistance(x, y) < 4 || eventBuckets.size && eventGuard(x, y) > 0 || keepOut?.(x, y)) return false;
+      const cx = Math.floor(x / 32), cy = Math.floor(y / 26);
+      for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) {
+        if (own3.has(cx + i + "," + (cy + j)) || !protectedChunk(cx + i, cy + j)) continue;
+        const x0 = (cx + i) * 32, y0 = (cy + j) * 26, dx = Math.max(0, x0 - x, x - (x0 + 31)), dy = Math.max(0, y0 - y, y - (y0 + 25));
+        if (dx + dy < 10) return false;
+      }
+      return true;
+    }
   }) : null;
   const envs = /* @__PURE__ */ new Map();
   function envAt(x, y) {
@@ -6549,7 +6772,11 @@ var SPOT_NAMES = Object.freeze({
   "town:10": "Wavecrest",
   "town:11": "Tidemoor",
   // The Upland town world-maker-v1.17 adds where no other generated town stands in Upland.
-  "town:12": "Heatherfell"
+  "town:12": "Heatherfell",
+  // The Volcanic towns world-maker-v1.19 adds where a Volcanic piece has no settlement.
+  "town:13": "Cinderhollow",
+  "town:14": "Emberfall",
+  "town:15": "Ashenmoor"
 });
 var hyp = PM.hypot;
 
@@ -6601,7 +6828,11 @@ var GENERATED_TOWN_SIZES = Object.freeze({
   "settlement-slot:village-outpost:12": "hamlet",
   "settlement-slot:village-outpost:13": "hamlet",
   "settlement-slot:village-outpost:14": "hamlet",
-  "settlement-slot:village-outpost:15": "hamlet"
+  "settlement-slot:village-outpost:15": "hamlet",
+  // world-maker-v1.19: a town in each Volcanic piece that has none.
+  "settlement-slot:town:13": "town",
+  "settlement-slot:town:14": "town",
+  "settlement-slot:town:15": "town"
 });
 var lakeMasks = /* @__PURE__ */ new WeakMap();
 function townLakeWaterV1(t) {
@@ -7822,11 +8053,21 @@ var LAKE_SPOTS = ["village-outpost:11", "village-outpost:12", "village-outpost:1
   });
 }
 SPOTS.push(...LAKE_SPOTS);
+var VOLCANIC_SPOTS = [["town:13", "town"], ["town:14", "town"], ["town:15", "town"]];
+for (const role of Object.keys(CAST_KITS)) {
+  const ks2 = Object.keys(CAST_KITS[role]);
+  shuffled("volcanic-kits|" + role, VOLCANIC_SPOTS.map((s) => s[0])).forEach((slot, i) => {
+    KIT_OF[slot + "|" + role] = ks2[i % ks2.length];
+  });
+}
+SPOTS.push(...VOLCANIC_SPOTS);
 var ISLAND_NAMES = [
   ["Anselm", "Baldric", "Cedric", "Darrow", "Elric", "Fergus", "Grady", "Holt", "Ingram", "Jory", "Kester", "Leof", "Morgan", "Niall", "Oswin", "Piers", "Radley", "Stellan", "Tobias", "Ulf"],
   ["Alys", "Bryony", "Cressida", "Delphine", "Eira", "Fern", "Gwen", "Hollis", "Isolde", "Jessamy", "Kerensa", "Lark", "Merry", "Nerys", "Orla", "Primrose", "Rhosyn", "Saffron", "Tilda", "Wynne"]
 ];
 var ISLAND_SLOTS = new Set([...ISLAND_SPOTS, ...UPLAND_SPOTS, ...LAKE_SPOTS].map((s) => s[0]));
+var VOLCANIC_NAMES = [["Barrick", "Corran", "Dagur", "Garrow", "Harald", "Kael", "Hakon", "Ragnar", "Soren", "Torvald", "Brokk", "Wulfric"], ["Aska", "Brenna", "Calla", "Edda", "Freya", "Ingrid", "Kaia", "Linnea", "Runa", "Sigrid", "Tove", "Vela"]];
+var VOLCANIC_SLOTS = new Set(VOLCANIC_SPOTS.map((s) => s[0]));
 var CAST = {};
 {
   const used = /* @__PURE__ */ new Set(["Ada", "Bren", "Mara", "Selene", "Ila", "Nell", "Oren"]);
@@ -7835,7 +8076,7 @@ var CAST = {};
     for (const role of size === "lake" ? ["general"] : size === "village" ? ["general", "smith", "innkeeper"] : ["general", "smith", "innkeeper", "enchanter"]) {
       const r = rng(slot + "|" + role), kit = KIT_OF[slot + "|" + role], K = CAST_KITS[role][kit];
       const beard = pick2(r, K.beard), look = { hair: pick2(r, K.hair), facialHair: beard, hairColor: K.old ? pick2(r, OLD) : pick2(r, COLORS), skin: pick2(r, SKINS) };
-      const [bearded, smooth2] = ISLAND_SLOTS.has(slot) ? ISLAND_NAMES : [BEARDED, SMOOTH];
+      const [bearded, smooth2] = VOLCANIC_SLOTS.has(slot) ? VOLCANIC_NAMES : ISLAND_SLOTS.has(slot) ? ISLAND_NAMES : [BEARDED, SMOOTH];
       let list2 = beard === "none" ? smooth2 : bearded;
       if (list2.every((n) => used.has(n))) list2 = [...bearded, ...smooth2];
       let name;
@@ -10114,7 +10355,7 @@ function validateRuntimePlan(p) {
     for (const b of w.bridgeGuards) requirePlan(Object.keys(b).sort().join(",") === "x1,x2,y1,y2" && Object.values(b).every(Number.isSafeInteger) && b.x1 <= b.x2 && b.y1 <= b.y2 && b.x2 - b.x1 <= 20 && b.y2 - b.y1 <= 20, "Invalid immutable bridge guard");
   }
   requirePlan(p.scale.tilePixels === 32 && p.scale.chunkTilesX === 32 && p.scale.chunkTilesY === 26 && p.scale.macroTilesX === 64 && p.scale.macroTilesY === 52, "Planned spatial scale");
-  requirePlan(p.settlements.length >= 20 && p.settlements.length <= 33 && p.sites.length === (p.firstJourney ? 125 : p.wildernessExtension ? 124 : p.populationOverlay ? 51 : 48) && p.futureIslands.length === 6 && p.factions.length === 3 && p.stonewatch.candidateCount > 0, "Incomplete planned reservations");
+  requirePlan(p.settlements.length >= 20 && p.settlements.length <= 36 && p.sites.length === (p.firstJourney ? 125 : p.wildernessExtension ? 124 : p.populationOverlay ? 51 : 48) && p.futureIslands.length === 6 && p.factions.length === 3 && p.stonewatch.candidateCount > 0, "Incomplete planned reservations");
   if (p.worldReshape) requirePlan(p.worldReshape.version === RESHAPE_VERSION && p.worldReshape.hash === RESHAPE_HASH && p.firstJourney && p.assetId === "alpha", "Uncommitted world reshape");
   if (p.firstJourney) requirePlan(p.firstJourney.version === ACCESS_VERSION && p.firstJourney.hash === ACCESS_HASH && p.wildernessExtension && p.hydrologyPlan && p.assetId === "alpha" && p.sites.filter((s) => s.id === "repeatable-slot:cave:woodland:small:109").length === 1, "Uncommitted first journey");
   if (p.wildernessExtension) requirePlan(p.wildernessExtension.version === WILDERNESS_VERSION && p.wildernessExtension.hash === WILDERNESS_HASH && p.assetId === "alpha", "Uncommitted wilderness extension");
@@ -13318,7 +13559,17 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (routeAt(x + dx, y + dy) || bridgeDecks.has(x + dx + "," + (y + dy)) || protection.at(x + dx, y + dy)) return true;
     return false;
   };
-  const stands = hasForestStands(binding) ? createForestStandsV2({ seedDigest: asset.seedDigest, asset, terrain: terrain2, routeAt, clearAt: standsClear, protectedChunk: (cx, cy) => protection.at(cx * 32, cy * 26), events: (wilderness?.eventCapacities ?? []).map((e) => e.position), terraces: terracesForBinding(binding), volcanoes: volcanoesForBinding(binding) }) : null;
+  const siteVolcanoes = siteVolcanoesForBinding(binding), lairIds = new Set(Object.values(asset.contentRoles?.bosses ?? {})), volcanicSites = siteVolcanoes ? [...caves, ...forts, ...ruins, ...crypts].filter((s) => terrain2.base(s.left + ((s.width ?? 12) >> 1), s.top + ((s.height ?? 9) >> 1)).biome === "l").map((s) => ({ id: s.reservation.id, family: s.reservation.familyId.replace("site-family:", ""), tier: s.reservation.tier, box: { x0: s.left, y0: s.top, x1: s.left + (s.width ?? 12) - 1, y1: s.top + (s.height ?? 9) - 1 }, trail: [...s.trail ?? []], own: [...s.reservation.footprint, ...s.reservation.approach].map((c) => c.x + "," + c.y), fp: s.reservation.footprint, ap: s.reservation.approach, lair: lairIds.has(s.reservation.id) })) : [];
+  const stands = hasForestStands(binding) ? createForestStandsV2({ seedDigest: asset.seedDigest, asset, terrain: terrain2, routeAt, clearAt: standsClear, protectedChunk: (cx, cy) => protection.at(cx * 32, cy * 26), events: (wilderness?.eventCapacities ?? []).map((e) => e.position), terraces: terracesForBinding(binding), volcanoes: volcanoesForBinding(binding), sites: volcanicSites, towns: siteVolcanoes ? (asset.generatedTowns?.towns ?? []).filter((t) => t.biome === "volcanic").map((t) => ({ ...t, bounds: townBoundsV1(t) })) : [], keepOut: landings ? (x, y) => landings.clearAt(x, y) : null }) : null;
+  if (stands?.volcanoes && volcanicSites.length) {
+    const byId2 = new Map([...forts, ...ruins].map((e) => [e.reservation.id, e]));
+    for (const [id, { add, remove }] of stands.volcanoes.siteTrails()) {
+      const e = byId2.get(id);
+      if (!e?.trail) continue;
+      for (const t of remove) e.trail.delete(t);
+      for (const t of add) e.trail.add(t);
+    }
+  }
   const terraced = Boolean(stands) && terracesForBinding(binding);
   function originalTile(x, y) {
     if (pilotRuins.some((r) => r.inside(x, y))) return acceptedPilotTile(x, y);
@@ -13337,7 +13588,7 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
       }
       const stand = stands?.tileAt(x, y);
       let obstacle = stands ? stand?.block ? { kind: stand.kind, clusterId: stand.clusterId } : null : clear ? null : forest?.applies(x, y, b.biome) ? forest.sample(x, y, b.biome) : nature.sample(x, y, b.biome);
-      if (obstacle) for (let dy = -1; dy <= 1 && obstacle; dy++) for (let dx = -1; dx <= 1; dx++) {
+      if (obstacle && !(siteVolcanoes && stand?.block === VOLCANO_PIECE)) for (let dy = -1; dy <= 1 && obstacle; dy++) for (let dx = -1; dx <= 1; dx++) {
         const xx = x + dx, yy = y + dy, q = terrain2.base(xx, yy), r = ruinByChunk.get(Math.floor(xx / 32) + "," + Math.floor(yy / 26));
         if (!q.walkable || q.bank || q.kind === "shore" || r && (r.ownsStructure(xx, yy) || r.trail.has(xx + "," + yy) || r.circulation.has(xx + "," + yy))) {
           obstacle = null;
@@ -13431,8 +13682,9 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     const eventAnchors = await createWoodlandPilotEventAnchors({ asset, binding, cx, cy, seed, sha256, tile, regularAnchors });
     const plannedAnchors = await createPlannedEventAnchorsV1({ asset, binding, cx, cy, seed, sha256, tile, biome, regularAnchors, otherAnchors: eventAnchors });
     const summitAnchors = terraced && isSeededBindingV1(binding) && hasWorldCombat(binding) ? await createSummitAnchorsV1({ terraces: stands.terraces, cx, cy, seed, sha256, tile, otherAnchors: [...regularAnchors, ...eventAnchors, ...plannedAnchors] }) : [];
+    const calderaRows = stands?.volcanoes ? stands.volcanoes.sitePieces().filter((g) => g.kind === "c" && g.bbox.x0 <= cx * 32 + 31 && g.bbox.x1 >= cx * 32 && g.bbox.y0 <= cy * 26 + 25 && g.bbox.y1 >= cy * 26).map((g) => ({ detail: g.detail, key: g.key })) : [];
     const volcanoAnchors = stands?.volcanoes && isSeededBindingV1(binding) && hasWorldCombat(binding) ? await createVolcanoSummitAnchorsV1({ volcanoes: stands.volcanoes, cx, cy, seed, sha256, tile, otherAnchors: [...regularAnchors, ...eventAnchors, ...plannedAnchors, ...summitAnchors] }) : [];
-    return freezeWire({ version: PLANNED_WORLD_VERSION, identity, chunkX, chunkY, region: { version: asset.version, regionX: String(Math.floor(cx / 2)), regionY: String(Math.floor(cy / 2)), biome, name: hasStarterVillage(binding) && cx >= sx && cx <= sx + 1 && cy >= sy && cy <= sy + 1 ? STARTER_VILLAGE_NAME + " \xB7 " + starterBiomeName() + " \xB7 Band 1" : biome === "ocean" ? "Open ocean" : biome[0].toUpperCase() + biome.slice(1) + " \xB7 Band " + c.band, minimumLevel: cellLevelAt(asset, Math.floor(cx / 2), Math.floor(cy / 2)) ?? [1, 1, 6, 11, 21, 41][c.band] ?? 1, originWidthChunks: 0, originHeightChunks: 0 }, collision: { tileSize: 32, width: 32, height: 26, tiles: collision2 }, visual: { terrain: visual2, biomes, blockers: blockers2, ...caveArt.decorations.length ? { decorations: caveArt.decorations } : {}, ...stands ? { stands: standRows } : {}, route: { centerline, clearance, ...["planned-world-shoreline-v2", "planned-world-water-v3"].includes(asset.version) ? { mapFeatures: mapRows } : {} } }, edges, anchors: [...regularAnchors, ...eventAnchors, ...plannedAnchors, ...summitAnchors, ...volcanoAnchors], sites: reserved?.socket.entrance.chunkX === chunkX && reserved?.socket.entrance.chunkY === chunkY ? [reserved.socket] : [] });
+    return freezeWire({ version: PLANNED_WORLD_VERSION, identity, chunkX, chunkY, region: { version: asset.version, regionX: String(Math.floor(cx / 2)), regionY: String(Math.floor(cy / 2)), biome, name: hasStarterVillage(binding) && cx >= sx && cx <= sx + 1 && cy >= sy && cy <= sy + 1 ? STARTER_VILLAGE_NAME + " \xB7 " + starterBiomeName() + " \xB7 Band 1" : biome === "ocean" ? "Open ocean" : biome[0].toUpperCase() + biome.slice(1) + " \xB7 Band " + c.band, minimumLevel: cellLevelAt(asset, Math.floor(cx / 2), Math.floor(cy / 2)) ?? [1, 1, 6, 11, 21, 41][c.band] ?? 1, originWidthChunks: 0, originHeightChunks: 0 }, collision: { tileSize: 32, width: 32, height: 26, tiles: collision2 }, visual: { terrain: visual2, biomes, blockers: blockers2, ...caveArt.decorations.length ? { decorations: caveArt.decorations } : {}, ...stands ? { stands: standRows } : {}, ...calderaRows.length ? { calderas: calderaRows } : {}, route: { centerline, clearance, ...["planned-world-shoreline-v2", "planned-world-water-v3"].includes(asset.version) ? { mapFeatures: mapRows } : {} } }, edges, anchors: [...regularAnchors, ...eventAnchors, ...plannedAnchors, ...summitAnchors, ...volcanoAnchors], sites: reserved?.socket.entrance.chunkX === chunkX && reserved?.socket.entrance.chunkY === chunkY ? [reserved.socket] : [] });
   }
   let hollowHome = null;
   async function generate(args) {
@@ -13486,7 +13738,7 @@ function validateMapKnowledge(k) {
   closedRecord(k, ["version", "assetHash", "revision", "settlements", "visited", "rumors", "journal"]);
   requireContract(k.version === MAP_KNOWLEDGE_VERSION && /^[a-f0-9]{64}$/.test(k.assetHash), "Map knowledge version/commitment");
   safeInteger(k.revision);
-  requireContract(Array.isArray(k.settlements) && k.settlements.length >= 20 && k.settlements.length <= 33, "Settlement map catalog");
+  requireContract(Array.isArray(k.settlements) && k.settlements.length >= 20 && k.settlements.length <= 36, "Settlement map catalog");
   const ids = /* @__PURE__ */ new Set();
   for (const s of k.settlements) {
     closedRecord(s, ["id", "kind", "class", "label", "x", "y", "band", "built"]);

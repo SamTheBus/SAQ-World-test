@@ -326,6 +326,7 @@ import {
   UNIQUE_TIERS,
   VITALITY_WEAVER_AFFIX_ID,
   VITALITY_WEAVER_D12_4,
+  VOLCANO_PIECE,
   WARDROBE_V1,
   WAYSIDE_POLICY,
   WAYSIDE_VERSION,
@@ -877,6 +878,7 @@ import {
   siteRunEpisodeObservationRequiredD13B,
   siteSupportsResetD13C,
   siteTransitionTarget,
+  siteVolcanoesForBinding,
   skillLoadout,
   spendGuard,
   spentPoints,
@@ -907,6 +909,7 @@ import {
   tomeProfile,
   townArtBuildingsV1,
   townBannersV1,
+  townBoundsV1,
   townCastleYewsV1,
   townChunkBlockers,
   townConnectorsV1,
@@ -1048,7 +1051,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-BPMXRPVJ.js";
+} from "./chunk-E7Z4O6IF.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -88477,7 +88480,7 @@ function createVolcanoPainter() {
       levels.push({ k, P: P19, cracks: cracks2, patches, seams, scree, cols, talus, body: body5, c: pal2.tops[Math.min(k, 4)] });
     }
     const art = { x0: b.x0 * T79 - 12, y0: b.y0 * T79 - 12, x1: (b.x1 + 1) * T79 + 12, y1: (b.y1 + 1) * T79 + 12 };
-    s = { g, H: H7, pal: pal2, levels, art, ramps: g.ramps.map((r) => rampShape(g, r)), stair: g.stair ? stairShape(g) : null, crater: g.pool ? craterShape(g) : null, flows: g.flows.map((f) => flowShape(g, f)) };
+    s = { g, H: H7, pal: pal2, levels, art, gap: g.d.gap ? gapShape(g) : null, ramps: g.ramps.map((r) => rampShape(g, r)), stair: g.stair ? stairShape(g) : null, crater: g.pool ? craterShape(g) : null, floor: g.kind === "c" && g.d.hole ? floorShape(g) : null, flows: g.flows.map((f) => flowShape(g, f)) };
     s.trail = trailLine(g, s.ramps);
     shapes2.set(id, s);
     built++;
@@ -88518,6 +88521,212 @@ function createVolcanoPainter() {
     const minX = Math.min(xAt(0), xAt(N3)), maxX = Math.max(xAt(0), xAt(N3));
     const mid = [0.5, i0, i0 + 1.5, (i0 + i1) / 2, i1 - 1.5, i1, N3 - 0.5].map((i) => [xAt(i), yN(i) + T79]);
     return { r, E: E7, C: C3, d, xAt, lift, yN, yS, yf, foot: foot2, ledge: ledge3, face: face4, outline: outline4, rim: rim2, minX, maxX, mid, landing: [Math.min(xAt(i1), xAt(N3)), Math.max(xAt(i1), xAt(N3))] };
+  }
+  function gapShape(g) {
+    const S9 = g.gapStair;
+    if (!S9) return null;
+    const C3 = g.cliff, X = (jc) => (S9.x0 + jc) * T79, dA = (jc) => Math.max(0, Math.min(C3, (jc - 1) / 2)), yT = (jc) => (S9.t0 + dA(jc)) * T79, yB = (jc) => (S9.t1 + 1 + dA(jc)) * T79, foot2 = (S9.t1 + 1 + C3) * T79, R10 = rng19(g.d.sh ^ 6191639), N3 = S9.N, K9 = [0, 1, 1 + 2 * C3, N3];
+    const ledge3 = new Path2D();
+    K9.forEach((jc, i) => i ? ledge3.lineTo(X(jc), yT(jc)) : ledge3.moveTo(X(jc), yT(jc)));
+    [...K9].reverse().forEach((jc) => ledge3.lineTo(X(jc), yB(jc)));
+    ledge3.closePath();
+    const face4 = new Path2D();
+    K9.forEach((jc, i) => i ? face4.lineTo(X(jc), yB(jc) - 2) : face4.moveTo(X(jc), yB(jc) - 2));
+    face4.lineTo(X(N3), foot2);
+    face4.lineTo(X(0), foot2);
+    face4.closePath();
+    const cols = [];
+    for (let x = X(0) - 2; x < X(N3); ) {
+      const w = 6 + Math.floor(R10() * 9), f = [];
+      for (let k = 0, n = Math.floor(R10() * 3); k < n; k++) f.push(yB(0) + 14 + R10() * (C3 * T79 - 22));
+      cols.push([x, w, yB(0), Math.floor(R10() * 7), 0, 0, f, 0]);
+      x += w;
+    }
+    const dots = [];
+    for (let k = 0; k < 70; k++) {
+      const jc = R10() * N3;
+      dots.push([X(jc), yT(jc) + 6 + R10() * (yB(jc) - yT(jc) - 12), R10()]);
+    }
+    let wallEnd = 1;
+    while (wallEnd < N3 && S9.d(wallEnd - 1) < C3) wallEnd++;
+    const t0 = S9.t0 * T79, t1 = (S9.t1 + 1) * T79, bend = [[X(N3 - 1), t0 + C3 * T79], [X(N3 + C3 - 1), t0], [X(N3 + C3 + 1), t0], [X(N3 + C3 + 1), t1], [X(N3 + C3), t1], [X(N3), t1 + C3 * T79], [X(N3 - 1), t1 + C3 * T79]];
+    for (let k = 0; k < 26; k++) {
+      const u = R10(), jc = N3 - 1 + u * (C3 + 2), dy = Math.max(0, Math.min(C3, N3 + C3 - 1 - jc)) * T79;
+      dots.push([X(jc), t0 + dy + 6 + R10() * (t1 - t0 - 12), R10()]);
+    }
+    return { X, yT, yB, dA, foot: foot2, ledge: ledge3, face: face4, cols, dots, N: N3, C: C3, wallEnd, K: K9, bend };
+  }
+  function gapStair(c, q, pal2) {
+    const ROCK4 = pal2.rock, { X, yT, yB, foot: foot2, ledge: ledge3, face: face4, cols, dots, N: N3, C: C3, wallEnd, K: K9 } = q, H7 = C3 * T79;
+    c.lineJoin = "round";
+    c.lineCap = "round";
+    c.strokeStyle = OL80;
+    c.lineWidth = 8.8;
+    c.beginPath();
+    c.moveTo(X(0), foot2);
+    c.lineTo(X(N3), foot2);
+    c.moveTo(X(0), yB(0));
+    K9.forEach((jc) => c.lineTo(X(jc), yB(jc)));
+    c.stroke();
+    c.save();
+    c.clip(face4);
+    for (const col2 of cols) column3(c, [col2[0], col2[1], yB(0) - H7, col2[3], 0, 0, col2[6], 0], 2 * H7, ROCK4);
+    c.restore();
+    const B6 = q.bend;
+    c.fillStyle = "#726a64";
+    c.beginPath();
+    B6.forEach((p, i) => i ? c.lineTo(...p) : c.moveTo(...p));
+    c.closePath();
+    c.fill();
+    c.strokeStyle = "#5a524d";
+    c.lineWidth = 2.4;
+    c.beginPath();
+    c.moveTo(...B6[0]);
+    c.lineTo(...B6[1]);
+    c.lineTo(...B6[2]);
+    c.moveTo(...B6[3]);
+    c.lineTo(...B6[4]);
+    c.lineTo(...B6[5]);
+    c.stroke();
+    c.fillStyle = "#7a716c";
+    c.fill(ledge3);
+    for (const [x, y, r] of dots) {
+      c.fillStyle = r < 0.5 ? "#5f5752" : "#958b84";
+      c.beginPath();
+      c.ellipse(x, y, 1.2 + r, 1 + r * 0.8, 0, 0, TAU128);
+      c.fill();
+    }
+    c.strokeStyle = tone63(ROCK4.bands[0], -0.45);
+    c.lineWidth = 3.2;
+    c.beginPath();
+    c.moveTo(X(0), yB(0));
+    K9.forEach((jc) => c.lineTo(X(jc), yB(jc)));
+    c.stroke();
+    c.strokeStyle = "rgba(255,255,255,.22)";
+    c.lineWidth = 2;
+    c.beginPath();
+    c.moveTo(X(0), yB(0) - 3);
+    K9.forEach((jc) => c.lineTo(X(jc), yB(jc) - 3));
+    c.stroke();
+    const wh = 14, wt = 8, bw = 22, xe = X(wallEnd), top = (x) => yT((x - X(0)) / T79), run2 = (f, o, h) => {
+      c.beginPath();
+      c.moveTo(X(0), top(X(0)) + o);
+      for (const jc of [1, wallEnd]) c.lineTo(X(jc), top(X(jc)) + o);
+      c.lineTo(xe, top(xe) + o + h);
+      c.lineTo(X(1), top(X(1)) + o + h);
+      c.lineTo(X(0), top(X(0)) + o + h);
+      c.closePath();
+      c.fillStyle = f;
+      c.fill();
+    };
+    c.strokeStyle = OL80;
+    c.lineWidth = 5;
+    c.beginPath();
+    c.moveTo(X(0), top(X(0)) - wt - 1);
+    c.lineTo(X(1), top(X(1)) - wt - 1);
+    c.lineTo(xe, top(xe) - wt - 1);
+    c.lineTo(xe, top(xe) + wh + 1);
+    c.lineTo(X(1), top(X(1)) + wh + 1);
+    c.lineTo(X(0), top(X(0)) + wh + 1);
+    c.closePath();
+    c.stroke();
+    run2(ROCK4.tones[2], 0, wh);
+    run2(ROCK4.caps[0], -wt, wt);
+    c.fillStyle = ROCK4.crack;
+    for (let x = X(0) + bw; x < xe - 6; x += bw) c.fillRect(x, top(x) - wt * 0.2, 1.5, wh + wt * 0.2);
+    c.fillStyle = ROCK4.lit;
+    for (let x = X(0) + 1; x < xe - 6; x += bw) c.fillRect(x + 1.5, top(x + 1.5), 1.3, wh);
+    c.fillStyle = "rgba(0,0,0,.3)";
+    c.beginPath();
+    c.moveTo(X(0), top(X(0)) + wh);
+    c.lineTo(X(1), top(X(1)) + wh);
+    c.lineTo(xe, top(xe) + wh);
+    c.lineTo(xe, top(xe) + wh + 5);
+    c.lineTo(X(1), top(X(1)) + wh + 5);
+    c.lineTo(X(0), top(X(0)) + wh + 5);
+    c.closePath();
+    c.fill();
+    const ey = top(xe);
+    c.fillStyle = OL80;
+    c.fillRect(xe - 2, ey - wt - 6, 14, wh + wt + 10);
+    c.fillStyle = ROCK4.caps[0];
+    c.fillRect(xe, ey - wt - 4, 10, wt);
+    c.fillStyle = ROCK4.tones[2];
+    c.fillRect(xe, ey - 4, 10, wh + 4);
+  }
+  function floorShape(g) {
+    const d = g.d, b = g.bbox, R10 = rng19(d.sh ^ 1008704039), r = 30, dx = Math.sqrt(3) * r, dy = 1.5 * r, vk = /* @__PURE__ */ new Map();
+    const vert = (x, y) => {
+      const k = Math.round(x / 4) + "," + Math.round(y / 4);
+      let v = vk.get(k);
+      if (!v) {
+        const h = terraceTileHash(d.sh ^ 32586, Math.round(x / 4), Math.round(y / 4));
+        v = [x + ((h & 255) / 255 - 0.5) * 16, y + ((h >>> 8 & 255) / 255 - 0.5) * 16];
+        vk.set(k, v);
+      }
+      return v;
+    };
+    const reach = d.x + d.s[0] - 4, tones = [new Path2D(), new Path2D(), new Path2D()], seams = new Path2D(), glow13 = new Path2D(), all = new Path2D(), embers3 = [];
+    for (let j = 0, py = b.y0 * T79; py <= (b.y1 + 1) * T79; j++, py += dy) for (let px7 = b.x0 * T79 + (j % 2 ? dx / 2 : 0); px7 <= (b.x1 + 1) * T79; px7 += dx) {
+      const tx = Math.floor(px7 / T79), ty = Math.floor(py / T79);
+      const inside5 = g.inHole(tx, ty) || g.inCh(tx, ty) && tx <= reach - R10() * 4;
+      if (!inside5) continue;
+      const q = [];
+      for (let k = 0; k < 6; k++) {
+        const a = (30 + 60 * k) * Math.PI / 180;
+        q.push(vert(px7 + Math.cos(a) * r, py + Math.sin(a) * r));
+      }
+      const P19 = new Path2D();
+      P19.moveTo(...q[0]);
+      for (let k = 1; k < 6; k++) P19.lineTo(...q[k]);
+      P19.closePath();
+      tones[Math.floor(R10() * 3)].addPath(P19);
+      all.addPath(P19);
+      seams.addPath(P19);
+      if (R10() < 0.16) {
+        const k = Math.floor(R10() * 6), a = q[k], c = q[(k + 1) % 6];
+        glow13.moveTo(...a);
+        glow13.quadraticCurveTo((a[0] + c[0]) / 2 + (R10() - 0.5) * 10, (a[1] + c[1]) / 2 + (R10() - 0.5) * 10, ...c);
+      }
+      if (R10() < 0.07) embers3.push([px7 + (R10() - 0.5) * 20, py + (R10() - 0.5) * 20]);
+    }
+    return { tones, seams, glow: glow13, all, embers: embers3 };
+  }
+  function crustFloor(c, f, pal2) {
+    const L = pal2.lava;
+    ["#3b3234", "#352d2f", "#40373a"].forEach((col2, i) => {
+      c.fillStyle = col2;
+      c.fill(f.tones[i]);
+    });
+    c.save();
+    c.clip(f.all);
+    c.fillStyle = "rgba(255,255,255,.05)";
+    c.fill(sh2(f.all, -2, -2));
+    c.restore();
+    c.lineJoin = "round";
+    c.strokeStyle = OL80;
+    c.lineWidth = 3;
+    c.stroke(f.seams);
+    c.lineCap = "round";
+    c.strokeStyle = L.dark;
+    c.lineWidth = 5;
+    c.stroke(f.glow);
+    c.strokeStyle = L.hot;
+    c.lineWidth = 2.2;
+    c.stroke(f.glow);
+    c.strokeStyle = L.core;
+    c.lineWidth = 0.9;
+    c.stroke(f.glow);
+    for (const [x, y] of f.embers) {
+      c.fillStyle = L.dark;
+      c.beginPath();
+      c.ellipse(x, y, 4, 3, 0, 0, TAU128);
+      c.fill();
+      c.fillStyle = L.hot;
+      c.beginPath();
+      c.ellipse(x, y, 2, 1.5, 0, 0, TAU128);
+      c.fill();
+    }
   }
   function stairShape(g) {
     const st = g.stair, E7 = g.levels[st.k].E;
@@ -89102,11 +89311,12 @@ function createVolcanoPainter() {
     const x0 = view3.x + wo.x, y0 = view3.y + wo.y, x1 = x0 + view3.width, y1 = y0 + view3.height;
     for (const { detail, key: key3 } of mountains) {
       const s = shapeOf2(detail, key3);
-      if (!s || !s.flows.length && !s.crater) continue;
+      if (!s || !s.flows.length && !s.crater && !s.gap) continue;
       const a = s.art;
       if (a.x1 < x0 || a.x0 > x1 || a.y1 < y0 || a.y0 > y1) continue;
       c.save();
       c.translate(-wo.x, -wo.y);
+      if (s.gap) gapStair(c, s.gap, s.pal);
       liveVolcano(c, s, t);
       c.restore();
       drawn++;
@@ -89127,16 +89337,17 @@ function createVolcanoPainter() {
       c.rect(bounds2.x, bounds2.y, bounds2.width, bounds2.height);
       c.clip();
       c.translate(-wo.x, -wo.y);
+      if (s.floor) crustFloor(c, s.floor, s.pal);
       for (const L of s.levels) {
         level(c, L, s.H, s.pal);
-        ramp5(c, s.ramps[L.k - 1], L.c, seed2 + L.k * 131 >>> 0, s.pal);
+        if (s.ramps[L.k - 1]) ramp5(c, s.ramps[L.k - 1], L.c, seed2 + L.k * 131 >>> 0, s.pal);
         if (s.stair && s.stair.k === L.k) stair(c, s.stair, L.c, s.pal);
         if (L.k === s.g.n && s.crater) bank3(c, null, s.crater, s.pal.lava);
       }
       for (const F6 of s.flows) flow(c, F6, s.pal);
       if (s.crater) molten(c, null, s.crater, s.pal.lava);
       for (const F6 of s.flows) for (const x of F6.cross) bridge(c, x, s.pal, (F6.seed ^ x.y0 * 31) >>> 0);
-      path12(c, s.trail.pts, seed2 + 17 >>> 0, 24, s.trail.end, 2 * T79, s.pal.trail);
+      if (s.trail.pts.length > 1) path12(c, s.trail.pts, seed2 + 17 >>> 0, 24, s.trail.end, 2 * T79, s.pal.trail);
       c.restore();
     }
     return drawn;
@@ -89249,6 +89460,7 @@ function createForestStandsArtV2(env, prior) {
     let m = null;
     if (v.stands && !space.site && !space.settlementInterior && v.worldAddress) {
       const off = environmentWorldOffset(space), blocked3 = /* @__PURE__ */ new Map(), masses = /* @__PURE__ */ new Map(), mountains = /* @__PURE__ */ new Map();
+      for (const p of v.calderas ?? []) if (!mountains.has(p.key)) mountains.set(p.key, { detail: p.detail, key: p.key, piece: "volcano" });
       for (const b of v.blockers ?? []) {
         const p = standsPiece(b.naturalClusterId);
         if (!p) continue;
@@ -89340,7 +89552,7 @@ function createForestStandsArtV2(env, prior) {
         add2(item2("stand/" + wid + "/stone", s, (tx + 0.5) * T80, (ty + 0.9) * T80, fit2(s, 40, n)));
       } else if (p?.piece === "terrace" || p?.piece === "volcano") {
         const t = terraceAt(m, tx, ty);
-        if (t && t.wx === t.g.cairn.x && t.wy === t.g.cairn.y) {
+        if (t && t.g.cairn && t.wx === t.g.cairn.x && t.wy === t.g.cairn.y) {
           const s = kit2(code2, p.piece === "volcano" ? "obsidian" : "cairn", n >>> 15);
           add2(item2("stand/" + wid + "/cairn", s, (tx + 0.5) * T80, (ty + 0.86) * T80, s ? Math.min(1.25, 44 / s.w) : 1));
         }
@@ -96889,7 +97101,17 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (routeAt(x + dx, y + dy) || bridgeDecks.has(x + dx + "," + (y + dy)) || protection.at(x + dx, y + dy)) return true;
     return false;
   };
-  const stands = hasForestStands(binding) ? createForestStandsV2({ seedDigest: asset.seedDigest, asset, terrain, routeAt, clearAt: standsClear, protectedChunk: (cx, cy2) => protection.at(cx * 32, cy2 * 26), events: (wilderness?.eventCapacities ?? []).map((e) => e.position), terraces: terracesForBinding(binding), volcanoes: volcanoesForBinding(binding) }) : null;
+  const siteVolcanoes = siteVolcanoesForBinding(binding), lairIds = new Set(Object.values(asset.contentRoles?.bosses ?? {})), volcanicSites = siteVolcanoes ? [...caves, ...forts, ...ruins, ...crypts].filter((s) => terrain.base(s.left + ((s.width ?? 12) >> 1), s.top + ((s.height ?? 9) >> 1)).biome === "l").map((s) => ({ id: s.reservation.id, family: s.reservation.familyId.replace("site-family:", ""), tier: s.reservation.tier, box: { x0: s.left, y0: s.top, x1: s.left + (s.width ?? 12) - 1, y1: s.top + (s.height ?? 9) - 1 }, trail: [...s.trail ?? []], own: [...s.reservation.footprint, ...s.reservation.approach].map((c) => c.x + "," + c.y), fp: s.reservation.footprint, ap: s.reservation.approach, lair: lairIds.has(s.reservation.id) })) : [];
+  const stands = hasForestStands(binding) ? createForestStandsV2({ seedDigest: asset.seedDigest, asset, terrain, routeAt, clearAt: standsClear, protectedChunk: (cx, cy2) => protection.at(cx * 32, cy2 * 26), events: (wilderness?.eventCapacities ?? []).map((e) => e.position), terraces: terracesForBinding(binding), volcanoes: volcanoesForBinding(binding), sites: volcanicSites, towns: siteVolcanoes ? (asset.generatedTowns?.towns ?? []).filter((t) => t.biome === "volcanic").map((t) => ({ ...t, bounds: townBoundsV1(t) })) : [], keepOut: landings ? (x, y) => landings.clearAt(x, y) : null }) : null;
+  if (stands?.volcanoes && volcanicSites.length) {
+    const byId = new Map([...forts, ...ruins].map((e) => [e.reservation.id, e]));
+    for (const [id, { add: add2, remove }] of stands.volcanoes.siteTrails()) {
+      const e = byId.get(id);
+      if (!e?.trail) continue;
+      for (const t of remove) e.trail.delete(t);
+      for (const t of add2) e.trail.add(t);
+    }
+  }
   const terraced = Boolean(stands) && terracesForBinding(binding);
   function originalTile(x, y) {
     if (pilotRuins.some((r) => r.inside(x, y))) return acceptedPilotTile(x, y);
@@ -96908,7 +97130,7 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
       }
       const stand = stands?.tileAt(x, y);
       let obstacle = stands ? stand?.block ? { kind: stand.kind, clusterId: stand.clusterId } : null : clear2 ? null : forest?.applies(x, y, b.biome) ? forest.sample(x, y, b.biome) : nature.sample(x, y, b.biome);
-      if (obstacle) for (let dy = -1; dy <= 1 && obstacle; dy++) for (let dx = -1; dx <= 1; dx++) {
+      if (obstacle && !(siteVolcanoes && stand?.block === VOLCANO_PIECE)) for (let dy = -1; dy <= 1 && obstacle; dy++) for (let dx = -1; dx <= 1; dx++) {
         const xx = x + dx, yy = y + dy, q = terrain.base(xx, yy), r = ruinByChunk.get(Math.floor(xx / 32) + "," + Math.floor(yy / 26));
         if (!q.walkable || q.bank || q.kind === "shore" || r && (r.ownsStructure(xx, yy) || r.trail.has(xx + "," + yy) || r.circulation.has(xx + "," + yy))) {
           obstacle = null;
@@ -97002,8 +97224,9 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     const eventAnchors = await createWoodlandPilotEventAnchors({ asset, binding, cx, cy: cy2, seed: seed2, sha256, tile, regularAnchors });
     const plannedAnchors = await createPlannedEventAnchorsV1({ asset, binding, cx, cy: cy2, seed: seed2, sha256, tile, biome, regularAnchors, otherAnchors: eventAnchors });
     const summitAnchors = terraced && isSeededBindingV1(binding) && hasWorldCombat(binding) ? await createSummitAnchorsV1({ terraces: stands.terraces, cx, cy: cy2, seed: seed2, sha256, tile, otherAnchors: [...regularAnchors, ...eventAnchors, ...plannedAnchors] }) : [];
+    const calderaRows = stands?.volcanoes ? stands.volcanoes.sitePieces().filter((g) => g.kind === "c" && g.bbox.x0 <= cx * 32 + 31 && g.bbox.x1 >= cx * 32 && g.bbox.y0 <= cy2 * 26 + 25 && g.bbox.y1 >= cy2 * 26).map((g) => ({ detail: g.detail, key: g.key })) : [];
     const volcanoAnchors = stands?.volcanoes && isSeededBindingV1(binding) && hasWorldCombat(binding) ? await createVolcanoSummitAnchorsV1({ volcanoes: stands.volcanoes, cx, cy: cy2, seed: seed2, sha256, tile, otherAnchors: [...regularAnchors, ...eventAnchors, ...plannedAnchors, ...summitAnchors] }) : [];
-    return freezeWire({ version: PLANNED_WORLD_VERSION, identity: identity2, chunkX, chunkY, region: { version: asset.version, regionX: String(Math.floor(cx / 2)), regionY: String(Math.floor(cy2 / 2)), biome, name: hasStarterVillage(binding) && cx >= sx && cx <= sx + 1 && cy2 >= sy && cy2 <= sy + 1 ? STARTER_VILLAGE_NAME + " \xB7 " + starterBiomeName() + " \xB7 Band 1" : biome === "ocean" ? "Open ocean" : biome[0].toUpperCase() + biome.slice(1) + " \xB7 Band " + c.band, minimumLevel: cellLevelAt(asset, Math.floor(cx / 2), Math.floor(cy2 / 2)) ?? [1, 1, 6, 11, 21, 41][c.band] ?? 1, originWidthChunks: 0, originHeightChunks: 0 }, collision: { tileSize: 32, width: 32, height: 26, tiles: collision }, visual: { terrain: visual, biomes: biomes2, blockers, ...caveArt.decorations.length ? { decorations: caveArt.decorations } : {}, ...stands ? { stands: standRows } : {}, route: { centerline, clearance, ...["planned-world-shoreline-v2", "planned-world-water-v3"].includes(asset.version) ? { mapFeatures: mapRows } : {} } }, edges, anchors: [...regularAnchors, ...eventAnchors, ...plannedAnchors, ...summitAnchors, ...volcanoAnchors], sites: reserved?.socket.entrance.chunkX === chunkX && reserved?.socket.entrance.chunkY === chunkY ? [reserved.socket] : [] });
+    return freezeWire({ version: PLANNED_WORLD_VERSION, identity: identity2, chunkX, chunkY, region: { version: asset.version, regionX: String(Math.floor(cx / 2)), regionY: String(Math.floor(cy2 / 2)), biome, name: hasStarterVillage(binding) && cx >= sx && cx <= sx + 1 && cy2 >= sy && cy2 <= sy + 1 ? STARTER_VILLAGE_NAME + " \xB7 " + starterBiomeName() + " \xB7 Band 1" : biome === "ocean" ? "Open ocean" : biome[0].toUpperCase() + biome.slice(1) + " \xB7 Band " + c.band, minimumLevel: cellLevelAt(asset, Math.floor(cx / 2), Math.floor(cy2 / 2)) ?? [1, 1, 6, 11, 21, 41][c.band] ?? 1, originWidthChunks: 0, originHeightChunks: 0 }, collision: { tileSize: 32, width: 32, height: 26, tiles: collision }, visual: { terrain: visual, biomes: biomes2, blockers, ...caveArt.decorations.length ? { decorations: caveArt.decorations } : {}, ...stands ? { stands: standRows } : {}, ...calderaRows.length ? { calderas: calderaRows } : {}, route: { centerline, clearance, ...["planned-world-shoreline-v2", "planned-world-water-v3"].includes(asset.version) ? { mapFeatures: mapRows } : {} } }, edges, anchors: [...regularAnchors, ...eventAnchors, ...plannedAnchors, ...summitAnchors, ...volcanoAnchors], sites: reserved?.socket.entrance.chunkX === chunkX && reserved?.socket.entrance.chunkY === chunkY ? [reserved.socket] : [] });
   }
   let hollowHome = null;
   async function generate(args) {
@@ -97052,7 +97275,7 @@ function validateMapKnowledge(k) {
   closedRecord(k, ["version", "assetHash", "revision", "settlements", "visited", "rumors", "journal"]);
   requireContract(k.version === MAP_KNOWLEDGE_VERSION && /^[a-f0-9]{64}$/.test(k.assetHash), "Map knowledge version/commitment");
   safeInteger(k.revision);
-  requireContract(Array.isArray(k.settlements) && k.settlements.length >= 20 && k.settlements.length <= 33, "Settlement map catalog");
+  requireContract(Array.isArray(k.settlements) && k.settlements.length >= 20 && k.settlements.length <= 36, "Settlement map catalog");
   const ids4 = /* @__PURE__ */ new Set();
   for (const s of k.settlements) {
     closedRecord(s, ["id", "kind", "class", "label", "x", "y", "band", "built"]);
