@@ -244,7 +244,7 @@ var RESHAPE_TIERS = Object.freeze({ "repeatable-slot:ruin:wetland:standard:067":
 var RESHAPE_VERSION = "world-reshape-v2";
 var RESHAPE_HASH = "ac15d856c2dbbe38203480172b32aae7d19ccdd61cef10eee16aade24a0900d2";
 var RESHAPE_HYDROLOGY_HASH = "e12fd26221c55e0357b674d4beaf28cc522ef5f9dde420b073373f0ef7be1b65";
-var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-snow";
+var RESHAPE_DATABASE = "saq-world-reshape-v2-ac15d856-volcanic";
 var hasWorldReshape = (b) => b?.reshapeVersion === RESHAPE_VERSION && b?.reshapeHash === RESHAPE_HASH;
 var reshapedSite = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_SITES, id) ? RESHAPE_SITES[id] : null;
 var reshapedTier = (id) => typeof id === "string" && Object.hasOwn(RESHAPE_TIERS, id) ? RESHAPE_TIERS[id] : null;
@@ -616,6 +616,9 @@ var BESTIARY_CARDS = freezeWire([
   ["lava_serpent", "Lava Serpent", "volcanic", "critDamage", "executeDmg"],
   ["hell_bat", "Hell Bat", "volcanic", "attackSpeed", "lifeKill"],
   ["slag_slime", "Slag Slime", "volcanic", "maxHpPct", "fireDmg"],
+  ["cinder_crab", "Cinder Crab", "volcanic", "defPct", "fireDmg"],
+  ["forge_imp", "Forge Imp", "volcanic", "strPct", "counterDmg"],
+  ["ember_newt", "Ember Newt", "volcanic", "moveSpeedPct", "fireDmg"],
   ["gargoyle", "Gargoyle Warden", "ruins", "strPct", "eliteDmg"],
   ["rust_nibbler", "Rust Nibbler", "ruins", "critChance", "itemQuality"],
   ["animated_armor", "Animated Armor", "ruins", "block", "counterDmg"],
@@ -1224,7 +1227,7 @@ var BURROWERS_V1_MELEE_MOTION = freezeWire({ burrower: { windupTicks: 9, impactT
 
 // src/shared/content/lesser_bosses_v1.js
 var LESSER_BOSSES_V1_VERSION = "lesser-bosses-v1";
-var LESSER_BOSS_FAMILIES_V1 = Object.freeze(["vinegorger", "rotbloom", "gulpjaw", "rustmaw", "sporecrown", "gravewing", "rootgorger", "thresher", "waxcrown", "pitjaw", "spinegrove", "sirocco", "mirelily", "croakmaw", "gorgeleech", "ironhorn", "stormtalon", "cairnwarden", "shardheart", "rimehorn", "frostvigil"]);
+var LESSER_BOSS_FAMILIES_V1 = Object.freeze(["vinegorger", "rotbloom", "gulpjaw", "rustmaw", "sporecrown", "gravewing", "rootgorger", "thresher", "waxcrown", "pitjaw", "spinegrove", "sirocco", "mirelily", "croakmaw", "gorgeleech", "ironhorn", "stormtalon", "cairnwarden", "shardheart", "rimehorn", "frostvigil", "ventshell", "anvilgrim", "pyrelisk"]);
 var source7 = "SAQ World lesser bosses (code-drawn, page 7NdtTtgZ); World ordinary adaptation";
 var specs7 = [
   ["vinegorger", "Vinegorger", 50, 7, 1.5, 50, 20, 21.6, 30, 22],
@@ -1257,6 +1260,11 @@ var snow = [
   ["rimehorn", "Rimehorn", 58, 7, 1.1, 56, 20, 21.6, 34, 24],
   ["frostvigil", "Frostvigil", 52, 7, 1.2, 52, 20, 21.6, 40, 24]
 ];
+var volcanic = [
+  ["ventshell", "Ventshell", 60, 7, 0.8, 56, 20, 21.6, 34, 24],
+  ["anvilgrim", "Anvilgrim", 58, 8, 0.9, 58, 20, 21.6, 40, 26],
+  ["pyrelisk", "Pyrelisk", 54, 7, 1.1, 52, 20, 21.6, 36, 24]
+];
 var enemy = ([family2, name, hp, damage, moveSpeed, delayTicks, hullRadius, combatRadius, reach, stopDistance], n) => {
   const enemyDefinitionId = "def:d410" + n.toString(16).padStart(28, "0");
   return {
@@ -1280,6 +1288,7 @@ var LESSER_BOSSES_V1_LATER_ENEMIES = freezeWire(later.map((row2, index) => enemy
 var LESSER_BOSSES_V1_WETLAND_ENEMIES = freezeWire(wetland.map((row2, index) => enemy(row2, index + 69)));
 var LESSER_BOSSES_V1_UPLAND_ENEMIES = freezeWire(upland.map((row2, index) => enemy(row2, index + 72)));
 var LESSER_BOSSES_V1_SNOW_ENEMIES = freezeWire(snow.map((row2, index) => enemy(row2, index + 78)));
+var LESSER_BOSSES_V1_VOLCANIC_ENEMIES = freezeWire(volcanic.map((row2, index) => enemy(row2, index + 84)));
 var LESSER_BOSSES_V1_METADATA = freezeWire(Object.fromEntries(LESSER_BOSS_FAMILIES_V1.map((f3) => [f3, { eligibility: { biomes: [], sites: [] }, threatCategory: "site-warden", rewardCategory: "ordinary-gear" }])));
 var LESSER_BOSSES_V1_MELEE_MOTION = freezeWire(Object.fromEntries(LESSER_BOSS_FAMILIES_V1.map((f3) => [f3, { windupTicks: 14, impactTicks: 3, recoveryTicks: 14 }])));
 var LESSER_BOSSES_V1 = Object.freeze({
@@ -1303,7 +1312,10 @@ var LESSER_BOSSES_V1 = Object.freeze({
   cairnwarden: Object.freeze({ id: "cairnwarden", label: "CAIRNWARDEN", family: "cairnwarden", biome: "upland", affixId: "vitality_weaver", sites: Object.freeze(["ruin", "crypt"]), lesser: true }),
   shardheart: Object.freeze({ id: "shardheart", label: "SHARDHEART", family: "shardheart", biome: "frostland", affixId: "iron_citadel", sites: Object.freeze(["ruin"]), lesser: true }),
   rimehorn: Object.freeze({ id: "rimehorn", label: "RIMEHORN", family: "rimehorn", biome: "frostland", affixId: "blood_berserker", sites: Object.freeze(["cave"]), lesser: true }),
-  frostvigil: Object.freeze({ id: "frostvigil", label: "FROSTVIGIL", family: "frostvigil", biome: "frostland", affixId: "nullifier", sites: Object.freeze(["fort", "crypt"]), lesser: true })
+  frostvigil: Object.freeze({ id: "frostvigil", label: "FROSTVIGIL", family: "frostvigil", biome: "frostland", affixId: "nullifier", sites: Object.freeze(["fort", "crypt"]), lesser: true }),
+  ventshell: Object.freeze({ id: "ventshell", label: "VENTSHELL", family: "ventshell", biome: "volcanic", affixId: "iron_citadel", sites: Object.freeze(["cave"]), lesser: true }),
+  anvilgrim: Object.freeze({ id: "anvilgrim", label: "ANVILGRIM", family: "anvilgrim", biome: "volcanic", affixId: "blood_berserker", sites: Object.freeze(["fort", "crypt"]), lesser: true }),
+  pyrelisk: Object.freeze({ id: "pyrelisk", label: "PYRELISK", family: "pyrelisk", biome: "volcanic", affixId: "swift_commander", sites: Object.freeze(["ruin"]), lesser: true })
 });
 var LESSER_BOSS_IDS_V1 = Object.freeze(Object.keys(LESSER_BOSSES_V1));
 var LESSER_BOSS_BODY_V1 = freezeWire({ hullRadius: 20, combatRadius: 21.6, maxHp: { numerator: 6, denominator: 1 }, attackDamage: { numerator: 3, denominator: 2 } });
@@ -1414,6 +1426,70 @@ var LESSER_BOSS_TRICKS_V1 = Object.freeze({
     slow: 0.6,
     cooldownTicks: 390
   }),
+  ventshell: Object.freeze({
+    kind: "eruption",
+    firstDelayTicks: 120,
+    minRange: 0,
+    maxRange: 190,
+    braceTicks: 45,
+    eruptTicks: 96,
+    spentTicks: 123,
+    riseTicks: 30,
+    launches: Object.freeze([0, 12, 24, 36, 48]),
+    flyTicks: 42,
+    offsets: Object.freeze([Object.freeze([0, 0]), Object.freeze([-32, -24]), Object.freeze([36, -18]), Object.freeze([-28, 36]), Object.freeze([40, 32])]),
+    radius: 15,
+    damageTenths: 16,
+    poolRadius: 13,
+    poolTicks: 117,
+    burnEveryTicks: 30,
+    burnTenths: 4,
+    cooldownTicks: 330
+  }),
+  anvilgrim: Object.freeze({
+    kind: "fissure",
+    firstDelayTicks: 120,
+    minRange: 0,
+    maxRange: 170,
+    raiseTicks: 60,
+    laneAt: 21,
+    crackTicks: 43,
+    fireTicks: 50,
+    stuckTicks: 90,
+    freeTicks: 24,
+    impactAhead: 67,
+    impactRadius: 16,
+    slamTenths: 14,
+    fan: 0.44,
+    length: 134,
+    laneWidth: 13,
+    waveTicks: 16,
+    damageTenths: 18,
+    burnEveryTicks: 24,
+    burnTenths: 4,
+    knockback: 8,
+    knockbackTicks: 10,
+    cooldownTicks: 330
+  }),
+  pyrelisk: Object.freeze({
+    kind: "wildfire",
+    firstDelayTicks: 150,
+    minRange: 0,
+    maxRange: 160,
+    rearTicks: 30,
+    warnTicks: 57,
+    burnTicks: 48,
+    spentTicks: 105,
+    riseTicks: 27,
+    radius: 170,
+    gapRadius: 24,
+    gapNear: 60,
+    gapFar: 90,
+    hitEveryTicks: 24,
+    damageTenths: 16,
+    burnTenths: 5,
+    cooldownTicks: 390
+  }),
   gorgeleech: Object.freeze({ kind: "latch", firstDelayTicks: 120, minRange: 30, maxRange: 150, windupTicks: 60, lungeTicks: 9, latchTicks: 120, slumpTicks: 72, length: 150, laneHalfWidth: 12, reach: 40, lungeTenths: 8, biteEveryTicks: 30, biteTenths: 6, healPercent: 2, slow: 0.45, breakStep: 5, cooldownTicks: 330 }),
   gulpjaw: Object.freeze({ kind: "tongue", firstDelayTicks: 120, minRange: 50, maxRange: 200, windupTicks: 60, lashTicks: 7, reelTicks: 40, crouchTicks: 15, leapTicks: 30, laneHalfWidth: 12, pullSpeed: 3.4, pullStop: 58, lashTenths: 5, radius: 25, damageTenths: 20, knockback: 10, knockbackTicks: 12, puddleTicks: 110, puddleRadius: 22, poisonTenths: 4, poisonEveryTicks: 30, cooldownTicks: 330 })
 });
@@ -1457,7 +1533,7 @@ var TROPICAL_CREATURES_V1_MELEE_MOTION = freezeWire({
 
 // src/shared/content/open_land_creatures_v1.js
 var OPEN_LAND_CREATURES_V1_VERSION = "world-open-land-creatures-v1";
-var OPEN_LAND_CREATURE_FAMILIES_V1 = Object.freeze(["field_mantis", "meadow_bee", "antlion", "cactling", "dust_imp", "bog_lily", "bog_frog", "leech", "horn_beetle", "griffling", "cairnling", "shardling", "young_yeti", "lantern_wisp"]);
+var OPEN_LAND_CREATURE_FAMILIES_V1 = Object.freeze(["field_mantis", "meadow_bee", "antlion", "cactling", "dust_imp", "bog_lily", "bog_frog", "leech", "horn_beetle", "griffling", "cairnling", "shardling", "young_yeti", "lantern_wisp", "cinder_crab", "forge_imp", "ember_newt"]);
 var source9 = "SAQ World lesser bosses pages Nu4kjgWd + XZjKMDyM, base creatures (code-drawn); World ordinary melee adaptation";
 var specs9 = [
   ["field_mantis", "Field Mantis", 40, 7, 1.6, 48],
@@ -1476,10 +1552,14 @@ var specs9 = [
   // The Snow's three (page KFmoD9gS): Shardheart's, Rimehorn's and Frostvigil's small kin.
   ["shardling", "Shardling", 42, 7, 1.2, 52],
   ["young_yeti", "Young Yeti", 52, 7, 1.1, 56],
-  ["lantern_wisp", "Lantern Wisp", 34, 6, 1.6, 46]
+  ["lantern_wisp", "Lantern Wisp", 34, 6, 1.6, 46],
+  // The Volcanic's three (page 6Fjy11c7, answer 4A): Ventshell's, Anvilgrim's and Pyrelisk's small kin.
+  ["cinder_crab", "Cinder Crab", 48, 6, 0.9, 56],
+  ["forge_imp", "Forge Imp", 40, 7, 1.4, 48],
+  ["ember_newt", "Ember Newt", 36, 6, 1.7, 46]
 ];
 var OPEN_LAND_CREATURES_V1_ENEMIES = freezeWire(specs9.map(([family2, name, hp, damage, moveSpeed, delayTicks], index) => {
-  const enemyDefinitionId = "def:d410" + (index < 8 ? index + 61 : index < 11 ? index + 67 : index + 70).toString(16).padStart(28, "0");
+  const enemyDefinitionId = "def:d410" + (index < 8 ? index + 61 : index < 11 ? index + 67 : index < 14 ? index + 70 : index + 73).toString(16).padStart(28, "0");
   return {
     enemyDefinitionId,
     contentDefinitionId: enemyDefinitionId,
@@ -1512,7 +1592,10 @@ var OPEN_LAND_CREATURES_V1_METADATA = freezeWire({
   cairnling: row("upland", "ordinary-heavy"),
   shardling: row("frostland", "ordinary-skirmisher"),
   young_yeti: row("frostland", "ordinary-heavy"),
-  lantern_wisp: row("frostland", "ordinary-skirmisher")
+  lantern_wisp: row("frostland", "ordinary-skirmisher"),
+  cinder_crab: row("volcanic", "ordinary-heavy"),
+  forge_imp: row("volcanic", "ordinary-skirmisher"),
+  ember_newt: row("volcanic", "ordinary-skirmisher")
 });
 var OPEN_LAND_CREATURES_V1_MELEE_MOTION = freezeWire({
   field_mantis: { windupTicks: 10, impactTicks: 2, recoveryTicks: 9 },
@@ -1528,11 +1611,15 @@ var OPEN_LAND_CREATURES_V1_MELEE_MOTION = freezeWire({
   cairnling: { windupTicks: 15, impactTicks: 3, recoveryTicks: 12 },
   shardling: { windupTicks: 11, impactTicks: 2, recoveryTicks: 10 },
   young_yeti: { windupTicks: 15, impactTicks: 3, recoveryTicks: 12 },
-  lantern_wisp: { windupTicks: 9, impactTicks: 2, recoveryTicks: 9 }
+  lantern_wisp: { windupTicks: 9, impactTicks: 2, recoveryTicks: 9 },
+  cinder_crab: { windupTicks: 14, impactTicks: 3, recoveryTicks: 11 },
+  forge_imp: { windupTicks: 11, impactTicks: 2, recoveryTicks: 10 },
+  ember_newt: { windupTicks: 9, impactTicks: 2, recoveryTicks: 9 }
 });
 var OPEN_LAND_CREATURES_V1_FIRST_ENEMIES = Object.freeze(OPEN_LAND_CREATURES_V1_ENEMIES.slice(0, 8));
 var OPEN_LAND_CREATURES_V1_UPLAND_ENEMIES = Object.freeze(OPEN_LAND_CREATURES_V1_ENEMIES.slice(8, 11));
-var OPEN_LAND_CREATURES_V1_SNOW_ENEMIES = Object.freeze(OPEN_LAND_CREATURES_V1_ENEMIES.slice(11));
+var OPEN_LAND_CREATURES_V1_SNOW_ENEMIES = Object.freeze(OPEN_LAND_CREATURES_V1_ENEMIES.slice(11, 14));
+var OPEN_LAND_CREATURES_V1_VOLCANIC_ENEMIES = Object.freeze(OPEN_LAND_CREATURES_V1_ENEMIES.slice(14));
 
 // src/shared/content/ordinary_enemies.js
 var ORDINARY_CATALOG_VERSION = "d11-world-creatures-v1";
@@ -1640,7 +1727,7 @@ var LEGACY_ORDINARY_ENEMIES = freezeWire([
   }
 ].map((d) => ({ ...d, contentDefinitionId: d.enemyDefinitionId })));
 var DUNGEON_MOBS_V1_CATALOG_ENEMIES = Object.freeze([...LEGACY_ORDINARY_ENEMIES, ...DUNGEON_MOBS_V1_ENEMIES]);
-var ORDINARY_ENEMIES = Object.freeze([...DUNGEON_MOBS_V1_CATALOG_ENEMIES, ...DUNGEON_MOBS_V2_ENEMIES, ...BIOME_CREATURES_V1_ENEMIES, ...BROOD_CREATURES_V1_ENEMIES, ...BANDITS_V1_ENEMIES, ...BURROWERS_V1_ENEMIES, ...LESSER_BOSSES_V1_ENEMIES, ...TROPICAL_CREATURES_V1_ENEMIES, ...LESSER_BOSSES_V1_LATER_ENEMIES, ...OPEN_LAND_CREATURES_V1_FIRST_ENEMIES, ...LESSER_BOSSES_V1_WETLAND_ENEMIES, ...LESSER_BOSSES_V1_UPLAND_ENEMIES, ...OPEN_LAND_CREATURES_V1_UPLAND_ENEMIES, ...LESSER_BOSSES_V1_SNOW_ENEMIES, ...OPEN_LAND_CREATURES_V1_SNOW_ENEMIES]);
+var ORDINARY_ENEMIES = Object.freeze([...DUNGEON_MOBS_V1_CATALOG_ENEMIES, ...DUNGEON_MOBS_V2_ENEMIES, ...BIOME_CREATURES_V1_ENEMIES, ...BROOD_CREATURES_V1_ENEMIES, ...BANDITS_V1_ENEMIES, ...BURROWERS_V1_ENEMIES, ...LESSER_BOSSES_V1_ENEMIES, ...TROPICAL_CREATURES_V1_ENEMIES, ...LESSER_BOSSES_V1_LATER_ENEMIES, ...OPEN_LAND_CREATURES_V1_FIRST_ENEMIES, ...LESSER_BOSSES_V1_WETLAND_ENEMIES, ...LESSER_BOSSES_V1_UPLAND_ENEMIES, ...OPEN_LAND_CREATURES_V1_UPLAND_ENEMIES, ...LESSER_BOSSES_V1_SNOW_ENEMIES, ...OPEN_LAND_CREATURES_V1_SNOW_ENEMIES, ...LESSER_BOSSES_V1_VOLCANIC_ENEMIES, ...OPEN_LAND_CREATURES_V1_VOLCANIC_ENEMIES]);
 function resolveOrdinaryProfile(enemy2, tier, progressionPower = BASELINE_PROGRESSION_POWER) {
   requireContract(ORDINARY_ENEMIES.includes(enemy2), "Unknown ordinary definition");
   const i = ORDINARY_ENEMIES.indexOf(enemy2), rank = THREAT_TIERS.indexOf(tier), power2 = resolveThreatPower(progressionPower, tier);
@@ -1677,13 +1764,15 @@ var LESSER_WETLAND_START = OPEN_LAND_CREATURES_V1_START + OPEN_LAND_CREATURES_V1
 var OPEN_LAND_UPLAND_START = LESSER_WETLAND_START + (LESSER_BOSSES_V1_WETLAND_ENEMIES.length + LESSER_BOSSES_V1_UPLAND_ENEMIES.length) * THREAT_TIERS.length;
 var LESSER_SNOW_START = OPEN_LAND_UPLAND_START + OPEN_LAND_CREATURES_V1_UPLAND_ENEMIES.length * THREAT_TIERS.length;
 var OPEN_LAND_SNOW_START = LESSER_SNOW_START + LESSER_BOSSES_V1_SNOW_ENEMIES.length * THREAT_TIERS.length;
+var LESSER_VOLCANIC_START = OPEN_LAND_SNOW_START + OPEN_LAND_CREATURES_V1_SNOW_ENEMIES.length * THREAT_TIERS.length;
+var OPEN_LAND_VOLCANIC_START = LESSER_VOLCANIC_START + LESSER_BOSSES_V1_VOLCANIC_ENEMIES.length * THREAT_TIERS.length;
 var BIOME_CREATURES_V1_PROFILES = Object.freeze(ORDINARY_PROFILES.slice(BIOME_CREATURES_V1_START, BROOD_CREATURES_V1_START));
 var BROOD_CREATURES_V1_PROFILES = Object.freeze(ORDINARY_PROFILES.slice(BROOD_CREATURES_V1_START, BANDITS_V1_START));
 var BANDITS_V1_PROFILES = Object.freeze(ORDINARY_PROFILES.slice(BANDITS_V1_START, BURROWERS_V1_START));
 var BURROWERS_V1_PROFILES = Object.freeze(ORDINARY_PROFILES.slice(BURROWERS_V1_START, LESSER_BOSSES_V1_START));
-var LESSER_BOSSES_V1_PROFILES = Object.freeze([...ORDINARY_PROFILES.slice(LESSER_BOSSES_V1_START, TROPICAL_CREATURES_V1_START), ...ORDINARY_PROFILES.slice(LESSER_LATER_START, OPEN_LAND_CREATURES_V1_START), ...ORDINARY_PROFILES.slice(LESSER_WETLAND_START, OPEN_LAND_UPLAND_START), ...ORDINARY_PROFILES.slice(LESSER_SNOW_START, OPEN_LAND_SNOW_START)]);
+var LESSER_BOSSES_V1_PROFILES = Object.freeze([...ORDINARY_PROFILES.slice(LESSER_BOSSES_V1_START, TROPICAL_CREATURES_V1_START), ...ORDINARY_PROFILES.slice(LESSER_LATER_START, OPEN_LAND_CREATURES_V1_START), ...ORDINARY_PROFILES.slice(LESSER_WETLAND_START, OPEN_LAND_UPLAND_START), ...ORDINARY_PROFILES.slice(LESSER_SNOW_START, OPEN_LAND_SNOW_START), ...ORDINARY_PROFILES.slice(LESSER_VOLCANIC_START, OPEN_LAND_VOLCANIC_START)]);
 var TROPICAL_CREATURES_V1_PROFILES = Object.freeze(ORDINARY_PROFILES.slice(TROPICAL_CREATURES_V1_START, LESSER_LATER_START));
-var OPEN_LAND_CREATURES_V1_PROFILES = Object.freeze([...ORDINARY_PROFILES.slice(OPEN_LAND_CREATURES_V1_START, LESSER_WETLAND_START), ...ORDINARY_PROFILES.slice(OPEN_LAND_UPLAND_START, LESSER_SNOW_START), ...ORDINARY_PROFILES.slice(OPEN_LAND_SNOW_START)]);
+var OPEN_LAND_CREATURES_V1_PROFILES = Object.freeze([...ORDINARY_PROFILES.slice(OPEN_LAND_CREATURES_V1_START, LESSER_WETLAND_START), ...ORDINARY_PROFILES.slice(OPEN_LAND_UPLAND_START, LESSER_SNOW_START), ...ORDINARY_PROFILES.slice(OPEN_LAND_SNOW_START, LESSER_VOLCANIC_START), ...ORDINARY_PROFILES.slice(OPEN_LAND_VOLCANIC_START)]);
 var enemyByProfile = new Map(ORDINARY_PROFILES.map((p) => [p.contentDefinitionId, ORDINARY_ENEMIES.find((d) => p.profileKey.startsWith(`ordinary-${d.family.replaceAll("_", "-")}-`))]));
 function ordinaryEnemyForProfile(id) {
   return enemyByProfile.get(id) ?? null;
@@ -5200,7 +5289,7 @@ var WILDERNESS_ECOLOGY_V3_MATRIX = freezeWire({
   desert: { surface: ["sand_scarab", "dune_scorpion", "antlion", "cactling", "dust_imp"], cave: ["dune_scorpion", "sand_scarab", "antlion"], ruin: ["tomb_mummy", "sand_scarab", "cactling"], fort: ["dune_scorpion", "tomb_mummy", "dust_imp"], crypt: ["tomb_mummy", "sand_scarab", "dust_imp"] },
   frostland: { surface: ["wyrmling", "gilded_scuttler", "shardling", "young_yeti", "lantern_wisp"], cave: ["wyrmling", "gilded_scuttler", "young_yeti"], ruin: ["mimic_shield", "shardling"], fort: ["mimic_shield", "gilded_scuttler", "lantern_wisp"], crypt: ["mimic_shield", "lantern_wisp"] },
   tropical: { surface: ["thorn_wyrm", "snapjaw", "dart_frog"], cave: ["thorn_wyrm", "dart_frog"], ruin: ["snapjaw", "dart_frog"], fort: ["dart_frog", "snapjaw"], crypt: ["snapjaw"] },
-  volcanic: { surface: ["hell_bat", "lava_serpent"], cave: ["slag_slime", "hell_bat"], ruin: ["magma_elemental", "slag_slime"], fort: ["magma_elemental", "lava_serpent"], crypt: [] }
+  volcanic: { surface: ["hell_bat", "lava_serpent", "cinder_crab", "forge_imp", "ember_newt"], cave: ["slag_slime", "hell_bat", "cinder_crab"], ruin: ["magma_elemental", "slag_slime", "ember_newt"], fort: ["magma_elemental", "lava_serpent", "forge_imp"], crypt: ["forge_imp"] }
 });
 var WILDERNESS_ECOLOGY_BOSS_CANDIDATES = freezeWire({
   "repeatable-slot:fort:upland:deep:01": { bossId: "aegis_goliath", support: ["mimic_shield"], status: "needs-native-arena-validation" },
@@ -13710,8 +13799,8 @@ var point = (p) => {
   requireContract(Number.isFinite(p.x) && Number.isFinite(p.y), "Invalid named trick point");
   return p;
 };
-var LESSER_PHASES = { roll: ["ready", "windup", "rolling", "dizzy"], spores: ["ready", "windup", "bursting", "recover"], dive: ["ready", "crouch", "airborne", "stuck", "rip"], burrow: ["ready", "dive", "tunnel", "warn", "up"], seeds: ["ready", "windup", "volley", "sprouts"], tongue: ["ready", "windup", "lash", "reel", "crouch", "leap", "puddle"], reap: ["ready", "windup", "second", "recover"], stings: ["ready", "windup", "volley", "tired"], pit: ["ready", "dig", "warn", "pull", "climb"], needles: ["ready", "windup", "turn", "second", "spent"], devil: ["ready", "cast", "warn", "chase", "fade"], cloud: ["ready", "windup", "belch", "linger"], ripples: ["ready", "windup", "croaks", "tired"], latch: ["ready", "windup", "lunge", "latch", "slump"], ram: ["ready", "windup", "charge", "rockfall", "dazed"], gale: ["ready", "windup", "gusts", "tired"], sling: ["ready", "tear", "throws", "call", "return", "stagger"], cage: ["ready", "cast", "shut", "frozen", "spent"], heave: ["ready", "toss", "gather", "scoop", "lift", "winded", "drift"], whiteout: ["ready", "raise", "storm", "gutter"] };
-var LESSER_SPANS = { roll: (t) => ({ windup: t.windupTicks, rolling: t.rollTicks, dizzy: t.dizzyTicks }), spores: (t) => ({ windup: t.windupTicks, bursting: t.gapTicks, recover: t.recoverTicks }), dive: (t) => ({ crouch: t.crouchTicks, airborne: t.airTicks, stuck: t.stuckTicks, rip: t.ripTicks }), burrow: (t) => ({ dive: t.diveTicks, tunnel: t.tunnelTicks, warn: t.warnTicks, up: t.upTicks }), seeds: (t) => ({ windup: t.windupTicks, volley: t.volleyTicks, sprouts: t.sproutTicks }), tongue: (t) => ({ windup: t.windupTicks, lash: t.lashTicks, reel: t.reelTicks, crouch: t.crouchTicks, leap: t.leapTicks, puddle: t.puddleTicks }), reap: (t) => ({ windup: t.windupTicks, second: t.secondTicks, recover: t.recoverTicks }), stings: (t) => ({ windup: t.windupTicks, volley: t.volleyTicks, tired: t.tiredTicks }), pit: (t) => ({ dig: t.digTicks, warn: t.warnTicks, pull: t.pullTicks, climb: t.climbTicks }), needles: (t) => ({ windup: t.windupTicks, turn: t.turnTicks, second: t.secondTicks, spent: t.spentTicks }), devil: (t) => ({ cast: t.castTicks, warn: t.warnTicks, chase: t.chaseTicks, fade: t.fadeTicks }), cloud: (t) => ({ windup: t.windupTicks, belch: t.belchTicks, linger: t.lingerTicks }), ripples: (t) => ({ windup: t.windupTicks, croaks: t.croakTicks, tired: t.tiredTicks }), latch: (t) => ({ windup: t.windupTicks, lunge: t.lungeTicks, latch: t.latchTicks, slump: t.slumpTicks }), ram: (t) => ({ windup: t.windupTicks, charge: t.chargeTicks, rockfall: t.fallTicks, dazed: t.dazedTicks }), gale: (t) => ({ windup: t.windupTicks, gusts: t.gustTicks, tired: t.tiredTicks }), sling: (t) => ({ tear: t.tearTicks, throws: t.throwTicks, call: t.callTicks, return: t.returnTicks, stagger: t.staggerTicks }), cage: (t) => ({ cast: t.castTicks, shut: t.shutTicks, frozen: t.frozenTicks, spent: t.spentTicks }), heave: (t) => ({ toss: t.tossTicks, gather: t.gatherTicks, scoop: t.scoopTicks, lift: t.liftTicks, winded: t.windedTicks, drift: t.driftTicks }), whiteout: (t) => ({ raise: t.raiseTicks, storm: t.stormTicks, gutter: t.gutterTicks }) };
+var LESSER_PHASES = { roll: ["ready", "windup", "rolling", "dizzy"], spores: ["ready", "windup", "bursting", "recover"], dive: ["ready", "crouch", "airborne", "stuck", "rip"], burrow: ["ready", "dive", "tunnel", "warn", "up"], seeds: ["ready", "windup", "volley", "sprouts"], tongue: ["ready", "windup", "lash", "reel", "crouch", "leap", "puddle"], reap: ["ready", "windup", "second", "recover"], stings: ["ready", "windup", "volley", "tired"], pit: ["ready", "dig", "warn", "pull", "climb"], needles: ["ready", "windup", "turn", "second", "spent"], devil: ["ready", "cast", "warn", "chase", "fade"], cloud: ["ready", "windup", "belch", "linger"], ripples: ["ready", "windup", "croaks", "tired"], latch: ["ready", "windup", "lunge", "latch", "slump"], ram: ["ready", "windup", "charge", "rockfall", "dazed"], gale: ["ready", "windup", "gusts", "tired"], sling: ["ready", "tear", "throws", "call", "return", "stagger"], cage: ["ready", "cast", "shut", "frozen", "spent"], heave: ["ready", "toss", "gather", "scoop", "lift", "winded", "drift"], whiteout: ["ready", "raise", "storm", "gutter"], eruption: ["ready", "brace", "erupt", "spent", "rise"], fissure: ["ready", "raise", "crack", "fire", "stuck", "free"], wildfire: ["ready", "rear", "warnA", "burnA", "warnB", "burnB", "spent", "rise"] };
+var LESSER_SPANS = { roll: (t) => ({ windup: t.windupTicks, rolling: t.rollTicks, dizzy: t.dizzyTicks }), spores: (t) => ({ windup: t.windupTicks, bursting: t.gapTicks, recover: t.recoverTicks }), dive: (t) => ({ crouch: t.crouchTicks, airborne: t.airTicks, stuck: t.stuckTicks, rip: t.ripTicks }), burrow: (t) => ({ dive: t.diveTicks, tunnel: t.tunnelTicks, warn: t.warnTicks, up: t.upTicks }), seeds: (t) => ({ windup: t.windupTicks, volley: t.volleyTicks, sprouts: t.sproutTicks }), tongue: (t) => ({ windup: t.windupTicks, lash: t.lashTicks, reel: t.reelTicks, crouch: t.crouchTicks, leap: t.leapTicks, puddle: t.puddleTicks }), reap: (t) => ({ windup: t.windupTicks, second: t.secondTicks, recover: t.recoverTicks }), stings: (t) => ({ windup: t.windupTicks, volley: t.volleyTicks, tired: t.tiredTicks }), pit: (t) => ({ dig: t.digTicks, warn: t.warnTicks, pull: t.pullTicks, climb: t.climbTicks }), needles: (t) => ({ windup: t.windupTicks, turn: t.turnTicks, second: t.secondTicks, spent: t.spentTicks }), devil: (t) => ({ cast: t.castTicks, warn: t.warnTicks, chase: t.chaseTicks, fade: t.fadeTicks }), cloud: (t) => ({ windup: t.windupTicks, belch: t.belchTicks, linger: t.lingerTicks }), ripples: (t) => ({ windup: t.windupTicks, croaks: t.croakTicks, tired: t.tiredTicks }), latch: (t) => ({ windup: t.windupTicks, lunge: t.lungeTicks, latch: t.latchTicks, slump: t.slumpTicks }), ram: (t) => ({ windup: t.windupTicks, charge: t.chargeTicks, rockfall: t.fallTicks, dazed: t.dazedTicks }), gale: (t) => ({ windup: t.windupTicks, gusts: t.gustTicks, tired: t.tiredTicks }), sling: (t) => ({ tear: t.tearTicks, throws: t.throwTicks, call: t.callTicks, return: t.returnTicks, stagger: t.staggerTicks }), cage: (t) => ({ cast: t.castTicks, shut: t.shutTicks, frozen: t.frozenTicks, spent: t.spentTicks }), heave: (t) => ({ toss: t.tossTicks, gather: t.gatherTicks, scoop: t.scoopTicks, lift: t.liftTicks, winded: t.windedTicks, drift: t.driftTicks }), whiteout: (t) => ({ raise: t.raiseTicks, storm: t.stormTicks, gutter: t.gutterTicks }), eruption: (t) => ({ brace: t.braceTicks, erupt: t.eruptTicks, spent: t.spentTicks, rise: t.riseTicks }), fissure: (t) => ({ raise: t.raiseTicks, crack: t.crackTicks, fire: t.fireTicks, stuck: t.stuckTicks, free: t.freeTicks }), wildfire: (t) => ({ rear: t.rearTicks, warnA: t.warnTicks, burnA: t.burnTicks, warnB: t.warnTicks, burnB: t.burnTicks, spent: t.spentTicks, rise: t.riseTicks }) };
 function validateLesserTrickV1(state, k, t) {
   closedRecord(k, ["kind", "phase", "phaseEndsTick", "sequence", "origin", "direction", "target", "points", "hitEntityIds", "knockbacksByEntityId"]);
   requireContract(LESSER_PHASES[t.kind].includes(k.phase), "Invalid lesser boss phase");
@@ -15005,7 +15094,7 @@ var hash3 = (s) => {
 var dist2 = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 function siteEndsActiveV1(state) {
   const w = state?.d9World?.plannedWorld, defs = state?.content?.definitionsById;
-  return Boolean(w && defs) && hasWorldReshape(w) && hasWorldCombat(state) && usesMultiroom(w) && hasBossHostingV1(w) && [...DUNGEON_MOBS_V2_ENEMIES, ...DUNGEON_MOBS_V2_PROFILES, ...BIOME_CREATURES_V1_ENEMIES, ...BIOME_CREATURES_V1_PROFILES, ...LESSER_BOSSES_V1_ENEMIES, ...LESSER_BOSSES_V1_PROFILES, ...TROPICAL_CREATURES_V1_ENEMIES, ...TROPICAL_CREATURES_V1_PROFILES, ...LESSER_BOSSES_V1_LATER_ENEMIES, ...LESSER_BOSSES_V1_WETLAND_ENEMIES, ...LESSER_BOSSES_V1_UPLAND_ENEMIES, ...LESSER_BOSSES_V1_SNOW_ENEMIES, ...OPEN_LAND_CREATURES_V1_ENEMIES, ...OPEN_LAND_CREATURES_V1_PROFILES].every((p) => defs[p.contentDefinitionId]);
+  return Boolean(w && defs) && hasWorldReshape(w) && hasWorldCombat(state) && usesMultiroom(w) && hasBossHostingV1(w) && [...DUNGEON_MOBS_V2_ENEMIES, ...DUNGEON_MOBS_V2_PROFILES, ...BIOME_CREATURES_V1_ENEMIES, ...BIOME_CREATURES_V1_PROFILES, ...LESSER_BOSSES_V1_ENEMIES, ...LESSER_BOSSES_V1_PROFILES, ...TROPICAL_CREATURES_V1_ENEMIES, ...TROPICAL_CREATURES_V1_PROFILES, ...LESSER_BOSSES_V1_LATER_ENEMIES, ...LESSER_BOSSES_V1_WETLAND_ENEMIES, ...LESSER_BOSSES_V1_UPLAND_ENEMIES, ...LESSER_BOSSES_V1_SNOW_ENEMIES, ...LESSER_BOSSES_V1_VOLCANIC_ENEMIES, ...OPEN_LAND_CREATURES_V1_ENEMIES, ...OPEN_LAND_CREATURES_V1_PROFILES].every((p) => defs[p.contentDefinitionId]);
 }
 var classicTurns = null;
 var listedTurns = /* @__PURE__ */ new WeakMap();
