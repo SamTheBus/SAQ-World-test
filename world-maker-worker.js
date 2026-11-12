@@ -830,7 +830,9 @@ var SPOT_NAMES = Object.freeze({
   "village-outpost:10": "Brinecombe",
   "town:09": "Seabright",
   "town:10": "Wavecrest",
-  "town:11": "Tidemoor"
+  "town:11": "Tidemoor",
+  // The Upland town world-maker-v1.17 adds where no other generated town stands in Upland.
+  "town:12": "Heatherfell"
 });
 var ALWAYS_WALLED = /* @__PURE__ */ new Set(["town:08"]);
 var sq = (v) => v * v;
@@ -1767,7 +1769,9 @@ var GENERATED_TOWN_SIZES = Object.freeze({
   "settlement-slot:village-outpost:10": "village",
   "settlement-slot:town:09": "town",
   "settlement-slot:town:10": "town",
-  "settlement-slot:town:11": "town"
+  "settlement-slot:town:11": "town",
+  // world-maker-v1.17: the Upland town, only where no other generated town stands in Upland.
+  "settlement-slot:town:12": "town"
 });
 var hyp2 = PM.hypot;
 var r3 = (v) => Math.round(v * 1e3) / 1e3;
@@ -1953,7 +1957,7 @@ function planGeneratedTownsV1(asset, spots = null) {
   }
   return { version: GENERATED_TOWNS_VERSION, layout: TOWN_LAYOUT_VERSION, towns };
 }
-var TOWN_NEW_ART = Object.freeze(/* @__PURE__ */ new Set(["grassland", "woodland", "desert", "frostland", "wetland"]));
+var TOWN_NEW_ART = Object.freeze(/* @__PURE__ */ new Set(["grassland", "woodland", "desert", "frostland", "wetland", "upland"]));
 var TOWN_SHOP_ROLES = Object.freeze({ hamlet: ["general", "innkeeper"], village: ["general", "smith", "innkeeper"], town: ["general", "smith", "innkeeper", "enchanter"], city: ["general", "smith", "innkeeper", "enchanter"], capital: ["general", "smith", "innkeeper", "enchanter"] });
 
 // src/shared/content/world_towns_v1.js
@@ -2160,11 +2164,17 @@ for (const role of Object.keys(CAST_KITS)) {
   });
 }
 SPOTS.push(...ISLAND_SPOTS);
+var UPLAND_SPOTS = [["town:12", "town"]];
+for (const role of Object.keys(CAST_KITS)) {
+  const ks2 = Object.keys(CAST_KITS[role]);
+  for (const [slot] of UPLAND_SPOTS) KIT_OF[slot + "|" + role] = ks2[rng("upland-kits|" + slot + "|" + role)() * ks2.length | 0];
+}
+SPOTS.push(...UPLAND_SPOTS);
 var ISLAND_NAMES = [
   ["Anselm", "Baldric", "Cedric", "Darrow", "Elric", "Fergus", "Grady", "Holt", "Ingram", "Jory", "Kester", "Leof", "Morgan", "Niall", "Oswin", "Piers", "Radley", "Stellan", "Tobias", "Ulf"],
   ["Alys", "Bryony", "Cressida", "Delphine", "Eira", "Fern", "Gwen", "Hollis", "Isolde", "Jessamy", "Kerensa", "Lark", "Merry", "Nerys", "Orla", "Primrose", "Rhosyn", "Saffron", "Tilda", "Wynne"]
 ];
-var ISLAND_SLOTS = new Set(ISLAND_SPOTS.map((s) => s[0]));
+var ISLAND_SLOTS = new Set([...ISLAND_SPOTS, ...UPLAND_SPOTS].map((s) => s[0]));
 var CAST = {};
 {
   const used = /* @__PURE__ */ new Set(["Ada", "Bren", "Mara", "Selene", "Ila", "Nell", "Oren"]);
@@ -4255,7 +4265,7 @@ function validateRuntimePlan(p) {
     for (const b of w.bridgeGuards) requirePlan(Object.keys(b).sort().join(",") === "x1,x2,y1,y2" && Object.values(b).every(Number.isSafeInteger) && b.x1 <= b.x2 && b.y1 <= b.y2 && b.x2 - b.x1 <= 20 && b.y2 - b.y1 <= 20, "Invalid immutable bridge guard");
   }
   requirePlan(p.scale.tilePixels === 32 && p.scale.chunkTilesX === 32 && p.scale.chunkTilesY === 26 && p.scale.macroTilesX === 64 && p.scale.macroTilesY === 52, "Planned spatial scale");
-  requirePlan(p.settlements.length >= 20 && p.settlements.length <= 27 && p.sites.length === (p.firstJourney ? 125 : p.wildernessExtension ? 124 : p.populationOverlay ? 51 : 48) && p.futureIslands.length === 6 && p.factions.length === 3 && p.stonewatch.candidateCount > 0, "Incomplete planned reservations");
+  requirePlan(p.settlements.length >= 20 && p.settlements.length <= 28 && p.sites.length === (p.firstJourney ? 125 : p.wildernessExtension ? 124 : p.populationOverlay ? 51 : 48) && p.futureIslands.length === 6 && p.factions.length === 3 && p.stonewatch.candidateCount > 0, "Incomplete planned reservations");
   if (p.worldReshape) requirePlan(p.worldReshape.version === RESHAPE_VERSION && p.worldReshape.hash === RESHAPE_HASH && p.firstJourney && p.assetId === "alpha", "Uncommitted world reshape");
   if (p.firstJourney) requirePlan(p.firstJourney.version === ACCESS_VERSION && p.firstJourney.hash === ACCESS_HASH && p.wildernessExtension && p.hydrologyPlan && p.assetId === "alpha" && p.sites.filter((s) => s.id === "repeatable-slot:cave:woodland:small:109").length === 1, "Uncommitted first journey");
   if (p.wildernessExtension) requirePlan(p.wildernessExtension.version === WILDERNESS_VERSION && p.wildernessExtension.hash === WILDERNESS_HASH && p.assetId === "alpha", "Uncommitted wilderness extension");
@@ -5088,6 +5098,7 @@ function makeRoles(asset) {
 var moveSite = (t, dx, dy, lm) => ({ ...t, anchor: { key: t.anchor.x + dx + "," + (t.anchor.y + dy), x: t.anchor.x + dx, y: t.anchor.y + dy }, footprint: t.footprint.map((c) => ({ x: c.x + 2 * dx, y: c.y + 2 * dy })), approach: t.approach.map((c) => ({ x: c.x + 2 * dx, y: c.y + 2 * dy })), landmassId: lm });
 var ISLAND_VILLAGES = ["settlement-slot:village-outpost:07", "settlement-slot:village-outpost:08", "settlement-slot:village-outpost:09", "settlement-slot:village-outpost:10"];
 var ISLAND_TOWNS = ["settlement-slot:town:09", "settlement-slot:town:10", "settlement-slot:town:11"];
+var UPLAND_TOWN = "settlement-slot:town:12";
 var SITE_MIX = { cave: { small: 33, standard: 4, large: 2, deep: 2 }, crypt: { small: 11, standard: 2, large: 2, deep: 1 }, fort: { small: 2, standard: 13, large: 2, deep: 1 }, ruin: { small: 4, standard: 24, large: 5, deep: 1 } };
 function makePlaces(seed, land, layout, biomes, catalog) {
   const { owner, landmasses, elevation, slope, depth } = land, { band, placed, taken, fits, put: put2, choose, mainland, majors, mediums, coastal, isLand } = layout, { biome } = biomes, rnd = stream(seed, "places");
@@ -5192,6 +5203,35 @@ function makePlaces(seed, land, layout, biomes, catalog) {
   let nv = 0, nt = 0;
   for (const k of [...mediums].sort((a, b) => size(b) - size(a))) if (!byIsland(k) && nv < ISLAND_VILLAGES.length && settleExtra(rename(VILLAGE, ISLAND_VILLAGES[nv], "island-village"), k)) nv++;
   for (const k of [...majors].sort((a, b) => size(b) - size(a))) if (!townish(k) && nt < ISLAND_TOWNS.length && settleExtra(rename(TOWN, ISLAND_TOWNS[nt], "island-town"), k)) nt++;
+  const U = B2.upland, upHas = [...placed.values()].some((s) => GENERATED_TOWN_SIZES[s.id] && biome[idx(s.anchor.x, s.anchor.y)] === U);
+  if (!upHas) {
+    const t = rename(TOWN, UPLAND_TOWN, "upland-town"), inUp = (ax, ay) => {
+      const dx = ax - t.anchor.x, dy = ay - t.anchor.y;
+      return t.core.every((c) => biome[idx(Math.floor((c.x + 2 * dx) / 2), Math.floor((c.y + 2 * dy) / 2))] === U);
+    };
+    let done = false;
+    for (const spacing of [3, 2, 1]) {
+      let best = null, bv = -Infinity;
+      for (const i of land.land) {
+        if (biome[i] !== U || !all.includes(owner[i])) continue;
+        const v = Math.min(inner[i], 6) / 6 + away(i) - slope[i] / 600 + rnd() * 0.01;
+        if (v <= bv || !inUp(cx(i), cy(i))) continue;
+        if (fits(t, cx(i), cy(i), owner[i], spacing)) {
+          bv = v;
+          best = i;
+        }
+      }
+      if (best !== null) {
+        const r = relocate(t, cx(best) - t.anchor.x, cy(best) - t.anchor.y, t.landmassId, LM[owner[best]]);
+        for (const c of [...r.core, ...r.expansion, ...r.sockets]) taken[idx(Math.floor(c.x / 2), Math.floor(c.y / 2))] = 1;
+        placed.set(r.id, r);
+        extras.push(r.id);
+        done = true;
+        break;
+      }
+    }
+    if (!done) throw Error("No room for an Upland town");
+  }
   const settlements2 = [...catalog.settlements.keys(), ...extras].map((id) => {
     const s = placed.get(id);
     if (!s) throw Error("Unplaced " + id);
@@ -7162,7 +7202,7 @@ var CLASSIC_EVENT_PLAN = freezeWire({ version: WORLD_EVENT_PLAN_VERSION, events:
 
 // src/shared/generation/world_maker_v1/make.js
 var TW4 = W * 64;
-var WORLD_MAKER_VERSION = "world-maker-v1.16";
+var WORLD_MAKER_VERSION = "world-maker-v1.17";
 function makeWorld(seed, catalog, tries = 4, onStep = null) {
   const started = performance.now();
   let w, why = [];

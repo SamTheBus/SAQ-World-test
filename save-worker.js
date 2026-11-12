@@ -6547,7 +6547,9 @@ var SPOT_NAMES = Object.freeze({
   "village-outpost:10": "Brinecombe",
   "town:09": "Seabright",
   "town:10": "Wavecrest",
-  "town:11": "Tidemoor"
+  "town:11": "Tidemoor",
+  // The Upland town world-maker-v1.17 adds where no other generated town stands in Upland.
+  "town:12": "Heatherfell"
 });
 var hyp = PM.hypot;
 
@@ -6585,7 +6587,9 @@ var GENERATED_TOWN_SIZES = Object.freeze({
   "settlement-slot:village-outpost:10": "village",
   "settlement-slot:town:09": "town",
   "settlement-slot:town:10": "town",
-  "settlement-slot:town:11": "town"
+  "settlement-slot:town:11": "town",
+  // world-maker-v1.17: the Upland town, only where no other generated town stands in Upland.
+  "settlement-slot:town:12": "town"
 });
 var hyp2 = PM.hypot;
 var r3 = (v) => Math.round(v * 1e3) / 1e3;
@@ -6718,7 +6722,7 @@ function townGeometryV1(t) {
   geoCache.set(t, g);
   return g;
 }
-var TOWN_NEW_ART = Object.freeze(/* @__PURE__ */ new Set(["grassland", "woodland", "desert", "frostland", "wetland"]));
+var TOWN_NEW_ART = Object.freeze(/* @__PURE__ */ new Set(["grassland", "woodland", "desert", "frostland", "wetland", "upland"]));
 var townNewArtV1 = (t) => TOWN_NEW_ART.has(t?.biome);
 var LANE = 8;
 var LANE_END = 0.3;
@@ -7726,11 +7730,17 @@ for (const role of Object.keys(CAST_KITS)) {
   });
 }
 SPOTS.push(...ISLAND_SPOTS);
+var UPLAND_SPOTS = [["town:12", "town"]];
+for (const role of Object.keys(CAST_KITS)) {
+  const ks2 = Object.keys(CAST_KITS[role]);
+  for (const [slot] of UPLAND_SPOTS) KIT_OF[slot + "|" + role] = ks2[rng("upland-kits|" + slot + "|" + role)() * ks2.length | 0];
+}
+SPOTS.push(...UPLAND_SPOTS);
 var ISLAND_NAMES = [
   ["Anselm", "Baldric", "Cedric", "Darrow", "Elric", "Fergus", "Grady", "Holt", "Ingram", "Jory", "Kester", "Leof", "Morgan", "Niall", "Oswin", "Piers", "Radley", "Stellan", "Tobias", "Ulf"],
   ["Alys", "Bryony", "Cressida", "Delphine", "Eira", "Fern", "Gwen", "Hollis", "Isolde", "Jessamy", "Kerensa", "Lark", "Merry", "Nerys", "Orla", "Primrose", "Rhosyn", "Saffron", "Tilda", "Wynne"]
 ];
-var ISLAND_SLOTS = new Set(ISLAND_SPOTS.map((s) => s[0]));
+var ISLAND_SLOTS = new Set([...ISLAND_SPOTS, ...UPLAND_SPOTS].map((s) => s[0]));
 var CAST = {};
 {
   const used = /* @__PURE__ */ new Set(["Ada", "Bren", "Mara", "Selene", "Ila", "Nell", "Oren"]);
@@ -10015,7 +10025,7 @@ function validateRuntimePlan(p) {
     for (const b of w.bridgeGuards) requirePlan(Object.keys(b).sort().join(",") === "x1,x2,y1,y2" && Object.values(b).every(Number.isSafeInteger) && b.x1 <= b.x2 && b.y1 <= b.y2 && b.x2 - b.x1 <= 20 && b.y2 - b.y1 <= 20, "Invalid immutable bridge guard");
   }
   requirePlan(p.scale.tilePixels === 32 && p.scale.chunkTilesX === 32 && p.scale.chunkTilesY === 26 && p.scale.macroTilesX === 64 && p.scale.macroTilesY === 52, "Planned spatial scale");
-  requirePlan(p.settlements.length >= 20 && p.settlements.length <= 27 && p.sites.length === (p.firstJourney ? 125 : p.wildernessExtension ? 124 : p.populationOverlay ? 51 : 48) && p.futureIslands.length === 6 && p.factions.length === 3 && p.stonewatch.candidateCount > 0, "Incomplete planned reservations");
+  requirePlan(p.settlements.length >= 20 && p.settlements.length <= 28 && p.sites.length === (p.firstJourney ? 125 : p.wildernessExtension ? 124 : p.populationOverlay ? 51 : 48) && p.futureIslands.length === 6 && p.factions.length === 3 && p.stonewatch.candidateCount > 0, "Incomplete planned reservations");
   if (p.worldReshape) requirePlan(p.worldReshape.version === RESHAPE_VERSION && p.worldReshape.hash === RESHAPE_HASH && p.firstJourney && p.assetId === "alpha", "Uncommitted world reshape");
   if (p.firstJourney) requirePlan(p.firstJourney.version === ACCESS_VERSION && p.firstJourney.hash === ACCESS_HASH && p.wildernessExtension && p.hydrologyPlan && p.assetId === "alpha" && p.sites.filter((s) => s.id === "repeatable-slot:cave:woodland:small:109").length === 1, "Uncommitted first journey");
   if (p.wildernessExtension) requirePlan(p.wildernessExtension.version === WILDERNESS_VERSION && p.wildernessExtension.hash === WILDERNESS_HASH && p.assetId === "alpha", "Uncommitted wilderness extension");
@@ -13386,7 +13396,7 @@ function validateMapKnowledge(k) {
   closedRecord(k, ["version", "assetHash", "revision", "settlements", "visited", "rumors", "journal"]);
   requireContract(k.version === MAP_KNOWLEDGE_VERSION && /^[a-f0-9]{64}$/.test(k.assetHash), "Map knowledge version/commitment");
   safeInteger(k.revision);
-  requireContract(Array.isArray(k.settlements) && k.settlements.length >= 20 && k.settlements.length <= 27, "Settlement map catalog");
+  requireContract(Array.isArray(k.settlements) && k.settlements.length >= 20 && k.settlements.length <= 28, "Settlement map catalog");
   const ids = /* @__PURE__ */ new Set();
   for (const s of k.settlements) {
     closedRecord(s, ["id", "kind", "class", "label", "x", "y", "band", "built"]);
