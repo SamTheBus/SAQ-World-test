@@ -671,6 +671,10 @@ var TERRACE_CLIFF = 3;
 var CLIFF = TERRACE_CLIFF;
 var STEPK = CLIFF + 5;
 
+// src/shared/generation/volcanoes_v1.js
+var CLIFF2 = 3;
+var STEPK2 = CLIFF2 + 5;
+
 // src/shared/generation/forest_stands_v2.js
 var FOREST_STANDS_VERSION = "forest-stands-v2";
 var FOREST_STANDS_PREFIX = FOREST_STANDS_VERSION + ":";
@@ -7156,7 +7160,7 @@ var CLASSIC_EVENT_PLAN = freezeWire({ version: WORLD_EVENT_PLAN_VERSION, events:
 
 // src/shared/generation/world_maker_v1/make.js
 var TW4 = W * 64;
-var WORLD_MAKER_VERSION = "world-maker-v1.15";
+var WORLD_MAKER_VERSION = "world-maker-v1.16";
 function makeWorld(seed, catalog, tries = 4, onStep = null) {
   const started = performance.now();
   let w, why = [];
