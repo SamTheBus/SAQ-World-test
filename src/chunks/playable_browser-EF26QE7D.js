@@ -1027,7 +1027,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-7BP3C74N.js";
+} from "./chunk-XZYLGVNO.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -152294,7 +152294,7 @@ function drawAegisBossHud(c, canvas, model) {
   c.textAlign = "center";
   c.font = "900 11px Georgia, serif";
   c.fillStyle = "#e2fcf5";
-  c.fillText("AEGIS GOLIATH", canvas.width / 2, y + 13);
+  c.fillText("SHIELD WARDEN", canvas.width / 2, y + 13);
   c.font = "800 8px system-ui";
   c.fillStyle = b.actionState === "dazed" ? "#fff0a6" : "#90e9ef";
   const names2 = { magnetic_pull: "MAGNETIC PULL \u2192 SLAM", boomerang_shield: "RETURNING SHIELDS", shield_bash: "SHIELD BASH" };

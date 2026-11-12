@@ -2596,7 +2596,7 @@ var BIOME_BOSS_REACH_V1 = Object.freeze({ grave_cleave: 78, crown_flame: 70, sol
 var BIOME_BOSS_POOLS_V1 = Object.freeze({ ghostfire: Object.freeze([44, 300]), sunfire: Object.freeze([30, 240]) });
 
 // src/shared/content/bestiary_bosses_v1.js
-var LABELS = { aegis_goliath: "AEGIS GOLIATH", brimstone_colossus: "BRIMSTONE COLOSSUS", arachnid_treant: "ARACHNID TREANT" };
+var LABELS = { aegis_goliath: "SHIELD WARDEN", brimstone_colossus: "BRIMSTONE COLOSSUS", arachnid_treant: "ARACHNID TREANT" };
 var title = (label2) => String(label2).toLowerCase().replace(/(^|[\s-])([a-z])/g, (m, a, b) => a + b.toUpperCase()).replace(/ (The|Of) /g, (w) => w.toLowerCase());
 var BOSS_PAGE_IDS = freezeWire([...WORLD_BOSS_ROLES]);
 var BOSS_PAGE_NAMES = freezeWire(Object.fromEntries([...BOSS_PAGE_IDS, "arachnid_treant"].map((id) => [id, title(RECOVERED_BOSSES[id]?.label ?? BIOME_BOSSES_V1[id]?.label ?? LABELS[id] ?? id.replace(/_/g, " "))])));
@@ -19428,7 +19428,7 @@ function validateAegisFortMimic(state, site, floor, index, actor, boss, m) {
 var AEGIS_GOLIATH_ID = "aegis_goliath";
 var AEGIS_PHYSICAL_PROFILE = ARACHNID_TREANT_PROFILE;
 var AEGIS_GOLIATH = freezeWire({
-  label: "AEGIS GOLIATH",
+  label: "SHIELD WARDEN",
   range: 220,
   turnSpeed: 0.038,
   abilityRecoveryTicks: 110,
