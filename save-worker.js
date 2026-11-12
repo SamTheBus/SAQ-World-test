@@ -2644,7 +2644,7 @@ var BESTIARY_STATS = freezeWire({
   poisonDmg: ["Poison damage", [...DMG], true],
   shockDmg: ["Shock damage", [...DMG], true],
   counterDmg: ["Counter damage", [...DMG], true],
-  eliteDmg: ["Elite damage", [...DMG], true],
+  eliteDmg: ["Elite and boss damage", [...DMG], true],
   executeDmg: ["Execute", [...DMG], false],
   rareDmg: ["Rare damage", [...DMG], false],
   nightDmg: ["Night damage", [...DMG], false],

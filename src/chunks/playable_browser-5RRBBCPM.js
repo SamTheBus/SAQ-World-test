@@ -1024,7 +1024,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-34K6EYQM.js";
+} from "./chunk-BCR2RRMD.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -94145,6 +94145,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     const d = definition2(t);
     return !isPodCombatTargetV4(t) && !d.isBoss && !d.isElite && !d.isMiniboss;
   };
+  const eliteOrBoss = (t) => !isPodCombatTargetV4(t) && Boolean(definition2(t).isBoss || s.eliteCombat?.elitesByEntityId?.[t.entityId] || s.bossCombat?.bossesByEntityId?.[t.entityId]);
   const stunTicks = (a, base3) => Math.min(90, Math.round(base3 * (100 + 10 * rank(a, "heavy_hands")) / 100));
   const daze = (a, t, base3) => {
     const r = rank(a, "concussion");
@@ -95721,7 +95722,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
         extra += (FIRE5.includes(mechanic) ? b.fireDmg : mechanic === "frost" ? b.frostDmg : mechanic === "lightning" ? b.lightningDmg : mechanic === "bleed" ? b.bleedDmg : mechanic === "poison" ? b.poisonDmg : 0) ?? 0;
         if ((waving || SHOCKWAVES.has(current)) && b.shockDmg) extra += b.shockDmg;
         if ((trigger === "reactive" || current === "retribution") && b.counterDmg) extra += b.counterDmg;
-        if (!ordinary(target) && b.eliteDmg) extra += b.eliteDmg;
+        if (b.eliteDmg && eliteOrBoss(target)) extra += b.eliteDmg;
         if (b.executeDmg && target.maxHp !== void 0 && compareCombat(multiplyCombat(target.hp, 10, 1), multiplyCombat(target.maxHp, 3, 1)) < 0) extra += b.executeDmg;
         if (b.rareDmg && isRareV1(s, target.entityId)) extra += b.rareDmg;
         if (b.nightDmg && worldTimeAtTick(s.tick).period === "night") extra += b.nightDmg;
@@ -95734,7 +95735,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       if (waving || SHOCKWAVES.has(current)) extra += gear2.shockDmg;
       if (trigger === "reactive" || current === "retribution") extra += gear2.counterDmg;
       if (current && gear2.skills[current]) extra += gear2.skills[current];
-      if (!ordinary(target)) extra += gear2.eliteDmg;
+      if (gear2.eliteDmg && eliteOrBoss(target)) extra += gear2.eliteDmg;
       if (extra) out = multiplyCombat(out, 1e4 + extra, 1e4);
       if (gear2.lifeHit && trigger !== "periodic" && source3.alive) healFlat(source3, gear2.lifeHit);
     }
@@ -111631,7 +111632,7 @@ var LABELS = {
   shockDmg: "Shockwave damage",
   counterDmg: "Counter damage",
   cdr: "Cooldown reduction",
-  eliteDmg: "Damage to elites",
+  eliteDmg: "Elite and boss damage",
   lifeHit: "Life on hit",
   lifeKill: "Life per kill"
 };
