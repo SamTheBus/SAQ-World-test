@@ -7,7 +7,7 @@ import {
   AEGIS_GOLIATH,
   AEGIS_GOLIATH_ID,
   AEGIS_MIMICS,
-  AFFIXES_V2,
+  AFFIXES_V3,
   ALPHA_POPULATION_BASE_HASH,
   ALPHA_POPULATION_HASH,
   ALPHA_POPULATION_PLAN_HASH,
@@ -74,6 +74,7 @@ import {
   CLASS_SKILL_IDS,
   CLASS_TREE_POINT_CAP,
   CLASS_TREE_SKILLS,
+  CLOSE_REACH,
   COMBAT_RUNTIME_VERSION,
   COMPOSITION_ELITE_V1,
   CONQUEST_TIERS,
@@ -119,6 +120,7 @@ import {
   ELITE_TYPES_V2,
   ENCHANTER_TOWER_V1,
   ENCOUNTER_PROGRESSION_VERSION,
+  FAR_REACH,
   FERRY_HASH,
   FERRY_NETWORK,
   FERRY_VERSION,
@@ -266,6 +268,7 @@ import {
   SITE_FINALE_RESERVATION_D13D_G,
   SITE_INTERACTION_RADIUS,
   SITE_RECIPE_VERSION,
+  SKILL_GROUPS,
   SKILL_SLOT_COUNT,
   SLAG_BURN_STATUS_D12_4K_VERSION,
   SLAG_SHAPER_AFFIX_ID,
@@ -613,6 +616,7 @@ import {
   huntReadyV1,
   huntSkinOfV1,
   huntStagesV1,
+  inGroup,
   initialD8Progression,
   initialDiscovery,
   initialEncounterProof,
@@ -1044,7 +1048,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-PCJK2WVI.js";
+} from "./chunk-BPMXRPVJ.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -98894,6 +98898,11 @@ var CHAIN_SHATTER = 50;
 var EXPOSE_TICKS = 240;
 var PERFECT_TICKS = 18;
 var PERFECT_SHOW_TICKS = 30;
+var PERFECT_GEAR_TICKS = 12;
+var SHARP_TICKS = 180;
+var HIT_CD_TICKS = 60;
+var KILL_CD_TICKS = 30;
+var PERF_CD_TICKS = 120;
 var COMBO_DAMAGE = Object.freeze([90, 90, 120]);
 var COMBO_FINISH_PIPS = 1;
 var PIPS_MAX = 5;
@@ -98919,8 +98928,8 @@ var FREE_SKILLS = Object.freeze(["shadowstep", "skyfall_leap"]);
 var LIVING_STORM_TICKS = 360;
 var pipCostOf = (id) => PIP_COSTS[id] ?? 0;
 var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" });
-var TIMED = ["guardUp", "mist", "veil", "gold", "surge", "enGarde", "rush", "wail", "shell", "riposte", "keen", "evade", "rest", "mend", "titan", "spite", "stepped", "quick", "wave", "phoenix", "hymn", "firm", "jugg", "cloak", "twinned", "regrow"];
-var LIVE = ["pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var TIMED = ["sharp", "hitCd", "killCd", "perfCd", "guardUp", "mist", "veil", "gold", "surge", "enGarde", "rush", "wail", "shell", "riposte", "keen", "evade", "rest", "mend", "titan", "spite", "stepped", "quick", "wave", "phoenix", "hymn", "firm", "jugg", "cloak", "twinned", "regrow"];
+var LIVE = ["sharp", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
 function skillCooldown(combat, skillId) {
   return combat?.skills?.cooldowns?.[skillId] ?? 0;
 }
@@ -99342,7 +99351,11 @@ function validateClassSkillState(s, combat, actor) {
     if (k.pips.crit !== void 0) safeInteger(k.pips.crit, 1, PIP_CRIT_TICKS);
   }
   if (k.guarding !== void 0) requireContract(k.guarding === true && actor.alive, "Invalid guarding");
-  if (k.guardUp !== void 0) safeInteger(k.guardUp, 1, PERFECT_TICKS);
+  if (k.guardUp !== void 0) safeInteger(k.guardUp, 1, PERFECT_TICKS + PERFECT_GEAR_TICKS);
+  if (k.sharp !== void 0) safeInteger(k.sharp, 1, SHARP_TICKS);
+  if (k.hitCd !== void 0) safeInteger(k.hitCd, 1, HIT_CD_TICKS);
+  if (k.killCd !== void 0) safeInteger(k.killCd, 1, KILL_CD_TICKS);
+  if (k.perfCd !== void 0) safeInteger(k.perfCd, 1, PERF_CD_TICKS);
   if (k.perfect !== void 0) safeInteger(k.perfect, Math.max(0, s.tick - PERFECT_SHOW_TICKS), s.tick);
   if (k.spent !== void 0) {
     closedRecord(k.spent, ["skillId", "n", "ticks"]);
@@ -101217,7 +101230,7 @@ function questGearReady(state2, player) {
 }
 function questGearPieceV1(state2, player, rec, level) {
   const sourceEntityId = questGearSourceIdV1(state2.campaign.seed.seedHex, player.playerId, rec.id), d = QUEST_POLICY.difficulty[recDifficulty(rec)], cls = heroClassOf(player.d8)?.id ?? null, base3 = rewardProgressionD9(level, sourceEntityId);
-  const progression = validateRewardProgressionD9({ ...base3, combatHash: WORLD_COMBAT_HASH, combatQuality: d.role === "boss" ? "elite" : d.role, rarityPolicyHash: WORLD_LOOT_V4_HASH, rarityHeroLevel: base3.sourceDepth, rarityRole: d.role, ...d.siteReward ? { siteReward: d.siteReward } : {}, questGear: rec.gearGroup ?? "any", ...cls ? { gearClass: cls, wardrobe: WARDROBE_V1, affixes: AFFIXES_V2 } : { armor: "overall" } });
+  const progression = validateRewardProgressionD9({ ...base3, combatHash: WORLD_COMBAT_HASH, combatQuality: d.role === "boss" ? "elite" : d.role, rarityPolicyHash: WORLD_LOOT_V4_HASH, rarityHeroLevel: base3.sourceDepth, rarityRole: d.role, ...d.siteReward ? { siteReward: d.siteReward } : {}, questGear: rec.gearGroup ?? "any", ...cls ? { gearClass: cls, wardrobe: WARDROBE_V1, affixes: AFFIXES_V3 } : { armor: "overall" } });
   const generated = generateGear(gearSeed(state2, player, sourceEntityId), progression);
   return { item: { itemId: `item:${player.playerId}:${sourceEntityId}`, definitionId: generated.definition.definitionId, ownerPlayerId: player.playerId, sourceEntityId, generated: copyWire(generated) }, origin: { quest: rec.id, sourceEntityId, progression: copyWire(progression) } };
 }
@@ -104727,7 +104740,7 @@ function applyFrostControl(s, source3, target, stats3, chillTicks = 240, boost =
   const controls = s.subweaponCombat.controls ?? (s.subweaponCombat.controls = {}), id = source3.entityId + "/" + target.entityId, old2 = controls[id];
   if (Object.values(controls).some((e) => e.targetId === target.entityId && e.expiresTick > s.tick && e.phase !== "chill")) return null;
   const stacks = (old2 && old2.expiresTick > s.tick ? old2.stacks : 0) + 1, def = s.content.definitionsById[target.contentDefinitionId] ?? {}, boss = def.isBoss === true, elite = def.isElite === true;
-  const phase2 = stacks === 4 ? boss ? "boss-slow" : "freeze" : "chill", duration = phase2 === "chill" ? chillTicks : boss ? 90 : Math.round((elite ? 30 : 60) * (100 + longer) / 100);
+  const phase2 = stacks === 4 ? boss ? "boss-slow" : "freeze" : "chill", more = gearAffixTotalsV2(Object.values(s.playersById ?? {}).find((p) => p.entityId === source3.entityId)).controlDur, grow2 = (t, cap7) => Math.min(cap7, Math.round(t * (1e4 + more) / 1e4)), duration = phase2 === "chill" ? grow2(chillTicks, 360) : boss ? 90 : grow2(Math.round((elite ? 30 : 60) * (100 + longer) / 100), (elite ? 68 : 135) + 126);
   const effect = { id, sourceId: source3.entityId, targetId: target.entityId, spaceInstanceId: source3.residency.spaceInstanceId, phase: phase2, stacks: phase2 === "chill" ? stacks : 0, appliedTick: s.tick, expiresTick: s.tick + duration, ...boost && phase2 === "chill" ? { boost } : {}, ...phase2 === "chill" ? chillSince(s, source3, old2) : {} };
   controls[id] = effect;
   if (phase2 === "boss-slow") {
@@ -106790,9 +106803,14 @@ function createMasteryEffects(s, { damage, eligible: eligible2, identity: identi
   const legal = (source3, origin, t, radius) => eligible2(source3, t) && Math.hypot(t.position.x - origin.position.x, t.position.y - origin.position.y) <= radius && subweaponLineClear(s.spacesByInstanceId[source3.residency.spaceInstanceId].collision, origin, t);
   const nearby = (source3, origin, radius) => combatTargetsV4(s).filter((t) => legal(source3, origin, t, radius)).sort((a, b) => a.entityId.localeCompare(b.entityId));
   const strike2 = (a, t, raw, kind, extra = {}) => damage(a, t, raw, kind, null, { sourceItem: damageSourceItem(p(a), kind), trigger: "mastery", ...extra });
+  const CONTROL_CAPS = { stun: 90, daze: 90, slow: 240 };
   function status2(a, t, kind, level, duration) {
     if (!t.alive || isPodCombatTargetV4(t) && kind !== "expose") return;
     const id = t.entityId + "/" + kind;
+    {
+      const bp = CONTROL_CAPS[kind] && p(a) ? gearAffixTotalsV2(p(a)).controlDur : 0;
+      if (bp) duration = Math.max(duration, Math.min(CONTROL_CAPS[kind], Math.round(duration * (1e4 + bp) / 1e4)));
+    }
     buckets[a.entityId].statuses[id] = { id, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, kind, rank: TREE_STATUSES[kind] ? Math.min(TREE_STATUSES[kind][0], level) : level, expiresTick: s.tick + duration };
   }
   function offhand2(a, t, stats3) {
@@ -106802,7 +106820,7 @@ function createMasteryEffects(s, { damage, eligible: eligible2, identity: identi
     const viper = r(a, "dagger_vipers_coating");
     if (viper) {
       const b = buckets[a.entityId], id = t.entityId, old2 = b.poisons[id];
-      b.poisons[id] = { id, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, attack: copyWire(stats3.attack), rank: viper, toxicRank: copyWire(nodeRank(p(a).d8, "dagger_inf_poison")), stacks: Math.min(5, (old2?.stacks ?? 0) + 1), nextTick: old2?.nextTick ?? s.tick + 60, expiresTick: s.tick + 600, sourceItem: damageSourceItem(p(a), "poison") };
+      b.poisons[id] = { id, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, attack: copyWire(stats3.attack), rank: viper, toxicRank: copyWire(nodeRank(p(a).d8, "dagger_inf_poison")), stacks: Math.min(5, (old2?.stacks ?? 0) + 1), nextTick: old2?.nextTick ?? s.tick + 60, expiresTick: s.tick + Math.min(900, Math.round(600 * (1e4 + gearAffixTotalsV2(p(a)).ailmentDur) / 1e4)), sourceItem: damageSourceItem(p(a), "poison") };
       if (combatRoll(s.subweaponCombat.actors[a.entityId], combatAmount(5 * viper, 100)) && t.alive) bleed(a, t, stats3);
       if (b.poisons[id].stacks === 5 && r(a, "dagger_keystone_assassin")) {
         delete b.poisons[id];
@@ -107234,11 +107252,20 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       gainPips(a, COMBO_FINISH_PIPS);
     }
   }
+  const chance = (a, tag) => {
+    let h = 2166136261;
+    for (const ch of `${s.campaign?.seed?.seedHex ?? ""}/${a.entityId}/${s.tick}/${tag}`) {
+      h ^= ch.charCodeAt(0);
+      h = Math.imul(h, 16777619) >>> 0;
+    }
+    return h % 1e4;
+  };
+  const gearOf = (a) => gearAffixTotalsV2(owner(a)), pipMax = (a) => Math.min(PIPS_CAP, PIPS_MAX + gearOf(a).maxPip), openPips = (a, combat) => classSkillsRecord(combat).pips ??= { n: Math.min(pipMax(a), gearOf(a).startPips), idle: PIP_IDLE_TICKS };
   function gainPips(a, n) {
     const combat = c.actors[a.entityId];
     if (!combat || !a.alive || !heroOf(a) || n <= 0) return;
-    const p = classSkillsRecord(combat).pips ??= { n: 0, idle: PIP_IDLE_TICKS };
-    p.n = Math.min(PIPS_MAX, p.n + n);
+    const p = openPips(a, combat);
+    p.n = Math.min(pipMax(a), p.n + n);
     p.idle = PIP_IDLE_TICKS;
   }
   function earnFor(a, skillId, n) {
@@ -107254,8 +107281,17 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (current && heroOf(a) === "mage") earnFor(a, current, n);
   };
   const fought = (a) => {
-    const p = c.actors[a.entityId]?.skills?.pips;
+    const combat = c.actors[a.entityId], p = combat?.skills?.pips;
     if (p) p.idle = PIP_IDLE_TICKS;
+    else if (combat && a.alive && heroOf(a) && gearOf(a).startPips) openPips(a, combat);
+  };
+  const cutGroups = (a, combat, groups, ticks) => {
+    const cls = heroOf(a);
+    for (const g of groups) for (const id of SKILL_GROUPS[g][cls] ?? []) {
+      if (id === "dash") {
+        if (combat.dash.cooldown > combat.dash.frames) combat.dash.cooldown = Math.max(combat.dash.frames, combat.dash.cooldown - ticks);
+      } else reduceSkillCooldown(combat, id, ticks);
+    }
   };
   const periodic = (a, t, kind, ...rest) => {
     const out = periodicHit(a, t, kind, ...rest);
@@ -107293,6 +107329,19 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (canStun(a)) stun(a, t, stunTicks(a, definition2(t).isElite || definition2(t).isMiniboss ? elite : base3));
   }
   const extent = (a, reach) => Math.min(400, reach * effects2.area(a) + (a.hullRadius ?? 0) + 10), landingOffset = (a, p, suffix = "") => ({ ["ox" + suffix]: Math.max(-400, Math.min(400, p.x - a.position.x)), ["oy" + suffix]: Math.max(-400, Math.min(400, p.y - a.position.y)) });
+  const held = (t) => Object.values(c.mastery ?? {}).some((b) => ["stun", "daze", "expose"].some((k) => {
+    const e = b.statuses[t.entityId + "/" + k];
+    return e && e.expiresTick > s.tick;
+  })) || Object.values(c.controls ?? {}).some((e) => e.targetId === t.entityId && e.expiresTick > s.tick);
+  const ailing = (t) => Object.values(c.effects).some((e) => e.targetId === t.entityId && e.expiresTick > s.tick) || Object.values(c.mastery ?? {}).some((b) => b.poisons?.[t.entityId]?.expiresTick > s.tick);
+  const controlTicks = (a, ticks, cap7) => {
+    const bp = gearOf(a).controlDur;
+    return bp ? Math.min(cap7, Math.round(ticks * (1e4 + bp) / 1e4)) : ticks;
+  }, ailmentTicks = (a, ticks) => {
+    const bp = gearOf(a).ailmentDur;
+    return bp ? Math.round(ticks * (1e4 + bp) / 1e4) : ticks;
+  };
+  const freezeCap = (t) => (definition2(t)?.isElite ? 68 : 135) + 126;
   const slowed = (t) => Object.values(c.mastery ?? {}).some((b) => {
     const e = b.statuses[t.entityId + "/slow"];
     return e && e.expiresTick > s.tick;
@@ -107355,8 +107404,8 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       if (!t.alive) continue;
       mastery?.primary(a, t, "proactive");
       if (!sword4) effects2.offhand(a, t, stats3);
-      const serrated = rank(a, "serrated_cuts"), hemorrhage = rank(a, "hemorrhage"), chance = stats3.familyProperties?.bleed ?? combatAmount(15, 100);
-      if (t.alive && (style.bleed || !sword4 && combatRoll(combat, hemorrhage ? addCombat(chance, combatAmount(5 * hemorrhage, 100)) : chance))) bleed(a, t, stats3, 6 * serrated);
+      const serrated = rank(a, "serrated_cuts"), hemorrhage = rank(a, "hemorrhage"), chance2 = stats3.familyProperties?.bleed ?? combatAmount(15, 100);
+      if (t.alive && (style.bleed || !sword4 && combatRoll(combat, hemorrhage ? addCombat(chance2, combatAmount(5 * hemorrhage, 100)) : chance2))) bleed(a, t, stats3, 6 * serrated);
       const viper = rank(a, "vipers_coating");
       if (viper && t.alive && combatRoll(combat, combatAmount(5 * viper, 100))) poison(a, t, stats3);
     }
@@ -107748,18 +107797,18 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (rank(a, "titan")) classSkillsRecord(combat).titan = TITAN_TICKS;
   }
   function retribution2(a, stats3, aim2, commandId) {
-    const R10 = T88.retribution, k = classSkillsRecord(c.actors[a.entityId]), held = k.held ?? [], raw = held.reduce((sum2, h) => addCombat(sum2, h.amount), multiplyCombat(stats3.attack, ...R10.attack)), reach = Math.min(400, (aug(a, "retribution", 0) ? scaled(R10.radius, T88.wide) : R10.radius) * effects2.area(a)), sourceItem = damageSourceItem(owner(a), "bash");
+    const R10 = T88.retribution, k = classSkillsRecord(c.actors[a.entityId]), held2 = k.held ?? [], raw = held2.reduce((sum2, h) => addCombat(sum2, h.amount), multiplyCombat(stats3.attack, ...R10.attack)), reach = Math.min(400, (aug(a, "retribution", 0) ? scaled(R10.radius, T88.wide) : R10.radius) * effects2.area(a)), sourceItem = damageSourceItem(owner(a), "bash");
     delete k.held;
     for (const t of around3(a, a.position, reach)) {
       const burst3 = aug(a, "retribution", 1) && c.effects[a.entityId + "/" + t.entityId + "/bleed"];
       damage(a, t, burst3 ? multiplyCombat(raw, 2, 1) : raw, "riposte", commandId, { sourceItem, trigger: "skill", ...burst3 ? { mark: "bloodburst" } : {} });
     }
-    return { r: reach, n: Math.min(12, held.length) };
+    return { r: reach, n: Math.min(12, held2.length) };
   }
   function stepHeld(a, combat) {
-    const held = combat.skills?.held;
-    if (!held) return;
-    const left = held.filter((h) => --h.ticks > 0);
+    const held2 = combat.skills?.held;
+    if (!held2) return;
+    const left = held2.filter((h) => --h.ticks > 0);
     if (left.length && a.alive) combat.skills.held = left;
     else clearSkillState(combat, "held");
   }
@@ -107790,7 +107839,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const b = c.mastery?.[a.entityId];
     if (!b || !t.alive || isPodCombatTargetV4(t)) return;
     const old2 = b.poisons[t.entityId], virulence = rank(a, "virulence"), plain5 = virulence ? combatInteger(pct3(stats3.attack, 6 * virulence)) : stats3.attack, attack = power > 1 ? combatInteger(multiplyCombat(plain5, power, 1)) : plain5;
-    b.poisons[t.entityId] = { id: t.entityId, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, attack: copyWire(power > 1 && (!old2 || compareCombat(old2.attack, attack) < 0) ? attack : old2?.attack ?? attack), rank: old2?.rank ?? 1, toxicRank: old2?.toxicRank ?? "0", stacks: Math.min(5, (old2?.stacks ?? 0) + 1), nextTick: old2?.nextTick ?? s.tick + 60, expiresTick: s.tick + Math.min(900, 60 * (10 + rank(a, "lingering_venom")) + longer), sourceItem: damageSourceItem(owner(a), "poison") };
+    b.poisons[t.entityId] = { id: t.entityId, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, attack: copyWire(power > 1 && (!old2 || compareCombat(old2.attack, attack) < 0) ? attack : old2?.attack ?? attack), rank: old2?.rank ?? 1, toxicRank: old2?.toxicRank ?? "0", stacks: Math.min(5, (old2?.stacks ?? 0) + 1), nextTick: old2?.nextTick ?? s.tick + 60, expiresTick: s.tick + Math.min(900, ailmentTicks(a, 60 * (10 + rank(a, "lingering_venom")) + longer)), sourceItem: damageSourceItem(owner(a), "poison") };
   }
   function toxicFan2(a, stats3, aim2, commandId) {
     const F6 = T88.toxicFan, wide = aug(a, "toxic_fan", 0), slow = aug(a, "toxic_fan", 1), barbed = aug(a, "toxic_fan", 2), seek = aug(a, "toxic_fan", 3), reach = seek ? scaled(F6.reach, T88.seeking.reach) : F6.reach, width2 = seek ? T88.seeking.cone : wide ? F6.wideCone : F6.cone;
@@ -108077,7 +108126,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       damage(a, t, raw, "frost", commandId, { sourceItem: damageSourceItem(owner(a), "frost"), trigger: "skill" });
       if (!t.alive || isPodCombatTargetV4(t)) continue;
       const def = definition2(t), phase2 = def.isBoss === true ? full(n) ? "chill" : "boss-slow" : !full(n) && (def.isElite === true || def.isMiniboss) ? "chill" : "freeze", id = a.entityId + "/" + t.entityId;
-      c.controls[id] = { id, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, phase: phase2, stacks: phase2 === "chill" ? 3 : 0, appliedTick: s.tick, expiresTick: s.tick + (phase2 === "chill" ? chill : phase2 === "boss-slow" ? 90 : Math.round((deep6 ? 90 : 60) * (100 + 10 * rank(a, "deep_freeze")) / 100) + 18 * n), ...phase2 === "chill" ? chillSince(s, a, c.controls[id]) : {} };
+      c.controls[id] = { id, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, phase: phase2, stacks: phase2 === "chill" ? 3 : 0, appliedTick: s.tick, expiresTick: s.tick + (phase2 === "chill" ? controlTicks(a, chill, 360) : phase2 === "boss-slow" ? 90 : controlTicks(a, Math.round((deep6 ? 90 : 60) * (100 + 10 * rank(a, "deep_freeze")) / 100) + 18 * n, freezeCap(t))), ...phase2 === "chill" ? chillSince(s, a, c.controls[id]) : {} };
       if (phase2 === "freeze") frozen.push(c.controls[id]);
       mageEarns(a, phase2 === "freeze" ? 2 : 1);
     }
@@ -108310,7 +108359,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     c.controls ??= {};
     const def = definition2(t), phase2 = def.isBoss === true ? "boss-slow" : !freeze2 || def.isElite === true || def.isMiniboss ? "chill" : "freeze", id = a.entityId + "/" + t.entityId, old2 = c.controls[id];
     if (old2 && old2.expiresTick > s.tick && (old2.phase === "freeze" || old2.phase === phase2)) return;
-    c.controls[id] = { id, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, phase: phase2, stacks: phase2 === "chill" ? 1 : 0, appliedTick: s.tick, expiresTick: s.tick + (phase2 === "chill" ? 240 : phase2 === "boss-slow" ? 90 : 60), ...phase2 === "chill" ? chillSince(s, a, old2) : {} };
+    c.controls[id] = { id, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, phase: phase2, stacks: phase2 === "chill" ? 1 : 0, appliedTick: s.tick, expiresTick: s.tick + (phase2 === "chill" ? controlTicks(a, 240, 360) : phase2 === "boss-slow" ? 90 : controlTicks(a, 60, freezeCap(t))), ...phase2 === "chill" ? chillSince(s, a, old2) : {} };
     mageEarns(a, phase2 === "freeze" ? 2 : 1);
   }
   function staticField2(a) {
@@ -108400,7 +108449,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       if (e.sourceId !== a.entityId || e.phase !== "chill" || e.since === void 0 || e.expiresTick <= s.tick || s.tick - e.since < 180) continue;
       const t = s.entitiesById[e.targetId];
       if (!t?.alive || definition2(t).isBoss) continue;
-      c.controls[e.id] = { id: e.id, sourceId: e.sourceId, targetId: e.targetId, spaceInstanceId: e.spaceInstanceId, phase: "freeze", stacks: 0, appliedTick: s.tick, expiresTick: s.tick + 12 * r };
+      c.controls[e.id] = { id: e.id, sourceId: e.sourceId, targetId: e.targetId, spaceInstanceId: e.spaceInstanceId, phase: "freeze", stacks: 0, appliedTick: s.tick, expiresTick: s.tick + controlTicks(a, 12 * r, freezeCap(t)) };
     }
   }
   function glacialBurst2(a, stats3, aim2, commandId) {
@@ -108576,6 +108625,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       return false;
     }
     pipsAfterUse(a, skillId, element ?? (skillId === "cast" ? castElement2 : null), ends);
+    {
+      const keep6 = gearOf(a).keepPip, paidN = was && !free ? own.skills?.spent?.skillId === skillId ? own.skills.spent.n : 0 : 0;
+      if (keep6 && paidN && own.skills?.pips && chance(a, skillId) < keep6) own.skills.pips.n = Math.min(pipMax(a), own.skills.pips.n + 1);
+    }
     if (spender(a, skillId)) {
       const k = classSkillsRecord(own), n = k.spent?.skillId === skillId ? k.spent.n : 0;
       if (n && SPEND_HOLD[skillId]) (k.spends ??= {})[skillId] = { n, ticks: SPEND_HOLD[skillId] };
@@ -108588,7 +108641,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const sigCut = (SIGNATURE_CUTS[skillId] ?? []).reduce((n, id) => n + rank(a, id), 0), base3 = sigCut ? Math.ceil(styled * (100 - 2 * sigCut) / 100) : styled;
     const longer = rank(a, "restless") ? [6, 5] : skillId === "cast" && rank(a, "overload") ? [13, 10] : [1, 1];
     record3.cooldowns[skillId] = Math.ceil((BREAKER.includes(skillId) && rank(a, "reckless") ? Math.ceil(base3 * 3 / 4) : base3) * longer[0] / longer[1]);
-    const cut2 = stats3?.cooldownCut, cdr = cut2 ? Number(BigInt(cut2.n) * 10000n / BigInt(cut2.d)) : Math.min(gearAffixTotalsV2(owner(a)).cdr + (owner(a)?.bestiary?.stats.cdr ?? 0), Math.round(CDR_CAP * 1e4));
+    const cut2 = stats3?.cooldownCut, G4 = gearOf(a), group = (inGroup("move", heroOf(a), skillId) ? G4.moveCdr : 0) + (inGroup("def", heroOf(a), skillId) ? G4.defCdr : 0), cdr = Math.min((cut2 ? Number(BigInt(cut2.n) * 10000n / BigInt(cut2.d)) : Math.min(G4.cdr + (owner(a)?.bestiary?.stats.cdr ?? 0), Math.round(CDR_CAP * 1e4))) + group, Math.round(CDR_CAP * 1e4));
     if (cdr) record3.cooldowns[skillId] = Math.max(1, Math.ceil(record3.cooldowns[skillId] * (1e4 - cdr) / 1e4));
     record3.cooldowns[skillId] = focusCooldownV1(s, owner(a)?.playerId, record3.cooldowns[skillId]);
     record3.last = { skillId, tick: s.tick, ...aim2, ...typeof done3 === "object" ? done3 : {} };
@@ -108669,7 +108722,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     if (up && !k?.guarding) {
       const r = classSkillsRecord(combat);
       r.guarding = true;
-      r.guardUp = PERFECT_TICKS;
+      r.guardUp = PERFECT_TICKS + Math.min(PERFECT_GEAR_TICKS, gearOf(a).perfectWindow);
     } else if (!up && k?.guarding) {
       delete k.guardUp;
       clearSkillState(combat, "guarding");
@@ -108738,9 +108791,19 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     const maxHp = getStats(a.entityId)?.maxHp;
     return maxHp !== void 0 && a.hp !== void 0 && compareCombat(multiplyCombat(a.hp, 100, 1), multiplyCombat(maxHp, percent, 1)) < 0;
   };
-  function incoming(source3, target, raw) {
+  function incoming(source3, target, raw, area2 = false) {
     fought(target);
     let out = weakened(source3) ? multiplyCombat(raw, 80, 100) : raw;
+    {
+      const G4 = gearOf(target);
+      if (G4.eliteDr && eliteOrBoss(source3)) out = multiplyCombat(out, 1e4 - G4.eliteDr, 1e4);
+      if (G4.areaDr && area2) out = multiplyCombat(out, 1e4 - G4.areaDr, 1e4);
+      const combat = c.actors[target.entityId];
+      if (G4.hitCdr && combat && target.alive && !combat.skills?.hitCd) {
+        cutGroups(target, combat, ["def"], G4.hitCdr);
+        classSkillsRecord(combat).hitCd = HIT_CD_TICKS;
+      }
+    }
     const thick2 = rank(target, "thick_skin"), def = definition2(source3);
     if (thick2 && (def.isElite || def.isBoss || def.isMiniboss)) out = multiplyCombat(out, 100 - 3 * thick2, 100);
     const bulwark2 = record2(target)?.bulwark, stance = rank(target, "bulwark_stance");
@@ -108948,6 +109011,24 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       if (trigger === "reactive" || current === "retribution") extra += gear2.counterDmg;
       if (current && gear2.skills[current]) extra += gear2.skills[current];
       if (gear2.eliteDmg && eliteOrBoss(target)) extra += gear2.eliteDmg;
+      if (gear2.any) {
+        const cls = heroOf(source3);
+        if (current) {
+          if (gear2.rangedDmg && inGroup("ranged", cls, current)) extra += gear2.rangedDmg;
+          if (gear2.areaDmg && inGroup("area", cls, current)) extra += gear2.areaDmg;
+          if (gear2.finisherDmg && (inGroup("finisher", cls, current) || spender(source3, current))) extra += gear2.finisherDmg;
+        }
+        if (gear2.heldDmg && held(target)) extra += gear2.heldDmg;
+        if (gear2.ailingDmg && ailing(target)) extra += gear2.ailingDmg;
+        if (gear2.closeDmg || gear2.farDmg) {
+          const gap2 = Math.hypot(target.position.x - source3.position.x, target.position.y - source3.position.y) - (target.hullRadius ?? 0) - (source3.hullRadius ?? 0);
+          if (gap2 <= CLOSE_REACH) extra += gear2.closeDmg;
+          else if (gap2 > FAR_REACH) extra += gear2.farDmg;
+        }
+        if (gear2.fullDmg && !low(source3, 90)) extra += gear2.fullDmg;
+        if (gear2.lowDmg && low(source3, 50)) extra += gear2.lowDmg;
+        if (gear2.perfectDmg && c.actors[source3.entityId]?.skills?.sharp) extra += gear2.perfectDmg;
+      }
       if (extra) out = multiplyCombat(out, 1e4 + extra, 1e4);
       if (gear2.lifeHit && trigger !== "periodic" && source3.alive) healFlat(source3, gear2.lifeHit);
     }
@@ -109007,9 +109088,14 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
       else if (hero === "rogue" && defense.defense === "parry") gainPips(target, 2);
     }
     if (defense.perfect && combat) {
-      const k = classSkillsRecord(combat);
+      const k = classSkillsRecord(combat), G4 = gearOf(target);
       k.perfect = s.tick;
       delete k.guardUp;
+      if (G4.perfectDmg) k.sharp = SHARP_TICKS;
+      if (G4.perfectCdr && !k.perfCd) {
+        cutGroups(target, combat, ["move", "def"], G4.perfectCdr);
+        k.perfCd = PERF_CD_TICKS;
+      }
       if (!isPodCombatTargetV4(source3) && !definition2(source3).isBoss && !s.bossCombat?.bossesByEntityId?.[source3.entityId]) knockback(target, source3, eliteOrBoss(source3) ? T88.bash.eliteKnockback : T88.bash.knockback);
     }
     const mirrored = attribution?.projectileImpact && (defense.defense === "block" && (defense.aegis || combat?.skills?.aegis) && aug(target, "aegis_pulse", 3) || defense.defense === "parry" && riposting && aug(target, "riposte", 3));
@@ -109224,6 +109310,14 @@ function createClassSkills(s, { damage, effects: effects2, periodic: periodicHit
     }
     const kill = gearAffixTotalsV2(owner(a)).lifeKill + (owner(a)?.bestiary?.stats.lifeKill ?? 0);
     if (a.alive && kill) heal(a, getStats(a.entityId), kill, 1e4);
+    {
+      const cool = gearOf(a).killCdr, own = c.actors[a.entityId];
+      if (cool && a.alive && own && !own.skills?.killCd) {
+        for (const id of Object.keys(own.skills?.cooldowns ?? {})) reduceSkillCooldown(own, id, cool);
+        if (own.dash.cooldown > own.dash.frames) own.dash.cooldown = Math.max(own.dash.frames, own.dash.cooldown - cool);
+        classSkillsRecord(own).killCd = KILL_CD_TICKS;
+      }
+    }
     const combat = c.actors[a.entityId], avalanche = rank(a, "avalanche"), stunned = avalanche ? c.mastery?.[a.entityId]?.statuses?.[target.entityId + "/stun"] : null;
     if (avalanche && combat && stunned && stunned.expiresTick > s.tick) reduceSkillCooldown(combat, "shield_charge", 60 * avalanche);
     const opportunist = rank(a, "opportunist");
@@ -109287,7 +109381,7 @@ function createSubweaponSimulation(s, { damage, eligible: eligible2, identity: i
   const effects2 = createMasteryEffects(s, { damage, eligible: eligible2, identity: identity2, getStats: stats3, awards: mastery, bleed: (a, t, captured) => periodic(a, t, "bleed", captured.attack, captured) });
   function periodic(source3, target, kind, attack, captured) {
     if (!target.alive) return;
-    const id = `${source3.entityId}/${target.entityId}/${kind}`, old2 = c.effects[id], longer = heroRank(players.get(source3.entityId), kind === "bleed" ? "serrated_edge" : "searing"), lingering = kind === "bleed" ? heroRank(players.get(source3.entityId), "lingering_venom") : 0, eye6 = kind === "burn" ? wornUniqueValue(players.get(source3.entityId), "eye-of-the-sun")?.[0] ?? 0 : 0, life = kind === "sting" ? 240 : Math.min(kind === "bleed" ? 1350 : 540, Math.round((kind === "bleed" ? 600 : 240) * (100 + 10 * longer) * (100 + eye6) * (100 + 10 * lingering) / 1e6) + (captured.extra ?? 0));
+    const id = `${source3.entityId}/${target.entityId}/${kind}`, old2 = c.effects[id], longer = heroRank(players.get(source3.entityId), kind === "bleed" ? "serrated_edge" : "searing"), lingering = kind === "bleed" ? heroRank(players.get(source3.entityId), "lingering_venom") : 0, eye6 = kind === "burn" ? wornUniqueValue(players.get(source3.entityId), "eye-of-the-sun")?.[0] ?? 0 : 0, life = kind === "sting" ? 240 : Math.min(kind === "bleed" ? 1350 : 540, Math.round((kind === "bleed" ? 600 : 240) * (100 + 10 * longer) * (100 + eye6) * (100 + 10 * lingering) * (1e4 + gearAffixTotalsV2(players.get(source3.entityId)).ailmentDur) / 1e10) + (captured.extra ?? 0));
     c.effects[id] = {
       id,
       sourceId: source3.entityId,
@@ -112795,6 +112889,8 @@ function createLesserBossCombatV1(state2, { applyDirectDamage, eligible: eligibl
     return tag ? Number(tag.slice(8 + id.length)) : -1;
   };
   function freeze2(k, id, ticks) {
+    const p = Object.values(state2.playersById).find((x) => x.entityId === id), cut = p ? gearAffixTotalsV2(p).stunDr : 0;
+    if (cut) ticks = Math.max(1, Math.round(ticks * (1e4 - cut) / 1e4));
     k.hitEntityIds = k.hitEntityIds.filter((x) => !x.startsWith("frozen:" + id + ":"));
     k.hitEntityIds.push("frozen:" + id + ":" + (state2.tick + ticks));
   }
@@ -113506,6 +113602,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
   const family = createSubweaponSimulation(state2, { damage, mastery, eligible: (a, b) => canActivityApplyDamage(state2, manifest, a, b), identity: identity2, getStats: progression.resolvedStats, refreshStats: progression.equipmentChanged });
   const hostileProjectiles = createHostileProjectileSimulation(state2, { damage, identity: identity2, lineClear: meleeLineClear, getSourceLevel: progression.combatLevel, canAct: (a) => frostMovement(state2, a) > 0 && !bossCombat.frozen(a.entityId), eligible: (a, b) => canActivityApplyDamage(state2, manifest, a, b), canLaunch: (a, b) => canActivityApplyDamage(state2, manifest, a, b) && (!containment.groupForActor(a.entityId) || containment.targetStillValid(a, b, (source3, target) => canActivityApplyDamage(state2, manifest, source3, target))) });
   function damage(source3, target, requested = null, mechanic = "main", causationCommandId = null, attribution = null) {
+    const askedMechanic = mechanic;
     if (isPodCombatTargetV4(target)) {
       if (!canActivityApplyDamage(state2, manifest, source3, target) || source3.team !== "party") return;
       const p = playerFor(source3.entityId), combat = state2.subweaponCombat.actors[source3.entityId], roll7 = { rng: combat.rng }, packet = criticalDamagePacket(roll7, progression.resolvedStats(source3.entityId), requested ?? source3.attackDamage, mechanic, false), before = target.hp;
@@ -113605,7 +113702,13 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
       eliteGuard = guarded.guard;
       raw = namedElites.mitigateIncoming(target, raw, source3, attribution);
     }
-    if (source3.team === "hostile" && target.team === "party" && !periodic) raw = family.classHooks.incoming(source3, target, raw);
+    if (source3.team === "hostile" && target.team === "party" && !periodic) raw = family.classHooks.incoming(
+      source3,
+      target,
+      raw,
+      /* an area attack (gear v3): a named hit that isn't a melee swing or a projectile */
+      !attribution?.contactMelee && !attribution?.projectileDirection && !attribution?.projectileImpact && !attribution?.directEnemyAttack && !["main", "hostile", "offhand"].includes(askedMechanic)
+    );
     if (target.team === "party" && !periodic) {
       const stats3 = progression.resolvedStats(target.entityId), suppressed = subweaponSuppressedD12_4I(state2, target.entityId);
       defenseStats = stats3;
@@ -113839,7 +113942,15 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
       } else if (command.kind === "combat.guardIntent") {
         guardIntent(state2.subweaponCombat.actors[actor.entityId].guard, command.payload.pressed, state2.primary.actorsById[actor.entityId]);
       } else if (command.kind === "combat.shadowDash") {
-        if (beginShadowDash(actor, state2.subweaponCombat.actors[actor.entityId], resolvePlayerStats(player), command.payload.aim, false, 100 - 5 * heroRank(player, "quick_dash") - 2 * (heroRank(player, "cinder_step") + heroRank(player, "frost_step") + heroRank(player, "static_step")))) family.classHooks.dashed(actor);
+        if (beginShadowDash(
+          actor,
+          state2.subweaponCombat.actors[actor.entityId],
+          resolvePlayerStats(player),
+          command.payload.aim,
+          false,
+          (100 - 5 * heroRank(player, "quick_dash") - 2 * (heroRank(player, "cinder_step") + heroRank(player, "frost_step") + heroRank(player, "static_step"))) * (1e4 - (inGroup("move", player?.d8?.heroClass, "dash") ? gearAffixTotalsV2(player).moveCdr : 0)) / 1e4
+          /* gear v3: Movement cooldowns */
+        )) family.classHooks.dashed(actor);
       } else if (command.kind === "combat.skill") {
         family.skill(actor, command.payload.skillId, command.payload.aim, command.commandId);
       } else if (command.kind === "gear.salvage") {
@@ -123156,12 +123267,13 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
   pipBox.setAttribute("aria-hidden", "true");
   pipTrack.setAttribute("class", "skill-wheel-pip-track");
   pipBox.append(pipTrack);
-  for (let i = 0; i < PIPS_MAX; i++) {
+  for (let i = 0; i < PIPS_CAP; i++) {
     const p = el3("span", "skill-wheel-pip");
     pipBox.append(p);
     pips.push(p);
   }
-  let pipPaint = "", pipCount = 0;
+  let pipPaint = "", pipCount = 0, pipRow = PIPS_MAX;
+  const PIP_STEP = (PIP_LAST - PIP_FIRST) / (PIPS_MAX - 1);
   wheel.append(ring7, pipBox);
   document2.getElementById("world-bag").parentElement.append(wheel, done3, attackSkill);
   const attackV2 = createAttackButtonV2({ document: document2, host: wheel.parentElement });
@@ -123375,12 +123487,13 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
     const pr = g.hub + 18, box6 = pr + 16, end = (deg) => {
       const a = deg * Math.PI / 180;
       return { x: box6 + f * Math.cos(a) * pr, y: box6 + Math.sin(a) * pr };
-    }, a0 = end(PIP_TRACK[0]), a1 = end(PIP_TRACK[1]), arc4 = `M${a0.x.toFixed(1)} ${a0.y.toFixed(1)}A${pr} ${pr} 0 0 ${f > 0 ? 1 : 0} ${a1.x.toFixed(1)} ${a1.y.toFixed(1)}`;
+    }, a0 = end(PIP_TRACK[0]), a1 = end(PIP_TRACK[1] + PIP_STEP * (pipRow - PIPS_MAX)), arc4 = `M${a0.x.toFixed(1)} ${a0.y.toFixed(1)}A${pr} ${pr} 0 0 ${f > 0 ? 1 : 0} ${a1.x.toFixed(1)} ${a1.y.toFixed(1)}`;
     pipTrack.setAttribute("viewBox", `0 0 ${box6 * 2} ${box6 * 2}`);
     pipTrack.style.cssText = `left:${(g.cx - box6).toFixed(1)}px;top:${(g.cy - box6).toFixed(1)}px;width:${box6 * 2}px;height:${box6 * 2}px`;
     pipTrack.innerHTML = `<path d="${arc4}" fill="none" stroke="#0b1015" stroke-width="25" stroke-linecap="round" opacity=".55"/><path d="${arc4}" fill="none" stroke="#c9b58b" stroke-opacity=".32" stroke-width="23" stroke-linecap="round"/><path d="${arc4}" fill="none" stroke="#121a22" stroke-opacity=".78" stroke-width="21" stroke-linecap="round"/>`;
     pips.forEach((p, i) => {
-      const deg = PIP_FIRST + (PIP_LAST - PIP_FIRST) * i / Math.max(1, pips.length - 1);
+      const deg = PIP_FIRST + PIP_STEP * i;
+      p.hidden = i >= pipRow;
       p.style.setProperty("--at", css(at8(deg, pr, PIP_SIZE)));
     });
     document2.body.classList.add("skill-arc-v1");
@@ -123455,14 +123568,22 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
       if (s.time.textContent !== label7) s.time.textContent = label7;
       s.b.disabled = !arranging && state2 === "locked";
     });
-    const pipN = heroClass ? Math.min(PIPS_MAX, c?.skills?.pips?.n ?? 0) : 0, full = pipN >= PIPS_MAX, shape3 = PIP_SHAPES[heroClass?.id];
+    {
+      const row2 = heroClass ? Math.min(PIPS_CAP, PIPS_MAX + gearAffixTotalsV2(p).maxPip) : PIPS_MAX;
+      if (row2 !== pipRow) {
+        pipRow = row2;
+        pipPaint = "";
+        layout();
+      }
+    }
+    const pipN = heroClass ? Math.min(pipRow, c?.skills?.pips?.n ?? 0) : 0, full = pipN >= PIPS_MAX, rowFull = pipN >= pipRow, shape3 = PIP_SHAPES[heroClass?.id];
     pipBox.hidden = !shape3 || arranging;
     if (shape3) {
-      const paint3 = `${heroClass.id}/${pipN}`;
+      const paint3 = `${heroClass.id}/${pipN}/${pipRow}`;
       if (pipPaint !== paint3) {
         pipPaint = paint3;
         pips.forEach((p2, i) => {
-          p2.innerHTML = pipSvgV1(shape3, heroClass.color, i < pipN, full);
+          p2.innerHTML = pipSvgV1(shape3, heroClass.color, i < pipN, rowFull);
         });
         if (pipN > pipCount) {
           const p2 = pips[pipN - 1], pop = () => {
@@ -123474,7 +123595,7 @@ function createSkillWheelV1({ document: document2, environment, readModel, adapt
           p2.dataset.wait = "true";
           attackV2.earned(p2, t, pop);
         }
-        pipBox.dataset.full = String(full);
+        pipBox.dataset.full = String(rowFull);
       }
       pipCount = pipN;
     }
@@ -125607,9 +125728,34 @@ var LABELS = {
   cdr: "Cooldown reduction",
   eliteDmg: "Elite and boss damage",
   lifeHit: "Life on hit",
-  lifeKill: "Life per kill"
+  lifeKill: "Life per kill",
+  // Affixes v3 (gear_affixes_v3.js).
+  rangedDmg: "Ranged skill damage",
+  areaDmg: "Area skill damage",
+  finisherDmg: "Finisher damage",
+  moveCdr: "Movement cooldown reduction",
+  defCdr: "Defensive cooldown reduction",
+  heldDmg: "Damage to held or Exposed enemies",
+  ailingDmg: "Damage to ailing enemies",
+  closeDmg: "Damage up close",
+  farDmg: "Damage from afar",
+  fullDmg: "Damage at full health",
+  lowDmg: "Damage at low health",
+  controlDur: "Control duration",
+  ailmentDur: "Ailment duration",
+  eliteDr: "Less damage from elites and bosses",
+  areaDr: "Less damage from area attacks",
+  stunDr: "Shorter stuns on you",
+  potionHeal: "Potion healing",
+  perfectDmg: "Damage after a perfect block",
+  hitCdr: "off Defensive cooldowns when hit",
+  killCdr: "off all cooldowns per kill",
+  perfectWindow: "Perfect block window",
+  perfectCdr: "off Movement and Defensive cooldowns on a perfect block"
 };
-var PCT = /* @__PURE__ */ new Set(["activeSpeed", "critChance", "critDamage", "block", "parry", "bonusAreaRadius", "atkPct", "maxHpPct", "defPct", "moveSpeedPct", "strPct", "dexPct", "intPct", "mainDmg", "offDmg", "fireDmg", "frostDmg", "lightningDmg", "bleedDmg", "poisonDmg", "shockDmg", "counterDmg", "skillDmg", "cdr", "eliteDmg", "lifeKill"]);
+var SECONDS = /* @__PURE__ */ new Set(["hitCdr", "killCdr", "perfectWindow", "perfectCdr"]);
+var branchName = (id) => id ? id[0].toUpperCase() + id.slice(1) : "";
+var PCT = /* @__PURE__ */ new Set(["activeSpeed", "critChance", "critDamage", "block", "parry", "bonusAreaRadius", "atkPct", "maxHpPct", "defPct", "moveSpeedPct", "strPct", "dexPct", "intPct", "mainDmg", "offDmg", "fireDmg", "frostDmg", "lightningDmg", "bleedDmg", "poisonDmg", "shockDmg", "counterDmg", "skillDmg", "cdr", "eliteDmg", "lifeKill", "rangedDmg", "areaDmg", "finisherDmg", "moveCdr", "defCdr", "heldDmg", "ailingDmg", "closeDmg", "farDmg", "fullDmg", "lowDmg", "controlDur", "ailmentDur", "eliteDr", "areaDr", "stunDr", "potionHeal", "keepPip", "perfectDmg"]);
 var FLAT = ["attack", "defense", "maxHp", "str", "dex", "int"];
 var zero6 = (v) => statValue(v) === 0;
 var sign2 = (v) => {
@@ -125622,10 +125768,12 @@ var affixLineKey = affixLine;
 var skillName = (id) => CLASS_TREE_SKILLS[id]?.name ?? id;
 function lineLabel(key3) {
   const [k, skill] = (key3.startsWith("fx:") ? key3.slice(3) : key3).split(":");
-  return k === "skillDmg" ? skillName(skill) + " damage" : k === "passiveRank" ? skillName(skill) : LABELS[k] ?? key3;
+  const pip = PIP_NAMES[skill] ?? "pip";
+  return k === "skillDmg" ? skillName(skill) + " damage" : k === "passiveRank" ? skillName(skill) : k === "branchRank" ? "to " + branchName(skill) + " passives" : k === "startPips" ? pip + " at the start of a fight" : k === "keepPip" ? "chance to keep 1 " + pip + " when you spend" : k === "maxPip" ? "max " + pip : LABELS[k] ?? key3;
 }
 function lineValue(key3, v) {
   const k = (key3.startsWith("fx:") ? key3.slice(3) : key3).split(":")[0], pct3 = key3.startsWith("fx:") && PCT.has(k);
+  if (key3.startsWith("fx:") && SECONDS.has(k)) return String(Number(v)) + " s";
   return statText(pct3 ? statScale(v, 100) : v, true) + (pct3 || key3 === "fx:moveSpeed" ? "%" : "");
 }
 var affixText = (a) => {
@@ -125711,7 +125859,43 @@ var ICON_PATHS = {
   lifeHit: ["#ff7d8f", '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"/><path d="M12 8.5v5M9.5 11h5"/>'],
   lifeKill: ["#ff9aa6", '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"/><path d="M9 11l2 2 4-4"/>']
 };
-var ICON_ALIAS = { atkPct: "attack", defPct: "defense", maxHpPct: "maxHp", strPct: "str", dexPct: "dex", intPct: "int", moveSpeedPct: "moveSpeed", activeSpd: "activeSpeed" };
+var ICON_ALIAS = {
+  atkPct: "attack",
+  defPct: "defense",
+  maxHpPct: "maxHp",
+  strPct: "str",
+  dexPct: "dex",
+  intPct: "int",
+  moveSpeedPct: "moveSpeed",
+  activeSpd: "activeSpeed",
+  // Affixes v3 lines borrow the nearest icon.
+  rangedDmg: "skillDmg",
+  areaDmg: "skillDmg",
+  finisherDmg: "skillDmg",
+  heldDmg: "eliteDmg",
+  ailingDmg: "bleedDmg",
+  closeDmg: "mainDmg",
+  farDmg: "mainDmg",
+  fullDmg: "lifeHit",
+  lowDmg: "lifeHit",
+  perfectDmg: "block",
+  perfectWindow: "block",
+  moveCdr: "cdr",
+  defCdr: "cdr",
+  hitCdr: "cdr",
+  killCdr: "cdr",
+  perfectCdr: "cdr",
+  controlDur: "cdr",
+  ailmentDur: "cdr",
+  eliteDr: "defense",
+  areaDr: "defense",
+  stunDr: "defense",
+  potionHeal: "lifeKill",
+  startPips: "passiveRank",
+  keepPip: "passiveRank",
+  maxPip: "passiveRank",
+  branchRank: "passiveRank"
+};
 function statIcon(key3, size = 16) {
   const k = (key3.startsWith("fx:") ? key3.slice(3) : key3).split(":")[0], icon2 = ICON_PATHS[ICON_ALIAS[k] ?? k];
   if (!icon2) return "";

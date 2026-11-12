@@ -14679,6 +14679,69 @@ function affixSkill(key9, cls, random) {
   return list2 ? list2[Math.floor(random() * list2.length)] : null;
 }
 
+// src/shared/content/gear_affixes_v3.js
+var AFFIXES_V3 = "affixes-v3";
+var isAffixesV2Plus = (v) => v === AFFIXES_V2 || v === AFFIXES_V3;
+var SKILL_GROUPS = freezeWire({
+  move: { knight: ["shield_charge", "skyfall_leap"], rogue: ["dash", "lunge", "shadowstep"], mage: ["dash"] },
+  def: { knight: ["guard", "counter_stance", "rallying_cry", "aegis_pulse"], rogue: ["riposte", "smoke_veil"], mage: ["ice_barrier"] },
+  ranged: { knight: ["shield_throw"], rogue: ["toxic_fan"], mage: ["cast", "ball_lightning", "firebloom", "meteor"] },
+  area: { knight: ["shield_bash", "earth_breaker", "retribution", "skyfall_leap"], rogue: ["whirling_blades", "rupture", "noxious_bloom"], mage: ["flashfreeze", "flame_wall", "static_field", "glacial_burst", "thunderfall"] },
+  finisher: { knight: ["retribution", "skyfall_leap", "aegis_pulse"], rogue: ["shadowstep", "thousand_cuts", "rupture", "noxious_bloom"], mage: ["glacial_burst", "meteor", "thunderfall"] }
+});
+var DAMAGE_GROUPS = { rangedDmg: "ranged", areaDmg: "area", finisherDmg: "finisher" };
+var COOLDOWN_GROUPS = { moveCdr: "move", defCdr: "def" };
+var groupsFor = (cls, keys2) => Object.keys(keys2).filter((k) => (SKILL_GROUPS[keys2[k]][cls]?.length ?? 0) >= 2);
+var V3_POOLS = freezeWire({
+  weapon: ["critChance", "critDamage", "activeSpd", "mainDmg", "classDmg", "skillDmg", "eliteDmg", "lifeHit", "groupDmg", "killCdr"],
+  shield: ["block", "offDmg", "classDmg", "skillDmg", "passiveRank", "cdr", "groupDmg", "controlDur", "branchRank", "maxPip"],
+  dagger: ["parry", "critChance", "offDmg", "classDmg", "skillDmg", "passiveRank", "cdr", "groupDmg", "ailmentDur", "branchRank", "maxPip"],
+  tome: ["critDamage", "critChance", "bonusAreaRadius", "offDmg", "classDmg", "skillDmg", "passiveRank", "cdr", "groupDmg", "branchRank", "maxPip"],
+  helmet: ["critChance", "activeSpd", "bonusAreaRadius", "classDmg", "passiveRank", "cdr", "controlDur", "ailmentDur", "branchRank", "startPips"],
+  gloves: ["atkPct", "critChance", "activeSpd", "attr", "mainDmg", "offDmg", "cdr", "lifeHit", "rangeDmg", "keepPip", "perfectWindow", "perfectDmg"],
+  overall: ["maxHpPct", "defPct", "attr", "lifeKill", "eliteDr", "areaDr", "hitCdr", "lowDmg", "perfectDmg"],
+  boots: ["moveSpeed", "activeSpd", "maxHpPct", "defPct", "lifeKill", "stunDr", "potionHeal", "hitCdr", "groupCdr", "perfectWindow", "perfectCdr"],
+  ring: ["atkPct", "critChance", "attr", "cdr", "eliteDmg", "lifeHit", "heldDmg", "ailingDmg", "healthDmg", "groupDmg", "maxPip"],
+  cape: ["maxHpPct", "defPct", "attr", "moveSpeed", "lifeKill", "rangeDmg", "healthDmg", "areaDr", "groupDmg", "killCdr", "startPips", "keepPip"]
+});
+var RARE_LINES = Object.freeze(["branchRank", "killCdr", "maxPip"]);
+var TIMING_LINES = Object.freeze(["perfectWindow", "perfectDmg", "perfectCdr"]);
+function affixPoolV3(slotKey, rarityTier, cls) {
+  return (V3_POOLS[slotKey] ?? []).filter((k) => (k !== "passiveRank" || rarityTier >= 2) && (!RARE_LINES.includes(k) || rarityTier >= 4) && (!TIMING_LINES.includes(k) || cls === "knight") && (k !== "groupCdr" || groupsFor(cls, COOLDOWN_GROUPS).length > 0));
+}
+var V3_RANGES = freezeWire({ rangedDmg: [50, 100], areaDmg: [50, 100], finisherDmg: [50, 100], moveCdr: [40, 80], defCdr: [40, 80], heldDmg: [60, 120], ailingDmg: [50, 110], closeDmg: [50, 100], farDmg: [50, 100], fullDmg: [60, 120], lowDmg: [80, 150], controlDur: [80, 160], ailmentDur: [80, 160], eliteDr: [30, 60], areaDr: [40, 80], stunDr: [100, 200], potionHeal: [100, 200], keepPip: [100, 200], perfectDmg: [80, 150] });
+var V3_FIXED = freezeWire({ hitCdr: { lo: 6, hi: 12, step: [1, 20] }, killCdr: { lo: 4, hi: 8, step: [1, 20] }, perfectWindow: { lo: 5, hi: 10, step: [1, 100] }, perfectCdr: { lo: 10, hi: 20, step: [1, 10] }, startPips: { lo: 1, hi: 2, step: [1, 1] }, maxPip: { lo: 1, hi: 1, step: [1, 1] }, branchRank: { lo: 1, hi: 1, step: [1, 1] } });
+var V3_KEYS = Object.freeze([...Object.keys(V3_RANGES), ...Object.keys(V3_FIXED)]);
+var isV3Affix = (key9) => V3_KEYS.includes(key9);
+var isFixedV3 = (key9) => Object.hasOwn(V3_FIXED, key9);
+var WHOLE_V3 = Object.freeze(["startPips", "maxPip", "branchRank"]);
+var STUN_DR_CAP = 0.5;
+var PERFECT_WINDOW_CAP = 0.2;
+var MAX_PIP_GEAR = 2;
+var TREES = {};
+var classTrees = (cls) => TREES[cls] ??= Object.freeze([...new Set(Object.values(CLASS_TREE_SKILLS).filter((x) => x.classId === cls).map((x) => x.tree))].sort());
+function resolveV3Affix(key9, cls, slotKey, random) {
+  const pick6 = (list2) => list2[Math.floor(random() * list2.length)];
+  if (key9 === "attr") return [pick6(["str", "dex", "int"]), null];
+  if (key9 === "groupDmg") {
+    const list2 = slotKey === "ring" || slotKey === "cape" ? ["areaDmg", "finisherDmg"] : groupsFor(cls, DAMAGE_GROUPS);
+    return [pick6(list2), null];
+  }
+  if (key9 === "groupCdr") return [pick6(groupsFor(cls, COOLDOWN_GROUPS)), null];
+  if (key9 === "rangeDmg") return [pick6(["closeDmg", "farDmg"]), null];
+  if (key9 === "healthDmg") return [pick6(["fullDmg", "lowDmg"]), null];
+  if (key9 === "branchRank") return [key9, pick6(classTrees(cls))];
+  if (key9 === "startPips" || key9 === "keepPip" || key9 === "maxPip") return [key9, cls];
+  return [key9, null];
+}
+var POOL_KEY = { str: "attr", dex: "attr", int: "attr", rangedDmg: "groupDmg", areaDmg: "groupDmg", finisherDmg: "groupDmg", moveCdr: "groupCdr", defCdr: "groupCdr", closeDmg: "rangeDmg", farDmg: "rangeDmg", fullDmg: "healthDmg", lowDmg: "healthDmg" };
+var v3PoolKeyOf = (key9, slotKey) => slotKey === "overall" && key9 === "lowDmg" ? key9 : POOL_KEY[key9] ?? key9;
+function fixedV3Value(key9, k) {
+  const x = V3_FIXED[key9], n = k * x.step[0], d = x.step[1];
+  if (d === 1) return String(n);
+  return String(Number((Math.round(n * 1e4 / d) / 1e4).toFixed(4)));
+}
+
 // src/shared/content/uniques_v1.js
 var unique = (id, name, family2, subType, noun, cls, from, biome, effect, flavor) => ({ id, name, family: family2, subType, noun, cls, look: id, from, biome, effect, flavor });
 var trophy = (...args) => ({ ...unique(...args), trophy: true });
@@ -14980,7 +15043,7 @@ function validateRewardProgressionD9(v) {
   requireContract(v.lockedDepth === void 0 || v.episodeSnapshotId !== void 0 && progressionBigInt(v.lockedDepth) >= 1n, "Co-op reward depth policy");
   requireContract(v.bestiaryQuality === void 0 || Number.isSafeInteger(v.bestiaryQuality) && v.bestiaryQuality > 0 && v.bestiaryQuality <= 1e4 && v.rarityPolicyHash !== void 0, "Bestiary quality policy");
   requireContract(v.swiftKill === void 0 || v.swiftKill === true && v.rarityPolicyHash !== void 0, "Swift kill reward policy");
-  requireContract(v.affixes === void 0 || v.affixes === AFFIXES_V2 && v.gearClass !== void 0, "Affix pool policy");
+  requireContract(v.affixes === void 0 || isAffixesV2Plus(v.affixes) && v.gearClass !== void 0, "Affix pool policy");
   requireContract(v.boon === void 0 || v.boon === "fortune" && v.rarityPolicyHash !== void 0, "Boon reward policy");
   requireContract(v.quickClear === void 0 || v.quickClear === true && v.rarityPolicyHash !== void 0 && v.combatQuality === "completion", "Quick clear reward policy");
   requireContract(v.armor === void 0 || v.armor === "overall" && v.gearClass === void 0 && v.combatHash === WORLD_COMBAT_HASH, "One-piece armor policy");
@@ -15498,26 +15561,42 @@ function generateAtPrecision(c, seed, input, { tier: tier2 = null, family: famil
       raw.baseMaxHp = v((10n + 4n * l) * factor);
     }
     if (type === "cape") {
-      raw.baseDef = progression.affixes === AFFIXES_V2 ? v(1n + l) : v((2n + l) / 2n);
+      raw.baseDef = isAffixesV2Plus(progression.affixes) ? v(1n + l) : v((2n + l) / 2n);
       raw.baseMaxHp = v((10n + 4n * l) / 2n);
     }
     if (type === "ring") {
-      const g3 = progression.affixes === AFFIXES_V2;
+      const g3 = isAffixesV2Plus(progression.affixes);
       raw.baseAtk = g3 ? v(1n + l) : v(1n + l / 3n);
       raw.baseDef = g3 ? v(1n + l) : v(1n + l / 4n);
       raw.baseMaxHp = g3 ? v(5n + 2n * l) : v(5n + l);
     }
-    if (type === "subweapon" && progression.affixes === AFFIXES_V2) {
+    if (type === "subweapon" && isAffixesV2Plus(progression.affixes)) {
       if (sub === "shield") raw.baseDef = v(2n + l);
       else if (sub === "dagger" || sub === "tome") raw.baseAtk = v(2n + l);
     }
   }
   if (cls) applyClassFlavor(raw, classGearFlavor(cls, type, n));
-  const v2 = Boolean(cls) && progression.affixes === AFFIXES_V2, affixes = [], pool = v2 ? affixPoolV2(AFFIX_POOLS[sub ?? type], sub ?? type, rarityTier) : [...AFFIX_POOLS[sub ?? type]], bonus = {};
+  const v3 = Boolean(cls) && progression.affixes === AFFIXES_V3, v2 = Boolean(cls) && isAffixesV2Plus(progression.affixes), affixes = [], pool = v3 ? affixPoolV3(sub ?? type, rarityTier, cls) : v2 ? affixPoolV2(AFFIX_POOLS[sub ?? type], sub ?? type, rarityTier) : [...AFFIX_POOLS[sub ?? type]], bonus = {};
   const uqLines = uq ? [...UNIQUE_TIERS[progression.unique]?.lines ?? []] : null;
   for (let i = 0; i < rarityTier && (uqLines ? uqLines.length : pool.length); i++) {
     let key9 = uqLines ? uqLines.shift() : pool.splice(Math.floor(random() * pool.length), 1)[0], value, skill = null;
     if (uqLines && key9.includes(":")) [key9, skill] = key9.split(":");
+    if (v3 && !uqLines) {
+      let named2 = null;
+      [key9, named2] = resolveV3Affix(key9, cls, sub ?? type, random);
+      if (isV3Affix(key9)) {
+        const fx = V3_FIXED[key9];
+        if (fx) {
+          const k = fx.lo + Math.floor(random() * (fx.hi - fx.lo + 1));
+          value = fx.step[1] === 1 ? progressionWire(BigInt(k * fx.step[0])) : round44(c.q(k * fx.step[0], fx.step[1]));
+        } else {
+          const [lo, hi] = V3_RANGES[key9];
+          value = round44(times3(f3(String(lo / 1e3), String(hi / 1e3)), c.q(100 + 5 * rarityTier, 100)));
+        }
+        affixes.push(named2 ? { key: key9, value, skill: named2 } : { key: key9, value });
+        continue;
+      }
+    }
     if ((v2 || uqLines) && (key9 === "classDmg" || isNewAffix(key9))) {
       key9 = resolveNewAffix(key9, cls, raw.spellType ?? null, random);
       skill = skill ?? affixSkill(key9, cls, random);
@@ -15536,8 +15615,8 @@ function generateAtPrecision(c, seed, input, { tier: tier2 = null, family: famil
       value = round44(times3(f3(String(lo / 1e3), String(hi / 1e3)), c.q(100 + 5 * rarityTier, 100)));
     } else if (key9 === "atk" || key9 === "def") value = ceil(times3(f3(".04", ".08"), E, flatR));
     else if (key9 === "maxHp") value = ceil(times3(f3(".12", ".24"), E, flatR));
-    else if (key9 === "moveSpeed") value = progression.affixes === AFFIXES_V2 ? ceil(times3(f3("10", "23"), P2)) : ceil(times3(1 + Math.floor(random() * 2), power2, P2));
-    else if (key9 === "critChance") value = progression.affixes === AFFIXES_V2 ? round44(capped(times3(f3(".01", ".02"), c.root(I(power2), 2), P2), I(".1"))) : round44(capped(times3(f3(".015", ".04"), c.root(I(power2), 2), P2), I(".2")));
+    else if (key9 === "moveSpeed") value = isAffixesV2Plus(progression.affixes) ? ceil(times3(f3("10", "23"), P2)) : ceil(times3(1 + Math.floor(random() * 2), power2, P2));
+    else if (key9 === "critChance") value = isAffixesV2Plus(progression.affixes) ? round44(capped(times3(f3(".01", ".02"), c.root(I(power2), 2), P2), I(".1"))) : round44(capped(times3(f3(".015", ".04"), c.root(I(power2), 2), P2), I(".2")));
     else if (key9 === "critDamage") value = round44(times3(f3(".03", ".06"), c.root(I(power2), 2), P2));
     else if (key9 === "block" || key9 === "parry") value = round44(capped(times3(f3(".005", ".015"), c.root(I(power2), 2), P2), I(".15")));
     else if (key9 === "bonusAreaRadius") value = round44(times3(f3(".04", ".10"), P2));
@@ -15575,6 +15654,14 @@ function affixRollRangeD9(g, key9) {
       const [lo, hi] = PERCENT_STAT_RANGES[key9];
       minimum = round44(mul2(I(lo, 1e3), star));
       maximum = round44(mul2(I(hi, 1e3), star));
+    } else if (V3_RANGES[key9]) {
+      const [lo, hi] = V3_RANGES[key9];
+      minimum = round44(mul2(I(lo, 1e3), star));
+      maximum = round44(mul2(I(hi, 1e3), star));
+    } else if (V3_FIXED[key9]) {
+      const x = V3_FIXED[key9], at2 = (k) => x.step[1] === 1 ? progressionWire(BigInt(k * x.step[0])) : round44(I(k * x.step[0], x.step[1]));
+      minimum = at2(x.lo);
+      maximum = at2(x.hi);
     } else if (NEW_AFFIX_RANGES[key9]) {
       const [lo, hi] = NEW_AFFIX_RANGES[key9];
       minimum = round44(mul2(I(lo, 1e3), star));
@@ -15590,7 +15677,7 @@ function affixRollRangeD9(g, key9) {
       const scale2 = mul2(c.dungeonScale(p).E, R2), lo = key9 === "maxHp" ? 12 : 4;
       minimum = ceil(mul2(I(lo, 100), scale2));
       maximum = ceil(mul2(I(lo * 2, 100), scale2));
-    } else if (key9 === "moveSpeed" && g.progression?.affixes === AFFIXES_V2) {
+    } else if (key9 === "moveSpeed" && isAffixesV2Plus(g.progression?.affixes)) {
       minimum = ceil(mul2(I(10), P2));
       maximum = ceil(mul2(I(23), P2));
     } else if (key9 === "moveSpeed") {
@@ -15604,7 +15691,7 @@ function affixRollRangeD9(g, key9) {
       minimum = round44(mul2(I(1, 100), scale2));
       maximum = round44(mul2(I(3, 100), scale2));
     } else if (["critChance", "critDamage", "block", "parry"].includes(key9)) {
-      const scale2 = mul2(c.root(I(p), 2), P2), v3 = g.progression?.affixes === AFFIXES_V2, lo = key9 === "critChance" ? v3 ? I(1, 100) : I(15, 1e3) : key9 === "critDamage" ? I(3, 100) : I(5, 1e3), hi = key9 === "critChance" ? v3 ? I(2, 100) : I(4, 100) : key9 === "critDamage" ? I(6, 100) : I(15, 1e3), limit = key9 === "critChance" ? v3 ? I(1, 10) : I(2, 10) : I(15, 100);
+      const scale2 = mul2(c.root(I(p), 2), P2), v3 = isAffixesV2Plus(g.progression?.affixes), lo = key9 === "critChance" ? v3 ? I(1, 100) : I(15, 1e3) : key9 === "critDamage" ? I(3, 100) : I(5, 1e3), hi = key9 === "critChance" ? v3 ? I(2, 100) : I(4, 100) : key9 === "critDamage" ? I(6, 100) : I(15, 1e3), limit = key9 === "critChance" ? v3 ? I(1, 10) : I(2, 10) : I(15, 100);
       minimum = round44(key9 === "critDamage" ? mul2(lo, scale2) : cap3(mul2(lo, scale2), limit));
       maximum = round44(key9 === "critDamage" ? mul2(hi, scale2) : cap3(mul2(hi, scale2), limit));
     } else {
@@ -16523,7 +16610,7 @@ function workshopResult(item2) {
       const next = generateGear3(g.seed, g.progression ?? g.contentDepth, { tier: tier2 + 1, family: g.definition.slot, subType: g.definition.subType ?? null, noun: g.definition.noun });
       definition = copyWire(next.definition);
       for (const a of next.affixes) adjust(definition, a.key, a.value, 0);
-      affixes = affixes.map((a) => a.key === "passiveRank" ? a : { ...a, value: scale(a.value, 100 + 15 * (tier2 + 1), 100 + 15 * tier2, integer.has(a.key) || a.key === "lifeHit") });
+      affixes = affixes.map((a) => a.key === "passiveRank" || isFixedV3(a.key) ? a : { ...a, value: scale(a.value, 100 + 15 * (tier2 + 1), 100 + 15 * tier2, integer.has(a.key) || a.key === "lifeHit") });
       for (const a of affixes) adjust(definition, a.key, 0, a.value);
       const additions3 = next.affixes.filter((a) => !affixes.some((old) => old.key === a.key));
       if (additions3.length) {
@@ -16535,16 +16622,27 @@ function workshopResult(item2) {
     } else if (step.kind === "reforge") {
       requireContract(!enchants && Number.isInteger(step.line) && step.line >= 0 && step.line < affixes.length && (lockedLine === null || lockedLine === step.line), "Invalid locked reforge line");
       lockedLine = step.line;
-      const v2 = g.progression?.affixes === AFFIXES_V2 && g.progression.gearClass, slot = g.definition.subType ?? g.definition.slot, classKey = (k) => Object.values(CLASS_DAMAGE).flat().includes(k) ? "classDmg" : k;
-      const old = affixes[step.line], pool = (v2 ? affixPoolV2(AFFIX_POOLS[slot], slot, tier2) : AFFIX_POOLS4[slot]).filter((k) => !affixes.some((a, i) => i !== step.line && classKey(a.key) === k)), picked = pool[Math.floor(random("key") * pool.length)];
+      const cls = g.progression?.gearClass, v3 = g.progression?.affixes === AFFIXES_V3 && cls, v2 = (g.progression?.affixes === AFFIXES_V2 || v3) && cls, slot = g.definition.subType ?? g.definition.slot, classKey = (k) => Object.values(CLASS_DAMAGE).flat().includes(k) ? "classDmg" : v3 ? v3PoolKeyOf(k, slot) : k;
+      const old = affixes[step.line], pool = (v3 ? affixPoolV3(slot, tier2, cls) : v2 ? affixPoolV2(AFFIX_POOLS[slot], slot, tier2) : AFFIX_POOLS4[slot]).filter((k) => !affixes.some((a, i) => i !== step.line && classKey(a.key) === k)), picked = pool[Math.floor(random("key") * pool.length)];
       let name = picked, skill = null;
-      if (v2 && (picked === "classDmg" || isNewAffix(picked))) {
+      if (v3) {
+        [name, skill] = resolveV3Affix(picked, cls, slot, () => random("class"));
+        if (name === "classDmg" || isNewAffix(name)) {
+          skill = null;
+          name = resolveNewAffix(name, cls, definition.spellType ?? null, () => random("class"));
+          skill = affixSkill(name, cls, () => random("skill"));
+        }
+      } else if (v2 && (picked === "classDmg" || isNewAffix(picked))) {
         name = resolveNewAffix(picked, g.progression.gearClass, definition.spellType ?? null, () => random("class"));
         skill = affixSkill(name, g.progression.gearClass, () => random("skill"));
       }
       const range = affixRollRange({ ...g, rarityTier: tier2, definition }, name), whole = integer.has(name) || name === "lifeHit" || name === "passiveRank";
       let value;
-      if (whole && (typeof range.minimum === "string" || typeof range.maximum === "string" || range.minimum?.chunks)) {
+      if (V3_FIXED[name]) {
+        const x = V3_FIXED[name];
+        value = fixedV3Value(name, x.lo + Math.floor(random("value") * (x.hi - x.lo + 1)));
+        if (x.step[1] === 1) value = Number(value);
+      } else if (whole && (typeof range.minimum === "string" || typeof range.maximum === "string" || range.minimum?.chunks)) {
         const lo = progressionBigInt(range.minimum), hi = progressionBigInt(range.maximum);
         value = progressionWire(lo + (hi - lo) * BigInt(Math.floor(random("value") * 1e6)) / 1000000n);
       } else value = whole ? Math.floor(range.minimum + random("value") * (range.maximum - range.minimum + 1)) : Number((Number(range.minimum) + random("value") * (Number(range.maximum) - Number(range.minimum))).toFixed(4));
@@ -17300,6 +17398,43 @@ function validateTownInteriors(s) {
   }
 }
 
+// src/shared/contracts/gear_affix_totals_v2.js
+var V3_ZERO = { rangedDmg: 0, areaDmg: 0, finisherDmg: 0, moveCdr: 0, defCdr: 0, heldDmg: 0, ailingDmg: 0, closeDmg: 0, farDmg: 0, fullDmg: 0, lowDmg: 0, controlDur: 0, ailmentDur: 0, eliteDr: 0, areaDr: 0, stunDr: 0, potionHeal: 0, keepPip: 0, perfectDmg: 0, hitCdr: 0, killCdr: 0, perfectWindow: 0, perfectCdr: 0, startPips: 0, maxPip: 0 };
+var EMPTY = Object.freeze({ any: false, mainDmg: 0, offDmg: 0, fireDmg: 0, frostDmg: 0, lightningDmg: 0, bleedDmg: 0, poisonDmg: 0, shockDmg: 0, counterDmg: 0, eliteDmg: 0, cdr: 0, lifeKill: 0, lifeHit: 0, ...V3_ZERO, skills: Object.freeze({}), ranks: Object.freeze({}), branches: Object.freeze({}) });
+var cache3 = /* @__PURE__ */ new WeakMap();
+var bp = (v) => Math.round(Number(v) * 1e4);
+var ticks = (v) => Math.round(Number(v) * 60);
+function gearAffixTotalsV2(player) {
+  const inv = player?.inventory;
+  if (!inv?.equipped || !inv.itemsById) return EMPTY;
+  const levels2 = inv.economy?.slotLevels ?? {}, key9 = inv.revision + "|" + Object.entries(inv.equipped).map(([slot, id]) => slot + "=" + id + "@" + (levels2[slot] ?? 0)).join(","), hit = cache3.get(inv);
+  if (hit?.key === key9) return hit.totals;
+  const t = { ...EMPTY, skills: {}, ranks: {}, branches: {} };
+  for (const [slot, id] of Object.entries(inv.equipped)) {
+    const item2 = id && inv.itemsById[id];
+    if (!item2?.generated) continue;
+    const scale2 = 100 + Number(levels2[slot] ?? 0), grow = (v) => Math.round(bp(v) * scale2 / 100);
+    for (const a of workshopResult(item2).affixes ?? []) {
+      if (!isNewAffix(a.key) && !isV3Affix(a.key)) continue;
+      t.any = true;
+      if (a.key === "skillDmg") t.skills[a.skill] = (t.skills[a.skill] ?? 0) + grow(a.value);
+      else if (a.key === "passiveRank") t.ranks[a.skill] = (t.ranks[a.skill] ?? 0) + Number(a.value);
+      else if (a.key === "branchRank") t.branches[a.skill] = (t.branches[a.skill] ?? 0) + Number(a.value);
+      else if (a.key === "startPips" || a.key === "maxPip") t[a.key] += Number(a.value);
+      else if (isFixedV3(a.key)) t[a.key] += ticks(a.value);
+      else if (a.key === "lifeHit") t.lifeHit += Math.round(Number(a.value) * scale2 / 100);
+      else t[a.key] += grow(a.value);
+    }
+  }
+  t.cdr = Math.min(t.cdr, bp(CDR_CAP));
+  t.stunDr = Math.min(t.stunDr, bp(STUN_DR_CAP));
+  t.perfectWindow = Math.min(t.perfectWindow, ticks(PERFECT_WINDOW_CAP));
+  t.maxPip = Math.min(t.maxPip, MAX_PIP_GEAR);
+  const totals2 = Object.freeze(t);
+  cache3.set(inv, { key: key9, totals: totals2 });
+  return totals2;
+}
+
 // src/shared/contracts/potion_belt_v1.js
 var POTION_BELT_POLICY = Object.freeze({
   version: "potion-belt-v1",
@@ -17320,9 +17455,9 @@ var POTION_BELT_POLICY = Object.freeze({
 });
 var B = POTION_BELT_POLICY;
 var G = B.ground;
-var EMPTY = Object.freeze({ grants: 0, capacityUpgrades: 0, potencyUpgrades: 0, lastUseTick: null });
+var EMPTY2 = Object.freeze({ grants: 0, capacityUpgrades: 0, potencyUpgrades: 0, lastUseTick: null });
 var NO_GROUND = Object.freeze({});
-var potionBelt = (p) => p.inventory.services?.potions ?? EMPTY;
+var potionBelt = (p) => p.inventory.services?.potions ?? EMPTY2;
 var potionCapacity = (p) => B.baseCharges + potionBelt(p).capacityUpgrades;
 function potionCount(p) {
   const l = p.inventory.services;
@@ -17367,7 +17502,7 @@ function validateGroundPotions(state, ground) {
   }
 }
 function validatePotionProgress(x, y) {
-  const a = x?.potions ?? EMPTY, b = y?.potions ?? EMPTY;
+  const a = x?.potions ?? EMPTY2, b = y?.potions ?? EMPTY2;
   requireContract(compareAmount(b.refillGold ?? "0", a.refillGold ?? "0") >= 0 && b.grants >= a.grants && b.capacityUpgrades >= a.capacityUpgrades && b.potencyUpgrades >= a.potencyUpgrades && (a.lastUseTick === null || b.lastUseTick !== null && b.lastUseTick >= a.lastUseTick), "Potion belt regressed");
   return b.capacityUpgrades - a.capacityUpgrades + b.potencyUpgrades - a.potencyUpgrades;
 }
@@ -17418,7 +17553,7 @@ function serviceStock(s, p, npc, gearClass = heroClassOf(p.d8)?.id ?? null, lega
   return offers.map((base) => {
     const offer = { ...base, price: merchantPrice(npc, base) }, sourceEntityId = "ent:" + token2(SETTLEMENT_LIFE_POLICY.stockVersion + (hasWorldCombat(s) ? "/" + WORLD_COMBAT_HASH : "") + (cls ? "/" + cls : "") + "/" + s.campaign.seed.seedHex + "/" + p.playerId + "/" + npc.id + "/" + offer.id), key9 = sourceEntityId + (legacyChest ? "/legacy-chest" : "");
     if (!stockCache.has(key9)) {
-      const progression = hasWorldCombat(s) ? { ...rewardProgressionD9([0, 1, 6, 11, 21, 41][npc.band], sourceEntityId), combatHash: WORLD_COMBAT_HASH, combatQuality: "ordinary", ...cls ? { gearClass: cls, affixes: AFFIXES_V2 } : {} } : rewardProgression(SETTLEMENT_LIFE_POLICY.bandSourceDepth[npc.band], sourceEntityId), generated = generateGear3(gearSeed(s, p, sourceEntityId), progression, { tier: SETTLEMENT_LIFE_POLICY.gearRarity, family: (cls || hasWorldCombat(s) && !legacyChest) && offer.family === "chest" ? "overall" : offer.family });
+      const progression = hasWorldCombat(s) ? { ...rewardProgressionD9([0, 1, 6, 11, 21, 41][npc.band], sourceEntityId), combatHash: WORLD_COMBAT_HASH, combatQuality: "ordinary", ...cls ? { gearClass: cls, affixes: AFFIXES_V3 } : {} } : rewardProgression(SETTLEMENT_LIFE_POLICY.bandSourceDepth[npc.band], sourceEntityId), generated = generateGear3(gearSeed(s, p, sourceEntityId), progression, { tier: SETTLEMENT_LIFE_POLICY.gearRarity, family: (cls || hasWorldCombat(s) && !legacyChest) && offer.family === "chest" ? "overall" : offer.family });
       if (stockCache.size >= 128) stockCache.delete(stockCache.keys().next().value);
       stockCache.set(key9, freezeWire({ offer, sourceEntityId, item: { itemId: `item:${p.playerId}:${sourceEntityId}`, definitionId: offer.definitionId, ownerPlayerId: p.playerId, sourceEntityId, generated: copyWire(generated) } }));
     }
@@ -17453,7 +17588,7 @@ function dailyOffer(s, p, npc, day, slot, level, cls) {
       }
     }
     const families = cls ? SHOP_FAMILIES[npc.role] : SHOP_FAMILIES_CLASSLESS[npc.role], family2 = families[(slot + day) % families.length];
-    const progression = { ...rewardProgressionD9(level, sourceEntityId), combatHash: WORLD_COMBAT_HASH, combatQuality: "ordinary", ...cls ? { gearClass: cls, wardrobe: WARDROBE_V1, affixes: AFFIXES_V2 } : { armor: "overall" } }, generated = generateGear3(gearSeed(s, p, sourceEntityId), progression, { tier: rarity, family: family2 });
+    const progression = { ...rewardProgressionD9(level, sourceEntityId), combatHash: WORLD_COMBAT_HASH, combatQuality: "ordinary", ...cls ? { gearClass: cls, wardrobe: WARDROBE_V1, affixes: AFFIXES_V3 } : { armor: "overall" } }, generated = generateGear3(gearSeed(s, p, sourceEntityId), progression, { tier: rarity, family: family2 });
     const item2 = { itemId: `item:${p.playerId}:${sourceEntityId}`, definitionId: generated.definition.definitionId, ownerPlayerId: p.playerId, sourceEntityId, generated: copyWire(generated) };
     if (stockCache.size >= 256) stockCache.delete(stockCache.keys().next().value);
     stockCache.set(key9, freezeWire({ offer: { id: DAILY + day + ":" + slot + ":" + level, family: family2, price: dailyBuyPrice(item2) }, sourceEntityId, item: item2 }));
@@ -18600,10 +18735,10 @@ var hash13 = (s) => {
   for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0;
   return h;
 };
-var cache3 = /* @__PURE__ */ new Map();
+var cache4 = /* @__PURE__ */ new Map();
 function populateCombatRooms(base, seed, family2, tier2, index, seeded2 = false) {
   const key9 = [seed, family2, tier2, index].join("/"), cacheKey = key9 + (seeded2 ? "/seeded" : "");
-  if (cache3.has(cacheKey)) return cache3.get(cacheKey);
+  if (cache4.has(cacheKey)) return cache4.get(cacheKey);
   const rooms = base.graph.rooms.filter((r) => r.role !== "arrival"), ranked = rooms.map((r) => ({ r, n: hash13(WORLD_COMBAT_VERSION + key9 + r.roomId) })).sort((a, b) => a.n - b.n), chosen = ranked.slice(0, Math.min(WORLD_COMBAT_POLICY.floorPacks[tier2], rooms.length)), members = [], packs = [];
   const families = family2 === "cave" ? ["slime", "rust_nibbler", "gargoyle"] : family2 === "fort" ? ["animated_armor", "gargoyle", "golem"] : ["cursed_blade", "gargoyle", "rust_nibbler"];
   for (const [i, { r, n }] of chosen.entries()) {
@@ -18626,8 +18761,8 @@ function populateCombatRooms(base, seed, family2, tier2, index, seeded2 = false)
     for (const [j, p] of used.entries()) members.push({ memberKey: family2 + ":horde:" + index + ":" + i + ":" + j, family: families[(n + j) % families.length], roomId: r.roomId, position: p, ...family2 === "fort" ? { eliteAffixId: i === 0 && j === 0 && index > 0 ? ["swift_commander", "slag_shaper", "iron_citadel"][Math.min(2, index - 1)] : null } : {} });
   }
   const result = freezeWire({ ...base, encounter: { rank: "C", combatVersion: WORLD_COMBAT_VERSION, packs, members } });
-  if (cache3.size >= 128) cache3.delete(cache3.keys().next().value);
-  cache3.set(cacheKey, result);
+  if (cache4.size >= 128) cache4.delete(cache4.keys().next().value);
+  cache4.set(cacheKey, result);
   return result;
 }
 
@@ -22190,16 +22325,16 @@ function siteOccupantsD13C(state, siteId2, { connectedOnly = true, interiorOnly 
   }).map((player) => player.playerId).sort();
 }
 function migrationEvidenceTick(state, siteId2) {
-  const groups = Object.values(state.groupsById).filter((group) => group.siteId === siteId2), ticks = [];
+  const groups = Object.values(state.groupsById).filter((group) => group.siteId === siteId2), ticks2 = [];
   for (const group of groups) {
-    if (group.lastRequiredTick !== null) ticks.push(group.lastRequiredTick);
+    if (group.lastRequiredTick !== null) ticks2.push(group.lastRequiredTick);
     if (group.entityIds.some((id) => {
       const actor = state.entitiesById[id];
       return actor && (!actor.alive || !same16(actor.hp, actor.maxHp));
-    })) ticks.push(state.encounterEconomy?.groups?.[group.groupId]?.startedTick ?? state.tick);
-    if (Object.keys(state.encounterEconomy?.groups?.[group.groupId]?.usedResources ?? {}).length) ticks.push(state.encounterEconomy.groups[group.groupId].startedTick);
+    })) ticks2.push(state.encounterEconomy?.groups?.[group.groupId]?.startedTick ?? state.tick);
+    if (Object.keys(state.encounterEconomy?.groups?.[group.groupId]?.usedResources ?? {}).length) ticks2.push(state.encounterEconomy.groups[group.groupId].startedTick);
   }
-  return ticks.length ? Math.min(...ticks) : null;
+  return ticks2.length ? Math.min(...ticks2) : null;
 }
 var commitment = (domain, value) => Array.from({ length: 8 }, (_, lane) => hash322(`${domain}/${lane}/${canonicalStringify(value)}`).toString(16).padStart(8, "0")).join("");
 var historyGenesis = (state, siteId2) => commitment("SAQ-WORLD-SITE-RUN-HISTORY-D13C1-GENESIS", { worldSeed: worldSeedHex(state), siteId: siteId2 });
@@ -25518,6 +25653,11 @@ var GOLD_TICKS = 900;
 var CLASS_FINISHERS = Object.freeze({ knight: Object.freeze(["retribution", "skyfall_leap", "aegis_pulse"]), rogue: Object.freeze(["thousand_cuts", "shadowstep", "noxious_bloom", "rupture"]), mage: Object.freeze(["meteor", "thunderfall", "glacial_burst"]) });
 var PERFECT_TICKS = 18;
 var PERFECT_SHOW_TICKS = 30;
+var PERFECT_GEAR_TICKS = 12;
+var SHARP_TICKS = 180;
+var HIT_CD_TICKS = 60;
+var KILL_CD_TICKS = 30;
+var PERF_CD_TICKS = 120;
 var COMBO_DAMAGE = Object.freeze([90, 90, 120]);
 var PIPS_CAP = 7;
 var PIP_IDLE_TICKS = 360;
@@ -25537,7 +25677,7 @@ var FREE_TICKS = 180;
 var FREE_SKILLS = Object.freeze(["shadowstep", "skyfall_leap"]);
 var LIVING_STORM_TICKS = 360;
 var PIP_NAMES = Object.freeze({ knight: "Grit", rogue: "Combo", mage: "Arcana" });
-var LIVE = ["pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
+var LIVE = ["sharp", "hitCd", "killCd", "perfCd", "pips", "spent", "spends", "free", "earned", "guarding", "guardUp", "perfect", "moss", "mist", "veil", "gold", "aftershock", "fault", "hymn", "firm", "jugg", "counters", "regrow", "leapSpare", "leapRefill", "again", "spin", "cloak", "twin", "twinned", "seeds", "thaw", "rime", "thunder", "wave", "shake", "storm", "duel", "phoenix", "blaze", "shade", "blooms", "aegis", "leap", "titan", "spite", "held", "cuts", "flower", "echo", "stepped", "stepSpare", "stepRefill", "meteors", "crack", "quick", "rest", "mend", "spare", "refill", "last", "flurry", "parry", "counter", "surge", "bulwark", "focus", "enGarde", "charge", "orbs", "rush", "trail", "pool", "wail", "shell", "hide", "sun", "casts", "ram", "thrown", "banner", "still", "riposte", "keen", "evade", "weave", "smoke", "wall", "ice", "field"];
 function validateClassSkillState(s, combat, actor) {
   const k = combat.skills;
   if (k === void 0) return;
@@ -25571,10 +25711,10 @@ function validateClassSkillState(s, combat, actor) {
   if (k.shell !== void 0) safeInteger(k.shell, 1, SHELL_MAX_TICKS);
   if (k.sun !== void 0) safeInteger(k.sun, 1, SUN_MAX);
   if (k.casts !== void 0) safeInteger(k.casts, 1, SUNFALL_MAX_CASTS - 1);
-  for (const [key9, stacks, ticks] of [["bulwark", 3, BULWARK_TICKS], ["charge", 5, CHARGE_TICKS], ["hide", MAX_HIDE, HIDE_TICKS]]) if (k[key9] !== void 0) {
+  for (const [key9, stacks, ticks2] of [["bulwark", 3, BULWARK_TICKS], ["charge", 5, CHARGE_TICKS], ["hide", MAX_HIDE, HIDE_TICKS]]) if (k[key9] !== void 0) {
     closedRecord(k[key9], ["stacks", "ticks"]);
     safeInteger(k[key9].stacks, 1, stacks);
-    safeInteger(k[key9].ticks, 1, ticks);
+    safeInteger(k[key9].ticks, 1, ticks2);
   }
   if (k.focus !== void 0) {
     closedRecord(k.focus, ["target", "hits"]);
@@ -25811,7 +25951,11 @@ function validateClassSkillState(s, combat, actor) {
     if (k.pips.crit !== void 0) safeInteger(k.pips.crit, 1, PIP_CRIT_TICKS);
   }
   if (k.guarding !== void 0) requireContract(k.guarding === true && actor.alive, "Invalid guarding");
-  if (k.guardUp !== void 0) safeInteger(k.guardUp, 1, PERFECT_TICKS);
+  if (k.guardUp !== void 0) safeInteger(k.guardUp, 1, PERFECT_TICKS + PERFECT_GEAR_TICKS);
+  if (k.sharp !== void 0) safeInteger(k.sharp, 1, SHARP_TICKS);
+  if (k.hitCd !== void 0) safeInteger(k.hitCd, 1, HIT_CD_TICKS);
+  if (k.killCd !== void 0) safeInteger(k.killCd, 1, KILL_CD_TICKS);
+  if (k.perfCd !== void 0) safeInteger(k.perfCd, 1, PERF_CD_TICKS);
   if (k.perfect !== void 0) safeInteger(k.perfect, Math.max(0, s.tick - PERFECT_SHOW_TICKS), s.tick);
   if (k.spent !== void 0) {
     closedRecord(k.spent, ["skillId", "n", "ticks"]);
@@ -26885,35 +27029,6 @@ function resolveMasteryContribution(player, base, { rawBlock, blockCap, rawParry
 }
 function resolveMasterySpellPower(r) {
   return times(times(times(times(addCombat(r.basePower, combatAmount(r.catalyst, 4)), combatAmount(1e3 + 35 * r.atk, 1e3)), combatAmount(100 + 4 * r.filler, 100)), masteryPower(28, 25, r.infinite)), combatAmount(100 + 15 * r.weaving * r.stacks, 100));
-}
-
-// src/shared/contracts/gear_affix_totals_v2.js
-var EMPTY2 = Object.freeze({ any: false, mainDmg: 0, offDmg: 0, fireDmg: 0, frostDmg: 0, lightningDmg: 0, bleedDmg: 0, poisonDmg: 0, shockDmg: 0, counterDmg: 0, eliteDmg: 0, cdr: 0, lifeKill: 0, lifeHit: 0, skills: Object.freeze({}), ranks: Object.freeze({}) });
-var cache4 = /* @__PURE__ */ new WeakMap();
-var bp = (v) => Math.round(Number(v) * 1e4);
-function gearAffixTotalsV2(player) {
-  const inv = player?.inventory;
-  if (!inv?.equipped || !inv.itemsById) return EMPTY2;
-  const levels2 = inv.economy?.slotLevels ?? {}, key9 = inv.revision + "|" + Object.entries(inv.equipped).map(([slot, id]) => slot + "=" + id + "@" + (levels2[slot] ?? 0)).join(","), hit = cache4.get(inv);
-  if (hit?.key === key9) return hit.totals;
-  const t = { ...EMPTY2, skills: {}, ranks: {} };
-  for (const [slot, id] of Object.entries(inv.equipped)) {
-    const item2 = id && inv.itemsById[id];
-    if (!item2?.generated) continue;
-    const scale2 = 100 + Number(levels2[slot] ?? 0), grow = (v) => Math.round(bp(v) * scale2 / 100);
-    for (const a of workshopResult(item2).affixes ?? []) {
-      if (!isNewAffix(a.key)) continue;
-      t.any = true;
-      if (a.key === "skillDmg") t.skills[a.skill] = (t.skills[a.skill] ?? 0) + grow(a.value);
-      else if (a.key === "passiveRank") t.ranks[a.skill] = (t.ranks[a.skill] ?? 0) + Number(a.value);
-      else if (a.key === "lifeHit") t.lifeHit += Math.round(Number(a.value) * scale2 / 100);
-      else t[a.key] += grow(a.value);
-    }
-  }
-  t.cdr = Math.min(t.cdr, bp(CDR_CAP));
-  const totals2 = Object.freeze(t);
-  cache4.set(inv, { key: key9, totals: totals2 });
-  return totals2;
 }
 
 // src/shared/contracts/player_stats_d9.js

@@ -5752,6 +5752,72 @@ function affixSkill(key5, cls, random) {
   return list2 ? list2[Math.floor(random() * list2.length)] : null;
 }
 
+// src/shared/content/gear_affixes_v3.js
+var AFFIXES_V3 = "affixes-v3";
+var isAffixesV2Plus = (v) => v === AFFIXES_V2 || v === AFFIXES_V3;
+var SKILL_GROUPS = freezeWire({
+  move: { knight: ["shield_charge", "skyfall_leap"], rogue: ["dash", "lunge", "shadowstep"], mage: ["dash"] },
+  def: { knight: ["guard", "counter_stance", "rallying_cry", "aegis_pulse"], rogue: ["riposte", "smoke_veil"], mage: ["ice_barrier"] },
+  ranged: { knight: ["shield_throw"], rogue: ["toxic_fan"], mage: ["cast", "ball_lightning", "firebloom", "meteor"] },
+  area: { knight: ["shield_bash", "earth_breaker", "retribution", "skyfall_leap"], rogue: ["whirling_blades", "rupture", "noxious_bloom"], mage: ["flashfreeze", "flame_wall", "static_field", "glacial_burst", "thunderfall"] },
+  finisher: { knight: ["retribution", "skyfall_leap", "aegis_pulse"], rogue: ["shadowstep", "thousand_cuts", "rupture", "noxious_bloom"], mage: ["glacial_burst", "meteor", "thunderfall"] }
+});
+var inGroup = (group, cls, id) => Boolean(SKILL_GROUPS[group]?.[cls]?.includes(id));
+var DAMAGE_GROUPS = { rangedDmg: "ranged", areaDmg: "area", finisherDmg: "finisher" };
+var COOLDOWN_GROUPS = { moveCdr: "move", defCdr: "def" };
+var groupsFor = (cls, keys2) => Object.keys(keys2).filter((k) => (SKILL_GROUPS[keys2[k]][cls]?.length ?? 0) >= 2);
+var V3_POOLS = freezeWire({
+  weapon: ["critChance", "critDamage", "activeSpd", "mainDmg", "classDmg", "skillDmg", "eliteDmg", "lifeHit", "groupDmg", "killCdr"],
+  shield: ["block", "offDmg", "classDmg", "skillDmg", "passiveRank", "cdr", "groupDmg", "controlDur", "branchRank", "maxPip"],
+  dagger: ["parry", "critChance", "offDmg", "classDmg", "skillDmg", "passiveRank", "cdr", "groupDmg", "ailmentDur", "branchRank", "maxPip"],
+  tome: ["critDamage", "critChance", "bonusAreaRadius", "offDmg", "classDmg", "skillDmg", "passiveRank", "cdr", "groupDmg", "branchRank", "maxPip"],
+  helmet: ["critChance", "activeSpd", "bonusAreaRadius", "classDmg", "passiveRank", "cdr", "controlDur", "ailmentDur", "branchRank", "startPips"],
+  gloves: ["atkPct", "critChance", "activeSpd", "attr", "mainDmg", "offDmg", "cdr", "lifeHit", "rangeDmg", "keepPip", "perfectWindow", "perfectDmg"],
+  overall: ["maxHpPct", "defPct", "attr", "lifeKill", "eliteDr", "areaDr", "hitCdr", "lowDmg", "perfectDmg"],
+  boots: ["moveSpeed", "activeSpd", "maxHpPct", "defPct", "lifeKill", "stunDr", "potionHeal", "hitCdr", "groupCdr", "perfectWindow", "perfectCdr"],
+  ring: ["atkPct", "critChance", "attr", "cdr", "eliteDmg", "lifeHit", "heldDmg", "ailingDmg", "healthDmg", "groupDmg", "maxPip"],
+  cape: ["maxHpPct", "defPct", "attr", "moveSpeed", "lifeKill", "rangeDmg", "healthDmg", "areaDr", "groupDmg", "killCdr", "startPips", "keepPip"]
+});
+var RARE_LINES = Object.freeze(["branchRank", "killCdr", "maxPip"]);
+var TIMING_LINES = Object.freeze(["perfectWindow", "perfectDmg", "perfectCdr"]);
+function affixPoolV3(slotKey, rarityTier, cls) {
+  return (V3_POOLS[slotKey] ?? []).filter((k) => (k !== "passiveRank" || rarityTier >= 2) && (!RARE_LINES.includes(k) || rarityTier >= 4) && (!TIMING_LINES.includes(k) || cls === "knight") && (k !== "groupCdr" || groupsFor(cls, COOLDOWN_GROUPS).length > 0));
+}
+var V3_RANGES = freezeWire({ rangedDmg: [50, 100], areaDmg: [50, 100], finisherDmg: [50, 100], moveCdr: [40, 80], defCdr: [40, 80], heldDmg: [60, 120], ailingDmg: [50, 110], closeDmg: [50, 100], farDmg: [50, 100], fullDmg: [60, 120], lowDmg: [80, 150], controlDur: [80, 160], ailmentDur: [80, 160], eliteDr: [30, 60], areaDr: [40, 80], stunDr: [100, 200], potionHeal: [100, 200], keepPip: [100, 200], perfectDmg: [80, 150] });
+var V3_FIXED = freezeWire({ hitCdr: { lo: 6, hi: 12, step: [1, 20] }, killCdr: { lo: 4, hi: 8, step: [1, 20] }, perfectWindow: { lo: 5, hi: 10, step: [1, 100] }, perfectCdr: { lo: 10, hi: 20, step: [1, 10] }, startPips: { lo: 1, hi: 2, step: [1, 1] }, maxPip: { lo: 1, hi: 1, step: [1, 1] }, branchRank: { lo: 1, hi: 1, step: [1, 1] } });
+var V3_KEYS = Object.freeze([...Object.keys(V3_RANGES), ...Object.keys(V3_FIXED)]);
+var isV3Affix = (key5) => V3_KEYS.includes(key5);
+var isFixedV3 = (key5) => Object.hasOwn(V3_FIXED, key5);
+var WHOLE_V3 = Object.freeze(["startPips", "maxPip", "branchRank"]);
+var STUN_DR_CAP = 0.5;
+var PERFECT_WINDOW_CAP = 0.2;
+var MAX_PIP_GEAR = 2;
+var CLOSE_REACH = 48;
+var FAR_REACH = 160;
+var TREES = {};
+var classTrees = (cls) => TREES[cls] ??= Object.freeze([...new Set(Object.values(CLASS_TREE_SKILLS).filter((x) => x.classId === cls).map((x) => x.tree))].sort());
+function resolveV3Affix(key5, cls, slotKey, random) {
+  const pick6 = (list2) => list2[Math.floor(random() * list2.length)];
+  if (key5 === "attr") return [pick6(["str", "dex", "int"]), null];
+  if (key5 === "groupDmg") {
+    const list2 = slotKey === "ring" || slotKey === "cape" ? ["areaDmg", "finisherDmg"] : groupsFor(cls, DAMAGE_GROUPS);
+    return [pick6(list2), null];
+  }
+  if (key5 === "groupCdr") return [pick6(groupsFor(cls, COOLDOWN_GROUPS)), null];
+  if (key5 === "rangeDmg") return [pick6(["closeDmg", "farDmg"]), null];
+  if (key5 === "healthDmg") return [pick6(["fullDmg", "lowDmg"]), null];
+  if (key5 === "branchRank") return [key5, pick6(classTrees(cls))];
+  if (key5 === "startPips" || key5 === "keepPip" || key5 === "maxPip") return [key5, cls];
+  return [key5, null];
+}
+var POOL_KEY = { str: "attr", dex: "attr", int: "attr", rangedDmg: "groupDmg", areaDmg: "groupDmg", finisherDmg: "groupDmg", moveCdr: "groupCdr", defCdr: "groupCdr", closeDmg: "rangeDmg", farDmg: "rangeDmg", fullDmg: "healthDmg", lowDmg: "healthDmg" };
+var v3PoolKeyOf = (key5, slotKey) => slotKey === "overall" && key5 === "lowDmg" ? key5 : POOL_KEY[key5] ?? key5;
+function fixedV3Value(key5, k) {
+  const x = V3_FIXED[key5], n = k * x.step[0], d = x.step[1];
+  if (d === 1) return String(n);
+  return String(Number((Math.round(n * 1e4 / d) / 1e4).toFixed(4)));
+}
+
 // src/shared/content/uniques_v1.js
 var unique = (id, name, family2, subType, noun, cls, from, biome, effect, flavor) => ({ id, name, family: family2, subType, noun, cls, look: id, from, biome, effect, flavor });
 var trophy = (...args) => ({ ...unique(...args), trophy: true });
@@ -6033,8 +6099,8 @@ function uniqueStarValue(id, tier) {
   return t.stars[Math.max(0, Math.min(3, (Number.isSafeInteger(tier) ? tier : UNIQUE_MIN_RARITY) - UNIQUE_MIN_RARITY))];
 }
 var NTH = Object.freeze({ 2: "second", 3: "third", 4: "fourth", 5: "fifth" });
-var seconds = (ticks) => {
-  const s = ticks / 60;
+var seconds = (ticks2) => {
+  const s = ticks2 / 60;
   return (Number.isInteger(s) ? String(s) : String(Math.round(s * 100) / 100)) + " s";
 };
 function uniqueEffectText(unique2, tier) {
@@ -6078,7 +6144,7 @@ function validateRewardProgressionD9(v) {
   requireContract(v.lockedDepth === void 0 || v.episodeSnapshotId !== void 0 && progressionBigInt(v.lockedDepth) >= 1n, "Co-op reward depth policy");
   requireContract(v.bestiaryQuality === void 0 || Number.isSafeInteger(v.bestiaryQuality) && v.bestiaryQuality > 0 && v.bestiaryQuality <= 1e4 && v.rarityPolicyHash !== void 0, "Bestiary quality policy");
   requireContract(v.swiftKill === void 0 || v.swiftKill === true && v.rarityPolicyHash !== void 0, "Swift kill reward policy");
-  requireContract(v.affixes === void 0 || v.affixes === AFFIXES_V2 && v.gearClass !== void 0, "Affix pool policy");
+  requireContract(v.affixes === void 0 || isAffixesV2Plus(v.affixes) && v.gearClass !== void 0, "Affix pool policy");
   requireContract(v.boon === void 0 || v.boon === "fortune" && v.rarityPolicyHash !== void 0, "Boon reward policy");
   requireContract(v.quickClear === void 0 || v.quickClear === true && v.rarityPolicyHash !== void 0 && v.combatQuality === "completion", "Quick clear reward policy");
   requireContract(v.armor === void 0 || v.armor === "overall" && v.gearClass === void 0 && v.combatHash === WORLD_COMBAT_HASH, "One-piece armor policy");
@@ -6139,7 +6205,7 @@ var blessingOfV1 = (s, playerId) => {
   return b && b.untilTick > s.tick ? b : null;
 };
 var swiftMoveV1 = (s, playerId) => blessingOfV1(s, playerId)?.blessing === "swift" ? 1 + BLESSING_EFFECTS.swift.movePercent / 100 : 1;
-var focusCooldownV1 = (s, playerId, ticks) => blessingOfV1(s, playerId)?.blessing === "focus" ? Math.max(1, Math.ceil(ticks * (100 - BLESSING_EFFECTS.focus.cooldownPercent) / 100)) : ticks;
+var focusCooldownV1 = (s, playerId, ticks2) => blessingOfV1(s, playerId)?.blessing === "focus" ? Math.max(1, Math.ceil(ticks2 * (100 - BLESSING_EFFECTS.focus.cooldownPercent) / 100)) : ticks2;
 function syncVigorV1(s) {
   const changed = [];
   for (const p of Object.values(s.playersById ?? {})) {
@@ -6712,26 +6778,42 @@ function generateAtPrecision(c, seed, input, { tier = null, family: family2 = nu
       raw.baseMaxHp = v((10n + 4n * l) * factor);
     }
     if (type === "cape") {
-      raw.baseDef = progression.affixes === AFFIXES_V2 ? v(1n + l) : v((2n + l) / 2n);
+      raw.baseDef = isAffixesV2Plus(progression.affixes) ? v(1n + l) : v((2n + l) / 2n);
       raw.baseMaxHp = v((10n + 4n * l) / 2n);
     }
     if (type === "ring") {
-      const g3 = progression.affixes === AFFIXES_V2;
+      const g3 = isAffixesV2Plus(progression.affixes);
       raw.baseAtk = g3 ? v(1n + l) : v(1n + l / 3n);
       raw.baseDef = g3 ? v(1n + l) : v(1n + l / 4n);
       raw.baseMaxHp = g3 ? v(5n + 2n * l) : v(5n + l);
     }
-    if (type === "subweapon" && progression.affixes === AFFIXES_V2) {
+    if (type === "subweapon" && isAffixesV2Plus(progression.affixes)) {
       if (sub === "shield") raw.baseDef = v(2n + l);
       else if (sub === "dagger" || sub === "tome") raw.baseAtk = v(2n + l);
     }
   }
   if (cls) applyClassFlavor(raw, classGearFlavor(cls, type, n));
-  const v2 = Boolean(cls) && progression.affixes === AFFIXES_V2, affixes = [], pool = v2 ? affixPoolV2(AFFIX_POOLS[sub ?? type], sub ?? type, rarityTier) : [...AFFIX_POOLS[sub ?? type]], bonus = {};
+  const v3 = Boolean(cls) && progression.affixes === AFFIXES_V3, v2 = Boolean(cls) && isAffixesV2Plus(progression.affixes), affixes = [], pool = v3 ? affixPoolV3(sub ?? type, rarityTier, cls) : v2 ? affixPoolV2(AFFIX_POOLS[sub ?? type], sub ?? type, rarityTier) : [...AFFIX_POOLS[sub ?? type]], bonus = {};
   const uqLines = uq ? [...UNIQUE_TIERS[progression.unique]?.lines ?? []] : null;
   for (let i = 0; i < rarityTier && (uqLines ? uqLines.length : pool.length); i++) {
     let key5 = uqLines ? uqLines.shift() : pool.splice(Math.floor(random() * pool.length), 1)[0], value, skill = null;
     if (uqLines && key5.includes(":")) [key5, skill] = key5.split(":");
+    if (v3 && !uqLines) {
+      let named = null;
+      [key5, named] = resolveV3Affix(key5, cls, sub ?? type, random);
+      if (isV3Affix(key5)) {
+        const fx = V3_FIXED[key5];
+        if (fx) {
+          const k = fx.lo + Math.floor(random() * (fx.hi - fx.lo + 1));
+          value = fx.step[1] === 1 ? progressionWire(BigInt(k * fx.step[0])) : round44(c.q(k * fx.step[0], fx.step[1]));
+        } else {
+          const [lo, hi] = V3_RANGES[key5];
+          value = round44(times3(f3(String(lo / 1e3), String(hi / 1e3)), c.q(100 + 5 * rarityTier, 100)));
+        }
+        affixes.push(named ? { key: key5, value, skill: named } : { key: key5, value });
+        continue;
+      }
+    }
     if ((v2 || uqLines) && (key5 === "classDmg" || isNewAffix(key5))) {
       key5 = resolveNewAffix(key5, cls, raw.spellType ?? null, random);
       skill = skill ?? affixSkill(key5, cls, random);
@@ -6750,8 +6832,8 @@ function generateAtPrecision(c, seed, input, { tier = null, family: family2 = nu
       value = round44(times3(f3(String(lo / 1e3), String(hi / 1e3)), c.q(100 + 5 * rarityTier, 100)));
     } else if (key5 === "atk" || key5 === "def") value = ceil(times3(f3(".04", ".08"), E, flatR));
     else if (key5 === "maxHp") value = ceil(times3(f3(".12", ".24"), E, flatR));
-    else if (key5 === "moveSpeed") value = progression.affixes === AFFIXES_V2 ? ceil(times3(f3("10", "23"), P2)) : ceil(times3(1 + Math.floor(random() * 2), power2, P2));
-    else if (key5 === "critChance") value = progression.affixes === AFFIXES_V2 ? round44(capped(times3(f3(".01", ".02"), c.root(I(power2), 2), P2), I(".1"))) : round44(capped(times3(f3(".015", ".04"), c.root(I(power2), 2), P2), I(".2")));
+    else if (key5 === "moveSpeed") value = isAffixesV2Plus(progression.affixes) ? ceil(times3(f3("10", "23"), P2)) : ceil(times3(1 + Math.floor(random() * 2), power2, P2));
+    else if (key5 === "critChance") value = isAffixesV2Plus(progression.affixes) ? round44(capped(times3(f3(".01", ".02"), c.root(I(power2), 2), P2), I(".1"))) : round44(capped(times3(f3(".015", ".04"), c.root(I(power2), 2), P2), I(".2")));
     else if (key5 === "critDamage") value = round44(times3(f3(".03", ".06"), c.root(I(power2), 2), P2));
     else if (key5 === "block" || key5 === "parry") value = round44(capped(times3(f3(".005", ".015"), c.root(I(power2), 2), P2), I(".15")));
     else if (key5 === "bonusAreaRadius") value = round44(times3(f3(".04", ".10"), P2));
@@ -6789,6 +6871,14 @@ function affixRollRangeD9(g, key5) {
       const [lo, hi] = PERCENT_STAT_RANGES[key5];
       minimum = round44(mul2(I(lo, 1e3), star));
       maximum = round44(mul2(I(hi, 1e3), star));
+    } else if (V3_RANGES[key5]) {
+      const [lo, hi] = V3_RANGES[key5];
+      minimum = round44(mul2(I(lo, 1e3), star));
+      maximum = round44(mul2(I(hi, 1e3), star));
+    } else if (V3_FIXED[key5]) {
+      const x = V3_FIXED[key5], at2 = (k) => x.step[1] === 1 ? progressionWire(BigInt(k * x.step[0])) : round44(I(k * x.step[0], x.step[1]));
+      minimum = at2(x.lo);
+      maximum = at2(x.hi);
     } else if (NEW_AFFIX_RANGES[key5]) {
       const [lo, hi] = NEW_AFFIX_RANGES[key5];
       minimum = round44(mul2(I(lo, 1e3), star));
@@ -6804,7 +6894,7 @@ function affixRollRangeD9(g, key5) {
       const scale2 = mul2(c.dungeonScale(p).E, R), lo = key5 === "maxHp" ? 12 : 4;
       minimum = ceil(mul2(I(lo, 100), scale2));
       maximum = ceil(mul2(I(lo * 2, 100), scale2));
-    } else if (key5 === "moveSpeed" && g.progression?.affixes === AFFIXES_V2) {
+    } else if (key5 === "moveSpeed" && isAffixesV2Plus(g.progression?.affixes)) {
       minimum = ceil(mul2(I(10), P2));
       maximum = ceil(mul2(I(23), P2));
     } else if (key5 === "moveSpeed") {
@@ -6818,7 +6908,7 @@ function affixRollRangeD9(g, key5) {
       minimum = round44(mul2(I(1, 100), scale2));
       maximum = round44(mul2(I(3, 100), scale2));
     } else if (["critChance", "critDamage", "block", "parry"].includes(key5)) {
-      const scale2 = mul2(c.root(I(p), 2), P2), v3 = g.progression?.affixes === AFFIXES_V2, lo = key5 === "critChance" ? v3 ? I(1, 100) : I(15, 1e3) : key5 === "critDamage" ? I(3, 100) : I(5, 1e3), hi = key5 === "critChance" ? v3 ? I(2, 100) : I(4, 100) : key5 === "critDamage" ? I(6, 100) : I(15, 1e3), limit = key5 === "critChance" ? v3 ? I(1, 10) : I(2, 10) : I(15, 100);
+      const scale2 = mul2(c.root(I(p), 2), P2), v3 = isAffixesV2Plus(g.progression?.affixes), lo = key5 === "critChance" ? v3 ? I(1, 100) : I(15, 1e3) : key5 === "critDamage" ? I(3, 100) : I(5, 1e3), hi = key5 === "critChance" ? v3 ? I(2, 100) : I(4, 100) : key5 === "critDamage" ? I(6, 100) : I(15, 1e3), limit = key5 === "critChance" ? v3 ? I(1, 10) : I(2, 10) : I(15, 100);
       minimum = round44(key5 === "critDamage" ? mul2(lo, scale2) : cap3(mul2(lo, scale2), limit));
       maximum = round44(key5 === "critDamage" ? mul2(hi, scale2) : cap3(mul2(hi, scale2), limit));
     } else {
@@ -7737,7 +7827,7 @@ function workshopResult(item) {
       const next = generateGear3(g.seed, g.progression ?? g.contentDepth, { tier: tier + 1, family: g.definition.slot, subType: g.definition.subType ?? null, noun: g.definition.noun });
       definition = copyWire(next.definition);
       for (const a of next.affixes) adjust(definition, a.key, a.value, 0);
-      affixes = affixes.map((a) => a.key === "passiveRank" ? a : { ...a, value: scale(a.value, 100 + 15 * (tier + 1), 100 + 15 * tier, integer.has(a.key) || a.key === "lifeHit") });
+      affixes = affixes.map((a) => a.key === "passiveRank" || isFixedV3(a.key) ? a : { ...a, value: scale(a.value, 100 + 15 * (tier + 1), 100 + 15 * tier, integer.has(a.key) || a.key === "lifeHit") });
       for (const a of affixes) adjust(definition, a.key, 0, a.value);
       const additions = next.affixes.filter((a) => !affixes.some((old) => old.key === a.key));
       if (additions.length) {
@@ -7749,16 +7839,27 @@ function workshopResult(item) {
     } else if (step.kind === "reforge") {
       requireContract(!enchants && Number.isInteger(step.line) && step.line >= 0 && step.line < affixes.length && (lockedLine === null || lockedLine === step.line), "Invalid locked reforge line");
       lockedLine = step.line;
-      const v2 = g.progression?.affixes === AFFIXES_V2 && g.progression.gearClass, slot = g.definition.subType ?? g.definition.slot, classKey = (k) => Object.values(CLASS_DAMAGE).flat().includes(k) ? "classDmg" : k;
-      const old = affixes[step.line], pool = (v2 ? affixPoolV2(AFFIX_POOLS[slot], slot, tier) : AFFIX_POOLS4[slot]).filter((k) => !affixes.some((a, i) => i !== step.line && classKey(a.key) === k)), picked = pool[Math.floor(random("key") * pool.length)];
+      const cls = g.progression?.gearClass, v3 = g.progression?.affixes === AFFIXES_V3 && cls, v2 = (g.progression?.affixes === AFFIXES_V2 || v3) && cls, slot = g.definition.subType ?? g.definition.slot, classKey = (k) => Object.values(CLASS_DAMAGE).flat().includes(k) ? "classDmg" : v3 ? v3PoolKeyOf(k, slot) : k;
+      const old = affixes[step.line], pool = (v3 ? affixPoolV3(slot, tier, cls) : v2 ? affixPoolV2(AFFIX_POOLS[slot], slot, tier) : AFFIX_POOLS4[slot]).filter((k) => !affixes.some((a, i) => i !== step.line && classKey(a.key) === k)), picked = pool[Math.floor(random("key") * pool.length)];
       let name = picked, skill = null;
-      if (v2 && (picked === "classDmg" || isNewAffix(picked))) {
+      if (v3) {
+        [name, skill] = resolveV3Affix(picked, cls, slot, () => random("class"));
+        if (name === "classDmg" || isNewAffix(name)) {
+          skill = null;
+          name = resolveNewAffix(name, cls, definition.spellType ?? null, () => random("class"));
+          skill = affixSkill(name, cls, () => random("skill"));
+        }
+      } else if (v2 && (picked === "classDmg" || isNewAffix(picked))) {
         name = resolveNewAffix(picked, g.progression.gearClass, definition.spellType ?? null, () => random("class"));
         skill = affixSkill(name, g.progression.gearClass, () => random("skill"));
       }
       const range = affixRollRange({ ...g, rarityTier: tier, definition }, name), whole = integer.has(name) || name === "lifeHit" || name === "passiveRank";
       let value;
-      if (whole && (typeof range.minimum === "string" || typeof range.maximum === "string" || range.minimum?.chunks)) {
+      if (V3_FIXED[name]) {
+        const x = V3_FIXED[name];
+        value = fixedV3Value(name, x.lo + Math.floor(random("value") * (x.hi - x.lo + 1)));
+        if (x.step[1] === 1) value = Number(value);
+      } else if (whole && (typeof range.minimum === "string" || typeof range.maximum === "string" || range.minimum?.chunks)) {
         const lo = progressionBigInt(range.minimum), hi = progressionBigInt(range.maximum);
         value = progressionWire(lo + (hi - lo) * BigInt(Math.floor(random("value") * 1e6)) / 1000000n);
       } else value = whole ? Math.floor(range.minimum + random("value") * (range.maximum - range.minimum + 1)) : Number((Number(range.minimum) + random("value") * (Number(range.maximum) - Number(range.minimum))).toFixed(4));
@@ -21230,6 +21331,49 @@ function validWorkshopChange(p, a, b) {
   return Boolean(b && workshopExtension(a, b) && p.inventory.services?.workshop?.records[b.itemId] && same15(b.workshop?.steps, p.inventory.services.workshop.records[b.itemId].receipts.map((r) => ({ kind: r.command.payload.operation, ...r.command.payload.operation === "reforge" ? { line: r.command.payload.line } : {} }))));
 }
 
+// src/shared/contracts/gear_affix_totals_v2.js
+var V3_ZERO = { rangedDmg: 0, areaDmg: 0, finisherDmg: 0, moveCdr: 0, defCdr: 0, heldDmg: 0, ailingDmg: 0, closeDmg: 0, farDmg: 0, fullDmg: 0, lowDmg: 0, controlDur: 0, ailmentDur: 0, eliteDr: 0, areaDr: 0, stunDr: 0, potionHeal: 0, keepPip: 0, perfectDmg: 0, hitCdr: 0, killCdr: 0, perfectWindow: 0, perfectCdr: 0, startPips: 0, maxPip: 0 };
+var EMPTY = Object.freeze({ any: false, mainDmg: 0, offDmg: 0, fireDmg: 0, frostDmg: 0, lightningDmg: 0, bleedDmg: 0, poisonDmg: 0, shockDmg: 0, counterDmg: 0, eliteDmg: 0, cdr: 0, lifeKill: 0, lifeHit: 0, ...V3_ZERO, skills: Object.freeze({}), ranks: Object.freeze({}), branches: Object.freeze({}) });
+var cache4 = /* @__PURE__ */ new WeakMap();
+var bp = (v) => Math.round(Number(v) * 1e4);
+var ticks = (v) => Math.round(Number(v) * 60);
+function gearAffixTotalsV2(player) {
+  const inv = player?.inventory;
+  if (!inv?.equipped || !inv.itemsById) return EMPTY;
+  const levels2 = inv.economy?.slotLevels ?? {}, key5 = inv.revision + "|" + Object.entries(inv.equipped).map(([slot, id]) => slot + "=" + id + "@" + (levels2[slot] ?? 0)).join(","), hit = cache4.get(inv);
+  if (hit?.key === key5) return hit.totals;
+  const t = { ...EMPTY, skills: {}, ranks: {}, branches: {} };
+  for (const [slot, id] of Object.entries(inv.equipped)) {
+    const item = id && inv.itemsById[id];
+    if (!item?.generated) continue;
+    const scale2 = 100 + Number(levels2[slot] ?? 0), grow = (v) => Math.round(bp(v) * scale2 / 100);
+    for (const a of workshopResult(item).affixes ?? []) {
+      if (!isNewAffix(a.key) && !isV3Affix(a.key)) continue;
+      t.any = true;
+      if (a.key === "skillDmg") t.skills[a.skill] = (t.skills[a.skill] ?? 0) + grow(a.value);
+      else if (a.key === "passiveRank") t.ranks[a.skill] = (t.ranks[a.skill] ?? 0) + Number(a.value);
+      else if (a.key === "branchRank") t.branches[a.skill] = (t.branches[a.skill] ?? 0) + Number(a.value);
+      else if (a.key === "startPips" || a.key === "maxPip") t[a.key] += Number(a.value);
+      else if (isFixedV3(a.key)) t[a.key] += ticks(a.value);
+      else if (a.key === "lifeHit") t.lifeHit += Math.round(Number(a.value) * scale2 / 100);
+      else t[a.key] += grow(a.value);
+    }
+  }
+  t.cdr = Math.min(t.cdr, bp(CDR_CAP));
+  t.stunDr = Math.min(t.stunDr, bp(STUN_DR_CAP));
+  t.perfectWindow = Math.min(t.perfectWindow, ticks(PERFECT_WINDOW_CAP));
+  t.maxPip = Math.min(t.maxPip, MAX_PIP_GEAR);
+  const totals2 = Object.freeze(t);
+  cache4.set(inv, { key: key5, totals: totals2 });
+  return totals2;
+}
+function heroRank(player, id) {
+  const r = classRank(player?.d8, id);
+  if (!r) return 0;
+  const g = gearAffixTotalsV2(player), def = CLASS_TREE_SKILLS[id];
+  return r + (g.ranks[id] ?? 0) + (def?.kind === "passive" && def.maxRank === 5 ? g.branches[def.tree] ?? 0 : 0);
+}
+
 // src/shared/contracts/potion_belt_v1.js
 var POTION_BELT_POLICY = Object.freeze({
   version: "potion-belt-v1",
@@ -21250,9 +21394,9 @@ var POTION_BELT_POLICY = Object.freeze({
 });
 var B = POTION_BELT_POLICY;
 var G = B.ground;
-var EMPTY = Object.freeze({ grants: 0, capacityUpgrades: 0, potencyUpgrades: 0, lastUseTick: null });
+var EMPTY2 = Object.freeze({ grants: 0, capacityUpgrades: 0, potencyUpgrades: 0, lastUseTick: null });
 var NO_GROUND = Object.freeze({});
-var potionBelt = (p) => p.inventory.services?.potions ?? EMPTY;
+var potionBelt = (p) => p.inventory.services?.potions ?? EMPTY2;
 var potionCapacity = (p) => B.baseCharges + potionBelt(p).capacityUpgrades;
 var potionHealPercent = (p) => B.baseHealPercent + B.potencyStep * potionBelt(p).potencyUpgrades;
 function potionCount(p) {
@@ -21260,7 +21404,7 @@ function potionCount(p) {
   return l ? l.supplyPurchases + potionBelt(p).grants - l.suppliesUsed : 0;
 }
 var potionCooldownTotal = (p) => Math.ceil(B.cooldownTicks * (1e4 - Math.min(5e3, p.bestiary?.stats.potionCooldown ?? 0)) / 1e4);
-var potionHealBonus = (p) => p.bestiary?.stats.potionHeal ?? 0;
+var potionHealBonus = (p) => (p.bestiary?.stats.potionHeal ?? 0) + gearAffixTotalsV2(p).potionHeal;
 function potionCooldownTicks(state, p) {
   const t = potionBelt(p).lastUseTick;
   return t === null ? 0 : Math.max(0, potionCooldownTotal(p) - (state.tick - t));
@@ -21395,7 +21539,7 @@ function validateGroundPotions(state, ground) {
   }
 }
 function validatePotionProgress(x, y) {
-  const a = x?.potions ?? EMPTY, b = y?.potions ?? EMPTY;
+  const a = x?.potions ?? EMPTY2, b = y?.potions ?? EMPTY2;
   requireContract(compareAmount(b.refillGold ?? "0", a.refillGold ?? "0") >= 0 && b.grants >= a.grants && b.capacityUpgrades >= a.capacityUpgrades && b.potencyUpgrades >= a.potencyUpgrades && (a.lastUseTick === null || b.lastUseTick !== null && b.lastUseTick >= a.lastUseTick), "Potion belt regressed");
   return b.capacityUpgrades - a.capacityUpgrades + b.potencyUpgrades - a.potencyUpgrades;
 }
@@ -21518,7 +21662,7 @@ function serviceStock(s, p, npc, gearClass = heroClassOf(p.d8)?.id ?? null, lega
   return offers.map((base) => {
     const offer = { ...base, price: merchantPrice(npc, base) }, sourceEntityId = "ent:" + token5(SETTLEMENT_LIFE_POLICY.stockVersion + (hasWorldCombat(s) ? "/" + WORLD_COMBAT_HASH : "") + (cls ? "/" + cls : "") + "/" + s.campaign.seed.seedHex + "/" + p.playerId + "/" + npc.id + "/" + offer.id), key5 = sourceEntityId + (legacyChest ? "/legacy-chest" : "");
     if (!stockCache.has(key5)) {
-      const progression = hasWorldCombat(s) ? { ...rewardProgressionD9([0, 1, 6, 11, 21, 41][npc.band], sourceEntityId), combatHash: WORLD_COMBAT_HASH, combatQuality: "ordinary", ...cls ? { gearClass: cls, affixes: AFFIXES_V2 } : {} } : rewardProgression(SETTLEMENT_LIFE_POLICY.bandSourceDepth[npc.band], sourceEntityId), generated = generateGear3(gearSeed(s, p, sourceEntityId), progression, { tier: SETTLEMENT_LIFE_POLICY.gearRarity, family: (cls || hasWorldCombat(s) && !legacyChest) && offer.family === "chest" ? "overall" : offer.family });
+      const progression = hasWorldCombat(s) ? { ...rewardProgressionD9([0, 1, 6, 11, 21, 41][npc.band], sourceEntityId), combatHash: WORLD_COMBAT_HASH, combatQuality: "ordinary", ...cls ? { gearClass: cls, affixes: AFFIXES_V3 } : {} } : rewardProgression(SETTLEMENT_LIFE_POLICY.bandSourceDepth[npc.band], sourceEntityId), generated = generateGear3(gearSeed(s, p, sourceEntityId), progression, { tier: SETTLEMENT_LIFE_POLICY.gearRarity, family: (cls || hasWorldCombat(s) && !legacyChest) && offer.family === "chest" ? "overall" : offer.family });
       if (stockCache.size >= 128) stockCache.delete(stockCache.keys().next().value);
       stockCache.set(key5, freezeWire({ offer, sourceEntityId, item: { itemId: `item:${p.playerId}:${sourceEntityId}`, definitionId: offer.definitionId, ownerPlayerId: p.playerId, sourceEntityId, generated: copyWire(generated) } }));
     }
@@ -21554,7 +21698,7 @@ function dailyOffer(s, p, npc, day, slot, level, cls) {
       }
     }
     const families = cls ? SHOP_FAMILIES[npc.role] : SHOP_FAMILIES_CLASSLESS[npc.role], family2 = families[(slot + day) % families.length];
-    const progression = { ...rewardProgressionD9(level, sourceEntityId), combatHash: WORLD_COMBAT_HASH, combatQuality: "ordinary", ...cls ? { gearClass: cls, wardrobe: WARDROBE_V1, affixes: AFFIXES_V2 } : { armor: "overall" } }, generated = generateGear3(gearSeed(s, p, sourceEntityId), progression, { tier: rarity, family: family2 });
+    const progression = { ...rewardProgressionD9(level, sourceEntityId), combatHash: WORLD_COMBAT_HASH, combatQuality: "ordinary", ...cls ? { gearClass: cls, wardrobe: WARDROBE_V1, affixes: AFFIXES_V3 } : { armor: "overall" } }, generated = generateGear3(gearSeed(s, p, sourceEntityId), progression, { tier: rarity, family: family2 });
     const item = { itemId: `item:${p.playerId}:${sourceEntityId}`, definitionId: generated.definition.definitionId, ownerPlayerId: p.playerId, sourceEntityId, generated: copyWire(generated) };
     if (stockCache.size >= 256) stockCache.delete(stockCache.keys().next().value);
     stockCache.set(key5, freezeWire({ offer: { id: DAILY + day + ":" + slot + ":" + level, family: family2, price: dailyBuyPrice(item) }, sourceEntityId, item }));
@@ -22113,16 +22257,16 @@ function siteOccupantsD13C(state, siteId2, { connectedOnly = true, interiorOnly 
   }).map((player) => player.playerId).sort();
 }
 function migrationEvidenceTick(state, siteId2) {
-  const groups = Object.values(state.groupsById).filter((group) => group.siteId === siteId2), ticks = [];
+  const groups = Object.values(state.groupsById).filter((group) => group.siteId === siteId2), ticks2 = [];
   for (const group of groups) {
-    if (group.lastRequiredTick !== null) ticks.push(group.lastRequiredTick);
+    if (group.lastRequiredTick !== null) ticks2.push(group.lastRequiredTick);
     if (group.entityIds.some((id) => {
       const actor = state.entitiesById[id];
       return actor && (!actor.alive || !same18(actor.hp, actor.maxHp));
-    })) ticks.push(state.encounterEconomy?.groups?.[group.groupId]?.startedTick ?? state.tick);
-    if (Object.keys(state.encounterEconomy?.groups?.[group.groupId]?.usedResources ?? {}).length) ticks.push(state.encounterEconomy.groups[group.groupId].startedTick);
+    })) ticks2.push(state.encounterEconomy?.groups?.[group.groupId]?.startedTick ?? state.tick);
+    if (Object.keys(state.encounterEconomy?.groups?.[group.groupId]?.usedResources ?? {}).length) ticks2.push(state.encounterEconomy.groups[group.groupId].startedTick);
   }
-  return ticks.length ? Math.min(...ticks) : null;
+  return ticks2.length ? Math.min(...ticks2) : null;
 }
 var commitment = (domain, value) => Array.from({ length: 8 }, (_, lane) => hash323(`${domain}/${lane}/${canonicalStringify(value)}`).toString(16).padStart(8, "0")).join("");
 var historyGenesis = (state, siteId2) => commitment("SAQ-WORLD-SITE-RUN-HISTORY-D13C1-GENESIS", { worldSeed: worldSeedHex(state), siteId: siteId2 });
@@ -27180,7 +27324,7 @@ function prepareEpisodeReward(state, p, source10, position, spaceInstanceId) {
   const worldProgression = ((w) => {
     const q = p.bestiary?.stats.itemQuality;
     return q && w.rarityPolicyHash !== void 0 ? { ...w, bestiaryQuality: q } : w;
-  })(captureQuickClearRewardV1(state, source10, captureBoonRewardV1(state, p, captureSiteRewardV1(state, source10, captureWorldRarityV2(state, p, source10, source10.progression ?? prototypeRewardProgression(source10.rank, id)))))), heroClass = heroClassOf(p.d8)?.id, world = worldProgression.combatHash === WORLD_COMBAT_HASH, baseProgression = heroClass && world ? { ...worldProgression, gearClass: heroClass, wardrobe: WARDROBE_V1, affixes: AFFIXES_V2 } : world ? { ...worldProgression, armor: "overall" } : worldProgression, modifiers = p.d8 ? progressionRewardWitness(p.d8) : null, progression = modifiers ? { ...baseProgression, quality: 1 + modifiers.qualityHundredths / 100, tomeEligibility: "personal-tome-d8-v1", modifiers } : baseProgression;
+  })(captureQuickClearRewardV1(state, source10, captureBoonRewardV1(state, p, captureSiteRewardV1(state, source10, captureWorldRarityV2(state, p, source10, source10.progression ?? prototypeRewardProgression(source10.rank, id)))))), heroClass = heroClassOf(p.d8)?.id, world = worldProgression.combatHash === WORLD_COMBAT_HASH, baseProgression = heroClass && world ? { ...worldProgression, gearClass: heroClass, wardrobe: WARDROBE_V1, affixes: AFFIXES_V3 } : world ? { ...worldProgression, armor: "overall" } : worldProgression, modifiers = p.d8 ? progressionRewardWitness(p.d8) : null, progression = modifiers ? { ...baseProgression, quality: 1 + modifiers.qualityHundredths / 100, tomeEligibility: "personal-tome-d8-v1", modifiers } : baseProgression;
   const ordinal = source10.kind === "enemy" ? safeInteger(inv.renewal.defeats + 1, 1) : 0, reward = rollContentReward(state, p, { ...source10, ...source10.progression ? { progression: worldProgression } : {}, ordinal, modifiers }), dropPosition = reward.definitionId ? freeGearPosition(state, p, spaceInstanceId, position) : { ...position };
   const unique2 = inv.d7 && reward.definitionId && heroClass && world ? uniqueRewardV1(state, source10, heroClass, gearSeed(state, p, id)) : null, dropped = unique2 ? { ...progression, unique: unique2 } : progression;
   const generated = inv.d7 && reward.definitionId ? generateGear3(gearSeed(state, p, id), dropped) : null;
@@ -27859,39 +28003,6 @@ function migratePresentationInventory(p) {
   }
   inv.gold = Math.min(MAX_GOLD2, total);
   return inv;
-}
-
-// src/shared/contracts/gear_affix_totals_v2.js
-var EMPTY2 = Object.freeze({ any: false, mainDmg: 0, offDmg: 0, fireDmg: 0, frostDmg: 0, lightningDmg: 0, bleedDmg: 0, poisonDmg: 0, shockDmg: 0, counterDmg: 0, eliteDmg: 0, cdr: 0, lifeKill: 0, lifeHit: 0, skills: Object.freeze({}), ranks: Object.freeze({}) });
-var cache4 = /* @__PURE__ */ new WeakMap();
-var bp = (v) => Math.round(Number(v) * 1e4);
-function gearAffixTotalsV2(player) {
-  const inv = player?.inventory;
-  if (!inv?.equipped || !inv.itemsById) return EMPTY2;
-  const levels2 = inv.economy?.slotLevels ?? {}, key5 = inv.revision + "|" + Object.entries(inv.equipped).map(([slot, id]) => slot + "=" + id + "@" + (levels2[slot] ?? 0)).join(","), hit = cache4.get(inv);
-  if (hit?.key === key5) return hit.totals;
-  const t = { ...EMPTY2, skills: {}, ranks: {} };
-  for (const [slot, id] of Object.entries(inv.equipped)) {
-    const item = id && inv.itemsById[id];
-    if (!item?.generated) continue;
-    const scale2 = 100 + Number(levels2[slot] ?? 0), grow = (v) => Math.round(bp(v) * scale2 / 100);
-    for (const a of workshopResult(item).affixes ?? []) {
-      if (!isNewAffix(a.key)) continue;
-      t.any = true;
-      if (a.key === "skillDmg") t.skills[a.skill] = (t.skills[a.skill] ?? 0) + grow(a.value);
-      else if (a.key === "passiveRank") t.ranks[a.skill] = (t.ranks[a.skill] ?? 0) + Number(a.value);
-      else if (a.key === "lifeHit") t.lifeHit += Math.round(Number(a.value) * scale2 / 100);
-      else t[a.key] += grow(a.value);
-    }
-  }
-  t.cdr = Math.min(t.cdr, bp(CDR_CAP));
-  const totals2 = Object.freeze(t);
-  cache4.set(inv, { key: key5, totals: totals2 });
-  return totals2;
-}
-function heroRank(player, id) {
-  const r = classRank(player?.d8, id);
-  return r ? r + (gearAffixTotalsV2(player).ranks[id] ?? 0) : 0;
 }
 
 // src/shared/contracts/player_stats_d9.js
@@ -30160,8 +30271,12 @@ export {
   validateBestiaryRootV1,
   projectBestiaryV1,
   WARDROBE_V1,
-  AFFIXES_V2,
   CDR_CAP,
+  AFFIXES_V3,
+  SKILL_GROUPS,
+  inGroup,
+  CLOSE_REACH,
+  FAR_REACH,
   UNIQUE_ITEMS,
   UNIQUE_TIERS,
   UNIQUE_LINE_UNLOCKS,
@@ -30595,6 +30710,8 @@ export {
   claimClassKit,
   workshopMaterialPrices,
   workshopQuote,
+  gearAffixTotalsV2,
+  heroRank,
   POTION_BELT_POLICY,
   potionCapacity,
   potionHealPercent,
@@ -30786,8 +30903,6 @@ export {
   inventoryReadModel,
   migrateD4Inventory,
   migratePresentationInventory,
-  gearAffixTotalsV2,
-  heroRank,
   validatePlayerInventory3 as validatePlayerInventory2,
   resolvePlayerStats,
   mitigateFractionalPlayerDamage,
