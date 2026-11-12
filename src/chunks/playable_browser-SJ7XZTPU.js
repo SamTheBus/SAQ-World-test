@@ -73152,7 +73152,7 @@ var DRESS = {
 };
 
 // src/client/upland_terraces_art_v1.js
-var TERRACES_ART_VERSION = "upland-terraces-art-v2";
+var TERRACES_ART_VERSION = "upland-terraces-art-v3";
 var T61 = 32;
 var TAU107 = Math.PI * 2;
 var OL64 = "#151515";
@@ -73220,7 +73220,7 @@ function createTerracePainter() {
     }
     const art = { x0: b.x0 * T61 - 12, y0: b.y0 * T61 - 12, x1: (b.x1 + 1) * T61 + 12, y1: (b.y1 + 1) * T61 + 12 };
     s = { g, H: H7, levels, art, ramps: g.ramps.map((r) => rampShape(g, r)), stair: g.stair ? stairShape(g) : null };
-    s.paths = pathLines(g, s.ramps);
+    s.trail = trailLine(g, s.ramps);
     shapes.set(id, s);
     built++;
     while (shapes.size > 12) shapes.delete(shapes.keys().next().value);
@@ -73265,28 +73265,24 @@ function createTerracePainter() {
     const st = g.stair, E6 = g.levels[st.k].E;
     return { k: st.k, x0: st.x * T61 + 4, w: 2 * T61 - 8, yt: (E6 + 1) * T61, H: g.cliff * T61 };
   }
-  function pathLines(g, ramps) {
-    const c = (x, y) => [(x + 0.5) * T61, (y + 0.5) * T61], out = [], C3 = g.cliff;
+  function trailLine(g, ramps) {
+    const c = (x, y) => [(x + 0.5) * T61, (y + 0.5) * T61], C3 = g.cliff, pts2 = [];
+    let end = null;
     for (const s of ramps) {
-      const r = s.r, E6 = s.E, pts2 = [];
-      if (r.k === 1) pts2.push(c(r.low, E6 + C3 + 5), c(r.low, E6 + C3 + 2.6));
-      pts2.push(...s.mid);
+      const r = s.r, E6 = s.E;
+      if (r.k === 1) pts2.push(c(r.low, E6 + C3 + 5.4), c(r.low, E6 + C3 + 2.6));
+      pts2.push(...pts2.length && r.k > 1 ? s.mid.slice(1) : s.mid);
       const hx = s.mid.at(-1)[0];
       if (r.k < g.n) {
         const top = g.levels[r.k + 1].E, nm = ramps[r.k].mid[0];
         pts2.push([hx, (E6 + 0.9) * T61], [hx, (E6 - 0.4) * T61], [(hx + nm[0]) / 2, (top + C3 + 2.7) * T61], nm);
-        out.push({ k: r.k, pts: pts2 });
       } else {
         const cx = (g.cairn.x + 0.5) * T61;
         pts2.push([hx, (E6 + 0.6) * T61], [hx, (g.cairn.y + 1.9) * T61], [cx + (hx > cx ? 1.2 : -1.2) * T61, (g.cairn.y + 1.5) * T61]);
-        out.push({ k: r.k, pts: pts2, end: [cx, (g.cairn.y + 1.2) * T61] });
+        end = [cx, (g.cairn.y + 1.2) * T61];
       }
     }
-    if (g.stair) {
-      const E6 = g.levels[g.stair.k].E;
-      out.push({ k: g.stair.k - 1, stair: true, pts: [[(g.stair.x + 1) * T61, (E6 + 2 * C3 + 0.6) * T61], [(g.stair.x + 1) * T61, (E6 + 2 * C3 + 2.5) * T61]] });
-    }
-    return out;
+    return { pts: pts2, end };
   }
   function level(c, L, H7) {
     const P17 = L.P, K7 = L.c;
@@ -73414,16 +73410,29 @@ function createTerracePainter() {
     o.push(pts2.at(-1));
     return o;
   }
-  function path12(c, pts2, seed2, w = 24, end = null) {
-    const q = cat(pts2), R9 = rng16(seed2), p = new Path2D();
-    q.forEach(([x, y], i) => i ? p.lineTo(x, y) : p.moveTo(x, y));
+  function path12(c, pts2, seed2, w = 24, end = null, tail2 = 0) {
+    const q = cat(pts2), R9 = rng16(seed2), len = [0];
+    for (let i = 1; i < q.length; i++) len.push(len[i - 1] + Math.hypot(q[i][0] - q[i - 1][0], q[i][1] - q[i - 1][1]));
+    const f = (i) => tail2 ? Math.min(1, 0.18 + 0.82 * Math.pow(Math.min(1, len[i] / tail2), 0.8)) : 1, first = q.findIndex((_, i) => f(i) >= 1);
+    const p = new Path2D();
+    for (let i = Math.max(0, first); i < q.length; i++) i === Math.max(0, first) ? p.moveTo(...q[i]) : p.lineTo(...q[i]);
+    const layer2 = (style, extra) => {
+      c.strokeStyle = style;
+      c.lineWidth = w + extra;
+      c.stroke(p);
+      for (let i = 0; i < first; i++) {
+        c.lineWidth = (w + extra) * f(i);
+        c.beginPath();
+        c.moveTo(...q[i]);
+        c.lineTo(...q[i + 1]);
+        c.stroke();
+      }
+    };
     const patch = end ? blob3(R9, end[0], end[1], 46, 0.28, 20) : null;
     c.save();
     c.lineCap = "round";
     c.lineJoin = "round";
-    c.strokeStyle = TRAIL.verge;
-    c.lineWidth = w + 12;
-    c.stroke(p);
+    layer2(TRAIL.verge, 12);
     if (patch) {
       c.lineWidth = 12;
       c.stroke(patch);
@@ -73431,34 +73440,43 @@ function createTerracePainter() {
       c.fill(patch);
     }
     for (let i = 0; i < q.length - 1; i++) {
-      const [x, y] = q[i], [x2, y2] = q[i + 1], nx = -(y2 - y), ny = x2 - x, l = Math.hypot(nx, ny) || 1;
+      const [x, y] = q[i], [x2, y2] = q[i + 1], nx = -(y2 - y), ny = x2 - x, l = Math.hypot(nx, ny) || 1, s = f(i);
       for (let k = 0; k < 3; k++) {
-        const sd = R9() < 0.5 ? -1 : 1, o = (w / 2 + 2 + R9() * 4) * sd;
+        const sd = R9() < 0.5 ? -1 : 1, o = ((w / 2 + 2) * s + R9() * 4) * sd;
         c.fillStyle = TRAIL.dots[k % 2];
         c.beginPath();
         c.arc(x + nx / l * o, y + ny / l * o, 0.9 + R9() * 0.8, 0, TAU107);
         c.fill();
       }
     }
-    c.strokeStyle = TRAIL.edge;
-    c.lineWidth = w + 3;
-    c.stroke(p);
+    layer2(TRAIL.edge, 3);
     if (patch) {
       c.lineWidth = 3;
       c.stroke(patch);
     }
-    c.strokeStyle = TRAIL.body;
-    c.lineWidth = w;
-    c.stroke(p);
+    layer2(TRAIL.body, 0);
     if (patch) {
       c.fillStyle = TRAIL.body;
       c.fill(patch);
     }
-    for (const [x, y] of q) for (let k = 0; k < 4; k++) {
-      c.fillStyle = TRAIL.gravel[k % 3];
-      c.beginPath();
-      c.arc(x + (R9() - 0.5) * w * 0.85, y + (R9() - 0.5) * w * 0.85, 0.7 + R9() * 0.9, 0, TAU107);
-      c.fill();
+    for (let i = 0; i < q.length; i++) {
+      const [x, y] = q[i], s = f(i);
+      for (let k = 0; k < 4; k++) {
+        c.fillStyle = TRAIL.gravel[k % 3];
+        c.beginPath();
+        c.arc(x + (R9() - 0.5) * w * 0.85 * s, y + (R9() - 0.5) * w * 0.85 * s, 0.7 + R9() * 0.9, 0, TAU107);
+        c.fill();
+      }
+    }
+    if (tail2 && q.length > 1) {
+      const [x, y] = q[0], [x2, y2] = q[1], l = Math.hypot(x - x2, y - y2) || 1, ux = (x - x2) / l, uy = (y - y2) / l;
+      for (let k = 0; k < 9; k++) {
+        const t = 4 + R9() * 22, o = (R9() - 0.5) * 14;
+        c.fillStyle = TRAIL.gravel[k % 3];
+        c.beginPath();
+        c.arc(x + ux * t - uy * o, y + uy * t + ux * o, 0.8 + R9() * 1, 0, TAU107);
+        c.fill();
+      }
     }
     c.restore();
   }
@@ -73479,12 +73497,9 @@ function createTerracePainter() {
       for (const L of s.levels) {
         level(c, L, s.H);
         ramp5(c, s.ramps[L.k - 1], L.c, seed2 + L.k * 131 >>> 0);
-        if (s.stair && s.stair.k === L.k) {
-          stair(c, s.stair, L.c);
-          for (const p of s.paths) if (p.stair) path12(c, p.pts, seed2 + 29, 20);
-        }
-        for (const p of s.paths) if (p.k === L.k && !p.stair) path12(c, p.pts, seed2 + L.k * 17 >>> 0, 24, p.end);
+        if (s.stair && s.stair.k === L.k) stair(c, s.stair, L.c);
       }
+      path12(c, s.trail.pts, seed2 + 17 >>> 0, 24, s.trail.end, 2 * T61);
       c.restore();
     }
     return drawn;
