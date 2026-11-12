@@ -1942,12 +1942,12 @@ function numericContext(precision = 48) {
       x = y;
     }
   }
-  const root2 = (a, k) => {
+  const root3 = (a, k) => {
     requireContract(Number.isSafeInteger(k) && k >= 1 && k <= 100, "Invalid root degree");
     const factor = S ** BigInt(k - 1), lo = rootInteger(a.lo * factor, k), hi = rootInteger(a.hi * factor, k);
     return pair(lo, hi ** BigInt(k) === a.hi * factor ? hi : hi + 1n);
   };
-  const frac = (a, p, d) => root2(power2(a, BigInt(p)), d);
+  const frac = (a, p, d) => root3(power2(a, BigInt(p)), d);
   function lnReduced(a) {
     requireContract(a.lo >= S && a.hi <= 2n * S, "Log reduction required");
     const z = div(sub(a, q(1)), add(a, q(1))), z2 = mul2(z, z);
@@ -2006,7 +2006,7 @@ function numericContext(precision = 48) {
     }
     return integerWire(lo);
   }
-  return { q, add, sub, mul: mul2, div, power: power2, root: root2, frac, log2Integer, exp: exp2, dungeonScale, endpoint, scale: S };
+  return { q, add, sub, mul: mul2, div, power: power2, root: root3, frac, log2Integer, exp: exp2, dungeonScale, endpoint, scale: S };
 }
 function certifyNumeric(evaluate) {
   for (const p of [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]) {
@@ -2916,9 +2916,9 @@ function planLocalFramesD9(participants, { keepOrigin = false, preparationAnchor
   for (let i = 0; i < sorted2.length; i++) for (let j = i + 1; j < sorted2.length; j++) if (abs(BigInt(sorted2[i].position.chunkX) - BigInt(sorted2[j].position.chunkX)) <= BigInt(mergeChunks) && abs(BigInt(sorted2[i].position.chunkY) - BigInt(sorted2[j].position.chunkY)) <= BigInt(mergeChunks)) parent[find(j)] = find(i);
   const components = /* @__PURE__ */ new Map();
   for (let i = 0; i < sorted2.length; i++) {
-    const root2 = find(i);
-    if (!components.has(root2)) components.set(root2, []);
-    components.get(root2).push(sorted2[i]);
+    const root3 = find(i);
+    if (!components.has(root3)) components.set(root3, []);
+    components.get(root3).push(sorted2[i]);
   }
   const groups = [...components.values()], originPlayers = keepOrigin ? groups.filter((ps) => ps.some((p) => abs(BigInt(p.position.chunkX)) <= 32n && abs(BigInt(p.position.chunkY)) <= 32n)).flat() : [];
   const remote = groups.filter((ps) => !originPlayers.includes(ps[0]));
@@ -3835,11 +3835,11 @@ function validatePulseRecord(state, e, definition, group) {
   }
 }
 function validateEliteCombatD12_4(state) {
-  const root2 = state.eliteCombat;
-  if (root2 === void 0) return;
-  closedRecord(root2, ["version", "elitesByEntityId"], ["hasteByEntityId", "timedStatusesByEntityId", "guardByEntityId", "attackAuraByEntityId", "nullificationResistanceByEntityId", "pendingHazardsBySourceEliteId", "hazardsById", "webbedByEntityId", "slagBurnByEntityId"]);
-  requireContract(root2.version === ELITE_COMBAT_D12_4_VERSION, "Unsupported elite combat state");
-  for (const [entityId2, e] of Object.entries(root2.elitesByEntityId)) {
+  const root3 = state.eliteCombat;
+  if (root3 === void 0) return;
+  closedRecord(root3, ["version", "elitesByEntityId"], ["hasteByEntityId", "timedStatusesByEntityId", "guardByEntityId", "attackAuraByEntityId", "nullificationResistanceByEntityId", "pendingHazardsBySourceEliteId", "hazardsById", "webbedByEntityId", "slagBurnByEntityId"]);
+  requireContract(root3.version === ELITE_COMBAT_D12_4_VERSION, "Unsupported elite combat state");
+  for (const [entityId2, e] of Object.entries(root3.elitesByEntityId)) {
     closedRecord(e, ["version", "eliteId", "entityId", "groupId", "siteId", "floorId", "roomId", "tier", "affixIds", "identitySource", "activatedTick", "nextPulseTick", "pulseSequence", "lastPulse"], ["composition", "namedEliteId", "namedTrick", "move"]);
     if (e.namedEliteId !== void 0) requireContract(Object.hasOwn(NAMED_ENDS_V1, e.namedEliteId) && NAMED_ENDS_V1[e.namedEliteId].affixId === e.affixIds[0], "Unknown named elite");
     if (e.namedTrick !== void 0) validateNamedTrickV1(state, e);
@@ -3862,15 +3862,15 @@ function validateEliteCombatD12_4(state) {
     } else requireContract(e.nextPulseTick === e.activatedTick + (e.pulseSequence + 1) * definition.pulse.cadenceTicks, "Elite pulse schedule drift");
     validatePulseRecord(state, e, definition, group);
   }
-  for (const [entityId2, h] of Object.entries(root2.hasteByEntityId ?? {})) {
+  for (const [entityId2, h] of Object.entries(root3.hasteByEntityId ?? {})) {
     closedRecord(h, ["version", "entityId", "stacks", "sourceEliteIds", "lastRefreshTick", "lingerExpiresTick", "nextDecayTick", "lastStackTick", "lastDecayTick"]);
     requireContract(h.version === ELITE_HASTE_D12_4D_VERSION && h.entityId === entityId2, "Invalid haste identity");
     const actor = state.entitiesById[entityId2];
     requireContract(actor?.team === "hostile", "Invalid haste recipient");
     safeInteger(h.stacks, 0, SWIFT_COMMANDER_D12_4D.pulse.maxStacks);
-    requireContract(Array.isArray(h.sourceEliteIds) && h.sourceEliteIds.length <= Object.keys(root2.elitesByEntityId).length && h.sourceEliteIds.every((id, index) => typeof id === "string" && (index === 0 || h.sourceEliteIds[index - 1] < id)), "Invalid haste sources");
+    requireContract(Array.isArray(h.sourceEliteIds) && h.sourceEliteIds.length <= Object.keys(root3.elitesByEntityId).length && h.sourceEliteIds.every((id, index) => typeof id === "string" && (index === 0 || h.sourceEliteIds[index - 1] < id)), "Invalid haste sources");
     for (const eliteId of h.sourceEliteIds) {
-      const e = Object.values(root2.elitesByEntityId).find((row2) => row2.eliteId === eliteId), source11 = state.entitiesById[e?.entityId];
+      const e = Object.values(root3.elitesByEntityId).find((row2) => row2.eliteId === eliteId), source11 = state.entitiesById[e?.entityId];
       requireContract(e?.affixIds[0] === SWIFT_COMMANDER_AFFIX_ID && source11?.alive && actor.alive && source11.residency.spaceInstanceId === actor.residency.spaceInstanceId && Math.hypot(source11.position.x - actor.position.x, source11.position.y - actor.position.y) <= SWIFT_COMMANDER_D12_4D.pulse.radius, "Invalid active haste source");
     }
     safeInteger(h.lastRefreshTick, 0, state.tick);
@@ -3882,15 +3882,15 @@ function validateEliteCombatD12_4(state) {
     else requireContract(h.nextDecayTick === null, "Zero-stack haste cannot decay");
     for (const key9 of ["lastStackTick", "lastDecayTick"]) if (h[key9] !== null) safeInteger(h[key9], 0, state.tick);
   }
-  for (const [entityId2, g] of Object.entries(root2.guardByEntityId ?? {})) {
+  for (const [entityId2, g] of Object.entries(root3.guardByEntityId ?? {})) {
     closedRecord(g, ["version", "entityId", "spaceInstanceId", "stacks", "sourceEliteIds", "lastRefreshTick", "lingerExpiresTick", "nextDecayTick", "lastStackTick", "lastDecayTick", "lastImpact"]);
     requireContract(g.version === ELITE_GUARD_D12_4G_VERSION && g.entityId === entityId2, "Invalid Guard identity");
     const actor = state.entitiesById[entityId2];
     requireContract(actor?.team === "hostile" && actor.alive && actor.residency.spaceInstanceId === g.spaceInstanceId, "Invalid Guard recipient");
     safeInteger(g.stacks, 0, IRON_CITADEL_D12_4G.pulse.maxStacks);
-    requireContract(Array.isArray(g.sourceEliteIds) && g.sourceEliteIds.length <= Object.keys(root2.elitesByEntityId).length && g.sourceEliteIds.every((id, index) => typeof id === "string" && (index === 0 || g.sourceEliteIds[index - 1] < id)), "Invalid Guard sources");
+    requireContract(Array.isArray(g.sourceEliteIds) && g.sourceEliteIds.length <= Object.keys(root3.elitesByEntityId).length && g.sourceEliteIds.every((id, index) => typeof id === "string" && (index === 0 || g.sourceEliteIds[index - 1] < id)), "Invalid Guard sources");
     for (const eliteId of g.sourceEliteIds) {
-      const e = Object.values(root2.elitesByEntityId).find((row2) => row2.eliteId === eliteId), source11 = state.entitiesById[e?.entityId];
+      const e = Object.values(root3.elitesByEntityId).find((row2) => row2.eliteId === eliteId), source11 = state.entitiesById[e?.entityId];
       requireContract(e?.affixIds[0] === IRON_CITADEL_AFFIX_ID && source11?.alive && source11.residency.spaceInstanceId === actor.residency.spaceInstanceId && Math.hypot(source11.position.x - actor.position.x, source11.position.y - actor.position.y) <= IRON_CITADEL_D12_4G.pulse.radius, "Invalid active Guard source");
     }
     safeInteger(g.lastRefreshTick, 0, state.tick);
@@ -3908,15 +3908,15 @@ function validateEliteCombatD12_4(state) {
       safeInteger(g.lastImpact.stacks, 1, IRON_CITADEL_D12_4G.pulse.maxStacks);
     }
   }
-  for (const [entityId2, aura] of Object.entries(root2.attackAuraByEntityId ?? {})) {
+  for (const [entityId2, aura] of Object.entries(root3.attackAuraByEntityId ?? {})) {
     closedRecord(aura, ["version", "entityId", "groupId", "spaceInstanceId", "stacks", "sourceEliteIds", "lastRefreshTick", "lingerExpiresTick", "nextDecayTick", "lastStackTick", "lastDecayTick"]);
     requireContract(aura.version === ELITE_ATTACK_AURA_D12_4H_A_VERSION && aura.entityId === entityId2, "Invalid attack-aura identity");
     const actor = state.entitiesById[entityId2], group = state.groupsById[aura.groupId];
     requireContract(actor?.team === "hostile" && actor.alive && group?.entityIds.includes(entityId2) && actor.residency.spaceInstanceId === aura.spaceInstanceId, "Invalid attack-aura recipient");
     safeInteger(aura.stacks, 0, BLOOD_BERSERKER_D12_4H_A.pulse.maxStacks);
-    requireContract(Array.isArray(aura.sourceEliteIds) && aura.sourceEliteIds.length <= Object.keys(root2.elitesByEntityId).length && aura.sourceEliteIds.every((id, index) => typeof id === "string" && (index === 0 || aura.sourceEliteIds[index - 1] < id)), "Invalid attack-aura sources");
+    requireContract(Array.isArray(aura.sourceEliteIds) && aura.sourceEliteIds.length <= Object.keys(root3.elitesByEntityId).length && aura.sourceEliteIds.every((id, index) => typeof id === "string" && (index === 0 || aura.sourceEliteIds[index - 1] < id)), "Invalid attack-aura sources");
     for (const eliteId of aura.sourceEliteIds) {
-      const e = Object.values(root2.elitesByEntityId).find((row2) => row2.eliteId === eliteId), source11 = state.entitiesById[e?.entityId];
+      const e = Object.values(root3.elitesByEntityId).find((row2) => row2.eliteId === eliteId), source11 = state.entitiesById[e?.entityId];
       requireContract(e?.affixIds[0] === BLOOD_BERSERKER_AFFIX_ID && e.groupId === aura.groupId && source11?.alive && source11.residency.spaceInstanceId === actor.residency.spaceInstanceId && Math.hypot(source11.position.x - actor.position.x, source11.position.y - actor.position.y) <= BLOOD_BERSERKER_D12_4H_A.pulse.radius, "Invalid active attack-aura source");
     }
     safeInteger(aura.lastRefreshTick, 0, state.tick);
@@ -3927,14 +3927,14 @@ function validateEliteCombatD12_4(state) {
     else requireContract(aura.nextDecayTick === (aura.lastDecayTick === null ? aura.lingerExpiresTick : aura.lastDecayTick + BLOOD_BERSERKER_D12_4H_A.pulse.decayTicks), "Attack-aura decay schedule drift");
     for (const key9 of ["lastStackTick", "lastDecayTick"]) if (aura[key9] !== null) safeInteger(aura[key9], 0, state.tick);
   }
-  for (const [entityId2, statuses] of Object.entries(root2.timedStatusesByEntityId ?? {})) {
+  for (const [entityId2, statuses] of Object.entries(root3.timedStatusesByEntityId ?? {})) {
     const actor = state.entitiesById[entityId2];
     requireContract(actor?.team === "party" && statuses && typeof statuses === "object" && !Array.isArray(statuses), "Invalid timed-status owner");
     for (const [statusId, status] of Object.entries(statuses)) {
       if (statusId === GLACIAL_WARDEN_D12_4E.pulse.statusId) {
         closedRecord(status, ["version", "entityId", "statusId", "sourceEliteId", "applicationTick", "expirationTick", "magnitude"]);
         requireContract(status.version === TIMED_ACTOR_STATUS_D12_4E_VERSION && status.entityId === entityId2 && status.statusId === statusId, "Invalid timed actor status identity");
-        const source11 = Object.values(root2.elitesByEntityId).find((row2) => row2.eliteId === status.sourceEliteId);
+        const source11 = Object.values(root3.elitesByEntityId).find((row2) => row2.eliteId === status.sourceEliteId);
         requireContract(source11?.affixIds[0] === GLACIAL_WARDEN_AFFIX_ID || source11?.namedEliteId === "sporecrown", "Invalid timed actor status source");
         safeInteger(status.applicationTick, 0, state.tick);
         safeInteger(status.expirationTick, status.applicationTick + 1, state.tick + GLACIAL_WARDEN_D12_4E.pulse.durationTicks);
@@ -3945,7 +3945,7 @@ function validateEliteCombatD12_4(state) {
       } else if (statusId === NULLIFIER_D12_4I.pulse.statusId) {
         closedRecord(status, ["version", "entityId", "statusId", "sourceEliteId", "applicationTick", "expirationTick"]);
         requireContract(status.version === TIMED_NULLIFIED_D12_4I_VERSION && status.entityId === entityId2 && status.statusId === statusId && actor.alive, "Invalid Nullified status identity");
-        const source11 = Object.values(root2.elitesByEntityId).find((row2) => row2.eliteId === status.sourceEliteId);
+        const source11 = Object.values(root3.elitesByEntityId).find((row2) => row2.eliteId === status.sourceEliteId);
         requireContract(source11?.affixIds[0] === NULLIFIER_AFFIX_ID, "Invalid Nullified source");
         safeInteger(status.applicationTick, 0, state.tick);
         safeInteger(status.expirationTick, state.tick + 1, state.tick + NULLIFIER_D12_4I.pulse.durationTicks);
@@ -3954,7 +3954,7 @@ function validateEliteCombatD12_4(state) {
         requireContract(statusId === TOXIC_DECAY_D12_4F.pulse.statusId, "Invalid timed actor status identity");
         closedRecord(status, ["version", "entityId", "statusId", "sourceEliteId", "applicationTick", "lastApplicationTick", "lastApplicationAdded", "expirationTick", "nextTickAt", "tickIntervalTicks", "stacks", "damagePerStack", "lastTick"]);
         requireContract(status.version === TIMED_PLAYER_POISON_D12_4F_VERSION && status.entityId === entityId2 && status.statusId === statusId && actor.alive && typeof status.lastApplicationAdded === "boolean", "Invalid Toxic Decay status identity");
-        const source11 = Object.values(root2.elitesByEntityId).find((row2) => row2.eliteId === status.sourceEliteId);
+        const source11 = Object.values(root3.elitesByEntityId).find((row2) => row2.eliteId === status.sourceEliteId);
         requireContract(source11?.affixIds[0] === TOXIC_DECAY_AFFIX_ID, "Invalid Toxic Decay source");
         safeInteger(status.applicationTick, 0, state.tick);
         safeInteger(status.lastApplicationTick, status.applicationTick, state.tick);
@@ -3968,21 +3968,21 @@ function validateEliteCombatD12_4(state) {
           safeInteger(status.lastTick.tick, status.applicationTick + status.tickIntervalTicks, state.tick);
           validateInteger(status.lastTick.damage);
           safeInteger(status.lastTick.stacks, 1, TOXIC_DECAY_D12_4F.pulse.maxStacks);
-          const tickSource = Object.values(root2.elitesByEntityId).find((row2) => row2.eliteId === status.lastTick.sourceEliteId);
+          const tickSource = Object.values(root3.elitesByEntityId).find((row2) => row2.eliteId === status.lastTick.sourceEliteId);
           requireContract(typeof status.lastTick.targetAlive === "boolean" && tickSource?.affixIds[0] === TOXIC_DECAY_AFFIX_ID, "Invalid Toxic Decay tick attribution");
         }
       }
     }
   }
-  for (const [entityId2, resistance] of Object.entries(root2.nullificationResistanceByEntityId ?? {})) {
+  for (const [entityId2, resistance] of Object.entries(root3.nullificationResistanceByEntityId ?? {})) {
     closedRecord(resistance, ["version", "entityId", "statusId", "sourceEliteId", "startedTick", "expirationTick"]);
-    const actor = state.entitiesById[entityId2], source11 = Object.values(root2.elitesByEntityId).find((row2) => row2.eliteId === resistance.sourceEliteId);
+    const actor = state.entitiesById[entityId2], source11 = Object.values(root3.elitesByEntityId).find((row2) => row2.eliteId === resistance.sourceEliteId);
     requireContract(resistance.version === NULLIFICATION_RESISTANCE_D12_4I_VERSION && resistance.entityId === entityId2 && resistance.statusId === NULLIFIER_D12_4I.pulse.statusId && actor?.team === "party" && actor.alive && source11?.affixIds[0] === NULLIFIER_AFFIX_ID, "Invalid Nullifier resistance identity");
     safeInteger(resistance.startedTick, 0, state.tick);
     safeInteger(resistance.expirationTick, state.tick + 1, state.tick + NULLIFIER_D12_4I.pulse.resistanceTicks);
-    requireContract(resistance.expirationTick === resistance.startedTick + NULLIFIER_D12_4I.pulse.resistanceTicks && state.tick < resistance.expirationTick && !root2.timedStatusesByEntityId?.[entityId2]?.[NULLIFIER_D12_4I.pulse.statusId], "Nullifier resistance schedule drift");
+    requireContract(resistance.expirationTick === resistance.startedTick + NULLIFIER_D12_4I.pulse.resistanceTicks && state.tick < resistance.expirationTick && !root3.timedStatusesByEntityId?.[entityId2]?.[NULLIFIER_D12_4I.pulse.statusId], "Nullifier resistance schedule drift");
   }
-  const web = WEB_WEAVER_D12_4J.pulse, slag = SLAG_SHAPER_D12_4K.pulse, partyEntityIds = new Set(Object.values(state.playersById).map((player) => player.entityId)), sourceByEliteId = new Map(Object.values(root2.elitesByEntityId).map((elite) => [elite.eliteId, elite])), activeCountBySource = /* @__PURE__ */ new Map();
+  const web = WEB_WEAVER_D12_4J.pulse, slag = SLAG_SHAPER_D12_4K.pulse, partyEntityIds = new Set(Object.values(state.playersById).map((player) => player.entityId)), sourceByEliteId = new Map(Object.values(root3.elitesByEntityId).map((elite) => [elite.eliteId, elite])), activeCountBySource = /* @__PURE__ */ new Map();
   const validateWebShape = (row2) => {
     closedRecord(row2.geometry, ["kind", "radiusX", "radiusY"]);
     closedRecord(row2.effect, ["statusId", "movementMultiplier"]);
@@ -3994,7 +3994,7 @@ function validateEliteCombatD12_4(state) {
     closedRecord(row2.effect.damageFraction, ["numerator", "denominator"]);
     requireContract(row2.kind === slag.hazardKind && row2.geometry.kind === slag.geometry.kind && row2.geometry.radiusX === slag.geometry.radiusX && row2.geometry.radiusY === slag.geometry.radiusY && row2.effect.statusId === slag.statusId && row2.effect.damageFraction.numerator === slag.damageMaxHp.numerator && row2.effect.damageFraction.denominator === slag.damageMaxHp.denominator && row2.effect.damageIntervalTicks === slag.damageIntervalTicks && row2.effect.nonlethal === false, "Slag hazard definition drift");
   };
-  for (const [sourceEliteId, pending] of Object.entries(root2.pendingHazardsBySourceEliteId ?? {})) {
+  for (const [sourceEliteId, pending] of Object.entries(root3.pendingHazardsBySourceEliteId ?? {})) {
     const sourceElite = sourceByEliteId.get(sourceEliteId), source11 = state.entitiesById[pending.sourceEntityId], base = pending.version === PENDING_HOSTILE_HAZARD_D12_4J_VERSION && sourceElite?.entityId === pending.sourceEntityId && pending.sourceEliteId === sourceEliteId && pending.hazardId === hostileHazardIdD12_4J(sourceEliteId, sourceElite.pulseSequence) && source11?.alive && source11.residency.spaceInstanceId === pending.spaceInstanceId && state.spacesByInstanceId[pending.spaceInstanceId] && Number.isFinite(pending.position?.x) && Number.isFinite(pending.position?.y);
     requireContract(base, "Invalid pending hostile hazard");
     safeInteger(pending.startedTick, 0, state.tick);
@@ -4012,7 +4012,7 @@ function validateEliteCombatD12_4(state) {
       validateSlagShape(pending);
     }
   }
-  for (const [hazardId, hazard] of Object.entries(root2.hazardsById ?? {})) {
+  for (const [hazardId, hazard] of Object.entries(root3.hazardsById ?? {})) {
     const sourceElite = sourceByEliteId.get(hazard.sourceEliteId), base = hazard.version === HOSTILE_FLOOR_HAZARD_D12_4J_VERSION && hazard.hazardId === hazardId && /^hazard:[a-f0-9]{32}$/.test(hazardId) && sourceElite?.entityId === hazard.sourceEntityId && state.spacesByInstanceId[hazard.spaceInstanceId] && Number.isFinite(hazard.position?.x) && Number.isFinite(hazard.position?.y);
     requireContract(base, "Invalid hostile floor hazard identity");
     safeInteger(hazard.creationTick, 0, state.tick);
@@ -4049,24 +4049,24 @@ function validateEliteCombatD12_4(state) {
     activeCountBySource.set(countKey, (activeCountBySource.get(countKey) ?? 0) + 1);
   }
   for (const [key9, count2] of activeCountBySource) requireContract(count2 <= (key9.endsWith("/" + web.hazardKind) ? web.maxActivePerSource : slag.maxActivePerSource), "Hostile active-hazard cap exceeded");
-  for (const [entityId2, status] of Object.entries(root2.webbedByEntityId ?? {})) {
+  for (const [entityId2, status] of Object.entries(root3.webbedByEntityId ?? {})) {
     closedRecord(status, ["version", "entityId", "statusId", "spaceInstanceId", "hazardIds", "startedTick", "lastEvaluatedTick", "movementMultiplier"]);
     const actor = state.entitiesById[entityId2];
     requireContract(status.version === WEBBED_STATUS_D12_4J_VERSION && status.entityId === entityId2 && status.statusId === web.statusId && partyEntityIds.has(entityId2) && actor?.alive && actor.residency.spaceInstanceId === status.spaceInstanceId && status.movementMultiplier === web.movementMultiplier.numerator / web.movementMultiplier.denominator, "Invalid Webbed status identity");
     safeInteger(status.startedTick, 0, state.tick);
     requireContract(status.lastEvaluatedTick === state.tick && Array.isArray(status.hazardIds) && status.hazardIds.length >= 1 && status.hazardIds.every((id, index) => typeof id === "string" && (index === 0 || status.hazardIds[index - 1] < id)), "Invalid Webbed status sources");
     for (const id of status.hazardIds) {
-      const hazard = root2.hazardsById[id], dx = actor.position.x - hazard?.position.x, dy = actor.position.y - hazard?.position.y, rx = web.geometry.radiusX + actor.hullRadius, ry = web.geometry.radiusY + actor.hullRadius;
+      const hazard = root3.hazardsById[id], dx = actor.position.x - hazard?.position.x, dy = actor.position.y - hazard?.position.y, rx = web.geometry.radiusX + actor.hullRadius, ry = web.geometry.radiusY + actor.hullRadius;
       requireContract(hazard?.kind === web.hazardKind && hazard.spaceInstanceId === status.spaceInstanceId && dx * dx / (rx * rx) + dy * dy / (ry * ry) <= 1, "Webbed actor outside authoritative hazard");
     }
   }
-  for (const [entityId2, status] of Object.entries(root2.slagBurnByEntityId ?? {})) {
+  for (const [entityId2, status] of Object.entries(root3.slagBurnByEntityId ?? {})) {
     closedRecord(status, ["version", "entityId", "statusId", "spaceInstanceId", "hazardIds", "startedTick", "lastEvaluatedTick"]);
     const actor = state.entitiesById[entityId2];
     requireContract(status.version === SLAG_BURN_STATUS_D12_4K_VERSION && status.entityId === entityId2 && status.statusId === slag.statusId && partyEntityIds.has(entityId2) && actor?.alive && actor.residency.spaceInstanceId === status.spaceInstanceId, "Invalid Slag Burn status identity");
     safeInteger(status.startedTick, 0, state.tick);
     requireContract(status.lastEvaluatedTick === state.tick && Array.isArray(status.hazardIds) && status.hazardIds.length >= 1 && status.hazardIds.every((id, index) => typeof id === "string" && (index === 0 || status.hazardIds[index - 1] < id)), "Invalid Slag Burn sources");
-    for (const id of status.hazardIds) requireContract(root2.hazardsById[id]?.kind === slag.hazardKind && root2.hazardsById[id].affectedEntityIds.includes(entityId2), "Slag Burn actor outside authoritative hazard");
+    for (const id of status.hazardIds) requireContract(root3.hazardsById[id]?.kind === slag.hazardKind && root3.hazardsById[id].affectedEntityIds.includes(entityId2), "Slag Burn actor outside authoritative hazard");
   }
 }
 
@@ -13042,7 +13042,7 @@ function createLakeLandingsV1({ asset, terrain: terrain2, routeAt, free }) {
       return { dir, dx, dy, px, py, kind: kind2, biome, len, root: { x: rx0, y: ry0 }, score: road };
     }
     function finish(c, id) {
-      const { dx, dy, px, py, root: root2, kind: kind2, len } = c, used = /* @__PURE__ */ new Set(), pieces = [];
+      const { dx, dy, px, py, root: root3, kind: kind2, len } = c, used = /* @__PURE__ */ new Set(), pieces = [];
       const mark = (x, y, w, hh) => {
         for (let j = 0; j < hh; j++) for (let i = 0; i < w; i++) used.add(x + i + "," + (y + j));
       };
@@ -13057,11 +13057,11 @@ function createLakeLandingsV1({ asset, terrain: terrain2, routeAt, free }) {
         pieces.push({ t, x, y });
         mark(x, y, SIZE[t][0], SIZE[t][1]);
       };
-      for (let k = -2; k <= Math.max(len, 0); k++) mark(root2.x + dx * k, root2.y + dy * k, 1, 1);
+      for (let k = -2; k <= Math.max(len, 0); k++) mark(root3.x + dx * k, root3.y + dy * k, 1, 1);
       if (kind2 === "i") {
         const ice = (x, y) => lake(x, y) && base(x, y).biome === "s";
         for (let k = 3; k <= 6 && !pieces.length; k++) {
-          const hx = root2.x + dx * k - 1, hy = root2.y + dy * k - 1;
+          const hx = root3.x + dx * k - 1, hy = root3.y + dy * k - 1;
           if (fits(hx, hy, 3, 2, ice)) put3("h", hx, hy);
         }
         if (!pieces.length) return null;
@@ -13070,9 +13070,9 @@ function createLakeLandingsV1({ asset, terrain: terrain2, routeAt, free }) {
         for (const [x, y] of [[H9.x + 3, H9.y + 3], [H9.x - 3, H9.y + 2], [H9.x + 4, H9.y - 1]]) if (!pieces.some((p) => p.t === "s") && fits(x, y, 2, 1, ice)) put3("s", x, y);
         return seal(c, id, pieces);
       }
-      const side = (s) => ({ x: root2.x + px * s, y: root2.y + py * s });
+      const side = (s) => ({ x: root3.x + px * s, y: root3.y + py * s });
       if (kind2 === "j") {
-        put3("q", root2.x + dx * len, root2.y + dy * len);
+        put3("q", root3.x + dx * len, root3.y + dy * len);
         for (const s of [1, -1]) {
           const q = side(s);
           if (!pieces.some((p) => p.t === "z") && fits(q.x, q.y, 1, 1, open2)) put3("z", q.x, q.y);
@@ -13084,7 +13084,7 @@ function createLakeLandingsV1({ asset, terrain: terrain2, routeAt, free }) {
       const boats = kind2 === "p" ? 1 : 2;
       for (const [k, s] of [[2, 1], [3, -1], [3, 1], [2, -1]]) {
         if (pieces.filter((p) => p.t === "b").length >= boats) break;
-        const x = root2.x + dx * k + px * s, y = root2.y + dy * k + py * s;
+        const x = root3.x + dx * k + px * s, y = root3.y + dy * k + py * s;
         if (lake(x, y) && lake(x + px * s, y + py * s)) put3("b", x, y);
       }
       for (const s of [1, -1]) {
@@ -13102,7 +13102,7 @@ function createLakeLandingsV1({ asset, terrain: terrain2, routeAt, free }) {
         const [w, hh] = SIZE[t];
         let best = null, bs = 1e9;
         for (let j = -hi; j <= hi; j++) for (let i = -hi; i <= hi; i++) {
-          const x = root2.x + i, y = root2.y + j, cxp = x + (w - 1) / 2, cyp = y + (hh - 1) / 2, d = Math.max(Math.abs(cxp - root2.x), Math.abs(cyp - root2.y)), ahead = (cxp - root2.x) * dx + (cyp - root2.y) * dy;
+          const x = root3.x + i, y = root3.y + j, cxp = x + (w - 1) / 2, cyp = y + (hh - 1) / 2, d = Math.max(Math.abs(cxp - root3.x), Math.abs(cyp - root3.y)), ahead = (cxp - root3.x) * dx + (cyp - root3.y) * dy;
           if (d < lo || d > hi || ahead > 0 || !fits(x, y, w, hh, open2)) continue;
           let crowd = false;
           for (let jj = -1; jj <= hh && !crowd; jj++) for (let ii = -1; ii <= w; ii++) if (used.has(x + ii + "," + (y + jj)) && pieces.some((p) => ii + x >= p.x && ii + x < p.x + SIZE[p.t][0] && jj + y >= p.y && jj + y < p.y + SIZE[p.t][1])) {
@@ -13563,9 +13563,9 @@ function validatePopulationSocket(s) {
   requireContract(e && newPopulationSelection(s.provenance.reservationId) && s.provenance.populationHash === ALPHA_POPULATION_HASH && (e.socket(s, /* @__PURE__ */ new WeakSet()) || f3?.socket(s, /* @__PURE__ */ new WeakSet())), "Population socket commitment/geometry drift");
   return s;
 }
-function validatePopulationReservation(root2, r) {
-  const e = (seededMatchers() ?? (hasWorldReshape(root2.plannedWorld) ? reshaped : commitments)).get(r.socket.provenance.reservationId);
-  requireContract((r.socket.provenance.reservationId !== FIRST_CAVE_ID || hasFirstJourney(root2.plannedWorld)) && root2.plannedWorld?.assetId === "alpha" && hasAlphaPopulation(root2.plannedWorld) && (!wildernessSelection(r.socket.provenance.reservationId) || root2.plannedWorld?.wildernessVersion === "wilderness-distribution-v2-native") && e && newPopulationSelection(r.socket.provenance.reservationId) && e.reservation(r, /* @__PURE__ */ new WeakSet()), "Population reservation commitment drift");
+function validatePopulationReservation(root3, r) {
+  const e = (seededMatchers() ?? (hasWorldReshape(root3.plannedWorld) ? reshaped : commitments)).get(r.socket.provenance.reservationId);
+  requireContract((r.socket.provenance.reservationId !== FIRST_CAVE_ID || hasFirstJourney(root3.plannedWorld)) && root3.plannedWorld?.assetId === "alpha" && hasAlphaPopulation(root3.plannedWorld) && (!wildernessSelection(r.socket.provenance.reservationId) || root3.plannedWorld?.wildernessVersion === "wilderness-distribution-v2-native") && e && newPopulationSelection(r.socket.provenance.reservationId) && e.reservation(r, /* @__PURE__ */ new WeakSet()), "Population reservation commitment drift");
   return r;
 }
 
@@ -16965,8 +16965,8 @@ function eventKind(s, id) {
   return hollowOrdinal(n) ? "hollow" : eventOrdinal(n) ? sporeOrdinal(n) ? "spore" : "legacy" : null;
 }
 var eventRecord = (s, id) => s.d9World?.worldEvents?.records[id] ?? null;
-function validateWorldEvents(root2) {
-  const w = root2.worldEvents;
+function validateWorldEvents(root3) {
+  const w = root3.worldEvents;
   if (!w) return;
   closedRecord(w, ["version", "revision", "records"], w.version === PLANNED_LEDGER_VERSION ? ["boons", "blessings", "stirring"] : []);
   requireContract([SPORE_VERSION, HOLLOW_LEDGER_VERSION, PLANNED_LEDGER_VERSION].includes(w.version), "Unknown event policy");
@@ -18257,12 +18257,12 @@ function restoreOrdinaryRosterProfiles(s, groupId) {
   if (row2) applySubstitutions(s, s.groupsById[groupId], row2);
 }
 function validateOrdinaryRosterState(s) {
-  const root2 = s.d9World?.ordinaryRoster, newIds = new Set(DUNGEON_MOBS_V1_PROFILES.map((p) => p.contentDefinitionId));
-  for (const g of Object.values(s.groupsById)) for (const id of g.entityIds) if (newIds.has(s.entitiesById[id].contentDefinitionId) && !isSiteEndLeaderV1(s, g.groupId, id) && !plannedEventGroupV1(s, g.groupId)) requireContract(root2 && recordFor(s, g.groupId)?.substitutionsById[id]?.toProfileId === s.entitiesById[id].contentDefinitionId, "New ordinary actor lacks roster provenance");
-  if (!root2) return;
-  closedRecord(root2, ["version", "activatedTick"]);
-  requireContract(hasWorldCombat(s) && root2.version === ORDINARY_ROSTER_V1, "Unrecognized ordinary roster binding");
-  safeInteger(root2.activatedTick, 0, s.tick);
+  const root3 = s.d9World?.ordinaryRoster, newIds = new Set(DUNGEON_MOBS_V1_PROFILES.map((p) => p.contentDefinitionId));
+  for (const g of Object.values(s.groupsById)) for (const id of g.entityIds) if (newIds.has(s.entitiesById[id].contentDefinitionId) && !isSiteEndLeaderV1(s, g.groupId, id) && !plannedEventGroupV1(s, g.groupId)) requireContract(root3 && recordFor(s, g.groupId)?.substitutionsById[id]?.toProfileId === s.entitiesById[id].contentDefinitionId, "New ordinary actor lacks roster provenance");
+  if (!root3) return;
+  closedRecord(root3, ["version", "activatedTick"]);
+  requireContract(hasWorldCombat(s) && root3.version === ORDINARY_ROSTER_V1, "Unrecognized ordinary roster binding");
+  safeInteger(root3.activatedTick, 0, s.tick);
   for (const [id, episode] of Object.entries(s.d9World.episodes)) {
     const row2 = episode.ordinaryRoster;
     if (!row2) continue;
@@ -18271,7 +18271,7 @@ function validateOrdinaryRosterState(s) {
     closedRecord(row2, ["version", "groupId", "adoptedEpisode", "adoptedTick", "poolKey", "substitutionsById"]);
     requireContract(row2.version === ORDINARY_ROSTER_V1 && row2.groupId === id, "Roster identity drift");
     safeInteger(row2.adoptedEpisode, 0, s.encounterEconomy.groups[id].episode);
-    safeInteger(row2.adoptedTick, root2.activatedTick, s.tick);
+    safeInteger(row2.adoptedTick, root3.activatedTick, s.tick);
     const context = contextFor(s, g);
     requireContract(context && context.pool.key === row2.poolKey && same5(selection(s, g, context), row2.substitutionsById), "Roster deterministic selection drift");
     for (const [entityId2, sub] of Object.entries(row2.substitutionsById)) {
@@ -18458,13 +18458,13 @@ function restoreOrdinaryRosterV2Profiles(s, groupId) {
   if (row2) apply(s, s.groupsById[groupId], row2);
 }
 function validateOrdinaryRosterV2State(s) {
-  const root2 = s.d9World?.ordinaryRosterV2, newIds = new Set([...DUNGEON_MOBS_V2_PROFILES, ...BIOME_CREATURES_V1_PROFILES, ...TROPICAL_CREATURES_V1_PROFILES, ...OPEN_LAND_CREATURES_V1_PROFILES].map((p) => p.contentDefinitionId));
-  for (const g of Object.values(s.groupsById)) for (const id of g.entityIds) if (newIds.has(s.entitiesById[id].contentDefinitionId) && !aegisMimicFor(s, id) && !isSiteEndLeaderV1(s, g.groupId, id) && !plannedEventGroupV1(s, g.groupId)) requireContract(root2 && recordFor2(s, g.groupId)?.substitutionsById[id]?.toProfileId === s.entitiesById[id].contentDefinitionId, "New V2 ordinary actor lacks roster provenance");
-  if (!root2) return;
-  closedRecord(root2, ["version", "activatedTick"]);
+  const root3 = s.d9World?.ordinaryRosterV2, newIds = new Set([...DUNGEON_MOBS_V2_PROFILES, ...BIOME_CREATURES_V1_PROFILES, ...TROPICAL_CREATURES_V1_PROFILES, ...OPEN_LAND_CREATURES_V1_PROFILES].map((p) => p.contentDefinitionId));
+  for (const g of Object.values(s.groupsById)) for (const id of g.entityIds) if (newIds.has(s.entitiesById[id].contentDefinitionId) && !aegisMimicFor(s, id) && !isSiteEndLeaderV1(s, g.groupId, id) && !plannedEventGroupV1(s, g.groupId)) requireContract(root3 && recordFor2(s, g.groupId)?.substitutionsById[id]?.toProfileId === s.entitiesById[id].contentDefinitionId, "New V2 ordinary actor lacks roster provenance");
+  if (!root3) return;
+  closedRecord(root3, ["version", "activatedTick"]);
   requireContract(completeCatalog(s), "V2 ordinary roster requires the complete appended catalog");
-  requireContract(hasWorldCombat(s) && root2.version === ORDINARY_ROSTER_V2, "Unrecognized V2 ordinary roster binding");
-  safeInteger(root2.activatedTick, 0, s.tick);
+  requireContract(hasWorldCombat(s) && root3.version === ORDINARY_ROSTER_V2, "Unrecognized V2 ordinary roster binding");
+  safeInteger(root3.activatedTick, 0, s.tick);
   for (const [id, episode] of Object.entries(s.d9World.episodes)) {
     const row2 = episode.ordinaryRosterV2;
     if (!row2) continue;
@@ -18473,7 +18473,7 @@ function validateOrdinaryRosterV2State(s) {
     closedRecord(row2, ["version", "groupId", "adoptedEpisode", "adoptedTick", "poolKey", "substitutionsById"]);
     requireContract(row2.version === ORDINARY_ROSTER_V2 && row2.groupId === id, "V2 roster identity drift");
     safeInteger(row2.adoptedEpisode, 0, s.encounterEconomy.groups[id].episode);
-    safeInteger(row2.adoptedTick, root2.activatedTick, s.tick);
+    safeInteger(row2.adoptedTick, root3.activatedTick, s.tick);
     const context = contextFor2(s, g);
     requireContract(context && context.key === row2.poolKey && same6(selection2(s, g, context), row2.substitutionsById), "V2 roster deterministic selection drift");
     for (const [entityId2, sub] of Object.entries(row2.substitutionsById)) {
@@ -19448,13 +19448,13 @@ function validatePlannedCryptSocketV2(s) {
   requireContract(s.entrance.chunkX === String(1024 + expected.core.x) && s.entrance.chunkY === String(1024 + expected.core.y) && s.entrance.localX === 528 && s.entrance.localY === 432, "Crypt V2 doorway drift");
   return s;
 }
-function validatePlannedCryptReservationV2(root2, r) {
+function validatePlannedCryptReservationV2(root3, r) {
   const s = r.socket, p = s.provenance, q = r.parcel;
-  requireContract(root2.plannedWorld?.cryptPrototype === PLANNED_CRYPT_V2 && cryptIdsForBinding(root2.plannedWorld).includes(p.reservationId) && r.version === PLANNED_CRYPT_RESERVATION && r.packageId === CRYPT_PACKAGE_ID && r.siteId === s.siteId, "Unselected Crypt V2 reservation");
+  requireContract(root3.plannedWorld?.cryptPrototype === PLANNED_CRYPT_V2 && cryptIdsForBinding(root3.plannedWorld).includes(p.reservationId) && r.version === PLANNED_CRYPT_RESERVATION && r.packageId === CRYPT_PACKAGE_ID && r.siteId === s.siteId, "Unselected Crypt V2 reservation");
   validatePlannedCryptSocketV2(s);
   closedRecord(q, ["version", "siteId", "socket", "familyId", "packageId", "tier", "label", "tileX", "tileY", "width", "height", "layoutSeed", "pages", "roadAnchor"]);
   const f3 = p.footprintChunks[0];
-  requireContract(q.version === PLANNED_CRYPT_V2 && q.siteId === r.siteId && same7(q.socket, s) && q.familyId === "site-family:crypt" && q.packageId === r.packageId && q.tier === p.sizeTier && q.label === s.region.biome[0].toUpperCase() + s.region.biome.slice(1) + " Crypt" && q.width === 12 && q.height === 12 && q.tileX === String((1024 + f3.x) * 32 + 10) && q.tileY === String((1024 + f3.y) * 26 + 5) && q.layoutSeed === s.siteSeed && same7(q.pages, [{ chunkX: String(1024 + f3.x), chunkY: String(1024 + f3.y) }]) && p.assetHash === root2.plannedWorld.assetHash && p.planHash === root2.plannedWorld.planHash, "Crypt V2 parcel drift");
+  requireContract(q.version === PLANNED_CRYPT_V2 && q.siteId === r.siteId && same7(q.socket, s) && q.familyId === "site-family:crypt" && q.packageId === r.packageId && q.tier === p.sizeTier && q.label === s.region.biome[0].toUpperCase() + s.region.biome.slice(1) + " Crypt" && q.width === 12 && q.height === 12 && q.tileX === String((1024 + f3.x) * 32 + 10) && q.tileY === String((1024 + f3.y) * 26 + 5) && q.layoutSeed === s.siteSeed && same7(q.pages, [{ chunkX: String(1024 + f3.x), chunkY: String(1024 + f3.y) }]) && p.assetHash === root3.plannedWorld.assetHash && p.planHash === root3.plannedWorld.planHash, "Crypt V2 parcel drift");
   return r;
 }
 
@@ -19480,12 +19480,12 @@ function validatePlannedRuinSocketV2(s) {
   requireContract(p.footprintChunks.some((c) => s.entrance.chunkX === String(1024 + c.x) && s.entrance.chunkY === String(1024 + c.y)), "Ruin V2 entrance outside footprint");
   return s;
 }
-function validatePlannedRuinReservationV2(root2, r) {
+function validatePlannedRuinReservationV2(root3, r) {
   const s = r.socket, p = s.provenance, q = r.parcel;
-  requireContract(root2.plannedWorld?.ruinPrototype === PLANNED_RUIN_V2 && plannedRuinIdsV2(root2.plannedWorld).includes(p.reservationId) && r.version === PLANNED_RUIN_RESERVATION && r.packageId === RUIN_FAMILY_PACKAGE_ID && r.siteId === s.siteId, "Unselected Ruin V2 reservation");
+  requireContract(root3.plannedWorld?.ruinPrototype === PLANNED_RUIN_V2 && plannedRuinIdsV2(root3.plannedWorld).includes(p.reservationId) && r.version === PLANNED_RUIN_RESERVATION && r.packageId === RUIN_FAMILY_PACKAGE_ID && r.siteId === s.siteId, "Unselected Ruin V2 reservation");
   validatePlannedRuinSocketV2(s);
   closedRecord(q, ["version", "siteId", "socket", "familyId", "packageId", "tier", "label", "tileX", "tileY", "width", "height", "layoutSeed", "pages", "roadAnchor"]);
-  requireContract(q.version === PLANNED_RUIN_V2 && q.siteId === r.siteId && same8(q.socket, s) && q.packageId === r.packageId && q.familyId === "site-family:ruin" && q.tier === p.sizeTier && [[56, 70], [84, 44]].some((v) => same8(v, [q.width, q.height])) && q.layoutSeed === s.siteSeed && p.assetHash === root2.plannedWorld.assetHash && p.planHash === root2.plannedWorld.planHash, "Ruin V2 parcel drift");
+  requireContract(q.version === PLANNED_RUIN_V2 && q.siteId === r.siteId && same8(q.socket, s) && q.packageId === r.packageId && q.familyId === "site-family:ruin" && q.tier === p.sizeTier && [[56, 70], [84, 44]].some((v) => same8(v, [q.width, q.height])) && q.layoutSeed === s.siteSeed && p.assetHash === root3.plannedWorld.assetHash && p.planHash === root3.plannedWorld.planHash, "Ruin V2 parcel drift");
   const left = Number(q.tileX) - 1024 * 32, top = Number(q.tileY) - 1024 * 26;
   safeInteger(left, 0);
   safeInteger(top, 0);
@@ -19521,14 +19521,14 @@ function validatePlannedRuinSocket(socket) {
   requireContract(p.footprintChunks.some((c) => socket.entrance.chunkX === String(1024 + c.x) && socket.entrance.chunkY === String(1024 + c.y)), "Ruin entrance outside footprint");
   return socket;
 }
-function validatePlannedRuinReservation(root2, r) {
-  if (r.socket.provenance.populationHash !== void 0 || r.socket.provenance.assetHash === ALPHA_POPULATION_BASE_HASH && newPopulationSelection(r.socket.provenance.reservationId)) return validatePopulationReservation(root2, r);
-  if (r.socket.provenance.placementVersion === PLANNED_RUIN_V2) return validatePlannedRuinReservationV2(root2, r);
-  requireContract([PLANNED_RUIN_VERSION, PLANNED_RUIN_V2].includes(root2.plannedWorld?.ruinPrototype) && root2.plannedWorld.assetId === "alpha" && ALPHA_RUIN_RESERVATION_IDS.includes(r.socket.provenance.reservationId) && r.version === PLANNED_RUIN_RESERVATION && r.packageId === RUIN_FAMILY_PACKAGE_ID && r.siteId === r.socket.siteId, "Unselected Ruin reservation");
+function validatePlannedRuinReservation(root3, r) {
+  if (r.socket.provenance.populationHash !== void 0 || r.socket.provenance.assetHash === ALPHA_POPULATION_BASE_HASH && newPopulationSelection(r.socket.provenance.reservationId)) return validatePopulationReservation(root3, r);
+  if (r.socket.provenance.placementVersion === PLANNED_RUIN_V2) return validatePlannedRuinReservationV2(root3, r);
+  requireContract([PLANNED_RUIN_VERSION, PLANNED_RUIN_V2].includes(root3.plannedWorld?.ruinPrototype) && root3.plannedWorld.assetId === "alpha" && ALPHA_RUIN_RESERVATION_IDS.includes(r.socket.provenance.reservationId) && r.version === PLANNED_RUIN_RESERVATION && r.packageId === RUIN_FAMILY_PACKAGE_ID && r.siteId === r.socket.siteId, "Unselected Ruin reservation");
   validatePlannedRuinSocket(r.socket);
   const p = r.socket.provenance, q = r.parcel;
   closedRecord(q, ["version", "siteId", "socket", "familyId", "packageId", "tier", "label", "tileX", "tileY", "width", "height", "layoutSeed", "pages", "roadAnchor"]);
-  requireContract(q.version === PLANNED_RUIN_VERSION && q.siteId === r.siteId && same9(q.socket, r.socket) && q.packageId === r.packageId && q.familyId === "site-family:ruin" && q.tier === p.sizeTier && same9([q.width, q.height], RUIN_TIER_POLICY[q.tier].exteriorTiles) && q.layoutSeed === r.socket.siteSeed && p.assetHash === root2.plannedWorld.assetHash && p.planHash === root2.plannedWorld.planHash, "Ruin parcel commitments drift");
+  requireContract(q.version === PLANNED_RUIN_VERSION && q.siteId === r.siteId && same9(q.socket, r.socket) && q.packageId === r.packageId && q.familyId === "site-family:ruin" && q.tier === p.sizeTier && same9([q.width, q.height], RUIN_TIER_POLICY[q.tier].exteriorTiles) && q.layoutSeed === r.socket.siteSeed && p.assetHash === root3.plannedWorld.assetHash && p.planHash === root3.plannedWorld.planHash, "Ruin parcel commitments drift");
   const small = p.sizeTier === "small", fx = small ? 78 : 75, fy = small ? 263 : 199, expected = small ? [{ x: 78, y: 263 }, { x: 78, y: 264 }] : [{ x: 75, y: 199 }, { x: 76, y: 199 }, { x: 75, y: 200 }, { x: 76, y: 200 }], approach = small ? [{ x: 79, y: 263 }] : [{ x: 77, y: 199 }, { x: 78, y: 199 }];
   requireContract(same9(p.footprintChunks, expected) && same9(p.approachChunks, approach) && siteFits(p.reservationId, r.socket.region.biome, p.band, small ? 1 : 3), "Selected Alpha Ruin footprint/progression drift");
   const left = fx * 32 + Math.floor(((small ? 32 : 64) - q.width) / 2), top = fy * 26, doorX = left + Math.floor(q.width / 2), doorY = top + Math.floor(q.height / 2);
@@ -19606,14 +19606,14 @@ function validatePlannedCryptSocket(s) {
   requireContract(s.entrance.chunkX === "1142" && s.entrance.chunkY === "1300" && s.entrance.localX === 528 && s.entrance.localY === 432, "Crypt door alignment drift");
   return s;
 }
-function validatePlannedCryptReservation(root2, r) {
-  if (r.socket.provenance.populationHash !== void 0 || r.socket.provenance.assetHash === ALPHA_POPULATION_BASE_HASH && newPopulationSelection(r.socket.provenance.reservationId)) return validatePopulationReservation(root2, r);
-  if (r.socket.provenance.placementVersion === PLANNED_CRYPT_V2) return validatePlannedCryptReservationV2(root2, r);
+function validatePlannedCryptReservation(root3, r) {
+  if (r.socket.provenance.populationHash !== void 0 || r.socket.provenance.assetHash === ALPHA_POPULATION_BASE_HASH && newPopulationSelection(r.socket.provenance.reservationId)) return validatePopulationReservation(root3, r);
+  if (r.socket.provenance.placementVersion === PLANNED_CRYPT_V2) return validatePlannedCryptReservationV2(root3, r);
   const q = r.parcel;
-  requireContract([PLANNED_CRYPT_VERSION, PLANNED_CRYPT_V2].includes(root2.plannedWorld?.cryptPrototype) && root2.plannedWorld.assetId === "alpha" && r.version === PLANNED_CRYPT_RESERVATION && r.packageId === CRYPT_PACKAGE_ID && r.siteId === r.socket.siteId, "Unselected Crypt");
+  requireContract([PLANNED_CRYPT_VERSION, PLANNED_CRYPT_V2].includes(root3.plannedWorld?.cryptPrototype) && root3.plannedWorld.assetId === "alpha" && r.version === PLANNED_CRYPT_RESERVATION && r.packageId === CRYPT_PACKAGE_ID && r.siteId === r.socket.siteId, "Unselected Crypt");
   validatePlannedCryptSocket(r.socket);
   closedRecord(q, ["version", "siteId", "socket", "familyId", "packageId", "tier", "label", "tileX", "tileY", "width", "height", "layoutSeed", "pages", "roadAnchor"]);
-  requireContract(q.version === PLANNED_CRYPT_VERSION && q.siteId === r.siteId && same10(q.socket, r.socket) && q.familyId === "site-family:crypt" && q.packageId === CRYPT_PACKAGE_ID && q.tier === "small" && q.label === r.socket.region.biome[0].toUpperCase() + r.socket.region.biome.slice(1) + " Crypt" && q.width === 12 && q.height === 12 && q.tileX === String(1024 * 32 + 118 * 32 + 10) && q.tileY === String(1024 * 26 + 276 * 26 + 5) && q.layoutSeed === r.socket.siteSeed && same10(q.pages, [{ chunkX: "1142", chunkY: "1300" }]) && r.socket.provenance.assetHash === root2.plannedWorld.assetHash && r.socket.provenance.planHash === root2.plannedWorld.planHash, "Crypt parcel drift");
+  requireContract(q.version === PLANNED_CRYPT_VERSION && q.siteId === r.siteId && same10(q.socket, r.socket) && q.familyId === "site-family:crypt" && q.packageId === CRYPT_PACKAGE_ID && q.tier === "small" && q.label === r.socket.region.biome[0].toUpperCase() + r.socket.region.biome.slice(1) + " Crypt" && q.width === 12 && q.height === 12 && q.tileX === String(1024 * 32 + 118 * 32 + 10) && q.tileY === String(1024 * 26 + 276 * 26 + 5) && q.layoutSeed === r.socket.siteSeed && same10(q.pages, [{ chunkX: "1142", chunkY: "1300" }]) && r.socket.provenance.assetHash === root3.plannedWorld.assetHash && r.socket.provenance.planHash === root3.plannedWorld.planHash, "Crypt parcel drift");
   return r;
 }
 var validateCryptFamily = (site) => validateRuinFamily(site, { familyDefinition: { ...site.packageVersion === CRYPT_POPULATION_VERSION ? CRYPT_CONFIGURATION_V3 : site.packageVersion === PLANNED_CRYPT_V2 ? CRYPT_CONFIGURATION_V2 : CRYPT_FAMILY_CONFIGURATION, validateSocket: validatePlannedCryptSocket } });
@@ -19872,13 +19872,13 @@ function fortFloorRecipeV2(seed, tier2, index) {
 
 // src/shared/contracts/planned_fort_v2.js
 var same11 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
-function validateFortReservationV2(root2, r) {
-  const p = r.socket.provenance, q = r.parcel, fixture = root2.plannedWorld.assetId === "fort-deep-fixture";
-  requireContract(root2.plannedWorld.fortPrototype === PLANNED_FORT_V2 && plannedFortIdsV2(root2.plannedWorld).includes(p.reservationId) && q.version === PLANNED_FORT_V2, "Unselected Fort V2 reservation");
+function validateFortReservationV2(root3, r) {
+  const p = r.socket.provenance, q = r.parcel, fixture = root3.plannedWorld.assetId === "fort-deep-fixture";
+  requireContract(root3.plannedWorld.fortPrototype === PLANNED_FORT_V2 && plannedFortIdsV2(root3.plannedWorld).includes(p.reservationId) && q.version === PLANNED_FORT_V2, "Unselected Fort V2 reservation");
   const expected = Array.from({ length: 3 }, (_, y) => Array.from({ length: 3 }, (_2, x) => ({ x: 248 + x, y: 220 + y }))).flat();
   requireContract(p.reservationId === (fixture ? DEEP_FORT_FIXTURE_ID : "repeatable-slot:fort:tropical:large:01") && p.sizeTier === (fixture ? "deep" : "large") && (fixture ? p.band === 5 : siteFits(p.reservationId, r.socket.region.biome, p.band, 5)) && same11(p.footprintChunks, expected) && same11(p.approachChunks, [{ x: 249, y: 223 }, { x: 249, y: 224 }, { x: 249, y: 225 }]), "Fort V2 selected capacity drift");
   requireContract(r.siteId === r.socket.siteId && r.packageId === "procedural-fort-family" && q.siteId === r.siteId && q.packageId === r.packageId && q.familyId === "site-family:fort" && same11(q.socket, r.socket) && q.tier === p.sizeTier && q.layoutSeed === r.socket.siteSeed && q.label === (fixture ? "Deep Fort fixture" : r.socket.region.biome[0].toUpperCase() + r.socket.region.biome.slice(1) + " Fort"), "Fort V2 parcel identity drift");
-  requireContract(p.assetHash === root2.plannedWorld.assetHash && p.planHash === root2.plannedWorld.planHash && q.tileX === String(1024 * 32 + 7944) && q.tileY === String(1024 * 26 + 5720) && q.width === 80 && q.height === 70 && q.roadAnchor.tileX === String(1024 * 32 + 7983) && q.roadAnchor.tileY === String(1024 * 26 + 5789), "Fort V2 geometry commitment drift");
+  requireContract(p.assetHash === root3.plannedWorld.assetHash && p.planHash === root3.plannedWorld.planHash && q.tileX === String(1024 * 32 + 7944) && q.tileY === String(1024 * 26 + 5720) && q.width === 80 && q.height === 70 && q.roadAnchor.tileX === String(1024 * 32 + 7983) && q.roadAnchor.tileY === String(1024 * 26 + 5789), "Fort V2 geometry commitment drift");
   requireContract(r.socket.entrance.chunkX === String(1024 + 249) && r.socket.entrance.chunkY === String(1024 + 221) && r.socket.entrance.localX === 528 && r.socket.entrance.localY === (5753 % 26 + 0.5) * 32, "Fort V2 entrance drift");
   requireContract(q.pages.length === expected.length && q.pages.every((c, i) => c.chunkX === String(1024 + expected[i].x) && c.chunkY === String(1024 + expected[i].y)), "Fort V2 page inventory drift");
   return r;
@@ -19908,17 +19908,17 @@ function validatePlannedFortSocket(socket) {
   requireContract(p.footprintChunks.some((c) => socket.entrance.chunkX === String(1024 + c.x) && socket.entrance.chunkY === String(1024 + c.y)), "Fort entrance outside footprint");
   return socket;
 }
-function validatePlannedFortReservation(root2, r) {
-  if (r.socket.provenance.populationHash !== void 0 || r.socket.provenance.assetHash === ALPHA_POPULATION_BASE_HASH && newPopulationSelection(r.socket.provenance.reservationId)) return validatePopulationReservation(root2, r);
+function validatePlannedFortReservation(root3, r) {
+  if (r.socket.provenance.populationHash !== void 0 || r.socket.provenance.assetHash === ALPHA_POPULATION_BASE_HASH && newPopulationSelection(r.socket.provenance.reservationId)) return validatePopulationReservation(root3, r);
   if (r.parcel.version === PLANNED_FORT_V2) {
     validatePlannedFortSocket(r.socket);
-    return validateFortReservationV2(root2, r);
+    return validateFortReservationV2(root3, r);
   }
-  requireContract([PLANNED_FORT_VERSION, PLANNED_FORT_V2].includes(root2.plannedWorld?.fortPrototype) && root2.plannedWorld.assetId === "alpha" && ALPHA_FORT_RESERVATION_IDS.includes(r.socket.provenance.reservationId) && r.version === PLANNED_FORT_RESERVATION && r.packageId === FORT_FAMILY_PACKAGE_ID && r.siteId === r.socket.siteId, "Unselected Fort reservation");
+  requireContract([PLANNED_FORT_VERSION, PLANNED_FORT_V2].includes(root3.plannedWorld?.fortPrototype) && root3.plannedWorld.assetId === "alpha" && ALPHA_FORT_RESERVATION_IDS.includes(r.socket.provenance.reservationId) && r.version === PLANNED_FORT_RESERVATION && r.packageId === FORT_FAMILY_PACKAGE_ID && r.siteId === r.socket.siteId, "Unselected Fort reservation");
   validatePlannedFortSocket(r.socket);
   const p = r.socket.provenance, q = r.parcel;
   closedRecord(q, ["version", "siteId", "socket", "familyId", "packageId", "tier", "label", "tileX", "tileY", "width", "height", "layoutSeed", "pages", "roadAnchor"]);
-  requireContract(q.version === PLANNED_FORT_VERSION && q.siteId === r.siteId && same12(q.socket, r.socket) && q.packageId === r.packageId && q.familyId === "site-family:fort" && q.tier === p.sizeTier && same12([q.width, q.height], FORT_TIER_POLICY[q.tier].exteriorTiles) && q.layoutSeed === r.socket.siteSeed && p.assetHash === root2.plannedWorld.assetHash && p.planHash === root2.plannedWorld.planHash, "Fort parcel commitments drift");
+  requireContract(q.version === PLANNED_FORT_VERSION && q.siteId === r.siteId && same12(q.socket, r.socket) && q.packageId === r.packageId && q.familyId === "site-family:fort" && q.tier === p.sizeTier && same12([q.width, q.height], FORT_TIER_POLICY[q.tier].exteriorTiles) && q.layoutSeed === r.socket.siteSeed && p.assetHash === root3.plannedWorld.assetHash && p.planHash === root3.plannedWorld.planHash, "Fort parcel commitments drift");
   const small = p.sizeTier === "small", fx = small ? 175 : 41, fy = small ? 89 : 254, expected = Array.from({ length: small ? 2 : 3 }, (_, y) => [{ x: fx, y: fy + y }, { x: fx + 1, y: fy + y }]).flat();
   requireContract(same12(p.footprintChunks, expected) && same12(p.approachChunks, [{ x: fx + 2, y: small ? fy : fy + 1 }, { x: fx + 3, y: small ? fy : fy + 1 }]) && siteFits(p.reservationId, r.socket.region.biome, p.band, small ? 3 : 1), "Selected Alpha Fort footprint/progression drift");
   const left = fx * 32 + Math.floor((64 - q.width) / 2), top = fy * 26, doorX = left + Math.floor(q.width / 2), doorY = top + 5 + FORT_TIER_POLICY[q.tier].floors[0].tiles[1] + 2;
@@ -20012,13 +20012,13 @@ function validatePlannedCaveSocket(site) {
   requireContract(site.entrance.chunkX === String(1024 + p.footprintChunk.x) && site.entrance.chunkY === String(1024 + p.footprintChunk.y) && site.entrance.localX === 432 && site.entrance.localY === 208, "Planned Cave exterior binding drift");
   return site;
 }
-function validatePlannedCaveReservation(root2, r) {
-  if (r.socket.provenance.populationHash !== void 0 || r.socket.provenance.assetHash === ALPHA_POPULATION_BASE_HASH && newPopulationSelection(r.socket.provenance.reservationId)) return validatePopulationReservation(root2, r);
-  requireContract([PLANNED_CAVE_VERSION, PLANNED_CAVE_POPULATION_VERSION].includes(root2.plannedWorld?.cavePrototype) && root2.plannedWorld.assetId === "alpha" && r.version === PLANNED_CAVE_RESERVATION, "Planned Cave requires explicit review composition");
+function validatePlannedCaveReservation(root3, r) {
+  if (r.socket.provenance.populationHash !== void 0 || r.socket.provenance.assetHash === ALPHA_POPULATION_BASE_HASH && newPopulationSelection(r.socket.provenance.reservationId)) return validatePopulationReservation(root3, r);
+  requireContract([PLANNED_CAVE_VERSION, PLANNED_CAVE_POPULATION_VERSION].includes(root3.plannedWorld?.cavePrototype) && root3.plannedWorld.assetId === "alpha" && r.version === PLANNED_CAVE_RESERVATION, "Planned Cave requires explicit review composition");
   validatePlannedCaveSocket(r.socket);
-  const p = r.socket.provenance, q = r.parcel, expected = plannedCaveSelection(root2.plannedWorld, p.reservationId);
+  const p = r.socket.provenance, q = r.parcel, expected = plannedCaveSelection(root3.plannedWorld, p.reservationId);
   requireContract(expected, "Unselected planned Cave");
-  requireContract(p.reservationId === expected.reservationId && p.assetHash === root2.plannedWorld.assetHash && p.planHash === root2.plannedWorld.planHash && same13(p.footprintChunk, expected.footprintChunk) && same13(p.approachChunk, expected.approachChunk) && p.sizeTier === expected.tier && p.band === expected.band && r.socket.region.biome === expected.biome, "Selected Alpha Cave reservation drift");
+  requireContract(p.reservationId === expected.reservationId && p.assetHash === root3.plannedWorld.assetHash && p.planHash === root3.plannedWorld.planHash && same13(p.footprintChunk, expected.footprintChunk) && same13(p.approachChunk, expected.approachChunk) && p.sizeTier === expected.tier && p.band === expected.band && r.socket.region.biome === expected.biome, "Selected Alpha Cave reservation drift");
   closedRecord(q, ["version", "siteId", "socket", "familyId", "packageId", "spawnOrdinal", "regionKey", "regionName", "geographicQualifier", "label", "tileX", "tileY", "width", "height", "orientation", "pages", "roadAnchor", "tier", "siteSeed", "layoutSeed", "placementProvenance"]);
   requireContract(q.version === PLANNED_CAVE_PARCEL && q.siteId === r.siteId && r.packageId === "woodland-cave-family" && q.packageId === r.packageId && q.familyId === "family:woodland-cave-d12" && q.spawnOrdinal === 0 && same13(q.socket, r.socket) && q.tier === p.sizeTier && digest6(q.siteSeed) && digest6(q.layoutSeed) && q.width === 12 && q.height === 9 && q.orientation === "south-facing" && q.tileX === String((1024 + p.footprintChunk.x) * 32 + 8) && q.tileY === String((1024 + p.footprintChunk.y) * 26 + 3), "Planned Cave parcel drift");
   requireContract(q.pages.length === 1 && q.pages[0].chunkX === r.socket.entrance.chunkX && q.pages[0].chunkY === r.socket.entrance.chunkY && digest6(q.pages[0].baseDigest) && q.pages[0].baseDigest.slice(0, 32) === p.chunkId.slice(6), "Planned Cave chunk commitment drift");
@@ -21729,11 +21729,11 @@ async function createArachnidTreantD12_5A({ campaignSeed, siteId: siteId2, floor
 }
 var validPoint = (p) => p && Number.isFinite(p.x) && Number.isFinite(p.y);
 function validateBossCombatD12_5A(state) {
-  const root2 = state.bossCombat;
-  if (root2 === void 0) return;
-  closedRecord(root2, ["version", "bossesByEntityId", "summonsByEntityId", "hazardsById", "statusesByEntityId"]);
-  requireContract(root2.version === BOSS_COMBAT_D12_5A_VERSION, "Unsupported boss combat state");
-  for (const [entityId2, boss] of Object.entries(root2.bossesByEntityId)) {
+  const root3 = state.bossCombat;
+  if (root3 === void 0) return;
+  closedRecord(root3, ["version", "bossesByEntityId", "summonsByEntityId", "hazardsById", "statusesByEntityId"]);
+  requireContract(root3.version === BOSS_COMBAT_D12_5A_VERSION, "Unsupported boss combat state");
+  for (const [entityId2, boss] of Object.entries(root3.bossesByEntityId)) {
     if (recoveredBossRecord(boss)) {
       validateRecoveredBossV1(state, entityId2, boss);
       continue;
@@ -21755,7 +21755,7 @@ function validateBossCombatD12_5A(state) {
     safeInteger(boss.nextActionTick, 0, state.tick + ARACHNID_TREANT_D12_5A.abilityRecoveryTicks + ARACHNID_TREANT_D12_5A.telegraphTicks);
     safeInteger(boss.abilitySequence, 0);
     safeInteger(boss.selectionSeed, 0, 4294967295);
-    requireContract(boss.summonEntityIds.length === 3 && new Set(boss.summonEntityIds).size === 3 && boss.summonEntityIds.every((id) => root2.summonsByEntityId[id]?.bossId === boss.bossId), "Invalid Arachnid Treant summons");
+    requireContract(boss.summonEntityIds.length === 3 && new Set(boss.summonEntityIds).size === 3 && boss.summonEntityIds.every((id) => root3.summonsByEntityId[id]?.bossId === boss.bossId), "Invalid Arachnid Treant summons");
     if (boss.actionState === "telegraphing") {
       requireContract(boss.activeAbility && boss.targetEntityId && validPoint(boss.targetPosition), "Missing boss telegraph target");
       safeInteger(boss.telegraphStartedTick, 0, state.tick);
@@ -21770,14 +21770,14 @@ function validateBossCombatD12_5A(state) {
     if (boss.shieldStartedTick !== null) safeInteger(boss.shieldStartedTick, boss.activatedTick, state.tick);
     if (boss.shieldBrokenTick !== null) safeInteger(boss.shieldBrokenTick, boss.shieldStartedTick ?? 0, state.tick);
   }
-  for (const [entityId2, summon] of Object.entries(root2.summonsByEntityId)) {
+  for (const [entityId2, summon] of Object.entries(root3.summonsByEntityId)) {
     if (summon.version === RECOVERED_SUMMON_VERSION) {
-      const owner = Object.values(root2.bossesByEntityId).find((b) => b.bossId === summon.bossId);
+      const owner = Object.values(root3.bossesByEntityId).find((b) => b.bossId === summon.bossId);
       validateRecoveredSummonV1(state, entityId2, summon, owner);
       continue;
     }
     closedRecord(summon, ["version", "entityId", "bossId", "groupId", "ordinal", "homePosition", "stage", "activatedTick", "hatchTick", "defeatedTick"]);
-    const actor = state.entitiesById[entityId2], boss = Object.values(root2.bossesByEntityId).find((row2) => row2.bossId === summon.bossId);
+    const actor = state.entitiesById[entityId2], boss = Object.values(root3.bossesByEntityId).find((row2) => row2.bossId === summon.bossId);
     requireContract(summon.version === BOSS_SUMMON_D12_5A_VERSION && summon.entityId === entityId2 && boss?.summonEntityIds[summon.ordinal] === entityId2 && summon.groupId === boss.groupId && actor?.team === "hostile" && state.groupsById[summon.groupId]?.entityIds.includes(entityId2) && validPoint(summon.homePosition) && ["dormant", "cocoon", "hatched", "defeated"].includes(summon.stage), "Invalid boss summon");
     if (summon.stage === "dormant") requireContract(actor.alive && summon.activatedTick === null && summon.hatchTick === null && summon.defeatedTick === null, "Invalid dormant cocoon");
     else {
@@ -21789,9 +21789,9 @@ function validateBossCombatD12_5A(state) {
       } else requireContract(actor.alive, "Defeated active summon");
     }
   }
-  for (const [hazardId, hazard] of Object.entries(root2.hazardsById)) {
+  for (const [hazardId, hazard] of Object.entries(root3.hazardsById)) {
     closedRecord(hazard, ["version", "hazardId", "kind", "bossId", "sourceEntityId", "spaceInstanceId", "position", "createdTick", "expirationTick", "geometry", "movementMultiplier"]);
-    const boss = root2.bossesByEntityId[hazard.sourceEntityId];
+    const boss = root3.bossesByEntityId[hazard.sourceEntityId];
     const spit = ARACHNID_TREANT_D12_5A.webSpit, shape = hazard.kind === "treant_root_web" ? [ARACHNID_TREANT_D12_5A.rootSnare.hazardDurationTicks, 75, 33.75, 0.4] : hazard.kind === "treant_spit_web" ? [spit.webDurationTicks, spit.webRadiusX, spit.webRadiusY, 0.4] : hazard.kind === "treant_spit_warning" ? [spit.telegraphTicks + 1, spit.radius, spit.radius, 1] : null;
     requireContract(shape && hazard.version === BOSS_HAZARD_D12_5A_VERSION && hazard.hazardId === hazardId && boss?.bossId === hazard.bossId && state.spacesByInstanceId[hazard.spaceInstanceId] && validPoint(hazard.position) && hazard.expirationTick - hazard.createdTick === shape[0] && state.tick < hazard.expirationTick, "Invalid Treant web hazard");
     requireContract(hazard.geometry.radiusX === shape[1] && hazard.geometry.radiusY === shape[2] && hazard.movementMultiplier === shape[3], "Invalid Treant web geometry");
@@ -21799,9 +21799,9 @@ function validateBossCombatD12_5A(state) {
     safeInteger(hazard.expirationTick, state.tick + 1);
   }
   const partyIds = new Set(Object.values(state.playersById).map((row2) => row2.entityId));
-  for (const [entityId2, status] of Object.entries(root2.statusesByEntityId)) {
+  for (const [entityId2, status] of Object.entries(root3.statusesByEntityId)) {
     closedRecord(status, ["version", "entityId", "statusId", "sourceBossId", "applicationTick", "expirationTick", "movementMultiplier"]);
-    requireContract(status.version === BOSS_STATUS_D12_5A_VERSION && status.entityId === entityId2 && status.statusId === ARACHNID_TREANT_D12_5A.rootSnare.statusId && partyIds.has(entityId2) && state.entitiesById[entityId2]?.alive && status.movementMultiplier === 0.4 && Object.values(root2.bossesByEntityId).some((row2) => row2.bossId === status.sourceBossId) && state.tick < status.expirationTick, "Invalid Treant root snare");
+    requireContract(status.version === BOSS_STATUS_D12_5A_VERSION && status.entityId === entityId2 && status.statusId === ARACHNID_TREANT_D12_5A.rootSnare.statusId && partyIds.has(entityId2) && state.entitiesById[entityId2]?.alive && status.movementMultiplier === 0.4 && Object.values(root3.bossesByEntityId).some((row2) => row2.bossId === status.sourceBossId) && state.tick < status.expirationTick, "Invalid Treant root snare");
     safeInteger(status.applicationTick, 0, state.tick);
     safeInteger(status.expirationTick, state.tick + 1);
   }
@@ -22998,13 +22998,13 @@ function accounting(state, delta, direction2) {
 }
 function detachChunksRuntimeD9(state, transfers) {
   requireContract(Array.isArray(transfers) && transfers.length > 0, "Chunk detachment batch");
-  let root2 = state.d9World.regionIndex;
+  let root3 = state.d9World.regionIndex;
   const chunkIds = /* @__PURE__ */ new Set(), groups = /* @__PURE__ */ new Set();
   for (const { chunk, delta, prepared } of transfers) {
     requireContract(!chunkIds.has(chunk.identity.id), "Duplicate chunk detachment");
     chunkIds.add(chunk.identity.id);
-    requireContract(root2 === prepared.expectedRoot, "Stale chunk page root");
-    root2 = prepared.root;
+    requireContract(root3 === prepared.expectedRoot, "Stale chunk page root");
+    root3 = prepared.root;
     requireContract(same19(captureChunkDeltaD9(state, chunk), delta), "Chunk changed during page preparation");
     requireContract(Object.values(delta.drops).every((rows3) => Object.keys(rows3).length === 0), "Deliberate Drops require their ownership-page handoff");
     for (const e of delta.encounters) {
@@ -23043,7 +23043,7 @@ function detachChunksRuntimeD9(state, transfers) {
   runtime.resources = runtime.resources.filter((r) => !groups.has(r.groupId));
   runtime.chunks = runtime.chunks.filter((c) => !chunkIds.has(c.identity.id));
   state.spacesByInstanceId[state.overworldInstanceId].collision.pages = runtime.chunks.map(runtimeCollisionPageD92);
-  state.d9World.regionIndex = root2;
+  state.d9World.regionIndex = root3;
   runtime.revision += transfers.length;
   pruneColdOriginsD9(state);
   captureWorldPositionsD9(state);
@@ -24531,6 +24531,39 @@ function migratePresentationInventory(p) {
 var plannedStartTiles = (b) => hasStarterVillage(b) ? starterArrivalTilesV1() : b?.townPrototype === PLANNED_TOWN_START_VERSION ? townStartTilesV1() : null;
 var plannedStartSettlementId = (b, fallback) => hasStarterVillage(b) ? STARTER_VILLAGE_ID : b?.townPrototype === PLANNED_TOWN_START_VERSION ? PLANNED_TOWN_ID : fallback;
 
+// src/shared/content/trip_snacks_v1.js
+var TRIP_EAT_TICKS = 144;
+var TRIP_TICKS = 120 * 60;
+var TRIP_WEAR_OFF_TICKS = 72;
+var TRIP_SNACKS_V1 = Object.freeze({
+  glowcap: Object.freeze({
+    id: "glowcap",
+    label: "Glowcap",
+    verb: "Eat",
+    buff: "damage",
+    amount: 0.2,
+    pill: "+20% damage",
+    text: "A glowing teal mushroom. Eat it for a trip: usually a good one (+20% damage for 2:00)."
+  }),
+  "frog-leg": Object.freeze({
+    id: "frog-leg",
+    label: "Frog Leg",
+    verb: "Lick",
+    buff: "speed",
+    amount: 0.25,
+    pill: "+25% speed",
+    text: "A tingly blue frog leg. Lick it for a trip: usually a good one (+25% move speed and a hop for 2:00)."
+  })
+});
+var TRIP_SNACK_IDS_V1 = Object.freeze(Object.keys(TRIP_SNACKS_V1));
+var TRIP_SNACK_DROPS_V1 = Object.freeze({
+  sporecrown: Object.freeze({ snack: "glowcap", chance: 1 / 10 }),
+  gulpjaw: Object.freeze({ snack: "frog-leg", chance: 1 / 10 }),
+  croakmaw: Object.freeze({ snack: "frog-leg", chance: 1 / 10 }),
+  dart_frog: Object.freeze({ snack: "frog-leg", chance: 1 / 200 }),
+  bog_frog: Object.freeze({ snack: "frog-leg", chance: 1 / 200 })
+});
+
 // src/shared/content/oldward_wood.js
 var REGION_ID = "region:7a01";
 var LAYOUT_VERSION = 1;
@@ -25061,6 +25094,9 @@ function validateCommand(command) {
     if (["up", "down"].includes(command.payload.direction)) requireContract(typeof command.payload.transitionId === "string" && command.payload.transitionId.length <= 180 && command.payload.extractionId === void 0, "Missing floor transition identity");
     else if (command.payload.direction === "extract") requireContract(typeof command.payload.extractionId === "string" && command.payload.extractionId.length <= 180 && command.payload.transitionId === void 0, "Missing extraction identity");
     else requireContract(command.payload.transitionId === void 0 && command.payload.extractionId === void 0, "Unexpected site transition identity");
+  } else if (command.kind === "trip.eat") {
+    closedRecord(command.payload, ["snack"]);
+    requireContract(TRIP_SNACK_IDS_V1.includes(command.payload.snack), "Invalid snack");
   } else if (command.kind === "space.travel") {
     closedRecord(command.payload, ["exitId"]);
     requireContract(["field-to-room", "room-to-field"].includes(command.payload.exitId) || isOldwardExit(command.payload.exitId), "Unknown authored or fixture exit");
@@ -25256,6 +25292,47 @@ function createCampaignStoreTransactions({
     decideTransaction: decideTransaction2,
     verifyPersistedEnvelope: verifyPersistedEnvelope2
   });
+}
+
+// src/shared/contracts/trip_snacks_world_v1.js
+var TRIP_ROOT_V1 = "trip-snacks-world-v1";
+var GROUND2 = Object.freeze({ settleTicks: 30, pickupRadius: 30, lifetimeTicks: 18e3, maximum: 12, spread: 16 });
+var TRIP_BAG_STACK_V1 = 99;
+var root2 = (s) => s.trips;
+function validateTripRootV1(s) {
+  const r = root2(s);
+  if (r === void 0) return;
+  closedRecord(r, ["version", "bagsByPlayerId", "groundByPlayerId", "tripsByPlayerId"]);
+  requireContract(r.version === TRIP_ROOT_V1, "Unsupported trip snacks root");
+  for (const [pid, bag] of Object.entries(r.bagsByPlayerId)) {
+    requireContract(s.playersById[pid] && Object.keys(bag).length >= 1, "Invalid snack bag");
+    for (const [k, n] of Object.entries(bag)) {
+      requireContract(TRIP_SNACKS_V1[k], "Unknown snack");
+      safeInteger(n, 1, TRIP_BAG_STACK_V1);
+    }
+  }
+  for (const [pid, ground] of Object.entries(r.groundByPlayerId)) {
+    requireContract(s.playersById[pid] && Object.keys(ground).length <= GROUND2.maximum, "Invalid ground snacks");
+    for (const [id, d] of Object.entries(ground)) {
+      requireContract(id.length <= 240, "Ground snack id");
+      closedRecord(d, ["snack", "spaceInstanceId", "tick"], ["world", "position"]);
+      requireContract(TRIP_SNACKS_V1[d.snack] && typeof d.spaceInstanceId === "string" && d.spaceInstanceId.length <= 240, "Ground snack");
+      safeInteger(d.tick, 0, s.tick);
+      requireContract(d.world === void 0 !== (d.position === void 0), "Ground snack place");
+      if (d.world) validateWorldPosition(d.world);
+      else {
+        closedRecord(d.position, ["x", "y"]);
+        requireContract(Number.isFinite(d.position.x) && Number.isFinite(d.position.y), "Ground snack position");
+      }
+    }
+  }
+  for (const [pid, t] of Object.entries(r.tripsByPlayerId)) {
+    requireContract(s.playersById[pid], "Trip without a hero");
+    closedRecord(t, ["snack", "outcome", "eatTick", "startTick", "endTick"]);
+    requireContract(TRIP_SNACKS_V1[t.snack] && t.outcome === "good", "Invalid trip");
+    safeInteger(t.eatTick, 0, s.tick);
+    requireContract(t.startTick === t.eatTick + TRIP_EAT_TICKS && t.endTick === t.startTick + TRIP_TICKS && s.tick < t.endTick + TRIP_WEAR_OFF_TICKS, "Trip timing");
+  }
 }
 
 // src/shared/contracts/class_skills_v1.js
@@ -25826,8 +25903,8 @@ var QUEST_ACTIONS = Object.freeze(["take", "abandon", "turnIn", "search", "deliv
 var ID = /^(?:qb:[a-z-]+:[0-9]{2}:[0-9]{1,6}:[0-9]|qf:civilian:seeded:[a-z-]+:[0-9]{2}:[a-z]+)$/;
 var TARGET = /^(?:site:[a-f0-9]{32}|settlement-slot:[a-z-]+:[0-9]{2}|event:[0-9]{1,6},[0-9]{1,6})$/;
 var ITEM_FAMILY = Object.fromEntries(Object.entries(QUEST_ITEMS).map(([f3, it]) => [it.id, f3]));
-function validateQuestsV1(root2) {
-  const q = root2.quests;
+function validateQuestsV1(root3) {
+  const q = root3.quests;
   if (q === void 0) return;
   closedRecord(q, ["version", "byPlayer"]);
   requireContract(q.version === QUEST_STATE_VERSION && q.byPlayer && typeof q.byPlayer === "object" && !Array.isArray(q.byPlayer) && Object.keys(q.byPlayer).length <= 8, "Quest state shape");
@@ -26458,11 +26535,11 @@ function overlayWoodlandCaveFamilyParcelsD12_2(chunk, parcels = []) {
 
 // src/shared/contracts/world_root_contract_d9.js
 var D9_ROOT_VERSION = "world-root-d9-v1";
-function validateOriginHordeShape(root2) {
-  if (root2.originHordes === void 0) return;
-  const overlay = root2.originHordes;
+function validateOriginHordeShape(root3) {
+  if (root3.originHordes === void 0) return;
+  const overlay = root3.originHordes;
   closedRecord(overlay, ["version", "groupsById"]);
-  requireContract(hasWorldCombat(root2.plannedWorld) && overlay.version === "world-origin-horde-overlay-v1", "Unrecognized origin horde overlay");
+  requireContract(hasWorldCombat(root3.plannedWorld) && overlay.version === "world-origin-horde-overlay-v1", "Unrecognized origin horde overlay");
   requireContract(overlay.groupsById && typeof overlay.groupsById === "object" && !Array.isArray(overlay.groupsById) && Object.keys(overlay.groupsById).length <= 16, "Origin horde group bound");
   for (const [id, row2] of Object.entries(overlay.groupsById)) {
     closedRecord(row2, ["groupId", "episode", "appliedTick", "status", "protectedEpisode", "definition"]);
@@ -26489,67 +26566,67 @@ function validateOriginHordeShape(root2) {
     }
   }
 }
-function validateD9Root(root2) {
-  validateWorldEvents(root2);
-  if (root2.ordinaryRosterV2) {
-    closedRecord(root2.ordinaryRosterV2, ["version", "activatedTick"]);
-    requireContract(hasWorldCombat(root2.plannedWorld) && root2.ordinaryRosterV2.version === "dungeon-ordinary-roster-v2", "Unrecognized V2 ordinary roster");
-    safeInteger(root2.ordinaryRosterV2.activatedTick);
+function validateD9Root(root3) {
+  validateWorldEvents(root3);
+  if (root3.ordinaryRosterV2) {
+    closedRecord(root3.ordinaryRosterV2, ["version", "activatedTick"]);
+    requireContract(hasWorldCombat(root3.plannedWorld) && root3.ordinaryRosterV2.version === "dungeon-ordinary-roster-v2", "Unrecognized V2 ordinary roster");
+    safeInteger(root3.ordinaryRosterV2.activatedTick);
   }
-  if (root2.ordinaryRoster) {
-    closedRecord(root2.ordinaryRoster, ["version", "activatedTick"]);
-    requireContract(hasWorldCombat(root2.plannedWorld) && root2.ordinaryRoster.version === "dungeon-ordinary-roster-v1", "Unrecognized ordinary roster");
-    safeInteger(root2.ordinaryRoster.activatedTick);
+  if (root3.ordinaryRoster) {
+    closedRecord(root3.ordinaryRoster, ["version", "activatedTick"]);
+    requireContract(hasWorldCombat(root3.plannedWorld) && root3.ordinaryRoster.version === "dungeon-ordinary-roster-v1", "Unrecognized ordinary roster");
+    safeInteger(root3.ordinaryRoster.activatedTick);
   }
-  validateOriginHordeShape(root2);
-  closedRecord(root2, ["version", "profile", "origin", "positions", "frame", "regionIndex", "discoveryIndex", "deadlineIndex", "migration", "runtime", "episodes", "content", "paging", "ownershipIndex", "groundIndex", "navigation", "runtimePolicy", "functionalSitesById", "siteReservationsById"], ["plannedWorld", "plannedStart", "settlementInterior", "townInteriors", "originHordes", "ordinaryRoster", "ordinaryRosterV2", "worldEvents", "quests"]);
-  validateQuestsV1(root2);
-  if (root2.plannedWorld) {
-    validatePlannedBinding(root2.plannedWorld);
-    validateWorldPosition(root2.plannedStart);
-  } else requireContract(!root2.plannedStart, "Unbound planned start");
-  requireContract(hasWorldCombat(root2.plannedWorld) ? [COMBAT_RUNTIME_VERSION, LEGACY_COMBAT_RUNTIME_VERSION].includes(root2.runtimePolicy) : root2.runtimePolicy === (hasAlphaPopulation(root2.plannedWorld) ? ALPHA_POPULATION_RETENTION.version : D9_RUNTIME_POLICY.version), "Unrecognized runtime admission policy");
-  requireContract(root2.version === D9_ROOT_VERSION && canonicalStringify(root2.profile) === canonicalStringify(D9_PROFILE), "Unknown pinned world profile");
-  requireContract(/^[a-f0-9]{64}$/.test(root2.origin.manifestHash), "Missing origin commitment");
-  for (const p of Object.values(root2.positions)) validateWorldPosition(p);
-  closedRecord(root2.runtime, ["revision", "frames", "chunks", "groups", "resources"]);
-  const siteGroupCount = Object.values(root2.functionalSitesById).reduce((n, site) => n + functionalSiteGroupsD12(site).length, 0);
-  requireContract(root2.runtime.frames.length <= D9_RUNTIME_POLICY.frames + Number(hasFerries(root2.plannedWorld)) && root2.runtime.chunks.length <= D9_RUNTIME_POLICY.residentChunks && root2.runtime.groups.length <= (usesHordeRetention({ d9World: root2 }) ? worldRetentionBudgets({ d9World: root2 }).groups : D9_RUNTIME_POLICY.proceduralGroups) + siteGroupCount, "D9 runtime admission bound");
-  validateSiteContentRootD9(root2.content);
-  validateWorldPagingD9(root2.paging);
-  validateNavigationD9(root2.navigation);
-  if (root2.navigation.knowledge) requireContract(root2.navigation.knowledge.assetHash === root2.plannedWorld?.assetHash, "Map knowledge asset mismatch");
-  requireContract(root2.functionalSitesById && typeof root2.functionalSitesById === "object" && !Array.isArray(root2.functionalSitesById) && Object.keys(root2.functionalSitesById).length <= 4096, "Functional site collection bound");
-  for (const [id, site] of Object.entries(root2.functionalSitesById)) {
+  validateOriginHordeShape(root3);
+  closedRecord(root3, ["version", "profile", "origin", "positions", "frame", "regionIndex", "discoveryIndex", "deadlineIndex", "migration", "runtime", "episodes", "content", "paging", "ownershipIndex", "groundIndex", "navigation", "runtimePolicy", "functionalSitesById", "siteReservationsById"], ["plannedWorld", "plannedStart", "settlementInterior", "townInteriors", "originHordes", "ordinaryRoster", "ordinaryRosterV2", "worldEvents", "quests"]);
+  validateQuestsV1(root3);
+  if (root3.plannedWorld) {
+    validatePlannedBinding(root3.plannedWorld);
+    validateWorldPosition(root3.plannedStart);
+  } else requireContract(!root3.plannedStart, "Unbound planned start");
+  requireContract(hasWorldCombat(root3.plannedWorld) ? [COMBAT_RUNTIME_VERSION, LEGACY_COMBAT_RUNTIME_VERSION].includes(root3.runtimePolicy) : root3.runtimePolicy === (hasAlphaPopulation(root3.plannedWorld) ? ALPHA_POPULATION_RETENTION.version : D9_RUNTIME_POLICY.version), "Unrecognized runtime admission policy");
+  requireContract(root3.version === D9_ROOT_VERSION && canonicalStringify(root3.profile) === canonicalStringify(D9_PROFILE), "Unknown pinned world profile");
+  requireContract(/^[a-f0-9]{64}$/.test(root3.origin.manifestHash), "Missing origin commitment");
+  for (const p of Object.values(root3.positions)) validateWorldPosition(p);
+  closedRecord(root3.runtime, ["revision", "frames", "chunks", "groups", "resources"]);
+  const siteGroupCount = Object.values(root3.functionalSitesById).reduce((n, site) => n + functionalSiteGroupsD12(site).length, 0);
+  requireContract(root3.runtime.frames.length <= D9_RUNTIME_POLICY.frames + Number(hasFerries(root3.plannedWorld)) && root3.runtime.chunks.length <= D9_RUNTIME_POLICY.residentChunks && root3.runtime.groups.length <= (usesHordeRetention({ d9World: root3 }) ? worldRetentionBudgets({ d9World: root3 }).groups : D9_RUNTIME_POLICY.proceduralGroups) + siteGroupCount, "D9 runtime admission bound");
+  validateSiteContentRootD9(root3.content);
+  validateWorldPagingD9(root3.paging);
+  validateNavigationD9(root3.navigation);
+  if (root3.navigation.knowledge) requireContract(root3.navigation.knowledge.assetHash === root3.plannedWorld?.assetHash, "Map knowledge asset mismatch");
+  requireContract(root3.functionalSitesById && typeof root3.functionalSitesById === "object" && !Array.isArray(root3.functionalSitesById) && Object.keys(root3.functionalSitesById).length <= 4096, "Functional site collection bound");
+  for (const [id, site] of Object.entries(root3.functionalSitesById)) {
     requireContract(id === site.siteId, "Functional site key mismatch");
     validateFunctionalSiteD9(site);
   }
-  requireContract(root2.siteReservationsById && typeof root2.siteReservationsById === "object" && !Array.isArray(root2.siteReservationsById) && Object.keys(root2.siteReservationsById).length <= 4096, "Site reservation collection bound");
+  requireContract(root3.siteReservationsById && typeof root3.siteReservationsById === "object" && !Array.isArray(root3.siteReservationsById) && Object.keys(root3.siteReservationsById).length <= 4096, "Site reservation collection bound");
   const packages = /* @__PURE__ */ new Set();
-  for (const [id, r] of Object.entries(root2.siteReservationsById)) {
+  for (const [id, r] of Object.entries(root3.siteReservationsById)) {
     closedRecord(r, ["version", "siteId", "packageId", "socket", "parcel"]);
     if (r.version === PLANNED_CRYPT_RESERVATION) {
       requireContract(id === r.siteId, "Crypt reservation key drift");
       validateSiteSocketD9(r.socket);
-      validatePlannedCryptReservation(root2, r);
+      validatePlannedCryptReservation(root3, r);
       continue;
     }
     if (r.version === PLANNED_RUIN_RESERVATION) {
       requireContract(id === r.siteId, "Ruin reservation key drift");
       validateSiteSocketD9(r.socket);
-      validatePlannedRuinReservation(root2, r);
+      validatePlannedRuinReservation(root3, r);
       continue;
     }
     if (r.version === PLANNED_FORT_RESERVATION) {
       requireContract(id === r.siteId, "Fort reservation key drift");
       validateSiteSocketD9(r.socket);
-      validatePlannedFortReservation(root2, r);
+      validatePlannedFortReservation(root3, r);
       continue;
     }
     if (r.version === PLANNED_CAVE_RESERVATION) {
       requireContract(id === r.siteId && r.socket.siteId === id, "Planned Cave key mismatch");
       validateSiteSocketD9(r.socket);
-      validatePlannedCaveReservation(root2, r);
+      validatePlannedCaveReservation(root3, r);
       continue;
     }
     const family2 = r.packageId === WOODLAND_CAVE_FAMILY_PACKAGE_ID, modernFamily = family2 && r.parcel?.version === WOODLAND_CAVE_FAMILY_PARCEL_D12_1, naturalFamily = family2 && r.parcel?.version === WOODLAND_CAVE_FAMILY_PARCEL_D12_2;
@@ -26560,24 +26637,24 @@ function validateD9Root(root2) {
     if (r.packageId === WOODLAND_CAVE_PACKAGE_ID) requireContract(r.parcel.version === WOODLAND_CAVE_VERSION && r.parcel.pages.length === 1, "Cave reservation parcel");
     if (family2) requireContract([WOODLAND_CAVE_FAMILY_PARCEL_D12, WOODLAND_CAVE_FAMILY_PARCEL_D12_1, WOODLAND_CAVE_FAMILY_PARCEL_D12_2].includes(r.parcel.version) && r.parcel.familyId === WOODLAND_CAVE_FAMILY_ID && r.parcel.spawnOrdinal >= 0 && r.parcel.spawnOrdinal < (naturalFamily ? 2 : modernFamily ? 16 : 4) && r.parcel.pages.length === 1 && (!(modernFamily || naturalFamily) || /^[a-f0-9]{64}$/.test(r.parcel.layoutSeed) && ["small", "standard", "large", "deep"].includes(r.parcel.tier)), "Cave family parcel");
   }
-  if (root2.plannedWorld?.cavePrototype) {
-    const expected = plannedCaveIds(root2.plannedWorld), actual = Object.values(root2.siteReservationsById).filter((r) => r.version === PLANNED_CAVE_RESERVATION).map((r) => r.socket.provenance.reservationId);
+  if (root3.plannedWorld?.cavePrototype) {
+    const expected = plannedCaveIds(root3.plannedWorld), actual = Object.values(root3.siteReservationsById).filter((r) => r.version === PLANNED_CAVE_RESERVATION).map((r) => r.socket.provenance.reservationId);
     requireContract(actual.length === expected.length && new Set(actual).size === actual.length && expected.every((id) => actual.includes(id)), "Planned Cave composition mismatch");
   }
-  if (root2.plannedWorld?.fortPrototype) {
-    const expected = plannedFortIdsV2(root2.plannedWorld), actual = Object.values(root2.siteReservationsById).filter((r) => r.version === PLANNED_FORT_RESERVATION).map((r) => r.socket.provenance.reservationId);
+  if (root3.plannedWorld?.fortPrototype) {
+    const expected = plannedFortIdsV2(root3.plannedWorld), actual = Object.values(root3.siteReservationsById).filter((r) => r.version === PLANNED_FORT_RESERVATION).map((r) => r.socket.provenance.reservationId);
     requireContract(actual.length === expected.length && new Set(actual).size === actual.length && expected.every((id) => actual.includes(id)), "Fort composition mismatch");
   }
-  if (root2.plannedWorld?.ruinPrototype) {
-    const expected = plannedRuinIdsV2(root2.plannedWorld), actual = Object.values(root2.siteReservationsById).filter((r) => r.version === PLANNED_RUIN_RESERVATION).map((r) => r.socket.provenance.reservationId);
+  if (root3.plannedWorld?.ruinPrototype) {
+    const expected = plannedRuinIdsV2(root3.plannedWorld), actual = Object.values(root3.siteReservationsById).filter((r) => r.version === PLANNED_RUIN_RESERVATION).map((r) => r.socket.provenance.reservationId);
     requireContract(actual.length === expected.length && new Set(actual).size === actual.length && expected.every((id) => actual.includes(id)), "Ruin composition mismatch");
   }
-  if (root2.plannedWorld?.cryptPrototype) {
-    const rows3 = Object.values(root2.siteReservationsById).filter((r) => r.version === PLANNED_CRYPT_RESERVATION);
-    const expected = cryptIdsForBinding(root2.plannedWorld), actual = rows3.map((r) => r.socket.provenance.reservationId);
+  if (root3.plannedWorld?.cryptPrototype) {
+    const rows3 = Object.values(root3.siteReservationsById).filter((r) => r.version === PLANNED_CRYPT_RESERVATION);
+    const expected = cryptIdsForBinding(root3.plannedWorld), actual = rows3.map((r) => r.socket.provenance.reservationId);
     requireContract(actual.length === expected.length && new Set(actual).size === actual.length && expected.every((id) => actual.includes(id)), "Crypt composition drift");
   }
-  return root2;
+  return root3;
 }
 
 // src/shared/contracts/origin_egress_d9.js
@@ -29371,16 +29448,16 @@ function installHostileProjectiles(state) {
   }
 }
 function validateHostileProjectiles(state) {
-  const root2 = state.hostileCombat;
-  if (!root2) return;
+  const root3 = state.hostileCombat;
+  if (!root3) return;
   requireContract(hasWorldCombat(state), "Hostile projectiles outside World combat");
-  closedRecord(root2, ["version", "actionsByEntityId", "projectiles"], ["catalogUpgrade", "catalogUpgradeV2"]);
-  requireContract(root2.version === HOSTILE_PROJECTILES_VERSION, "Hostile projectile version");
-  closedRecord(root2.actionsByEntityId, [], Object.keys(root2.actionsByEntityId));
-  closedRecord(root2.projectiles, [], Object.keys(root2.projectiles));
-  requireContract(Object.keys(root2.actionsByEntityId).length <= Object.keys(state.entitiesById).length, "Hostile ranged action bound");
+  closedRecord(root3, ["version", "actionsByEntityId", "projectiles"], ["catalogUpgrade", "catalogUpgradeV2"]);
+  requireContract(root3.version === HOSTILE_PROJECTILES_VERSION, "Hostile projectile version");
+  closedRecord(root3.actionsByEntityId, [], Object.keys(root3.actionsByEntityId));
+  closedRecord(root3.projectiles, [], Object.keys(root3.projectiles));
+  requireContract(Object.keys(root3.actionsByEntityId).length <= Object.keys(state.entitiesById).length, "Hostile ranged action bound");
   const parties = new Set(Object.values(state.playersById).map((p) => p.entityId));
-  for (const [id, a] of Object.entries(root2.actionsByEntityId)) {
+  for (const [id, a] of Object.entries(root3.actionsByEntityId)) {
     const source11 = state.entitiesById[id], profile2 = ranged3(source11);
     requireContract(source11?.team === "hostile" && profile2, "Hostile ranged action owner");
     closedRecord(a, ["phase", "phaseStartedTick", "phaseEndsTick", "targetEntityId", "aim", "actionSequence"], ["nextShotTick"]);
@@ -29403,14 +29480,14 @@ function validateHostileProjectiles(state) {
       vector(a.aim, true);
     }
   }
-  requireContract(Object.keys(root2.projectiles).length <= HOSTILE_PROJECTILE_LIMITS.global, "Hostile projectile global bound");
+  requireContract(Object.keys(root3.projectiles).length <= HOSTILE_PROJECTILE_LIMITS.global, "Hostile projectile global bound");
   const counts = /* @__PURE__ */ new Map(), groupByActor = new Map(Object.values(state.groupsById).flatMap((g) => g.entityIds.map((id) => [id, g])));
-  for (const [id, b] of Object.entries(root2.projectiles)) {
+  for (const [id, b] of Object.entries(root3.projectiles)) {
     closedRecord(b, ["id", "sourceId", "sourceResidencyRevision", "spaceInstanceId", "intendedTargetId", "position", "direction", "remaining", "remainingTicks", "firedTick", "radius", "type", "attack", "sourceLevel", "actionSequence"]);
     validateId("attackActionId", id);
     requireContract(b.id === id, "Hostile projectile identity");
     const source11 = state.entitiesById[b.sourceId], profile2 = ranged3(source11), g = groupByActor.get(b.sourceId);
-    requireContract(source11?.alive && source11.team === "hostile" && profile2 && root2.actionsByEntityId[b.sourceId], "Hostile projectile source");
+    requireContract(source11?.alive && source11.team === "hostile" && profile2 && root3.actionsByEntityId[b.sourceId], "Hostile projectile source");
     requireContract(source11.residency.spaceInstanceId === b.spaceInstanceId && source11.residency.residencyRevision === b.sourceResidencyRevision, "Hostile projectile source residency");
     requireContract(parties.has(b.intendedTargetId), "Hostile projectile intended target");
     requireContract(state.entitiesById[b.intendedTargetId].residency.spaceInstanceId === b.spaceInstanceId, "Hostile projectile target residency");
@@ -29752,15 +29829,16 @@ function validateActivityCommand(command) {
   const { residencyRevision, ...legacy } = command;
   safeInteger(residencyRevision, 1);
   validateCommand(legacy);
-  requireContract(["worldEvent.activate", "discovery.readNote", "quest.act", "movement.setIntent", "combat.primaryIntent", "combat.guardIntent", "combat.shadowDash", "combat.skill", "subweapon.claim", "classkit.claim", "service.modify", "service.material", "service.breakdown", "service.bestiary", "service.buy", "service.sell", "service.rest", "supply.use", "ferry.travel", "map.travel", "site.transition", "player.respawn", "player.revive", "loot.pickup", "gear.salvage", "gear.drop", "resource.interact", "progression.change", "forge.attune", "equipment.equip", "equipment.unequip"].includes(command.kind), "Unsupported activity command");
+  requireContract(["worldEvent.activate", "discovery.readNote", "quest.act", "movement.setIntent", "combat.primaryIntent", "combat.guardIntent", "combat.shadowDash", "combat.skill", "subweapon.claim", "classkit.claim", "service.modify", "service.material", "service.breakdown", "service.bestiary", "service.buy", "service.sell", "service.rest", "supply.use", "trip.eat", "ferry.travel", "map.travel", "site.transition", "player.respawn", "player.revive", "loot.pickup", "gear.salvage", "gear.drop", "resource.interact", "progression.change", "forge.attune", "equipment.equip", "equipment.unequip"].includes(command.kind), "Unsupported activity command");
   return command;
 }
 var same31 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 function validateActivityState(s) {
   validateWorldEventsState(s);
   validateWire(s);
-  closedRecord(s, ["format", "protocolVersion", "ticksPerSecond", "tick", "content", "campaign", "session", "playersById", "spacesByInstanceId", "entitiesById", "groupsById", "primary", "eventEmission", "appliedCommandsById", "appliedClientSequences", "lastAppliedAuthorityOrder", "identitySequence", "overworldInstanceId", "proofCase", "residencyHistoryByEntityId", "primaryContextsById"], ["siteExitProtectionByEntityId", "playerRespawnsById", "playerRevivesById", "encounterEconomy", "subweaponCombat", "d9World", "eliteCombat", "bossCombat", "hostileCombat", "wildernessCrowdGraceByEntityId", "waitingRoom", "bestiary"]);
+  closedRecord(s, ["format", "protocolVersion", "ticksPerSecond", "tick", "content", "campaign", "session", "playersById", "spacesByInstanceId", "entitiesById", "groupsById", "primary", "eventEmission", "appliedCommandsById", "appliedClientSequences", "lastAppliedAuthorityOrder", "identitySequence", "overworldInstanceId", "proofCase", "residencyHistoryByEntityId", "primaryContextsById"], ["siteExitProtectionByEntityId", "playerRespawnsById", "playerRevivesById", "encounterEconomy", "subweaponCombat", "d9World", "eliteCombat", "bossCombat", "hostileCombat", "wildernessCrowdGraceByEntityId", "waitingRoom", "bestiary", "trips"]);
   validateBestiaryRootV1(s);
+  validateTripRootV1(s);
   if (s.waitingRoom) {
     closedRecord(s.waitingRoom, ["version", "spaceInstanceId"]);
     requireContract(s.waitingRoom.version === "world-waiting-room-v1" && s.spacesByInstanceId[s.waitingRoom.spaceInstanceId] && s.waitingRoom.spaceInstanceId !== s.overworldInstanceId, "Invalid waiting room");
@@ -30882,9 +30960,9 @@ async function pageDigest(value, sha256) {
   });
   return entry.promise;
 }
-function createPageTransaction({ root: root2 = null, readPage, sha256 }) {
+function createPageTransaction({ root: root3 = null, readPage, sha256 }) {
   const dirty = /* @__PURE__ */ new Map(), cache5 = /* @__PURE__ */ new Map();
-  let current = root2;
+  let current = root3;
   const load = async (id) => {
     if (!id) return null;
     if (dirty.has(id)) return dirty.get(id);
@@ -30979,16 +31057,16 @@ var WORLD_PAGE_STORE = "worldPagesD9";
 var WORLD_ROOT_STORE = "worldRootsD9";
 var WORLD_PUBLICATION_VERSION = "world-publication-d9-v1";
 var digest10 = (id) => requireContract(typeof id === "string" && /^[a-f0-9]{64}$/.test(id), "Invalid world-page commitment");
-function validateWorldPublication(root2) {
-  validateWire(root2);
-  closedRecord(root2, ["version", "campaignId", "revision", "tick", "profile", "originPage", "runtimePage", "regions", "knowledge", "deadlines", "content", "ownership", "ground", "previous"]);
-  requireContract(root2.version === WORLD_PUBLICATION_VERSION && root2.profile === D9_PROFILE.version, "Unsupported world publication");
-  requireContract(typeof root2.campaignId === "string", "Missing campaign identity");
-  safeInteger(root2.revision, 1);
-  safeInteger(root2.tick);
-  for (const k of ["originPage", "runtimePage"]) digest10(root2[k]);
-  for (const k of ["regions", "knowledge", "deadlines", "content", "ownership", "ground", "previous"]) if (root2[k] !== null) digest10(root2[k]);
-  return root2;
+function validateWorldPublication(root3) {
+  validateWire(root3);
+  closedRecord(root3, ["version", "campaignId", "revision", "tick", "profile", "originPage", "runtimePage", "regions", "knowledge", "deadlines", "content", "ownership", "ground", "previous"]);
+  requireContract(root3.version === WORLD_PUBLICATION_VERSION && root3.profile === D9_PROFILE.version, "Unsupported world publication");
+  requireContract(typeof root3.campaignId === "string", "Missing campaign identity");
+  safeInteger(root3.revision, 1);
+  safeInteger(root3.tick);
+  for (const k of ["originPage", "runtimePage"]) digest10(root3[k]);
+  for (const k of ["regions", "knowledge", "deadlines", "content", "ownership", "ground", "previous"]) if (root3[k] !== null) digest10(root3[k]);
+  return root3;
 }
 function pageReferences(value) {
   validateWire(value);
@@ -31056,17 +31134,17 @@ function createWorldPagePublication({ openDatabase, sha256 }) {
     const record2 = await read(WORLD_ROOT_STORE, campaignId);
     if (!record2) return null;
     digest10(record2.id);
-    const root2 = await readPage(record2.id);
-    validateWorldPublication(root2);
-    requireContract(root2.campaignId === campaignId && record2.revision === root2.revision, "World root identity mismatch");
-    return { id: record2.id, root: root2 };
+    const root3 = await readPage(record2.id);
+    validateWorldPublication(root3);
+    requireContract(root3.campaignId === campaignId && record2.revision === root3.revision, "World root identity mismatch");
+    return { id: record2.id, root: root3 };
   }
-  async function publish({ root: root2, pages, expectedRoot = null, legacyCheckpoint = null }) {
-    validateWorldPublication(root2);
+  async function publish({ root: root3, pages, expectedRoot = null, legacyCheckpoint = null }) {
+    validateWorldPublication(root3);
     requireContract(Array.isArray(pages) && pages.length <= 256, "World publication batch bound");
     if (expectedRoot !== null) digest10(expectedRoot);
-    requireContract(root2.previous === expectedRoot, "World root parent mismatch");
-    requireContract(expectedRoot !== null || root2.revision === 1, "Initial root revision");
+    requireContract(root3.previous === expectedRoot, "World root parent mismatch");
+    requireContract(expectedRoot !== null || root3.revision === 1, "Initial root revision");
     const staged = /* @__PURE__ */ new Map(), referenceLists = /* @__PURE__ */ new Map();
     for (const { id, value } of pages) {
       digest10(id);
@@ -31077,7 +31155,7 @@ function createWorldPagePublication({ openDatabase, sha256 }) {
       staged.set(id, owned);
       referenceLists.set(owned, [...refs]);
     }
-    const rootId = await pageDigest(root2, sha256), ownedRoot = copyWire(root2);
+    const rootId = await pageDigest(root3, sha256), ownedRoot = copyWire(root3);
     staged.set(rootId, ownedRoot);
     referenceLists.set(ownedRoot, pageReferences(ownedRoot));
     const references = (value) => {
@@ -31108,28 +31186,28 @@ function createWorldPagePublication({ openDatabase, sha256 }) {
         if (--remaining !== 0) return;
         try {
           if (current?.id === rootId) {
-            requireContract(current.revision === root2.revision, "Replay revision mismatch");
+            requireContract(current.revision === root3.revision, "Replay revision mismatch");
             return;
           }
           requireContract((current?.id ?? null) === expectedRoot, "Stale world publication");
-          requireContract(root2.revision === (current?.revision ?? 0) + 1, "World revision gap");
+          requireContract(root3.revision === (current?.revision ?? 0) + 1, "World revision gap");
           if (expectedRoot === null) {
             requireContract(typeof legacyCheckpoint === "string" && legacy === legacyCheckpoint, "Origin migration checkpoint changed");
           }
           requireContract(found.size === referenced.size, "World publication references missing pages");
           trackWorldPublicationD9(tx, { staged, rootId, previous: expectedRoot, references, abort });
           for (const [id, value] of staged) tx.objectStore(WORLD_PAGE_STORE).put(value, id);
-          tx.objectStore(WORLD_ROOT_STORE).put({ id: rootId, revision: root2.revision }, root2.campaignId);
+          tx.objectStore(WORLD_ROOT_STORE).put({ id: rootId, revision: root3.revision }, root3.campaignId);
         } catch (e) {
           abort(e);
         }
       }
-      const r = tx.objectStore(WORLD_ROOT_STORE).get(root2.campaignId);
+      const r = tx.objectStore(WORLD_ROOT_STORE).get(root3.campaignId);
       r.onsuccess = () => {
         current = r.result ?? null;
         ready2();
       };
-      const old = tx.objectStore("campaigns").get(root2.campaignId);
+      const old = tx.objectStore("campaigns").get(root3.campaignId);
       old.onsuccess = () => {
         legacy = old.result ?? null;
         ready2();
@@ -31143,7 +31221,7 @@ function createWorldPagePublication({ openDatabase, sha256 }) {
       }
       tx.oncomplete = () => {
         db.close();
-        resolve({ status: "committed", id: rootId, revision: root2.revision });
+        resolve({ status: "committed", id: rootId, revision: root3.revision });
       };
       tx.onabort = () => {
         db.close();
@@ -31863,9 +31941,9 @@ async function readValue(index, key9, io) {
   requireContract(await pageDigest(doc, io.sha256) === ref.pageId && doc.kind === "navigation", "Navigation page commitment");
   return doc.payload;
 }
-async function prepareNavigationPagesD9({ root: root2, navigation, stagedPages = [] }, { sha256, readPage }) {
+async function prepareNavigationPagesD9({ root: root3, navigation, stagedPages = [] }, { sha256, readPage }) {
   validateNavigationD9(navigation);
-  const staged = new Map(stagedPages.map((p) => [p.id, p.value])), io = { sha256, readPage: async (id) => staged.get(id) ?? readPage(id) }, index = createPageTransaction({ root: root2, readPage: io.readPage, sha256 }), documents = /* @__PURE__ */ new Map(), rows3 = navigation.pending.slice(0, D9_RUNTIME_POLICY.navigationFlushPages);
+  const staged = new Map(stagedPages.map((p) => [p.id, p.value])), io = { sha256, readPage: async (id) => staged.get(id) ?? readPage(id) }, index = createPageTransaction({ root: root3, readPage: io.readPage, sha256 }), documents = /* @__PURE__ */ new Map(), rows3 = navigation.pending.slice(0, D9_RUNTIME_POLICY.navigationFlushPages);
   async function put3(key9, value) {
     const doc = worldDocument("navigation", value), id = await pageDigest(doc, sha256);
     staged.set(id, doc);
@@ -31887,18 +31965,18 @@ async function prepareNavigationPagesD9({ root: root2, navigation, stagedPages =
       await put3(k, { ...summary ?? {}, version: VERSION2, playerId: row2.playerId, spaceInstanceId: row2.spaceInstanceId, chunkX: String(x), chunkY: String(y), level, tiles: summary?.tiles ?? cells3.join(""), markers: [], region: null });
     }
   }
-  return { expectedRoot: root2, root: index.root(), rows: copyWire(rows3), pages: [...documents.values(), ...index.pages()] };
+  return { expectedRoot: root3, root: index.root(), rows: copyWire(rows3), pages: [...documents.values(), ...index.pages()] };
 }
-async function readNavigationWindowD9({ root: root2, playerId, spaceInstanceId, level, x, y, width, height, stagedPages = [] }, { sha256, readPage }) {
+async function readNavigationWindowD9({ root: root3, playerId, spaceInstanceId, level, x, y, width, height, stagedPages = [] }, { sha256, readPage }) {
   signedAddress(x);
   signedAddress(y);
   requireContract(Number.isInteger(level) && level >= 0 && level <= MAP_MAX_LEVEL_D9 && Number.isInteger(width) && Number.isInteger(height) && width > 0 && height > 0 && width * height <= D9_RUNTIME_POLICY.mapViewportCells, "Map viewport admission");
-  const staged = new Map(stagedPages.map((p) => [p.id, p.value])), io = { sha256, readPage: async (id) => staged.get(id) ?? readPage(id) }, index = createPageTransaction({ root: root2, sha256, readPage: io.readPage }), pages = [];
+  const staged = new Map(stagedPages.map((p) => [p.id, p.value])), io = { sha256, readPage: async (id) => staged.get(id) ?? readPage(id) }, index = createPageTransaction({ root: root3, sha256, readPage: io.readPage }), pages = [];
   for (let dy = 0; dy < height; dy++) for (let dx = 0; dx < width; dx++) {
     const cx = String(BigInt(x) + BigInt(dx)), cy = String(BigInt(y) + BigInt(dy)), page = await readValue(index, await mapKey(playerId, spaceInstanceId, level, cx, cy, sha256), io);
     if (page) pages.push(copyWire(page));
   }
-  return { version: VERSION2, root: root2, level, pages };
+  return { version: VERSION2, root: root3, level, pages };
 }
 
 // src/shared/contracts/world_seats_v1.js
@@ -32002,6 +32080,9 @@ function seatComparable(s, kept, party2, room2) {
   }
   only(c.bestiary?.albumsByPlayerId);
   only(c.bestiary?.groundByPlayerId);
+  only(c.trips?.bagsByPlayerId);
+  only(c.trips?.groundByPlayerId);
+  only(c.trips?.tripsByPlayerId);
   eachTarget(c, (row2, key9) => {
     if (party2.entities.has(row2[key9])) row2[key9] = "?";
   });
@@ -32427,14 +32508,14 @@ function installGearIndexD9(state, plan) {
   state.d9World.groundIndex = plan.groundIndex;
   state.d9World.paging.indexedRevisions = { ...plan.indexedRevisions };
 }
-async function readOwnedGearD9(root2, ownerPlayerId, itemId2, { readPage, sha256 }) {
-  if (!root2) return null;
-  const tx = createPageTransaction({ root: root2, readPage, sha256 }), row2 = await tx.get(await gearOwnershipKeyD9(ownerPlayerId, itemId2, sha256));
+async function readOwnedGearD9(root3, ownerPlayerId, itemId2, { readPage, sha256 }) {
+  if (!root3) return null;
+  const tx = createPageTransaction({ root: root3, readPage, sha256 }), row2 = await tx.get(await gearOwnershipKeyD9(ownerPlayerId, itemId2, sha256));
   return row2 ? copyWire(validateOwnedGearPageD9(row2)) : null;
 }
-async function readGroundChunkD9(root2, address, { readPage, sha256 }) {
-  if (!root2) return null;
-  const tx = createPageTransaction({ root: root2, readPage, sha256 }), ref = await tx.get(await gearChunkKeyD9(address, sha256));
+async function readGroundChunkD9(root3, address, { readPage, sha256 }) {
+  if (!root3) return null;
+  const tx = createPageTransaction({ root: root3, readPage, sha256 }), ref = await tx.get(await gearChunkKeyD9(address, sha256));
   if (!ref) return null;
   const doc = await readPage(ref.pageId);
   requireContract(await pageDigest(doc, sha256) === ref.pageId && doc.kind === "ground-chunk" && same34(doc.payload.address, address), "Ground chunk commitment/address mismatch");
@@ -32453,7 +32534,7 @@ async function readGroundCellPageD9(id, descriptor, { readPage, sha256 }) {
 // src/storage/world_gear_knowledge_d9.js
 var same35 = (a, b) => canonicalStringify(a) === canonicalStringify(b);
 async function prepareGearKnowledgeD9(state, { readPage, sha256, excludingGround = {} }) {
-  const root2 = state.d9World.ownershipIndex, tx = createPageTransaction({ root: root2, readPage, sha256 }), remoteGearByPlayer = {}, coldObligations = {}, revisions = {};
+  const root3 = state.d9World.ownershipIndex, tx = createPageTransaction({ root: root3, readPage, sha256 }), remoteGearByPlayer = {}, coldObligations = {}, revisions = {};
   for (const p of Object.values(state.playersById)) {
     revisions[p.playerId] = p.inventory.revision;
     requireContract(state.d9World.paging.indexedRevisions[p.playerId] === p.inventory.revision, "Index inventory changes before loading gear knowledge");
@@ -32463,7 +32544,7 @@ async function prepareGearKnowledgeD9(state, { readPage, sha256, excludingGround
     for (const id of candidates) {
       const marker = id.lastIndexOf(":ent:"), sourceEntityId = marker >= 0 ? id.slice(marker + 1) : null, reward = sourceEntityId ? inv.rewardsByEntityId[sourceEntityId] : null;
       if (inv.itemsById[id] || sourceEntityId && inv.renewal.groundBySourceId[sourceEntityId] && !excludingGround[p.playerId]?.includes(sourceEntityId) || inv.d7.salvaged[id] || inv.d7.autoSalvaged[id] || inv.services?.salesByItemId[id]) continue;
-      const row2 = await readOwnedGearD9(root2, p.playerId, id, { readPage, sha256 });
+      const row2 = await readOwnedGearD9(root3, p.playerId, id, { readPage, sha256 });
       requireContract(row2 && ["DROPPED", "SALVAGED", "AUTO_SALVAGED", "SOLD"].includes(row2.disposition) && (!reward || row2.item.definitionId === reward.definitionId && same35(row2.item.generated ?? null, reward.generated ?? null)), "Claimed reward lost its current owned disposition");
       remote[id] = { item: copyWire(row2.item), origin: copyWire(row2.origin), disposition: row2.disposition, recordHash: await pageDigest(row2, sha256) };
     }
@@ -32480,7 +32561,7 @@ async function prepareGearKnowledgeD9(state, { readPage, sha256, excludingGround
       (coldObligations[gid] ??= {})[p.playerId] = count2;
     }
   }
-  return { root: root2, revisions, groupIds: Object.keys(state.groupsById).sort(), remoteGearByPlayer, coldObligations };
+  return { root: root3, revisions, groupIds: Object.keys(state.groupsById).sort(), remoteGearByPlayer, coldObligations };
 }
 function installGearKnowledgeD9(state, plan) {
   requireContract(state.d9World.ownershipIndex === plan.root && same35(Object.keys(state.groupsById).sort(), plan.groupIds), "Gear knowledge context changed");
@@ -32535,28 +32616,28 @@ async function prepareWorldSnapshotD9(state, { sha256, previous = null, checkpoi
   Object.assign(lean.campaign, { saveRevision, checkpointId });
   const external = [state.d9World.regionIndex, state.d9World.discoveryIndex, state.d9World.deadlineIndex, state.d9World.content.index, state.d9World.ownershipIndex, state.d9World.groundIndex].filter(Boolean);
   const runtimePage = await add(worldDocument("runtime", { version: "world-runtime-cut-d9-v1", state: lean, participantPages, geometry: geometry2 }, [originPage, ...Object.values(participantPages), ...external]));
-  const root2 = { version: WORLD_PUBLICATION_VERSION, campaignId: state.campaign.campaignId, revision: revision2, tick: state.tick, profile: D9_PROFILE.version, originPage, runtimePage, regions: state.d9World.regionIndex, knowledge: state.d9World.discoveryIndex, deadlines: state.d9World.deadlineIndex, content: state.d9World.content.index, ownership: state.d9World.ownershipIndex, ground: state.d9World.groundIndex, previous: previous?.id ?? null };
-  validateWorldPublication(root2);
-  return { root: root2, pages: [...pages.values()], expectedRoot: previous?.id ?? null };
+  const root3 = { version: WORLD_PUBLICATION_VERSION, campaignId: state.campaign.campaignId, revision: revision2, tick: state.tick, profile: D9_PROFILE.version, originPage, runtimePage, regions: state.d9World.regionIndex, knowledge: state.d9World.discoveryIndex, deadlines: state.d9World.deadlineIndex, content: state.d9World.content.index, ownership: state.d9World.ownershipIndex, ground: state.d9World.groundIndex, previous: previous?.id ?? null };
+  validateWorldPublication(root3);
+  return { root: root3, pages: [...pages.values()], expectedRoot: previous?.id ?? null };
 }
 async function openWorldSnapshotD9(publication, { sha256, readPage, generatePlannedChunk = null }) {
-  const { root: root2 } = publication;
-  validateWorldPublication(root2);
-  requireContract(await pageDigest(root2, sha256) === publication.id, "World root commitment mismatch");
+  const { root: root3 } = publication;
+  validateWorldPublication(root3);
+  requireContract(await pageDigest(root3, sha256) === publication.id, "World root commitment mismatch");
   const read = async (id) => {
     const v = await readPage(id);
     requireContract(await pageDigest(v, sha256) === id, "World document commitment mismatch");
     return v;
   };
-  const [origin2, runtime] = await Promise.all([read(root2.originPage), read(root2.runtimePage)]);
+  const [origin2, runtime] = await Promise.all([read(root3.originPage), read(root3.runtimePage)]);
   requireContract(origin2.kind === "origin" && runtime.kind === "runtime" && origin2.payload.version === "world-origin-static-d9-v1" && runtime.payload.version === "world-runtime-cut-d9-v1", "World document kind/version mismatch");
   closedRecord(origin2.payload, ["version", "content", "origin", "collisions"]);
   closedRecord(runtime.payload, ["version", "state", "participantPages", "geometry"]);
   const state = copyWire(runtime.payload.state);
   migrateLegacyFunctionalSitesD10(state.d9World);
   requireContract(state.content === null && state.playersById === null && state.d9World.origin === null && state.d9World.runtime.chunks.length === 0, "Ambiguous packed state");
-  requireContract(state.tick === root2.tick && state.campaign.campaignId === root2.campaignId && state.campaign.saveRevision === state.d9World.migration.sourceSaveRevision + root2.revision, "World root/cut identity mismatch");
-  requireContract(state.d9World.regionIndex === root2.regions && state.d9World.discoveryIndex === root2.knowledge && state.d9World.deadlineIndex === root2.deadlines && state.d9World.content.index === root2.content && state.d9World.ownershipIndex === root2.ownership && state.d9World.groundIndex === root2.ground, "World page roots differ from exact cut");
+  requireContract(state.tick === root3.tick && state.campaign.campaignId === root3.campaignId && state.campaign.saveRevision === state.d9World.migration.sourceSaveRevision + root3.revision, "World root/cut identity mismatch");
+  requireContract(state.d9World.regionIndex === root3.regions && state.d9World.discoveryIndex === root3.knowledge && state.d9World.deadlineIndex === root3.deadlines && state.d9World.content.index === root3.content && state.d9World.ownershipIndex === root3.ownership && state.d9World.groundIndex === root3.ground, "World page roots differ from exact cut");
   state.content = copyWire(origin2.payload.content);
   state.d9World.origin = copyWire(origin2.payload.origin);
   state.playersById = {};
@@ -32697,9 +32778,9 @@ function createWorldPageBufferD9({ readPage, sha256, limit = D9_RUNTIME_POLICY.d
   function stage(pages) {
     prepareStage(pages)();
   }
-  async function readChunk(root2, address) {
-    if (!root2) return null;
-    const tx = createPageTransaction({ root: root2, readPage: read, sha256 }), ref = await tx.get(await chunkDeltaKeyD9(address, sha256));
+  async function readChunk(root3, address) {
+    if (!root3) return null;
+    const tx = createPageTransaction({ root: root3, readPage: read, sha256 }), ref = await tx.get(await chunkDeltaKeyD9(address, sha256));
     if (!ref) return null;
     requireContract(ref.version === "world-page-ref-d9-v1", "Chunk index reference version");
     const doc = await read(ref.pageId);
@@ -32707,10 +32788,10 @@ function createWorldPageBufferD9({ readPage, sha256, limit = D9_RUNTIME_POLICY.d
     requireContract(doc.payload.chunkX === address.chunkX && doc.payload.chunkY === address.chunkY, "Chunk delta address mismatch");
     return copyWire(doc.payload);
   }
-  async function prepareChunk(root2, delta) {
-    const doc = worldDocument("chunk-delta", delta), pageId = await pageDigest(doc, sha256), tx = createPageTransaction({ root: root2, readPage: read, sha256 });
+  async function prepareChunk(root3, delta) {
+    const doc = worldDocument("chunk-delta", delta), pageId = await pageDigest(doc, sha256), tx = createPageTransaction({ root: root3, readPage: read, sha256 });
     await tx.set(await chunkDeltaKeyD9(delta, sha256), { version: "world-page-ref-d9-v1", pageId });
-    return { expectedRoot: root2, root: tx.root(), pages: [{ id: pageId, value: doc }, ...tx.pages()] };
+    return { expectedRoot: root3, root: tx.root(), pages: [{ id: pageId, value: doc }, ...tx.pages()] };
   }
   return {
     readPage: read,
@@ -33200,13 +33281,13 @@ function worldTransferPatchD9(before, after, { releasedGroupIds = [], placements
       for (const key9 of /* @__PURE__ */ new Set([...Object.keys(a), ...Object.keys(b)])) visit(a[key9], b[key9], [...path, key9], Object.hasOwn(a, key9), Object.hasOwn(b, key9));
     } else changes.push({ path, before: pack2(a, aExists), after: pack2(b, bExists) });
   }
-  for (const root2 of transferRoots) {
-    const aExists = Object.hasOwn(before, root2), bExists = Object.hasOwn(after, root2);
+  for (const root3 of transferRoots) {
+    const aExists = Object.hasOwn(before, root3), bExists = Object.hasOwn(after, root3);
     if (aExists && bExists) {
-      validateWire(before[root2]);
-      validateWire(after[root2]);
+      validateWire(before[root3]);
+      validateWire(after[root3]);
     }
-    visit(before[root2], after[root2], [root2], aExists, bExists);
+    visit(before[root3], after[root3], [root3], aExists, bExists);
   }
   requireContract(changes.length <= 256, "World transfer needs a smaller prepared batch");
   return { version: "world-transfer-patch-d9-v1", campaignId: before.campaign.campaignId, runtimeRevision: before.d9World.runtime.revision, frames: copyWire(before.d9World.runtime.frames), revisions: Object.fromEntries(Object.values(before.playersById).map((p) => [p.playerId, p.inventory.revision])), releasedGroupIds: [...releasedGroupIds], placements: copyWire(placements), coldGroups: [...coldGroups], changes };
@@ -33285,8 +33366,8 @@ async function dueWorldDeadlines(index, tick, limit = 64) {
   safeInteger(tick);
   return index.range({ through: tick.toString(16).padStart(14, "0") + "f".repeat(50), limit });
 }
-async function prepareChunkDeadlinesD9(root2, delta, { readPage, sha256 }) {
-  const tx = createPageTransaction({ root: root2, readPage, sha256 });
+async function prepareChunkDeadlinesD9(root3, delta, { readPage, sha256 }) {
+  const tx = createPageTransaction({ root: root3, readPage, sha256 });
   for (const e of delta.encounters) {
     if (!e.group.cleared || e.economy.vacatedTick === null) continue;
     const base = { version: D9_DEADLINE_VERSION, chunkX: delta.chunkX, chunkY: delta.chunkY, anchorId: e.episode.anchorId, episode: e.economy.episode, vacatedTick: e.economy.vacatedTick };

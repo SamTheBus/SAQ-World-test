@@ -4196,6 +4196,60 @@ function validateHeroLook(look) {
 }
 var heroLookOf = (d8) => d8?.look ?? DEFAULT_LOOK;
 
+// src/shared/content/trip_snacks_v1.js
+var TRIP_TICKS_PER_SECOND = 60;
+var TRIP_EAT_TICKS = 144;
+var TRIP_TICKS = 120 * 60;
+var TRIP_WEAR_OFF_TICKS = 72;
+var BAD_TRIP_CHANCE = 0;
+var TRIP_SNACKS_V1 = Object.freeze({
+  glowcap: Object.freeze({
+    id: "glowcap",
+    label: "Glowcap",
+    verb: "Eat",
+    buff: "damage",
+    amount: 0.2,
+    pill: "+20% damage",
+    text: "A glowing teal mushroom. Eat it for a trip: usually a good one (+20% damage for 2:00)."
+  }),
+  "frog-leg": Object.freeze({
+    id: "frog-leg",
+    label: "Frog Leg",
+    verb: "Lick",
+    buff: "speed",
+    amount: 0.25,
+    pill: "+25% speed",
+    text: "A tingly blue frog leg. Lick it for a trip: usually a good one (+25% move speed and a hop for 2:00)."
+  })
+});
+var TRIP_SNACK_IDS_V1 = Object.freeze(Object.keys(TRIP_SNACKS_V1));
+var TRIP_SNACK_DROPS_V1 = Object.freeze({
+  sporecrown: Object.freeze({ snack: "glowcap", chance: 1 / 10 }),
+  gulpjaw: Object.freeze({ snack: "frog-leg", chance: 1 / 10 }),
+  croakmaw: Object.freeze({ snack: "frog-leg", chance: 1 / 10 }),
+  dart_frog: Object.freeze({ snack: "frog-leg", chance: 1 / 200 }),
+  bog_frog: Object.freeze({ snack: "frog-leg", chance: 1 / 200 })
+});
+function tripBuffV1(trip, tick) {
+  if (!trip || trip.outcome !== "good" || !(tick >= trip.startTick && tick < trip.endTick)) return null;
+  return TRIP_SNACKS_V1[trip.snack] ?? null;
+}
+function tripDamageMultiplierV1(trip, tick) {
+  const b = tripBuffV1(trip, tick);
+  return b?.buff === "damage" ? 1 + b.amount : 1;
+}
+function tripSpeedMultiplierV1(trip, tick) {
+  const b = tripBuffV1(trip, tick);
+  return b?.buff === "speed" ? 1 + b.amount : 1;
+}
+function startTripV1(snack, tick, roll2) {
+  const outcome = roll2 < BAD_TRIP_CHANCE ? "bad" : "good", startTick = tick + TRIP_EAT_TICKS;
+  return Object.freeze({ snack, outcome: outcome === "bad" ? "good" : outcome, eatTick: tick, startTick, endTick: startTick + TRIP_TICKS });
+}
+function tripExpiredV1(trip, tick) {
+  return !trip || tick >= trip.endTick + TRIP_WEAR_OFF_TICKS;
+}
+
 // src/shared/contracts/hashing.js
 function utf8(value) {
   requireContract(typeof value === "string" && !value.includes("\0"), "Invalid UTF-8 input");
@@ -4867,6 +4921,9 @@ function validateCommand(command) {
     if (["up", "down"].includes(command.payload.direction)) requireContract(typeof command.payload.transitionId === "string" && command.payload.transitionId.length <= 180 && command.payload.extractionId === void 0, "Missing floor transition identity");
     else if (command.payload.direction === "extract") requireContract(typeof command.payload.extractionId === "string" && command.payload.extractionId.length <= 180 && command.payload.transitionId === void 0, "Missing extraction identity");
     else requireContract(command.payload.transitionId === void 0 && command.payload.extractionId === void 0, "Unexpected site transition identity");
+  } else if (command.kind === "trip.eat") {
+    closedRecord(command.payload, ["snack"]);
+    requireContract(TRIP_SNACK_IDS_V1.includes(command.payload.snack), "Invalid snack");
   } else if (command.kind === "space.travel") {
     closedRecord(command.payload, ["exitId"]);
     requireContract(["field-to-room", "room-to-field"].includes(command.payload.exitId) || isOldwardExit(command.payload.exitId), "Unknown authored or fixture exit");
@@ -29696,6 +29753,17 @@ export {
   DEFAULT_LOOK,
   validHeroName,
   heroLookOf,
+  TRIP_TICKS_PER_SECOND,
+  TRIP_EAT_TICKS,
+  TRIP_TICKS,
+  TRIP_WEAR_OFF_TICKS,
+  TRIP_SNACKS_V1,
+  TRIP_SNACK_IDS_V1,
+  TRIP_SNACK_DROPS_V1,
+  tripDamageMultiplierV1,
+  tripSpeedMultiplierV1,
+  startTripV1,
+  tripExpiredV1,
   SPACE_IDS,
   OLDWARD_SPACES,
   createOldwardSeamlessManifest,
@@ -29768,6 +29836,7 @@ export {
   createMajorNameRegistry,
   D9_PROFILE,
   COMPOSITION_ELITE_V1,
+  compositionHashV1,
   VITALITY_WEAVER_AFFIX_ID,
   SWIFT_COMMANDER_AFFIX_ID,
   GLACIAL_WARDEN_AFFIX_ID,
