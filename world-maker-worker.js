@@ -711,6 +711,7 @@ var COMBAT_BALANCE_V3 = freezeWire({
   miniBoss: { maxHp: { numerator: 6, denominator: 1 }, attackDamage: { numerator: 3, denominator: 2 } },
   boss: { maxHp: 45, attackDamage: 4 }
 });
+var STAT_PERKS_V1 = freezeWire({ version: "stat-perks-v1", basisPointsPerPoint: 10, hasteCapBasisPoints: 2e3, cooldownCapBasisPoints: 1500, areaCapBasisPoints: 2e3 });
 
 // src/shared/content/economy_v1.js
 var ECONOMY_V1 = freezeWire({

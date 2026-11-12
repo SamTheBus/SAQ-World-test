@@ -2330,6 +2330,7 @@ var COMBAT_BALANCE_V3 = freezeWire({
   miniBoss: { maxHp: { numerator: 6, denominator: 1 }, attackDamage: { numerator: 3, denominator: 2 } },
   boss: { maxHp: 45, attackDamage: 4 }
 });
+var STAT_PERKS_V1 = freezeWire({ version: "stat-perks-v1", basisPointsPerPoint: 10, hasteCapBasisPoints: 2e3, cooldownCapBasisPoints: 1500, areaCapBasisPoints: 2e3 });
 
 // src/shared/content/economy_v1.js
 var ECONOMY_V1 = freezeWire({
@@ -27256,6 +27257,39 @@ function migratePresentationInventory(p) {
   return inv;
 }
 
+// src/shared/contracts/gear_affix_totals_v2.js
+var EMPTY2 = Object.freeze({ any: false, mainDmg: 0, offDmg: 0, fireDmg: 0, frostDmg: 0, lightningDmg: 0, bleedDmg: 0, poisonDmg: 0, shockDmg: 0, counterDmg: 0, eliteDmg: 0, cdr: 0, lifeKill: 0, lifeHit: 0, skills: Object.freeze({}), ranks: Object.freeze({}) });
+var cache4 = /* @__PURE__ */ new WeakMap();
+var bp = (v) => Math.round(Number(v) * 1e4);
+function gearAffixTotalsV2(player) {
+  const inv = player?.inventory;
+  if (!inv?.equipped || !inv.itemsById) return EMPTY2;
+  const levels2 = inv.economy?.slotLevels ?? {}, key5 = inv.revision + "|" + Object.entries(inv.equipped).map(([slot, id]) => slot + "=" + id + "@" + (levels2[slot] ?? 0)).join(","), hit = cache4.get(inv);
+  if (hit?.key === key5) return hit.totals;
+  const t = { ...EMPTY2, skills: {}, ranks: {} };
+  for (const [slot, id] of Object.entries(inv.equipped)) {
+    const item = id && inv.itemsById[id];
+    if (!item?.generated) continue;
+    const scale2 = 100 + Number(levels2[slot] ?? 0), grow = (v) => Math.round(bp(v) * scale2 / 100);
+    for (const a of workshopResult(item).affixes ?? []) {
+      if (!isNewAffix(a.key)) continue;
+      t.any = true;
+      if (a.key === "skillDmg") t.skills[a.skill] = (t.skills[a.skill] ?? 0) + grow(a.value);
+      else if (a.key === "passiveRank") t.ranks[a.skill] = (t.ranks[a.skill] ?? 0) + Number(a.value);
+      else if (a.key === "lifeHit") t.lifeHit += Math.round(Number(a.value) * scale2 / 100);
+      else t[a.key] += grow(a.value);
+    }
+  }
+  t.cdr = Math.min(t.cdr, bp(CDR_CAP));
+  const totals2 = Object.freeze(t);
+  cache4.set(inv, { key: key5, totals: totals2 });
+  return totals2;
+}
+function heroRank(player, id) {
+  const r = classRank(player?.d8, id);
+  return r ? r + (gearAffixTotalsV2(player).ranks[id] ?? 0) : 0;
+}
+
 // src/shared/contracts/player_stats_d9.js
 var times2 = (a, b) => {
   b = asCombatAmount(b);
@@ -27290,10 +27324,18 @@ function resolveD9PlayerStats(player) {
   for (const k of ["str", "dex", "int"]) attributes[k] = combatInteger(roundCombat(times2(attributes[k], addCombat(1, effect(k + "Pct"))), "floor"));
   const str = subtractCombat(maxCombat(attributes.str, 5), 5), dex = subtractCombat(maxCombat(attributes.dex, 5), 5), intel = subtractCombat(maxCombat(attributes.int, 5), 5), f3 = definition?.family ?? {};
   const gear = (k) => multiplyCombat(exactDecimal(definition?.bonuses[k] ?? 0), scale2, 100);
-  const balanced = usesBuildBalanceV2(player), flatAttack = balanced ? addCombat(base.attack, gear("attack")) : addCombat(addCombat(addCombat(base.attack, gear("attack")), multiplyCombat(str, 5, 2)), dex);
+  const perkBp = (pts, cap3) => {
+    const n = BigInt(pts.n) * BigInt(STAT_PERKS_V1.basisPointsPerPoint) / BigInt(pts.d);
+    return Number(n < BigInt(cap3) ? n : BigInt(cap3));
+  };
+  const balanced = usesBuildBalanceV2(player), hasteBp = balanced ? perkBp(dex, STAT_PERKS_V1.hasteCapBasisPoints) : 0, areaBp = balanced && family2 === "tome" ? perkBp(intel, STAT_PERKS_V1.areaCapBasisPoints) : 0;
+  if (hasteBp) effects.activeSpeed = addCombat(effects.activeSpeed ?? 0, combatAmount(hasteBp, 1e4));
+  if (areaBp) effects.bonusAreaRadius = addCombat(effects.bonusAreaRadius ?? 0, combatAmount(areaBp, 1e4));
+  const cooldownBp = balanced ? Math.min(gearAffixTotalsV2(player).cdr + (player.bestiary?.stats?.cdr ?? 0) + perkBp(intel, STAT_PERKS_V1.cooldownCapBasisPoints), Math.round(CDR_CAP * 1e4)) : 0;
+  const flatAttack = balanced ? addCombat(base.attack, gear("attack")) : addCombat(addCombat(addCombat(base.attack, gear("attack")), multiplyCombat(str, 5, 2)), dex);
   const main = family2 === "dagger" ? dex : family2 === "tome" ? intel : str, attack = times2(flatAttack, addCombat(quantize(addCombat(1, effect("atkPct"))), balanced ? multiplyCombat(main, COMBAT_BALANCE_V3.mainAttackBasisPoints, 1e4) : multiplyCombat(main, 1, 1e3)));
   const maxHp = roundCombat(times2(addCombat(addCombat(addCombat(base.maxHp, gear("maxHp")), balanced && family2 === "shield" ? BUILD_BALANCE_POLICY.attributes.shieldBaseHp : 0), multiplyCombat(str, balanced ? BUILD_BALANCE_POLICY.attributes.strHp : 10)), addCombat(quantize(addCombat(1, effect("maxHpPct"))), multiplyCombat(str, balanced ? 0 : 1, 1e3))));
-  const defense = pct2(addCombat(addCombat(base.defense, gear("defense")), multiplyCombat(intel, 1, 5)), "defPct"), tome = tomeProfile(definition?.spellType ?? "fire", definition?.rarityTier ?? 0), den = addCombat(intel, 150);
+  const defense = pct2(addCombat(addCombat(base.defense, gear("defense")), balanced ? 0 : multiplyCombat(intel, 1, 5)), "defPct"), tome = tomeProfile(definition?.spellType ?? "fire", definition?.rarityTier ?? 0), den = addCombat(intel, 150);
   const barrier = balanced ? combatAmount(0) : addCombat(tome.barrier, multiplyCombat(intel, 15n * BigInt(den.d), 100n * BigInt(den.n)));
   const chance = addCombat(addCombat(combatAmount(5, 100), effect("critChance")), balanced ? multiplyCombat(main, COMBAT_BALANCE_V3.mainCritBasisPoints, 1e4) : 0), overflow = compareCombat(chance, 1) > 0 ? subtractCombat(chance, 1) : combatAmount(0);
   const rawBlock = addCombat(roundCombat(multiplyCombat(addCombat(effect("block"), exactDecimal(definition?.family ? 0 : 0.15)), 1e6)), multiplyCombat(str, 1e3)), rawParry = addCombat(roundCombat(multiplyCombat(addCombat(effect("parry"), exactDecimal(definition?.family ? 0 : 0.12)), 1e6)), multiplyCombat(dex, 1e3));
@@ -27302,7 +27344,7 @@ function resolveD9PlayerStats(player) {
   const speed = multiplyCombat(minCombat(combatAmount(5, 2), times2(addCombat(1, multiplyCombat(addCombat(boots, effect("moveSpeed")), 1, 100)), addCombat(1, effect("moveSpeedPct")))), 3);
   const result = {
     ...base,
-    ...balanced ? { armorLevel: String(player.progression.level) } : {},
+    ...balanced ? { armorLevel: String(player.progression.level), cooldownCut: combatAmount(cooldownBp, 1e4) } : {},
     attack,
     maxHp,
     defense,
@@ -27902,38 +27944,6 @@ function validateAttackTiming(t, base) {
   const total = t.startup + t.active + t.recovery, original = base.startup + base.active + base.recovery;
   requireContract(total <= original && total >= Math.round(original / 3.75), "Haste ceiling");
   requireContract(canonicalStringify({ ...t, startup: base.startup, active: base.active, recovery: base.recovery }) === canonicalStringify(base), "Haste changed attack behavior");
-}
-
-// src/shared/contracts/gear_affix_totals_v2.js
-var EMPTY2 = Object.freeze({ any: false, mainDmg: 0, offDmg: 0, fireDmg: 0, frostDmg: 0, lightningDmg: 0, bleedDmg: 0, poisonDmg: 0, shockDmg: 0, counterDmg: 0, eliteDmg: 0, cdr: 0, lifeKill: 0, lifeHit: 0, skills: Object.freeze({}), ranks: Object.freeze({}) });
-var cache4 = /* @__PURE__ */ new WeakMap();
-var bp = (v) => Math.round(Number(v) * 1e4);
-function gearAffixTotalsV2(player) {
-  const inv = player?.inventory;
-  if (!inv?.equipped || !inv.itemsById) return EMPTY2;
-  const key5 = inv.revision + "|" + Object.entries(inv.equipped).map(([slot, id]) => slot + "=" + id).join(","), hit = cache4.get(inv);
-  if (hit?.key === key5) return hit.totals;
-  const t = { ...EMPTY2, skills: {}, ranks: {} };
-  for (const id of Object.values(inv.equipped)) {
-    const item = id && inv.itemsById[id];
-    if (!item?.generated) continue;
-    for (const a of workshopResult(item).affixes ?? []) {
-      if (!isNewAffix(a.key)) continue;
-      t.any = true;
-      if (a.key === "skillDmg") t.skills[a.skill] = (t.skills[a.skill] ?? 0) + bp(a.value);
-      else if (a.key === "passiveRank") t.ranks[a.skill] = (t.ranks[a.skill] ?? 0) + Number(a.value);
-      else if (a.key === "lifeHit") t.lifeHit += Number(a.value);
-      else t[a.key] += bp(a.value);
-    }
-  }
-  t.cdr = Math.min(t.cdr, bp(CDR_CAP));
-  const totals2 = Object.freeze(t);
-  cache4.set(inv, { key: key5, totals: totals2 });
-  return totals2;
-}
-function heroRank(player, id) {
-  const r = classRank(player?.d8, id);
-  return r ? r + (gearAffixTotalsV2(player).ranks[id] ?? 0) : 0;
 }
 
 // src/simulation/primary_rules.js
@@ -29236,6 +29246,7 @@ export {
   oldwardAreaDefinition,
   oldwardSpace,
   integerRoot,
+  STAT_PERKS_V1,
   goldUnit,
   minutesGold,
   potionRefillPriceV1,
@@ -30151,13 +30162,13 @@ export {
   inventoryReadModel,
   migrateD4Inventory,
   migratePresentationInventory,
+  gearAffixTotalsV2,
+  heroRank,
   validatePlayerInventory3 as validatePlayerInventory2,
   resolvePlayerStats,
   mitigateFractionalPlayerDamage,
   mitigateWorldPlayerDamage,
   mitigatePlayerDamage,
-  gearAffixTotalsV2,
-  heroRank,
   applyPrimaryIntent,
   readyPrimarySources,
   beginPrimary,

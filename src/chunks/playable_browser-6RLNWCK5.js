@@ -287,6 +287,7 @@ import {
   STARTER_VERSION,
   STARTER_VILLAGE_ID,
   STARTER_VILLAGE_NAME,
+  STAT_PERKS_V1,
   SUBWEAPONS,
   SUBWEAPON_TYPES,
   SUMMIT_FAMILIES,
@@ -1023,7 +1024,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-RTR5ZVHN.js";
+} from "./chunk-6XCT23D3.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -95422,7 +95423,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     const sigCut = (SIGNATURE_CUTS[skillId] ?? []).reduce((n, id) => n + rank(a, id), 0), base3 = sigCut ? Math.ceil(styled * (100 - 2 * sigCut) / 100) : styled;
     const longer = rank(a, "restless") ? [6, 5] : skillId === "cast" && rank(a, "overload") ? [13, 10] : [1, 1];
     record3.cooldowns[skillId] = Math.ceil((BREAKER.includes(skillId) && rank(a, "reckless") ? Math.ceil(base3 * 3 / 4) : base3) * longer[0] / longer[1]);
-    const cdr = Math.min(gearAffixTotalsV2(owner(a)).cdr + (owner(a)?.bestiary?.stats.cdr ?? 0), Math.round(CDR_CAP * 1e4));
+    const cut2 = stats3?.cooldownCut, cdr = cut2 ? Number(BigInt(cut2.n) * 10000n / BigInt(cut2.d)) : Math.min(gearAffixTotalsV2(owner(a)).cdr + (owner(a)?.bestiary?.stats.cdr ?? 0), Math.round(CDR_CAP * 1e4));
     if (cdr) record3.cooldowns[skillId] = Math.max(1, Math.ceil(record3.cooldowns[skillId] * (1e4 - cdr) / 1e4));
     record3.cooldowns[skillId] = focusCooldownV1(s, owner(a)?.playerId, record3.cooldowns[skillId]);
     record3.last = { skillId, tick: s.tick, ...aim2, ...typeof done3 === "object" ? done3 : {} };
@@ -111761,6 +111762,7 @@ function characterStatGroupsV3(model) {
     ["Critical chance", s.critChance, pct3],
     ["Critical damage", s.critMultiplier, mult],
     ["Active haste", s.activeHaste, pct3],
+    ["Cooldown reduction", s.cooldownCut, pct3],
     ["Block chance", s.blockChance, pct3],
     ["Parry chance", s.parryChance, pct3],
     ["Maximum barrier", s.maxBarrier],
@@ -111795,7 +111797,7 @@ function characterStatGroupsV3(model) {
 }
 var BRUSH = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4l6 6-8 8H6v-6z"/><path d="M11 7l6 6"/></svg>';
 var KEY_STATS = [["Attack", "attack", "Attack"], ["Defense", "defense", "Defense"], ["Maximum health", "maxHp", "Max HP"], ["Critical chance", "critChance", "Crit"]];
-var ROW_ICONS = { "Attack": "attack", "Defense": "defense", "Maximum health": "maxHp", "Critical chance": "critChance", "Critical damage": "critDamage", "Active haste": "activeSpeed", "Block chance": "block", "Parry chance": "parry", "Area multiplier": "bonusAreaRadius", "Movement speed": "moveSpeed", "Maximum barrier": "defense" };
+var ROW_ICONS = { "Attack": "attack", "Defense": "defense", "Maximum health": "maxHp", "Critical chance": "critChance", "Critical damage": "critDamage", "Active haste": "activeSpeed", "Cooldown reduction": "cdr", "Block chance": "block", "Parry chance": "parry", "Area multiplier": "bonusAreaRadius", "Movement speed": "moveSpeed", "Maximum barrier": "defense" };
 var KEY_LABELS = new Set(KEY_STATS.map((k) => k[0]));
 function statGain(before, after) {
   if (before === after || after === void 0) return "";
@@ -112756,7 +112758,20 @@ function createProgressionPresentation({ document: document2, readModel, issue }
   attrFoot.append(undo, el3("span", "", "sx-spacer"), commit);
   attributes.append(attrHead, attrRows, attrFoot);
   let unspent = 0, held = false, holdTimer = null, repeatTimer = null;
-  const ATTR_COLORS = { str: "#e8836b", dex: "#5fd38a", int: "#8f8cf0" }, ATTR_SHORT_V2 = { str: "+1 Attack \xB7 +6 Max HP \xB7 Block", dex: "+1 Attack \xB7 +0.25% Crit \xB7 Parry", int: "+1 Attack \xB7 +0.2 Defense \xB7 Tome power" }, ATTR_SHORT = { str: "+2.5 Attack \xB7 +10 Max HP \xB7 Block", dex: "+1 Attack \xB7 Dagger power \xB7 Crit damage", int: "+0.2 Defense \xB7 Tome power" };
+  const ATTR_COLORS = { str: "#e8836b", dex: "#5fd38a", int: "#8f8cf0" }, ATTR_SHORT = { str: "+2.5 Attack \xB7 +10 Max HP \xB7 Block", dex: "+1 Attack \xB7 Dagger power \xB7 Crit damage", int: "+0.2 Defense \xB7 Tome power" };
+  const MAIN_OF = { shield: "str", dagger: "dex", tome: "int" }, PK = STAT_PERKS_V1, LEAD = "+0.25% Attack \xB7 +0.1% Crit \xB7 ";
+  const attrPerkText = (k, family, total) => {
+    const main = MAIN_OF[family] === k, pts2 = Math.max(0, total - 5), perk = (name, capBp) => pts2 * PK.basisPointsPerPoint >= capBp ? `${name} ${capBp / 100}% (max)` : `+0.1% ${name}`;
+    if (k === "str") return main ? LEAD + "+0.1% Block \xB7 +6 Max HP" : "+6 Max HP";
+    if (k === "dex") return (main ? LEAD + "+0.1% Parry \xB7 " : "") + perk("Active haste", PK.hasteCapBasisPoints);
+    return (main ? LEAD + perk("Area size", PK.areaCapBasisPoints) + " \xB7 " : "") + perk("Cooldowns", PK.cooldownCapBasisPoints);
+  };
+  const attrPerkTitle = (k, family) => {
+    const main = MAIN_OF[family] === k, lead = `Each ${k.toUpperCase()} above 5: ` + (main ? "+0.25% Attack, +0.1% Crit chance, " : "");
+    if (k === "str") return lead + (main ? "more Block and " : "") + "+6 Max HP." + (main ? " A Shield also gives +20 Max HP." : "");
+    if (k === "dex") return lead + (main ? "more Parry and " : "") + `+0.1% Active haste (up to ${PK.hasteCapBasisPoints / 100}%).`;
+    return lead + (main ? `+0.1% Area size (up to ${PK.areaCapBasisPoints / 100}%) and ` : "") + `+0.1% Cooldowns (up to ${PK.cooldownCapBasisPoints / 100}%; all Cooldowns together stop at 30%).`;
+  };
   const spare = () => unspent - draft.str - draft.dex - draft.int;
   const stopHold = () => {
     clearTimeout(holdTimer);
@@ -112765,10 +112780,11 @@ function createProgressionPresentation({ document: document2, readModel, issue }
   };
   const attrRow = {};
   for (const k of ["str", "dex", "int"]) {
-    const row2 = el3("div", "", "sx-arow"), ic = el3("span", "", "sx-aic"), text3 = el3("div", "", "sx-atext"), line29 = el3("div", "", "sx-aline"), value2 = el3("span", "", "sx-aval"), gain2 = el3("span", "", "sx-adraft"), desc = el3("div", "", "sx-adesc"), step = el3("div", "", "sx-step");
+    const row2 = el3("div", "", "sx-arow"), ic = el3("span", "", "sx-aic"), text3 = el3("div", "", "sx-atext"), line29 = el3("div", "", "sx-aline"), value2 = el3("span", "", "sx-aval"), gain2 = el3("span", "", "sx-adraft"), badge = el3("span", "Main", "sx-amain"), desc = el3("div", "", "sx-adesc"), step = el3("div", "", "sx-step");
     ic.innerHTML = statIcon(k, 20);
     row2.style.setProperty("--c", ATTR_COLORS[k]);
-    line29.append(el3("b", k.toUpperCase()), value2, gain2);
+    badge.hidden = true;
+    line29.append(el3("b", k.toUpperCase()), value2, gain2, badge);
     text3.append(line29, desc);
     const add2 = () => {
       if (spare() <= 0) return false;
@@ -112810,7 +112826,7 @@ function createProgressionPresentation({ document: document2, readModel, issue }
     step.append(minus2, plus);
     row2.append(ic, text3, step);
     attrRows.append(row2);
-    attrRow[k] = { row: row2, value: value2, gain: gain2, desc, minus: minus2, plus, bump: false };
+    attrRow[k] = { row: row2, value: value2, gain: gain2, badge, desc, minus: minus2, plus, bump: false };
   }
   let previewKey = "", previewStats = null;
   function preview(m, local8, d) {
@@ -112899,8 +112915,10 @@ function createProgressionPresentation({ document: document2, readModel, issue }
       r.row.classList.toggle("can-spend", can);
       r.value.textContent = draft[k] ? statText(Number(statValue(base3)) + draft[k]) : statText(base3);
       r.gain.textContent = draft[k] ? "+" + draft[k] : "";
-      r.desc.textContent = (v2 ? ATTR_SHORT_V2 : ATTR_SHORT)[k];
-      r.row.title = (v2 ? { str: "Each STR above 5: +1 Attack and +6 HP; Shield/main-family Attack scaling and raw Block bonus. Equipping a Shield also grants +20 Max HP.", dex: "Each DEX above 5: +1 Attack and +0.25 percentage points Crit chance; Dagger-family Attack scaling and raw Parry bonus.", int: "Each INT above 5: +1 Attack, +0.2 Defense, and +0.25% Tome spell power. Tome-family Attack scaling is retained." } : ATTRIBUTE_MEANINGS)[k];
+      const family = local8.stats.subType;
+      r.desc.textContent = v2 ? attrPerkText(k, family, Number(statValue(base3)) + draft[k]) : ATTR_SHORT[k];
+      r.row.title = v2 ? attrPerkTitle(k, family) : ATTRIBUTE_MEANINGS[k];
+      r.badge.hidden = !v2 || MAIN_OF[family] !== k;
       r.minus.hidden = r.plus.hidden = !can;
       r.minus.disabled = !draft[k];
       r.plus.disabled = left <= 0;
