@@ -77957,41 +77957,47 @@ function shrinkPuff(c, x, y, k) {
     c.restore();
   }
 }
-function edgeInner(c, W19, H7, b, t) {
-  const P19 = 2 * (W19 + H7), waves = Math.max(4, Math.round(P19 / Math.max(120, Math.min(W19, H7) * 0.42))), amp = b * 0.32, step = Math.max(6, b * 0.5), k = b * 1.5, d = (s2) => b + Math.sin(s2 / P19 * waves * TAU115 - t * 1.6) * amp;
-  let s = 0;
-  c.moveTo(k, d(0));
-  for (let x = k; x <= W19 - k; x += step) c.lineTo(x, d(s + x));
-  s += W19;
-  for (let y = k; y <= H7 - k; y += step) c.lineTo(W19 - d(s + y), y);
-  s += H7;
-  for (let x = W19 - k; x >= k; x -= step) c.lineTo(x, H7 - d(s + W19 - x));
-  s += W19;
-  for (let y = H7 - k; y >= k; y -= step) c.lineTo(d(s + H7 - y), y);
-  c.closePath();
-}
+var edgeCanvas = null;
 function drawTripSwirl(c, W19, H7, t, amt) {
-  if (!(amt > 0) || !(W19 > 0 && H7 > 0)) return;
-  const b = Math.max(5, Math.min(W19, H7) * 0.022) * amt;
+  if (!(amt > 0) || !(W19 > 0 && H7 > 0) || typeof document === "undefined") return;
+  const w = Math.max(32, Math.round(W19 / 4)), h = Math.max(32, Math.round(H7 / 4));
+  edgeCanvas ??= document.createElement("canvas");
+  if (edgeCanvas.width !== w || edgeCanvas.height !== h) {
+    edgeCanvas.width = w;
+    edgeCanvas.height = h;
+  }
+  const v = edgeCanvas.getContext("2d");
+  v.setTransform(1, 0, 0, 1, 0, 0);
+  v.globalCompositeOperation = "source-over";
+  v.clearRect(0, 0, w, h);
+  const D2 = Math.min(w, h) * (0.09 + 0.015 * Math.sin(t * 1.4)) * amt;
+  const side = (x0, y0, x1, y1, x, y, sw, sh3) => {
+    const g = v.createLinearGradient(x0, y0, x1, y1);
+    g.addColorStop(0, "rgba(255,255,255,1)");
+    g.addColorStop(0.25, "rgba(255,255,255,.4)");
+    g.addColorStop(0.65, "rgba(255,255,255,.06)");
+    g.addColorStop(1, "rgba(255,255,255,0)");
+    v.fillStyle = g;
+    v.fillRect(x, y, sw, sh3);
+  };
+  side(0, 0, 0, D2, 0, 0, w, D2);
+  side(0, h, 0, h - D2, 0, h - D2, w, D2);
+  side(0, 0, D2, 0, 0, 0, D2, h);
+  side(w, 0, w - D2, 0, w - D2, 0, D2, h);
+  v.globalCompositeOperation = "source-in";
+  if (v.createConicGradient) {
+    const g = v.createConicGradient(t * 0.5, w / 2, h / 2);
+    for (let i = 0; i <= 12; i++) g.addColorStop(i / 12, `hsl(${i * 30},95%,62%)`);
+    v.fillStyle = g;
+  } else v.fillStyle = `hsl(${t * 40 % 360},95%,62%)`;
+  v.fillRect(0, 0, w, h);
+  v.globalCompositeOperation = "source-over";
   c.save();
   c.setTransform(1, 0, 0, 1, 0, 0);
-  if (c.createConicGradient) {
-    const g = c.createConicGradient(t * 0.5, W19 / 2, H7 / 2);
-    for (let i = 0; i <= 12; i++) g.addColorStop(i / 12, `hsl(${i * 30},95%,62%)`);
-    c.fillStyle = g;
-  } else c.fillStyle = `hsl(${t * 40 % 360},95%,62%)`;
-  c.globalAlpha = 0.78;
-  c.beginPath();
-  c.rect(0, 0, W19, H7);
-  edgeInner(c, W19, H7, b, t);
-  c.fill("evenodd");
-  c.globalAlpha = 0.6;
-  c.strokeStyle = "#fff";
-  c.lineWidth = Math.max(1, b * 0.12);
-  c.lineJoin = "round";
-  c.beginPath();
-  edgeInner(c, W19, H7, b, t);
-  c.stroke();
+  c.globalCompositeOperation = "screen";
+  c.globalAlpha = 0.85;
+  c.imageSmoothingEnabled = true;
+  c.drawImage(edgeCanvas, 0, 0, W19, H7);
   c.restore();
 }
 function tripCanvasFilter(t, amt) {
