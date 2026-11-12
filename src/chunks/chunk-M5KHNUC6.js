@@ -1899,6 +1899,14 @@ function eventAtSlotV1(asset, eventSlotId) {
   return m.get(eventSlotId) ?? null;
 }
 
+// src/shared/content/upland_summits_v1.js
+var SUMMIT_ORDINAL = 1;
+var SUMMIT_GUARDS = Object.freeze({ 3: Object.freeze({ count: 6, rank: "B" }), 4: Object.freeze({ count: 8, rank: "A" }) });
+var SUMMIT_FAMILIES = Object.freeze(["golem", "gargoyle", "rust_nibbler", "gargoyle", "golem", "rust_nibbler", "gargoyle", "golem"]);
+var isSummitAnchorV1 = (anchor) => anchor?.ordinal === SUMMIT_ORDINAL && Boolean(anchor.summit);
+var summitGroupV1 = (s, groupId) => Boolean(s?.d9World?.plannedWorld) && s.d9World.episodes?.[groupId]?.geography?.anchorOrdinal === SUMMIT_ORDINAL;
+var summitAlreadyAdmittedV1 = (anchor, episode) => isSummitAnchorV1(anchor) && Boolean(episode);
+
 // src/shared/content/planned_events_v1.js
 var BUILT_EVENT_KINDS = Object.freeze(["cursed_shrine", "nests", "road_ambush", "wayside_shrine", "raided_camp", "buried_cache", "trophy_hunt"]);
 var CATEGORIES = Object.freeze(["pathside", "backcountry", "deep_wild"]);
@@ -2094,7 +2102,7 @@ var roadsideSkinOfV1 = (biome) => ROADSIDE_SKINS[biome] ?? "woodland";
 var roadsideChestV1 = (s, source10) => {
   if (source10.kind !== "chest") return false;
   const n = s.d9World?.episodes?.[source10.groupId]?.geography?.anchorOrdinal;
-  return Boolean(roadsideOrdinalV1(n) || plannedEventOrdinal(n) && (plannedEventFirstKind(n) === "buried_cache" || s.d9World.worldEvents?.records[source10.groupId]?.kind === "trophy_hunt"));
+  return Boolean(roadsideOrdinalV1(n) || summitGroupV1(s, source10.groupId) || plannedEventOrdinal(n) && (plannedEventFirstKind(n) === "buried_cache" || s.d9World.worldEvents?.records[source10.groupId]?.kind === "trophy_hunt"));
 };
 var ROADSIDE_LABELS = freezeWire({ road_ambush: "Road Ambush", wayside_shrine: "Wayside Shrine" });
 var CAMP_CREW = freezeWire(["bandit_cutthroat", "bandit_brute", "bandit_cutthroat", "bandit_archer", "bandit_cutthroat", "bandit_cutthroat"]);
@@ -14308,11 +14316,17 @@ function broodElitesV1(s, g, { includeDefeated = false } = {}) {
   const primary = NEST_POLICY.broodAffixes[nestSkinOfV1(nestBiomeV1(s, g.groupId))];
   return ids.map((id) => ({ id, n: g.entityIds.indexOf(id), primary }));
 }
+var summitGuardIdV1 = (s, g) => summitGroupV1(s, g.groupId) ? g.entityIds[0] ?? null : null;
+function summitGuardElitesV1(s, g, { includeDefeated = false } = {}) {
+  const id = summitGuardIdV1(s, g);
+  if (!id || !includeDefeated && !s.entitiesById[id]?.alive) return [];
+  return [{ id, n: 0, primary: COMPOSITION_POLICY_V1.primaryAffixes[compositionHashV1(COMPOSITION_V1 + "/summit/" + s.campaign.seed.seedHex + "/" + g.groupId) % COMPOSITION_POLICY_V1.primaryAffixes.length] }];
+}
 function compositionCandidatesV1(s, g, level, { includeDefeated = false } = {}) {
-  const f3 = floorFor(s, g), champion = huntChampionIdV1(s, g), chance = compositionBandV1(level).chancePercent, key5 = COMPOSITION_V1 + "/" + s.campaign.seed.seedHex + "/" + g.groupId + "/" + String(s.encounterEconomy.groups[g.groupId].episode) + "/" + String(level);
+  const f3 = floorFor(s, g), champion = huntChampionIdV1(s, g), guard = summitGuardIdV1(s, g), chance = compositionBandV1(level).chancePercent, key5 = COMPOSITION_V1 + "/" + s.campaign.seed.seedHex + "/" + g.groupId + "/" + String(s.encounterEconomy.groups[g.groupId].episode) + "/" + String(level);
   const candidates = g.entityIds.flatMap((id, n) => {
     const a = s.entitiesById[id], spec = f3?.encounter.members[n];
-    if (!a || !includeDefeated && !a.alive || a.boss || s.content?.definitionsById[a.contentDefinitionId]?.isBoss || s.bossCombat?.bossesByEntityId?.[id] || String(spec?.memberKey).startsWith("finale:") || !ordinaryEnemyForProfile(a.contentDefinitionId) || BROOD_CREATURE_FAMILIES_V1.includes(familyOf2(s, id)) || id === champion) return [];
+    if (!a || !includeDefeated && !a.alive || a.boss || s.content?.definitionsById[a.contentDefinitionId]?.isBoss || s.bossCombat?.bossesByEntityId?.[id] || String(spec?.memberKey).startsWith("finale:") || !ordinaryEnemyForProfile(a.contentDefinitionId) || BROOD_CREATURE_FAMILIES_V1.includes(familyOf2(s, id)) || id === champion || id === guard) return [];
     return [{ id, n, roll: compositionHashV1(key5 + "/" + id), primary: COMPOSITION_POLICY_V1.primaryAffixes[compositionHashV1(key5 + "/" + id + "/primary") % COMPOSITION_POLICY_V1.primaryAffixes.length] }];
   }).sort((a, b) => a.roll - b.roll || a.id.localeCompare(b.id));
   const rolled = candidates.filter((c) => c.roll % 100 < chance);
@@ -14322,7 +14336,7 @@ function adoptEncounterCompositionV1(s, g, level, { rescale = false } = {}) {
   if (!hasWorldCombat(s) || g.cleared) return [];
   const root2 = s.eliteCombat ??= initialEliteCombatD12_4(), f3 = floorFor(s, g), changed = [], budget = Math.min(COMPOSITION_POLICY_V1.maximumElitesPerGroup, Math.max(1, Math.ceil(g.entityIds.length / COMPOSITION_POLICY_V1.membersPerEliteBudget)));
   let count2 = g.entityIds.filter((id) => root2.elitesByEntityId[id] && familyOf2(s, id) !== "broodling").length;
-  const chosen = new Map([...broodElitesV1(s, g), ...huntChampionElitesV1(s, g), ...compositionCandidatesV1(s, g, level).filter((c) => !root2.elitesByEntityId[c.id]).slice(0, Math.max(0, budget - count2))].filter((c) => !root2.elitesByEntityId[c.id]).map((c) => [c.id, c]));
+  const chosen = new Map([...broodElitesV1(s, g), ...huntChampionElitesV1(s, g), ...summitGuardElitesV1(s, g), ...compositionCandidatesV1(s, g, level).filter((c) => !root2.elitesByEntityId[c.id]).slice(0, Math.max(0, budget - count2))].filter((c) => !root2.elitesByEntityId[c.id]).map((c) => [c.id, c]));
   for (const [n, id] of g.entityIds.entries()) {
     if (aegisMimicFor(s, id)) continue;
     const prior = root2.elitesByEntityId[id], c = chosen.get(id), spec = f3?.encounter.members[n];
@@ -14356,7 +14370,7 @@ function validateCompositionEliteV1(s, e) {
   requireContract(canonicalStringify(e.affixIds.slice(1)) === canonicalStringify(passiveEliteTraitsV1(e.identitySource, level)), "Composition passive roll changed");
   if (!e.composition.inherited) {
     requireContract(e.eliteId === generatedEliteId(e.identitySource), "Generated elite identity changed");
-    const row2 = [...broodElitesV1(s, g, { includeDefeated: true }), ...huntChampionElitesV1(s, g, { includeDefeated: true }), ...compositionCandidatesV1(s, g, level, { includeDefeated: true })].find((c) => c.id === e.entityId);
+    const row2 = [...broodElitesV1(s, g, { includeDefeated: true }), ...huntChampionElitesV1(s, g, { includeDefeated: true }), ...summitGuardElitesV1(s, g, { includeDefeated: true }), ...compositionCandidatesV1(s, g, level, { includeDefeated: true })].find((c) => c.id === e.entityId);
     requireContract(row2 && row2.primary === e.affixIds[0], "Composition candidate roll changed");
   }
 }
@@ -29252,6 +29266,11 @@ export {
   useEventLinksV1,
   eventCacheTileV1,
   eventAtSlotV1,
+  SUMMIT_ORDINAL,
+  SUMMIT_GUARDS,
+  SUMMIT_FAMILIES,
+  summitGroupV1,
+  summitAlreadyAdmittedV1,
   BUILT_EVENT_KINDS,
   ROADSIDE_KINDS,
   plannedEventOrdinal,

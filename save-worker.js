@@ -1978,6 +1978,14 @@ function resetEncounterSnapshotV2(prior, { tick, minimumLevel, participants, sca
   return { ...prior, activatedTick: tick, minimumLevel: progressionWire(progressionBigInt(minimumLevel)), effectiveLevel: level, sourceDepth: level, participants: participants.map((p) => ({ playerId: p.playerId, heroLevel: progressionWire(progressionBigInt(p.heroLevel)) })) };
 }
 
+// src/shared/content/upland_summits_v1.js
+var SUMMIT_ORDINAL = 1;
+var SUMMIT_GUARDS = Object.freeze({ 3: Object.freeze({ count: 6, rank: "B" }), 4: Object.freeze({ count: 8, rank: "A" }) });
+var SUMMIT_FAMILIES = Object.freeze(["golem", "gargoyle", "rust_nibbler", "gargoyle", "golem", "rust_nibbler", "gargoyle", "golem"]);
+var isSummitAnchorV1 = (anchor) => anchor?.ordinal === SUMMIT_ORDINAL && Boolean(anchor.summit);
+var summitGroupV1 = (s, groupId) => Boolean(s?.d9World?.plannedWorld) && s.d9World.episodes?.[groupId]?.geography?.anchorOrdinal === SUMMIT_ORDINAL;
+var summitAlreadyAdmittedV1 = (anchor, episode) => isSummitAnchorV1(anchor) && Boolean(episode);
+
 // src/shared/content/planned_events_v1.js
 var BUILT_EVENT_KINDS = Object.freeze(["cursed_shrine", "nests", "road_ambush", "wayside_shrine", "raided_camp", "buried_cache", "trophy_hunt"]);
 var CATEGORIES = Object.freeze(["pathside", "backcountry", "deep_wild"]);
@@ -2173,7 +2181,7 @@ var roadsideSkinOfV1 = (biome) => ROADSIDE_SKINS[biome] ?? "woodland";
 var roadsideChestV1 = (s, source11) => {
   if (source11.kind !== "chest") return false;
   const n = s.d9World?.episodes?.[source11.groupId]?.geography?.anchorOrdinal;
-  return Boolean(roadsideOrdinalV1(n) || plannedEventOrdinal(n) && (plannedEventFirstKind(n) === "buried_cache" || s.d9World.worldEvents?.records[source11.groupId]?.kind === "trophy_hunt"));
+  return Boolean(roadsideOrdinalV1(n) || summitGroupV1(s, source11.groupId) || plannedEventOrdinal(n) && (plannedEventFirstKind(n) === "buried_cache" || s.d9World.worldEvents?.records[source11.groupId]?.kind === "trophy_hunt"));
 };
 var ROADSIDE_LABELS = freezeWire({ road_ambush: "Road Ambush", wayside_shrine: "Wayside Shrine" });
 var CAMP_CREW = freezeWire(["bandit_cutthroat", "bandit_brute", "bandit_cutthroat", "bandit_archer", "bandit_cutthroat", "bandit_cutthroat"]);
@@ -3422,11 +3430,17 @@ function broodElitesV1(s, g, { includeDefeated = false } = {}) {
   const primary = NEST_POLICY.broodAffixes[nestSkinOfV1(nestBiomeV1(s, g.groupId))];
   return ids.map((id) => ({ id, n: g.entityIds.indexOf(id), primary }));
 }
+var summitGuardIdV1 = (s, g) => summitGroupV1(s, g.groupId) ? g.entityIds[0] ?? null : null;
+function summitGuardElitesV1(s, g, { includeDefeated = false } = {}) {
+  const id = summitGuardIdV1(s, g);
+  if (!id || !includeDefeated && !s.entitiesById[id]?.alive) return [];
+  return [{ id, n: 0, primary: COMPOSITION_POLICY_V1.primaryAffixes[compositionHashV1(COMPOSITION_V1 + "/summit/" + s.campaign.seed.seedHex + "/" + g.groupId) % COMPOSITION_POLICY_V1.primaryAffixes.length] }];
+}
 function compositionCandidatesV1(s, g, level, { includeDefeated = false } = {}) {
-  const f3 = floorFor(s, g), champion = huntChampionIdV1(s, g), chance = compositionBandV1(level).chancePercent, key9 = COMPOSITION_V1 + "/" + s.campaign.seed.seedHex + "/" + g.groupId + "/" + String(s.encounterEconomy.groups[g.groupId].episode) + "/" + String(level);
+  const f3 = floorFor(s, g), champion = huntChampionIdV1(s, g), guard = summitGuardIdV1(s, g), chance = compositionBandV1(level).chancePercent, key9 = COMPOSITION_V1 + "/" + s.campaign.seed.seedHex + "/" + g.groupId + "/" + String(s.encounterEconomy.groups[g.groupId].episode) + "/" + String(level);
   const candidates = g.entityIds.flatMap((id, n) => {
     const a = s.entitiesById[id], spec = f3?.encounter.members[n];
-    if (!a || !includeDefeated && !a.alive || a.boss || s.content?.definitionsById[a.contentDefinitionId]?.isBoss || s.bossCombat?.bossesByEntityId?.[id] || String(spec?.memberKey).startsWith("finale:") || !ordinaryEnemyForProfile(a.contentDefinitionId) || BROOD_CREATURE_FAMILIES_V1.includes(familyOf2(s, id)) || id === champion) return [];
+    if (!a || !includeDefeated && !a.alive || a.boss || s.content?.definitionsById[a.contentDefinitionId]?.isBoss || s.bossCombat?.bossesByEntityId?.[id] || String(spec?.memberKey).startsWith("finale:") || !ordinaryEnemyForProfile(a.contentDefinitionId) || BROOD_CREATURE_FAMILIES_V1.includes(familyOf2(s, id)) || id === champion || id === guard) return [];
     return [{ id, n, roll: compositionHashV1(key9 + "/" + id), primary: COMPOSITION_POLICY_V1.primaryAffixes[compositionHashV1(key9 + "/" + id + "/primary") % COMPOSITION_POLICY_V1.primaryAffixes.length] }];
   }).sort((a, b) => a.roll - b.roll || a.id.localeCompare(b.id));
   const rolled = candidates.filter((c) => c.roll % 100 < chance);
@@ -3441,7 +3455,7 @@ function validateCompositionEliteV1(s, e) {
   requireContract(canonicalStringify(e.affixIds.slice(1)) === canonicalStringify(passiveEliteTraitsV1(e.identitySource, level)), "Composition passive roll changed");
   if (!e.composition.inherited) {
     requireContract(e.eliteId === generatedEliteId(e.identitySource), "Generated elite identity changed");
-    const row2 = [...broodElitesV1(s, g, { includeDefeated: true }), ...huntChampionElitesV1(s, g, { includeDefeated: true }), ...compositionCandidatesV1(s, g, level, { includeDefeated: true })].find((c) => c.id === e.entityId);
+    const row2 = [...broodElitesV1(s, g, { includeDefeated: true }), ...huntChampionElitesV1(s, g, { includeDefeated: true }), ...summitGuardElitesV1(s, g, { includeDefeated: true }), ...compositionCandidatesV1(s, g, level, { includeDefeated: true })].find((c) => c.id === e.entityId);
     requireContract(row2 && row2.primary === e.affixIds[0], "Composition candidate roll changed");
   }
 }
@@ -5689,7 +5703,7 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
     }
     return Math.max(0, 1 - d / 10, eventBuckets.size ? eventGuard(x, y) : 0);
   }
-  const T8 = terraces ? createUplandTerraces({
+  const T9 = terraces ? createUplandTerraces({
     hash: standsHashText(seedDigest + "/" + FOREST_STANDS_VERSION + "/terrace"),
     high,
     biomeAt: (x, y) => x < 0 || y < 0 || x >= W9 || y >= terrain2.heightTiles ? null : base(x, y).biome,
@@ -5739,7 +5753,7 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
         kind2 = p.grove && S.vnoise(K.grove, x / 60, y / 60) > 0.55 ? "bamboo" : "thicket";
         r = 2.2 + roll * 4;
       }
-      if (kind2 && T8 && T8.near(x - r * 1.32, y - r * 1.32, x + r * 1.32, y + r * 1.32, 4)) kind2 = null;
+      if (kind2 && T9 && T9.near(x - r * 1.32, y - r * 1.32, x + r * 1.32, y + r * 1.32, 4)) kind2 = null;
       if (kind2 && e.road > 4) {
         const a = (h >>> 18 & 255) / 255, stretch = 1.05 + (h >>> 26 & 15) / 28;
         c = { cx, cy, x, y, kind: kind2, biome: e.biome, r: Math.min(RMAX, r), pri: h, ax: a, stretch };
@@ -5878,7 +5892,7 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
     }
     const p = PROFILES[e.biome], s = standAt(x, y), zone = S.zone(s, e.biome);
     out = { zone, cover: false, trail: false, block: null, kind: null, clusterId: null };
-    const tm = T8?.at(x, y);
+    const tm = T9?.at(x, y);
     if (tm) {
       const g = tm.g;
       if (tm.r.block) {
@@ -5934,8 +5948,8 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
     const [cx, cy] = key9.split(",").map(Number);
     return mass(cx, cy);
   }
-  const terraceAt = (x, y) => T8?.at(x, y) ?? null;
-  return Object.freeze({ tileAt, massByKey, standAt, envAt, terraceAt, terraces: T8 });
+  const terraceAt = (x, y) => T9?.at(x, y) ?? null;
+  return Object.freeze({ tileAt, massByKey, standAt, envAt, terraceAt, terraces: T9 });
 }
 var pick = (list2, h) => {
   let total = 0;
@@ -6118,7 +6132,7 @@ function townCrossingsV1(streets, line, closed = false) {
 var allStreets = (t) => [...t.streets, ...townConnectorsV1(t).map((c) => [c.pts, c.w])];
 var GATE_ART = { village: { WH: 36, TW: 34, k: 0.9 }, town: { WH: 40, TW: 36, k: 1 }, city: { WH: 50, TW: 40, k: 1.15 }, capital: { WH: 58, TW: 44, k: 1.3 } };
 function townGateSpanV1(size, f3, h, at2, len = 0) {
-  const cfg = GATE_ART[size === "hamlet" ? "village" : size] ?? GATE_ART.town, gk = Math.min(1.5, (f3.gateScale ?? 1) * cfg.k), T8 = 32, s = h.s;
+  const cfg = GATE_ART[size === "hamlet" ? "village" : size] ?? GATE_ART.town, gk = Math.min(1.5, (f3.gateScale ?? 1) * cfg.k), T9 = 32, s = h.s;
   const [ax, ay] = at2(s - 0.8), [bx, by] = at2(s + 0.8), wa = PM.atan2(by - ay, bx - ax);
   let lo = 0, hi = 0;
   for (const p of h.parts ?? [h]) {
@@ -6136,7 +6150,7 @@ function townGateSpanV1(size, f3, h, at2, len = 0) {
     const half = Math.max(-lo, hi) + pad;
     return { pre: half, post: half, vertical: false };
   }
-  const foot = cfg.WH + cfg.TW / 2 + 6, h2 = (cfg.WH + 60) * gk * 1.3, north = Math.max(pad, (foot + 12) / T8), south = Math.max(pad, (h2 + 26 - foot) / T8);
+  const foot = cfg.WH + cfg.TW / 2 + 6, h2 = (cfg.WH + 60) * gk * 1.3, north = Math.max(pad, (foot + 12) / T9), south = Math.max(pad, (h2 + 26 - foot) / T9);
   return ay < by ? { pre: -lo + north, post: hi + south, vertical: true } : { pre: -lo + south, post: hi + north, vertical: true };
 }
 function wallMarks(t, f3, open2) {
@@ -6353,8 +6367,8 @@ function townArtBuildingsV1(t) {
   return A;
 }
 function townCastleYewsV1(f3) {
-  const T8 = 32, k = f3.keep, cx = (f3.x + f3.w / 2) * T8, G2 = (k.y + k.h) * T8, yb = (f3.y + f3.h - 1) * T8, out = [];
-  for (let y = G2 + 2.8 * T8; y < yb - 6.2 * T8; y += 2.2 * T8) for (const sd of [-1, 1]) out.push({ x: cx + sd * (2.6 * T8 + 16), y });
+  const T9 = 32, k = f3.keep, cx = (f3.x + f3.w / 2) * T9, G2 = (k.y + k.h) * T9, yb = (f3.y + f3.h - 1) * T9, out = [];
+  for (let y = G2 + 2.8 * T9; y < yb - 6.2 * T9; y += 2.2 * T9) for (const sd of [-1, 1]) out.push({ x: cx + sd * (2.6 * T9 + 16), y });
   return out;
 }
 var townFountainArtV1 = (t) => {
@@ -6369,11 +6383,11 @@ function townArtBlockersV1(t) {
   out = [];
   blockCache.set(t, out);
   if (!townNewArtV1(t)) return out;
-  const T8 = 32;
-  const tile = (x, y) => out.push({ x: Math.floor(x / T8), y: Math.floor(y / T8), w: 1, h: 1 });
+  const T9 = 32;
+  const tile = (x, y) => out.push({ x: Math.floor(x / T9), y: Math.floor(y / T9), w: 1, h: 1 });
   const span2 = (p0, p1) => {
-    let a = Math.ceil(p0 / T8 - 0.5), b = Math.floor(p1 / T8 - 0.5);
-    if (b < a) a = b = Math.floor((p0 + p1) / 2 / T8);
+    let a = Math.ceil(p0 / T9 - 0.5), b = Math.floor(p1 / T9 - 0.5);
+    if (b < a) a = b = Math.floor((p0 + p1) / 2 / T9);
     return [a, b - a + 1];
   };
   const box3 = (x0, y0, x1, y1) => {
@@ -6381,24 +6395,24 @@ function townArtBlockersV1(t) {
     out.push({ x: a, y: b, w, h });
   };
   const oval = (cx, cy, rx, ry) => {
-    for (let y = Math.floor((cy - ry) / T8); y <= Math.floor((cy + ry) / T8); y++) for (let x = Math.floor((cx - rx) / T8); x <= Math.floor((cx + rx) / T8); x++) {
-      const dx = ((x + 0.5) * T8 - cx) / rx, dy = ((y + 0.5) * T8 - cy) / ry;
+    for (let y = Math.floor((cy - ry) / T9); y <= Math.floor((cy + ry) / T9); y++) for (let x = Math.floor((cx - rx) / T9); x <= Math.floor((cx + rx) / T9); x++) {
+      const dx = ((x + 0.5) * T9 - cx) / rx, dy = ((y + 0.5) * T9 - cy) / ry;
       if (dx * dx + dy * dy <= 1) out.push({ x, y, w: 1, h: 1 });
     }
     tile(cx, cy);
   };
   const zone = t.features.some((f3) => f3.type === "zone"), plazas = t.features.filter((f3) => f3.type === "plaza");
   const ring = (R2, gate) => {
-    const gx = (R2.x + R2.w / 2) * T8;
+    const gx = (R2.x + R2.w / 2) * T9;
     for (let x = R2.x; x < R2.x + R2.w; x++) {
       out.push({ x, y: R2.y, w: 1, h: 1 });
-      if (Math.abs((x + 0.5) * T8 - gx) >= gate) out.push({ x, y: R2.y + R2.h - 1, w: 1, h: 1 });
+      if (Math.abs((x + 0.5) * T9 - gx) >= gate) out.push({ x, y: R2.y + R2.h - 1, w: 1, h: 1 });
     }
     out.push({ x: R2.x, y: R2.y, w: 1, h: R2.h }, { x: R2.x + R2.w - 1, y: R2.y, w: 1, h: R2.h });
   };
   for (const [, R2, k] of t.places) if (k === "garden") {
     ring(R2, 20);
-    const x = R2.x * T8, y = R2.y * T8, w = R2.w * T8, h = R2.h * T8;
+    const x = R2.x * T9, y = R2.y * T9, w = R2.w * T9, h = R2.h * T9;
     tile(x + w / 2 + 34, y + h + 12);
     tile(x + w / 2 - 40, y + h + 14);
     if (w >= 192) box3(x + w - 48, y + 34, x + w - 8, y + 46);
@@ -6408,7 +6422,7 @@ function townArtBlockersV1(t) {
     oval(f3.x, f3.y + dy, rx, ry);
   }
   for (const p of plazas) {
-    const fx = (p.x + p.w / 2) * T8, fy = (p.y + p.h / 2) * T8 + 20;
+    const fx = (p.x + p.w / 2) * T9, fy = (p.y + p.h / 2) * T9 + 20;
     if (zone) {
       const cap3 = t.size === "capital", d = cap3 ? 230 : 200;
       for (const s of [-1, 1]) {
@@ -6424,12 +6438,12 @@ function townArtBlockersV1(t) {
   }
   for (const st of t.features.filter((f3) => f3.type === "stalls")) for (const s of st.stalls) out.push({ x: s.x, y: s.y, w: 3, h: 2 });
   for (const g of t.features.filter((f3) => f3.type === "green")) {
-    oval(g.x * T8, g.y * T8 + 10, 30, 12);
-    oval(g.x * T8 + g.rx * T8 * 0.55, g.y * T8 - g.ry * T8 * 0.15, 26, 10);
+    oval(g.x * T9, g.y * T9 + 10, 30, 12);
+    oval(g.x * T9 + g.rx * T9 * 0.55, g.y * T9 - g.ry * T9 * 0.15, 26, 10);
   }
   for (const f3 of t.features) {
     if (f3.type === "tower" && f3.circle) {
-      const E = f3.circle, cx = (E.x + E.w / 2) * T8, cy = (E.y + E.h / 2) * T8, rx = E.w * T8 / 2 - 6, ry = E.h * T8 / 2 - 4;
+      const E = f3.circle, cx = (E.x + E.w / 2) * T9, cy = (E.y + E.h / 2) * T9, rx = E.w * T9 / 2 - 6, ry = E.h * T9 / 2 - 4;
       for (let k = 0; k < 6; k++) {
         const a = -Math.PI / 2 + k * Math.PI * 2 / 6 + 0.26;
         if (Math.cos(a) > 0.5 && Math.sin(a) < 0.5) continue;
@@ -6437,7 +6451,7 @@ function townArtBlockersV1(t) {
       }
     }
     if (f3.type === "forge" && f3.pad) {
-      const E = f3.pad, x = E.x * T8, y = E.y * T8;
+      const E = f3.pad, x = E.x * T9, y = E.y * T9;
       out.push({ x: E.x, y: E.y, w: E.w, h: Math.min(4, E.h) });
       tile(x + 134, y + 208);
       box3(x + 168, y + 162, x + 208, y + 178);
@@ -6452,7 +6466,7 @@ function townArtBlockersV1(t) {
     if (f3.type === "manor" && f3.building) {
       const b = t.buildings.find((q) => q.id === f3.building);
       if (b) {
-        const X = b.x * T8, W9 = b.w * T8, G2 = (b.y + b.h) * T8, cx = X + W9 / 2, fy = G2 + 2.4 * T8;
+        const X = b.x * T9, W9 = b.w * T9, G2 = (b.y + b.h) * T9, cx = X + W9 / 2, fy = G2 + 2.4 * T9;
         box3(X + 6, fy - 10, cx - 34, fy);
         box3(cx + 34, fy - 10, X + W9 - 6, fy);
         for (const sx of [cx - 120, cx + 120]) tile(sx, G2 + 30);
@@ -6461,7 +6475,7 @@ function townArtBlockersV1(t) {
     if (f3.type === "field") ring(f3, 26);
     if (f3.type === "yard") out.push({ x: f3.x, y: f3.y, w: f3.w, h: f3.h });
     if (f3.type === "monument") {
-      const x = f3.x * T8, y = f3.y * T8, R2 = (f3.r - 0.7) * T8, E = 0.8;
+      const x = f3.x * T9, y = f3.y * T9, R2 = (f3.r - 0.7) * T9, E = 0.8;
       oval(x, y + 24, 62, 26);
       for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
         tile(x + sx * 92, y + sy * R2 * E * 0.86 + (sy < 0 ? 6 : 12) - 4);
@@ -6469,44 +6483,44 @@ function townArtBlockersV1(t) {
       }
     }
     if (f3.type === "castle") {
-      const k = f3.keep, X = k.x * T8, W9 = k.w * T8, G2 = (k.y + k.h) * T8, cx = X + W9 / 2, pw = W9 * 0.3;
+      const k = f3.keep, X = k.x * T9, W9 = k.w * T9, G2 = (k.y + k.h) * T9, cx = X + W9 / 2, pw = W9 * 0.3;
       for (const sx of [X + 4, X + W9 - 4]) oval(sx, G2 + 20, 40, 16);
       for (const sd of [-1, 1]) tile(cx + sd * (pw / 2 + 54), G2 + 34);
       for (const y of townCastleYewsV1(f3)) tile(y.x, y.y - 4);
     }
-    if (f3.type === "castleTrees") for (const [tx, ty] of f3.trees) tile(tx * T8, ty * T8 - 2);
+    if (f3.type === "castleTrees") for (const [tx, ty] of f3.trees) tile(tx * T9, ty * T9 - 2);
     if (f3.type === "manor" && f3.garden && !f3.building) {
-      const g = f3.garden, x = g.x * T8, y = g.y * T8, w = g.w * T8, h = g.h * T8, cx = x + w / 2, cy = y + h / 2, R0 = Math.min(w, h) * 0.2, gap = 13;
+      const g = f3.garden, x = g.x * T9, y = g.y * T9, w = g.w * T9, h = g.h * T9, cx = x + w / 2, cy = y + h / 2, R0 = Math.min(w, h) * 0.2, gap = 13;
       oval(cx, cy, R0 + 4, R0 * 0.7 + 3);
       for (const [px, py] of [[x + 18, y + 18], [x + w - 18, y + 18], [x + 18, y + h - 18], [x + w - 18, y + h - 18]]) tile(px, py);
       if (w >= 280) for (const sd of [-1, 1]) box3(cx + sd * (R0 + 22) - 14, cy + R0 - 8, cx + sd * (R0 + 22) + 14, cy + R0 + 10);
       for (const [sx, sy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
         const bx0 = sx < 0 ? x + 16 : cx + gap, by0 = sy < 0 ? y + 16 : cy + gap, bw = w / 2 - 16 - gap, bh = h / 2 - 16 - gap;
-        for (let ty = Math.floor(by0 / T8); ty <= Math.floor((by0 + bh) / T8); ty++) for (let tx = Math.floor(bx0 / T8); tx <= Math.floor((bx0 + bw) / T8); tx++) {
-          const mx = (tx + 0.5) * T8, my = (ty + 0.5) * T8;
+        for (let ty = Math.floor(by0 / T9); ty <= Math.floor((by0 + bh) / T9); ty++) for (let tx = Math.floor(bx0 / T9); tx <= Math.floor((bx0 + bw) / T9); tx++) {
+          const mx = (tx + 0.5) * T9, my = (ty + 0.5) * T9;
           if (mx > bx0 && mx < bx0 + bw && my > by0 && my < by0 + bh) out.push({ x: tx, y: ty, w: 1, h: 1 });
         }
       }
     }
     if (f3.type === "inn" && f3.garden) {
-      const E = f3.garden, b = t.buildings.find((q) => q.id === f3.building), north = b?.doorSide === "north", x = E.x * T8, y = E.y * T8, w = E.w * T8, h = E.h * T8, py0 = y + (north ? h * 0.52 : h * 0.2);
+      const E = f3.garden, b = t.buildings.find((q) => q.id === f3.building), north = b?.doorSide === "north", x = E.x * T9, y = E.y * T9, w = E.w * T9, h = E.h * T9, py0 = y + (north ? h * 0.52 : h * 0.2);
       for (const ty of [py0 + 30, north ? y + 70 : y + h - 50]) box3(x + w / 2 - 30, ty - 6, x + w / 2 + 22, ty + 22);
       const gy = north ? y + h - 26 : y + 40;
       box3(x + w - 64, gy - 10, x + w - 34, gy);
-      out.push({ x: E.x, y: Math.floor((y + 12) / T8), w: 1, h: Math.floor((y + h - 13) / T8) - Math.floor((y + 12) / T8) + 1 });
+      out.push({ x: E.x, y: Math.floor((y + 12) / T9), w: 1, h: Math.floor((y + h - 13) / T9) - Math.floor((y + 12) / T9) + 1 });
       out.push({ x: E.x, y: north ? E.y + E.h - 1 : E.y, w: E.w, h: 1 });
     }
   }
   const A = townArtBuildingsV1(t);
   if (A.barracks) {
-    const b = A.barracks, X = b.x * T8, W9 = b.w * T8, G2 = (b.y + b.h) * T8, x0 = X + 12, x1 = X + W9 - 12;
+    const b = A.barracks, X = b.x * T9, W9 = b.w * T9, G2 = (b.y + b.h) * T9, x0 = X + 12, x1 = X + W9 - 12;
     tile(x0 + 40, G2 + 26);
     tile(x0 + 100, G2 + 30);
     tile(x1 - 40, G2 + 26);
     tile(x1 - 92, G2 + 18);
   }
   if (A.stables) {
-    const b = A.stables, X = b.x * T8, W9 = b.w * T8, G2 = (b.y + b.h) * T8, x0 = X + 12, x1 = X + W9 - 12, cx = (x0 + x1) / 2;
+    const b = A.stables, X = b.x * T9, W9 = b.w * T9, G2 = (b.y + b.h) * T9, x0 = X + 12, x1 = X + W9 - 12, cx = (x0 + x1) / 2;
     tile(x0 + 56, G2 + 20);
     box3(cx - 80, G2 + 12, cx - 44, G2 + 30);
     tile(cx + 70, G2 + 18);
@@ -12222,6 +12236,74 @@ function createOutdoorBridgeDecks(records2, terrain2) {
   return tiles3;
 }
 
+// src/shared/generation/upland_summit_anchors_v1.js
+var T2 = 32;
+var CW = 32;
+var CH = 26;
+function mountainsIn(terraces, cx, cy) {
+  const out = [], x0 = cx * CW, y0 = cy * CH, C = terraces.CELL;
+  for (let j = Math.floor(y0 / C) - 1; j <= Math.floor((y0 + CH) / C) + 1; j++) for (let i = Math.floor(x0 / C) - 1; i <= Math.floor((x0 + CW) / C) + 1; i++) {
+    const g = terraces.mountain(i, j);
+    if (g && SUMMIT_GUARDS[g.n] && g.cairn.x >= x0 && g.cairn.x < x0 + CW && g.cairn.y >= y0 && g.cairn.y < y0 + CH) out.push(g);
+  }
+  return out;
+}
+var plain = (g, tile, x, y, minLevel) => {
+  const r = g.role(x, y);
+  return Boolean(r) && r.role === "top" && r.level >= minLevel && !g.onPath(x, y) && tile(x, y).collision === "1";
+};
+function summitPlanV1(g, tile, cx, cy, otherAnchors = []) {
+  const { count: count2, rank } = SUMMIT_GUARDS[g.n], x0 = cx * CW, y0 = cy * CH, inChunk2 = (x, y) => x >= x0 && x < x0 + CW && y >= y0 && y < y0 + CH, local = (x, y) => ({ x: (x - x0 + 0.5) * T2, y: (y - y0 + 0.5) * T2 });
+  const far = (p) => otherAnchors.every((a) => Math.hypot(p.x - a.position.x, p.y - a.position.y) >= 96);
+  const cairn = g.cairn, away = g.ramps[g.n - 1].high > cairn.x ? -1 : 1;
+  let chest = null;
+  for (const [dx, dy] of [[2 * away, 0], [3 * away, 0], [2 * away, -1], [-2 * away, 0], [-3 * away, 0], [2 * away, 1]]) {
+    const x = cairn.x + dx, y = cairn.y + dy;
+    if (inChunk2(x, y) && plain(g, tile, x, y, g.n) && far(local(x, y))) {
+      chest = { x, y };
+      break;
+    }
+  }
+  if (!chest) return null;
+  const cp = local(chest.x, chest.y), cand = [];
+  for (const minLevel of [g.n, g.n - 1]) for (let y = Math.max(y0, cairn.y - 12); y <= Math.min(y0 + CH - 1, cairn.y + 12); y++) for (let x = Math.max(x0, cairn.x - 14); x <= Math.min(x0 + CW - 1, cairn.x + 14); x++) {
+    if (!plain(g, tile, x, y, minLevel) || cand.some((c) => c.x === x && c.y === y)) continue;
+    const p = local(x, y), d = Math.hypot(x - cairn.x, y - cairn.y);
+    if (d < 2.5 || Math.hypot(p.x - cp.x, p.y - cp.y) < 64 || !far(p) || p.x < 16 || p.y < 16 || p.x > CW * T2 - 16 || p.y > CH * T2 - 16) continue;
+    cand.push({ x, y, p, score: (g.level(x, y) === g.n ? 0 : 100) + d + (terraceTileHash(g.d.sh, x, y) >>> 8) % 100 / 100 });
+  }
+  cand.sort((a, b) => a.score - b.score || a.y - b.y || a.x - b.x);
+  const members = [];
+  for (const c of cand) {
+    if (members.some((m) => Math.hypot(m.position.x - c.p.x, m.position.y - c.p.y) < 78)) continue;
+    members.push({ family: SUMMIT_FAMILIES[members.length], position: c.p });
+    if (members.length === count2) break;
+  }
+  if (members.length < count2) return null;
+  let ledge = null;
+  if (g.stair) {
+    const E = g.levels[g.stair.k].E, side = g.stair.x > g.cairn.x ? 2 : -1;
+    for (const [x, y] of [[g.stair.x + side, E - 1], [g.stair.x, E - 2], [g.stair.x + 1, E - 2], [g.stair.x + side, E - 2]]) if (plain(g, tile, x, y, g.stair.k) && g.level(x, y) === g.stair.k) {
+      ledge = local(x, y);
+      break;
+    }
+  }
+  const clamp2 = (v, hi) => Math.max(16, Math.min(hi - 16, v)), position2 = ledge ? { x: clamp2(Math.round((cp.x + ledge.x) / 2), CW * T2), y: clamp2(Math.round((cp.y + ledge.y) / 2), CH * T2) } : cp;
+  const chests = [{ x: cp.x - position2.x, y: cp.y - position2.y, completion: true }, ...ledge ? [{ x: ledge.x - position2.x, y: ledge.y - position2.y }] : []];
+  return { position: position2, rank, members, chests };
+}
+async function createSummitAnchorsV1({ terraces, cx, cy, seed, sha256, tile, otherAnchors = [] }) {
+  if (!terraces) return [];
+  const out = [];
+  for (const g of mountainsIn(terraces, cx, cy)) {
+    const plan = summitPlanV1(g, tile, cx, cy, [...otherAnchors, ...out]);
+    if (!plan) continue;
+    const identity = await worldIdentity(seed, "anchor", ["upland-summit-v1", g.d.x, g.d.y], sha256);
+    out.push({ id: identity.id, ordinal: SUMMIT_ORDINAL, position: plan.position, rank: plan.rank, combatVersion: WORLD_COMBAT_VERSION, members: plan.members, summit: { levels: g.n, chests: plan.chests } });
+  }
+  return out;
+}
+
 // src/shared/generation/planned_world_chunks_v1.js
 var cellLevels = /* @__PURE__ */ new WeakMap();
 var cellLevelAt = (asset, x, y) => {
@@ -12357,8 +12439,8 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
   const standsRow = (c, x, y) => {
     const s = stands.tileAt(x, y);
     if (!s || c.kind === "bridge" || c.material === "H" || c.material === "V") return ".";
-    const plain = c.town || c.caveExterior || c.fortExterior || c.ruinExterior || c.wildernessTrack || c.wildernessClearing || c.route > 0 || c.collision !== "1";
-    return standsCell(s.zone, !plain && s.cover, !plain && s.trail);
+    const plain2 = c.town || c.caveExterior || c.fortExterior || c.ruinExterior || c.wildernessTrack || c.wildernessClearing || c.route > 0 || c.collision !== "1";
+    return standsCell(s.zone, !plain2 && s.cover, !plain2 && s.trail);
   };
   const accessChunks = /* @__PURE__ */ new Set();
   if (asset.firstJourney) {
@@ -12421,7 +12503,8 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     const regularAnchors = packAnchors(cx, cy, identity.digest);
     const eventAnchors = await createWoodlandPilotEventAnchors({ asset, binding, cx, cy, seed, sha256, tile, regularAnchors });
     const plannedAnchors = await createPlannedEventAnchorsV1({ asset, binding, cx, cy, seed, sha256, tile, biome, regularAnchors, otherAnchors: eventAnchors });
-    return freezeWire({ version: PLANNED_WORLD_VERSION, identity, chunkX, chunkY, region: { version: asset.version, regionX: String(Math.floor(cx / 2)), regionY: String(Math.floor(cy / 2)), biome, name: hasStarterVillage(binding) && cx >= sx && cx <= sx + 1 && cy >= sy && cy <= sy + 1 ? STARTER_VILLAGE_NAME + " \xB7 " + starterBiomeName() + " \xB7 Band 1" : biome === "ocean" ? "Open ocean" : biome[0].toUpperCase() + biome.slice(1) + " \xB7 Band " + c.band, minimumLevel: cellLevelAt(asset, Math.floor(cx / 2), Math.floor(cy / 2)) ?? [1, 1, 6, 11, 21, 41][c.band] ?? 1, originWidthChunks: 0, originHeightChunks: 0 }, collision: { tileSize: 32, width: 32, height: 26, tiles: collision2 }, visual: { terrain: visual2, biomes, blockers: blockers2, ...caveArt.decorations.length ? { decorations: caveArt.decorations } : {}, ...stands ? { stands: standRows } : {}, route: { centerline, clearance, ...["planned-world-shoreline-v2", "planned-world-water-v3"].includes(asset.version) ? { mapFeatures: mapRows } : {} } }, edges, anchors: [...regularAnchors, ...eventAnchors, ...plannedAnchors], sites: reserved?.socket.entrance.chunkX === chunkX && reserved?.socket.entrance.chunkY === chunkY ? [reserved.socket] : [] });
+    const summitAnchors = terraced && isSeededBindingV1(binding) && hasWorldCombat(binding) ? await createSummitAnchorsV1({ terraces: stands.terraces, cx, cy, seed, sha256, tile, otherAnchors: [...regularAnchors, ...eventAnchors, ...plannedAnchors] }) : [];
+    return freezeWire({ version: PLANNED_WORLD_VERSION, identity, chunkX, chunkY, region: { version: asset.version, regionX: String(Math.floor(cx / 2)), regionY: String(Math.floor(cy / 2)), biome, name: hasStarterVillage(binding) && cx >= sx && cx <= sx + 1 && cy >= sy && cy <= sy + 1 ? STARTER_VILLAGE_NAME + " \xB7 " + starterBiomeName() + " \xB7 Band 1" : biome === "ocean" ? "Open ocean" : biome[0].toUpperCase() + biome.slice(1) + " \xB7 Band " + c.band, minimumLevel: cellLevelAt(asset, Math.floor(cx / 2), Math.floor(cy / 2)) ?? [1, 1, 6, 11, 21, 41][c.band] ?? 1, originWidthChunks: 0, originHeightChunks: 0 }, collision: { tileSize: 32, width: 32, height: 26, tiles: collision2 }, visual: { terrain: visual2, biomes, blockers: blockers2, ...caveArt.decorations.length ? { decorations: caveArt.decorations } : {}, ...stands ? { stands: standRows } : {}, route: { centerline, clearance, ...["planned-world-shoreline-v2", "planned-world-water-v3"].includes(asset.version) ? { mapFeatures: mapRows } : {} } }, edges, anchors: [...regularAnchors, ...eventAnchors, ...plannedAnchors, ...summitAnchors], sites: reserved?.socket.entrance.chunkX === chunkX && reserved?.socket.entrance.chunkY === chunkY ? [reserved.socket] : [] });
   }
   let hollowHome = null;
   async function generate(args) {
@@ -19655,9 +19738,9 @@ var FORT_FAMILY_DEFINITION_V2 = Object.freeze({ package: FORT_PACKAGE_V2, family
 // src/shared/generation/woodland_cave_family_d12.js
 var GENERATED_SITE_D12 = "generated-site-family-d12-v1";
 var GENERATED_FLOOR_D12 = "generated-site-floor-d12-v1";
-var T2 = 32;
+var T3 = 32;
 var u322 = (bytes) => ((bytes[0] ?? 0) << 24 >>> 0) + ((bytes[1] ?? 0) << 16) + ((bytes[2] ?? 0) << 8) + (bytes[3] ?? 0) >>> 0;
-var point8 = (x, y) => ({ x: (x + 0.5) * T2, y: (y + 0.5) * T2 });
+var point8 = (x, y) => ({ x: (x + 0.5) * T3, y: (y + 0.5) * T3 });
 async function scoped2(seed, siteId2, floorIndex, domain, sha256) {
   return hashBytes(frameUtf8([WOODLAND_CAVE_FAMILY_ID, WOODLAND_CAVE_GENERATOR_VERSION, seed, siteId2, String(floorIndex), domain]), sha256);
 }
@@ -19755,7 +19838,7 @@ async function generateWoodlandCaveInstanceD12({ campaignSeed, site, spawnOrdina
     if (up) decorations3.push({ id: `decor:${floorIndex}:stairs-up`, kind: "cave-stairs-up", x: arrival.x + 0.5, y: arrival.y + 0.5, variant: floorIndex % 3 });
     if (down) decorations3.push({ id: `decor:${floorIndex}:stairs-down`, kind: "cave-stairs-down", x: progress.x + 0.5, y: progress.y + 0.5, variant: floorIndex % 3 });
     if (floorIndex === floorCount - 1) decorations3.push({ id: `decor:${floorIndex}:reward-nook`, kind: "cave-reward-nook", x: progress.x + 0.5, y: progress.y + 0.5, variant: 0 });
-    const rows3 = grid.map((r) => r.join("")), floorId = `floor:${site.siteId}:${floorIndex}`, recipe = { version: GENERATED_FLOOR_D12, floorId, index: floorIndex, floorSeed, graph: { rooms, edges }, collision: { tileSize: T2, width, height, tiles: [...rows3] }, visual: { version: "woodland-cave-generated-d12-v1", originTile: { x: 0, y: 0 }, terrain: [...rows3], blockers: [], decorations: decorations3 }, entrance: point8(arrival.x, arrival.y), transitions: { up, down }, encounter: { rank: WOODLAND_CAVE_FAMILY_D12.encounterPolicy.rank, members }, reward: floorIndex === floorCount - 1 ? { rewardId: `reward:${site.siteId}:${floorIndex}:0`, ...WOODLAND_CAVE_FAMILY_D12.rewardPolicy, position: point8(progress.x + (progress.x < width / 2 ? 2 : -2), progress.y) } : null, decorationIds: decorations3.map((d) => d.id) };
+    const rows3 = grid.map((r) => r.join("")), floorId = `floor:${site.siteId}:${floorIndex}`, recipe = { version: GENERATED_FLOOR_D12, floorId, index: floorIndex, floorSeed, graph: { rooms, edges }, collision: { tileSize: T3, width, height, tiles: [...rows3] }, visual: { version: "woodland-cave-generated-d12-v1", originTile: { x: 0, y: 0 }, terrain: [...rows3], blockers: [], decorations: decorations3 }, entrance: point8(arrival.x, arrival.y), transitions: { up, down }, encounter: { rank: WOODLAND_CAVE_FAMILY_D12.encounterPolicy.rank, members }, reward: floorIndex === floorCount - 1 ? { rewardId: `reward:${site.siteId}:${floorIndex}:0`, ...WOODLAND_CAVE_FAMILY_D12.rewardPolicy, position: point8(progress.x + (progress.x < width / 2 ? 2 : -2), progress.y) } : null, decorationIds: decorations3.map((d) => d.id) };
     floors.push(recipe);
   }
   for (let i = 0; i < floors.length; i++) {
@@ -19831,12 +19914,12 @@ var WOODLAND_CAVE_FAMILY_DEFINITION_D12 = Object.freeze({ package: WOODLAND_CAVE
 // src/shared/generation/woodland_cave_family_d12_1.js
 var GENERATED_SITE_D12_1 = "generated-site-family-d12-1-v1";
 var GENERATED_FLOOR_D12_1 = "generated-site-floor-d12-1-v1";
-var T3 = 32;
+var T4 = 32;
 var W4 = 62;
 var H4 = 47;
 var u323 = (bytes) => ((bytes[0] ?? 0) << 24 >>> 0) + ((bytes[1] ?? 0) << 16) + ((bytes[2] ?? 0) << 8) + (bytes[3] ?? 0) >>> 0;
 var pick5 = (bytes, n, offset = 0) => u323(bytes.slice(offset % Math.max(1, bytes.length - 3), offset % Math.max(1, bytes.length - 3) + 4)) % n;
-var point9 = (x, y) => ({ x: (x + 0.5) * T3, y: (y + 0.5) * T3 });
+var point9 = (x, y) => ({ x: (x + 0.5) * T4, y: (y + 0.5) * T4 });
 var distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 var gridPoint = (x, y) => ({ x, y });
 var rolesEncounter = /* @__PURE__ */ new Set(["small-encounter", "large-encounter", "junction"]);
@@ -19978,7 +20061,7 @@ function assembleFloor2({ site, floorIndex, floorCount, roomCount, tier: tier2, 
   requireContract(connected3(rooms, edges), "Disconnected Cave module graph");
   const arrival = gridPoint(rooms[0].cx, rooms[0].cy), last = rooms.at(-1), progress = gridPoint(last.cx, last.cy), up = floorIndex > 0 ? { transitionId: `transition:${site.siteId}:${floorIndex}:up`, floorId: null, anchor: point9(arrival.x, arrival.y) } : null, down = floorIndex < floorCount - 1 ? { transitionId: `transition:${site.siteId}:${floorIndex}:down`, floorId: null, anchor: point9(progress.x, progress.y) } : null;
   const reward = floorIndex === floorCount - 1 ? { rewardId: `reward:${site.siteId}:${floorIndex}:0`, ...WOODLAND_CAVE_FAMILY_D12_1.rewardPolicy, position: point9(progress.x + (mirror2 ? -2 : 2), progress.y) } : null;
-  const reserved = [arrival, progress, ...reward ? [{ x: reward.position.x / T3 - 0.5, y: reward.position.y / T3 - 0.5 }] : []], encounterRooms = rooms.filter((r) => rolesEncounter.has(r.role)), members = [], used = [];
+  const reserved = [arrival, progress, ...reward ? [{ x: reward.position.x / T4 - 0.5, y: reward.position.y / T4 - 0.5 }] : []], encounterRooms = rooms.filter((r) => rolesEncounter.has(r.role)), members = [], used = [];
   const memberCount = Math.min(WOODLAND_CAVE_FAMILY_D12_1.encounterPolicy.maximumMembersPerFloor, tier2.threat[0] + pick5(b, tier2.threat[1] - tier2.threat[0] + 1, 27));
   for (let i = 0; i < memberCount; i++) {
     const room2 = encounterRooms[i % Math.max(1, encounterRooms.length)] ?? rooms[Math.min(i + 1, rooms.length - 2)];
@@ -20010,7 +20093,7 @@ function assembleFloor2({ site, floorIndex, floorCount, roomCount, tier: tier2, 
   if (reward) decorations3.push({ id: `decor:${floorIndex}:reward-nook`, kind: "cave-reward-nook", x: progress.x + 0.5, y: progress.y + 0.5, variant: 0, interactionDecoration: true });
   requireContract(rooms.every((room2) => reachable2(grid, arrival, { x: room2.cx, y: room2.cy })) && reachable2(grid, arrival, progress), "Unreachable Cave module anchor");
   const rows3 = grid.map((row2) => row2.join("")), floorId = `floor:${site.siteId}:${floorIndex}`;
-  return { version: GENERATED_FLOOR_D12_1, floorId, index: floorIndex, floorSeed, graph: { rooms, edges, modules, assembly: { version: "bounded-authored-module-assembly-d12-1-v1", attempt: pick5(b, 8, 1), fallback: false } }, collision: { tileSize: T3, width: W4, height: H4, tiles: rows3 }, visual: { version: "woodland-cave-generated-d12-1-v1", originTile: { x: 0, y: 0 }, terrain: [...rows3], blockers: [], decorations: decorations3, motifs: floorMotifs(grid, b, floorIndex) }, entrance: point9(arrival.x, arrival.y), transitions: { up, down }, encounter: { rank: WOODLAND_CAVE_FAMILY_D12_1.encounterPolicy.rank, members }, reward, decorationIds: decorations3.map((d) => d.id) };
+  return { version: GENERATED_FLOOR_D12_1, floorId, index: floorIndex, floorSeed, graph: { rooms, edges, modules, assembly: { version: "bounded-authored-module-assembly-d12-1-v1", attempt: pick5(b, 8, 1), fallback: false } }, collision: { tileSize: T4, width: W4, height: H4, tiles: rows3 }, visual: { version: "woodland-cave-generated-d12-1-v1", originTile: { x: 0, y: 0 }, terrain: [...rows3], blockers: [], decorations: decorations3, motifs: floorMotifs(grid, b, floorIndex) }, entrance: point9(arrival.x, arrival.y), transitions: { up, down }, encounter: { rank: WOODLAND_CAVE_FAMILY_D12_1.encounterPolicy.rank, members }, reward, decorationIds: decorations3.map((d) => d.id) };
 }
 async function generateWoodlandCaveInstanceD12_1({ campaignSeed, site, reservation = null, spawnOrdinal = 0, evidenceFixture = null }, { sha256 }) {
   validateWoodlandCaveModuleCatalogD12_1();
@@ -20040,9 +20123,9 @@ function validateGeneratedWoodlandCaveD12_1(g) {
   for (const [i, f3] of g.floors.entries()) {
     requireContract(f3.version === GENERATED_FLOOR_D12_1 && f3.index === i && f3.floorId === g.floorIds[i] && f3.collision.width === W4 && f3.collision.height === H4 && f3.collision.tiles.length === H4 && f3.collision.tiles.every((row2) => row2.length === W4 && /^[01]+$/.test(row2)) && canonicalStringify(f3.visual.terrain) === canonicalStringify(f3.collision.tiles) && connected3(f3.graph.rooms, f3.graph.edges), "Invalid generated D12.1 Cave floor");
     requireContract(f3.graph.rooms.length >= tier2.rooms[0] && f3.graph.rooms.length <= tier2.rooms[1] && f3.graph.rooms.every((room2, a) => f3.graph.rooms.every((other, b) => a === b || room2.bounds.x + room2.bounds.width <= other.bounds.x || other.bounds.x + other.bounds.width <= room2.bounds.x || room2.bounds.y + room2.bounds.height <= other.bounds.y || other.bounds.y + other.bounds.height <= room2.bounds.y)), "Overlapping or out-of-tier Cave rooms");
-    const actorTiles = f3.encounter.members.map((m) => ({ x: m.position.x / T3 - 0.5, y: m.position.y / T3 - 0.5 }));
+    const actorTiles = f3.encounter.members.map((m) => ({ x: m.position.x / T4 - 0.5, y: m.position.y / T4 - 0.5 }));
     requireContract(actorTiles.every((a, n) => actorTiles.every((b, m) => n === m || distance(a, b) >= 3)), "Crowded Cave encounter anchors");
-    const fixed = [{ x: f3.entrance.x / T3 - 0.5, y: f3.entrance.y / T3 - 0.5 }, ...Object.values(f3.transitions).filter(Boolean).map((t) => ({ x: t.anchor.x / T3 - 0.5, y: t.anchor.y / T3 - 0.5 })), ...f3.reward ? [{ x: f3.reward.position.x / T3 - 0.5, y: f3.reward.position.y / T3 - 0.5 }] : []];
+    const fixed = [{ x: f3.entrance.x / T4 - 0.5, y: f3.entrance.y / T4 - 0.5 }, ...Object.values(f3.transitions).filter(Boolean).map((t) => ({ x: t.anchor.x / T4 - 0.5, y: t.anchor.y / T4 - 0.5 })), ...f3.reward ? [{ x: f3.reward.position.x / T4 - 0.5, y: f3.reward.position.y / T4 - 0.5 }] : []];
     requireContract(f3.visual.decorations.filter((d) => !d.interactionDecoration).every((d) => fixed.every((p) => distance(d, p) >= 3) && actorTiles.every((p) => distance(d, p) >= 3)), "Cave decoration exclusion violated");
   }
   return g;
@@ -22862,12 +22945,14 @@ function installEncounterEconomy(s, m) {
 }
 var layouts2 = /* @__PURE__ */ new WeakMap();
 var d9Layouts = /* @__PURE__ */ new WeakMap();
+var wildernessLeftoverV1 = (s, r) => Boolean(s.d9World?.plannedWorld) && r.spaceInstanceId === s.overworldInstanceId && !s.groupsById[r.groupId]?.siteId && !eventKind(s, r.groupId) && !summitGroupV1(s, r.groupId);
 function encounterResourceLayout(s, m) {
   if (s.d9World) {
     const cached = d9Layouts.get(s);
     if (cached?.revision === s.d9World.runtime.revision) return cached.value;
     const out = {};
     for (const r of [...s.d9World.origin.resources, ...s.d9World.runtime.resources]) {
+      if (wildernessLeftoverV1(s, r)) continue;
       (out[r.groupId] ??= []).push(r);
     }
     d9Layouts.set(s, { revision: s.d9World.runtime.revision, value: out });
@@ -25081,12 +25166,12 @@ async function generateChunkD9({ seed, chunkX, chunkY, origin: origin2 }, sha256
 }
 
 // src/shared/generation/woodland_fort_placement_d10.js
-var CW = 32n;
-var CH = 26n;
-var T4 = 32;
+var CW2 = 32n;
+var CH2 = 26n;
+var T5 = 32;
 var key5 = (x, y) => x + "," + y;
 var inside3 = (x, y, p) => x >= BigInt(p.tileX) && x < BigInt(p.tileX) + 48n && y >= BigInt(p.tileY) && y < BigInt(p.tileY) + 36n;
-var fortParcelOwnsWorldPositionD10 = (parcel2, p) => Boolean(parcel2 && inside3(BigInt(p.chunkX) * CW + BigInt(Math.floor(p.localX / T4)), BigInt(p.chunkY) * CH + BigInt(Math.floor(p.localY / T4)), parcel2));
+var fortParcelOwnsWorldPositionD10 = (parcel2, p) => Boolean(parcel2 && inside3(BigInt(p.chunkX) * CW2 + BigInt(Math.floor(p.localX / T5)), BigInt(p.chunkY) * CH2 + BigInt(Math.floor(p.localY / T5)), parcel2));
 async function planWoodlandFortParcelD10({ seed, origin: origin2, ruinSocket, maxRouteTiles = 160 }, sha256) {
   requireContract(ruinSocket?.siteId && maxRouteTiles >= 1 && maxRouteTiles <= 512, "Fort reservation input");
   const cache4 = /* @__PURE__ */ new Map();
@@ -25099,27 +25184,27 @@ async function planWoodlandFortParcelD10({ seed, origin: origin2, ruinSocket, ma
     return cache4.get(id);
   }
   async function cell(x, y) {
-    const cx = floorDiv(x, CW), cy = floorDiv(y, CH), page = await chunk(cx, cy);
+    const cx = floorDiv(x, CW2), cy = floorDiv(y, CH2), page = await chunk(cx, cy);
     if (!page) return null;
-    return { page, x: Number(x - cx * CW), y: Number(y - cy * CH) };
+    return { page, x: Number(x - cx * CW2), y: Number(y - cy * CH2) };
   }
-  const startX = BigInt(ruinSocket.entrance.chunkX) * CW + BigInt(Math.floor(ruinSocket.entrance.localX / T4));
-  const startY = BigInt(ruinSocket.entrance.chunkY) * CH + BigInt(Math.floor(ruinSocket.entrance.localY / T4));
+  const startX = BigInt(ruinSocket.entrance.chunkX) * CW2 + BigInt(Math.floor(ruinSocket.entrance.localX / T5));
+  const startY = BigInt(ruinSocket.entrance.chunkY) * CH2 + BigInt(Math.floor(ruinSocket.entrance.localY / T5));
   const queue = [{ x: startX, y: startY, d: 0 }], seen = /* @__PURE__ */ new Set([key5(startX, startY)]);
   for (let i = 0; i < queue.length; i++) {
     const { x, y, d } = queue[i], at2 = await cell(x, y);
     if (!at2 || at2.page.visual.route.centerline[at2.y][at2.x] !== "1") continue;
-    const authored2 = (at2.page.sites ?? []).filter((site) => site.siteId !== ruinSocket.siteId && site.region.biome === "woodland" && site.entrance.localX / T4 - 0.5 === at2.x && site.entrance.localY / T4 - 0.5 === at2.y);
+    const authored2 = (at2.page.sites ?? []).filter((site) => site.siteId !== ruinSocket.siteId && site.region.biome === "woodland" && site.entrance.localX / T5 - 0.5 === at2.x && site.entrance.localY / T5 - 0.5 === at2.y);
     const candidates = [...authored2];
     if (d >= 48 && d <= 160 && at2.page.region.biome === "woodland") {
-      const identity = await worldIdentity(seed, "site-bootstrap", [WOODLAND_FORT_VERSION, "fort"], sha256), site = { version: SITE_BOOTSTRAP_SOCKET_D9, siteId: "site:" + identity.digest.slice(0, 32), siteSeed: identity.digest, entrance: { chunkX: at2.page.chunkX, chunkY: at2.page.chunkY, localX: (at2.x + 0.5) * T4, localY: (at2.y + 0.5) * T4 }, siteClass: "dungeon", capabilities: ["interior"], region: { regionX: at2.page.region.regionX, regionY: at2.page.region.regionY, biome: "woodland" }, minimumLevel: copyWire(at2.page.region.minimumLevel), provenance: { geographyVersion: at2.page.version, chunkId: at2.page.identity.id, placementVersion: SITE_BOOTSTRAP_PLACEMENT_D9, identityDomain: "site-bootstrap", sourceEgress: ruinSocket.provenance.sourceEgress ?? origin2.egress.openings[0].side, routeDistanceTiles: d } };
+      const identity = await worldIdentity(seed, "site-bootstrap", [WOODLAND_FORT_VERSION, "fort"], sha256), site = { version: SITE_BOOTSTRAP_SOCKET_D9, siteId: "site:" + identity.digest.slice(0, 32), siteSeed: identity.digest, entrance: { chunkX: at2.page.chunkX, chunkY: at2.page.chunkY, localX: (at2.x + 0.5) * T5, localY: (at2.y + 0.5) * T5 }, siteClass: "dungeon", capabilities: ["interior"], region: { regionX: at2.page.region.regionX, regionY: at2.page.region.regionY, biome: "woodland" }, minimumLevel: copyWire(at2.page.region.minimumLevel), provenance: { geographyVersion: at2.page.version, chunkId: at2.page.identity.id, placementVersion: SITE_BOOTSTRAP_PLACEMENT_D9, identityDomain: "site-bootstrap", sourceEgress: ruinSocket.provenance.sourceEgress ?? origin2.egress.openings[0].side, routeDistanceTiles: d } };
       validateSiteSocketD9(site);
       candidates.push(site);
     }
     for (const site of candidates) {
       const p = { version: WOODLAND_FORT_VERSION, siteId: site.siteId, socket: copyWire(site), tileX: String(x - 23n), tileY: String(y - 35n), pages: [], routeDistanceTiles: d };
       const left = BigInt(p.tileX), top = BigInt(p.tileY), right = left + 47n, bottom = top + 35n;
-      const x0 = floorDiv(left, CW), x1 = floorDiv(right, CW), y0 = floorDiv(top, CH), y1 = floorDiv(bottom, CH);
+      const x0 = floorDiv(left, CW2), x1 = floorDiv(right, CW2), y0 = floorDiv(top, CH2), y1 = floorDiv(bottom, CH2);
       if (x1 - x0 !== 1n || y1 - y0 !== 1n) continue;
       const outside = await cell(x, y + 1n);
       if (outside?.page.visual.route.centerline[outside.y]?.[outside.x] !== "1") continue;
@@ -25160,7 +25245,7 @@ async function planWoodlandFortParcelD10({ seed, origin: origin2, ruinSocket, ma
 function overlayWoodlandFortParcelD10(chunk, parcel2) {
   if (!parcel2?.pages.some((p) => p.chunkX === chunk.chunkX && p.chunkY === chunk.chunkY)) return chunk;
   requireContract(parcel2.version === WOODLAND_FORT_VERSION && parcel2.pages.some((p) => p.chunkX === chunk.chunkX && p.chunkY === chunk.chunkY && p.baseDigest === chunk.identity.digest), "Fort parcel/base mismatch");
-  const x0 = BigInt(parcel2.tileX), y0 = BigInt(parcel2.tileY), cx = BigInt(chunk.chunkX) * CW, cy = BigInt(chunk.chunkY) * CH;
+  const x0 = BigInt(parcel2.tileX), y0 = BigInt(parcel2.tileY), cx = BigInt(chunk.chunkX) * CW2, cy = BigInt(chunk.chunkY) * CH2;
   const collision2 = chunk.collision.tiles.map((r) => [...r]), terrain2 = chunk.visual.terrain.map((r) => [...r]), biomes = chunk.visual.biomes.map((r) => [...r]);
   const centerline = chunk.visual.route.centerline.map((r) => [...r]), clearance = chunk.visual.route.clearance.map((r) => [...r]);
   const own3 = (x, y) => inside3(cx + BigInt(x), cy + BigInt(y), parcel2);
@@ -25184,24 +25269,24 @@ function overlayWoodlandFortParcelD10(chunk, parcel2) {
   const decorations3 = (chunk.visual.decorations ?? []).filter((d) => !own3(Math.floor(d.x), Math.floor(d.y)));
   for (const d of WOODLAND_FORT_TEMPLATE.visual.decorations ?? []) {
     const gx = x0 + BigInt(Math.floor(d.x)), gy = y0 + BigInt(Math.floor(d.y));
-    if (gx < cx || gx >= cx + CW || gy < cy || gy >= cy + CH) continue;
+    if (gx < cx || gx >= cx + CW2 || gy < cy || gy >= cy + CH2) continue;
     decorations3.push({ ...copyWire(d), id: `fort-decoration:${parcel2.siteId}:${d.kind}:${d.x},${d.y}`, x: Number(gx - cx) + (d.x - Math.floor(d.x)), y: Number(gy - cy) + (d.y - Math.floor(d.y)) });
   }
-  const anchors2 = chunk.anchors.filter((a) => !own3(Math.floor(a.position.x / T4), Math.floor(a.position.y / T4)));
-  const sites6 = chunk.sites.filter((s) => s.siteId === parcel2.siteId || !own3(Math.floor(s.entrance.localX / T4), Math.floor(s.entrance.localY / T4)));
+  const anchors2 = chunk.anchors.filter((a) => !own3(Math.floor(a.position.x / T5), Math.floor(a.position.y / T5)));
+  const sites6 = chunk.sites.filter((s) => s.siteId === parcel2.siteId || !own3(Math.floor(s.entrance.localX / T5), Math.floor(s.entrance.localY / T5)));
   if (parcel2.socket.entrance.chunkX === chunk.chunkX && parcel2.socket.entrance.chunkY === chunk.chunkY && !sites6.some((s) => s.siteId === parcel2.siteId)) sites6.push(copyWire(parcel2.socket));
   return freezeWire({ ...copyWire(chunk), collision: { ...copyWire(chunk.collision), tiles: collision2.map((r) => r.join("")) }, visual: { ...copyWire(chunk.visual), terrain: terrain2.map((r) => r.join("")), biomes: biomes.map((r) => r.join("")), blockers: blockers2, decorations: decorations3, route: { centerline: centerline.map((r) => r.join("")), clearance: clearance.map((r) => r.join("")) } }, anchors: anchors2, sites: sites6, compound: { siteId: parcel2.siteId, version: parcel2.version, pages: copyWire(parcel2.pages) } });
 }
 
 // src/shared/generation/woodland_cave_placement_d10.js
-var CW2 = 32n;
-var CH2 = 26n;
-var T5 = 32;
+var CW3 = 32n;
+var CH3 = 26n;
+var T6 = 32;
 var W6 = BigInt(WOODLAND_CAVE_EXTERIOR.width);
 var H6 = BigInt(WOODLAND_CAVE_EXTERIOR.height);
 var key6 = (x, y) => x + "," + y;
 var inside4 = (x, y, p) => x >= BigInt(p.tileX) && x < BigInt(p.tileX) + W6 && y >= BigInt(p.tileY) && y < BigInt(p.tileY) + H6;
-var caveParcelOwnsWorldPositionD10 = (parcel2, p) => Boolean(parcel2 && inside4(BigInt(p.chunkX) * CW2 + BigInt(Math.floor(p.localX / T5)), BigInt(p.chunkY) * CH2 + BigInt(Math.floor(p.localY / T5)), parcel2));
+var caveParcelOwnsWorldPositionD10 = (parcel2, p) => Boolean(parcel2 && inside4(BigInt(p.chunkX) * CW3 + BigInt(Math.floor(p.localX / T6)), BigInt(p.chunkY) * CH3 + BigInt(Math.floor(p.localY / T6)), parcel2));
 async function planWoodlandCaveParcelD10({ seed, origin: origin2, ruinSocket, fortParcel, minRouteTiles = 48, maxRouteTiles = 192, excludedParcels = [], excludedPlacementRegions = [], minimumSeparationTiles = 0 }, sha256) {
   requireContract(ruinSocket?.siteId && fortParcel?.siteId && minRouteTiles >= 48 && minRouteTiles <= maxRouteTiles && maxRouteTiles <= 512 && minimumSeparationTiles >= 0, "Cave reservation input");
   const cache4 = /* @__PURE__ */ new Map();
@@ -25214,16 +25299,16 @@ async function planWoodlandCaveParcelD10({ seed, origin: origin2, ruinSocket, fo
     return cache4.get(id);
   }
   async function cell(x, y) {
-    const cx = floorDiv(x, CW2), cy = floorDiv(y, CH2), page = await chunk(cx, cy);
-    return page ? { page, x: Number(x - cx * CW2), y: Number(y - cy * CH2) } : null;
+    const cx = floorDiv(x, CW3), cy = floorDiv(y, CH3), page = await chunk(cx, cy);
+    return page ? { page, x: Number(x - cx * CW3), y: Number(y - cy * CH3) } : null;
   }
-  const startX = BigInt(fortParcel.socket.entrance.chunkX) * CW2 + BigInt(Math.floor(fortParcel.socket.entrance.localX / T5)), startY = BigInt(fortParcel.socket.entrance.chunkY) * CH2 + BigInt(Math.floor(fortParcel.socket.entrance.localY / T5));
+  const startX = BigInt(fortParcel.socket.entrance.chunkX) * CW3 + BigInt(Math.floor(fortParcel.socket.entrance.localX / T6)), startY = BigInt(fortParcel.socket.entrance.chunkY) * CH3 + BigInt(Math.floor(fortParcel.socket.entrance.localY / T6));
   const queue = [{ x: startX, y: startY, d: 0 }], seen = /* @__PURE__ */ new Set([key6(startX, startY)]), identity = await worldIdentity(seed, "site-bootstrap", [WOODLAND_CAVE_VERSION, "cave"], sha256);
   for (let i = 0; i < queue.length; i++) {
     const { x, y, d } = queue[i], at2 = await cell(x, y);
     if (!at2 || at2.page.visual.route.centerline[at2.y]?.[at2.x] !== "1") continue;
     if (d >= minRouteTiles && d <= maxRouteTiles && at2.page.region.biome === "woodland") {
-      const left = x - 5n, top = y - H6, x0 = floorDiv(left, CW2), x1 = floorDiv(left + W6 - 1n, CW2), y0 = floorDiv(top, CH2), y1 = floorDiv(top + H6 - 1n, CH2);
+      const left = x - 5n, top = y - H6, x0 = floorDiv(left, CW3), x1 = floorDiv(left + W6 - 1n, CW3), y0 = floorDiv(top, CH3), y1 = floorDiv(top + H6 - 1n, CH3);
       if (x0 === x1 && y0 === y1) {
         const page = await chunk(x0, y0);
         let valid = Boolean(page), woodland = 0, total = 0;
@@ -25241,11 +25326,11 @@ async function planWoodlandCaveParcelD10({ seed, origin: origin2, ruinSocket, fo
             if (xx >= left && xx < left + W6 && yy >= top && yy < top + H6 && q.page.visual.route.centerline[q.y][q.x] === "1") valid = false;
           }
           for (const s of page.sites ?? []) {
-            const sx = BigInt(s.entrance.chunkX) * CW2 + BigInt(Math.floor(s.entrance.localX / T5)), sy = BigInt(s.entrance.chunkY) * CH2 + BigInt(Math.floor(s.entrance.localY / T5));
+            const sx = BigInt(s.entrance.chunkX) * CW3 + BigInt(Math.floor(s.entrance.localX / T6)), sy = BigInt(s.entrance.chunkY) * CH3 + BigInt(Math.floor(s.entrance.localY / T6));
             if (s.siteId === ruinSocket.siteId || inside4(sx, sy, parcel2)) valid = false;
           }
           for (let yy = top; yy < top + H6; yy++) for (let xx = left; xx < left + W6; xx++) {
-            const p = normalizeWorldPosition({ chunkX: String(floorDiv(xx, CW2)), chunkY: String(floorDiv(yy, CH2)), localX: Number(xx - floorDiv(xx, CW2) * CW2) * T5 + 16, localY: Number(yy - floorDiv(yy, CH2) * CH2) * T5 + 16 });
+            const p = normalizeWorldPosition({ chunkX: String(floorDiv(xx, CW3)), chunkY: String(floorDiv(yy, CH3)), localX: Number(xx - floorDiv(xx, CW3) * CW3) * T6 + 16, localY: Number(yy - floorDiv(yy, CH3) * CH3) * T6 + 16 });
             if (fortParcelOwnsWorldPositionD10(fortParcel, p)) valid = false;
           }
         }
@@ -25256,7 +25341,7 @@ async function planWoodlandCaveParcelD10({ seed, origin: origin2, ruinSocket, fo
         const placementRegion = `${floorDiv(left, 128n)},${floorDiv(top, 104n)}`;
         if (valid && excludedPlacementRegions.includes(placementRegion)) valid = false;
         if (valid && woodland * 4 >= total * 3) {
-          const ex = left + BigInt(WOODLAND_CAVE_EXTERIOR.entranceTile.x), ey = top + BigInt(WOODLAND_CAVE_EXTERIOR.entranceTile.y), ecx = floorDiv(ex, CW2), ecy = floorDiv(ey, CH2), site = { version: SITE_BOOTSTRAP_SOCKET_D9, siteId: parcel2.siteId, siteSeed: identity.digest, entrance: { chunkX: String(ecx), chunkY: String(ecy), localX: Number(ex - ecx * CW2) * T5 + 16, localY: Number(ey - ecy * CH2) * T5 + 16 }, siteClass: "dungeon", capabilities: ["interior"], region: { regionX: page.region.regionX, regionY: page.region.regionY, biome: "woodland" }, minimumLevel: copyWire(page.region.minimumLevel), provenance: { geographyVersion: page.version, chunkId: page.identity.id, placementVersion: SITE_BOOTSTRAP_PLACEMENT_D9, identityDomain: "site-bootstrap", sourceEgress: ruinSocket.provenance.sourceEgress ?? origin2.egress.openings[0].side, routeDistanceTiles: d + 6 } };
+          const ex = left + BigInt(WOODLAND_CAVE_EXTERIOR.entranceTile.x), ey = top + BigInt(WOODLAND_CAVE_EXTERIOR.entranceTile.y), ecx = floorDiv(ex, CW3), ecy = floorDiv(ey, CH3), site = { version: SITE_BOOTSTRAP_SOCKET_D9, siteId: parcel2.siteId, siteSeed: identity.digest, entrance: { chunkX: String(ecx), chunkY: String(ecy), localX: Number(ex - ecx * CW3) * T6 + 16, localY: Number(ey - ecy * CH3) * T6 + 16 }, siteClass: "dungeon", capabilities: ["interior"], region: { regionX: page.region.regionX, regionY: page.region.regionY, biome: "woodland" }, minimumLevel: copyWire(page.region.minimumLevel), provenance: { geographyVersion: page.version, chunkId: page.identity.id, placementVersion: SITE_BOOTSTRAP_PLACEMENT_D9, identityDomain: "site-bootstrap", sourceEgress: ruinSocket.provenance.sourceEgress ?? origin2.egress.openings[0].side, routeDistanceTiles: d + 6 } };
           validateSiteSocketD9(site);
           parcel2.socket = site;
           return freezeWire(parcel2);
@@ -25279,7 +25364,7 @@ function overlayWoodlandCaveParcelD10(chunk, parcel2) {
   if (!parcel2?.pages.some((p) => p.chunkX === chunk.chunkX && p.chunkY === chunk.chunkY)) return chunk;
   const page = parcel2.pages.find((p) => p.chunkX === chunk.chunkX && p.chunkY === chunk.chunkY);
   requireContract(parcel2.version === WOODLAND_CAVE_VERSION && page.baseDigest === chunk.identity.digest, "Cave parcel/base mismatch");
-  const x0 = BigInt(parcel2.tileX), y0 = BigInt(parcel2.tileY), cx = BigInt(chunk.chunkX) * CW2, cy = BigInt(chunk.chunkY) * CH2, own3 = (x, y) => inside4(cx + BigInt(x), cy + BigInt(y), parcel2), collision2 = chunk.collision.tiles.map((r) => [...r]), terrain2 = chunk.visual.terrain.map((r) => [...r]), biomes = chunk.visual.biomes.map((r) => [...r]), centerline = chunk.visual.route.centerline.map((r) => [...r]), clearance = chunk.visual.route.clearance.map((r) => [...r]);
+  const x0 = BigInt(parcel2.tileX), y0 = BigInt(parcel2.tileY), cx = BigInt(chunk.chunkX) * CW3, cy = BigInt(chunk.chunkY) * CH3, own3 = (x, y) => inside4(cx + BigInt(x), cy + BigInt(y), parcel2), collision2 = chunk.collision.tiles.map((r) => [...r]), terrain2 = chunk.visual.terrain.map((r) => [...r]), biomes = chunk.visual.biomes.map((r) => [...r]), centerline = chunk.visual.route.centerline.map((r) => [...r]), clearance = chunk.visual.route.clearance.map((r) => [...r]);
   for (let y = 0; y < 26; y++) for (let x = 0; x < 32; x++) if (own3(x, y)) {
     const fx = Number(cx + BigInt(x) - x0), fy = Number(cy + BigInt(y) - y0);
     collision2[y][x] = WOODLAND_CAVE_EXTERIOR.collision[fy][fx];
@@ -25301,7 +25386,7 @@ function overlayWoodlandCaveParcelD10(chunk, parcel2) {
     const gx = x0 + BigInt(Math.floor(d.x)), gy = y0 + BigInt(Math.floor(d.y));
     decorations3.push({ ...copyWire(d), id: `cave-decoration:${parcel2.siteId}:${d.kind}:${d.x},${d.y}`, x: Number(gx - cx) + (d.x - Math.floor(d.x)), y: Number(gy - cy) + (d.y - Math.floor(d.y)) });
   }
-  const anchors2 = chunk.anchors.filter((a) => !own3(Math.floor(a.position.x / T5), Math.floor(a.position.y / T5))), sites6 = chunk.sites.filter((s) => !own3(Math.floor(s.entrance.localX / T5), Math.floor(s.entrance.localY / T5)));
+  const anchors2 = chunk.anchors.filter((a) => !own3(Math.floor(a.position.x / T6), Math.floor(a.position.y / T6))), sites6 = chunk.sites.filter((s) => !own3(Math.floor(s.entrance.localX / T6), Math.floor(s.entrance.localY / T6)));
   if (parcel2.socket.entrance.chunkX === chunk.chunkX && parcel2.socket.entrance.chunkY === chunk.chunkY) sites6.push(copyWire(parcel2.socket));
   return freezeWire({ ...copyWire(chunk), collision: { ...copyWire(chunk.collision), tiles: collision2.map((r) => r.join("")) }, visual: { ...copyWire(chunk.visual), terrain: terrain2.map((r) => r.join("")), biomes: biomes.map((r) => r.join("")), blockers: blockers2, decorations: decorations3, route: { centerline: centerline.map((r) => r.join("")), clearance: clearance.map((r) => r.join("")) } }, anchors: anchors2, sites: sites6, cave: { siteId: parcel2.siteId, version: parcel2.version, pages: copyWire(parcel2.pages) } });
 }
@@ -25339,12 +25424,12 @@ function overlayWoodlandCaveFamilyParcelsD12_1(chunk, parcels = []) {
 
 // src/shared/generation/woodland_cave_region_placement_d12_2.js
 var WOODLAND_CAVE_FAMILY_PARCEL_D12_2 = "woodland-cave-family-parcel-d12-2-v1";
-var CW3 = 32n;
-var CH3 = 26n;
+var CW4 = 32n;
+var CH4 = 26n;
 var R = 8n;
 var W7 = BigInt(WOODLAND_CAVE_EXTERIOR.width);
 var H7 = BigInt(WOODLAND_CAVE_EXTERIOR.height);
-var T6 = 32;
+var T7 = 32;
 var hash19 = (text) => {
   let n = 2166136261;
   for (const c of text) {
@@ -25371,7 +25456,7 @@ async function planWoodlandCaveRegionD12_2({ seed, origin: origin2, regionX, reg
   if (region.biome !== "woodland") return freezeWire({ version: "woodland-cave-region-plan-d12-2-v1", regionKey: woodlandCaveRegionKeyD12_2(regionX, regionY), regionName: region.name, count: 0, parcels: [] });
   const desired = await woodlandCaveRegionDensityD12_2({ seed, regionX, regionY, guarantee }, sha256);
   if (!desired) return freezeWire({ version: "woodland-cave-region-plan-d12-2-v1", regionKey: woodlandCaveRegionKeyD12_2(regionX, regionY), regionName: region.name, count: 0, parcels: [] });
-  const rx = BigInt(regionX), ry = BigInt(regionY), regionTileX = rx * R * CW3, regionTileY = ry * R * CH3, centerX = regionTileX + R * CW3 / 2n, centerY = regionTileY + R * CH3 / 2n, cache4 = /* @__PURE__ */ new Map(), candidates = [];
+  const rx = BigInt(regionX), ry = BigInt(regionY), regionTileX = rx * R * CW4, regionTileY = ry * R * CH4, centerX = regionTileX + R * CW4 / 2n, centerY = regionTileY + R * CH4 / 2n, cache4 = /* @__PURE__ */ new Map(), candidates = [];
   async function chunk(cx, cy) {
     const k = key7(cx, cy);
     if (!cache4.has(k)) {
@@ -25383,17 +25468,17 @@ async function planWoodlandCaveRegionD12_2({ seed, origin: origin2, regionX, reg
   for (let oy = 0n; oy < R; oy++) for (let ox = 0n; ox < R; ox++) {
     const cx = rx * R + ox, cy = ry * R + oy, page = await chunk(cx, cy);
     if (!page) continue;
-    for (let y = H7 + 1n; y < CH3 - 1n; y++) for (let x = 6n; x < CW3 - 6n; x++) if (page.visual.route.centerline[Number(y)]?.[Number(x)] === "1") {
-      const left = cx * CW3 + x - 5n, top = cy * CH3 + y - H7;
-      if (left < regionTileX + BigInt(WOODLAND_CAVE_FAMILY_D12_2.placement.regionInteriorMarginTiles) || left + W7 > regionTileX + R * CW3 - BigInt(WOODLAND_CAVE_FAMILY_D12_2.placement.regionInteriorMarginTiles) || top < regionTileY + BigInt(WOODLAND_CAVE_FAMILY_D12_2.placement.regionInteriorMarginTiles) || top + H7 > regionTileY + R * CH3 - BigInt(WOODLAND_CAVE_FAMILY_D12_2.placement.regionInteriorMarginTiles)) continue;
+    for (let y = H7 + 1n; y < CH4 - 1n; y++) for (let x = 6n; x < CW4 - 6n; x++) if (page.visual.route.centerline[Number(y)]?.[Number(x)] === "1") {
+      const left = cx * CW4 + x - 5n, top = cy * CH4 + y - H7;
+      if (left < regionTileX + BigInt(WOODLAND_CAVE_FAMILY_D12_2.placement.regionInteriorMarginTiles) || left + W7 > regionTileX + R * CW4 - BigInt(WOODLAND_CAVE_FAMILY_D12_2.placement.regionInteriorMarginTiles) || top < regionTileY + BigInt(WOODLAND_CAVE_FAMILY_D12_2.placement.regionInteriorMarginTiles) || top + H7 > regionTileY + R * CH4 - BigInt(WOODLAND_CAVE_FAMILY_D12_2.placement.regionInteriorMarginTiles)) continue;
       let woodland = 0, total = 0, valid = true;
       for (let yy = top - 2n; yy < top + H7 + 2n; yy++) for (let xx = left - 2n; xx < left + W7 + 2n; xx++) {
-        const qcx = floorDiv(xx, CW3), qcy = floorDiv(yy, CH3), q = await chunk(qcx, qcy);
+        const qcx = floorDiv(xx, CW4), qcy = floorDiv(yy, CH4), q = await chunk(qcx, qcy);
         if (!q) {
           valid = false;
           continue;
         }
-        const lx = Number(xx - qcx * CW3), ly = Number(yy - qcy * CH3);
+        const lx = Number(xx - qcx * CW4), ly = Number(yy - qcy * CH4);
         total++;
         if (q.visual.biomes[ly][lx] === "w") woodland++;
         if (xx >= left && xx < left + W7 && yy >= top && yy < top + H7 && q.visual.route.centerline[ly][lx] === "1") valid = false;
@@ -25405,12 +25490,12 @@ async function planWoodlandCaveRegionD12_2({ seed, origin: origin2, regionX, reg
         const ax = BigInt(p.tileX), ay = BigInt(p.tileY), aw = BigInt(p.width ?? (p.pages?.length === 4 ? 48 : 12)), ah = BigInt(p.height ?? (p.pages?.length === 4 ? 36 : 9)), dx = Number(left + W7 / 2n - (ax + aw / 2n)), dy = Number(top + H7 / 2n - (ay + ah / 2n));
         return left < ax + aw && left + W7 > ax && top < ay + ah && top + H7 > ay || Math.hypot(dx, dy) < WOODLAND_CAVE_FAMILY_D12_2.placement.minimumSeparationTiles;
       })) continue;
-      if (page.sites.some((s) => insideParcel(BigInt(s.entrance.chunkX) * CW3 + BigInt(Math.floor(s.entrance.localX / T6)), BigInt(s.entrance.chunkY) * CH3 + BigInt(Math.floor(s.entrance.localY / T6)), provisional))) continue;
+      if (page.sites.some((s) => insideParcel(BigInt(s.entrance.chunkX) * CW4 + BigInt(Math.floor(s.entrance.localX / T7)), BigInt(s.entrance.chunkY) * CH4 + BigInt(Math.floor(s.entrance.localY / T7)), provisional))) continue;
       const nearDistance = existingParcels.length ? Math.min(...existingParcels.filter((p) => p?.tileX !== void 0).map((p) => {
         const px = BigInt(p.tileX) + BigInt(p.width ?? 12) / 2n, py = BigInt(p.tileY) + BigInt(p.height ?? 9) / 2n;
         return Math.hypot(Number(left + W7 / 2n - px), Number(top + H7 / 2n - py));
       })) : Infinity;
-      candidates.push({ left, top, page, road: { x: cx * CW3 + x, y: cy * CH3 + y }, score: hash19(`${seed}/${regionX}/${regionY}/${left}/${top}`), nearDistance, direction: compass(left + W7 / 2n, top + H7 / 2n, centerX, centerY) });
+      candidates.push({ left, top, page, road: { x: cx * CW4 + x, y: cy * CH4 + y }, score: hash19(`${seed}/${regionX}/${regionY}/${left}/${top}`), nearDistance, direction: compass(left + W7 / 2n, top + H7 / 2n, centerX, centerY) });
     }
   }
   candidates.sort((a, b) => (guarantee ? a.nearDistance - b.nearDistance : 0) || a.score - b.score || (a.left < b.left ? -1 : a.left > b.left ? 1 : 0) || (a.top < b.top ? -1 : 1));
@@ -25427,7 +25512,7 @@ async function planWoodlandCaveRegionD12_2({ seed, origin: origin2, regionX, reg
   const actualCount = chosen.length;
   const parcels = [];
   for (const [ordinal, c] of chosen.entries()) {
-    const identity = await worldIdentity(seed, "site-family-region-owned-reservation", [WOODLAND_CAVE_FAMILY_VERSION_D12_2, WOODLAND_CAVE_FAMILY_ID, regionX, regionY, String(ordinal), String(c.left), String(c.top)], sha256), siteId2 = "site:" + identity.digest.slice(0, 32), ex = c.left + BigInt(WOODLAND_CAVE_EXTERIOR.entranceTile.x), ey = c.top + BigInt(WOODLAND_CAVE_EXTERIOR.entranceTile.y), ecx = floorDiv(ex, CW3), ecy = floorDiv(ey, CH3), socket = { version: SITE_REGIONAL_SOCKET_D12_2, siteId: siteId2, siteSeed: identity.digest, entrance: { chunkX: String(ecx), chunkY: String(ecy), localX: Number(ex - ecx * CW3) * T6 + 16, localY: Number(ey - ecy * CH3) * T6 + 16 }, siteClass: "dungeon", capabilities: ["interior"], region: { regionX, regionY, biome: "woodland" }, minimumLevel: copyWire(region.minimumLevel), provenance: { geographyVersion: c.page.version, chunkId: c.page.identity.id, placementVersion: WOODLAND_CAVE_FAMILY_PARCEL_D12_2, identityDomain: "region-owned-cave", regionKey: woodlandCaveRegionKeyD12_2(regionX, regionY), ordinal } };
+    const identity = await worldIdentity(seed, "site-family-region-owned-reservation", [WOODLAND_CAVE_FAMILY_VERSION_D12_2, WOODLAND_CAVE_FAMILY_ID, regionX, regionY, String(ordinal), String(c.left), String(c.top)], sha256), siteId2 = "site:" + identity.digest.slice(0, 32), ex = c.left + BigInt(WOODLAND_CAVE_EXTERIOR.entranceTile.x), ey = c.top + BigInt(WOODLAND_CAVE_EXTERIOR.entranceTile.y), ecx = floorDiv(ex, CW4), ecy = floorDiv(ey, CH4), socket = { version: SITE_REGIONAL_SOCKET_D12_2, siteId: siteId2, siteSeed: identity.digest, entrance: { chunkX: String(ecx), chunkY: String(ecy), localX: Number(ex - ecx * CW4) * T7 + 16, localY: Number(ey - ecy * CH4) * T7 + 16 }, siteClass: "dungeon", capabilities: ["interior"], region: { regionX, regionY, biome: "woodland" }, minimumLevel: copyWire(region.minimumLevel), provenance: { geographyVersion: c.page.version, chunkId: c.page.identity.id, placementVersion: WOODLAND_CAVE_FAMILY_PARCEL_D12_2, identityDomain: "region-owned-cave", regionKey: woodlandCaveRegionKeyD12_2(regionX, regionY), ordinal } };
     validateSiteSocketD9(socket);
     const geographicQualifier = actualCount === 1 ? "" : c.direction, label2 = actualCount === 1 ? `${region.name} Cave` : `${c.direction} ${region.name} Cave`, stable3 = await deriveWoodlandCaveIdentityD12_2({ campaignSeed: seed, site: socket, label: label2, regionName: region.name, geographicQualifier }, { sha256 }), parcel2 = freezeWire({ version: WOODLAND_CAVE_FAMILY_PARCEL_D12_2, siteId: siteId2, socket, familyId: WOODLAND_CAVE_FAMILY_ID, packageId: WOODLAND_CAVE_FAMILY_PACKAGE_ID, spawnOrdinal: ordinal, regionKey: woodlandCaveRegionKeyD12_2(regionX, regionY), regionName: region.name, geographicQualifier, label: label2, tileX: String(c.left), tileY: String(c.top), width: Number(W7), height: Number(H7), orientation: "north-of-road", pages: [{ chunkX: c.page.chunkX, chunkY: c.page.chunkY, baseDigest: c.page.identity.digest }], roadAnchor: { tileX: String(c.road.x), tileY: String(c.road.y) }, tier: stable3.tier, siteSeed: stable3.siteSeed, layoutSeed: stable3.layoutSeed, placementProvenance: { version: WOODLAND_CAVE_FAMILY_PARCEL_D12_2, kind: "lazy-region-owned-reservation", regionKey: woodlandCaveRegionKeyD12_2(regionX, regionY), ordinal, guaranteed: guarantee } });
     parcels.push(parcel2);
@@ -25572,7 +25657,7 @@ function validateD9Root(root2) {
 
 // src/shared/contracts/origin_egress_d9.js
 function originEgress(manifest, collision2, resources = []) {
-  const w = collision2.width, h = collision2.height, T8 = collision2.tileSize, walk = (x, y) => collision2.tiles[y]?.[x] === "1", start = { x: Math.floor(manifest.start.position.x / T8), y: Math.floor(manifest.start.position.y / T8) }, seen = /* @__PURE__ */ new Set(), queue = [start];
+  const w = collision2.width, h = collision2.height, T9 = collision2.tileSize, walk = (x, y) => collision2.tiles[y]?.[x] === "1", start = { x: Math.floor(manifest.start.position.x / T9), y: Math.floor(manifest.start.position.y / T9) }, seen = /* @__PURE__ */ new Set(), queue = [start];
   for (let i = 0; i < queue.length; i++) {
     const p = queue[i], key9 = p.x + "," + p.y;
     if (seen.has(key9) || !walk(p.x, p.y)) continue;
@@ -25582,7 +25667,7 @@ function originEgress(manifest, collision2, resources = []) {
       if (x >= 0 && y >= 0 && x < w && y < h && !seen.has(x + "," + y)) queue.push({ x, y });
     }
   }
-  const overlap = (x, y) => manifest.safeRegions.some((r) => x * T8 < r.x + r.width && (x + 1) * T8 > r.x && y * T8 < r.y + r.height && (y + 1) * T8 > r.y) || [...manifest.sites, ...resources].some((s) => s.position && Math.hypot((x + 0.5) * T8 - s.position.x, (y + 0.5) * T8 - s.position.y) < 96);
+  const overlap = (x, y) => manifest.safeRegions.some((r) => x * T9 < r.x + r.width && (x + 1) * T9 > r.x && y * T9 < r.y + r.height && (y + 1) * T9 > r.y) || [...manifest.sites, ...resources].some((s) => s.position && Math.hypot((x + 0.5) * T9 - s.position.x, (y + 0.5) * T9 - s.position.y) < 96);
   const openings = [];
   for (const side of ["north", "east", "south", "west"]) {
     const horizontal = side === "north" || side === "south", length = horizontal ? w : h, candidates = [];
@@ -31167,7 +31252,7 @@ function overlayFunctionalSiteBootstrapD9(chunk, plan) {
 
 // src/shared/generation/woodland_ruin_exterior_d11_3_2.js
 var WOODLAND_RUIN_EXTERIOR_D11_3_2 = "woodland-ruin-exterior-d11.3.2-v1";
-var T7 = 32;
+var T8 = 32;
 var ROWS2 = [
   "000000000",
   "000000000",
@@ -31183,7 +31268,7 @@ var TOP = -4;
 function overlayWoodlandRuinExteriorD11_3_2(chunk, bootstrap) {
   const site = bootstrap?.bootstrap ?? bootstrap?.guaranteedCandidate ?? bootstrap;
   if (!site?.entrance || site.entrance.chunkX !== chunk.chunkX || site.entrance.chunkY !== chunk.chunkY) return chunk;
-  const ex = Math.floor(site.entrance.localX / T7), ey = Math.floor(site.entrance.localY / T7);
+  const ex = Math.floor(site.entrance.localX / T8), ey = Math.floor(site.entrance.localY / T8);
   requireContract(ex + LEFT >= 0 && ex + LEFT + 9 <= 32 && ey + TOP >= 0 && ey + TOP + 8 <= 26, "Ruin exterior crosses page boundary");
   const collision2 = chunk.collision.tiles.map((r) => [...r]), terrain2 = chunk.visual.terrain.map((r) => [...r]), biomes = chunk.visual.biomes.map((r) => [...r]), centerline = chunk.visual.route.centerline.map((r) => [...r]), clearance = chunk.visual.route.clearance.map((r) => [...r]);
   for (let ry = 0; ry < ROWS2.length; ry++) for (let rx = 0; rx < ROWS2[ry].length; rx++) {
@@ -31206,7 +31291,7 @@ function overlayWoodlandRuinExteriorD11_3_2(chunk, bootstrap) {
     { x: ex - 4, y: ey + 3, width: 1, height: 1, detail: "left-root" },
     { x: ex + 4, y: ey + 3, width: 1, height: 1, detail: "right-root" }
   ]) blockers2.push({ id: `ruin:${site.siteId}:${b.detail}`, ...b, kind: "ruin-exterior-masonry" });
-  const decorations3 = (chunk.visual.decorations ?? []).filter((d) => !owns(Math.floor(d.x), Math.floor(d.y))), anchors2 = chunk.anchors.filter((a) => !owns(Math.floor(a.position.x / T7), Math.floor(a.position.y / T7))), sites6 = chunk.sites.filter((s) => s.siteId === site.siteId || !owns(Math.floor(s.entrance.localX / T7), Math.floor(s.entrance.localY / T7)));
+  const decorations3 = (chunk.visual.decorations ?? []).filter((d) => !owns(Math.floor(d.x), Math.floor(d.y))), anchors2 = chunk.anchors.filter((a) => !owns(Math.floor(a.position.x / T8), Math.floor(a.position.y / T8))), sites6 = chunk.sites.filter((s) => s.siteId === site.siteId || !owns(Math.floor(s.entrance.localX / T8), Math.floor(s.entrance.localY / T8)));
   return freezeWire({ ...copyWire(chunk), collision: { ...copyWire(chunk.collision), tiles: collision2.map((r) => r.join("")) }, visual: { ...copyWire(chunk.visual), terrain: terrain2.map((r) => r.join("")), biomes: biomes.map((r) => r.join("")), blockers: blockers2, decorations: decorations3, route: { centerline: centerline.map((r) => r.join("")), clearance: clearance.map((r) => r.join("")) } }, anchors: anchors2, sites: sites6, ruinExterior: { version: WOODLAND_RUIN_EXTERIOR_D11_3_2, siteId: site.siteId, entranceTile: { x: ex, y: ey }, mask: [...ROWS2] } });
 }
 
@@ -32437,7 +32522,7 @@ async function prepareWorldEncountersD9(before, { sha256 }) {
   const candidates = [];
   for (const chunk of state.d9World.runtime.chunks) for (const anchor of chunk.anchors) {
     const id = "ordinary:" + anchor.id.split(":").at(-1), old = state.d9World.episodes[id];
-    if (woodlandPilotEventAlreadyAdmitted(anchor, old)) continue;
+    if (woodlandPilotEventAlreadyAdmitted(anchor, old) || summitAlreadyAdmittedV1(anchor, old)) continue;
     if (state.groupsById[id] && !old?.renewalEligible) continue;
     const world = normalizeWorldPosition({ chunkX: chunk.chunkX, chunkY: chunk.chunkY, localX: anchor.position.x, localY: anchor.position.y }), local = projectToLocalFrameD9(world, frames);
     if (!local) continue;
@@ -32462,6 +32547,10 @@ async function prepareWorldEncountersD9(before, { sha256 }) {
       const member = plan.definition.members.at(-1);
       chest.position = { ...member.position };
       plan.resources.push(chest);
+    }
+    if (isSummitAnchorV1(c.anchor)) {
+      const q = plan.resources[0], a = plan.definition.anchor;
+      plan.resources = c.anchor.summit.chests.map((o, n) => ({ groupId: q.groupId, ordinal: n, kind: "chest", art: "chest", ...o.completion ? { completion: true } : {}, position: { x: a.x + o.x, y: a.y + o.y }, spaceInstanceId: q.spaceInstanceId }));
     }
     if (hollowOrdinal(c.anchor.ordinal)) {
       const q = plan.resources[0];

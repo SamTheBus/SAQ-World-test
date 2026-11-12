@@ -289,6 +289,9 @@ import {
   STARTER_VILLAGE_NAME,
   SUBWEAPONS,
   SUBWEAPON_TYPES,
+  SUMMIT_FAMILIES,
+  SUMMIT_GUARDS,
+  SUMMIT_ORDINAL,
   SWIFT_COMMANDER_AFFIX_ID,
   SWIFT_COMMANDER_D12_4D,
   TAVERN_INTERIOR_V1,
@@ -868,6 +871,8 @@ import {
   subtractAmount,
   subtractCombat,
   subweaponSuppressedD12_4I,
+  summitAlreadyAdmittedV1,
+  summitGroupV1,
   sunfallDiscsV1,
   supplyCount,
   swiftMoveV1,
@@ -1018,7 +1023,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-ZNK5GJW2.js";
+} from "./chunk-M5KHNUC6.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -55048,7 +55053,7 @@ function wing5(c, P17, s, d, rot2, fold, crack3) {
   c.scale(d, 1);
   c.rotate(-rot2);
   c.scale(1 - fold * 0.55, 1 + fold * 0.12);
-  const Wr = [20, -22], T72 = [[43, -17], [47, 1], [37, 16]], B6 = [3, 15];
+  const Wr = [20, -22], T73 = [[43, -17], [47, 1], [37, 16]], B6 = [3, 15];
   const scal = (a, b, k = 0.3) => {
     const m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
     return [m[0] + (Wr[0] - m[0]) * k, m[1] + (Wr[1] - m[1]) * k];
@@ -55057,10 +55062,10 @@ function wing5(c, P17, s, d, rot2, fold, crack3) {
     c.beginPath();
     c.moveTo(0, 0);
     c.lineTo(...Wr);
-    c.lineTo(...T72[0]);
-    c.quadraticCurveTo(...scal(T72[0], T72[1]), ...T72[1]);
-    c.quadraticCurveTo(...scal(T72[1], T72[2]), ...T72[2]);
-    c.quadraticCurveTo(...scal(T72[2], B6, 0.25), ...B6);
+    c.lineTo(...T73[0]);
+    c.quadraticCurveTo(...scal(T73[0], T73[1]), ...T73[1]);
+    c.quadraticCurveTo(...scal(T73[1], T73[2]), ...T73[2]);
+    c.quadraticCurveTo(...scal(T73[2], B6, 0.25), ...B6);
     c.closePath();
   };
   mem();
@@ -55078,14 +55083,14 @@ function wing5(c, P17, s, d, rot2, fold, crack3) {
     c.beginPath();
     c.moveTo(0, 0);
     c.lineTo(...Wr);
-    c.lineTo(...T72[0]);
+    c.lineTo(...T73[0]);
     c.lineTo(30, -12);
     c.lineTo(8, 2);
     c.closePath();
     c.fill();
     c.strokeStyle = P17.wingD;
     c.lineWidth = 0.6;
-    for (const tp of T72) {
+    for (const tp of T73) {
       c.beginPath();
       c.moveTo(Wr[0] * 0.6, Wr[1] * 0.6 + 4);
       c.quadraticCurveTo((Wr[0] + tp[0]) / 2, (Wr[1] + tp[1]) / 2 + 5, tp[0] - 3, tp[1]);
@@ -55098,11 +55103,11 @@ function wing5(c, P17, s, d, rot2, fold, crack3) {
   c.lineWidth = LW3;
   c.stroke();
   limb2(c, [[0, 0], [Wr[0] * 0.5, Wr[1] * 0.62], Wr], W3(s, P17.st), 3.6);
-  for (const [i, tp] of T72.entries()) limb2(c, [Wr, tp], W3(s, P17.st), 2.3 - i * 0.3);
+  for (const [i, tp] of T73.entries()) limb2(c, [Wr, tp], W3(s, P17.st), 2.3 - i * 0.3);
   if (!s.flash) stroke2(c, [[1, -1.4], [Wr[0] * 0.5, Wr[1] * 0.62 - 1.2], [Wr[0] - 1, Wr[1] - 1]], P17.stL, 0.9);
   circ3(c, Wr[0], Wr[1], 2.6, W3(s, P17.st), true, FINE3);
   poly6(c, [[Wr[0] - 1.6, Wr[1] - 1], [Wr[0] + 1, Wr[1] - 7.5], [Wr[0] + 2.6, Wr[1] - 0.6]], W3(s, P17.horn), true, FINE3);
-  for (const tp of T72) poly6(c, [[tp[0] - 1, tp[1] - 1], [tp[0] + 2.6, tp[1] + 0.6], [tp[0] - 0.4, tp[1] + 1.4]], W3(s, P17.horn), true, 0.8);
+  for (const tp of T73) poly6(c, [[tp[0] - 1, tp[1] - 1], [tp[0] + 2.6, tp[1] + 0.6], [tp[0] - 0.4, tp[1] + 1.4]], W3(s, P17.horn), true, 0.8);
   if (crack3) glowLine(c, s, P17, [[26, -4], [29, -1.6], [28.4, 1.6]], 0.8);
   if (P17.moss && !s.flash) {
     for (const [x, y] of [[6, 4], [14, 10]]) {
@@ -57859,12 +57864,12 @@ function drawTwister(c, t, { y0 = -4, y1 = -60, r0 = 2.5, r1 = 22, n = 9, spin =
     const v = i / (n - 1);
     B6.push({ v, y: mix15(y0, y1, v), r: mix15(r0, r1, Math.pow(v, 1.75)), x: Math.sin(t * 3 * spin - v * 4.2) * sway * (0.35 + (1 - v) * 0.9) + lean * v });
   }
-  const T72 = B6[n - 1], ryT = T72.r * 0.3;
+  const T73 = B6[n - 1], ryT = T73.r * 0.3;
   const sil = () => {
     c.beginPath();
     c.moveTo(B6[0].x, B6[0].y + 1.5);
     for (const b of B6) c.lineTo(b.x - b.r, b.y);
-    c.ellipse(T72.x, T72.y, T72.r, ryT, 0, Math.PI, 0);
+    c.ellipse(T73.x, T73.y, T73.r, ryT, 0, Math.PI, 0);
     for (let i = n - 1; i >= 0; i--) c.lineTo(B6[i].x + B6[i].r, B6[i].y);
     c.closePath();
   };
@@ -57931,7 +57936,7 @@ function drawTwister(c, t, { y0 = -4, y1 = -60, r0 = 2.5, r1 = 22, n = 9, spin =
     c.restore();
   }
   c.beginPath();
-  c.ellipse(T72.x, T72.y, T72.r, ryT, 0, 0, TAU99);
+  c.ellipse(T73.x, T73.y, T73.r, ryT, 0, 0, TAU99);
   c.fillStyle = flash ? "#fff" : P17.s1;
   c.fill();
   c.strokeStyle = INK30;
@@ -57940,7 +57945,7 @@ function drawTwister(c, t, { y0 = -4, y1 = -60, r0 = 2.5, r1 = 22, n = 9, spin =
   if (!flash) {
     c.fillStyle = P17.s3;
     c.beginPath();
-    c.ellipse(T72.x + 1, T72.y + 0.4, T72.r * 0.62, ryT * 0.55, 0, 0, TAU99);
+    c.ellipse(T73.x + 1, T73.y + 0.4, T73.r * 0.62, ryT * 0.55, 0, 0, TAU99);
     c.fill();
   }
 }
@@ -58279,10 +58284,10 @@ var rimAt = (o, R9, i) => {
   return { x: o.x + Math.cos(a) * (R9 - 3), y: o.y + Math.sin(a) * (R9 - 3) * 0.7, a };
 };
 function snareWarnItems(actor, k, q, tick, out) {
-  const t = LESSER_BOSS_TRICKS_V1[actor.enemyFamily], T72 = k.target, id = "lesser-vfx/" + actor.entityId;
-  if (!T72 || q <= 0.35) return;
+  const t = LESSER_BOSS_TRICKS_V1[actor.enemyFamily], T73 = k.target, id = "lesser-vfx/" + actor.entityId;
+  if (!T73 || q <= 0.35) return;
   for (let i = 0; i < 8; i++) {
-    const p = rimAt(T72, t.radius, i), j = Math.sin(tick * SEC * 22 + i * 1.7) * 1.2, g = ease4((q - 0.35) / 0.65) * 0.32;
+    const p = rimAt(T73, t.radius, i), j = Math.sin(tick * SEC * 22 + i * 1.7) * 1.2, g = ease4((q - 0.35) / 0.65) * 0.32;
     out.push({ id: id + "/tip" + i, anchorX: p.x, anchorY: p.y, draw: (c) => drawRoot(c, p.x, p.y, p.x + j, p.y - 7, g, { w: 2.4, curl: Math.cos(p.a) * 0.3, leaf: false }) });
   }
 }
@@ -59036,35 +59041,35 @@ function devilK(k, t, tick) {
   return k.phase === "chase" ? ease4(clamp27(age / 15)) : k.phase === "fade" ? 1 - ease4(q) : 0;
 }
 function devilGround(c, actor, k, tick) {
-  const t = LESSER_BOSS_TRICKS_V1[actor.enemyFamily], G3 = OPEN_LOOKS.dust, { age } = ageOf(k, t, tick), T72 = k.target;
-  if (!T72) return;
+  const t = LESSER_BOSS_TRICKS_V1[actor.enemyFamily], G3 = OPEN_LOOKS.dust, { age } = ageOf(k, t, tick), T73 = k.target;
+  if (!T73) return;
   if (k.phase === "warn") {
-    gameWarn(c, T72.x, T72.y, t.radius, age / t.warnTicks, age * SEC, G3);
+    gameWarn(c, T73.x, T73.y, t.radius, age / t.warnTicks, age * SEC, G3);
     return;
   }
   if (k.phase !== "chase" && k.phase !== "fade") return;
   let trail2 = devilTrails.get(actor.entityId);
   if (!trail2 || trail2.sequence !== k.sequence) {
-    trail2 = { sequence: k.sequence, start: { x: T72.x, y: T72.y }, pts: [], tick: -1 };
+    trail2 = { sequence: k.sequence, start: { x: T73.x, y: T73.y }, pts: [], tick: -1 };
     devilTrails.set(actor.entityId, trail2);
   }
   if (trail2.tick !== tick && k.phase === "chase") {
-    trail2.pts.push({ x: T72.x, y: T72.y });
+    trail2.pts.push({ x: T73.x, y: T73.y });
     if (trail2.pts.length > 80) trail2.pts.shift();
     trail2.tick = tick;
   }
   const kk = devilK(k, t, tick);
   if (k.phase === "chase") gameBurst(c, trail2.start.x, trail2.start.y, t.radius, age * SEC, G3, 0.35);
   scuffs(c, trail2.pts, kk);
-  chaseRing(c, T72.x, T72.y, t.radius, tick * SEC, kk);
+  chaseRing(c, T73.x, T73.y, t.radius, tick * SEC, kk);
 }
 function devilItems(actor, k, tick, out) {
   if (k.phase !== "chase" && k.phase !== "fade" || !k.target) return;
-  const t = LESSER_BOSS_TRICKS_V1[actor.enemyFamily], T72 = k.target, kk = devilK(k, t, tick);
+  const t = LESSER_BOSS_TRICKS_V1[actor.enemyFamily], T73 = k.target, kk = devilK(k, t, tick);
   if (kk <= 0) return;
-  out.push({ id: "lesser-vfx/" + actor.entityId + "/devil", anchorX: T72.x, anchorY: T72.y + 0.5, draw: (c) => {
+  out.push({ id: "lesser-vfx/" + actor.entityId + "/devil", anchorX: T73.x, anchorY: T73.y + 0.5, draw: (c) => {
     c.save();
-    c.translate(T72.x, T72.y);
+    c.translate(T73.x, T73.y);
     c.scale(kk, mix15(0.2, 1, kk));
     drawTwister(c, tick * SEC, { y0: -2, y1: -40, r0: 1.8, r1: 14, n: 8, spin: 1.6, sway: 2.5, P: SIRO_PAL.S });
     c.restore();
@@ -61563,9 +61568,9 @@ function galeItems(model, actor, k, tick, out) {
     } });
   }
   if (k.phase !== "gusts") return;
-  const fade2 = 1 - clamp27((age - (GALE.gustTicks - 9)) / 9), T72 = age * SEC4;
+  const fade2 = 1 - clamp27((age - (GALE.gustTicks - 9)) / 9), T73 = age * SEC4;
   for (let i = 0; i < 12; i++) {
-    const u = (T72 * 1.5 + i / 12) % 1, a = W16.a + (rnd3(i, 3) - 0.5) * 1.7 * GALE.halfAngle, r = 26 + u * (R9 - 36), gy = W16.y + Math.sin(a) * r * 0.9, x = W16.x + Math.cos(a) * r, y = gy - 4 - rnd3(i, 4) * 18;
+    const u = (T73 * 1.5 + i / 12) % 1, a = W16.a + (rnd3(i, 3) - 0.5) * 1.7 * GALE.halfAngle, r = 26 + u * (R9 - 36), gy = W16.y + Math.sin(a) * r * 0.9, x = W16.x + Math.cos(a) * r, y = gy - 4 - rnd3(i, 4) * 18;
     out.push({ id: id + "/gust" + i, anchorX: x, anchorY: gy, draw: (c) => {
       streak(c, x, y, a, 12 + rnd3(i, 5) * 8, Math.sin(u * Math.PI) * fade2);
       if (i % 3 === 0) {
@@ -61580,7 +61585,7 @@ function galeItems(model, actor, k, tick, out) {
     } });
   }
   for (let i = 0; i < 2; i++) {
-    const u = (T72 * 0.8 + i * 0.5) % 1, r = 10 + u * 130, x = W16.x + Math.cos(W16.a) * r, gy = W16.y + Math.sin(W16.a) * r, y = gy - 40 + i * 22 + Math.sin(u * 9 + i) * 6 - u * 10;
+    const u = (T73 * 0.8 + i * 0.5) % 1, r = 10 + u * 130, x = W16.x + Math.cos(W16.a) * r, gy = W16.y + Math.sin(W16.a) * r, y = gy - 40 + i * 22 + Math.sin(u * 9 + i) * 6 - u * 10;
     out.push({ id: id + "/feather" + i, anchorX: x, anchorY: gy - 10, draw: (c) => {
       c.save();
       c.globalAlpha = fade2;
@@ -61727,19 +61732,19 @@ function fillPts2(c, pts2, col2) {
 function crystal2(c, x, y, a, L, w, P17, s, o = {}) {
   if (L < 0.5) return;
   const ca = Math.cos(a), sa = Math.sin(a), p = (u, v) => P22(u, v, ca, sa, x, y), sh2 = o.shoulder ?? 0.68;
-  const A = p(0, -w * 0.4), B6 = p(L * sh2, -w * 0.5), T72 = p(L, 0), C3 = p(L * sh2, w * 0.5), D2 = p(0, w * 0.4), r0 = p(0, -w * 0.08), r1 = p(L * sh2, -w * 0.1), d0 = p(0, w * 0.2), d1 = p(L * sh2, w * 0.25);
+  const A = p(0, -w * 0.4), B6 = p(L * sh2, -w * 0.5), T73 = p(L, 0), C3 = p(L * sh2, w * 0.5), D2 = p(0, w * 0.4), r0 = p(0, -w * 0.08), r1 = p(L * sh2, -w * 0.1), d0 = p(0, w * 0.2), d1 = p(L * sh2, w * 0.25);
   const dark = o.dark;
-  fillPts2(c, [A, B6, T72, C3, D2], W10(s, dark ? P17.iceDD : P17.ice));
+  fillPts2(c, [A, B6, T73, C3, D2], W10(s, dark ? P17.iceDD : P17.ice));
   if (!s.flash) {
-    fillPts2(c, [A, B6, T72, r1, r0], dark ? P17.iceD : P17.iceL);
-    fillPts2(c, [d0, d1, T72, C3, D2], dark ? P17.deep : P17.iceD);
-    fillPts2(c, [B6, T72, r1], dark ? P17.ice : P17.rim);
+    fillPts2(c, [A, B6, T73, r1, r0], dark ? P17.iceD : P17.iceL);
+    fillPts2(c, [d0, d1, T73, C3, D2], dark ? P17.deep : P17.iceD);
+    fillPts2(c, [B6, T73, r1], dark ? P17.ice : P17.rim);
     c.strokeStyle = dark ? "rgba(220,245,255,.35)" : "rgba(255,255,255,.75)";
     c.lineWidth = 0.7;
     c.beginPath();
     c.moveTo(...r0);
     c.lineTo(...r1);
-    c.lineTo(...T72);
+    c.lineTo(...T73);
     c.stroke();
     if (o.frost) {
       c.fillStyle = P17.frost;
@@ -61755,7 +61760,7 @@ function crystal2(c, x, y, a, L, w, P17, s, o = {}) {
   c.beginPath();
   c.moveTo(...A);
   c.lineTo(...B6);
-  c.lineTo(...T72);
+  c.lineTo(...T73);
   c.lineTo(...C3);
   c.lineTo(...D2);
   if (o.open !== true) c.closePath();
@@ -64032,7 +64037,7 @@ function clock4(k, t, tick) {
   }
   return A;
 }
-var seg2 = (T72, a, b) => clamp27((T72 - a) / (b - a));
+var seg2 = (T73, a, b) => clamp27((T73 - a) / (b - a));
 var faceOf4 = (actor) => actor.presentationFacingX === -1 ? -1 : 1;
 function meleeOf4(actor, tick) {
   const m = actor.meleePhase;
@@ -64483,24 +64488,24 @@ function cagePose(actor, k, tick, s) {
   }
   if (k && k.phase !== "ready") {
     if (k.direction) face4 = k.direction.x < 0 ? -1 : 1;
-    const T72 = clock4(k, CAGE, tick) * SEC5;
-    s.cast = T72 < 1 ? ease4(seg2(T72, 0, 0.45)) : 1 - ease4(seg2(T72, 1.05, 1.4));
-    s.thrust = T72 < 2.1 ? ease4(seg2(T72, 1.55, 1.82)) : 1 - ease4(seg2(T72, 2.1, 2.4));
-    s.spent = ease4(seg2(T72, 2.15, 2.6)) * (1 - ease4(seg2(T72, REGROW, CAGE_END)));
-    if (T72 >= REGROW) {
+    const T73 = clock4(k, CAGE, tick) * SEC5;
+    s.cast = T73 < 1 ? ease4(seg2(T73, 0, 0.45)) : 1 - ease4(seg2(T73, 1.05, 1.4));
+    s.thrust = T73 < 2.1 ? ease4(seg2(T73, 1.55, 1.82)) : 1 - ease4(seg2(T73, 2.1, 2.4));
+    s.spent = ease4(seg2(T73, 2.15, 2.6)) * (1 - ease4(seg2(T73, REGROW, CAGE_END)));
+    if (T73 >= REGROW) {
       s.launched = 0;
       s.regrowFrom = 4;
-      s.regrow = seg2(T72, REGROW, CAGE_END);
-    } else s.launched = THROWS.filter((q) => T72 >= q.t).length;
+      s.regrow = seg2(T73, REGROW, CAGE_END);
+    } else s.launched = THROWS.filter((q) => T73 >= q.t).length;
   }
   return { face: face4, x, y, rot: 0, sq: 1 };
 }
 var rim = (k, a) => ({ x: k.target.x + Math.cos(a) * CR, y: k.target.y + Math.sin(a) * CR });
 function cageGround(c, actor, k, tick) {
   if (!k.target) return;
-  const G3 = ICE_LOOK, T72 = clock4(k, CAGE, tick) * SEC5, { x: CX2, y: CY2 } = k.target;
-  if (T72 >= WARN0 && T72 < CLOSE) {
-    gameWarn(c, CX2, CY2, CR, seg2(T72, WARN0, CLOSE), T72 - WARN0, G3);
+  const G3 = ICE_LOOK, T73 = clock4(k, CAGE, tick) * SEC5, { x: CX2, y: CY2 } = k.target;
+  if (T73 >= WARN0 && T73 < CLOSE) {
+    gameWarn(c, CX2, CY2, CR, seg2(T73, WARN0, CLOSE), T73 - WARN0, G3);
     for (const p of PILLARS) {
       const q = rim(k, p.a);
       c.fillStyle = G3.lit;
@@ -64509,8 +64514,8 @@ function cageGround(c, actor, k, tick) {
       c.fill();
     }
   }
-  if (T72 >= CLOSE && T72 < NOVA + 0.1) {
-    const u = seg2(T72, CLOSE, NOVA);
+  if (T73 >= CLOSE && T73 < NOVA + 0.1) {
+    const u = seg2(T73, CLOSE, NOVA);
     c.save();
     c.fillStyle = `rgba(47,159,214,${0.18 + u * 0.22})`;
     c.beginPath();
@@ -64533,10 +64538,10 @@ function cageGround(c, actor, k, tick) {
     c.stroke();
     c.restore();
   }
-  if (T72 >= NOVA && T72 < NOVA + 0.6) gameBurst(c, CX2, CY2, CR, T72 - NOVA, G3, 0.55);
-  if (T72 >= CLOSE && T72 < THAW + 0.7) {
+  if (T73 >= NOVA && T73 < NOVA + 0.6) gameBurst(c, CX2, CY2, CR, T73 - NOVA, G3, 0.55);
+  if (T73 >= CLOSE && T73 < THAW + 0.7) {
     c.save();
-    c.globalAlpha = 1 - seg2(T72, THAW + 0.2, THAW + 0.7);
+    c.globalAlpha = 1 - seg2(T73, THAW + 0.2, THAW + 0.7);
     c.strokeStyle = "#f4f9fc";
     c.lineWidth = 5;
     c.beginPath();
@@ -64551,9 +64556,9 @@ function cageGround(c, actor, k, tick) {
   }
   for (const q of THROWS) {
     const land = q.t + FLY2, r = rim(k, q.a);
-    if (T72 >= land && T72 < land + 0.4) gameBurst(c, r.x, r.y, 9, T72 - land, G3, 0.35);
-    if (T72 >= q.t && T72 < land) {
-      const u = seg2(T72, q.t, land), o = k.origin;
+    if (T73 >= land && T73 < land + 0.4) gameBurst(c, r.x, r.y, 9, T73 - land, G3, 0.35);
+    if (T73 >= q.t && T73 < land) {
+      const u = seg2(T73, q.t, land), o = k.origin;
       shadow41(c, mix15(o.x, r.x, u), mix15(o.y, r.y, u), 5, 1.8, 0.18);
     }
   }
@@ -64561,11 +64566,11 @@ function cageGround(c, actor, k, tick) {
 var caged = (model, k) => party2(model).filter((h) => Math.hypot(h.position.x - k.target.x, h.position.y - k.target.y) <= CR + (h.hullRadius ?? 10) * 0.5);
 function cageItems(model, actor, k, tick, out) {
   if (!k.target) return;
-  const T72 = clock4(k, CAGE, tick) * SEC5, id = "lesser-vfx/" + actor.entityId, face4 = k.direction?.x < 0 ? -1 : 1, o = actor.position;
+  const T73 = clock4(k, CAGE, tick) * SEC5, id = "lesser-vfx/" + actor.entityId, face4 = k.direction?.x < 0 ? -1 : 1, o = actor.position;
   for (const [i, q] of THROWS.entries()) {
     const r = rim(k, q.a), land = q.t + FLY2;
-    if (T72 >= q.t && T72 < land) {
-      const sx = o.x + face4 * q.back[0], sy = o.y + q.back[1], u = seg2(T72, q.t, land), x = mix15(sx, r.x, u), y = mix15(sy, r.y, u) - Math.sin(u * Math.PI) * 60, dx = r.x - sx, dy = r.y - sy - Math.cos(u * Math.PI) * 60 * Math.PI, a = Math.atan2(dy, dx), gy = mix15(o.y, r.y, u);
+    if (T73 >= q.t && T73 < land) {
+      const sx = o.x + face4 * q.back[0], sy = o.y + q.back[1], u = seg2(T73, q.t, land), x = mix15(sx, r.x, u), y = mix15(sy, r.y, u) - Math.sin(u * Math.PI) * 60, dx = r.x - sx, dy = r.y - sy - Math.cos(u * Math.PI) * 60 * Math.PI, a = Math.atan2(dy, dx), gy = mix15(o.y, r.y, u);
       out.push({ id: id + "/shard" + i, anchorX: x, anchorY: Math.max(gy, footOf(actor) + 0.5), draw: (c) => {
         for (let j = 1; j < 5; j++) {
           const v = Math.max(0, u - j * 0.06);
@@ -64574,9 +64579,9 @@ function cageItems(model, actor, k, tick, out) {
         crystal2(c, x - Math.cos(a) * 16, y - Math.sin(a) * 16, a, 32, 10, P9, {}, { frost: true, lw: 1.4 });
       } });
     }
-    if (T72 >= land && T72 < CLOSE + 0.05) out.push({ id: id + "/stuck" + i, anchorX: r.x, anchorY: r.y + 0.5, draw: (c) => crystal2(c, r.x - Math.cos(q.a) * 3, r.y + 2, -Math.PI / 2 + Math.cos(q.a) * 0.35, 26, 9, P9, {}, { frost: true, lw: 1.3 }) });
-    if (T72 >= land && T72 < land + 0.35) {
-      const v = seg2(T72, land, land + 0.35);
+    if (T73 >= land && T73 < CLOSE + 0.05) out.push({ id: id + "/stuck" + i, anchorX: r.x, anchorY: r.y + 0.5, draw: (c) => crystal2(c, r.x - Math.cos(q.a) * 3, r.y + 2, -Math.PI / 2 + Math.cos(q.a) * 0.35, 26, 9, P9, {}, { frost: true, lw: 1.3 }) });
+    if (T73 >= land && T73 < land + 0.35) {
+      const v = seg2(T73, land, land + 0.35);
       out.push({ id: id + "/chip" + i, anchorX: r.x, anchorY: r.y + 3, draw: (c) => {
         for (let j = 0; j < 4; j++) {
           const aa = Math.PI + j / 3 * Math.PI;
@@ -64586,10 +64591,10 @@ function cageItems(model, actor, k, tick, out) {
     }
   }
   for (const [i, p] of PILLARS.entries()) {
-    const r = rim(k, p.a), h = p.big ? 30 : 24, grow2 = seg2(T72, CLOSE, CLOSE + 0.14);
-    if (T72 >= CLOSE && T72 < THAW + 0.05) out.push({ id: id + "/pillar" + i, anchorX: r.x, anchorY: r.y, draw: (c) => pillar(c, r.x, r.y, h, grow2, p.seed, p.big) });
-    else if (T72 >= THAW + 0.05 && T72 < THAW + 0.6) {
-      const v = seg2(T72, THAW + 0.05, THAW + 0.6);
+    const r = rim(k, p.a), h = p.big ? 30 : 24, grow2 = seg2(T73, CLOSE, CLOSE + 0.14);
+    if (T73 >= CLOSE && T73 < THAW + 0.05) out.push({ id: id + "/pillar" + i, anchorX: r.x, anchorY: r.y, draw: (c) => pillar(c, r.x, r.y, h, grow2, p.seed, p.big) });
+    else if (T73 >= THAW + 0.05 && T73 < THAW + 0.6) {
+      const v = seg2(T73, THAW + 0.05, THAW + 0.6);
       out.push({ id: id + "/pillar" + i, anchorX: r.x, anchorY: r.y, draw: (c) => {
         c.save();
         c.globalAlpha = 1 - seg2(v, 0.6, 1);
@@ -64600,19 +64605,19 @@ function cageItems(model, actor, k, tick, out) {
         c.restore();
       } });
     }
-    if (T72 >= CLOSE && T72 < CLOSE + 0.25) {
-      const v = seg2(T72, CLOSE, CLOSE + 0.25);
+    if (T73 >= CLOSE && T73 < CLOSE + 0.25) {
+      const v = seg2(T73, CLOSE, CLOSE + 0.25);
       out.push({ id: id + "/pspark" + i, anchorX: r.x, anchorY: r.y + 1, draw: (c) => spark(c, r.x + (rnd3(p.seed, 1) - 0.5) * 8, r.y - h * v, 3, 1 - v) });
     }
   }
-  if (T72 >= NOVA && T72 < THAW + 0.5) for (const h of caged(model, k)) {
+  if (T73 >= NOVA && T73 < THAW + 0.5) for (const h of caged(model, k)) {
     const hx = h.position.x, hy = h.position.y, fy = heroFoot(h);
-    if (T72 < THAW + 0.05) out.push({ id: id + "/ice/" + h.entityId, anchorX: hx, anchorY: fy, draw: (c) => {
-      iceBlock(c, hx, hy + 1, clamp27((T72 - NOVA) / 0.08), seg2(T72, THAW - 0.35, THAW));
+    if (T73 < THAW + 0.05) out.push({ id: id + "/ice/" + h.entityId, anchorX: hx, anchorY: fy, draw: (c) => {
+      iceBlock(c, hx, hy + 1, clamp27((T73 - NOVA) / 0.08), seg2(T73, THAW - 0.35, THAW));
       label2(c, "FROZEN", hx, hy + 13, 1, "#bfefff");
     } });
     else {
-      const v = seg2(T72, THAW + 0.05, THAW + 0.5);
+      const v = seg2(T73, THAW + 0.05, THAW + 0.5);
       out.push({ id: id + "/ice/" + h.entityId, anchorX: hx, anchorY: fy, draw: (c) => {
         for (let j = 0; j < 7; j++) {
           const aa = j / 7 * TAU99 + 0.3;
@@ -64621,7 +64626,7 @@ function cageItems(model, actor, k, tick, out) {
       } });
     }
   }
-  openLabel(actor, id, T72 > 2.4 && T72 < REGROW ? clamp27((T72 - 2.4) / 0.2) * clamp27((REGROW - 0.1 - T72) / 0.2) : 0, out);
+  openLabel(actor, id, T73 > 2.4 && T73 < REGROW ? clamp27((T73 - 2.4) / 0.2) * clamp27((REGROW - 0.1 - T73) / 0.2) : 0, out);
 }
 var RIME = LESSER_BOSS_TRICKS_V1.rimehorn;
 var HURL = 0.25;
@@ -64650,55 +64655,55 @@ function heavePose(actor, k, tick, s) {
   }
   if (k && k.phase !== "ready") {
     if (k.direction) face4 = k.direction.x < 0 ? -1 : 1;
-    const T72 = clock4(k, RIME, tick) * SEC5;
+    const T73 = clock4(k, RIME, tick) * SEC5;
     if (throwing(k)) {
       for (const th of TOSS) {
         const t0 = th.w, t1 = th.h, t2 = th.h + HURL;
-        if (T72 >= t0 && T72 < t1) {
-          Object.assign(s, { wind: seg2(T72, t0, t1), ball: mix15(3, 7, ease4(seg2(T72, t0 + 0.02, t1 - 0.08))) });
-        } else if (T72 >= t1 && T72 < t2) {
-          const u = seg2(T72, t1, t2);
+        if (T73 >= t0 && T73 < t1) {
+          Object.assign(s, { wind: seg2(T73, t0, t1), ball: mix15(3, 7, ease4(seg2(T73, t0 + 0.02, t1 - 0.08))) });
+        } else if (T73 >= t1 && T73 < t2) {
+          const u = seg2(T73, t1, t2);
           Object.assign(s, { wind: 1, hurl: u, ball: u < REL ? 7 : 0 });
-        } else if (T72 >= t2 && T72 < t2 + 0.3) s.follow = 1 - ease4(seg2(T72, t2 + 0.05, t2 + 0.3));
+        } else if (T73 >= t2 && T73 < t2 + 0.3) s.follow = 1 - ease4(seg2(T73, t2 + 0.05, t2 + 0.3));
       }
-      const G0 = RIME.tossTicks * SEC5, G1 = G0 + RIME.gatherTicks * SEC5, scoop = ease4(seg2(T72, G0 + 0.05, G0 + 0.35)) * (1 - ease4(seg2(T72, G1 - 0.3, G1)));
+      const G0 = RIME.tossTicks * SEC5, G1 = G0 + RIME.gatherTicks * SEC5, scoop = ease4(seg2(T73, G0 + 0.05, G0 + 0.35)) * (1 - ease4(seg2(T73, G1 - 0.3, G1)));
       if (scoop > 0) {
         for (const key3 of ["wind", "hurl", "ball", "follow"]) delete s[key3];
         s.scoop = scoop;
       }
     } else {
       const rel = HEAVE[0] + (HEAVE[1] - HEAVE[0]) * REL;
-      s.scoop = T72 < LIFT[0] ? ease4(seg2(T72, 0, 0.25)) : 1 - ease4(seg2(T72, LIFT[0], LIFT[1]));
-      s.lift = T72 < HEAVE[1] ? ease4(seg2(T72, LIFT[0], LIFT[1])) : 0;
-      s.heave = T72 < HEAVE[1] ? seg2(T72, HEAVE[0], HEAVE[1]) : 1 - ease4(seg2(T72, 1.45, 1.75));
-      s.tired = T72 < WIND_END ? ease4(seg2(T72, 1.45, 1.8)) : 1 - ease4(seg2(T72, WIND_END, WIND_END + 0.5));
-      s.chunk = T72 < rel ? mix15(0.35, 1, ease4(seg2(T72, 0.2, 0.6))) : 0;
-      s.chunkRot = (T72 >= LIFT[1] && T72 < HEAVE[0] ? Math.sin(T72 * 60) * 0.03 : 0) + (T72 >= HEAVE[0] && T72 < rel ? -seg2(T72, HEAVE[0], rel) * 0.4 : 0);
+      s.scoop = T73 < LIFT[0] ? ease4(seg2(T73, 0, 0.25)) : 1 - ease4(seg2(T73, LIFT[0], LIFT[1]));
+      s.lift = T73 < HEAVE[1] ? ease4(seg2(T73, LIFT[0], LIFT[1])) : 0;
+      s.heave = T73 < HEAVE[1] ? seg2(T73, HEAVE[0], HEAVE[1]) : 1 - ease4(seg2(T73, 1.45, 1.75));
+      s.tired = T73 < WIND_END ? ease4(seg2(T73, 1.45, 1.8)) : 1 - ease4(seg2(T73, WIND_END, WIND_END + 0.5));
+      s.chunk = T73 < rel ? mix15(0.35, 1, ease4(seg2(T73, 0.2, 0.6))) : 0;
+      s.chunkRot = (T73 >= LIFT[1] && T73 < HEAVE[0] ? Math.sin(T73 * 60) * 0.03 : 0) + (T73 >= HEAVE[0] && T73 < rel ? -seg2(T73, HEAVE[0], rel) * 0.4 : 0);
       if (k.phase === "drift" && s.walk) s.tired *= 0.5;
     }
   }
   return { face: face4, x, y, rot: 0, sq: 1 };
 }
 function heaveGround(c, actor, k, tick) {
-  const G3 = SNOW_LOOK, T72 = clock4(k, RIME, tick) * SEC5, face4 = k.direction?.x < 0 ? -1 : 1;
+  const G3 = SNOW_LOOK, T73 = clock4(k, RIME, tick) * SEC5, face4 = k.direction?.x < 0 ? -1 : 1;
   if (throwing(k)) {
     TOSS.forEach((th, i) => {
       const p = k.points?.[i];
       if (!p) return;
-      if (T72 >= th.w + 0.15 && T72 < th.land) gameWarn(c, p.x, p.y, RIME.throwRadius, seg2(T72, th.w + 0.15, th.land), T72 - th.w - 0.15, G3);
-      if (T72 >= th.land && T72 < th.land + 0.4) gameBurst(c, p.x, p.y, RIME.throwRadius + 2, T72 - th.land, G3, 0.4);
-      if (T72 >= th.land && T72 < th.land + 1.6) splat(c, p.x, p.y, Math.min(1, seg2(T72, th.land, th.land + 0.08)) * (1 - seg2(T72, th.land + 1.2, th.land + 1.6)));
-      if (T72 >= th.h + HURL * REL && T72 < th.land) {
-        const u = seg2(T72, th.h + HURL * REL, th.land);
+      if (T73 >= th.w + 0.15 && T73 < th.land) gameWarn(c, p.x, p.y, RIME.throwRadius, seg2(T73, th.w + 0.15, th.land), T73 - th.w - 0.15, G3);
+      if (T73 >= th.land && T73 < th.land + 0.4) gameBurst(c, p.x, p.y, RIME.throwRadius + 2, T73 - th.land, G3, 0.4);
+      if (T73 >= th.land && T73 < th.land + 1.6) splat(c, p.x, p.y, Math.min(1, seg2(T73, th.land, th.land + 0.08)) * (1 - seg2(T73, th.land + 1.2, th.land + 1.6)));
+      if (T73 >= th.h + HURL * REL && T73 < th.land) {
+        const u = seg2(T73, th.h + HURL * REL, th.land);
         shadow41(c, mix15(actor.position.x, p.x, u), mix15(actor.position.y, p.y, u) + 1, 5, 1.8, 0.22 * u + 0.06);
       }
     });
     return;
   }
-  if (T72 >= 0.15 && T72 < 1.4) {
-    const h = local4(actor, face4, [TROLL_HANDS.scoop[0] - 2, -1]), g = ease4(seg2(T72, 0.15, 0.5));
+  if (T73 >= 0.15 && T73 < 1.4) {
+    const h = local4(actor, face4, [TROLL_HANDS.scoop[0] - 2, -1]), g = ease4(seg2(T73, 0.15, 0.5));
     c.save();
-    c.globalAlpha = 1 - seg2(T72, 1.1, 1.4);
+    c.globalAlpha = 1 - seg2(T73, 1.1, 1.4);
     c.fillStyle = "rgba(110,140,165,.45)";
     c.beginPath();
     c.ellipse(h.x, h.y, 15 * g, 5 * g, 0, 0, TAU99);
@@ -64710,20 +64715,20 @@ function heaveGround(c, actor, k, tick) {
   }
   if (!k.target) return;
   const { x: tx, y: ty } = k.target;
-  if (T72 >= LIFT[0] && T72 < LAND) gameWarn(c, tx, ty, RR, seg2(T72, LIFT[0], LAND), T72 - LIFT[0], G3);
-  if (T72 >= LAND && T72 < LAND + 0.5) gameBurst(c, tx, ty, RR + 4, T72 - LAND, G3, 0.5);
+  if (T73 >= LIFT[0] && T73 < LAND) gameWarn(c, tx, ty, RR, seg2(T73, LIFT[0], LAND), T73 - LIFT[0], G3);
+  if (T73 >= LAND && T73 < LAND + 0.5) gameBurst(c, tx, ty, RR + 4, T73 - LAND, G3, 0.5);
   const rel = HEAVE[0] + (HEAVE[1] - HEAVE[0]) * REL;
-  if (T72 >= rel && T72 < LAND) {
-    const u = seg2(T72, rel, LAND);
+  if (T73 >= rel && T73 < LAND) {
+    const u = seg2(T73, rel, LAND);
     shadow41(c, mix15(actor.position.x, tx, u), mix15(actor.position.y, ty, u) + 1, mix15(10, 24, u), mix15(3, 8, u), 0.12 + u * 0.22);
   }
 }
 function heaveItems(model, actor, k, tick, out) {
-  const T72 = clock4(k, RIME, tick) * SEC5, id = "lesser-vfx/" + actor.entityId, face4 = k.direction?.x < 0 ? -1 : 1, o = actor.position, foot2 = footOf(actor), hand4 = local4(actor, face4, TROLL_HANDS.scoop);
+  const T73 = clock4(k, RIME, tick) * SEC5, id = "lesser-vfx/" + actor.entityId, face4 = k.direction?.x < 0 ? -1 : 1, o = actor.position, foot2 = footOf(actor), hand4 = local4(actor, face4, TROLL_HANDS.scoop);
   const scoopSnow = (t0, t1, n, key3) => {
-    if (T72 >= t0 && T72 < t1) out.push({ id: id + "/" + key3, anchorX: hand4.x, anchorY: foot2 + 0.5, draw: (c) => {
+    if (T73 >= t0 && T73 < t1) out.push({ id: id + "/" + key3, anchorX: hand4.x, anchorY: foot2 + 0.5, draw: (c) => {
       for (let i = 0; i < n; i++) {
-        const ph = (T72 * 2.6 + i / n) % 1;
+        const ph = (T73 * 2.6 + i / n) % 1;
         clump(c, hand4.x + face4 * (-8 - n + i * 7 + ph * 4), o.y - 2 - Math.sin(ph * Math.PI) * (n > 3 ? 16 : 12), 1.4 + ph, ph * 5 + i);
       }
     } });
@@ -64733,8 +64738,8 @@ function heaveItems(model, actor, k, tick, out) {
     scoopSnow(G0 + 0.1, G1 - 0.1, 3, "scoop");
     TOSS.forEach((th, i) => {
       const p = k.points?.[i], rel2 = th.h + HURL * REL;
-      if (T72 >= th.w && T72 < th.w + 0.3) {
-        const v = seg2(T72, th.w, th.w + 0.3), gx = o.x + face4 * 46;
+      if (T73 >= th.w && T73 < th.w + 0.3) {
+        const v = seg2(T73, th.w, th.w + 0.3), gx = o.x + face4 * 46;
         out.push({ id: id + "/grab" + i, anchorX: gx, anchorY: foot2 + 0.5, draw: (c) => {
           for (let j = 0; j < 4; j++) {
             const a = Math.PI * (1.1 + j * 0.27);
@@ -64743,8 +64748,8 @@ function heaveItems(model, actor, k, tick, out) {
         } });
       }
       if (!p) return;
-      if (T72 >= rel2 && T72 < th.land) {
-        const hp = trollThrowHand({ wind: 1, hurl: REL }), sx = o.x + face4 * hp[0], sy = o.y + hp[1], u = seg2(T72, rel2, th.land), at8 = (v) => [mix15(sx, p.x, v), mix15(sy, p.y - 6, v) - Math.sin(v * Math.PI) * 46], gy = mix15(o.y, p.y, u);
+      if (T73 >= rel2 && T73 < th.land) {
+        const hp = trollThrowHand({ wind: 1, hurl: REL }), sx = o.x + face4 * hp[0], sy = o.y + hp[1], u = seg2(T73, rel2, th.land), at8 = (v) => [mix15(sx, p.x, v), mix15(sy, p.y - 6, v) - Math.sin(v * Math.PI) * 46], gy = mix15(o.y, p.y, u);
         out.push({ id: id + "/ball" + i, anchorX: mix15(sx, p.x, u), anchorY: Math.max(gy, foot2 + 0.5), draw: (c) => {
           for (let j = 3; j >= 1; j--) {
             const [qx, qy] = at8(Math.max(0, u - j * 0.06));
@@ -64760,11 +64765,11 @@ function heaveItems(model, actor, k, tick, out) {
             c.restore();
           }
           const [bx, by] = at8(u);
-          snowball(c, bx, by, 8, T72 * 9);
+          snowball(c, bx, by, 8, T73 * 9);
         } });
       }
-      if (T72 >= th.land && T72 < th.land + 0.45) {
-        const v = seg2(T72, th.land, th.land + 0.45);
+      if (T73 >= th.land && T73 < th.land + 0.45) {
+        const v = seg2(T73, th.land, th.land + 0.45);
         out.push({ id: id + "/burst" + i, anchorX: p.x, anchorY: p.y + 6, draw: (c) => {
           for (let j = 0; j < 7; j++) {
             const a = Math.PI + j / 6 * Math.PI + rnd3(j, 7) * 0.3, d = v * (8 + rnd3(j, 8) * 12);
@@ -64773,19 +64778,19 @@ function heaveItems(model, actor, k, tick, out) {
         } });
       }
     });
-    openLabel(actor, id, clamp27((T72 - G0 - 0.2) / 0.15) * clamp27((G1 - 0.25 - T72) / 0.15), out);
+    openLabel(actor, id, clamp27((T73 - G0 - 0.2) / 0.15) * clamp27((G1 - 0.25 - T73) / 0.15), out);
     return;
   }
   scoopSnow(0.15, 0.7, 5, "tear");
   const rel = HEAVE[0] + (HEAVE[1] - HEAVE[0]) * REL;
   if (!k.target) return;
   const { x: tx, y: ty } = k.target;
-  if (T72 >= rel && T72 < LAND) {
-    const hp = trollChunkAt({ lift: 1, heave: REL, chunk: 1 }, 0, 24), sx = o.x + face4 * hp[0], sy = o.y + hp[1], u = seg2(T72, rel, LAND), gy = mix15(o.y, ty, u), x = mix15(sx, tx, u), y = mix15(sy, ty - 14, u) - Math.sin(u * Math.PI) * 70;
+  if (T73 >= rel && T73 < LAND) {
+    const hp = trollChunkAt({ lift: 1, heave: REL, chunk: 1 }, 0, 24), sx = o.x + face4 * hp[0], sy = o.y + hp[1], u = seg2(T73, rel, LAND), gy = mix15(o.y, ty, u), x = mix15(sx, tx, u), y = mix15(sy, ty - 14, u) - Math.sin(u * Math.PI) * 70;
     out.push({ id: id + "/chunk", anchorX: x, anchorY: Math.max(gy, foot2 + 1), draw: (c) => snowChunk(c, x, y, 24, (-0.4 - u * 3.2) * face4) });
   }
-  if (T72 >= LAND && T72 < LAND + 0.7) {
-    const v = seg2(T72, LAND, LAND + 0.7);
+  if (T73 >= LAND && T73 < LAND + 0.7) {
+    const v = seg2(T73, LAND, LAND + 0.7);
     out.push({ id: id + "/smash", anchorX: tx, anchorY: ty + 16, draw: (c) => {
       for (let i = 0; i < 7; i++) {
         const a = i / 7 * TAU99 + rnd3(i, 41) * 0.5, d = v * (14 + rnd3(i, 42) * 26);
@@ -64797,14 +64802,14 @@ function heaveItems(model, actor, k, tick, out) {
       }
     } });
   }
-  if (T72 >= LAND) {
-    const kk = ease4(seg2(T72, LAND, LAND + 0.2)), a = 1 - seg2(T72, DRIFT_END - 0.5, DRIFT_END);
+  if (T73 >= LAND) {
+    const kk = ease4(seg2(T73, LAND, LAND + 0.2)), a = 1 - seg2(T73, DRIFT_END - 0.5, DRIFT_END);
     out.push({ id: id + "/drift", anchorX: tx, anchorY: ty - 2, draw: (c) => {
       drift4(c, tx, ty, kk * 1.25, a);
-      label2(c, "drift: slows", tx, ty + 24, seg2(T72, LAND + 0.3, LAND + 0.5) * a);
+      label2(c, "drift: slows", tx, ty + 24, seg2(T73, LAND + 0.3, LAND + 0.5) * a);
     } });
   }
-  openLabel(actor, id, T72 > 1.75 && T72 < WIND_END ? clamp27((T72 - 1.75) / 0.15) * clamp27((WIND_END - 0.1 - T72) / 0.2) : 0, out);
+  openLabel(actor, id, T73 > 1.75 && T73 < WIND_END ? clamp27((T73 - 1.75) / 0.15) * clamp27((WIND_END - 0.1 - T73) / 0.2) : 0, out);
 }
 var WHITE = LESSER_BOSS_TRICKS_V1.frostvigil;
 var WR = WHITE.radius;
@@ -64831,9 +64836,9 @@ function vigilPose(actor, k, tick, s) {
   }
   if (k && k.phase !== "ready") {
     if (k.direction) face4 = k.direction.x < 0 ? -1 : 1;
-    const T72 = clock4(k, WHITE, tick) * SEC5;
-    s.raise = T72 < CALM ? ease4(seg2(T72, 0, 0.55)) : 1 - ease4(seg2(T72, CALM, CALM + 0.3));
-    s.gutter = ease4(seg2(T72, CALM, CALM + 0.35)) * (1 - ease4(seg2(T72, GUT_END - 0.35, GUT_END)));
+    const T73 = clock4(k, WHITE, tick) * SEC5;
+    s.raise = T73 < CALM ? ease4(seg2(T73, 0, 0.55)) : 1 - ease4(seg2(T73, CALM, CALM + 0.3));
+    s.gutter = ease4(seg2(T73, CALM, CALM + 0.35)) * (1 - ease4(seg2(T73, GUT_END - 0.35, GUT_END)));
   }
   return { face: face4, x, y, rot: 0, sq: 1 };
 }
@@ -64846,7 +64851,7 @@ function meterOf(actor, k, h, tick) {
     m = { seq: k.sequence, tick, n: 0, frozenUntil: -1, frozenAt: -1 };
     meters.set(key3, m);
   }
-  const T72 = clock4(k, WHITE, tick) * SEC5, inStorm = k.phase === "storm", dt = Math.min(10, Math.max(0, tick - m.tick));
+  const T73 = clock4(k, WHITE, tick) * SEC5, inStorm = k.phase === "storm", dt = Math.min(10, Math.max(0, tick - m.tick));
   m.tick = tick;
   if (inStorm && dt > 0 && tick >= m.frozenUntil) {
     const inReach = Math.hypot(h.position.x - k.origin.x, h.position.y - k.origin.y) <= WR;
@@ -64857,7 +64862,7 @@ function meterOf(actor, k, h, tick) {
       m.frozenUntil = tick + WHITE.frozenTicks;
     }
   }
-  if (!inStorm && T72 < STORM) m.n = 0;
+  if (!inStorm && T73 < STORM) m.n = 0;
   return m;
 }
 function sweepMeters(model) {
@@ -64867,12 +64872,12 @@ function sweepMeters(model) {
   }
 }
 function vigilGround(c, actor, k, tick, model) {
-  const G3 = STORM_LOOK, T72 = clock4(k, WHITE, tick) * SEC5, { x: BX, y: BY } = k.origin, pts2 = k.points ?? [];
-  const storm = T72 >= STORM && T72 < CALM + 0.3, sa = T72 < CALM ? seg2(T72, STORM, STORM + 0.2) : 1 - seg2(T72, CALM, CALM + 0.3);
-  if (T72 >= 0.2 && T72 < STORM + 0.25) {
+  const G3 = STORM_LOOK, T73 = clock4(k, WHITE, tick) * SEC5, { x: BX, y: BY } = k.origin, pts2 = k.points ?? [];
+  const storm = T73 >= STORM && T73 < CALM + 0.3, sa = T73 < CALM ? seg2(T73, STORM, STORM + 0.2) : 1 - seg2(T73, CALM, CALM + 0.3);
+  if (T73 >= 0.2 && T73 < STORM + 0.25) {
     c.save();
-    c.globalAlpha = 1 - seg2(T72, STORM, STORM + 0.25);
-    gameWarn(c, BX, BY, WR, seg2(T72, 0.2, STORM), T72 - 0.2, G3);
+    c.globalAlpha = 1 - seg2(T73, STORM, STORM + 0.25);
+    gameWarn(c, BX, BY, WR, seg2(T73, 0.2, STORM), T73 - 0.2, G3);
     c.restore();
   }
   if (storm) {
@@ -64890,10 +64895,10 @@ function vigilGround(c, actor, k, tick, model) {
     c.stroke();
     c.restore();
   }
-  const pk = seg2(T72, POOLS_AT, POOLS_AT + 0.15) * (1 - seg2(T72, GUT_END - 0.3, GUT_END));
+  const pk = seg2(T73, POOLS_AT, POOLS_AT + 0.15) * (1 - seg2(T73, GUT_END - 0.3, GUT_END));
   for (const p of pts2) pool3(c, p.x, p.y, pk, tick * SEC5, PR);
-  if (T72 >= POOLS_AT && T72 < POOLS_AT + 0.35) for (const p of pts2) gameBurst(c, p.x, p.y, PR, T72 - POOLS_AT, LIGHT_LOOK, 0.35);
-  if (T72 >= POOLS_AT && T72 < CALM) for (const p of pts2) for (let j = 0; j < 3; j++) {
+  if (T73 >= POOLS_AT && T73 < POOLS_AT + 0.35) for (const p of pts2) gameBurst(c, p.x, p.y, PR, T73 - POOLS_AT, LIGHT_LOOK, 0.35);
+  if (T73 >= POOLS_AT && T73 < CALM) for (const p of pts2) for (let j = 0; j < 3; j++) {
     const ph = (tick * SEC5 * 1.1 + j / 3) % 1, r = PR + (1 - ph) * 26;
     c.save();
     c.globalAlpha = ph * 0.85 * pk;
@@ -64913,15 +64918,15 @@ function vigilGround(c, actor, k, tick, model) {
   }
 }
 function vigilItems(model, actor, k, tick, out) {
-  const T72 = clock4(k, WHITE, tick) * SEC5, id = "lesser-vfx/" + actor.entityId, face4 = k.direction?.x < 0 ? -1 : 1, { x: BX, y: BY } = k.origin, pts2 = k.points ?? [], t = tick * SEC5;
-  const pk = seg2(T72, POOLS_AT, POOLS_AT + 0.15) * (1 - seg2(T72, GUT_END - 0.3, GUT_END)), storm = T72 >= STORM && T72 < CALM + 0.3, sa = T72 < CALM ? seg2(T72, STORM, STORM + 0.2) : 1 - seg2(T72, CALM, CALM + 0.3);
-  const L = LANTERN({ raise: T72 < CALM ? ease4(seg2(T72, 0, 0.55)) : 0 }), LX = actor.position.x + face4 * L[0], LY = actor.position.y + L[1];
+  const T73 = clock4(k, WHITE, tick) * SEC5, id = "lesser-vfx/" + actor.entityId, face4 = k.direction?.x < 0 ? -1 : 1, { x: BX, y: BY } = k.origin, pts2 = k.points ?? [], t = tick * SEC5;
+  const pk = seg2(T73, POOLS_AT, POOLS_AT + 0.15) * (1 - seg2(T73, GUT_END - 0.3, GUT_END)), storm = T73 >= STORM && T73 < CALM + 0.3, sa = T73 < CALM ? seg2(T73, STORM, STORM + 0.2) : 1 - seg2(T73, CALM, CALM + 0.3);
+  const L = LANTERN({ raise: T73 < CALM ? ease4(seg2(T73, 0, 0.55)) : 0 }), LX = actor.position.x + face4 * L[0], LY = actor.position.y + L[1];
   pts2.forEach((p, i) => {
     out.push({ id: id + "/beam" + i, anchorX: p.x, anchorY: p.y - PR, draw: (c) => beam(c, p.x, p.y, pk, t, PR) });
     const end = CALM, taken = party2(model).some((h) => Math.hypot(h.position.x - p.x, h.position.y - p.y) <= SAFE);
-    if (T72 >= POOLS_AT + 0.05 && T72 < end && !taken) out.push({ id: id + "/here" + i, anchorX: p.x, anchorY: p.y + PR, draw: (c) => label2(c, "STAND IN THE LIGHT", p.x, p.y - PR - 6, Math.min(seg2(T72, POOLS_AT + 0.05, POOLS_AT + 0.2), 1 - seg2(T72, end - 0.15, end)), "#ffe7a0") });
-    const t0 = 0.2 + i * 0.06, u = seg2(T72, t0, POOLS_AT);
-    if (T72 >= t0 && T72 < POOLS_AT) out.push({ id: id + "/spark" + i, anchorX: p.x, anchorY: p.y, draw: (c) => {
+    if (T73 >= POOLS_AT + 0.05 && T73 < end && !taken) out.push({ id: id + "/here" + i, anchorX: p.x, anchorY: p.y + PR, draw: (c) => label2(c, "STAND IN THE LIGHT", p.x, p.y - PR - 6, Math.min(seg2(T73, POOLS_AT + 0.05, POOLS_AT + 0.2), 1 - seg2(T73, end - 0.15, end)), "#ffe7a0") });
+    const t0 = 0.2 + i * 0.06, u = seg2(T73, t0, POOLS_AT);
+    if (T73 >= t0 && T73 < POOLS_AT) out.push({ id: id + "/spark" + i, anchorX: p.x, anchorY: p.y, draw: (c) => {
       for (let j = 0; j < 4; j++) {
         const v = Math.max(0, u - j * 0.07);
         warmSpark(c, mix15(LX, p.x, v), mix15(LY, p.y, v) - Math.sin(v * Math.PI) * 30, 3.4 - j * 0.6, 1 - j * 0.22);
@@ -64957,7 +64962,7 @@ function vigilItems(model, actor, k, tick, out) {
       } });
     }
   }
-  openLabel(actor, id, T72 > CALM + 0.3 && T72 < GUT_END ? clamp27((T72 - CALM - 0.3) / 0.15) * clamp27((GUT_END - 0.2 - T72) / 0.2) : 0, out);
+  openLabel(actor, id, T73 > CALM + 0.3 && T73 < GUT_END ? clamp27((T73 - CALM - 0.3) / 0.15) * clamp27((GUT_END - 0.2 - T73) / 0.2) : 0, out);
 }
 var SNOW_POSES = Object.freeze({ shardheart: cagePose, rimehorn: heavePose, frostvigil: vigilPose });
 var SNOW_GROUNDS = Object.freeze({ cage: cageGround, heave: heaveGround, whiteout: vigilGround });
@@ -65372,12 +65377,12 @@ function graveGround3(c, actor, k, tick) {
       }
     }
     if (k.target) {
-      const T72 = k.target, lockAt = DIVE.airTicks - DIVE.lockTicks;
-      gameWarn(c, T72.x, T72.y, R9, q, age * SEC6, STONE_WARN);
+      const T73 = k.target, lockAt = DIVE.airTicks - DIVE.lockTicks;
+      gameWarn(c, T73.x, T73.y, R9, q, age * SEC6, STONE_WARN);
       const g = clamp27((age - 6) / (DIVE.airTicks - 6));
       c.fillStyle = `rgba(12,10,10,${0.12 + g * 0.3})`;
       c.beginPath();
-      c.ellipse(T72.x, T72.y, 6 + g * g * 22, (6 + g * g * 22) * 0.42, 0, 0, TAU99);
+      c.ellipse(T73.x, T73.y, 6 + g * g * 22, (6 + g * g * 22) * 0.42, 0, 0, TAU99);
       c.fill();
       if (age >= lockAt && age < lockAt + 12) {
         const u = (age - lockAt) / 12;
@@ -65386,7 +65391,7 @@ function graveGround3(c, actor, k, tick) {
         c.strokeStyle = "#ffffff";
         c.lineWidth = 2;
         c.beginPath();
-        c.arc(T72.x, T72.y, R9 + u * 5, 0, TAU99);
+        c.arc(T73.x, T73.y, R9 + u * 5, 0, TAU99);
         c.stroke();
         c.restore();
       }
@@ -65505,8 +65510,8 @@ function rotLean(k, tick) {
     const back = ease4(clamp27(q / 0.92));
     return { lean: -back * 0.9, swell: back, gape: mix15(0.22, 0.95, back), tilt: -back * 0.15 };
   }
-  const T72 = age * SEC6, lunge2 = Math.max(0, 1 - clamp27(T72 / 0.6)), kick = SEED_FIRE.reduce((m, f) => Math.max(m, age >= f && age < f + 8 ? 1 - (age - f) / 8 : 0), 0);
-  return { lean: mix15(-0.9, 0, clamp27(T72 / 0.1)) + lunge2 * 0.55 + kick * 0.25, swell: Math.max(0, 1 - clamp27(T72 / 0.45)), gape: T72 < 0.45 ? 0.95 - kick * 0.25 : void 0, tilt: 0 };
+  const T73 = age * SEC6, lunge2 = Math.max(0, 1 - clamp27(T73 / 0.6)), kick = SEED_FIRE.reduce((m, f) => Math.max(m, age >= f && age < f + 8 ? 1 - (age - f) / 8 : 0), 0);
+  return { lean: mix15(-0.9, 0, clamp27(T73 / 0.1)) + lunge2 * 0.55 + kick * 0.25, swell: Math.max(0, 1 - clamp27(T73 / 0.45)), gape: T73 < 0.45 ? 0.95 - kick * 0.25 : void 0, tilt: 0 };
 }
 function rotPose(actor, k, tick, s) {
   let face4 = actor.presentationFacingX === -1 ? -1 : 1;
@@ -65594,22 +65599,22 @@ function tongueLine(actor, k, tick) {
 function vineGround(c, actor, k, tick) {
   const VINE2 = LESSER_BOSS_TRICKS_V1[actor.enemyFamily];
   if (VINE2.snare && k.phase === "up") return snareGround(c, actor, k, tick);
-  const G3 = VINE2.snare ? OPEN_LOOKS.root : GROUND_LOOKS.thorn, { age, q } = phaseAge(k, VINE2, tick), f = vineSide(actor, k), o = k.origin, hole = { x: o.x + f * HOLE_AHEAD, y: o.y + 1 }, T72 = k.target;
-  if (!T72) return;
+  const G3 = VINE2.snare ? OPEN_LOOKS.root : GROUND_LOOKS.thorn, { age, q } = phaseAge(k, VINE2, tick), f = vineSide(actor, k), o = k.origin, hole = { x: o.x + f * HOLE_AHEAD, y: o.y + 1 }, T73 = k.target;
+  if (!T73) return;
   if (k.phase === "dive") craterBack(c, hole.x, hole.y, 9, Math.max(0.6, q));
   else if (k.phase === "tunnel") {
     craterBack(c, hole.x, hole.y, 9, 0.6);
-    ridge2(c, hole.x + f * 4, hole.y, T72.x, T72.y + 1, ease4(q), tick * SEC6);
+    ridge2(c, hole.x + f * 4, hole.y, T73.x, T73.y + 1, ease4(q), tick * SEC6);
   } else if (k.phase === "warn") {
     craterBack(c, hole.x, hole.y, 9, 0.6 * (1 - clamp27((q - 0.35) / 0.65)));
-    if (q < 0.25) ridge2(c, hole.x + f * 4, hole.y, T72.x, T72.y + 1, 1, tick * SEC6);
-    gameWarn(c, T72.x, T72.y, VINE2.radius, q, age * SEC6, G3);
-    cracks(c, T72.x, T72.y, 24, ease4(q));
+    if (q < 0.25) ridge2(c, hole.x + f * 4, hole.y, T73.x, T73.y + 1, 1, tick * SEC6);
+    gameWarn(c, T73.x, T73.y, VINE2.radius, q, age * SEC6, G3);
+    cracks(c, T73.x, T73.y, 24, ease4(q));
   } else if (k.phase === "up") {
     const fade2 = 1 - ease4(clamp27((age - 48) / (VINE2.upTicks - 48)));
-    cracks(c, T72.x, T72.y, 24, fade2);
-    craterBack(c, T72.x, T72.y, 11, fade2);
-    gameBurst(c, T72.x, T72.y, VINE2.radius, age * SEC6, G3, 0.5);
+    cracks(c, T73.x, T73.y, 24, fade2);
+    craterBack(c, T73.x, T73.y, 11, fade2);
+    gameBurst(c, T73.x, T73.y, VINE2.radius, age * SEC6, G3, 0.5);
   }
 }
 function seedsTimeline(k, tick) {
@@ -65662,27 +65667,27 @@ function tongueGround(c, actor, k, tick) {
     gameWarn(c, k.target.x, k.target.y, FROG.radius, a / span2, a * SEC6, GP);
   }
   if (k.phase === "puddle" && k.target) {
-    const T72 = k.target;
-    gameBurst(c, T72.x, T72.y, FROG.radius, age * SEC6, GP, 0.5);
-    puddle5(c, T72.x, T72.y, FROG.puddleRadius, tick * SEC6, ease4(clamp27(age / 12)) * (1 - ease4(clamp27((age - FROG.puddleTicks + 30) / 30))));
+    const T73 = k.target;
+    gameBurst(c, T73.x, T73.y, FROG.radius, age * SEC6, GP, 0.5);
+    puddle5(c, T73.x, T73.y, FROG.puddleRadius, tick * SEC6, ease4(clamp27(age / 12)) * (1 - ease4(clamp27((age - FROG.puddleTicks + 30) / 30))));
   }
 }
 function vineItems(model, actor, k, tick, out) {
   const VINE2 = LESSER_BOSS_TRICKS_V1[actor.enemyFamily];
   if (VINE2.snare && k.phase === "up") return snareItems(model, actor, k, tick, out);
-  const P17 = VINE2.snare ? VINE_PAL.B : VINE_PAL.A, { age, q } = phaseAge(k, VINE2, tick), f = vineSide(actor, k), o = k.origin, hole = { x: o.x + f * HOLE_AHEAD, y: o.y + 1 }, T72 = k.target, id = "lesser-vfx/" + actor.entityId;
-  if (!T72) return;
+  const P17 = VINE2.snare ? VINE_PAL.B : VINE_PAL.A, { age, q } = phaseAge(k, VINE2, tick), f = vineSide(actor, k), o = k.origin, hole = { x: o.x + f * HOLE_AHEAD, y: o.y + 1 }, T73 = k.target, id = "lesser-vfx/" + actor.entityId;
+  if (!T73) return;
   if (k.phase === "dive") out.push({ id: id + "/hole", anchorX: hole.x, anchorY: hole.y + 0.5, draw: (c) => {
     craterFront(c, hole.x, hole.y, 9, Math.max(0.6, q));
     spray(c, hole.x, hole.y, clamp27((age - 3) / 27), 9, 2.6, 20, 11);
   } });
   else if (k.phase === "tunnel") {
-    const u = ease4(q), len = Math.hypot(T72.x - hole.x, T72.y - hole.y) || 1, vis = 1 - clamp27((age - 44) / 10), lean = -1.1 * sideOf2(T72.x - hole.x, f);
+    const u = ease4(q), len = Math.hypot(T73.x - hole.x, T73.y - hole.y) || 1, vis = 1 - clamp27((age - 44) / 10), lean = -1.1 * sideOf2(T73.x - hole.x, f);
     for (let i = 0; i < 3; i++) {
-      const v = clamp27(u - i * 6 / len), x = mix15(hole.x, T72.x, v), y = mix15(hole.y, T72.y, v) - 0.5, h = (13 - i * 2.5) * vis * clamp27(q * 6 - i * 0.5);
+      const v = clamp27(u - i * 6 / len), x = mix15(hole.x, T73.x, v), y = mix15(hole.y, T73.y, v) - 0.5, h = (13 - i * 2.5) * vis * clamp27(q * 6 - i * 0.5);
       out.push({ id: id + "/fin" + i, anchorX: x, anchorY: y, draw: (c) => finThorn(c, x, y, h, lean, P17) });
     }
-    const fx = mix15(hole.x, T72.x, u), fy = mix15(hole.y, T72.y, u);
+    const fx = mix15(hole.x, T73.x, u), fy = mix15(hole.y, T73.y, u);
     out.push({ id: id + "/dust", anchorX: fx, anchorY: fy + 1, draw: (c) => {
       for (let i = 0; i < 3; i++) {
         const ph = (age * SEC6 * 3.2 + i / 3) % 1;
@@ -65691,17 +65696,17 @@ function vineItems(model, actor, k, tick, out) {
     } });
   } else if (k.phase === "warn" && VINE2.snare) snareWarnItems(actor, k, q, tick, out);
   else if (k.phase === "warn" && q > 0.55) for (let i = 0; i < 9; i++) {
-    const a = i / 9 * TAU99 + 0.2, x = T72.x + Math.cos(a) * 17 + Math.sin(tick * 0.67 + i) * 0.4, y = T72.y + Math.sin(a) * 17 * 0.7;
+    const a = i / 9 * TAU99 + 0.2, x = T73.x + Math.cos(a) * 17 + Math.sin(tick * 0.67 + i) * 0.4, y = T73.y + Math.sin(a) * 17 * 0.7;
     out.push({ id: id + "/tip" + i, anchorX: x, anchorY: y, draw: (c) => finThorn(c, x, y, 2.5 + ease4((q - 0.55) / 0.45) * 3, 0, P17) });
   }
   else if (k.phase === "up") {
     const fade2 = 1 - ease4(clamp27((age - 48) / (VINE2.upTicks - 48))), retract = ease4(clamp27((age - 27) / 21));
-    out.push({ id: id + "/lip", anchorX: T72.x, anchorY: T72.y + (actor.hullRadius ?? 20) * 0.45 + 0.5, draw: (c) => {
-      craterFront(c, T72.x, T72.y, 11, fade2);
-      spray(c, T72.x, T72.y, clamp27(age / 33), 12, 6.2, 30, 21);
+    out.push({ id: id + "/lip", anchorX: T73.x, anchorY: T73.y + (actor.hullRadius ?? 20) * 0.45 + 0.5, draw: (c) => {
+      craterFront(c, T73.x, T73.y, 11, fade2);
+      spray(c, T73.x, T73.y, clamp27(age / 33), 12, 6.2, 30, 21);
     } });
     if (retract < 1) for (let i = 0; i < 9; i++) {
-      const a = i / 9 * TAU99 + 0.2, r = 17 + i % 2 * 4, x = T72.x + Math.cos(a) * r, y = T72.y + Math.sin(a) * r * 0.7, h = (15 + i % 3 * 5) * ease4(clamp27((age - i * 1.3) / 7)) * (1 - retract);
+      const a = i / 9 * TAU99 + 0.2, r = 17 + i % 2 * 4, x = T73.x + Math.cos(a) * r, y = T73.y + Math.sin(a) * r * 0.7, h = (15 + i % 3 * 5) * ease4(clamp27((age - i * 1.3) / 7)) * (1 - retract);
       out.push({ id: id + "/thorn" + i, anchorX: x, anchorY: y, draw: (c) => finThorn(c, x, y, h, Math.cos(a) * 0.6, P17) });
     }
   }
@@ -65756,8 +65761,8 @@ function tongueItems(actor, k, tick, out) {
     } });
   }
   if (k.phase === "puddle" && k.target && age < 30) {
-    const T72 = k.target;
-    out.push({ id: id + "/splash", anchorX: T72.x, anchorY: T72.y + (actor.hullRadius ?? 20) * 0.45 + 1, draw: (c) => splash(c, T72.x, T72.y, age / 30, 10, 22, GROUND_LOOKS.poison.fill, 51) });
+    const T73 = k.target;
+    out.push({ id: id + "/splash", anchorX: T73.x, anchorY: T73.y + (actor.hullRadius ?? 20) * 0.45 + 1, draw: (c) => splash(c, T73.x, T73.y, age / 30, 10, 22, GROUND_LOOKS.poison.fill, 51) });
   }
 }
 function lesserBossDepthItemsV1(model, tick) {
@@ -72323,7 +72328,7 @@ function grass(c, x, y, h, col2, n = 7, seed2 = 1, spread = 1.3, o = 1.4) {
   }
 }
 function frond(c, x, y, len, ang, droop, wd, col2, o = 1.5) {
-  const P17 = R5(col2), qx = x + Math.cos(ang) * len * 0.55, qy = y + Math.sin(ang) * len * 0.55, tx = x + Math.cos(ang) * len * 0.9, ty = y + Math.sin(ang) * len * 0.9 + droop * len, C3 = (t) => [(1 - t) * (1 - t) * x + 2 * (1 - t) * t * qx + t * t * tx, (1 - t) * (1 - t) * y + 2 * (1 - t) * t * qy + t * t * ty], T72 = (t) => {
+  const P17 = R5(col2), qx = x + Math.cos(ang) * len * 0.55, qy = y + Math.sin(ang) * len * 0.55, tx = x + Math.cos(ang) * len * 0.9, ty = y + Math.sin(ang) * len * 0.9 + droop * len, C3 = (t) => [(1 - t) * (1 - t) * x + 2 * (1 - t) * t * qx + t * t * tx, (1 - t) * (1 - t) * y + 2 * (1 - t) * t * qy + t * t * ty], T73 = (t) => {
     const a = C3(Math.max(0, t - 0.01)), b = C3(Math.min(1, t + 0.01)), l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
     return [(b[0] - a[0]) / l, (b[1] - a[1]) / l];
   }, Wd = (t) => wd * Math.pow(Math.sin(Math.PI * Math.min(1, t * 1.04 + 0.06)), 0.7), M4 = Math.max(5, Math.round(len / 3.4));
@@ -72331,7 +72336,7 @@ function frond(c, x, y, len, ang, droop, wd, col2, o = 1.5) {
     const segs = [];
     let prev = C3(0);
     for (let j = 0; j < M4; j++) {
-      const t0 = j / M4, t1 = (j + 1) / M4, tt = (j + 0.85) / M4, [ux, uy] = T72(tt), cp = C3(t0 + 0.35 / M4), [vx, vy] = T72(t0), tip = C3(Math.min(1, tt)), w = Wd(tt), n0 = C3(t1), w1 = Wd(t1), [nx1, ny1] = T72(t1);
+      const t0 = j / M4, t1 = (j + 1) / M4, tt = (j + 0.85) / M4, [ux, uy] = T73(tt), cp = C3(t0 + 0.35 / M4), [vx, vy] = T73(t0), tip = C3(Math.min(1, tt)), w = Wd(tt), n0 = C3(t1), w1 = Wd(t1), [nx1, ny1] = T73(t1);
       const TIP2 = [tip[0] - uy * s * w + ux * len / M4 * 0.5, tip[1] + ux * s * w + uy * len / M4 * 0.5], Q1 = [cp[0] - vy * s * w * 1.05, cp[1] + vx * s * w * 1.05], N1 = [n0[0] - ny1 * s * w1 * 0.32, n0[1] + nx1 * s * w1 * 0.32], Q2 = [(TIP2[0] + N1[0]) / 2 - uy * s * w * 0.05, (TIP2[1] + N1[1]) / 2 + ux * s * w * 0.05];
       segs.push([prev, Q1, TIP2], [TIP2, Q2, N1]);
       prev = N1;
@@ -72348,7 +72353,7 @@ function frond(c, x, y, len, ang, droop, wd, col2, o = 1.5) {
   }
   p.closePath();
   prop3(c, [[p, P17.m]], o);
-  const [mx, my] = T72(0.5), litA = -my * -0.6 + mx * -0.8 > 0, L = litA ? A : B6, h = new Path2D();
+  const [mx, my] = T73(0.5), litA = -my * -0.6 + mx * -0.8 > 0, L = litA ? A : B6, h = new Path2D();
   h.moveTo(x, y);
   for (const [, q, b] of L) h.quadraticCurveTo(q[0], q[1], b[0], b[1]);
   for (let t = 1; t >= 0; t -= 0.1) h.lineTo(...C3(t));
@@ -76936,7 +76941,7 @@ function falchion(c, A) {
   gem(c, 16.7, 0, 1.4, A.gem);
 }
 var LEAF = { b: "#58a55c", d: "#3f7d43" };
-var stoneOf4 = (A, plain3) => A.gem ? { b: A.c, d: A.d } : plain3;
+var stoneOf4 = (A, plain4) => A.gem ? { b: A.c, d: A.d } : plain4;
 function stoneGlow(c, A, x, y, r, t, speed = 3) {
   if (!A.gem) return;
   const [cr, cg, cb] = hexRgb(A.c);
@@ -80807,6 +80812,74 @@ function createOutdoorBridgeDecks(records, terrain) {
   return tiles6;
 }
 
+// src/shared/generation/upland_summit_anchors_v1.js
+var T65 = 32;
+var CW = 32;
+var CH = 26;
+function mountainsIn(terraces, cx, cy2) {
+  const out = [], x0 = cx * CW, y0 = cy2 * CH, C3 = terraces.CELL;
+  for (let j = Math.floor(y0 / C3) - 1; j <= Math.floor((y0 + CH) / C3) + 1; j++) for (let i = Math.floor(x0 / C3) - 1; i <= Math.floor((x0 + CW) / C3) + 1; i++) {
+    const g = terraces.mountain(i, j);
+    if (g && SUMMIT_GUARDS[g.n] && g.cairn.x >= x0 && g.cairn.x < x0 + CW && g.cairn.y >= y0 && g.cairn.y < y0 + CH) out.push(g);
+  }
+  return out;
+}
+var plain3 = (g, tile, x, y, minLevel) => {
+  const r = g.role(x, y);
+  return Boolean(r) && r.role === "top" && r.level >= minLevel && !g.onPath(x, y) && tile(x, y).collision === "1";
+};
+function summitPlanV1(g, tile, cx, cy2, otherAnchors = []) {
+  const { count, rank } = SUMMIT_GUARDS[g.n], x0 = cx * CW, y0 = cy2 * CH, inChunk = (x, y) => x >= x0 && x < x0 + CW && y >= y0 && y < y0 + CH, local8 = (x, y) => ({ x: (x - x0 + 0.5) * T65, y: (y - y0 + 0.5) * T65 });
+  const far = (p) => otherAnchors.every((a) => Math.hypot(p.x - a.position.x, p.y - a.position.y) >= 96);
+  const cairn = g.cairn, away = g.ramps[g.n - 1].high > cairn.x ? -1 : 1;
+  let chest3 = null;
+  for (const [dx, dy] of [[2 * away, 0], [3 * away, 0], [2 * away, -1], [-2 * away, 0], [-3 * away, 0], [2 * away, 1]]) {
+    const x = cairn.x + dx, y = cairn.y + dy;
+    if (inChunk(x, y) && plain3(g, tile, x, y, g.n) && far(local8(x, y))) {
+      chest3 = { x, y };
+      break;
+    }
+  }
+  if (!chest3) return null;
+  const cp = local8(chest3.x, chest3.y), cand = [];
+  for (const minLevel of [g.n, g.n - 1]) for (let y = Math.max(y0, cairn.y - 12); y <= Math.min(y0 + CH - 1, cairn.y + 12); y++) for (let x = Math.max(x0, cairn.x - 14); x <= Math.min(x0 + CW - 1, cairn.x + 14); x++) {
+    if (!plain3(g, tile, x, y, minLevel) || cand.some((c) => c.x === x && c.y === y)) continue;
+    const p = local8(x, y), d = Math.hypot(x - cairn.x, y - cairn.y);
+    if (d < 2.5 || Math.hypot(p.x - cp.x, p.y - cp.y) < 64 || !far(p) || p.x < 16 || p.y < 16 || p.x > CW * T65 - 16 || p.y > CH * T65 - 16) continue;
+    cand.push({ x, y, p, score: (g.level(x, y) === g.n ? 0 : 100) + d + (terraceTileHash(g.d.sh, x, y) >>> 8) % 100 / 100 });
+  }
+  cand.sort((a, b) => a.score - b.score || a.y - b.y || a.x - b.x);
+  const members = [];
+  for (const c of cand) {
+    if (members.some((m) => Math.hypot(m.position.x - c.p.x, m.position.y - c.p.y) < 78)) continue;
+    members.push({ family: SUMMIT_FAMILIES[members.length], position: c.p });
+    if (members.length === count) break;
+  }
+  if (members.length < count) return null;
+  let ledge3 = null;
+  if (g.stair) {
+    const E6 = g.levels[g.stair.k].E, side = g.stair.x > g.cairn.x ? 2 : -1;
+    for (const [x, y] of [[g.stair.x + side, E6 - 1], [g.stair.x, E6 - 2], [g.stair.x + 1, E6 - 2], [g.stair.x + side, E6 - 2]]) if (plain3(g, tile, x, y, g.stair.k) && g.level(x, y) === g.stair.k) {
+      ledge3 = local8(x, y);
+      break;
+    }
+  }
+  const clamp56 = (v, hi) => Math.max(16, Math.min(hi - 16, v)), position4 = ledge3 ? { x: clamp56(Math.round((cp.x + ledge3.x) / 2), CW * T65), y: clamp56(Math.round((cp.y + ledge3.y) / 2), CH * T65) } : cp;
+  const chests = [{ x: cp.x - position4.x, y: cp.y - position4.y, completion: true }, ...ledge3 ? [{ x: ledge3.x - position4.x, y: ledge3.y - position4.y }] : []];
+  return { position: position4, rank, members, chests };
+}
+async function createSummitAnchorsV1({ terraces, cx, cy: cy2, seed: seed2, sha256, tile, otherAnchors = [] }) {
+  if (!terraces) return [];
+  const out = [];
+  for (const g of mountainsIn(terraces, cx, cy2)) {
+    const plan = summitPlanV1(g, tile, cx, cy2, [...otherAnchors, ...out]);
+    if (!plan) continue;
+    const identity2 = await worldIdentity(seed2, "anchor", ["upland-summit-v1", g.d.x, g.d.y], sha256);
+    out.push({ id: identity2.id, ordinal: SUMMIT_ORDINAL, position: plan.position, rank: plan.rank, combatVersion: WORLD_COMBAT_VERSION, members: plan.members, summit: { levels: g.n, chests: plan.chests } });
+  }
+  return out;
+}
+
 // src/shared/generation/planned_world_chunks_v1.js
 var cellLevels = /* @__PURE__ */ new WeakMap();
 var cellLevelAt = (asset, x, y) => {
@@ -80942,8 +81015,8 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
   const standsRow = (c, x, y) => {
     const s = stands.tileAt(x, y);
     if (!s || c.kind === "bridge" || c.material === "H" || c.material === "V") return ".";
-    const plain3 = c.town || c.caveExterior || c.fortExterior || c.ruinExterior || c.wildernessTrack || c.wildernessClearing || c.route > 0 || c.collision !== "1";
-    return standsCell(s.zone, !plain3 && s.cover, !plain3 && s.trail);
+    const plain4 = c.town || c.caveExterior || c.fortExterior || c.ruinExterior || c.wildernessTrack || c.wildernessClearing || c.route > 0 || c.collision !== "1";
+    return standsCell(s.zone, !plain4 && s.cover, !plain4 && s.trail);
   };
   const accessChunks = /* @__PURE__ */ new Set();
   if (asset.firstJourney) {
@@ -81006,7 +81079,8 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     const regularAnchors = packAnchors(cx, cy2, identity2.digest);
     const eventAnchors = await createWoodlandPilotEventAnchors({ asset, binding, cx, cy: cy2, seed: seed2, sha256, tile, regularAnchors });
     const plannedAnchors = await createPlannedEventAnchorsV1({ asset, binding, cx, cy: cy2, seed: seed2, sha256, tile, biome, regularAnchors, otherAnchors: eventAnchors });
-    return freezeWire({ version: PLANNED_WORLD_VERSION, identity: identity2, chunkX, chunkY, region: { version: asset.version, regionX: String(Math.floor(cx / 2)), regionY: String(Math.floor(cy2 / 2)), biome, name: hasStarterVillage(binding) && cx >= sx && cx <= sx + 1 && cy2 >= sy && cy2 <= sy + 1 ? STARTER_VILLAGE_NAME + " \xB7 " + starterBiomeName() + " \xB7 Band 1" : biome === "ocean" ? "Open ocean" : biome[0].toUpperCase() + biome.slice(1) + " \xB7 Band " + c.band, minimumLevel: cellLevelAt(asset, Math.floor(cx / 2), Math.floor(cy2 / 2)) ?? [1, 1, 6, 11, 21, 41][c.band] ?? 1, originWidthChunks: 0, originHeightChunks: 0 }, collision: { tileSize: 32, width: 32, height: 26, tiles: collision }, visual: { terrain: visual, biomes: biomes2, blockers, ...caveArt.decorations.length ? { decorations: caveArt.decorations } : {}, ...stands ? { stands: standRows } : {}, route: { centerline, clearance, ...["planned-world-shoreline-v2", "planned-world-water-v3"].includes(asset.version) ? { mapFeatures: mapRows } : {} } }, edges, anchors: [...regularAnchors, ...eventAnchors, ...plannedAnchors], sites: reserved?.socket.entrance.chunkX === chunkX && reserved?.socket.entrance.chunkY === chunkY ? [reserved.socket] : [] });
+    const summitAnchors = terraced && isSeededBindingV1(binding) && hasWorldCombat(binding) ? await createSummitAnchorsV1({ terraces: stands.terraces, cx, cy: cy2, seed: seed2, sha256, tile, otherAnchors: [...regularAnchors, ...eventAnchors, ...plannedAnchors] }) : [];
+    return freezeWire({ version: PLANNED_WORLD_VERSION, identity: identity2, chunkX, chunkY, region: { version: asset.version, regionX: String(Math.floor(cx / 2)), regionY: String(Math.floor(cy2 / 2)), biome, name: hasStarterVillage(binding) && cx >= sx && cx <= sx + 1 && cy2 >= sy && cy2 <= sy + 1 ? STARTER_VILLAGE_NAME + " \xB7 " + starterBiomeName() + " \xB7 Band 1" : biome === "ocean" ? "Open ocean" : biome[0].toUpperCase() + biome.slice(1) + " \xB7 Band " + c.band, minimumLevel: cellLevelAt(asset, Math.floor(cx / 2), Math.floor(cy2 / 2)) ?? [1, 1, 6, 11, 21, 41][c.band] ?? 1, originWidthChunks: 0, originHeightChunks: 0 }, collision: { tileSize: 32, width: 32, height: 26, tiles: collision }, visual: { terrain: visual, biomes: biomes2, blockers, ...caveArt.decorations.length ? { decorations: caveArt.decorations } : {}, ...stands ? { stands: standRows } : {}, route: { centerline, clearance, ...["planned-world-shoreline-v2", "planned-world-water-v3"].includes(asset.version) ? { mapFeatures: mapRows } : {} } }, edges, anchors: [...regularAnchors, ...eventAnchors, ...plannedAnchors, ...summitAnchors], sites: reserved?.socket.entrance.chunkX === chunkX && reserved?.socket.entrance.chunkY === chunkY ? [reserved.socket] : [] });
   }
   let hollowHome = null;
   async function generate(args) {
@@ -85349,14 +85423,14 @@ var WOODLAND_REGION_NAME_ROOTS_D12_2 = freezeWire(["Alder", "Moss", "Green", "Pi
 var WOODLAND_REGION_NAME_ENDINGS_D12_2 = freezeWire(["wild", "grove", "wood", "reach"]);
 
 // src/shared/generation/woodland_fort_placement_d10.js
-var CW = 32n;
-var CH = 26n;
-var T65 = 32;
+var CW2 = 32n;
+var CH2 = 26n;
+var T66 = 32;
 var inside2 = (x, y, p) => x >= BigInt(p.tileX) && x < BigInt(p.tileX) + 48n && y >= BigInt(p.tileY) && y < BigInt(p.tileY) + 36n;
 function overlayWoodlandFortParcelD10(chunk3, parcel2) {
   if (!parcel2?.pages.some((p) => p.chunkX === chunk3.chunkX && p.chunkY === chunk3.chunkY)) return chunk3;
   requireContract(parcel2.version === WOODLAND_FORT_VERSION && parcel2.pages.some((p) => p.chunkX === chunk3.chunkX && p.chunkY === chunk3.chunkY && p.baseDigest === chunk3.identity.digest), "Fort parcel/base mismatch");
-  const x0 = BigInt(parcel2.tileX), y0 = BigInt(parcel2.tileY), cx = BigInt(chunk3.chunkX) * CW, cy2 = BigInt(chunk3.chunkY) * CH;
+  const x0 = BigInt(parcel2.tileX), y0 = BigInt(parcel2.tileY), cx = BigInt(chunk3.chunkX) * CW2, cy2 = BigInt(chunk3.chunkY) * CH2;
   const collision = chunk3.collision.tiles.map((r) => [...r]), terrain = chunk3.visual.terrain.map((r) => [...r]), biomes2 = chunk3.visual.biomes.map((r) => [...r]);
   const centerline = chunk3.visual.route.centerline.map((r) => [...r]), clearance = chunk3.visual.route.clearance.map((r) => [...r]);
   const own = (x, y) => inside2(cx + BigInt(x), cy2 + BigInt(y), parcel2);
@@ -85380,19 +85454,19 @@ function overlayWoodlandFortParcelD10(chunk3, parcel2) {
   const decorations = (chunk3.visual.decorations ?? []).filter((d) => !own(Math.floor(d.x), Math.floor(d.y)));
   for (const d of WOODLAND_FORT_TEMPLATE.visual.decorations ?? []) {
     const gx = x0 + BigInt(Math.floor(d.x)), gy = y0 + BigInt(Math.floor(d.y));
-    if (gx < cx || gx >= cx + CW || gy < cy2 || gy >= cy2 + CH) continue;
+    if (gx < cx || gx >= cx + CW2 || gy < cy2 || gy >= cy2 + CH2) continue;
     decorations.push({ ...copyWire(d), id: `fort-decoration:${parcel2.siteId}:${d.kind}:${d.x},${d.y}`, x: Number(gx - cx) + (d.x - Math.floor(d.x)), y: Number(gy - cy2) + (d.y - Math.floor(d.y)) });
   }
-  const anchors = chunk3.anchors.filter((a) => !own(Math.floor(a.position.x / T65), Math.floor(a.position.y / T65)));
-  const sites = chunk3.sites.filter((s) => s.siteId === parcel2.siteId || !own(Math.floor(s.entrance.localX / T65), Math.floor(s.entrance.localY / T65)));
+  const anchors = chunk3.anchors.filter((a) => !own(Math.floor(a.position.x / T66), Math.floor(a.position.y / T66)));
+  const sites = chunk3.sites.filter((s) => s.siteId === parcel2.siteId || !own(Math.floor(s.entrance.localX / T66), Math.floor(s.entrance.localY / T66)));
   if (parcel2.socket.entrance.chunkX === chunk3.chunkX && parcel2.socket.entrance.chunkY === chunk3.chunkY && !sites.some((s) => s.siteId === parcel2.siteId)) sites.push(copyWire(parcel2.socket));
   return freezeWire({ ...copyWire(chunk3), collision: { ...copyWire(chunk3.collision), tiles: collision.map((r) => r.join("")) }, visual: { ...copyWire(chunk3.visual), terrain: terrain.map((r) => r.join("")), biomes: biomes2.map((r) => r.join("")), blockers, decorations, route: { centerline: centerline.map((r) => r.join("")), clearance: clearance.map((r) => r.join("")) } }, anchors, sites, compound: { siteId: parcel2.siteId, version: parcel2.version, pages: copyWire(parcel2.pages) } });
 }
 
 // src/shared/generation/woodland_cave_placement_d10.js
-var CW2 = 32n;
-var CH2 = 26n;
-var T66 = 32;
+var CW3 = 32n;
+var CH3 = 26n;
+var T67 = 32;
 var W13 = BigInt(WOODLAND_CAVE_EXTERIOR.width);
 var H4 = BigInt(WOODLAND_CAVE_EXTERIOR.height);
 var inside3 = (x, y, p) => x >= BigInt(p.tileX) && x < BigInt(p.tileX) + W13 && y >= BigInt(p.tileY) && y < BigInt(p.tileY) + H4;
@@ -85400,7 +85474,7 @@ function overlayWoodlandCaveParcelD10(chunk3, parcel2) {
   if (!parcel2?.pages.some((p) => p.chunkX === chunk3.chunkX && p.chunkY === chunk3.chunkY)) return chunk3;
   const page = parcel2.pages.find((p) => p.chunkX === chunk3.chunkX && p.chunkY === chunk3.chunkY);
   requireContract(parcel2.version === WOODLAND_CAVE_VERSION && page.baseDigest === chunk3.identity.digest, "Cave parcel/base mismatch");
-  const x0 = BigInt(parcel2.tileX), y0 = BigInt(parcel2.tileY), cx = BigInt(chunk3.chunkX) * CW2, cy2 = BigInt(chunk3.chunkY) * CH2, own = (x, y) => inside3(cx + BigInt(x), cy2 + BigInt(y), parcel2), collision = chunk3.collision.tiles.map((r) => [...r]), terrain = chunk3.visual.terrain.map((r) => [...r]), biomes2 = chunk3.visual.biomes.map((r) => [...r]), centerline = chunk3.visual.route.centerline.map((r) => [...r]), clearance = chunk3.visual.route.clearance.map((r) => [...r]);
+  const x0 = BigInt(parcel2.tileX), y0 = BigInt(parcel2.tileY), cx = BigInt(chunk3.chunkX) * CW3, cy2 = BigInt(chunk3.chunkY) * CH3, own = (x, y) => inside3(cx + BigInt(x), cy2 + BigInt(y), parcel2), collision = chunk3.collision.tiles.map((r) => [...r]), terrain = chunk3.visual.terrain.map((r) => [...r]), biomes2 = chunk3.visual.biomes.map((r) => [...r]), centerline = chunk3.visual.route.centerline.map((r) => [...r]), clearance = chunk3.visual.route.clearance.map((r) => [...r]);
   for (let y = 0; y < 26; y++) for (let x = 0; x < 32; x++) if (own(x, y)) {
     const fx = Number(cx + BigInt(x) - x0), fy = Number(cy2 + BigInt(y) - y0);
     collision[y][x] = WOODLAND_CAVE_EXTERIOR.collision[fy][fx];
@@ -85422,7 +85496,7 @@ function overlayWoodlandCaveParcelD10(chunk3, parcel2) {
     const gx = x0 + BigInt(Math.floor(d.x)), gy = y0 + BigInt(Math.floor(d.y));
     decorations.push({ ...copyWire(d), id: `cave-decoration:${parcel2.siteId}:${d.kind}:${d.x},${d.y}`, x: Number(gx - cx) + (d.x - Math.floor(d.x)), y: Number(gy - cy2) + (d.y - Math.floor(d.y)) });
   }
-  const anchors = chunk3.anchors.filter((a) => !own(Math.floor(a.position.x / T66), Math.floor(a.position.y / T66))), sites = chunk3.sites.filter((s) => !own(Math.floor(s.entrance.localX / T66), Math.floor(s.entrance.localY / T66)));
+  const anchors = chunk3.anchors.filter((a) => !own(Math.floor(a.position.x / T67), Math.floor(a.position.y / T67))), sites = chunk3.sites.filter((s) => !own(Math.floor(s.entrance.localX / T67), Math.floor(s.entrance.localY / T67)));
   if (parcel2.socket.entrance.chunkX === chunk3.chunkX && parcel2.socket.entrance.chunkY === chunk3.chunkY) sites.push(copyWire(parcel2.socket));
   return freezeWire({ ...copyWire(chunk3), collision: { ...copyWire(chunk3.collision), tiles: collision.map((r) => r.join("")) }, visual: { ...copyWire(chunk3.visual), terrain: terrain.map((r) => r.join("")), biomes: biomes2.map((r) => r.join("")), blockers, decorations, route: { centerline: centerline.map((r) => r.join("")), clearance: clearance.map((r) => r.join("")) } }, anchors, sites, cave: { siteId: parcel2.siteId, version: parcel2.version, pages: copyWire(parcel2.pages) } });
 }
@@ -85610,7 +85684,7 @@ function validateD9Root(root3) {
 
 // src/shared/contracts/origin_egress_d9.js
 function originEgress(manifest, collision, resources = []) {
-  const w = collision.width, h = collision.height, T72 = collision.tileSize, walk = (x, y) => collision.tiles[y]?.[x] === "1", start = { x: Math.floor(manifest.start.position.x / T72), y: Math.floor(manifest.start.position.y / T72) }, seen4 = /* @__PURE__ */ new Set(), queue = [start];
+  const w = collision.width, h = collision.height, T73 = collision.tileSize, walk = (x, y) => collision.tiles[y]?.[x] === "1", start = { x: Math.floor(manifest.start.position.x / T73), y: Math.floor(manifest.start.position.y / T73) }, seen4 = /* @__PURE__ */ new Set(), queue = [start];
   for (let i = 0; i < queue.length; i++) {
     const p = queue[i], key3 = p.x + "," + p.y;
     if (seen4.has(key3) || !walk(p.x, p.y)) continue;
@@ -85620,7 +85694,7 @@ function originEgress(manifest, collision, resources = []) {
       if (x >= 0 && y >= 0 && x < w && y < h && !seen4.has(x + "," + y)) queue.push({ x, y });
     }
   }
-  const overlap = (x, y) => manifest.safeRegions.some((r) => x * T72 < r.x + r.width && (x + 1) * T72 > r.x && y * T72 < r.y + r.height && (y + 1) * T72 > r.y) || [...manifest.sites, ...resources].some((s) => s.position && Math.hypot((x + 0.5) * T72 - s.position.x, (y + 0.5) * T72 - s.position.y) < 96);
+  const overlap = (x, y) => manifest.safeRegions.some((r) => x * T73 < r.x + r.width && (x + 1) * T73 > r.x && y * T73 < r.y + r.height && (y + 1) * T73 > r.y) || [...manifest.sites, ...resources].some((s) => s.position && Math.hypot((x + 0.5) * T73 - s.position.x, (y + 0.5) * T73 - s.position.y) < 96);
   const openings = [];
   for (const side of ["north", "east", "south", "west"]) {
     const horizontal = side === "north" || side === "south", length = horizontal ? w : h, candidates = [];
@@ -85658,7 +85732,7 @@ function applyOriginEgress(collision, overlay) {
 }
 function originEgressGuidePaths(manifest, collision, overlay) {
   requireContract(overlay.version === "origin-egress-d9-v1", "Origin overlay version");
-  const applied = applyOriginEgress(collision, overlay), T72 = applied.tileSize, start = { x: Math.floor(manifest.start.position.x / T72), y: Math.floor(manifest.start.position.y / T72) }, key3 = (p) => p.x + "," + p.y, prior = /* @__PURE__ */ new Map([[key3(start), null]]), queue = [start];
+  const applied = applyOriginEgress(collision, overlay), T73 = applied.tileSize, start = { x: Math.floor(manifest.start.position.x / T73), y: Math.floor(manifest.start.position.y / T73) }, key3 = (p) => p.x + "," + p.y, prior = /* @__PURE__ */ new Map([[key3(start), null]]), queue = [start];
   for (let i = 0; i < queue.length; i++) {
     const p = queue[i];
     for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
@@ -86349,12 +86423,14 @@ function installEncounterEconomy(s, m) {
 }
 var layouts2 = /* @__PURE__ */ new WeakMap();
 var d9Layouts = /* @__PURE__ */ new WeakMap();
+var wildernessLeftoverV1 = (s, r) => Boolean(s.d9World?.plannedWorld) && r.spaceInstanceId === s.overworldInstanceId && !s.groupsById[r.groupId]?.siteId && !eventKind(s, r.groupId) && !summitGroupV1(s, r.groupId);
 function encounterResourceLayout(s, m) {
   if (s.d9World) {
     const cached = d9Layouts.get(s);
     if (cached?.revision === s.d9World.runtime.revision) return cached.value;
     const out = {};
     for (const r of [...s.d9World.origin.resources, ...s.d9World.runtime.resources]) {
+      if (wildernessLeftoverV1(s, r)) continue;
       (out[r.groupId] ??= []).push(r);
     }
     d9Layouts.set(s, { revision: s.d9World.runtime.revision, value: out });
@@ -90759,9 +90835,9 @@ var U = Object.freeze({ ring: 64, burst: 56, pool: 40, beam: { reach: 200, attac
 var TROPHY2 = Object.freeze({ goldOver: 20, stingPulses: 4 });
 function offhandStyle(player) {
   const inv = player?.inventory, item2 = inv?.itemsById[inv.equipped?.subweapon], type = item2 ? itemLookType(item2) : null;
-  return T67.styles[type] ? type : null;
+  return T68.styles[type] ? type : null;
 }
-var T67 = CLASS_SKILL_TUNING_V1;
+var T68 = CLASS_SKILL_TUNING_V1;
 var FLURRY_SWORD_CUT = 1;
 var scaled = (value2, f) => f ? Math.round(value2 * f[0] / f[1]) : value2;
 var unit5 = (v) => {
@@ -90837,7 +90913,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (t.alive && !isPodCombatTargetV4(t)) periodic(a, t, "bleed", boost ? combatInteger(pct3(stats3.attack, boost)) : stats3.attack, stats3);
   };
   const grip = (a, t, ticks) => {
-    if (t.alive && !isPodCombatTargetV4(t) && canStun(a)) effects2.status(a, t, "hinder", T67.grip, Math.min(60, ticks));
+    if (t.alive && !isPodCombatTargetV4(t) && canStun(a)) effects2.status(a, t, "hinder", T68.grip, Math.min(60, ticks));
   };
   function knockOut(a, t, base2, elite) {
     if (!t.alive || isPodCombatTargetV4(t)) return;
@@ -90863,20 +90939,20 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     else stun(a, t, stunTicks(a, 12 * r));
   }
   function bash(a, stats3, aim2, commandId) {
-    const impact = rank(a, "impact_training"), spiked = rank(a, "spiked_shield"), base2 = addCombat(multiplyCombat(stats3.attack, ...T67.bash.attack), shieldPacket(stats3)), raw = impact ? pct3(base2, 6 * impact) : base2, style = T67.styles[offhandStyle(owner(a))] ?? {};
+    const impact = rank(a, "impact_training"), spiked = rank(a, "spiked_shield"), base2 = addCombat(multiplyCombat(stats3.attack, ...T68.bash.attack), shieldPacket(stats3)), raw = impact ? pct3(base2, 6 * impact) : base2, style = T68.styles[offhandStyle(owner(a))] ?? {};
     let hits2 = 0;
-    for (const t of cone4(a, aim2, T67.bash.reach * (100 + 6 * rank(a, "seismic_reach")) / 100, T67.bash.cone, T67.bash.targets)) {
+    for (const t of cone4(a, aim2, T68.bash.reach * (100 + 6 * rank(a, "seismic_reach")) / 100, T68.bash.cone, T68.bash.targets)) {
       damage(a, t, raw, "bash", commandId, { sourceItem: damageSourceItem(owner(a), "bash"), trigger: "skill", masteryArea: true });
       hits2++;
       if (spiked) bleed(a, t, stats3, 10 * spiked);
       if (!t.alive || isPodCombatTargetV4(t)) continue;
       if (definition2(t).isBoss) {
-        daze(a, t, scaled(T67.bash.stun, style.stun));
+        daze(a, t, scaled(T68.bash.stun, style.stun));
         continue;
       }
       const elite = Boolean(definition2(t).isElite || definition2(t).isMiniboss);
-      knockback(a, t, scaled(elite ? T67.bash.eliteKnockback : T67.bash.knockback, style.knockback));
-      if (canStun(a)) stun(a, t, stunTicks(a, scaled(elite ? T67.bash.eliteStun : T67.bash.stun, style.stun)));
+      knockback(a, t, scaled(elite ? T68.bash.eliteKnockback : T68.bash.knockback, style.knockback));
+      if (canStun(a)) stun(a, t, stunTicks(a, scaled(elite ? T68.bash.eliteStun : T68.bash.stun, style.stun)));
     }
     bracing(a, hits2);
     const sourceItem = damageSourceItem(owner(a), "bash"), combat = c.actors[a.entityId], sun = combat?.skills?.sun;
@@ -90898,15 +90974,15 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
   function bracing(a, hits2) {
     const r = rank(a, "bracing_bash"), g = c.actors[a.entityId]?.guard;
     if (!r || !hits2 || !g || !a.alive) return;
-    const n = Math.round(32 * T67.bracingBash * r * hits2 / 100);
+    const n = Math.round(32 * T68.bracingBash * r * hits2 / 100);
     if (!n) return;
     g.integrity = combatInteger(minCombat(32, addCombat(g.integrity, n)));
     if (compareCombat(g.integrity, 32) >= 0) g.guardRechargeRemainder = 0;
   }
   function cut(a, stats3, aim2, commandId, index = 0) {
-    const combat = c.actors[a.entityId], style = T67.styles[offhandStyle(owner(a))] ?? {}, sword4 = index === FLURRY_SWORD_CUT;
-    for (const t of cone4(a, aim2, T67.flurry.reach, T67.flurry.cone, T67.flurry.targets)) {
-      damage(a, t, multiplyCombat(stats3.attack, ...T67.flurry.attack), "offhand", commandId, { sourceItem: damageSourceItem(owner(a), sword4 ? "main" : "offhand"), trigger: "skill", ...combat.skills?.keen ? { critBonus: combatAmount(1) } : style.critBonus ? { critBonus: combatAmount(...style.critBonus) } : {} });
+    const combat = c.actors[a.entityId], style = T68.styles[offhandStyle(owner(a))] ?? {}, sword4 = index === FLURRY_SWORD_CUT;
+    for (const t of cone4(a, aim2, T68.flurry.reach, T68.flurry.cone, T68.flurry.targets)) {
+      damage(a, t, multiplyCombat(stats3.attack, ...T68.flurry.attack), "offhand", commandId, { sourceItem: damageSourceItem(owner(a), sword4 ? "main" : "offhand"), trigger: "skill", ...combat.skills?.keen ? { critBonus: combatAmount(1) } : style.critBonus ? { critBonus: combatAmount(...style.critBonus) } : {} });
       if (!t.alive) continue;
       mastery?.primary(a, t, "proactive");
       if (!sword4) effects2.offhand(a, t, stats3);
@@ -90918,16 +90994,16 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (index === FLURRY_CUTS - 1) clearSkillState(combat, "keen");
   }
   function flurry(a, stats3, aim2, commandId) {
-    const combat = c.actors[a.entityId], r = rank(a, "fourth_cut"), fourth = Boolean(r && combatRoll(combat, combatAmount(T67.fourthCut * r, 100)));
+    const combat = c.actors[a.entityId], r = rank(a, "fourth_cut"), fourth = Boolean(r && combatRoll(combat, combatAmount(T68.fourthCut * r, 100)));
     cut(a, stats3, aim2, commandId);
     classSkillsRecord(combat).flurry = { cutsLeft: FLURRY_CUTS - 1 + (fourth ? 1 : 0), nextTick: s.tick + FLURRY_GAP_TICKS, ...aim2 };
-    if (T67.styles[offhandStyle(owner(a))]?.parry) openParryWindow(combat);
+    if (T68.styles[offhandStyle(owner(a))]?.parry) openParryWindow(combat);
     return fourth ? { n: 4 } : true;
   }
   function cast2(a, stats3, aim2, commandId) {
     const range2 = Math.min(137, 128 + (a.hullRadius ?? 0)), heading = Math.atan2(aim2.y, aim2.x);
     if (Object.keys(c.projectiles).length >= 16) return false;
-    const ahead = (t) => offAxis(a, t, heading) <= T67.cast.cone ? 0 : 1;
+    const ahead = (t) => offAxis(a, t, heading) <= T68.cast.cone ? 0 : 1;
     const target = effects2.nearby(a, a, range2 + 40).filter((t) => clearHullGap(a, t) <= 128).sort((x, y) => ahead(x) - ahead(y) || distance12(a, x) - distance12(a, y) || x.entityId.localeCompare(y.entityId))[0] ?? null;
     const syphon = rank(a, "arcane_syphon") && spendBarrier(a) ? 6 * rank(a, "arcane_syphon") : 0;
     const toward3 = target ? unit5({ x: target.position.x - a.position.x, y: target.position.y - a.position.y }) : aim2, player = owner(a), recipe = player?.d8 ? captureTomeRecipe(player, effects2.area(a), stats3) : null, element = recipe ? commitTomeAnchor(player, recipe) : stats3.spellType ?? "fire", id = identity2("act");
@@ -90946,7 +91022,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       delivery: element,
       ...recipe ? { tomeRecipe: recipe } : { firePower: copyWire(stats3.familyProperties?.tomePower ?? stats3.familyProperties?.firePower ?? combatAmount(18, 10)) },
       sourceItem: damageSourceItem(player, element),
-      attack: copyWire(combatInteger(syphon ? pct3(multiplyCombat(stats3.attack, ...T67.cast.attack), syphon) : multiplyCombat(stats3.attack, ...T67.cast.attack))),
+      attack: copyWire(combatInteger(syphon ? pct3(multiplyCombat(stats3.attack, ...T68.cast.attack), syphon) : multiplyCombat(stats3.attack, ...T68.cast.attack))),
       rulesVersion: "combat-integer-v2",
       commandId
     };
@@ -90974,7 +91050,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     return true;
   }
   function earthBreaker2(a, stats3, aim2, commandId) {
-    const E6 = T67.earthBreaker, impact = rank(a, "impact_training"), base2 = addCombat(multiplyCombat(stats3.attack, ...E6.attack), shieldPacket(stats3)), raw = impact ? pct3(base2, 6 * impact) : base2, stunAll = aug(a, "earth_breaker", 0);
+    const E6 = T68.earthBreaker, impact = rank(a, "impact_training"), base2 = addCombat(multiplyCombat(stats3.attack, ...E6.attack), shieldPacket(stats3)), raw = impact ? pct3(base2, 6 * impact) : base2, stunAll = aug(a, "earth_breaker", 0);
     const reach = E6.radius * (100 + 6 * rank(a, "seismic_reach")) / 100, targets = cone4(a, aim2, reach, Math.PI, E6.targets);
     if (aug(a, "earth_breaker", 1)) for (const t of targets) pull(a, t, E6.pull);
     const combat = c.actors[a.entityId], titan = combat.skills?.titan && rank(a, "titan") ? 15 * rank(a, "titan") : 0;
@@ -91003,7 +91079,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     }
     if (--k.ticks > 0) return;
     clearSkillState(combat, "aftershock");
-    const stats3 = getStats(a.entityId), hit = multiplyCombat(breakerHit(a, stats3, T67.earthBreaker.attack), ...T67.aftershock), sourceItem = damageSourceItem(owner(a), "bash");
+    const stats3 = getStats(a.entityId), hit = multiplyCombat(breakerHit(a, stats3, T68.earthBreaker.attack), ...T68.aftershock), sourceItem = damageSourceItem(owner(a), "bash");
     for (const t of around3(a, k, k.r)) damage(a, t, hit, "quake", null, { sourceItem, trigger: "skill" });
   }
   function stepFault(a, combat) {
@@ -91014,14 +91090,14 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       return;
     }
     if (--k.next <= 0) {
-      k.next = T67.fault.pulse;
+      k.next = T68.fault.pulse;
       const stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "fire");
-      for (const t of around3(a, k, k.r)) damage(a, t, multiplyCombat(stats3.attack, ...T67.fault.attack), "fire", null, { sourceItem, trigger: "skill" });
+      for (const t of around3(a, k, k.r)) damage(a, t, multiplyCombat(stats3.attack, ...T68.fault.attack), "fire", null, { sourceItem, trigger: "skill" });
     }
     if (--k.ticks <= 0) clearSkillState(combat, "fault");
   }
   function rallyingCry2(a, stats3, aim2) {
-    const R9 = T67.rallyingCry, secondWind = aug(a, "rallying_cry", 0);
+    const R9 = T68.rallyingCry, secondWind = aug(a, "rallying_cry", 0);
     heal(a, stats3, ...secondWind ? R9.secondWind : R9.heal);
     const near4 = cone4(a, aim2, R9.radius, Math.PI, R9.targets).filter((t) => !isPodCombatTargetV4(t));
     if (aug(a, "rallying_cry", 1)) for (const t of near4) pull(a, t, R9.pull);
@@ -91039,7 +91115,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     return true;
   }
   function shieldCharge2(a, stats3, aim2) {
-    const R9 = T67.shieldCharge, reach = aug(a, "shield_charge", 1) ? scaled(R9.reach, T67.wider) : R9.reach, end = pathEnd(a, { x: aim2.x, y: aim2.y, remaining: reach }), len = Math.hypot(end.x - a.position.x, end.y - a.position.y);
+    const R9 = T68.shieldCharge, reach = aug(a, "shield_charge", 1) ? scaled(R9.reach, T68.wider) : R9.reach, end = pathEnd(a, { x: aim2.x, y: aim2.y, remaining: reach }), len = Math.hypot(end.x - a.position.x, end.y - a.position.y);
     classSkillsRecord(c.actors[a.entityId]).ram = { x: end.x, y: end.y, dx: aim2.x, dy: aim2.y, ticks: Math.min(RAM_TICKS, Math.max(1, Math.ceil(len / R9.step))) };
     lowerShield(c.actors[a.entityId].guard);
     return landingOffset(a, end);
@@ -91055,7 +91131,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       clearSkillState(combat, "ram");
       return;
     }
-    const R9 = T67.shieldCharge, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "bash"), left = Math.hypot(r.x - a.position.x, r.y - a.position.y), move2 = Math.min(R9.step, left);
+    const R9 = T68.shieldCharge, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "bash"), left = Math.hypot(r.x - a.position.x, r.y - a.position.y), move2 = Math.min(R9.step, left);
     lowerShield(combat.guard);
     if (move2 > 0) {
       const ahead = (a.hullRadius ?? 0) + 4, front2 = { x: a.position.x + r.dx * ahead, y: a.position.y + r.dy * ahead };
@@ -91106,10 +91182,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     }
   }
   function slamBody(a, stats3, aim2, quake) {
-    const S6 = T67.slam, hit = multiplyCombat(breakerHit(a, stats3, T67.earthBreaker.attack), ...S6.attack), sourceItem = damageSourceItem(owner(a), "bash");
+    const S6 = T68.slam, hit = multiplyCombat(breakerHit(a, stats3, T68.earthBreaker.attack), ...S6.attack), sourceItem = damageSourceItem(owner(a), "bash");
     for (const t of around3(a, a.position, S6.radius * effects2.area(a))) {
       damage(a, t, hit, "quake", null, { sourceItem, trigger: "skill" });
-      if (t.alive && canStun(a) && !isPodCombatTargetV4(t)) effects2.status(a, t, "slow", T67.earthBreaker.slow, S6.slowTicks);
+      if (t.alive && canStun(a) && !isPodCombatTargetV4(t)) effects2.status(a, t, "slow", T68.earthBreaker.slow, S6.slowTicks);
     }
     if (!quake) classSkillsRecord(c.actors[a.entityId]).shake = { x: a.position.x, y: a.position.y, dx: aim2.x, dy: aim2.y, r: extent(a, S6.radius), ticks: SHAKE_TICKS };
   }
@@ -91120,13 +91196,13 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     return out;
   }
   function shieldThrow2(a, stats3, aim2) {
-    const S6 = T67.shieldThrow, first = cone4(a, aim2, S6.reach, S6.cone, 1)[0], end = first ? null : pathEnd(a, { x: aim2.x, y: aim2.y, remaining: S6.reach });
+    const S6 = T68.shieldThrow, first = cone4(a, aim2, S6.reach, S6.cone, 1)[0], end = first ? null : pathEnd(a, { x: aim2.x, y: aim2.y, remaining: S6.reach });
     classSkillsRecord(c.actors[a.entityId]).thrown = { x: a.position.x, y: a.position.y, ids: first ? [first.entityId] : [], hit: [], ticks: THROW_TICKS, ...end ? { tx: end.x, ty: end.y } : {} };
     lowerShield(c.actors[a.entityId].guard);
     return first ? landingOffset(a, first.position) : landingOffset(a, end);
   }
   function throwHit(a, stats3, t) {
-    damage(a, t, addCombat(multiplyCombat(stats3.attack, ...T67.shieldThrow.attack), shieldPacket(stats3)), "bash", null, { sourceItem: damageSourceItem(owner(a), "bash"), trigger: "skill" });
+    damage(a, t, addCombat(multiplyCombat(stats3.attack, ...T68.shieldThrow.attack), shieldPacket(stats3)), "bash", null, { sourceItem: damageSourceItem(owner(a), "bash"), trigger: "skill" });
     if (aug(a, "shield_throw", 2)) bleed(a, t, stats3);
   }
   function stepThrow(a, combat) {
@@ -91137,7 +91213,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       return;
     }
     lowerShield(combat.guard);
-    const S6 = T67.shieldThrow, stats3 = getStats(a.entityId);
+    const S6 = T68.shieldThrow, stats3 = getStats(a.entityId);
     let target = th.ids.length ? s.entitiesById[th.ids[0]] : null;
     if (target && (!target.alive || target.residency.spaceInstanceId !== a.residency.spaceInstanceId)) {
       th.ids = [];
@@ -91155,7 +91231,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
         if (marked && !th.hit.length && canStun(a)) effects2.status(a, target, "mark", marked, 300);
         const first = !th.hit.length;
         throwHit(a, stats3, target);
-        if (first && aug(a, "shield_throw", 3)) knockOut(a, target, T67.heavy.stun, T67.heavy.eliteStun);
+        if (first && aug(a, "shield_throw", 3)) knockOut(a, target, T68.heavy.stun, T68.heavy.eliteStun);
         th.hit = [...th.hit, target.entityId];
         const most = aug(a, "shield_throw", 3) ? 2 : aug(a, "shield_throw", 0) ? S6.ricochet : S6.targets, next = th.hit.length < most ? effects2.nearby(a, target, S6.hop).filter((t) => t.alive && !th.hit.includes(t.entityId) && !isPodCombatTargetV4(t)).sort((x, y) => distance12(target, x) - distance12(target, y) || x.entityId.localeCompare(y.entityId))[0] : null;
         th.ids = next ? [next.entityId] : [];
@@ -91175,13 +91251,13 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (--th.ticks <= 0) clearSkillState(combat, "thrown");
   }
   function warBanner2(a, stats3, aim2) {
-    const on = aug(a, "war_banner", 3) ? cone4(a, aim2, T67.lance.reach, 0.6, 3).find((t) => !isPodCombatTargetV4(t)) : null, at8 = on ? on.position : a.position;
+    const on = aug(a, "war_banner", 3) ? cone4(a, aim2, T68.lance.reach, 0.6, 3).find((t) => !isPodCombatTargetV4(t)) : null, at8 = on ? on.position : a.position;
     classSkillsRecord(c.actors[a.entityId]).banner = { x: at8.x, y: at8.y, ticks: aug(a, "war_banner", 0) ? BANNER_MAX : BANNER_TICKS, next: 60, ...on ? { on: on.entityId } : {} };
     return true;
   }
   const nearBanner = (a) => {
     const b = c.actors[a.entityId]?.skills?.banner;
-    return Boolean(b && a.alive && Math.hypot(a.position.x - b.x, a.position.y - b.y) <= T67.warBanner.radius);
+    return Boolean(b && a.alive && Math.hypot(a.position.x - b.x, a.position.y - b.y) <= T68.warBanner.radius);
   };
   function stepBanner(a, combat) {
     const b = combat.skills?.banner;
@@ -91199,10 +91275,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     }
     if (--b.next <= 0) {
       b.next = 60;
-      if (aug(a, "war_banner", 1) && nearBanner(a)) heal(a, getStats(a.entityId), ...T67.warBanner.heal);
+      if (aug(a, "war_banner", 1) && nearBanner(a)) heal(a, getStats(a.entityId), ...T68.warBanner.heal);
       if (b.on) {
         const stats3 = getStats(a.entityId);
-        damage(a, s.entitiesById[b.on], multiplyCombat(stats3.attack, ...T67.lance.attack), "bash", null, { sourceItem: damageSourceItem(owner(a), "bash"), trigger: "skill" });
+        damage(a, s.entitiesById[b.on], multiplyCombat(stats3.attack, ...T68.lance.attack), "bash", null, { sourceItem: damageSourceItem(owner(a), "bash"), trigger: "skill" });
       }
     }
     if (--b.ticks <= 0) clearSkillState(combat, "banner");
@@ -91236,32 +91312,32 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       return;
     }
     if (--k.next <= 0) {
-      k.next = T67.crack.pulse;
+      k.next = T68.crack.pulse;
       if (canStun(a)) {
-        for (const t of around3(a, k, k.r)) if (!isPodCombatTargetV4(t)) effects2.status(a, t, "hinder", k.rank, T67.crack.hold);
+        for (const t of around3(a, k, k.r)) if (!isPodCombatTargetV4(t)) effects2.status(a, t, "hinder", k.rank, T68.crack.hold);
       }
     }
     if (--k.ticks <= 0) clearSkillState(combat, "crack");
   }
   function shove(a, strong = false) {
-    const P17 = T67.aegisPulse;
+    const P17 = T68.aegisPulse;
     for (const t of around3(a, a.position, P17.radius * effects2.area(a))) if (!isPodCombatTargetV4(t) && !definition2(t).isBoss) {
       knockback(a, t, (definition2(t).isElite || definition2(t).isMiniboss ? P17.shove / 2 : P17.shove) * (strong ? 2 : 1));
-      if (strong && t.alive && ordinary(t) && canStun(a)) stun(a, t, stunTicks(a, T67.repulsor));
+      if (strong && t.alive && ordinary(t) && canStun(a)) stun(a, t, stunTicks(a, T68.repulsor));
     }
   }
   function aegisPulse2(a, stats3) {
-    const P17 = T67.aegisPulse, over = aug(a, "aegis_pulse", 1), worth = combatInteger(multiplyCombat(stats3.maxHp, P17.worth, 100)), hp = over ? combatInteger(multiplyCombat(worth, ...P17.overcharge)) : worth;
+    const P17 = T68.aegisPulse, over = aug(a, "aegis_pulse", 1), worth = combatInteger(multiplyCombat(stats3.maxHp, P17.worth, 100)), hp = over ? combatInteger(multiplyCombat(worth, ...P17.overcharge)) : worth;
     shove(a, aug(a, "aegis_pulse", 2));
     if (compareCombat(hp, 0) > 0) classSkillsRecord(c.actors[a.entityId]).aegis = { hp, full: hp, ticks: over ? OVERCHARGE_TICKS : AEGIS_TICKS, ...over ? { over: true } : {}, ...aug(a, "aegis_pulse", 0) ? { echo: true } : {} };
     return { r: extent(a, P17.radius) };
   }
   function skyfallLeap2(a, stats3, aim2) {
-    const L = T67.skyfallLeap, t = cone4(a, aim2, L.reach, L.cone, 1)[0], toward3 = t ? unit5({ x: t.position.x - a.position.x, y: t.position.y - a.position.y }) : aim2, far = t ? Math.max(0, Math.min(L.reach, distance12(a, t) - (a.hullRadius ?? 0) - (t.hullRadius ?? 0) - 2)) : L.reach, end = pathEnd(a, { x: toward3.x, y: toward3.y, remaining: far }), combat = c.actors[a.entityId];
+    const L = T68.skyfallLeap, t = cone4(a, aim2, L.reach, L.cone, 1)[0], toward3 = t ? unit5({ x: t.position.x - a.position.x, y: t.position.y - a.position.y }) : aim2, far = t ? Math.max(0, Math.min(L.reach, distance12(a, t) - (a.hullRadius ?? 0) - (t.hullRadius ?? 0) - 2)) : L.reach, end = pathEnd(a, { x: toward3.x, y: toward3.y, remaining: far }), combat = c.actors[a.entityId];
     const heavy2 = aug(a, "skyfall_leap", 2), air = heavy2 ? LEAP_TICKS + LEAP_HEAVY_TICKS : LEAP_TICKS;
     classSkillsRecord(combat).leap = { x: end.x, y: end.y, sx: a.position.x, sy: a.position.y, ticks: air, ...heavy2 ? { of: air } : {} };
     lowerShield(combat.guard);
-    return { ...landingOffset(a, end), r: extent(a, aug(a, "skyfall_leap", 0) ? scaled(L.radius, T67.wide) : L.radius), ...heavy2 ? { air } : {} };
+    return { ...landingOffset(a, end), r: extent(a, aug(a, "skyfall_leap", 0) ? scaled(L.radius, T68.wide) : L.radius), ...heavy2 ? { air } : {} };
   }
   function stepLeap(a, combat) {
     const l = combat.skills?.leap;
@@ -91278,7 +91354,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     }
     if (--l.ticks > 0) return;
     clearSkillState(combat, "leap");
-    const L = T67.skyfallLeap, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "bash"), radius = (aug(a, "skyfall_leap", 0) ? scaled(L.radius, T67.wide) : L.radius) * effects2.area(a), near4 = around3(a, a.position, radius), crash2 = crowd(a, breakerHit(a, stats3, L.attack), near4.length), hit = l.of ? multiplyCombat(crash2, 2, 1) : crash2;
+    const L = T68.skyfallLeap, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "bash"), radius = (aug(a, "skyfall_leap", 0) ? scaled(L.radius, T68.wide) : L.radius) * effects2.area(a), near4 = around3(a, a.position, radius), crash2 = crowd(a, breakerHit(a, stats3, L.attack), near4.length), hit = l.of ? multiplyCombat(crash2, 2, 1) : crash2;
     for (const t of near4) {
       const was = slowed(t);
       damage(a, t, hit, "quake", null, { sourceItem, trigger: "skill" });
@@ -91296,7 +91372,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (rank(a, "titan")) classSkillsRecord(combat).titan = TITAN_TICKS;
   }
   function retribution2(a, stats3, aim2, commandId) {
-    const R9 = T67.retribution, k = classSkillsRecord(c.actors[a.entityId]), held = k.held ?? [], raw = held.reduce((sum2, h) => addCombat(sum2, h.amount), multiplyCombat(stats3.attack, ...R9.attack)), reach = Math.min(400, (aug(a, "retribution", 0) ? scaled(R9.radius, T67.wide) : R9.radius) * effects2.area(a)), sourceItem = damageSourceItem(owner(a), "bash");
+    const R9 = T68.retribution, k = classSkillsRecord(c.actors[a.entityId]), held = k.held ?? [], raw = held.reduce((sum2, h) => addCombat(sum2, h.amount), multiplyCombat(stats3.attack, ...R9.attack)), reach = Math.min(400, (aug(a, "retribution", 0) ? scaled(R9.radius, T68.wide) : R9.radius) * effects2.area(a)), sourceItem = damageSourceItem(owner(a), "bash");
     delete k.held;
     for (const t of around3(a, a.position, reach)) {
       const burst2 = aug(a, "retribution", 1) && c.effects[a.entityId + "/" + t.entityId + "/bleed"];
@@ -91313,13 +91389,13 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
   }
   let refund = 0;
   function lunge2(a, stats3, aim2, commandId) {
-    const L = T67.lunge, reach = aug(a, "lunge", 0) ? scaled(L.reach, T67.wider) : L.reach, t = cone4(a, aim2, reach, L.cone, 1)[0], combat = c.actors[a.entityId], toward3 = t ? { x: t.position.x - a.position.x, y: t.position.y - a.position.y } : aim2, l = Math.hypot(toward3.x, toward3.y);
+    const L = T68.lunge, reach = aug(a, "lunge", 0) ? scaled(L.reach, T68.wider) : L.reach, t = cone4(a, aim2, reach, L.cone, 1)[0], combat = c.actors[a.entityId], toward3 = t ? { x: t.position.x - a.position.x, y: t.position.y - a.position.y } : aim2, l = Math.hypot(toward3.x, toward3.y);
     const step2 = t ? Math.min(L.step, Math.max(0, l - (a.hullRadius ?? 0) - (t.hullRadius ?? 0) - 4)) : L.step / 2;
     if (step2 >= 8 && l > 1e-9 && !combat.dash.frames) {
       Object.assign(combat.dash, { frames: Math.ceil(step2 / 8), remaining: step2, x: toward3.x / l, y: toward3.y / l });
       sunTrail(a, combat);
     }
-    const each = combat.skills?.again ? multiplyCombat(multiplyCombat(stats3.attack, ...L.attack), ...T67.again) : multiplyCombat(stats3.attack, ...L.attack);
+    const each = combat.skills?.again ? multiplyCombat(multiplyCombat(stats3.attack, ...L.attack), ...T68.again) : multiplyCombat(stats3.attack, ...L.attack);
     if (aug(a, "lunge", 2)) {
       const d = unit5(toward3), end = pathEnd(a, { x: d.x, y: d.y, remaining: reach });
       for (const n of alongPath(a, a.position, end)) if (n !== t && n.alive) damage(a, n, each, "offhand", commandId, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "skill" });
@@ -91340,7 +91416,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     b.poisons[t.entityId] = { id: t.entityId, sourceId: a.entityId, targetId: t.entityId, spaceInstanceId: a.residency.spaceInstanceId, attack: copyWire(old2?.attack ?? attack), rank: old2?.rank ?? 1, toxicRank: old2?.toxicRank ?? "0", stacks: Math.min(5, (old2?.stacks ?? 0) + 1), nextTick: old2?.nextTick ?? s.tick + 60, expiresTick: s.tick + Math.min(900, 60 * (10 + rank(a, "lingering_venom")) + longer), sourceItem: damageSourceItem(owner(a), "poison") };
   }
   function toxicFan2(a, stats3, aim2, commandId) {
-    const F6 = T67.toxicFan, wide = aug(a, "toxic_fan", 0), slow = aug(a, "toxic_fan", 1), barbed = aug(a, "toxic_fan", 2), seek = aug(a, "toxic_fan", 3), reach = seek ? scaled(F6.reach, T67.seeking.reach) : F6.reach, width2 = seek ? T67.seeking.cone : wide ? F6.wideCone : F6.cone;
+    const F6 = T68.toxicFan, wide = aug(a, "toxic_fan", 0), slow = aug(a, "toxic_fan", 1), barbed = aug(a, "toxic_fan", 2), seek = aug(a, "toxic_fan", 3), reach = seek ? scaled(F6.reach, T68.seeking.reach) : F6.reach, width2 = seek ? T68.seeking.cone : wide ? F6.wideCone : F6.cone;
     for (const t of cone4(a, aim2, reach, width2, wide ? F6.wideTargets : F6.targets)) {
       damage(a, t, multiplyCombat(stats3.attack, ...F6.attack), "offhand", commandId, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "skill" });
       poison(a, t, stats3);
@@ -91350,11 +91426,11 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     return { r: extent(a, reach), spread: width2 };
   }
   function whirlingBlades2(a, stats3, aim2, commandId) {
-    const W16 = T67.whirlingBlades, reach = aug(a, "whirling_blades", 0) ? scaled(W16.radius, T67.wide) : W16.radius, targets = cone4(a, aim2, reach, Math.PI, W16.targets);
+    const W16 = T68.whirlingBlades, reach = aug(a, "whirling_blades", 0) ? scaled(W16.radius, T68.wide) : W16.radius, targets = cone4(a, aim2, reach, Math.PI, W16.targets);
     if (aug(a, "whirling_blades", 1)) for (const t of targets) pull(a, t, W16.pull);
     for (const t of targets) for (let i = 0; i < W16.hits && t.alive; i++) damage(a, t, multiplyCombat(stats3.attack, ...W16.attack), "offhand", commandId, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "skill" });
     const ward = aug(a, "whirling_blades", 2), tornado = aug(a, "whirling_blades", 3);
-    if (ward || tornado) classSkillsRecord(c.actors[a.entityId]).spin = { ticks: tornado ? TORNADO_TICKS : SPIN_TICKS, r: Math.max(1, Math.min(400, Math.round(reach))), ...tornado ? { hits: T67.tornado.waves, next: T67.tornado.gap } : {} };
+    if (ward || tornado) classSkillsRecord(c.actors[a.entityId]).spin = { ticks: tornado ? TORNADO_TICKS : SPIN_TICKS, r: Math.max(1, Math.min(400, Math.round(reach))), ...tornado ? { hits: T68.tornado.waves, next: T68.tornado.gap } : {} };
     return { r: extent(a, reach) };
   }
   function stepSpin(a, combat) {
@@ -91365,10 +91441,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       return;
     }
     if (sp.hits && --sp.next <= 0) {
-      const W16 = T67.whirlingBlades, stats3 = getStats(a.entityId), targets = cone4(a, { x: 1, y: 0 }, sp.r, Math.PI, W16.targets);
+      const W16 = T68.whirlingBlades, stats3 = getStats(a.entityId), targets = cone4(a, { x: 1, y: 0 }, sp.r, Math.PI, W16.targets);
       if (aug(a, "whirling_blades", 1)) for (const t of targets) pull(a, t, W16.pull);
       for (const t of targets) damage(a, t, multiplyCombat(stats3.attack, ...W16.attack), "offhand", null, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "skill" });
-      if (--sp.hits > 0) sp.next = T67.tornado.gap;
+      if (--sp.hits > 0) sp.next = T68.tornado.gap;
       else {
         delete sp.hits;
         delete sp.next;
@@ -91383,7 +91459,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     return true;
   }
   function rupture2(a, stats3, aim2, commandId) {
-    const R9 = T67.rupture, reach = R9.radius * effects2.area(a), sourceItem = damageSourceItem(owner(a), "offhand"), torn = [];
+    const R9 = T68.rupture, reach = R9.radius * effects2.area(a), sourceItem = damageSourceItem(owner(a), "offhand"), torn = [];
     let total = "0";
     for (const t of around3(a, a.position, reach)) {
       const id = a.entityId + "/" + t.entityId + "/bleed", e = c.effects[id];
@@ -91404,7 +91480,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       if (res?.damage) total = addCombat(total, res.damage);
       if (!torn.includes(t)) torn.push(t);
     }
-    if (aug(a, "rupture", 2) && a.alive && compareCombat(total, 0) > 0) a.hp = combatInteger(minCombat(stats3.maxHp, addCombat(a.hp, multiplyCombat(total, T67.vampiric, rank(a, "blood_price") ? 200 : 100))));
+    if (aug(a, "rupture", 2) && a.alive && compareCombat(total, 0) > 0) a.hp = combatInteger(minCombat(stats3.maxHp, addCombat(a.hp, multiplyCombat(total, T68.vampiric, rank(a, "blood_price") ? 200 : 100))));
     if (aug(a, "rupture", 0)) for (const t of torn) for (const n of effects2.nearby(a, t, R9.hop).filter((n2) => n2 !== t && n2.alive && !torn.includes(n2)).sort((x, y) => distance12(t, x) - distance12(t, y) || x.entityId.localeCompare(y.entityId)).slice(0, R9.chain)) bleed(a, n, stats3);
     const contagious = rank(a, "contagious");
     if (contagious) for (const n of around3(a, a.position, reach).filter((n2) => !isPodCombatTargetV4(n2) && !c.effects[a.entityId + "/" + n2.entityId + "/bleed"]).sort((x, y) => distance12(a, x) - distance12(a, y) || x.entityId.localeCompare(y.entityId)).slice(0, contagious)) bleed(a, n, stats3);
@@ -91412,17 +91488,17 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
   }
   function smokeVeil2(a) {
     classSkillsRecord(c.actors[a.entityId]).smoke = { x: a.position.x, y: a.position.y, ticks: aug(a, "smoke_veil", 1) ? SMOKE_MAX : SMOKE_TICKS, next: 1 };
-    return { r: T67.smokeVeil.radius };
+    return { r: T68.smokeVeil.radius };
   }
   const blinded = (t) => Object.entries(c.actors).some(([id, k]) => {
     const m = k.skills?.smoke;
     if (!m) return false;
     const h = s.entitiesById?.[id];
-    return Boolean(h?.alive && aug(h, "smoke_veil", 3) && Math.hypot(t.position.x - m.x, t.position.y - m.y) <= T67.smokeVeil.radius + (t.hullRadius ?? 0));
+    return Boolean(h?.alive && aug(h, "smoke_veil", 3) && Math.hypot(t.position.x - m.x, t.position.y - m.y) <= T68.smokeVeil.radius + (t.hullRadius ?? 0));
   });
   const inSmoke = (a) => {
     const m = c.actors[a.entityId]?.skills?.smoke;
-    return Boolean(m && a.alive && Math.hypot(a.position.x - m.x, a.position.y - m.y) <= T67.smokeVeil.radius);
+    return Boolean(m && a.alive && Math.hypot(a.position.x - m.x, a.position.y - m.y) <= T68.smokeVeil.radius);
   };
   function stepSmoke(a, combat) {
     const m = combat.skills?.smoke;
@@ -91431,7 +91507,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       clearSkillState(combat, "smoke");
       return;
     }
-    const S6 = T67.smokeVeil;
+    const S6 = T68.smokeVeil;
     const shade8 = rank(a, "shade");
     if (shade8 && combat.dash.cooldown > 1 && s.tick % 10 < shade8 && inSmoke(a)) combat.dash.cooldown--;
     if (aug(a, "smoke_veil", 2) && inSmoke(a) && combat.dash.cooldown > combat.dash.frames) combat.dash.cooldown = combat.dash.frames;
@@ -91449,20 +91525,20 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (--m.ticks <= 0) clearSkillState(combat, "smoke");
   }
   function thousandCuts2(a, stats3, aim2, commandId) {
-    const C3 = T67.thousandCuts, t = cone4(a, aim2, C3.reach, C3.cone, 1)[0];
+    const C3 = T68.thousandCuts, t = cone4(a, aim2, C3.reach, C3.cone, 1)[0];
     if (!t || isPodCombatTargetV4(t)) return false;
     classSkillsRecord(c.actors[a.entityId]).cuts = { target: t.entityId, left: C3.cuts, next: s.tick };
     slash2(a, stats3, commandId);
     return landingOffset(a, t.position);
   }
   function slash2(a, stats3, commandId = null) {
-    const C3 = T67.thousandCuts, combat = c.actors[a.entityId], cuts = combat.skills?.cuts, t = cuts ? s.entitiesById[cuts.target] : null;
+    const C3 = T68.thousandCuts, combat = c.actors[a.entityId], cuts = combat.skills?.cuts, t = cuts ? s.entitiesById[cuts.target] : null;
     if (!t?.alive || t.residency.spaceInstanceId !== a.residency.spaceInstanceId || distance12(a, t) > C3.reach + 40 + (t.hullRadius ?? 0)) {
       clearSkillState(combat, "cuts");
       return;
     }
-    const sourceItem = damageSourceItem(owner(a), "offhand"), each = multiplyCombat(stats3.attack, ...C3.attack), hit = damage(a, t, aug(a, "thousand_cuts", 2) && cuts.left === 1 ? multiplyCombat(each, T67.finalCut, 1) : each, "offhand", commandId, { sourceItem, trigger: "skill" });
-    if (aug(a, "thousand_cuts", 3) && t.alive && combatRoll(combat, combatAmount(...T67.ribbons))) bleed(a, t, stats3);
+    const sourceItem = damageSourceItem(owner(a), "offhand"), each = multiplyCombat(stats3.attack, ...C3.attack), hit = damage(a, t, aug(a, "thousand_cuts", 2) && cuts.left === 1 ? multiplyCombat(each, T68.finalCut, 1) : each, "offhand", commandId, { sourceItem, trigger: "skill" });
+    if (aug(a, "thousand_cuts", 3) && t.alive && combatRoll(combat, combatAmount(...T68.ribbons))) bleed(a, t, stats3);
     if (aug(a, "thousand_cuts", 1)) for (const n of effects2.nearby(a, t, C3.fan).filter((n2) => n2 !== t && n2.alive).sort((x, y) => distance12(t, x) - distance12(t, y) || x.entityId.localeCompare(y.entityId)).slice(0, C3.fanTargets)) damage(a, n, each, "offhand", commandId, { sourceItem, trigger: "skill", mark: "fan" });
     if (hit?.critical) {
       const flourish = rank(a, "flourish");
@@ -91486,7 +91562,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     slash2(a, stats3);
   }
   function noxiousBloom2(a, stats3, aim2, commandId) {
-    const N3 = T67.noxiousBloom, r = Math.max(1, Math.min(400, Math.round((aug(a, "noxious_bloom", 1) ? scaled(N3.radius, T67.wide) : N3.radius) * effects2.area(a)))), longer = aug(a, "noxious_bloom", 0) ? 120 : 0, sourceItem = damageSourceItem(owner(a), "offhand");
+    const N3 = T68.noxiousBloom, r = Math.max(1, Math.min(400, Math.round((aug(a, "noxious_bloom", 1) ? scaled(N3.radius, T68.wide) : N3.radius) * effects2.area(a)))), longer = aug(a, "noxious_bloom", 0) ? 120 : 0, sourceItem = damageSourceItem(owner(a), "offhand");
     for (const t of around3(a, a.position, r)) {
       damage(a, t, multiplyCombat(stats3.attack, ...N3.attack), "offhand", commandId, { sourceItem, trigger: "skill" });
       poison(a, t, stats3, longer);
@@ -91525,7 +91601,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     const r = rank(a, "afterimage");
     if (!r || !a.alive) return;
     const stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "offhand");
-    for (const t of around3(a, e, T67.afterimage.radius)) damage(a, t, multiplyCombat(stats3.attack, 20 * r, 100), "offhand", null, { sourceItem, trigger: "proc" });
+    for (const t of around3(a, e, T68.afterimage.radius)) damage(a, t, multiplyCombat(stats3.attack, 20 * r, 100), "offhand", null, { sourceItem, trigger: "proc" });
   }
   function stepEcho(a, combat) {
     const e = combat.skills?.echo;
@@ -91534,7 +91610,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     echoBurst(a, e);
   }
   function shadowstep2(a, stats3, aim2, exclude = null) {
-    const S6 = T67.shadowstep, t = effects2.nearby(a, a, S6.reach).filter((t2) => t2.alive && t2.entityId !== exclude && !isPodCombatTargetV4(t2) && distance12(a, t2) <= S6.reach + (t2.hullRadius ?? 0)).sort((x, y) => distance12(a, x) - distance12(a, y) || x.entityId.localeCompare(y.entityId))[0];
+    const S6 = T68.shadowstep, t = effects2.nearby(a, a, S6.reach).filter((t2) => t2.alive && t2.entityId !== exclude && !isPodCombatTargetV4(t2) && distance12(a, t2) <= S6.reach + (t2.hullRadius ?? 0)).sort((x, y) => distance12(a, x) - distance12(a, y) || x.entityId.localeCompare(y.entityId))[0];
     if (!t) return false;
     const d = unit5({ x: t.position.x - a.position.x, y: t.position.y - a.position.y }), gap2 = (t.hullRadius ?? 0) + (a.hullRadius ?? 0) + 6, from = { ...a.position }, col2 = space(a);
     const spot = [[d.x, d.y], [-d.y, d.x], [d.y, -d.x], [-d.x, -d.y]].map(([x, y]) => ({ x: t.position.x + x * gap2, y: t.position.y + y * gap2 })).find((p) => !collidesWithTiles(col2, p.x, p.y, a.hullRadius));
@@ -91590,16 +91666,16 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     return { position: { x: a.position.x + aim2.x * d, y: a.position.y + aim2.y * d } };
   }
   function firebloom2(a, stats3, aim2, commandId) {
-    const B6 = T67.firebloom, marks2 = cone4(a, aim2, B6.reach, B6.cone, aug(a, "firebloom", 1) ? 2 : 1), radius = (aug(a, "firebloom", 0) ? scaled(B6.radius, T67.wide) : B6.radius) * effects2.area(a), raw = spell(stats3, B6.attack), kindling = rank(a, "kindling"), base2 = combatInteger(multiplyCombat(stats3.attack, ...B6.attack)), burn2 = kindling ? combatInteger(pct3(base2, 6 * kindling)) : base2, sourceItem = damageSourceItem(owner(a), "fire");
+    const B6 = T68.firebloom, marks2 = cone4(a, aim2, B6.reach, B6.cone, aug(a, "firebloom", 1) ? 2 : 1), radius = (aug(a, "firebloom", 0) ? scaled(B6.radius, T68.wide) : B6.radius) * effects2.area(a), raw = spell(stats3, B6.attack), kindling = rank(a, "kindling"), base2 = combatInteger(multiplyCombat(stats3.attack, ...B6.attack)), burn2 = kindling ? combatInteger(pct3(base2, 6 * kindling)) : base2, sourceItem = damageSourceItem(owner(a), "fire");
     const origins = marks2.length ? marks2.map((t) => ({ position: { ...t.position } })) : [landing(a, aim2, B6.distance)];
-    const linger = aug(a, "firebloom", 2) ? { extra: T67.linger } : {};
+    const linger = aug(a, "firebloom", 2) ? { extra: T68.linger } : {};
     for (const origin of origins) for (const t of effects2.nearby(a, origin, radius).slice(0, B6.targets)) {
       damage(a, t, raw, "fire", commandId, { sourceItem, trigger: "skill" });
       if (t.alive && !isPodCombatTargetV4(t)) periodic(a, t, "burn", burn2, { sourceItem, ...linger });
     }
     if (aug(a, "firebloom", 3)) {
       const k = classSkillsRecord(c.actors[a.entityId]);
-      k.seeds = [...k.seeds ?? [], ...origins.map((o) => ({ x: o.position.x, y: o.position.y, r: Math.max(1, Math.min(400, Math.round(radius * T67.seed[0] / T67.seed[1]))), ticks: SEED_TICKS }))].slice(-MAX_SEEDS);
+      k.seeds = [...k.seeds ?? [], ...origins.map((o) => ({ x: o.position.x, y: o.position.y, r: Math.max(1, Math.min(400, Math.round(radius * T68.seed[0] / T68.seed[1]))), ticks: SEED_TICKS }))].slice(-MAX_SEEDS);
     }
     return { r: Math.min(400, radius), ...landingOffset(a, origins[0].position), ...origins[1] ? landingOffset(a, origins[1].position, "2") : {} };
   }
@@ -91610,7 +91686,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       clearSkillState(combat, "seeds");
       return;
     }
-    const B6 = T67.firebloom, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "fire"), linger = aug(a, "firebloom", 2) ? { extra: T67.linger } : {};
+    const B6 = T68.firebloom, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "fire"), linger = aug(a, "firebloom", 2) ? { extra: T68.linger } : {};
     for (const e of list) if (--e.ticks <= 0) for (const t of around3(a, e, e.r).slice(0, B6.targets)) {
       damage(a, t, spell(stats3, B6.attack), "fire", null, { sourceItem, trigger: "skill" });
       if (t.alive && !isPodCombatTargetV4(t)) periodic(a, t, "burn", combatInteger(multiplyCombat(stats3.attack, ...B6.attack)), { sourceItem, ...linger });
@@ -91620,7 +91696,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     else clearSkillState(combat, "seeds");
   }
   function flashfreeze2(a, stats3, aim2, commandId) {
-    const F6 = T67.flashfreeze, raw = spell(stats3, F6.attack), chill = 240 + 24 * rank(a, "cold_snap"), reach = aug(a, "flashfreeze", 0) ? scaled(F6.radius, T67.wide) : F6.radius, deep6 = aug(a, "flashfreeze", 1), frozen = [];
+    const F6 = T68.flashfreeze, raw = spell(stats3, F6.attack), chill = 240 + 24 * rank(a, "cold_snap"), reach = aug(a, "flashfreeze", 0) ? scaled(F6.radius, T68.wide) : F6.radius, deep6 = aug(a, "flashfreeze", 1), frozen = [];
     c.controls ??= {};
     for (const t of cone4(a, aim2, reach, Math.PI, F6.targets)) {
       damage(a, t, raw, "frost", commandId, { sourceItem: damageSourceItem(owner(a), "frost"), trigger: "skill" });
@@ -91634,7 +91710,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       const k = classSkillsRecord(combat);
       k.thaw = [...(k.thaw ?? []).filter((e) => !frozen.some((f) => f.targetId === e.target)), ...frozen.map((f) => ({ target: f.targetId, at: f.expiresTick }))].slice(-MAX_THAW);
     }
-    if (aug(a, "flashfreeze", 3) && frozen.length) growIce(a, combat, T67.frostArmor.worth * frozen.length, T67.frostArmor.cap);
+    if (aug(a, "flashfreeze", 3) && frozen.length) growIce(a, combat, T68.frostArmor.worth * frozen.length, T68.frostArmor.cap);
     return { r: extent(a, reach) };
   }
   function stepThaw(a, combat) {
@@ -91644,7 +91720,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       clearSkillState(combat, "thaw");
       return;
     }
-    const N3 = T67.nova, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "frost"), left = [];
+    const N3 = T68.nova, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "frost"), left = [];
     for (const e of list) {
       const t = s.entitiesById[e.target];
       if (!t?.alive) continue;
@@ -91663,7 +91739,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     return true;
   }
   function zap(a, stats3, o) {
-    const B6 = T67.ballLightning, raw = spell(stats3, B6.attack), sourceItem = damageSourceItem(owner(a), "lightning"), from = { entityId: a.entityId, position: { x: o.x, y: o.y } }, hit = effects2.nearby(a, { position: { x: o.x, y: o.y } }, B6.radius * effects2.area(a)).slice(0, B6.targets), chain2 = aug(a, "ball_lightning", 1);
+    const B6 = T68.ballLightning, raw = spell(stats3, B6.attack), sourceItem = damageSourceItem(owner(a), "lightning"), from = { entityId: a.entityId, position: { x: o.x, y: o.y } }, hit = effects2.nearby(a, { position: { x: o.x, y: o.y } }, B6.radius * effects2.area(a)).slice(0, B6.targets), chain2 = aug(a, "ball_lightning", 1);
     for (const t of hit) {
       damage(a, t, raw, "lightning", null, { sourceItem, trigger: "skill", chainFrom: from });
       if (chain2) {
@@ -91680,7 +91756,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       return;
     }
     const stats3 = getStats(a.entityId), col2 = space(a);
-    const v = T67.ballLightning.speed * (aug(a, "ball_lightning", 3) ? T67.slowOrb : 1);
+    const v = T68.ballLightning.speed * (aug(a, "ball_lightning", 3) ? T68.slowOrb : 1);
     for (const o of orbs) {
       const x = o.x + o.dx * v, y = o.y + o.dy * v;
       if (!collidesWithTiles(col2, x, y, 4)) {
@@ -91691,7 +91767,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
         o.next = ORB_ZAP_TICKS;
         zap(a, stats3, o);
       }
-      if (--o.ticks <= 0 && o.boom) for (const t of around3(a, o, T67.boom.radius * effects2.area(a))) damage(a, t, spell(stats3, T67.boom.attack), "lightning", null, { sourceItem: damageSourceItem(owner(a), "lightning"), trigger: "skill" });
+      if (--o.ticks <= 0 && o.boom) for (const t of around3(a, o, T68.boom.radius * effects2.area(a))) damage(a, t, spell(stats3, T68.boom.attack), "lightning", null, { sourceItem: damageSourceItem(owner(a), "lightning"), trigger: "skill" });
     }
     const left = orbs.filter((o) => o.ticks > 0);
     if (left.length) combat.skills.orbs = left;
@@ -91707,15 +91783,15 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (--trail2.next <= 0) {
       trail2.next = TRAIL_PULSE_TICKS;
       const r = rank(a, "cinder_step"), stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "fire");
-      if (r) for (const t of alongPath(a, { x: trail2.x, y: trail2.y }, { x: trail2.x2, y: trail2.y2 })) damage(a, t, multiplyCombat(stats3.attack, T67.cinderStep.attack[0] * r, T67.cinderStep.attack[1]), "fire", null, { sourceItem, trigger: "proc" });
+      if (r) for (const t of alongPath(a, { x: trail2.x, y: trail2.y }, { x: trail2.x2, y: trail2.y2 })) damage(a, t, multiplyCombat(stats3.attack, T68.cinderStep.attack[0] * r, T68.cinderStep.attack[1]), "fire", null, { sourceItem, trigger: "proc" });
       if (wears(a, "pharaoh-khopesh")) for (const t of alongPath(a, { x: trail2.x, y: trail2.y }, { x: trail2.x2, y: trail2.y2 })) burn(a, t, sourceItem);
       const fr = rank(a, "frost_step");
       if (fr && canStun(a)) {
-        for (const t of alongPath(a, { x: trail2.x, y: trail2.y }, { x: trail2.x2, y: trail2.y2 })) if (!isPodCombatTargetV4(t) && !Object.values(c.controls ?? {}).some((e) => e.sourceId === a.entityId && e.targetId === t.entityId && e.expiresTick > s.tick)) applyFrostControl(s, a, t, stats3, 240 + 24 * rank(a, "cold_snap"), T67.frostStep.boost * fr);
+        for (const t of alongPath(a, { x: trail2.x, y: trail2.y }, { x: trail2.x2, y: trail2.y2 })) if (!isPodCombatTargetV4(t) && !Object.values(c.controls ?? {}).some((e) => e.sourceId === a.entityId && e.targetId === t.entityId && e.expiresTick > s.tick)) applyFrostControl(s, a, t, stats3, 240 + 24 * rank(a, "cold_snap"), T68.frostStep.boost * fr);
       }
       const sp = rank(a, "static_step");
       if (sp) {
-        const S6 = T67.staticStep, at8 = { x: trail2.x, y: trail2.y }, from = { entityId: a.entityId, position: at8 }, d = (t) => Math.hypot(t.position.x - at8.x, t.position.y - at8.y), zapItem = damageSourceItem(owner(a), "lightning");
+        const S6 = T68.staticStep, at8 = { x: trail2.x, y: trail2.y }, from = { entityId: a.entityId, position: at8 }, d = (t) => Math.hypot(t.position.x - at8.x, t.position.y - at8.y), zapItem = damageSourceItem(owner(a), "lightning");
         for (const t of effects2.nearby(a, { position: at8 }, S6.radius * effects2.area(a)).sort((x, y) => d(x) - d(y) || x.entityId.localeCompare(y.entityId)).slice(0, S6.targets)) damage(a, t, multiplyCombat(stats3.attack, S6.attack[0] * sp, S6.attack[1]), "lightning", null, { sourceItem: zapItem, trigger: "proc", chainFrom: from });
       }
     }
@@ -91751,18 +91827,18 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     }
   }
   function flameWall2(a, stats3, aim2) {
-    const W16 = T67.flameWall, ring7 = aug(a, "flame_wall", 1), at8 = ring7 ? { position: { ...a.position } } : landing(a, aim2, W16.ahead);
+    const W16 = T68.flameWall, ring7 = aug(a, "flame_wall", 1), at8 = ring7 ? { position: { ...a.position } } : landing(a, aim2, W16.ahead);
     classSkillsRecord(c.actors[a.entityId]).wall = { x: at8.position.x, y: at8.position.y, dx: aim2.x, dy: aim2.y, ticks: aug(a, "flame_wall", 0) ? WALL_MAX : WALL_TICKS, next: 1, ...ring7 ? { ring: true } : {} };
     return ring7 ? { r: W16.ring } : landingOffset(a, at8.position);
   }
   function fromWall(w, p) {
-    if (w.ring) return Math.abs(Math.hypot(p.x - w.x, p.y - w.y) - T67.flameWall.ring);
-    const px7 = p.x - w.x, py = p.y - w.y, along3 = Math.max(-T67.flameWall.half, Math.min(T67.flameWall.half, -px7 * w.dy + py * w.dx));
+    if (w.ring) return Math.abs(Math.hypot(p.x - w.x, p.y - w.y) - T68.flameWall.ring);
+    const px7 = p.x - w.x, py = p.y - w.y, along3 = Math.max(-T68.flameWall.half, Math.min(T68.flameWall.half, -px7 * w.dy + py * w.dx));
     return Math.hypot(px7 - -w.dy * along3, py - w.dx * along3);
   }
   const nearWall = (a) => {
     const w = c.actors[a.entityId]?.skills?.wall;
-    return Boolean(w && a.alive && fromWall(w, a.position) <= T67.flameWall.near);
+    return Boolean(w && a.alive && fromWall(w, a.position) <= T68.flameWall.near);
   };
   function moss4(a, combat) {
     const share = a.alive ? worn(a, "mossback-pelt") : null, k = combat.skills;
@@ -91787,9 +91863,9 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       clearSkillState(combat, "wall");
       return;
     }
-    const W16 = T67.flameWall;
+    const W16 = T68.flameWall;
     if (!w.ring && aug(a, "flame_wall", 3)) {
-      const x = w.x + w.dx * T67.rolling, y = w.y + w.dy * T67.rolling;
+      const x = w.x + w.dx * T68.rolling, y = w.y + w.dy * T68.rolling;
       if (!collidesWithTiles(space(a), x, y, 4)) {
         w.x = x;
         w.y = y;
@@ -91811,8 +91887,8 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (--w.ticks <= 0) clearSkillState(combat, "wall");
   }
   function iceWorth(a, stats3) {
-    const I = T67.iceBarrier, base2 = aug(a, "ice_barrier", 0) ? I.thick : I.worth, worth = combatInteger(multiplyCombat(stats3.maxHp, base2, 100));
-    return rank(a, "ice_fortress") ? combatInteger(multiplyCombat(worth, ...T67.fortress)) : worth;
+    const I = T68.iceBarrier, base2 = aug(a, "ice_barrier", 0) ? I.thick : I.worth, worth = combatInteger(multiplyCombat(stats3.maxHp, base2, 100));
+    return rank(a, "ice_fortress") ? combatInteger(multiplyCombat(worth, ...T68.fortress)) : worth;
   }
   function iceBarrier2(a, stats3) {
     const hp = iceWorth(a, stats3);
@@ -91826,13 +91902,13 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
   function spendBarrier(a) {
     const combat = c.actors[a.entityId], ice = combat?.skills?.ice;
     if (ice) {
-      const cost = combatInteger(multiplyCombat(ice.hp, 1, T67.syphon)), left = combatInteger(subtractCombat(ice.hp, compareCombat(cost, 0) > 0 ? cost : 1));
+      const cost = combatInteger(multiplyCombat(ice.hp, 1, T68.syphon)), left = combatInteger(subtractCombat(ice.hp, compareCombat(cost, 0) > 0 ? cost : 1));
       if (compareCombat(left, 0) > 0) ice.hp = left;
       else clearSkillState(combat, "ice");
       return true;
     }
     if (combat && compareCombat(combat.barrier ?? 0, 0) > 0) {
-      const cost = combatInteger(multiplyCombat(combat.barrier, 1, T67.syphon));
+      const cost = combatInteger(multiplyCombat(combat.barrier, 1, T68.syphon));
       combat.barrier = combatInteger(subtractCombat(combat.barrier, compareCombat(cost, 0) > 0 ? cost : 1));
       return true;
     }
@@ -91851,16 +91927,16 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
   }
   function staticField2(a) {
     classSkillsRecord(c.actors[a.entityId]).field = { x: a.position.x, y: a.position.y, ticks: aug(a, "static_field", 0) ? FIELD_MAX : FIELD_TICKS, next: PULSE_TICKS };
-    return { r: T67.staticField.radius };
+    return { r: T68.staticField.radius };
   }
   function inField(a) {
     const f = c.actors[a.entityId]?.skills?.field;
     if (!f || !a.alive) return [];
-    return around3(a, f, T67.staticField.radius).slice(0, T67.staticField.targets);
+    return around3(a, f, T68.staticField.radius).slice(0, T68.staticField.targets);
   }
   const fieldHolds = (a, t) => {
     const f = c.actors[a.entityId]?.skills?.field;
-    return Boolean(f && Math.hypot(t.position.x - f.x, t.position.y - f.y) <= T67.staticField.radius + (t.hullRadius ?? 0));
+    return Boolean(f && Math.hypot(t.position.x - f.x, t.position.y - f.y) <= T68.staticField.radius + (t.hullRadius ?? 0));
   };
   const conductor = (a, t) => aug(a, "static_field", 2) && fieldHolds(a, t) ? 2 : 0;
   function stepField(a, combat) {
@@ -91870,14 +91946,14 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       clearSkillState(combat, "field");
       return;
     }
-    const F6 = T67.staticField;
+    const F6 = T68.staticField;
     if (aug(a, "static_field", 3)) {
       f.x = a.position.x;
       f.y = a.position.y;
     }
     if (--f.next <= 0) {
       f.next = PULSE_TICKS;
-      const stats3 = getStats(a.entityId), raw = spell(stats3, F6.attack), sourceItem = damageSourceItem(owner(a), "lightning"), from = { entityId: a.entityId, position: { x: f.x, y: f.y } }, magnet = (aug(a, "static_field", 1) ? F6.pull : 0) + T67.magnetic * rank(a, "magnetic");
+      const stats3 = getStats(a.entityId), raw = spell(stats3, F6.attack), sourceItem = damageSourceItem(owner(a), "lightning"), from = { entityId: a.entityId, position: { x: f.x, y: f.y } }, magnet = (aug(a, "static_field", 1) ? F6.pull : 0) + T68.magnetic * rank(a, "magnetic");
       for (const t of inField(a)) {
         damage(a, t, raw, "lightning", null, { sourceItem, trigger: "skill", chainFrom: from });
         if (magnet && t.alive && !isPodCombatTargetV4(t) && !definition2(t).isBoss) {
@@ -91892,8 +91968,8 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (--f.ticks <= 0) clearSkillState(combat, "field");
   }
   function meteor(a, stats3, aim2) {
-    const M4 = T67.meteor, first = cone4(a, aim2, M4.reach, M4.cone, 1)[0], at8 = first ? { ...first.position } : landing(a, aim2, M4.distance).position, shower = aug(a, "meteor", 1), comet = aug(a, "meteor", 3), ground = METEOR_GROUND_TICKS + (aug(a, "meteor", 0) ? M4.crater : 0), col2 = space(a), heading = Math.atan2(aim2.y, aim2.x);
-    const spots = shower ? [0, 1, 2].map((i) => ({ x: at8.x + Math.cos(heading + i * Math.PI * 2 / 3) * M4.spacing, y: at8.y + Math.sin(heading + i * Math.PI * 2 / 3) * M4.spacing })).map((p) => collidesWithTiles(col2, p.x, p.y, 4) ? { ...at8 } : p) : [at8], size = shower ? scaled(M4.radius, M4.small) : M4.radius, r = comet ? scaled(size, T67.comet) : size;
+    const M4 = T68.meteor, first = cone4(a, aim2, M4.reach, M4.cone, 1)[0], at8 = first ? { ...first.position } : landing(a, aim2, M4.distance).position, shower = aug(a, "meteor", 1), comet = aug(a, "meteor", 3), ground = METEOR_GROUND_TICKS + (aug(a, "meteor", 0) ? M4.crater : 0), col2 = space(a), heading = Math.atan2(aim2.y, aim2.x);
+    const spots = shower ? [0, 1, 2].map((i) => ({ x: at8.x + Math.cos(heading + i * Math.PI * 2 / 3) * M4.spacing, y: at8.y + Math.sin(heading + i * Math.PI * 2 / 3) * M4.spacing })).map((p) => collidesWithTiles(col2, p.x, p.y, 4) ? { ...at8 } : p) : [at8], size = shower ? scaled(M4.radius, M4.small) : M4.radius, r = comet ? scaled(size, T68.comet) : size;
     classSkillsRecord(c.actors[a.entityId]).meteors = spots.map((p, i) => ({ x: p.x, y: p.y, fall: comet ? 1 + i * 4 : METEOR_FALL_TICKS + i * 10, ticks: ground, next: M4.pulse, r }));
     return { n: spots.length };
   }
@@ -91904,7 +91980,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       clearSkillState(combat, "meteors");
       return;
     }
-    const M4 = T67.meteor, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "fire"), A = effects2.area(a);
+    const M4 = T68.meteor, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "fire"), A = effects2.area(a);
     for (const m of list) {
       if (m.fall > 0) {
         if (--m.fall > 0) continue;
@@ -91912,7 +91988,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
         for (const t of around3(a, m, m.r * A)) {
           damage(a, t, aug(a, "meteor", 1) ? multiplyCombat(raw, ...M4.small) : raw, "fire", null, { sourceItem, trigger: "skill" });
           burn(a, t, sourceItem);
-          if (aug(a, "meteor", 2) && t.alive && ordinary(t) && canStun(a)) effects2.status(a, t, "stun", 1, T67.molten);
+          if (aug(a, "meteor", 2) && t.alive && ordinary(t) && canStun(a)) effects2.status(a, t, "stun", 1, T68.molten);
         }
         continue;
       }
@@ -91938,7 +92014,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     }
   }
   function glacialBurst2(a, stats3, aim2, commandId) {
-    const G3 = T67.glacialBurst, combat = c.actors[a.entityId], ice = combat.skills?.ice, old2 = combat.barrier ?? 0, spent = addCombat(ice ? ice.hp : 0, old2);
+    const G3 = T68.glacialBurst, combat = c.actors[a.entityId], ice = combat.skills?.ice, old2 = combat.barrier ?? 0, spent = addCombat(ice ? ice.hp : 0, old2);
     if (compareCombat(spent, 0) <= 0) return false;
     const ticks = ice?.ticks ?? ICE_TICKS;
     clearSkillState(combat, "ice");
@@ -91973,14 +92049,14 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       return;
     }
     if (--k.next <= 0) {
-      k.next = T67.rime.pulse;
-      for (const t of around3(a, k, k.r)) grip(a, t, T67.rime.hold);
+      k.next = T68.rime.pulse;
+      for (const t of around3(a, k, k.r)) grip(a, t, T68.rime.hold);
     }
     if (--k.ticks <= 0) clearSkillState(combat, "rime");
   }
   const weight2 = (t) => isPodCombatTargetV4(t) ? -1 : definition2(t).isBoss ? 2 : definition2(t).isElite || definition2(t).isMiniboss ? 1 : 0;
   function strike2(a, stats3, commandId) {
-    const F6 = T67.thunderfall, bolts = F6.bolts + (aug(a, "thunderfall", 0) ? 2 : 0) + rank(a, "storm_call"), reach = Math.min(400, F6.radius * effects2.area(a)), raw = spell(stats3, F6.attack), sourceItem = damageSourceItem(owner(a), "lightning"), clap = aug(a, "thunderfall", 1);
+    const F6 = T68.thunderfall, bolts = F6.bolts + (aug(a, "thunderfall", 0) ? 2 : 0) + rank(a, "storm_call"), reach = Math.min(400, F6.radius * effects2.area(a)), raw = spell(stats3, F6.attack), sourceItem = damageSourceItem(owner(a), "lightning"), clap = aug(a, "thunderfall", 1);
     const near4 = around3(a, a.position, reach).sort((x, y) => distance12(a, x) - distance12(a, y) || x.entityId.localeCompare(y.entityId)), rod = aug(a, "thunderfall", 2) ? near4.slice().sort((x, y) => weight2(y) - weight2(x) || compareCombat(y.hp, x.hp) || distance12(a, x) - distance12(a, y) || x.entityId.localeCompare(y.entityId))[0] : null;
     const targets = rod ? Array(bolts).fill(rod) : near4.slice(0, bolts);
     for (const t of targets) {
@@ -92016,7 +92092,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     }
     if (--st.next > 0) return;
     st.next = STORM_TICKS;
-    const F6 = T67.thunderfall, t = around3(a, a.position, Math.min(400, T67.storm.radius * effects2.area(a))).sort((x, y) => distance12(a, x) - distance12(a, y) || x.entityId.localeCompare(y.entityId))[0];
+    const F6 = T68.thunderfall, t = around3(a, a.position, Math.min(400, T68.storm.radius * effects2.area(a))).sort((x, y) => distance12(a, x) - distance12(a, y) || x.entityId.localeCompare(y.entityId))[0];
     if (!t) return;
     const stats3 = getStats(a.entityId);
     damage(a, t, spell(stats3, F6.attack), "lightning", null, { sourceItem: damageSourceItem(owner(a), "lightning"), trigger: "proc", chainFrom: { entityId: a.entityId, position: { x: t.position.x, y: t.position.y - F6.sky } } });
@@ -92025,7 +92101,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (!rank(a, "absolute_zero") || !a.alive) return;
     let n = 0;
     for (const e of Object.values(c.controls ?? {})) if (e.sourceId === a.entityId && e.phase === "freeze" && e.appliedTick === s.tick - 1) n++;
-    if (n) growIce(a, combat, T67.zero.worth * n, T67.zero.cap);
+    if (n) growIce(a, combat, T68.zero.worth * n, T68.zero.cap);
   }
   function growIce(a, combat, percent, capPercent) {
     const stats3 = getStats(a.entityId), ice = combat.skills?.ice, had = ice ? ice.hp : "0", cap6 = combatInteger(multiplyCombat(stats3.maxHp, capPercent, 100)), gain = combatInteger(multiplyCombat(stats3.maxHp, percent, 100)), hp = compareCombat(had, cap6) >= 0 ? had : combatInteger(minCombat(cap6, addCombat(had, gain)));
@@ -92051,7 +92127,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (!combat.skills?.blaze) return;
     delete combat.skills.blaze;
     if (!a.alive) return;
-    const P17 = T67.phoenix, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "fire");
+    const P17 = T68.phoenix, stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), "fire");
     for (const t of around3(a, a.position, Math.min(400, P17.radius * effects2.area(a)))) {
       damage(a, t, spell(stats3, P17.attack), "fire", null, { sourceItem, trigger: "proc" });
       burn(a, t, sourceItem);
@@ -92079,7 +92155,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       current = null;
     }
     if (!done3) return false;
-    const record3 = classSkillsRecord(c.actors[a.entityId]), styled = skillId === "shield_bash" ? Math.ceil(scaled(CLASS_SKILLS[skillId].cooldownTicks, T67.styles[offhandStyle(owner(a))]?.cooldown)) : CLASS_SKILLS[skillId].cooldownTicks;
+    const record3 = classSkillsRecord(c.actors[a.entityId]), styled = skillId === "shield_bash" ? Math.ceil(scaled(CLASS_SKILLS[skillId].cooldownTicks, T68.styles[offhandStyle(owner(a))]?.cooldown)) : CLASS_SKILLS[skillId].cooldownTicks;
     const sigCut = (SIGNATURE_CUTS[skillId] ?? []).reduce((n, id) => n + rank(a, id), 0), base2 = sigCut ? Math.ceil(styled * (100 - 2 * sigCut) / 100) : styled;
     const longer = rank(a, "restless") ? [6, 5] : skillId === "cast" && rank(a, "overload") ? [13, 10] : [1, 1];
     record3.cooldowns[skillId] = Math.ceil((BREAKER.includes(skillId) && rank(a, "reckless") ? Math.ceil(base2 * 3 / 4) : base2) * longer[0] / longer[1]);
@@ -92130,11 +92206,11 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
   function mend(a, combat) {
     const k = combat.skills;
     if (!k?.mend || !a.alive || k.mend % 60 !== 1) return;
-    heal(a, getStats(a.entityId), T67.secondBreath * Math.max(1, rank(a, "second_breath")), 100);
+    heal(a, getStats(a.entityId), T68.secondBreath * Math.max(1, rank(a, "second_breath")), 100);
   }
   function bearer(a, combat) {
     const r = rank(a, "standard_bearer"), g = combat.guard;
-    if (!r || !g || g.raised || g.delay > 0 || s.tick % Math.round(T67.bearer / r) || !nearBanner(a) || compareCombat(g.integrity, 32) >= 0) return;
+    if (!r || !g || g.raised || g.delay > 0 || s.tick % Math.round(T68.bearer / r) || !nearBanner(a) || compareCombat(g.integrity, 32) >= 0) return;
     g.integrity = combatInteger(minCombat(32, addCombat(g.integrity, 1)));
     if (compareCombat(g.integrity, 32) >= 0) g.guardRechargeRemainder = 0;
   }
@@ -92227,7 +92303,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (bulwark2 && stance) out = multiplyCombat(out, 100 - 2 * stance * bulwark2.stacks, 100);
     if (nearBanner(target)) {
       const q = addCombat(getStats(target.entityId)?.defense ?? 0, 0), n = BigInt(q.n), d = BigInt(q.d);
-      if (n > 0n) out = multiplyCombat(out, 2000n * d + 100n * n, 2000n * d + BigInt(100 + T67.warBanner.defense) * n);
+      if (n > 0n) out = multiplyCombat(out, 2000n * d + 100n * n, 2000n * d + BigInt(100 + T68.warBanner.defense) * n);
     }
     const rooted = rank(target, "rooted");
     if (rooted && record2(target)?.still >= STILL_TICKS) out = multiplyCombat(out, 100 - 4 * rooted, 100);
@@ -92242,9 +92318,9 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     const septic = rank(target, "septic"), poisoned = septic ? c.mastery?.[target.entityId]?.poisons?.[source3.entityId] : null;
     if (septic && poisoned && poisoned.expiresTick > s.tick) out = multiplyCombat(out, 100 - 3 * septic, 100);
     const k = record2(target);
-    if (k?.jugg) out = multiplyCombat(out, T67.jugg, 100);
-    if (k?.spin && aug(target, "whirling_blades", 2)) out = multiplyCombat(out, T67.ward, 100);
-    if (blinded(source3)) out = multiplyCombat(out, T67.blind, 100);
+    if (k?.jugg) out = multiplyCombat(out, T68.jugg, 100);
+    if (k?.spin && aug(target, "whirling_blades", 2)) out = multiplyCombat(out, T68.ward, 100);
+    if (blinded(source3)) out = multiplyCombat(out, T68.blind, 100);
     if (k?.cloak) return multiplyCombat(out, 0, 1);
     const own = c.actors[target.entityId];
     if (k?.mist) {
@@ -92321,14 +92397,14 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       out = pct3(out, 8 * rank(source3, "en_garde"));
     }
     const duel = rank(source3, "duel");
-    if (duel && effects2.nearby(source3, source3, T67.duel).filter((t) => t.alive && Math.hypot(t.position.x - source3.position.x, t.position.y - source3.position.y) <= T67.duel + (t.hullRadius ?? 0)).length === 1) out = pct3(out, 4 * duel);
+    if (duel && effects2.nearby(source3, source3, T68.duel).filter((t) => t.alive && Math.hypot(t.position.x - source3.position.x, t.position.y - source3.position.y) <= T68.duel + (t.hullRadius ?? 0)).length === 1) out = pct3(out, 4 * duel);
     const firewalker = rank(source3, "firewalker");
     if (firewalker && nearWall(source3)) out = pct3(out, 4 * firewalker);
     const wire2 = rank(source3, "live_wire");
     if (wire2 && mechanic === "lightning" && fieldHolds(source3, target)) out = pct3(out, 5 * wire2);
     if (weaving) out = pct3(out, 4 * weaving);
-    if (nearBanner(source3)) out = pct3(out, T67.warBanner.attack);
-    if (record2(source3)?.hymn) out = pct3(out, T67.hymn);
+    if (nearBanner(source3)) out = pct3(out, T68.warBanner.attack);
+    if (record2(source3)?.hymn) out = pct3(out, T68.hymn);
     const vengeance = rank(source3, "vengeance");
     if (vengeance) {
       const q = addCombat(getStats(source3.entityId)?.maxHp ?? 0, 0), n = BigInt(q.n), lost = n - BigInt(source3.hp) * BigInt(q.d), tenths = n > 0n && lost > 0n ? Number(10n * lost / n) : 0;
@@ -92355,7 +92431,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (fester && mechanic === "poison" && inFlower(source3, target)) out = pct3(out, 5 * fester);
     const pyro = rank(source3, "pyromaniac");
     if (pyro) {
-      const P17 = T67.pyromaniac;
+      const P17 = T68.pyromaniac;
       let n = 0;
       for (const e of Object.values(c.effects)) {
         if (n >= P17.most) break;
@@ -92367,7 +92443,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     }
     if (stepHit === target.entityId) {
       stepHit = null;
-      out = multiplyCombat(out, ...aug(source3, "shadowstep", 0) ? T67.shadowstep.assassinate : T67.shadowstep.crit);
+      out = multiplyCombat(out, ...aug(source3, "shadowstep", 0) ? T68.shadowstep.assassinate : T68.shadowstep.crit);
       const sharp = rank(source3, "assassinate");
       if (sharp) out = pct3(out, 10 * sharp);
       const own = c.actors[source3.entityId];
@@ -92425,10 +92501,10 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       k.focus = k.focus?.target === target.entityId ? { target: target.entityId, hits: Math.min(5, k.focus.hits + 1) } : { target: target.entityId, hits: 1 };
     }
     if (rank(source3, "master_duelist") && !isPodCombatTargetV4(target)) {
-      const k = classSkillsRecord(combat), same12 = k.duel?.target === target.entityId, busy = k.duel && !same12 && DUEL_TICKS - k.duel.ticks < T67.duelHold && s.entitiesById[k.duel.target]?.alive === true;
+      const k = classSkillsRecord(combat), same12 = k.duel?.target === target.entityId, busy = k.duel && !same12 && DUEL_TICKS - k.duel.ticks < T68.duelHold && s.entitiesById[k.duel.target]?.alive === true;
       if (!busy) {
         const stacks = same12 ? k.duel.stacks : 0;
-        if (stacks) out = pct3(out, T67.duelist * stacks);
+        if (stacks) out = pct3(out, T68.duelist * stacks);
         k.duel = { target: target.entityId, stacks: Math.min(MAX_DUEL, stacks + 1), ticks: DUEL_TICKS };
       }
     }
@@ -92449,14 +92525,14 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       if (!source3.alive) return;
     }
     if (defense.counter === "stance") {
-      damage(target, source3, multiplyCombat(stats3.attack, ...T67.counter.attack), "riposte", null, { sourceItem: damageSourceItem(p, "bash"), trigger: "reactive" });
+      damage(target, source3, multiplyCombat(stats3.attack, ...T68.counter.attack), "riposte", null, { sourceItem: damageSourceItem(p, "bash"), trigger: "reactive" });
       if (aug(target, "counter_stance", 2) && combat) {
-        for (const t of around3(target, target.position, T67.reprisal * effects2.area(target))) if (t !== source3) damage(target, t, multiplyCombat(stats3.attack, ...T67.counter.attack), "riposte", null, { sourceItem: damageSourceItem(p, "bash"), trigger: "reactive" });
+        for (const t of around3(target, target.position, T68.reprisal * effects2.area(target))) if (t !== source3) damage(target, t, multiplyCombat(stats3.attack, ...T68.counter.attack), "riposte", null, { sourceItem: damageSourceItem(p, "bash"), trigger: "reactive" });
         classSkillsRecord(combat).wave = WAVE_TICKS;
       }
       if (aug(target, "counter_stance", 0)) bleed(target, source3, stats3);
-      if (definition2(source3).isBoss) daze(target, source3, T67.counter.stun);
-      else if (source3.alive && canStun(target)) stun(target, source3, stunTicks(target, T67.counter.stun));
+      if (definition2(source3).isBoss) daze(target, source3, T68.counter.stun);
+      else if (source3.alive && canStun(target)) stun(target, source3, stunTicks(target, T68.counter.stun));
     }
     const retaliation = rank(target, "retaliation");
     if (retaliation && defense.defense === "block" && source3.alive) damage(target, source3, multiplyCombat(stats3.defense, retaliation, 10), "riposte", null, { sourceItem: damageSourceItem(p, "bash"), trigger: "reactive" });
@@ -92473,7 +92549,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (defense.defense === "parry" && rank(target, "en_garde") && combat) classSkillsRecord(combat).enGarde = EN_GARDE_TICKS;
     if (defense.defense === "parry" && combat?.skills?.riposte) {
       clearSkillState(combat, "riposte");
-      damage(target, source3, multiplyCombat(stats3.attack, ...aug(target, "riposte", 0) ? T67.riposte.counterCut : T67.riposte.attack), "riposte", null, { sourceItem: damageSourceItem(p, "offhand"), trigger: "reactive" });
+      damage(target, source3, multiplyCombat(stats3.attack, ...aug(target, "riposte", 0) ? T68.riposte.counterCut : T68.riposte.attack), "riposte", null, { sourceItem: damageSourceItem(p, "offhand"), trigger: "reactive" });
       classSkillsRecord(combat).keen = KEEN_TICKS;
       if (aug(target, "riposte", 1)) combat.dash.cooldown = 0;
       const mark = rank(target, "marked_for_death");
@@ -92482,16 +92558,16 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     const nerves = rank(target, "steel_nerves");
     if (nerves && defense.defense === "parry" && target.alive) heal(target, stats3, nerves, 100);
     if (defense.ice && source3.alive && canStun(target)) frost(target, source3, false);
-    if (defense.ice && source3.alive && aug(target, "ice_barrier", 2)) damage(target, source3, spell(stats3, T67.spiked), "frost", null, { sourceItem: damageSourceItem(p, "frost"), trigger: "reactive" });
+    if (defense.ice && source3.alive && aug(target, "ice_barrier", 2)) damage(target, source3, spell(stats3, T68.spiked), "frost", null, { sourceItem: damageSourceItem(p, "frost"), trigger: "reactive" });
     if (defense.ice === "broke" && combat?.skills?.regrow && aug(target, "ice_barrier", 3) && target.alive) {
-      const hp = combatInteger(multiplyCombat(iceWorth(target, stats3), ...T67.regrow.share));
+      const hp = combatInteger(multiplyCombat(iceWorth(target, stats3), ...T68.regrow.share));
       clearSkillState(combat, "regrow");
-      if (compareCombat(hp, 0) > 0) classSkillsRecord(combat).ice = { hp, ticks: T67.regrow.ticks, grown: true };
+      if (compareCombat(hp, 0) > 0) classSkillsRecord(combat).ice = { hp, ticks: T68.regrow.ticks, grown: true };
     }
-    if (defense.ice === "broke" && aug(target, "ice_barrier", 1) && canStun(target)) for (const t of around3(target, target.position, T67.flashfreeze.radius)) frost(target, t, true);
+    if (defense.ice === "broke" && aug(target, "ice_barrier", 1) && canStun(target)) for (const t of around3(target, target.position, T68.flashfreeze.radius)) frost(target, t, true);
     const ward = rank(target, "frost_ward");
     if (ward && defense.ice === "broke" && canStun(target)) {
-      for (const t of around3(target, target.position, T67.flashfreeze.radius)) if (!isPodCombatTargetV4(t)) for (let n = 0; n < ward && t.alive; n++) applyFrostControl(s, target, t, stats3, 240 + 24 * rank(target, "cold_snap"));
+      for (const t of around3(target, target.position, T68.flashfreeze.radius)) if (!isPodCombatTargetV4(t)) for (let n = 0; n < ward && t.alive; n++) applyFrostControl(s, target, t, stats3, 240 + 24 * rank(target, "cold_snap"));
     }
     const aegis = combat?.skills?.aegis, bastion = rank(target, "bastion_ward");
     if (aegis && bastion && defense.defense === "block") aegis.hp = combatInteger(minCombat(aegis.full, addCombat(aegis.hp, multiplyCombat(aegis.full, 2 * bastion, 100))));
@@ -92505,7 +92581,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       }
     }
     if (defense.defense !== "block" && rank(target, "retribution") && aug(target, "retribution", 3) && combat) {
-      const amount2 = combatInteger(multiplyCombat(defense.damage ?? 0, ...T67.retaliate));
+      const amount2 = combatInteger(multiplyCombat(defense.damage ?? 0, ...T68.retaliate));
       if (compareCombat(amount2, 0) > 0) {
         const k = classSkillsRecord(combat);
         k.held = [...k.held ?? [], { amount: amount2, ticks: aug(target, "retribution", 2) ? MEMORY_MAX : MEMORY_TICKS }].slice(-HELD_MAX);
@@ -92513,7 +92589,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     }
     if (rank(target, "thorned_bulwark") && defense.defense === "block" && source3.alive) bleed(target, source3, stats3);
     if (rank(target, "bulwark_colossus") && defense.defense === "block" && combat && target.alive) {
-      const W16 = T67.colossus, sourceItem = damageSourceItem(p, "bash");
+      const W16 = T68.colossus, sourceItem = damageSourceItem(p, "bash");
       for (const t of around3(target, target.position, W16.radius * effects2.area(target))) {
         damage(target, t, multiplyCombat(stats3.attack, ...W16.attack), "quake", null, { sourceItem, trigger: "reactive" });
         if (t.alive && !isPodCombatTargetV4(t) && !definition2(t).isBoss) knockback(target, t, W16.shove);
@@ -92545,7 +92621,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
   function speed(entityId2) {
     const p = players.get(entityId2);
     if (!p) return 1;
-    const surge = c.actors[entityId2]?.skills?.surge, plating = (classRank(p.d8, "heavy_plating") ? 0.9 : 1) * (classRank(p.d8, "ice_fortress") && s.entitiesById[entityId2] && hasBarrier(s.entitiesById[entityId2]) ? T67.fortressSpeed : 1);
+    const surge = c.actors[entityId2]?.skills?.surge, plating = (classRank(p.d8, "heavy_plating") ? 0.9 : 1) * (classRank(p.d8, "ice_fortress") && s.entitiesById[entityId2] && hasBarrier(s.entitiesById[entityId2]) ? T68.fortressSpeed : 1);
     return surge ? plating * (1 + (4 * classRank(p.d8, "momentum") + 5 * classRank(p.d8, "light_step")) / 100) : plating;
   }
   function pathEnd(a, d) {
@@ -92580,7 +92656,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (rank(a, "hit_and_run")) classSkillsRecord(combat).rush = RUSH_TICKS;
     {
       const r = rank(a, "blade_rush");
-      if (r) reduceSkillCooldown(combat, "flurry", T67.bladeRush * r);
+      if (r) reduceSkillCooldown(combat, "flurry", T68.bladeRush * r);
     }
     if (rank(a, "evasive")) classSkillsRecord(combat).evade = EVADE_TICKS;
     {
@@ -92593,7 +92669,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     const cross4 = rank(a, "crosscut");
     if (cross4) {
       const stats3 = getStats(a.entityId);
-      for (const t of alongPath(a, from, to)) damage(a, t, multiplyCombat(stats3.attack, T67.crosscut.attack[0] * cross4, T67.crosscut.attack[1]), "offhand", null, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "proc" });
+      for (const t of alongPath(a, from, to)) damage(a, t, multiplyCombat(stats3.attack, T68.crosscut.attack[0] * cross4, T68.crosscut.attack[1]), "offhand", null, { sourceItem: damageSourceItem(owner(a), "offhand"), trigger: "proc" });
     }
     {
       const sunTicks = worn(a, "pharaoh-khopesh") ?? 0, fire2 = Boolean(sunTicks || rank(a, "cinder_step")), frost2 = rank(a, "frost_step") > 0, spark2 = rank(a, "static_step") > 0, ticks = Math.max(rank(a, "cinder_step") || frost2 || spark2 ? TRAIL_TICKS : 0, sunTicks);
@@ -92617,7 +92693,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
   }
   function burst(a, target, element, percent) {
     const stats3 = getStats(a.entityId), sourceItem = damageSourceItem(owner(a), element);
-    for (const t of around3(a, target.position, T67.burst)) if (t !== target) damage(a, t, multiplyCombat(stats3.attack, percent, 100), element, null, { sourceItem, trigger: "proc" });
+    for (const t of around3(a, target.position, T68.burst)) if (t !== target) damage(a, t, multiplyCombat(stats3.attack, percent, 100), element, null, { sourceItem, trigger: "proc" });
   }
   function defeated(a, target) {
     if (!players.get(a.entityId)) return;
@@ -92666,15 +92742,15 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
     if (rank(a, "quickening") && combat && zapped?.id === target.entityId && zapped.tick === s.tick) classSkillsRecord(combat).quick = QUICK_TICKS;
     if (rank(a, "virulent_bloom") && a.alive && combat && c.mastery?.[a.entityId]?.poisons?.[target.entityId]) {
       const k = classSkillsRecord(combat);
-      k.blooms = [...k.blooms ?? [], { x: target.position.x, y: target.position.y, r: Math.max(1, Math.min(400, Math.round(T67.bloom.radius * effects2.area(a)))), ticks: BLOOM_TICKS, next: PULSE_TICKS }].slice(-MAX_BLOOMS);
+      k.blooms = [...k.blooms ?? [], { x: target.position.x, y: target.position.y, r: Math.max(1, Math.min(400, Math.round(T68.bloom.radius * effects2.area(a)))), ticks: BLOOM_TICKS, next: PULSE_TICKS }].slice(-MAX_BLOOMS);
     }
     const harvest = rank(a, "red_harvest"), bled = c.effects[a.entityId + "/" + target.entityId + "/bleed"];
-    if (harvest && bled) for (const n of around3(a, target.position, T67.jump).filter((n2) => n2 !== target && !isPodCombatTargetV4(n2)).sort((x, y) => distance12(target, x) - distance12(target, y) || x.entityId.localeCompare(y.entityId)).slice(0, harvest)) periodic(a, n, "bleed", bled.attack, { sourceItem: bled.sourceItem });
+    if (harvest && bled) for (const n of around3(a, target.position, T68.jump).filter((n2) => n2 !== target && !isPodCombatTargetV4(n2)).sort((x, y) => distance12(target, x) - distance12(target, y) || x.entityId.localeCompare(y.entityId)).slice(0, harvest)) periodic(a, n, "bleed", bled.attack, { sourceItem: bled.sourceItem });
   }
   function spread(a, t, e) {
     const r = rank(a, "spreading_flames");
     if (!r || !a.alive || !combatRoll(c.actors[a.entityId], combatAmount(5 * r, 100))) return;
-    const n = around3(a, t.position, T67.jump).filter((n2) => n2 !== t && !isPodCombatTargetV4(n2) && !c.effects[a.entityId + "/" + n2.entityId + "/burn"]).sort((x, y) => distance12(t, x) - distance12(t, y) || x.entityId.localeCompare(y.entityId))[0];
+    const n = around3(a, t.position, T68.jump).filter((n2) => n2 !== t && !isPodCombatTargetV4(n2) && !c.effects[a.entityId + "/" + n2.entityId + "/burn"]).sort((x, y) => distance12(t, x) - distance12(t, y) || x.entityId.localeCompare(y.entityId))[0];
     if (n) periodic(a, n, "burn", e.attack, { sourceItem: e.sourceItem });
   }
   function lethal(a, raw) {
@@ -92683,7 +92759,7 @@ function createClassSkills(s, { damage, effects: effects2, periodic, getStats, p
       const stats3 = getStats(a.entityId), k2 = classSkillsRecord(combat);
       k2.phoenix = PHOENIX_TICKS;
       k2.blaze = true;
-      const to = combatInteger(multiplyCombat(stats3.maxHp, T67.phoenix.heal, 100));
+      const to = combatInteger(multiplyCombat(stats3.maxHp, T68.phoenix.heal, 100));
       if (compareCombat(to, a.hp) > 0) a.hp = to;
       return combatInteger(subtractCombat(raw, raw));
     }
@@ -99974,7 +100050,7 @@ var WEAPONS2 = {
 };
 var LEAF2 = { b: "#58a55c", d: "#3f7d43", l: "#79c47c" };
 var OPEN = "#1d232b";
-var stoneOf5 = (A, plain3) => A.gem ? { b: A.c, d: A.d, l: "#ffffff" } : plain3;
+var stoneOf5 = (A, plain4) => A.gem ? { b: A.c, d: A.d, l: "#ffffff" } : plain4;
 function arcBand2(cx, cy2, r0, r1, a0, a1, n = 12) {
   const pts2 = [];
   for (let i = 0; i <= n; i++) {
@@ -101428,8 +101504,8 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
       c.append(f);
       return f;
     };
-    const button3 = (label6, fn, plain3) => {
-      const go = el3("button", label6, "qx-btn" + (plain3 ? " is-plain" : ""));
+    const button3 = (label6, fn, plain4) => {
+      const go = el3("button", label6, "qx-btn" + (plain4 ? " is-plain" : ""));
       go.type = "button";
       go.disabled = busy;
       go.onclick = fn;
@@ -101505,8 +101581,8 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     h.append(el3("small", n?.roleLabel ?? ""));
     who.append(h);
     const acts = el3("div", null, "qx-acts");
-    const btn = (label6, fn, plain3) => {
-      const b = el3("button", label6, "qx-btn" + (plain3 ? " is-plain" : ""));
+    const btn = (label6, fn, plain4) => {
+      const b = el3("button", label6, "qx-btn" + (plain4 ? " is-plain" : ""));
       b.type = "button";
       b.disabled = busy;
       b.onclick = fn;
@@ -102501,9 +102577,9 @@ function paintCryptEntranceV3(c, x, y, biome, seed2 = 21) {
       stone(c, sx, sy, 14 + R9() * 12, 10 + R9() * 8, b.rock, seed2 + i, { n: 7, o: 1.4, crack: false });
     }
   } else if (b.cover === "grass" || b.cover === "moss") {
-    const T72 = [tone52(b.mound, -0.3), tone52(b.mound, -0.16), tone52(b.mound, 0.2), tone52(b.mound, 0.32)];
+    const T73 = [tone52(b.mound, -0.3), tone52(b.mound, -0.16), tone52(b.mound, 0.2), tone52(b.mound, 0.32)];
     for (let i = 0; i < 190; i++) {
-      c.fillStyle = T72[R9() * 4 | 0];
+      c.fillStyle = T73[R9() * 4 | 0];
       c.fill(leaf3(x + (R9() - 0.5) * 350, y - 12 - R9() * 168, 4 + R9() * 4, -Math.PI / 2 + (R9() - 0.5) * 1.6, 1.5));
     }
     for (let i = 0; i < 12; i++) {
@@ -102827,27 +102903,27 @@ function mound(c, cx, base2, w, h, b, seed2) {
     const X = cx + w / 2 - i * w / 6;
     foot2.push([X, base2 + 5 + R9() * 7]);
   }
-  const out = smooth21([...top, ...foot2]), T72 = coverPal(b), topAt = (X) => {
+  const out = smooth21([...top, ...foot2]), T73 = coverPal(b), topAt = (X) => {
     for (let i = 1; i < top.length; i++) if (X <= top[i][0]) {
       const k = (X - top[i - 1][0]) / (top[i][0] - top[i - 1][0]);
       return top[i - 1][1] + (top[i][1] - top[i - 1][1]) * k;
     }
     return base2;
   };
-  prop4(c, [[out, T72.m]], 2.6);
+  prop4(c, [[out, T73.m]], 2.6);
   c.save();
   c.clip(out);
-  c.fillStyle = T72.d;
+  c.fillStyle = T73.d;
   c.fill(out);
   const lit2 = new Path2D();
   lit2.addPath(out, new DOMMatrix([1, 0, 0, 1, -w * 0.035, -h * 0.1]));
-  c.fillStyle = T72.m;
+  c.fillStyle = T73.m;
   c.fill(lit2);
-  c.fillStyle = T72.l;
+  c.fillStyle = T73.l;
   c.beginPath();
   c.ellipse(cx - w * 0.14, base2 - h * 0.66, w * 0.34, h * 0.3, -0.15, 0, TAU113);
   c.fill();
-  c.fillStyle = T72.h;
+  c.fillStyle = T73.h;
   c.globalAlpha = 0.6;
   c.beginPath();
   c.ellipse(cx - w * 0.2, base2 - h * 0.84, w * 0.17, h * 0.08, -0.2, 0, TAU113);
@@ -102857,7 +102933,7 @@ function mound(c, cx, base2, w, h, b, seed2) {
     const n = Math.round(w * h / 70);
     for (let i = 0; i < n; i++) {
       const X = cx - w / 2 + R9() * w, Y = topAt(X) + 4 + R9() * (base2 - topAt(X));
-      c.fillStyle = [T72.d, T72.l, T72.m, T72.h, T72.d, T72.m][R9() * 6 | 0];
+      c.fillStyle = [T73.d, T73.l, T73.m, T73.h, T73.d, T73.m][R9() * 6 | 0];
       c.fill(leaf3(X, Y, 4 + R9() * 4, -Math.PI / 2 + (R9() - 0.5) * 1.5, 1.4));
     }
     if (b.cover === "heather") for (let i = 0; i < w * h / 900; i++) {
@@ -102867,7 +102943,7 @@ function mound(c, cx, base2, w, h, b, seed2) {
       c.fill();
     }
   } else if (b.cover === "sand") {
-    c.strokeStyle = T72.d;
+    c.strokeStyle = T73.d;
     c.lineWidth = 1.2;
     for (let i = 0; i < h / 18; i++) {
       const ry = base2 - 8 - i * 18;
@@ -128359,7 +128435,7 @@ function plannedVillageDepthItems(m, v) {
 }
 
 // src/client/generated_town_presentation_v1.js
-var T68 = 32;
+var T69 = 32;
 var OL68 = "#151515";
 var STONE17 = { desert: "#d6bc8e", frostland: "#b9bfc4", volcanic: "#5c5452", wetland: "#9e9886", tropical: "#c2b391" };
 var stoneOf6 = (b) => STONE17[b] ?? "#b3ab9a";
@@ -128370,8 +128446,8 @@ function towns(m, v) {
   for (const p of m.space.generatedTowns ?? []) {
     const t = generatedTownV1(p.id);
     if (!t) continue;
-    const W16 = t.core[0] * T68, H7 = t.core[1] * T68;
-    if (!seen3(v, p.x - 12 * T68, p.y - 12 * T68, W16 + 24 * T68, H7 + 24 * T68, 160)) continue;
+    const W16 = t.core[0] * T69, H7 = t.core[1] * T69;
+    if (!seen3(v, p.x - 12 * T69, p.y - 12 * T69, W16 + 24 * T69, H7 + 24 * T69, 160)) continue;
     out.push({ t, o: { x: p.x, y: p.y } });
   }
   return out;
@@ -128401,7 +128477,7 @@ function templateOf(t) {
   return m;
 }
 function field2(c, o, f) {
-  const x = o.x + f.x * T68, y = o.y + f.y * T68, w = f.w * T68, h = f.h * T68, [a, b] = CROP[f.kind] ?? CROP.hay;
+  const x = o.x + f.x * T69, y = o.y + f.y * T69, w = f.w * T69, h = f.h * T69, [a, b] = CROP[f.kind] ?? CROP.hay;
   prop(c, [[rect2(x + 4, y + 4, w - 8, h - 8), a]], 1.6);
   c.save();
   c.beginPath();
@@ -128418,10 +128494,10 @@ function field2(c, o, f) {
   c.strokeRect(x, y, w, h);
 }
 function pad(c, o, R9, col2) {
-  const x = o.x + R9.x * T68, y = o.y + R9.y * T68;
+  const x = o.x + R9.x * T69, y = o.y + R9.y * T69;
   c.fillStyle = col2;
   c.beginPath();
-  c.roundRect(x + 3, y + 3, R9.w * T68 - 6, R9.h * T68 - 6, 10);
+  c.roundRect(x + 3, y + 3, R9.w * T69 - 6, R9.h * T69 - 6, 10);
   c.fill();
 }
 var layerCache = /* @__PURE__ */ new WeakMap();
@@ -128433,7 +128509,7 @@ function layersOf(t) {
   if (!townNewArtV1(t)) return L;
   const geo = townGeometryV1(t), zone = t.features.some((f) => f.type === "zone"), plazas = t.features.filter((f) => f.type === "plaza"), greens = t.features.filter((f) => f.type === "green"), big = t.size === "city" || t.size === "capital";
   const streets = [...t.streets, ...townConnectorsV1(t).map((c) => [c.pts, c.w, false])];
-  const paved = zone ? townDryStreetsV1(t).filter((s) => s[2]) : [], dirt2 = t.streets.filter((s) => !s[2]), sq = (f) => ({ x0: f.x * T68, y0: f.y * T68, x1: (f.x + f.w) * T68, y1: (f.y + f.h) * T68 });
+  const paved = zone ? townDryStreetsV1(t).filter((s) => s[2]) : [], dirt2 = t.streets.filter((s) => !s[2]), sq = (f) => ({ x0: f.x * T69, y0: f.y * T69, x1: (f.x + f.w) * T69, y1: (f.y + f.h) * T69 });
   const near4 = (h, pts2) => {
     let best = 1e9;
     for (let i = 1; i < pts2.length; i++) {
@@ -128458,29 +128534,29 @@ function layersOf(t) {
   const A = townArtBuildingsV1(t), chapelF = t.features.find((f) => f.type === "chapel"), civic = [];
   if (A.chapel) {
     const b = A.chapel, path12 = down(b.label === "Chapel" ? b.x + 3.3 : b.x + b.w / 2, b.y + b.h);
-    civic.push({ box: { x0: b.x * T68 - 60, y0: b.y * T68 - 60, x1: (b.x + b.w) * T68 + 60, y1: (b.y + b.h + path12 + 1) * T68 + 30 }, draw: (c) => churchGround2(c, b, t.biome, path12) });
+    civic.push({ box: { x0: b.x * T69 - 60, y0: b.y * T69 - 60, x1: (b.x + b.w) * T69 + 60, y1: (b.y + b.h + path12 + 1) * T69 + 30 }, draw: (c) => churchGround2(c, b, t.biome, path12) });
     const E6 = chapelF?.yard;
     if (E6) {
       const gp = down(E6.x + E6.w / 2, E6.y + E6.h);
-      civic.push({ box: { x0: E6.x * T68 - 30, y0: E6.y * T68 - 30, x1: (E6.x + E6.w) * T68 + 30, y1: (E6.y + E6.h + gp + 1) * T68 + 30 }, draw: (c) => graveGround2(c, E6, t.biome, b.label, gp) });
+      civic.push({ box: { x0: E6.x * T69 - 30, y0: E6.y * T69 - 30, x1: (E6.x + E6.w) * T69 + 30, y1: (E6.y + E6.h + gp + 1) * T69 + 30 }, draw: (c) => graveGround2(c, E6, t.biome, b.label, gp) });
     }
   }
   if (A.hall) {
     const b = A.hall, path12 = down(b.x + b.w / 2, b.y + b.h + 3);
-    civic.push({ box: { x0: b.x * T68 - 40, y0: b.y * T68 - 40, x1: (b.x + b.w) * T68 + 40, y1: (b.y + b.h + 3 + path12 + 1) * T68 + 40 }, draw: (c) => hallGround2(c, b, t.biome, path12) });
+    civic.push({ box: { x0: b.x * T69 - 40, y0: b.y * T69 - 40, x1: (b.x + b.w) * T69 + 40, y1: (b.y + b.h + 3 + path12 + 1) * T69 + 40 }, draw: (c) => hallGround2(c, b, t.biome, path12) });
   }
   for (const b of A.manors) {
     const path12 = down(b.x + b.w / 2, b.y + b.h);
-    civic.push({ box: { x0: b.x * T68 - 60, y0: b.y * T68 - 40, x1: (b.x + b.w) * T68 + 60, y1: (b.y + b.h + Math.max(3, path12) + 1) * T68 + 40 }, draw: (c) => manorGround3(c, b, t.biome, path12) });
+    civic.push({ box: { x0: b.x * T69 - 60, y0: b.y * T69 - 40, x1: (b.x + b.w) * T69 + 60, y1: (b.y + b.h + Math.max(3, path12) + 1) * T69 + 40 }, draw: (c) => manorGround3(c, b, t.biome, path12) });
   }
   for (const f of t.features.filter((f2) => f2.type === "monument")) {
-    const F6 = { ...f, r: f.r - 0.7 }, x = f.x * T68, y = f.y * T68, R9 = F6.r * T68 + 60, slot = t.id.replace("settlement-slot:", "");
+    const F6 = { ...f, r: f.r - 0.7 }, x = f.x * T69, y = f.y * T69, R9 = F6.r * T69 + 60, slot = t.id.replace("settlement-slot:", "");
     civic.push({ box: { x0: x - R9, y0: y - R9, x1: x + R9, y1: y + R9 }, draw: (c) => monumentGround23(c, F6, t.biome, slot) });
   }
   const castleF = t.features.find((f) => f.type === "castle"), capital = [];
   for (const f of t.features.filter((f2) => f2.type === "avenue")) {
-    const q = boxOf(f.pts), g = f.w * T68 / 2 + 20;
-    capital.push({ box: { x0: q.x0 * T68 - g, y0: q.y0 * T68 - g, x1: q.x1 * T68 + g, y1: q.y1 * T68 + g }, draw: (c) => avenueStrip3(c, f.pts, f.w, t.biome) });
+    const q = boxOf(f.pts), g = f.w * T69 / 2 + 20;
+    capital.push({ box: { x0: q.x0 * T69 - g, y0: q.y0 * T69 - g, x1: q.x1 * T69 + g, y1: q.y1 * T69 + g }, draw: (c) => avenueStrip3(c, f.pts, f.w, t.biome) });
   }
   if (castleF) capital.push({ box: grow2(sq(castleF), 20), draw: (c) => castleGround3(c, castleF, t.biome) });
   for (const f of t.features.filter((f2) => f2.type === "manor" && f2.garden && !f2.building)) capital.push({ box: grow2(sq(f.garden), 16), draw: (c) => formalGarden3(c, f.garden, t.biome) });
@@ -128488,7 +128564,7 @@ function layersOf(t) {
   for (const f of t.features.filter((f2) => f2.type === "field")) farm.push({ box: grow2(sq(f), 20), draw: (c) => fieldGround(c, f, t.biome) });
   for (const [, R9, k] of t.places) if (k === "garden") farm.push({ box: grow2(sq(R9), 20), draw: (c) => plotGround(c, R9, t.biome) });
   for (const f of t.features.filter((f2) => f2.type === "yard")) farm.push({ box: grow2(sq(f), 16), draw: (c) => yardGround3(c, f, t.biome) });
-  for (const [b, fn] of [[A.barracks, barracksGround3], [A.stables, stablesGround3]]) if (b) farm.push({ box: { x0: b.x * T68 - 10, y0: (b.y + b.h) * T68 - 20, x1: (b.x + b.w) * T68 + 10, y1: (b.y + b.h) * T68 + 70 }, draw: (c) => fn(c, b, t.biome) });
+  for (const [b, fn] of [[A.barracks, barracksGround3], [A.stables, stablesGround3]]) if (b) farm.push({ box: { x0: b.x * T69 - 10, y0: (b.y + b.h) * T69 - 20, x1: (b.x + b.w) * T69 + 10, y1: (b.y + b.h) * T69 + 70 }, draw: (c) => fn(c, b, t.biome) });
   if (t.biome === "wetland") {
     const A2 = townArtBuildingsV1(t), own = new Set([A2.chapel, A2.hall, ...A2.manors, A2.barracks, A2.stables].filter(Boolean).map((b) => b.id));
     own.add("b:900");
@@ -128534,8 +128610,8 @@ function layersOf(t) {
   if (paved.length) {
     let b = null;
     for (const [p, w] of paved) {
-      const q = boxOf(p), g = w * T68 / 2 + 12;
-      const r = { x0: q.x0 * T68 - g, y0: q.y0 * T68 - g, x1: q.x1 * T68 + g, y1: q.y1 * T68 + g };
+      const q = boxOf(p), g = w * T69 / 2 + 12;
+      const r = { x0: q.x0 * T69 - g, y0: q.y0 * T69 - g, x1: q.x1 * T69 + g, y1: q.y1 * T69 + g };
       under.push(r);
     }
     for (const f of plazas) {
@@ -128545,15 +128621,15 @@ function layersOf(t) {
   }
   const rw = geo.river?.w ?? 0;
   for (const { h } of bridges) {
-    const R9 = (rw + 2.4) * T68 / 2 + h.w * T68;
-    under.push({ x0: h.x * T68 - R9, y0: h.y * T68 - R9, x1: h.x * T68 + R9, y1: h.y * T68 + R9 });
+    const R9 = (rw + 2.4) * T69 / 2 + h.w * T69;
+    under.push({ x0: h.x * T69 - R9, y0: h.y * T69 - R9, x1: h.x * T69 + R9, y1: h.y * T69 + R9 });
   }
   const mouths = zone ? [] : plazas;
   for (const f of mouths) {
     const r = sq(f);
     over.push({ x0: r.x0 - 200, y0: r.y0 - 200, x1: r.x1 + 200, y1: r.y1 + 200 });
   }
-  for (const g of greens) over.push({ x0: (g.x - g.rx) * T68 - 30, y0: (g.y - g.ry) * T68 - 30, x1: (g.x + g.rx) * T68 + 30, y1: (g.y + g.ry) * T68 + 30 });
+  for (const g of greens) over.push({ x0: (g.x - g.rx) * T69 - 30, y0: (g.y - g.ry) * T69 - 30, x1: (g.x + g.rx) * T69 + 30, y1: (g.y + g.ry) * T69 + 30 });
   if (under.length) L.under = { boxes: under, draw: (c, b) => {
     if (paved.length) {
       cityPaving(c, paved, plazas, b, t.biome);
@@ -128568,8 +128644,8 @@ function layersOf(t) {
     if (innF && hits(grow2(sq(innF.garden), 30), b)) innGround2(c, innF.garden, t.biome);
     if (court && hits(grow2(sq(court), 20), b)) runeCourtGround(c, court, t.biome);
     for (const x of bridges) {
-      const R9 = (rw + 2.4) * T68 / 2 + x.h.w * T68;
-      if (hits({ x0: x.h.x * T68 - R9, y0: x.h.y * T68 - R9, x1: x.h.x * T68 + R9, y1: x.h.y * T68 + R9 }, b)) townBridge(c, x.h, rw, t.biome, x.stone, x.paved);
+      const R9 = (rw + 2.4) * T69 / 2 + x.h.w * T69;
+      if (hits({ x0: x.h.x * T69 - R9, y0: x.h.y * T69 - R9, x1: x.h.x * T69 + R9, y1: x.h.y * T69 + R9 }, b)) townBridge(c, x.h, rw, t.biome, x.stone, x.paved);
     }
     for (const p of civic) if (hits(p.box, b)) p.draw(c);
   } };
@@ -128674,13 +128750,13 @@ function drawGeneratedTownsGround(c, m, v) {
     const [W16, H7] = t.core, L = layersOf(t), art = townNewArtV1(t);
     for (const f of t.features) {
       if (art && (f.type === "field" || f.type === "forge" || f.type === "inn" || f.type === "chapel")) continue;
-      if (f.type === "field" && seen3(v, o.x + f.x * T68, o.y + f.y * T68, f.w * T68, f.h * T68)) field2(c, o, f);
-      else if (f.type === "forge" && f.pad && seen3(v, o.x + f.pad.x * T68, o.y + f.pad.y * T68, f.pad.w * T68, f.pad.h * T68)) pad(c, o, f.pad, "rgba(60,48,40,.35)");
-      else if (f.type === "inn" && f.garden && seen3(v, o.x + f.garden.x * T68, o.y + f.garden.y * T68, f.garden.w * T68, f.garden.h * T68)) pad(c, o, f.garden, "rgba(160,130,90,.3)");
-      else if (f.type === "chapel" && f.yard && seen3(v, o.x + f.yard.x * T68, o.y + f.yard.y * T68, f.yard.w * T68, f.yard.h * T68)) pad(c, o, f.yard, "rgba(70,110,50,.25)");
+      if (f.type === "field" && seen3(v, o.x + f.x * T69, o.y + f.y * T69, f.w * T69, f.h * T69)) field2(c, o, f);
+      else if (f.type === "forge" && f.pad && seen3(v, o.x + f.pad.x * T69, o.y + f.pad.y * T69, f.pad.w * T69, f.pad.h * T69)) pad(c, o, f.pad, "rgba(60,48,40,.35)");
+      else if (f.type === "inn" && f.garden && seen3(v, o.x + f.garden.x * T69, o.y + f.garden.y * T69, f.garden.w * T69, f.garden.h * T69)) pad(c, o, f.garden, "rgba(160,130,90,.3)");
+      else if (f.type === "chapel" && f.yard && seen3(v, o.x + f.yard.x * T69, o.y + f.yard.y * T69, f.yard.w * T69, f.yard.h * T69)) pad(c, o, f.yard, "rgba(70,110,50,.25)");
     }
     drawLayer(c, t, o, v, "u", L.under, s, budget);
-    if (seen3(v, o.x, o.y, W16 * T68, H7 * T68)) drawSettlementGroundV1(c, "generated", templateOf(t), o, t.biome, v);
+    if (seen3(v, o.x, o.y, W16 * T69, H7 * T69)) drawSettlementGroundV1(c, "generated", templateOf(t), o, t.biome, v);
     drawLayer(c, t, o, v, "o", L.over, s, budget);
   }
   for (const { t, o } of list) {
@@ -128827,7 +128903,7 @@ function generatedTownDepthItems(m, v, env = null) {
     for (const [i, p] of wallParts(t).entries()) {
       if (art) continue;
       if (p.kind === "tower") {
-        const x = o.x + p.x * T68, y = o.y + p.y * T68;
+        const x = o.x + p.x * T69, y = o.y + p.y * T69;
         if (!seen3(v, x - 40, y - 110, 80, 130)) continue;
         const behind2 = actor && ay < y + 14 && ay > y - 110 && Math.abs(ax - x) < 40;
         out.push(depthItem({ id: key3 + "tower:" + i, anchorX: x, anchorY: y + 14, draw: (c) => {
@@ -128838,7 +128914,7 @@ function generatedTownDepthItems(m, v, env = null) {
         } }));
         continue;
       }
-      const pts2 = p.pts.map(([x, y]) => [o.x + x * T68, o.y + y * T68]), b = boxOf(pts2);
+      const pts2 = p.pts.map(([x, y]) => [o.x + x * T69, o.y + y * T69]), b = boxOf(pts2);
       if (!seen3(v, b.x0 - 20, b.y0 - WH - 20, b.x1 - b.x0 + 40, b.y1 - b.y0 + WH + 30)) continue;
       const behind = actor && ay < b.y1 + 6 && ay > b.y0 - WH - 40 && ax > b.x0 - 14 && ax < b.x1 + 14;
       out.push(depthItem({ id: key3 + "wall:" + i, anchorX: b.x0, anchorY: b.y1 + 6, draw: (c) => {
@@ -128851,7 +128927,7 @@ function generatedTownDepthItems(m, v, env = null) {
     if (art) {
       out.push(...townBuildingDepthItemsV1(t, o, v, actor, key3, env));
       for (const [i, p] of townStreetPlanV1(t).entries()) {
-        const lx = p.x * T68, ly = p.y * T68 - 4, x = o.x + lx, y = o.y + ly;
+        const lx = p.x * T69, ly = p.y * T69 - 4, x = o.x + lx, y = o.y + ly;
         if (!seen3(v, x - 50, y - 100, 100, 110)) continue;
         out.push(depthItem({ id: key3 + "prop:" + i, anchorX: x, anchorY: y, draw: (c) => {
           c.save();
@@ -128861,9 +128937,9 @@ function generatedTownDepthItems(m, v, env = null) {
         } }));
       }
       for (const { b, d, south } of fencesOf(t)) {
-        const x = o.x + b.x * T68, y0 = o.y + (south ? b.y + b.h : b.y - d) * T68;
-        if (!seen3(v, x - 10, y0 - 30, b.w * T68 + 20, d * T68 + 40)) continue;
-        const side = o.y + (south ? (b.y + b.h + d) * T68 - 8 : b.y * T68 - 8), front2 = o.y + (south ? (b.y + b.h + d) * T68 - 6 : (b.y - d) * T68 + 4);
+        const x = o.x + b.x * T69, y0 = o.y + (south ? b.y + b.h : b.y - d) * T69;
+        if (!seen3(v, x - 10, y0 - 30, b.w * T69 + 20, d * T69 + 40)) continue;
+        const side = o.y + (south ? (b.y + b.h + d) * T69 - 8 : b.y * T69 - 8), front2 = o.y + (south ? (b.y + b.h + d) * T69 - 6 : (b.y - d) * T69 + 4);
         out.push(depthItem({ id: key3 + "pickets:" + b.id, anchorX: x, anchorY: side, draw: (c) => {
           c.save();
           c.translate(o.x, o.y);
@@ -128880,11 +128956,11 @@ function generatedTownDepthItems(m, v, env = null) {
     }
     for (const f of t.features) {
       if (f.type === "lamps" && !art) for (const [i, l] of f.lamps.entries()) {
-        const x = o.x + l.x * T68 + 16, y = o.y + l.y * T68 + 24;
+        const x = o.x + l.x * T69 + 16, y = o.y + l.y * T69 + 24;
         if (seen3(v, x - 20, y - 80, 40, 90)) out.push(depthItem({ id: key3 + "lamp:" + i, anchorX: x, anchorY: y, draw: (c) => lamp2(c, x, y) }));
       }
       if (f.type === "stalls" && !art) for (const [i, s] of f.stalls.entries()) {
-        const x = o.x + s.x * T68 + 2, y = o.y + s.y * T68 + 30;
+        const x = o.x + s.x * T69 + 2, y = o.y + s.y * T69 + 30;
         if (seen3(v, x - 10, y - 60, 80, 70)) out.push(depthItem({ id: key3 + "stall:" + i, anchorX: x, anchorY: y, draw: (c) => stall4(c, x, y, i + t.buildings.length) }));
       }
     }
@@ -129808,7 +129884,7 @@ function plannedTownDepthItems(m, v) {
 }
 
 // src/client/town_art_v1/interiors.js
-var T69 = 32;
+var T70 = 32;
 var TAU142 = Math.PI * 2;
 var OL69 = "#151515";
 var line27 = (c, pts2, col2, w) => {
@@ -130035,7 +130111,7 @@ function plate4(c, x, y, food = "bread") {
   }
 }
 function table(c, p, t, items) {
-  const x = p.x * T69, y = p.y * T69, w = p.w * T69, h = p.h * T69, top = y + 4, th = h - 20;
+  const x = p.x * T70, y = p.y * T70, w = p.w * T70, h = p.h * T70, top = y + 4, th = h - 20;
   shadow44(c, x + w / 2 + 3, y + h - 2, w / 2, 5, 0.25);
   for (const lx of [x + 5, x + w - 10]) prop2(c, [[rect3(lx, y + h - 16, 5, 14), DARKW]], 1);
   prop2(c, [[rect3(x + 2, top, w - 4, th), OAK2]], 1.6);
@@ -130052,21 +130128,21 @@ function table(c, p, t, items) {
   items(c, x, top, w, th, t);
 }
 function bench9(c, p) {
-  const x = p.x * T69, y = p.y * T69, w = p.w * T69;
+  const x = p.x * T70, y = p.y * T70, w = p.w * T70;
   shadow44(c, x + w / 2 + 2, y + 28, w / 2, 4, 0.22);
   for (const lx of [x + 6, x + w - 10]) prop2(c, [[rect3(lx, y + 18, 4, 10), DARKW]], 1);
   prop2(c, [[rect3(x + 3, y + 8, w - 6, 10), OAK2], [rect3(x + 3, y + 18, w - 6, 4), tone2(OAK2, -0.22)]], 1.3);
   px6(c, x + 5, y + 9.4, w - 10, 1.6, tone2(OAK2, 0.18));
 }
 function chair(c, p) {
-  const x = p.x * T69, y = p.y * T69;
+  const x = p.x * T70, y = p.y * T70;
   shadow44(c, x + 17, y + 28, 10, 4, 0.22);
   prop2(c, [[rect3(x + 7, y + 14, 18, 7), OAK2], [rect3(x + 8, y + 21, 3, 8), DARKW], [rect3(x + 21, y + 21, 3, 8), DARKW]], 1.1);
   prop2(c, [[rect3(x + 6, y - 2, 20, 4), tone2(OAK2, 0.1)], [rect3(x + 7, y + 2, 3, 16), DARKW], [rect3(x + 22, y + 2, 3, 16), DARKW]], 1.1);
   for (const sx of [x + 12.5, x + 17]) px6(c, sx, y + 2, 2.4, 12, tone2(OAK2, -0.1));
 }
 function hearth(c, p, t) {
-  const x = p.x * T69 - 4, y = p.y * T69, w = p.w * T69 + 8, h = p.h * T69;
+  const x = p.x * T70 - 4, y = p.y * T70, w = p.w * T70 + 8, h = p.h * T70;
   prop2(c, [[rect3(x + 4, y - 26, w - 8, 30), STONE18]], 1.4);
   prop2(c, [[rect3(x, y + 2, w, h - 2), STONE18]], 1.8);
   const r = rnd7(11);
@@ -130107,7 +130183,7 @@ function hearth(c, p, t) {
   prop2(c, [[rect3(x - 2, y + h - 2, w + 4, 5), tone2(STONE18, -0.1)]], 1);
 }
 function counter(c, p, t) {
-  const x = p.x * T69, y = p.y * T69, w = p.w * T69, h = p.h * T69;
+  const x = p.x * T70, y = p.y * T70, w = p.w * T70, h = p.h * T70;
   shadow44(c, x + w / 2 + 4, y + h, w / 2 + 4, 5, 0.25);
   prop2(c, [[rect3(x + 1, y - 6, w - 2, h - 6), "#5a3a22"]], 1.8);
   px6(c, x + 3, y - 4, w - 6, 2, tone2("#5a3a22", 0.25));
@@ -130129,7 +130205,7 @@ function counter(c, p, t) {
   tankard(c, x + 12, y + 90);
 }
 function oven(c, p, t) {
-  const x = p.x * T69, y = p.y * T69, w = p.w * T69, h = p.h * T69;
+  const x = p.x * T70, y = p.y * T70, w = p.w * T70, h = p.h * T70;
   prop2(c, [[rect3(x + 14, y - 30, 14, 32), "#a4523a"]], 1.3);
   const dome3 = new Path2D();
   dome3.moveTo(x + 2, y + h - 2);
@@ -130170,7 +130246,7 @@ function oven(c, p, t) {
   prop2(c, [[rect3(x, y + h - 3, w, 4), tone2("#b8603e", -0.2)]], 1);
 }
 function worktop(c, p) {
-  const x = p.x * T69, y = p.y * T69, w = p.w * T69, h = p.h * T69;
+  const x = p.x * T70, y = p.y * T70, w = p.w * T70, h = p.h * T70;
   shadow44(c, x + w / 2 + 3, y + h, w / 2, 4, 0.22);
   for (const ly of [y + h - 14]) for (const lx of [x + 4, x + w - 8]) prop2(c, [[rect3(lx, ly, 4, 12), DARKW]], 1);
   prop2(c, [[rect3(x + 1, y + 2, w - 2, h - 16), "#c9a676"]], 1.5);
@@ -130189,7 +130265,7 @@ function worktop(c, p) {
   prop2(c, [[ell2(x + 20, y + 38, 4, 2.6), "#d29a4a"]], 0.8);
 }
 function cupboard(c, p) {
-  const x = p.x * T69, y = p.y * T69, w = p.w * T69, h = p.h * T69;
+  const x = p.x * T70, y = p.y * T70, w = p.w * T70, h = p.h * T70;
   shadow44(c, x + w / 2 + 3, y + h, w / 2, 4, 0.22);
   prop2(c, [[rect3(x + 2, y - 32, w - 4, h + 30), "#7a5232"]], 1.8);
   px6(c, x + 5, y - 29, w - 10, h + 24, "#3a2a20");
@@ -130206,7 +130282,7 @@ function cupboard(c, p) {
   sc(c, x + w - 16, y + h - 2, 0.5, () => sack(c, x + w - 16, y + h - 2, "#b89a6a"));
 }
 function barrelRack(c, p) {
-  const x = p.x * T69, y = p.y * T69, w = p.w * T69, h = p.h * T69;
+  const x = p.x * T70, y = p.y * T70, w = p.w * T70, h = p.h * T70;
   shadow44(c, x + w / 2 + 3, y + h, w / 2, 4, 0.22);
   prop2(c, [[rect3(x + 2, y + h - 10, w - 4, 8), DARKW]], 1.2);
   for (const [bx, by] of [[x + 16, y + h - 12], [x + w - 16, y + h - 12], [x + w / 2, y + h - 30]]) {
@@ -130220,7 +130296,7 @@ function barrelRack(c, p) {
   }
 }
 function stairs(c, p) {
-  const x = p.x * T69, y = p.y * T69, w = p.w * T69, h = p.h * T69;
+  const x = p.x * T70, y = p.y * T70, w = p.w * T70, h = p.h * T70;
   prop2(c, [[rect3(x, y, w, h), "#4a3626"]], 1.6);
   for (let i = 0; i < 7; i++) {
     const sy = y + h - 10 - i * 8;
@@ -130254,7 +130330,7 @@ var QUILT = { nw: "#4f6f9a", ne: "#5e7f4e", sw: "#9a4a3e", se: "#b8863a" };
 var WARD2 = "#7a5232";
 var BRASS8 = "#d8a640";
 function bed(c, p, head17, quilt) {
-  const x = p.x * T69, y = p.y * T69, w = p.w * T69, h = p.h * T69;
+  const x = p.x * T70, y = p.y * T70, w = p.w * T70, h = p.h * T70;
   shadow44(c, x + w / 2 + 3, y + h - 1, w / 2, 5, 0.25);
   c.save();
   if (head17 === "R") {
@@ -130285,7 +130361,7 @@ function bed(c, p, head17, quilt) {
   c.restore();
 }
 function desk(c, p, t) {
-  const x = p.x * T69, y = p.y * T69, w = T69, h = T69;
+  const x = p.x * T70, y = p.y * T70, w = T70, h = T70;
   shadow44(c, x + w / 2 + 2, y + h - 1, w / 2 - 2, 4, 0.22);
   for (const lx of [x + 4, x + w - 8]) prop2(c, [[rect3(lx, y + h - 14, 4, 13), DARKW]], 1);
   prop2(c, [[rect3(x + 2, y + 2, w - 4, h - 17), OAK2]], 1.4);
@@ -130299,7 +130375,7 @@ function desk(c, p, t) {
   candle(c, x + 7, y + 9, t);
 }
 function wardrobe(c, p) {
-  const x = p.x * T69, y = p.y * T69, w = T69, h = T69;
+  const x = p.x * T70, y = p.y * T70, w = T70, h = T70;
   shadow44(c, x + w / 2 + 3, y + h - 2, w / 2, 4, 0.22);
   prop2(c, [[rect3(x + 3, y - 26, w - 6, h + 22), WARD2]], 1.6);
   prop2(c, [[rect3(x + 1, y - 31, w - 2, 6), tone2(WARD2, -0.12)]], 1.2);
@@ -130323,7 +130399,7 @@ function ovalRug(c, cx, cy2, rx, ry, col2) {
   });
 }
 function stairsDown(c, p) {
-  const x = p.x * T69, y = p.y * T69, w = p.w * T69, h = p.h * T69;
+  const x = p.x * T70, y = p.y * T70, w = p.w * T70, h = p.h * T70;
   prop2(c, [[rect3(x, y, w, h), "#20160f"]], 1.6);
   for (let i = 0; i < 6; i++) {
     const sy = y + 2 + i * 9, f = tone2(PLANK4, -0.04 - i * 0.1);
@@ -130662,8 +130738,8 @@ function plantPot(c, x, y) {
     c.fill();
   }
 }
-var IW = TAVERN_INTERIOR_V1.width * T69;
-var IH = TAVERN_INTERIOR_V1.height * T69;
+var IW = TAVERN_INTERIOR_V1.width * T70;
+var IH = TAVERN_INTERIOR_V1.height * T70;
 function innFloorV1(c, floorId, t) {
   px6(c, 0, 0, IW, IH, "#2a241e");
   if (floorId === "ground") {
@@ -130693,7 +130769,7 @@ function innItemsV1(floorId, t) {
   const F6 = TAVERN_INTERIOR_V1.floors.find((f) => f.id === floorId), items = [];
   if (floorId === "ground") {
     for (const p of F6.furniture) {
-      const bottom = (p.y + p.h) * T69;
+      const bottom = (p.y + p.h) * T70;
       let draw;
       if (p.type === "table") draw = (c) => table(c, p, t, ITEMS2[p.id] ?? (() => {
       }));
@@ -130705,9 +130781,9 @@ function innItemsV1(floorId, t) {
       else if (p.type === "worktop") draw = (c) => worktop(c, p);
       else if (p.type === "cupboard") draw = (c) => cupboard(c, p);
       else draw = (c) => barrelRack(c, p);
-      items.push({ id: p.id, x: p.x * T69, y: bottom - 4, draw });
+      items.push({ id: p.id, x: p.x * T70, y: bottom - 4, draw });
     }
-    items.push({ id: "stairs", x: F6.stairs.x * T69, y: (F6.stairs.y + F6.stairs.h) * T69 - 30, draw: (c) => stairs(c, F6.stairs) });
+    items.push({ id: "stairs", x: F6.stairs.x * T70, y: (F6.stairs.y + F6.stairs.h) * T70 - 30, draw: (c) => stairs(c, F6.stairs) });
     items.push({ id: "bar-barrels", x: 300, y: 182, draw: (c) => {
       sc(c, 300, 182, 0.55, () => barrel5(c, 300, 182, 10, 24));
       sc(c, 282, 186, 0.5, () => crate2(c, 268, 186, 26, 22));
@@ -130716,20 +130792,20 @@ function innItemsV1(floorId, t) {
     return items;
   }
   for (const p of F6.furniture) {
-    const k = p.id.split("-")[1], bottom = (p.y + p.h) * T69;
+    const k = p.id.split("-")[1], bottom = (p.y + p.h) * T70;
     let draw;
     if (p.type === "bed") draw = (c) => bed(c, p, k.endsWith("e") ? "R" : "L", QUILT[k]);
     else if (p.type === "desk") draw = (c) => desk(c, p, t);
     else draw = (c) => wardrobe(c, p);
-    items.push({ id: p.id, x: p.x * T69, y: bottom - 4, draw });
+    items.push({ id: p.id, x: p.x * T70, y: bottom - 4, draw });
   }
-  items.push({ id: "stairs", x: F6.stairs.x * T69, y: F6.stairs.y * T69, draw: (c) => stairsDown(c, F6.stairs) });
+  items.push({ id: "stairs", x: F6.stairs.x * T70, y: F6.stairs.y * T70, draw: (c) => stairsDown(c, F6.stairs) });
   items.push({ id: "caps", x: 0, y: IH + 40, draw: (c) => wallCaps(c, IW, IH, null) });
   return items;
 }
 var R8 = ENCHANTER_TOWER_V1;
-var HW = R8.width * T69;
-var HH = R8.height * T69;
+var HW = R8.width * T70;
+var HH = R8.height * T70;
 var DOOR = [R8.floors[0].door.x0, R8.floors[0].door.x1];
 var E5 = R8.round;
 var WALL6 = 30;
@@ -130851,7 +130927,7 @@ function hallFloorV1(c, t) {
 function hallItemsV1(t) {
   const items = [];
   for (const p of R8.floors[0].furniture) {
-    const k = p.type, tx = p.x, ty = p.y, x = tx * T69, y = ty * T69, w = p.w * T69, h = p.h * T69, bottom = y + h;
+    const k = p.type, tx = p.x, ty = p.y, x = tx * T70, y = ty * T70, w = p.w * T70, h = p.h * T70, bottom = y + h;
     let draw;
     if (k === "shelf") draw = (c) => bookshelf(c, x, y, w, tx * 7 + ty);
     else if (k === "altar") draw = (c) => altar(c, x, y, w, h, t);
@@ -138962,10 +139038,10 @@ function tintRgb(r, g, b, s, out) {
     return out;
   }
   if (s.stone && max - min <= 34) {
-    const T72 = s.stone, lt = T72[0] * 0.299 + T72[1] * 0.587 + T72[2] * 0.114, f = L / lt * s.gain, a = s.amount;
-    out[0] = clamp53(r + (T72[0] * f - r) * a);
-    out[1] = clamp53(g + (T72[1] * f - g) * a);
-    out[2] = clamp53(b + (T72[2] * f - b) * a);
+    const T73 = s.stone, lt = T73[0] * 0.299 + T73[1] * 0.587 + T73[2] * 0.114, f = L / lt * s.gain, a = s.amount;
+    out[0] = clamp53(r + (T73[0] * f - r) * a);
+    out[1] = clamp53(g + (T73[1] * f - g) * a);
+    out[2] = clamp53(b + (T73[2] * f - b) * a);
   }
   return out;
 }
@@ -141014,7 +141090,7 @@ function drawInlandDryBank(c, type, biome, x, y, t, seed2, offset2, at8) {
 
 // src/client/river_bridges_v1.js
 var TAU149 = Math.PI * 2;
-var T70 = 32;
+var T71 = 32;
 var OL72 = "#151515";
 function rng19(seed2) {
   let a = seed2 >>> 0;
@@ -141204,34 +141280,34 @@ function pileRipple(c, x, y, w) {
   c.stroke();
 }
 function bridgeH(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
-  const B6 = BRIDGE[style], P17 = ramp4(B6.deck, "#1d120a", "#ffe7b8"), Pb = ramp4(B6.beam ?? B6.curb, "#120a04", "#ffd9a0"), Pp = ramp4(B6.post ?? B6.curb ?? B6.wall, "#140c06", "#ffe0a8"), R9 = rng19(seed2), H7 = wid * T70, L = len * T70;
-  const tiles6 = parts ?? [...Array(len).keys()].map((i) => [i === 0 ? "a" : i === len - 1 ? "b" : "m", x + i * T70]);
-  const span2 = [Math.min(...tiles6.map((t) => t[1])), Math.max(...tiles6.map((t) => t[1])) + T70];
+  const B6 = BRIDGE[style], P17 = ramp4(B6.deck, "#1d120a", "#ffe7b8"), Pb = ramp4(B6.beam ?? B6.curb, "#120a04", "#ffd9a0"), Pp = ramp4(B6.post ?? B6.curb ?? B6.wall, "#140c06", "#ffe0a8"), R9 = rng19(seed2), H7 = wid * T71, L = len * T71;
+  const tiles6 = parts ?? [...Array(len).keys()].map((i) => [i === 0 ? "a" : i === len - 1 ? "b" : "m", x + i * T71]);
+  const span2 = [Math.min(...tiles6.map((t) => t[1])), Math.max(...tiles6.map((t) => t[1])) + T71];
   c.save();
   c.lineJoin = "round";
   c.lineCap = "round";
   c.fillStyle = "rgba(6,14,22,.26)";
-  for (const [k, tx] of tiles6) c.fillRect(tx + 3, y + 5, T70, H7);
+  for (const [k, tx] of tiles6) c.fillRect(tx + 3, y + 5, T71, H7);
   const faceH = B6.stone || B6.basalt ? 13 : 6;
   for (const [k, tx] of tiles6) {
     const fy = y + H7;
     if (B6.stone || B6.basalt) {
       const Pw = ramp4(B6.wall, "#14181e", "#fff0d0");
-      prop5(c, [[rect5(tx, fy, T70, faceH), Pw.m]], 1.2);
-      masonry2(c, tx, fy, T70, faceH, Pw, R9);
+      prop5(c, [[rect5(tx, fy, T71, faceH), Pw.m]], 1.2);
+      masonry2(c, tx, fy, T71, faceH, Pw, R9);
       if (k === "m") {
         const a = new Path2D();
         a.moveTo(tx + 5, fy + faceH + 1);
         a.lineTo(tx + 5, fy + 7);
-        a.quadraticCurveTo(tx + T70 / 2, fy - 1, tx + T70 - 5, fy + 7);
-        a.lineTo(tx + T70 - 5, fy + faceH + 1);
+        a.quadraticCurveTo(tx + T71 / 2, fy - 1, tx + T71 - 5, fy + 7);
+        a.lineTo(tx + T71 - 5, fy + faceH + 1);
         a.closePath();
         c.fillStyle = B6.basalt ? "#3a1a10" : "#173847";
         c.fill(a);
         c.save();
         c.clip(a);
         c.fillStyle = B6.basalt ? "rgba(255,140,40,.55)" : "rgba(120,200,220,.35)";
-        c.fillRect(tx, fy + faceH - 3, T70, 3);
+        c.fillRect(tx, fy + faceH - 3, T71, 3);
         c.restore();
         c.strokeStyle = OL72;
         c.lineWidth = 1.4;
@@ -141240,36 +141316,36 @@ function bridgeH(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
         c.lineWidth = 1.2;
         c.beginPath();
         c.moveTo(tx + 4, fy + 7.5);
-        c.quadraticCurveTo(tx + T70 / 2, fy - 2.2, tx + T70 - 4, fy + 7.5);
+        c.quadraticCurveTo(tx + T71 / 2, fy - 2.2, tx + T71 - 4, fy + 7.5);
         c.stroke();
       }
     } else {
       if (k === "m") {
-        for (const px7 of [tx + 3, tx + T70 - 3]) {
+        for (const px7 of [tx + 3, tx + T71 - 3]) {
           prop5(c, [[rect5(px7 - 2, fy + 2, 4, 9), Pb.d]], 1);
           pileRipple(c, px7, fy + 11, 3);
         }
       } else {
         const st = ramp4(B6.foot, "#10161e", "#fff4dc");
         for (let i = 0; i < 3; i++) {
-          const q = rrect(tx + i * T70 / 3 + 0.5, fy + 2, T70 / 3 - 1, 6, 1.4);
+          const q = rrect(tx + i * T71 / 3 + 0.5, fy + 2, T71 / 3 - 1, 6, 1.4);
           prop5(c, [[q, st.m]], 1);
           c.fillStyle = st.l;
-          c.fillRect(tx + i * T70 / 3 + 1.4, fy + 2.6, T70 / 3 - 3, 1.2);
+          c.fillRect(tx + i * T71 / 3 + 1.4, fy + 2.6, T71 / 3 - 3, 1.2);
         }
       }
-      prop5(c, [[rect5(tx, fy, T70, 4), Pb.m]], 1.1);
+      prop5(c, [[rect5(tx, fy, T71, 4), Pb.m]], 1.1);
       c.fillStyle = Pb.l;
-      c.fillRect(tx, fy, T70, 1);
+      c.fillRect(tx, fy, T71, 1);
     }
   }
   const top = new Path2D();
-  for (const [k, tx] of tiles6) top.rect(tx, y, T70, H7);
+  for (const [k, tx] of tiles6) top.rect(tx, y, T71, H7);
   prop5(c, [[top, P17.m]], 1.3);
   c.save();
   c.clip(top);
   for (const [k, tx] of tiles6) {
-    if (B6.stone) flags7(c, tx, y, T70, H7, P17, R9);
+    if (B6.stone) flags7(c, tx, y, T71, H7, P17, R9);
     else if (B6.basalt) {
       const Ph = ramp4(B6.deck, "#0a0808", "#ffd2a0");
       for (let j = 0; j < Math.ceil(H7 / 9) + 1; j++) for (let i = 0; i < 5; i++) {
@@ -141284,9 +141360,9 @@ function bridgeH(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
         c.fillStyle = tone55(Ph.m, (R9() - 0.5) * 0.1);
         c.fill(shift3(q, 0.4, 0.5));
       }
-    } else planks2(c, tx, y, T70, H7, true, P17, R9, B6.rope_ ? 5.3 : 6.4, B6.rope_ ? "#2a3a40" : null);
+    } else planks2(c, tx, y, T71, H7, true, P17, R9, B6.rope_ ? 5.3 : 6.4, B6.rope_ ? "#2a3a40" : null);
     if (B6.moss) for (let i = 0; i < 3; i++) {
-      const mx = tx + R9() * T70, my = y + R9() * H7;
+      const mx = tx + R9() * T71, my = y + R9() * H7;
       c.fillStyle = "rgba(110,150,70,.55)";
       c.beginPath();
       c.ellipse(mx, my, 3 + R9() * 3, 1.6 + R9(), 0, 0, TAU149);
@@ -141299,9 +141375,9 @@ function bridgeH(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
     for (const [ey, face4] of [[y, true], [y + H7 - 6, true]]) {
       for (const [k, tx] of tiles6) {
         const wy = ey - 5;
-        prop5(c, [[rect5(tx, wy, T70, 11), Pw.m]], 1.2);
+        prop5(c, [[rect5(tx, wy, T71, 11), Pw.m]], 1.2);
         c.save();
-        c.clip(rect5(tx, wy, T70, 11));
+        c.clip(rect5(tx, wy, T71, 11));
         if (B6.basalt) {
           for (let i = 0; i < 5; i++) {
             const cx = tx + 3.2 + i * 6.4, q = poly17([...Array(6)].map((_, a) => [cx + Math.cos(a * TAU149 / 6) * 3.3, wy + 3 + Math.sin(a * TAU149 / 6) * 2.6]));
@@ -141320,7 +141396,7 @@ function bridgeH(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
           }
         } else {
           c.fillStyle = Pw.l;
-          c.fillRect(tx, wy, T70, 4);
+          c.fillRect(tx, wy, T71, 4);
           c.strokeStyle = Pw.d2;
           c.lineWidth = 0.9;
           for (let i = 0; i < 4; i++) {
@@ -141330,13 +141406,13 @@ function bridgeH(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
             c.stroke();
           }
           c.fillStyle = Pw.h;
-          c.fillRect(tx, wy, T70, 1);
-          masonry2(c, tx, wy + 4, T70, 7, Pw, R9);
+          c.fillRect(tx, wy, T71, 1);
+          masonry2(c, tx, wy + 4, T71, 7, Pw, R9);
         }
         c.restore();
       }
       for (const [k, tx] of tiles6) if (k !== "m") {
-        const px7 = k === "a" ? tx + 2 : tx + T70 - 2;
+        const px7 = k === "a" ? tx + 2 : tx + T71 - 2;
         const q = rect5(px7 - 3.5, ey - 9, 7, 15);
         prop5(c, [[q, Pw.m]], 1.2);
         c.fillStyle = Pw.l;
@@ -141348,16 +141424,16 @@ function bridgeH(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
   } else {
     for (const ey of [y, y + H7 - 4]) {
       const q = new Path2D();
-      for (const [k, tx] of tiles6) q.rect(tx, ey, T70, 4);
+      for (const [k, tx] of tiles6) q.rect(tx, ey, T71, 4);
       prop5(c, [[q, Pb.m]], 1.1);
       c.fillStyle = Pb.l;
-      for (const [k, tx] of tiles6) c.fillRect(tx, ey, T70, 1.2);
+      for (const [k, tx] of tiles6) c.fillRect(tx, ey, T71, 1.2);
     }
     for (const ey of [y + 2, y + H7 - 2]) {
       const xs = [];
       for (const [k, tx] of tiles6) {
         xs.push(tx);
-        if (k === "b") xs.push(tx + T70);
+        if (k === "b") xs.push(tx + T71);
       }
       const xu = [...new Set(xs.map((v) => Math.round(v * 10) / 10))].sort((a, b) => a - b);
       if (B6.low) {
@@ -141401,7 +141477,7 @@ function bridgeH(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
         continue;
       }
       for (const hh of [11, 6]) {
-        const segs = parts ? tiles6.map(([k, tx]) => [k === "a" ? tx + 1 : tx, k === "b" ? tx + T70 - 1 : tx + T70]) : [[span2[0] + 1, span2[1] - 1]];
+        const segs = parts ? tiles6.map(([k, tx]) => [k === "a" ? tx + 1 : tx, k === "b" ? tx + T71 - 1 : tx + T71]) : [[span2[0] + 1, span2[1] - 1]];
         for (const [a, b] of segs) {
           prop5(c, [[rect5(a, ey - hh - 1.6, b - a, 3.2), Pp.m]], 1);
           c.fillStyle = Pp.h;
@@ -141410,7 +141486,7 @@ function bridgeH(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
           c.fillRect(a, ey - hh + 0.8, b - a, 0.8);
         }
         if (B6.snow) {
-          for (const [k, tx] of tiles6) drift7(c, [[tx + T70 / 2, ey - hh - 1.6, T70 * 0.42, 1.3]], 0.6);
+          for (const [k, tx] of tiles6) drift7(c, [[tx + T71 / 2, ey - hh - 1.6, T71 * 0.42, 1.3]], 0.6);
         }
       }
       for (const px7 of xu) {
@@ -141419,46 +141495,46 @@ function bridgeH(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
       }
     }
     if (B6.snow) {
-      for (const [k, tx] of tiles6) for (const ey of [y + 5.5, y + H7 - 6]) drift7(c, [[tx + T70 * 0.3, ey, T70 * 0.32, 1.7], [tx + T70 * 0.72, ey + 0.4, T70 * 0.3, 1.5]], 0.7);
+      for (const [k, tx] of tiles6) for (const ey of [y + 5.5, y + H7 - 6]) drift7(c, [[tx + T71 * 0.3, ey, T71 * 0.32, 1.7], [tx + T71 * 0.72, ey + 0.4, T71 * 0.3, 1.5]], 0.7);
     }
   }
   c.restore();
 }
 function bridgeV(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
-  const B6 = BRIDGE[style], P17 = ramp4(B6.deck, "#1d120a", "#ffe7b8"), Pb = ramp4(B6.beam ?? B6.curb, "#120a04", "#ffd9a0"), Pp = ramp4(B6.post ?? B6.curb ?? B6.wall, "#140c06", "#ffe0a8"), R9 = rng19(seed2), W16 = wid * T70;
-  const tiles6 = parts ?? [...Array(len).keys()].map((i) => [i === 0 ? "a" : i === len - 1 ? "b" : "m", y + i * T70]);
+  const B6 = BRIDGE[style], P17 = ramp4(B6.deck, "#1d120a", "#ffe7b8"), Pb = ramp4(B6.beam ?? B6.curb, "#120a04", "#ffd9a0"), Pp = ramp4(B6.post ?? B6.curb ?? B6.wall, "#140c06", "#ffe0a8"), R9 = rng19(seed2), W16 = wid * T71;
+  const tiles6 = parts ?? [...Array(len).keys()].map((i) => [i === 0 ? "a" : i === len - 1 ? "b" : "m", y + i * T71]);
   c.save();
   c.lineJoin = "round";
   c.lineCap = "round";
   c.fillStyle = "rgba(6,14,22,.26)";
-  for (const [k, ty] of tiles6) c.fillRect(x + 4, ty + 4, W16, T70);
+  for (const [k, ty] of tiles6) c.fillRect(x + 4, ty + 4, W16, T71);
   if (!B6.stone) {
     for (const [k, ty] of tiles6) if (k === "m") for (const ex of [x - 3, x + W16 - 1]) {
-      prop5(c, [[rect5(ex, ty + T70 / 2 - 2, 4, 4), Pb.d]], 1);
+      prop5(c, [[rect5(ex, ty + T71 / 2 - 2, 4, 4), Pb.d]], 1);
     }
   }
   const top = new Path2D();
-  for (const [k, ty] of tiles6) top.rect(x, ty, W16, T70);
+  for (const [k, ty] of tiles6) top.rect(x, ty, W16, T71);
   prop5(c, [[top, P17.m]], 1.3);
   c.save();
   c.clip(top);
   for (const [k, ty] of tiles6) {
-    if (B6.stone) flags7(c, x, ty, W16, T70, P17, R9);
-    else planks2(c, x, ty, W16, T70, false, P17, R9);
+    if (B6.stone) flags7(c, x, ty, W16, T71, P17, R9);
+    else planks2(c, x, ty, W16, T71, false, P17, R9);
   }
   c.restore();
   for (const [k, ty] of tiles6) if (k === "b") {
-    const fy = ty + T70, st = ramp4(B6.stone ? B6.wall : B6.foot, "#10161e", "#fff4dc");
+    const fy = ty + T71, st = ramp4(B6.stone ? B6.wall : B6.foot, "#10161e", "#fff4dc");
     prop5(c, [[rect5(x, fy, W16, B6.stone ? 9 : 6), st.m]], 1.2);
     masonry2(c, x, fy, W16, B6.stone ? 9 : 6, st, R9);
   }
   if (B6.stone) {
     const Pw = ramp4(B6.wall, "#14181e", "#fff0d0");
     for (const ex of [x, x + W16 - 6]) for (const [k, ty] of tiles6) {
-      const q = rect5(ex, ty - 6, 6, T70 + (k === "b" ? 6 : 0));
+      const q = rect5(ex, ty - 6, 6, T71 + (k === "b" ? 6 : 0));
       prop5(c, [[q, Pw.l]], 1.1);
       c.fillStyle = Pw.h;
-      c.fillRect(ex, ty - 6, 1, T70);
+      c.fillRect(ex, ty - 6, 1, T71);
       c.strokeStyle = Pw.d2;
       c.lineWidth = 0.8;
       for (let i = 1; i < 4; i++) {
@@ -141469,25 +141545,25 @@ function bridgeV(c, x, y, len, wid, style = "timber", seed2 = 1, parts = null) {
       }
       if (k === "b") {
         c.fillStyle = Pw.d;
-        c.fillRect(ex, ty + T70 - 6, 6, 6);
+        c.fillRect(ex, ty + T71 - 6, 6, 6);
       }
     }
   } else {
     for (const ex of [x, x + W16 - 4]) {
       const q = new Path2D();
-      for (const [k, ty] of tiles6) q.rect(ex, ty, 4, T70);
+      for (const [k, ty] of tiles6) q.rect(ex, ty, 4, T71);
       prop5(c, [[q, Pb.m]], 1.1);
       c.fillStyle = Pb.l;
-      for (const [k, ty] of tiles6) c.fillRect(ex, ty, 1.2, T70);
+      for (const [k, ty] of tiles6) c.fillRect(ex, ty, 1.2, T71);
     }
     for (const ex of [x + 2, x + W16 - 2]) {
       for (const [k, ty] of tiles6) {
-        const q = rect5(ex - 1.1, ty - 10, 2.2, T70);
+        const q = rect5(ex - 1.1, ty - 10, 2.2, T71);
         prop5(c, [[q, Pp.l]], 0.9);
       }
       for (const [k, ty] of tiles6) {
         post4(c, ex, ty + (k === "a" ? 3 : 0) + 1, k === "a" ? 13 : 11.5, Pp, k === "a" ? 4.6 : 3.6, true, B6.snow);
-        if (k === "b") post4(c, ex, ty + T70 - 1, 13, Pp, 4.6, true, B6.snow);
+        if (k === "b") post4(c, ex, ty + T71 - 1, 13, Pp, 4.6, true, B6.snow);
       }
     }
   }
@@ -146881,7 +146957,7 @@ function overlayFunctionalSiteBootstrapD9(chunk3, plan) {
 
 // src/shared/generation/woodland_ruin_exterior_d11_3_2.js
 var WOODLAND_RUIN_EXTERIOR_D11_3_2 = "woodland-ruin-exterior-d11.3.2-v1";
-var T71 = 32;
+var T72 = 32;
 var ROWS2 = [
   "000000000",
   "000000000",
@@ -146897,7 +146973,7 @@ var TOP3 = -4;
 function overlayWoodlandRuinExteriorD11_3_2(chunk3, bootstrap) {
   const site = bootstrap?.bootstrap ?? bootstrap?.guaranteedCandidate ?? bootstrap;
   if (!site?.entrance || site.entrance.chunkX !== chunk3.chunkX || site.entrance.chunkY !== chunk3.chunkY) return chunk3;
-  const ex = Math.floor(site.entrance.localX / T71), ey = Math.floor(site.entrance.localY / T71);
+  const ex = Math.floor(site.entrance.localX / T72), ey = Math.floor(site.entrance.localY / T72);
   requireContract(ex + LEFT >= 0 && ex + LEFT + 9 <= 32 && ey + TOP3 >= 0 && ey + TOP3 + 8 <= 26, "Ruin exterior crosses page boundary");
   const collision = chunk3.collision.tiles.map((r) => [...r]), terrain = chunk3.visual.terrain.map((r) => [...r]), biomes2 = chunk3.visual.biomes.map((r) => [...r]), centerline = chunk3.visual.route.centerline.map((r) => [...r]), clearance = chunk3.visual.route.clearance.map((r) => [...r]);
   for (let ry = 0; ry < ROWS2.length; ry++) for (let rx = 0; rx < ROWS2[ry].length; rx++) {
@@ -146920,7 +146996,7 @@ function overlayWoodlandRuinExteriorD11_3_2(chunk3, bootstrap) {
     { x: ex - 4, y: ey + 3, width: 1, height: 1, detail: "left-root" },
     { x: ex + 4, y: ey + 3, width: 1, height: 1, detail: "right-root" }
   ]) blockers.push({ id: `ruin:${site.siteId}:${b.detail}`, ...b, kind: "ruin-exterior-masonry" });
-  const decorations = (chunk3.visual.decorations ?? []).filter((d) => !owns(Math.floor(d.x), Math.floor(d.y))), anchors = chunk3.anchors.filter((a) => !owns(Math.floor(a.position.x / T71), Math.floor(a.position.y / T71))), sites = chunk3.sites.filter((s) => s.siteId === site.siteId || !owns(Math.floor(s.entrance.localX / T71), Math.floor(s.entrance.localY / T71)));
+  const decorations = (chunk3.visual.decorations ?? []).filter((d) => !owns(Math.floor(d.x), Math.floor(d.y))), anchors = chunk3.anchors.filter((a) => !owns(Math.floor(a.position.x / T72), Math.floor(a.position.y / T72))), sites = chunk3.sites.filter((s) => s.siteId === site.siteId || !owns(Math.floor(s.entrance.localX / T72), Math.floor(s.entrance.localY / T72)));
   return freezeWire({ ...copyWire(chunk3), collision: { ...copyWire(chunk3.collision), tiles: collision.map((r) => r.join("")) }, visual: { ...copyWire(chunk3.visual), terrain: terrain.map((r) => r.join("")), biomes: biomes2.map((r) => r.join("")), blockers, decorations, route: { centerline: centerline.map((r) => r.join("")), clearance: clearance.map((r) => r.join("")) } }, anchors, sites, ruinExterior: { version: WOODLAND_RUIN_EXTERIOR_D11_3_2, siteId: site.siteId, entranceTile: { x: ex, y: ey }, mask: [...ROWS2] } });
 }
 
@@ -147007,7 +147083,7 @@ function createWorldResidencyD9({ authority, worker: rawWorker, pageBuffer, site
       if (parcelKeys.some((k) => pinned.has(k))) for (const k of parcelKeys) pinned.add(k);
       const approach = w.runtime.chunks.some((c) => c.anchors.some((anchor2) => {
         const id = "ordinary:" + anchor2.id.split(":").at(-1);
-        if (woodlandPilotEventAlreadyAdmitted(anchor2, w.episodes[id])) return false;
+        if (woodlandPilotEventAlreadyAdmitted(anchor2, w.episodes[id]) || summitAlreadyAdmittedV1(anchor2, w.episodes[id])) return false;
         if (s.groupsById[id] && !w.episodes[id]?.renewalEligible) return false;
         const q = projectToLocalFrameD9({ chunkX: c.chunkX, chunkY: c.chunkY, localX: anchor2.position.x, localY: anchor2.position.y }, w.runtime.frames);
         return q && Object.values(s.playersById).some((p) => {
