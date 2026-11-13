@@ -1993,7 +1993,7 @@ var SUMMIT_ORDINAL = 1;
 var SUMMIT_GUARDS = Object.freeze({ 3: Object.freeze({ count: 6, rank: "B" }), 4: Object.freeze({ count: 8, rank: "A" }) });
 var SUMMIT_FAMILIES = Object.freeze(["golem", "gargoyle", "rust_nibbler", "gargoyle", "golem", "rust_nibbler", "gargoyle", "golem"]);
 var isSummitAnchorV1 = (anchor) => anchor?.ordinal === SUMMIT_ORDINAL && Boolean(anchor.summit);
-var summitGroupV1 = (s, groupId) => Boolean(s?.d9World?.plannedWorld) && s.d9World.episodes?.[groupId]?.geography?.anchorOrdinal === SUMMIT_ORDINAL;
+var summitGroupV1 = (s, groupId) => Boolean(s?.d9World?.plannedWorld) && !s.groupsById?.[groupId]?.siteId && s.d9World.episodes?.[groupId]?.geography?.anchorOrdinal === SUMMIT_ORDINAL;
 var summitAlreadyAdmittedV1 = (anchor, episode) => isSummitAnchorV1(anchor) && Boolean(episode);
 
 // src/shared/content/planned_events_v1.js
