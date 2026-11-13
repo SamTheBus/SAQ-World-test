@@ -5397,6 +5397,10 @@ var terracesForBinding = (b) => {
   const m = /^world-maker-v1\.(\d+)$/.exec(b?.worldMaker ?? "");
   return Boolean(m) && Number(m[1]) >= 15;
 };
+var terraceSiteGuardForBinding = (b) => {
+  const m = /^world-maker-v1\.(\d+)$/.exec(b?.worldMaker ?? "");
+  return Boolean(m) && Number(m[1]) >= 21;
+};
 var mix2 = (n) => {
   n = Math.imul(n ^ n >>> 16, 2246822507);
   n = Math.imul(n ^ n >>> 13, 3266489909);
@@ -6344,7 +6348,7 @@ var bounded = (map, limit) => {
   if (map.size >= limit) map.clear();
   return map;
 };
-function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, clearAt, protectedChunk, events = [], terraces = false, volcanoes = false, sites: sites6 = [], towns = [], keepOut = null }) {
+function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, clearAt, protectedChunk, siteChunk = null, events = [], terraces = false, volcanoes = false, sites: sites6 = [], towns = [], keepOut = null }) {
   const S = createStandField(seedDigest), K = S.K, W9 = terrain2.widthTiles;
   const elevations = asset.cellRows.flatMap((r) => r.cells.map((c) => c[10])).sort((p, q) => p - q);
   const rank = (v) => {
@@ -6426,6 +6430,15 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
     }
     return Math.max(0, 1 - d / 10, eventBuckets.size ? eventGuard(x, y) : 0);
   }
+  function nearSite(x, y) {
+    const cx = Math.floor(x / 32), cy = Math.floor(y / 26);
+    for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) {
+      if (!siteChunk(cx + i, cy + j)) continue;
+      const x0 = (cx + i) * 32, y0 = (cy + j) * 26, dx = Math.max(0, x0 - x, x - (x0 + 31)), dy = Math.max(0, y0 - y, y - (y0 + 25));
+      if (dx + dy < 10) return true;
+    }
+    return false;
+  }
   const T10 = terraces ? createUplandTerraces({
     hash: standsHashText(seedDigest + "/" + FOREST_STANDS_VERSION + "/terrace"),
     high,
@@ -6434,7 +6447,7 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
       const b = base(x, y);
       return b.walkable && b.biome === "r" && !b.bank && b.kind !== "shore" && !clearAt(x, y, b);
     },
-    open: (x, y) => guardAt(x, y) === 0 && roadDistance(x, y) >= 4
+    open: (x, y) => guardAt(x, y) === 0 && roadDistance(x, y) >= 4 && !(siteChunk && nearSite(x, y))
   }) : null;
   const V = volcanoes ? createVolcanoes({
     hash: standsHashText(seedDigest + "/" + FOREST_STANDS_VERSION + "/volcano"),
@@ -13584,7 +13597,10 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     return false;
   };
   const siteVolcanoes = siteVolcanoesForBinding(binding), lairIds = new Set(Object.values(asset.contentRoles?.bosses ?? {})), volcanicSites = siteVolcanoes ? [...caves, ...forts, ...ruins, ...crypts].filter((s) => terrain2.base(s.left + ((s.width ?? 12) >> 1), s.top + ((s.height ?? 9) >> 1)).biome === "l").map((s) => ({ id: s.reservation.id, family: s.reservation.familyId.replace("site-family:", ""), tier: s.reservation.tier, box: { x0: s.left, y0: s.top, x1: s.left + (s.width ?? 12) - 1, y1: s.top + (s.height ?? 9) - 1 }, trail: [...s.trail ?? []], own: [...s.reservation.footprint, ...s.reservation.approach].map((c) => c.x + "," + c.y), fp: s.reservation.footprint, ap: s.reservation.approach, lair: lairIds.has(s.reservation.id) })) : [];
-  const stands = hasForestStands(binding) ? createForestStandsV2({ seedDigest: asset.seedDigest, asset, terrain: terrain2, routeAt, clearAt: standsClear, protectedChunk: (cx, cy) => protection.at(cx * 32, cy * 26), events: (wilderness?.eventCapacities ?? []).map((e) => e.position), terraces: terracesForBinding(binding), volcanoes: volcanoesForBinding(binding), sites: volcanicSites, towns: siteVolcanoes ? (asset.generatedTowns?.towns ?? []).filter((t) => t.biome === "volcanic").map((t) => ({ ...t, bounds: townBoundsV1(t) })) : [], keepOut: landings ? (x, y) => landings.clearAt(x, y) : null }) : null;
+  const stands = hasForestStands(binding) ? createForestStandsV2({ seedDigest: asset.seedDigest, asset, terrain: terrain2, routeAt, clearAt: standsClear, protectedChunk: (cx, cy) => protection.at(cx * 32, cy * 26), siteChunk: terraceSiteGuardForBinding(binding) ? (cx, cy) => {
+    const k = cx + "," + cy;
+    return ruinByChunk.has(k) || fortByChunk.has(k) || caveByChunk.has(k);
+  } : null, events: (wilderness?.eventCapacities ?? []).map((e) => e.position), terraces: terracesForBinding(binding), volcanoes: volcanoesForBinding(binding), sites: volcanicSites, towns: siteVolcanoes ? (asset.generatedTowns?.towns ?? []).filter((t) => t.biome === "volcanic").map((t) => ({ ...t, bounds: townBoundsV1(t) })) : [], keepOut: landings ? (x, y) => landings.clearAt(x, y) : null }) : null;
   if (stands?.volcanoes && volcanicSites.length) {
     const byId2 = new Map([...forts, ...ruins].map((e) => [e.reservation.id, e]));
     for (const [id, { add, remove }] of stands.volcanoes.siteTrails()) {

@@ -12256,6 +12256,10 @@ var terracesForBinding = (b) => {
   const m = /^world-maker-v1\.(\d+)$/.exec(b?.worldMaker ?? "");
   return Boolean(m) && Number(m[1]) >= 15;
 };
+var terraceSiteGuardForBinding = (b) => {
+  const m = /^world-maker-v1\.(\d+)$/.exec(b?.worldMaker ?? "");
+  return Boolean(m) && Number(m[1]) >= 21;
+};
 var mix2 = (n) => {
   n = Math.imul(n ^ n >>> 16, 2246822507);
   n = Math.imul(n ^ n >>> 13, 3266489909);
@@ -13224,7 +13228,7 @@ var bounded = (map, limit) => {
   if (map.size >= limit) map.clear();
   return map;
 };
-function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, clearAt, protectedChunk, events = [], terraces = false, volcanoes = false, sites: sites6 = [], towns = [], keepOut = null }) {
+function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, clearAt, protectedChunk, siteChunk = null, events = [], terraces = false, volcanoes = false, sites: sites6 = [], towns = [], keepOut = null }) {
   const S = createStandField(seedDigest), K = S.K, W6 = terrain2.widthTiles;
   const elevations = asset.cellRows.flatMap((r) => r.cells.map((c) => c[10])).sort((p, q) => p - q);
   const rank = (v) => {
@@ -13306,6 +13310,15 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
     }
     return Math.max(0, 1 - d / 10, eventBuckets.size ? eventGuard(x, y) : 0);
   }
+  function nearSite(x, y) {
+    const cx = Math.floor(x / 32), cy = Math.floor(y / 26);
+    for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) {
+      if (!siteChunk(cx + i, cy + j)) continue;
+      const x0 = (cx + i) * 32, y0 = (cy + j) * 26, dx = Math.max(0, x0 - x, x - (x0 + 31)), dy = Math.max(0, y0 - y, y - (y0 + 25));
+      if (dx + dy < 10) return true;
+    }
+    return false;
+  }
   const T4 = terraces ? createUplandTerraces({
     hash: standsHashText(seedDigest + "/" + FOREST_STANDS_VERSION + "/terrace"),
     high,
@@ -13314,7 +13327,7 @@ function createForestStandsV2({ seedDigest, asset, terrain: terrain2, routeAt, c
       const b = base(x, y);
       return b.walkable && b.biome === "r" && !b.bank && b.kind !== "shore" && !clearAt(x, y, b);
     },
-    open: (x, y) => guardAt(x, y) === 0 && roadDistance(x, y) >= 4
+    open: (x, y) => guardAt(x, y) === 0 && roadDistance(x, y) >= 4 && !(siteChunk && nearSite(x, y))
   }) : null;
   const V = volcanoes ? createVolcanoes({
     hash: standsHashText(seedDigest + "/" + FOREST_STANDS_VERSION + "/volcano"),
@@ -30709,6 +30722,7 @@ export {
   hasBossHostingV1,
   TERRACES_VERSION,
   terracesForBinding,
+  terraceSiteGuardForBinding,
   terraceTileHash,
   readTerrace,
   terraceGeometry,

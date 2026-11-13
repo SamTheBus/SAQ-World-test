@@ -903,6 +903,7 @@ import {
   tavernSpaceIds,
   technicalChunkId,
   terraceGeometry,
+  terraceSiteGuardForBinding,
   terraceTileHash,
   terracesForBinding,
   tileAddress,
@@ -1052,7 +1053,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-GMJTKPGH.js";
+} from "./chunk-P6PZAXOG.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -1295,8 +1296,8 @@ function createCamera() {
     const snap2 = !Number.isFinite(Number(time3)) || lastTime === null || elapsed <= 0 || elapsed >= SNAP_GAP_MS || current.spaceKey !== key3 || lastWidth !== width2 || lastHeight !== height || current.zoom !== zoom || actorJump >= SNAP_DISTANCE;
     if (snap2) current = Object.freeze({ ...target, zoom, spaceKey: key3 });
     else {
-      const goal = (value2, wanted, zone) => Math.abs(wanted - value2) <= zone ? value2 : wanted - Math.sign(wanted - value2) * zone, alpha2 = 1 - Math.exp(-elapsed / FOLLOW_TIME_MS), clamp64 = (value2, map, view3) => c.endless ? value2 : map <= view3 ? (map - view3) / 2 : Math.max(0, Math.min(map - view3, value2));
-      current = Object.freeze({ x: clamp64(current.x + (goal(current.x, target.x, DEAD_ZONE_X) - current.x) * alpha2, mapWidth, viewWidth), y: clamp64(current.y + (goal(current.y, target.y, DEAD_ZONE_Y) - current.y) * alpha2, mapHeight, viewHeight), zoom, spaceKey: key3 });
+      const goal = (value2, wanted, zone) => Math.abs(wanted - value2) <= zone ? value2 : wanted - Math.sign(wanted - value2) * zone, alpha = 1 - Math.exp(-elapsed / FOLLOW_TIME_MS), clamp64 = (value2, map, view3) => c.endless ? value2 : map <= view3 ? (map - view3) / 2 : Math.max(0, Math.min(map - view3, value2));
+      current = Object.freeze({ x: clamp64(current.x + (goal(current.x, target.x, DEAD_ZONE_X) - current.x) * alpha, mapWidth, viewWidth), y: clamp64(current.y + (goal(current.y, target.y, DEAD_ZONE_Y) - current.y) * alpha, mapHeight, viewHeight), zoom, spaceKey: key3 });
     }
     lastTime = Number.isFinite(Number(time3)) ? Number(time3) : null;
     lastWidth = width2;
@@ -1454,8 +1455,8 @@ function createActorMotionPresentationV1({ collisionProbe = null, now: now3 = ()
   }
   function sample(model, time3, deadline3) {
     observe(model, now3());
-    const alpha2 = Number.isFinite(deadline3) && Number.isFinite(time3) ? clamp((time3 - deadline3 + P.periodMs) / P.periodMs) : 1;
-    const target = Math.max(0, model.tick - P.bufferTicks + alpha2);
+    const alpha = Number.isFinite(deadline3) && Number.isFinite(time3) ? clamp((time3 - deadline3 + P.periodMs) / P.periodMs) : 1;
+    const target = Math.max(0, model.tick - P.bufferTicks + alpha);
     displayTick = Math.min(model.tick, Math.max(displayTick ?? target, target));
     const positions = /* @__PURE__ */ new Map();
     for (const [id, r] of records) {
@@ -51073,13 +51074,13 @@ async function createNightLootArtV1(env, prior, options = {}) {
       if (typeof value2 !== "boolean") throw TypeError("VFX comparison must be boolean");
       enabled = value2;
     },
-    fragment(ctx, material, index, x, y, size, rotation, alpha2) {
+    fragment(ctx, material, index, x, y, size, rotation, alpha) {
       if (!enabled || !data) return false;
       const row2 = { wood: 0, clay: 4, urn: 8, metal: 12 }[material];
       if (row2 === void 0) return false;
       const sprite6 = data.sprites[row2 + (index & 3)].image, scale = size / Math.max(sprite6.width, sprite6.height);
       ctx.save();
-      ctx.globalAlpha = alpha2;
+      ctx.globalAlpha = alpha;
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
       ctx.translate(x, y);
@@ -51571,13 +51572,13 @@ async function createBreakablePropArtV1(env, prior, options = {}) {
     error = e.message;
   }
   const loadMs = env.performance.now() - start;
-  function paint3(ctx, key3, x, bottom, w, h, alpha2 = 1) {
+  function paint3(ctx, key3, x, bottom, w, h, alpha = 1) {
     const image = data?.sprites.get(key3);
     if (!image) return false;
-    if (alpha2 <= 0) return true;
+    if (alpha <= 0) return true;
     const scale = Math.min(w / image.width, h / image.height), width2 = image.width * scale, height = image.height * scale;
     ctx.save();
-    ctx.globalAlpha *= alpha2;
+    ctx.globalAlpha *= alpha;
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
     ctx.drawImage(image, x - width2 / 2, bottom - height, width2, height);
@@ -60591,9 +60592,9 @@ function solid(c, p, col2, o = 1.5, k = 2, cool, warm2) {
   shade4(c, p, P19, k);
   return P19;
 }
-function strokes(c, list, col2, w = 0.8, alpha2 = 1) {
+function strokes(c, list, col2, w = 0.8, alpha = 1) {
   c.save();
-  c.globalAlpha = alpha2;
+  c.globalAlpha = alpha;
   c.strokeStyle = col2;
   c.lineWidth = w;
   c.lineCap = "round";
@@ -60604,8 +60605,8 @@ function strokes(c, list, col2, w = 0.8, alpha2 = 1) {
   }
   c.restore();
 }
-function shine(c, x, y, rx, ry, a = -0.4, alpha2 = 0.85) {
-  c.fillStyle = `rgba(255,255,255,${alpha2})`;
+function shine(c, x, y, rx, ry, a = -0.4, alpha = 0.85) {
+  c.fillStyle = `rgba(255,255,255,${alpha})`;
   c.beginPath();
   c.ellipse(x, y, rx, ry, a, 0, TAU113);
   c.fill();
@@ -73865,9 +73866,9 @@ function warmSpark(c, x, y, r, a) {
   c.fill();
   c.restore();
 }
-function streak2(c, ox, oy, r, a0, len, w, alpha2) {
+function streak2(c, ox, oy, r, a0, len, w, alpha) {
   c.save();
-  c.globalAlpha = alpha2;
+  c.globalAlpha = alpha;
   c.lineCap = "round";
   c.strokeStyle = "rgba(70,110,145,.85)";
   c.lineWidth = w + 1.6;
@@ -78253,7 +78254,7 @@ function sporePose(actor, k, tick, s) {
   return { face: 1, x, y, rot: 0, sq: 1 };
 }
 function gravePose(actor, k, tick, s) {
-  let x = 0, y = 0, rot2 = 0, alpha2 = 1;
+  let x = 0, y = 0, rot2 = 0, alpha = 1;
   const mel = meleeOf6(actor, tick);
   if (mel && (!k || k.phase === "ready")) {
     const side = mel.dir.x < 0 ? -1 : 1;
@@ -78285,15 +78286,15 @@ function gravePose(actor, k, tick, s) {
         s.spread = 1;
         s.crouch = Math.max(0, 1 - u * 4);
         s.flap = Math.sin(u * TAU115 * 1.5) * 0.25;
-        alpha2 = 1 - clamp27((u - 0.7) / 0.3);
+        alpha = 1 - clamp27((u - 0.7) / 0.3);
       } else if (age >= DIVE.airTicks - FALL_TICKS && k.target) {
         const u = (age - (DIVE.airTicks - FALL_TICKS)) / FALL_TICKS;
         s.lift = TOP * (1 - u * u);
         s.dive = 1;
         x = k.target.x - actor.position.x;
         y = k.target.y - actor.position.y;
-        alpha2 = clamp27(u * 3);
-      } else alpha2 = 0;
+        alpha = clamp27(u * 3);
+      } else alpha = 0;
     } else if (k.phase === "stuck") {
       s.stuck = 1;
       s.tug = tick * SEC7;
@@ -78305,7 +78306,7 @@ function gravePose(actor, k, tick, s) {
       s.spread = u < 0.5 ? 0 : ease4((u - 0.5) / 0.5) * 0.6;
     }
   }
-  return { face: 1, x, y, rot: rot2, sq: 1, alpha: alpha2 };
+  return { face: 1, x, y, rot: rot2, sq: 1, alpha };
 }
 var POSES = { rustmaw: rustPose, sporecrown: sporePose, gravewing: gravePose, vinegorger: (...a) => vinePose(...a), rotbloom: (...a) => rotPose(...a), gulpjaw: (...a) => frogPose(...a), rootgorger: (...a) => vinePose(...a), ...OPEN_POSES, ...WET_POSES, ...UP_POSES, ...SNOW_POSES, ...VOLCANIC_POSES };
 function drawLesserBossBodyV1(c, actor, tick, { flash = false, motionBlend = 0, labelsY = -84, hat = null } = {}) {
@@ -78922,28 +78923,28 @@ var chargeOf = (actor) => {
   const k = actor.alive ? actor.elite?.namedTrick : null;
   return k?.kind === "charge" && k.direction ? k : null;
 };
-function lane(c, k, q, alpha2) {
+function lane(c, k, q, alpha) {
   const length = CHARGE.speed * CHARGE.chargeTicks + CHARGE.contactRadius, w = CHARGE.contactRadius;
   c.save();
   c.translate(k.origin.x, k.origin.y);
   c.rotate(Math.atan2(k.direction.y, k.direction.x));
-  c.globalAlpha = alpha2;
+  c.globalAlpha = alpha;
   c.beginPath();
   c.roundRect(-w * 0.6, -w, length + w * 0.6, w * 2, w * 0.7);
   c.fillStyle = "#f7b96624";
   c.fill();
   c.lineWidth = 1.5;
   c.strokeStyle = AMBER;
-  c.globalAlpha = alpha2 * 0.7;
+  c.globalAlpha = alpha * 0.7;
   c.stroke();
-  c.globalAlpha = alpha2;
+  c.globalAlpha = alpha;
   c.beginPath();
   c.roundRect(-w * 0.6, -w, (length + w * 0.6) * q, w * 2, w * 0.7);
   c.fillStyle = "#f7b96638";
   c.fill();
   for (let i = 0; i < 5; i++) {
     const x = 28 + i * (length - 44) / 4, lit2 = x / length <= q;
-    c.globalAlpha = alpha2 * (lit2 ? 0.95 : 0.35);
+    c.globalAlpha = alpha * (lit2 ? 0.95 : 0.35);
     c.strokeStyle = lit2 ? PALE : AMBER;
     c.lineWidth = 2.4;
     c.lineCap = "round";
@@ -78954,7 +78955,7 @@ function lane(c, k, q, alpha2) {
     c.lineTo(x - 6, 9);
     c.stroke();
   }
-  c.globalAlpha = alpha2 * (0.35 + 0.65 * q);
+  c.globalAlpha = alpha * (0.35 + 0.65 * q);
   c.strokeStyle = AMBER;
   c.lineWidth = 3;
   c.beginPath();
@@ -80487,8 +80488,8 @@ function webKnot(c, x, y, angle3, scale, light2 = false) {
   c.stroke();
   c.restore();
 }
-function webArc(c, rx, ry, radius, front2, alpha2, lineWidth = 1.7) {
-  c.globalAlpha = alpha2;
+function webArc(c, rx, ry, radius, front2, alpha, lineWidth = 1.7) {
+  c.globalAlpha = alpha;
   const span2 = halfSpan(front2, 0.035);
   if (!span2) return;
   const [start, end] = span2;
@@ -80563,16 +80564,16 @@ function groundWeb(c, row2, tick, pending) {
   const x = row2.position.x, y = row2.position.y, rx = row2.geometry.radiusX, ry = row2.geometry.radiusY, seed2 = parseInt(row2.hazardId.slice(-8), 16) >>> 0;
   c.save();
   c.translate(x, y);
-  let alpha2 = 0.72, contraction = 1;
+  let alpha = 0.72, contraction = 1;
   if (pending) {
     const progress8 = Math.max(0, Math.min(1, (tick - row2.startedTick) / (row2.resolvesTick - row2.startedTick)));
-    alpha2 = 0.2 + 0.58 * progress8;
+    alpha = 0.2 + 0.58 * progress8;
     contraction = 1.34 - progress8 * 0.34;
   } else {
-    alpha2 = Math.min(0.78, row2.ageTicks / 10 * 0.78, row2.remainingTicks / 24 * 0.78);
+    alpha = Math.min(0.78, row2.ageTicks / 10 * 0.78, row2.remainingTicks / 24 * 0.78);
     if (row2.ageTicks < 10) contraction = 1.12 - row2.ageTicks * 0.012;
   }
-  c.globalAlpha = Math.max(0, alpha2);
+  c.globalAlpha = Math.max(0, alpha);
   for (let ring7 = 1; ring7 <= 4; ring7++) {
     const r = ring7 / 4 * contraction, crooked = (seed2 >> ring7 & 3) - 1.5;
     c.strokeStyle = WEB_INDIGO;
@@ -80665,8 +80666,8 @@ function slagFragment(c, x, y, angle3, scale, hot = false) {
   c.stroke();
   c.restore();
 }
-function slagHalfArc(c, front2, alpha2) {
-  c.globalAlpha = alpha2;
+function slagHalfArc(c, front2, alpha) {
+  c.globalAlpha = alpha;
   const span2 = halfSpan(front2, 0.035);
   if (!span2) return;
   const [start, end] = span2;
@@ -80726,13 +80727,13 @@ function groundSlag(c, row2, tick, pending) {
   const x = row2.position.x, y = row2.position.y, rx = row2.geometry.radiusX, ry = row2.geometry.radiusY, seed2 = parseInt(row2.hazardId.slice(-8), 16) >>> 0;
   c.save();
   c.translate(x, y);
-  let alpha2 = 0.88, contraction = 1;
+  let alpha = 0.88, contraction = 1;
   if (pending) {
     const progress8 = Math.max(0, Math.min(1, (tick - row2.startedTick) / (row2.resolvesTick - row2.startedTick)));
-    alpha2 = 0.25 + 0.62 * progress8;
+    alpha = 0.25 + 0.62 * progress8;
     contraction = progress8 === 1 ? 1 : 1.16 - progress8 * 0.16;
-  } else alpha2 = Math.min(0.9, row2.ageTicks / 8 * 0.9, row2.remainingTicks / 20 * 0.9);
-  c.globalAlpha = Math.max(0, alpha2);
+  } else alpha = Math.min(0.9, row2.ageTicks / 8 * 0.9, row2.remainingTicks / 20 * 0.9);
+  c.globalAlpha = Math.max(0, alpha);
   c.fillStyle = pending ? SLAG_SHADOW : SLAG_CRUST;
   c.beginPath();
   c.ellipse(0, 0, rx * contraction, ry * contraction, 0, 0, TAU116);
@@ -81414,9 +81415,9 @@ var ANCHORS = {
   tomb_mummy: { head: [0, -40], mouth: [4, -37], top: -51, back: [-4, -34], half: 17 }
 };
 var anchorsOf = (family) => ANCHORS[family] ?? ANCHORS.golem;
-function puff3(c, x, y, r, fill7, edge, alpha2 = 1) {
+function puff3(c, x, y, r, fill7, edge, alpha = 1) {
   c.save();
-  c.globalAlpha *= alpha2;
+  c.globalAlpha *= alpha;
   c.fillStyle = fill7;
   c.strokeStyle = edge;
   c.lineWidth = 0.9;
@@ -82897,8 +82898,8 @@ function createRuinGrovePlan(ruin, seed2, nativeTile) {
 function paintRuinContactShadow(c, x, y, size, kind = "tree") {
   const radius = size * (kind === "tree" ? 0.18 : 0.28), ground = y + size * 0.85;
   c.save();
-  for (const [scale, alpha2] of [[1, 0.04], [0.7, 0.05], [0.38, 0.08]]) {
-    c.fillStyle = `rgba(31,54,28,${alpha2})`;
+  for (const [scale, alpha] of [[1, 0.04], [0.7, 0.05], [0.38, 0.08]]) {
+    c.fillStyle = `rgba(31,54,28,${alpha})`;
     c.beginPath();
     c.ellipse(x + size * 0.5, ground, radius * scale, size * 0.075 * scale, 0, 0, Math.PI * 2);
     c.fill();
@@ -83330,10 +83331,10 @@ function createCrispGrassV1(doc, stamp6, clock7 = () => 0) {
     const wx = cx * L.period - L.offX + p.ax * L.k, wy = cy2 * L.period - L.offY + p.ay * L.k, busy = Math.max(0, Math.min(1, (woodlandFieldV1(wx / 900, wy / 900, seed2 + 1) - 0.25) / 0.5)), r = terrainHash(p.id * 7 + cx * 131, cy2 * 977 + L.layer, seed2 + 3) / 4294967296;
     return L.layer === 1 ? r < 0.8 + 0.2 * busy : r < 0.45 * busy;
   }
-  function draw(c, x, y, w, h, wx, wy, alpha2 = 1, seed2 = 0, pal2 = null) {
-    if (alpha2 <= 0) return;
+  function draw(c, x, y, w, h, wx, wy, alpha = 1, seed2 = 0, pal2 = null) {
+    if (alpha <= 0) return;
     stats3.tiles++;
-    c.globalAlpha = alpha2;
+    c.globalAlpha = alpha;
     c.fillStyle = pal2?.base ?? BASE4;
     c.fillRect(x, y, w, h);
     for (const L of index) {
@@ -83761,9 +83762,9 @@ async function createWoodlandEnvironmentV1(environment, review, prior, initial =
     if (!active2() || space.site || space.settlementInterior || !space.visual?.worldAddress) return 0;
     return ["w", "a"].includes(code2(space, x, y)) ? 1 : 0;
   }
-  function material(c, index, x, y, w, h, wx, wy, period, alpha2) {
-    if (alpha2 <= 0) return;
-    c.globalAlpha = alpha2;
+  function material(c, index, x, y, w, h, wx, wy, period, alpha) {
+    if (alpha <= 0) return;
+    c.globalAlpha = alpha;
     for (let yy = 0; yy < h; ) {
       const sy = ((wy + yy) % period + period) % period, hh = Math.min(h - yy, period - sy);
       if (hh < 1e-6) break;
@@ -83777,10 +83778,10 @@ async function createWoodlandEnvironmentV1(environment, review, prior, initial =
     }
     c.globalAlpha = 1;
   }
-  function paint3(c, index, x, y, w, h, wx, wy, alpha2, seed2) {
-    material(c, index, x, y, w, h, wx, wy, 768, alpha2);
+  function paint3(c, index, x, y, w, h, wx, wy, alpha, seed2) {
+    material(c, index, x, y, w, h, wx, wy, 768, alpha);
     const mix35 = 0.18 + 0.38 * woodlandFieldV1(wx / 1792, wy / 1792, seed2 + 39);
-    material(c, index, x, y, w, h, wx + 157, wy + 271, 1024, alpha2 * mix35);
+    material(c, index, x, y, w, h, wx + 157, wy + 271, 1024, alpha * mix35);
   }
   const shoreTile = (v, x, y) => {
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
@@ -83802,10 +83803,10 @@ async function createWoodlandEnvironmentV1(environment, review, prior, initial =
       const type = v.terrain[y - (v.originTile?.y ?? 0)]?.[x - (v.originTile?.x ?? 0)];
       if (!type || ["O", "K", "C", "H", "V"].includes(type)) continue;
       if ((type === "W" || type === "L") && !shoreTile(v, x, y)) continue;
-      const alpha2 = groundWeight(space, x * 32 + 16, y * 32 + 16);
-      if (!alpha2) continue;
+      const alpha = groundWeight(space, x * 32 + 16, y * 32 + 16);
+      if (!alpha) continue;
       draws.ground++;
-      crisp.draw(c, x * 32, y * 32, 32, 32, x * 32 + o.x, y * 32 + o.y, alpha2, seed2, code2(space, x * 32 + 16, y * 32 + 16) === "a" ? MEADOW : null);
+      crisp.draw(c, x * 32, y * 32, 32, 32, x * 32 + o.x, y * 32 + o.y, alpha, seed2, code2(space, x * 32 + 16, y * 32 + 16) === "a" ? MEADOW : null);
     }
   }
   const blockedCache = /* @__PURE__ */ new WeakMap();
@@ -83860,8 +83861,8 @@ async function createWoodlandEnvironmentV1(environment, review, prior, initial =
     const o = environmentWorldOffset(space), seed2 = environmentSeed(space), t = 32, x0 = Math.floor(bounds2.x / t) - 1, x1 = Math.floor((bounds2.x + bounds2.width) / t), y0 = Math.floor(bounds2.y / t) - 1, y1 = Math.floor((bounds2.y + bounds2.height) / t);
     for (const type of ["r", "p"]) for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
       if (at8(x, y) !== type) continue;
-      const alpha2 = groundWeight(space, x * t + 16, y * t + 16);
-      if (!alpha2) continue;
+      const alpha = groundWeight(space, x * t + 16, y * t + 16);
+      if (!alpha) continue;
       const mask2 = roadMask(at8, x, y), n = terrainHash(x + o.x / t, y + o.y / t, seed2), north = mask2 & 1, east = mask2 & 2, south = mask2 & 4, west = mask2 & 8, trail3 = type === "p", inset = trail3 ? 6 : 2, nwRoad = !trail3 && at8(x - 1, y - 1) === "r", neRoad = !trail3 && at8(x + 1, y - 1) === "r", swRoad = !trail3 && at8(x - 1, y + 1) === "r", seRoad = !trail3 && at8(x + 1, y + 1) === "r", px7 = x * t, py = y * t, l = px7 + (west || nwRoad || swRoad ? -1 : inset + n % 2), r = px7 + (east || neRoad || seRoad ? t + 1 : t - inset - (n >>> 4) % 2), top = py + (north || nwRoad || neRoad ? -1 : inset + (n >>> 8) % 2), bottom = py + (south || swRoad || seRoad ? t + 1 : t - inset - (n >>> 12) % 2), nw = !north && !west ? 9 : 0, ne = !north && !east ? 9 : 0, se = !south && !east ? 9 : 0, sw = !south && !west ? 9 : 0;
       c.save();
       c.beginPath();
@@ -83876,7 +83877,7 @@ async function createWoodlandEnvironmentV1(environment, review, prior, initial =
       c.quadraticCurveTo(l, top, l + nw, top);
       c.closePath();
       c.clip();
-      paint3(c, 1, px7 - 1, py - 1, t + 2, t + 2, px7 - 1 + o.x, py - 1 + o.y, alpha2, seed2);
+      paint3(c, 1, px7 - 1, py - 1, t + 2, t + 2, px7 - 1 + o.x, py - 1 + o.y, alpha, seed2);
       c.restore();
       draws.road++;
     }
@@ -83886,8 +83887,8 @@ async function createWoodlandEnvironmentV1(environment, review, prior, initial =
       const d = roadsideDetailV1(space, x, y, occupied, protection);
       if (d) return d;
     }
-    const alpha2 = weight2(space, x * 32 + 16, y * 32 + 16);
-    if (!alpha2) return void 0;
+    const alpha = weight2(space, x * 32 + 16, y * 32 + 16);
+    if (!alpha) return void 0;
     const p = address3(space, x * 32, y * 32), v = space.visual, ox = v.originTile?.x ?? 0, oy = v.originTile?.y ?? 0;
     if (protection.has(Math.floor(p.x), Math.floor(p.y))) return null;
     const type = v.terrain[y - oy]?.[x - ox];
@@ -85331,11 +85332,11 @@ async function createWoodlandForestArtV1(env, review, prior) {
     const v = space.visual, b = v.biomes?.[Math.floor(y / 32) - (v.originTile?.y ?? 0)]?.[Math.floor(x / 32) - (v.originTile?.x ?? 0)], o = environmentWorldOffset(space), tx = (x + o.x - 1048576) / 32, ty = (y + o.y - 851968) / 32, s = WOODLAND_FOREST_POLICY.scope;
     return b === "w" && tx >= s.left && tx < s.right && ty >= s.top && ty < s.bottom;
   };
-  function stamp6(c, image, cx, ground, width2, flip, alpha2 = 1) {
+  function stamp6(c, image, cx, ground, width2, flip, alpha = 1) {
     const h = width2 * image.height / image.width;
     c.save();
     smoothSpriteContext(c);
-    c.globalAlpha = alpha2;
+    c.globalAlpha = alpha;
     c.translate(cx, ground);
     if (flip) c.scale(-1, 1);
     c.drawImage(image, -width2 / 2, -h, width2, h);
@@ -85726,10 +85727,10 @@ async function createBiomeNatureArtV1(env, review, prior) {
     const list = kits[code2][kind];
     return list[h % list.length];
   };
-  function stamp6(c, p, gx, gy, k, alpha2 = 1) {
+  function stamp6(c, p, gx, gy, k, alpha = 1) {
     c.save();
     smoothSpriteContext(c);
-    c.globalAlpha = alpha2;
+    c.globalAlpha = alpha;
     c.drawImage(p.image, gx - p.ax * k, gy - p.ay * k, p.w * k, p.h * k);
     c.restore();
     c.globalAlpha = 1;
@@ -89441,10 +89442,10 @@ function createForestStandsArtV2(env, prior) {
     return { s, k: o.k ?? fit2(s, 46, seed2) };
   }
   const item2 = (id, s, gx, gy, k, extra = null) => s ? { id, s, gx, gy, k, x0: gx - s.ax * k, y0: gy - s.ay * k, x1: gx + (s.w - s.ax) * k, y1: gy + (s.h - s.ay) * k, ...extra } : null;
-  function stamp6(c, it, alpha2 = 1) {
+  function stamp6(c, it, alpha = 1) {
     c.save();
     smoothSpriteContext(c);
-    if (alpha2 !== 1) c.globalAlpha = alpha2;
+    if (alpha !== 1) c.globalAlpha = alpha;
     c.drawImage(it.s.image, it.x0, it.y0, it.x1 - it.x0, it.y1 - it.y0);
     c.restore();
   }
@@ -91941,13 +91942,6 @@ var px3 = (c, x, y, w, h, col2) => {
   c.fillStyle = tint(col2);
   c.fillRect(x, y, w, h);
 };
-function alpha(c, col2, a, draw) {
-  c.save();
-  c.globalAlpha *= a;
-  c.fillStyle = tint(col2);
-  draw();
-  c.restore();
-}
 function glow4(c, x, y, r, rgb6, a) {
   const g = c.createRadialGradient(x, y, 0, x, y, r);
   g.addColorStop(0, `rgba(${rgb6},${a})`);
@@ -92151,14 +92145,23 @@ function eyes(c, blink, y = -7.2) {
     px3(c, 4.8, y, 1.6, 2.4, "#1b2631");
   }
 }
+var SHAVE = [-10.8, -15, 2.4, -15, 2.4, -13.4, -1.4, -12.6, -3, -10.8, -3.4, -8.6, -6.6, -8.4, -9.2, -7.2, -10.8, -7.2];
+var STUBBLE = [-3.4, -7.4, -2.2, -7.4, -1.6, -4.4, 0.8, -3.6, 8.6, -3.8, 8.6, 1.4, -3.8, 1.4];
+function shaved(c, shape3, S9, H7, grain = 0.3) {
+  c.save();
+  c.clip(poly9(HEAD3));
+  c.clip(poly9(shape3));
+  c.fillStyle = tint(mix19(S9.b, H7.d, grain));
+  c.fillRect(-12, -16, 22, 18);
+  const fill7 = mix19(S9.b, H7.d, grain);
+  c.fillStyle = tint(mix19(fill7, H7.d, 0.45));
+  let row2 = 0;
+  for (let y = -14.6; y < 2; y += 1.7, row2++) for (let x = -11 + row2 % 2 * 1.1 + row2 % 3 * 0.35; x < 9; x += 2.2) c.fillRect(x, y, 0.6, 0.6);
+  c.restore();
+}
 function bareHead(c, st, S9, H7, blink, hat) {
   G2(c, HEAD3, S9, { bottom: true, split: 0.86, lw: 1.4 });
-  if (st === "mohawk" || st === "undercut" || st === "mullet") {
-    c.save();
-    c.clip(poly9(HEAD3));
-    alpha(c, H7.b, 0.22, () => c.fillRect(-10, -14, 11, 9));
-    c.restore();
-  }
+  if (st === "mohawk" || st === "undercut" || st === "mullet") shaved(c, SHAVE, S9, H7);
   if (st === "buzz") {
     c.save();
     if (hat) {
@@ -92192,14 +92195,9 @@ function bareHead(c, st, S9, H7, blink, hat) {
   if (!["bald", "mohawk", "buzz", "curly", "undercut"].includes(st)) px3(c, -6.4, -14.4, 7, 0.9, H7.l);
   c.restore();
 }
-function facialHair(c, b, H7) {
+function facialHair(c, b, H7, S9) {
   const MOUTH3 = "#3b2418", o = { bottom: true, split: 0.64, lw: 1.2 }, BEARD = [-3.6, -7.4, -2.2, -7.4, -1.4, -4.2, 1.2, -3.6, 8.2, -3.6, 8.4, 0.2, 6.8, 2.2, -0.8, 2.2, -3.4, 0.2];
-  if (b === "stubble") {
-    alpha(c, H7.b, 0.32, () => {
-      c.fillRect(-1.4, -3.8, 9.4, 4.4);
-      c.fillRect(-3, -7, 1.8, 3.6);
-    });
-  }
+  if (b === "stubble") shaved(c, STUBBLE, S9, H7, 0.24);
   if (b === "mustache") G2(c, [1.4, -3.2, 2.4, -4.2, 7.4, -4.2, 8.4, -3.2, 7.2, -2.4, 4.8, -3.4, 2.4, -2.4], H7, { flat: true, lw: 1 });
   if (b === "handlebar") G2(c, [1, -3, 2.4, -4.2, 7.4, -4.2, 9.2, -3.6, 10, -5.6, 11, -4.4, 9.8, -2.2, 7.2, -2.6, 4.8, -3.4, 2.4, -2.6], H7, { flat: true, lw: 1 });
   if (b === "goatee") {
@@ -94798,7 +94796,7 @@ function drawBlockyHero(c, spec, pose = {}) {
       c.beginPath();
       c.rect(-1.2, -10.4, 8.6, 9.6);
       c.clip();
-      facialHair(c, look.facialHair, H7);
+      facialHair(c, look.facialHair, H7, S9);
       c.restore();
       fringe2();
       eyes(c, blink, -7.4);
@@ -94819,13 +94817,13 @@ function drawBlockyHero(c, spec, pose = {}) {
       c.beginPath();
       c.rect(-1.4, -10.6, 8.8, 10.2);
       c.clip();
-      facialHair(c, look.facialHair, H7);
+      facialHair(c, look.facialHair, H7, S9);
       c.restore();
     };
     helmetPiece(c, w.helmet, A2, red, sway, HOOD_FACE.has(w.helmet) ? hoodFace : COIF_FACE.has(w.helmet) ? coifFace : OPEN_HOOD_FACE.has(w.helmet) ? openHoodFace : null);
   } else {
     bareHead(c, st, S9, H7, blink, hairHidden);
-    facialHair(c, look.facialHair, H7);
+    facialHair(c, look.facialHair, H7, S9);
     if (hatOn) helmetPiece(c, w.helmet, accOf(w.g.helmet), red, sway, null);
   }
   c.restore();
@@ -97173,7 +97171,10 @@ function createPlannedChunkGenerator(asset, binding, sha256) {
     return false;
   };
   const siteVolcanoes = siteVolcanoesForBinding(binding), lairIds = new Set(Object.values(asset.contentRoles?.bosses ?? {})), volcanicSites = siteVolcanoes ? [...caves, ...forts, ...ruins, ...crypts].filter((s) => terrain.base(s.left + ((s.width ?? 12) >> 1), s.top + ((s.height ?? 9) >> 1)).biome === "l").map((s) => ({ id: s.reservation.id, family: s.reservation.familyId.replace("site-family:", ""), tier: s.reservation.tier, box: { x0: s.left, y0: s.top, x1: s.left + (s.width ?? 12) - 1, y1: s.top + (s.height ?? 9) - 1 }, trail: [...s.trail ?? []], own: [...s.reservation.footprint, ...s.reservation.approach].map((c) => c.x + "," + c.y), fp: s.reservation.footprint, ap: s.reservation.approach, lair: lairIds.has(s.reservation.id) })) : [];
-  const stands = hasForestStands(binding) ? createForestStandsV2({ seedDigest: asset.seedDigest, asset, terrain, routeAt, clearAt: standsClear, protectedChunk: (cx, cy2) => protection.at(cx * 32, cy2 * 26), events: (wilderness?.eventCapacities ?? []).map((e) => e.position), terraces: terracesForBinding(binding), volcanoes: volcanoesForBinding(binding), sites: volcanicSites, towns: siteVolcanoes ? (asset.generatedTowns?.towns ?? []).filter((t) => t.biome === "volcanic").map((t) => ({ ...t, bounds: townBoundsV1(t) })) : [], keepOut: landings ? (x, y) => landings.clearAt(x, y) : null }) : null;
+  const stands = hasForestStands(binding) ? createForestStandsV2({ seedDigest: asset.seedDigest, asset, terrain, routeAt, clearAt: standsClear, protectedChunk: (cx, cy2) => protection.at(cx * 32, cy2 * 26), siteChunk: terraceSiteGuardForBinding(binding) ? (cx, cy2) => {
+    const k = cx + "," + cy2;
+    return ruinByChunk.has(k) || fortByChunk.has(k) || caveByChunk.has(k);
+  } : null, events: (wilderness?.eventCapacities ?? []).map((e) => e.position), terraces: terracesForBinding(binding), volcanoes: volcanoesForBinding(binding), sites: volcanicSites, towns: siteVolcanoes ? (asset.generatedTowns?.towns ?? []).filter((t) => t.biome === "volcanic").map((t) => ({ ...t, bounds: townBoundsV1(t) })) : [], keepOut: landings ? (x, y) => landings.clearAt(x, y) : null }) : null;
   if (stands?.volcanoes && volcanicSites.length) {
     const byId = new Map([...forts, ...ruins].map((e) => [e.reservation.id, e]));
     for (const [id, { add: add2, remove }] of stands.volcanoes.siteTrails()) {
@@ -125458,13 +125459,13 @@ function glowStroke(ctx, color28, blur, width2, draw, core5 = true) {
   }
   ctx.restore();
 }
-function bloom3(ctx, x, y, r, color28, alpha2) {
-  if (r <= 0 || alpha2 <= 0) return;
+function bloom3(ctx, x, y, r, color28, alpha) {
+  if (r <= 0 || alpha <= 0) return;
   ctx.save();
   ctx.globalCompositeOperation = "lighter";
   const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-  g.addColorStop(0, rgba2("#ffffff", Math.min(1, alpha2)));
-  g.addColorStop(0.25, rgba2(color28, Math.min(1, alpha2 * 0.85)));
+  g.addColorStop(0, rgba2("#ffffff", Math.min(1, alpha)));
+  g.addColorStop(0.25, rgba2(color28, Math.min(1, alpha * 0.85)));
   g.addColorStop(1, rgba2(color28, 0));
   ctx.fillStyle = g;
   ctx.beginPath();
@@ -125472,12 +125473,12 @@ function bloom3(ctx, x, y, r, color28, alpha2) {
   ctx.fill();
   ctx.restore();
 }
-function blob6(ctx, x, y, r, color28, alpha2) {
-  if (r <= 0 || alpha2 <= 0) return;
+function blob6(ctx, x, y, r, color28, alpha) {
+  if (r <= 0 || alpha <= 0) return;
   ctx.save();
   ctx.globalCompositeOperation = "lighter";
   const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-  g.addColorStop(0, rgba2(color28, Math.min(1, alpha2)));
+  g.addColorStop(0, rgba2(color28, Math.min(1, alpha)));
   g.addColorStop(1, rgba2(color28, 0));
   ctx.fillStyle = g;
   ctx.beginPath();
@@ -125485,11 +125486,11 @@ function blob6(ctx, x, y, r, color28, alpha2) {
   ctx.fill();
   ctx.restore();
 }
-function mote(ctx, x, y, r, color28, alpha2) {
-  if (alpha2 <= 0) return;
+function mote(ctx, x, y, r, color28, alpha) {
+  if (alpha <= 0) return;
   ctx.save();
   ctx.globalCompositeOperation = "lighter";
-  ctx.globalAlpha = Math.min(1, alpha2);
+  ctx.globalAlpha = Math.min(1, alpha);
   ctx.shadowBlur = 6;
   ctx.shadowColor = color28;
   ctx.fillStyle = color28;
@@ -125498,8 +125499,8 @@ function mote(ctx, x, y, r, color28, alpha2) {
   ctx.fill();
   ctx.restore();
 }
-function star42(ctx, x, y, r, color28, alpha2) {
-  if (alpha2 <= 0 || r <= 0) return;
+function star42(ctx, x, y, r, color28, alpha) {
+  if (alpha <= 0 || r <= 0) return;
   glowStroke(ctx, color28, 6, 0.9, () => {
     ctx.beginPath();
     ctx.moveTo(x, y - r);
@@ -125512,7 +125513,7 @@ function star42(ctx, x, y, r, color28, alpha2) {
     ctx.lineTo(x - r * 0.3, y - r * 0.3);
     ctx.closePath();
   }, false);
-  mote(ctx, x, y, r * 0.35, "#ffffff", alpha2);
+  mote(ctx, x, y, r * 0.35, "#ffffff", alpha);
 }
 function jag(ctx, x0, y0, x1, y1, seed2, amp) {
   ctx.beginPath();
@@ -125552,9 +125553,9 @@ function bez2(p, u) {
 var SLASHES = [[-34, -30, -8, -28, 12, 2, 28, 22], [-46, 24, -16, 22, 14, -12, 36, -38], [-28, 20, -8, 16, 8, -6, 22, -26], [-42, -36, -12, -32, 16, 8, 38, 30]].map((p) => p.map((v) => v * 0.6));
 var STRIKES = Object.freeze([{ cut: 0, blade: "dagger", curve: 0 }, { cut: 1, blade: "sword", curve: 1 }, { cut: 2, blade: "dagger", curve: 2 }, { cut: 2, blade: "sword", curve: 3 }]);
 var FOURTH_STRIKES = Object.freeze([...STRIKES, { cut: 3, blade: "dagger", curve: 0 }]);
-function crescent(ctx, p, u0, u1, width2, color28, alpha2, wave = 0) {
-  alpha2 *= smooth23((u1 - u0) / 0.4) ** 2;
-  if (u1 - u0 < 0.01 || alpha2 <= 0) return;
+function crescent(ctx, p, u0, u1, width2, color28, alpha, wave = 0) {
+  alpha *= smooth23((u1 - u0) / 0.4) ** 2;
+  if (u1 - u0 < 0.01 || alpha <= 0) return;
   const n = 20, outer = [], inner = [];
   for (let i = 0; i <= n; i++) {
     const s = i / n, u = lerp4(u0, u1, s), a = bez2(p, u), b = bez2(p, Math.min(1, u + 0.01)), c = bez2(p, Math.max(0, u - 0.01)), dx = b.x - c.x, dy = b.y - c.y, l = Math.hypot(dx, dy) || 1, nx = -dy / l, ny = dx / l;
@@ -125564,7 +125565,7 @@ function crescent(ctx, p, u0, u1, width2, color28, alpha2, wave = 0) {
   }
   ctx.save();
   ctx.globalCompositeOperation = "lighter";
-  ctx.globalAlpha = Math.min(1, alpha2);
+  ctx.globalAlpha = Math.min(1, alpha);
   ctx.shadowBlur = 12;
   ctx.shadowColor = color28;
   ctx.fillStyle = color28;
@@ -135671,9 +135672,9 @@ function createDynamicWorldLightsV1(doc) {
     drawn = 0;
     if (!frame3?.enabled) return;
     const interior2 = frame3.profile === "interior";
-    const pool4 = (x, y, radius, color28, alpha2) => {
+    const pool4 = (x, y, radius, color28, alpha) => {
       if (x + radius < view3.x || y + radius < view3.y || x - radius > view3.x + view3.width || y - radius > view3.y + view3.height) return;
-      lc.globalAlpha = Math.min(1, alpha2);
+      lc.globalAlpha = Math.min(1, alpha);
       lc.drawImage(stamp6(color28), x - radius, y - radius, radius * 2, radius * 2);
       drawn++;
     };
@@ -135717,9 +135718,9 @@ function createDynamicWorldLightsV1(doc) {
     const visible3 = (x, y, r) => !(x + r < view3.x || y + r < view3.y || x - r > view3.x + view3.width || y - r > view3.y + view3.height);
     ctx.save();
     ctx.globalCompositeOperation = "screen";
-    const bounce = (x, y, r, color28, alpha2) => {
+    const bounce = (x, y, r, color28, alpha) => {
       if (!visible3(x, y, r)) return;
-      ctx.globalAlpha = alpha2 * strength;
+      ctx.globalAlpha = alpha * strength;
       ctx.drawImage(stamp6(color28), x - r, y - r, r * 2, r * 2);
     };
     for (const portal of model.space.exits ?? []) if (portal.extractionPortal?.visible) bounce(portal.x, portal.y, 110, PORTAL_OUTER, 0.2);
@@ -136059,14 +136060,14 @@ function opaqueBottom(g, width2, height, from = 0, to = 1) {
 }
 function recordSpriteDrawsV1(paint3) {
   const draws = [], stack = [];
-  let m = [1, 0, 0, 1, 0, 0], alpha2 = 1, procedural = false;
+  let m = [1, 0, 0, 1, 0, 0], alpha = 1, procedural = false;
   const api = {
     save() {
-      stack.push([m, alpha2]);
+      stack.push([m, alpha]);
     },
     restore() {
       const s = stack.pop();
-      if (s) [m, alpha2] = s;
+      if (s) [m, alpha] = s;
     },
     translate(x, y) {
       m = multiply(m, [1, 0, 0, 1, x, y]);
@@ -136088,10 +136089,10 @@ function recordSpriteDrawsV1(paint3) {
       m = [1, 0, 0, 1, 0, 0];
     },
     drawImage(image, ...r) {
-      if (alpha2 <= 0.05 || !image || !(image.width > 0 && image.height > 0)) return;
+      if (alpha <= 0.05 || !image || !(image.width > 0 && image.height > 0)) return;
       const w = image.width, h = image.height;
       const [sx, sy, sw, sh3, dx, dy, dw, dh] = r.length >= 8 ? r : r.length >= 4 ? [0, 0, w, h, ...r] : [0, 0, w, h, r[0], r[1], w, h];
-      draws.push({ image, sx, sy, sw, sh: sh3, dx, dy, dw, dh, m, alpha: alpha2 });
+      draws.push({ image, sx, sy, sw, sh: sh3, dx, dy, dw, dh, m, alpha });
     },
     fill() {
       procedural = true;
@@ -136114,8 +136115,8 @@ function recordSpriteDrawsV1(paint3) {
     createRadialGradient: () => ({ addColorStop: noop }),
     createPattern: () => null
   };
-  const ctx = new Proxy(api, { get: (t, k) => k === "globalAlpha" ? alpha2 : Object.hasOwn(t, k) ? t[k] : typeof k === "string" && /^[a-z]/.test(k) && !/Style$|^line|^font|^text|^image|^global|^shadow|^filter|^canvas$/.test(k) ? noop : void 0, set: (t, k, v) => {
-    if (k === "globalAlpha") alpha2 = Number(v);
+  const ctx = new Proxy(api, { get: (t, k) => k === "globalAlpha" ? alpha : Object.hasOwn(t, k) ? t[k] : typeof k === "string" && /^[a-z]/.test(k) && !/Style$|^line|^font|^text|^image|^global|^shadow|^filter|^canvas$/.test(k) ? noop : void 0, set: (t, k, v) => {
+    if (k === "globalAlpha") alpha = Number(v);
     return true;
   } });
   let handled = false;
@@ -136224,8 +136225,8 @@ function createSilhouetteShadowsV1(doc, limits = SILHOUETTE_LIMITS) {
     stats3 = { scenery: 0, procedural: 0, polygons: 0, actors: 0, actorRenders: 0, recordings: stats3.recordings };
     const target = ctx.canvas;
     if (typeof ctx.getTransform !== "function" || !target?.ownerDocument?.createElement || !(target.width > 0 && target.height > 0) || !frame3?.enabled) return false;
-    const indoor = frame3.profile === "interior", alpha2 = indoor ? limits.indoorAlpha : Math.min(limits.outdoorMaximumAlpha, frame3.shadowAlpha * limits.outdoorGain);
-    if (alpha2 <= 4e-3) return true;
+    const indoor = frame3.profile === "interior", alpha = indoor ? limits.indoorAlpha : Math.min(limits.outdoorMaximumAlpha, frame3.shadowAlpha * limits.outdoorGain);
+    if (alpha <= 4e-3) return true;
     const vector2 = indoor ? { x: 0, y: limits.indoorDepth * limits.referenceHeight } : { x: frame3.vector.x, y: frame3.vector.y * limits.verticalScale }, flatFrame = { ...frame3, vector: vector2 };
     const w = Math.max(1, Math.ceil(target.width * limits.layerScale)), h = Math.max(1, Math.ceil(target.height * limits.layerScale));
     let layer2 = layers.get(target);
@@ -136301,7 +136302,7 @@ function createSilhouetteShadowsV1(doc, limits = SILHOUETTE_LIMITS) {
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.globalCompositeOperation = "source-over";
-    ctx.globalAlpha = alpha2;
+    ctx.globalAlpha = alpha;
     ctx.drawImage(layer2, 0, 0, target.width, target.height);
     ctx.restore();
     return true;
@@ -136343,10 +136344,10 @@ function createHeroLevelUpV3() {
   function ring7(ctx, u, [delay, span2, radius], half) {
     const t = (u - delay) / span2;
     if (t <= 0 || t >= 1) return;
-    const ease31 = t * t * (3 - 2 * t), y = 5 - 44 * ease31, r = radius + 6 * Math.sin(t * Math.PI), alpha2 = Math.min(1, t / 0.12) * (1 - t) ** 0.6;
+    const ease31 = t * t * (3 - 2 * t), y = 5 - 44 * ease31, r = radius + 6 * Math.sin(t * Math.PI), alpha = Math.min(1, t / 0.12) * (1 - t) ** 0.6;
     const [a, b] = half === "back" ? [Math.PI, Math.PI * 2] : [0, Math.PI];
     ctx.save();
-    ctx.globalAlpha *= alpha2;
+    ctx.globalAlpha *= alpha;
     ctx.strokeStyle = "#4a3410";
     ctx.lineWidth = 5;
     ctx.beginPath();
@@ -136393,10 +136394,10 @@ function createHeroLevelUpV3() {
     ctx.translate(actor.position.x, actor.position.y);
     ctx.globalAlpha = fade;
     ctx.globalCompositeOperation = "lighter";
-    for (const [delay, speed, alpha2] of [[0, 1, 0.85], [0.12, 0.8, 0.5]]) {
+    for (const [delay, speed, alpha] of [[0, 1, 0.85], [0.12, 0.8, 0.5]]) {
       const t = Math.max(0, Math.min(1, (u - delay) / 0.45 * speed));
       if (t > 0 && t < 1) {
-        ctx.strokeStyle = `rgba(255,215,120,${alpha2 * (1 - t)})`;
+        ctx.strokeStyle = `rgba(255,215,120,${alpha * (1 - t)})`;
         ctx.lineWidth = 5 * (1 - t) + 1;
         ctx.beginPath();
         ctx.ellipse(0, 6, 18 + 95 * t, 6 + 30 * t, 0, 0, Math.PI * 2);
@@ -138517,10 +138518,10 @@ function swornShield(c, x, y, i, t, flash) {
   drawMimicShieldV4(c, { x: -16, y: -16, w: 32, h: 32, flashTimer: flash ? 1 : 0, familyAttack: null }, t * 1e3 / 60, 11 + i * 7);
   c.restore();
 }
-function spiritShield(c, x, y, s, spin, t, alpha2 = 1) {
+function spiritShield(c, x, y, s, spin, t, alpha = 1) {
   c.save();
   c.translate(x, y);
-  c.globalAlpha *= alpha2;
+  c.globalAlpha *= alpha;
   c.scale(s * Math.max(0.22, Math.abs(Math.cos(spin))), s);
   const o = [[-7, -8], [0, -10], [7, -8], [7.5, 2], [0, 10], [-7.5, 2]];
   glow8(c, () => poly13(c, o, STEEL_SHADE, true, 1.26 / s), 6);
@@ -138892,12 +138893,12 @@ function createWardenPresentation() {
   }
   return { update, clear: clear2 };
 }
-function puff4(c, x, y, s, seed2, alpha2) {
-  if (alpha2 <= 0) return;
+function puff4(c, x, y, s, seed2, alpha) {
+  if (alpha <= 0) return;
   c.save();
   c.translate(x, y);
   c.scale(s, s);
-  c.globalAlpha *= alpha2;
+  c.globalAlpha *= alpha;
   const lump3 = (lx, ly, r, fill7, lit2) => {
     c.beginPath();
     c.moveTo(lx - r, ly);
@@ -138921,19 +138922,19 @@ function puff4(c, x, y, s, seed2, alpha2) {
   lump3(o, -4.5, 6.5, "#a89a85", "#d3c6ae");
   c.restore();
 }
-function chip4(c, x, y, s, rot2, fill7, lit2, alpha2 = 1) {
+function chip4(c, x, y, s, rot2, fill7, lit2, alpha = 1) {
   c.save();
   c.translate(x, y);
   c.rotate(rot2);
-  c.globalAlpha *= alpha2;
+  c.globalAlpha *= alpha;
   poly13(c, [[-s, -s * 0.35], [-s * 0.2, -s], [s, -s * 0.3], [s * 0.65, s], [-s * 0.7, s * 0.75]], fill7, true, 1);
   poly13(c, [[-s, -s * 0.35], [-s * 0.2, -s], [s, -s * 0.3], [-s * 0.1, 0]], lit2, false);
   c.restore();
 }
-function slab3(c, x, y, r, tilt, seed2, alpha2 = 1) {
+function slab3(c, x, y, r, tilt, seed2, alpha = 1) {
   c.save();
   c.translate(x, y);
-  c.globalAlpha *= alpha2;
+  c.globalAlpha *= alpha;
   const pts2 = [];
   for (let k = 0; k < 5; k++) {
     const a = k * TAU142 / 5 + rnd7(seed2, k) * 0.6, rr3 = r * (0.75 + rnd7(seed2, k + 5) * 0.35);
@@ -138944,11 +138945,11 @@ function slab3(c, x, y, r, tilt, seed2, alpha2 = 1) {
   poly13(c, [pts2[2], pts2[3], pts2[4], [0, -tilt * r * 0.6]], tilt > 0.5 ? "#b0946f" : STONE_LIT2, false);
   c.restore();
 }
-function shard3(c, x, y, h, w, lean, seed2, alpha2 = 1) {
-  if (h < 1 || alpha2 <= 0) return;
+function shard3(c, x, y, h, w, lean, seed2, alpha = 1) {
+  if (h < 1 || alpha <= 0) return;
   c.save();
   c.translate(x, y);
-  c.globalAlpha *= alpha2;
+  c.globalAlpha *= alpha;
   const lx = lean * h * 0.6, j = rnd7(seed2, 2) * 0.4;
   poly13(c, [[-w * 1.3, 1], [-w * 0.7, -2.6], [w * 0.6, -3], [w * 1.35, 0.8], [w * 0.4, 3], [-w * 0.6, 3]], SOIL5, true, 1);
   const tip = [lx, -h], L = [-w, 0], R10 = [w, 0];
@@ -139001,10 +139002,10 @@ function wedgeCrack(c, x, y, ang, len, w, seed2, glowK) {
   c.lineWidth = 1.2;
   c.stroke();
 }
-function ridge3(c, cx, cy2, r, a0, a1, w, alpha2) {
-  if (alpha2 <= 0 || r < 2) return;
+function ridge3(c, cx, cy2, r, a0, a1, w, alpha) {
+  if (alpha <= 0 || r < 2) return;
   c.save();
-  c.globalAlpha *= alpha2;
+  c.globalAlpha *= alpha;
   c.translate(cx, cy2);
   c.beginPath();
   c.arc(0, 0, r + w / 2, a0, a1);
@@ -142127,9 +142128,9 @@ function drawBiomeBossV1(c, a, t, flash = false) {
   if (paint3 && a.alive && eliteLayerD12_4() !== "body") drawRelease(c, a, q, v.facing);
   return true;
 }
-function ring3(c, x, y, r, color28, alpha2, width2) {
+function ring3(c, x, y, r, color28, alpha, width2) {
   c.save();
-  c.globalAlpha = alpha2;
+  c.globalAlpha = alpha;
   c.strokeStyle = color28;
   c.lineWidth = width2;
   c.beginPath();
@@ -142137,9 +142138,9 @@ function ring3(c, x, y, r, color28, alpha2, width2) {
   c.stroke();
   c.restore();
 }
-function disc3(c, x, y, r, color28, alpha2) {
+function disc3(c, x, y, r, color28, alpha) {
   c.save();
-  c.globalAlpha = alpha2;
+  c.globalAlpha = alpha;
   c.fillStyle = color28;
   c.beginPath();
   c.arc(x, y, r, 0, TAU147);
@@ -142748,11 +142749,11 @@ function chains(rows) {
 }
 function ageGradient(c, chain2, tick, rgb6, minimum, maximum, span2 = 90) {
   const first = chain2[0], last = chain2.find((r) => r.expiresTick - tick >= span2) ?? chain2.at(-1), a = first.from, b = last.to;
-  const alpha2 = (row2) => mix23(minimum, maximum, ease16((row2.expiresTick - tick) / span2));
-  if (distance10(a, b) < 0.1) return `rgba(${rgb6},${alpha2(last)})`;
+  const alpha = (row2) => mix23(minimum, maximum, ease16((row2.expiresTick - tick) / span2));
+  if (distance10(a, b) < 0.1) return `rgba(${rgb6},${alpha(last)})`;
   const gradient = c.createLinearGradient(a.x, a.y, b.x, b.y);
-  gradient.addColorStop(0, `rgba(${rgb6},${alpha2(first)})`);
-  gradient.addColorStop(1, `rgba(${rgb6},${alpha2(last)})`);
+  gradient.addColorStop(0, `rgba(${rgb6},${alpha(first)})`);
+  gradient.addColorStop(1, `rgba(${rgb6},${alpha(last)})`);
   return gradient;
 }
 function drawCorrosiveTrails(c, rows, tick) {
@@ -142806,7 +142807,7 @@ function drawCorrosiveTrails(c, rows, tick) {
     c.restore();
   }
 }
-function approvedMinion(c, row2, tick, { scaleX = 1, scaleY = 1, alpha: alpha2 = 1, flash = false } = {}) {
+function approvedMinion(c, row2, tick, { scaleX = 1, scaleY = 1, alpha = 1, flash = false } = {}) {
   const family = row2.enemyFamily, profile = creaturePresentationForRenderV3(family), frame3 = profile?.painterFrame, painter2 = CREATURE_PAINTERS_D11[family];
   if (!profile || !painter2) return;
   const melee3 = typeof row2.meleePhase === "object" ? row2.meleePhase : null, span2 = Math.max(1, (melee3?.phaseEndsTick ?? tick) - (melee3?.phaseStartedTick ?? tick));
@@ -142814,7 +142815,7 @@ function approvedMinion(c, row2, tick, { scaleX = 1, scaleY = 1, alpha: alpha2 =
   const m = { x: frame3.x, y: frame3.y, w: frame3.width, h: frame3.height, flashTimer: flash ? 1 : 0, movedLastTick: !!row2.movedLastTick, meleePhase: melee3, phaseProgress: melee3 ? clamp45((tick - melee3.phaseStartedTick) / span2) : 0, meleeAction: !!attack, familyAttack: attack, deathProgress: 0, presentationTick: tick, motionBlend: row2.movedLastTick ? 1 : 0, stepPhase: tick * 0.66 + seed2 % 17 * 0.13, paletteKey: profile.paletteKey };
   c.save();
   c.translate(row2.position.x, row2.position.y);
-  c.globalAlpha *= alpha2;
+  c.globalAlpha *= alpha;
   c.scale(scaleX, scaleY);
   if (attack) {
     c.translate(attack.body.x, attack.body.y);
@@ -143188,7 +143189,7 @@ function drawCorrosiveAbomination(c, actor, tick, flash = false, { gelOpacity = 
   if (actor.boss?.bossDefinitionId !== ID3) return false;
   const pose = corrosiveAttackPose(actor, tick), death = actor.alive === false ? clamp46((actor.deathAge ?? 0) / 36) : 0;
   const left = Math.floor(Math.min(-90, (pose.tip?.x ?? 0) - 30)), top = Math.floor(Math.min(-135, (pose.tip?.y ?? 0) - 45)), right = Math.ceil(Math.max(90, (pose.tip?.x ?? 0) + 30)), bottom = Math.ceil(Math.max(35, (pose.tip?.y ?? 0) + 30)), w = right - left, h = bottom - top;
-  const surface3 = surfaceFor(c), alpha2 = flash ? 1 : clamp46(gelOpacity);
+  const surface3 = surfaceFor(c), alpha = flash ? 1 : clamp46(gelOpacity);
   if (surface3 && w * 2 <= 768 && h * 2 <= 768) {
     const g = surface3.context;
     g.setTransform(1, 0, 0, 1, 0, 0);
@@ -143196,12 +143197,12 @@ function drawCorrosiveAbomination(c, actor, tick, flash = false, { gelOpacity = 
     g.setTransform(2, 0, 0, 2, (-actor.position.x - left) * 2, (-actor.position.y - top) * 2);
     paintGel(g, actor, tick, flash);
     c.save();
-    c.globalAlpha *= alpha2;
+    c.globalAlpha *= alpha;
     c.drawImage(surface3.canvas, 0, 0, w * 2, h * 2, actor.position.x + left, actor.position.y + top, w, h);
     c.restore();
   } else {
     c.save();
-    c.globalAlpha *= alpha2;
+    c.globalAlpha *= alpha;
     paintGel(c, actor, tick, flash);
     c.restore();
   }
@@ -143809,9 +143810,9 @@ function slamForce(c, row2, tick, pending, source3) {
   c.save();
   c.globalAlpha *= g.alpha;
   if (pending && source3) {
-    const pose = voidAttackPose(source3, tick), from = point9(source3.position.x + pose.bodyX, source3.position.y + pose.bodyY), alpha2 = 0.42 * Math.sin(Math.PI * castProgress(row2, tick));
+    const pose = voidAttackPose(source3, tick), from = point9(source3.position.x + pose.bodyX, source3.position.y + pose.bodyY), alpha = 0.42 * Math.sin(Math.PI * castProgress(row2, tick));
     c.save();
-    c.globalAlpha *= alpha2;
+    c.globalAlpha *= alpha;
     c.strokeStyle = "#be7de5";
     c.lineWidth = 0.9;
     c.beginPath();
@@ -144210,9 +144211,9 @@ function line23(c, points2, color28, width2) {
   c.lineWidth = width2;
   c.stroke();
 }
-function marks(c, radius, alpha2 = 1, reverse = false) {
+function marks(c, radius, alpha = 1, reverse = false) {
   c.save();
-  c.globalAlpha *= alpha2;
+  c.globalAlpha *= alpha;
   for (let i = 0; i < 12; i++) {
     const a = i * TAU154 / 12 - Math.PI / 2, major = i % 3 === 0;
     const r1 = radius - (major ? 11 : 6), r2 = radius - 3;
@@ -144319,9 +144320,9 @@ function drawChronosSlamGroundV6(c, row2, tick, pending) {
   }
   c.restore();
 }
-function spectralHand(c, length, alpha2 = 1) {
+function spectralHand(c, length, alpha = 1) {
   c.save();
-  c.globalAlpha *= alpha2;
+  c.globalAlpha *= alpha;
   polygon18(c, [[-20, -5], [-11, -9], [-3, -5], [length - 27, -5], [length - 23, -11], [length, 0], [length - 23, 11], [length - 27, 5], [-3, 5], [-11, 9], [-20, 5]], GOLD21, 2.5);
   polygon18(c, [[8, -2], [length - 27, -2], [length - 23, -7], [length - 5, 0], [length - 23, 4], [length - 27, 1], [8, 1]], IVORY, 0.6);
   line23(c, [[11, 3], [length - 28, 3]], BRASS5, 1.4);
@@ -144341,11 +144342,11 @@ function drawChronosSlamForceV6(c, row2, tick, pending) {
     const px7 = -Math.cos(handAngle) * handLength;
     const py = tipY - Math.sin(handAngle) * handLength;
     if (pose.q < 0.58) {
-      for (const [delta3, alpha2] of [[-0.14, 0.12], [-0.27, 0.065]]) {
+      for (const [delta3, alpha] of [[-0.14, 0.12], [-0.27, 0.065]]) {
         c.save();
         c.translate(px7, py);
         c.rotate(handAngle + delta3);
-        spectralHand(c, handLength, alpha2);
+        spectralHand(c, handLength, alpha);
         c.restore();
       }
     }
@@ -146820,8 +146821,8 @@ var GLOW6 = { chronos: "#e2ac43", chronosPale: "#ffe8ad", nexus: "#f12c94", nexu
 function extendedBossEffectLights(model, tick) {
   const a = projected(model, tick);
   if (!a) return [];
-  const h = a.bossHazards, out = [], at8 = (p, lift, r, color28, alpha2) => {
-    if (p && alpha2 > 0.01) out.push({ x: p.x, y: p.y - lift, r, color: color28, alpha: alpha2 });
+  const h = a.bossHazards, out = [], at8 = (p, lift, r, color28, alpha) => {
+    if (p && alpha > 0.01) out.push({ x: p.x, y: p.y - lift, r, color: color28, alpha });
   };
   const ramp5 = (row2) => Math.max(0, Math.min(1, (tick - row2.startedTick) / Math.max(1, row2.resolvesTick - row2.startedTick))), pending = (row2) => tick >= row2.startedTick && tick <= row2.resolvesTick;
   const body5 = (row2) => a.entitiesById?.[row2.sourceEntityId]?.position ?? row2.currentPosition ?? row2.position;
@@ -147037,8 +147038,8 @@ var VOID_PALE = "#efd3ff";
 function archivedBossEffectLights(model, tick) {
   const v = archivedBossArtModel(model, tick);
   if (!v) return [];
-  const h = v.bossHazards, out = [], at8 = (p, lift, r, color28, alpha2) => {
-    if (p && alpha2 > 0.01) out.push({ x: p.x, y: p.y - lift, r, color: color28, alpha: alpha2 });
+  const h = v.bossHazards, out = [], at8 = (p, lift, r, color28, alpha) => {
+    if (p && alpha > 0.01) out.push({ x: p.x, y: p.y - lift, r, color: color28, alpha });
   };
   for (const row2 of h.corrosiveImpacts ?? []) if (row2.ability === "slam") at8(row2.targetPosition, 8, 58, ACID2, 0.55 * lightEnvelope(tick - row2.resolvedTick, 40));
   for (const row2 of h.corrosiveSpores ?? []) if ((row2.stage ?? "drifting") === "drifting") at8(row2.position, 7, 20, ACID2, 0.25);
@@ -147645,11 +147646,11 @@ function warning2(c, p, r, q, color82 = GOLD25) {
   c.lineWidth = 1.3;
   c.stroke();
 }
-function reversalMarks(c, p, r, turn42, alpha2 = 1) {
+function reversalMarks(c, p, r, turn42, alpha = 1) {
   c.save();
   c.translate(p.x, p.y);
   c.rotate(turn42);
-  c.globalAlpha *= alpha2;
+  c.globalAlpha *= alpha;
   for (let i = 0; i < 4; i++) {
     c.save();
     c.rotate(i * TAU161 / 4);
@@ -147752,10 +147753,10 @@ function caster(row2, model2, tick) {
   const actor2 = model2.entitiesById?.[row2.sourceEntityId], p = actor2?.position ?? row2.currentPosition ?? row2.sourcePosition ?? row2.originPosition, pose = actor2 ? marcusAttackPose(actor2, tick) : { bodyX: 0, bodyY: -9, rotation: 0 }, offset2 = rotate3(0, -24, pose.rotation);
   return { actor: actor2, p, pose, clasp: point25(p.x + pose.bodyX + offset2.x, p.y + pose.bodyY + offset2.y) };
 }
-function rope2(c, from, to, bend = 0, alpha2 = 1) {
+function rope2(c, from, to, bend = 0, alpha = 1) {
   const d = unit14(to.x - from.x, to.y - from.y), control = point25((from.x + to.x) / 2 - d.y * bend, (from.y + to.y) / 2 + d.x * bend);
   c.save();
-  c.globalAlpha *= alpha2;
+  c.globalAlpha *= alpha;
   c.lineCap = "round";
   c.beginPath();
   c.moveTo(from.x, from.y);
@@ -147771,11 +147772,11 @@ function rope2(c, from, to, bend = 0, alpha2 = 1) {
   c.stroke();
   c.restore();
 }
-function ropeLoop(c, p, rx, ry, angle22 = 0, alpha2 = 1) {
+function ropeLoop(c, p, rx, ry, angle22 = 0, alpha = 1) {
   c.save();
   c.translate(p.x, p.y);
   c.rotate(angle22);
-  c.globalAlpha *= alpha2;
+  c.globalAlpha *= alpha;
   c.beginPath();
   c.ellipse(0, 0, Math.max(0.1, rx), Math.max(0.1, ry), 0, 0, TAU161);
   c.strokeStyle = INK52;
@@ -148447,10 +148448,10 @@ function drawGildedVaultKeeper(c, actor2, tick, flash = false) {
   c.restore();
   return true;
 }
-function sealMark(c, x, y, r, alpha2 = 1) {
+function sealMark(c, x, y, r, alpha = 1) {
   c.save();
   c.translate(x, y);
-  c.globalAlpha *= alpha2;
+  c.globalAlpha *= alpha;
   circle6(c, 0, 0, r, GOLD26, 1);
   circle6(c, 0, 0, r * 0.78, "#b4803466", 0.7);
   c.fillStyle = GOLD26;
@@ -148773,9 +148774,9 @@ function payoutPickup(c, row2, tick) {
     c.restore();
   }
   if (age >= 10) {
-    const pop = clamp56((age - 10) / 20), alpha2 = 1 - ease25(pop);
+    const pop = clamp56((age - 10) / 20), alpha = 1 - ease25(pop);
     c.save();
-    c.globalAlpha *= alpha2;
+    c.globalAlpha *= alpha;
     for (let i = 0; i < 4; i++) {
       const a = i * TAU162 / 4 + 0.35, r = 4 + 8 * ease25(pop);
       line27(c, [[to.x + Math.cos(a) * r, to.y + Math.sin(a) * r], [to.x + Math.cos(a) * (r + 3), to.y + Math.sin(a) * (r + 3)]], i % 2 ? LIGHT10 : PALE11, 0.9);
@@ -149054,8 +149055,8 @@ var PALE_GOLD2 = "#ffe094";
 function treasuryBossEffectLights(model, tick) {
   const a = project(model, tick);
   if (!a) return [];
-  const h = a.bossHazards ?? {}, out = [], at8 = (p, lift, r, color28, alpha2) => {
-    if (p && alpha2 > 0.01) out.push({ x: p.x, y: p.y - lift, r, color: color28, alpha: alpha2 });
+  const h = a.bossHazards ?? {}, out = [], at8 = (p, lift, r, color28, alpha) => {
+    if (p && alpha > 0.01) out.push({ x: p.x, y: p.y - lift, r, color: color28, alpha });
   };
   const body5 = (row2) => a.entitiesById?.[row2.sourceEntityId]?.position ?? row2.currentPosition ?? row2.sourcePosition ?? row2.originPosition ?? row2.position;
   const ward = (row2, life) => {
@@ -149816,8 +149817,8 @@ function brimstoneSlams(model, tick) {
   return rows;
 }
 function brimstoneEffectLights(model, tick) {
-  const out = [], at8 = (x, y, r, alpha2) => {
-    if (alpha2 > 0.01) out.push({ x, y, r, color: LAVA, alpha: alpha2 });
+  const out = [], at8 = (x, y, r, alpha) => {
+    if (alpha > 0.01) out.push({ x, y, r, color: LAVA, alpha });
   };
   for (const v of model.bossHazards?.brimstoneVents ?? []) {
     if (v.stage !== "erupting") {
@@ -149985,7 +149986,7 @@ function drop2(c, x, y, vx, vy, s) {
   c.fill();
   c.restore();
 }
-function smoke8(c, x, y, tick, seed2, scale = 1, alpha2 = 0.6) {
+function smoke8(c, x, y, tick, seed2, scale = 1, alpha = 0.6) {
   for (let i = 0; i < 2; i++) {
     const age = (tick * 0.5 + i * 20 + seed2 % 17) % 40, q = age / 40, pts2 = [];
     for (let k = 0; k <= 6; k++) {
@@ -149993,7 +149994,7 @@ function smoke8(c, x, y, tick, seed2, scale = 1, alpha2 = 0.6) {
       pts2.push([x + Math.sin(u * 3 + tick * 0.04 + i + seed2) * 2.5 * u * scale + u * u * (3 + q * 6) * scale * (i ? 1 : -1), y - (u * (10 + q * 16) + q * 6) * scale]);
     }
     c.save();
-    c.globalAlpha *= alpha2 * (1 - q) * Math.min(1, age / 4);
+    c.globalAlpha *= alpha * (1 - q) * Math.min(1, age / 4);
     const rib2 = (wm, col2) => {
       const l = [], r = [];
       pts2.forEach(([px7, py], k) => {
@@ -152697,13 +152698,13 @@ function drawIronChest(ctx, cx, cy2, time3, P19) {
       let sparkProgress = (time3 / (tier2 === "iron_bound" ? 800 + i * 200 : tier2 === "gilded" ? 600 + i * 200 : 500 + i * 150) + i * (tier2 === "astral" ? 0.25 : 0.33)) % 1;
       let sx = cx + Math.sin(time3 / 150 + i * 2.5) * (tier2 === "astral" ? 11 : 8);
       let sy = cy2 - sparkProgress * (tier2 === "astral" ? 20 : 15);
-      let alpha2 = (1 - sparkProgress) * 0.8 * (1 - P19);
+      let alpha = (1 - sparkProgress) * 0.8 * (1 - P19);
       if (tier2 === "iron_bound") {
-        ctx.fillStyle = `rgba(230, 126, 34, ${alpha2})`;
+        ctx.fillStyle = `rgba(230, 126, 34, ${alpha})`;
       } else if (tier2 === "gilded") {
-        ctx.fillStyle = `rgba(255, 215, 0, ${alpha2})`;
+        ctx.fillStyle = `rgba(255, 215, 0, ${alpha})`;
       } else {
-        ctx.fillStyle = i % 2 === 0 ? `rgba(0, 255, 255, ${alpha2})` : `rgba(168, 85, 247, ${alpha2})`;
+        ctx.fillStyle = i % 2 === 0 ? `rgba(0, 255, 255, ${alpha})` : `rgba(168, 85, 247, ${alpha})`;
       }
       ctx.beginPath();
       ctx.arc(sx, sy, 1, 0, Math.PI * 2);
@@ -154985,11 +154986,11 @@ function strokePoints(ctx, pts2) {
   ctx.moveTo(pts2[0].x, pts2[0].y);
   for (let i = 1; i < pts2.length; i++) ctx.lineTo(pts2[i].x, pts2[i].y);
 }
-function lightning(ctx, x0, y0, x1, y1, seed2, amp, width2, alpha2 = 1) {
-  if (alpha2 <= 0) return;
+function lightning(ctx, x0, y0, x1, y1, seed2, amp, width2, alpha = 1) {
+  if (alpha <= 0) return;
   const C3 = CAST_COLORS.lightning, pts2 = boltPoints(x0, y0, x1, y1, seed2, amp);
   ctx.save();
-  ctx.globalAlpha *= Math.min(1, alpha2);
+  ctx.globalAlpha *= Math.min(1, alpha);
   glowStroke(ctx, C3.deep, 14, width2 * 2.2, () => strokePoints(ctx, pts2), false);
   glowStroke(ctx, C3.main, 8, width2, () => strokePoints(ctx, pts2));
   for (let f = 0; f < 2; f++) {
@@ -155117,10 +155118,10 @@ function iceLance(ctx, x, y, dir, len) {
   ctx.fill();
   ctx.restore();
 }
-function snowStar(ctx, x, y, r, alpha2) {
-  if (alpha2 <= 0) return;
+function snowStar(ctx, x, y, r, alpha) {
+  if (alpha <= 0) return;
   ctx.save();
-  ctx.globalAlpha *= Math.min(1, alpha2);
+  ctx.globalAlpha *= Math.min(1, alpha);
   glowStroke(ctx, "#bfe9ff", 4, 0.6, () => {
     ctx.beginPath();
     ctx.moveTo(x - r, y);
@@ -155129,7 +155130,7 @@ function snowStar(ctx, x, y, r, alpha2) {
     ctx.lineTo(x, y + r);
   }, false);
   ctx.restore();
-  mote(ctx, x, y, 0.4, "#ffffff", alpha2);
+  mote(ctx, x, y, 0.4, "#ffffff", alpha);
 }
 function drawCastBolt(ctx, element, p, origin, time3) {
   const t = time3 / 1e3, dir = Math.atan2(p.vy, p.vx), bx = -Math.cos(dir), by = -Math.sin(dir), C3 = CAST_COLORS[element] ?? CAST_COLORS.fire;
@@ -155160,10 +155161,10 @@ function drawCastBolt(ctx, element, p, origin, time3) {
   if (element === "frost") iceLance(ctx, p.x, p.y, dir, 19);
   else fireball(ctx, p.x, p.y, 4.6, t, dir, 1);
 }
-function starburst(ctx, x, y, R10, color28, alpha2, seed2) {
-  if (R10 <= 0 || alpha2 <= 0) return;
+function starburst(ctx, x, y, R10, color28, alpha, seed2) {
+  if (R10 <= 0 || alpha <= 0) return;
   ctx.save();
-  ctx.globalAlpha *= Math.min(1, alpha2);
+  ctx.globalAlpha *= Math.min(1, alpha);
   ctx.beginPath();
   for (let i = 0; i < 22; i++) {
     const a = i * Math.PI / 11 + 0.2, rr3 = R10 * (i % 2 ? 0.6 + 0.12 * rnd6(seed2 + i) : 0.9 + 0.25 * rnd6(seed2 + i + 40)), px7 = x + Math.cos(a) * rr3, py = y + Math.sin(a) * rr3 * 0.85;
@@ -155175,10 +155176,10 @@ function starburst(ctx, x, y, R10, color28, alpha2, seed2) {
   ctx.fill();
   ctx.restore();
 }
-function crystal5(ctx, x, y, ht, wd, lean, alpha2) {
-  if (ht <= 0.5 || alpha2 <= 0) return;
+function crystal5(ctx, x, y, ht, wd, lean, alpha) {
+  if (ht <= 0.5 || alpha <= 0) return;
   ctx.save();
-  ctx.globalAlpha *= alpha2;
+  ctx.globalAlpha *= alpha;
   ctx.translate(x, y);
   ctx.rotate(lean);
   const shape3 = () => {
@@ -155207,10 +155208,10 @@ function crystal5(ctx, x, y, ht, wd, lean, alpha2) {
   ctx.stroke();
   ctx.restore();
 }
-function shard4(ctx, x, y, r, rot2, alpha2) {
-  if (alpha2 <= 0) return;
+function shard4(ctx, x, y, r, rot2, alpha) {
+  if (alpha <= 0) return;
   ctx.save();
-  ctx.globalAlpha *= Math.min(1, alpha2);
+  ctx.globalAlpha *= Math.min(1, alpha);
   ctx.translate(x, y);
   ctx.rotate(rot2);
   ctx.beginPath();
@@ -155495,8 +155496,8 @@ function hexCells(ctx, x0, y0, x1, y1, pick4) {
     ctx.closePath();
   }
 }
-function rune(ctx, x, y, r, lit2, alpha2) {
-  if (alpha2 <= 0) return;
+function rune(ctx, x, y, r, lit2, alpha) {
+  if (alpha <= 0) return;
   const path15 = () => {
     ctx.beginPath();
     ctx.moveTo(x, y - r);
@@ -155509,14 +155510,14 @@ function rune(ctx, x, y, r, lit2, alpha2) {
   };
   if (lit2) {
     ctx.save();
-    ctx.globalAlpha *= alpha2;
+    ctx.globalAlpha *= alpha;
     glowStroke(ctx, KNIGHT_BLUE, 6, 1, path15);
     ctx.restore();
-    mote(ctx, x, y, 0.7, KNIGHT_CORE, alpha2);
+    mote(ctx, x, y, 0.7, KNIGHT_CORE, alpha);
     return;
   }
   ctx.save();
-  ctx.globalAlpha *= alpha2;
+  ctx.globalAlpha *= alpha;
   path15();
   ctx.fillStyle = "#132029";
   ctx.fill();
@@ -155630,21 +155631,21 @@ var circle8 = (ctx, x, y, r, a0 = 0, a1 = TAU137) => {
   ctx.beginPath();
   ctx.arc(x, y, Math.max(0.1, r), a0, a1);
 };
-function area(ctx, x, y, r, color28, alpha2) {
-  if (alpha2 <= 0 || r <= 0) return;
+function area(ctx, x, y, r, color28, alpha) {
+  if (alpha <= 0 || r <= 0) return;
   ctx.save();
   const g = ctx.createRadialGradient(x, y, r * 0.15, x, y, r);
-  g.addColorStop(0, rgba2(color28, 0.05 * alpha2));
-  g.addColorStop(0.7, rgba2(color28, 0.12 * alpha2));
-  g.addColorStop(1, rgba2(color28, 0.3 * alpha2));
+  g.addColorStop(0, rgba2(color28, 0.05 * alpha));
+  g.addColorStop(0.7, rgba2(color28, 0.12 * alpha));
+  g.addColorStop(1, rgba2(color28, 0.3 * alpha));
   ctx.fillStyle = g;
   circle8(ctx, x, y, r);
   ctx.fill();
   ctx.restore();
 }
-function runeRing(ctx, x, y, r, K9, alpha2, spin = 0, count = 12) {
-  if (alpha2 <= 0) return;
-  neon(ctx, K9, 1.3, () => circle8(ctx, x, y, r), alpha2);
+function runeRing(ctx, x, y, r, K9, alpha, spin = 0, count = 12) {
+  if (alpha <= 0) return;
+  neon(ctx, K9, 1.3, () => circle8(ctx, x, y, r), alpha);
   for (let i = 0; i < count; i++) {
     const a = spin + i * TAU137 / count, px7 = x + Math.cos(a) * r, py = y + Math.sin(a) * r;
     neon(ctx, K9, 1.1, () => {
@@ -155653,13 +155654,13 @@ function runeRing(ctx, x, y, r, K9, alpha2, spin = 0, count = 12) {
       ctx.lineTo(px7 + Math.cos(a) * 3.5, py + Math.sin(a) * 3.5);
       ctx.moveTo(px7 - Math.sin(a) * 2.4, py + Math.cos(a) * 2.4);
       ctx.lineTo(px7 + Math.sin(a) * 2.4, py - Math.cos(a) * 2.4);
-    }, alpha2);
+    }, alpha);
   }
 }
-function neon(ctx, K9, width2, draw, alpha2 = 1) {
-  if (alpha2 <= 0 || width2 <= 0) return;
+function neon(ctx, K9, width2, draw, alpha = 1) {
+  if (alpha <= 0 || width2 <= 0) return;
   ctx.save();
-  ctx.globalAlpha *= Math.min(1, alpha2);
+  ctx.globalAlpha *= Math.min(1, alpha);
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
   ctx.strokeStyle = rgba2(K9.deep, 0.55);
@@ -155667,13 +155668,13 @@ function neon(ctx, K9, width2, draw, alpha2 = 1) {
   draw();
   ctx.stroke();
   ctx.restore();
-  glowStroke(ctx, K9.main, 10, width2 * Math.min(1, alpha2), draw, false);
-  glowStroke(ctx, K9.spark, 0, Math.max(0.5, width2 * 0.32) * Math.min(1, alpha2), draw, false);
+  glowStroke(ctx, K9.main, 10, width2 * Math.min(1, alpha), draw, false);
+  glowStroke(ctx, K9.spark, 0, Math.max(0.5, width2 * 0.32) * Math.min(1, alpha), draw, false);
 }
-function withAlpha(ctx, alpha2, draw) {
-  if (alpha2 <= 0) return;
+function withAlpha(ctx, alpha, draw) {
+  if (alpha <= 0) return;
   ctx.save();
-  ctx.globalAlpha *= Math.min(1, alpha2);
+  ctx.globalAlpha *= Math.min(1, alpha);
   draw();
   ctx.restore();
 }
@@ -155845,8 +155846,8 @@ function counterStance(ctx, b, age) {
     mote(ctx, x + f * 15 + Math.cos(a) * d, y - 14 + Math.sin(a) * d, 1.4 * (1 - k), K9.spark, 1 - k);
   }
 }
-function sealShape(ctx, x, y, s, K9, alpha2) {
-  if (alpha2 <= 0 || s <= 0) return;
+function sealShape(ctx, x, y, s, K9, alpha) {
+  if (alpha <= 0 || s <= 0) return;
   const path15 = () => {
     ctx.beginPath();
     ctx.moveTo(x, y - 13 * s);
@@ -155857,7 +155858,7 @@ function sealShape(ctx, x, y, s, K9, alpha2) {
     ctx.lineTo(x - 9 * s, y - 8 * s);
     ctx.closePath();
   };
-  withAlpha(ctx, alpha2, () => {
+  withAlpha(ctx, alpha, () => {
     path15();
     const g = ctx.createLinearGradient(x, y - 13 * s, x, y + 13 * s);
     g.addColorStop(0, rgba2(K9.main, 0.55));
@@ -155865,7 +155866,7 @@ function sealShape(ctx, x, y, s, K9, alpha2) {
     ctx.fillStyle = g;
     ctx.fill();
   });
-  neon(ctx, K9, 1.5, path15, alpha2);
+  neon(ctx, K9, 1.5, path15, alpha);
   neon(ctx, K9, 1.1, () => {
     ctx.beginPath();
     ctx.moveTo(x - 4.5 * s, y - 1 * s);
@@ -155873,7 +155874,7 @@ function sealShape(ctx, x, y, s, K9, alpha2) {
     ctx.moveTo(x + 1.5 * s, y - 4.5 * s);
     ctx.lineTo(x + 4.5 * s, y - 1 * s);
     ctx.lineTo(x + 1.5 * s, y + 2.5 * s);
-  }, alpha2);
+  }, alpha);
 }
 function drawCounterWard(ctx, x, y, facing2, ready, time3, spentAge = -1) {
   const K9 = C.reprisal, flare = spentAge >= 0 && spentAge < 380 ? spentAge / 380 : -1;
@@ -156543,8 +156544,8 @@ function drawThrownShield(ctx, th, time3) {
 }
 var BANNER_REACH = 100;
 var BANNER = Object.freeze({ cloth: "#2f6fb0", shade: "#1f4c80", trim: "#ffd36b", pole: "#6b4a2b", cap: "#ffe9a8" });
-function bannerPole2(ctx, x, y, time3, alpha2 = 1) {
-  withAlpha(ctx, alpha2, () => {
+function bannerPole2(ctx, x, y, time3, alpha = 1) {
+  withAlpha(ctx, alpha, () => {
     const top = y - 46, t = time3 / 1e3;
     ctx.fillStyle = BANNER.pole;
     ctx.strokeStyle = "#1a1008";
@@ -156686,9 +156687,9 @@ function smokeVeil(ctx, b, age) {
     standV1(ctx, y, () => smokePuff(ctx, x, y - r * 0.6, r, fade));
   }
 }
-function smokePuff(ctx, x, y, r, alpha2) {
+function smokePuff(ctx, x, y, r, alpha) {
   const lobes3 = [[0, 0, 1], [-0.8, 0.25, 0.72], [0.8, 0.3, 0.66]];
-  withAlpha(ctx, alpha2, () => {
+  withAlpha(ctx, alpha, () => {
     ctx.fillStyle = "#6f6684";
     for (const [dx, dy, k] of lobes3) {
       circle8(ctx, x + dx * r, y + dy * r, r * k + 1.2);
@@ -157185,9 +157186,9 @@ function thousandCuts(ctx, b, age) {
   }
   if (age < 120) blob6(ctx, b.x, b.y - 12, 14, K9.main, 0.6 * (1 - age / 120));
 }
-function petals2(ctx, x, y, r, count, alpha2, spin) {
-  if (alpha2 <= 0 || r <= 1) return;
-  withAlpha(ctx, alpha2, () => {
+function petals2(ctx, x, y, r, count, alpha, spin) {
+  if (alpha <= 0 || r <= 1) return;
+  withAlpha(ctx, alpha, () => {
     for (let i = 0; i < count; i++) {
       const a = spin + i * TAU137 / count, c = Math.cos(a), s = Math.sin(a), w = r * 0.32, tip = { x: x + c * r, y: y + s * r }, mid = { x: x + c * r * 0.5, y: y + s * r * 0.5 };
       ctx.beginPath();
@@ -157762,11 +157763,11 @@ function drawTreeSkillBurst(ctx, skillId, b, age) {
 var UNIQUE_COLORS = Object.freeze({ ghost: "#c4ffa0", ghostDark: "#0b2412", sun: "#ffcf4a", sunDark: "#6a2e08", violet: "#b48cf0", violetDark: "#2a1838", gold: "#ffd75a", goldDark: "#5a3a0a" });
 var C2 = UNIQUE_COLORS;
 var ease29 = (k) => 1 - (1 - k) * (1 - k);
-function neon2(ctx, color28, dark, width2, draw, alpha2 = 1) {
+function neon2(ctx, color28, dark, width2, draw, alpha = 1) {
   ctx.save();
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
-  ctx.globalAlpha *= 0.8 * alpha2;
+  ctx.globalAlpha *= 0.8 * alpha;
   ctx.strokeStyle = dark;
   ctx.lineWidth = width2 * 2.6;
   draw();
@@ -157780,11 +157781,11 @@ function neon2(ctx, color28, dark, width2, draw, alpha2 = 1) {
   ctx.stroke();
   ctx.restore();
 }
-function flameRing(ctx, x, y, r, time3, count = 14, height = 8, alpha2 = 1) {
+function flameRing(ctx, x, y, r, time3, count = 14, height = 8, alpha = 1) {
   for (let i = 0; i < count; i++) {
     const a = i / count * TAU137 + time3 / 900, px7 = x + Math.cos(a) * r, py = y + Math.sin(a) * r * 0.45, h = height * (0.6 + 0.4 * Math.sin(time3 / 80 + i * 1.7));
     standV1(ctx, py, () => {
-      ctx.globalAlpha *= alpha2;
+      ctx.globalAlpha *= alpha;
       neon2(ctx, C2.ghost, C2.ghostDark, 1.8, () => {
         ctx.beginPath();
         ctx.moveTo(px7 - 2, py);
@@ -158575,8 +158576,8 @@ function createCombatVfx() {
     drawMasteryHazards(ctx, m, time3);
   }
   function lights(m, time3) {
-    const out = [], at8 = (x, y, r, color28, alpha2) => {
-      if (alpha2 > 0.01) out.push({ x, y, r, color: color28, alpha: alpha2 });
+    const out = [], at8 = (x, y, r, color28, alpha) => {
+      if (alpha > 0.01) out.push({ x, y, r, color: color28, alpha });
     };
     for (const b of bursts) {
       const l = burstLight(b), k = l ? lightEnvelope(time3 - b.born, l.life) : 0;
@@ -158698,9 +158699,9 @@ function drawBossChestParticlesD12_5B(ctx, x, y, age, seed2, front2) {
     if (travel <= 0) continue;
     const angle3 = i * 2.399963 + seed2 % 97 * 0.017, radius = 8 + travel * (24 + i % 4 * 4), px7 = x + Math.cos(angle3) * radius, py = y + 5 + Math.sin(angle3) * radius * 0.44 - Math.sin(travel * Math.PI) * (10 + i % 3 * 4), isFront = py >= y + 4;
     if (isFront !== front2) continue;
-    const alpha2 = fade * Math.sin(travel * Math.PI);
-    if (alpha2 <= 0) continue;
-    ctx.globalAlpha = alpha2;
+    const alpha = fade * Math.sin(travel * Math.PI);
+    if (alpha <= 0) continue;
+    ctx.globalAlpha = alpha;
     ctx.fillStyle = i % 3 ? "#e9bd58" : "#8ed46c";
     ctx.strokeStyle = "#26351f";
     ctx.lineWidth = 1;
@@ -158910,9 +158911,9 @@ function drawBossChestParticlesD12_5B2(ctx, x, y, age, seed2, front2) {
     if (travel <= 0) continue;
     const angle3 = i * 2.399963 + seed2 % 97 * 0.017, radius = 8 + travel * (24 + i % 4 * 4), px7 = x + Math.cos(angle3) * radius, py = y + 5 + Math.sin(angle3) * radius * 0.44 - Math.sin(travel * Math.PI) * (10 + i % 3 * 4), isFront = py >= y + 4;
     if (isFront !== front2) continue;
-    const alpha2 = fade * Math.sin(travel * Math.PI);
-    if (alpha2 <= 0) continue;
-    ctx.globalAlpha = alpha2;
+    const alpha = fade * Math.sin(travel * Math.PI);
+    if (alpha <= 0) continue;
+    ctx.globalAlpha = alpha;
     ctx.fillStyle = i % 3 ? "#e9bd58" : "#8ed46c";
     ctx.strokeStyle = "#26351f";
     ctx.lineWidth = 1;
@@ -159379,10 +159380,10 @@ function lightMotion(light2, time3) {
 }
 function describeLights(space) {
   const lights = [], t = space.collision.tileSize;
-  const add2 = (id, x, y, radius, kind, alpha2 = 1) => {
+  const add2 = (id, x, y, radius, kind, alpha = 1) => {
     if (lights.length >= LIGHT_LIMITS.descriptors) return;
     const n = terrainHash(Math.round(x), Math.round(y), 317);
-    lights.push(Object.freeze({ id, x, y, radius, kind, color: kind === "window" ? "#ffd37a" : kind === "mushroom" ? "#79e0bd" : kind === "shaft" ? "#d4e7bd" : "#ff9d32", intensity: kind === "window" ? 0.22 : 0.42, alpha: alpha2, dynamic: !["window", "shaft"].includes(kind), phase: n % 6283 / 1e3, frequency: 3e-3 + n % 9 * 19e-5 }));
+    lights.push(Object.freeze({ id, x, y, radius, kind, color: kind === "window" ? "#ffd37a" : kind === "mushroom" ? "#79e0bd" : kind === "shaft" ? "#d4e7bd" : "#ff9d32", intensity: kind === "window" ? 0.22 : 0.42, alpha, dynamic: !["window", "shaft"].includes(kind), phase: n % 6283 / 1e3, frequency: 3e-3 + n % 9 * 19e-5 }));
   };
   const site = authoredSite(space);
   if (site) {
@@ -159997,7 +159998,7 @@ function createRewardFeedback(canvas) {
     doc.getElementById("world-gold")?.animate?.([{ color: "#fff4ac", filter: "brightness(1.35)" }, { color: "#ffd43c", filter: "brightness(1)" }], { duration: 420 });
   }
   function drawToken(p, pos, age) {
-    const trail3 = p.trail ??= [], alpha2 = ctx.globalAlpha, seed2 = p.born % 997 / 97;
+    const trail3 = p.trail ??= [], alpha = ctx.globalAlpha, seed2 = p.born % 997 / 97;
     trail3.push(pos.x, pos.y);
     if (trail3.length > 12) trail3.splice(0, 2);
     if (p.kind === "xp") {
@@ -160006,11 +160007,11 @@ function createRewardFeedback(canvas) {
       ctx.globalCompositeOperation = "lighter";
       for (let i = 0; i < trail3.length - 2; i += 2) {
         const k = (i / 2 + 1) / (trail3.length / 2), s2 = 6 + 8 * k;
-        ctx.globalAlpha = alpha2 * 0.35 * k;
+        ctx.globalAlpha = alpha * 0.35 * k;
         ctx.drawImage(stamps.xpGlow, trail3[i] - s2 / 2, trail3[i + 1] - s2 / 2, s2, s2);
       }
       const g = 30 * pulse4;
-      ctx.globalAlpha = alpha2 * 0.9;
+      ctx.globalAlpha = alpha * 0.9;
       ctx.drawImage(stamps.xpGlow, pos.x - g / 2, pos.y - g / 2, g, g);
       ctx.restore();
       const s = 15 * pulse4;
@@ -160023,7 +160024,7 @@ function createRewardFeedback(canvas) {
       ctx.fillStyle = "#ffd86b";
       for (let i = 0; i < trail3.length - 2; i += 2) {
         const k = (i / 2 + 1) / (trail3.length / 2);
-        ctx.globalAlpha = alpha2 * 0.45 * k;
+        ctx.globalAlpha = alpha * 0.45 * k;
         ctx.beginPath();
         ctx.arc(trail3[i], trail3[i + 1], 1.5 + 2 * k, 0, Math.PI * 2);
         ctx.fill();
@@ -160036,7 +160037,7 @@ function createRewardFeedback(canvas) {
     if (flash < 0.18 && Math.abs(spin) > 0.7) {
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
-      ctx.globalAlpha = alpha2 * (1 - flash / 0.18);
+      ctx.globalAlpha = alpha * (1 - flash / 0.18);
       ctx.drawImage(stamps.glint, pos.x - 9.5, pos.y - 9.5, 9, 9);
       ctx.restore();
     }
@@ -160573,8 +160574,8 @@ function drawCaveDecorationShadowD10(ctx, d, t) {
     ctx.beginPath();
     ctx.moveTo(x, y + 24);
     ctx.bezierCurveTo(x - 8, y + 70, x + 14, y + 115, x + 5, y + 178);
-    for (const [width2, alpha2] of [[70, 0.1], [56, 0.12], [42, 0.14]]) {
-      ctx.strokeStyle = `rgba(107,88,56,${alpha2})`;
+    for (const [width2, alpha] of [[70, 0.1], [56, 0.12], [42, 0.14]]) {
+      ctx.strokeStyle = `rgba(107,88,56,${alpha})`;
       ctx.lineWidth = width2;
       ctx.stroke();
     }

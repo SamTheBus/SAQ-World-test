@@ -7658,7 +7658,7 @@ var CLASSIC_EVENT_PLAN = freezeWire({ version: WORLD_EVENT_PLAN_VERSION, events:
 
 // src/shared/generation/world_maker_v1/make.js
 var TW4 = W * 64;
-var WORLD_MAKER_VERSION = "world-maker-v1.20";
+var WORLD_MAKER_VERSION = "world-maker-v1.21";
 function makeWorld(seed, catalog, tries = 4, onStep = null) {
   const started = performance.now();
   let w, why = [];
