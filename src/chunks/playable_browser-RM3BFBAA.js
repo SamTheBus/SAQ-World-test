@@ -792,7 +792,6 @@ import {
   potionCount,
   potionDropCount,
   potionHealPercent,
-  potionRefillPriceV1,
   potionUpgrade,
   prepareEpisodeReward,
   prepareProgressionChange,
@@ -852,7 +851,6 @@ import {
   recoveredBossForId,
   recoveredBossRecord,
   recycleSporeV4,
-  refillPotionsV1,
   regionAddress,
   relativeWorldPosition,
   requireContract,
@@ -1098,7 +1096,7 @@ import {
   worldTimeAtMinute,
   worldTimeAtTick,
   wrathDamageV1
-} from "./chunk-W4ARCYAJ.js";
+} from "./chunk-7ZA6RRK6.js";
 
 // src/storage/bestiary_store_v1.js
 var bestiaryStoreKey = (channel2) => `${channel2}saq-world-bestiary-v1`;
@@ -134372,7 +134370,7 @@ function createActivitySimulation(initialState, { measure: measure2 = (_name, fn
       state2.tick = safeInteger(state2.tick + 1, 1);
       if (state2.d9World && state2.tick % POTION_BELT_POLICY.refillIntervalTicks === 0) for (const p of Object.values(state2.playersById)) {
         const a = state2.entitiesById[p.entityId];
-        if (a?.alive && a.residency.spaceInstanceId === state2.overworldInstanceId && (isStarterVillageSafe(state2, a.position) || isGeneratedTownSafeV1(state2, a.position) || isWorldPointSafe(manifest, a.position))) (hasWorldCombat(state2) ? refillPotionsV1 : grantPotions)(p, POTION_BELT_POLICY.maxCapacityUpgrades + POTION_BELT_POLICY.baseCharges);
+        if (a?.alive && a.residency.spaceInstanceId === state2.overworldInstanceId && (isStarterVillageSafe(state2, a.position) || isGeneratedTownSafeV1(state2, a.position) || isWorldPointSafe(manifest, a.position))) grantPotions(p, POTION_BELT_POLICY.maxCapacityUpgrades + POTION_BELT_POLICY.baseCharges);
       }
       if (state2.d9World) for (const p of Object.values(state2.playersById)) {
         collectGroundPotions(state2, p);
@@ -135975,7 +135973,7 @@ function createActivityClientPort({ authority, localPlayerId, measure: measure2 
           worldTime: worldTimeAtTick(state2.tick),
           localPlayerId,
           inventory,
-          potions: Object.freeze({ count: potionCount(player), capacity: potionCapacity(player), healPercent: potionHealPercent(player), cooldownTicks: potionCooldownTicks(state2, player), cooldownTotal: potionCooldownTotal(player), enabled: Boolean(player.inventory?.services), refillPrice: hasWorldCombat(state2) ? potionRefillPriceV1(player.progression?.level ?? 1) : null, drops: freezeProjection(potionDrops) }),
+          potions: Object.freeze({ count: potionCount(player), capacity: potionCapacity(player), healPercent: potionHealPercent(player), cooldownTicks: potionCooldownTicks(state2, player), cooldownTotal: potionCooldownTotal(player), enabled: Boolean(player.inventory?.services), refillPrice: null, drops: freezeProjection(potionDrops) }),
           forgeAccess: forgeAccess(state2, player, m),
           loot: freezeProjection(loot),
           resources: freezeProjection(resources),

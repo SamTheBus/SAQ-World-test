@@ -2505,7 +2505,6 @@ function attunementMaterialsV1(level) {
   if (level + 1 >= A.mythicFromStep) out["Mythic Scrap"] = ramp(level + 1 - A.mythicFromStep, 101 - A.mythicFromStep);
   return out;
 }
-var potionRefillPriceV1 = (heroLevel) => minutesGold(1, heroLevel, ECONOMY_V1.potionRefillPercentOfMinute);
 
 // src/shared/content/world_combat_v1.js
 var WORLD_COMBAT_VERSION = "world-combat-hordes-progression-v1";
@@ -22417,18 +22416,6 @@ function grantPotions(p, count2) {
   if (granted) writable2(p).grants += granted;
   return granted;
 }
-function refillPotionsV1(p, count2) {
-  if (!p.inventory.services) return 0;
-  const price = potionRefillPriceV1(p.progression?.level ?? 1);
-  let n = Math.min(Math.max(0, potionCapacity(p) - potionCount(p)), count2);
-  while (n > 0 && compareAmount(p.inventory.gold, multiplyAmount(price, String(n))) < 0) n--;
-  if (!n) return 0;
-  const cost = multiplyAmount(price, String(n)), b = writable2(p);
-  b.grants += n;
-  b.refillGold = addAmount(b.refillGold ?? "0", cost);
-  p.inventory.gold = subtractAmount(p.inventory.gold, cost);
-  return n;
-}
 function markPotionUsed(state, p) {
   writable2(p).lastUseTick = state.tick;
 }
@@ -31045,7 +31032,6 @@ export {
   STAT_PERKS_V1,
   goldUnit,
   minutesGold,
-  potionRefillPriceV1,
   WORLD_COMBAT_VERSION,
   WORLD_COMBAT_HASH,
   hasWorldCombat,
@@ -31828,7 +31814,6 @@ export {
   potionCooldownTotal,
   potionCooldownTicks,
   grantPotions,
-  refillPotionsV1,
   groundPotions,
   groundPotionPosition,
   dropPotions,
