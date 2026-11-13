@@ -6233,6 +6233,7 @@ var classTrees = (cls) => TREES[cls] ??= Object.freeze([...new Set(Object.values
 function resolveV3Affix(key5, cls, slotKey, random) {
   const pick6 = (list2) => list2[Math.floor(random() * list2.length)];
   if (key5 === "attr") return [pick6(["str", "dex", "int"]), null];
+  if (key5 === "mainAttr") return [{ knight: "str", rogue: "dex", mage: "int" }[cls] ?? pick6(["str", "dex", "int"]), null];
   if (key5 === "groupDmg") {
     const list2 = slotKey === "ring" || slotKey === "cape" ? ["areaDmg", "finisherDmg"] : groupsFor(cls, DAMAGE_GROUPS);
     return [pick6(list2), null];
@@ -6453,6 +6454,56 @@ var UNIQUE_ITEMS = freezeWire(Object.fromEntries([
     "When a movement skill lands (Dash, Blink, Lunge, Shadowstep, Shield Charge or Skyfall Leap), the ground quakes: a ring of lava cracks bursts around you for {0} of your Attack and knocks enemies back. Once every 4 s.",
     "Every step a small eruption."
   ),
+  // Shield Warden (Upland): its lodestone, its thrown spirit shield, its circling shields and its plate (Sammy 2026-11-13,
+  // the set page and all four passes approved).
+  unique(
+    "lodestone-aegis",
+    "Lodestone Aegis",
+    "subweapon",
+    "shield",
+    "Kite Shield",
+    "knight",
+    "aegis_goliath",
+    "upland",
+    "Shield Bash pulls first: a lodestone ring drags every enemy near you in to your shield (not bosses) and slams them for {0} of your Attack. Then the bash lands on all of them.",
+    "Whatever it faces comes closer."
+  ),
+  unique(
+    "oathcutter",
+    "Oathcutter",
+    "subweapon",
+    "dagger",
+    "Main-Gauche",
+    "rogue",
+    "aegis_goliath",
+    "upland",
+    "Flurry also throws a spirit shield. It flies out through every enemy in a line for {0} of your Attack, then comes back to you and hits them all again. Once every 3 s.",
+    "Thrown in anger, home by oath."
+  ),
+  unique(
+    "wardlight-scepter",
+    "Wardlight Scepter",
+    "weapon",
+    null,
+    "Scepter",
+    "mage",
+    "aegis_goliath",
+    "upland",
+    "Three spirit shields circle you. Each one takes a hit meant for you, then breaks in a burst of spirit light that hits the enemies near you for {0} of your Attack. A broken shield comes back after 6 s.",
+    "Three oaths, still sworn."
+  ),
+  unique(
+    "wardenplate",
+    "Wardenplate",
+    "overall",
+    null,
+    "Warden Plate",
+    null,
+    "aegis_goliath",
+    "upland",
+    "When a hit drops you below 40% Health, a ring of spirit shields slams down around you: it knocks the enemies near you back, and you take {0} less damage for 4 s. Once every 30 s.",
+    "It held the fort gate for a hundred years."
+  ),
   // Nightmare Sporecrown, the boss at the end of a bad Glowcap trip (trip passes 5c-1..5c-4, Sammy 2026-11-11/12).
   // It always drops one of the four (trip_nightmare_world_v1.js); they drop nowhere else (no biome).
   unique(
@@ -6670,6 +6721,10 @@ var UNIQUE_TIERS = freezeWire({
   "ventcutter": { lines: ["mainDmg", "critDamage", "critChance", "dex", "eliteDmg"], stars: [90, 125, 160, 210], unit: "pct" },
   "coreheart": { lines: ["mainDmg", "fireDmg", "critChance", "activeSpd", "eliteDmg"], stars: [100, 135, 170, 220], unit: "pct" },
   "brimstone-treads": { lines: ["moveSpeed", "atkPct", "critDamage", "eliteDmg", "lifeKill"], stars: [50, 70, 90, 120], unit: "pct" },
+  "lodestone-aegis": { lines: ["block", "offDmg", "controlDur", "cdr", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
+  "oathcutter": { lines: ["offDmg", "critChance", "parry", "cdr", "eliteDmg"], stars: [50, 70, 90, 120], unit: "pct" },
+  "wardlight-scepter": { lines: ["mainDmg", "critChance", "activeSpd", "maxHpPct", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
+  "wardenplate": { lines: ["maxHpPct", "defPct", "lifeKill", "cdr", "atkPct"], stars: [30, 40, 50, 65], unit: "pct" },
   // Nightmare Sporecrown (v3 lines below; these five are the v2 fallback).
   "sporeveil-aegis": { lines: ["block", "controlDur", "defCdr", "counterDmg", "eliteDmg"], stars: [60, 90, 120, 180], unit: "ticks" },
   "gazecap-dirk": { lines: ["offDmg", "critChance", "critDamage", "dex", "eliteDmg"], stars: [60, 80, 100, 130], unit: "pct" },
@@ -6705,6 +6760,10 @@ var UNIQUE_LINES_V3 = freezeWire({
   "ventcutter": { always: "critDamage", pool: ["critChance", "fireDmg", "areaDmg", "ailmentDur", "dex", "eliteDmg"], leg: ["killCdr"] },
   "coreheart": { always: "fireDmg", pool: ["mainDmg", "activeSpd", "moveCdr", "critChance", "ailmentDur", "ailingDmg", "eliteDmg"], leg: ["maxPip"] },
   "brimstone-treads": { always: "areaDr", pool: ["moveSpeed", "moveCdr", "maxHpPct", "defPct", "stunDr", "areaDmg", "sigDmg"], leg: [] },
+  "lodestone-aegis": { always: "areaDmg", pool: ["block", "offDmg", "controlDur", "cdr", "eliteDr", "perfectCdr"], leg: ["branchRank:bastion"] },
+  "oathcutter": { always: "rangedDmg", pool: ["offDmg", "critChance", "parry", "classDmg", "ailmentDur", "eliteDmg"], leg: ["killCdr"] },
+  "wardlight-scepter": { always: "mainDmg", pool: ["critChance", "activeSpd", "areaDmg", "maxHpPct", "eliteDr", "eliteDmg"], leg: ["maxPip"] },
+  "wardenplate": { always: "eliteDr", pool: ["maxHpPct", "defPct", "mainAttr", "lifeKill", "areaDr", "hitCdr", "lowDmg"], leg: [] },
   // Nightmare Sporecrown set (lines page YTCrxKzJ..., Sammy 2026-11-12).
   "sporeveil-aegis": { always: "controlDur", pool: ["block", "defCdr", "ccDmg", "counterDmg", "areaDr", "perfectCdr"], leg: ["maxPip"] },
   "gazecap-dirk": { always: "critChance", pool: ["offDmg", "critDamage", "areaDmg", "exposeDmg", "classDmg", "eliteDmg"], leg: ["killCdr"] },
@@ -6746,6 +6805,7 @@ function uniqueLineKeyV3(id, affix) {
   if (list2.includes(affix.key)) return affix.key;
   if (SIG_DMG.includes(affix.key) && list2.includes("sigDmg")) return "sigDmg";
   if (CLASS_KINDS.includes(affix.key) && list2.includes("classDmg")) return "classDmg";
+  if (["str", "dex", "int"].includes(affix.key) && list2.includes("mainAttr")) return "mainAttr";
   return affix.key;
 }
 function uniqueStarValue(id, tier) {
@@ -6768,7 +6828,7 @@ function uniqueEffectText(unique2, tier) {
 var uniqueOf = (definition) => UNIQUE_ITEMS[definition?.unique] ?? null;
 var uniquesFrom = (source10, cls) => UNIQUE_IDS.filter((id) => UNIQUE_ITEMS[id].from === source10 && (UNIQUE_ITEMS[id].cls === null || UNIQUE_ITEMS[id].cls === cls));
 var trophyFromV1 = (biome) => Object.values(UNIQUE_ITEMS).find((u) => u.trophy && u.biome === biome)?.from ?? null;
-var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault"]);
+var UNIQUE_BOSSES = Object.freeze(["barrow_king", "sun_pharaoh", "arachnid_treant", "overlord_iron_vault", "aegis_goliath"]);
 function nightmareUniqueV1(cls, pick6) {
   const own3 = cls ? uniquesFrom("nightmare_sporecrown", cls) : [], mine = own3.find((id) => UNIQUE_ITEMS[id].cls === cls), any = own3.find((id) => UNIQUE_ITEMS[id].cls === null);
   if (!mine) return null;
@@ -7456,8 +7516,8 @@ function generateAtPrecision(c, seed, input, { tier = null, family: family2 = nu
   const type = family2 ?? pick6(families), sub = type === "subweapon" ? subType ?? (cls ? classOffhand : pick6(["shield", "dagger", "tome"])) : null, own3 = type === "cape" ? CAPE_NOUNS : cls && type !== "ring" ? classGearNouns(cls, type) : GEAR_NOUNS[sub ?? type], shared = wardrobe && type === "helmet" ? SHARED_HELMET_NOUNS : [], nouns = [
     ...own3 ?? [],
     ...shared,
-    ...uq?.trophy || (uq?.family === "gloves" || uq?.family === "boots") && uq.cls === null ? [uq.noun] : []
-    /* any-class unique gloves and boots (Cocoonsilk Wraps, Brimstone Treads) keep their own noun */
+    ...uq?.trophy || ["gloves", "boots", "overall"].includes(uq?.family) && uq.cls === null ? [uq.noun] : []
+    /* any-class unique gloves, boots and armor (Cocoonsilk Wraps, Brimstone Treads, Wardenplate) keep their own noun */
   ], n = noun ?? (type === "subweapon" && cls && progression.mainTree ? smartOffhandNoun(cls, progression.mainTree, random) : shared.length && random() < 0.2 ? pick6(shared) : pick6(own3));
   requireContract((family2 ? cls ? classFamilies : GEAR_FAMILIES : families).includes(type) && (!cls || type !== "subweapon" || sub === classOffhand) && nouns?.includes(n), "Unknown generated family/noun");
   const E = c.dungeonScale(power2).E, R = c.q(100 + 7 * rarityTier, 100), P2 = c.q((100 + 15 * rarityTier) * (type === "overall" ? 18 : 10), 1e3), flatR = c.mul(R, c.q(type === "overall" ? 18 : 10, 10));
@@ -27981,6 +28041,7 @@ var BY_NOUN = Object.freeze({
   "Steel Boots": "sabatons",
   Treads: "boots",
   Exosuit: "plate",
+  "Warden Plate": "plate",
   "Inquisitor Robes": "robe",
   "Full Plate Armor": "plate",
   Trenchcoat: "leather",
@@ -28022,7 +28083,7 @@ var BY_NOUN = Object.freeze({
   "Silk Wraps": "wraps",
   "Silk Slippers": "slippers"
 });
-var OVERALL_LEGS = Object.freeze({ plate: "greaves", hauberk: "chausses", doublet: "breeches", leather: "trousers", "mossback-pelt": "pelt" });
+var OVERALL_LEGS = Object.freeze({ plate: "greaves", hauberk: "chausses", doublet: "breeches", leather: "trousers", "mossback-pelt": "pelt", wardenplate: "warden-greaves" });
 var TOME_LOOKS = Object.freeze({ fire: "tome-fire", lightning: "tome-storm", frost: "tome-frost" });
 var LOOK_POOLS = Object.freeze({
   sword: Object.freeze(["sword", "broadsword", "leaf-sword"]),
