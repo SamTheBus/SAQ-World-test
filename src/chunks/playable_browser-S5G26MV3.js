@@ -110974,7 +110974,7 @@ function smithHammer(c, A2) {
 }
 function slagmaul(c, A2, t = 0) {
   const coal3 = { b: "#3a2c26", d: "#2a201b", l: "#4e3c33" }, wrap3 = { b: "#a04f35", d: "#7d3a27", l: "#bd6446" }, iron = { b: "#4a4f57", d: "#33373d", l: "#6b727c" }, bas = { b: "#4a4046", d: "#352e33", l: "#6a5e63" }, knuck = { b: "#5f555b", d: "#463e43", l: "#7a6e70" }, slag2 = { b: "#3b3439", d: "#29242a" };
-  const heat = 0.75 + 0.25 * Math.sin(t * 3.2), LAVA5 = "#f6662c", GOLD40 = "#ffbd53";
+  const heat = 0.75 + 0.25 * Math.sin(t * 3.2), LAVA5 = "#f6662c", GOLD41 = "#ffbd53";
   G3(c, [10.2, -1.8, 11.6, -2.2, 12.6, -1.2, 12.4, 1.4, 11, 2.1, 9.8, 1], slag2, { split: 0.5, lw: 1 });
   px3(c, 10.8, -0.4, 1, 0.8, LAVA5);
   R3(c, 12.4, -1, 12.4, 2, coal3, { flat: true, lw: 1.2 });
@@ -110996,7 +110996,7 @@ function slagmaul(c, A2, t = 0) {
     c.moveTo(29.6, y);
     c.lineTo(35.4, y);
     c.stroke();
-    c.strokeStyle = GOLD40;
+    c.strokeStyle = GOLD41;
     c.globalAlpha = heat;
     c.lineWidth = 0.6;
     c.beginPath();
@@ -111015,10 +111015,10 @@ function slagmaul(c, A2, t = 0) {
     c.save();
     c.lineCap = "round";
     c.lineJoin = "round";
-    for (const [col2, lw] of [[LAVA5, w], [GOLD40, w * 0.4]]) {
+    for (const [col2, lw] of [[LAVA5, w], [GOLD41, w * 0.4]]) {
       c.strokeStyle = col2;
       c.lineWidth = lw;
-      if (col2 === GOLD40) c.globalAlpha = heat;
+      if (col2 === GOLD41) c.globalAlpha = heat;
       c.beginPath();
       pts2.forEach(([x, y], k) => k ? c.lineTo(x, y) : c.moveTo(x, y));
       c.stroke();
@@ -111033,7 +111033,7 @@ function slagmaul(c, A2, t = 0) {
 var VENT_CHARGE = null;
 function ventcutter(c, A2, t = 0) {
   const obs = { b: "#2f2935", d: "#211d26", l: "#5a4f66" }, bas = { b: "#4a4046", d: "#352e33", l: "#6a5e63" }, wrap3 = { b: "#a04f35", d: "#7d3a27", l: "#bd6446" }, slag2 = { b: "#3b3439", d: "#29242a" };
-  const LAVA5 = "#f6662c", GOLD40 = "#ffbd53", WHITE4 = "#fff0b0", heat = 0.75 + 0.25 * Math.sin(t * 3.6), n = VENT_CHARGE;
+  const LAVA5 = "#f6662c", GOLD41 = "#ffbd53", WHITE4 = "#fff0b0", heat = 0.75 + 0.25 * Math.sin(t * 3.6), n = VENT_CHARGE;
   G3(c, [10.6, -1.6, 12, -2, 12.8, -1, 12.6, 1.2, 11.4, 1.8, 10.4, 0.8], slag2, { split: 0.5, lw: 1 });
   px3(c, 11.1, -0.3, 0.9, 0.7, LAVA5);
   R3(c, 12.4, -1.1, 4, 2.2, wrap3, { flat: true, lw: 1.2 });
@@ -111044,7 +111044,7 @@ function ventcutter(c, A2, t = 0) {
   c.lineCap = "round";
   c.lineJoin = "round";
   const edge = [[18.6, 1.5], [24, 0.95], [28.8, 0.15], [31.6, -0.6], [34.2, -4.8]];
-  for (const [col2, lw, a] of [[LAVA5, 0.95, 1], [GOLD40, 0.4, heat]]) {
+  for (const [col2, lw, a] of [[LAVA5, 0.95, 1], [GOLD41, 0.4, heat]]) {
     c.strokeStyle = col2;
     c.lineWidth = lw;
     c.globalAlpha = a;
@@ -111075,7 +111075,7 @@ function ventcutter(c, A2, t = 0) {
     c.stroke();
     c.beginPath();
     c.ellipse(x, y - 0.05, 0.75, 0.45, -0.12, 0, TAU163);
-    c.fillStyle = lit2 > 0.5 ? ready ? WHITE4 : GOLD40 : "#5a2c22";
+    c.fillStyle = lit2 > 0.5 ? ready ? WHITE4 : GOLD41 : "#5a2c22";
     c.fill();
     if (lit2 > 0.5) {
       const [r, g, b] = ready ? [255, 240, 176] : [255, 189, 83];
@@ -111092,7 +111092,7 @@ function ventcutter(c, A2, t = 0) {
 var CORE_PRIMED = null;
 function coreheart(c, A2, t = 0) {
   const bas = { b: "#4a4046", d: "#352e33", l: "#6a5e63" }, iron = { b: "#4a4f57", d: "#33373d", l: "#6b727c" }, claw4 = { b: "#7c828c", d: "#5a6068", l: "#a3a9b2" }, wrap3 = { b: "#a04f35", d: "#7d3a27", l: "#bd6446" }, slag2 = { b: "#3b3439", d: "#29242a" };
-  const LAVA5 = "#f6662c", DEEP7 = "#c9361f", GOLD40 = "#ffbd53", WHITE4 = "#fff0b0", p = CORE_PRIMED ?? 0, heat = 0.7 + 0.3 * Math.sin(t * (3 + p * 5));
+  const LAVA5 = "#f6662c", DEEP7 = "#c9361f", GOLD41 = "#ffbd53", WHITE4 = "#fff0b0", p = CORE_PRIMED ?? 0, heat = 0.7 + 0.3 * Math.sin(t * (3 + p * 5));
   G3(c, [9.8, -1.3, 11, -1.6, 11.8, -0.8, 11.6, 1, 10.6, 1.5, 9.6, 0.6], slag2, { split: 0.5, lw: 0.9 });
   R3(c, 11.4, -1, 3.8, 2, wrap3, { flat: true, lw: 1.1 });
   px3(c, 12.6, -1, 0.5, 2, "#00000044");
@@ -111120,12 +111120,12 @@ function coreheart(c, A2, t = 0) {
     c.beginPath();
     for (let i = 0; i < h.length; i += 2) i ? c.lineTo(h[i], h[i + 1]) : c.moveTo(h[i], h[i + 1]);
     c.closePath();
-    c.fillStyle = p > 0.5 ? GOLD40 : LAVA5;
+    c.fillStyle = p > 0.5 ? GOLD41 : LAVA5;
     c.fill();
   }
   c.save();
   c.globalAlpha = heat * (p > 0.5 ? 1 : 0.6);
-  c.fillStyle = p > 0.5 ? WHITE4 : GOLD40;
+  c.fillStyle = p > 0.5 ? WHITE4 : GOLD41;
   c.beginPath();
   c.ellipse(27.6, -0.2, 0.9 + p * 0.4, 0.6 + p * 0.3, 0, 0, TAU163);
   c.fill();
@@ -115805,7 +115805,7 @@ var QUEST_ITEM_POLICY = Object.freeze({
   leftoverCap: 99,
   leftoverKinds: 16
 });
-var item = (id2, name, plural3, creatures, art, desc, title2, why) => Object.freeze({ id: id2, name, plural: plural3, creatures, art, desc, title: title2, why });
+var item = (id2, name, plural3, creatures, art, desc, title3, why) => Object.freeze({ id: id2, name, plural: plural3, creatures, art, desc, title: title3, why });
 var QUEST_ITEMS = Object.freeze({
   tusk_boar: item("boar-tusk", "Boar Tusk", "Boar Tusks", "Tusk Boars", "tusk", "Pried from a Tusk Boar.", "Tusk Trouble", "Tusk Boars have been tearing up the fields {dir} of {town}."),
   field_scarecrow: item("scarecrow-cape", "Scarecrow's Torn Cape", "Scarecrow's Torn Capes", "Field Scarecrows", "gear:cape:ragged-cape", "Torn off a Field Scarecrow.", "Rags in the Wind", "Field Scarecrows walk the meadows {dir} of {town} at all hours."),
@@ -116051,35 +116051,35 @@ function questTextV1(q2, names2) {
     ...it ? { need: String(q2.need), plural: it.plural, Plural: it.plural, creatures: it.creatures } : {}
   };
   const found = Boolean(names2.found);
-  let title2, step3, note2;
+  let title3, step3, note2;
   if (q2.kind === "collect") {
-    title2 = it.title;
+    title3 = it.title;
     note2 = fill2(it.why + " Bring me {need} {plural}.", v);
     step3 = fill2("Collect {need} {plural} from {creatures}", v);
   } else if (q2.kind === "clear") {
-    title2 = fill2("Trouble at {label}", v);
+    title3 = fill2("Trouble at {label}", v);
     note2 = fill2("Something has moved into {label}, {dir} of {town}. Clear it out.", v);
     step3 = fill2(found ? "Clear out {label}" : "Find {label} \xB7 search the marked area", v);
   } else if (q2.kind === "hunt") {
-    title2 = fill2("Wanted: {kind}", v);
+    title3 = fill2("Wanted: {kind}", v);
     note2 = fill2("{a} has made a lair in {label}, {dir} of {town}. Hunt {it} down.", v);
     step3 = fill2("Hunt {the} at {label}", v);
   } else if (q2.kind === "carry") {
-    title2 = PARCEL_TITLE[parcel2] + " for " + (names2.dest ?? "a town to the " + dir);
+    title3 = PARCEL_TITLE[parcel2] + " for " + (names2.dest ?? "a town to the " + dir);
     note2 = fill2("Carry this letter to {dest} and hand it in at the notice board there.", v);
     step3 = fill2("Take the {parcel} to {dest}", v);
   } else if (q2.kind === "find") {
-    title2 = "The lost " + v.item;
+    title3 = "The lost " + v.item;
     note2 = fill2("Someone lost " + aOrAn(v.item) + " in a clearing {dir} of {town}. Search the clearing and bring it back.", v);
     step3 = found ? "Search the clearing for the " + v.item : "Find the clearing \xB7 search the marked area";
   } else {
-    title2 = "Taken by looters";
+    title3 = "Taken by looters";
     note2 = fill2("Looters are holding {captive} at their camp {dir} of {town}. Drive them off and bring {freed} home.", v);
     step3 = fill2("Free {freed} at the looters' camp", v);
   }
   if (folk) note2 = fill2(FOLK[q2.kind][folk] ?? FOLK[q2.kind].general, v);
   if (q2.status === "ready") step3 = fill2(q2.source === "folk" ? "Return to {giver} in {town}" : "Return to the {town} notice board", { ...v, giver: giverWord(names2.giverName, names2.town) });
-  return { title: sentences(title2), note: sentences(note2), step: sentences(step3) };
+  return { title: sentences(title3), note: sentences(note2), step: sentences(step3) };
 }
 
 // src/shared/generation/alderwood_access_v1.js
@@ -118120,9 +118120,9 @@ function mountPlannedReviewControlsV1({ environment, controls, review, session }
   };
   const doc = environment.document, section = doc.createElement("details");
   section.id = "planned-world-review";
-  const title2 = doc.createElement("summary");
-  title2.textContent = (doc.body.dataset.cumulativeReview === "true" ? "Cumulative world preview \xB7 " : "Planned world review \xB7 ") + review.asset.assetId;
-  section.append(title2);
+  const title3 = doc.createElement("summary");
+  title3.textContent = (doc.body.dataset.cumulativeReview === "true" ? "Cumulative world preview \xB7 " : "Planned world review \xB7 ") + review.asset.assetId;
+  section.append(title3);
   if (review.binding.settlementServicesVersion) review.targets.push({ id: "life:town-enchanter", label: "Selene \xB7 Enchanter (inspection)", tile: { x: 5909, y: 5754 } });
   const note2 = doc.createElement("p");
   note2.textContent = review.binding.sitePopulation ? review.binding.wildernessVersion ? "Wilderness V2: 108 playable sites (40 caves, 18 forts, 34 ruins, 16 crypts) including 73 scattered wilderness additions. Trails and event clearing capacities reserved. Original Alpha geography and baseline sites preserved. " : "Alpha population: 35 playable sites - 12 caves, 7 forts, 9 ruins, 7 crypts. All tiers now have real Alpha destinations. Original 48 reservations remain; three explicit additions bring the roster to 51. Signature families remain reserved and UNBUILT. Town and furnished tavern, refined water, Hybrid V2, provisional routes and six future islands are preserved. Named coastal ferries connect all seven populated islands. Walk to a landing and press E/touch; no inspection travel is required.  Large Cave rewards are provisional; Deep Cave finale remains UNBOUND. Optional fixtures remain separate campaigns." : (review.asset.reviewFixture ? "ISOLATED " + (review.asset.assetId === "crypt-large-fixture" ? "LARGE CRYPT" : review.asset.assetId === "ruin-deep-fixture" ? "DEEP RUIN" : "DEEP FORT") + " FIXTURE. Separate disposable campaign; NOT a populated Alpha destination. " : "") + (review.binding.cryptPrototype ? "Crypt family: Alpha Small (1), Standard (2) and Deep (4) floors; Large (3) is an optional isolated fixture. " : "") + (review.binding.ruinPrototype ? (review.binding.ruinPrototype === PLANNED_RUIN_V2 ? review.asset.reviewFixture ? "Deep Ruin: four floors. " : "Three Alpha ruins: Small, Standard and Large (three floors). Deep is a separate optional fixture. " : "Small and Standard ruins playable. ") + "Ordinary personal floor chests; existing temporary encounters. " : "") + (review.binding.fortPrototype ? "Fort family review. Existing upper commander/underground elites are temporary encounters. Ocean-separated forts need inspection travel. " : "") + (review.binding.cavePrototype ? review.caveReservations.length > 1 ? "Four procedural caves playable; native cave art/rosters reused. Large rewards provisional; Deep finale UNBOUND. Island Deep has no walking connection to the mainland. " : "One Desert Standard Cave is playable via the existing trail. Native cave art/roster reused. " : "") + (review.binding.townPrototype ? "One populated open town and furnished two-floor tavern; remaining reservations are UNBUILT. " : "") + "Provisional travel-network candidate \xB7 actual campaign \xB7 20 settlements / 48 sites / 6 future islands / 3 campuses reserved. Other settlement buildings and destination interiors remain UNBUILT. Timber bridges cross suitable local channels. Ocean travel is not implemented.";
@@ -118498,8 +118498,8 @@ function laneFor(doc) {
     card.addEventListener("pointerup", end);
     card.addEventListener("pointercancel", end);
   }
-  function show({ kind = "loot", title: title2, sub = "", accent = null, image = null, key: key4 = null, ms = DEFAULT_MS }) {
-    const id2 = key4 ?? kind + "/" + title2, prior = cards.get(id2);
+  function show({ kind = "loot", title: title3, sub = "", accent = null, image = null, key: key4 = null, ms = DEFAULT_MS }) {
+    const id2 = key4 ?? kind + "/" + title3, prior = cards.get(id2);
     if (prior) {
       const n = Number(prior.dataset.count || 1) + 1;
       prior.dataset.count = String(n);
@@ -118533,7 +118533,7 @@ function laneFor(doc) {
     const text3 = doc.createElement("div");
     text3.className = "toast-text";
     const t = doc.createElement("strong");
-    t.textContent = title2;
+    t.textContent = title3;
     const s = doc.createElement("small");
     s.className = "toast-sub";
     s.textContent = sub;
@@ -118602,9 +118602,9 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
   root6.setAttribute("role", "dialog");
   root6.setAttribute("aria-modal", "true");
   root6.setAttribute("aria-labelledby", "hero-creator-title");
-  const panel = el3("div", "hc-panel"), head18 = el3("header", "hc-head"), title2 = el3("h2", "", "Create your hero"), intro = el3("p", "hc-intro");
-  title2.id = "hero-creator-title";
-  head18.append(title2, intro);
+  const panel = el3("div", "hc-panel"), head18 = el3("header", "hc-head"), title3 = el3("h2", "", "Create your hero"), intro = el3("p", "hc-intro");
+  title3.id = "hero-creator-title";
+  head18.append(title3, intro);
   if (beforeGame?.strip) head18.append(beforeGame.strip);
   const body6 = el3("div", "hc-body"), preview = el3("div", "hc-preview"), stage2 = el3("canvas", "hc-stage"), bar2 = el3("div", "hc-bar");
   stage2.setAttribute("role", "img");
@@ -118832,7 +118832,7 @@ function createHeroCreatorV1({ document: document2, environment, readModel, adap
     laterRow.hidden = mode !== "create";
     for (const f of lookFields) f.f.hidden = mode === "class";
     helmToggle.b.hidden = randomButton.hidden = mode === "class";
-    title2.textContent = mode === "create" ? "Create your hero" : mode === "class" ? "Choose your class" : "Your hero\u2019s look";
+    title3.textContent = mode === "create" ? "Create your hero" : mode === "class" ? "Choose your class" : "Your hero\u2019s look";
     intro.textContent = mode === "create" ? "Name your hero and choose how they look. Pick a class now or later; once picked, it\u2019s permanent." : mode === "class" ? "Your class is permanent for this hero. Your name and look stay as they are." : "Change how your hero looks. Your gear still goes on top.";
     for (const [id2, { b }] of Object.entries(cardButtons)) {
       b.setAttribute("aria-pressed", String(id2 === cls));
@@ -119065,9 +119065,9 @@ async function newWorldFlowV1({ environment, save, startBuild = startWorldBuildV
 function chooseWorld(document2, { pick: pick4, text: text3, roll: roll9 }) {
   const { el: el3, button: button3, icon: icon2, dialog } = dom(document2);
   return new Promise((resolve) => {
-    const root6 = dialog("new-world-title"), panel = el3("div", "nw-panel"), head18 = el3("header", "nw-head"), title2 = el3("h2", "", "Choose your world");
-    title2.id = "new-world-title";
-    head18.append(title2, el3("p", "nw-intro", "Each hero lives in one world. Play the classic map, or grow a new one from a seed."));
+    const root6 = dialog("new-world-title"), panel = el3("div", "nw-panel"), head18 = el3("header", "nw-head"), title3 = el3("h2", "", "Choose your world");
+    title3.id = "new-world-title";
+    head18.append(title3, el3("p", "nw-intro", "Each hero lives in one world. Play the classic map, or grow a new one from a seed."));
     const body6 = el3("div", "nw-body"), cards = el3("div", "nw-cards"), legend = el3("p", "nw-legend", "World");
     const card = (kind, name, about, tag2) => {
       const b = button3("nw-card is-" + kind, "", () => {
@@ -119195,10 +119195,10 @@ async function buildWithHero(environment, seed2, save, startBuild) {
 }
 function buildStrip(document2, seed2) {
   const { el: el3, icon: icon2 } = dom(document2);
-  const root6 = el3("div", "nw-strip"), title2 = el3("strong", "nw-strip-title"), detail = el3("span", "nw-strip-detail"), bar2 = el3("span", "nw-bar"), fill9 = el3("span", "nw-bar-fill"), percent = el3("span", "nw-strip-percent");
+  const root6 = el3("div", "nw-strip"), title3 = el3("strong", "nw-strip-title"), detail = el3("span", "nw-strip-detail"), bar2 = el3("span", "nw-bar"), fill9 = el3("span", "nw-bar-fill"), percent = el3("span", "nw-strip-percent");
   root6.setAttribute("role", "status");
   bar2.append(fill9);
-  root6.append(icon2("seeded", "nw-strip-icon"), title2, detail, bar2, percent);
+  root6.append(icon2("seeded", "nw-strip-icon"), title3, detail, bar2, percent);
   let last = "";
   return { root: root6, paint(state2) {
     const key4 = JSON.stringify([Math.floor(state2.fraction * 100), state2.stage, state2.failed]);
@@ -119207,7 +119207,7 @@ function buildStrip(document2, seed2) {
     const done3 = state2.stage === WORLD_BUILD_STAGES.length, shown2 = Math.floor(state2.fraction * 100);
     root6.classList.toggle("is-failed", Boolean(state2.failed));
     root6.classList.toggle("is-done", done3);
-    title2.textContent = state2.failed ? "This world couldn\u2019t be built" : done3 ? "Your world is ready" : "Building your world";
+    title3.textContent = state2.failed ? "This world couldn\u2019t be built" : done3 ? "Your world is ready" : "Building your world";
     detail.textContent = state2.failed ? "Seed " + seed2.seed + " \xB7 you can try again after making your hero" : "Seed " + seed2.seed + (done3 ? "" : " \xB7 " + WORLD_BUILD_STAGES[state2.stage].label);
     bar2.hidden = percent.hidden = Boolean(state2.failed);
     fill9.style.width = shown2 + "%";
@@ -119216,9 +119216,9 @@ function buildStrip(document2, seed2) {
 }
 function waitingPanel(document2, environment, seed2) {
   const { el: el3, button: button3, dialog } = dom(document2);
-  const root6 = dialog("new-world-wait-title"), panel = el3("div", "nw-panel nw-wait-panel"), head18 = el3("header", "nw-head"), title2 = el3("h2", "", "Your world is almost ready"), intro = el3("p", "nw-intro");
-  title2.id = "new-world-wait-title";
-  head18.append(title2, intro);
+  const root6 = dialog("new-world-wait-title"), panel = el3("div", "nw-panel nw-wait-panel"), head18 = el3("header", "nw-head"), title3 = el3("h2", "", "Your world is almost ready"), intro = el3("p", "nw-intro");
+  title3.id = "new-world-wait-title";
+  head18.append(title3, intro);
   root6.hidden = true;
   const body6 = el3("div", "nw-wait"), heroBox = el3("div", "nw-wait-hero"), portrait = el3("canvas", "nw-wait-portrait"), heroName = el3("strong", "nw-wait-name"), heroClass = el3("span", "nw-wait-class");
   portrait.setAttribute("aria-hidden", "true");
@@ -119295,10 +119295,10 @@ function waitingPanel(document2, environment, seed2) {
     });
     intro.textContent = state2.failed ? `${name} is ready, but this seed\u2019s world couldn\u2019t be made.` : `${name} is ready. The adventure starts as soon as the world is built.`;
     if (state2.failed) {
-      title2.textContent = "This world couldn\u2019t be built";
+      title3.textContent = "This world couldn\u2019t be built";
       note2.textContent = "The world maker stopped: " + state2.failed + ". Try again, or play the classic world with " + name + ".";
     } else {
-      title2.textContent = "Your world is almost ready";
+      title3.textContent = "Your world is almost ready";
       note2.textContent = "Your world is saved with " + name + ", so it only builds once.";
     }
     retry.hidden = classic.hidden = !state2.failed;
@@ -137475,8 +137475,8 @@ function createWorldEventHudV4(document2, onActivate = () => {
   root6.hidden = true;
   root6.setAttribute("data-gameplay-hud", "");
   root6.setAttribute("aria-label", "Local event");
-  const tag2 = document2.createElement("small"), head18 = document2.createElement("div"), title2 = document2.createElement("strong"), timer = document2.createElement("time"), row2 = document2.createElement("div"), pips = document2.createElement("span"), bar2 = document2.createElement("span"), fill9 = document2.createElement("i"), barText = document2.createElement("b"), line39 = document2.createElement("p"), action2 = document2.createElement("button");
-  head18.append(title2, timer);
+  const tag2 = document2.createElement("small"), head18 = document2.createElement("div"), title3 = document2.createElement("strong"), timer = document2.createElement("time"), row2 = document2.createElement("div"), pips = document2.createElement("span"), bar2 = document2.createElement("span"), fill9 = document2.createElement("i"), barText = document2.createElement("b"), line39 = document2.createElement("p"), action2 = document2.createElement("button");
+  head18.append(title3, timer);
   bar2.append(fill9, barText);
   row2.append(pips, bar2);
   action2.type = "button";
@@ -137555,7 +137555,7 @@ function createWorldEventHudV4(document2, onActivate = () => {
     root6.style.setProperty("--accent", trackerRow.accent ?? "#c27dff");
     root6.dataset.kind = trackerRow.kind ?? "";
     tag2.textContent = trackerRow.tag ?? "";
-    title2.textContent = trackerRow.title ?? "";
+    title3.textContent = trackerRow.title ?? "";
     timer.textContent = trackerRow.timer ?? "";
     line39.textContent = trackerRow.line ?? "";
     const n = trackerRow.pips ?? 0;
@@ -139039,7 +139039,7 @@ BOOTS["gorehide-stompers"] = (c, A2) => {
   G4(c, [25.6, 22, 27.8, 18.4, 30.4, 16.8, 31, 17.8, 29, 19.6, 27.6, 22.6], TQ.tusk, { split: 0.6, lw: 0.9 });
 };
 BOOTS["brimstone-treads"] = (c, A2) => {
-  const bas = { b: "#4a4046", d: "#352e33", l: "#6a5e63" }, iron = { b: "#4a4f57", d: "#33373d", l: "#6b727c" }, wrap3 = { b: "#a04f35", d: "#7d3a27", l: "#bd6446" }, slag2 = { b: "#3b3439", d: "#29242a" }, LAVA5 = "#f6662c", GOLD40 = "#ffbd53";
+  const bas = { b: "#4a4046", d: "#352e33", l: "#6a5e63" }, iron = { b: "#4a4f57", d: "#33373d", l: "#6b727c" }, wrap3 = { b: "#a04f35", d: "#7d3a27", l: "#bd6446" }, slag2 = { b: "#3b3439", d: "#29242a" }, LAVA5 = "#f6662c", GOLD41 = "#ffbd53";
   {
     const g = c.createRadialGradient(18, 26, 0, 18, 26, 13);
     g.addColorStop(0, "rgba(246,102,44,.32)");
@@ -139063,7 +139063,7 @@ BOOTS["brimstone-treads"] = (c, A2) => {
     for (let i = 2; i < pts2.length; i += 2) c.lineTo(pts2[i], pts2[i + 1]);
     c.stroke();
   }
-  c.strokeStyle = GOLD40;
+  c.strokeStyle = GOLD41;
   c.lineWidth = 0.45;
   c.beginPath();
   c.moveTo(11.5, 23.4);
@@ -139079,8 +139079,8 @@ BOOTS["brimstone-treads"] = (c, A2) => {
   gem2(c, 13.3, 12.9, 2.2, A2.gem);
   R6(c, 8.2, 25.4, 21, 3, slag2, { split: 0.6, lw: 1 });
   px4(c, 8.8, 25, 19.8, 1, LAVA5);
-  px4(c, 12, 25.1, 3, 0.7, GOLD40);
-  px4(c, 21, 25.1, 2.4, 0.7, GOLD40);
+  px4(c, 12, 25.1, 3, 0.7, GOLD41);
+  px4(c, 21, 25.1, 2.4, 0.7, GOLD41);
 };
 GLOVES2["sunsting-grips"] = (c, A2) => {
   glove(c, A2, { hand: TQ.amber, cuff: TQ.chitin, joints: true });
@@ -140514,9 +140514,9 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     g.append(formatAmount(gold) + " gold");
     box6.append(g, el3("span", "+" + Number(xp).toLocaleString("en-US") + " XP", "qr-xp"));
     if (gear2) {
-      const [title2, how] = (GEAR_GROUP[gear2.group] ?? GEAR_GROUP.any)(gear2.cls), item2 = el3("div", null, "qr-item"), q2 = el3("span", "?", "qr-q"), t = el3("div");
+      const [title3, how] = (GEAR_GROUP[gear2.group] ?? GEAR_GROUP.any)(gear2.cls), item2 = el3("div", null, "qr-item"), q2 = el3("span", "?", "qr-q"), t = el3("div");
       q2.setAttribute("aria-hidden", "true");
-      t.append(el3("b", title2 + (gear2.cls ? " for your " + (CLASS_LABEL[gear2.cls] ?? gear2.cls) : "")), el3("small", how));
+      t.append(el3("b", title3 + (gear2.cls ? " for your " + (CLASS_LABEL[gear2.cls] ?? gear2.cls) : "")), el3("small", how));
       item2.append(q2, t);
       box6.append(item2);
       const odds = el3("div", null, "qr-odds"), bar2 = el3("div", null, "qr-bar"), legend = el3("div", null, "qr-legend");
@@ -140688,10 +140688,10 @@ function createQuestUiV1({ document: doc, adapter, readModel, clearInput = () =>
     }
     if (notice) body6.append(el3("p", notice, "qb-note"));
     const active2 = new Map(q2.active.map((a) => [a.id, a])), full = q2.active.length >= q2.limit, cur = trackedQuest(q2);
-    const card = (kind, label7, title2, text3, cls = "") => {
+    const card = (kind, label7, title3, text3, cls = "") => {
       const c = el3("article", null, "qb-card" + cls), k = el3("span", null, "qb-kind");
       k.append(icon2(kind, "qb-ico"), label7);
-      c.append(k, el3("h4", title2), el3("p", text3, "qb-text"));
+      c.append(k, el3("h4", title3), el3("p", text3, "qb-text"));
       body6.append(c);
       return c;
     };
@@ -152347,8 +152347,8 @@ function waysideTracker(e) {
   const w = e.wayside, name = (WAYSIDE_SKINS_V1[e.skin] ?? WAYSIDE_SKINS_V1.woodland).name, base3 = { groupId: e.groupId, kind: e.kind, accent: "#f0c46a", tag: "WAYSIDE SHRINE", title: name, pips: 0, done: 0 };
   if (e.status === "dormant") return { ...base3, line: "Pray here for a blessing that lasts 3 minutes.", action: { label: e.canActivate ? "E / tap \xB7 Pray" : e.activeCount >= 4 ? "Finish another event first" : "Walk up to the shrine", enabled: Boolean(e.canActivate) } };
   if (!w.blessing) return { ...base3, title: "Praying\u2026", bar: w.prayer, barText: "Prayer", line: "Stay close to the shrine." };
-  const [title2, fx] = BLESSING_NAMES[w.blessing] ?? [w.blessing, ""];
-  return { ...base3, tag: "BLESSED", title: title2, line: fx + " for 3 minutes. The shrine relights after a while." };
+  const [title3, fx] = BLESSING_NAMES[w.blessing] ?? [w.blessing, ""];
+  return { ...base3, tag: "BLESSED", title: title3, line: fx + " for 3 minutes. The shrine relights after a while." };
 }
 function blessingBadgeV1(model) {
   const b = model.eventBlessing;
@@ -155364,7 +155364,7 @@ var ARROW_DOWN = '<svg width="9" height="9" viewBox="0 0 12 12" aria-hidden="tru
 function characterStatGroupsV3(model) {
   const p = model.playersById[model.localPlayerId], s = p.stats, f = s.familyProperties ?? {}, groups = [];
   const value2 = (v) => v === void 0 ? "\u2014" : statText(v, true), pct3 = (v) => v === void 0 ? "\u2014" : statText(statScale(v, 100), true) + "%", mult = (v) => v === void 0 ? "\u2014" : statText(v, true) + "\xD7";
-  const group = (title2, rows) => groups.push({ title: title2, rows: rows.filter((r) => r[1] !== void 0).map(([label7, v, format = value2]) => ({ label: label7, value: format(v) })) });
+  const group = (title3, rows) => groups.push({ title: title3, rows: rows.filter((r) => r[1] !== void 0).map(([label7, v, format = value2]) => ({ label: label7, value: format(v) })) });
   group("Combat", [
     ["Attack", s.attack],
     ["Defense", s.defense],
@@ -155931,11 +155931,11 @@ function createSkillTreeViewV2({ document: document2, send, only = null }) {
       sheetBody.replaceChildren(el3("p", "Tap a skill to see what it does and learn it.", "sheet-empty"));
       return;
     }
-    const s = skillStateV2(d, n), next = integerWire(integerBigInt(s.rank) + 1n), headRow = el3("div", "", "sheet-head"), icon2 = disc4(n, false), title2 = el3("div"), tags = el3("div", "", "sheet-tags");
+    const s = skillStateV2(d, n), next = integerWire(integerBigInt(s.rank) + 1n), headRow = el3("div", "", "sheet-head"), icon2 = disc4(n, false), title3 = el3("div"), tags = el3("div", "", "sheet-tags");
     stateClasses(headRow, n, s);
     tags.append(el3("span", tree2 === "utility" ? "Utility" : TIER_TAGS[n.tier]), el3("span", s.maxed ? "Mastered" : `Rank ${rankText(n, s.rank)}`, s.maxed ? "done" : ""));
-    title2.append(el3("h3", n.name), tags);
-    headRow.append(icon2.wrap, title2, button3("\xD7", "sheet-close", close));
+    title3.append(el3("h3", n.name), tags);
+    headRow.append(icon2.wrap, title3, button3("\xD7", "sheet-close", close));
     const parts = [headRow, el3("p", nodeDescription(n), "sheet-desc")], effect = (label7, text3, cls = "") => {
       const e = el3("div", "", `sheet-effect ${cls}`);
       e.append(el3("b", label7), el3("span", text3));
@@ -157058,8 +157058,8 @@ function createFriendsViewV1({ document: document2, environment, friends, action
     }
     render(true);
   };
-  const box6 = (title2, count) => {
-    const b = el3("div", "fr-box"), h = el3("h4", "", title2);
+  const box6 = (title3, count) => {
+    const b = el3("div", "fr-box"), h = el3("h4", "", title3);
     if (count != null) h.append(el3("span", "", String(count)));
     b.append(h);
     return b;
@@ -158040,16 +158040,16 @@ function createInventoryPresentation({ document: document2, environment, readMod
     close2.className = "gx-close";
     close2.dataset.action = "dismiss";
     close2.setAttribute("aria-label", "Close item");
-    const head18 = element("div", "", "gx-head"), frame3 = element("div", "", "gx-itemicon"), info2 = element("div", "", "gx-iteminfo"), title2 = element("h4", displayName(d), "gx-itemname");
-    title2.id = "world-item-title";
-    title2.tabIndex = -1;
+    const head18 = element("div", "", "gx-head"), frame3 = element("div", "", "gx-itemicon"), info2 = element("div", "", "gx-iteminfo"), title3 = element("h4", displayName(d), "gx-itemname");
+    title3.id = "world-item-title";
+    title3.tabIndex = -1;
     frame3.append(itemIcon(item2));
     const unique = uniqueOf(d);
     if (unique) {
-      title2.classList.add("is-unique");
-      title2.append(element("span", "Unique", "gx-uniquetag"));
+      title3.classList.add("is-unique");
+      title3.append(element("span", "Unique", "gx-uniquetag"));
     }
-    info2.append(title2, element("span", [RARITY_NAMES[d.rarityTier ?? 0], `${d.rarityTier ?? 0}\u2605`, (SLOT_NAMES[equippedSlot ?? (d.slot === "ring" ? "ring1" : d.slot)] ?? label6(d.slot)).replace(/ \d$/, ""), gen?.itemPower != null ? "Lv " + statText(gen.itemPower) : null].filter(Boolean).join(" \xB7 "), "gx-itemsub"));
+    info2.append(title3, element("span", [RARITY_NAMES[d.rarityTier ?? 0], `${d.rarityTier ?? 0}\u2605`, (SLOT_NAMES[equippedSlot ?? (d.slot === "ring" ? "ring1" : d.slot)] ?? label6(d.slot)).replace(/ \d$/, ""), gen?.itemPower != null ? "Lv " + statText(gen.itemPower) : null].filter(Boolean).join(" \xB7 "), "gx-itemsub"));
     head18.append(frame3, info2, close2);
     scroll.append(head18);
     if (target && d.slot === "ring") {
@@ -158559,7 +158559,7 @@ function createWorldEventHudV3(document2, onActivate = () => {
   root6.hidden = true;
   root6.setAttribute("data-gameplay-hud", "");
   root6.setAttribute("aria-label", "Local event objectives");
-  const tag2 = document2.createElement("small"), title2 = document2.createElement("strong"), objective = document2.createElement("p"), bars = document2.createElement("div"), detail = document2.createElement("span");
+  const tag2 = document2.createElement("small"), title3 = document2.createElement("strong"), objective = document2.createElement("p"), bars = document2.createElement("div"), detail = document2.createElement("span");
   const pods = Array.from({ length: 3 }, (_, n) => {
     const row2 = document2.createElement("div"), label7 = document2.createElement("span"), bar2 = document2.createElement("progress");
     label7.textContent = "Pod " + (n + 1);
@@ -158575,7 +158575,7 @@ function createWorldEventHudV3(document2, onActivate = () => {
   action2.onclick = () => {
     if (currentGroup && !root6.hidden && !action2.hidden && !action2.disabled) onActivate(currentGroup);
   };
-  root6.append(tag2, title2, objective, bars, detail, action2);
+  root6.append(tag2, title3, objective, bars, detail, action2);
   const style = document2.createElement("style");
   style.textContent = `#world-event-hud-v3{position:absolute;z-index:7;top:76px;left:12px;width:min(258px,52vw);padding:10px 13px;border:1px solid #8863a6;border-left:3px solid #b282d7;border-radius:3px 8px 8px 3px;background:linear-gradient(120deg,#152330f2,#17212ae8);color:#eef4f4;font:12px/1.4 system-ui;pointer-events:none;box-sizing:border-box}#world-event-hud-v3 button{pointer-events:auto;touch-action:manipulation;margin-top:8px;padding:7px 10px;font:600 12px system-ui;border:1px solid #ab87cc;border-radius:4px;background:#32404f;color:#f0e7fa}#world-event-hud-v3 button:disabled{opacity:.6}#world-event-hud-v3[hidden]{display:none!important}#world-event-hud-v3 small{display:block;color:#ceabea;letter-spacing:.14em;font-size:9px;font-weight:800}#world-event-hud-v3 strong{display:block;font-size:16px;margin:2px 0 5px}#world-event-hud-v3 p{margin:4px 0 7px}#world-event-hud-v3>span{display:block;margin-top:7px;font-size:11px;color:#bbcfd4}#world-event-hud-v3>div>div{display:flex;align-items:center;gap:8px;margin:3px 0}#world-event-hud-v3 progress{width:100%;height:7px;accent-color:#afdf9d}#world-event-hud-v3 div span{min-width:47px;font-size:10px}#world-event-hud-v3[data-state=completed]{border-color:#7fbd95}#world-event-hud-v3[data-state=dormant]>div{display:none}@media(max-width:600px){#world-event-hud-v3{top:68px;left:8px;width:min(210px,51vw);padding:7px 9px;font-size:11px}#world-event-hud-v3 strong{font-size:14px}}@media(max-height:450px){#world-event-hud-v3{top:62px;padding:5px 9px}#world-event-hud-v3>div{display:none}}`;
   document2.head.append(style);
@@ -158611,7 +158611,7 @@ function createWorldEventHudV3(document2, onActivate = () => {
       action2.hidden = event.status !== "dormant";
       action2.disabled = !event.canActivate;
       action2.textContent = event.canActivate ? "E / tap \xB7 Investigate" : "Approach the hollow";
-      title2.textContent = "Hidden Hollow";
+      title3.textContent = "Hidden Hollow";
       tag2.textContent = event.status === "completed" ? "EVENT COMPLETE" : event.status === "dormant" ? "LOCAL EVENT" : model.tick - enteredTick < 150 ? "EVENT STARTED" : "LOCAL EVENT \xB7 ACTIVE";
       objective.textContent = event.status === "dormant" ? "Something is moving inside the fallen tree." : event.status === "completed" ? event.rewardClaimed ? "Reward claimed." : "Claim your reward chest." : h.guardian ? "Defeat the Hollow Guardian" : `Drive back the creatures \xB7 wave ${Math.max(1, h.wave)}/3`;
       detail.textContent = event.status === "dormant" ? "Investigate deliberately to begin." : event.status === "completed" ? "The hollow falls quiet." : h.living ? `${h.living} enemies emerging / fighting \xB7 ${h.remaining} total remaining` : h.nextWaveTicks ? `Movement inside \xB7 ${Math.ceil(h.nextWaveTicks / 60)}s` : "Watch the hollow entrance.";
@@ -158627,7 +158627,7 @@ function createWorldEventHudV3(document2, onActivate = () => {
     action2.textContent = event.canActivate ? "E / tap \xB7 Disturb pod" : "Approach a pod";
     root6.dataset.state = event.status;
     tag2.textContent = event.status === "dormant" ? "LOCAL EVENT" : event.status === "completed" ? "EVENT COMPLETE" : model.tick - enteredTick < 150 ? "EVENT STARTED" : "LOCAL EVENT \xB7 ACTIVE";
-    title2.textContent = "Spore Outbreak";
+    title3.textContent = "Spore Outbreak";
     objective.textContent = event.status === "dormant" ? "E / tap near a pod to disturb it." : event.status === "completed" ? event.rewardClaimed ? "Reward claimed." : "Claim your reward chest." : `Destroy the spore pods \xB7 ${destroyed}/3`;
     pods.forEach(({ label: label7, bar: bar2 }, n) => {
       label7.textContent = event.pods[n]?.used ? "Broken" : "Pod " + (n + 1);
@@ -159186,9 +159186,9 @@ function createSettlementServicesMenu2(options) {
     panel.dataset.serviceKind = kind;
     panel.replaceChildren();
     const shell3 = el3("div", void 0, "tn-shell"), head18 = el3("div", void 0, "tn-head"), face5 = markup(el3("div", void 0, "tn-npc"), FACES3[kind]), who = el3("div", void 0, "tn-who");
-    const title2 = el3("h3", npc?.name ?? "Potions");
-    if (npc?.tier && npc.stock?.length) title2.append(el3("span", { village: "Village", town: "Town", city: "City" }[npc.tier], "tn-tier"));
-    who.append(title2, el3("small", npc?.roleLabel ?? "Your potion belt"));
+    const title3 = el3("h3", npc?.name ?? "Potions");
+    if (npc?.tier && npc.stock?.length) title3.append(el3("span", { village: "Village", town: "Town", city: "City" }[npc.tier], "tn-tier"));
+    who.append(title3, el3("small", npc?.roleLabel ?? "Your potion belt"));
     const exit = button3("", close, "close", "tn-x");
     exit.innerHTML = CLOSE2;
     exit.setAttribute("aria-label", "Close");
@@ -159336,7 +159336,7 @@ function createSettlementServicesMenu2(options) {
       body6.append(card);
       if (npc?.role === "general") {
         const B7 = POTION_BELT_POLICY;
-        for (const [offerId, title3, max, text3, icon2] of [[B7.offers.capacity, "Bigger belt", B7.maxCapacityUpgrades, () => ["Carry ", belt.capacity, belt.capacity + 1, " potions"], FLASK(true)], [B7.offers.potency, "Stronger brew", B7.maxPotencyUpgrades, () => ["Heal ", belt.healPercent + "%", belt.healPercent + B7.potencyStep + "%", " of max HP"], '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ef6f7d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"/><path d="M12 8.5v5M9.5 11h5"/></svg>']]) {
+        for (const [offerId, title4, max, text3, icon2] of [[B7.offers.capacity, "Bigger belt", B7.maxCapacityUpgrades, () => ["Carry ", belt.capacity, belt.capacity + 1, " potions"], FLASK(true)], [B7.offers.potency, "Stronger brew", B7.maxPotencyUpgrades, () => ["Heal ", belt.healPercent + "%", belt.healPercent + B7.potencyStep + "%", " of max HP"], '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ef6f7d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"/><path d="M12 8.5v5M9.5 11h5"/></svg>']]) {
           const u = potionUpgrade(p, offerId), row2 = el3("div", void 0, "tn-card tn-upg"), info2 = el3("div");
           info2.style.flex = "1";
           const [a, b, c, d] = text3(), line40 = el3("p");
@@ -159347,12 +159347,12 @@ function createSettlementServicesMenu2(options) {
           } else line40.append("Fully upgraded");
           const pips = el3("div", void 0, "tn-pips");
           for (let n = 0; n < max; n++) pips.append(el3("i", void 0, n < u.done ? "on" : ""));
-          info2.append(el3("h4", title3), line40, pips);
+          info2.append(el3("h4", title4), line40, pips);
           const buy = button3("", () => issue("service.buy", { npcId, offerId }), "buy:" + offerId, "tn-btn is-gold is-small");
           if (u.price) buy.append(coin4(), formatAmount(u.price));
           else buy.append("Done");
           buy.disabled = busy || !u.price || compareAmount(inv.gold, u.price) < 0;
-          buy.setAttribute("aria-label", u.price ? title3 + ", " + u.price + " gold" : title3 + ", fully upgraded");
+          buy.setAttribute("aria-label", u.price ? title4 + ", " + u.price + " gold" : title4 + ", fully upgraded");
           row2.append(markup(el3("div", void 0, "tn-ic"), icon2), info2, buy);
           body6.append(row2);
         }
@@ -159738,8 +159738,8 @@ function createSettingsPageV1({ document: doc, environment: env }) {
     if (text3 !== void 0) e.textContent = text3;
     return e;
   };
-  const name = (title2, note2, fixed) => {
-    const n = el3("div", "st-name" + (fixed ? " fixed" : ""), title2);
+  const name = (title3, note2, fixed) => {
+    const n = el3("div", "st-name" + (fixed ? " fixed" : ""), title3);
     if (note2) n.append(el3("small", null, note2));
     return n;
   };
@@ -159748,9 +159748,9 @@ function createSettingsPageV1({ document: doc, environment: env }) {
     l.append(...kids);
     return l;
   };
-  const section = (title2, ...lines2) => {
+  const section = (title3, ...lines2) => {
     const sec4 = el3("section", "st-sec");
-    sec4.append(el3("h3", null, title2), ...lines2);
+    sec4.append(el3("h3", null, title3), ...lines2);
     return sec4;
   };
   const toggle = (label7, key4) => {
@@ -161300,12 +161300,12 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
   zoomIn.setAttribute("aria-label", "Zoom minimap in");
   zoomOut.setAttribute("aria-label", "Zoom minimap out");
   mini.append(small, zoomIn, zoomOut, placeLine);
-  const atlas = el3("section", "m2-atlas"), large = el3("canvas"), title2 = el3("div", "m2-title"), titleSub = el3("span"), tools2 = el3("div", "m2-tools"), sheet = el3("aside", "m2-sheet"), toast = el3("div", "m2-toast"), kneelBox = el3("div", "m2-kneel"), kneelMedal = el3("canvas"), kneelText = el3("strong"), kneelBar = el3("b"), banner8 = el3("div", "m2-banner"), bannerCanvas = el3("canvas"), notice = el3("div", "m2-notice"), noticeIcon = el3("canvas"), noticeTop = el3("small"), noticeName = el3("strong");
+  const atlas = el3("section", "m2-atlas"), large = el3("canvas"), title3 = el3("div", "m2-title"), titleSub = el3("span"), tools2 = el3("div", "m2-tools"), sheet = el3("aside", "m2-sheet"), toast = el3("div", "m2-toast"), kneelBox = el3("div", "m2-kneel"), kneelMedal = el3("canvas"), kneelText = el3("strong"), kneelBar = el3("b"), banner8 = el3("div", "m2-banner"), bannerCanvas = el3("canvas"), notice = el3("div", "m2-notice"), noticeIcon = el3("canvas"), noticeTop = el3("small"), noticeName = el3("strong");
   atlas.hidden = true;
   atlas.setAttribute("role", "dialog");
   atlas.setAttribute("aria-modal", "true");
   atlas.setAttribute("aria-label", "World map");
-  title2.append(el3("strong", void 0, "The Known World"), titleSub);
+  title3.append(el3("strong", void 0, "The Known World"), titleSub);
   sheet.hidden = true;
   sheet.setAttribute("aria-live", "polite");
   toast.hidden = true;
@@ -161326,7 +161326,7 @@ function createAtlasMapV2({ document: doc, environment: env, port, releaseInput,
     notice.hidden = true;
     notice.setAttribute("role", "status");
   }
-  atlas.append(large, title2, tools2, sheet);
+  atlas.append(large, title3, tools2, sheet);
   doc.body.append(mini, atlas, toast, kneelBox, banner8, notice);
   let open3 = false, closed2 = false, meta = null, model = null, center3 = null, span3 = 600, selected = null, sheetMode = null, hits2 = [], lastPaint = -1, dirty = true, busy = false, metadataError = null, requests = 0, rasterBuilds = 0, cacheHits = 0, paintMs = 0, atlasSize = null, gesture = null;
   let questTarget = null, tracked = store.get("saq-map-track"), miniOffset = Number(store.get("saq-minimap-zoom")) || 0, kneel = null, toastUntil = 0, seen4 = null, bannerQueue = [], bannerUntil = 0, insideTown = null, placeLineUntil = 0, lastBanner = { id: null }, placesKey = null, placesList = [], bezel = null;
@@ -198277,6 +198277,73 @@ function createEmissiveOcclusionV1(doc) {
   }, resources: () => ({ emissiveMasks: masks.size, emissiveMaskRedraws: redrawn, emissiveMaskCanvases: pool4.length }) });
 }
 
+// src/client/minor_boss_bar_v1.js
+var MINOR_BOSS_BAR_V1 = Object.freeze({ pickUp: 380, letGo: 640, width: 340 });
+var GOLD40 = "#e9c766";
+var title2 = (text3) => String(text3).toLowerCase().replace(/(^|[\s'-])(\p{L})/gu, (_, lead, ch) => lead + ch.toUpperCase());
+function minorBossOfV1(actor) {
+  if (!actor?.alive || actor.team !== "hostile" || actor.boss) return null;
+  const named2 = NAMED_ENDS_V1[actor.elite?.namedEliteId];
+  if (named2) return LESSER_BOSSES_V1[named2.id] ? { name: title2(named2.label), tag: "LESSER BOSS", accent: GOLD40, half: true } : { name: title2(named2.label), tag: "NAMED ELITE", accent: GOLD40, half: false };
+  if (actor.champion?.name) return actor.champion.tag === "ALPHA" ? { name: actor.champion.name, tag: "DEN ALPHA", accent: "#d9a05a", half: false } : { name: actor.champion.name, tag: actor.champion.tag ?? "CHAMPION", accent: "#ffb0a0", half: false };
+  if (actor.brood?.sac) return { name: "Brood Mother", tag: "NEST", accent: "#c9a0ff", half: false };
+  return null;
+}
+function pickMinorBossV1(model, hero, lastId = null) {
+  if (!hero?.position) return null;
+  const away = (a) => Math.hypot(a.position.x - hero.position.x, a.position.y - hero.position.y);
+  const kept = lastId ? model.entitiesById?.[lastId] : null;
+  if (kept && minorBossOfV1(kept) && away(kept) <= MINOR_BOSS_BAR_V1.letGo) return lastId;
+  let best = null, bestAway = MINOR_BOSS_BAR_V1.pickUp;
+  for (const [id2, a] of Object.entries(model.entitiesById ?? {})) {
+    if (!a?.position || !minorBossOfV1(a)) continue;
+    const d = away(a);
+    if (d <= bestAway && (d < bestAway || best === null || id2 < best)) {
+      best = id2;
+      bestAway = d;
+    }
+  }
+  return best;
+}
+function createMinorBossBarV1() {
+  let shownId = null;
+  return Object.freeze({
+    // Draws the bar and says whether it did. trails: the renderer's createHealthTrailsV3.
+    draw(c, canvas, model, hero, trails2, time3) {
+      shownId = pickMinorBossV1(model, hero, shownId);
+      const actor = shownId ? model.entitiesById[shownId] : null, kind = minorBossOfV1(actor);
+      if (!kind) return false;
+      const reading = trails2.sample("boss/" + shownId, actorHealthRatio(actor), time3);
+      drawMinorBossPanelV1(c, canvas, kind, reading);
+      return true;
+    },
+    shown: () => shownId,
+    reset() {
+      shownId = null;
+    }
+  });
+}
+function drawMinorBossPanelV1(c, canvas, kind, reading) {
+  const width2 = Math.min(MINOR_BOSS_BAR_V1.width, canvas.width - 28), x = (canvas.width - width2) / 2, y = 14, h = 34;
+  c.save();
+  c.fillStyle = "#111923ee";
+  c.fillRect(x, y, width2, h);
+  c.strokeStyle = kind.accent;
+  c.lineWidth = 1.5;
+  c.strokeRect(x + 0.75, y + 0.75, width2 - 1.5, h - 1.5);
+  c.textAlign = "center";
+  c.textBaseline = "alphabetic";
+  c.lineJoin = "round";
+  c.font = "800 7px system-ui";
+  c.fillStyle = kind.accent;
+  c.fillText(kind.tag, canvas.width / 2, y + 9);
+  c.font = "900 11px Georgia,serif";
+  c.fillStyle = "#f6e8d7";
+  c.fillText(kind.name, canvas.width / 2, y + 20);
+  drawHealthBarV4(c, { x: x + 10, y: y + 24, w: width2 - 20, h: 6, ratio: reading.actual, trail: reading.trail, impact: reading.impact, flash: reading.flash, fill: ENEMY_HEALTH_FILL_V4, edge: kind.accent, ticks: 10, marker: kind.half ? 0.5 : null, pad: 1.5 });
+  c.restore();
+}
+
 // src/client/aegis_mimic_presentation_v2.js
 var TAU217 = Math.PI * 2;
 var clamp65 = (v) => Math.max(0, Math.min(1, v));
@@ -203353,11 +203420,12 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
   let invalidations = 0, lastInvalidationReason = "none", resizeEvents = 0, resizeChanges = 0, resizeNoops = 0, lastResize = null;
   let observedFrames = null, observedFrameKey = null;
   let animatedFlowers = 0, animatedWater = 0, ambientMarks = 0, lastEnvironment = null, lastRenderedEntities = 0, seamless = false, hellShown = false, hellWarmFrame = 0;
-  const perfectBlock = createPerfectBlockArtV1(), feedback = createCombatFeedback(), healthTrails = createHealthTrailsV3(), bossEffects = createBossEffectsObserver(), observeBossEffects = bossEffects.observe;
+  const perfectBlock = createPerfectBlockArtV1(), feedback = createCombatFeedback(), healthTrails = createHealthTrailsV3(), minorBossBar = createMinorBossBarV1(), bossEffects = createBossEffectsObserver(), observeBossEffects = bossEffects.observe;
   function invalidate(reason = "explicit") {
     invalidations++;
     lastInvalidationReason = reason;
     healthTrails.clear();
+    minorBossBar.reset();
     bossEffects.clear();
     prompt.clear();
     environmentCache.clear(reason);
@@ -203834,8 +203902,10 @@ function createWorldRenderer(canvas, { performanceProbe = null, developmentScene
     ctx.restore();
     if (!drawTripSourScreenV1(ctx, canvas, model, time3)) drawTripScreenV1(ctx, canvas, localTrip?.amt ?? 0, time3);
     drawTripPortalArrowV1(ctx, canvas, model, cam, time3);
-    if (!drawTripNightmareHudV1(ctx, canvas, model) && !drawRecoveredBossHudV1(ctx, canvas, model) && !drawBrimstoneBossHud(ctx, canvas, model) && !drawAegisBossHud(ctx, canvas, model)) drawArachnidTreantBossHudD12_5A(ctx, canvas, model);
+    const bigBossBar = drawTripNightmareHudV1(ctx, canvas, model) || drawRecoveredBossHudV1(ctx, canvas, model) || drawBrimstoneBossHud(ctx, canvas, model) || drawAegisBossHud(ctx, canvas, model) || drawArachnidTreantBossHudD12_5A(ctx, canvas, model);
     drawTreasuryBossHudV2(ctx, canvas, model);
+    if (!bigBossBar) minorBossBar.draw(ctx, canvas, model, actor, healthTrails, time3);
+    else minorBossBar.reset();
     const aliveBoss = Object.entries(model.entitiesById).find(([, entity]) => entity.alive && entity.boss);
     if (aliveBoss) {
       const [bossId, boss] = aliveBoss, visual = healthTrails.sample("boss/" + bossId, actorHealthRatio(boss), time3);
@@ -204758,9 +204828,9 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
       if (!review) {
         review = doc.createElement("details");
         review.id = "rpg-review-tools";
-        const title2 = doc.createElement("summary");
-        title2.textContent = "Playtest & diagnostics";
-        review.append(title2);
+        const title3 = doc.createElement("summary");
+        title3.textContent = "Playtest & diagnostics";
+        review.append(title3);
         disclosure.append(review);
       }
       let actions = doc.getElementById("rpg-menu-actions");
@@ -204778,9 +204848,9 @@ function mountPlayableClient({ port, environment, nextCommandToken, capabilities
       if (!campaign) {
         campaign = doc.createElement("details");
         campaign.id = "rpg-campaign-options";
-        const title2 = doc.createElement("summary");
-        title2.textContent = "Campaign options";
-        campaign.append(title2);
+        const title3 = doc.createElement("summary");
+        title3.textContent = "Campaign options";
+        campaign.append(title3);
         disclosure.insertBefore(campaign, review);
       }
       for (const id2 of ["start-new-campaign", "reset-local-world-data"]) {
@@ -208003,11 +208073,11 @@ function watchForUpdatesV1(environment, { save = null, intervalMs = 18e4, firstC
     banner8.id = "update-banner-v1";
     banner8.dataset.gameplayHud = "";
     banner8.setAttribute("aria-live", "polite");
-    const title2 = doc.createElement("strong");
-    title2.textContent = "New version ready";
+    const title3 = doc.createElement("strong");
+    title3.textContent = "New version ready";
     const sub = doc.createElement("span");
     sub.textContent = "Tap to update";
-    banner8.append(title2, sub);
+    banner8.append(title3, sub);
     banner8.addEventListener("click", async () => {
       if (banner8.disabled) return;
       banner8.disabled = true;
@@ -209333,23 +209403,23 @@ var qrcode = function(typeNumber, errorCorrectionLevel) {
     qrHtml += "</table>";
     return qrHtml;
   };
-  _this.createSvgTag = function(cellSize, margin, alt, title2) {
+  _this.createSvgTag = function(cellSize, margin, alt, title3) {
     let opts = {};
     if (typeof arguments[0] == "object") {
       opts = arguments[0];
       cellSize = opts.cellSize;
       margin = opts.margin;
       alt = opts.alt;
-      title2 = opts.title;
+      title3 = opts.title;
     }
     cellSize = cellSize || 2;
     margin = typeof margin == "undefined" ? cellSize * 4 : margin;
     alt = typeof alt === "string" ? { text: alt } : alt || {};
     alt.text = alt.text || null;
     alt.id = alt.text ? alt.id || "qrcode-description" : null;
-    title2 = typeof title2 === "string" ? { text: title2 } : title2 || {};
-    title2.text = title2.text || null;
-    title2.id = title2.text ? title2.id || "qrcode-title" : null;
+    title3 = typeof title3 === "string" ? { text: title3 } : title3 || {};
+    title3.text = title3.text || null;
+    title3.id = title3.text ? title3.id || "qrcode-title" : null;
     const size = _this.getModuleCount() * cellSize + margin * 2;
     let c, mc, r, mr, qrSvg = "", rect6;
     rect6 = "l" + cellSize + ",0 0," + cellSize + " -" + cellSize + ",0 0,-" + cellSize + "z ";
@@ -209357,9 +209427,9 @@ var qrcode = function(typeNumber, errorCorrectionLevel) {
     qrSvg += !opts.scalable ? ' width="' + size + 'px" height="' + size + 'px"' : "";
     qrSvg += ' viewBox="0 0 ' + size + " " + size + '" ';
     qrSvg += ' preserveAspectRatio="xMinYMin meet"';
-    qrSvg += title2.text || alt.text ? ' role="img" aria-labelledby="' + escapeXml([title2.id, alt.id].join(" ").trim()) + '"' : "";
+    qrSvg += title3.text || alt.text ? ' role="img" aria-labelledby="' + escapeXml([title3.id, alt.id].join(" ").trim()) + '"' : "";
     qrSvg += ">";
-    qrSvg += title2.text ? '<title id="' + escapeXml(title2.id) + '">' + escapeXml(title2.text) + "</title>" : "";
+    qrSvg += title3.text ? '<title id="' + escapeXml(title3.id) + '">' + escapeXml(title3.text) + "</title>" : "";
     qrSvg += alt.text ? '<description id="' + escapeXml(alt.id) + '">' + escapeXml(alt.text) + "</description>" : "";
     qrSvg += '<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>';
     qrSvg += '<path d="';
@@ -211115,11 +211185,11 @@ async function scanQr(environment, host) {
   }, 200);
   return result;
 }
-function shell2(environment, title2, intro) {
+function shell2(environment, title3, intro) {
   const document2 = environment.document, root6 = el(document2, "div", "coop-screen"), card = el(document2, "div", "coop-card");
   root6.setAttribute("role", "dialog");
-  root6.setAttribute("aria-label", title2);
-  card.append(el(document2, "h2", "coop-title", title2), el(document2, "p", "coop-intro", intro));
+  root6.setAttribute("aria-label", title3);
+  card.append(el(document2, "h2", "coop-title", title3), el(document2, "p", "coop-intro", intro));
   root6.append(card);
   document2.body.append(root6);
   const status2 = el(document2, "p", "coop-status");
@@ -211423,8 +211493,8 @@ function mountCoopBarV1({ environment, label: label7, action: action2, onAction 
     }
   };
 }
-function showCoopEndedV1({ environment, title: title2 = "Back home", reason, onHome, again = null }) {
-  const ui = shell2(environment, title2, reason), actions = el(ui.document, "div", "coop-actions");
+function showCoopEndedV1({ environment, title: title3 = "Back home", reason, onHome, again = null }) {
+  const ui = shell2(environment, title3, reason), actions = el(ui.document, "div", "coop-actions");
   actions.append(button(ui.document, again ? "coop-secondary" : "coop-primary", "Back to my world", () => {
     ui.close();
     onHome();
@@ -211471,8 +211541,8 @@ function createFriendsFlowV1({ environment, friends, game, now: now3 = () => Dat
     if (text3 != null) e.textContent = text3;
     return e;
   };
-  function card({ who, title: title2, sub, buttons = [], ms = 0, onTimeout = null, id: id2 = null }) {
-    const c = { who, title: title2, sub, buttons, ms, onTimeout, id: id2, timer: null };
+  function card({ who, title: title3, sub, buttons = [], ms = 0, onTimeout = null, id: id2 = null }) {
+    const c = { who, title: title3, sub, buttons, ms, onTimeout, id: id2, timer: null };
     cards.push(c);
     if (!shown2) next();
     return c;
@@ -212865,8 +212935,8 @@ async function startWorldClient(environment) {
       }
     }
     if (woodlandReview) {
-      const evidence = environment.document.createElement("details"), title2 = environment.document.createElement("summary"), refresh = environment.document.createElement("button"), output = environment.document.createElement("textarea");
-      title2.textContent = "Woodland validation evidence \xB7 read only";
+      const evidence = environment.document.createElement("details"), title3 = environment.document.createElement("summary"), refresh = environment.document.createElement("button"), output = environment.document.createElement("textarea");
+      title3.textContent = "Woodland validation evidence \xB7 read only";
       refresh.textContent = "Refresh Woodland evidence";
       output.id = "woodland-review-json";
       output.readOnly = true;
@@ -212876,7 +212946,7 @@ async function startWorldClient(environment) {
         const m = gameplayPort.getReadModel(), p = m.playersById[m.localPlayerId], a = m.entitiesById[p.entityId];
         output.value = JSON.stringify({ runtime: runtimeFingerprint, tick: m.tick, worldEvents: m.worldEvents, player: { id: m.localPlayerId, position: a.position, space: m.context?.spaceInstanceId, hp: a.hp }, art: environmentArt.resources(), presentation: client.resources(), streaming: session.resources(), performance: performanceProbe?.snapshot(), save: session.gateStatus?.(), scope: "Read-only review snapshot; not an authority mutation" }, null, 2);
       };
-      evidence.append(title2, refresh, output);
+      evidence.append(title3, refresh, output);
       group.append(evidence);
     }
     if (environmentArt.setRouteMode) {
