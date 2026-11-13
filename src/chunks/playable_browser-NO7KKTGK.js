@@ -114289,44 +114289,36 @@ function wardlightScepter(c, A2, t = 0) {
   c.lineTo(24, 0);
   c.stroke();
   c.restore();
-  G3(c, [24.2, -0.8, 25.6, -2.9, 28, -4.3, 28.4, -3.5, 26.4, -2.2, 25.2, -0.3], steel, { flat: true, lw: 0.6 });
-  G3(c, [24.2, 0.8, 25.6, 2.9, 28, 4.3, 28.4, 3.5, 26.4, 2.2, 25.2, 0.3], steel, { flat: true, lw: 0.6 });
-  const cx = 29, cy2 = 0;
-  glow5(c, cx, cy2, 4 + lit2 * 0.8 + pulse3, "101,230,236", 0.18 + 0.08 * lit2);
+  G3(c, [23.2, -1.7, 24.8, -1.7, 24.8, 1.7, 23.2, 1.7], deep6, { flat: true, lw: 0.6 });
+  G3(c, [24.8, -1.1, 26, -1.4, 26, 1.4, 24.8, 1.1], steel, { flat: true, lw: 0.6 });
+  G3(c, [26, -1.5, 28.4, -3.2, 29.1, -3.4, 28.9, -2.3, 29.5, -1.2, 29.1, 0, 29.5, 1.2, 28.9, 2.3, 29.1, 3.4, 28.4, 3.2, 26, 1.5], steel, { flat: true, lw: 0.5 });
+  G3(c, [26.3, -1.3, 28.3, -2.8, 28.7, -2.9, 28.6, -2.4, 26.6, -1], { b: steel.l }, { flat: true, line: false });
+  [-1.45, 0, 1.45].forEach((y, i) => {
+    const on = clamp01(lit2 - i);
+    if (on > 0) glow5(c, 27.1, y, 1.6, "101,230,236", 0.4 * on);
+    G3(c, [26.65, y - 0.5, 27.55, y - 0.5, 27.6, y, 27.1, y + 0.6, 26.6, y], { b: on > 0.5 ? CYL : "#45525e" }, { flat: true, lw: 0.25 });
+  });
+  const cx = 31, cy2 = 0, dim = 0.55 + 0.15 * lit2;
+  glow5(c, cx, cy2, 4 + lit2 * 0.7 + pulse3, "101,230,236", 0.14 + 0.07 * lit2);
   c.beginPath();
-  c.arc(cx, cy2, 1.5, 0, TAU167);
-  c.fillStyle = tint(lit2 > 0 ? CYL : "#6a8b90");
+  c.arc(cx, cy2, 2.3, 0, TAU167);
+  c.fillStyle = tint(lit2 > 0 ? CY2 : "#5a7c82");
   c.fill();
-  c.lineWidth = 0.6;
+  c.save();
+  c.globalAlpha *= dim;
+  c.beginPath();
+  c.arc(cx + 0.35, cy2 - 0.3, 1.4, 0, TAU167);
+  c.fillStyle = tint(CYL);
+  c.fill();
+  c.restore();
+  c.beginPath();
+  c.arc(cx, cy2, 2.3, 0, TAU167);
+  c.lineWidth = 0.7;
   c.strokeStyle = K6;
   c.stroke();
-  px3(c, cx - 0.7, cy2 - 0.7, 0.6, 0.6, "#ffffff");
-  const kite = [[-1.25, -1.5], [1.25, -1.5], [1.4, 0.35], [0, 1.9], [-1.4, 0.35]];
-  [-Math.PI / 2, Math.PI / 6, Math.PI * 5 / 6].forEach((a, i) => {
-    const on = clamp01(lit2 - i), x = cx + Math.cos(a) * 3.5, y = cy2 + Math.sin(a) * 3.5;
-    c.save();
-    c.translate(x, y);
-    c.rotate(a - Math.PI / 2 + Math.PI);
-    const pts2 = kite.flatMap(([u, v]) => [u, v]);
-    G3(c, pts2, { b: "#3a4653" }, { flat: true, lw: 0.55 });
-    G3(c, kite.flatMap(([u, v]) => [u * 0.68, v * 0.68]), { b: on > 0.5 ? "#5d6d7c" : "#465260" }, { flat: true, line: false });
-    if (on > 0) {
-      c.save();
-      c.globalAlpha *= on;
-      c.shadowColor = CY2;
-      c.shadowBlur = 2.5;
-      c.strokeStyle = tint(CY2);
-      c.lineWidth = 0.45;
-      c.beginPath();
-      kite.forEach(([u, v], k) => k ? c.lineTo(u * 0.9, v * 0.9) : c.moveTo(u * 0.9, v * 0.9));
-      c.closePath();
-      c.stroke();
-      c.fillStyle = tint(CYL);
-      c.fillRect(-0.45, -0.5, 0.9, 0.4);
-      c.restore();
-    }
-    c.restore();
-  });
+  px3(c, cx + 0.4, cy2 - 1.2, 0.6, 0.6, "#ffffff");
+  G3(c, [33.1, -0.45, 34.1, -1, 35, -1, 35, 1, 34.1, 1, 33.1, 0.45], steel, { flat: true, lw: 0.55 });
+  px3(c, 34.2, -0.7, 0.5, 0.5, steel.l);
   gem2(c, 17.2, 0, 1.2, A2.gem ?? "#65e6ec");
 }
 var WEAPONS = {
@@ -116852,7 +116844,7 @@ function drawBlockyHero(c, spec, pose3 = {}) {
   FLASH2 = false;
 }
 var LEG_COLORS = { greaves: P14.plate, chausses: M.mail, breeches: M.breeches, trousers: P14.darkPants };
-var WEAPON_SPAN = { "frogspawn-wand": [11.2, 33], "lashtongue-saber": [8.4, 35], croakhammer: [10.6, 37], "wardlight-scepter": [8.6, 33.6], coreheart: [8.2, 32], ventcutter: [7.6, 39.4], slagmaul: [7, 38.6], greatsword: [9.4, 40.6], halberd: [6, 43.4], mace: [10.6, 32.6], sword: [10.6, 34.4], saber: [12.4, 34.6], axe: [10.6, 35], warhammer: [10.6, 33.2], rapier: [10.6, 38.4], scimitar: [12.4, 34.8], wand: [11.2, 29.6], scepter: [11.2, 31.8] };
+var WEAPON_SPAN = { "frogspawn-wand": [11.2, 33], "lashtongue-saber": [8.4, 35], croakhammer: [10.6, 37], "wardlight-scepter": [8.6, 35.6], coreheart: [8.2, 32], ventcutter: [7.6, 39.4], slagmaul: [7, 38.6], greatsword: [9.4, 40.6], halberd: [6, 43.4], mace: [10.6, 32.6], sword: [10.6, 34.4], saber: [12.4, 34.6], axe: [10.6, 35], warhammer: [10.6, 33.2], rapier: [10.6, 38.4], scimitar: [12.4, 34.8], wand: [11.2, 29.6], scepter: [11.2, 31.8] };
 var HERO_COLORS = Object.freeze({ P: P14, M, ACC });
 function drawItemIcon(c, item2, size = 48) {
   SILK_CHARGE = COCOON_READY = VENT_CHARGE = CORE_PRIMED = TREADS_READY = null;
